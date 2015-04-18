@@ -24,8 +24,8 @@ import (
 //   and executing the "search" application, version "v1", runnable
 //   on either the "base" or "media" profile.
 type Application interface {
-	// Object provides GetPermissions/SetPermissions methods to read/modify AccessLists for the
-	// Application methods.
+	// Object provides GetPermissions/SetPermissions methods to read/modify
+	// Permissions for the Application methods.
 	permissions.Object
 	// Match checks if any of the given profiles contains an application
 	// envelope for the given application version (specified through the
@@ -61,8 +61,8 @@ type MediaInfo struct {
 //
 // To delete the binary, clients invoke the Delete() method.
 type Binary interface {
-	// Object provides GetPermissions/SetPermissions methods to read/modify AccessLists for the
-	// Binary methods.
+	// Object provides GetPermissions/SetPermissions methods to read/modify
+	// Permissions for the Binary methods.
 	permissions.Object
 	// Create expresses the intent to create a binary identified by the
 	// object name suffix consisting of the given number of parts. The

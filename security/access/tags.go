@@ -11,7 +11,7 @@ import "v.io/v23/vdl"
 //
 // Typical use of this is to setup an AccessList authorizer that uses these pre-defined
 // tags:
-//   authorizer := PermissionsAuthorizer(myacl, TypicalTagType())
+//   authorizer := PermissionsAuthorizer(myperms, TypicalTagType())
 func TypicalTagType() *vdl.Type {
 	return vdl.TypeOf(Tag(""))
 }

@@ -77,12 +77,12 @@ func init() {
 }
 
 var (
-	ErrNoBlessings         = verror.Register("v.io/v23/services/groups.NoBlessings", verror.NoRetry, "{1:}{2:} No blessings recognized; cannot create group AccessList")
+	ErrNoBlessings         = verror.Register("v.io/v23/services/groups.NoBlessings", verror.NoRetry, "{1:}{2:} No blessings recognized; cannot create group Permissions")
 	ErrExcessiveContention = verror.Register("v.io/v23/services/groups.ExcessiveContention", verror.RetryBackoff, "{1:}{2:} Gave up after encountering excessive contention; try again later")
 )
 
 func init() {
-	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrNoBlessings.ID), "{1:}{2:} No blessings recognized; cannot create group AccessList")
+	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrNoBlessings.ID), "{1:}{2:} No blessings recognized; cannot create group Permissions")
 	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrExcessiveContention.ID), "{1:}{2:} Gave up after encountering excessive contention; try again later")
 }
 
@@ -99,7 +99,7 @@ func NewErrExcessiveContention(ctx *context.T) error {
 // GroupClientMethods is the client interface
 // containing Group methods.
 //
-// A group's version covers its AccessList as well as any other data stored in
+// A group's version covers its Permissions as well as any other data stored in
 // the group. Clients should treat versions as opaque identifiers. For both Get
 // and Rest, if version is set and matches the Group's current version, the
 // response will indicate that fact but will otherwise be empty.
@@ -145,15 +145,15 @@ type GroupClientMethods interface {
 	//    MyMethod() (string, error) {Blue}
 	//
 	//    // Allow clients to change access via the access.Object interface:
-	//    SetPermissions(acl access.Permissions, version string) error         {Red}
-	//    GetPermissions() (acl access.Permissions, version string, err error) {Blue}
+	//    SetPermissions(perms access.Permissions, version string) error         {Red}
+	//    GetPermissions() (perms access.Permissions, version string, err error) {Blue}
 	//  }
 	permissions.ObjectClientMethods
 	// Create creates a new group if it doesn't already exist.
-	// If acl is nil, a default Permissions is used, providing Admin access to
+	// If perms is nil, a default Permissions is used, providing Admin access to
 	// the caller.
 	// Create requires the caller to have Write permission at the GroupServer.
-	Create(ctx *context.T, acl access.Permissions, entries []BlessingPatternChunk, opts ...rpc.CallOpt) error
+	Create(ctx *context.T, perms access.Permissions, entries []BlessingPatternChunk, opts ...rpc.CallOpt) error
 	// Delete deletes the group.
 	// Permissions for all group-related methods except Create() are checked
 	// against the Group object.
@@ -166,7 +166,7 @@ type GroupClientMethods interface {
 	// TODO(sadovsky): Flesh out this API.
 	Get(ctx *context.T, req GetRequest, reqVersion string, opts ...rpc.CallOpt) (res GetResponse, version string, err error)
 	// Rest returns information sufficient for the client to perform its
-	// AccessList checks.
+	// Permissions checks.
 	// TODO(sadovsky): Flesh out this API.
 	Rest(ctx *context.T, req RestRequest, reqVersion string, opts ...rpc.CallOpt) (res RestResponse, version string, err error)
 }
@@ -221,7 +221,7 @@ func (c implGroupClientStub) Rest(ctx *context.T, i0 RestRequest, i1 string, opt
 // GroupServerMethods is the interface a server writer
 // implements for Group.
 //
-// A group's version covers its AccessList as well as any other data stored in
+// A group's version covers its Permissions as well as any other data stored in
 // the group. Clients should treat versions as opaque identifiers. For both Get
 // and Rest, if version is set and matches the Group's current version, the
 // response will indicate that fact but will otherwise be empty.
@@ -267,15 +267,15 @@ type GroupServerMethods interface {
 	//    MyMethod() (string, error) {Blue}
 	//
 	//    // Allow clients to change access via the access.Object interface:
-	//    SetPermissions(acl access.Permissions, version string) error         {Red}
-	//    GetPermissions() (acl access.Permissions, version string, err error) {Blue}
+	//    SetPermissions(perms access.Permissions, version string) error         {Red}
+	//    GetPermissions() (perms access.Permissions, version string, err error) {Blue}
 	//  }
 	permissions.ObjectServerMethods
 	// Create creates a new group if it doesn't already exist.
-	// If acl is nil, a default Permissions is used, providing Admin access to
+	// If perms is nil, a default Permissions is used, providing Admin access to
 	// the caller.
 	// Create requires the caller to have Write permission at the GroupServer.
-	Create(ctx *context.T, call rpc.ServerCall, acl access.Permissions, entries []BlessingPatternChunk) error
+	Create(ctx *context.T, call rpc.ServerCall, perms access.Permissions, entries []BlessingPatternChunk) error
 	// Delete deletes the group.
 	// Permissions for all group-related methods except Create() are checked
 	// against the Group object.
@@ -288,7 +288,7 @@ type GroupServerMethods interface {
 	// TODO(sadovsky): Flesh out this API.
 	Get(ctx *context.T, call rpc.ServerCall, req GetRequest, reqVersion string) (res GetResponse, version string, err error)
 	// Rest returns information sufficient for the client to perform its
-	// AccessList checks.
+	// Permissions checks.
 	// TODO(sadovsky): Flesh out this API.
 	Rest(ctx *context.T, call rpc.ServerCall, req RestRequest, reqVersion string) (res RestResponse, version string, err error)
 }
@@ -369,16 +369,16 @@ var GroupDesc rpc.InterfaceDesc = descGroup
 var descGroup = rpc.InterfaceDesc{
 	Name:    "Group",
 	PkgPath: "v.io/v23/services/groups",
-	Doc:     "// A group's version covers its AccessList as well as any other data stored in\n// the group. Clients should treat versions as opaque identifiers. For both Get\n// and Rest, if version is set and matches the Group's current version, the\n// response will indicate that fact but will otherwise be empty.",
+	Doc:     "// A group's version covers its Permissions as well as any other data stored in\n// the group. Clients should treat versions as opaque identifiers. For both Get\n// and Rest, if version is set and matches the Group's current version, the\n// response will indicate that fact but will otherwise be empty.",
 	Embeds: []rpc.EmbedDesc{
-		{"Object", "v.io/v23/services/permissions", "// Object provides access control for Vanadium objects.\n//\n// Vanadium services implementing dynamic access control would typically embed\n// this interface and tag additional methods defined by the service with one of\n// Admin, Read, Write, Resolve etc. For example, the VDL definition of the\n// object would be:\n//\n//   package mypackage\n//\n//   import \"v.io/v23/security/access\"\n//   import \"v.io/v23/services/permissions\"\n//\n//   type MyObject interface {\n//     permissions.Object\n//     MyRead() (string, error) {access.Read}\n//     MyWrite(string) error    {access.Write}\n//   }\n//\n// If the set of pre-defined tags is insufficient, services may define their\n// own tag type and annotate all methods with this new type.\n//\n// Instead of embedding this Object interface, define SetPermissions and\n// GetPermissions in their own interface. Authorization policies will typically\n// respect annotations of a single type. For example, the VDL definition of an\n// object would be:\n//\n//  package mypackage\n//\n//  import \"v.io/v23/security/access\"\n//\n//  type MyTag string\n//\n//  const (\n//    Blue = MyTag(\"Blue\")\n//    Red  = MyTag(\"Red\")\n//  )\n//\n//  type MyObject interface {\n//    MyMethod() (string, error) {Blue}\n//\n//    // Allow clients to change access via the access.Object interface:\n//    SetPermissions(acl access.Permissions, version string) error         {Red}\n//    GetPermissions() (acl access.Permissions, version string, err error) {Blue}\n//  }"},
+		{"Object", "v.io/v23/services/permissions", "// Object provides access control for Vanadium objects.\n//\n// Vanadium services implementing dynamic access control would typically embed\n// this interface and tag additional methods defined by the service with one of\n// Admin, Read, Write, Resolve etc. For example, the VDL definition of the\n// object would be:\n//\n//   package mypackage\n//\n//   import \"v.io/v23/security/access\"\n//   import \"v.io/v23/services/permissions\"\n//\n//   type MyObject interface {\n//     permissions.Object\n//     MyRead() (string, error) {access.Read}\n//     MyWrite(string) error    {access.Write}\n//   }\n//\n// If the set of pre-defined tags is insufficient, services may define their\n// own tag type and annotate all methods with this new type.\n//\n// Instead of embedding this Object interface, define SetPermissions and\n// GetPermissions in their own interface. Authorization policies will typically\n// respect annotations of a single type. For example, the VDL definition of an\n// object would be:\n//\n//  package mypackage\n//\n//  import \"v.io/v23/security/access\"\n//\n//  type MyTag string\n//\n//  const (\n//    Blue = MyTag(\"Blue\")\n//    Red  = MyTag(\"Red\")\n//  )\n//\n//  type MyObject interface {\n//    MyMethod() (string, error) {Blue}\n//\n//    // Allow clients to change access via the access.Object interface:\n//    SetPermissions(perms access.Permissions, version string) error         {Red}\n//    GetPermissions() (perms access.Permissions, version string, err error) {Blue}\n//  }"},
 	},
 	Methods: []rpc.MethodDesc{
 		{
 			Name: "Create",
-			Doc:  "// Create creates a new group if it doesn't already exist.\n// If acl is nil, a default Permissions is used, providing Admin access to\n// the caller.\n// Create requires the caller to have Write permission at the GroupServer.",
+			Doc:  "// Create creates a new group if it doesn't already exist.\n// If perms is nil, a default Permissions is used, providing Admin access to\n// the caller.\n// Create requires the caller to have Write permission at the GroupServer.",
 			InArgs: []rpc.ArgDesc{
-				{"acl", ``},     // access.Permissions
+				{"perms", ``},   // access.Permissions
 				{"entries", ``}, // []BlessingPatternChunk
 			},
 			Tags: []*vdl.Value{vdl.ValueOf(access.Tag("Write"))},
@@ -424,7 +424,7 @@ var descGroup = rpc.InterfaceDesc{
 		},
 		{
 			Name: "Rest",
-			Doc:  "// Rest returns information sufficient for the client to perform its\n// AccessList checks.\n// TODO(sadovsky): Flesh out this API.",
+			Doc:  "// Rest returns information sufficient for the client to perform its\n// Permissions checks.\n// TODO(sadovsky): Flesh out this API.",
 			InArgs: []rpc.ArgDesc{
 				{"req", ``},        // RestRequest
 				{"reqVersion", ``}, // string

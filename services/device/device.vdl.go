@@ -442,8 +442,8 @@ type ApplicationClientMethods interface {
 	//    MyMethod() (string, error) {Blue}
 	//
 	//    // Allow clients to change access via the access.Object interface:
-	//    SetPermissions(acl access.Permissions, version string) error         {Red}
-	//    GetPermissions() (acl access.Permissions, version string, err error) {Blue}
+	//    SetPermissions(perms access.Permissions, version string) error         {Red}
+	//    GetPermissions() (perms access.Permissions, version string, err error) {Blue}
 	//  }
 	permissions.ObjectClientMethods
 	// Install installs the application identified by the first argument and
@@ -821,8 +821,8 @@ type ApplicationServerMethods interface {
 	//    MyMethod() (string, error) {Blue}
 	//
 	//    // Allow clients to change access via the access.Object interface:
-	//    SetPermissions(acl access.Permissions, version string) error         {Red}
-	//    GetPermissions() (acl access.Permissions, version string, err error) {Blue}
+	//    SetPermissions(perms access.Permissions, version string) error         {Red}
+	//    GetPermissions() (perms access.Permissions, version string, err error) {Blue}
 	//  }
 	permissions.ObjectServerMethods
 	// Install installs the application identified by the first argument and
@@ -961,8 +961,8 @@ type ApplicationServerStubMethods interface {
 	//    MyMethod() (string, error) {Blue}
 	//
 	//    // Allow clients to change access via the access.Object interface:
-	//    SetPermissions(acl access.Permissions, version string) error         {Red}
-	//    GetPermissions() (acl access.Permissions, version string, err error) {Blue}
+	//    SetPermissions(perms access.Permissions, version string) error         {Red}
+	//    GetPermissions() (perms access.Permissions, version string, err error) {Blue}
 	//  }
 	permissions.ObjectServerStubMethods
 	// Install installs the application identified by the first argument and
@@ -1147,7 +1147,7 @@ var descApplication = rpc.InterfaceDesc{
 	PkgPath: "v.io/v23/services/device",
 	Doc:     "// Application can be used to manage applications on a device. The\n// idea is that this interace will be invoked using an object name that\n// identifies the application and its installations and instances\n// where applicable.\n//\n// In particular, the interface methods can be divided into three\n// groups based on their intended receiver:\n//\n// 1) Method receiver is an application:\n// -- Install()\n//\n// 2) Method receiver is an application installation:\n// -- Instantiate()\n// -- Uninstall()\n// -- Update()\n//\n// 3) Method receiver is application installation instance:\n// -- Run()\n// -- Kill()\n// -- Delete()\n//\n// The following methods complement one another:\n// -- Install() and Uninstall()\n// -- Instantiate() and Delete()\n// -- Run() and Kill()\n//\n// Examples:\n// # Install Google Maps on the device.\n// device/apps.Install(\"/google.com/appstore/maps\", nil, nil) --> \"google maps/0\"\n//\n// # Create and start an instance of the previously installed maps application\n// installation.\n// device/apps/google maps/0.Instantiate() --> { \"0\" }\n// device/apps/google maps/0/0.Run()\n//\n// # Create and start a second instance of the previously installed maps\n// application installation.\n// device/apps/google maps/0.Instantiate() --> { \"1\" }\n// device/apps/google maps/0/1.Run()\n//\n// # Kill and delete the first instance previously started.\n// device/apps/google maps/0/0.Kill()\n// device/apps/google maps/0/0.Delete()\n//\n// # Install a second Google Maps installation.\n// device/apps.Install(\"/google.com/appstore/maps\", nil, nil) --> \"google maps/1\"\n//\n// # Update the second maps installation to the latest version available.\n// device/apps/google maps/1.Update()\n//\n// # Update the first maps installation to a specific version.\n// device/apps/google maps/0.UpdateTo(\"/google.com/appstore/beta/maps\")\n//\n// Finally, an application installation instance can be in one of three abstract\n// states: 1) \"does not exist/deleted\", 2) \"running\", or 3) \"not-running\". The\n// interface methods transition between these abstract states using the\n// following state machine:\n//\n// apply(Instantiate(), \"does not exist\") = \"not-running\"\n// apply(Run(), \"not-running\") = \"running\"\n// apply(Kill(), \"running\") = \"not-running\"\n// apply(Delete(), \"not-running\") = \"deleted\"",
 	Embeds: []rpc.EmbedDesc{
-		{"Object", "v.io/v23/services/permissions", "// Object provides access control for Vanadium objects.\n//\n// Vanadium services implementing dynamic access control would typically embed\n// this interface and tag additional methods defined by the service with one of\n// Admin, Read, Write, Resolve etc. For example, the VDL definition of the\n// object would be:\n//\n//   package mypackage\n//\n//   import \"v.io/v23/security/access\"\n//   import \"v.io/v23/services/permissions\"\n//\n//   type MyObject interface {\n//     permissions.Object\n//     MyRead() (string, error) {access.Read}\n//     MyWrite(string) error    {access.Write}\n//   }\n//\n// If the set of pre-defined tags is insufficient, services may define their\n// own tag type and annotate all methods with this new type.\n//\n// Instead of embedding this Object interface, define SetPermissions and\n// GetPermissions in their own interface. Authorization policies will typically\n// respect annotations of a single type. For example, the VDL definition of an\n// object would be:\n//\n//  package mypackage\n//\n//  import \"v.io/v23/security/access\"\n//\n//  type MyTag string\n//\n//  const (\n//    Blue = MyTag(\"Blue\")\n//    Red  = MyTag(\"Red\")\n//  )\n//\n//  type MyObject interface {\n//    MyMethod() (string, error) {Blue}\n//\n//    // Allow clients to change access via the access.Object interface:\n//    SetPermissions(acl access.Permissions, version string) error         {Red}\n//    GetPermissions() (acl access.Permissions, version string, err error) {Blue}\n//  }"},
+		{"Object", "v.io/v23/services/permissions", "// Object provides access control for Vanadium objects.\n//\n// Vanadium services implementing dynamic access control would typically embed\n// this interface and tag additional methods defined by the service with one of\n// Admin, Read, Write, Resolve etc. For example, the VDL definition of the\n// object would be:\n//\n//   package mypackage\n//\n//   import \"v.io/v23/security/access\"\n//   import \"v.io/v23/services/permissions\"\n//\n//   type MyObject interface {\n//     permissions.Object\n//     MyRead() (string, error) {access.Read}\n//     MyWrite(string) error    {access.Write}\n//   }\n//\n// If the set of pre-defined tags is insufficient, services may define their\n// own tag type and annotate all methods with this new type.\n//\n// Instead of embedding this Object interface, define SetPermissions and\n// GetPermissions in their own interface. Authorization policies will typically\n// respect annotations of a single type. For example, the VDL definition of an\n// object would be:\n//\n//  package mypackage\n//\n//  import \"v.io/v23/security/access\"\n//\n//  type MyTag string\n//\n//  const (\n//    Blue = MyTag(\"Blue\")\n//    Red  = MyTag(\"Red\")\n//  )\n//\n//  type MyObject interface {\n//    MyMethod() (string, error) {Blue}\n//\n//    // Allow clients to change access via the access.Object interface:\n//    SetPermissions(perms access.Permissions, version string) error         {Red}\n//    GetPermissions() (perms access.Permissions, version string, err error) {Blue}\n//  }"},
 	},
 	Methods: []rpc.MethodDesc{
 		{

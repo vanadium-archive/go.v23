@@ -51,18 +51,18 @@ import (
 //    MyMethod() (string, error) {Blue}
 //
 //    // Allow clients to change access via the access.Object interface:
-//    SetPermissions(acl access.Permissions, version string) error         {Red}
-//    GetPermissions() (acl access.Permissions, version string, err error) {Blue}
+//    SetPermissions(perms access.Permissions, version string) error         {Red}
+//    GetPermissions() (perms access.Permissions, version string, err error) {Blue}
 //  }
 type Object interface {
-  // SetPermissions replaces the current AccessList for an object.  version
+  // SetPermissions replaces the current Permissions for an object.  version
   // allows for optional, optimistic concurrency control.  If non-empty,
   // version's value must come from GetPermissions.  If any client has
   // successfully called SetPermissions in the meantime, the version will be
   // stale and SetPermissions will fail.  If empty, SetPermissions performs an
   // unconditional update.
   //
-  // AccessList objects are expected to be small.  It is up to the
+  // Permissions objects are expected to be small.  It is up to the
   // implementation to define the exact limit, though it should probably be
   // around 100KB.  Large lists of principals should use the Group API or
   // blessings.
@@ -70,16 +70,16 @@ type Object interface {
   // There is some ambiguity when calling SetPermissions on a mount point.
   // Does it affect the mount itself or does it affect the service endpoint
   // that the mount points to?  The chosen behavior is that it affects the
-  // service endpoint.  To modify the mount point's AccessList, use
+  // service endpoint.  To modify the mount point's Permissions, use
   // ResolveToMountTable to get an endpoint and call SetPermissions on that.
   // This means that clients must know when a name refers to a mount point to
-  // change its AccessList.
-  SetPermissions(acl access.Permissions, version string) error {access.Admin}
+  // change its Permissions.
+  SetPermissions(perms access.Permissions, version string) error {access.Admin}
 
-  // GetPermissions returns the complete, current AccessList for an object. The
+  // GetPermissions returns the complete, current Permissions for an object. The
   // returned version can be passed to a subsequent call to SetPermissions for
   // optimistic concurrency control. A successful call to SetPermissions will
   // invalidate version, and the client must call GetPermissions again to get
   // the current version.
-  GetPermissions() (acl access.Permissions, version string | error) {access.Admin}
+  GetPermissions() (perms access.Permissions, version string | error) {access.Admin}
 }

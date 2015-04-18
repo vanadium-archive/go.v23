@@ -32,16 +32,16 @@ type RestRequest struct {
 type RestResponse struct {
 }
 
-// A group's version covers its AccessList as well as any other data stored in
+// A group's version covers its Permissions as well as any other data stored in
 // the group. Clients should treat versions as opaque identifiers. For both Get
 // and Rest, if version is set and matches the Group's current version, the
 // response will indicate that fact but will otherwise be empty.
 type Group interface {
 	// Create creates a new group if it doesn't already exist.
-	// If acl is nil, a default Permissions is used, providing Admin access to
+	// If perms is nil, a default Permissions is used, providing Admin access to
 	// the caller.
 	// Create requires the caller to have Write permission at the GroupServer.
-	Create(acl access.Permissions, entries []BlessingPatternChunk) error {access.Write}
+	Create(perms access.Permissions, entries []BlessingPatternChunk) error {access.Write}
 
 	// Delete deletes the group.
 	// Permissions for all group-related methods except Create() are checked
@@ -59,7 +59,7 @@ type Group interface {
 	Get(req GetRequest, reqVersion string) (res GetResponse, version string | error) {access.Read}
 
 	// Rest returns information sufficient for the client to perform its
-	// AccessList checks.
+	// Permissions checks.
 	// TODO(sadovsky): Flesh out this API.
 	Rest(req RestRequest, reqVersion string) (res RestResponse, version string | error) {access.Resolve}
 
@@ -68,6 +68,6 @@ type Group interface {
 }
 
 error (
-	NoBlessings() {"en":"No blessings recognized; cannot create group AccessList"}
+	NoBlessings() {"en":"No blessings recognized; cannot create group Permissions"}
 	ExcessiveContention() {RetryBackoff, "en":"Gave up after encountering excessive contention; try again later"}
 )

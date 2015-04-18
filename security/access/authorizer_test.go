@@ -26,13 +26,14 @@ func authorize(authorizer security.Authorizer, params *security.CallParams) erro
 	return authorizer.Authorize(ctx, security.NewCall(params))
 }
 
-// TestPermissionsAuthorizer is both a test and a demonstration of the use of the
-// access.PermissionsAuthorizer and interaction with interface specification in VDL.
+// TestPermissionsAuthorizer is both a test and a demonstration of the use of
+// the access.PermissionsAuthorizer and interaction with interface specification
+// in VDL.
 func TestPermissionsAuthorizer(t *testing.T) {
 	type P []security.BlessingPattern
 	type S []string
 	// access.Permissions to test against.
-	acl := access.Permissions{
+	perms := access.Permissions{
 		"R": {
 			In: P{security.AllPrincipals},
 		},
@@ -49,7 +50,7 @@ func TestPermissionsAuthorizer(t *testing.T) {
 		Client security.Blessings
 	}
 
-	authorizer, err := access.PermissionsAuthorizer(acl, vdl.TypeOf(internal.Read))
+	authorizer, err := access.PermissionsAuthorizer(perms, vdl.TypeOf(internal.Read))
 	if err != nil {
 		t.Fatalf("Could not create authorizer: %v", err)
 	}
@@ -231,11 +232,11 @@ func TestTagTypeMustBeString(t *testing.T) {
 func TestMultipleTags(t *testing.T) {
 	var (
 		allowAll = access.AccessList{In: []security.BlessingPattern{security.AllPrincipals}}
-		acl      = access.Permissions{
+		perms    = access.Permissions{
 			"R": allowAll,
 			"W": allowAll,
 		}
-		authorizer, _ = access.PermissionsAuthorizer(acl, vdl.TypeOf(internal.Read))
+		authorizer, _ = access.PermissionsAuthorizer(perms, vdl.TypeOf(internal.Read))
 		pserver       = newPrincipal(t)
 		pclient       = newPrincipal(t)
 		server, _     = pserver.BlessSelf("server")

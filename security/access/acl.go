@@ -13,8 +13,9 @@ import (
 	"v.io/v23/security"
 )
 
-// Includes returns true iff the AccessList grants access to a principal that presents
-// blessings (i.e., if at least one of the blessings matches the AccessList).
+// Includes returns true iff the AccessList grants access to a principal that
+// presents blessings (i.e., if at least one of the blessings matches the
+// AccessList).
 func (acl AccessList) Includes(blessings ...string) bool {
 	blessings = acl.pruneBlacklisted(blessings)
 	for _, pattern := range acl.In {

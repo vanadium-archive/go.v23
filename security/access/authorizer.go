@@ -17,10 +17,10 @@ import (
 const pkgPath = "v.io/v23/security/access"
 
 var (
-	errTagNeedsString             = verror.Register(pkgPath+".errTagNeedsString", verror.NoRetry, "{1:}{2:}tag type({3}) must be backed by a string not {4}{:_}")
-	errNoMethodTags               = verror.Register(pkgPath+".errNoMethodTags", verror.NoRetry, "{1:}{2:}PermissionsAuthorizer.Authorize called with an object ({3}, method {4}) that has no tags of type {5}; this is likely unintentional{:_}")
-	errMultipleMethodTags         = verror.Register(pkgPath+".errMultipleMethodTags", verror.NoRetry, "{1:}{2:}PermissionsAuthorizer on {3}.{4} cannot handle multiple tags of type {5} ({6}); this is likely unintentional{:_}")
-	errCantReadAccessListFromFile = verror.Register(pkgPath+".errCantReadAccessListFromFile", verror.NoRetry, "{1:}{2:}failed to read AccessList from file{:_}")
+	errTagNeedsString              = verror.Register(pkgPath+".errTagNeedsString", verror.NoRetry, "{1:}{2:}tag type({3}) must be backed by a string not {4}{:_}")
+	errNoMethodTags                = verror.Register(pkgPath+".errNoMethodTags", verror.NoRetry, "{1:}{2:}PermissionsAuthorizer.Authorize called with an object ({3}, method {4}) that has no tags of type {5}; this is likely unintentional{:_}")
+	errMultipleMethodTags          = verror.Register(pkgPath+".errMultipleMethodTags", verror.NoRetry, "{1:}{2:}PermissionsAuthorizer on {3}.{4} cannot handle multiple tags of type {5} ({6}); this is likely unintentional{:_}")
+	errCantReadPermissionsFromFile = verror.Register(pkgPath+".errCantReadPermissionsFromFile", verror.NoRetry, "{1:}{2:}failed to read Permissions from file{:_}")
 )
 
 // PermissionsAuthorizer implements an authorization policy where access is
@@ -58,34 +58,35 @@ var (
 //     SetIndex(int, string) error   {WriteAccess}
 //   }
 //
-// (2) Setup the rpc.Dispatcher to use the PermissionsAuthorizer
+// (2) Configure the rpc.Dispatcher to use the PermissionsAuthorizer
 //   import (
 //     "reflect"
 //
 //     "v.io/v23/rpc"
 //     "v.io/v23/security"
-//     "v.io/x/ref/lib/security/acl"
+//     "v.io/v23/security/access"
 //   )
 //
 //   type dispatcher struct{}
 //   func (d dispatcher) Lookup(suffix, method) (rpc.Invoker, security.Authorizer, error) {
-//      acl := acl.Permissions{
-//        "R": acl.AccessList{In: []security.BlessingPattern{"alice/friends", "alice/family"} },
-//        "W": acl.AccessList{In: []security.BlessingPattern{"alice/family", "alice/colleagues" } },
+//      perms := access.Permissions{
+//        "R": access.AccessList{In: []security.BlessingPattern{"alice/friends", "alice/family"} },
+//        "W": access.AccessList{In: []security.BlessingPattern{"alice/family", "alice/colleagues" } },
 //      }
 //      typ := reflect.TypeOf(ReadAccess)  // equivalently, reflect.TypeOf(WriteAccess)
-//      return newInvoker(), acl.PermissionsAuthorizer(acl, typ), nil
+//      return newInvoker(), access.PermissionsAuthorizer(perms, typ), nil
 //   }
 //
-// With the above dispatcher, the server will grant access to a peer with the blessing
-// "alice/friend/bob" access only to the "Get" and "GetIndex" methods. A peer presenting
-// the blessing "alice/colleague/carol" will get access only to the "Set" and "SetIndex"
-// methods. A peer presenting "alice/family/mom" will get access to all methods.
-func PermissionsAuthorizer(acls Permissions, tagType *vdl.Type) (security.Authorizer, error) {
+// With the above dispatcher, the server will grant access to a peer with the
+// blessing "alice/friend/bob" access only to the "Get" and "GetIndex" methods.
+// A peer presenting the blessing "alice/colleague/carol" will get access only
+// to the "Set" and "SetIndex" methods. A peer presenting "alice/family/mom"
+// will get access to all methods.
+func PermissionsAuthorizer(perms Permissions, tagType *vdl.Type) (security.Authorizer, error) {
 	if tagType.Kind() != vdl.String {
 		return nil, errTagType(tagType)
 	}
-	return &authorizer{acls, tagType}, nil
+	return &authorizer{perms, tagType}, nil
 }
 
 // PermissionsAuthorizerFromFile applies the same authorization policy as
@@ -109,7 +110,7 @@ func errTagType(tt *vdl.Type) error {
 }
 
 type authorizer struct {
-	acls    Permissions
+	perms   Permissions
 	tagType *vdl.Type
 }
 
@@ -127,7 +128,7 @@ func (a *authorizer) Authorize(ctx *context.T, call security.Call) error {
 				return verror.New(errMultipleMethodTags, ctx, call.Suffix(), call.Method(), a.tagType, call.MethodTags())
 			}
 			hastag = true
-			if acl, exists := a.acls[tag.RawString()]; !exists || !acl.Includes(blessings...) {
+			if acl, exists := a.perms[tag.RawString()]; !exists || !acl.Includes(blessings...) {
 				return NewErrNoPermissions(ctx, blessings, invalid, tag.RawString())
 			}
 		}
@@ -144,12 +145,12 @@ type fileAuthorizer struct {
 }
 
 func (a *fileAuthorizer) Authorize(ctx *context.T, call security.Call) error {
-	acl, err := loadPermissionsFromFile(a.filename)
+	perms, err := loadPermissionsFromFile(a.filename)
 	if err != nil {
 		// TODO(ashankar): Information leak?
-		return verror.New(errCantReadAccessListFromFile, ctx, err)
+		return verror.New(errCantReadPermissionsFromFile, ctx, err)
 	}
-	return (&authorizer{acl, a.tagType}).Authorize(ctx, call)
+	return (&authorizer{perms, a.tagType}).Authorize(ctx, call)
 }
 
 func loadPermissionsFromFile(filename string) (Permissions, error) {

@@ -3,7 +3,7 @@
 // license that can be found in the LICENSE file.
 
 // Package internal provides a VDL specification for a service used in the
-// unittest of the acl package.
+// unittest of the access package.
 package internal
 
 // Any package can define tags (of arbitrary types) to be attached to methods.
@@ -11,8 +11,8 @@ package internal
 type MyTag string
 
 const (
-	// For this example/unittest, there are three possible values of MyTag,
-        // each represented by a single-character string.
+	// For this example/unittest, there are three possible values of MyTag, each
+	// represented by a single-character string.
 	Read    = MyTag("R")
 	Write   = MyTag("W")
 	Execute = MyTag("X")

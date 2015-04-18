@@ -83,16 +83,16 @@
 //
 //   client := access.ObjectClient(name)
 //   for {
-//     acl, etag, err := client.GetPermissions()
+//     perms, etag, err := client.GetPermissions()
 //     if err != nil {
 //       return err
 //     }
-//     acl[newTag] = AccessList{In: []security.BlessingPattern{newPattern}}
-//     // Use the same etag with the modified acl to ensure that no other client
-//     // has modified the acl since GetPermissions returned.
-//     if err := client.SetPermissions(acl, etag); err != nil {
+//     perms[newTag] = AccessList{In: []security.BlessingPattern{newPattern}}
+//     // Use the same etag with the modified perms to ensure that no other client
+//     // has modified the perms since GetPermissions returned.
+//     if err := client.SetPermissions(perms, etag); err != nil {
 //       if verror.ErrorID(err) == verror.ErrBadEtag.Id {
-//         // Another client replaced the AccessList after our GetPermissions returned.
+//         // Another client replaced the Permissions after our GetPermissions returned.
 //         // Try again.
 //         continue
 //       }

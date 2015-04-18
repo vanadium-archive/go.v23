@@ -6,7 +6,7 @@
 // Source: vdl.vdl
 
 // Package internal provides a VDL specification for a service used in the
-// unittest of the acl package.
+// unittest of the access package.
 package internal
 
 import (
@@ -30,8 +30,8 @@ func init() {
 	vdl.Register((*MyTag)(nil))
 }
 
-// For this example/unittest, there are three possible values of MyTag,
-// each represented by a single-character string.
+// For this example/unittest, there are three possible values of MyTag, each
+// represented by a single-character string.
 const Read = MyTag("R")
 
 const Write = MyTag("W")
