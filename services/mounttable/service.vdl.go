@@ -140,8 +140,6 @@ type MountTableClientMethods interface {
 	// ResolveStep takes the next step in resolving a name.  Returns the next
 	// servers to query and the suffix at those servers.
 	ResolveStep(*context.T, ...rpc.CallOpt) (naming.MountEntry, error)
-	// Obsolete, left for backward compatability until all uses are killed.
-	ResolveStepX(*context.T, ...rpc.CallOpt) (naming.MountEntry, error)
 }
 
 // MountTableClientStub adds universal methods to MountTableClientMethods.
@@ -178,11 +176,6 @@ func (c implMountTableClientStub) Delete(ctx *context.T, i0 bool, opts ...rpc.Ca
 
 func (c implMountTableClientStub) ResolveStep(ctx *context.T, opts ...rpc.CallOpt) (o0 naming.MountEntry, err error) {
 	err = v23.GetClient(ctx).Call(ctx, c.name, "ResolveStep", nil, []interface{}{&o0}, opts...)
-	return
-}
-
-func (c implMountTableClientStub) ResolveStepX(ctx *context.T, opts ...rpc.CallOpt) (o0 naming.MountEntry, err error) {
-	err = v23.GetClient(ctx).Call(ctx, c.name, "ResolveStepX", nil, []interface{}{&o0}, opts...)
 	return
 }
 
@@ -263,8 +256,6 @@ type MountTableServerMethods interface {
 	// ResolveStep takes the next step in resolving a name.  Returns the next
 	// servers to query and the suffix at those servers.
 	ResolveStep(*context.T, rpc.ServerCall) (naming.MountEntry, error)
-	// Obsolete, left for backward compatability until all uses are killed.
-	ResolveStepX(*context.T, rpc.ServerCall) (naming.MountEntry, error)
 }
 
 // MountTableServerStubMethods is the server interface containing
@@ -320,10 +311,6 @@ func (s implMountTableServerStub) ResolveStep(ctx *context.T, call rpc.ServerCal
 	return s.impl.ResolveStep(ctx, call)
 }
 
-func (s implMountTableServerStub) ResolveStepX(ctx *context.T, call rpc.ServerCall) (naming.MountEntry, error) {
-	return s.impl.ResolveStepX(ctx, call)
-}
-
 func (s implMountTableServerStub) Globber() *rpc.GlobState {
 	return s.gs
 }
@@ -370,13 +357,6 @@ var descMountTable = rpc.InterfaceDesc{
 		{
 			Name: "ResolveStep",
 			Doc:  "// ResolveStep takes the next step in resolving a name.  Returns the next\n// servers to query and the suffix at those servers.",
-			OutArgs: []rpc.ArgDesc{
-				{"", ``}, // naming.MountEntry
-			},
-		},
-		{
-			Name: "ResolveStepX",
-			Doc:  "// Obsolete, left for backward compatability until all uses are killed.",
 			OutArgs: []rpc.ArgDesc{
 				{"", ``}, // naming.MountEntry
 			},
