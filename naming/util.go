@@ -5,10 +5,7 @@
 package naming
 
 import (
-	"strconv"
 	"strings"
-
-	"v.io/v23/rpc/version"
 )
 
 // EndpointOpt must be implemented by all optional parameters to FormatEndpoint
@@ -22,35 +19,22 @@ type EndpointOpt interface {
 // as options.
 func FormatEndpoint(network, address string, opts ...EndpointOpt) string {
 	rid := "@"
-	versions := "@@"
 	var blessings []string
-	servesMountTable := false
+	mounttable := ""
 	for _, o := range opts {
 		switch v := o.(type) {
 		case RoutingID:
 			rid = "@" + v.String()
-		case version.RPCVersionRange:
-			versions = "@" + strconv.FormatUint(uint64(v.Min), 10) +
-				"@" + strconv.FormatUint(uint64(v.Max), 10)
 		case ServesMountTable:
-			servesMountTable = bool(v)
+			if bool(v) {
+				mounttable = "m"
+			} else {
+				mounttable = "s"
+			}
 		case BlessingOpt:
 			blessings = append(blessings, string(v))
 		}
 	}
-	if len(blessings) > 0 {
-		mORs := "s"
-		if servesMountTable {
-			mORs = "m"
-		}
-		// "," is chosen as the separator for blessings
-		// because it is an invalid substring in blessings.
-		return "@4@" + network + "@" + address + rid + versions + "@" + mORs + "@" + strings.Join(blessings, ",") + "@@"
-	}
-	if servesMountTable {
-		return "@3@" + network + "@" + address + rid + versions + "@" + "m" + "@@"
-	}
-	// For now, only use the v3 endpoint when we need to - i.e. only
-	// mount tables will export v3 endpoints.
-	return "@2@" + network + "@" + address + rid + versions + "@@"
+
+	return "@5@" + network + "@" + address + rid + "@" + mounttable + "@" + strings.Join(blessings, ",") + "@@"
 }
