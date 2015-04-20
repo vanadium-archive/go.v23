@@ -51,7 +51,7 @@ func TestMatchedBy(t *testing.T) {
 	for _, test := range tests {
 		// All combinations of test.Matches should match.
 		for i := 0; i < len(test.Matches); i++ {
-			for j := i + 1; j < len(test.Matches); j++ {
+			for j := i + 1; j <= len(test.Matches); j++ {
 				args := []string(test.Matches[i:j])
 				if !test.Pattern.MatchedBy(args...) {
 					t.Errorf("%q.MatchedBy(%v) returned false", test.Pattern, args)
@@ -60,7 +60,7 @@ func TestMatchedBy(t *testing.T) {
 		}
 		// All combinations of test.DoesNotMatch should not match.
 		for i := 0; i < len(test.DoesNotMatch); i++ {
-			for j := i + 1; j < len(test.DoesNotMatch); j++ {
+			for j := i + 1; j <= len(test.DoesNotMatch); j++ {
 				args := []string(test.DoesNotMatch[i:j])
 				if test.Pattern.MatchedBy(args...) {
 					t.Errorf("%q.MatchedBy(%v) returned true", test.Pattern, args)
@@ -87,7 +87,7 @@ func TestMatchedByCornerCases(t *testing.T) {
 		t.Errorf("%q.MatchedBy(%q) failed", AllPrincipals, "")
 	}
 	if NoExtension.MatchedBy("") {
-		t.Errorf("%q.MatchedBy() returned true", NoExtension)
+		t.Errorf("%q.MatchedBy(%q) returned true", NoExtension, "")
 	}
 	if BlessingPattern("ann/$").MatchedBy("") {
 		t.Errorf("%q.MatchedBy(%q) returned true", "ann/$", "")
