@@ -76,13 +76,13 @@ type Stream interface {
 
 // NewAddAddrsSetting creates the Setting to be sent to Listen to inform
 // it of new addresses that have become available since the last change.
-func NewAddAddrsSetting(a []Address) config.Setting {
+func NewAddAddrsSetting(a []net.Addr) config.Setting {
 	return config.NewAny(NewAddrsSetting, NewAddrsSettingDesc, a)
 }
 
 // NewRmAddrsSetting creates the Setting to be sent to Listen to inform
 // it of addresses that are no longer available.
-func NewRmAddrsSetting(a []Address) config.Setting {
+func NewRmAddrsSetting(a []net.Addr) config.Setting {
 	return config.NewAny(RmAddrsSetting, RmAddrsSettingDesc, a)
 }
 
@@ -120,27 +120,10 @@ type ListenSpec struct {
 	// The name of the Stream to Fork on the StreamPublisher.
 	StreamName string
 
-	// AddressChooser returns a function that can be used to
+	// AddressChooser is a function that can be used to
 	// choose the preferred address to publish with the mount table
 	// when one is not otherwise specified.
-	AddressChooser AddressChooser
-}
-
-// NetworkInterface represents a network interface.
-type NetworkInterface interface {
-	// Networks returns the set of networks accessible over this interface.
-	Networks() []net.Addr
-	// InterfaceIndex returns the index of this interface.
-	InterfaceIndex() int
-	// InterfaceName returns the name of this interface.
-	InterfaceName() string
-}
-
-// Address represents a network address and the interface that hosts it.
-type Address interface {
-	// Address returns the network address this instance represents.
-	Address() net.Addr
-	NetworkInterface
+	AddressChooser func(protocol string, candidates []net.Addr) ([]net.Addr, error)
 }
 
 func (l ListenSpec) String() string {
@@ -163,10 +146,6 @@ func (l ListenSpec) Copy() ListenSpec {
 	l.Addrs = append(ListenAddrs{}, l.Addrs...)
 	return l
 }
-
-// AddressChooser returns the address it prefers out of the set passed to it
-// for the specified network.
-type AddressChooser func(network string, addrs []Address) ([]Address, error)
 
 // Server defines the interface for managing a collection of services.
 type Server interface {
