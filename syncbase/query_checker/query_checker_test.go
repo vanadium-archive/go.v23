@@ -34,7 +34,18 @@ func TestCreate(t *testing.T) {
 
 type checkSelectTest struct {
 	query string
-	err   *query_checker.SemanticError
+}
+
+type keyPrefixesTest struct {
+	query       string
+	keyPrefixes []string
+}
+
+type regularExpressionsTest struct {
+	query      string
+	regex      string
+	matches    []string
+	nonMatches []string
 }
 
 type parseSelectErrorTest struct {
@@ -44,37 +55,52 @@ type parseSelectErrorTest struct {
 
 func TestQueryChecker(t *testing.T) {
 	basic := []checkSelectTest{
+		{"select k, v from Customer"},
+		{"select k, v.name from Customer"},
+		{"select k, v.name from Customer limit 200"},
+		{"select k, v.name from Customer offset 100"},
+		{"select k, v.name from Customer where k = \"foo\""},
+		{"select v from Customer where type = \"Foo.Bar\""},
+		{"select k, v from Customer where type = \"Foo.Bar\" and k like \"abc%\" limit 100 offset 200"},
+	}
+
+	for _, test := range basic {
+		s, syntaxErr := query_parser.Parse(test.query)
+		if syntaxErr != nil {
+			t.Errorf("query: %s; unexpected error: got %v, want nil", test.query, syntaxErr)
+		}
+		err := query_checker.Check(store, s)
+		if err != nil {
+			t.Errorf("query: %s; got %v, want: nil", test.query, err)
+		}
+	}
+}
+
+func TestKeyPrefixes(t *testing.T) {
+	basic := []keyPrefixesTest{
 		{
 			"select k, v from Customer",
-			nil,
-		},
-		{
-			"select k, v.name from Customer",
-			nil,
-		},
-		{
-			"select k, v.name from Customer limit 200",
-			nil,
-		},
-		{
-			"select k, v.name from Customer offset 100",
-			nil,
-		},
-		{
-			"select k, v.name from Customer where k = \"foo\"",
-			nil,
-		},
-		{
-			"select v from Customer where type = \"Foo.Bar\"",
-			nil,
-		},
-		{
-			"select v from Customer where type = \"Foo.Bar\" and k >= \"100\" and k < \"200\" and v.foo > 50 and v.bar <= 1000 and v.baz <> -20.7",
-			nil,
+			[]string{""},
 		},
 		{
 			"select k, v from Customer where type = \"Foo.Bar\" and k like \"abc%\" limit 100 offset 200",
-			nil,
+			[]string{"abc"},
+		},
+		{
+			"select k, v from Customer where k = \"Foo.Bar\" and k like \"abc%\" limit 100 offset 200",
+			[]string{"Foo.Bar", "abc"},
+		},
+		{
+			"select k, v from Customer where k = \"Foo.Bar\" or k like \"Foo\" or k like \"abc%\" limit 100 offset 200",
+			[]string{"Foo", "abc"},
+		},
+		{
+			"select k, v from Customer where k like \"Foo\\%Bar\" or k like \"abc%\" limit 100 offset 200",
+			[]string{"Foo%Bar", "abc"},
+		},
+		{
+			"select k, v from Customer where k like \"Foo\\\\%Bar\" or k like \"abc%\" limit 100 offset 200",
+			[]string{"Foo\\", "abc"},
 		},
 	}
 
@@ -86,6 +112,94 @@ func TestQueryChecker(t *testing.T) {
 		err := query_checker.Check(store, s)
 		if err != nil {
 			t.Errorf("query: %s; got %v, want: nil", test.query, err)
+		}
+		switch sel := (*s).(type) {
+		case query_parser.SelectStatement:
+			prefixes := query_checker.CompileKeyPrefixes(sel.Where)
+			if !reflect.DeepEqual(test.keyPrefixes, prefixes) {
+				t.Errorf("query: %s;\nGOT  %v\nWANT %v", test.query, prefixes, test.keyPrefixes)
+			}
+		default:
+			t.Errorf("query: %s;\nGOT  %v\nWANT query_parser.SelectStatement", test.query, *s)
+		}
+	}
+}
+
+func TestRegularExpressions(t *testing.T) {
+	basic := []regularExpressionsTest{
+		{
+			"select v from Customer where v like \"abc%\"",
+			"^abc.*?$",
+			[]string{"abc", "abcd", "abcabc"},
+			[]string{"xabcd"},
+		},
+		{
+			"select v from Customer where v like \"abc_\"",
+			"^abc.$",
+			[]string{"abcd", "abc1"},
+			[]string{"abc", "xabcd", "abcde"},
+		},
+		{
+			"select v from Customer where v like \"abc_efg\"",
+			"^abc.efg$",
+			[]string{"abcdefg"},
+			[]string{"abc", "xabcd", "abcde", "abcdefgh"},
+		},
+		{
+			"select v from Customer where v like \"abc\\\\efg\"",
+			"^abc\\\\efg$",
+			[]string{"abc\\efg"},
+			[]string{"abc\\", "xabc\\efg", "abc\\de", "abc\\defgh"},
+		},
+		{
+			"select v from Customer where v like \"abc%def\"",
+			"^abc.*?def$",
+			[]string{"abcdefdef", "abcdef", "abcdefghidef"},
+			[]string{"abcdefg", "abcdefde"},
+		},
+		{
+			"select v from Customer where v like \"[0-9]*abc%def\"",
+			"^\\[0-9\\]\\*abc.*?def$",
+			[]string{"[0-9]*abcdefdef", "[0-9]*abcdef", "[0-9]*abcdefghidef"},
+			[]string{"0abcdefg", "9abcdefde", "[0-9]abcdefg", "[0-9]abcdefg", "[0-9]abcdefg"},
+		},
+		{
+			"select v from Customer where v like \"[0-9]*a\\\\b\\\\c%def\"",
+			"^\\[0-9\\]\\*a\\\\b\\\\c.*?def$",
+			[]string{"[0-9]*a\\b\\cdefdef", "[0-9]*a\\b\\cdef", "[0-9]*a\\b\\cdefghidef"},
+			[]string{"0a\\b\\cdefg", "9a\\\b\\cdefde", "[0-9]a\\\b\\cdefg", "[0-9]a\\b\\cdefg", "[0-9]a\\b\\cdefg"},
+		},
+	}
+
+	for _, test := range basic {
+		s, syntaxErr := query_parser.Parse(test.query)
+		if syntaxErr != nil {
+			t.Errorf("query: %s; unexpected error: got %v, want nil", test.query, syntaxErr)
+		}
+		err := query_checker.Check(store, s)
+		if err != nil {
+			t.Errorf("query: %s; got %v, want: nil", test.query, err)
+		}
+		switch sel := (*s).(type) {
+		case query_parser.SelectStatement:
+			// We know there is exactly one like expression and operand2 contains
+			// a regex and compiled regex.
+			if sel.Where.Expr.Operand2.Regex != test.regex {
+				t.Errorf("query: %s;\nGOT  %s\nWANT %s", test.query, sel.Where.Expr.Operand2.Regex, test.regex)
+			}
+			regexp := sel.Where.Expr.Operand2.CompRegex
+			// Make sure all matches actually match
+			for _, m := range test.matches {
+				if !regexp.MatchString(m) {
+					t.Errorf("query: %s;Expected match: %s; \nGOT  false\nWANT true", test.query, m)
+				}
+			}
+			// Make sure all nonMatches actually don't match
+			for _, n := range test.nonMatches {
+				if regexp.MatchString(n) {
+					t.Errorf("query: %s;Expected nonMatch: %s; \nGOT  true\nWANT false", test.query, n)
+				}
+			}
 		}
 	}
 }
@@ -107,13 +221,15 @@ func TestQueryParserErrors(t *testing.T) {
 		{"select v.* from Customer where type >= \"foo\"", query_checker.Error(31, "Type expressions must be 'type = <string-literal>'.")},
 		{"select v.* from Customer where \"foo\" = type", query_checker.Error(31, "Type expressions must be 'type = <string-literal>'.")},
 		{"select v.* from Customer where v.x like v.y", query_checker.Error(31, "Like expressions require right operand of type <string-literal>.")},
-		{"select v.* from Customer where k = v.y", query_checker.Error(31, "Key (i.e., 'k') expressions must be of form 'k <op> <string-literal>'.")},
-		{"select v.* from Customer where k <> v.y", query_checker.Error(31, "Key (i.e., 'k') expressions must be of form 'k <op> <string-literal>'.")},
-		{"select v.* from Customer where k < v.y", query_checker.Error(31, "Key (i.e., 'k') expressions must be of form 'k <op> <string-literal>'.")},
-		{"select v.* from Customer where k <= v.y", query_checker.Error(31, "Key (i.e., 'k') expressions must be of form 'k <op> <string-literal>'.")},
-		{"select v.* from Customer where k > v.y", query_checker.Error(31, "Key (i.e., 'k') expressions must be of form 'k <op> <string-literal>'.")},
-		{"select v.* from Customer where k >= v.y", query_checker.Error(31, "Key (i.e., 'k') expressions must be of form 'k <op> <string-literal>'.")},
-		{"select v.* from Customer where \"abc%\" = k", query_checker.Error(31, "Key (i.e., 'k') expressions must be of form 'k <op> <string-literal>'.")},
+		{"select v.* from Customer where k = v.y", query_checker.Error(31, "Key (i.e., 'k') expressions must be of form 'k like|= <string-literal>'.")},
+		{"select v.* from Customer where k <> v.y", query_checker.Error(31, "Key (i.e., 'k') expressions must be of form 'k like|= <string-literal>'.")},
+		{"select v.* from Customer where k < v.y", query_checker.Error(31, "Key (i.e., 'k') expressions must be of form 'k like|= <string-literal>'.")},
+		{"select v.* from Customer where k <= v.y", query_checker.Error(31, "Key (i.e., 'k') expressions must be of form 'k like|= <string-literal>'.")},
+		{"select v.* from Customer where k > v.y", query_checker.Error(31, "Key (i.e., 'k') expressions must be of form 'k like|= <string-literal>'.")},
+		{"select v.* from Customer where k >= v.y", query_checker.Error(31, "Key (i.e., 'k') expressions must be of form 'k like|= <string-literal>'.")},
+		{"select v.* from Customer where \"abc%\" = k", query_checker.Error(31, "Key (i.e., 'k') expressions must be of form 'k like|= <string-literal>'.")},
+		{"select v from Customer where type = \"Foo.Bar\" and k >= \"100\" and k < \"200\" and v.foo > 50 and v.bar <= 1000 and v.baz <> -20.7", query_checker.Error(50, "Key (i.e., 'k') expressions must be of form 'k like|= <string-literal>'.")},
+		{"select v.* from Customer where k like \"a\\bc%\"", query_checker.Error(38, "Expected '\\', '%' or '_' after '\\'.")},
 	}
 
 	for _, test := range basic {

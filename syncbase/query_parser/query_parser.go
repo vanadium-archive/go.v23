@@ -73,6 +73,7 @@ package query_parser
 
 import (
 	"fmt"
+	"regexp"
 	"strconv"
 	"strings"
 	"text/scanner"
@@ -169,13 +170,16 @@ const (
 )
 
 type Operand struct {
-	Type    OperandType
-	Char    rune
-	Column  *Field
-	Int     int64
-	Float   float64
-	Literal string
-	Expr    *Expression
+	Type      OperandType
+	Char      rune
+	Column    *Field
+	Int       int64
+	Float     float64
+	Literal   string
+	Prefix    string // Computed by checker for Like expressions
+	Regex     string // Computed by checker for Like expressions
+	CompRegex *regexp.Regexp
+	Expr      *Expression
 	Node
 }
 
@@ -231,6 +235,7 @@ type SelectStatement struct {
 }
 
 func ScanToken(s *scanner.Scanner) *Token {
+	// TODO(jkline): Replace golang text/scanner.  It likes to write to stderr.
 	var token Token
 	tok := s.Scan()
 	token.Value = s.TokenText()
