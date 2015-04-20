@@ -64,7 +64,7 @@ type Object interface {
   //
   // Permissions objects are expected to be small.  It is up to the
   // implementation to define the exact limit, though it should probably be
-  // around 100KB.  Large lists of principals should use the Group API or
+  // around 100KB.  Large lists of principals can be represented concisely using
   // blessings.
   //
   // There is some ambiguity when calling SetPermissions on a mount point.

@@ -55,42 +55,44 @@
 // "home".  Resolve protects these servers against potential denial of service
 // attacks on these large, shared directories.
 //
-// Groups and blessings allow for sweeping access changes.  A group is suitable
-// for saying that the same set of principals have access to a set of unrelated
-// resources (e.g. docs, VMs, images).  See the Group API for a complete
-// description.  A blessing is useful for controlling access to objects that
-// are always accessed together.  For example, a document may have embedded
-// images and comments, each with a unique name.  When accessing a document,
-// the server would generate a blessing that the client would use to fetch the
-// images and comments; the images and comments would have this blessed
-// identity in their AccessLists.  Changes to the document's AccessList are therefore
-// "propagated" to the images and comments.
+// Blessings allow for sweeping access changes. In particular, a blessing is
+// useful for controlling access to objects that are always accessed together.
+// For example, a document may have embedded images and comments, each with a
+// unique name. When accessing a document, the server would generate a blessing
+// that the client would use to fetch the images and comments; the images and
+// comments would have this blessed identity in their AccessLists. Changes to
+// the document's AccessLists are therefore "propagated" to the images and
+// comments.
 //
-// Some services will want a concept of implicit access control.  They are free
-// to implement this as is best for their service.  However, GetPermissions should
-// respond with the correct AccessList.  For example, a corporate file server would
-// allow all employees to create their own directory and have full control
-// within that directory.  Employees should not be allowed to modify other
-// employee directories.  In other words, within the directory "home", employee
-// E should be allowed to modify only "home/E".  The file server doesn't know
-// the list of all employees a priori, so it uses an implementation-specific
-// rule to map employee identities to their home directory.
+// In the future, we may add some sort of "groups" mechanism to provide an
+// alternative way to express access control policies.
+//
+// Some services will want a concept of implicit access control. They are free
+// to implement this as appropriate for their service. However, GetPermissions
+// should respond with the correct Permissions. For example, a corporate file
+// server would allow all employees to create their own directory and have full
+// control within that directory. Employees should not be allowed to modify
+// other employee directories. In other words, within the directory "home",
+// employee E should be allowed to modify only "home/E". The file server doesn't
+// know the list of all employees a priori, so it uses an
+// implementation-specific rule to map employee identities to their home
+// directory.
 //
 // Examples
 //
 //   client := access.ObjectClient(name)
 //   for {
-//     perms, etag, err := client.GetPermissions()
+//     perms, version, err := client.GetPermissions()
 //     if err != nil {
 //       return err
 //     }
 //     perms[newTag] = AccessList{In: []security.BlessingPattern{newPattern}}
-//     // Use the same etag with the modified perms to ensure that no other client
-//     // has modified the perms since GetPermissions returned.
-//     if err := client.SetPermissions(perms, etag); err != nil {
-//       if verror.ErrorID(err) == verror.ErrBadEtag.Id {
-//         // Another client replaced the Permissions after our GetPermissions returned.
-//         // Try again.
+//     // Use the same version with the modified perms to ensure that no other
+//     // client has modified the perms since GetPermissions returned.
+//     if err := client.SetPermissions(perms, version); err != nil {
+//       if verror.ErrorID(err) == verror.ErrBadVersion.Id {
+//         // Another client replaced the Permissions after our GetPermissions
+//         // returned. Try again.
 //         continue
 //       }
 //       return err
@@ -100,8 +102,8 @@ package access
 
 import "v.io/v23/security"
 
-// AccessList represents an Access Control List - a set of blessings that should be
-// granted access.
+// AccessList represents an Access Control List - a set of blessings that should
+// be granted access.
 //
 // See also: https://v.io/glossary.html#access-control-list
 type AccessList struct {

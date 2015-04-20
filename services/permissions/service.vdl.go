@@ -77,7 +77,7 @@ type ObjectClientMethods interface {
 	//
 	// Permissions objects are expected to be small.  It is up to the
 	// implementation to define the exact limit, though it should probably be
-	// around 100KB.  Large lists of principals should use the Group API or
+	// around 100KB.  Large lists of principals can be represented concisely using
 	// blessings.
 	//
 	// There is some ambiguity when calling SetPermissions on a mount point.
@@ -178,7 +178,7 @@ type ObjectServerMethods interface {
 	//
 	// Permissions objects are expected to be small.  It is up to the
 	// implementation to define the exact limit, though it should probably be
-	// around 100KB.  Large lists of principals should use the Group API or
+	// around 100KB.  Large lists of principals can be represented concisely using
 	// blessings.
 	//
 	// There is some ambiguity when calling SetPermissions on a mount point.
@@ -259,7 +259,7 @@ var descObject = rpc.InterfaceDesc{
 	Methods: []rpc.MethodDesc{
 		{
 			Name: "SetPermissions",
-			Doc:  "// SetPermissions replaces the current Permissions for an object.  version\n// allows for optional, optimistic concurrency control.  If non-empty,\n// version's value must come from GetPermissions.  If any client has\n// successfully called SetPermissions in the meantime, the version will be\n// stale and SetPermissions will fail.  If empty, SetPermissions performs an\n// unconditional update.\n//\n// Permissions objects are expected to be small.  It is up to the\n// implementation to define the exact limit, though it should probably be\n// around 100KB.  Large lists of principals should use the Group API or\n// blessings.\n//\n// There is some ambiguity when calling SetPermissions on a mount point.\n// Does it affect the mount itself or does it affect the service endpoint\n// that the mount points to?  The chosen behavior is that it affects the\n// service endpoint.  To modify the mount point's Permissions, use\n// ResolveToMountTable to get an endpoint and call SetPermissions on that.\n// This means that clients must know when a name refers to a mount point to\n// change its Permissions.",
+			Doc:  "// SetPermissions replaces the current Permissions for an object.  version\n// allows for optional, optimistic concurrency control.  If non-empty,\n// version's value must come from GetPermissions.  If any client has\n// successfully called SetPermissions in the meantime, the version will be\n// stale and SetPermissions will fail.  If empty, SetPermissions performs an\n// unconditional update.\n//\n// Permissions objects are expected to be small.  It is up to the\n// implementation to define the exact limit, though it should probably be\n// around 100KB.  Large lists of principals can be represented concisely using\n// blessings.\n//\n// There is some ambiguity when calling SetPermissions on a mount point.\n// Does it affect the mount itself or does it affect the service endpoint\n// that the mount points to?  The chosen behavior is that it affects the\n// service endpoint.  To modify the mount point's Permissions, use\n// ResolveToMountTable to get an endpoint and call SetPermissions on that.\n// This means that clients must know when a name refers to a mount point to\n// change its Permissions.",
 			InArgs: []rpc.ArgDesc{
 				{"perms", ``},   // access.Permissions
 				{"version", ``}, // string
