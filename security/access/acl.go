@@ -50,7 +50,7 @@ func (acl AccessList) pruneBlacklisted(blessings []string) []string {
 // only if the remote blessings are included in the AccessList.
 //
 // TODO(ashankar): Add tests for this
-func (acl *AccessList) Authorize(ctx *context.T, call security.Call) error {
+func (acl AccessList) Authorize(ctx *context.T, call security.Call) error {
 	blessingsForCall, invalid := security.RemoteBlessingNames(ctx, call)
 	if acl.Includes(blessingsForCall...) {
 		return nil
