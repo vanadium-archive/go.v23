@@ -777,7 +777,7 @@ func TestBlessingsOnWireWithMissingCertificates(t *testing.T) {
 	}
 }
 
-func TestCustomChainValidator(t *testing.T) {
+func TestOverrideCaveatValidation(t *testing.T) {
 	falseReturningCav := Caveat{
 		Id: uniqueid.Id{0x99, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00},
 	}
@@ -805,12 +805,13 @@ func TestCustomChainValidator(t *testing.T) {
 		}
 		return results
 	}
+	setCaveatValidationForTest(validator)
+	defer setCaveatValidationForTest(defaultCaveatValidation)
 
 	p := newPrincipal(t)
 	ctx, cf := context.RootContext()
 	defer cf()
 
-	ctx = context.WithValue(ctx, chainValidatorKey, validator)
 	bu, err := p.BlessSelf("unrestricted", UnconstrainedUse())
 	if err != nil {
 		t.Fatal(err)
@@ -864,88 +865,6 @@ func TestCustomChainValidator(t *testing.T) {
 	if !reflect.DeepEqual(results, expectedResults) {
 		t.Fatalf("Unexpected results from RemoteBlessingNames. Got %v, want %v", results, expectedResults)
 	}
-}
-
-func TestSetCaveatValidator(t *testing.T) {
-	// Clear out state as if the process just started.
-	clear := func() {
-		caveatValidationSetup.mu.Lock()
-		caveatValidationSetup.fn = nil
-		caveatValidationSetup.finalized = false
-		caveatValidationSetup.mu.Unlock()
-	}
-	clear()
-	defer clear() // To undo the SetCaveatValidator call in this test.
-
-	type callcav struct {
-		call Call
-		cav  Caveat
-	}
-	var (
-		p      = newPrincipal(t)
-		c      = make(chan callcav, 1)
-		cav    = newCaveat(MethodCaveat("Method"))
-		b, err = p.BlessSelf("alice", cav)
-	)
-	if err != nil {
-		t.Fatal(err)
-	}
-	p.AddToRoots(b)
-	SetCaveatValidator(func(ctx *context.T, call Call, cav Caveat) error {
-		c <- callcav{call, cav}
-		return nil
-	})
-	// The function registered above should be invoked.
-	call := NewCall(&CallParams{LocalPrincipal: p, RemoteBlessings: b})
-	ctx, cancel := context.RootContext()
-	defer cancel()
-	RemoteBlessingNames(ctx, call)
-	select {
-	case <-time.Tick(10 * time.Second):
-		t.Fatalf("Caveat validation function not invoked")
-	case got := <-c:
-		if !reflect.DeepEqual(call, got.call) {
-			t.Errorf("Caveat validation function invoked with call=%v, want %v", got.call, call)
-		}
-		if !reflect.DeepEqual(cav, got.cav) {
-			t.Errorf("Caveat validation function invoked with cav=%v, want %v", got.cav, cav)
-		}
-	}
-	// A second call to SetCaveatValidator should panic.
-	func() {
-		defer func() {
-			if err := recover(); err == nil {
-				panic("expected a panic")
-			}
-		}()
-		SetCaveatValidator(nil)
-	}()
-}
-
-func TestSetCaveatValidatorAfterCaveatUse(t *testing.T) {
-	// Validate caveats somehow:
-	var (
-		p      = newPrincipal(t)
-		cav    = newCaveat(MethodCaveat("Method"))
-		b, err = p.BlessSelf("alice", cav)
-	)
-	if err != nil {
-		t.Fatal(err)
-	}
-	// Trigger caveat validation:
-	p.AddToRoots(b)
-	ctx, cancel := context.RootContext()
-	defer cancel()
-	RemoteBlessingNames(ctx, NewCall(&CallParams{LocalPrincipal: p, RemoteBlessings: b}))
-	// Now SetValidatorCaveat should fail.
-	func() {
-		defer func() {
-			if err := recover(); err == nil {
-				panic("expected a panic")
-			}
-		}()
-		SetCaveatValidator(nil)
-	}()
 }
 
 func TestRemoteBlessingNames(t *testing.T) {

@@ -41,13 +41,6 @@ type Blessings struct {
 	publicKey PublicKey
 }
 
-// chainValidatorKey is the key in the context to lookup the validator for a
-// chain of caveats.  This is a hacky mechanism only used by wspr.
-//
-// TODO(toddw): Combine this mechanism with SetCaveatValidator into a single
-// public API for overriding caveat validation.
-const chainValidatorKey = "customChainValidator"
-
 // PublicKey returns the public key of the principal to which
 // blessings obtained from this object are bound.
 //
@@ -187,37 +180,17 @@ func verifyChainSignature(ctx *context.T, call Call, chain []Certificate) (strin
 	return blessing, nil
 }
 
-func defaultChainCaveatValidator(ctx *context.T, call Call, chains [][]Caveat) []error {
+func defaultCaveatValidation(ctx *context.T, call Call, chains [][]Caveat) []error {
 	results := make([]error, len(chains))
 	for i, chain := range chains {
 		for _, cav := range chain {
-			if err := validateCaveat(ctx, call, cav); err != nil {
+			if err := cav.Validate(ctx, call); err != nil {
 				results[i] = err
 				break
 			}
 		}
 	}
-
 	return results
-}
-
-// validateCaveat is pretty much the same as cav.Validate(call), but it defers
-// to any validation scheme overrides via SetCaveatValidator.
-func validateCaveat(ctx *context.T, call Call, cav Caveat) error {
-	caveatValidationSetup.mu.RLock()
-	fn := caveatValidationSetup.fn
-	finalized := caveatValidationSetup.finalized
-	caveatValidationSetup.mu.RUnlock()
-	if !finalized {
-		caveatValidationSetup.mu.Lock()
-		caveatValidationSetup.finalized = true
-		fn = caveatValidationSetup.fn
-		caveatValidationSetup.mu.Unlock()
-	}
-	if fn != nil {
-		return fn(ctx, call, cav)
-	}
-	return cav.Validate(ctx, call)
 }
 
 // TODO(ashankar): Get rid of this function? It allows users to mess
@@ -300,36 +273,6 @@ func UnionOfBlessings(blessings ...Blessings) (Blessings, error) {
 	return ret, nil
 }
 
-var caveatValidationSetup struct {
-	mu        sync.RWMutex
-	fn        func(*context.T, Call, Caveat) error
-	finalized bool
-}
-
-// SetGlobalCaveatValidator sets the mechanism used for validating Caveats.
-//
-// This is normally needed only when using this Go library as a library for
-// security privimitives and validating Caveats defined in the native language
-// (e.g., Java, JavaScript). In such cases, the address space of the Go process
-// cannot interpret the caveat data or execute the validation checks, so this
-// function is used as a bridge to defer the validation check to the native
-// language.
-//
-// This function can be called at most once, before any caveats have ever been
-// validated.
-//
-// If never invoked, the default Go API is used to associate validation
-// functions with caveats.
-func SetCaveatValidator(fn func(*context.T, Call, Caveat) error) {
-	caveatValidationSetup.mu.Lock()
-	defer caveatValidationSetup.mu.Unlock()
-	if caveatValidationSetup.finalized {
-		panic("SetCaveatValidator cannot be called multiple times or after this process has checked at least some caveats")
-	}
-	caveatValidationSetup.finalized = true
-	caveatValidationSetup.fn = fn
-}
-
 type certificateChainsSorter [][]Certificate
 
 func (c certificateChainsSorter) Len() int      { return len(c) }
@@ -371,6 +314,37 @@ func DefaultBlessingPatterns(p Principal) (patterns []BlessingPattern) {
 	return
 }
 
+var (
+	caveatValidationMu         sync.RWMutex
+	caveatValidation           = defaultCaveatValidation
+	caveatValidationOverridden = false
+)
+
+func overrideCaveatValidation(fn func(ctx *context.T, call Call, sets [][]Caveat) []error) {
+	caveatValidationMu.Lock()
+	if caveatValidationOverridden {
+		panic("security: OverrideCaveatValidation may only be called once")
+	}
+	caveatValidationOverridden = true
+	caveatValidation = fn
+	caveatValidationMu.Unlock()
+}
+
+func setCaveatValidationForTest(fn func(ctx *context.T, call Call, sets [][]Caveat) []error) {
+	// For tests we skip the panic on multiple calls, so that we can easily revert
+	// to the default validator.
+	caveatValidationMu.Lock()
+	caveatValidation = fn
+	caveatValidationMu.Unlock()
+}
+
+func getCaveatValidation() func(ctx *context.T, call Call, sets [][]Caveat) []error {
+	caveatValidationMu.RLock()
+	fn := caveatValidation
+	caveatValidationMu.RUnlock()
+	return fn
+}
+
 // ReturnBlessingNames returns the validated set of human-readable blessing names
 // encapsulated in the blessings object presented by the remote end of a call.
 //
@@ -389,20 +363,14 @@ func RemoteBlessingNames(ctx *context.T, call Call) ([]string, []RejectedBlessin
 		return nil, nil
 	}
 	b := call.RemoteBlessings()
-
 	if b.IsZero() {
 		return nil, nil
 	}
-	validator := defaultChainCaveatValidator
-	if customValidator := ctx.Value(chainValidatorKey); customValidator != nil {
-		validator = customValidator.(func(*context.T, Call, [][]Caveat) []error)
-	}
-
 	var (
-		validatedNames      []string
-		rejected            []RejectedBlessing
-		pendingNames        []string
-		pendingChainCaveats [][]Caveat
+		validatedNames    []string
+		rejected          []RejectedBlessing
+		pendingNames      []string
+		pendingCaveatSets [][]Caveat
 	)
 	for _, chain := range b.chains {
 		name, err := verifyChainSignature(ctx, call, chain)
@@ -420,15 +388,14 @@ func RemoteBlessingNames(ctx *context.T, call Call) ([]string, []RejectedBlessin
 			validatedNames = append(validatedNames, name) // No caveats to validate, add it to blessingNames.
 		} else {
 			pendingNames = append(pendingNames, name)
-			pendingChainCaveats = append(pendingChainCaveats, cavs)
+			pendingCaveatSets = append(pendingCaveatSets, cavs)
 		}
 	}
-
-	if len(pendingChainCaveats) == 0 {
+	if len(pendingCaveatSets) == 0 {
 		return validatedNames, rejected
 	}
 
-	validationResults := validator(ctx, call, pendingChainCaveats)
+	validationResults := getCaveatValidation()(ctx, call, pendingCaveatSets)
 	if g, w := len(validationResults), len(pendingNames); g != w {
 		panic(fmt.Sprintf("Got wrong number of validation results. Got %d, expected %d.", g, w))
 	}
