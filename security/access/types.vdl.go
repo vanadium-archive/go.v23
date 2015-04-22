@@ -17,10 +17,9 @@
 // Overview
 //
 // Vanadium objects provide GetPermissions and SetPermissions methods.  An
-// AccessList (Access Control List) contains the set of blessings that grant
-// principals access to the object. All methods on objects can have "tags" on
-// them and the access control list used for the method is selected based on
-// that tag (from a Permissions).
+// AccessList contains the set of blessings that grant principals access to the
+// object. All methods on objects can have "tags" on them and the AccessList
+// used for the method is selected based on that tag (from a Permissions).
 //
 // An object can have multiple names, so GetPermissions and SetPermissions can
 // be invoked on any of these names, but the object itself has a single
@@ -114,10 +113,9 @@ import (
 	"v.io/v23/security"
 )
 
-// AccessList represents an Access Control List - a set of blessings that should
-// be granted access.
+// AccessList represents a set of blessings that should be granted access.
 //
-// See also: https://v.io/glossary.html#access-control-list
+// See also: https://v.io/glossary.html#access-list
 type AccessList struct {
 	// In denotes the set of blessings (represented as BlessingPatterns) that
 	// should be granted access, unless blacklisted by an entry in NotIn.
@@ -144,8 +142,8 @@ func (AccessList) __VDLReflect(struct {
 }) {
 }
 
-// Permissions maps string tags to access control lists specifying the
-// blessings required to invoke methods with that tag.
+// Permissions maps string tags to access lists specifying the blessings
+// required to invoke methods with that tag.
 //
 // These tags are meant to add a layer of interposition between the set of
 // users (blessings, specifically) and the set of methods, much like "Roles" do

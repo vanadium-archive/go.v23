@@ -70,7 +70,7 @@ func ReadPermissions(r io.Reader) (m Permissions, err error) {
 }
 
 // Add updates m to so that blessings matching pattern will be included in the
-// access control lists for the provided tag (by adding to the "In" list).
+// access list for the provided tag (by adding to the "In" list).
 //
 func (m Permissions) Add(pattern security.BlessingPattern, tag string) {
 	list := m[tag]
@@ -81,7 +81,7 @@ func (m Permissions) Add(pattern security.BlessingPattern, tag string) {
 }
 
 // Blacklist updates m so that the provided blessing will be excluded from
-// the access control list for the provided tag (via m[tag].NotIn).
+// the access list for the provided tag (via m[tag].NotIn).
 func (m Permissions) Blacklist(blessing string, tag string) {
 	list := m[tag]
 	list.NotIn = append(list.NotIn, blessing)
