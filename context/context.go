@@ -10,9 +10,18 @@
 //
 // 1) A context.T is returned from v23.Init().  This will generally be
 // used to set up servers in main, or for stand-alone client programs.
+//    func main() {
+//      ctx, shutdown := v23.Init()
+//      defer shutdown()
+//
+//      doSomething(ctx)
+//    }
 //
 // 2) A context.T is passed to every server method implementation as the first
 // parameter.
+//    func (m *myServer) Method(ctx *context.T, call rpc.ServerCall) error {
+//      doSomething(ctx)
+//    }
 //
 // Once you have a context you can derive further contexts to change settings.
 // for example to adjust a deadline you might do:
