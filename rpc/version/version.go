@@ -27,7 +27,7 @@ const (
 	// RPCVersion5 uses the new security model (Principal and Blessings objects),
 	// and sends discharges for third-party caveats on the server's blessings
 	// during authentication.
-	RPCVersion5
+	rPCVersion5
 
 	// RPCVersion6 adds control channel encryption to RPCVersion5.
 	RPCVersion6
