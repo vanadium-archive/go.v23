@@ -8,7 +8,8 @@ import (
 	"strings"
 	"testing"
 
-	"v.io/v23/config"
+	"v.io/x/lib/pubsub"
+
 	"v.io/v23/context"
 	"v.io/v23/namespace"
 	"v.io/v23/naming"
@@ -45,7 +46,7 @@ func (*mockRuntime) WithNewNamespace(ctx *context.T, roots ...string) (*context.
 func (*mockRuntime) GetNamespace(ctx *context.T) namespace.T         { return nil }
 func (*mockRuntime) GetAppCycle(ctx *context.T) AppCycle             { return nil }
 func (*mockRuntime) GetListenSpec(ctx *context.T) rpc.ListenSpec     { return rpc.ListenSpec{} }
-func (*mockRuntime) GetPublisher(ctx *context.T) *config.Publisher   { return nil }
+func (*mockRuntime) GetPublisher(ctx *context.T) *pubsub.Publisher   { return nil }
 func (*mockRuntime) WithBackgroundContext(ctx *context.T) *context.T { return nil }
 func (*mockRuntime) GetBackgroundContext(ctx *context.T) *context.T  { return nil }
 

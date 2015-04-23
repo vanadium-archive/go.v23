@@ -11,7 +11,8 @@ import (
 	"strings"
 	"time"
 
-	"v.io/v23/config"
+	"v.io/x/lib/pubsub"
+
 	"v.io/v23/context"
 	"v.io/v23/naming"
 	"v.io/v23/security"
@@ -76,14 +77,14 @@ type Stream interface {
 
 // NewAddAddrsSetting creates the Setting to be sent to Listen to inform
 // it of new addresses that have become available since the last change.
-func NewAddAddrsSetting(a []net.Addr) config.Setting {
-	return config.NewAny(NewAddrsSetting, NewAddrsSettingDesc, a)
+func NewAddAddrsSetting(a []net.Addr) pubsub.Setting {
+	return pubsub.NewAny(NewAddrsSetting, NewAddrsSettingDesc, a)
 }
 
 // NewRmAddrsSetting creates the Setting to be sent to Listen to inform
 // it of addresses that are no longer available.
-func NewRmAddrsSetting(a []net.Addr) config.Setting {
-	return config.NewAny(RmAddrsSetting, RmAddrsSettingDesc, a)
+func NewRmAddrsSetting(a []net.Addr) pubsub.Setting {
+	return pubsub.NewAny(RmAddrsSetting, RmAddrsSettingDesc, a)
 }
 
 const (
@@ -116,7 +117,7 @@ type ListenSpec struct {
 
 	// A publisher, which if non-nil, can be used to receive updated
 	// network Settings via the stream named StreamName.
-	StreamPublisher *config.Publisher
+	StreamPublisher *pubsub.Publisher
 	// The name of the Stream to Fork on the StreamPublisher.
 	StreamName string
 
@@ -332,7 +333,7 @@ type MountState []MountStatus
 type NetworkChange struct {
 	Time    time.Time         // Time of last change.
 	State   ServerState       // The current state of the server.
-	Setting config.Setting    // The Setting sent for the last change.
+	Setting pubsub.Setting    // The Setting sent for the last change.
 	Changed []naming.Endpoint // The set of endpoints added/removed as a result of this change.
 	Error   error             // Any error that encountered.
 }
