@@ -7,7 +7,6 @@ package naming
 import (
 	"net"
 
-	"v.io/v23/rpc/version"
 	"v.io/v23/verror"
 )
 
@@ -37,22 +36,6 @@ type Endpoint interface {
 	//   @<version>@<version specific fields>@@
 	// Where version is an unsigned integer.
 	//
-	// TODO(ashankar,cnicolaou): Remove versions 2 & 3 before release?
-	//
-	// Version 1 is the current version for network address information:
-	//   @1@<protocol>@<address>@<routingid>@@
-	// Where protocol is the underlying network protocol (tcp, bluetooth etc.)
-	// and address is the address specific to that protocol (host:port for
-	// tcp, MAC address for bluetooth etc.)
-	//
-	// Version 2 is an old version for RPC:
-	//   @2@<protocol>@<address>@<routingid>@<rpc version>@<rpc codec>@@
-	//
-	// Version 3 is an old version for RPC:
-	//   @3@<protocol>@<address>@<routingid>@<rpc version>@<rpc codec>@m|s@@
-	//
-	// Version 4 is the previous version for RPC:
-	//   @4@<protocol>@<address>@<routingid>@<min RPC version>@<max RPC version>@m|s@[<blessing>[,<blessing>]...]@@
 	// Version 5 is the current version for RPC:
 	//   @5@<protocol>@<address>@<routingid>@m|s@[<blessing>[,<blessing>]...]@@
 	//
@@ -87,10 +70,6 @@ type Endpoint interface {
 	// BlessingNames returns the blessings that the process associated with
 	// this Endpoint will present.
 	BlessingNames() []string
-
-	// RPCVersionRange returns the range of protocol versions supported by
-	// the process at this endpoint.
-	RPCVersionRange() version.RPCVersionRange
 }
 
 // Names returns the servers represented by MountEntry as names, including

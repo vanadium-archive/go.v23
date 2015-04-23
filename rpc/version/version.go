@@ -18,31 +18,15 @@ const (
 	// relevant and that version information should be obtained elsewhere.
 	DeprecatedRPCVersion
 
-	// Deprecated versions
-	rpcVersion2
-	rpcVersion3
-	rpcVersion4
-
-	// TODO(ashankar): Unexport all versions except the last before release
-	// RPCVersion5 uses the new security model (Principal and Blessings objects),
-	// and sends discharges for third-party caveats on the server's blessings
-	// during authentication.
+	rPCVersion2
+	rPCVersion3
+	rPCVersion4
 	rPCVersion5
+	rPCVersion6
+	rPCVersion7
+	rPCVersion8
 
-	// RPCVersion6 adds control channel encryption to RPCVersion5.
-	RPCVersion6
-
-	// RPCVersion7 uses concrete types for security.Discharge during VC
-	// authentication.
-	RPCVersion7
-
-	// RPCVersion8 uses separate VOM type flow to share VOM types across all flows
-	// in a VC.
-	RPCVersion8
-
-	// RPCVersion9 uses nacl/box encryption for VCs instead of TLS.
-	// In addition versioning information is exchanged during VC setup
-	// instead of in the endpoints.
+	// The release version of the RPC protocol.
 	RPCVersion9
 )
 
@@ -51,7 +35,3 @@ const (
 type RPCVersionRange struct {
 	Min, Max RPCVersion
 }
-
-// EndpointOpt implents the EndpointOpt interface so an RPCVersionRange
-// can be used as an option to FormatEndpoint.
-func (RPCVersionRange) EndpointOpt() {}

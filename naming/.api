@@ -5,6 +5,8 @@ pkg naming, const ReservedNamePrefix ideal-string
 pkg naming, const UnknownProtocol ideal-string
 pkg naming, func Clean(string) string
 pkg naming, func Compare(RoutingID, RoutingID) bool
+pkg naming, func DecodeFromNameElement(string) (string, bool)
+pkg naming, func EncodeAsNameElement(string) string
 pkg naming, func FixedRoutingID(uint64) RoutingID
 pkg naming, func FormatEndpoint(string, string, ...EndpointOpt) string
 pkg naming, func IsReserved(string) bool
@@ -38,12 +40,11 @@ pkg naming, type BlessingOpt string
 pkg naming, type CacheCtl interface { CacheCtl }
 pkg naming, type CacheCtl interface, CacheCtl()
 pkg naming, type DisableCache bool
-pkg naming, type Endpoint interface { Addr, BlessingNames, Name, Network, RPCVersionRange, RoutingID, ServesLeaf, ServesMountTable, String, VersionedString }
+pkg naming, type Endpoint interface { Addr, BlessingNames, Name, Network, RoutingID, ServesLeaf, ServesMountTable, String, VersionedString }
 pkg naming, type Endpoint interface, Addr() net.Addr
 pkg naming, type Endpoint interface, BlessingNames() []string
 pkg naming, type Endpoint interface, Name() string
 pkg naming, type Endpoint interface, Network() string
-pkg naming, type Endpoint interface, RPCVersionRange() version.RPCVersionRange
 pkg naming, type Endpoint interface, RoutingID() RoutingID
 pkg naming, type Endpoint interface, ServesLeaf() bool
 pkg naming, type Endpoint interface, ServesMountTable() bool
@@ -77,9 +78,9 @@ pkg naming, type NamespaceOpt interface, NSOpt()
 pkg naming, type ReplaceMount bool
 pkg naming, type RoutingID struct
 pkg naming, type ServesMountTable bool
-pkg naming, var ErrNameExists unknown-type
-pkg naming, var ErrNoMountTable unknown-type
-pkg naming, var ErrNoSuchName unknown-type
-pkg naming, var ErrNoSuchNameRoot unknown-type
-pkg naming, var ErrResolutionDepthExceeded unknown-type
+pkg naming, var ErrNameExists verror.IDAction
+pkg naming, var ErrNoMountTable verror.IDAction
+pkg naming, var ErrNoSuchName verror.IDAction
+pkg naming, var ErrNoSuchNameRoot verror.IDAction
+pkg naming, var ErrResolutionDepthExceeded verror.IDAction
 pkg naming, var NullRoutingID RoutingID

@@ -1,10 +1,6 @@
 pkg version, const DeprecatedRPCVersion RPCVersion
-pkg version, const RPCVersion6 RPCVersion
-pkg version, const RPCVersion7 RPCVersion
-pkg version, const RPCVersion8 RPCVersion
 pkg version, const RPCVersion9 RPCVersion
 pkg version, const UnknownRPCVersion RPCVersion
-pkg version, method (RPCVersionRange) EndpointOpt()
 pkg version, type RPCVersion uint32
 pkg version, type RPCVersionRange struct
 pkg version, type RPCVersionRange struct, Max RPCVersion
