@@ -1,0 +1,15 @@
+pkg context, func RootContext() (*T, CancelFunc)
+pkg context, func WithCancel(*T) (*T, CancelFunc)
+pkg context, func WithDeadline(*T, time.Time) (*T, CancelFunc)
+pkg context, func WithRootCancel(*T) (*T, CancelFunc)
+pkg context, func WithTimeout(*T, time.Duration) (*T, CancelFunc)
+pkg context, func WithValue(*T, interface{}, interface{}) *T
+pkg context, method (*T) Deadline() (time.Time, bool)
+pkg context, method (*T) Done() <-chan struct{}
+pkg context, method (*T) Err() error
+pkg context, method (*T) Initialized() bool
+pkg context, method (*T) Value(interface{}) interface{}
+pkg context, type CancelFunc func()
+pkg context, type T struct
+pkg context, var Canceled error
+pkg context, var DeadlineExceeded error

@@ -1,0 +1,35 @@
+pkg config, func Format(Setting) string
+pkg config, func NewAny(string, string, interface{}) Setting
+pkg config, func NewBool(string, string, bool) Setting
+pkg config, func NewDuration(string, string, time.Duration) Setting
+pkg config, func NewFloat64(string, string, float64) Setting
+pkg config, func NewInt(string, string, int) Setting
+pkg config, func NewInt64(string, string, int64) Setting
+pkg config, func NewPublisher() *Publisher
+pkg config, func NewString(string, string, string) Setting
+pkg config, method (*Any) Description() string
+pkg config, method (*Any) Name() string
+pkg config, method (*Any) String() string
+pkg config, method (*Any) Value() interface{}
+pkg config, method (*DurationFlag) Set(string) error
+pkg config, method (*Publisher) CloseFork(string, chan<- Setting) error
+pkg config, method (*Publisher) CreateStream(string, string, <-chan Setting) (<-chan struct{}, error)
+pkg config, method (*Publisher) ForkStream(string, chan<- Setting) (*Stream, error)
+pkg config, method (*Publisher) Latest(string) *Stream
+pkg config, method (*Publisher) Shutdown()
+pkg config, method (*Publisher) String() string
+pkg config, method (DurationFlag) Get() interface{}
+pkg config, method (DurationFlag) String() string
+pkg config, type Any struct
+pkg config, type DurationFlag struct
+pkg config, type DurationFlag struct, embedded time.Duration
+pkg config, type Publisher struct
+pkg config, type Setting interface { Description, Name, String, Value }
+pkg config, type Setting interface, Description() string
+pkg config, type Setting interface, Name() string
+pkg config, type Setting interface, String() string
+pkg config, type Setting interface, Value() interface{}
+pkg config, type Stream struct
+pkg config, type Stream struct, Description string
+pkg config, type Stream struct, Latest map[string]Setting
+pkg config, type Stream struct, Name string

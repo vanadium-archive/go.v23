@@ -1,0 +1,183 @@
+pkg rpc, const GlobMethod ideal-string
+pkg rpc, const NewAddrsSetting ideal-string
+pkg rpc, const NewAddrsSettingDesc ideal-string
+pkg rpc, const ReservedMethodSignature ideal-string
+pkg rpc, const ReservedSignature ideal-string
+pkg rpc, const RmAddrsSetting ideal-string
+pkg rpc, const RmAddrsSettingDesc ideal-string
+pkg rpc, const ServerActive ServerState
+pkg rpc, const ServerInit ServerState
+pkg rpc, const ServerStopped ServerState
+pkg rpc, const ServerStopping ServerState
+pkg rpc, func ChildrenGlobberInvoker(...string) Invoker
+pkg rpc, func NewAddAddrsSetting([]Address) config.Setting
+pkg rpc, func NewGlobState(interface{}) *GlobState
+pkg rpc, func NewRmAddrsSetting([]Address) config.Setting
+pkg rpc, func ReflectInvoker(interface{}) (Invoker, error)
+pkg rpc, func ReflectInvokerOrDie(interface{}) Invoker
+pkg rpc, func RegisterProtocol(string, DialerFunc, ListenerFunc, ...string) bool
+pkg rpc, func RegisterUnknownProtocol(string, DialerFunc, ListenerFunc) bool
+pkg rpc, func RegisteredProtocol(string) (DialerFunc, ListenerFunc, []string)
+pkg rpc, func RegisteredProtocols() []string
+pkg rpc, func TypeCheckMethods(interface{}) map[string]error
+pkg rpc, method (ListenSpec) Copy() ListenSpec
+pkg rpc, method (ListenSpec) String() string
+pkg rpc, method (MountState) Names() []string
+pkg rpc, method (MountState) Servers() []string
+pkg rpc, method (MountStatus) String() string
+pkg rpc, method (NetworkChange) DebugString() string
+pkg rpc, method (ServerState) String() string
+pkg rpc, type Address interface { Address, InterfaceIndex, InterfaceName, Networks }
+pkg rpc, type Address interface, Address() net.Addr
+pkg rpc, type Address interface, InterfaceIndex() int
+pkg rpc, type Address interface, InterfaceName() string
+pkg rpc, type Address interface, Networks() []net.Addr
+pkg rpc, type AddressChooser func(network string, addrs []Address) ([]Address, error)
+pkg rpc, type AllGlobber interface { Glob__ }
+pkg rpc, type AllGlobber interface, Glob__(*context.T, ServerCall, string) (<-chan naming.GlobReply, error)
+pkg rpc, type ArgDesc struct
+pkg rpc, type ArgDesc struct, Doc string
+pkg rpc, type ArgDesc struct, Name string
+pkg rpc, type BlessingsRequest struct
+pkg rpc, type BlessingsRequest struct, Blessings *security.Blessings
+pkg rpc, type BlessingsRequest struct, Key uint64
+pkg rpc, type CallOpt interface { RPCCallOpt }
+pkg rpc, type CallOpt interface, RPCCallOpt()
+pkg rpc, type ChildrenGlobber interface { GlobChildren__ }
+pkg rpc, type ChildrenGlobber interface, GlobChildren__(*context.T, ServerCall) (<-chan string, error)
+pkg rpc, type Client interface { Call, Close, StartCall }
+pkg rpc, type Client interface, Call(*context.T, string, string, []interface{}, []interface{}, ...CallOpt) error
+pkg rpc, type Client interface, Close()
+pkg rpc, type Client interface, StartCall(*context.T, string, string, []interface{}, ...CallOpt) (ClientCall, error)
+pkg rpc, type ClientCall interface { CloseSend, Finish, Recv, RemoteBlessings, Send }
+pkg rpc, type ClientCall interface, CloseSend() error
+pkg rpc, type ClientCall interface, Finish(...interface{}) error
+pkg rpc, type ClientCall interface, Recv(interface{}) error
+pkg rpc, type ClientCall interface, RemoteBlessings() ([]string, security.Blessings)
+pkg rpc, type ClientCall interface, Send(interface{}) error
+pkg rpc, type ClientOpt interface { RPCClientOpt }
+pkg rpc, type ClientOpt interface, RPCClientOpt()
+pkg rpc, type Describer interface { Describe__ }
+pkg rpc, type Describer interface, Describe__() []InterfaceDesc
+pkg rpc, type DialerFunc func(protocol, address string, timeout time.Duration) (net.Conn, error)
+pkg rpc, type Dispatcher interface { Lookup }
+pkg rpc, type Dispatcher interface, Lookup(string) (interface{}, security.Authorizer, error)
+pkg rpc, type EmbedDesc struct
+pkg rpc, type EmbedDesc struct, Doc string
+pkg rpc, type EmbedDesc struct, Name string
+pkg rpc, type EmbedDesc struct, PkgPath string
+pkg rpc, type GlobState struct
+pkg rpc, type GlobState struct, AllGlobber AllGlobber
+pkg rpc, type GlobState struct, ChildrenGlobber ChildrenGlobber
+pkg rpc, type Globber interface { Globber }
+pkg rpc, type Globber interface, Globber() *GlobState
+pkg rpc, type Granter interface { Grant, RPCCallOpt }
+pkg rpc, type Granter interface, Grant(*context.T, security.Call) (security.Blessings, error)
+pkg rpc, type Granter interface, RPCCallOpt()
+pkg rpc, type InterfaceDesc struct
+pkg rpc, type InterfaceDesc struct, Doc string
+pkg rpc, type InterfaceDesc struct, Embeds []EmbedDesc
+pkg rpc, type InterfaceDesc struct, Methods []MethodDesc
+pkg rpc, type InterfaceDesc struct, Name string
+pkg rpc, type InterfaceDesc struct, PkgPath string
+pkg rpc, type Invoker interface { Globber, Invoke, MethodSignature, Prepare, Signature }
+pkg rpc, type Invoker interface, Globber() *GlobState
+pkg rpc, type Invoker interface, Invoke(*context.T, StreamServerCall, string, []interface{}) ([]interface{}, error)
+pkg rpc, type Invoker interface, MethodSignature(*context.T, ServerCall, string) (signature.Method, error)
+pkg rpc, type Invoker interface, Prepare(string, int) ([]interface{}, []*vdl.Value, error)
+pkg rpc, type Invoker interface, Signature(*context.T, ServerCall) ([]signature.Interface, error)
+pkg rpc, type ListenAddrs []struct {  Protocol, Address string;}
+pkg rpc, type ListenSpec struct
+pkg rpc, type ListenSpec struct, AddressChooser AddressChooser
+pkg rpc, type ListenSpec struct, Addrs ListenAddrs
+pkg rpc, type ListenSpec struct, Proxy string
+pkg rpc, type ListenSpec struct, StreamName string
+pkg rpc, type ListenSpec struct, StreamPublisher *config.Publisher
+pkg rpc, type ListenerFunc func(protocol, address string) (net.Listener, error)
+pkg rpc, type MethodDesc struct
+pkg rpc, type MethodDesc struct, Doc string
+pkg rpc, type MethodDesc struct, InArgs []ArgDesc
+pkg rpc, type MethodDesc struct, InStream ArgDesc
+pkg rpc, type MethodDesc struct, Name string
+pkg rpc, type MethodDesc struct, OutArgs []ArgDesc
+pkg rpc, type MethodDesc struct, OutStream ArgDesc
+pkg rpc, type MethodDesc struct, Tags []*vdl.Value
+pkg rpc, type MountState []MountStatus
+pkg rpc, type MountStatus struct
+pkg rpc, type MountStatus struct, LastMount time.Time
+pkg rpc, type MountStatus struct, LastMountErr error
+pkg rpc, type MountStatus struct, LastUnmount time.Time
+pkg rpc, type MountStatus struct, LastUnmountErr error
+pkg rpc, type MountStatus struct, Name string
+pkg rpc, type MountStatus struct, Server string
+pkg rpc, type MountStatus struct, TTL time.Duration
+pkg rpc, type NetworkChange struct
+pkg rpc, type NetworkChange struct, Changed []naming.Endpoint
+pkg rpc, type NetworkChange struct, Error error
+pkg rpc, type NetworkChange struct, Setting config.Setting
+pkg rpc, type NetworkChange struct, State ServerState
+pkg rpc, type NetworkChange struct, Time time.Time
+pkg rpc, type NetworkInterface interface { InterfaceIndex, InterfaceName, Networks }
+pkg rpc, type NetworkInterface interface, InterfaceIndex() int
+pkg rpc, type NetworkInterface interface, InterfaceName() string
+pkg rpc, type NetworkInterface interface, Networks() []net.Addr
+pkg rpc, type ProxyStatus struct
+pkg rpc, type ProxyStatus struct, Endpoint naming.Endpoint
+pkg rpc, type ProxyStatus struct, Error error
+pkg rpc, type ProxyStatus struct, Proxy string
+pkg rpc, type Request struct
+pkg rpc, type Request struct, Blessings BlessingsRequest
+pkg rpc, type Request struct, Deadline time.Deadline
+pkg rpc, type Request struct, Discharges []security.Discharge
+pkg rpc, type Request struct, EndStreamArgs bool
+pkg rpc, type Request struct, GrantedBlessings security.Blessings
+pkg rpc, type Request struct, Method string
+pkg rpc, type Request struct, NumPosArgs uint64
+pkg rpc, type Request struct, Suffix string
+pkg rpc, type Request struct, TraceRequest vtrace.Request
+pkg rpc, type Response struct
+pkg rpc, type Response struct, AckBlessings bool
+pkg rpc, type Response struct, EndStreamResults bool
+pkg rpc, type Response struct, Error error
+pkg rpc, type Response struct, NumPosResults uint64
+pkg rpc, type Response struct, TraceResponse vtrace.Response
+pkg rpc, type Server interface { AddName, Listen, RemoveName, Serve, ServeDispatcher, Status, Stop, UnwatchNetwork, WatchNetwork }
+pkg rpc, type Server interface, AddName(string) error
+pkg rpc, type Server interface, Listen(ListenSpec) ([]naming.Endpoint, error)
+pkg rpc, type Server interface, RemoveName(string)
+pkg rpc, type Server interface, Serve(string, interface{}, security.Authorizer) error
+pkg rpc, type Server interface, ServeDispatcher(string, Dispatcher) error
+pkg rpc, type Server interface, Status() ServerStatus
+pkg rpc, type Server interface, Stop() error
+pkg rpc, type Server interface, UnwatchNetwork(chan<- NetworkChange)
+pkg rpc, type Server interface, WatchNetwork(chan<- NetworkChange)
+pkg rpc, type ServerCall interface { GrantedBlessings, LocalEndpoint, RemoteEndpoint, Security, Server, Suffix }
+pkg rpc, type ServerCall interface, GrantedBlessings() security.Blessings
+pkg rpc, type ServerCall interface, LocalEndpoint() naming.Endpoint
+pkg rpc, type ServerCall interface, RemoteEndpoint() naming.Endpoint
+pkg rpc, type ServerCall interface, Security() security.Call
+pkg rpc, type ServerCall interface, Server() Server
+pkg rpc, type ServerCall interface, Suffix() string
+pkg rpc, type ServerOpt interface { RPCServerOpt }
+pkg rpc, type ServerOpt interface, RPCServerOpt()
+pkg rpc, type ServerState int
+pkg rpc, type ServerStatus struct
+pkg rpc, type ServerStatus struct, Endpoints []naming.Endpoint
+pkg rpc, type ServerStatus struct, Errors []error
+pkg rpc, type ServerStatus struct, Mounts MountState
+pkg rpc, type ServerStatus struct, Proxies []ProxyStatus
+pkg rpc, type ServerStatus struct, ServesMountTable bool
+pkg rpc, type ServerStatus struct, State ServerState
+pkg rpc, type Stream interface { Recv, Send }
+pkg rpc, type Stream interface, Recv(interface{}) error
+pkg rpc, type Stream interface, Send(interface{}) error
+pkg rpc, type StreamServerCall interface { GrantedBlessings, LocalEndpoint, Recv, RemoteEndpoint, Security, Send, Server, Suffix }
+pkg rpc, type StreamServerCall interface, GrantedBlessings() security.Blessings
+pkg rpc, type StreamServerCall interface, LocalEndpoint() naming.Endpoint
+pkg rpc, type StreamServerCall interface, Recv(interface{}) error
+pkg rpc, type StreamServerCall interface, RemoteEndpoint() naming.Endpoint
+pkg rpc, type StreamServerCall interface, Security() security.Call
+pkg rpc, type StreamServerCall interface, Send(interface{}) error
+pkg rpc, type StreamServerCall interface, Server() Server
+pkg rpc, type StreamServerCall interface, Suffix() string
+pkg rpc, type UniversalServiceMethods interface {}

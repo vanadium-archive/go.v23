@@ -1,0 +1,85 @@
+pkg naming, const Leaf MountFlag
+pkg naming, const MT MountFlag
+pkg naming, const Replace MountFlag
+pkg naming, const ReservedNamePrefix ideal-string
+pkg naming, const UnknownProtocol ideal-string
+pkg naming, func Clean(string) string
+pkg naming, func Compare(RoutingID, RoutingID) bool
+pkg naming, func FixedRoutingID(uint64) RoutingID
+pkg naming, func FormatEndpoint(string, string, ...EndpointOpt) string
+pkg naming, func IsReserved(string) bool
+pkg naming, func Join(...string) string
+pkg naming, func JoinAddressName(string, string) string
+pkg naming, func NewRoutingID() (RoutingID, error)
+pkg naming, func ReadRoutingID(io.Reader) (RoutingID, error)
+pkg naming, func Rooted(string) bool
+pkg naming, func SplitAddressName(string) (string, string)
+pkg naming, func StripReserved(string) string
+pkg naming, func TrimSuffix(string, string) string
+pkg naming, method (*MountEntry) Names() []string
+pkg naming, method (*RoutingID) FromString(string) error
+pkg naming, method (BlessingOpt) EndpointOpt()
+pkg naming, method (DisableCache) CacheCtl()
+pkg naming, method (GlobReplyEntry) Index() int
+pkg naming, method (GlobReplyEntry) Interface() interface{}
+pkg naming, method (GlobReplyEntry) Name() string
+pkg naming, method (GlobReplyError) Index() int
+pkg naming, method (GlobReplyError) Interface() interface{}
+pkg naming, method (GlobReplyError) Name() string
+pkg naming, method (IsLeaf) NSOpt()
+pkg naming, method (ReplaceMount) NSOpt()
+pkg naming, method (RoutingID) EndpointOpt()
+pkg naming, method (RoutingID) IsReserved() bool
+pkg naming, method (RoutingID) String() string
+pkg naming, method (RoutingID) Write(io.Writer) error
+pkg naming, method (ServesMountTable) EndpointOpt()
+pkg naming, method (ServesMountTable) NSOpt()
+pkg naming, type BlessingOpt string
+pkg naming, type CacheCtl interface { CacheCtl }
+pkg naming, type CacheCtl interface, CacheCtl()
+pkg naming, type DisableCache bool
+pkg naming, type Endpoint interface { Addr, BlessingNames, Name, Network, RPCVersionRange, RoutingID, ServesLeaf, ServesMountTable, String, VersionedString }
+pkg naming, type Endpoint interface, Addr() net.Addr
+pkg naming, type Endpoint interface, BlessingNames() []string
+pkg naming, type Endpoint interface, Name() string
+pkg naming, type Endpoint interface, Network() string
+pkg naming, type Endpoint interface, RPCVersionRange() version.RPCVersionRange
+pkg naming, type Endpoint interface, RoutingID() RoutingID
+pkg naming, type Endpoint interface, ServesLeaf() bool
+pkg naming, type Endpoint interface, ServesMountTable() bool
+pkg naming, type Endpoint interface, String() string
+pkg naming, type Endpoint interface, VersionedString(int) string
+pkg naming, type EndpointOpt interface { EndpointOpt }
+pkg naming, type EndpointOpt interface, EndpointOpt()
+pkg naming, type GlobError struct
+pkg naming, type GlobError struct, Error error
+pkg naming, type GlobError struct, Name string
+pkg naming, type GlobReply interface, Index() int
+pkg naming, type GlobReply interface, Interface() interface{}
+pkg naming, type GlobReply interface, Name() string
+pkg naming, type GlobReply interface, unexported methods
+pkg naming, type GlobReplyEntry struct
+pkg naming, type GlobReplyEntry struct, Value MountEntry
+pkg naming, type GlobReplyError struct
+pkg naming, type GlobReplyError struct, Value GlobError
+pkg naming, type IsLeaf bool
+pkg naming, type MountEntry struct
+pkg naming, type MountEntry struct, IsLeaf bool
+pkg naming, type MountEntry struct, Name string
+pkg naming, type MountEntry struct, Servers []MountedServer
+pkg naming, type MountEntry struct, ServesMountTable bool
+pkg naming, type MountFlag uint32
+pkg naming, type MountedServer struct
+pkg naming, type MountedServer struct, Deadline time.Deadline
+pkg naming, type MountedServer struct, Server string
+pkg naming, type NamespaceOpt interface { NSOpt }
+pkg naming, type NamespaceOpt interface, NSOpt()
+pkg naming, type ReplaceMount bool
+pkg naming, type RoutingID struct
+pkg naming, type ServesMountTable bool
+pkg naming, var ErrNameExists unknown-type
+pkg naming, var ErrNoMountTable unknown-type
+pkg naming, var ErrNoSuchName unknown-type
+pkg naming, var ErrNoSuchNameRoot unknown-type
+pkg naming, var ErrResolutionDepthExceeded unknown-type
+pkg naming, var NullRoutingID RoutingID

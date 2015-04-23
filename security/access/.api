@@ -1,0 +1,29 @@
+pkg access, const Admin Tag
+pkg access, const Debug Tag
+pkg access, const Read Tag
+pkg access, const Resolve Tag
+pkg access, const Write Tag
+pkg access, func AllTypicalTags() []Tag
+pkg access, func NewErrAccessListMatch(*context.T, []string, []security.RejectedBlessing) error
+pkg access, func NewErrNoPermissions(*context.T, []string, []security.RejectedBlessing, string) error
+pkg access, func NewErrTooBig(*context.T) error
+pkg access, func PermissionsAuthorizer(Permissions, *vdl.Type) (security.Authorizer, error)
+pkg access, func PermissionsAuthorizerFromFile(string, *vdl.Type) (security.Authorizer, error)
+pkg access, func ReadPermissions(io.Reader) (Permissions, error)
+pkg access, func TypicalTagType() *vdl.Type
+pkg access, method (AccessList) Authorize(*context.T, security.Call) error
+pkg access, method (AccessList) Includes(...string) bool
+pkg access, method (Permissions) Add(security.BlessingPattern, string)
+pkg access, method (Permissions) Blacklist(string, string)
+pkg access, method (Permissions) Clear(string, ...string)
+pkg access, method (Permissions) Copy() Permissions
+pkg access, method (Permissions) Normalize() Permissions
+pkg access, method (Permissions) WriteTo(io.Writer) error
+pkg access, type AccessList struct
+pkg access, type AccessList struct, In []security.BlessingPattern
+pkg access, type AccessList struct, NotIn []string
+pkg access, type Permissions map[string]AccessList
+pkg access, type Tag string
+pkg access, var ErrAccessListMatch unknown-type
+pkg access, var ErrNoPermissions unknown-type
+pkg access, var ErrTooBig unknown-type

@@ -1,0 +1,24 @@
+pkg vdltool, const GenLanguageGo GenLanguage
+pkg vdltool, const GenLanguageJava GenLanguage
+pkg vdltool, const GenLanguageJavascript GenLanguage
+pkg vdltool, func GenLanguageFromString(string) (GenLanguage, error)
+pkg vdltool, method (*GenLanguage) Set(string) error
+pkg vdltool, method (GenLanguage) String() string
+pkg vdltool, type Config struct
+pkg vdltool, type Config struct, GenLanguages map[GenLanguage]struct{}
+pkg vdltool, type Config struct, Go GoConfig
+pkg vdltool, type Config struct, Java JavaConfig
+pkg vdltool, type Config struct, Javascript JavascriptConfig
+pkg vdltool, type GenLanguage int
+pkg vdltool, type GoConfig struct
+pkg vdltool, type GoConfig struct, WireToNativeTypes map[string]GoType
+pkg vdltool, type GoImport struct
+pkg vdltool, type GoImport struct, Name string
+pkg vdltool, type GoImport struct, Path string
+pkg vdltool, type GoType struct
+pkg vdltool, type GoType struct, Imports []GoImport
+pkg vdltool, type GoType struct, Type string
+pkg vdltool, type JavaConfig struct
+pkg vdltool, type JavaConfig struct, WireToNativeTypes map[string]string
+pkg vdltool, type JavascriptConfig struct
+pkg vdltool, var GenLanguageAll [...]GenLanguage

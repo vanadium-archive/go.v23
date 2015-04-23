@@ -1,0 +1,8 @@
+pkg binary, const MissingChecksum ideal-string
+pkg binary, const MissingSize int64
+pkg binary, type Description struct
+pkg binary, type Description struct, Name string
+pkg binary, type Description struct, Profiles map[string]bool
+pkg binary, type PartInfo struct
+pkg binary, type PartInfo struct, Checksum string
+pkg binary, type PartInfo struct, Size int64

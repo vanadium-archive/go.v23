@@ -1,0 +1,14 @@
+pkg time, func Now() Time
+pkg time, method (Duration) Normalize() Duration
+pkg time, method (Time) Normalize() Time
+pkg time, type Deadline struct
+pkg time, type Deadline struct, embedded time.Time
+pkg time, type Duration struct
+pkg time, type Duration struct, Nanos int32
+pkg time, type Duration struct, Seconds int64
+pkg time, type Time struct
+pkg time, type Time struct, Nanos int32
+pkg time, type Time struct, Seconds int64
+pkg time, type WireDeadline struct
+pkg time, type WireDeadline struct, FromNow time.Duration
+pkg time, type WireDeadline struct, NoDeadline bool
