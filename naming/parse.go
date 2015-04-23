@@ -138,3 +138,77 @@ func splitIntoTwo(str, separator string) (string, string) {
 	}
 	return elems[0], elems[1]
 }
+
+// EncodeAsNameElement makes a string representable as a name element by escaping slashes.
+func EncodeAsNameElement(s string) string {
+	if !strings.ContainsAny(s, "%/") {
+		return s
+	}
+	t := make([]byte, len(s)*3)
+	j := 0
+	for i := 0; i < len(s); i++ {
+		c := s[i]
+		if c != '/' && c != '%' {
+			t[j] = c
+			j++
+			continue
+		}
+		t[j] = '%'
+		t[j+1] = "0123456789ABCDEF"[c>>4]
+		t[j+2] = "0123456789ABCDEF"[c&15]
+		j += 3
+	}
+	return string(t[:j])
+}
+
+func isHex(c byte) bool {
+	switch {
+	case '0' <= c && c <= '9':
+		return true
+	case 'a' <= c && c <= 'f':
+		return true
+	case 'A' <= c && c <= 'F':
+		return true
+	}
+	return false
+}
+
+func unHex(c byte) byte {
+	switch {
+	case '0' <= c && c <= '9':
+		return c - '0'
+	case 'a' <= c && c <= 'f':
+		return c - 'a' + 10
+	case 'A' <= c && c <= 'F':
+		return c - 'A' + 10
+	}
+	return 0
+}
+
+// DecodeFromNameElement decodes an encoded name element.  If s is correctly encoded return
+// the decoded string and true.  Otherwise return the original string and false.
+//
+// Note that this is more than the inverse of EncodeAsNameElement since it cn handle more hex encodings than
+// / and %.  This is intentional since we'll most likely want to add other letters to the set to be encoded.
+func DecodeFromNameElement(s string) (string, bool) {
+	if !strings.Contains(s, "%") {
+		return s, true
+	}
+	t := make([]byte, len(s)*3)
+	j := 0
+	for i := 0; i < len(s); {
+		if s[i] != '%' {
+			t[j] = s[i]
+			j++
+			i++
+			continue
+		}
+		if len(s) <= i+2 || !isHex(s[i+1]) || !isHex(s[i+2]) {
+			return s, false
+		}
+		t[j] = unHex(s[i+1])<<4 | unHex(s[i+2])
+		i += 3
+		j++
+	}
+	return string(t[:j]), true
+}

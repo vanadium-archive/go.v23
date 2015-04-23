@@ -261,3 +261,41 @@ func TestClean(t *testing.T) {
 		}
 	}
 }
+
+func TestEncodeDecode(t *testing.T) {
+	cases := []struct {
+		unenc, enc string
+	}{
+		{"", ""},
+		{"/", "%2F"},
+		{"%", "%25"},
+		{"/The % rain in /% Spain", "%2FThe %25 rain in %2F%25 Spain"},
+	}
+	for _, c := range cases {
+		if want, got := c.enc, EncodeAsNameElement(c.unenc); got != want {
+			t.Errorf("EncodeAsNameElement(%s) got %q, want %q", c.unenc, got, want)
+		}
+	}
+	for _, c := range cases {
+		want := c.unenc
+		got, ok := DecodeFromNameElement(c.enc)
+		if !ok {
+			t.Errorf("DecodeFromNameElement(%s) not ok", c.enc)
+		}
+		if got != want {
+			t.Errorf("DecodeFromNameElement(%s) got %q, want %q", c.enc, got, want)
+		}
+	}
+	badEncodings := []string{"%2", "%aqq"}
+	for _, bad := range badEncodings {
+		want := bad
+		got, ok := DecodeFromNameElement(bad)
+		if ok {
+			t.Errorf("DecodeFromNameElement(%s) should not be ok", bad)
+		}
+		if got != want {
+			t.Errorf("DecodeFromNameElement(%s) got %q, want %q", bad, got, want)
+
+		}
+	}
+}
