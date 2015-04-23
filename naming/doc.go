@@ -4,6 +4,9 @@
 
 // Package naming defines types and utilities associated with naming.
 //
+//   Concept: https://v.io/concepts/naming.html
+//   Tutorial: https://v.io/tutorials/naming/overview.html
+//
 // Object names are 'resolved' using a MountTable to obtain a MountedServer that
 // RPC method invocations can be directed at. MountTables may be mounted on each
 // other to typically create a hierarchy. The name resolution process can thus
