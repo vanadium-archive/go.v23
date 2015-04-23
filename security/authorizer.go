@@ -6,10 +6,11 @@ package security
 
 import "v.io/v23/context"
 
-// DefaultAuthorizer returns an Authorizer implementation that should be used
-// when it doubt. It has the conservative policy that requires one end of the
-// RPC to have a blessing that is extended from the blessing presented by the
-// other end.
+// DefaultAuthorizer returns an Authorizer that implements a "reasonably secure"
+// authorization policy that can be used whenever in doubt.
+//
+// It has the conservative policy that requires one end of the RPC to have a
+// blessing that is extended from the blessing presented by the other end.
 func DefaultAuthorizer() Authorizer {
 	return defaultAuthorizer{}
 }
@@ -38,3 +39,14 @@ func (defaultAuthorizer) Authorize(ctx *context.T, call Call) error {
 
 	return NewErrAuthorizationFailed(ctx, remoteNames, remoteErr, localNames)
 }
+
+// AllowEveryone returns an Authorizer which implements a policy of always
+// allowing access - irrespective of any parameters of the call or the
+// blessings of the caller.
+func AllowEveryone() Authorizer {
+	return allowEveryone{}
+}
+
+type allowEveryone struct{}
+
+func (allowEveryone) Authorize(*context.T, Call) error { return nil }

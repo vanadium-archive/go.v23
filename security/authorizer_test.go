@@ -143,3 +143,23 @@ func mkThirdPartyCaveat(t *testing.T, discharger PublicKey, location string, c C
 	}
 	return tpc
 }
+
+func TestAllowEveryone(t *testing.T) {
+	var (
+		pali = newPrincipal(t)
+		pbob = newPrincipal(t)
+
+		ali, _ = pali.BlessSelf("ali")
+		bob, _ = pbob.BlessSelf("bob")
+
+		ctx, cancel = context.RootContext()
+	)
+	defer cancel()
+	if err := AllowEveryone().Authorize(ctx, NewCall(&CallParams{
+		LocalPrincipal:  pali,
+		LocalBlessings:  ali,
+		RemoteBlessings: bob,
+	})); err != nil {
+		t.Fatal(err)
+	}
+}

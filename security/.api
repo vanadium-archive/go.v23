@@ -8,6 +8,7 @@ pkg security, const SHA512Hash Hash
 pkg security, const SignatureForBlessingCertificates ideal-string
 pkg security, const SignatureForDischarge ideal-string
 pkg security, const SignatureForMessageSigning ideal-string
+pkg security, func AllowEveryone() Authorizer
 pkg security, func CreatePrincipal(Signer, BlessingStore, BlessingRoots) (Principal, error)
 pkg security, func DefaultAuthorizer() Authorizer
 pkg security, func DefaultBlessingPatterns(Principal) []BlessingPattern
@@ -160,17 +161,17 @@ pkg security, type WireDischarge interface, unexported methods
 pkg security, type WireDischargePublicKey struct
 pkg security, type WireDischargePublicKey struct, Value publicKeyDischarge
 pkg security, var ConstCaveat CaveatDescriptor
-pkg security, var ErrAuthorizationFailed unknown-type
-pkg security, var ErrCaveatNotRegistered unknown-type
-pkg security, var ErrCaveatParamAny unknown-type
-pkg security, var ErrCaveatParamCoding unknown-type
-pkg security, var ErrCaveatParamTypeMismatch unknown-type
-pkg security, var ErrCaveatValidation unknown-type
-pkg security, var ErrConstCaveatValidation unknown-type
-pkg security, var ErrExpiryCaveatValidation unknown-type
-pkg security, var ErrMethodCaveatValidation unknown-type
-pkg security, var ErrPeerBlessingsCaveatValidation unknown-type
-pkg security, var ErrUnrecognizedRoot unknown-type
+pkg security, var ErrAuthorizationFailed verror.IDAction
+pkg security, var ErrCaveatNotRegistered verror.IDAction
+pkg security, var ErrCaveatParamAny verror.IDAction
+pkg security, var ErrCaveatParamCoding verror.IDAction
+pkg security, var ErrCaveatParamTypeMismatch verror.IDAction
+pkg security, var ErrCaveatValidation verror.IDAction
+pkg security, var ErrConstCaveatValidation verror.IDAction
+pkg security, var ErrExpiryCaveatValidation verror.IDAction
+pkg security, var ErrMethodCaveatValidation verror.IDAction
+pkg security, var ErrPeerBlessingsCaveatValidation verror.IDAction
+pkg security, var ErrUnrecognizedRoot verror.IDAction
 pkg security, var ExpiryCaveatX CaveatDescriptor
 pkg security, var MethodCaveatX CaveatDescriptor
 pkg security, var PeerBlessingsCaveat CaveatDescriptor
