@@ -4,6 +4,9 @@
 
 // Package rpc defines interfaces for communication via remote procedure call.
 //
+//   Concept: https://v.io/concepts/rpc.html
+//   Tutorial: https://v.io/tutorials/basics.html
+//
 // There are two actors in the system, clients and servers.  Clients invoke
 // methods on Servers, using the StartCall method provided by the Client
 // interface.  Servers implement methods on named objects.  The named object is

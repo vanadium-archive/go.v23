@@ -2,8 +2,10 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// Package security provides an API for the Vanadium security concepts defined in
-// https://v.io/concepts/security.html.
+// Package security defines types and utilities associated with security.
+//
+//   Concept: https://v.io/concepts/security.html
+//   Tutorial: https://v.io/tutorials/security/overview.html
 //
 // The primitives and APIs defined in this package enable bi-directional,
 // end-to-end authentication between communicating parties; authorization based
