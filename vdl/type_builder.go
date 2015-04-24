@@ -337,8 +337,11 @@ func (b *TypeBuilder) Named(name string) PendingNamed {
 // Build builds all pending types.  Build must be called before Built may be
 // called on each pending type to retrieve the final result.
 //
-// TODO(toddw): Change Build() to return an error rather than a boolean.
-func (b *TypeBuilder) Build() bool {
+// Build guarantees that either all pending types are successfully built, or
+// none of them are.  I.e. all calls to Built will either return a non-nil Type
+// and nil error, or nil Type.  The pending type(s) that had build errors will
+// return non-nil errors.
+func (b *TypeBuilder) Build() {
 	// First finalize all types, indicating no more mutations will occur.
 	for _, p := range b.ptypes {
 		p.err = p.finalize()
@@ -365,10 +368,9 @@ func (b *TypeBuilder) Build() bool {
 			for _, q := range b.ptypes {
 				q.Type = nil
 			}
-			return false
+			return
 		}
 	}
-	return true
 }
 
 func (p *pending) ptype() *Type { return p.Type }

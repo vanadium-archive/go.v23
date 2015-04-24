@@ -94,7 +94,7 @@ pkg vdl, method (*Type) NumField() int
 pkg vdl, method (*Type) String() string
 pkg vdl, method (*Type) Walk(WalkMode, func(*Type) bool) bool
 pkg vdl, method (*TypeBuilder) Array() PendingArray
-pkg vdl, method (*TypeBuilder) Build() bool
+pkg vdl, method (*TypeBuilder) Build()
 pkg vdl, method (*TypeBuilder) Enum() PendingEnum
 pkg vdl, method (*TypeBuilder) List() PendingList
 pkg vdl, method (*TypeBuilder) Map() PendingMap
