@@ -153,15 +153,11 @@ func (d *TypeDecoder) readWireType(tid typeId) error {
 func (d *TypeDecoder) buildType(tid typeId) error {
 	builder := vdl.TypeBuilder{}
 	pending := make(map[typeId]vdl.PendingType)
-	pt, err := d.makeType(tid, &builder, pending)
+	_, err := d.makeType(tid, &builder, pending)
 	if err != nil {
 		return err
 	}
-	if !builder.Build() {
-		// TODO(toddw): Change TypeBuilder.Build() to directly return the error.
-		_, err := pt.Built()
-		return err
-	}
+	builder.Build()
 	types := make(map[typeId]*vdl.Type)
 	for tid, pt := range pending {
 		tt, err := pt.Built()

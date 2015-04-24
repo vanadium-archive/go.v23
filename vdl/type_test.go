@@ -883,14 +883,17 @@ func TestSelfRecursiveType(t *testing.T) {
 
 func TestStrictCycleType(t *testing.T) {
 	var builder TypeBuilder
-	a, b := builder.Named("A"), builder.Named("B")
+	pendA, pendB := builder.Named("A"), builder.Named("B")
 	stA, stB := builder.Struct(), builder.Struct()
-	a.AssignBase(stA)
-	b.AssignBase(stB)
-	stA.AppendField("X", Int32Type).AppendField("B", b)
-	stB.AppendField("X", Int32Type).AppendField("A", a)
-	if ok := builder.Build(); ok != false {
-		t.Errorf(`Type A struct{X int32; B B struct{X int32; A A}} should not be valid`)
+	pendA.AssignBase(stA)
+	pendB.AssignBase(stB)
+	stA.AppendField("X", Int32Type).AppendField("B", pendB)
+	stB.AppendField("X", Int32Type).AppendField("A", pendA)
+	builder.Build()
+	a, aerr := pendA.Built()
+	b, berr := pendB.Built()
+	if a != nil || b != nil || aerr == nil || berr == nil {
+		t.Errorf(`Type A struct{X int32; B B struct{X int32; A A}} should not be valid (%v, %v, %v, %v)`, a, b, aerr, berr)
 	}
 }
 

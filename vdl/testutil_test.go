@@ -691,7 +691,7 @@ func AssignNum(v *Value, num float64) *Value {
 	case Complex64, Complex128:
 		v.AssignComplex(complex(num, 0))
 	default:
-		panic(fmt.Errorf("val: AssignNum unhandled %v", v.Type()))
+		panic(fmt.Errorf("vdl: AssignNum unhandled %v", v.Type()))
 	}
 	return v
 }

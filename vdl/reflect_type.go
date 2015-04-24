@@ -43,26 +43,20 @@ func (reg *rtRegistry) update(pending map[reflect.Type]TypeOrPending) {
 		return
 	}
 	for rt, top := range pending {
-		reg.rtmap[rt] = getBuiltType(top)
+		t, _ := getBuiltType(top)
+		reg.rtmap[rt] = t
 	}
 }
 
-// getBuiltType returns the built type from top.  Panics if the type couldn't be
-// retrieved; the caller must ensure a valid type is contained in top.
-func getBuiltType(top TypeOrPending) *Type {
+// getBuiltType returns the built type from top.
+func getBuiltType(top TypeOrPending) (*Type, error) {
 	switch ttop := top.(type) {
 	case *Type:
-		return ttop
+		return ttop, nil
 	case PendingType:
-		t, err := ttop.Built()
-		if err != nil {
-			panic(err)
-		}
-		if t != nil {
-			return t
-		}
+		return ttop.Built()
 	}
-	panic(fmt.Errorf("val: nil type extracted from TypeOrPending"))
+	panic(fmt.Errorf("vdl: unknown type in TypeOrPending: %T %v", top, top))
 }
 
 // TypeOf returns the type corresponding to v.  It's a helper for calling
@@ -206,13 +200,24 @@ func TypeFromReflect(rt reflect.Type) (*Type, error) {
 	if err != nil {
 		return nil, err
 	}
-	if !builder.Build() {
-		// The result must be a pending type with a non-nil error.
-		_, err := result.(PendingType).Built()
-		return nil, err
+	builder.Build()
+	built, err := getBuiltType(result)
+	if built == nil {
+		// There must have been an error building one of the types.  Return the
+		// first error we find, favoring errors from building the result itself.
+		if err != nil {
+			return nil, err
+		}
+		for _, top := range pending {
+			_, err := getBuiltType(top)
+			if err != nil {
+				return nil, err
+			}
+		}
+		panic(fmt.Errorf("vdl: inconsistent results from TypeBuilder.Build: %v", pending))
 	}
 	rtCache.update(pending)
-	return getBuiltType(result), nil
+	return built, nil
 }
 
 // typeFromReflectLocked returns the Type or PendingType corresponding to rt.
@@ -388,7 +393,7 @@ func makeUnnamedFromReflectLocked(ri *reflectInfo, builder *TypeBuilder, pending
 	if t := typeFromRTKind[rt.Kind()]; t != nil {
 		return t, nil
 	}
-	panic(fmt.Errorf("val: makeUnnamedFromReflectLocked unhandled %v %v", rt.Kind(), rt))
+	panic(fmt.Errorf("vdl: makeUnnamedFromReflectLocked unhandled %v %v", rt.Kind(), rt))
 }
 
 var (

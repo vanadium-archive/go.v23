@@ -200,7 +200,7 @@ func compat(a, b *Type, seenA, seenB map[*Type]bool) bool {
 		}
 		return false
 	default:
-		panic(fmt.Errorf("val: compat unhandled types %q %q", a, b))
+		panic(fmt.Errorf("vdl: compat unhandled types %q %q", a, b))
 	}
 }
 
