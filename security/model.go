@@ -78,7 +78,7 @@
 //  // (in process A)
 //  call := GetCall() // Call under which p2 is seeking a blessing from alice, call.LocalPrincipal = p1
 //  key2 := call.RemoteBlessings().PublicKey()
-//  onlyFor10Minutes := ExpiryCaveat(time.Now().Add(10*time.Minute))
+//  onlyFor10Minutes := NewExpiryCaveat(time.Now().Add(10*time.Minute))
 //  aliceFriend, _ := p1.Bless(key2, alice, "friend", onlyFor10Minutes)
 //  SendBlessingToProcessB(aliceFriend)
 //

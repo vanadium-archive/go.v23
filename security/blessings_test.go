@@ -67,8 +67,8 @@ func TestByteSize(t *testing.T) {
 		}
 		t.Logf("Marshaled caveat                           : %4d bytes (%v)", len(c.ParamVom), &c)
 	}
-	logCaveatSize(ExpiryCaveat(time.Now()))
-	logCaveatSize(MethodCaveat("m"))
+	logCaveatSize(NewExpiryCaveat(time.Now()))
+	logCaveatSize(NewMethodCaveat("m"))
 }
 
 func BenchmarkBlessingsSingleCertificateEquality(b *testing.B) {
@@ -76,7 +76,7 @@ func BenchmarkBlessingsSingleCertificateEquality(b *testing.B) {
 	if err != nil {
 		b.Fatal(err)
 	}
-	caveat, err := ExpiryCaveat(time.Now().Add(time.Hour))
+	caveat, err := NewExpiryCaveat(time.Now().Add(time.Hour))
 	if err != nil {
 		b.Fatal(err)
 	}
@@ -102,7 +102,7 @@ func BenchmarkBless(b *testing.B) {
 		b.Fatal(err)
 	}
 	// Include at least one caveat as having caveats should be the common case.
-	caveat, err := ExpiryCaveat(time.Now().Add(time.Hour))
+	caveat, err := NewExpiryCaveat(time.Now().Add(time.Hour))
 	if err != nil {
 		b.Fatal(err)
 	}

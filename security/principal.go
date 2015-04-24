@@ -135,7 +135,7 @@ func (p *principal) Sign(message []byte) (Signature, error) {
 }
 
 func (p *principal) MintDischarge(forCaveat, caveatOnDischarge Caveat, additionalCaveatsOnDischarge ...Caveat) (Discharge, error) {
-	if forCaveat.Id != PublicKeyThirdPartyCaveatX.Id {
+	if forCaveat.Id != PublicKeyThirdPartyCaveat.Id {
 		return Discharge{}, verror.New(errCantMintDischarges, nil, forCaveat)
 	}
 	id := forCaveat.ThirdPartyDetails().ID()

@@ -31,7 +31,7 @@ func TestBlessSelf(t *testing.T) {
 		}
 	)
 
-	alice, err := p.BlessSelf("alice", newCaveat(MethodCaveat("Method")))
+	alice, err := p.BlessSelf("alice", newCaveat(NewMethodCaveat("Method")))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -75,7 +75,7 @@ func TestBless(t *testing.T) {
 		t.Errorf("p1 was able to extend a nil blessing to produce: %v", b)
 	}
 	// p1 blessing p2 as "alice/friend" for "Suffix.Method"
-	friend, err := p1.Bless(p2.PublicKey(), alice, "friend", newCaveat(MethodCaveat("Method")), newSuffixCaveat("Suffix"))
+	friend, err := p1.Bless(p2.PublicKey(), alice, "friend", newCaveat(NewMethodCaveat("Method")), newSuffixCaveat("Suffix"))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -112,8 +112,8 @@ func TestThirdPartyCaveats(t *testing.T) {
 		tp1 = newCaveat(NewPublicKeyCaveat(p1.PublicKey(), "peoria", ThirdPartyRequirements{}, UnconstrainedUse()))
 		tp2 = newCaveat(NewPublicKeyCaveat(p1.PublicKey(), "london", ThirdPartyRequirements{}, UnconstrainedUse()))
 		tp3 = newCaveat(NewPublicKeyCaveat(p1.PublicKey(), "delhi", ThirdPartyRequirements{}, UnconstrainedUse()))
-		c1  = newCaveat(MethodCaveat("method"))
-		c2  = newCaveat(ExpiryCaveat(time.Now()))
+		c1  = newCaveat(NewMethodCaveat("method"))
+		c2  = newCaveat(NewExpiryCaveat(time.Now()))
 	)
 
 	b, err := p1.BlessSelf("alice", tp1, c1, tp2)
@@ -132,11 +132,11 @@ func TestThirdPartyCaveats(t *testing.T) {
 }
 
 func TestBlessingsInfoAndLocalBlessingNames(t *testing.T) {
-	expiryCaveat, err := ExpiryCaveat(time.Now().Add(time.Minute))
+	expiryCaveat, err := NewExpiryCaveat(time.Now().Add(time.Minute))
 	if err != nil {
 		t.Fatal(err)
 	}
-	methodCaveat, err := MethodCaveat("FriendMethod")
+	methodCaveat, err := NewMethodCaveat("FriendMethod")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -462,12 +462,12 @@ func TestUnionOfBlessings(t *testing.T) {
 			return params
 		}
 	)
-	alicefriend, err := p1.Bless(p.PublicKey(), alice, "friend", newCaveat(MethodCaveat("Method", "AliceMethod")))
+	alicefriend, err := p1.Bless(p.PublicKey(), alice, "friend", newCaveat(NewMethodCaveat("Method", "AliceMethod")))
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	bobfriend, err := p2.Bless(p.PublicKey(), bob, "friend", newCaveat(MethodCaveat("Method", "BobMethod")))
+	bobfriend, err := p2.Bless(p.PublicKey(), bob, "friend", newCaveat(NewMethodCaveat("Method", "BobMethod")))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -565,7 +565,7 @@ func TestCertificateCompositionAttack(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	bobfamilyspouse, err := p3.Bless(p4.PublicKey(), bobfamily, "spouse", newCaveat(MethodCaveat("Foo")))
+	bobfamilyspouse, err := p3.Bless(p4.PublicKey(), bobfamily, "spouse", newCaveat(NewMethodCaveat("Foo")))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -878,7 +878,7 @@ func TestRemoteBlessingNames(t *testing.T) {
 			return ret
 		}
 
-		b1 = mkBlessing("alice", newCaveat(MethodCaveat("Method")))
+		b1 = mkBlessing("alice", newCaveat(NewMethodCaveat("Method")))
 		b2 = mkBlessing("bob")
 
 		bnames = func(b Blessings, method string) ([]string, []RejectedBlessing) {

@@ -29,7 +29,7 @@ func init() {
 		return NewErrConstCaveatValidation(ctx)
 	})
 
-	RegisterCaveatValidator(ExpiryCaveatX, func(ctx *context.T, call Call, expiry time.Time) error {
+	RegisterCaveatValidator(ExpiryCaveat, func(ctx *context.T, call Call, expiry time.Time) error {
 		now := call.Timestamp()
 		if now.After(expiry) {
 			return NewErrExpiryCaveatValidation(ctx, now, expiry)
@@ -37,7 +37,7 @@ func init() {
 		return nil
 	})
 
-	RegisterCaveatValidator(MethodCaveatX, func(ctx *context.T, call Call, methods []string) error {
+	RegisterCaveatValidator(MethodCaveat, func(ctx *context.T, call Call, methods []string) error {
 		for _, m := range methods {
 			if call.Method() == m {
 				return nil
@@ -57,7 +57,7 @@ func init() {
 		return NewErrPeerBlessingsCaveatValidation(ctx, lnames, patterns)
 	})
 
-	RegisterCaveatValidator(PublicKeyThirdPartyCaveatX, func(ctx *context.T, call Call, params publicKeyThirdPartyCaveat) error {
+	RegisterCaveatValidator(PublicKeyThirdPartyCaveat, func(ctx *context.T, call Call, params publicKeyThirdPartyCaveatParam) error {
 		discharge, ok := call.RemoteDischarges()[params.ID()]
 		if !ok {
 			return verror.New(errMissingDischarge, ctx, params.ID())

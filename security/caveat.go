@@ -77,8 +77,6 @@ func (r *caveatRegistry) register(d CaveatDescriptor, validator interface{}) err
 	fn := reflect.ValueOf(validator)
 	param := vdl.TypeToReflect(d.ParamType)
 	if param == nil {
-		// If you hit this error, https://github.com/veyron/release-issues/issues/907
-		// might be the problem.
 		return verror.New(errBadCaveatDescriptorType, nil, d.ParamType)
 	}
 	var (
@@ -174,25 +172,6 @@ func NewCaveat(c CaveatDescriptor, param interface{}) (Caveat, error) {
 	return Caveat{c.Id, bytes}, nil
 }
 
-// ExpiryCaveat returns a Caveat that validates iff the current time is before t.
-func ExpiryCaveat(t time.Time) (Caveat, error) {
-	c, err := NewCaveat(ExpiryCaveatX, t)
-	if err != nil {
-		return c, err
-	}
-	return c, nil
-}
-
-// MethodCaveat returns a Caveat that validates iff the method being invoked by
-// the peer is listed in an argument to this function.
-func MethodCaveat(method string, additionalMethods ...string) (Caveat, error) {
-	c, err := NewCaveat(MethodCaveatX, append(additionalMethods, method))
-	if err != nil {
-		return c, err
-	}
-	return c, nil
-}
-
 // digest returns a hash of the contents of c.
 func (c *Caveat) digest(hash Hash) []byte {
 	return hash.sum(append(hash.sum(c.Id[:]), hash.sum(c.ParamVom)...))
@@ -211,8 +190,8 @@ func (c *Caveat) Validate(ctx *context.T, call Call) error {
 // ThirdPartyDetails returns nil if c is not a third party caveat, or details about
 // the third party otherwise.
 func (c *Caveat) ThirdPartyDetails() ThirdPartyCaveat {
-	if c.Id == PublicKeyThirdPartyCaveatX.Id {
-		var param publicKeyThirdPartyCaveat
+	if c.Id == PublicKeyThirdPartyCaveat.Id {
+		var param publicKeyThirdPartyCaveatParam
 		if err := vom.Decode(c.ParamVom, &param); err != nil {
 			// TODO(jsimsa): Decide what (if any) logging mechanism to use.
 			// vlog.Errorf("Error decoding PublicKeyThirdPartyCaveat: %v", err)
@@ -237,6 +216,25 @@ func UnconstrainedUse() Caveat {
 	return unconstrainedUseCaveat
 }
 
+// NewExpiryCaveat returns a Caveat that validates iff the current time is before t.
+func NewExpiryCaveat(t time.Time) (Caveat, error) {
+	c, err := NewCaveat(ExpiryCaveat, t)
+	if err != nil {
+		return c, err
+	}
+	return c, nil
+}
+
+// NewMethodCaveat returns a Caveat that validates iff the method being invoked by
+// the peer is listed in an argument to this function.
+func NewMethodCaveat(method string, additionalMethods ...string) (Caveat, error) {
+	c, err := NewCaveat(MethodCaveat, append(additionalMethods, method))
+	if err != nil {
+		return c, err
+	}
+	return c, nil
+}
+
 // NewPublicKeyCaveat returns a third-party caveat, i.e., the returned
 // Caveat will be valid only when a discharge signed by discharger
 // is issued.
@@ -247,7 +245,7 @@ func UnconstrainedUse() Caveat {
 // The discharger will validate all provided caveats (caveat,
 // additionalCaveats) before issuing a discharge.
 func NewPublicKeyCaveat(discharger PublicKey, location string, requirements ThirdPartyRequirements, caveat Caveat, additionalCaveats ...Caveat) (Caveat, error) {
-	param := publicKeyThirdPartyCaveat{
+	param := publicKeyThirdPartyCaveatParam{
 		Caveats:                append(additionalCaveats, caveat),
 		DischargerLocation:     location,
 		DischargerRequirements: requirements,
@@ -259,14 +257,14 @@ func NewPublicKeyCaveat(discharger PublicKey, location string, requirements Thir
 	if _, err := rand.Read(param.Nonce[:]); err != nil {
 		return Caveat{}, err
 	}
-	c, err := NewCaveat(PublicKeyThirdPartyCaveatX, param)
+	c, err := NewCaveat(PublicKeyThirdPartyCaveat, param)
 	if err != nil {
 		return c, err
 	}
 	return c, nil
 }
 
-func (c *publicKeyThirdPartyCaveat) ID() string {
+func (c *publicKeyThirdPartyCaveatParam) ID() string {
 	key, err := c.discharger(nil)
 	if err != nil {
 		// TODO(jsimsa): Decide what (if any) logging mechanism to use.
@@ -281,12 +279,12 @@ func (c *publicKeyThirdPartyCaveat) ID() string {
 	return base64.StdEncoding.EncodeToString(hash.sum(bytes))
 }
 
-func (c *publicKeyThirdPartyCaveat) Location() string { return c.DischargerLocation }
-func (c *publicKeyThirdPartyCaveat) Requirements() ThirdPartyRequirements {
+func (c *publicKeyThirdPartyCaveatParam) Location() string { return c.DischargerLocation }
+func (c *publicKeyThirdPartyCaveatParam) Requirements() ThirdPartyRequirements {
 	return c.DischargerRequirements
 }
 
-func (c *publicKeyThirdPartyCaveat) Dischargeable(ctx *context.T, call Call) error {
+func (c *publicKeyThirdPartyCaveatParam) Dischargeable(ctx *context.T, call Call) error {
 	// Validate the caveats embedded within this third-party caveat.
 	for _, cav := range c.Caveats {
 		if err := cav.Validate(ctx, call); err != nil {
@@ -296,7 +294,7 @@ func (c *publicKeyThirdPartyCaveat) Dischargeable(ctx *context.T, call Call) err
 	return nil
 }
 
-func (c *publicKeyThirdPartyCaveat) discharger(cxt *context.T) (PublicKey, error) {
+func (c *publicKeyThirdPartyCaveatParam) discharger(cxt *context.T) (PublicKey, error) {
 	key, err := UnmarshalPublicKey(c.DischargerKey)
 	if err != nil {
 		return nil, verror.New(errCantUnmarshalDischargeKey, cxt, fmt.Sprintf("%T", *c), err)
@@ -304,7 +302,7 @@ func (c *publicKeyThirdPartyCaveat) discharger(cxt *context.T) (PublicKey, error
 	return key, nil
 }
 
-func (c publicKeyThirdPartyCaveat) String() string {
+func (c publicKeyThirdPartyCaveatParam) String() string {
 	return fmt.Sprintf("%v@%v [%+v]", c.ID(), c.Location(), c.Requirements())
 }
 

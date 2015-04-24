@@ -12,11 +12,9 @@ pkg security, func AllowEveryone() Authorizer
 pkg security, func CreatePrincipal(Signer, BlessingStore, BlessingRoots) (Principal, error)
 pkg security, func DefaultAuthorizer() Authorizer
 pkg security, func DefaultBlessingPatterns(Principal) []BlessingPattern
-pkg security, func ExpiryCaveat(time.Time) (Caveat, error)
 pkg security, func JoinPatternName(BlessingPattern, string) string
 pkg security, func LocalBlessingNames(*context.T, Call) []string
 pkg security, func MarshalBlessings(Blessings) WireBlessings
-pkg security, func MethodCaveat(string, ...string) (Caveat, error)
 pkg security, func NewCall(*CallParams) Call
 pkg security, func NewCaveat(CaveatDescriptor, interface{}) (Caveat, error)
 pkg security, func NewECDSAPublicKey(*ecdsa.PublicKey) PublicKey
@@ -31,7 +29,9 @@ pkg security, func NewErrExpiryCaveatValidation(*context.T, time.Time, time.Time
 pkg security, func NewErrMethodCaveatValidation(*context.T, string, []string) error
 pkg security, func NewErrPeerBlessingsCaveatValidation(*context.T, []string, []BlessingPattern) error
 pkg security, func NewErrUnrecognizedRoot(*context.T, string, error) error
+pkg security, func NewExpiryCaveat(time.Time) (Caveat, error)
 pkg security, func NewInMemoryECDSASigner(*ecdsa.PrivateKey) Signer
+pkg security, func NewMethodCaveat(string, ...string) (Caveat, error)
 pkg security, func NewPublicKeyCaveat(PublicKey, string, ThirdPartyRequirements, Caveat, ...Caveat) (Caveat, error)
 pkg security, func RegisterCaveatValidator(CaveatDescriptor, interface{})
 pkg security, func RemoteBlessingNames(*context.T, Call) ([]string, []RejectedBlessing)
@@ -172,7 +172,7 @@ pkg security, var ErrExpiryCaveatValidation verror.IDAction
 pkg security, var ErrMethodCaveatValidation verror.IDAction
 pkg security, var ErrPeerBlessingsCaveatValidation verror.IDAction
 pkg security, var ErrUnrecognizedRoot verror.IDAction
-pkg security, var ExpiryCaveatX CaveatDescriptor
-pkg security, var MethodCaveatX CaveatDescriptor
+pkg security, var ExpiryCaveat CaveatDescriptor
+pkg security, var MethodCaveat CaveatDescriptor
 pkg security, var PeerBlessingsCaveat CaveatDescriptor
-pkg security, var PublicKeyThirdPartyCaveatX CaveatDescriptor
+pkg security, var PublicKeyThirdPartyCaveat CaveatDescriptor

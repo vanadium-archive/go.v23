@@ -84,7 +84,7 @@ func wireDischargeFromNative(wire *WireDischarge, native Discharge) error {
 
 func expiryTime(cav Caveat) time.Time {
 	switch cav.Id {
-	case ExpiryCaveatX.Id:
+	case ExpiryCaveat.Id:
 		var t time.Time
 		if err := vom.Decode(cav.ParamVom, &t); err != nil {
 			// TODO(jsimsa): Decide what (if any) logging mechanism to use.

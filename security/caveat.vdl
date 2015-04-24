@@ -15,28 +15,21 @@ const (
 
   // ExpiryCaveat represents a caveat that validates iff the current time is no later
   // the specified time.Time.
-  //
-  // TODO(suharshs,ashankar): Rename to ExpiryCaveat and drop the ExpiryCaveat helper function.
-  ExpiryCaveatX = CaveatDescriptor{
+  ExpiryCaveat = CaveatDescriptor{
     Id:        uniqueid.Id{0xa6, 0x4c, 0x2d, 0x1, 0x19, 0xfb, 0xa3, 0x34, 0x80, 0x71, 0xfe, 0xeb, 0x2f, 0x30, 0x80, 0x0},
     ParamType: typeobject(time.Time),
   }
 
   // MethodCaveat represents a caveat that validates iff the method being
   // invoked is included in this list. An empty list implies that the caveat is invalid.
-  //
-  // TODO(ashankar): Rename to MethodCaveat and drop the MethodCaveat helper function?
-  MethodCaveatX = CaveatDescriptor{
+  MethodCaveat = CaveatDescriptor{
     Id:        uniqueid.Id{0x54, 0xa6, 0x76, 0x39, 0x81, 0x37, 0x18, 0x7e, 0xcd, 0xb2, 0x6d, 0x2d, 0x69, 0xba, 0x0, 0x3},
     ParamType: typeobject([]string),
   }
 
-  // TODO(ashankar): Rename to PublicKeyThirdPartyCaveat (and
-  // publicKeyThirdPartyCaveat becomes publicKeyThirdPartyCaveatParam or
-  // something?).
-  PublicKeyThirdPartyCaveatX = CaveatDescriptor{
+  PublicKeyThirdPartyCaveat = CaveatDescriptor{
     Id:        uniqueid.Id{0x79, 0x72, 0xce, 0x17, 0x4a, 0x7b, 0xa9, 0x3f, 0x79, 0x54, 0x7d, 0x76, 0x9c, 0x91, 0x80, 0x0},
-    ParamType: typeobject(publicKeyThirdPartyCaveat),
+    ParamType: typeobject(publicKeyThirdPartyCaveatParam),
   }
 
   // PeerBlessingsCaveat represents a caveat that validates iff the peer being communicated
@@ -82,7 +75,7 @@ error (
 
 type nonce [16]byte
 
-// publicKeyThirdPartyCaveat represents a third-party caveat that requires
+// publicKeyThirdPartyCaveatParam represents a third-party caveat that requires
 // discharges to be issued by a principal identified by a public key.
 //
 // The Id of the caveat is base64-encoded:
@@ -91,7 +84,7 @@ type nonce [16]byte
 // equivalent to that of the DischargerKey. For example, if DischargerKey
 // represents an ECDSA public key with the P384 curve, then hash should be
 // SHA384.
-type publicKeyThirdPartyCaveat struct {
+type publicKeyThirdPartyCaveatParam struct {
   // Nonce specifies a cryptographically random nonce associated with an
   // instance of the caveat. This prevents discharge replays, where
   // discharges for ThirdPartyCaveats embedded in the certificates for
@@ -112,7 +105,7 @@ type publicKeyThirdPartyCaveat struct {
   DischargerRequirements ThirdPartyRequirements
 }
 
-// publicKeyDischarge represents the discharge issued for publicKeyThirdPartyCaveats.
+// publicKeyDischarge represents the discharge issued for publicKeyThirdPartyCaveatParams.
 //
 // The message digest of this structure is computed as follows:
 // hash(hash(ThirdPartyCaveatId), hash(Caveats[0]), hash(Caveats[1]), ...),

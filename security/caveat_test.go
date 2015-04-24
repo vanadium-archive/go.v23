@@ -35,13 +35,13 @@ func TestStandardCaveatFactories(t *testing.T) {
 			ok  bool
 		}{
 			// ExpiryCaveat
-			{C(ExpiryCaveat(now.Add(time.Second))), true},
-			{C(ExpiryCaveat(now.Add(-1 * time.Second))), false},
+			{C(NewExpiryCaveat(now.Add(time.Second))), true},
+			{C(NewExpiryCaveat(now.Add(-1 * time.Second))), false},
 			// MethodCaveat
-			{C(MethodCaveat("Foo")), true},
-			{C(MethodCaveat("Bar")), false},
-			{C(MethodCaveat("Foo", "Bar")), true},
-			{C(MethodCaveat("Bar", "Baz")), false},
+			{C(NewMethodCaveat("Foo")), true},
+			{C(NewMethodCaveat("Bar")), false},
+			{C(NewMethodCaveat("Foo", "Bar")), true},
+			{C(NewMethodCaveat("Bar", "Baz")), false},
 			// PeerBlesingsCaveat
 			{C(NewCaveat(PeerBlessingsCaveat, []BlessingPattern{"alice/phone"})), true},
 			{C(NewCaveat(PeerBlessingsCaveat, []BlessingPattern{"alice/tablet", "other"})), true},
@@ -67,8 +67,8 @@ func TestStandardCaveatFactories(t *testing.T) {
 func TestPublicKeyThirdPartyCaveat(t *testing.T) {
 	var (
 		now          = time.Now()
-		valid        = newCaveat(ExpiryCaveat(now.Add(time.Second)))
-		expired      = newCaveat(ExpiryCaveat(now.Add(-1 * time.Second)))
+		valid        = newCaveat(NewExpiryCaveat(now.Add(time.Second)))
+		expired      = newCaveat(NewExpiryCaveat(now.Add(-1 * time.Second)))
 		discharger   = newPrincipal(t)
 		randomserver = newPrincipal(t)
 		ctxAndCall   = func(method string, discharges ...Discharge) (*context.T, Call) {
@@ -94,7 +94,7 @@ func TestPublicKeyThirdPartyCaveat(t *testing.T) {
 		t.Fatal(err)
 	}
 	// Should validate when the discharge is present (and caveats on the discharge are met).
-	d, err := discharger.MintDischarge(tpc, newCaveat(MethodCaveat("Method1")))
+	d, err := discharger.MintDischarge(tpc, newCaveat(NewMethodCaveat("Method1")))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -250,8 +250,8 @@ func TestRegisterCaveat(t *testing.T) {
 
 func TestThirdPartyDetails(t *testing.T) {
 	niltests := []Caveat{
-		newCaveat(ExpiryCaveat(time.Now())),
-		newCaveat(MethodCaveat("Foo", "Bar")),
+		newCaveat(NewExpiryCaveat(time.Now())),
+		newCaveat(NewMethodCaveat("Foo", "Bar")),
 	}
 	for _, c := range niltests {
 		if tp := c.ThirdPartyDetails(); tp != nil {
@@ -259,7 +259,7 @@ func TestThirdPartyDetails(t *testing.T) {
 		}
 	}
 	req := ThirdPartyRequirements{ReportMethod: true}
-	c, err := NewPublicKeyCaveat(newPrincipal(t).PublicKey(), "location", req, newCaveat(ExpiryCaveat(time.Now())))
+	c, err := NewPublicKeyCaveat(newPrincipal(t).PublicKey(), "location", req, newCaveat(NewExpiryCaveat(time.Now())))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -274,9 +274,9 @@ func TestPublicKeyDischargeExpiry(t *testing.T) {
 	var (
 		discharger = newPrincipal(t)
 		now        = time.Now()
-		oneh       = newCaveat(ExpiryCaveat(now.Add(time.Hour)))
-		twoh       = newCaveat(ExpiryCaveat(now.Add(2 * time.Hour)))
-		threeh     = newCaveat(ExpiryCaveat(now.Add(3 * time.Hour)))
+		oneh       = newCaveat(NewExpiryCaveat(now.Add(time.Hour)))
+		twoh       = newCaveat(NewExpiryCaveat(now.Add(2 * time.Hour)))
+		threeh     = newCaveat(NewExpiryCaveat(now.Add(3 * time.Hour)))
 	)
 
 	tpc, err := NewPublicKeyCaveat(discharger.PublicKey(), "location", ThirdPartyRequirements{}, oneh)
@@ -285,7 +285,7 @@ func TestPublicKeyDischargeExpiry(t *testing.T) {
 	}
 
 	// Mint three discharges; one with no ExpiryCaveat...
-	noExpiry, err := discharger.MintDischarge(tpc, newCaveat(MethodCaveat("Method1")))
+	noExpiry, err := discharger.MintDischarge(tpc, newCaveat(NewMethodCaveat("Method1")))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -316,7 +316,7 @@ func TestPublicKeyDischargeExpiry(t *testing.T) {
 // (expiry)
 func BenchmarkNewCaveat(b *testing.B) {
 	for i := 0; i < b.N; i++ {
-		if _, err := NewCaveat(ExpiryCaveatX, time.Time{}); err != nil {
+		if _, err := NewExpiryCaveat(time.Time{}); err != nil {
 			b.Fatal(err)
 		}
 	}
@@ -324,7 +324,7 @@ func BenchmarkNewCaveat(b *testing.B) {
 
 // Benchmark caveat valdation using one of the simplest caveats (expiry).
 func BenchmarkValidateCaveat(b *testing.B) {
-	cav, err := NewCaveat(ExpiryCaveatX, time.Now())
+	cav, err := NewExpiryCaveat(time.Now())
 	if err != nil {
 		b.Fatal(err)
 	}

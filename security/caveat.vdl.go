@@ -27,7 +27,7 @@ func (nonce) __VDLReflect(struct {
 }) {
 }
 
-// publicKeyThirdPartyCaveat represents a third-party caveat that requires
+// publicKeyThirdPartyCaveatParam represents a third-party caveat that requires
 // discharges to be issued by a principal identified by a public key.
 //
 // The Id of the caveat is base64-encoded:
@@ -36,7 +36,7 @@ func (nonce) __VDLReflect(struct {
 // equivalent to that of the DischargerKey. For example, if DischargerKey
 // represents an ECDSA public key with the P384 curve, then hash should be
 // SHA384.
-type publicKeyThirdPartyCaveat struct {
+type publicKeyThirdPartyCaveatParam struct {
 	// Nonce specifies a cryptographically random nonce associated with an
 	// instance of the caveat. This prevents discharge replays, where
 	// discharges for ThirdPartyCaveats embedded in the certificates for
@@ -57,12 +57,12 @@ type publicKeyThirdPartyCaveat struct {
 	DischargerRequirements ThirdPartyRequirements
 }
 
-func (publicKeyThirdPartyCaveat) __VDLReflect(struct {
-	Name string "v.io/v23/security.publicKeyThirdPartyCaveat"
+func (publicKeyThirdPartyCaveatParam) __VDLReflect(struct {
+	Name string "v.io/v23/security.publicKeyThirdPartyCaveatParam"
 }) {
 }
 
-// publicKeyDischarge represents the discharge issued for publicKeyThirdPartyCaveats.
+// publicKeyDischarge represents the discharge issued for publicKeyThirdPartyCaveatParams.
 //
 // The message digest of this structure is computed as follows:
 // hash(hash(ThirdPartyCaveatId), hash(Caveats[0]), hash(Caveats[1]), ...),
@@ -81,7 +81,7 @@ func (publicKeyDischarge) __VDLReflect(struct {
 
 func init() {
 	vdl.Register((*nonce)(nil))
-	vdl.Register((*publicKeyThirdPartyCaveat)(nil))
+	vdl.Register((*publicKeyThirdPartyCaveatParam)(nil))
 	vdl.Register((*publicKeyDischarge)(nil))
 }
 
@@ -92,9 +92,7 @@ var ConstCaveat = CaveatDescriptor{
 
 // ExpiryCaveat represents a caveat that validates iff the current time is no later
 // the specified time.Time.
-//
-// TODO(suharshs,ashankar): Rename to ExpiryCaveat and drop the ExpiryCaveat helper function.
-var ExpiryCaveatX = CaveatDescriptor{
+var ExpiryCaveat = CaveatDescriptor{
 	Id: uniqueid.Id{
 		166,
 		76,
@@ -118,9 +116,7 @@ var ExpiryCaveatX = CaveatDescriptor{
 
 // MethodCaveat represents a caveat that validates iff the method being
 // invoked is included in this list. An empty list implies that the caveat is invalid.
-//
-// TODO(ashankar): Rename to MethodCaveat and drop the MethodCaveat helper function?
-var MethodCaveatX = CaveatDescriptor{
+var MethodCaveat = CaveatDescriptor{
 	Id: uniqueid.Id{
 		84,
 		166,
@@ -142,10 +138,7 @@ var MethodCaveatX = CaveatDescriptor{
 	ParamType: vdl.TypeOf([]string(nil)),
 }
 
-// TODO(ashankar): Rename to PublicKeyThirdPartyCaveat (and
-// publicKeyThirdPartyCaveat becomes publicKeyThirdPartyCaveatParam or
-// something?).
-var PublicKeyThirdPartyCaveatX = CaveatDescriptor{
+var PublicKeyThirdPartyCaveat = CaveatDescriptor{
 	Id: uniqueid.Id{
 		121,
 		114,
@@ -164,7 +157,7 @@ var PublicKeyThirdPartyCaveatX = CaveatDescriptor{
 		128,
 		0,
 	},
-	ParamType: vdl.TypeOf(publicKeyThirdPartyCaveat{}),
+	ParamType: vdl.TypeOf(publicKeyThirdPartyCaveatParam{}),
 }
 
 // PeerBlessingsCaveat represents a caveat that validates iff the peer being communicated
