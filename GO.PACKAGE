@@ -2,6 +2,7 @@
 	"dependencies": {
 		"outgoing": [
 			{"allow": "v.io/v23/..."},
+			{"allow": "v.io/x/lib/pubsub"},
 			{"deny": "..."}
 		],
 		"incoming": [

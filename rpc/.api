@@ -10,9 +10,9 @@ pkg rpc, const ServerInit ServerState
 pkg rpc, const ServerStopped ServerState
 pkg rpc, const ServerStopping ServerState
 pkg rpc, func ChildrenGlobberInvoker(...string) Invoker
-pkg rpc, func NewAddAddrsSetting([]Address) config.Setting
+pkg rpc, func NewAddAddrsSetting([]net.Addr) pubsub.Setting
 pkg rpc, func NewGlobState(interface{}) *GlobState
-pkg rpc, func NewRmAddrsSetting([]Address) config.Setting
+pkg rpc, func NewRmAddrsSetting([]net.Addr) pubsub.Setting
 pkg rpc, func ReflectInvoker(interface{}) (Invoker, error)
 pkg rpc, func ReflectInvokerOrDie(interface{}) Invoker
 pkg rpc, func RegisterProtocol(string, DialerFunc, ListenerFunc, ...string) bool
@@ -27,12 +27,6 @@ pkg rpc, method (MountState) Servers() []string
 pkg rpc, method (MountStatus) String() string
 pkg rpc, method (NetworkChange) DebugString() string
 pkg rpc, method (ServerState) String() string
-pkg rpc, type Address interface { Address, InterfaceIndex, InterfaceName, Networks }
-pkg rpc, type Address interface, Address() net.Addr
-pkg rpc, type Address interface, InterfaceIndex() int
-pkg rpc, type Address interface, InterfaceName() string
-pkg rpc, type Address interface, Networks() []net.Addr
-pkg rpc, type AddressChooser func(network string, addrs []Address) ([]Address, error)
 pkg rpc, type AllGlobber interface { Glob__ }
 pkg rpc, type AllGlobber interface, Glob__(*context.T, ServerCall, string) (<-chan naming.GlobReply, error)
 pkg rpc, type ArgDesc struct
@@ -88,11 +82,11 @@ pkg rpc, type Invoker interface, Prepare(string, int) ([]interface{}, []*vdl.Val
 pkg rpc, type Invoker interface, Signature(*context.T, ServerCall) ([]signature.Interface, error)
 pkg rpc, type ListenAddrs []struct {  Protocol, Address string;}
 pkg rpc, type ListenSpec struct
-pkg rpc, type ListenSpec struct, AddressChooser AddressChooser
+pkg rpc, type ListenSpec struct, AddressChooser func(string, []net.Addr) ([]net.Addr, error)
 pkg rpc, type ListenSpec struct, Addrs ListenAddrs
 pkg rpc, type ListenSpec struct, Proxy string
 pkg rpc, type ListenSpec struct, StreamName string
-pkg rpc, type ListenSpec struct, StreamPublisher *config.Publisher
+pkg rpc, type ListenSpec struct, StreamPublisher *pubsub.Publisher
 pkg rpc, type ListenerFunc func(protocol, address string) (net.Listener, error)
 pkg rpc, type MethodDesc struct
 pkg rpc, type MethodDesc struct, Doc string
@@ -114,13 +108,9 @@ pkg rpc, type MountStatus struct, TTL time.Duration
 pkg rpc, type NetworkChange struct
 pkg rpc, type NetworkChange struct, Changed []naming.Endpoint
 pkg rpc, type NetworkChange struct, Error error
-pkg rpc, type NetworkChange struct, Setting config.Setting
+pkg rpc, type NetworkChange struct, Setting pubsub.Setting
 pkg rpc, type NetworkChange struct, State ServerState
 pkg rpc, type NetworkChange struct, Time time.Time
-pkg rpc, type NetworkInterface interface { InterfaceIndex, InterfaceName, Networks }
-pkg rpc, type NetworkInterface interface, InterfaceIndex() int
-pkg rpc, type NetworkInterface interface, InterfaceName() string
-pkg rpc, type NetworkInterface interface, Networks() []net.Addr
 pkg rpc, type ProxyStatus struct
 pkg rpc, type ProxyStatus struct, Endpoint naming.Endpoint
 pkg rpc, type ProxyStatus struct, Error error
