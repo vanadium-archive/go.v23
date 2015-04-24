@@ -1,4 +1,5 @@
 pkg version, const DeprecatedRPCVersion RPCVersion
+pkg version, const RPCVersion10 RPCVersion
 pkg version, const RPCVersion9 RPCVersion
 pkg version, const UnknownRPCVersion RPCVersion
 pkg version, type RPCVersion uint32
