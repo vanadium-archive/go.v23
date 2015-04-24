@@ -11,8 +11,6 @@ import (
 	"strings"
 	"time"
 
-	"v.io/x/lib/pubsub"
-
 	"v.io/v23/context"
 	"v.io/v23/naming"
 	"v.io/v23/security"
@@ -75,25 +73,6 @@ type Stream interface {
 	Recv(itemptr interface{}) error
 }
 
-// NewAddAddrsSetting creates the Setting to be sent to Listen to inform
-// it of new addresses that have become available since the last change.
-func NewAddAddrsSetting(a []net.Addr) pubsub.Setting {
-	return pubsub.NewAny(NewAddrsSetting, NewAddrsSettingDesc, a)
-}
-
-// NewRmAddrsSetting creates the Setting to be sent to Listen to inform
-// it of addresses that are no longer available.
-func NewRmAddrsSetting(a []net.Addr) pubsub.Setting {
-	return pubsub.NewAny(RmAddrsSetting, RmAddrsSettingDesc, a)
-}
-
-const (
-	NewAddrsSetting     = "NewAddrs"
-	NewAddrsSettingDesc = "New Addresses discovered since last change"
-	RmAddrsSetting      = "RmAddrs"
-	RmAddrsSettingDesc  = "Addresses that have been removed since last change"
-)
-
 // ListenAddrs is the set of protocol, address pairs to listen on.
 // An anonymous struct is used to to more easily initialize a ListenSpec
 // from a different package.
@@ -115,12 +94,6 @@ type ListenSpec struct {
 	// The name of a proxy to be used to proxy connections to this listener.
 	Proxy string
 
-	// A publisher, which if non-nil, can be used to receive updated
-	// network Settings via the stream named StreamName.
-	StreamPublisher *pubsub.Publisher
-	// The name of the Stream to Fork on the StreamPublisher.
-	StreamName string
-
 	// AddressChooser is a function that can be used to
 	// choose the preferred address to publish with the mount table
 	// when one is not otherwise specified.
@@ -134,9 +107,6 @@ func (l ListenSpec) String() string {
 	}
 	if len(l.Proxy) > 0 {
 		s += "proxy(" + l.Proxy + ") "
-	}
-	if l.StreamPublisher != nil {
-		s += "publisher(" + l.StreamName + ")"
 	}
 	return strings.TrimSpace(s)
 }
@@ -331,16 +301,18 @@ type MountState []MountStatus
 // NetworkChange represents the changes made in response to a network
 // Setting change being received.
 type NetworkChange struct {
-	Time    time.Time         // Time of last change.
-	State   ServerState       // The current state of the server.
-	Setting pubsub.Setting    // The Setting sent for the last change.
-	Changed []naming.Endpoint // The set of endpoints added/removed as a result of this change.
-	Error   error             // Any error that encountered.
+	Time         time.Time         // Time of last change.
+	State        ServerState       // The current state of the server.
+	AddedAddrs   []net.Addr        // Addresses added sinced the last change.
+	RemovedAddrs []net.Addr        // Addresses removed since the last change.
+	Changed      []naming.Endpoint // The set of endpoints added/removed as a result of this change.
+	Error        error             // Any error that encountered.
 }
 
 func (nc NetworkChange) DebugString() string {
 	s := fmt.Sprintf("NetworkChange @ %s\n", nc.Time)
-	s += fmt.Sprintf("  Setting: %s\n", nc.Setting)
+	s += fmt.Sprintf("  Added: %s\n", nc.AddedAddrs)
+	s += fmt.Sprintf("  Removed: %s\n", nc.RemovedAddrs)
 	if nc.Error != nil {
 		s += fmt.Sprintf("  Error: %s", nc.Error)
 	}

@@ -1,18 +1,12 @@
 pkg rpc, const GlobMethod ideal-string
-pkg rpc, const NewAddrsSetting ideal-string
-pkg rpc, const NewAddrsSettingDesc ideal-string
 pkg rpc, const ReservedMethodSignature ideal-string
 pkg rpc, const ReservedSignature ideal-string
-pkg rpc, const RmAddrsSetting ideal-string
-pkg rpc, const RmAddrsSettingDesc ideal-string
 pkg rpc, const ServerActive ServerState
 pkg rpc, const ServerInit ServerState
 pkg rpc, const ServerStopped ServerState
 pkg rpc, const ServerStopping ServerState
 pkg rpc, func ChildrenGlobberInvoker(...string) Invoker
-pkg rpc, func NewAddAddrsSetting([]net.Addr) pubsub.Setting
 pkg rpc, func NewGlobState(interface{}) *GlobState
-pkg rpc, func NewRmAddrsSetting([]net.Addr) pubsub.Setting
 pkg rpc, func ReflectInvoker(interface{}) (Invoker, error)
 pkg rpc, func ReflectInvokerOrDie(interface{}) Invoker
 pkg rpc, func RegisterProtocol(string, DialerFunc, ListenerFunc, ...string) bool
@@ -85,8 +79,6 @@ pkg rpc, type ListenSpec struct
 pkg rpc, type ListenSpec struct, AddressChooser func(string, []net.Addr) ([]net.Addr, error)
 pkg rpc, type ListenSpec struct, Addrs ListenAddrs
 pkg rpc, type ListenSpec struct, Proxy string
-pkg rpc, type ListenSpec struct, StreamName string
-pkg rpc, type ListenSpec struct, StreamPublisher *pubsub.Publisher
 pkg rpc, type ListenerFunc func(protocol, address string) (net.Listener, error)
 pkg rpc, type MethodDesc struct
 pkg rpc, type MethodDesc struct, Doc string
@@ -106,9 +98,10 @@ pkg rpc, type MountStatus struct, Name string
 pkg rpc, type MountStatus struct, Server string
 pkg rpc, type MountStatus struct, TTL time.Duration
 pkg rpc, type NetworkChange struct
+pkg rpc, type NetworkChange struct, AddedAddrs []net.Addr
 pkg rpc, type NetworkChange struct, Changed []naming.Endpoint
 pkg rpc, type NetworkChange struct, Error error
-pkg rpc, type NetworkChange struct, Setting pubsub.Setting
+pkg rpc, type NetworkChange struct, RemovedAddrs []net.Addr
 pkg rpc, type NetworkChange struct, State ServerState
 pkg rpc, type NetworkChange struct, Time time.Time
 pkg rpc, type ProxyStatus struct
