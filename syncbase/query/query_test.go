@@ -7,6 +7,7 @@ package query_test
 import (
 	"errors"
 	"fmt"
+	"math/big"
 	"reflect"
 	"testing"
 	"v.io/syncbase/v23/syncbase/query"
@@ -27,10 +28,63 @@ func (db MockStore) CheckTable(table string) error {
 	return errors.New(fmt.Sprintf("No such table: %s", table))
 }
 
+func (db MockStore) GetKeys(prefix string) ([]string, error) {
+	var keys []string
+	keys = append(keys, prefix)
+	for i := 1; i < 10; i++ {
+		keys = append(keys, prefix+string(i))
+	}
+	return keys, nil
+}
+
+type Nest2 struct {
+	Foo string
+	Bar bool
+	Baz int64
+}
+
+type Nest1 struct {
+	FooBarBaz Nest2
+}
+
+type Customer struct {
+	Name              string
+	ID                int64
+	Active            bool
+	Rating            rune
+	Street            string
+	City              string
+	State             string
+	Zip               string
+	GratuituousBigInt *big.Int
+	GratuituousBigRat *big.Rat
+	GratuituousByte   byte
+	GratuituousUint16 uint16
+	GratuituousUint32 uint32
+	GratuituousUint64 uint64
+	GratuituousInt16  int16
+	GratuituousInt32  int32
+	Foo               Nest1
+}
+
+func (db MockStore) GetValue(k string) (interface{}, error) {
+	if k == "123456" {
+		return sampleRow, nil
+	} else if k == "123" {
+		return sampleRow123, nil
+	} else {
+		return nil, nil
+	}
+}
+
 var store MockStore
+var sampleRow Customer
+var sampleRow123 Customer
 
 func TestCreate(t *testing.T) {
 	store.tables = &[]string{"Customer", "Invoice"}
+	sampleRow = Customer{"John Smith", 123456, true, 'A', "1 Main St.", "Palo Alto", "CA", "94303", big.NewInt(1234567890), big.NewRat(123, 1), byte(12), uint16(1234), uint32(5678), uint64(999888777666), int16(9876), int32(876543), Nest1{Nest2{"foo", true, 42}}}
+	sampleRow123 = Customer{"John Smith", 123, true, 123, "1 Main St.", "Palo Alto", "CA", "94303", big.NewInt(123), big.NewRat(123, 1), byte(123), uint16(123), uint32(123), uint64(123), int16(123), int32(123), Nest1{Nest2{"foo", true, 123}}}
 }
 
 type keyPrefixesTest struct {
@@ -44,6 +98,13 @@ type evalWhereUsingOnlyKeyTest struct {
 	key    string
 	result bool
 	err    error
+}
+
+type evalTest struct {
+	query  string
+	k      string
+	v      interface{}
+	result bool
 }
 
 type execSelectTest struct {
@@ -300,6 +361,220 @@ func TestEvalWhereUsingOnlyKey(t *testing.T) {
 					}
 					if (err == nil && test.err != nil) || (err != nil && test.err == nil) {
 						t.Errorf("query: %s; got %v, want %v", test.query, err, test.err)
+					}
+				default:
+					t.Errorf("query: %s; got %v, want query_parser.SelectStatement", reflect.TypeOf(*s))
+				}
+			}
+		}
+	}
+}
+
+func TestEval(t *testing.T) {
+	basic := []evalTest{
+		{
+			"select k, v from Customer where type = \"v.io/syncbase/v23/syncbase/query_test.Customer\"",
+			"123456", sampleRow, true,
+		},
+		{
+			"select k, v from Customer where v.Name = \"John Smith\"",
+			"123456", sampleRow, true,
+		},
+		{
+			"select k, v from Customer where v.Name = v.Name",
+			"123456", sampleRow, true,
+		},
+		{
+			"select k, v from Customer where v = v",
+			"123456", sampleRow, true,
+		},
+		{
+			"select k, v from Customer where v > v",
+			"123456", sampleRow, false,
+		},
+		{
+			"select k, v from Customer where v < v",
+			"123456", sampleRow, false,
+		},
+		{
+			"select k, v from Customer where v >= v",
+			"123456", sampleRow, false,
+		},
+		{
+			"select k, v from Customer where v <= v",
+			"123456", sampleRow, false,
+		},
+		{
+			"select k, v from Customer where v.Rating = 'A'",
+			"123456", sampleRow, true,
+		},
+		{
+			"select k, v from Customer where v.Rating <> 'A'",
+			"123456", sampleRow, false,
+		},
+		{
+			"select k, v from Customer where v.Rating >= 'B'",
+			"123456", sampleRow, false,
+		},
+		{
+			"select k, v from Customer where v.Rating <= 'B'",
+			"123456", sampleRow, true,
+		},
+		{
+			"select k, v from Customer where v.Active = true",
+			"123456", sampleRow, true,
+		},
+		{
+			"select k, v from Customer where v.Active = false",
+			"123456", sampleRow, false,
+		},
+		{
+			"select k, v from Customer where v.GratuituousBigInt > 100",
+			"123456", sampleRow, true,
+		},
+		{
+			"select k, v from Customer where v.GratuituousBigInt = 1234567890",
+			"123456", sampleRow, true,
+		},
+		{
+			"select k, v from Customer where 9876543210 < v.GratuituousBigInt",
+			"123456", sampleRow, false,
+		},
+		{
+			"select k, v from Customer where 12 = v.GratuituousByte",
+			"123456", sampleRow, true,
+		},
+		{
+			"select k, v from Customer where 11 < v.GratuituousByte",
+			"123456", sampleRow, true,
+		},
+		{
+			"select k, v from Customer where v.GratuituousByte > 10",
+			"123456", sampleRow, true,
+		},
+		{
+			"select k, v from Customer where v.GratuituousByte >= 14",
+			"123456", sampleRow, false,
+		},
+		{
+			"select k, v from Customer where v.GratuituousByte >= 11.0",
+			"123456", sampleRow, true,
+		},
+		{
+			"select k, v from Customer where v.GratuituousUint64 = 999888777666",
+			"123456", sampleRow, true,
+		},
+		{
+			"select k, v from Customer where v.GratuituousUint64 < 999888777666",
+			"123456", sampleRow, false,
+		},
+		{
+			"select k, v from Customer where v.GratuituousByte < v.GratuituousUint64",
+			"123456", sampleRow, true,
+		},
+		{
+			"select k, v from Customer where v.GratuituousBigRat = 123",
+			"123456", sampleRow, true,
+		},
+		{
+			"select k, v from Customer where v.GratuituousUint16 = 1234",
+			"123456", sampleRow, true,
+		},
+		{
+			"select k, v from Customer where v.GratuituousUint32 = 5678",
+			"123456", sampleRow, true,
+		},
+		{
+			"select k, v from Customer where v.GratuituousInt16 = 9876",
+			"123456", sampleRow, true,
+		},
+		{
+			"select k, v from Customer where v.GratuituousInt32 = 876543",
+			"123456", sampleRow, true,
+		},
+		{
+			// Deeply nested string.
+			"select v from Customer where v.Foo.FooBarBaz.Foo = \"foo\"",
+			"123456", sampleRow, true,
+		},
+		{
+			// Deeply nested bool.
+			"select v from Customer where v.Foo.FooBarBaz.Bar = true",
+			"123456", sampleRow, true,
+		},
+		{
+			// Deeply nested int64.
+			"select v from Customer where v.Foo.FooBarBaz.Baz = 42",
+			"123456", sampleRow, true,
+		},
+		{
+			// Convert int64 to string
+			"select v from Customer where v.Foo.FooBarBaz.Baz = \"42\"",
+			"123456", sampleRow, true,
+		},
+		{
+			// Convert bool to string
+			"select v from Customer where v.Foo.FooBarBaz.Bar = \"true\"",
+			"123456", sampleRow, true,
+		},
+		{
+			// Bool can't convert to other types.
+			"select v from Customer where v.Foo.FooBarBaz.Bar = 1",
+			"123456", sampleRow, false,
+		},
+		{
+			// Test that all numeric types can compare to a big.Rat
+			"select v from Customer where v.GratuituousBigRat = v.Foo.FooBarBaz.Baz and v.GratuituousBigRat = v.ID and v.GratuituousBigRat = v.Rating and v.GratuituousBigRat = v.GratuituousBigInt and v.GratuituousBigRat = v.GratuituousByte and v.GratuituousBigRat = v.GratuituousUint16 and v.GratuituousBigRat = v.GratuituousUint32 and v.GratuituousBigRat = v.GratuituousUint64 and v.GratuituousBigRat = v.GratuituousInt16 and v.GratuituousBigRat = v.GratuituousInt32",
+			"123", sampleRow123, true,
+		},
+		{
+			// Test that all numeric types can compare to a big.Int
+			"select v from Customer where v.GratuituousBigInt = v.Foo.FooBarBaz.Baz and v.GratuituousBigInt = v.ID and v.GratuituousBigRat = v.Rating and v.GratuituousBigInt = v.GratuituousBigInt and v.GratuituousBigInt = v.GratuituousByte and v.GratuituousBigInt = v.GratuituousUint16 and v.GratuituousBigInt = v.GratuituousUint32 and v.GratuituousBigInt = v.GratuituousUint64 and v.GratuituousBigInt = v.GratuituousInt16 and v.GratuituousBigInt = v.GratuituousInt32",
+			"123", sampleRow123, true,
+		},
+		{
+			// Test that all numeric types can compare to an int32
+			"select v from Customer where v.GratuituousInt32 = v.Foo.FooBarBaz.Baz and v.GratuituousInt32 = v.ID and v.GratuituousBigRat = v.Rating and v.GratuituousInt32 = v.GratuituousInt32 and v.GratuituousInt32 = v.GratuituousByte and v.GratuituousInt32 = v.GratuituousUint16 and v.GratuituousInt32 = v.GratuituousUint32 and v.GratuituousInt32 = v.GratuituousUint64 and v.GratuituousInt32 = v.GratuituousInt16 and v.GratuituousInt32 = v.GratuituousBigInt",
+			"123", sampleRow123, true,
+		},
+		{
+			// Test that all numeric types can compare to an int16
+			"select v from Customer where v.GratuituousInt16 = v.Foo.FooBarBaz.Baz and v.GratuituousInt16 = v.ID and v.GratuituousBigRat = v.Rating and v.GratuituousInt16 = v.GratuituousInt16 and v.GratuituousInt16 = v.GratuituousByte and v.GratuituousInt16 = v.GratuituousUint16 and v.GratuituousInt16 = v.GratuituousUint32 and v.GratuituousInt16 = v.GratuituousUint64 and v.GratuituousInt16 = v.GratuituousInt32 and v.GratuituousInt16 = v.GratuituousBigInt",
+			"123", sampleRow123, true,
+		},
+		{
+			// Test that all numeric types can compare to an uint64
+			"select v from Customer where v.GratuituousUint64 = v.Foo.FooBarBaz.Baz and v.GratuituousUint64 = v.ID and v.GratuituousBigRat = v.Rating and v.GratuituousUint64 = v.GratuituousUint64 and v.GratuituousUint64 = v.GratuituousByte and v.GratuituousUint64 = v.GratuituousUint16 and v.GratuituousUint64 = v.GratuituousUint32 and v.GratuituousUint64 = v.GratuituousUint16 and v.GratuituousUint64 = v.GratuituousInt32 and v.GratuituousUint64 = v.GratuituousBigInt",
+			"123", sampleRow123, true,
+		},
+		{
+			// Test that all numeric types can compare to an uint32
+			"select v from Customer where v.GratuituousUint32 = v.Foo.FooBarBaz.Baz and v.GratuituousUint32 = v.ID and v.GratuituousBigRat = v.Rating and v.GratuituousUint32 = v.GratuituousUint32 and v.GratuituousUint32 = v.GratuituousByte and v.GratuituousUint32 = v.GratuituousUint16 and v.GratuituousUint32 = v.GratuituousUint64 and v.GratuituousUint32 = v.GratuituousUint16 and v.GratuituousUint32 = v.GratuituousInt32 and v.GratuituousUint32 = v.GratuituousBigInt",
+			"123", sampleRow123, true,
+		},
+		{
+			// Test that all numeric types can compare to an uint16
+			"select v from Customer where v.GratuituousUint16 = v.Foo.FooBarBaz.Baz and v.GratuituousUint16 = v.ID and v.GratuituousBigRat = v.Rating and v.GratuituousUint16 = v.GratuituousUint16 and v.GratuituousUint16 = v.GratuituousByte and v.GratuituousUint32 = v.GratuituousUint16 and v.GratuituousUint16 = v.GratuituousUint64 and v.GratuituousUint16 = v.GratuituousUint16 and v.GratuituousUint16 = v.GratuituousInt32 and v.GratuituousUint16 = v.GratuituousBigInt",
+			"123", sampleRow123, true,
+		},
+	}
+
+	for _, test := range basic {
+		s, synErr := query_parser.Parse(test.query)
+		if synErr != nil {
+			t.Errorf("query: %s; got %v, want nil", test.query, synErr)
+		}
+		if synErr == nil {
+			semErr := query_checker.Check(store, s)
+			if semErr != nil {
+				t.Errorf("query: %s; got %v, want nil", test.query, semErr)
+			}
+			if semErr == nil {
+				switch sel := (*s).(type) {
+				case query_parser.SelectStatement:
+					result := query.Eval(test.k, test.v, sel.Where.Expr)
+					if result != test.result {
+						t.Errorf("query: %s; got %v, want %v", test.query, result, test.result)
 					}
 				default:
 					t.Errorf("query: %s; got %v, want query_parser.SelectStatement", reflect.TypeOf(*s))

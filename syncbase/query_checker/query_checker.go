@@ -12,7 +12,6 @@
 // WhereClause (optional)
 // LimitClause (optional)
 // ResultsOffsetClause (optional)
-
 package query_checker
 
 import (
@@ -46,7 +45,7 @@ func Check(db Store, s *query_parser.Statement) *SemanticError {
 	case query_parser.SelectStatement:
 		return CheckSelectStatement(db, &sel)
 	default:
-		return Error((*s).Offset(), "Cannot semantically check statement, unkown type.")
+		return Error((*s).Offset(), "Cannot semantically check statement, unknown type.")
 	}
 }
 
@@ -69,7 +68,7 @@ func CheckSelectStatement(db Store, s *query_parser.SelectStatement) *SemanticEr
 	return nil
 }
 
-// Check select clause.  Fields can be 'k' and v[{.<ident>}...][.*]
+// Check select clause.  Fields can be 'k' and v[{.<ident>}...]
 func CheckSelectClause(s *query_parser.SelectClause) *SemanticError {
 	for _, c := range s.Columns {
 		switch c.Segments[0].Value {
@@ -78,15 +77,7 @@ func CheckSelectClause(s *query_parser.SelectClause) *SemanticError {
 				return Error(c.Segments[1].Off, "Dot notation may not be used on a key (string) field.")
 			}
 		case "v":
-			// "*" may only be ultimate segment.
-			foundAsterisk := false
-			for i := 1; i < len(c.Segments); i++ {
-				if c.Segments[i].Value == "*" {
-					foundAsterisk = true
-				} else if foundAsterisk {
-					return Error(c.Segments[i].Off, "'*' is only valid as the ultimate segment of a field.")
-				}
-			}
+			// Nothing to check.
 		default:
 			return Error(c.Segments[0].Off, "Select field must be 'k' or 'v[{.<ident>}...]'.")
 		}
@@ -98,7 +89,6 @@ func CheckSelectClause(s *query_parser.SelectClause) *SemanticError {
 func CheckFromClause(db Store, f *query_parser.FromClause) *SemanticError {
 	if err := db.CheckTable(f.Table.Name); err != nil {
 		return Error(f.Table.Off, err.Error())
-
 	}
 	return nil
 }
@@ -121,7 +111,7 @@ func CheckExpression(e *query_parser.Expression) *SemanticError {
 
 	// Like expressions require operand2 to be a string literal that must be validated.
 	if e.Operator.Type == query_parser.Like {
-		if e.Operand2.Type != query_parser.OpLiteral {
+		if e.Operand2.Type != query_parser.TypLiteral {
 			return Error(e.Off, "Like expressions require right operand of type <string-literal>.")
 		}
 		prefix, err := ComputePrefix(e.Operand2.Off, e.Operand2.Literal)
@@ -140,13 +130,18 @@ func CheckExpression(e *query_parser.Expression) *SemanticError {
 	}
 
 	// type as an operand must be the first operand, the operator must be = and the 2nd operand must be string literal.
-	if (e.Operand1.Type == query_parser.OpField && strings.ToLower(e.Operand1.Column.Segments[0].Value) == "type" && (e.Operator.Type != query_parser.Equal || e.Operand2.Type != query_parser.OpLiteral)) || (e.Operand2.Type == query_parser.OpField && strings.ToLower(e.Operand2.Column.Segments[0].Value) == "type") {
+	if (IsType(e.Operand1) && (e.Operator.Type != query_parser.Equal || e.Operand2.Type != query_parser.TypLiteral)) || IsType(e.Operand2) {
 		return Error(e.Off, "Type expressions must be 'type = <string-literal>'.")
 	}
 
 	// k as an operand must be the first operand, the operator must be like or = and the 2nd operand must be a string literal.
-	if (e.Operand1.Type == query_parser.OpField && strings.ToLower(e.Operand1.Column.Segments[0].Value) == "k" && ((e.Operator.Type != query_parser.Equal && e.Operator.Type != query_parser.Like) || e.Operand2.Type != query_parser.OpLiteral)) || (e.Operand2.Type == query_parser.OpField && strings.ToLower(e.Operand2.Column.Segments[0].Value) == "k") {
+	if (IsKey(e.Operand1) && ((e.Operator.Type != query_parser.Equal && e.Operator.Type != query_parser.Like) || e.Operand2.Type != query_parser.TypLiteral)) || IsKey(e.Operand2) {
 		return Error(e.Off, "Key (i.e., 'k') expressions must be of form 'k like|= <string-literal>'.")
+	}
+
+	// If either operand is a bool, only = and <> operators are allowed.
+	if (e.Operand1.Type == query_parser.TypBool || e.Operand2.Type == query_parser.TypBool) && e.Operator.Type != query_parser.Equal && e.Operator.Type != query_parser.NotEqual {
+		return Error(e.Operator.Off, "Boolean operands may only be used in equals and not equals expressions.")
 	}
 
 	return nil
@@ -154,9 +149,9 @@ func CheckExpression(e *query_parser.Expression) *SemanticError {
 
 func CheckOperand(o *query_parser.Operand) *SemanticError {
 	switch o.Type {
-	case query_parser.OpExpr:
+	case query_parser.TypExpr:
 		return CheckExpression(o.Expr)
-	case query_parser.OpField:
+	case query_parser.TypField:
 		switch o.Column.Segments[0].Value {
 		case "k":
 			if len(o.Column.Segments) > 1 {
@@ -210,13 +205,6 @@ func ComputePrefix(off int64, s string) (string, *SemanticError) {
 		return "", Error(off, "Expected '\\', '%' or '_' after '\\'")
 	}
 	return s2, nil
-	if idx := strings.Index(s, "%"); idx != -1 {
-		s = s[0:idx]
-	}
-	if idx := strings.Index(s, "_"); idx != -1 {
-		s = s[0:idx]
-	}
-	return s, nil
 }
 
 // Convert Like expression to a regex.  That is, convert:
@@ -286,12 +274,24 @@ func ComputeRegex(off int64, s string) (string, *regexp.Regexp, *SemanticError) 
 	return regex, compRegex, nil
 }
 
+func IsLogicalOperator(o *query_parser.BinaryOperator) bool {
+	return o.Type == query_parser.And || o.Type == query_parser.Or
+}
+
+func IsField(o *query_parser.Operand) bool {
+	return o.Type == query_parser.TypField
+}
+
 func IsKey(o *query_parser.Operand) bool {
-	return o.Type == query_parser.OpField && strings.ToLower(o.Column.Segments[0].Value) == "k"
+	return IsField(o) && strings.ToLower(o.Column.Segments[0].Value) == "k"
+}
+
+func IsType(o *query_parser.Operand) bool {
+	return IsField(o) && strings.ToLower(o.Column.Segments[0].Value) == "type"
 }
 
 func IsExpr(o *query_parser.Operand) bool {
-	return o.Type == query_parser.OpExpr
+	return o.Type == query_parser.TypExpr
 }
 
 // Compile a list of key prefixes to fetch with scan.  Prefixes are returned in sorted order

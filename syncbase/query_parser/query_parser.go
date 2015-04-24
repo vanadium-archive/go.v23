@@ -10,9 +10,7 @@
 // <query_specification> ::=
 //   SELECT <field_clause> <from_clause> [<where_clause>] [<limit_offset_clause>]
 //
-// <field_clause> ::= <column_field>[{<comma><column_field>}...]
-//
-// <column_field> ::= <field>[<period><asterisk>]
+// <field_clause> ::= <field>[{<comma><field>}...]
 //
 // <field> ::= <segment>[{<period><segment>}...]
 //
@@ -73,6 +71,7 @@ package query_parser
 
 import (
 	"fmt"
+	"math/big"
 	"regexp"
 	"strconv"
 	"strings"
@@ -83,8 +82,7 @@ import (
 type TokenType int
 
 const (
-	TokASTERISK TokenType = 1 + iota
-	TokCHAR
+	TokCHAR TokenType = 1 + iota
 	TokCOMMA
 	TokEOF
 	TokEQUAL
@@ -161,25 +159,33 @@ type BinaryOperator struct {
 type OperandType int
 
 const (
-	OpChar OperandType = 1 + iota
-	OpField
-	OpInt
-	OpFloat
-	OpLiteral
-	OpExpr
+	TypBigInt OperandType = 1 + iota // Only as a result of Resolve/Coerce Operand
+	TypBigRat                        // Only as a result of Resolve/Coerce Operand
+	TypBool
+	TypExpr
+	TypField
+	TypFloat
+	TypInt
+	TypLiteral
+	TypObject // Only as the result of a ResolveOperand.
+	TypUint   // Only as a result of a ResolveOperand
 )
 
 type Operand struct {
 	Type      OperandType
-	Char      rune
+	BigInt    *big.Int
+	BigRat    *big.Rat
+	Bool      bool
 	Column    *Field
-	Int       int64
 	Float     float64
+	Int       int64
 	Literal   string
 	Prefix    string // Computed by checker for Like expressions
 	Regex     string // Computed by checker for Like expressions
+	Uint      uint64
 	CompRegex *regexp.Regexp
 	Expr      *Expression
+	Object    interface{}
 	Node
 }
 
@@ -248,8 +254,6 @@ func ScanToken(s *scanner.Scanner) *Token {
 		token.Tok = TokCOMMA
 	case '-':
 		token.Tok = TokMINUS
-	case '*':
-		token.Tok = TokASTERISK
 	case '(':
 		token.Tok = TokLEFTPAREN
 	case ')':
@@ -367,8 +371,8 @@ func ParseSelectClause(s *scanner.Scanner, token *Token) (*SelectClause, *Token,
 
 // Parse a column (field). Return SelectClause and next token (or SyntaxError).
 func ParseColumn(s *scanner.Scanner, selectClause *SelectClause, token *Token) (*Token, *SyntaxError) {
-	if token.Tok != TokIDENT && token.Tok != TokASTERISK {
-		return nil, Error(token.Off, fmt.Sprintf("Expected identifier or '*', found '%s'", token.Value))
+	if token.Tok != TokIDENT {
+		return nil, Error(token.Off, fmt.Sprintf("Expected identifier, found '%s'", token.Value))
 	}
 	var col Field
 	col.Off = token.Off
@@ -380,8 +384,8 @@ func ParseColumn(s *scanner.Scanner, selectClause *SelectClause, token *Token) (
 
 	for token.Tok != TokEOF && token.Tok == TokPERIOD {
 		token = ScanToken(s)
-		if token.Tok != TokIDENT && token.Tok != TokASTERISK {
-			return nil, Error(token.Off, fmt.Sprintf("Expected identifier or '*', found '%s'", token.Value))
+		if token.Tok != TokIDENT {
+			return nil, Error(token.Off, fmt.Sprintf("Expected identifier, found '%s'", token.Value))
 		}
 		var segment Segment
 		segment.Value = token.Value
@@ -484,7 +488,7 @@ func ParseExpression(s *scanner.Scanner, token *Token) (*Expression, *Token, *Sy
 		}
 		var newExpression Expression
 		var operand1 Operand
-		operand1.Type = OpExpr
+		operand1.Type = TypExpr
 		operand1.Expr = expr
 		operand1.Off = operand1.Expr.Off
 		newExpression.Operand1 = &operand1
@@ -500,10 +504,10 @@ func ParseExpression(s *scanner.Scanner, token *Token) (*Expression, *Token, *Sy
 		var operand2 Operand
 		expr.Operand2 = &operand2
 		if token.Tok == TokLEFTPAREN {
-			expr.Operand2.Type = OpExpr
+			expr.Operand2.Type = TypExpr
 			expr.Operand2.Expr, token, err = ParseParenthesizedExpression(s, token)
 		} else {
-			expr.Operand2.Type = OpExpr
+			expr.Operand2.Type = TypExpr
 			expr.Operand2.Expr, token, err = ParseLikeEqualExpression(s, token)
 		}
 		if err != nil {
@@ -561,30 +565,37 @@ func ParseOperand(s *scanner.Scanner, token *Token) (*Operand, *Token, *SyntaxEr
 	operand.Off = token.Off
 	switch token.Tok {
 	case TokIDENT:
-		operand.Type = OpField
+		operand.Type = TypField
 		var field Field
 		field.Off = token.Off
 		var segment Segment
 		segment.Off = token.Off
 		segment.Value = token.Value
 		field.Segments = append(field.Segments, segment)
-
-		// Get the next token.  See if it is a '.'.
 		token = ScanToken(s)
-		for token.Tok != TokEOF && token.Tok == TokPERIOD {
-			token = ScanToken(s)
-			if token.Tok != TokIDENT {
-				return nil, nil, Error(token.Off, fmt.Sprintf("Expected identifier, found '%s'", token.Value))
+
+		// Check for true/false.  If so, change this operand to a bool.
+		// If the next token is not a period, check for true and false operands.
+		if token.Tok != TokPERIOD && strings.ToLower(segment.Value) == "true" || strings.ToLower(segment.Value) == "false" {
+			operand.Type = TypBool
+			operand.Bool = strings.ToLower(segment.Value) == "true"
+		} else { // This is a field (column) operand.
+			// If the next token is a period, collect the rest of the segments in the column.
+			for token.Tok != TokEOF && token.Tok == TokPERIOD {
+				token = ScanToken(s)
+				if token.Tok != TokIDENT {
+					return nil, nil, Error(token.Off, fmt.Sprintf("Expected identifier, found '%s'", token.Value))
+				}
+				var segment Segment
+				segment.Off = token.Off
+				segment.Value = token.Value
+				field.Segments = append(field.Segments, segment)
+				token = ScanToken(s)
 			}
-			var segment Segment
-			segment.Off = token.Off
-			segment.Value = token.Value
-			field.Segments = append(field.Segments, segment)
-			token = ScanToken(s)
+			operand.Column = &field
 		}
-		operand.Column = &field
 	case TokINT:
-		operand.Type = OpInt
+		operand.Type = TypInt
 		i, err := strconv.ParseInt(token.Value, 0, 64)
 		if err != nil {
 			return nil, nil, Error(token.Off, fmt.Sprintf("Could not convert %s to int64.", token.Value))
@@ -592,7 +603,7 @@ func ParseOperand(s *scanner.Scanner, token *Token) (*Operand, *Token, *SyntaxEr
 		operand.Int = i
 		token = ScanToken(s)
 	case TokFLOAT:
-		operand.Type = OpFloat
+		operand.Type = TypFloat
 		f, err := strconv.ParseFloat(token.Value, 64)
 		if err != nil {
 			return nil, nil, Error(token.Off, fmt.Sprintf("Could not convert %s to float64.", token.Value))
@@ -600,11 +611,12 @@ func ParseOperand(s *scanner.Scanner, token *Token) (*Operand, *Token, *SyntaxEr
 		operand.Float = f
 		token = ScanToken(s)
 	case TokCHAR:
-		operand.Type = OpChar
-		operand.Char, _ = utf8.DecodeRuneInString(token.Value)
+		operand.Type = TypInt
+		ch, _ := utf8.DecodeRuneInString(token.Value)
+		operand.Int = int64(ch)
 		token = ScanToken(s)
 	case TokSTRING:
-		operand.Type = OpLiteral
+		operand.Type = TypLiteral
 		operand.Literal = token.Value
 		token = ScanToken(s)
 	case TokMINUS:
@@ -613,14 +625,14 @@ func ParseOperand(s *scanner.Scanner, token *Token) (*Operand, *Token, *SyntaxEr
 		token = ScanToken(s)
 		switch token.Tok {
 		case TokINT:
-			operand.Type = OpInt
+			operand.Type = TypInt
 			i, err := strconv.ParseInt("-"+token.Value, 0, 64)
 			if err != nil {
 				return nil, nil, Error(off, fmt.Sprintf("Could not convert %s to int64.", "-"+token.Value))
 			}
 			operand.Int = i
 		case TokFLOAT:
-			operand.Type = OpFloat
+			operand.Type = TypFloat
 			f, err := strconv.ParseFloat("-"+token.Value, 64)
 			if err != nil {
 				return nil, nil, Error(off, fmt.Sprintf("Could not convert %s to float64.", "-"+token.Value))
@@ -747,7 +759,7 @@ func ParseLimitClause(s *scanner.Scanner, token *Token) (*LimitClause, *Token, *
 	lc.Off = token.Off
 	token = ScanToken(s)
 	var err *SyntaxError
-	lc.Limit, token, err = ParseInt64(s, token)
+	lc.Limit, token, err = ParseNonNegInt64(s, token)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -760,7 +772,7 @@ func ParseResultsOffsetClause(s *scanner.Scanner, token *Token) (*ResultsOffsetC
 	oc.Off = token.Off
 	token = ScanToken(s)
 	var err *SyntaxError
-	oc.ResultsOffset, token, err = ParseInt64(s, token)
+	oc.ResultsOffset, token, err = ParseNonNegInt64(s, token)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -768,9 +780,11 @@ func ParseResultsOffsetClause(s *scanner.Scanner, token *Token) (*ResultsOffsetC
 }
 
 // Parse and return an Int64Value and next token (or SyntaxError).
-func ParseInt64(s *scanner.Scanner, token *Token) (*Int64Value, *Token, *SyntaxError) {
+// This function is called by ParseLimitClause and ParseResultsOffsetClause.  The integer
+// values for both of these clauses cannot be negative.
+func ParseNonNegInt64(s *scanner.Scanner, token *Token) (*Int64Value, *Token, *SyntaxError) {
 	// We expect an integer literal
-	// Negative integers are not allowed here, so don't bother looking for TokMINUS.
+	// Since we're looking for integers >= 0, don't allow TokMINUS.
 	if token.Tok == TokEOF {
 		return nil, nil, Error(token.Off, "Unexpected end of statement, expected integer literal.")
 	}
@@ -863,22 +877,33 @@ func (l ResultsOffsetClause) String() string {
 func (o Operand) String() string {
 	val := fmt.Sprintf("Off(%d):", o.Off)
 	switch o.Type {
-	case OpField:
+	case TypBigInt:
+		val += "(BigInt)"
+		val += o.BigInt.String()
+	case TypBigRat:
+		val += "(BigRat)"
+		val += o.BigRat.String()
+	case TypField:
+		val += "(field)"
 		val += o.Column.String()
-	case OpChar:
-		val += "(char)"
-		val += strconv.QuoteRune(o.Char)
-	case OpInt:
+	case TypBool:
+		val += "(bool)"
+		val += strconv.FormatBool(o.Bool)
+	case TypInt:
 		val += "(int)"
 		val += strconv.FormatInt(o.Int, 10)
-	case OpFloat:
+	case TypFloat:
 		val += "(float)"
 		val += strconv.FormatFloat(o.Float, 'f', -1, 64)
-	case OpLiteral:
+	case TypLiteral:
 		val += "(literal)"
 		val += o.Literal
-	case OpExpr:
+	case TypExpr:
+		val += "(expr)"
 		val += o.Expr.String()
+	case TypObject:
+		val += "(object)"
+		val += fmt.Sprintf("%v", o.Object)
 	default:
 		val += "<operand-type-undefined>"
 

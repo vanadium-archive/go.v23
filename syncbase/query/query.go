@@ -13,7 +13,6 @@ import (
 	"errors"
 	"fmt"
 	"reflect"
-	"strings"
 	"v.io/syncbase/v23/syncbase/query_checker"
 	"v.io/syncbase/v23/syncbase/query_parser"
 )
@@ -21,6 +20,9 @@ import (
 // TODO(jkline): Flesh out this interface.
 type Store interface {
 	CheckTable(table string) error
+	// TODO(jkline): GetKeys will need to be streaming in real life.
+	GetKeys(prefix string) ([]string, error)
+	GetValue(k string) (interface{}, error)
 }
 
 // TODO(jkline): Flesh out this interface.
@@ -130,7 +132,7 @@ func AllKeysMustBeFetched(e *query_parser.Expression) bool {
 	case query_parser.Or:
 		return AllKeysMustBeFetched(e.Operand1.Expr) || AllKeysMustBeFetched(e.Operand2.Expr)
 	default: // =, > >=, <, <=, Like, <>, NotLike
-		if e.Operand1.Type == query_parser.OpField && strings.ToLower(e.Operand1.Column.Segments[0].Value) == "k" {
+		if query_checker.IsKey(e.Operand1) {
 			return false
 		} else {
 			return true
@@ -187,19 +189,11 @@ func EvalExprUsingOnlyKey(e *query_parser.Expression, k string) (bool, error) {
 			}
 		}
 	default: // =, > >=, <, <=, Like, <>, NotLike
-		if e.Operand1.Type != query_parser.OpField || strings.ToLower(e.Operand1.Column.Segments[0].Value) != "k" {
+		if !query_checker.IsKey(e.Operand1) {
 			// Non-key expressions are evaluated as false.
 			return false, errors.New("Value required for answer.") // err text not used
 		} else {
-			// Need to evaluate the key expression.
-			// Currently, only = and like are allowed.
-			// Operand2 must be a string literal.
-			switch e.Operator.Type {
-			case query_parser.Equal:
-				return k == e.Operand2.Literal, nil
-			default: // query_parse.Like
-				return e.Operand2.CompRegex.MatchString(k), nil
-			}
+			return EvalKeyExpression(e, k), nil
 		}
 	}
 }

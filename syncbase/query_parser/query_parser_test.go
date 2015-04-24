@@ -24,14 +24,14 @@ type parseSelectErrorTest struct {
 func TestQueryParser(t *testing.T) {
 	basic := []parseSelectTest{
 		{
-			"select * from Customer",
+			"select v from Customer",
 			query_parser.SelectStatement{
 				Select: &query_parser.SelectClause{
 					Columns: []query_parser.Field{
 						query_parser.Field{
 							Segments: []query_parser.Segment{
 								query_parser.Segment{
-									Value: "*",
+									Value: "v",
 									Node:  query_parser.Node{Off: 7},
 								},
 							},
@@ -52,14 +52,14 @@ func TestQueryParser(t *testing.T) {
 			nil,
 		},
 		{
-			"   select * from Customer",
+			"   select v from Customer",
 			query_parser.SelectStatement{
 				Select: &query_parser.SelectClause{
 					Columns: []query_parser.Field{
 						query_parser.Field{
 							Segments: []query_parser.Segment{
 								query_parser.Segment{
-									Value: "*",
+									Value: "v",
 									Node:  query_parser.Node{Off: 10},
 								},
 							},
@@ -80,14 +80,14 @@ func TestQueryParser(t *testing.T) {
 			nil,
 		},
 		{
-			"select * from Customer limit 100 offset 200",
+			"select v from Customer limit 100 offset 200",
 			query_parser.SelectStatement{
 				Select: &query_parser.SelectClause{
 					Columns: []query_parser.Field{
 						query_parser.Field{
 							Segments: []query_parser.Segment{
 								query_parser.Segment{
-									Value: "*",
+									Value: "v",
 									Node:  query_parser.Node{Off: 7},
 								},
 							},
@@ -122,14 +122,14 @@ func TestQueryParser(t *testing.T) {
 			nil,
 		},
 		{
-			"select * from Customer offset 400 limit 10",
+			"select v from Customer offset 400 limit 10",
 			query_parser.SelectStatement{
 				Select: &query_parser.SelectClause{
 					Columns: []query_parser.Field{
 						query_parser.Field{
 							Segments: []query_parser.Segment{
 								query_parser.Segment{
-									Value: "*",
+									Value: "v",
 									Node:  query_parser.Node{Off: 7},
 								},
 							},
@@ -164,14 +164,14 @@ func TestQueryParser(t *testing.T) {
 			nil,
 		},
 		{
-			"select * from Customer limit 100 offset 200 limit 1 offset 2",
+			"select v from Customer limit 100 offset 200 limit 1 offset 2",
 			query_parser.SelectStatement{
 				Select: &query_parser.SelectClause{
 					Columns: []query_parser.Field{
 						query_parser.Field{
 							Segments: []query_parser.Segment{
 								query_parser.Segment{
-									Value: "*",
+									Value: "v",
 									Node:  query_parser.Node{Off: 7},
 								},
 							},
@@ -206,7 +206,7 @@ func TestQueryParser(t *testing.T) {
 			nil,
 		},
 		{
-			"select foo.*, bar.* from Customer",
+			"select foo.x, bar.y from Customer",
 			query_parser.SelectStatement{
 				Select: &query_parser.SelectClause{
 					Columns: []query_parser.Field{
@@ -217,7 +217,7 @@ func TestQueryParser(t *testing.T) {
 									Node:  query_parser.Node{Off: 7},
 								},
 								query_parser.Segment{
-									Value: "*",
+									Value: "x",
 									Node:  query_parser.Node{Off: 11},
 								},
 							},
@@ -230,7 +230,7 @@ func TestQueryParser(t *testing.T) {
 									Node:  query_parser.Node{Off: 14},
 								},
 								query_parser.Segment{
-									Value: "*",
+									Value: "y",
 									Node:  query_parser.Node{Off: 18},
 								},
 							},
@@ -277,7 +277,7 @@ func TestQueryParser(t *testing.T) {
 				Where: &query_parser.WhereClause{
 					Expr: &query_parser.Expression{
 						Operand1: &query_parser.Operand{
-							Type: query_parser.OpField,
+							Type: query_parser.TypField,
 							Column: &query_parser.Field{
 								Segments: []query_parser.Segment{
 									query_parser.Segment{
@@ -294,13 +294,133 @@ func TestQueryParser(t *testing.T) {
 							Node: query_parser.Node{Off: 36},
 						},
 						Operand2: &query_parser.Operand{
-							Type: query_parser.OpInt,
+							Type: query_parser.TypInt,
 							Int:  42,
 							Node: query_parser.Node{Off: 42},
 						},
 						Node: query_parser.Node{Off: 30},
 					},
 					Node: query_parser.Node{Off: 24},
+				},
+				Node: query_parser.Node{Off: 0},
+			},
+			nil,
+		},
+		{
+			"select v from Customer where v.Value equal true",
+			query_parser.SelectStatement{
+				Select: &query_parser.SelectClause{
+					Columns: []query_parser.Field{
+						query_parser.Field{
+							Segments: []query_parser.Segment{
+								query_parser.Segment{
+									Value: "v",
+									Node:  query_parser.Node{Off: 7},
+								},
+							},
+							Node: query_parser.Node{Off: 7},
+						},
+					},
+					Node: query_parser.Node{Off: 0},
+				},
+				From: &query_parser.FromClause{
+					Table: query_parser.TableEntry{
+						Name: "Customer",
+						Node: query_parser.Node{Off: 14},
+					},
+					Node: query_parser.Node{Off: 9},
+				},
+				Where: &query_parser.WhereClause{
+					Expr: &query_parser.Expression{
+						Operand1: &query_parser.Operand{
+							Type: query_parser.TypField,
+							Column: &query_parser.Field{
+								Segments: []query_parser.Segment{
+									query_parser.Segment{
+										Value: "v",
+										Node:  query_parser.Node{Off: 29},
+									},
+									query_parser.Segment{
+										Value: "Value",
+										Node:  query_parser.Node{Off: 31},
+									},
+								},
+								Node: query_parser.Node{Off: 29},
+							},
+							Node: query_parser.Node{Off: 29},
+						},
+						Operator: &query_parser.BinaryOperator{
+							Type: query_parser.Equal,
+							Node: query_parser.Node{Off: 37},
+						},
+						Operand2: &query_parser.Operand{
+							Type: query_parser.TypBool,
+							Bool: true,
+							Node: query_parser.Node{Off: 43},
+						},
+						Node: query_parser.Node{Off: 29},
+					},
+					Node: query_parser.Node{Off: 23},
+				},
+				Node: query_parser.Node{Off: 0},
+			},
+			nil,
+		},
+		{
+			"select v from Customer where v.Value = false",
+			query_parser.SelectStatement{
+				Select: &query_parser.SelectClause{
+					Columns: []query_parser.Field{
+						query_parser.Field{
+							Segments: []query_parser.Segment{
+								query_parser.Segment{
+									Value: "v",
+									Node:  query_parser.Node{Off: 7},
+								},
+							},
+							Node: query_parser.Node{Off: 7},
+						},
+					},
+					Node: query_parser.Node{Off: 0},
+				},
+				From: &query_parser.FromClause{
+					Table: query_parser.TableEntry{
+						Name: "Customer",
+						Node: query_parser.Node{Off: 14},
+					},
+					Node: query_parser.Node{Off: 9},
+				},
+				Where: &query_parser.WhereClause{
+					Expr: &query_parser.Expression{
+						Operand1: &query_parser.Operand{
+							Type: query_parser.TypField,
+							Column: &query_parser.Field{
+								Segments: []query_parser.Segment{
+									query_parser.Segment{
+										Value: "v",
+										Node:  query_parser.Node{Off: 29},
+									},
+									query_parser.Segment{
+										Value: "Value",
+										Node:  query_parser.Node{Off: 31},
+									},
+								},
+								Node: query_parser.Node{Off: 29},
+							},
+							Node: query_parser.Node{Off: 29},
+						},
+						Operator: &query_parser.BinaryOperator{
+							Type: query_parser.Equal,
+							Node: query_parser.Node{Off: 37},
+						},
+						Operand2: &query_parser.Operand{
+							Type: query_parser.TypBool,
+							Bool: false,
+							Node: query_parser.Node{Off: 39},
+						},
+						Node: query_parser.Node{Off: 29},
+					},
+					Node: query_parser.Node{Off: 23},
 				},
 				Node: query_parser.Node{Off: 0},
 			},
@@ -333,7 +453,7 @@ func TestQueryParser(t *testing.T) {
 				Where: &query_parser.WhereClause{
 					Expr: &query_parser.Expression{
 						Operand1: &query_parser.Operand{
-							Type: query_parser.OpField,
+							Type: query_parser.TypField,
 							Column: &query_parser.Field{
 								Segments: []query_parser.Segment{
 									query_parser.Segment{
@@ -354,7 +474,7 @@ func TestQueryParser(t *testing.T) {
 							Node: query_parser.Node{Off: 37},
 						},
 						Operand2: &query_parser.Operand{
-							Type: query_parser.OpInt,
+							Type: query_parser.TypInt,
 							Int:  -42,
 							Node: query_parser.Node{Off: 43},
 						},
@@ -393,7 +513,7 @@ func TestQueryParser(t *testing.T) {
 				Where: &query_parser.WhereClause{
 					Expr: &query_parser.Expression{
 						Operand1: &query_parser.Operand{
-							Type: query_parser.OpField,
+							Type: query_parser.TypField,
 							Column: &query_parser.Field{
 								Segments: []query_parser.Segment{
 									query_parser.Segment{
@@ -414,7 +534,7 @@ func TestQueryParser(t *testing.T) {
 							Node: query_parser.Node{Off: 37},
 						},
 						Operand2: &query_parser.Operand{
-							Type:  query_parser.OpFloat,
+							Type:  query_parser.TypFloat,
 							Float: -18.888,
 							Node:  query_parser.Node{Off: 43},
 						},
@@ -453,7 +573,7 @@ func TestQueryParser(t *testing.T) {
 				Where: &query_parser.WhereClause{
 					Expr: &query_parser.Expression{
 						Operand1: &query_parser.Operand{
-							Type: query_parser.OpField,
+							Type: query_parser.TypField,
 							Column: &query_parser.Field{
 								Segments: []query_parser.Segment{
 									query_parser.Segment{
@@ -470,8 +590,8 @@ func TestQueryParser(t *testing.T) {
 							Node: query_parser.Node{Off: 24},
 						},
 						Operand2: &query_parser.Operand{
-							Type: query_parser.OpChar,
-							Char: 'c',
+							Type: query_parser.TypInt,
+							Int:  'c',
 							Node: query_parser.Node{Off: 26},
 						},
 						Node: query_parser.Node{Off: 22},
@@ -509,7 +629,7 @@ func TestQueryParser(t *testing.T) {
 				Where: &query_parser.WhereClause{
 					Expr: &query_parser.Expression{
 						Operand1: &query_parser.Operand{
-							Type: query_parser.OpField,
+							Type: query_parser.TypField,
 							Column: &query_parser.Field{
 								Segments: []query_parser.Segment{
 									query_parser.Segment{
@@ -526,8 +646,8 @@ func TestQueryParser(t *testing.T) {
 							Node: query_parser.Node{Off: 24},
 						},
 						Operand2: &query_parser.Operand{
-							Type: query_parser.OpChar,
-							Char: 'c',
+							Type: query_parser.TypInt,
+							Int:  'c',
 							Node: query_parser.Node{Off: 26},
 						},
 						Node: query_parser.Node{Off: 22},
@@ -579,7 +699,7 @@ func TestQueryParser(t *testing.T) {
 				Where: &query_parser.WhereClause{
 					Expr: &query_parser.Expression{
 						Operand1: &query_parser.Operand{
-							Type: query_parser.OpField,
+							Type: query_parser.TypField,
 							Column: &query_parser.Field{
 								Segments: []query_parser.Segment{
 									query_parser.Segment{
@@ -596,8 +716,8 @@ func TestQueryParser(t *testing.T) {
 							Node: query_parser.Node{Off: 24},
 						},
 						Operand2: &query_parser.Operand{
-							Type: query_parser.OpChar,
-							Char: 'c',
+							Type: query_parser.TypInt,
+							Int:  'c',
 							Node: query_parser.Node{Off: 26},
 						},
 						Node: query_parser.Node{Off: 22},
@@ -642,7 +762,7 @@ func TestQueryParser(t *testing.T) {
 				Where: &query_parser.WhereClause{
 					Expr: &query_parser.Expression{
 						Operand1: &query_parser.Operand{
-							Type: query_parser.OpField,
+							Type: query_parser.TypField,
 							Column: &query_parser.Field{
 								Segments: []query_parser.Segment{
 									query_parser.Segment{
@@ -659,8 +779,8 @@ func TestQueryParser(t *testing.T) {
 							Node: query_parser.Node{Off: 24},
 						},
 						Operand2: &query_parser.Operand{
-							Type: query_parser.OpChar,
-							Char: 'c',
+							Type: query_parser.TypInt,
+							Int:  'c',
 							Node: query_parser.Node{Off: 26},
 						},
 						Node: query_parser.Node{Off: 22},
@@ -726,10 +846,10 @@ func TestQueryParser(t *testing.T) {
 				Where: &query_parser.WhereClause{
 					Expr: &query_parser.Expression{
 						Operand1: &query_parser.Operand{
-							Type: query_parser.OpExpr,
+							Type: query_parser.TypExpr,
 							Expr: &query_parser.Expression{
 								Operand1: &query_parser.Operand{
-									Type: query_parser.OpField,
+									Type: query_parser.TypField,
 									Column: &query_parser.Field{
 										Segments: []query_parser.Segment{
 											query_parser.Segment{
@@ -754,7 +874,7 @@ func TestQueryParser(t *testing.T) {
 									Node: query_parser.Node{Off: 57},
 								},
 								Operand2: &query_parser.Operand{
-									Type:    query_parser.OpLiteral,
+									Type:    query_parser.TypLiteral,
 									Literal: "baz",
 									Node:    query_parser.Node{Off: 59},
 								},
@@ -767,10 +887,10 @@ func TestQueryParser(t *testing.T) {
 							Node: query_parser.Node{Off: 65},
 						},
 						Operand2: &query_parser.Operand{
-							Type: query_parser.OpExpr,
+							Type: query_parser.TypExpr,
 							Expr: &query_parser.Expression{
 								Operand1: &query_parser.Operand{
-									Type: query_parser.OpField,
+									Type: query_parser.TypField,
 									Column: &query_parser.Field{
 										Segments: []query_parser.Segment{
 											query_parser.Segment{
@@ -795,7 +915,7 @@ func TestQueryParser(t *testing.T) {
 									Node: query_parser.Node{Off: 75},
 								},
 								Operand2: &query_parser.Operand{
-									Type:    query_parser.OpLiteral,
+									Type:    query_parser.TypLiteral,
 									Literal: "%foobarbaz",
 									Node:    query_parser.Node{Off: 80},
 								},
@@ -847,10 +967,10 @@ func TestQueryParser(t *testing.T) {
 				Where: &query_parser.WhereClause{
 					Expr: &query_parser.Expression{
 						Operand1: &query_parser.Operand{
-							Type: query_parser.OpExpr,
+							Type: query_parser.TypExpr,
 							Expr: &query_parser.Expression{
 								Operand1: &query_parser.Operand{
-									Type: query_parser.OpField,
+									Type: query_parser.TypField,
 									Column: &query_parser.Field{
 										Segments: []query_parser.Segment{
 											query_parser.Segment{
@@ -871,7 +991,7 @@ func TestQueryParser(t *testing.T) {
 									Node: query_parser.Node{Off: 53},
 								},
 								Operand2: &query_parser.Operand{
-									Type: query_parser.OpInt,
+									Type: query_parser.TypInt,
 									Int:  123,
 									Node: query_parser.Node{Off: 54},
 								},
@@ -884,10 +1004,10 @@ func TestQueryParser(t *testing.T) {
 							Node: query_parser.Node{Off: 58},
 						},
 						Operand2: &query_parser.Operand{
-							Type: query_parser.OpExpr,
+							Type: query_parser.TypExpr,
 							Expr: &query_parser.Expression{
 								Operand1: &query_parser.Operand{
-									Type: query_parser.OpField,
+									Type: query_parser.TypField,
 									Column: &query_parser.Field{
 										Segments: []query_parser.Segment{
 											query_parser.Segment{
@@ -908,7 +1028,7 @@ func TestQueryParser(t *testing.T) {
 									Node: query_parser.Node{Off: 77},
 								},
 								Operand2: &query_parser.Operand{
-									Type:    query_parser.OpLiteral,
+									Type:    query_parser.TypLiteral,
 									Literal: "f%",
 									Node:    query_parser.Node{Off: 82},
 								},
@@ -951,13 +1071,13 @@ func TestQueryParser(t *testing.T) {
 				Where: &query_parser.WhereClause{
 					Expr: &query_parser.Expression{
 						Operand1: &query_parser.Operand{
-							Type: query_parser.OpExpr,
+							Type: query_parser.TypExpr,
 							Expr: &query_parser.Expression{
 								Operand1: &query_parser.Operand{
-									Type: query_parser.OpExpr,
+									Type: query_parser.TypExpr,
 									Expr: &query_parser.Expression{
 										Operand1: &query_parser.Operand{
-											Type: query_parser.OpField,
+											Type: query_parser.TypField,
 											Column: &query_parser.Field{
 												Segments: []query_parser.Segment{
 													query_parser.Segment{
@@ -974,7 +1094,7 @@ func TestQueryParser(t *testing.T) {
 											Node: query_parser.Node{Off: 32},
 										},
 										Operand2: &query_parser.Operand{
-											Type: query_parser.OpInt,
+											Type: query_parser.TypInt,
 											Int:  123,
 											Node: query_parser.Node{Off: 33},
 										},
@@ -987,10 +1107,10 @@ func TestQueryParser(t *testing.T) {
 									Node: query_parser.Node{Off: 37},
 								},
 								Operand2: &query_parser.Operand{
-									Type: query_parser.OpExpr,
+									Type: query_parser.TypExpr,
 									Expr: &query_parser.Expression{
 										Operand1: &query_parser.Operand{
-											Type: query_parser.OpField,
+											Type: query_parser.TypField,
 											Column: &query_parser.Field{
 												Segments: []query_parser.Segment{
 													query_parser.Segment{
@@ -1007,7 +1127,7 @@ func TestQueryParser(t *testing.T) {
 											Node: query_parser.Node{Off: 41},
 										},
 										Operand2: &query_parser.Operand{
-											Type: query_parser.OpInt,
+											Type: query_parser.TypInt,
 											Int:  456,
 											Node: query_parser.Node{Off: 42},
 										},
@@ -1024,10 +1144,10 @@ func TestQueryParser(t *testing.T) {
 							Node: query_parser.Node{Off: 46},
 						},
 						Operand2: &query_parser.Operand{
-							Type: query_parser.OpExpr,
+							Type: query_parser.TypExpr,
 							Expr: &query_parser.Expression{
 								Operand1: &query_parser.Operand{
-									Type: query_parser.OpField,
+									Type: query_parser.TypField,
 									Column: &query_parser.Field{
 										Segments: []query_parser.Segment{
 											query_parser.Segment{
@@ -1044,7 +1164,7 @@ func TestQueryParser(t *testing.T) {
 									Node: query_parser.Node{Off: 51},
 								},
 								Operand2: &query_parser.Operand{
-									Type: query_parser.OpInt,
+									Type: query_parser.TypInt,
 									Int:  789,
 									Node: query_parser.Node{Off: 52},
 								},
@@ -1087,13 +1207,13 @@ func TestQueryParser(t *testing.T) {
 				Where: &query_parser.WhereClause{
 					Expr: &query_parser.Expression{
 						Operand1: &query_parser.Operand{
-							Type: query_parser.OpExpr,
+							Type: query_parser.TypExpr,
 							Expr: &query_parser.Expression{
 								Operand1: &query_parser.Operand{
-									Type: query_parser.OpExpr,
+									Type: query_parser.TypExpr,
 									Expr: &query_parser.Expression{
 										Operand1: &query_parser.Operand{
-											Type: query_parser.OpField,
+											Type: query_parser.TypField,
 											Column: &query_parser.Field{
 												Segments: []query_parser.Segment{
 													query_parser.Segment{
@@ -1110,7 +1230,7 @@ func TestQueryParser(t *testing.T) {
 											Node: query_parser.Node{Off: 33},
 										},
 										Operand2: &query_parser.Operand{
-											Type: query_parser.OpInt,
+											Type: query_parser.TypInt,
 											Int:  123,
 											Node: query_parser.Node{Off: 34},
 										},
@@ -1123,10 +1243,10 @@ func TestQueryParser(t *testing.T) {
 									Node: query_parser.Node{Off: 38},
 								},
 								Operand2: &query_parser.Operand{
-									Type: query_parser.OpExpr,
+									Type: query_parser.TypExpr,
 									Expr: &query_parser.Expression{
 										Operand1: &query_parser.Operand{
-											Type: query_parser.OpField,
+											Type: query_parser.TypField,
 											Column: &query_parser.Field{
 												Segments: []query_parser.Segment{
 													query_parser.Segment{
@@ -1143,7 +1263,7 @@ func TestQueryParser(t *testing.T) {
 											Node: query_parser.Node{Off: 42},
 										},
 										Operand2: &query_parser.Operand{
-											Type: query_parser.OpInt,
+											Type: query_parser.TypInt,
 											Int:  456,
 											Node: query_parser.Node{Off: 43},
 										},
@@ -1160,10 +1280,10 @@ func TestQueryParser(t *testing.T) {
 							Node: query_parser.Node{Off: 48},
 						},
 						Operand2: &query_parser.Operand{
-							Type: query_parser.OpExpr,
+							Type: query_parser.TypExpr,
 							Expr: &query_parser.Expression{
 								Operand1: &query_parser.Operand{
-									Type: query_parser.OpField,
+									Type: query_parser.TypField,
 									Column: &query_parser.Field{
 										Segments: []query_parser.Segment{
 											query_parser.Segment{
@@ -1180,7 +1300,7 @@ func TestQueryParser(t *testing.T) {
 									Node: query_parser.Node{Off: 53},
 								},
 								Operand2: &query_parser.Operand{
-									Type: query_parser.OpInt,
+									Type: query_parser.TypInt,
 									Int:  789,
 									Node: query_parser.Node{Off: 54},
 								},
@@ -1223,13 +1343,13 @@ func TestQueryParser(t *testing.T) {
 				Where: &query_parser.WhereClause{
 					Expr: &query_parser.Expression{
 						Operand1: &query_parser.Operand{
-							Type: query_parser.OpExpr,
+							Type: query_parser.TypExpr,
 							Expr: &query_parser.Expression{
 								Operand1: &query_parser.Operand{
-									Type: query_parser.OpExpr,
+									Type: query_parser.TypExpr,
 									Expr: &query_parser.Expression{
 										Operand1: &query_parser.Operand{
-											Type: query_parser.OpField,
+											Type: query_parser.TypField,
 											Column: &query_parser.Field{
 												Segments: []query_parser.Segment{
 													query_parser.Segment{
@@ -1246,7 +1366,7 @@ func TestQueryParser(t *testing.T) {
 											Node: query_parser.Node{Off: 33},
 										},
 										Operand2: &query_parser.Operand{
-											Type: query_parser.OpInt,
+											Type: query_parser.TypInt,
 											Int:  123,
 											Node: query_parser.Node{Off: 35},
 										},
@@ -1259,10 +1379,10 @@ func TestQueryParser(t *testing.T) {
 									Node: query_parser.Node{Off: 39},
 								},
 								Operand2: &query_parser.Operand{
-									Type: query_parser.OpExpr,
+									Type: query_parser.TypExpr,
 									Expr: &query_parser.Expression{
 										Operand1: &query_parser.Operand{
-											Type: query_parser.OpField,
+											Type: query_parser.TypField,
 											Column: &query_parser.Field{
 												Segments: []query_parser.Segment{
 													query_parser.Segment{
@@ -1279,7 +1399,7 @@ func TestQueryParser(t *testing.T) {
 											Node: query_parser.Node{Off: 43},
 										},
 										Operand2: &query_parser.Operand{
-											Type: query_parser.OpInt,
+											Type: query_parser.TypInt,
 											Int:  456,
 											Node: query_parser.Node{Off: 44},
 										},
@@ -1296,10 +1416,10 @@ func TestQueryParser(t *testing.T) {
 							Node: query_parser.Node{Off: 49},
 						},
 						Operand2: &query_parser.Operand{
-							Type: query_parser.OpExpr,
+							Type: query_parser.TypExpr,
 							Expr: &query_parser.Expression{
 								Operand1: &query_parser.Operand{
-									Type: query_parser.OpField,
+									Type: query_parser.TypField,
 									Column: &query_parser.Field{
 										Segments: []query_parser.Segment{
 											query_parser.Segment{
@@ -1316,7 +1436,7 @@ func TestQueryParser(t *testing.T) {
 									Node: query_parser.Node{Off: 54},
 								},
 								Operand2: &query_parser.Operand{
-									Type: query_parser.OpInt,
+									Type: query_parser.TypInt,
 									Int:  789,
 									Node: query_parser.Node{Off: 56},
 								},
@@ -1359,10 +1479,10 @@ func TestQueryParser(t *testing.T) {
 				Where: &query_parser.WhereClause{
 					Expr: &query_parser.Expression{
 						Operand1: &query_parser.Operand{
-							Type: query_parser.OpExpr,
+							Type: query_parser.TypExpr,
 							Expr: &query_parser.Expression{
 								Operand1: &query_parser.Operand{
-									Type: query_parser.OpField,
+									Type: query_parser.TypField,
 									Column: &query_parser.Field{
 										Segments: []query_parser.Segment{
 											query_parser.Segment{
@@ -1379,7 +1499,7 @@ func TestQueryParser(t *testing.T) {
 									Node: query_parser.Node{Off: 32},
 								},
 								Operand2: &query_parser.Operand{
-									Type: query_parser.OpInt,
+									Type: query_parser.TypInt,
 									Int:  123,
 									Node: query_parser.Node{Off: 33},
 								},
@@ -1392,13 +1512,13 @@ func TestQueryParser(t *testing.T) {
 							Node: query_parser.Node{Off: 37},
 						},
 						Operand2: &query_parser.Operand{
-							Type: query_parser.OpExpr,
+							Type: query_parser.TypExpr,
 							Expr: &query_parser.Expression{
 								Operand1: &query_parser.Operand{
-									Type: query_parser.OpExpr,
+									Type: query_parser.TypExpr,
 									Expr: &query_parser.Expression{
 										Operand1: &query_parser.Operand{
-											Type: query_parser.OpField,
+											Type: query_parser.TypField,
 											Column: &query_parser.Field{
 												Segments: []query_parser.Segment{
 													query_parser.Segment{
@@ -1415,7 +1535,7 @@ func TestQueryParser(t *testing.T) {
 											Node: query_parser.Node{Off: 42},
 										},
 										Operand2: &query_parser.Operand{
-											Type: query_parser.OpInt,
+											Type: query_parser.TypInt,
 											Int:  456,
 											Node: query_parser.Node{Off: 43},
 										},
@@ -1428,10 +1548,10 @@ func TestQueryParser(t *testing.T) {
 									Node: query_parser.Node{Off: 47},
 								},
 								Operand2: &query_parser.Operand{
-									Type: query_parser.OpExpr,
+									Type: query_parser.TypExpr,
 									Expr: &query_parser.Expression{
 										Operand1: &query_parser.Operand{
-											Type: query_parser.OpField,
+											Type: query_parser.TypField,
 											Column: &query_parser.Field{
 												Segments: []query_parser.Segment{
 													query_parser.Segment{
@@ -1448,7 +1568,7 @@ func TestQueryParser(t *testing.T) {
 											Node: query_parser.Node{Off: 52},
 										},
 										Operand2: &query_parser.Operand{
-											Type: query_parser.OpInt,
+											Type: query_parser.TypInt,
 											Int:  789,
 											Node: query_parser.Node{Off: 53},
 										},
@@ -1495,10 +1615,10 @@ func TestQueryParser(t *testing.T) {
 				Where: &query_parser.WhereClause{
 					Expr: &query_parser.Expression{
 						Operand1: &query_parser.Operand{
-							Type: query_parser.OpExpr,
+							Type: query_parser.TypExpr,
 							Expr: &query_parser.Expression{
 								Operand1: &query_parser.Operand{
-									Type: query_parser.OpField,
+									Type: query_parser.TypField,
 									Column: &query_parser.Field{
 										Segments: []query_parser.Segment{
 											query_parser.Segment{
@@ -1515,7 +1635,7 @@ func TestQueryParser(t *testing.T) {
 									Node: query_parser.Node{Off: 33},
 								},
 								Operand2: &query_parser.Operand{
-									Type: query_parser.OpInt,
+									Type: query_parser.TypInt,
 									Int:  123,
 									Node: query_parser.Node{Off: 34},
 								},
@@ -1528,13 +1648,13 @@ func TestQueryParser(t *testing.T) {
 							Node: query_parser.Node{Off: 39},
 						},
 						Operand2: &query_parser.Operand{
-							Type: query_parser.OpExpr,
+							Type: query_parser.TypExpr,
 							Expr: &query_parser.Expression{
 								Operand1: &query_parser.Operand{
-									Type: query_parser.OpExpr,
+									Type: query_parser.TypExpr,
 									Expr: &query_parser.Expression{
 										Operand1: &query_parser.Operand{
-											Type: query_parser.OpField,
+											Type: query_parser.TypField,
 											Column: &query_parser.Field{
 												Segments: []query_parser.Segment{
 													query_parser.Segment{
@@ -1551,7 +1671,7 @@ func TestQueryParser(t *testing.T) {
 											Node: query_parser.Node{Off: 45},
 										},
 										Operand2: &query_parser.Operand{
-											Type: query_parser.OpInt,
+											Type: query_parser.TypInt,
 											Int:  456,
 											Node: query_parser.Node{Off: 46},
 										},
@@ -1564,10 +1684,10 @@ func TestQueryParser(t *testing.T) {
 									Node: query_parser.Node{Off: 51},
 								},
 								Operand2: &query_parser.Operand{
-									Type: query_parser.OpExpr,
+									Type: query_parser.TypExpr,
 									Expr: &query_parser.Expression{
 										Operand1: &query_parser.Operand{
-											Type: query_parser.OpField,
+											Type: query_parser.TypField,
 											Column: &query_parser.Field{
 												Segments: []query_parser.Segment{
 													query_parser.Segment{
@@ -1584,7 +1704,7 @@ func TestQueryParser(t *testing.T) {
 											Node: query_parser.Node{Off: 57},
 										},
 										Operand2: &query_parser.Operand{
-											Type: query_parser.OpInt,
+											Type: query_parser.TypInt,
 											Int:  789,
 											Node: query_parser.Node{Off: 58},
 										},
@@ -1631,13 +1751,13 @@ func TestQueryParser(t *testing.T) {
 				Where: &query_parser.WhereClause{
 					Expr: &query_parser.Expression{
 						Operand1: &query_parser.Operand{
-							Type: query_parser.OpExpr,
+							Type: query_parser.TypExpr,
 							Expr: &query_parser.Expression{
 								Operand1: &query_parser.Operand{
-									Type: query_parser.OpExpr,
+									Type: query_parser.TypExpr,
 									Expr: &query_parser.Expression{
 										Operand1: &query_parser.Operand{
-											Type: query_parser.OpField,
+											Type: query_parser.TypField,
 											Column: &query_parser.Field{
 												Segments: []query_parser.Segment{
 													query_parser.Segment{
@@ -1654,7 +1774,7 @@ func TestQueryParser(t *testing.T) {
 											Node: query_parser.Node{Off: 32},
 										},
 										Operand2: &query_parser.Operand{
-											Type: query_parser.OpInt,
+											Type: query_parser.TypInt,
 											Int:  123,
 											Node: query_parser.Node{Off: 34},
 										},
@@ -1667,10 +1787,10 @@ func TestQueryParser(t *testing.T) {
 									Node: query_parser.Node{Off: 38},
 								},
 								Operand2: &query_parser.Operand{
-									Type: query_parser.OpExpr,
+									Type: query_parser.TypExpr,
 									Expr: &query_parser.Expression{
 										Operand1: &query_parser.Operand{
-											Type: query_parser.OpField,
+											Type: query_parser.TypField,
 											Column: &query_parser.Field{
 												Segments: []query_parser.Segment{
 													query_parser.Segment{
@@ -1687,7 +1807,7 @@ func TestQueryParser(t *testing.T) {
 											Node: query_parser.Node{Off: 43},
 										},
 										Operand2: &query_parser.Operand{
-											Type: query_parser.OpInt,
+											Type: query_parser.TypInt,
 											Int:  456,
 											Node: query_parser.Node{Off: 53},
 										},
@@ -1704,10 +1824,10 @@ func TestQueryParser(t *testing.T) {
 							Node: query_parser.Node{Off: 57},
 						},
 						Operand2: &query_parser.Operand{
-							Type: query_parser.OpExpr,
+							Type: query_parser.TypExpr,
 							Expr: &query_parser.Expression{
 								Operand1: &query_parser.Operand{
-									Type: query_parser.OpField,
+									Type: query_parser.TypField,
 									Column: &query_parser.Field{
 										Segments: []query_parser.Segment{
 											query_parser.Segment{
@@ -1724,7 +1844,7 @@ func TestQueryParser(t *testing.T) {
 									Node: query_parser.Node{Off: 63},
 								},
 								Operand2: &query_parser.Operand{
-									Type:    query_parser.OpLiteral,
+									Type:    query_parser.TypLiteral,
 									Literal: "abc%",
 									Node:    query_parser.Node{Off: 72},
 								},
@@ -1750,7 +1870,7 @@ func TestQueryParser(t *testing.T) {
 		switch (*st).(type) {
 		case query_parser.SelectStatement:
 			if !reflect.DeepEqual(test.statement, *st) {
-				t.Errorf("query: %s;\nGOT  %s\nWANT %s", test.query, st, test.statement)
+				t.Errorf("query: %s;\nGOT  %s\nWANT %s", test.query, *st, test.statement)
 			}
 		}
 	}
@@ -1762,9 +1882,9 @@ func TestQueryParserErrors(t *testing.T) {
 		{";", query_parser.Error(0, "Expected identifier, found ';'")},
 		{"foo", query_parser.Error(0, "Unknown identifier: foo")},
 		{"(foo)", query_parser.Error(0, "Expected identifier, found '('")},
-		{"select foo.", query_parser.Error(11, "Expected identifier or '*', found ''")},
+		{"select foo.", query_parser.Error(11, "Expected identifier, found ''")},
 		{"select foo. from a", query_parser.Error(17, "Expected 'from', found 'a'")},
-		{"select (foo)", query_parser.Error(7, "Expected identifier or '*', found '('")},
+		{"select (foo)", query_parser.Error(7, "Expected identifier, found '('")},
 		{"select from where", query_parser.Error(12, "Expected 'from', found 'where'")},
 		{"create table Customer (CustRecord cust_pkg.Cust, primary key(CustRecord.CustID))", query_parser.Error(0, "Unknown identifier: create")},
 		{"select foo from Customer where (A=123 or B=456) and C=789)", query_parser.Error(57, "Unexpected: ')'.")},
@@ -1779,7 +1899,7 @@ func TestQueryParserErrors(t *testing.T) {
 		{"select foo from Customer where (A=123 or B=456) and C=789)", query_parser.Error(57, "Unexpected: ')'.")},
 		{"select foo bar from Customer", query_parser.Error(11, "Expected 'from', found 'bar'")},
 		{"select foo from Customer Invoice", query_parser.Error(25, "Unexpected: 'Invoice'.")},
-		{"select (foo) from (Customer)", query_parser.Error(7, "Expected identifier or '*', found '('")},
+		{"select (foo) from (Customer)", query_parser.Error(7, "Expected identifier, found '('")},
 		{"select foo, bar from Customer where a = (b)", query_parser.Error(40, "Expected operand, found '('.")},
 		{"select foo, bar from Customer where a = b and (c) = d", query_parser.Error(48, "Expected operator ('like', 'not like', '=', '<>', 'equal' or 'not equal', found ')'.")},
 		{"select foo, bar from Customer where a = b and c =", query_parser.Error(49, "Unexpected end of statement, expected operand.")},
@@ -1794,11 +1914,13 @@ func TestQueryParserErrors(t *testing.T) {
 		{"select a from b where c not", query_parser.Error(27, "Expected 'equal' or 'like'")},
 		{"select a from b where c not 8", query_parser.Error(28, "Expected 'equal' or 'like'")},
 		{"select x from y where a and b = c", query_parser.Error(24, "Expected operator ('like', 'not like', '=', '<>', '<', '<=', '>', '>=', 'equal' or 'not equal', found 'and'.")},
-		{"select * from Customer limit 100 offset a", query_parser.Error(40, "Expected positive integer literal., found 'a'.")},
-		{"select * from Customer limit a offset 200", query_parser.Error(29, "Expected positive integer literal., found 'a'.")},
-		{"select * from Customer limit", query_parser.Error(28, "Unexpected end of statement, expected integer literal.")},
-		{"select * from Customer, Invoice", query_parser.Error(22, "Unexpected: ','.")},
-		{"select * from Customer As Cust where foo = bar", query_parser.Error(23, "Unexpected: 'As'.")},
+		{"select v from Customer limit 100 offset a", query_parser.Error(40, "Expected positive integer literal., found 'a'.")},
+		{"select v from Customer limit -100 offset 5", query_parser.Error(29, "Expected positive integer literal., found '-'.")},
+		{"select v from Customer limit 100 offset -5", query_parser.Error(40, "Expected positive integer literal., found '-'.")},
+		{"select v from Customer limit a offset 200", query_parser.Error(29, "Expected positive integer literal., found 'a'.")},
+		{"select v from Customer limit", query_parser.Error(28, "Unexpected end of statement, expected integer literal.")},
+		{"select v from Customer, Invoice", query_parser.Error(22, "Unexpected: ','.")},
+		{"select v from Customer As Cust where foo = bar", query_parser.Error(23, "Unexpected: 'As'.")},
 	}
 
 	for _, test := range basic {
