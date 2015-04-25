@@ -24,6 +24,6 @@ pkg access, type AccessList struct, In []security.BlessingPattern
 pkg access, type AccessList struct, NotIn []string
 pkg access, type Permissions map[string]AccessList
 pkg access, type Tag string
-pkg access, var ErrAccessListMatch unknown-type
-pkg access, var ErrNoPermissions unknown-type
-pkg access, var ErrTooBig unknown-type
+pkg access, var ErrAccessListMatch verror.IDAction
+pkg access, var ErrNoPermissions verror.IDAction
+pkg access, var ErrTooBig verror.IDAction

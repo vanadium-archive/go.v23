@@ -33,9 +33,15 @@ pkg build, type BuilderBuildClientCall interface, SendStream() interface {  Send
 pkg build, type BuilderBuildClientStream interface { RecvStream, SendStream }
 pkg build, type BuilderBuildClientStream interface, RecvStream() interface {  Advance() bool;; Value() File;; Err() error;}
 pkg build, type BuilderBuildClientStream interface, SendStream() interface {  Send(item File) error;; Close() error;}
+pkg build, type BuilderBuildServerCall interface { GrantedBlessings, LocalEndpoint, RecvStream, RemoteEndpoint, Security, SendStream, Server, Suffix }
+pkg build, type BuilderBuildServerCall interface, GrantedBlessings() security.Blessings
+pkg build, type BuilderBuildServerCall interface, LocalEndpoint() naming.Endpoint
 pkg build, type BuilderBuildServerCall interface, RecvStream() interface {  Advance() bool;; Value() File;; Err() error;}
+pkg build, type BuilderBuildServerCall interface, RemoteEndpoint() naming.Endpoint
+pkg build, type BuilderBuildServerCall interface, Security() security.Call
 pkg build, type BuilderBuildServerCall interface, SendStream() interface {  Send(item File) error;}
-pkg build, type BuilderBuildServerCall interface, unexported methods
+pkg build, type BuilderBuildServerCall interface, Server() Server
+pkg build, type BuilderBuildServerCall interface, Suffix() string
 pkg build, type BuilderBuildServerCallStub struct
 pkg build, type BuilderBuildServerCallStub struct, embedded rpc.StreamServerCall
 pkg build, type BuilderBuildServerStream interface { RecvStream, SendStream }
@@ -44,9 +50,9 @@ pkg build, type BuilderBuildServerStream interface, SendStream() interface {  Se
 pkg build, type BuilderClientMethods interface { Build, Describe }
 pkg build, type BuilderClientMethods interface, Build(*context.T, Architecture, OperatingSystem, ...rpc.CallOpt) (BuilderBuildClientCall, error)
 pkg build, type BuilderClientMethods interface, Describe(*context.T, string, ...rpc.CallOpt) (binary.Description, error)
+pkg build, type BuilderClientStub interface { Build, Describe }
 pkg build, type BuilderClientStub interface, Build(*context.T, Architecture, OperatingSystem, ...rpc.CallOpt) (BuilderBuildClientCall, error)
 pkg build, type BuilderClientStub interface, Describe(*context.T, string, ...rpc.CallOpt) (binary.Description, error)
-pkg build, type BuilderClientStub interface, unexported methods
 pkg build, type BuilderServerMethods interface { Build, Describe }
 pkg build, type BuilderServerMethods interface, Build(*context.T, BuilderBuildServerCall, Architecture, OperatingSystem) ([]byte, error)
 pkg build, type BuilderServerMethods interface, Describe(*context.T, rpc.ServerCall, string) (binary.Description, error)

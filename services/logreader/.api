@@ -9,16 +9,22 @@ pkg logreader, type LogEntry struct, Position int64
 pkg logreader, type LogFileClientMethods interface { ReadLog, Size }
 pkg logreader, type LogFileClientMethods interface, ReadLog(*context.T, int64, int32, bool, ...rpc.CallOpt) (LogFileReadLogClientCall, error)
 pkg logreader, type LogFileClientMethods interface, Size(*context.T, ...rpc.CallOpt) (int64, error)
+pkg logreader, type LogFileClientStub interface { ReadLog, Size }
 pkg logreader, type LogFileClientStub interface, ReadLog(*context.T, int64, int32, bool, ...rpc.CallOpt) (LogFileReadLogClientCall, error)
 pkg logreader, type LogFileClientStub interface, Size(*context.T, ...rpc.CallOpt) (int64, error)
-pkg logreader, type LogFileClientStub interface, unexported methods
 pkg logreader, type LogFileReadLogClientCall interface { Finish, RecvStream }
 pkg logreader, type LogFileReadLogClientCall interface, Finish() (int64, error)
 pkg logreader, type LogFileReadLogClientCall interface, RecvStream() interface {  Advance() bool;; Value() LogEntry;; Err() error;}
 pkg logreader, type LogFileReadLogClientStream interface { RecvStream }
 pkg logreader, type LogFileReadLogClientStream interface, RecvStream() interface {  Advance() bool;; Value() LogEntry;; Err() error;}
+pkg logreader, type LogFileReadLogServerCall interface { GrantedBlessings, LocalEndpoint, RemoteEndpoint, Security, SendStream, Server, Suffix }
+pkg logreader, type LogFileReadLogServerCall interface, GrantedBlessings() security.Blessings
+pkg logreader, type LogFileReadLogServerCall interface, LocalEndpoint() naming.Endpoint
+pkg logreader, type LogFileReadLogServerCall interface, RemoteEndpoint() naming.Endpoint
+pkg logreader, type LogFileReadLogServerCall interface, Security() security.Call
 pkg logreader, type LogFileReadLogServerCall interface, SendStream() interface {  Send(item LogEntry) error;}
-pkg logreader, type LogFileReadLogServerCall interface, unexported methods
+pkg logreader, type LogFileReadLogServerCall interface, Server() Server
+pkg logreader, type LogFileReadLogServerCall interface, Suffix() string
 pkg logreader, type LogFileReadLogServerCallStub struct
 pkg logreader, type LogFileReadLogServerCallStub struct, embedded rpc.StreamServerCall
 pkg logreader, type LogFileReadLogServerStream interface { SendStream }
