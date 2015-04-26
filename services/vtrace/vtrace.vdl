@@ -15,7 +15,7 @@ import (
 type Store interface {
 	// Trace returns the trace that matches the given Id.
 	// Will return a NoExists error if no matching trace was found.
-	Trace(uniqueid.Id) (vtrace.TraceRecord | error) {access.Debug}
+	Trace(id uniqueid.Id) (vtrace.TraceRecord | error) {access.Debug}
 
 	// AllTraces returns TraceRecords for all traces the server currently
 	// knows about.

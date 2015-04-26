@@ -28,7 +28,7 @@ import (
 type StoreClientMethods interface {
 	// Trace returns the trace that matches the given Id.
 	// Will return a NoExists error if no matching trace was found.
-	Trace(*context.T, uniqueid.Id, ...rpc.CallOpt) (vtrace.TraceRecord, error)
+	Trace(ctx *context.T, id uniqueid.Id, opts ...rpc.CallOpt) (vtrace.TraceRecord, error)
 	// AllTraces returns TraceRecords for all traces the server currently
 	// knows about.
 	AllTraces(*context.T, ...rpc.CallOpt) (StoreAllTracesClientCall, error)
@@ -137,7 +137,7 @@ func (c *implStoreAllTracesClientCall) Finish() (err error) {
 type StoreServerMethods interface {
 	// Trace returns the trace that matches the given Id.
 	// Will return a NoExists error if no matching trace was found.
-	Trace(*context.T, rpc.ServerCall, uniqueid.Id) (vtrace.TraceRecord, error)
+	Trace(ctx *context.T, call rpc.ServerCall, id uniqueid.Id) (vtrace.TraceRecord, error)
 	// AllTraces returns TraceRecords for all traces the server currently
 	// knows about.
 	AllTraces(*context.T, StoreAllTracesServerCall) error
@@ -150,7 +150,7 @@ type StoreServerMethods interface {
 type StoreServerStubMethods interface {
 	// Trace returns the trace that matches the given Id.
 	// Will return a NoExists error if no matching trace was found.
-	Trace(*context.T, rpc.ServerCall, uniqueid.Id) (vtrace.TraceRecord, error)
+	Trace(ctx *context.T, call rpc.ServerCall, id uniqueid.Id) (vtrace.TraceRecord, error)
 	// AllTraces returns TraceRecords for all traces the server currently
 	// knows about.
 	AllTraces(*context.T, *StoreAllTracesServerCallStub) error
@@ -213,7 +213,7 @@ var descStore = rpc.InterfaceDesc{
 			Name: "Trace",
 			Doc:  "// Trace returns the trace that matches the given Id.\n// Will return a NoExists error if no matching trace was found.",
 			InArgs: []rpc.ArgDesc{
-				{"", ``}, // uniqueid.Id
+				{"id", ``}, // uniqueid.Id
 			},
 			OutArgs: []rpc.ArgDesc{
 				{"", ``}, // vtrace.TraceRecord
