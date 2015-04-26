@@ -262,15 +262,6 @@ type BlessingStore interface {
 	// This description is detailed and lists out the contents of the store.
 	// Use fmt.Sprintf("%v", ...) for a more succinct description.
 	DebugString() string
-
-	// TODO(ataly,ashankar): Might add methods so that discharges
-	// can be persisted. e.g,
-	// // AddDischarge adds a Discharge to the store iff there is a
-	// // blessing that requires it.
-	// AddDischarge(d Discharge) error
-	// // Discharges returns all the Discharges that have been
-	// // added to the store and are required by "blessings".
-	// Discharges(blessings Blessings) []Discharge
 }
 
 // BlessingRoots hosts the set of authoritative public keys for roots
@@ -340,10 +331,6 @@ type ThirdPartyCaveat interface {
 	// It assumes that the ThirdPartCaveat was obtained from the remote end of
 	// call.
 	Dischargeable(ctx *context.T, call Call) error
-
-	// TODO(andreser, ashankar): require the discharger to have a specific
-	// identity so that the private information below is not exposed to
-	// anybody who can accept an rpc call.
 }
 
 // Call defines the state available for authorizing a principal.
@@ -379,13 +366,6 @@ type Call interface {
 	// RemoteEndpoint() returns the Endpoint of the principal at the remote end
 	// of communication.
 	RemoteEndpoint() naming.Endpoint
-
-	// TODO(ashankar,ataly): Disallow Call interface implementations
-	// in other packages for now?
-	// For now, the only way to create a Call is to use the factory function
-	// defined in this package. May revisit this, but till the API stabilizes,
-	// better to avoid multiple implementations.
-	// canOnlyBeImplementedInThisPackageForNow()
 }
 
 // Authorizer is the interface for performing authorization checks.

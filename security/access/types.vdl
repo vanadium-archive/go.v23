@@ -124,8 +124,6 @@ type AccessList struct {
   // "alice/friend/carol" etc. but NOT to a principal that presents
   // "alice/friend/bob" or "alice/friend/bob/spouse" etc.
   NotIn []string
-
-  // TODO(ashankar,ataly): Groups API and group identifiers here.
 }
 
 // Permissions maps string tags to access lists specifying the blessings
