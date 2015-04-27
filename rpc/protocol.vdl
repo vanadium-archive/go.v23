@@ -118,6 +118,11 @@ type Request struct {
 	// TraceRequest maintains the vtrace context between clients and servers
 	// and specifies additional parameters that control how tracing behaves.
 	TraceRequest vtrace.Request
+
+  // Language indicates the language of the instegator of the RPC.
+  // By convention it should be an IETF language tag:
+  // http://en.wikipedia.org/wiki/IETF_language_tag
+  Language string
 }
 
 // Response describes the response header sent by the server to the client.  A

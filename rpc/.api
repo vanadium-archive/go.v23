@@ -114,6 +114,7 @@ pkg rpc, type Request struct, Deadline time.Deadline
 pkg rpc, type Request struct, Discharges []security.Discharge
 pkg rpc, type Request struct, EndStreamArgs bool
 pkg rpc, type Request struct, GrantedBlessings security.Blessings
+pkg rpc, type Request struct, Language string
 pkg rpc, type Request struct, Method string
 pkg rpc, type Request struct, NumPosArgs uint64
 pkg rpc, type Request struct, Suffix string
