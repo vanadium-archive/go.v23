@@ -12,18 +12,70 @@ import (
 	"io/ioutil"
 	"os"
 	"testing"
+	"time"
 
 	"v.io/v23/context"
 	"v.io/v23/security"
 	"v.io/v23/security/access"
 	"v.io/v23/security/access/internal"
 	"v.io/v23/vdl"
+	"v.io/v23/verror"
 )
 
 func authorize(authorizer security.Authorizer, params *security.CallParams) error {
 	ctx, cancel := context.RootContext()
 	defer cancel()
 	return authorizer.Authorize(ctx, security.NewCall(params))
+}
+
+func TestAccessListAuthorizer(t *testing.T) {
+	var (
+		pali = newPrincipal(t)
+		pbob = newPrincipal(t)
+		pche = newPrincipal(t)
+
+		expired, _ = security.NewExpiryCaveat(time.Now().Add(-1 * time.Minute))
+
+		ali, _                = pbob.BlessSelf("ali")
+		bob, _                = pbob.BlessSelf("bob")
+		bobSelf, _            = pbob.BlessSelf("bob/self")
+		bobDelegate, _        = pbob.Bless(pche.PublicKey(), bob, "delegate/che", security.UnconstrainedUse())
+		bobDelegateBad, _     = pbob.Bless(pche.PublicKey(), bob, "delegate/badman", security.UnconstrainedUse())
+		bobDelegateExpired, _ = pbob.Bless(pche.PublicKey(), bob, "delegate/che", expired)
+
+		bobUnion, _    = security.UnionOfBlessings(bobDelegate, bobDelegateExpired)
+		bobBadUnion, _ = security.UnionOfBlessings(bobDelegateBad, bobDelegateExpired)
+
+		acl = access.AccessList{
+			In:    []security.BlessingPattern{"bob/delegate", "bob/self"},
+			NotIn: []string{"bob/delegate/badman"},
+		}
+
+		tests = []struct {
+			B         security.Blessings
+			Authorize bool
+		}{
+			{bob, false},
+			{bobSelf, true},
+			{bobDelegate, true},
+			{bobDelegateBad, false},
+			{bobDelegateExpired, false},
+			{bobUnion, true},
+			{bobBadUnion, false},
+		}
+	)
+	for _, test := range tests {
+		err := authorize(acl, &security.CallParams{
+			LocalPrincipal:  pali,
+			LocalBlessings:  ali,
+			RemoteBlessings: test.B,
+		})
+		if test.Authorize && err != nil {
+			t.Errorf("%v: Got error %v", test.B, err)
+		} else if errid := verror.ErrorID(err); !test.Authorize && errid != access.ErrAccessListMatch.ID {
+			t.Errorf("%v: Got error %v (errorid=%v) want errorid %v", test.B, err, errid, access.ErrAccessListMatch.ID)
+		}
+	}
 }
 
 // TestPermissionsAuthorizer is both a test and a demonstration of the use of
