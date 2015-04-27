@@ -1,7 +1,7 @@
 // Copyright 2015 The Vanadium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
-
+//
 // Package query performs SQL-like select queries on the Syncbase NoSQL database.
 //
 // Note: Presently, the query package is deliberately not depending on other parts of syncbase.
@@ -13,8 +13,9 @@ import (
 	"errors"
 	"fmt"
 	"reflect"
-	"v.io/syncbase/v23/syncbase/query/query_checker"
-	"v.io/syncbase/v23/syncbase/query/query_parser"
+
+	"v.io/syncbase/v23/syncbase/nosql/internal/query/query_checker"
+	"v.io/syncbase/v23/syncbase/nosql/internal/query/query_parser"
 )
 
 // TODO(jkline): Flesh out this interface.

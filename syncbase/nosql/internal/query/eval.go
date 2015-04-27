@@ -1,7 +1,6 @@
 // Copyright 2015 The Vanadium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
-
 package query
 
 import (
@@ -10,8 +9,9 @@ import (
 	"math/big"
 	"reflect"
 	"strconv"
-	"v.io/syncbase/v23/syncbase/query/query_checker"
-	"v.io/syncbase/v23/syncbase/query/query_parser"
+
+	"v.io/syncbase/v23/syncbase/nosql/internal/query/query_checker"
+	"v.io/syncbase/v23/syncbase/nosql/internal/query/query_parser"
 )
 
 func Eval(k string, v interface{}, e *query_parser.Expression) bool {

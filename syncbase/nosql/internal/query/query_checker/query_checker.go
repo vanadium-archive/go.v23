@@ -1,7 +1,7 @@
 // Copyright 2015 The Vanadium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
-
+//
 // Package query_checker performs a semantic check on an AST produced
 // by the query_parser package.
 //
@@ -20,7 +20,8 @@ import (
 	"regexp"
 	"sort"
 	"strings"
-	"v.io/syncbase/v23/syncbase/query/query_parser"
+
+	"v.io/syncbase/v23/syncbase/nosql/internal/query/query_parser"
 )
 
 type Store interface {

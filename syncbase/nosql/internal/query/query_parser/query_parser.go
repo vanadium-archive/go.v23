@@ -1,7 +1,7 @@
 // Copyright 2015 The Vanadium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
-
+//
 // Package query_parser is a parser to parse a simplified select statement (a la SQL) for the
 // Vanadium key value store (a.k.a., syncbase).
 //
@@ -66,7 +66,6 @@
 // Example:
 // select foo.bar, baz from foobarbaz where foo = 42 and bar not like "abc%"
 //
-
 package query_parser
 
 import (

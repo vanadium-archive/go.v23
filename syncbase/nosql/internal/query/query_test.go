@@ -1,7 +1,6 @@
 // Copyright 2015 The Vanadium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
-
 package query_test
 
 import (
@@ -10,9 +9,10 @@ import (
 	"math/big"
 	"reflect"
 	"testing"
-	"v.io/syncbase/v23/syncbase/query"
-	"v.io/syncbase/v23/syncbase/query/query_checker"
-	"v.io/syncbase/v23/syncbase/query/query_parser"
+
+	"v.io/syncbase/v23/syncbase/nosql/internal/query"
+	"v.io/syncbase/v23/syncbase/nosql/internal/query/query_checker"
+	"v.io/syncbase/v23/syncbase/nosql/internal/query/query_parser"
 )
 
 type MockStore struct {
@@ -373,7 +373,11 @@ func TestEvalWhereUsingOnlyKey(t *testing.T) {
 func TestEval(t *testing.T) {
 	basic := []evalTest{
 		{
-			"select k, v from Customer where type = \"v.io/syncbase/v23/syncbase/query_test.Customer\"",
+			"select k, v from Customer where type = \"v.io/syncbase/v23/syncbase/nosql/internal/query_test.Customer\"",
+			"123456", sampleRow, true,
+		},
+		{
+			"select k, v from Customer where type = \"Customer\"",
 			"123456", sampleRow, true,
 		},
 		{
