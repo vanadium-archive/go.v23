@@ -2,14 +2,14 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// +build android nacl wspr
+// +build java android nacl wspr
 //
 // We only expose the functionality below for the above build tags, to
 // discourage general usage.  The binaries that currently require this
 // functionality are our langage proxies:
-//   android: jni (for Java)
-//   nacl:    browspr (for JavaScript)
-//   wsprd:   wsprd (for JavaScript)
+//   java/android: jni
+//   nacl:         browspr (for JavaScript)
+//   wsprd:        wsprd (for JavaScript)
 
 package security
 
