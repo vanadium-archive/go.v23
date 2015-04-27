@@ -240,7 +240,7 @@ type SelectStatement struct {
 }
 
 func ScanToken(s *scanner.Scanner) *Token {
-	// TODO(jkline): Replace golang text/scanner.  It likes to write to stderr.
+	// TODO(jkline): Replace golang text/scanner.
 	var token Token
 	tok := s.Scan()
 	token.Value = s.TokenText()
@@ -281,18 +281,31 @@ func ScanToken(s *scanner.Scanner) *Token {
 	return &token
 }
 
+// Text/scanner reports errors to stderr that are not errors in the query language.
+// For example, to get the value where the key is "\",
+// One would write the string:
+// "select v where k = \"\\\""
+// This will result in the scanner spewing "literal not terminated" to stderr if we don't
+// set the Error field in Scanner.  As such, Error is set to the following function which
+// eats errors.  In the longer term, there is still a TODO to replace text/scanner with
+// our own scanner.
+func ScannerError(s *scanner.Scanner, msg string) {
+	// Do nothing.
+}
+
 // Parse a statement.  Return it or a SyntaxError.
 func Parse(src string) (*Statement, *SyntaxError) {
 	r := strings.NewReader(src)
 	var s scanner.Scanner
 	s.Init(r)
+	s.Error = ScannerError
 
 	token := ScanToken(&s) // eat the select
 	if token.Tok == TokEOF {
 		return nil, Error(token.Off, "No statement found.")
 	}
 	if token.Tok != TokIDENT {
-		return nil, Error(token.Off, fmt.Sprintf("Expected identifier, found '%s'", token.Value))
+		return nil, Error(token.Off, fmt.Sprintf("Expected identifier, found '%s'.", token.Value))
 	}
 	switch strings.ToLower(token.Value) {
 	case "select":
@@ -371,7 +384,7 @@ func ParseSelectClause(s *scanner.Scanner, token *Token) (*SelectClause, *Token,
 // Parse a column (field). Return SelectClause and next token (or SyntaxError).
 func ParseColumn(s *scanner.Scanner, selectClause *SelectClause, token *Token) (*Token, *SyntaxError) {
 	if token.Tok != TokIDENT {
-		return nil, Error(token.Off, fmt.Sprintf("Expected identifier, found '%s'", token.Value))
+		return nil, Error(token.Off, fmt.Sprintf("Expected identifier, found '%s'.", token.Value))
 	}
 	var col Field
 	col.Off = token.Off
@@ -384,7 +397,7 @@ func ParseColumn(s *scanner.Scanner, selectClause *SelectClause, token *Token) (
 	for token.Tok != TokEOF && token.Tok == TokPERIOD {
 		token = ScanToken(s)
 		if token.Tok != TokIDENT {
-			return nil, Error(token.Off, fmt.Sprintf("Expected identifier, found '%s'", token.Value))
+			return nil, Error(token.Off, fmt.Sprintf("Expected identifier, found '%s'.", token.Value))
 		}
 		var segment Segment
 		segment.Value = token.Value
@@ -410,7 +423,7 @@ func ParseFromClause(s *scanner.Scanner, token *Token) (*FromClause, *Token, *Sy
 		return nil, nil, Error(token.Off, "Unexpected end of statement.")
 	}
 	if token.Tok != TokIDENT {
-		return nil, nil, Error(token.Off, fmt.Sprintf("Expected identifier, found '%s'", token.Value))
+		return nil, nil, Error(token.Off, fmt.Sprintf("Expected identifier, found '%s'.", token.Value))
 	}
 	fromClause.Table.Off = token.Off
 	fromClause.Table.Name = token.Value
@@ -583,7 +596,7 @@ func ParseOperand(s *scanner.Scanner, token *Token) (*Operand, *Token, *SyntaxEr
 			for token.Tok != TokEOF && token.Tok == TokPERIOD {
 				token = ScanToken(s)
 				if token.Tok != TokIDENT {
-					return nil, nil, Error(token.Off, fmt.Sprintf("Expected identifier, found '%s'", token.Value))
+					return nil, nil, Error(token.Off, fmt.Sprintf("Expected identifier, found '%s'.", token.Value))
 				}
 				var segment Segment
 				segment.Off = token.Off

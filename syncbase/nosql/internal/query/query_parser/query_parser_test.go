@@ -1860,6 +1860,71 @@ func TestQueryParser(t *testing.T) {
 			},
 			nil,
 		},
+		{
+			"select k, v from Customer where k = \"\\\"",
+			query_parser.SelectStatement{
+				Select: &query_parser.SelectClause{
+					Columns: []query_parser.Field{
+						query_parser.Field{
+							Segments: []query_parser.Segment{
+								query_parser.Segment{
+									Value: "k",
+									Node:  query_parser.Node{Off: 7},
+								},
+							},
+							Node: query_parser.Node{Off: 7},
+						},
+						query_parser.Field{
+							Segments: []query_parser.Segment{
+								query_parser.Segment{
+									Value: "v",
+									Node:  query_parser.Node{Off: 10},
+								},
+							},
+							Node: query_parser.Node{Off: 10},
+						},
+					},
+					Node: query_parser.Node{Off: 0},
+				},
+				From: &query_parser.FromClause{
+					Table: query_parser.TableEntry{
+						Name: "Customer",
+						Node: query_parser.Node{Off: 17},
+					},
+					Node: query_parser.Node{Off: 12},
+				},
+				Where: &query_parser.WhereClause{
+					Expr: &query_parser.Expression{
+						Operand1: &query_parser.Operand{
+							Type: query_parser.TypField,
+							Column: &query_parser.Field{
+								Segments: []query_parser.Segment{
+									query_parser.Segment{
+										Value: "k",
+										Node:  query_parser.Node{Off: 32},
+									},
+								},
+								Node: query_parser.Node{Off: 32},
+							},
+							Node: query_parser.Node{Off: 32},
+						},
+						Operator: &query_parser.BinaryOperator{
+							Type: query_parser.Equal,
+							Node: query_parser.Node{Off: 34},
+						},
+						Operand2: &query_parser.Operand{
+							Type:    query_parser.TypLiteral,
+							Literal: "\\",
+							Node:    query_parser.Node{Off: 36},
+						},
+						Node: query_parser.Node{Off: 32},
+					},
+					Node: query_parser.Node{Off: 26},
+				},
+				Node: query_parser.Node{Off: 0},
+			},
+			nil,
+		},
 	}
 
 	for _, test := range basic {
@@ -1879,12 +1944,12 @@ func TestQueryParser(t *testing.T) {
 func TestQueryParserErrors(t *testing.T) {
 	basic := []parseSelectErrorTest{
 		{"", query_parser.Error(0, "No statement found.")},
-		{";", query_parser.Error(0, "Expected identifier, found ';'")},
+		{";", query_parser.Error(0, "Expected identifier, found ';'.")},
 		{"foo", query_parser.Error(0, "Unknown identifier: foo")},
-		{"(foo)", query_parser.Error(0, "Expected identifier, found '('")},
-		{"select foo.", query_parser.Error(11, "Expected identifier, found ''")},
+		{"(foo)", query_parser.Error(0, "Expected identifier, found '('.")},
+		{"select foo.", query_parser.Error(11, "Expected identifier, found ''.")},
 		{"select foo. from a", query_parser.Error(17, "Expected 'from', found 'a'")},
-		{"select (foo)", query_parser.Error(7, "Expected identifier, found '('")},
+		{"select (foo)", query_parser.Error(7, "Expected identifier, found '('.")},
 		{"select from where", query_parser.Error(12, "Expected 'from', found 'where'")},
 		{"create table Customer (CustRecord cust_pkg.Cust, primary key(CustRecord.CustID))", query_parser.Error(0, "Unknown identifier: create")},
 		{"select foo from Customer where (A=123 or B=456) and C=789)", query_parser.Error(57, "Unexpected: ')'.")},
@@ -1899,7 +1964,7 @@ func TestQueryParserErrors(t *testing.T) {
 		{"select foo from Customer where (A=123 or B=456) and C=789)", query_parser.Error(57, "Unexpected: ')'.")},
 		{"select foo bar from Customer", query_parser.Error(11, "Expected 'from', found 'bar'")},
 		{"select foo from Customer Invoice", query_parser.Error(25, "Unexpected: 'Invoice'.")},
-		{"select (foo) from (Customer)", query_parser.Error(7, "Expected identifier, found '('")},
+		{"select (foo) from (Customer)", query_parser.Error(7, "Expected identifier, found '('.")},
 		{"select foo, bar from Customer where a = (b)", query_parser.Error(40, "Expected operand, found '('.")},
 		{"select foo, bar from Customer where a = b and (c) = d", query_parser.Error(48, "Expected operator ('like', 'not like', '=', '<>', 'equal' or 'not equal', found ')'.")},
 		{"select foo, bar from Customer where a = b and c =", query_parser.Error(49, "Unexpected end of statement, expected operand.")},
@@ -1921,6 +1986,7 @@ func TestQueryParserErrors(t *testing.T) {
 		{"select v from Customer limit", query_parser.Error(28, "Unexpected end of statement, expected integer literal.")},
 		{"select v from Customer, Invoice", query_parser.Error(22, "Unexpected: ','.")},
 		{"select v from Customer As Cust where foo = bar", query_parser.Error(23, "Unexpected: 'As'.")},
+		{"select 1abc from Customer where foo = bar", query_parser.Error(7, "Expected identifier, found '1'.")},
 	}
 
 	for _, test := range basic {

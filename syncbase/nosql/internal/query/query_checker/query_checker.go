@@ -132,7 +132,7 @@ func CheckExpression(e *query_parser.Expression) *SemanticError {
 
 	// type as an operand must be the first operand, the operator must be = and the 2nd operand must be string literal.
 	if (IsType(e.Operand1) && (e.Operator.Type != query_parser.Equal || e.Operand2.Type != query_parser.TypLiteral)) || IsType(e.Operand2) {
-		return Error(e.Off, "Type expressions must be 'type = <string-literal>'.")
+		return Error(e.Off, "Type expressions must be 't = <string-literal>'.")
 	}
 
 	// k as an operand must be the first operand, the operator must be like or = and the 2nd operand must be a string literal.
@@ -159,12 +159,12 @@ func CheckOperand(o *query_parser.Operand) *SemanticError {
 				return Error(o.Column.Segments[1].Off, "Dot notation may not be used on a key (string) field.")
 			}
 		case "v":
-		case "type":
+		case "t":
 			if len(o.Column.Segments) > 1 {
 				return Error(o.Column.Segments[1].Off, "Dot notation may not be used with type.")
 			}
 		default:
-			return Error(o.Column.Segments[0].Off, "Where field must be 'k', 'v[{.<ident>}...]' or 'type'.")
+			return Error(o.Column.Segments[0].Off, "Where field must be 'k', 'v[{.<ident>}...]' or 't'.")
 		}
 		return nil
 	default:
@@ -288,7 +288,7 @@ func IsKey(o *query_parser.Operand) bool {
 }
 
 func IsType(o *query_parser.Operand) bool {
-	return IsField(o) && strings.ToLower(o.Column.Segments[0].Value) == "type"
+	return IsField(o) && strings.ToLower(o.Column.Segments[0].Value) == "t"
 }
 
 func IsExpr(o *query_parser.Operand) bool {

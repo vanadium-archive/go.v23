@@ -147,12 +147,12 @@ func TestQueryExec(t *testing.T) {
 			nil,
 		},
 		{
-			"select v from Customer where type = \"Foo.Bar\"",
+			"select v from Customer where t = \"Foo.Bar\"",
 			nil,
 			nil,
 		},
 		{
-			"select k, v from Customer where type = \"Foo.Bar\" and k like \"abc%\" limit 100 offset 200",
+			"select k, v from Customer where t = \"Foo.Bar\" and k like \"abc%\" limit 100 offset 200",
 			nil,
 			nil,
 		},
@@ -176,13 +176,13 @@ func TestKeyPrefixes(t *testing.T) {
 		},
 		{
 			// All selected rows will have key prefix of "abc".
-			"select k, v from Customer where type = \"Foo.Bar\" and k like \"abc%\"",
+			"select k, v from Customer where t = \"Foo.Bar\" and k like \"abc%\"",
 			[]string{"abc"},
 			nil,
 		},
 		{
 			// Need all keys (single prefix of "").
-			"select k, v from Customer where type = \"Foo.Bar\" or k like \"abc%\"",
+			"select k, v from Customer where t = \"Foo.Bar\" or k like \"abc%\"",
 			[]string{""},
 			nil,
 		},
@@ -194,7 +194,7 @@ func TestKeyPrefixes(t *testing.T) {
 		},
 		{
 			// All selected rows will have key prefix of "foo".
-			"select k, v from Customer where type = \"Foo.Bar\" and k like \"foo_bar\"",
+			"select k, v from Customer where t = \"Foo.Bar\" and k like \"foo_bar\"",
 			[]string{"foo"},
 			nil,
 		},
@@ -328,7 +328,7 @@ func TestEvalWhereUsingOnlyKey(t *testing.T) {
 		},
 		{
 			// Need value (i.e., its type) to determine if row should be selected.
-			"select k, v from Customer where k = \"xyz\" or type = \"foo.Bar\"",
+			"select k, v from Customer where k = \"xyz\" or t = \"foo.Bar\"",
 			"wxyz",
 			false,
 			errors.New("Value required for answer."),
@@ -373,11 +373,11 @@ func TestEvalWhereUsingOnlyKey(t *testing.T) {
 func TestEval(t *testing.T) {
 	basic := []evalTest{
 		{
-			"select k, v from Customer where type = \"v.io/syncbase/v23/syncbase/nosql/internal/query_test.Customer\"",
+			"select k, v from Customer where t = \"v.io/syncbase/v23/syncbase/nosql/internal/query_test.Customer\"",
 			"123456", sampleRow, true,
 		},
 		{
-			"select k, v from Customer where type = \"Customer\"",
+			"select k, v from Customer where t = \"Customer\"",
 			"123456", sampleRow, true,
 		},
 		{
