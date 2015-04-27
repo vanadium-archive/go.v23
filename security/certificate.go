@@ -27,8 +27,6 @@ var (
 	// invalidBlessingSubStrings are strings that a blessing extension cannot have as a substring.
 	invalidBlessingSubStrings = []string{string(AllPrincipals), ChainSeparator + ChainSeparator /* double slash not allowed */, ",", "@@", "(", ")", "<", ">"}
 	// invalidBlessingExtensions are strings that are disallowed as blessing extensions.
-	// TODO(ataly, ashankar): Add more reserved characters/strings to this list. Note that
-	// we need to be careful that none of these invalid strings are valid email addresses.
 	invalidBlessingExtensions = []string{string(NoExtension)}
 )
 
