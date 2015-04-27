@@ -9,8 +9,8 @@ import (
 	"fmt"
 	"reflect"
 	"testing"
-	"v.io/syncbase/v23/syncbase/query_checker"
-	"v.io/syncbase/v23/syncbase/query_parser"
+	"v.io/syncbase/v23/syncbase/query/query_checker"
+	"v.io/syncbase/v23/syncbase/query/query_parser"
 )
 
 type MockStore struct {

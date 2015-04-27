@@ -10,8 +10,8 @@ import (
 	"math/big"
 	"reflect"
 	"strconv"
-	"v.io/syncbase/v23/syncbase/query_checker"
-	"v.io/syncbase/v23/syncbase/query_parser"
+	"v.io/syncbase/v23/syncbase/query/query_checker"
+	"v.io/syncbase/v23/syncbase/query/query_parser"
 )
 
 func Eval(k string, v interface{}, e *query_parser.Expression) bool {

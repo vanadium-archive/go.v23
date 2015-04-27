@@ -7,7 +7,7 @@ package query_parser_test
 import (
 	"reflect"
 	"testing"
-	"v.io/syncbase/v23/syncbase/query_parser"
+	"v.io/syncbase/v23/syncbase/query/query_parser"
 )
 
 type parseSelectTest struct {
