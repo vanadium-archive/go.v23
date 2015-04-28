@@ -107,10 +107,24 @@ type evalTest struct {
 	result bool
 }
 
+type projectionTest struct {
+	query  string
+	k      string
+	v      interface{}
+	result []interface{}
+}
+
 type execSelectTest struct {
 	query string
 	r     *query.ResultStream
 	err   *query.QueryError
+}
+
+type execSelectSingleRowTest struct {
+	query  string
+	k      string
+	v      interface{}
+	result interface{}
 }
 
 type parseSelectErrorTest struct {
@@ -578,6 +592,168 @@ func TestEval(t *testing.T) {
 				case query_parser.SelectStatement:
 					result := query.Eval(test.k, test.v, sel.Where.Expr)
 					if result != test.result {
+						t.Errorf("query: %s; got %v, want %v", test.query, result, test.result)
+					}
+				default:
+					t.Errorf("query: %s; got %v, want query_parser.SelectStatement", reflect.TypeOf(*s))
+				}
+			}
+		}
+	}
+}
+
+func TestProjection(t *testing.T) {
+	basic := []projectionTest{
+		{
+			"select k, v from Customer where t = \"Customer\"",
+			"123456", sampleRow,
+			[]interface{}{
+				"123456",
+				sampleRow,
+			},
+		},
+		{
+			"select k, v, v.Name, v.ID, v.Active, v.Rating, v.Street, v.City, v.State, v.Zip, v.GratuituousBigInt, v.GratuituousBigRat, v.GratuituousByte, v.GratuituousUint16, v.GratuituousUint32, v.GratuituousUint64, v.GratuituousInt16, v.GratuituousInt32, v.Foo, v.Foo.FooBarBaz, v.Foo.FooBarBaz.Foo, v.Foo.FooBarBaz.Bar, v.Foo.FooBarBaz.Baz from Customer where t = \"Customer\"",
+			"123456", sampleRow,
+			[]interface{}{
+				"123456",
+				sampleRow,
+				"John Smith",
+				int64(123456),
+				true,
+				'A',
+				"1 Main St.",
+				"Palo Alto",
+				"CA",
+				"94303",
+				big.NewInt(1234567890),
+				big.NewRat(123, 1),
+				byte(12),
+				uint16(1234),
+				uint32(5678),
+				uint64(999888777666),
+				int16(9876),
+				int32(876543),
+				Nest1{Nest2{"foo", true, int64(42)}},
+				Nest2{"foo", true, int64(42)},
+				"foo",
+				true,
+				int64(42),
+			},
+		},
+	}
+
+	for _, test := range basic {
+		s, synErr := query_parser.Parse(test.query)
+		if synErr != nil {
+			t.Errorf("query: %s; got %v, want nil", test.query, synErr)
+		}
+		if synErr == nil {
+			semErr := query_checker.Check(store, s)
+			if semErr != nil {
+				t.Errorf("query: %s; got %v, want nil", test.query, semErr)
+			}
+			if semErr == nil {
+				switch sel := (*s).(type) {
+				case query_parser.SelectStatement:
+					result := query.ComposeProjection(test.k, test.v, sel.Select)
+					if !reflect.DeepEqual(result, test.result) {
+						t.Errorf("query: %s; got %v, want %v", test.query, result, test.result)
+					}
+				default:
+					t.Errorf("query: %s; got %v, want query_parser.SelectStatement", reflect.TypeOf(*s))
+				}
+			}
+		}
+	}
+}
+
+func TestExecSelectSingleRow(t *testing.T) {
+	basic := []execSelectSingleRowTest{
+		{
+			"select k, v from Customer where t = \"Customer\"",
+			"123456", sampleRow,
+			[]interface{}{
+				"123456",
+				sampleRow,
+			},
+		},
+		{
+			"select k, v from Customer where t = \"Customer\" and k like \"123%\"",
+			"123456", sampleRow,
+			[]interface{}{
+				"123456",
+				sampleRow,
+			},
+		},
+		{
+			"select k, v from Customer where t = \"Invoice\" and k like \"123%\"",
+			"123456", sampleRow,
+			nil,
+		},
+		{
+			"select k, v from Customer where t = \"Customer\" and k like \"456%\"",
+			"123456", sampleRow,
+			nil,
+		},
+		{
+			"select v from Customer where v.Name = \"John Smith\"",
+			"123456", sampleRow,
+			[]interface{}{
+				sampleRow,
+			},
+		},
+		{
+			"select v from Customer where v.Name = \"John Doe\"",
+			"123456", sampleRow,
+			nil,
+		},
+		{
+			"select k, v, v.Name, v.ID, v.Active, v.Rating, v.Street, v.City, v.State, v.Zip, v.GratuituousBigInt, v.GratuituousBigRat, v.GratuituousByte, v.GratuituousUint16, v.GratuituousUint32, v.GratuituousUint64, v.GratuituousInt16, v.GratuituousInt32, v.Foo, v.Foo.FooBarBaz, v.Foo.FooBarBaz.Foo, v.Foo.FooBarBaz.Bar, v.Foo.FooBarBaz.Baz from Customer where t = \"Customer\"",
+			"123456", sampleRow,
+			[]interface{}{
+				"123456",
+				sampleRow,
+				"John Smith",
+				int64(123456),
+				true,
+				'A',
+				"1 Main St.",
+				"Palo Alto",
+				"CA",
+				"94303",
+				big.NewInt(1234567890),
+				big.NewRat(123, 1),
+				byte(12),
+				uint16(1234),
+				uint32(5678),
+				uint64(999888777666),
+				int16(9876),
+				int32(876543),
+				Nest1{Nest2{"foo", true, int64(42)}},
+				Nest2{"foo", true, int64(42)},
+				"foo",
+				true,
+				int64(42),
+			},
+		},
+	}
+
+	for _, test := range basic {
+		s, synErr := query_parser.Parse(test.query)
+		if synErr != nil {
+			t.Errorf("query: %s; got %v, want nil", test.query, synErr)
+		}
+		if synErr == nil {
+			semErr := query_checker.Check(store, s)
+			if semErr != nil {
+				t.Errorf("query: %s; got %v, want nil", test.query, semErr)
+			}
+			if semErr == nil {
+				switch sel := (*s).(type) {
+				case query_parser.SelectStatement:
+					result := query.ExecSelectSingleRow(test.k, test.v, &sel)
+					if !reflect.DeepEqual(result, test.result) {
 						t.Errorf("query: %s; got %v, want %v", test.query, result, test.result)
 					}
 				default:

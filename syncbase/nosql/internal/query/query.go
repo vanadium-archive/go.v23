@@ -108,6 +108,21 @@ func Exec(db Store, q string) (ResultStream, *QueryError) {
 	}
 }
 
+// Given a key, a value and a SelectClause, return the projection.
+// This function is only called if Eval returned true on the WhereClause expression.
+func ComposeProjection(k string, v interface{}, s *query_parser.SelectClause) []interface{} {
+	var projection []interface{}
+	for _, f := range s.Columns {
+		if query_checker.IsKeyField(&f) {
+			projection = append(projection, k)
+		} else {
+			// If field not found, nil is returned (as per specification).
+			projection = append(projection, ResolveField(v, &f))
+		}
+	}
+	return projection
+}
+
 // Given a query (i.e.,, select statement), return the key prefixes needed to satisfy the query.
 // A return of a single empty string ([]string{ "" }) means fetch all keys.
 func CompileKeyPrefixes(w *query_parser.WhereClause) []string {
@@ -199,6 +214,16 @@ func EvalExprUsingOnlyKey(e *query_parser.Expression, k string) (bool, error) {
 	}
 }
 
+// For testing purposes, given a SelectStatement, k and v;
+// return nil if row not selected, else return the projection (type []interface{}).
+func ExecSelectSingleRow(k string, v interface{}, s *query_parser.SelectStatement) interface{} {
+	if !Eval(k, v, s.Where.Expr) {
+		return nil
+	}
+	return ComposeProjection(k, v, s.Select)
+}
+
+// TODO(jkline): Flesh out this function.
 func ExecSelect(db Store, s *query_parser.SelectStatement) (ResultStream, *QueryError) {
 	_ = CompileKeyPrefixes(s.Where)
 	return ResultStreamImpl{}, nil

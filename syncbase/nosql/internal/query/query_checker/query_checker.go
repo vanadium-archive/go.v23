@@ -284,11 +284,23 @@ func IsField(o *query_parser.Operand) bool {
 }
 
 func IsKey(o *query_parser.Operand) bool {
-	return IsField(o) && strings.ToLower(o.Column.Segments[0].Value) == "k"
+	return IsField(o) && IsKeyField(o.Column)
 }
 
 func IsType(o *query_parser.Operand) bool {
-	return IsField(o) && strings.ToLower(o.Column.Segments[0].Value) == "t"
+	return IsField(o) && IsTypeField(o.Column)
+}
+
+func IsKeyField(f *query_parser.Field) bool {
+	return strings.ToLower(f.Segments[0].Value) == "k"
+}
+
+func IsValueField(f *query_parser.Field) bool {
+	return strings.ToLower(f.Segments[0].Value) == "v"
+}
+
+func IsTypeField(f *query_parser.Field) bool {
+	return strings.ToLower(f.Segments[0].Value) == "t"
 }
 
 func IsExpr(o *query_parser.Operand) bool {
