@@ -111,7 +111,7 @@ func (DumpAtom) __VDLReflect(struct {
 type DumpKind int
 
 const (
-	DumpKindMagic DumpKind = iota
+	DumpKindVersion DumpKind = iota
 	DumpKindControl
 	DumpKindMsgId
 	DumpKindTypeMsg
@@ -126,7 +126,7 @@ const (
 )
 
 // DumpKindAll holds all labels for DumpKind.
-var DumpKindAll = [...]DumpKind{DumpKindMagic, DumpKindControl, DumpKindMsgId, DumpKindTypeMsg, DumpKindValueMsg, DumpKindMsgLen, DumpKindTypeId, DumpKindPrimValue, DumpKindByteLen, DumpKindValueLen, DumpKindIndex, DumpKindWireTypeIndex}
+var DumpKindAll = [...]DumpKind{DumpKindVersion, DumpKindControl, DumpKindMsgId, DumpKindTypeMsg, DumpKindValueMsg, DumpKindMsgLen, DumpKindTypeId, DumpKindPrimValue, DumpKindByteLen, DumpKindValueLen, DumpKindIndex, DumpKindWireTypeIndex}
 
 // DumpKindFromString creates a DumpKind from a string label.
 func DumpKindFromString(label string) (x DumpKind, err error) {
@@ -137,8 +137,8 @@ func DumpKindFromString(label string) (x DumpKind, err error) {
 // Set assigns label to x.
 func (x *DumpKind) Set(label string) error {
 	switch label {
-	case "Magic", "magic":
-		*x = DumpKindMagic
+	case "Version", "version":
+		*x = DumpKindVersion
 		return nil
 	case "Control", "control":
 		*x = DumpKindControl
@@ -181,8 +181,8 @@ func (x *DumpKind) Set(label string) error {
 // String returns the string label of x.
 func (x DumpKind) String() string {
 	switch x {
-	case DumpKindMagic:
-		return "Magic"
+	case DumpKindVersion:
+		return "Version"
 	case DumpKindControl:
 		return "Control"
 	case DumpKindMsgId:
@@ -211,7 +211,7 @@ func (x DumpKind) String() string {
 
 func (DumpKind) __VDLReflect(struct {
 	Name string "v.io/v23/vom.DumpKind"
-	Enum struct{ Magic, Control, MsgId, TypeMsg, ValueMsg, MsgLen, TypeId, PrimValue, ByteLen, ValueLen, Index, WireTypeIndex string }
+	Enum struct{ Version, Control, MsgId, TypeMsg, ValueMsg, MsgLen, TypeId, PrimValue, ByteLen, ValueLen, Index, WireTypeIndex string }
 }) {
 }
 

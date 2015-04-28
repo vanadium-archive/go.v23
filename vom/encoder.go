@@ -46,7 +46,8 @@ type Encoder struct {
 	// encoding buffer, which will be used to ignore zero value fields in structs.
 	typeStack []typeStackEntry
 	// All types are sent through typeEnc.
-	typeEnc *TypeEncoder
+	typeEnc         *TypeEncoder
+	sentVersionByte bool
 }
 
 type typeStackEntry struct {
@@ -56,29 +57,36 @@ type typeStackEntry struct {
 
 // NewEncoder returns a new Encoder that writes to the given writer in the
 // binary format. The binary format is compact and fast.
-func NewEncoder(w io.Writer) (*Encoder, error) {
-	if err := writeMagicByte(w); err != nil {
-		return nil, err
+func NewEncoder(w io.Writer) *Encoder {
+	return &Encoder{
+		writer:          w,
+		buf:             newEncbuf(),
+		typeStack:       make([]typeStackEntry, 0, 10),
+		typeEnc:         newTypeEncoderWithoutVersionByte(w),
+		sentVersionByte: false,
 	}
-	return newEncoder(w, newTypeEncoder(w)), nil
 }
 
 // NewEncoderWithTypeEncoder returns a new Encoder that writes to the given
 // writer in the binary format. Types will be encoded separately through the
 // given typeEncoder.
-func NewEncoderWithTypeEncoder(w io.Writer, typeEnc *TypeEncoder) (*Encoder, error) {
-	if err := writeMagicByte(w); err != nil {
-		return nil, err
+func NewEncoderWithTypeEncoder(w io.Writer, typeEnc *TypeEncoder) *Encoder {
+	return &Encoder{
+		writer:          w,
+		buf:             newEncbuf(),
+		typeStack:       make([]typeStackEntry, 0, 10),
+		typeEnc:         typeEnc,
+		sentVersionByte: false,
 	}
-	return newEncoder(w, typeEnc), nil
 }
 
-func newEncoder(w io.Writer, typeEnc *TypeEncoder) *Encoder {
+func newEncoderWithoutVersionByte(w io.Writer, typeEnc *TypeEncoder) *Encoder {
 	return &Encoder{
-		writer:    w,
-		buf:       newEncbuf(),
-		typeStack: make([]typeStackEntry, 0, 10),
-		typeEnc:   typeEnc,
+		writer:          w,
+		buf:             newEncbuf(),
+		typeStack:       make([]typeStackEntry, 0, 10),
+		typeEnc:         typeEnc,
+		sentVersionByte: true,
 	}
 }
 
@@ -100,6 +108,12 @@ func (e *Encoder) Encode(v interface{}) error {
 		// TODO(toddw): Decode from RawValue, encoding into e.enc.
 		_ = raw
 		panic("Encode(RawValue) NOT IMPLEMENTED")
+	}
+	if !e.sentVersionByte {
+		if err := writeVersionByte(e.writer); err != nil {
+			return err
+		}
+		e.sentVersionByte = true
 	}
 	if err := e.startEncode(); err != nil {
 		return err

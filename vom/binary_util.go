@@ -13,12 +13,12 @@ import (
 )
 
 var (
-	errInvalid           = verror.Register(pkgPath+".errInvalid", verror.NoRetry, "{1:}{2:} vom: invalid encoding{:_}")
-	errMsgLen            = verror.Register(pkgPath+".errMsgLen", verror.NoRetry, "{1:}{2:} vom: message larger than {3} bytes{:_}")
-	errUintOverflow      = verror.Register(pkgPath+".errUintOverflow", verror.NoRetry, "{1:}{2:} vom: scalar larger than 8 bytes{:_}")
-	errBadControlCode    = verror.Register(pkgPath+".errBadControlCode", verror.NoRetry, "{1:}{2:} invalid control code{:_}")
-	errCantReadMagicByte = verror.Register(pkgPath+".errCantReadMagicByte", verror.NoRetry, "{1:}{2:} error reading magic byte {3}{:_}")
-	errBadMagicByte      = verror.Register(pkgPath+".errBadMagicByte", verror.NoRetry, "{1:}{2:} bad magic byte, got {3}, want {4}{:_}")
+	errInvalid             = verror.Register(pkgPath+".errInvalid", verror.NoRetry, "{1:}{2:} vom: invalid encoding{:_}")
+	errMsgLen              = verror.Register(pkgPath+".errMsgLen", verror.NoRetry, "{1:}{2:} vom: message larger than {3} bytes{:_}")
+	errUintOverflow        = verror.Register(pkgPath+".errUintOverflow", verror.NoRetry, "{1:}{2:} vom: scalar larger than 8 bytes{:_}")
+	errBadControlCode      = verror.Register(pkgPath+".errBadControlCode", verror.NoRetry, "{1:}{2:} invalid control code{:_}")
+	errCantReadVersionByte = verror.Register(pkgPath+".errCantReadVersionByte", verror.NoRetry, "{1:}{2:} error reading version byte {3}{:_}")
+	errBadVersionByte      = verror.Register(pkgPath+".errBadVersionByte", verror.NoRetry, "{1:}{2:} bad version byte, got {3}, want {4}{:_}")
 )
 
 // Binary encoding and decoding routines.  The binary format is identical to the
@@ -29,11 +29,11 @@ const (
 	maxEncodedUintBytes = uint64Size + 1 // +1 for length byte
 	maxBinaryMsgLen     = 1 << 30        // 1GiB limit to each message
 
-	// Every binary stream starts with this magic byte, to distinguish the binary
+	// Every binary stream starts with this version byte, to distinguish the binary
 	// encoding from the JSON encoding.  Note that every valid JSON encoding must
-	// start with an ASCII character, or the BOM U+FEFF, and this magic byte is
+	// start with an ASCII character, or the BOM U+FEFF, and this version byte is
 	// unambiguous regardless of the endianness of the JSON encoding.
-	binaryMagicByte byte = 0x80
+	binaryVersionByte byte = 0x80
 )
 
 // hasBinaryMsgLen returns true iff the type t is encoded with a top-level
@@ -451,22 +451,22 @@ func binaryIgnoreString(buf *decbuf) error {
 	return buf.Skip(len)
 }
 
-func writeMagicByte(w io.Writer) error {
-	// The binary format always starts with a magic byte.
-	if _, err := w.Write([]byte{binaryMagicByte}); err != nil {
+func writeVersionByte(w io.Writer) error {
+	// The binary format always starts with a version byte.
+	if _, err := w.Write([]byte{binaryVersionByte}); err != nil {
 		return err
 	}
 	return nil
 }
 
-func readMagicByte(buf *decbuf) error {
-	// The binary format always starts with a magic byte.
-	magic, err := buf.PeekByte()
+func readVersionByte(buf *decbuf) error {
+	// The binary format always starts with a version byte.
+	versionByte, err := buf.PeekByte()
 	if err != nil {
-		return verror.New(errCantReadMagicByte, nil, err)
+		return verror.New(errCantReadVersionByte, nil, err)
 	}
-	if magic != binaryMagicByte {
-		return verror.New(errBadMagicByte, nil, magic, binaryMagicByte)
+	if versionByte != binaryVersionByte {
+		return verror.New(errBadVersionByte, nil, versionByte, binaryVersionByte)
 	}
 	buf.Skip(1)
 	return nil

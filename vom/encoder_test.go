@@ -15,9 +15,9 @@ import (
 func TestEncoder(t *testing.T) {
 	for _, test := range testdata.Tests {
 		name := test.Name + " [vdl.Value]"
-		testEncode(t, name, test.Value, test.HexMagic+test.HexType+test.HexValue)
+		testEncode(t, name, test.Value, test.HexVersion+test.HexType+test.HexValue)
 		name = test.Name + " [vdl.Value] (with TypeEncoder)"
-		testEncodeWithTypeEncoder(t, name, test.Value, test.HexMagic, test.HexType, test.HexValue)
+		testEncodeWithTypeEncoder(t, name, test.Value, test.HexVersion, test.HexType, test.HexValue)
 
 		// Convert into Go value for the rest of our tests.
 		goValue, err := toGoValue(test.Value)
@@ -27,19 +27,15 @@ func TestEncoder(t *testing.T) {
 		}
 
 		name = test.Name + " [go value]"
-		testEncode(t, name, goValue, test.HexMagic+test.HexType+test.HexValue)
+		testEncode(t, name, goValue, test.HexVersion+test.HexType+test.HexValue)
 		name = test.Name + " [go value] (with TypeEncoder)"
-		testEncodeWithTypeEncoder(t, name, goValue, test.HexMagic, test.HexType, test.HexValue)
+		testEncodeWithTypeEncoder(t, name, goValue, test.HexVersion, test.HexType, test.HexValue)
 	}
 }
 
 func testEncode(t *testing.T, name string, value interface{}, hex string) {
 	var buf bytes.Buffer
-	encoder, err := NewEncoder(&buf)
-	if err != nil {
-		t.Errorf("%s: NewEncoder failed: %v", name, err)
-		return
-	}
+	encoder := NewEncoder(&buf)
 	if err := encoder.Encode(value); err != nil {
 		t.Errorf("%s: Encode(%#v) failed: %v", name, value, err)
 		return
@@ -54,32 +50,23 @@ func testEncode(t *testing.T, name string, value interface{}, hex string) {
 	}
 }
 
-func testEncodeWithTypeEncoder(t *testing.T, name string, value interface{}, hexmagic, hextype, hexvalue string) {
-	var typebuf bytes.Buffer
-	typeenc, err := NewTypeEncoder(&typebuf)
-	if err != nil {
-		t.Errorf("%s: NewTypeEncoder failed: %v", name, err)
-		return
-	}
-	var buf bytes.Buffer
-	encoder, err := NewEncoderWithTypeEncoder(&buf, typeenc)
-	if err != nil {
-		t.Errorf("%s: NewEncoderWithTypeEncoder failed: %v", name, err)
-		return
-	}
+func testEncodeWithTypeEncoder(t *testing.T, name string, value interface{}, hexversion, hextype, hexvalue string) {
+	var buf, typebuf bytes.Buffer
+	typeenc := NewTypeEncoder(&typebuf)
+	encoder := NewEncoderWithTypeEncoder(&buf, typeenc)
 	if err := encoder.Encode(value); err != nil {
 		t.Errorf("%s: Encode(%#v) failed: %v", name, value, err)
 		return
 	}
-	got, want := fmt.Sprintf("%x", typebuf.Bytes()), hexmagic+hextype
+	got, want := fmt.Sprintf("%x", typebuf.Bytes()), hexversion+hextype
 	match, err := matchHexPat(got, want)
 	if err != nil {
 		t.Error(err)
 	}
-	if !match {
+	if !match && len(hextype) > 0 {
 		t.Errorf("%s: EncodeType(%#v)\nGOT %s\nWANT %s", name, value, got, want)
 	}
-	got, want = fmt.Sprintf("%x", buf.Bytes()), hexmagic+hexvalue
+	got, want = fmt.Sprintf("%x", buf.Bytes()), hexversion+hexvalue
 	match, err = matchHexPat(got, want)
 	if err != nil {
 		t.Error(err)

@@ -173,7 +173,7 @@ func startDumpWorker(cmd <-chan dumpCmd, close chan<- struct{}, w DumpWriter) {
 		cmdChan:   cmd,
 		closeChan: close,
 		w:         w,
-		typeDec:   newTypeDecoder(nil),
+		typeDec:   newTypeDecoderWithoutVersionByte(nil),
 	}
 	worker.buf = newDecbuf(worker)
 	go worker.decodeLoop()
@@ -373,6 +373,18 @@ func (d *dumpWorker) writeAtom(kind DumpKind, data Primitive, format string, v .
 }
 
 func (d *dumpWorker) decodeNextValue() error {
+	// Decode the version byte. To make the dumper easier to use on partial data,
+	// the version byte is optional. Note that this relies on 0x80 not being a
+	// valid first byte of regular data.
+	d.prepareAtom("waiting for version byte or first byte of message")
+	switch versionByte, err := d.buf.PeekByte(); {
+	case err != nil:
+		d.writeStatus(err, true)
+		return err
+	case versionByte == binaryVersionByte:
+		d.buf.Skip(1)
+		d.writeAtom(DumpKindVersion, PrimitivePByte{versionByte}, "vom version 0")
+	}
 	// Decode type messages until we get to the type of the next value.
 	valType, err := d.decodeValueType()
 	if err != nil {
@@ -390,17 +402,6 @@ func (d *dumpWorker) decodeNextValue() error {
 func (d *dumpWorker) decodeValueType() (*vdl.Type, error) {
 	for {
 		d.status = DumpStatus{}
-		// Decode the magic byte.  To make the dumper easier to use on partial data,
-		// the magic byte is optional.  Note that this relies on 0x80 not being a
-		// valid first byte of regular data.
-		d.prepareAtom("waiting for magic byte or first byte of message")
-		switch magic, err := d.buf.PeekByte(); {
-		case err != nil:
-			return nil, err
-		case magic == binaryMagicByte:
-			d.buf.Skip(1)
-			d.writeAtom(DumpKindMagic, PrimitivePByte{magic}, "vom version 0")
-		}
 		d.prepareAtom("waiting for message ID")
 		id, err := binaryDecodeInt(d.buf)
 		if err != nil {

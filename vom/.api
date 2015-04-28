@@ -3,7 +3,6 @@ pkg vom, const ControlKindNil ControlKind
 pkg vom, const DumpKindByteLen DumpKind
 pkg vom, const DumpKindControl DumpKind
 pkg vom, const DumpKindIndex DumpKind
-pkg vom, const DumpKindMagic DumpKind
 pkg vom, const DumpKindMsgId DumpKind
 pkg vom, const DumpKindMsgLen DumpKind
 pkg vom, const DumpKindPrimValue DumpKind
@@ -11,6 +10,7 @@ pkg vom, const DumpKindTypeId DumpKind
 pkg vom, const DumpKindTypeMsg DumpKind
 pkg vom, const DumpKindValueLen DumpKind
 pkg vom, const DumpKindValueMsg DumpKind
+pkg vom, const DumpKindVersion DumpKind
 pkg vom, const DumpKindWireTypeIndex DumpKind
 pkg vom, const WireCtrlEnd byte
 pkg vom, const WireCtrlNil byte
@@ -37,14 +37,14 @@ pkg vom, func Decode([]byte, interface{}) error
 pkg vom, func Dump([]byte) string
 pkg vom, func DumpKindFromString(string) (DumpKind, error)
 pkg vom, func Encode(interface{}) ([]byte, error)
-pkg vom, func NewDecoder(io.Reader) (*Decoder, error)
-pkg vom, func NewDecoderWithTypeDecoder(io.Reader, *TypeDecoder) (*Decoder, error)
+pkg vom, func NewDecoder(io.Reader) *Decoder
+pkg vom, func NewDecoderWithTypeDecoder(io.Reader, *TypeDecoder) *Decoder
 pkg vom, func NewDumpWriter(io.Writer) DumpWriter
 pkg vom, func NewDumper(DumpWriter) *Dumper
-pkg vom, func NewEncoder(io.Writer) (*Encoder, error)
-pkg vom, func NewEncoderWithTypeEncoder(io.Writer, *TypeEncoder) (*Encoder, error)
-pkg vom, func NewTypeDecoder(io.Reader) (*TypeDecoder, error)
-pkg vom, func NewTypeEncoder(io.Writer) (*TypeEncoder, error)
+pkg vom, func NewEncoder(io.Writer) *Encoder
+pkg vom, func NewEncoderWithTypeEncoder(io.Writer, *TypeEncoder) *Encoder
+pkg vom, func NewTypeDecoder(io.Reader) *TypeDecoder
+pkg vom, func NewTypeEncoder(io.Writer) *TypeEncoder
 pkg vom, method (*ControlKind) Set(string) error
 pkg vom, method (*Decoder) Decode(interface{}) error
 pkg vom, method (*Decoder) Ignore() error

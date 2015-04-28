@@ -27,7 +27,7 @@ type DumpAtom struct {
 
 // DumpKind enumerates the different kinds of dump atoms.
 type DumpKind enum {
-	Magic         // [byte] Magic number, the first byte of a vom stream.
+	Version       // [byte] Version byte, the first byte of a vom stream.
 	Control       // [byte] Control byte.
 	MsgId         // [int]  Message Id, distinguishing type and value messages.
 	TypeMsg       // [uint] Type message, describes the type identified by -MsgId.

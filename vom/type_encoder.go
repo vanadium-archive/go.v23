@@ -25,24 +25,28 @@ type TypeEncoder struct {
 	typeToId map[*vdl.Type]typeId // GUARDED_BY(typeMu)
 	nextId   typeId               // GUARDED_BY(typeMu)
 
-	encMu sync.Mutex
-	enc   *Encoder // GUARDED_BY(encMu)
+	encMu           sync.Mutex
+	enc             *Encoder // GUARDED_BY(encMu)
+	sentVersionByte bool     // GUARDED_BY(encMu)
 }
 
 // NewTypeEncoder returns a new TypeEncoder that writes types to the given
 // writer in the binary format.
-func NewTypeEncoder(w io.Writer) (*TypeEncoder, error) {
-	if err := writeMagicByte(w); err != nil {
-		return nil, err
+func NewTypeEncoder(w io.Writer) *TypeEncoder {
+	return &TypeEncoder{
+		typeToId:        make(map[*vdl.Type]typeId),
+		nextId:          WireIdFirstUserType,
+		enc:             newEncoderWithoutVersionByte(w, nil),
+		sentVersionByte: false,
 	}
-	return newTypeEncoder(w), nil
 }
 
-func newTypeEncoder(w io.Writer) *TypeEncoder {
+func newTypeEncoderWithoutVersionByte(w io.Writer) *TypeEncoder {
 	return &TypeEncoder{
-		typeToId: make(map[*vdl.Type]typeId),
-		nextId:   WireIdFirstUserType,
-		enc:      newEncoder(w, nil),
+		typeToId:        make(map[*vdl.Type]typeId),
+		nextId:          WireIdFirstUserType,
+		enc:             newEncoderWithoutVersionByte(w, nil),
+		sentVersionByte: true,
 	}
 }
 
@@ -72,6 +76,12 @@ func (e *TypeEncoder) encode(tt *vdl.Type) (typeId, error) {
 	// orders. Figure out the solution.
 	e.encMu.Lock()
 	defer e.encMu.Unlock()
+	if !e.sentVersionByte {
+		if err := writeVersionByte(e.enc.writer); err != nil {
+			return 0, err
+		}
+		e.sentVersionByte = true
+	}
 	return e.encodeType(tt)
 }
 

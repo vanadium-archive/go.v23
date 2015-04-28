@@ -22,9 +22,9 @@ import (
 func TestDecoder(t *testing.T) {
 	for _, test := range testdata.Tests {
 		// Decode hex patterns into binary data.
-		binmagic, err := binFromHexPat(test.HexMagic)
+		binversion, err := binFromHexPat(test.HexVersion)
 		if err != nil {
-			t.Errorf("%s: couldn't convert to binary from hexmagic: %q", test.Name, test.HexMagic)
+			t.Errorf("%s: couldn't convert to binary from hexversion: %q", test.Name, test.HexVersion)
 			continue
 		}
 		bintype, err := binFromHexPat(test.HexType)
@@ -39,14 +39,14 @@ func TestDecoder(t *testing.T) {
 		}
 
 		name := test.Name + " [vdl.Value]"
-		testDecodeVDL(t, name, binmagic+bintype+binvalue, test.Value)
+		testDecodeVDL(t, name, binversion+bintype+binvalue, test.Value)
 		name = test.Name + " [vdl.Value] (with TypeDecoder)"
-		testDecodeVDLWithTypeDecoder(t, name, binmagic, bintype, binvalue, test.Value)
+		testDecodeVDLWithTypeDecoder(t, name, binversion, bintype, binvalue, test.Value)
 
 		name = test.Name + " [vdl.Any]"
-		testDecodeVDL(t, name, binmagic+bintype+binvalue, vdl.AnyValue(test.Value))
+		testDecodeVDL(t, name, binversion+bintype+binvalue, vdl.AnyValue(test.Value))
 		name = test.Name + " [vdl.Any] (with TypeDecoder)"
-		testDecodeVDLWithTypeDecoder(t, name, binmagic, bintype, binvalue, vdl.AnyValue(test.Value))
+		testDecodeVDLWithTypeDecoder(t, name, binversion, bintype, binvalue, vdl.AnyValue(test.Value))
 
 		// Convert into Go value for the rest of our tests.
 		goValue, err := toGoValue(test.Value)
@@ -56,25 +56,21 @@ func TestDecoder(t *testing.T) {
 		}
 
 		name = test.Name + " [go value]"
-		testDecodeGo(t, name, binmagic+bintype+binvalue, reflect.TypeOf(goValue), goValue)
+		testDecodeGo(t, name, binversion+bintype+binvalue, reflect.TypeOf(goValue), goValue)
 		name = test.Name + " [go value] (with TypeDecoder)"
-		testDecodeGoWithTypeDecoder(t, name, binmagic, bintype, binvalue, reflect.TypeOf(goValue), goValue)
+		testDecodeGoWithTypeDecoder(t, name, binversion, bintype, binvalue, reflect.TypeOf(goValue), goValue)
 
 		name = test.Name + " [go interface]"
-		testDecodeGo(t, name, binmagic+bintype+binvalue, reflect.TypeOf((*interface{})(nil)).Elem(), goValue)
+		testDecodeGo(t, name, binversion+bintype+binvalue, reflect.TypeOf((*interface{})(nil)).Elem(), goValue)
 		name = test.Name + " [go interface] (with TypeDecoder)"
-		testDecodeGoWithTypeDecoder(t, name, binmagic, bintype, binvalue, reflect.TypeOf((*interface{})(nil)).Elem(), goValue)
+		testDecodeGoWithTypeDecoder(t, name, binversion, bintype, binvalue, reflect.TypeOf((*interface{})(nil)).Elem(), goValue)
 	}
 }
 
 func testDecodeVDL(t *testing.T, name, bin string, value *vdl.Value) {
 	for _, mode := range allReadModes {
 		head := fmt.Sprintf("%s (%s)", name, mode)
-		decoder, err := NewDecoder(mode.testReader(strings.NewReader(bin)))
-		if err != nil {
-			t.Errorf("%s: NewDecoder failed: %v", head, err)
-			return
-		}
+		decoder := NewDecoder(mode.testReader(strings.NewReader(bin)))
 		got := vdl.ZeroValue(value.Type())
 		if err := decoder.Decode(got); err != nil {
 			t.Errorf("%s: Decode failed: %v", head, err)
@@ -87,19 +83,11 @@ func testDecodeVDL(t *testing.T, name, bin string, value *vdl.Value) {
 	}
 }
 
-func testDecodeVDLWithTypeDecoder(t *testing.T, name, binmagic, bintype, binvalue string, value *vdl.Value) {
+func testDecodeVDLWithTypeDecoder(t *testing.T, name, binversion, bintype, binvalue string, value *vdl.Value) {
 	for _, mode := range allReadModes {
 		head := fmt.Sprintf("%s (%s)", name, mode)
-		typedec, err := NewTypeDecoder(mode.testReader(strings.NewReader(binmagic + bintype)))
-		if err != nil {
-			t.Errorf("%s: NewTypeDecoder failed: %v", head, err)
-			return
-		}
-		decoder, err := NewDecoderWithTypeDecoder(mode.testReader(strings.NewReader(binmagic+binvalue)), typedec)
-		if err != nil {
-			t.Errorf("%s: NewDecoderWithTypeDecoder failed: %v", head, err)
-			return
-		}
+		typedec := NewTypeDecoder(mode.testReader(strings.NewReader(binversion + bintype)))
+		decoder := NewDecoderWithTypeDecoder(mode.testReader(strings.NewReader(binversion+binvalue)), typedec)
 		got := vdl.ZeroValue(value.Type())
 		if err := decoder.Decode(got); err != nil {
 			t.Errorf("%s: Decode failed: %v", head, err)
@@ -115,11 +103,7 @@ func testDecodeVDLWithTypeDecoder(t *testing.T, name, binmagic, bintype, binvalu
 func testDecodeGo(t *testing.T, name, bin string, rt reflect.Type, want interface{}) {
 	for _, mode := range allReadModes {
 		head := fmt.Sprintf("%s (%s)", name, mode)
-		decoder, err := NewDecoder(mode.testReader(strings.NewReader(bin)))
-		if err != nil {
-			t.Errorf("%s: NewDecoder failed: %v", head, err)
-			return
-		}
+		decoder := NewDecoder(mode.testReader(strings.NewReader(bin)))
 		rvGot := reflect.New(rt)
 		if err := decoder.Decode(rvGot.Interface()); err != nil {
 			t.Errorf("%s: Decode failed: %v", head, err)
@@ -132,19 +116,11 @@ func testDecodeGo(t *testing.T, name, bin string, rt reflect.Type, want interfac
 	}
 }
 
-func testDecodeGoWithTypeDecoder(t *testing.T, name, binmagic, bintype, binvalue string, rt reflect.Type, want interface{}) {
+func testDecodeGoWithTypeDecoder(t *testing.T, name, binversion, bintype, binvalue string, rt reflect.Type, want interface{}) {
 	for _, mode := range allReadModes {
 		head := fmt.Sprintf("%s (%s)", name, mode)
-		typedec, err := NewTypeDecoder(mode.testReader(strings.NewReader(binmagic + bintype)))
-		if err != nil {
-			t.Errorf("%s: NewTypeDecoder failed: %v", head, err)
-			return
-		}
-		decoder, err := NewDecoderWithTypeDecoder(mode.testReader(strings.NewReader(binmagic+binvalue)), typedec)
-		if err != nil {
-			t.Errorf("%s: NewDecoderWithTypeDecoder failed: %v", head, err)
-			return
-		}
+		typedec := NewTypeDecoder(mode.testReader(strings.NewReader(binversion + bintype)))
+		decoder := NewDecoderWithTypeDecoder(mode.testReader(strings.NewReader(binversion+binvalue)), typedec)
 		rv := reflect.New(rt)
 		if err := decoder.Decode(rv.Interface()); err != nil {
 			t.Errorf("%s: Decode failed: %v", head, err)
@@ -258,16 +234,9 @@ func testRoundtrip(t *testing.T, withTypeEncoderDecoder bool, concurrency int) {
 		typedec *TypeDecoder
 	)
 	if withTypeEncoderDecoder {
-		var err error
 		r, w := newPipe()
-		typeenc, err = NewTypeEncoder(w)
-		if err != nil {
-			t.Fatal("NewTypeEncoder failed: %v", err)
-		}
-		typedec, err = NewTypeDecoder(r)
-		if err != nil {
-			t.Fatal("NewTypeDecoder failed: %v", err)
-		}
+		typeenc = NewTypeEncoder(w)
+		typedec = NewTypeDecoder(r)
 	}
 
 	var wg sync.WaitGroup
@@ -283,30 +252,13 @@ func testRoundtrip(t *testing.T, withTypeEncoderDecoder bool, concurrency int) {
 					encoder *Encoder
 					decoder *Decoder
 					buf     bytes.Buffer
-					err     error
 				)
 				if withTypeEncoderDecoder {
-					encoder, err = NewEncoderWithTypeEncoder(&buf, typeenc)
-					if err != nil {
-						t.Errorf("%s: NewEncoderWithTypeEncoder failed: %v", name, err)
-						return
-					}
-					decoder, err = NewDecoderWithTypeDecoder(&buf, typedec)
-					if err != nil {
-						t.Errorf("%s: NewDecoderWithTypeDecoder failed: %v", name, err)
-						return
-					}
+					encoder = NewEncoderWithTypeEncoder(&buf, typeenc)
+					decoder = NewDecoderWithTypeDecoder(&buf, typedec)
 				} else {
-					encoder, err = NewEncoder(&buf)
-					if err != nil {
-						t.Errorf("%s: NewEncoder failed: %v", name, err)
-						return
-					}
-					decoder, err = NewDecoder(&buf)
-					if err != nil {
-						t.Errorf("%s: NewDecoder failed: %v", name, err)
-						return
-					}
+					encoder = NewEncoder(&buf)
+					decoder = NewDecoder(&buf)
 				}
 
 				if err := encoder.Encode(test.In); err != nil {
