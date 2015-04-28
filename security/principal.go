@@ -77,9 +77,10 @@ func (s errStore) PublicKey() PublicKey                       { return s.key }
 
 type errRoots struct{}
 
-func (errRoots) Add(PublicKey, BlessingPattern) error { return verror.New(errNilRoots, nil) }
-func (errRoots) Recognized(PublicKey, string) error   { return verror.New(errNilRoots, nil) }
-func (errRoots) DebugString() string                  { return verror.New(errNilRoots, nil).Error() }
+func (errRoots) Add(PublicKey, BlessingPattern) error  { return verror.New(errNilRoots, nil) }
+func (errRoots) Recognized(PublicKey, string) error    { return verror.New(errNilRoots, nil) }
+func (errRoots) Dump() map[BlessingPattern][]PublicKey { return nil }
+func (errRoots) DebugString() string                   { return verror.New(errNilRoots, nil).Error() }
 
 type principal struct {
 	signer Signer

@@ -344,6 +344,7 @@ func newPrincipal(t *testing.T) security.Principal {
 
 type trustAllRoots struct{}
 
-func (trustAllRoots) Add(security.PublicKey, security.BlessingPattern) error { return nil }
-func (trustAllRoots) Recognized(security.PublicKey, string) error            { return nil }
-func (trustAllRoots) DebugString() string                                    { return fmt.Sprintf("%T", trustAllRoots{}) }
+func (trustAllRoots) Add(security.PublicKey, security.BlessingPattern) error  { return nil }
+func (trustAllRoots) Recognized(security.PublicKey, string) error             { return nil }
+func (trustAllRoots) Dump() map[security.BlessingPattern][]security.PublicKey { return nil }
+func (trustAllRoots) DebugString() string                                     { return fmt.Sprintf("%T", trustAllRoots{}) }

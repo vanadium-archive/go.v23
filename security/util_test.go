@@ -47,6 +47,14 @@ func (r *roots) Recognized(root PublicKey, blessing string) error {
 	return NewErrUnrecognizedRoot(nil, root.String(), nil)
 }
 
+func (r *roots) Dump() map[BlessingPattern][]PublicKey {
+	ret := make(map[BlessingPattern][]PublicKey)
+	for _, mr := range r.data {
+		ret[mr.pattern] = append(ret[mr.pattern], mr.root)
+	}
+	return ret
+}
+
 func (*roots) DebugString() string {
 	return "BlessingRoots implementation for testing purposes only"
 }

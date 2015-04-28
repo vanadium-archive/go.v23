@@ -64,9 +64,10 @@ pkg security, method (WireDischargePublicKey) Name() string
 pkg security, type Authorizer interface { Authorize }
 pkg security, type Authorizer interface, Authorize(*context.T, Call) error
 pkg security, type BlessingPattern string
-pkg security, type BlessingRoots interface { Add, DebugString, Recognized }
+pkg security, type BlessingRoots interface { Add, DebugString, Dump, Recognized }
 pkg security, type BlessingRoots interface, Add(PublicKey, BlessingPattern) error
 pkg security, type BlessingRoots interface, DebugString() string
+pkg security, type BlessingRoots interface, Dump() map[BlessingPattern][]PublicKey
 pkg security, type BlessingRoots interface, Recognized(PublicKey, string) error
 pkg security, type BlessingStore interface { DebugString, Default, ForPeer, PeerBlessings, PublicKey, Set, SetDefault }
 pkg security, type BlessingStore interface, DebugString() string

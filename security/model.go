@@ -281,6 +281,11 @@ type BlessingRoots interface {
 	// as an authority on a pattern that is matched by blessing.
 	Recognized(root PublicKey, blessing string) error
 
+	// Dump returns the set of recognized roots as a map from
+	// blessing patterns to the set of authoritative keys for that
+	// pattern.
+	Dump() map[BlessingPattern][]PublicKey
+
 	// DebugString returns a human-readable string description of the roots.
 	// This description is detailed and lists out all the roots. Use
 	// fmt.Sprintf("%v", ...) for a more succinct description.
