@@ -220,11 +220,11 @@ type BlessingStore interface {
 	Set(blessings Blessings, forPeers BlessingPattern) (Blessings, error)
 
 	// ForPeer returns the set of blessings that have been previously
-	// Add-ed to the store with an intent of being shared with peers
+	// added to the store with an intent of being shared with peers
 	// that have at least one of the provided blessings.
 	//
 	// If no peerBlessings are provided then blessings marked for all peers
-	// (i.e., Add-ed with the AllPrincipals pattern) is returned.
+	// (i.e., added with the AllPrincipals pattern) is returned.
 	//
 	// Returns the zero value if there are no matching blessings in the store.
 	ForPeer(peerBlessings ...string) Blessings
