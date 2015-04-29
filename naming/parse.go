@@ -194,7 +194,7 @@ func DecodeFromNameElement(s string) (string, bool) {
 	if !strings.Contains(s, "%") {
 		return s, true
 	}
-	t := make([]byte, len(s)*3)
+	t := make([]byte, len(s))
 	j := 0
 	for i := 0; i < len(s); {
 		if s[i] != '%' {
