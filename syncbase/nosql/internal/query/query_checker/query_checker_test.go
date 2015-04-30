@@ -10,26 +10,41 @@ import (
 	"testing"
 
 	"v.io/syncbase/v23/syncbase/nosql/internal/query/query_checker"
+	"v.io/syncbase/v23/syncbase/nosql/internal/query/query_db"
 	"v.io/syncbase/v23/syncbase/nosql/internal/query/query_parser"
 )
 
-type MockStore struct {
-	tables *[]string
+type MockDB struct {
 }
 
-func (db MockStore) CheckTable(table string) error {
-	for _, db_table := range *db.tables {
-		if table == db_table {
-			return nil
-		}
+type CustomerTable struct {
+}
+
+type InvoiceTable struct {
+}
+
+func (invoiceTable InvoiceTable) Scan(prefixes []string) (query_db.KeyValueStream, error) {
+	return nil, errors.New("unimplemented")
+}
+
+func (customerTable CustomerTable) Scan(prefixes []string) (query_db.KeyValueStream, error) {
+	return nil, errors.New("unimplemented")
+}
+
+func (db MockDB) GetTable(table string) (query_db.Table, error) {
+	if table == "Customer" {
+		var customerTable CustomerTable
+		return customerTable, nil
+	} else if table == "Invoice" {
+		var invoiceTable InvoiceTable
+		return invoiceTable, nil
 	}
-	return errors.New(fmt.Sprintf("No such table: %s", table))
+	return nil, errors.New(fmt.Sprintf("No such table: %s", table))
 }
 
-var store MockStore
+var db MockDB
 
 func TestCreate(t *testing.T) {
-	store.tables = &[]string{"Customer", "Invoice"}
 }
 
 type checkSelectTest struct {
@@ -77,7 +92,7 @@ func TestQueryChecker(t *testing.T) {
 		if syntaxErr != nil {
 			t.Errorf("query: %s; unexpected error: got %v, want nil", test.query, syntaxErr)
 		}
-		err := query_checker.Check(store, s)
+		err := query_checker.Check(db, s)
 		if err != nil {
 			t.Errorf("query: %s; got %v, want: nil", test.query, err)
 		}
@@ -117,7 +132,7 @@ func TestKeyPrefixes(t *testing.T) {
 		if syntaxErr != nil {
 			t.Errorf("query: %s; unexpected error: got %v, want nil", test.query, syntaxErr)
 		}
-		err := query_checker.Check(store, s)
+		err := query_checker.Check(db, s)
 		if err != nil {
 			t.Errorf("query: %s; got %v, want: nil", test.query, err)
 		}
@@ -184,7 +199,7 @@ func TestRegularExpressions(t *testing.T) {
 		if syntaxErr != nil {
 			t.Errorf("query: %s; unexpected error: got %v, want nil", test.query, syntaxErr)
 		}
-		err := query_checker.Check(store, s)
+		err := query_checker.Check(db, s)
 		if err != nil {
 			t.Errorf("query: %s; got %v, want: nil", test.query, err)
 		}
@@ -246,7 +261,7 @@ func TestQueryCheckerErrors(t *testing.T) {
 		if syntaxErr != nil {
 			t.Errorf("query: %s; unexpected error: got %v, want nil", test.query, syntaxErr)
 		} else {
-			err := query_checker.Check(store, s)
+			err := query_checker.Check(db, s)
 			if !reflect.DeepEqual(err, test.err) {
 				t.Errorf("query: %s; got %v, want %v", test.query, err, test.err)
 			}

@@ -76,6 +76,8 @@ import (
 	"strings"
 	"text/scanner"
 	"unicode/utf8"
+
+	"v.io/syncbase/v23/syncbase/nosql/internal/query/query_db"
 )
 
 type TokenType int
@@ -206,7 +208,8 @@ type FromClause struct {
 }
 
 type TableEntry struct {
-	Name string
+	Name    string
+	DBTable query_db.Table // Checker gets table from db and sets this.
 	Node
 }
 

@@ -8,27 +8,76 @@ import (
 	"fmt"
 	"math/big"
 	"reflect"
+	"strings"
 	"testing"
 
 	"v.io/syncbase/v23/syncbase/nosql/internal/query"
 	"v.io/syncbase/v23/syncbase/nosql/internal/query/query_checker"
+	"v.io/syncbase/v23/syncbase/nosql/internal/query/query_db"
 	"v.io/syncbase/v23/syncbase/nosql/internal/query/query_parser"
 )
 
-type MockStore struct {
-	tables *[]string
+type MockDB struct {
 }
 
-func (db MockStore) CheckTable(table string) error {
-	for _, db_table := range *db.tables {
-		if table == db_table {
-			return nil
+type CustomerTable struct {
+}
+
+type KeyValueStreamImpl struct {
+	cursor       int
+	prefixes     []string
+	prefixCursor int
+	customerRows []CustomerKV
+}
+
+func (kvs *KeyValueStreamImpl) Advance() bool {
+	for true {
+		kvs.cursor++ // initialized to -1
+		if kvs.cursor >= len(kvs.customerRows) {
+			return false
+		}
+		// does it match any prefix
+		for kvs.prefixCursor < len(kvs.prefixes) {
+			if kvs.prefixes[kvs.prefixCursor] == "" || strings.HasPrefix(kvs.customerRows[kvs.cursor].key, kvs.prefixes[kvs.prefixCursor]) {
+				return true
+			}
+			// Keys and prefixes are both sorted low to high, so we can increment
+			// prefixCursor
+			kvs.prefixCursor++
 		}
 	}
-	return errors.New(fmt.Sprintf("No such table: %s", table))
+	return false
 }
 
-func (db MockStore) GetKeys(prefix string) ([]string, error) {
+func (kvs *KeyValueStreamImpl) KeyValue() (string, interface{}) {
+	return kvs.customerRows[kvs.cursor].key, kvs.customerRows[kvs.cursor].value
+}
+
+func (kvs *KeyValueStreamImpl) Err() error {
+	return nil
+}
+
+func (kvs *KeyValueStreamImpl) Cancel() {
+}
+
+func (customerTable CustomerTable) Scan(prefixes []string) (query_db.KeyValueStream, error) {
+	var keyValueStreamImpl KeyValueStreamImpl
+	keyValueStreamImpl.cursor = -1
+	keyValueStreamImpl.prefixes = prefixes
+	keyValueStreamImpl.customerRows = customerRows
+	return &keyValueStreamImpl, nil
+}
+
+func (db MockDB) GetTable(table string) (query_db.Table, error) {
+	if table == "Customer" {
+		var customerTable CustomerTable
+		return customerTable, nil
+	}
+	return nil, errors.New(fmt.Sprintf("No such table: %s.", table))
+
+}
+
+func (db MockDB) GetKeys(prefix string) ([]string, error) {
 	var keys []string
 	keys = append(keys, prefix)
 	for i := 1; i < 10; i++ {
@@ -67,24 +116,66 @@ type Customer struct {
 	Foo               Nest1
 }
 
-func (db MockStore) GetValue(k string) (interface{}, error) {
-	if k == "123456" {
-		return sampleRow, nil
-	} else if k == "123" {
-		return sampleRow123, nil
-	} else {
-		return nil, nil
-	}
+type Invoice struct {
+	CustID     int64
+	InvoiceNum int64
+	Amount     int64
 }
 
-var store MockStore
+var db MockDB
 var sampleRow Customer
 var sampleRow123 Customer
 
+type CustomerKV struct {
+	key   string
+	value interface{}
+}
+
+var customerRows []CustomerKV
+
 func TestCreate(t *testing.T) {
-	store.tables = &[]string{"Customer", "Invoice"}
 	sampleRow = Customer{"John Smith", 123456, true, 'A', "1 Main St.", "Palo Alto", "CA", "94303", big.NewInt(1234567890), big.NewRat(123, 1), byte(12), uint16(1234), uint32(5678), uint64(999888777666), int16(9876), int32(876543), Nest1{Nest2{"foo", true, 42}}}
 	sampleRow123 = Customer{"John Smith", 123, true, 123, "1 Main St.", "Palo Alto", "CA", "94303", big.NewInt(123), big.NewRat(123, 1), byte(123), uint16(123), uint32(123), uint64(123), int16(123), int32(123), Nest1{Nest2{"foo", true, 123}}}
+	sampleRow = Customer{"John Smith", 123456, true, 'A', "1 Main St.", "Palo Alto", "CA", "94303", big.NewInt(1234567890), big.NewRat(123, 1), byte(12), uint16(1234), uint32(5678), uint64(999888777666), int16(9876), int32(876543), Nest1{Nest2{"foo", true, 42}}}
+
+	customerRows = []CustomerKV{
+		CustomerKV{
+			"001",
+			Customer{"John Smith", 1, true, 'A', "1 Main St.", "Palo Alto", "CA", "94303", big.NewInt(1234567890), big.NewRat(123, 1), byte(12), uint16(1234), uint32(5678), uint64(999888777666), int16(9876), int32(876543), Nest1{Nest2{"foo", true, 42}}},
+		},
+		CustomerKV{
+			"001001",
+			Invoice{1, 1000, 42},
+		},
+		CustomerKV{
+			"001002",
+			Invoice{1, 1003, 7},
+		},
+		CustomerKV{
+			"001003",
+			Invoice{1, 1005, 88},
+		},
+		CustomerKV{
+			"002",
+			Customer{"Bat Masterson", 2, true, 'B', "777 Any St.", "collins", "IA", "50055", big.NewInt(9999), big.NewRat(999999, 1), byte(9), uint16(99), uint32(999), uint64(9999999), int16(9), int32(99), Nest1{Nest2{"bar", false, 84}}},
+		},
+		CustomerKV{
+			"002001",
+			Invoice{2, 1001, 166},
+		},
+		CustomerKV{
+			"002002",
+			Invoice{2, 1002, 243},
+		},
+		CustomerKV{
+			"002003",
+			Invoice{2, 1004, 787},
+		},
+		CustomerKV{
+			"002004",
+			Invoice{2, 1006, 88},
+		},
+	}
 }
 
 type keyPrefixesTest struct {
@@ -116,8 +207,7 @@ type projectionTest struct {
 
 type execSelectTest struct {
 	query string
-	r     *query.ResultStream
-	err   *query.QueryError
+	r     []interface{}
 }
 
 type execSelectSingleRowTest struct {
@@ -127,55 +217,244 @@ type execSelectSingleRowTest struct {
 	result interface{}
 }
 
-type parseSelectErrorTest struct {
+type execSelectErrorTest struct {
 	query string
 	err   *query.QueryError
 }
 
-// TODO(jkline): Flesh out this test.
 func TestQueryExec(t *testing.T) {
 	basic := []execSelectTest{
 		{
-			"select k, v from Customer",
-			nil,
-			nil,
+			// Select values for all customer records.
+			"select v from Customer where t = \"Customer\"",
+			[]interface{}{
+				[]interface{}{customerRows[0].value},
+				[]interface{}{customerRows[4].value},
+			},
 		},
 		{
-			"select k, v.name from Customer",
-			nil,
-			nil,
+			// Select keys & values for all customer records.
+			"select k, v from Customer where t = \"Customer\"",
+			[]interface{}{
+				[]interface{}{customerRows[0].key, customerRows[0].value},
+				[]interface{}{customerRows[4].key, customerRows[4].value},
+			},
 		},
 		{
-			"select k, v.name from Customer limit 200",
-			nil,
-			nil,
+			// Select keys & names for all customer records.
+			"select k, v.Name from Customer where t = \"Customer\"",
+			[]interface{}{
+				[]interface{}{customerRows[0].key, "John Smith"},
+				[]interface{}{customerRows[4].key, "Bat Masterson"},
+			},
 		},
 		{
-			"select k, v.name from Customer offset 100",
-			nil,
-			nil,
+			// Select both customer and invoice records.
+			// Customer records have ID.
+			// Invoice records have CustID.
+			"select v.ID, v.CustID from Customer",
+			[]interface{}{
+				[]interface{}{int64(1), nil},
+				[]interface{}{nil, int64(1)},
+				[]interface{}{nil, int64(1)},
+				[]interface{}{nil, int64(1)},
+				[]interface{}{int64(2), nil},
+				[]interface{}{nil, int64(2)},
+				[]interface{}{nil, int64(2)},
+				[]interface{}{nil, int64(2)},
+				[]interface{}{nil, int64(2)},
+			},
 		},
 		{
-			"select k, v.name from Customer where k = \"foo\"",
-			nil,
-			nil,
+			// Select keys & values fo all invoice records.
+			"select k, v from Customer where t = \"Invoice\"",
+			[]interface{}{
+				[]interface{}{customerRows[1].key, customerRows[1].value},
+				[]interface{}{customerRows[2].key, customerRows[2].value},
+				[]interface{}{customerRows[3].key, customerRows[3].value},
+				[]interface{}{customerRows[5].key, customerRows[5].value},
+				[]interface{}{customerRows[6].key, customerRows[6].value},
+				[]interface{}{customerRows[7].key, customerRows[7].value},
+				[]interface{}{customerRows[8].key, customerRows[8].value},
+			},
 		},
 		{
-			"select v from Customer where t = \"Foo.Bar\"",
-			nil,
-			nil,
+			// Select key, cust id, invoice number and amount for $88 invoices.
+			"select k, v.CustID, v.InvoiceNum, v.Amount from Customer where t = \"Invoice\" and v.Amount = 88",
+			[]interface{}{
+				[]interface{}{customerRows[3].key, int64(1), int64(1005), int64(88)},
+				[]interface{}{customerRows[8].key, int64(2), int64(1006), int64(88)},
+			},
 		},
 		{
-			"select k, v from Customer where t = \"Foo.Bar\" and k like \"abc%\" limit 100 offset 200",
-			nil,
-			nil,
+			// Select keys & values for all records with a key prefix of "001".
+			"select k, v from Customer where k like \"001%\"",
+			[]interface{}{
+				[]interface{}{customerRows[0].key, customerRows[0].value},
+				[]interface{}{customerRows[1].key, customerRows[1].value},
+				[]interface{}{customerRows[2].key, customerRows[2].value},
+				[]interface{}{customerRows[3].key, customerRows[3].value},
+			},
+		},
+		{
+			// Select keys & values for all records with a key prefix of "001".
+			// or a key prefix of "002".
+			"select k, v from Customer where k like \"001%\" or k like \"002%\"",
+			[]interface{}{
+				[]interface{}{customerRows[0].key, customerRows[0].value},
+				[]interface{}{customerRows[1].key, customerRows[1].value},
+				[]interface{}{customerRows[2].key, customerRows[2].value},
+				[]interface{}{customerRows[3].key, customerRows[3].value},
+				[]interface{}{customerRows[4].key, customerRows[4].value},
+				[]interface{}{customerRows[5].key, customerRows[5].value},
+				[]interface{}{customerRows[6].key, customerRows[6].value},
+				[]interface{}{customerRows[7].key, customerRows[7].value},
+				[]interface{}{customerRows[8].key, customerRows[8].value},
+			},
+		},
+		{
+			// Select keys & values for all records with a key prefix of "001".
+			// or a key prefix of "002".
+			"select k, v from Customer where k like \"002%\" or k like \"001%\"",
+			[]interface{}{
+				[]interface{}{customerRows[0].key, customerRows[0].value},
+				[]interface{}{customerRows[1].key, customerRows[1].value},
+				[]interface{}{customerRows[2].key, customerRows[2].value},
+				[]interface{}{customerRows[3].key, customerRows[3].value},
+				[]interface{}{customerRows[4].key, customerRows[4].value},
+				[]interface{}{customerRows[5].key, customerRows[5].value},
+				[]interface{}{customerRows[6].key, customerRows[6].value},
+				[]interface{}{customerRows[7].key, customerRows[7].value},
+				[]interface{}{customerRows[8].key, customerRows[8].value},
+			},
+		},
+		{
+			// Let's play with whitespace and mixed case.
+			"   sElEcT  k,  v from \n  Customer WhErE k lIkE \"002%\" oR k LiKe \"001%\"",
+			[]interface{}{
+				[]interface{}{customerRows[0].key, customerRows[0].value},
+				[]interface{}{customerRows[1].key, customerRows[1].value},
+				[]interface{}{customerRows[2].key, customerRows[2].value},
+				[]interface{}{customerRows[3].key, customerRows[3].value},
+				[]interface{}{customerRows[4].key, customerRows[4].value},
+				[]interface{}{customerRows[5].key, customerRows[5].value},
+				[]interface{}{customerRows[6].key, customerRows[6].value},
+				[]interface{}{customerRows[7].key, customerRows[7].value},
+				[]interface{}{customerRows[8].key, customerRows[8].value},
+			},
+		},
+		{
+			// Add in a like clause that accepts all strings.
+			"   sElEcT  k,  v from \n  Customer WhErE k lIkE \"002%\" oR k LiKe \"001%\" or k lIkE \"%\"",
+			[]interface{}{
+				[]interface{}{customerRows[0].key, customerRows[0].value},
+				[]interface{}{customerRows[1].key, customerRows[1].value},
+				[]interface{}{customerRows[2].key, customerRows[2].value},
+				[]interface{}{customerRows[3].key, customerRows[3].value},
+				[]interface{}{customerRows[4].key, customerRows[4].value},
+				[]interface{}{customerRows[5].key, customerRows[5].value},
+				[]interface{}{customerRows[6].key, customerRows[6].value},
+				[]interface{}{customerRows[7].key, customerRows[7].value},
+				[]interface{}{customerRows[8].key, customerRows[8].value},
+			},
+		},
+		{
+			// Select id, name for customers whose last name is Masterson.
+			"select v.ID, v.Name from Customer where t = \"Customer\" and v.Name like \"%Masterson\"",
+			[]interface{}{
+				[]interface{}{int64(2), "Bat Masterson"},
+			},
+		},
+		{
+			// Select records where v.Foo.FooBarBaz.Baz is 84 or type is Invoice.
+			"select v from Customer where v.Foo.FooBarBaz.Baz = 84 or t = \"Invoice\"",
+			[]interface{}{
+				[]interface{}{customerRows[1].value},
+				[]interface{}{customerRows[2].value},
+				[]interface{}{customerRows[3].value},
+				[]interface{}{customerRows[4].value},
+				[]interface{}{customerRows[5].value},
+				[]interface{}{customerRows[6].value},
+				[]interface{}{customerRows[7].value},
+				[]interface{}{customerRows[8].value},
+			},
+		},
+		{
+			// Select customer name for customer ID (i.e., key) "001".
+			"select v.Name from Customer where t = \"Customer\" and k = \"001\"",
+			[]interface{}{
+				[]interface{}{"John Smith"},
+			},
+		},
+		{
+			// Select records where v.Foo.FooBarBaz.Bar is true.
+			"select v from Customer where v.Foo.FooBarBaz.Bar = true",
+			[]interface{}{
+				[]interface{}{customerRows[0].value},
+			},
+		},
+		{
+			// Select records where v.Foo.FooBarBaz.Baz is 84 or type is Invoice.
+			// Limit 3
+			"select v from Customer where v.Foo.FooBarBaz.Baz = 84 or t = \"Invoice\" limit 3",
+			[]interface{}{
+				[]interface{}{customerRows[1].value},
+				[]interface{}{customerRows[2].value},
+				[]interface{}{customerRows[3].value},
+			},
+		},
+		{
+			// Select records where v.Foo.FooBarBaz.Baz is 84 or type is Invoice.
+			// Offset 5
+			"select v from Customer where v.Foo.FooBarBaz.Baz = 84 or t = \"Invoice\" offset 5",
+			[]interface{}{
+				[]interface{}{customerRows[6].value},
+				[]interface{}{customerRows[7].value},
+				[]interface{}{customerRows[8].value},
+			},
+		},
+		{
+			// Select records where v.Foo.FooBarBaz.Baz is 199.
+			"select v from Customer where v.Foo.FooBarBaz.Baz = 199",
+			[]interface{}{},
+		},
+		{
+			// Select records where v.Foo.FooBarBaz.Baz is 84 or type is Invoice.
+			// Offset 8
+			"select v from Customer where v.Foo.FooBarBaz.Baz = 84 or t = \"Invoice\" offset 8",
+			[]interface{}{},
+		},
+		{
+			// Select records where v.Foo.FooBarBaz.Baz is 84 or type is Invoice.
+			// Offset 23
+			"select v from Customer where v.Foo.FooBarBaz.Baz = 84 or t = \"Invoice\" offset 23",
+			[]interface{}{},
+		},
+		{
+			// Select records where v.Foo.FooBarBaz.Baz is 84 or type is Invoice.
+			// Limit 3 Offset 2
+			"select v from Customer where v.Foo.FooBarBaz.Baz = 84 or t = \"Invoice\" limit 3 offset 2",
+			[]interface{}{
+				[]interface{}{customerRows[3].value},
+				[]interface{}{customerRows[4].value},
+				[]interface{}{customerRows[5].value},
+			},
 		},
 	}
 
 	for _, test := range basic {
-		_, err := query.Exec(store, test.query)
+		rs, err := query.Exec(db, test.query)
 		if err != nil {
 			t.Errorf("query: %s; got %v, want nil", test.query, err)
+		} else {
+			// Collect results.
+			r := []interface{}{}
+			for rs.Advance() {
+				r = append(r, rs.Result())
+			}
+			if !reflect.DeepEqual(test.r, r) {
+				t.Errorf("query: %s; got %v, want %v", test.query, r, test.r)
+			}
 		}
 	}
 }
@@ -298,7 +577,7 @@ func TestKeyPrefixes(t *testing.T) {
 			t.Errorf("query: %s; got %v, want nil", test.query, synErr)
 		}
 		if synErr == nil {
-			semErr := query_checker.Check(store, s)
+			semErr := query_checker.Check(db, s)
 			if semErr != nil {
 				t.Errorf("query: %s; got %v, want nil", test.query, semErr)
 			}
@@ -362,7 +641,7 @@ func TestEvalWhereUsingOnlyKey(t *testing.T) {
 			t.Errorf("query: %s; got %v, want nil", test.query, synErr)
 		}
 		if synErr == nil {
-			semErr := query_checker.Check(store, s)
+			semErr := query_checker.Check(db, s)
 			if semErr != nil {
 				t.Errorf("query: %s; got %v, want nil", test.query, semErr)
 			}
@@ -583,7 +862,7 @@ func TestEval(t *testing.T) {
 			t.Errorf("query: %s; got %v, want nil", test.query, synErr)
 		}
 		if synErr == nil {
-			semErr := query_checker.Check(store, s)
+			semErr := query_checker.Check(db, s)
 			if semErr != nil {
 				t.Errorf("query: %s; got %v, want nil", test.query, semErr)
 			}
@@ -649,7 +928,7 @@ func TestProjection(t *testing.T) {
 			t.Errorf("query: %s; got %v, want nil", test.query, synErr)
 		}
 		if synErr == nil {
-			semErr := query_checker.Check(store, s)
+			semErr := query_checker.Check(db, s)
 			if semErr != nil {
 				t.Errorf("query: %s; got %v, want nil", test.query, semErr)
 			}
@@ -745,7 +1024,7 @@ func TestExecSelectSingleRow(t *testing.T) {
 			t.Errorf("query: %s; got %v, want nil", test.query, synErr)
 		}
 		if synErr == nil {
-			semErr := query_checker.Check(store, s)
+			semErr := query_checker.Check(db, s)
 			if semErr != nil {
 				t.Errorf("query: %s; got %v, want nil", test.query, semErr)
 			}
@@ -764,14 +1043,27 @@ func TestExecSelectSingleRow(t *testing.T) {
 	}
 }
 
-// TODO(jkline): Flesh out this test.
+// TODO(jkline): More negative tests here (even though they are tested elsewhere)?
 func TestExecErrors(t *testing.T) {
-	basic := []parseSelectErrorTest{
-	//{"select a from Customer", query_checker.Error(7, "Select field must be 'k' or 'v[{.<ident>}...]'.")},
+	basic := []execSelectErrorTest{
+		{
+			"select a from Customer",
+			query.Error(7, "Select field must be 'k' or 'v[{.<ident>}...]'."),
+		},
+		{
+			"select v from Unknown",
+			// The following error text is dependent on implementation of Database.
+			query.Error(14, "No such table: Unknown."),
+		},
+		{
+			"select v from Customer offset -1",
+			// The following error text is dependent on implementation of Database.
+			query.Error(30, "Expected positive integer literal., found '-'."),
+		},
 	}
 
 	for _, test := range basic {
-		_, err := query.Exec(store, test.query)
+		_, err := query.Exec(db, test.query)
 		if !reflect.DeepEqual(err, test.err) {
 			t.Errorf("query: %s; got %v, want %v", test.query, err, test.err)
 		}

@@ -15,84 +15,32 @@ import (
 	"reflect"
 
 	"v.io/syncbase/v23/syncbase/nosql/internal/query/query_checker"
+	"v.io/syncbase/v23/syncbase/nosql/internal/query/query_db"
 	"v.io/syncbase/v23/syncbase/nosql/internal/query/query_parser"
 )
 
-// TODO(jkline): Flesh out this interface.
-type Store interface {
-	CheckTable(table string) error
-	// TODO(jkline): GetKeys will need to be streaming in real life.
-	GetKeys(prefix string) ([]string, error)
-	GetValue(k string) (interface{}, error)
-}
-
-// TODO(jkline): Flesh out this interface.
-type ResultStream interface {
-	Advance() bool
-	Result() *KV
-	Err() *QueryError
-	Cancel()
-}
-
-// TODO(jkline): Flesh out this struct.
-type KV struct {
-	K string
-	V interface{}
-}
-
-// TODO(jkline): Flesh out this struct.
-type ResultStreamImpl struct {
-}
-
-// TODO(jkline): Flesh out this function.
-func (r ResultStreamImpl) Advance() bool {
-	return true
-}
-
-// TODO(jkline): Flesh out this function.
-func (r ResultStreamImpl) Result() *KV {
-	return nil
-}
-
-// TODO(jkline): Flesh out this function.
-func (r ResultStreamImpl) Err() *QueryError {
-	return nil
-}
-
-// TODO(jkline): Flesh out this function.
-func (r ResultStreamImpl) Cancel() {
-}
-
 type QueryError struct {
-	SynErr *query_parser.SyntaxError
-	SemErr *query_checker.SemanticError
-	Msg    string
-	Off    int64
+	Msg string
+	Off int64
 }
 
 func (e *QueryError) Error() string {
-	if e.SynErr != nil {
-		return e.SynErr.Error()
-	} else if e.SemErr != nil {
-		return e.SemErr.Error()
-	} else {
-		return fmt.Sprintf("[Off:%d] %s", e.Off, e.Msg)
-	}
+	return fmt.Sprintf("[Off:%d] %s", e.Off, e.Msg)
 }
 
 func Error(offset int64, msg string) *QueryError {
-	return &QueryError{Msg: msg, Off: offset}
+	return &QueryError{msg, offset}
 }
 
 func ErrorFromSyntax(synerr *query_parser.SyntaxError) *QueryError {
-	return &QueryError{SynErr: synerr}
+	return &QueryError{synerr.Msg, synerr.Off}
 }
 
 func ErrorFromSemantic(semerr *query_checker.SemanticError) *QueryError {
-	return &QueryError{SemErr: semerr}
+	return &QueryError{semerr.Msg, semerr.Off}
 }
 
-func Exec(db Store, q string) (ResultStream, *QueryError) {
+func Exec(db query_db.Database, q string) (ResultStream, *QueryError) {
 	s, err := query_parser.Parse(q)
 	if err != nil {
 		return nil, ErrorFromSyntax(err)
@@ -216,6 +164,8 @@ func EvalExprUsingOnlyKey(e *query_parser.Expression, k string) (bool, error) {
 
 // For testing purposes, given a SelectStatement, k and v;
 // return nil if row not selected, else return the projection (type []interface{}).
+// Note: limit and offset clauses are ignored for this function as they make no sense
+// for a single row.
 func ExecSelectSingleRow(k string, v interface{}, s *query_parser.SelectStatement) interface{} {
 	if !Eval(k, v, s.Where.Expr) {
 		return nil
@@ -223,8 +173,79 @@ func ExecSelectSingleRow(k string, v interface{}, s *query_parser.SelectStatemen
 	return ComposeProjection(k, v, s.Select)
 }
 
-// TODO(jkline): Flesh out this function.
-func ExecSelect(db Store, s *query_parser.SelectStatement) (ResultStream, *QueryError) {
-	_ = CompileKeyPrefixes(s.Where)
-	return ResultStreamImpl{}, nil
+type ResultStream interface {
+	Advance() bool
+	Result() []interface{}
+	Err() *QueryError
+	Cancel()
+}
+
+type ResultStreamImpl struct {
+	selectStatement *query_parser.SelectStatement
+	resultCount     int64 // results served so far (needed for limit clause)
+	skippedCount    int64 // skipped so far (needed for offset clause)
+	keyValueStream  query_db.KeyValueStream
+	k               string
+	v               interface{}
+	err             *QueryError
+}
+
+func (rs *ResultStreamImpl) Advance() bool {
+	if rs.selectStatement.Limit != nil && rs.resultCount >= rs.selectStatement.Limit.Limit.Value {
+		return false
+	}
+	for rs.keyValueStream.Advance() {
+		if err := rs.keyValueStream.Err(); err != nil {
+			rs.err = Error(rs.selectStatement.Off, err.Error())
+			return false
+		}
+		k, v := rs.keyValueStream.KeyValue()
+		if err := rs.keyValueStream.Err(); err != nil {
+			rs.err = Error(rs.selectStatement.Off, err.Error())
+			return false
+		}
+		// EvalWhereUsingOnlyKey
+		// true: the row should included in the results
+		// false: the row should NOT be included
+		// error: the value and/or type of the value are required to determine...
+		match, err := EvalWhereUsingOnlyKey(rs.selectStatement, k)
+		if err != nil {
+			match = Eval(k, v, rs.selectStatement.Where.Expr)
+		}
+		if match {
+			if rs.selectStatement.ResultsOffset == nil || rs.selectStatement.ResultsOffset.ResultsOffset.Value <= rs.skippedCount {
+				rs.k = k
+				rs.v = v
+				rs.resultCount++
+				return true
+			} else {
+				rs.skippedCount++
+			}
+		}
+	}
+	return false
+}
+
+func (rs *ResultStreamImpl) Result() []interface{} {
+	return ComposeProjection(rs.k, rs.v, rs.selectStatement.Select)
+}
+
+func (rs *ResultStreamImpl) Err() *QueryError {
+	return rs.err
+}
+
+func (rs *ResultStreamImpl) Cancel() {
+	rs.keyValueStream.Cancel()
+}
+
+func ExecSelect(db query_db.Database, s *query_parser.SelectStatement) (ResultStream, *QueryError) {
+	prefixes := CompileKeyPrefixes(s.Where)
+	keyValueStream, err := s.From.Table.DBTable.Scan(prefixes)
+	if err != nil {
+		return nil, Error(s.Off, err.Error())
+	}
+	var resultStream ResultStreamImpl
+	resultStream.selectStatement = s
+	resultStream.keyValueStream = keyValueStream
+	return &resultStream, nil
 }

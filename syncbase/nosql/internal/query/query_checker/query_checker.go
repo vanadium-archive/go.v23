@@ -21,12 +21,9 @@ import (
 	"sort"
 	"strings"
 
+	"v.io/syncbase/v23/syncbase/nosql/internal/query/query_db"
 	"v.io/syncbase/v23/syncbase/nosql/internal/query/query_parser"
 )
-
-type Store interface {
-	CheckTable(table string) error
-}
 
 type SemanticError struct {
 	Msg string
@@ -41,7 +38,7 @@ func Error(offset int64, msg string) *SemanticError {
 	return &SemanticError{msg, offset}
 }
 
-func Check(db Store, s *query_parser.Statement) *SemanticError {
+func Check(db query_db.Database, s *query_parser.Statement) *SemanticError {
 	switch sel := (*s).(type) {
 	case query_parser.SelectStatement:
 		return CheckSelectStatement(db, &sel)
@@ -50,7 +47,7 @@ func Check(db Store, s *query_parser.Statement) *SemanticError {
 	}
 }
 
-func CheckSelectStatement(db Store, s *query_parser.SelectStatement) *SemanticError {
+func CheckSelectStatement(db query_db.Database, s *query_parser.SelectStatement) *SemanticError {
 	if err := CheckSelectClause(s.Select); err != nil {
 		return err
 	}
@@ -87,8 +84,10 @@ func CheckSelectClause(s *query_parser.SelectClause) *SemanticError {
 }
 
 // Check from clause.  Table must exist in the database.
-func CheckFromClause(db Store, f *query_parser.FromClause) *SemanticError {
-	if err := db.CheckTable(f.Table.Name); err != nil {
+func CheckFromClause(db query_db.Database, f *query_parser.FromClause) *SemanticError {
+	var err error
+	f.Table.DBTable, err = db.GetTable(f.Table.Name)
+	if err != nil {
 		return Error(f.Table.Off, err.Error())
 	}
 	return nil

@@ -167,6 +167,8 @@ func ConvertValueToString(o *query_parser.Operand) (*query_parser.Operand, error
 		c.Literal = strconv.FormatInt(o.Int, 10)
 	case query_parser.TypLiteral:
 		c.Literal = o.Literal
+		c.Regex = o.Regex         // non-nil for rhs of like expressions
+		c.CompRegex = o.CompRegex // non-nil for rhs of like expressions
 	case query_parser.TypUint:
 		c.Literal = strconv.FormatUint(o.Uint, 10)
 	default: // query_parser.TypObject
