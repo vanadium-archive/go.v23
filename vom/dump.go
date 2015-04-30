@@ -53,6 +53,12 @@ func (w dumpWriter) WriteAtom(atom DumpAtom) {
 }
 
 func (w dumpWriter) WriteStatus(status DumpStatus) {
+	id := verror.ErrorID(status.Err)
+	if status.MsgLen == 0 && status.MsgN == 0 && (id == errDumperFlushed.ID || id == errDumperClosed.ID) {
+		// Don't output status when we're waiting to decode the next message, and
+		// we're either flushed or closed, to avoid cluttering the output.
+		return
+	}
 	fmt.Fprintln(w.w, status)
 }
 
@@ -314,14 +320,13 @@ func (a DumpAtom) String() string {
 	return ret
 }
 
+// writeStatus writes the current decoding status to the the DumpWriter.  It is
+// called automatically after every message is decoded, and also on every error
+// encountered during decoding.  It is also triggered by manual calls to
+// Dumper.Status.
 func (d *dumpWorker) writeStatus(err error, doneDecoding bool) {
 	if doneDecoding {
 		d.status.Err = err
-		if (verror.ErrorID(err) == errDumperFlushed.ID || verror.ErrorID(err) == errDumperClosed.ID) && d.status.MsgLen == 0 && d.status.MsgN == 0 {
-			// Don't write status for flushed and closed when we've finished decoding
-			// and are waiting for the next message.
-			return
-		}
 		if err == nil {
 			// Successful decoding, don't include the last "waiting..." debug message.
 			d.status.Debug = ""
@@ -336,6 +341,9 @@ func (d *dumpWorker) writeStatus(err error, doneDecoding bool) {
 		d.status.Buf = nil
 	}
 	d.w.WriteStatus(d.status)
+	if doneDecoding {
+		d.status = DumpStatus{}
+	}
 }
 
 // prepareAtom sets the status.Debug message, and prepares the decbuf so that
@@ -373,18 +381,6 @@ func (d *dumpWorker) writeAtom(kind DumpKind, data Primitive, format string, v .
 }
 
 func (d *dumpWorker) decodeNextValue() error {
-	// Decode the version byte. To make the dumper easier to use on partial data,
-	// the version byte is optional. Note that this relies on 0x80 not being a
-	// valid first byte of regular data.
-	d.prepareAtom("waiting for version byte or first byte of message")
-	switch versionByte, err := d.buf.PeekByte(); {
-	case err != nil:
-		d.writeStatus(err, true)
-		return err
-	case versionByte == binaryVersionByte:
-		d.buf.Skip(1)
-		d.writeAtom(DumpKindVersion, PrimitivePByte{versionByte}, "vom version 0")
-	}
 	// Decode type messages until we get to the type of the next value.
 	valType, err := d.decodeValueType()
 	if err != nil {
@@ -401,7 +397,19 @@ func (d *dumpWorker) decodeNextValue() error {
 
 func (d *dumpWorker) decodeValueType() (*vdl.Type, error) {
 	for {
-		d.status = DumpStatus{}
+		// Decode the version byte. To make the dumper easier to use on partial
+		// data, the version byte is optional, and is allowed to appear before any
+		// type or value message. Note that this relies on 0x80 not being a valid
+		// first byte of regular messages.
+		d.prepareAtom("waiting for version byte or first byte of message")
+		switch versionByte, err := d.buf.PeekByte(); {
+		case err != nil:
+			return nil, err
+		case versionByte == binaryVersionByte:
+			d.buf.Skip(1)
+			d.writeAtom(DumpKindVersion, PrimitivePByte{versionByte}, "vom version 0")
+			d.writeStatus(nil, true)
+		}
 		d.prepareAtom("waiting for message ID")
 		id, err := binaryDecodeInt(d.buf)
 		if err != nil {
@@ -439,6 +447,7 @@ func (d *dumpWorker) decodeValueType() (*vdl.Type, error) {
 		if err := d.typeDec.addWireType(tid, wt); err != nil {
 			return nil, err
 		}
+		d.writeStatus(nil, true)
 	}
 }
 
