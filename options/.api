@@ -1,6 +1,7 @@
 pkg options, const SecurityConfidential SecurityLevel
 pkg options, const SecurityNone SecurityLevel
 pkg options, method (AllowedServersPolicy) RPCCallOpt()
+pkg options, method (IsLeaf) RPCServerOpt()
 pkg options, method (NoResolve) NSOpt()
 pkg options, method (NoResolve) RPCCallOpt()
 pkg options, method (NoRetry) NSOpt()
@@ -15,6 +16,7 @@ pkg options, method (ServesMountTable) RPCServerOpt()
 pkg options, method (SkipServerEndpointAuthorization) NSOpt()
 pkg options, method (SkipServerEndpointAuthorization) RPCCallOpt()
 pkg options, type AllowedServersPolicy []security.BlessingPattern
+pkg options, type IsLeaf bool
 pkg options, type NoResolve struct
 pkg options, type NoRetry struct
 pkg options, type RetryTimeout time.Duration

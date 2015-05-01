@@ -133,6 +133,11 @@ type ServesMountTable bool
 
 func (ServesMountTable) RPCServerOpt() {}
 
+// Create a server that will be used to serve a leaf service.
+type IsLeaf bool
+
+func (IsLeaf) RPCServerOpt() {}
+
 // When NoRetry is specified, the client will not retry calls that fail but would
 // normally be retried.
 type NoRetry struct{}
