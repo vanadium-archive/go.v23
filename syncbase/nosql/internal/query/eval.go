@@ -449,6 +449,12 @@ func ResolveOperand(v interface{}, o *query_parser.Operand) *query_parser.Operan
 		var b big.Int
 		b.SetUint64(value)
 		newOp.BigInt = &b
+	case float32:
+		newOp.Type = query_parser.TypFloat
+		newOp.Float = float64(value)
+	case float64:
+		newOp.Type = query_parser.TypFloat
+		newOp.Float = value
 	case string:
 		newOp.Type = query_parser.TypLiteral
 		newOp.Literal = value

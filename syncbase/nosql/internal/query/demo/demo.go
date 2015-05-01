@@ -34,11 +34,11 @@
 //                 ^
 //     Error: [Off:12] Expected 'from', found 'fro'
 //     Enter query (or 'dump' or 'exit')? select k, v from Customer
-//     001,{John Smith 1 true 65 {1 Main St. Palo Alto CA 94303} {false [1234567890]} {{false [123]} {false []}} 12 1234 5678 999888777666 9876 876543}
+//     001,{John Smith 1 true 65 {1 Main St. Palo Alto CA 94303}
 //     001001,{1 1000 42 {1 Main St. Palo Alto CA 94303}}
 //     001002,{1 1003 7 {2 Main St. Palo Alto CA 94303}}
 //     001003,{1 1005 88 {3 Main St. Palo Alto CA 94303}}
-//     002,{Bat Masterson 2 true 66 {777 Any St. Collins IA 50055} {false [9999]} {{false [999999]} {false []}} 9 99 999 9999999 9 99}
+//     002,{Bat Masterson 2 true 66 {777 Any St. Collins IA 50055}
 //     002001,{2 1001 166 {777 Any St. collins IA 50055}}
 //     002002,{2 1002 243 {888 Any St. collins IA 50055}}
 //     002003,{2 1004 787 {999 Any St. collins IA 50055}}
@@ -139,19 +139,11 @@ type AddressInfo struct {
 }
 
 type Customer struct {
-	Name              string
-	ID                int64
-	Active            bool
-	Rating            rune
-	Address           AddressInfo
-	GratuituousBigInt big.Int
-	GratuituousBigRat big.Rat
-	GratuituousByte   byte
-	GratuituousUint16 uint16
-	GratuituousUint32 uint32
-	GratuituousUint64 uint64
-	GratuituousInt16  int16
-	GratuituousInt32  int32
+	Name    string
+	ID      int64
+	Active  bool
+	Rating  rune
+	Address AddressInfo
 }
 
 type Invoice struct {
@@ -159,6 +151,20 @@ type Invoice struct {
 	InvoiceNum int64
 	Amount     int64
 	ShipTo     AddressInfo
+}
+
+type Numbers struct {
+	B    byte
+	UI16 uint16
+	UI32 uint32
+	UI64 uint64
+	I16  int16
+	I32  int32
+	I64  int64
+	BI   big.Int
+	F32  float32
+	F64  float64
+	BR   big.Rat
 }
 
 type kv struct {
@@ -173,7 +179,7 @@ func createDB() query_db.Database {
 	custTable.rows = []kv{
 		kv{
 			"001",
-			Customer{"John Smith", 1, true, 'A', AddressInfo{"1 Main St.", "Palo Alto", "CA", "94303"}, *big.NewInt(1234567890), *big.NewRat(123, 1), byte(12), uint16(1234), uint32(5678), uint64(999888777666), int16(9876), int32(876543)},
+			Customer{"John Smith", 1, true, 'A', AddressInfo{"1 Main St.", "Palo Alto", "CA", "94303"}},
 		},
 		kv{
 			"001001",
@@ -189,7 +195,7 @@ func createDB() query_db.Database {
 		},
 		kv{
 			"002",
-			Customer{"Bat Masterson", 2, true, 'B', AddressInfo{"777 Any St.", "Collins", "IA", "50055"}, *big.NewInt(9999), *big.NewRat(999999, 1), byte(9), uint16(99), uint32(999), uint64(9999999), int16(9), int32(99)},
+			Customer{"Bat Masterson", 2, true, 'B', AddressInfo{"777 Any St.", "Collins", "IA", "50055"}},
 		},
 		kv{
 			"002001",
@@ -209,6 +215,20 @@ func createDB() query_db.Database {
 		},
 	}
 	db.tables = append(db.tables, custTable)
+
+	var numTable table
+	numTable.name = "Numbers"
+	numTable.rows = []kv{
+		kv{
+			"001",
+			Numbers{byte(12), uint16(1234), uint32(5678), uint64(999888777666), int16(9876), int32(876543), int64(128), *big.NewInt(1234567890), float32(3.14159), float64(2.71828182846), *big.NewRat(123, 1)},
+		},
+		kv{
+			"002",
+			Numbers{byte(9), uint16(99), uint32(999), uint64(9999999), int16(9), int32(99), int64(88), *big.NewInt(9999), float32(1.41421356237), float64(1.73205080757), *big.NewRat(999999, 1)},
+		},
+	}
+	db.tables = append(db.tables, numTable)
 	return db
 }
 
@@ -218,13 +238,14 @@ func dumpDB(db query_db.Database) {
 		for _, t := range db.tables {
 			fmt.Printf("table: %s\n", t.name)
 			for _, row := range t.rows {
-				fmt.Printf("\n")
 				fmt.Printf("key: %s, value: ", row.key)
 				switch v := row.value.(type) {
 				case Customer:
-					fmt.Printf("type:Customer Name:%v,ID:%v,Active:%v,Rating:%v,Address{%v},GratuituousBigInt:%v,GratuituousBigRat:%v:GratuituousByte:%v:GratuituousUint16:%v:GratuituousUint32:%v:GratuituousUint64:%v:GratuituousInt16:%v:GratuituousInt32:$v\n", v.Name, v.ID, v.Active, v.Rating, dumpAddress(&v.Address), v.GratuituousBigInt, v.GratuituousBigRat, v.GratuituousByte, v.GratuituousUint16, v.GratuituousUint32, v.GratuituousUint64, v.GratuituousInt16, v.GratuituousInt32)
+					fmt.Printf("type:Customer Name:%v,ID:%v,Active:%v,Rating:%v,Address{%v}\n", v.Name, v.ID, v.Active, v.Rating, dumpAddress(&v.Address))
 				case Invoice:
 					fmt.Printf("type:Invoice CustID:%v,InvoiceNum:%v,Amount:%v,ShipTo:{%v}\n", v.CustID, v.InvoiceNum, v.Amount, dumpAddress(&v.ShipTo))
+				case Numbers:
+					fmt.Printf("type:Numbers B:%v,UI16:%v,UI32:%v,UI64:%v,I16:%v,I32:%v,I64:%v,BI:%v,F32:%v,F64:%v,BR:%v\n", v.B, v.UI16, v.UI32, v.UI64, v.I16, v.I32, v.I64, v.BI, v.F32, v.F64, v.BR)
 				default:
 					fmt.Printf("%v\n", row.value)
 				}

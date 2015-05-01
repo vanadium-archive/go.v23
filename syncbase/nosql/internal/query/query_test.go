@@ -84,15 +84,6 @@ func (db MockDB) GetTable(table string) (query_db.Table, error) {
 
 }
 
-func (db MockDB) GetKeys(prefix string) ([]string, error) {
-	var keys []string
-	keys = append(keys, prefix)
-	for i := 1; i < 10; i++ {
-		keys = append(keys, prefix+string(i))
-	}
-	return keys, nil
-}
-
 type Nest2 struct {
 	Foo string
 	Bar bool
