@@ -36,14 +36,21 @@ func (kvs *KeyValueStreamImpl) Advance() bool {
 		if kvs.cursor >= len(kvs.customerRows) {
 			return false
 		}
-		// does it match any prefix
 		for kvs.prefixCursor < len(kvs.prefixes) {
+			// does it match any prefix
 			if kvs.prefixes[kvs.prefixCursor] == "" || strings.HasPrefix(kvs.customerRows[kvs.cursor].key, kvs.prefixes[kvs.prefixCursor]) {
 				return true
 			}
 			// Keys and prefixes are both sorted low to high, so we can increment
-			// prefixCursor
-			kvs.prefixCursor++
+			// prefixCursor if the prefix is < the key.
+			if kvs.prefixes[kvs.prefixCursor] < kvs.customerRows[kvs.cursor].key {
+				kvs.prefixCursor++
+				if kvs.prefixCursor >= len(kvs.prefixes) {
+					return false
+				}
+			} else {
+				break
+			}
 		}
 	}
 	return false
@@ -294,6 +301,17 @@ func TestQueryExec(t *testing.T) {
 				[]interface{}{customerRows[1].key, customerRows[1].value},
 				[]interface{}{customerRows[2].key, customerRows[2].value},
 				[]interface{}{customerRows[3].key, customerRows[3].value},
+			},
+		},
+		{
+			// Select keys & values for all records with a key prefix of "001".
+			"select k, v from Customer where k like \"002%\"",
+			[]interface{}{
+				[]interface{}{customerRows[4].key, customerRows[4].value},
+				[]interface{}{customerRows[5].key, customerRows[5].value},
+				[]interface{}{customerRows[6].key, customerRows[6].value},
+				[]interface{}{customerRows[7].key, customerRows[7].value},
+				[]interface{}{customerRows[8].key, customerRows[8].value},
 			},
 		},
 		{
