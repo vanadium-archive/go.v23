@@ -10,7 +10,6 @@
 package query
 
 import (
-	"errors"
 	"fmt"
 	"reflect"
 
@@ -22,6 +21,29 @@ import (
 type QueryError struct {
 	Msg string
 	Off int64
+}
+
+type ResultStream interface {
+	Advance() bool
+	Result() []interface{}
+	Err() *QueryError
+	Cancel()
+}
+
+func Exec(db query_db.Database, q string) (ResultStream, *QueryError) {
+	s, err := query_parser.Parse(q)
+	if err != nil {
+		return nil, ErrorFromSyntax(err)
+	}
+	if err := query_checker.Check(db, s); err != nil {
+		return nil, ErrorFromSemantic(err)
+	}
+	switch sel := (*s).(type) {
+	case query_parser.SelectStatement:
+		return execSelect(db, &sel)
+	default:
+		return nil, Error((*s).Offset(), fmt.Sprintf("Cannot exec statement type %v", reflect.TypeOf(*s)))
+	}
 }
 
 func (e *QueryError) Error() string {
@@ -38,22 +60,6 @@ func ErrorFromSyntax(synerr *query_parser.SyntaxError) *QueryError {
 
 func ErrorFromSemantic(semerr *query_checker.SemanticError) *QueryError {
 	return &QueryError{semerr.Msg, semerr.Off}
-}
-
-func Exec(db query_db.Database, q string) (ResultStream, *QueryError) {
-	s, err := query_parser.Parse(q)
-	if err != nil {
-		return nil, ErrorFromSyntax(err)
-	}
-	if err := query_checker.Check(db, s); err != nil {
-		return nil, ErrorFromSemantic(err)
-	}
-	switch sel := (*s).(type) {
-	case query_parser.SelectStatement:
-		return ExecSelect(db, &sel)
-	default:
-		return nil, Error((*s).Offset(), fmt.Sprintf("Cannot exec statement type %v", reflect.TypeOf(*s)))
-	}
 }
 
 // Given a key, a value and a SelectClause, return the projection.
@@ -79,86 +85,10 @@ func CompileKeyPrefixes(w *query_parser.WhereClause) []string {
 	// other (type for value) expression.  If the where clause evaluates to true,
 	// it is possible for a row to be selected without any dependence on the contents
 	// of the key.  In that case, all keys must be fetched.
-	if w == nil || AllKeysMustBeFetched(w.Expr) {
+	if w == nil || CheckIfAllKeysMustBeFetched(w.Expr) {
 		return []string{""}
 	} else {
 		return query_checker.CompileKeyPrefixes(w)
-	}
-}
-
-// Evaluate the where clause, substituting false for all expressions involving the key and
-// true for all other expressions.  If the answer is true, it is possible to satisfy the
-// expression for any key.  As such, all keys must be fetched.
-func AllKeysMustBeFetched(e *query_parser.Expression) bool {
-	switch e.Operator.Type {
-	case query_parser.And:
-		return AllKeysMustBeFetched(e.Operand1.Expr) && AllKeysMustBeFetched(e.Operand2.Expr)
-	case query_parser.Or:
-		return AllKeysMustBeFetched(e.Operand1.Expr) || AllKeysMustBeFetched(e.Operand2.Expr)
-	default: // =, > >=, <, <=, Like, <>, NotLike
-		if query_checker.IsKey(e.Operand1) {
-			return false
-		} else {
-			return true
-		}
-	}
-}
-
-// Evaluate the where clause to determine if the row should be selected, but do so using only
-// the key.  Possible returns are:
-// true: the row should included in the results
-// false: the row should NOT be included
-// error: the value and/or type of the value are required to determine if row should be included.
-// The above decision is accomplished by evaluating all expressions which reference the key and
-// substituing false for all other expressions.  If the result is true, true is returned.
-// If the result is false, but no other experssions (i.e., expressions which refer to the type of
-// of the value or the value itself) were encountered, false is returned; else, an error is
-// returned indicating the value must be fetched in order to determine if the row should be included
-// in the results.
-func EvalWhereUsingOnlyKey(s *query_parser.SelectStatement, k string) (bool, error) {
-	if s.Where == nil { // all rows will be in result
-		return true, nil
-	}
-	return EvalExprUsingOnlyKey(s.Where.Expr, k)
-}
-
-func EvalExprUsingOnlyKey(e *query_parser.Expression, k string) (bool, error) {
-	switch e.Operator.Type {
-	case query_parser.And:
-		op1Result, err1 := EvalExprUsingOnlyKey(e.Operand1.Expr, k)
-		op2Result, err2 := EvalExprUsingOnlyKey(e.Operand2.Expr, k)
-		if op1Result && op2Result {
-			return true, nil
-		} else if (op1Result == false && err1 == nil) || (op2Result == false && err2 == nil) {
-			// One of the operands evaluated to false with no error.
-			// As such, the value is not needed to reject the row.
-			return false, nil
-		} else {
-			if err1 != nil {
-				return false, err1
-			} else {
-				return false, err2
-			}
-		}
-	case query_parser.Or:
-		op1Result, err1 := EvalExprUsingOnlyKey(e.Operand1.Expr, k)
-		op2Result, err2 := EvalExprUsingOnlyKey(e.Operand2.Expr, k)
-		if op1Result || op2Result {
-			return true, nil
-		} else {
-			if err1 != nil {
-				return false, err1
-			} else {
-				return false, err2 // err2 may or may not be nil
-			}
-		}
-	default: // =, > >=, <, <=, Like, <>, NotLike
-		if !query_checker.IsKey(e.Operand1) {
-			// Non-key expressions are evaluated as false.
-			return false, errors.New("Value required for answer.") // err text not used
-		} else {
-			return EvalKeyExpression(e, k), nil
-		}
 	}
 }
 
@@ -173,14 +103,7 @@ func ExecSelectSingleRow(k string, v interface{}, s *query_parser.SelectStatemen
 	return ComposeProjection(k, v, s.Select)
 }
 
-type ResultStream interface {
-	Advance() bool
-	Result() []interface{}
-	Err() *QueryError
-	Cancel()
-}
-
-type ResultStreamImpl struct {
+type resultStreamImpl struct {
 	selectStatement *query_parser.SelectStatement
 	resultCount     int64 // results served so far (needed for limit clause)
 	skippedCount    int64 // skipped so far (needed for offset clause)
@@ -190,7 +113,7 @@ type ResultStreamImpl struct {
 	err             *QueryError
 }
 
-func (rs *ResultStreamImpl) Advance() bool {
+func (rs *resultStreamImpl) Advance() bool {
 	if rs.selectStatement.Limit != nil && rs.resultCount >= rs.selectStatement.Limit.Limit.Value {
 		return false
 	}
@@ -226,25 +149,25 @@ func (rs *ResultStreamImpl) Advance() bool {
 	return false
 }
 
-func (rs *ResultStreamImpl) Result() []interface{} {
+func (rs *resultStreamImpl) Result() []interface{} {
 	return ComposeProjection(rs.k, rs.v, rs.selectStatement.Select)
 }
 
-func (rs *ResultStreamImpl) Err() *QueryError {
+func (rs *resultStreamImpl) Err() *QueryError {
 	return rs.err
 }
 
-func (rs *ResultStreamImpl) Cancel() {
+func (rs *resultStreamImpl) Cancel() {
 	rs.keyValueStream.Cancel()
 }
 
-func ExecSelect(db query_db.Database, s *query_parser.SelectStatement) (ResultStream, *QueryError) {
+func execSelect(db query_db.Database, s *query_parser.SelectStatement) (ResultStream, *QueryError) {
 	prefixes := CompileKeyPrefixes(s.Where)
 	keyValueStream, err := s.From.Table.DBTable.Scan(prefixes)
 	if err != nil {
 		return nil, Error(s.Off, err.Error())
 	}
-	var resultStream ResultStreamImpl
+	var resultStream resultStreamImpl
 	resultStream.selectStatement = s
 	resultStream.keyValueStream = keyValueStream
 	return &resultStream, nil

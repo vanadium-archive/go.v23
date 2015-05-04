@@ -16,13 +16,13 @@ import (
 
 func Eval(k string, v interface{}, e *query_parser.Expression) bool {
 	if query_checker.IsLogicalOperator(e.Operator) {
-		return EvalLogicalOperators(k, v, e)
+		return evalLogicalOperators(k, v, e)
 	} else {
-		return EvalComparisonOperators(k, v, e)
+		return evalComparisonOperators(k, v, e)
 	}
 }
 
-func EvalLogicalOperators(k string, v interface{}, e *query_parser.Expression) bool {
+func evalLogicalOperators(k string, v interface{}, e *query_parser.Expression) bool {
 	switch e.Operator.Type {
 	case query_parser.And:
 		return Eval(k, v, e.Operand1.Expr) && Eval(k, v, e.Operand2.Expr)
@@ -31,67 +31,67 @@ func EvalLogicalOperators(k string, v interface{}, e *query_parser.Expression) b
 	}
 }
 
-func EvalComparisonOperators(k string, v interface{}, e *query_parser.Expression) bool {
+func evalComparisonOperators(k string, v interface{}, e *query_parser.Expression) bool {
 	// Key and type expressions are evaluated differently from value expression.
 	// Key expressions always have a string literal on the rhs and are currently
 	// limited to = and <>.
 	// Type expressions are limited to = and must have a stiring literal rhs.  Also,
 	// they are evaluated via reflection on the value.
 	if query_checker.IsKey(e.Operand1) {
-		return EvalKeyExpression(e, k)
+		return evalKeyExpression(e, k)
 	} else if query_checker.IsType(e.Operand1) {
-		return EvalTypeExpression(e, v)
+		return evalTypeExpression(e, v)
 	} else {
-		return EvalValueExpression(k, v, e)
+		return evalValueExpression(k, v, e)
 	}
 }
 
-func EvalValueExpression(k string, v interface{}, e *query_parser.Expression) bool {
+func evalValueExpression(k string, v interface{}, e *query_parser.Expression) bool {
 	// Any fields that are value fields that need to be resolved.
-	lhsValue := ResolveOperand(v, e.Operand1)
+	lhsValue := resolveOperand(v, e.Operand1)
 	if lhsValue == nil {
 		return false
 	}
-	rhsValue := ResolveOperand(v, e.Operand2)
+	rhsValue := resolveOperand(v, e.Operand2)
 	if rhsValue == nil {
 		return false
 	}
-	// Coerce operands so they are comparable
+	// coerce operands so they are comparable
 	var err error
-	lhsValue, rhsValue, err = CoerceValues(lhsValue, rhsValue)
+	lhsValue, rhsValue, err = coerceValues(lhsValue, rhsValue)
 	if err != nil {
 		return false // If operands can't be coerced to compare, expr evals to false.
 	}
 	// Do the compare
 	switch lhsValue.Type {
 	case query_parser.TypBigInt:
-		return CompareBigInts(lhsValue, rhsValue, e.Operator)
+		return compareBigInts(lhsValue, rhsValue, e.Operator)
 	case query_parser.TypBigRat:
-		return CompareBigRats(lhsValue, rhsValue, e.Operator)
+		return compareBigRats(lhsValue, rhsValue, e.Operator)
 	case query_parser.TypBool:
-		return CompareBools(lhsValue, rhsValue, e.Operator)
+		return compareBools(lhsValue, rhsValue, e.Operator)
 	case query_parser.TypFloat:
-		return CompareFloats(lhsValue, rhsValue, e.Operator)
+		return compareFloats(lhsValue, rhsValue, e.Operator)
 	case query_parser.TypInt:
-		return CompareInts(lhsValue, rhsValue, e.Operator)
+		return compareInts(lhsValue, rhsValue, e.Operator)
 	case query_parser.TypLiteral:
-		return CompareStrings(lhsValue, rhsValue, e.Operator)
+		return compareStrings(lhsValue, rhsValue, e.Operator)
 	case query_parser.TypUint:
-		return CompareUints(lhsValue, rhsValue, e.Operator)
+		return compareUints(lhsValue, rhsValue, e.Operator)
 	case query_parser.TypObject:
-		return CompareObjects(lhsValue, rhsValue, e.Operator)
+		return compareObjects(lhsValue, rhsValue, e.Operator)
 	}
 	return false
 }
 
-func CoerceValues(lhsValue, rhsValue *query_parser.Operand) (*query_parser.Operand, *query_parser.Operand, error) {
+func coerceValues(lhsValue, rhsValue *query_parser.Operand) (*query_parser.Operand, *query_parser.Operand, error) {
 	var err error
 	// If either operand is a string, convert the other to a string.
 	if lhsValue.Type == query_parser.TypLiteral || rhsValue.Type == query_parser.TypLiteral {
-		if lhsValue, err = ConvertValueToString(lhsValue); err != nil {
+		if lhsValue, err = convertValueToString(lhsValue); err != nil {
 			return nil, nil, err
 		}
-		if rhsValue, err = ConvertValueToString(rhsValue); err != nil {
+		if rhsValue, err = convertValueToString(rhsValue); err != nil {
 			return nil, nil, err
 		}
 	}
@@ -99,47 +99,47 @@ func CoerceValues(lhsValue, rhsValue *query_parser.Operand) (*query_parser.Opera
 	// Also, if one operand is a float and the other is a big int,
 	// convert both to big rats.
 	if lhsValue.Type == query_parser.TypBigRat || rhsValue.Type == query_parser.TypBigRat || (lhsValue.Type == query_parser.TypBigInt && rhsValue.Type == query_parser.TypFloat) || (lhsValue.Type == query_parser.TypFloat && rhsValue.Type == query_parser.TypBigInt) {
-		if lhsValue, err = ConvertValueToBigRat(lhsValue); err != nil {
+		if lhsValue, err = convertValueToBigRat(lhsValue); err != nil {
 			return nil, nil, err
 		}
-		if rhsValue, err = ConvertValueToBigRat(rhsValue); err != nil {
+		if rhsValue, err = convertValueToBigRat(rhsValue); err != nil {
 			return nil, nil, err
 		}
 	}
 	// If either operand is a float, convert the other to a float.
 	if lhsValue.Type == query_parser.TypFloat || rhsValue.Type == query_parser.TypFloat {
-		if lhsValue, err = ConvertValueToFloat(lhsValue); err != nil {
+		if lhsValue, err = convertValueToFloat(lhsValue); err != nil {
 			return nil, nil, err
 		}
-		if rhsValue, err = ConvertValueToFloat(rhsValue); err != nil {
+		if rhsValue, err = convertValueToFloat(rhsValue); err != nil {
 			return nil, nil, err
 		}
 	}
 	// If either operand is a big int, convert both to a big int.
 	// Also, if one operand is a uint64 and the other is an int64, convert both to big ints.
 	if lhsValue.Type == query_parser.TypBigInt || rhsValue.Type == query_parser.TypBigInt || (lhsValue.Type == query_parser.TypUint && rhsValue.Type == query_parser.TypInt) || (lhsValue.Type == query_parser.TypInt && rhsValue.Type == query_parser.TypUint) {
-		if lhsValue, err = ConvertValueToBigInt(lhsValue); err != nil {
+		if lhsValue, err = convertValueToBigInt(lhsValue); err != nil {
 			return nil, nil, err
 		}
-		if rhsValue, err = ConvertValueToBigInt(rhsValue); err != nil {
+		if rhsValue, err = convertValueToBigInt(rhsValue); err != nil {
 			return nil, nil, err
 		}
 	}
 	// If either operand is an int64, convert the other to int64.
 	if lhsValue.Type == query_parser.TypInt || rhsValue.Type == query_parser.TypInt {
-		if lhsValue, err = ConvertValueToInt(lhsValue); err != nil {
+		if lhsValue, err = convertValueToInt(lhsValue); err != nil {
 			return nil, nil, err
 		}
-		if rhsValue, err = ConvertValueToInt(rhsValue); err != nil {
+		if rhsValue, err = convertValueToInt(rhsValue); err != nil {
 			return nil, nil, err
 		}
 	}
 	// If either operand is an uint64, convert the other to uint64.
 	if lhsValue.Type == query_parser.TypUint || rhsValue.Type == query_parser.TypUint {
-		if lhsValue, err = ConvertValueToUint(lhsValue); err != nil {
+		if lhsValue, err = convertValueToUint(lhsValue); err != nil {
 			return nil, nil, err
 		}
-		if rhsValue, err = ConvertValueToUint(rhsValue); err != nil {
+		if rhsValue, err = convertValueToUint(rhsValue); err != nil {
 			return nil, nil, err
 		}
 	}
@@ -151,7 +151,7 @@ func CoerceValues(lhsValue, rhsValue *query_parser.Operand) (*query_parser.Opera
 	return lhsValue, rhsValue, nil
 }
 
-func ConvertValueToString(o *query_parser.Operand) (*query_parser.Operand, error) {
+func convertValueToString(o *query_parser.Operand) (*query_parser.Operand, error) {
 	var c query_parser.Operand
 	c.Type = query_parser.TypLiteral
 	switch o.Type {
@@ -177,7 +177,7 @@ func ConvertValueToString(o *query_parser.Operand) (*query_parser.Operand, error
 	return &c, nil
 }
 
-func ConvertValueToBigRat(o *query_parser.Operand) (*query_parser.Operand, error) {
+func convertValueToBigRat(o *query_parser.Operand) (*query_parser.Operand, error) {
 	// operand cannot be literal.
 	var c query_parser.Operand
 	c.Type = query_parser.TypBigRat
@@ -205,7 +205,7 @@ func ConvertValueToBigRat(o *query_parser.Operand) (*query_parser.Operand, error
 	return &c, nil
 }
 
-func ConvertValueToFloat(o *query_parser.Operand) (*query_parser.Operand, error) {
+func convertValueToFloat(o *query_parser.Operand) (*query_parser.Operand, error) {
 	// Operand cannot be literal, big.Rat or big.Int
 	var c query_parser.Operand
 	c.Type = query_parser.TypFloat
@@ -224,7 +224,7 @@ func ConvertValueToFloat(o *query_parser.Operand) (*query_parser.Operand, error)
 	return &c, nil
 }
 
-func ConvertValueToBigInt(o *query_parser.Operand) (*query_parser.Operand, error) {
+func convertValueToBigInt(o *query_parser.Operand) (*query_parser.Operand, error) {
 	// Operand cannot be literal, big.Rat or float.
 	var c query_parser.Operand
 	c.Type = query_parser.TypBigInt
@@ -245,7 +245,7 @@ func ConvertValueToBigInt(o *query_parser.Operand) (*query_parser.Operand, error
 	return &c, nil
 }
 
-func ConvertValueToInt(o *query_parser.Operand) (*query_parser.Operand, error) {
+func convertValueToInt(o *query_parser.Operand) (*query_parser.Operand, error) {
 	// Operand cannot be literal, big.Rat or float or uint64.
 	var c query_parser.Operand
 	c.Type = query_parser.TypInt
@@ -260,7 +260,7 @@ func ConvertValueToInt(o *query_parser.Operand) (*query_parser.Operand, error) {
 	return &c, nil
 }
 
-func ConvertValueToUint(o *query_parser.Operand) (*query_parser.Operand, error) {
+func convertValueToUint(o *query_parser.Operand) (*query_parser.Operand, error) {
 	// Operand cannot be literal, big.Rat or float or int64.
 	var c query_parser.Operand
 	c.Type = query_parser.TypUint
@@ -275,7 +275,7 @@ func ConvertValueToUint(o *query_parser.Operand) (*query_parser.Operand, error) 
 	return &c, nil
 }
 
-func CompareBools(lhsValue, rhsValue *query_parser.Operand, oper *query_parser.BinaryOperator) bool {
+func compareBools(lhsValue, rhsValue *query_parser.Operand, oper *query_parser.BinaryOperator) bool {
 	switch oper.Type {
 	case query_parser.Equal:
 		return lhsValue.Bool == rhsValue.Bool
@@ -284,7 +284,7 @@ func CompareBools(lhsValue, rhsValue *query_parser.Operand, oper *query_parser.B
 	}
 }
 
-func CompareBigInts(lhsValue, rhsValue *query_parser.Operand, oper *query_parser.BinaryOperator) bool {
+func compareBigInts(lhsValue, rhsValue *query_parser.Operand, oper *query_parser.BinaryOperator) bool {
 	switch oper.Type {
 	case query_parser.Equal:
 		return lhsValue.BigInt.Cmp(rhsValue.BigInt) == 0
@@ -301,7 +301,7 @@ func CompareBigInts(lhsValue, rhsValue *query_parser.Operand, oper *query_parser
 	}
 }
 
-func CompareBigRats(lhsValue, rhsValue *query_parser.Operand, oper *query_parser.BinaryOperator) bool {
+func compareBigRats(lhsValue, rhsValue *query_parser.Operand, oper *query_parser.BinaryOperator) bool {
 	switch oper.Type {
 	case query_parser.Equal:
 		return lhsValue.BigRat.Cmp(rhsValue.BigRat) == 0
@@ -318,7 +318,7 @@ func CompareBigRats(lhsValue, rhsValue *query_parser.Operand, oper *query_parser
 	}
 }
 
-func CompareFloats(lhsValue, rhsValue *query_parser.Operand, oper *query_parser.BinaryOperator) bool {
+func compareFloats(lhsValue, rhsValue *query_parser.Operand, oper *query_parser.BinaryOperator) bool {
 	switch oper.Type {
 	case query_parser.Equal:
 		return lhsValue.Float == rhsValue.Float
@@ -335,7 +335,7 @@ func CompareFloats(lhsValue, rhsValue *query_parser.Operand, oper *query_parser.
 	}
 }
 
-func CompareInts(lhsValue, rhsValue *query_parser.Operand, oper *query_parser.BinaryOperator) bool {
+func compareInts(lhsValue, rhsValue *query_parser.Operand, oper *query_parser.BinaryOperator) bool {
 	switch oper.Type {
 	case query_parser.Equal:
 		return lhsValue.Int == rhsValue.Int
@@ -352,7 +352,7 @@ func CompareInts(lhsValue, rhsValue *query_parser.Operand, oper *query_parser.Bi
 	}
 }
 
-func CompareUints(lhsValue, rhsValue *query_parser.Operand, oper *query_parser.BinaryOperator) bool {
+func compareUints(lhsValue, rhsValue *query_parser.Operand, oper *query_parser.BinaryOperator) bool {
 	switch oper.Type {
 	case query_parser.Equal:
 		return lhsValue.Uint == rhsValue.Uint
@@ -369,7 +369,7 @@ func CompareUints(lhsValue, rhsValue *query_parser.Operand, oper *query_parser.B
 	}
 }
 
-func CompareStrings(lhsValue, rhsValue *query_parser.Operand, oper *query_parser.BinaryOperator) bool {
+func compareStrings(lhsValue, rhsValue *query_parser.Operand, oper *query_parser.BinaryOperator) bool {
 	switch oper.Type {
 	case query_parser.Equal:
 		return lhsValue.Literal == rhsValue.Literal
@@ -390,7 +390,7 @@ func CompareStrings(lhsValue, rhsValue *query_parser.Operand, oper *query_parser
 	}
 }
 
-func CompareObjects(lhsValue, rhsValue *query_parser.Operand, oper *query_parser.BinaryOperator) bool {
+func compareObjects(lhsValue, rhsValue *query_parser.Operand, oper *query_parser.BinaryOperator) bool {
 	switch oper.Type {
 	case query_parser.Equal:
 		return reflect.DeepEqual(lhsValue.Object, rhsValue.Object)
@@ -401,7 +401,7 @@ func CompareObjects(lhsValue, rhsValue *query_parser.Operand, oper *query_parser
 	}
 }
 
-func ResolveOperand(v interface{}, o *query_parser.Operand) *query_parser.Operand {
+func resolveOperand(v interface{}, o *query_parser.Operand) *query_parser.Operand {
 	if o.Type != query_parser.TypField {
 		return o
 	}
@@ -495,7 +495,7 @@ func ResolveField(v interface{}, f *query_parser.Field) interface{} {
 }
 
 // Evaluate an expression where the first operand refers to the key.
-func EvalKeyExpression(e *query_parser.Expression, k string) bool {
+func evalKeyExpression(e *query_parser.Expression, k string) bool {
 	// Need to evaluate the key expression.
 	// Currently, only = and like are allowed.
 	// Operand2 must be a string literal.
@@ -507,7 +507,7 @@ func EvalKeyExpression(e *query_parser.Expression, k string) bool {
 	}
 }
 
-func EvalTypeExpression(e *query_parser.Expression, v interface{}) bool {
+func evalTypeExpression(e *query_parser.Expression, v interface{}) bool {
 	if v == nil {
 		// The type expression does not match.
 		return false
@@ -518,4 +518,80 @@ func EvalTypeExpression(e *query_parser.Expression, v interface{}) bool {
 	}
 	// Try to match on just the name.
 	return reflect.ValueOf(v).Type().Name() == e.Operand2.Literal
+}
+
+// Evaluate the where clause, substituting false for all expressions involving the key and
+// true for all other expressions.  If the answer is true, it is possible to satisfy the
+// expression for any key.  As such, all keys must be fetched.
+func CheckIfAllKeysMustBeFetched(e *query_parser.Expression) bool {
+	switch e.Operator.Type {
+	case query_parser.And:
+		return CheckIfAllKeysMustBeFetched(e.Operand1.Expr) && CheckIfAllKeysMustBeFetched(e.Operand2.Expr)
+	case query_parser.Or:
+		return CheckIfAllKeysMustBeFetched(e.Operand1.Expr) || CheckIfAllKeysMustBeFetched(e.Operand2.Expr)
+	default: // =, > >=, <, <=, Like, <>, NotLike
+		if query_checker.IsKey(e.Operand1) {
+			return false
+		} else {
+			return true
+		}
+	}
+}
+
+// Evaluate the where clause to determine if the row should be selected, but do so using only
+// the key.  Possible returns are:
+// true: the row should included in the results
+// false: the row should NOT be included
+// error: the value and/or type of the value are required to determine if row should be included.
+// The above decision is accomplished by evaluating all expressions which reference the key and
+// substituing false for all other expressions.  If the result is true, true is returned.
+// If the result is false, but no other experssions (i.e., expressions which refer to the type
+// of the value or the value itself) were encountered, false is returned; else, an error is
+// returned indicating the value must be fetched in order to determine if the row should be included
+// in the results.
+func EvalWhereUsingOnlyKey(s *query_parser.SelectStatement, k string) (bool, error) {
+	if s.Where == nil { // all rows will be in result
+		return true, nil
+	}
+	return evalExprUsingOnlyKey(s.Where.Expr, k)
+}
+
+func evalExprUsingOnlyKey(e *query_parser.Expression, k string) (bool, error) {
+	switch e.Operator.Type {
+	case query_parser.And:
+		op1Result, err1 := evalExprUsingOnlyKey(e.Operand1.Expr, k)
+		op2Result, err2 := evalExprUsingOnlyKey(e.Operand2.Expr, k)
+		if op1Result && op2Result {
+			return true, nil
+		} else if (op1Result == false && err1 == nil) || (op2Result == false && err2 == nil) {
+			// One of the operands evaluated to false with no error.
+			// As such, the value is not needed to reject the row.
+			return false, nil
+		} else {
+			if err1 != nil {
+				return false, err1
+			} else {
+				return false, err2
+			}
+		}
+	case query_parser.Or:
+		op1Result, err1 := evalExprUsingOnlyKey(e.Operand1.Expr, k)
+		op2Result, err2 := evalExprUsingOnlyKey(e.Operand2.Expr, k)
+		if op1Result || op2Result {
+			return true, nil
+		} else {
+			if err1 != nil {
+				return false, err1
+			} else {
+				return false, err2 // err2 may or may not be nil
+			}
+		}
+	default: // =, > >=, <, <=, Like, <>, NotLike
+		if !query_checker.IsKey(e.Operand1) {
+			// Non-key expressions are evaluated as false.
+			return false, errors.New("Value required for answer.") // err text not used
+		} else {
+			return evalKeyExpression(e, k), nil
+		}
+	}
 }

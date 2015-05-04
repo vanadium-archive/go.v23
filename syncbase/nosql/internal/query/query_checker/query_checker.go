@@ -41,33 +41,33 @@ func Error(offset int64, msg string) *SemanticError {
 func Check(db query_db.Database, s *query_parser.Statement) *SemanticError {
 	switch sel := (*s).(type) {
 	case query_parser.SelectStatement:
-		return CheckSelectStatement(db, &sel)
+		return checkSelectStatement(db, &sel)
 	default:
 		return Error((*s).Offset(), "Cannot semantically check statement, unknown type.")
 	}
 }
 
-func CheckSelectStatement(db query_db.Database, s *query_parser.SelectStatement) *SemanticError {
-	if err := CheckSelectClause(s.Select); err != nil {
+func checkSelectStatement(db query_db.Database, s *query_parser.SelectStatement) *SemanticError {
+	if err := checkSelectClause(s.Select); err != nil {
 		return err
 	}
-	if err := CheckFromClause(db, s.From); err != nil {
+	if err := checkFromClause(db, s.From); err != nil {
 		return err
 	}
-	if err := CheckWhereClause(s.Where); err != nil {
+	if err := checkWhereClause(s.Where); err != nil {
 		return err
 	}
-	if err := CheckLimitClause(s.Limit); err != nil {
+	if err := checkLimitClause(s.Limit); err != nil {
 		return err
 	}
-	if err := CheckResultsOffsetClause(s.ResultsOffset); err != nil {
+	if err := checkResultsOffsetClause(s.ResultsOffset); err != nil {
 		return err
 	}
 	return nil
 }
 
 // Check select clause.  Fields can be 'k' and v[{.<ident>}...]
-func CheckSelectClause(s *query_parser.SelectClause) *SemanticError {
+func checkSelectClause(s *query_parser.SelectClause) *SemanticError {
 	for _, c := range s.Columns {
 		switch c.Segments[0].Value {
 		case "k":
@@ -84,7 +84,7 @@ func CheckSelectClause(s *query_parser.SelectClause) *SemanticError {
 }
 
 // Check from clause.  Table must exist in the database.
-func CheckFromClause(db query_db.Database, f *query_parser.FromClause) *SemanticError {
+func checkFromClause(db query_db.Database, f *query_parser.FromClause) *SemanticError {
 	var err error
 	f.Table.DBTable, err = db.GetTable(f.Table.Name)
 	if err != nil {
@@ -94,18 +94,18 @@ func CheckFromClause(db query_db.Database, f *query_parser.FromClause) *Semantic
 }
 
 // Check where clause.
-func CheckWhereClause(w *query_parser.WhereClause) *SemanticError {
+func checkWhereClause(w *query_parser.WhereClause) *SemanticError {
 	if w == nil {
 		return nil
 	}
-	return CheckExpression(w.Expr)
+	return checkExpression(w.Expr)
 }
 
-func CheckExpression(e *query_parser.Expression) *SemanticError {
-	if err := CheckOperand(e.Operand1); err != nil {
+func checkExpression(e *query_parser.Expression) *SemanticError {
+	if err := checkOperand(e.Operand1); err != nil {
 		return err
 	}
-	if err := CheckOperand(e.Operand2); err != nil {
+	if err := checkOperand(e.Operand2); err != nil {
 		return err
 	}
 
@@ -114,14 +114,14 @@ func CheckExpression(e *query_parser.Expression) *SemanticError {
 		if e.Operand2.Type != query_parser.TypLiteral {
 			return Error(e.Off, "Like expressions require right operand of type <string-literal>.")
 		}
-		prefix, err := ComputePrefix(e.Operand2.Off, e.Operand2.Literal)
+		prefix, err := computePrefix(e.Operand2.Off, e.Operand2.Literal)
 		if err != nil {
 			return err
 		}
 		e.Operand2.Prefix = prefix
 		// Compute the regular expression now to to check for errors.
 		// Save the regex (testing) and the compiled regex (for later use in evaluation).
-		regex, compRegex, err := ComputeRegex(e.Operand2.Off, e.Operand2.Literal)
+		regex, compRegex, err := computeRegex(e.Operand2.Off, e.Operand2.Literal)
 		if err != nil {
 			return err
 		}
@@ -147,10 +147,10 @@ func CheckExpression(e *query_parser.Expression) *SemanticError {
 	return nil
 }
 
-func CheckOperand(o *query_parser.Operand) *SemanticError {
+func checkOperand(o *query_parser.Operand) *SemanticError {
 	switch o.Type {
 	case query_parser.TypExpr:
-		return CheckExpression(o.Expr)
+		return checkExpression(o.Expr)
 	case query_parser.TypField:
 		switch o.Column.Segments[0].Value {
 		case "k":
@@ -172,7 +172,7 @@ func CheckOperand(o *query_parser.Operand) *SemanticError {
 }
 
 // Only include up to (but not including) a wildcard character ('%', '_').
-func ComputePrefix(off int64, s string) (string, *SemanticError) {
+func computePrefix(off int64, s string) (string, *SemanticError) {
 	if strings.Index(s, "%") == -1 && strings.Index(s, "_") == -1 && strings.Index(s, "\\") == -1 {
 		return s, nil
 	}
@@ -212,7 +212,7 @@ func ComputePrefix(off int64, s string) (string, *SemanticError) {
 // _ to .
 // Escape everything that would be incorrectly interpreted as a regex.
 // Note: \% and \_ are used to escape % and _, respectively.
-func ComputeRegex(off int64, s string) (string, *regexp.Regexp, *SemanticError) {
+func computeRegex(off int64, s string) (string, *regexp.Regexp, *SemanticError) {
 	// Escape everything, this will escape too much as like wildcards can
 	// also be escaped by a backslash (\%, \_, \\).
 	escaped := regexp.QuoteMeta(s)
@@ -315,7 +315,7 @@ func CompileKeyPrefixes(where *query_parser.WhereClause) []string {
 		return []string{""}
 	} else {
 		// Collect all key string literal operands.
-		p := CollectKeyPrefixes(where.Expr)
+		p := collectKeyPrefixes(where.Expr)
 		// Sort
 		sort.Strings(p)
 		// Elminate overlaps
@@ -331,7 +331,7 @@ func CompileKeyPrefixes(where *query_parser.WhereClause) []string {
 }
 
 // Collect all operand2 string literals where operand1 of the expression is ident "k".
-func CollectKeyPrefixes(expr *query_parser.Expression) []string {
+func collectKeyPrefixes(expr *query_parser.Expression) []string {
 	var prefixes []string
 	if IsKey(expr.Operand1) {
 		if expr.Operator.Type == query_parser.Like {
@@ -342,12 +342,12 @@ func CollectKeyPrefixes(expr *query_parser.Expression) []string {
 		return prefixes
 	}
 	if IsExpr(expr.Operand1) {
-		for _, p := range CollectKeyPrefixes(expr.Operand1.Expr) {
+		for _, p := range collectKeyPrefixes(expr.Operand1.Expr) {
 			prefixes = append(prefixes, p)
 		}
 	}
 	if IsExpr(expr.Operand2) {
-		for _, p := range CollectKeyPrefixes(expr.Operand2.Expr) {
+		for _, p := range collectKeyPrefixes(expr.Operand2.Expr) {
 			prefixes = append(prefixes, p)
 		}
 	}
@@ -356,7 +356,7 @@ func CollectKeyPrefixes(expr *query_parser.Expression) []string {
 
 // Check limit clause.  Limit must be >= 1.
 // Note: The parser will not allow negative numbers here.
-func CheckLimitClause(l *query_parser.LimitClause) *SemanticError {
+func checkLimitClause(l *query_parser.LimitClause) *SemanticError {
 	if l == nil {
 		return nil
 	}
@@ -368,7 +368,7 @@ func CheckLimitClause(l *query_parser.LimitClause) *SemanticError {
 
 // Check results offset clause.  Offset must be >= 0.
 // Note: The parser will not allow negative numbers here, so this check is presently superfluous.
-func CheckResultsOffsetClause(o *query_parser.ResultsOffsetClause) *SemanticError {
+func checkResultsOffsetClause(o *query_parser.ResultsOffsetClause) *SemanticError {
 	if o == nil {
 		return nil
 	}

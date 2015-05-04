@@ -14,35 +14,35 @@ import (
 	"v.io/syncbase/v23/syncbase/nosql/internal/query/query_parser"
 )
 
-type MockDB struct {
+type mockDB struct {
 }
 
-type CustomerTable struct {
+type customerTable struct {
 }
 
-type InvoiceTable struct {
+type invoiceTable struct {
 }
 
-func (invoiceTable InvoiceTable) Scan(prefixes []string) (query_db.KeyValueStream, error) {
+func (t invoiceTable) Scan(prefixes []string) (query_db.KeyValueStream, error) {
 	return nil, errors.New("unimplemented")
 }
 
-func (customerTable CustomerTable) Scan(prefixes []string) (query_db.KeyValueStream, error) {
+func (t customerTable) Scan(prefixes []string) (query_db.KeyValueStream, error) {
 	return nil, errors.New("unimplemented")
 }
 
-func (db MockDB) GetTable(table string) (query_db.Table, error) {
+func (db mockDB) GetTable(table string) (query_db.Table, error) {
 	if table == "Customer" {
-		var customerTable CustomerTable
-		return customerTable, nil
+		var t customerTable
+		return t, nil
 	} else if table == "Invoice" {
-		var invoiceTable InvoiceTable
-		return invoiceTable, nil
+		var t invoiceTable
+		return t, nil
 	}
 	return nil, errors.New(fmt.Sprintf("No such table: %s", table))
 }
 
-var db MockDB
+var db mockDB
 
 func TestCreate(t *testing.T) {
 }

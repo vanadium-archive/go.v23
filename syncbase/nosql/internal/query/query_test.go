@@ -17,20 +17,20 @@ import (
 	"v.io/syncbase/v23/syncbase/nosql/internal/query/query_parser"
 )
 
-type MockDB struct {
+type mockDB struct {
 }
 
-type CustomerTable struct {
+type customerTable struct {
 }
 
-type KeyValueStreamImpl struct {
+type keyValueStreamImpl struct {
 	cursor       int
 	prefixes     []string
 	prefixCursor int
-	customerRows []CustomerKV
+	customerRows []customerKV
 }
 
-func (kvs *KeyValueStreamImpl) Advance() bool {
+func (kvs *keyValueStreamImpl) Advance() bool {
 	for true {
 		kvs.cursor++ // initialized to -1
 		if kvs.cursor >= len(kvs.customerRows) {
@@ -56,28 +56,28 @@ func (kvs *KeyValueStreamImpl) Advance() bool {
 	return false
 }
 
-func (kvs *KeyValueStreamImpl) KeyValue() (string, interface{}) {
+func (kvs *keyValueStreamImpl) KeyValue() (string, interface{}) {
 	return kvs.customerRows[kvs.cursor].key, kvs.customerRows[kvs.cursor].value
 }
 
-func (kvs *KeyValueStreamImpl) Err() error {
+func (kvs *keyValueStreamImpl) Err() error {
 	return nil
 }
 
-func (kvs *KeyValueStreamImpl) Cancel() {
+func (kvs *keyValueStreamImpl) Cancel() {
 }
 
-func (customerTable CustomerTable) Scan(prefixes []string) (query_db.KeyValueStream, error) {
-	var keyValueStreamImpl KeyValueStreamImpl
+func (customerTable customerTable) Scan(prefixes []string) (query_db.KeyValueStream, error) {
+	var keyValueStreamImpl keyValueStreamImpl
 	keyValueStreamImpl.cursor = -1
 	keyValueStreamImpl.prefixes = prefixes
 	keyValueStreamImpl.customerRows = customerRows
 	return &keyValueStreamImpl, nil
 }
 
-func (db MockDB) GetTable(table string) (query_db.Table, error) {
+func (db mockDB) GetTable(table string) (query_db.Table, error) {
 	if table == "Customer" {
-		var customerTable CustomerTable
+		var customerTable customerTable
 		return customerTable, nil
 	}
 	return nil, errors.New(fmt.Sprintf("No such table: %s.", table))
@@ -120,56 +120,56 @@ type Invoice struct {
 	Amount     int64
 }
 
-var db MockDB
+var db mockDB
 var sampleRow Customer
 var sampleRow123 Customer
 
-type CustomerKV struct {
+type customerKV struct {
 	key   string
 	value interface{}
 }
 
-var customerRows []CustomerKV
+var customerRows []customerKV
 
 func TestCreate(t *testing.T) {
 	sampleRow = Customer{"John Smith", 123456, true, 'A', "1 Main St.", "Palo Alto", "CA", "94303", big.NewInt(1234567890), big.NewRat(123, 1), byte(12), uint16(1234), uint32(5678), uint64(999888777666), int16(9876), int32(876543), Nest1{Nest2{"foo", true, 42}}}
 	sampleRow123 = Customer{"John Smith", 123, true, 123, "1 Main St.", "Palo Alto", "CA", "94303", big.NewInt(123), big.NewRat(123, 1), byte(123), uint16(123), uint32(123), uint64(123), int16(123), int32(123), Nest1{Nest2{"foo", true, 123}}}
 	sampleRow = Customer{"John Smith", 123456, true, 'A', "1 Main St.", "Palo Alto", "CA", "94303", big.NewInt(1234567890), big.NewRat(123, 1), byte(12), uint16(1234), uint32(5678), uint64(999888777666), int16(9876), int32(876543), Nest1{Nest2{"foo", true, 42}}}
 
-	customerRows = []CustomerKV{
-		CustomerKV{
+	customerRows = []customerKV{
+		customerKV{
 			"001",
 			Customer{"John Smith", 1, true, 'A', "1 Main St.", "Palo Alto", "CA", "94303", big.NewInt(1234567890), big.NewRat(123, 1), byte(12), uint16(1234), uint32(5678), uint64(999888777666), int16(9876), int32(876543), Nest1{Nest2{"foo", true, 42}}},
 		},
-		CustomerKV{
+		customerKV{
 			"001001",
 			Invoice{1, 1000, 42},
 		},
-		CustomerKV{
+		customerKV{
 			"001002",
 			Invoice{1, 1003, 7},
 		},
-		CustomerKV{
+		customerKV{
 			"001003",
 			Invoice{1, 1005, 88},
 		},
-		CustomerKV{
+		customerKV{
 			"002",
 			Customer{"Bat Masterson", 2, true, 'B', "777 Any St.", "collins", "IA", "50055", big.NewInt(9999), big.NewRat(999999, 1), byte(9), uint16(99), uint32(999), uint64(9999999), int16(9), int32(99), Nest1{Nest2{"bar", false, 84}}},
 		},
-		CustomerKV{
+		customerKV{
 			"002001",
 			Invoice{2, 1001, 166},
 		},
-		CustomerKV{
+		customerKV{
 			"002002",
 			Invoice{2, 1002, 243},
 		},
-		CustomerKV{
+		customerKV{
 			"002003",
 			Invoice{2, 1004, 787},
 		},
-		CustomerKV{
+		customerKV{
 			"002004",
 			Invoice{2, 1006, 88},
 		},
