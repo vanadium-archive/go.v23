@@ -9,6 +9,7 @@ import (
 	"v.io/v23/context"
 	"v.io/v23/naming"
 	"v.io/v23/security/access"
+	"v.io/v23/verror"
 )
 
 type table struct {
@@ -45,29 +46,25 @@ func (t *table) Put(ctx *context.T, key string, value interface{}) error {
 
 // Delete implements Table.Delete.
 func (t *table) Delete(ctx *context.T, r RowRange) error {
-	return t.c.Delete(ctx, r.Start(), r.Limit())
+	return t.c.DeleteRowRange(ctx, r.Start(), r.Limit())
 }
 
 // Scan implements Table.Scan.
 func (t *table) Scan(ctx *context.T, r RowRange) (Stream, error) {
-	// TODO(sadovsky): Implement.
-	return nil, nil
+	return nil, verror.NewErrNotImplemented(ctx)
 }
 
 // SetPermissions implements Table.SetPermissions.
 func (t *table) SetPermissions(ctx *context.T, prefix PrefixRange, perms access.Permissions) error {
-	// TODO(sadovsky): Implement.
-	return nil
+	return verror.NewErrNotImplemented(ctx)
 }
 
 // GetPermissions implements Table.GetPermissions.
 func (t *table) GetPermissions(ctx *context.T, key string) ([]PrefixPermissions, error) {
-	// TODO(sadovsky): Implement.
-	return nil, nil
+	return nil, verror.NewErrNotImplemented(ctx)
 }
 
 // DeletePermissions implements Table.DeletePermissions.
 func (t *table) DeletePermissions(ctx *context.T, prefix PrefixRange) error {
-	// TODO(sadovsky): Implement.
-	return nil
+	return verror.NewErrNotImplemented(ctx)
 }

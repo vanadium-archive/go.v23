@@ -9,6 +9,7 @@ import (
 	"v.io/v23/context"
 	"v.io/v23/naming"
 	"v.io/v23/security/access"
+	"v.io/v23/verror"
 )
 
 func NewService(name string) Service {
@@ -32,8 +33,7 @@ func (s *service) App(relativeName string) App {
 
 // ListApps implements Service.ListApps.
 func (s *service) ListApps(ctx *context.T) ([]string, error) {
-	// TODO(sadovsky): Implement on top of Glob.
-	return nil, nil
+	return nil, verror.NewErrNotImplemented(ctx)
 }
 
 // SetPermissions implements Service.SetPermissions.

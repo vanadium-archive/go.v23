@@ -19,6 +19,10 @@ func RunInBatch(ctx *context.T, d Database, opts BatchOptions, fn func(b BatchDa
 		return err
 	}
 	if err := b.Commit(ctx); err != nil {
+		// TODO(sadovsky): Commit() can fail for a number of reasons, e.g. RPC
+		// failure or ErrConcurrentTransaction. Depending on the cause of failure,
+		// it may be desirable to retry the Commit() and/or to call Abort(). For
+		// now, we always abort on a failed commit.
 		b.Abort(ctx)
 		return err
 	}

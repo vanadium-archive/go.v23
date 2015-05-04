@@ -85,8 +85,8 @@ type ServiceClientMethods interface {
 	//    MyMethod() (string, error) {Blue}
 	//
 	//    // Allow clients to change access via the access.Object interface:
-	//    SetPermissions(acl access.Permissions, version string) error         {Red}
-	//    GetPermissions() (acl access.Permissions, version string, err error) {Blue}
+	//    SetPermissions(perms access.Permissions, version string) error         {Red}
+	//    GetPermissions() (perms access.Permissions, version string, err error) {Blue}
 	//  }
 	permissions.ObjectClientMethods
 }
@@ -155,8 +155,8 @@ type ServiceServerMethods interface {
 	//    MyMethod() (string, error) {Blue}
 	//
 	//    // Allow clients to change access via the access.Object interface:
-	//    SetPermissions(acl access.Permissions, version string) error         {Red}
-	//    GetPermissions() (acl access.Permissions, version string, err error) {Blue}
+	//    SetPermissions(perms access.Permissions, version string) error         {Red}
+	//    GetPermissions() (perms access.Permissions, version string, err error) {Blue}
 	//  }
 	permissions.ObjectServerMethods
 }
@@ -215,7 +215,7 @@ var descService = rpc.InterfaceDesc{
 	PkgPath: "v.io/syncbase/v23/services/syncbase",
 	Doc:     "// Service represents a Vanadium Syncbase service.\n// Service.Glob operates over App names.",
 	Embeds: []rpc.EmbedDesc{
-		{"Object", "v.io/v23/services/permissions", "// Object provides access control for Vanadium objects.\n//\n// Vanadium services implementing dynamic access control would typically embed\n// this interface and tag additional methods defined by the service with one of\n// Admin, Read, Write, Resolve etc. For example, the VDL definition of the\n// object would be:\n//\n//   package mypackage\n//\n//   import \"v.io/v23/security/access\"\n//   import \"v.io/v23/services/permissions\"\n//\n//   type MyObject interface {\n//     permissions.Object\n//     MyRead() (string, error) {access.Read}\n//     MyWrite(string) error    {access.Write}\n//   }\n//\n// If the set of pre-defined tags is insufficient, services may define their\n// own tag type and annotate all methods with this new type.\n//\n// Instead of embedding this Object interface, define SetPermissions and\n// GetPermissions in their own interface. Authorization policies will typically\n// respect annotations of a single type. For example, the VDL definition of an\n// object would be:\n//\n//  package mypackage\n//\n//  import \"v.io/v23/security/access\"\n//\n//  type MyTag string\n//\n//  const (\n//    Blue = MyTag(\"Blue\")\n//    Red  = MyTag(\"Red\")\n//  )\n//\n//  type MyObject interface {\n//    MyMethod() (string, error) {Blue}\n//\n//    // Allow clients to change access via the access.Object interface:\n//    SetPermissions(acl access.Permissions, version string) error         {Red}\n//    GetPermissions() (acl access.Permissions, version string, err error) {Blue}\n//  }"},
+		{"Object", "v.io/v23/services/permissions", "// Object provides access control for Vanadium objects.\n//\n// Vanadium services implementing dynamic access control would typically embed\n// this interface and tag additional methods defined by the service with one of\n// Admin, Read, Write, Resolve etc. For example, the VDL definition of the\n// object would be:\n//\n//   package mypackage\n//\n//   import \"v.io/v23/security/access\"\n//   import \"v.io/v23/services/permissions\"\n//\n//   type MyObject interface {\n//     permissions.Object\n//     MyRead() (string, error) {access.Read}\n//     MyWrite(string) error    {access.Write}\n//   }\n//\n// If the set of pre-defined tags is insufficient, services may define their\n// own tag type and annotate all methods with this new type.\n//\n// Instead of embedding this Object interface, define SetPermissions and\n// GetPermissions in their own interface. Authorization policies will typically\n// respect annotations of a single type. For example, the VDL definition of an\n// object would be:\n//\n//  package mypackage\n//\n//  import \"v.io/v23/security/access\"\n//\n//  type MyTag string\n//\n//  const (\n//    Blue = MyTag(\"Blue\")\n//    Red  = MyTag(\"Red\")\n//  )\n//\n//  type MyObject interface {\n//    MyMethod() (string, error) {Blue}\n//\n//    // Allow clients to change access via the access.Object interface:\n//    SetPermissions(perms access.Permissions, version string) error         {Red}\n//    GetPermissions() (perms access.Permissions, version string, err error) {Blue}\n//  }"},
 	},
 }
 
@@ -267,12 +267,12 @@ type AppClientMethods interface {
 	//    MyMethod() (string, error) {Blue}
 	//
 	//    // Allow clients to change access via the access.Object interface:
-	//    SetPermissions(acl access.Permissions, version string) error         {Red}
-	//    GetPermissions() (acl access.Permissions, version string, err error) {Blue}
+	//    SetPermissions(perms access.Permissions, version string) error         {Red}
+	//    GetPermissions() (perms access.Permissions, version string, err error) {Blue}
 	//  }
 	permissions.ObjectClientMethods
 	// Create creates this App.
-	// If perms is nil, Permissions is inherited (copied) from the Service.
+	// If perms is nil, we inherit (copy) the Service perms.
 	// Create requires the caller to have Write permission at the Service.
 	Create(ctx *context.T, perms access.Permissions, opts ...rpc.CallOpt) error
 	// Delete deletes this App.
@@ -354,16 +354,16 @@ type AppServerMethods interface {
 	//    MyMethod() (string, error) {Blue}
 	//
 	//    // Allow clients to change access via the access.Object interface:
-	//    SetPermissions(acl access.Permissions, version string) error         {Red}
-	//    GetPermissions() (acl access.Permissions, version string, err error) {Blue}
+	//    SetPermissions(perms access.Permissions, version string) error         {Red}
+	//    GetPermissions() (perms access.Permissions, version string, err error) {Blue}
 	//  }
 	permissions.ObjectServerMethods
 	// Create creates this App.
-	// If perms is nil, Permissions is inherited (copied) from the Service.
+	// If perms is nil, we inherit (copy) the Service perms.
 	// Create requires the caller to have Write permission at the Service.
-	Create(call rpc.ServerCall, perms access.Permissions) error
+	Create(ctx *context.T, call rpc.ServerCall, perms access.Permissions) error
 	// Delete deletes this App.
-	Delete(rpc.ServerCall) error
+	Delete(*context.T, rpc.ServerCall) error
 }
 
 // AppServerStubMethods is the server interface containing
@@ -403,12 +403,12 @@ type implAppServerStub struct {
 	gs *rpc.GlobState
 }
 
-func (s implAppServerStub) Create(call rpc.ServerCall, i0 access.Permissions) error {
-	return s.impl.Create(call, i0)
+func (s implAppServerStub) Create(ctx *context.T, call rpc.ServerCall, i0 access.Permissions) error {
+	return s.impl.Create(ctx, call, i0)
 }
 
-func (s implAppServerStub) Delete(call rpc.ServerCall) error {
-	return s.impl.Delete(call)
+func (s implAppServerStub) Delete(ctx *context.T, call rpc.ServerCall) error {
+	return s.impl.Delete(ctx, call)
 }
 
 func (s implAppServerStub) Globber() *rpc.GlobState {
@@ -428,12 +428,12 @@ var descApp = rpc.InterfaceDesc{
 	PkgPath: "v.io/syncbase/v23/services/syncbase",
 	Doc:     "// App represents the data for a specific app instance (possibly a combination\n// of user, device, and app).\n// App.Glob operates over Database names.",
 	Embeds: []rpc.EmbedDesc{
-		{"Object", "v.io/v23/services/permissions", "// Object provides access control for Vanadium objects.\n//\n// Vanadium services implementing dynamic access control would typically embed\n// this interface and tag additional methods defined by the service with one of\n// Admin, Read, Write, Resolve etc. For example, the VDL definition of the\n// object would be:\n//\n//   package mypackage\n//\n//   import \"v.io/v23/security/access\"\n//   import \"v.io/v23/services/permissions\"\n//\n//   type MyObject interface {\n//     permissions.Object\n//     MyRead() (string, error) {access.Read}\n//     MyWrite(string) error    {access.Write}\n//   }\n//\n// If the set of pre-defined tags is insufficient, services may define their\n// own tag type and annotate all methods with this new type.\n//\n// Instead of embedding this Object interface, define SetPermissions and\n// GetPermissions in their own interface. Authorization policies will typically\n// respect annotations of a single type. For example, the VDL definition of an\n// object would be:\n//\n//  package mypackage\n//\n//  import \"v.io/v23/security/access\"\n//\n//  type MyTag string\n//\n//  const (\n//    Blue = MyTag(\"Blue\")\n//    Red  = MyTag(\"Red\")\n//  )\n//\n//  type MyObject interface {\n//    MyMethod() (string, error) {Blue}\n//\n//    // Allow clients to change access via the access.Object interface:\n//    SetPermissions(acl access.Permissions, version string) error         {Red}\n//    GetPermissions() (acl access.Permissions, version string, err error) {Blue}\n//  }"},
+		{"Object", "v.io/v23/services/permissions", "// Object provides access control for Vanadium objects.\n//\n// Vanadium services implementing dynamic access control would typically embed\n// this interface and tag additional methods defined by the service with one of\n// Admin, Read, Write, Resolve etc. For example, the VDL definition of the\n// object would be:\n//\n//   package mypackage\n//\n//   import \"v.io/v23/security/access\"\n//   import \"v.io/v23/services/permissions\"\n//\n//   type MyObject interface {\n//     permissions.Object\n//     MyRead() (string, error) {access.Read}\n//     MyWrite(string) error    {access.Write}\n//   }\n//\n// If the set of pre-defined tags is insufficient, services may define their\n// own tag type and annotate all methods with this new type.\n//\n// Instead of embedding this Object interface, define SetPermissions and\n// GetPermissions in their own interface. Authorization policies will typically\n// respect annotations of a single type. For example, the VDL definition of an\n// object would be:\n//\n//  package mypackage\n//\n//  import \"v.io/v23/security/access\"\n//\n//  type MyTag string\n//\n//  const (\n//    Blue = MyTag(\"Blue\")\n//    Red  = MyTag(\"Red\")\n//  )\n//\n//  type MyObject interface {\n//    MyMethod() (string, error) {Blue}\n//\n//    // Allow clients to change access via the access.Object interface:\n//    SetPermissions(perms access.Permissions, version string) error         {Red}\n//    GetPermissions() (perms access.Permissions, version string, err error) {Blue}\n//  }"},
 	},
 	Methods: []rpc.MethodDesc{
 		{
 			Name: "Create",
-			Doc:  "// Create creates this App.\n// If perms is nil, Permissions is inherited (copied) from the Service.\n// Create requires the caller to have Write permission at the Service.",
+			Doc:  "// Create creates this App.\n// If perms is nil, we inherit (copy) the Service perms.\n// Create requires the caller to have Write permission at the Service.",
 			InArgs: []rpc.ArgDesc{
 				{"perms", ``}, // access.Permissions
 			},

@@ -12,13 +12,35 @@ import (
 	// VDL system imports
 	"v.io/v23"
 	"v.io/v23/context"
+	"v.io/v23/i18n"
 	"v.io/v23/rpc"
 	"v.io/v23/vdl"
+	"v.io/v23/verror"
 
 	// VDL user imports
 	"v.io/v23/security/access"
 	"v.io/v23/services/permissions"
 )
+
+var (
+	ErrBoundToBatch    = verror.Register("v.io/syncbase/v23/services/syncbase/nosql.BoundToBatch", verror.NoRetry, "{1:}{2:} bound to batch")
+	ErrNotBoundToBatch = verror.Register("v.io/syncbase/v23/services/syncbase/nosql.NotBoundToBatch", verror.NoRetry, "{1:}{2:} not bound to batch")
+)
+
+func init() {
+	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrBoundToBatch.ID), "{1:}{2:} bound to batch")
+	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrNotBoundToBatch.ID), "{1:}{2:} not bound to batch")
+}
+
+// NewErrBoundToBatch returns an error with the ErrBoundToBatch ID.
+func NewErrBoundToBatch(ctx *context.T) error {
+	return verror.New(ErrBoundToBatch, ctx)
+}
+
+// NewErrNotBoundToBatch returns an error with the ErrNotBoundToBatch ID.
+func NewErrNotBoundToBatch(ctx *context.T) error {
+	return verror.New(ErrNotBoundToBatch, ctx)
+}
 
 // DatabaseClientMethods is the client interface
 // containing Database methods.
@@ -70,18 +92,12 @@ type DatabaseClientMethods interface {
 	//    MyMethod() (string, error) {Blue}
 	//
 	//    // Allow clients to change access via the access.Object interface:
-	//    SetPermissions(acl access.Permissions, version string) error         {Red}
-	//    GetPermissions() (acl access.Permissions, version string, err error) {Blue}
+	//    SetPermissions(perms access.Permissions, version string) error         {Red}
+	//    GetPermissions() (perms access.Permissions, version string, err error) {Blue}
 	//  }
 	permissions.ObjectClientMethods
-	// Create creates the specified Table.
-	// If perms is nil, Permissions is inherited (copied) from the Database.
-	// relativeName must not contain slashes.
-	CreateTable(ctx *context.T, relativeName string, perms access.Permissions, opts ...rpc.CallOpt) error
-	// DeleteTable deletes the specified Table.
-	DeleteTable(ctx *context.T, relativeName string, opts ...rpc.CallOpt) error
 	// Create creates this Database.
-	// If perms is nil, Permissions is inherited (copied) from the App.
+	// If perms is nil, we inherit (copy) the App perms.
 	// Create requires the caller to have Write permission at the App.
 	Create(ctx *context.T, perms access.Permissions, opts ...rpc.CallOpt) error
 	// Delete deletes this Database.
@@ -90,17 +106,7 @@ type DatabaseClientMethods interface {
 	// Database handle bound to this batch. If this Database is already bound to a
 	// batch, BeginBatch() will fail with ErrBoundToBatch.
 	//
-	// Default concurrency semantics:
-	// - Reads inside a batch see a consistent snapshot, taken during
-	//   BeginBatch(), and will not see the effect of writes inside the batch.
-	// - Commit() may fail with ErrConcurrentBatch, indicating that after
-	//   BeginBatch() but before Commit(), some concurrent routine wrote to a key
-	//   that matches a key or row-range read inside this batch. (Writes inside a
-	//   batch cannot cause that batch's Commit() to fail.)
-	// - Other methods (e.g. Get) will never fail with error ErrConcurrentBatch,
-	//   even if it is known that Commit() will fail with this error.
-	//
-	// Concurrency semantics can be configured using BatchOptions.
+	// Concurrency semantics are documented in model.go.
 	BeginBatch(ctx *context.T, bo BatchOptions, opts ...rpc.CallOpt) (string, error)
 	// Commit persists the pending changes to the database.
 	// If this Database is not bound to a batch, Commit() will fail with
@@ -129,16 +135,6 @@ type implDatabaseClientStub struct {
 	name string
 
 	permissions.ObjectClientStub
-}
-
-func (c implDatabaseClientStub) CreateTable(ctx *context.T, i0 string, i1 access.Permissions, opts ...rpc.CallOpt) (err error) {
-	err = v23.GetClient(ctx).Call(ctx, c.name, "CreateTable", []interface{}{i0, i1}, nil, opts...)
-	return
-}
-
-func (c implDatabaseClientStub) DeleteTable(ctx *context.T, i0 string, opts ...rpc.CallOpt) (err error) {
-	err = v23.GetClient(ctx).Call(ctx, c.name, "DeleteTable", []interface{}{i0}, nil, opts...)
-	return
 }
 
 func (c implDatabaseClientStub) Create(ctx *context.T, i0 access.Permissions, opts ...rpc.CallOpt) (err error) {
@@ -216,48 +212,32 @@ type DatabaseServerMethods interface {
 	//    MyMethod() (string, error) {Blue}
 	//
 	//    // Allow clients to change access via the access.Object interface:
-	//    SetPermissions(acl access.Permissions, version string) error         {Red}
-	//    GetPermissions() (acl access.Permissions, version string, err error) {Blue}
+	//    SetPermissions(perms access.Permissions, version string) error         {Red}
+	//    GetPermissions() (perms access.Permissions, version string, err error) {Blue}
 	//  }
 	permissions.ObjectServerMethods
-	// Create creates the specified Table.
-	// If perms is nil, Permissions is inherited (copied) from the Database.
-	// relativeName must not contain slashes.
-	CreateTable(call rpc.ServerCall, relativeName string, perms access.Permissions) error
-	// DeleteTable deletes the specified Table.
-	DeleteTable(call rpc.ServerCall, relativeName string) error
 	// Create creates this Database.
-	// If perms is nil, Permissions is inherited (copied) from the App.
+	// If perms is nil, we inherit (copy) the App perms.
 	// Create requires the caller to have Write permission at the App.
-	Create(call rpc.ServerCall, perms access.Permissions) error
+	Create(ctx *context.T, call rpc.ServerCall, perms access.Permissions) error
 	// Delete deletes this Database.
-	Delete(rpc.ServerCall) error
+	Delete(*context.T, rpc.ServerCall) error
 	// BeginBatch creates a new batch. It returns an App-relative name for a
 	// Database handle bound to this batch. If this Database is already bound to a
 	// batch, BeginBatch() will fail with ErrBoundToBatch.
 	//
-	// Default concurrency semantics:
-	// - Reads inside a batch see a consistent snapshot, taken during
-	//   BeginBatch(), and will not see the effect of writes inside the batch.
-	// - Commit() may fail with ErrConcurrentBatch, indicating that after
-	//   BeginBatch() but before Commit(), some concurrent routine wrote to a key
-	//   that matches a key or row-range read inside this batch. (Writes inside a
-	//   batch cannot cause that batch's Commit() to fail.)
-	// - Other methods (e.g. Get) will never fail with error ErrConcurrentBatch,
-	//   even if it is known that Commit() will fail with this error.
-	//
-	// Concurrency semantics can be configured using BatchOptions.
-	BeginBatch(call rpc.ServerCall, bo BatchOptions) (string, error)
+	// Concurrency semantics are documented in model.go.
+	BeginBatch(ctx *context.T, call rpc.ServerCall, bo BatchOptions) (string, error)
 	// Commit persists the pending changes to the database.
 	// If this Database is not bound to a batch, Commit() will fail with
 	// ErrNotBoundToBatch.
-	Commit(rpc.ServerCall) error
+	Commit(*context.T, rpc.ServerCall) error
 	// Abort notifies the server that any pending changes can be discarded.
 	// It is not strictly required, but it may allow the server to release locks
 	// or other resources sooner than if it was not called.
 	// If this Database is not bound to a batch, Abort() will fail with
 	// ErrNotBoundToBatch.
-	Abort(rpc.ServerCall) error
+	Abort(*context.T, rpc.ServerCall) error
 }
 
 // DatabaseServerStubMethods is the server interface containing
@@ -297,32 +277,24 @@ type implDatabaseServerStub struct {
 	gs *rpc.GlobState
 }
 
-func (s implDatabaseServerStub) CreateTable(call rpc.ServerCall, i0 string, i1 access.Permissions) error {
-	return s.impl.CreateTable(call, i0, i1)
+func (s implDatabaseServerStub) Create(ctx *context.T, call rpc.ServerCall, i0 access.Permissions) error {
+	return s.impl.Create(ctx, call, i0)
 }
 
-func (s implDatabaseServerStub) DeleteTable(call rpc.ServerCall, i0 string) error {
-	return s.impl.DeleteTable(call, i0)
+func (s implDatabaseServerStub) Delete(ctx *context.T, call rpc.ServerCall) error {
+	return s.impl.Delete(ctx, call)
 }
 
-func (s implDatabaseServerStub) Create(call rpc.ServerCall, i0 access.Permissions) error {
-	return s.impl.Create(call, i0)
+func (s implDatabaseServerStub) BeginBatch(ctx *context.T, call rpc.ServerCall, i0 BatchOptions) (string, error) {
+	return s.impl.BeginBatch(ctx, call, i0)
 }
 
-func (s implDatabaseServerStub) Delete(call rpc.ServerCall) error {
-	return s.impl.Delete(call)
+func (s implDatabaseServerStub) Commit(ctx *context.T, call rpc.ServerCall) error {
+	return s.impl.Commit(ctx, call)
 }
 
-func (s implDatabaseServerStub) BeginBatch(call rpc.ServerCall, i0 BatchOptions) (string, error) {
-	return s.impl.BeginBatch(call, i0)
-}
-
-func (s implDatabaseServerStub) Commit(call rpc.ServerCall) error {
-	return s.impl.Commit(call)
-}
-
-func (s implDatabaseServerStub) Abort(call rpc.ServerCall) error {
-	return s.impl.Abort(call)
+func (s implDatabaseServerStub) Abort(ctx *context.T, call rpc.ServerCall) error {
+	return s.impl.Abort(ctx, call)
 }
 
 func (s implDatabaseServerStub) Globber() *rpc.GlobState {
@@ -342,29 +314,12 @@ var descDatabase = rpc.InterfaceDesc{
 	PkgPath: "v.io/syncbase/v23/services/syncbase/nosql",
 	Doc:     "// Database represents a collection of Tables. Batches, queries, sync, watch,\n// etc. all operate at the Database level.\n// Database.Glob operates over Table names.\n//\n// TODO(sadovsky): Add Watch method.",
 	Embeds: []rpc.EmbedDesc{
-		{"Object", "v.io/v23/services/permissions", "// Object provides access control for Vanadium objects.\n//\n// Vanadium services implementing dynamic access control would typically embed\n// this interface and tag additional methods defined by the service with one of\n// Admin, Read, Write, Resolve etc. For example, the VDL definition of the\n// object would be:\n//\n//   package mypackage\n//\n//   import \"v.io/v23/security/access\"\n//   import \"v.io/v23/services/permissions\"\n//\n//   type MyObject interface {\n//     permissions.Object\n//     MyRead() (string, error) {access.Read}\n//     MyWrite(string) error    {access.Write}\n//   }\n//\n// If the set of pre-defined tags is insufficient, services may define their\n// own tag type and annotate all methods with this new type.\n//\n// Instead of embedding this Object interface, define SetPermissions and\n// GetPermissions in their own interface. Authorization policies will typically\n// respect annotations of a single type. For example, the VDL definition of an\n// object would be:\n//\n//  package mypackage\n//\n//  import \"v.io/v23/security/access\"\n//\n//  type MyTag string\n//\n//  const (\n//    Blue = MyTag(\"Blue\")\n//    Red  = MyTag(\"Red\")\n//  )\n//\n//  type MyObject interface {\n//    MyMethod() (string, error) {Blue}\n//\n//    // Allow clients to change access via the access.Object interface:\n//    SetPermissions(acl access.Permissions, version string) error         {Red}\n//    GetPermissions() (acl access.Permissions, version string, err error) {Blue}\n//  }"},
+		{"Object", "v.io/v23/services/permissions", "// Object provides access control for Vanadium objects.\n//\n// Vanadium services implementing dynamic access control would typically embed\n// this interface and tag additional methods defined by the service with one of\n// Admin, Read, Write, Resolve etc. For example, the VDL definition of the\n// object would be:\n//\n//   package mypackage\n//\n//   import \"v.io/v23/security/access\"\n//   import \"v.io/v23/services/permissions\"\n//\n//   type MyObject interface {\n//     permissions.Object\n//     MyRead() (string, error) {access.Read}\n//     MyWrite(string) error    {access.Write}\n//   }\n//\n// If the set of pre-defined tags is insufficient, services may define their\n// own tag type and annotate all methods with this new type.\n//\n// Instead of embedding this Object interface, define SetPermissions and\n// GetPermissions in their own interface. Authorization policies will typically\n// respect annotations of a single type. For example, the VDL definition of an\n// object would be:\n//\n//  package mypackage\n//\n//  import \"v.io/v23/security/access\"\n//\n//  type MyTag string\n//\n//  const (\n//    Blue = MyTag(\"Blue\")\n//    Red  = MyTag(\"Red\")\n//  )\n//\n//  type MyObject interface {\n//    MyMethod() (string, error) {Blue}\n//\n//    // Allow clients to change access via the access.Object interface:\n//    SetPermissions(perms access.Permissions, version string) error         {Red}\n//    GetPermissions() (perms access.Permissions, version string, err error) {Blue}\n//  }"},
 	},
 	Methods: []rpc.MethodDesc{
 		{
-			Name: "CreateTable",
-			Doc:  "// Create creates the specified Table.\n// If perms is nil, Permissions is inherited (copied) from the Database.\n// relativeName must not contain slashes.",
-			InArgs: []rpc.ArgDesc{
-				{"relativeName", ``}, // string
-				{"perms", ``},        // access.Permissions
-			},
-			Tags: []*vdl.Value{vdl.ValueOf(access.Tag("Write"))},
-		},
-		{
-			Name: "DeleteTable",
-			Doc:  "// DeleteTable deletes the specified Table.",
-			InArgs: []rpc.ArgDesc{
-				{"relativeName", ``}, // string
-			},
-			Tags: []*vdl.Value{vdl.ValueOf(access.Tag("Write"))},
-		},
-		{
 			Name: "Create",
-			Doc:  "// Create creates this Database.\n// If perms is nil, Permissions is inherited (copied) from the App.\n// Create requires the caller to have Write permission at the App.",
+			Doc:  "// Create creates this Database.\n// If perms is nil, we inherit (copy) the App perms.\n// Create requires the caller to have Write permission at the App.",
 			InArgs: []rpc.ArgDesc{
 				{"perms", ``}, // access.Permissions
 			},
@@ -377,7 +332,7 @@ var descDatabase = rpc.InterfaceDesc{
 		},
 		{
 			Name: "BeginBatch",
-			Doc:  "// BeginBatch creates a new batch. It returns an App-relative name for a\n// Database handle bound to this batch. If this Database is already bound to a\n// batch, BeginBatch() will fail with ErrBoundToBatch.\n//\n// Default concurrency semantics:\n// - Reads inside a batch see a consistent snapshot, taken during\n//   BeginBatch(), and will not see the effect of writes inside the batch.\n// - Commit() may fail with ErrConcurrentBatch, indicating that after\n//   BeginBatch() but before Commit(), some concurrent routine wrote to a key\n//   that matches a key or row-range read inside this batch. (Writes inside a\n//   batch cannot cause that batch's Commit() to fail.)\n// - Other methods (e.g. Get) will never fail with error ErrConcurrentBatch,\n//   even if it is known that Commit() will fail with this error.\n//\n// Concurrency semantics can be configured using BatchOptions.",
+			Doc:  "// BeginBatch creates a new batch. It returns an App-relative name for a\n// Database handle bound to this batch. If this Database is already bound to a\n// batch, BeginBatch() will fail with ErrBoundToBatch.\n//\n// Concurrency semantics are documented in model.go.",
 			InArgs: []rpc.ArgDesc{
 				{"bo", ``}, // BatchOptions
 			},
@@ -405,15 +360,17 @@ var descDatabase = rpc.InterfaceDesc{
 // Table represents a collection of Rows.
 // Table.Glob operates over the primary keys of Rows in the Table.
 type TableClientMethods interface {
-	// Delete deletes all rows in the given range. See helpers nosql.Prefix(),
-	// nosql.Range(), nosql.SingleRow(). If the last row that is covered by a
-	// prefix from SetPermissions is deleted, that (prefix, permissions) pair is
-	// removed.
-	// TODO(sadovsky): Automatic GC does not interact well with sync, especially
-	// in the presence of fine-grained ACLs. Need to think this through. Perhaps
-	// we should only remove prefix permissions fully covered by the given
-	// RowRange.
-	Delete(ctx *context.T, start string, limit string, opts ...rpc.CallOpt) error
+	// Create creates this Table.
+	// If perms is nil, we inherit (copy) the Database perms.
+	Create(ctx *context.T, perms access.Permissions, opts ...rpc.CallOpt) error
+	// Delete deletes this Table.
+	Delete(*context.T, ...rpc.CallOpt) error
+	// DeleteRowRange deletes all rows in the given range. If the last row that is
+	// covered by a prefix from SetPermissions is deleted, that (prefix, perms)
+	// pair is removed.
+	// TODO(sadovsky): Automatic GC does not interact well with sync. This API
+	// needs to be revisited.
+	DeleteRowRange(ctx *context.T, start string, limit string, opts ...rpc.CallOpt) error
 	// SetPermissions sets the permissions for all current and future rows with
 	// the given prefix. If the prefix overlaps with an existing prefix, the
 	// longest prefix that matches a row applies. For example:
@@ -425,8 +382,8 @@ type TableClientMethods interface {
 	// SetPermissions will fail if called with a prefix that does not match any
 	// rows.
 	SetPermissions(ctx *context.T, prefix string, perms access.Permissions, opts ...rpc.CallOpt) error
-	// GetPermissions returns an array of (prefix, permissions) pairs. The array
-	// is sorted from longest prefix to shortest, so element zero is the one that
+	// GetPermissions returns an array of (prefix, perms) pairs. The array is
+	// sorted from longest prefix to shortest, so element zero is the one that
 	// applies to the row with the given key. The last element is always the
 	// prefix "" which represents the table's permissions -- the array will always
 	// have at least one element.
@@ -452,8 +409,18 @@ type implTableClientStub struct {
 	name string
 }
 
-func (c implTableClientStub) Delete(ctx *context.T, i0 string, i1 string, opts ...rpc.CallOpt) (err error) {
-	err = v23.GetClient(ctx).Call(ctx, c.name, "Delete", []interface{}{i0, i1}, nil, opts...)
+func (c implTableClientStub) Create(ctx *context.T, i0 access.Permissions, opts ...rpc.CallOpt) (err error) {
+	err = v23.GetClient(ctx).Call(ctx, c.name, "Create", []interface{}{i0}, nil, opts...)
+	return
+}
+
+func (c implTableClientStub) Delete(ctx *context.T, opts ...rpc.CallOpt) (err error) {
+	err = v23.GetClient(ctx).Call(ctx, c.name, "Delete", nil, nil, opts...)
+	return
+}
+
+func (c implTableClientStub) DeleteRowRange(ctx *context.T, i0 string, i1 string, opts ...rpc.CallOpt) (err error) {
+	err = v23.GetClient(ctx).Call(ctx, c.name, "DeleteRowRange", []interface{}{i0, i1}, nil, opts...)
 	return
 }
 
@@ -478,15 +445,17 @@ func (c implTableClientStub) DeletePermissions(ctx *context.T, i0 string, opts .
 // Table represents a collection of Rows.
 // Table.Glob operates over the primary keys of Rows in the Table.
 type TableServerMethods interface {
-	// Delete deletes all rows in the given range. See helpers nosql.Prefix(),
-	// nosql.Range(), nosql.SingleRow(). If the last row that is covered by a
-	// prefix from SetPermissions is deleted, that (prefix, permissions) pair is
-	// removed.
-	// TODO(sadovsky): Automatic GC does not interact well with sync, especially
-	// in the presence of fine-grained ACLs. Need to think this through. Perhaps
-	// we should only remove prefix permissions fully covered by the given
-	// RowRange.
-	Delete(call rpc.ServerCall, start string, limit string) error
+	// Create creates this Table.
+	// If perms is nil, we inherit (copy) the Database perms.
+	Create(ctx *context.T, call rpc.ServerCall, perms access.Permissions) error
+	// Delete deletes this Table.
+	Delete(*context.T, rpc.ServerCall) error
+	// DeleteRowRange deletes all rows in the given range. If the last row that is
+	// covered by a prefix from SetPermissions is deleted, that (prefix, perms)
+	// pair is removed.
+	// TODO(sadovsky): Automatic GC does not interact well with sync. This API
+	// needs to be revisited.
+	DeleteRowRange(ctx *context.T, call rpc.ServerCall, start string, limit string) error
 	// SetPermissions sets the permissions for all current and future rows with
 	// the given prefix. If the prefix overlaps with an existing prefix, the
 	// longest prefix that matches a row applies. For example:
@@ -497,17 +466,17 @@ type TableServerMethods interface {
 	//
 	// SetPermissions will fail if called with a prefix that does not match any
 	// rows.
-	SetPermissions(call rpc.ServerCall, prefix string, perms access.Permissions) error
-	// GetPermissions returns an array of (prefix, permissions) pairs. The array
-	// is sorted from longest prefix to shortest, so element zero is the one that
+	SetPermissions(ctx *context.T, call rpc.ServerCall, prefix string, perms access.Permissions) error
+	// GetPermissions returns an array of (prefix, perms) pairs. The array is
+	// sorted from longest prefix to shortest, so element zero is the one that
 	// applies to the row with the given key. The last element is always the
 	// prefix "" which represents the table's permissions -- the array will always
 	// have at least one element.
-	GetPermissions(call rpc.ServerCall, key string) ([]PrefixPermissions, error)
+	GetPermissions(ctx *context.T, call rpc.ServerCall, key string) ([]PrefixPermissions, error)
 	// DeletePermissions deletes the permissions for the specified prefix. Any
 	// rows covered by this prefix will use the next longest prefix's permissions
 	// (see the array returned by GetPermissions).
-	DeletePermissions(call rpc.ServerCall, prefix string) error
+	DeletePermissions(ctx *context.T, call rpc.ServerCall, prefix string) error
 }
 
 // TableServerStubMethods is the server interface containing
@@ -545,20 +514,28 @@ type implTableServerStub struct {
 	gs   *rpc.GlobState
 }
 
-func (s implTableServerStub) Delete(call rpc.ServerCall, i0 string, i1 string) error {
-	return s.impl.Delete(call, i0, i1)
+func (s implTableServerStub) Create(ctx *context.T, call rpc.ServerCall, i0 access.Permissions) error {
+	return s.impl.Create(ctx, call, i0)
 }
 
-func (s implTableServerStub) SetPermissions(call rpc.ServerCall, i0 string, i1 access.Permissions) error {
-	return s.impl.SetPermissions(call, i0, i1)
+func (s implTableServerStub) Delete(ctx *context.T, call rpc.ServerCall) error {
+	return s.impl.Delete(ctx, call)
 }
 
-func (s implTableServerStub) GetPermissions(call rpc.ServerCall, i0 string) ([]PrefixPermissions, error) {
-	return s.impl.GetPermissions(call, i0)
+func (s implTableServerStub) DeleteRowRange(ctx *context.T, call rpc.ServerCall, i0 string, i1 string) error {
+	return s.impl.DeleteRowRange(ctx, call, i0, i1)
 }
 
-func (s implTableServerStub) DeletePermissions(call rpc.ServerCall, i0 string) error {
-	return s.impl.DeletePermissions(call, i0)
+func (s implTableServerStub) SetPermissions(ctx *context.T, call rpc.ServerCall, i0 string, i1 access.Permissions) error {
+	return s.impl.SetPermissions(ctx, call, i0, i1)
+}
+
+func (s implTableServerStub) GetPermissions(ctx *context.T, call rpc.ServerCall, i0 string) ([]PrefixPermissions, error) {
+	return s.impl.GetPermissions(ctx, call, i0)
+}
+
+func (s implTableServerStub) DeletePermissions(ctx *context.T, call rpc.ServerCall, i0 string) error {
+	return s.impl.DeletePermissions(ctx, call, i0)
 }
 
 func (s implTableServerStub) Globber() *rpc.GlobState {
@@ -579,12 +556,26 @@ var descTable = rpc.InterfaceDesc{
 	Doc:     "// Table represents a collection of Rows.\n// Table.Glob operates over the primary keys of Rows in the Table.",
 	Methods: []rpc.MethodDesc{
 		{
+			Name: "Create",
+			Doc:  "// Create creates this Table.\n// If perms is nil, we inherit (copy) the Database perms.",
+			InArgs: []rpc.ArgDesc{
+				{"perms", ``}, // access.Permissions
+			},
+			Tags: []*vdl.Value{vdl.ValueOf(access.Tag("Write"))},
+		},
+		{
 			Name: "Delete",
-			Doc:  "// Delete deletes all rows in the given range. See helpers nosql.Prefix(),\n// nosql.Range(), nosql.SingleRow(). If the last row that is covered by a\n// prefix from SetPermissions is deleted, that (prefix, permissions) pair is\n// removed.\n// TODO(sadovsky): Automatic GC does not interact well with sync, especially\n// in the presence of fine-grained ACLs. Need to think this through. Perhaps\n// we should only remove prefix permissions fully covered by the given\n// RowRange.",
+			Doc:  "// Delete deletes this Table.",
+			Tags: []*vdl.Value{vdl.ValueOf(access.Tag("Write"))},
+		},
+		{
+			Name: "DeleteRowRange",
+			Doc:  "// DeleteRowRange deletes all rows in the given range. If the last row that is\n// covered by a prefix from SetPermissions is deleted, that (prefix, perms)\n// pair is removed.\n// TODO(sadovsky): Automatic GC does not interact well with sync. This API\n// needs to be revisited.",
 			InArgs: []rpc.ArgDesc{
 				{"start", ``}, // string
 				{"limit", ``}, // string
 			},
+			Tags: []*vdl.Value{vdl.ValueOf(access.Tag("Write"))},
 		},
 		{
 			Name: "SetPermissions",
@@ -597,7 +588,7 @@ var descTable = rpc.InterfaceDesc{
 		},
 		{
 			Name: "GetPermissions",
-			Doc:  "// GetPermissions returns an array of (prefix, permissions) pairs. The array\n// is sorted from longest prefix to shortest, so element zero is the one that\n// applies to the row with the given key. The last element is always the\n// prefix \"\" which represents the table's permissions -- the array will always\n// have at least one element.",
+			Doc:  "// GetPermissions returns an array of (prefix, perms) pairs. The array is\n// sorted from longest prefix to shortest, so element zero is the one that\n// applies to the row with the given key. The last element is always the\n// prefix \"\" which represents the table's permissions -- the array will always\n// have at least one element.",
 			InArgs: []rpc.ArgDesc{
 				{"key", ``}, // string
 			},
@@ -670,11 +661,11 @@ func (c implRowClientStub) Delete(ctx *context.T, opts ...rpc.CallOpt) (err erro
 // permissions in the Table.
 type RowServerMethods interface {
 	// Get returns the value for this Row.
-	Get(rpc.ServerCall) (*vdl.Value, error)
+	Get(*context.T, rpc.ServerCall) (*vdl.Value, error)
 	// Put writes the given value for this Row.
-	Put(call rpc.ServerCall, value *vdl.Value) error
+	Put(ctx *context.T, call rpc.ServerCall, value *vdl.Value) error
 	// Delete deletes this Row.
-	Delete(rpc.ServerCall) error
+	Delete(*context.T, rpc.ServerCall) error
 }
 
 // RowServerStubMethods is the server interface containing
@@ -712,16 +703,16 @@ type implRowServerStub struct {
 	gs   *rpc.GlobState
 }
 
-func (s implRowServerStub) Get(call rpc.ServerCall) (*vdl.Value, error) {
-	return s.impl.Get(call)
+func (s implRowServerStub) Get(ctx *context.T, call rpc.ServerCall) (*vdl.Value, error) {
+	return s.impl.Get(ctx, call)
 }
 
-func (s implRowServerStub) Put(call rpc.ServerCall, i0 *vdl.Value) error {
-	return s.impl.Put(call, i0)
+func (s implRowServerStub) Put(ctx *context.T, call rpc.ServerCall, i0 *vdl.Value) error {
+	return s.impl.Put(ctx, call, i0)
 }
 
-func (s implRowServerStub) Delete(call rpc.ServerCall) error {
-	return s.impl.Delete(call)
+func (s implRowServerStub) Delete(ctx *context.T, call rpc.ServerCall) error {
+	return s.impl.Delete(ctx, call)
 }
 
 func (s implRowServerStub) Globber() *rpc.GlobState {

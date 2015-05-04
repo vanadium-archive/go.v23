@@ -9,6 +9,7 @@ import (
 	"v.io/v23/context"
 	"v.io/v23/naming"
 	"v.io/v23/security/access"
+	"v.io/v23/verror"
 )
 
 func NewDatabase(name, relativeName string) Database {
@@ -38,8 +39,7 @@ func (d *database) Table(relativeName string) Table {
 
 // ListTables implements Database.ListTables.
 func (d *database) ListTables(ctx *context.T) ([]string, error) {
-	// TODO(sadovsky): Implement on top of Glob.
-	return nil, nil
+	return nil, verror.NewErrNotImplemented(ctx)
 }
 
 // Create implements Database.Create.
@@ -54,17 +54,16 @@ func (d *database) Delete(ctx *context.T) error {
 
 // CreateTable implements Database.CreateTable.
 func (d *database) CreateTable(ctx *context.T, relativeName string, perms access.Permissions) error {
-	return d.c.CreateTable(ctx, relativeName, perms)
+	return wire.TableClient(naming.Join(d.name, relativeName)).Create(ctx, perms)
 }
 
 // DeleteTable implements Database.DeleteTable.
 func (d *database) DeleteTable(ctx *context.T, relativeName string) error {
-	return d.c.DeleteTable(ctx, relativeName)
+	return wire.TableClient(naming.Join(d.name, relativeName)).Delete(ctx)
 }
 
 func (d *database) BeginBatch(ctx *context.T, opts BatchOptions) (BatchDatabase, error) {
-	// TODO(sadovsky): Implement.
-	return nil, nil
+	return nil, verror.NewErrNotImplemented(ctx)
 }
 
 // SetPermissions implements Database.SetPermissions.

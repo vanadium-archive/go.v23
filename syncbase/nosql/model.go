@@ -7,7 +7,7 @@ package nosql
 
 import (
 	wire "v.io/syncbase/v23/services/syncbase/nosql"
-	"v.io/syncbase/v23/syncbase/common"
+	"v.io/syncbase/v23/syncbase/util"
 	"v.io/v23/context"
 	"v.io/v23/security/access"
 )
@@ -40,14 +40,14 @@ type Database interface {
 	Name() string
 
 	// Create creates this Database.
-	// If perms is nil, Permissions is inherited (copied) from the App.
+	// If perms is nil, we inherit (copy) the App perms.
 	Create(ctx *context.T, perms access.Permissions) error
 
 	// Delete deletes this Database.
 	Delete(ctx *context.T) error
 
 	// Create creates the specified Table.
-	// If perms is nil, Permissions is inherited (copied) from the Database.
+	// If perms is nil, we inherit (copy) the Database perms.
 	// relativeName must not contain slashes.
 	CreateTable(ctx *context.T, relativeName string, perms access.Permissions) error
 
@@ -74,7 +74,7 @@ type Database interface {
 
 	// SetPermissions and GetPermissions are included from the AccessController
 	// interface.
-	common.AccessController
+	util.AccessController
 }
 
 // BatchDatabase is a handle to a set of reads and writes to the database that
@@ -94,7 +94,7 @@ type BatchDatabase interface {
 	Abort(ctx *context.T)
 }
 
-// PrefixPermissions represents a pair of (prefix, permissions).
+// PrefixPermissions represents a pair of (prefix, perms).
 type PrefixPermissions struct {
 	prefix PrefixRange
 	perms  access.Permissions
@@ -124,20 +124,20 @@ type Table interface {
 	// must be set.
 	// TODO(kash): Can VOM handle everything that satisfies interface{}?
 	// Need to talk to Todd.
+	// TODO(sadovsky): Maybe distinguish insert from update (and also offer
+	// upsert) so that last-one-wins can have deletes trump updates.
 	Put(ctx *context.T, key string, value interface{}) error
 
-	// Delete deletes all rows in the given range. See helpers nosql.Prefix(),
-	// nosql.Range(), nosql.SingleRow(). If the last row that is covered by a
-	// prefix from SetPermissions is deleted, that (prefix, permissions) pair is
+	// Delete deletes all rows in the given range. If the last row that is covered
+	// by a prefix from SetPermissions is deleted, that (prefix, perms) pair is
 	// removed.
-	// TODO(sadovsky): Automatic GC does not interact well with sync, especially
-	// in the presence of fine-grained ACLs. Need to think this through. Perhaps
-	// we should only remove prefix-permissions fully covered by the given
-	// RowRange.
+	// See helpers nosql.Prefix(), nosql.Range(), nosql.SingleRow().
+	// TODO(sadovsky): Automatic GC does not interact well with sync. This API
+	// needs to be revisited.
 	Delete(ctx *context.T, r RowRange) error
 
-	// Scan returns all rows in the given range. See helpers nosql.Prefix(),
-	// nosql.Range(), nosql.SingleRow().
+	// Scan returns all rows in the given range.
+	// See helpers nosql.Prefix(), nosql.Range(), nosql.SingleRow().
 	Scan(ctx *context.T, r RowRange) (Stream, error)
 
 	// SetPermissions sets the permissions for all current and future rows with
@@ -152,8 +152,8 @@ type Table interface {
 	// rows.
 	SetPermissions(ctx *context.T, prefix PrefixRange, perms access.Permissions) error
 
-	// GetPermissions returns an array of (prefix, permissions) pairs. The array
-	// is sorted from longest prefix to shortest, so element zero is the one that
+	// GetPermissions returns an array of (prefix, perms) pairs. The array is
+	// sorted from longest prefix to shortest, so element zero is the one that
 	// applies to the row with the given key. The last element is always the
 	// prefix "" which represents the table's permissions -- the array will always
 	// have at least one element.

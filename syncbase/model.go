@@ -9,8 +9,8 @@
 package syncbase
 
 import (
-	"v.io/syncbase/v23/syncbase/common"
 	"v.io/syncbase/v23/syncbase/nosql"
+	"v.io/syncbase/v23/syncbase/util"
 	"v.io/v23/context"
 	"v.io/v23/security/access"
 )
@@ -34,7 +34,7 @@ type Service interface {
 
 	// SetPermissions and GetPermissions are included from the AccessController
 	// interface.
-	common.AccessController
+	util.AccessController
 }
 
 // App represents the data for a specific app instance (possibly a combination
@@ -52,7 +52,7 @@ type App interface {
 	ListDatabases(ctx *context.T) ([]string, error)
 
 	// Create creates this App.
-	// If perms is nil, Permissions is inherited (copied) from the Service.
+	// If perms is nil, we inherit (copy) the Service perms.
 	Create(ctx *context.T, perms access.Permissions) error
 
 	// Delete deletes this App.
@@ -60,5 +60,5 @@ type App interface {
 
 	// SetPermissions and GetPermissions are included from the AccessController
 	// interface.
-	common.AccessController
+	util.AccessController
 }

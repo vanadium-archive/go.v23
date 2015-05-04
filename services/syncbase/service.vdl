@@ -32,7 +32,7 @@ type Service interface {
 // App.Glob operates over Database names.
 type App interface {
 	// Create creates this App.
-	// If perms is nil, Permissions is inherited (copied) from the Service.
+	// If perms is nil, we inherit (copy) the Service perms.
 	// Create requires the caller to have Write permission at the Service.
 	Create(perms access.Permissions) error {access.Write}
 

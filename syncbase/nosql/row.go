@@ -7,6 +7,7 @@ package nosql
 import (
 	wire "v.io/syncbase/v23/services/syncbase/nosql"
 	"v.io/v23/context"
+	"v.io/v23/verror"
 )
 
 type row struct {
@@ -26,14 +27,12 @@ func (r *row) Key() string {
 
 // Get implements Row.Get.
 func (r *row) Get(ctx *context.T, value interface{}) error {
-	// TODO(sadovsky): Implement.
-	return nil
+	return verror.NewErrNotImplemented(ctx)
 }
 
 // Put implements Row.Put.
 func (r *row) Put(ctx *context.T, value interface{}) error {
-	// TODO(sadovsky): Implement.
-	return nil
+	return verror.NewErrNotImplemented(ctx)
 }
 
 // Delete implements Row.Delete.

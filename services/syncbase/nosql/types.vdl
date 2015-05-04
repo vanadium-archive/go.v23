@@ -5,7 +5,7 @@
 package nosql
 
 import (
-  "v.io/v23/security/access"
+	"v.io/v23/security/access"
 )
 
 // BatchOptions configures a batch.
@@ -27,7 +27,7 @@ type BatchOptions struct {
 	ReadOnly bool
 }
 
-// PrefixPermissions represents a pair of (prefix, permissions).
+// PrefixPermissions represents a pair of (prefix, perms).
 type PrefixPermissions struct {
 	Prefix string
 	Perms  access.Permissions

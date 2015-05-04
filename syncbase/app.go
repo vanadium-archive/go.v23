@@ -10,6 +10,7 @@ import (
 	"v.io/v23/context"
 	"v.io/v23/naming"
 	"v.io/v23/security/access"
+	"v.io/v23/verror"
 )
 
 type app struct {
@@ -30,14 +31,12 @@ func (a *app) Name() string {
 // NoSQLDatabase implements App.NoSQLDatabase.
 func (a *app) NoSQLDatabase(relativeName string) nosql.Database {
 	name := naming.Join(a.name, relativeName)
-	// TODO(sadovsky): It's annoying that we must export nosql.DatabaseImpl.
 	return nosql.NewDatabase(name, relativeName)
 }
 
 // ListDatabases implements App.ListDatabases.
 func (a *app) ListDatabases(ctx *context.T) ([]string, error) {
-	// TODO(sadovsky): Implement on top of Glob.
-	return nil, nil
+	return nil, verror.NewErrNotImplemented(ctx)
 }
 
 // Create implements App.Create.

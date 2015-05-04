@@ -16,16 +16,8 @@ import (
 //
 // TODO(sadovsky): Add Watch method.
 type Database interface {
-	// Create creates the specified Table.
-	// If perms is nil, Permissions is inherited (copied) from the Database.
-	// relativeName must not contain slashes.
-	CreateTable(relativeName string, perms access.Permissions) error {access.Write}
-
-	// DeleteTable deletes the specified Table.
-	DeleteTable(relativeName string) error {access.Write}
-
 	// Create creates this Database.
-	// If perms is nil, Permissions is inherited (copied) from the App.
+	// If perms is nil, we inherit (copy) the App perms.
 	// Create requires the caller to have Write permission at the App.
 	Create(perms access.Permissions) error {access.Write}
 
@@ -36,17 +28,7 @@ type Database interface {
 	// Database handle bound to this batch. If this Database is already bound to a
 	// batch, BeginBatch() will fail with ErrBoundToBatch.
 	//
-	// Default concurrency semantics:
-	// - Reads inside a batch see a consistent snapshot, taken during
-	//   BeginBatch(), and will not see the effect of writes inside the batch.
-	// - Commit() may fail with ErrConcurrentBatch, indicating that after
-	//   BeginBatch() but before Commit(), some concurrent routine wrote to a key
-	//   that matches a key or row-range read inside this batch. (Writes inside a
-	//   batch cannot cause that batch's Commit() to fail.)
-	// - Other methods (e.g. Get) will never fail with error ErrConcurrentBatch,
-	//   even if it is known that Commit() will fail with this error.
-	//
-	// Concurrency semantics can be configured using BatchOptions.
+	// Concurrency semantics are documented in model.go.
 	BeginBatch(bo BatchOptions) (string | error) {access.Read}
 
 	// Commit persists the pending changes to the database.
@@ -68,15 +50,19 @@ type Database interface {
 // Table represents a collection of Rows.
 // Table.Glob operates over the primary keys of Rows in the Table.
 type Table interface {
-	// Delete deletes all rows in the given range. See helpers nosql.Prefix(),
-	// nosql.Range(), nosql.SingleRow(). If the last row that is covered by a
-	// prefix from SetPermissions is deleted, that (prefix, permissions) pair is
-	// removed.
-	// TODO(sadovsky): Automatic GC does not interact well with sync, especially
-	// in the presence of fine-grained ACLs. Need to think this through. Perhaps
-	// we should only remove prefix permissions fully covered by the given
-	// RowRange.
-	Delete(start, limit string) error
+	// Create creates this Table.
+	// If perms is nil, we inherit (copy) the Database perms.
+	Create(perms access.Permissions) error {access.Write}
+
+	// Delete deletes this Table.
+	Delete() error {access.Write}
+
+	// DeleteRowRange deletes all rows in the given range. If the last row that is
+	// covered by a prefix from SetPermissions is deleted, that (prefix, perms)
+	// pair is removed.
+	// TODO(sadovsky): Automatic GC does not interact well with sync. This API
+	// needs to be revisited.
+	DeleteRowRange(start, limit string) error {access.Write}
 
 	// TODO(sadovsky): Add Scan (which accepts a RowRange) and implement Glob in
 	// terms of Scan?
@@ -93,8 +79,8 @@ type Table interface {
 	// rows.
 	SetPermissions(prefix string, perms access.Permissions) error {access.Admin}
 
-	// GetPermissions returns an array of (prefix, permissions) pairs. The array
-	// is sorted from longest prefix to shortest, so element zero is the one that
+	// GetPermissions returns an array of (prefix, perms) pairs. The array is
+	// sorted from longest prefix to shortest, so element zero is the one that
 	// applies to the row with the given key. The last element is always the
 	// prefix "" which represents the table's permissions -- the array will always
 	// have at least one element.
@@ -119,3 +105,8 @@ type Row interface {
 	// Delete deletes this Row.
 	Delete() error {access.Write}
 }
+
+error (
+	BoundToBatch() {"en": "bound to batch"}
+	NotBoundToBatch() {"en": "not bound to batch"}
+)

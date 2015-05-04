@@ -38,7 +38,7 @@ func (BatchOptions) __VDLReflect(struct {
 }) {
 }
 
-// PrefixPermissions represents a pair of (prefix, permissions).
+// PrefixPermissions represents a pair of (prefix, perms).
 type PrefixPermissions struct {
 	Prefix string
 	Perms  access.Permissions
