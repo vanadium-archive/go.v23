@@ -67,12 +67,9 @@ func ErrorFromSemantic(semerr *query_checker.SemanticError) *QueryError {
 func ComposeProjection(k string, v interface{}, s *query_parser.SelectClause) []interface{} {
 	var projection []interface{}
 	for _, f := range s.Columns {
-		if query_checker.IsKeyField(&f) {
-			projection = append(projection, k)
-		} else {
-			// If field not found, nil is returned (as per specification).
-			projection = append(projection, ResolveField(v, &f))
-		}
+		// If field not found, nil is returned (as per specification).
+		c, _, _ := ResolveField(k, v, &f)
+		projection = append(projection, c)
 	}
 	return projection
 }

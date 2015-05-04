@@ -167,7 +167,7 @@ const (
 	TypField
 	TypFloat
 	TypInt
-	TypLiteral
+	TypStr
 	TypObject // Only as the result of a ResolveOperand.
 	TypUint   // Only as a result of a ResolveOperand
 )
@@ -180,9 +180,11 @@ type Operand struct {
 	Column    *Field
 	Float     float64
 	Int       int64
-	Literal   string
+	Str       string
 	Prefix    string // Computed by checker for Like expressions
 	Regex     string // Computed by checker for Like expressions
+	HasAltStr bool   // set true when evaluating type = expressions
+	AltStr    string // set when evaluating type = expressions
 	Uint      uint64
 	CompRegex *regexp.Regexp
 	Expr      *Expression
@@ -631,8 +633,8 @@ func parseOperand(s *scanner.Scanner, token *Token) (*Operand, *Token, *SyntaxEr
 		operand.Int = int64(ch)
 		token = scanToken(s)
 	case TokSTRING:
-		operand.Type = TypLiteral
-		operand.Literal = token.Value
+		operand.Type = TypStr
+		operand.Str = token.Value
 		token = scanToken(s)
 	case TokMINUS:
 		// Could be negative int or negative float
@@ -910,9 +912,9 @@ func (o Operand) String() string {
 	case TypFloat:
 		val += "(float)"
 		val += strconv.FormatFloat(o.Float, 'f', -1, 64)
-	case TypLiteral:
-		val += "(literal)"
-		val += o.Literal
+	case TypStr:
+		val += "(string)"
+		val += o.Str
 	case TypExpr:
 		val += "(expr)"
 		val += o.Expr.String()

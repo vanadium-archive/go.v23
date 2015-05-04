@@ -111,17 +111,17 @@ func checkExpression(e *query_parser.Expression) *SemanticError {
 
 	// Like expressions require operand2 to be a string literal that must be validated.
 	if e.Operator.Type == query_parser.Like {
-		if e.Operand2.Type != query_parser.TypLiteral {
+		if e.Operand2.Type != query_parser.TypStr {
 			return Error(e.Off, "Like expressions require right operand of type <string-literal>.")
 		}
-		prefix, err := computePrefix(e.Operand2.Off, e.Operand2.Literal)
+		prefix, err := computePrefix(e.Operand2.Off, e.Operand2.Str)
 		if err != nil {
 			return err
 		}
 		e.Operand2.Prefix = prefix
 		// Compute the regular expression now to to check for errors.
 		// Save the regex (testing) and the compiled regex (for later use in evaluation).
-		regex, compRegex, err := computeRegex(e.Operand2.Off, e.Operand2.Literal)
+		regex, compRegex, err := computeRegex(e.Operand2.Off, e.Operand2.Str)
 		if err != nil {
 			return err
 		}
@@ -130,12 +130,12 @@ func checkExpression(e *query_parser.Expression) *SemanticError {
 	}
 
 	// type as an operand must be the first operand, the operator must be = and the 2nd operand must be string literal.
-	if (IsType(e.Operand1) && (e.Operator.Type != query_parser.Equal || e.Operand2.Type != query_parser.TypLiteral)) || IsType(e.Operand2) {
+	if (IsType(e.Operand1) && (e.Operator.Type != query_parser.Equal || e.Operand2.Type != query_parser.TypStr)) || IsType(e.Operand2) {
 		return Error(e.Off, "Type expressions must be 't = <string-literal>'.")
 	}
 
 	// k as an operand must be the first operand, the operator must be like or = and the 2nd operand must be a string literal.
-	if (IsKey(e.Operand1) && ((e.Operator.Type != query_parser.Equal && e.Operator.Type != query_parser.Like) || e.Operand2.Type != query_parser.TypLiteral)) || IsKey(e.Operand2) {
+	if (IsKey(e.Operand1) && ((e.Operator.Type != query_parser.Equal && e.Operator.Type != query_parser.Like) || e.Operand2.Type != query_parser.TypStr)) || IsKey(e.Operand2) {
 		return Error(e.Off, "Key (i.e., 'k') expressions must be of form 'k like|= <string-literal>'.")
 	}
 
@@ -337,7 +337,7 @@ func collectKeyPrefixes(expr *query_parser.Expression) []string {
 		if expr.Operator.Type == query_parser.Like {
 			prefixes = append(prefixes, expr.Operand2.Prefix)
 		} else { // OpEqual
-			prefixes = append(prefixes, expr.Operand2.Literal)
+			prefixes = append(prefixes, expr.Operand2.Str)
 		}
 		return prefixes
 	}

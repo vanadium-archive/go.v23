@@ -32,27 +32,11 @@ func evalLogicalOperators(k string, v interface{}, e *query_parser.Expression) b
 }
 
 func evalComparisonOperators(k string, v interface{}, e *query_parser.Expression) bool {
-	// Key and type expressions are evaluated differently from value expression.
-	// Key expressions always have a string literal on the rhs and are currently
-	// limited to = and <>.
-	// Type expressions are limited to = and must have a stiring literal rhs.  Also,
-	// they are evaluated via reflection on the value.
-	if query_checker.IsKey(e.Operand1) {
-		return evalKeyExpression(e, k)
-	} else if query_checker.IsType(e.Operand1) {
-		return evalTypeExpression(e, v)
-	} else {
-		return evalValueExpression(k, v, e)
-	}
-}
-
-func evalValueExpression(k string, v interface{}, e *query_parser.Expression) bool {
-	// Any fields that are value fields that need to be resolved.
-	lhsValue := resolveOperand(v, e.Operand1)
+	lhsValue := resolveOperand(k, v, e.Operand1)
 	if lhsValue == nil {
 		return false
 	}
-	rhsValue := resolveOperand(v, e.Operand2)
+	rhsValue := resolveOperand(k, v, e.Operand2)
 	if rhsValue == nil {
 		return false
 	}
@@ -74,7 +58,7 @@ func evalValueExpression(k string, v interface{}, e *query_parser.Expression) bo
 		return compareFloats(lhsValue, rhsValue, e.Operator)
 	case query_parser.TypInt:
 		return compareInts(lhsValue, rhsValue, e.Operator)
-	case query_parser.TypLiteral:
+	case query_parser.TypStr:
 		return compareStrings(lhsValue, rhsValue, e.Operator)
 	case query_parser.TypUint:
 		return compareUints(lhsValue, rhsValue, e.Operator)
@@ -87,7 +71,7 @@ func evalValueExpression(k string, v interface{}, e *query_parser.Expression) bo
 func coerceValues(lhsValue, rhsValue *query_parser.Operand) (*query_parser.Operand, *query_parser.Operand, error) {
 	var err error
 	// If either operand is a string, convert the other to a string.
-	if lhsValue.Type == query_parser.TypLiteral || rhsValue.Type == query_parser.TypLiteral {
+	if lhsValue.Type == query_parser.TypStr || rhsValue.Type == query_parser.TypStr {
 		if lhsValue, err = convertValueToString(lhsValue); err != nil {
 			return nil, nil, err
 		}
@@ -153,24 +137,27 @@ func coerceValues(lhsValue, rhsValue *query_parser.Operand) (*query_parser.Opera
 
 func convertValueToString(o *query_parser.Operand) (*query_parser.Operand, error) {
 	var c query_parser.Operand
-	c.Type = query_parser.TypLiteral
+	c.Type = query_parser.TypStr
+	c.Off = o.Off
 	switch o.Type {
 	case query_parser.TypBigInt:
-		c.Literal = o.BigInt.String()
+		c.Str = o.BigInt.String()
 	case query_parser.TypBigRat:
-		c.Literal = o.BigRat.String()
+		c.Str = o.BigRat.String()
 	case query_parser.TypBool:
-		c.Literal = strconv.FormatBool(o.Bool)
+		c.Str = strconv.FormatBool(o.Bool)
 	case query_parser.TypFloat:
-		c.Literal = strconv.FormatFloat(o.Float, 'f', -1, 64)
+		c.Str = strconv.FormatFloat(o.Float, 'f', -1, 64)
 	case query_parser.TypInt:
-		c.Literal = strconv.FormatInt(o.Int, 10)
-	case query_parser.TypLiteral:
-		c.Literal = o.Literal
-		c.Regex = o.Regex         // non-nil for rhs of like expressions
+		c.Str = strconv.FormatInt(o.Int, 10)
+	case query_parser.TypStr:
+		c.Str = o.Str
+		c.HasAltStr = o.HasAltStr // true for type = expressions
+		c.AltStr = o.AltStr
+		c.Regex = o.Regex         // non-empty for rhs of like expressions
 		c.CompRegex = o.CompRegex // non-nil for rhs of like expressions
 	case query_parser.TypUint:
-		c.Literal = strconv.FormatUint(o.Uint, 10)
+		c.Str = strconv.FormatUint(o.Uint, 10)
 	default: // query_parser.TypObject
 		return nil, errors.New("Cannot convert object to string for comparison.")
 	}
@@ -178,7 +165,7 @@ func convertValueToString(o *query_parser.Operand) (*query_parser.Operand, error
 }
 
 func convertValueToBigRat(o *query_parser.Operand) (*query_parser.Operand, error) {
-	// operand cannot be literal.
+	// operand cannot be string literal.
 	var c query_parser.Operand
 	c.Type = query_parser.TypBigRat
 	switch o.Type {
@@ -372,21 +359,27 @@ func compareUints(lhsValue, rhsValue *query_parser.Operand, oper *query_parser.B
 func compareStrings(lhsValue, rhsValue *query_parser.Operand, oper *query_parser.BinaryOperator) bool {
 	switch oper.Type {
 	case query_parser.Equal:
-		return lhsValue.Literal == rhsValue.Literal
+		r := lhsValue.Str == rhsValue.Str
+		// Handle special case for type equal clauses.
+		// Only the lhs can have the AltStr field set.
+		if !r && lhsValue.HasAltStr {
+			r = lhsValue.AltStr == rhsValue.Str
+		}
+		return r
 	case query_parser.NotEqual:
-		return lhsValue.Literal != rhsValue.Literal
+		return lhsValue.Str != rhsValue.Str
 	case query_parser.LessThan:
-		return lhsValue.Literal < rhsValue.Literal
+		return lhsValue.Str < rhsValue.Str
 	case query_parser.LessThanOrEqual:
-		return lhsValue.Literal <= rhsValue.Literal
+		return lhsValue.Str <= rhsValue.Str
 	case query_parser.GreaterThan:
-		return lhsValue.Literal > rhsValue.Literal
+		return lhsValue.Str > rhsValue.Str
 	case query_parser.GreaterThanOrEqual:
-		return lhsValue.Literal >= rhsValue.Literal
+		return lhsValue.Str >= rhsValue.Str
 	case query_parser.Like:
-		return rhsValue.CompRegex.MatchString(lhsValue.Literal)
+		return rhsValue.CompRegex.MatchString(lhsValue.Str)
 	default: // query_parser.NotLike:
-		return !rhsValue.CompRegex.MatchString(lhsValue.Literal)
+		return !rhsValue.CompRegex.MatchString(lhsValue.Str)
 	}
 }
 
@@ -401,11 +394,14 @@ func compareObjects(lhsValue, rhsValue *query_parser.Operand, oper *query_parser
 	}
 }
 
-func resolveOperand(v interface{}, o *query_parser.Operand) *query_parser.Operand {
+func resolveOperand(k string, v interface{}, o *query_parser.Operand) *query_parser.Operand {
 	if o.Type != query_parser.TypField {
 		return o
 	}
-	value := ResolveField(v, o.Column)
+	value, hasAltStr, altStr := ResolveField(k, v, o.Column)
+	if value == nil {
+		return nil
+	}
 
 	// Convert value to an operand
 	var newOp query_parser.Operand
@@ -456,8 +452,10 @@ func resolveOperand(v interface{}, o *query_parser.Operand) *query_parser.Operan
 		newOp.Type = query_parser.TypFloat
 		newOp.Float = value
 	case string:
-		newOp.Type = query_parser.TypLiteral
-		newOp.Literal = value
+		newOp.Type = query_parser.TypStr
+		newOp.Str = value
+		newOp.HasAltStr = hasAltStr
+		newOp.AltStr = altStr
 	case *big.Int:
 		newOp.Type = query_parser.TypBigInt
 		newOp.BigInt = value
@@ -471,7 +469,24 @@ func resolveOperand(v interface{}, o *query_parser.Operand) *query_parser.Operan
 	return &newOp
 }
 
-func ResolveField(v interface{}, f *query_parser.Field) interface{} {
+// Resolve a field.  In the special case where a type is evaluated, in addition
+// to a string being returned, and alternate string is returned.  In this case,
+// <string-value>, true, <alt-string> is returned.  In all other cases,
+// <value>,false,"" is returned.
+func ResolveField(k string, v interface{}, f *query_parser.Field) (interface{}, bool, string) {
+	if query_checker.IsKeyField(f) {
+		return k, false, ""
+	}
+	if query_checker.IsTypeField(f) {
+		if v == nil {
+			return nil, false, ""
+		} else {
+			// Types evaluate to two strings, Str and AltStr.
+			// This is because types match on full path or just the name.
+			name := reflect.ValueOf(v).Type().Name()
+			return reflect.ValueOf(v).Type().PkgPath() + "." + name, true, name
+		}
+	}
 	var object interface{}
 	object = v
 	segments := f.Segments
@@ -479,45 +494,19 @@ func ResolveField(v interface{}, f *query_parser.Field) interface{} {
 	for i := 1; i < len(segments); i++ {
 		// object must be a struct in order to look for the next segment.
 		if reflect.ValueOf(object).Kind() != reflect.Struct {
-			return nil // field does not exist
+			return nil, false, "" // field does not exist
 		}
 		// Look up the segment in object.
 		_, ok := reflect.ValueOf(object).Type().FieldByName(segments[i].Value)
 		if !ok {
-			return nil // field does not exist
+			return nil, false, "" // field does not exist
 		}
 		if !reflect.ValueOf(object).FieldByName(segments[i].Value).CanInterface() {
-			return nil
+			return nil, false, ""
 		}
 		object = reflect.ValueOf(object).FieldByName(segments[i].Value).Interface()
 	}
-	return object
-}
-
-// Evaluate an expression where the first operand refers to the key.
-func evalKeyExpression(e *query_parser.Expression, k string) bool {
-	// Need to evaluate the key expression.
-	// Currently, only = and like are allowed.
-	// Operand2 must be a string literal.
-	switch e.Operator.Type {
-	case query_parser.Equal:
-		return k == e.Operand2.Literal
-	default: // query_parse.Like
-		return e.Operand2.CompRegex.MatchString(k)
-	}
-}
-
-func evalTypeExpression(e *query_parser.Expression, v interface{}) bool {
-	if v == nil {
-		// The type expression does not match.
-		return false
-	}
-	// First try to match on the full type.
-	if reflect.ValueOf(v).Type().PkgPath()+"."+reflect.ValueOf(v).Type().Name() == e.Operand2.Literal {
-		return true
-	}
-	// Try to match on just the name.
-	return reflect.ValueOf(v).Type().Name() == e.Operand2.Literal
+	return object, false, ""
 }
 
 // Evaluate the where clause, substituting false for all expressions involving the key and
@@ -591,7 +580,7 @@ func evalExprUsingOnlyKey(e *query_parser.Expression, k string) (bool, error) {
 			// Non-key expressions are evaluated as false.
 			return false, errors.New("Value required for answer.") // err text not used
 		} else {
-			return evalKeyExpression(e, k), nil
+			return evalComparisonOperators(k, nil, e), nil
 		}
 	}
 }
