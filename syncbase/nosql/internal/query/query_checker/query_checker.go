@@ -166,6 +166,8 @@ func checkOperand(o *query_parser.Operand) *SemanticError {
 			return Error(o.Column.Segments[0].Off, "Where field must be 'k', 'v[{.<ident>}...]' or 't'.")
 		}
 		return nil
+	case query_parser.TypFunction:
+		return Error(o.Function.Off, "Functions are not yet supported.  Stay tuned.")
 	default:
 		return nil
 	}

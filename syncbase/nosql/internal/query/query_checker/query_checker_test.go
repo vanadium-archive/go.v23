@@ -254,6 +254,8 @@ func TestQueryCheckerErrors(t *testing.T) {
 		{"select v.z from Customer where k like \"a\\bc%\"", query_checker.Error(38, "Expected '\\', '%' or '_' after '\\'.")},
 		{"select v from Customer where v.A > false", query_checker.Error(33, "Boolean operands may only be used in equals and not equals expressions.")},
 		{"select v from Customer where true <= v.A", query_checker.Error(34, "Boolean operands may only be used in equals and not equals expressions.")},
+		{"select v from Customer where Now() < Date(\"2015/07/22\")", query_checker.Error(29, "Functions are not yet supported.  Stay tuned.")},
+		{"select v from Customer where Foo(\"2015/07/22\", true, 3.14157) = true", query_checker.Error(29, "Functions are not yet supported.  Stay tuned.")},
 	}
 
 	for _, test := range basic {

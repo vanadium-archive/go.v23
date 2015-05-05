@@ -166,6 +166,7 @@ const (
 	TypExpr
 	TypField
 	TypFloat
+	TypFunction
 	TypInt
 	TypStr
 	TypObject // Only as the result of a ResolveOperand.
@@ -179,6 +180,7 @@ type Operand struct {
 	Bool      bool
 	Column    *Field
 	Float     float64
+	Function  *Function
 	Int       int64
 	Str       string
 	Prefix    string // Computed by checker for Like expressions
@@ -189,6 +191,12 @@ type Operand struct {
 	CompRegex *regexp.Regexp
 	Expr      *Expression
 	Object    interface{}
+	Node
+}
+
+type Function struct {
+	Name string
+	Args []*Operand
 	Node
 }
 
@@ -593,9 +601,40 @@ func parseOperand(s *scanner.Scanner, token *Token) (*Operand, *Token, *SyntaxEr
 
 		// Check for true/false.  If so, change this operand to a bool.
 		// If the next token is not a period, check for true and false operands.
+		// Also, check for function call.  If so, change to a function operand.
 		if token.Tok != TokPERIOD && strings.ToLower(segment.Value) == "true" || strings.ToLower(segment.Value) == "false" {
 			operand.Type = TypBool
 			operand.Bool = strings.ToLower(segment.Value) == "true"
+		} else if token.Tok == TokLEFTPAREN {
+			operand.Type = TypFunction
+			var function Function
+			function.Name = segment.Value
+			function.Off = segment.Off
+			token = scanToken(s)
+			for token.Tok != TokRIGHTPAREN {
+				if token.Tok == TokEOF {
+					return nil, nil, Error(token.Off, fmt.Sprintf("Expected ')'"))
+				}
+				var arg *Operand
+				var err *SyntaxError
+				arg, token, err = parseOperand(s, token)
+				if err != nil {
+					return nil, nil, err
+				}
+				function.Args = append(function.Args, arg)
+				// A comma or right paren is expected, but a right paren cannot come after a comma.
+				if token.Tok == TokCOMMA {
+					token = scanToken(s)
+					if token.Tok == TokRIGHTPAREN {
+						// right paren cannot come after a comma
+						return nil, nil, Error(token.Off, fmt.Sprintf("Expected operand, found ')'."))
+					}
+				} else if token.Tok != TokRIGHTPAREN {
+					return nil, nil, Error(token.Off, fmt.Sprintf("Expected right paren or comma."))
+				}
+			}
+			token = scanToken(s) // eat right paren
+			operand.Function = &function
 		} else { // This is a field (column) operand.
 			// If the next token is a period, collect the rest of the segments in the column.
 			for token.Tok != TokEOF && token.Tok == TokPERIOD {
@@ -867,6 +906,19 @@ func (f Field) String() string {
 	return val
 }
 
+func (f Function) String() string {
+	val := fmt.Sprintf("Off(%d):", f.Off)
+	val += f.Name
+	val += "("
+	sep := ""
+	for _, a := range f.Args {
+		val += sep + a.String()
+		sep = ","
+	}
+	val += ")"
+	return val
+}
+
 func (s Segment) String() string {
 	return fmt.Sprintf(" Off(%d):%s", s.Off, s.Value)
 }
@@ -912,6 +964,9 @@ func (o Operand) String() string {
 	case TypFloat:
 		val += "(float)"
 		val += strconv.FormatFloat(o.Float, 'f', -1, 64)
+	case TypFunction:
+		val += "(function)"
+		val += o.Function.String()
 	case TypStr:
 		val += "(string)"
 		val += o.Str

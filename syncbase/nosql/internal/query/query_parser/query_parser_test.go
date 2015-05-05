@@ -1925,6 +1925,132 @@ func TestQueryParser(t *testing.T) {
 			},
 			nil,
 		},
+		{
+			"select v from Customer where Now() < Time(\"2015/07/22\") and Foo(10,20.1,v.Bar) = true",
+			query_parser.SelectStatement{
+				Select: &query_parser.SelectClause{
+					Columns: []query_parser.Field{
+						query_parser.Field{
+							Segments: []query_parser.Segment{
+								query_parser.Segment{
+									Value: "v",
+									Node:  query_parser.Node{Off: 7},
+								},
+							},
+							Node: query_parser.Node{Off: 7},
+						},
+					},
+					Node: query_parser.Node{Off: 0},
+				},
+				From: &query_parser.FromClause{
+					Table: query_parser.TableEntry{
+						Name: "Customer",
+						Node: query_parser.Node{Off: 14},
+					},
+					Node: query_parser.Node{Off: 9},
+				},
+				Where: &query_parser.WhereClause{
+					Expr: &query_parser.Expression{
+						Operand1: &query_parser.Operand{
+							Type: query_parser.TypExpr,
+							Expr: &query_parser.Expression{
+								Operand1: &query_parser.Operand{
+									Type: query_parser.TypFunction,
+									Function: &query_parser.Function{
+										Name: "Now",
+										Args: nil,
+										Node: query_parser.Node{Off: 29},
+									},
+									Node: query_parser.Node{Off: 29},
+								},
+								Operator: &query_parser.BinaryOperator{
+									Type: query_parser.LessThan,
+									Node: query_parser.Node{Off: 35},
+								},
+								Operand2: &query_parser.Operand{
+									Type: query_parser.TypFunction,
+									Function: &query_parser.Function{
+										Name: "Time",
+										Args: []*query_parser.Operand{
+											&query_parser.Operand{
+												Type: query_parser.TypStr,
+												Str:  "2015/07/22",
+												Node: query_parser.Node{Off: 42},
+											},
+										},
+										Node: query_parser.Node{Off: 37},
+									},
+									Node: query_parser.Node{Off: 37},
+								},
+								Node: query_parser.Node{Off: 29},
+							},
+							Node: query_parser.Node{Off: 29},
+						},
+						Node: query_parser.Node{Off: 29},
+						Operator: &query_parser.BinaryOperator{
+							Type: query_parser.And,
+							Node: query_parser.Node{Off: 56},
+						},
+						Operand2: &query_parser.Operand{
+							Type: query_parser.TypExpr,
+							Expr: &query_parser.Expression{
+								Operand1: &query_parser.Operand{
+									Type: query_parser.TypFunction,
+									Function: &query_parser.Function{
+										Name: "Foo",
+										Args: []*query_parser.Operand{
+											&query_parser.Operand{
+												Type: query_parser.TypInt,
+												Int:  10,
+												Node: query_parser.Node{Off: 64},
+											},
+											&query_parser.Operand{
+												Type:  query_parser.TypFloat,
+												Float: 20.1,
+												Node:  query_parser.Node{Off: 67},
+											},
+											&query_parser.Operand{
+												Type: query_parser.TypField,
+												Column: &query_parser.Field{
+													Segments: []query_parser.Segment{
+														query_parser.Segment{
+															Value: "v",
+															Node:  query_parser.Node{Off: 72},
+														},
+														query_parser.Segment{
+															Value: "Bar",
+															Node:  query_parser.Node{Off: 74},
+														},
+													},
+													Node: query_parser.Node{Off: 72},
+												},
+												Node: query_parser.Node{Off: 72},
+											},
+										},
+										Node: query_parser.Node{Off: 60},
+									},
+									Node: query_parser.Node{Off: 60},
+								},
+								Operator: &query_parser.BinaryOperator{
+									Type: query_parser.Equal,
+									Node: query_parser.Node{Off: 79},
+								},
+								Operand2: &query_parser.Operand{
+									Type: query_parser.TypBool,
+									Bool: true,
+									Node: query_parser.Node{Off: 81},
+								},
+								Node: query_parser.Node{Off: 60},
+							},
+							Node: query_parser.Node{Off: 60},
+						},
+					},
+					Node: query_parser.Node{Off: 23},
+				},
+				Node: query_parser.Node{Off: 0},
+			},
+			nil,
+		},
 	}
 
 	for _, test := range basic {
@@ -1987,6 +2113,10 @@ func TestQueryParserErrors(t *testing.T) {
 		{"select v from Customer, Invoice", query_parser.Error(22, "Unexpected: ','.")},
 		{"select v from Customer As Cust where foo = bar", query_parser.Error(23, "Unexpected: 'As'.")},
 		{"select 1abc from Customer where foo = bar", query_parser.Error(7, "Expected identifier, found '1'.")},
+		{"select v from Customer where Foo(1,) = true", query_parser.Error(35, "Expected operand, found ')'.")},
+		{"select v from Customer where Foo(,1) = true", query_parser.Error(33, "Expected operand, found ','.")},
+		{"select v from Customer where Foo(1, 2.0 = true", query_parser.Error(40, "Expected right paren or comma.")},
+		{"select v from Customer where Foo(1, 2.0 limit 100", query_parser.Error(40, "Expected right paren or comma.")},
 	}
 
 	for _, test := range basic {
