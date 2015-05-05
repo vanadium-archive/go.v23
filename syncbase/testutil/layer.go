@@ -291,7 +291,7 @@ func makeLayer(i interface{}) layer {
 	case nosql.Database:
 		return &database{t}
 	default:
-		vlog.Fatal("unexpected type: %T", t)
+		vlog.Fatalf("unexpected type: %T", t)
 	}
 	return nil
 }

@@ -598,7 +598,7 @@ func TestKeyPrefixes(t *testing.T) {
 						t.Errorf("query: %s;\nGOT  %v\nWANT %v", test.query, keyPrefixes, test.keyPrefixes)
 					}
 				default:
-					t.Errorf("query: %s; got %v, want query_parser.SelectStatement", reflect.TypeOf(*s))
+					t.Errorf("query: %s; got %v, want query_parser.SelectStatement", test.query, reflect.TypeOf(*s))
 				}
 			}
 		}
@@ -665,7 +665,7 @@ func TestEvalWhereUsingOnlyKey(t *testing.T) {
 						t.Errorf("query: %s; got %v, want %v", test.query, err, test.err)
 					}
 				default:
-					t.Errorf("query: %s; got %v, want query_parser.SelectStatement", reflect.TypeOf(*s))
+					t.Errorf("query: %s; got %v, want query_parser.SelectStatement", test.query, reflect.TypeOf(*s))
 				}
 			}
 		}
@@ -883,7 +883,7 @@ func TestEval(t *testing.T) {
 						t.Errorf("query: %s; got %v, want %v", test.query, result, test.result)
 					}
 				default:
-					t.Errorf("query: %s; got %v, want query_parser.SelectStatement", reflect.TypeOf(*s))
+					t.Errorf("query: %s; got %v, want query_parser.SelectStatement", test.query, reflect.TypeOf(*s))
 				}
 			}
 		}
@@ -949,7 +949,7 @@ func TestProjection(t *testing.T) {
 						t.Errorf("query: %s; got %v, want %v", test.query, result, test.result)
 					}
 				default:
-					t.Errorf("query: %s; got %v, want query_parser.SelectStatement", reflect.TypeOf(*s))
+					t.Errorf("query: %s; got %v, want query_parser.SelectStatement", test.query, reflect.TypeOf(*s))
 				}
 			}
 		}
@@ -1045,7 +1045,7 @@ func TestExecSelectSingleRow(t *testing.T) {
 						t.Errorf("query: %s; got %v, want %v", test.query, result, test.result)
 					}
 				default:
-					t.Errorf("query: %s; got %v, want query_parser.SelectStatement", reflect.TypeOf(*s))
+					t.Errorf("query: %s; got %v, want query_parser.SelectStatement", test.query, reflect.TypeOf(*s))
 				}
 			}
 		}
