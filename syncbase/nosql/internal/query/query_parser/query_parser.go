@@ -80,6 +80,8 @@ const (
 	Equal
 	GreaterThan
 	GreaterThanOrEqual
+	Is
+	IsNot
 	LessThan
 	LessThanOrEqual
 	Like
@@ -104,6 +106,7 @@ const (
 	TypFloat
 	TypFunction
 	TypInt
+	TypNil
 	TypStr
 	TypObject // Only as the result of a ResolveOperand.
 	TypUint   // Only as a result of a ResolveOperand
@@ -535,12 +538,14 @@ func parseOperand(s *scanner.Scanner, token *Token) (*Operand, *Token, *SyntaxEr
 		field.Segments = append(field.Segments, segment)
 		token = scanToken(s)
 
-		// Check for true/false.  If so, change this operand to a bool.
-		// If the next token is not a period, check for true and false operands.
+		// If the next token is not a period, check for true/false/nil.
+		// If true/false or nil, change this operand to a bool or nil, respectively.
 		// Also, check for function call.  If so, change to a function operand.
-		if token.Tok != TokPERIOD && strings.ToLower(segment.Value) == "true" || strings.ToLower(segment.Value) == "false" {
+		if token.Tok != TokPERIOD && (strings.ToLower(segment.Value) == "true" || strings.ToLower(segment.Value) == "false") {
 			operand.Type = TypBool
 			operand.Bool = strings.ToLower(segment.Value) == "true"
+		} else if token.Tok != TokPERIOD && strings.ToLower(segment.Value) == "nil" {
+			operand.Type = TypNil
 		} else if token.Tok == TokLEFTPAREN {
 			operand.Type = TypFunction
 			var function Function
@@ -651,8 +656,18 @@ func parseBinaryOperator(s *scanner.Scanner, token *Token) (*BinaryOperator, *To
 		switch strings.ToLower(token.Value) {
 		case "equal":
 			operator.Type = Equal
+			token = scanToken(s)
+		case "is":
+			operator.Type = Is
+			token = scanToken(s)
+			// if the next token is "not", change to IsNot
+			if token.Tok != TokEOF && strings.ToLower(token.Value) == "not" {
+				operator.Type = IsNot
+				token = scanToken(s)
+			}
 		case "like":
 			operator.Type = Like
+			token = scanToken(s)
 		case "not":
 			token = scanToken(s)
 			if token.Tok == TokEOF || (strings.ToLower(token.Value) != "equal" && strings.ToLower(token.Value) != "like") {
@@ -664,10 +679,10 @@ func parseBinaryOperator(s *scanner.Scanner, token *Token) (*BinaryOperator, *To
 			default: //case "like":
 				operator.Type = NotLike
 			}
+			token = scanToken(s)
 		default:
 			return nil, nil, Error(token.Off, fmt.Sprintf("Expected operator ('like', 'not like', '=', '<>', '<', '<=', '>', '>=', 'equal' or 'not equal', found '%s'.", token.Value))
 		}
-		token = scanToken(s)
 	} else {
 		switch token.Tok {
 		case TokEQUAL:
@@ -909,6 +924,8 @@ func (o Operand) String() string {
 	case TypExpr:
 		val += "(expr)"
 		val += o.Expr.String()
+	case TypNil:
+		val += "<nil>"
 	case TypObject:
 		val += "(object)"
 		val += fmt.Sprintf("%v", o.Object)
@@ -930,6 +947,10 @@ func (o BinaryOperator) String() string {
 		val += ">"
 	case GreaterThanOrEqual:
 		val += ">="
+	case Is:
+		val += "IS"
+	case IsNot:
+		val += "IS NOT"
 	case LessThan:
 		val += "<"
 	case LessThanOrEqual:

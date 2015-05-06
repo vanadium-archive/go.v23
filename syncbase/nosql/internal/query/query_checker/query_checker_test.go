@@ -83,6 +83,10 @@ func TestQueryChecker(t *testing.T) {
 		{"select v from Customer where false = true"},
 		{"select v from Customer where true = false"},
 		{"select v from Customer where false <> true"},
+		{"select v from Customer where v.ZipCode is nil"},
+		{"select v from Customer where v.ZipCode Is Nil"},
+		{"select v from Customer where v.ZipCode is not nil"},
+		{"select v from Customer where v.ZipCode IS NOT NIL"},
 	}
 
 	for _, test := range basic {
@@ -254,6 +258,20 @@ func TestQueryCheckerErrors(t *testing.T) {
 		{"select v from Customer where true <= v.A", query_checker.Error(34, "Boolean operands may only be used in equals and not equals expressions.")},
 		{"select v from Customer where Now() < Date(\"2015/07/22\")", query_checker.Error(29, "Functions are not yet supported.  Stay tuned.")},
 		{"select v from Customer where Foo(\"2015/07/22\", true, 3.14157) = true", query_checker.Error(29, "Functions are not yet supported.  Stay tuned.")},
+		{"select v from Customer where t is nil", query_checker.Error(29, "Type expressions must be 't = <string-literal>'.")},
+		{"select v from Customer where k is nil", query_checker.Error(29, "Key (i.e., 'k') expressions must be of form 'k like|= <string-literal>'.")},
+		{"select v from Customer where nil is v.ZipCode", query_checker.Error(29, "'Is/is not' expressions require left operand to be a value operand.")},
+		{"select v from Customer where v.ZipCode is \"94303\"", query_checker.Error(42, "'Is/is not' expressions require right operand to be nil.")},
+		{"select v from Customer where v.ZipCode is 94303", query_checker.Error(42, "'Is/is not' expressions require right operand to be nil.")},
+		{"select v from Customer where v.ZipCode is true", query_checker.Error(42, "'Is/is not' expressions require right operand to be nil.")},
+		{"select v from Customer where v.ZipCode is 943.03", query_checker.Error(42, "'Is/is not' expressions require right operand to be nil.")},
+		{"select v from Customer where t is not nil", query_checker.Error(29, "Type expressions must be 't = <string-literal>'.")},
+		{"select v from Customer where k is not nil", query_checker.Error(29, "Key (i.e., 'k') expressions must be of form 'k like|= <string-literal>'.")},
+		{"select v from Customer where nil is not v.ZipCode", query_checker.Error(29, "'Is/is not' expressions require left operand to be a value operand.")},
+		{"select v from Customer where v.ZipCode is not \"94303\"", query_checker.Error(46, "'Is/is not' expressions require right operand to be nil.")},
+		{"select v from Customer where v.ZipCode is not 94303", query_checker.Error(46, "'Is/is not' expressions require right operand to be nil.")},
+		{"select v from Customer where v.ZipCode is not true", query_checker.Error(46, "'Is/is not' expressions require right operand to be nil.")},
+		{"select v from Customer where v.ZipCode is not 943.03", query_checker.Error(46, "'Is/is not' expressions require right operand to be nil.")},
 	}
 
 	for _, test := range basic {

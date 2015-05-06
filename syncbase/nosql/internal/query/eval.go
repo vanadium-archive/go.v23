@@ -37,6 +37,16 @@ func evalLogicalOperators(k string, v interface{}, e *query_parser.Expression) b
 
 func evalComparisonOperators(k string, v interface{}, e *query_parser.Expression) bool {
 	lhsValue := resolveOperand(k, v, e.Operand1)
+	// Check for an is nil epression (i.e., v[.<field>...] is nil).
+	// These expressions evaluate to true if the field cannot be resolved.
+	if e.Operator.Type == query_parser.Is && e.Operand2.Type == query_parser.TypNil {
+		return lhsValue == nil
+	}
+	if e.Operator.Type == query_parser.IsNot && e.Operand2.Type == query_parser.TypNil {
+		return lhsValue != nil
+	}
+	// For anything but "is[not] nil" (which is handled above), an unresolved operator
+	// results in the expression evaluating to false.
 	if lhsValue == nil {
 		return false
 	}

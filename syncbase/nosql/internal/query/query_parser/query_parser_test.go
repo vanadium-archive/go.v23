@@ -368,6 +368,124 @@ func TestQueryParser(t *testing.T) {
 			nil,
 		},
 		{
+			"select v from Customer where v.ZipCode is nil",
+			query_parser.SelectStatement{
+				Select: &query_parser.SelectClause{
+					Columns: []query_parser.Field{
+						query_parser.Field{
+							Segments: []query_parser.Segment{
+								query_parser.Segment{
+									Value: "v",
+									Node:  query_parser.Node{Off: 7},
+								},
+							},
+							Node: query_parser.Node{Off: 7},
+						},
+					},
+					Node: query_parser.Node{Off: 0},
+				},
+				From: &query_parser.FromClause{
+					Table: query_parser.TableEntry{
+						Name: "Customer",
+						Node: query_parser.Node{Off: 14},
+					},
+					Node: query_parser.Node{Off: 9},
+				},
+				Where: &query_parser.WhereClause{
+					Expr: &query_parser.Expression{
+						Operand1: &query_parser.Operand{
+							Type: query_parser.TypField,
+							Column: &query_parser.Field{
+								Segments: []query_parser.Segment{
+									query_parser.Segment{
+										Value: "v",
+										Node:  query_parser.Node{Off: 29},
+									},
+									query_parser.Segment{
+										Value: "ZipCode",
+										Node:  query_parser.Node{Off: 31},
+									},
+								},
+								Node: query_parser.Node{Off: 29},
+							},
+							Node: query_parser.Node{Off: 29},
+						},
+						Operator: &query_parser.BinaryOperator{
+							Type: query_parser.Is,
+							Node: query_parser.Node{Off: 39},
+						},
+						Operand2: &query_parser.Operand{
+							Type: query_parser.TypNil,
+							Node: query_parser.Node{Off: 42},
+						},
+						Node: query_parser.Node{Off: 29},
+					},
+					Node: query_parser.Node{Off: 23},
+				},
+				Node: query_parser.Node{Off: 0},
+			},
+			nil,
+		},
+		{
+			"select v from Customer where v.ZipCode is not nil",
+			query_parser.SelectStatement{
+				Select: &query_parser.SelectClause{
+					Columns: []query_parser.Field{
+						query_parser.Field{
+							Segments: []query_parser.Segment{
+								query_parser.Segment{
+									Value: "v",
+									Node:  query_parser.Node{Off: 7},
+								},
+							},
+							Node: query_parser.Node{Off: 7},
+						},
+					},
+					Node: query_parser.Node{Off: 0},
+				},
+				From: &query_parser.FromClause{
+					Table: query_parser.TableEntry{
+						Name: "Customer",
+						Node: query_parser.Node{Off: 14},
+					},
+					Node: query_parser.Node{Off: 9},
+				},
+				Where: &query_parser.WhereClause{
+					Expr: &query_parser.Expression{
+						Operand1: &query_parser.Operand{
+							Type: query_parser.TypField,
+							Column: &query_parser.Field{
+								Segments: []query_parser.Segment{
+									query_parser.Segment{
+										Value: "v",
+										Node:  query_parser.Node{Off: 29},
+									},
+									query_parser.Segment{
+										Value: "ZipCode",
+										Node:  query_parser.Node{Off: 31},
+									},
+								},
+								Node: query_parser.Node{Off: 29},
+							},
+							Node: query_parser.Node{Off: 29},
+						},
+						Operator: &query_parser.BinaryOperator{
+							Type: query_parser.IsNot,
+							Node: query_parser.Node{Off: 39},
+						},
+						Operand2: &query_parser.Operand{
+							Type: query_parser.TypNil,
+							Node: query_parser.Node{Off: 46},
+						},
+						Node: query_parser.Node{Off: 29},
+					},
+					Node: query_parser.Node{Off: 23},
+				},
+				Node: query_parser.Node{Off: 0},
+			},
+			nil,
+		},
+		{
 			"select v from Customer where v.Value = false",
 			query_parser.SelectStatement{
 				Select: &query_parser.SelectClause{
@@ -2118,6 +2236,8 @@ func TestQueryParserErrors(t *testing.T) {
 		{"select v from Customer where Foo(,1) = true", query_parser.Error(33, "Expected operand, found ','.")},
 		{"select v from Customer where Foo(1, 2.0 = true", query_parser.Error(40, "Expected right paren or comma.")},
 		{"select v from Customer where Foo(1, 2.0 limit 100", query_parser.Error(40, "Expected right paren or comma.")},
+		{"select v from Customer where v is", query_parser.Error(33, "Unexpected end of statement, expected operand.")},
+		{"select v from Customer where v = 1.0 is k = \"abc\"", query_parser.Error(37, "Unexpected: 'is'.")},
 	}
 
 	for _, test := range basic {

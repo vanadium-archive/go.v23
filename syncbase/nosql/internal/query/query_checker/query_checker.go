@@ -119,6 +119,16 @@ func checkExpression(e *query_parser.Expression) *SemanticError {
 		e.Operand2.CompRegex = compRegex
 	}
 
+	// Is/IsNot expressions require operand1 to be a value and operand2 to be nil.
+	if e.Operator.Type == query_parser.Is || e.Operator.Type == query_parser.IsNot {
+		if !IsField(e.Operand1) {
+			return Error(e.Operand1.Off, "'Is/is not' expressions require left operand to be a value operand.")
+		}
+		if e.Operand2.Type != query_parser.TypNil {
+			return Error(e.Operand2.Off, "'Is/is not' expressions require right operand to be nil.")
+		}
+	}
+
 	// type as an operand must be the first operand, the operator must be = and the 2nd operand must be string literal.
 	if (IsType(e.Operand1) && (e.Operator.Type != query_parser.Equal || e.Operand2.Type != query_parser.TypStr)) || IsType(e.Operand2) {
 		return Error(e.Off, "Type expressions must be 't = <string-literal>'.")

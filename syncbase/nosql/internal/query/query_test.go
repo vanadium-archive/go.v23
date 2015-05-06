@@ -231,6 +231,85 @@ func TestQueryExec(t *testing.T) {
 			},
 		},
 		{
+			// Select values where v.InvoiceNum is nil
+			// Since InvoiceNum does not exist for Invoice,
+			// this will return just customers.
+			"select v from Customer where v.InvoiceNum is nil",
+			[]interface{}{
+				[]interface{}{customerRows[0].value},
+				[]interface{}{customerRows[4].value},
+			},
+		},
+		{
+			// Select values where v.InvoiceNum is nil
+			// or v.Name is nil This will select all customers
+			// with the former and all invoices with the latter.
+			// Hence, all records are returned.
+			"select v from Customer where v.InvoiceNum is nil or v.Name is nil",
+			[]interface{}{
+				[]interface{}{customerRows[0].value},
+				[]interface{}{customerRows[1].value},
+				[]interface{}{customerRows[2].value},
+				[]interface{}{customerRows[3].value},
+				[]interface{}{customerRows[4].value},
+				[]interface{}{customerRows[5].value},
+				[]interface{}{customerRows[6].value},
+				[]interface{}{customerRows[7].value},
+				[]interface{}{customerRows[8].value},
+			},
+		},
+		{
+			// Select values where v.InvoiceNum is nil
+			// and v.Name is nil.  Expect nothing returned.
+			"select v from Customer where v.InvoiceNum is nil and v.Name is nil",
+			[]interface{}{},
+		},
+		{
+			// Select values where v.InvoiceNum is not nil
+			// This will return just invoices.
+			"select v from Customer where v.InvoiceNum is not nil",
+			[]interface{}{
+				[]interface{}{customerRows[1].value},
+				[]interface{}{customerRows[2].value},
+				[]interface{}{customerRows[3].value},
+				[]interface{}{customerRows[5].value},
+				[]interface{}{customerRows[6].value},
+				[]interface{}{customerRows[7].value},
+				[]interface{}{customerRows[8].value},
+			},
+		},
+		{
+			// Select values where v.InvoiceNum is not nil
+			// or v.Name is not nil. All records are returned.
+			"select v from Customer where v.InvoiceNum is not nil or v.Name is not nil",
+			[]interface{}{
+				[]interface{}{customerRows[0].value},
+				[]interface{}{customerRows[1].value},
+				[]interface{}{customerRows[2].value},
+				[]interface{}{customerRows[3].value},
+				[]interface{}{customerRows[4].value},
+				[]interface{}{customerRows[5].value},
+				[]interface{}{customerRows[6].value},
+				[]interface{}{customerRows[7].value},
+				[]interface{}{customerRows[8].value},
+			},
+		},
+		{
+			// Select values where v.InvoiceNum is nil and v.Name is not nil.
+			// All customers are returned.
+			"select v from Customer where v.InvoiceNum is nil and v.Name is not nil",
+			[]interface{}{
+				[]interface{}{customerRows[0].value},
+				[]interface{}{customerRows[4].value},
+			},
+		},
+		{
+			// Select values where v.InvoiceNum is not nil
+			// and v.Name is not nil.  Expect nothing returned.
+			"select v from Customer where v.InvoiceNum is not nil and v.Name is not nil",
+			[]interface{}{},
+		},
+		{
 			// Select keys & values for all customer records.
 			"select k, v from Customer where t = \"Customer\"",
 			[]interface{}{
@@ -389,6 +468,18 @@ func TestQueryExec(t *testing.T) {
 			},
 		},
 		{
+			// Select records where v.Foo.FooBarBaz.Baz is 84 and v.InvoiceNum is not nil.
+			"select v from Customer where v.Foo.FooBarBaz.Baz = 84 and v.InvoiceNum is not nil",
+			[]interface{}{},
+		},
+		{
+			// Select records where v.Foo.FooBarBaz.Baz is 84 and v.InvoiceNum is nil.
+			"select v from Customer where v.Foo.FooBarBaz.Baz = 84 and v.InvoiceNum is nil",
+			[]interface{}{
+				[]interface{}{customerRows[4].value},
+			},
+		},
+		{
 			// Select customer name for customer ID (i.e., key) "001".
 			"select v.Name from Customer where t = \"Customer\" and k = \"001\"",
 			[]interface{}{
@@ -448,6 +539,22 @@ func TestQueryExec(t *testing.T) {
 				[]interface{}{customerRows[4].value},
 				[]interface{}{customerRows[5].value},
 			},
+		},
+		{
+			// Select records where v.Foo.FooBarBaz.Baz is 84 or (type is Invoice and v.InvoiceNum is not nil).
+			// Limit 3 Offset 2
+			"select v from Customer where v.Foo.FooBarBaz.Baz = 84 or (t = \"Invoice\" and v.InvoiceNum is not nil) limit 3 offset 2",
+			[]interface{}{
+				[]interface{}{customerRows[3].value},
+				[]interface{}{customerRows[4].value},
+				[]interface{}{customerRows[5].value},
+			},
+		},
+		{
+			// Select records where v.Foo.FooBarBaz.Baz is 84 or (type is Invoice and v.InvoiceNum is nil).
+			// Limit 3 Offset 2
+			"select v from Customer where v.Foo.FooBarBaz.Baz = 84 or (t = \"Invoice\" and v.InvoiceNum is nil) limit 3 offset 2",
+			[]interface{}{},
 		},
 	}
 
