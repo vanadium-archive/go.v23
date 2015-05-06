@@ -17,11 +17,15 @@ import (
 // protocol-specific string representation of an address.
 type DialerFunc func(protocol, address string, timeout time.Duration) (net.Conn, error)
 
+// ResolverFunc is the function used for protocol-specific address normalization.
+// e.g. the TCP resolve performs DNS resolution.
+type ResolverFunc func(protocol, address string) (string, string, error)
+
 // ListenerFunc is the function used to create net.Listener objects given a
 // protocol-specific string representation of the address a server will listen on.
 type ListenerFunc func(protocol, address string) (net.Listener, error)
 
-// RegisterProtocol makes available a Dialer and a Listener to RegisteredNetwork.
+// RegisterProtocol makes available a Dialer, Resolver, and Listener to RegisteredNetwork.
 // If the protocol represents other actual protocols, you need to specify all the
 // actual protocols. E.g, "wsh" represents "tcp4", "tcp6", "ws4", and "ws6".
 //
@@ -31,7 +35,7 @@ type ListenerFunc func(protocol, address string) (net.Listener, error)
 //
 // Successive calls to RegisterProtocol replace the contents of a previous
 // call to it and returns trues if a previous value was replaced, false otherwise.
-func RegisterProtocol(protocol string, dialer DialerFunc, listener ListenerFunc, p ...string) bool {
+func RegisterProtocol(protocol string, dialer DialerFunc, resolver ResolverFunc, listener ListenerFunc, p ...string) bool {
 	// This is for handling the common case where protocol is a "singleton", to
 	// make it easier to specify.
 	if len(p) == 0 {
@@ -40,11 +44,11 @@ func RegisterProtocol(protocol string, dialer DialerFunc, listener ListenerFunc,
 	registryLock.Lock()
 	defer registryLock.Unlock()
 	_, present := registry[protocol]
-	registry[protocol] = registryEntry{dialer, listener, p}
+	registry[protocol] = registryEntry{dialer, resolver, listener, p}
 	return present
 }
 
-// RegisterUnknownProtocol registers a Dialer and a Listener for endpoints with
+// RegisterUnknownProtocol registers a Dialer, Resolver, and Listener for endpoints with
 // no specified protocol.
 //
 // The desired protocol provided in the first argument will be passed to the
@@ -52,7 +56,7 @@ func RegisterProtocol(protocol string, dialer DialerFunc, listener ListenerFunc,
 //
 // The protocol itself must have already been registered before RegisterUnknownProtocol
 // is called, otherwise we'll panic.
-func RegisterUnknownProtocol(protocol string, dialer DialerFunc, listener ListenerFunc) bool {
+func RegisterUnknownProtocol(protocol string, dialer DialerFunc, resolver ResolverFunc, listener ListenerFunc) bool {
 	var p []string
 	registryLock.RLock()
 	r, present := registry[protocol]
@@ -64,19 +68,22 @@ func RegisterUnknownProtocol(protocol string, dialer DialerFunc, listener Listen
 	wrappedDialer := func(_, address string, timeout time.Duration) (net.Conn, error) {
 		return dialer(protocol, address, timeout)
 	}
+	wrappedResolver := func(_, address string) (string, string, error) {
+		return resolver(protocol, address)
+	}
 	wrappedListener := func(_, address string) (net.Listener, error) {
 		return listener(protocol, address)
 	}
-	return RegisterProtocol(naming.UnknownProtocol, wrappedDialer, wrappedListener, p...)
+	return RegisterProtocol(naming.UnknownProtocol, wrappedDialer, wrappedResolver, wrappedListener, p...)
 }
 
-// RegisteredProtocol returns the Dialer and Listener registered with a
+// RegisteredProtocol returns the Dialer, Resolver, and Listener registered with a
 // previous call to RegisterProtocol.
-func RegisteredProtocol(protocol string) (DialerFunc, ListenerFunc, []string) {
+func RegisteredProtocol(protocol string) (DialerFunc, ResolverFunc, ListenerFunc, []string) {
 	registryLock.RLock()
 	e := registry[protocol]
 	registryLock.RUnlock()
-	return e.d, e.l, e.p
+	return e.d, e.r, e.l, e.p
 }
 
 // RegisteredProtocols returns the list of protocols that have been previously
@@ -94,6 +101,7 @@ func RegisteredProtocols() []string {
 
 type registryEntry struct {
 	d DialerFunc
+	r ResolverFunc
 	l ListenerFunc
 	p []string
 }
