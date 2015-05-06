@@ -170,6 +170,21 @@ type JavaConfig struct {
 	// The code generator assumes that the conversion functions will be registered
 	// in java vdl package.
 	WireToNativeTypes map[string]string
+	// WireTypeRenames specifies the mapping from a VDL wire type name to its
+	// Java native type name.
+	//
+	// WireTypeRenames are meant for scenarios where the VDL wire name
+	// conflicts in some way with the Java native names, e.g., a VDL Integer
+	// type could be named VInteger for clarity.
+	//
+	// When combined with WireToNativeTypes, this feature allows us to attach
+	// functions to VDL types.  For example, we may rename AccessList VDL type
+	// into WireAccessList and then map WireAccessList to our Java native type
+	// AccessList which defines functions on the VDL data.
+	//
+	// The key of the map is the name of the VDL wire type, which must be
+	// defined in the vdl package associated with the vdl.config file.
+	WireTypeRenames map[string]string
 }
 
 func (JavaConfig) __VDLReflect(struct {

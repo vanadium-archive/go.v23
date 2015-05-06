@@ -20,5 +20,6 @@ pkg vdltool, type GoType struct, Imports []GoImport
 pkg vdltool, type GoType struct, Type string
 pkg vdltool, type JavaConfig struct
 pkg vdltool, type JavaConfig struct, WireToNativeTypes map[string]string
+pkg vdltool, type JavaConfig struct, WireTypeRenames map[string]string
 pkg vdltool, type JavascriptConfig struct
 pkg vdltool, var GenLanguageAll [...]GenLanguage
