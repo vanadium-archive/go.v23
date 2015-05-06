@@ -1,6 +1,7 @@
 // Copyright 2015 The Vanadium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
+
 package query
 
 import (
@@ -26,8 +27,11 @@ func evalLogicalOperators(k string, v interface{}, e *query_parser.Expression) b
 	switch e.Operator.Type {
 	case query_parser.And:
 		return Eval(k, v, e.Operand1.Expr) && Eval(k, v, e.Operand2.Expr)
-	default: // query_parser.Or
+	case query_parser.Or:
 		return Eval(k, v, e.Operand1.Expr) || Eval(k, v, e.Operand2.Expr)
+	default:
+		// TODO(jkline): Log this logic error and all other similar cases.
+		return false
 	}
 }
 
@@ -129,7 +133,7 @@ func coerceValues(lhsValue, rhsValue *query_parser.Operand) (*query_parser.Opera
 	}
 	// Must be the same at this point.
 	if lhsValue.Type != rhsValue.Type {
-		return nil, nil, errors.New(fmt.Sprintf("Logic error: expeced like types, got: %v, %v", lhsValue, rhsValue))
+		return nil, nil, errors.New(fmt.Sprintf("Logic error: expected like types, got: %v, %v", lhsValue, rhsValue))
 	}
 
 	return lhsValue, rhsValue, nil
@@ -158,8 +162,11 @@ func convertValueToString(o *query_parser.Operand) (*query_parser.Operand, error
 		c.CompRegex = o.CompRegex // non-nil for rhs of like expressions
 	case query_parser.TypUint:
 		c.Str = strconv.FormatUint(o.Uint, 10)
-	default: // query_parser.TypObject
+	case query_parser.TypObject:
 		return nil, errors.New("Cannot convert object to string for comparison.")
+	default:
+		// TODO(jkline): Log this logic error and all other similar cases.
+		return nil, errors.New("Cannot convert operand to string for comparison.")
 	}
 	return &c, nil
 }
@@ -186,8 +193,11 @@ func convertValueToBigRat(o *query_parser.Operand) (*query_parser.Operand, error
 		bi.SetUint64(o.Uint)
 		var br big.Rat
 		c.BigRat = br.SetInt(&bi)
-	default: // query_parser.TypObject
+	case query_parser.TypObject:
 		return nil, errors.New("Cannot convert object to big.Rat for comparison.")
+	default:
+		// TODO(jkline): Log this logic error and all other similar cases.
+		return nil, errors.New("Cannot convert operand to big.Rat for comparison.")
 	}
 	return &c, nil
 }
@@ -205,8 +215,11 @@ func convertValueToFloat(o *query_parser.Operand) (*query_parser.Operand, error)
 		c.Float = float64(o.Int)
 	case query_parser.TypUint:
 		c.Float = float64(o.Uint)
-	default: // query_parser.TypObject
+	case query_parser.TypObject:
 		return nil, errors.New("Cannot convert object to float64 for comparison.")
+	default:
+		// TODO(jkline): Log this logic error and all other similar cases.
+		return nil, errors.New("Cannot convert operand to float64 for comparison.")
 	}
 	return &c, nil
 }
@@ -226,8 +239,11 @@ func convertValueToBigInt(o *query_parser.Operand) (*query_parser.Operand, error
 		var b big.Int
 		b.SetUint64(o.Uint)
 		c.BigInt = &b
-	default: // case query_parser.TypObject
+	case query_parser.TypObject:
 		return nil, errors.New("Cannot convert object to big.Int for comparison.")
+	default:
+		// TODO(jkline): Log this logic error and all other similar cases.
+		return nil, errors.New("Cannot convert operand to big.Int for comparison.")
 	}
 	return &c, nil
 }
@@ -241,8 +257,11 @@ func convertValueToInt(o *query_parser.Operand) (*query_parser.Operand, error) {
 		return nil, errors.New("Cannot convert bool to int64 for comparison.")
 	case query_parser.TypInt:
 		c.Int = o.Int
-	default: //case query_parser.TypObject
+	case query_parser.TypObject:
 		return nil, errors.New("Cannot convert object to int64 for comparison.")
+	default:
+		// TODO(jkline): Log this logic error and all other similar cases.
+		return nil, errors.New("Cannot convert operand to int64 for comparison.")
 	}
 	return &c, nil
 }
@@ -256,8 +275,11 @@ func convertValueToUint(o *query_parser.Operand) (*query_parser.Operand, error) 
 		return nil, errors.New("Cannot convert bool to int64 for comparison.")
 	case query_parser.TypUint:
 		c.Uint = o.Uint
-	default: //case query_parser.TypObject
+	case query_parser.TypObject:
 		return nil, errors.New("Cannot convert object to int64 for comparison.")
+	default:
+		// TODO(jkline): Log this logic error and all other similar cases.
+		return nil, errors.New("Cannot convert operand to int64 for comparison.")
 	}
 	return &c, nil
 }
@@ -266,8 +288,11 @@ func compareBools(lhsValue, rhsValue *query_parser.Operand, oper *query_parser.B
 	switch oper.Type {
 	case query_parser.Equal:
 		return lhsValue.Bool == rhsValue.Bool
-	default: // query_parser.NotEqual
+	case query_parser.NotEqual:
 		return lhsValue.Bool != rhsValue.Bool
+	default:
+		// TODO(jkline): Log this logic error and all other similar cases.
+		return false
 	}
 }
 
@@ -283,8 +308,11 @@ func compareBigInts(lhsValue, rhsValue *query_parser.Operand, oper *query_parser
 		return lhsValue.BigInt.Cmp(rhsValue.BigInt) <= 0
 	case query_parser.GreaterThan:
 		return lhsValue.BigInt.Cmp(rhsValue.BigInt) > 0
-	default: // case query_parser.GreaterThanOrEqual
+	case query_parser.GreaterThanOrEqual:
 		return lhsValue.BigInt.Cmp(rhsValue.BigInt) >= 0
+	default:
+		// TODO(jkline): Log this logic error and all other similar cases.
+		return false
 	}
 }
 
@@ -300,8 +328,11 @@ func compareBigRats(lhsValue, rhsValue *query_parser.Operand, oper *query_parser
 		return lhsValue.BigRat.Cmp(rhsValue.BigRat) <= 0
 	case query_parser.GreaterThan:
 		return lhsValue.BigRat.Cmp(rhsValue.BigRat) > 0
-	default: // case query_parser.GreaterThanOrEqual
+	case query_parser.GreaterThanOrEqual:
 		return lhsValue.BigRat.Cmp(rhsValue.BigRat) >= 0
+	default:
+		// TODO(jkline): Log this logic error and all other similar cases.
+		return false
 	}
 }
 
@@ -317,8 +348,11 @@ func compareFloats(lhsValue, rhsValue *query_parser.Operand, oper *query_parser.
 		return lhsValue.Float <= rhsValue.Float
 	case query_parser.GreaterThan:
 		return lhsValue.Float > rhsValue.Float
-	default: // case query_parser.GreaterThanOrEqual
+	case query_parser.GreaterThanOrEqual:
 		return lhsValue.Float >= rhsValue.Float
+	default:
+		// TODO(jkline): Log this logic error and all other similar cases.
+		return false
 	}
 }
 
@@ -334,8 +368,11 @@ func compareInts(lhsValue, rhsValue *query_parser.Operand, oper *query_parser.Bi
 		return lhsValue.Int <= rhsValue.Int
 	case query_parser.GreaterThan:
 		return lhsValue.Int > rhsValue.Int
-	default: // case query_parser.GreaterThanOrEqual
+	case query_parser.GreaterThanOrEqual:
 		return lhsValue.Int >= rhsValue.Int
+	default:
+		// TODO(jkline): Log this logic error and all other similar cases.
+		return false
 	}
 }
 
@@ -351,8 +388,11 @@ func compareUints(lhsValue, rhsValue *query_parser.Operand, oper *query_parser.B
 		return lhsValue.Uint <= rhsValue.Uint
 	case query_parser.GreaterThan:
 		return lhsValue.Uint > rhsValue.Uint
-	default: // case query_parser.GreaterThanOrEqual
+	case query_parser.GreaterThanOrEqual:
 		return lhsValue.Uint >= rhsValue.Uint
+	default:
+		// TODO(jkline): Log this logic error and all other similar cases.
+		return false
 	}
 }
 
@@ -378,8 +418,11 @@ func compareStrings(lhsValue, rhsValue *query_parser.Operand, oper *query_parser
 		return lhsValue.Str >= rhsValue.Str
 	case query_parser.Like:
 		return rhsValue.CompRegex.MatchString(lhsValue.Str)
-	default: // query_parser.NotLike:
+	case query_parser.NotLike:
 		return !rhsValue.CompRegex.MatchString(lhsValue.Str)
+	default:
+		// TODO(jkline): Log this logic error and all other similar cases.
+		return false
 	}
 }
 
@@ -487,8 +530,7 @@ func ResolveField(k string, v interface{}, f *query_parser.Field) (interface{}, 
 			return reflect.ValueOf(v).Type().PkgPath() + "." + name, true, name
 		}
 	}
-	var object interface{}
-	object = v
+	object := v
 	segments := f.Segments
 	// The first segment will always be v itself, skip it.
 	for i := 1; i < len(segments); i++ {
@@ -527,60 +569,66 @@ func CheckIfAllKeysMustBeFetched(e *query_parser.Expression) bool {
 	}
 }
 
+// EvalWhereUsingOnlyKey return type.  See that function for details.
+type EvalWithKeyResult int
+
+const (
+	INCLUDE EvalWithKeyResult = iota
+	EXCLUDE
+	FETCH_VALUE
+)
+
 // Evaluate the where clause to determine if the row should be selected, but do so using only
 // the key.  Possible returns are:
-// true: the row should included in the results
-// false: the row should NOT be included
-// error: the value and/or type of the value are required to determine if row should be included.
+// INCLUDE: the row should included in the results
+// EXCLUDE: the row should NOT be included
+// FETCH_VALUE: the value and/or type of the value are required to determine if row should be included.
 // The above decision is accomplished by evaluating all expressions which reference the key and
-// substituing false for all other expressions.  If the result is true, true is returned.
-// If the result is false, but no other experssions (i.e., expressions which refer to the type
-// of the value or the value itself) were encountered, false is returned; else, an error is
+// substituing false for all other expressions.  If the result is true, INCLUDE is returned.
+// If the result is false, but no other expressions (i.e., expressions which refer to the type
+// of the value or the value itself) were encountered, EXCLUDE is returned; else, FETCH_VALUE is
 // returned indicating the value must be fetched in order to determine if the row should be included
 // in the results.
-func EvalWhereUsingOnlyKey(s *query_parser.SelectStatement, k string) (bool, error) {
+func EvalWhereUsingOnlyKey(s *query_parser.SelectStatement, k string) EvalWithKeyResult {
 	if s.Where == nil { // all rows will be in result
-		return true, nil
+		return INCLUDE
 	}
 	return evalExprUsingOnlyKey(s.Where.Expr, k)
 }
 
-func evalExprUsingOnlyKey(e *query_parser.Expression, k string) (bool, error) {
+func evalExprUsingOnlyKey(e *query_parser.Expression, k string) EvalWithKeyResult {
 	switch e.Operator.Type {
 	case query_parser.And:
-		op1Result, err1 := evalExprUsingOnlyKey(e.Operand1.Expr, k)
-		op2Result, err2 := evalExprUsingOnlyKey(e.Operand2.Expr, k)
-		if op1Result && op2Result {
-			return true, nil
-		} else if (op1Result == false && err1 == nil) || (op2Result == false && err2 == nil) {
-			// One of the operands evaluated to false with no error.
+		op1Result := evalExprUsingOnlyKey(e.Operand1.Expr, k)
+		op2Result := evalExprUsingOnlyKey(e.Operand2.Expr, k)
+		if op1Result == INCLUDE && op2Result == INCLUDE {
+			return INCLUDE
+		} else if op1Result == EXCLUDE || op2Result == EXCLUDE {
+			// One of the operands evaluated to EXCLUDE.
 			// As such, the value is not needed to reject the row.
-			return false, nil
+			return EXCLUDE
 		} else {
-			if err1 != nil {
-				return false, err1
-			} else {
-				return false, err2
-			}
+			return FETCH_VALUE
 		}
 	case query_parser.Or:
-		op1Result, err1 := evalExprUsingOnlyKey(e.Operand1.Expr, k)
-		op2Result, err2 := evalExprUsingOnlyKey(e.Operand2.Expr, k)
-		if op1Result || op2Result {
-			return true, nil
+		op1Result := evalExprUsingOnlyKey(e.Operand1.Expr, k)
+		op2Result := evalExprUsingOnlyKey(e.Operand2.Expr, k)
+		if op1Result == INCLUDE || op2Result == INCLUDE {
+			return INCLUDE
+		} else if op1Result == EXCLUDE && op2Result == EXCLUDE {
+			return EXCLUDE
 		} else {
-			if err1 != nil {
-				return false, err1
-			} else {
-				return false, err2 // err2 may or may not be nil
-			}
+			return FETCH_VALUE
 		}
 	default: // =, > >=, <, <=, Like, <>, NotLike
 		if !query_checker.IsKey(e.Operand1) {
-			// Non-key expressions are evaluated as false.
-			return false, errors.New("Value required for answer.") // err text not used
+			return FETCH_VALUE
 		} else {
-			return evalComparisonOperators(k, nil, e), nil
+			if evalComparisonOperators(k, nil, e) {
+				return INCLUDE
+			} else {
+				return EXCLUDE
+			}
 		}
 	}
 }

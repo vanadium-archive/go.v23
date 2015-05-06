@@ -1,11 +1,6 @@
 // Copyright 2015 The Vanadium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
-//
-// Package query performs SQL-like select queries on the Syncbase NoSQL database.
-//
-// Note: Presently, the query package is deliberately not depending on other parts of syncbase.
-// This will change at a future date.
 
 package query
 
@@ -115,21 +110,19 @@ func (rs *resultStreamImpl) Advance() bool {
 		return false
 	}
 	for rs.keyValueStream.Advance() {
-		if err := rs.keyValueStream.Err(); err != nil {
-			rs.err = Error(rs.selectStatement.Off, err.Error())
-			return false
-		}
 		k, v := rs.keyValueStream.KeyValue()
-		if err := rs.keyValueStream.Err(); err != nil {
-			rs.err = Error(rs.selectStatement.Off, err.Error())
-			return false
-		}
 		// EvalWhereUsingOnlyKey
-		// true: the row should included in the results
-		// false: the row should NOT be included
-		// error: the value and/or type of the value are required to determine...
-		match, err := EvalWhereUsingOnlyKey(rs.selectStatement, k)
-		if err != nil {
+		// INCLUDE: the row should be included in the results
+		// EXCLUDE: the row should NOT be included
+		// FETCH_VALUE: the value and/or type of the value are required to make determination.
+		rv := EvalWhereUsingOnlyKey(rs.selectStatement, k)
+		var match bool
+		switch rv {
+		case INCLUDE:
+			match = true
+		case EXCLUDE:
+			match = false
+		case FETCH_VALUE:
 			match = Eval(k, v, rs.selectStatement.Where.Expr)
 		}
 		if match {
@@ -142,6 +135,9 @@ func (rs *resultStreamImpl) Advance() bool {
 				rs.skippedCount++
 			}
 		}
+	}
+	if err := rs.keyValueStream.Err(); err != nil {
+		rs.err = Error(rs.selectStatement.Off, err.Error())
 	}
 	return false
 }

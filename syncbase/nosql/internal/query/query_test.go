@@ -1,6 +1,7 @@
 // Copyright 2015 The Vanadium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
+
 package query_test
 
 import (
@@ -131,7 +132,7 @@ type customerKV struct {
 
 var customerRows []customerKV
 
-func TestCreate(t *testing.T) {
+func init() {
 	sampleRow = Customer{"John Smith", 123456, true, 'A', "1 Main St.", "Palo Alto", "CA", "94303", big.NewInt(1234567890), big.NewRat(123, 1), byte(12), uint16(1234), uint32(5678), uint64(999888777666), int16(9876), int32(876543), Nest1{Nest2{"foo", true, 42}}}
 	sampleRow123 = Customer{"John Smith", 123, true, 123, "1 Main St.", "Palo Alto", "CA", "94303", big.NewInt(123), big.NewRat(123, 1), byte(123), uint16(123), uint32(123), uint64(123), int16(123), int32(123), Nest1{Nest2{"foo", true, 123}}}
 	sampleRow = Customer{"John Smith", 123456, true, 'A', "1 Main St.", "Palo Alto", "CA", "94303", big.NewInt(1234567890), big.NewRat(123, 1), byte(12), uint16(1234), uint32(5678), uint64(999888777666), int16(9876), int32(876543), Nest1{Nest2{"foo", true, 42}}}
@@ -185,8 +186,7 @@ type keyPrefixesTest struct {
 type evalWhereUsingOnlyKeyTest struct {
 	query  string
 	key    string
-	result bool
-	err    error
+	result query.EvalWithKeyResult
 }
 
 type evalTest struct {
@@ -611,36 +611,31 @@ func TestEvalWhereUsingOnlyKey(t *testing.T) {
 			// Row will be selected using only the key.
 			"select k, v from Customer where k like \"abc%\"",
 			"abcdef",
-			true,
-			nil,
+			query.INCLUDE,
 		},
 		{
 			// Row will be rejected using only the key.
 			"select k, v from Customer where k like \"abc\"",
 			"abcd",
-			false,
-			nil,
+			query.EXCLUDE,
 		},
 		{
 			// Need value to determine if row should be selected.
 			"select k, v from Customer where k = \"abc\" or v.zip = \"94303\"",
 			"abcd",
-			false,
-			errors.New("Value required for answer."),
+			query.FETCH_VALUE,
 		},
 		{
 			// Need value (i.e., its type) to determine if row should be selected.
 			"select k, v from Customer where k = \"xyz\" or t = \"foo.Bar\"",
 			"wxyz",
-			false,
-			errors.New("Value required for answer."),
+			query.FETCH_VALUE,
 		},
 		{
 			// Although value is in where clause, it is not needed to reject row.
 			"select k, v from Customer where k = \"abcd\" and v.zip = \"94303\"",
 			"abcde",
-			false,
-			nil,
+			query.EXCLUDE,
 		},
 	}
 
@@ -657,12 +652,9 @@ func TestEvalWhereUsingOnlyKey(t *testing.T) {
 			if semErr == nil {
 				switch sel := (*s).(type) {
 				case query_parser.SelectStatement:
-					result, err := query.EvalWhereUsingOnlyKey(&sel, test.key)
+					result := query.EvalWhereUsingOnlyKey(&sel, test.key)
 					if result != test.result {
 						t.Errorf("query: %s; got %v, want %v", test.query, result, test.result)
-					}
-					if (err == nil && test.err != nil) || (err != nil && test.err == nil) {
-						t.Errorf("query: %s; got %v, want %v", test.query, err, test.err)
 					}
 				default:
 					t.Errorf("query: %s; got %v, want query_parser.SelectStatement", test.query, reflect.TypeOf(*s))
