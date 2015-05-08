@@ -23,7 +23,7 @@ import (
 type nonce [16]byte
 
 func (nonce) __VDLReflect(struct {
-	Name string "v.io/v23/security.nonce"
+	Name string `vdl:"v.io/v23/security.nonce"`
 }) {
 }
 
@@ -58,7 +58,7 @@ type publicKeyThirdPartyCaveatParam struct {
 }
 
 func (publicKeyThirdPartyCaveatParam) __VDLReflect(struct {
-	Name string "v.io/v23/security.publicKeyThirdPartyCaveatParam"
+	Name string `vdl:"v.io/v23/security.publicKeyThirdPartyCaveatParam"`
 }) {
 }
 
@@ -75,7 +75,7 @@ type publicKeyDischarge struct {
 }
 
 func (publicKeyDischarge) __VDLReflect(struct {
-	Name string "v.io/v23/security.publicKeyDischarge"
+	Name string `vdl:"v.io/v23/security.publicKeyDischarge"`
 }) {
 }
 

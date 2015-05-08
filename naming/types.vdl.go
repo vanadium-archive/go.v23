@@ -19,7 +19,7 @@ import (
 type MountFlag uint32
 
 func (MountFlag) __VDLReflect(struct {
-	Name string "v.io/v23/naming.MountFlag"
+	Name string `vdl:"v.io/v23/naming.MountFlag"`
 }) {
 }
 
@@ -32,7 +32,7 @@ type MountedServer struct {
 }
 
 func (MountedServer) __VDLReflect(struct {
-	Name string "v.io/v23/naming.MountedServer"
+	Name string `vdl:"v.io/v23/naming.MountedServer"`
 }) {
 }
 
@@ -49,7 +49,7 @@ type MountEntry struct {
 }
 
 func (MountEntry) __VDLReflect(struct {
-	Name string "v.io/v23/naming.MountEntry"
+	Name string `vdl:"v.io/v23/naming.MountEntry"`
 }) {
 }
 
@@ -63,7 +63,7 @@ type GlobError struct {
 }
 
 func (GlobError) __VDLReflect(struct {
-	Name string "v.io/v23/naming.GlobError"
+	Name string `vdl:"v.io/v23/naming.GlobError"`
 }) {
 }
 
@@ -87,7 +87,7 @@ type (
 	GlobReplyError struct{ Value GlobError }
 	// __GlobReplyReflect describes the GlobReply union type.
 	__GlobReplyReflect struct {
-		Name  string "v.io/v23/naming.GlobReply"
+		Name  string `vdl:"v.io/v23/naming.GlobReply"`
 		Type  GlobReply
 		Union struct {
 			Entry GlobReplyEntry

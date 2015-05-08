@@ -44,7 +44,7 @@ type (
 	PrimitivePControl struct{ Value ControlKind }
 	// __PrimitiveReflect describes the Primitive union type.
 	__PrimitiveReflect struct {
-		Name  string "v.io/v23/vom.Primitive"
+		Name  string `vdl:"v.io/v23/vom.Primitive"`
 		Type  Primitive
 		Union struct {
 			PBool    PrimitivePBool
@@ -103,7 +103,7 @@ type DumpAtom struct {
 }
 
 func (DumpAtom) __VDLReflect(struct {
-	Name string "v.io/v23/vom.DumpAtom"
+	Name string `vdl:"v.io/v23/vom.DumpAtom"`
 }) {
 }
 
@@ -210,7 +210,7 @@ func (x DumpKind) String() string {
 }
 
 func (DumpKind) __VDLReflect(struct {
-	Name string "v.io/v23/vom.DumpKind"
+	Name string `vdl:"v.io/v23/vom.DumpKind"`
 	Enum struct{ Version, Control, MsgId, TypeMsg, ValueMsg, MsgLen, TypeId, PrimValue, ByteLen, ValueLen, Index, WireTypeIndex string }
 }) {
 }
@@ -258,7 +258,7 @@ func (x ControlKind) String() string {
 }
 
 func (ControlKind) __VDLReflect(struct {
-	Name string "v.io/v23/vom.ControlKind"
+	Name string `vdl:"v.io/v23/vom.ControlKind"`
 	Enum struct{ Nil, End string }
 }) {
 }

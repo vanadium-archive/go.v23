@@ -70,7 +70,7 @@ func (x Architecture) String() string {
 }
 
 func (Architecture) __VDLReflect(struct {
-	Name string "v.io/v23/services/build.Architecture"
+	Name string `vdl:"v.io/v23/services/build.Architecture"`
 	Enum struct{ Amd64, Arm, X86 string }
 }) {
 }
@@ -124,7 +124,7 @@ func (x Format) String() string {
 }
 
 func (Format) __VDLReflect(struct {
-	Name string "v.io/v23/services/build.Format"
+	Name string `vdl:"v.io/v23/services/build.Format"`
 	Enum struct{ Elf, Mach, Pe string }
 }) {
 }
@@ -178,7 +178,7 @@ func (x OperatingSystem) String() string {
 }
 
 func (OperatingSystem) __VDLReflect(struct {
-	Name string "v.io/v23/services/build.OperatingSystem"
+	Name string `vdl:"v.io/v23/services/build.OperatingSystem"`
 	Enum struct{ Darwin, Linux, Windows string }
 }) {
 }
@@ -190,7 +190,7 @@ type File struct {
 }
 
 func (File) __VDLReflect(struct {
-	Name string "v.io/v23/services/build.File"
+	Name string `vdl:"v.io/v23/services/build.File"`
 }) {
 }
 

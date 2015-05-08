@@ -30,7 +30,7 @@ type Config struct {
 }
 
 func (Config) __VDLReflect(struct {
-	Name string "vdltool.Config"
+	Name string `vdl:"vdltool.Config"`
 }) {
 }
 
@@ -83,7 +83,7 @@ func (x GenLanguage) String() string {
 }
 
 func (GenLanguage) __VDLReflect(struct {
-	Name string "vdltool.GenLanguage"
+	Name string `vdl:"vdltool.GenLanguage"`
 	Enum struct{ Go, Java, Javascript string }
 }) {
 }
@@ -115,7 +115,7 @@ type GoConfig struct {
 }
 
 func (GoConfig) __VDLReflect(struct {
-	Name string "vdltool.GoConfig"
+	Name string `vdl:"vdltool.GoConfig"`
 }) {
 }
 
@@ -132,7 +132,7 @@ type GoType struct {
 }
 
 func (GoType) __VDLReflect(struct {
-	Name string "vdltool.GoType"
+	Name string `vdl:"vdltool.GoType"`
 }) {
 }
 
@@ -147,7 +147,7 @@ type GoImport struct {
 }
 
 func (GoImport) __VDLReflect(struct {
-	Name string "vdltool.GoImport"
+	Name string `vdl:"vdltool.GoImport"`
 }) {
 }
 
@@ -188,7 +188,7 @@ type JavaConfig struct {
 }
 
 func (JavaConfig) __VDLReflect(struct {
-	Name string "vdltool.JavaConfig"
+	Name string `vdl:"vdltool.JavaConfig"`
 }) {
 }
 
@@ -197,7 +197,7 @@ type JavascriptConfig struct {
 }
 
 func (JavascriptConfig) __VDLReflect(struct {
-	Name string "vdltool.JavascriptConfig"
+	Name string `vdl:"vdltool.JavascriptConfig"`
 }) {
 }
 

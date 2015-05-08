@@ -33,7 +33,7 @@ type Task struct {
 }
 
 func (Task) __VDLReflect(struct {
-	Name string "v.io/v23/services/appcycle.Task"
+	Name string `vdl:"v.io/v23/services/appcycle.Task"`
 }) {
 }
 

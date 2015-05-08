@@ -29,7 +29,7 @@ type LogEntry struct {
 }
 
 func (LogEntry) __VDLReflect(struct {
-	Name string "v.io/v23/services/logreader.LogEntry"
+	Name string `vdl:"v.io/v23/services/logreader.LogEntry"`
 }) {
 }
 

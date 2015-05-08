@@ -61,7 +61,7 @@ type Request struct {
 }
 
 func (Request) __VDLReflect(struct {
-	Name string "v.io/v23/rpc.Request"
+	Name string `vdl:"v.io/v23/rpc.Request"`
 }) {
 }
 
@@ -88,7 +88,7 @@ type Response struct {
 }
 
 func (Response) __VDLReflect(struct {
-	Name string "v.io/v23/rpc.Response"
+	Name string `vdl:"v.io/v23/rpc.Response"`
 }) {
 }
 
@@ -109,7 +109,7 @@ type BlessingsRequest struct {
 }
 
 func (BlessingsRequest) __VDLReflect(struct {
-	Name string "v.io/v23/rpc.BlessingsRequest"
+	Name string `vdl:"v.io/v23/rpc.BlessingsRequest"`
 }) {
 }
 

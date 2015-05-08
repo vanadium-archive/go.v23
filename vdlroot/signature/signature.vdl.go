@@ -23,7 +23,7 @@ type Interface struct {
 }
 
 func (Interface) __VDLReflect(struct {
-	Name string "signature.Interface"
+	Name string `vdl:"signature.Interface"`
 }) {
 }
 
@@ -35,7 +35,7 @@ type Embed struct {
 }
 
 func (Embed) __VDLReflect(struct {
-	Name string "signature.Embed"
+	Name string `vdl:"signature.Embed"`
 }) {
 }
 
@@ -51,7 +51,7 @@ type Method struct {
 }
 
 func (Method) __VDLReflect(struct {
-	Name string "signature.Method"
+	Name string `vdl:"signature.Method"`
 }) {
 }
 
@@ -63,7 +63,7 @@ type Arg struct {
 }
 
 func (Arg) __VDLReflect(struct {
-	Name string "signature.Arg"
+	Name string `vdl:"signature.Arg"`
 }) {
 }
 

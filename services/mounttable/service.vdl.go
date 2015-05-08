@@ -33,7 +33,7 @@ import (
 type Tag string
 
 func (Tag) __VDLReflect(struct {
-	Name string "v.io/v23/services/mounttable.Tag"
+	Name string `vdl:"v.io/v23/services/mounttable.Tag"`
 }) {
 }
 

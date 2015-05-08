@@ -24,7 +24,7 @@ type WireError struct {
 }
 
 func (WireError) __VDLReflect(struct {
-	Name string "v.io/v23/vdl.WireError"
+	Name string `vdl:"v.io/v23/vdl.WireError"`
 }) {
 }
 
@@ -85,7 +85,7 @@ func (x WireRetryCode) String() string {
 }
 
 func (WireRetryCode) __VDLReflect(struct {
-	Name string "v.io/v23/vdl.WireRetryCode"
+	Name string `vdl:"v.io/v23/vdl.WireRetryCode"`
 	Enum struct{ NoRetry, RetryConnection, RetryRefetch, RetryBackoff string }
 }) {
 }

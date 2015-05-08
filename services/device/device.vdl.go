@@ -32,7 +32,7 @@ import (
 type Config map[string]string
 
 func (Config) __VDLReflect(struct {
-	Name string "v.io/v23/services/device.Config"
+	Name string `vdl:"v.io/v23/services/device.Config"`
 }) {
 }
 
@@ -80,7 +80,7 @@ func (x InstallationState) String() string {
 }
 
 func (InstallationState) __VDLReflect(struct {
-	Name string "v.io/v23/services/device.InstallationState"
+	Name string `vdl:"v.io/v23/services/device.InstallationState"`
 	Enum struct{ Active, Uninstalled string }
 }) {
 }
@@ -153,7 +153,7 @@ func (x InstanceState) String() string {
 }
 
 func (InstanceState) __VDLReflect(struct {
-	Name string "v.io/v23/services/device.InstanceState"
+	Name string `vdl:"v.io/v23/services/device.InstanceState"`
 	Enum struct{ Launching, Running, Dying, NotRunning, Updating, Deleted string }
 }) {
 }
@@ -178,7 +178,7 @@ type (
 	StatusInstallation struct{ Value InstallationStatus }
 	// __StatusReflect describes the Status union type.
 	__StatusReflect struct {
-		Name  string "v.io/v23/services/device.Status"
+		Name  string `vdl:"v.io/v23/services/device.Status"`
 		Type  Status
 		Union struct {
 			Instance     StatusInstance
@@ -205,7 +205,7 @@ type InstallationStatus struct {
 }
 
 func (InstallationStatus) __VDLReflect(struct {
-	Name string "v.io/v23/services/device.InstallationStatus"
+	Name string `vdl:"v.io/v23/services/device.InstallationStatus"`
 }) {
 }
 
@@ -217,7 +217,7 @@ type InstanceStatus struct {
 }
 
 func (InstanceStatus) __VDLReflect(struct {
-	Name string "v.io/v23/services/device.InstanceStatus"
+	Name string `vdl:"v.io/v23/services/device.InstanceStatus"`
 }) {
 }
 
@@ -244,7 +244,7 @@ type (
 	BlessServerMessageInstancePublicKey struct{ Value []byte }
 	// __BlessServerMessageReflect describes the BlessServerMessage union type.
 	__BlessServerMessageReflect struct {
-		Name  string "v.io/v23/services/device.BlessServerMessage"
+		Name  string `vdl:"v.io/v23/services/device.BlessServerMessage"`
 		Type  BlessServerMessage
 		Union struct {
 			InstancePublicKey BlessServerMessageInstancePublicKey
@@ -279,7 +279,7 @@ type (
 	BlessClientMessageAppBlessings struct{ Value security.Blessings }
 	// __BlessClientMessageReflect describes the BlessClientMessage union type.
 	__BlessClientMessageReflect struct {
-		Name  string "v.io/v23/services/device.BlessClientMessage"
+		Name  string `vdl:"v.io/v23/services/device.BlessClientMessage"`
 		Type  BlessClientMessage
 		Union struct {
 			AppBlessings BlessClientMessageAppBlessings
@@ -306,7 +306,7 @@ type Description struct {
 }
 
 func (Description) __VDLReflect(struct {
-	Name string "v.io/v23/services/device.Description"
+	Name string `vdl:"v.io/v23/services/device.Description"`
 }) {
 }
 
@@ -318,7 +318,7 @@ type Association struct {
 }
 
 func (Association) __VDLReflect(struct {
-	Name string "v.io/v23/services/device.Association"
+	Name string `vdl:"v.io/v23/services/device.Association"`
 }) {
 }
 
