@@ -14,7 +14,7 @@ import (
 
 	"v.io/v23/naming"
 
-	_ "v.io/x/ref/profiles"
+	_ "v.io/x/ref/runtime/factories/generic"
 )
 
 var protocolFlag = protocolFlagVar{"tcp"}

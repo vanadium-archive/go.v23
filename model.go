@@ -349,7 +349,7 @@ runtime implementation.`)
 //   - Initialize a Runtime implementation (providing the flags to it)
 //   - Return a Runtime implemenation, initial context, Shutdown func.
 //
-// See the v.io/x/ref/profiles package for a complete description of the
+// See the v.io/x/ref/runtime package for a complete description of the
 // precanned Profiles and how to use them.
 type Profile func(ctx *context.T) (Runtime, *context.T, Shutdown, error)
 
@@ -365,7 +365,7 @@ func RegisterProfile(f Profile) {
 		format := `A profile has already been registered.
 This is most likely because a library package is
 importing a profile.  Look for imports of the form
-'v.io/x/ref/profiles/...' and remove them.  Profiles should only be
+'v.io/x/ref/runtime/...' and remove them.  Profiles should only be
 imported in your main package.  Previous registration was from:
 %s
 Current registration is from:
