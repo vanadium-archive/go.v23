@@ -133,7 +133,7 @@ func TestDurationToNativeError(t *testing.T) {
 		native := randGoDuration() // Start with an arbitrary value.
 		err := durationToNative(test.Wire, &native)
 		if got, want := fmt.Sprint(err), test.Err; !strings.Contains(got, want) {
-			t.Errorf("%v durationToNative got error %q, want substr %q", got, want)
+			t.Errorf("%v durationToNative got error %q, want substr %q", test.Wire, got, want)
 		}
 		if got, want := native, gotime.Duration(0); got != want {
 			t.Errorf("%v durationToNative got %v, want %v", test.Wire, got, want)

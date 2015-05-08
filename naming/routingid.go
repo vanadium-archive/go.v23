@@ -110,7 +110,6 @@ func NewRoutingID() (RoutingID, error) {
 			return rid, nil
 		}
 	}
-	return rid, nil
 }
 
 func Compare(a, b RoutingID) bool {

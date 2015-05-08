@@ -55,7 +55,7 @@ func TestSignature(t *testing.T) {
 		}
 		message[len(message)-1] = message[len(message)-1] + 1
 		if sig.Verify(signer.PublicKey(), message) {
-			t.Errorf("Signature of modified message incorrectly verified with curve of %d bits", len(message), nbits)
+			t.Errorf("Signature of modified message incorrectly verified with curve of %d bits", nbits)
 			continue
 		}
 		// Signing small messages and then extending them.

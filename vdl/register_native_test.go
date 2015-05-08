@@ -39,7 +39,7 @@ func TestRegisterNative(t *testing.T) {
 		// convert_test via the verror package, so we can't check registration.
 	}
 	for _, test := range tests {
-		name := fmt.Sprint("[%v %v]", test.WireType, test.NativeType)
+		name := fmt.Sprintf("[%v %v]", test.WireType, test.NativeType)
 		RegisterNative(test.toNativeFunc.Interface(), test.fromNativeFunc.Interface())
 		if got, want := nativeInfoFromWire(test.WireType), test; !equalNativeInfo(*got, want) {
 			t.Errorf("%s nativeInfoFromWire got %#v, want %#v", name, got, want)
@@ -69,10 +69,10 @@ func TestDeriveNativeInfo(t *testing.T) {
 		},
 	}
 	for _, test := range tests {
-		name := fmt.Sprint("[%v %v]", test.WireType, test.NativeType)
+		name := fmt.Sprintf("[%v %v]", test.WireType, test.NativeType)
 		ni, err := deriveNativeInfo(test.toNativeFunc.Interface(), test.fromNativeFunc.Interface())
 		if err != nil {
-			t.Errorf("%s got error: %v", err)
+			t.Errorf("%s got error: %v", name, err)
 		}
 		if got, want := ni, test; !equalNativeInfo(*got, want) {
 			t.Errorf("%s got %#v, want %#v", name, got, want)

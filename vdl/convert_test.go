@@ -1170,7 +1170,7 @@ func expectConvert(t *testing.T, tname string, got, want interface{}, deref int)
 	rvGot := reflect.ValueOf(got)
 	for d := 0; d < deref; d++ {
 		if rvGot.Kind() != reflect.Ptr || rvGot.IsNil() {
-			t.Errorf("%s can't deref %d %T %v", deref, got, got)
+			t.Errorf("%s can't deref %d %T %v", tname, deref, got, got)
 			return
 		}
 		rvGot = rvGot.Elem()

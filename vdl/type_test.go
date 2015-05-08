@@ -136,7 +136,7 @@ func allTypes() (types []*Type) {
 	}
 	for ix, t := range types {
 		if t.CanBeNamed() {
-			types = append(types, NamedType(fmt.Sprint("Named%d", ix), t))
+			types = append(types, NamedType(fmt.Sprintf("Named%d", ix), t))
 		}
 	}
 	for _, t := range types {

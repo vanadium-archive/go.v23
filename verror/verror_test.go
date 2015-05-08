@@ -225,25 +225,25 @@ func init() {
 
 func TestDefaultValues(t *testing.T) {
 	if got, want := verror.ErrorID(nil), verror.ID(""); got != want {
-		t.Errorf("got: %d, want: %d", got, want)
+		t.Errorf("got: %v, want: %v", got, want)
 	}
 	if got, want := verror.Action(nil), verror.NoRetry; got != want {
-		t.Errorf("got: %d, want: %d", got, want)
+		t.Errorf("got: %v, want: %v", got, want)
 	}
 
 	if got, want := verror.ErrorID(verror.E{}), verror.ID(""); got != want {
-		t.Errorf("got: %d, want: %d", got, want)
+		t.Errorf("got: %v, want: %v", got, want)
 	}
 	if got, want := verror.Action(verror.E{}), verror.NoRetry; got != want {
-		t.Errorf("got: %d, want: %d", got, want)
+		t.Errorf("got: %v, want: %v", got, want)
 	}
 
 	unknown := verror.ExplicitNew(verror.ErrUnknown, i18n.NoLangID, "", "")
 	if got, want := verror.ErrorID(unknown), verror.ErrUnknown.ID; got != want {
-		t.Errorf("got: %d, want: %d", got, want)
+		t.Errorf("got: %v, want: %v", got, want)
 	}
 	if got, want := verror.Action(unknown), verror.NoRetry; got != want {
-		t.Errorf("got: %d, want: %d", got, want)
+		t.Errorf("got: %v, want: %v", got, want)
 	}
 }
 
