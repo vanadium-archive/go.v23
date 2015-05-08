@@ -170,13 +170,6 @@ const (
   // fetching the initial state. See the "Initial State" section
   // above.
   InitialStateSkipped = int32(2)
-
-  // XXX: The google3 version has the following field, but I'm not sure how
-  // to represent it in v23.
-  // The element may exist, but some error has occurred. More information is
-  // available in the value field - the value is a serialized util.Status
-  // proto (from util/task/status.proto).
-  // ERROR = 3;
 )
 
 // Change is the new value for a watched entity.
