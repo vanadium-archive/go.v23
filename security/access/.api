@@ -4,14 +4,18 @@ pkg access, const Read Tag
 pkg access, const Resolve Tag
 pkg access, const Write Tag
 pkg access, func AllTypicalTags() []Tag
+pkg access, func IsUnenforceablePatterns(error) []security.BlessingPattern
 pkg access, func NewErrAccessListMatch(*context.T, []string, []security.RejectedBlessing) error
+pkg access, func NewErrInvalidOpenAccessList(*context.T) error
 pkg access, func NewErrNoPermissions(*context.T, []string, []security.RejectedBlessing, string) error
 pkg access, func NewErrTooBig(*context.T) error
+pkg access, func NewErrUnenforceablePatterns(*context.T, []security.BlessingPattern) error
 pkg access, func PermissionsAuthorizer(Permissions, *vdl.Type) (security.Authorizer, error)
 pkg access, func PermissionsAuthorizerFromFile(string, *vdl.Type) (security.Authorizer, error)
 pkg access, func ReadPermissions(io.Reader) (Permissions, error)
 pkg access, func TypicalTagType() *vdl.Type
 pkg access, method (AccessList) Authorize(*context.T, security.Call) error
+pkg access, method (AccessList) Enforceable(*context.T, security.Principal) error
 pkg access, method (AccessList) Includes(...string) bool
 pkg access, method (Permissions) Add(security.BlessingPattern, string)
 pkg access, method (Permissions) Blacklist(string, string)
@@ -25,5 +29,7 @@ pkg access, type AccessList struct, NotIn []string
 pkg access, type Permissions map[string]AccessList
 pkg access, type Tag string
 pkg access, var ErrAccessListMatch verror.IDAction
+pkg access, var ErrInvalidOpenAccessList verror.IDAction
 pkg access, var ErrNoPermissions verror.IDAction
 pkg access, var ErrTooBig verror.IDAction
+pkg access, var ErrUnenforceablePatterns verror.IDAction

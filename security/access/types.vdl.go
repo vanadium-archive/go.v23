@@ -186,15 +186,19 @@ const Resolve = Tag("Resolve") // Operations involving namespace navigation.
 
 var (
 	// The AccessList is too big.  Use groups to represent large sets of principals.
-	ErrTooBig          = verror.Register("v.io/v23/security/access.TooBig", verror.NoRetry, "{1:}{2:} AccessList is too big")
-	ErrNoPermissions   = verror.Register("v.io/v23/security/access.NoPermissions", verror.NoRetry, "{1:}{2:} {3} does not have {5} access (rejected blessings: {4})")
-	ErrAccessListMatch = verror.Register("v.io/v23/security/access.AccessListMatch", verror.NoRetry, "{1:}{2:} {3} does not match the access list (rejected blessings: {4})")
+	ErrTooBig                = verror.Register("v.io/v23/security/access.TooBig", verror.NoRetry, "{1:}{2:} AccessList is too big")
+	ErrNoPermissions         = verror.Register("v.io/v23/security/access.NoPermissions", verror.NoRetry, "{1:}{2:} {3} does not have {5} access (rejected blessings: {4})")
+	ErrAccessListMatch       = verror.Register("v.io/v23/security/access.AccessListMatch", verror.NoRetry, "{1:}{2:} {3} does not match the access list (rejected blessings: {4})")
+	ErrUnenforceablePatterns = verror.Register("v.io/v23/security/access.UnenforceablePatterns", verror.NoRetry, "{1:}{2:} AccessList contains the following invalid or unrecognized patterns in the In list: {3}")
+	ErrInvalidOpenAccessList = verror.Register("v.io/v23/security/access.InvalidOpenAccessList", verror.NoRetry, "{1:}{2:} AccessList with the pattern ... in its In list must have no other patterns in the In or NotIn lists")
 )
 
 func init() {
 	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrTooBig.ID), "{1:}{2:} AccessList is too big")
 	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrNoPermissions.ID), "{1:}{2:} {3} does not have {5} access (rejected blessings: {4})")
 	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrAccessListMatch.ID), "{1:}{2:} {3} does not match the access list (rejected blessings: {4})")
+	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrUnenforceablePatterns.ID), "{1:}{2:} AccessList contains the following invalid or unrecognized patterns in the In list: {3}")
+	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrInvalidOpenAccessList.ID), "{1:}{2:} AccessList with the pattern ... in its In list must have no other patterns in the In or NotIn lists")
 }
 
 // NewErrTooBig returns an error with the ErrTooBig ID.
@@ -210,4 +214,14 @@ func NewErrNoPermissions(ctx *context.T, validBlessings []string, rejectedBlessi
 // NewErrAccessListMatch returns an error with the ErrAccessListMatch ID.
 func NewErrAccessListMatch(ctx *context.T, validBlessings []string, rejectedBlessings []security.RejectedBlessing) error {
 	return verror.New(ErrAccessListMatch, ctx, validBlessings, rejectedBlessings)
+}
+
+// NewErrUnenforceablePatterns returns an error with the ErrUnenforceablePatterns ID.
+func NewErrUnenforceablePatterns(ctx *context.T, rejectedPatterns []security.BlessingPattern) error {
+	return verror.New(ErrUnenforceablePatterns, ctx, rejectedPatterns)
+}
+
+// NewErrInvalidOpenAccessList returns an error with the ErrInvalidOpenAccessList ID.
+func NewErrInvalidOpenAccessList(ctx *context.T) error {
+	return verror.New(ErrInvalidOpenAccessList, ctx)
 }

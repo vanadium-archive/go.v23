@@ -8,9 +8,10 @@ import (
 	"encoding/json"
 	"io"
 	"sort"
-
+	"strings"
 	"v.io/v23/context"
 	"v.io/v23/security"
+	"v.io/v23/verror"
 )
 
 // Includes returns true iff the AccessList grants access to a principal that
@@ -54,6 +55,55 @@ func (acl AccessList) Authorize(ctx *context.T, call security.Call) error {
 		return nil
 	}
 	return NewErrAccessListMatch(ctx, blessingsForCall, invalid)
+}
+
+// Enforceable checks if the AccessList is enforceable by the provided
+// principal.
+//
+// It returns nil if all blessing patterns in the 'In' list are valid and
+// matched by a blessing name that is recognized by one of the provided
+// principal's roots.
+//
+// An error with identifier ErrOpenAccessList.ID is returned if the 'In' list
+// contains the pattern "..." along with other patterns in the 'In' or 'NotIn'
+// lists. Otherwise an error with identifier ErrUnenforceablePatterns.ID is
+// returned.
+func (acl AccessList) Enforceable(ctx *context.T, p security.Principal) error {
+	if acl.isOpen() {
+		return nil
+	}
+
+	var (
+		rootPatterns []security.BlessingPattern
+		rejected     []security.BlessingPattern
+	)
+	for pattern, _ := range p.Roots().Dump() {
+		rootPatterns = append(rootPatterns, pattern)
+	}
+
+	for _, p := range acl.In {
+		if p == security.AllPrincipals {
+			return NewErrInvalidOpenAccessList(ctx)
+		}
+		if !p.IsValid() {
+			rejected = append(rejected, p)
+			continue
+		}
+		if !isRecognized(p, rootPatterns) {
+			rejected = append(rejected, p)
+		}
+	}
+	if len(rejected) == 0 {
+		return nil
+	}
+	return NewErrUnenforceablePatterns(ctx, rejected)
+}
+
+func (acl AccessList) isOpen() bool {
+	if len(acl.NotIn) == 0 && (len(acl.In) == 1 && acl.In[0] == security.AllPrincipals) {
+		return true
+	}
+	return false
 }
 
 // WriteTo writes the JSON-encoded representation of a Permissions to w.
@@ -155,6 +205,28 @@ func (m Permissions) Normalize() Permissions {
 	return m
 }
 
+// UnenforceablePatterns checks if the error has the identifier
+// ErrUnenforceablePatterns.ID, and if so returns the set of
+// unenforceable patterns encapsulated in it.  It returns nil otherwise.
+func IsUnenforceablePatterns(err error) []security.BlessingPattern {
+	if verror.ErrorID(err) != ErrUnenforceablePatterns.ID {
+		return nil
+	}
+	verr, ok := err.(verror.E)
+	if !ok {
+		return nil
+	}
+	params := verr.ParamList
+	if len(params) != 3 {
+		return nil
+	}
+	patterns, ok := params[2].([]security.BlessingPattern)
+	if !ok {
+		return nil
+	}
+	return patterns
+}
+
 func removeDuplicatePatterns(l []security.BlessingPattern) (ret []security.BlessingPattern) {
 	m := make(map[security.BlessingPattern]bool)
 	for _, s := range l {
@@ -177,6 +249,40 @@ func removeDuplicateStrings(l []string) (ret []string) {
 		m[s] = true
 	}
 	return ret
+}
+
+// This method assumes that p != security.AllPrincipals
+func isRecognized(p security.BlessingPattern, rootPatterns []security.BlessingPattern) bool {
+	if p == security.NoExtension {
+		return true
+	}
+
+	const nonExtSuffix = security.ChainSeparator + string(security.NoExtension)
+
+	s := string(p)
+	nonExtPattern := strings.HasSuffix(s, nonExtSuffix)
+	if nonExtPattern {
+		s = strings.TrimSuffix(s, nonExtSuffix)
+	}
+
+	for _, root := range rootPatterns {
+		if root == security.NoExtension {
+			continue
+		}
+		nonExtRoot := strings.HasSuffix(string(root), nonExtSuffix)
+		if !nonExtPattern && nonExtRoot {
+			// The root, by virtue of being non-extendable, will only be matched
+			// by a single blessing name, whereas, the pattern, by virtue of being
+			// extendable, will be matched by infinitely many blessing names.
+			// Therefore, not all blessing names that match the pattern are recognized
+			// by the root.
+			continue
+		}
+		if root.MatchedBy(s) {
+			return true
+		}
+	}
+	return false
 }
 
 type byPattern []security.BlessingPattern

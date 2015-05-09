@@ -11,6 +11,8 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
+	"reflect"
+	"sort"
 	"testing"
 	"time"
 
@@ -26,6 +28,12 @@ func authorize(authorizer security.Authorizer, params *security.CallParams) erro
 	ctx, cancel := context.RootContext()
 	defer cancel()
 	return authorizer.Authorize(ctx, security.NewCall(params))
+}
+
+func enforceable(al access.AccessList, p security.Principal) error {
+	ctx, cancel := context.RootContext()
+	defer cancel()
+	return al.Enforceable(ctx, p)
 }
 
 func TestAccessListAuthorizer(t *testing.T) {
@@ -77,6 +85,90 @@ func TestAccessListAuthorizer(t *testing.T) {
 		}
 	}
 }
+
+func TestAccessListEnforceable(t *testing.T) {
+	var (
+		p          = newPrincipal(t)
+		roots      = p.Roots()
+		key        = p.PublicKey()
+		addToRoots = func(roots security.BlessingRoots, k security.PublicKey, p security.BlessingPattern) {
+			if err := roots.Add(k, p); err != nil {
+				t.Fatal(err)
+			}
+		}
+	)
+	addToRoots(roots, key, "ali/spouse/$")
+	addToRoots(roots, key, "bob/friend")
+
+	type (
+		bp []security.BlessingPattern // shorthand
+		s  []string                   // shorthand
+	)
+
+	tests := []struct {
+		al       access.AccessList
+		errID    verror.ID
+		rejected []security.BlessingPattern
+	}{
+		{
+			al: access.AccessList{
+				In:    bp{"$", "ali/spouse/$", "bob/friend/$", "bob/friend/colleague"},
+				NotIn: s{"ali/spouse/friend", "bob"}, // NotIn patterns don't matter.
+			},
+		},
+		{
+			al: access.AccessList{
+				In:    bp{"bob/friend/$", "ali/$/spouse", "bob//friend", "bob/..."}, // invalid patterns are rejected
+				NotIn: s{"ali/spouse/friend", "bob"},
+			},
+			errID:    access.ErrUnenforceablePatterns.ID,
+			rejected: bp{"ali/$/spouse", "bob//friend", "bob/..."},
+		},
+		{
+			al: access.AccessList{
+				In:    bp{"ali/spouse/$", "bob/friend/$", "ali", "ali/$", "ali/spouse", "ali/spouse/friend", "bob", "bob/$", "bob/spouse"}, // unrecognized patterns are rejected
+				NotIn: s{"ali/spouse/friend", "bob"},
+			},
+			errID:    access.ErrUnenforceablePatterns.ID,
+			rejected: bp{"ali", "ali/$", "ali/spouse", "ali/spouse/friend", "bob", "bob/$", "bob/spouse"},
+		},
+		{
+			al: access.AccessList{
+				In:    bp{"..."},
+				NotIn: s{"bob/friend"},
+			},
+			errID: access.ErrInvalidOpenAccessList.ID,
+		},
+		{
+			al: access.AccessList{
+				In: bp{"...", "bob/friend"},
+			},
+			errID: access.ErrInvalidOpenAccessList.ID,
+		},
+	}
+	for _, test := range tests {
+		gotErr := enforceable(test.al, p)
+		if (test.errID == "" && gotErr != nil) || (verror.ErrorID(gotErr) != test.errID) {
+			t.Errorf("%v.Enforceable(...): got error %v, want error with ID %v", test.al, gotErr, test.errID)
+		}
+		if test.errID != access.ErrUnenforceablePatterns.ID {
+			continue
+		}
+
+		gotRejected := access.IsUnenforceablePatterns(gotErr)
+		sort.Sort(byPattern(gotRejected))
+		sort.Sort(byPattern(test.rejected))
+		if !reflect.DeepEqual(gotRejected, test.rejected) {
+			t.Errorf("IsUnenforceablePatterns(%v): got rejected pattern %v, want %v", gotErr, gotRejected, test.rejected)
+		}
+	}
+}
+
+type byPattern []security.BlessingPattern
+
+func (a byPattern) Len() int           { return len(a) }
+func (a byPattern) Swap(i, j int)      { a[i], a[j] = a[j], a[i] }
+func (a byPattern) Less(i, j int) bool { return a[i] < a[j] }
 
 // TestPermissionsAuthorizer is both a test and a demonstration of the use of
 // the access.PermissionsAuthorizer and interaction with interface specification
@@ -335,16 +427,27 @@ func newPrincipal(t *testing.T) security.Principal {
 	p, err := security.CreatePrincipal(
 		security.NewInMemoryECDSASigner(key),
 		nil,
-		trustAllRoots{})
+		&trustAllRoots{dump: make(map[security.BlessingPattern][]security.PublicKey)})
 	if err != nil {
 		t.Fatal(err)
 	}
 	return p
 }
 
-type trustAllRoots struct{}
+type trustAllRoots struct {
+	dump map[security.BlessingPattern][]security.PublicKey
+}
 
-func (trustAllRoots) Add(security.PublicKey, security.BlessingPattern) error  { return nil }
-func (trustAllRoots) Recognized(security.PublicKey, string) error             { return nil }
-func (trustAllRoots) Dump() map[security.BlessingPattern][]security.PublicKey { return nil }
-func (trustAllRoots) DebugString() string                                     { return fmt.Sprintf("%T", trustAllRoots{}) }
+func (r *trustAllRoots) Add(root security.PublicKey, pattern security.BlessingPattern) error {
+	r.dump[pattern] = append(r.dump[pattern], root)
+	return nil
+}
+func (r *trustAllRoots) Recognized(root security.PublicKey, blessing string) error {
+	return nil
+}
+func (r *trustAllRoots) Dump() map[security.BlessingPattern][]security.PublicKey {
+	return r.dump
+}
+func (r *trustAllRoots) DebugString() string {
+	return fmt.Sprintf("%v", r)
+}

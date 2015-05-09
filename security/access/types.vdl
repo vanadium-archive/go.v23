@@ -158,4 +158,8 @@ error (
 	NoPermissions(validBlessings []string, rejectedBlessings []security.RejectedBlessing, tag string){"en":"{validBlessings} does not have {tag} access (rejected blessings: {rejectedBlessings})"}
 
 	AccessListMatch(validBlessings []string, rejectedBlessings []security.RejectedBlessing){"en":"{validBlessings} does not match the access list (rejected blessings: {rejectedBlessings})"}
+
+	UnenforceablePatterns(rejectedPatterns []security.BlessingPattern){"en":"AccessList contains the following invalid or unrecognized patterns in the In list: {rejectedPatterns}"}
+
+	InvalidOpenAccessList(){"en": "AccessList with the pattern ... in its In list must have no other patterns in the In or NotIn lists"}
 )
