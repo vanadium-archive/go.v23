@@ -34,7 +34,7 @@ type BatchOptions struct {
 }
 
 func (BatchOptions) __VDLReflect(struct {
-	Name string "v.io/syncbase/v23/services/syncbase/nosql.BatchOptions"
+	Name string `vdl:"v.io/syncbase/v23/services/syncbase/nosql.BatchOptions"`
 }) {
 }
 
@@ -45,7 +45,7 @@ type PrefixPermissions struct {
 }
 
 func (PrefixPermissions) __VDLReflect(struct {
-	Name string "v.io/syncbase/v23/services/syncbase/nosql.PrefixPermissions"
+	Name string `vdl:"v.io/syncbase/v23/services/syncbase/nosql.PrefixPermissions"`
 }) {
 }
 
