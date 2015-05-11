@@ -71,6 +71,48 @@ func TestByteSize(t *testing.T) {
 	logCaveatSize(NewMethodCaveat("m"))
 }
 
+func TestBlessingsExpiry(t *testing.T) {
+	p, err := CreatePrincipal(newSigner(), nil, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	now := time.Now()
+	oneHour := now.Add(time.Hour)
+	twoHour := now.Add(2 * time.Hour)
+	oneHourCav, err := NewExpiryCaveat(oneHour)
+	if err != nil {
+		t.Fatal(err)
+	}
+	twoHourCav, err := NewExpiryCaveat(twoHour)
+	if err != nil {
+		t.Fatal(err)
+	}
+	// twoHourB should expiry in two hours.
+	twoHourB, err := p.BlessSelf("self", twoHourCav)
+	if err != nil {
+		t.Fatal(err)
+	}
+	// oneHourB should expiry in one hour.
+	oneHourB, err := p.BlessSelf("self", oneHourCav, twoHourCav)
+	if err != nil {
+		t.Fatal(err)
+	}
+	// noExpiryB should never expiry.
+	noExpiryB, err := p.BlessSelf("self", UnconstrainedUse())
+	if err != nil {
+		t.Fatal(err)
+	}
+	if exp := noExpiryB.Expiry(); !exp.IsZero() {
+		t.Errorf("got %v, want %v", exp, time.Time{})
+	}
+	if got, want := oneHourB.Expiry().UTC(), oneHour.UTC(); got != want {
+		t.Errorf("got %v, want %v", got, want)
+	}
+	if got, want := twoHourB.Expiry().UTC(), twoHour.UTC(); got != want {
+		t.Errorf("got %v, want %v", got, want)
+	}
+}
+
 func BenchmarkBlessingsSingleCertificateEquality(b *testing.B) {
 	p, err := CreatePrincipal(newSigner(), nil, nil)
 	if err != nil {
