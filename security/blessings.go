@@ -11,6 +11,7 @@ import (
 	"sort"
 	"strings"
 	"sync"
+	"time"
 
 	"v.io/v23/context"
 	"v.io/v23/verror"
@@ -75,6 +76,22 @@ func (b Blessings) IsZero() bool {
 // i.e., 'b' will be authorized wherever 'blessings' is and vice-versa.
 func (b Blessings) Equivalent(blessings Blessings) bool {
 	return reflect.DeepEqual(b, blessings)
+}
+
+// Expiry returns the time at which b will no longer be valid, or the zero
+// value of time.Time if the blessing does not expire.
+func (b Blessings) Expiry() time.Time {
+	var min time.Time
+	for _, chain := range b.chains {
+		for _, cert := range chain {
+			for _, cav := range cert.Caveats {
+				if t := expiryTime(cav); !t.IsZero() && (min.IsZero() || t.Before(min)) {
+					min = t
+				}
+			}
+		}
+	}
+	return min
 }
 
 func (b Blessings) publicKeyDER() []byte {

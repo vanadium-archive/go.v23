@@ -57,8 +57,7 @@ func (d Discharge) Expiry() time.Time {
 	switch v := d.wire.(type) {
 	case WireDischargePublicKey:
 		for _, cav := range v.Value.Caveats {
-			t := expiryTime(cav)
-			if !t.IsZero() && (min.IsZero() || t.Before(min)) {
+			if t := expiryTime(cav); !t.IsZero() && (min.IsZero() || t.Before(min)) {
 				min = t
 			}
 		}
