@@ -12,7 +12,7 @@ pkg v23, func GetReservedNameDispatcher(*context.T) rpc.Dispatcher
 pkg v23, func Init() (*context.T, Shutdown)
 pkg v23, func NewEndpoint(string) (naming.Endpoint, error)
 pkg v23, func NewServer(*context.T, ...rpc.ServerOpt) (rpc.Server, error)
-pkg v23, func RegisterProfile(Profile)
+pkg v23, func RegisterRuntimeFactory(RuntimeFactory)
 pkg v23, func WithBackgroundContext(*context.T) *context.T
 pkg v23, func WithNewClient(*context.T, ...rpc.ClientOpt) (*context.T, rpc.Client, error)
 pkg v23, func WithNewNamespace(*context.T, ...string) (*context.T, namespace.T, error)
@@ -27,7 +27,6 @@ pkg v23, type AppCycle interface, Remote() interface{}
 pkg v23, type AppCycle interface, Stop()
 pkg v23, type AppCycle interface, TrackTask(chan<- Task)
 pkg v23, type AppCycle interface, WaitForStop(chan<- string)
-pkg v23, type Profile func(ctx *context.T) (Runtime, *context.T, Shutdown, error)
 pkg v23, type Runtime interface { GetAppCycle, GetBackgroundContext, GetClient, GetListenSpec, GetNamespace, GetPrincipal, GetReservedNameDispatcher, Init, NewEndpoint, NewServer, WithBackgroundContext, WithNewClient, WithNewNamespace, WithNewStreamManager, WithPrincipal, WithReservedNameDispatcher }
 pkg v23, type Runtime interface, GetAppCycle(*context.T) AppCycle
 pkg v23, type Runtime interface, GetBackgroundContext(*context.T) *context.T
@@ -45,6 +44,7 @@ pkg v23, type Runtime interface, WithNewNamespace(*context.T, ...string) (*conte
 pkg v23, type Runtime interface, WithNewStreamManager(*context.T) (*context.T, error)
 pkg v23, type Runtime interface, WithPrincipal(*context.T, security.Principal) (*context.T, error)
 pkg v23, type Runtime interface, WithReservedNameDispatcher(*context.T, rpc.Dispatcher) *context.T
+pkg v23, type RuntimeFactory func(ctx *context.T) (Runtime, *context.T, Shutdown, error)
 pkg v23, type Shutdown func()
 pkg v23, type Task struct
 pkg v23, type Task struct, Goal int32

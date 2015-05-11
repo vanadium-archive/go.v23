@@ -49,7 +49,7 @@ type Task struct {
 
 // AppCycle is the interface for managing the shutdown of a runtime
 // remotely and locally. An appropriate instance of this is provided by
-// the Profile to the runtime implementation which in turn arranges to
+// the RuntimeFactory to the runtime implementation which in turn arranges to
 // serve it on an appropriate network address.
 type AppCycle interface {
 	// Stop causes all the channels returned by WaitForStop to return the
@@ -289,11 +289,11 @@ func GetReservedNameDispatcher(ctx *context.T) rpc.Dispatcher {
 var initState = &initStateData{}
 
 type initStateData struct {
-	mu           sync.RWMutex
-	runtime      Runtime
-	runtimeStack string
-	profile      Profile
-	profileStack string
+	mu                  sync.RWMutex
+	runtime             Runtime
+	runtimeStack        string
+	runtimeFactory      RuntimeFactory
+	runtimeFactoryStack string
 }
 
 func (i *initStateData) currentRuntime() Runtime {
@@ -315,66 +315,64 @@ runtime implementation.`)
 	return i.runtime
 }
 
-// A profile represents the combination of hardware, operating system,
-// compiler and libraries available to the application. The Profile
+// A RuntimeFactory represents the combination of hardware, operating system,
+// compiler and libraries available to the application. The RuntimeFactory
 // creates a runtime implementation with the required hardware, operating system
 // and library specific dependencies included.
 //
-// The implementations of the Profile are intended to capture all of
-// the dependencies implied by that profile. For example, if a Profile requires
+// The implementations of the RuntimeFactory are intended to capture all of
+// the dependencies implied by that RuntimeFactory. For example, if a RuntimeFactory requires
 // a particular hardware specific library (say Bluetooth support), then the
-// implementation of the Profile should include that dependency and
+// implementation of the RuntimeFactory should include that dependency and
 // the resulting runtime instance; the package implementing
-// the Profile should expose the additional APIs needed to use the
+// the RuntimeFactory should expose the additional APIs needed to use the
 // functionality.
 //
-// Profiles range from the generic to the very specific (e.g. "linux" or
+// RuntimeFactories range from the generic to the very specific (e.g. "linux" or
 // "my-sprinkler-controller-v2". Applications should, in general, use
-// as generic a Profile as possbile.
+// as generic a RuntimeFactory as possbile.
 //
-// Profiles are registered using v23.RegisterProfile and subsequent
-// registrations will panic. Packages that implement profiles will typically
-// call RegisterProfile in their init functions so importing a profile will
-// be sufficient to register it. Only one profile can be registered in any
+// RuntimeFactories are registered using v23.RegisterRuntimeFactory and subsequent
+// registrations will panic. Packages that implement RuntimeFactories will typically
+// call RegisterRuntimeFactory in their init functions so importing a RuntimeFactory will
+// be sufficient to register it. Only one RuntimeFactory can be registered in any
 // program, and subsequent registrations will panic.  Typically a program's main
-// package will be the only place to import a profile.
+// package will be the only place to import a RuntimeFactory.
 //
-// This scheme allows applications to use a pre-supplied Profile as well
-// as for developers to create their own Profiles (to represent their
-// hardware and software system). The Vanadium Build System, once fully
-// developed will likely insert generated that uses one of the above schemes
-// to configure profiles.
+// This scheme allows applications to use a pre-supplied RuntimeFactory as well
+// as for developers to create their own RuntimeFactories (to represent their
+// hardware and software system).
 //
-// At a minimum a Profile must do the following:
+// At a minimum a RuntimeFactory must do the following:
 //   - Initialize a Runtime implementation (providing the flags to it)
 //   - Return a Runtime implemenation, initial context, Shutdown func.
 //
-// See the v.io/x/ref/runtime package for a complete description of the
-// precanned Profiles and how to use them.
-type Profile func(ctx *context.T) (Runtime, *context.T, Shutdown, error)
+// See the v.io/x/ref/runtime/factories package for a complete description of the
+// precanned RuntimeFactories and how to use them.
+type RuntimeFactory func(ctx *context.T) (Runtime, *context.T, Shutdown, error)
 
-// RegisterProfile register the specified Profile.
+// RegisterRuntimeFactory register the specified RuntimeFactory.
 // It must be called before v23.Init; typically it will be called by an init
 // function. It will panic if called more than once.
-func RegisterProfile(f Profile) {
-	// Skip 3 frames: runtime.Callers, getStack, RegisterProfile.
+func RegisterRuntimeFactory(f RuntimeFactory) {
+	// Skip 3 frames: runtime.Callers, getStack, RegisterRuntimeFactory.
 	stack := getStack(3)
 	initState.mu.Lock()
 	defer initState.mu.Unlock()
-	if initState.profile != nil {
-		format := `A profile has already been registered.
+	if initState.runtimeFactory != nil {
+		format := `A RuntimeFactory has already been registered.
 This is most likely because a library package is
-importing a profile.  Look for imports of the form
-'v.io/x/ref/runtime/...' and remove them.  Profiles should only be
-imported in your main package.  Previous registration was from:
+importing a RuntimeFactory.  Look for imports of the form
+'v.io/x/ref/runtime/factories/...' and remove them.  RuntimeFactories should
+only be imported in your main package.  Previous registration was from:
 %s
 Current registration is from:
 %s
 `
-		panic(fmt.Sprintf(format, initState.profileStack, stack))
+		panic(fmt.Sprintf(format, initState.runtimeFactoryStack, stack))
 	}
-	initState.profile = f
-	initState.profileStack = stack
+	initState.runtimeFactory = f
+	initState.runtimeFactoryStack = stack
 }
 
 type Shutdown func()
@@ -398,11 +396,11 @@ func getStack(skip int) string {
 // returned previously before calling Init the second time.
 func Init() (*context.T, Shutdown) {
 	initState.mu.Lock()
-	profile := initState.profile
-	if initState.profile == nil {
+	runtimeFactory := initState.runtimeFactory
+	if initState.runtimeFactory == nil {
 		initState.mu.Unlock()
-		panic("No profile has been registered nor specified. This is most" +
-			" likely because your main package has not imported a profile")
+		panic("No RuntimeFactory has been registered nor specified. This is most" +
+			" likely because your main package has not imported a RuntimeFactory")
 	}
 
 	// Skip 3 stack frames: runtime.Callers, getStack, Init
@@ -428,7 +426,7 @@ This registration is from:
 	// is shut down we invoke rootcancel.  This allows the cleanup
 	// to perform operations that require uncancelled contexts.
 	ctx, cancel := context.WithCancel(rootctx)
-	rt, ctx, shutdown, err := profile(ctx)
+	rt, ctx, shutdown, err := runtimeFactory(ctx)
 	if err != nil {
 		cancel()
 		rootcancel()
@@ -441,7 +439,7 @@ This registration is from:
 
 	vshutdown := func() {
 		// Note we call our own cancel here to ensure that the
-		// runtime/profile implementor has not attached anything to a
+		// runtime/runtimeFactory implementor has not attached anything to a
 		// non-cancellable context.
 		cancel()
 		shutdown()

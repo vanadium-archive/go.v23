@@ -15,8 +15,8 @@ import (
 	"v.io/v23/security"
 )
 
-// Create a mock profile initialization function.
-func MockInit(ctx *context.T) (Runtime, *context.T, Shutdown, error) {
+// Create a mock RuntimeFactory.
+func MockFactory(ctx *context.T) (Runtime, *context.T, Shutdown, error) {
 	return &mockRuntime{}, nil, func() {}, nil
 }
 
@@ -53,16 +53,16 @@ func (*mockRuntime) WithReservedNameDispatcher(ctx *context.T, d rpc.Dispatcher)
 
 func (*mockRuntime) GetReservedNameDispatcher(ctx *context.T) rpc.Dispatcher { return nil }
 
-func TestPanicOnInitWithNoProfile(t *testing.T) {
+func TestPanicOnInitWithNoRuntimeFactory(t *testing.T) {
 	clear()
-	// Calling Init without a registered profile should panic.
+	// Calling Init without a registered RuntimeFactory should panic.
 	catcher := func() {
 		r := recover()
 		if r == nil {
 			t.Fatalf("recover returned nil")
 		}
 		str := r.(string)
-		if !strings.Contains(str, "No profile has been registered") {
+		if !strings.Contains(str, "No RuntimeFactory has been registered") {
 			t.Fatalf("unexpected error: %s", str)
 		}
 	}
@@ -70,35 +70,35 @@ func TestPanicOnInitWithNoProfile(t *testing.T) {
 	Init()
 }
 
-func TestInitWithRegisteredProfile(t *testing.T) {
+func TestInitWithRegisteredRuntimeFactory(t *testing.T) {
 	clear()
-	// Calling v23.Init with a profile should succeed.
-	RegisterProfile(MockInit)
+	// Calling v23.Init with a RuntimeFactory should succeed.
+	RegisterRuntimeFactory(MockFactory)
 	Init()
 }
 
-func TestPanicOnSecondProfileRegistration(t *testing.T) {
+func TestPanicOnSecondRuntimeFactoryRegistration(t *testing.T) {
 	clear()
-	// Registering multiple profiles should fail.
-	RegisterProfile(MockInit)
+	// Registering multiple RuntimeFactory should fail.
+	RegisterRuntimeFactory(MockFactory)
 	catcher := func() {
 		r := recover()
 		if r == nil {
 			t.Fatalf("recover returned nil")
 		}
 		str := r.(string)
-		if !strings.Contains(str, "A profile has already been registered") {
+		if !strings.Contains(str, "A RuntimeFactory has already been registered") {
 			t.Fatalf("unexpected error: %s", str)
 		}
 	}
 	defer catcher()
-	RegisterProfile(MockInit)
+	RegisterRuntimeFactory(MockFactory)
 }
 
 func TestPanicOnSecondInit(t *testing.T) {
 	clear()
 	// Calling Init again before calling shutdown should fail.
-	RegisterProfile(MockInit)
+	RegisterRuntimeFactory(MockFactory)
 	Init()
 	catcher := func() {
 		r := recover()
@@ -117,7 +117,7 @@ func TestPanicOnSecondInit(t *testing.T) {
 func TestSecondInitAfterShutdown(t *testing.T) {
 	clear()
 	// Calling Init, shutting down, and then calling Init again should succeed.
-	RegisterProfile(MockInit)
+	RegisterRuntimeFactory(MockFactory)
 	_, shutdown := Init()
 	shutdown()
 	Init()
@@ -128,7 +128,7 @@ func clear() {
 	initState.mu.Lock()
 	initState.runtime = nil
 	initState.runtimeStack = ""
-	initState.profile = nil
-	initState.profileStack = ""
+	initState.runtimeFactory = nil
+	initState.runtimeFactoryStack = ""
 	initState.mu.Unlock()
 }
