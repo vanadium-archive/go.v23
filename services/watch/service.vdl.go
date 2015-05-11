@@ -133,7 +133,7 @@ type GlobRequest struct {
 }
 
 func (GlobRequest) __VDLReflect(struct {
-	Name string "v.io/v23/services/watch.GlobRequest"
+	Name string `vdl:"v.io/v23/services/watch.GlobRequest"`
 }) {
 }
 
@@ -171,7 +171,7 @@ func (GlobRequest) __VDLReflect(struct {
 type ResumeMarker []byte
 
 func (ResumeMarker) __VDLReflect(struct {
-	Name string "v.io/v23/services/watch.ResumeMarker"
+	Name string `vdl:"v.io/v23/services/watch.ResumeMarker"`
 }) {
 }
 
@@ -197,7 +197,7 @@ type Change struct {
 }
 
 func (Change) __VDLReflect(struct {
-	Name string "v.io/v23/services/watch.Change"
+	Name string `vdl:"v.io/v23/services/watch.Change"`
 }) {
 }
 

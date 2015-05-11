@@ -138,7 +138,7 @@ type AccessList struct {
 }
 
 func (AccessList) __VDLReflect(struct {
-	Name string "v.io/v23/security/access.AccessList"
+	Name string `vdl:"v.io/v23/security/access.AccessList"`
 }) {
 }
 
@@ -152,7 +152,7 @@ func (AccessList) __VDLReflect(struct {
 type Permissions map[string]AccessList
 
 func (Permissions) __VDLReflect(struct {
-	Name string "v.io/v23/security/access.Permissions"
+	Name string `vdl:"v.io/v23/security/access.Permissions"`
 }) {
 }
 
@@ -164,7 +164,7 @@ func (Permissions) __VDLReflect(struct {
 type Tag string
 
 func (Tag) __VDLReflect(struct {
-	Name string "v.io/v23/security/access.Tag"
+	Name string `vdl:"v.io/v23/security/access.Tag"`
 }) {
 }
 

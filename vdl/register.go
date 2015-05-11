@@ -243,7 +243,7 @@ func deriveReflectInfo(rt reflect.Type) (*reflectInfo, error) {
 			}
 		}
 		if field, ok := rtReflect.FieldByName("Name"); ok {
-			ri.Name = string(field.Tag)
+			ri.Name = field.Tag.Get("vdl")
 		}
 		if field, ok := rtReflect.FieldByName("Enum"); ok {
 			if err := describeEnum(field.Type, rt, ri); err != nil {

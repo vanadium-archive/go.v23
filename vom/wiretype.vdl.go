@@ -16,7 +16,7 @@ import (
 type typeId uint64
 
 func (typeId) __VDLReflect(struct {
-	Name string "v.io/v23/vom.typeId"
+	Name string `vdl:"v.io/v23/vom.typeId"`
 }) {
 }
 
@@ -60,7 +60,7 @@ type (
 	wireTypeOptionalT struct{ Value wireOptional } // INDEX = 8
 	// __wireTypeReflect describes the wireType union type.
 	__wireTypeReflect struct {
-		Name  string "v.io/v23/vom.wireType"
+		Name  string `vdl:"v.io/v23/vom.wireType"`
 		Type  wireType
 		Union struct {
 			NamedT    wireTypeNamedT
@@ -128,7 +128,7 @@ type wireNamed struct {
 }
 
 func (wireNamed) __VDLReflect(struct {
-	Name string "v.io/v23/vom.wireNamed"
+	Name string `vdl:"v.io/v23/vom.wireNamed"`
 }) {
 }
 
@@ -139,7 +139,7 @@ type wireEnum struct {
 }
 
 func (wireEnum) __VDLReflect(struct {
-	Name string "v.io/v23/vom.wireEnum"
+	Name string `vdl:"v.io/v23/vom.wireEnum"`
 }) {
 }
 
@@ -151,7 +151,7 @@ type wireArray struct {
 }
 
 func (wireArray) __VDLReflect(struct {
-	Name string "v.io/v23/vom.wireArray"
+	Name string `vdl:"v.io/v23/vom.wireArray"`
 }) {
 }
 
@@ -162,7 +162,7 @@ type wireList struct {
 }
 
 func (wireList) __VDLReflect(struct {
-	Name string "v.io/v23/vom.wireList"
+	Name string `vdl:"v.io/v23/vom.wireList"`
 }) {
 }
 
@@ -173,7 +173,7 @@ type wireSet struct {
 }
 
 func (wireSet) __VDLReflect(struct {
-	Name string "v.io/v23/vom.wireSet"
+	Name string `vdl:"v.io/v23/vom.wireSet"`
 }) {
 }
 
@@ -185,7 +185,7 @@ type wireMap struct {
 }
 
 func (wireMap) __VDLReflect(struct {
-	Name string "v.io/v23/vom.wireMap"
+	Name string `vdl:"v.io/v23/vom.wireMap"`
 }) {
 }
 
@@ -196,7 +196,7 @@ type wireField struct {
 }
 
 func (wireField) __VDLReflect(struct {
-	Name string "v.io/v23/vom.wireField"
+	Name string `vdl:"v.io/v23/vom.wireField"`
 }) {
 }
 
@@ -207,7 +207,7 @@ type wireStruct struct {
 }
 
 func (wireStruct) __VDLReflect(struct {
-	Name string "v.io/v23/vom.wireStruct"
+	Name string `vdl:"v.io/v23/vom.wireStruct"`
 }) {
 }
 
@@ -218,7 +218,7 @@ type wireUnion struct {
 }
 
 func (wireUnion) __VDLReflect(struct {
-	Name string "v.io/v23/vom.wireUnion"
+	Name string `vdl:"v.io/v23/vom.wireUnion"`
 }) {
 }
 
@@ -229,7 +229,7 @@ type wireOptional struct {
 }
 
 func (wireOptional) __VDLReflect(struct {
-	Name string "v.io/v23/vom.wireOptional"
+	Name string `vdl:"v.io/v23/vom.wireOptional"`
 }) {
 }
 

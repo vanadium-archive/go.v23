@@ -42,7 +42,7 @@ type Time struct {
 }
 
 func (Time) __VDLReflect(struct {
-	Name string "time.Time"
+	Name string `vdl:"time.Time"`
 }) {
 }
 
@@ -62,7 +62,7 @@ type Duration struct {
 }
 
 func (Duration) __VDLReflect(struct {
-	Name string "time.Duration"
+	Name string `vdl:"time.Duration"`
 }) {
 }
 
@@ -97,7 +97,7 @@ type WireDeadline struct {
 }
 
 func (WireDeadline) __VDLReflect(struct {
-	Name string "time.WireDeadline"
+	Name string `vdl:"time.WireDeadline"`
 }) {
 }
 

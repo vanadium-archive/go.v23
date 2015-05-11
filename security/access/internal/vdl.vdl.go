@@ -22,7 +22,7 @@ import (
 type MyTag string
 
 func (MyTag) __VDLReflect(struct {
-	Name string "v.io/v23/security/access/internal.MyTag"
+	Name string `vdl:"v.io/v23/security/access/internal.MyTag"`
 }) {
 }
 

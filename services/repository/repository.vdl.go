@@ -31,7 +31,7 @@ type MediaInfo struct {
 }
 
 func (MediaInfo) __VDLReflect(struct {
-	Name string "v.io/v23/services/repository.MediaInfo"
+	Name string `vdl:"v.io/v23/services/repository.MediaInfo"`
 }) {
 }
 

@@ -16,7 +16,7 @@ import (
 type Id [16]byte
 
 func (Id) __VDLReflect(struct {
-	Name string "v.io/v23/uniqueid.Id"
+	Name string `vdl:"v.io/v23/uniqueid.Id"`
 }) {
 }
 

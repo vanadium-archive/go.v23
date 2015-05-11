@@ -23,7 +23,7 @@ type TraceRecord struct {
 }
 
 func (TraceRecord) __VDLReflect(struct {
-	Name string "v.io/v23/vtrace.TraceRecord"
+	Name string `vdl:"v.io/v23/vtrace.TraceRecord"`
 }) {
 }
 
@@ -38,7 +38,7 @@ type Annotation struct {
 }
 
 func (Annotation) __VDLReflect(struct {
-	Name string "v.io/v23/vtrace.Annotation"
+	Name string `vdl:"v.io/v23/vtrace.Annotation"`
 }) {
 }
 
@@ -54,14 +54,14 @@ type SpanRecord struct {
 }
 
 func (SpanRecord) __VDLReflect(struct {
-	Name string "v.io/v23/vtrace.SpanRecord"
+	Name string `vdl:"v.io/v23/vtrace.SpanRecord"`
 }) {
 }
 
 type TraceFlags int32
 
 func (TraceFlags) __VDLReflect(struct {
-	Name string "v.io/v23/vtrace.TraceFlags"
+	Name string `vdl:"v.io/v23/vtrace.TraceFlags"`
 }) {
 }
 
@@ -73,7 +73,7 @@ type Request struct {
 }
 
 func (Request) __VDLReflect(struct {
-	Name string "v.io/v23/vtrace.Request"
+	Name string `vdl:"v.io/v23/vtrace.Request"`
 }) {
 }
 
@@ -87,7 +87,7 @@ type Response struct {
 }
 
 func (Response) __VDLReflect(struct {
-	Name string "v.io/v23/vtrace.Response"
+	Name string `vdl:"v.io/v23/vtrace.Response"`
 }) {
 }
 

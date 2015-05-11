@@ -34,7 +34,7 @@ import (
 type BlessingPattern string
 
 func (BlessingPattern) __VDLReflect(struct {
-	Name string "v.io/v23/security.BlessingPattern"
+	Name string `vdl:"v.io/v23/security.BlessingPattern"`
 }) {
 }
 
@@ -42,7 +42,7 @@ func (BlessingPattern) __VDLReflect(struct {
 type Hash string
 
 func (Hash) __VDLReflect(struct {
-	Name string "v.io/v23/security.Hash"
+	Name string `vdl:"v.io/v23/security.Hash"`
 }) {
 }
 
@@ -60,7 +60,7 @@ type Signature struct {
 }
 
 func (Signature) __VDLReflect(struct {
-	Name string "v.io/v23/security.Signature"
+	Name string `vdl:"v.io/v23/security.Signature"`
 }) {
 }
 
@@ -76,7 +76,7 @@ type ThirdPartyRequirements struct {
 }
 
 func (ThirdPartyRequirements) __VDLReflect(struct {
-	Name string "v.io/v23/security.ThirdPartyRequirements"
+	Name string `vdl:"v.io/v23/security.ThirdPartyRequirements"`
 }) {
 }
 
@@ -97,7 +97,7 @@ type DischargeImpetus struct {
 }
 
 func (DischargeImpetus) __VDLReflect(struct {
-	Name string "v.io/v23/security.DischargeImpetus"
+	Name string `vdl:"v.io/v23/security.DischargeImpetus"`
 }) {
 }
 
@@ -116,7 +116,7 @@ type Certificate struct {
 }
 
 func (Certificate) __VDLReflect(struct {
-	Name string "v.io/v23/security.Certificate"
+	Name string `vdl:"v.io/v23/security.Certificate"`
 }) {
 }
 
@@ -132,7 +132,7 @@ type CaveatDescriptor struct {
 }
 
 func (CaveatDescriptor) __VDLReflect(struct {
-	Name string "v.io/v23/security.CaveatDescriptor"
+	Name string `vdl:"v.io/v23/security.CaveatDescriptor"`
 }) {
 }
 
@@ -150,7 +150,7 @@ type Caveat struct {
 }
 
 func (Caveat) __VDLReflect(struct {
-	Name string "v.io/v23/security.Caveat"
+	Name string `vdl:"v.io/v23/security.Caveat"`
 }) {
 }
 
@@ -170,7 +170,7 @@ type WireBlessings struct {
 }
 
 func (WireBlessings) __VDLReflect(struct {
-	Name string "v.io/v23/security.WireBlessings"
+	Name string `vdl:"v.io/v23/security.WireBlessings"`
 }) {
 }
 
@@ -193,7 +193,7 @@ type (
 	WireDischargePublicKey struct{ Value publicKeyDischarge } // Discharge for PublicKeyThirdPartyCaveat
 	// __WireDischargeReflect describes the WireDischarge union type.
 	__WireDischargeReflect struct {
-		Name  string "v.io/v23/security.WireDischarge"
+		Name  string `vdl:"v.io/v23/security.WireDischarge"`
 		Type  WireDischarge
 		Union struct {
 			PublicKey WireDischargePublicKey
@@ -213,7 +213,7 @@ type RejectedBlessing struct {
 }
 
 func (RejectedBlessing) __VDLReflect(struct {
-	Name string "v.io/v23/security.RejectedBlessing"
+	Name string `vdl:"v.io/v23/security.RejectedBlessing"`
 }) {
 }
 
