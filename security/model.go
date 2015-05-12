@@ -174,7 +174,7 @@ type Principal interface {
 	// presented by the remote end in particular call.
 	BlessingsInfo(blessings Blessings) map[string][]Caveat
 
-	// BlessingsStore provides access to the BlessingStore containing blessings
+	// BlessingStore provides access to the BlessingStore containing blessings
 	// that have been granted to this principal.
 	BlessingStore() BlessingStore
 
