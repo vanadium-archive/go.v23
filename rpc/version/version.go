@@ -25,13 +25,14 @@ const (
 	rPCVersion6
 	rPCVersion7
 	rPCVersion8
-
-	// The release version of the RPC protocol.
-	RPCVersion9
+	rPCVersion9
 
 	// Open a special flow over which discharges for third-party
 	// caveats on the server's blessings are sent.
 	RPCVersion10
+
+	// Optimized authentication.
+	RPCVersion11
 )
 
 // RPCVersionRange allows you to optionally specify a range of versions to
