@@ -684,7 +684,7 @@ func parseBinaryOperator(s *scanner.Scanner, token *Token) (*BinaryOperator, *To
 			}
 			token = scanToken(s)
 		default:
-			return nil, nil, Error(token.Off, fmt.Sprintf("Expected operator ('like', 'not like', '=', '<>', '<', '<=', '>', '>=', 'equal' or 'not equal', found '%s'.", token.Value))
+			return nil, nil, Error(token.Off, fmt.Sprintf("Expected operator ('like', 'not like', '=', '<>', '<', '<=', '>', '>=', 'equal' or 'not equal'), found '%s'.", token.Value))
 		}
 	} else {
 		switch token.Tok {
@@ -715,7 +715,7 @@ func parseBinaryOperator(s *scanner.Scanner, token *Token) (*BinaryOperator, *To
 				operator.Type = GreaterThan
 			}
 		default:
-			return nil, nil, Error(token.Off, fmt.Sprintf("Expected operator ('like', 'not like', '=', '<>', 'equal' or 'not equal', found '%s'.", token.Value))
+			return nil, nil, Error(token.Off, fmt.Sprintf("Expected operator ('like', 'not like', '=', '<>', 'equal' or 'not equal'), found '%s'.", token.Value))
 		}
 	}
 
@@ -735,7 +735,7 @@ func parseLogicalOperator(s *scanner.Scanner, token *Token) (*BinaryOperator, *T
 	case "or":
 		operator.Type = Or
 	default:
-		return nil, nil, Error(token.Off, fmt.Sprintf("Expected operator ('and' or 'or', found '%s'.", token.Value))
+		return nil, nil, Error(token.Off, fmt.Sprintf("Expected operator ('and' or 'or'), found '%s'.", token.Value))
 	}
 
 	token = scanToken(s)

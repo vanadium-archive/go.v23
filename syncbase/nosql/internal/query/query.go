@@ -26,19 +26,19 @@ type ResultStream interface {
 	Cancel()
 }
 
-func Exec(db query_db.Database, q string) (ResultStream, *QueryError) {
+func Exec(db query_db.Database, q string) ([]string, ResultStream, *QueryError) {
 	s, err := query_parser.Parse(q)
 	if err != nil {
-		return nil, ErrorFromSyntax(err)
+		return nil, nil, ErrorFromSyntax(err)
 	}
 	if err := query_checker.Check(db, s); err != nil {
-		return nil, ErrorFromSemantic(err)
+		return nil, nil, ErrorFromSemantic(err)
 	}
 	switch sel := (*s).(type) {
 	case query_parser.SelectStatement:
 		return execSelect(db, &sel)
 	default:
-		return nil, Error((*s).Offset(), fmt.Sprintf("Cannot exec statement type %v", reflect.TypeOf(*s)))
+		return nil, nil, Error((*s).Offset(), fmt.Sprintf("Cannot exec statement type %v", reflect.TypeOf(*s)))
 	}
 }
 
@@ -156,14 +156,28 @@ func (rs *resultStreamImpl) Cancel() {
 	rs.keyValueStream.Cancel()
 }
 
-func execSelect(db query_db.Database, s *query_parser.SelectStatement) (ResultStream, *QueryError) {
+func getColumnHeadings(s *query_parser.SelectStatement) []string {
+	columnHeaders := []string{}
+	for _, field := range s.Select.Columns {
+		sep := ""
+		columnName := ""
+		for _, segment := range field.Segments {
+			columnName = columnName + sep + segment.Value
+			sep = "."
+		}
+		columnHeaders = append(columnHeaders, columnName)
+	}
+	return columnHeaders
+}
+
+func execSelect(db query_db.Database, s *query_parser.SelectStatement) ([]string, ResultStream, *QueryError) {
 	prefixes := CompileKeyPrefixes(s.Where)
 	keyValueStream, err := s.From.Table.DBTable.Scan(prefixes)
 	if err != nil {
-		return nil, Error(s.Off, err.Error())
+		return nil, nil, Error(s.Off, err.Error())
 	}
 	var resultStream resultStreamImpl
 	resultStream.selectStatement = s
 	resultStream.keyValueStream = keyValueStream
-	return &resultStream, nil
+	return getColumnHeadings(s), &resultStream, nil
 }

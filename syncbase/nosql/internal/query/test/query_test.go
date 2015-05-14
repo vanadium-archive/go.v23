@@ -589,7 +589,7 @@ func TestQueryExec(t *testing.T) {
 	}
 
 	for _, test := range basic {
-		rs, err := query.Exec(db, test.query)
+		_, rs, err := query.Exec(db, test.query)
 		if err != nil {
 			t.Errorf("query: %s; got %v, want nil", test.query, err)
 		} else {
@@ -1191,7 +1191,7 @@ func TestExecErrors(t *testing.T) {
 	}
 
 	for _, test := range basic {
-		_, err := query.Exec(db, test.query)
+		_, _, err := query.Exec(db, test.query)
 		if !reflect.DeepEqual(err, test.err) {
 			t.Errorf("query: %s; got %v, want %v", test.query, err, test.err)
 		}
