@@ -8,16 +8,21 @@ import (
 	"bufio"
 	"errors"
 	"fmt"
-	"math/big"
 	"os"
 	"strings"
 
 	"v.io/syncbase/v23/syncbase/nosql/internal/query"
 	"v.io/syncbase/v23/syncbase/nosql/internal/query/query_db"
+	"v.io/v23/vdl"
 )
 
 type demoDB struct {
 	tables []table
+}
+
+type kv struct {
+	key   string
+	value *vdl.Value
 }
 
 type table struct {
@@ -58,7 +63,7 @@ func (kvs *keyValueStreamImpl) Advance() bool {
 	return false
 }
 
-func (kvs *keyValueStreamImpl) KeyValue() (string, interface{}) {
+func (kvs *keyValueStreamImpl) KeyValue() (string, *vdl.Value) {
 	return kvs.table.rows[kvs.cursor].key, kvs.table.rows[kvs.cursor].value
 }
 
@@ -87,47 +92,6 @@ func (db demoDB) GetTable(table string) (query_db.Table, error) {
 
 }
 
-type AddressInfo struct {
-	Street string
-	City   string
-	State  string
-	Zip    string
-}
-
-type Customer struct {
-	Name    string
-	ID      int64
-	Active  bool
-	Rating  rune
-	Address AddressInfo
-}
-
-type Invoice struct {
-	CustID     int64
-	InvoiceNum int64
-	Amount     int64
-	ShipTo     AddressInfo
-}
-
-type Numbers struct {
-	B    byte
-	UI16 uint16
-	UI32 uint32
-	UI64 uint64
-	I16  int16
-	I32  int32
-	I64  int64
-	BI   big.Int
-	F32  float32
-	F64  float64
-	BR   big.Rat
-}
-
-type kv struct {
-	key   string
-	value interface{}
-}
-
 func createDB() query_db.Database {
 	var db demoDB
 	var custTable table
@@ -135,39 +99,39 @@ func createDB() query_db.Database {
 	custTable.rows = []kv{
 		kv{
 			"001",
-			Customer{"John Smith", 1, true, 'A', AddressInfo{"1 Main St.", "Palo Alto", "CA", "94303"}},
+			vdl.ValueOf(Customer{"John Smith", 1, true, AddressInfo{"1 Main St.", "Palo Alto", "CA", "94303"}, CreditReport{Agency: CreditAgencyEquifax, Report: AgencyReportEquifaxReport{EquifaxCreditReport{'A'}}}}),
 		},
 		kv{
 			"001001",
-			Invoice{1, 1000, 42, AddressInfo{"1 Main St.", "Palo Alto", "CA", "94303"}},
+			vdl.ValueOf(Invoice{1, 1000, 42, AddressInfo{"1 Main St.", "Palo Alto", "CA", "94303"}}),
 		},
 		kv{
 			"001002",
-			Invoice{1, 1003, 7, AddressInfo{"2 Main St.", "Palo Alto", "CA", "94303"}},
+			vdl.ValueOf(Invoice{1, 1003, 7, AddressInfo{"2 Main St.", "Palo Alto", "CA", "94303"}}),
 		},
 		kv{
 			"001003",
-			Invoice{1, 1005, 88, AddressInfo{"3 Main St.", "Palo Alto", "CA", "94303"}},
+			vdl.ValueOf(Invoice{1, 1005, 88, AddressInfo{"3 Main St.", "Palo Alto", "CA", "94303"}}),
 		},
 		kv{
 			"002",
-			Customer{"Bat Masterson", 2, true, 'B', AddressInfo{"777 Any St.", "Collins", "IA", "50055"}},
+			vdl.ValueOf(Customer{"Bat Masterson", 2, true, AddressInfo{"777 Any St.", "Collins", "IA", "50055"}, CreditReport{Agency: CreditAgencyTransUnion, Report: AgencyReportTransUnionReport{TransUnionCreditReport{80}}}}),
 		},
 		kv{
 			"002001",
-			Invoice{2, 1001, 166, AddressInfo{"777 Any St.", "collins", "IA", "50055"}},
+			vdl.ValueOf(Invoice{2, 1001, 166, AddressInfo{"777 Any St.", "collins", "IA", "50055"}}),
 		},
 		kv{
 			"002002",
-			Invoice{2, 1002, 243, AddressInfo{"888 Any St.", "collins", "IA", "50055"}},
+			vdl.ValueOf(Invoice{2, 1002, 243, AddressInfo{"888 Any St.", "collins", "IA", "50055"}}),
 		},
 		kv{
 			"002003",
-			Invoice{2, 1004, 787, AddressInfo{"999 Any St.", "collins", "IA", "50055"}},
+			vdl.ValueOf(Invoice{2, 1004, 787, AddressInfo{"999 Any St.", "collins", "IA", "50055"}}),
 		},
 		kv{
 			"002004",
-			Invoice{2, 1006, 88, AddressInfo{"101010 Any St.", "collins", "IA", "50055"}},
+			vdl.ValueOf(Invoice{2, 1006, 88, AddressInfo{"101010 Any St.", "collins", "IA", "50055"}}),
 		},
 	}
 	db.tables = append(db.tables, custTable)
@@ -177,14 +141,19 @@ func createDB() query_db.Database {
 	numTable.rows = []kv{
 		kv{
 			"001",
-			Numbers{byte(12), uint16(1234), uint32(5678), uint64(999888777666), int16(9876), int32(876543), int64(128), *big.NewInt(1234567890), float32(3.14159), float64(2.71828182846), *big.NewRat(123, 1)},
+			vdl.ValueOf(Numbers{byte(12), uint16(1234), uint32(5678), uint64(999888777666), int16(9876), int32(876543), int64(128), float32(3.14159), float64(2.71828182846), complex64(123.0 + 7.0i), complex128(456.789 + 10.1112i)}),
 		},
 		kv{
 			"002",
-			Numbers{byte(9), uint16(99), uint32(999), uint64(9999999), int16(9), int32(99), int64(88), *big.NewInt(9999), float32(1.41421356237), float64(1.73205080757), *big.NewRat(999999, 1)},
+			vdl.ValueOf(Numbers{byte(9), uint16(99), uint32(999), uint64(9999999), int16(9), int32(99), int64(88), float32(1.41421356237), float64(1.73205080757), complex64(9.87 + 7.65i), complex128(4.32 + 1.0i)}),
+		},
+		kv{
+			"003",
+			vdl.ValueOf(Numbers{byte(210), uint16(210), uint32(210), uint64(210), int16(210), int32(210), int64(210), float32(210.0), float64(210.0), complex64(210.0 + 0.0i), complex128(210.0 + 0.0i)}),
 		},
 	}
 	db.tables = append(db.tables, numTable)
+
 	return db
 }
 
@@ -194,17 +163,7 @@ func dumpDB(db query_db.Database) {
 		for _, t := range db.tables {
 			fmt.Printf("table: %s\n", t.name)
 			for _, row := range t.rows {
-				fmt.Printf("key: %s, value: ", row.key)
-				switch v := row.value.(type) {
-				case Customer:
-					fmt.Printf("type:Customer Name:%v,ID:%v,Active:%v,Rating:%v,Address{%v}\n", v.Name, v.ID, v.Active, v.Rating, dumpAddress(&v.Address))
-				case Invoice:
-					fmt.Printf("type:Invoice CustID:%v,InvoiceNum:%v,Amount:%v,ShipTo:{%v}\n", v.CustID, v.InvoiceNum, v.Amount, dumpAddress(&v.ShipTo))
-				case Numbers:
-					fmt.Printf("type:Numbers B:%v,UI16:%v,UI32:%v,UI64:%v,I16:%v,I32:%v,I64:%v,BI:%v,F32:%v,F64:%v,BR:%v\n", v.B, v.UI16, v.UI32, v.UI64, v.I16, v.I32, v.I64, v.BI, v.F32, v.F64, v.BR)
-				default:
-					fmt.Printf("%v\n", row.value)
-				}
+				fmt.Printf("key: %s, value: %v", row.key, row.value)
 			}
 		}
 	}

@@ -11,6 +11,7 @@ import (
 	"v.io/syncbase/v23/syncbase/nosql/internal/query/query_checker"
 	"v.io/syncbase/v23/syncbase/nosql/internal/query/query_db"
 	"v.io/syncbase/v23/syncbase/nosql/internal/query/query_parser"
+	"v.io/v23/vdl"
 )
 
 type QueryError struct {
@@ -20,7 +21,7 @@ type QueryError struct {
 
 type ResultStream interface {
 	Advance() bool
-	Result() []interface{}
+	Result() []*vdl.Value
 	Err() *QueryError
 	Cancel()
 }
@@ -59,8 +60,8 @@ func ErrorFromSemantic(semerr *query_checker.SemanticError) *QueryError {
 
 // Given a key, a value and a SelectClause, return the projection.
 // This function is only called if Eval returned true on the WhereClause expression.
-func ComposeProjection(k string, v interface{}, s *query_parser.SelectClause) []interface{} {
-	var projection []interface{}
+func ComposeProjection(k string, v *vdl.Value, s *query_parser.SelectClause) []*vdl.Value {
+	var projection []*vdl.Value
 	for _, f := range s.Columns {
 		// If field not found, nil is returned (as per specification).
 		c, _, _ := ResolveField(k, v, &f)
@@ -85,12 +86,13 @@ func CompileKeyPrefixes(w *query_parser.WhereClause) []string {
 }
 
 // For testing purposes, given a SelectStatement, k and v;
-// return nil if row not selected, else return the projection (type []interface{}).
+// return nil if row not selected, else return the projection (type []*vdl.Value).
 // Note: limit and offset clauses are ignored for this function as they make no sense
 // for a single row.
-func ExecSelectSingleRow(k string, v interface{}, s *query_parser.SelectStatement) interface{} {
+func ExecSelectSingleRow(k string, v *vdl.Value, s *query_parser.SelectStatement) []*vdl.Value {
 	if !Eval(k, v, s.Where.Expr) {
-		return nil
+		rs := []*vdl.Value{}
+		return rs
 	}
 	return ComposeProjection(k, v, s.Select)
 }
@@ -101,7 +103,7 @@ type resultStreamImpl struct {
 	skippedCount    int64 // skipped so far (needed for offset clause)
 	keyValueStream  query_db.KeyValueStream
 	k               string
-	v               interface{}
+	v               *vdl.Value
 	err             *QueryError
 }
 
@@ -142,7 +144,7 @@ func (rs *resultStreamImpl) Advance() bool {
 	return false
 }
 
-func (rs *resultStreamImpl) Result() []interface{} {
+func (rs *resultStreamImpl) Result() []*vdl.Value {
 	return ComposeProjection(rs.k, rs.v, rs.selectStatement.Select)
 }
 

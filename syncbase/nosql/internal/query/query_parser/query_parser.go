@@ -14,6 +14,7 @@ import (
 	"unicode/utf8"
 
 	"v.io/syncbase/v23/syncbase/nosql/internal/query/query_db"
+	"v.io/v23/vdl"
 )
 
 type TokenType int
@@ -101,6 +102,7 @@ const (
 	TypBigInt OperandType = 1 + iota // Only as a result of Resolve/Coerce Operand
 	TypBigRat                        // Only as a result of Resolve/Coerce Operand
 	TypBool
+	TypComplex
 	TypExpr
 	TypField
 	TypFloat
@@ -117,6 +119,7 @@ type Operand struct {
 	BigInt    *big.Int
 	BigRat    *big.Rat
 	Bool      bool
+	Complex   complex128
 	Column    *Field
 	Float     float64
 	Function  *Function
@@ -129,7 +132,7 @@ type Operand struct {
 	Uint      uint64
 	CompRegex *regexp.Regexp
 	Expr      *Expression
-	Object    interface{}
+	Object    *vdl.Value
 	Node
 }
 
@@ -903,6 +906,9 @@ func (o Operand) String() string {
 	case TypBigRat:
 		val += "(BigRat)"
 		val += o.BigRat.String()
+	case TypComplex:
+		val += "(Complex)"
+		val += fmt.Sprintf("%g", o.Complex)
 	case TypField:
 		val += "(field)"
 		val += o.Column.String()

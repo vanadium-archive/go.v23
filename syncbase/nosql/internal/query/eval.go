@@ -13,9 +13,10 @@ import (
 
 	"v.io/syncbase/v23/syncbase/nosql/internal/query/query_checker"
 	"v.io/syncbase/v23/syncbase/nosql/internal/query/query_parser"
+	"v.io/v23/vdl"
 )
 
-func Eval(k string, v interface{}, e *query_parser.Expression) bool {
+func Eval(k string, v *vdl.Value, e *query_parser.Expression) bool {
 	if query_checker.IsLogicalOperator(e.Operator) {
 		return evalLogicalOperators(k, v, e)
 	} else {
@@ -23,7 +24,7 @@ func Eval(k string, v interface{}, e *query_parser.Expression) bool {
 	}
 }
 
-func evalLogicalOperators(k string, v interface{}, e *query_parser.Expression) bool {
+func evalLogicalOperators(k string, v *vdl.Value, e *query_parser.Expression) bool {
 	switch e.Operator.Type {
 	case query_parser.And:
 		return Eval(k, v, e.Operand1.Expr) && Eval(k, v, e.Operand2.Expr)
@@ -35,7 +36,7 @@ func evalLogicalOperators(k string, v interface{}, e *query_parser.Expression) b
 	}
 }
 
-func evalComparisonOperators(k string, v interface{}, e *query_parser.Expression) bool {
+func evalComparisonOperators(k string, v *vdl.Value, e *query_parser.Expression) bool {
 	lhsValue := resolveOperand(k, v, e.Operand1)
 	// Check for an is nil epression (i.e., v[.<field>...] is nil).
 	// These expressions evaluate to true if the field cannot be resolved.
@@ -68,6 +69,8 @@ func evalComparisonOperators(k string, v interface{}, e *query_parser.Expression
 		return compareBigRats(lhsValue, rhsValue, e.Operator)
 	case query_parser.TypBool:
 		return compareBools(lhsValue, rhsValue, e.Operator)
+	case query_parser.TypComplex:
+		return compareComplex(lhsValue, rhsValue, e.Operator)
 	case query_parser.TypFloat:
 		return compareFloats(lhsValue, rhsValue, e.Operator)
 	case query_parser.TypInt:
@@ -83,6 +86,7 @@ func evalComparisonOperators(k string, v interface{}, e *query_parser.Expression
 }
 
 func coerceValues(lhsValue, rhsValue *query_parser.Operand) (*query_parser.Operand, *query_parser.Operand, error) {
+	// TODO(jkline): explore using vdl for coercions ( https://v.io/designdocs/vdl-spec.html#conversions ).
 	var err error
 	// If either operand is a string, convert the other to a string.
 	if lhsValue.Type == query_parser.TypStr || rhsValue.Type == query_parser.TypStr {
@@ -92,6 +96,23 @@ func coerceValues(lhsValue, rhsValue *query_parser.Operand) (*query_parser.Opera
 		if rhsValue, err = convertValueToString(rhsValue); err != nil {
 			return nil, nil, err
 		}
+		return lhsValue, rhsValue, nil
+	}
+	// If either operand is Complex, promote numerics to Complex.
+	// Comparing complex to string is handled above.
+	if lhsValue.Type == query_parser.TypComplex || rhsValue.Type == query_parser.TypComplex {
+		// If both complex, just return them.
+		if lhsValue.Type == query_parser.TypComplex && rhsValue.Type == query_parser.TypComplex {
+			return lhsValue, rhsValue, nil
+		}
+		var err error
+		if lhsValue, err = convertValueToComplex(lhsValue); err != nil {
+			return nil, nil, err
+		}
+		if rhsValue, err = convertValueToComplex(rhsValue); err != nil {
+			return nil, nil, err
+		}
+		return lhsValue, rhsValue, nil
 	}
 	// If either operand is a big rat, convert both to a big rat.
 	// Also, if one operand is a float and the other is a big int,
@@ -103,6 +124,7 @@ func coerceValues(lhsValue, rhsValue *query_parser.Operand) (*query_parser.Opera
 		if rhsValue, err = convertValueToBigRat(rhsValue); err != nil {
 			return nil, nil, err
 		}
+		return lhsValue, rhsValue, nil
 	}
 	// If either operand is a float, convert the other to a float.
 	if lhsValue.Type == query_parser.TypFloat || rhsValue.Type == query_parser.TypFloat {
@@ -112,6 +134,7 @@ func coerceValues(lhsValue, rhsValue *query_parser.Operand) (*query_parser.Opera
 		if rhsValue, err = convertValueToFloat(rhsValue); err != nil {
 			return nil, nil, err
 		}
+		return lhsValue, rhsValue, nil
 	}
 	// If either operand is a big int, convert both to a big int.
 	// Also, if one operand is a uint64 and the other is an int64, convert both to big ints.
@@ -122,6 +145,7 @@ func coerceValues(lhsValue, rhsValue *query_parser.Operand) (*query_parser.Opera
 		if rhsValue, err = convertValueToBigInt(rhsValue); err != nil {
 			return nil, nil, err
 		}
+		return lhsValue, rhsValue, nil
 	}
 	// If either operand is an int64, convert the other to int64.
 	if lhsValue.Type == query_parser.TypInt || rhsValue.Type == query_parser.TypInt {
@@ -131,6 +155,7 @@ func coerceValues(lhsValue, rhsValue *query_parser.Operand) (*query_parser.Opera
 		if rhsValue, err = convertValueToInt(rhsValue); err != nil {
 			return nil, nil, err
 		}
+		return lhsValue, rhsValue, nil
 	}
 	// If either operand is an uint64, convert the other to uint64.
 	if lhsValue.Type == query_parser.TypUint || rhsValue.Type == query_parser.TypUint {
@@ -140,6 +165,7 @@ func coerceValues(lhsValue, rhsValue *query_parser.Operand) (*query_parser.Opera
 		if rhsValue, err = convertValueToUint(rhsValue); err != nil {
 			return nil, nil, err
 		}
+		return lhsValue, rhsValue, nil
 	}
 	// Must be the same at this point.
 	if lhsValue.Type != rhsValue.Type {
@@ -160,6 +186,8 @@ func convertValueToString(o *query_parser.Operand) (*query_parser.Operand, error
 		c.Str = o.BigRat.String()
 	case query_parser.TypBool:
 		c.Str = strconv.FormatBool(o.Bool)
+	case query_parser.TypComplex:
+		c.Str = fmt.Sprintf("%g", o.Complex)
 	case query_parser.TypFloat:
 		c.Str = strconv.FormatFloat(o.Float, 'f', -1, 64)
 	case query_parser.TypInt:
@@ -177,6 +205,24 @@ func convertValueToString(o *query_parser.Operand) (*query_parser.Operand, error
 	default:
 		// TODO(jkline): Log this logic error and all other similar cases.
 		return nil, errors.New("Cannot convert operand to string for comparison.")
+	}
+	return &c, nil
+}
+
+func convertValueToComplex(o *query_parser.Operand) (*query_parser.Operand, error) {
+	var c query_parser.Operand
+	c.Type = query_parser.TypComplex
+	switch o.Type {
+	case query_parser.TypComplex:
+		return o, nil
+	case query_parser.TypFloat:
+		c.Complex = complex(o.Float, 0.0i)
+	case query_parser.TypInt:
+		c.Complex = complex(float64(o.Int), 0.0i)
+	case query_parser.TypUint:
+		c.Complex = complex(float64(o.Uint), 0.0i)
+	default:
+		return nil, errors.New("Cannot convert operand to Complex for comparison.")
 	}
 	return &c, nil
 }
@@ -346,6 +392,18 @@ func compareBigRats(lhsValue, rhsValue *query_parser.Operand, oper *query_parser
 	}
 }
 
+func compareComplex(lhsValue, rhsValue *query_parser.Operand, oper *query_parser.BinaryOperator) bool {
+	switch oper.Type {
+	case query_parser.Equal:
+		return lhsValue.Complex == rhsValue.Complex
+	case query_parser.NotEqual:
+		return lhsValue.Complex != rhsValue.Complex
+	default:
+		// Complex values are not ordered.  All other operands return false.
+		return false
+	}
+}
+
 func compareFloats(lhsValue, rhsValue *query_parser.Operand, oper *query_parser.BinaryOperator) bool {
 	switch oper.Type {
 	case query_parser.Equal:
@@ -447,12 +505,12 @@ func compareObjects(lhsValue, rhsValue *query_parser.Operand, oper *query_parser
 	}
 }
 
-func resolveOperand(k string, v interface{}, o *query_parser.Operand) *query_parser.Operand {
+func resolveOperand(k string, v *vdl.Value, o *query_parser.Operand) *query_parser.Operand {
 	if o.Type != query_parser.TypField {
 		return o
 	}
 	value, hasAltStr, altStr := ResolveField(k, v, o.Column)
-	if value == nil {
+	if value.IsNil() {
 		return nil
 	}
 
@@ -460,61 +518,34 @@ func resolveOperand(k string, v interface{}, o *query_parser.Operand) *query_par
 	var newOp query_parser.Operand
 	newOp.Off = o.Off
 
-	switch value := value.(type) {
-	case bool:
+	switch value.Kind() {
+	case vdl.Bool:
 		newOp.Type = query_parser.TypBool
-		newOp.Bool = value
-	case int:
+		newOp.Bool = value.Bool()
+	case vdl.Byte:
 		newOp.Type = query_parser.TypInt
-		newOp.Int = int64(value)
-	case int8:
-		newOp.Type = query_parser.TypInt
-		newOp.Int = int64(value)
-	case int16:
-		newOp.Type = query_parser.TypInt
-		newOp.Int = int64(value)
-	case int32: // rune
-		newOp.Type = query_parser.TypInt
-		newOp.Int = int64(value)
-	case int64:
-		newOp.Type = query_parser.TypInt
-		newOp.Int = value
-	case uint:
-		newOp.Type = query_parser.TypBigInt
-		var b big.Int
-		b.SetUint64(uint64(value))
-		newOp.BigInt = &b
-	case uint8: // byte
-		newOp.Type = query_parser.TypInt
-		newOp.Int = int64(value)
-	case uint16:
-		newOp.Type = query_parser.TypInt
-		newOp.Int = int64(value)
-	case uint32:
-		newOp.Type = query_parser.TypInt
-		newOp.Int = int64(value)
-	case uint64:
-		newOp.Type = query_parser.TypBigInt
-		var b big.Int
-		b.SetUint64(value)
-		newOp.BigInt = &b
-	case float32:
-		newOp.Type = query_parser.TypFloat
-		newOp.Float = float64(value)
-	case float64:
-		newOp.Type = query_parser.TypFloat
-		newOp.Float = value
-	case string:
+		newOp.Int = int64(value.Byte())
+	case vdl.Enum:
 		newOp.Type = query_parser.TypStr
-		newOp.Str = value
+		newOp.Str = value.EnumLabel()
+		newOp.HasAltStr = false
+	case vdl.Int16, vdl.Int32, vdl.Int64:
+		newOp.Type = query_parser.TypInt
+		newOp.Int = value.Int()
+	case vdl.Uint16, vdl.Uint32, vdl.Uint64:
+		newOp.Type = query_parser.TypInt
+		newOp.Int = int64(value.Uint())
+	case vdl.Float32, vdl.Float64:
+		newOp.Type = query_parser.TypFloat
+		newOp.Float = value.Float()
+	case vdl.String:
+		newOp.Type = query_parser.TypStr
+		newOp.Str = value.RawString()
 		newOp.HasAltStr = hasAltStr
 		newOp.AltStr = altStr
-	case *big.Int:
-		newOp.Type = query_parser.TypBigInt
-		newOp.BigInt = value
-	case *big.Rat:
-		newOp.Type = query_parser.TypBigRat
-		newOp.BigRat = value
+	case vdl.Complex64, vdl.Complex128:
+		newOp.Type = query_parser.TypComplex
+		newOp.Complex = value.Complex()
 	default: // OpObject for structs, arrays, maps, ...
 		newOp.Type = query_parser.TypObject
 		newOp.Object = value
@@ -526,37 +557,38 @@ func resolveOperand(k string, v interface{}, o *query_parser.Operand) *query_par
 // to a string being returned, and alternate string is returned.  In this case,
 // <string-value>, true, <alt-string> is returned.  In all other cases,
 // <value>,false,"" is returned.
-func ResolveField(k string, v interface{}, f *query_parser.Field) (interface{}, bool, string) {
+func ResolveField(k string, v *vdl.Value, f *query_parser.Field) (*vdl.Value, bool, string) {
 	if query_checker.IsKeyField(f) {
-		return k, false, ""
+		return vdl.StringValue(k), false, ""
 	}
+	t := v.Type()
 	if query_checker.IsTypeField(f) {
-		if v == nil {
-			return nil, false, ""
-		} else {
-			// Types evaluate to two strings, Str and AltStr.
-			// This is because types match on full path or just the name.
-			name := reflect.ValueOf(v).Type().Name()
-			return reflect.ValueOf(v).Type().PkgPath() + "." + name, true, name
-		}
+		// Types evaluate to two strings, Str and AltStr.
+		// This is because types match on full path or just the name.
+		pkg, name := vdl.SplitIdent(t.Name())
+		return vdl.StringValue(pkg + "." + name), true, name
 	}
+
 	object := v
 	segments := f.Segments
-	// The first segment will always be v itself, skip it.
+	// The first segment will always be v (itself), skip it.
 	for i := 1; i < len(segments); i++ {
 		// object must be a struct in order to look for the next segment.
-		if reflect.ValueOf(object).Kind() != reflect.Struct {
-			return nil, false, "" // field does not exist
+		if object.Kind() == vdl.Struct {
+			if object = object.StructFieldByName(segments[i].Value); object == nil {
+				return vdl.ValueOf(nil), false, "" // field does not exist
+			}
+		} else if object.Kind() == vdl.Union {
+			unionType := object.Type()
+			idx, tempValue := object.UnionField()
+			if segments[i].Value == unionType.Field(idx).Name {
+				object = tempValue
+			} else {
+				return vdl.ValueOf(nil), false, "" // union field does not exist or is not set
+			}
+		} else {
+			return vdl.ValueOf(nil), false, "" // can only traverse into structs and unions
 		}
-		// Look up the segment in object.
-		_, ok := reflect.ValueOf(object).Type().FieldByName(segments[i].Value)
-		if !ok {
-			return nil, false, "" // field does not exist
-		}
-		if !reflect.ValueOf(object).FieldByName(segments[i].Value).CanInterface() {
-			return nil, false, ""
-		}
-		object = reflect.ValueOf(object).FieldByName(segments[i].Value).Interface()
 	}
 	return object, false, ""
 }

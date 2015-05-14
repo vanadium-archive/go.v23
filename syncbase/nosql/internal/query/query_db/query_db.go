@@ -4,6 +4,10 @@
 
 package query_db
 
+import (
+	"v.io/v23/vdl"
+)
+
 type Database interface {
 	GetTable(name string) (Table, error)
 }
@@ -29,7 +33,7 @@ type KeyValueStream interface {
 	// KeyValue returns the element that was staged by Advance.
 	// KeyValue may panic if Advance returned false or was not
 	// called at all.  KeyValue does not block.
-	KeyValue() (string, interface{})
+	KeyValue() (string, *vdl.Value)
 
 	// Err returns a non-nil error iff the stream encountered
 	// any errors.  Err does not block.
