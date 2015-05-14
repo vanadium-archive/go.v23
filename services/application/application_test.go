@@ -11,6 +11,7 @@ import (
 	"encoding/json"
 	"reflect"
 	"testing"
+	"time"
 
 	"v.io/v23/security"
 )
@@ -26,12 +27,14 @@ func TestEnvelopeJSON(t *testing.T) {
 			"pkg1": SignedFile{File: "pkg1.data"},
 			"pkg2": SignedFile{File: "pkg2.config"},
 		},
+		Restarts:          2,
+		RestartTimeWindow: time.Second,
 	}
 	// If the fields of Envelope have been changed, then the testdata above
 	// needs to be updated.  This actually applies recursively to the types
 	// of the fields of Envelope. If you have ideas on how to test that,
 	// chime in.
-	if n := reflect.TypeOf(before).NumField(); n != 6 {
+	if n := reflect.TypeOf(before).NumField(); n != 8 {
 		t.Errorf("It appears that fields have been added to or removed from Envelope but TestEnvelopeJSON has not been updated. Please update it.")
 	}
 

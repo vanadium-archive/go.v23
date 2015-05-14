@@ -9,6 +9,7 @@ package application
 import (
 	"encoding/base64"
 	"encoding/json"
+	"time"
 
 	"v.io/v23/security"
 	"v.io/v23/verror"
@@ -24,12 +25,14 @@ var (
 )
 
 type jsonType struct {
-	Title     string
-	Args      []string
-	Binary    SignedFile
-	Publisher string // base64-vom-encoded security.Blessings
-	Env       []string
-	Packages  Packages
+	Title             string
+	Args              []string
+	Binary            SignedFile
+	Publisher         string // base64-vom-encoded security.Blessings
+	Env               []string
+	Packages          Packages
+	Restarts          int32
+	RestartTimeWindow time.Duration
 }
 
 func (env Envelope) MarshalJSON() ([]byte, error) {
@@ -41,12 +44,14 @@ func (env Envelope) MarshalJSON() ([]byte, error) {
 		}
 	}
 	return json.Marshal(jsonType{
-		Title:     env.Title,
-		Args:      env.Args,
-		Binary:    env.Binary,
-		Publisher: base64.URLEncoding.EncodeToString(bytes),
-		Env:       env.Env,
-		Packages:  env.Packages,
+		Title:             env.Title,
+		Args:              env.Args,
+		Binary:            env.Binary,
+		Publisher:         base64.URLEncoding.EncodeToString(bytes),
+		Env:               env.Env,
+		Packages:          env.Packages,
+		Restarts:          env.Restarts,
+		RestartTimeWindow: env.RestartTimeWindow,
 	})
 }
 
@@ -71,5 +76,7 @@ func (env *Envelope) UnmarshalJSON(input []byte) error {
 	env.Publisher = publisher
 	env.Env = jt.Env
 	env.Packages = jt.Packages
+	env.Restarts = jt.Restarts
+	env.RestartTimeWindow = jt.RestartTimeWindow
 	return nil
 }
