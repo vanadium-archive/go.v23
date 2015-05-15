@@ -149,8 +149,27 @@ type Expression struct {
 	Node
 }
 
+// ColumnEntry is only used in SelectClause.
+// The AS name, if present, will ONLY be used in the
+// returned column header.
+type ColumnEntry struct {
+	Column Field
+	As     *AsClause // If not nil, used in returned column header.
+	Node
+}
+
+type AsClause struct {
+	AltName Name
+	Node
+}
+
+type Name struct {
+	Value string
+	Node
+}
+
 type SelectClause struct {
-	Columns []Field
+	Columns []ColumnEntry
 	Node
 }
 
@@ -341,12 +360,14 @@ func parseColumn(s *scanner.Scanner, selectClause *SelectClause, token *Token) (
 	if token.Tok != TokIDENT {
 		return nil, Error(token.Off, fmt.Sprintf("Expected identifier, found '%s'.", token.Value))
 	}
-	var col Field
-	col.Off = token.Off
+
+	var columnEntry ColumnEntry
+	columnEntry.Off = token.Off
+	columnEntry.Column.Off = token.Off
 	var segment Segment
 	segment.Value = token.Value
 	segment.Off = token.Off
-	col.Segments = append(col.Segments, segment)
+	columnEntry.Column.Segments = append(columnEntry.Column.Segments, segment)
 	token = scanToken(s)
 
 	for token.Tok != TokEOF && token.Tok == TokPERIOD {
@@ -357,11 +378,25 @@ func parseColumn(s *scanner.Scanner, selectClause *SelectClause, token *Token) (
 		var segment Segment
 		segment.Value = token.Value
 		segment.Off = token.Off
-		col.Segments = append(col.Segments, segment)
+		columnEntry.Column.Segments = append(columnEntry.Column.Segments, segment)
 		token = scanToken(s)
 	}
 
-	selectClause.Columns = append(selectClause.Columns, col)
+	// Check for AS
+	if token.Tok == TokIDENT && strings.ToLower(token.Value) == "as" {
+		var asClause AsClause
+		asClause.Off = token.Off
+		token = scanToken(s)
+		if token.Tok != TokIDENT {
+			return nil, Error(token.Off, fmt.Sprintf("Expected identifier, found '%s'.", token.Value))
+		}
+		asClause.AltName.Value = token.Value
+		asClause.AltName.Off = token.Off
+		columnEntry.As = &asClause
+		token = scanToken(s)
+	}
+
+	selectClause.Columns = append(selectClause.Columns, columnEntry)
 	return token, nil
 }
 
@@ -839,13 +874,33 @@ func (st SelectStatement) String() string {
 
 func (sel SelectClause) String() string {
 	val := fmt.Sprintf(" Off(%d):SELECT Columns(", sel.Off)
-	for i := range sel.Columns {
-		if i != 0 {
-			val += ","
-		}
-		val += sel.Columns[i].String()
+	sep := ""
+	for _, column := range sel.Columns {
+		val += sep + column.String()
+		sep = ","
 	}
 	val += ")"
+	return val
+}
+
+func (c ColumnEntry) String() string {
+	val := fmt.Sprintf(" Off(%d):", c.Off)
+	val += c.Column.String()
+	if c.As != nil {
+		val += c.As.String()
+	}
+	return val
+}
+
+func (a AsClause) String() string {
+	val := fmt.Sprintf(" Off(%d):", a.Off)
+	val += a.AltName.String()
+	return val
+}
+
+func (n Name) String() string {
+	val := fmt.Sprintf(" Off(%d):", n.Off)
+	val += n.Value
 	return val
 }
 

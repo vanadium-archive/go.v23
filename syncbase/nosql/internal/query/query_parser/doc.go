@@ -10,7 +10,9 @@
 // <query_specification> ::=
 //   SELECT <field_clause> <from_clause> [<where_clause>] [<limit_offset_clause>]
 //
-// <field_clause> ::= <field>[{<comma><field>}...]
+// <field_clause> ::= <column>[{<comma><field>}...]
+//
+// <column> ::= <field> [AS <string_literal>]
 //
 // <field> ::= <segment>[{<period><segment>}...]
 //

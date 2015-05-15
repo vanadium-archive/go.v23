@@ -59,15 +59,15 @@ func checkSelectStatement(db query_db.Database, s *query_parser.SelectStatement)
 // Check select clause.  Fields can be 'k' and v[{.<ident>}...]
 func checkSelectClause(s *query_parser.SelectClause) *SemanticError {
 	for _, c := range s.Columns {
-		switch c.Segments[0].Value {
+		switch c.Column.Segments[0].Value {
 		case "k":
-			if len(c.Segments) > 1 {
-				return Error(c.Segments[1].Off, "Dot notation may not be used on a key (string) field.")
+			if len(c.Column.Segments) > 1 {
+				return Error(c.Column.Segments[1].Off, "Dot notation may not be used on a key (string) field.")
 			}
 		case "v":
 			// Nothing to check.
 		default:
-			return Error(c.Segments[0].Off, "Select field must be 'k' or 'v[{.<ident>}...]'.")
+			return Error(c.Column.Segments[0].Off, "Select field must be 'k' or 'v[{.<ident>}...]'.")
 		}
 	}
 	return nil

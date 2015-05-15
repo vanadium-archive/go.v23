@@ -200,6 +200,7 @@ type projectionTest struct {
 
 type execSelectTest struct {
 	query string
+	h     []string
 	r     [][]*vdl.Value
 }
 
@@ -227,6 +228,7 @@ func TestQueryExec(t *testing.T) {
 		{
 			// Select values for all customer records.
 			"select v from Customer where t = \"Customer\"",
+			[]string{"v"},
 			[][]*vdl.Value{
 				[]*vdl.Value{custTable.rows[0].value},
 				[]*vdl.Value{custTable.rows[4].value},
@@ -237,6 +239,7 @@ func TestQueryExec(t *testing.T) {
 			// Since InvoiceNum does not exist for Invoice,
 			// this will return just customers.
 			"select v from Customer where v.InvoiceNum is nil",
+			[]string{"v"},
 			[][]*vdl.Value{
 				[]*vdl.Value{custTable.rows[0].value},
 				[]*vdl.Value{custTable.rows[4].value},
@@ -248,6 +251,7 @@ func TestQueryExec(t *testing.T) {
 			// with the former and all invoices with the latter.
 			// Hence, all records are returned.
 			"select v from Customer where v.InvoiceNum is nil or v.Name is nil",
+			[]string{"v"},
 			[][]*vdl.Value{
 				[]*vdl.Value{custTable.rows[0].value},
 				[]*vdl.Value{custTable.rows[1].value},
@@ -264,12 +268,14 @@ func TestQueryExec(t *testing.T) {
 			// Select values where v.InvoiceNum is nil
 			// and v.Name is nil.  Expect nothing returned.
 			"select v from Customer where v.InvoiceNum is nil and v.Name is nil",
+			[]string{"v"},
 			[][]*vdl.Value{},
 		},
 		{
 			// Select values where v.InvoiceNum is not nil
 			// This will return just invoices.
 			"select v from Customer where v.InvoiceNum is not nil",
+			[]string{"v"},
 			[][]*vdl.Value{
 				[]*vdl.Value{custTable.rows[1].value},
 				[]*vdl.Value{custTable.rows[2].value},
@@ -284,6 +290,7 @@ func TestQueryExec(t *testing.T) {
 			// Select values where v.InvoiceNum is not nil
 			// or v.Name is not nil. All records are returned.
 			"select v from Customer where v.InvoiceNum is not nil or v.Name is not nil",
+			[]string{"v"},
 			[][]*vdl.Value{
 				[]*vdl.Value{custTable.rows[0].value},
 				[]*vdl.Value{custTable.rows[1].value},
@@ -300,6 +307,7 @@ func TestQueryExec(t *testing.T) {
 			// Select values where v.InvoiceNum is nil and v.Name is not nil.
 			// All customers are returned.
 			"select v from Customer where v.InvoiceNum is nil and v.Name is not nil",
+			[]string{"v"},
 			[][]*vdl.Value{
 				[]*vdl.Value{custTable.rows[0].value},
 				[]*vdl.Value{custTable.rows[4].value},
@@ -309,11 +317,13 @@ func TestQueryExec(t *testing.T) {
 			// Select values where v.InvoiceNum is not nil
 			// and v.Name is not nil.  Expect nothing returned.
 			"select v from Customer where v.InvoiceNum is not nil and v.Name is not nil",
+			[]string{"v"},
 			[][]*vdl.Value{},
 		},
 		{
 			// Select keys & values for all customer records.
 			"select k, v from Customer where t = \"Customer\"",
+			[]string{"k", "v"},
 			[][]*vdl.Value{
 				[]*vdl.Value{vdl.ValueOf(custTable.rows[0].key), custTable.rows[0].value},
 				[]*vdl.Value{vdl.ValueOf(custTable.rows[4].key), custTable.rows[4].value},
@@ -322,6 +332,7 @@ func TestQueryExec(t *testing.T) {
 		{
 			// Select keys & names for all customer records.
 			"select k, v.Name from Customer where t = \"Customer\"",
+			[]string{"k", "v.Name"},
 			[][]*vdl.Value{
 				[]*vdl.Value{vdl.ValueOf(custTable.rows[0].key), vdl.ValueOf("John Smith")},
 				[]*vdl.Value{vdl.ValueOf(custTable.rows[4].key), vdl.ValueOf("Bat Masterson")},
@@ -332,6 +343,7 @@ func TestQueryExec(t *testing.T) {
 			// Customer records have Id.
 			// Invoice records have CustId.
 			"select v.Id, v.CustId from Customer",
+			[]string{"v.Id", "v.CustId"},
 			[][]*vdl.Value{
 				[]*vdl.Value{vdl.ValueOf(int64(1)), vdl.ValueOf(nil)},
 				[]*vdl.Value{vdl.ValueOf(nil), vdl.ValueOf(int64(1))},
@@ -347,6 +359,7 @@ func TestQueryExec(t *testing.T) {
 		{
 			// Select keys & values fo all invoice records.
 			"select k, v from Customer where t = \"Invoice\"",
+			[]string{"k", "v"},
 			[][]*vdl.Value{
 				[]*vdl.Value{vdl.ValueOf(custTable.rows[1].key), custTable.rows[1].value},
 				[]*vdl.Value{vdl.ValueOf(custTable.rows[2].key), custTable.rows[2].value},
@@ -359,7 +372,8 @@ func TestQueryExec(t *testing.T) {
 		},
 		{
 			// Select key, cust id, invoice number and amount for $88 invoices.
-			"select k, v.CustId, v.InvoiceNum, v.Amount from Customer where t = \"Invoice\" and v.Amount = 88",
+			"select k, v.CustId as ID, v.InvoiceNum as InvoiceNumber, v.Amount as Amt from Customer where t = \"Invoice\" and v.Amount = 88",
+			[]string{"k", "ID", "InvoiceNumber", "Amt"},
 			[][]*vdl.Value{
 				[]*vdl.Value{vdl.ValueOf(custTable.rows[3].key), vdl.ValueOf(int64(1)), vdl.ValueOf(int64(1005)), vdl.ValueOf(int64(88))},
 				[]*vdl.Value{vdl.ValueOf(custTable.rows[8].key), vdl.ValueOf(int64(2)), vdl.ValueOf(int64(1006)), vdl.ValueOf(int64(88))},
@@ -368,6 +382,7 @@ func TestQueryExec(t *testing.T) {
 		{
 			// Select keys & values for all records with a key prefix of "001".
 			"select k, v from Customer where k like \"001%\"",
+			[]string{"k", "v"},
 			[][]*vdl.Value{
 				[]*vdl.Value{vdl.ValueOf(custTable.rows[0].key), custTable.rows[0].value},
 				[]*vdl.Value{vdl.ValueOf(custTable.rows[1].key), custTable.rows[1].value},
@@ -378,6 +393,7 @@ func TestQueryExec(t *testing.T) {
 		{
 			// Select keys & values for all records with a key prefix of "001".
 			"select k, v from Customer where k like \"002%\"",
+			[]string{"k", "v"},
 			[][]*vdl.Value{
 				[]*vdl.Value{vdl.ValueOf(custTable.rows[4].key), custTable.rows[4].value},
 				[]*vdl.Value{vdl.ValueOf(custTable.rows[5].key), custTable.rows[5].value},
@@ -390,6 +406,7 @@ func TestQueryExec(t *testing.T) {
 			// Select keys & values for all records with a key prefix of "001".
 			// or a key prefix of "002".
 			"select k, v from Customer where k like \"001%\" or k like \"002%\"",
+			[]string{"k", "v"},
 			[][]*vdl.Value{
 				[]*vdl.Value{vdl.ValueOf(custTable.rows[0].key), custTable.rows[0].value},
 				[]*vdl.Value{vdl.ValueOf(custTable.rows[1].key), custTable.rows[1].value},
@@ -406,6 +423,7 @@ func TestQueryExec(t *testing.T) {
 			// Select keys & values for all records with a key prefix of "001".
 			// or a key prefix of "002".
 			"select k, v from Customer where k like \"002%\" or k like \"001%\"",
+			[]string{"k", "v"},
 			[][]*vdl.Value{
 				[]*vdl.Value{vdl.ValueOf(custTable.rows[0].key), custTable.rows[0].value},
 				[]*vdl.Value{vdl.ValueOf(custTable.rows[1].key), custTable.rows[1].value},
@@ -421,6 +439,7 @@ func TestQueryExec(t *testing.T) {
 		{
 			// Let's play with whitespace and mixed case.
 			"   sElEcT  k,  v from \n  Customer WhErE k lIkE \"002%\" oR k LiKe \"001%\"",
+			[]string{"k", "v"},
 			[][]*vdl.Value{
 				[]*vdl.Value{vdl.ValueOf(custTable.rows[0].key), custTable.rows[0].value},
 				[]*vdl.Value{vdl.ValueOf(custTable.rows[1].key), custTable.rows[1].value},
@@ -436,6 +455,7 @@ func TestQueryExec(t *testing.T) {
 		{
 			// Add in a like clause that accepts all strings.
 			"   sElEcT  k,  v from \n  Customer WhErE k lIkE \"002%\" oR k LiKe \"001%\" or k lIkE \"%\"",
+			[]string{"k", "v"},
 			[][]*vdl.Value{
 				[]*vdl.Value{vdl.ValueOf(custTable.rows[0].key), custTable.rows[0].value},
 				[]*vdl.Value{vdl.ValueOf(custTable.rows[1].key), custTable.rows[1].value},
@@ -450,7 +470,8 @@ func TestQueryExec(t *testing.T) {
 		},
 		{
 			// Select id, name for customers whose last name is Masterson.
-			"select v.Id, v.Name from Customer where t = \"Customer\" and v.Name like \"%Masterson\"",
+			"select v.Id as ID, v.Name as Name from Customer where t = \"Customer\" and v.Name like \"%Masterson\"",
+			[]string{"ID", "Name"},
 			[][]*vdl.Value{
 				[]*vdl.Value{vdl.ValueOf(int64(2)), vdl.ValueOf("Bat Masterson")},
 			},
@@ -458,6 +479,7 @@ func TestQueryExec(t *testing.T) {
 		{
 			// Select records where v.Address.City is "Collins" or type is Invoice.
 			"select v from Customer where v.Address.City = \"Collins\" or t = \"Invoice\"",
+			[]string{"v"},
 			[][]*vdl.Value{
 				[]*vdl.Value{custTable.rows[1].value},
 				[]*vdl.Value{custTable.rows[2].value},
@@ -472,18 +494,21 @@ func TestQueryExec(t *testing.T) {
 		{
 			// Select records where v.Address.City is "Collins" and v.InvoiceNum is not nil.
 			"select v from Customer where v.Address.City = \"Collins\" and v.InvoiceNum is not nil",
+			[]string{"v"},
 			[][]*vdl.Value{},
 		},
 		{
 			// Select records where v.Address.City is "Collins" and v.InvoiceNum is nil.
 			"select v from Customer where v.Address.City = \"Collins\" and v.InvoiceNum is nil",
+			[]string{"v"},
 			[][]*vdl.Value{
 				[]*vdl.Value{custTable.rows[4].value},
 			},
 		},
 		{
 			// Select customer name for customer Id (i.e., key) "001".
-			"select v.Name from Customer where t = \"Customer\" and k = \"001\"",
+			"select v.Name as Name from Customer where t = \"Customer\" and k = \"001\"",
+			[]string{"Name"},
 			[][]*vdl.Value{
 				[]*vdl.Value{vdl.ValueOf("John Smith")},
 			},
@@ -491,6 +516,7 @@ func TestQueryExec(t *testing.T) {
 		{
 			// Select v where v.Credit.Report.EquifaxReport.Rating = 'A'
 			"select v from Customer where v.Credit.Report.EquifaxReport.Rating = 'A'",
+			[]string{"v"},
 			[][]*vdl.Value{
 				[]*vdl.Value{custTable.rows[0].value},
 			},
@@ -498,6 +524,7 @@ func TestQueryExec(t *testing.T) {
 		{
 			// Select v where v.AgencyRating = "Bad"
 			"select v from Customer where v.Credit.Report.EquifaxReport.Rating < 'A' or v.Credit.Report.ExperianReport.Rating = \"Bad\" or v.Credit.Report.TransUnionReport.Rating < 90",
+			[]string{"v"},
 			[][]*vdl.Value{
 				[]*vdl.Value{custTable.rows[4].value},
 			},
@@ -505,6 +532,7 @@ func TestQueryExec(t *testing.T) {
 		{
 			// Select records where v.Bar.Baz.Name = "FooBarBaz"
 			"select v from Foo where v.Bar.Baz.Name = \"FooBarBaz\"",
+			[]string{"v"},
 			[][]*vdl.Value{
 				[]*vdl.Value{fooTable.rows[0].value},
 			},
@@ -512,6 +540,7 @@ func TestQueryExec(t *testing.T) {
 		{
 			// Select records where v.Bar.Baz.TitleOrValue.Value = 42
 			"select v from Foo where v.Bar.Baz.TitleOrValue.Value = 42",
+			[]string{"v"},
 			[][]*vdl.Value{
 				[]*vdl.Value{fooTable.rows[1].value},
 			},
@@ -519,6 +548,7 @@ func TestQueryExec(t *testing.T) {
 		{
 			// Select records where v.Bar.Baz.TitleOrValue.Title = "Vice President"
 			"select v from Foo where v.Bar.Baz.TitleOrValue.Title = \"Vice President\"",
+			[]string{"v"},
 			[][]*vdl.Value{
 				[]*vdl.Value{fooTable.rows[0].value},
 			},
@@ -527,6 +557,7 @@ func TestQueryExec(t *testing.T) {
 			// Select records where v.Address.City = "Collins" or type is Invoice.
 			// Limit 3
 			"select v from Customer where v.Address.City = \"Collins\" or t = \"Invoice\" limit 3",
+			[]string{"v"},
 			[][]*vdl.Value{
 				[]*vdl.Value{custTable.rows[1].value},
 				[]*vdl.Value{custTable.rows[2].value},
@@ -537,6 +568,7 @@ func TestQueryExec(t *testing.T) {
 			// Select records where v.Address.City = "Collins" or type is Invoice.
 			// Offset 5
 			"select v from Customer where v.Address.City = \"Collins\" or t = \"Invoice\" offset 5",
+			[]string{"v"},
 			[][]*vdl.Value{
 				[]*vdl.Value{custTable.rows[6].value},
 				[]*vdl.Value{custTable.rows[7].value},
@@ -546,24 +578,28 @@ func TestQueryExec(t *testing.T) {
 		{
 			// Select records where v.Address.City = "Collins" is "Mountain View".
 			"select v from Customer where v.Address.City = \"Mountain View\"",
+			[]string{"v"},
 			[][]*vdl.Value{},
 		},
 		{
 			// Select records where v.Address.City = "Collins" or type is Invoice.
 			// Offset 8
 			"select v from Customer where v.Address.City = \"Collins\" or t = \"Invoice\" offset 8",
+			[]string{"v"},
 			[][]*vdl.Value{},
 		},
 		{
 			// Select records where v.Address.City = "Collins" or type is Invoice.
 			// Offset 23
 			"select v from Customer where v.Address.City = \"Collins\" or t = \"Invoice\" offset 23",
+			[]string{"v"},
 			[][]*vdl.Value{},
 		},
 		{
 			// Select records where v.Address.City = "Collins" is 84 or type is Invoice.
 			// Limit 3 Offset 2
 			"select v from Customer where v.Address.City = \"Collins\" or t = \"Invoice\" limit 3 offset 2",
+			[]string{"v"},
 			[][]*vdl.Value{
 				[]*vdl.Value{custTable.rows[3].value},
 				[]*vdl.Value{custTable.rows[4].value},
@@ -574,6 +610,7 @@ func TestQueryExec(t *testing.T) {
 			// Select records where v.Address.City = "Collins" or (type is Invoice and v.InvoiceNum is not nil).
 			// Limit 3 Offset 2
 			"select v from Customer where v.Address.City = \"Collins\" or (t = \"Invoice\" and v.InvoiceNum is not nil) limit 3 offset 2",
+			[]string{"v"},
 			[][]*vdl.Value{
 				[]*vdl.Value{custTable.rows[3].value},
 				[]*vdl.Value{custTable.rows[4].value},
@@ -584,12 +621,13 @@ func TestQueryExec(t *testing.T) {
 			// Select records where v.Address.City = "Collins" or (type is Invoice and v.InvoiceNum is nil).
 			// Limit 3 Offset 2
 			"select v from Customer where v.Address.City = \"Collins\" or (t = \"Invoice\" and v.InvoiceNum is nil) limit 3 offset 2",
+			[]string{"v"},
 			[][]*vdl.Value{},
 		},
 	}
 
 	for _, test := range basic {
-		_, rs, err := query.Exec(db, test.query)
+		h, rs, err := query.Exec(db, test.query)
 		if err != nil {
 			t.Errorf("query: %s; got %v, want nil", test.query, err)
 		} else {
@@ -600,6 +638,9 @@ func TestQueryExec(t *testing.T) {
 			}
 			if !reflect.DeepEqual(test.r, r) {
 				t.Errorf("query: %s; got %v, want %v", test.query, r, test.r)
+			}
+			if !reflect.DeepEqual(test.h, h) {
+				t.Errorf("query: %s; got %v, want %v", test.query, h, test.h)
 			}
 		}
 	}

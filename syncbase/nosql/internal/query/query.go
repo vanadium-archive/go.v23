@@ -64,7 +64,7 @@ func ComposeProjection(k string, v *vdl.Value, s *query_parser.SelectClause) []*
 	var projection []*vdl.Value
 	for _, f := range s.Columns {
 		// If field not found, nil is returned (as per specification).
-		c, _, _ := ResolveField(k, v, &f)
+		c, _, _ := ResolveField(k, v, &f.Column)
 		projection = append(projection, c)
 	}
 	return projection
@@ -158,12 +158,17 @@ func (rs *resultStreamImpl) Cancel() {
 
 func getColumnHeadings(s *query_parser.SelectStatement) []string {
 	columnHeaders := []string{}
-	for _, field := range s.Select.Columns {
-		sep := ""
+	for _, column := range s.Select.Columns {
 		columnName := ""
-		for _, segment := range field.Segments {
-			columnName = columnName + sep + segment.Value
-			sep = "."
+		if column.As != nil {
+			columnName = column.As.AltName.Value
+		} else {
+			field := column.Column
+			sep := ""
+			for _, segment := range field.Segments {
+				columnName = columnName + sep + segment.Value
+				sep = "."
+			}
 		}
 		columnHeaders = append(columnHeaders, columnName)
 	}
