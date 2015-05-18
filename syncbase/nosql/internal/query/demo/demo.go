@@ -13,6 +13,7 @@ import (
 	"github.com/peterh/liner"
 	"v.io/syncbase/v23/syncbase/nosql/internal/query"
 	"v.io/syncbase/v23/syncbase/nosql/internal/query/demo/db"
+	"v.io/syncbase/v23/syncbase/nosql/internal/query/demo/reader"
 	"v.io/syncbase/v23/syncbase/nosql/internal/query/query_db"
 )
 
@@ -50,13 +51,14 @@ func queryExec(d query_db.Database, q string) {
 }
 
 func main() {
-	line := liner.NewLiner()
-	defer line.Close()
-	line.SetCtrlCAborts(true)
+	// TODO(kash): Detect if this is not a terminal and use
+	// reader.NewNonInteractive.
+	input := reader.NewInteractive()
+	defer input.Close()
 
 	d := db.GetDatabase()
 	for true {
-		if q, err := line.Prompt("Enter query or 'dump'? "); err != nil {
+		if q, err := input.GetQuery(); err != nil {
 			if err == io.EOF {
 				// ctrl-d
 				fmt.Println()
