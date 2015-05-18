@@ -83,12 +83,8 @@
 //  SendBlessingToProcessB(aliceFriend)
 //
 // p2 can then add this blessing to its store such that this blessing will be
-// presented to p1 anytime p2 communicates with it in the future:
-//  // (in process B)
-//  p2.BlessingStore().Set(aliceFriend, "alice")
-//
-// p2 could also mark this blessing so that it is used when communicating with
-// "alice" and any of her delegates:
+// presented to "alice" (and her delegates) anytime p2 communicates with it in
+// the future:
 //  // (in process B)
 //  p2.BlessingStore().Set(aliceFriend, "alice")
 //
