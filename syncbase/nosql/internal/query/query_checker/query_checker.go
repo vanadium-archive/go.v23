@@ -6,112 +6,99 @@ package query_checker
 
 import (
 	"bytes"
-	"fmt"
 	"regexp"
 	"sort"
 	"strings"
 
 	"v.io/syncbase/v23/syncbase/nosql/internal/query/query_db"
 	"v.io/syncbase/v23/syncbase/nosql/internal/query/query_parser"
+	"v.io/syncbase/v23/syncbase/nosql/syncql"
 )
 
-type SemanticError struct {
-	Msg string
-	Off int64
-}
-
-func (e *SemanticError) Error() string {
-	return fmt.Sprintf("[Off:%d] %s", e.Off, e.Msg)
-}
-
-func Error(offset int64, msg string) *SemanticError {
-	return &SemanticError{msg, offset}
-}
-
-func Check(db query_db.Database, s *query_parser.Statement) *SemanticError {
+func Check(db query_db.Database, s *query_parser.Statement) error {
 	switch sel := (*s).(type) {
 	case query_parser.SelectStatement:
 		return checkSelectStatement(db, &sel)
 	default:
-		return Error((*s).Offset(), "Cannot semantically check statement, unknown type.")
+		return syncql.NewErrCheckOfUnknownStatementType(db.GetContext(), (*s).Offset())
 	}
 }
 
-func checkSelectStatement(db query_db.Database, s *query_parser.SelectStatement) *SemanticError {
-	if err := checkSelectClause(s.Select); err != nil {
+func checkSelectStatement(db query_db.Database, s *query_parser.SelectStatement) error {
+	if err := checkSelectClause(db, s.Select); err != nil {
 		return err
 	}
 	if err := checkFromClause(db, s.From); err != nil {
 		return err
 	}
-	if err := checkWhereClause(s.Where); err != nil {
+	if err := checkWhereClause(db, s.Where); err != nil {
 		return err
 	}
-	if err := checkLimitClause(s.Limit); err != nil {
+	if err := checkLimitClause(db, s.Limit); err != nil {
 		return err
 	}
-	if err := checkResultsOffsetClause(s.ResultsOffset); err != nil {
+	if err := checkResultsOffsetClause(db, s.ResultsOffset); err != nil {
 		return err
 	}
 	return nil
 }
 
 // Check select clause.  Fields can be 'k' and v[{.<ident>}...]
-func checkSelectClause(s *query_parser.SelectClause) *SemanticError {
+func checkSelectClause(db query_db.Database, s *query_parser.SelectClause) error {
 	for _, c := range s.Columns {
 		switch c.Column.Segments[0].Value {
 		case "k":
 			if len(c.Column.Segments) > 1 {
-				return Error(c.Column.Segments[1].Off, "Dot notation may not be used on a key (string) field.")
+				return syncql.NewErrDotNotationDisallowedForKey(db.GetContext(), c.Column.Segments[1].Off)
 			}
 		case "v":
 			// Nothing to check.
 		default:
-			return Error(c.Column.Segments[0].Off, "Select field must be 'k' or 'v[{.<ident>}...]'.")
+			return syncql.NewErrInvalidSelectField(db.GetContext(), c.Column.Segments[0].Off)
 		}
 	}
 	return nil
 }
 
 // Check from clause.  Table must exist in the database.
-func checkFromClause(db query_db.Database, f *query_parser.FromClause) *SemanticError {
+func checkFromClause(db query_db.Database, f *query_parser.FromClause) error {
 	var err error
 	f.Table.DBTable, err = db.GetTable(f.Table.Name)
 	if err != nil {
-		return Error(f.Table.Off, err.Error())
+		return syncql.NewErrTableCantAccess(db.GetContext(), f.Table.Off, f.Table.Name, err)
 	}
 	return nil
 }
 
 // Check where clause.
-func checkWhereClause(w *query_parser.WhereClause) *SemanticError {
+func checkWhereClause(db query_db.Database, w *query_parser.WhereClause) error {
 	if w == nil {
 		return nil
 	}
-	return checkExpression(w.Expr)
+	return checkExpression(db, w.Expr)
 }
 
-func checkExpression(e *query_parser.Expression) *SemanticError {
-	if err := checkOperand(e.Operand1); err != nil {
+func checkExpression(db query_db.Database, e *query_parser.Expression) error {
+	if err := checkOperand(db, e.Operand1); err != nil {
 		return err
 	}
-	if err := checkOperand(e.Operand2); err != nil {
+	if err := checkOperand(db, e.Operand2); err != nil {
 		return err
 	}
 
 	// Like expressions require operand2 to be a string literal that must be validated.
 	if e.Operator.Type == query_parser.Like {
 		if e.Operand2.Type != query_parser.TypStr {
-			return Error(e.Off, "Like expressions require right operand of type <string-literal>.")
+			return syncql.NewErrLikeExpressionsRequireRhsString(db.GetContext(), e.Off)
 		}
-		prefix, err := computePrefix(e.Operand2.Off, e.Operand2.Str)
+		prefix, err := computePrefix(db, e.Operand2.Off, e.Operand2.Str)
 		if err != nil {
 			return err
 		}
 		e.Operand2.Prefix = prefix
 		// Compute the regular expression now to to check for errors.
 		// Save the regex (testing) and the compiled regex (for later use in evaluation).
-		regex, compRegex, err := computeRegex(e.Operand2.Off, e.Operand2.Str)
+		regex, compRegex, err := computeRegex(db, e.Operand2.Off, e.Operand2.Str)
 		if err != nil {
 			return err
 		}
@@ -122,59 +109,59 @@ func checkExpression(e *query_parser.Expression) *SemanticError {
 	// Is/IsNot expressions require operand1 to be a value and operand2 to be nil.
 	if e.Operator.Type == query_parser.Is || e.Operator.Type == query_parser.IsNot {
 		if !IsField(e.Operand1) {
-			return Error(e.Operand1.Off, "'Is/is not' expressions require left operand to be a value operand.")
+			return syncql.NewErrIsIsNotRequireLhsValue(db.GetContext(), e.Operand1.Off)
 		}
 		if e.Operand2.Type != query_parser.TypNil {
-			return Error(e.Operand2.Off, "'Is/is not' expressions require right operand to be nil.")
+			return syncql.NewErrIsIsNotRequireRhsNil(db.GetContext(), e.Operand2.Off)
 		}
 	}
 
 	// type as an operand must be the first operand, the operator must be = and the 2nd operand must be string literal.
 	if (IsType(e.Operand1) && (e.Operator.Type != query_parser.Equal || e.Operand2.Type != query_parser.TypStr)) || IsType(e.Operand2) {
-		return Error(e.Off, "Type expressions must be 't = <string-literal>'.")
+		return syncql.NewErrTypeExpressionForm(db.GetContext(), e.Off)
 	}
 
 	// k as an operand must be the first operand, the operator must be like or = and the 2nd operand must be a string literal.
 	if (IsKey(e.Operand1) && ((e.Operator.Type != query_parser.Equal && e.Operator.Type != query_parser.Like) || e.Operand2.Type != query_parser.TypStr)) || IsKey(e.Operand2) {
-		return Error(e.Off, "Key (i.e., 'k') expressions must be of form 'k like|= <string-literal>'.")
+		return syncql.NewErrKeyExpressionForm(db.GetContext(), e.Off)
 	}
 
 	// If either operand is a bool, only = and <> operators are allowed.
 	if (e.Operand1.Type == query_parser.TypBool || e.Operand2.Type == query_parser.TypBool) && e.Operator.Type != query_parser.Equal && e.Operator.Type != query_parser.NotEqual {
-		return Error(e.Operator.Off, "Boolean operands may only be used in equals and not equals expressions.")
+		return syncql.NewErrBoolInvalidExpression(db.GetContext(), e.Operator.Off)
 	}
 
 	return nil
 }
 
-func checkOperand(o *query_parser.Operand) *SemanticError {
+func checkOperand(db query_db.Database, o *query_parser.Operand) error {
 	switch o.Type {
 	case query_parser.TypExpr:
-		return checkExpression(o.Expr)
+		return checkExpression(db, o.Expr)
 	case query_parser.TypField:
 		switch o.Column.Segments[0].Value {
 		case "k":
 			if len(o.Column.Segments) > 1 {
-				return Error(o.Column.Segments[1].Off, "Dot notation may not be used on a key (string) field.")
+				return syncql.NewErrDotNotationDisallowedForKey(db.GetContext(), o.Column.Segments[1].Off)
 			}
 		case "v":
 		case "t":
 			if len(o.Column.Segments) > 1 {
-				return Error(o.Column.Segments[1].Off, "Dot notation may not be used with type.")
+				return syncql.NewErrDotNotationDisallowedForType(db.GetContext(), o.Column.Segments[1].Off)
 			}
 		default:
-			return Error(o.Column.Segments[0].Off, "Where field must be 'k', 'v[{.<ident>}...]' or 't'.")
+			return syncql.NewErrBadFieldInWhere(db.GetContext(), o.Column.Segments[0].Off)
 		}
 		return nil
 	case query_parser.TypFunction:
-		return Error(o.Function.Off, "Functions are not yet supported.  Stay tuned.")
+		return syncql.NewErrFunctionsNotYetSupported(db.GetContext(), o.Function.Off)
 	default:
 		return nil
 	}
 }
 
 // Only include up to (but not including) a wildcard character ('%', '_').
-func computePrefix(off int64, s string) (string, *SemanticError) {
+func computePrefix(db query_db.Database, off int64, s string) (string, error) {
 	if strings.Index(s, "%") == -1 && strings.Index(s, "_") == -1 && strings.Index(s, "\\") == -1 {
 		return s, nil
 	}
@@ -190,7 +177,7 @@ func computePrefix(off int64, s string) (string, *SemanticError) {
 			case '_':
 				s2 += string(c)
 			default:
-				return "", Error(off, "Expected '\\', '%' or '_' after '\\'.")
+				return "", syncql.NewErrInvalidEscapedChar(db.GetContext(), off)
 			}
 			escapedChar = false
 		} else {
@@ -204,7 +191,7 @@ func computePrefix(off int64, s string) (string, *SemanticError) {
 		}
 	}
 	if escapedChar {
-		return "", Error(off, "Expected '\\', '%' or '_' after '\\'")
+		return "", syncql.NewErrInvalidEscapedChar(db.GetContext(), off)
 	}
 	return s2, nil
 }
@@ -214,7 +201,7 @@ func computePrefix(off int64, s string) (string, *SemanticError) {
 // _ to .
 // Escape everything that would be incorrectly interpreted as a regex.
 // Note: \% and \_ are used to escape % and _, respectively.
-func computeRegex(off int64, s string) (string, *regexp.Regexp, *SemanticError) {
+func computeRegex(db query_db.Database, off int64, s string) (string, *regexp.Regexp, error) {
 	// Escape everything, this will escape too much as like wildcards can
 	// also be escaped by a backslash (\%, \_, \\).
 	escaped := regexp.QuoteMeta(s)
@@ -271,7 +258,7 @@ func computeRegex(off int64, s string) (string, *regexp.Regexp, *SemanticError) 
 	regex := buf.String()
 	compRegex, err := regexp.Compile(regex)
 	if err != nil {
-		return "", nil, Error(off, err.Error())
+		return "", nil, syncql.NewErrErrorCompilingRegularExpression(db.GetContext(), off, regex, err)
 	}
 	return regex, compRegex, nil
 }
@@ -358,24 +345,24 @@ func collectKeyPrefixes(expr *query_parser.Expression) []string {
 
 // Check limit clause.  Limit must be >= 1.
 // Note: The parser will not allow negative numbers here.
-func checkLimitClause(l *query_parser.LimitClause) *SemanticError {
+func checkLimitClause(db query_db.Database, l *query_parser.LimitClause) error {
 	if l == nil {
 		return nil
 	}
 	if l.Limit.Value < 1 {
-		return Error(l.Limit.Off, "Limit must be > 0.")
+		return syncql.NewErrLimitMustBeGe0(db.GetContext(), l.Limit.Off)
 	}
 	return nil
 }
 
 // Check results offset clause.  Offset must be >= 0.
 // Note: The parser will not allow negative numbers here, so this check is presently superfluous.
-func checkResultsOffsetClause(o *query_parser.ResultsOffsetClause) *SemanticError {
+func checkResultsOffsetClause(db query_db.Database, o *query_parser.ResultsOffsetClause) error {
 	if o == nil {
 		return nil
 	}
 	if o.ResultsOffset.Value < 0 {
-		return Error(o.ResultsOffset.Off, "Offset must be >= 0.")
+		return syncql.NewErrOffsetMustBeGe0(db.GetContext(), o.ResultsOffset.Off)
 	}
 	return nil
 }

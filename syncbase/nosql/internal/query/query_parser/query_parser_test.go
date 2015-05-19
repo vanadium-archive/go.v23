@@ -8,18 +8,45 @@ import (
 	"reflect"
 	"testing"
 
+	"v.io/syncbase/v23/syncbase/nosql/internal/query/query_db"
 	"v.io/syncbase/v23/syncbase/nosql/internal/query/query_parser"
+	"v.io/syncbase/v23/syncbase/nosql/syncql"
+	"v.io/v23"
+	"v.io/v23/context"
+	"v.io/v23/verror"
+	_ "v.io/x/ref/runtime/factories/generic"
+	"v.io/x/ref/test"
 )
 
 type parseSelectTest struct {
 	query     string
 	statement query_parser.SelectStatement
-	err       *query_parser.SyntaxError
+	err       error
 }
 
 type parseSelectErrorTest struct {
 	query string
-	err   *query_parser.SyntaxError
+	err   error
+}
+
+type mockDB struct {
+	ctx *context.T
+}
+
+func (db *mockDB) GetContext() *context.T {
+	return db.ctx
+}
+
+func (db *mockDB) GetTable(name string) (query_db.Table, error) {
+	return nil, nil
+}
+
+var db mockDB
+
+func init() {
+	var shutdown v23.Shutdown
+	db.ctx, shutdown = test.InitForTest()
+	defer shutdown()
 }
 
 func TestQueryParser(t *testing.T) {
@@ -2321,7 +2348,7 @@ func TestQueryParser(t *testing.T) {
 	}
 
 	for _, test := range basic {
-		st, err := query_parser.Parse(test.query)
+		st, err := query_parser.Parse(&db, test.query)
 		if err != nil {
 			t.Errorf("query: %s; unexpected error: got %v, want nil", test.query, err)
 		}
@@ -2336,62 +2363,63 @@ func TestQueryParser(t *testing.T) {
 
 func TestQueryParserErrors(t *testing.T) {
 	basic := []parseSelectErrorTest{
-		{"", query_parser.Error(0, "No statement found.")},
-		{";", query_parser.Error(0, "Expected identifier, found ';'.")},
-		{"foo", query_parser.Error(0, "Unknown identifier: foo")},
-		{"(foo)", query_parser.Error(0, "Expected identifier, found '('.")},
-		{"select foo.", query_parser.Error(11, "Expected identifier, found ''.")},
-		{"select foo. from a", query_parser.Error(17, "Expected 'from', found 'a'")},
-		{"select (foo)", query_parser.Error(7, "Expected identifier, found '('.")},
-		{"select from where", query_parser.Error(12, "Expected 'from', found 'where'")},
-		{"create table Customer (CustRecord cust_pkg.Cust, primary key(CustRecord.CustID))", query_parser.Error(0, "Unknown identifier: create")},
-		{"select foo from Customer where (A=123 or B=456) and C=789)", query_parser.Error(57, "Unexpected: ')'.")},
-		{"select foo from Customer where ((A=123 or B=456) and C=789", query_parser.Error(58, "Unexpected end of statement.")},
-		{"select foo from Customer where (((((A=123 or B=456 and C=789))))", query_parser.Error(64, "Unexpected end of statement.")},
-		{"select foo from Customer where (A=123 or B=456) and C=789)))))", query_parser.Error(57, "Unexpected: ')'.")},
-		{"select foo from Customer where", query_parser.Error(30, "Unexpected end of statement.")},
-		{"select foo from Customer where ", query_parser.Error(31, "Unexpected end of statement.")},
-		{"select foo from Customer where )", query_parser.Error(31, "Expected operand, found ')'.")},
-		{"select foo from Customer where )A=123 or B=456) and C=789", query_parser.Error(31, "Expected operand, found ')'.")},
-		{"select foo from Customer where ()A=123 or B=456) and C=789", query_parser.Error(32, "Expected operand, found ')'.")},
-		{"select foo from Customer where (A=123 or B=456) and C=789)", query_parser.Error(57, "Unexpected: ')'.")},
-		{"select foo bar from Customer", query_parser.Error(11, "Expected 'from', found 'bar'")},
-		{"select foo from Customer Invoice", query_parser.Error(25, "Unexpected: 'Invoice'.")},
-		{"select (foo) from (Customer)", query_parser.Error(7, "Expected identifier, found '('.")},
-		{"select foo, bar from Customer where a = (b)", query_parser.Error(40, "Expected operand, found '('.")},
-		{"select foo, bar from Customer where a = b and (c) = d", query_parser.Error(48, "Expected operator ('like', 'not like', '=', '<>', 'equal' or 'not equal'), found ')'.")},
-		{"select foo, bar from Customer where a = b and c =", query_parser.Error(49, "Unexpected end of statement, expected operand.")},
-		{"select foo, bar from Customer where a = ", query_parser.Error(40, "Unexpected end of statement, expected operand.")},
-		{"select foo, bar from Customer where a", query_parser.Error(37, "Unexpected end of statement, expected operator.")},
-		{"select", query_parser.Error(6, "Unexpected end of statement.")},
-		{"select a from", query_parser.Error(13, "Unexpected end of statement.")},
-		{"select a from b where c = d and e =", query_parser.Error(35, "Unexpected end of statement, expected operand.")},
-		{"select a from b where c = d and f", query_parser.Error(33, "Unexpected end of statement, expected operator.")},
-		{"select a from b where c = d and f *", query_parser.Error(34, "Expected operator ('like', 'not like', '=', '<>', 'equal' or 'not equal'), found '*'.")},
-		{"select a from b where c <", query_parser.Error(25, "Unexpected end of statement, expected operand.")},
-		{"select a from b where c not", query_parser.Error(27, "Expected 'equal' or 'like'")},
-		{"select a from b where c not 8", query_parser.Error(28, "Expected 'equal' or 'like'")},
-		{"select x from y where a and b = c", query_parser.Error(24, "Expected operator ('like', 'not like', '=', '<>', '<', '<=', '>', '>=', 'equal' or 'not equal'), found 'and'.")},
-		{"select v from Customer limit 100 offset a", query_parser.Error(40, "Expected positive integer literal., found 'a'.")},
-		{"select v from Customer limit -100 offset 5", query_parser.Error(29, "Expected positive integer literal., found '-'.")},
-		{"select v from Customer limit 100 offset -5", query_parser.Error(40, "Expected positive integer literal., found '-'.")},
-		{"select v from Customer limit a offset 200", query_parser.Error(29, "Expected positive integer literal., found 'a'.")},
-		{"select v from Customer limit", query_parser.Error(28, "Unexpected end of statement, expected integer literal.")},
-		{"select v from Customer, Invoice", query_parser.Error(22, "Unexpected: ','.")},
-		{"select v from Customer As Cust where foo = bar", query_parser.Error(23, "Unexpected: 'As'.")},
-		{"select 1abc from Customer where foo = bar", query_parser.Error(7, "Expected identifier, found '1'.")},
-		{"select v from Customer where Foo(1,) = true", query_parser.Error(35, "Expected operand, found ')'.")},
-		{"select v from Customer where Foo(,1) = true", query_parser.Error(33, "Expected operand, found ','.")},
-		{"select v from Customer where Foo(1, 2.0 = true", query_parser.Error(40, "Expected right paren or comma.")},
-		{"select v from Customer where Foo(1, 2.0 limit 100", query_parser.Error(40, "Expected right paren or comma.")},
-		{"select v from Customer where v is", query_parser.Error(33, "Unexpected end of statement, expected operand.")},
-		{"select v from Customer where v = 1.0 is k = \"abc\"", query_parser.Error(37, "Unexpected: 'is'.")},
-		{"select v as from Customer", query_parser.Error(17, "Expected 'from', found 'Customer'")},
+		{"", syncql.NewErrNoStatementFound(db.GetContext(), 0)},
+		{";", syncql.NewErrExpectedIdentifier(db.GetContext(), 0, ";")},
+		{"foo", syncql.NewErrUnknownIdentifier(db.GetContext(), 0, "foo")},
+		{"(foo)", syncql.NewErrExpectedIdentifier(db.GetContext(), 0, "(")},
+		{"select foo.", syncql.NewErrExpectedIdentifier(db.GetContext(), 11, "")},
+		{"select foo. from a", syncql.NewErrExpectedFrom(db.GetContext(), 17, "a")},
+		{"select (foo)", syncql.NewErrExpectedIdentifier(db.GetContext(), 7, "(")},
+		{"select from where", syncql.NewErrExpectedFrom(db.GetContext(), 12, "where")},
+		{"create table Customer (CustRecord cust_pkg.Cust, primary key(CustRecord.CustID))", syncql.NewErrUnknownIdentifier(db.GetContext(), 0, "create")},
+		{"select foo from Customer where (A=123 or B=456) and C=789)", syncql.NewErrUnexpected(db.GetContext(), 57, ")")},
+		{"select foo from Customer where ((A=123 or B=456) and C=789", syncql.NewErrUnexpectedEndOfStatement(db.GetContext(), 58)},
+		{"select foo from Customer where (((((A=123 or B=456 and C=789))))", syncql.NewErrUnexpectedEndOfStatement(db.GetContext(), 64)},
+		{"select foo from Customer where (A=123 or B=456) and C=789)))))", syncql.NewErrUnexpected(db.GetContext(), 57, ")")},
+		{"select foo from Customer where", syncql.NewErrUnexpectedEndOfStatement(db.GetContext(), 30)},
+		{"select foo from Customer where ", syncql.NewErrUnexpectedEndOfStatement(db.GetContext(), 31)},
+		{"select foo from Customer where )", syncql.NewErrExpectedOperand(db.GetContext(), 31, ")")},
+		{"select foo from Customer where )A=123 or B=456) and C=789", syncql.NewErrExpectedOperand(db.GetContext(), 31, ")")},
+		{"select foo from Customer where ()A=123 or B=456) and C=789", syncql.NewErrExpectedOperand(db.GetContext(), 32, ")")},
+		{"select foo from Customer where (A=123 or B=456) and C=789)", syncql.NewErrUnexpected(db.GetContext(), 57, ")")},
+		{"select foo bar from Customer", syncql.NewErrExpectedFrom(db.GetContext(), 11, "bar")},
+		{"select foo from Customer Invoice", syncql.NewErrUnexpected(db.GetContext(), 25, "Invoice")},
+		{"select (foo) from (Customer)", syncql.NewErrExpectedIdentifier(db.GetContext(), 7, "(")},
+		{"select foo, bar from Customer where a = (b)", syncql.NewErrExpectedOperand(db.GetContext(), 40, "(")},
+		{"select foo, bar from Customer where a = b and (c) = d", syncql.NewErrExpectedOperator(db.GetContext(), 48, ")")},
+		{"select foo, bar from Customer where a = b and c =", syncql.NewErrUnexpectedEndOfStatement(db.GetContext(), 49)},
+		{"select foo, bar from Customer where a = ", syncql.NewErrUnexpectedEndOfStatement(db.GetContext(), 40)},
+		{"select foo, bar from Customer where a", syncql.NewErrUnexpectedEndOfStatement(db.GetContext(), 37)},
+		{"select", syncql.NewErrUnexpectedEndOfStatement(db.GetContext(), 6)},
+		{"select a from", syncql.NewErrUnexpectedEndOfStatement(db.GetContext(), 13)},
+		{"select a from b where c = d and e =", syncql.NewErrUnexpectedEndOfStatement(db.GetContext(), 35)},
+		{"select a from b where c = d and f", syncql.NewErrUnexpectedEndOfStatement(db.GetContext(), 33)},
+		{"select a from b where c = d and f *", syncql.NewErrExpectedOperator(db.GetContext(), 34, "*")},
+		{"select a from b where c <", syncql.NewErrUnexpectedEndOfStatement(db.GetContext(), 25)},
+		{"select a from b where c not", syncql.NewErrExpected(db.GetContext(), 27, "'equal' or 'like'")},
+		{"select a from b where c not 8", syncql.NewErrExpected(db.GetContext(), 28, "'equal' or 'like'")},
+		{"select x from y where a and b = c", syncql.NewErrExpectedOperator(db.GetContext(), 24, "and")},
+		{"select v from Customer limit 100 offset a", syncql.NewErrExpected(db.GetContext(), 40, "positive integer literal")},
+		{"select v from Customer limit -100 offset 5", syncql.NewErrExpected(db.GetContext(), 29, "positive integer literal")},
+		{"select v from Customer limit 100 offset -5", syncql.NewErrExpected(db.GetContext(), 40, "positive integer literal")},
+		{"select v from Customer limit a offset 200", syncql.NewErrExpected(db.GetContext(), 29, "positive integer literal")},
+		{"select v from Customer limit", syncql.NewErrUnexpectedEndOfStatement(db.GetContext(), 28)},
+		{"select v from Customer, Invoice", syncql.NewErrUnexpected(db.GetContext(), 22, ",")},
+		{"select v from Customer As Cust where foo = bar", syncql.NewErrUnexpected(db.GetContext(), 23, "As")},
+		{"select 1abc from Customer where foo = bar", syncql.NewErrExpectedIdentifier(db.GetContext(), 7, "1")},
+		{"select v from Customer where Foo(1,) = true", syncql.NewErrExpectedOperand(db.GetContext(), 35, ")")},
+		{"select v from Customer where Foo(,1) = true", syncql.NewErrExpectedOperand(db.GetContext(), 33, ",")},
+		{"select v from Customer where Foo(1, 2.0 = true", syncql.NewErrUnexpected(db.GetContext(), 40, "=")},
+		{"select v from Customer where Foo(1, 2.0 limit 100", syncql.NewErrUnexpected(db.GetContext(), 40, "limit")},
+		{"select v from Customer where v is", syncql.NewErrUnexpectedEndOfStatement(db.GetContext(), 33)},
+		{"select v from Customer where v = 1.0 is k = \"abc\"", syncql.NewErrUnexpected(db.GetContext(), 37, "is")},
+		{"select v as from Customer", syncql.NewErrExpectedFrom(db.GetContext(), 17, "Customer")},
 	}
 
 	for _, test := range basic {
-		_, err := query_parser.Parse(test.query)
-		if !reflect.DeepEqual(err, test.err) {
+		_, err := query_parser.Parse(&db, test.query)
+		// Test both that the IDs compare and the text compares (since the offset needs to match).
+		if verror.ErrorID(err) != verror.ErrorID(test.err) || err.Error() != test.err.Error() {
 			t.Errorf("query: %s; got %v, want %v", test.query, err, test.err)
 		}
 	}

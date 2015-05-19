@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"strconv"
 	"strings"
 
 	"github.com/peterh/liner"
@@ -23,11 +24,29 @@ func dumpDB(d query_db.Database) {
 	}
 }
 
+// Split an error message into an offset and the remaining (i.e., rhs of offset) message.
+// The convention for syncql is "<module><optional-rpc>[offset}<remaining-message>".
+func splitError(err error) (int64, string) {
+	errMsg := err.Error()
+	idx1 := strings.Index(errMsg, "[")
+	idx2 := strings.Index(errMsg, "]")
+	if idx1 == -1 || idx2 == -1 {
+		return 0, errMsg
+	}
+	offsetString := errMsg[idx1+1 : idx2]
+	offset, err := strconv.ParseInt(offsetString, 10, 64)
+	if err != nil {
+		return 0, errMsg
+	}
+	return offset, errMsg[idx2+1:]
+}
+
 func queryExec(d query_db.Database, q string) {
 	if columnNames, rs, err := query.Exec(d, q); err != nil {
+		off, msg := splitError(err)
 		fmt.Fprintf(os.Stderr, "%s\n", q)
-		fmt.Fprintf(os.Stderr, "%s^\n", strings.Repeat(" ", int(err.Off)))
-		fmt.Fprintf(os.Stderr, "Error: %s\n", err.Msg)
+		fmt.Fprintf(os.Stderr, "%s^\n", strings.Repeat(" ", int(off)))
+		fmt.Fprintf(os.Stderr, "Error: %s\n", msg)
 	} else {
 		sep := ""
 		for _, cName := range columnNames {

@@ -13,15 +13,32 @@ import (
 	"v.io/syncbase/v23/syncbase/nosql/internal/query/query_checker"
 	"v.io/syncbase/v23/syncbase/nosql/internal/query/query_db"
 	"v.io/syncbase/v23/syncbase/nosql/internal/query/query_parser"
+	"v.io/syncbase/v23/syncbase/nosql/syncql"
+	"v.io/v23"
+	"v.io/v23/context"
+	"v.io/v23/verror"
+	_ "v.io/x/ref/runtime/factories/generic"
+	"v.io/x/ref/test"
 )
 
 type mockDB struct {
+	ctx *context.T
+}
+
+func (db *mockDB) GetContext() *context.T {
+	return db.ctx
 }
 
 type customerTable struct {
 }
 
 type invoiceTable struct {
+}
+
+func init() {
+	var shutdown v23.Shutdown
+	db.ctx, shutdown = test.InitForTest()
+	defer shutdown()
 }
 
 func (t invoiceTable) Scan(prefixes []string) (query_db.KeyValueStream, error) {
@@ -32,7 +49,7 @@ func (t customerTable) Scan(prefixes []string) (query_db.KeyValueStream, error) 
 	return nil, errors.New("unimplemented")
 }
 
-func (db mockDB) GetTable(table string) (query_db.Table, error) {
+func (db *mockDB) GetTable(table string) (query_db.Table, error) {
 	if table == "Customer" {
 		var t customerTable
 		return t, nil
@@ -63,7 +80,7 @@ type regularExpressionsTest struct {
 
 type parseSelectErrorTest struct {
 	query string
-	err   *query_checker.SemanticError
+	err   error
 }
 
 func TestQueryChecker(t *testing.T) {
@@ -90,11 +107,11 @@ func TestQueryChecker(t *testing.T) {
 	}
 
 	for _, test := range basic {
-		s, syntaxErr := query_parser.Parse(test.query)
+		s, syntaxErr := query_parser.Parse(&db, test.query)
 		if syntaxErr != nil {
 			t.Errorf("query: %s; unexpected error: got %v, want nil", test.query, syntaxErr)
 		}
-		err := query_checker.Check(db, s)
+		err := query_checker.Check(&db, s)
 		if err != nil {
 			t.Errorf("query: %s; got %v, want: nil", test.query, err)
 		}
@@ -130,11 +147,11 @@ func TestKeyPrefixes(t *testing.T) {
 	}
 
 	for _, test := range basic {
-		s, syntaxErr := query_parser.Parse(test.query)
+		s, syntaxErr := query_parser.Parse(&db, test.query)
 		if syntaxErr != nil {
 			t.Errorf("query: %s; unexpected error: got %v, want nil", test.query, syntaxErr)
 		}
-		err := query_checker.Check(db, s)
+		err := query_checker.Check(&db, s)
 		if err != nil {
 			t.Errorf("query: %s; got %v, want: nil", test.query, err)
 		}
@@ -197,11 +214,11 @@ func TestRegularExpressions(t *testing.T) {
 	}
 
 	for _, test := range basic {
-		s, syntaxErr := query_parser.Parse(test.query)
+		s, syntaxErr := query_parser.Parse(&db, test.query)
 		if syntaxErr != nil {
 			t.Errorf("query: %s; unexpected error: got %v, want nil", test.query, syntaxErr)
 		}
-		err := query_checker.Check(db, s)
+		err := query_checker.Check(&db, s)
 		if err != nil {
 			t.Errorf("query: %s; got %v, want: nil", test.query, err)
 		}
@@ -231,56 +248,57 @@ func TestRegularExpressions(t *testing.T) {
 
 func TestQueryCheckerErrors(t *testing.T) {
 	basic := []parseSelectErrorTest{
-		{"select a from Customer", query_checker.Error(7, "Select field must be 'k' or 'v[{.<ident>}...]'.")},
-		{"select v from Bob", query_checker.Error(14, "No such table: Bob")},
-		{"select k.a from Customer", query_checker.Error(9, "Dot notation may not be used on a key (string) field.")},
-		{"select k from Customer where t.a = \"Foo.Bar\"", query_checker.Error(31, "Dot notation may not be used with type.")},
-		{"select v from Customer where a=1", query_checker.Error(29, "Where field must be 'k', 'v[{.<ident>}...]' or 't'.")},
-		{"select v from Customer limit 0", query_checker.Error(29, "Limit must be > 0.")},
-		{"select v.z from Customer where t = 2", query_checker.Error(31, "Type expressions must be 't = <string-literal>'.")},
-		{"select v.z from Customer where t <> \"foo\"", query_checker.Error(31, "Type expressions must be 't = <string-literal>'.")},
-		{"select v.z from Customer where t < \"foo\"", query_checker.Error(31, "Type expressions must be 't = <string-literal>'.")},
-		{"select v.z from Customer where t <= \"foo\"", query_checker.Error(31, "Type expressions must be 't = <string-literal>'.")},
-		{"select v.z from Customer where t > \"foo\"", query_checker.Error(31, "Type expressions must be 't = <string-literal>'.")},
-		{"select v.z from Customer where t >= \"foo\"", query_checker.Error(31, "Type expressions must be 't = <string-literal>'.")},
-		{"select v.z from Customer where \"foo\" = t", query_checker.Error(31, "Type expressions must be 't = <string-literal>'.")},
-		{"select v.z from Customer where v.x like v.y", query_checker.Error(31, "Like expressions require right operand of type <string-literal>.")},
-		{"select v.z from Customer where k = v.y", query_checker.Error(31, "Key (i.e., 'k') expressions must be of form 'k like|= <string-literal>'.")},
-		{"select v.z from Customer where k <> v.y", query_checker.Error(31, "Key (i.e., 'k') expressions must be of form 'k like|= <string-literal>'.")},
-		{"select v.z from Customer where k < v.y", query_checker.Error(31, "Key (i.e., 'k') expressions must be of form 'k like|= <string-literal>'.")},
-		{"select v.z from Customer where k <= v.y", query_checker.Error(31, "Key (i.e., 'k') expressions must be of form 'k like|= <string-literal>'.")},
-		{"select v.z from Customer where k > v.y", query_checker.Error(31, "Key (i.e., 'k') expressions must be of form 'k like|= <string-literal>'.")},
-		{"select v.z from Customer where k >= v.y", query_checker.Error(31, "Key (i.e., 'k') expressions must be of form 'k like|= <string-literal>'.")},
-		{"select v.z from Customer where \"abc%\" = k", query_checker.Error(31, "Key (i.e., 'k') expressions must be of form 'k like|= <string-literal>'.")},
-		{"select v from Customer where t = \"Foo.Bar\" and k >= \"100\" and k < \"200\" and v.foo > 50 and v.bar <= 1000 and v.baz <> -20.7", query_checker.Error(47, "Key (i.e., 'k') expressions must be of form 'k like|= <string-literal>'.")},
-		{"select v.z from Customer where k like \"a\\bc%\"", query_checker.Error(38, "Expected '\\', '%' or '_' after '\\'.")},
-		{"select v from Customer where v.A > false", query_checker.Error(33, "Boolean operands may only be used in equals and not equals expressions.")},
-		{"select v from Customer where true <= v.A", query_checker.Error(34, "Boolean operands may only be used in equals and not equals expressions.")},
-		{"select v from Customer where Now() < Date(\"2015/07/22\")", query_checker.Error(29, "Functions are not yet supported.  Stay tuned.")},
-		{"select v from Customer where Foo(\"2015/07/22\", true, 3.14157) = true", query_checker.Error(29, "Functions are not yet supported.  Stay tuned.")},
-		{"select v from Customer where t is nil", query_checker.Error(29, "Type expressions must be 't = <string-literal>'.")},
-		{"select v from Customer where k is nil", query_checker.Error(29, "Key (i.e., 'k') expressions must be of form 'k like|= <string-literal>'.")},
-		{"select v from Customer where nil is v.ZipCode", query_checker.Error(29, "'Is/is not' expressions require left operand to be a value operand.")},
-		{"select v from Customer where v.ZipCode is \"94303\"", query_checker.Error(42, "'Is/is not' expressions require right operand to be nil.")},
-		{"select v from Customer where v.ZipCode is 94303", query_checker.Error(42, "'Is/is not' expressions require right operand to be nil.")},
-		{"select v from Customer where v.ZipCode is true", query_checker.Error(42, "'Is/is not' expressions require right operand to be nil.")},
-		{"select v from Customer where v.ZipCode is 943.03", query_checker.Error(42, "'Is/is not' expressions require right operand to be nil.")},
-		{"select v from Customer where t is not nil", query_checker.Error(29, "Type expressions must be 't = <string-literal>'.")},
-		{"select v from Customer where k is not nil", query_checker.Error(29, "Key (i.e., 'k') expressions must be of form 'k like|= <string-literal>'.")},
-		{"select v from Customer where nil is not v.ZipCode", query_checker.Error(29, "'Is/is not' expressions require left operand to be a value operand.")},
-		{"select v from Customer where v.ZipCode is not \"94303\"", query_checker.Error(46, "'Is/is not' expressions require right operand to be nil.")},
-		{"select v from Customer where v.ZipCode is not 94303", query_checker.Error(46, "'Is/is not' expressions require right operand to be nil.")},
-		{"select v from Customer where v.ZipCode is not true", query_checker.Error(46, "'Is/is not' expressions require right operand to be nil.")},
-		{"select v from Customer where v.ZipCode is not 943.03", query_checker.Error(46, "'Is/is not' expressions require right operand to be nil.")},
+		{"select a from Customer", syncql.NewErrInvalidSelectField(db.GetContext(), 7)},
+		{"select v from Bob", syncql.NewErrTableCantAccess(db.GetContext(), 14, "Bob", errors.New("No such table: Bob"))},
+		{"select k.a from Customer", syncql.NewErrDotNotationDisallowedForKey(db.GetContext(), 9)},
+		{"select k from Customer where t.a = \"Foo.Bar\"", syncql.NewErrDotNotationDisallowedForType(db.GetContext(), 31)},
+		{"select v from Customer where a=1", syncql.NewErrBadFieldInWhere(db.GetContext(), 29)},
+		{"select v from Customer limit 0", syncql.NewErrLimitMustBeGe0(db.GetContext(), 29)},
+		{"select v.z from Customer where t = 2", syncql.NewErrTypeExpressionForm(db.GetContext(), 31)},
+		{"select v.z from Customer where t <> \"foo\"", syncql.NewErrTypeExpressionForm(db.GetContext(), 31)},
+		{"select v.z from Customer where t < \"foo\"", syncql.NewErrTypeExpressionForm(db.GetContext(), 31)},
+		{"select v.z from Customer where t <= \"foo\"", syncql.NewErrTypeExpressionForm(db.GetContext(), 31)},
+		{"select v.z from Customer where t > \"foo\"", syncql.NewErrTypeExpressionForm(db.GetContext(), 31)},
+		{"select v.z from Customer where t >= \"foo\"", syncql.NewErrTypeExpressionForm(db.GetContext(), 31)},
+		{"select v.z from Customer where \"foo\" = t", syncql.NewErrTypeExpressionForm(db.GetContext(), 31)},
+		{"select v.z from Customer where v.x like v.y", syncql.NewErrLikeExpressionsRequireRhsString(db.GetContext(), 31)},
+		{"select v.z from Customer where k = v.y", syncql.NewErrKeyExpressionForm(db.GetContext(), 31)},
+		{"select v.z from Customer where k <> v.y", syncql.NewErrKeyExpressionForm(db.GetContext(), 31)},
+		{"select v.z from Customer where k < v.y", syncql.NewErrKeyExpressionForm(db.GetContext(), 31)},
+		{"select v.z from Customer where k <= v.y", syncql.NewErrKeyExpressionForm(db.GetContext(), 31)},
+		{"select v.z from Customer where k > v.y", syncql.NewErrKeyExpressionForm(db.GetContext(), 31)},
+		{"select v.z from Customer where k >= v.y", syncql.NewErrKeyExpressionForm(db.GetContext(), 31)},
+		{"select v.z from Customer where \"abc%\" = k", syncql.NewErrKeyExpressionForm(db.GetContext(), 31)},
+		{"select v from Customer where t = \"Foo.Bar\" and k >= \"100\" and k < \"200\" and v.foo > 50 and v.bar <= 1000 and v.baz <> -20.7", syncql.NewErrKeyExpressionForm(db.GetContext(), 47)},
+		{"select v.z from Customer where k like \"a\\bc%\"", syncql.NewErrInvalidEscapedChar(db.GetContext(), 38)},
+		{"select v from Customer where v.A > false", syncql.NewErrBoolInvalidExpression(db.GetContext(), 33)},
+		{"select v from Customer where true <= v.A", syncql.NewErrBoolInvalidExpression(db.GetContext(), 34)},
+		{"select v from Customer where Now() < Date(\"2015/07/22\")", syncql.NewErrFunctionsNotYetSupported(db.GetContext(), 29)},
+		{"select v from Customer where Foo(\"2015/07/22\", true, 3.14157) = true", syncql.NewErrFunctionsNotYetSupported(db.GetContext(), 29)},
+		{"select v from Customer where t is nil", syncql.NewErrTypeExpressionForm(db.GetContext(), 29)},
+		{"select v from Customer where k is nil", syncql.NewErrKeyExpressionForm(db.GetContext(), 29)},
+		{"select v from Customer where nil is v.ZipCode", syncql.NewErrIsIsNotRequireLhsValue(db.GetContext(), 29)},
+		{"select v from Customer where v.ZipCode is \"94303\"", syncql.NewErrIsIsNotRequireRhsNil(db.GetContext(), 42)},
+		{"select v from Customer where v.ZipCode is 94303", syncql.NewErrIsIsNotRequireRhsNil(db.GetContext(), 42)},
+		{"select v from Customer where v.ZipCode is true", syncql.NewErrIsIsNotRequireRhsNil(db.GetContext(), 42)},
+		{"select v from Customer where v.ZipCode is 943.03", syncql.NewErrIsIsNotRequireRhsNil(db.GetContext(), 42)},
+		{"select v from Customer where t is not nil", syncql.NewErrTypeExpressionForm(db.GetContext(), 29)},
+		{"select v from Customer where k is not nil", syncql.NewErrKeyExpressionForm(db.GetContext(), 29)},
+		{"select v from Customer where nil is not v.ZipCode", syncql.NewErrIsIsNotRequireLhsValue(db.GetContext(), 29)},
+		{"select v from Customer where v.ZipCode is not \"94303\"", syncql.NewErrIsIsNotRequireRhsNil(db.GetContext(), 46)},
+		{"select v from Customer where v.ZipCode is not 94303", syncql.NewErrIsIsNotRequireRhsNil(db.GetContext(), 46)},
+		{"select v from Customer where v.ZipCode is not true", syncql.NewErrIsIsNotRequireRhsNil(db.GetContext(), 46)},
+		{"select v from Customer where v.ZipCode is not 943.03", syncql.NewErrIsIsNotRequireRhsNil(db.GetContext(), 46)},
 	}
 
 	for _, test := range basic {
-		s, syntaxErr := query_parser.Parse(test.query)
+		s, syntaxErr := query_parser.Parse(&db, test.query)
 		if syntaxErr != nil {
 			t.Errorf("query: %s; unexpected error: got %v, want nil", test.query, syntaxErr)
 		} else {
-			err := query_checker.Check(db, s)
-			if !reflect.DeepEqual(err, test.err) {
+			err := query_checker.Check(&db, s)
+			// Test both that the IDs compare and the text compares (since the offset needs to match).
+			if verror.ErrorID(err) != verror.ErrorID(test.err) || err.Error() != test.err.Error() {
 				t.Errorf("query: %s; got %v, want %v", test.query, err, test.err)
 			}
 		}

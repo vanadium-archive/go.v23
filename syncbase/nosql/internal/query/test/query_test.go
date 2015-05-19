@@ -15,10 +15,17 @@ import (
 	"v.io/syncbase/v23/syncbase/nosql/internal/query/query_checker"
 	"v.io/syncbase/v23/syncbase/nosql/internal/query/query_db"
 	"v.io/syncbase/v23/syncbase/nosql/internal/query/query_parser"
+	"v.io/syncbase/v23/syncbase/nosql/syncql"
+	"v.io/v23"
+	"v.io/v23/context"
 	"v.io/v23/vdl"
+	"v.io/v23/verror"
+	_ "v.io/x/ref/runtime/factories/generic"
+	"v.io/x/ref/test"
 )
 
 type mockDB struct {
+	ctx    *context.T
 	tables []table
 }
 
@@ -79,6 +86,10 @@ func (t table) Scan(prefixes []string) (query_db.KeyValueStream, error) {
 	return &keyValueStreamImpl, nil
 }
 
+func (db mockDB) GetContext() *context.T {
+	return db.ctx
+}
+
 func (db mockDB) GetTable(table string) (query_db.Table, error) {
 	for _, t := range db.tables {
 		if t.name == table {
@@ -100,6 +111,10 @@ type kv struct {
 }
 
 func init() {
+	var shutdown v23.Shutdown
+	db.ctx, shutdown = test.InitForTest()
+	defer shutdown()
+
 	custTable.name = "Customer"
 	custTable.rows = []kv{
 		kv{
@@ -175,7 +190,7 @@ func init() {
 type keyPrefixesTest struct {
 	query       string
 	keyPrefixes []string
-	err         *query.QueryError
+	err         error
 }
 
 type evalWhereUsingOnlyKeyTest struct {
@@ -213,7 +228,7 @@ type execSelectSingleRowTest struct {
 
 type execSelectErrorTest struct {
 	query string
-	err   *query.QueryError
+	err   error
 }
 
 type execResolveFieldTest struct {
@@ -759,7 +774,7 @@ func TestKeyPrefixes(t *testing.T) {
 	}
 
 	for _, test := range basic {
-		s, synErr := query_parser.Parse(test.query)
+		s, synErr := query_parser.Parse(db, test.query)
 		if synErr != nil {
 			t.Errorf("query: %s; got %v, want nil", test.query, synErr)
 		}
@@ -818,7 +833,7 @@ func TestEvalWhereUsingOnlyKey(t *testing.T) {
 	}
 
 	for _, test := range basic {
-		s, synErr := query_parser.Parse(test.query)
+		s, synErr := query_parser.Parse(db, test.query)
 		if synErr != nil {
 			t.Errorf("query: %s; got %v, want nil", test.query, synErr)
 		}
@@ -1049,7 +1064,7 @@ func TestEval(t *testing.T) {
 	}
 
 	for _, test := range basic {
-		s, synErr := query_parser.Parse(test.query)
+		s, synErr := query_parser.Parse(db, test.query)
 		if synErr != nil {
 			t.Errorf("query: %s; got %v, want nil", test.query, synErr)
 		}
@@ -1103,7 +1118,7 @@ func TestProjection(t *testing.T) {
 	}
 
 	for _, test := range basic {
-		s, synErr := query_parser.Parse(test.query)
+		s, synErr := query_parser.Parse(db, test.query)
 		if synErr != nil {
 			t.Errorf("query: %s; got %v, want nil", test.query, synErr)
 		}
@@ -1188,7 +1203,7 @@ func TestExecSelectSingleRow(t *testing.T) {
 	}
 
 	for _, test := range basic {
-		s, synErr := query_parser.Parse(test.query)
+		s, synErr := query_parser.Parse(db, test.query)
 		if synErr != nil {
 			t.Errorf("query: %s; got %v, want nil", test.query, synErr)
 		}
@@ -1217,23 +1232,24 @@ func TestExecErrors(t *testing.T) {
 	basic := []execSelectErrorTest{
 		{
 			"select a from Customer",
-			query.Error(7, "Select field must be 'k' or 'v[{.<ident>}...]'."),
+			syncql.NewErrInvalidSelectField(db.GetContext(), 7),
 		},
 		{
 			"select v from Unknown",
 			// The following error text is dependent on implementation of Database.
-			query.Error(14, "No such table: Unknown."),
+			syncql.NewErrTableCantAccess(db.GetContext(), 14, "Unknown", errors.New("No such table: Unknown.")),
 		},
 		{
 			"select v from Customer offset -1",
 			// The following error text is dependent on implementation of Database.
-			query.Error(30, "Expected positive integer literal., found '-'."),
+			syncql.NewErrExpected(db.GetContext(), 30, "positive integer literal"),
 		},
 	}
 
 	for _, test := range basic {
 		_, _, err := query.Exec(db, test.query)
-		if !reflect.DeepEqual(err, test.err) {
+		// Test both that the IDs compare and the text compares (since the offset needs to match).
+		if verror.ErrorID(err) != verror.ErrorID(test.err) || err.Error() != test.err.Error() {
 			t.Errorf("query: %s; got %v, want %v", test.query, err, test.err)
 		}
 	}

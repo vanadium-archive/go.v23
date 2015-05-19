@@ -5,10 +5,12 @@
 package query_db
 
 import (
+	"v.io/v23/context"
 	"v.io/v23/vdl"
 )
 
 type Database interface {
+	GetContext() *context.T
 	GetTable(name string) (Table, error)
 }
 

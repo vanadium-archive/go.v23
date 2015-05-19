@@ -14,6 +14,7 @@ import (
 	"unicode/utf8"
 
 	"v.io/syncbase/v23/syncbase/nosql/internal/query/query_db"
+	"v.io/syncbase/v23/syncbase/nosql/syncql"
 	"v.io/v23/vdl"
 )
 
@@ -40,19 +41,6 @@ type Token struct {
 	Tok   TokenType
 	Value string
 	Off   int64
-}
-
-type SyntaxError struct {
-	Msg string
-	Off int64
-}
-
-func (e *SyntaxError) Error() string {
-	return fmt.Sprintf("[Off:%d] %s", e.Off, e.Msg)
-}
-
-func Error(offset int64, msg string) *SyntaxError {
-	return &SyntaxError{msg, offset}
 }
 
 type Node struct {
@@ -267,8 +255,8 @@ func scannerError(s *scanner.Scanner, msg string) {
 	// Do nothing.
 }
 
-// Parse a statement.  Return it or a SyntaxError.
-func Parse(src string) (*Statement, *SyntaxError) {
+// Parse a statement.  Return it or an error.
+func Parse(db query_db.Database, src string) (*Statement, error) {
 	r := strings.NewReader(src)
 	var s scanner.Scanner
 	s.Init(r)
@@ -276,59 +264,59 @@ func Parse(src string) (*Statement, *SyntaxError) {
 
 	token := scanToken(&s) // eat the select
 	if token.Tok == TokEOF {
-		return nil, Error(token.Off, "No statement found.")
+		return nil, syncql.NewErrNoStatementFound(db.GetContext(), token.Off)
 	}
 	if token.Tok != TokIDENT {
-		return nil, Error(token.Off, fmt.Sprintf("Expected identifier, found '%s'.", token.Value))
+		return nil, syncql.NewErrExpectedIdentifier(db.GetContext(), token.Off, token.Value)
 	}
 	switch strings.ToLower(token.Value) {
 	case "select":
 		var st Statement
-		var err *SyntaxError
-		st, token, err = selectStatement(&s, token)
+		var err error
+		st, token, err = selectStatement(db, &s, token)
 		return &st, err
 	default:
-		return nil, Error(token.Off, fmt.Sprintf("Unknown identifier: %s", token.Value))
+		return nil, syncql.NewErrUnknownIdentifier(db.GetContext(), token.Off, token.Value)
 	}
 }
 
 // Parse the [currently] one and only supported statement: select.
-func selectStatement(s *scanner.Scanner, token *Token) (Statement, *Token, *SyntaxError) {
+func selectStatement(db query_db.Database, s *scanner.Scanner, token *Token) (Statement, *Token, error) {
 	var st SelectStatement
 	st.Off = token.Off
 
 	// parse SelectClause
-	var err *SyntaxError
-	st.Select, token, err = parseSelectClause(s, token)
+	var err error
+	st.Select, token, err = parseSelectClause(db, s, token)
 	if err != nil {
 		return nil, nil, err
 	}
 
-	st.From, token, err = parseFromClause(s, token)
+	st.From, token, err = parseFromClause(db, s, token)
 	if err != nil {
 		return nil, nil, err
 	}
 
-	st.Where, token, err = parseWhereClause(s, token)
+	st.Where, token, err = parseWhereClause(db, s, token)
 	if err != nil {
 		return nil, nil, err
 	}
 
-	st.Limit, st.ResultsOffset, token, err = parseLimitResultsOffsetClauses(s, token)
+	st.Limit, st.ResultsOffset, token, err = parseLimitResultsOffsetClauses(db, s, token)
 	if err != nil {
 		return nil, nil, err
 	}
 
 	// There can be nothing remaining for the current statement
 	if token.Tok != TokEOF {
-		return nil, nil, Error(token.Off, fmt.Sprintf("Unexpected: '%s'.", token.Value))
+		return nil, nil, syncql.NewErrUnexpected(db.GetContext(), token.Off, token.Value)
 	}
 
 	return st, token, nil
 }
 
-// Parse the select clause (fields). Return *SelectClause, next token (or SyntaxError).
-func parseSelectClause(s *scanner.Scanner, token *Token) (*SelectClause, *Token, *SyntaxError) {
+// Parse the select clause (fields). Return *SelectClause, next token (or error).
+func parseSelectClause(db query_db.Database, s *scanner.Scanner, token *Token) (*SelectClause, *Token, error) {
 	// must be at least one column or it is an error
 	// columns may be in dot notation
 	// columns are separated by commas
@@ -336,18 +324,18 @@ func parseSelectClause(s *scanner.Scanner, token *Token) (*SelectClause, *Token,
 	selectClause.Off = token.Off
 	token = scanToken(s) // eat the select
 	if token.Tok == TokEOF {
-		return nil, nil, Error(token.Off, "Unexpected end of statement.")
+		return nil, nil, syncql.NewErrUnexpectedEndOfStatement(db.GetContext(), token.Off)
 	}
-	var err *SyntaxError
+	var err error
 	// scan first column
-	if token, err = parseColumn(s, &selectClause, token); err != nil {
+	if token, err = parseColumn(db, s, &selectClause, token); err != nil {
 		return nil, nil, err
 	}
 
 	// More columns?
 	for token.Tok == TokCOMMA {
 		token = scanToken(s)
-		if token, err = parseColumn(s, &selectClause, token); err != nil {
+		if token, err = parseColumn(db, s, &selectClause, token); err != nil {
 			return nil, nil, err
 		}
 	}
@@ -355,10 +343,10 @@ func parseSelectClause(s *scanner.Scanner, token *Token) (*SelectClause, *Token,
 	return &selectClause, token, nil
 }
 
-// Parse a column (field). Return SelectClause and next token (or SyntaxError).
-func parseColumn(s *scanner.Scanner, selectClause *SelectClause, token *Token) (*Token, *SyntaxError) {
+// Parse a column (field). Return SelectClause and next token (or error).
+func parseColumn(db query_db.Database, s *scanner.Scanner, selectClause *SelectClause, token *Token) (*Token, error) {
 	if token.Tok != TokIDENT {
-		return nil, Error(token.Off, fmt.Sprintf("Expected identifier, found '%s'.", token.Value))
+		return nil, syncql.NewErrExpectedIdentifier(db.GetContext(), token.Off, token.Value)
 	}
 
 	var columnEntry ColumnEntry
@@ -373,7 +361,7 @@ func parseColumn(s *scanner.Scanner, selectClause *SelectClause, token *Token) (
 	for token.Tok != TokEOF && token.Tok == TokPERIOD {
 		token = scanToken(s)
 		if token.Tok != TokIDENT {
-			return nil, Error(token.Off, fmt.Sprintf("Expected identifier, found '%s'.", token.Value))
+			return nil, syncql.NewErrExpectedIdentifier(db.GetContext(), token.Off, token.Value)
 		}
 		var segment Segment
 		segment.Value = token.Value
@@ -388,7 +376,7 @@ func parseColumn(s *scanner.Scanner, selectClause *SelectClause, token *Token) (
 		asClause.Off = token.Off
 		token = scanToken(s)
 		if token.Tok != TokIDENT {
-			return nil, Error(token.Off, fmt.Sprintf("Expected identifier, found '%s'.", token.Value))
+			return nil, syncql.NewErrExpectedIdentifier(db.GetContext(), token.Off, token.Value)
 		}
 		asClause.AltName.Value = token.Value
 		asClause.AltName.Off = token.Off
@@ -400,20 +388,20 @@ func parseColumn(s *scanner.Scanner, selectClause *SelectClause, token *Token) (
 	return token, nil
 }
 
-// Parse the from clause, Return FromClause and next Token or SyntaxError.
-func parseFromClause(s *scanner.Scanner, token *Token) (*FromClause, *Token, *SyntaxError) {
+// Parse the from clause, Return FromClause and next Token or error.
+func parseFromClause(db query_db.Database, s *scanner.Scanner, token *Token) (*FromClause, *Token, error) {
 	if strings.ToLower(token.Value) != "from" {
-		return nil, nil, Error(token.Off, fmt.Sprintf("Expected 'from', found '%s'", token.Value))
+		return nil, nil, syncql.NewErrExpectedFrom(db.GetContext(), token.Off, token.Value)
 	}
 	var fromClause FromClause
 	fromClause.Off = token.Off
 	token = scanToken(s) // eat from
 	// must be a table specified
 	if token.Tok == TokEOF {
-		return nil, nil, Error(token.Off, "Unexpected end of statement.")
+		return nil, nil, syncql.NewErrUnexpectedEndOfStatement(db.GetContext(), token.Off)
 	}
 	if token.Tok != TokIDENT {
-		return nil, nil, Error(token.Off, fmt.Sprintf("Expected identifier, found '%s'.", token.Value))
+		return nil, nil, syncql.NewErrExpectedIdentifier(db.GetContext(), token.Off, token.Value)
 	}
 	fromClause.Table.Off = token.Off
 	fromClause.Table.Name = token.Value
@@ -421,8 +409,8 @@ func parseFromClause(s *scanner.Scanner, token *Token) (*FromClause, *Token, *Sy
 	return &fromClause, token, nil
 }
 
-// Parse the where clause (if any).  Return WhereClause (could be nil) and and next Token or SyntaxError.
-func parseWhereClause(s *scanner.Scanner, token *Token) (*WhereClause, *Token, *SyntaxError) {
+// Parse the where clause (if any).  Return WhereClause (could be nil) and and next Token or error.
+func parseWhereClause(db query_db.Database, s *scanner.Scanner, token *Token) (*WhereClause, *Token, error) {
 	// parse Optional where clause
 	if token.Tok != TokEOF {
 		if strings.ToLower(token.Value) != "where" {
@@ -432,8 +420,8 @@ func parseWhereClause(s *scanner.Scanner, token *Token) (*WhereClause, *Token, *
 		where.Off = token.Off
 		token = scanToken(s)
 		// parse expression
-		var err *SyntaxError
-		where.Expr, token, err = parseExpression(s, token)
+		var err error
+		where.Expr, token, err = parseExpression(db, s, token)
 		if err != nil {
 			return nil, nil, err
 		}
@@ -443,41 +431,41 @@ func parseWhereClause(s *scanner.Scanner, token *Token) (*WhereClause, *Token, *
 	}
 }
 
-// Parse a parenthesized expression.  Return expression and next token (or SyntaxError)
-func parseParenthesizedExpression(s *scanner.Scanner, token *Token) (*Expression, *Token, *SyntaxError) {
+// Parse a parenthesized expression.  Return expression and next token (or error)
+func parseParenthesizedExpression(db query_db.Database, s *scanner.Scanner, token *Token) (*Expression, *Token, error) {
 	// Only called when token == TokLEFTPAREN
 	token = scanToken(s) // eat '('
 	var expr *Expression
-	var err *SyntaxError
-	expr, token, err = parseExpression(s, token)
+	var err error
+	expr, token, err = parseExpression(db, s, token)
 	if err != nil {
 		return nil, nil, err
 	}
 	// Expect right paren
 	if token.Tok == TokEOF {
-		return nil, nil, Error(token.Off, "Unexpected end of statement.")
+		return nil, nil, syncql.NewErrUnexpectedEndOfStatement(db.GetContext(), token.Off)
 	}
 	if token.Tok != TokRIGHTPAREN {
-		return nil, nil, Error(token.Off, "Expected ')'.")
+		return nil, nil, syncql.NewErrExpected(db.GetContext(), token.Off, ")")
 	}
 	token = scanToken(s) // eat ')'
 	return expr, token, nil
 }
 
-// Parse an expression.  Return expression and next token (or SyntaxError)
-func parseExpression(s *scanner.Scanner, token *Token) (*Expression, *Token, *SyntaxError) {
+// Parse an expression.  Return expression and next token (or error)
+func parseExpression(db query_db.Database, s *scanner.Scanner, token *Token) (*Expression, *Token, error) {
 	if token.Tok == TokEOF {
-		return nil, nil, Error(token.Off, "Unexpected end of statement.")
+		return nil, nil, syncql.NewErrUnexpectedEndOfStatement(db.GetContext(), token.Off)
 	}
 
-	var err *SyntaxError
+	var err error
 	var expr *Expression
 
 	if token.Tok == TokLEFTPAREN {
-		expr, token, err = parseParenthesizedExpression(s, token)
+		expr, token, err = parseParenthesizedExpression(db, s, token)
 	} else {
 		// We expect a like/equal expression
-		expr, token, err = parseLikeEqualExpression(s, token)
+		expr, token, err = parseLikeEqualExpression(db, s, token)
 	}
 	if err != nil {
 		return nil, nil, err
@@ -496,7 +484,7 @@ func parseExpression(s *scanner.Scanner, token *Token) (*Expression, *Token, *Sy
 		newExpression.Operand1 = &operand1
 		newExpression.Off = operand1.Off
 
-		newExpression.Operator, token, err = parseLogicalOperator(s, token)
+		newExpression.Operator, token, err = parseLogicalOperator(db, s, token)
 		if err != nil {
 			return nil, nil, err
 		}
@@ -507,10 +495,10 @@ func parseExpression(s *scanner.Scanner, token *Token) (*Expression, *Token, *Sy
 		expr.Operand2 = &operand2
 		if token.Tok == TokLEFTPAREN {
 			expr.Operand2.Type = TypExpr
-			expr.Operand2.Expr, token, err = parseParenthesizedExpression(s, token)
+			expr.Operand2.Expr, token, err = parseParenthesizedExpression(db, s, token)
 		} else {
 			expr.Operand2.Type = TypExpr
-			expr.Operand2.Expr, token, err = parseLikeEqualExpression(s, token)
+			expr.Operand2.Expr, token, err = parseLikeEqualExpression(db, s, token)
 		}
 		if err != nil {
 			return nil, nil, err
@@ -521,22 +509,22 @@ func parseExpression(s *scanner.Scanner, token *Token) (*Expression, *Token, *Sy
 	return expr, token, nil
 }
 
-// Parse a binary expression.  Return expression and next token (or SyntaxError)
-func parseLikeEqualExpression(s *scanner.Scanner, token *Token) (*Expression, *Token, *SyntaxError) {
+// Parse a binary expression.  Return expression and next token (or error)
+func parseLikeEqualExpression(db query_db.Database, s *scanner.Scanner, token *Token) (*Expression, *Token, error) {
 	var expression Expression
 	expression.Off = token.Off
 
 	// operand 1
 	var operand1 *Operand
-	var err *SyntaxError
-	operand1, token, err = parseOperand(s, token)
+	var err error
+	operand1, token, err = parseOperand(db, s, token)
 	if err != nil {
 		return nil, nil, err
 	}
 
 	// operator
 	var operator *BinaryOperator
-	operator, token, err = parseBinaryOperator(s, token)
+	operator, token, err = parseBinaryOperator(db, s, token)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -544,9 +532,9 @@ func parseLikeEqualExpression(s *scanner.Scanner, token *Token) (*Expression, *T
 	// operand 2
 	var operand2 *Operand
 	if token.Tok == TokEOF {
-		return nil, nil, Error(token.Off, "Unexpected end of statement, expected operand.")
+		return nil, nil, syncql.NewErrUnexpectedEndOfStatement(db.GetContext(), token.Off)
 	}
-	operand2, token, err = parseOperand(s, token)
+	operand2, token, err = parseOperand(db, s, token)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -558,10 +546,10 @@ func parseLikeEqualExpression(s *scanner.Scanner, token *Token) (*Expression, *T
 	return &expression, token, nil
 }
 
-// Parse an operand (field or literal) and return it and the next Token (or SyntaxError)
-func parseOperand(s *scanner.Scanner, token *Token) (*Operand, *Token, *SyntaxError) {
+// Parse an operand (field or literal) and return it and the next Token (or error)
+func parseOperand(db query_db.Database, s *scanner.Scanner, token *Token) (*Operand, *Token, error) {
 	if token.Tok == TokEOF {
-		return nil, nil, Error(token.Off, "Unexpected end of statement, expected operand.")
+		return nil, nil, syncql.NewErrUnexpectedEndOfStatement(db.GetContext(), token.Off)
 	}
 	var operand Operand
 	operand.Off = token.Off
@@ -592,11 +580,11 @@ func parseOperand(s *scanner.Scanner, token *Token) (*Operand, *Token, *SyntaxEr
 			token = scanToken(s)
 			for token.Tok != TokRIGHTPAREN {
 				if token.Tok == TokEOF {
-					return nil, nil, Error(token.Off, fmt.Sprintf("Expected ')'"))
+					return nil, nil, syncql.NewErrExpected(db.GetContext(), token.Off, ")")
 				}
 				var arg *Operand
-				var err *SyntaxError
-				arg, token, err = parseOperand(s, token)
+				var err error
+				arg, token, err = parseOperand(db, s, token)
 				if err != nil {
 					return nil, nil, err
 				}
@@ -606,10 +594,10 @@ func parseOperand(s *scanner.Scanner, token *Token) (*Operand, *Token, *SyntaxEr
 					token = scanToken(s)
 					if token.Tok == TokRIGHTPAREN {
 						// right paren cannot come after a comma
-						return nil, nil, Error(token.Off, fmt.Sprintf("Expected operand, found ')'."))
+						return nil, nil, syncql.NewErrExpectedOperand(db.GetContext(), token.Off, token.Value)
 					}
 				} else if token.Tok != TokRIGHTPAREN {
-					return nil, nil, Error(token.Off, fmt.Sprintf("Expected right paren or comma."))
+					return nil, nil, syncql.NewErrUnexpected(db.GetContext(), token.Off, token.Value)
 				}
 			}
 			token = scanToken(s) // eat right paren
@@ -619,7 +607,7 @@ func parseOperand(s *scanner.Scanner, token *Token) (*Operand, *Token, *SyntaxEr
 			for token.Tok != TokEOF && token.Tok == TokPERIOD {
 				token = scanToken(s)
 				if token.Tok != TokIDENT {
-					return nil, nil, Error(token.Off, fmt.Sprintf("Expected identifier, found '%s'.", token.Value))
+					return nil, nil, syncql.NewErrExpectedIdentifier(db.GetContext(), token.Off, token.Value)
 				}
 				var segment Segment
 				segment.Off = token.Off
@@ -633,7 +621,7 @@ func parseOperand(s *scanner.Scanner, token *Token) (*Operand, *Token, *SyntaxEr
 		operand.Type = TypInt
 		i, err := strconv.ParseInt(token.Value, 0, 64)
 		if err != nil {
-			return nil, nil, Error(token.Off, fmt.Sprintf("Could not convert %s to int64.", token.Value))
+			return nil, nil, syncql.NewErrCouldNotConvert(db.GetContext(), token.Off, token.Value, "int64")
 		}
 		operand.Int = i
 		token = scanToken(s)
@@ -641,7 +629,7 @@ func parseOperand(s *scanner.Scanner, token *Token) (*Operand, *Token, *SyntaxEr
 		operand.Type = TypFloat
 		f, err := strconv.ParseFloat(token.Value, 64)
 		if err != nil {
-			return nil, nil, Error(token.Off, fmt.Sprintf("Could not convert %s to float64.", token.Value))
+			return nil, nil, syncql.NewErrCouldNotConvert(db.GetContext(), token.Off, token.Value, "float64")
 		}
 		operand.Float = f
 		token = scanToken(s)
@@ -663,30 +651,30 @@ func parseOperand(s *scanner.Scanner, token *Token) (*Operand, *Token, *SyntaxEr
 			operand.Type = TypInt
 			i, err := strconv.ParseInt("-"+token.Value, 0, 64)
 			if err != nil {
-				return nil, nil, Error(off, fmt.Sprintf("Could not convert %s to int64.", "-"+token.Value))
+				return nil, nil, syncql.NewErrCouldNotConvert(db.GetContext(), off, "-"+token.Value, "int64")
 			}
 			operand.Int = i
 		case TokFLOAT:
 			operand.Type = TypFloat
 			f, err := strconv.ParseFloat("-"+token.Value, 64)
 			if err != nil {
-				return nil, nil, Error(off, fmt.Sprintf("Could not convert %s to float64.", "-"+token.Value))
+				return nil, nil, syncql.NewErrCouldNotConvert(db.GetContext(), off, "-"+token.Value, "float64")
 			}
 			operand.Float = f
 		default:
-			return nil, nil, Error(token.Off, fmt.Sprintf("Expected int or float."))
+			return nil, nil, syncql.NewErrExpected(db.GetContext(), token.Off, "int or float")
 		}
 		token = scanToken(s)
 	default:
-		return nil, nil, Error(token.Off, fmt.Sprintf("Expected operand, found '%s'.", token.Value))
+		return nil, nil, syncql.NewErrExpectedOperand(db.GetContext(), token.Off, token.Value)
 	}
 	return &operand, token, nil
 }
 
-// Parse binary operator and return it and the next Token (or SyntaxError)
-func parseBinaryOperator(s *scanner.Scanner, token *Token) (*BinaryOperator, *Token, *SyntaxError) {
+// Parse binary operator and return it and the next Token (or error)
+func parseBinaryOperator(db query_db.Database, s *scanner.Scanner, token *Token) (*BinaryOperator, *Token, error) {
 	if token.Tok == TokEOF {
-		return nil, nil, Error(token.Off, "Unexpected end of statement, expected operator.")
+		return nil, nil, syncql.NewErrUnexpectedEndOfStatement(db.GetContext(), token.Off)
 	}
 	var operator BinaryOperator
 	operator.Off = token.Off
@@ -709,7 +697,7 @@ func parseBinaryOperator(s *scanner.Scanner, token *Token) (*BinaryOperator, *To
 		case "not":
 			token = scanToken(s)
 			if token.Tok == TokEOF || (strings.ToLower(token.Value) != "equal" && strings.ToLower(token.Value) != "like") {
-				return nil, nil, Error(token.Off, "Expected 'equal' or 'like'")
+				return nil, nil, syncql.NewErrExpected(db.GetContext(), token.Off, "'equal' or 'like'")
 			}
 			switch strings.ToLower(token.Value) {
 			case "equal":
@@ -719,7 +707,7 @@ func parseBinaryOperator(s *scanner.Scanner, token *Token) (*BinaryOperator, *To
 			}
 			token = scanToken(s)
 		default:
-			return nil, nil, Error(token.Off, fmt.Sprintf("Expected operator ('like', 'not like', '=', '<>', '<', '<=', '>', '>=', 'equal' or 'not equal'), found '%s'.", token.Value))
+			return nil, nil, syncql.NewErrExpectedOperator(db.GetContext(), token.Off, token.Value)
 		}
 	} else {
 		switch token.Tok {
@@ -750,17 +738,17 @@ func parseBinaryOperator(s *scanner.Scanner, token *Token) (*BinaryOperator, *To
 				operator.Type = GreaterThan
 			}
 		default:
-			return nil, nil, Error(token.Off, fmt.Sprintf("Expected operator ('like', 'not like', '=', '<>', 'equal' or 'not equal'), found '%s'.", token.Value))
+			return nil, nil, syncql.NewErrExpectedOperator(db.GetContext(), token.Off, token.Value)
 		}
 	}
 
 	return &operator, token, nil
 }
 
-// Parse logical operator and return it and the next Token (or SyntaxError)
-func parseLogicalOperator(s *scanner.Scanner, token *Token) (*BinaryOperator, *Token, *SyntaxError) {
+// Parse logical operator and return it and the next Token (or error)
+func parseLogicalOperator(db query_db.Database, s *scanner.Scanner, token *Token) (*BinaryOperator, *Token, error) {
 	if token.Tok == TokEOF {
-		return nil, nil, Error(token.Off, "Unexpected end of statement, expected operator.")
+		return nil, nil, syncql.NewErrUnexpectedEndOfStatement(db.GetContext(), token.Off)
 	}
 	var operator BinaryOperator
 	operator.Off = token.Off
@@ -770,24 +758,24 @@ func parseLogicalOperator(s *scanner.Scanner, token *Token) (*BinaryOperator, *T
 	case "or":
 		operator.Type = Or
 	default:
-		return nil, nil, Error(token.Off, fmt.Sprintf("Expected operator ('and' or 'or'), found '%s'.", token.Value))
+		return nil, nil, syncql.NewErrExpectedOperator(db.GetContext(), token.Off, token.Value)
 	}
 
 	token = scanToken(s)
 	return &operator, token, nil
 }
 
-// Parse and return LimitClause and ResultsOffsetClause (one or both can be nil) and next token (or SyntaxError)
-func parseLimitResultsOffsetClauses(s *scanner.Scanner, token *Token) (*LimitClause, *ResultsOffsetClause, *Token, *SyntaxError) {
-	var err *SyntaxError
+// Parse and return LimitClause and ResultsOffsetClause (one or both can be nil) and next token (or error)
+func parseLimitResultsOffsetClauses(db query_db.Database, s *scanner.Scanner, token *Token) (*LimitClause, *ResultsOffsetClause, *Token, error) {
+	var err error
 	var lc *LimitClause
 	var oc *ResultsOffsetClause
 	for token.Tok != TokEOF {
 		// Note: Can be in any order.  If more than one limit or offset clause, the last one wins
 		if token.Tok == TokIDENT && strings.ToLower(token.Value) == "limit" {
-			lc, token, err = parseLimitClause(s, token)
+			lc, token, err = parseLimitClause(db, s, token)
 		} else if token.Tok == TokIDENT && strings.ToLower(token.Value) == "offset" {
-			oc, token, err = parseResultsOffsetClause(s, token)
+			oc, token, err = parseResultsOffsetClause(db, s, token)
 		} else {
 			return lc, oc, token, nil
 		}
@@ -798,50 +786,51 @@ func parseLimitResultsOffsetClauses(s *scanner.Scanner, token *Token) (*LimitCla
 	return lc, oc, token, nil
 }
 
-// Parse the limit clause.  Return the LimitClause and the next Token (or SyntaxError).
-func parseLimitClause(s *scanner.Scanner, token *Token) (*LimitClause, *Token, *SyntaxError) {
+// Parse the limit clause.  Return the LimitClause and the next Token (or error).
+func parseLimitClause(db query_db.Database, s *scanner.Scanner, token *Token) (*LimitClause, *Token, error) {
 	var lc LimitClause
 	lc.Off = token.Off
 	token = scanToken(s)
-	var err *SyntaxError
-	lc.Limit, token, err = parseNonNegInt64(s, token)
+	var err error
+	lc.Limit, token, err = parseNonNegInt64(db, s, token)
 	if err != nil {
 		return nil, nil, err
 	}
 	return &lc, token, nil
 }
 
-// Parse the results offset clause.  Return the ResultsOffsetClause and the next Token (or SyntaxError).
-func parseResultsOffsetClause(s *scanner.Scanner, token *Token) (*ResultsOffsetClause, *Token, *SyntaxError) {
+// Parse the results offset clause.  Return the ResultsOffsetClause and the next Token (or error).
+func parseResultsOffsetClause(db query_db.Database, s *scanner.Scanner, token *Token) (*ResultsOffsetClause, *Token, error) {
 	var oc ResultsOffsetClause
 	oc.Off = token.Off
 	token = scanToken(s)
-	var err *SyntaxError
-	oc.ResultsOffset, token, err = parseNonNegInt64(s, token)
+	var err error
+	oc.ResultsOffset, token, err = parseNonNegInt64(db, s, token)
 	if err != nil {
 		return nil, nil, err
 	}
 	return &oc, token, nil
 }
 
-// Parse and return an Int64Value and next token (or SyntaxError).
+// Parse and return an Int64Value and next token (or error).
 // This function is called by parseLimitClause and parseResultsOffsetClause.  The integer
 // values for both of these clauses cannot be negative.
-func parseNonNegInt64(s *scanner.Scanner, token *Token) (*Int64Value, *Token, *SyntaxError) {
+func parseNonNegInt64(db query_db.Database, s *scanner.Scanner, token *Token) (*Int64Value, *Token, error) {
 	// We expect an integer literal
 	// Since we're looking for integers >= 0, don't allow TokMINUS.
 	if token.Tok == TokEOF {
-		return nil, nil, Error(token.Off, "Unexpected end of statement, expected integer literal.")
+		return nil, nil, syncql.NewErrUnexpectedEndOfStatement(db.GetContext(), token.Off)
 	}
 	if token.Tok != TokINT {
-		return nil, nil, Error(token.Off, fmt.Sprintf("Expected positive integer literal., found '%s'.", token.Value))
+		return nil, nil, syncql.NewErrExpected(db.GetContext(), token.Off, "positive integer literal")
 	}
 	var v Int64Value
 	v.Off = token.Off
 	var err error
 	v.Value, err = strconv.ParseInt(token.Value, 0, 64)
 	if err != nil {
-		return nil, nil, Error(token.Off, fmt.Sprintf("Logic error, could not convert %s to int64.", token.Value))
+		// The token value has already been checked, so this can't happen.
+		return nil, nil, syncql.NewErrCouldNotConvert(db.GetContext(), token.Off, token.Value, "int64")
 	}
 	token = scanToken(s)
 	return &v, token, nil

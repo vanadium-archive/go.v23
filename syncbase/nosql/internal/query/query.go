@@ -5,57 +5,36 @@
 package query
 
 import (
-	"fmt"
 	"reflect"
 
 	"v.io/syncbase/v23/syncbase/nosql/internal/query/query_checker"
 	"v.io/syncbase/v23/syncbase/nosql/internal/query/query_db"
 	"v.io/syncbase/v23/syncbase/nosql/internal/query/query_parser"
+	"v.io/syncbase/v23/syncbase/nosql/syncql"
 	"v.io/v23/vdl"
 )
-
-type QueryError struct {
-	Msg string
-	Off int64
-}
 
 type ResultStream interface {
 	Advance() bool
 	Result() []*vdl.Value
-	Err() *QueryError
+	Err() error
 	Cancel()
 }
 
-func Exec(db query_db.Database, q string) ([]string, ResultStream, *QueryError) {
-	s, err := query_parser.Parse(q)
+func Exec(db query_db.Database, q string) ([]string, ResultStream, error) {
+	s, err := query_parser.Parse(db, q)
 	if err != nil {
-		return nil, nil, ErrorFromSyntax(err)
+		return nil, nil, err
 	}
 	if err := query_checker.Check(db, s); err != nil {
-		return nil, nil, ErrorFromSemantic(err)
+		return nil, nil, err
 	}
 	switch sel := (*s).(type) {
 	case query_parser.SelectStatement:
 		return execSelect(db, &sel)
 	default:
-		return nil, nil, Error((*s).Offset(), fmt.Sprintf("Cannot exec statement type %v", reflect.TypeOf(*s)))
+		return nil, nil, syncql.NewErrExecOfUnkonwnStatementType(db.GetContext(), (*s).Offset(), reflect.TypeOf(*s).Name())
 	}
-}
-
-func (e *QueryError) Error() string {
-	return fmt.Sprintf("[Off:%d] %s", e.Off, e.Msg)
-}
-
-func Error(offset int64, msg string) *QueryError {
-	return &QueryError{msg, offset}
-}
-
-func ErrorFromSyntax(synerr *query_parser.SyntaxError) *QueryError {
-	return &QueryError{synerr.Msg, synerr.Off}
-}
-
-func ErrorFromSemantic(semerr *query_checker.SemanticError) *QueryError {
-	return &QueryError{semerr.Msg, semerr.Off}
 }
 
 // Given a key, a value and a SelectClause, return the projection.
@@ -98,13 +77,14 @@ func ExecSelectSingleRow(k string, v *vdl.Value, s *query_parser.SelectStatement
 }
 
 type resultStreamImpl struct {
+	db              query_db.Database
 	selectStatement *query_parser.SelectStatement
 	resultCount     int64 // results served so far (needed for limit clause)
 	skippedCount    int64 // skipped so far (needed for offset clause)
 	keyValueStream  query_db.KeyValueStream
 	k               string
 	v               *vdl.Value
-	err             *QueryError
+	err             error
 }
 
 func (rs *resultStreamImpl) Advance() bool {
@@ -139,7 +119,7 @@ func (rs *resultStreamImpl) Advance() bool {
 		}
 	}
 	if err := rs.keyValueStream.Err(); err != nil {
-		rs.err = Error(rs.selectStatement.Off, err.Error())
+		rs.err = syncql.NewErrKeyValueStreamError(rs.db.GetContext(), rs.selectStatement.Off, err)
 	}
 	return false
 }
@@ -148,7 +128,7 @@ func (rs *resultStreamImpl) Result() []*vdl.Value {
 	return ComposeProjection(rs.k, rs.v, rs.selectStatement.Select)
 }
 
-func (rs *resultStreamImpl) Err() *QueryError {
+func (rs *resultStreamImpl) Err() error {
 	return rs.err
 }
 
@@ -175,13 +155,14 @@ func getColumnHeadings(s *query_parser.SelectStatement) []string {
 	return columnHeaders
 }
 
-func execSelect(db query_db.Database, s *query_parser.SelectStatement) ([]string, ResultStream, *QueryError) {
+func execSelect(db query_db.Database, s *query_parser.SelectStatement) ([]string, ResultStream, error) {
 	prefixes := CompileKeyPrefixes(s.Where)
 	keyValueStream, err := s.From.Table.DBTable.Scan(prefixes)
 	if err != nil {
-		return nil, nil, Error(s.Off, err.Error())
+		return nil, nil, syncql.NewErrScanError(db.GetContext(), s.Off, err)
 	}
 	var resultStream resultStreamImpl
+	resultStream.db = db
 	resultStream.selectStatement = s
 	resultStream.keyValueStream = keyValueStream
 	return getColumnHeadings(s), &resultStream, nil

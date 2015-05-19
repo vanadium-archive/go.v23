@@ -10,16 +10,24 @@ import (
 	"strings"
 
 	"v.io/syncbase/v23/syncbase/nosql/internal/query/query_db"
+	"v.io/v23"
+	"v.io/v23/context"
 	"v.io/v23/vdl"
+	_ "v.io/x/ref/runtime/factories/generic"
+	"v.io/x/ref/test"
 )
 
 var d *demoDB
 
 func init() {
 	d = createDB()
+	var shutdown v23.Shutdown
+	d.ctx, shutdown = test.InitForTest()
+	defer shutdown()
 }
 
 type demoDB struct {
+	ctx    *context.T
 	tables []table
 }
 
@@ -100,6 +108,10 @@ func GetTableNames() []string {
 // Database instances are obtained outside the query package.
 func GetDatabase() query_db.Database {
 	return d
+}
+
+func (db demoDB) GetContext() *context.T {
+	return db.ctx
 }
 
 func (d demoDB) GetTable(table string) (query_db.Table, error) {
