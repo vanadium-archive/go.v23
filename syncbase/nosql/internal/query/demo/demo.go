@@ -11,7 +11,6 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/peterh/liner"
 	"v.io/syncbase/v23/syncbase/nosql/internal/query"
 	"v.io/syncbase/v23/syncbase/nosql/internal/query/demo/db"
 	"v.io/syncbase/v23/syncbase/nosql/internal/query/demo/reader"
@@ -90,7 +89,6 @@ func main() {
 			if q == "" || strings.ToLower(q) == "exit" || strings.ToLower(q) == "quit" {
 				break
 			}
-			line.AppendHistory(q)
 			if strings.ToLower(q) == "dump" {
 				dumpDB(d)
 			} else {
