@@ -83,11 +83,7 @@ type noninteractive struct {
 // NewNonInteractive returns a T that simply reads input from stdin. Useful
 // for when the user is piping input from a file or another program.
 func NewNonInteractive() *T {
-	return &T{
-		prompt: &noninteractive{
-			input: bufio.NewReader(os.Stdin),
-		},
-	}
+	return newT(&noninteractive{bufio.NewReader(os.Stdin)})
 }
 
 func (i *noninteractive) Close() {

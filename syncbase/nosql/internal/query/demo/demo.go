@@ -11,6 +11,8 @@ import (
 	"strconv"
 	"strings"
 
+	isatty "github.com/mattn/go-isatty"
+
 	"v.io/syncbase/v23/syncbase/nosql/internal/query"
 	"v.io/syncbase/v23/syncbase/nosql/internal/query/demo/db"
 	"v.io/syncbase/v23/syncbase/nosql/internal/query/demo/reader"
@@ -69,17 +71,23 @@ func queryExec(d query_db.Database, q string) {
 }
 
 func main() {
-	// TODO(kash): Detect if this is not a terminal and use
-	// reader.NewNonInteractive.
-	input := reader.NewInteractive()
+	var input *reader.T
+	isTerminal := isatty.IsTerminal(os.Stdin.Fd())
+	if isTerminal {
+		input = reader.NewInteractive()
+	} else {
+		input = reader.NewNonInteractive()
+	}
 	defer input.Close()
 
 	d := db.GetDatabase()
 	for true {
 		if q, err := input.GetQuery(); err != nil {
 			if err == io.EOF {
-				// ctrl-d
-				fmt.Println()
+				if isTerminal {
+					// ctrl-d
+					fmt.Println()
+				}
 				break
 			} else {
 				// ctrl-c
