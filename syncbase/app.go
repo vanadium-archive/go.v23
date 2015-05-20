@@ -13,10 +13,19 @@ import (
 	"v.io/v23/security/access"
 )
 
+func newApp(parentFullName, relativeName string) App {
+	fullName := naming.Join(parentFullName, relativeName)
+	return &app{
+		c:        wire.AppClient(fullName),
+		fullName: fullName,
+		name:     relativeName,
+	}
+}
+
 type app struct {
-	c            wire.AppClientMethods
-	name         string
-	relativeName string
+	c        wire.AppClientMethods
+	fullName string
+	name     string
 }
 
 var _ App = (*app)(nil)
@@ -25,23 +34,22 @@ var _ App = (*app)(nil)
 
 // Name implements App.Name.
 func (a *app) Name() string {
-	return a.relativeName
+	return a.name
 }
 
 // FullName implements App.FullName.
 func (a *app) FullName() string {
-	return a.name
+	return a.fullName
 }
 
 // NoSQLDatabase implements App.NoSQLDatabase.
 func (a *app) NoSQLDatabase(relativeName string) nosql.Database {
-	name := naming.Join(a.name, relativeName)
-	return nosql.NewDatabase(name, relativeName)
+	return nosql.NewDatabase(a.fullName, relativeName)
 }
 
 // ListDatabases implements App.ListDatabases.
 func (a *app) ListDatabases(ctx *context.T) ([]string, error) {
-	return util.List(ctx, a.name)
+	return util.List(ctx, a.fullName)
 }
 
 // Create implements App.Create.

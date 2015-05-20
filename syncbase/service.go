@@ -8,17 +8,16 @@ import (
 	wire "v.io/syncbase/v23/services/syncbase"
 	"v.io/syncbase/v23/syncbase/util"
 	"v.io/v23/context"
-	"v.io/v23/naming"
 	"v.io/v23/security/access"
 )
 
-func NewService(name string) Service {
-	return &service{wire.ServiceClient(name), name}
+func NewService(fullName string) Service {
+	return &service{wire.ServiceClient(fullName), fullName}
 }
 
 type service struct {
-	c    wire.ServiceClientMethods
-	name string
+	c        wire.ServiceClientMethods
+	fullName string
 }
 
 var _ Service = (*service)(nil)
@@ -27,18 +26,17 @@ var _ Service = (*service)(nil)
 
 // FullName implements Service.FullName.
 func (s *service) FullName() string {
-	return s.name
+	return s.fullName
 }
 
 // App implements Service.App.
 func (s *service) App(relativeName string) App {
-	name := naming.Join(s.name, relativeName)
-	return &app{wire.AppClient(name), name, relativeName}
+	return newApp(s.fullName, relativeName)
 }
 
 // ListApps implements Service.ListApps.
 func (s *service) ListApps(ctx *context.T) ([]string, error) {
-	return util.List(ctx, s.name)
+	return util.List(ctx, s.fullName)
 }
 
 // SetPermissions implements Service.SetPermissions.

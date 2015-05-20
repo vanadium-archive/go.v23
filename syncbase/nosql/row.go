@@ -7,13 +7,24 @@ package nosql
 import (
 	wire "v.io/syncbase/v23/services/syncbase/nosql"
 	"v.io/v23/context"
+	"v.io/v23/naming"
 	"v.io/v23/vom"
 )
 
+func newRow(parentFullName, key string) Row {
+	// TODO(sadovsky): Escape delimiters in key?
+	fullName := naming.Join(parentFullName, key)
+	return &row{
+		c:        wire.RowClient(fullName),
+		fullName: fullName,
+		key:      key,
+	}
+}
+
 type row struct {
-	c    wire.RowClientMethods
-	name string
-	key  string
+	c        wire.RowClientMethods
+	fullName string
+	key      string
 }
 
 var _ Row = (*row)(nil)
@@ -27,7 +38,7 @@ func (r *row) Key() string {
 
 // FullName implements Row.FullName.
 func (r *row) FullName() string {
-	return r.name
+	return r.fullName
 }
 
 // Get implements Row.Get.
