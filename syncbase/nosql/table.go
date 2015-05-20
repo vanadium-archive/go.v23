@@ -11,10 +11,19 @@ import (
 	"v.io/v23/security/access"
 )
 
+func newTable(parentFullName, relativeName string) Table {
+	fullName := naming.Join(parentFullName, relativeName)
+	return &table{
+		c:        wire.TableClient(fullName),
+		fullName: fullName,
+		name:     relativeName,
+	}
+}
+
 type table struct {
-	c            wire.TableClientMethods
-	name         string
-	relativeName string
+	c        wire.TableClientMethods
+	fullName string
+	name     string
 }
 
 var _ Table = (*table)(nil)
@@ -23,19 +32,17 @@ var _ Table = (*table)(nil)
 
 // Name implements Table.Name.
 func (t *table) Name() string {
-	return t.relativeName
+	return t.name
 }
 
 // FullName implements Table.FullName.
 func (t *table) FullName() string {
-	return t.name
+	return t.fullName
 }
 
 // Row implements Table.Row.
 func (t *table) Row(key string) Row {
-	// TODO(sadovsky): Escape delimiters in key?
-	name := naming.Join(t.name, key)
-	return &row{wire.RowClient(name), name, key}
+	return newRow(t.fullName, key)
 }
 
 // Get implements Table.Get.

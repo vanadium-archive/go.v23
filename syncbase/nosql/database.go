@@ -13,14 +13,19 @@ import (
 	"v.io/v23/verror"
 )
 
-func NewDatabase(name, relativeName string) Database {
-	return &database{wire.DatabaseClient(name), name, relativeName}
+func NewDatabase(parentFullName, relativeName string) Database {
+	fullName := naming.Join(parentFullName, relativeName)
+	return &database{
+		c:        wire.DatabaseClient(fullName),
+		fullName: fullName,
+		name:     relativeName,
+	}
 }
 
 type database struct {
-	c            wire.DatabaseClientMethods
-	name         string
-	relativeName string
+	c        wire.DatabaseClientMethods
+	fullName string
+	name     string
 }
 
 var _ Database = (*database)(nil)
@@ -29,23 +34,22 @@ var _ Database = (*database)(nil)
 
 // Name implements Database.Name.
 func (d *database) Name() string {
-	return d.relativeName
+	return d.name
 }
 
 // FullName implements Database.FullName.
 func (d *database) FullName() string {
-	return d.name
+	return d.fullName
 }
 
 // Table implements Database.Table.
 func (d *database) Table(relativeName string) Table {
-	name := naming.Join(d.name, relativeName)
-	return &table{wire.TableClient(name), name, relativeName}
+	return newTable(d.fullName, relativeName)
 }
 
 // ListTables implements Database.ListTables.
 func (d *database) ListTables(ctx *context.T) ([]string, error) {
-	return util.List(ctx, d.name)
+	return util.List(ctx, d.fullName)
 }
 
 // Create implements Database.Create.
@@ -60,12 +64,12 @@ func (d *database) Delete(ctx *context.T) error {
 
 // CreateTable implements Database.CreateTable.
 func (d *database) CreateTable(ctx *context.T, relativeName string, perms access.Permissions) error {
-	return wire.TableClient(naming.Join(d.name, relativeName)).Create(ctx, perms)
+	return wire.TableClient(naming.Join(d.fullName, relativeName)).Create(ctx, perms)
 }
 
 // DeleteTable implements Database.DeleteTable.
 func (d *database) DeleteTable(ctx *context.T, relativeName string) error {
-	return wire.TableClient(naming.Join(d.name, relativeName)).Delete(ctx)
+	return wire.TableClient(naming.Join(d.fullName, relativeName)).Delete(ctx)
 }
 
 // BeginBatch implements Database.BeginBatch.
