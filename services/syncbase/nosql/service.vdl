@@ -59,14 +59,14 @@ type Table interface {
 
 	// DeleteRowRange deletes all rows in the given range. If the last row that is
 	// covered by a prefix from SetPermissions is deleted, that (prefix, perms)
-	// pair is removed. If end is "", all rows with keys >= start are included.
+	// pair is removed. If limit is "", all rows with keys >= start are included.
 	// TODO(sadovsky): Automatic GC interacts poorly with sync. Revisit this API.
-	DeleteRowRange(start, end string) error {access.Write}
+	DeleteRowRange(start, limit string) error {access.Write}
 
 	// Scan returns all rows in the given range. The returned stream reads from a
-	// consistent snapshot taken at the time of the Scan RPC. If end is "", all
+	// consistent snapshot taken at the time of the Scan RPC. If limit is "", all
 	// rows with keys >= start are included.
-	Scan(start, end string) stream<_, KeyValue> error {access.Read}
+	Scan(start, limit string) stream<_, KeyValue> error {access.Read}
 
 	// SetPermissions sets the permissions for all current and future rows with
 	// the given prefix. If the prefix overlaps with an existing prefix, the

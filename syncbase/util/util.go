@@ -26,8 +26,8 @@ func PrefixRangeStart(p string) string {
 	return p
 }
 
-// PrefixRangeEnd returns the end of the row range for the given prefix.
-func PrefixRangeEnd(p string) string {
+// PrefixRangeLimit returns the limit of the row range for the given prefix.
+func PrefixRangeLimit(p string) string {
 	// A string is a []byte, i.e. can be thought of as a base-256 number. The code
 	// below effectively adds 1 to this number, then chops off any trailing \x00
 	// bytes. If the input string consists entirely of \xff bytes, we return an

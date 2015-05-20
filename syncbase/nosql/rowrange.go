@@ -8,12 +8,11 @@ import (
 	"v.io/syncbase/v23/syncbase/util"
 )
 
-// RowRange represents all rows with keys in [start, end). If end is "", all
+// RowRange represents all rows with keys in [start, limit). If limit is "", all
 // rows with keys >= start are included.
 type RowRange interface {
 	Start() string
-	// TODO(sadovsky): Rename to "limit" everywhere.
-	End() string
+	Limit() string
 }
 
 // PrefixRange represents all rows with keys that have some prefix.
@@ -25,7 +24,7 @@ type PrefixRange interface {
 // rowRange implements the RowRange interface.
 type rowRange struct {
 	start string
-	end   string
+	limit string
 }
 
 var _ RowRange = (*rowRange)(nil)
@@ -34,16 +33,16 @@ func (r *rowRange) Start() string {
 	return r.start
 }
 
-func (r *rowRange) End() string {
-	return r.end
+func (r *rowRange) Limit() string {
+	return r.limit
 }
 
 func SingleRow(row string) RowRange {
-	return &rowRange{start: row, end: row + "\x00"}
+	return &rowRange{start: row, limit: row + "\x00"}
 }
 
-func Range(start, end string) RowRange {
-	return &rowRange{start: start, end: end}
+func Range(start, limit string) RowRange {
+	return &rowRange{start: start, limit: limit}
 }
 
 // prefixRange implements the PrefixRange interface (and thus also the RowRange
@@ -60,8 +59,8 @@ func (r *prefixRange) Start() string {
 	return util.PrefixRangeStart(r.prefix)
 }
 
-func (r *prefixRange) End() string {
-	return util.PrefixRangeEnd(r.prefix)
+func (r *prefixRange) Limit() string {
+	return util.PrefixRangeLimit(r.prefix)
 }
 
 func (r *prefixRange) Prefix() string {

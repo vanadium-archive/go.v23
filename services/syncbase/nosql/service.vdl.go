@@ -368,13 +368,13 @@ type TableClientMethods interface {
 	Delete(*context.T, ...rpc.CallOpt) error
 	// DeleteRowRange deletes all rows in the given range. If the last row that is
 	// covered by a prefix from SetPermissions is deleted, that (prefix, perms)
-	// pair is removed. If end is "", all rows with keys >= start are included.
+	// pair is removed. If limit is "", all rows with keys >= start are included.
 	// TODO(sadovsky): Automatic GC interacts poorly with sync. Revisit this API.
-	DeleteRowRange(ctx *context.T, start string, end string, opts ...rpc.CallOpt) error
+	DeleteRowRange(ctx *context.T, start string, limit string, opts ...rpc.CallOpt) error
 	// Scan returns all rows in the given range. The returned stream reads from a
-	// consistent snapshot taken at the time of the Scan RPC. If end is "", all
+	// consistent snapshot taken at the time of the Scan RPC. If limit is "", all
 	// rows with keys >= start are included.
-	Scan(ctx *context.T, start string, end string, opts ...rpc.CallOpt) (TableScanClientCall, error)
+	Scan(ctx *context.T, start string, limit string, opts ...rpc.CallOpt) (TableScanClientCall, error)
 	// SetPermissions sets the permissions for all current and future rows with
 	// the given prefix. If the prefix overlaps with an existing prefix, the
 	// longest prefix that matches a row applies. For example:
@@ -534,13 +534,13 @@ type TableServerMethods interface {
 	Delete(*context.T, rpc.ServerCall) error
 	// DeleteRowRange deletes all rows in the given range. If the last row that is
 	// covered by a prefix from SetPermissions is deleted, that (prefix, perms)
-	// pair is removed. If end is "", all rows with keys >= start are included.
+	// pair is removed. If limit is "", all rows with keys >= start are included.
 	// TODO(sadovsky): Automatic GC interacts poorly with sync. Revisit this API.
-	DeleteRowRange(ctx *context.T, call rpc.ServerCall, start string, end string) error
+	DeleteRowRange(ctx *context.T, call rpc.ServerCall, start string, limit string) error
 	// Scan returns all rows in the given range. The returned stream reads from a
-	// consistent snapshot taken at the time of the Scan RPC. If end is "", all
+	// consistent snapshot taken at the time of the Scan RPC. If limit is "", all
 	// rows with keys >= start are included.
-	Scan(ctx *context.T, call TableScanServerCall, start string, end string) error
+	Scan(ctx *context.T, call TableScanServerCall, start string, limit string) error
 	// SetPermissions sets the permissions for all current and future rows with
 	// the given prefix. If the prefix overlaps with an existing prefix, the
 	// longest prefix that matches a row applies. For example:
@@ -576,13 +576,13 @@ type TableServerStubMethods interface {
 	Delete(*context.T, rpc.ServerCall) error
 	// DeleteRowRange deletes all rows in the given range. If the last row that is
 	// covered by a prefix from SetPermissions is deleted, that (prefix, perms)
-	// pair is removed. If end is "", all rows with keys >= start are included.
+	// pair is removed. If limit is "", all rows with keys >= start are included.
 	// TODO(sadovsky): Automatic GC interacts poorly with sync. Revisit this API.
-	DeleteRowRange(ctx *context.T, call rpc.ServerCall, start string, end string) error
+	DeleteRowRange(ctx *context.T, call rpc.ServerCall, start string, limit string) error
 	// Scan returns all rows in the given range. The returned stream reads from a
-	// consistent snapshot taken at the time of the Scan RPC. If end is "", all
+	// consistent snapshot taken at the time of the Scan RPC. If limit is "", all
 	// rows with keys >= start are included.
-	Scan(ctx *context.T, call *TableScanServerCallStub, start string, end string) error
+	Scan(ctx *context.T, call *TableScanServerCallStub, start string, limit string) error
 	// SetPermissions sets the permissions for all current and future rows with
 	// the given prefix. If the prefix overlaps with an existing prefix, the
 	// longest prefix that matches a row applies. For example:
@@ -695,19 +695,19 @@ var descTable = rpc.InterfaceDesc{
 		},
 		{
 			Name: "DeleteRowRange",
-			Doc:  "// DeleteRowRange deletes all rows in the given range. If the last row that is\n// covered by a prefix from SetPermissions is deleted, that (prefix, perms)\n// pair is removed. If end is \"\", all rows with keys >= start are included.\n// TODO(sadovsky): Automatic GC interacts poorly with sync. Revisit this API.",
+			Doc:  "// DeleteRowRange deletes all rows in the given range. If the last row that is\n// covered by a prefix from SetPermissions is deleted, that (prefix, perms)\n// pair is removed. If limit is \"\", all rows with keys >= start are included.\n// TODO(sadovsky): Automatic GC interacts poorly with sync. Revisit this API.",
 			InArgs: []rpc.ArgDesc{
 				{"start", ``}, // string
-				{"end", ``},   // string
+				{"limit", ``}, // string
 			},
 			Tags: []*vdl.Value{vdl.ValueOf(access.Tag("Write"))},
 		},
 		{
 			Name: "Scan",
-			Doc:  "// Scan returns all rows in the given range. The returned stream reads from a\n// consistent snapshot taken at the time of the Scan RPC. If end is \"\", all\n// rows with keys >= start are included.",
+			Doc:  "// Scan returns all rows in the given range. The returned stream reads from a\n// consistent snapshot taken at the time of the Scan RPC. If limit is \"\", all\n// rows with keys >= start are included.",
 			InArgs: []rpc.ArgDesc{
 				{"start", ``}, // string
-				{"end", ``},   // string
+				{"limit", ``}, // string
 			},
 			Tags: []*vdl.Value{vdl.ValueOf(access.Tag("Read"))},
 		},

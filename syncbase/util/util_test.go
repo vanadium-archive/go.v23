@@ -39,7 +39,7 @@ func TestPrefixRange(t *testing.T) {
 	tests := []struct {
 		prefix string
 		start  string
-		end    string
+		limit  string
 	}{
 		{"", "", ""},
 		{"a", "a", "b"},
@@ -55,9 +55,9 @@ func TestPrefixRange(t *testing.T) {
 		{"\xff\xff", "\xff\xff", ""},
 	}
 	for _, test := range tests {
-		start, end := util.PrefixRangeStart(test.prefix), util.PrefixRangeEnd(test.prefix)
-		if start != test.start || end != test.end {
-			t.Errorf("%q: got {%q, %q}, want {%q, %q}", test.prefix, start, end, test.start, test.end)
+		start, limit := util.PrefixRangeStart(test.prefix), util.PrefixRangeLimit(test.prefix)
+		if start != test.start || limit != test.limit {
+			t.Errorf("%q: got {%q, %q}, want {%q, %q}", test.prefix, start, limit, test.start, test.limit)
 		}
 	}
 }
