@@ -60,8 +60,50 @@ func (KeyValue) __VDLReflect(struct {
 }) {
 }
 
+// SyncGroupSpec contains the specification for a SyncGroup.
+type SyncGroupSpec struct {
+	// Human readable description.
+	Description string
+	// Permissions for the SyncGroup.
+	Perms access.Permissions
+	// SyncGroup prefixes (relative to the database).  Prefixes
+	// must take the form "<tableName>/<rowKeyPrefix>" where
+	// tableName is non-empty.
+	Prefixes []string
+	// Mount tables at which to advertise this SyncGroup. These
+	// are the mount tables used for rendezvous in addition to the
+	// one in the neighborhood. Typically, we will have only one
+	// entry.  However, an array allows mount tables to be changed
+	// over time.
+	//
+	// TODO(hpucha): Figure out a convention for
+	// advertising SyncGroups in the mount table.
+	MountTables []string
+	// Option to change the privacy of the SyncGroup. Configures
+	// whether blobs in a SyncGroup can be served to clients
+	// holding blobrefs obtained from other SyncGroups.
+	IsPrivate bool
+}
+
+func (SyncGroupSpec) __VDLReflect(struct {
+	Name string `vdl:"v.io/syncbase/v23/services/syncbase/nosql.SyncGroupSpec"`
+}) {
+}
+
+// SyncGroupMemberInfo contains per-member metadata.
+type SyncGroupMemberInfo struct {
+	SyncPriority byte
+}
+
+func (SyncGroupMemberInfo) __VDLReflect(struct {
+	Name string `vdl:"v.io/syncbase/v23/services/syncbase/nosql.SyncGroupMemberInfo"`
+}) {
+}
+
 func init() {
 	vdl.Register((*BatchOptions)(nil))
 	vdl.Register((*PrefixPermissions)(nil))
 	vdl.Register((*KeyValue)(nil))
+	vdl.Register((*SyncGroupSpec)(nil))
+	vdl.Register((*SyncGroupMemberInfo)(nil))
 }
