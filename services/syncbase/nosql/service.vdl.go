@@ -10,6 +10,7 @@ package nosql
 
 import (
 	// VDL system imports
+	"io"
 	"v.io/v23"
 	"v.io/v23/context"
 	"v.io/v23/i18n"
@@ -367,10 +368,13 @@ type TableClientMethods interface {
 	Delete(*context.T, ...rpc.CallOpt) error
 	// DeleteRowRange deletes all rows in the given range. If the last row that is
 	// covered by a prefix from SetPermissions is deleted, that (prefix, perms)
-	// pair is removed.
-	// TODO(sadovsky): Automatic GC does not interact well with sync. This API
-	// needs to be revisited.
-	DeleteRowRange(ctx *context.T, start string, limit string, opts ...rpc.CallOpt) error
+	// pair is removed. If end is "", all rows with keys >= start are included.
+	// TODO(sadovsky): Automatic GC interacts poorly with sync. Revisit this API.
+	DeleteRowRange(ctx *context.T, start string, end string, opts ...rpc.CallOpt) error
+	// Scan returns all rows in the given range. The returned stream reads from a
+	// consistent snapshot taken at the time of the Scan RPC. If end is "", all
+	// rows with keys >= start are included.
+	Scan(ctx *context.T, start string, end string, opts ...rpc.CallOpt) (TableScanClientCall, error)
 	// SetPermissions sets the permissions for all current and future rows with
 	// the given prefix. If the prefix overlaps with an existing prefix, the
 	// longest prefix that matches a row applies. For example:
@@ -424,6 +428,15 @@ func (c implTableClientStub) DeleteRowRange(ctx *context.T, i0 string, i1 string
 	return
 }
 
+func (c implTableClientStub) Scan(ctx *context.T, i0 string, i1 string, opts ...rpc.CallOpt) (ocall TableScanClientCall, err error) {
+	var call rpc.ClientCall
+	if call, err = v23.GetClient(ctx).StartCall(ctx, c.name, "Scan", []interface{}{i0, i1}, opts...); err != nil {
+		return
+	}
+	ocall = &implTableScanClientCall{ClientCall: call}
+	return
+}
+
 func (c implTableClientStub) SetPermissions(ctx *context.T, i0 string, i1 access.Permissions, opts ...rpc.CallOpt) (err error) {
 	err = v23.GetClient(ctx).Call(ctx, c.name, "SetPermissions", []interface{}{i0, i1}, nil, opts...)
 	return
@@ -436,6 +449,75 @@ func (c implTableClientStub) GetPermissions(ctx *context.T, i0 string, opts ...r
 
 func (c implTableClientStub) DeletePermissions(ctx *context.T, i0 string, opts ...rpc.CallOpt) (err error) {
 	err = v23.GetClient(ctx).Call(ctx, c.name, "DeletePermissions", []interface{}{i0}, nil, opts...)
+	return
+}
+
+// TableScanClientStream is the client stream for Table.Scan.
+type TableScanClientStream interface {
+	// RecvStream returns the receiver side of the Table.Scan client stream.
+	RecvStream() interface {
+		// Advance stages an item so that it may be retrieved via Value.  Returns
+		// true iff there is an item to retrieve.  Advance must be called before
+		// Value is called.  May block if an item is not available.
+		Advance() bool
+		// Value returns the item that was staged by Advance.  May panic if Advance
+		// returned false or was not called.  Never blocks.
+		Value() KeyValue
+		// Err returns any error encountered by Advance.  Never blocks.
+		Err() error
+	}
+}
+
+// TableScanClientCall represents the call returned from Table.Scan.
+type TableScanClientCall interface {
+	TableScanClientStream
+	// Finish blocks until the server is done, and returns the positional return
+	// values for call.
+	//
+	// Finish returns immediately if the call has been canceled; depending on the
+	// timing the output could either be an error signaling cancelation, or the
+	// valid positional return values from the server.
+	//
+	// Calling Finish is mandatory for releasing stream resources, unless the call
+	// has been canceled or any of the other methods return an error.  Finish should
+	// be called at most once.
+	Finish() error
+}
+
+type implTableScanClientCall struct {
+	rpc.ClientCall
+	valRecv KeyValue
+	errRecv error
+}
+
+func (c *implTableScanClientCall) RecvStream() interface {
+	Advance() bool
+	Value() KeyValue
+	Err() error
+} {
+	return implTableScanClientCallRecv{c}
+}
+
+type implTableScanClientCallRecv struct {
+	c *implTableScanClientCall
+}
+
+func (c implTableScanClientCallRecv) Advance() bool {
+	c.c.valRecv = KeyValue{}
+	c.c.errRecv = c.c.Recv(&c.c.valRecv)
+	return c.c.errRecv == nil
+}
+func (c implTableScanClientCallRecv) Value() KeyValue {
+	return c.c.valRecv
+}
+func (c implTableScanClientCallRecv) Err() error {
+	if c.c.errRecv == io.EOF {
+		return nil
+	}
+	return c.c.errRecv
+}
+func (c *implTableScanClientCall) Finish() (err error) {
+	err = c.ClientCall.Finish()
 	return
 }
 
@@ -452,10 +534,13 @@ type TableServerMethods interface {
 	Delete(*context.T, rpc.ServerCall) error
 	// DeleteRowRange deletes all rows in the given range. If the last row that is
 	// covered by a prefix from SetPermissions is deleted, that (prefix, perms)
-	// pair is removed.
-	// TODO(sadovsky): Automatic GC does not interact well with sync. This API
-	// needs to be revisited.
-	DeleteRowRange(ctx *context.T, call rpc.ServerCall, start string, limit string) error
+	// pair is removed. If end is "", all rows with keys >= start are included.
+	// TODO(sadovsky): Automatic GC interacts poorly with sync. Revisit this API.
+	DeleteRowRange(ctx *context.T, call rpc.ServerCall, start string, end string) error
+	// Scan returns all rows in the given range. The returned stream reads from a
+	// consistent snapshot taken at the time of the Scan RPC. If end is "", all
+	// rows with keys >= start are included.
+	Scan(ctx *context.T, call TableScanServerCall, start string, end string) error
 	// SetPermissions sets the permissions for all current and future rows with
 	// the given prefix. If the prefix overlaps with an existing prefix, the
 	// longest prefix that matches a row applies. For example:
@@ -481,9 +566,45 @@ type TableServerMethods interface {
 
 // TableServerStubMethods is the server interface containing
 // Table methods, as expected by rpc.Server.
-// There is no difference between this interface and TableServerMethods
-// since there are no streaming methods.
-type TableServerStubMethods TableServerMethods
+// The only difference between this interface and TableServerMethods
+// is the streaming methods.
+type TableServerStubMethods interface {
+	// Create creates this Table.
+	// If perms is nil, we inherit (copy) the Database perms.
+	Create(ctx *context.T, call rpc.ServerCall, perms access.Permissions) error
+	// Delete deletes this Table.
+	Delete(*context.T, rpc.ServerCall) error
+	// DeleteRowRange deletes all rows in the given range. If the last row that is
+	// covered by a prefix from SetPermissions is deleted, that (prefix, perms)
+	// pair is removed. If end is "", all rows with keys >= start are included.
+	// TODO(sadovsky): Automatic GC interacts poorly with sync. Revisit this API.
+	DeleteRowRange(ctx *context.T, call rpc.ServerCall, start string, end string) error
+	// Scan returns all rows in the given range. The returned stream reads from a
+	// consistent snapshot taken at the time of the Scan RPC. If end is "", all
+	// rows with keys >= start are included.
+	Scan(ctx *context.T, call *TableScanServerCallStub, start string, end string) error
+	// SetPermissions sets the permissions for all current and future rows with
+	// the given prefix. If the prefix overlaps with an existing prefix, the
+	// longest prefix that matches a row applies. For example:
+	//     SetPermissions(ctx, Prefix("a/b"), perms1)
+	//     SetPermissions(ctx, Prefix("a/b/c"), perms2)
+	// The permissions for row "a/b/1" are perms1, and the permissions for row
+	// "a/b/c/1" are perms2.
+	//
+	// SetPermissions will fail if called with a prefix that does not match any
+	// rows.
+	SetPermissions(ctx *context.T, call rpc.ServerCall, prefix string, perms access.Permissions) error
+	// GetPermissions returns an array of (prefix, perms) pairs. The array is
+	// sorted from longest prefix to shortest, so element zero is the one that
+	// applies to the row with the given key. The last element is always the
+	// prefix "" which represents the table's permissions -- the array will always
+	// have at least one element.
+	GetPermissions(ctx *context.T, call rpc.ServerCall, key string) ([]PrefixPermissions, error)
+	// DeletePermissions deletes the permissions for the specified prefix. Any
+	// rows covered by this prefix will use the next longest prefix's permissions
+	// (see the array returned by GetPermissions).
+	DeletePermissions(ctx *context.T, call rpc.ServerCall, prefix string) error
+}
 
 // TableServerStub adds universal methods to TableServerStubMethods.
 type TableServerStub interface {
@@ -524,6 +645,10 @@ func (s implTableServerStub) Delete(ctx *context.T, call rpc.ServerCall) error {
 
 func (s implTableServerStub) DeleteRowRange(ctx *context.T, call rpc.ServerCall, i0 string, i1 string) error {
 	return s.impl.DeleteRowRange(ctx, call, i0, i1)
+}
+
+func (s implTableServerStub) Scan(ctx *context.T, call *TableScanServerCallStub, i0 string, i1 string) error {
+	return s.impl.Scan(ctx, call, i0, i1)
 }
 
 func (s implTableServerStub) SetPermissions(ctx *context.T, call rpc.ServerCall, i0 string, i1 access.Permissions) error {
@@ -570,12 +695,21 @@ var descTable = rpc.InterfaceDesc{
 		},
 		{
 			Name: "DeleteRowRange",
-			Doc:  "// DeleteRowRange deletes all rows in the given range. If the last row that is\n// covered by a prefix from SetPermissions is deleted, that (prefix, perms)\n// pair is removed.\n// TODO(sadovsky): Automatic GC does not interact well with sync. This API\n// needs to be revisited.",
+			Doc:  "// DeleteRowRange deletes all rows in the given range. If the last row that is\n// covered by a prefix from SetPermissions is deleted, that (prefix, perms)\n// pair is removed. If end is \"\", all rows with keys >= start are included.\n// TODO(sadovsky): Automatic GC interacts poorly with sync. Revisit this API.",
 			InArgs: []rpc.ArgDesc{
 				{"start", ``}, // string
-				{"limit", ``}, // string
+				{"end", ``},   // string
 			},
 			Tags: []*vdl.Value{vdl.ValueOf(access.Tag("Write"))},
+		},
+		{
+			Name: "Scan",
+			Doc:  "// Scan returns all rows in the given range. The returned stream reads from a\n// consistent snapshot taken at the time of the Scan RPC. If end is \"\", all\n// rows with keys >= start are included.",
+			InArgs: []rpc.ArgDesc{
+				{"start", ``}, // string
+				{"end", ``},   // string
+			},
+			Tags: []*vdl.Value{vdl.ValueOf(access.Tag("Read"))},
 		},
 		{
 			Name: "SetPermissions",
@@ -608,17 +742,63 @@ var descTable = rpc.InterfaceDesc{
 	},
 }
 
+// TableScanServerStream is the server stream for Table.Scan.
+type TableScanServerStream interface {
+	// SendStream returns the send side of the Table.Scan server stream.
+	SendStream() interface {
+		// Send places the item onto the output stream.  Returns errors encountered
+		// while sending.  Blocks if there is no buffer space; will unblock when
+		// buffer space is available.
+		Send(item KeyValue) error
+	}
+}
+
+// TableScanServerCall represents the context passed to Table.Scan.
+type TableScanServerCall interface {
+	rpc.ServerCall
+	TableScanServerStream
+}
+
+// TableScanServerCallStub is a wrapper that converts rpc.StreamServerCall into
+// a typesafe stub that implements TableScanServerCall.
+type TableScanServerCallStub struct {
+	rpc.StreamServerCall
+}
+
+// Init initializes TableScanServerCallStub from rpc.StreamServerCall.
+func (s *TableScanServerCallStub) Init(call rpc.StreamServerCall) {
+	s.StreamServerCall = call
+}
+
+// SendStream returns the send side of the Table.Scan server stream.
+func (s *TableScanServerCallStub) SendStream() interface {
+	Send(item KeyValue) error
+} {
+	return implTableScanServerCallSend{s}
+}
+
+type implTableScanServerCallSend struct {
+	s *TableScanServerCallStub
+}
+
+func (s implTableScanServerCallSend) Send(item KeyValue) error {
+	return s.s.Send(item)
+}
+
 // RowClientMethods is the client interface
 // containing Row methods.
 //
 // Row represents a single row in a Table.
 // All access checks are performed against the most specific matching prefix
 // permissions in the Table.
+// NOTE(sadovsky): Currently we send []byte values over the wire for Get, Put,
+// and Scan. If there's a way to avoid encoding/decoding on the server side, we
+// can use vdl.Value everywhere without sacrificing performance.
 type RowClientMethods interface {
 	// Get returns the value for this Row.
-	Get(*context.T, ...rpc.CallOpt) (*vdl.Value, error)
+	Get(*context.T, ...rpc.CallOpt) ([]byte, error)
 	// Put writes the given value for this Row.
-	Put(ctx *context.T, value *vdl.Value, opts ...rpc.CallOpt) error
+	Put(ctx *context.T, value []byte, opts ...rpc.CallOpt) error
 	// Delete deletes this Row.
 	Delete(*context.T, ...rpc.CallOpt) error
 }
@@ -638,12 +818,12 @@ type implRowClientStub struct {
 	name string
 }
 
-func (c implRowClientStub) Get(ctx *context.T, opts ...rpc.CallOpt) (o0 *vdl.Value, err error) {
+func (c implRowClientStub) Get(ctx *context.T, opts ...rpc.CallOpt) (o0 []byte, err error) {
 	err = v23.GetClient(ctx).Call(ctx, c.name, "Get", nil, []interface{}{&o0}, opts...)
 	return
 }
 
-func (c implRowClientStub) Put(ctx *context.T, i0 *vdl.Value, opts ...rpc.CallOpt) (err error) {
+func (c implRowClientStub) Put(ctx *context.T, i0 []byte, opts ...rpc.CallOpt) (err error) {
 	err = v23.GetClient(ctx).Call(ctx, c.name, "Put", []interface{}{i0}, nil, opts...)
 	return
 }
@@ -659,11 +839,14 @@ func (c implRowClientStub) Delete(ctx *context.T, opts ...rpc.CallOpt) (err erro
 // Row represents a single row in a Table.
 // All access checks are performed against the most specific matching prefix
 // permissions in the Table.
+// NOTE(sadovsky): Currently we send []byte values over the wire for Get, Put,
+// and Scan. If there's a way to avoid encoding/decoding on the server side, we
+// can use vdl.Value everywhere without sacrificing performance.
 type RowServerMethods interface {
 	// Get returns the value for this Row.
-	Get(*context.T, rpc.ServerCall) (*vdl.Value, error)
+	Get(*context.T, rpc.ServerCall) ([]byte, error)
 	// Put writes the given value for this Row.
-	Put(ctx *context.T, call rpc.ServerCall, value *vdl.Value) error
+	Put(ctx *context.T, call rpc.ServerCall, value []byte) error
 	// Delete deletes this Row.
 	Delete(*context.T, rpc.ServerCall) error
 }
@@ -703,11 +886,11 @@ type implRowServerStub struct {
 	gs   *rpc.GlobState
 }
 
-func (s implRowServerStub) Get(ctx *context.T, call rpc.ServerCall) (*vdl.Value, error) {
+func (s implRowServerStub) Get(ctx *context.T, call rpc.ServerCall) ([]byte, error) {
 	return s.impl.Get(ctx, call)
 }
 
-func (s implRowServerStub) Put(ctx *context.T, call rpc.ServerCall, i0 *vdl.Value) error {
+func (s implRowServerStub) Put(ctx *context.T, call rpc.ServerCall, i0 []byte) error {
 	return s.impl.Put(ctx, call, i0)
 }
 
@@ -730,13 +913,13 @@ var RowDesc rpc.InterfaceDesc = descRow
 var descRow = rpc.InterfaceDesc{
 	Name:    "Row",
 	PkgPath: "v.io/syncbase/v23/services/syncbase/nosql",
-	Doc:     "// Row represents a single row in a Table.\n// All access checks are performed against the most specific matching prefix\n// permissions in the Table.",
+	Doc:     "// Row represents a single row in a Table.\n// All access checks are performed against the most specific matching prefix\n// permissions in the Table.\n// NOTE(sadovsky): Currently we send []byte values over the wire for Get, Put,\n// and Scan. If there's a way to avoid encoding/decoding on the server side, we\n// can use vdl.Value everywhere without sacrificing performance.",
 	Methods: []rpc.MethodDesc{
 		{
 			Name: "Get",
 			Doc:  "// Get returns the value for this Row.",
 			OutArgs: []rpc.ArgDesc{
-				{"", ``}, // *vdl.Value
+				{"", ``}, // []byte
 			},
 			Tags: []*vdl.Value{vdl.ValueOf(access.Tag("Read"))},
 		},
@@ -744,7 +927,7 @@ var descRow = rpc.InterfaceDesc{
 			Name: "Put",
 			Doc:  "// Put writes the given value for this Row.",
 			InArgs: []rpc.ArgDesc{
-				{"value", ``}, // *vdl.Value
+				{"value", ``}, // []byte
 			},
 			Tags: []*vdl.Value{vdl.ValueOf(access.Tag("Write"))},
 		},

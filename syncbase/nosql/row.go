@@ -7,7 +7,7 @@ package nosql
 import (
 	wire "v.io/syncbase/v23/services/syncbase/nosql"
 	"v.io/v23/context"
-	"v.io/v23/verror"
+	"v.io/v23/vom"
 )
 
 type row struct {
@@ -25,14 +25,27 @@ func (r *row) Key() string {
 	return r.key
 }
 
+// FullName implements Row.FullName.
+func (r *row) FullName() string {
+	return r.name
+}
+
 // Get implements Row.Get.
 func (r *row) Get(ctx *context.T, value interface{}) error {
-	return verror.NewErrNotImplemented(ctx)
+	bytes, err := r.c.Get(ctx)
+	if err != nil {
+		return err
+	}
+	return vom.Decode(bytes, value)
 }
 
 // Put implements Row.Put.
 func (r *row) Put(ctx *context.T, value interface{}) error {
-	return verror.NewErrNotImplemented(ctx)
+	bytes, err := vom.Encode(value)
+	if err != nil {
+		return err
+	}
+	return r.c.Put(ctx, bytes)
 }
 
 // Delete implements Row.Delete.

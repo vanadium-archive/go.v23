@@ -2,10 +2,10 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// Package testutil defines helpers for tests.
 package testutil
 
 import (
+	"fmt"
 	"reflect"
 	"testing"
 
@@ -27,12 +27,12 @@ func TestCreate(t *testing.T, ctx *context.T, i interface{}) {
 
 	// child.Create should fail since self does not exist.
 	if err := child.Create(ctx, nil); verror.ErrorID(err) != verror.ErrNoExistOrNoAccess.ID {
-		t.Fatalf("child.Create() should have failed: %s", err)
+		t.Fatalf("child.Create() should have failed: %v", err)
 	}
 
 	// Create self.
 	if err := self.Create(ctx, nil); err != nil {
-		t.Fatalf("self.Create() failed: %s", err)
+		t.Fatalf("self.Create() failed: %v", err)
 	}
 	if gotPerms, wantPerms := getPermsOrDie(t, ctx, self), defaultPerms(); !reflect.DeepEqual(gotPerms, wantPerms) {
 		t.Errorf("Perms do not match: got %v, want %v", gotPerms, wantPerms)
@@ -40,12 +40,12 @@ func TestCreate(t *testing.T, ctx *context.T, i interface{}) {
 
 	// child.Create should now succeed.
 	if err := child.Create(ctx, nil); err != nil {
-		t.Fatalf("child.Create() failed: %s", err)
+		t.Fatalf("child.Create() failed: %v", err)
 	}
 
 	// self.Create should fail since self already exists.
 	if err := self.Create(ctx, nil); verror.ErrorID(err) != verror.ErrExist.ID {
-		t.Fatalf("self.Create() should have failed: %s", err)
+		t.Fatalf("self.Create() should have failed: %v", err)
 	}
 
 	// Test create with non-default perms.
@@ -53,7 +53,7 @@ func TestCreate(t *testing.T, ctx *context.T, i interface{}) {
 	perms := access.Permissions{}
 	perms.Add(security.BlessingPattern("server/client"), string(access.Admin))
 	if err := self2.Create(ctx, perms); err != nil {
-		t.Fatalf("self2.Create() failed: %s", err)
+		t.Fatalf("self2.Create() failed: %v", err)
 	}
 	if gotPerms, wantPerms := getPermsOrDie(t, ctx, self2), perms; !reflect.DeepEqual(gotPerms, wantPerms) {
 		t.Errorf("Perms do not match: got %v, want %v", gotPerms, wantPerms)
@@ -63,10 +63,10 @@ func TestCreate(t *testing.T, ctx *context.T, i interface{}) {
 	perms = defaultPerms()
 	perms.Blacklist("server/client", string(access.Write))
 	if err := parent.SetPermissions(ctx, perms, ""); err != nil {
-		t.Fatalf("parent.SetPermissions() failed: %s", err)
+		t.Fatalf("parent.SetPermissions() failed: %v", err)
 	}
 	if err := parent.Child("self3").Create(ctx, nil); verror.ErrorID(err) != verror.ErrNoExistOrNoAccess.ID {
-		t.Fatalf("self3.Create() should have failed: %s", err)
+		t.Fatalf("self3.Create() should have failed: %v", err)
 	}
 }
 
@@ -78,52 +78,92 @@ func TestDelete(t *testing.T, ctx *context.T, i interface{}) {
 
 	// Create self.
 	if err := self.Create(ctx, nil); err != nil {
-		t.Fatalf("self.Create() failed: %s", err)
+		t.Fatalf("self.Create() failed: %v", err)
 	}
 
 	// self.Create should fail, since self already exists.
 	if err := self.Create(ctx, nil); verror.ErrorID(err) != verror.ErrExist.ID {
-		t.Fatalf("self.Create() should have failed: %s", err)
+		t.Fatalf("self.Create() should have failed: %v", err)
 	}
 
 	// By default, self perms are copied from parent, so self.Delete should
 	// succeed.
 	if err := self.Delete(ctx); err != nil {
-		t.Fatalf("self.Delete() failed: %s", err)
+		t.Fatalf("self.Delete() failed: %v", err)
 	}
 
 	// child.Create should fail, since self does not exist.
 	if err := child.Create(ctx, nil); verror.ErrorID(err) != verror.ErrNoExistOrNoAccess.ID {
-		t.Fatalf("child.Create() should have failed: %s", err)
+		t.Fatalf("child.Create() should have failed: %v", err)
 	}
 
 	// self.Create should succeed, since self was deleted.
 	if err := self.Create(ctx, nil); err != nil {
-		t.Fatalf("self.Create() failed: %s", err)
+		t.Fatalf("self.Create() failed: %v", err)
 	}
 
 	// Test that delete fails if the perms disallow access.
 	self2 := parent.Child("self2")
 	if err := self2.Create(ctx, nil); err != nil {
-		t.Fatalf("self2.Create() failed: %s", err)
+		t.Fatalf("self2.Create() failed: %v", err)
 	}
 	perms := defaultPerms()
 	perms.Blacklist("server/client", string(access.Write))
 	if err := self2.SetPermissions(ctx, perms, ""); err != nil {
-		t.Fatalf("self2.SetPermissions() failed: %s", err)
+		t.Fatalf("self2.SetPermissions() failed: %v", err)
 	}
 	if err := self2.Delete(ctx); verror.ErrorID(err) != verror.ErrNoExistOrNoAccess.ID {
-		t.Fatalf("self2.Delete() should have failed: %s", err)
+		t.Fatalf("self2.Delete() should have failed: %v", err)
 	}
 
 	// Test that delete succeeds even if the parent perms disallow access.
 	perms = defaultPerms()
 	perms.Blacklist("server/client", string(access.Write))
 	if err := parent.SetPermissions(ctx, perms, ""); err != nil {
-		t.Fatalf("parent.SetPermissions() failed: %s", err)
+		t.Fatalf("parent.SetPermissions() failed: %v", err)
 	}
 	if err := self.Delete(ctx); err != nil {
-		t.Fatalf("self.Delete() failed: %s", err)
+		t.Fatalf("self.Delete() failed: %v", err)
+	}
+}
+
+func TestListChildren(t *testing.T, ctx *context.T, i interface{}) {
+	self := makeLayer(i)
+
+	var got, want []string
+	var err error
+
+	got, err = self.ListChildren(ctx)
+	want = []string{}
+	if err != nil {
+		t.Fatalf("self.ListChildren() failed: %v", err)
+	}
+	if !reflect.DeepEqual(got, want) {
+		t.Fatalf("Lists do not match: got %v, want %v", got, want)
+	}
+
+	if err := self.Child("y").Create(ctx, nil); err != nil {
+		t.Fatalf("y.Create() failed: %v", err)
+	}
+	got, err = self.ListChildren(ctx)
+	want = []string{"y"}
+	if err != nil {
+		t.Fatalf("self.ListChildren() failed: %v", err)
+	}
+	if !reflect.DeepEqual(got, want) {
+		t.Fatalf("Lists do not match: got %v, want %v", got, want)
+	}
+
+	if err := self.Child("x").Create(ctx, nil); err != nil {
+		t.Fatalf("x.Create() failed: %v", err)
+	}
+	got, err = self.ListChildren(ctx)
+	want = []string{"x", "y"}
+	if err != nil {
+		t.Fatalf("self.ListChildren() failed: %v", err)
+	}
+	if !reflect.DeepEqual(got, want) {
+		t.Fatalf("Lists do not match: got %v, want %v", got, want)
 	}
 }
 
@@ -146,7 +186,7 @@ func TestPerms(t *testing.T, ctx *context.T, ac util.AccessController) {
 		perms, version, err := ac.GetPermissions(ctx)
 		if err != nil {
 			// Use Fatalf rather than t.Fatalf so we get a stack trace.
-			Fatalf(t, "GetPermissions failed: %s", err)
+			Fatalf(t, "GetPermissions failed: %v", err)
 		}
 		return perms, version
 	}
@@ -168,7 +208,7 @@ func TestPerms(t *testing.T, ctx *context.T, ac util.AccessController) {
 	// SetPermissions with correct version should succeed.
 	permsBefore, versionBefore = permsAfter, versionAfter
 	if err := ac.SetPermissions(ctx, myperms, versionBefore); err != nil {
-		t.Fatalf("SetPermissions failed: %s", err)
+		t.Fatalf("SetPermissions failed: %v", err)
 	}
 	// Check that perms and version actually changed.
 	permsAfter, versionAfter = getPermsAndVersionOrDie()
@@ -183,7 +223,7 @@ func TestPerms(t *testing.T, ctx *context.T, ac util.AccessController) {
 	permsBefore, versionBefore = permsAfter, versionAfter
 	myperms.Add(security.BlessingPattern("server/client"), string(access.Read))
 	if err := ac.SetPermissions(ctx, myperms, ""); err != nil {
-		t.Fatalf("SetPermissions failed: %s", err)
+		t.Fatalf("SetPermissions failed: %v", err)
 	}
 	// Check that perms and version actually changed.
 	permsAfter, versionAfter = getPermsAndVersionOrDie()
@@ -198,7 +238,7 @@ func TestPerms(t *testing.T, ctx *context.T, ac util.AccessController) {
 	// still change.
 	permsBefore, versionBefore = permsAfter, versionAfter
 	if err := ac.SetPermissions(ctx, myperms, ""); err != nil {
-		t.Fatalf("SetPermissions failed: %s", err)
+		t.Fatalf("SetPermissions failed: %v", err)
 	}
 	// Check that perms did not change and version did change.
 	permsAfter, versionAfter = getPermsAndVersionOrDie()
@@ -211,7 +251,7 @@ func TestPerms(t *testing.T, ctx *context.T, ac util.AccessController) {
 
 	// Take away our access. SetPermissions and GetPermissions should fail.
 	if err := ac.SetPermissions(ctx, access.Permissions{}, ""); err != nil {
-		t.Fatalf("SetPermissions failed: %s", err)
+		t.Fatalf("SetPermissions failed: %v", err)
 	}
 	if _, _, err := ac.GetPermissions(ctx); verror.ErrorID(err) != verror.ErrNoExistOrNoAccess.ID {
 		t.Fatal("GetPermissions should have failed with access error")
@@ -224,10 +264,13 @@ func TestPerms(t *testing.T, ctx *context.T, ac util.AccessController) {
 ////////////////////////////////////////
 // Internal helpers
 
+const notAvailable = "not available"
+
 type layer interface {
 	util.AccessController
 	Create(ctx *context.T, perms access.Permissions) error
 	Delete(ctx *context.T) error
+	ListChildren(ctx *context.T) ([]string, error)
 	Child(childName string) layer
 }
 
@@ -236,10 +279,13 @@ type service struct {
 }
 
 func (s *service) Create(ctx *context.T, perms access.Permissions) error {
-	panic("not available")
+	panic(notAvailable)
 }
 func (s *service) Delete(ctx *context.T) error {
-	panic("not available")
+	panic(notAvailable)
+}
+func (s *service) ListChildren(ctx *context.T) ([]string, error) {
+	return s.ListApps(ctx)
 }
 func (s *service) Child(childName string) layer {
 	return makeLayer(s.App(childName))
@@ -249,6 +295,9 @@ type app struct {
 	syncbase.App
 }
 
+func (a *app) ListChildren(ctx *context.T) ([]string, error) {
+	return a.ListDatabases(ctx)
+}
 func (a *app) Child(childName string) layer {
 	return makeLayer(a.NoSQLDatabase(childName))
 }
@@ -257,29 +306,65 @@ type database struct {
 	nosql.Database
 }
 
+func (d *database) ListChildren(ctx *context.T) ([]string, error) {
+	return d.ListTables(ctx)
+}
 func (d *database) Child(childName string) layer {
-	return &table{name: childName, d: d}
+	return &table{Table: d.Table(childName), d: d}
 }
 
 type table struct {
-	name string
-	d    nosql.Database
+	nosql.Table
+	d nosql.Database
 }
 
 func (t *table) Create(ctx *context.T, perms access.Permissions) error {
-	return t.d.CreateTable(ctx, t.name, perms)
+	return t.d.CreateTable(ctx, t.Name(), perms)
 }
 func (t *table) Delete(ctx *context.T) error {
-	return t.d.DeleteTable(ctx, t.name)
+	return t.d.DeleteTable(ctx, t.Name())
 }
 func (t *table) SetPermissions(ctx *context.T, perms access.Permissions, version string) error {
-	panic("not available")
+	return t.Table.SetPermissions(ctx, nosql.Prefix(""), perms)
 }
 func (t *table) GetPermissions(ctx *context.T) (perms access.Permissions, version string, err error) {
-	panic("not available")
+	permsList, err := t.Table.GetPermissions(ctx, "")
+	if len(permsList) != 1 || permsList[0].Prefix.Prefix() != "" {
+		panic(fmt.Sprintf("unexpected perms list: %v", permsList))
+	}
+	return permsList[0].Perms, "", nil
+}
+func (t *table) ListChildren(ctx *context.T) ([]string, error) {
+	panic(notAvailable)
 }
 func (t *table) Child(childName string) layer {
-	panic("not available")
+	return &row{t.Row(childName)}
+}
+
+type row struct {
+	nosql.Row
+}
+
+func (r *row) Create(ctx *context.T, perms access.Permissions) error {
+	if perms != nil {
+		panic(fmt.Sprintf("bad perms: %v", perms))
+	}
+	return r.Put(ctx, true)
+}
+func (r *row) Delete(ctx *context.T) error {
+	return r.Delete(ctx)
+}
+func (r *row) SetPermissions(ctx *context.T, perms access.Permissions, version string) error {
+	panic(notAvailable)
+}
+func (r *row) GetPermissions(ctx *context.T) (perms access.Permissions, version string, err error) {
+	panic(notAvailable)
+}
+func (r *row) ListChildren(ctx *context.T) ([]string, error) {
+	panic(notAvailable)
+}
+func (r *row) Child(childName string) layer {
+	panic(notAvailable)
 }
 
 func makeLayer(i interface{}) layer {

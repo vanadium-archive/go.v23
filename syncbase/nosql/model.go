@@ -39,6 +39,9 @@ type Database interface {
 	// Name returns the relative name of this Database.
 	Name() string
 
+	// FullName returns the full name (object name) of this Database.
+	FullName() string
+
 	// Create creates this Database.
 	// If perms is nil, we inherit (copy) the App perms.
 	Create(ctx *context.T, perms access.Permissions) error
@@ -96,8 +99,8 @@ type BatchDatabase interface {
 
 // PrefixPermissions represents a pair of (prefix, perms).
 type PrefixPermissions struct {
-	prefix PrefixRange
-	perms  access.Permissions
+	Prefix PrefixRange
+	Perms  access.Permissions
 }
 
 // Table represents a collection of Rows.
@@ -108,6 +111,9 @@ type PrefixPermissions struct {
 type Table interface {
 	// Name returns the relative name of this Table.
 	Name() string
+
+	// FullName returns the full name (object name) of this Table.
+	FullName() string
 
 	// Row returns the Row with the given primary key.
 	Row(key string) Row
@@ -132,12 +138,13 @@ type Table interface {
 	// by a prefix from SetPermissions is deleted, that (prefix, perms) pair is
 	// removed.
 	// See helpers nosql.Prefix(), nosql.Range(), nosql.SingleRow().
-	// TODO(sadovsky): Automatic GC does not interact well with sync. This API
-	// needs to be revisited.
+	// TODO(sadovsky): Automatic GC interacts poorly with sync. Revisit this API.
 	Delete(ctx *context.T, r RowRange) error
 
-	// Scan returns all rows in the given range.
+	// Scan returns all rows in the given range. The returned stream reads from a
+	// consistent snapshot taken at the time of the Scan RPC.
 	// See helpers nosql.Prefix(), nosql.Range(), nosql.SingleRow().
+	// TODO(sadovsky): Stop returning error.
 	Scan(ctx *context.T, r RowRange) (Stream, error)
 
 	// SetPermissions sets the permissions for all current and future rows with
@@ -170,6 +177,9 @@ type Row interface {
 	// Key returns the primary key for this Row.
 	Key() string
 
+	// FullName returns the full name (object name) of this Row.
+	FullName() string
+
 	// Get returns the value for this Row.
 	Get(ctx *context.T, value interface{}) error
 
@@ -180,24 +190,25 @@ type Row interface {
 	Delete(ctx *context.T) error
 }
 
-// KeyValue is a wrapper for the key and value from a single row.
-type KeyValue struct {
-	Key   string
-	Value interface{}
-}
-
 // Stream is an interface for iterating through a collection of key-value pairs.
 type Stream interface {
-	// Advance stages an element so the client can retrieve it with Value. Advance
-	// returns true iff there is an element to retrieve. The client must call
-	// Advance before calling Value. The client must call Cancel if it does not
-	// iterate through all elements (i.e. until Advance returns false). Advance
-	// may block if an element is not immediately available.
+	// Advance stages an element so the client can retrieve it with Key or Value.
+	// Advance returns true iff there is an element to retrieve. The client must
+	// call Advance before calling Key or Value. The client must call Cancel if it
+	// does not iterate through all elements (i.e. until Advance returns false).
+	// Advance may block if an element is not immediately available.
 	Advance() bool
 
-	// Value returns the element that was staged by Advance. Value may panic if
-	// Advance returned false or was not called at all. Value does not block.
-	Value() KeyValue
+	// Key returns the key of the element that was staged by Advance.
+	// Key may panic if Advance returned false or was not called at all.
+	// Key does not block.
+	Key() string
+
+	// Value returns the value of the element that was staged by Advance, or an
+	// error if the value could not be decoded.
+	// Value may panic if Advance returned false or was not called at all.
+	// Value does not block.
+	Value(value interface{}) error
 
 	// Err returns a non-nil error iff the stream encountered any errors. Err does
 	// not block.
@@ -206,7 +217,7 @@ type Stream interface {
 	// Cancel notifies the stream provider that it can stop producing elements.
 	// The client must call Cancel if it does not iterate through all elements
 	// (i.e. until Advance returns false). Cancel is idempotent and can be called
-	// concurrently with a goroutine that is iterating via Advance/Value. Cancel
-	// causes Advance to subsequently return false. Cancel does not block.
+	// concurrently with a goroutine that is iterating via Advance/Key/Value.
+	// Cancel causes Advance to subsequently return false. Cancel does not block.
 	Cancel()
 }

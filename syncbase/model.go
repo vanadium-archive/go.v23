@@ -25,6 +25,9 @@ import (
 // Service represents a Vanadium Syncbase service.
 // Use syncbase.NewService to get a Service.
 type Service interface {
+	// FullName returns the full name (object name) of this Service.
+	FullName() string
+
 	// App returns the App with the given name.
 	// relativeName must not contain slashes.
 	App(relativeName string) App
@@ -42,6 +45,9 @@ type Service interface {
 type App interface {
 	// Name returns the relative name of this App.
 	Name() string
+
+	// FullName returns the full name (object name) of this App.
+	FullName() string
 
 	// NoSQLDatabase returns the nosql.Database with the given name.
 	// relativeName must not contain slashes.

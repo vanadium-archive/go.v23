@@ -6,10 +6,10 @@ package syncbase
 
 import (
 	wire "v.io/syncbase/v23/services/syncbase"
+	"v.io/syncbase/v23/syncbase/util"
 	"v.io/v23/context"
 	"v.io/v23/naming"
 	"v.io/v23/security/access"
-	"v.io/v23/verror"
 )
 
 func NewService(name string) Service {
@@ -25,6 +25,11 @@ var _ Service = (*service)(nil)
 
 // TODO(sadovsky): Validate names before sending RPCs.
 
+// FullName implements Service.FullName.
+func (s *service) FullName() string {
+	return s.name
+}
+
 // App implements Service.App.
 func (s *service) App(relativeName string) App {
 	name := naming.Join(s.name, relativeName)
@@ -33,7 +38,7 @@ func (s *service) App(relativeName string) App {
 
 // ListApps implements Service.ListApps.
 func (s *service) ListApps(ctx *context.T) ([]string, error) {
-	return nil, verror.NewErrNotImplemented(ctx)
+	return util.List(ctx, s.name)
 }
 
 // SetPermissions implements Service.SetPermissions.

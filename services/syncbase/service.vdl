@@ -22,11 +22,6 @@ type Service interface {
 	permissions.Object
 }
 
-// TODO(sadovsky): We may want to allow clients to rename their Apps and
-// Databases (and Tables, via schema updates). Internally, this means we'd need
-// to add a layer of indirection, where client-supplied names get translated
-// into opaque internal identifiers.
-
 // App represents the data for a specific app instance (possibly a combination
 // of user, device, and app).
 // App.Glob operates over Database names.

@@ -6,6 +6,7 @@ package nosql
 
 import (
 	wire "v.io/syncbase/v23/services/syncbase/nosql"
+	"v.io/syncbase/v23/syncbase/util"
 	"v.io/v23/context"
 	"v.io/v23/naming"
 	"v.io/v23/security/access"
@@ -31,6 +32,11 @@ func (d *database) Name() string {
 	return d.relativeName
 }
 
+// FullName implements Database.FullName.
+func (d *database) FullName() string {
+	return d.name
+}
+
 // Table implements Database.Table.
 func (d *database) Table(relativeName string) Table {
 	name := naming.Join(d.name, relativeName)
@@ -39,7 +45,7 @@ func (d *database) Table(relativeName string) Table {
 
 // ListTables implements Database.ListTables.
 func (d *database) ListTables(ctx *context.T) ([]string, error) {
-	return nil, verror.NewErrNotImplemented(ctx)
+	return util.List(ctx, d.name)
 }
 
 // Create implements Database.Create.
@@ -62,6 +68,7 @@ func (d *database) DeleteTable(ctx *context.T, relativeName string) error {
 	return wire.TableClient(naming.Join(d.name, relativeName)).Delete(ctx)
 }
 
+// BeginBatch implements Database.BeginBatch.
 func (d *database) BeginBatch(ctx *context.T, opts BatchOptions) (BatchDatabase, error) {
 	return nil, verror.NewErrNotImplemented(ctx)
 }

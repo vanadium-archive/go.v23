@@ -4,35 +4,46 @@
 
 package nosql
 
+import (
+	"v.io/syncbase/v23/syncbase/util"
+)
+
+// RowRange represents all rows with keys in [start, end). If end is "", all
+// rows with keys >= start are included.
 type RowRange interface {
 	Start() string
-	Limit() string
+	// TODO(sadovsky): Rename to "limit" everywhere.
+	End() string
 }
 
+// PrefixRange represents all rows with keys that have some prefix.
 type PrefixRange interface {
 	RowRange
 	Prefix() string
 }
 
+// rowRange implements the RowRange interface.
 type rowRange struct {
 	start string
-	limit string
+	end   string
 }
+
+var _ RowRange = (*rowRange)(nil)
 
 func (r *rowRange) Start() string {
 	return r.start
 }
 
-func (r *rowRange) Limit() string {
-	return r.limit
+func (r *rowRange) End() string {
+	return r.end
 }
 
 func SingleRow(row string) RowRange {
-	return &rowRange{start: row, limit: row + "\x00"}
+	return &rowRange{start: row, end: row + "\x00"}
 }
 
-func Range(start, limit string) RowRange {
-	return &rowRange{start: start, limit: limit}
+func Range(start, end string) RowRange {
+	return &rowRange{start: start, end: end}
 }
 
 // prefixRange implements the PrefixRange interface (and thus also the RowRange
@@ -43,21 +54,14 @@ type prefixRange struct {
 	prefix string
 }
 
+var _ PrefixRange = (*prefixRange)(nil)
+
 func (r *prefixRange) Start() string {
-	return r.prefix
+	return util.PrefixRangeStart(r.prefix)
 }
 
-func (r *prefixRange) Limit() string {
-	p := r.prefix
-	if p == "" {
-		return p
-	}
-	// TODO(sadovsky): Special handling for delimiters or other reserved chars?
-	// TODO(sadovsky): This implementation is incorrect if we allow prefix strings
-	// to contain bytes with the max possible value (255). In practice we may
-	// disallow such byte values, but in any case it's probably best to make this
-	// implementation defensive.
-	return p[:len(p)-1] + string(p[len(p)-1]+1)
+func (r *prefixRange) End() string {
+	return util.PrefixRangeEnd(r.prefix)
 }
 
 func (r *prefixRange) Prefix() string {

@@ -49,7 +49,19 @@ func (PrefixPermissions) __VDLReflect(struct {
 }) {
 }
 
+// KeyValue is a key-value pair.
+type KeyValue struct {
+	Key   string
+	Value []byte
+}
+
+func (KeyValue) __VDLReflect(struct {
+	Name string `vdl:"v.io/syncbase/v23/services/syncbase/nosql.KeyValue"`
+}) {
+}
+
 func init() {
 	vdl.Register((*BatchOptions)(nil))
 	vdl.Register((*PrefixPermissions)(nil))
+	vdl.Register((*KeyValue)(nil))
 }

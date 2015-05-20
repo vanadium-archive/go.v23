@@ -15,14 +15,20 @@ import (
 ////////////////////////////////////////
 // Test cases
 
-// TODO(sadovsky): Finish writing tests.
-
 func TestNameAndKey(t *testing.T) {
 	a := syncbase.NewService("s").App("a")
 
 	if a.Name() != "a" {
-		t.Errorf("Wrong name: %s", a.Name())
+		t.Errorf("Wrong name: %q", a.Name())
 	}
+}
+
+// Tests that Service.ListApps works as expected.
+func TestListApps(t *testing.T) {
+	ctx, sName, cleanup := tu.SetupOrDie(nil)
+	defer cleanup()
+	s := syncbase.NewService(sName)
+	tu.TestListChildren(t, ctx, s)
 }
 
 // Tests that Service.{Set,Get}Permissions work as expected.
@@ -46,13 +52,18 @@ func TestAppDelete(t *testing.T) {
 	tu.TestDelete(t, ctx, syncbase.NewService(sName))
 }
 
+// Tests that App.ListDatabases works as expected.
+func TestListDatabases(t *testing.T) {
+	ctx, sName, cleanup := tu.SetupOrDie(nil)
+	defer cleanup()
+	a := tu.CreateApp(t, ctx, syncbase.NewService(sName), "a")
+	tu.TestListChildren(t, ctx, a)
+}
+
 // Tests that App.{Set,Get}Permissions work as expected.
 func TestAppPerms(t *testing.T) {
 	ctx, sName, cleanup := tu.SetupOrDie(nil)
 	defer cleanup()
-	a := syncbase.NewService(sName).App("a")
-	if err := a.Create(ctx, nil); err != nil {
-		t.Fatalf("a.Create() failed: %s", err)
-	}
+	a := tu.CreateApp(t, ctx, syncbase.NewService(sName), "a")
 	tu.TestPerms(t, ctx, a)
 }

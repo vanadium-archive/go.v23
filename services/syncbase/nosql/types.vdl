@@ -32,3 +32,9 @@ type PrefixPermissions struct {
 	Prefix string
 	Perms  access.Permissions
 }
+
+// KeyValue is a key-value pair.
+type KeyValue struct {
+	Key   string
+	Value []byte
+}

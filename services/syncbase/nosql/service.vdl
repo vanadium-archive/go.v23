@@ -59,13 +59,14 @@ type Table interface {
 
 	// DeleteRowRange deletes all rows in the given range. If the last row that is
 	// covered by a prefix from SetPermissions is deleted, that (prefix, perms)
-	// pair is removed.
-	// TODO(sadovsky): Automatic GC does not interact well with sync. This API
-	// needs to be revisited.
-	DeleteRowRange(start, limit string) error {access.Write}
+	// pair is removed. If end is "", all rows with keys >= start are included.
+	// TODO(sadovsky): Automatic GC interacts poorly with sync. Revisit this API.
+	DeleteRowRange(start, end string) error {access.Write}
 
-	// TODO(sadovsky): Add Scan (which accepts a RowRange) and implement Glob in
-	// terms of Scan?
+	// Scan returns all rows in the given range. The returned stream reads from a
+	// consistent snapshot taken at the time of the Scan RPC. If end is "", all
+	// rows with keys >= start are included.
+	Scan(start, end string) stream<_, KeyValue> error {access.Read}
 
 	// SetPermissions sets the permissions for all current and future rows with
 	// the given prefix. If the prefix overlaps with an existing prefix, the
@@ -95,12 +96,15 @@ type Table interface {
 // Row represents a single row in a Table.
 // All access checks are performed against the most specific matching prefix
 // permissions in the Table.
+// NOTE(sadovsky): Currently we send []byte values over the wire for Get, Put,
+// and Scan. If there's a way to avoid encoding/decoding on the server side, we
+// can use vdl.Value everywhere without sacrificing performance.
 type Row interface {
 	// Get returns the value for this Row.
-	Get() (any | error) {access.Read}
+	Get() ([]byte | error) {access.Read}
 
 	// Put writes the given value for this Row.
-	Put(value any) error {access.Write}
+	Put(value []byte) error {access.Write}
 
 	// Delete deletes this Row.
 	Delete() error {access.Write}

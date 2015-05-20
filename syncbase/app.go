@@ -7,10 +7,10 @@ package syncbase
 import (
 	wire "v.io/syncbase/v23/services/syncbase"
 	"v.io/syncbase/v23/syncbase/nosql"
+	"v.io/syncbase/v23/syncbase/util"
 	"v.io/v23/context"
 	"v.io/v23/naming"
 	"v.io/v23/security/access"
-	"v.io/v23/verror"
 )
 
 type app struct {
@@ -28,6 +28,11 @@ func (a *app) Name() string {
 	return a.relativeName
 }
 
+// FullName implements App.FullName.
+func (a *app) FullName() string {
+	return a.name
+}
+
 // NoSQLDatabase implements App.NoSQLDatabase.
 func (a *app) NoSQLDatabase(relativeName string) nosql.Database {
 	name := naming.Join(a.name, relativeName)
@@ -36,7 +41,7 @@ func (a *app) NoSQLDatabase(relativeName string) nosql.Database {
 
 // ListDatabases implements App.ListDatabases.
 func (a *app) ListDatabases(ctx *context.T) ([]string, error) {
-	return nil, verror.NewErrNotImplemented(ctx)
+	return util.List(ctx, a.name)
 }
 
 // Create implements App.Create.
