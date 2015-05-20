@@ -13,7 +13,9 @@ import (
 	"v.io/v23/vdl"
 
 	// VDL user imports
+	"time"
 	"v.io/v23/security"
+	_ "v.io/v23/vdlroot/time"
 )
 
 // Envelope is a collection of metadata that describes an application.
@@ -38,6 +40,21 @@ type Envelope struct {
 	// Packages is the set of packages to install on the local filesystem
 	// before executing the binary
 	Packages Packages
+	// Restarts specifies how many times the device manager will attempt
+	// to automatically restart an application that has crashed before
+	// giving up and marking the application as NotRunning.
+	Restarts int32
+	// RestartTimeWindow is the time window within which an
+	// application exit is considered a crash that counts against the
+	// Restarts budget. If the application crashes after less than
+	// RestartTimeWindow time for Restarts consecutive times, the
+	// application is marked NotRunning and no more restart attempts
+	// are made. If the application has run continuously for more
+	// than RestartTimeWindow, subsequent crashes will again benefit
+	// from up to Restarts restarts (that is, the Restarts budget is
+	// reset by a successful run of at least RestartTimeWindow
+	// duration).
+	RestartTimeWindow time.Duration
 }
 
 func (Envelope) __VDLReflect(struct {
