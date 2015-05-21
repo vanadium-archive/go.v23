@@ -51,7 +51,7 @@ func TestGetQuery(t *testing.T) {
 		},
 		{ // Multiple queries on one line.
 			[]string{"select k from C; select bar from C;"},
-			[]string{"select k from C", "select bar from C"},
+			[]string{"select k from C", " select bar from C"},
 		},
 		{ // Multiple queries without a ; are just one query.
 			[]string{"select k from C select bar from C;"},
@@ -59,7 +59,11 @@ func TestGetQuery(t *testing.T) {
 		},
 		{ // Multiple queries without a ; are just one query.
 			[]string{"select k from C", "select bar from C;"},
-			[]string{"select k from C select bar from C"},
+			[]string{"select k from C\nselect bar from C"},
+		},
+		{
+			[]string{"select\tfoo.bar from\nC;"},
+			[]string{"select\tfoo.bar from\nC"},
 		},
 	}
 	for _, test := range tests {
@@ -77,7 +81,7 @@ func TestGetQuery(t *testing.T) {
 			}
 		}
 		if got, want := queries, test.queries; !reflect.DeepEqual(got, want) {
-			t.Errorf("test %v: got %v, want %v", test.lines, got, want)
+			t.Errorf("test %#v: got %#v, want %#v", test.lines, got, want)
 		}
 	}
 }

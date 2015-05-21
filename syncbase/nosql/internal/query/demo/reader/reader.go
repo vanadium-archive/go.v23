@@ -22,7 +22,7 @@ type T struct {
 
 func newT(prompt prompter) *T {
 	t := &T{prompt: prompt}
-	t.s.Init(strings.NewReader(""))
+	t.initScanner("")
 	return t
 }
 
@@ -31,12 +31,13 @@ func (t *T) Close() {
 	t.prompt.Close()
 }
 
-// GetQuery returns an entire query, stripping out any extraneous whitespace.
-// For example, if the user enters
-//   select k
-//      from Customers;
-// the returned string would be
-//   select k from Customers;
+func (t *T) initScanner(input string) {
+	t.s.Init(strings.NewReader(input))
+	// Keep all whitespace.
+	t.s.Whitespace = 0
+}
+
+// GetQuery returns an entire query where queries are delimited by semicolons.
 // GetQuery returns the error io.EOF when there is no more input.
 func (t *T) GetQuery() (string, error) {
 	if t.s.Peek() == scanner.EOF {
@@ -44,7 +45,7 @@ func (t *T) GetQuery() (string, error) {
 		if err != nil {
 			return "", err
 		}
-		t.s.Init(strings.NewReader(input))
+		t.initScanner(input)
 	}
 	var query string
 WholeQuery:
@@ -53,16 +54,14 @@ WholeQuery:
 			if tok == ';' {
 				break WholeQuery
 			}
-			if query != "" {
-				query += " "
-			}
 			query += t.s.TokenText()
 		}
 		input, err := t.prompt.ContinuePrompt()
 		if err != nil {
 			return "", err
 		}
-		t.s.Init(strings.NewReader(input))
+		t.initScanner(input)
+		query += "\n" // User started a new line.
 	}
 	t.prompt.AppendHistory(query + ";")
 	return query, nil
