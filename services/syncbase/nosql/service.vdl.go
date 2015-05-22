@@ -49,60 +49,55 @@ func NewErrNotBoundToBatch(ctx *context.T) error {
 // SyncGroupManager is the interface for SyncGroup operations.
 // TODO(hpucha): Add blessings to create/join and add a refresh method.
 type SyncGroupManagerClientMethods interface {
-	// GetSyncGroupNames returns the global names of all SyncGroups attached
-	// to this database.
+	// GetSyncGroupNames returns the global names of all SyncGroups attached to
+	// this database.
 	GetSyncGroupNames(*context.T, ...rpc.CallOpt) ([]string, error)
-	// CreateSyncGroup creates a new SyncGroup with the given
-	// spec.
+	// CreateSyncGroup creates a new SyncGroup with the given spec.
 	//
-	// Requires: Client must have at least Read access on the
-	// Database; prefix ACL must exist at each SyncGroup prefix;
-	// Client must have at least Read access on each of these
-	// prefix ACLs.
+	// Requires: Client must have at least Read access on the Database; prefix ACL
+	// must exist at each SyncGroup prefix; Client must have at least Read access
+	// on each of these prefix ACLs.
 	CreateSyncGroup(ctx *context.T, sgName string, spec SyncGroupSpec, myInfo SyncGroupMemberInfo, opts ...rpc.CallOpt) error
-	// JoinSyncGroup joins the specified SyncGroup.
+	// JoinSyncGroup joins the SyncGroup.
 	//
-	// Requires: Client must have at least Read access on the
-	// Database, and on the SyncGroup ACL.
+	// Requires: Client must have at least Read access on the Database and on the
+	// SyncGroup ACL.
 	JoinSyncGroup(ctx *context.T, sgName string, myInfo SyncGroupMemberInfo, opts ...rpc.CallOpt) (spec SyncGroupSpec, err error)
-	// LeaveSyncGroup leaves the SyncGroup, and synced data will
-	// continue to be available.
+	// LeaveSyncGroup leaves the SyncGroup. Previously synced data will continue
+	// to be available.
 	//
 	// Requires: Client must have at least Read access on the Database.
 	LeaveSyncGroup(ctx *context.T, sgName string, opts ...rpc.CallOpt) error
-	// DestroySyncGroup destroys the SyncGroup, and synced data
-	// will continue to be available.
+	// DestroySyncGroup destroys the SyncGroup. Previously synced data will
+	// continue to be available to all members.
 	//
-	// Requires: Client must have at least Read access on the
-	// Database, and must have Admin access on the SyncGroup ACL.
+	// Requires: Client must have at least Read access on the Database, and must
+	// have Admin access on the SyncGroup ACL.
 	DestroySyncGroup(ctx *context.T, sgName string, opts ...rpc.CallOpt) error
-	// EjectFromSyncGroup ejects a member from the
-	// SyncGroup. Ejected member will not able to sync further,
-	// but will retain any data previously available locally.
+	// EjectFromSyncGroup ejects a member from the SyncGroup. The ejected member
+	// will not be able to sync further, but will retain any data it has already
+	// synced.
 	//
-	// Requires: Client must have at least Read access on the
-	// Database, and must have Admin access on the SyncGroup ACL.
+	// Requires: Client must have at least Read access on the Database, and must
+	// have Admin access on the SyncGroup ACL.
 	EjectFromSyncGroup(ctx *context.T, sgName string, member string, opts ...rpc.CallOpt) error
-	// GetSyncGroupSpec gets the SyncGroup spec. version allows
-	// for atomic read-modify-write of the spec by providing
-	// optimistic concurrency control.
+	// GetSyncGroupSpec gets the SyncGroup spec. version allows for atomic
+	// read-modify-write of the spec - see comment for SetSyncGroupSpec.
 	//
-	// Requires: Client must have at least Read access on the
-	// Database, and on the SyncGroup ACL.
+	// Requires: Client must have at least Read access on the Database and on the
+	// SyncGroup ACL.
 	GetSyncGroupSpec(ctx *context.T, sgName string, opts ...rpc.CallOpt) (spec SyncGroupSpec, version string, err error)
-	// SetSyncGroupSpec sets the SyncGroup spec. version may be
-	// either empty, or the value from a recent Get. If not empty,
-	// Set will only succeed if version matches that specified in
-	// Set.
+	// SetSyncGroupSpec sets the SyncGroup spec. version may be either empty or
+	// the value from a previous Get. If not empty, Set will only succeed if the
+	// current version matches the specified one.
 	//
-	// Requires: Client must have at least Read access on the
-	// Database, and must have Admin access on the SyncGroup ACL.
+	// Requires: Client must have at least Read access on the Database, and must
+	// have Admin access on the SyncGroup ACL.
 	SetSyncGroupSpec(ctx *context.T, sgName string, spec SyncGroupSpec, version string, opts ...rpc.CallOpt) error
-	// GetSyncGroupMembers gets the info on members who joined
-	// this SyncGroup.
+	// GetSyncGroupMembers gets the info objects for members of the SyncGroup.
 	//
-	// Requires: Client must have at least Read access on the
-	// Database, and on the SyncGroup ACL.
+	// Requires: Client must have at least Read access on the Database and on the
+	// SyncGroup ACL.
 	GetSyncGroupMembers(ctx *context.T, sgName string, opts ...rpc.CallOpt) (members map[string]SyncGroupMemberInfo, err error)
 }
 
@@ -172,60 +167,55 @@ func (c implSyncGroupManagerClientStub) GetSyncGroupMembers(ctx *context.T, i0 s
 // SyncGroupManager is the interface for SyncGroup operations.
 // TODO(hpucha): Add blessings to create/join and add a refresh method.
 type SyncGroupManagerServerMethods interface {
-	// GetSyncGroupNames returns the global names of all SyncGroups attached
-	// to this database.
+	// GetSyncGroupNames returns the global names of all SyncGroups attached to
+	// this database.
 	GetSyncGroupNames(*context.T, rpc.ServerCall) ([]string, error)
-	// CreateSyncGroup creates a new SyncGroup with the given
-	// spec.
+	// CreateSyncGroup creates a new SyncGroup with the given spec.
 	//
-	// Requires: Client must have at least Read access on the
-	// Database; prefix ACL must exist at each SyncGroup prefix;
-	// Client must have at least Read access on each of these
-	// prefix ACLs.
+	// Requires: Client must have at least Read access on the Database; prefix ACL
+	// must exist at each SyncGroup prefix; Client must have at least Read access
+	// on each of these prefix ACLs.
 	CreateSyncGroup(ctx *context.T, call rpc.ServerCall, sgName string, spec SyncGroupSpec, myInfo SyncGroupMemberInfo) error
-	// JoinSyncGroup joins the specified SyncGroup.
+	// JoinSyncGroup joins the SyncGroup.
 	//
-	// Requires: Client must have at least Read access on the
-	// Database, and on the SyncGroup ACL.
+	// Requires: Client must have at least Read access on the Database and on the
+	// SyncGroup ACL.
 	JoinSyncGroup(ctx *context.T, call rpc.ServerCall, sgName string, myInfo SyncGroupMemberInfo) (spec SyncGroupSpec, err error)
-	// LeaveSyncGroup leaves the SyncGroup, and synced data will
-	// continue to be available.
+	// LeaveSyncGroup leaves the SyncGroup. Previously synced data will continue
+	// to be available.
 	//
 	// Requires: Client must have at least Read access on the Database.
 	LeaveSyncGroup(ctx *context.T, call rpc.ServerCall, sgName string) error
-	// DestroySyncGroup destroys the SyncGroup, and synced data
-	// will continue to be available.
+	// DestroySyncGroup destroys the SyncGroup. Previously synced data will
+	// continue to be available to all members.
 	//
-	// Requires: Client must have at least Read access on the
-	// Database, and must have Admin access on the SyncGroup ACL.
+	// Requires: Client must have at least Read access on the Database, and must
+	// have Admin access on the SyncGroup ACL.
 	DestroySyncGroup(ctx *context.T, call rpc.ServerCall, sgName string) error
-	// EjectFromSyncGroup ejects a member from the
-	// SyncGroup. Ejected member will not able to sync further,
-	// but will retain any data previously available locally.
+	// EjectFromSyncGroup ejects a member from the SyncGroup. The ejected member
+	// will not be able to sync further, but will retain any data it has already
+	// synced.
 	//
-	// Requires: Client must have at least Read access on the
-	// Database, and must have Admin access on the SyncGroup ACL.
+	// Requires: Client must have at least Read access on the Database, and must
+	// have Admin access on the SyncGroup ACL.
 	EjectFromSyncGroup(ctx *context.T, call rpc.ServerCall, sgName string, member string) error
-	// GetSyncGroupSpec gets the SyncGroup spec. version allows
-	// for atomic read-modify-write of the spec by providing
-	// optimistic concurrency control.
+	// GetSyncGroupSpec gets the SyncGroup spec. version allows for atomic
+	// read-modify-write of the spec - see comment for SetSyncGroupSpec.
 	//
-	// Requires: Client must have at least Read access on the
-	// Database, and on the SyncGroup ACL.
+	// Requires: Client must have at least Read access on the Database and on the
+	// SyncGroup ACL.
 	GetSyncGroupSpec(ctx *context.T, call rpc.ServerCall, sgName string) (spec SyncGroupSpec, version string, err error)
-	// SetSyncGroupSpec sets the SyncGroup spec. version may be
-	// either empty, or the value from a recent Get. If not empty,
-	// Set will only succeed if version matches that specified in
-	// Set.
+	// SetSyncGroupSpec sets the SyncGroup spec. version may be either empty or
+	// the value from a previous Get. If not empty, Set will only succeed if the
+	// current version matches the specified one.
 	//
-	// Requires: Client must have at least Read access on the
-	// Database, and must have Admin access on the SyncGroup ACL.
+	// Requires: Client must have at least Read access on the Database, and must
+	// have Admin access on the SyncGroup ACL.
 	SetSyncGroupSpec(ctx *context.T, call rpc.ServerCall, sgName string, spec SyncGroupSpec, version string) error
-	// GetSyncGroupMembers gets the info on members who joined
-	// this SyncGroup.
+	// GetSyncGroupMembers gets the info objects for members of the SyncGroup.
 	//
-	// Requires: Client must have at least Read access on the
-	// Database, and on the SyncGroup ACL.
+	// Requires: Client must have at least Read access on the Database and on the
+	// SyncGroup ACL.
 	GetSyncGroupMembers(ctx *context.T, call rpc.ServerCall, sgName string) (members map[string]SyncGroupMemberInfo, err error)
 }
 
@@ -319,7 +309,7 @@ var descSyncGroupManager = rpc.InterfaceDesc{
 	Methods: []rpc.MethodDesc{
 		{
 			Name: "GetSyncGroupNames",
-			Doc:  "// GetSyncGroupNames returns the global names of all SyncGroups attached\n// to this database.",
+			Doc:  "// GetSyncGroupNames returns the global names of all SyncGroups attached to\n// this database.",
 			OutArgs: []rpc.ArgDesc{
 				{"", ``}, // []string
 			},
@@ -327,7 +317,7 @@ var descSyncGroupManager = rpc.InterfaceDesc{
 		},
 		{
 			Name: "CreateSyncGroup",
-			Doc:  "// CreateSyncGroup creates a new SyncGroup with the given\n// spec.\n//\n// Requires: Client must have at least Read access on the\n// Database; prefix ACL must exist at each SyncGroup prefix;\n// Client must have at least Read access on each of these\n// prefix ACLs.",
+			Doc:  "// CreateSyncGroup creates a new SyncGroup with the given spec.\n//\n// Requires: Client must have at least Read access on the Database; prefix ACL\n// must exist at each SyncGroup prefix; Client must have at least Read access\n// on each of these prefix ACLs.",
 			InArgs: []rpc.ArgDesc{
 				{"sgName", ``}, // string
 				{"spec", ``},   // SyncGroupSpec
@@ -337,7 +327,7 @@ var descSyncGroupManager = rpc.InterfaceDesc{
 		},
 		{
 			Name: "JoinSyncGroup",
-			Doc:  "// JoinSyncGroup joins the specified SyncGroup.\n//\n// Requires: Client must have at least Read access on the\n// Database, and on the SyncGroup ACL.",
+			Doc:  "// JoinSyncGroup joins the SyncGroup.\n//\n// Requires: Client must have at least Read access on the Database and on the\n// SyncGroup ACL.",
 			InArgs: []rpc.ArgDesc{
 				{"sgName", ``}, // string
 				{"myInfo", ``}, // SyncGroupMemberInfo
@@ -349,7 +339,7 @@ var descSyncGroupManager = rpc.InterfaceDesc{
 		},
 		{
 			Name: "LeaveSyncGroup",
-			Doc:  "// LeaveSyncGroup leaves the SyncGroup, and synced data will\n// continue to be available.\n//\n// Requires: Client must have at least Read access on the Database.",
+			Doc:  "// LeaveSyncGroup leaves the SyncGroup. Previously synced data will continue\n// to be available.\n//\n// Requires: Client must have at least Read access on the Database.",
 			InArgs: []rpc.ArgDesc{
 				{"sgName", ``}, // string
 			},
@@ -357,7 +347,7 @@ var descSyncGroupManager = rpc.InterfaceDesc{
 		},
 		{
 			Name: "DestroySyncGroup",
-			Doc:  "// DestroySyncGroup destroys the SyncGroup, and synced data\n// will continue to be available.\n//\n// Requires: Client must have at least Read access on the\n// Database, and must have Admin access on the SyncGroup ACL.",
+			Doc:  "// DestroySyncGroup destroys the SyncGroup. Previously synced data will\n// continue to be available to all members.\n//\n// Requires: Client must have at least Read access on the Database, and must\n// have Admin access on the SyncGroup ACL.",
 			InArgs: []rpc.ArgDesc{
 				{"sgName", ``}, // string
 			},
@@ -365,7 +355,7 @@ var descSyncGroupManager = rpc.InterfaceDesc{
 		},
 		{
 			Name: "EjectFromSyncGroup",
-			Doc:  "// EjectFromSyncGroup ejects a member from the\n// SyncGroup. Ejected member will not able to sync further,\n// but will retain any data previously available locally.\n//\n// Requires: Client must have at least Read access on the\n// Database, and must have Admin access on the SyncGroup ACL.",
+			Doc:  "// EjectFromSyncGroup ejects a member from the SyncGroup. The ejected member\n// will not be able to sync further, but will retain any data it has already\n// synced.\n//\n// Requires: Client must have at least Read access on the Database, and must\n// have Admin access on the SyncGroup ACL.",
 			InArgs: []rpc.ArgDesc{
 				{"sgName", ``}, // string
 				{"member", ``}, // string
@@ -374,7 +364,7 @@ var descSyncGroupManager = rpc.InterfaceDesc{
 		},
 		{
 			Name: "GetSyncGroupSpec",
-			Doc:  "// GetSyncGroupSpec gets the SyncGroup spec. version allows\n// for atomic read-modify-write of the spec by providing\n// optimistic concurrency control.\n//\n// Requires: Client must have at least Read access on the\n// Database, and on the SyncGroup ACL.",
+			Doc:  "// GetSyncGroupSpec gets the SyncGroup spec. version allows for atomic\n// read-modify-write of the spec - see comment for SetSyncGroupSpec.\n//\n// Requires: Client must have at least Read access on the Database and on the\n// SyncGroup ACL.",
 			InArgs: []rpc.ArgDesc{
 				{"sgName", ``}, // string
 			},
@@ -386,7 +376,7 @@ var descSyncGroupManager = rpc.InterfaceDesc{
 		},
 		{
 			Name: "SetSyncGroupSpec",
-			Doc:  "// SetSyncGroupSpec sets the SyncGroup spec. version may be\n// either empty, or the value from a recent Get. If not empty,\n// Set will only succeed if version matches that specified in\n// Set.\n//\n// Requires: Client must have at least Read access on the\n// Database, and must have Admin access on the SyncGroup ACL.",
+			Doc:  "// SetSyncGroupSpec sets the SyncGroup spec. version may be either empty or\n// the value from a previous Get. If not empty, Set will only succeed if the\n// current version matches the specified one.\n//\n// Requires: Client must have at least Read access on the Database, and must\n// have Admin access on the SyncGroup ACL.",
 			InArgs: []rpc.ArgDesc{
 				{"sgName", ``},  // string
 				{"spec", ``},    // SyncGroupSpec
@@ -396,7 +386,7 @@ var descSyncGroupManager = rpc.InterfaceDesc{
 		},
 		{
 			Name: "GetSyncGroupMembers",
-			Doc:  "// GetSyncGroupMembers gets the info on members who joined\n// this SyncGroup.\n//\n// Requires: Client must have at least Read access on the\n// Database, and on the SyncGroup ACL.",
+			Doc:  "// GetSyncGroupMembers gets the info objects for members of the SyncGroup.\n//\n// Requires: Client must have at least Read access on the Database and on the\n// SyncGroup ACL.",
 			InArgs: []rpc.ArgDesc{
 				{"sgName", ``}, // string
 			},
