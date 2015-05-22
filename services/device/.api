@@ -27,6 +27,9 @@ pkg device, method (BlessServerMessageInstancePublicKey) Interface() interface{}
 pkg device, method (BlessServerMessageInstancePublicKey) Name() string
 pkg device, method (InstallationState) String() string
 pkg device, method (InstanceState) String() string
+pkg device, method (StatusDevice) Index() int
+pkg device, method (StatusDevice) Interface() interface{}
+pkg device, method (StatusDevice) Name() string
 pkg device, method (StatusInstallation) Index() int
 pkg device, method (StatusInstallation) Interface() interface{}
 pkg device, method (StatusInstallation) Name() string
@@ -240,6 +243,9 @@ pkg device, type DeviceServerStubMethods interface, Uninstall(*context.T, rpc.Se
 pkg device, type DeviceServerStubMethods interface, Update(*context.T, rpc.ServerCall) error
 pkg device, type DeviceServerStubMethods interface, UpdateTo(*context.T, rpc.ServerCall, string) error
 pkg device, type DeviceServerStubMethods interface, unexported methods
+pkg device, type DeviceStatus struct
+pkg device, type DeviceStatus struct, State InstanceState
+pkg device, type DeviceStatus struct, Version string
 pkg device, type InstallationState int
 pkg device, type InstallationStatus struct
 pkg device, type InstallationStatus struct, State InstallationState
@@ -252,6 +258,8 @@ pkg device, type Status interface, Index() int
 pkg device, type Status interface, Interface() interface{}
 pkg device, type Status interface, Name() string
 pkg device, type Status interface, unexported methods
+pkg device, type StatusDevice struct
+pkg device, type StatusDevice struct, Value DeviceStatus
 pkg device, type StatusInstallation struct
 pkg device, type StatusInstallation struct, Value InstallationStatus
 pkg device, type StatusInstance struct

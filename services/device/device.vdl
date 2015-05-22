@@ -219,8 +219,9 @@ type Application interface {
 
 // Status is returned by the Application Status method.
 type Status union {
-     Instance InstanceStatus
-     Installation InstallationStatus
+	Instance InstanceStatus
+	Installation InstallationStatus
+	Device DeviceStatus
 }
 
 // InstallationStatus specifies the Status returned by the Application Status
@@ -233,6 +234,13 @@ type InstallationStatus struct {
 // InstanceStatus specifies the Status returned by the Application Status method
 // for instance objects.
 type InstanceStatus struct {
+	State InstanceState
+	Version string
+}
+
+// DeviceStatus specifies the Status returned by the Application Status method
+// for the device service object.
+type DeviceStatus struct {
 	State InstanceState
 	Version string
 }

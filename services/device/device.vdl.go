@@ -176,6 +176,8 @@ type (
 	StatusInstance struct{ Value InstanceStatus }
 	// StatusInstallation represents field Installation of the Status union type.
 	StatusInstallation struct{ Value InstallationStatus }
+	// StatusDevice represents field Device of the Status union type.
+	StatusDevice struct{ Value DeviceStatus }
 	// __StatusReflect describes the Status union type.
 	__StatusReflect struct {
 		Name  string `vdl:"v.io/v23/services/device.Status"`
@@ -183,6 +185,7 @@ type (
 		Union struct {
 			Instance     StatusInstance
 			Installation StatusInstallation
+			Device       StatusDevice
 		}
 	}
 )
@@ -196,6 +199,11 @@ func (x StatusInstallation) Index() int                   { return 1 }
 func (x StatusInstallation) Interface() interface{}       { return x.Value }
 func (x StatusInstallation) Name() string                 { return "Installation" }
 func (x StatusInstallation) __VDLReflect(__StatusReflect) {}
+
+func (x StatusDevice) Index() int                   { return 2 }
+func (x StatusDevice) Interface() interface{}       { return x.Value }
+func (x StatusDevice) Name() string                 { return "Device" }
+func (x StatusDevice) __VDLReflect(__StatusReflect) {}
 
 // InstallationStatus specifies the Status returned by the Application Status
 // method for installation objects.
@@ -218,6 +226,18 @@ type InstanceStatus struct {
 
 func (InstanceStatus) __VDLReflect(struct {
 	Name string `vdl:"v.io/v23/services/device.InstanceStatus"`
+}) {
+}
+
+// DeviceStatus specifies the Status returned by the Application Status method
+// for the device service object.
+type DeviceStatus struct {
+	State   InstanceState
+	Version string
+}
+
+func (DeviceStatus) __VDLReflect(struct {
+	Name string `vdl:"v.io/v23/services/device.DeviceStatus"`
 }) {
 }
 
@@ -329,6 +349,7 @@ func init() {
 	vdl.Register((*Status)(nil))
 	vdl.Register((*InstallationStatus)(nil))
 	vdl.Register((*InstanceStatus)(nil))
+	vdl.Register((*DeviceStatus)(nil))
 	vdl.Register((*BlessServerMessage)(nil))
 	vdl.Register((*BlessClientMessage)(nil))
 	vdl.Register((*Description)(nil))
