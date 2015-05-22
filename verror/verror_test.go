@@ -144,7 +144,7 @@ func TestChained(t *testing.T) {
 }
 
 func init() {
-	rootCtx, shutdown := test.InitForTest()
+	rootCtx, shutdown := test.V23Init()
 	defer shutdown()
 
 	def := i18n.WithLangID(rootCtx, en)
