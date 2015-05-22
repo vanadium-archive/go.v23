@@ -19,10 +19,12 @@ import (
 
 var d *demoDB
 
-func init() {
+func InitDB() {
 	d = createDB()
 	var shutdown v23.Shutdown
 	d.ctx, shutdown = test.InitForTest()
+	// TODO(kash): This is broken because shutdown will run immediately
+	// and invalidate d.ctx.
 	defer shutdown()
 }
 

@@ -5,6 +5,7 @@
 package main
 
 import (
+	"flag"
 	"fmt"
 	"io"
 	"os"
@@ -16,7 +17,15 @@ import (
 	"v.io/syncbase/v23/syncbase/nosql/internal/query"
 	"v.io/syncbase/v23/syncbase/nosql/internal/query/demo/db"
 	"v.io/syncbase/v23/syncbase/nosql/internal/query/demo/reader"
+	"v.io/syncbase/v23/syncbase/nosql/internal/query/demo/writer"
 	"v.io/syncbase/v23/syncbase/nosql/internal/query/query_db"
+	_ "v.io/x/ref/runtime/factories/generic"
+)
+
+var (
+	format = flag.String("format", "table",
+		"Output format.  'table': human-readable table; 'csv': comma-separated values, use -csv-delimiter to control the delimiter.")
+	csvDelimiter = flag.String("csv-delimiter", ",", "Delimiter to use when printing data as CSV (e.g. \"\t\", \",\")")
 )
 
 func dumpDB(d query_db.Database) {
@@ -50,27 +59,26 @@ func queryExec(d query_db.Database, q string) {
 		fmt.Fprintf(os.Stderr, "%s^\n", strings.Repeat(" ", int(off)))
 		fmt.Fprintf(os.Stderr, "Error: %s\n", msg)
 	} else {
-		sep := ""
-		for _, cName := range columnNames {
-			fmt.Printf("%s%s", sep, cName)
-			sep = " | "
-		}
-		fmt.Printf("\n")
-		for rs.Advance() {
-			sep = ""
-			for _, column := range rs.Result() {
-				fmt.Printf("%s%v", sep, column)
-				sep = " | "
+		if *format == "table" {
+			if err := writer.WriteTable(os.Stdout, columnNames, rs); err != nil {
+				fmt.Fprintf(os.Stderr, "Error: %s\n", err.Error())
 			}
-			fmt.Printf("\n")
-		}
-		if err := rs.Err(); err != nil {
-			fmt.Fprintf(os.Stderr, "Error: %s\n", err.Error())
+		} else {
+			if err := writer.WriteCSV(os.Stdout, columnNames, rs, *csvDelimiter); err != nil {
+				fmt.Fprintf(os.Stderr, "Error: %s\n", err.Error())
+			}
 		}
 	}
 }
 
 func main() {
+	db.InitDB()
+
+	if *format != "table" && *format != "csv" {
+		fmt.Fprintf(os.Stderr, "Unsupported -format %q.  Must be one of 'table' or 'csv'.\n", *format)
+		os.Exit(-1)
+	}
+
 	var input *reader.T
 	isTerminal := isatty.IsTerminal(os.Stdin.Fd())
 	if isTerminal {
