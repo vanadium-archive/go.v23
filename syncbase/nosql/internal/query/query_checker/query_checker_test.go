@@ -37,7 +37,7 @@ type invoiceTable struct {
 
 func init() {
 	var shutdown v23.Shutdown
-	db.ctx, shutdown = test.InitForTest()
+	db.ctx, shutdown = test.V23Init()
 	defer shutdown()
 }
 

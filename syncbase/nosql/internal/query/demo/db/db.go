@@ -22,7 +22,7 @@ var d *demoDB
 func InitDB() {
 	d = createDB()
 	var shutdown v23.Shutdown
-	d.ctx, shutdown = test.InitForTest()
+	d.ctx, shutdown = test.V23Init()
 	// TODO(kash): This is broken because shutdown will run immediately
 	// and invalidate d.ctx.
 	defer shutdown()
