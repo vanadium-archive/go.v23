@@ -72,7 +72,8 @@ func queryExec(d query_db.Database, q string) {
 }
 
 func main() {
-	db.InitDB()
+	shutdown := db.InitDB()
+	defer shutdown()
 
 	if *format != "table" && *format != "csv" {
 		fmt.Fprintf(os.Stderr, "Unsupported -format %q.  Must be one of 'table' or 'csv'.\n", *format)

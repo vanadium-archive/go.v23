@@ -19,13 +19,11 @@ import (
 
 var d *demoDB
 
-func InitDB() {
+func InitDB() v23.Shutdown {
 	d = createDB()
 	var shutdown v23.Shutdown
 	d.ctx, shutdown = test.V23Init()
-	// TODO(kash): This is broken because shutdown will run immediately
-	// and invalidate d.ctx.
-	defer shutdown()
+	return shutdown
 }
 
 type demoDB struct {
