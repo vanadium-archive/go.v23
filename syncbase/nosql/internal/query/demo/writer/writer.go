@@ -14,6 +14,14 @@ import (
 	"v.io/v23/vdl"
 )
 
+type Justification int
+
+const (
+	Unknown Justification = iota
+	Left
+	Right
+)
+
 // WriteTable formats the results as ASCII tables.
 func WriteTable(out io.Writer, columnNames []string, rs query.ResultStream) error {
 	// Buffer the results so we can compute the column widths.
@@ -21,12 +29,16 @@ func WriteTable(out io.Writer, columnNames []string, rs query.ResultStream) erro
 	for i, cName := range columnNames {
 		columnWidths[i] = len(cName)
 	}
+	justification := make([]Justification, len(columnNames))
 	var results [][]string
 	for rs.Advance() {
 		row := make([]string, len(columnNames))
 		for i, column := range rs.Result() {
 			if i >= len(columnNames) {
 				return errors.New("more columns in result than in columnNames")
+			}
+			if justification[i] == Unknown {
+				justification[i] = getJustification(column)
 			}
 			columnStr := toString(column)
 			row[i] = columnStr
@@ -51,9 +63,11 @@ func WriteTable(out io.Writer, columnNames []string, rs query.ResultStream) erro
 	for _, result := range results {
 		sep = "| "
 		for i, column := range result {
-			// TODO(kash): We print everything left justified.  It would be better
-			// to right justify numbers.
-			io.WriteString(out, fmt.Sprintf("%s%-*s", sep, columnWidths[i], column))
+			if justification[i] == Right {
+				io.WriteString(out, fmt.Sprintf("%s%*s", sep, columnWidths[i], column))
+			} else {
+				io.WriteString(out, fmt.Sprintf("%s%-*s", sep, columnWidths[i], column))
+			}
 			sep = " | "
 		}
 		io.WriteString(out, " |\n")
@@ -69,6 +83,18 @@ func writeBorder(out io.Writer, columnWidths []int) {
 		sep = "-+-"
 	}
 	io.WriteString(out, "-+\n")
+}
+
+func getJustification(val *vdl.Value) Justification {
+	switch val.Kind() {
+	// TODO(kash): Floating point numbers should have the decimal point line up.
+	case vdl.Bool, vdl.Byte, vdl.Uint16, vdl.Uint32, vdl.Uint64, vdl.Int16, vdl.Int32, vdl.Int64,
+		vdl.Float32, vdl.Float64, vdl.Complex64, vdl.Complex128:
+		return Right
+	// TODO(kash): Leave nil values as unknown.
+	default:
+		return Left
+	}
 }
 
 // WriteCSV formats the results as CSV as specified by https://tools.ietf.org/html/rfc4180.
