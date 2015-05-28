@@ -50,6 +50,9 @@ type T interface {
 	//   prefix/... means all names below prefix.
 	//   prefix/*** is like prefix/... but doesn't traverse into non-mounttable servers.
 	//
+	// The returned channel must be drained until it is closed, otherwise a goroutine
+	// (that publishes to the channel) may be leaked.
+	//
 	// Example:
 	//	rc, err := ns.Glob(ctx, pattern)
 	//	if err != nil {
@@ -63,7 +66,7 @@ type T interface {
 	//			fmt.Fprintf(stderr, "%s can't be traversed: %s\n", v.Name, v.Error)
 	//		}
 	//	}
-	Glob(ctx *context.T, pattern string, opts ...naming.NamespaceOpt) (chan naming.GlobReply, error)
+	Glob(ctx *context.T, pattern string, opts ...naming.NamespaceOpt) (<-chan naming.GlobReply, error)
 
 	// SetRoots sets the roots that the local Namespace is
 	// relative to. All relative names passed to the methods above
