@@ -1,0 +1,5 @@
+pkg conventions, const AuthenticatedUser ideal-string
+pkg conventions, const ServerUser ideal-string
+pkg conventions, const UnauthenticatedUser ideal-string
+pkg conventions, func GetClientUserIds(*context.T, security.Call) []string
+pkg conventions, func ParseUserId(string) []string
