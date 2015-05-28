@@ -128,4 +128,12 @@ type (
 	BrieEnum enum{ Glee; Brie; Three }
 	BeanEnum enum{ Bean }
 	FoodEnum enum{ Bean; Brie; Cherry }
+
+	StructAny struct {
+		Any any
+	}
+
+	StructMap struct {
+		Map map[int64]int64
+	}
 )

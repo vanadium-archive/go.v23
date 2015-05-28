@@ -732,6 +732,24 @@ func (FoodEnum) __VDLReflect(struct {
 }) {
 }
 
+type StructAny struct {
+	Any *vdl.Value
+}
+
+func (StructAny) __VDLReflect(struct {
+	Name string `vdl:"v.io/v23/vom/testdata.StructAny"`
+}) {
+}
+
+type StructMap struct {
+	Map map[int64]int64
+}
+
+func (StructMap) __VDLReflect(struct {
+	Name string `vdl:"v.io/v23/vom/testdata.StructMap"`
+}) {
+}
+
 func init() {
 	vdl.Register((*ConvertGroup)(nil))
 	vdl.Register((*VomdataStruct)(nil))
@@ -793,4 +811,6 @@ func init() {
 	vdl.Register((*BrieEnum)(nil))
 	vdl.Register((*BeanEnum)(nil))
 	vdl.Register((*FoodEnum)(nil))
+	vdl.Register((*StructAny)(nil))
+	vdl.Register((*StructMap)(nil))
 }

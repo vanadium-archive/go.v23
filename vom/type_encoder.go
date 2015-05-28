@@ -26,7 +26,7 @@ type TypeEncoder struct {
 	nextId   typeId               // GUARDED_BY(typeMu)
 
 	encMu           sync.Mutex
-	enc             *Encoder // GUARDED_BY(encMu)
+	enc             *encoder // GUARDED_BY(encMu)
 	sentVersionByte bool     // GUARDED_BY(encMu)
 }
 

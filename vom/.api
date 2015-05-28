@@ -54,31 +54,6 @@ pkg vom, method (*Dumper) Flush() error
 pkg vom, method (*Dumper) Status()
 pkg vom, method (*Dumper) Write([]byte) (int, error)
 pkg vom, method (*Encoder) Encode(interface{}) error
-pkg vom, method (*Encoder) FinishElem(vdl.Target) error
-pkg vom, method (*Encoder) FinishField(vdl.Target, vdl.Target) error
-pkg vom, method (*Encoder) FinishFields(vdl.FieldsTarget) error
-pkg vom, method (*Encoder) FinishKey(vdl.Target) error
-pkg vom, method (*Encoder) FinishKeyStartField(vdl.Target) (vdl.Target, error)
-pkg vom, method (*Encoder) FinishList(vdl.ListTarget) error
-pkg vom, method (*Encoder) FinishMap(vdl.MapTarget) error
-pkg vom, method (*Encoder) FinishSet(vdl.SetTarget) error
-pkg vom, method (*Encoder) FromBool(bool, *vdl.Type) error
-pkg vom, method (*Encoder) FromBytes([]byte, *vdl.Type) error
-pkg vom, method (*Encoder) FromComplex(complex128, *vdl.Type) error
-pkg vom, method (*Encoder) FromEnumLabel(string, *vdl.Type) error
-pkg vom, method (*Encoder) FromFloat(float64, *vdl.Type) error
-pkg vom, method (*Encoder) FromInt(int64, *vdl.Type) error
-pkg vom, method (*Encoder) FromNil(*vdl.Type) error
-pkg vom, method (*Encoder) FromString(string, *vdl.Type) error
-pkg vom, method (*Encoder) FromTypeObject(*vdl.Type) error
-pkg vom, method (*Encoder) FromUint(uint64, *vdl.Type) error
-pkg vom, method (*Encoder) StartElem(int) (vdl.Target, error)
-pkg vom, method (*Encoder) StartField(string) (vdl.Target, vdl.Target, error)
-pkg vom, method (*Encoder) StartFields(*vdl.Type) (vdl.FieldsTarget, error)
-pkg vom, method (*Encoder) StartKey() (vdl.Target, error)
-pkg vom, method (*Encoder) StartList(*vdl.Type, int) (vdl.ListTarget, error)
-pkg vom, method (*Encoder) StartMap(*vdl.Type, int) (vdl.MapTarget, error)
-pkg vom, method (*Encoder) StartSet(*vdl.Type, int) (vdl.SetTarget, error)
 pkg vom, method (ControlKind) String() string
 pkg vom, method (DumpAtom) String() string
 pkg vom, method (DumpKind) String() string
