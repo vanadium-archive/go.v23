@@ -359,68 +359,99 @@ func init() {
 // ApplicationClientMethods is the client interface
 // containing Application methods.
 //
-// Application can be used to manage applications on a device. The
-// idea is that this interace will be invoked using an object name that
-// identifies the application and its installations and instances
-// where applicable.
+// Application can be used to manage applications on a device. This interface
+// will be invoked using an object name that identifies the application and its
+// installations and instances where applicable.
 //
-// In particular, the interface methods can be divided into three
-// groups based on their intended receiver:
+// An application is defined by a title.  An application can have multiple
+// installations on a device.  The installations are grouped under the same
+// application, but are otherwise independent of each other.  Each installation
+// can have zero or more instances (which can be running or not).  The instances
+// are independent of each other, and do not share state (like local storage).
+// Interaction among instances should occur via Vanadium RPC, facilitated by the
+// local mounttable.
+//
+// The device manager supports versioning of applications.  Each installation
+// maintains a tree of versions, where a version is defined by a specific
+// envelope.  The tree structure comes from 'previous version' references: each
+// version (except the initial installation version) maintains a reference to
+// the version that preceded it.  The installation maintains a current version
+// reference that is used for new instances.  Each update operation on the
+// installation creates a new version, sets the previous reference of the new
+// version to the current version, and then updates the current version to refer
+// to the new version.  Each revert operation on the installation sets the
+// current version to the previous version of the current version.  Each
+// instance maintains a current version reference that is used to run the
+// instance.  The initial version of the instance is set to the current version
+// of the installation at the time of instantiation.  Each update operation on
+// the instance updates the instance's current version to the current version of
+// the installation.  Each revert operation on the instance updates the
+// instance's current version to the previous version of the instance's version.
+//
+// The Application interface methods can be divided based on their intended
+// receiver:
 //
 // 1) Method receiver is an application:
-// -- Install()
+//     - Install()
 //
 // 2) Method receiver is an application installation:
-// -- Instantiate()
-// -- Uninstall()
-// -- Update()
+//     - Instantiate()
+//     - Uninstall()
 //
-// 3) Method receiver is application installation instance:
-// -- Run()
-// -- Kill()
-// -- Delete()
+// 3) Method receiver is an application instance:
+//     - Run()
+//     - Kill()
+//     - Delete()
+//
+// 4) Method receiver is an application installation or instance:
+//     - Update()
+//     - Revert()
 //
 // The following methods complement one another:
-// -- Install() and Uninstall()
-// -- Instantiate() and Delete()
-// -- Run() and Kill()
+//     - Install() and Uninstall()
+//     - Instantiate() and Delete()
+//     - Run() and Kill()
+//     - Update() and Revert()
+//
+//
 //
 // Examples:
-// # Install Google Maps on the device.
-// device/apps.Install("/google.com/appstore/maps", nil, nil) --> "google maps/0"
 //
-// # Create and start an instance of the previously installed maps application
+// Install Google Maps on the device.
+//     device/apps.Install("/google.com/appstore/maps", nil, nil) --> "google maps/0"
+//
+// Create and start an instance of the previously installed maps application
 // installation.
-// device/apps/google maps/0.Instantiate() --> { "0" }
-// device/apps/google maps/0/0.Run()
+//    device/apps/google maps/0.Instantiate() --> { "0" }
+//    device/apps/google maps/0/0.Run()
 //
-// # Create and start a second instance of the previously installed maps
+// Create and start a second instance of the previously installed maps
 // application installation.
-// device/apps/google maps/0.Instantiate() --> { "1" }
-// device/apps/google maps/0/1.Run()
+//    device/apps/google maps/0.Instantiate() --> { "1" }
+//    device/apps/google maps/0/1.Run()
 //
-// # Kill and delete the first instance previously started.
-// device/apps/google maps/0/0.Kill()
-// device/apps/google maps/0/0.Delete()
+// Kill and delete the first instance previously started.
+//    device/apps/google maps/0/0.Kill()
+//    device/apps/google maps/0/0.Delete()
 //
-// # Install a second Google Maps installation.
-// device/apps.Install("/google.com/appstore/maps", nil, nil) --> "google maps/1"
+// Install a second Google Maps installation.
+//    device/apps.Install("/google.com/appstore/maps", nil, nil) --> "google maps/1"
 //
-// # Update the second maps installation to the latest version available.
-// device/apps/google maps/1.Update()
+// Update the second maps installation to the latest version available.
+//    device/apps/google maps/1.Update()
 //
-// # Update the first maps installation to a specific version.
-// device/apps/google maps/0.UpdateTo("/google.com/appstore/beta/maps")
+// Update the first maps installation to a specific version.
+//    device/apps/google maps/0.UpdateTo("/google.com/appstore/beta/maps")
 //
 // Finally, an application installation instance can be in one of three abstract
 // states: 1) "does not exist/deleted", 2) "running", or 3) "not-running". The
 // interface methods transition between these abstract states using the
 // following state machine:
 //
-// apply(Instantiate(), "does not exist") = "not-running"
-// apply(Run(), "not-running") = "running"
-// apply(Kill(), "running") = "not-running"
-// apply(Delete(), "not-running") = "deleted"
+//    apply(Instantiate(), "does not exist") = "not-running"
+//    apply(Run(), "not-running") = "running"
+//    apply(Kill(), "running") = "not-running"
+//    apply(Delete(), "not-running") = "deleted"
 type ApplicationClientMethods interface {
 	// Object provides access control for Vanadium objects.
 	//
@@ -530,11 +561,14 @@ type ApplicationClientMethods interface {
 	// may or may not result in a restart depending on the device manager
 	// setup).
 	Kill(ctx *context.T, deadline time.Duration, opts ...rpc.CallOpt) error
-	// Update updates the application installation from the object name
-	// provided during Install.  If the new application envelope contains a
-	// different application title, the update does not occur, and an error
-	// is returned.
-	// The installation must be in state Active.
+	// Update updates an application installation's version to a new version
+	// created from the envelope at the object name provided during Install.
+	// If the new application envelope contains a different application
+	// title, the update does not occur, and an error is returned.  The
+	// installation must be in state Active.
+	//
+	// Update updates an application instance's version to the current
+	// installation version.  The instance must be in state NotRunning.
 	Update(*context.T, ...rpc.CallOpt) error
 	// UpdateTo updates the application installation(s) to the application
 	// specified by the object name argument.  If the new application
@@ -542,9 +576,13 @@ type ApplicationClientMethods interface {
 	// occur, and an error is returned.
 	// The installation must be in state Active.
 	UpdateTo(ctx *context.T, name string, opts ...rpc.CallOpt) error
-	// Revert reverts an application installation to the most recent
-	// previous installation.
-	// The application must be in state Active.
+	// Revert reverts an application installation's version to the previous
+	// version of its current version.  The installation must be in state
+	// Active.
+	//
+	// Revert reverts an application instance's version to the previous
+	// version of its current version.  The instance must be in state
+	// NotRunning.
 	Revert(*context.T, ...rpc.CallOpt) error
 	// Debug returns debug information about the application installation or
 	// instance.  This is generally highly implementation-specific, and
@@ -738,68 +776,99 @@ func (c *implApplicationInstantiateClientCall) Finish() (o0 string, err error) {
 // ApplicationServerMethods is the interface a server writer
 // implements for Application.
 //
-// Application can be used to manage applications on a device. The
-// idea is that this interace will be invoked using an object name that
-// identifies the application and its installations and instances
-// where applicable.
+// Application can be used to manage applications on a device. This interface
+// will be invoked using an object name that identifies the application and its
+// installations and instances where applicable.
 //
-// In particular, the interface methods can be divided into three
-// groups based on their intended receiver:
+// An application is defined by a title.  An application can have multiple
+// installations on a device.  The installations are grouped under the same
+// application, but are otherwise independent of each other.  Each installation
+// can have zero or more instances (which can be running or not).  The instances
+// are independent of each other, and do not share state (like local storage).
+// Interaction among instances should occur via Vanadium RPC, facilitated by the
+// local mounttable.
+//
+// The device manager supports versioning of applications.  Each installation
+// maintains a tree of versions, where a version is defined by a specific
+// envelope.  The tree structure comes from 'previous version' references: each
+// version (except the initial installation version) maintains a reference to
+// the version that preceded it.  The installation maintains a current version
+// reference that is used for new instances.  Each update operation on the
+// installation creates a new version, sets the previous reference of the new
+// version to the current version, and then updates the current version to refer
+// to the new version.  Each revert operation on the installation sets the
+// current version to the previous version of the current version.  Each
+// instance maintains a current version reference that is used to run the
+// instance.  The initial version of the instance is set to the current version
+// of the installation at the time of instantiation.  Each update operation on
+// the instance updates the instance's current version to the current version of
+// the installation.  Each revert operation on the instance updates the
+// instance's current version to the previous version of the instance's version.
+//
+// The Application interface methods can be divided based on their intended
+// receiver:
 //
 // 1) Method receiver is an application:
-// -- Install()
+//     - Install()
 //
 // 2) Method receiver is an application installation:
-// -- Instantiate()
-// -- Uninstall()
-// -- Update()
+//     - Instantiate()
+//     - Uninstall()
 //
-// 3) Method receiver is application installation instance:
-// -- Run()
-// -- Kill()
-// -- Delete()
+// 3) Method receiver is an application instance:
+//     - Run()
+//     - Kill()
+//     - Delete()
+//
+// 4) Method receiver is an application installation or instance:
+//     - Update()
+//     - Revert()
 //
 // The following methods complement one another:
-// -- Install() and Uninstall()
-// -- Instantiate() and Delete()
-// -- Run() and Kill()
+//     - Install() and Uninstall()
+//     - Instantiate() and Delete()
+//     - Run() and Kill()
+//     - Update() and Revert()
+//
+//
 //
 // Examples:
-// # Install Google Maps on the device.
-// device/apps.Install("/google.com/appstore/maps", nil, nil) --> "google maps/0"
 //
-// # Create and start an instance of the previously installed maps application
+// Install Google Maps on the device.
+//     device/apps.Install("/google.com/appstore/maps", nil, nil) --> "google maps/0"
+//
+// Create and start an instance of the previously installed maps application
 // installation.
-// device/apps/google maps/0.Instantiate() --> { "0" }
-// device/apps/google maps/0/0.Run()
+//    device/apps/google maps/0.Instantiate() --> { "0" }
+//    device/apps/google maps/0/0.Run()
 //
-// # Create and start a second instance of the previously installed maps
+// Create and start a second instance of the previously installed maps
 // application installation.
-// device/apps/google maps/0.Instantiate() --> { "1" }
-// device/apps/google maps/0/1.Run()
+//    device/apps/google maps/0.Instantiate() --> { "1" }
+//    device/apps/google maps/0/1.Run()
 //
-// # Kill and delete the first instance previously started.
-// device/apps/google maps/0/0.Kill()
-// device/apps/google maps/0/0.Delete()
+// Kill and delete the first instance previously started.
+//    device/apps/google maps/0/0.Kill()
+//    device/apps/google maps/0/0.Delete()
 //
-// # Install a second Google Maps installation.
-// device/apps.Install("/google.com/appstore/maps", nil, nil) --> "google maps/1"
+// Install a second Google Maps installation.
+//    device/apps.Install("/google.com/appstore/maps", nil, nil) --> "google maps/1"
 //
-// # Update the second maps installation to the latest version available.
-// device/apps/google maps/1.Update()
+// Update the second maps installation to the latest version available.
+//    device/apps/google maps/1.Update()
 //
-// # Update the first maps installation to a specific version.
-// device/apps/google maps/0.UpdateTo("/google.com/appstore/beta/maps")
+// Update the first maps installation to a specific version.
+//    device/apps/google maps/0.UpdateTo("/google.com/appstore/beta/maps")
 //
 // Finally, an application installation instance can be in one of three abstract
 // states: 1) "does not exist/deleted", 2) "running", or 3) "not-running". The
 // interface methods transition between these abstract states using the
 // following state machine:
 //
-// apply(Instantiate(), "does not exist") = "not-running"
-// apply(Run(), "not-running") = "running"
-// apply(Kill(), "running") = "not-running"
-// apply(Delete(), "not-running") = "deleted"
+//    apply(Instantiate(), "does not exist") = "not-running"
+//    apply(Run(), "not-running") = "running"
+//    apply(Kill(), "running") = "not-running"
+//    apply(Delete(), "not-running") = "deleted"
 type ApplicationServerMethods interface {
 	// Object provides access control for Vanadium objects.
 	//
@@ -909,11 +978,14 @@ type ApplicationServerMethods interface {
 	// may or may not result in a restart depending on the device manager
 	// setup).
 	Kill(ctx *context.T, call rpc.ServerCall, deadline time.Duration) error
-	// Update updates the application installation from the object name
-	// provided during Install.  If the new application envelope contains a
-	// different application title, the update does not occur, and an error
-	// is returned.
-	// The installation must be in state Active.
+	// Update updates an application installation's version to a new version
+	// created from the envelope at the object name provided during Install.
+	// If the new application envelope contains a different application
+	// title, the update does not occur, and an error is returned.  The
+	// installation must be in state Active.
+	//
+	// Update updates an application instance's version to the current
+	// installation version.  The instance must be in state NotRunning.
 	Update(*context.T, rpc.ServerCall) error
 	// UpdateTo updates the application installation(s) to the application
 	// specified by the object name argument.  If the new application
@@ -921,9 +993,13 @@ type ApplicationServerMethods interface {
 	// occur, and an error is returned.
 	// The installation must be in state Active.
 	UpdateTo(ctx *context.T, call rpc.ServerCall, name string) error
-	// Revert reverts an application installation to the most recent
-	// previous installation.
-	// The application must be in state Active.
+	// Revert reverts an application installation's version to the previous
+	// version of its current version.  The installation must be in state
+	// Active.
+	//
+	// Revert reverts an application instance's version to the previous
+	// version of its current version.  The instance must be in state
+	// NotRunning.
 	Revert(*context.T, rpc.ServerCall) error
 	// Debug returns debug information about the application installation or
 	// instance.  This is generally highly implementation-specific, and
@@ -1049,11 +1125,14 @@ type ApplicationServerStubMethods interface {
 	// may or may not result in a restart depending on the device manager
 	// setup).
 	Kill(ctx *context.T, call rpc.ServerCall, deadline time.Duration) error
-	// Update updates the application installation from the object name
-	// provided during Install.  If the new application envelope contains a
-	// different application title, the update does not occur, and an error
-	// is returned.
-	// The installation must be in state Active.
+	// Update updates an application installation's version to a new version
+	// created from the envelope at the object name provided during Install.
+	// If the new application envelope contains a different application
+	// title, the update does not occur, and an error is returned.  The
+	// installation must be in state Active.
+	//
+	// Update updates an application instance's version to the current
+	// installation version.  The instance must be in state NotRunning.
 	Update(*context.T, rpc.ServerCall) error
 	// UpdateTo updates the application installation(s) to the application
 	// specified by the object name argument.  If the new application
@@ -1061,9 +1140,13 @@ type ApplicationServerStubMethods interface {
 	// occur, and an error is returned.
 	// The installation must be in state Active.
 	UpdateTo(ctx *context.T, call rpc.ServerCall, name string) error
-	// Revert reverts an application installation to the most recent
-	// previous installation.
-	// The application must be in state Active.
+	// Revert reverts an application installation's version to the previous
+	// version of its current version.  The installation must be in state
+	// Active.
+	//
+	// Revert reverts an application instance's version to the previous
+	// version of its current version.  The instance must be in state
+	// NotRunning.
 	Revert(*context.T, rpc.ServerCall) error
 	// Debug returns debug information about the application installation or
 	// instance.  This is generally highly implementation-specific, and
@@ -1166,7 +1249,7 @@ var ApplicationDesc rpc.InterfaceDesc = descApplication
 var descApplication = rpc.InterfaceDesc{
 	Name:    "Application",
 	PkgPath: "v.io/v23/services/device",
-	Doc:     "// Application can be used to manage applications on a device. The\n// idea is that this interace will be invoked using an object name that\n// identifies the application and its installations and instances\n// where applicable.\n//\n// In particular, the interface methods can be divided into three\n// groups based on their intended receiver:\n//\n// 1) Method receiver is an application:\n// -- Install()\n//\n// 2) Method receiver is an application installation:\n// -- Instantiate()\n// -- Uninstall()\n// -- Update()\n//\n// 3) Method receiver is application installation instance:\n// -- Run()\n// -- Kill()\n// -- Delete()\n//\n// The following methods complement one another:\n// -- Install() and Uninstall()\n// -- Instantiate() and Delete()\n// -- Run() and Kill()\n//\n// Examples:\n// # Install Google Maps on the device.\n// device/apps.Install(\"/google.com/appstore/maps\", nil, nil) --> \"google maps/0\"\n//\n// # Create and start an instance of the previously installed maps application\n// installation.\n// device/apps/google maps/0.Instantiate() --> { \"0\" }\n// device/apps/google maps/0/0.Run()\n//\n// # Create and start a second instance of the previously installed maps\n// application installation.\n// device/apps/google maps/0.Instantiate() --> { \"1\" }\n// device/apps/google maps/0/1.Run()\n//\n// # Kill and delete the first instance previously started.\n// device/apps/google maps/0/0.Kill()\n// device/apps/google maps/0/0.Delete()\n//\n// # Install a second Google Maps installation.\n// device/apps.Install(\"/google.com/appstore/maps\", nil, nil) --> \"google maps/1\"\n//\n// # Update the second maps installation to the latest version available.\n// device/apps/google maps/1.Update()\n//\n// # Update the first maps installation to a specific version.\n// device/apps/google maps/0.UpdateTo(\"/google.com/appstore/beta/maps\")\n//\n// Finally, an application installation instance can be in one of three abstract\n// states: 1) \"does not exist/deleted\", 2) \"running\", or 3) \"not-running\". The\n// interface methods transition between these abstract states using the\n// following state machine:\n//\n// apply(Instantiate(), \"does not exist\") = \"not-running\"\n// apply(Run(), \"not-running\") = \"running\"\n// apply(Kill(), \"running\") = \"not-running\"\n// apply(Delete(), \"not-running\") = \"deleted\"",
+	Doc:     "// Application can be used to manage applications on a device. This interface\n// will be invoked using an object name that identifies the application and its\n// installations and instances where applicable.\n//\n// An application is defined by a title.  An application can have multiple\n// installations on a device.  The installations are grouped under the same\n// application, but are otherwise independent of each other.  Each installation\n// can have zero or more instances (which can be running or not).  The instances\n// are independent of each other, and do not share state (like local storage).\n// Interaction among instances should occur via Vanadium RPC, facilitated by the\n// local mounttable.\n//\n// The device manager supports versioning of applications.  Each installation\n// maintains a tree of versions, where a version is defined by a specific\n// envelope.  The tree structure comes from 'previous version' references: each\n// version (except the initial installation version) maintains a reference to\n// the version that preceded it.  The installation maintains a current version\n// reference that is used for new instances.  Each update operation on the\n// installation creates a new version, sets the previous reference of the new\n// version to the current version, and then updates the current version to refer\n// to the new version.  Each revert operation on the installation sets the\n// current version to the previous version of the current version.  Each\n// instance maintains a current version reference that is used to run the\n// instance.  The initial version of the instance is set to the current version\n// of the installation at the time of instantiation.  Each update operation on\n// the instance updates the instance's current version to the current version of\n// the installation.  Each revert operation on the instance updates the\n// instance's current version to the previous version of the instance's version.\n//\n// The Application interface methods can be divided based on their intended\n// receiver:\n//\n// 1) Method receiver is an application:\n//     - Install()\n//\n// 2) Method receiver is an application installation:\n//     - Instantiate()\n//     - Uninstall()\n//\n// 3) Method receiver is an application instance:\n//     - Run()\n//     - Kill()\n//     - Delete()\n//\n// 4) Method receiver is an application installation or instance:\n//     - Update()\n//     - Revert()\n//\n// The following methods complement one another:\n//     - Install() and Uninstall()\n//     - Instantiate() and Delete()\n//     - Run() and Kill()\n//     - Update() and Revert()\n//\n//\n//\n// Examples:\n//\n// Install Google Maps on the device.\n//     device/apps.Install(\"/google.com/appstore/maps\", nil, nil) --> \"google maps/0\"\n//\n// Create and start an instance of the previously installed maps application\n// installation.\n//    device/apps/google maps/0.Instantiate() --> { \"0\" }\n//    device/apps/google maps/0/0.Run()\n//\n// Create and start a second instance of the previously installed maps\n// application installation.\n//    device/apps/google maps/0.Instantiate() --> { \"1\" }\n//    device/apps/google maps/0/1.Run()\n//\n// Kill and delete the first instance previously started.\n//    device/apps/google maps/0/0.Kill()\n//    device/apps/google maps/0/0.Delete()\n//\n// Install a second Google Maps installation.\n//    device/apps.Install(\"/google.com/appstore/maps\", nil, nil) --> \"google maps/1\"\n//\n// Update the second maps installation to the latest version available.\n//    device/apps/google maps/1.Update()\n//\n// Update the first maps installation to a specific version.\n//    device/apps/google maps/0.UpdateTo(\"/google.com/appstore/beta/maps\")\n//\n// Finally, an application installation instance can be in one of three abstract\n// states: 1) \"does not exist/deleted\", 2) \"running\", or 3) \"not-running\". The\n// interface methods transition between these abstract states using the\n// following state machine:\n//\n//    apply(Instantiate(), \"does not exist\") = \"not-running\"\n//    apply(Run(), \"not-running\") = \"running\"\n//    apply(Kill(), \"running\") = \"not-running\"\n//    apply(Delete(), \"not-running\") = \"deleted\"",
 	Embeds: []rpc.EmbedDesc{
 		{"Object", "v.io/v23/services/permissions", "// Object provides access control for Vanadium objects.\n//\n// Vanadium services implementing dynamic access control would typically embed\n// this interface and tag additional methods defined by the service with one of\n// Admin, Read, Write, Resolve etc. For example, the VDL definition of the\n// object would be:\n//\n//   package mypackage\n//\n//   import \"v.io/v23/security/access\"\n//   import \"v.io/v23/services/permissions\"\n//\n//   type MyObject interface {\n//     permissions.Object\n//     MyRead() (string, error) {access.Read}\n//     MyWrite(string) error    {access.Write}\n//   }\n//\n// If the set of pre-defined tags is insufficient, services may define their\n// own tag type and annotate all methods with this new type.\n//\n// Instead of embedding this Object interface, define SetPermissions and\n// GetPermissions in their own interface. Authorization policies will typically\n// respect annotations of a single type. For example, the VDL definition of an\n// object would be:\n//\n//  package mypackage\n//\n//  import \"v.io/v23/security/access\"\n//\n//  type MyTag string\n//\n//  const (\n//    Blue = MyTag(\"Blue\")\n//    Red  = MyTag(\"Red\")\n//  )\n//\n//  type MyObject interface {\n//    MyMethod() (string, error) {Blue}\n//\n//    // Allow clients to change access via the access.Object interface:\n//    SetPermissions(perms access.Permissions, version string) error         {Red}\n//    GetPermissions() (perms access.Permissions, version string, err error) {Blue}\n//  }"},
 	},
@@ -1217,7 +1300,7 @@ var descApplication = rpc.InterfaceDesc{
 		},
 		{
 			Name: "Update",
-			Doc:  "// Update updates the application installation from the object name\n// provided during Install.  If the new application envelope contains a\n// different application title, the update does not occur, and an error\n// is returned.\n// The installation must be in state Active.",
+			Doc:  "// Update updates an application installation's version to a new version\n// created from the envelope at the object name provided during Install.\n// If the new application envelope contains a different application\n// title, the update does not occur, and an error is returned.  The\n// installation must be in state Active.\n//\n// Update updates an application instance's version to the current\n// installation version.  The instance must be in state NotRunning.",
 			Tags: []*vdl.Value{vdl.ValueOf(access.Tag("Admin"))},
 		},
 		{
@@ -1230,7 +1313,7 @@ var descApplication = rpc.InterfaceDesc{
 		},
 		{
 			Name: "Revert",
-			Doc:  "// Revert reverts an application installation to the most recent\n// previous installation.\n// The application must be in state Active.",
+			Doc:  "// Revert reverts an application installation's version to the previous\n// version of its current version.  The installation must be in state\n// Active.\n//\n// Revert reverts an application instance's version to the previous\n// version of its current version.  The instance must be in state\n// NotRunning.",
 			Tags: []*vdl.Value{vdl.ValueOf(access.Tag("Admin"))},
 		},
 		{
@@ -1468,68 +1551,99 @@ var descClaimable = rpc.InterfaceDesc{
 // Device can be used to manage a device remotely using an object name that
 // identifies it.
 type DeviceClientMethods interface {
-	// Application can be used to manage applications on a device. The
-	// idea is that this interace will be invoked using an object name that
-	// identifies the application and its installations and instances
-	// where applicable.
+	// Application can be used to manage applications on a device. This interface
+	// will be invoked using an object name that identifies the application and its
+	// installations and instances where applicable.
 	//
-	// In particular, the interface methods can be divided into three
-	// groups based on their intended receiver:
+	// An application is defined by a title.  An application can have multiple
+	// installations on a device.  The installations are grouped under the same
+	// application, but are otherwise independent of each other.  Each installation
+	// can have zero or more instances (which can be running or not).  The instances
+	// are independent of each other, and do not share state (like local storage).
+	// Interaction among instances should occur via Vanadium RPC, facilitated by the
+	// local mounttable.
+	//
+	// The device manager supports versioning of applications.  Each installation
+	// maintains a tree of versions, where a version is defined by a specific
+	// envelope.  The tree structure comes from 'previous version' references: each
+	// version (except the initial installation version) maintains a reference to
+	// the version that preceded it.  The installation maintains a current version
+	// reference that is used for new instances.  Each update operation on the
+	// installation creates a new version, sets the previous reference of the new
+	// version to the current version, and then updates the current version to refer
+	// to the new version.  Each revert operation on the installation sets the
+	// current version to the previous version of the current version.  Each
+	// instance maintains a current version reference that is used to run the
+	// instance.  The initial version of the instance is set to the current version
+	// of the installation at the time of instantiation.  Each update operation on
+	// the instance updates the instance's current version to the current version of
+	// the installation.  Each revert operation on the instance updates the
+	// instance's current version to the previous version of the instance's version.
+	//
+	// The Application interface methods can be divided based on their intended
+	// receiver:
 	//
 	// 1) Method receiver is an application:
-	// -- Install()
+	//     - Install()
 	//
 	// 2) Method receiver is an application installation:
-	// -- Instantiate()
-	// -- Uninstall()
-	// -- Update()
+	//     - Instantiate()
+	//     - Uninstall()
 	//
-	// 3) Method receiver is application installation instance:
-	// -- Run()
-	// -- Kill()
-	// -- Delete()
+	// 3) Method receiver is an application instance:
+	//     - Run()
+	//     - Kill()
+	//     - Delete()
+	//
+	// 4) Method receiver is an application installation or instance:
+	//     - Update()
+	//     - Revert()
 	//
 	// The following methods complement one another:
-	// -- Install() and Uninstall()
-	// -- Instantiate() and Delete()
-	// -- Run() and Kill()
+	//     - Install() and Uninstall()
+	//     - Instantiate() and Delete()
+	//     - Run() and Kill()
+	//     - Update() and Revert()
+	//
+	//
 	//
 	// Examples:
-	// # Install Google Maps on the device.
-	// device/apps.Install("/google.com/appstore/maps", nil, nil) --> "google maps/0"
 	//
-	// # Create and start an instance of the previously installed maps application
+	// Install Google Maps on the device.
+	//     device/apps.Install("/google.com/appstore/maps", nil, nil) --> "google maps/0"
+	//
+	// Create and start an instance of the previously installed maps application
 	// installation.
-	// device/apps/google maps/0.Instantiate() --> { "0" }
-	// device/apps/google maps/0/0.Run()
+	//    device/apps/google maps/0.Instantiate() --> { "0" }
+	//    device/apps/google maps/0/0.Run()
 	//
-	// # Create and start a second instance of the previously installed maps
+	// Create and start a second instance of the previously installed maps
 	// application installation.
-	// device/apps/google maps/0.Instantiate() --> { "1" }
-	// device/apps/google maps/0/1.Run()
+	//    device/apps/google maps/0.Instantiate() --> { "1" }
+	//    device/apps/google maps/0/1.Run()
 	//
-	// # Kill and delete the first instance previously started.
-	// device/apps/google maps/0/0.Kill()
-	// device/apps/google maps/0/0.Delete()
+	// Kill and delete the first instance previously started.
+	//    device/apps/google maps/0/0.Kill()
+	//    device/apps/google maps/0/0.Delete()
 	//
-	// # Install a second Google Maps installation.
-	// device/apps.Install("/google.com/appstore/maps", nil, nil) --> "google maps/1"
+	// Install a second Google Maps installation.
+	//    device/apps.Install("/google.com/appstore/maps", nil, nil) --> "google maps/1"
 	//
-	// # Update the second maps installation to the latest version available.
-	// device/apps/google maps/1.Update()
+	// Update the second maps installation to the latest version available.
+	//    device/apps/google maps/1.Update()
 	//
-	// # Update the first maps installation to a specific version.
-	// device/apps/google maps/0.UpdateTo("/google.com/appstore/beta/maps")
+	// Update the first maps installation to a specific version.
+	//    device/apps/google maps/0.UpdateTo("/google.com/appstore/beta/maps")
 	//
 	// Finally, an application installation instance can be in one of three abstract
 	// states: 1) "does not exist/deleted", 2) "running", or 3) "not-running". The
 	// interface methods transition between these abstract states using the
 	// following state machine:
 	//
-	// apply(Instantiate(), "does not exist") = "not-running"
-	// apply(Run(), "not-running") = "running"
-	// apply(Kill(), "running") = "not-running"
-	// apply(Delete(), "not-running") = "deleted"
+	//    apply(Instantiate(), "does not exist") = "not-running"
+	//    apply(Run(), "not-running") = "running"
+	//    apply(Kill(), "running") = "not-running"
+	//    apply(Delete(), "not-running") = "deleted"
 	ApplicationClientMethods
 	// Describe generates a description of the device.
 	Describe(*context.T, ...rpc.CallOpt) (Description, error)
@@ -1597,68 +1711,99 @@ func (c implDeviceClientStub) ListAssociations(ctx *context.T, opts ...rpc.CallO
 // Device can be used to manage a device remotely using an object name that
 // identifies it.
 type DeviceServerMethods interface {
-	// Application can be used to manage applications on a device. The
-	// idea is that this interace will be invoked using an object name that
-	// identifies the application and its installations and instances
-	// where applicable.
+	// Application can be used to manage applications on a device. This interface
+	// will be invoked using an object name that identifies the application and its
+	// installations and instances where applicable.
 	//
-	// In particular, the interface methods can be divided into three
-	// groups based on their intended receiver:
+	// An application is defined by a title.  An application can have multiple
+	// installations on a device.  The installations are grouped under the same
+	// application, but are otherwise independent of each other.  Each installation
+	// can have zero or more instances (which can be running or not).  The instances
+	// are independent of each other, and do not share state (like local storage).
+	// Interaction among instances should occur via Vanadium RPC, facilitated by the
+	// local mounttable.
+	//
+	// The device manager supports versioning of applications.  Each installation
+	// maintains a tree of versions, where a version is defined by a specific
+	// envelope.  The tree structure comes from 'previous version' references: each
+	// version (except the initial installation version) maintains a reference to
+	// the version that preceded it.  The installation maintains a current version
+	// reference that is used for new instances.  Each update operation on the
+	// installation creates a new version, sets the previous reference of the new
+	// version to the current version, and then updates the current version to refer
+	// to the new version.  Each revert operation on the installation sets the
+	// current version to the previous version of the current version.  Each
+	// instance maintains a current version reference that is used to run the
+	// instance.  The initial version of the instance is set to the current version
+	// of the installation at the time of instantiation.  Each update operation on
+	// the instance updates the instance's current version to the current version of
+	// the installation.  Each revert operation on the instance updates the
+	// instance's current version to the previous version of the instance's version.
+	//
+	// The Application interface methods can be divided based on their intended
+	// receiver:
 	//
 	// 1) Method receiver is an application:
-	// -- Install()
+	//     - Install()
 	//
 	// 2) Method receiver is an application installation:
-	// -- Instantiate()
-	// -- Uninstall()
-	// -- Update()
+	//     - Instantiate()
+	//     - Uninstall()
 	//
-	// 3) Method receiver is application installation instance:
-	// -- Run()
-	// -- Kill()
-	// -- Delete()
+	// 3) Method receiver is an application instance:
+	//     - Run()
+	//     - Kill()
+	//     - Delete()
+	//
+	// 4) Method receiver is an application installation or instance:
+	//     - Update()
+	//     - Revert()
 	//
 	// The following methods complement one another:
-	// -- Install() and Uninstall()
-	// -- Instantiate() and Delete()
-	// -- Run() and Kill()
+	//     - Install() and Uninstall()
+	//     - Instantiate() and Delete()
+	//     - Run() and Kill()
+	//     - Update() and Revert()
+	//
+	//
 	//
 	// Examples:
-	// # Install Google Maps on the device.
-	// device/apps.Install("/google.com/appstore/maps", nil, nil) --> "google maps/0"
 	//
-	// # Create and start an instance of the previously installed maps application
+	// Install Google Maps on the device.
+	//     device/apps.Install("/google.com/appstore/maps", nil, nil) --> "google maps/0"
+	//
+	// Create and start an instance of the previously installed maps application
 	// installation.
-	// device/apps/google maps/0.Instantiate() --> { "0" }
-	// device/apps/google maps/0/0.Run()
+	//    device/apps/google maps/0.Instantiate() --> { "0" }
+	//    device/apps/google maps/0/0.Run()
 	//
-	// # Create and start a second instance of the previously installed maps
+	// Create and start a second instance of the previously installed maps
 	// application installation.
-	// device/apps/google maps/0.Instantiate() --> { "1" }
-	// device/apps/google maps/0/1.Run()
+	//    device/apps/google maps/0.Instantiate() --> { "1" }
+	//    device/apps/google maps/0/1.Run()
 	//
-	// # Kill and delete the first instance previously started.
-	// device/apps/google maps/0/0.Kill()
-	// device/apps/google maps/0/0.Delete()
+	// Kill and delete the first instance previously started.
+	//    device/apps/google maps/0/0.Kill()
+	//    device/apps/google maps/0/0.Delete()
 	//
-	// # Install a second Google Maps installation.
-	// device/apps.Install("/google.com/appstore/maps", nil, nil) --> "google maps/1"
+	// Install a second Google Maps installation.
+	//    device/apps.Install("/google.com/appstore/maps", nil, nil) --> "google maps/1"
 	//
-	// # Update the second maps installation to the latest version available.
-	// device/apps/google maps/1.Update()
+	// Update the second maps installation to the latest version available.
+	//    device/apps/google maps/1.Update()
 	//
-	// # Update the first maps installation to a specific version.
-	// device/apps/google maps/0.UpdateTo("/google.com/appstore/beta/maps")
+	// Update the first maps installation to a specific version.
+	//    device/apps/google maps/0.UpdateTo("/google.com/appstore/beta/maps")
 	//
 	// Finally, an application installation instance can be in one of three abstract
 	// states: 1) "does not exist/deleted", 2) "running", or 3) "not-running". The
 	// interface methods transition between these abstract states using the
 	// following state machine:
 	//
-	// apply(Instantiate(), "does not exist") = "not-running"
-	// apply(Run(), "not-running") = "running"
-	// apply(Kill(), "running") = "not-running"
-	// apply(Delete(), "not-running") = "deleted"
+	//    apply(Instantiate(), "does not exist") = "not-running"
+	//    apply(Run(), "not-running") = "running"
+	//    apply(Kill(), "running") = "not-running"
+	//    apply(Delete(), "not-running") = "deleted"
 	ApplicationServerMethods
 	// Describe generates a description of the device.
 	Describe(*context.T, rpc.ServerCall) (Description, error)
@@ -1683,68 +1828,99 @@ type DeviceServerMethods interface {
 // The only difference between this interface and DeviceServerMethods
 // is the streaming methods.
 type DeviceServerStubMethods interface {
-	// Application can be used to manage applications on a device. The
-	// idea is that this interace will be invoked using an object name that
-	// identifies the application and its installations and instances
-	// where applicable.
+	// Application can be used to manage applications on a device. This interface
+	// will be invoked using an object name that identifies the application and its
+	// installations and instances where applicable.
 	//
-	// In particular, the interface methods can be divided into three
-	// groups based on their intended receiver:
+	// An application is defined by a title.  An application can have multiple
+	// installations on a device.  The installations are grouped under the same
+	// application, but are otherwise independent of each other.  Each installation
+	// can have zero or more instances (which can be running or not).  The instances
+	// are independent of each other, and do not share state (like local storage).
+	// Interaction among instances should occur via Vanadium RPC, facilitated by the
+	// local mounttable.
+	//
+	// The device manager supports versioning of applications.  Each installation
+	// maintains a tree of versions, where a version is defined by a specific
+	// envelope.  The tree structure comes from 'previous version' references: each
+	// version (except the initial installation version) maintains a reference to
+	// the version that preceded it.  The installation maintains a current version
+	// reference that is used for new instances.  Each update operation on the
+	// installation creates a new version, sets the previous reference of the new
+	// version to the current version, and then updates the current version to refer
+	// to the new version.  Each revert operation on the installation sets the
+	// current version to the previous version of the current version.  Each
+	// instance maintains a current version reference that is used to run the
+	// instance.  The initial version of the instance is set to the current version
+	// of the installation at the time of instantiation.  Each update operation on
+	// the instance updates the instance's current version to the current version of
+	// the installation.  Each revert operation on the instance updates the
+	// instance's current version to the previous version of the instance's version.
+	//
+	// The Application interface methods can be divided based on their intended
+	// receiver:
 	//
 	// 1) Method receiver is an application:
-	// -- Install()
+	//     - Install()
 	//
 	// 2) Method receiver is an application installation:
-	// -- Instantiate()
-	// -- Uninstall()
-	// -- Update()
+	//     - Instantiate()
+	//     - Uninstall()
 	//
-	// 3) Method receiver is application installation instance:
-	// -- Run()
-	// -- Kill()
-	// -- Delete()
+	// 3) Method receiver is an application instance:
+	//     - Run()
+	//     - Kill()
+	//     - Delete()
+	//
+	// 4) Method receiver is an application installation or instance:
+	//     - Update()
+	//     - Revert()
 	//
 	// The following methods complement one another:
-	// -- Install() and Uninstall()
-	// -- Instantiate() and Delete()
-	// -- Run() and Kill()
+	//     - Install() and Uninstall()
+	//     - Instantiate() and Delete()
+	//     - Run() and Kill()
+	//     - Update() and Revert()
+	//
+	//
 	//
 	// Examples:
-	// # Install Google Maps on the device.
-	// device/apps.Install("/google.com/appstore/maps", nil, nil) --> "google maps/0"
 	//
-	// # Create and start an instance of the previously installed maps application
+	// Install Google Maps on the device.
+	//     device/apps.Install("/google.com/appstore/maps", nil, nil) --> "google maps/0"
+	//
+	// Create and start an instance of the previously installed maps application
 	// installation.
-	// device/apps/google maps/0.Instantiate() --> { "0" }
-	// device/apps/google maps/0/0.Run()
+	//    device/apps/google maps/0.Instantiate() --> { "0" }
+	//    device/apps/google maps/0/0.Run()
 	//
-	// # Create and start a second instance of the previously installed maps
+	// Create and start a second instance of the previously installed maps
 	// application installation.
-	// device/apps/google maps/0.Instantiate() --> { "1" }
-	// device/apps/google maps/0/1.Run()
+	//    device/apps/google maps/0.Instantiate() --> { "1" }
+	//    device/apps/google maps/0/1.Run()
 	//
-	// # Kill and delete the first instance previously started.
-	// device/apps/google maps/0/0.Kill()
-	// device/apps/google maps/0/0.Delete()
+	// Kill and delete the first instance previously started.
+	//    device/apps/google maps/0/0.Kill()
+	//    device/apps/google maps/0/0.Delete()
 	//
-	// # Install a second Google Maps installation.
-	// device/apps.Install("/google.com/appstore/maps", nil, nil) --> "google maps/1"
+	// Install a second Google Maps installation.
+	//    device/apps.Install("/google.com/appstore/maps", nil, nil) --> "google maps/1"
 	//
-	// # Update the second maps installation to the latest version available.
-	// device/apps/google maps/1.Update()
+	// Update the second maps installation to the latest version available.
+	//    device/apps/google maps/1.Update()
 	//
-	// # Update the first maps installation to a specific version.
-	// device/apps/google maps/0.UpdateTo("/google.com/appstore/beta/maps")
+	// Update the first maps installation to a specific version.
+	//    device/apps/google maps/0.UpdateTo("/google.com/appstore/beta/maps")
 	//
 	// Finally, an application installation instance can be in one of three abstract
 	// states: 1) "does not exist/deleted", 2) "running", or 3) "not-running". The
 	// interface methods transition between these abstract states using the
 	// following state machine:
 	//
-	// apply(Instantiate(), "does not exist") = "not-running"
-	// apply(Run(), "not-running") = "running"
-	// apply(Kill(), "running") = "not-running"
-	// apply(Delete(), "not-running") = "deleted"
+	//    apply(Instantiate(), "does not exist") = "not-running"
+	//    apply(Run(), "not-running") = "running"
+	//    apply(Kill(), "running") = "not-running"
+	//    apply(Delete(), "not-running") = "deleted"
 	ApplicationServerStubMethods
 	// Describe generates a description of the device.
 	Describe(*context.T, rpc.ServerCall) (Description, error)
@@ -1832,7 +2008,7 @@ var descDevice = rpc.InterfaceDesc{
 	PkgPath: "v.io/v23/services/device",
 	Doc:     "// Device can be used to manage a device remotely using an object name that\n// identifies it.",
 	Embeds: []rpc.EmbedDesc{
-		{"Application", "v.io/v23/services/device", "// Application can be used to manage applications on a device. The\n// idea is that this interace will be invoked using an object name that\n// identifies the application and its installations and instances\n// where applicable.\n//\n// In particular, the interface methods can be divided into three\n// groups based on their intended receiver:\n//\n// 1) Method receiver is an application:\n// -- Install()\n//\n// 2) Method receiver is an application installation:\n// -- Instantiate()\n// -- Uninstall()\n// -- Update()\n//\n// 3) Method receiver is application installation instance:\n// -- Run()\n// -- Kill()\n// -- Delete()\n//\n// The following methods complement one another:\n// -- Install() and Uninstall()\n// -- Instantiate() and Delete()\n// -- Run() and Kill()\n//\n// Examples:\n// # Install Google Maps on the device.\n// device/apps.Install(\"/google.com/appstore/maps\", nil, nil) --> \"google maps/0\"\n//\n// # Create and start an instance of the previously installed maps application\n// installation.\n// device/apps/google maps/0.Instantiate() --> { \"0\" }\n// device/apps/google maps/0/0.Run()\n//\n// # Create and start a second instance of the previously installed maps\n// application installation.\n// device/apps/google maps/0.Instantiate() --> { \"1\" }\n// device/apps/google maps/0/1.Run()\n//\n// # Kill and delete the first instance previously started.\n// device/apps/google maps/0/0.Kill()\n// device/apps/google maps/0/0.Delete()\n//\n// # Install a second Google Maps installation.\n// device/apps.Install(\"/google.com/appstore/maps\", nil, nil) --> \"google maps/1\"\n//\n// # Update the second maps installation to the latest version available.\n// device/apps/google maps/1.Update()\n//\n// # Update the first maps installation to a specific version.\n// device/apps/google maps/0.UpdateTo(\"/google.com/appstore/beta/maps\")\n//\n// Finally, an application installation instance can be in one of three abstract\n// states: 1) \"does not exist/deleted\", 2) \"running\", or 3) \"not-running\". The\n// interface methods transition between these abstract states using the\n// following state machine:\n//\n// apply(Instantiate(), \"does not exist\") = \"not-running\"\n// apply(Run(), \"not-running\") = \"running\"\n// apply(Kill(), \"running\") = \"not-running\"\n// apply(Delete(), \"not-running\") = \"deleted\""},
+		{"Application", "v.io/v23/services/device", "// Application can be used to manage applications on a device. This interface\n// will be invoked using an object name that identifies the application and its\n// installations and instances where applicable.\n//\n// An application is defined by a title.  An application can have multiple\n// installations on a device.  The installations are grouped under the same\n// application, but are otherwise independent of each other.  Each installation\n// can have zero or more instances (which can be running or not).  The instances\n// are independent of each other, and do not share state (like local storage).\n// Interaction among instances should occur via Vanadium RPC, facilitated by the\n// local mounttable.\n//\n// The device manager supports versioning of applications.  Each installation\n// maintains a tree of versions, where a version is defined by a specific\n// envelope.  The tree structure comes from 'previous version' references: each\n// version (except the initial installation version) maintains a reference to\n// the version that preceded it.  The installation maintains a current version\n// reference that is used for new instances.  Each update operation on the\n// installation creates a new version, sets the previous reference of the new\n// version to the current version, and then updates the current version to refer\n// to the new version.  Each revert operation on the installation sets the\n// current version to the previous version of the current version.  Each\n// instance maintains a current version reference that is used to run the\n// instance.  The initial version of the instance is set to the current version\n// of the installation at the time of instantiation.  Each update operation on\n// the instance updates the instance's current version to the current version of\n// the installation.  Each revert operation on the instance updates the\n// instance's current version to the previous version of the instance's version.\n//\n// The Application interface methods can be divided based on their intended\n// receiver:\n//\n// 1) Method receiver is an application:\n//     - Install()\n//\n// 2) Method receiver is an application installation:\n//     - Instantiate()\n//     - Uninstall()\n//\n// 3) Method receiver is an application instance:\n//     - Run()\n//     - Kill()\n//     - Delete()\n//\n// 4) Method receiver is an application installation or instance:\n//     - Update()\n//     - Revert()\n//\n// The following methods complement one another:\n//     - Install() and Uninstall()\n//     - Instantiate() and Delete()\n//     - Run() and Kill()\n//     - Update() and Revert()\n//\n//\n//\n// Examples:\n//\n// Install Google Maps on the device.\n//     device/apps.Install(\"/google.com/appstore/maps\", nil, nil) --> \"google maps/0\"\n//\n// Create and start an instance of the previously installed maps application\n// installation.\n//    device/apps/google maps/0.Instantiate() --> { \"0\" }\n//    device/apps/google maps/0/0.Run()\n//\n// Create and start a second instance of the previously installed maps\n// application installation.\n//    device/apps/google maps/0.Instantiate() --> { \"1\" }\n//    device/apps/google maps/0/1.Run()\n//\n// Kill and delete the first instance previously started.\n//    device/apps/google maps/0/0.Kill()\n//    device/apps/google maps/0/0.Delete()\n//\n// Install a second Google Maps installation.\n//    device/apps.Install(\"/google.com/appstore/maps\", nil, nil) --> \"google maps/1\"\n//\n// Update the second maps installation to the latest version available.\n//    device/apps/google maps/1.Update()\n//\n// Update the first maps installation to a specific version.\n//    device/apps/google maps/0.UpdateTo(\"/google.com/appstore/beta/maps\")\n//\n// Finally, an application installation instance can be in one of three abstract\n// states: 1) \"does not exist/deleted\", 2) \"running\", or 3) \"not-running\". The\n// interface methods transition between these abstract states using the\n// following state machine:\n//\n//    apply(Instantiate(), \"does not exist\") = \"not-running\"\n//    apply(Run(), \"not-running\") = \"running\"\n//    apply(Kill(), \"running\") = \"not-running\"\n//    apply(Delete(), \"not-running\") = \"deleted\""},
 	},
 	Methods: []rpc.MethodDesc{
 		{
