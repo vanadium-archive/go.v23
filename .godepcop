@@ -1,0 +1,16 @@
+<godepcop>
+  <!-- The packages under v23 are the public Vanadium API and are widely used.
+
+       Maintain a struct rule that v23 only imports from v23, to avoid painful
+       circular dependencies. -->
+  <import allow="v.io/v23/..."/>
+  <import deny="..."/>
+
+  <!-- Relax the rule for external tests, but keep a curated list rather than
+       allowing a blanket "..." to avoid adding unwanted dependencies. -->
+  <xtest allow="github.com/cosnicolaou/llog"/>
+  <xtest allow="github.com/gorilla/websocket"/>
+  <xtest allow="golang.org/x/crypto/..."/>
+  <xtest allow="v.io/x/lib/..."/>
+  <xtest allow="v.io/x/ref/..."/>
+</godepcop>
