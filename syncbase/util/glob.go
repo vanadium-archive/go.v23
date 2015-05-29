@@ -5,46 +5,38 @@
 package util
 
 import (
-	"io"
 	"sort"
+	"strings"
 
 	"v.io/v23"
 	"v.io/v23/context"
 	"v.io/v23/naming"
-	"v.io/v23/rpc"
 )
 
-// List does client.Glob("*") and returns a sorted slice of results or a
-// VDL-compatible error.
+// List does namespace.Glob("name/*") and returns a sorted slice of results or
+// a VDL-compatible error.
 func List(ctx *context.T, name string) ([]string, error) {
-	client := v23.GetClient(ctx)
-	// TODO(sadovsky): This is nuts. Why is Glob not a method on the stub, just
-	// like every other streaming method?
-	call, err := client.StartCall(ctx, name, rpc.GlobMethod, []interface{}{"*"})
+	ns := v23.GetNamespace(ctx)
+	ch, err := ns.Glob(ctx, naming.Join(name, "*"))
 	if err != nil {
 		return nil, err
 	}
-	res := []string{}
-	done := false
-	for !done {
-		var gr naming.GlobReply
-		switch err := call.Recv(&gr); err {
-		case nil:
-			switch v := gr.(type) {
-			case naming.GlobReplyEntry:
-				res = append(res, v.Value.Name)
-			case naming.GlobReplyError:
-				return nil, v.Value.Error
-			}
-		case io.EOF:
-			done = true
-		default:
-			return nil, err
+
+	names := []string{}
+	for globReply := range ch {
+		switch v := globReply.(type) {
+		case *naming.GlobReplyEntry:
+			// NOTE(nlacasse): The names that come back from Glob are all
+			// rooted.  We only want the last part of the name, so we must chop
+			// off everything before the final '/'.  Since endpoints can
+			// themselves contain slashes, we have to remove the endpoint from
+			// the name first.
+			_, name := naming.SplitAddressName(v.Value.Name)
+			names = append(names, name[strings.LastIndex(name, "/")+1:])
+		case *naming.GlobReplyError:
+			return nil, v.Value.Error
 		}
 	}
-	if err := call.Finish(); err != nil {
-		return nil, err
-	}
-	sort.Strings(res)
-	return res, nil
+	sort.Strings(names)
+	return names, nil
 }
