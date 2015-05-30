@@ -1,7 +1,7 @@
 <godepcop>
   <!-- The packages under v23 are the public Vanadium API and are widely used.
 
-       Maintain a struct rule that v23 only imports from v23, to avoid painful
+       Maintain a strict rule that v23 only imports from v23, to avoid painful
        circular dependencies. -->
   <import allow="v.io/v23/..."/>
   <import deny="..."/>
