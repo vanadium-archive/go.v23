@@ -57,13 +57,13 @@ func (t *table) Put(ctx *context.T, key string, value interface{}) error {
 
 // Delete implements Table.Delete.
 func (t *table) Delete(ctx *context.T, r RowRange) error {
-	return t.c.DeleteRowRange(ctx, r.Start(), r.Limit())
+	return t.c.DeleteRowRange(ctx, []byte(r.Start()), []byte(r.Limit()))
 }
 
 // Scan implements Table.Scan.
 func (t *table) Scan(ctx *context.T, r RowRange) (Stream, error) {
 	ctx, cancel := context.WithCancel(ctx)
-	call, err := t.c.Scan(ctx, r.Start(), r.Limit())
+	call, err := t.c.Scan(ctx, []byte(r.Start()), []byte(r.Limit()))
 	if err != nil {
 		return nil, err
 	}

@@ -134,15 +134,17 @@ type Table interface {
 	// upsert) so that last-one-wins can have deletes trump updates.
 	Put(ctx *context.T, key string, value interface{}) error
 
-	// Delete deletes all rows in the given range. If the last row that is covered
-	// by a prefix from SetPermissions is deleted, that (prefix, perms) pair is
-	// removed.
+	// Delete deletes all rows in the given half-open range [start, limit). If
+	// limit is "", all rows with keys >= start are included. If the last row that
+	// is covered by a prefix from SetPermissions is deleted, that (prefix, perms)
+	// pair is removed.
 	// See helpers nosql.Prefix(), nosql.Range(), nosql.SingleRow().
 	// TODO(sadovsky): Automatic GC interacts poorly with sync. Revisit this API.
 	Delete(ctx *context.T, r RowRange) error
 
-	// Scan returns all rows in the given range. The returned stream reads from a
-	// consistent snapshot taken at the time of the Scan RPC.
+	// Scan returns all rows in the given half-open range [start, limit). If limit
+	// is "", all rows with keys >= start are included. The returned stream reads
+	// from a consistent snapshot taken at the time of the Scan RPC.
 	// See helpers nosql.Prefix(), nosql.Range(), nosql.SingleRow().
 	// TODO(sadovsky): Stop returning error.
 	Scan(ctx *context.T, r RowRange) (Stream, error)

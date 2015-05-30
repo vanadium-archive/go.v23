@@ -25,6 +25,7 @@ import (
 type BatchOptions struct {
 	// Arbitrary string, typically used to describe the intent behind a batch.
 	// Hints are surfaced to clients during conflict resolution.
+	// TODO(sadovsky): Use "any" here?
 	Hint string
 	// ReadOnly specifies whether the batch should allow writes.
 	// If ReadOnly is set to true, Abort() should be used to release any resources

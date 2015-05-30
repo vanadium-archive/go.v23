@@ -735,11 +735,11 @@ type TableClientMethods interface {
 	// covered by a prefix from SetPermissions is deleted, that (prefix, perms)
 	// pair is removed. If limit is "", all rows with keys >= start are included.
 	// TODO(sadovsky): Automatic GC interacts poorly with sync. Revisit this API.
-	DeleteRowRange(ctx *context.T, start string, limit string, opts ...rpc.CallOpt) error
+	DeleteRowRange(ctx *context.T, start []byte, limit []byte, opts ...rpc.CallOpt) error
 	// Scan returns all rows in the given range. The returned stream reads from a
 	// consistent snapshot taken at the time of the Scan RPC. If limit is "", all
 	// rows with keys >= start are included.
-	Scan(ctx *context.T, start string, limit string, opts ...rpc.CallOpt) (TableScanClientCall, error)
+	Scan(ctx *context.T, start []byte, limit []byte, opts ...rpc.CallOpt) (TableScanClientCall, error)
 	// SetPermissions sets the permissions for all current and future rows with
 	// the given prefix. If the prefix overlaps with an existing prefix, the
 	// longest prefix that matches a row applies. For example:
@@ -788,12 +788,12 @@ func (c implTableClientStub) Delete(ctx *context.T, opts ...rpc.CallOpt) (err er
 	return
 }
 
-func (c implTableClientStub) DeleteRowRange(ctx *context.T, i0 string, i1 string, opts ...rpc.CallOpt) (err error) {
+func (c implTableClientStub) DeleteRowRange(ctx *context.T, i0 []byte, i1 []byte, opts ...rpc.CallOpt) (err error) {
 	err = v23.GetClient(ctx).Call(ctx, c.name, "DeleteRowRange", []interface{}{i0, i1}, nil, opts...)
 	return
 }
 
-func (c implTableClientStub) Scan(ctx *context.T, i0 string, i1 string, opts ...rpc.CallOpt) (ocall TableScanClientCall, err error) {
+func (c implTableClientStub) Scan(ctx *context.T, i0 []byte, i1 []byte, opts ...rpc.CallOpt) (ocall TableScanClientCall, err error) {
 	var call rpc.ClientCall
 	if call, err = v23.GetClient(ctx).StartCall(ctx, c.name, "Scan", []interface{}{i0, i1}, opts...); err != nil {
 		return
@@ -901,11 +901,11 @@ type TableServerMethods interface {
 	// covered by a prefix from SetPermissions is deleted, that (prefix, perms)
 	// pair is removed. If limit is "", all rows with keys >= start are included.
 	// TODO(sadovsky): Automatic GC interacts poorly with sync. Revisit this API.
-	DeleteRowRange(ctx *context.T, call rpc.ServerCall, start string, limit string) error
+	DeleteRowRange(ctx *context.T, call rpc.ServerCall, start []byte, limit []byte) error
 	// Scan returns all rows in the given range. The returned stream reads from a
 	// consistent snapshot taken at the time of the Scan RPC. If limit is "", all
 	// rows with keys >= start are included.
-	Scan(ctx *context.T, call TableScanServerCall, start string, limit string) error
+	Scan(ctx *context.T, call TableScanServerCall, start []byte, limit []byte) error
 	// SetPermissions sets the permissions for all current and future rows with
 	// the given prefix. If the prefix overlaps with an existing prefix, the
 	// longest prefix that matches a row applies. For example:
@@ -943,11 +943,11 @@ type TableServerStubMethods interface {
 	// covered by a prefix from SetPermissions is deleted, that (prefix, perms)
 	// pair is removed. If limit is "", all rows with keys >= start are included.
 	// TODO(sadovsky): Automatic GC interacts poorly with sync. Revisit this API.
-	DeleteRowRange(ctx *context.T, call rpc.ServerCall, start string, limit string) error
+	DeleteRowRange(ctx *context.T, call rpc.ServerCall, start []byte, limit []byte) error
 	// Scan returns all rows in the given range. The returned stream reads from a
 	// consistent snapshot taken at the time of the Scan RPC. If limit is "", all
 	// rows with keys >= start are included.
-	Scan(ctx *context.T, call *TableScanServerCallStub, start string, limit string) error
+	Scan(ctx *context.T, call *TableScanServerCallStub, start []byte, limit []byte) error
 	// SetPermissions sets the permissions for all current and future rows with
 	// the given prefix. If the prefix overlaps with an existing prefix, the
 	// longest prefix that matches a row applies. For example:
@@ -1008,11 +1008,11 @@ func (s implTableServerStub) Delete(ctx *context.T, call rpc.ServerCall) error {
 	return s.impl.Delete(ctx, call)
 }
 
-func (s implTableServerStub) DeleteRowRange(ctx *context.T, call rpc.ServerCall, i0 string, i1 string) error {
+func (s implTableServerStub) DeleteRowRange(ctx *context.T, call rpc.ServerCall, i0 []byte, i1 []byte) error {
 	return s.impl.DeleteRowRange(ctx, call, i0, i1)
 }
 
-func (s implTableServerStub) Scan(ctx *context.T, call *TableScanServerCallStub, i0 string, i1 string) error {
+func (s implTableServerStub) Scan(ctx *context.T, call *TableScanServerCallStub, i0 []byte, i1 []byte) error {
 	return s.impl.Scan(ctx, call, i0, i1)
 }
 
@@ -1062,8 +1062,8 @@ var descTable = rpc.InterfaceDesc{
 			Name: "DeleteRowRange",
 			Doc:  "// DeleteRowRange deletes all rows in the given range. If the last row that is\n// covered by a prefix from SetPermissions is deleted, that (prefix, perms)\n// pair is removed. If limit is \"\", all rows with keys >= start are included.\n// TODO(sadovsky): Automatic GC interacts poorly with sync. Revisit this API.",
 			InArgs: []rpc.ArgDesc{
-				{"start", ``}, // string
-				{"limit", ``}, // string
+				{"start", ``}, // []byte
+				{"limit", ``}, // []byte
 			},
 			Tags: []*vdl.Value{vdl.ValueOf(access.Tag("Write"))},
 		},
@@ -1071,8 +1071,8 @@ var descTable = rpc.InterfaceDesc{
 			Name: "Scan",
 			Doc:  "// Scan returns all rows in the given range. The returned stream reads from a\n// consistent snapshot taken at the time of the Scan RPC. If limit is \"\", all\n// rows with keys >= start are included.",
 			InArgs: []rpc.ArgDesc{
-				{"start", ``}, // string
-				{"limit", ``}, // string
+				{"start", ``}, // []byte
+				{"limit", ``}, // []byte
 			},
 			Tags: []*vdl.Value{vdl.ValueOf(access.Tag("Read"))},
 		},
