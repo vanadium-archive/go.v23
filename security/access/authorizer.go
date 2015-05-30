@@ -89,9 +89,15 @@ func PermissionsAuthorizer(perms Permissions, tagType *vdl.Type) (security.Autho
 	return &authorizer{perms, tagType}, nil
 }
 
+// TypicalTagTypePermissionsAuthorizer is like PermissionsAuthorizer, but
+// assumes TypicalTagType and thus avoids returning an error.
+func TypicalTagTypePermissionsAuthorizer(perms Permissions) security.Authorizer {
+	return &authorizer{perms, TypicalTagType()}
+}
+
 // PermissionsAuthorizerFromFile applies the same authorization policy as
-// PermissionsAuthorizer, with the Permissions to be used sourced from a file named
-// filename.
+// PermissionsAuthorizer, with the Permissions to be used sourced from a file
+// named filename.
 //
 // Changes to the file are monitored and affect subsequent calls to Authorize.
 // Currently, this is achieved by re-reading the file on every call to

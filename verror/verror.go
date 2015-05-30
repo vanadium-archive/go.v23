@@ -161,7 +161,7 @@ const maxPCs = 40 // Maximum number of PC values we'll include in a stack trace.
 // it.  By convention, clients are expected to use name of the form "X=Y" to
 // distinguish their subordinate errors from those of other abstraction layers.
 // For example, a layer reporting on errors in individual blessings in an RPC
-// might use strings like "blessing=<bessing_name>".
+// might use strings like "blessing=<blessing_name>".
 type SubErrs []SubErr
 
 type SubErrOpts uint32
@@ -351,7 +351,7 @@ func convertInternal(idAction IDAction, langID i18n.LangID, componentName string
 	if e, ok := assertIsE(err); ok {
 		oldParams := e.ParamList
 
-		// Convert all embedded E erors, recursively.
+		// Convert all embedded E errors, recursively.
 		for i := range oldParams {
 			if subErr, isE := oldParams[i].(E); isE {
 				oldParams[i] = convertInternal(idAction, langID, componentName, opName, stack, subErr)

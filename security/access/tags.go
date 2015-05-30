@@ -6,12 +6,16 @@ package access
 
 import "v.io/v23/vdl"
 
-// TypicalTagType returns the type of the pre-defined tags in this access
+// TypicalTagType returns the type of the predefined tags in this access
 // package.
 //
-// Typical use of this is to setup an AccessList authorizer that uses these pre-defined
+// Typical use of this is to setup an Authorizer that uses these predefined
 // tags:
-//   authorizer := PermissionsAuthorizer(myperms, TypicalTagType())
+//   authorizer, err := PermissionsAuthorizerFromFile(name, TypicalTagType())
+//
+// For the common case of setting up an Authorizer for a Permissions object with
+// these predefined tags, a convenience function is provided:
+//   authorizer := TypicalTagTypePermissionsAuthorizer(myperms)
 func TypicalTagType() *vdl.Type {
 	return vdl.TypeOf(Tag(""))
 }

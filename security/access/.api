@@ -14,6 +14,7 @@ pkg access, func PermissionsAuthorizer(Permissions, *vdl.Type) (security.Authori
 pkg access, func PermissionsAuthorizerFromFile(string, *vdl.Type) (security.Authorizer, error)
 pkg access, func ReadPermissions(io.Reader) (Permissions, error)
 pkg access, func TypicalTagType() *vdl.Type
+pkg access, func TypicalTagTypePermissionsAuthorizer(Permissions) security.Authorizer
 pkg access, method (AccessList) Authorize(*context.T, security.Call) error
 pkg access, method (AccessList) Enforceable(*context.T, security.Principal) error
 pkg access, method (AccessList) Includes(...string) bool
