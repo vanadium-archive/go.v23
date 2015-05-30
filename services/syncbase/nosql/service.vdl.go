@@ -731,14 +731,15 @@ type TableClientMethods interface {
 	Create(ctx *context.T, perms access.Permissions, opts ...rpc.CallOpt) error
 	// Delete deletes this Table.
 	Delete(*context.T, ...rpc.CallOpt) error
-	// DeleteRowRange deletes all rows in the given range. If the last row that is
-	// covered by a prefix from SetPermissions is deleted, that (prefix, perms)
-	// pair is removed. If limit is "", all rows with keys >= start are included.
+	// Delete deletes all rows in the given half-open range [start, limit). If
+	// limit is "", all rows with keys >= start are included. If the last row that
+	// is covered by a prefix from SetPermissions is deleted, that (prefix, perms)
+	// pair is removed.
 	// TODO(sadovsky): Automatic GC interacts poorly with sync. Revisit this API.
 	DeleteRowRange(ctx *context.T, start []byte, limit []byte, opts ...rpc.CallOpt) error
-	// Scan returns all rows in the given range. The returned stream reads from a
-	// consistent snapshot taken at the time of the Scan RPC. If limit is "", all
-	// rows with keys >= start are included.
+	// Scan returns all rows in the given half-open range [start, limit). If limit
+	// is "", all rows with keys >= start are included. The returned stream reads
+	// from a consistent snapshot taken at the time of the Scan RPC.
 	Scan(ctx *context.T, start []byte, limit []byte, opts ...rpc.CallOpt) (TableScanClientCall, error)
 	// SetPermissions sets the permissions for all current and future rows with
 	// the given prefix. If the prefix overlaps with an existing prefix, the
@@ -897,14 +898,15 @@ type TableServerMethods interface {
 	Create(ctx *context.T, call rpc.ServerCall, perms access.Permissions) error
 	// Delete deletes this Table.
 	Delete(*context.T, rpc.ServerCall) error
-	// DeleteRowRange deletes all rows in the given range. If the last row that is
-	// covered by a prefix from SetPermissions is deleted, that (prefix, perms)
-	// pair is removed. If limit is "", all rows with keys >= start are included.
+	// Delete deletes all rows in the given half-open range [start, limit). If
+	// limit is "", all rows with keys >= start are included. If the last row that
+	// is covered by a prefix from SetPermissions is deleted, that (prefix, perms)
+	// pair is removed.
 	// TODO(sadovsky): Automatic GC interacts poorly with sync. Revisit this API.
 	DeleteRowRange(ctx *context.T, call rpc.ServerCall, start []byte, limit []byte) error
-	// Scan returns all rows in the given range. The returned stream reads from a
-	// consistent snapshot taken at the time of the Scan RPC. If limit is "", all
-	// rows with keys >= start are included.
+	// Scan returns all rows in the given half-open range [start, limit). If limit
+	// is "", all rows with keys >= start are included. The returned stream reads
+	// from a consistent snapshot taken at the time of the Scan RPC.
 	Scan(ctx *context.T, call TableScanServerCall, start []byte, limit []byte) error
 	// SetPermissions sets the permissions for all current and future rows with
 	// the given prefix. If the prefix overlaps with an existing prefix, the
@@ -939,14 +941,15 @@ type TableServerStubMethods interface {
 	Create(ctx *context.T, call rpc.ServerCall, perms access.Permissions) error
 	// Delete deletes this Table.
 	Delete(*context.T, rpc.ServerCall) error
-	// DeleteRowRange deletes all rows in the given range. If the last row that is
-	// covered by a prefix from SetPermissions is deleted, that (prefix, perms)
-	// pair is removed. If limit is "", all rows with keys >= start are included.
+	// Delete deletes all rows in the given half-open range [start, limit). If
+	// limit is "", all rows with keys >= start are included. If the last row that
+	// is covered by a prefix from SetPermissions is deleted, that (prefix, perms)
+	// pair is removed.
 	// TODO(sadovsky): Automatic GC interacts poorly with sync. Revisit this API.
 	DeleteRowRange(ctx *context.T, call rpc.ServerCall, start []byte, limit []byte) error
-	// Scan returns all rows in the given range. The returned stream reads from a
-	// consistent snapshot taken at the time of the Scan RPC. If limit is "", all
-	// rows with keys >= start are included.
+	// Scan returns all rows in the given half-open range [start, limit). If limit
+	// is "", all rows with keys >= start are included. The returned stream reads
+	// from a consistent snapshot taken at the time of the Scan RPC.
 	Scan(ctx *context.T, call *TableScanServerCallStub, start []byte, limit []byte) error
 	// SetPermissions sets the permissions for all current and future rows with
 	// the given prefix. If the prefix overlaps with an existing prefix, the
@@ -1060,7 +1063,7 @@ var descTable = rpc.InterfaceDesc{
 		},
 		{
 			Name: "DeleteRowRange",
-			Doc:  "// DeleteRowRange deletes all rows in the given range. If the last row that is\n// covered by a prefix from SetPermissions is deleted, that (prefix, perms)\n// pair is removed. If limit is \"\", all rows with keys >= start are included.\n// TODO(sadovsky): Automatic GC interacts poorly with sync. Revisit this API.",
+			Doc:  "// Delete deletes all rows in the given half-open range [start, limit). If\n// limit is \"\", all rows with keys >= start are included. If the last row that\n// is covered by a prefix from SetPermissions is deleted, that (prefix, perms)\n// pair is removed.\n// TODO(sadovsky): Automatic GC interacts poorly with sync. Revisit this API.",
 			InArgs: []rpc.ArgDesc{
 				{"start", ``}, // []byte
 				{"limit", ``}, // []byte
@@ -1069,7 +1072,7 @@ var descTable = rpc.InterfaceDesc{
 		},
 		{
 			Name: "Scan",
-			Doc:  "// Scan returns all rows in the given range. The returned stream reads from a\n// consistent snapshot taken at the time of the Scan RPC. If limit is \"\", all\n// rows with keys >= start are included.",
+			Doc:  "// Scan returns all rows in the given half-open range [start, limit). If limit\n// is \"\", all rows with keys >= start are included. The returned stream reads\n// from a consistent snapshot taken at the time of the Scan RPC.",
 			InArgs: []rpc.ArgDesc{
 				{"start", ``}, // []byte
 				{"limit", ``}, // []byte
