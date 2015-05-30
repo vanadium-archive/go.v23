@@ -3,8 +3,8 @@
 
        Maintain a strict rule that v23 only imports from v23, to avoid painful
        circular dependencies. -->
-  <import allow="v.io/v23/..."/>
-  <import deny="..."/>
+  <pkg allow="v.io/v23/..."/>
+  <pkg deny="..."/>
 
   <!-- Relax the rule for external tests, but keep a curated list rather than
        allowing a blanket "..." to avoid adding unwanted dependencies. -->

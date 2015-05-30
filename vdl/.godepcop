@@ -4,7 +4,7 @@
 
        Maintain a strict rule of no imports (other than standard packages), to
        avoid painful circular dependencies.  -->
-  <import deny="..."/>
+  <pkg deny="..."/>
 
   <!-- Relax the rule for external tests -->
   <xtest allow="v.io/v23/..."/>
