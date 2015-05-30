@@ -98,7 +98,7 @@ func SetupOrDie(perms access.Permissions) (clientCtx *context.T, serverName stri
 func getPermsOrDie(t *testing.T, ctx *context.T, ac util.AccessController) access.Permissions {
 	perms, _, err := ac.GetPermissions(ctx)
 	if err != nil {
-		Fatalf(t, "GetPermissions failed: %s", err)
+		Fatalf(t, "GetPermissions failed: %v", err)
 	}
 	return perms
 }

@@ -16,6 +16,10 @@ import (
 // List does namespace.Glob("name/*") and returns a sorted slice of results or
 // a VDL-compatible error.
 func List(ctx *context.T, name string) ([]string, error) {
+	// TODO(sadovsky): Why can't Glob be a method on the stub, just like every
+	// other streaming method? Even if we encourage clients to use the namespace
+	// library to glob, we ought to make the underlying RPC implementation
+	// understandable and familiar.
 	ns := v23.GetNamespace(ctx)
 	ch, err := ns.Glob(ctx, naming.Join(name, "*"))
 	if err != nil {
