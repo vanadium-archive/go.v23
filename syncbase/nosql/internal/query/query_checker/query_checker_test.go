@@ -104,6 +104,7 @@ func TestQueryChecker(t *testing.T) {
 		{"select v from Customer where v.ZipCode Is Nil"},
 		{"select v from Customer where v.ZipCode is not nil"},
 		{"select v from Customer where v.ZipCode IS NOT NIL"},
+		{"select v from Customer where Now() < 10"},
 	}
 
 	for _, test := range basic {
@@ -273,8 +274,7 @@ func TestQueryCheckerErrors(t *testing.T) {
 		{"select v.z from Customer where k like \"a\\bc%\"", syncql.NewErrInvalidEscapedChar(db.GetContext(), 38)},
 		{"select v from Customer where v.A > false", syncql.NewErrBoolInvalidExpression(db.GetContext(), 33)},
 		{"select v from Customer where true <= v.A", syncql.NewErrBoolInvalidExpression(db.GetContext(), 34)},
-		{"select v from Customer where Now() < Date(\"2015/07/22\")", syncql.NewErrFunctionsNotYetSupported(db.GetContext(), 29)},
-		{"select v from Customer where Foo(\"2015/07/22\", true, 3.14157) = true", syncql.NewErrFunctionsNotYetSupported(db.GetContext(), 29)},
+		{"select v from Customer where Foo(\"2015/07/22\", true, 3.14157) = true", syncql.NewErrFunctionNotFound(db.GetContext(), 29, "Foo")},
 		{"select v from Customer where t is nil", syncql.NewErrTypeExpressionForm(db.GetContext(), 29)},
 		{"select v from Customer where k is nil", syncql.NewErrKeyExpressionForm(db.GetContext(), 29)},
 		{"select v from Customer where nil is v.ZipCode", syncql.NewErrIsIsNotRequireLhsValue(db.GetContext(), 29)},
@@ -289,6 +289,15 @@ func TestQueryCheckerErrors(t *testing.T) {
 		{"select v from Customer where v.ZipCode is not 94303", syncql.NewErrIsIsNotRequireRhsNil(db.GetContext(), 46)},
 		{"select v from Customer where v.ZipCode is not true", syncql.NewErrIsIsNotRequireRhsNil(db.GetContext(), 46)},
 		{"select v from Customer where v.ZipCode is not 943.03", syncql.NewErrIsIsNotRequireRhsNil(db.GetContext(), 46)},
+		{"select v from Customer where t = \"Customer\" and y(v.InvoiceDate, \"ABC\") = 2015", syncql.NewErrFunctionReturnedError(db.GetContext(), 65, "y", errors.New("unknown time zone ABC"))},
+		{"select v from Customer where t = \"Customer\" and YM(v.InvoiceDate, \"ABC\") = 2015", syncql.NewErrFunctionReturnedError(db.GetContext(), 66, "YM", errors.New("unknown time zone ABC"))},
+		{"select v from Customer where t = \"Customer\" and YMD(v.InvoiceDate, \"ABC\") = 2015", syncql.NewErrFunctionReturnedError(db.GetContext(), 67, "YMD", errors.New("unknown time zone ABC"))},
+		{"select v from Customer where t = \"Customer\" and YMDH(v.InvoiceDate, \"ABC\") = 2015", syncql.NewErrFunctionReturnedError(db.GetContext(), 68, "YMDH", errors.New("unknown time zone ABC"))},
+		{"select v from Customer where t = \"Customer\" and YMDHM(v.InvoiceDate, \"ABC\") = 2015", syncql.NewErrFunctionReturnedError(db.GetContext(), 69, "YMDHM", errors.New("unknown time zone ABC"))},
+		{"select v from Customer where t = \"Customer\" and YMDHMS(v.InvoiceDate, \"ABC\") = 2015", syncql.NewErrFunctionReturnedError(db.GetContext(), 70, "YMDHMS", errors.New("unknown time zone ABC"))},
+		{"select v from Customer where t = \"Customer\" and Now(v.InvoiceDate, \"ABC\") = 2015", syncql.NewErrFunctionArgCount(db.GetContext(), 48, "Now", 0, 2)},
+		{"select v from Customer where t = \"Customer\" and LowerCase(v.Name, 2) = \"smith\"", syncql.NewErrFunctionArgCount(db.GetContext(), 48, "LowerCase", 1, 2)},
+		{"select v from Customer where t = \"Customer\" and UpperCase(v.Name, 2) = \"SMITH\"", syncql.NewErrFunctionArgCount(db.GetContext(), 48, "UpperCase", 1, 2)},
 	}
 
 	for _, test := range basic {

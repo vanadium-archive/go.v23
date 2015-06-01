@@ -10,6 +10,7 @@ import (
 	"reflect"
 	"strings"
 	"testing"
+	"time"
 
 	"v.io/syncbase/v23/syncbase/nosql/internal/query"
 	"v.io/syncbase/v23/syncbase/nosql/internal/query/query_checker"
@@ -115,6 +116,14 @@ func init() {
 	db.ctx, shutdown = test.V23Init()
 	defer shutdown()
 
+	t20150122131101, _ := time.Parse("Jan 2 2006 15:04:05 -0700 MST", "Jan 22 2015 13:11:01 -0800 PST")
+	t20150210161202, _ := time.Parse("Jan 2 2006 15:04:05 -0700 MST", "Feb 10 2015 16:12:02 -0800 PST")
+	t20150311101303, _ := time.Parse("Jan 2 2006 15:04:05 -0700 MST", "Mar 11 2015 10:13:03 -0700 PDT")
+	t20150317111404, _ := time.Parse("Jan 2 2006 15:04:05 -0700 MST", "Mar 17 2015 11:14:04 -0700 PDT")
+	t20150317131505, _ := time.Parse("Jan 2 2006 15:04:05 -0700 MST", "Mar 17 2015 13:15:05 -0700 PDT")
+	t20150412221606, _ := time.Parse("Jan 2 2006 15:04:05 -0700 MST", "Apr 12 2015 22:16:06 -0700 PDT")
+	t20150413141707, _ := time.Parse("Jan 2 2006 15:04:05 -0700 MST", "Apr 13 2015 14:17:07 -0700 PDT")
+
 	custTable.name = "Customer"
 	custTable.rows = []kv{
 		kv{
@@ -123,15 +132,15 @@ func init() {
 		},
 		kv{
 			"001001",
-			vdl.ValueOf(Invoice{1, 1000, 42, AddressInfo{"1 Main St.", "Palo Alto", "CA", "94303"}}),
+			vdl.ValueOf(Invoice{1, 1000, t20150122131101, 42, AddressInfo{"1 Main St.", "Palo Alto", "CA", "94303"}}),
 		},
 		kv{
 			"001002",
-			vdl.ValueOf(Invoice{1, 1003, 7, AddressInfo{"2 Main St.", "Palo Alto", "CA", "94303"}}),
+			vdl.ValueOf(Invoice{1, 1003, t20150210161202, 7, AddressInfo{"2 Main St.", "Palo Alto", "CA", "94303"}}),
 		},
 		kv{
 			"001003",
-			vdl.ValueOf(Invoice{1, 1005, 88, AddressInfo{"3 Main St.", "Palo Alto", "CA", "94303"}}),
+			vdl.ValueOf(Invoice{1, 1005, t20150311101303, 88, AddressInfo{"3 Main St.", "Palo Alto", "CA", "94303"}}),
 		},
 		kv{
 			"002",
@@ -139,19 +148,19 @@ func init() {
 		},
 		kv{
 			"002001",
-			vdl.ValueOf(Invoice{2, 1001, 166, AddressInfo{"777 Any St.", "collins", "IA", "50055"}}),
+			vdl.ValueOf(Invoice{2, 1001, t20150317111404, 166, AddressInfo{"777 Any St.", "collins", "IA", "50055"}}),
 		},
 		kv{
 			"002002",
-			vdl.ValueOf(Invoice{2, 1002, 243, AddressInfo{"888 Any St.", "collins", "IA", "50055"}}),
+			vdl.ValueOf(Invoice{2, 1002, t20150317131505, 243, AddressInfo{"888 Any St.", "collins", "IA", "50055"}}),
 		},
 		kv{
 			"002003",
-			vdl.ValueOf(Invoice{2, 1004, 787, AddressInfo{"999 Any St.", "collins", "IA", "50055"}}),
+			vdl.ValueOf(Invoice{2, 1004, t20150412221606, 787, AddressInfo{"999 Any St.", "collins", "IA", "50055"}}),
 		},
 		kv{
 			"002004",
-			vdl.ValueOf(Invoice{2, 1006, 88, AddressInfo{"101010 Any St.", "collins", "IA", "50055"}}),
+			vdl.ValueOf(Invoice{2, 1006, t20150413141707, 88, AddressInfo{"101010 Any St.", "collins", "IA", "50055"}}),
 		},
 	}
 	db.tables = append(db.tables, custTable)
@@ -639,6 +648,124 @@ func TestQueryExec(t *testing.T) {
 			[]string{"v"},
 			[][]*vdl.Value{},
 		},
+		// Test functions.
+		{
+			// Select invoice records where date is 2015-03-17
+			"select v from Customer where t = \"Invoice\" and YMD(v.InvoiceDate, \"America/Los_Angeles\") = Date(\"2015-03-17 PDT\")",
+			[]string{"v"},
+			[][]*vdl.Value{
+				[]*vdl.Value{custTable.rows[5].value},
+				[]*vdl.Value{custTable.rows[6].value},
+			},
+		},
+		{
+			// Now will always be > 2012, so all customer records will be returned.
+			"select v from Customer where Now() > Date(\"2012-03-17 PDT\")",
+			[]string{"v"},
+			[][]*vdl.Value{
+				[]*vdl.Value{custTable.rows[0].value},
+				[]*vdl.Value{custTable.rows[1].value},
+				[]*vdl.Value{custTable.rows[2].value},
+				[]*vdl.Value{custTable.rows[3].value},
+				[]*vdl.Value{custTable.rows[4].value},
+				[]*vdl.Value{custTable.rows[5].value},
+				[]*vdl.Value{custTable.rows[6].value},
+				[]*vdl.Value{custTable.rows[7].value},
+				[]*vdl.Value{custTable.rows[8].value},
+			},
+		},
+		{
+			// Select April 2015 PT invoices.
+			// Note: this wouldn't work for March as daylight saving occurs March 8
+			// and causes comparisons for those days to be off 1 hour.
+			// It would work to use UTC -- see next test.
+			"select k from Customer where YM(v.InvoiceDate, \"America/Los_Angeles\") = YM(Date(\"2015-04-01 PST\"), \"America/Los_Angeles\")",
+			[]string{"k"},
+			[][]*vdl.Value{
+				[]*vdl.Value{vdl.ValueOf(custTable.rows[7].key)},
+				[]*vdl.Value{vdl.ValueOf(custTable.rows[8].key)},
+			},
+		},
+		{
+			// Select March 2015 UTC invoices.
+			"select k from Customer where YM(v.InvoiceDate, \"UTC\") = YM(Date(\"2015-03-01 UTC\"), \"UTC\")",
+			[]string{"k"},
+			[][]*vdl.Value{
+				[]*vdl.Value{vdl.ValueOf(custTable.rows[3].key)},
+				[]*vdl.Value{vdl.ValueOf(custTable.rows[5].key)},
+				[]*vdl.Value{vdl.ValueOf(custTable.rows[6].key)},
+			},
+		},
+		{
+			// Select 2015 UTC invoices.
+			"select k from Customer where Y(v.InvoiceDate, \"UTC\") = Y(Date(\"2015-01-01 UTC\"), \"UTC\")",
+			[]string{"k"},
+			[][]*vdl.Value{
+				[]*vdl.Value{vdl.ValueOf(custTable.rows[1].key)},
+				[]*vdl.Value{vdl.ValueOf(custTable.rows[2].key)},
+				[]*vdl.Value{vdl.ValueOf(custTable.rows[3].key)},
+				[]*vdl.Value{vdl.ValueOf(custTable.rows[5].key)},
+				[]*vdl.Value{vdl.ValueOf(custTable.rows[6].key)},
+				[]*vdl.Value{vdl.ValueOf(custTable.rows[7].key)},
+				[]*vdl.Value{vdl.ValueOf(custTable.rows[8].key)},
+			},
+		},
+		{
+			// Select the Mar 17 2015 11:14:04 America/Los_Angeles invoice.
+			"select k from Customer where v.InvoiceDate = DateTime(\"2015-03-17 11:14:04 PDT\")",
+			[]string{"k"},
+			[][]*vdl.Value{
+				[]*vdl.Value{vdl.ValueOf(custTable.rows[5].key)},
+			},
+		},
+		{
+			// Select invoices in the minute Mar 17 2015 11:14 America/Los_Angeles invoice.
+			"select k from Customer where YMDHM(v.InvoiceDate, \"America/Los_Angeles\") = YMDHM(DateTime(\"2015-03-17 11:14:00 PDT\"), \"America/Los_Angeles\")",
+			[]string{"k"},
+			[][]*vdl.Value{
+				[]*vdl.Value{vdl.ValueOf(custTable.rows[5].key)},
+			},
+		},
+		{
+			// Select invoices in the hour Mar 17 2015 11 hundred America/Los_Angeles invoice.
+			"select k from Customer where YMDH(v.InvoiceDate, \"America/Los_Angeles\") = YMDH(DateTime(\"2015-03-17 11:00:00 PDT\"), \"America/Los_Angeles\")",
+			[]string{"k"},
+			[][]*vdl.Value{
+				[]*vdl.Value{vdl.ValueOf(custTable.rows[5].key)},
+			},
+		},
+		{
+			// Select invoices on the day Mar 17 2015 America/Los_Angeles invoice.
+			"select k from Customer where YMD(v.InvoiceDate, \"America/Los_Angeles\") = YMD(Date(\"2015-03-17 PDT\"), \"America/Los_Angeles\")",
+			[]string{"k"},
+			[][]*vdl.Value{
+				[]*vdl.Value{vdl.ValueOf(custTable.rows[5].key)},
+				[]*vdl.Value{vdl.ValueOf(custTable.rows[6].key)},
+			},
+		},
+		// Test string functions.
+		{
+			// Select invoices shipped to Any street -- using LowerCase.
+			"select k from Customer where t = \"Invoice\" and LowerCase(v.ShipTo.Street) like \"%any%\"",
+			[]string{"k"},
+			[][]*vdl.Value{
+				[]*vdl.Value{vdl.ValueOf(custTable.rows[5].key)},
+				[]*vdl.Value{vdl.ValueOf(custTable.rows[6].key)},
+				[]*vdl.Value{vdl.ValueOf(custTable.rows[7].key)},
+				[]*vdl.Value{vdl.ValueOf(custTable.rows[8].key)},
+			},
+		},
+		{
+			// Select invoices shipped to Any street -- using UpperCase.
+			"select k from Customer where t = \"Invoice\" and UpperCase(v.ShipTo.Street) like \"%ANY%\"",
+			[]string{"k"},
+			[][]*vdl.Value{
+				[]*vdl.Value{vdl.ValueOf(custTable.rows[5].key)},
+				[]*vdl.Value{vdl.ValueOf(custTable.rows[6].key)},
+				[]*vdl.Value{vdl.ValueOf(custTable.rows[7].key)},
+				[]*vdl.Value{vdl.ValueOf(custTable.rows[8].key)},
+			},
+		},
 	}
 
 	for _, test := range basic {
@@ -845,7 +972,7 @@ func TestEvalWhereUsingOnlyKey(t *testing.T) {
 			if semErr == nil {
 				switch sel := (*s).(type) {
 				case query_parser.SelectStatement:
-					result := query.EvalWhereUsingOnlyKey(&sel, test.key)
+					result := query.EvalWhereUsingOnlyKey(db, &sel, test.key)
 					if result != test.result {
 						t.Errorf("query: %s; got %v, want %v", test.query, result, test.result)
 					}
@@ -1076,7 +1203,7 @@ func TestEval(t *testing.T) {
 			if semErr == nil {
 				switch sel := (*s).(type) {
 				case query_parser.SelectStatement:
-					result := query.Eval(test.k, test.v, sel.Where.Expr)
+					result := query.Eval(db, test.k, test.v, sel.Where.Expr)
 					if result != test.result {
 						t.Errorf("query: %s; got %v, want %v", test.query, result, test.result)
 					}
@@ -1215,7 +1342,7 @@ func TestExecSelectSingleRow(t *testing.T) {
 			if semErr == nil {
 				switch sel := (*s).(type) {
 				case query_parser.SelectStatement:
-					result := query.ExecSelectSingleRow(test.k, test.v, &sel)
+					result := query.ExecSelectSingleRow(db, test.k, test.v, &sel)
 					if !reflect.DeepEqual(result, test.result) {
 						t.Errorf("query: %s; got %v, want %v", test.query, result, test.result)
 					}

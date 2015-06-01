@@ -11,6 +11,7 @@ import (
 	"strconv"
 	"strings"
 	"text/scanner"
+	"time"
 	"unicode/utf8"
 
 	"v.io/syncbase/v23/syncbase/nosql/internal/query/query_db"
@@ -98,6 +99,7 @@ const (
 	TypInt
 	TypNil
 	TypStr
+	TypTime
 	TypObject // Only as the result of a ResolveOperand.
 	TypUint   // Only as a result of a ResolveOperand
 )
@@ -113,6 +115,7 @@ type Operand struct {
 	Function  *Function
 	Int       int64
 	Str       string
+	Time      time.Time
 	Prefix    string // Computed by checker for Like expressions
 	Regex     string // Computed by checker for Like expressions
 	HasAltStr bool   // set true when evaluating type = expressions
@@ -125,8 +128,12 @@ type Operand struct {
 }
 
 type Function struct {
-	Name string
-	Args []*Operand
+	Name     string
+	Args     []*Operand
+	ArgTypes []OperandType // Filled in by checker.
+	RetType  OperandType   // Filled in by checker.
+	Computed bool          // Checker sets to true and sets RetValue if function takes no args
+	RetValue *Operand
 	Node
 }
 
@@ -282,6 +289,7 @@ func Parse(db query_db.Database, src string) (*Statement, error) {
 
 // Parse the [currently] one and only supported statement: select.
 func selectStatement(db query_db.Database, s *scanner.Scanner, token *Token) (Statement, *Token, error) {
+	// TODO(jkline): keep a count of recursions and limit it to some arbitrary number.
 	var st SelectStatement
 	st.Off = token.Off
 
@@ -974,6 +982,9 @@ func (o Operand) String() string {
 	case TypExpr:
 		val += "(expr)"
 		val += o.Expr.String()
+	case TypTime:
+		val += "(time)"
+		val += o.Time.Format("Mon Jan 2 15:04:05 -0700 MST 2006")
 	case TypNil:
 		val += "<nil>"
 	case TypObject:

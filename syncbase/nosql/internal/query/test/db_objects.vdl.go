@@ -11,6 +11,10 @@ import (
 	// VDL system imports
 	"fmt"
 	"v.io/v23/vdl"
+
+	// VDL user imports
+	"time"
+	_ "v.io/v23/vdlroot/time"
 )
 
 type AddressInfo struct {
@@ -221,10 +225,11 @@ func (Customer) __VDLReflect(struct {
 }
 
 type Invoice struct {
-	CustId     int64
-	InvoiceNum int64
-	Amount     int64
-	ShipTo     AddressInfo
+	CustId      int64
+	InvoiceNum  int64
+	InvoiceDate time.Time
+	Amount      int64
+	ShipTo      AddressInfo
 }
 
 func (Invoice) __VDLReflect(struct {

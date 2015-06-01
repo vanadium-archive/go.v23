@@ -68,8 +68,8 @@ func CompileKeyPrefixes(w *query_parser.WhereClause) []string {
 // return nil if row not selected, else return the projection (type []*vdl.Value).
 // Note: limit and offset clauses are ignored for this function as they make no sense
 // for a single row.
-func ExecSelectSingleRow(k string, v *vdl.Value, s *query_parser.SelectStatement) []*vdl.Value {
-	if !Eval(k, v, s.Where.Expr) {
+func ExecSelectSingleRow(db query_db.Database, k string, v *vdl.Value, s *query_parser.SelectStatement) []*vdl.Value {
+	if !Eval(db, k, v, s.Where.Expr) {
 		rs := []*vdl.Value{}
 		return rs
 	}
@@ -97,7 +97,7 @@ func (rs *resultStreamImpl) Advance() bool {
 		// INCLUDE: the row should be included in the results
 		// EXCLUDE: the row should NOT be included
 		// FETCH_VALUE: the value and/or type of the value are required to make determination.
-		rv := EvalWhereUsingOnlyKey(rs.selectStatement, k)
+		rv := EvalWhereUsingOnlyKey(rs.db, rs.selectStatement, k)
 		var match bool
 		switch rv {
 		case INCLUDE:
@@ -105,7 +105,7 @@ func (rs *resultStreamImpl) Advance() bool {
 		case EXCLUDE:
 			match = false
 		case FETCH_VALUE:
-			match = Eval(k, v, rs.selectStatement.Where.Expr)
+			match = Eval(rs.db, k, v, rs.selectStatement.Where.Expr)
 		}
 		if match {
 			if rs.selectStatement.ResultsOffset == nil || rs.selectStatement.ResultsOffset.ResultsOffset.Value <= rs.skippedCount {

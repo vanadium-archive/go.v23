@@ -11,6 +11,7 @@ import (
 	"strings"
 
 	"v.io/syncbase/v23/syncbase/nosql/internal/query/query_db"
+	"v.io/syncbase/v23/syncbase/nosql/internal/query/query_functions"
 	"v.io/syncbase/v23/syncbase/nosql/internal/query/query_parser"
 	"v.io/syncbase/v23/syncbase/nosql/syncql"
 )
@@ -154,10 +155,29 @@ func checkOperand(db query_db.Database, o *query_parser.Operand) error {
 		}
 		return nil
 	case query_parser.TypFunction:
-		return syncql.NewErrFunctionsNotYetSupported(db.GetContext(), o.Function.Off)
-	default:
-		return nil
+		// Each of the functions args needs to be checked first.
+		for _, arg := range o.Function.Args {
+			if err := checkOperand(db, arg); err != nil {
+				return err
+			}
+		}
+		// Call query_functions.CheckFunction.  This will check for correct number of args
+		// and, to the extent possible, correct types.
+		// Furthermore, it may execute the function if the function takes no args or
+		// takes only literal args (or an arg that is a function that is also executed
+		// early).  CheckFunction will fill in arg types, return types and may fill in
+		// Computed and RetValue.
+		err := query_functions.CheckFunction(db, o.Function)
+		if err != nil {
+			return err
+		}
+		// If function executed early, computed will be true and RetValue set.
+		// Convert the operand to the RetValue
+		if o.Function.Computed {
+			*o = *o.Function.RetValue
+		}
 	}
+	return nil
 }
 
 // Only include up to (but not including) a wildcard character ('%', '_').

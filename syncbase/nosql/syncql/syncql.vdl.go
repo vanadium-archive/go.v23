@@ -28,8 +28,9 @@ var (
 	ErrExpectedIdentifier              = verror.Register("v.io/syncbase/v23/syncbase/nosql/syncql.ExpectedIdentifier", verror.NoRetry, "{1:}{2:} [{3}]Expected identifier, found {4}.")
 	ErrExpectedOperand                 = verror.Register("v.io/syncbase/v23/syncbase/nosql/syncql.ExpectedOperand", verror.NoRetry, "{1:}{2:} [{3}]Expected operand, found {4}.")
 	ErrExpectedOperator                = verror.Register("v.io/syncbase/v23/syncbase/nosql/syncql.ExpectedOperator", verror.NoRetry, "{1:}{2:} [{3}]Expected operator, found {4}.")
-	// TODO(jkline): Kill me when functions are supported.
-	ErrFunctionsNotYetSupported        = verror.Register("v.io/syncbase/v23/syncbase/nosql/syncql.FunctionsNotYetSupported", verror.NoRetry, "{1:}{2:} [{3}]Functions are not yet supported.  Stay tuned.")
+	ErrFunctionArgCount                = verror.Register("v.io/syncbase/v23/syncbase/nosql/syncql.FunctionArgCount", verror.NoRetry, "{1:}{2:} [{3}]Function '{4}' expects {5} args, found: {6}.")
+	ErrFunctionNotFound                = verror.Register("v.io/syncbase/v23/syncbase/nosql/syncql.FunctionNotFound", verror.NoRetry, "{1:}{2:} [{3}]Function '{4}' not found.")
+	ErrFunctionReturnedError           = verror.Register("v.io/syncbase/v23/syncbase/nosql/syncql.FunctionReturnedError", verror.NoRetry, "{1:}{2:} [{3}]Function '{4}' returned error: {5}.")
 	ErrIsIsNotRequireLhsValue          = verror.Register("v.io/syncbase/v23/syncbase/nosql/syncql.IsIsNotRequireLhsValue", verror.NoRetry, "{1:}{2:} [{3}]'Is/is not' expressions require left operand to be a value operand.")
 	ErrIsIsNotRequireRhsNil            = verror.Register("v.io/syncbase/v23/syncbase/nosql/syncql.IsIsNotRequireRhsNil", verror.NoRetry, "{1:}{2:} [{3}]'Is/is not' expressions require right operand to be nil.")
 	ErrInvalidEscapedChar              = verror.Register("v.io/syncbase/v23/syncbase/nosql/syncql.InvalidEscapedChar", verror.NoRetry, "{1:}{2:} [{3}Expected backslash, percent, or underscore after backslash.]")
@@ -62,7 +63,9 @@ func init() {
 	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrExpectedIdentifier.ID), "{1:}{2:} [{3}]Expected identifier, found {4}.")
 	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrExpectedOperand.ID), "{1:}{2:} [{3}]Expected operand, found {4}.")
 	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrExpectedOperator.ID), "{1:}{2:} [{3}]Expected operator, found {4}.")
-	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrFunctionsNotYetSupported.ID), "{1:}{2:} [{3}]Functions are not yet supported.  Stay tuned.")
+	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrFunctionArgCount.ID), "{1:}{2:} [{3}]Function '{4}' expects {5} args, found: {6}.")
+	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrFunctionNotFound.ID), "{1:}{2:} [{3}]Function '{4}' not found.")
+	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrFunctionReturnedError.ID), "{1:}{2:} [{3}]Function '{4}' returned error: {5}.")
 	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrIsIsNotRequireLhsValue.ID), "{1:}{2:} [{3}]'Is/is not' expressions require left operand to be a value operand.")
 	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrIsIsNotRequireRhsNil.ID), "{1:}{2:} [{3}]'Is/is not' expressions require right operand to be nil.")
 	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrInvalidEscapedChar.ID), "{1:}{2:} [{3}Expected backslash, percent, or underscore after backslash.]")
@@ -146,9 +149,19 @@ func NewErrExpectedOperator(ctx *context.T, off int64, found string) error {
 	return verror.New(ErrExpectedOperator, ctx, off, found)
 }
 
-// NewErrFunctionsNotYetSupported returns an error with the ErrFunctionsNotYetSupported ID.
-func NewErrFunctionsNotYetSupported(ctx *context.T, off int64) error {
-	return verror.New(ErrFunctionsNotYetSupported, ctx, off)
+// NewErrFunctionArgCount returns an error with the ErrFunctionArgCount ID.
+func NewErrFunctionArgCount(ctx *context.T, off int64, name string, expected int64, found int64) error {
+	return verror.New(ErrFunctionArgCount, ctx, off, name, expected, found)
+}
+
+// NewErrFunctionNotFound returns an error with the ErrFunctionNotFound ID.
+func NewErrFunctionNotFound(ctx *context.T, off int64, name string) error {
+	return verror.New(ErrFunctionNotFound, ctx, off, name)
+}
+
+// NewErrFunctionReturnedError returns an error with the ErrFunctionReturnedError ID.
+func NewErrFunctionReturnedError(ctx *context.T, off int64, name string, err error) error {
+	return verror.New(ErrFunctionReturnedError, ctx, off, name, err)
 }
 
 // NewErrIsIsNotRequireLhsValue returns an error with the ErrIsIsNotRequireLhsValue ID.

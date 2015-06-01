@@ -4,6 +4,8 @@
 
 package test
 
+import "time"
+
 type AddressInfo struct {
 	Street string
 	City   string
@@ -54,10 +56,11 @@ type Customer struct {
 }
 
 type Invoice struct {
-	CustId     int64
-	InvoiceNum int64
-	Amount     int64
-	ShipTo     AddressInfo
+	CustId      int64
+	InvoiceNum  int64
+	InvoiceDate time.Time
+	Amount      int64
+	ShipTo      AddressInfo
 }
 
 type Numbers struct {

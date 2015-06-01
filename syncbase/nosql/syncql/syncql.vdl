@@ -45,9 +45,14 @@ error (
 	ExpectedOperator(off int64, found string) {
 		"en": "[{off}]Expected operator, found {found}.",
 	}
-	// TODO(jkline): Kill me when functions are supported.
-	FunctionsNotYetSupported(off int64) {
-		"en": "[{off}]Functions are not yet supported.  Stay tuned.",
+	FunctionArgCount(off int64, name string, expected int64, found int64) {
+		"en": "[{off}]Function '{name}' expects {expected} args, found: {found}.",
+	}
+	FunctionNotFound(off int64, name string) {
+		"en": "[{off}]Function '{name}' not found.",
+	}
+	FunctionReturnedError(off int64, name string, err error) {
+		"en": "[{off}]Function '{name}' returned error: {err}.",
 	}
 	IsIsNotRequireLhsValue(off int64) {
 		"en": "[{off}]'Is/is not' expressions require left operand to be a value operand.",
