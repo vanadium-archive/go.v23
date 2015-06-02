@@ -144,12 +144,22 @@ type Expression struct {
 	Node
 }
 
-// ColumnEntry is only used in SelectClause.
+type SelectorType int
+
+const (
+	TypSelField SelectorType = 1 + iota
+	TypSelFunc
+)
+
+// Selector: entries in the select clause.
+// Entries can be functions for fields.
 // The AS name, if present, will ONLY be used in the
 // returned column header.
-type ColumnEntry struct {
-	Column Field
-	As     *AsClause // If not nil, used in returned column header.
+type Selector struct {
+	Type     SelectorType
+	Field    *Field
+	Function *Function
+	As       *AsClause // If not nil, used in returned column header.
 	Node
 }
 
@@ -164,7 +174,7 @@ type Name struct {
 }
 
 type SelectClause struct {
-	Columns []ColumnEntry
+	Selectors []Selector
 	Node
 }
 
@@ -325,9 +335,9 @@ func selectStatement(db query_db.Database, s *scanner.Scanner, token *Token) (St
 
 // Parse the select clause (fields). Return *SelectClause, next token (or error).
 func parseSelectClause(db query_db.Database, s *scanner.Scanner, token *Token) (*SelectClause, *Token, error) {
-	// must be at least one column or it is an error
-	// columns may be in dot notation
-	// columns are separated by commas
+	// must be at least one selector or it is an error
+	// field seclectors may be in dot notation
+	// selectors are separated by commas
 	var selectClause SelectClause
 	selectClause.Off = token.Off
 	token = scanToken(s) // eat the select
@@ -335,15 +345,15 @@ func parseSelectClause(db query_db.Database, s *scanner.Scanner, token *Token) (
 		return nil, nil, syncql.NewErrUnexpectedEndOfStatement(db.GetContext(), token.Off)
 	}
 	var err error
-	// scan first column
-	if token, err = parseColumn(db, s, &selectClause, token); err != nil {
+	// scan first selector
+	if token, err = parseSelector(db, s, &selectClause, token); err != nil {
 		return nil, nil, err
 	}
 
-	// More columns?
+	// More selectors?
 	for token.Tok == TokCOMMA {
 		token = scanToken(s)
-		if token, err = parseColumn(db, s, &selectClause, token); err != nil {
+		if token, err = parseSelector(db, s, &selectClause, token); err != nil {
 			return nil, nil, err
 		}
 	}
@@ -351,31 +361,47 @@ func parseSelectClause(db query_db.Database, s *scanner.Scanner, token *Token) (
 	return &selectClause, token, nil
 }
 
-// Parse a column (field). Return SelectClause and next token (or error).
-func parseColumn(db query_db.Database, s *scanner.Scanner, selectClause *SelectClause, token *Token) (*Token, error) {
+// Parse a selector. Return next token (or error).
+func parseSelector(db query_db.Database, s *scanner.Scanner, selectClause *SelectClause, token *Token) (*Token, error) {
 	if token.Tok != TokIDENT {
 		return nil, syncql.NewErrExpectedIdentifier(db.GetContext(), token.Off, token.Value)
 	}
 
-	var columnEntry ColumnEntry
-	columnEntry.Off = token.Off
-	columnEntry.Column.Off = token.Off
+	var selector Selector
+	selector.Off = token.Off
+	selector.Type = TypSelField
+	var field Field
+	selector.Field = &field
+	selector.Field.Off = token.Off
+	selector.Field = &field
 	var segment Segment
 	segment.Value = token.Value
 	segment.Off = token.Off
-	columnEntry.Column.Segments = append(columnEntry.Column.Segments, segment)
+	selector.Field.Segments = append(selector.Field.Segments, segment)
 	token = scanToken(s)
 
-	for token.Tok != TokEOF && token.Tok == TokPERIOD {
-		token = scanToken(s)
-		if token.Tok != TokIDENT {
-			return nil, syncql.NewErrExpectedIdentifier(db.GetContext(), token.Off, token.Value)
+	// It might be a function.
+	if token.Tok == TokLEFTPAREN {
+		// switch selector to a function
+		selector.Type = TypSelFunc
+		var err error
+		if selector.Function, token, err = parseFunction(db, s, segment.Value, segment.Off, token); err != nil {
+			return nil, err
 		}
-		var segment Segment
-		segment.Value = token.Value
-		segment.Off = token.Off
-		columnEntry.Column.Segments = append(columnEntry.Column.Segments, segment)
-		token = scanToken(s)
+		selector.Field = nil
+
+	} else {
+		for token.Tok != TokEOF && token.Tok == TokPERIOD {
+			token = scanToken(s)
+			if token.Tok != TokIDENT {
+				return nil, syncql.NewErrExpectedIdentifier(db.GetContext(), token.Off, token.Value)
+			}
+			var segment Segment
+			segment.Value = token.Value
+			segment.Off = token.Off
+			selector.Field.Segments = append(selector.Field.Segments, segment)
+			token = scanToken(s)
+		}
 	}
 
 	// Check for AS
@@ -388,11 +414,11 @@ func parseColumn(db query_db.Database, s *scanner.Scanner, selectClause *SelectC
 		}
 		asClause.AltName.Value = token.Value
 		asClause.AltName.Off = token.Off
-		columnEntry.As = &asClause
+		selector.As = &asClause
 		token = scanToken(s)
 	}
 
-	selectClause.Columns = append(selectClause.Columns, columnEntry)
+	selectClause.Selectors = append(selectClause.Selectors, selector)
 	return token, nil
 }
 
@@ -554,6 +580,37 @@ func parseLikeEqualExpression(db query_db.Database, s *scanner.Scanner, token *T
 	return &expression, token, nil
 }
 
+func parseFunction(db query_db.Database, s *scanner.Scanner, funcName string, funcOffset int64, token *Token) (*Function, *Token, error) {
+	var function Function
+	function.Name = funcName
+	function.Off = funcOffset
+	token = scanToken(s) // eat left paren
+	for token.Tok != TokRIGHTPAREN {
+		if token.Tok == TokEOF {
+			return nil, nil, syncql.NewErrExpected(db.GetContext(), token.Off, ")")
+		}
+		var arg *Operand
+		var err error
+		arg, token, err = parseOperand(db, s, token)
+		if err != nil {
+			return nil, nil, err
+		}
+		function.Args = append(function.Args, arg)
+		// A comma or right paren is expected, but a right paren cannot come after a comma.
+		if token.Tok == TokCOMMA {
+			token = scanToken(s)
+			if token.Tok == TokRIGHTPAREN {
+				// right paren cannot come after a comma
+				return nil, nil, syncql.NewErrExpectedOperand(db.GetContext(), token.Off, token.Value)
+			}
+		} else if token.Tok != TokRIGHTPAREN {
+			return nil, nil, syncql.NewErrUnexpected(db.GetContext(), token.Off, token.Value)
+		}
+	}
+	token = scanToken(s) // eat right paren
+	return &function, token, nil
+}
+
 // Parse an operand (field or literal) and return it and the next Token (or error)
 func parseOperand(db query_db.Database, s *scanner.Scanner, token *Token) (*Operand, *Token, error) {
 	if token.Tok == TokEOF {
@@ -582,34 +639,10 @@ func parseOperand(db query_db.Database, s *scanner.Scanner, token *Token) (*Oper
 			operand.Type = TypNil
 		} else if token.Tok == TokLEFTPAREN {
 			operand.Type = TypFunction
-			var function Function
-			function.Name = segment.Value
-			function.Off = segment.Off
-			token = scanToken(s)
-			for token.Tok != TokRIGHTPAREN {
-				if token.Tok == TokEOF {
-					return nil, nil, syncql.NewErrExpected(db.GetContext(), token.Off, ")")
-				}
-				var arg *Operand
-				var err error
-				arg, token, err = parseOperand(db, s, token)
-				if err != nil {
-					return nil, nil, err
-				}
-				function.Args = append(function.Args, arg)
-				// A comma or right paren is expected, but a right paren cannot come after a comma.
-				if token.Tok == TokCOMMA {
-					token = scanToken(s)
-					if token.Tok == TokRIGHTPAREN {
-						// right paren cannot come after a comma
-						return nil, nil, syncql.NewErrExpectedOperand(db.GetContext(), token.Off, token.Value)
-					}
-				} else if token.Tok != TokRIGHTPAREN {
-					return nil, nil, syncql.NewErrUnexpected(db.GetContext(), token.Off, token.Value)
-				}
+			var err error
+			if operand.Function, token, err = parseFunction(db, s, segment.Value, segment.Off, token); err != nil {
+				return nil, nil, err
 			}
-			token = scanToken(s) // eat right paren
-			operand.Function = &function
 		} else { // This is a field (column) operand.
 			// If the next token is a period, collect the rest of the segments in the column.
 			for token.Tok != TokEOF && token.Tok == TokPERIOD {
@@ -872,19 +905,24 @@ func (st SelectStatement) String() string {
 func (sel SelectClause) String() string {
 	val := fmt.Sprintf(" Off(%d):SELECT Columns(", sel.Off)
 	sep := ""
-	for _, column := range sel.Columns {
-		val += sep + column.String()
+	for _, selector := range sel.Selectors {
+		val += sep + selector.String()
 		sep = ","
 	}
 	val += ")"
 	return val
 }
 
-func (c ColumnEntry) String() string {
-	val := fmt.Sprintf(" Off(%d):", c.Off)
-	val += c.Column.String()
-	if c.As != nil {
-		val += c.As.String()
+func (s Selector) String() string {
+	val := fmt.Sprintf(" Off(%d):", s.Off)
+	switch s.Type {
+	case TypSelField:
+		val += s.Field.String()
+	case TypSelFunc:
+		val += s.Function.String()
+	}
+	if s.As != nil {
+		val += s.As.String()
 	}
 	return val
 }

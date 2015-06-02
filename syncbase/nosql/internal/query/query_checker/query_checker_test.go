@@ -105,6 +105,8 @@ func TestQueryChecker(t *testing.T) {
 		{"select v from Customer where v.ZipCode is not nil"},
 		{"select v from Customer where v.ZipCode IS NOT NIL"},
 		{"select v from Customer where Now() < 10"},
+		{"select Now() from Customer"},
+		{"select Date(\"2015-06-01 PST\"), DateTime(\"2015-06-01 12:34:56 PST\"), Y(YM(YMD(YMDH(YMDHM(YMDHMS(Now(), \"America/Los_Angeles\"), \"America/Los_Angeles\"), \"America/Los_Angeles\"), \"America/Los_Angeles\"), \"America/Los_Angeles\"), \"America/Los_Angeles\") from Customer"},
 	}
 
 	for _, test := range basic {
@@ -298,6 +300,8 @@ func TestQueryCheckerErrors(t *testing.T) {
 		{"select v from Customer where t = \"Customer\" and Now(v.InvoiceDate, \"ABC\") = 2015", syncql.NewErrFunctionArgCount(db.GetContext(), 48, "Now", 0, 2)},
 		{"select v from Customer where t = \"Customer\" and LowerCase(v.Name, 2) = \"smith\"", syncql.NewErrFunctionArgCount(db.GetContext(), 48, "LowerCase", 1, 2)},
 		{"select v from Customer where t = \"Customer\" and UpperCase(v.Name, 2) = \"SMITH\"", syncql.NewErrFunctionArgCount(db.GetContext(), 48, "UpperCase", 1, 2)},
+		{"select Date() from Customer", syncql.NewErrFunctionArgCount(db.GetContext(), 7, "Date", 1, 0)},
+		{"select Y(v.InvoiceDate, \"Foo\") from Customer where t = \"Invoice\"", syncql.NewErrFunctionReturnedError(db.GetContext(), 24, "Y", errors.New("unknown time zone Foo"))},
 	}
 
 	for _, test := range basic {

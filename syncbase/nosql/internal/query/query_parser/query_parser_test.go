@@ -55,9 +55,10 @@ func TestQueryParser(t *testing.T) {
 			"select v from Customer",
 			query_parser.SelectStatement{
 				Select: &query_parser.SelectClause{
-					Columns: []query_parser.ColumnEntry{
-						query_parser.ColumnEntry{
-							Column: query_parser.Field{
+					Selectors: []query_parser.Selector{
+						query_parser.Selector{
+							Type: query_parser.TypSelField,
+							Field: &query_parser.Field{
 								Segments: []query_parser.Segment{
 									query_parser.Segment{
 										Value: "v",
@@ -85,9 +86,10 @@ func TestQueryParser(t *testing.T) {
 			"select k as Key, v as Value from Customer",
 			query_parser.SelectStatement{
 				Select: &query_parser.SelectClause{
-					Columns: []query_parser.ColumnEntry{
-						query_parser.ColumnEntry{
-							Column: query_parser.Field{
+					Selectors: []query_parser.Selector{
+						query_parser.Selector{
+							Type: query_parser.TypSelField,
+							Field: &query_parser.Field{
 								Segments: []query_parser.Segment{
 									query_parser.Segment{
 										Value: "k",
@@ -105,8 +107,9 @@ func TestQueryParser(t *testing.T) {
 							},
 							Node: query_parser.Node{Off: 7},
 						},
-						query_parser.ColumnEntry{
-							Column: query_parser.Field{
+						query_parser.Selector{
+							Type: query_parser.TypSelField,
+							Field: &query_parser.Field{
 								Segments: []query_parser.Segment{
 									query_parser.Segment{
 										Value: "v",
@@ -141,9 +144,10 @@ func TestQueryParser(t *testing.T) {
 			"   select v from Customer",
 			query_parser.SelectStatement{
 				Select: &query_parser.SelectClause{
-					Columns: []query_parser.ColumnEntry{
-						query_parser.ColumnEntry{
-							Column: query_parser.Field{
+					Selectors: []query_parser.Selector{
+						query_parser.Selector{
+							Type: query_parser.TypSelField,
+							Field: &query_parser.Field{
 								Segments: []query_parser.Segment{
 									query_parser.Segment{
 										Value: "v",
@@ -172,9 +176,10 @@ func TestQueryParser(t *testing.T) {
 			"select v from Customer limit 100 offset 200",
 			query_parser.SelectStatement{
 				Select: &query_parser.SelectClause{
-					Columns: []query_parser.ColumnEntry{
-						query_parser.ColumnEntry{
-							Column: query_parser.Field{
+					Selectors: []query_parser.Selector{
+						query_parser.Selector{
+							Type: query_parser.TypSelField,
+							Field: &query_parser.Field{
 								Segments: []query_parser.Segment{
 									query_parser.Segment{
 										Value: "v",
@@ -217,9 +222,10 @@ func TestQueryParser(t *testing.T) {
 			"select v from Customer offset 400 limit 10",
 			query_parser.SelectStatement{
 				Select: &query_parser.SelectClause{
-					Columns: []query_parser.ColumnEntry{
-						query_parser.ColumnEntry{
-							Column: query_parser.Field{
+					Selectors: []query_parser.Selector{
+						query_parser.Selector{
+							Type: query_parser.TypSelField,
+							Field: &query_parser.Field{
 								Segments: []query_parser.Segment{
 									query_parser.Segment{
 										Value: "v",
@@ -262,9 +268,10 @@ func TestQueryParser(t *testing.T) {
 			"select v from Customer limit 100 offset 200 limit 1 offset 2",
 			query_parser.SelectStatement{
 				Select: &query_parser.SelectClause{
-					Columns: []query_parser.ColumnEntry{
-						query_parser.ColumnEntry{
-							Column: query_parser.Field{
+					Selectors: []query_parser.Selector{
+						query_parser.Selector{
+							Type: query_parser.TypSelField,
+							Field: &query_parser.Field{
 								Segments: []query_parser.Segment{
 									query_parser.Segment{
 										Value: "v",
@@ -307,9 +314,10 @@ func TestQueryParser(t *testing.T) {
 			"select foo.x, bar.y from Customer",
 			query_parser.SelectStatement{
 				Select: &query_parser.SelectClause{
-					Columns: []query_parser.ColumnEntry{
-						query_parser.ColumnEntry{
-							Column: query_parser.Field{
+					Selectors: []query_parser.Selector{
+						query_parser.Selector{
+							Type: query_parser.TypSelField,
+							Field: &query_parser.Field{
 								Segments: []query_parser.Segment{
 									query_parser.Segment{
 										Value: "foo",
@@ -324,8 +332,9 @@ func TestQueryParser(t *testing.T) {
 							},
 							Node: query_parser.Node{Off: 7},
 						},
-						query_parser.ColumnEntry{
-							Column: query_parser.Field{
+						query_parser.Selector{
+							Type: query_parser.TypSelField,
+							Field: &query_parser.Field{
 								Segments: []query_parser.Segment{
 									query_parser.Segment{
 										Value: "bar",
@@ -358,9 +367,10 @@ func TestQueryParser(t *testing.T) {
 			"select select from from where where equal 42",
 			query_parser.SelectStatement{
 				Select: &query_parser.SelectClause{
-					Columns: []query_parser.ColumnEntry{
-						query_parser.ColumnEntry{
-							Column: query_parser.Field{
+					Selectors: []query_parser.Selector{
+						query_parser.Selector{
+							Type: query_parser.TypSelField,
+							Field: &query_parser.Field{
 								Segments: []query_parser.Segment{
 									query_parser.Segment{
 										Value: "select",
@@ -417,9 +427,10 @@ func TestQueryParser(t *testing.T) {
 			"select v from Customer where v.Value equal true",
 			query_parser.SelectStatement{
 				Select: &query_parser.SelectClause{
-					Columns: []query_parser.ColumnEntry{
-						query_parser.ColumnEntry{
-							Column: query_parser.Field{
+					Selectors: []query_parser.Selector{
+						query_parser.Selector{
+							Type: query_parser.TypSelField,
+							Field: &query_parser.Field{
 								Segments: []query_parser.Segment{
 									query_parser.Segment{
 										Value: "v",
@@ -480,9 +491,10 @@ func TestQueryParser(t *testing.T) {
 			"select v from Customer where v.ZipCode is nil",
 			query_parser.SelectStatement{
 				Select: &query_parser.SelectClause{
-					Columns: []query_parser.ColumnEntry{
-						query_parser.ColumnEntry{
-							Column: query_parser.Field{
+					Selectors: []query_parser.Selector{
+						query_parser.Selector{
+							Type: query_parser.TypSelField,
+							Field: &query_parser.Field{
 								Segments: []query_parser.Segment{
 									query_parser.Segment{
 										Value: "v",
@@ -542,9 +554,10 @@ func TestQueryParser(t *testing.T) {
 			"select v from Customer where v.ZipCode is not nil",
 			query_parser.SelectStatement{
 				Select: &query_parser.SelectClause{
-					Columns: []query_parser.ColumnEntry{
-						query_parser.ColumnEntry{
-							Column: query_parser.Field{
+					Selectors: []query_parser.Selector{
+						query_parser.Selector{
+							Type: query_parser.TypSelField,
+							Field: &query_parser.Field{
 								Segments: []query_parser.Segment{
 									query_parser.Segment{
 										Value: "v",
@@ -604,9 +617,10 @@ func TestQueryParser(t *testing.T) {
 			"select v from Customer where v.Value = false",
 			query_parser.SelectStatement{
 				Select: &query_parser.SelectClause{
-					Columns: []query_parser.ColumnEntry{
-						query_parser.ColumnEntry{
-							Column: query_parser.Field{
+					Selectors: []query_parser.Selector{
+						query_parser.Selector{
+							Type: query_parser.TypSelField,
+							Field: &query_parser.Field{
 								Segments: []query_parser.Segment{
 									query_parser.Segment{
 										Value: "v",
@@ -667,9 +681,10 @@ func TestQueryParser(t *testing.T) {
 			"select v from Customer where v.Value equal -42",
 			query_parser.SelectStatement{
 				Select: &query_parser.SelectClause{
-					Columns: []query_parser.ColumnEntry{
-						query_parser.ColumnEntry{
-							Column: query_parser.Field{
+					Selectors: []query_parser.Selector{
+						query_parser.Selector{
+							Type: query_parser.TypSelField,
+							Field: &query_parser.Field{
 								Segments: []query_parser.Segment{
 									query_parser.Segment{
 										Value: "v",
@@ -730,9 +745,10 @@ func TestQueryParser(t *testing.T) {
 			"select v from Customer where v.Value equal -18.888",
 			query_parser.SelectStatement{
 				Select: &query_parser.SelectClause{
-					Columns: []query_parser.ColumnEntry{
-						query_parser.ColumnEntry{
-							Column: query_parser.Field{
+					Selectors: []query_parser.Selector{
+						query_parser.Selector{
+							Type: query_parser.TypSelField,
+							Field: &query_parser.Field{
 								Segments: []query_parser.Segment{
 									query_parser.Segment{
 										Value: "v",
@@ -793,9 +809,10 @@ func TestQueryParser(t *testing.T) {
 			"select x from y where b = 'c'",
 			query_parser.SelectStatement{
 				Select: &query_parser.SelectClause{
-					Columns: []query_parser.ColumnEntry{
-						query_parser.ColumnEntry{
-							Column: query_parser.Field{
+					Selectors: []query_parser.Selector{
+						query_parser.Selector{
+							Type: query_parser.TypSelField,
+							Field: &query_parser.Field{
 								Segments: []query_parser.Segment{
 									query_parser.Segment{
 										Value: "x",
@@ -852,9 +869,10 @@ func TestQueryParser(t *testing.T) {
 			"select x from y where b = 'c' limit 10 offset 20",
 			query_parser.SelectStatement{
 				Select: &query_parser.SelectClause{
-					Columns: []query_parser.ColumnEntry{
-						query_parser.ColumnEntry{
-							Column: query_parser.Field{
+					Selectors: []query_parser.Selector{
+						query_parser.Selector{
+							Type: query_parser.TypSelField,
+							Field: &query_parser.Field{
 								Segments: []query_parser.Segment{
 									query_parser.Segment{
 										Value: "x",
@@ -925,9 +943,10 @@ func TestQueryParser(t *testing.T) {
 			"select x from y where b = 'c' limit 10",
 			query_parser.SelectStatement{
 				Select: &query_parser.SelectClause{
-					Columns: []query_parser.ColumnEntry{
-						query_parser.ColumnEntry{
-							Column: query_parser.Field{
+					Selectors: []query_parser.Selector{
+						query_parser.Selector{
+							Type: query_parser.TypSelField,
+							Field: &query_parser.Field{
 								Segments: []query_parser.Segment{
 									query_parser.Segment{
 										Value: "x",
@@ -991,9 +1010,10 @@ func TestQueryParser(t *testing.T) {
 			"select x from y where b = 'c' offset 10",
 			query_parser.SelectStatement{
 				Select: &query_parser.SelectClause{
-					Columns: []query_parser.ColumnEntry{
-						query_parser.ColumnEntry{
-							Column: query_parser.Field{
+					Selectors: []query_parser.Selector{
+						query_parser.Selector{
+							Type: query_parser.TypSelField,
+							Field: &query_parser.Field{
 								Segments: []query_parser.Segment{
 									query_parser.Segment{
 										Value: "x",
@@ -1057,9 +1077,10 @@ func TestQueryParser(t *testing.T) {
 			"select foo.bar, tom.dick.harry from Customer where a.b.c = \"baz\" and d.e.f like \"%foobarbaz\"",
 			query_parser.SelectStatement{
 				Select: &query_parser.SelectClause{
-					Columns: []query_parser.ColumnEntry{
-						query_parser.ColumnEntry{
-							Column: query_parser.Field{
+					Selectors: []query_parser.Selector{
+						query_parser.Selector{
+							Type: query_parser.TypSelField,
+							Field: &query_parser.Field{
 								Segments: []query_parser.Segment{
 									query_parser.Segment{
 										Value: "foo",
@@ -1074,8 +1095,9 @@ func TestQueryParser(t *testing.T) {
 							},
 							Node: query_parser.Node{Off: 7},
 						},
-						query_parser.ColumnEntry{
-							Column: query_parser.Field{
+						query_parser.Selector{
+							Type: query_parser.TypSelField,
+							Field: &query_parser.Field{
 								Segments: []query_parser.Segment{
 									query_parser.Segment{
 										Value: "tom",
@@ -1196,9 +1218,10 @@ func TestQueryParser(t *testing.T) {
 			"select foo, bar from Customer where CustRecord.CustID=123 or CustRecord.Name like \"f%\"",
 			query_parser.SelectStatement{
 				Select: &query_parser.SelectClause{
-					Columns: []query_parser.ColumnEntry{
-						query_parser.ColumnEntry{
-							Column: query_parser.Field{
+					Selectors: []query_parser.Selector{
+						query_parser.Selector{
+							Type: query_parser.TypSelField,
+							Field: &query_parser.Field{
 								Segments: []query_parser.Segment{
 									query_parser.Segment{
 										Value: "foo",
@@ -1209,8 +1232,9 @@ func TestQueryParser(t *testing.T) {
 							},
 							Node: query_parser.Node{Off: 7},
 						},
-						query_parser.ColumnEntry{
-							Column: query_parser.Field{
+						query_parser.Selector{
+							Type: query_parser.TypSelField,
+							Field: &query_parser.Field{
 								Segments: []query_parser.Segment{
 									query_parser.Segment{
 										Value: "bar",
@@ -1315,9 +1339,10 @@ func TestQueryParser(t *testing.T) {
 			"select foo from Customer where A=123 or B=456 and C=789",
 			query_parser.SelectStatement{
 				Select: &query_parser.SelectClause{
-					Columns: []query_parser.ColumnEntry{
-						query_parser.ColumnEntry{
-							Column: query_parser.Field{
+					Selectors: []query_parser.Selector{
+						query_parser.Selector{
+							Type: query_parser.TypSelField,
+							Field: &query_parser.Field{
 								Segments: []query_parser.Segment{
 									query_parser.Segment{
 										Value: "foo",
@@ -1454,9 +1479,10 @@ func TestQueryParser(t *testing.T) {
 			"select foo from Customer where (A=123 or B=456) and C=789",
 			query_parser.SelectStatement{
 				Select: &query_parser.SelectClause{
-					Columns: []query_parser.ColumnEntry{
-						query_parser.ColumnEntry{
-							Column: query_parser.Field{
+					Selectors: []query_parser.Selector{
+						query_parser.Selector{
+							Type: query_parser.TypSelField,
+							Field: &query_parser.Field{
 								Segments: []query_parser.Segment{
 									query_parser.Segment{
 										Value: "foo",
@@ -1593,9 +1619,10 @@ func TestQueryParser(t *testing.T) {
 			"select foo from Customer where (A<=123 or B>456) and C>=789",
 			query_parser.SelectStatement{
 				Select: &query_parser.SelectClause{
-					Columns: []query_parser.ColumnEntry{
-						query_parser.ColumnEntry{
-							Column: query_parser.Field{
+					Selectors: []query_parser.Selector{
+						query_parser.Selector{
+							Type: query_parser.TypSelField,
+							Field: &query_parser.Field{
 								Segments: []query_parser.Segment{
 									query_parser.Segment{
 										Value: "foo",
@@ -1732,9 +1759,10 @@ func TestQueryParser(t *testing.T) {
 			"select foo from Customer where A=123 or (B=456 and C=789)",
 			query_parser.SelectStatement{
 				Select: &query_parser.SelectClause{
-					Columns: []query_parser.ColumnEntry{
-						query_parser.ColumnEntry{
-							Column: query_parser.Field{
+					Selectors: []query_parser.Selector{
+						query_parser.Selector{
+							Type: query_parser.TypSelField,
+							Field: &query_parser.Field{
 								Segments: []query_parser.Segment{
 									query_parser.Segment{
 										Value: "foo",
@@ -1871,9 +1899,10 @@ func TestQueryParser(t *testing.T) {
 			"select foo from Customer where (A=123) or ((B=456) and (C=789))",
 			query_parser.SelectStatement{
 				Select: &query_parser.SelectClause{
-					Columns: []query_parser.ColumnEntry{
-						query_parser.ColumnEntry{
-							Column: query_parser.Field{
+					Selectors: []query_parser.Selector{
+						query_parser.Selector{
+							Type: query_parser.TypSelField,
+							Field: &query_parser.Field{
 								Segments: []query_parser.Segment{
 									query_parser.Segment{
 										Value: "foo",
@@ -2010,9 +2039,10 @@ func TestQueryParser(t *testing.T) {
 			"select foo from Customer where A<>123 or B not equal 456 and C not like \"abc%\"",
 			query_parser.SelectStatement{
 				Select: &query_parser.SelectClause{
-					Columns: []query_parser.ColumnEntry{
-						query_parser.ColumnEntry{
-							Column: query_parser.Field{
+					Selectors: []query_parser.Selector{
+						query_parser.Selector{
+							Type: query_parser.TypSelField,
+							Field: &query_parser.Field{
 								Segments: []query_parser.Segment{
 									query_parser.Segment{
 										Value: "foo",
@@ -2149,9 +2179,10 @@ func TestQueryParser(t *testing.T) {
 			"select k, v from Customer where k = \"\\\"",
 			query_parser.SelectStatement{
 				Select: &query_parser.SelectClause{
-					Columns: []query_parser.ColumnEntry{
-						query_parser.ColumnEntry{
-							Column: query_parser.Field{
+					Selectors: []query_parser.Selector{
+						query_parser.Selector{
+							Type: query_parser.TypSelField,
+							Field: &query_parser.Field{
 								Segments: []query_parser.Segment{
 									query_parser.Segment{
 										Value: "k",
@@ -2162,8 +2193,9 @@ func TestQueryParser(t *testing.T) {
 							},
 							Node: query_parser.Node{Off: 7},
 						},
-						query_parser.ColumnEntry{
-							Column: query_parser.Field{
+						query_parser.Selector{
+							Type: query_parser.TypSelField,
+							Field: &query_parser.Field{
 								Segments: []query_parser.Segment{
 									query_parser.Segment{
 										Value: "v",
@@ -2220,9 +2252,10 @@ func TestQueryParser(t *testing.T) {
 			"select v from Customer where Now() < Time(\"2015/07/22\") and Foo(10,20.1,v.Bar) = true",
 			query_parser.SelectStatement{
 				Select: &query_parser.SelectClause{
-					Columns: []query_parser.ColumnEntry{
-						query_parser.ColumnEntry{
-							Column: query_parser.Field{
+					Selectors: []query_parser.Selector{
+						query_parser.Selector{
+							Type: query_parser.TypSelField,
+							Field: &query_parser.Field{
 								Segments: []query_parser.Segment{
 									query_parser.Segment{
 										Value: "v",
@@ -2340,6 +2373,75 @@ func TestQueryParser(t *testing.T) {
 						},
 					},
 					Node: query_parser.Node{Off: 23},
+				},
+				Node: query_parser.Node{Off: 0},
+			},
+			nil,
+		},
+		{
+			"select Now() from Customer",
+			query_parser.SelectStatement{
+				Select: &query_parser.SelectClause{
+					Selectors: []query_parser.Selector{
+						query_parser.Selector{
+							Type: query_parser.TypSelFunc,
+							Function: &query_parser.Function{
+								Name: "Now",
+								Args: nil,
+								Node: query_parser.Node{Off: 7},
+							},
+							Node: query_parser.Node{Off: 7},
+						},
+					},
+				},
+				From: &query_parser.FromClause{
+					Table: query_parser.TableEntry{
+						Name: "Customer",
+						Node: query_parser.Node{Off: 18},
+					},
+					Node: query_parser.Node{Off: 13},
+				},
+				Node: query_parser.Node{Off: 0},
+			},
+			nil,
+		},
+		{
+			"select Now(), Date(\"2015-06-01 PST\") from Customer",
+			query_parser.SelectStatement{
+				Select: &query_parser.SelectClause{
+					Selectors: []query_parser.Selector{
+						query_parser.Selector{
+							Type: query_parser.TypSelFunc,
+							Function: &query_parser.Function{
+								Name: "Now",
+								Args: nil,
+								Node: query_parser.Node{Off: 7},
+							},
+							Node: query_parser.Node{Off: 7},
+						},
+						query_parser.Selector{
+							Type: query_parser.TypSelFunc,
+							Function: &query_parser.Function{
+								Name: "Date",
+								Args: []*query_parser.Operand{
+									&query_parser.Operand{
+										Type: query_parser.TypStr,
+										Str:  "2015-06-01 PST",
+										Node: query_parser.Node{Off: 19},
+									},
+								},
+								Node: query_parser.Node{Off: 14},
+							},
+							Node: query_parser.Node{Off: 14},
+						},
+					},
+				},
+				From: &query_parser.FromClause{
+					Table: query_parser.TableEntry{
+						Name: "Customer",
+						Node: query_parser.Node{Off: 42},
+					},
+					Node: query_parser.Node{Off: 37},
 				},
 				Node: query_parser.Node{Off: 0},
 			},

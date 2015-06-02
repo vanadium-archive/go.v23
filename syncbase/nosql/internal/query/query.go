@@ -9,6 +9,7 @@ import (
 
 	"v.io/syncbase/v23/syncbase/nosql/internal/query/query_checker"
 	"v.io/syncbase/v23/syncbase/nosql/internal/query/query_db"
+	"v.io/syncbase/v23/syncbase/nosql/internal/query/query_functions"
 	"v.io/syncbase/v23/syncbase/nosql/internal/query/query_parser"
 	"v.io/syncbase/v23/syncbase/nosql/syncql"
 	"v.io/v23/vdl"
@@ -39,12 +40,27 @@ func Exec(db query_db.Database, q string) ([]string, ResultStream, error) {
 
 // Given a key, a value and a SelectClause, return the projection.
 // This function is only called if Eval returned true on the WhereClause expression.
-func ComposeProjection(k string, v *vdl.Value, s *query_parser.SelectClause) []*vdl.Value {
+func ComposeProjection(db query_db.Database, k string, v *vdl.Value, s *query_parser.SelectClause) []*vdl.Value {
 	var projection []*vdl.Value
-	for _, f := range s.Columns {
-		// If field not found, nil is returned (as per specification).
-		c, _, _ := ResolveField(k, v, &f.Column)
-		projection = append(projection, c)
+	for _, selector := range s.Selectors {
+		switch selector.Type {
+		case query_parser.TypSelField:
+			// If field not found, nil is returned (as per specification).
+			f, _, _ := ResolveField(k, v, selector.Field)
+			projection = append(projection, f)
+		case query_parser.TypSelFunc:
+			if selector.Function.Computed {
+				projection = append(projection, query_functions.ConvertFunctionRetValueToVdlValue(selector.Function.RetValue))
+			} else {
+				// need to exec function
+				// If error executing function, return nil (as per specification).
+				retValue, err := resolveArgsAndExecFunction(db, k, v, selector.Function)
+				if err != nil {
+					retValue = nil
+				}
+				projection = append(projection, query_functions.ConvertFunctionRetValueToVdlValue(retValue))
+			}
+		}
 	}
 	return projection
 }
@@ -73,7 +89,7 @@ func ExecSelectSingleRow(db query_db.Database, k string, v *vdl.Value, s *query_
 		rs := []*vdl.Value{}
 		return rs
 	}
-	return ComposeProjection(k, v, s.Select)
+	return ComposeProjection(db, k, v, s.Select)
 }
 
 type resultStreamImpl struct {
@@ -125,7 +141,7 @@ func (rs *resultStreamImpl) Advance() bool {
 }
 
 func (rs *resultStreamImpl) Result() []*vdl.Value {
-	return ComposeProjection(rs.k, rs.v, rs.selectStatement.Select)
+	return ComposeProjection(rs.db, rs.k, rs.v, rs.selectStatement.Select)
 }
 
 func (rs *resultStreamImpl) Err() error {
@@ -138,16 +154,20 @@ func (rs *resultStreamImpl) Cancel() {
 
 func getColumnHeadings(s *query_parser.SelectStatement) []string {
 	columnHeaders := []string{}
-	for _, column := range s.Select.Columns {
+	for _, selector := range s.Select.Selectors {
 		columnName := ""
-		if column.As != nil {
-			columnName = column.As.AltName.Value
+		if selector.As != nil {
+			columnName = selector.As.AltName.Value
 		} else {
-			field := column.Column
-			sep := ""
-			for _, segment := range field.Segments {
-				columnName = columnName + sep + segment.Value
-				sep = "."
+			switch selector.Type {
+			case query_parser.TypSelField:
+				sep := ""
+				for _, segment := range selector.Field.Segments {
+					columnName = columnName + sep + segment.Value
+					sep = "."
+				}
+			case query_parser.TypSelFunc:
+				columnName = selector.Function.Name
 			}
 		}
 		columnHeaders = append(columnHeaders, columnName)

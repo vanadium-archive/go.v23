@@ -46,16 +46,24 @@ func checkSelectStatement(db query_db.Database, s *query_parser.SelectStatement)
 
 // Check select clause.  Fields can be 'k' and v[{.<ident>}...]
 func checkSelectClause(db query_db.Database, s *query_parser.SelectClause) error {
-	for _, c := range s.Columns {
-		switch c.Column.Segments[0].Value {
-		case "k":
-			if len(c.Column.Segments) > 1 {
-				return syncql.NewErrDotNotationDisallowedForKey(db.GetContext(), c.Column.Segments[1].Off)
+	for _, selector := range s.Selectors {
+		switch selector.Type {
+		case query_parser.TypSelField:
+			switch selector.Field.Segments[0].Value {
+			case "k":
+				if len(selector.Field.Segments) > 1 {
+					return syncql.NewErrDotNotationDisallowedForKey(db.GetContext(), selector.Field.Segments[1].Off)
+				}
+			case "v":
+				// Nothing to check.
+			default:
+				return syncql.NewErrInvalidSelectField(db.GetContext(), selector.Field.Segments[0].Off)
 			}
-		case "v":
-			// Nothing to check.
-		default:
-			return syncql.NewErrInvalidSelectField(db.GetContext(), c.Column.Segments[0].Off)
+		case query_parser.TypSelFunc:
+			err := query_functions.CheckFunction(db, selector.Function)
+			if err != nil {
+				return err
+			}
 		}
 	}
 	return nil

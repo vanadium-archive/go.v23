@@ -11,6 +11,7 @@ import (
 	"v.io/syncbase/v23/syncbase/nosql/internal/query/query_db"
 	"v.io/syncbase/v23/syncbase/nosql/internal/query/query_parser"
 	"v.io/syncbase/v23/syncbase/nosql/syncql"
+	"v.io/v23/vdl"
 )
 
 type queryFunc func(int64, []*query_parser.Operand) (*query_parser.Operand, error)
@@ -116,6 +117,32 @@ func ExecFunction(db query_db.Database, f *query_parser.Function, args []*query_
 		} else {
 			return retValue, nil
 		}
+	}
+}
+
+func ConvertFunctionRetValueToVdlValue(o *query_parser.Operand) *vdl.Value {
+	switch o.Type {
+	case query_parser.TypBool:
+		return vdl.ValueOf(o.Bool)
+	case query_parser.TypComplex:
+		return vdl.ValueOf(o.Complex)
+	case query_parser.TypFloat:
+		return vdl.ValueOf(o.Float)
+	case query_parser.TypInt:
+		return vdl.ValueOf(o.Int)
+	case query_parser.TypStr:
+		return vdl.ValueOf(o.Str)
+	case query_parser.TypTime:
+		return vdl.ValueOf(o.Time)
+	case query_parser.TypObject:
+		return vdl.ValueOf(o.Object)
+	case query_parser.TypUint:
+		return vdl.ValueOf(o.Uint)
+	default:
+		// Other types can't be converted and *shouldn't* be returned
+		// from a function.  This case will result in a nil for this
+		// column in the row.
+		return nil
 	}
 }
 

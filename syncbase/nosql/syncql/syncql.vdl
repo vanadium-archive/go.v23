@@ -48,6 +48,9 @@ error (
 	FunctionArgCount(off int64, name string, expected int64, found int64) {
 		"en": "[{off}]Function '{name}' expects {expected} args, found: {found}.",
 	}
+	FunctionArgBad(off int64, funcName, argName string) {
+		"en": "[{off}]Function '{funcName}' arg '{argName}' could not be resolved.",
+	}
 	FunctionNotFound(off int64, name string) {
 		"en": "[{off}]Function '{name}' not found.",
 	}

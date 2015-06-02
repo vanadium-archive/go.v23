@@ -111,6 +111,18 @@ type kv struct {
 	value *vdl.Value
 }
 
+var t2015 time.Time
+
+var t2015_04 time.Time
+var t2015_04_12 time.Time
+var t2015_04_12_22 time.Time
+var t2015_04_12_22_16 time.Time
+var t2015_04_12_22_16_06 time.Time
+
+var t2015_07 time.Time
+var t2015_07_01 time.Time
+var t2015_07_01_01_23_45 time.Time
+
 func init() {
 	var shutdown v23.Shutdown
 	db.ctx, shutdown = test.V23Init()
@@ -123,6 +135,19 @@ func init() {
 	t20150317131505, _ := time.Parse("Jan 2 2006 15:04:05 -0700 MST", "Mar 17 2015 13:15:05 -0700 PDT")
 	t20150412221606, _ := time.Parse("Jan 2 2006 15:04:05 -0700 MST", "Apr 12 2015 22:16:06 -0700 PDT")
 	t20150413141707, _ := time.Parse("Jan 2 2006 15:04:05 -0700 MST", "Apr 13 2015 14:17:07 -0700 PDT")
+
+	t2015, _ = time.Parse("2006 MST", "2015 PST")
+
+	t2015_04, _ = time.Parse("Jan 2006 MST", "Apr 2015 PDT")
+	t2015_07, _ = time.Parse("Jan 2006 MST", "Jul 2015 PDT")
+
+	t2015_04_12, _ = time.Parse("Jan 2 2006 MST", "Apr 12 2015 PDT")
+	t2015_07_01, _ = time.Parse("Jan 2 2006 MST", "Jul 01 2015 PDT")
+
+	t2015_04_12_22, _ = time.Parse("Jan 2 2006 15 MST", "Apr 12 2015 22 PDT")
+	t2015_04_12_22_16, _ = time.Parse("Jan 2 2006 15:04 MST", "Apr 12 2015 22:16 PDT")
+	t2015_04_12_22_16_06, _ = time.Parse("Jan 2 2006 15:04:05 MST", "Apr 12 2015 22:16:06 PDT")
+	t2015_07_01_01_23_45, _ = time.Parse("Jan 2 2006 15:04:05 MST", "Jul 01 2015 01:23:45 PDT")
 
 	custTable.name = "Customer"
 	custTable.rows = []kv{
@@ -226,6 +251,11 @@ type execSelectTest struct {
 	query string
 	h     []string
 	r     [][]*vdl.Value
+}
+
+type preExecFunctionTest struct {
+	query string
+	h     []string
 }
 
 type execSelectSingleRowTest struct {
@@ -679,7 +709,7 @@ func TestQueryExec(t *testing.T) {
 			// Note: this wouldn't work for March as daylight saving occurs March 8
 			// and causes comparisons for those days to be off 1 hour.
 			// It would work to use UTC -- see next test.
-			"select k from Customer where YM(v.InvoiceDate, \"America/Los_Angeles\") = YM(Date(\"2015-04-01 PST\"), \"America/Los_Angeles\")",
+			"select k from Customer where YM(v.InvoiceDate, \"America/Los_Angeles\") = YM(Date(\"2015-04-01 PDT\"), \"America/Los_Angeles\")",
 			[]string{"k"},
 			[][]*vdl.Value{
 				[]*vdl.Value{vdl.ValueOf(custTable.rows[7].key)},
@@ -743,7 +773,7 @@ func TestQueryExec(t *testing.T) {
 				[]*vdl.Value{vdl.ValueOf(custTable.rows[6].key)},
 			},
 		},
-		// Test string functions.
+		// Test string functions in where clause.
 		{
 			// Select invoices shipped to Any street -- using LowerCase.
 			"select k from Customer where t = \"Invoice\" and LowerCase(v.ShipTo.Street) like \"%any%\"",
@@ -766,6 +796,137 @@ func TestQueryExec(t *testing.T) {
 				[]*vdl.Value{vdl.ValueOf(custTable.rows[8].key)},
 			},
 		},
+		// Select clause functions.
+		// Date function
+		{
+			"select Date(\"2015-07-01 PDT\") from Customer",
+			[]string{"Date"},
+			[][]*vdl.Value{
+				[]*vdl.Value{vdl.ValueOf(t2015_07_01)},
+				[]*vdl.Value{vdl.ValueOf(t2015_07_01)},
+				[]*vdl.Value{vdl.ValueOf(t2015_07_01)},
+				[]*vdl.Value{vdl.ValueOf(t2015_07_01)},
+				[]*vdl.Value{vdl.ValueOf(t2015_07_01)},
+				[]*vdl.Value{vdl.ValueOf(t2015_07_01)},
+				[]*vdl.Value{vdl.ValueOf(t2015_07_01)},
+				[]*vdl.Value{vdl.ValueOf(t2015_07_01)},
+				[]*vdl.Value{vdl.ValueOf(t2015_07_01)},
+			},
+		},
+		// DateTime function
+		{
+			"select DateTime(\"2015-07-01 01:23:45 PDT\") from Customer",
+			[]string{"DateTime"},
+			[][]*vdl.Value{
+				[]*vdl.Value{vdl.ValueOf(t2015_07_01_01_23_45)},
+				[]*vdl.Value{vdl.ValueOf(t2015_07_01_01_23_45)},
+				[]*vdl.Value{vdl.ValueOf(t2015_07_01_01_23_45)},
+				[]*vdl.Value{vdl.ValueOf(t2015_07_01_01_23_45)},
+				[]*vdl.Value{vdl.ValueOf(t2015_07_01_01_23_45)},
+				[]*vdl.Value{vdl.ValueOf(t2015_07_01_01_23_45)},
+				[]*vdl.Value{vdl.ValueOf(t2015_07_01_01_23_45)},
+				[]*vdl.Value{vdl.ValueOf(t2015_07_01_01_23_45)},
+				[]*vdl.Value{vdl.ValueOf(t2015_07_01_01_23_45)},
+			},
+		},
+		// LowerCase function
+		{
+			"select LowerCase(v.Name) as name from Customer where t = \"Customer\"",
+			[]string{"name"},
+			[][]*vdl.Value{
+				[]*vdl.Value{vdl.ValueOf("john smith")},
+				[]*vdl.Value{vdl.ValueOf("bat masterson")},
+			},
+		},
+		// UpperCase function
+		{
+			"select UpperCase(v.Name) as NAME from Customer where t = \"Customer\"",
+			[]string{"NAME"},
+			[][]*vdl.Value{
+				[]*vdl.Value{vdl.ValueOf("JOHN SMITH")},
+				[]*vdl.Value{vdl.ValueOf("BAT MASTERSON")},
+			},
+		},
+		// YMDHMS function
+		{
+			"select k, YMDHMS(v.InvoiceDate, \"America/Los_Angeles\") from Customer where t = \"Invoice\" and k = \"002003\"",
+			[]string{
+				"k",
+				"YMDHMS",
+			},
+			[][]*vdl.Value{
+				[]*vdl.Value{vdl.ValueOf("002003"), vdl.ValueOf(t2015_04_12_22_16_06)},
+			},
+		},
+		// YMDHM function
+		{
+			"select k, YMDHM(v.InvoiceDate, \"America/Los_Angeles\") from Customer where t = \"Invoice\" and k = \"002003\"",
+			[]string{
+				"k",
+				"YMDHM",
+			},
+			[][]*vdl.Value{
+				[]*vdl.Value{vdl.ValueOf("002003"), vdl.ValueOf(t2015_04_12_22_16)},
+			},
+		},
+		// YMDH function
+		{
+			"select k, YMDH(v.InvoiceDate, \"America/Los_Angeles\") from Customer where t = \"Invoice\" and k = \"002003\"",
+			[]string{
+				"k",
+				"YMDH",
+			},
+			[][]*vdl.Value{
+				[]*vdl.Value{vdl.ValueOf("002003"), vdl.ValueOf(t2015_04_12_22)},
+			},
+		},
+		// YMD function
+		{
+			"select k, YMD(v.InvoiceDate, \"America/Los_Angeles\") from Customer where t = \"Invoice\" and k = \"002003\"",
+			[]string{
+				"k",
+				"YMD",
+			},
+			[][]*vdl.Value{
+				[]*vdl.Value{vdl.ValueOf("002003"), vdl.ValueOf(t2015_04_12)},
+			},
+		},
+		// YM function
+		{
+			"select k, YM(v.InvoiceDate, \"America/Los_Angeles\") from Customer where t = \"Invoice\" and k = \"002003\"",
+			[]string{
+				"k",
+				"YM",
+			},
+			[][]*vdl.Value{
+				[]*vdl.Value{vdl.ValueOf("002003"), vdl.ValueOf(t2015_04)},
+			},
+		},
+		// Y function
+		{
+			"select k, Y(v.InvoiceDate, \"America/Los_Angeles\") from Customer where t = \"Invoice\" and k = \"001001\"",
+			[]string{
+				"k",
+				"Y",
+			},
+			[][]*vdl.Value{
+				[]*vdl.Value{vdl.ValueOf("001001"), vdl.ValueOf(t2015)},
+			},
+		},
+		// Nested functions
+		{
+			"select Y(YM(YMD(YMDH(YMDHM(YMDHMS(v.InvoiceDate, \"America/Los_Angeles\"), \"America/Los_Angeles\"), \"America/Los_Angeles\"), \"America/Los_Angeles\"), \"America/Los_Angeles\"), \"America/Los_Angeles\")  from Customer where t = \"Invoice\" and k = \"001001\"",
+			[]string{"Y"},
+			[][]*vdl.Value{
+				[]*vdl.Value{vdl.ValueOf(t2015)},
+			},
+		},
+		// Bad arg to function.  Expression is false.
+		{
+			"select v from Customer where t = \"Invoice\" and YMD(v.InvoiceDate, v.Foo) = v.InvoiceDate",
+			[]string{"v"},
+			[][]*vdl.Value{},
+		},
 	}
 
 	for _, test := range basic {
@@ -780,6 +941,40 @@ func TestQueryExec(t *testing.T) {
 			}
 			if !reflect.DeepEqual(test.r, r) {
 				t.Errorf("query: %s; got %v, want %v", test.query, r, test.r)
+			}
+			if !reflect.DeepEqual(test.h, h) {
+				t.Errorf("query: %s; got %v, want %v", test.query, h, test.h)
+			}
+		}
+	}
+}
+
+// Use Now to verify it is "pre" executed such that all the rows
+// have the same time.
+func TestPreExecFunctions(t *testing.T) {
+	basic := []preExecFunctionTest{
+		{
+			"select Now() from Customer",
+			[]string{
+				"Now",
+			},
+		},
+	}
+
+	for _, test := range basic {
+		h, rs, err := query.Exec(db, test.query)
+		if err != nil {
+			t.Errorf("query: %s; got %v, want nil", test.query, err)
+		} else {
+			// Check that all results are identical.
+			// Collect results.
+			var last []*vdl.Value
+			for rs.Advance() {
+				result := rs.Result()
+				if last != nil && !reflect.DeepEqual(last, result) {
+					t.Errorf("query: %s; got %v, want %v", test.query, result, last)
+				}
+				last = result
 			}
 			if !reflect.DeepEqual(test.h, h) {
 				t.Errorf("query: %s; got %v, want %v", test.query, h, test.h)
@@ -1257,7 +1452,7 @@ func TestProjection(t *testing.T) {
 			if semErr == nil {
 				switch sel := (*s).(type) {
 				case query_parser.SelectStatement:
-					result := query.ComposeProjection(test.k, test.v, sel.Select)
+					result := query.ComposeProjection(db, test.k, test.v, sel.Select)
 					if !reflect.DeepEqual(result, test.result) {
 						t.Errorf("query: %s; got %v, want %v", test.query, result, test.result)
 					}

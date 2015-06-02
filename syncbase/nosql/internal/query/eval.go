@@ -14,6 +14,7 @@ import (
 	"v.io/syncbase/v23/syncbase/nosql/internal/query/query_db"
 	"v.io/syncbase/v23/syncbase/nosql/internal/query/query_functions"
 	"v.io/syncbase/v23/syncbase/nosql/internal/query/query_parser"
+	"v.io/syncbase/v23/syncbase/nosql/syncql"
 	"v.io/v23/vdl"
 )
 
@@ -363,26 +364,35 @@ func compareObjects(lhsValue, rhsValue *query_parser.Operand, oper *query_parser
 	}
 }
 
+func resolveArgsAndExecFunction(db query_db.Database, k string, v *vdl.Value, f *query_parser.Function) (*query_parser.Operand, error) {
+	// Resolve the function's arguments
+	callingArgs := []*query_parser.Operand{}
+	for _, arg := range f.Args {
+		resolvedArg := resolveOperand(db, k, v, arg)
+		if resolvedArg == nil {
+			return nil, syncql.NewErrFunctionArgBad(db.GetContext(), arg.Off, f.Name, arg.String())
+		}
+		callingArgs = append(callingArgs, resolvedArg)
+	}
+	// Exec the function
+	retValue, err := query_functions.ExecFunction(db, f, callingArgs)
+	if err != nil {
+		return nil, err
+	}
+	return retValue, nil
+}
+
 func resolveOperand(db query_db.Database, k string, v *vdl.Value, o *query_parser.Operand) *query_parser.Operand {
 	if o.Type == query_parser.TypFunction {
 		// Note: if the function was computed at check time, the operand is replaced
 		// in the parse tree with the return value.  As such, thre is no need to check
 		// the computed field.
-		// Resolve the functions arguments
-		callingArgs := []*query_parser.Operand{}
-		for _, arg := range o.Function.Args {
-			resolvedArg := resolveOperand(db, k, v, arg)
-			if resolvedArg == nil {
-				return nil
-			}
-			callingArgs = append(callingArgs, resolvedArg)
-		}
-		// Exec the function
-		retValue, err := query_functions.ExecFunction(db, o.Function, callingArgs)
-		if err != nil {
+		if retValue, err := resolveArgsAndExecFunction(db, k, v, o.Function); err == nil {
+			return retValue
+		} else {
+			// Per spec, function errors resolve to nil
 			return nil
 		}
-		return retValue
 	}
 	if o.Type != query_parser.TypField {
 		return o
