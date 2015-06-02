@@ -133,7 +133,7 @@ type SyncGroupManager interface {
 	//
 	// Requires: Client must have at least Read access on the Database and on the
 	// SyncGroup ACL.
-	JoinSyncGroup(sgName string,  myInfo SyncGroupMemberInfo) (spec SyncGroupSpec | error) {access.Read}
+	JoinSyncGroup(sgName string, myInfo SyncGroupMemberInfo) (spec SyncGroupSpec | error) {access.Read}
 
 	// LeaveSyncGroup leaves the SyncGroup. Previously synced data will continue
 	// to be available.

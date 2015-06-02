@@ -34,7 +34,7 @@ func TestCreate(t *testing.T, ctx *context.T, i interface{}) {
 	if err := self.Create(ctx, nil); err != nil {
 		t.Fatalf("self.Create() failed: %v", err)
 	}
-	if gotPerms, wantPerms := getPermsOrDie(t, ctx, self), defaultPerms(); !reflect.DeepEqual(gotPerms, wantPerms) {
+	if gotPerms, wantPerms := getPermsOrDie(t, ctx, self), DefaultPerms(); !reflect.DeepEqual(gotPerms, wantPerms) {
 		t.Errorf("Perms do not match: got %v, want %v", gotPerms, wantPerms)
 	}
 
@@ -60,7 +60,7 @@ func TestCreate(t *testing.T, ctx *context.T, i interface{}) {
 	}
 
 	// Test that create fails if the parent perms disallow access.
-	perms = defaultPerms()
+	perms = DefaultPerms()
 	perms.Blacklist("server/client", string(access.Write))
 	if err := parent.SetPermissions(ctx, perms, ""); err != nil {
 		t.Fatalf("parent.SetPermissions() failed: %v", err)
@@ -107,7 +107,7 @@ func TestDelete(t *testing.T, ctx *context.T, i interface{}) {
 	if err := self2.Create(ctx, nil); err != nil {
 		t.Fatalf("self2.Create() failed: %v", err)
 	}
-	perms := defaultPerms()
+	perms := DefaultPerms()
 	perms.Blacklist("server/client", string(access.Write))
 	if err := self2.SetPermissions(ctx, perms, ""); err != nil {
 		t.Fatalf("self2.SetPermissions() failed: %v", err)
@@ -117,7 +117,7 @@ func TestDelete(t *testing.T, ctx *context.T, i interface{}) {
 	}
 
 	// Test that delete succeeds even if the parent perms disallow access.
-	perms = defaultPerms()
+	perms = DefaultPerms()
 	perms.Blacklist("server/client", string(access.Write))
 	if err := parent.SetPermissions(ctx, perms, ""); err != nil {
 		t.Fatalf("parent.SetPermissions() failed: %v", err)

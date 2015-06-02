@@ -92,6 +92,14 @@ func SetupOrDie(perms access.Permissions) (clientCtx *context.T, serverName stri
 	return
 }
 
+func DefaultPerms() access.Permissions {
+	perms := access.Permissions{}
+	for _, tag := range access.AllTypicalTags() {
+		perms.Add(security.BlessingPattern("server/client"), string(tag))
+	}
+	return perms
+}
+
 ////////////////////////////////////////
 // Internal helpers
 
@@ -99,14 +107,6 @@ func getPermsOrDie(t *testing.T, ctx *context.T, ac util.AccessController) acces
 	perms, _, err := ac.GetPermissions(ctx)
 	if err != nil {
 		Fatalf(t, "GetPermissions failed: %v", err)
-	}
-	return perms
-}
-
-func defaultPerms() access.Permissions {
-	perms := access.Permissions{}
-	for _, tag := range access.AllTypicalTags() {
-		perms.Add(security.BlessingPattern("server/client"), string(tag))
 	}
 	return perms
 }
@@ -122,7 +122,7 @@ func newServer(ctx *context.T, perms access.Permissions) (string, func()) {
 	}
 
 	if perms == nil {
-		perms = defaultPerms()
+		perms = DefaultPerms()
 	}
 	service, err := server.NewService(nil, nil, perms)
 	if err != nil {

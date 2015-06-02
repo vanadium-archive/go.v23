@@ -86,3 +86,13 @@ func (d *database) SetPermissions(ctx *context.T, perms access.Permissions, vers
 func (d *database) GetPermissions(ctx *context.T) (perms access.Permissions, version string, err error) {
 	return d.c.GetPermissions(ctx)
 }
+
+// SyncGroup implements Database.SyncGroup.
+func (d *database) SyncGroup(sgName string) SyncGroup {
+	return newSyncGroup(d.fullName, sgName)
+}
+
+// GetSyncGroupNames implements Database.GetSyncGroupNames.
+func (d *database) GetSyncGroupNames(ctx *context.T) ([]string, error) {
+	return d.c.GetSyncGroupNames(ctx)
+}

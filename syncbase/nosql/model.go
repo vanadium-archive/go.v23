@@ -78,6 +78,13 @@ type Database interface {
 	// SetPermissions and GetPermissions are included from the AccessController
 	// interface.
 	util.AccessController
+
+	// SyncGroup returns a handle to the SyncGroup with the given name.
+	SyncGroup(sgName string) SyncGroup
+
+	// GetSyncGroupNames returns the global names of all SyncGroups attached to
+	// this database.
+	GetSyncGroupNames(ctx *context.T) ([]string, error)
 }
 
 // BatchDatabase is a handle to a set of reads and writes to the database that
@@ -222,4 +229,62 @@ type Stream interface {
 	// concurrently with a goroutine that is iterating via Advance/Key/Value.
 	// Cancel causes Advance to subsequently return false. Cancel does not block.
 	Cancel()
+}
+
+// SyncGroup is the interface for a SyncGroup in the store.
+type SyncGroup interface {
+	// Create creates a new SyncGroup with the given spec.
+	//
+	// Requires: Client must have at least Read access on the Database; prefix ACL
+	// must exist at each SyncGroup prefix; Client must have at least Read access
+	// on each of these prefix ACLs.
+	Create(ctx *context.T, spec wire.SyncGroupSpec, myInfo wire.SyncGroupMemberInfo) error
+
+	// Join joins a SyncGroup.
+	//
+	// Requires: Client must have at least Read access on the Database and on the
+	// SyncGroup ACL.
+	Join(ctx *context.T, myInfo wire.SyncGroupMemberInfo) (wire.SyncGroupSpec, error)
+
+	// Leave leaves the SyncGroup. Previously synced data will continue
+	// to be available.
+	//
+	// Requires: Client must have at least Read access on the Database.
+	Leave(ctx *context.T) error
+
+	// Destroy destroys the SyncGroup. Previously synced data will
+	// continue to be available to all members.
+	//
+	// Requires: Client must have at least Read access on the Database, and must
+	// have Admin access on the SyncGroup ACL.
+	Destroy(ctx *context.T) error
+
+	// Eject ejects a member from the SyncGroup. The ejected member
+	// will not be able to sync further, but will retain any data it has already
+	// synced.
+	//
+	// Requires: Client must have at least Read access on the Database, and must
+	// have Admin access on the SyncGroup ACL.
+	Eject(ctx *context.T, member string) error
+
+	// GetSpec gets the SyncGroup spec. version allows for atomic
+	// read-modify-write of the spec - see comment for SetSpec.
+	//
+	// Requires: Client must have at least Read access on the Database and on the
+	// SyncGroup ACL.
+	GetSpec(ctx *context.T) (spec wire.SyncGroupSpec, version string, err error)
+
+	// SetSpec sets the SyncGroup spec. version may be either empty or
+	// the value from a previous Get. If not empty, Set will only succeed if the
+	// current version matches the specified one.
+	//
+	// Requires: Client must have at least Read access on the Database, and must
+	// have Admin access on the SyncGroup ACL.
+	SetSpec(ctx *context.T, spec wire.SyncGroupSpec, version string) error
+
+	// GetMembers gets the info objects for members of the SyncGroup.
+	//
+	// Requires: Client must have at least Read access on the Database and on the
+	// SyncGroup ACL.
+	GetMembers(ctx *context.T) (map[string]wire.SyncGroupMemberInfo, error)
 }
