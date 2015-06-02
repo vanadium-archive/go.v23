@@ -248,14 +248,14 @@ type projectionTest struct {
 }
 
 type execSelectTest struct {
-	query string
-	h     []string
-	r     [][]*vdl.Value
+	query   string
+	headers []string
+	r       [][]*vdl.Value
 }
 
 type preExecFunctionTest struct {
-	query string
-	h     []string
+	query   string
+	headers []string
 }
 
 type execSelectSingleRowTest struct {
@@ -930,7 +930,7 @@ func TestQueryExec(t *testing.T) {
 	}
 
 	for _, test := range basic {
-		h, rs, err := query.Exec(db, test.query)
+		headers, rs, err := query.Exec(db, test.query)
 		if err != nil {
 			t.Errorf("query: %s; got %v, want nil", test.query, err)
 		} else {
@@ -942,8 +942,8 @@ func TestQueryExec(t *testing.T) {
 			if !reflect.DeepEqual(test.r, r) {
 				t.Errorf("query: %s; got %v, want %v", test.query, r, test.r)
 			}
-			if !reflect.DeepEqual(test.h, h) {
-				t.Errorf("query: %s; got %v, want %v", test.query, h, test.h)
+			if !reflect.DeepEqual(test.headers, headers) {
+				t.Errorf("query: %s; got %v, want %v", test.query, headers, test.headers)
 			}
 		}
 	}
@@ -962,7 +962,7 @@ func TestPreExecFunctions(t *testing.T) {
 	}
 
 	for _, test := range basic {
-		h, rs, err := query.Exec(db, test.query)
+		headers, rs, err := query.Exec(db, test.query)
 		if err != nil {
 			t.Errorf("query: %s; got %v, want nil", test.query, err)
 		} else {
@@ -976,8 +976,8 @@ func TestPreExecFunctions(t *testing.T) {
 				}
 				last = result
 			}
-			if !reflect.DeepEqual(test.h, h) {
-				t.Errorf("query: %s; got %v, want %v", test.query, h, test.h)
+			if !reflect.DeepEqual(test.headers, headers) {
+				t.Errorf("query: %s; got %v, want %v", test.query, headers, test.headers)
 			}
 		}
 	}
