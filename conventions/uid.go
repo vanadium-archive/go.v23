@@ -19,7 +19,6 @@ const pkgPath = "v.io/v23/conventions"
 // the identity and type "?" meaning that we don't know what type of Id this is.
 const (
 	ServerUser          = "self/?/ServerUser"      // a client that has our public key
-	AuthenticatedUser   = "self/?/Authenticated"   // a client with blessings we trust but with none matching a user id
 	UnauthenticatedUser = "self/?/Unauthenticated" // a client which presents no blessing we trust
 )
 
@@ -32,12 +31,13 @@ func GetClientUserIds(ctx *context.T, call security.Call) []string {
 		return []string{ServerUser}
 	}
 	// The convention is: the first 3 components of a blessing name are a user name
-	// if the second component is a single character.  Otherwise, we have no idea.
+	// if the second component is a single character.  Otherwise, use just the first
+	// component.
 	var ids []string
 	rbn, _ := security.RemoteBlessingNames(ctx, call)
 	for _, b := range rbn {
 		if c := ParseUserId(b); c != nil {
-			ids = append(ids, strings.Join(c[0:3], security.ChainSeparator))
+			ids = append(ids, strings.Join(c, security.ChainSeparator))
 		}
 	}
 	// If the client has our public key, we assume identity.
@@ -46,8 +46,6 @@ func GetClientUserIds(ctx *context.T, call security.Call) []string {
 	}
 	if len(ids) > 0 {
 		return ids
-	} else if len(rbn) > 0 {
-		return []string{AuthenticatedUser}
 	} else {
 		return []string{UnauthenticatedUser}
 	}
@@ -57,7 +55,14 @@ func GetClientUserIds(ctx *context.T, call security.Call) []string {
 func ParseUserId(s string) []string {
 	c := strings.Split(s, security.ChainSeparator)
 	if len(c) >= 3 && len(c[1]) == 1 {
+		// Identity provider conforms to conventions.
 		return c[0:3]
+	} else if len(c) >= 1 {
+		// Identity provider doesn't conform.  Treat all his users as a single resource group.
+		//
+		// This has the side effect of making tests a bit easier to write since you can use
+		// "bob" and "alice" rather than "self/u/bob" and "self/u/alice" or some such.
+		return c[0:1]
 	}
 	return nil
 }

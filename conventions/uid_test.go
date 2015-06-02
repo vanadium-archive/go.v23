@@ -21,12 +21,12 @@ func TestParseUserId(t *testing.T) {
 		in   string
 		want []string
 	}{
-		{"dev.v.io", nil},
-		{"dev.v.io/u", nil},
+		{"dev.v.io", []string{"dev.v.io"}},
+		{"dev.v.io/u", []string{"dev.v.io"}},
 		{"dev.v.io/u/p@google.com", []string{"dev.v.io", "u", "p@google.com"}},
-		{"dev.v.io/uu/p@google.com", nil},
+		{"dev.v.io/uu/p@google.com", []string{"dev.v.io"}},
 		{"dev.v.io/u/p@google.com/x", []string{"dev.v.io", "u", "p@google.com"}},
-		{"dev.v.io/uu/p@google.com/x", nil},
+		{"dev.v.io/uu/p@google.com/x", []string{"dev.v.io"}},
 	}
 	for _, tt := range tests {
 		if got := ParseUserId(tt.in); !reflect.DeepEqual(got, tt.want) {
@@ -64,7 +64,7 @@ func TestGetClientUserIds(t *testing.T) {
 		t.Errorf("blessing myself %s", err)
 	}
 	call = security.NewCall(&security.CallParams{RemoteBlessings: blessings, LocalPrincipal: bob})
-	if want, got := []string{AuthenticatedUser}, GetClientUserIds(ctx, call); !reflect.DeepEqual(got, want) {
+	if want, got := []string{"idt"}, GetClientUserIds(ctx, call); !reflect.DeepEqual(got, want) {
 		t.Errorf("GetClientUserIds() wanted %v, got %v", want, got)
 	}
 
@@ -74,7 +74,7 @@ func TestGetClientUserIds(t *testing.T) {
 		t.Errorf("blessing myself %s", err)
 	}
 	call = security.NewCall(&security.CallParams{RemoteBlessings: blessings, LocalBlessings: blessings, LocalPrincipal: bob})
-	if want, got := []string{ServerUser}, GetClientUserIds(ctx, call); !reflect.DeepEqual(got, want) {
+	if want, got := []string{"idt", ServerUser}, GetClientUserIds(ctx, call); !reflect.DeepEqual(got, want) {
 		t.Errorf("GetClientUserIds() wanted %v, got %v", want, got)
 	}
 
