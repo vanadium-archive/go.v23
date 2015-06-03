@@ -119,7 +119,7 @@ func checkScan(t *testing.T, ctx *context.T, tb nosql.Table, r nosql.RowRange, w
 	for it.Advance() {
 		gotKey := it.Key()
 		gotKeys = append(gotKeys, gotKey)
-		i := len(gotKeys)
+		i := len(gotKeys) - 1
 		if i >= len(wantKeys) {
 			continue
 		}
