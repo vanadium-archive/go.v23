@@ -305,7 +305,7 @@ func makeInternal(idAction IDAction, langID i18n.LangID, componentName string, o
 // parameters are formatted into the message according to i18n.Cat().Format.
 // The caller's PC is added to the error's stack.
 // If the parameter list contains an instance of verror.E, then the stack of
-// the first, and only the first, ocurrence of such an instance, will be chained
+// the first, and only the first, occurrence of such an instance, will be chained
 // to the stack of this newly created error.
 func ExplicitNew(idAction IDAction, langID i18n.LangID, componentName string, opName string, v ...interface{}) error {
 	stack := make([]uintptr, maxPCs)
@@ -323,7 +323,7 @@ func WithComponentName(ctx *context.T, componentName string) *context.T {
 }
 
 // New is like ExplicitNew(), but obtains the language, component name, and operation
-// name from the specified context.T.   ctx may be nil.
+// name from the specified context.T.  ctx may be nil.
 func New(idAction IDAction, ctx *context.T, v ...interface{}) error {
 	langID, componentName, opName := dataFromContext(ctx)
 	stack := make([]uintptr, maxPCs)
@@ -345,10 +345,12 @@ func convertInternal(idAction IDAction, langID i18n.LangID, componentName string
 	//  - if not yet set, set parameters 0 and 1 from componentName and
 	//    opName.
 	//  - if langID is set, and we have the appropriate language's format
-	//    in our catalogue, use it.  Otheriwse, retain a message (assuming
+	//    in our catalogue, use it.  Otherwise, retain a message (assuming
 	//    additional parameters were not set) even if the language is not
 	//    correct.
-	if e, ok := assertIsE(err); ok {
+	if e, ok := assertIsE(err); !ok {
+		return makeInternal(idAction, langID, componentName, opName, stack, err.Error())
+	} else {
 		oldParams := e.ParamList
 
 		// Convert all embedded E errors, recursively.
@@ -411,10 +413,9 @@ func convertInternal(idAction IDAction, langID i18n.LangID, componentName string
 		}
 		return E{e.ID, e.Action, msg, newParams, e.stackPCs, nil}
 	}
-	return makeInternal(idAction, langID, componentName, opName, stack, err.Error())
 }
 
-// ExplicitConvert converts a regular err into an E error, setting its id to id.  If
+// ExplicitConvert converts a regular err into an E error, setting its IDAction to idAction.  If
 // err is already an E, it returns err or an equivalent value without changing its type, but
 // potentially changing the language, component or operation if langID!=i18n.NoLangID,
 // componentName!="" or opName!="" respectively.  The caller's PC is added to the
@@ -449,7 +450,7 @@ func SetDefaultContext(ctx *context.T) {
 }
 
 // Convert is like ExplicitConvert(), but obtains the language, component and operation names
-// from the specified context.T.   ctx may be nil.
+// from the specified context.T.  ctx may be nil.
 func Convert(idAction IDAction, ctx *context.T, err error) error {
 	if err == nil {
 		return nil
@@ -498,7 +499,7 @@ func (e E) Error() string {
 	return msg
 }
 
-// String is the default printing function for SubErrs
+// String is the default printing function for SubErrs.
 func (subErrs SubErrs) String() (result string) {
 	if len(subErrs) > 0 {
 		sep := ""
