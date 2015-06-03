@@ -26,7 +26,7 @@ func TestCreate(t *testing.T, ctx *context.T, i interface{}) {
 	child := self.Child("child")
 
 	// child.Create should fail since self does not exist.
-	if err := child.Create(ctx, nil); verror.ErrorID(err) != verror.ErrNoExistOrNoAccess.ID {
+	if err := child.Create(ctx, nil); verror.ErrorID(err) != verror.ErrNoExist.ID {
 		t.Fatalf("child.Create() should have failed: %v", err)
 	}
 
@@ -65,7 +65,7 @@ func TestCreate(t *testing.T, ctx *context.T, i interface{}) {
 	if err := parent.SetPermissions(ctx, perms, ""); err != nil {
 		t.Fatalf("parent.SetPermissions() failed: %v", err)
 	}
-	if err := parent.Child("self3").Create(ctx, nil); verror.ErrorID(err) != verror.ErrNoExistOrNoAccess.ID {
+	if err := parent.Child("self3").Create(ctx, nil); verror.ErrorID(err) != verror.ErrNoAccess.ID {
 		t.Fatalf("self3.Create() should have failed: %v", err)
 	}
 }
@@ -93,7 +93,7 @@ func TestDelete(t *testing.T, ctx *context.T, i interface{}) {
 	}
 
 	// child.Create should fail, since self does not exist.
-	if err := child.Create(ctx, nil); verror.ErrorID(err) != verror.ErrNoExistOrNoAccess.ID {
+	if err := child.Create(ctx, nil); verror.ErrorID(err) != verror.ErrNoExist.ID {
 		t.Fatalf("child.Create() should have failed: %v", err)
 	}
 
@@ -112,7 +112,7 @@ func TestDelete(t *testing.T, ctx *context.T, i interface{}) {
 	if err := self2.SetPermissions(ctx, perms, ""); err != nil {
 		t.Fatalf("self2.SetPermissions() failed: %v", err)
 	}
-	if err := self2.Delete(ctx); verror.ErrorID(err) != verror.ErrNoExistOrNoAccess.ID {
+	if err := self2.Delete(ctx); verror.ErrorID(err) != verror.ErrNoAccess.ID {
 		t.Fatalf("self2.Delete() should have failed: %v", err)
 	}
 
@@ -122,6 +122,11 @@ func TestDelete(t *testing.T, ctx *context.T, i interface{}) {
 	if err := parent.SetPermissions(ctx, perms, ""); err != nil {
 		t.Fatalf("parent.SetPermissions() failed: %v", err)
 	}
+	if err := self.Delete(ctx); err != nil {
+		t.Fatalf("self.Delete() failed: %v", err)
+	}
+
+	// Test that delete is idempotent.
 	if err := self.Delete(ctx); err != nil {
 		t.Fatalf("self.Delete() failed: %v", err)
 	}
@@ -253,10 +258,10 @@ func TestPerms(t *testing.T, ctx *context.T, ac util.AccessController) {
 	if err := ac.SetPermissions(ctx, access.Permissions{}, ""); err != nil {
 		t.Fatalf("SetPermissions failed: %v", err)
 	}
-	if _, _, err := ac.GetPermissions(ctx); verror.ErrorID(err) != verror.ErrNoExistOrNoAccess.ID {
+	if _, _, err := ac.GetPermissions(ctx); verror.ErrorID(err) != verror.ErrNoAccess.ID {
 		t.Fatal("GetPermissions should have failed with access error")
 	}
-	if err := ac.SetPermissions(ctx, myperms, ""); verror.ErrorID(err) != verror.ErrNoExistOrNoAccess.ID {
+	if err := ac.SetPermissions(ctx, myperms, ""); verror.ErrorID(err) != verror.ErrNoAccess.ID {
 		t.Fatal("SetPermissions should have failed with access error")
 	}
 }

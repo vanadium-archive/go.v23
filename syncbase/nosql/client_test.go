@@ -98,6 +98,8 @@ func TestTablePerms(t *testing.T) {
 ////////////////////////////////////////
 // Tests involving rows
 
+// TODO(sadovsky): Test perms-checking in all test functions below.
+
 type Foo struct {
 	I int
 	S string
@@ -112,31 +114,35 @@ func checkScan(t *testing.T, ctx *context.T, tb nosql.Table, r nosql.RowRange, w
 	if len(wantKeys) != len(wantValues) {
 		panic("bad input args")
 	}
-	it, err := tb.Scan(ctx, r)
-	if err == nil {
-		i := 0
-		for it.Advance() {
-			gotKey, wantKey := it.Key(), wantKeys[i]
-			wantValue := wantValues[i]
-			gotValue := reflect.Zero(reflect.TypeOf(wantValue)).Interface()
-			if gotKey != wantKey {
-				tu.Fatalf(t, "Keys do not match: got %q, want %q", gotKey, wantKey)
-			}
-			if err := it.Value(&gotValue); err != nil {
-				tu.Fatalf(t, "it.Value() failed: %v", err)
-			}
-			if !reflect.DeepEqual(gotValue, wantValue) {
-				tu.Fatalf(t, "Values do not match: got %v, want %v", gotValue, wantValue)
-			}
-			i++
+	it := tb.Scan(ctx, r)
+	gotKeys := []string{}
+	for it.Advance() {
+		gotKey := it.Key()
+		gotKeys = append(gotKeys, gotKey)
+		i := len(gotKeys)
+		if i >= len(wantKeys) {
+			continue
 		}
-		err = it.Err()
-		if i < len(wantKeys) {
-			tu.Fatalf(t, "Unmatched keys: %v", wantKeys[i:])
+		// Check key.
+		wantKey := wantKeys[i]
+		if gotKey != wantKey {
+			tu.Fatalf(t, "Keys do not match: got %q, want %q", gotKey, wantKey)
+		}
+		// Check value.
+		wantValue := wantValues[i]
+		gotValue := reflect.Zero(reflect.TypeOf(wantValue)).Interface()
+		if err := it.Value(&gotValue); err != nil {
+			tu.Fatalf(t, "it.Value() failed: %v", err)
+		}
+		if !reflect.DeepEqual(gotValue, wantValue) {
+			tu.Fatalf(t, "Values do not match: got %v, want %v", gotValue, wantValue)
 		}
 	}
-	if err != nil {
+	if err := it.Err(); err != nil {
 		tu.Fatalf(t, "tb.Scan() failed: %v", err)
+	}
+	if len(gotKeys) != len(wantKeys) {
+		tu.Fatalf(t, "Unmatched keys: got %v, want %v", gotKeys, wantKeys)
 	}
 }
 
@@ -185,6 +191,46 @@ func TestTableScan(t *testing.T) {
 	checkScan(t, ctx, tb, nosql.Prefix("z"), []string{}, []interface{}{})
 }
 
+// Tests that Table.Delete works as expected.
+func TestTableDeleteRowRange(t *testing.T) {
+	ctx, sName, cleanup := tu.SetupOrDie(nil)
+	defer cleanup()
+	a := tu.CreateApp(t, ctx, syncbase.NewService(sName), "a")
+	d := tu.CreateNoSQLDatabase(t, ctx, a, "d")
+	tb := tu.CreateTable(t, ctx, d, "tb")
+
+	checkScan(t, ctx, tb, nosql.Prefix(""), []string{}, []interface{}{})
+
+	// Put foo and bar.
+	fooWant := Foo{I: 4, S: "f"}
+	if err := tb.Put(ctx, "foo", &fooWant); err != nil {
+		t.Fatalf("tb.Put() failed: %v", err)
+	}
+	barWant := Bar{F: 0.5, S: "b"}
+	if err := tb.Put(ctx, "bar", &barWant); err != nil {
+		t.Fatalf("tb.Put() failed: %v", err)
+	}
+	checkScan(t, ctx, tb, nosql.Prefix(""), []string{"bar", "foo"}, []interface{}{&barWant, &fooWant})
+
+	// Delete foo.
+	if err := tb.Delete(ctx, nosql.Prefix("f")); err != nil {
+		t.Fatalf("tb.Delete() failed: %v", err)
+	}
+	checkScan(t, ctx, tb, nosql.Prefix(""), []string{"bar"}, []interface{}{&barWant})
+
+	// Restore foo.
+	if err := tb.Put(ctx, "foo", &fooWant); err != nil {
+		t.Fatalf("tb.Put() failed: %v", err)
+	}
+	checkScan(t, ctx, tb, nosql.Prefix(""), []string{"bar", "foo"}, []interface{}{&barWant, &fooWant})
+
+	// Delete everything.
+	if err := tb.Delete(ctx, nosql.Prefix("")); err != nil {
+		t.Fatalf("tb.Delete() failed: %v", err)
+	}
+	checkScan(t, ctx, tb, nosql.Prefix(""), []string{}, []interface{}{})
+}
+
 // Tests that Table.{Get,Put,Delete} work as expected.
 func TestTableRowMethods(t *testing.T) {
 	ctx, sName, cleanup := tu.SetupOrDie(nil)
@@ -217,15 +263,12 @@ func TestTableRowMethods(t *testing.T) {
 	if !reflect.DeepEqual(got, want) {
 		t.Fatalf("Values do not match: got %v, want %v", got, want)
 	}
-	// TODO(sadovsky): Enable once table.DeleteRowRange is implemented.
-	/*
-		if err := tb.Delete(ctx, nosql.Prefix("f")); err != nil {
-			t.Fatalf("tb.Delete() failed: %v", err)
-		}
-		if err := tb.Get(ctx, "f", &got); verror.ErrorID(err) != verror.ErrNoExist.ID {
-			t.Fatalf("r.Get() should have failed: %v", err)
-		}
-	*/
+	if err := tb.Delete(ctx, nosql.Prefix("f")); err != nil {
+		t.Fatalf("tb.Delete() failed: %v", err)
+	}
+	if err := tb.Get(ctx, "f", &got); verror.ErrorID(err) != verror.ErrNoExist.ID {
+		t.Fatalf("r.Get() should have failed: %v", err)
+	}
 }
 
 // Tests that Row.{Get,Put,Delete} work as expected.

@@ -37,6 +37,7 @@ func newStream(cancel context.CancelFunc, call wire.TableScanClientCall) *stream
 	}
 }
 
+// Advance implements Stream.Advance.
 func (s *stream) Advance() bool {
 	s.mu.Lock()
 	defer s.mu.Unlock()
@@ -58,6 +59,7 @@ func (s *stream) Advance() bool {
 	return true
 }
 
+// Key implements Stream.Key.
 func (s *stream) Key() string {
 	s.mu.Lock()
 	defer s.mu.Unlock()
@@ -67,6 +69,7 @@ func (s *stream) Key() string {
 	return s.curr.Key
 }
 
+// Value implements Stream.Value.
 func (s *stream) Value(value interface{}) error {
 	s.mu.Lock()
 	defer s.mu.Unlock()
@@ -76,6 +79,7 @@ func (s *stream) Value(value interface{}) error {
 	return vom.Decode(s.curr.Value, value)
 }
 
+// Err implements Stream.Err.
 func (s *stream) Err() error {
 	s.mu.Lock()
 	defer s.mu.Unlock()
@@ -89,6 +93,7 @@ func (s *stream) Err() error {
 	return verror.New(idAction, nil, s.err)
 }
 
+// Cancel implements Stream.Cancel.
 // TODO(sadovsky): Make Cancel non-blocking.
 func (s *stream) Cancel() {
 	s.mu.Lock()

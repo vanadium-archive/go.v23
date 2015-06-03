@@ -153,8 +153,7 @@ type Table interface {
 	// is "", all rows with keys >= start are included. The returned stream reads
 	// from a consistent snapshot taken at the time of the Scan RPC.
 	// See helpers nosql.Prefix(), nosql.Range(), nosql.SingleRow().
-	// TODO(sadovsky): Stop returning error.
-	Scan(ctx *context.T, r RowRange) (Stream, error)
+	Scan(ctx *context.T, r RowRange) Stream
 
 	// SetPermissions sets the permissions for all current and future rows with
 	// the given prefix. If the prefix overlaps with an existing prefix, the

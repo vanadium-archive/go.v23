@@ -61,13 +61,13 @@ func (t *table) Delete(ctx *context.T, r RowRange) error {
 }
 
 // Scan implements Table.Scan.
-func (t *table) Scan(ctx *context.T, r RowRange) (Stream, error) {
+func (t *table) Scan(ctx *context.T, r RowRange) Stream {
 	ctx, cancel := context.WithCancel(ctx)
 	call, err := t.c.Scan(ctx, []byte(r.Start()), []byte(r.Limit()))
 	if err != nil {
-		return nil, err
+		return &InvalidStream{Error: err}
 	}
-	return newStream(cancel, call), nil
+	return newStream(cancel, call)
 }
 
 // SetPermissions implements Table.SetPermissions.

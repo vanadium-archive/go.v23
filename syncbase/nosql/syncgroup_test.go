@@ -29,7 +29,7 @@ func TestCreateSyncGroup(t *testing.T) {
 	spec := wire.SyncGroupSpec{}
 	info := wire.SyncGroupMemberInfo{8}
 	if err := sg1.Create(ctx, spec, info); verror.ErrorID(err) != verror.ErrBadArg.ID {
-		t.Fatalf("Create with empty spec didn't fail")
+		t.Fatalf("Create with empty spec didn't fail: %v", err)
 	}
 
 	// Create successfully.
@@ -42,7 +42,7 @@ func TestCreateSyncGroup(t *testing.T) {
 
 	// Check if creating an already existing syncgroup fails.
 	if err := sg1.Create(ctx, spec, info); verror.ErrorID(err) != verror.ErrExist.ID {
-		t.Fatalf("Create already existing sg didn't fail")
+		t.Fatalf("Create already existing sg didn't fail: %v", err)
 	}
 
 	// Create a peer syncgroup.
@@ -62,12 +62,13 @@ func TestCreateSyncGroup(t *testing.T) {
 	}
 	sg4 := d.SyncGroup("sg4")
 	spec.Description = "test syncgroup sg4"
-	if err := sg4.Create(ctx, spec, info); verror.ErrorID(err) != verror.ErrNoExistOrNoAccess.ID {
-		t.Fatalf("Create without permissions didn't fail")
+	if err := sg4.Create(ctx, spec, info); verror.ErrorID(err) != verror.ErrNoAccess.ID {
+		t.Fatalf("Create without permissions didn't fail: %v", err)
 	}
 }
 
-// TODO(hpucha): Consider using this helper function for both success and fail cases.
+// TODO(hpucha): Consider using this helper function for both success and
+// failure cases.
 func createSyncGroup(t *testing.T, ctx *context.T, d nosql.Database, sgName string, spec wire.SyncGroupSpec) nosql.SyncGroup {
 	sg := d.SyncGroup(sgName)
 	info := wire.SyncGroupMemberInfo{8}
