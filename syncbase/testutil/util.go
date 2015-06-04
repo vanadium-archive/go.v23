@@ -6,6 +6,8 @@
 package testutil
 
 import (
+	"io/ioutil"
+	"os"
 	"runtime/debug"
 	"testing"
 
@@ -124,7 +126,17 @@ func newServer(ctx *context.T, perms access.Permissions) (string, func()) {
 	if perms == nil {
 		perms = DefaultPerms()
 	}
-	service, err := server.NewService(nil, nil, perms)
+	rootDir, err := ioutil.TempDir("", "syncbase")
+	if err != nil {
+		vlog.Fatal("ioutil.TempDir() failed: ", err)
+	}
+	service, err := server.NewService(nil, nil, server.ServiceOptions{
+		Perms:   perms,
+		RootDir: rootDir,
+		// TODO(sadovsky): Switch to leveldb once Database.Delete actually deletes
+		// the underlying storage engine data (or similar).
+		Engine: "memstore",
+	})
 	if err != nil {
 		vlog.Fatal("server.NewService() failed: ", err)
 	}
@@ -137,5 +149,6 @@ func newServer(ctx *context.T, perms access.Permissions) (string, func()) {
 	name := naming.JoinAddressName(eps[0].String(), "")
 	return name, func() {
 		s.Stop()
+		os.RemoveAll(rootDir)
 	}
 }
