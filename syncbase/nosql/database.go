@@ -10,22 +10,23 @@ import (
 	"v.io/v23/context"
 	"v.io/v23/naming"
 	"v.io/v23/security/access"
-	"v.io/v23/verror"
 )
 
-func NewDatabase(parentFullName, relativeName string) Database {
+func NewDatabase(parentFullName, relativeName string) *database {
 	fullName := naming.Join(parentFullName, relativeName)
 	return &database{
-		c:        wire.DatabaseClient(fullName),
-		fullName: fullName,
-		name:     relativeName,
+		c:              wire.DatabaseClient(fullName),
+		parentFullName: parentFullName,
+		fullName:       fullName,
+		name:           relativeName,
 	}
 }
 
 type database struct {
-	c        wire.DatabaseClientMethods
-	fullName string
-	name     string
+	c              wire.DatabaseClientMethods
+	parentFullName string
+	fullName       string
+	name           string
 }
 
 var _ Database = (*database)(nil)
@@ -73,8 +74,12 @@ func (d *database) DeleteTable(ctx *context.T, relativeName string) error {
 }
 
 // BeginBatch implements Database.BeginBatch.
-func (d *database) BeginBatch(ctx *context.T, opts BatchOptions) (BatchDatabase, error) {
-	return nil, verror.NewErrNotImplemented(ctx)
+func (d *database) BeginBatch(ctx *context.T, opts wire.BatchOptions) (BatchDatabase, error) {
+	relativeName, err := d.c.BeginBatch(ctx, opts)
+	if err != nil {
+		return nil, err
+	}
+	return &batch{database: *NewDatabase(d.parentFullName, relativeName)}, nil
 }
 
 // SetPermissions implements Database.SetPermissions.

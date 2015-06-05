@@ -19,6 +19,12 @@ import (
 // It allows clients to pass the handle to helper methods that are
 // batch-agnostic.
 type DatabaseHandle interface {
+	// Name returns the relative name of this DatabaseHandle.
+	Name() string
+
+	// FullName returns the full name (object name) of this DatabaseHandle.
+	FullName() string
+
 	// Table returns the Table with the given name.
 	// relativeName must not contain slashes.
 	Table(relativeName string) Table
@@ -27,20 +33,12 @@ type DatabaseHandle interface {
 	ListTables(ctx *context.T) ([]string, error)
 }
 
-type BatchOptions wire.BatchOptions
-
 // Database represents a collection of Tables. Batches, queries, sync, watch,
 // etc. all operate at the Database level.
 //
 // TODO(sadovsky): Add Watch method.
 type Database interface {
 	DatabaseHandle
-
-	// Name returns the relative name of this Database.
-	Name() string
-
-	// FullName returns the full name (object name) of this Database.
-	FullName() string
 
 	// Create creates this Database.
 	// If perms is nil, we inherit (copy) the App perms.
@@ -73,7 +71,7 @@ type Database interface {
 	//
 	// Concurrency semantics can be configured using BatchOptions.
 	// TODO(sadovsky): Maybe use varargs for options.
-	BeginBatch(ctx *context.T, opts BatchOptions) (BatchDatabase, error)
+	BeginBatch(ctx *context.T, opts wire.BatchOptions) (BatchDatabase, error)
 
 	// SetPermissions and GetPermissions are included from the AccessController
 	// interface.

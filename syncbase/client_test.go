@@ -9,17 +9,23 @@ import (
 
 	"v.io/syncbase/v23/syncbase"
 	tu "v.io/syncbase/v23/syncbase/testutil"
+	"v.io/v23/naming"
 	_ "v.io/x/ref/runtime/factories/generic"
 )
 
-////////////////////////////////////////
-// Test cases
+// Tests various Name and FullName methods.
+func TestName(t *testing.T) {
+	s := syncbase.NewService("s")
+	a := s.App("a")
 
-func TestNameAndKey(t *testing.T) {
-	a := syncbase.NewService("s").App("a")
-
+	if s.FullName() != "s" {
+		t.Errorf("Wrong full name: %q", s.FullName())
+	}
 	if a.Name() != "a" {
 		t.Errorf("Wrong name: %q", a.Name())
+	}
+	if a.FullName() != naming.Join("s", "a") {
+		t.Errorf("Wrong name: %q", a.FullName())
 	}
 }
 

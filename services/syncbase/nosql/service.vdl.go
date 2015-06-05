@@ -26,11 +26,13 @@ import (
 var (
 	ErrBoundToBatch    = verror.Register("v.io/syncbase/v23/services/syncbase/nosql.BoundToBatch", verror.NoRetry, "{1:}{2:} bound to batch")
 	ErrNotBoundToBatch = verror.Register("v.io/syncbase/v23/services/syncbase/nosql.NotBoundToBatch", verror.NoRetry, "{1:}{2:} not bound to batch")
+	ErrReadOnlyBatch   = verror.Register("v.io/syncbase/v23/services/syncbase/nosql.ReadOnlyBatch", verror.NoRetry, "{1:}{2:} batch is read-only")
 )
 
 func init() {
 	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrBoundToBatch.ID), "{1:}{2:} bound to batch")
 	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrNotBoundToBatch.ID), "{1:}{2:} not bound to batch")
+	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrReadOnlyBatch.ID), "{1:}{2:} batch is read-only")
 }
 
 // NewErrBoundToBatch returns an error with the ErrBoundToBatch ID.
@@ -41,6 +43,11 @@ func NewErrBoundToBatch(ctx *context.T) error {
 // NewErrNotBoundToBatch returns an error with the ErrNotBoundToBatch ID.
 func NewErrNotBoundToBatch(ctx *context.T) error {
 	return verror.New(ErrNotBoundToBatch, ctx)
+}
+
+// NewErrReadOnlyBatch returns an error with the ErrReadOnlyBatch ID.
+func NewErrReadOnlyBatch(ctx *context.T) error {
+	return verror.New(ErrReadOnlyBatch, ctx)
 }
 
 // SyncGroupManagerClientMethods is the client interface

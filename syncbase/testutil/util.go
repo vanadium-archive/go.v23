@@ -8,6 +8,7 @@ package testutil
 import (
 	"io/ioutil"
 	"os"
+	"reflect"
 	"runtime/debug"
 	"testing"
 
@@ -100,6 +101,42 @@ func DefaultPerms() access.Permissions {
 		perms.Add(security.BlessingPattern("server/client"), string(tag))
 	}
 	return perms
+}
+
+func CheckScan(t *testing.T, ctx *context.T, tb nosql.Table, r nosql.RowRange, wantKeys []string, wantValues []interface{}) {
+	if len(wantKeys) != len(wantValues) {
+		panic("bad input args")
+	}
+	it := tb.Scan(ctx, r)
+	gotKeys := []string{}
+	for it.Advance() {
+		gotKey := it.Key()
+		gotKeys = append(gotKeys, gotKey)
+		i := len(gotKeys) - 1
+		if i >= len(wantKeys) {
+			continue
+		}
+		// Check key.
+		wantKey := wantKeys[i]
+		if gotKey != wantKey {
+			Fatalf(t, "Keys do not match: got %q, want %q", gotKey, wantKey)
+		}
+		// Check value.
+		wantValue := wantValues[i]
+		gotValue := reflect.Zero(reflect.TypeOf(wantValue)).Interface()
+		if err := it.Value(&gotValue); err != nil {
+			Fatalf(t, "it.Value() failed: %v", err)
+		}
+		if !reflect.DeepEqual(gotValue, wantValue) {
+			Fatalf(t, "Values do not match: got %v, want %v", gotValue, wantValue)
+		}
+	}
+	if err := it.Err(); err != nil {
+		Fatalf(t, "tb.Scan() failed: %v", err)
+	}
+	if len(gotKeys) != len(wantKeys) {
+		Fatalf(t, "Unmatched keys: got %v, want %v", gotKeys, wantKeys)
+	}
 }
 
 ////////////////////////////////////////

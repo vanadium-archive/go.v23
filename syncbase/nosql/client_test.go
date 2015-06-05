@@ -11,30 +11,36 @@ import (
 	"v.io/syncbase/v23/syncbase"
 	"v.io/syncbase/v23/syncbase/nosql"
 	tu "v.io/syncbase/v23/syncbase/testutil"
-	"v.io/v23/context"
+	"v.io/v23/naming"
 	"v.io/v23/verror"
 	_ "v.io/x/ref/runtime/factories/generic"
 )
 
-////////////////////////////////////////
-// Test cases
-
 // TODO(sadovsky): Finish writing tests.
 
+// Tests various Name, FullName, and Key methods.
 func TestNameAndKey(t *testing.T) {
-	a := syncbase.NewService("s").App("a")
-	d := a.NoSQLDatabase("d")
+	d := syncbase.NewService("s").App("a").NoSQLDatabase("d")
 	tb := d.Table("tb")
 	r := tb.Row("r")
 
 	if d.Name() != "d" {
 		t.Errorf("Wrong name: %q", d.Name())
 	}
+	if d.FullName() != naming.Join("s", "a", "d") {
+		t.Errorf("Wrong full name: %q", d.FullName())
+	}
 	if tb.Name() != "tb" {
 		t.Errorf("Wrong name: %q", tb.Name())
 	}
+	if tb.FullName() != naming.Join("s", "a", "d", "tb") {
+		t.Errorf("Wrong full name: %q", tb.FullName())
+	}
 	if r.Key() != "r" {
 		t.Errorf("Wrong key: %q", r.Key())
+	}
+	if r.FullName() != naming.Join("s", "a", "d", "tb", "r") {
+		t.Errorf("Wrong full name: %q", r.FullName())
 	}
 }
 
@@ -110,42 +116,6 @@ type Bar struct {
 	S string
 }
 
-func checkScan(t *testing.T, ctx *context.T, tb nosql.Table, r nosql.RowRange, wantKeys []string, wantValues []interface{}) {
-	if len(wantKeys) != len(wantValues) {
-		panic("bad input args")
-	}
-	it := tb.Scan(ctx, r)
-	gotKeys := []string{}
-	for it.Advance() {
-		gotKey := it.Key()
-		gotKeys = append(gotKeys, gotKey)
-		i := len(gotKeys) - 1
-		if i >= len(wantKeys) {
-			continue
-		}
-		// Check key.
-		wantKey := wantKeys[i]
-		if gotKey != wantKey {
-			tu.Fatalf(t, "Keys do not match: got %q, want %q", gotKey, wantKey)
-		}
-		// Check value.
-		wantValue := wantValues[i]
-		gotValue := reflect.Zero(reflect.TypeOf(wantValue)).Interface()
-		if err := it.Value(&gotValue); err != nil {
-			tu.Fatalf(t, "it.Value() failed: %v", err)
-		}
-		if !reflect.DeepEqual(gotValue, wantValue) {
-			tu.Fatalf(t, "Values do not match: got %v, want %v", gotValue, wantValue)
-		}
-	}
-	if err := it.Err(); err != nil {
-		tu.Fatalf(t, "tb.Scan() failed: %v", err)
-	}
-	if len(gotKeys) != len(wantKeys) {
-		tu.Fatalf(t, "Unmatched keys: got %v, want %v", gotKeys, wantKeys)
-	}
-}
-
 // Tests that Table.Scan works as expected.
 func TestTableScan(t *testing.T) {
 	ctx, sName, cleanup := tu.SetupOrDie(nil)
@@ -154,7 +124,7 @@ func TestTableScan(t *testing.T) {
 	d := tu.CreateNoSQLDatabase(t, ctx, a, "d")
 	tb := tu.CreateTable(t, ctx, d, "tb")
 
-	checkScan(t, ctx, tb, nosql.Prefix(""), []string{}, []interface{}{})
+	tu.CheckScan(t, ctx, tb, nosql.Prefix(""), []string{}, []interface{}{})
 
 	fooWant := Foo{I: 4, S: "f"}
 	if err := tb.Put(ctx, "foo", &fooWant); err != nil {
@@ -166,29 +136,29 @@ func TestTableScan(t *testing.T) {
 	}
 
 	// Match all keys.
-	checkScan(t, ctx, tb, nosql.Prefix(""), []string{"bar", "foo"}, []interface{}{&barWant, &fooWant})
-	checkScan(t, ctx, tb, nosql.Range("", ""), []string{"bar", "foo"}, []interface{}{&barWant, &fooWant})
-	checkScan(t, ctx, tb, nosql.Range("", "z"), []string{"bar", "foo"}, []interface{}{&barWant, &fooWant})
-	checkScan(t, ctx, tb, nosql.Range("a", ""), []string{"bar", "foo"}, []interface{}{&barWant, &fooWant})
-	checkScan(t, ctx, tb, nosql.Range("a", "z"), []string{"bar", "foo"}, []interface{}{&barWant, &fooWant})
+	tu.CheckScan(t, ctx, tb, nosql.Prefix(""), []string{"bar", "foo"}, []interface{}{&barWant, &fooWant})
+	tu.CheckScan(t, ctx, tb, nosql.Range("", ""), []string{"bar", "foo"}, []interface{}{&barWant, &fooWant})
+	tu.CheckScan(t, ctx, tb, nosql.Range("", "z"), []string{"bar", "foo"}, []interface{}{&barWant, &fooWant})
+	tu.CheckScan(t, ctx, tb, nosql.Range("a", ""), []string{"bar", "foo"}, []interface{}{&barWant, &fooWant})
+	tu.CheckScan(t, ctx, tb, nosql.Range("a", "z"), []string{"bar", "foo"}, []interface{}{&barWant, &fooWant})
 
 	// Match "bar" only.
-	checkScan(t, ctx, tb, nosql.Prefix("b"), []string{"bar"}, []interface{}{&barWant})
-	checkScan(t, ctx, tb, nosql.Prefix("bar"), []string{"bar"}, []interface{}{&barWant})
-	checkScan(t, ctx, tb, nosql.Range("bar", "baz"), []string{"bar"}, []interface{}{&barWant})
-	checkScan(t, ctx, tb, nosql.Range("bar", "foo"), []string{"bar"}, []interface{}{&barWant})
-	checkScan(t, ctx, tb, nosql.Range("", "foo"), []string{"bar"}, []interface{}{&barWant})
+	tu.CheckScan(t, ctx, tb, nosql.Prefix("b"), []string{"bar"}, []interface{}{&barWant})
+	tu.CheckScan(t, ctx, tb, nosql.Prefix("bar"), []string{"bar"}, []interface{}{&barWant})
+	tu.CheckScan(t, ctx, tb, nosql.Range("bar", "baz"), []string{"bar"}, []interface{}{&barWant})
+	tu.CheckScan(t, ctx, tb, nosql.Range("bar", "foo"), []string{"bar"}, []interface{}{&barWant})
+	tu.CheckScan(t, ctx, tb, nosql.Range("", "foo"), []string{"bar"}, []interface{}{&barWant})
 
 	// Match "foo" only.
-	checkScan(t, ctx, tb, nosql.Prefix("f"), []string{"foo"}, []interface{}{&fooWant})
-	checkScan(t, ctx, tb, nosql.Prefix("foo"), []string{"foo"}, []interface{}{&fooWant})
-	checkScan(t, ctx, tb, nosql.Range("foo", "fox"), []string{"foo"}, []interface{}{&fooWant})
-	checkScan(t, ctx, tb, nosql.Range("foo", ""), []string{"foo"}, []interface{}{&fooWant})
+	tu.CheckScan(t, ctx, tb, nosql.Prefix("f"), []string{"foo"}, []interface{}{&fooWant})
+	tu.CheckScan(t, ctx, tb, nosql.Prefix("foo"), []string{"foo"}, []interface{}{&fooWant})
+	tu.CheckScan(t, ctx, tb, nosql.Range("foo", "fox"), []string{"foo"}, []interface{}{&fooWant})
+	tu.CheckScan(t, ctx, tb, nosql.Range("foo", ""), []string{"foo"}, []interface{}{&fooWant})
 
 	// Match nothing.
-	checkScan(t, ctx, tb, nosql.Range("a", "bar"), []string{}, []interface{}{})
-	checkScan(t, ctx, tb, nosql.Range("bar", "bar"), []string{}, []interface{}{})
-	checkScan(t, ctx, tb, nosql.Prefix("z"), []string{}, []interface{}{})
+	tu.CheckScan(t, ctx, tb, nosql.Range("a", "bar"), []string{}, []interface{}{})
+	tu.CheckScan(t, ctx, tb, nosql.Range("bar", "bar"), []string{}, []interface{}{})
+	tu.CheckScan(t, ctx, tb, nosql.Prefix("z"), []string{}, []interface{}{})
 }
 
 // Tests that Table.Delete works as expected.
@@ -199,7 +169,7 @@ func TestTableDeleteRowRange(t *testing.T) {
 	d := tu.CreateNoSQLDatabase(t, ctx, a, "d")
 	tb := tu.CreateTable(t, ctx, d, "tb")
 
-	checkScan(t, ctx, tb, nosql.Prefix(""), []string{}, []interface{}{})
+	tu.CheckScan(t, ctx, tb, nosql.Prefix(""), []string{}, []interface{}{})
 
 	// Put foo and bar.
 	fooWant := Foo{I: 4, S: "f"}
@@ -210,25 +180,25 @@ func TestTableDeleteRowRange(t *testing.T) {
 	if err := tb.Put(ctx, "bar", &barWant); err != nil {
 		t.Fatalf("tb.Put() failed: %v", err)
 	}
-	checkScan(t, ctx, tb, nosql.Prefix(""), []string{"bar", "foo"}, []interface{}{&barWant, &fooWant})
+	tu.CheckScan(t, ctx, tb, nosql.Prefix(""), []string{"bar", "foo"}, []interface{}{&barWant, &fooWant})
 
 	// Delete foo.
 	if err := tb.Delete(ctx, nosql.Prefix("f")); err != nil {
 		t.Fatalf("tb.Delete() failed: %v", err)
 	}
-	checkScan(t, ctx, tb, nosql.Prefix(""), []string{"bar"}, []interface{}{&barWant})
+	tu.CheckScan(t, ctx, tb, nosql.Prefix(""), []string{"bar"}, []interface{}{&barWant})
 
 	// Restore foo.
 	if err := tb.Put(ctx, "foo", &fooWant); err != nil {
 		t.Fatalf("tb.Put() failed: %v", err)
 	}
-	checkScan(t, ctx, tb, nosql.Prefix(""), []string{"bar", "foo"}, []interface{}{&barWant, &fooWant})
+	tu.CheckScan(t, ctx, tb, nosql.Prefix(""), []string{"bar", "foo"}, []interface{}{&barWant, &fooWant})
 
 	// Delete everything.
 	if err := tb.Delete(ctx, nosql.Prefix("")); err != nil {
 		t.Fatalf("tb.Delete() failed: %v", err)
 	}
-	checkScan(t, ctx, tb, nosql.Prefix(""), []string{}, []interface{}{})
+	tu.CheckScan(t, ctx, tb, nosql.Prefix(""), []string{}, []interface{}{})
 }
 
 // Tests that Table.{Get,Put,Delete} work as expected.

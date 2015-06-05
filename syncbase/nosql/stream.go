@@ -86,11 +86,7 @@ func (s *stream) Err() error {
 	if s.err == nil {
 		return nil
 	}
-	idAction := verror.ErrInternal
-	if verror.ErrorID(s.err) == verror.ErrCanceled.ID {
-		idAction = verror.ErrCanceled
-	}
-	return verror.New(idAction, nil, s.err)
+	return verror.Convert(verror.IDAction{}, nil, s.err)
 }
 
 // Cancel implements Stream.Cancel.
