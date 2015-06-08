@@ -60,28 +60,16 @@ func CreateTable(t *testing.T, ctx *context.T, d nosql.Database, name string) no
 }
 
 func SetupOrDie(perms access.Permissions) (clientCtx *context.T, serverName string, cleanup func()) {
+	ctx, sName, cleanup, _, _ := SetupOrDieCustom("client", "server", perms)
+	return ctx, sName, cleanup
+}
+
+func SetupOrDieCustom(client, server string, perms access.Permissions) (clientCtx *context.T, serverName string, cleanup func(), sp security.Principal, ctx *context.T) {
 	ctx, shutdown := v23.Init()
-	cp, sp := tsecurity.NewPrincipal("client"), tsecurity.NewPrincipal("server")
+	sp = tsecurity.NewPrincipal(server)
 
-	// Have the server principal bless the client principal as "client".
-	blessings, err := sp.Bless(cp.PublicKey(), sp.BlessingStore().Default(), "client", security.UnconstrainedUse())
-	if err != nil {
-		vlog.Fatal("sp.Bless() failed: ", err)
-	}
-	// Have the client present its "client" blessing when talking to the server.
-	if _, err := cp.BlessingStore().Set(blessings, "server"); err != nil {
-		vlog.Fatal("cp.BlessingStore().Set() failed: ", err)
-	}
-	// Have the client treat the server's public key as an authority on all
-	// blessings that match the pattern "server".
-	if err := cp.AddToRoots(blessings); err != nil {
-		vlog.Fatal("cp.AddToRoots() failed: ", err)
-	}
+	clientCtx = NewClient(client, server, ctx, sp)
 
-	clientCtx, err = v23.WithPrincipal(ctx, cp)
-	if err != nil {
-		vlog.Fatal("v23.WithPrincipal() failed: ", err)
-	}
 	serverCtx, err := v23.WithPrincipal(ctx, sp)
 	if err != nil {
 		vlog.Fatal("v23.WithPrincipal() failed: ", err)
@@ -95,7 +83,7 @@ func SetupOrDie(perms access.Permissions) (clientCtx *context.T, serverName stri
 	return
 }
 
-func DefaultPerms() access.Permissions {
+func defaultPerms() access.Permissions {
 	perms := access.Permissions{}
 	for _, tag := range access.AllTypicalTags() {
 		perms.Add(security.BlessingPattern("server/client"), string(tag))
@@ -161,7 +149,7 @@ func newServer(ctx *context.T, perms access.Permissions) (string, func()) {
 	}
 
 	if perms == nil {
-		perms = DefaultPerms()
+		perms = defaultPerms()
 	}
 	rootDir, err := ioutil.TempDir("", "syncbase")
 	if err != nil {
@@ -188,4 +176,32 @@ func newServer(ctx *context.T, perms access.Permissions) (string, func()) {
 		s.Stop()
 		os.RemoveAll(rootDir)
 	}
+}
+
+func NewClient(client, server string, ctx *context.T, sp security.Principal) (clientCtx *context.T) {
+	cp := tsecurity.NewPrincipal(client)
+
+	// Have the server principal bless the client principal as "client".
+	blessings, err := sp.Bless(cp.PublicKey(), sp.BlessingStore().Default(), client, security.UnconstrainedUse())
+	if err != nil {
+		vlog.Fatal("sp.Bless() failed: ", err)
+	}
+
+	// Have the client present its "client" blessing when talking to the server.
+	if _, err := cp.BlessingStore().Set(blessings, security.BlessingPattern(server)); err != nil {
+		vlog.Fatal("cp.BlessingStore().Set() failed: ", err)
+	}
+
+	// Have the client treat the server's public key as an authority on all
+	// blessings that match the pattern "server".
+	if err := cp.AddToRoots(blessings); err != nil {
+		vlog.Fatal("cp.AddToRoots() failed: ", err)
+	}
+
+	clientCtx, err = v23.WithPrincipal(ctx, cp)
+	if err != nil {
+		vlog.Fatal("v23.WithPrincipal() failed: ", err)
+	}
+
+	return clientCtx
 }
