@@ -2,15 +2,19 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package context
+package context_test
 
 import (
+	"bytes"
+	"fmt"
 	"sync"
 	"testing"
 	"time"
+
+	"v.io/v23/context"
 )
 
-func testCancel(t *testing.T, ctx *T, cancel CancelFunc) {
+func testCancel(t *testing.T, ctx *context.T, cancel context.CancelFunc) {
 	select {
 	case <-ctx.Done():
 		t.Errorf("Done closed when deadline not yet passed")
@@ -32,13 +36,13 @@ func testCancel(t *testing.T, ctx *T, cancel CancelFunc) {
 	case <-time.After(3 * time.Second):
 		t.Fatal("timed out witing for cancellation.")
 	}
-	if err := ctx.Err(); err != Canceled {
-		t.Errorf("Unexpected error want %v, got %v", Canceled, err)
+	if err := ctx.Err(); err != context.Canceled {
+		t.Errorf("Unexpected error want %v, got %v", context.Canceled, err)
 	}
 }
 
 func TestRootContext(t *testing.T) {
-	var ctx *T
+	var ctx *context.T
 
 	if ctx.Initialized() {
 		t.Error("Nil context should be uninitialized")
@@ -46,7 +50,7 @@ func TestRootContext(t *testing.T) {
 	if got := ctx.Err(); got != nil {
 		t.Errorf("Expected nil error, got: %v", got)
 	}
-	ctx = &T{}
+	ctx = &context.T{}
 	if ctx.Initialized() {
 		t.Error("Zero context should be uninitialized")
 	}
@@ -56,41 +60,41 @@ func TestRootContext(t *testing.T) {
 }
 
 func TestCancelContext(t *testing.T) {
-	root, _ := RootContext()
-	ctx, cancel := WithCancel(root)
+	root, _ := context.RootContext()
+	ctx, cancel := context.WithCancel(root)
 	testCancel(t, ctx, cancel)
 
 	// Test cancelling a cancel context which is the child
 	// of a cancellable context.
-	parent, _ := WithCancel(root)
-	child, cancel := WithCancel(parent)
+	parent, _ := context.WithCancel(root)
+	child, cancel := context.WithCancel(parent)
 	cancel()
 	<-child.Done()
 
 	// Test adding a cancellable child context after the parent is
 	// already cancelled.
-	parent, cancel = WithCancel(root)
+	parent, cancel = context.WithCancel(root)
 	cancel()
-	child, _ = WithCancel(parent)
+	child, _ = context.WithCancel(parent)
 	<-child.Done() // The child should have been cancelled right away.
 }
 
 func TestMultiLevelCancelContext(t *testing.T) {
-	root, _ := RootContext()
-	c0, c0Cancel := WithCancel(root)
-	c1, _ := WithCancel(c0)
-	c2, _ := WithCancel(c1)
-	c3, _ := WithCancel(c2)
+	root, _ := context.RootContext()
+	c0, c0Cancel := context.WithCancel(root)
+	c1, _ := context.WithCancel(c0)
+	c2, _ := context.WithCancel(c1)
+	c3, _ := context.WithCancel(c2)
 	testCancel(t, c3, c0Cancel)
 }
 
-func testDeadline(t *testing.T, ctx *T, start time.Time, desiredTimeout time.Duration) {
+func testDeadline(t *testing.T, ctx *context.T, start time.Time, desiredTimeout time.Duration) {
 	<-ctx.Done()
 	if delta := time.Now().Sub(start); delta < desiredTimeout {
 		t.Errorf("Deadline too short want %s got %s", desiredTimeout, delta)
 	}
-	if err := ctx.Err(); err != DeadlineExceeded {
-		t.Errorf("Unexpected error want %s, got %s", DeadlineExceeded, err)
+	if err := ctx.Err(); err != context.DeadlineExceeded {
+		t.Errorf("Unexpected error want %s, got %s", context.DeadlineExceeded, err)
 	}
 }
 
@@ -99,44 +103,44 @@ func TestDeadlineContext(t *testing.T) {
 		3 * time.Millisecond,
 		0,
 	}
-	rootCtx, _ := RootContext()
-	cancelCtx, _ := WithCancel(rootCtx)
-	deadlineCtx, _ := WithDeadline(rootCtx, time.Now().Add(time.Hour))
+	rootCtx, _ := context.RootContext()
+	cancelCtx, _ := context.WithCancel(rootCtx)
+	deadlineCtx, _ := context.WithDeadline(rootCtx, time.Now().Add(time.Hour))
 
 	for _, desiredTimeout := range cases {
 		// Test all the various ways of getting deadline contexts.
 		start := time.Now()
-		ctx, _ := WithDeadline(rootCtx, start.Add(desiredTimeout))
+		ctx, _ := context.WithDeadline(rootCtx, start.Add(desiredTimeout))
 		testDeadline(t, ctx, start, desiredTimeout)
 
 		start = time.Now()
-		ctx, _ = WithDeadline(cancelCtx, start.Add(desiredTimeout))
+		ctx, _ = context.WithDeadline(cancelCtx, start.Add(desiredTimeout))
 		testDeadline(t, ctx, start, desiredTimeout)
 
 		start = time.Now()
-		ctx, _ = WithDeadline(deadlineCtx, start.Add(desiredTimeout))
+		ctx, _ = context.WithDeadline(deadlineCtx, start.Add(desiredTimeout))
 		testDeadline(t, ctx, start, desiredTimeout)
 
 		start = time.Now()
-		ctx, _ = WithTimeout(rootCtx, desiredTimeout)
+		ctx, _ = context.WithTimeout(rootCtx, desiredTimeout)
 		testDeadline(t, ctx, start, desiredTimeout)
 
 		start = time.Now()
-		ctx, _ = WithTimeout(cancelCtx, desiredTimeout)
+		ctx, _ = context.WithTimeout(cancelCtx, desiredTimeout)
 		testDeadline(t, ctx, start, desiredTimeout)
 
 		start = time.Now()
-		ctx, _ = WithTimeout(deadlineCtx, desiredTimeout)
+		ctx, _ = context.WithTimeout(deadlineCtx, desiredTimeout)
 		testDeadline(t, ctx, start, desiredTimeout)
 	}
 
-	ctx, cancel := WithDeadline(rootCtx, time.Now().Add(100*time.Hour))
+	ctx, cancel := context.WithDeadline(rootCtx, time.Now().Add(100*time.Hour))
 	testCancel(t, ctx, cancel)
 }
 
 func TestDeadlineContextWithRace(t *testing.T) {
-	root, _ := RootContext()
-	ctx, cancel := WithDeadline(root, time.Now().Add(100*time.Hour))
+	root, _ := context.RootContext()
+	ctx, cancel := context.WithDeadline(root, time.Now().Add(100*time.Hour))
 	var wg sync.WaitGroup
 	wg.Add(10)
 	for i := 0; i < 10; i++ {
@@ -147,8 +151,8 @@ func TestDeadlineContextWithRace(t *testing.T) {
 	}
 	wg.Wait()
 	<-ctx.Done()
-	if err := ctx.Err(); err != Canceled {
-		t.Errorf("Unexpected error want %v, got %v", Canceled, err)
+	if err := ctx.Err(); err != context.Canceled {
+		t.Errorf("Unexpected error want %v, got %v", context.Canceled, err)
 	}
 }
 
@@ -165,10 +169,10 @@ func TestValueContext(t *testing.T) {
 		val2
 		val3
 	)
-	root, _ := RootContext()
-	ctx1 := WithValue(root, key1, val1)
-	ctx2 := WithValue(ctx1, key2, val2)
-	ctx3 := WithValue(ctx2, key3, val3)
+	root, _ := context.RootContext()
+	ctx1 := context.WithValue(root, key1, val1)
+	ctx2 := context.WithValue(ctx1, key2, val2)
+	ctx3 := context.WithValue(ctx2, key3, val3)
 
 	expected := map[interface{}]interface{}{
 		key1: val1,
@@ -185,14 +189,14 @@ func TestValueContext(t *testing.T) {
 }
 
 func TestRootCancel(t *testing.T) {
-	root, rootcancel := RootContext()
-	a, acancel := WithCancel(root)
-	b := WithValue(a, "key", "value")
+	root, rootcancel := context.RootContext()
+	a, acancel := context.WithCancel(root)
+	b := context.WithValue(a, "key", "value")
 
-	c, ccancel := WithRootCancel(b)
-	d, _ := WithCancel(c)
+	c, ccancel := context.WithRootCancel(b)
+	d, _ := context.WithCancel(c)
 
-	e, _ := WithRootCancel(b)
+	e, _ := context.WithRootCancel(b)
 
 	if s, ok := d.Value("key").(string); !ok || s != "value" {
 		t.Error("Lost a value but shouldn't have.")
@@ -219,4 +223,60 @@ func TestRootCancel(t *testing.T) {
 	rootcancel()
 	<-root.Done()
 	<-e.Done()
+}
+
+type stringLogger struct {
+	bytes.Buffer
+}
+
+func (*stringLogger) Info(args ...interface{})                 {}
+func (*stringLogger) InfoDepth(depth int, args ...interface{}) {}
+func (sl *stringLogger) Infof(format string, args ...interface{}) {
+	sl.WriteString(fmt.Sprintf(format, args...))
+}
+func (*stringLogger) InfoStack(all bool) {}
+
+func (*stringLogger) Error(args ...interface{})                 {}
+func (*stringLogger) ErrorDepth(depth int, args ...interface{}) {}
+func (*stringLogger) Errorf(format string, args ...interface{}) {}
+
+func (*stringLogger) Fatal(args ...interface{})                 {}
+func (*stringLogger) FatalDepth(depth int, args ...interface{}) {}
+func (*stringLogger) Fatalf(format string, args ...interface{}) {}
+
+func (*stringLogger) Panic(args ...interface{})                 {}
+func (*stringLogger) PanicDepth(depth int, args ...interface{}) {}
+func (*stringLogger) Panicf(format string, args ...interface{}) {}
+
+func (*stringLogger) V(level int) bool { return false }
+func (d *stringLogger) VI(level int) interface {
+	Info(args ...interface{})
+	Infof(format string, args ...interface{})
+	InfoDepth(depth int, args ...interface{})
+	InfoStack(all bool)
+} {
+	return d
+}
+
+func (*stringLogger) FlushLog()      {}
+func (*stringLogger) LogDir() string { return "" }
+func (*stringLogger) Stats() (Info, Error struct{ Lines, Bytes int64 }) {
+	return struct{ Lines, Bytes int64 }{0, 0}, struct{ Lines, Bytes int64 }{0, 0}
+}
+func (*stringLogger) ConfigureFromFlags() error             { return nil }
+func (*stringLogger) ExplicitlySetFlags() map[string]string { return nil }
+
+func TestLogging(t *testing.T) {
+	root, rootcancel := context.RootContext()
+	root.Infof("this message should be silently discarded")
+
+	logger := &stringLogger{}
+	ctx := context.WithLogger(root, logger)
+	ctx.Infof("Oh, %s", "hello there")
+
+	if got, want := logger.String(), "Oh, hello there"; got != want {
+		t.Fatalf("got %v, want %v", got, want)
+	}
+
+	rootcancel()
 }

@@ -77,6 +77,8 @@ import (
 	"errors"
 	"sync"
 	"time"
+
+	"v.io/v23/logging"
 )
 
 type internalKey int
@@ -99,11 +101,15 @@ var Canceled = errors.New("context canceled")
 // deadlines and therefore been canceled automatically.
 var DeadlineExceeded = errors.New("context deadline exceeded")
 
+type hiddenLogger logging.Logger
+
 // T carries deadlines, cancellation and data across API boundaries.
 // It is safe to use a T from multiple goroutines simultaneously.  The
 // zero-type of context is uninitialized and will panic if used
-// directly by application code.
+// directly by application code. It also implements v23/logging.Logger and
+// hence can be used directly for logging (e.g. ctx.Infof(...)).
 type T struct {
+	hiddenLogger
 	parent     *T
 	key, value interface{}
 }
@@ -116,7 +122,15 @@ type T struct {
 // is sometimes useful in tests, where it is undesirable to initialize a
 // runtime to test a function that reads from a T.
 func RootContext() (*T, CancelFunc) {
-	return WithCancel(&T{key: rootKey})
+	return WithCancel(&T{hiddenLogger: logging.Discard, key: rootKey})
+}
+
+// WithLogger returns a child of the current context that embeds the supplied
+// logger.
+func WithLogger(parent *T, logger logging.Logger) *T {
+	child := *parent
+	child.hiddenLogger = logger
+	return &child
 }
 
 // Initialized returns true if this context has been properly initialized
@@ -235,7 +249,7 @@ func WithValue(parent *T, key interface{}, val interface{}) *T {
 	if key == nil {
 		panic("Attempting to store a context value with an untyped nil key.")
 	}
-	return &T{parent, key, val}
+	return &T{hiddenLogger: parent.hiddenLogger, parent: parent, key: key, value: val}
 }
 
 func withCancelState(parent *T) (*T, func(error)) {

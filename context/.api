@@ -1,6 +1,7 @@
 pkg context, func RootContext() (*T, CancelFunc)
 pkg context, func WithCancel(*T) (*T, CancelFunc)
 pkg context, func WithDeadline(*T, time.Time) (*T, CancelFunc)
+pkg context, func WithLogger(*T, logging.Logger) *T
 pkg context, func WithRootCancel(*T) (*T, CancelFunc)
 pkg context, func WithTimeout(*T, time.Duration) (*T, CancelFunc)
 pkg context, func WithValue(*T, interface{}, interface{}) *T
