@@ -28,11 +28,6 @@ pkg logging, type Logger interface, PanicDepth(int, ...interface{})
 pkg logging, type Logger interface, Panicf(string, ...interface{})
 pkg logging, type Logger interface, V(int) bool
 pkg logging, type Logger interface, VI(int) interface {  Info(args ...interface{});; Infof(format string, args ...interface{});; InfoDepth(depth int, args ...interface{});; InfoStack(all bool);}
-pkg logging, type ManageLog interface { ConfigureFromFlags, ExplicitlySetFlags, LogDir, Stats }
-pkg logging, type ManageLog interface, ConfigureFromFlags() error
-pkg logging, type ManageLog interface, ExplicitlySetFlags() map[string]string
-pkg logging, type ManageLog interface, LogDir() string
-pkg logging, type ManageLog interface, Stats() (struct{ Lines, Bytes int64 }, struct{ Lines, Bytes int64 })
 pkg logging, type PanicLog interface { Panic, PanicDepth, Panicf }
 pkg logging, type PanicLog interface, Panic(...interface{})
 pkg logging, type PanicLog interface, PanicDepth(int, ...interface{})
