@@ -158,9 +158,7 @@ func newServer(ctx *context.T, perms access.Permissions) (string, func()) {
 	service, err := server.NewService(nil, nil, server.ServiceOptions{
 		Perms:   perms,
 		RootDir: rootDir,
-		// TODO(sadovsky): Switch to leveldb once Database.Delete actually deletes
-		// the underlying storage engine data (or similar).
-		Engine: "memstore",
+		Engine:  "leveldb",
 	})
 	if err != nil {
 		vlog.Fatal("server.NewService() failed: ", err)
