@@ -61,7 +61,8 @@ type Database interface {
 	//
 	// Default concurrency semantics:
 	// - Reads inside a batch see a consistent snapshot, taken during
-	//   BeginBatch(), and will not see the effect of writes inside the batch.
+	//   BeginBatch(), and will also see the effect of writes and deletes inside
+	//   the batch.
 	// - Commit() may fail with ErrConcurrentBatch, indicating that after
 	//   BeginBatch() but before Commit(), some concurrent routine wrote to a key
 	//   that matches a key or row-range read inside this batch. (Writes inside a
