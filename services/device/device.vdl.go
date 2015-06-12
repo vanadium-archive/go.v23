@@ -1661,6 +1661,9 @@ type DeviceClientMethods interface {
 	// ListAssociations returns all of the associations between Vanadium identities
 	// and system names.
 	ListAssociations(*context.T, ...rpc.CallOpt) ([]Association, error)
+	// Request the device manager to perform regularly scheduled cleanup actions
+	// immediately.
+	TidyNow(*context.T, ...rpc.CallOpt) error
 }
 
 // DeviceClientStub adds universal methods to DeviceClientMethods.
@@ -1702,6 +1705,11 @@ func (c implDeviceClientStub) AssociateAccount(ctx *context.T, i0 []string, i1 s
 
 func (c implDeviceClientStub) ListAssociations(ctx *context.T, opts ...rpc.CallOpt) (o0 []Association, err error) {
 	err = v23.GetClient(ctx).Call(ctx, c.name, "ListAssociations", nil, []interface{}{&o0}, opts...)
+	return
+}
+
+func (c implDeviceClientStub) TidyNow(ctx *context.T, opts ...rpc.CallOpt) (err error) {
+	err = v23.GetClient(ctx).Call(ctx, c.name, "TidyNow", nil, nil, opts...)
 	return
 }
 
@@ -1821,6 +1829,9 @@ type DeviceServerMethods interface {
 	// ListAssociations returns all of the associations between Vanadium identities
 	// and system names.
 	ListAssociations(*context.T, rpc.ServerCall) ([]Association, error)
+	// Request the device manager to perform regularly scheduled cleanup actions
+	// immediately.
+	TidyNow(*context.T, rpc.ServerCall) error
 }
 
 // DeviceServerStubMethods is the server interface containing
@@ -1938,6 +1949,9 @@ type DeviceServerStubMethods interface {
 	// ListAssociations returns all of the associations between Vanadium identities
 	// and system names.
 	ListAssociations(*context.T, rpc.ServerCall) ([]Association, error)
+	// Request the device manager to perform regularly scheduled cleanup actions
+	// immediately.
+	TidyNow(*context.T, rpc.ServerCall) error
 }
 
 // DeviceServerStub adds universal methods to DeviceServerStubMethods.
@@ -1989,6 +2003,10 @@ func (s implDeviceServerStub) AssociateAccount(ctx *context.T, call rpc.ServerCa
 
 func (s implDeviceServerStub) ListAssociations(ctx *context.T, call rpc.ServerCall) ([]Association, error) {
 	return s.impl.ListAssociations(ctx, call)
+}
+
+func (s implDeviceServerStub) TidyNow(ctx *context.T, call rpc.ServerCall) error {
+	return s.impl.TidyNow(ctx, call)
 }
 
 func (s implDeviceServerStub) Globber() *rpc.GlobState {
@@ -2053,6 +2071,11 @@ var descDevice = rpc.InterfaceDesc{
 			OutArgs: []rpc.ArgDesc{
 				{"", ``}, // []Association
 			},
+			Tags: []*vdl.Value{vdl.ValueOf(access.Tag("Admin"))},
+		},
+		{
+			Name: "TidyNow",
+			Doc:  "// Request the device manager to perform regularly scheduled cleanup actions\n// immediately.",
 			Tags: []*vdl.Value{vdl.ValueOf(access.Tag("Admin"))},
 		},
 	},

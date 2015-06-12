@@ -360,4 +360,7 @@ type Device interface {
 	// ListAssociations returns all of the associations between Vanadium identities
 	// and system names.
 	ListAssociations() ([]Association | error) {access.Admin}
+	// Request the device manager to perform regularly scheduled cleanup actions
+	// immediately.
+	TidyNow() error {access.Admin}
 }
