@@ -151,7 +151,7 @@ pkg device, type ClaimableServerStubMethods ClaimableServerMethods
 pkg device, type Config map[string]string
 pkg device, type Description struct
 pkg device, type Description struct, Profiles map[string]struct{}
-pkg device, type DeviceClientMethods interface { AssociateAccount, Debug, Delete, Describe, GetPermissions, Install, Instantiate, IsRunnable, Kill, ListAssociations, Reset, Revert, Run, SetPermissions, Status, Uninstall, Update, UpdateTo }
+pkg device, type DeviceClientMethods interface { AssociateAccount, Debug, Delete, Describe, GetPermissions, Install, Instantiate, IsRunnable, Kill, ListAssociations, Reset, Revert, Run, SetPermissions, Status, TidyNow, Uninstall, Update, UpdateTo }
 pkg device, type DeviceClientMethods interface, AssociateAccount(*context.T, []string, string, ...rpc.CallOpt) error
 pkg device, type DeviceClientMethods interface, Debug(*context.T, ...rpc.CallOpt) (string, error)
 pkg device, type DeviceClientMethods interface, Delete(*context.T, ...rpc.CallOpt) error
@@ -167,10 +167,11 @@ pkg device, type DeviceClientMethods interface, Revert(*context.T, ...rpc.CallOp
 pkg device, type DeviceClientMethods interface, Run(*context.T, ...rpc.CallOpt) error
 pkg device, type DeviceClientMethods interface, SetPermissions(*context.T, access.Permissions, string, ...rpc.CallOpt) error
 pkg device, type DeviceClientMethods interface, Status(*context.T, ...rpc.CallOpt) (Status, error)
+pkg device, type DeviceClientMethods interface, TidyNow(*context.T, ...rpc.CallOpt) error
 pkg device, type DeviceClientMethods interface, Uninstall(*context.T, ...rpc.CallOpt) error
 pkg device, type DeviceClientMethods interface, Update(*context.T, ...rpc.CallOpt) error
 pkg device, type DeviceClientMethods interface, UpdateTo(*context.T, string, ...rpc.CallOpt) error
-pkg device, type DeviceClientStub interface { AssociateAccount, Debug, Delete, Describe, GetPermissions, Install, Instantiate, IsRunnable, Kill, ListAssociations, Reset, Revert, Run, SetPermissions, Status, Uninstall, Update, UpdateTo }
+pkg device, type DeviceClientStub interface { AssociateAccount, Debug, Delete, Describe, GetPermissions, Install, Instantiate, IsRunnable, Kill, ListAssociations, Reset, Revert, Run, SetPermissions, Status, TidyNow, Uninstall, Update, UpdateTo }
 pkg device, type DeviceClientStub interface, AssociateAccount(*context.T, []string, string, ...rpc.CallOpt) error
 pkg device, type DeviceClientStub interface, Debug(*context.T, ...rpc.CallOpt) (string, error)
 pkg device, type DeviceClientStub interface, Delete(*context.T, ...rpc.CallOpt) error
@@ -186,10 +187,11 @@ pkg device, type DeviceClientStub interface, Revert(*context.T, ...rpc.CallOpt) 
 pkg device, type DeviceClientStub interface, Run(*context.T, ...rpc.CallOpt) error
 pkg device, type DeviceClientStub interface, SetPermissions(*context.T, access.Permissions, string, ...rpc.CallOpt) error
 pkg device, type DeviceClientStub interface, Status(*context.T, ...rpc.CallOpt) (Status, error)
+pkg device, type DeviceClientStub interface, TidyNow(*context.T, ...rpc.CallOpt) error
 pkg device, type DeviceClientStub interface, Uninstall(*context.T, ...rpc.CallOpt) error
 pkg device, type DeviceClientStub interface, Update(*context.T, ...rpc.CallOpt) error
 pkg device, type DeviceClientStub interface, UpdateTo(*context.T, string, ...rpc.CallOpt) error
-pkg device, type DeviceServerMethods interface { AssociateAccount, Debug, Delete, Describe, GetPermissions, Install, Instantiate, IsRunnable, Kill, ListAssociations, Reset, Revert, Run, SetPermissions, Status, Uninstall, Update, UpdateTo }
+pkg device, type DeviceServerMethods interface { AssociateAccount, Debug, Delete, Describe, GetPermissions, Install, Instantiate, IsRunnable, Kill, ListAssociations, Reset, Revert, Run, SetPermissions, Status, TidyNow, Uninstall, Update, UpdateTo }
 pkg device, type DeviceServerMethods interface, AssociateAccount(*context.T, rpc.ServerCall, []string, string) error
 pkg device, type DeviceServerMethods interface, Debug(*context.T, rpc.ServerCall) (string, error)
 pkg device, type DeviceServerMethods interface, Delete(*context.T, rpc.ServerCall) error
@@ -205,6 +207,7 @@ pkg device, type DeviceServerMethods interface, Revert(*context.T, rpc.ServerCal
 pkg device, type DeviceServerMethods interface, Run(*context.T, rpc.ServerCall) error
 pkg device, type DeviceServerMethods interface, SetPermissions(*context.T, rpc.ServerCall, access.Permissions, string) error
 pkg device, type DeviceServerMethods interface, Status(*context.T, rpc.ServerCall) (Status, error)
+pkg device, type DeviceServerMethods interface, TidyNow(*context.T, rpc.ServerCall) error
 pkg device, type DeviceServerMethods interface, Uninstall(*context.T, rpc.ServerCall) error
 pkg device, type DeviceServerMethods interface, Update(*context.T, rpc.ServerCall) error
 pkg device, type DeviceServerMethods interface, UpdateTo(*context.T, rpc.ServerCall, string) error
@@ -222,6 +225,7 @@ pkg device, type DeviceServerStub interface, Reset(*context.T, rpc.ServerCall, t
 pkg device, type DeviceServerStub interface, Revert(*context.T, rpc.ServerCall) error
 pkg device, type DeviceServerStub interface, Run(*context.T, rpc.ServerCall) error
 pkg device, type DeviceServerStub interface, Status(*context.T, rpc.ServerCall) (Status, error)
+pkg device, type DeviceServerStub interface, TidyNow(*context.T, rpc.ServerCall) error
 pkg device, type DeviceServerStub interface, Uninstall(*context.T, rpc.ServerCall) error
 pkg device, type DeviceServerStub interface, Update(*context.T, rpc.ServerCall) error
 pkg device, type DeviceServerStub interface, UpdateTo(*context.T, rpc.ServerCall, string) error
@@ -239,6 +243,7 @@ pkg device, type DeviceServerStubMethods interface, Reset(*context.T, rpc.Server
 pkg device, type DeviceServerStubMethods interface, Revert(*context.T, rpc.ServerCall) error
 pkg device, type DeviceServerStubMethods interface, Run(*context.T, rpc.ServerCall) error
 pkg device, type DeviceServerStubMethods interface, Status(*context.T, rpc.ServerCall) (Status, error)
+pkg device, type DeviceServerStubMethods interface, TidyNow(*context.T, rpc.ServerCall) error
 pkg device, type DeviceServerStubMethods interface, Uninstall(*context.T, rpc.ServerCall) error
 pkg device, type DeviceServerStubMethods interface, Update(*context.T, rpc.ServerCall) error
 pkg device, type DeviceServerStubMethods interface, UpdateTo(*context.T, rpc.ServerCall, string) error
