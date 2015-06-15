@@ -338,7 +338,8 @@ func CompileKeyPrefixes(where *query_parser.WhereClause) []string {
 		// Elminate overlaps
 		var p2 []string
 		for i, s := range p {
-			if i != 0 && strings.HasPrefix(s, p[i-1]) {
+			// Skip over prefixes that are already covered by prior key prefixes.
+			if i != 0 && strings.HasPrefix(s, p2[len(p2)-1]) {
 				continue
 			}
 			p2 = append(p2, s)

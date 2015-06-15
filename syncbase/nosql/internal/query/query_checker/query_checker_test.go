@@ -132,6 +132,10 @@ func TestKeyPrefixes(t *testing.T) {
 			[]string{"abc"},
 		},
 		{
+			"select  k,  v from \n  Customer where k like \"002%\" or k like \"001%\" or k like \"%\"",
+			[]string{""},
+		},
+		{
 			"select k, v from Customer where k = \"Foo.Bar\" and k like \"abc%\" limit 100 offset 200",
 			[]string{"Foo.Bar", "abc"},
 		},
