@@ -253,7 +253,11 @@ func TestDisallowedMethods(t *testing.T) {
 
 	// Non-batch methods on batch.
 	bc := wire.DatabaseClient(b.FullName())
-	if err := bc.Create(ctx, nil); verror.ErrorID(err) != wire.ErrBoundToBatch.ID {
+	// For bc.Create(), we check that err is not nil instead of checking for
+	// ErrBoundToBatch specifically since in practice bc.Create() will return
+	// either ErrExist or "invalid name" depending on whether the database and
+	// batch exist.
+	if err := bc.Create(ctx, nil); err == nil {
 		t.Fatalf("bc.Create() should have failed: %v", err)
 	}
 	if err := bc.Delete(ctx); verror.ErrorID(err) != wire.ErrBoundToBatch.ID {
@@ -271,5 +275,25 @@ func TestDisallowedMethods(t *testing.T) {
 	// TODO(sadovsky): Test all other SyncGroupManager methods.
 	if _, err := bc.GetSyncGroupNames(ctx); verror.ErrorID(err) != wire.ErrBoundToBatch.ID {
 		t.Fatalf("bc.GetSyncGroupNames() should have failed: %v", err)
+	}
+
+	// Test that Table.{Create,Delete} fail with ErrBoundToBatch.
+	tc := wire.TableClient(naming.Join(b.FullName(), "tb"))
+	if err := tc.Create(ctx, nil); verror.ErrorID(err) != wire.ErrBoundToBatch.ID {
+		t.Fatalf("tc.Create() should have failed: %v", err)
+	}
+	if err := tc.Delete(ctx); verror.ErrorID(err) != wire.ErrBoundToBatch.ID {
+		t.Fatalf("tc.Delete() should have failed: %v", err)
+	}
+}
+
+// Tests that d.BeginBatch() fails gracefully if the database does not exist.
+func TestBeginBatchWithNonexistentDatabase(t *testing.T) {
+	ctx, sName, cleanup := tu.SetupOrDie(nil)
+	defer cleanup()
+	a := tu.CreateApp(t, ctx, syncbase.NewService(sName), "a")
+	d := a.NoSQLDatabase("d")
+	if _, err := d.BeginBatch(ctx, wire.BatchOptions{}); verror.ErrorID(err) != verror.ErrNoExist.ID {
+		t.Fatalf("d.BeginBatch() should have failed: %v", err)
 	}
 }
