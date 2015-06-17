@@ -14,8 +14,10 @@ import (
 	wire "v.io/syncbase/v23/services/syncbase/nosql"
 	"v.io/syncbase/v23/syncbase"
 	"v.io/syncbase/v23/syncbase/nosql"
+	"v.io/syncbase/v23/syncbase/nosql/syncql"
 	tu "v.io/syncbase/v23/syncbase/testutil"
 	"v.io/v23/naming"
+	"v.io/v23/vdl"
 	"v.io/v23/verror"
 	_ "v.io/x/ref/runtime/factories/generic"
 )
@@ -114,6 +116,90 @@ func TestBatchBasics(t *testing.T) {
 
 	// Check that foo, bar, and baz (but not rab) are now visible.
 	tu.CheckScan(t, ctx, tb, nosql.Prefix(""), []string{"barKey", "bazKey", "fooKey"}, []interface{}{"barValue", "bazValue", "fooValue"})
+}
+
+// Tests that BatchDatabase.Exec doesn't see changes committed outside the batch.
+// 1. Create a read only batch.
+// 2. query all rows in the table
+// 3. commit a new row outside of the batch
+// 4. confirm new row not seen when querying all rows in the table
+// 5. abort the batch and create a new readonly batch
+// 6. confirm new row NOW seen when querying all rows in the table
+func TestBatchExec(t *testing.T) {
+	ctx, sName, cleanup := tu.SetupOrDie(nil)
+	defer cleanup()
+	a := tu.CreateApp(t, ctx, syncbase.NewService(sName), "a")
+	d := tu.CreateNoSQLDatabase(t, ctx, a, "d")
+	tb := tu.CreateTable(t, ctx, d, "tb")
+
+	foo := Foo{I: 4, S: "f"}
+	if err := tb.Put(ctx, "foo", foo); err != nil {
+		t.Fatalf("tb.Put() failed: %v", err)
+	}
+
+	bar := Bar{F: 0.5, S: "b"}
+	// NOTE: not best practice, but store bar as
+	// optional (by passing the address of bar to Put).
+	// This tests auto-dereferencing.
+	if err := tb.Put(ctx, "bar", &bar); err != nil {
+		t.Fatalf("tb.Put() failed: %v", err)
+	}
+
+	baz := Baz{Name: "John Doe", Active: true}
+	if err := tb.Put(ctx, "baz", baz); err != nil {
+		t.Fatalf("tb.Put() failed: %v", err)
+	}
+
+	// Begin a readonly batch.
+	roBatch, err := d.BeginBatch(ctx, wire.BatchOptions{ReadOnly: true})
+	if err != nil {
+		t.Fatalf("d.BeginBatch() failed: %v", err)
+	}
+
+	// fetch all rows
+	tu.CheckExec(t, ctx, roBatch, "select k, v from tb",
+		[]string{"k", "v"},
+		[][]*vdl.Value{
+			[]*vdl.Value{vdl.ValueOf("bar"), vdl.ValueOf(bar)},
+			[]*vdl.Value{vdl.ValueOf("baz"), vdl.ValueOf(baz)},
+			[]*vdl.Value{vdl.ValueOf("foo"), vdl.ValueOf(foo)},
+		})
+
+	// Add a row outside this batch
+	newRow := Baz{Name: "Alice Wonderland", Active: false}
+	if err := tb.Put(ctx, "newRow", newRow); err != nil {
+		t.Fatalf("tb.Put() failed: %v", err)
+	}
+
+	// confirm fetching all rows doesn't get the new row
+	tu.CheckExec(t, ctx, roBatch, "select k, v from tb",
+		[]string{"k", "v"},
+		[][]*vdl.Value{
+			[]*vdl.Value{vdl.ValueOf("bar"), vdl.ValueOf(bar)},
+			[]*vdl.Value{vdl.ValueOf("baz"), vdl.ValueOf(baz)},
+			[]*vdl.Value{vdl.ValueOf("foo"), vdl.ValueOf(foo)},
+		})
+
+	// start a new batch
+	roBatch.Abort(ctx)
+	roBatch, err = d.BeginBatch(ctx, wire.BatchOptions{ReadOnly: true})
+	if err != nil {
+		t.Fatalf("d.BeginBatch() failed: %v", err)
+	}
+	defer roBatch.Abort(ctx)
+
+	// confirm fetching all rows NOW gets the new row
+	tu.CheckExec(t, ctx, roBatch, "select k, v from tb",
+		[]string{"k", "v"},
+		[][]*vdl.Value{
+			[]*vdl.Value{vdl.ValueOf("bar"), vdl.ValueOf(bar)},
+			[]*vdl.Value{vdl.ValueOf("baz"), vdl.ValueOf(baz)},
+			[]*vdl.Value{vdl.ValueOf("foo"), vdl.ValueOf(foo)},
+			[]*vdl.Value{vdl.ValueOf("newRow"), vdl.ValueOf(newRow)},
+		})
+
+	// test error condition on batch
+	tu.CheckExecError(t, ctx, roBatch, "select k, v from foo", syncql.ErrTableCantAccess.ID)
 }
 
 // Tests enforcement of BatchOptions.ReadOnly.

@@ -129,7 +129,7 @@ func CheckScan(t *testing.T, ctx *context.T, tb nosql.Table, r nosql.RowRange, w
 	}
 }
 
-func CheckExec(t *testing.T, ctx *context.T, db nosql.Database, q string, wantHeaders []string, wantResults [][]*vdl.Value) {
+func CheckExec(t *testing.T, ctx *context.T, db nosql.DatabaseHandle, q string, wantHeaders []string, wantResults [][]*vdl.Value) {
 	gotHeaders, it, err := db.Exec(ctx, q)
 	if err != nil {
 		t.Errorf("query %q: got %v, want nil", q, err)
@@ -150,7 +150,7 @@ func CheckExec(t *testing.T, ctx *context.T, db nosql.Database, q string, wantHe
 	}
 }
 
-func CheckExecError(t *testing.T, ctx *context.T, db nosql.Database, q string, wantErrorID verror.ID) {
+func CheckExecError(t *testing.T, ctx *context.T, db nosql.DatabaseHandle, q string, wantErrorID verror.ID) {
 	_, rs, err := db.Exec(ctx, q)
 	if err == nil {
 		if rs.Advance() {

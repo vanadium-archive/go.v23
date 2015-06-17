@@ -32,6 +32,15 @@ type DatabaseHandle interface {
 
 	// ListTables returns a list of all Table names.
 	ListTables(ctx *context.T) ([]string, error)
+
+	// Exec executes a syncQL query.
+	// If no error is returned, Exec returns an array of headers (i.e., column names)
+	// and a result stream which contains an array of values for each row that matches
+	// the query.  The number of values returned in each row of the result stream will
+	// match the size of the headers string array.
+	// TODO(jkline): Our storage engines don't yet reflect prior puts or deletes
+	// performed inside the batch.  This also applies to Scan.
+	Exec(ctx *context.T, query string) ([]string, ResultStream, error)
 }
 
 // Database represents a collection of Tables. Batches, queries, sync, watch,
@@ -55,14 +64,6 @@ type Database interface {
 
 	// DeleteTable deletes the specified Table.
 	DeleteTable(ctx *context.T, relativeName string) error
-
-	// Exec executes a syncQL query.
-	// If no error is returned, Exec returns an array of headers (i.e., column names)
-	// and a result stream which contains an array of values for each row which matches
-	// the query.  The number of values returned in each row of the result stream will
-	// match the size of the headers string array.
-	// TODO(jkline): Move this to DatabaseHandle to make it work in batches.
-	Exec(ctx *context.T, query string) ([]string, ResultStream, error)
 
 	// BeginBatch creates a new batch. Instead of calling this function directly,
 	// clients are recommended to use the RunInBatch() helper function, which
