@@ -84,6 +84,20 @@ type ListenAddrs []struct {
 	Protocol, Address string
 }
 
+// AddressChooser determines the preferred address to publish with the mount
+// table when one is not otherwise specified.
+type AddressChooser interface {
+	ChooseAddress(protocol string, candidates []net.Addr) ([]net.Addr, error)
+}
+
+// AddressChooserFunc is a convenience for implementations that wish to supply
+// a function literal implementation of AddressChooser.
+type AddressChooserFunc func(protocol string, candidates []net.Addr) ([]net.Addr, error)
+
+func (f AddressChooserFunc) ChooseAddress(protocol string, candidates []net.Addr) ([]net.Addr, error) {
+	return f(protocol, candidates)
+}
+
 // ListenSpec specifies the information required to create a set of listening
 // network endpoints for a server and, optionally, the name of a proxy
 // to use in conjunction with that listener.
@@ -94,10 +108,9 @@ type ListenSpec struct {
 	// The name of a proxy to be used to proxy connections to this listener.
 	Proxy string
 
-	// AddressChooser is a function that can be used to
-	// choose the preferred address to publish with the mount table
-	// when one is not otherwise specified.
-	AddressChooser func(protocol string, candidates []net.Addr) ([]net.Addr, error)
+	// The address chooser to use for determining preferred publishing
+	// addresses.
+	AddressChooser
 }
 
 func (l ListenSpec) String() string {

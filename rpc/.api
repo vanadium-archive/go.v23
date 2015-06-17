@@ -14,6 +14,7 @@ pkg rpc, func RegisterUnknownProtocol(string, DialerFunc, ResolverFunc, Listener
 pkg rpc, func RegisteredProtocol(string) (DialerFunc, ResolverFunc, ListenerFunc, []string)
 pkg rpc, func RegisteredProtocols() []string
 pkg rpc, func TypeCheckMethods(interface{}) map[string]error
+pkg rpc, method (AddressChooserFunc) ChooseAddress(string, []net.Addr) ([]net.Addr, error)
 pkg rpc, method (ListenSpec) Copy() ListenSpec
 pkg rpc, method (ListenSpec) String() string
 pkg rpc, method (MountState) Names() []string
@@ -21,6 +22,9 @@ pkg rpc, method (MountState) Servers() []string
 pkg rpc, method (MountStatus) String() string
 pkg rpc, method (NetworkChange) DebugString() string
 pkg rpc, method (ServerState) String() string
+pkg rpc, type AddressChooser interface { ChooseAddress }
+pkg rpc, type AddressChooser interface, ChooseAddress(string, []net.Addr) ([]net.Addr, error)
+pkg rpc, type AddressChooserFunc func(protocol string, candidates []net.Addr) ([]net.Addr, error)
 pkg rpc, type AllGlobber interface { Glob__ }
 pkg rpc, type AllGlobber interface, Glob__(*context.T, ServerCall, string) (<-chan naming.GlobReply, error)
 pkg rpc, type ArgDesc struct
@@ -76,9 +80,9 @@ pkg rpc, type Invoker interface, Prepare(string, int) ([]interface{}, []*vdl.Val
 pkg rpc, type Invoker interface, Signature(*context.T, ServerCall) ([]signature.Interface, error)
 pkg rpc, type ListenAddrs []struct {  Protocol, Address string;}
 pkg rpc, type ListenSpec struct
-pkg rpc, type ListenSpec struct, AddressChooser func(string, []net.Addr) ([]net.Addr, error)
 pkg rpc, type ListenSpec struct, Addrs ListenAddrs
 pkg rpc, type ListenSpec struct, Proxy string
+pkg rpc, type ListenSpec struct, embedded AddressChooser
 pkg rpc, type ListenerFunc func(protocol, address string) (net.Listener, error)
 pkg rpc, type MethodDesc struct
 pkg rpc, type MethodDesc struct, Doc string
