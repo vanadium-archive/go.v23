@@ -14,8 +14,8 @@ import (
 
 	"v.io/syncbase/v23/syncbase/nosql/internal/query"
 	"v.io/syncbase/v23/syncbase/nosql/internal/query/query_checker"
-	"v.io/syncbase/v23/syncbase/nosql/internal/query/query_db"
 	"v.io/syncbase/v23/syncbase/nosql/internal/query/query_parser"
+	"v.io/syncbase/v23/syncbase/nosql/query_db"
 	"v.io/syncbase/v23/syncbase/nosql/syncql"
 	"v.io/v23"
 	"v.io/v23/context"
@@ -988,6 +988,12 @@ func TestKeyPrefixes(t *testing.T) {
 		{
 			// Need all keys (single prefix of "").
 			"select k, v from Customer",
+			[]string{""},
+			nil,
+		},
+		{
+			// Need all keys (single prefix of "").
+			"   sElEcT  k,  v from \n  Customer WhErE k lIkE \"002%\" oR k LiKe \"001%\" or k lIkE \"%\"",
 			[]string{""},
 			nil,
 		},

@@ -478,6 +478,10 @@ type DatabaseClientMethods interface {
 	// If this Database is not bound to a batch, Commit() will fail with
 	// ErrNotBoundToBatch.
 	Commit(*context.T, ...rpc.CallOpt) error
+	// Exec executes a syncQL query and returns all results as specified by
+	// in the query's select clause.  The returned stream reads
+	// from a consistent snapshot taken at the time of the Exec RPC.
+	Exec(ctx *context.T, query string, opts ...rpc.CallOpt) (DatabaseExecClientCall, error)
 	// Abort notifies the server that any pending changes can be discarded.
 	// It is not strictly required, but it may allow the server to release locks
 	// or other resources sooner than if it was not called.
@@ -524,8 +528,85 @@ func (c implDatabaseClientStub) Commit(ctx *context.T, opts ...rpc.CallOpt) (err
 	return
 }
 
+func (c implDatabaseClientStub) Exec(ctx *context.T, i0 string, opts ...rpc.CallOpt) (ocall DatabaseExecClientCall, err error) {
+	var call rpc.ClientCall
+	if call, err = v23.GetClient(ctx).StartCall(ctx, c.name, "Exec", []interface{}{i0}, opts...); err != nil {
+		return
+	}
+	ocall = &implDatabaseExecClientCall{ClientCall: call}
+	return
+}
+
 func (c implDatabaseClientStub) Abort(ctx *context.T, opts ...rpc.CallOpt) (err error) {
 	err = v23.GetClient(ctx).Call(ctx, c.name, "Abort", nil, nil, opts...)
+	return
+}
+
+// DatabaseExecClientStream is the client stream for Database.Exec.
+type DatabaseExecClientStream interface {
+	// RecvStream returns the receiver side of the Database.Exec client stream.
+	RecvStream() interface {
+		// Advance stages an item so that it may be retrieved via Value.  Returns
+		// true iff there is an item to retrieve.  Advance must be called before
+		// Value is called.  May block if an item is not available.
+		Advance() bool
+		// Value returns the item that was staged by Advance.  May panic if Advance
+		// returned false or was not called.  Never blocks.
+		Value() []*vdl.Value
+		// Err returns any error encountered by Advance.  Never blocks.
+		Err() error
+	}
+}
+
+// DatabaseExecClientCall represents the call returned from Database.Exec.
+type DatabaseExecClientCall interface {
+	DatabaseExecClientStream
+	// Finish blocks until the server is done, and returns the positional return
+	// values for call.
+	//
+	// Finish returns immediately if the call has been canceled; depending on the
+	// timing the output could either be an error signaling cancelation, or the
+	// valid positional return values from the server.
+	//
+	// Calling Finish is mandatory for releasing stream resources, unless the call
+	// has been canceled or any of the other methods return an error.  Finish should
+	// be called at most once.
+	Finish() error
+}
+
+type implDatabaseExecClientCall struct {
+	rpc.ClientCall
+	valRecv []*vdl.Value
+	errRecv error
+}
+
+func (c *implDatabaseExecClientCall) RecvStream() interface {
+	Advance() bool
+	Value() []*vdl.Value
+	Err() error
+} {
+	return implDatabaseExecClientCallRecv{c}
+}
+
+type implDatabaseExecClientCallRecv struct {
+	c *implDatabaseExecClientCall
+}
+
+func (c implDatabaseExecClientCallRecv) Advance() bool {
+	c.c.errRecv = c.c.Recv(&c.c.valRecv)
+	return c.c.errRecv == nil
+}
+func (c implDatabaseExecClientCallRecv) Value() []*vdl.Value {
+	return c.c.valRecv
+}
+func (c implDatabaseExecClientCallRecv) Err() error {
+	if c.c.errRecv == io.EOF {
+		return nil
+	}
+	return c.c.errRecv
+}
+func (c *implDatabaseExecClientCall) Finish() (err error) {
+	err = c.ClientCall.Finish()
 	return
 }
 
@@ -602,6 +683,10 @@ type DatabaseServerMethods interface {
 	// If this Database is not bound to a batch, Commit() will fail with
 	// ErrNotBoundToBatch.
 	Commit(*context.T, rpc.ServerCall) error
+	// Exec executes a syncQL query and returns all results as specified by
+	// in the query's select clause.  The returned stream reads
+	// from a consistent snapshot taken at the time of the Exec RPC.
+	Exec(ctx *context.T, call DatabaseExecServerCall, query string) error
 	// Abort notifies the server that any pending changes can be discarded.
 	// It is not strictly required, but it may allow the server to release locks
 	// or other resources sooner than if it was not called.
@@ -612,9 +697,84 @@ type DatabaseServerMethods interface {
 
 // DatabaseServerStubMethods is the server interface containing
 // Database methods, as expected by rpc.Server.
-// There is no difference between this interface and DatabaseServerMethods
-// since there are no streaming methods.
-type DatabaseServerStubMethods DatabaseServerMethods
+// The only difference between this interface and DatabaseServerMethods
+// is the streaming methods.
+type DatabaseServerStubMethods interface {
+	// Object provides access control for Vanadium objects.
+	//
+	// Vanadium services implementing dynamic access control would typically embed
+	// this interface and tag additional methods defined by the service with one of
+	// Admin, Read, Write, Resolve etc. For example, the VDL definition of the
+	// object would be:
+	//
+	//   package mypackage
+	//
+	//   import "v.io/v23/security/access"
+	//   import "v.io/v23/services/permissions"
+	//
+	//   type MyObject interface {
+	//     permissions.Object
+	//     MyRead() (string, error) {access.Read}
+	//     MyWrite(string) error    {access.Write}
+	//   }
+	//
+	// If the set of pre-defined tags is insufficient, services may define their
+	// own tag type and annotate all methods with this new type.
+	//
+	// Instead of embedding this Object interface, define SetPermissions and
+	// GetPermissions in their own interface. Authorization policies will typically
+	// respect annotations of a single type. For example, the VDL definition of an
+	// object would be:
+	//
+	//  package mypackage
+	//
+	//  import "v.io/v23/security/access"
+	//
+	//  type MyTag string
+	//
+	//  const (
+	//    Blue = MyTag("Blue")
+	//    Red  = MyTag("Red")
+	//  )
+	//
+	//  type MyObject interface {
+	//    MyMethod() (string, error) {Blue}
+	//
+	//    // Allow clients to change access via the access.Object interface:
+	//    SetPermissions(perms access.Permissions, version string) error         {Red}
+	//    GetPermissions() (perms access.Permissions, version string, err error) {Blue}
+	//  }
+	permissions.ObjectServerStubMethods
+	// SyncGroupManager is the interface for SyncGroup operations.
+	// TODO(hpucha): Add blessings to create/join and add a refresh method.
+	SyncGroupManagerServerStubMethods
+	// Create creates this Database.
+	// If perms is nil, we inherit (copy) the App perms.
+	// Create requires the caller to have Write permission at the App.
+	Create(ctx *context.T, call rpc.ServerCall, perms access.Permissions) error
+	// Delete deletes this Database.
+	Delete(*context.T, rpc.ServerCall) error
+	// BeginBatch creates a new batch. It returns an App-relative name for a
+	// Database handle bound to this batch. If this Database is already bound to a
+	// batch, BeginBatch() will fail with ErrBoundToBatch.
+	//
+	// Concurrency semantics are documented in model.go.
+	BeginBatch(ctx *context.T, call rpc.ServerCall, bo BatchOptions) (string, error)
+	// Commit persists the pending changes to the database.
+	// If this Database is not bound to a batch, Commit() will fail with
+	// ErrNotBoundToBatch.
+	Commit(*context.T, rpc.ServerCall) error
+	// Exec executes a syncQL query and returns all results as specified by
+	// in the query's select clause.  The returned stream reads
+	// from a consistent snapshot taken at the time of the Exec RPC.
+	Exec(ctx *context.T, call *DatabaseExecServerCallStub, query string) error
+	// Abort notifies the server that any pending changes can be discarded.
+	// It is not strictly required, but it may allow the server to release locks
+	// or other resources sooner than if it was not called.
+	// If this Database is not bound to a batch, Abort() will fail with
+	// ErrNotBoundToBatch.
+	Abort(*context.T, rpc.ServerCall) error
+}
 
 // DatabaseServerStub adds universal methods to DatabaseServerStubMethods.
 type DatabaseServerStub interface {
@@ -663,6 +823,10 @@ func (s implDatabaseServerStub) BeginBatch(ctx *context.T, call rpc.ServerCall, 
 
 func (s implDatabaseServerStub) Commit(ctx *context.T, call rpc.ServerCall) error {
 	return s.impl.Commit(ctx, call)
+}
+
+func (s implDatabaseServerStub) Exec(ctx *context.T, call *DatabaseExecServerCallStub, i0 string) error {
+	return s.impl.Exec(ctx, call, i0)
 }
 
 func (s implDatabaseServerStub) Abort(ctx *context.T, call rpc.ServerCall) error {
@@ -720,11 +884,62 @@ var descDatabase = rpc.InterfaceDesc{
 			Tags: []*vdl.Value{vdl.ValueOf(access.Tag("Read"))},
 		},
 		{
+			Name: "Exec",
+			Doc:  "// Exec executes a syncQL query and returns all results as specified by\n// in the query's select clause.  The returned stream reads\n// from a consistent snapshot taken at the time of the Exec RPC.",
+			InArgs: []rpc.ArgDesc{
+				{"query", ``}, // string
+			},
+			Tags: []*vdl.Value{vdl.ValueOf(access.Tag("Read"))},
+		},
+		{
 			Name: "Abort",
 			Doc:  "// Abort notifies the server that any pending changes can be discarded.\n// It is not strictly required, but it may allow the server to release locks\n// or other resources sooner than if it was not called.\n// If this Database is not bound to a batch, Abort() will fail with\n// ErrNotBoundToBatch.",
 			Tags: []*vdl.Value{vdl.ValueOf(access.Tag("Read"))},
 		},
 	},
+}
+
+// DatabaseExecServerStream is the server stream for Database.Exec.
+type DatabaseExecServerStream interface {
+	// SendStream returns the send side of the Database.Exec server stream.
+	SendStream() interface {
+		// Send places the item onto the output stream.  Returns errors encountered
+		// while sending.  Blocks if there is no buffer space; will unblock when
+		// buffer space is available.
+		Send(item []*vdl.Value) error
+	}
+}
+
+// DatabaseExecServerCall represents the context passed to Database.Exec.
+type DatabaseExecServerCall interface {
+	rpc.ServerCall
+	DatabaseExecServerStream
+}
+
+// DatabaseExecServerCallStub is a wrapper that converts rpc.StreamServerCall into
+// a typesafe stub that implements DatabaseExecServerCall.
+type DatabaseExecServerCallStub struct {
+	rpc.StreamServerCall
+}
+
+// Init initializes DatabaseExecServerCallStub from rpc.StreamServerCall.
+func (s *DatabaseExecServerCallStub) Init(call rpc.StreamServerCall) {
+	s.StreamServerCall = call
+}
+
+// SendStream returns the send side of the Database.Exec server stream.
+func (s *DatabaseExecServerCallStub) SendStream() interface {
+	Send(item []*vdl.Value) error
+} {
+	return implDatabaseExecServerCallSend{s}
+}
+
+type implDatabaseExecServerCallSend struct {
+	s *DatabaseExecServerCallStub
+}
+
+func (s implDatabaseExecServerCallSend) Send(item []*vdl.Value) error {
+	return s.s.Send(item)
 }
 
 // TableClientMethods is the client interface

@@ -22,6 +22,8 @@ import (
 	"v.io/v23/rpc"
 	"v.io/v23/security"
 	"v.io/v23/security/access"
+	"v.io/v23/vdl"
+	"v.io/v23/verror"
 	"v.io/x/lib/vlog"
 	tsecurity "v.io/x/ref/test/testutil"
 )
@@ -124,6 +126,41 @@ func CheckScan(t *testing.T, ctx *context.T, tb nosql.Table, r nosql.RowRange, w
 	}
 	if len(gotKeys) != len(wantKeys) {
 		Fatalf(t, "Unmatched keys: got %v, want %v", gotKeys, wantKeys)
+	}
+}
+
+func CheckExec(t *testing.T, ctx *context.T, db nosql.Database, q string, wantHeaders []string, wantResults [][]*vdl.Value) {
+	gotHeaders, it, err := db.Exec(ctx, q)
+	if err != nil {
+		t.Errorf("query %q: got %v, want nil", q, err)
+	}
+	if !reflect.DeepEqual(gotHeaders, wantHeaders) {
+		t.Errorf("query %q: got %v, want %v", q, gotHeaders, wantHeaders)
+	}
+	gotResults := [][]*vdl.Value{}
+	for it.Advance() {
+		gotResult := it.Result()
+		gotResults = append(gotResults, gotResult)
+	}
+	if it.Err() != nil {
+		t.Errorf("query %q: got %v, want nil", q, it.Err())
+	}
+	if !reflect.DeepEqual(gotResults, wantResults) {
+		t.Errorf("query %q: got %v, want %v", q, gotResults, wantResults)
+	}
+}
+
+func CheckExecError(t *testing.T, ctx *context.T, db nosql.Database, q string, wantErrorID verror.ID) {
+	_, rs, err := db.Exec(ctx, q)
+	if err == nil {
+		if rs.Advance() {
+			t.Errorf("query %q: got true, want false", q)
+		}
+		err = rs.Err()
+	}
+	if verror.ErrorID(err) != wantErrorID {
+		t.Errorf("%q", verror.DebugString(err))
+		t.Errorf("query %q: got %v, want: %v", q, verror.ErrorID(err), wantErrorID)
 	}
 }
 

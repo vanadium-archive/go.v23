@@ -10,6 +10,7 @@ import (
 	"v.io/syncbase/v23/syncbase/util"
 	"v.io/v23/context"
 	"v.io/v23/security/access"
+	"v.io/v23/vdl"
 )
 
 // TODO(sadovsky): Document the access control policy for every method where
@@ -54,6 +55,14 @@ type Database interface {
 
 	// DeleteTable deletes the specified Table.
 	DeleteTable(ctx *context.T, relativeName string) error
+
+	// Exec executes a syncQL query.
+	// If no error is returned, Exec returns an array of headers (i.e., column names)
+	// and a result stream which contains an array of values for each row which matches
+	// the query.  The number of values returned in each row of the result stream will
+	// match the size of the headers string array.
+	// TODO(jkline): Move this to DatabaseHandle to make it work in batches.
+	Exec(ctx *context.T, query string) ([]string, ResultStream, error)
 
 	// BeginBatch creates a new batch. Instead of calling this function directly,
 	// clients are recommended to use the RunInBatch() helper function, which
@@ -225,6 +234,32 @@ type Stream interface {
 	// The client must call Cancel if it does not iterate through all elements
 	// (i.e. until Advance returns false). Cancel is idempotent and can be called
 	// concurrently with a goroutine that is iterating via Advance/Key/Value.
+	// Cancel causes Advance to subsequently return false. Cancel does not block.
+	Cancel()
+}
+
+// ResultStream is an interface for iterating through rows resulting from an Exec.
+type ResultStream interface {
+	// Advance stages an result so the client can retrieve it with Result.
+	// Advance returns true iff there is a result to retrieve. The client must
+	// call Advance before calling Result. The client must call Cancel if it
+	// does not iterate through all results (i.e. until Advance returns false).
+	// Advance may block if a result is not immediately available.
+	Advance() bool
+
+	// Result returns the result that was staged by Advance.
+	// Result may panic if Advance returned false or was not called at all.
+	// Result does not block.
+	Result() []*vdl.Value
+
+	// Err returns a non-nil error iff the stream encountered any errors. Err does
+	// not block.
+	Err() error
+
+	// Cancel notifies the stream provider that it can stop producing results.
+	// The client must call Cancel if it does not iterate through all results
+	// (i.e. until Advance returns false). Cancel is idempotent and can be called
+	// concurrently with a goroutine that is iterating via Advance/Result.
 	// Cancel causes Advance to subsequently return false. Cancel does not block.
 	Cancel()
 }

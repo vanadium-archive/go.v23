@@ -36,6 +36,11 @@ type Database interface {
 	// ErrNotBoundToBatch.
 	Commit() error {access.Read}
 
+	// Exec executes a syncQL query and returns all results as specified by
+	// in the query's select clause.  The returned stream reads
+	// from a consistent snapshot taken at the time of the Exec RPC.
+	Exec(query string) stream<_, []any> error {access.Read}
+
 	// Abort notifies the server that any pending changes can be discarded.
 	// It is not strictly required, but it may allow the server to release locks
 	// or other resources sooner than if it was not called.

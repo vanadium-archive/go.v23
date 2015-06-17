@@ -73,6 +73,30 @@ func (d *database) DeleteTable(ctx *context.T, relativeName string) error {
 	return wire.TableClient(naming.Join(d.fullName, relativeName)).Delete(ctx)
 }
 
+// Exec implements Database.Exec.
+func (d *database) Exec(ctx *context.T, query string) ([]string, ResultStream, error) {
+	ctx, cancel := context.WithCancel(ctx)
+	call, err := d.c.Exec(ctx, query)
+	if err != nil {
+		return nil, nil, err
+	}
+	resultStream := newResultStream(cancel, call)
+	// The first row contains headers, pull them off the stream
+	// and return them separately.
+	var headers []string
+	if !resultStream.Advance() {
+		if err = resultStream.Err(); err != nil {
+			// Since there was an error, can't get headers.
+			// Just return the error.
+			return nil, nil, err
+		}
+	}
+	for _, header := range resultStream.Result() {
+		headers = append(headers, header.RawString())
+	}
+	return headers, resultStream, nil
+}
+
 // BeginBatch implements Database.BeginBatch.
 func (d *database) BeginBatch(ctx *context.T, opts wire.BatchOptions) (BatchDatabase, error) {
 	relativeName, err := d.c.BeginBatch(ctx, opts)

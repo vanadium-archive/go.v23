@@ -18,7 +18,7 @@ import (
 	"v.io/syncbase/v23/syncbase/nosql/internal/query/demo/db"
 	"v.io/syncbase/v23/syncbase/nosql/internal/query/demo/reader"
 	"v.io/syncbase/v23/syncbase/nosql/internal/query/demo/writer"
-	"v.io/syncbase/v23/syncbase/nosql/internal/query/query_db"
+	"v.io/syncbase/v23/syncbase/nosql/query_db"
 	_ "v.io/x/ref/runtime/factories/generic"
 )
 

@@ -11,9 +11,9 @@ import (
 
 	"v.io/syncbase/v23/syncbase/nosql/internal/query/conversions"
 	"v.io/syncbase/v23/syncbase/nosql/internal/query/query_checker"
-	"v.io/syncbase/v23/syncbase/nosql/internal/query/query_db"
 	"v.io/syncbase/v23/syncbase/nosql/internal/query/query_functions"
 	"v.io/syncbase/v23/syncbase/nosql/internal/query/query_parser"
+	"v.io/syncbase/v23/syncbase/nosql/query_db"
 	"v.io/syncbase/v23/syncbase/nosql/syncql"
 	"v.io/v23/vdl"
 )
@@ -449,6 +449,20 @@ func resolveOperand(db query_db.Database, k string, v *vdl.Value, o *query_parse
 	return &newOp
 }
 
+// Auto-dereference Any and Optional values
+func autoDereference(o *vdl.Value) *vdl.Value {
+	for o.Kind() == vdl.Any || o.Kind() == vdl.Optional {
+		o = o.Elem()
+		if o == nil {
+			break
+		}
+	}
+	if o == nil {
+		o = vdl.ValueOf(nil)
+	}
+	return o
+}
+
 // Resolve a field.  In the special case where a type is evaluated, in addition
 // to a string being returned, and alternate string is returned.  In this case,
 // <string-value>, true, <alt-string> is returned.  In all other cases,
@@ -457,6 +471,8 @@ func ResolveField(k string, v *vdl.Value, f *query_parser.Field) (*vdl.Value, bo
 	if query_checker.IsKeyField(f) {
 		return vdl.StringValue(k), false, ""
 	}
+	// Auto-dereference Any and Optional values
+	v = autoDereference(v)
 	t := v.Type()
 	if query_checker.IsTypeField(f) {
 		// Types evaluate to two strings, Str and AltStr.
@@ -469,6 +485,8 @@ func ResolveField(k string, v *vdl.Value, f *query_parser.Field) (*vdl.Value, bo
 	segments := f.Segments
 	// The first segment will always be v (itself), skip it.
 	for i := 1; i < len(segments); i++ {
+		// Auto-dereference Any and Optional values
+		object = autoDereference(object)
 		// object must be a struct in order to look for the next segment.
 		if object.Kind() == vdl.Struct {
 			if object = object.StructFieldByName(segments[i].Value); object == nil {

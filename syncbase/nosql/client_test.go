@@ -10,8 +10,10 @@ import (
 
 	"v.io/syncbase/v23/syncbase"
 	"v.io/syncbase/v23/syncbase/nosql"
+	"v.io/syncbase/v23/syncbase/nosql/syncql"
 	tu "v.io/syncbase/v23/syncbase/testutil"
 	"v.io/v23/naming"
+	"v.io/v23/vdl"
 	"v.io/v23/verror"
 	_ "v.io/x/ref/runtime/factories/generic"
 )
@@ -50,6 +52,83 @@ func TestDatabaseCreate(t *testing.T) {
 	defer cleanup()
 	a := tu.CreateApp(t, ctx, syncbase.NewService(sName), "a")
 	tu.TestCreate(t, ctx, a)
+}
+
+// Tests that Database.Exec works as expected.
+// Note: More comprehensive client/server tests are in the exec_test
+// directory.  Also, exec is tested in its entirety in
+// v23/syncbase/nosql/internal/query/...
+func TestExec(t *testing.T) {
+	ctx, sName, cleanup := tu.SetupOrDie(nil)
+	defer cleanup()
+	a := tu.CreateApp(t, ctx, syncbase.NewService(sName), "a")
+	d := tu.CreateNoSQLDatabase(t, ctx, a, "d")
+	tb := tu.CreateTable(t, ctx, d, "tb")
+
+	foo := Foo{I: 4, S: "f"}
+	if err := tb.Put(ctx, "foo", foo); err != nil {
+		t.Fatalf("tb.Put() failed: %v", err)
+	}
+
+	bar := Bar{F: 0.5, S: "b"}
+	// NOTE: not best practice, but store bar as
+	// optional (by passing the address of bar to Put).
+	// This tests auto-dereferencing.
+	if err := tb.Put(ctx, "bar", &bar); err != nil {
+		t.Fatalf("tb.Put() failed: %v", err)
+	}
+
+	baz := Baz{Name: "John Doe", Active: true}
+	if err := tb.Put(ctx, "baz", baz); err != nil {
+		t.Fatalf("tb.Put() failed: %v", err)
+	}
+
+	tu.CheckExec(t, ctx, d, "select k, v.Name from tb where t = \"Baz\"",
+		[]string{"k", "v.Name"},
+		[][]*vdl.Value{
+			[]*vdl.Value{vdl.ValueOf("baz"), vdl.ValueOf(baz.Name)},
+		})
+
+	tu.CheckExec(t, ctx, d, "select k, v from tb",
+		[]string{"k", "v"},
+		[][]*vdl.Value{
+			[]*vdl.Value{vdl.ValueOf("bar"), vdl.ValueOf(bar)},
+			[]*vdl.Value{vdl.ValueOf("baz"), vdl.ValueOf(baz)},
+			[]*vdl.Value{vdl.ValueOf("foo"), vdl.ValueOf(foo)},
+		})
+
+	tu.CheckExec(t, ctx, d, "select k, v from tb where k like \"ba%\"",
+		[]string{"k", "v"},
+		[][]*vdl.Value{
+			[]*vdl.Value{vdl.ValueOf("bar"), vdl.ValueOf(bar)},
+			[]*vdl.Value{vdl.ValueOf("baz"), vdl.ValueOf(baz)},
+		})
+
+	tu.CheckExec(t, ctx, d, "select k, v from tb where v.Active = true",
+		[]string{"k", "v"},
+		[][]*vdl.Value{
+			[]*vdl.Value{vdl.ValueOf("baz"), vdl.ValueOf(baz)},
+		})
+
+	tu.CheckExec(t, ctx, d, "select k, v from tb where t = \"Bar\"",
+		[]string{"k", "v"},
+		[][]*vdl.Value{
+			[]*vdl.Value{vdl.ValueOf("bar"), vdl.ValueOf(bar)},
+		})
+
+	tu.CheckExec(t, ctx, d, "select k, v from tb where v.F = 0.5",
+		[]string{"k", "v"},
+		[][]*vdl.Value{
+			[]*vdl.Value{vdl.ValueOf("bar"), vdl.ValueOf(bar)},
+		})
+
+	tu.CheckExec(t, ctx, d, "select k, v from tb where t = \"Baz\"",
+		[]string{"k", "v"},
+		[][]*vdl.Value{
+			[]*vdl.Value{vdl.ValueOf("baz"), vdl.ValueOf(baz)},
+		})
+
+	tu.CheckExecError(t, ctx, d, "select k, v from foo", syncql.ErrTableCantAccess.ID)
 }
 
 // Tests that Database.Delete works as expected.
@@ -114,6 +193,11 @@ type Foo struct {
 type Bar struct {
 	F float32
 	S string
+}
+
+type Baz struct {
+	Name   string
+	Active bool
 }
 
 // Tests that Table.Scan works as expected.

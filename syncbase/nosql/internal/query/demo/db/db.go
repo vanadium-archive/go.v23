@@ -9,7 +9,7 @@ import (
 	"fmt"
 	"strings"
 
-	"v.io/syncbase/v23/syncbase/nosql/internal/query/query_db"
+	"v.io/syncbase/v23/syncbase/nosql/query_db"
 	"v.io/v23"
 	"v.io/v23/context"
 	"v.io/v23/vdl"
