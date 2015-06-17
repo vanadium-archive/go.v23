@@ -8,7 +8,24 @@ pkg context, func WithValue(*T, interface{}, interface{}) *T
 pkg context, method (*T) Deadline() (time.Time, bool)
 pkg context, method (*T) Done() <-chan struct{}
 pkg context, method (*T) Err() error
+pkg context, method (*T) Error(...interface{})
+pkg context, method (*T) ErrorDepth(int, ...interface{})
+pkg context, method (*T) Errorf(string, ...interface{})
+pkg context, method (*T) Fatal(...interface{})
+pkg context, method (*T) FatalDepth(int, ...interface{})
+pkg context, method (*T) Fatalf(string, ...interface{})
+pkg context, method (*T) FlushLog()
+pkg context, method (*T) Info(...interface{})
+pkg context, method (*T) InfoDepth(int, ...interface{})
+pkg context, method (*T) InfoStack(bool)
+pkg context, method (*T) Infof(string, ...interface{})
 pkg context, method (*T) Initialized() bool
+pkg context, method (*T) LoggerImplementation() interface{}
+pkg context, method (*T) Panic(...interface{})
+pkg context, method (*T) PanicDepth(int, ...interface{})
+pkg context, method (*T) Panicf(string, ...interface{})
+pkg context, method (*T) V(int) bool
+pkg context, method (*T) VI(int) interface {  Info(args ...interface{}); Infof(format string, args ...interface{}); InfoDepth(depth int, args ...interface{}); InfoStack(all bool);}
 pkg context, method (*T) Value(interface{}) interface{}
 pkg context, type CancelFunc func()
 pkg context, type T struct

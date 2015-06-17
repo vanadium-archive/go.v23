@@ -12,6 +12,7 @@ import (
 	"time"
 
 	"v.io/v23/context"
+	"v.io/v23/logging"
 )
 
 func testCancel(t *testing.T, ctx *context.T, cancel context.CancelFunc) {
@@ -229,12 +230,10 @@ type stringLogger struct {
 	bytes.Buffer
 }
 
-func (*stringLogger) Info(args ...interface{})                 {}
-func (*stringLogger) InfoDepth(depth int, args ...interface{}) {}
-func (sl *stringLogger) Infof(format string, args ...interface{}) {
-	sl.WriteString(fmt.Sprintf(format, args...))
-}
-func (*stringLogger) InfoStack(all bool) {}
+func (*stringLogger) Info(args ...interface{})                    {}
+func (sl *stringLogger) InfoDepth(depth int, args ...interface{}) { sl.WriteString(fmt.Sprint(args...)) }
+func (sl *stringLogger) Infof(format string, args ...interface{}) {}
+func (*stringLogger) InfoStack(all bool)                          {}
 
 func (*stringLogger) Error(args ...interface{})                 {}
 func (*stringLogger) ErrorDepth(depth int, args ...interface{}) {}
@@ -268,6 +267,7 @@ func (*stringLogger) ExplicitlySetFlags() map[string]string { return nil }
 
 func TestLogging(t *testing.T) {
 	root, rootcancel := context.RootContext()
+	var _ logging.Logger = root
 	root.Infof("this message should be silently discarded")
 
 	logger := &stringLogger{}
