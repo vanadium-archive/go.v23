@@ -7,8 +7,10 @@ package writer_test
 import (
 	"bytes"
 	"testing"
+	"time"
 
 	"v.io/syncbase/v23/syncbase/nosql/internal/query"
+	"v.io/syncbase/v23/syncbase/nosql/internal/query/demo/db"
 	"v.io/syncbase/v23/syncbase/nosql/internal/query/demo/writer"
 	"v.io/v23/vdl"
 )
@@ -143,6 +145,78 @@ bar |
 +---------+---------+
 `,
 		},
+		{ // nil is shown as blank.
+			[]string{"c1"},
+			[][]interface{}{
+				{nil},
+			},
+			`
++----+
+| c1 |
++----+
+|    |
++----+
+`,
+		},
+		{
+			[]string{"c1"},
+			[][]interface{}{
+				{db.Customer{"John Smith", 1, true, db.AddressInfo{"1 Main St.", "Palo Alto", "CA", "94303"}, db.CreditReport{Agency: db.CreditAgencyEquifax, Report: db.AgencyReportEquifaxReport{db.EquifaxCreditReport{'A'}}}}},
+				{db.Invoice{1, 1000, 42, db.AddressInfo{"1 Main St.", "Palo Alto", "CA", "94303"}}},
+			},
+			`
++------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+|                                                                                                                                                                                       c1 |
++------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| {Name: "John Smith", Id: 1, Active: true, Address: {Street: "1 Main St.", City: "Palo Alto", State: "CA", Zip: "94303"}, Credit: {Agency: Equifax, Report: EquifaxReport: {Rating: 65}}} |
+| {CustId: 1, InvoiceNum: 1000, Amount: 42, ShipTo: {Street: "1 Main St.", City: "Palo Alto", State: "CA", Zip: "94303"}}                                                                  |
++------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+`,
+		},
+		{
+			[]string{"c1"},
+			[][]interface{}{
+				{db.Composite{db.Array2String{"foo", "棎鶊鵱"}, []int32{1, 2}, map[int32]struct{}{1: struct{}{}, 2: struct{}{}}, map[string]int32{"foo": 1, "bar": 2}}},
+			},
+			`
++----------------------------------------------------------------------------------+
+|                                                                               c1 |
++----------------------------------------------------------------------------------+
+| {Arr: ["foo", "棎鶊鵱"], ListInt: [1, 2], MySet: {1, 2}, Map: {"bar": 2, "foo": 1}} |
++----------------------------------------------------------------------------------+
+`,
+		},
+		{ // Types not built in to Go.
+			[]string{"time", "type", "union", "enum", "set"},
+			[][]interface{}{
+				{time.Unix(13377331, 0), vdl.TypeOf(map[float32]struct{ B bool }{}), db.TitleOrValueTypeTitle{"dahar master"}, db.ExperianRatingBad, map[int32]struct{}{47: struct{}{}}},
+			},
+			`
++-------------------------------+----------------------------------------+-----------------------+------+------+
+|                          time |                                   type |                 union | enum |  set |
++-------------------------------+----------------------------------------+-----------------------+------+------+
+| 1970-06-04 19:55:31 +0000 UTC | typeobject(map[float32]struct{B bool}) | Title: "dahar master" | Bad  | {47} |
++-------------------------------+----------------------------------------+-----------------------+------+------+
+`,
+		},
+		{
+			[]string{"c1"},
+			[][]interface{}{
+				{
+					db.Recursive{nil, &db.Times{time.Unix(123456789, 42244224), time.Duration(13377331)}, map[db.Array2String]db.Recursive{
+						db.Array2String{"a", "b"}:       db.Recursive{},
+						db.Array2String{"x\nx", "y\"y"}: db.Recursive{vdl.ValueOf(db.AgencyReportExperianReport{db.ExperianCreditReport{db.ExperianRatingGood}}), nil, nil},
+					}},
+				},
+			},
+			`
++----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+|                                                                                                                                                                                                                               c1 |
++----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| {Any: nil, Maybe: {Stamp: "1973-11-29 21:33:09.042244224 +0000 UTC", Interval: "13.377331ms"}, Rec: {["a", "b"]: {Any: nil, Maybe: nil, Rec: {}}, ["x\nx", "y\"y"]: {Any: ExperianReport: {Rating: Good}, Maybe: nil, Rec: {}}}} |
++----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+`,
+		},
 	}
 	for _, test := range tests {
 		var b bytes.Buffer
@@ -240,11 +314,24 @@ foo	bar,"foo,bar"
 `,
 		},
 		{ // Same as above but use a non-default delimiter.
-			[]string{"foo\tbar", "foo,bar"},
+			[]string{"foo\tbar", "foo,棎鶊鵱"},
 			[][]interface{}{},
 			"\t",
 			`
-"foo	bar"	foo,bar
+"foo	bar"	foo,棎鶊鵱
+`,
+		},
+		{
+			[]string{"c1"},
+			[][]interface{}{
+				{db.Customer{"John Smith", 1, true, db.AddressInfo{"1 Main St.", "Palo Alto", "CA", "94303"}, db.CreditReport{Agency: db.CreditAgencyEquifax, Report: db.AgencyReportEquifaxReport{db.EquifaxCreditReport{'A'}}}}},
+				{db.Invoice{1, 1000, 42, db.AddressInfo{"1 Main St.", "Palo Alto", "CA", "94303"}}},
+			},
+			",",
+			`
+c1
+"{Name: ""John Smith"", Id: 1, Active: true, Address: {Street: ""1 Main St."", City: ""Palo Alto"", State: ""CA"", Zip: ""94303""}, Credit: {Agency: Equifax, Report: EquifaxReport: {Rating: 65}}}"
+"{CustId: 1, InvoiceNum: 1000, Amount: 42, ShipTo: {Street: ""1 Main St."", City: ""Palo Alto"", State: ""CA"", Zip: ""94303""}}"
 `,
 		},
 	}

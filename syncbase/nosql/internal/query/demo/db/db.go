@@ -8,6 +8,7 @@ import (
 	"errors"
 	"fmt"
 	"strings"
+	"time"
 
 	"v.io/syncbase/v23/syncbase/nosql/query_db"
 	"v.io/v23"
@@ -150,19 +151,19 @@ func createDB() *demoDB {
 		},
 		kv{
 			"002001",
-			vdl.ValueOf(Invoice{2, 1001, 166, AddressInfo{"777 Any St.", "collins", "IA", "50055"}}),
+			vdl.ValueOf(Invoice{2, 1001, 166, AddressInfo{"777 Any St.", "Collins", "IA", "50055"}}),
 		},
 		kv{
 			"002002",
-			vdl.ValueOf(Invoice{2, 1002, 243, AddressInfo{"888 Any St.", "collins", "IA", "50055"}}),
+			vdl.ValueOf(Invoice{2, 1002, 243, AddressInfo{"888 Any St.", "Collins", "IA", "50055"}}),
 		},
 		kv{
 			"002003",
-			vdl.ValueOf(Invoice{2, 1004, 787, AddressInfo{"999 Any St.", "collins", "IA", "50055"}}),
+			vdl.ValueOf(Invoice{2, 1004, 787, AddressInfo{"999 Any St.", "Collins", "IA", "50055"}}),
 		},
 		kv{
 			"002004",
-			vdl.ValueOf(Invoice{2, 1006, 88, AddressInfo{"101010 Any St.", "collins", "IA", "50055"}}),
+			vdl.ValueOf(Invoice{2, 1006, 88, AddressInfo{"101010 Any St.", "Collins", "IA", "50055"}}),
 		},
 	}
 	d.tables = append(d.tables, custTable)
@@ -184,6 +185,32 @@ func createDB() *demoDB {
 		},
 	}
 	d.tables = append(d.tables, numTable)
+
+	var compositeTable table
+	compositeTable.name = "Composites"
+	compositeTable.rows = []kv{
+		kv{
+			"uno",
+			vdl.ValueOf(Composite{Array2String{"foo", "bar"}, []int32{1, 2}, map[int32]struct{}{1: struct{}{}, 2: struct{}{}}, map[string]int32{"foo": 1, "bar": 2}}),
+		},
+	}
+	d.tables = append(d.tables, compositeTable)
+
+	var recursiveTable table
+	recursiveTable.name = "Recursives"
+	recursiveTable.rows = []kv{
+		kv{
+			"alpha",
+			vdl.ValueOf(Recursive{nil, &Times{time.Unix(123456789, 42244224), time.Duration(1337)}, map[Array2String]Recursive{
+				Array2String{"a", "b"}: Recursive{},
+				Array2String{"x", "y"}: Recursive{vdl.ValueOf(CreditReport{Agency: CreditAgencyExperian, Report: AgencyReportExperianReport{ExperianCreditReport{ExperianRatingGood}}}), nil, map[Array2String]Recursive{
+					Array2String{"alpha", "beta"}: Recursive{vdl.ValueOf(FooType{Bar: BarType{Baz: BazType{Name: "hello", TitleOrValue: TitleOrValueTypeValue{Value: 42}}}}), nil, nil},
+				}},
+				Array2String{"u", "v"}: Recursive{vdl.ValueOf(vdl.TypeOf(Recursive{})), nil, nil},
+			}}),
+		},
+	}
+	d.tables = append(d.tables, recursiveTable)
 
 	return d
 }

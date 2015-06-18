@@ -11,6 +11,10 @@ import (
 	// VDL system imports
 	"fmt"
 	"v.io/v23/vdl"
+
+	// VDL user imports
+	"time"
+	_ "v.io/v23/vdlroot/time"
 )
 
 type AddressInfo struct {
@@ -316,6 +320,46 @@ func (BazType) __VDLReflect(struct {
 }) {
 }
 
+type Array2String [2]string
+
+func (Array2String) __VDLReflect(struct {
+	Name string `vdl:"v.io/syncbase/v23/syncbase/nosql/internal/query/demo/db.Array2String"`
+}) {
+}
+
+type Composite struct {
+	Arr     Array2String
+	ListInt []int32
+	MySet   map[int32]struct{}
+	Map     map[string]int32
+}
+
+func (Composite) __VDLReflect(struct {
+	Name string `vdl:"v.io/syncbase/v23/syncbase/nosql/internal/query/demo/db.Composite"`
+}) {
+}
+
+type Times struct {
+	Stamp    time.Time
+	Interval time.Duration
+}
+
+func (Times) __VDLReflect(struct {
+	Name string `vdl:"v.io/syncbase/v23/syncbase/nosql/internal/query/demo/db.Times"`
+}) {
+}
+
+type Recursive struct {
+	Any   *vdl.Value
+	Maybe *Times
+	Rec   map[Array2String]Recursive
+}
+
+func (Recursive) __VDLReflect(struct {
+	Name string `vdl:"v.io/syncbase/v23/syncbase/nosql/internal/query/demo/db.Recursive"`
+}) {
+}
+
 func init() {
 	vdl.Register((*AddressInfo)(nil))
 	vdl.Register((*CreditAgency)(nil))
@@ -332,4 +376,8 @@ func init() {
 	vdl.Register((*BarType)(nil))
 	vdl.Register((*TitleOrValueType)(nil))
 	vdl.Register((*BazType)(nil))
+	vdl.Register((*Array2String)(nil))
+	vdl.Register((*Composite)(nil))
+	vdl.Register((*Times)(nil))
+	vdl.Register((*Recursive)(nil))
 }

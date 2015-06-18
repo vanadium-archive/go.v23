@@ -4,6 +4,8 @@
 
 package db
 
+import "time"
+
 type AddressInfo struct {
 	Street string
 	City   string
@@ -18,8 +20,8 @@ type CreditAgency enum {
 }
 
 type ExperianRating enum {
-        Good
-        Bad
+	Good
+	Bad
 }
 
 type EquifaxCreditReport struct {
@@ -90,4 +92,24 @@ type TitleOrValueType union {
 type BazType struct {
 	Name         string
 	TitleOrValue TitleOrValueType
+}
+
+type Array2String [2]string
+
+type Composite struct {
+	Arr     Array2String
+	ListInt []int32
+	MySet   set[int32]
+	Map     map[string]int32
+}
+
+type Times struct {
+	Stamp    time.Time
+	Interval time.Duration
+}
+
+type Recursive struct {
+	Any   any
+	Maybe ?Times
+	Rec   map[Array2String]Recursive
 }

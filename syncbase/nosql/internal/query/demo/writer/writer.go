@@ -8,10 +8,13 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"strconv"
 	"strings"
+	"unicode/utf8"
 
 	"v.io/syncbase/v23/syncbase/nosql/internal/query"
 	"v.io/v23/vdl"
+	vtime "v.io/v23/vdlroot/time"
 )
 
 type Justification int
@@ -27,7 +30,7 @@ func WriteTable(out io.Writer, columnNames []string, rs query.ResultStream) erro
 	// Buffer the results so we can compute the column widths.
 	columnWidths := make([]int, len(columnNames))
 	for i, cName := range columnNames {
-		columnWidths[i] = len(cName)
+		columnWidths[i] = utf8.RuneCountInString(cName)
 	}
 	justification := make([]Justification, len(columnNames))
 	var results [][]string
@@ -40,10 +43,11 @@ func WriteTable(out io.Writer, columnNames []string, rs query.ResultStream) erro
 			if justification[i] == Unknown {
 				justification[i] = getJustification(column)
 			}
-			columnStr := toString(column)
+			columnStr := toString(column, false)
 			row[i] = columnStr
-			if len(columnStr) > columnWidths[i] {
-				columnWidths[i] = len(columnStr)
+			columnLen := utf8.RuneCountInString(columnStr)
+			if columnLen > columnWidths[i] {
+				columnWidths[i] = columnLen
 			}
 		}
 		results = append(results, row)
@@ -109,7 +113,7 @@ func WriteCSV(out io.Writer, columnNames []string, rs query.ResultStream, delimi
 	for rs.Advance() {
 		delim := ""
 		for _, column := range rs.Result() {
-			str := doubleQuoteForCSV(toString(column), delimiter)
+			str := doubleQuoteForCSV(toString(column, false), delimiter)
 			io.WriteString(out, fmt.Sprintf("%s%s", delim, str))
 			delim = delimiter
 		}
@@ -134,7 +138,23 @@ func doubleQuoteForCSV(str, delimiter string) string {
 	return str
 }
 
-func toString(val *vdl.Value) string {
+// Converts VDL value to readable yet parseable string representation.
+// If nested is not set, strings outside composites are left unquoted.
+// TODO(ivanpi): Handle cycles and improve non-tree DAG handling.
+func toString(val *vdl.Value, nested bool) string {
+	switch val.Type() {
+	case vdl.TypeOf(vtime.Time{}), vdl.TypeOf(vtime.Duration{}):
+		s, err := toStringNative(val)
+		if err != nil {
+			panic(fmt.Sprintf("toStringNative failed for builtin time type: %v", err))
+		}
+		if nested {
+			s = strconv.Quote(s)
+		}
+		return s
+	default:
+		// fall through to Kind switch
+	}
 	switch val.Kind() {
 	case vdl.Bool:
 		return fmt.Sprint(val.Bool())
@@ -150,19 +170,81 @@ func toString(val *vdl.Value) string {
 		c := val.Complex()
 		return fmt.Sprintf("%v+%vi", real(c), imag(c))
 	case vdl.String:
-		return val.RawString()
+		s := val.RawString()
+		if nested {
+			s = strconv.Quote(s)
+		}
+		return s
 	case vdl.Enum:
 		return val.EnumLabel()
 	case vdl.Array, vdl.List:
-		ret := "["
-		sep := ""
-		for i := 0; i < val.Len(); i++ {
-			ret += sep + toString(val.Index(i))
+		return listToString("[", ", ", "]", val.Len(), func(i int) string {
+			return toString(val.Index(i), true)
+		})
+	case vdl.Any, vdl.Optional:
+		if val.IsNil() {
+			if nested {
+				return "nil"
+			}
+			// TODO(ivanpi): Blank is better for CSV, but <nil> might be better for table and TSV.
+			return ""
 		}
-		return ret + "]"
-		// TODO(kash): Add support for Nil, Time, TypeObject, Set, Map, Struct,
-		// Union.  Not sure if I need to support Any and Optional.
+		return toString(val.Elem(), nested)
+	case vdl.Struct:
+		return listToString("{", ", ", "}", val.Type().NumField(), func(i int) string {
+			field := toString(val.StructField(i), true)
+			return fmt.Sprintf("%s: %s", val.Type().Field(i).Name, field)
+		})
+	case vdl.Union:
+		ui, uv := val.UnionField()
+		field := toString(uv, true)
+		return fmt.Sprintf("%s: %s", val.Type().Field(ui).Name, field)
+	case vdl.Set:
+		// TODO(ivanpi): vdl.SortValuesAsString() used for predictable output ordering.
+		// Use a more sensible sort for numbers etc.
+		keys := vdl.SortValuesAsString(val.Keys())
+		return listToString("{", ", ", "}", len(keys), func(i int) string {
+			return toString(keys[i], true)
+		})
+	case vdl.Map:
+		// TODO(ivanpi): vdl.SortValuesAsString() used for predictable output ordering.
+		// Use a more sensible sort for numbers etc.
+		keys := vdl.SortValuesAsString(val.Keys())
+		return listToString("{", ", ", "}", len(keys), func(i int) string {
+			k := toString(keys[i], true)
+			v := toString(val.MapIndex(keys[i]), true)
+			return fmt.Sprintf("%s: %s", k, v)
+		})
+	case vdl.TypeObject:
+		return val.String()
 	default:
-		return fmt.Sprintf("unknown Kind %s", val.Kind())
+		panic(fmt.Sprintf("unknown Kind %s", val.Kind()))
 	}
+}
+
+// Converts a VDL value to string using the corresponding native type String()
+// method.
+func toStringNative(val *vdl.Value) (string, error) {
+	var natVal interface{}
+	if err := vdl.Convert(&natVal, val); err != nil {
+		return "", fmt.Errorf("failed converting %s to native value: %v", val.Type().String(), err)
+	}
+	if _, ok := natVal.(*vdl.Value); ok {
+		return "", fmt.Errorf("failed converting %s to native value: got vdl.Value", val.Type().String())
+	}
+	if strNatVal, ok := natVal.(fmt.Stringer); !ok {
+		return "", fmt.Errorf("native value of %s doesn't implement String()", val.Type().String())
+	} else {
+		return strNatVal.String(), nil
+	}
+}
+
+// Stringifies a sequence of n elements, where element i string representation
+// is obtained using elemToString(i),
+func listToString(begin, sep, end string, n int, elemToString func(i int) string) string {
+	elems := make([]string, n)
+	for i, _ := range elems {
+		elems[i] = elemToString(i)
+	}
+	return begin + strings.Join(elems, sep) + end
 }
