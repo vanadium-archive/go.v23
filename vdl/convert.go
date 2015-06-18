@@ -442,6 +442,9 @@ func rvSettableZeroValue(rt reflect.Type, tt *Type) reflect.Value {
 	// Handle composite types with inline subtypes.
 	switch {
 	case tt.Kind() == Union:
+		if nativeInfoFromNative(rt) != nil {
+			return rv
+		}
 		if rt.Kind() == reflect.Struct {
 			// Union struct, which represents a single field.
 			rv.Field(0).Set(rvSettableZeroValue(rt.Field(0).Type, tt.Field(0).Type))
