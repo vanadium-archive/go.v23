@@ -41,11 +41,11 @@ func init() {
 	defer shutdown()
 }
 
-func (t invoiceTable) Scan(prefixes []string) (query_db.KeyValueStream, error) {
+func (t invoiceTable) Scan(keyRanges query_db.KeyRanges) (query_db.KeyValueStream, error) {
 	return nil, errors.New("unimplemented")
 }
 
-func (t customerTable) Scan(prefixes []string) (query_db.KeyValueStream, error) {
+func (t customerTable) Scan(keyRanges query_db.KeyRanges) (query_db.KeyValueStream, error) {
 	return nil, errors.New("unimplemented")
 }
 
@@ -66,9 +66,9 @@ type checkSelectTest struct {
 	query string
 }
 
-type keyPrefixesTest struct {
-	query       string
-	keyPrefixes []string
+type keyRangesTest struct {
+	query     string
+	keyRanges query_db.KeyRanges
 }
 
 type regularExpressionsTest struct {
@@ -121,35 +121,69 @@ func TestQueryChecker(t *testing.T) {
 	}
 }
 
-func TestKeyPrefixes(t *testing.T) {
-	basic := []keyPrefixesTest{
+func appendZeroByte(start string) string {
+	limit := []byte(start)
+	limit = append(limit, 0)
+	return string(limit)
+
+}
+
+func TestKeyRanges(t *testing.T) {
+	basic := []keyRangesTest{
 		{
 			"select k, v from Customer",
-			[]string{""},
+			query_db.KeyRanges{
+				query_db.KeyRange{string([]byte{0}), string([]byte{255})},
+			},
 		},
 		{
 			"select k, v from Customer where t = \"Foo.Bar\" and k like \"abc%\" limit 100 offset 200",
-			[]string{"abc"},
+			query_db.KeyRanges{
+				query_db.KeyRange{"abc", "abd"},
+			},
 		},
 		{
 			"select  k,  v from \n  Customer where k like \"002%\" or k like \"001%\" or k like \"%\"",
-			[]string{""},
+			query_db.KeyRanges{
+				query_db.KeyRange{string([]byte{0}), string([]byte{255})},
+			},
 		},
 		{
 			"select k, v from Customer where k = \"Foo.Bar\" and k like \"abc%\" limit 100 offset 200",
-			[]string{"Foo.Bar", "abc"},
+			query_db.KeyRanges{
+				query_db.KeyRange{"Foo.Bar", appendZeroByte("Foo.Bar")},
+				query_db.KeyRange{"abc", "abd"},
+			},
 		},
 		{
+			// Note: 'like "Foo"' is optimized to '= "Foo"
 			"select k, v from Customer where k = \"Foo.Bar\" or k like \"Foo\" or k like \"abc%\" limit 100 offset 200",
-			[]string{"Foo", "abc"},
+			query_db.KeyRanges{
+				query_db.KeyRange{"Foo", appendZeroByte("Foo")},
+				query_db.KeyRange{"Foo.Bar", appendZeroByte("Foo.Bar")},
+				query_db.KeyRange{"abc", "abd"},
+			},
 		},
 		{
 			"select k, v from Customer where k like \"Foo\\%Bar\" or k like \"abc%\" limit 100 offset 200",
-			[]string{"Foo%Bar", "abc"},
+			query_db.KeyRanges{
+				query_db.KeyRange{"Foo%Bar", appendZeroByte("Foo%Bar")},
+				query_db.KeyRange{"abc", "abd"},
+			},
 		},
 		{
 			"select k, v from Customer where k like \"Foo\\\\%Bar\" or k like \"abc%\" limit 100 offset 200",
-			[]string{"Foo\\", "abc"},
+			query_db.KeyRanges{
+				query_db.KeyRange{"Foo\\", "Foo]"},
+				query_db.KeyRange{"abc", "abd"},
+			},
+		},
+		{
+			"select k, v from Customer where k like \"Foo\\\\\\%Bar\" or k like \"abc%\" limit 100 offset 200",
+			query_db.KeyRanges{
+				query_db.KeyRange{"Foo\\%Bar", appendZeroByte("Foo\\%Bar")},
+				query_db.KeyRange{"abc", "abd"},
+			},
 		},
 	}
 
@@ -164,9 +198,9 @@ func TestKeyPrefixes(t *testing.T) {
 		}
 		switch sel := (*s).(type) {
 		case query_parser.SelectStatement:
-			prefixes := query_checker.CompileKeyPrefixes(sel.Where)
-			if !reflect.DeepEqual(test.keyPrefixes, prefixes) {
-				t.Errorf("query: %s;\nGOT  %v\nWANT %v", test.query, prefixes, test.keyPrefixes)
+			keyRanges := query_checker.CompileKeyRanges(sel.Where)
+			if !reflect.DeepEqual(test.keyRanges, keyRanges) {
+				t.Errorf("query: %s;\nGOT  %v\nWANT %v", test.query, keyRanges, test.keyRanges)
 			}
 		default:
 			t.Errorf("query: %s;\nGOT  %v\nWANT query_parser.SelectStatement", test.query, *s)

@@ -107,9 +107,17 @@ func checkExpression(db query_db.Database, e *query_parser.Expression) error {
 		e.Operand2.Prefix = prefix
 		// Compute the regular expression now to to check for errors.
 		// Save the regex (testing) and the compiled regex (for later use in evaluation).
-		regex, compRegex, err := computeRegex(db, e.Operand2.Off, e.Operand2.Str)
+		regex, compRegex, foundWildcard, err := computeRegex(db, e.Operand2.Off, e.Operand2.Str)
 		if err != nil {
 			return err
+		}
+		// Optimization: If like argument contains no wildcards, convert the expression to equals.
+		if !foundWildcard {
+			e.Operator.Type = query_parser.Equal
+			// Since this is no longer a like expression, we need to unescape
+			// any escaped chars (i.e., "\\", "\_" and "\%" become
+			// "\", "_" and "%", respectively).
+			e.Operand2.Str = unescapeLikeExpression(e.Operand2.Str)
 		}
 		e.Operand2.Regex = regex
 		e.Operand2.CompRegex = compRegex
@@ -227,68 +235,85 @@ func computePrefix(db query_db.Database, off int64, s string) (string, error) {
 // Convert Like expression to a regex.  That is, convert:
 // % to .*?
 // _ to .
+// Unescape '\\', '\%' and '\_' to '\', '%' and '_', respectively.
 // Escape everything that would be incorrectly interpreted as a regex.
-// Note: \% and \_ are used to escape % and _, respectively.
-func computeRegex(db query_db.Database, off int64, s string) (string, *regexp.Regexp, error) {
-	// Escape everything, this will escape too much as like wildcards can
-	// also be escaped by a backslash (\%, \_, \\).
-	escaped := regexp.QuoteMeta(s)
-	// Change all unescaped '%' chars to ".*?" and all unescaped '_' chars to '.'.
-	var buf bytes.Buffer
-	buf.WriteString("^")
-	backslash_level := 0
-	for _, c := range escaped {
-		switch backslash_level {
-		case 0:
-			switch c {
-			case '%':
-				buf.WriteString(".*?")
-			case '_':
-				buf.WriteString(".")
-			case '\\':
-				backslash_level++
-			default:
-				buf.WriteString(string(c))
+//
+// The approach this function takes is to collect characters to be escaped
+// into toBeEscapedBuf.  When a wildcard is encountered, first toBeEscapedBuf
+// is escaped and written to the regex buffer, next the wildcard is translated
+// to regex (either ".*?" or ".") and written to the regex buffer.
+// At the end, any remaining chars in toBeEscapedBuf are written.
+//
+// Return values are:
+// 1. string: uncompiled regular expression
+// 2. *Regexp: compiled regular expression
+// 3. bool: true if wildcards were found (if false, like is converted to equal)
+// 4. error: non-nil if error encountered
+func computeRegex(db query_db.Database, off int64, s string) (string, *regexp.Regexp, bool, error) {
+	var buf bytes.Buffer            // buffer for return regex
+	var toBeEscapedBuf bytes.Buffer // buffer to hold characters waiting to be escaped
+
+	buf.WriteString("^") // '^<regex_str>$'
+	escapedMode := false
+	foundWildcard := false
+
+	for _, c := range s {
+		switch c {
+		case '%', '_':
+			if escapedMode {
+				toBeEscapedBuf.WriteString(string(c))
+			} else {
+				// Write out any chars waiting to be escaped, then
+				// write ".*?' or '.'.
+				buf.WriteString(regexp.QuoteMeta(toBeEscapedBuf.String()))
+				toBeEscapedBuf.Reset()
+				if c == '%' {
+					buf.WriteString(".*?")
+				} else {
+					buf.WriteString(".")
+				}
+				foundWildcard = true
 			}
-		case 1:
-			switch c {
-			case '\\':
-				// backslashes become double backslashes because of the
-				// QuoteMeta above.  Let's see what's next.
-				backslash_level++
-			default:
-				// In this case, QuoteMeta is escaping a regex character.  We
-				// need to honor the escape (e.g., \*, \[, \]).
-				buf.WriteString("\\")
-				buf.WriteString(string(c))
-				backslash_level = 0
+			escapedMode = false
+		case '\\':
+			if escapedMode {
+				toBeEscapedBuf.WriteString(string(c))
 			}
-		case 2:
-			switch c {
-			case '\\':
-				// We've hit a third backslash.
-				// Write out the first \ (escaped as \\).
-				// Set backslash_level to 1 since we've encountered
-				// another backslash and need to see what follows.
-				buf.WriteString("\\\\")
-				backslash_level = 1
-			default:
-				// The user wrote \% or \_.
-				// It was escaped by QuoteMeta to \\% or \\_.
-				// Since the % or _ was escaped, just write it so regex can
-				// treat it like any character.
-				buf.WriteString(string(c))
-				backslash_level = 0
-			}
+			escapedMode = !escapedMode
+		default:
+			toBeEscapedBuf.WriteString(string(c))
 		}
 	}
-	buf.WriteString("$")
+	// Write any remaining chars in toBeEscapedBuf.
+	buf.WriteString(regexp.QuoteMeta(toBeEscapedBuf.String()))
+	buf.WriteString("$") // '^<regex_str>$'
 	regex := buf.String()
 	compRegex, err := regexp.Compile(regex)
 	if err != nil {
-		return "", nil, syncql.NewErrErrorCompilingRegularExpression(db.GetContext(), off, regex, err)
+		return "", nil, false, syncql.NewErrErrorCompilingRegularExpression(db.GetContext(), off, regex, err)
 	}
-	return regex, compRegex, nil
+	return regex, compRegex, foundWildcard, nil
+}
+
+// Unescape '\\', '\%' and '\_' to '\', '%' and '_', respectively.
+func unescapeLikeExpression(s string) string {
+	var buf bytes.Buffer // buffer for returned unescaped string
+
+	escapedMode := false
+
+	for _, c := range s {
+		switch c {
+		case '\\':
+			if escapedMode {
+				buf.WriteString(string(c))
+			}
+			escapedMode = !escapedMode
+		default:
+			buf.WriteString(string(c))
+			escapedMode = false
+		}
+	}
+	return buf.String()
 }
 
 func IsLogicalOperator(o *query_parser.BinaryOperator) bool {
@@ -323,53 +348,97 @@ func IsExpr(o *query_parser.Operand) bool {
 	return o.Type == query_parser.TypExpr
 }
 
-// Compile a list of key prefixes to fetch with scan.  Prefixes are returned in sorted order
-// and do not overlap (e.g., prefixes of "ab" and "abc" would be combined as "ab").
-// A single empty string (array len of 1) is returned if all keys are to be fetched.
-// Used by query package.  In query_checker package so prefixes can be tested.
-func CompileKeyPrefixes(where *query_parser.WhereClause) []string {
-	if where == nil {
-		return []string{""}
-	} else {
-		// Collect all key string literal operands.
-		p := collectKeyPrefixes(where.Expr)
-		// Sort
-		sort.Strings(p)
-		// Elminate overlaps
-		var p2 []string
-		for i, s := range p {
-			// Skip over prefixes that are already covered by prior key prefixes.
-			if i != 0 && strings.HasPrefix(s, p2[len(p2)-1]) {
-				continue
-			}
-			p2 = append(p2, s)
+// Function copied from syncbase.
+func computeKeyRangeForPrefix(prefix string) query_db.KeyRange {
+	if prefix == "" {
+		return query_db.KeyRange{string([]byte{0}), string([]byte{255})}
+	}
+	limit := []byte(prefix)
+	for len(limit) > 0 {
+		if limit[len(limit)-1] == 255 {
+			limit = limit[:len(limit)-1] // chop off trailing \x00
+		} else {
+			limit[len(limit)-1] += 1 // add 1
+			break                    // no carry
 		}
-		return p2
+	}
+	return query_db.KeyRange{prefix, string(limit)}
+}
+
+// The limit for a single value range is simply a zero byte appended.
+// In this way, only the single 'start' value will be returned (or nothing if that single
+// value is not present).
+func computeKeyRangeForSingleValue(start string) query_db.KeyRange {
+	limit := []byte(start)
+	limit = append(limit, 0)
+	return query_db.KeyRange{start, string(limit)}
+}
+
+// Compute a list of key ranges to be used by query_db's Table.Scan implementation.
+func CompileKeyRanges(where *query_parser.WhereClause) query_db.KeyRanges {
+	if where == nil {
+		return query_db.KeyRanges{computeKeyRangeForPrefix("")}
+	}
+	var keyRanges query_db.KeyRanges
+	collectKeyRanges(where.Expr, &keyRanges)
+	return keyRanges
+}
+
+func collectKeyRanges(expr *query_parser.Expression, keyRanges *query_db.KeyRanges) {
+	if IsKey(expr.Operand1) {
+		if expr.Operator.Type == query_parser.Like {
+			addKeyRange(computeKeyRangeForPrefix(expr.Operand2.Prefix), keyRanges)
+		} else { // OpEqual
+			addKeyRange(computeKeyRangeForSingleValue(expr.Operand2.Str), keyRanges)
+		}
+	}
+	if IsExpr(expr.Operand1) {
+		collectKeyRanges(expr.Operand1.Expr, keyRanges)
+	}
+	if IsExpr(expr.Operand2) {
+		collectKeyRanges(expr.Operand2.Expr, keyRanges)
 	}
 }
 
-// Collect all operand2 string literals where operand1 of the expression is ident "k".
-func collectKeyPrefixes(expr *query_parser.Expression) []string {
-	var prefixes []string
-	if IsKey(expr.Operand1) {
-		if expr.Operator.Type == query_parser.Like {
-			prefixes = append(prefixes, expr.Operand2.Prefix)
-		} else { // OpEqual
-			prefixes = append(prefixes, expr.Operand2.Str)
+func addKeyRange(keyRange query_db.KeyRange, keyRanges *query_db.KeyRanges) {
+	handled := false
+	// Is there an overlap with an existing range?
+	for i, r := range *keyRanges {
+		// In the following if,
+		// the first paren expr is true if the start of the range to be added is contained in r
+		// the second paren expr is true if the limit of the range to be added is contained in r
+		// the third paren expr is true if the range to be added entirely contains r
+		if (keyRange.Start >= r.Start && keyRange.Start <= r.Limit) ||
+			(keyRange.Limit >= r.Start && keyRange.Limit <= r.Limit) ||
+			(keyRange.Start <= r.Start && keyRange.Limit >= r.Limit) {
+			// keyRange overlaps with existing range at keyRanges[i]
+			// set newKeyRange to a range that ecompasses both
+			var newKeyRange query_db.KeyRange
+			if keyRange.Start < r.Start {
+				newKeyRange.Start = keyRange.Start
+			} else {
+				newKeyRange.Start = r.Start
+			}
+			if keyRange.Limit > r.Limit {
+				newKeyRange.Limit = keyRange.Limit
+			} else {
+				newKeyRange.Limit = r.Limit
+			}
+			// The new range may overlap with other ranges in keyRanges
+			// delete the current range and call addKeyRange again
+			// This recursion will continue until no ranges overlap.
+			*keyRanges = append((*keyRanges)[:i], (*keyRanges)[i+1:]...)
+			addKeyRange(newKeyRange, keyRanges)
+			handled = true // we don't want to add keyRange below
+			break
 		}
-		return prefixes
 	}
-	if IsExpr(expr.Operand1) {
-		for _, p := range collectKeyPrefixes(expr.Operand1.Expr) {
-			prefixes = append(prefixes, p)
-		}
+	// no overlap, just add it
+	if !handled {
+		*keyRanges = append(*keyRanges, keyRange)
 	}
-	if IsExpr(expr.Operand2) {
-		for _, p := range collectKeyPrefixes(expr.Operand2.Expr) {
-			prefixes = append(prefixes, p)
-		}
-	}
-	return prefixes
+	// sort before returning
+	sort.Sort(*keyRanges)
 }
 
 // Check limit clause.  Limit must be >= 1.

@@ -19,7 +19,7 @@ type Table interface {
 	// of the prefixes arguments.
 	// Note: an empty string prefix (""), matches all keys.
 	// The prefixes argument will be sorted (low to high).
-	Scan(prefixes []string) (KeyValueStream, error)
+	Scan(keyRanges KeyRanges) (KeyValueStream, error)
 }
 
 type KeyValueStream interface {
@@ -49,4 +49,29 @@ type KeyValueStream interface {
 	// Advance/Value.  Cancel causes Advance to subsequently
 	// return  false.  Cancel does not block.
 	Cancel()
+}
+
+type KeyRange struct {
+	Start string
+	Limit string
+}
+
+type KeyRanges []KeyRange
+
+// Implement sort interface for KeyRanges.
+func (keyRanges KeyRanges) Len() int {
+	return len(keyRanges)
+}
+
+func (keyRanges KeyRanges) Less(i, j int) bool {
+	return keyRanges[i].Start < keyRanges[j].Start
+}
+
+func (keyRanges KeyRanges) Swap(i, j int) {
+	saveStart := keyRanges[i].Start
+	saveLimit := keyRanges[i].Limit
+	keyRanges[i].Start = keyRanges[j].Start
+	keyRanges[i].Limit = keyRanges[j].Limit
+	keyRanges[j].Start = saveStart
+	keyRanges[j].Limit = saveLimit
 }

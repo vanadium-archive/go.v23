@@ -7,7 +7,6 @@ package db
 import (
 	"errors"
 	"fmt"
-	"strings"
 	"time"
 
 	"v.io/syncbase/v23/syncbase/nosql/query_db"
@@ -43,10 +42,10 @@ type table struct {
 }
 
 type keyValueStreamImpl struct {
-	table        table
-	cursor       int
-	prefixes     []string
-	prefixCursor int
+	table       table
+	cursor      int
+	keyRanges   query_db.KeyRanges
+	rangeCursor int
 }
 
 func (kvs *keyValueStreamImpl) Advance() bool {
@@ -55,16 +54,17 @@ func (kvs *keyValueStreamImpl) Advance() bool {
 		if kvs.cursor >= len(kvs.table.rows) {
 			return false
 		}
-		for kvs.prefixCursor < len(kvs.prefixes) {
-			// does it match any prefix
-			if kvs.prefixes[kvs.prefixCursor] == "" || strings.HasPrefix(kvs.table.rows[kvs.cursor].key, kvs.prefixes[kvs.prefixCursor]) {
+		for kvs.rangeCursor < len(kvs.keyRanges) {
+			// does it match any keyRange (or is the keyRange the 0-255 wildcard)?
+			if (kvs.keyRanges[kvs.rangeCursor].Start == string([]byte{0}) && kvs.keyRanges[kvs.rangeCursor].Limit == string([]byte{255})) ||
+				(kvs.table.rows[kvs.cursor].key >= kvs.keyRanges[kvs.rangeCursor].Start && kvs.table.rows[kvs.cursor].key <= kvs.keyRanges[kvs.rangeCursor].Limit) {
 				return true
 			}
-			// Keys and prefixes are both sorted low to high, so we can increment
-			// prefixCursor if the prefix is < the key.
-			if kvs.prefixes[kvs.prefixCursor] < kvs.table.rows[kvs.cursor].key {
-				kvs.prefixCursor++
-				if kvs.prefixCursor >= len(kvs.prefixes) {
+			// Keys and keyRanges are both sorted low to high, so we can increment
+			// rangeCursor if the keyRange.Limit is < the key.
+			if kvs.keyRanges[kvs.rangeCursor].Limit < kvs.table.rows[kvs.cursor].key {
+				kvs.rangeCursor++
+				if kvs.rangeCursor >= len(kvs.keyRanges) {
 					return false
 				}
 			} else {
@@ -86,11 +86,11 @@ func (kvs *keyValueStreamImpl) Err() error {
 func (kvs *keyValueStreamImpl) Cancel() {
 }
 
-func (t table) Scan(prefixes []string) (query_db.KeyValueStream, error) {
+func (t table) Scan(keyRanges query_db.KeyRanges) (query_db.KeyValueStream, error) {
 	var keyValueStreamImpl keyValueStreamImpl
 	keyValueStreamImpl.table = t
 	keyValueStreamImpl.cursor = -1
-	keyValueStreamImpl.prefixes = prefixes
+	keyValueStreamImpl.keyRanges = keyRanges
 	return &keyValueStreamImpl, nil
 }
 

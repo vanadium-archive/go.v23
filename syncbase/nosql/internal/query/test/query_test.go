@@ -8,7 +8,6 @@ import (
 	"errors"
 	"fmt"
 	"reflect"
-	"strings"
 	"testing"
 	"time"
 
@@ -36,10 +35,10 @@ type table struct {
 }
 
 type keyValueStreamImpl struct {
-	table        table
-	cursor       int
-	prefixes     []string
-	prefixCursor int
+	table           table
+	cursor          int
+	keyRanges       query_db.KeyRanges
+	keyRangesCursor int
 }
 
 func (kvs *keyValueStreamImpl) Advance() bool {
@@ -48,16 +47,16 @@ func (kvs *keyValueStreamImpl) Advance() bool {
 		if kvs.cursor >= len(kvs.table.rows) {
 			return false
 		}
-		for kvs.prefixCursor < len(kvs.prefixes) {
-			// does it match any prefix
-			if kvs.prefixes[kvs.prefixCursor] == "" || strings.HasPrefix(kvs.table.rows[kvs.cursor].key, kvs.prefixes[kvs.prefixCursor]) {
+		for kvs.keyRangesCursor < len(kvs.keyRanges) {
+			// does it match any keyRange (or is the keyRange the 0-255 wildcard)?
+			if (kvs.keyRanges[kvs.keyRangesCursor].Start == string([]byte{0}) && kvs.keyRanges[kvs.keyRangesCursor].Limit == string([]byte{255})) || (kvs.table.rows[kvs.cursor].key >= kvs.keyRanges[kvs.keyRangesCursor].Start && kvs.table.rows[kvs.cursor].key <= kvs.keyRanges[kvs.keyRangesCursor].Limit) {
 				return true
 			}
-			// Keys and prefixes are both sorted low to high, so we can increment
-			// prefixCursor if the prefix is < the key.
-			if kvs.prefixes[kvs.prefixCursor] < kvs.table.rows[kvs.cursor].key {
-				kvs.prefixCursor++
-				if kvs.prefixCursor >= len(kvs.prefixes) {
+			// Keys and keyRanges are both sorted low to high, so we can increment
+			// keyRangesCursor if the keyRange.Limit is < the key.
+			if kvs.keyRanges[kvs.keyRangesCursor].Limit < kvs.table.rows[kvs.cursor].key {
+				kvs.keyRangesCursor++
+				if kvs.keyRangesCursor >= len(kvs.keyRanges) {
 					return false
 				}
 			} else {
@@ -79,11 +78,11 @@ func (kvs *keyValueStreamImpl) Err() error {
 func (kvs *keyValueStreamImpl) Cancel() {
 }
 
-func (t table) Scan(prefixes []string) (query_db.KeyValueStream, error) {
+func (t table) Scan(keyRanges query_db.KeyRanges) (query_db.KeyValueStream, error) {
 	var keyValueStreamImpl keyValueStreamImpl
 	keyValueStreamImpl.table = t
 	keyValueStreamImpl.cursor = -1
-	keyValueStreamImpl.prefixes = prefixes
+	keyValueStreamImpl.keyRanges = keyRanges
 	return &keyValueStreamImpl, nil
 }
 
@@ -221,10 +220,10 @@ func init() {
 	db.tables = append(db.tables, fooTable)
 }
 
-type keyPrefixesTest struct {
-	query       string
-	keyPrefixes []string
-	err         error
+type keyRangesTest struct {
+	query     string
+	keyRanges query_db.KeyRanges
+	err       error
 }
 
 type evalWhereUsingOnlyKeyTest struct {
@@ -983,120 +982,206 @@ func TestPreExecFunctions(t *testing.T) {
 	}
 }
 
-func TestKeyPrefixes(t *testing.T) {
-	basic := []keyPrefixesTest{
+func appendZeroByte(start string) string {
+	limit := []byte(start)
+	limit = append(limit, 0)
+	return string(limit)
+
+}
+
+func plusOne(start string) string {
+	limit := []byte(start)
+	for len(limit) > 0 {
+		if limit[len(limit)-1] == 255 {
+			limit = limit[:len(limit)-1] // chop off trailing \x00
+		} else {
+			limit[len(limit)-1] += 1 // add 1
+			break                    // no carry
+		}
+	}
+	return string(limit)
+}
+
+func TestKeyRanges(t *testing.T) {
+	basic := []keyRangesTest{
 		{
-			// Need all keys (single prefix of "").
+			// Need all keys
 			"select k, v from Customer",
-			[]string{""},
+			query_db.KeyRanges{
+				query_db.KeyRange{string([]byte{0}), string([]byte{255})},
+			},
 			nil,
 		},
 		{
-			// Need all keys (single prefix of "").
-			"   sElEcT  k,  v from \n  Customer WhErE k lIkE \"002%\" oR k LiKe \"001%\" or k lIkE \"%\"",
-			[]string{""},
+			// Keys 001 and 003
+			"   select  k,  v from Customer where k = \"001\" or k = \"003\"",
+			query_db.KeyRanges{
+				query_db.KeyRange{"001", appendZeroByte("001")},
+				query_db.KeyRange{"003", appendZeroByte("003")},
+			},
+			nil,
+		},
+		{
+			// Need all keys
+			"select  k,  v from Customer where k like \"%\" or k like \"001%\" or k like \"002%\"",
+			query_db.KeyRanges{
+				query_db.KeyRange{string([]byte{0}), string([]byte{255})},
+			},
+			nil,
+		},
+		{
+			// Need all keys, likes in where clause in different order
+			"select  k,  v from Customer where k like \"002%\" or k like \"001%\" or k like \"%\"",
+			query_db.KeyRanges{
+				query_db.KeyRange{string([]byte{0}), string([]byte{255})},
+			},
 			nil,
 		},
 		{
 			// All selected rows will have key prefix of "abc".
 			"select k, v from Customer where t = \"Foo.Bar\" and k like \"abc%\"",
-			[]string{"abc"},
+			query_db.KeyRanges{
+				query_db.KeyRange{"abc", plusOne("abc")},
+			},
 			nil,
 		},
 		{
-			// Need all keys (single prefix of "").
+			// Need all keys
 			"select k, v from Customer where t = \"Foo.Bar\" or k like \"abc%\"",
-			[]string{""},
+			query_db.KeyRanges{
+				query_db.KeyRange{string([]byte{0}), string([]byte{255})},
+			},
 			nil,
 		},
 		{
-			// Need all keys (single prefix of "").
+			// Need all keys
 			"select k, v from Customer where k like \"abc%\" or v.zip = \"94303\"",
-			[]string{""},
+			query_db.KeyRanges{
+				query_db.KeyRange{string([]byte{0}), string([]byte{255})},
+			},
 			nil,
 		},
 		{
 			// All selected rows will have key prefix of "foo".
 			"select k, v from Customer where t = \"Foo.Bar\" and k like \"foo_bar\"",
-			[]string{"foo"},
+			query_db.KeyRanges{
+				query_db.KeyRange{"foo", plusOne("foo")},
+			},
 			nil,
 		},
 		{
-			// All selected rows will have key prefix of "baz" or "foo".
+			// All selected rows will have key == "baz" or prefix of "foo".
 			"select k, v from Customer where k like \"foo_bar\" or k = \"baz\"",
-			[]string{"baz", "foo"},
+			query_db.KeyRanges{
+				query_db.KeyRange{"baz", appendZeroByte("baz")},
+				query_db.KeyRange{"foo", plusOne("foo")},
+			},
 			nil,
 		},
 		{
-			// All selected rows will have key prefix of "fo".
+			// All selected rows will have key == "fo" or prefix of "foo".
 			"select k, v from Customer where k like \"foo_bar\" or k = \"fo\"",
-			[]string{"fo"},
+			query_db.KeyRanges{
+				query_db.KeyRange{"fo", appendZeroByte("fo")},
+				query_db.KeyRange{"foo", plusOne("foo")},
+			},
+			nil,
+		},
+		{
+			// All selected rows will have prefix of "fo".
+			// k == foo is a subset of above prefix
+			"select k, v from Customer where k like \"fo_bar\" or k = \"foo\"",
+			query_db.KeyRanges{
+				query_db.KeyRange{"fo", plusOne("fo")},
+			},
 			nil,
 		},
 		{
 			// All selected rows will have key prefix of "foo".
 			"select k, v from Customer where k like \"foo%bar\"",
-			[]string{"foo"},
+			query_db.KeyRanges{
+				query_db.KeyRange{"foo", plusOne("foo")},
+			},
 			nil,
 		},
 		{
-			// All selected rows will have key prefix of "foo\bar".
+			// Select "foo\bar" row.
 			"select k, v from Customer where k like \"foo\\\\bar\"",
-			[]string{"foo\\bar"},
+			query_db.KeyRanges{
+				query_db.KeyRange{"foo\\bar", appendZeroByte("foo\\bar")},
+			},
 			nil,
 		},
 		{
-			// All selected rows will have key prefix of "foo%bar".
+			// Select "foo%bar" row.
 			"select k, v from Customer where k like \"foo\\%bar\"",
-			[]string{"foo%bar"},
+			query_db.KeyRanges{
+				query_db.KeyRange{"foo%bar", appendZeroByte("foo%bar")},
+			},
 			nil,
 		},
 		{
-			// All selected rows will have key prefix of "foo\%bar".
+			// Select "foo\%bar" row.
 			"select k, v from Customer where k like \"foo\\\\\\%bar\"",
-			[]string{"foo\\%bar"},
+			query_db.KeyRanges{
+				query_db.KeyRange{"foo\\%bar", appendZeroByte("foo\\%bar")},
+			},
 			nil,
 		},
 		{
-			// Need all keys (single prefix of "").
+			// Need all keys
 			"select k, v from Customer where k like \"%foo\"",
-			[]string{""},
+			query_db.KeyRanges{
+				query_db.KeyRange{string([]byte{0}), string([]byte{255})},
+			},
 			nil,
 		},
 		{
-			// Need all keys (single prefix of "").
+			// Need all keys
 			"select k, v from Customer where k like \"_foo\"",
-			[]string{""},
+			query_db.KeyRanges{
+				query_db.KeyRange{string([]byte{0}), string([]byte{255})},
+			},
 			nil,
 		},
 		{
-			// All selected rows will have key prefix of "foo_bar".
+			// Select "foo_bar" row.
 			"select k, v from Customer where k like \"foo\\_bar\"",
-			[]string{"foo_bar"},
+			query_db.KeyRanges{
+				query_db.KeyRange{"foo_bar", appendZeroByte("foo_bar")},
+			},
 			nil,
 		},
 		{
-			// All selected rows will have key prefix of "foobar%".
+			// Select "foobar%" row.
 			"select k, v from Customer where k like \"foobar\\%\"",
-			[]string{"foobar%"},
+			query_db.KeyRanges{
+				query_db.KeyRange{"foobar%", appendZeroByte("foobar%")},
+			},
 			nil,
 		},
 		{
-			// All selected rows will have key prefix of "foobar_".
+			// Select "foobar_" row.
 			"select k, v from Customer where k like \"foobar\\_\"",
-			[]string{"foobar_"},
+			query_db.KeyRanges{
+				query_db.KeyRange{"foobar_", appendZeroByte("foobar_")},
+			},
 			nil,
 		},
 		{
-			// All selected rows will have key prefix of "\%_".
+			// Select "\%_" row.
 			"select k, v from Customer where k like \"\\\\\\%\\_\"",
-			[]string{"\\%_"},
+			query_db.KeyRanges{
+				query_db.KeyRange{"\\%_", appendZeroByte("\\%_")},
+			},
 			nil,
 		},
 		{
-			// All selected rows will have key prefix of "%_abc\".
+			// Select "%_abc\" row.
 			"select k, v from Customer where k = \"%_abc\\\"",
-			[]string{"%_abc\\"},
+			query_db.KeyRanges{
+				query_db.KeyRange{"%_abc\\", appendZeroByte("%_abc\\")},
+			},
 			nil,
 		},
 	}
@@ -1114,9 +1199,9 @@ func TestKeyPrefixes(t *testing.T) {
 			if semErr == nil {
 				switch sel := (*s).(type) {
 				case query_parser.SelectStatement:
-					keyPrefixes := query.CompileKeyPrefixes(sel.Where)
-					if !reflect.DeepEqual(test.keyPrefixes, keyPrefixes) {
-						t.Errorf("query: %s;\nGOT  %v\nWANT %v", test.query, keyPrefixes, test.keyPrefixes)
+					keyRanges := query.CompileKeyRanges(sel.Where)
+					if !reflect.DeepEqual(test.keyRanges, keyRanges) {
+						t.Errorf("query: %s;\nGOT  %v\nWANT %v", test.query, keyRanges, test.keyRanges)
 					}
 				default:
 					t.Errorf("query: %s; got %v, want query_parser.SelectStatement", test.query, reflect.TypeOf(*s))
