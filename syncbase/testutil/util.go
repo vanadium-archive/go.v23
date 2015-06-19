@@ -19,13 +19,13 @@ import (
 	"v.io/syncbase/x/ref/services/syncbase/server"
 	"v.io/v23"
 	"v.io/v23/context"
-	"v.io/v23/naming"
-	"v.io/v23/rpc"
 	"v.io/v23/security"
 	"v.io/v23/security/access"
 	"v.io/v23/vdl"
 	"v.io/v23/verror"
 	"v.io/x/lib/vlog"
+	"v.io/x/ref/lib/flags"
+	"v.io/x/ref/lib/xrpc"
 	tsecurity "v.io/x/ref/test/testutil"
 )
 
@@ -68,6 +68,12 @@ func SetupOrDie(perms access.Permissions) (clientCtx *context.T, serverName stri
 }
 
 func SetupOrDieCustom(client, server string, perms access.Permissions) (clientCtx *context.T, serverName string, cleanup func(), sp security.Principal, ctx *context.T) {
+	// TODO(mattr): Instead of SetDefaultHostPort the arguably more correct thing
+	// would be to call v.io/x/ref/test.Init() from the test packages that import
+	// the profile.  Note you should only call that from the package that imports
+	// the profile, not from libraries like this.  Also, it would be better if
+	// v23.Init was test.V23Init().
+	flags.SetDefaultHostPort("127.0.0.1:0")
 	ctx, shutdown := v23.Init()
 	sp = tsecurity.NewPrincipal(server)
 
@@ -179,15 +185,6 @@ func getPermsOrDie(t *testing.T, ctx *context.T, ac util.AccessController) acces
 }
 
 func newServer(clientName, serverName string, ctx *context.T, perms access.Permissions) (string, func()) {
-	s, err := v23.NewServer(ctx)
-	if err != nil {
-		vlog.Fatal("v23.NewServer() failed: ", err)
-	}
-	eps, err := s.Listen(rpc.ListenSpec{Addrs: rpc.ListenAddrs{{"tcp", "127.0.0.1:0"}}})
-	if err != nil {
-		vlog.Fatal("s.Listen() failed: ", err)
-	}
-
 	if perms == nil {
 		perms = DefaultPerms(fmt.Sprintf("%s/%s", serverName, clientName))
 	}
@@ -203,13 +200,11 @@ func newServer(clientName, serverName string, ctx *context.T, perms access.Permi
 	if err != nil {
 		vlog.Fatal("server.NewService() failed: ", err)
 	}
-	d := server.NewDispatcher(service)
-
-	if err := s.ServeDispatcher("", d); err != nil {
-		vlog.Fatal("s.ServeDispatcher() failed: ", err)
+	s, err := xrpc.NewDispatchingServer(ctx, "", server.NewDispatcher(service))
+	if err != nil {
+		vlog.Fatal("xrpc.NewDispatchingServer() failed: ", err)
 	}
-
-	name := naming.JoinAddressName(eps[0].String(), "")
+	name := s.Status().Endpoints[0].Name()
 	return name, func() {
 		s.Stop()
 		os.RemoveAll(rootDir)
