@@ -19,6 +19,7 @@ import (
 )
 
 // TODO(sadovsky): Finish writing tests.
+// TODO(rogulenko): Test perms checking for Glob and Exec.
 
 // Tests various Name, FullName, and Key methods.
 func TestNameAndKey(t *testing.T) {
@@ -177,13 +178,159 @@ func TestTableDelete(t *testing.T) {
 
 // Tests that Table.{Set,Get,Delete}Permissions methods work as expected.
 func TestTablePerms(t *testing.T) {
-	// TODO(sadovsky): Implement.
+	clientACtx, sName, cleanup, sp, ctx := tu.SetupOrDieCustom("clientA", "server", nil)
+	defer cleanup()
+	clientBCtx := tu.NewClient("clientB", "server", ctx, sp)
+	a := tu.CreateApp(t, clientACtx, syncbase.NewService(sName), "a")
+	d := tu.CreateNoSQLDatabase(t, clientACtx, a, "d")
+	tb := tu.CreateTable(t, clientACtx, d, "tb")
+
+	// Permission objects.
+	aAndB := tu.DefaultPerms("server/clientA", "server/clientB")
+	aOnly := tu.DefaultPerms("server/clientA")
+	bOnly := tu.DefaultPerms("server/clientB")
+
+	// Set initial permissions.
+	if err := tb.SetPermissions(clientACtx, nosql.Prefix(""), aAndB); err != nil {
+		t.Fatalf("tb.SetPermissions() failed: %v", err)
+	}
+	if err := tb.SetPermissions(clientACtx, nosql.Prefix("prefix"), aAndB); err != nil {
+		t.Fatalf("tb.SetPermissions() failed: %v", err)
+	}
+	if err := tb.SetPermissions(clientBCtx, nosql.Prefix("prefix"), aAndB); err != nil {
+		t.Fatalf("tb.SetPermissions() failed: %v", err)
+	}
+	if err := tb.SetPermissions(clientACtx, nosql.Prefix("prefix_a"), aOnly); err != nil {
+		t.Fatalf("tb.SetPermissions() failed: %v", err)
+	}
+	if err := tb.SetPermissions(clientBCtx, nosql.Prefix("prefix_b"), bOnly); err != nil {
+		t.Fatalf("tb.SetPermissions() failed: %v", err)
+	}
+
+	// Checks A has no access to 'prefix_b' and vice versa.
+	if err := tb.SetPermissions(clientACtx, nosql.Prefix("prefix_b"), aOnly); verror.ErrorID(err) != verror.ErrNoAccess.ID {
+		t.Fatalf("tb.SetPermissions() should have failed: %v", err)
+	}
+	if err := tb.SetPermissions(clientACtx, nosql.Prefix("prefix_b_suffix"), aOnly); verror.ErrorID(err) != verror.ErrNoAccess.ID {
+		t.Fatalf("tb.SetPermissions() should have failed: %v", err)
+	}
+	if err := tb.SetPermissions(clientBCtx, nosql.Prefix("prefix_a"), bOnly); verror.ErrorID(err) != verror.ErrNoAccess.ID {
+		t.Fatalf("tb.SetPermissions() should have failed: %v", err)
+	}
+	if err := tb.SetPermissions(clientBCtx, nosql.Prefix("prefix_a_suffix"), bOnly); verror.ErrorID(err) != verror.ErrNoAccess.ID {
+		t.Fatalf("tb.SetPermissions() should have failed: %v", err)
+	}
+
+	// Check GetPermissions.
+	wantPerms := []nosql.PrefixPermissions{
+		nosql.PrefixPermissions{Prefix: nosql.Prefix(""), Perms: aAndB},
+	}
+	if got, _ := tb.GetPermissions(clientACtx, ""); !reflect.DeepEqual(got, wantPerms) {
+		t.Fatalf("Unexpected permissions: got %v, want %v", got, wantPerms)
+	}
+	if got, _ := tb.GetPermissions(clientACtx, "abc"); !reflect.DeepEqual(got, wantPerms) {
+		t.Fatalf("Unexpected permissions: got %v, want %v", got, wantPerms)
+	}
+	wantPerms = []nosql.PrefixPermissions{
+		nosql.PrefixPermissions{Prefix: nosql.Prefix("prefix"), Perms: aAndB},
+		nosql.PrefixPermissions{Prefix: nosql.Prefix(""), Perms: aAndB},
+	}
+	if got, _ := tb.GetPermissions(clientACtx, "prefix"); !reflect.DeepEqual(got, wantPerms) {
+		t.Fatalf("Unexpected permissions: got %v, want %v", got, wantPerms)
+	}
+	if got, _ := tb.GetPermissions(clientACtx, "prefix_c"); !reflect.DeepEqual(got, wantPerms) {
+		t.Fatalf("Unexpected permissions: got %v, want %v", got, wantPerms)
+	}
+	wantPerms = []nosql.PrefixPermissions{
+		nosql.PrefixPermissions{Prefix: nosql.Prefix("prefix_a"), Perms: aOnly},
+		nosql.PrefixPermissions{Prefix: nosql.Prefix("prefix"), Perms: aAndB},
+		nosql.PrefixPermissions{Prefix: nosql.Prefix(""), Perms: aAndB},
+	}
+	if got, _ := tb.GetPermissions(clientACtx, "prefix_a"); !reflect.DeepEqual(got, wantPerms) {
+		t.Fatalf("Unexpected permissions: got %v, want %v", got, wantPerms)
+	}
+	if got, _ := tb.GetPermissions(clientACtx, "prefix_a_suffix"); !reflect.DeepEqual(got, wantPerms) {
+		t.Fatalf("Unexpected permissions: got %v, want %v", got, wantPerms)
+	}
+	wantPerms = []nosql.PrefixPermissions{
+		nosql.PrefixPermissions{Prefix: nosql.Prefix("prefix_b"), Perms: bOnly},
+		nosql.PrefixPermissions{Prefix: nosql.Prefix("prefix"), Perms: aAndB},
+		nosql.PrefixPermissions{Prefix: nosql.Prefix(""), Perms: aAndB},
+	}
+	if got, _ := tb.GetPermissions(clientACtx, "prefix_b"); !reflect.DeepEqual(got, wantPerms) {
+		t.Fatalf("Unexpected permissions: got %v, want %v", got, wantPerms)
+	}
+	if got, _ := tb.GetPermissions(clientACtx, "prefix_b_suffix"); !reflect.DeepEqual(got, wantPerms) {
+		t.Fatalf("Unexpected permissions: got %v, want %v", got, wantPerms)
+	}
+
+	// Delete some prefix permissions and check again.
+	// Check that A can't delete permissions of B.
+	if err := tb.DeletePermissions(clientACtx, nosql.Prefix("prefix_b")); verror.ErrorID(err) != verror.ErrNoAccess.ID {
+		t.Fatalf("tb.DeletePermissions() should have failed: %v", err)
+	}
+	if err := tb.DeletePermissions(clientBCtx, nosql.Prefix("prefix_a")); verror.ErrorID(err) != verror.ErrNoAccess.ID {
+		t.Fatalf("tb.DeletePermissions() should have failed: %v", err)
+	}
+	// Delete 'prefix' and 'prefix_a'
+	if err := tb.DeletePermissions(clientACtx, nosql.Prefix("prefix")); err != nil {
+		t.Fatalf("tb.DeletePermissions() failed: %v", err)
+	}
+	if err := tb.DeletePermissions(clientACtx, nosql.Prefix("prefix_a")); err != nil {
+		t.Fatalf("tb.DeletePermissions() failed: %v", err)
+	}
+	// Check DeletePermissions is idempotent.
+	if err := tb.DeletePermissions(clientACtx, nosql.Prefix("prefix")); err != nil {
+		t.Fatalf("tb.DeletePermissions() failed: %v", err)
+	}
+
+	// Check GetPermissions again.
+	wantPerms = []nosql.PrefixPermissions{
+		nosql.PrefixPermissions{Prefix: nosql.Prefix(""), Perms: aAndB},
+	}
+	if got, _ := tb.GetPermissions(clientACtx, ""); !reflect.DeepEqual(got, wantPerms) {
+		t.Fatalf("Unexpected permissions: got %v, want %v", got, wantPerms)
+	}
+	if got, _ := tb.GetPermissions(clientACtx, "prefix"); !reflect.DeepEqual(got, wantPerms) {
+		t.Fatalf("Unexpected permissions: got %v, want %v", got, wantPerms)
+	}
+	if got, _ := tb.GetPermissions(clientACtx, "prefix_a"); !reflect.DeepEqual(got, wantPerms) {
+		t.Fatalf("Unexpected permissions: got %v, want %v", got, wantPerms)
+	}
+	if got, _ := tb.GetPermissions(clientACtx, "prefix_a_suffix"); !reflect.DeepEqual(got, wantPerms) {
+		t.Fatalf("Unexpected permissions: got %v, want %v", got, wantPerms)
+	}
+	wantPerms = []nosql.PrefixPermissions{
+		nosql.PrefixPermissions{Prefix: nosql.Prefix("prefix_b"), Perms: bOnly},
+		nosql.PrefixPermissions{Prefix: nosql.Prefix(""), Perms: aAndB},
+	}
+	if got, _ := tb.GetPermissions(clientACtx, "prefix_b"); !reflect.DeepEqual(got, wantPerms) {
+		t.Fatalf("Unexpected permissions: got %v, want %v", got, wantPerms)
+	}
+	if got, _ := tb.GetPermissions(clientACtx, "prefix_b_suffix"); !reflect.DeepEqual(got, wantPerms) {
+		t.Fatalf("Unexpected permissions: got %v, want %v", got, wantPerms)
+	}
+
+	// Remove B from table-level permissions and check B has no access.
+	if err := tb.SetPermissions(clientACtx, nosql.Prefix(""), aOnly); err != nil {
+		t.Fatalf("tb.SetPermissions() failed: %v", err)
+	}
+	if _, err := tb.GetPermissions(clientBCtx, ""); verror.ErrorID(err) != verror.ErrNoAccess.ID {
+		t.Fatalf("tb.GetPermissions() should have failed: %v", err)
+	}
+	if _, err := tb.GetPermissions(clientBCtx, "prefix_b"); verror.ErrorID(err) != verror.ErrNoAccess.ID {
+		t.Fatalf("tb.GetPermissions() should have failed: %v", err)
+	}
+	if err := tb.SetPermissions(clientBCtx, nosql.Prefix(""), bOnly); verror.ErrorID(err) != verror.ErrNoAccess.ID {
+		t.Fatalf("tb.SetPermissions() should have failed: %v", err)
+	}
+	if err := tb.SetPermissions(clientBCtx, nosql.Prefix("prefix_b"), bOnly); verror.ErrorID(err) != verror.ErrNoAccess.ID {
+		t.Fatalf("tb.SetPermissions() should have failed: %v", err)
+	}
 }
 
 ////////////////////////////////////////
 // Tests involving rows
-
-// TODO(sadovsky): Test perms-checking in all test functions below.
 
 type Foo struct {
 	I int
@@ -363,5 +510,70 @@ func TestRowMethods(t *testing.T) {
 	}
 	if err := r.Get(ctx, &got); verror.ErrorID(err) != verror.ErrNoExist.ID {
 		t.Fatalf("r.Get() should have failed: %v", err)
+	}
+}
+
+// Test permission checking in Row.{Get,Put,Delete} and
+// Table.{Scan, DeleteRowRange}.
+func TestRowPermissions(t *testing.T) {
+	clientACtx, sName, cleanup, sp, ctx := tu.SetupOrDieCustom("clientA", "server", nil)
+	defer cleanup()
+	clientBCtx := tu.NewClient("clientB", "server", ctx, sp)
+	a := tu.CreateApp(t, clientACtx, syncbase.NewService(sName), "a")
+	d := tu.CreateNoSQLDatabase(t, clientACtx, a, "d")
+	tb := tu.CreateTable(t, clientACtx, d, "tb")
+
+	// Permission objects.
+	aAndB := tu.DefaultPerms("server/clientA", "server/clientB")
+	aOnly := tu.DefaultPerms("server/clientA")
+	bOnly := tu.DefaultPerms("server/clientB")
+
+	// Set initial permissions.
+	if err := tb.SetPermissions(clientACtx, nosql.Prefix(""), aAndB); err != nil {
+		t.Fatalf("tb.SetPermissions() failed: %v", err)
+	}
+	if err := tb.SetPermissions(clientACtx, nosql.Prefix("a"), aOnly); err != nil {
+		t.Fatalf("tb.SetPermissions() failed: %v", err)
+	}
+	if err := tb.SetPermissions(clientBCtx, nosql.Prefix("b"), bOnly); err != nil {
+		t.Fatalf("tb.SetPermissions() failed: %v", err)
+	}
+
+	// Add some key-value pairs.
+	ra := tb.Row("afoo")
+	rb := tb.Row("bfoo")
+	if err := ra.Put(clientACtx, Foo{}); err != nil {
+		t.Fatalf("ra.Put() failed: %v", err)
+	}
+	if err := rb.Put(clientBCtx, Foo{}); err != nil {
+		t.Fatalf("rb.Put() failed: %v", err)
+	}
+
+	// Check A doesn't have access to 'b'.
+	if err := rb.Get(clientACtx, &Foo{}); verror.ErrorID(err) != verror.ErrNoAccess.ID {
+		t.Fatalf("rb.Get() should have failed: %v", err)
+	}
+	if err := rb.Put(clientACtx, Foo{}); verror.ErrorID(err) != verror.ErrNoAccess.ID {
+		t.Fatalf("rb.Put() should have failed: %v", err)
+	}
+	if err := rb.Delete(clientACtx); verror.ErrorID(err) != verror.ErrNoAccess.ID {
+		t.Fatalf("rb.Delete() should have failed: %v", err)
+	}
+	// Test Table.Delete and Scan.
+	if err := tb.Delete(clientACtx, nosql.Prefix("")); verror.ErrorID(err) != verror.ErrNoAccess.ID {
+		t.Fatalf("tb.Delete should have failed: %v", err)
+	}
+	s := tb.Scan(clientACtx, nosql.Prefix(""))
+	if !s.Advance() {
+		t.Fatalf("Stream should have advanced: %v", s.Err())
+	}
+	if s.Key() != "afoo" {
+		t.Fatalf("Unexpected key: got %q, want %q", s.Key(), "afoo")
+	}
+	if s.Advance() {
+		t.Fatalf("Stream advanced unexpectedly")
+	}
+	if err := s.Err(); verror.ErrorID(err) != verror.ErrNoAccess.ID {
+		t.Fatalf("Unexpected stream error: %v", err)
 	}
 }

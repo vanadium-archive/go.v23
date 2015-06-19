@@ -6,6 +6,7 @@
 package testutil
 
 import (
+	"fmt"
 	"io/ioutil"
 	"os"
 	"reflect"
@@ -77,7 +78,7 @@ func SetupOrDieCustom(client, server string, perms access.Permissions) (clientCt
 		vlog.Fatal("v23.WithPrincipal() failed: ", err)
 	}
 
-	serverName, stopServer := newServer(serverCtx, perms)
+	serverName, stopServer := newServer(client, server, serverCtx, perms)
 	cleanup = func() {
 		stopServer()
 		shutdown()
@@ -85,10 +86,12 @@ func SetupOrDieCustom(client, server string, perms access.Permissions) (clientCt
 	return
 }
 
-func defaultPerms() access.Permissions {
+func DefaultPerms(patterns ...string) access.Permissions {
 	perms := access.Permissions{}
 	for _, tag := range access.AllTypicalTags() {
-		perms.Add(security.BlessingPattern("server/client"), string(tag))
+		for _, pattern := range patterns {
+			perms.Add(security.BlessingPattern(pattern), string(tag))
+		}
 	}
 	return perms
 }
@@ -175,7 +178,7 @@ func getPermsOrDie(t *testing.T, ctx *context.T, ac util.AccessController) acces
 	return perms
 }
 
-func newServer(ctx *context.T, perms access.Permissions) (string, func()) {
+func newServer(clientName, serverName string, ctx *context.T, perms access.Permissions) (string, func()) {
 	s, err := v23.NewServer(ctx)
 	if err != nil {
 		vlog.Fatal("v23.NewServer() failed: ", err)
@@ -186,7 +189,7 @@ func newServer(ctx *context.T, perms access.Permissions) (string, func()) {
 	}
 
 	if perms == nil {
-		perms = defaultPerms()
+		perms = DefaultPerms(fmt.Sprintf("%s/%s", serverName, clientName))
 	}
 	rootDir, err := ioutil.TempDir("", "syncbase")
 	if err != nil {

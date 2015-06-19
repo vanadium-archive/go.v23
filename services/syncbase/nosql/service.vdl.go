@@ -954,15 +954,18 @@ type TableClientMethods interface {
 	// Delete deletes this Table.
 	Delete(*context.T, ...rpc.CallOpt) error
 	// Delete deletes all rows in the given half-open range [start, limit). If
-	// limit is "", all rows with keys >= start are included. If the last row that
-	// is covered by a prefix from SetPermissions is deleted, that (prefix, perms)
-	// pair is removed.
-	// TODO(sadovsky): Automatic GC interacts poorly with sync. Revisit this API.
+	// limit is "", all rows with keys >= start are included.
 	DeleteRowRange(ctx *context.T, start []byte, limit []byte, opts ...rpc.CallOpt) error
 	// Scan returns all rows in the given half-open range [start, limit). If limit
 	// is "", all rows with keys >= start are included. The returned stream reads
 	// from a consistent snapshot taken at the time of the Scan RPC.
 	Scan(ctx *context.T, start []byte, limit []byte, opts ...rpc.CallOpt) (TableScanClientCall, error)
+	// GetPermissions returns an array of (prefix, perms) pairs. The array is
+	// sorted from longest prefix to shortest, so element zero is the one that
+	// applies to the row with the given key. The last element is always the
+	// prefix "" which represents the table's permissions -- the array will always
+	// have at least one element.
+	GetPermissions(ctx *context.T, key string, opts ...rpc.CallOpt) ([]PrefixPermissions, error)
 	// SetPermissions sets the permissions for all current and future rows with
 	// the given prefix. If the prefix overlaps with an existing prefix, the
 	// longest prefix that matches a row applies. For example:
@@ -970,16 +973,7 @@ type TableClientMethods interface {
 	//     SetPermissions(ctx, Prefix("a/b/c"), perms2)
 	// The permissions for row "a/b/1" are perms1, and the permissions for row
 	// "a/b/c/1" are perms2.
-	//
-	// SetPermissions will fail if called with a prefix that does not match any
-	// rows.
 	SetPermissions(ctx *context.T, prefix string, perms access.Permissions, opts ...rpc.CallOpt) error
-	// GetPermissions returns an array of (prefix, perms) pairs. The array is
-	// sorted from longest prefix to shortest, so element zero is the one that
-	// applies to the row with the given key. The last element is always the
-	// prefix "" which represents the table's permissions -- the array will always
-	// have at least one element.
-	GetPermissions(ctx *context.T, key string, opts ...rpc.CallOpt) ([]PrefixPermissions, error)
 	// DeletePermissions deletes the permissions for the specified prefix. Any
 	// rows covered by this prefix will use the next longest prefix's permissions
 	// (see the array returned by GetPermissions).
@@ -1025,13 +1019,13 @@ func (c implTableClientStub) Scan(ctx *context.T, i0 []byte, i1 []byte, opts ...
 	return
 }
 
-func (c implTableClientStub) SetPermissions(ctx *context.T, i0 string, i1 access.Permissions, opts ...rpc.CallOpt) (err error) {
-	err = v23.GetClient(ctx).Call(ctx, c.name, "SetPermissions", []interface{}{i0, i1}, nil, opts...)
+func (c implTableClientStub) GetPermissions(ctx *context.T, i0 string, opts ...rpc.CallOpt) (o0 []PrefixPermissions, err error) {
+	err = v23.GetClient(ctx).Call(ctx, c.name, "GetPermissions", []interface{}{i0}, []interface{}{&o0}, opts...)
 	return
 }
 
-func (c implTableClientStub) GetPermissions(ctx *context.T, i0 string, opts ...rpc.CallOpt) (o0 []PrefixPermissions, err error) {
-	err = v23.GetClient(ctx).Call(ctx, c.name, "GetPermissions", []interface{}{i0}, []interface{}{&o0}, opts...)
+func (c implTableClientStub) SetPermissions(ctx *context.T, i0 string, i1 access.Permissions, opts ...rpc.CallOpt) (err error) {
+	err = v23.GetClient(ctx).Call(ctx, c.name, "SetPermissions", []interface{}{i0, i1}, nil, opts...)
 	return
 }
 
@@ -1121,15 +1115,18 @@ type TableServerMethods interface {
 	// Delete deletes this Table.
 	Delete(*context.T, rpc.ServerCall) error
 	// Delete deletes all rows in the given half-open range [start, limit). If
-	// limit is "", all rows with keys >= start are included. If the last row that
-	// is covered by a prefix from SetPermissions is deleted, that (prefix, perms)
-	// pair is removed.
-	// TODO(sadovsky): Automatic GC interacts poorly with sync. Revisit this API.
+	// limit is "", all rows with keys >= start are included.
 	DeleteRowRange(ctx *context.T, call rpc.ServerCall, start []byte, limit []byte) error
 	// Scan returns all rows in the given half-open range [start, limit). If limit
 	// is "", all rows with keys >= start are included. The returned stream reads
 	// from a consistent snapshot taken at the time of the Scan RPC.
 	Scan(ctx *context.T, call TableScanServerCall, start []byte, limit []byte) error
+	// GetPermissions returns an array of (prefix, perms) pairs. The array is
+	// sorted from longest prefix to shortest, so element zero is the one that
+	// applies to the row with the given key. The last element is always the
+	// prefix "" which represents the table's permissions -- the array will always
+	// have at least one element.
+	GetPermissions(ctx *context.T, call rpc.ServerCall, key string) ([]PrefixPermissions, error)
 	// SetPermissions sets the permissions for all current and future rows with
 	// the given prefix. If the prefix overlaps with an existing prefix, the
 	// longest prefix that matches a row applies. For example:
@@ -1137,16 +1134,7 @@ type TableServerMethods interface {
 	//     SetPermissions(ctx, Prefix("a/b/c"), perms2)
 	// The permissions for row "a/b/1" are perms1, and the permissions for row
 	// "a/b/c/1" are perms2.
-	//
-	// SetPermissions will fail if called with a prefix that does not match any
-	// rows.
 	SetPermissions(ctx *context.T, call rpc.ServerCall, prefix string, perms access.Permissions) error
-	// GetPermissions returns an array of (prefix, perms) pairs. The array is
-	// sorted from longest prefix to shortest, so element zero is the one that
-	// applies to the row with the given key. The last element is always the
-	// prefix "" which represents the table's permissions -- the array will always
-	// have at least one element.
-	GetPermissions(ctx *context.T, call rpc.ServerCall, key string) ([]PrefixPermissions, error)
 	// DeletePermissions deletes the permissions for the specified prefix. Any
 	// rows covered by this prefix will use the next longest prefix's permissions
 	// (see the array returned by GetPermissions).
@@ -1164,15 +1152,18 @@ type TableServerStubMethods interface {
 	// Delete deletes this Table.
 	Delete(*context.T, rpc.ServerCall) error
 	// Delete deletes all rows in the given half-open range [start, limit). If
-	// limit is "", all rows with keys >= start are included. If the last row that
-	// is covered by a prefix from SetPermissions is deleted, that (prefix, perms)
-	// pair is removed.
-	// TODO(sadovsky): Automatic GC interacts poorly with sync. Revisit this API.
+	// limit is "", all rows with keys >= start are included.
 	DeleteRowRange(ctx *context.T, call rpc.ServerCall, start []byte, limit []byte) error
 	// Scan returns all rows in the given half-open range [start, limit). If limit
 	// is "", all rows with keys >= start are included. The returned stream reads
 	// from a consistent snapshot taken at the time of the Scan RPC.
 	Scan(ctx *context.T, call *TableScanServerCallStub, start []byte, limit []byte) error
+	// GetPermissions returns an array of (prefix, perms) pairs. The array is
+	// sorted from longest prefix to shortest, so element zero is the one that
+	// applies to the row with the given key. The last element is always the
+	// prefix "" which represents the table's permissions -- the array will always
+	// have at least one element.
+	GetPermissions(ctx *context.T, call rpc.ServerCall, key string) ([]PrefixPermissions, error)
 	// SetPermissions sets the permissions for all current and future rows with
 	// the given prefix. If the prefix overlaps with an existing prefix, the
 	// longest prefix that matches a row applies. For example:
@@ -1180,16 +1171,7 @@ type TableServerStubMethods interface {
 	//     SetPermissions(ctx, Prefix("a/b/c"), perms2)
 	// The permissions for row "a/b/1" are perms1, and the permissions for row
 	// "a/b/c/1" are perms2.
-	//
-	// SetPermissions will fail if called with a prefix that does not match any
-	// rows.
 	SetPermissions(ctx *context.T, call rpc.ServerCall, prefix string, perms access.Permissions) error
-	// GetPermissions returns an array of (prefix, perms) pairs. The array is
-	// sorted from longest prefix to shortest, so element zero is the one that
-	// applies to the row with the given key. The last element is always the
-	// prefix "" which represents the table's permissions -- the array will always
-	// have at least one element.
-	GetPermissions(ctx *context.T, call rpc.ServerCall, key string) ([]PrefixPermissions, error)
 	// DeletePermissions deletes the permissions for the specified prefix. Any
 	// rows covered by this prefix will use the next longest prefix's permissions
 	// (see the array returned by GetPermissions).
@@ -1241,12 +1223,12 @@ func (s implTableServerStub) Scan(ctx *context.T, call *TableScanServerCallStub,
 	return s.impl.Scan(ctx, call, i0, i1)
 }
 
-func (s implTableServerStub) SetPermissions(ctx *context.T, call rpc.ServerCall, i0 string, i1 access.Permissions) error {
-	return s.impl.SetPermissions(ctx, call, i0, i1)
-}
-
 func (s implTableServerStub) GetPermissions(ctx *context.T, call rpc.ServerCall, i0 string) ([]PrefixPermissions, error) {
 	return s.impl.GetPermissions(ctx, call, i0)
+}
+
+func (s implTableServerStub) SetPermissions(ctx *context.T, call rpc.ServerCall, i0 string, i1 access.Permissions) error {
+	return s.impl.SetPermissions(ctx, call, i0, i1)
 }
 
 func (s implTableServerStub) DeletePermissions(ctx *context.T, call rpc.ServerCall, i0 string) error {
@@ -1285,7 +1267,7 @@ var descTable = rpc.InterfaceDesc{
 		},
 		{
 			Name: "DeleteRowRange",
-			Doc:  "// Delete deletes all rows in the given half-open range [start, limit). If\n// limit is \"\", all rows with keys >= start are included. If the last row that\n// is covered by a prefix from SetPermissions is deleted, that (prefix, perms)\n// pair is removed.\n// TODO(sadovsky): Automatic GC interacts poorly with sync. Revisit this API.",
+			Doc:  "// Delete deletes all rows in the given half-open range [start, limit). If\n// limit is \"\", all rows with keys >= start are included.",
 			InArgs: []rpc.ArgDesc{
 				{"start", ``}, // []byte
 				{"limit", ``}, // []byte
@@ -1302,15 +1284,6 @@ var descTable = rpc.InterfaceDesc{
 			Tags: []*vdl.Value{vdl.ValueOf(access.Tag("Read"))},
 		},
 		{
-			Name: "SetPermissions",
-			Doc:  "// SetPermissions sets the permissions for all current and future rows with\n// the given prefix. If the prefix overlaps with an existing prefix, the\n// longest prefix that matches a row applies. For example:\n//     SetPermissions(ctx, Prefix(\"a/b\"), perms1)\n//     SetPermissions(ctx, Prefix(\"a/b/c\"), perms2)\n// The permissions for row \"a/b/1\" are perms1, and the permissions for row\n// \"a/b/c/1\" are perms2.\n//\n// SetPermissions will fail if called with a prefix that does not match any\n// rows.",
-			InArgs: []rpc.ArgDesc{
-				{"prefix", ``}, // string
-				{"perms", ``},  // access.Permissions
-			},
-			Tags: []*vdl.Value{vdl.ValueOf(access.Tag("Admin"))},
-		},
-		{
 			Name: "GetPermissions",
 			Doc:  "// GetPermissions returns an array of (prefix, perms) pairs. The array is\n// sorted from longest prefix to shortest, so element zero is the one that\n// applies to the row with the given key. The last element is always the\n// prefix \"\" which represents the table's permissions -- the array will always\n// have at least one element.",
 			InArgs: []rpc.ArgDesc{
@@ -1318,6 +1291,15 @@ var descTable = rpc.InterfaceDesc{
 			},
 			OutArgs: []rpc.ArgDesc{
 				{"", ``}, // []PrefixPermissions
+			},
+			Tags: []*vdl.Value{vdl.ValueOf(access.Tag("Admin"))},
+		},
+		{
+			Name: "SetPermissions",
+			Doc:  "// SetPermissions sets the permissions for all current and future rows with\n// the given prefix. If the prefix overlaps with an existing prefix, the\n// longest prefix that matches a row applies. For example:\n//     SetPermissions(ctx, Prefix(\"a/b\"), perms1)\n//     SetPermissions(ctx, Prefix(\"a/b/c\"), perms2)\n// The permissions for row \"a/b/1\" are perms1, and the permissions for row\n// \"a/b/c/1\" are perms2.",
+			InArgs: []rpc.ArgDesc{
+				{"prefix", ``}, // string
+				{"perms", ``},  // access.Permissions
 			},
 			Tags: []*vdl.Value{vdl.ValueOf(access.Tag("Admin"))},
 		},

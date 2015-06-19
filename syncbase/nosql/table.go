@@ -70,11 +70,6 @@ func (t *table) Scan(ctx *context.T, r RowRange) Stream {
 	return newStream(cancel, call)
 }
 
-// SetPermissions implements Table.SetPermissions.
-func (t *table) SetPermissions(ctx *context.T, prefix PrefixRange, perms access.Permissions) error {
-	return t.c.SetPermissions(ctx, prefix.Prefix(), perms)
-}
-
 // GetPermissions implements Table.GetPermissions.
 func (t *table) GetPermissions(ctx *context.T, key string) ([]PrefixPermissions, error) {
 	wirePermsList, err := t.c.GetPermissions(ctx, key)
@@ -83,6 +78,11 @@ func (t *table) GetPermissions(ctx *context.T, key string) ([]PrefixPermissions,
 		permsList = append(permsList, PrefixPermissions{Prefix: Prefix(v.Prefix), Perms: v.Perms})
 	}
 	return permsList, err
+}
+
+// SetPermissions implements Table.SetPermissions.
+func (t *table) SetPermissions(ctx *context.T, prefix PrefixRange, perms access.Permissions) error {
+	return t.c.SetPermissions(ctx, prefix.Prefix(), perms)
 }
 
 // DeletePermissions implements Table.DeletePermissions.

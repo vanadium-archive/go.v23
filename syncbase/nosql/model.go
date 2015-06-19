@@ -151,11 +151,8 @@ type Table interface {
 	Put(ctx *context.T, key string, value interface{}) error
 
 	// Delete deletes all rows in the given half-open range [start, limit). If
-	// limit is "", all rows with keys >= start are included. If the last row that
-	// is covered by a prefix from SetPermissions is deleted, that (prefix, perms)
-	// pair is removed.
+	// limit is "", all rows with keys >= start are included.
 	// See helpers nosql.Prefix(), nosql.Range(), nosql.SingleRow().
-	// TODO(sadovsky): Automatic GC interacts poorly with sync. Revisit this API.
 	Delete(ctx *context.T, r RowRange) error
 
 	// Scan returns all rows in the given half-open range [start, limit). If limit
@@ -164,6 +161,13 @@ type Table interface {
 	// See helpers nosql.Prefix(), nosql.Range(), nosql.SingleRow().
 	Scan(ctx *context.T, r RowRange) Stream
 
+	// GetPermissions returns an array of (prefix, perms) pairs. The array is
+	// sorted from longest prefix to shortest, so element zero is the one that
+	// applies to the row with the given key. The last element is always the
+	// prefix "" which represents the table's permissions -- the array will always
+	// have at least one element.
+	GetPermissions(ctx *context.T, key string) ([]PrefixPermissions, error)
+
 	// SetPermissions sets the permissions for all current and future rows with
 	// the given prefix. If the prefix overlaps with an existing prefix, the
 	// longest prefix that matches a row applies. For example:
@@ -171,17 +175,7 @@ type Table interface {
 	//     SetPermissions(ctx, Prefix("a/b/c"), perms2)
 	// The permissions for row "a/b/1" are perms1, and the permissions for row
 	// "a/b/c/1" are perms2.
-	//
-	// SetPermissions will fail if called with a prefix that does not match any
-	// rows.
 	SetPermissions(ctx *context.T, prefix PrefixRange, perms access.Permissions) error
-
-	// GetPermissions returns an array of (prefix, perms) pairs. The array is
-	// sorted from longest prefix to shortest, so element zero is the one that
-	// applies to the row with the given key. The last element is always the
-	// prefix "" which represents the table's permissions -- the array will always
-	// have at least one element.
-	GetPermissions(ctx *context.T, key string) ([]PrefixPermissions, error)
 
 	// DeletePermissions deletes the permissions for the specified prefix. Any
 	// rows covered by this prefix will use the next longest prefix's permissions
