@@ -24,7 +24,7 @@ import (
 
 var (
 	format = flag.String("format", "table",
-		"Output format.  'table': human-readable table; 'csv': comma-separated values, use -csv-delimiter to control the delimiter.")
+		"Output format.  'table': human-readable table; 'csv': comma-separated values, use -csv-delimiter to control the delimiter; 'json': JSON arrays.")
 	csvDelimiter = flag.String("csv-delimiter", ",", "Delimiter to use when printing data as CSV (e.g. \"\t\", \",\")")
 )
 
@@ -63,10 +63,16 @@ func queryExec(d query_db.Database, q string) {
 			if err := writer.WriteTable(os.Stdout, columnNames, rs); err != nil {
 				fmt.Fprintf(os.Stderr, "Error: %s\n", err.Error())
 			}
-		} else {
+		} else if *format == "csv" {
 			if err := writer.WriteCSV(os.Stdout, columnNames, rs, *csvDelimiter); err != nil {
 				fmt.Fprintf(os.Stderr, "Error: %s\n", err.Error())
 			}
+		} else if *format == "json" {
+			if err := writer.WriteJson(os.Stdout, columnNames, rs); err != nil {
+				fmt.Fprintf(os.Stderr, "Error: %s\n", err.Error())
+			}
+		} else {
+			panic(fmt.Sprintf("invalid format flag value: %v", *format))
 		}
 	}
 }
@@ -75,8 +81,8 @@ func main() {
 	shutdown := db.InitDB()
 	defer shutdown()
 
-	if *format != "table" && *format != "csv" {
-		fmt.Fprintf(os.Stderr, "Unsupported -format %q.  Must be one of 'table' or 'csv'.\n", *format)
+	if *format != "table" && *format != "csv" && *format != "json" {
+		fmt.Fprintf(os.Stderr, "Unsupported -format %q.  Must be one of 'table', 'csv', or 'json'.\n", *format)
 		os.Exit(-1)
 	}
 
@@ -103,10 +109,11 @@ func main() {
 				break
 			}
 		} else {
-			if q == "" || strings.ToLower(q) == "exit" || strings.ToLower(q) == "quit" {
+			tq := strings.ToLower(strings.TrimSpace(q))
+			if tq == "" || tq == "exit" || tq == "quit" {
 				break
 			}
-			if strings.ToLower(q) == "dump" {
+			if tq == "dump" {
 				dumpDB(d)
 			} else {
 				queryExec(d, q)

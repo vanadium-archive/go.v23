@@ -5,6 +5,7 @@
 package writer
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 	"io"
@@ -138,6 +139,34 @@ func doubleQuoteForCSV(str, delimiter string) string {
 	return str
 }
 
+// WriteJson formats the result as a JSON array of arrays (rows) of values.
+func WriteJson(out io.Writer, columnNames []string, rs query.ResultStream) error {
+	io.WriteString(out, "[\n")
+	io.WriteString(out, "  [")
+	delim := ""
+	for _, cName := range columnNames {
+		str, err := json.Marshal(cName)
+		if err != nil {
+			panic(fmt.Sprintf("JSON marshalling failed for column name: %v", err))
+		}
+		io.WriteString(out, fmt.Sprintf("%s%s", delim, str))
+		delim = ", "
+	}
+	io.WriteString(out, "]\n")
+	for rs.Advance() {
+		io.WriteString(out, fmt.Sprintf(" ,["))
+		delim := ""
+		for _, column := range rs.Result() {
+			str := toJson(column)
+			io.WriteString(out, fmt.Sprintf("%s%s", delim, str))
+			delim = ", "
+		}
+		io.WriteString(out, "]\n")
+	}
+	io.WriteString(out, "]\n")
+	return rs.Err()
+}
+
 // Converts VDL value to readable yet parseable string representation.
 // If nested is not set, strings outside composites are left unquoted.
 // TODO(ivanpi): Handle cycles and improve non-tree DAG handling.
@@ -247,4 +276,130 @@ func listToString(begin, sep, end string, n int, elemToString func(i int) string
 		elems[i] = elemToString(i)
 	}
 	return begin + strings.Join(elems, sep) + end
+}
+
+// Converts VDL value to JSON representation.
+func toJson(val *vdl.Value) string {
+	jf := toJsonFriendly(val)
+	jOut, err := json.Marshal(jf)
+	if err != nil {
+		panic(fmt.Sprintf("JSON marshalling failed: %v", err))
+	}
+	return string(jOut)
+}
+
+// Converts VDL value to Go type compatible with json.Marshal().
+func toJsonFriendly(val *vdl.Value) interface{} {
+	switch val.Type() {
+	case vdl.TypeOf(vtime.Time{}), vdl.TypeOf(vtime.Duration{}):
+		s, err := toStringNative(val)
+		if err != nil {
+			panic(fmt.Sprintf("toStringNative failed for builtin time type: %v", err))
+		}
+		return s
+	default:
+		// fall through to Kind switch
+	}
+	switch val.Kind() {
+	case vdl.Bool:
+		return val.Bool()
+	case vdl.Byte:
+		return val.Byte()
+	case vdl.Uint16, vdl.Uint32, vdl.Uint64:
+		return val.Uint()
+	case vdl.Int16, vdl.Int32, vdl.Int64:
+		return val.Int()
+	case vdl.Float32, vdl.Float64:
+		return val.Float()
+	case vdl.Complex64, vdl.Complex128:
+		// Go doesn't support marshalling complex values, we need to stringify.
+		c := val.Complex()
+		return fmt.Sprintf("%v+%vi", real(c), imag(c))
+	case vdl.String:
+		return val.RawString()
+	case vdl.Enum:
+		return val.EnumLabel()
+	case vdl.Array, vdl.List:
+		arr := make([]interface{}, val.Len())
+		for i, _ := range arr {
+			arr[i] = toJsonFriendly(val.Index(i))
+		}
+		return arr
+	case vdl.Any, vdl.Optional:
+		if val.IsNil() {
+			return nil
+		}
+		return toJsonFriendly(val.Elem())
+	case vdl.Struct:
+		// TODO(ivanpi): Consider lowercasing field names.
+		return toOrderedMap(val.Type().NumField(), func(i int) (string, interface{}) {
+			return val.Type().Field(i).Name, toJsonFriendly(val.StructField(i))
+		})
+	case vdl.Union:
+		// TODO(ivanpi): Consider lowercasing field name.
+		ui, uv := val.UnionField()
+		return toOrderedMap(1, func(_ int) (string, interface{}) {
+			return val.Type().Field(ui).Name, toJsonFriendly(uv)
+		})
+	case vdl.Set:
+		// TODO(ivanpi): vdl.SortValuesAsString() used for predictable output ordering.
+		// Use a more sensible sort for numbers etc.
+		keys := vdl.SortValuesAsString(val.Keys())
+		return toOrderedMap(len(keys), func(i int) (string, interface{}) {
+			return toString(keys[i], false), true
+		})
+	case vdl.Map:
+		// TODO(ivanpi): vdl.SortValuesAsString() used for predictable output ordering.
+		// Use a more sensible sort for numbers etc.
+		keys := vdl.SortValuesAsString(val.Keys())
+		return toOrderedMap(len(keys), func(i int) (string, interface{}) {
+			return toString(keys[i], false), toJsonFriendly(val.MapIndex(keys[i]))
+		})
+	case vdl.TypeObject:
+		return val.String()
+	default:
+		panic(fmt.Sprintf("unknown Kind %s", val.Kind()))
+	}
+}
+
+// Serializes to JSON object, preserving key order.
+// Native Go map will serialize to JSON object with sorted keys, which is
+// unexpected behaviour for a struct.
+type orderedMap []orderedMapElem
+
+type orderedMapElem struct {
+	Key string
+	Val interface{}
+}
+
+var _ json.Marshaler = (*orderedMap)(nil)
+
+// Builds an orderedMap with n elements, obtaining the key and value of element
+// i using elemToKeyVal(i).
+func toOrderedMap(n int, elemToKeyVal func(i int) (string, interface{})) orderedMap {
+	om := make(orderedMap, n)
+	for i, _ := range om {
+		om[i].Key, om[i].Val = elemToKeyVal(i)
+	}
+	return om
+}
+
+// Serializes orderedMap to JSON object, preserving key order.
+func (om orderedMap) MarshalJSON() (_ []byte, rerr error) {
+	defer func() {
+		if r := recover(); r != nil {
+			rerr = fmt.Errorf("orderedMap: %v", r)
+		}
+	}()
+	return []byte(listToString("{", ",", "}", len(om), func(i int) string {
+		keyJson, err := json.Marshal(om[i].Key)
+		if err != nil {
+			panic(err)
+		}
+		valJson, err := json.Marshal(om[i].Val)
+		if err != nil {
+			panic(err)
+		}
+		return fmt.Sprintf("%s:%s", keyJson, valJson)
+	})), nil
 }
