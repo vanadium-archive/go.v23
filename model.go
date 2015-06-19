@@ -162,6 +162,9 @@ type Runtime interface {
 	// GetListenSpec returns the ListenSpec in 'ctx'.
 	GetListenSpec(ctx *context.T) rpc.ListenSpec
 
+	// WithListenSpec attaches a ListenSpec to the returned context.
+	WithListenSpec(ctx *context.T, ls rpc.ListenSpec) *context.T
+
 	// WithBackgroundContext creates a new context derived from 'ctx'
 	// with the given context set as the background context.
 	WithBackgroundContext(ctx *context.T) *context.T
@@ -259,6 +262,11 @@ func GetAppCycle(ctx *context.T) AppCycle {
 // GetListenSpec returns the ListenSpec in 'ctx'.
 func GetListenSpec(ctx *context.T) rpc.ListenSpec {
 	return initState.currentRuntime().GetListenSpec(ctx)
+}
+
+// WithListenSpec attaches a ListenSpec to the returned context.
+func WithListenSpec(ctx *context.T, ls rpc.ListenSpec) *context.T {
+	return initState.currentRuntime().WithListenSpec(ctx, ls)
 }
 
 // WithBackgroundContext creates a new context derived from 'ctx'
