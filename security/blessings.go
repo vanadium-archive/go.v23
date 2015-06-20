@@ -151,23 +151,22 @@ func nameForPrincipal(p Principal, chain []Certificate) string {
 	return blessing
 }
 
-func validateCertificateChains(chains [][]Certificate, ch chan error) {
-	for _, chain := range chains {
-		pMarshaledKey := chain[0].PublicKey
-		pSignature := Signature{}
-		for _, cert := range chain {
-			go func(cert Certificate, parent Signature, marshaledParentKey []byte) {
-				parentKey, err := UnmarshalPublicKey(marshaledParentKey)
-				if err != nil {
-					ch <- err
-					return
-				}
-				ch <- cert.validate(parent, parentKey)
-			}(cert, pSignature, pMarshaledKey)
-			pMarshaledKey = cert.PublicKey
-			pSignature = cert.Signature
-		}
+func validateCertificateChain(chain []Certificate) (PublicKey, error) {
+	parent := &Signature{}
+	key, err := UnmarshalPublicKey(chain[0].PublicKey)
+	if err != nil {
+		return nil, err
 	}
+	for idx, cert := range chain {
+		if err := cert.validate(*parent, key); err != nil {
+			return nil, err
+		}
+		if key, err = UnmarshalPublicKey(cert.PublicKey); err != nil {
+			return nil, err
+		}
+		parent = &(chain[idx].Signature)
+	}
+	return key, nil
 }
 
 // Verifies that the chain signatures are correct, without handling caveat validation
@@ -225,37 +224,25 @@ func wireBlessingsToNative(wire WireBlessings, native *Blessings) error {
 	if len(certchains) == 0 || len(certchains[0]) == 0 {
 		return verror.New(errEmptyChain, nil)
 	}
-	marshaledKey := certchains[0][len(certchains[0])-1].PublicKey
-	key, err := UnmarshalPublicKey(marshaledKey)
+	// Public keys should match for all chains.
+	marshaledkey := certchains[0][len(certchains[0])-1].PublicKey
+	key, err := validateCertificateChain(certchains[0])
 	if err != nil {
 		return err
 	}
-
-	// Do error checking up-front to avoid doing unnecessary work.
-	ncerts := 0
-	for _, chain := range certchains {
+	for i := 1; i < len(certchains); i++ {
+		chain := certchains[i]
 		if len(chain) == 0 {
 			return verror.New(errEmptyChain, nil)
 		}
-		if !bytes.Equal(marshaledKey, chain[len(chain)-1].PublicKey) {
+		cert := chain[len(chain)-1]
+		if !bytes.Equal(marshaledkey, cert.PublicKey) {
 			return verror.New(errMultiplePublicKeys, nil)
 		}
-		ncerts += len(chain)
-	}
-
-	// Now validate all the certs in parallel.
-	var firstErr error
-	ch := make(chan error, ncerts)
-	validateCertificateChains(certchains, ch)
-	for i := 0; i < ncerts; i++ {
-		if err = <-ch; err != nil && firstErr == nil {
-			firstErr = err
+		if _, err := validateCertificateChain(chain); err != nil {
+			return err
 		}
 	}
-	if firstErr != nil {
-		return firstErr
-	}
-
 	native.chains = certchains
 	native.publicKey = key
 	return nil
