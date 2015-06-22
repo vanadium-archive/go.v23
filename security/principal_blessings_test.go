@@ -727,11 +727,7 @@ func TestBlessingsOnWireWithMissingCertificates(t *testing.T) {
 	}
 
 	C1, C2, C3 := chain[0], chain[1], chain[2]
-	var CX1, CX2, CX3 Certificate
-	CX1.PublicKey = C1.PublicKey
-	CX2.PublicKey = C2.PublicKey
-	CX3.PublicKey = C3.PublicKey
-
+	var CX Certificate
 	// The following combinations should fail because a certificate is missing
 	type C []Certificate
 	tests := []struct {
@@ -741,9 +737,9 @@ func TestBlessingsOnWireWithMissingCertificates(t *testing.T) {
 		{C{}, "empty certificate chain"}, // Empty chain
 		{C{C1, C3}, "invalid Signature"}, // Missing link in the chain
 		{C{C2, C3}, "invalid Signature"},
-		{C{CX1, C2, C2}, "signature"},
-		{C{C1, CX2, C3}, "signature"},
-		{C{C1, C2, CX3}, "signature"},
+		{C{CX, C2, C3}, "syntax error"},
+		{C{C1, CX, C3}, "signature"},
+		{C{C1, C2, CX}, "signature"},
 		{C{C1, C2, C3}, ""}, // Valid chain
 	}
 	for idx, test := range tests {
