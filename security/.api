@@ -71,9 +71,12 @@ pkg security, type BlessingRoots interface, Add(PublicKey, BlessingPattern) erro
 pkg security, type BlessingRoots interface, DebugString() string
 pkg security, type BlessingRoots interface, Dump() map[BlessingPattern][]PublicKey
 pkg security, type BlessingRoots interface, Recognized(PublicKey, string) error
-pkg security, type BlessingStore interface { DebugString, Default, ForPeer, PeerBlessings, PublicKey, Set, SetDefault }
+pkg security, type BlessingStore interface { CacheDischarge, ClearDischarges, DebugString, Default, Discharge, ForPeer, PeerBlessings, PublicKey, Set, SetDefault }
+pkg security, type BlessingStore interface, CacheDischarge(Discharge, Caveat, DischargeImpetus)
+pkg security, type BlessingStore interface, ClearDischarges(...Discharge)
 pkg security, type BlessingStore interface, DebugString() string
 pkg security, type BlessingStore interface, Default() Blessings
+pkg security, type BlessingStore interface, Discharge(Caveat, DischargeImpetus) Discharge
 pkg security, type BlessingStore interface, ForPeer(...string) Blessings
 pkg security, type BlessingStore interface, PeerBlessings() map[BlessingPattern]Blessings
 pkg security, type BlessingStore interface, PublicKey() PublicKey

@@ -195,6 +195,8 @@ type Principal interface {
 // BlessingStore is the interface for storing blessings bound to a
 // principal and managing the subset of blessings to be presented to
 // particular peers.
+// BlessingStore implementations may also cache Discharges for third-party caveats
+// on blessings, allowing unexpired Discharges to be reused.
 type BlessingStore interface {
 	// Set marks the set of blessings to be shared with peers.
 	//
@@ -253,6 +255,17 @@ type BlessingStore interface {
 	// PeerBlessings returns all the blessings that the BlessingStore
 	// currently holds for various peers.
 	PeerBlessings() map[BlessingPattern]Blessings
+
+	// CacheDischarge inserts the discharge for the provided impetus and caveat into the cache.
+	CacheDischarge(discharge Discharge, caveat Caveat, impetus DischargeImpetus)
+
+	// ClearDischarges clears the input discharges from the BlessingStore's
+	// discharge cache.
+	ClearDischarges(discharges ...Discharge)
+
+	// Discharge takes a caveat and DischargeImpetus and returns a cached discharge,
+	// returning a zero value if no corresponding cached discharge can be found.
+	Discharge(caveat Caveat, impetus DischargeImpetus) Discharge
 
 	// DebugString return a human-readable string description of the store.
 	// This description is detailed and lists out the contents of the store.
