@@ -11,8 +11,9 @@ import (
 	"v.io/syncbase/v23/syncbase"
 	"v.io/syncbase/v23/syncbase/nosql"
 	tu "v.io/syncbase/v23/syncbase/testutil"
-
+	"v.io/syncbase/x/ref/services/syncbase/server/util"
 	"v.io/v23/context"
+	"v.io/v23/naming"
 	"v.io/v23/security"
 	"v.io/v23/security/access"
 	"v.io/v23/verror"
@@ -27,7 +28,9 @@ func TestCreateSyncGroup(t *testing.T) {
 
 	// Check if create fails with empty spec.
 	spec := wire.SyncGroupSpec{}
-	createSyncGroup(t, ctx, d, "sg1", spec, verror.ErrBadArg.ID)
+	sg1 := naming.Join(sName, util.SyncbaseSuffix, "sg1")
+
+	createSyncGroup(t, ctx, d, sg1, spec, verror.ErrBadArg.ID)
 
 	// Create successfully.
 	spec = wire.SyncGroupSpec{
@@ -35,19 +38,21 @@ func TestCreateSyncGroup(t *testing.T) {
 		Perms:       nil,
 		Prefixes:    []string{"t1/foo"},
 	}
-	createSyncGroup(t, ctx, d, "sg1", spec, verror.ID(""))
+	createSyncGroup(t, ctx, d, sg1, spec, verror.ID(""))
 
 	// Check if creating an already existing syncgroup fails.
-	createSyncGroup(t, ctx, d, "sg1", spec, verror.ErrExist.ID)
+	createSyncGroup(t, ctx, d, sg1, spec, verror.ErrExist.ID)
 
 	// Create a peer syncgroup.
 	spec.Description = "test syncgroup sg2"
-	createSyncGroup(t, ctx, d, "sg2", spec, verror.ID(""))
+	sg2 := naming.Join(sName, util.SyncbaseSuffix, "sg2")
+	createSyncGroup(t, ctx, d, sg2, spec, verror.ID(""))
 
 	// Create a nested syncgroup.
 	spec.Description = "test syncgroup sg3"
 	spec.Prefixes = []string{"t1/foobar"}
-	createSyncGroup(t, ctx, d, "sg3", spec, verror.ID(""))
+	sg3 := naming.Join(sName, util.SyncbaseSuffix, "sg3")
+	createSyncGroup(t, ctx, d, sg3, spec, verror.ID(""))
 
 	// Check that create fails if the perms disallow access.
 	perms := perms("server/client")
@@ -56,7 +61,8 @@ func TestCreateSyncGroup(t *testing.T) {
 		t.Fatalf("d.SetPermissions() failed: %v", err)
 	}
 	spec.Description = "test syncgroup sg4"
-	createSyncGroup(t, ctx, d, "sg4", spec, verror.ErrNoAccess.ID)
+	sg4 := naming.Join(sName, util.SyncbaseSuffix, "sg4")
+	createSyncGroup(t, ctx, d, sg4, spec, verror.ErrNoAccess.ID)
 }
 
 // Tests that SyncGroup.Join works as expected for the case with one Syncbase
@@ -76,7 +82,7 @@ func TestJoinSyncGroup(t *testing.T) {
 		Perms:       perms("server/client1"),
 		Prefixes:    []string{"t1/foo"},
 	}
-	sgNameA := sName + "sgA"
+	sgNameA := naming.Join(sName, util.SyncbaseSuffix, "sgA")
 	createSyncGroup(t, ctx1, d1, sgNameA, specA, verror.ID(""))
 
 	// Check that creator can call join successfully.
@@ -109,7 +115,7 @@ func TestJoinSyncGroup(t *testing.T) {
 		Perms:       perms("server/client1", "server/client2"),
 		Prefixes:    []string{"t1/foo"},
 	}
-	sgNameB := sName + "sgB"
+	sgNameB := naming.Join(sName, util.SyncbaseSuffix, "sgB")
 	createSyncGroup(t, ctx1, d1, sgNameB, specB, verror.ID(""))
 
 	// Check that client2's join now succeeds.
