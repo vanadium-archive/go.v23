@@ -25,6 +25,7 @@ import (
 	"v.io/v23/services/application"
 	"v.io/v23/services/binary"
 	"v.io/v23/services/permissions"
+	"v.io/v23/services/tidyable"
 	_ "v.io/v23/vdlroot/time"
 )
 
@@ -1645,6 +1646,8 @@ type DeviceClientMethods interface {
 	//    apply(Kill(), "running") = "not-running"
 	//    apply(Delete(), "not-running") = "deleted"
 	ApplicationClientMethods
+	// Tidyable specifies that a service can be tidied.
+	tidyable.TidyableClientMethods
 	// Describe generates a description of the device.
 	Describe(*context.T, ...rpc.CallOpt) (Description, error)
 	// IsRunnable checks if the device can execute the given binary.
@@ -1661,9 +1664,6 @@ type DeviceClientMethods interface {
 	// ListAssociations returns all of the associations between Vanadium identities
 	// and system names.
 	ListAssociations(*context.T, ...rpc.CallOpt) ([]Association, error)
-	// Request the device manager to perform regularly scheduled cleanup actions
-	// immediately.
-	TidyNow(*context.T, ...rpc.CallOpt) error
 }
 
 // DeviceClientStub adds universal methods to DeviceClientMethods.
@@ -1674,13 +1674,14 @@ type DeviceClientStub interface {
 
 // DeviceClient returns a client stub for Device.
 func DeviceClient(name string) DeviceClientStub {
-	return implDeviceClientStub{name, ApplicationClient(name)}
+	return implDeviceClientStub{name, ApplicationClient(name), tidyable.TidyableClient(name)}
 }
 
 type implDeviceClientStub struct {
 	name string
 
 	ApplicationClientStub
+	tidyable.TidyableClientStub
 }
 
 func (c implDeviceClientStub) Describe(ctx *context.T, opts ...rpc.CallOpt) (o0 Description, err error) {
@@ -1705,11 +1706,6 @@ func (c implDeviceClientStub) AssociateAccount(ctx *context.T, i0 []string, i1 s
 
 func (c implDeviceClientStub) ListAssociations(ctx *context.T, opts ...rpc.CallOpt) (o0 []Association, err error) {
 	err = v23.GetClient(ctx).Call(ctx, c.name, "ListAssociations", nil, []interface{}{&o0}, opts...)
-	return
-}
-
-func (c implDeviceClientStub) TidyNow(ctx *context.T, opts ...rpc.CallOpt) (err error) {
-	err = v23.GetClient(ctx).Call(ctx, c.name, "TidyNow", nil, nil, opts...)
 	return
 }
 
@@ -1813,6 +1809,8 @@ type DeviceServerMethods interface {
 	//    apply(Kill(), "running") = "not-running"
 	//    apply(Delete(), "not-running") = "deleted"
 	ApplicationServerMethods
+	// Tidyable specifies that a service can be tidied.
+	tidyable.TidyableServerMethods
 	// Describe generates a description of the device.
 	Describe(*context.T, rpc.ServerCall) (Description, error)
 	// IsRunnable checks if the device can execute the given binary.
@@ -1829,9 +1827,6 @@ type DeviceServerMethods interface {
 	// ListAssociations returns all of the associations between Vanadium identities
 	// and system names.
 	ListAssociations(*context.T, rpc.ServerCall) ([]Association, error)
-	// Request the device manager to perform regularly scheduled cleanup actions
-	// immediately.
-	TidyNow(*context.T, rpc.ServerCall) error
 }
 
 // DeviceServerStubMethods is the server interface containing
@@ -1933,6 +1928,8 @@ type DeviceServerStubMethods interface {
 	//    apply(Kill(), "running") = "not-running"
 	//    apply(Delete(), "not-running") = "deleted"
 	ApplicationServerStubMethods
+	// Tidyable specifies that a service can be tidied.
+	tidyable.TidyableServerStubMethods
 	// Describe generates a description of the device.
 	Describe(*context.T, rpc.ServerCall) (Description, error)
 	// IsRunnable checks if the device can execute the given binary.
@@ -1949,9 +1946,6 @@ type DeviceServerStubMethods interface {
 	// ListAssociations returns all of the associations between Vanadium identities
 	// and system names.
 	ListAssociations(*context.T, rpc.ServerCall) ([]Association, error)
-	// Request the device manager to perform regularly scheduled cleanup actions
-	// immediately.
-	TidyNow(*context.T, rpc.ServerCall) error
 }
 
 // DeviceServerStub adds universal methods to DeviceServerStubMethods.
@@ -1968,6 +1962,7 @@ func DeviceServer(impl DeviceServerMethods) DeviceServerStub {
 	stub := implDeviceServerStub{
 		impl: impl,
 		ApplicationServerStub: ApplicationServer(impl),
+		TidyableServerStub:    tidyable.TidyableServer(impl),
 	}
 	// Initialize GlobState; always check the stub itself first, to handle the
 	// case where the user has the Glob method defined in their VDL source.
@@ -1982,6 +1977,7 @@ func DeviceServer(impl DeviceServerMethods) DeviceServerStub {
 type implDeviceServerStub struct {
 	impl DeviceServerMethods
 	ApplicationServerStub
+	tidyable.TidyableServerStub
 	gs *rpc.GlobState
 }
 
@@ -2005,16 +2001,12 @@ func (s implDeviceServerStub) ListAssociations(ctx *context.T, call rpc.ServerCa
 	return s.impl.ListAssociations(ctx, call)
 }
 
-func (s implDeviceServerStub) TidyNow(ctx *context.T, call rpc.ServerCall) error {
-	return s.impl.TidyNow(ctx, call)
-}
-
 func (s implDeviceServerStub) Globber() *rpc.GlobState {
 	return s.gs
 }
 
 func (s implDeviceServerStub) Describe__() []rpc.InterfaceDesc {
-	return []rpc.InterfaceDesc{DeviceDesc, ApplicationDesc, permissions.ObjectDesc}
+	return []rpc.InterfaceDesc{DeviceDesc, ApplicationDesc, permissions.ObjectDesc, tidyable.TidyableDesc}
 }
 
 // DeviceDesc describes the Device interface.
@@ -2027,6 +2019,7 @@ var descDevice = rpc.InterfaceDesc{
 	Doc:     "// Device can be used to manage a device remotely using an object name that\n// identifies it.",
 	Embeds: []rpc.EmbedDesc{
 		{"Application", "v.io/v23/services/device", "// Application can be used to manage applications on a device. This interface\n// will be invoked using an object name that identifies the application and its\n// installations and instances where applicable.\n//\n// An application is defined by a title.  An application can have multiple\n// installations on a device.  The installations are grouped under the same\n// application, but are otherwise independent of each other.  Each installation\n// can have zero or more instances (which can be running or not).  The instances\n// are independent of each other, and do not share state (like local storage).\n// Interaction among instances should occur via Vanadium RPC, facilitated by the\n// local mounttable.\n//\n// The device manager supports versioning of applications.  Each installation\n// maintains a tree of versions, where a version is defined by a specific\n// envelope.  The tree structure comes from 'previous version' references: each\n// version (except the initial installation version) maintains a reference to\n// the version that preceded it.  The installation maintains a current version\n// reference that is used for new instances.  Each update operation on the\n// installation creates a new version, sets the previous reference of the new\n// version to the current version, and then updates the current version to refer\n// to the new version.  Each revert operation on the installation sets the\n// current version to the previous version of the current version.  Each\n// instance maintains a current version reference that is used to run the\n// instance.  The initial version of the instance is set to the current version\n// of the installation at the time of instantiation.  Each update operation on\n// the instance updates the instance's current version to the current version of\n// the installation.  Each revert operation on the instance updates the\n// instance's current version to the previous version of the instance's version.\n//\n// The Application interface methods can be divided based on their intended\n// receiver:\n//\n// 1) Method receiver is an application:\n//     - Install()\n//\n// 2) Method receiver is an application installation:\n//     - Instantiate()\n//     - Uninstall()\n//\n// 3) Method receiver is an application instance:\n//     - Run()\n//     - Kill()\n//     - Delete()\n//\n// 4) Method receiver is an application installation or instance:\n//     - Update()\n//     - Revert()\n//\n// The following methods complement one another:\n//     - Install() and Uninstall()\n//     - Instantiate() and Delete()\n//     - Run() and Kill()\n//     - Update() and Revert()\n//\n//\n//\n// Examples:\n//\n// Install Google Maps on the device.\n//     device/apps.Install(\"/google.com/appstore/maps\", nil, nil) --> \"google maps/0\"\n//\n// Create and start an instance of the previously installed maps application\n// installation.\n//    device/apps/google maps/0.Instantiate() --> { \"0\" }\n//    device/apps/google maps/0/0.Run()\n//\n// Create and start a second instance of the previously installed maps\n// application installation.\n//    device/apps/google maps/0.Instantiate() --> { \"1\" }\n//    device/apps/google maps/0/1.Run()\n//\n// Kill and delete the first instance previously started.\n//    device/apps/google maps/0/0.Kill()\n//    device/apps/google maps/0/0.Delete()\n//\n// Install a second Google Maps installation.\n//    device/apps.Install(\"/google.com/appstore/maps\", nil, nil) --> \"google maps/1\"\n//\n// Update the second maps installation to the latest version available.\n//    device/apps/google maps/1.Update()\n//\n// Update the first maps installation to a specific version.\n//    device/apps/google maps/0.UpdateTo(\"/google.com/appstore/beta/maps\")\n//\n// Finally, an application installation instance can be in one of three abstract\n// states: 1) \"does not exist/deleted\", 2) \"running\", or 3) \"not-running\". The\n// interface methods transition between these abstract states using the\n// following state machine:\n//\n//    apply(Instantiate(), \"does not exist\") = \"not-running\"\n//    apply(Run(), \"not-running\") = \"running\"\n//    apply(Kill(), \"running\") = \"not-running\"\n//    apply(Delete(), \"not-running\") = \"deleted\""},
+		{"Tidyable", "v.io/v23/services/tidyable", "// Tidyable specifies that a service can be tidied."},
 	},
 	Methods: []rpc.MethodDesc{
 		{
@@ -2071,11 +2064,6 @@ var descDevice = rpc.InterfaceDesc{
 			OutArgs: []rpc.ArgDesc{
 				{"", ``}, // []Association
 			},
-			Tags: []*vdl.Value{vdl.ValueOf(access.Tag("Admin"))},
-		},
-		{
-			Name: "TidyNow",
-			Doc:  "// Request the device manager to perform regularly scheduled cleanup actions\n// immediately.",
 			Tags: []*vdl.Value{vdl.ValueOf(access.Tag("Admin"))},
 		},
 	},

@@ -225,7 +225,6 @@ pkg device, type DeviceServerStub interface, Reset(*context.T, rpc.ServerCall, t
 pkg device, type DeviceServerStub interface, Revert(*context.T, rpc.ServerCall) error
 pkg device, type DeviceServerStub interface, Run(*context.T, rpc.ServerCall) error
 pkg device, type DeviceServerStub interface, Status(*context.T, rpc.ServerCall) (Status, error)
-pkg device, type DeviceServerStub interface, TidyNow(*context.T, rpc.ServerCall) error
 pkg device, type DeviceServerStub interface, Uninstall(*context.T, rpc.ServerCall) error
 pkg device, type DeviceServerStub interface, Update(*context.T, rpc.ServerCall) error
 pkg device, type DeviceServerStub interface, UpdateTo(*context.T, rpc.ServerCall, string) error
@@ -243,7 +242,6 @@ pkg device, type DeviceServerStubMethods interface, Reset(*context.T, rpc.Server
 pkg device, type DeviceServerStubMethods interface, Revert(*context.T, rpc.ServerCall) error
 pkg device, type DeviceServerStubMethods interface, Run(*context.T, rpc.ServerCall) error
 pkg device, type DeviceServerStubMethods interface, Status(*context.T, rpc.ServerCall) (Status, error)
-pkg device, type DeviceServerStubMethods interface, TidyNow(*context.T, rpc.ServerCall) error
 pkg device, type DeviceServerStubMethods interface, Uninstall(*context.T, rpc.ServerCall) error
 pkg device, type DeviceServerStubMethods interface, Update(*context.T, rpc.ServerCall) error
 pkg device, type DeviceServerStubMethods interface, UpdateTo(*context.T, rpc.ServerCall, string) error
