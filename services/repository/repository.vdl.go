@@ -22,6 +22,7 @@ import (
 	"v.io/v23/services/application"
 	"v.io/v23/services/binary"
 	"v.io/v23/services/permissions"
+	"v.io/v23/services/tidyable"
 )
 
 // MediaInfo contains the metadata information for a binary.
@@ -98,6 +99,8 @@ type ApplicationClientMethods interface {
 	//    GetPermissions() (perms access.Permissions, version string, err error) {Blue}
 	//  }
 	permissions.ObjectClientMethods
+	// Tidyable specifies that a service can be tidied.
+	tidyable.TidyableClientMethods
 	// Match checks if any of the given profiles contains an application
 	// envelope for the given application version (specified through the
 	// object name suffix) and if so, returns this envelope. If multiple
@@ -114,13 +117,14 @@ type ApplicationClientStub interface {
 
 // ApplicationClient returns a client stub for Application.
 func ApplicationClient(name string) ApplicationClientStub {
-	return implApplicationClientStub{name, permissions.ObjectClient(name)}
+	return implApplicationClientStub{name, permissions.ObjectClient(name), tidyable.TidyableClient(name)}
 }
 
 type implApplicationClientStub struct {
 	name string
 
 	permissions.ObjectClientStub
+	tidyable.TidyableClientStub
 }
 
 func (c implApplicationClientStub) Match(ctx *context.T, i0 []string, opts ...rpc.CallOpt) (o0 application.Envelope, err error) {
@@ -187,6 +191,8 @@ type ApplicationServerMethods interface {
 	//    GetPermissions() (perms access.Permissions, version string, err error) {Blue}
 	//  }
 	permissions.ObjectServerMethods
+	// Tidyable specifies that a service can be tidied.
+	tidyable.TidyableServerMethods
 	// Match checks if any of the given profiles contains an application
 	// envelope for the given application version (specified through the
 	// object name suffix) and if so, returns this envelope. If multiple
@@ -213,8 +219,9 @@ type ApplicationServerStub interface {
 // an object that may be used by rpc.Server.
 func ApplicationServer(impl ApplicationServerMethods) ApplicationServerStub {
 	stub := implApplicationServerStub{
-		impl:             impl,
-		ObjectServerStub: permissions.ObjectServer(impl),
+		impl:               impl,
+		ObjectServerStub:   permissions.ObjectServer(impl),
+		TidyableServerStub: tidyable.TidyableServer(impl),
 	}
 	// Initialize GlobState; always check the stub itself first, to handle the
 	// case where the user has the Glob method defined in their VDL source.
@@ -229,6 +236,7 @@ func ApplicationServer(impl ApplicationServerMethods) ApplicationServerStub {
 type implApplicationServerStub struct {
 	impl ApplicationServerMethods
 	permissions.ObjectServerStub
+	tidyable.TidyableServerStub
 	gs *rpc.GlobState
 }
 
@@ -241,7 +249,7 @@ func (s implApplicationServerStub) Globber() *rpc.GlobState {
 }
 
 func (s implApplicationServerStub) Describe__() []rpc.InterfaceDesc {
-	return []rpc.InterfaceDesc{ApplicationDesc, permissions.ObjectDesc}
+	return []rpc.InterfaceDesc{ApplicationDesc, permissions.ObjectDesc, tidyable.TidyableDesc}
 }
 
 // ApplicationDesc describes the Application interface.
@@ -254,6 +262,7 @@ var descApplication = rpc.InterfaceDesc{
 	Doc:     "// Application provides access to application envelopes. An\n// application envelope is identified by an application name and an\n// application version, which are specified through the object name,\n// and a profile name, which is specified using a method argument.\n//\n// Example:\n// /apps/search/v1.Match([]string{\"base\", \"media\"})\n//   returns an application envelope that can be used for downloading\n//   and executing the \"search\" application, version \"v1\", runnable\n//   on either the \"base\" or \"media\" profile.",
 	Embeds: []rpc.EmbedDesc{
 		{"Object", "v.io/v23/services/permissions", "// Object provides access control for Vanadium objects.\n//\n// Vanadium services implementing dynamic access control would typically embed\n// this interface and tag additional methods defined by the service with one of\n// Admin, Read, Write, Resolve etc. For example, the VDL definition of the\n// object would be:\n//\n//   package mypackage\n//\n//   import \"v.io/v23/security/access\"\n//   import \"v.io/v23/services/permissions\"\n//\n//   type MyObject interface {\n//     permissions.Object\n//     MyRead() (string, error) {access.Read}\n//     MyWrite(string) error    {access.Write}\n//   }\n//\n// If the set of pre-defined tags is insufficient, services may define their\n// own tag type and annotate all methods with this new type.\n//\n// Instead of embedding this Object interface, define SetPermissions and\n// GetPermissions in their own interface. Authorization policies will typically\n// respect annotations of a single type. For example, the VDL definition of an\n// object would be:\n//\n//  package mypackage\n//\n//  import \"v.io/v23/security/access\"\n//\n//  type MyTag string\n//\n//  const (\n//    Blue = MyTag(\"Blue\")\n//    Red  = MyTag(\"Red\")\n//  )\n//\n//  type MyObject interface {\n//    MyMethod() (string, error) {Blue}\n//\n//    // Allow clients to change access via the access.Object interface:\n//    SetPermissions(perms access.Permissions, version string) error         {Red}\n//    GetPermissions() (perms access.Permissions, version string, err error) {Blue}\n//  }"},
+		{"Tidyable", "v.io/v23/services/tidyable", "// Tidyable specifies that a service can be tidied."},
 	},
 	Methods: []rpc.MethodDesc{
 		{

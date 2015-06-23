@@ -11,6 +11,7 @@ import (
 	"v.io/v23/services/application"
 	"v.io/v23/services/binary"
 	"v.io/v23/services/permissions"
+	"v.io/v23/services/tidyable"
 )
 
 // Application provides access to application envelopes. An
@@ -27,6 +28,8 @@ type Application interface {
 	// Object provides GetPermissions/SetPermissions methods to read/modify
 	// Permissions for the Application methods.
 	permissions.Object
+	// Tidyable provides TidyNow to force cleanup of state now.
+	tidyable.Tidyable
 	// Match checks if any of the given profiles contains an application
 	// envelope for the given application version (specified through the
 	// object name suffix) and if so, returns this envelope. If multiple
