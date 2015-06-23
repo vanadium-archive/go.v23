@@ -24,7 +24,7 @@ import (
 
 var (
 	format = flag.String("format", "table",
-		"Output format.  'table': human-readable table; 'csv': comma-separated values, use -csv-delimiter to control the delimiter; 'json': JSON arrays.")
+		"Output format.  'table': human-readable table; 'csv': comma-separated values, use -csv-delimiter to control the delimiter; 'json': JSON objects.")
 	csvDelimiter = flag.String("csv-delimiter", ",", "Delimiter to use when printing data as CSV (e.g. \"\t\", \",\")")
 )
 

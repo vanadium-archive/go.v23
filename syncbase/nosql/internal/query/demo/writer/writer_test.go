@@ -366,11 +366,13 @@ func TestWriteJson(t *testing.T) {
 				{6, "bar\tfoo"},
 			},
 			`
-[
-  ["c\n1", "c鶊2"]
- ,[5, "foo\nbar"]
- ,[6, "bar\tfoo"]
-]
+[{
+  "c\n1": 5,
+  "c鶊2": "foo\nbar"
+}, {
+  "c\n1": 6,
+  "c鶊2": "bar\tfoo"
+}]
 `,
 		},
 		{ // Numbers.
@@ -387,34 +389,63 @@ func TestWriteJson(t *testing.T) {
 				},
 			},
 			`
-[
-  ["byte", "uint16", "uint32", "uint64", "int16", "int32", "int64", "float32", "float64", "complex64", "complex128"]
- ,[12, 1234, 5678, 999888777666, 9876, 876543, 128, 3.141590118408203, 2.71828182846, "123+7i", "456.789+10.1112i"]
- ,[9, 99, 999, 9999999, 9, 99, 88, 1.4142135381698608, 1.73205080757, "9.869999885559082+7.650000095367432i", "4.32+1i"]
-]
+[{
+  "byte": 12,
+  "uint16": 1234,
+  "uint32": 5678,
+  "uint64": 999888777666,
+  "int16": 9876,
+  "int32": 876543,
+  "int64": 128,
+  "float32": 3.141590118408203,
+  "float64": 2.71828182846,
+  "complex64": "123+7i",
+  "complex128": "456.789+10.1112i"
+}, {
+  "byte": 9,
+  "uint16": 99,
+  "uint32": 999,
+  "uint64": 9999999,
+  "int16": 9,
+  "int32": 99,
+  "int64": 88,
+  "float32": 1.4142135381698608,
+  "float64": 1.73205080757,
+  "complex64": "9.869999885559082+7.650000095367432i",
+  "complex128": "4.32+1i"
+}]
 `,
 		},
 		{ // Empty result.
-			[]string{},
+			[]string{"nothing", "nada", "zilch"},
 			[][]interface{}{},
 			`
-[
-  []
-]
+[]
+`,
+		},
+		{ // Empty column set.
+			[]string{},
+			[][]interface{}{
+				{},
+				{},
+			},
+			`
+[{
+}, {
+}]
 `,
 		},
 		{ // Empty values.
 			[]string{"blank", "empty", "nil"},
 			[][]interface{}{
 				{struct{}{}, []string{}, nil},
-				{},
 			},
 			`
-[
-  ["blank", "empty", "nil"]
- ,[{}, [], null]
- ,[]
-]
+[{
+  "blank": {},
+  "empty": [],
+  "nil": null
+}]
 `,
 		},
 		{
@@ -424,11 +455,11 @@ func TestWriteJson(t *testing.T) {
 				{db.Invoice{1, 1000, 42, db.AddressInfo{"1 Main St.", "Palo Alto", "CA", "94303"}}},
 			},
 			`
-[
-  ["c1"]
- ,[{"Name":"John Smith","Id":1,"Active":true,"Address":{"Street":"1 Main St.","City":"Palo Alto","State":"CA","Zip":"94303"},"Credit":{"Agency":"Equifax","Report":{"EquifaxReport":{"Rating":65}}}}]
- ,[{"CustId":1,"InvoiceNum":1000,"Amount":42,"ShipTo":{"Street":"1 Main St.","City":"Palo Alto","State":"CA","Zip":"94303"}}]
-]
+[{
+  "c1": {"Name":"John Smith","Id":1,"Active":true,"Address":{"Street":"1 Main St.","City":"Palo Alto","State":"CA","Zip":"94303"},"Credit":{"Agency":"Equifax","Report":{"EquifaxReport":{"Rating":65}}}}
+}, {
+  "c1": {"CustId":1,"InvoiceNum":1000,"Amount":42,"ShipTo":{"Street":"1 Main St.","City":"Palo Alto","State":"CA","Zip":"94303"}}
+}]
 `,
 		},
 		{
@@ -441,10 +472,11 @@ func TestWriteJson(t *testing.T) {
 				},
 			},
 			`
-[
-  ["nil", "composite", "typeobj"]
- ,[null, {"Arr":["foo","bar"],"ListInt":[1,2],"MySet":{"1":true,"2":true},"Map":{"bar":2,"foo":1}}, "typeobject(set[string])"]
-]
+[{
+  "nil": null,
+  "composite": {"Arr":["foo","bar"],"ListInt":[1,2],"MySet":{"1":true,"2":true},"Map":{"bar":2,"foo":1}},
+  "typeobj": "typeobject(set[string])"
+}]
 `,
 		},
 		{
@@ -458,10 +490,9 @@ func TestWriteJson(t *testing.T) {
 				},
 			},
 			`
-[
-  ["c1"]
- ,[{"Any":null,"Maybe":{"Stamp":"1973-11-29 21:33:09.042244224 +0000 UTC","Interval":"1.337µs"},"Rec":{"[\"a\", \"棎鶊鵱\"]":{"Any":null,"Maybe":null,"Rec":{}},"[\"x\", \"y\"]":{"Any":{"Agency":"Experian","Report":{"ExperianReport":{"Rating":"Good"}}},"Maybe":null,"Rec":{}}}}]
-]
+[{
+  "c1": {"Any":null,"Maybe":{"Stamp":"1973-11-29 21:33:09.042244224 +0000 UTC","Interval":"1.337µs"},"Rec":{"[\"a\", \"棎鶊鵱\"]":{"Any":null,"Maybe":null,"Rec":{}},"[\"x\", \"y\"]":{"Any":{"Agency":"Experian","Report":{"ExperianReport":{"Rating":"Good"}}},"Maybe":null,"Rec":{}}}}
+}]
 `,
 		},
 	}

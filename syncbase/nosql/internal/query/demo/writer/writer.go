@@ -141,27 +141,26 @@ func doubleQuoteForCSV(str, delimiter string) string {
 
 // WriteJson formats the result as a JSON array of arrays (rows) of values.
 func WriteJson(out io.Writer, columnNames []string, rs query.ResultStream) error {
-	io.WriteString(out, "[\n")
-	io.WriteString(out, "  [")
-	delim := ""
-	for _, cName := range columnNames {
-		str, err := json.Marshal(cName)
+	io.WriteString(out, "[")
+	jsonColNames := make([][]byte, len(columnNames))
+	for i, cName := range columnNames {
+		jsonCName, err := json.Marshal(cName)
 		if err != nil {
 			panic(fmt.Sprintf("JSON marshalling failed for column name: %v", err))
 		}
-		io.WriteString(out, fmt.Sprintf("%s%s", delim, str))
-		delim = ", "
+		jsonColNames[i] = jsonCName
 	}
-	io.WriteString(out, "]\n")
+	bOpen := "{"
 	for rs.Advance() {
-		io.WriteString(out, fmt.Sprintf(" ,["))
-		delim := ""
-		for _, column := range rs.Result() {
+		io.WriteString(out, bOpen)
+		linestart := "\n  "
+		for i, column := range rs.Result() {
 			str := toJson(column)
-			io.WriteString(out, fmt.Sprintf("%s%s", delim, str))
-			delim = ", "
+			io.WriteString(out, fmt.Sprintf("%s%s: %s", linestart, jsonColNames[i], str))
+			linestart = ",\n  "
 		}
-		io.WriteString(out, "]\n")
+		io.WriteString(out, "\n}")
+		bOpen = ", {"
 	}
 	io.WriteString(out, "]\n")
 	return rs.Err()
