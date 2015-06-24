@@ -178,17 +178,17 @@ func TestTableDelete(t *testing.T) {
 
 // Tests that Table.{Set,Get,Delete}Permissions methods work as expected.
 func TestTablePerms(t *testing.T) {
-	clientACtx, sName, cleanup, sp, ctx := tu.SetupOrDieCustom("clientA", "server", nil)
+	ctx, clientACtx, sName, rootp, cleanup := tu.SetupOrDieCustom("clientA", "server", nil)
 	defer cleanup()
-	clientBCtx := tu.NewClient("clientB", "server", ctx, sp)
+	clientBCtx := tu.NewCtx(ctx, rootp, "clientB")
 	a := tu.CreateApp(t, clientACtx, syncbase.NewService(sName), "a")
 	d := tu.CreateNoSQLDatabase(t, clientACtx, a, "d")
 	tb := tu.CreateTable(t, clientACtx, d, "tb")
 
 	// Permission objects.
-	aAndB := tu.DefaultPerms("server/clientA", "server/clientB")
-	aOnly := tu.DefaultPerms("server/clientA")
-	bOnly := tu.DefaultPerms("server/clientB")
+	aAndB := tu.DefaultPerms("root/clientA", "root/clientB")
+	aOnly := tu.DefaultPerms("root/clientA")
+	bOnly := tu.DefaultPerms("root/clientB")
 
 	// Set initial permissions.
 	if err := tb.SetPermissions(clientACtx, nosql.Prefix(""), aAndB); err != nil {
@@ -516,17 +516,17 @@ func TestRowMethods(t *testing.T) {
 // Test permission checking in Row.{Get,Put,Delete} and
 // Table.{Scan, DeleteRowRange}.
 func TestRowPermissions(t *testing.T) {
-	clientACtx, sName, cleanup, sp, ctx := tu.SetupOrDieCustom("clientA", "server", nil)
+	ctx, clientACtx, sName, rootp, cleanup := tu.SetupOrDieCustom("clientA", "server", nil)
 	defer cleanup()
-	clientBCtx := tu.NewClient("clientB", "server", ctx, sp)
+	clientBCtx := tu.NewCtx(ctx, rootp, "clientB")
 	a := tu.CreateApp(t, clientACtx, syncbase.NewService(sName), "a")
 	d := tu.CreateNoSQLDatabase(t, clientACtx, a, "d")
 	tb := tu.CreateTable(t, clientACtx, d, "tb")
 
 	// Permission objects.
-	aAndB := tu.DefaultPerms("server/clientA", "server/clientB")
-	aOnly := tu.DefaultPerms("server/clientA")
-	bOnly := tu.DefaultPerms("server/clientB")
+	aAndB := tu.DefaultPerms("root/clientA", "root/clientB")
+	aOnly := tu.DefaultPerms("root/clientA")
+	bOnly := tu.DefaultPerms("root/clientB")
 
 	// Set initial permissions.
 	if err := tb.SetPermissions(clientACtx, nosql.Prefix(""), aAndB); err != nil {

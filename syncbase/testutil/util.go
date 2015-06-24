@@ -63,11 +63,11 @@ func CreateTable(t *testing.T, ctx *context.T, d nosql.Database, name string) no
 }
 
 func SetupOrDie(perms access.Permissions) (clientCtx *context.T, serverName string, cleanup func()) {
-	ctx, sName, cleanup, _, _ := SetupOrDieCustom("client", "server", perms)
-	return ctx, sName, cleanup
+	_, clientCtx, serverName, _, cleanup = SetupOrDieCustom("client", "server", perms)
+	return
 }
 
-func SetupOrDieCustom(client, server string, perms access.Permissions) (clientCtx *context.T, serverName string, cleanup func(), sp security.Principal, ctx *context.T) {
+func SetupOrDieCustom(clientSuffix, serverSuffix string, perms access.Permissions) (ctx, clientCtx *context.T, serverName string, rootp security.Principal, cleanup func()) {
 	// TODO(mattr): Instead of SetDefaultHostPort the arguably more correct thing
 	// would be to call v.io/x/ref/test.Init() from the test packages that import
 	// the profile.  Note you should only call that from the package that imports
@@ -75,16 +75,14 @@ func SetupOrDieCustom(client, server string, perms access.Permissions) (clientCt
 	// v23.Init was test.V23Init().
 	flags.SetDefaultHostPort("127.0.0.1:0")
 	ctx, shutdown := v23.Init()
-	sp = tsecurity.NewPrincipal(server)
 
-	clientCtx = NewClient(client, server, ctx, sp)
+	rootp = tsecurity.NewPrincipal("root")
+	clientCtx, serverCtx := NewCtx(ctx, rootp, clientSuffix), NewCtx(ctx, rootp, serverSuffix)
 
-	serverCtx, err := v23.WithPrincipal(ctx, sp)
-	if err != nil {
-		vlog.Fatal("v23.WithPrincipal() failed: ", err)
+	if perms == nil {
+		perms = DefaultPerms(fmt.Sprintf("%s/%s", "root", clientSuffix))
 	}
-
-	serverName, stopServer := newServer(client, server, serverCtx, perms)
+	serverName, stopServer := newServer(serverCtx, perms)
 	cleanup = func() {
 		stopServer()
 		shutdown()
@@ -184,9 +182,9 @@ func getPermsOrDie(t *testing.T, ctx *context.T, ac util.AccessController) acces
 	return perms
 }
 
-func newServer(clientName, serverName string, ctx *context.T, perms access.Permissions) (string, func()) {
+func newServer(serverCtx *context.T, perms access.Permissions) (string, func()) {
 	if perms == nil {
-		perms = DefaultPerms(fmt.Sprintf("%s/%s", serverName, clientName))
+		vlog.Fatal("perms must be specified")
 	}
 	rootDir, err := ioutil.TempDir("", "syncbase")
 	if err != nil {
@@ -200,7 +198,7 @@ func newServer(clientName, serverName string, ctx *context.T, perms access.Permi
 	if err != nil {
 		vlog.Fatal("server.NewService() failed: ", err)
 	}
-	s, err := xrpc.NewDispatchingServer(ctx, "", server.NewDispatcher(service))
+	s, err := xrpc.NewDispatchingServer(serverCtx, "", server.NewDispatcher(service))
 	if err != nil {
 		vlog.Fatal("xrpc.NewDispatchingServer() failed: ", err)
 	}
@@ -211,30 +209,41 @@ func newServer(clientName, serverName string, ctx *context.T, perms access.Permi
 	}
 }
 
-func NewClient(client, server string, ctx *context.T, sp security.Principal) (clientCtx *context.T) {
-	cp := tsecurity.NewPrincipal(client)
+// Creates a new context object with blessing "root/<suffix>", configured to
+// present this blessing when acting as a server as well as when acting as a
+// client and talking to a server that presents a blessing rooted at "root".
+func NewCtx(ctx *context.T, rootp security.Principal, suffix string) *context.T {
+	// Principal for the new context.
+	p := tsecurity.NewPrincipal(suffix)
 
-	// Have the server principal bless the client principal as "client".
-	blessings, err := sp.Bless(cp.PublicKey(), sp.BlessingStore().Default(), client, security.UnconstrainedUse())
+	// Bless the new principal as "root/<suffix>".
+	blessings, err := rootp.Bless(p.PublicKey(), rootp.BlessingStore().Default(), suffix, security.UnconstrainedUse())
 	if err != nil {
-		vlog.Fatal("sp.Bless() failed: ", err)
+		vlog.Fatal("rootp.Bless() failed: ", err)
 	}
 
-	// Have the client present its "client" blessing when talking to the server.
-	if _, err := cp.BlessingStore().Set(blessings, security.BlessingPattern(server)); err != nil {
-		vlog.Fatal("cp.BlessingStore().Set() failed: ", err)
+	// Make it so users of the new context present their "root/<suffix>" blessing
+	// when talking to servers with blessings rooted at "root".
+	if _, err := p.BlessingStore().Set(blessings, security.BlessingPattern("root")); err != nil {
+		vlog.Fatal("p.BlessingStore().Set() failed: ", err)
 	}
 
-	// Have the client treat the server's public key as an authority on all
-	// blessings that match the pattern "server".
-	if err := cp.AddToRoots(blessings); err != nil {
-		vlog.Fatal("cp.AddToRoots() failed: ", err)
+	// Make it so that when users of the new context act as a server, they present
+	// their "root/<suffix>" blessing.
+	if err := p.BlessingStore().SetDefault(blessings); err != nil {
+		vlog.Fatal("p.BlessingStore().SetDefault() failed: ", err)
 	}
 
-	clientCtx, err = v23.WithPrincipal(ctx, cp)
+	// Have users of the prepared context treat root's public key as an authority
+	// on all blessings rooted at "root".
+	if err := p.AddToRoots(blessings); err != nil {
+		vlog.Fatal("p.AddToRoots() failed: ", err)
+	}
+
+	resCtx, err := v23.WithPrincipal(ctx, p)
 	if err != nil {
 		vlog.Fatal("v23.WithPrincipal() failed: ", err)
 	}
 
-	return clientCtx
+	return resCtx
 }
