@@ -73,15 +73,57 @@ func TestBatchBasics(t *testing.T) {
 		t.Fatalf("Put() failed: %v", err)
 	}
 
-	// Check that foo is not yet visible.
+	// Check that foo is visible inside of this transaction.
+	tu.CheckScan(t, ctx, b1tb, nosql.Prefix(""), []string{"fooKey"}, []interface{}{"fooValue"})
+
+	// Check that foo is not yet visible outside of this transaction.
 	tu.CheckScan(t, ctx, tb, nosql.Prefix(""), []string{}, []interface{}{})
+
+	// Start a scan in b1, advance the scan one row, put a new value that would
+	// occur later in the scan (if it were visible) and then advance the scan to see
+	// that it doesn't show (since we snapshot uncommiteed changes at the start).
+	// Ditto for Exec.
+	// start the scan and exec
+	scanIt := b1tb.Scan(ctx, nosql.Prefix(""))
+	if !scanIt.Advance() {
+		t.Fatal("scanIt.Advance() returned false")
+	}
+	_, execIt, err := b1.Exec(ctx, "select k from tb")
+	if err != nil {
+		t.Fatalf("b1.Exec() failed: %v", err)
+	}
+	if !execIt.Advance() {
+		t.Fatal("execIt.Advance() returned false")
+	}
+	// put "zzzKey"
+	if err := b1tb.Put(ctx, "zzzKey", "zzzValue"); err != nil {
+		t.Fatalf("Put() failed: %v", err)
+	}
+	// make sure Scan's Advance doesn't return a "zzzKey"
+	for scanIt.Advance() {
+		if string(scanIt.Key()) == "zzzKey" {
+			t.Fatal("scanIt.Advance() found zzzKey")
+		}
+	}
+	if scanIt.Err() != nil {
+		t.Fatalf("scanIt.Advance() failed: %v", err)
+	}
+	// make sure Exec's Advance doesn't return a "zzzKey"
+	for execIt.Advance() {
+		if string(execIt.Result()[0].String()) == "zzzKey" {
+			t.Fatal("execIt.Advance() found zzzKey")
+		}
+	}
+	if execIt.Err() != nil {
+		t.Fatalf("execIt.Advance() failed: %v", err)
+	}
 
 	if err := b1.Commit(ctx); err != nil {
 		t.Fatalf("b1.Commit() failed: %v", err)
 	}
 
 	// Check that foo is now visible.
-	tu.CheckScan(t, ctx, tb, nosql.Prefix(""), []string{"fooKey"}, []interface{}{"fooValue"})
+	tu.CheckScan(t, ctx, tb, nosql.Prefix(""), []string{"fooKey", "zzzKey"}, []interface{}{"fooValue", "zzzValue"})
 
 	// Test that concurrent transactions are isolated.
 	if b1, err = d.BeginBatch(ctx, wire.BatchOptions{}); err != nil {
@@ -114,8 +156,8 @@ func TestBatchBasics(t *testing.T) {
 		t.Fatalf("b2.Commit() should have failed: %v", err)
 	}
 
-	// Check that foo, bar, and baz (but not rab) are now visible.
-	tu.CheckScan(t, ctx, tb, nosql.Prefix(""), []string{"barKey", "bazKey", "fooKey"}, []interface{}{"barValue", "bazValue", "fooValue"})
+	// Check that foo, bar, baz and zzz (but not rab) are now visible.
+	tu.CheckScan(t, ctx, tb, nosql.Prefix(""), []string{"barKey", "bazKey", "fooKey", "zzzKey"}, []interface{}{"barValue", "bazValue", "fooValue", "zzzValue"})
 }
 
 // Tests that BatchDatabase.Exec doesn't see changes committed outside the batch.
@@ -125,7 +167,7 @@ func TestBatchBasics(t *testing.T) {
 // 4. confirm new row not seen when querying all rows in the table
 // 5. abort the batch and create a new readonly batch
 // 6. confirm new row NOW seen when querying all rows in the table
-func TestBatchExec(t *testing.T) {
+func TestBatchExecIsolation(t *testing.T) {
 	ctx, sName, cleanup := tu.SetupOrDie(nil)
 	defer cleanup()
 	a := tu.CreateApp(t, ctx, syncbase.NewService(sName), "a")
@@ -200,6 +242,131 @@ func TestBatchExec(t *testing.T) {
 
 	// test error condition on batch
 	tu.CheckExecError(t, ctx, roBatch, "select k, v from foo", syncql.ErrTableCantAccess.ID)
+}
+
+// Tests that BatchDatabase.Exec DOES see changes made inside the transaction but before
+// Exec is called.
+func TestBatchExec(t *testing.T) {
+	ctx, sName, cleanup := tu.SetupOrDie(nil)
+	defer cleanup()
+	a := tu.CreateApp(t, ctx, syncbase.NewService(sName), "a")
+	d := tu.CreateNoSQLDatabase(t, ctx, a, "d")
+	tb := tu.CreateTable(t, ctx, d, "tb")
+
+	foo := Foo{I: 4, S: "f"}
+	if err := tb.Put(ctx, "foo", foo); err != nil {
+		t.Fatalf("tb.Put() failed: %v", err)
+	}
+
+	bar := Bar{F: 0.5, S: "b"}
+	// NOTE: not best practice, but store bar as
+	// optional (by passing the address of bar to Put).
+	// This tests auto-dereferencing.
+	if err := tb.Put(ctx, "bar", &bar); err != nil {
+		t.Fatalf("tb.Put() failed: %v", err)
+	}
+
+	baz := Baz{Name: "John Doe", Active: true}
+	if err := tb.Put(ctx, "baz", baz); err != nil {
+		t.Fatalf("tb.Put() failed: %v", err)
+	}
+
+	// Begin a readwrite batch.
+	rwBatch, err := d.BeginBatch(ctx, wire.BatchOptions{ReadOnly: false})
+	if err != nil {
+		t.Fatalf("d.BeginBatch() failed: %v", err)
+	}
+
+	// fetch all rows
+	tu.CheckExec(t, ctx, rwBatch, "select k, v from tb",
+		[]string{"k", "v"},
+		[][]*vdl.Value{
+			[]*vdl.Value{vdl.ValueOf("bar"), vdl.ValueOf(bar)},
+			[]*vdl.Value{vdl.ValueOf("baz"), vdl.ValueOf(baz)},
+			[]*vdl.Value{vdl.ValueOf("foo"), vdl.ValueOf(foo)},
+		})
+
+	rwBatchTb := rwBatch.Table("tb")
+
+	// Add a row in this batch
+	newRow := Baz{Name: "Snow White", Active: true}
+	if err := rwBatchTb.Put(ctx, "newRow", newRow); err != nil {
+		t.Fatalf("rwBatchTb.Put() failed: %v", err)
+	}
+
+	// confirm fetching all rows DOES get the new row
+	tu.CheckExec(t, ctx, rwBatch, "select k, v from tb",
+		[]string{"k", "v"},
+		[][]*vdl.Value{
+			[]*vdl.Value{vdl.ValueOf("bar"), vdl.ValueOf(bar)},
+			[]*vdl.Value{vdl.ValueOf("baz"), vdl.ValueOf(baz)},
+			[]*vdl.Value{vdl.ValueOf("foo"), vdl.ValueOf(foo)},
+			[]*vdl.Value{vdl.ValueOf("newRow"), vdl.ValueOf(newRow)},
+		})
+
+	// Delete the first row (bar) and the last row (newRow).
+	// Change the baz row.  Confirm these rows are no longer fetched and that
+	// the change to baz is seen.
+	if err := rwBatchTb.Delete(ctx, nosql.SingleRow("bar")); err != nil {
+		t.Fatalf("rwBatchTb.Delete(bar) failed: %v", err)
+	}
+	if err := rwBatchTb.Delete(ctx, nosql.SingleRow("newRow")); err != nil {
+		t.Fatalf("rwBatchTb.Delete(newRow) failed: %v", err)
+	}
+	baz2 := Baz{Name: "Batman", Active: false}
+	if err := rwBatchTb.Put(ctx, "baz", baz2); err != nil {
+		t.Fatalf("tb.Put() failed: %v", err)
+	}
+	tu.CheckExec(t, ctx, rwBatch, "select k, v from tb",
+		[]string{"k", "v"},
+		[][]*vdl.Value{
+			[]*vdl.Value{vdl.ValueOf("baz"), vdl.ValueOf(baz2)},
+			[]*vdl.Value{vdl.ValueOf("foo"), vdl.ValueOf(foo)},
+		})
+
+	// Add the 2 rows (we just deleted) back again.
+	// Delete the other two rows (baz, foo).
+	// Confirm we just see the three rows we added back.
+	// Add a row in this batch
+	bar2 := Baz{Name: "Tom Thumb", Active: true}
+	if err := rwBatchTb.Put(ctx, "bar", bar2); err != nil {
+		t.Fatalf("rwBatchTb.Put() failed: %v", err)
+	}
+	newRow2 := Baz{Name: "Snow White", Active: false}
+	if err := rwBatchTb.Put(ctx, "newRow", newRow2); err != nil {
+		t.Fatalf("rwBatchTb.Put() failed: %v", err)
+	}
+	if err := rwBatchTb.Delete(ctx, nosql.SingleRow("baz")); err != nil {
+		t.Fatalf("rwBatchTb.Delete(baz) failed: %v", err)
+	}
+	if err := rwBatchTb.Delete(ctx, nosql.SingleRow("foo")); err != nil {
+		t.Fatalf("rwBatchTb.Delete(foo) failed: %v", err)
+	}
+	tu.CheckExec(t, ctx, rwBatch, "select k, v from tb",
+		[]string{"k", "v"},
+		[][]*vdl.Value{
+			[]*vdl.Value{vdl.ValueOf("bar"), vdl.ValueOf(bar2)},
+			[]*vdl.Value{vdl.ValueOf("newRow"), vdl.ValueOf(newRow2)},
+		})
+
+	// commit rw batch
+	rwBatch.Commit(ctx)
+
+	// start a new (ro) batch
+	roBatch, err := d.BeginBatch(ctx, wire.BatchOptions{ReadOnly: false})
+	if err != nil {
+		t.Fatalf("d.BeginBatch() failed: %v", err)
+	}
+	defer roBatch.Abort(ctx)
+
+	// confirm fetching all rows gets the rows committed above
+	// as it was never committed
+	tu.CheckExec(t, ctx, roBatch, "select k, v from tb",
+		[]string{"k", "v"},
+		[][]*vdl.Value{
+			[]*vdl.Value{vdl.ValueOf("bar"), vdl.ValueOf(bar2)},
+			[]*vdl.Value{vdl.ValueOf("newRow"), vdl.ValueOf(newRow2)},
+		})
 }
 
 // Tests enforcement of BatchOptions.ReadOnly.
