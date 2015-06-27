@@ -190,7 +190,7 @@ func newServer(serverCtx *context.T, perms access.Permissions) (string, func()) 
 	if err != nil {
 		vlog.Fatal("ioutil.TempDir() failed: ", err)
 	}
-	service, err := server.NewService(nil, nil, server.ServiceOptions{
+	service, err := server.NewService(serverCtx, nil, server.ServiceOptions{
 		Perms:   perms,
 		RootDir: rootDir,
 		Engine:  "leveldb",
