@@ -470,17 +470,15 @@ type DatabaseClientMethods interface {
 	Delete(*context.T, ...rpc.CallOpt) error
 	// BeginBatch creates a new batch. It returns an App-relative name for a
 	// Database handle bound to this batch. If this Database is already bound to a
-	// batch, BeginBatch() will fail with ErrBoundToBatch.
-	//
-	// Concurrency semantics are documented in model.go.
+	// batch, BeginBatch() will fail with ErrBoundToBatch. Concurrency semantics
+	// are documented in model.go.
 	BeginBatch(ctx *context.T, bo BatchOptions, opts ...rpc.CallOpt) (string, error)
 	// Commit persists the pending changes to the database.
 	// If this Database is not bound to a batch, Commit() will fail with
 	// ErrNotBoundToBatch.
 	Commit(*context.T, ...rpc.CallOpt) error
-	// Exec executes a syncQL query and returns all results as specified by
-	// in the query's select clause.  The returned stream reads
-	// from a consistent snapshot taken at the time of the Exec RPC.
+	// Exec executes a syncQL query and returns all results as specified by in the
+	// query's select clause. Concurrency semantics are documented in model.go.
 	Exec(ctx *context.T, query string, opts ...rpc.CallOpt) (DatabaseExecClientCall, error)
 	// Abort notifies the server that any pending changes can be discarded.
 	// It is not strictly required, but it may allow the server to release locks
@@ -675,17 +673,15 @@ type DatabaseServerMethods interface {
 	Delete(*context.T, rpc.ServerCall) error
 	// BeginBatch creates a new batch. It returns an App-relative name for a
 	// Database handle bound to this batch. If this Database is already bound to a
-	// batch, BeginBatch() will fail with ErrBoundToBatch.
-	//
-	// Concurrency semantics are documented in model.go.
+	// batch, BeginBatch() will fail with ErrBoundToBatch. Concurrency semantics
+	// are documented in model.go.
 	BeginBatch(ctx *context.T, call rpc.ServerCall, bo BatchOptions) (string, error)
 	// Commit persists the pending changes to the database.
 	// If this Database is not bound to a batch, Commit() will fail with
 	// ErrNotBoundToBatch.
 	Commit(*context.T, rpc.ServerCall) error
-	// Exec executes a syncQL query and returns all results as specified by
-	// in the query's select clause.  The returned stream reads
-	// from a consistent snapshot taken at the time of the Exec RPC.
+	// Exec executes a syncQL query and returns all results as specified by in the
+	// query's select clause. Concurrency semantics are documented in model.go.
 	Exec(ctx *context.T, call DatabaseExecServerCall, query string) error
 	// Abort notifies the server that any pending changes can be discarded.
 	// It is not strictly required, but it may allow the server to release locks
@@ -756,17 +752,15 @@ type DatabaseServerStubMethods interface {
 	Delete(*context.T, rpc.ServerCall) error
 	// BeginBatch creates a new batch. It returns an App-relative name for a
 	// Database handle bound to this batch. If this Database is already bound to a
-	// batch, BeginBatch() will fail with ErrBoundToBatch.
-	//
-	// Concurrency semantics are documented in model.go.
+	// batch, BeginBatch() will fail with ErrBoundToBatch. Concurrency semantics
+	// are documented in model.go.
 	BeginBatch(ctx *context.T, call rpc.ServerCall, bo BatchOptions) (string, error)
 	// Commit persists the pending changes to the database.
 	// If this Database is not bound to a batch, Commit() will fail with
 	// ErrNotBoundToBatch.
 	Commit(*context.T, rpc.ServerCall) error
-	// Exec executes a syncQL query and returns all results as specified by
-	// in the query's select clause.  The returned stream reads
-	// from a consistent snapshot taken at the time of the Exec RPC.
+	// Exec executes a syncQL query and returns all results as specified by in the
+	// query's select clause. Concurrency semantics are documented in model.go.
 	Exec(ctx *context.T, call *DatabaseExecServerCallStub, query string) error
 	// Abort notifies the server that any pending changes can be discarded.
 	// It is not strictly required, but it may allow the server to release locks
@@ -869,7 +863,7 @@ var descDatabase = rpc.InterfaceDesc{
 		},
 		{
 			Name: "BeginBatch",
-			Doc:  "// BeginBatch creates a new batch. It returns an App-relative name for a\n// Database handle bound to this batch. If this Database is already bound to a\n// batch, BeginBatch() will fail with ErrBoundToBatch.\n//\n// Concurrency semantics are documented in model.go.",
+			Doc:  "// BeginBatch creates a new batch. It returns an App-relative name for a\n// Database handle bound to this batch. If this Database is already bound to a\n// batch, BeginBatch() will fail with ErrBoundToBatch. Concurrency semantics\n// are documented in model.go.",
 			InArgs: []rpc.ArgDesc{
 				{"bo", ``}, // BatchOptions
 			},
@@ -885,7 +879,7 @@ var descDatabase = rpc.InterfaceDesc{
 		},
 		{
 			Name: "Exec",
-			Doc:  "// Exec executes a syncQL query and returns all results as specified by\n// in the query's select clause.  The returned stream reads\n// from a consistent snapshot taken at the time of the Exec RPC.",
+			Doc:  "// Exec executes a syncQL query and returns all results as specified by in the\n// query's select clause. Concurrency semantics are documented in model.go.",
 			InArgs: []rpc.ArgDesc{
 				{"query", ``}, // string
 			},
@@ -957,8 +951,8 @@ type TableClientMethods interface {
 	// limit is "", all rows with keys >= start are included.
 	DeleteRowRange(ctx *context.T, start []byte, limit []byte, opts ...rpc.CallOpt) error
 	// Scan returns all rows in the given half-open range [start, limit). If limit
-	// is "", all rows with keys >= start are included. The returned stream reads
-	// from a consistent snapshot taken at the time of the Scan RPC.
+	// is "", all rows with keys >= start are included. Concurrency semantics are
+	// documented in model.go.
 	Scan(ctx *context.T, start []byte, limit []byte, opts ...rpc.CallOpt) (TableScanClientCall, error)
 	// GetPermissions returns an array of (prefix, perms) pairs. The array is
 	// sorted from longest prefix to shortest, so element zero is the one that
@@ -1118,8 +1112,8 @@ type TableServerMethods interface {
 	// limit is "", all rows with keys >= start are included.
 	DeleteRowRange(ctx *context.T, call rpc.ServerCall, start []byte, limit []byte) error
 	// Scan returns all rows in the given half-open range [start, limit). If limit
-	// is "", all rows with keys >= start are included. The returned stream reads
-	// from a consistent snapshot taken at the time of the Scan RPC.
+	// is "", all rows with keys >= start are included. Concurrency semantics are
+	// documented in model.go.
 	Scan(ctx *context.T, call TableScanServerCall, start []byte, limit []byte) error
 	// GetPermissions returns an array of (prefix, perms) pairs. The array is
 	// sorted from longest prefix to shortest, so element zero is the one that
@@ -1155,8 +1149,8 @@ type TableServerStubMethods interface {
 	// limit is "", all rows with keys >= start are included.
 	DeleteRowRange(ctx *context.T, call rpc.ServerCall, start []byte, limit []byte) error
 	// Scan returns all rows in the given half-open range [start, limit). If limit
-	// is "", all rows with keys >= start are included. The returned stream reads
-	// from a consistent snapshot taken at the time of the Scan RPC.
+	// is "", all rows with keys >= start are included. Concurrency semantics are
+	// documented in model.go.
 	Scan(ctx *context.T, call *TableScanServerCallStub, start []byte, limit []byte) error
 	// GetPermissions returns an array of (prefix, perms) pairs. The array is
 	// sorted from longest prefix to shortest, so element zero is the one that
@@ -1276,7 +1270,7 @@ var descTable = rpc.InterfaceDesc{
 		},
 		{
 			Name: "Scan",
-			Doc:  "// Scan returns all rows in the given half-open range [start, limit). If limit\n// is \"\", all rows with keys >= start are included. The returned stream reads\n// from a consistent snapshot taken at the time of the Scan RPC.",
+			Doc:  "// Scan returns all rows in the given half-open range [start, limit). If limit\n// is \"\", all rows with keys >= start are included. Concurrency semantics are\n// documented in model.go.",
 			InArgs: []rpc.ArgDesc{
 				{"start", ``}, // []byte
 				{"limit", ``}, // []byte

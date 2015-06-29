@@ -34,12 +34,14 @@ type DatabaseHandle interface {
 	ListTables(ctx *context.T) ([]string, error)
 
 	// Exec executes a syncQL query.
-	// If no error is returned, Exec returns an array of headers (i.e., column names)
-	// and a result stream which contains an array of values for each row that matches
-	// the query.  The number of values returned in each row of the result stream will
-	// match the size of the headers string array.
-	// TODO(jkline): Our storage engines don't yet reflect prior puts or deletes
-	// performed inside the batch.  This also applies to Scan.
+	// If no error is returned, Exec returns an array of headers (i.e., column
+	// names) and a result stream which contains an array of values for each row
+	// that matches the query.  The number of values returned in each row of the
+	// result stream will match the size of the headers string array.
+	// Concurrency semantics: It is legal to perform writes concurrently with
+	// Exec. The returned stream reads from a consistent snapshot taken at the
+	// time of the RPC, and will not reflect subsequent writes to keys not yet
+	// reached by the stream.
 	Exec(ctx *context.T, query string) ([]string, ResultStream, error)
 }
 
@@ -66,19 +68,21 @@ type Database interface {
 	DeleteTable(ctx *context.T, relativeName string) error
 
 	// BeginBatch creates a new batch. Instead of calling this function directly,
-	// clients are recommended to use the RunInBatch() helper function, which
+	// clients are encouraged to use the RunInBatch() helper function, which
 	// detects "concurrent batch" errors and handles retries internally.
 	//
 	// Default concurrency semantics:
-	// - Reads inside a batch see a consistent snapshot, taken during
-	//   BeginBatch(), and will also see the effect of writes and deletes inside
-	//   the batch.
+	// - Reads (e.g. gets, scans) inside a batch operate over a consistent
+	//   snapshot taken during BeginBatch(), and will see the effects of prior
+	//   writes performed inside the batch.
 	// - Commit() may fail with ErrConcurrentBatch, indicating that after
 	//   BeginBatch() but before Commit(), some concurrent routine wrote to a key
-	//   that matches a key or row-range read inside this batch. (Writes inside a
-	//   batch cannot cause that batch's Commit() to fail.)
-	// - Other methods (e.g. Get) will never fail with error ErrConcurrentBatch,
-	//   even if it is known that Commit() will fail with this error.
+	//   that matches a key or row-range read inside this batch.
+	// - Other methods will never fail with error ErrConcurrentBatch, even if it
+	//   is known that Commit() will fail with this error.
+	//
+	// Once a batch has been committed or aborted, subsequent method calls will
+	// fail with no effect.
 	//
 	// Concurrency semantics can be configured using BatchOptions.
 	// TODO(sadovsky): Maybe use varargs for options.
@@ -156,8 +160,11 @@ type Table interface {
 	Delete(ctx *context.T, r RowRange) error
 
 	// Scan returns all rows in the given half-open range [start, limit). If limit
-	// is "", all rows with keys >= start are included. The returned stream reads
-	// from a consistent snapshot taken at the time of the Scan RPC.
+	// is "", all rows with keys >= start are included.
+	// Concurrency semantics: It is legal to perform writes concurrently with
+	// Scan. The returned stream reads from a consistent snapshot taken at the
+	// time of the RPC, and will not reflect subsequent writes to keys not yet
+	// reached by the stream.
 	// See helpers nosql.Prefix(), nosql.Range(), nosql.SingleRow().
 	Scan(ctx *context.T, r RowRange) Stream
 
@@ -233,7 +240,8 @@ type Stream interface {
 	Cancel()
 }
 
-// ResultStream is an interface for iterating through rows resulting from an Exec.
+// ResultStream is an interface for iterating through rows resulting from an
+// Exec.
 type ResultStream interface {
 	// Advance stages an result so the client can retrieve it with Result.
 	// Advance returns true iff there is a result to retrieve. The client must

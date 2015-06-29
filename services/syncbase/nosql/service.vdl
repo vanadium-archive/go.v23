@@ -26,9 +26,8 @@ type Database interface {
 
 	// BeginBatch creates a new batch. It returns an App-relative name for a
 	// Database handle bound to this batch. If this Database is already bound to a
-	// batch, BeginBatch() will fail with ErrBoundToBatch.
-	//
-	// Concurrency semantics are documented in model.go.
+	// batch, BeginBatch() will fail with ErrBoundToBatch. Concurrency semantics
+	// are documented in model.go.
 	BeginBatch(bo BatchOptions) (string | error) {access.Read}
 
 	// Commit persists the pending changes to the database.
@@ -36,9 +35,8 @@ type Database interface {
 	// ErrNotBoundToBatch.
 	Commit() error {access.Read}
 
-	// Exec executes a syncQL query and returns all results as specified by
-	// in the query's select clause.  The returned stream reads
-	// from a consistent snapshot taken at the time of the Exec RPC.
+	// Exec executes a syncQL query and returns all results as specified by in the
+	// query's select clause. Concurrency semantics are documented in model.go.
 	Exec(query string) stream<_, []any> error {access.Read}
 
 	// Abort notifies the server that any pending changes can be discarded.
@@ -71,8 +69,8 @@ type Table interface {
 	DeleteRowRange(start, limit []byte) error {access.Write}
 
 	// Scan returns all rows in the given half-open range [start, limit). If limit
-	// is "", all rows with keys >= start are included. The returned stream reads
-	// from a consistent snapshot taken at the time of the Scan RPC.
+	// is "", all rows with keys >= start are included. Concurrency semantics are
+	// documented in model.go.
 	Scan(start, limit []byte) stream<_, KeyValue> error {access.Read}
 
 	// GetPermissions returns an array of (prefix, perms) pairs. The array is
