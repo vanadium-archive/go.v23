@@ -1,0 +1,19 @@
+pkg flow, type Acceptor interface { Accept, Closed, ListeningEndpoints }
+pkg flow, type Acceptor interface, Accept(*context.T) (Flow, error)
+pkg flow, type Acceptor interface, Closed() <-chan struct{}
+pkg flow, type Acceptor interface, ListeningEndpoints() []naming.Endpoint
+pkg flow, type Flow interface { Closed, LocalBlessings, LocalDischarges, LocalEndpoint, Read, RemoteBlessings, RemoteDischarges, RemoteEndpoint, Write }
+pkg flow, type Flow interface, Closed() <-chan struct{}
+pkg flow, type Flow interface, LocalBlessings() security.Blessings
+pkg flow, type Flow interface, LocalDischarges() map[string]security.Discharge
+pkg flow, type Flow interface, LocalEndpoint() naming.Endpoint
+pkg flow, type Flow interface, Read([]byte) (int, error)
+pkg flow, type Flow interface, RemoteBlessings() security.Blessings
+pkg flow, type Flow interface, RemoteDischarges() map[string]security.Discharge
+pkg flow, type Flow interface, RemoteEndpoint() naming.Endpoint
+pkg flow, type Flow interface, Write([]byte) (int, error)
+pkg flow, type Manager interface { Acceptor, Closed, Dial, Listen }
+pkg flow, type Manager interface, Acceptor(*context.T, security.Blessings) (Acceptor, error)
+pkg flow, type Manager interface, Closed() <-chan struct{}
+pkg flow, type Manager interface, Dial(*context.T, naming.Endpoint, security.Authorizer) (Flow, error)
+pkg flow, type Manager interface, Listen(*context.T, string, string) error
