@@ -41,15 +41,25 @@ type keyValueStreamImpl struct {
 	keyRangesCursor int
 }
 
+func compareKeyToLimit(key, limit string) int {
+	if limit == "" || key < limit {
+		return -1
+	} else if key == limit {
+		return 0
+	} else {
+		return 1
+	}
+}
+
 func (kvs *keyValueStreamImpl) Advance() bool {
 	for true {
 		kvs.cursor++ // initialized to -1
 		if kvs.cursor >= len(kvs.table.rows) {
 			return false
 		}
+		// does it match any keyRange
 		for kvs.keyRangesCursor < len(kvs.keyRanges) {
-			// does it match any keyRange (or is the keyRange the 0-255 wildcard)?
-			if (kvs.keyRanges[kvs.keyRangesCursor].Start == string([]byte{0}) && kvs.keyRanges[kvs.keyRangesCursor].Limit == string([]byte{255})) || (kvs.table.rows[kvs.cursor].key >= kvs.keyRanges[kvs.keyRangesCursor].Start && kvs.table.rows[kvs.cursor].key <= kvs.keyRanges[kvs.keyRangesCursor].Limit) {
+			if kvs.table.rows[kvs.cursor].key >= kvs.keyRanges[kvs.keyRangesCursor].Start && compareKeyToLimit(kvs.table.rows[kvs.cursor].key, kvs.keyRanges[kvs.keyRangesCursor].Limit) < 0 {
 				return true
 			}
 			// Keys and keyRanges are both sorted low to high, so we can increment
@@ -222,7 +232,7 @@ func init() {
 
 type keyRangesTest struct {
 	query     string
-	keyRanges query_db.KeyRanges
+	keyRanges *query_db.KeyRanges
 	err       error
 }
 
@@ -542,6 +552,93 @@ func TestQueryExec(t *testing.T) {
 				[]*vdl.Value{custTable.rows[6].value},
 				[]*vdl.Value{custTable.rows[7].value},
 				[]*vdl.Value{custTable.rows[8].value},
+			},
+		},
+		{
+			"select k from Customer where k >= \"002001\" and k <= \"002002\"",
+			[]string{"k"},
+			[][]*vdl.Value{
+				[]*vdl.Value{vdl.ValueOf("002001")},
+				[]*vdl.Value{vdl.ValueOf("002002")},
+			},
+		},
+		{
+			"select k from Customer where k > \"002001\" and k <= \"002002\"",
+			[]string{"k"},
+			[][]*vdl.Value{
+				[]*vdl.Value{vdl.ValueOf("002002")},
+			},
+		},
+		{
+			"select k from Customer where k > \"002001\" and k < \"002002\"",
+			[]string{"k"},
+			[][]*vdl.Value{},
+		},
+		{
+			"select k from Customer where k > \"002001\" or k < \"002002\"",
+			[]string{"k"},
+			[][]*vdl.Value{
+				[]*vdl.Value{vdl.ValueOf("001")},
+				[]*vdl.Value{vdl.ValueOf("001001")},
+				[]*vdl.Value{vdl.ValueOf("001002")},
+				[]*vdl.Value{vdl.ValueOf("001003")},
+				[]*vdl.Value{vdl.ValueOf("002")},
+				[]*vdl.Value{vdl.ValueOf("002001")},
+				[]*vdl.Value{vdl.ValueOf("002002")},
+				[]*vdl.Value{vdl.ValueOf("002003")},
+				[]*vdl.Value{vdl.ValueOf("002004")},
+			},
+		},
+		{
+			"select k from Customer where k <> \"002\"",
+			[]string{"k"},
+			[][]*vdl.Value{
+				[]*vdl.Value{vdl.ValueOf("001")},
+				[]*vdl.Value{vdl.ValueOf("001001")},
+				[]*vdl.Value{vdl.ValueOf("001002")},
+				[]*vdl.Value{vdl.ValueOf("001003")},
+				[]*vdl.Value{vdl.ValueOf("002001")},
+				[]*vdl.Value{vdl.ValueOf("002002")},
+				[]*vdl.Value{vdl.ValueOf("002003")},
+				[]*vdl.Value{vdl.ValueOf("002004")},
+			},
+		},
+		{
+			"select k from Customer where k <> \"002\" or k like \"002\"",
+			[]string{"k"},
+			[][]*vdl.Value{
+				[]*vdl.Value{vdl.ValueOf("001")},
+				[]*vdl.Value{vdl.ValueOf("001001")},
+				[]*vdl.Value{vdl.ValueOf("001002")},
+				[]*vdl.Value{vdl.ValueOf("001003")},
+				[]*vdl.Value{vdl.ValueOf("002")},
+				[]*vdl.Value{vdl.ValueOf("002001")},
+				[]*vdl.Value{vdl.ValueOf("002002")},
+				[]*vdl.Value{vdl.ValueOf("002003")},
+				[]*vdl.Value{vdl.ValueOf("002004")},
+			},
+		},
+		{
+			"select k from Customer where k <> \"002\" and k like \"002\"",
+			[]string{"k"},
+			[][]*vdl.Value{},
+		},
+		{
+			"select k from Customer where k <> \"002\" and k like \"002%\"",
+			[]string{"k"},
+			[][]*vdl.Value{
+				[]*vdl.Value{vdl.ValueOf("002001")},
+				[]*vdl.Value{vdl.ValueOf("002002")},
+				[]*vdl.Value{vdl.ValueOf("002003")},
+				[]*vdl.Value{vdl.ValueOf("002004")},
+			},
+		},
+		{
+			"select k from Customer where k <> \"002\" and k like \"%002\"",
+			[]string{"k"},
+			[][]*vdl.Value{
+				[]*vdl.Value{vdl.ValueOf("001002")},
+				[]*vdl.Value{vdl.ValueOf("002002")},
 			},
 		},
 		{
@@ -1007,40 +1104,46 @@ func TestKeyRanges(t *testing.T) {
 		{
 			// Need all keys
 			"select k, v from Customer",
-			query_db.KeyRanges{
-				query_db.KeyRange{string([]byte{0}), string([]byte{255})},
+			&query_db.KeyRanges{
+				query_db.KeyRange{"", ""},
 			},
 			nil,
 		},
 		{
-			// Keys 001 and 003
+			// Keys 001 or 003
 			"   select  k,  v from Customer where k = \"001\" or k = \"003\"",
-			query_db.KeyRanges{
+			&query_db.KeyRanges{
 				query_db.KeyRange{"001", appendZeroByte("001")},
 				query_db.KeyRange{"003", appendZeroByte("003")},
 			},
 			nil,
 		},
 		{
+			// Keys 001 and 003 (resulting in no keys)
+			"   select  k,  v from Customer where k = \"001\" and k = \"003\"",
+			&query_db.KeyRanges{},
+			nil,
+		},
+		{
 			// Need all keys
 			"select  k,  v from Customer where k like \"%\" or k like \"001%\" or k like \"002%\"",
-			query_db.KeyRanges{
-				query_db.KeyRange{string([]byte{0}), string([]byte{255})},
+			&query_db.KeyRanges{
+				query_db.KeyRange{"", ""},
 			},
 			nil,
 		},
 		{
 			// Need all keys, likes in where clause in different order
 			"select  k,  v from Customer where k like \"002%\" or k like \"001%\" or k like \"%\"",
-			query_db.KeyRanges{
-				query_db.KeyRange{string([]byte{0}), string([]byte{255})},
+			&query_db.KeyRanges{
+				query_db.KeyRange{"", ""},
 			},
 			nil,
 		},
 		{
 			// All selected rows will have key prefix of "abc".
 			"select k, v from Customer where t = \"Foo.Bar\" and k like \"abc%\"",
-			query_db.KeyRanges{
+			&query_db.KeyRanges{
 				query_db.KeyRange{"abc", plusOne("abc")},
 			},
 			nil,
@@ -1048,23 +1151,23 @@ func TestKeyRanges(t *testing.T) {
 		{
 			// Need all keys
 			"select k, v from Customer where t = \"Foo.Bar\" or k like \"abc%\"",
-			query_db.KeyRanges{
-				query_db.KeyRange{string([]byte{0}), string([]byte{255})},
+			&query_db.KeyRanges{
+				query_db.KeyRange{"", ""},
 			},
 			nil,
 		},
 		{
 			// Need all keys
 			"select k, v from Customer where k like \"abc%\" or v.zip = \"94303\"",
-			query_db.KeyRanges{
-				query_db.KeyRange{string([]byte{0}), string([]byte{255})},
+			&query_db.KeyRanges{
+				query_db.KeyRange{"", ""},
 			},
 			nil,
 		},
 		{
 			// All selected rows will have key prefix of "foo".
 			"select k, v from Customer where t = \"Foo.Bar\" and k like \"foo_bar\"",
-			query_db.KeyRanges{
+			&query_db.KeyRanges{
 				query_db.KeyRange{"foo", plusOne("foo")},
 			},
 			nil,
@@ -1072,7 +1175,7 @@ func TestKeyRanges(t *testing.T) {
 		{
 			// All selected rows will have key == "baz" or prefix of "foo".
 			"select k, v from Customer where k like \"foo_bar\" or k = \"baz\"",
-			query_db.KeyRanges{
+			&query_db.KeyRanges{
 				query_db.KeyRange{"baz", appendZeroByte("baz")},
 				query_db.KeyRange{"foo", plusOne("foo")},
 			},
@@ -1081,7 +1184,7 @@ func TestKeyRanges(t *testing.T) {
 		{
 			// All selected rows will have key == "fo" or prefix of "foo".
 			"select k, v from Customer where k like \"foo_bar\" or k = \"fo\"",
-			query_db.KeyRanges{
+			&query_db.KeyRanges{
 				query_db.KeyRange{"fo", appendZeroByte("fo")},
 				query_db.KeyRange{"foo", plusOne("foo")},
 			},
@@ -1091,7 +1194,7 @@ func TestKeyRanges(t *testing.T) {
 			// All selected rows will have prefix of "fo".
 			// k == foo is a subset of above prefix
 			"select k, v from Customer where k like \"fo_bar\" or k = \"foo\"",
-			query_db.KeyRanges{
+			&query_db.KeyRanges{
 				query_db.KeyRange{"fo", plusOne("fo")},
 			},
 			nil,
@@ -1099,7 +1202,7 @@ func TestKeyRanges(t *testing.T) {
 		{
 			// All selected rows will have key prefix of "foo".
 			"select k, v from Customer where k like \"foo%bar\"",
-			query_db.KeyRanges{
+			&query_db.KeyRanges{
 				query_db.KeyRange{"foo", plusOne("foo")},
 			},
 			nil,
@@ -1107,7 +1210,7 @@ func TestKeyRanges(t *testing.T) {
 		{
 			// Select "foo\bar" row.
 			"select k, v from Customer where k like \"foo\\\\bar\"",
-			query_db.KeyRanges{
+			&query_db.KeyRanges{
 				query_db.KeyRange{"foo\\bar", appendZeroByte("foo\\bar")},
 			},
 			nil,
@@ -1115,7 +1218,7 @@ func TestKeyRanges(t *testing.T) {
 		{
 			// Select "foo%bar" row.
 			"select k, v from Customer where k like \"foo\\%bar\"",
-			query_db.KeyRanges{
+			&query_db.KeyRanges{
 				query_db.KeyRange{"foo%bar", appendZeroByte("foo%bar")},
 			},
 			nil,
@@ -1123,7 +1226,7 @@ func TestKeyRanges(t *testing.T) {
 		{
 			// Select "foo\%bar" row.
 			"select k, v from Customer where k like \"foo\\\\\\%bar\"",
-			query_db.KeyRanges{
+			&query_db.KeyRanges{
 				query_db.KeyRange{"foo\\%bar", appendZeroByte("foo\\%bar")},
 			},
 			nil,
@@ -1131,23 +1234,23 @@ func TestKeyRanges(t *testing.T) {
 		{
 			// Need all keys
 			"select k, v from Customer where k like \"%foo\"",
-			query_db.KeyRanges{
-				query_db.KeyRange{string([]byte{0}), string([]byte{255})},
+			&query_db.KeyRanges{
+				query_db.KeyRange{"", ""},
 			},
 			nil,
 		},
 		{
 			// Need all keys
 			"select k, v from Customer where k like \"_foo\"",
-			query_db.KeyRanges{
-				query_db.KeyRange{string([]byte{0}), string([]byte{255})},
+			&query_db.KeyRanges{
+				query_db.KeyRange{"", ""},
 			},
 			nil,
 		},
 		{
 			// Select "foo_bar" row.
 			"select k, v from Customer where k like \"foo\\_bar\"",
-			query_db.KeyRanges{
+			&query_db.KeyRanges{
 				query_db.KeyRange{"foo_bar", appendZeroByte("foo_bar")},
 			},
 			nil,
@@ -1155,7 +1258,7 @@ func TestKeyRanges(t *testing.T) {
 		{
 			// Select "foobar%" row.
 			"select k, v from Customer where k like \"foobar\\%\"",
-			query_db.KeyRanges{
+			&query_db.KeyRanges{
 				query_db.KeyRange{"foobar%", appendZeroByte("foobar%")},
 			},
 			nil,
@@ -1163,7 +1266,7 @@ func TestKeyRanges(t *testing.T) {
 		{
 			// Select "foobar_" row.
 			"select k, v from Customer where k like \"foobar\\_\"",
-			query_db.KeyRanges{
+			&query_db.KeyRanges{
 				query_db.KeyRange{"foobar_", appendZeroByte("foobar_")},
 			},
 			nil,
@@ -1171,7 +1274,7 @@ func TestKeyRanges(t *testing.T) {
 		{
 			// Select "\%_" row.
 			"select k, v from Customer where k like \"\\\\\\%\\_\"",
-			query_db.KeyRanges{
+			&query_db.KeyRanges{
 				query_db.KeyRange{"\\%_", appendZeroByte("\\%_")},
 			},
 			nil,
@@ -1179,7 +1282,7 @@ func TestKeyRanges(t *testing.T) {
 		{
 			// Select "%_abc\" row.
 			"select k, v from Customer where k = \"%_abc\\\"",
-			query_db.KeyRanges{
+			&query_db.KeyRanges{
 				query_db.KeyRange{"%_abc\\", appendZeroByte("%_abc\\")},
 			},
 			nil,
@@ -1199,7 +1302,7 @@ func TestKeyRanges(t *testing.T) {
 			if semErr == nil {
 				switch sel := (*s).(type) {
 				case query_parser.SelectStatement:
-					keyRanges := query.CompileKeyRanges(sel.Where)
+					keyRanges := query_checker.CompileKeyRanges(sel.Where)
 					if !reflect.DeepEqual(test.keyRanges, keyRanges) {
 						t.Errorf("query: %s;\nGOT  %v\nWANT %v", test.query, keyRanges, test.keyRanges)
 					}

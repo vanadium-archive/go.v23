@@ -16,6 +16,14 @@ import (
 	"v.io/syncbase/v23/syncbase/nosql/syncql"
 )
 
+const (
+	MaxRangeLimit = ""
+)
+
+var (
+	KeyRangeAll = query_db.KeyRange{"", MaxRangeLimit}
+)
+
 func Check(db query_db.Database, s *query_parser.Statement) error {
 	switch sel := (*s).(type) {
 	case query_parser.SelectStatement:
@@ -138,8 +146,17 @@ func checkExpression(db query_db.Database, e *query_parser.Expression) error {
 		return syncql.NewErrTypeExpressionForm(db.GetContext(), e.Off)
 	}
 
-	// k as an operand must be the first operand, the operator must be like or = and the 2nd operand must be a string literal.
-	if (IsKey(e.Operand1) && ((e.Operator.Type != query_parser.Equal && e.Operator.Type != query_parser.Like) || e.Operand2.Type != query_parser.TypStr)) || IsKey(e.Operand2) {
+	// k as an operand must be the first operand, the operator must be
+	// = | <> | > | >= | < | <= | like and the 2nd operand must be a string literal.
+	if (IsKey(e.Operand1) &&
+		((e.Operator.Type != query_parser.Equal &&
+			e.Operator.Type != query_parser.GreaterThan &&
+			e.Operator.Type != query_parser.GreaterThanOrEqual &&
+			e.Operator.Type != query_parser.LessThan &&
+			e.Operator.Type != query_parser.LessThanOrEqual &&
+			e.Operator.Type != query_parser.Like &&
+			e.Operator.Type != query_parser.NotEqual) ||
+			e.Operand2.Type != query_parser.TypStr)) || IsKey(e.Operand2) {
 		return syncql.NewErrKeyExpressionForm(db.GetContext(), e.Off)
 	}
 
@@ -348,11 +365,11 @@ func IsExpr(o *query_parser.Operand) bool {
 	return o.Type == query_parser.TypExpr
 }
 
-// Function copied from syncbase.
 func computeKeyRangeForPrefix(prefix string) query_db.KeyRange {
 	if prefix == "" {
-		return query_db.KeyRange{string([]byte{0}), string([]byte{255})}
+		return KeyRangeAll
 	}
+	// Copied from syncbase.
 	limit := []byte(prefix)
 	for len(limit) > 0 {
 		if limit[len(limit)-1] == 255 {
@@ -375,28 +392,133 @@ func computeKeyRangeForSingleValue(start string) query_db.KeyRange {
 }
 
 // Compute a list of key ranges to be used by query_db's Table.Scan implementation.
-func CompileKeyRanges(where *query_parser.WhereClause) query_db.KeyRanges {
+func CompileKeyRanges(where *query_parser.WhereClause) *query_db.KeyRanges {
 	if where == nil {
-		return query_db.KeyRanges{computeKeyRangeForPrefix("")}
+		return &query_db.KeyRanges{KeyRangeAll}
 	}
-	var keyRanges query_db.KeyRanges
-	collectKeyRanges(where.Expr, &keyRanges)
+	return collectKeyRanges(where.Expr)
+}
+
+func computeIntersection(lhs, rhs query_db.KeyRange) *query_db.KeyRange {
+	// Detect if lhs.Start is contained within rhs or rhs.Start is contained within lhs.
+	if (lhs.Start >= rhs.Start && compareStartToLimit(lhs.Start, rhs.Limit) < 0) ||
+		(rhs.Start >= lhs.Start && compareStartToLimit(rhs.Start, lhs.Limit) < 0) {
+		var start, limit string
+		if lhs.Start < rhs.Start {
+			start = rhs.Start
+		} else {
+			start = lhs.Start
+		}
+		if compareLimits(lhs.Limit, rhs.Limit) < 0 {
+			limit = lhs.Limit
+		} else {
+			limit = rhs.Limit
+		}
+		return &query_db.KeyRange{start, limit}
+	}
+	return nil
+}
+
+func keyRangeIntersection(lhs, rhs *query_db.KeyRanges) *query_db.KeyRanges {
+	keyRanges := &query_db.KeyRanges{}
+	lCur, rCur := 0, 0
+	for lCur < len(*lhs) && rCur < len(*rhs) {
+		// Any intersection at current cursors?
+		if intersection := computeIntersection((*lhs)[lCur], (*rhs)[rCur]); intersection != nil {
+			// Add the intersection
+			addKeyRange(*intersection, keyRanges)
+		}
+		// increment the range with the lesser limit
+		c := compareLimits((*lhs)[lCur].Limit, (*rhs)[rCur].Limit)
+		switch c {
+		case -1:
+			lCur++
+		case 1:
+			rCur++
+		default:
+			lCur++
+			rCur++
+		}
+	}
 	return keyRanges
 }
 
-func collectKeyRanges(expr *query_parser.Expression, keyRanges *query_db.KeyRanges) {
-	if IsKey(expr.Operand1) {
-		if expr.Operator.Type == query_parser.Like {
-			addKeyRange(computeKeyRangeForPrefix(expr.Operand2.Prefix), keyRanges)
-		} else { // OpEqual
-			addKeyRange(computeKeyRangeForSingleValue(expr.Operand2.Str), keyRanges)
+func collectKeyRanges(expr *query_parser.Expression) *query_db.KeyRanges {
+	if IsExpr(expr.Operand1) { // then both operands must be expressions
+		lhsKeyRanges := collectKeyRanges(expr.Operand1.Expr)
+		rhsKeyRanges := collectKeyRanges(expr.Operand2.Expr)
+		if expr.Operator.Type == query_parser.And {
+			// intersection of lhsKeyRanges and rhsKeyRanges
+			return keyRangeIntersection(lhsKeyRanges, rhsKeyRanges)
+		} else { // or
+			// union of lhsKeyRanges and rhsKeyRanges
+			for _, rhsKeyRange := range *rhsKeyRanges {
+				addKeyRange(rhsKeyRange, lhsKeyRanges)
+			}
+			return lhsKeyRanges
 		}
+	} else if IsKey(expr.Operand1) {
+		switch expr.Operator.Type {
+		case query_parser.Equal:
+			return &query_db.KeyRanges{computeKeyRangeForSingleValue(expr.Operand2.Str)}
+		case query_parser.GreaterThan:
+			return &query_db.KeyRanges{query_db.KeyRange{string(append([]byte(expr.Operand2.Str), 0)), MaxRangeLimit}}
+		case query_parser.GreaterThanOrEqual:
+			return &query_db.KeyRanges{query_db.KeyRange{expr.Operand2.Str, MaxRangeLimit}}
+		case query_parser.Like:
+			return &query_db.KeyRanges{computeKeyRangeForPrefix(expr.Operand2.Prefix)}
+		case query_parser.LessThan:
+			return &query_db.KeyRanges{query_db.KeyRange{"", expr.Operand2.Str}}
+		case query_parser.LessThanOrEqual:
+			return &query_db.KeyRanges{query_db.KeyRange{"", string(append([]byte(expr.Operand2.Str), 0))}}
+		default: // case query_parser.NotEqual:
+			return &query_db.KeyRanges{
+				query_db.KeyRange{"", expr.Operand2.Str},
+				query_db.KeyRange{string(append([]byte(expr.Operand2.Str), 0)), MaxRangeLimit},
+			}
+		}
+	} else { // not a key compare, so it applies to the entire key range
+		return &query_db.KeyRanges{KeyRangeAll}
 	}
-	if IsExpr(expr.Operand1) {
-		collectKeyRanges(expr.Operand1.Expr, keyRanges)
+}
+
+// Helper function to compare start and limit byte arrays  taking into account that
+// MaxRangeLimit is actually []byte{}.
+func compareLimits(limitA, limitB string) int {
+	if limitA == limitB {
+		return 0
+	} else if limitA == MaxRangeLimit {
+		return 1
+	} else if limitB == MaxRangeLimit {
+		return -1
+	} else if limitA < limitB {
+		return -1
+	} else {
+		return 1
 	}
-	if IsExpr(expr.Operand2) {
-		collectKeyRanges(expr.Operand2.Expr, keyRanges)
+}
+
+func compareStartToLimit(startA, limitB string) int {
+	if limitB == MaxRangeLimit {
+		return -1
+	} else if startA == limitB {
+		return 0
+	} else if startA < limitB {
+		return -1
+	} else {
+		return 1
+	}
+}
+
+func compareLimitToStart(limitA, startB string) int {
+	if limitA == MaxRangeLimit {
+		return -1
+	} else if limitA == startB {
+		return 0
+	} else if limitA < startB {
+		return -1
+	} else {
+		return 1
 	}
 }
 
@@ -408,9 +530,10 @@ func addKeyRange(keyRange query_db.KeyRange, keyRanges *query_db.KeyRanges) {
 		// the first paren expr is true if the start of the range to be added is contained in r
 		// the second paren expr is true if the limit of the range to be added is contained in r
 		// the third paren expr is true if the range to be added entirely contains r
-		if (keyRange.Start >= r.Start && keyRange.Start <= r.Limit) ||
-			(keyRange.Limit >= r.Start && keyRange.Limit <= r.Limit) ||
-			(keyRange.Start <= r.Start && keyRange.Limit >= r.Limit) {
+		if (keyRange.Start >= r.Start && compareStartToLimit(keyRange.Start, r.Limit) <= 0) ||
+			(compareLimitToStart(keyRange.Limit, r.Start) >= 0 && compareLimits(keyRange.Limit, r.Limit) <= 0) ||
+			(keyRange.Start <= r.Start && compareLimits(keyRange.Limit, r.Limit) >= 0) {
+
 			// keyRange overlaps with existing range at keyRanges[i]
 			// set newKeyRange to a range that ecompasses both
 			var newKeyRange query_db.KeyRange
@@ -419,7 +542,7 @@ func addKeyRange(keyRange query_db.KeyRange, keyRanges *query_db.KeyRanges) {
 			} else {
 				newKeyRange.Start = r.Start
 			}
-			if keyRange.Limit > r.Limit {
+			if compareLimits(keyRange.Limit, r.Limit) > 0 {
 				newKeyRange.Limit = keyRange.Limit
 			} else {
 				newKeyRange.Limit = r.Limit

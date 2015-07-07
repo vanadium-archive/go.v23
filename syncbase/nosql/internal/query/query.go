@@ -65,21 +65,6 @@ func ComposeProjection(db query_db.Database, k string, v *vdl.Value, s *query_pa
 	return projection
 }
 
-// Given a query (i.e.,, select statement), return the key ranges needed to satisfy the query.
-// A return of a single element array of string([]byte{0}), string([]byte{255}) means fetch all.
-func CompileKeyRanges(w *query_parser.WhereClause) query_db.KeyRanges {
-	// First determine if every key needs to be fetched.  To do this, evaluate the
-	// where clause substituting false for every key expression and true for every
-	// other (type for value) expression.  If the where clause evaluates to true,
-	// it is possible for a row to be selected without any dependence on the contents
-	// of the key.  In that case, all keys must be fetched.
-	if w == nil || CheckIfAllKeysMustBeFetched(w.Expr) {
-		return query_db.KeyRanges{query_db.KeyRange{string([]byte{0}), string([]byte{255})}}
-	} else {
-		return query_checker.CompileKeyRanges(w)
-	}
-}
-
 // For testing purposes, given a SelectStatement, k and v;
 // return nil if row not selected, else return the projection (type []*vdl.Value).
 // Note: limit and offset clauses are ignored for this function as they make no sense
@@ -176,8 +161,7 @@ func getColumnHeadings(s *query_parser.SelectStatement) []string {
 }
 
 func execSelect(db query_db.Database, s *query_parser.SelectStatement) ([]string, ResultStream, error) {
-	keyRanges := CompileKeyRanges(s.Where)
-	keyValueStream, err := s.From.Table.DBTable.Scan(keyRanges)
+	keyValueStream, err := s.From.Table.DBTable.Scan(*query_checker.CompileKeyRanges(s.Where))
 	if err != nil {
 		return nil, nil, syncql.NewErrScanError(db.GetContext(), s.Off, err)
 	}

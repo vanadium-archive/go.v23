@@ -68,7 +68,7 @@ type checkSelectTest struct {
 
 type keyRangesTest struct {
 	query     string
-	keyRanges query_db.KeyRanges
+	keyRanges *query_db.KeyRanges
 }
 
 type regularExpressionsTest struct {
@@ -132,33 +132,97 @@ func TestKeyRanges(t *testing.T) {
 	basic := []keyRangesTest{
 		{
 			"select k, v from Customer",
-			query_db.KeyRanges{
-				query_db.KeyRange{string([]byte{0}), string([]byte{255})},
+			&query_db.KeyRanges{
+				query_db.KeyRange{"", ""},
 			},
 		},
 		{
+			"select k, v from Customer where k = \"abc\" or k = \"def\"",
+			&query_db.KeyRanges{
+				query_db.KeyRange{"abc", appendZeroByte("abc")},
+				query_db.KeyRange{"def", appendZeroByte("def")},
+			},
+		},
+		{
+			"select k, v from Customer where k >= \"foo\" and k < \"goo\"",
+			&query_db.KeyRanges{
+				query_db.KeyRange{"foo", "goo"},
+			},
+		},
+		{
+			"select k, v from Customer where k >= \"foo\" and k <= \"goo\"",
+			&query_db.KeyRanges{
+				query_db.KeyRange{"foo", appendZeroByte("goo")},
+			},
+		},
+		{
+			"select k, v from Customer where k <> \"foo\"",
+			&query_db.KeyRanges{
+				query_db.KeyRange{"", "foo"},
+				query_db.KeyRange{appendZeroByte("foo"), ""},
+			},
+		},
+		{
+			"select k, v from Customer where k <> \"foo\" and k > \"bar\"",
+			&query_db.KeyRanges{
+				query_db.KeyRange{appendZeroByte("bar"), "foo"},
+				query_db.KeyRange{appendZeroByte("foo"), ""},
+			},
+		},
+		{
+			"select k, v from Customer where k <> \"foo\" or k > \"bar\"",
+			&query_db.KeyRanges{
+				query_db.KeyRange{"", ""},
+			},
+		},
+		{
+			"select k, v from Customer where k <> \"bar\" or k > \"foo\"",
+			&query_db.KeyRanges{
+				query_db.KeyRange{"", "bar"},
+				query_db.KeyRange{appendZeroByte("bar"), ""},
+			},
+		},
+		{
+			"select v from Customer where t = \"Foo.Bar\" and k >= \"100\" and k < \"200\" and v.foo > 50 and v.bar <= 1000 and v.baz <> -20.7",
+			&query_db.KeyRanges{
+				query_db.KeyRange{"100", "200"},
+			},
+		},
+		{
+			"select k, v from Customer where k = \"abc\" and k = \"def\"",
+			&query_db.KeyRanges{},
+		},
+		{
 			"select k, v from Customer where t = \"Foo.Bar\" and k like \"abc%\" limit 100 offset 200",
-			query_db.KeyRanges{
+			&query_db.KeyRanges{
 				query_db.KeyRange{"abc", "abd"},
 			},
 		},
 		{
 			"select  k,  v from \n  Customer where k like \"002%\" or k like \"001%\" or k like \"%\"",
-			query_db.KeyRanges{
-				query_db.KeyRange{string([]byte{0}), string([]byte{255})},
+			&query_db.KeyRanges{
+				query_db.KeyRange{"", ""},
 			},
 		},
 		{
 			"select k, v from Customer where k = \"Foo.Bar\" and k like \"abc%\" limit 100 offset 200",
-			query_db.KeyRanges{
-				query_db.KeyRange{"Foo.Bar", appendZeroByte("Foo.Bar")},
-				query_db.KeyRange{"abc", "abd"},
+			&query_db.KeyRanges{},
+		},
+		{
+			"select k, v from Customer where k like \"foo%\" and k like \"bar%\"",
+			&query_db.KeyRanges{},
+		},
+		{
+			"select k, v from Customer where k like \"foo%\" or k like \"bar%\"",
+			&query_db.KeyRanges{
+				query_db.KeyRange{"bar", "bas"},
+				query_db.KeyRange{"foo", "fop"},
 			},
 		},
 		{
 			// Note: 'like "Foo"' is optimized to '= "Foo"
 			"select k, v from Customer where k = \"Foo.Bar\" or k like \"Foo\" or k like \"abc%\" limit 100 offset 200",
-			query_db.KeyRanges{
+			&query_db.KeyRanges{
 				query_db.KeyRange{"Foo", appendZeroByte("Foo")},
 				query_db.KeyRange{"Foo.Bar", appendZeroByte("Foo.Bar")},
 				query_db.KeyRange{"abc", "abd"},
@@ -166,21 +230,21 @@ func TestKeyRanges(t *testing.T) {
 		},
 		{
 			"select k, v from Customer where k like \"Foo\\%Bar\" or k like \"abc%\" limit 100 offset 200",
-			query_db.KeyRanges{
+			&query_db.KeyRanges{
 				query_db.KeyRange{"Foo%Bar", appendZeroByte("Foo%Bar")},
 				query_db.KeyRange{"abc", "abd"},
 			},
 		},
 		{
 			"select k, v from Customer where k like \"Foo\\\\%Bar\" or k like \"abc%\" limit 100 offset 200",
-			query_db.KeyRanges{
+			&query_db.KeyRanges{
 				query_db.KeyRange{"Foo\\", "Foo]"},
 				query_db.KeyRange{"abc", "abd"},
 			},
 		},
 		{
 			"select k, v from Customer where k like \"Foo\\\\\\%Bar\" or k like \"abc%\" limit 100 offset 200",
-			query_db.KeyRanges{
+			&query_db.KeyRanges{
 				query_db.KeyRange{"Foo\\%Bar", appendZeroByte("Foo\\%Bar")},
 				query_db.KeyRange{"abc", "abd"},
 			},
@@ -310,8 +374,8 @@ func TestQueryCheckerErrors(t *testing.T) {
 		{"select v.z from Customer where k > v.y", syncql.NewErrKeyExpressionForm(db.GetContext(), 31)},
 		{"select v.z from Customer where k >= v.y", syncql.NewErrKeyExpressionForm(db.GetContext(), 31)},
 		{"select v.z from Customer where \"abc%\" = k", syncql.NewErrKeyExpressionForm(db.GetContext(), 31)},
-		{"select v from Customer where t = \"Foo.Bar\" and k >= \"100\" and k < \"200\" and v.foo > 50 and v.bar <= 1000 and v.baz <> -20.7", syncql.NewErrKeyExpressionForm(db.GetContext(), 47)},
 		{"select v.z from Customer where k like \"a\\bc%\"", syncql.NewErrInvalidEscapedChar(db.GetContext(), 38)},
+		{"select v.z from Customer where k not like \"foo\"", syncql.NewErrKeyExpressionForm(db.GetContext(), 31)},
 		{"select v from Customer where v.A > false", syncql.NewErrBoolInvalidExpression(db.GetContext(), 33)},
 		{"select v from Customer where true <= v.A", syncql.NewErrBoolInvalidExpression(db.GetContext(), 34)},
 		{"select v from Customer where Foo(\"2015/07/22\", true, 3.14157) = true", syncql.NewErrFunctionNotFound(db.GetContext(), 29, "Foo")},

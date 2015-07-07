@@ -48,16 +48,25 @@ type keyValueStreamImpl struct {
 	rangeCursor int
 }
 
+func compareKeyToLimit(key, limit string) int {
+	if limit == "" || key < limit {
+		return -1
+	} else if key == limit {
+		return 0
+	} else {
+		return 1
+	}
+}
+
 func (kvs *keyValueStreamImpl) Advance() bool {
 	for true {
 		kvs.cursor++ // initialized to -1
 		if kvs.cursor >= len(kvs.table.rows) {
 			return false
 		}
+		// does it match any keyRange
 		for kvs.rangeCursor < len(kvs.keyRanges) {
-			// does it match any keyRange (or is the keyRange the 0-255 wildcard)?
-			if (kvs.keyRanges[kvs.rangeCursor].Start == string([]byte{0}) && kvs.keyRanges[kvs.rangeCursor].Limit == string([]byte{255})) ||
-				(kvs.table.rows[kvs.cursor].key >= kvs.keyRanges[kvs.rangeCursor].Start && kvs.table.rows[kvs.cursor].key <= kvs.keyRanges[kvs.rangeCursor].Limit) {
+			if kvs.table.rows[kvs.cursor].key >= kvs.keyRanges[kvs.rangeCursor].Start && compareKeyToLimit(kvs.table.rows[kvs.cursor].key, kvs.keyRanges[kvs.rangeCursor].Limit) < 0 {
 				return true
 			}
 			// Keys and keyRanges are both sorted low to high, so we can increment

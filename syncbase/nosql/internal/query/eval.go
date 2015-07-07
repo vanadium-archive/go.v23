@@ -507,24 +507,6 @@ func ResolveField(k string, v *vdl.Value, f *query_parser.Field) (*vdl.Value, bo
 	return object, false, ""
 }
 
-// Evaluate the where clause, substituting false for all expressions involving the key and
-// true for all other expressions.  If the answer is true, it is possible to satisfy the
-// expression for any key.  As such, all keys must be fetched.
-func CheckIfAllKeysMustBeFetched(e *query_parser.Expression) bool {
-	switch e.Operator.Type {
-	case query_parser.And:
-		return CheckIfAllKeysMustBeFetched(e.Operand1.Expr) && CheckIfAllKeysMustBeFetched(e.Operand2.Expr)
-	case query_parser.Or:
-		return CheckIfAllKeysMustBeFetched(e.Operand1.Expr) || CheckIfAllKeysMustBeFetched(e.Operand2.Expr)
-	default: // =, > >=, <, <=, Like, <>, NotLike
-		if query_checker.IsKey(e.Operand1) {
-			return false
-		} else {
-			return true
-		}
-	}
-}
-
 // EvalWhereUsingOnlyKey return type.  See that function for details.
 type EvalWithKeyResult int
 
