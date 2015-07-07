@@ -24,13 +24,13 @@ func V23TestSyncbasedJoinSyncGroup(t *v23tests.T) {
 	v23tests.RunRootMT(t, "--v23.tcp.address=127.0.0.1:0")
 	server0Creds, _ := t.Shell().NewChildCredentials("s0")
 	client0Creds, _ := t.Shell().NewChildCredentials("s0/c0")
-	cleanSync0 := tu.StartSyncbased(t, server0Creds, "sync0",
+	cleanSync0 := tu.StartSyncbased(t, server0Creds, "sync0", "",
 		`{"Read": {"In":["root/s0/c0"]}, "Write": {"In":["root/s0/c0"]}}`)
 	defer cleanSync0()
 
 	server1Creds, _ := t.Shell().NewChildCredentials("s0/s1")
 	client1Creds, _ := t.Shell().NewChildCredentials("s0/s1/c1")
-	cleanSync1 := tu.StartSyncbased(t, server1Creds, "sync1",
+	cleanSync1 := tu.StartSyncbased(t, server1Creds, "sync1", "",
 		`{"Read": {"In":["root/s0/s1/c1"]}, "Write": {"In":["root/s0/s1/c1"]}}`)
 	defer cleanSync1()
 

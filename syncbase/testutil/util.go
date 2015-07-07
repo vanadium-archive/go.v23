@@ -62,6 +62,8 @@ func CreateTable(t *testing.T, ctx *context.T, d nosql.Database, name string) no
 	return d.Table(name)
 }
 
+// TODO(sadovsky): Drop the 'perms' argument. The only client that passes
+// non-nil, syncgroup_test.go, should use SetupOrDieCustom instead.
 func SetupOrDie(perms access.Permissions) (clientCtx *context.T, serverName string, cleanup func()) {
 	_, clientCtx, serverName, _, cleanup = SetupOrDieCustom("client", "server", perms)
 	return
@@ -100,9 +102,9 @@ func DefaultPerms(patterns ...string) access.Permissions {
 	return perms
 }
 
-func CheckScan(t *testing.T, ctx *context.T, tb nosql.Table, r nosql.RowRange, wantKeys []string, wantValues []interface{}) {
+func ScanMatches(ctx *context.T, tb nosql.Table, r nosql.RowRange, wantKeys []string, wantValues []interface{}) error {
 	if len(wantKeys) != len(wantValues) {
-		panic("bad input args")
+		return fmt.Errorf("bad input args")
 	}
 	it := tb.Scan(ctx, r)
 	gotKeys := []string{}
@@ -116,23 +118,30 @@ func CheckScan(t *testing.T, ctx *context.T, tb nosql.Table, r nosql.RowRange, w
 		// Check key.
 		wantKey := wantKeys[i]
 		if gotKey != wantKey {
-			Fatalf(t, "Keys do not match: got %q, want %q", gotKey, wantKey)
+			return fmt.Errorf("Keys do not match: got %q, want %q", gotKey, wantKey)
 		}
 		// Check value.
 		wantValue := wantValues[i]
 		gotValue := reflect.Zero(reflect.TypeOf(wantValue)).Interface()
 		if err := it.Value(&gotValue); err != nil {
-			Fatalf(t, "it.Value() failed: %v", err)
+			return fmt.Errorf("it.Value() failed: %v", err)
 		}
 		if !reflect.DeepEqual(gotValue, wantValue) {
-			Fatalf(t, "Values do not match: got %v, want %v", gotValue, wantValue)
+			return fmt.Errorf("Values do not match: got %v, want %v", gotValue, wantValue)
 		}
 	}
 	if err := it.Err(); err != nil {
-		Fatalf(t, "tb.Scan() failed: %v", err)
+		return fmt.Errorf("tb.Scan() failed: %v", err)
 	}
 	if len(gotKeys) != len(wantKeys) {
-		Fatalf(t, "Unmatched keys: got %v, want %v", gotKeys, wantKeys)
+		return fmt.Errorf("Unmatched keys: got %v, want %v", gotKeys, wantKeys)
+	}
+	return nil
+}
+
+func CheckScan(t *testing.T, ctx *context.T, tb nosql.Table, r nosql.RowRange, wantKeys []string, wantValues []interface{}) {
+	if err := ScanMatches(ctx, tb, r, wantKeys, wantValues); err != nil {
+		Fatalf(t, err.Error())
 	}
 }
 

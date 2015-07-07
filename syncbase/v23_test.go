@@ -28,3 +28,7 @@ func TestMain(m *testing.M) {
 func TestV23SyncbasedPutGet(t *testing.T) {
 	v23tests.RunTest(t, V23TestSyncbasedPutGet)
 }
+
+func TestV23ServiceRestart(t *testing.T) {
+	v23tests.RunTest(t, V23TestServiceRestart)
+}

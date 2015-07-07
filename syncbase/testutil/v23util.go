@@ -16,30 +16,41 @@ import (
 	"v.io/x/ref/test/v23tests"
 )
 
-// StartSyncbased starts the syncbased binary. The syncbased invocation is
-// intended to be used from an integration test (v23.test). The returned
-// cleanup function should be called once the invokation is no longer used.
-func StartSyncbased(t *v23tests.T, creds *modules.CustomCredentials, name, permsLiteral string) (cleanup func()) {
+// StartSyncbased starts a syncbased process, intended to be accessed from an
+// integration test (run using --v23.tests). The returned cleanup function
+// should be called once the syncbased process is no longer needed.
+func StartSyncbased(t *v23tests.T, creds *modules.CustomCredentials, name, rootDir, permsLiteral string) (cleanup func()) {
 	syncbased := t.BuildV23Pkg("v.io/syncbase/x/ref/services/syncbase/syncbased")
-	// Create dir for the store.
-	path, err := ioutil.TempDir("", "syncbase_leveldb")
-	if err != nil {
-		V23Fatalf(t, "can't create temp dir: %v", err)
+	// Create root dir for the store.
+	rmRootDir := false
+	if rootDir == "" {
+		var err error
+		rootDir, err = ioutil.TempDir("", "syncbase_leveldb")
+		if err != nil {
+			V23Fatalf(t, "can't create temp dir: %v", err)
+		}
+		rmRootDir = true
 	}
-	// Start syncbased
+	// Start syncbased.
 	invocation := syncbased.WithStartOpts(syncbased.StartOpts().WithCustomCredentials(creds)).Start(
 		"--v23.tcp.address=127.0.0.1:0",
 		"--v23.permissions.literal", permsLiteral,
 		"--name="+name,
-		"--root-dir="+path)
+		"--root-dir="+rootDir)
 	return func() {
+		// TODO(sadovsky): Something's broken here. If the syncbased invocation
+		// fails (e.g. if NewService returns an error), currently it's possible for
+		// the test to fail without the crash error getting logged. This makes
+		// debugging a challenge.
 		go invocation.Kill(syscall.SIGINT)
 		stdout, stderr := bytes.NewBuffer(nil), bytes.NewBuffer(nil)
 		if err := invocation.Shutdown(stdout, stderr); err != nil {
-			log.Printf("syncbase terminated with an error: %v\nstdout: %v\nstderr: %v\n", err, stdout, stderr)
+			log.Printf("syncbased terminated with an error: %v\nstdout: %v\nstderr: %v\n", err, stdout, stderr)
 		}
-		if err := os.RemoveAll(path); err != nil {
-			V23Fatalf(t, "can't destroy db at %v: %v", path, err)
+		if rmRootDir {
+			if err := os.RemoveAll(rootDir); err != nil {
+				V23Fatalf(t, "can't remove dir %v: %v", rootDir, err)
+			}
 		}
 	}
 }
