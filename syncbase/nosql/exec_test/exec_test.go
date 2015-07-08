@@ -922,7 +922,7 @@ func TestExecErrors(t *testing.T) {
 		{
 			"select v from Unknown",
 			// The following error text is dependent on the implementation of the query_db.Database interface.
-			syncql.NewErrTableCantAccess(ctx, 14, "Unknown", errors.New("exec_test.test:\"a/db\".Exec: Does not exist: Unknown")),
+			syncql.NewErrTableCantAccess(ctx, 14, "Unknown", errors.New("exec_test.test:\"a/db\".Exec: Does not exist: $table:Unknown")),
 		},
 		{
 			"select v from Customer offset -1",
