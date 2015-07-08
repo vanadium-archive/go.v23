@@ -13,8 +13,7 @@ import (
 	"v.io/v23/naming"
 )
 
-// List does namespace.Glob("name/*") and returns a sorted slice of results or
-// a VDL-compatible error.
+// List does namespace.Glob("name/*") and returns a sorted slice of results.
 func List(ctx *context.T, name string) ([]string, error) {
 	// TODO(sadovsky): Why can't Glob be a method on the stub, just like every
 	// other streaming method? Even if we encourage clients to use the namespace
