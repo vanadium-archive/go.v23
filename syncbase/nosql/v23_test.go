@@ -28,3 +28,7 @@ func TestMain(m *testing.M) {
 func TestV23SyncbasedJoinSyncGroup(t *testing.T) {
 	v23tests.RunTest(t, V23TestSyncbasedJoinSyncGroup)
 }
+
+func TestV23SyncbasedGetDeltas(t *testing.T) {
+	v23tests.RunTest(t, V23TestSyncbasedGetDeltas)
+}
