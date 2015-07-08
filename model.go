@@ -57,11 +57,11 @@ type AppCycle interface {
 	// Stop does not block.  If any of the channels are not receiving,
 	// the message is not sent on them.
 	// If WaitForStop had never been called, Stop acts like ForceStop.
-	Stop()
+	Stop(ctx *context.T)
 
 	// ForceStop causes the application to exit immediately with an error
 	// code.
-	ForceStop()
+	ForceStop(ctx *context.T)
 
 	// WaitForStop takes in a channel on which a stop event will be
 	// conveyed.  The stop event is represented by a string identifying the
@@ -72,7 +72,7 @@ type AppCycle interface {
 	// The channel is assumed to remain open while messages could be sent on
 	// it.  The channel will be automatically closed during the call to
 	// Cleanup.
-	WaitForStop(chan<- string)
+	WaitForStop(ctx *context.T, ch chan<- string)
 
 	// AdvanceGoal extends the goal value in the shutdown task tracker.
 	// Non-positive delta is ignored.

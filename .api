@@ -23,11 +23,11 @@ pkg v23, func WithReservedNameDispatcher(*context.T, rpc.Dispatcher) *context.T
 pkg v23, type AppCycle interface { AdvanceGoal, AdvanceProgress, ForceStop, Remote, Stop, TrackTask, WaitForStop }
 pkg v23, type AppCycle interface, AdvanceGoal(int32)
 pkg v23, type AppCycle interface, AdvanceProgress(int32)
-pkg v23, type AppCycle interface, ForceStop()
+pkg v23, type AppCycle interface, ForceStop(*context.T)
 pkg v23, type AppCycle interface, Remote() interface{}
-pkg v23, type AppCycle interface, Stop()
+pkg v23, type AppCycle interface, Stop(*context.T)
 pkg v23, type AppCycle interface, TrackTask(chan<- Task)
-pkg v23, type AppCycle interface, WaitForStop(chan<- string)
+pkg v23, type AppCycle interface, WaitForStop(*context.T, chan<- string)
 pkg v23, type Runtime interface { GetAppCycle, GetBackgroundContext, GetClient, GetListenSpec, GetNamespace, GetPrincipal, GetReservedNameDispatcher, Init, NewEndpoint, NewServer, WithBackgroundContext, WithListenSpec, WithNewClient, WithNewNamespace, WithNewStreamManager, WithPrincipal, WithReservedNameDispatcher }
 pkg v23, type Runtime interface, GetAppCycle(*context.T) AppCycle
 pkg v23, type Runtime interface, GetBackgroundContext(*context.T) *context.T

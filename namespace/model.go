@@ -38,7 +38,7 @@ type T interface {
 
 	// FlushCacheEntry flushes resolution information cached for the name.  If
 	// anything was flushed it returns true.
-	FlushCacheEntry(name string) bool
+	FlushCacheEntry(ctx *context.T, name string) bool
 
 	// CacheCtl sets controls and returns the current control values.
 	CacheCtl(ctls ...naming.CacheCtl) []naming.CacheCtl
