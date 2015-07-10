@@ -53,7 +53,7 @@ pkg rpc, type Describer interface { Describe__ }
 pkg rpc, type Describer interface, Describe__() []InterfaceDesc
 pkg rpc, type DialerFunc func(protocol, address string, timeout time.Duration) (net.Conn, error)
 pkg rpc, type Dispatcher interface { Lookup }
-pkg rpc, type Dispatcher interface, Lookup(string) (interface{}, security.Authorizer, error)
+pkg rpc, type Dispatcher interface, Lookup(*context.T, string) (interface{}, security.Authorizer, error)
 pkg rpc, type EmbedDesc struct
 pkg rpc, type EmbedDesc struct, Doc string
 pkg rpc, type EmbedDesc struct, Name string
@@ -76,7 +76,7 @@ pkg rpc, type Invoker interface { Globber, Invoke, MethodSignature, Prepare, Sig
 pkg rpc, type Invoker interface, Globber() *GlobState
 pkg rpc, type Invoker interface, Invoke(*context.T, StreamServerCall, string, []interface{}) ([]interface{}, error)
 pkg rpc, type Invoker interface, MethodSignature(*context.T, ServerCall, string) (signature.Method, error)
-pkg rpc, type Invoker interface, Prepare(string, int) ([]interface{}, []*vdl.Value, error)
+pkg rpc, type Invoker interface, Prepare(*context.T, string, int) ([]interface{}, []*vdl.Value, error)
 pkg rpc, type Invoker interface, Signature(*context.T, ServerCall) ([]signature.Interface, error)
 pkg rpc, type ListenAddrs []struct {  Protocol, Address string;}
 pkg rpc, type ListenSpec struct
