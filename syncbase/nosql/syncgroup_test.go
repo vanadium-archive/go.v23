@@ -32,11 +32,21 @@ func TestCreateSyncGroup(t *testing.T) {
 
 	createSyncGroup(t, ctx, d, sg1, spec, verror.ErrBadArg.ID)
 
+	// Prefill entries before creating a SyncGroup to exercise the bootstrap
+	// of a SyncGroup through Snapshot operations to the watcher.
+	t1 := tu.CreateTable(t, ctx, d, "t1")
+	for _, k := range []string{"foo123", "foobar123", "xyz"} {
+		if err := t1.Put(ctx, k, "value@"+k); err != nil {
+			t.Fatalf("t1.Put() of %s failed: %v", k, err)
+		}
+	}
+
 	// Create successfully.
+	// TODO(rdaoud): switch prefixes to (table, prefix) tuples.
 	spec = wire.SyncGroupSpec{
 		Description: "test syncgroup sg1",
 		Perms:       nil,
-		Prefixes:    []string{"t1/foo"},
+		Prefixes:    []string{"t1:foo"},
 	}
 	createSyncGroup(t, ctx, d, sg1, spec, verror.ID(""))
 
@@ -50,7 +60,7 @@ func TestCreateSyncGroup(t *testing.T) {
 
 	// Create a nested syncgroup.
 	spec.Description = "test syncgroup sg3"
-	spec.Prefixes = []string{"t1/foobar"}
+	spec.Prefixes = []string{"t1:foobar"}
 	sg3 := naming.Join(sName, util.SyncbaseSuffix, "sg3")
 	createSyncGroup(t, ctx, d, sg3, spec, verror.ID(""))
 
@@ -80,7 +90,7 @@ func TestJoinSyncGroup(t *testing.T) {
 	specA := wire.SyncGroupSpec{
 		Description: "test syncgroup sgA",
 		Perms:       perms("root/client1"),
-		Prefixes:    []string{"t1/foo"},
+		Prefixes:    []string{"t1:foo"},
 	}
 	sgNameA := naming.Join(sName, util.SyncbaseSuffix, "sgA")
 	createSyncGroup(t, ctx1, d1, sgNameA, specA, verror.ID(""))
@@ -113,7 +123,7 @@ func TestJoinSyncGroup(t *testing.T) {
 	specB := wire.SyncGroupSpec{
 		Description: "test syncgroup sgB",
 		Perms:       perms("root/client1", "root/client2"),
-		Prefixes:    []string{"t1/foo"},
+		Prefixes:    []string{"t1:foo"},
 	}
 	sgNameB := naming.Join(sName, util.SyncbaseSuffix, "sgB")
 	createSyncGroup(t, ctx1, d1, sgNameB, specB, verror.ID(""))
