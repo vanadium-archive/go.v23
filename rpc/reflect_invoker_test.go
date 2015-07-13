@@ -180,7 +180,7 @@ func (o *tags) Describe__() []rpc.InterfaceDesc {
 }
 
 func TestReflectInvoker(t *testing.T) {
-	ctx, shutdown := test.V23InitWithParams(test.InitParams{})
+	ctx, shutdown := test.TestContext()
 	defer shutdown()
 	type v []interface{}
 	type testcase struct {
@@ -647,7 +647,7 @@ func TestReflectInvokerPanic(t *testing.T) {
 }
 
 func TestReflectInvokerErrors(t *testing.T) {
-	ctx, shutdown := test.V23InitWithParams(test.InitParams{})
+	ctx, shutdown := test.TestContext()
 	defer shutdown()
 	type v []interface{}
 	type testcase struct {
