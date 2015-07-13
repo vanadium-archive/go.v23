@@ -23,7 +23,7 @@ import (
 	"v.io/v23/vdl"
 	"v.io/v23/vdlroot/signature"
 	"v.io/v23/verror"
-
+	_ "v.io/x/ref/runtime/factories/generic"
 	"v.io/x/ref/test"
 	"v.io/x/ref/test/testutil"
 )
@@ -180,6 +180,8 @@ func (o *tags) Describe__() []rpc.InterfaceDesc {
 }
 
 func TestReflectInvoker(t *testing.T) {
+	ctx, shutdown := test.V23InitWithParams(test.InitParams{})
+	defer shutdown()
 	type v []interface{}
 	type testcase struct {
 		obj    testObjIface
@@ -210,7 +212,7 @@ func TestReflectInvoker(t *testing.T) {
 	}
 	testInvoker := func(test testcase, invoker rpc.Invoker) {
 		// Call Invoker.Prepare and check results.
-		argptrs, tags, err := invoker.Prepare(test.method, len(test.args))
+		argptrs, tags, err := invoker.Prepare(ctx, test.method, len(test.args))
 		if err != nil {
 			t.Errorf("%s Prepare unexpected error: %v", name(test), err)
 		}
@@ -645,6 +647,8 @@ func TestReflectInvokerPanic(t *testing.T) {
 }
 
 func TestReflectInvokerErrors(t *testing.T) {
+	ctx, shutdown := test.V23InitWithParams(test.InitParams{})
+	defer shutdown()
 	type v []interface{}
 	type testcase struct {
 		obj        interface{}
@@ -662,7 +666,7 @@ func TestReflectInvokerErrors(t *testing.T) {
 	}
 	testInvoker := func(test testcase, invoker rpc.Invoker) {
 		// Call Invoker.Prepare and check error.
-		_, _, err := invoker.Prepare(test.method, len(test.args))
+		_, _, err := invoker.Prepare(ctx, test.method, len(test.args))
 		if verror.ErrorID(err) != test.prepareErr {
 			t.Errorf(`%s Prepare got error "%v", want id %v`, name(test), err, test.prepareErr)
 		}

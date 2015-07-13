@@ -165,7 +165,7 @@ func ReflectInvokerOrDie(obj interface{}) Invoker {
 }
 
 // Prepare implements the Invoker.Prepare method.
-func (ri reflectInvoker) Prepare(method string, _ int) ([]interface{}, []*vdl.Value, error) {
+func (ri reflectInvoker) Prepare(ctx *context.T, method string, _ int) ([]interface{}, []*vdl.Value, error) {
 	info, ok := ri.methods[method]
 	if !ok {
 		return nil, nil, verror.New(verror.ErrUnknownMethod, nil, method)

@@ -412,7 +412,7 @@ type Dispatcher interface {
 	//
 	// Lookup may be called concurrently by the underlying RPC system, and
 	// hence must be thread-safe.
-	Lookup(suffix string) (interface{}, security.Authorizer, error)
+	Lookup(ctx *context.T, suffix string) (interface{}, security.Authorizer, error)
 }
 
 // Invoker defines the interface used by the server for invoking methods on
@@ -445,7 +445,7 @@ type Invoker interface {
 	// The returned method tags provide additional information associated with the
 	// method.  E.g. the security system uses tags to configure AccessLists.  The tags
 	// are typically configured in the VDL specification of the method.
-	Prepare(method string, numArgs int) (argptrs []interface{}, tags []*vdl.Value, _ error)
+	Prepare(ctx *context.T, method string, numArgs int) (argptrs []interface{}, tags []*vdl.Value, _ error)
 
 	// Invoke is the second stage of method invocation.  It is passed the the
 	// in-flight context and call, the method name, and the argptrs returned by
