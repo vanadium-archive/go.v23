@@ -32,3 +32,7 @@ func TestV23SyncbasedJoinSyncGroup(t *testing.T) {
 func TestV23SyncbasedGetDeltas(t *testing.T) {
 	v23tests.RunTest(t, V23TestSyncbasedGetDeltas)
 }
+
+func TestV23SyncbasedExchangeDeltas(t *testing.T) {
+	v23tests.RunTest(t, V23TestSyncbasedExchangeDeltas)
+}

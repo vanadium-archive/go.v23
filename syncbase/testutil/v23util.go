@@ -56,11 +56,11 @@ func StartSyncbased(t *v23tests.T, creds *modules.CustomCredentials, name, rootD
 }
 
 // RunClient runs modules.Program and waits until it terminates.
-func RunClient(t *v23tests.T, creds *modules.CustomCredentials, program modules.Program) {
+func RunClient(t *v23tests.T, creds *modules.CustomCredentials, program modules.Program, args ...string) {
 	client, err := t.Shell().StartWithOpts(
 		t.Shell().DefaultStartOpts().WithCustomCredentials(creds),
 		nil,
-		program)
+		program, args...)
 	if err != nil {
 		V23Fatalf(t, "unable to start the client: %v", err)
 	}
