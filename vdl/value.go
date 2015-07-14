@@ -535,9 +535,7 @@ func (v *Value) Assign(x *Value) *Value {
 		v.rep = zeroRep(v.t)
 	case v.t == x.t:
 		if v.t.kind == Byte {
-			// Byte needs to be handled as a special case.
-			// If the byte is backed by a byte array, the value at the byte array index needs to be updated.
-			// Use AssignByte to handle this logic.
+			// Use AssignByte to handle both the value and pointer cases.
 			v.AssignByte(x.Byte())
 		} else {
 			// Types are identical, v is assigned a copy of the underlying rep.
@@ -574,9 +572,12 @@ func (v *Value) AssignBool(x bool) *Value {
 func (v *Value) AssignByte(x byte) *Value {
 	v.t.checkKind("AssignByte", Byte)
 	switch trep := v.rep.(type) {
-	case uint64:
+	case uint64, nil:
+		// Handle cases where v.rep is a standalone number, or where v.rep == nil.
+		// The nil case occurs when typedCopy is used to copy a byte value.
 		v.rep = uint64(x)
 	case *byte:
+		// Handle case where v.rep represents a byte in a list or array.
 		*trep = x
 	default:
 		panic(fmt.Errorf("vdl: AssignByte mismatched rep %v %T %v", v.t, v.rep, v.rep))

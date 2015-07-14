@@ -73,7 +73,7 @@ type (
 	NInterface  interface{}
 	NType       *Type
 	NBool       bool
-	NUint8      uint8
+	NByte       byte
 	NUint16     uint16
 	NUint32     uint32
 	NUint64     uint64
@@ -93,7 +93,7 @@ type (
 	NArray3Interface  [3]NInterface
 	NArray3TypeObject [3]*Type
 	NArray3Bool       [3]bool
-	NArray3Uint8      [3]uint8
+	NArray3Byte       [3]byte
 	NArray3Uint16     [3]uint16
 	NArray3Uint32     [3]uint32
 	NArray3Uint64     [3]uint64
@@ -113,7 +113,7 @@ type (
 	NStructInterface      struct{ X NInterface }
 	NStructTypeObject     struct{ X *Type }
 	NStructBool           struct{ X bool }
-	NStructUint8          struct{ X uint8 }
+	NStructByte           struct{ X byte }
 	NStructUint16         struct{ X uint16 }
 	NStructUint32         struct{ X uint32 }
 	NStructUint64         struct{ X uint64 }
@@ -135,7 +135,7 @@ type (
 	NSliceInterface  []NInterface
 	NSliceTypeObject []*Type
 	NSliceBool       []bool
-	NSliceUint8      []uint8
+	NSliceByte       []byte
 	NSliceUint16     []uint16
 	NSliceUint32     []uint32
 	NSliceUint64     []uint64
@@ -155,7 +155,7 @@ type (
 	NSetInterface  map[NInterface]struct{}
 	NSetTypeObject map[*Type]struct{}
 	NSetBool       map[bool]struct{}
-	NSetUint8      map[uint8]struct{}
+	NSetByte       map[byte]struct{}
 	NSetUint16     map[uint16]struct{}
 	NSetUint32     map[uint32]struct{}
 	NSetUint64     map[uint64]struct{}
@@ -175,7 +175,7 @@ type (
 	NMapInterface  map[NInterface]NInterface
 	NMapTypeObject map[*Type]*Type
 	NMapBool       map[bool]bool
-	NMapUint8      map[uint8]uint8
+	NMapByte       map[byte]byte
 	NMapUint16     map[uint16]uint16
 	NMapUint32     map[uint32]uint32
 	NMapUint64     map[uint64]uint64
@@ -197,10 +197,12 @@ type (
 	NRecurseB    struct{ A []NRecurseA }
 
 	// Composite types representing sets of numbers.
+	NMapByteEmpty      map[NByte]struct{}
 	NMapUint64Empty    map[NUint64]struct{}
 	NMapInt64Empty     map[NUint64]struct{}
 	NMapFloat64Empty   map[NUint64]struct{}
 	NMapComplex64Empty map[NUint64]struct{}
+	NMapByteBool       map[NByte]NBool
 	NMapUint64Bool     map[NUint64]NBool
 	NMapInt64Bool      map[NInt64]NBool
 	NMapFloat64Bool    map[NFloat64]NBool
@@ -212,10 +214,12 @@ type (
 	NStructXYZBoolUnexported struct{ a, X, b, Y, c, Z, d NBool }
 	NStructWXBool            struct{ W, X NBool }
 	// Composite types representing maps of strings to numbers.
+	NMapStringByte      map[NString]NByte
 	NMapStringUint64    map[NString]NUint64
 	NMapStringInt64     map[NString]NInt64
 	NMapStringFloat64   map[NString]NFloat64
 	NMapStringComplex64 map[NString]NComplex64
+	NStructVWXByte      struct{ V, W, X NByte }
 	NStructVWXUint64    struct{ V, W, X NUint64 }
 	NStructVWXInt64     struct{ V, W, X NInt64 }
 	NStructVWXFloat64   struct{ V, W, X NFloat64 }
@@ -230,6 +234,7 @@ type (
 		X complex64
 		d interface{}
 	}
+	NStructUVByte      struct{ U, V NByte }
 	NStructUVUint64    struct{ U, V NUint64 }
 	NStructUVInt64     struct{ U, V NInt64 }
 	NStructUVFloat64   struct{ U, V NFloat64 }
@@ -535,6 +540,8 @@ var (
 	ListComplex64Type    = ListType(Complex64Type)
 	ListComplex64TypeN   = NamedType("NListComplex64", ListType(Complex64TypeN))
 	// Composite types representing sets of numbers.
+	SetByteType           = SetType(ByteType)
+	SetByteTypeN          = NamedType("NSetByte", SetType(ByteTypeN))
 	SetUint64Type         = SetType(Uint64Type)
 	SetUint64TypeN        = NamedType("NSetUint64", SetType(Uint64TypeN))
 	SetInt64Type          = SetType(Int64Type)
@@ -543,6 +550,8 @@ var (
 	SetFloat64TypeN       = NamedType("NSetFloat64", SetType(Float64TypeN))
 	SetComplex64Type      = SetType(Complex64Type)
 	SetComplex64TypeN     = NamedType("NSetComplex64", SetType(Complex64TypeN))
+	MapByteBoolType       = MapType(ByteType, BoolType)
+	MapByteBoolTypeN      = NamedType("NMapByteBool", MapType(ByteTypeN, BoolTypeN))
 	MapUint64BoolType     = MapType(Uint64Type, BoolType)
 	MapUint64BoolTypeN    = NamedType("NMapUint64Bool", MapType(Uint64TypeN, BoolTypeN))
 	MapInt64BoolType      = MapType(Int64Type, BoolType)
@@ -561,6 +570,8 @@ var (
 	StructWXBoolType   = StructType(Field{"W", BoolType}, Field{"X", BoolType})
 	StructWXBoolTypeN  = NamedType("NStructWXBool", StructType(Field{"W", BoolTypeN}, Field{"X", BoolTypeN}))
 	// Composite types representing maps of strings to numbers.
+	MapStringByteType       = MapType(StringType, ByteType)
+	MapStringByteTypeN      = NamedType("NMapStringByte", MapType(StringTypeN, ByteTypeN))
 	MapStringUint64Type     = MapType(StringType, Uint64Type)
 	MapStringUint64TypeN    = NamedType("NMapStringUint64", MapType(StringTypeN, Uint64TypeN))
 	MapStringInt64Type      = MapType(StringType, Int64Type)
@@ -569,6 +580,8 @@ var (
 	MapStringFloat64TypeN   = NamedType("NMapStringFloat64", MapType(StringTypeN, Float64TypeN))
 	MapStringComplex64Type  = MapType(StringType, Complex64Type)
 	MapStringComplex64TypeN = NamedType("NMapStringComplex64", MapType(StringTypeN, Complex64TypeN))
+	StructVWXByteType       = StructType(Field{"V", ByteType}, Field{"W", ByteType}, Field{"X", ByteType})
+	StructVWXByteTypeN      = NamedType("NStructVWXByte", StructType(Field{"V", ByteTypeN}, Field{"W", ByteTypeN}, Field{"X", ByteTypeN}))
 	StructVWXUint64Type     = StructType(Field{"V", Uint64Type}, Field{"W", Uint64Type}, Field{"X", Uint64Type})
 	StructVWXUint64TypeN    = NamedType("NStructVWXUint64", StructType(Field{"V", Uint64TypeN}, Field{"W", Uint64TypeN}, Field{"X", Uint64TypeN}))
 	StructVWXInt64Type      = StructType(Field{"V", Int64Type}, Field{"W", Int64Type}, Field{"X", Int64Type})
@@ -577,6 +590,8 @@ var (
 	StructVWXFloat64TypeN   = NamedType("NStructVWXFloat64", StructType(Field{"V", Float64TypeN}, Field{"W", Float64TypeN}, Field{"X", Float64TypeN}))
 	StructVWXComplex64Type  = StructType(Field{"V", Complex64Type}, Field{"W", Complex64Type}, Field{"X", Complex64Type})
 	StructVWXComplex64TypeN = NamedType("NStructVWXComplex64", StructType(Field{"V", Complex64TypeN}, Field{"W", Complex64TypeN}, Field{"X", Complex64TypeN}))
+	StructUVByteType        = StructType(Field{"U", ByteType}, Field{"V", ByteType})
+	StructUVByteTypeN       = NamedType("NStructUVByte", StructType(Field{"U", ByteTypeN}, Field{"V", ByteTypeN}))
 	StructUVUint64Type      = StructType(Field{"U", Uint64Type}, Field{"V", Uint64Type})
 	StructUVUint64TypeN     = NamedType("NStructUVUint64", StructType(Field{"U", Uint64TypeN}, Field{"V", Uint64TypeN}))
 	StructUVInt64Type       = StructType(Field{"U", Int64Type}, Field{"V", Int64Type})

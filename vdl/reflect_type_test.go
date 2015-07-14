@@ -22,7 +22,7 @@ type rtTest struct {
 var rtKeyTests = []rtTest{
 	// Unnamed scalars
 	{reflect.TypeOf(bool(false)), BoolType},
-	{reflect.TypeOf(uint8(0)), ByteType},
+	{reflect.TypeOf(byte(0)), ByteType},
 	{reflect.TypeOf(uint16(0)), Uint16Type},
 	{reflect.TypeOf(uint32(0)), Uint32Type},
 	{reflect.TypeOf(uint64(0)), Uint64Type},
@@ -40,7 +40,7 @@ var rtKeyTests = []rtTest{
 	{reflect.TypeOf(string("")), StringType},
 	// Named scalars
 	{reflect.TypeOf(NBool(false)), NameN("Bool", BoolType)},
-	{reflect.TypeOf(NUint8(0)), NameN("Uint8", ByteType)},
+	{reflect.TypeOf(NByte(0)), NameN("Byte", ByteType)},
 	{reflect.TypeOf(NUint16(0)), NameN("Uint16", Uint16Type)},
 	{reflect.TypeOf(NUint32(0)), NameN("Uint32", Uint32Type)},
 	{reflect.TypeOf(NUint64(0)), NameN("Uint64", Uint64Type)},
@@ -58,7 +58,7 @@ var rtKeyTests = []rtTest{
 	{reflect.TypeOf(NString("")), NameN("String", StringType)},
 	// Unnamed arrays
 	{reflect.TypeOf([3]bool{}), ArrayType(3, BoolType)},
-	{reflect.TypeOf([3]uint8{}), ArrayType(3, ByteType)},
+	{reflect.TypeOf([3]byte{}), ArrayType(3, ByteType)},
 	{reflect.TypeOf([3]uint16{}), ArrayType(3, Uint16Type)},
 	{reflect.TypeOf([3]uint32{}), ArrayType(3, Uint32Type)},
 	{reflect.TypeOf([3]uint64{}), ArrayType(3, Uint64Type)},
@@ -76,7 +76,7 @@ var rtKeyTests = []rtTest{
 	{reflect.TypeOf([3]string{}), ArrayType(3, StringType)},
 	// Named arrays
 	{reflect.TypeOf(NArray3Bool{}), NameNArray("Bool", BoolType)},
-	{reflect.TypeOf(NArray3Uint8{}), NameNArray("Uint8", ByteType)},
+	{reflect.TypeOf(NArray3Byte{}), NameNArray("Byte", ByteType)},
 	{reflect.TypeOf(NArray3Uint16{}), NameNArray("Uint16", Uint16Type)},
 	{reflect.TypeOf(NArray3Uint32{}), NameNArray("Uint32", Uint32Type)},
 	{reflect.TypeOf(NArray3Uint64{}), NameNArray("Uint64", Uint64Type)},
@@ -94,7 +94,7 @@ var rtKeyTests = []rtTest{
 	{reflect.TypeOf(NArray3String{}), NameNArray("String", StringType)},
 	// Unnamed structs
 	{reflect.TypeOf(struct{ X bool }{}), StructType(Field{"X", BoolType})},
-	{reflect.TypeOf(struct{ X uint8 }{}), StructType(Field{"X", ByteType})},
+	{reflect.TypeOf(struct{ X byte }{}), StructType(Field{"X", ByteType})},
 	{reflect.TypeOf(struct{ X uint16 }{}), StructType(Field{"X", Uint16Type})},
 	{reflect.TypeOf(struct{ X uint32 }{}), StructType(Field{"X", Uint32Type})},
 	{reflect.TypeOf(struct{ X uint64 }{}), StructType(Field{"X", Uint64Type})},
@@ -112,7 +112,7 @@ var rtKeyTests = []rtTest{
 	{reflect.TypeOf(struct{ X string }{}), StructType(Field{"X", StringType})},
 	// Named structs
 	{reflect.TypeOf(NStructBool{}), NameNStruct("Bool", BoolType)},
-	{reflect.TypeOf(NStructUint8{}), NameNStruct("Uint8", ByteType)},
+	{reflect.TypeOf(NStructByte{}), NameNStruct("Byte", ByteType)},
 	{reflect.TypeOf(NStructUint16{}), NameNStruct("Uint16", Uint16Type)},
 	{reflect.TypeOf(NStructUint32{}), NameNStruct("Uint32", Uint32Type)},
 	{reflect.TypeOf(NStructUint64{}), NameNStruct("Uint64", Uint64Type)},
@@ -172,7 +172,7 @@ var rtNonKeyTests = []rtTest{
 	{reflect.TypeOf([]error{}), ListType(ErrorType)},
 	{reflect.TypeOf([]*Type{}), ListType(TypeObjectType)},
 	{reflect.TypeOf([]bool{}), ListType(BoolType)},
-	{reflect.TypeOf([]uint8{}), ListType(ByteType)},
+	{reflect.TypeOf([]byte{}), ListType(ByteType)},
 	{reflect.TypeOf([]uint16{}), ListType(Uint16Type)},
 	{reflect.TypeOf([]uint32{}), ListType(Uint32Type)},
 	{reflect.TypeOf([]uint64{}), ListType(Uint64Type)},
@@ -192,7 +192,7 @@ var rtNonKeyTests = []rtTest{
 	{reflect.TypeOf(NSliceInterface{}), NameNSlice("Interface", AnyType)},
 	{reflect.TypeOf(NSliceTypeObject{}), NameNSlice("TypeObject", TypeObjectType)},
 	{reflect.TypeOf(NSliceBool{}), NameNSlice("Bool", BoolType)},
-	{reflect.TypeOf(NSliceUint8{}), NameNSlice("Uint8", ByteType)},
+	{reflect.TypeOf(NSliceByte{}), NameNSlice("Byte", ByteType)},
 	{reflect.TypeOf(NSliceUint16{}), NameNSlice("Uint16", Uint16Type)},
 	{reflect.TypeOf(NSliceUint32{}), NameNSlice("Uint32", Uint32Type)},
 	{reflect.TypeOf(NSliceUint64{}), NameNSlice("Uint64", Uint64Type)},
@@ -210,7 +210,7 @@ var rtNonKeyTests = []rtTest{
 	{reflect.TypeOf(NSliceString{}), NameNSlice("String", StringType)},
 	// Unnamed sets
 	{reflect.TypeOf(map[bool]struct{}{}), rtSet(BoolType)},
-	{reflect.TypeOf(map[uint8]struct{}{}), rtSet(ByteType)},
+	{reflect.TypeOf(map[byte]struct{}{}), rtSet(ByteType)},
 	{reflect.TypeOf(map[uint16]struct{}{}), rtSet(Uint16Type)},
 	{reflect.TypeOf(map[uint32]struct{}{}), rtSet(Uint32Type)},
 	{reflect.TypeOf(map[uint64]struct{}{}), rtSet(Uint64Type)},
@@ -228,7 +228,7 @@ var rtNonKeyTests = []rtTest{
 	{reflect.TypeOf(map[string]struct{}{}), rtSet(StringType)},
 	// Named sets
 	{reflect.TypeOf(NSetBool{}), NameNSet("Bool", BoolType)},
-	{reflect.TypeOf(NSetUint8{}), NameNSet("Uint8", ByteType)},
+	{reflect.TypeOf(NSetByte{}), NameNSet("Byte", ByteType)},
 	{reflect.TypeOf(NSetUint16{}), NameNSet("Uint16", Uint16Type)},
 	{reflect.TypeOf(NSetUint32{}), NameNSet("Uint32", Uint32Type)},
 	{reflect.TypeOf(NSetUint64{}), NameNSet("Uint64", Uint64Type)},
@@ -246,7 +246,7 @@ var rtNonKeyTests = []rtTest{
 	{reflect.TypeOf(NSetString{}), NameNSet("String", StringType)},
 	// Unnamed maps
 	{reflect.TypeOf(map[bool]bool{}), rtMap(BoolType)},
-	{reflect.TypeOf(map[uint8]uint8{}), rtMap(ByteType)},
+	{reflect.TypeOf(map[byte]byte{}), rtMap(ByteType)},
 	{reflect.TypeOf(map[uint16]uint16{}), rtMap(Uint16Type)},
 	{reflect.TypeOf(map[uint32]uint32{}), rtMap(Uint32Type)},
 	{reflect.TypeOf(map[uint64]uint64{}), rtMap(Uint64Type)},
@@ -264,7 +264,7 @@ var rtNonKeyTests = []rtTest{
 	{reflect.TypeOf(map[string]string{}), rtMap(StringType)},
 	// Named maps
 	{reflect.TypeOf(NMapBool{}), NameNMap("Bool", BoolType)},
-	{reflect.TypeOf(NMapUint8{}), NameNMap("Uint8", ByteType)},
+	{reflect.TypeOf(NMapByte{}), NameNMap("Byte", ByteType)},
 	{reflect.TypeOf(NMapUint16{}), NameNMap("Uint16", Uint16Type)},
 	{reflect.TypeOf(NMapUint32{}), NameNMap("Uint32", Uint32Type)},
 	{reflect.TypeOf(NMapUint64{}), NameNMap("Uint64", Uint64Type)},
