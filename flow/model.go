@@ -12,10 +12,6 @@
 // A Manager can Listen on multiple protocols and addresses. Listening
 // causes the Manager to accept flows from any of the specified protocols and addresses.
 // Additionally a Manager will accept incoming Dialed out connections for their lifetime.
-//
-// A Acceptor is used to accept flows from the Manager. Each Acceptor has a unique id
-// that is in the endpoint for that Acceptor. The Manager routes incoming messages
-// to the correct Acceptor based on that id.
 package flow
 
 import (
@@ -27,28 +23,29 @@ import (
 
 // Manager is the interface for managing the creation of Flows.
 type Manager interface {
-	// Acceptor creates a Acceptor that can be used to accept new flows from addresses
-	// that the Manager is listening on.
-	//
-	// For example:
-	//   err := m.Listen(ctx, "tcp", ":0")
-	//   a, err := m.Acceptor(ctx, blessings)
-	//   for {
-	//     flow, err := a.Accept(ctx)
-	//     // process flow
-	//   }
-	//
-	// can be used to accept Flows initiated by remote processes to the endpoints returned
-	// by Acceptor.Endpoints. All created Acceptors accept Flows from all addresses the
-	// Manager is listening on, but are differentiated by a RoutingID unique to each
-	// Acceptor.
-	//
-	// 'blessings' are the Blessings presented to the Client during authentication.
-	Acceptor(ctx *context.T, blessings security.Blessings) (Acceptor, error)
-
 	// Listen causes the Manager to accept flows from the provided protocol and address.
 	// Listen may be called muliple times.
 	Listen(ctx *context.T, protocol, address string) error
+
+	// ListeningEndpoints returns the endpoints that the Manager has explicitly
+	// listened on. The Manager will accept new flows on these endpoints.
+	// Returned endpoints all have a RoutingID unique to the Acceptor.
+	ListeningEndpoints() []naming.Endpoint
+
+	// Accept blocks until a new Flow has been initiated by a remote process.
+	// Flows are accepted from addresses that the Manager is listening on, including
+	// outgoing dialed connections.
+	//
+	// For example:
+	//   err := m.Listen*(ctx, "tcp", ":0")
+	//   for {
+	//     flow, err := m.Accept(ctx, blessings)
+	//     // process flow
+	//   }
+	//
+	// can be used to accept Flows initiated by remote processes.
+	// 'blessings' are the Blessings presented to the Client during authentication.
+	Accept(ctx *context.T, blessings security.Blessings) (Flow, error)
 
 	// Dial creates a Flow to the provided remote endpoint. 'auth' is used to authorize
 	// the remote end.
@@ -90,19 +87,5 @@ type Flow interface {
 
 	// Closed returns a channel that remains open until the flow has been closed or
 	// the ctx to the Dial or Accept call used to create the flow has been cancelled.
-	Closed() <-chan struct{}
-}
-
-// Acceptor is the interface for accepting Flows created by a remote process.
-type Acceptor interface {
-	// ListeningEndpoints returns the endpoints that the Manager has explicitly
-	// listened on. The Acceptor will accept new flows on these endpoints.
-	// Returned endpoints all have a RoutingID unique to the Acceptor.
-	ListeningEndpoints() []naming.Endpoint
-	// Accept blocks until a new Flow has been initiated by a remote process.
-	Accept(ctx *context.T) (Flow, error)
-	// Closed returns a channel that remains open until the Acceptor has been closed.
-	// i.e. the context provided to Manager.Acceptor() has been cancelled. Once the
-	// channel is closed, all calls to Accept will result in an error.
 	Closed() <-chan struct{}
 }
