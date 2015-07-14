@@ -49,6 +49,10 @@ type App interface {
 	// FullName returns the full name (object name) of this App.
 	FullName() string
 
+	// Exists returns true only if this App exists. Insufficient permissions
+	// cause Exists to return false instead of an error.
+	Exists(ctx *context.T) (bool, error)
+
 	// NoSQLDatabase returns the nosql.Database with the given name.
 	// relativeName must not contain slashes.
 	NoSQLDatabase(relativeName string) nosql.Database

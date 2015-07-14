@@ -277,6 +277,9 @@ type AppClientMethods interface {
 	Create(ctx *context.T, perms access.Permissions, opts ...rpc.CallOpt) error
 	// Delete deletes this App.
 	Delete(*context.T, ...rpc.CallOpt) error
+	// Exists returns true only if this App exists. Insufficient permissions
+	// cause Exists to return false instead of an error.
+	Exists(*context.T, ...rpc.CallOpt) (bool, error)
 }
 
 // AppClientStub adds universal methods to AppClientMethods.
@@ -303,6 +306,11 @@ func (c implAppClientStub) Create(ctx *context.T, i0 access.Permissions, opts ..
 
 func (c implAppClientStub) Delete(ctx *context.T, opts ...rpc.CallOpt) (err error) {
 	err = v23.GetClient(ctx).Call(ctx, c.name, "Delete", nil, nil, opts...)
+	return
+}
+
+func (c implAppClientStub) Exists(ctx *context.T, opts ...rpc.CallOpt) (o0 bool, err error) {
+	err = v23.GetClient(ctx).Call(ctx, c.name, "Exists", nil, []interface{}{&o0}, opts...)
 	return
 }
 
@@ -364,6 +372,9 @@ type AppServerMethods interface {
 	Create(ctx *context.T, call rpc.ServerCall, perms access.Permissions) error
 	// Delete deletes this App.
 	Delete(*context.T, rpc.ServerCall) error
+	// Exists returns true only if this App exists. Insufficient permissions
+	// cause Exists to return false instead of an error.
+	Exists(*context.T, rpc.ServerCall) (bool, error)
 }
 
 // AppServerStubMethods is the server interface containing
@@ -411,6 +422,10 @@ func (s implAppServerStub) Delete(ctx *context.T, call rpc.ServerCall) error {
 	return s.impl.Delete(ctx, call)
 }
 
+func (s implAppServerStub) Exists(ctx *context.T, call rpc.ServerCall) (bool, error) {
+	return s.impl.Exists(ctx, call)
+}
+
 func (s implAppServerStub) Globber() *rpc.GlobState {
 	return s.gs
 }
@@ -443,6 +458,14 @@ var descApp = rpc.InterfaceDesc{
 			Name: "Delete",
 			Doc:  "// Delete deletes this App.",
 			Tags: []*vdl.Value{vdl.ValueOf(access.Tag("Write"))},
+		},
+		{
+			Name: "Exists",
+			Doc:  "// Exists returns true only if this App exists. Insufficient permissions\n// cause Exists to return false instead of an error.",
+			OutArgs: []rpc.ArgDesc{
+				{"", ``}, // bool
+			},
+			Tags: []*vdl.Value{vdl.ValueOf(access.Tag("Read"))},
 		},
 	},
 }

@@ -59,6 +59,12 @@ type Database interface {
 	// Delete deletes this Database.
 	Delete(ctx *context.T) error
 
+	// Exists returns true only if this Database exists. Insufficient permissions
+	// cause Exists to return false instead of an error.
+	// TODO(ivanpi): Exists may fail with an error if higher levels of hierarchy
+	// do not exist.
+	Exists(ctx *context.T) (bool, error)
+
 	// Create creates the specified Table.
 	// If perms is nil, we inherit (copy) the Database perms.
 	// relativeName must not contain slashes.
@@ -135,6 +141,12 @@ type Table interface {
 	// FullName returns the full name (object name) of this Table.
 	FullName() string
 
+	// Exists returns true only if this Table exists. Insufficient permissions
+	// cause Exists to return false instead of an error.
+	// TODO(ivanpi): Exists may fail with an error if higher levels of hierarchy
+	// do not exist.
+	Exists(ctx *context.T) (bool, error)
+
 	// Row returns the Row with the given primary key.
 	Row(key string) Row
 
@@ -197,6 +209,12 @@ type Row interface {
 
 	// FullName returns the full name (object name) of this Row.
 	FullName() string
+
+	// Exists returns true only if this Row exists. Insufficient permissions
+	// cause Exists to return false instead of an error.
+	// TODO(ivanpi): Exists may fail with an error if higher levels of hierarchy
+	// do not exist.
+	Exists(ctx *context.T) (bool, error)
 
 	// Get returns the value for this Row.
 	Get(ctx *context.T, value interface{}) error

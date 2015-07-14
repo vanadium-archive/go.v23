@@ -24,6 +24,12 @@ type Database interface {
 	// Delete deletes this Database.
 	Delete() error {access.Write}
 
+	// Exists returns true only if this Database exists. Insufficient permissions
+	// cause Exists to return false instead of an error.
+	// TODO(ivanpi): Exists may fail with an error if higher levels of hierarchy
+	// do not exist.
+	Exists() (bool | error) {access.Read}
+
 	// BeginBatch creates a new batch. It returns an App-relative name for a
 	// Database handle bound to this batch. If this Database is already bound to a
 	// batch, BeginBatch() will fail with ErrBoundToBatch. Concurrency semantics
@@ -64,6 +70,12 @@ type Table interface {
 	// Delete deletes this Table.
 	Delete() error {access.Write}
 
+	// Exists returns true only if this Table exists. Insufficient permissions
+	// cause Exists to return false instead of an error.
+	// TODO(ivanpi): Exists may fail with an error if higher levels of hierarchy
+	// do not exist.
+	Exists() (bool | error) {access.Read}
+
 	// Delete deletes all rows in the given half-open range [start, limit). If
 	// limit is "", all rows with keys >= start are included.
 	DeleteRowRange(start, limit []byte) error {access.Write}
@@ -102,6 +114,12 @@ type Table interface {
 // and Scan. If there's a way to avoid encoding/decoding on the server side, we
 // can use vdl.Value everywhere without sacrificing performance.
 type Row interface {
+	// Exists returns true only if this Row exists. Insufficient permissions
+	// cause Exists to return false instead of an error.
+	// TODO(ivanpi): Exists may fail with an error if higher levels of hierarchy
+	// do not exist.
+	Exists() (bool | error) {access.Read}
+
 	// Get returns the value for this Row.
 	Get() ([]byte | error) {access.Read}
 

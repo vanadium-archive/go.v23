@@ -34,6 +34,10 @@ type App interface {
 	// Delete deletes this App.
 	Delete() error {access.Write}
 
+	// Exists returns true only if this App exists. Insufficient permissions
+	// cause Exists to return false instead of an error.
+	Exists() (bool | error) {access.Read}
+
 	// SetPermissions and GetPermissions are included from the Object interface.
 	permissions.Object
 }

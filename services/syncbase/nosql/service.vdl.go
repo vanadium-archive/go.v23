@@ -468,6 +468,11 @@ type DatabaseClientMethods interface {
 	Create(ctx *context.T, perms access.Permissions, opts ...rpc.CallOpt) error
 	// Delete deletes this Database.
 	Delete(*context.T, ...rpc.CallOpt) error
+	// Exists returns true only if this Database exists. Insufficient permissions
+	// cause Exists to return false instead of an error.
+	// TODO(ivanpi): Exists may fail with an error if higher levels of hierarchy
+	// do not exist.
+	Exists(*context.T, ...rpc.CallOpt) (bool, error)
 	// BeginBatch creates a new batch. It returns an App-relative name for a
 	// Database handle bound to this batch. If this Database is already bound to a
 	// batch, BeginBatch() will fail with ErrBoundToBatch. Concurrency semantics
@@ -513,6 +518,11 @@ func (c implDatabaseClientStub) Create(ctx *context.T, i0 access.Permissions, op
 
 func (c implDatabaseClientStub) Delete(ctx *context.T, opts ...rpc.CallOpt) (err error) {
 	err = v23.GetClient(ctx).Call(ctx, c.name, "Delete", nil, nil, opts...)
+	return
+}
+
+func (c implDatabaseClientStub) Exists(ctx *context.T, opts ...rpc.CallOpt) (o0 bool, err error) {
+	err = v23.GetClient(ctx).Call(ctx, c.name, "Exists", nil, []interface{}{&o0}, opts...)
 	return
 }
 
@@ -671,6 +681,11 @@ type DatabaseServerMethods interface {
 	Create(ctx *context.T, call rpc.ServerCall, perms access.Permissions) error
 	// Delete deletes this Database.
 	Delete(*context.T, rpc.ServerCall) error
+	// Exists returns true only if this Database exists. Insufficient permissions
+	// cause Exists to return false instead of an error.
+	// TODO(ivanpi): Exists may fail with an error if higher levels of hierarchy
+	// do not exist.
+	Exists(*context.T, rpc.ServerCall) (bool, error)
 	// BeginBatch creates a new batch. It returns an App-relative name for a
 	// Database handle bound to this batch. If this Database is already bound to a
 	// batch, BeginBatch() will fail with ErrBoundToBatch. Concurrency semantics
@@ -750,6 +765,11 @@ type DatabaseServerStubMethods interface {
 	Create(ctx *context.T, call rpc.ServerCall, perms access.Permissions) error
 	// Delete deletes this Database.
 	Delete(*context.T, rpc.ServerCall) error
+	// Exists returns true only if this Database exists. Insufficient permissions
+	// cause Exists to return false instead of an error.
+	// TODO(ivanpi): Exists may fail with an error if higher levels of hierarchy
+	// do not exist.
+	Exists(*context.T, rpc.ServerCall) (bool, error)
 	// BeginBatch creates a new batch. It returns an App-relative name for a
 	// Database handle bound to this batch. If this Database is already bound to a
 	// batch, BeginBatch() will fail with ErrBoundToBatch. Concurrency semantics
@@ -811,6 +831,10 @@ func (s implDatabaseServerStub) Delete(ctx *context.T, call rpc.ServerCall) erro
 	return s.impl.Delete(ctx, call)
 }
 
+func (s implDatabaseServerStub) Exists(ctx *context.T, call rpc.ServerCall) (bool, error) {
+	return s.impl.Exists(ctx, call)
+}
+
 func (s implDatabaseServerStub) BeginBatch(ctx *context.T, call rpc.ServerCall, i0 BatchOptions) (string, error) {
 	return s.impl.BeginBatch(ctx, call, i0)
 }
@@ -860,6 +884,14 @@ var descDatabase = rpc.InterfaceDesc{
 			Name: "Delete",
 			Doc:  "// Delete deletes this Database.",
 			Tags: []*vdl.Value{vdl.ValueOf(access.Tag("Write"))},
+		},
+		{
+			Name: "Exists",
+			Doc:  "// Exists returns true only if this Database exists. Insufficient permissions\n// cause Exists to return false instead of an error.\n// TODO(ivanpi): Exists may fail with an error if higher levels of hierarchy\n// do not exist.",
+			OutArgs: []rpc.ArgDesc{
+				{"", ``}, // bool
+			},
+			Tags: []*vdl.Value{vdl.ValueOf(access.Tag("Read"))},
 		},
 		{
 			Name: "BeginBatch",
@@ -947,6 +979,11 @@ type TableClientMethods interface {
 	Create(ctx *context.T, perms access.Permissions, opts ...rpc.CallOpt) error
 	// Delete deletes this Table.
 	Delete(*context.T, ...rpc.CallOpt) error
+	// Exists returns true only if this Table exists. Insufficient permissions
+	// cause Exists to return false instead of an error.
+	// TODO(ivanpi): Exists may fail with an error if higher levels of hierarchy
+	// do not exist.
+	Exists(*context.T, ...rpc.CallOpt) (bool, error)
 	// Delete deletes all rows in the given half-open range [start, limit). If
 	// limit is "", all rows with keys >= start are included.
 	DeleteRowRange(ctx *context.T, start []byte, limit []byte, opts ...rpc.CallOpt) error
@@ -996,6 +1033,11 @@ func (c implTableClientStub) Create(ctx *context.T, i0 access.Permissions, opts 
 
 func (c implTableClientStub) Delete(ctx *context.T, opts ...rpc.CallOpt) (err error) {
 	err = v23.GetClient(ctx).Call(ctx, c.name, "Delete", nil, nil, opts...)
+	return
+}
+
+func (c implTableClientStub) Exists(ctx *context.T, opts ...rpc.CallOpt) (o0 bool, err error) {
+	err = v23.GetClient(ctx).Call(ctx, c.name, "Exists", nil, []interface{}{&o0}, opts...)
 	return
 }
 
@@ -1108,6 +1150,11 @@ type TableServerMethods interface {
 	Create(ctx *context.T, call rpc.ServerCall, perms access.Permissions) error
 	// Delete deletes this Table.
 	Delete(*context.T, rpc.ServerCall) error
+	// Exists returns true only if this Table exists. Insufficient permissions
+	// cause Exists to return false instead of an error.
+	// TODO(ivanpi): Exists may fail with an error if higher levels of hierarchy
+	// do not exist.
+	Exists(*context.T, rpc.ServerCall) (bool, error)
 	// Delete deletes all rows in the given half-open range [start, limit). If
 	// limit is "", all rows with keys >= start are included.
 	DeleteRowRange(ctx *context.T, call rpc.ServerCall, start []byte, limit []byte) error
@@ -1145,6 +1192,11 @@ type TableServerStubMethods interface {
 	Create(ctx *context.T, call rpc.ServerCall, perms access.Permissions) error
 	// Delete deletes this Table.
 	Delete(*context.T, rpc.ServerCall) error
+	// Exists returns true only if this Table exists. Insufficient permissions
+	// cause Exists to return false instead of an error.
+	// TODO(ivanpi): Exists may fail with an error if higher levels of hierarchy
+	// do not exist.
+	Exists(*context.T, rpc.ServerCall) (bool, error)
 	// Delete deletes all rows in the given half-open range [start, limit). If
 	// limit is "", all rows with keys >= start are included.
 	DeleteRowRange(ctx *context.T, call rpc.ServerCall, start []byte, limit []byte) error
@@ -1209,6 +1261,10 @@ func (s implTableServerStub) Delete(ctx *context.T, call rpc.ServerCall) error {
 	return s.impl.Delete(ctx, call)
 }
 
+func (s implTableServerStub) Exists(ctx *context.T, call rpc.ServerCall) (bool, error) {
+	return s.impl.Exists(ctx, call)
+}
+
 func (s implTableServerStub) DeleteRowRange(ctx *context.T, call rpc.ServerCall, i0 []byte, i1 []byte) error {
 	return s.impl.DeleteRowRange(ctx, call, i0, i1)
 }
@@ -1258,6 +1314,14 @@ var descTable = rpc.InterfaceDesc{
 			Name: "Delete",
 			Doc:  "// Delete deletes this Table.",
 			Tags: []*vdl.Value{vdl.ValueOf(access.Tag("Write"))},
+		},
+		{
+			Name: "Exists",
+			Doc:  "// Exists returns true only if this Table exists. Insufficient permissions\n// cause Exists to return false instead of an error.\n// TODO(ivanpi): Exists may fail with an error if higher levels of hierarchy\n// do not exist.",
+			OutArgs: []rpc.ArgDesc{
+				{"", ``}, // bool
+			},
+			Tags: []*vdl.Value{vdl.ValueOf(access.Tag("Read"))},
 		},
 		{
 			Name: "DeleteRowRange",
@@ -1361,6 +1425,11 @@ func (s implTableScanServerCallSend) Send(item KeyValue) error {
 // and Scan. If there's a way to avoid encoding/decoding on the server side, we
 // can use vdl.Value everywhere without sacrificing performance.
 type RowClientMethods interface {
+	// Exists returns true only if this Row exists. Insufficient permissions
+	// cause Exists to return false instead of an error.
+	// TODO(ivanpi): Exists may fail with an error if higher levels of hierarchy
+	// do not exist.
+	Exists(*context.T, ...rpc.CallOpt) (bool, error)
 	// Get returns the value for this Row.
 	Get(*context.T, ...rpc.CallOpt) ([]byte, error)
 	// Put writes the given value for this Row.
@@ -1382,6 +1451,11 @@ func RowClient(name string) RowClientStub {
 
 type implRowClientStub struct {
 	name string
+}
+
+func (c implRowClientStub) Exists(ctx *context.T, opts ...rpc.CallOpt) (o0 bool, err error) {
+	err = v23.GetClient(ctx).Call(ctx, c.name, "Exists", nil, []interface{}{&o0}, opts...)
+	return
 }
 
 func (c implRowClientStub) Get(ctx *context.T, opts ...rpc.CallOpt) (o0 []byte, err error) {
@@ -1409,6 +1483,11 @@ func (c implRowClientStub) Delete(ctx *context.T, opts ...rpc.CallOpt) (err erro
 // and Scan. If there's a way to avoid encoding/decoding on the server side, we
 // can use vdl.Value everywhere without sacrificing performance.
 type RowServerMethods interface {
+	// Exists returns true only if this Row exists. Insufficient permissions
+	// cause Exists to return false instead of an error.
+	// TODO(ivanpi): Exists may fail with an error if higher levels of hierarchy
+	// do not exist.
+	Exists(*context.T, rpc.ServerCall) (bool, error)
 	// Get returns the value for this Row.
 	Get(*context.T, rpc.ServerCall) ([]byte, error)
 	// Put writes the given value for this Row.
@@ -1452,6 +1531,10 @@ type implRowServerStub struct {
 	gs   *rpc.GlobState
 }
 
+func (s implRowServerStub) Exists(ctx *context.T, call rpc.ServerCall) (bool, error) {
+	return s.impl.Exists(ctx, call)
+}
+
 func (s implRowServerStub) Get(ctx *context.T, call rpc.ServerCall) ([]byte, error) {
 	return s.impl.Get(ctx, call)
 }
@@ -1481,6 +1564,14 @@ var descRow = rpc.InterfaceDesc{
 	PkgPath: "v.io/syncbase/v23/services/syncbase/nosql",
 	Doc:     "// Row represents a single row in a Table.\n// All access checks are performed against the most specific matching prefix\n// permissions in the Table.\n// NOTE(sadovsky): Currently we send []byte values over the wire for Get, Put,\n// and Scan. If there's a way to avoid encoding/decoding on the server side, we\n// can use vdl.Value everywhere without sacrificing performance.",
 	Methods: []rpc.MethodDesc{
+		{
+			Name: "Exists",
+			Doc:  "// Exists returns true only if this Row exists. Insufficient permissions\n// cause Exists to return false instead of an error.\n// TODO(ivanpi): Exists may fail with an error if higher levels of hierarchy\n// do not exist.",
+			OutArgs: []rpc.ArgDesc{
+				{"", ``}, // bool
+			},
+			Tags: []*vdl.Value{vdl.ValueOf(access.Tag("Read"))},
+		},
 		{
 			Name: "Get",
 			Doc:  "// Get returns the value for this Row.",

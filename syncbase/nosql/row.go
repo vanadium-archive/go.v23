@@ -41,6 +41,11 @@ func (r *row) FullName() string {
 	return r.fullName
 }
 
+// Exists implements Row.Exists.
+func (r *row) Exists(ctx *context.T) (bool, error) {
+	return r.c.Exists(ctx)
+}
+
 // Get implements Row.Get.
 func (r *row) Get(ctx *context.T, value interface{}) error {
 	bytes, err := r.c.Get(ctx)

@@ -43,6 +43,11 @@ func (d *database) FullName() string {
 	return d.fullName
 }
 
+// Exists implements Database.Exists.
+func (d *database) Exists(ctx *context.T) (bool, error) {
+	return d.c.Exists(ctx)
+}
+
 // Table implements Database.Table.
 func (d *database) Table(relativeName string) Table {
 	return newTable(d.fullName, relativeName)

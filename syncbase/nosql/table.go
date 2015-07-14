@@ -40,6 +40,11 @@ func (t *table) FullName() string {
 	return t.fullName
 }
 
+// Exists implements Table.Exists.
+func (t *table) Exists(ctx *context.T) (bool, error) {
+	return t.c.Exists(ctx)
+}
+
 // Row implements Table.Row.
 func (t *table) Row(key string) Row {
 	return newRow(t.fullName, key)

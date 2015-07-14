@@ -42,6 +42,11 @@ func (a *app) FullName() string {
 	return a.fullName
 }
 
+// Exists implements App.Exists.
+func (a *app) Exists(ctx *context.T) (bool, error) {
+	return a.c.Exists(ctx)
+}
+
 // NoSQLDatabase implements App.NoSQLDatabase.
 func (a *app) NoSQLDatabase(relativeName string) nosql.Database {
 	return nosql.NewDatabase(a.fullName, relativeName)

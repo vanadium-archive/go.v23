@@ -17,6 +17,7 @@ import (
 	"v.io/v23/security/access"
 	"v.io/v23/verror"
 	"v.io/x/lib/vlog"
+	"v.io/x/ref/test/testutil"
 )
 
 // TestCreate tests that object creation works as expected.
@@ -30,6 +31,11 @@ func TestCreate(t *testing.T, ctx *context.T, i interface{}) {
 		t.Fatalf("child.Create() should have failed: %v", err)
 	}
 
+	assertExists(t, ctx, self, "self", false)
+	// TODO(ivanpi): Exists on child when parent does not exist currently fails
+	// with an error instead of returning false.
+	//assertExists(t, ctx, child, "child", false)
+
 	// Create self.
 	if err := self.Create(ctx, nil); err != nil {
 		t.Fatalf("self.Create() failed: %v", err)
@@ -38,15 +44,22 @@ func TestCreate(t *testing.T, ctx *context.T, i interface{}) {
 		t.Errorf("Perms do not match: got %v, want %v", gotPerms, wantPerms)
 	}
 
+	assertExists(t, ctx, self, "self", true)
+	assertExists(t, ctx, child, "child", false)
+
 	// child.Create should now succeed.
 	if err := child.Create(ctx, nil); err != nil {
 		t.Fatalf("child.Create() failed: %v", err)
 	}
 
+	assertExists(t, ctx, child, "child", true)
+
 	// self.Create should fail since self already exists.
 	if err := self.Create(ctx, nil); verror.ErrorID(err) != verror.ErrExist.ID {
 		t.Fatalf("self.Create() should have failed: %v", err)
 	}
+
+	assertExists(t, ctx, self, "self", true)
 
 	// Test create with non-default perms.
 	self2 := parent.Child("self2")
@@ -59,15 +72,22 @@ func TestCreate(t *testing.T, ctx *context.T, i interface{}) {
 		t.Errorf("Perms do not match: got %v, want %v", gotPerms, wantPerms)
 	}
 
+	// Even though self2 exists, Exists returns false because Read access is needed.
+	assertExists(t, ctx, self2, "self2", false)
+
 	// Test that create fails if the parent perms disallow access.
 	perms = DefaultPerms("root/client")
 	perms.Blacklist("root/client", string(access.Write))
 	if err := parent.SetPermissions(ctx, perms, ""); err != nil {
 		t.Fatalf("parent.SetPermissions() failed: %v", err)
 	}
-	if err := parent.Child("self3").Create(ctx, nil); verror.ErrorID(err) != verror.ErrNoAccess.ID {
+	self3 := parent.Child("self3")
+	if err := self3.Create(ctx, nil); verror.ErrorID(err) != verror.ErrNoAccess.ID {
 		t.Fatalf("self3.Create() should have failed: %v", err)
 	}
+
+	assertExists(t, ctx, self, "self", true)
+	assertExists(t, ctx, self3, "self3", false)
 }
 
 // TestDelete tests that object deletion works as expected.
@@ -81,10 +101,14 @@ func TestDelete(t *testing.T, ctx *context.T, i interface{}) {
 		t.Fatalf("self.Create() failed: %v", err)
 	}
 
+	assertExists(t, ctx, self, "self", true)
+
 	// self.Create should fail, since self already exists.
 	if err := self.Create(ctx, nil); verror.ErrorID(err) != verror.ErrExist.ID {
 		t.Fatalf("self.Create() should have failed: %v", err)
 	}
+
+	assertExists(t, ctx, self, "self", true)
 
 	// By default, self perms are copied from parent, so self.Delete should
 	// succeed.
@@ -92,15 +116,25 @@ func TestDelete(t *testing.T, ctx *context.T, i interface{}) {
 		t.Fatalf("self.Delete() failed: %v", err)
 	}
 
+	assertExists(t, ctx, self, "self", false)
+
 	// child.Create should fail, since self does not exist.
 	if err := child.Create(ctx, nil); verror.ErrorID(err) != verror.ErrNoExist.ID {
 		t.Fatalf("child.Create() should have failed: %v", err)
 	}
 
+	assertExists(t, ctx, self, "self", false)
+	// TODO(ivanpi): Exists on child when parent does not exist currently fails
+	// with an error instead of returning false.
+	//assertExists(t, ctx, child, "child", false)
+
 	// self.Create should succeed, since self was deleted.
 	if err := self.Create(ctx, nil); err != nil {
 		t.Fatalf("self.Create() failed: %v", err)
 	}
+
+	assertExists(t, ctx, self, "self", true)
+	assertExists(t, ctx, child, "child", false)
 
 	// Test that delete fails if the perms disallow access.
 	self2 := parent.Child("self2")
@@ -116,6 +150,8 @@ func TestDelete(t *testing.T, ctx *context.T, i interface{}) {
 		t.Fatalf("self2.Delete() should have failed: %v", err)
 	}
 
+	assertExists(t, ctx, self2, "self2", true)
+
 	// Test that delete succeeds even if the parent perms disallow access.
 	perms = DefaultPerms("root/client")
 	perms.Blacklist("root/client", string(access.Write))
@@ -126,10 +162,14 @@ func TestDelete(t *testing.T, ctx *context.T, i interface{}) {
 		t.Fatalf("self.Delete() failed: %v", err)
 	}
 
+	assertExists(t, ctx, self, "self", false)
+
 	// Test that delete is idempotent.
 	if err := self.Delete(ctx); err != nil {
 		t.Fatalf("self.Delete() failed: %v", err)
 	}
+
+	assertExists(t, ctx, self, "self", false)
 }
 
 func TestListChildren(t *testing.T, ctx *context.T, i interface{}) {
@@ -275,6 +315,7 @@ type layer interface {
 	util.AccessController
 	Create(ctx *context.T, perms access.Permissions) error
 	Delete(ctx *context.T) error
+	Exists(ctx *context.T) (bool, error)
 	ListChildren(ctx *context.T) ([]string, error)
 	Child(childName string) layer
 }
@@ -287,6 +328,9 @@ func (s *service) Create(ctx *context.T, perms access.Permissions) error {
 	panic(notAvailable)
 }
 func (s *service) Delete(ctx *context.T) error {
+	panic(notAvailable)
+}
+func (s *service) Exists(ctx *context.T) (bool, error) {
 	panic(notAvailable)
 }
 func (s *service) ListChildren(ctx *context.T) ([]string, error) {
@@ -384,4 +428,12 @@ func makeLayer(i interface{}) layer {
 		vlog.Fatalf("unexpected type: %T", t)
 	}
 	return nil
+}
+
+func assertExists(t *testing.T, ctx *context.T, l layer, name string, want bool) {
+	if got, err := l.Exists(ctx); err != nil {
+		t.Fatal(testutil.FormatLogLine(2, "%s.Exists() failed: %v", name, err))
+	} else if got != want {
+		t.Error(testutil.FormatLogLine(2, "%s.Exists() got %v, want %v", name, got, want))
+	}
 }
