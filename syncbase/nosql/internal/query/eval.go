@@ -397,7 +397,7 @@ func resolveOperand(db query_db.Database, k string, v *vdl.Value, o *query_parse
 	if o.Type != query_parser.TypField {
 		return o
 	}
-	value, hasAltStr, altStr := ResolveField(k, v, o.Column)
+	value, hasAltStr, altStr := ResolveField(db, k, v, o.Column)
 	if value.IsNil() {
 		return nil
 	}
@@ -463,11 +463,99 @@ func autoDereference(o *vdl.Value) *vdl.Value {
 	return o
 }
 
+// Resolve object with the key(s) (if a key(s) was specified).  That is, resolve the object with the
+// value of what is specified in brackets (for maps, sets. arrays and lists).
+// If no key was specified, just return the object.
+// If a key was specified, but the object is not map, set, array or list: return nil.
+// If the key resolved to nil, return nil.
+// If the key can't be converted to the required type, return nil.
+// For arrays/lists, if the index is out of bounds, return nil.
+// For maps, if key not found, return nil.
+// For sets, if key found, return true, else return false.
+func resolveWithKey(db query_db.Database, k string, v *vdl.Value, object *vdl.Value, segment query_parser.Segment) *vdl.Value {
+	for _, key := range segment.Keys {
+		o := resolveOperand(db, k, v, key)
+		if o == nil {
+			return vdl.ValueOf(nil)
+		}
+		proposedKey := valueFromResolvedOperand(o)
+		if proposedKey == nil {
+			return vdl.ValueOf(nil)
+		}
+		switch object.Kind() {
+		case vdl.Array, vdl.List:
+			// convert key to int
+			// vdl's Index function wants an int.
+			// vdl can't make an int.
+			// int is guaranteed to be at least 32-bits.
+			// So have vdl make an int32 and then convert it to an int.
+			index32 := vdl.Int32Value(0)
+			if err := vdl.Convert(index32, proposedKey); err != nil {
+				return vdl.ValueOf(nil)
+			}
+			index := int(index32.Int())
+			if index < 0 || index >= object.Len() {
+				return vdl.ValueOf(nil)
+			}
+			object = object.Index(index)
+		case vdl.Map, vdl.Set:
+			reqKeyType := object.Type().Key()
+			keyVal := vdl.ZeroValue(reqKeyType)
+			if err := vdl.Convert(keyVal, proposedKey); err != nil {
+				return vdl.ValueOf(nil)
+			}
+			if object.Kind() == vdl.Map {
+				rv := object.MapIndex(keyVal)
+				if rv != nil {
+					object = rv
+				} else {
+					return vdl.ValueOf(nil)
+				}
+			} else { // vdl.Set
+				object = vdl.ValueOf(object.ContainsKey(keyVal))
+			}
+		default:
+			return vdl.ValueOf(nil)
+		}
+	}
+	return object
+}
+
+// Return the value of a non-nil *Operand that has been resolved by resolveOperand.
+func valueFromResolvedOperand(o *query_parser.Operand) interface{} {
+	// This switch contains the possible types returned from resolveOperand.
+	switch o.Type {
+	case query_parser.TypBigInt:
+		return o.BigInt
+	case query_parser.TypBigRat:
+		return o.BigRat
+	case query_parser.TypBool:
+		return o.Bool
+	case query_parser.TypComplex:
+		return o.Complex
+	case query_parser.TypFloat:
+		return o.Float
+	case query_parser.TypInt:
+		return o.Int
+	case query_parser.TypNil:
+		return nil
+	case query_parser.TypStr:
+		return o.Str
+	case query_parser.TypTime:
+		return o.Time
+	case query_parser.TypObject:
+		return o.Object
+	case query_parser.TypUint:
+		return o.Uint
+	}
+	return nil
+}
+
 // Resolve a field.  In the special case where a type is evaluated, in addition
 // to a string being returned, and alternate string is returned.  In this case,
 // <string-value>, true, <alt-string> is returned.  In all other cases,
 // <value>,false,"" is returned.
-func ResolveField(k string, v *vdl.Value, f *query_parser.Field) (*vdl.Value, bool, string) {
+func ResolveField(db query_db.Database, k string, v *vdl.Value, f *query_parser.Field) (*vdl.Value, bool, string) {
 	if query_checker.IsKeyField(f) {
 		return vdl.StringValue(k), false, ""
 	}
@@ -483,7 +571,10 @@ func ResolveField(k string, v *vdl.Value, f *query_parser.Field) (*vdl.Value, bo
 
 	object := v
 	segments := f.Segments
-	// The first segment will always be v (itself), skip it.
+	// Does v contain a key?
+	object = resolveWithKey(db, k, v, object, segments[0])
+
+	// More segments?
 	for i := 1; i < len(segments); i++ {
 		// Auto-dereference Any and Optional values
 		object = autoDereference(object)
@@ -492,6 +583,7 @@ func ResolveField(k string, v *vdl.Value, f *query_parser.Field) (*vdl.Value, bo
 			if object = object.StructFieldByName(segments[i].Value); object == nil {
 				return vdl.ValueOf(nil), false, "" // field does not exist
 			}
+			object = resolveWithKey(db, k, v, object, segments[i])
 		} else if object.Kind() == vdl.Union {
 			unionType := object.Type()
 			idx, tempValue := object.UnionField()
@@ -500,6 +592,7 @@ func ResolveField(k string, v *vdl.Value, f *query_parser.Field) (*vdl.Value, bo
 			} else {
 				return vdl.ValueOf(nil), false, "" // union field does not exist or is not set
 			}
+			object = resolveWithKey(db, k, v, object, segments[i])
 		} else {
 			return vdl.ValueOf(nil), false, "" // can only traverse into structs and unions
 		}

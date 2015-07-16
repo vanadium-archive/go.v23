@@ -30,10 +30,12 @@ const (
 	TokIDENT
 	TokINT
 	TokLEFTANGLEBRACKET
+	TokLEFTBRACKET
 	TokLEFTPAREN
 	TokMINUS
 	TokPERIOD
 	TokRIGHTANGLEBRACKET
+	TokRIGHTBRACKET
 	TokRIGHTPAREN
 	TokSTRING
 )
@@ -55,6 +57,7 @@ type Statement interface {
 
 type Segment struct {
 	Value string
+	Keys  []*Operand // Used as key(s) or index(es) to dereference map/set/array/list.
 	Node
 }
 
@@ -242,6 +245,10 @@ func scanToken(s *scanner.Scanner) *Token {
 		token.Tok = TokLEFTANGLEBRACKET
 	case '>':
 		token.Tok = TokRIGHTANGLEBRACKET
+	case '[':
+		token.Tok = TokLEFTBRACKET
+	case ']':
+		token.Tok = TokRIGHTBRACKET
 	case scanner.EOF:
 		token.Tok = TokEOF
 	case scanner.Ident:
@@ -374,14 +381,20 @@ func parseSelector(db query_db.Database, s *scanner.Scanner, selectClause *Selec
 	selector.Field = &field
 	selector.Field.Off = token.Off
 	selector.Field = &field
-	var segment Segment
-	segment.Value = token.Value
-	segment.Off = token.Off
-	selector.Field.Segments = append(selector.Field.Segments, segment)
-	token = scanToken(s)
+
+	var segment *Segment
+	var err error
+	if segment, token, err = parseSegment(db, s, token); err != nil {
+		return nil, err
+	}
+	selector.Field.Segments = append(selector.Field.Segments, *segment)
 
 	// It might be a function.
 	if token.Tok == TokLEFTPAREN {
+		// Segments with a key(s) specified cannot be function calls.
+		if len(segment.Keys) != 0 {
+			return nil, syncql.NewErrUnexpected(db.GetContext(), token.Off, token.Value)
+		}
 		// switch selector to a function
 		selector.Type = TypSelFunc
 		var err error
@@ -396,11 +409,10 @@ func parseSelector(db query_db.Database, s *scanner.Scanner, selectClause *Selec
 			if token.Tok != TokIDENT {
 				return nil, syncql.NewErrExpectedIdentifier(db.GetContext(), token.Off, token.Value)
 			}
-			var segment Segment
-			segment.Value = token.Value
-			segment.Off = token.Off
-			selector.Field.Segments = append(selector.Field.Segments, segment)
-			token = scanToken(s)
+			if segment, token, err = parseSegment(db, s, token); err != nil {
+				return nil, err
+			}
+			selector.Field.Segments = append(selector.Field.Segments, *segment)
 		}
 	}
 
@@ -420,6 +432,32 @@ func parseSelector(db query_db.Database, s *scanner.Scanner, selectClause *Selec
 
 	selectClause.Selectors = append(selectClause.Selectors, selector)
 	return token, nil
+}
+
+// Parse a segment. Return the segment and the next token (or error).
+// Check for a key (i.e., [<key>] following the segment).
+func parseSegment(db query_db.Database, s *scanner.Scanner, token *Token) (*Segment, *Token, error) {
+	var segment Segment
+	segment.Value = token.Value
+	segment.Off = token.Off
+	token = scanToken(s)
+
+	for token.Tok == TokLEFTBRACKET {
+		// A key to the segment is specified.
+		token = scanToken(s)
+		var key *Operand
+		var err error
+		key, token, err = parseOperand(db, s, token)
+		if err != nil {
+			return nil, nil, err
+		}
+		segment.Keys = append(segment.Keys, key)
+		if token.Tok != TokRIGHTBRACKET {
+			return nil, nil, syncql.NewErrExpected(db.GetContext(), token.Off, "]")
+		}
+		token = scanToken(s)
+	}
+	return &segment, token, nil
 }
 
 // Parse the from clause, Return FromClause and next Token or error.
@@ -623,11 +661,12 @@ func parseOperand(db query_db.Database, s *scanner.Scanner, token *Token) (*Oper
 		operand.Type = TypField
 		var field Field
 		field.Off = token.Off
-		var segment Segment
-		segment.Off = token.Off
-		segment.Value = token.Value
-		field.Segments = append(field.Segments, segment)
-		token = scanToken(s)
+		var segment *Segment
+		var err error
+		if segment, token, err = parseSegment(db, s, token); err != nil {
+			return nil, nil, err
+		}
+		field.Segments = append(field.Segments, *segment)
 
 		// If the next token is not a period, check for true/false/nil.
 		// If true/false or nil, change this operand to a bool or nil, respectively.
@@ -638,6 +677,10 @@ func parseOperand(db query_db.Database, s *scanner.Scanner, token *Token) (*Oper
 		} else if token.Tok != TokPERIOD && strings.ToLower(segment.Value) == "nil" {
 			operand.Type = TypNil
 		} else if token.Tok == TokLEFTPAREN {
+			// Segments with a key specified cannot be function calls.
+			if len(segment.Keys) != 0 {
+				return nil, nil, syncql.NewErrUnexpected(db.GetContext(), token.Off, token.Value)
+			}
 			operand.Type = TypFunction
 			var err error
 			if operand.Function, token, err = parseFunction(db, s, segment.Value, segment.Off, token); err != nil {
@@ -650,11 +693,10 @@ func parseOperand(db query_db.Database, s *scanner.Scanner, token *Token) (*Oper
 				if token.Tok != TokIDENT {
 					return nil, nil, syncql.NewErrExpectedIdentifier(db.GetContext(), token.Off, token.Value)
 				}
-				var segment Segment
-				segment.Off = token.Off
-				segment.Value = token.Value
-				field.Segments = append(field.Segments, segment)
-				token = scanToken(s)
+				if segment, token, err = parseSegment(db, s, token); err != nil {
+					return nil, nil, err
+				}
+				field.Segments = append(field.Segments, *segment)
 			}
 			operand.Column = &field
 		}
@@ -964,7 +1006,11 @@ func (f Function) String() string {
 }
 
 func (s Segment) String() string {
-	return fmt.Sprintf(" Off(%d):%s", s.Off, s.Value)
+	val := fmt.Sprintf(" Off(%d):%s", s.Off, s.Value)
+	for _, k := range s.Keys {
+		val += "[" + k.String() + "]"
+	}
+	return val
 }
 
 func (f FromClause) String() string {

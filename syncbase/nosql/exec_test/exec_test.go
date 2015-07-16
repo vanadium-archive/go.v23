@@ -35,6 +35,7 @@ type kv struct {
 var customerEntries []kv
 var numbersEntries []kv
 var fooEntries []kv
+var keyIndexDataEntries []kv
 
 var t2015 time.Time
 
@@ -56,6 +57,7 @@ func setup(t *testing.T) {
 	customerTable := tu.CreateTable(t, ctx, db, "Customer")
 	numbersTable := tu.CreateTable(t, ctx, db, "Numbers")
 	fooTable := tu.CreateTable(t, ctx, db, "Foo")
+	keyIndexDataTable := tu.CreateTable(t, ctx, db, "KeyIndexData")
 
 	t20150122131101, _ := time.Parse("Jan 2 2006 15:04:05 -0700 MST", "Jan 22 2015 13:11:01 -0800 PST")
 	t20150210161202, _ := time.Parse("Jan 2 2006 15:04:05 -0700 MST", "Feb 10 2015 16:12:02 -0800 PST")
@@ -172,6 +174,18 @@ func setup(t *testing.T) {
 	f = FooType{BarType{BazType{"BazBarFoo", TitleOrValueTypeValue{42}}}}
 	fooEntries = append(fooEntries, kv{k, vdl.ValueOf(f)})
 	if err := fooTable.Put(ctx, k, f); err != nil {
+		t.Fatalf("fooTable.Put() failed: %v", err)
+	}
+
+	k = "aaa"
+	kid := KeyIndexData{
+		[4]string{"Fee", "Fi", "Fo", "Fum"},
+		[]string{"I", "smell", "the", "blood", "of", "an", "Englishman"},
+		map[complex128]string{complex(1.1, 2.2): "Be he living, or be he dead"},
+		map[string]struct{}{"I’ll grind his bones to mix my bread": {}},
+	}
+	keyIndexDataEntries = append(keyIndexDataEntries, kv{k, vdl.ValueOf(kid)})
+	if err := keyIndexDataTable.Put(ctx, k, kid); err != nil {
 		t.Fatalf("fooTable.Put() failed: %v", err)
 	}
 }
@@ -851,6 +865,17 @@ func TestQueryExec(t *testing.T) {
 			[][]*vdl.Value{
 				[]*vdl.Value{numbersEntries[2].value},
 			},
+		},
+		{
+			// array, list, map, set
+			"select v.A[2], v.L[6], v.M[Complex(1.1, 2.2)], v.S[\"I’ll grind his bones to mix my bread\"] from KeyIndexData",
+			[]string{"v.A[2]", "v.L[6]", "v.M[Complex]", "v.S[I’ll grind his bones to mix my bread]"},
+			[][]*vdl.Value{[]*vdl.Value{
+				vdl.ValueOf("Fo"),
+				vdl.ValueOf("Englishman"),
+				vdl.ValueOf("Be he living, or be he dead"),
+				vdl.ValueOf(true),
+			}},
 		},
 	}
 

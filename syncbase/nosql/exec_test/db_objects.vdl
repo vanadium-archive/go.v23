@@ -94,3 +94,12 @@ type BazType struct {
 	Name         string
 	TitleOrValue TitleOrValueType
 }
+
+type ArrayOfFour [4]string
+
+type KeyIndexData struct {
+	A ArrayOfFour
+	L []string
+	M map[complex128]string
+	S set[string]
+}

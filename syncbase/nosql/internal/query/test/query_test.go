@@ -114,6 +114,13 @@ var db mockDB
 var custTable table
 var numTable table
 var fooTable table
+var funWithMapsTable table
+var ratingsArrayTable table
+var tdhApprovalsTable table
+var previousRatingsTable table
+var previousAddressesTable table
+var manyMapsTable table
+var manySetsTable table
 
 type kv struct {
 	key   string
@@ -162,7 +169,7 @@ func init() {
 	custTable.rows = []kv{
 		kv{
 			"001",
-			vdl.ValueOf(Customer{"John Smith", 1, true, AddressInfo{"1 Main St.", "Palo Alto", "CA", "94303"}, CreditReport{Agency: CreditAgencyEquifax, Report: AgencyReportEquifaxReport{EquifaxCreditReport{'A'}}}}),
+			vdl.ValueOf(Customer{"John Smith", 1, true, AddressInfo{"1 Main St.", "Palo Alto", "CA", "94303"}, []AddressInfo{AddressInfo{"10 Brown St.", "Mountain View", "CA", "94043"}}, CreditReport{Agency: CreditAgencyEquifax, Report: AgencyReportEquifaxReport{EquifaxCreditReport{'A', [4]int16{87, 81, 42, 2}}}}}),
 		},
 		kv{
 			"001001",
@@ -178,7 +185,7 @@ func init() {
 		},
 		kv{
 			"002",
-			vdl.ValueOf(Customer{"Bat Masterson", 2, true, AddressInfo{"777 Any St.", "Collins", "IA", "50055"}, CreditReport{Agency: CreditAgencyTransUnion, Report: AgencyReportTransUnionReport{TransUnionCreditReport{80}}}}),
+			vdl.ValueOf(Customer{"Bat Masterson", 2, true, AddressInfo{"777 Any St.", "Collins", "IA", "50055"}, []AddressInfo{AddressInfo{"19 Green St.", "Boulder", "CO", "80301"}, AddressInfo{"558 W. Orange St.", "Lancaster", "PA", "17603"}}, CreditReport{Agency: CreditAgencyTransUnion, Report: AgencyReportTransUnionReport{TransUnionCreditReport{80, map[string]int16{"2015Q2": 40, "2015Q1": 60}}}}}),
 		},
 		kv{
 			"002001",
@@ -195,6 +202,10 @@ func init() {
 		kv{
 			"002004",
 			vdl.ValueOf(Invoice{2, 1006, t20150413141707, 88, AddressInfo{"101010 Any St.", "collins", "IA", "50055"}}),
+		},
+		kv{
+			"003",
+			vdl.ValueOf(Customer{"John Steed", 3, true, AddressInfo{"100 Queen St.", "New London", "CT", "06320"}, []AddressInfo{}, CreditReport{Agency: CreditAgencyExperian, Report: AgencyReportExperianReport{ExperianCreditReport{ExperianRatingGood, map[Tdh]struct{}{TdhTom: {}, TdhHarry: {}}, TdhTom}}}}),
 		},
 	}
 	db.tables = append(db.tables, custTable)
@@ -228,6 +239,141 @@ func init() {
 		},
 	}
 	db.tables = append(db.tables, fooTable)
+
+	funWithMapsTable.name = "FunWithMaps"
+	funWithMapsTable.rows = []kv{
+		kv{
+			"AAA",
+			vdl.ValueOf(FunWithMaps{K{'a', "bbb"}, map[K]V{K{'a', "aaa"}: V{"bbb", 23.0}, K{'a', "bbb"}: V{"ccc", 14.7}},
+				map[int16][]map[string]struct{}{
+					23: []map[string]struct{}{
+						map[string]struct{}{"foo": {}, "bar": {}},
+					},
+				},
+			}),
+		},
+		kv{
+			"BBB",
+			vdl.ValueOf(FunWithMaps{K{'x', "zzz"}, map[K]V{K{'x', "zzz"}: V{"yyy", 17.1}, K{'r', "sss"}: V{"qqq", 7.8}},
+				map[int16][]map[string]struct{}{
+					42: []map[string]struct{}{
+						map[string]struct{}{"great": {}, "dane": {}},
+						map[string]struct{}{"german": {}, "shepard": {}},
+					},
+				},
+			}),
+		},
+	}
+	db.tables = append(db.tables, funWithMapsTable)
+
+	ratingsArrayTable.name = "RatingsArray"
+	ratingsArrayTable.rows = []kv{
+		kv{
+			"000",
+			vdl.ValueOf(RatingsArray{40, 20, 10, 0}),
+		},
+		kv{
+			"111",
+			vdl.ValueOf(RatingsArray{17, 18, 19, 20}),
+		},
+	}
+	db.tables = append(db.tables, ratingsArrayTable)
+
+	tdhApprovalsTable.name = "TdhApprovals"
+	tdhApprovalsTable.rows = []kv{
+		kv{
+			"yyy",
+			vdl.ValueOf(map[Tdh]struct{}{TdhTom: {}}),
+		},
+		kv{
+			"zzz",
+			vdl.ValueOf(map[Tdh]struct{}{TdhDick: {}, TdhHarry: {}}),
+		},
+	}
+	db.tables = append(db.tables, tdhApprovalsTable)
+
+	previousRatingsTable.name = "PreviousRatings"
+	previousRatingsTable.rows = []kv{
+		kv{
+			"x1",
+			vdl.ValueOf(map[string]int16{"1Q2015": 1, "2Q2015": 2}),
+		},
+		kv{
+			"x2",
+			vdl.ValueOf(map[string]int16{"2Q2015": 3}),
+		},
+	}
+	db.tables = append(db.tables, previousRatingsTable)
+
+	previousAddressesTable.name = "PreviousAddresses"
+	previousAddressesTable.rows = []kv{
+		kv{
+			"a1",
+			vdl.ValueOf([]AddressInfo{
+				AddressInfo{"100 Main St.", "Anytown", "CA", "94303"},
+				AddressInfo{"200 Main St.", "Othertown", "IA", "51050"},
+			}),
+		},
+		kv{
+			"a2",
+			vdl.ValueOf([]AddressInfo{
+				AddressInfo{"500 Orange St", "Uptown", "ID", "83209"},
+				AddressInfo{"200 Fulton St", "Downtown", "MT", "59001"},
+			}),
+		},
+	}
+	db.tables = append(db.tables, previousAddressesTable)
+
+	manyMapsTable.name = "ManyMaps"
+	manyMapsTable.rows = []kv{
+		kv{
+			"0",
+			vdl.ValueOf(ManyMaps{
+				map[bool]string{true: "It was the best of times,"},
+				map[byte]string{10: "it was the worst of times,"},
+				map[uint16]string{16: "it was the age of wisdom,"},
+				map[uint32]string{32: "it was the age of foolishness,"},
+				map[uint64]string{64: "it was the epoch of belief,"},
+				map[int16]string{17: "it was the epoch of incredulity,"},
+				map[int32]string{33: "it was the season of Light,"},
+				map[int64]string{65: "it was the season of Darkness,"},
+				map[float32]string{32.1: "it was the spring of hope,"},
+				map[float64]string{64.2: "it was the winter of despair,"},
+				map[complex64]string{(456.789 + 10.1112i): "we had everything before us,"},
+				map[complex128]string{(123.456 + 11.2223i): "we had nothing before us,"},
+				map[string]string{"Dickens": "we are all going direct to Heaven,"},
+				map[string]map[string]string{
+					"Charles": map[string]string{"Dickens": "we are all going direct to Heaven,"},
+				},
+				map[time.Time]string{t2015_07_01_01_23_45: "we are all going direct the other way"},
+			}),
+		},
+	}
+	db.tables = append(db.tables, manyMapsTable)
+
+	manySetsTable.name = "ManySets"
+	manySetsTable.rows = []kv{
+		kv{
+			"0",
+			vdl.ValueOf(ManySets{
+				map[bool]struct{}{true: {}},
+				map[byte]struct{}{10: {}},
+				map[uint16]struct{}{16: {}},
+				map[uint32]struct{}{32: {}},
+				map[uint64]struct{}{64: {}},
+				map[int16]struct{}{17: {}},
+				map[int32]struct{}{33: {}},
+				map[int64]struct{}{65: {}},
+				map[float32]struct{}{32.1: {}},
+				map[float64]struct{}{64.2: {}},
+				map[complex64]struct{}{(456.789 + 10.1112i): {}},
+				map[complex128]struct{}{(123.456 + 11.2223i): {}},
+				map[string]struct{}{"Dickens": {}},
+				map[time.Time]struct{}{t2015_07_01_01_23_45: {}},
+			}),
+		},
+	}
+	db.tables = append(db.tables, manySetsTable)
 }
 
 type keyRangesTest struct {
@@ -295,6 +441,7 @@ func TestQueryExec(t *testing.T) {
 			[][]*vdl.Value{
 				[]*vdl.Value{custTable.rows[0].value},
 				[]*vdl.Value{custTable.rows[4].value},
+				[]*vdl.Value{custTable.rows[9].value},
 			},
 		},
 		{
@@ -306,6 +453,7 @@ func TestQueryExec(t *testing.T) {
 			[][]*vdl.Value{
 				[]*vdl.Value{custTable.rows[0].value},
 				[]*vdl.Value{custTable.rows[4].value},
+				[]*vdl.Value{custTable.rows[9].value},
 			},
 		},
 		{
@@ -325,6 +473,7 @@ func TestQueryExec(t *testing.T) {
 				[]*vdl.Value{custTable.rows[6].value},
 				[]*vdl.Value{custTable.rows[7].value},
 				[]*vdl.Value{custTable.rows[8].value},
+				[]*vdl.Value{custTable.rows[9].value},
 			},
 		},
 		{
@@ -364,6 +513,7 @@ func TestQueryExec(t *testing.T) {
 				[]*vdl.Value{custTable.rows[6].value},
 				[]*vdl.Value{custTable.rows[7].value},
 				[]*vdl.Value{custTable.rows[8].value},
+				[]*vdl.Value{custTable.rows[9].value},
 			},
 		},
 		{
@@ -374,6 +524,7 @@ func TestQueryExec(t *testing.T) {
 			[][]*vdl.Value{
 				[]*vdl.Value{custTable.rows[0].value},
 				[]*vdl.Value{custTable.rows[4].value},
+				[]*vdl.Value{custTable.rows[9].value},
 			},
 		},
 		{
@@ -390,6 +541,7 @@ func TestQueryExec(t *testing.T) {
 			[][]*vdl.Value{
 				[]*vdl.Value{vdl.ValueOf(custTable.rows[0].key), custTable.rows[0].value},
 				[]*vdl.Value{vdl.ValueOf(custTable.rows[4].key), custTable.rows[4].value},
+				[]*vdl.Value{vdl.ValueOf(custTable.rows[9].key), custTable.rows[9].value},
 			},
 		},
 		{
@@ -399,6 +551,7 @@ func TestQueryExec(t *testing.T) {
 			[][]*vdl.Value{
 				[]*vdl.Value{vdl.ValueOf(custTable.rows[0].key), vdl.ValueOf("John Smith")},
 				[]*vdl.Value{vdl.ValueOf(custTable.rows[4].key), vdl.ValueOf("Bat Masterson")},
+				[]*vdl.Value{vdl.ValueOf(custTable.rows[9].key), vdl.ValueOf("John Steed")},
 			},
 		},
 		{
@@ -417,6 +570,7 @@ func TestQueryExec(t *testing.T) {
 				[]*vdl.Value{vdl.ValueOf(nil), vdl.ValueOf(int64(2))},
 				[]*vdl.Value{vdl.ValueOf(nil), vdl.ValueOf(int64(2))},
 				[]*vdl.Value{vdl.ValueOf(nil), vdl.ValueOf(int64(2))},
+				[]*vdl.Value{vdl.ValueOf(int64(3)), vdl.ValueOf(nil)},
 			},
 		},
 		{
@@ -529,6 +683,7 @@ func TestQueryExec(t *testing.T) {
 				[]*vdl.Value{vdl.ValueOf(custTable.rows[6].key), custTable.rows[6].value},
 				[]*vdl.Value{vdl.ValueOf(custTable.rows[7].key), custTable.rows[7].value},
 				[]*vdl.Value{vdl.ValueOf(custTable.rows[8].key), custTable.rows[8].value},
+				[]*vdl.Value{vdl.ValueOf(custTable.rows[9].key), custTable.rows[9].value},
 			},
 		},
 		{
@@ -587,6 +742,7 @@ func TestQueryExec(t *testing.T) {
 				[]*vdl.Value{vdl.ValueOf("002002")},
 				[]*vdl.Value{vdl.ValueOf("002003")},
 				[]*vdl.Value{vdl.ValueOf("002004")},
+				[]*vdl.Value{vdl.ValueOf("003")},
 			},
 		},
 		{
@@ -601,6 +757,7 @@ func TestQueryExec(t *testing.T) {
 				[]*vdl.Value{vdl.ValueOf("002002")},
 				[]*vdl.Value{vdl.ValueOf("002003")},
 				[]*vdl.Value{vdl.ValueOf("002004")},
+				[]*vdl.Value{vdl.ValueOf("003")},
 			},
 		},
 		{
@@ -616,6 +773,7 @@ func TestQueryExec(t *testing.T) {
 				[]*vdl.Value{vdl.ValueOf("002002")},
 				[]*vdl.Value{vdl.ValueOf("002003")},
 				[]*vdl.Value{vdl.ValueOf("002004")},
+				[]*vdl.Value{vdl.ValueOf("003")},
 			},
 		},
 		{
@@ -798,6 +956,7 @@ func TestQueryExec(t *testing.T) {
 				[]*vdl.Value{custTable.rows[6].value},
 				[]*vdl.Value{custTable.rows[7].value},
 				[]*vdl.Value{custTable.rows[8].value},
+				[]*vdl.Value{custTable.rows[9].value},
 			},
 		},
 		{
@@ -907,6 +1066,7 @@ func TestQueryExec(t *testing.T) {
 				[]*vdl.Value{vdl.ValueOf(t2015_07_01)},
 				[]*vdl.Value{vdl.ValueOf(t2015_07_01)},
 				[]*vdl.Value{vdl.ValueOf(t2015_07_01)},
+				[]*vdl.Value{vdl.ValueOf(t2015_07_01)},
 			},
 		},
 		// DateTime function
@@ -914,6 +1074,7 @@ func TestQueryExec(t *testing.T) {
 			"select DateTime(\"2015-07-01 01:23:45 PDT\") from Customer",
 			[]string{"DateTime"},
 			[][]*vdl.Value{
+				[]*vdl.Value{vdl.ValueOf(t2015_07_01_01_23_45)},
 				[]*vdl.Value{vdl.ValueOf(t2015_07_01_01_23_45)},
 				[]*vdl.Value{vdl.ValueOf(t2015_07_01_01_23_45)},
 				[]*vdl.Value{vdl.ValueOf(t2015_07_01_01_23_45)},
@@ -932,6 +1093,7 @@ func TestQueryExec(t *testing.T) {
 			[][]*vdl.Value{
 				[]*vdl.Value{vdl.ValueOf("john smith")},
 				[]*vdl.Value{vdl.ValueOf("bat masterson")},
+				[]*vdl.Value{vdl.ValueOf("john steed")},
 			},
 		},
 		// UpperCase function
@@ -941,6 +1103,7 @@ func TestQueryExec(t *testing.T) {
 			[][]*vdl.Value{
 				[]*vdl.Value{vdl.ValueOf("JOHN SMITH")},
 				[]*vdl.Value{vdl.ValueOf("BAT MASTERSON")},
+				[]*vdl.Value{vdl.ValueOf("JOHN STEED")},
 			},
 		},
 		// YMDHMS function
@@ -1022,6 +1185,256 @@ func TestQueryExec(t *testing.T) {
 			"select v from Customer where t = \"Invoice\" and YMD(v.InvoiceDate, v.Foo) = v.InvoiceDate",
 			[]string{"v"},
 			[][]*vdl.Value{},
+		},
+		// Map in selection
+		{
+			"select v.Credit.Report.TransUnionReport.PreviousRatings[\"2015Q2\"] from Customer where v.Name = \"Bat Masterson\"",
+			[]string{"v.Credit.Report.TransUnionReport.PreviousRatings[2015Q2]"},
+			[][]*vdl.Value{
+				[]*vdl.Value{vdl.ValueOf(int16(40))},
+			},
+		},
+		// Map in selection using function as key.
+		{
+			"select v.Credit.Report.TransUnionReport.PreviousRatings[UpperCase(\"2015q2\")] from Customer where v.Name = \"Bat Masterson\"",
+			[]string{"v.Credit.Report.TransUnionReport.PreviousRatings[UpperCase]"},
+			[][]*vdl.Value{
+				[]*vdl.Value{vdl.ValueOf(int16(40))},
+			},
+		},
+		// Map in selection using struct as key.
+		{
+			"select v.Map[v.Key] from FunWithMaps",
+			[]string{"v.Map[v.Key]"},
+			[][]*vdl.Value{
+				[]*vdl.Value{vdl.ValueOf(V{"ccc", 14.7})},
+				[]*vdl.Value{vdl.ValueOf(V{"yyy", 17.1})},
+			},
+		},
+		// map of int16 to array of sets of strings
+		{
+			"select v.Confusing[23][0][\"foo\"] from FunWithMaps",
+			[]string{"v.Confusing[23][0][foo]"},
+			[][]*vdl.Value{
+				[]*vdl.Value{vdl.ValueOf(true)},
+				[]*vdl.Value{vdl.ValueOf(nil)},
+			},
+		},
+		// Function using a map lookup as arg
+		{
+			"select UpperCase(v.B[true]) from ManyMaps",
+			[]string{"UpperCase"},
+			[][]*vdl.Value{
+				[]*vdl.Value{vdl.ValueOf("IT WAS THE BEST OF TIMES,")},
+			},
+		},
+		// Set in selection
+		{
+			"select v.Credit.Report.ExperianReport.TdhApprovals[\"Tom\"], v.Credit.Report.ExperianReport.TdhApprovals[\"Dick\"], v.Credit.Report.ExperianReport.TdhApprovals[\"Harry\"] from Customer where v.Name = \"John Steed\"",
+			[]string{
+				"v.Credit.Report.ExperianReport.TdhApprovals[Tom]",
+				"v.Credit.Report.ExperianReport.TdhApprovals[Dick]",
+				"v.Credit.Report.ExperianReport.TdhApprovals[Harry]",
+			},
+			[][]*vdl.Value{
+				[]*vdl.Value{vdl.ValueOf(true), vdl.ValueOf(false), vdl.ValueOf(true)},
+			},
+		},
+		// List in selection
+		{
+			"select v.PreviousAddresses[0].Street from Customer where v.Name = \"Bat Masterson\"",
+			[]string{"v.PreviousAddresses[0].Street"},
+			[][]*vdl.Value{
+				[]*vdl.Value{vdl.ValueOf("19 Green St.")},
+			},
+		},
+		// List in selection (index out of bounds)
+		{
+			"select v.PreviousAddresses[2].Street from Customer where v.Name = \"Bat Masterson\"",
+			[]string{"v.PreviousAddresses[2].Street"},
+			[][]*vdl.Value{
+				[]*vdl.Value{vdl.ValueOf(nil)},
+			},
+		},
+		// Array in selection
+		{
+			"select v.Credit.Report.EquifaxReport.FourScoreRatings[2] from Customer where v.Name = \"John Smith\"",
+			[]string{"v.Credit.Report.EquifaxReport.FourScoreRatings[2]"},
+			[][]*vdl.Value{
+				[]*vdl.Value{vdl.ValueOf(int16(42))},
+			},
+		},
+		// Array in selection (using an array as the index)
+		// Note: v.Credit.Report.EquifaxReport.FourScoreRatings[3] is 2
+		// and v.Credit.Report.EquifaxReport.FourScoreRatings[2] is 42
+		{
+			"select v.Credit.Report.EquifaxReport.FourScoreRatings[v.Credit.Report.EquifaxReport.FourScoreRatings[3]] from Customer where v.Name = \"John Smith\"",
+			[]string{"v.Credit.Report.EquifaxReport.FourScoreRatings[v.Credit.Report.EquifaxReport.FourScoreRatings[3]]"},
+			[][]*vdl.Value{
+				[]*vdl.Value{vdl.ValueOf(int16(42))},
+			},
+		},
+		// Array in selection (index out of bounds)
+		{
+			"select v.Credit.Report.EquifaxReport.FourScoreRatings[4] from Customer where v.Name = \"John Smith\"",
+			[]string{"v.Credit.Report.EquifaxReport.FourScoreRatings[4]"},
+			[][]*vdl.Value{
+				[]*vdl.Value{vdl.ValueOf(nil)},
+			},
+		},
+		// Map in where expression
+		{
+			"select v.Name from Customer where v.Credit.Report.TransUnionReport.PreviousRatings[\"2015Q2\"] = 40",
+			[]string{"v.Name"},
+			[][]*vdl.Value{
+				[]*vdl.Value{vdl.ValueOf("Bat Masterson")},
+			},
+		},
+		// Set in where expression (convert string to enum to do lookup)
+		{
+			"select v.Name from Customer where v.Credit.Report.ExperianReport.TdhApprovals[\"Tom\"] = true",
+			[]string{
+				"v.Name",
+			},
+			[][]*vdl.Value{
+				[]*vdl.Value{vdl.ValueOf("John Steed")},
+			},
+		},
+		// Negative case: Set in where expression (convert string to enum to do lookup)
+		{
+			"select v.Name from Customer where v.Credit.Report.ExperianReport.TdhApprovals[\"Dick\"] = true",
+			[]string{
+				"v.Name",
+			},
+			[][]*vdl.Value{},
+		},
+		// Set in where expression (use another field as lookup key)
+		// Find all customers where experian auditor was also an approver.
+		{
+			"select v.Name from Customer where v.Credit.Report.ExperianReport.TdhApprovals[v.Credit.Report.ExperianReport.Auditor] = true",
+			[]string{
+				"v.Name",
+			},
+			[][]*vdl.Value{
+				[]*vdl.Value{vdl.ValueOf("John Steed")},
+			},
+		},
+		// List in where expression
+		{
+			"select v.Name from Customer where v.PreviousAddresses[0].Street = \"19 Green St.\"",
+			[]string{"v.Name"},
+			[][]*vdl.Value{
+				[]*vdl.Value{vdl.ValueOf("Bat Masterson")},
+			},
+		},
+		// List in where expression (index out of bounds)
+		{
+			"select v.Name from Customer where v.PreviousAddresses[10].Street = \"19 Green St.\"",
+			[]string{"v.Name"},
+			[][]*vdl.Value{},
+		},
+		// Array in where expression
+		{
+			"select v.Name from Customer where v.Credit.Report.EquifaxReport.FourScoreRatings[2] = 42",
+			[]string{"v.Name"},
+			[][]*vdl.Value{
+				[]*vdl.Value{vdl.ValueOf("John Smith")},
+			},
+		},
+		// Array in where expression (using another field as index)
+		// Note: v.Credit.Report.EquifaxReport.FourScoreRatings[3] is 2
+		// and v.Credit.Report.EquifaxReport.FourScoreRatings[2] is 42
+		{
+			"select v.Name from Customer where v.Credit.Report.EquifaxReport.FourScoreRatings[v.Credit.Report.EquifaxReport.FourScoreRatings[3]] = 42",
+			[]string{"v.Name"},
+			[][]*vdl.Value{
+				[]*vdl.Value{vdl.ValueOf("John Smith")},
+			},
+		},
+		// Array in where expression (index out of bounds, using another field as index)
+		{
+			"select v.Name from Customer where v.Credit.Report.EquifaxReport.FourScoreRatings[v.Credit.Report.EquifaxReport.FourScoreRatings[2]] = 42",
+			[]string{"v.Name"},
+			[][]*vdl.Value{},
+		},
+		// Array in select and where expressions (top level value is the array)
+		{
+			"select v[0], v[1], v[2], v[3] from RatingsArray where v[0] = 40",
+			[]string{"v[0]", "v[1]", "v[2]", "v[3]"},
+			[][]*vdl.Value{
+				[]*vdl.Value{vdl.ValueOf(int16(40)), vdl.ValueOf(int16(20)), vdl.ValueOf(int16(10)), vdl.ValueOf(int16(0))},
+			},
+		},
+		// List in select and where expressions (top level value is the list)
+		{
+			"select v[-1].City, v[0].City, v[1].City, v[2].City from PreviousAddresses where v[1].Street = \"200 Main St.\"",
+			[]string{"v[-1].City", "v[0].City", "v[1].City", "v[2].City"},
+			[][]*vdl.Value{
+				[]*vdl.Value{vdl.ValueOf(nil), vdl.ValueOf("Anytown"), vdl.ValueOf("Othertown"), vdl.ValueOf(nil)},
+			},
+		},
+		// Set in select and where expressions (top level value is the set)
+		{
+			"select v[\"Tom\"], v[\"Dick\"], v[\"Harry\"] from TdhApprovals where v[\"Dick\"] = true",
+			[]string{"v[Tom]", "v[Dick]", "v[Harry]"},
+			[][]*vdl.Value{
+				[]*vdl.Value{vdl.ValueOf(false), vdl.ValueOf(true), vdl.ValueOf(true)},
+			},
+		},
+		// Map in select and where expressions (top level value is the map)
+		{
+			"select v[\"1Q2015\"], v[\"2Q2015\"] from PreviousRatings where v[\"2Q2015\"] = 3",
+			[]string{"v[1Q2015]", "v[2Q2015]"},
+			[][]*vdl.Value{
+				[]*vdl.Value{vdl.ValueOf(nil), vdl.ValueOf(int16(3))},
+			},
+		},
+		// Test lots of types as map keys
+		{
+			"select v.B[true], v.By[10], v.U16[16], v.U32[32], v.U64[64], v.I16[17], v.I32[33], v.I64[65], v.F32[32.1], v.F64[64.2], v.C64[Complex(456.789, 10.1112)], v.C128[Complex(123.456, 11.2223)], v.S[\"Dickens\"], v.Ms[\"Charles\"][\"Dickens\"], v.T[DateTime(\"2015-07-01 01:23:45 PDT\")] from ManyMaps",
+			[]string{"v.B[true]", "v.By[10]", "v.U16[16]", "v.U32[32]", "v.U64[64]", "v.I16[17]", "v.I32[33]", "v.I64[65]", "v.F32[32.1]", "v.F64[64.2]", "v.C64[Complex]", "v.C128[Complex]", "v.S[Dickens]", "v.Ms[Charles][Dickens]", "v.T[DateTime]"},
+			[][]*vdl.Value{
+				[]*vdl.Value{
+					vdl.ValueOf("It was the best of times,"),
+					vdl.ValueOf("it was the worst of times,"),
+					vdl.ValueOf("it was the age of wisdom,"),
+					vdl.ValueOf("it was the age of foolishness,"),
+					vdl.ValueOf("it was the epoch of belief,"),
+					vdl.ValueOf("it was the epoch of incredulity,"),
+					vdl.ValueOf("it was the season of Light,"),
+					vdl.ValueOf("it was the season of Darkness,"),
+					vdl.ValueOf("it was the spring of hope,"),
+					vdl.ValueOf("it was the winter of despair,"),
+					vdl.ValueOf("we had everything before us,"),
+					vdl.ValueOf("we had nothing before us,"),
+					vdl.ValueOf("we are all going direct to Heaven,"),
+					vdl.ValueOf("we are all going direct to Heaven,"),
+					vdl.ValueOf("we are all going direct the other way"),
+				},
+			},
+		},
+		// Test lots of types as set keys
+		{
+			"select v.B[true], v.By[10], v.U16[16], v.U32[32], v.U64[64], v.I16[17], v.I32[33], v.I64[65], v.F32[32.1], v.F64[64.2], v.C64[Complex(456.789, 10.1112)], v.C128[Complex(123.456, 11.2223)], v.S[\"Dickens\"], v.T[DateTime(\"2015-07-01 01:23:45 PDT\")] from ManySets",
+			[]string{"v.B[true]", "v.By[10]", "v.U16[16]", "v.U32[32]", "v.U64[64]", "v.I16[17]", "v.I32[33]", "v.I64[65]", "v.F32[32.1]", "v.F64[64.2]", "v.C64[Complex]", "v.C128[Complex]", "v.S[Dickens]", "v.T[DateTime]"},
+			[][]*vdl.Value{
+				[]*vdl.Value{
+					vdl.ValueOf(true),
+					vdl.ValueOf(true),
+					vdl.ValueOf(true),
+					vdl.ValueOf(true),
+					vdl.ValueOf(true),
+					vdl.ValueOf(true),
+					vdl.ValueOf(true),
+					vdl.ValueOf(true),
+					vdl.ValueOf(true),
+					vdl.ValueOf(true),
+					vdl.ValueOf(true),
+					vdl.ValueOf(true),
+					vdl.ValueOf(true),
+					vdl.ValueOf(true),
+				},
+			},
 		},
 	}
 
@@ -1488,7 +1901,15 @@ func TestEval(t *testing.T) {
 			numTable.rows[0].key, numTable.rows[0].value, true,
 		},
 		{
+			"select k, v from Numbers where v.C64 = Complex(123, 7)",
+			numTable.rows[0].key, numTable.rows[0].value, true,
+		},
+		{
 			"select k, v from Numbers where v.C128 = \"(456.789+10.1112i)\"",
+			numTable.rows[0].key, numTable.rows[0].value, true,
+		},
+		{
+			"select k, v from Numbers where v.C128 = Complex(456.789, 10.1112)",
 			numTable.rows[0].key, numTable.rows[0].value, true,
 		},
 		{
@@ -1826,7 +2247,7 @@ func TestResolveField(t *testing.T) {
 	}
 
 	for _, test := range basic {
-		r, _, _ := query.ResolveField(test.k, test.v, &test.f)
+		r, _, _ := query.ResolveField(db, test.k, test.v, &test.f)
 		if !reflect.DeepEqual(r, test.r) {
 			t.Errorf("got %v(%s), want %v(%s)", r, r.Type(), test.r, test.r.Type())
 		}

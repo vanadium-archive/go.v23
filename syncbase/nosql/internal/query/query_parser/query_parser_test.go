@@ -2447,6 +2447,169 @@ func TestQueryParser(t *testing.T) {
 			},
 			nil,
 		},
+		{
+			"select v[\"foo\"] from Customer",
+			query_parser.SelectStatement{
+				Select: &query_parser.SelectClause{
+					Selectors: []query_parser.Selector{
+						query_parser.Selector{
+							Type: query_parser.TypSelField,
+							Field: &query_parser.Field{
+								Segments: []query_parser.Segment{
+									query_parser.Segment{
+										Value: "v",
+										Keys: []*query_parser.Operand{
+											&query_parser.Operand{
+												Type: query_parser.TypStr,
+												Str:  "foo",
+												Node: query_parser.Node{Off: 9},
+											},
+										},
+										Node: query_parser.Node{Off: 7},
+									},
+								},
+								Node: query_parser.Node{Off: 7},
+							},
+							Node: query_parser.Node{Off: 7},
+						},
+					},
+				},
+				From: &query_parser.FromClause{
+					Table: query_parser.TableEntry{
+						Name: "Customer",
+						Node: query_parser.Node{Off: 21},
+					},
+					Node: query_parser.Node{Off: 16},
+				},
+				Node: query_parser.Node{Off: 0},
+			},
+			nil,
+		},
+		{
+			"select v[\"foo\"][\"bar\"] from Customer",
+			query_parser.SelectStatement{
+				Select: &query_parser.SelectClause{
+					Selectors: []query_parser.Selector{
+						query_parser.Selector{
+							Type: query_parser.TypSelField,
+							Field: &query_parser.Field{
+								Segments: []query_parser.Segment{
+									query_parser.Segment{
+										Value: "v",
+										Keys: []*query_parser.Operand{
+											&query_parser.Operand{
+												Type: query_parser.TypStr,
+												Str:  "foo",
+												Node: query_parser.Node{Off: 9},
+											},
+											&query_parser.Operand{
+												Type: query_parser.TypStr,
+												Str:  "bar",
+												Node: query_parser.Node{Off: 16},
+											},
+										},
+										Node: query_parser.Node{Off: 7},
+									},
+								},
+								Node: query_parser.Node{Off: 7},
+							},
+							Node: query_parser.Node{Off: 7},
+						},
+					},
+				},
+				From: &query_parser.FromClause{
+					Table: query_parser.TableEntry{
+						Name: "Customer",
+						Node: query_parser.Node{Off: 28},
+					},
+					Node: query_parser.Node{Off: 23},
+				},
+				Node: query_parser.Node{Off: 0},
+			},
+			nil,
+		},
+		{
+			"select v from Customer where v.Foo[v.Bar] = \"abc\"",
+			query_parser.SelectStatement{
+				Select: &query_parser.SelectClause{
+					Selectors: []query_parser.Selector{
+						query_parser.Selector{
+							Type: query_parser.TypSelField,
+							Field: &query_parser.Field{
+								Segments: []query_parser.Segment{
+									query_parser.Segment{
+										Value: "v",
+										Node:  query_parser.Node{Off: 7},
+									},
+								},
+								Node: query_parser.Node{Off: 7},
+							},
+							Node: query_parser.Node{Off: 7},
+						},
+					},
+				},
+				From: &query_parser.FromClause{
+					Table: query_parser.TableEntry{
+						Name: "Customer",
+						Node: query_parser.Node{Off: 14},
+					},
+					Node: query_parser.Node{Off: 9},
+				},
+				Where: &query_parser.WhereClause{
+					Expr: &query_parser.Expression{
+						Operand1: &query_parser.Operand{
+							Type: query_parser.TypField,
+							Column: &query_parser.Field{
+								Segments: []query_parser.Segment{
+									query_parser.Segment{
+										Value: "v",
+										Node:  query_parser.Node{Off: 29},
+									},
+									query_parser.Segment{
+										Value: "Foo",
+										Keys: []*query_parser.Operand{
+											&query_parser.Operand{
+												Type: query_parser.TypField,
+												Column: &query_parser.Field{
+													Segments: []query_parser.Segment{
+														query_parser.Segment{
+															Value: "v",
+															Node:  query_parser.Node{Off: 35},
+														},
+														query_parser.Segment{
+															Value: "Bar",
+															Node:  query_parser.Node{Off: 37},
+														},
+													},
+													Node: query_parser.Node{Off: 35},
+												},
+												Node: query_parser.Node{Off: 35},
+											},
+										},
+										Node: query_parser.Node{Off: 31},
+									},
+								},
+								Node: query_parser.Node{Off: 29},
+							},
+							Node: query_parser.Node{Off: 29},
+						},
+						Operator: &query_parser.BinaryOperator{
+							Type: query_parser.Equal,
+							Node: query_parser.Node{Off: 42},
+						},
+						Operand2: &query_parser.Operand{
+							Type: query_parser.TypStr,
+							Str:  "abc",
+							Node: query_parser.Node{Off: 44},
+						},
+						Node: query_parser.Node{Off: 29},
+					},
+					Node: query_parser.Node{Off: 23},
+				},
+				Node: query_parser.Node{Off: 0},
+			},
+			nil,
+		},
 	}
 
 	for _, test := range basic {

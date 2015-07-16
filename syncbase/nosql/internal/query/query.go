@@ -5,7 +5,9 @@
 package query
 
 import (
+	"fmt"
 	"reflect"
+	"strconv"
 
 	"v.io/syncbase/v23/syncbase/nosql/internal/query/query_checker"
 	"v.io/syncbase/v23/syncbase/nosql/internal/query/query_functions"
@@ -46,7 +48,7 @@ func ComposeProjection(db query_db.Database, k string, v *vdl.Value, s *query_pa
 		switch selector.Type {
 		case query_parser.TypSelField:
 			// If field not found, nil is returned (as per specification).
-			f, _, _ := ResolveField(k, v, selector.Field)
+			f, _, _ := ResolveField(db, k, v, selector.Field)
 			projection = append(projection, f)
 		case query_parser.TypSelFunc:
 			if selector.Function.Computed {
@@ -149,6 +151,9 @@ func getColumnHeadings(s *query_parser.SelectStatement) []string {
 				sep := ""
 				for _, segment := range selector.Field.Segments {
 					columnName = columnName + sep + segment.Value
+					for _, key := range segment.Keys {
+						columnName += getSegmentKeyAsHeading(key)
+					}
 					sep = "."
 				}
 			case query_parser.TypSelFunc:
@@ -158,6 +163,52 @@ func getColumnHeadings(s *query_parser.SelectStatement) []string {
 		columnHeaders = append(columnHeaders, columnName)
 	}
 	return columnHeaders
+}
+
+// TODO(jkline): Should we really include key/index of a map/set/array/list in the header?
+// The column names can get quite long.  Perhaps just "[]" at the end of the segment
+// would be better.  The author of the query can always use the As clause to specify a
+// better heading.  Note: for functions, just the function name is included in the header.
+// When a decision is made, it's best to be consistent for functions and key/indexes.
+func getSegmentKeyAsHeading(segKey *query_parser.Operand) string {
+	val := "["
+	switch segKey.Type {
+	case query_parser.TypBigInt:
+		val += segKey.BigInt.String()
+	case query_parser.TypBigRat:
+		val += segKey.BigRat.String()
+	case query_parser.TypComplex:
+		val += fmt.Sprintf("%g", segKey.Complex)
+	case query_parser.TypField:
+		sep := ""
+		for _, segment := range segKey.Column.Segments {
+			val += sep + segment.Value
+			for _, key := range segment.Keys {
+				val += getSegmentKeyAsHeading(key)
+			}
+			sep = "."
+		}
+	case query_parser.TypBool:
+		val += strconv.FormatBool(segKey.Bool)
+	case query_parser.TypInt:
+		val += strconv.FormatInt(segKey.Int, 10)
+	case query_parser.TypFloat:
+		val += strconv.FormatFloat(segKey.Float, 'f', -1, 64)
+	case query_parser.TypFunction:
+		val += segKey.Function.Name
+	case query_parser.TypStr:
+		val += segKey.Str
+	case query_parser.TypTime:
+		val += segKey.Time.Format("Mon Jan 2 15:04:05 -0700 MST 2006")
+	case query_parser.TypNil:
+		val += "<nil>"
+	case query_parser.TypObject:
+		val += "<object>"
+	default:
+		val += "<?>"
+	}
+	val += "]"
+	return val
 }
 
 func execSelect(db query_db.Database, s *query_parser.SelectStatement) ([]string, ResultStream, error) {

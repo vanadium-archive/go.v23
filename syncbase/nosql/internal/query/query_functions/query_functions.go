@@ -38,8 +38,11 @@ func init() {
 	functions["ymdhm"] = function{[]query_parser.OperandType{query_parser.TypStr, query_parser.TypStr}, query_parser.TypTime, ymdhm, timeAndStringArgsCheck}
 	functions["ymdhms"] = function{[]query_parser.OperandType{query_parser.TypStr, query_parser.TypStr}, query_parser.TypTime, ymdhms, timeAndStringArgsCheck}
 	functions["now"] = function{[]query_parser.OperandType{}, query_parser.TypTime, now, nil}
+
 	functions["lowercase"] = function{[]query_parser.OperandType{query_parser.TypStr}, query_parser.TypStr, lowerCase, singleStringArgCheck}
 	functions["uppercase"] = function{[]query_parser.OperandType{query_parser.TypStr}, query_parser.TypStr, upperCase, singleStringArgCheck}
+
+	functions["complex"] = function{[]query_parser.OperandType{query_parser.TypFloat, query_parser.TypFloat}, query_parser.TypComplex, complexFunc, twoFloatsArgsCheck}
 }
 
 // Check that function exists and that the number of args passed matches the spec.
@@ -151,6 +154,14 @@ func makeStrOp(off int64, s string) *query_parser.Operand {
 	o.Off = off
 	o.Type = query_parser.TypStr
 	o.Str = s
+	return &o
+}
+
+func makeComplexOp(off int64, c complex128) *query_parser.Operand {
+	var o query_parser.Operand
+	o.Off = off
+	o.Type = query_parser.TypComplex
+	o.Complex = c
 	return &o
 }
 

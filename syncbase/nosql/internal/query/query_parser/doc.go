@@ -16,7 +16,11 @@
 //
 // <field> ::= <segment>[{<period><segment>}...]
 //
-// <segment> ::= <identifier>
+// <segment> ::= <identifier>[<keys>]
+//
+// <keys> ::= <key>...
+//
+// <key> ::= <left_bracket> <operand> <right_bracket>
 //
 // <from_clause> ::= FROM <table>
 //

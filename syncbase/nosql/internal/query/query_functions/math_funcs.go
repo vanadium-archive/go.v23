@@ -1,0 +1,53 @@
+// Copyright 2015 The Vanadium Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style
+// license that can be found in the LICENSE file.
+
+package query_functions
+
+import (
+	"v.io/syncbase/v23/syncbase/nosql/internal/query/conversions"
+	"v.io/syncbase/v23/syncbase/nosql/internal/query/query_parser"
+)
+
+func complexFunc(off int64, args []*query_parser.Operand) (*query_parser.Operand, error) {
+	r, err := conversions.ConvertValueToFloat(args[0])
+	if err != nil {
+		return nil, err
+	}
+
+	i, err := conversions.ConvertValueToFloat(args[1])
+	if err != nil {
+		return nil, err
+	}
+
+	return makeComplexOp(off, complex(r.Float, i.Float)), nil
+}
+
+func twoFloatsArgsCheck(off int64, args []*query_parser.Operand) (*query_parser.Operand, error) {
+	// The two args must be convertable to floats.
+	if err := checkIfPossibleThatArgIsConvertableToFloat(args[0]); err != nil {
+		return args[0], err
+	}
+	if err := checkIfPossibleThatArgIsConvertableToFloat(args[1]); err != nil {
+		return args[1], err
+	}
+	return nil, nil
+}
+
+// If possible, check if arg is convertable to a float.  Fields and not yet computed
+// functions cannot be checked and will just return nil.
+func checkIfPossibleThatArgIsConvertableToFloat(arg *query_parser.Operand) error {
+	// If arg is a literal or an already computed function,
+	// make sure it can be converted to a float.
+	switch arg.Type {
+	case query_parser.TypBigInt, query_parser.TypBigRat, query_parser.TypBool, query_parser.TypComplex, query_parser.TypFloat, query_parser.TypInt, query_parser.TypStr, query_parser.TypTime, query_parser.TypUint:
+		_, err := conversions.ConvertValueToFloat(arg)
+		return err
+	case query_parser.TypFunction:
+		if arg.Function.Computed {
+			_, err := conversions.ConvertValueToFloat(arg.Function.RetValue)
+			return err
+		}
+	}
+	return nil
+}

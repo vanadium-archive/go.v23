@@ -321,6 +321,25 @@ func (BazType) __VDLReflect(struct {
 }) {
 }
 
+type ArrayOfFour [4]string
+
+func (ArrayOfFour) __VDLReflect(struct {
+	Name string `vdl:"v.io/syncbase/v23/syncbase/nosql/exec_test.ArrayOfFour"`
+}) {
+}
+
+type KeyIndexData struct {
+	A ArrayOfFour
+	L []string
+	M map[complex128]string
+	S map[string]struct{}
+}
+
+func (KeyIndexData) __VDLReflect(struct {
+	Name string `vdl:"v.io/syncbase/v23/syncbase/nosql/exec_test.KeyIndexData"`
+}) {
+}
+
 func init() {
 	vdl.Register((*AddressInfo)(nil))
 	vdl.Register((*CreditAgency)(nil))
@@ -337,4 +356,6 @@ func init() {
 	vdl.Register((*BarType)(nil))
 	vdl.Register((*TitleOrValueType)(nil))
 	vdl.Register((*BazType)(nil))
+	vdl.Register((*ArrayOfFour)(nil))
+	vdl.Register((*KeyIndexData)(nil))
 }

@@ -129,8 +129,16 @@ func (ExperianRating) __VDLReflect(struct {
 }) {
 }
 
+type RatingsArray [4]int16
+
+func (RatingsArray) __VDLReflect(struct {
+	Name string `vdl:"v.io/syncbase/v23/syncbase/nosql/internal/query/test.RatingsArray"`
+}) {
+}
+
 type EquifaxCreditReport struct {
-	Rating byte
+	Rating           byte
+	FourScoreRatings RatingsArray
 }
 
 func (EquifaxCreditReport) __VDLReflect(struct {
@@ -138,8 +146,63 @@ func (EquifaxCreditReport) __VDLReflect(struct {
 }) {
 }
 
+type Tdh int
+
+const (
+	TdhTom Tdh = iota
+	TdhDick
+	TdhHarry
+)
+
+// TdhAll holds all labels for Tdh.
+var TdhAll = [...]Tdh{TdhTom, TdhDick, TdhHarry}
+
+// TdhFromString creates a Tdh from a string label.
+func TdhFromString(label string) (x Tdh, err error) {
+	err = x.Set(label)
+	return
+}
+
+// Set assigns label to x.
+func (x *Tdh) Set(label string) error {
+	switch label {
+	case "Tom", "tom":
+		*x = TdhTom
+		return nil
+	case "Dick", "dick":
+		*x = TdhDick
+		return nil
+	case "Harry", "harry":
+		*x = TdhHarry
+		return nil
+	}
+	*x = -1
+	return fmt.Errorf("unknown label %q in test.Tdh", label)
+}
+
+// String returns the string label of x.
+func (x Tdh) String() string {
+	switch x {
+	case TdhTom:
+		return "Tom"
+	case TdhDick:
+		return "Dick"
+	case TdhHarry:
+		return "Harry"
+	}
+	return ""
+}
+
+func (Tdh) __VDLReflect(struct {
+	Name string `vdl:"v.io/syncbase/v23/syncbase/nosql/internal/query/test.Tdh"`
+	Enum struct{ Tom, Dick, Harry string }
+}) {
+}
+
 type ExperianCreditReport struct {
-	Rating ExperianRating
+	Rating       ExperianRating
+	TdhApprovals map[Tdh]struct{}
+	Auditor      Tdh
 }
 
 func (ExperianCreditReport) __VDLReflect(struct {
@@ -148,7 +211,8 @@ func (ExperianCreditReport) __VDLReflect(struct {
 }
 
 type TransUnionCreditReport struct {
-	Rating int16
+	Rating          int16
+	PreviousRatings map[string]int16
 }
 
 func (TransUnionCreditReport) __VDLReflect(struct {
@@ -212,11 +276,12 @@ func (CreditReport) __VDLReflect(struct {
 }
 
 type Customer struct {
-	Name    string
-	Id      int64
-	Active  bool
-	Address AddressInfo
-	Credit  CreditReport
+	Name              string
+	Id                int64
+	Active            bool
+	Address           AddressInfo
+	PreviousAddresses []AddressInfo
+	Credit            CreditReport
 }
 
 func (Customer) __VDLReflect(struct {
@@ -321,11 +386,89 @@ func (BazType) __VDLReflect(struct {
 }) {
 }
 
+type K struct {
+	A byte
+	B string
+}
+
+func (K) __VDLReflect(struct {
+	Name string `vdl:"v.io/syncbase/v23/syncbase/nosql/internal/query/test.K"`
+}) {
+}
+
+type V struct {
+	A string
+	B float32
+}
+
+func (V) __VDLReflect(struct {
+	Name string `vdl:"v.io/syncbase/v23/syncbase/nosql/internal/query/test.V"`
+}) {
+}
+
+type FunWithMaps struct {
+	Key       K
+	Map       map[K]V
+	Confusing map[int16][]map[string]struct{}
+}
+
+func (FunWithMaps) __VDLReflect(struct {
+	Name string `vdl:"v.io/syncbase/v23/syncbase/nosql/internal/query/test.FunWithMaps"`
+}) {
+}
+
+type ManyMaps struct {
+	B    map[bool]string
+	By   map[byte]string
+	U16  map[uint16]string
+	U32  map[uint32]string
+	U64  map[uint64]string
+	I16  map[int16]string
+	I32  map[int32]string
+	I64  map[int64]string
+	F32  map[float32]string
+	F64  map[float64]string
+	C64  map[complex64]string
+	C128 map[complex128]string
+	S    map[string]string
+	Ms   map[string]map[string]string
+	T    map[time.Time]string
+}
+
+func (ManyMaps) __VDLReflect(struct {
+	Name string `vdl:"v.io/syncbase/v23/syncbase/nosql/internal/query/test.ManyMaps"`
+}) {
+}
+
+type ManySets struct {
+	B    map[bool]struct{}
+	By   map[byte]struct{}
+	U16  map[uint16]struct{}
+	U32  map[uint32]struct{}
+	U64  map[uint64]struct{}
+	I16  map[int16]struct{}
+	I32  map[int32]struct{}
+	I64  map[int64]struct{}
+	F32  map[float32]struct{}
+	F64  map[float64]struct{}
+	C64  map[complex64]struct{}
+	C128 map[complex128]struct{}
+	S    map[string]struct{}
+	T    map[time.Time]struct{}
+}
+
+func (ManySets) __VDLReflect(struct {
+	Name string `vdl:"v.io/syncbase/v23/syncbase/nosql/internal/query/test.ManySets"`
+}) {
+}
+
 func init() {
 	vdl.Register((*AddressInfo)(nil))
 	vdl.Register((*CreditAgency)(nil))
 	vdl.Register((*ExperianRating)(nil))
+	vdl.Register((*RatingsArray)(nil))
 	vdl.Register((*EquifaxCreditReport)(nil))
+	vdl.Register((*Tdh)(nil))
 	vdl.Register((*ExperianCreditReport)(nil))
 	vdl.Register((*TransUnionCreditReport)(nil))
 	vdl.Register((*AgencyReport)(nil))
@@ -337,4 +480,9 @@ func init() {
 	vdl.Register((*BarType)(nil))
 	vdl.Register((*TitleOrValueType)(nil))
 	vdl.Register((*BazType)(nil))
+	vdl.Register((*K)(nil))
+	vdl.Register((*V)(nil))
+	vdl.Register((*FunWithMaps)(nil))
+	vdl.Register((*ManyMaps)(nil))
+	vdl.Register((*ManySets)(nil))
 }
