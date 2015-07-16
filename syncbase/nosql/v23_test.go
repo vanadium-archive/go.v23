@@ -44,3 +44,11 @@ func TestV23NestedSyncGroups(t *testing.T) {
 func TestV23NestedAndPeerSyncGroups(t *testing.T) {
 	v23tests.RunTest(t, V23TestNestedAndPeerSyncGroups)
 }
+
+func TestV23SyncbasedGetDeltasPrePopulate(t *testing.T) {
+	v23tests.RunTest(t, V23TestSyncbasedGetDeltasPrePopulate)
+}
+
+func TestV23SyncbasedGetDeltasMultiApp(t *testing.T) {
+	v23tests.RunTest(t, V23TestSyncbasedGetDeltasMultiApp)
+}
