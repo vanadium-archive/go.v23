@@ -506,7 +506,14 @@ var runVerifyNestedSyncGroupData = modules.Register(func(env *modules.Env, args 
 	a := syncbase.NewService(args[0]).App("a")
 	d := a.NoSQLDatabase("d")
 
-	// Wait for a bit (up to 8 sec) until the last key appears.
+	// Wait for a bit (up to 8 sec) until the last key appears. This chosen
+	// time interval is dependent on how fast the membership view is
+	// refreshed (currently 2 seconds) and how frequently we sync with peers
+	// (every 50 ms), and then adding a substantial safeguard to it to
+	// ensure that the test is not flaky even in somewhat abnormal
+	// conditions. Note that we wait longer than the 2 node tests since more
+	// nodes implies more pair-wise communication before achieving steady
+	// state.
 	tb := d.Table("tb")
 
 	r := tb.Row("f9")
