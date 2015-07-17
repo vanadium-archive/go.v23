@@ -9,6 +9,7 @@ package nosql
 
 import (
 	// VDL system imports
+	"fmt"
 	"v.io/v23/vdl"
 
 	// VDL user imports
@@ -101,10 +102,132 @@ func (SyncGroupMemberInfo) __VDLReflect(struct {
 }) {
 }
 
+// ResumeMarker is a pointer in the database event log.
+type ResumeMarker string
+
+func (ResumeMarker) __VDLReflect(struct {
+	Name string `vdl:"v.io/syncbase/v23/services/syncbase/nosql.ResumeMarker"`
+}) {
+}
+
+// TablePrefixRange describes a prefix range in a table.
+type TablePrefixRange struct {
+	Table  string
+	Prefix string
+}
+
+func (TablePrefixRange) __VDLReflect(struct {
+	Name string `vdl:"v.io/syncbase/v23/services/syncbase/nosql.TablePrefixRange"`
+}) {
+}
+
+// WatchRequest specifies which rows should be watched and a starting point
+// in the database event log from which to receive updates.
+type WatchRequest struct {
+	// Ranges specifies the subset of the database for which the client wants
+	// updates.
+	Ranges []TablePrefixRange
+	// ResumeMarker is the starting point in the database event log from which
+	// to receive updates.
+	ResumeMarker ResumeMarker
+}
+
+func (WatchRequest) __VDLReflect(struct {
+	Name string `vdl:"v.io/syncbase/v23/services/syncbase/nosql.WatchRequest"`
+}) {
+}
+
+// ChangeType describes the type of the row change: Put or Delete.
+// TODO(rogulenko): Consider adding the Shell type.
+type ChangeType int
+
+const (
+	ChangeTypePut ChangeType = iota
+	ChangeTypeDelete
+)
+
+// ChangeTypeAll holds all labels for ChangeType.
+var ChangeTypeAll = [...]ChangeType{ChangeTypePut, ChangeTypeDelete}
+
+// ChangeTypeFromString creates a ChangeType from a string label.
+func ChangeTypeFromString(label string) (x ChangeType, err error) {
+	err = x.Set(label)
+	return
+}
+
+// Set assigns label to x.
+func (x *ChangeType) Set(label string) error {
+	switch label {
+	case "Put", "put":
+		*x = ChangeTypePut
+		return nil
+	case "Delete", "delete":
+		*x = ChangeTypeDelete
+		return nil
+	}
+	*x = -1
+	return fmt.Errorf("unknown label %q in nosql.ChangeType", label)
+}
+
+// String returns the string label of x.
+func (x ChangeType) String() string {
+	switch x {
+	case ChangeTypePut:
+		return "Put"
+	case ChangeTypeDelete:
+		return "Delete"
+	}
+	return ""
+}
+
+func (ChangeType) __VDLReflect(struct {
+	Name string `vdl:"v.io/syncbase/v23/services/syncbase/nosql.ChangeType"`
+	Enum struct{ Put, Delete string }
+}) {
+}
+
+// Change is the new value for a watched entity.
+type Change struct {
+	// Table is the name of the table that contains the changed row.
+	Table string
+	// Row is the key of the changed row.
+	Row string
+	// ChangeType describes the type of the change. If the ChangeType equals to
+	// Put, then the row exists in the table and the Value contains the new
+	// value for this row. If the state equals to Delete, then the row was
+	// removed from the table.
+	ChangeType ChangeType
+	// Value is the new value for the row if the state equals to Put,
+	// otherwise the Value is nil.
+	Value []byte
+	// ResumeMarker provides a compact representation of all the messages
+	// that have been received by the caller for the given Watch call.
+	// This marker can be provided in the Request message to allow the caller
+	// to resume the stream watching at a specific point without fetching the
+	// initial state.
+	ResumeMarker ResumeMarker
+	// FromSync indicates whether the change came from sync. If FromSync is
+	// false, then the change originated from the local device.
+	FromSync bool
+	// If true, this Change is followed by more Changes that are in the
+	// same batch as this Change.
+	Continued bool
+}
+
+func (Change) __VDLReflect(struct {
+	Name string `vdl:"v.io/syncbase/v23/services/syncbase/nosql.Change"`
+}) {
+}
+
 func init() {
 	vdl.Register((*BatchOptions)(nil))
 	vdl.Register((*PrefixPermissions)(nil))
 	vdl.Register((*KeyValue)(nil))
 	vdl.Register((*SyncGroupSpec)(nil))
 	vdl.Register((*SyncGroupMemberInfo)(nil))
+	vdl.Register((*ResumeMarker)(nil))
+	vdl.Register((*TablePrefixRange)(nil))
+	vdl.Register((*WatchRequest)(nil))
+	vdl.Register((*ChangeType)(nil))
+	vdl.Register((*Change)(nil))
 }

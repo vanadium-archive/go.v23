@@ -73,3 +73,65 @@ type SyncGroupSpec struct {
 type SyncGroupMemberInfo struct {
 	SyncPriority byte
 }
+
+// ResumeMarker is a pointer in the database event log.
+type ResumeMarker string
+
+// TablePrefixRange describes a prefix range in a table.
+type TablePrefixRange struct {
+	Table  string
+	Prefix string
+}
+
+// WatchRequest specifies which rows should be watched and a starting point
+// in the database event log from which to receive updates.
+type WatchRequest struct {
+	// Ranges specifies the subset of the database for which the client wants
+	// updates.
+	Ranges []TablePrefixRange
+
+	// ResumeMarker is the starting point in the database event log from which
+	// to receive updates.
+	ResumeMarker ResumeMarker
+}
+
+// ChangeType describes the type of the row change: Put or Delete.
+// TODO(rogulenko): Consider adding the Shell type.
+type ChangeType enum {
+	Put
+	Delete
+}
+
+// Change is the new value for a watched entity.
+type Change struct {
+	// Table is the name of the table that contains the changed row.
+	Table string
+
+	// Row is the key of the changed row.
+	Row string
+
+	// ChangeType describes the type of the change. If the ChangeType equals to
+	// Put, then the row exists in the table and the Value contains the new
+	// value for this row. If the state equals to Delete, then the row was
+	// removed from the table.
+	ChangeType ChangeType
+
+	// Value is the new value for the row if the state equals to Put,
+	// otherwise the Value is nil.
+	Value []byte
+
+	// ResumeMarker provides a compact representation of all the messages
+	// that have been received by the caller for the given Watch call.
+	// This marker can be provided in the Request message to allow the caller
+	// to resume the stream watching at a specific point without fetching the
+	// initial state.
+	ResumeMarker ResumeMarker
+
+	// FromSync indicates whether the change came from sync. If FromSync is
+	// false, then the change originated from the local device.
+	FromSync bool
+
+	// If true, this Change is followed by more Changes that are in the
+	// same batch as this Change.
+	Continued bool
+}
