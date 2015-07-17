@@ -6,8 +6,8 @@
 package nosql
 
 import (
-  "v.io/v23/security/access"
-  "v.io/v23/services/permissions"
+	"v.io/v23/security/access"
+	"v.io/v23/services/permissions"
 )
 
 // Database represents a collection of Tables. Batches, queries, sync, watch,
@@ -54,6 +54,9 @@ type Database interface {
 
 	// SetPermissions and GetPermissions are included from the Object interface.
 	permissions.Object
+
+	// DatabaseWatcher implements the API to watch for updates in the database.
+	DatabaseWatcher
 
 	// SyncGroupManager implements the API for managing SyncGroups attached to a
 	// Database.
@@ -198,6 +201,42 @@ type SyncGroupManager interface {
 	// Suspend/ResumeSync
 	// Get/SetSyncPolicy with policies such as "sync only via wifi", "sync
 	// aggressively", "sync once per day".
+}
+
+// Watch allows a client to watch for updates in the database. For each watched
+// request, the client will receive a reliable stream of watch events without
+// re-ordering.
+//
+// The watching is done by starting a streaming RPC. The argument to the RPC
+// contains the ResumeMarker that points to a particular place in the database
+// event log and a set of (table, row prefix) pairs. Updates with rows not
+// covered by the set are excluded from the result stream. The result stream
+// consists of a never-ending sequence of Change messages (until the call fails
+// or is canceled). Each Change message contains an optional continued bit.
+// A sub-sequence of Change messages with continued=true followed by a Change
+// message with continued=false forms a batch. If the client has no access to
+// a row specified in a change, that change is excluded from the result stream.
+//
+// See "v.io/v23/services/watch".GlobWatcher for more detailed explanation of
+// the general behavior.
+//
+// The DatabaseWatcher is designed to be used in the following way:
+// 1) begin a read-only batch
+// 2) read all information your app needs
+// 3) read the ResumeMarker
+// 4) abort the batch
+// 5) start watching changes to the data using the ResumeMarker
+// In this configuration the client doesn't miss any changes.
+type DatabaseWatcher interface {
+	// Watch returns a stream of changes for a given watch request. If this
+	// Database is bound to a batch, Watch() will fail with ErrBoundToBatch.
+	// If the provided ResumeMarker is invalid or outdated, Watch() will fail
+	// with "v.io/v23/services/watch".ErrUnknownResumeMarker.
+	Watch(req WatchRequest) stream<_, Change> error {access.Read}
+
+	// GetResumeMarker returns the ResumeMarker that points to the current end
+	// of the current event log. GetResumeMarker() can be called on a batch.
+	GetResumeMarker() (ResumeMarker | error) {access.Read}
 }
 
 error (
