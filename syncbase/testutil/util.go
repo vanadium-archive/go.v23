@@ -13,6 +13,7 @@ import (
 	"runtime/debug"
 	"testing"
 
+	wire "v.io/syncbase/v23/services/syncbase/nosql"
 	"v.io/syncbase/v23/syncbase"
 	"v.io/syncbase/v23/syncbase/nosql"
 	"v.io/syncbase/v23/syncbase/util"
@@ -48,7 +49,7 @@ func CreateApp(t *testing.T, ctx *context.T, s syncbase.Service, name string) sy
 }
 
 func CreateNoSQLDatabase(t *testing.T, ctx *context.T, a syncbase.App, name string) nosql.Database {
-	d := a.NoSQLDatabase(name)
+	d := a.NoSQLDatabase(name, nil)
 	if err := d.Create(ctx, nil); err != nil {
 		Fatalf(t, "d.Create() failed: %v", err)
 	}
@@ -177,6 +178,26 @@ func CheckExecError(t *testing.T, ctx *context.T, db nosql.DatabaseHandle, q str
 	if verror.ErrorID(err) != wantErrorID {
 		t.Errorf("%q", verror.DebugString(err))
 		t.Errorf("query %q: got %v, want: %v", q, verror.ErrorID(err), wantErrorID)
+	}
+}
+
+type MockSchemaUpgrader struct {
+	CallCount int
+}
+
+func (msu *MockSchemaUpgrader) Run(db nosql.Database, oldVersion, newVersion int64) error {
+	msu.CallCount++
+	return nil
+}
+
+var _ nosql.SchemaUpgrader = (*MockSchemaUpgrader)(nil)
+
+func DefaultSchema() *nosql.Schema {
+	return &nosql.Schema{
+		Metadata: wire.SchemaMetadata{
+			Version: 0,
+		},
+		Upgrader: nosql.SchemaUpgrader(&MockSchemaUpgrader{}),
 	}
 }
 

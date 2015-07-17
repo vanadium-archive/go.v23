@@ -55,7 +55,9 @@ type App interface {
 
 	// NoSQLDatabase returns the nosql.Database with the given name.
 	// relativeName must not contain slashes.
-	NoSQLDatabase(relativeName string) nosql.Database
+	// schema can be nil only if schema was never set for the database in the
+	// first place. See nosql.Schema for more details.
+	NoSQLDatabase(relativeName string, schema *nosql.Schema) nosql.Database
 
 	// ListDatabases returns a list of all Database names.
 	// TODO(kash): Include the database type (NoSQL vs. SQL).

@@ -23,7 +23,7 @@ import (
 
 // Tests various Name, FullName, and Key methods.
 func TestNameAndKey(t *testing.T) {
-	d := syncbase.NewService("s").App("a").NoSQLDatabase("d")
+	d := syncbase.NewService("s").App("a").NoSQLDatabase("d", nil)
 	tb := d.Table("tb")
 	r := tb.Row("r")
 

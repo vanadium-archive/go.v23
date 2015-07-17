@@ -52,7 +52,7 @@ var runTestSyncbasedPutGet = modules.Register(func(env *modules.Env, args ...str
 	if err := a.Create(ctx, nil); err != nil {
 		return fmt.Errorf("unable to create an app: %v", err)
 	}
-	d := a.NoSQLDatabase("d")
+	d := a.NoSQLDatabase("d", nil)
 	if err := d.Create(ctx, nil); err != nil {
 		return fmt.Errorf("unable to create a database: %v", err)
 	}
@@ -123,7 +123,7 @@ var runCreateHierarchy = modules.Register(func(env *modules.Env, args ...string)
 		if err := a.Create(ctx, nil); err != nil {
 			return fmt.Errorf("a.Create() failed: %v", err)
 		}
-		for _, d := range []nosql.Database{a.NoSQLDatabase("d1"), a.NoSQLDatabase("d2")} {
+		for _, d := range []nosql.Database{a.NoSQLDatabase("d1", nil), a.NoSQLDatabase("d2", nil)} {
 			if err := d.Create(ctx, nil); err != nil {
 				return fmt.Errorf("d.Create() failed: %v", err)
 			}
@@ -166,7 +166,7 @@ var runCheckHierarchy = modules.Register(func(env *modules.Env, args ...string) 
 			return fmt.Errorf("Databases do not match: got %v, want %v", got, want)
 		}
 		for _, dName := range want {
-			d := a.NoSQLDatabase(dName)
+			d := a.NoSQLDatabase(dName, nil)
 			if got, err = d.ListTables(ctx); err != nil {
 				return fmt.Errorf("d.ListTables() failed: %v", err)
 			}

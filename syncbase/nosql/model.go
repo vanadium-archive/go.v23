@@ -104,6 +104,15 @@ type Database interface {
 	// GetSyncGroupNames returns the global names of all SyncGroups attached to
 	// this database.
 	GetSyncGroupNames(ctx *context.T) ([]string, error)
+
+	// This method compares the current schema version of the database with the
+	// schema version provided while creating this database handle. If the
+	// current database schema version is lower, then the SchemaUpdater is
+	// called. If SchemaUpdater is successful this method stores the new schema
+	// metadata in database.
+	// Note: schema can be nil, in which case this method skips schema check
+	// and the caller is responsible for maintaining schema sanity.
+	UpgradeIfOutdated(ctx *context.T) (bool, error)
 }
 
 // BatchDatabase is a handle to a set of reads and writes to the database that
@@ -341,4 +350,27 @@ type SyncGroup interface {
 	// Requires: Client must have at least Read access on the Database and on the
 	// SyncGroup ACL.
 	GetMembers(ctx *context.T) (map[string]wire.SyncGroupMemberInfo, error)
+}
+
+// SchemaUpgrader interface must be implemented by the App in order to upgrade
+// the database schema from a lower version to a higher version.
+type SchemaUpgrader interface {
+	// Takes an instance of database and upgrades data from old
+	// schema to new schema. This method must be idempotent.
+	Run(db Database, oldVersion, newVersion int64) error
+}
+
+// Each database has a Schema associated with it which defines the current
+// version of the database. When a new version of app wishes to change
+// its data in a way that it is not compatible with the old app's data,
+// the app must change the schema version and provide relevant upgrade logic
+// in the Upgrader. The conflict resolution rules are also associated with the
+// schema version. Hence if the conflict resolution rules change then the schema
+// version also must be bumped.
+//
+// Schema provides metadata and a SchemaUpgrader for a given database.
+// SchemaUpgrader is purely local and not persisted.
+type Schema struct {
+	Metadata wire.SchemaMetadata
+	Upgrader SchemaUpgrader
 }

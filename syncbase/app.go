@@ -48,8 +48,8 @@ func (a *app) Exists(ctx *context.T) (bool, error) {
 }
 
 // NoSQLDatabase implements App.NoSQLDatabase.
-func (a *app) NoSQLDatabase(relativeName string) nosql.Database {
-	return nosql.NewDatabase(a.fullName, relativeName)
+func (a *app) NoSQLDatabase(relativeName string, schema *nosql.Schema) nosql.Database {
+	return nosql.NewDatabase(a.fullName, relativeName, schema)
 }
 
 // ListDatabases implements App.ListDatabases.

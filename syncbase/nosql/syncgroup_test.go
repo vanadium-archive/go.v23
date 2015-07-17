@@ -101,7 +101,7 @@ func TestJoinSyncGroup(t *testing.T) {
 	// Create client2.
 	ctx2 := tu.NewCtx(ctx, rootp, "client2")
 	a2 := syncbase.NewService(sName).App("a")
-	d2 := a2.NoSQLDatabase("d")
+	d2 := a2.NoSQLDatabase("d", nil)
 
 	// Check that client2's join fails if the perms disallow access.
 	joinSyncGroup(t, ctx2, d2, sgNameA, verror.ErrNoAccess.ID)

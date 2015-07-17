@@ -74,6 +74,81 @@ type SyncGroupMemberInfo struct {
 	SyncPriority byte
 }
 
+// ResolverType defines the possible conflict resolution policies.
+// A Conflict is defined as presence of two independent sets of updates
+// originating from the same version of an object. Syncbase
+// uses version vectors to determine sequence of changes to a given row. Hence
+// if device A updates a row with key "foo" from version V3 to V4, then syncs
+// with device B which further updates the same row from version V4 to V5 and
+// then V5 is synced back to device A, device A will see V5 as a forward
+// progression of "foo" and not a conflict with V3 of "foo". But in the
+// meantime if device A had already updated "foo" again from version V4 to
+// version V6 then there is a conflict between V5 and V6 with V4 being the
+// common ancestor.
+type ResolverType enum {
+	// LastWins is a policy which resolves a conflict between two writes by
+	// choosing the version which has the greatest timestamp.
+	// For example, if device A created V6 at time T1 and device B created V5 at
+	// time T2 where timestamp T2 > T1, then V5 will be accepted as the
+	// resolution of the conflict.
+	// Syncbase maintains an internal clock for creating write timestamps. This
+	// clock is kept up to date via regular synchronization with NTP and with
+	// other syncbases. As long as the syncbase has access to an NTP server
+	// directly or indirectly via another syncbase, the internal clock will
+	// track NTP time and correct any skews suffered by the local system clock.
+	LastWins
+
+	// AppResolves is a policy which allows an App to handle resolution of a
+	// conflict on its own. In order to receive the conflicts, the app needs to
+	// register a conflict resolution stream using
+	// Database.StartConflictResolver().
+	AppResolves
+
+	// Defer is a policy that allows an instance of an App to outsource its
+	// conflict resolution to some other instance, typically a more capable
+	// instance (in terms of resources, knowledge or permissions) such as a
+	// cloud or admin instance.
+	Defer
+}
+
+// SchemaMetadata maintains metadata related to the schema of a given database.
+// There is one SchemaMetadata per database.
+type SchemaMetadata struct {
+	// Non negative Schema version number. Should be increased with every schema change
+	// (e.g. adding fields to structs) that cannot be handled by previous
+	// versions of the app.
+	Version int64
+	Policy  CrPolicy
+}
+
+// For a given row with a conflict, all rules are matched against the row.
+// If no rules match the row, we default to "LastWins". If multiple
+// rules match the row, ties are broken as follows:
+//  1. If one match has a longer prefix than the other, take that one.
+//  2. Else, if only one match specifies a type, take that one.
+//  3. Else, the two matches are identical; take the last one in the Rules array.
+type CrPolicy struct {
+	Rules []CrRule
+}
+
+// CrRule provides a filter and the type of resolution to perform for a row
+// under conflict that passes the filter.
+type CrRule struct {
+	// TableName is the name of the table that this rule applies to.
+	TableName	string
+
+	// KeyPrefix represents the set of keys within the given table for which
+	// this policy applies. TableName must not be empty if this field is set.
+	KeyPrefix	string
+
+	// Type includes the full package path for the value type for which this
+	// policy applies.
+	Type 		string
+
+	// Policy for resolving conflict.
+	Resolver 	ResolverType
+}
+
 // BlobRef is a reference to a blob.
 type BlobRef string
 

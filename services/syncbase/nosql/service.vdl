@@ -19,7 +19,7 @@ type Database interface {
 	// Create creates this Database.
 	// If perms is nil, we inherit (copy) the App perms.
 	// Create requires the caller to have Write permission at the App.
-	Create(perms access.Permissions) error {access.Write}
+	Create(perms access.Permissions, metadata ?SchemaMetadata) error {access.Write}
 
 	// Delete deletes this Database.
 	Delete() error {access.Write}
@@ -34,6 +34,7 @@ type Database interface {
 	// Database handle bound to this batch. If this Database is already bound to a
 	// batch, BeginBatch() will fail with ErrBoundToBatch. Concurrency semantics
 	// are documented in model.go.
+	// TODO(sadovsky): make BatchOptions optional
 	BeginBatch(bo BatchOptions) (string | error) {access.Read}
 
 	// Commit persists the pending changes to the database.
@@ -65,6 +66,10 @@ type Database interface {
 	// BlobManager implements the API for managing blobs attached to rows in
 	// a Database.
 	BlobManager
+
+	// SchemaManager implements the API for managing schema metadata attached
+	// to a Database.
+	SchemaManager
 }
 
 // Table represents a collection of Rows.
@@ -205,6 +210,20 @@ type SyncGroupManager interface {
 	// Suspend/ResumeSync
 	// Get/SetSyncPolicy with policies such as "sync only via wifi", "sync
 	// aggressively", "sync once per day".
+}
+
+// SchemaManager implements the API for managing schema metadata attached
+// to a Database.
+type SchemaManager interface {
+	// GetSchemaMetadata retrieves schema metadata for this database.
+	//
+	// Requires: Client must have at least Read access on the Database.
+	GetSchemaMetadata() (SchemaMetadata | error) {access.Read}
+
+	// SetSchemaMetadata stores schema metadata for this database.
+	//
+	// Requires: Client must have at least Write access on the Database.
+	SetSchemaMetadata(metadata SchemaMetadata) error {access.Write}
 }
 
 // BlobManager is the interface for blob operations.

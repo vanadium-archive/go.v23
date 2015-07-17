@@ -280,7 +280,7 @@ var runSetupAppA = modules.Register(func(env *modules.Env, args ...string) error
 
 	a := syncbase.NewService(args[0]).App("a")
 	a.Create(ctx, nil)
-	d := a.NoSQLDatabase("d")
+	d := a.NoSQLDatabase("d", nil)
 	d.Create(ctx, nil)
 	d.CreateTable(ctx, "tb", nil)
 
@@ -292,7 +292,7 @@ var runCreateSyncGroup = modules.Register(func(env *modules.Env, args ...string)
 	defer shutdown()
 
 	a := syncbase.NewService(args[0]).App("a")
-	d := a.NoSQLDatabase("d")
+	d := a.NoSQLDatabase("d", nil)
 
 	mtName := env.Vars[ref.EnvNamespacePrefix]
 	spec := wire.SyncGroupSpec{
@@ -315,7 +315,7 @@ var runJoinSyncGroup = modules.Register(func(env *modules.Env, args ...string) e
 	defer shutdown()
 
 	a := syncbase.NewService(args[0]).App("a")
-	d := a.NoSQLDatabase("d")
+	d := a.NoSQLDatabase("d", nil)
 
 	sg := d.SyncGroup(args[1])
 	info := wire.SyncGroupMemberInfo{10}
@@ -330,7 +330,7 @@ var runPopulateData = modules.Register(func(env *modules.Env, args ...string) er
 	defer shutdown()
 
 	a := syncbase.NewService(args[0]).App("a")
-	d := a.NoSQLDatabase("d")
+	d := a.NoSQLDatabase("d", nil)
 
 	// Do Puts.
 	tb := d.Table("tb")
@@ -351,7 +351,7 @@ var runUpdateData = modules.Register(func(env *modules.Env, args ...string) erro
 	defer shutdown()
 
 	a := syncbase.NewService(args[0]).App("a")
-	d := a.NoSQLDatabase("d")
+	d := a.NoSQLDatabase("d", nil)
 
 	// Do Puts.
 	tb := d.Table("tb")
@@ -373,7 +373,7 @@ var runVerifySyncGroupData = modules.Register(func(env *modules.Env, args ...str
 	defer shutdown()
 
 	a := syncbase.NewService(args[0]).App("a")
-	d := a.NoSQLDatabase("d")
+	d := a.NoSQLDatabase("d", nil)
 
 	// Wait for a bit (up to 4 sec) until the last key appears.
 	tb := d.Table("tb")
@@ -433,7 +433,7 @@ var runVerifyNonSyncGroupData = modules.Register(func(env *modules.Env, args ...
 	defer shutdown()
 
 	a := syncbase.NewService(args[0]).App("a")
-	d := a.NoSQLDatabase("d")
+	d := a.NoSQLDatabase("d", nil)
 	tb := d.Table("tb")
 
 	// Verify through a scan that none of that data exists.
@@ -458,7 +458,7 @@ var runVerifyLocalAndRemoteData = modules.Register(func(env *modules.Env, args .
 	defer shutdown()
 
 	a := syncbase.NewService(args[0]).App("a")
-	d := a.NoSQLDatabase("d")
+	d := a.NoSQLDatabase("d", nil)
 	tb := d.Table("tb")
 
 	// Wait for a bit (up to 4 sec) until the last key appears.
@@ -504,7 +504,7 @@ var runVerifyNestedSyncGroupData = modules.Register(func(env *modules.Env, args 
 	defer shutdown()
 
 	a := syncbase.NewService(args[0]).App("a")
-	d := a.NoSQLDatabase("d")
+	d := a.NoSQLDatabase("d", nil)
 
 	// Wait for a bit (up to 8 sec) until the last key appears. This chosen
 	// time interval is dependent on how fast the membership view is
@@ -560,7 +560,7 @@ var runSetupAppMulti = modules.Register(func(env *modules.Env, args ...string) e
 
 		for j := 0; j < numDbs; j++ {
 			dbName := fmt.Sprintf("d%d", j)
-			d := a.NoSQLDatabase(dbName)
+			d := a.NoSQLDatabase(dbName, nil)
 			d.Create(ctx, nil)
 
 			for k := 0; k < numTbs; k++ {
@@ -594,7 +594,7 @@ var runPopulateSyncGroupMulti = modules.Register(func(env *modules.Env, args ...
 		// For each database...
 		for j := 0; j < numDbs; j++ {
 			dbName := fmt.Sprintf("d%d", j)
-			d := a.NoSQLDatabase(dbName)
+			d := a.NoSQLDatabase(dbName, nil)
 
 			// For each table, pre-populate entries on each prefix.
 			// Also determine the SyncGroup prefixes.
@@ -653,7 +653,7 @@ var runJoinSyncGroupMulti = modules.Register(func(env *modules.Env, args ...stri
 
 		for j := 0; j < numDbs; j++ {
 			dbName := fmt.Sprintf("d%d", j)
-			d := a.NoSQLDatabase(dbName)
+			d := a.NoSQLDatabase(dbName, nil)
 
 			sgName := naming.Join(sgNamePrefix, appName, dbName)
 			sg := d.SyncGroup(sgName)
@@ -685,7 +685,7 @@ var runVerifySyncGroupDataMulti = modules.Register(func(env *modules.Env, args .
 
 		for j := 0; j < numDbs; j++ {
 			dbName := fmt.Sprintf("d%d", j)
-			d := a.NoSQLDatabase(dbName)
+			d := a.NoSQLDatabase(dbName, nil)
 
 			for k := 0; k < numTbs; k++ {
 				tbName := fmt.Sprintf("tb%d", k)

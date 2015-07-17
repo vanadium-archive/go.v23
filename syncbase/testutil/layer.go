@@ -348,7 +348,7 @@ func (a *app) ListChildren(ctx *context.T) ([]string, error) {
 	return a.ListDatabases(ctx)
 }
 func (a *app) Child(childName string) layer {
-	return makeLayer(a.NoSQLDatabase(childName))
+	return makeLayer(a.NoSQLDatabase(childName, nil))
 }
 
 type database struct {

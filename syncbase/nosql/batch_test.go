@@ -510,7 +510,7 @@ func TestDisallowedMethods(t *testing.T) {
 	// ErrBoundToBatch specifically since in practice bc.Create() will return
 	// either ErrExist or "invalid name" depending on whether the database and
 	// batch exist.
-	if err := bc.Create(ctx, nil); err == nil {
+	if err := bc.Create(ctx, nil, nil); err == nil {
 		t.Fatalf("bc.Create() should have failed: %v", err)
 	}
 	if err := bc.Delete(ctx); verror.ErrorID(err) != wire.ErrBoundToBatch.ID {
@@ -545,7 +545,7 @@ func TestBeginBatchWithNonexistentDatabase(t *testing.T) {
 	ctx, sName, cleanup := tu.SetupOrDie(nil)
 	defer cleanup()
 	a := tu.CreateApp(t, ctx, syncbase.NewService(sName), "a")
-	d := a.NoSQLDatabase("d")
+	d := a.NoSQLDatabase("d", nil)
 	if _, err := d.BeginBatch(ctx, wire.BatchOptions{}); verror.ErrorID(err) != verror.ErrNoExist.ID {
 		t.Fatalf("d.BeginBatch() should have failed: %v", err)
 	}

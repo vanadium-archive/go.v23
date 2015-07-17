@@ -102,6 +102,120 @@ func (SyncGroupMemberInfo) __VDLReflect(struct {
 }) {
 }
 
+// ResolverType defines the possible conflict resolution policies.
+// A Conflict is defined as presence of two independent sets of updates
+// originating from the same version of an object. Syncbase
+// uses version vectors to determine sequence of changes to a given row. Hence
+// if device A updates a row with key "foo" from version V3 to V4, then syncs
+// with device B which further updates the same row from version V4 to V5 and
+// then V5 is synced back to device A, device A will see V5 as a forward
+// progression of "foo" and not a conflict with V3 of "foo". But in the
+// meantime if device A had already updated "foo" again from version V4 to
+// version V6 then there is a conflict between V5 and V6 with V4 being the
+// common ancestor.
+type ResolverType int
+
+const (
+	ResolverTypeLastWins ResolverType = iota
+	ResolverTypeAppResolves
+	ResolverTypeDefer
+)
+
+// ResolverTypeAll holds all labels for ResolverType.
+var ResolverTypeAll = [...]ResolverType{ResolverTypeLastWins, ResolverTypeAppResolves, ResolverTypeDefer}
+
+// ResolverTypeFromString creates a ResolverType from a string label.
+func ResolverTypeFromString(label string) (x ResolverType, err error) {
+	err = x.Set(label)
+	return
+}
+
+// Set assigns label to x.
+func (x *ResolverType) Set(label string) error {
+	switch label {
+	case "LastWins", "lastwins":
+		*x = ResolverTypeLastWins
+		return nil
+	case "AppResolves", "appresolves":
+		*x = ResolverTypeAppResolves
+		return nil
+	case "Defer", "defer":
+		*x = ResolverTypeDefer
+		return nil
+	}
+	*x = -1
+	return fmt.Errorf("unknown label %q in nosql.ResolverType", label)
+}
+
+// String returns the string label of x.
+func (x ResolverType) String() string {
+	switch x {
+	case ResolverTypeLastWins:
+		return "LastWins"
+	case ResolverTypeAppResolves:
+		return "AppResolves"
+	case ResolverTypeDefer:
+		return "Defer"
+	}
+	return ""
+}
+
+func (ResolverType) __VDLReflect(struct {
+	Name string `vdl:"v.io/syncbase/v23/services/syncbase/nosql.ResolverType"`
+	Enum struct{ LastWins, AppResolves, Defer string }
+}) {
+}
+
+// SchemaMetadata maintains metadata related to the schema of a given database.
+// There is one SchemaMetadata per database.
+type SchemaMetadata struct {
+	// Non negative Schema version number. Should be increased with every schema change
+	// (e.g. adding fields to structs) that cannot be handled by previous
+	// versions of the app.
+	Version int64
+	Policy  CrPolicy
+}
+
+func (SchemaMetadata) __VDLReflect(struct {
+	Name string `vdl:"v.io/syncbase/v23/services/syncbase/nosql.SchemaMetadata"`
+}) {
+}
+
+// For a given row with a conflict, all rules are matched against the row.
+// If no rules match the row, we default to "LastWins". If multiple
+// rules match the row, ties are broken as follows:
+//  1. If one match has a longer prefix than the other, take that one.
+//  2. Else, if only one match specifies a type, take that one.
+//  3. Else, the two matches are identical; take the last one in the Rules array.
+type CrPolicy struct {
+	Rules []CrRule
+}
+
+func (CrPolicy) __VDLReflect(struct {
+	Name string `vdl:"v.io/syncbase/v23/services/syncbase/nosql.CrPolicy"`
+}) {
+}
+
+// CrRule provides a filter and the type of resolution to perform for a row
+// under conflict that passes the filter.
+type CrRule struct {
+	// TableName is the name of the table that this rule applies to.
+	TableName string
+	// KeyPrefix represents the set of keys within the given table for which
+	// this policy applies. TableName must not be empty if this field is set.
+	KeyPrefix string
+	// Type includes the full package path for the value type for which this
+	// policy applies.
+	Type string
+	// Policy for resolving conflict.
+	Resolver ResolverType
+}
+
+func (CrRule) __VDLReflect(struct {
+	Name string `vdl:"v.io/syncbase/v23/services/syncbase/nosql.CrRule"`
+}) {
+}
+
 // BlobRef is a reference to a blob.
 type BlobRef string
 
@@ -305,6 +419,10 @@ func init() {
 	vdl.Register((*KeyValue)(nil))
 	vdl.Register((*SyncGroupSpec)(nil))
 	vdl.Register((*SyncGroupMemberInfo)(nil))
+	vdl.Register((*ResolverType)(nil))
+	vdl.Register((*SchemaMetadata)(nil))
+	vdl.Register((*CrPolicy)(nil))
+	vdl.Register((*CrRule)(nil))
 	vdl.Register((*BlobRef)(nil))
 	vdl.Register((*FetchState)(nil))
 	vdl.Register((*FetchStatus)(nil))

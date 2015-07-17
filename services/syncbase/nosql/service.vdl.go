@@ -1421,6 +1421,142 @@ func (s implBlobManagerFetchBlobServerCallSend) Send(item FetchStatus) error {
 	return s.s.Send(item)
 }
 
+// SchemaManagerClientMethods is the client interface
+// containing SchemaManager methods.
+//
+// SchemaManager implements the API for managing schema metadata attached
+// to a Database.
+type SchemaManagerClientMethods interface {
+	// GetSchemaMetadata retrieves schema metadata for this database.
+	//
+	// Requires: Client must have at least Read access on the Database.
+	GetSchemaMetadata(*context.T, ...rpc.CallOpt) (SchemaMetadata, error)
+	// SetSchemaMetadata stores schema metadata for this database.
+	//
+	// Requires: Client must have at least Write access on the Database.
+	SetSchemaMetadata(ctx *context.T, metadata SchemaMetadata, opts ...rpc.CallOpt) error
+}
+
+// SchemaManagerClientStub adds universal methods to SchemaManagerClientMethods.
+type SchemaManagerClientStub interface {
+	SchemaManagerClientMethods
+	rpc.UniversalServiceMethods
+}
+
+// SchemaManagerClient returns a client stub for SchemaManager.
+func SchemaManagerClient(name string) SchemaManagerClientStub {
+	return implSchemaManagerClientStub{name}
+}
+
+type implSchemaManagerClientStub struct {
+	name string
+}
+
+func (c implSchemaManagerClientStub) GetSchemaMetadata(ctx *context.T, opts ...rpc.CallOpt) (o0 SchemaMetadata, err error) {
+	err = v23.GetClient(ctx).Call(ctx, c.name, "GetSchemaMetadata", nil, []interface{}{&o0}, opts...)
+	return
+}
+
+func (c implSchemaManagerClientStub) SetSchemaMetadata(ctx *context.T, i0 SchemaMetadata, opts ...rpc.CallOpt) (err error) {
+	err = v23.GetClient(ctx).Call(ctx, c.name, "SetSchemaMetadata", []interface{}{i0}, nil, opts...)
+	return
+}
+
+// SchemaManagerServerMethods is the interface a server writer
+// implements for SchemaManager.
+//
+// SchemaManager implements the API for managing schema metadata attached
+// to a Database.
+type SchemaManagerServerMethods interface {
+	// GetSchemaMetadata retrieves schema metadata for this database.
+	//
+	// Requires: Client must have at least Read access on the Database.
+	GetSchemaMetadata(*context.T, rpc.ServerCall) (SchemaMetadata, error)
+	// SetSchemaMetadata stores schema metadata for this database.
+	//
+	// Requires: Client must have at least Write access on the Database.
+	SetSchemaMetadata(ctx *context.T, call rpc.ServerCall, metadata SchemaMetadata) error
+}
+
+// SchemaManagerServerStubMethods is the server interface containing
+// SchemaManager methods, as expected by rpc.Server.
+// There is no difference between this interface and SchemaManagerServerMethods
+// since there are no streaming methods.
+type SchemaManagerServerStubMethods SchemaManagerServerMethods
+
+// SchemaManagerServerStub adds universal methods to SchemaManagerServerStubMethods.
+type SchemaManagerServerStub interface {
+	SchemaManagerServerStubMethods
+	// Describe the SchemaManager interfaces.
+	Describe__() []rpc.InterfaceDesc
+}
+
+// SchemaManagerServer returns a server stub for SchemaManager.
+// It converts an implementation of SchemaManagerServerMethods into
+// an object that may be used by rpc.Server.
+func SchemaManagerServer(impl SchemaManagerServerMethods) SchemaManagerServerStub {
+	stub := implSchemaManagerServerStub{
+		impl: impl,
+	}
+	// Initialize GlobState; always check the stub itself first, to handle the
+	// case where the user has the Glob method defined in their VDL source.
+	if gs := rpc.NewGlobState(stub); gs != nil {
+		stub.gs = gs
+	} else if gs := rpc.NewGlobState(impl); gs != nil {
+		stub.gs = gs
+	}
+	return stub
+}
+
+type implSchemaManagerServerStub struct {
+	impl SchemaManagerServerMethods
+	gs   *rpc.GlobState
+}
+
+func (s implSchemaManagerServerStub) GetSchemaMetadata(ctx *context.T, call rpc.ServerCall) (SchemaMetadata, error) {
+	return s.impl.GetSchemaMetadata(ctx, call)
+}
+
+func (s implSchemaManagerServerStub) SetSchemaMetadata(ctx *context.T, call rpc.ServerCall, i0 SchemaMetadata) error {
+	return s.impl.SetSchemaMetadata(ctx, call, i0)
+}
+
+func (s implSchemaManagerServerStub) Globber() *rpc.GlobState {
+	return s.gs
+}
+
+func (s implSchemaManagerServerStub) Describe__() []rpc.InterfaceDesc {
+	return []rpc.InterfaceDesc{SchemaManagerDesc}
+}
+
+// SchemaManagerDesc describes the SchemaManager interface.
+var SchemaManagerDesc rpc.InterfaceDesc = descSchemaManager
+
+// descSchemaManager hides the desc to keep godoc clean.
+var descSchemaManager = rpc.InterfaceDesc{
+	Name:    "SchemaManager",
+	PkgPath: "v.io/syncbase/v23/services/syncbase/nosql",
+	Doc:     "// SchemaManager implements the API for managing schema metadata attached\n// to a Database.",
+	Methods: []rpc.MethodDesc{
+		{
+			Name: "GetSchemaMetadata",
+			Doc:  "// GetSchemaMetadata retrieves schema metadata for this database.\n//\n// Requires: Client must have at least Read access on the Database.",
+			OutArgs: []rpc.ArgDesc{
+				{"", ``}, // SchemaMetadata
+			},
+			Tags: []*vdl.Value{vdl.ValueOf(access.Tag("Read"))},
+		},
+		{
+			Name: "SetSchemaMetadata",
+			Doc:  "// SetSchemaMetadata stores schema metadata for this database.\n//\n// Requires: Client must have at least Write access on the Database.",
+			InArgs: []rpc.ArgDesc{
+				{"metadata", ``}, // SchemaMetadata
+			},
+			Tags: []*vdl.Value{vdl.ValueOf(access.Tag("Write"))},
+		},
+	},
+}
+
 // DatabaseClientMethods is the client interface
 // containing Database methods.
 //
@@ -1505,10 +1641,13 @@ type DatabaseClientMethods interface {
 	SyncGroupManagerClientMethods
 	// BlobManager is the interface for blob operations.
 	BlobManagerClientMethods
+	// SchemaManager implements the API for managing schema metadata attached
+	// to a Database.
+	SchemaManagerClientMethods
 	// Create creates this Database.
 	// If perms is nil, we inherit (copy) the App perms.
 	// Create requires the caller to have Write permission at the App.
-	Create(ctx *context.T, perms access.Permissions, opts ...rpc.CallOpt) error
+	Create(ctx *context.T, perms access.Permissions, metadata *SchemaMetadata, opts ...rpc.CallOpt) error
 	// Delete deletes this Database.
 	Delete(*context.T, ...rpc.CallOpt) error
 	// Exists returns true only if this Database exists. Insufficient permissions
@@ -1520,6 +1659,7 @@ type DatabaseClientMethods interface {
 	// Database handle bound to this batch. If this Database is already bound to a
 	// batch, BeginBatch() will fail with ErrBoundToBatch. Concurrency semantics
 	// are documented in model.go.
+	// TODO(sadovsky): make BatchOptions optional
 	BeginBatch(ctx *context.T, bo BatchOptions, opts ...rpc.CallOpt) (string, error)
 	// Commit persists the pending changes to the database.
 	// If this Database is not bound to a batch, Commit() will fail with
@@ -1544,7 +1684,7 @@ type DatabaseClientStub interface {
 
 // DatabaseClient returns a client stub for Database.
 func DatabaseClient(name string) DatabaseClientStub {
-	return implDatabaseClientStub{name, permissions.ObjectClient(name), DatabaseWatcherClient(name), SyncGroupManagerClient(name), BlobManagerClient(name)}
+	return implDatabaseClientStub{name, permissions.ObjectClient(name), DatabaseWatcherClient(name), SyncGroupManagerClient(name), BlobManagerClient(name), SchemaManagerClient(name)}
 }
 
 type implDatabaseClientStub struct {
@@ -1554,10 +1694,11 @@ type implDatabaseClientStub struct {
 	DatabaseWatcherClientStub
 	SyncGroupManagerClientStub
 	BlobManagerClientStub
+	SchemaManagerClientStub
 }
 
-func (c implDatabaseClientStub) Create(ctx *context.T, i0 access.Permissions, opts ...rpc.CallOpt) (err error) {
-	err = v23.GetClient(ctx).Call(ctx, c.name, "Create", []interface{}{i0}, nil, opts...)
+func (c implDatabaseClientStub) Create(ctx *context.T, i0 access.Permissions, i1 *SchemaMetadata, opts ...rpc.CallOpt) (err error) {
+	err = v23.GetClient(ctx).Call(ctx, c.name, "Create", []interface{}{i0, i1}, nil, opts...)
 	return
 }
 
@@ -1747,10 +1888,13 @@ type DatabaseServerMethods interface {
 	SyncGroupManagerServerMethods
 	// BlobManager is the interface for blob operations.
 	BlobManagerServerMethods
+	// SchemaManager implements the API for managing schema metadata attached
+	// to a Database.
+	SchemaManagerServerMethods
 	// Create creates this Database.
 	// If perms is nil, we inherit (copy) the App perms.
 	// Create requires the caller to have Write permission at the App.
-	Create(ctx *context.T, call rpc.ServerCall, perms access.Permissions) error
+	Create(ctx *context.T, call rpc.ServerCall, perms access.Permissions, metadata *SchemaMetadata) error
 	// Delete deletes this Database.
 	Delete(*context.T, rpc.ServerCall) error
 	// Exists returns true only if this Database exists. Insufficient permissions
@@ -1762,6 +1906,7 @@ type DatabaseServerMethods interface {
 	// Database handle bound to this batch. If this Database is already bound to a
 	// batch, BeginBatch() will fail with ErrBoundToBatch. Concurrency semantics
 	// are documented in model.go.
+	// TODO(sadovsky): make BatchOptions optional
 	BeginBatch(ctx *context.T, call rpc.ServerCall, bo BatchOptions) (string, error)
 	// Commit persists the pending changes to the database.
 	// If this Database is not bound to a batch, Commit() will fail with
@@ -1858,10 +2003,13 @@ type DatabaseServerStubMethods interface {
 	SyncGroupManagerServerStubMethods
 	// BlobManager is the interface for blob operations.
 	BlobManagerServerStubMethods
+	// SchemaManager implements the API for managing schema metadata attached
+	// to a Database.
+	SchemaManagerServerStubMethods
 	// Create creates this Database.
 	// If perms is nil, we inherit (copy) the App perms.
 	// Create requires the caller to have Write permission at the App.
-	Create(ctx *context.T, call rpc.ServerCall, perms access.Permissions) error
+	Create(ctx *context.T, call rpc.ServerCall, perms access.Permissions, metadata *SchemaMetadata) error
 	// Delete deletes this Database.
 	Delete(*context.T, rpc.ServerCall) error
 	// Exists returns true only if this Database exists. Insufficient permissions
@@ -1873,6 +2021,7 @@ type DatabaseServerStubMethods interface {
 	// Database handle bound to this batch. If this Database is already bound to a
 	// batch, BeginBatch() will fail with ErrBoundToBatch. Concurrency semantics
 	// are documented in model.go.
+	// TODO(sadovsky): make BatchOptions optional
 	BeginBatch(ctx *context.T, call rpc.ServerCall, bo BatchOptions) (string, error)
 	// Commit persists the pending changes to the database.
 	// If this Database is not bound to a batch, Commit() will fail with
@@ -1906,6 +2055,7 @@ func DatabaseServer(impl DatabaseServerMethods) DatabaseServerStub {
 		DatabaseWatcherServerStub:  DatabaseWatcherServer(impl),
 		SyncGroupManagerServerStub: SyncGroupManagerServer(impl),
 		BlobManagerServerStub:      BlobManagerServer(impl),
+		SchemaManagerServerStub:    SchemaManagerServer(impl),
 	}
 	// Initialize GlobState; always check the stub itself first, to handle the
 	// case where the user has the Glob method defined in their VDL source.
@@ -1923,11 +2073,12 @@ type implDatabaseServerStub struct {
 	DatabaseWatcherServerStub
 	SyncGroupManagerServerStub
 	BlobManagerServerStub
+	SchemaManagerServerStub
 	gs *rpc.GlobState
 }
 
-func (s implDatabaseServerStub) Create(ctx *context.T, call rpc.ServerCall, i0 access.Permissions) error {
-	return s.impl.Create(ctx, call, i0)
+func (s implDatabaseServerStub) Create(ctx *context.T, call rpc.ServerCall, i0 access.Permissions, i1 *SchemaMetadata) error {
+	return s.impl.Create(ctx, call, i0, i1)
 }
 
 func (s implDatabaseServerStub) Delete(ctx *context.T, call rpc.ServerCall) error {
@@ -1959,7 +2110,7 @@ func (s implDatabaseServerStub) Globber() *rpc.GlobState {
 }
 
 func (s implDatabaseServerStub) Describe__() []rpc.InterfaceDesc {
-	return []rpc.InterfaceDesc{DatabaseDesc, permissions.ObjectDesc, DatabaseWatcherDesc, SyncGroupManagerDesc, BlobManagerDesc}
+	return []rpc.InterfaceDesc{DatabaseDesc, permissions.ObjectDesc, DatabaseWatcherDesc, SyncGroupManagerDesc, BlobManagerDesc, SchemaManagerDesc}
 }
 
 // DatabaseDesc describes the Database interface.
@@ -1975,13 +2126,15 @@ var descDatabase = rpc.InterfaceDesc{
 		{"DatabaseWatcher", "v.io/syncbase/v23/services/syncbase/nosql", "// Watch allows a client to watch for updates in the database. For each watched\n// request, the client will receive a reliable stream of watch events without\n// re-ordering.\n//\n// The watching is done by starting a streaming RPC. The argument to the RPC\n// contains the ResumeMarker that points to a particular place in the database\n// event log and a set of (table, row prefix) pairs. Updates with rows not\n// covered by the set are excluded from the result stream. The result stream\n// consists of a never-ending sequence of Change messages (until the call fails\n// or is canceled). Each Change message contains an optional continued bit.\n// A sub-sequence of Change messages with continued=true followed by a Change\n// message with continued=false forms a batch. If the client has no access to\n// a row specified in a change, that change is excluded from the result stream.\n//\n// See \"v.io/v23/services/watch\".GlobWatcher for more detailed explanation of\n// the general behavior.\n//\n// The DatabaseWatcher is designed to be used in the following way:\n// 1) begin a read-only batch\n// 2) read all information your app needs\n// 3) read the ResumeMarker\n// 4) abort the batch\n// 5) start watching changes to the data using the ResumeMarker\n// In this configuration the client doesn't miss any changes."},
 		{"SyncGroupManager", "v.io/syncbase/v23/services/syncbase/nosql", "// SyncGroupManager is the interface for SyncGroup operations.\n// TODO(hpucha): Add blessings to create/join and add a refresh method."},
 		{"BlobManager", "v.io/syncbase/v23/services/syncbase/nosql", "// BlobManager is the interface for blob operations."},
+		{"SchemaManager", "v.io/syncbase/v23/services/syncbase/nosql", "// SchemaManager implements the API for managing schema metadata attached\n// to a Database."},
 	},
 	Methods: []rpc.MethodDesc{
 		{
 			Name: "Create",
 			Doc:  "// Create creates this Database.\n// If perms is nil, we inherit (copy) the App perms.\n// Create requires the caller to have Write permission at the App.",
 			InArgs: []rpc.ArgDesc{
-				{"perms", ``}, // access.Permissions
+				{"perms", ``},    // access.Permissions
+				{"metadata", ``}, // *SchemaMetadata
 			},
 			Tags: []*vdl.Value{vdl.ValueOf(access.Tag("Write"))},
 		},
@@ -2000,7 +2153,7 @@ var descDatabase = rpc.InterfaceDesc{
 		},
 		{
 			Name: "BeginBatch",
-			Doc:  "// BeginBatch creates a new batch. It returns an App-relative name for a\n// Database handle bound to this batch. If this Database is already bound to a\n// batch, BeginBatch() will fail with ErrBoundToBatch. Concurrency semantics\n// are documented in model.go.",
+			Doc:  "// BeginBatch creates a new batch. It returns an App-relative name for a\n// Database handle bound to this batch. If this Database is already bound to a\n// batch, BeginBatch() will fail with ErrBoundToBatch. Concurrency semantics\n// are documented in model.go.\n// TODO(sadovsky): make BatchOptions optional",
 			InArgs: []rpc.ArgDesc{
 				{"bo", ``}, // BatchOptions
 			},
