@@ -61,6 +61,10 @@ type Database interface {
 	// SyncGroupManager implements the API for managing SyncGroups attached to a
 	// Database.
 	SyncGroupManager
+
+	// BlobManager implements the API for managing blobs attached to rows in
+	// a Database.
+	BlobManager
 }
 
 // Table represents a collection of Rows.
@@ -201,6 +205,60 @@ type SyncGroupManager interface {
 	// Suspend/ResumeSync
 	// Get/SetSyncPolicy with policies such as "sync only via wifi", "sync
 	// aggressively", "sync once per day".
+}
+
+// BlobManager is the interface for blob operations.
+type BlobManager interface {
+	// API for resumable blob creation (append-only). After commit, a blob
+	// is immutable. Before commit, the BlobRef can be used with PutBlob,
+	// GetBlobSize, DeleteBlob, and CommitBlob.
+	//
+	// CreateBlob returns a BlobRef for a newly created blob.
+	CreateBlob() (br BlobRef | error) {access.Write}
+
+	// PutBlob appends the byte stream to the blob.
+	PutBlob(br BlobRef) stream<[]byte, _> error {access.Write}
+
+	// CommitBlob marks the blob as immutable.
+	CommitBlob(br BlobRef) error {access.Write}
+
+	// GetBlobSize returns the count of bytes written as part of the blob
+	// (committed or uncommitted).
+	GetBlobSize(br BlobRef) (uint64 | error) {access.Read}
+
+	// DeleteBlob locally deletes the blob (committed or uncommitted).
+	DeleteBlob(br BlobRef) error {access.Write}
+
+	// GetBlob returns the byte stream from a committed blob starting at offset.
+	GetBlob(br BlobRef, offset uint64) stream<_, []byte> error {access.Read}
+
+	// FetchBlob initiates fetching a blob if not locally found. priority
+	// controls the network priority of the blob. Higher priority blobs are
+	// fetched before the lower priority ones. However an ongoing blob
+	// transfer is not interrupted. Status updates are streamed back to the
+	// client as fetch is in progress.
+	FetchBlob(br BlobRef, priority uint64) stream<_, FetchStatus> error {access.Read}
+
+	// PinBlob locally pins the blob so that it is not evicted.
+	PinBlob(br BlobRef) error {access.Write}
+
+	// UnpinBlob locally unpins the blob so that it can be evicted if needed.
+	UnpinBlob(br BlobRef) error {access.Write}
+
+	// KeepBlob locally caches the blob with the specified rank. Lower
+	// ranked blobs are more eagerly evicted.
+	KeepBlob(br BlobRef, rank uint64) error {access.Write}
+
+	// TODO(hpucha): Add API for efficient blob cloning. Options include:
+	// (1) CloneBlob RPC with an array of mods that sepcify the offset and
+	// len for the new bytes. This might need two len fields to support
+	// growing a blob in the middle instead of just replacing byte for byte
+	// in the src blob. Or perhaps Offset>=0 to mean "read from old blob at
+	// this offset for Length bytes", and Offset<0 to mean "read the next
+	// Length Bytes from the PutBlob() stream". (2) We could adopt API
+	// similar to the local blob store with BlockOrFile segments, giving a
+	// more flexible way to clone blobs. Also provide support for parallel
+	// blob upload.
 }
 
 // Watch allows a client to watch for updates in the database. For each watched

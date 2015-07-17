@@ -74,6 +74,28 @@ type SyncGroupMemberInfo struct {
 	SyncPriority byte
 }
 
+// BlobRef is a reference to a blob.
+type BlobRef string
+
+const (
+	NullBlobRef = BlobRef("")
+)
+
+// FetchState represents the state transitions of a blob fetch.
+type FetchState enum {
+	Pending // Fetch request is queued.
+	Locating // Blob discovery is in progress to find a source for the blob.
+	Fetching // Blob transfer is in progress.
+	Done // Blob is locally cached.
+}
+
+// FetchStatus describes the progress of an asynchronous blob fetch.
+type FetchStatus struct {
+	State FetchState // State of the blob fetch request.
+	Received uint64 // Total number of bytes received.
+	Total uint64 // Blob size.
+}
+
 // ResumeMarker is a pointer in the database event log.
 type ResumeMarker string
 

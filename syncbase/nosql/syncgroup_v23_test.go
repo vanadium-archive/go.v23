@@ -677,7 +677,7 @@ var runVerifySyncGroupDataMulti = modules.Register(func(env *modules.Env, args .
 	numTbs, _ := strconv.Atoi(args[3])
 	prefixes := args[4:]
 
-	time.Sleep(10 * time.Second)
+	time.Sleep(15 * time.Second)
 
 	for i := 0; i < numApps; i++ {
 		appName := fmt.Sprintf("a%d", i)

@@ -102,6 +102,86 @@ func (SyncGroupMemberInfo) __VDLReflect(struct {
 }) {
 }
 
+// BlobRef is a reference to a blob.
+type BlobRef string
+
+func (BlobRef) __VDLReflect(struct {
+	Name string `vdl:"v.io/syncbase/v23/services/syncbase/nosql.BlobRef"`
+}) {
+}
+
+// FetchState represents the state transitions of a blob fetch.
+type FetchState int
+
+const (
+	FetchStatePending FetchState = iota
+	FetchStateLocating
+	FetchStateFetching
+	FetchStateDone
+)
+
+// FetchStateAll holds all labels for FetchState.
+var FetchStateAll = [...]FetchState{FetchStatePending, FetchStateLocating, FetchStateFetching, FetchStateDone}
+
+// FetchStateFromString creates a FetchState from a string label.
+func FetchStateFromString(label string) (x FetchState, err error) {
+	err = x.Set(label)
+	return
+}
+
+// Set assigns label to x.
+func (x *FetchState) Set(label string) error {
+	switch label {
+	case "Pending", "pending":
+		*x = FetchStatePending
+		return nil
+	case "Locating", "locating":
+		*x = FetchStateLocating
+		return nil
+	case "Fetching", "fetching":
+		*x = FetchStateFetching
+		return nil
+	case "Done", "done":
+		*x = FetchStateDone
+		return nil
+	}
+	*x = -1
+	return fmt.Errorf("unknown label %q in nosql.FetchState", label)
+}
+
+// String returns the string label of x.
+func (x FetchState) String() string {
+	switch x {
+	case FetchStatePending:
+		return "Pending"
+	case FetchStateLocating:
+		return "Locating"
+	case FetchStateFetching:
+		return "Fetching"
+	case FetchStateDone:
+		return "Done"
+	}
+	return ""
+}
+
+func (FetchState) __VDLReflect(struct {
+	Name string `vdl:"v.io/syncbase/v23/services/syncbase/nosql.FetchState"`
+	Enum struct{ Pending, Locating, Fetching, Done string }
+}) {
+}
+
+// FetchStatus describes the progress of an asynchronous blob fetch.
+type FetchStatus struct {
+	State    FetchState // State of the blob fetch request.
+	Received uint64     // Total number of bytes received.
+	Total    uint64     // Blob size.
+}
+
+func (FetchStatus) __VDLReflect(struct {
+	Name string `vdl:"v.io/syncbase/v23/services/syncbase/nosql.FetchStatus"`
+}) {
+}
+
 // ResumeMarker is a pointer in the database event log.
 type ResumeMarker string
 
@@ -225,9 +305,14 @@ func init() {
 	vdl.Register((*KeyValue)(nil))
 	vdl.Register((*SyncGroupSpec)(nil))
 	vdl.Register((*SyncGroupMemberInfo)(nil))
+	vdl.Register((*BlobRef)(nil))
+	vdl.Register((*FetchState)(nil))
+	vdl.Register((*FetchStatus)(nil))
 	vdl.Register((*ResumeMarker)(nil))
 	vdl.Register((*TablePrefixRange)(nil))
 	vdl.Register((*WatchRequest)(nil))
 	vdl.Register((*ChangeType)(nil))
 	vdl.Register((*Change)(nil))
 }
+
+const NullBlobRef = BlobRef("")
