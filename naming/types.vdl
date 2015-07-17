@@ -44,8 +44,14 @@ type GlobError struct {
 	Error error
 }
 
-// GlobReply is the data type of the chan returned by Glob__.
+// GlobReply is the data type returned by Glob__.
 type GlobReply union {
 	Entry MountEntry
+	Error GlobError
+}
+
+// GlobChildrenReply is the data type returned by GlobChildren__.
+type GlobChildrenReply union {
+	Name string
 	Error GlobError
 }

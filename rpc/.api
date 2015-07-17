@@ -27,6 +27,8 @@ pkg rpc, type AddressChooser interface, ChooseAddress(string, []net.Addr) ([]net
 pkg rpc, type AddressChooserFunc func(protocol string, candidates []net.Addr) ([]net.Addr, error)
 pkg rpc, type AllGlobber interface { Glob__ }
 pkg rpc, type AllGlobber interface, Glob__(*context.T, ServerCall, string) (<-chan naming.GlobReply, error)
+pkg rpc, type AllGlobberX interface { Glob__ }
+pkg rpc, type AllGlobberX interface, Glob__(*context.T, GlobServerCall, *glob.Glob) error
 pkg rpc, type ArgDesc struct
 pkg rpc, type ArgDesc struct, Doc string
 pkg rpc, type ArgDesc struct, Name string
@@ -37,6 +39,8 @@ pkg rpc, type CallOpt interface { RPCCallOpt }
 pkg rpc, type CallOpt interface, RPCCallOpt()
 pkg rpc, type ChildrenGlobber interface { GlobChildren__ }
 pkg rpc, type ChildrenGlobber interface, GlobChildren__(*context.T, ServerCall) (<-chan string, error)
+pkg rpc, type ChildrenGlobberX interface { GlobChildren__ }
+pkg rpc, type ChildrenGlobberX interface, GlobChildren__(*context.T, GlobChildrenServerCall, *glob.Element) error
 pkg rpc, type Client interface { Call, Close, StartCall }
 pkg rpc, type Client interface, Call(*context.T, string, string, []interface{}, []interface{}, ...CallOpt) error
 pkg rpc, type Client interface, Close()
@@ -58,9 +62,27 @@ pkg rpc, type EmbedDesc struct
 pkg rpc, type EmbedDesc struct, Doc string
 pkg rpc, type EmbedDesc struct, Name string
 pkg rpc, type EmbedDesc struct, PkgPath string
+pkg rpc, type GlobChildrenServerCall interface { GrantedBlessings, LocalEndpoint, RemoteEndpoint, Security, SendStream, Server, Suffix }
+pkg rpc, type GlobChildrenServerCall interface, GrantedBlessings() security.Blessings
+pkg rpc, type GlobChildrenServerCall interface, LocalEndpoint() naming.Endpoint
+pkg rpc, type GlobChildrenServerCall interface, RemoteEndpoint() naming.Endpoint
+pkg rpc, type GlobChildrenServerCall interface, Security() security.Call
+pkg rpc, type GlobChildrenServerCall interface, SendStream() interface {  Send(reply naming.GlobChildrenReply) error;}
+pkg rpc, type GlobChildrenServerCall interface, Server() Server
+pkg rpc, type GlobChildrenServerCall interface, Suffix() string
+pkg rpc, type GlobServerCall interface { GrantedBlessings, LocalEndpoint, RemoteEndpoint, Security, SendStream, Server, Suffix }
+pkg rpc, type GlobServerCall interface, GrantedBlessings() security.Blessings
+pkg rpc, type GlobServerCall interface, LocalEndpoint() naming.Endpoint
+pkg rpc, type GlobServerCall interface, RemoteEndpoint() naming.Endpoint
+pkg rpc, type GlobServerCall interface, Security() security.Call
+pkg rpc, type GlobServerCall interface, SendStream() interface {  Send(reply naming.GlobReply) error;}
+pkg rpc, type GlobServerCall interface, Server() Server
+pkg rpc, type GlobServerCall interface, Suffix() string
 pkg rpc, type GlobState struct
 pkg rpc, type GlobState struct, AllGlobber AllGlobber
+pkg rpc, type GlobState struct, AllGlobberX AllGlobberX
 pkg rpc, type GlobState struct, ChildrenGlobber ChildrenGlobber
+pkg rpc, type GlobState struct, ChildrenGlobberX ChildrenGlobberX
 pkg rpc, type Globber interface { Globber }
 pkg rpc, type Globber interface, Globber() *GlobState
 pkg rpc, type Granter interface { Grant, RPCCallOpt }

@@ -12,6 +12,7 @@ import (
 	"time"
 
 	"v.io/v23/context"
+	"v.io/v23/glob"
 	"v.io/v23/naming"
 	"v.io/v23/security"
 	"v.io/v23/vdl"
@@ -487,8 +488,10 @@ type Globber interface {
 
 // GlobState indicates which Glob interface the object implements.
 type GlobState struct {
-	AllGlobber      AllGlobber
-	ChildrenGlobber ChildrenGlobber
+	AllGlobber       AllGlobber
+	ChildrenGlobber  ChildrenGlobber
+	AllGlobberX      AllGlobberX
+	ChildrenGlobberX ChildrenGlobberX
 }
 
 // AllGlobber is a powerful interface that allows the object to enumerate the
@@ -509,6 +512,44 @@ type ChildrenGlobber interface {
 	// on a channel.  It should return an error if the receiver doesn't
 	// exist.
 	GlobChildren__(ctx *context.T, call ServerCall) (<-chan string, error)
+}
+
+// AllGlobberX is a powerful interface that allows the object to enumerate the
+// the entire namespace below the receiver object. Every object that implements
+// it must be able to handle glob requests that could match any object below
+// itself. E.g. "a/b".Glob__("*/*"), "a/b".Glob__("c/..."), etc.
+type AllGlobberX interface {
+	// Glob__ returns a GlobReply for the objects that match the given
+	// glob pattern in the namespace below the receiver object. All the
+	// names returned are relative to the receiver.
+	Glob__(ctx *context.T, call GlobServerCall, g *glob.Glob) error
+}
+
+// GlobServerCall defines the in-flight context for a Glob__ call, including the
+// method to stream the results.
+type GlobServerCall interface {
+	SendStream() interface {
+		Send(reply naming.GlobReply) error
+	}
+	ServerCall
+}
+
+// ChildrenGlobberX allows the object to enumerate the namespace immediately
+// below the receiver object.
+type ChildrenGlobberX interface {
+	// GlobChildren__ returns a GlobChildrenReply for the receiver's
+	// immediate children that match the glob pattern element.
+	// It should return an error if the receiver doesn't exist.
+	GlobChildren__(ctx *context.T, call GlobChildrenServerCall, matcher *glob.Element) error
+}
+
+// GlobChildrenServerCall defines the in-flight context for a GlobChildren__
+// call, including the method to stream the results.
+type GlobChildrenServerCall interface {
+	SendStream() interface {
+		Send(reply naming.GlobChildrenReply) error
+	}
+	ServerCall
 }
 
 // StreamServerCall defines the in-flight context for a server method

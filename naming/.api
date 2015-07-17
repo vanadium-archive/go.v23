@@ -22,6 +22,12 @@ pkg naming, method (*MountEntry) Names() []string
 pkg naming, method (*RoutingID) FromString(string) error
 pkg naming, method (BlessingOpt) EndpointOpt()
 pkg naming, method (DisableCache) CacheCtl()
+pkg naming, method (GlobChildrenReplyError) Index() int
+pkg naming, method (GlobChildrenReplyError) Interface() interface{}
+pkg naming, method (GlobChildrenReplyError) Name() string
+pkg naming, method (GlobChildrenReplyName) Index() int
+pkg naming, method (GlobChildrenReplyName) Interface() interface{}
+pkg naming, method (GlobChildrenReplyName) Name() string
 pkg naming, method (GlobReplyEntry) Index() int
 pkg naming, method (GlobReplyEntry) Interface() interface{}
 pkg naming, method (GlobReplyEntry) Name() string
@@ -52,6 +58,14 @@ pkg naming, type Endpoint interface, String() string
 pkg naming, type Endpoint interface, VersionedString(int) string
 pkg naming, type EndpointOpt interface { EndpointOpt }
 pkg naming, type EndpointOpt interface, EndpointOpt()
+pkg naming, type GlobChildrenReply interface, Index() int
+pkg naming, type GlobChildrenReply interface, Interface() interface{}
+pkg naming, type GlobChildrenReply interface, Name() string
+pkg naming, type GlobChildrenReply interface, unexported methods
+pkg naming, type GlobChildrenReplyError struct
+pkg naming, type GlobChildrenReplyError struct, Value GlobError
+pkg naming, type GlobChildrenReplyName struct
+pkg naming, type GlobChildrenReplyName struct, Value string
 pkg naming, type GlobError struct
 pkg naming, type GlobError struct, Error error
 pkg naming, type GlobError struct, Name string

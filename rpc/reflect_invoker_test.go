@@ -17,6 +17,7 @@ import (
 	"time"
 
 	"v.io/v23/context"
+	"v.io/v23/glob"
 	"v.io/v23/naming"
 	"v.io/v23/rpc"
 	"v.io/v23/security"
@@ -707,9 +708,23 @@ func (childrenGlobberObject) GlobChildren__(*context.T, rpc.ServerCall) (<-chan 
 	return nil, nil
 }
 
+type allGlobberXObject struct{}
+
+func (allGlobberXObject) Glob__(*context.T, rpc.GlobServerCall, *glob.Glob) error {
+	return nil
+}
+
+type childrenGlobberXObject struct{}
+
+func (childrenGlobberXObject) GlobChildren__(*context.T, rpc.GlobChildrenServerCall, *glob.Element) error {
+	return nil
+}
+
 func TestReflectInvokerGlobber(t *testing.T) {
 	allGlobber := allGlobberObject{}
 	childrenGlobber := childrenGlobberObject{}
+	allGlobberX := allGlobberXObject{}
+	childrenGlobberX := childrenGlobberXObject{}
 	gs := &rpc.GlobState{AllGlobber: allGlobber}
 	vGlobber := &vGlobberObject{gs}
 
@@ -720,6 +735,8 @@ func TestReflectInvokerGlobber(t *testing.T) {
 		{vGlobber, gs},
 		{allGlobber, &rpc.GlobState{AllGlobber: allGlobber}},
 		{childrenGlobber, &rpc.GlobState{ChildrenGlobber: childrenGlobber}},
+		{allGlobberX, &rpc.GlobState{AllGlobberX: allGlobberX}},
+		{childrenGlobberX, &rpc.GlobState{ChildrenGlobberX: childrenGlobberX}},
 	}
 
 	for _, tc := range testcases {

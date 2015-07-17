@@ -4,15 +4,26 @@
 
 package rpc
 
-import "v.io/v23/context"
+import (
+	"v.io/v23/context"
+	"v.io/v23/glob"
+	"v.io/v23/naming"
+)
 
 // NewGlobState returns the GlobState corresponding to obj.  Returns nil if obj
 // doesn't implement AllGlobber or ChildrenGlobber.
 func NewGlobState(obj interface{}) *GlobState {
 	a, ok1 := obj.(AllGlobber)
 	c, ok2 := obj.(ChildrenGlobber)
-	if ok1 || ok2 {
-		return &GlobState{AllGlobber: a, ChildrenGlobber: c}
+	ax, ok3 := obj.(AllGlobberX)
+	cx, ok4 := obj.(ChildrenGlobberX)
+	if ok1 || ok2 || ok3 || ok4 {
+		return &GlobState{
+			AllGlobber:       a,
+			ChildrenGlobber:  c,
+			AllGlobberX:      ax,
+			ChildrenGlobberX: cx,
+		}
 	}
 	return nil
 }
@@ -27,11 +38,12 @@ type obj struct {
 	children []string
 }
 
-func (o obj) GlobChildren__(*context.T, ServerCall) (<-chan string, error) {
-	ch := make(chan string, len(o.children))
+func (o obj) GlobChildren__(_ *context.T, call GlobChildrenServerCall, matcher *glob.Element) error {
+	sender := call.SendStream()
 	for _, v := range o.children {
-		ch <- v
+		if matcher.Match(v) {
+			sender.Send(naming.GlobChildrenReplyName{v})
+		}
 	}
-	close(ch)
-	return ch, nil
+	return nil
 }
