@@ -243,13 +243,13 @@ type BlobManager interface {
 
 	// GetBlobSize returns the count of bytes written as part of the blob
 	// (committed or uncommitted).
-	GetBlobSize(br BlobRef) (uint64 | error) {access.Read}
+	GetBlobSize(br BlobRef) (int64 | error) {access.Read}
 
 	// DeleteBlob locally deletes the blob (committed or uncommitted).
 	DeleteBlob(br BlobRef) error {access.Write}
 
 	// GetBlob returns the byte stream from a committed blob starting at offset.
-	GetBlob(br BlobRef, offset uint64) stream<_, []byte> error {access.Read}
+	GetBlob(br BlobRef, offset int64) stream<_, []byte> error {access.Read}
 
 	// FetchBlob initiates fetching a blob if not locally found. priority
 	// controls the network priority of the blob. Higher priority blobs are

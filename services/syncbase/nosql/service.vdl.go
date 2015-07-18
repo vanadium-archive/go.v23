@@ -727,11 +727,11 @@ type BlobManagerClientMethods interface {
 	CommitBlob(ctx *context.T, br BlobRef, opts ...rpc.CallOpt) error
 	// GetBlobSize returns the count of bytes written as part of the blob
 	// (committed or uncommitted).
-	GetBlobSize(ctx *context.T, br BlobRef, opts ...rpc.CallOpt) (uint64, error)
+	GetBlobSize(ctx *context.T, br BlobRef, opts ...rpc.CallOpt) (int64, error)
 	// DeleteBlob locally deletes the blob (committed or uncommitted).
 	DeleteBlob(ctx *context.T, br BlobRef, opts ...rpc.CallOpt) error
 	// GetBlob returns the byte stream from a committed blob starting at offset.
-	GetBlob(ctx *context.T, br BlobRef, offset uint64, opts ...rpc.CallOpt) (BlobManagerGetBlobClientCall, error)
+	GetBlob(ctx *context.T, br BlobRef, offset int64, opts ...rpc.CallOpt) (BlobManagerGetBlobClientCall, error)
 	// FetchBlob initiates fetching a blob if not locally found. priority
 	// controls the network priority of the blob. Higher priority blobs are
 	// fetched before the lower priority ones. However an ongoing blob
@@ -781,7 +781,7 @@ func (c implBlobManagerClientStub) CommitBlob(ctx *context.T, i0 BlobRef, opts .
 	return
 }
 
-func (c implBlobManagerClientStub) GetBlobSize(ctx *context.T, i0 BlobRef, opts ...rpc.CallOpt) (o0 uint64, err error) {
+func (c implBlobManagerClientStub) GetBlobSize(ctx *context.T, i0 BlobRef, opts ...rpc.CallOpt) (o0 int64, err error) {
 	err = v23.GetClient(ctx).Call(ctx, c.name, "GetBlobSize", []interface{}{i0}, []interface{}{&o0}, opts...)
 	return
 }
@@ -791,7 +791,7 @@ func (c implBlobManagerClientStub) DeleteBlob(ctx *context.T, i0 BlobRef, opts .
 	return
 }
 
-func (c implBlobManagerClientStub) GetBlob(ctx *context.T, i0 BlobRef, i1 uint64, opts ...rpc.CallOpt) (ocall BlobManagerGetBlobClientCall, err error) {
+func (c implBlobManagerClientStub) GetBlob(ctx *context.T, i0 BlobRef, i1 int64, opts ...rpc.CallOpt) (ocall BlobManagerGetBlobClientCall, err error) {
 	var call rpc.ClientCall
 	if call, err = v23.GetClient(ctx).StartCall(ctx, c.name, "GetBlob", []interface{}{i0, i1}, opts...); err != nil {
 		return
@@ -1041,11 +1041,11 @@ type BlobManagerServerMethods interface {
 	CommitBlob(ctx *context.T, call rpc.ServerCall, br BlobRef) error
 	// GetBlobSize returns the count of bytes written as part of the blob
 	// (committed or uncommitted).
-	GetBlobSize(ctx *context.T, call rpc.ServerCall, br BlobRef) (uint64, error)
+	GetBlobSize(ctx *context.T, call rpc.ServerCall, br BlobRef) (int64, error)
 	// DeleteBlob locally deletes the blob (committed or uncommitted).
 	DeleteBlob(ctx *context.T, call rpc.ServerCall, br BlobRef) error
 	// GetBlob returns the byte stream from a committed blob starting at offset.
-	GetBlob(ctx *context.T, call BlobManagerGetBlobServerCall, br BlobRef, offset uint64) error
+	GetBlob(ctx *context.T, call BlobManagerGetBlobServerCall, br BlobRef, offset int64) error
 	// FetchBlob initiates fetching a blob if not locally found. priority
 	// controls the network priority of the blob. Higher priority blobs are
 	// fetched before the lower priority ones. However an ongoing blob
@@ -1078,11 +1078,11 @@ type BlobManagerServerStubMethods interface {
 	CommitBlob(ctx *context.T, call rpc.ServerCall, br BlobRef) error
 	// GetBlobSize returns the count of bytes written as part of the blob
 	// (committed or uncommitted).
-	GetBlobSize(ctx *context.T, call rpc.ServerCall, br BlobRef) (uint64, error)
+	GetBlobSize(ctx *context.T, call rpc.ServerCall, br BlobRef) (int64, error)
 	// DeleteBlob locally deletes the blob (committed or uncommitted).
 	DeleteBlob(ctx *context.T, call rpc.ServerCall, br BlobRef) error
 	// GetBlob returns the byte stream from a committed blob starting at offset.
-	GetBlob(ctx *context.T, call *BlobManagerGetBlobServerCallStub, br BlobRef, offset uint64) error
+	GetBlob(ctx *context.T, call *BlobManagerGetBlobServerCallStub, br BlobRef, offset int64) error
 	// FetchBlob initiates fetching a blob if not locally found. priority
 	// controls the network priority of the blob. Higher priority blobs are
 	// fetched before the lower priority ones. However an ongoing blob
@@ -1139,7 +1139,7 @@ func (s implBlobManagerServerStub) CommitBlob(ctx *context.T, call rpc.ServerCal
 	return s.impl.CommitBlob(ctx, call, i0)
 }
 
-func (s implBlobManagerServerStub) GetBlobSize(ctx *context.T, call rpc.ServerCall, i0 BlobRef) (uint64, error) {
+func (s implBlobManagerServerStub) GetBlobSize(ctx *context.T, call rpc.ServerCall, i0 BlobRef) (int64, error) {
 	return s.impl.GetBlobSize(ctx, call, i0)
 }
 
@@ -1147,7 +1147,7 @@ func (s implBlobManagerServerStub) DeleteBlob(ctx *context.T, call rpc.ServerCal
 	return s.impl.DeleteBlob(ctx, call, i0)
 }
 
-func (s implBlobManagerServerStub) GetBlob(ctx *context.T, call *BlobManagerGetBlobServerCallStub, i0 BlobRef, i1 uint64) error {
+func (s implBlobManagerServerStub) GetBlob(ctx *context.T, call *BlobManagerGetBlobServerCallStub, i0 BlobRef, i1 int64) error {
 	return s.impl.GetBlob(ctx, call, i0, i1)
 }
 
@@ -1215,7 +1215,7 @@ var descBlobManager = rpc.InterfaceDesc{
 				{"br", ``}, // BlobRef
 			},
 			OutArgs: []rpc.ArgDesc{
-				{"", ``}, // uint64
+				{"", ``}, // int64
 			},
 			Tags: []*vdl.Value{vdl.ValueOf(access.Tag("Read"))},
 		},
@@ -1232,7 +1232,7 @@ var descBlobManager = rpc.InterfaceDesc{
 			Doc:  "// GetBlob returns the byte stream from a committed blob starting at offset.",
 			InArgs: []rpc.ArgDesc{
 				{"br", ``},     // BlobRef
-				{"offset", ``}, // uint64
+				{"offset", ``}, // int64
 			},
 			Tags: []*vdl.Value{vdl.ValueOf(access.Tag("Read"))},
 		},
