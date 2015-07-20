@@ -64,14 +64,22 @@ type Manager interface {
 	Closed() <-chan struct{}
 }
 
-// Flow is the interface for a flow-controlled channel multiplexed over underlying network connections.
-type Flow interface {
-	io.ReadWriter
-
+// Conn represents the connection onto which this flow is multiplexed.
+// Since this Conn may be shared between many flows it wouldn't be safe
+// to read and write to it directly.  We just provide some metadata.
+type Conn interface {
 	// LocalEndpoint returns the local vanadium Endpoint
 	LocalEndpoint() naming.Endpoint
 	// RemoteEndpoint returns the remote vanadium Endpoint
 	RemoteEndpoint() naming.Endpoint
+	// Closed returns a channel that remains open until the connection has been closed.
+	Closed() <-chan struct{}
+}
+
+// Flow is the interface for a flow-controlled channel multiplexed over a Conn.
+type Flow interface {
+	io.ReadWriter
+
 	// LocalBlessings returns the blessings presented by the local end of the flow during authentication.
 	LocalBlessings() security.Blessings
 	// RemoteBlessings returns the blessings presented by the remote end of the flow during authentication.
@@ -84,6 +92,9 @@ type Flow interface {
 	//
 	// Discharges are organized in a map keyed by the discharge-identifier.
 	RemoteDischarges() map[string]security.Discharge
+
+	// Conn returns the connection the flow is multiplexed on.
+	Conn() Conn
 
 	// Closed returns a channel that remains open until the flow has been closed or
 	// the ctx to the Dial or Accept call used to create the flow has been cancelled.
