@@ -8,11 +8,24 @@
 // The select is of the form:
 //
 // <query_specification> ::=
-//   SELECT <field_clause> <from_clause> [<where_clause>] [<limit_offset_clause>]
+//   <select_clause> <from_clause> [<where_clause>] [<limit_offset_clause>]
 //
-// <field_clause> ::= <column>[{<comma><field>}...]
+// <select_clause> ::= SELECT <selector> [{<comma><selector>}...]
 //
-// <column> ::= <field> [AS <string_literal>]
+// <from_clause> ::= FROM <table>
+//
+// <where_clause> ::= WHERE <expression>
+//
+// <limit_offset_clause> ::=
+//   LIMIT <int_literal> [OFFSET <int_literal>]
+//   | OFFSET <int_literal> [LIMIT <int_literal>]
+//
+// <selector> ::= <column> [AS <string_literal>]
+//
+// <column> ::=
+//   K
+//   | V[<period><field>]
+//   | <function>
 //
 // <field> ::= <segment>[{<period><segment>}...]
 //
@@ -22,22 +35,12 @@
 //
 // <key> ::= <left_bracket> <operand> <right_bracket>
 //
-// <from_clause> ::= FROM <table>
+// <function> ::= <identifier><left_paren>[<operand>[{<comma><operand>}...]<right_paren>
 //
 // <table> ::= <identifier>
 //
-// <where_clause> ::= WHERE <expression>
-//
-// <limit_offset_clause> ::=
-// <limit_clause> [<offset_clause>]
-// | <offset_clause> [<limit_clause>]
-//
-// <limit_clause> ::= LIMIT <int_literal>
-//
-// <offset_clause> ::= OFFSET <int_literal>
-//
 // <expression> ::=
-//   ( <expression> )
+//   <left_paren> <expression> <right_paren>
 //   | <logical_expression>
 //   | <binary_expression>
 //
@@ -50,25 +53,33 @@
 //
 // <binary_expression> ::=
 //   <operand> <binary_op> <operand>
+//   | V[<period><field>] IS [NOT] NIL
 //
 // <operand> ::=
-//   <field>
+//   K
+//   | V[<period><field>]
+//   | T
 //   | <literal>
+//   | <function>
 //
 // <binary_op> ::=
 //   =
-//   | <>
-//   | <
-//   | >
-//   | <=
-//   | >=
 //   | EQUAL
+//   | <>
 //   | NOT EQUAL
 //   | LIKE
 //   | NOT LIKE
+//   | <
+//   | <=
+//   | >=
+//   | >
 //
-// <literal> ::= <string_literal> | <char_literal> | <int_literal> | <float_literal>
+// <literal> ::=
+//   <string_literal>
+//   | <bool_literal>
+//   | <int_literal>
+//   | <float_literal>
 //
 // Example:
-// select foo.bar, baz from foobarbaz where foo = 42 and bar not like "abc%"
+// select v.foo.bar, v.baz[2] from foobarbaz where (v.foo = 42 and v.bar not like "abc%) or (k >= "100" and  k < "200")
 package query_parser
