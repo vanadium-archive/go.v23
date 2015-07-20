@@ -40,6 +40,13 @@ var (
 type Blessings struct {
 	chains    [][]Certificate
 	publicKey PublicKey
+
+	// newscheme[i] is true iff chains[i] contains certificates where certificate signatures
+	// are as per
+	// https://docs.google.com/document/d/1jGbhwKw2SRFUIV_C55GdAwd_UzZtRoSEnnskt0GzNw4/edit?usp=sharing
+	//
+	// TODO(ashankar): Remove when closing out https://github.com/vanadium/issues/issues/543
+	newscheme []bool
 }
 
 // PublicKey returns the public key of the principal to which
@@ -151,14 +158,14 @@ func nameForPrincipal(p Principal, chain []Certificate) string {
 	return blessing
 }
 
-func validateCertificateChain(chain []Certificate) (PublicKey, error) {
+func deprecatedValidateCertificateChain(chain []Certificate) (PublicKey, error) {
 	parent := &Signature{}
 	key, err := UnmarshalPublicKey(chain[0].PublicKey)
 	if err != nil {
 		return nil, err
 	}
 	for idx, cert := range chain {
-		if err := cert.validate(*parent, key); err != nil {
+		if err := cert.deprecatedValidate(*parent, key); err != nil {
 			return nil, err
 		}
 		if key, err = UnmarshalPublicKey(cert.PublicKey); err != nil {
@@ -169,16 +176,38 @@ func validateCertificateChain(chain []Certificate) (PublicKey, error) {
 	return key, nil
 }
 
-// Verifies that the chain signatures are correct, without handling caveat validation
-func verifyChainSignature(ctx *context.T, call Call, chain []Certificate) (string, error) {
+// TODO(ashankar): Remove to fully resolve https://github.com/vanadium/issues/issues/543
+func transitionalValidateCertificateChain(chain []Certificate) (PublicKey, bool, error) {
+	if useNewCertificateSigningScheme {
+		// Try the new scheme first, then the old
+		if key, err := validateCertificateChain(chain); err == nil {
+			return key, true, nil
+		} else if oldkey, olderr := deprecatedValidateCertificateChain(chain); olderr == nil {
+			return oldkey, false, nil
+		} else {
+			return nil, false, err
+		}
+	}
+	// Try the old scheme first and then the new.
+	if key, err := deprecatedValidateCertificateChain(chain); err == nil {
+		return key, false, nil
+	} else if newkey, newerr := validateCertificateChain(chain); newerr == nil {
+		return newkey, true, nil
+	} else {
+		return nil, false, err
+	}
+}
+
+// Returns the blessing name represented by chain, ignoring any caveats on the
+// validity of the blessing name.
+func chainName(ctx *context.T, call Call, chain []Certificate) (string, error) {
 	blessing := chain[0].Extension
 	for i := 1; i < len(chain); i++ {
 		blessing += ChainSeparator
 		blessing += chain[i].Extension
 	}
 
-	// Verify that the root of the chain is recognized as an authority
-	// on blessing.
+	// Root of the chain must be recognized as an authority on the blessing.
 	root, err := UnmarshalPublicKey(chain[0].PublicKey)
 	if err != nil {
 		return blessing, err
@@ -226,7 +255,11 @@ func wireBlessingsToNative(wire WireBlessings, native *Blessings) error {
 	}
 	// Public keys should match for all chains.
 	marshaledkey := certchains[0][len(certchains[0])-1].PublicKey
-	key, err := validateCertificateChain(certchains[0])
+	newscheme := make([]bool, len(certchains))
+
+	var key PublicKey
+	var err error
+	key, newscheme[0], err = transitionalValidateCertificateChain(certchains[0])
 	if err != nil {
 		return err
 	}
@@ -239,12 +272,13 @@ func wireBlessingsToNative(wire WireBlessings, native *Blessings) error {
 		if !bytes.Equal(marshaledkey, cert.PublicKey) {
 			return verror.New(errMultiplePublicKeys, nil)
 		}
-		if _, err := validateCertificateChain(chain); err != nil {
+		if _, newscheme[i], err = transitionalValidateCertificateChain(chain); err != nil {
 			return err
 		}
 	}
 	native.chains = certchains
 	native.publicKey = key
+	native.newscheme = newscheme
 	return nil
 }
 
@@ -279,6 +313,7 @@ func UnionOfBlessings(blessings ...Blessings) (Blessings, error) {
 			return Blessings{}, verror.New(errInvalidUnion, nil)
 		}
 		ret.chains = append(ret.chains, b.chains...)
+		ret.newscheme = append(ret.newscheme, b.newscheme...)
 	}
 	var err error
 	if ret.publicKey, err = UnmarshalPublicKey(key0); err != nil {
@@ -390,7 +425,7 @@ func RemoteBlessingNames(ctx *context.T, call Call) ([]string, []RejectedBlessin
 		pendingCaveatSets [][]Caveat
 	)
 	for _, chain := range b.chains {
-		name, err := verifyChainSignature(ctx, call, chain)
+		name, err := chainName(ctx, call, chain)
 		if err != nil {
 			rejected = append(rejected, RejectedBlessing{name, err})
 			continue

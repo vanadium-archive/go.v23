@@ -32,6 +32,19 @@ func (sig *Signature) Verify(key PublicKey, message []byte) bool {
 	}
 }
 
+func (sig *Signature) digest(hashfn Hash) []byte {
+	var fields []byte
+	w := func(data []byte) {
+		fields = append(fields, hashfn.sum(data)...)
+	}
+	w([]byte(sig.Hash))
+	w(sig.Purpose)
+	w([]byte("ECDSA")) // The signing algorithm
+	w(sig.R)
+	w(sig.S)
+	return hashfn.sum(fields)
+}
+
 // NewInMemoryECDSASigner creates a Signer that uses the provided ECDSA private
 // key to sign messages.  This private key is kept in the clear in the memory
 // of the running process.
@@ -85,7 +98,7 @@ func messageDigest(hash Hash, purpose, message []byte) []byte {
 }
 
 // sum returns the hash of data using hash as the cryptographic hash function.
-// Returns nil if data is nil or hash is not recognized.
+// Returns nil if the hash function is not recognized.
 func (hash Hash) sum(data []byte) []byte {
 	switch hash {
 	case SHA1Hash:

@@ -6,7 +6,9 @@ package security
 
 import (
 	"bytes"
+	"crypto/sha256"
 	"strings"
+	"sync"
 
 	"v.io/v23/verror"
 )
@@ -21,14 +23,22 @@ var (
 	errBadBlessingBadEnd          = verror.Register(pkgPath+".errBadBlessingBadEnd", verror.NoRetry, "{1:}{2:}invalid blessing extension(ends with {3}){:_}")
 	errBadBlessingExtension       = verror.Register(pkgPath+".errBadBlessingExtension", verror.NoRetry, "{1:}{2:}invalid blessing extension({3}){:_}")
 	errBadBlessingBadSubstring    = verror.Register(pkgPath+".errBadBlessingBadSubstring", verror.NoRetry, "{1:}{2:}invalid blessing extension({3} has {4} as a substring){:_}")
-)
 
-var (
 	// invalidBlessingSubStrings are strings that a blessing extension cannot have as a substring.
 	invalidBlessingSubStrings = []string{string(AllPrincipals), ChainSeparator + ChainSeparator /* double slash not allowed */, ",", "@@", "(", ")", "<", ">"}
 	// invalidBlessingExtensions are strings that are disallowed as blessing extensions.
 	invalidBlessingExtensions = []string{string(NoExtension)}
+
+	// Cache of previously verified certificate chains (identified by the digest of the certificate chain).
+	// Used to reduce computation overhead of certificate verification when the same set of certificates are
+	// seen repeatedly.
+	//
+	// Caching scheme described in
+	// https://docs.google.com/document/d/1jGbhwKw2SRFUIV_C55GdAwd_UzZtRoSEnnskt0GzNw4/edit?usp=sharing
+	signatureCache = &sigCache{m: make(map[[sha256.Size]byte]bool)}
 )
+
+const signatureCacheMaxSize = 1 << 10 // 32 bytes * 1K = 32KB + map overhead in Go
 
 func newUnsignedCertificate(extension string, key PublicKey, caveats ...Caveat) (*Certificate, error) {
 	err := validateExtension(extension)
@@ -42,7 +52,38 @@ func newUnsignedCertificate(extension string, key PublicKey, caveats ...Caveat) 
 	return cert, nil
 }
 
-func (c *Certificate) digest(hash Hash, parent Signature) []byte {
+func (c *Certificate) contentDigest(hashfn Hash) []byte {
+	var fields []byte
+	w := func(data []byte) {
+		fields = append(fields, hashfn.sum(data)...)
+	}
+	w(c.PublicKey)
+	w([]byte(c.Extension))
+	for _, cav := range c.Caveats {
+		fields = append(fields, cav.digest(hashfn)...)
+	}
+	return hashfn.sum(fields)
+}
+
+// chainedDigests returns the digest and contentDigest of a certificate chain
+// formed by chaining c to an another certificate chain (identified by its
+// digest).
+//
+// If len(chain) == 0, the implication is that 'c' is the first certificate
+// (a.k.a. "root") of the chain.
+func (c *Certificate) chainedDigests(hashfn Hash, chain []byte) (digest, contentDigest []byte) {
+	contentDigest = c.contentDigest(hashfn)
+	digest = hashfn.sum(append(contentDigest, c.Signature.digest(hashfn)...))
+	if len(chain) > 0 {
+		// c is not the "root" of the chain
+		contentDigest = hashfn.sum(append(chain, contentDigest...))
+		digest = hashfn.sum(append(chain, digest...))
+	}
+	return
+}
+
+// TODO(ashankar): Remove this to complete resolution of https://github.com/vanadium/issues/issues/543
+func (c *Certificate) deprecatedDigest(hash Hash, parent Signature) []byte {
 	var fields []byte
 	w := func(data []byte) {
 		fields = append(fields, hash.sum(data)...)
@@ -62,22 +103,24 @@ func (c *Certificate) digest(hash Hash, parent Signature) []byte {
 	return hash.sum(fields)
 }
 
-func (c *Certificate) validate(parentSignature Signature, parentKey PublicKey) error {
+// TODO(ashankar): Remove this to complete resolution of https://github.com/vanadium/issues/issues/543
+func (c *Certificate) deprecatedValidate(parentSignature Signature, parentKey PublicKey) error {
 	if !bytes.Equal(c.Signature.Purpose, blessPurpose) {
 		return verror.New(errInapproriateCertSignature, nil, c.Extension, c.Signature.Purpose)
 	}
 	if err := validateExtension(c.Extension); err != nil {
 		return verror.New(errBadBlessingExtensionInCert, nil, c.Extension, err)
 	}
-	if !c.Signature.Verify(parentKey, c.digest(c.Signature.Hash, parentSignature)) {
+	if !c.Signature.Verify(parentKey, c.deprecatedDigest(c.Signature.Hash, parentSignature)) {
 		return verror.New(errBadCertSignature, nil, c.Extension, parentKey)
 	}
 	return nil
 }
 
-func (c *Certificate) sign(signer Signer, parentSignature Signature) error {
+// TODO(ashankar): Remove this to complete resolution of https://github.com/vanadium/issues/issues/543
+func (c *Certificate) deprecatedSign(signer Signer, parentSignature Signature) error {
 	var err error
-	c.Signature, err = signer.Sign(blessPurpose, c.digest(signer.PublicKey().hash(), parentSignature))
+	c.Signature, err = signer.Sign(blessPurpose, c.deprecatedDigest(signer.PublicKey().hash(), parentSignature))
 	return err
 }
 
@@ -102,4 +145,137 @@ func validateExtension(extension string) error {
 		}
 	}
 	return nil
+}
+
+// Validation algorithm as specified in:
+// https://docs.google.com/document/d/1jGbhwKw2SRFUIV_C55GdAwd_UzZtRoSEnnskt0GzNw4/edit?usp=sharing
+func validateCertificateChain(chain []Certificate) (PublicKey, error) {
+	pubkey, err := UnmarshalPublicKey(chain[len(chain)-1].PublicKey)
+	if err != nil {
+		return nil, err
+	}
+	var (
+		digest        = make([][]byte, len(chain))
+		contentDigest = make([][]byte, len(chain))
+	)
+	digest[0], contentDigest[0] = chain[0].chainedDigests(chain[0].Signature.Hash, nil)
+	for i := 1; i < len(chain); i++ {
+		digest[i], contentDigest[i] = chain[i].chainedDigests(chain[i].Signature.Hash, digest[i-1])
+	}
+	// Verify certificates in reverse order as per the algorithm linked to above.
+	for i := len(chain) - 1; i >= 0; i-- {
+		c := chain[i]
+		// Check the in-memory cache
+		if signatureCache.verify(digest[i]) {
+			// chain[0:i] has been validated before
+			// and chain[i:] has been validated in this for loop.
+			signatureCache.cache(digest[i:])
+			return pubkey, nil
+		}
+		// Some basic sanity checks on the certificate.
+		if !bytes.Equal(c.Signature.Purpose, blessPurpose) {
+			return nil, verror.New(errInapproriateCertSignature, nil, c.Extension, c.Signature.Purpose)
+		}
+		if err := validateExtension(c.Extension); err != nil {
+			return nil, verror.New(errBadBlessingExtensionInCert, nil, c.Extension, err)
+		}
+		// Verify the signature.
+		var signer PublicKey
+		if i == 0 {
+			signer, err = UnmarshalPublicKey(chain[0].PublicKey)
+		} else {
+			signer, err = UnmarshalPublicKey(chain[i-1].PublicKey)
+		}
+		if err != nil {
+			return nil, err
+		}
+		if !chain[i].Signature.Verify(signer, contentDigest[i]) {
+			return nil, verror.New(errBadCertSignature, nil, chain[i].Extension, signer)
+		}
+	}
+	signatureCache.cache(digest)
+	return pubkey, nil
+}
+
+// chainCertificate binds cert to an existing certificate chain and returns the resulting chain.
+func chainCertificate(signer Signer, chain []Certificate, cert Certificate) ([]Certificate, error) {
+	var digest []byte
+	for _, c := range chain {
+		digest, _ = c.chainedDigests(c.Signature.Hash, digest)
+	}
+	_, cdigest := cert.chainedDigests(signer.PublicKey().hash(), digest)
+	var err error
+	if cert.Signature, err = signer.Sign(blessPurpose, cdigest); err != nil {
+		return nil, err
+	}
+	cpy := make([]Certificate, len(chain)+1)
+	copy(cpy, chain)
+	cpy[len(cpy)-1] = cert
+	return cpy, nil
+}
+
+// Concurrent access friendly map of previously verified certificate chains
+// (identified by their digest).
+//
+// TODO(ashankar,ataly): sigCache.verify may leak information based on the
+// time it takes to execute because sigCache.m does not provide "constant time"
+// lookups (in the sense of crypto/subtle.ConstantTimeEq for example).
+// Technically, constant time lookups are required as per:
+// https://docs.google.com/document/d/1jGbhwKw2SRFUIV_C55GdAwd_UzZtRoSEnnskt0GzNw4/edit?usp=sharing
+type sigCache struct {
+	disabled bool // Only here for microbenchmarks
+	sync.RWMutex
+	m map[[sha256.Size]byte]bool
+}
+
+func (s *sigCache) disable() {
+	s.Lock()
+	s.disabled = true
+	s.m = make(map[[sha256.Size]byte]bool)
+	s.Unlock()
+}
+
+func (s *sigCache) enable() {
+	s.Lock()
+	s.disabled = false
+	s.Unlock()
+}
+
+func (s *sigCache) verify(digest []byte) bool {
+	key := sha256.Sum256(digest)
+	s.RLock()
+	ret := s.m[key]
+	s.RUnlock()
+	return ret
+}
+
+func (s *sigCache) cache(digests [][]byte) {
+	keys := make([][sha256.Size]byte, len(digests))
+	for i, d := range digests {
+		keys[i] = sha256.Sum256(d)
+	}
+	s.Lock()
+	if s.disabled {
+		s.Unlock()
+		return
+	}
+	for _, k := range keys {
+		s.m[k] = true
+	}
+	// Might have gone over our size limit for the cache, remove entries.
+	// This may evict the entries that were just inserted, live with that.
+	if len(s.m) > signatureCacheMaxSize {
+		n := len(s.m) - signatureCacheMaxSize
+		m := 0
+		// Randomly evict and entry. Fortunately, map iteration is in random key order
+		// (see "Iteration Order" in http://blog.golang.org/go-maps-in-action)
+		for key, _ := range s.m {
+			delete(s.m, key)
+			m++
+			if m >= n {
+				break
+			}
+		}
+	}
+	s.Unlock()
 }

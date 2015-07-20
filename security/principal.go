@@ -59,6 +59,12 @@ var (
 	errCantSignDischarge  = verror.Register(pkgPath+".errCantSignDischarge", verror.NoRetry, "{1:}{2:}failed to sign discharge: {3}{:_}")
 	errCantUnmarshalKey   = verror.Register(pkgPath+".errCantUnmarshalKey", verror.NoRetry, "{1:}{2:}failed to unmarshal public key in root certificate with Extension: {3}: {4}{:_}")
 	errCantAddRoot        = verror.Register(pkgPath+".errCantAddRoot", verror.NoRetry, "{1:}{2:}failed to Add root: {3} for pattern: {4} to this principal's roots: {5}{:_}")
+
+	// If true, Principal.BlessSelf will create certificates with the new
+	// signature scheme.
+	//
+	// TODO(ashankar): Remove to fully resolve https://github.com/vanadium/issues/issues/543
+	useNewCertificateSigningScheme = false
 )
 
 type errStore struct {
@@ -106,17 +112,23 @@ func (p *principal) Bless(key PublicKey, with Blessings, extension string, cavea
 	chains := with.chains
 	newchains := make([][]Certificate, len(chains))
 	for idx, chain := range chains {
-		if err := cert.sign(p.signer, chain[len(chain)-1].Signature); err != nil {
+		if with.newscheme[idx] {
+			if newchains[idx], err = chainCertificate(p.signer, chain, *cert); err != nil {
+				return Blessings{}, err
+			}
+		} else if err := cert.deprecatedSign(p.signer, chain[len(chain)-1].Signature); err != nil {
 			return Blessings{}, err
+		} else {
+			cpy := make([]Certificate, len(chain)+1)
+			copy(cpy, chain)
+			cpy[len(cpy)-1] = *cert
+			newchains[idx] = cpy
 		}
-		cpy := make([]Certificate, len(chain)+1)
-		copy(cpy, chain)
-		cpy[len(cpy)-1] = *cert
-		newchains[idx] = cpy
 	}
 	return Blessings{
 		chains:    newchains,
 		publicKey: key,
+		newscheme: with.newscheme,
 	}, nil
 }
 
@@ -125,12 +137,24 @@ func (p *principal) BlessSelf(name string, caveats ...Caveat) (Blessings, error)
 	if err != nil {
 		return Blessings{}, err
 	}
-	if err := cert.sign(p.signer, Signature{}); err != nil {
+	if useNewCertificateSigningScheme {
+		chain, err := chainCertificate(p.signer, nil, *cert)
+		if err != nil {
+			return Blessings{}, err
+		}
+		return Blessings{
+			chains:    [][]Certificate{chain},
+			publicKey: p.PublicKey(),
+			newscheme: []bool{true},
+		}, nil
+	}
+	if err := cert.deprecatedSign(p.signer, Signature{}); err != nil {
 		return Blessings{}, err
 	}
 	return Blessings{
 		chains:    [][]Certificate{[]Certificate{*cert}},
 		publicKey: p.PublicKey(),
+		newscheme: []bool{false},
 	}, nil
 }
 

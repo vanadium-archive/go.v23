@@ -134,7 +134,15 @@ func BenchmarkBlessingsSingleCertificateEquality(b *testing.B) {
 	}
 }
 
-func BenchmarkBless(b *testing.B) {
+// TODO(ashankar): Remove to fully resolve https://github.com/vanadium/issues/issues/543
+func runWithSignatureScheme(newscheme bool, f func(*testing.B), b *testing.B) {
+	old := useNewCertificateSigningScheme
+	useNewCertificateSigningScheme = newscheme
+	f(b)
+	useNewCertificateSigningScheme = old
+}
+
+func benchmarkBless(b *testing.B) {
 	p, err := CreatePrincipal(newSigner(), nil, nil)
 	if err != nil {
 		b.Fatal(err)
@@ -157,7 +165,15 @@ func BenchmarkBless(b *testing.B) {
 	}
 }
 
-func BenchmarkVerifyCertificateIntegrity(b *testing.B) {
+func BenchmarkBless_Deprecated(b *testing.B) {
+	runWithSignatureScheme(false, benchmarkBless, b)
+}
+
+func BenchmarkBless(b *testing.B) {
+	runWithSignatureScheme(true, benchmarkBless, b)
+}
+
+func benchmarkVerifyCertificateIntegrity(b *testing.B) {
 	native := makeBlessings(b, 1)
 	var wire WireBlessings
 	if err := wireBlessingsFromNative(&wire, native); err != nil {
@@ -169,6 +185,20 @@ func BenchmarkVerifyCertificateIntegrity(b *testing.B) {
 			b.Fatal(err)
 		}
 	}
+}
+
+func BenchmarkVerifyCertificateIntegrity_Deprecated(b *testing.B) {
+	runWithSignatureScheme(false, benchmarkVerifyCertificateIntegrity, b)
+}
+
+func BenchmarkVerifyCertificateIntegrity(b *testing.B) {
+	runWithSignatureScheme(true, benchmarkVerifyCertificateIntegrity, b)
+}
+
+func BenchmarkVerifyCertificateIntegrity_NoCaching(b *testing.B) {
+	signatureCache.disable()
+	defer signatureCache.enable()
+	runWithSignatureScheme(true, benchmarkVerifyCertificateIntegrity, b)
 }
 
 func makeBlessings(t testing.TB, ncerts int) Blessings {
