@@ -22,7 +22,7 @@ var (
 	ErrDotNotationDisallowedForKey     = verror.Register("v.io/syncbase/v23/syncbase/nosql/syncql.DotNotationDisallowedForKey", verror.NoRetry, "{1:}{2:} [{3}]Dot notation may not be used on a key field.")
 	ErrDotNotationDisallowedForType    = verror.Register("v.io/syncbase/v23/syncbase/nosql/syncql.DotNotationDisallowedForType", verror.NoRetry, "{1:}{2:} [{3}]Dot notation may not be used with type.")
 	ErrErrorCompilingRegularExpression = verror.Register("v.io/syncbase/v23/syncbase/nosql/syncql.ErrorCompilingRegularExpression", verror.NoRetry, "{1:}{2:} [{3}]The following error encountered compiling regex '{4}': {5}")
-	ErrExecOfUnkonwnStatementType      = verror.Register("v.io/syncbase/v23/syncbase/nosql/syncql.ExecOfUnkonwnStatementType", verror.NoRetry, "{1:}{2:} [{3}]Cannot execute unknown statement type: {4}.")
+	ErrExecOfUnknownStatementType      = verror.Register("v.io/syncbase/v23/syncbase/nosql/syncql.ExecOfUnknownStatementType", verror.NoRetry, "{1:}{2:} [{3}]Cannot execute unknown statement type: {4}.")
 	ErrExpected                        = verror.Register("v.io/syncbase/v23/syncbase/nosql/syncql.Expected", verror.NoRetry, "{1:}{2:} [{3}]Expected '{4}'.")
 	ErrExpectedFrom                    = verror.Register("v.io/syncbase/v23/syncbase/nosql/syncql.ExpectedFrom", verror.NoRetry, "{1:}{2:} [{3}]Expected 'from', found {4}.")
 	ErrExpectedIdentifier              = verror.Register("v.io/syncbase/v23/syncbase/nosql/syncql.ExpectedIdentifier", verror.NoRetry, "{1:}{2:} [{3}]Expected identifier, found {4}.")
@@ -58,7 +58,7 @@ func init() {
 	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrDotNotationDisallowedForKey.ID), "{1:}{2:} [{3}]Dot notation may not be used on a key field.")
 	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrDotNotationDisallowedForType.ID), "{1:}{2:} [{3}]Dot notation may not be used with type.")
 	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrErrorCompilingRegularExpression.ID), "{1:}{2:} [{3}]The following error encountered compiling regex '{4}': {5}")
-	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrExecOfUnkonwnStatementType.ID), "{1:}{2:} [{3}]Cannot execute unknown statement type: {4}.")
+	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrExecOfUnknownStatementType.ID), "{1:}{2:} [{3}]Cannot execute unknown statement type: {4}.")
 	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrExpected.ID), "{1:}{2:} [{3}]Expected '{4}'.")
 	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrExpectedFrom.ID), "{1:}{2:} [{3}]Expected 'from', found {4}.")
 	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrExpectedIdentifier.ID), "{1:}{2:} [{3}]Expected identifier, found {4}.")
@@ -121,9 +121,9 @@ func NewErrErrorCompilingRegularExpression(ctx *context.T, off int64, regex stri
 	return verror.New(ErrErrorCompilingRegularExpression, ctx, off, regex, err)
 }
 
-// NewErrExecOfUnkonwnStatementType returns an error with the ErrExecOfUnkonwnStatementType ID.
-func NewErrExecOfUnkonwnStatementType(ctx *context.T, off int64, statementType string) error {
-	return verror.New(ErrExecOfUnkonwnStatementType, ctx, off, statementType)
+// NewErrExecOfUnknownStatementType returns an error with the ErrExecOfUnknownStatementType ID.
+func NewErrExecOfUnknownStatementType(ctx *context.T, off int64, statementType string) error {
+	return verror.New(ErrExecOfUnknownStatementType, ctx, off, statementType)
 }
 
 // NewErrExpected returns an error with the ErrExpected ID.

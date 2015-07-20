@@ -27,7 +27,7 @@ error (
 	ErrorCompilingRegularExpression(off int64, regex string, err error) {
 		"en": "[{off}]The following error encountered compiling regex '{regex}': {err}",
 	}
-	ExecOfUnkonwnStatementType(off int64, statementType string) {
+	ExecOfUnknownStatementType(off int64, statementType string) {
 		"en": "[{off}]Cannot execute unknown statement type: {statementType}.",
 	}
 	Expected(off int64, expected string) {

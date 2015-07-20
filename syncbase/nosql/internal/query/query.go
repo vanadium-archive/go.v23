@@ -36,7 +36,7 @@ func Exec(db query_db.Database, q string) ([]string, ResultStream, error) {
 	case query_parser.SelectStatement:
 		return execSelect(db, &sel)
 	default:
-		return nil, nil, syncql.NewErrExecOfUnkonwnStatementType(db.GetContext(), (*s).Offset(), reflect.TypeOf(*s).Name())
+		return nil, nil, syncql.NewErrExecOfUnknownStatementType(db.GetContext(), (*s).Offset(), reflect.TypeOf(*s).Name())
 	}
 }
 
