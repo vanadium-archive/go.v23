@@ -20,7 +20,7 @@ var (
 
 // Verify returns true iff sig is a valid signature for a message.
 func (sig *Signature) Verify(key PublicKey, message []byte) bool {
-	if message = messageDigest(sig.Hash, sig.Purpose, message); message == nil {
+	if message = messageDigest(sig.Hash, sig.Purpose, message, key); message == nil {
 		return false
 	}
 	switch v := key.(type) {
@@ -68,7 +68,7 @@ type ecdsaSigner struct {
 
 func (c *ecdsaSigner) Sign(purpose, message []byte) (Signature, error) {
 	hash := c.pubkey.hash()
-	if message = messageDigest(hash, purpose, message); message == nil {
+	if message = messageDigest(hash, purpose, message, c.pubkey); message == nil {
 		return Signature{}, verror.New(errSignCantHash, nil, hash)
 	}
 	r, s, err := c.sign(message)
@@ -87,14 +87,36 @@ func (c *ecdsaSigner) PublicKey() PublicKey {
 	return c.pubkey
 }
 
-func messageDigest(hash Hash, purpose, message []byte) []byte {
-	if message = hash.sum(message); message == nil {
+func messageDigest(hash Hash, purpose, message []byte, key PublicKey) []byte {
+	var fields []byte
+	w := func(data []byte) bool {
+		h := hash.sum(data)
+		if h == nil {
+			return false
+		}
+		fields = append(fields, h...)
+		return true
+	}
+	if isV1Purpose(purpose) {
+		// In order to defend agains "Duplicate Signature Key Selection (DSKS)" attacks
+		// as defined in the paper "Another look at Security Definition" by Neal Koblitz
+		// and Alfred Menzes, we also include the public key of the signer in the message
+		// being signed.
+		keybytes, err := key.MarshalBinary()
+		if err != nil {
+			return nil
+		}
+		if !w(keybytes) {
+			return nil
+		}
+	}
+	if !w(message) {
 		return nil
 	}
-	if purpose = hash.sum(purpose); purpose == nil {
+	if !w(purpose) {
 		return nil
 	}
-	return hash.sum(append(message, purpose...))
+	return hash.sum(fields)
 }
 
 // sum returns the hash of data using hash as the cryptographic hash function.
@@ -115,4 +137,13 @@ func (hash Hash) sum(data []byte) []byte {
 		return h[:]
 	}
 	return nil
+}
+
+func isV1Purpose(purpose []byte) bool {
+	switch string(purpose) {
+	case SignatureForMessageSigningV1, SignatureForBlessingCertificatesV1, SignatureForDischargeV1:
+		return true
+	default:
+		return false
+	}
 }

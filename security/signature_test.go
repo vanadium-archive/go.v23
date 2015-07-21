@@ -27,9 +27,23 @@ func TestSignature(t *testing.T) {
 			t.Errorf("Failed to generate key for curve of %d bits: %v", nbits, err)
 			continue
 		}
-		// Sign a message nbits long and then ensure that a larger message does not have the same signature.
-		message := make([]byte, nbits>>3)
+		// Test that the defined signing purposes work as expected.
+		purposes := [][]byte{[]byte(SignatureForMessageSigningV1), []byte(SignatureForBlessingCertificatesV1), []byte(SignatureForDischargeV1)}
+		message := []byte("test")
 		signer := NewInMemoryECDSASigner(key)
+		for _, p := range purposes {
+			sig, err := signer.Sign(p, message)
+			if err != nil {
+				t.Errorf("Failed to generate signature with curve of %d bits: %v", nbits, err)
+				continue
+			}
+			if !sig.Verify(signer.PublicKey(), message) {
+				t.Errorf("Signature verification failed with curve of %d bits", nbits)
+				continue
+			}
+		}
+		// Sign a message nbits long and then ensure that a larger message does not have the same signature.
+		message = make([]byte, nbits>>3)
 		sig, err := signer.Sign(nil, message)
 		if err != nil {
 			t.Errorf("Failed to generate signature with curve of %d bits: %v", nbits, err)
@@ -78,6 +92,7 @@ func TestSignature(t *testing.T) {
 			}
 		}
 	}
+
 }
 
 func TestSignaturePurpose(t *testing.T) {

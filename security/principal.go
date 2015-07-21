@@ -5,6 +5,7 @@
 package security
 
 import (
+	"bytes"
 	"reflect"
 	"v.io/v23/verror"
 )
@@ -44,6 +45,9 @@ var (
 	// For this to work, ALL private key operations by the Principal must
 	// use a distinct "purpose" and no two "purpose"s should share a prefix
 	// or suffix.
+
+	// TODO(ataly, ashankar): Switch the following purposes to version 1
+	// once all binaries have transitioned to it.
 	blessPurpose     = []byte(SignatureForBlessingCertificates)
 	signPurpose      = []byte(SignatureForMessageSigning)
 	dischargePurpose = []byte(SignatureForDischarge)
@@ -90,6 +94,14 @@ func (errRoots) Add(PublicKey, BlessingPattern) error  { return verror.New(errNi
 func (errRoots) Recognized(PublicKey, string) error    { return verror.New(errNilRoots, nil) }
 func (errRoots) Dump() map[BlessingPattern][]PublicKey { return nil }
 func (errRoots) DebugString() string                   { return verror.New(errNilRoots, nil).Error() }
+
+func isValidBlessingPurpose(purpose []byte) bool {
+	return bytes.Equal(purpose, []byte(SignatureForBlessingCertificates)) || bytes.Equal(purpose, []byte(SignatureForBlessingCertificatesV1))
+}
+
+func isValidDischargePurpose(purpose []byte) bool {
+	return bytes.Equal(purpose, []byte(SignatureForDischarge)) || bytes.Equal(purpose, []byte(SignatureForDischargeV1))
+}
 
 type principal struct {
 	signer Signer

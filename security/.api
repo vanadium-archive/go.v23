@@ -6,8 +6,11 @@ pkg security, const SHA256Hash Hash
 pkg security, const SHA384Hash Hash
 pkg security, const SHA512Hash Hash
 pkg security, const SignatureForBlessingCertificates ideal-string
+pkg security, const SignatureForBlessingCertificatesV1 ideal-string
 pkg security, const SignatureForDischarge ideal-string
+pkg security, const SignatureForDischargeV1 ideal-string
 pkg security, const SignatureForMessageSigning ideal-string
+pkg security, const SignatureForMessageSigningV1 ideal-string
 pkg security, func AllowEveryone() Authorizer
 pkg security, func CreatePrincipal(Signer, BlessingStore, BlessingRoots) (Principal, error)
 pkg security, func DefaultAuthorizer() Authorizer

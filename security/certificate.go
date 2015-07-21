@@ -5,7 +5,6 @@
 package security
 
 import (
-	"bytes"
 	"crypto/sha256"
 	"strings"
 	"sync"
@@ -105,7 +104,7 @@ func (c *Certificate) deprecatedDigest(hash Hash, parent Signature) []byte {
 
 // TODO(ashankar): Remove this to complete resolution of https://github.com/vanadium/issues/issues/543
 func (c *Certificate) deprecatedValidate(parentSignature Signature, parentKey PublicKey) error {
-	if !bytes.Equal(c.Signature.Purpose, blessPurpose) {
+	if !isValidBlessingPurpose(c.Signature.Purpose) {
 		return verror.New(errInapproriateCertSignature, nil, c.Extension, c.Signature.Purpose)
 	}
 	if err := validateExtension(c.Extension); err != nil {
@@ -173,7 +172,7 @@ func validateCertificateChain(chain []Certificate) (PublicKey, error) {
 			return pubkey, nil
 		}
 		// Some basic sanity checks on the certificate.
-		if !bytes.Equal(c.Signature.Purpose, blessPurpose) {
+		if !isValidBlessingPurpose(c.Signature.Purpose) {
 			return nil, verror.New(errInapproriateCertSignature, nil, c.Extension, c.Signature.Purpose)
 		}
 		if err := validateExtension(c.Extension); err != nil {

@@ -43,9 +43,15 @@ const (
 	SHA384Hash = Hash("SHA384") // SHA384 cryptographic hash function defined in FIPS 180-2.
 	SHA512Hash = Hash("SHA512") // SHA512 cryptographic hash function defined in FIPS 180-2.
 
+	// TODO(ataly, ashankar): Switch the following purposes to version 1
+	// once all binaries have transitioned to it.
 	SignatureForMessageSigning       = "S" // Signature.Purpose used by a Principal to sign arbitrary messages.
 	SignatureForBlessingCertificates = "B" // Signature.Purpose used by a Principal when signing Certificates for creating blessings.
 	SignatureForDischarge            = "D" // Signature.Purpose used by a Principal when signing discharges for public-key based third-party caveats.
+
+	SignatureForMessageSigningV1       = "S1" // Signature.Purpose used by a Principal to sign arbitrary messages.
+	SignatureForBlessingCertificatesV1 = "B1" // Signature.Purpose used by a Principal when signing Certificates for creating blessings.
+	SignatureForDischargeV1            = "D1" // Signature.Purpose used by a Principal when signing discharges for public-key based third-party caveats.
 )
 
 // Signature represents a digital signature.
