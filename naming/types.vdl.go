@@ -70,7 +70,7 @@ func (GlobError) __VDLReflect(struct {
 type (
 	// GlobReply represents any single field of the GlobReply union type.
 	//
-	// GlobReply is the data type of the chan returned by Glob__.
+	// GlobReply is the data type returned by Glob__.
 	GlobReply interface {
 		// Index returns the field index.
 		Index() int
@@ -106,12 +106,52 @@ func (x GlobReplyError) Interface() interface{}          { return x.Value }
 func (x GlobReplyError) Name() string                    { return "Error" }
 func (x GlobReplyError) __VDLReflect(__GlobReplyReflect) {}
 
+type (
+	// GlobChildrenReply represents any single field of the GlobChildrenReply union type.
+	//
+	// GlobChildrenReply is the data type returned by GlobChildren__.
+	GlobChildrenReply interface {
+		// Index returns the field index.
+		Index() int
+		// Interface returns the field value as an interface.
+		Interface() interface{}
+		// Name returns the field name.
+		Name() string
+		// __VDLReflect describes the GlobChildrenReply union type.
+		__VDLReflect(__GlobChildrenReplyReflect)
+	}
+	// GlobChildrenReplyName represents field Name of the GlobChildrenReply union type.
+	GlobChildrenReplyName struct{ Value string }
+	// GlobChildrenReplyError represents field Error of the GlobChildrenReply union type.
+	GlobChildrenReplyError struct{ Value GlobError }
+	// __GlobChildrenReplyReflect describes the GlobChildrenReply union type.
+	__GlobChildrenReplyReflect struct {
+		Name  string `vdl:"v.io/v23/naming.GlobChildrenReply"`
+		Type  GlobChildrenReply
+		Union struct {
+			Name  GlobChildrenReplyName
+			Error GlobChildrenReplyError
+		}
+	}
+)
+
+func (x GlobChildrenReplyName) Index() int                              { return 0 }
+func (x GlobChildrenReplyName) Interface() interface{}                  { return x.Value }
+func (x GlobChildrenReplyName) Name() string                            { return "Name" }
+func (x GlobChildrenReplyName) __VDLReflect(__GlobChildrenReplyReflect) {}
+
+func (x GlobChildrenReplyError) Index() int                              { return 1 }
+func (x GlobChildrenReplyError) Interface() interface{}                  { return x.Value }
+func (x GlobChildrenReplyError) Name() string                            { return "Error" }
+func (x GlobChildrenReplyError) __VDLReflect(__GlobChildrenReplyReflect) {}
+
 func init() {
 	vdl.Register((*MountFlag)(nil))
 	vdl.Register((*MountedServer)(nil))
 	vdl.Register((*MountEntry)(nil))
 	vdl.Register((*GlobError)(nil))
 	vdl.Register((*GlobReply)(nil))
+	vdl.Register((*GlobChildrenReply)(nil))
 }
 
 const Replace = MountFlag(1) // Replace means the mount should replace what is currently at the mount point

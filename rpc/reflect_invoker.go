@@ -10,6 +10,7 @@ import (
 	"sync"
 
 	"v.io/v23/context"
+	"v.io/v23/glob"
 	"v.io/v23/naming"
 	"v.io/v23/vdl"
 	"v.io/v23/vdlroot/signature"
@@ -384,16 +385,20 @@ const (
 )
 
 var (
-	rtPtrToContext         = reflect.TypeOf((*context.T)(nil))
-	rtStreamServerCall     = reflect.TypeOf((*StreamServerCall)(nil)).Elem()
-	rtServerCall           = reflect.TypeOf((*ServerCall)(nil)).Elem()
-	rtBool                 = reflect.TypeOf(bool(false))
-	rtError                = reflect.TypeOf((*error)(nil)).Elem()
-	rtString               = reflect.TypeOf("")
-	rtStringChan           = reflect.TypeOf((<-chan string)(nil))
-	rtGlobReplyChan        = reflect.TypeOf((<-chan naming.GlobReply)(nil))
-	rtPtrToGlobState       = reflect.TypeOf((*GlobState)(nil))
-	rtSliceOfInterfaceDesc = reflect.TypeOf([]InterfaceDesc{})
+	rtPtrToContext           = reflect.TypeOf((*context.T)(nil))
+	rtStreamServerCall       = reflect.TypeOf((*StreamServerCall)(nil)).Elem()
+	rtServerCall             = reflect.TypeOf((*ServerCall)(nil)).Elem()
+	rtGlobServerCall         = reflect.TypeOf((*GlobServerCall)(nil)).Elem()
+	rtGlobChildrenServerCall = reflect.TypeOf((*GlobChildrenServerCall)(nil)).Elem()
+	rtBool                   = reflect.TypeOf(bool(false))
+	rtError                  = reflect.TypeOf((*error)(nil)).Elem()
+	rtString                 = reflect.TypeOf("")
+	rtStringChan             = reflect.TypeOf((<-chan string)(nil))
+	rtGlobReplyChan          = reflect.TypeOf((<-chan naming.GlobReply)(nil))
+	rtPtrToGlobState         = reflect.TypeOf((*GlobState)(nil))
+	rtSliceOfInterfaceDesc   = reflect.TypeOf([]InterfaceDesc{})
+	rtPtrToGlobGlob          = reflect.TypeOf((*glob.Glob)(nil))
+	rtPtrToGlobElement       = reflect.TypeOf((*glob.Element)(nil))
 
 	// ReflectInvoker will panic iff the error is Aborted, otherwise it will
 	// silently ignore the error.
@@ -416,8 +421,8 @@ var (
 	errNoFinalErrorOutArg = verror.Register(pkgPath+".errNoFinalErrorOutArg", verror.NoRetry, "{1:}{2:}Invalid out-args (final out-arg must be error){:_}")
 	errBadDescribe        = verror.Register(pkgPath+".errBadDescribe", verror.NoRetry, "{1:}{2:}Describe__ must have signature Describe__() []rpc.InterfaceDesc{:_}")
 	errBadGlobber         = verror.Register(pkgPath+".errBadGlobber", verror.NoRetry, "{1:}{2:}Globber must have signature Globber() *rpc.GlobState{:_}")
-	errBadGlob            = verror.Register(pkgPath+".errBadGlob", verror.NoRetry, "{1:}{2:}Glob__ must have signature Glob__(*context.T, rpc.ServerCall, pattern string) (<-chan naming.GlobReply, error){:_}")
-	errBadGlobChildren    = verror.Register(pkgPath+".errBadGlobChildren", verror.NoRetry, "{1:}{2:}GlobChildren__ must have signature GlobChildren__(*context.T, rpc.ServerCall) (<-chan string, error){:_}")
+	errBadGlob            = verror.Register(pkgPath+".errBadGlob", verror.NoRetry, "{1:}{2:}Glob__ must have signature Glob__(*context.T, rpc.ServerCall, pattern string) (<-chan naming.GlobReply, error) or Glob__(ctx *context.T, call GlobServerCall, g *glob.Glob) error{:_}")
+	errBadGlobChildren    = verror.Register(pkgPath+".errBadGlobChildren", verror.NoRetry, "{1:}{2:}GlobChildren__ must have signature GlobChildren__(*context.T, rpc.ServerCall) (<-chan string, error) or GlobChildren__(ctx *context.T, call GlobChildrenServerCall, matcher *glob.Element) error{:_}")
 
 	errNeedStreamingCall       = verror.Register(pkgPath+".errNeedStreamingCall", verror.NoRetry, "{1:}{2:}Call arg %s is invalid streaming call; must be pointer to a struct representing the typesafe streaming call."+forgotWrap+"{:_}")
 	errNeedInitMethod          = verror.Register(pkgPath+".errNeedInitMethod", verror.NoRetry, "{1:}{2:}Call arg %s is invalid streaming call; must have Init method."+forgotWrap+"{:_}")
@@ -491,20 +496,32 @@ func typeCheckReservedMethod(method reflect.Method) error {
 		return verror.New(verror.ErrInternal, nil, verror.New(errReservedMethod, nil))
 	case "Glob__":
 		// Glob__(*context.T, rpc.ServerCall, string) (<-chan naming.GlobReply, error)
-		if t := method.Type; t.NumIn() != 4 || t.NumOut() != 2 ||
-			t.In(1) != rtPtrToContext || t.In(2) != rtServerCall || t.In(3) != rtString ||
-			t.Out(0) != rtGlobReplyChan || t.Out(1) != rtError {
-			return abortedf(errBadGlob)
+		if t := method.Type; t.NumIn() == 4 && t.NumOut() == 2 &&
+			t.In(1) == rtPtrToContext && t.In(2) == rtServerCall && t.In(3) == rtString &&
+			t.Out(0) == rtGlobReplyChan && t.Out(1) == rtError {
+			return verror.New(verror.ErrInternal, nil, verror.New(errReservedMethod, nil))
 		}
-		return verror.New(verror.ErrInternal, nil, verror.New(errReservedMethod, nil))
+		// Glob__(ctx *context.T, call GlobServerCall, g *glob.Glob) error
+		if t := method.Type; t.NumIn() == 4 && t.NumOut() == 1 &&
+			t.In(1) == rtPtrToContext && t.In(2) == rtGlobServerCall && t.In(3) == rtPtrToGlobGlob &&
+			t.Out(0) == rtError {
+			return verror.New(verror.ErrInternal, nil, verror.New(errReservedMethod, nil))
+		}
+		return abortedf(errBadGlob)
 	case "GlobChildren__":
 		// GlobChildren__(*context.T, rpc.ServerCall) (<-chan string, error)
-		if t := method.Type; t.NumIn() != 3 || t.NumOut() != 2 ||
-			t.In(1) != rtPtrToContext || t.In(2) != rtServerCall ||
-			t.Out(0) != rtStringChan || t.Out(1) != rtError {
-			return abortedf(errBadGlobChildren)
+		if t := method.Type; t.NumIn() == 3 && t.NumOut() == 2 &&
+			t.In(1) == rtPtrToContext && t.In(2) == rtServerCall &&
+			t.Out(0) == rtStringChan && t.Out(1) == rtError {
+			return verror.New(verror.ErrInternal, nil, verror.New(errReservedMethod, nil))
 		}
-		return verror.New(verror.ErrInternal, nil, verror.New(errReservedMethod, nil))
+		// GlobChildren__(ctx *context.T, call GlobChildrenServerCall, matcher *glob.Element) error
+		if t := method.Type; t.NumIn() == 4 && t.NumOut() == 1 &&
+			t.In(1) == rtPtrToContext && t.In(2) == rtGlobChildrenServerCall && t.In(3) == rtPtrToGlobElement &&
+			t.Out(0) == rtError {
+			return verror.New(verror.ErrInternal, nil, verror.New(errReservedMethod, nil))
+		}
+		return abortedf(errBadGlobChildren)
 	}
 	return nil
 }
