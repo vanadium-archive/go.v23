@@ -16,6 +16,7 @@ package flow
 
 import (
 	"io"
+
 	"v.io/v23/context"
 	"v.io/v23/naming"
 	"v.io/v23/security"
@@ -25,6 +26,9 @@ import (
 type Manager interface {
 	// Listen causes the Manager to accept flows from the provided protocol and address.
 	// Listen may be called muliple times.
+	//
+	// The flow.Manager associated with ctx must be the receiver of the method,
+	// otherwise an error is returned.
 	Listen(ctx *context.T, protocol, address string) error
 
 	// ListeningEndpoints returns the endpoints that the Manager has explicitly
@@ -33,36 +37,44 @@ type Manager interface {
 	ListeningEndpoints() []naming.Endpoint
 
 	// Accept blocks until a new Flow has been initiated by a remote process.
-	// Flows are accepted from addresses that the Manager is listening on, including
-	// outgoing dialed connections.
+	// Flows are accepted from addresses that the Manager is listening on,
+	// including outgoing dialed connections.
 	//
 	// For example:
 	//   err := m.Listen*(ctx, "tcp", ":0")
 	//   for {
-	//     flow, err := m.Accept(ctx, blessings)
+	//     flow, err := m.Accept(ctx)
 	//     // process flow
 	//   }
 	//
 	// can be used to accept Flows initiated by remote processes.
-	// 'blessings' are the Blessings presented to the Client during authentication.
-	Accept(ctx *context.T, blessings security.Blessings) (Flow, error)
+	//
+	// The flow.Manager associated with ctx must be the receiver of the method,
+	// otherwise an error is returned.
+	Accept(ctx *context.T) (Flow, error)
 
-	// Dial creates a Flow to the provided remote endpoint. 'auth' is used to authorize
-	// the remote end.
+	// Dial creates a Flow to the provided remote endpoint, using 'fn' to
+	// determine the blessings that will be sent to the remote end.
 	//
 	// To maximize re-use of connections, the Manager will also Listen on Dialed
 	// connections for the lifetime of the connection.
 	//
-	// TODO(suharshs): Revisit passing in an authorizer here. Perhaps restrict server
-	// authorization to a smaller set of policies, or use a different mechanism to
-	// allow the user to specify a policy.
-	Dial(ctx *context.T, remote naming.Endpoint, auth security.Authorizer) (Flow, error)
+	// The flow.Manager associated with ctx must be the receiver of the method,
+	// otherwise an error is returned.
+	Dial(ctx *context.T, remote naming.Endpoint, fn BlessingsForPeer) (Flow, error)
 
 	// Closed returns a channel that remains open for the lifetime of the Manager
 	// object. Once the channel is closed any operations on the Manager will
 	// necessarily fail.
 	Closed() <-chan struct{}
 }
+
+// BlessingsForPeer is the type of a callback used in performing security
+// authorization.  The remote end reveals its blessings first in the
+// authorization protocol, so the callback should first authorize the remote
+// blessings in the call.  Once authorized, the callback should return the
+// blessings that will be revealed to the remote end.
+type BlessingsForPeer func(ctx *context.T, call security.Call) (security.Blessings, error)
 
 // Conn represents the connection onto which this flow is multiplexed.
 // Since this Conn may be shared between many flows it wouldn't be safe
@@ -80,15 +92,36 @@ type Conn interface {
 type Flow interface {
 	io.ReadWriter
 
-	// LocalBlessings returns the blessings presented by the local end of the flow during authentication.
+	// WriteV is like Write, but allows writing more than one buffer at a time.
+	// The data in each buffer is written sequentially onto the flow.  Returns the
+	// number of bytes written.  WriteV must return a non-nil error if it writes
+	// less than the total number of bytes from all buffers.
+	WriteV(d []byte, data ...[]byte) (int, error)
+
+	// WriteVAndClose performs WriteV, and then closes the underlying flow.
+	WriteVAndClose(d []byte, data ...[]byte) (int, error)
+
+	// SetContext sets the context associated with the flow.  Typically this is
+	// used to set state that is only available after the flow is connected, such
+	// as a more restricted flow timeout, or the language of the request.
+	//
+	// The flow.Manager associated with ctx must be the same flow.Manager that the
+	// flow was dialed or accepted from, otherwise an error is returned.
+	SetContext(ctx *context.T) error
+
+	// LocalBlessings returns the blessings presented by the local end of the flow
+	// during authentication.
 	LocalBlessings() security.Blessings
-	// RemoteBlessings returns the blessings presented by the remote end of the flow during authentication.
+	// RemoteBlessings returns the blessings presented by the remote end of the
+	// flow during authentication.
 	RemoteBlessings() security.Blessings
-	// LocalDischarges returns the discharges presented by the local end of the flow during authentication.
+	// LocalDischarges returns the discharges presented by the local end of the
+	// flow during authentication.
 	//
 	// Discharges are organized in a map keyed by the discharge-identifier.
 	LocalDischarges() map[string]security.Discharge
-	// RemoteDischarges returns the discharges presented by the remote end of the flow during authentication.
+	// RemoteDischarges returns the discharges presented by the remote end of the
+	// flow during authentication.
 	//
 	// Discharges are organized in a map keyed by the discharge-identifier.
 	RemoteDischarges() map[string]security.Discharge
