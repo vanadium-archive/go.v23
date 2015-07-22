@@ -7,6 +7,8 @@ package security
 import (
 	"reflect"
 	"testing"
+
+	"v.io/v23/context"
 )
 
 func TestDischargeToAndFromWire(t *testing.T) {
@@ -39,6 +41,36 @@ func TestDischargeToAndFromWire(t *testing.T) {
 	}
 }
 
+func TestDischargeSignatureCaching(t *testing.T) {
+	var (
+		p1          = newPrincipal(t)
+		p2          = newPrincipal(t)
+		cav         = newCaveat(NewPublicKeyCaveat(p1.PublicKey(), "peoria", ThirdPartyRequirements{}, UnconstrainedUse()))
+		ctx, cancel = context.RootContext()
+		mkCall      = func(d Discharge) Call {
+			return NewCall(&CallParams{
+				RemoteDischarges: map[string]Discharge{cav.ThirdPartyDetails().ID(): d},
+			})
+		}
+	)
+	defer cancel()
+	discharge1, err := p1.MintDischarge(cav, UnconstrainedUse())
+	if err != nil {
+		t.Fatal(err)
+	}
+	// Another principal (p2) may mint a discharge for the same caveat, but it should not be accepted.
+	discharge2, err := p2.MintDischarge(cav, UnconstrainedUse())
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := cav.Validate(ctx, mkCall(discharge1)); err != nil {
+		t.Error(err)
+	}
+	if err := cav.Validate(ctx, mkCall(discharge2)); err == nil {
+		t.Errorf("Caveat that required a discharge from one principal was validated by a discharge created by another!")
+	}
+}
+
 func BenchmarkDischargeEquality(b *testing.B) {
 	p, err := CreatePrincipal(newSigner(), nil, nil)
 	if err != nil {
@@ -53,4 +85,43 @@ func BenchmarkDischargeEquality(b *testing.B) {
 	for i := 0; i < b.N; i++ {
 		discharge.Equivalent(discharge)
 	}
+}
+
+func benchmarkPublicKeyDischargeVerification(caching bool, b *testing.B) {
+	if !caching {
+		dischargeSignatureCache.disable()
+		defer dischargeSignatureCache.enable()
+	}
+	p, err := CreatePrincipal(newSigner(), nil, nil)
+	if err != nil {
+		b.Fatal(err)
+	}
+	cav := newCaveat(NewPublicKeyCaveat(p.PublicKey(), "moline", ThirdPartyRequirements{}, UnconstrainedUse()))
+	discharge, err := p.MintDischarge(cav, UnconstrainedUse())
+	if err != nil {
+		b.Fatal(err)
+	}
+	ctx, cancel := context.RootContext()
+	defer cancel()
+	call := NewCall(&CallParams{
+		RemoteDischarges: map[string]Discharge{
+			cav.ThirdPartyDetails().ID(): discharge,
+		}})
+	// Validate once for the initial expensive signature validation (not stored in the cache).
+	if err := cav.Validate(ctx, call); err != nil {
+		b.Fatal(err)
+	}
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		if err := cav.Validate(ctx, call); err != nil {
+			b.Fatal(err)
+		}
+	}
+}
+
+func BenchmarkPublicKeyDischargeVerification_Cached(b *testing.B) {
+	benchmarkPublicKeyDischargeVerification(true, b)
+}
+func BenchmarkPublicKeyDischargeVerification(b *testing.B) {
+	benchmarkPublicKeyDischargeVerification(false, b)
 }

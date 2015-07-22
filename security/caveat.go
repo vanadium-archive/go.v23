@@ -6,6 +6,7 @@ package security
 
 import (
 	"crypto/rand"
+	"crypto/sha256"
 	"encoding/base64"
 	"fmt"
 	"reflect"
@@ -34,6 +35,8 @@ var (
 	errCantUnmarshalDischargeKey      = verror.Register(pkgPath+".errCantUnmarshalDischargeKey", verror.NoRetry, "{1:}{2:}invalid {3}: failed to unmarshal discharger's public key: {4}{:_}")
 	errInapproriateDischargeSignature = verror.Register(pkgPath+".errInapproriateDischargeSignature", verror.NoRetry, "{1:}{2:}signature on discharge for caveat {3} was not intended for discharges(purpose={4}){:_}")
 	errBadDischargeSignature          = verror.Register(pkgPath+".errBadDischargeSignature", verror.NoRetry, "{1:}{2:}signature verification on discharge for caveat {3} failed{:_}")
+
+	dischargeSignatureCache = &sigCache{m: make(map[[sha256.Size]byte]bool)}
 )
 
 type registryEntry struct {
@@ -317,10 +320,27 @@ func (d *publicKeyDischarge) verify(cxt *context.T, key PublicKey) error {
 	if !isValidDischargePurpose(d.Signature.Purpose) {
 		return verror.New(errInapproriateDischargeSignature, cxt, d.ThirdPartyCaveatId, d.Signature.Purpose)
 	}
-	if !d.Signature.Verify(key, d.digest(key.hash())) {
+	digest := d.digest(key.hash())
+	cachekey, err := d.signatureCacheKey(digest, key, d.Signature)
+	if err == nil && dischargeSignatureCache.verify(cachekey) {
+		return nil
+	}
+	if !d.Signature.Verify(key, digest) {
 		return verror.New(errBadDischargeSignature, cxt, d.ThirdPartyCaveatId)
 	}
+	dischargeSignatureCache.cache([][]byte{cachekey})
 	return nil
+}
+
+func (d *publicKeyDischarge) signatureCacheKey(digest []byte, key PublicKey, signature Signature) ([]byte, error) {
+	// Every "argument" to signature verification must make it into the cache key.
+	keybytes, err := key.MarshalBinary()
+	if err != nil {
+		return nil, err
+	}
+	keyhash := key.hash().sum(keybytes)
+	sighash := signature.digest(key.hash())
+	return append(keyhash[:], append(sighash, digest...)...), nil
 }
 
 func (d *publicKeyDischarge) sign(signer Signer) error {
