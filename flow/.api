@@ -1,8 +1,9 @@
+pkg flow, type BlessingsForPeer func(ctx *context.T, call security.Call) (security.Blessings, error)
 pkg flow, type Conn interface { Closed, LocalEndpoint, RemoteEndpoint }
 pkg flow, type Conn interface, Closed() <-chan struct{}
 pkg flow, type Conn interface, LocalEndpoint() naming.Endpoint
 pkg flow, type Conn interface, RemoteEndpoint() naming.Endpoint
-pkg flow, type Flow interface { Closed, Conn, LocalBlessings, LocalDischarges, Read, RemoteBlessings, RemoteDischarges, Write }
+pkg flow, type Flow interface { Closed, Conn, LocalBlessings, LocalDischarges, Read, RemoteBlessings, RemoteDischarges, SetContext, Write, WriteV, WriteVAndClose }
 pkg flow, type Flow interface, Closed() <-chan struct{}
 pkg flow, type Flow interface, Conn() Conn
 pkg flow, type Flow interface, LocalBlessings() security.Blessings
@@ -10,10 +11,13 @@ pkg flow, type Flow interface, LocalDischarges() map[string]security.Discharge
 pkg flow, type Flow interface, Read([]byte) (int, error)
 pkg flow, type Flow interface, RemoteBlessings() security.Blessings
 pkg flow, type Flow interface, RemoteDischarges() map[string]security.Discharge
+pkg flow, type Flow interface, SetContext(*context.T) error
 pkg flow, type Flow interface, Write([]byte) (int, error)
+pkg flow, type Flow interface, WriteV([]byte, ...[]byte) (int, error)
+pkg flow, type Flow interface, WriteVAndClose([]byte, ...[]byte) (int, error)
 pkg flow, type Manager interface { Accept, Closed, Dial, Listen, ListeningEndpoints }
-pkg flow, type Manager interface, Accept(*context.T, security.Blessings) (Flow, error)
+pkg flow, type Manager interface, Accept(*context.T) (Flow, error)
 pkg flow, type Manager interface, Closed() <-chan struct{}
-pkg flow, type Manager interface, Dial(*context.T, naming.Endpoint, security.Authorizer) (Flow, error)
+pkg flow, type Manager interface, Dial(*context.T, naming.Endpoint, BlessingsForPeer) (Flow, error)
 pkg flow, type Manager interface, Listen(*context.T, string, string) error
 pkg flow, type Manager interface, ListeningEndpoints() []naming.Endpoint
