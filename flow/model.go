@@ -88,18 +88,35 @@ type Conn interface {
 	Closed() <-chan struct{}
 }
 
-// Flow is the interface for a flow-controlled channel multiplexed over a Conn.
-type Flow interface {
-	io.ReadWriter
-
-	// WriteV is like Write, but allows writing more than one buffer at a time.
+// MsgWriter defines and interface for writing messages.
+type MsgWriter interface {
+	// WriteMsg is like Write, but allows writing more than one buffer at a time.
 	// The data in each buffer is written sequentially onto the flow.  Returns the
 	// number of bytes written.  WriteV must return a non-nil error if it writes
 	// less than the total number of bytes from all buffers.
-	WriteV(d []byte, data ...[]byte) (int, error)
+	WriteMsg(data ...[]byte) (int, error)
+}
 
-	// WriteVAndClose performs WriteV, and then closes the underlying flow.
-	WriteVAndClose(d []byte, data ...[]byte) (int, error)
+// MsgReader defines an interface for reading messages.
+type MsgReader interface {
+	// ReadMsg is like read, but it reads bytes in chunks.  Depending on the
+	// implementation the batch boundaries might or might not be significant.
+	ReadMsg() ([]byte, error)
+}
+
+// MsgReadWriter combines the MsgReader and MsgWriter interfaces
+type MsgReadWriter interface {
+	MsgWriter
+	MsgReader
+}
+
+// Flow is the interface for a flow-controlled channel multiplexed over a Conn.
+type Flow interface {
+	io.ReadWriter
+	MsgReadWriter
+
+	// WriteVAndClose performs WriteMsg and then closes the flow.
+	WriteMsgAndClose(data ...[]byte) (int, error)
 
 	// SetContext sets the context associated with the flow.  Typically this is
 	// used to set state that is only available after the flow is connected, such
