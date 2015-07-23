@@ -64,7 +64,7 @@ func (kvs *keyValueStreamImpl) Advance() bool {
 			}
 			// Keys and keyRanges are both sorted low to high, so we can increment
 			// keyRangesCursor if the keyRange.Limit is < the key.
-			if kvs.keyRanges[kvs.keyRangesCursor].Limit < kvs.table.rows[kvs.cursor].key {
+			if compareKeyToLimit(kvs.table.rows[kvs.cursor].key, kvs.keyRanges[kvs.keyRangesCursor].Limit) > 0 {
 				kvs.keyRangesCursor++
 				if kvs.keyRangesCursor >= len(kvs.keyRanges) {
 					return false
@@ -608,7 +608,7 @@ func TestQueryExec(t *testing.T) {
 			},
 		},
 		{
-			// Select keys & values for all records with a key prefix of "001".
+			// Select keys & values for all records with a key prefix of "002".
 			"select k, v from Customer where k like \"002%\"",
 			[]string{"k", "v"},
 			[][]*vdl.Value{
@@ -617,6 +617,35 @@ func TestQueryExec(t *testing.T) {
 				[]*vdl.Value{vdl.ValueOf(custTable.rows[6].key), custTable.rows[6].value},
 				[]*vdl.Value{vdl.ValueOf(custTable.rows[7].key), custTable.rows[7].value},
 				[]*vdl.Value{vdl.ValueOf(custTable.rows[8].key), custTable.rows[8].value},
+			},
+		},
+		{
+			// Select keys & values for all records with a key prefix NOT LIKE "002%".
+			"select k, v from Customer where k not like \"002%\"",
+			[]string{"k", "v"},
+			[][]*vdl.Value{
+				[]*vdl.Value{vdl.ValueOf(custTable.rows[0].key), custTable.rows[0].value},
+				[]*vdl.Value{vdl.ValueOf(custTable.rows[1].key), custTable.rows[1].value},
+				[]*vdl.Value{vdl.ValueOf(custTable.rows[2].key), custTable.rows[2].value},
+				[]*vdl.Value{vdl.ValueOf(custTable.rows[3].key), custTable.rows[3].value},
+				[]*vdl.Value{vdl.ValueOf(custTable.rows[9].key), custTable.rows[9].value},
+			},
+		},
+		{
+			// Select keys & values for all records with a key prefix NOT LIKE "002".
+			// will be optimized to k <> "002"
+			"select k, v from Customer where k not like \"002\"",
+			[]string{"k", "v"},
+			[][]*vdl.Value{
+				[]*vdl.Value{vdl.ValueOf(custTable.rows[0].key), custTable.rows[0].value},
+				[]*vdl.Value{vdl.ValueOf(custTable.rows[1].key), custTable.rows[1].value},
+				[]*vdl.Value{vdl.ValueOf(custTable.rows[2].key), custTable.rows[2].value},
+				[]*vdl.Value{vdl.ValueOf(custTable.rows[3].key), custTable.rows[3].value},
+				[]*vdl.Value{vdl.ValueOf(custTable.rows[5].key), custTable.rows[5].value},
+				[]*vdl.Value{vdl.ValueOf(custTable.rows[6].key), custTable.rows[6].value},
+				[]*vdl.Value{vdl.ValueOf(custTable.rows[7].key), custTable.rows[7].value},
+				[]*vdl.Value{vdl.ValueOf(custTable.rows[8].key), custTable.rows[8].value},
+				[]*vdl.Value{vdl.ValueOf(custTable.rows[9].key), custTable.rows[9].value},
 			},
 		},
 		{

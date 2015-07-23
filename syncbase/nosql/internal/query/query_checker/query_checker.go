@@ -104,7 +104,7 @@ func checkExpression(db query_db.Database, e *query_parser.Expression) error {
 	}
 
 	// Like expressions require operand2 to be a string literal that must be validated.
-	if e.Operator.Type == query_parser.Like {
+	if e.Operator.Type == query_parser.Like || e.Operator.Type == query_parser.NotLike {
 		if e.Operand2.Type != query_parser.TypStr {
 			return syncql.NewErrLikeExpressionsRequireRhsString(db.GetContext(), e.Off)
 		}
@@ -119,9 +119,13 @@ func checkExpression(db query_db.Database, e *query_parser.Expression) error {
 		if err != nil {
 			return err
 		}
-		// Optimization: If like argument contains no wildcards, convert the expression to equals.
+		// Optimization: If like/not like argument contains no wildcards, convert the expression to equals/not equals.
 		if !foundWildcard {
-			e.Operator.Type = query_parser.Equal
+			if e.Operator.Type == query_parser.Like {
+				e.Operator.Type = query_parser.Equal
+			} else { // not like
+				e.Operator.Type = query_parser.NotEqual
+			}
 			// Since this is no longer a like expression, we need to unescape
 			// any escaped chars (i.e., "\\", "\_" and "\%" become
 			// "\", "_" and "%", respectively).
@@ -147,7 +151,7 @@ func checkExpression(db query_db.Database, e *query_parser.Expression) error {
 	}
 
 	// k as an operand must be the first operand, the operator must be
-	// = | <> | > | >= | < | <= | like and the 2nd operand must be a string literal.
+	// = | <> | > | >= | < | <= | like | not like and the 2nd operand must be a string literal.
 	if (IsKey(e.Operand1) &&
 		((e.Operator.Type != query_parser.Equal &&
 			e.Operator.Type != query_parser.GreaterThan &&
@@ -155,7 +159,8 @@ func checkExpression(db query_db.Database, e *query_parser.Expression) error {
 			e.Operator.Type != query_parser.LessThan &&
 			e.Operator.Type != query_parser.LessThanOrEqual &&
 			e.Operator.Type != query_parser.Like &&
-			e.Operator.Type != query_parser.NotEqual) ||
+			e.Operator.Type != query_parser.NotEqual &&
+			e.Operator.Type != query_parser.NotLike) ||
 			e.Operand2.Type != query_parser.TypStr)) || IsKey(e.Operand2) {
 		return syncql.NewErrKeyExpressionForm(db.GetContext(), e.Off)
 	}
@@ -365,10 +370,7 @@ func IsExpr(o *query_parser.Operand) bool {
 	return o.Type == query_parser.TypExpr
 }
 
-func computeKeyRangeForPrefix(prefix string) query_db.KeyRange {
-	if prefix == "" {
-		return KeyRangeAll
-	}
+func afterPrefix(prefix string) string {
 	// Copied from syncbase.
 	limit := []byte(prefix)
 	for len(limit) > 0 {
@@ -379,7 +381,24 @@ func computeKeyRangeForPrefix(prefix string) query_db.KeyRange {
 			break                    // no carry
 		}
 	}
-	return query_db.KeyRange{prefix, string(limit)}
+	return string(limit)
+}
+
+func computeKeyRangeForLike(prefix string) query_db.KeyRange {
+	if prefix == "" {
+		return KeyRangeAll
+	}
+	return query_db.KeyRange{prefix, afterPrefix(prefix)}
+}
+
+func computeKeyRangesForNotLike(prefix string) *query_db.KeyRanges {
+	if prefix == "" {
+		return &query_db.KeyRanges{KeyRangeAll}
+	}
+	return &query_db.KeyRanges{
+		query_db.KeyRange{"", prefix},
+		query_db.KeyRange{afterPrefix(prefix), ""},
+	}
 }
 
 // The limit for a single value range is simply a zero byte appended.
@@ -466,7 +485,9 @@ func collectKeyRanges(expr *query_parser.Expression) *query_db.KeyRanges {
 		case query_parser.GreaterThanOrEqual:
 			return &query_db.KeyRanges{query_db.KeyRange{expr.Operand2.Str, MaxRangeLimit}}
 		case query_parser.Like:
-			return &query_db.KeyRanges{computeKeyRangeForPrefix(expr.Operand2.Prefix)}
+			return &query_db.KeyRanges{computeKeyRangeForLike(expr.Operand2.Prefix)}
+		case query_parser.NotLike:
+			return computeKeyRangesForNotLike(expr.Operand2.Prefix)
 		case query_parser.LessThan:
 			return &query_db.KeyRanges{query_db.KeyRange{"", expr.Operand2.Str}}
 		case query_parser.LessThanOrEqual:

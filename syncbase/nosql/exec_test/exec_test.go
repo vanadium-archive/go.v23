@@ -142,6 +142,13 @@ func setup(t *testing.T) {
 		t.Fatalf("customerTable.Put() failed: %v", err)
 	}
 
+	k = "003"
+	c = Customer{"John Steed", 3, true, AddressInfo{"100 Queen St.", "New London", "CT", "06320"}, CreditReport{Agency: CreditAgencyExperian, Report: AgencyReportExperianReport{ExperianCreditReport{ExperianRatingGood}}}}
+	customerEntries = append(customerEntries, kv{k, vdl.ValueOf(c)})
+	if err := customerTable.Put(ctx, k, c); err != nil {
+		t.Fatalf("customerTable.Put() failed: %v", err)
+	}
+
 	k = "001"
 	n := Numbers{byte(12), uint16(1234), uint32(5678), uint64(999888777666), int16(9876), int32(876543), int64(128), float32(3.14159), float64(2.71828182846), complex64(123.0 + 7.0i), complex128(456.789 + 10.1112i)}
 	numbersEntries = append(numbersEntries, kv{k, vdl.ValueOf(n)})
@@ -217,6 +224,7 @@ func TestQueryExec(t *testing.T) {
 			[][]*vdl.Value{
 				[]*vdl.Value{customerEntries[0].value},
 				[]*vdl.Value{customerEntries[4].value},
+				[]*vdl.Value{customerEntries[9].value},
 			},
 		},
 		{
@@ -228,6 +236,7 @@ func TestQueryExec(t *testing.T) {
 			[][]*vdl.Value{
 				[]*vdl.Value{customerEntries[0].value},
 				[]*vdl.Value{customerEntries[4].value},
+				[]*vdl.Value{customerEntries[9].value},
 			},
 		},
 		{
@@ -247,6 +256,7 @@ func TestQueryExec(t *testing.T) {
 				[]*vdl.Value{customerEntries[6].value},
 				[]*vdl.Value{customerEntries[7].value},
 				[]*vdl.Value{customerEntries[8].value},
+				[]*vdl.Value{customerEntries[9].value},
 			},
 		},
 		{
@@ -286,6 +296,7 @@ func TestQueryExec(t *testing.T) {
 				[]*vdl.Value{customerEntries[6].value},
 				[]*vdl.Value{customerEntries[7].value},
 				[]*vdl.Value{customerEntries[8].value},
+				[]*vdl.Value{customerEntries[9].value},
 			},
 		},
 		{
@@ -296,6 +307,7 @@ func TestQueryExec(t *testing.T) {
 			[][]*vdl.Value{
 				[]*vdl.Value{customerEntries[0].value},
 				[]*vdl.Value{customerEntries[4].value},
+				[]*vdl.Value{customerEntries[9].value},
 			},
 		},
 		{
@@ -312,6 +324,7 @@ func TestQueryExec(t *testing.T) {
 			[][]*vdl.Value{
 				[]*vdl.Value{vdl.ValueOf(customerEntries[0].key), customerEntries[0].value},
 				[]*vdl.Value{vdl.ValueOf(customerEntries[4].key), customerEntries[4].value},
+				[]*vdl.Value{vdl.ValueOf(customerEntries[9].key), customerEntries[9].value},
 			},
 		},
 		{
@@ -321,6 +334,7 @@ func TestQueryExec(t *testing.T) {
 			[][]*vdl.Value{
 				[]*vdl.Value{vdl.ValueOf(customerEntries[0].key), vdl.ValueOf("John Smith")},
 				[]*vdl.Value{vdl.ValueOf(customerEntries[4].key), vdl.ValueOf("Bat Masterson")},
+				[]*vdl.Value{vdl.ValueOf(customerEntries[9].key), vdl.ValueOf("John Steed")},
 			},
 		},
 		{
@@ -339,6 +353,7 @@ func TestQueryExec(t *testing.T) {
 				[]*vdl.Value{vdl.ValueOf(nil), vdl.ValueOf(int64(2))},
 				[]*vdl.Value{vdl.ValueOf(nil), vdl.ValueOf(int64(2))},
 				[]*vdl.Value{vdl.ValueOf(nil), vdl.ValueOf(int64(2))},
+				[]*vdl.Value{vdl.ValueOf(int64(3)), vdl.ValueOf(nil)},
 			},
 		},
 		{
@@ -376,7 +391,7 @@ func TestQueryExec(t *testing.T) {
 			},
 		},
 		{
-			// Select keys & values for all records with a key prefix of "001".
+			// Select keys & values for all records with a key prefix of "002".
 			"select k, v from Customer where k like \"002%\"",
 			[]string{"k", "v"},
 			[][]*vdl.Value{
@@ -385,6 +400,35 @@ func TestQueryExec(t *testing.T) {
 				[]*vdl.Value{vdl.ValueOf(customerEntries[6].key), customerEntries[6].value},
 				[]*vdl.Value{vdl.ValueOf(customerEntries[7].key), customerEntries[7].value},
 				[]*vdl.Value{vdl.ValueOf(customerEntries[8].key), customerEntries[8].value},
+			},
+		},
+		{
+			// Select keys & values for all records with NOT key prefix "002%".
+			"select k, v from Customer where k not like \"002%\"",
+			[]string{"k", "v"},
+			[][]*vdl.Value{
+				[]*vdl.Value{vdl.ValueOf(customerEntries[0].key), customerEntries[0].value},
+				[]*vdl.Value{vdl.ValueOf(customerEntries[1].key), customerEntries[1].value},
+				[]*vdl.Value{vdl.ValueOf(customerEntries[2].key), customerEntries[2].value},
+				[]*vdl.Value{vdl.ValueOf(customerEntries[3].key), customerEntries[3].value},
+				[]*vdl.Value{vdl.ValueOf(customerEntries[9].key), customerEntries[9].value},
+			},
+		},
+		{
+			// Select keys & values for all records with NOT key prefix "002".
+			// Will be optimized to k <> "002"
+			"select k, v from Customer where k not like \"002\"",
+			[]string{"k", "v"},
+			[][]*vdl.Value{
+				[]*vdl.Value{vdl.ValueOf(customerEntries[0].key), customerEntries[0].value},
+				[]*vdl.Value{vdl.ValueOf(customerEntries[1].key), customerEntries[1].value},
+				[]*vdl.Value{vdl.ValueOf(customerEntries[2].key), customerEntries[2].value},
+				[]*vdl.Value{vdl.ValueOf(customerEntries[3].key), customerEntries[3].value},
+				[]*vdl.Value{vdl.ValueOf(customerEntries[5].key), customerEntries[5].value},
+				[]*vdl.Value{vdl.ValueOf(customerEntries[6].key), customerEntries[6].value},
+				[]*vdl.Value{vdl.ValueOf(customerEntries[7].key), customerEntries[7].value},
+				[]*vdl.Value{vdl.ValueOf(customerEntries[8].key), customerEntries[8].value},
+				[]*vdl.Value{vdl.ValueOf(customerEntries[9].key), customerEntries[9].value},
 			},
 		},
 		{
@@ -451,6 +495,7 @@ func TestQueryExec(t *testing.T) {
 				[]*vdl.Value{vdl.ValueOf(customerEntries[6].key), customerEntries[6].value},
 				[]*vdl.Value{vdl.ValueOf(customerEntries[7].key), customerEntries[7].value},
 				[]*vdl.Value{vdl.ValueOf(customerEntries[8].key), customerEntries[8].value},
+				[]*vdl.Value{vdl.ValueOf(customerEntries[9].key), customerEntries[9].value},
 			},
 		},
 		{
@@ -633,6 +678,7 @@ func TestQueryExec(t *testing.T) {
 				[]*vdl.Value{customerEntries[6].value},
 				[]*vdl.Value{customerEntries[7].value},
 				[]*vdl.Value{customerEntries[8].value},
+				[]*vdl.Value{customerEntries[9].value},
 			},
 		},
 		{
@@ -742,6 +788,7 @@ func TestQueryExec(t *testing.T) {
 				[]*vdl.Value{vdl.ValueOf(t2015_07_01)},
 				[]*vdl.Value{vdl.ValueOf(t2015_07_01)},
 				[]*vdl.Value{vdl.ValueOf(t2015_07_01)},
+				[]*vdl.Value{vdl.ValueOf(t2015_07_01)},
 			},
 		},
 		// DateTime function
@@ -749,6 +796,7 @@ func TestQueryExec(t *testing.T) {
 			"select DateTime(\"2015-07-01 01:23:45 PDT\") from Customer",
 			[]string{"DateTime"},
 			[][]*vdl.Value{
+				[]*vdl.Value{vdl.ValueOf(t2015_07_01_01_23_45)},
 				[]*vdl.Value{vdl.ValueOf(t2015_07_01_01_23_45)},
 				[]*vdl.Value{vdl.ValueOf(t2015_07_01_01_23_45)},
 				[]*vdl.Value{vdl.ValueOf(t2015_07_01_01_23_45)},
@@ -767,6 +815,7 @@ func TestQueryExec(t *testing.T) {
 			[][]*vdl.Value{
 				[]*vdl.Value{vdl.ValueOf("john smith")},
 				[]*vdl.Value{vdl.ValueOf("bat masterson")},
+				[]*vdl.Value{vdl.ValueOf("john steed")},
 			},
 		},
 		// UpperCase function
@@ -776,6 +825,7 @@ func TestQueryExec(t *testing.T) {
 			[][]*vdl.Value{
 				[]*vdl.Value{vdl.ValueOf("JOHN SMITH")},
 				[]*vdl.Value{vdl.ValueOf("BAT MASTERSON")},
+				[]*vdl.Value{vdl.ValueOf("JOHN STEED")},
 			},
 		},
 		// YMDHMS function

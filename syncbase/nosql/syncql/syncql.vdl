@@ -71,7 +71,7 @@ error (
 		"en": "[{off}]Select field must be 'k' or 'v[{.<ident>}...]'.",
 	}
 	KeyExpressionForm(off int64) {
-		"en": "[{off}]Key (i.e., 'k') expressions must be of form 'k  [=|<>|>|>=|<|<=|like] <string-literal>'.",
+		"en": "[{off}]Key (i.e., 'k') expressions must be of form 'k  [=|<>|>|>=|<|<=|like|not like] <string-literal>'.",
 	}
 	KeyValueStreamError(off int64, err error) {
 		"en": "[{off}]KeyValueStream error: {err}.",

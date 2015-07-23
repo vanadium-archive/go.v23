@@ -92,6 +92,8 @@ func TestQueryChecker(t *testing.T) {
 		{"select k, v.name from Customer where k = \"foo\""},
 		{"select v from Customer where t = \"Foo.Bar\""},
 		{"select k, v from Customer where t = \"Foo.Bar\" and k like \"abc%\" limit 100 offset 200"},
+		{"select v.z from Customer where k not like \"foo\""},
+		{"select v.z from Customer where k not like \"foo%\""},
 		{"select v from Customer where v.A = true"},
 		{"select v from Customer where v.A <> true"},
 		{"select v from Customer where false = v.A"},
@@ -249,6 +251,13 @@ func TestKeyRanges(t *testing.T) {
 				query_db.KeyRange{"abc", "abd"},
 			},
 		},
+		{
+			"select k, v from Customer where k not like \"002%\"",
+			&query_db.KeyRanges{
+				query_db.KeyRange{"", "002"},
+				query_db.KeyRange{"003", ""},
+			},
+		},
 	}
 
 	for _, test := range basic {
@@ -375,7 +384,6 @@ func TestQueryCheckerErrors(t *testing.T) {
 		{"select v.z from Customer where k >= v.y", syncql.NewErrKeyExpressionForm(db.GetContext(), 31)},
 		{"select v.z from Customer where \"abc%\" = k", syncql.NewErrKeyExpressionForm(db.GetContext(), 31)},
 		{"select v.z from Customer where k like \"a\\bc%\"", syncql.NewErrInvalidEscapedChar(db.GetContext(), 38)},
-		{"select v.z from Customer where k not like \"foo\"", syncql.NewErrKeyExpressionForm(db.GetContext(), 31)},
 		{"select v from Customer where v.A > false", syncql.NewErrBoolInvalidExpression(db.GetContext(), 33)},
 		{"select v from Customer where true <= v.A", syncql.NewErrBoolInvalidExpression(db.GetContext(), 34)},
 		{"select v from Customer where Foo(\"2015/07/22\", true, 3.14157) = true", syncql.NewErrFunctionNotFound(db.GetContext(), 29, "Foo")},
