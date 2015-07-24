@@ -41,7 +41,7 @@ type Manager interface {
 	// including outgoing dialed connections.
 	//
 	// For example:
-	//   err := m.Listen*(ctx, "tcp", ":0")
+	//   err := m.Listen(ctx, "tcp", ":0")
 	//   for {
 	//     flow, err := m.Accept(ctx)
 	//     // process flow

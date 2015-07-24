@@ -1,3 +1,12 @@
+pkg flow, func NewErrAborted(*context.T, error) error
+pkg flow, func NewErrAuth(*context.T, error) error
+pkg flow, func NewErrBadArg(*context.T, error) error
+pkg flow, func NewErrBadState(*context.T, error) error
+pkg flow, func NewErrDialFailed(*context.T, error) error
+pkg flow, func NewErrNetwork(*context.T, error) error
+pkg flow, func NewErrNotTrusted(*context.T, error) error
+pkg flow, func NewErrProxy(*context.T, error) error
+pkg flow, func NewErrResolveFailed(*context.T, error) error
 pkg flow, type BlessingsForPeer func(ctx *context.T, call security.Call) (security.Blessings, error)
 pkg flow, type Conn interface { Closed, LocalEndpoint, RemoteEndpoint }
 pkg flow, type Conn interface, Closed() <-chan struct{}
@@ -29,3 +38,12 @@ pkg flow, type MsgReader interface { ReadMsg }
 pkg flow, type MsgReader interface, ReadMsg() ([]byte, error)
 pkg flow, type MsgWriter interface { WriteMsg }
 pkg flow, type MsgWriter interface, WriteMsg(...[]byte) (int, error)
+pkg flow, var ErrAborted verror.IDAction
+pkg flow, var ErrAuth verror.IDAction
+pkg flow, var ErrBadArg verror.IDAction
+pkg flow, var ErrBadState verror.IDAction
+pkg flow, var ErrDialFailed verror.IDAction
+pkg flow, var ErrNetwork verror.IDAction
+pkg flow, var ErrNotTrusted verror.IDAction
+pkg flow, var ErrProxy verror.IDAction
+pkg flow, var ErrResolveFailed verror.IDAction
