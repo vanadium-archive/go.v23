@@ -340,6 +340,15 @@ func (KeyIndexData) __VDLReflect(struct {
 }) {
 }
 
+type BigData struct {
+	Key string // A dup of the key stored in the value.
+}
+
+func (BigData) __VDLReflect(struct {
+	Name string `vdl:"v.io/syncbase/v23/syncbase/nosql/exec_test.BigData"`
+}) {
+}
+
 func init() {
 	vdl.Register((*AddressInfo)(nil))
 	vdl.Register((*CreditAgency)(nil))
@@ -358,4 +367,5 @@ func init() {
 	vdl.Register((*BazType)(nil))
 	vdl.Register((*ArrayOfFour)(nil))
 	vdl.Register((*KeyIndexData)(nil))
+	vdl.Register((*BigData)(nil))
 }

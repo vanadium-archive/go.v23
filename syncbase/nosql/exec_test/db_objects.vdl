@@ -103,3 +103,7 @@ type KeyIndexData struct {
 	M map[complex128]string
 	S set[string]
 }
+
+type BigData struct {
+	Key string // A dup of the key stored in the value.
+}

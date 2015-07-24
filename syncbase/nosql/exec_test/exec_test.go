@@ -6,6 +6,7 @@ package exectest
 
 import (
 	"errors"
+	"fmt"
 	"reflect"
 	"strings"
 	"testing"
@@ -58,6 +59,7 @@ func setup(t *testing.T) {
 	numbersTable := tu.CreateTable(t, ctx, db, "Numbers")
 	fooTable := tu.CreateTable(t, ctx, db, "Foo")
 	keyIndexDataTable := tu.CreateTable(t, ctx, db, "KeyIndexData")
+	bigTable := tu.CreateTable(t, ctx, db, "BigTable")
 
 	t20150122131101, _ := time.Parse("Jan 2 2006 15:04:05 -0700 MST", "Jan 22 2015 13:11:01 -0800 PST")
 	t20150210161202, _ := time.Parse("Jan 2 2006 15:04:05 -0700 MST", "Feb 10 2015 16:12:02 -0800 PST")
@@ -193,7 +195,15 @@ func setup(t *testing.T) {
 	}
 	keyIndexDataEntries = append(keyIndexDataEntries, kv{k, vdl.ValueOf(kid)})
 	if err := keyIndexDataTable.Put(ctx, k, kid); err != nil {
-		t.Fatalf("fooTable.Put() failed: %v", err)
+		t.Fatalf("keyIndexDataTable.Put() failed: %v", err)
+	}
+
+	for i := 100; i < 301; i++ {
+		k = fmt.Sprintf("%d", i)
+		b := BigData{k}
+		if err := bigTable.Put(ctx, k, b); err != nil {
+			t.Fatalf("bigTable.Put() failed: %v", err)
+		}
 	}
 }
 
@@ -927,6 +937,163 @@ func TestQueryExec(t *testing.T) {
 				vdl.ValueOf(true),
 			}},
 		},
+		{
+			"select k, v.Key from BigTable where k < \"101\" or k = \"200\" or k like \"300%\"",
+			[]string{"k", "v.Key"},
+			[][]*vdl.Value{svPair("100"), svPair("200"), svPair("300")},
+		},
+		{
+			"select k, v.Key from BigTable where k like \"10_\" or k like \"20_\"",
+			[]string{"k", "v.Key"},
+			[][]*vdl.Value{
+				svPair("100"),
+				svPair("101"),
+				svPair("102"),
+				svPair("103"),
+				svPair("104"),
+				svPair("105"),
+				svPair("106"),
+				svPair("107"),
+				svPair("108"),
+				svPair("109"),
+				svPair("200"),
+				svPair("201"),
+				svPair("202"),
+				svPair("203"),
+				svPair("204"),
+				svPair("205"),
+				svPair("206"),
+				svPair("207"),
+				svPair("208"),
+				svPair("209"),
+			},
+		},
+		{
+			"select k, v.Key from BigTable where k like \"_%9\"",
+			[]string{"k", "v.Key"},
+			[][]*vdl.Value{
+				svPair("109"),
+				svPair("119"),
+				svPair("129"),
+				svPair("139"),
+				svPair("149"),
+				svPair("159"),
+				svPair("169"),
+				svPair("179"),
+				svPair("189"),
+				svPair("199"),
+				svPair("209"),
+				svPair("219"),
+				svPair("229"),
+				svPair("239"),
+				svPair("249"),
+				svPair("259"),
+				svPair("269"),
+				svPair("279"),
+				svPair("289"),
+				svPair("299"),
+			},
+		},
+		{
+			"select k, v.Key from BigTable where k like \"__0\"",
+			[]string{"k", "v.Key"},
+			[][]*vdl.Value{
+				svPair("100"),
+				svPair("110"),
+				svPair("120"),
+				svPair("130"),
+				svPair("140"),
+				svPair("150"),
+				svPair("160"),
+				svPair("170"),
+				svPair("180"),
+				svPair("190"),
+				svPair("200"),
+				svPair("210"),
+				svPair("220"),
+				svPair("230"),
+				svPair("240"),
+				svPair("250"),
+				svPair("260"),
+				svPair("270"),
+				svPair("280"),
+				svPair("290"),
+				svPair("300"),
+			},
+		},
+		{
+			"select k, v.Key from BigTable where k like \"10%\" or  k like \"20%\" or  k like \"30%\"",
+			[]string{"k", "v.Key"},
+			[][]*vdl.Value{
+				svPair("100"),
+				svPair("101"),
+				svPair("102"),
+				svPair("103"),
+				svPair("104"),
+				svPair("105"),
+				svPair("106"),
+				svPair("107"),
+				svPair("108"),
+				svPair("109"),
+				svPair("200"),
+				svPair("201"),
+				svPair("202"),
+				svPair("203"),
+				svPair("204"),
+				svPair("205"),
+				svPair("206"),
+				svPair("207"),
+				svPair("208"),
+				svPair("209"),
+				svPair("300"),
+			},
+		},
+		{
+			"select k, v.Key from BigTable where k like \"1__\" and  k like \"_2_\" and  k like \"__3\"",
+			[]string{"k", "v.Key"},
+			[][]*vdl.Value{svPair("123")},
+		},
+		{
+			"select k, v.Key from BigTable where (k >  \"100\" and k < \"103\") or (k > \"205\" and k < \"208\")",
+			[]string{"k", "v.Key"},
+			[][]*vdl.Value{
+				svPair("101"),
+				svPair("102"),
+				svPair("206"),
+				svPair("207"),
+			},
+		},
+		{
+			"select k, v.Key from BigTable where k <=  \"100\" or k = \"101\" or k >= \"300\" or (k <> \"299\" and k not like \"300\" and k >= \"298\")",
+			[]string{"k", "v.Key"},
+			[][]*vdl.Value{
+				svPair("100"),
+				svPair("101"),
+				svPair("298"),
+				svPair("300"),
+			},
+		},
+		{
+			"select k, v.Key from BigTable where k like  \"1%\" and k like \"%9\"",
+			[]string{"k", "v.Key"},
+			[][]*vdl.Value{
+				svPair("109"),
+				svPair("119"),
+				svPair("129"),
+				svPair("139"),
+				svPair("149"),
+				svPair("159"),
+				svPair("169"),
+				svPair("179"),
+				svPair("189"),
+				svPair("199"),
+			},
+		},
+		{
+			"select k, v.Key from BigTable where k like  \"3%\" and k like \"30%\" and k like \"300%\"",
+			[]string{"k", "v.Key"},
+			[][]*vdl.Value{svPair("300")},
+		},
 	}
 
 	for _, test := range basic {
@@ -947,6 +1114,11 @@ func TestQueryExec(t *testing.T) {
 			}
 		}
 	}
+}
+
+func svPair(s string) []*vdl.Value {
+	v := vdl.ValueOf(s)
+	return []*vdl.Value{v, v}
 }
 
 // Use Now to verify it is "pre" executed such that all the rows
