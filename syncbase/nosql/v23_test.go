@@ -33,6 +33,10 @@ func TestV23SyncbasedGetDeltas(t *testing.T) {
 	v23tests.RunTest(t, V23TestSyncbasedGetDeltas)
 }
 
+func TestV23SyncbasedGetDeltasWithDel(t *testing.T) {
+	v23tests.RunTest(t, V23TestSyncbasedGetDeltasWithDel)
+}
+
 func TestV23SyncbasedExchangeDeltas(t *testing.T) {
 	v23tests.RunTest(t, V23TestSyncbasedExchangeDeltas)
 }

@@ -7,6 +7,7 @@ package nosql_test
 import (
 	"fmt"
 	"strconv"
+	"strings"
 	"time"
 
 	wire "v.io/syncbase/v23/services/syncbase/nosql"
@@ -16,6 +17,7 @@ import (
 	constants "v.io/syncbase/x/ref/services/syncbase/server/util"
 	"v.io/v23"
 	"v.io/v23/naming"
+	"v.io/v23/verror"
 	"v.io/x/ref"
 	_ "v.io/x/ref/runtime/factories/generic"
 	"v.io/x/ref/test/modules"
@@ -79,6 +81,46 @@ func V23TestSyncbasedGetDeltas(t *v23tests.T) {
 	tu.RunClient(t, client1Creds, runSetupAppA, "sync1")
 	tu.RunClient(t, client1Creds, runJoinSyncGroup, "sync1", sgName)
 	tu.RunClient(t, client1Creds, runVerifySyncGroupData, "sync1", "foo", "0", "10")
+}
+
+// V23TestSyncbasedGetDeltasWithDel tests the sending of deltas between two
+// Syncbase instances and their clients. The 1st client creates a SyncGroup and
+// puts some database entries in it. The 2nd client joins that SyncGroup and
+// reads the database entries. The 1st client then deletes a portion of this
+// data, and adds new entries. The 2nd client verifies that these changes are
+// correctly synced. This verifies the end-to-end synchronization of data along
+// the path: client0--Syncbase0--Syncbase1--client1 with a workload of puts and
+// deletes.
+func V23TestSyncbasedGetDeltasWithDel(t *v23tests.T) {
+	v23tests.RunRootMT(t, "--v23.tcp.address=127.0.0.1:0")
+	server0Creds, _ := t.Shell().NewChildCredentials("s0")
+	client0Creds, _ := t.Shell().NewChildCredentials("c0")
+	cleanSync0 := tu.StartSyncbased(t, server0Creds, "sync0", "",
+		`{"Read": {"In":["root/c0"]}, "Write": {"In":["root/c0"]}}`)
+	defer cleanSync0()
+
+	server1Creds, _ := t.Shell().NewChildCredentials("s1")
+	client1Creds, _ := t.Shell().NewChildCredentials("c1")
+	cleanSync1 := tu.StartSyncbased(t, server1Creds, "sync1", "",
+		`{"Read": {"In":["root/c1"]}, "Write": {"In":["root/c1"]}}`)
+	defer cleanSync1()
+
+	sgName := naming.Join("sync0", constants.SyncbaseSuffix, "SG1")
+
+	tu.RunClient(t, client0Creds, runSetupAppA, "sync0")
+	tu.RunClient(t, client0Creds, runCreateSyncGroup, "sync0", sgName, "tb:foo,tb:bar", "root/s0", "root/s1")
+	tu.RunClient(t, client0Creds, runPopulateData, "sync0", "foo", "0")
+
+	tu.RunClient(t, client1Creds, runSetupAppA, "sync1")
+	tu.RunClient(t, client1Creds, runJoinSyncGroup, "sync1", sgName)
+	tu.RunClient(t, client1Creds, runVerifySyncGroupData, "sync1", "foo", "0", "10")
+
+	tu.RunClient(t, client0Creds, runDeleteData, "sync0", "foo", "0")
+	tu.RunClient(t, client0Creds, runVerifyDeletedData, "sync0", "foo")
+	tu.RunClient(t, client1Creds, runVerifyDeletedData, "sync1", "foo")
+
+	tu.RunClient(t, client0Creds, runPopulateData, "sync0", "bar", "0")
+	tu.RunClient(t, client1Creds, runVerifySyncGroupData, "sync1", "bar", "0", "10")
 }
 
 // V23TestSyncbasedExchangeDeltas tests the exchange of deltas between two
@@ -274,6 +316,9 @@ func V23TestSyncbasedGetDeltasMultiApp(t *v23tests.T) {
 ////////////////////////////////////
 // Helpers.
 
+// TODO(hpucha): Look into refactoring scan logic out of the helpers, and
+// avoiding gets when we can scan.
+
 var runSetupAppA = modules.Register(func(env *modules.Env, args ...string) error {
 	ctx, shutdown := v23.Init()
 	defer shutdown()
@@ -298,7 +343,7 @@ var runCreateSyncGroup = modules.Register(func(env *modules.Env, args ...string)
 	spec := wire.SyncGroupSpec{
 		Description: "test syncgroup sg",
 		Perms:       perms(args[3:]...),
-		Prefixes:    []string{args[2]},
+		Prefixes:    strings.Split(args[2], ","),
 		MountTables: []string{mtName},
 	}
 
@@ -368,6 +413,28 @@ var runUpdateData = modules.Register(func(env *modules.Env, args ...string) erro
 	return nil
 }, "runUpdateData")
 
+var runDeleteData = modules.Register(func(env *modules.Env, args ...string) error {
+	ctx, shutdown := v23.Init()
+	defer shutdown()
+
+	a := syncbase.NewService(args[0]).App("a")
+	d := a.NoSQLDatabase("d", nil)
+
+	// Do Puts.
+	tb := d.Table("tb")
+	start, _ := strconv.ParseUint(args[1], 10, 64)
+
+	for i := start; i < start+5; i++ {
+		key := fmt.Sprintf("foo%d", i)
+		r := tb.Row(key)
+		if err := r.Delete(ctx); err != nil {
+			return fmt.Errorf("r.Delete() failed: %v\n", err)
+		}
+	}
+
+	return nil
+}, "runDeleteData")
+
 var runVerifySyncGroupData = modules.Register(func(env *modules.Env, args ...string) error {
 	ctx, shutdown := v23.Init()
 	defer shutdown()
@@ -427,6 +494,55 @@ var runVerifySyncGroupData = modules.Register(func(env *modules.Env, args ...str
 	}
 	return nil
 }, "runVerifySyncGroupData")
+
+var runVerifyDeletedData = modules.Register(func(env *modules.Env, args ...string) error {
+	ctx, shutdown := v23.Init()
+	defer shutdown()
+
+	a := syncbase.NewService(args[0]).App("a")
+	d := a.NoSQLDatabase("d", nil)
+
+	// Wait for a bit for deletions to propagate.
+	tb := d.Table("tb")
+
+	r := tb.Row("foo4")
+	for i := 0; i < 8; i++ {
+		time.Sleep(500 * time.Millisecond)
+		var value string
+		if err := r.Get(ctx, &value); verror.ErrorID(err) == verror.ErrNoExist.ID {
+			break
+		}
+	}
+
+	// Verify using a scan operation.
+	stream := tb.Scan(ctx, nosql.Prefix(args[1]))
+	count := 0
+	for i := 5; stream.Advance(); i++ {
+		want := fmt.Sprintf("%s%d", args[1], i)
+		got := stream.Key()
+		if got != want {
+			return fmt.Errorf("unexpected key in scan: got %q, want %q\n", got, want)
+		}
+		want = "testkey" + want
+		if err := stream.Value(&got); err != nil {
+			return fmt.Errorf("cannot fetch value in scan: %v\n", err)
+		}
+		if got != want {
+			return fmt.Errorf("unexpected value in scan: got %q, want %q\n", got, want)
+		}
+		count++
+	}
+
+	if err := stream.Err(); err != nil {
+		return fmt.Errorf("scan stream error: %v\n", err)
+	}
+
+	if count != 5 {
+		return fmt.Errorf("scan stream count error: %v\n", count)
+	}
+
+	return nil
+}, "runVerifyDeletedData")
 
 var runVerifyNonSyncGroupData = modules.Register(func(env *modules.Env, args ...string) error {
 	ctx, shutdown := v23.Init()
