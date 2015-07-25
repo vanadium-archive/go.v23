@@ -29,9 +29,9 @@ var (
 // to a principal in a specific call.
 //
 // Blessings objects are meant to be presented to other principals to
-// authenticate and authorize actions. The functions 'LocalBlessingNames'
-// and 'RemoteBlessingNames' defined in this package can be used to uncover
-// the blessing names encapsulated in these objects.
+// authenticate and authorize actions. The functions 'LocalBlessingNames',
+// 'SigningBlessingNames' and 'RemoteBlessingNames' defined in this package
+// can be used to uncover the blessing names encapsulated in these objects.
 //
 // Blessings objects are immutable and multiple goroutines may invoke methods
 // on them simultaneously.
@@ -198,9 +198,10 @@ func transitionalValidateCertificateChain(chain []Certificate) (PublicKey, bool,
 	}
 }
 
-// Returns the blessing name represented by chain, ignoring any caveats on the
-// validity of the blessing name.
-func chainName(ctx *context.T, call Call, chain []Certificate) (string, error) {
+// chainName returns the blessing name represented by 'chain' for the provided
+// context and principal, ignoring any caveats on the validity of the blessing
+// name.
+func chainName(ctx *context.T, p Principal, chain []Certificate) (string, error) {
 	blessing := chain[0].Extension
 	for i := 1; i < len(chain); i++ {
 		blessing += ChainSeparator
@@ -212,18 +213,27 @@ func chainName(ctx *context.T, call Call, chain []Certificate) (string, error) {
 	if err != nil {
 		return blessing, err
 	}
-	local := call.LocalPrincipal()
-	if local == nil {
+	if p == nil {
 		return blessing, NewErrUnrecognizedRoot(ctx, root.String(), verror.New(errMisconfiguredRoots, ctx))
 	}
-	if local.Roots() == nil {
+	if p.Roots() == nil {
 		return blessing, NewErrUnrecognizedRoot(ctx, root.String(), verror.New(errMisconfiguredRoots, ctx))
 	}
-	if err := local.Roots().Recognized(root, blessing); err != nil {
+	if err := p.Roots().Recognized(root, blessing); err != nil {
 		return blessing, err
 	}
 
 	return blessing, nil
+}
+
+// chainCaveats returns the union of the set of caveats in the  certificates present
+// in 'chain'.
+func chainCaveats(chain []Certificate) []Caveat {
+	var cavs []Caveat
+	for _, c := range chain {
+		cavs = append(cavs, c.Caveats...)
+	}
+	return cavs
 }
 
 func defaultCaveatValidation(ctx *context.T, call Call, chains [][]Caveat) []error {
@@ -397,6 +407,97 @@ func getCaveatValidation() func(ctx *context.T, call Call, sets [][]Caveat) []er
 	return fn
 }
 
+func isSigningBlessingCaveat(cav Caveat) bool {
+	if cav.Id == ExpiryCaveat.Id {
+		return true
+	}
+	// TODO(ataly): Figure out what revocation caveats can be supported
+	// for signing blessings. Our current revocation caveats are third-party
+	// caveats and are unsuitable for signing for the following reasons:
+	// - They violate the requirement that the caveat should be universally
+	//   understandable and validatable. This is because validating the
+	//   caveat requires reaching out to a third-party caveat discharger
+	//   which may be reachable from some services and unreachable from others
+	//   (perhaps due to network partitions).
+	// - Given a third-party caveat, there is no way to tell whether it is revocation
+	//   caveat.
+	return false
+}
+
+func validateCaveatsForSigning(ctx *context.T, call Call, chain []Certificate) error {
+	for _, cav := range chainCaveats(chain) {
+		if !isSigningBlessingCaveat(cav) {
+			return NewErrInvalidSigningBlessingCaveat(nil, cav.Id)
+		}
+		if err := cav.Validate(ctx, call); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+// SigningBlessings returns a blessings object that encapsulates the subset of
+// names of the provided blessings object that can be used to sign data at rest.
+//
+// The names of the returned blessings object can be obtained using the
+// 'SigningNames' function.
+func SigningBlessings(blessings Blessings) Blessings {
+	ret := Blessings{}
+	for i, chain := range blessings.chains {
+		suitableForSigning := true
+		for _, cav := range chainCaveats(chain) {
+			if !isSigningBlessingCaveat(cav) {
+				suitableForSigning = false
+				break
+			}
+		}
+		if suitableForSigning {
+			ret.chains = append(ret.chains, chain)
+			ret.newscheme = append(ret.newscheme, blessings.newscheme[i])
+		}
+	}
+	if len(ret.chains) > 0 {
+		ret.publicKey = blessings.publicKey
+	}
+	return ret
+}
+
+// SigningBlessingNames returns the validated set of human-readable blessing
+// names encapsulated in the provided signing blessings object, as determined
+// by the provided principal.
+//
+// This function also returns the RejectedBlessings for each blessing name that
+// cannot be validated.
+// TODO(ataly): While the principal is encapsulated inside context.T, we can't
+// extract it due to an import cycle issue. Therefore at the moment we have the
+// principal separately passed to this function. We should clean this up.
+func SigningBlessingNames(ctx *context.T, p Principal, blessings Blessings) ([]string, []RejectedBlessing) {
+	if ctx == nil || p == nil {
+		return nil, nil
+	}
+	if blessings.IsZero() {
+		return nil, nil
+	}
+	var (
+		validatedNames []string
+		rejected       []RejectedBlessing
+	)
+	for _, chain := range blessings.chains {
+		name, err := chainName(ctx, p, chain)
+		if err != nil {
+			rejected = append(rejected, RejectedBlessing{name, err})
+			continue
+		}
+		call := NewCall(&CallParams{LocalPrincipal: p, RemoteBlessings: blessings})
+		if err := validateCaveatsForSigning(ctx, call, chain); err != nil {
+			rejected = append(rejected, RejectedBlessing{name, err})
+			continue
+		}
+		validatedNames = append(validatedNames, name)
+	}
+	return validatedNames, rejected
+}
+
 // ReturnBlessingNames returns the validated set of human-readable blessing names
 // encapsulated in the blessings object presented by the remote end of a call.
 //
@@ -425,16 +526,13 @@ func RemoteBlessingNames(ctx *context.T, call Call) ([]string, []RejectedBlessin
 		pendingCaveatSets [][]Caveat
 	)
 	for _, chain := range b.chains {
-		name, err := chainName(ctx, call, chain)
+		name, err := chainName(ctx, call.LocalPrincipal(), chain)
 		if err != nil {
 			rejected = append(rejected, RejectedBlessing{name, err})
 			continue
 		}
 
-		cavs := []Caveat{}
-		for _, cert := range chain {
-			cavs = append(cavs, cert.Caveats...)
-		}
+		cavs := chainCaveats(chain)
 
 		if len(cavs) == 0 {
 			validatedNames = append(validatedNames, name) // No caveats to validate, add it to blessingNames.

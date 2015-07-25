@@ -913,3 +913,90 @@ func TestRemoteBlessingNames(t *testing.T) {
 		t.Errorf("Got (%v, %v), want ([], [bob: <untrusted root>])", accepted, rejected)
 	}
 }
+
+func TestSigningBlessings(t *testing.T) {
+	var (
+		google = newPrincipal(t)
+		alice  = newPrincipal(t)
+		bob    = newPrincipal(t)
+
+		googleB, _ = google.BlessSelf("google")
+
+		peerCav, _ = NewCaveat(PeerBlessingsCaveat, []BlessingPattern{"youtube"})
+
+		aliceSelf, _          = alice.BlessSelf("alice")
+		googleYoutubeUser, _  = google.Bless(alice.PublicKey(), googleB, "youtube/user", peerCav)
+		googleAliceExpired, _ = google.Bless(alice.PublicKey(), googleB, "alice/expired", newCaveat(NewExpiryCaveat(time.Now().Add(-time.Second))))
+		googleAlice, _        = google.Bless(alice.PublicKey(), googleB, "alice", newCaveat(NewExpiryCaveat(time.Now().Add(time.Hour))))
+		aliceB, _             = UnionOfBlessings(aliceSelf, googleYoutubeUser, googleAliceExpired, googleAlice)
+
+		// rawNames returns the blessing names encapsulated in the provided blessings, without
+		// validating any caveats and blessing roots.
+		rawNames = func(b Blessings) []string {
+			var ret []string
+			for _, chain := range b.chains {
+				if len(chain) == 0 {
+					continue
+				}
+				name := chain[0].Extension
+				for i := 1; i < len(chain); i++ {
+					name += ChainSeparator
+					name += chain[i].Extension
+				}
+				ret = append(ret, name)
+			}
+			return ret
+		}
+	)
+	if err := bob.AddToRoots(googleB); err != nil {
+		t.Fatal(err)
+	}
+
+	// The blessing "google/youtube/user" should be dropped when calling
+	// SigningBlessings on 'aliceB'
+	aliceSigning := SigningBlessings(aliceB)
+
+	if !reflect.DeepEqual(aliceSigning.PublicKey(), aliceB.PublicKey()) {
+		t.Fatal("SigningBlessings returned blessings with different public key")
+	}
+
+	got, want := rawNames(aliceSigning), []string{"alice", "google/alice/expired", "google/alice"}
+	sort.Strings(got)
+	sort.Strings(want)
+	if !reflect.DeepEqual(got, want) {
+		t.Fatalf("SigningBlessings(%v): got %v, want %v", aliceB, got, want)
+	}
+
+	// Alice sends the blessings 'aliceB' to Bob as part of signed data.
+	// The signing names seen by bob must correspond to blessings
+	// that have recognized roots and only valid signing caveats.
+	ctx, cf := context.RootContext()
+	defer cf()
+
+	names, rejected := SigningBlessingNames(ctx, bob, aliceB)
+	if want := []string{"google/alice"}; !reflect.DeepEqual(names, want) {
+		t.Fatalf("SigningBlessingNames(%v): got names %v, want %v", aliceB, names, want)
+	}
+	if got := len(rejected); got != 3 {
+		t.Fatalf("SigningBlessingNames(%v): got %d rejected blessing names, want 3", aliceB, got)
+	}
+	for _, r := range rejected {
+		switch r.Blessing {
+		case "alice":
+			if got, want := verror.ErrorID(r.Err), ErrUnrecognizedRoot.ID; got != want {
+				t.Errorf("SigningBlessingNames(%v): rejected blessing %v with errorID %v, want errorID %v", aliceB, r.Blessing, got, want)
+			}
+		case "google/alice/expired":
+			if got, want := verror.ErrorID(r.Err), ErrCaveatValidation.ID; got != want {
+				t.Errorf("SigningBlessingNames(%v): rejected blessing %v with errorID %v, want errorID %v", aliceB, r.Blessing, got, want)
+			}
+		case "google/youtube/user":
+			if got, want := verror.ErrorID(r.Err), ErrInvalidSigningBlessingCaveat.ID; got != want {
+				t.Errorf("SigningBlessingNames(%v): rejected blessing %v with errorID %v, want errorID %v", aliceB, r.Blessing, got, want)
+			}
+		default:
+			t.Errorf("SigningBlessingNames(%v): invalid rejected blessing name %v", aliceB, r.Blessing)
+
+		}
+	}
+}

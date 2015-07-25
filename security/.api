@@ -30,6 +30,7 @@ pkg security, func NewErrCaveatParamTypeMismatch(*context.T, uniqueid.Id, *vdl.T
 pkg security, func NewErrCaveatValidation(*context.T, error) error
 pkg security, func NewErrConstCaveatValidation(*context.T) error
 pkg security, func NewErrExpiryCaveatValidation(*context.T, time.Time, time.Time) error
+pkg security, func NewErrInvalidSigningBlessingCaveat(*context.T, uniqueid.Id) error
 pkg security, func NewErrMethodCaveatValidation(*context.T, string, []string) error
 pkg security, func NewErrPeerBlessingsCaveatValidation(*context.T, []string, []BlessingPattern) error
 pkg security, func NewErrUnrecognizedRoot(*context.T, string, error) error
@@ -39,6 +40,8 @@ pkg security, func NewMethodCaveat(string, ...string) (Caveat, error)
 pkg security, func NewPublicKeyCaveat(PublicKey, string, ThirdPartyRequirements, Caveat, ...Caveat) (Caveat, error)
 pkg security, func RegisterCaveatValidator(CaveatDescriptor, interface{})
 pkg security, func RemoteBlessingNames(*context.T, Call) ([]string, []RejectedBlessing)
+pkg security, func SigningBlessingNames(*context.T, Principal, Blessings) ([]string, []RejectedBlessing)
+pkg security, func SigningBlessings(Blessings) Blessings
 pkg security, func SplitPatternName(string) (BlessingPattern, string)
 pkg security, func UnconstrainedUse() Caveat
 pkg security, func UnionOfBlessings(...Blessings) (Blessings, error)
@@ -178,6 +181,7 @@ pkg security, var ErrCaveatParamTypeMismatch verror.IDAction
 pkg security, var ErrCaveatValidation verror.IDAction
 pkg security, var ErrConstCaveatValidation verror.IDAction
 pkg security, var ErrExpiryCaveatValidation verror.IDAction
+pkg security, var ErrInvalidSigningBlessingCaveat verror.IDAction
 pkg security, var ErrMethodCaveatValidation verror.IDAction
 pkg security, var ErrPeerBlessingsCaveatValidation verror.IDAction
 pkg security, var ErrUnrecognizedRoot verror.IDAction
