@@ -85,6 +85,24 @@ func (b Blessings) Equivalent(blessings Blessings) bool {
 	return reflect.DeepEqual(b, blessings)
 }
 
+// CouldHaveNames returns true iff the blessings 'b' encapsulates the provided
+// set of blessing names.
+//
+// This check ignores all caveats on the blessing name and the recognition status
+// of its blessing root.
+func (b Blessings) CouldHaveNames(names []string) bool {
+	hasNames := make(map[string]bool)
+	for _, chain := range b.chains {
+		hasNames[name(chain)] = true
+	}
+	for _, n := range names {
+		if !hasNames[n] {
+			return false
+		}
+	}
+	return true
+}
+
 // Expiry returns the time at which b will no longer be valid, or the zero
 // value of time.Time if the blessing does not expire.
 func (b Blessings) Expiry() time.Time {
@@ -132,16 +150,20 @@ func (b Blessings) String() string {
 	return strings.Join(blessings, ",")
 }
 
+func name(chain []Certificate) string {
+	blessing := chain[0].Extension
+	for i := 1; i < len(chain); i++ {
+		blessing += ChainSeparator
+		blessing += chain[i].Extension
+	}
+	return blessing
+}
+
 func nameForPrincipal(p Principal, chain []Certificate) string {
 	// Verify the chain belongs to this principal
 	pKey, err := p.PublicKey().MarshalBinary()
 	if err != nil || !bytes.Equal(chain[len(chain)-1].PublicKey, pKey) {
 		return ""
-	}
-	blessing := chain[0].Extension
-	for i := 1; i < len(chain); i++ {
-		blessing += ChainSeparator
-		blessing += chain[i].Extension
 	}
 	// Verify that the root of the chain is recognized as an authority
 	// on blessing.
@@ -152,6 +174,8 @@ func nameForPrincipal(p Principal, chain []Certificate) string {
 	if p.Roots() == nil {
 		return ""
 	}
+
+	blessing := name(chain)
 	if err := p.Roots().Recognized(rootKey, blessing); err != nil {
 		return ""
 	}
@@ -202,12 +226,7 @@ func transitionalValidateCertificateChain(chain []Certificate) (PublicKey, bool,
 // context and principal, ignoring any caveats on the validity of the blessing
 // name.
 func chainName(ctx *context.T, p Principal, chain []Certificate) (string, error) {
-	blessing := chain[0].Extension
-	for i := 1; i < len(chain); i++ {
-		blessing += ChainSeparator
-		blessing += chain[i].Extension
-	}
-
+	blessing := name(chain)
 	// Root of the chain must be recognized as an authority on the blessing.
 	root, err := UnmarshalPublicKey(chain[0].PublicKey)
 	if err != nil {

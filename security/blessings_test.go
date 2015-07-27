@@ -71,6 +71,56 @@ func TestByteSize(t *testing.T) {
 	logCaveatSize(NewMethodCaveat("m"))
 }
 
+func TestBlessingCouldHaveNames(t *testing.T) {
+	falseCaveat, err := NewCaveat(ConstCaveat, false)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	bless := func(p Principal, key PublicKey, with Blessings, extension string) Blessings {
+		b, err := p.Bless(key, with, extension, falseCaveat)
+		if err != nil {
+			t.Fatal(err)
+		}
+		return b
+	}
+
+	var (
+		alice = newPrincipal(t)
+		bob   = newPrincipal(t)
+
+		bbob = blessSelf(t, bob, "bob/tablet")
+
+		balice1   = blessSelf(t, alice, "alice")
+		balice2   = blessSelf(t, alice, "alice/phone/youtube", falseCaveat)
+		balice3   = bless(bob, alice.PublicKey(), bbob, "friend")
+		balice, _ = UnionOfBlessings(balice1, balice2, balice3)
+	)
+
+	tests := []struct {
+		names  []string
+		result bool
+	}{
+		{[]string{"alice", "alice/phone/youtube", "bob/tablet/friend"}, true},
+		{[]string{"alice", "alice/phone/youtube"}, true},
+		{[]string{"alice/phone/youtube", "bob/tablet/friend"}, true},
+		{[]string{"alice", "bob/tablet/friend"}, true},
+		{[]string{"alice"}, true},
+		{[]string{"alice/phone/youtube"}, true},
+		{[]string{"bob/tablet/friend"}, true},
+		{[]string{"alice/tablet"}, false},
+		{[]string{"alice/phone"}, false},
+		{[]string{"bob/tablet"}, false},
+		{[]string{"bob/tablet/friend/spouse"}, false},
+		{[]string{"carol/phone"}, false},
+	}
+	for _, test := range tests {
+		if got, want := balice.CouldHaveNames(test.names), test.result; got != want {
+			t.Errorf("%v.CouldHaveNames(%v): got %v, want %v", balice, test.names, got, want)
+		}
+	}
+}
+
 func TestBlessingsExpiry(t *testing.T) {
 	p, err := CreatePrincipal(newSigner(), nil, nil)
 	if err != nil {

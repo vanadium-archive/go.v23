@@ -54,6 +54,7 @@ pkg security, method (BlessingPattern) IsValid() bool
 pkg security, method (BlessingPattern) MakeNonExtendable() BlessingPattern
 pkg security, method (BlessingPattern) MatchedBy(...string) bool
 pkg security, method (BlessingPattern) PrefixPatterns() []BlessingPattern
+pkg security, method (Blessings) CouldHaveNames([]string) bool
 pkg security, method (Blessings) Equivalent(Blessings) bool
 pkg security, method (Blessings) Expiry() time.Time
 pkg security, method (Blessings) IsZero() bool
