@@ -313,4 +313,5 @@ error (
 	BoundToBatch() {"en": "bound to batch"}
 	NotBoundToBatch() {"en": "not bound to batch"}
 	ReadOnlyBatch() {"en": "batch is read-only"}
+	ConcurrentBatch() {"en": "concurrent batch"}
 )

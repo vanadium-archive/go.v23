@@ -184,8 +184,8 @@ type Table interface {
 	// is "", all rows with keys >= start are included.
 	// Concurrency semantics: It is legal to perform writes concurrently with
 	// Scan. The returned stream reads from a consistent snapshot taken at the
-	// time of the RPC, and will not reflect subsequent writes to keys not yet
-	// reached by the stream.
+	// time of the RPC (or at the time of BeginBatch, if in a batch), and will not
+	// reflect subsequent writes to keys not yet reached by the stream.
 	// See helpers nosql.Prefix(), nosql.Range(), nosql.SingleRow().
 	Scan(ctx *context.T, r RowRange) Stream
 
