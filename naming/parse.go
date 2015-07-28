@@ -139,16 +139,20 @@ func splitIntoTwo(str, separator string) (string, string) {
 	return elems[0], elems[1]
 }
 
-// EncodeAsNameElement makes a string representable as a name element by escaping slashes.
-func EncodeAsNameElement(s string) string {
-	if !strings.ContainsAny(s, "%/") {
+// Escape encodes a string replacing the characters in <special> and % with a %<hex> escape.
+// For efficiency we assume that special contains only single byte characters.  If we need
+// to escape runes, we'll have to rethink.
+func Escape(s, special string) string {
+	special += "%"
+	if !strings.ContainsAny(s, special) {
 		return s
 	}
+	// Enough room to escape every character.
 	t := make([]byte, len(s)*3)
 	j := 0
 	for i := 0; i < len(s); i++ {
 		c := s[i]
-		if c != '/' && c != '%' {
+		if strings.IndexByte(special, c) < 0 {
 			t[j] = c
 			j++
 			continue
@@ -159,6 +163,11 @@ func EncodeAsNameElement(s string) string {
 		j += 3
 	}
 	return string(t[:j])
+}
+
+// EncodeAsNameElement makes a string representable as a name element by escaping slashes.
+func EncodeAsNameElement(s string) string {
+	return Escape(s, "/")
 }
 
 func isHex(c byte) bool {
@@ -185,12 +194,8 @@ func unHex(c byte) byte {
 	return 0
 }
 
-// DecodeFromNameElement decodes an encoded name element.  If s is correctly encoded return
-// the decoded string and true.  Otherwise return the original string and false.
-//
-// Note that this is more than the inverse of EncodeAsNameElement since it cn handle more hex encodings than
-// / and %.  This is intentional since we'll most likely want to add other letters to the set to be encoded.
-func DecodeFromNameElement(s string) (string, bool) {
+// Unescape decodes %<hex> encodings in a string into the relevant character.  It returns false on error.
+func Unescape(s string) (string, bool) {
 	if !strings.Contains(s, "%") {
 		return s, true
 	}
@@ -211,4 +216,13 @@ func DecodeFromNameElement(s string) (string, bool) {
 		j++
 	}
 	return string(t[:j]), true
+}
+
+// DecodeFromNameElement decodes an encoded name element.  If s is correctly encoded return
+// the decoded string and true.  Otherwise return the original string and false.
+//
+// Note that this is more than the inverse of EncodeAsNameElement since it cn handle more hex encodings than
+// / and %.  This is intentional since we'll most likely want to add other letters to the set to be encoded.
+func DecodeFromNameElement(s string) (string, bool) {
+	return Unescape(s)
 }
