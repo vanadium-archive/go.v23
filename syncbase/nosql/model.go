@@ -129,7 +129,7 @@ type BatchDatabase interface {
 	// Abort notifies the server that any pending changes can be discarded.
 	// It is not strictly required, but it may allow the server to release locks
 	// or other resources sooner than if it was not called.
-	Abort(ctx *context.T)
+	Abort(ctx *context.T) error
 }
 
 // PrefixPermissions represents a pair of (prefix, perms).
@@ -357,7 +357,7 @@ type SyncGroup interface {
 type SchemaUpgrader interface {
 	// Takes an instance of database and upgrades data from old
 	// schema to new schema. This method must be idempotent.
-	Run(db Database, oldVersion, newVersion int64) error
+	Run(db Database, oldVersion, newVersion int32) error
 }
 
 // Each database has a Schema associated with it which defines the current

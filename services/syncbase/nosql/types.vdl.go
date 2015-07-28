@@ -172,7 +172,7 @@ type SchemaMetadata struct {
 	// Non negative Schema version number. Should be increased with every schema change
 	// (e.g. adding fields to structs) that cannot be handled by previous
 	// versions of the app.
-	Version int64
+	Version int32
 	Policy  CrPolicy
 }
 

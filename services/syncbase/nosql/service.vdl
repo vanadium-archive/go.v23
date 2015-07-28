@@ -14,45 +14,47 @@ import (
 // Database represents a collection of Tables. Batches, queries, sync, watch,
 // etc. all operate at the Database level.
 // Database.Glob operates over Table names.
+// Param schemaVersion is the version number that the client expects the database
+// to be at. To disable schema version checking, pass -1.
 //
 // TODO(sadovsky): Add Watch method.
 type Database interface {
 	// Create creates this Database.
 	// If perms is nil, we inherit (copy) the App perms.
 	// Create requires the caller to have Write permission at the App.
-	Create(perms access.Permissions, metadata ?SchemaMetadata) error {access.Write}
+	Create(metadata ?SchemaMetadata, perms access.Permissions) error {access.Write}
 
 	// Delete deletes this Database.
-	Delete() error {access.Write}
+	Delete(schemaVersion int32) error {access.Write}
 
 	// Exists returns true only if this Database exists. Insufficient permissions
 	// cause Exists to return false instead of an error.
 	// TODO(ivanpi): Exists may fail with an error if higher levels of hierarchy
 	// do not exist.
-	Exists() (bool | error) {access.Read}
+	Exists(schemaVersion int32) (bool | error) {access.Read}
 
 	// BeginBatch creates a new batch. It returns an App-relative name for a
 	// Database handle bound to this batch. If this Database is already bound to a
 	// batch, BeginBatch() will fail with ErrBoundToBatch. Concurrency semantics
 	// are documented in model.go.
 	// TODO(sadovsky): make BatchOptions optional
-	BeginBatch(bo BatchOptions) (string | error) {access.Read}
+	BeginBatch(schemaVersion int32, bo BatchOptions) (string | error) {access.Read}
 
 	// Commit persists the pending changes to the database.
 	// If this Database is not bound to a batch, Commit() will fail with
 	// ErrNotBoundToBatch.
-	Commit() error {access.Read}
+	Commit(schemaVersion int32) error {access.Read}
 
 	// Exec executes a syncQL query and returns all results as specified by in the
 	// query's select clause. Concurrency semantics are documented in model.go.
-	Exec(query string) stream<_, []any> error {access.Read}
+	Exec(schemaVersion int32, query string) stream<_, []any> error {access.Read}
 
 	// Abort notifies the server that any pending changes can be discarded.
 	// It is not strictly required, but it may allow the server to release locks
 	// or other resources sooner than if it was not called.
 	// If this Database is not bound to a batch, Abort() will fail with
 	// ErrNotBoundToBatch.
-	Abort() error {access.Read}
+	Abort(schemaVersion int32) error {access.Read}
 
 	// SetPermissions and GetPermissions are included from the Object interface.
 	permissions.Object
@@ -75,35 +77,37 @@ type Database interface {
 
 // Table represents a collection of Rows.
 // Table.Glob operates over the primary keys of Rows in the Table.
+// SchemaVersion is the version number that the client expects the database
+// to be at. To disable schema version checking, pass -1.
 type Table interface {
 	// Create creates this Table.
 	// If perms is nil, we inherit (copy) the Database perms.
-	Create(perms access.Permissions) error {access.Write}
+	Create(schemaVersion int32, perms access.Permissions) error {access.Write}
 
 	// Delete deletes this Table.
-	Delete() error {access.Write}
+	Delete(schemaVersion int32) error {access.Write}
 
 	// Exists returns true only if this Table exists. Insufficient permissions
 	// cause Exists to return false instead of an error.
 	// TODO(ivanpi): Exists may fail with an error if higher levels of hierarchy
 	// do not exist.
-	Exists() (bool | error) {access.Read}
+	Exists(schemaVersion int32) (bool | error) {access.Read}
 
 	// Delete deletes all rows in the given half-open range [start, limit). If
 	// limit is "", all rows with keys >= start are included.
-	DeleteRowRange(start, limit []byte) error {access.Write}
+	DeleteRowRange(schemaVersion int32, start, limit []byte) error {access.Write}
 
 	// Scan returns all rows in the given half-open range [start, limit). If limit
 	// is "", all rows with keys >= start are included. Concurrency semantics are
 	// documented in model.go.
-	Scan(start, limit []byte) stream<_, KeyValue> error {access.Read}
+	Scan(schemaVersion int32, start, limit []byte) stream<_, KeyValue> error {access.Read}
 
 	// GetPermissions returns an array of (prefix, perms) pairs. The array is
 	// sorted from longest prefix to shortest, so element zero is the one that
 	// applies to the row with the given key. The last element is always the
 	// prefix "" which represents the table's permissions -- the array will always
 	// have at least one element.
-	GetPermissions(key string) ([]PrefixPermissions | error) {access.Admin}
+	GetPermissions(schemaVersion int32, key string) ([]PrefixPermissions | error) {access.Admin}
 
 	// SetPermissions sets the permissions for all current and future rows with
 	// the given prefix. If the prefix overlaps with an existing prefix, the
@@ -112,17 +116,19 @@ type Table interface {
 	//     SetPermissions(ctx, Prefix("a/b/c"), perms2)
 	// The permissions for row "a/b/1" are perms1, and the permissions for row
 	// "a/b/c/1" are perms2.
-	SetPermissions(prefix string, perms access.Permissions) error {access.Admin}
+	SetPermissions(schemaVersion int32, prefix string, perms access.Permissions) error {access.Admin}
 
 	// DeletePermissions deletes the permissions for the specified prefix. Any
 	// rows covered by this prefix will use the next longest prefix's permissions
 	// (see the array returned by GetPermissions).
-	DeletePermissions(prefix string) error {access.Admin}
+	DeletePermissions(schemaVersion int32, prefix string) error {access.Admin}
 }
 
 // Row represents a single row in a Table.
 // All access checks are performed against the most specific matching prefix
 // permissions in the Table.
+// SchemaVersion is the version number that the client expects the database
+// to be at. To disable schema version checking, pass -1.
 // NOTE(sadovsky): Currently we send []byte values over the wire for Get, Put,
 // and Scan. If there's a way to avoid encoding/decoding on the server side, we
 // can use vdl.Value everywhere without sacrificing performance.
@@ -131,16 +137,16 @@ type Row interface {
 	// cause Exists to return false instead of an error.
 	// TODO(ivanpi): Exists may fail with an error if higher levels of hierarchy
 	// do not exist.
-	Exists() (bool | error) {access.Read}
+	Exists(schemaVersion int32) (bool | error) {access.Read}
 
 	// Get returns the value for this Row.
-	Get() ([]byte | error) {access.Read}
+	Get(schemaVersion int32) ([]byte | error) {access.Read}
 
 	// Put writes the given value for this Row.
-	Put(value []byte) error {access.Write}
+	Put(schemaVersion int32, value []byte) error {access.Write}
 
 	// Delete deletes this Row.
-	Delete() error {access.Write}
+	Delete(schemaVersion int32) error {access.Write}
 }
 
 // SyncGroupManager is the interface for SyncGroup operations.
@@ -314,4 +320,5 @@ error (
 	NotBoundToBatch() {"en": "not bound to batch"}
 	ReadOnlyBatch() {"en": "batch is read-only"}
 	ConcurrentBatch() {"en": "concurrent batch"}
+	SchemaVersionMismatch() {"en": "actual schema version does not match the provided one"}
 )

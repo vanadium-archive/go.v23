@@ -49,12 +49,12 @@ func (d *database) FullName() string {
 
 // Exists implements Database.Exists.
 func (d *database) Exists(ctx *context.T) (bool, error) {
-	return d.c.Exists(ctx)
+	return d.c.Exists(ctx, d.schemaVersion())
 }
 
 // Table implements Database.Table.
 func (d *database) Table(relativeName string) Table {
-	return newTable(d.fullName, relativeName)
+	return newTable(d.fullName, relativeName, d.schemaVersion())
 }
 
 // ListTables implements Database.ListTables.
@@ -68,28 +68,28 @@ func (d *database) Create(ctx *context.T, perms access.Permissions) error {
 	if d.schema != nil {
 		schemaMetadata = &d.schema.Metadata
 	}
-	return d.c.Create(ctx, perms, schemaMetadata)
+	return d.c.Create(ctx, schemaMetadata, perms)
 }
 
 // Delete implements Database.Delete.
 func (d *database) Delete(ctx *context.T) error {
-	return d.c.Delete(ctx)
+	return d.c.Delete(ctx, d.schemaVersion())
 }
 
 // CreateTable implements Database.CreateTable.
 func (d *database) CreateTable(ctx *context.T, relativeName string, perms access.Permissions) error {
-	return wire.TableClient(naming.Join(d.fullName, relativeName)).Create(ctx, perms)
+	return wire.TableClient(naming.Join(d.fullName, relativeName)).Create(ctx, d.schemaVersion(), perms)
 }
 
 // DeleteTable implements Database.DeleteTable.
 func (d *database) DeleteTable(ctx *context.T, relativeName string) error {
-	return wire.TableClient(naming.Join(d.fullName, relativeName)).Delete(ctx)
+	return wire.TableClient(naming.Join(d.fullName, relativeName)).Delete(ctx, d.schemaVersion())
 }
 
 // Exec implements Database.Exec.
 func (d *database) Exec(ctx *context.T, query string) ([]string, ResultStream, error) {
 	ctx, cancel := context.WithCancel(ctx)
-	call, err := d.c.Exec(ctx, query)
+	call, err := d.c.Exec(ctx, d.schemaVersion(), query)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -112,7 +112,7 @@ func (d *database) Exec(ctx *context.T, query string) ([]string, ResultStream, e
 
 // BeginBatch implements Database.BeginBatch.
 func (d *database) BeginBatch(ctx *context.T, opts wire.BatchOptions) (BatchDatabase, error) {
-	relativeName, err := d.c.BeginBatch(ctx, opts)
+	relativeName, err := d.c.BeginBatch(ctx, d.schemaVersion(), opts)
 	if err != nil {
 		return nil, err
 	}
@@ -195,4 +195,11 @@ func (d *database) UpgradeIfOutdated(ctx *context.T) (bool, error) {
 
 func (d *database) getSchemaManager() schemaManagerImpl {
 	return newSchemaManager(d.fullName)
+}
+
+func (d *database) schemaVersion() int32 {
+	if d.schema == nil {
+		return -1
+	}
+	return d.schema.Metadata.Version
 }

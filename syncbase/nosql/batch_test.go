@@ -497,10 +497,10 @@ func TestDisallowedMethods(t *testing.T) {
 
 	// Batch methods on non-batch.
 	dc := wire.DatabaseClient(d.FullName())
-	if err := dc.Commit(ctx); verror.ErrorID(err) != wire.ErrNotBoundToBatch.ID {
+	if err := dc.Commit(ctx, -1); verror.ErrorID(err) != wire.ErrNotBoundToBatch.ID {
 		t.Fatalf("dc.Commit() should have failed: %v", err)
 	}
-	if err := dc.Abort(ctx); verror.ErrorID(err) != wire.ErrNotBoundToBatch.ID {
+	if err := dc.Abort(ctx, -1); verror.ErrorID(err) != wire.ErrNotBoundToBatch.ID {
 		t.Fatalf("dc.Abort() should have failed: %v", err)
 	}
 
@@ -513,10 +513,10 @@ func TestDisallowedMethods(t *testing.T) {
 	if err := bc.Create(ctx, nil, nil); err == nil {
 		t.Fatalf("bc.Create() should have failed: %v", err)
 	}
-	if err := bc.Delete(ctx); verror.ErrorID(err) != wire.ErrBoundToBatch.ID {
+	if err := bc.Delete(ctx, -1); verror.ErrorID(err) != wire.ErrBoundToBatch.ID {
 		t.Fatalf("bc.Delete() should have failed: %v", err)
 	}
-	if _, err := bc.BeginBatch(ctx, wire.BatchOptions{}); verror.ErrorID(err) != wire.ErrBoundToBatch.ID {
+	if _, err := bc.BeginBatch(ctx, -1, wire.BatchOptions{}); verror.ErrorID(err) != wire.ErrBoundToBatch.ID {
 		t.Fatalf("bc.BeginBatch() should have failed: %v", err)
 	}
 	if _, _, err := bc.GetPermissions(ctx); verror.ErrorID(err) != wire.ErrBoundToBatch.ID {
@@ -532,10 +532,10 @@ func TestDisallowedMethods(t *testing.T) {
 
 	// Test that Table.{Create,Delete} fail with ErrBoundToBatch.
 	tc := wire.TableClient(naming.Join(b.FullName(), "tb"))
-	if err := tc.Create(ctx, nil); verror.ErrorID(err) != wire.ErrBoundToBatch.ID {
+	if err := tc.Create(ctx, -1, nil); verror.ErrorID(err) != wire.ErrBoundToBatch.ID {
 		t.Fatalf("tc.Create() should have failed: %v", err)
 	}
-	if err := tc.Delete(ctx); verror.ErrorID(err) != wire.ErrBoundToBatch.ID {
+	if err := tc.Delete(ctx, -1); verror.ErrorID(err) != wire.ErrBoundToBatch.ID {
 		t.Fatalf("tc.Delete() should have failed: %v", err)
 	}
 }

@@ -18,12 +18,12 @@ var _ BatchDatabase = (*batch)(nil)
 
 // Commit implements BatchDatabase.Commit.
 func (b *batch) Commit(ctx *context.T) error {
-	return b.c.Commit(ctx)
+	return b.c.Commit(ctx, b.schemaVersion())
 }
 
 // Abort implements BatchDatabase.Abort.
-func (b *batch) Abort(ctx *context.T) {
-	b.c.Abort(ctx)
+func (b *batch) Abort(ctx *context.T) error {
+	return b.c.Abort(ctx, b.schemaVersion())
 }
 
 // RunInBatch runs the given fn in a batch, managing retries and commit/abort.

@@ -25,10 +25,11 @@ import (
 )
 
 var (
-	ErrBoundToBatch    = verror.Register("v.io/syncbase/v23/services/syncbase/nosql.BoundToBatch", verror.NoRetry, "{1:}{2:} bound to batch")
-	ErrNotBoundToBatch = verror.Register("v.io/syncbase/v23/services/syncbase/nosql.NotBoundToBatch", verror.NoRetry, "{1:}{2:} not bound to batch")
-	ErrReadOnlyBatch   = verror.Register("v.io/syncbase/v23/services/syncbase/nosql.ReadOnlyBatch", verror.NoRetry, "{1:}{2:} batch is read-only")
-	ErrConcurrentBatch = verror.Register("v.io/syncbase/v23/services/syncbase/nosql.ConcurrentBatch", verror.NoRetry, "{1:}{2:} concurrent batch")
+	ErrBoundToBatch          = verror.Register("v.io/syncbase/v23/services/syncbase/nosql.BoundToBatch", verror.NoRetry, "{1:}{2:} bound to batch")
+	ErrNotBoundToBatch       = verror.Register("v.io/syncbase/v23/services/syncbase/nosql.NotBoundToBatch", verror.NoRetry, "{1:}{2:} not bound to batch")
+	ErrReadOnlyBatch         = verror.Register("v.io/syncbase/v23/services/syncbase/nosql.ReadOnlyBatch", verror.NoRetry, "{1:}{2:} batch is read-only")
+	ErrConcurrentBatch       = verror.Register("v.io/syncbase/v23/services/syncbase/nosql.ConcurrentBatch", verror.NoRetry, "{1:}{2:} concurrent batch")
+	ErrSchemaVersionMismatch = verror.Register("v.io/syncbase/v23/services/syncbase/nosql.SchemaVersionMismatch", verror.NoRetry, "{1:}{2:} actual schema version does not match the provided one")
 )
 
 func init() {
@@ -36,6 +37,7 @@ func init() {
 	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrNotBoundToBatch.ID), "{1:}{2:} not bound to batch")
 	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrReadOnlyBatch.ID), "{1:}{2:} batch is read-only")
 	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrConcurrentBatch.ID), "{1:}{2:} concurrent batch")
+	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrSchemaVersionMismatch.ID), "{1:}{2:} actual schema version does not match the provided one")
 }
 
 // NewErrBoundToBatch returns an error with the ErrBoundToBatch ID.
@@ -56,6 +58,11 @@ func NewErrReadOnlyBatch(ctx *context.T) error {
 // NewErrConcurrentBatch returns an error with the ErrConcurrentBatch ID.
 func NewErrConcurrentBatch(ctx *context.T) error {
 	return verror.New(ErrConcurrentBatch, ctx)
+}
+
+// NewErrSchemaVersionMismatch returns an error with the ErrSchemaVersionMismatch ID.
+func NewErrSchemaVersionMismatch(ctx *context.T) error {
+	return verror.New(ErrSchemaVersionMismatch, ctx)
 }
 
 // DatabaseWatcherClientMethods is the client interface
@@ -1431,6 +1438,8 @@ var descSchemaManager = rpc.InterfaceDesc{
 // Database represents a collection of Tables. Batches, queries, sync, watch,
 // etc. all operate at the Database level.
 // Database.Glob operates over Table names.
+// Param schemaVersion is the version number that the client expects the database
+// to be at. To disable schema version checking, pass -1.
 //
 // TODO(sadovsky): Add Watch method.
 type DatabaseClientMethods interface {
@@ -1511,33 +1520,33 @@ type DatabaseClientMethods interface {
 	// Create creates this Database.
 	// If perms is nil, we inherit (copy) the App perms.
 	// Create requires the caller to have Write permission at the App.
-	Create(ctx *context.T, perms access.Permissions, metadata *SchemaMetadata, opts ...rpc.CallOpt) error
+	Create(ctx *context.T, metadata *SchemaMetadata, perms access.Permissions, opts ...rpc.CallOpt) error
 	// Delete deletes this Database.
-	Delete(*context.T, ...rpc.CallOpt) error
+	Delete(ctx *context.T, schemaVersion int32, opts ...rpc.CallOpt) error
 	// Exists returns true only if this Database exists. Insufficient permissions
 	// cause Exists to return false instead of an error.
 	// TODO(ivanpi): Exists may fail with an error if higher levels of hierarchy
 	// do not exist.
-	Exists(*context.T, ...rpc.CallOpt) (bool, error)
+	Exists(ctx *context.T, schemaVersion int32, opts ...rpc.CallOpt) (bool, error)
 	// BeginBatch creates a new batch. It returns an App-relative name for a
 	// Database handle bound to this batch. If this Database is already bound to a
 	// batch, BeginBatch() will fail with ErrBoundToBatch. Concurrency semantics
 	// are documented in model.go.
 	// TODO(sadovsky): make BatchOptions optional
-	BeginBatch(ctx *context.T, bo BatchOptions, opts ...rpc.CallOpt) (string, error)
+	BeginBatch(ctx *context.T, schemaVersion int32, bo BatchOptions, opts ...rpc.CallOpt) (string, error)
 	// Commit persists the pending changes to the database.
 	// If this Database is not bound to a batch, Commit() will fail with
 	// ErrNotBoundToBatch.
-	Commit(*context.T, ...rpc.CallOpt) error
+	Commit(ctx *context.T, schemaVersion int32, opts ...rpc.CallOpt) error
 	// Exec executes a syncQL query and returns all results as specified by in the
 	// query's select clause. Concurrency semantics are documented in model.go.
-	Exec(ctx *context.T, query string, opts ...rpc.CallOpt) (DatabaseExecClientCall, error)
+	Exec(ctx *context.T, schemaVersion int32, query string, opts ...rpc.CallOpt) (DatabaseExecClientCall, error)
 	// Abort notifies the server that any pending changes can be discarded.
 	// It is not strictly required, but it may allow the server to release locks
 	// or other resources sooner than if it was not called.
 	// If this Database is not bound to a batch, Abort() will fail with
 	// ErrNotBoundToBatch.
-	Abort(*context.T, ...rpc.CallOpt) error
+	Abort(ctx *context.T, schemaVersion int32, opts ...rpc.CallOpt) error
 }
 
 // DatabaseClientStub adds universal methods to DatabaseClientMethods.
@@ -1561,42 +1570,42 @@ type implDatabaseClientStub struct {
 	SchemaManagerClientStub
 }
 
-func (c implDatabaseClientStub) Create(ctx *context.T, i0 access.Permissions, i1 *SchemaMetadata, opts ...rpc.CallOpt) (err error) {
+func (c implDatabaseClientStub) Create(ctx *context.T, i0 *SchemaMetadata, i1 access.Permissions, opts ...rpc.CallOpt) (err error) {
 	err = v23.GetClient(ctx).Call(ctx, c.name, "Create", []interface{}{i0, i1}, nil, opts...)
 	return
 }
 
-func (c implDatabaseClientStub) Delete(ctx *context.T, opts ...rpc.CallOpt) (err error) {
-	err = v23.GetClient(ctx).Call(ctx, c.name, "Delete", nil, nil, opts...)
+func (c implDatabaseClientStub) Delete(ctx *context.T, i0 int32, opts ...rpc.CallOpt) (err error) {
+	err = v23.GetClient(ctx).Call(ctx, c.name, "Delete", []interface{}{i0}, nil, opts...)
 	return
 }
 
-func (c implDatabaseClientStub) Exists(ctx *context.T, opts ...rpc.CallOpt) (o0 bool, err error) {
-	err = v23.GetClient(ctx).Call(ctx, c.name, "Exists", nil, []interface{}{&o0}, opts...)
+func (c implDatabaseClientStub) Exists(ctx *context.T, i0 int32, opts ...rpc.CallOpt) (o0 bool, err error) {
+	err = v23.GetClient(ctx).Call(ctx, c.name, "Exists", []interface{}{i0}, []interface{}{&o0}, opts...)
 	return
 }
 
-func (c implDatabaseClientStub) BeginBatch(ctx *context.T, i0 BatchOptions, opts ...rpc.CallOpt) (o0 string, err error) {
-	err = v23.GetClient(ctx).Call(ctx, c.name, "BeginBatch", []interface{}{i0}, []interface{}{&o0}, opts...)
+func (c implDatabaseClientStub) BeginBatch(ctx *context.T, i0 int32, i1 BatchOptions, opts ...rpc.CallOpt) (o0 string, err error) {
+	err = v23.GetClient(ctx).Call(ctx, c.name, "BeginBatch", []interface{}{i0, i1}, []interface{}{&o0}, opts...)
 	return
 }
 
-func (c implDatabaseClientStub) Commit(ctx *context.T, opts ...rpc.CallOpt) (err error) {
-	err = v23.GetClient(ctx).Call(ctx, c.name, "Commit", nil, nil, opts...)
+func (c implDatabaseClientStub) Commit(ctx *context.T, i0 int32, opts ...rpc.CallOpt) (err error) {
+	err = v23.GetClient(ctx).Call(ctx, c.name, "Commit", []interface{}{i0}, nil, opts...)
 	return
 }
 
-func (c implDatabaseClientStub) Exec(ctx *context.T, i0 string, opts ...rpc.CallOpt) (ocall DatabaseExecClientCall, err error) {
+func (c implDatabaseClientStub) Exec(ctx *context.T, i0 int32, i1 string, opts ...rpc.CallOpt) (ocall DatabaseExecClientCall, err error) {
 	var call rpc.ClientCall
-	if call, err = v23.GetClient(ctx).StartCall(ctx, c.name, "Exec", []interface{}{i0}, opts...); err != nil {
+	if call, err = v23.GetClient(ctx).StartCall(ctx, c.name, "Exec", []interface{}{i0, i1}, opts...); err != nil {
 		return
 	}
 	ocall = &implDatabaseExecClientCall{ClientCall: call}
 	return
 }
 
-func (c implDatabaseClientStub) Abort(ctx *context.T, opts ...rpc.CallOpt) (err error) {
-	err = v23.GetClient(ctx).Call(ctx, c.name, "Abort", nil, nil, opts...)
+func (c implDatabaseClientStub) Abort(ctx *context.T, i0 int32, opts ...rpc.CallOpt) (err error) {
+	err = v23.GetClient(ctx).Call(ctx, c.name, "Abort", []interface{}{i0}, nil, opts...)
 	return
 }
 
@@ -1674,6 +1683,8 @@ func (c *implDatabaseExecClientCall) Finish() (err error) {
 // Database represents a collection of Tables. Batches, queries, sync, watch,
 // etc. all operate at the Database level.
 // Database.Glob operates over Table names.
+// Param schemaVersion is the version number that the client expects the database
+// to be at. To disable schema version checking, pass -1.
 //
 // TODO(sadovsky): Add Watch method.
 type DatabaseServerMethods interface {
@@ -1754,33 +1765,33 @@ type DatabaseServerMethods interface {
 	// Create creates this Database.
 	// If perms is nil, we inherit (copy) the App perms.
 	// Create requires the caller to have Write permission at the App.
-	Create(ctx *context.T, call rpc.ServerCall, perms access.Permissions, metadata *SchemaMetadata) error
+	Create(ctx *context.T, call rpc.ServerCall, metadata *SchemaMetadata, perms access.Permissions) error
 	// Delete deletes this Database.
-	Delete(*context.T, rpc.ServerCall) error
+	Delete(ctx *context.T, call rpc.ServerCall, schemaVersion int32) error
 	// Exists returns true only if this Database exists. Insufficient permissions
 	// cause Exists to return false instead of an error.
 	// TODO(ivanpi): Exists may fail with an error if higher levels of hierarchy
 	// do not exist.
-	Exists(*context.T, rpc.ServerCall) (bool, error)
+	Exists(ctx *context.T, call rpc.ServerCall, schemaVersion int32) (bool, error)
 	// BeginBatch creates a new batch. It returns an App-relative name for a
 	// Database handle bound to this batch. If this Database is already bound to a
 	// batch, BeginBatch() will fail with ErrBoundToBatch. Concurrency semantics
 	// are documented in model.go.
 	// TODO(sadovsky): make BatchOptions optional
-	BeginBatch(ctx *context.T, call rpc.ServerCall, bo BatchOptions) (string, error)
+	BeginBatch(ctx *context.T, call rpc.ServerCall, schemaVersion int32, bo BatchOptions) (string, error)
 	// Commit persists the pending changes to the database.
 	// If this Database is not bound to a batch, Commit() will fail with
 	// ErrNotBoundToBatch.
-	Commit(*context.T, rpc.ServerCall) error
+	Commit(ctx *context.T, call rpc.ServerCall, schemaVersion int32) error
 	// Exec executes a syncQL query and returns all results as specified by in the
 	// query's select clause. Concurrency semantics are documented in model.go.
-	Exec(ctx *context.T, call DatabaseExecServerCall, query string) error
+	Exec(ctx *context.T, call DatabaseExecServerCall, schemaVersion int32, query string) error
 	// Abort notifies the server that any pending changes can be discarded.
 	// It is not strictly required, but it may allow the server to release locks
 	// or other resources sooner than if it was not called.
 	// If this Database is not bound to a batch, Abort() will fail with
 	// ErrNotBoundToBatch.
-	Abort(*context.T, rpc.ServerCall) error
+	Abort(ctx *context.T, call rpc.ServerCall, schemaVersion int32) error
 }
 
 // DatabaseServerStubMethods is the server interface containing
@@ -1865,33 +1876,33 @@ type DatabaseServerStubMethods interface {
 	// Create creates this Database.
 	// If perms is nil, we inherit (copy) the App perms.
 	// Create requires the caller to have Write permission at the App.
-	Create(ctx *context.T, call rpc.ServerCall, perms access.Permissions, metadata *SchemaMetadata) error
+	Create(ctx *context.T, call rpc.ServerCall, metadata *SchemaMetadata, perms access.Permissions) error
 	// Delete deletes this Database.
-	Delete(*context.T, rpc.ServerCall) error
+	Delete(ctx *context.T, call rpc.ServerCall, schemaVersion int32) error
 	// Exists returns true only if this Database exists. Insufficient permissions
 	// cause Exists to return false instead of an error.
 	// TODO(ivanpi): Exists may fail with an error if higher levels of hierarchy
 	// do not exist.
-	Exists(*context.T, rpc.ServerCall) (bool, error)
+	Exists(ctx *context.T, call rpc.ServerCall, schemaVersion int32) (bool, error)
 	// BeginBatch creates a new batch. It returns an App-relative name for a
 	// Database handle bound to this batch. If this Database is already bound to a
 	// batch, BeginBatch() will fail with ErrBoundToBatch. Concurrency semantics
 	// are documented in model.go.
 	// TODO(sadovsky): make BatchOptions optional
-	BeginBatch(ctx *context.T, call rpc.ServerCall, bo BatchOptions) (string, error)
+	BeginBatch(ctx *context.T, call rpc.ServerCall, schemaVersion int32, bo BatchOptions) (string, error)
 	// Commit persists the pending changes to the database.
 	// If this Database is not bound to a batch, Commit() will fail with
 	// ErrNotBoundToBatch.
-	Commit(*context.T, rpc.ServerCall) error
+	Commit(ctx *context.T, call rpc.ServerCall, schemaVersion int32) error
 	// Exec executes a syncQL query and returns all results as specified by in the
 	// query's select clause. Concurrency semantics are documented in model.go.
-	Exec(ctx *context.T, call *DatabaseExecServerCallStub, query string) error
+	Exec(ctx *context.T, call *DatabaseExecServerCallStub, schemaVersion int32, query string) error
 	// Abort notifies the server that any pending changes can be discarded.
 	// It is not strictly required, but it may allow the server to release locks
 	// or other resources sooner than if it was not called.
 	// If this Database is not bound to a batch, Abort() will fail with
 	// ErrNotBoundToBatch.
-	Abort(*context.T, rpc.ServerCall) error
+	Abort(ctx *context.T, call rpc.ServerCall, schemaVersion int32) error
 }
 
 // DatabaseServerStub adds universal methods to DatabaseServerStubMethods.
@@ -1933,32 +1944,32 @@ type implDatabaseServerStub struct {
 	gs *rpc.GlobState
 }
 
-func (s implDatabaseServerStub) Create(ctx *context.T, call rpc.ServerCall, i0 access.Permissions, i1 *SchemaMetadata) error {
+func (s implDatabaseServerStub) Create(ctx *context.T, call rpc.ServerCall, i0 *SchemaMetadata, i1 access.Permissions) error {
 	return s.impl.Create(ctx, call, i0, i1)
 }
 
-func (s implDatabaseServerStub) Delete(ctx *context.T, call rpc.ServerCall) error {
-	return s.impl.Delete(ctx, call)
+func (s implDatabaseServerStub) Delete(ctx *context.T, call rpc.ServerCall, i0 int32) error {
+	return s.impl.Delete(ctx, call, i0)
 }
 
-func (s implDatabaseServerStub) Exists(ctx *context.T, call rpc.ServerCall) (bool, error) {
-	return s.impl.Exists(ctx, call)
+func (s implDatabaseServerStub) Exists(ctx *context.T, call rpc.ServerCall, i0 int32) (bool, error) {
+	return s.impl.Exists(ctx, call, i0)
 }
 
-func (s implDatabaseServerStub) BeginBatch(ctx *context.T, call rpc.ServerCall, i0 BatchOptions) (string, error) {
-	return s.impl.BeginBatch(ctx, call, i0)
+func (s implDatabaseServerStub) BeginBatch(ctx *context.T, call rpc.ServerCall, i0 int32, i1 BatchOptions) (string, error) {
+	return s.impl.BeginBatch(ctx, call, i0, i1)
 }
 
-func (s implDatabaseServerStub) Commit(ctx *context.T, call rpc.ServerCall) error {
-	return s.impl.Commit(ctx, call)
+func (s implDatabaseServerStub) Commit(ctx *context.T, call rpc.ServerCall, i0 int32) error {
+	return s.impl.Commit(ctx, call, i0)
 }
 
-func (s implDatabaseServerStub) Exec(ctx *context.T, call *DatabaseExecServerCallStub, i0 string) error {
-	return s.impl.Exec(ctx, call, i0)
+func (s implDatabaseServerStub) Exec(ctx *context.T, call *DatabaseExecServerCallStub, i0 int32, i1 string) error {
+	return s.impl.Exec(ctx, call, i0, i1)
 }
 
-func (s implDatabaseServerStub) Abort(ctx *context.T, call rpc.ServerCall) error {
-	return s.impl.Abort(ctx, call)
+func (s implDatabaseServerStub) Abort(ctx *context.T, call rpc.ServerCall, i0 int32) error {
+	return s.impl.Abort(ctx, call, i0)
 }
 
 func (s implDatabaseServerStub) Globber() *rpc.GlobState {
@@ -1976,7 +1987,7 @@ var DatabaseDesc rpc.InterfaceDesc = descDatabase
 var descDatabase = rpc.InterfaceDesc{
 	Name:    "Database",
 	PkgPath: "v.io/syncbase/v23/services/syncbase/nosql",
-	Doc:     "// Database represents a collection of Tables. Batches, queries, sync, watch,\n// etc. all operate at the Database level.\n// Database.Glob operates over Table names.\n//\n// TODO(sadovsky): Add Watch method.",
+	Doc:     "// Database represents a collection of Tables. Batches, queries, sync, watch,\n// etc. all operate at the Database level.\n// Database.Glob operates over Table names.\n// Param schemaVersion is the version number that the client expects the database\n// to be at. To disable schema version checking, pass -1.\n//\n// TODO(sadovsky): Add Watch method.",
 	Embeds: []rpc.EmbedDesc{
 		{"Object", "v.io/v23/services/permissions", "// Object provides access control for Vanadium objects.\n//\n// Vanadium services implementing dynamic access control would typically embed\n// this interface and tag additional methods defined by the service with one of\n// Admin, Read, Write, Resolve etc. For example, the VDL definition of the\n// object would be:\n//\n//   package mypackage\n//\n//   import \"v.io/v23/security/access\"\n//   import \"v.io/v23/services/permissions\"\n//\n//   type MyObject interface {\n//     permissions.Object\n//     MyRead() (string, error) {access.Read}\n//     MyWrite(string) error    {access.Write}\n//   }\n//\n// If the set of pre-defined tags is insufficient, services may define their\n// own tag type and annotate all methods with this new type.\n//\n// Instead of embedding this Object interface, define SetPermissions and\n// GetPermissions in their own interface. Authorization policies will typically\n// respect annotations of a single type. For example, the VDL definition of an\n// object would be:\n//\n//  package mypackage\n//\n//  import \"v.io/v23/security/access\"\n//\n//  type MyTag string\n//\n//  const (\n//    Blue = MyTag(\"Blue\")\n//    Red  = MyTag(\"Red\")\n//  )\n//\n//  type MyObject interface {\n//    MyMethod() (string, error) {Blue}\n//\n//    // Allow clients to change access via the access.Object interface:\n//    SetPermissions(perms access.Permissions, version string) error         {Red}\n//    GetPermissions() (perms access.Permissions, version string, err error) {Blue}\n//  }"},
 		{"DatabaseWatcher", "v.io/syncbase/v23/services/syncbase/nosql", "// Watch allows a client to watch for updates in the database. For each watched\n// request, the client will receive a reliable stream of watch events without\n// re-ordering. See watch.GlobWatcher for a detailed explanation of the\n// behavior.\n//\n// The watching is done by starting a streaming RPC. The argument to the RPC\n// contains the ResumeMarker that points to a particular place in the database\n// event log. The result stream consists of a never-ending sequence of Change\n// messages (until the call fails or is canceled). Each Change contains the\n// Name field in the form \"<tableName>/<rowKey>\" and the Value field of the\n// StoreChange type. If the client has no access to a row specified in a change,\n// that change is excluded from the result stream.\n//\n// The DatabaseWatcher is designed to be used in the following way:\n// 1) begin a read-only batch\n// 2) read all information your app needs\n// 3) read the ResumeMarker\n// 4) abort the batch\n// 5) start watching changes to the data using the ResumeMarker\n// In this configuration the client doesn't miss any changes."},
@@ -1989,19 +2000,25 @@ var descDatabase = rpc.InterfaceDesc{
 			Name: "Create",
 			Doc:  "// Create creates this Database.\n// If perms is nil, we inherit (copy) the App perms.\n// Create requires the caller to have Write permission at the App.",
 			InArgs: []rpc.ArgDesc{
-				{"perms", ``},    // access.Permissions
 				{"metadata", ``}, // *SchemaMetadata
+				{"perms", ``},    // access.Permissions
 			},
 			Tags: []*vdl.Value{vdl.ValueOf(access.Tag("Write"))},
 		},
 		{
 			Name: "Delete",
 			Doc:  "// Delete deletes this Database.",
+			InArgs: []rpc.ArgDesc{
+				{"schemaVersion", ``}, // int32
+			},
 			Tags: []*vdl.Value{vdl.ValueOf(access.Tag("Write"))},
 		},
 		{
 			Name: "Exists",
 			Doc:  "// Exists returns true only if this Database exists. Insufficient permissions\n// cause Exists to return false instead of an error.\n// TODO(ivanpi): Exists may fail with an error if higher levels of hierarchy\n// do not exist.",
+			InArgs: []rpc.ArgDesc{
+				{"schemaVersion", ``}, // int32
+			},
 			OutArgs: []rpc.ArgDesc{
 				{"", ``}, // bool
 			},
@@ -2011,7 +2028,8 @@ var descDatabase = rpc.InterfaceDesc{
 			Name: "BeginBatch",
 			Doc:  "// BeginBatch creates a new batch. It returns an App-relative name for a\n// Database handle bound to this batch. If this Database is already bound to a\n// batch, BeginBatch() will fail with ErrBoundToBatch. Concurrency semantics\n// are documented in model.go.\n// TODO(sadovsky): make BatchOptions optional",
 			InArgs: []rpc.ArgDesc{
-				{"bo", ``}, // BatchOptions
+				{"schemaVersion", ``}, // int32
+				{"bo", ``},            // BatchOptions
 			},
 			OutArgs: []rpc.ArgDesc{
 				{"", ``}, // string
@@ -2021,19 +2039,26 @@ var descDatabase = rpc.InterfaceDesc{
 		{
 			Name: "Commit",
 			Doc:  "// Commit persists the pending changes to the database.\n// If this Database is not bound to a batch, Commit() will fail with\n// ErrNotBoundToBatch.",
+			InArgs: []rpc.ArgDesc{
+				{"schemaVersion", ``}, // int32
+			},
 			Tags: []*vdl.Value{vdl.ValueOf(access.Tag("Read"))},
 		},
 		{
 			Name: "Exec",
 			Doc:  "// Exec executes a syncQL query and returns all results as specified by in the\n// query's select clause. Concurrency semantics are documented in model.go.",
 			InArgs: []rpc.ArgDesc{
-				{"query", ``}, // string
+				{"schemaVersion", ``}, // int32
+				{"query", ``},         // string
 			},
 			Tags: []*vdl.Value{vdl.ValueOf(access.Tag("Read"))},
 		},
 		{
 			Name: "Abort",
 			Doc:  "// Abort notifies the server that any pending changes can be discarded.\n// It is not strictly required, but it may allow the server to release locks\n// or other resources sooner than if it was not called.\n// If this Database is not bound to a batch, Abort() will fail with\n// ErrNotBoundToBatch.",
+			InArgs: []rpc.ArgDesc{
+				{"schemaVersion", ``}, // int32
+			},
 			Tags: []*vdl.Value{vdl.ValueOf(access.Tag("Read"))},
 		},
 	},
@@ -2087,30 +2112,32 @@ func (s implDatabaseExecServerCallSend) Send(item []*vdl.Value) error {
 //
 // Table represents a collection of Rows.
 // Table.Glob operates over the primary keys of Rows in the Table.
+// SchemaVersion is the version number that the client expects the database
+// to be at. To disable schema version checking, pass -1.
 type TableClientMethods interface {
 	// Create creates this Table.
 	// If perms is nil, we inherit (copy) the Database perms.
-	Create(ctx *context.T, perms access.Permissions, opts ...rpc.CallOpt) error
+	Create(ctx *context.T, schemaVersion int32, perms access.Permissions, opts ...rpc.CallOpt) error
 	// Delete deletes this Table.
-	Delete(*context.T, ...rpc.CallOpt) error
+	Delete(ctx *context.T, schemaVersion int32, opts ...rpc.CallOpt) error
 	// Exists returns true only if this Table exists. Insufficient permissions
 	// cause Exists to return false instead of an error.
 	// TODO(ivanpi): Exists may fail with an error if higher levels of hierarchy
 	// do not exist.
-	Exists(*context.T, ...rpc.CallOpt) (bool, error)
+	Exists(ctx *context.T, schemaVersion int32, opts ...rpc.CallOpt) (bool, error)
 	// Delete deletes all rows in the given half-open range [start, limit). If
 	// limit is "", all rows with keys >= start are included.
-	DeleteRowRange(ctx *context.T, start []byte, limit []byte, opts ...rpc.CallOpt) error
+	DeleteRowRange(ctx *context.T, schemaVersion int32, start []byte, limit []byte, opts ...rpc.CallOpt) error
 	// Scan returns all rows in the given half-open range [start, limit). If limit
 	// is "", all rows with keys >= start are included. Concurrency semantics are
 	// documented in model.go.
-	Scan(ctx *context.T, start []byte, limit []byte, opts ...rpc.CallOpt) (TableScanClientCall, error)
+	Scan(ctx *context.T, schemaVersion int32, start []byte, limit []byte, opts ...rpc.CallOpt) (TableScanClientCall, error)
 	// GetPermissions returns an array of (prefix, perms) pairs. The array is
 	// sorted from longest prefix to shortest, so element zero is the one that
 	// applies to the row with the given key. The last element is always the
 	// prefix "" which represents the table's permissions -- the array will always
 	// have at least one element.
-	GetPermissions(ctx *context.T, key string, opts ...rpc.CallOpt) ([]PrefixPermissions, error)
+	GetPermissions(ctx *context.T, schemaVersion int32, key string, opts ...rpc.CallOpt) ([]PrefixPermissions, error)
 	// SetPermissions sets the permissions for all current and future rows with
 	// the given prefix. If the prefix overlaps with an existing prefix, the
 	// longest prefix that matches a row applies. For example:
@@ -2118,11 +2145,11 @@ type TableClientMethods interface {
 	//     SetPermissions(ctx, Prefix("a/b/c"), perms2)
 	// The permissions for row "a/b/1" are perms1, and the permissions for row
 	// "a/b/c/1" are perms2.
-	SetPermissions(ctx *context.T, prefix string, perms access.Permissions, opts ...rpc.CallOpt) error
+	SetPermissions(ctx *context.T, schemaVersion int32, prefix string, perms access.Permissions, opts ...rpc.CallOpt) error
 	// DeletePermissions deletes the permissions for the specified prefix. Any
 	// rows covered by this prefix will use the next longest prefix's permissions
 	// (see the array returned by GetPermissions).
-	DeletePermissions(ctx *context.T, prefix string, opts ...rpc.CallOpt) error
+	DeletePermissions(ctx *context.T, schemaVersion int32, prefix string, opts ...rpc.CallOpt) error
 }
 
 // TableClientStub adds universal methods to TableClientMethods.
@@ -2140,47 +2167,47 @@ type implTableClientStub struct {
 	name string
 }
 
-func (c implTableClientStub) Create(ctx *context.T, i0 access.Permissions, opts ...rpc.CallOpt) (err error) {
-	err = v23.GetClient(ctx).Call(ctx, c.name, "Create", []interface{}{i0}, nil, opts...)
+func (c implTableClientStub) Create(ctx *context.T, i0 int32, i1 access.Permissions, opts ...rpc.CallOpt) (err error) {
+	err = v23.GetClient(ctx).Call(ctx, c.name, "Create", []interface{}{i0, i1}, nil, opts...)
 	return
 }
 
-func (c implTableClientStub) Delete(ctx *context.T, opts ...rpc.CallOpt) (err error) {
-	err = v23.GetClient(ctx).Call(ctx, c.name, "Delete", nil, nil, opts...)
+func (c implTableClientStub) Delete(ctx *context.T, i0 int32, opts ...rpc.CallOpt) (err error) {
+	err = v23.GetClient(ctx).Call(ctx, c.name, "Delete", []interface{}{i0}, nil, opts...)
 	return
 }
 
-func (c implTableClientStub) Exists(ctx *context.T, opts ...rpc.CallOpt) (o0 bool, err error) {
-	err = v23.GetClient(ctx).Call(ctx, c.name, "Exists", nil, []interface{}{&o0}, opts...)
+func (c implTableClientStub) Exists(ctx *context.T, i0 int32, opts ...rpc.CallOpt) (o0 bool, err error) {
+	err = v23.GetClient(ctx).Call(ctx, c.name, "Exists", []interface{}{i0}, []interface{}{&o0}, opts...)
 	return
 }
 
-func (c implTableClientStub) DeleteRowRange(ctx *context.T, i0 []byte, i1 []byte, opts ...rpc.CallOpt) (err error) {
-	err = v23.GetClient(ctx).Call(ctx, c.name, "DeleteRowRange", []interface{}{i0, i1}, nil, opts...)
+func (c implTableClientStub) DeleteRowRange(ctx *context.T, i0 int32, i1 []byte, i2 []byte, opts ...rpc.CallOpt) (err error) {
+	err = v23.GetClient(ctx).Call(ctx, c.name, "DeleteRowRange", []interface{}{i0, i1, i2}, nil, opts...)
 	return
 }
 
-func (c implTableClientStub) Scan(ctx *context.T, i0 []byte, i1 []byte, opts ...rpc.CallOpt) (ocall TableScanClientCall, err error) {
+func (c implTableClientStub) Scan(ctx *context.T, i0 int32, i1 []byte, i2 []byte, opts ...rpc.CallOpt) (ocall TableScanClientCall, err error) {
 	var call rpc.ClientCall
-	if call, err = v23.GetClient(ctx).StartCall(ctx, c.name, "Scan", []interface{}{i0, i1}, opts...); err != nil {
+	if call, err = v23.GetClient(ctx).StartCall(ctx, c.name, "Scan", []interface{}{i0, i1, i2}, opts...); err != nil {
 		return
 	}
 	ocall = &implTableScanClientCall{ClientCall: call}
 	return
 }
 
-func (c implTableClientStub) GetPermissions(ctx *context.T, i0 string, opts ...rpc.CallOpt) (o0 []PrefixPermissions, err error) {
-	err = v23.GetClient(ctx).Call(ctx, c.name, "GetPermissions", []interface{}{i0}, []interface{}{&o0}, opts...)
+func (c implTableClientStub) GetPermissions(ctx *context.T, i0 int32, i1 string, opts ...rpc.CallOpt) (o0 []PrefixPermissions, err error) {
+	err = v23.GetClient(ctx).Call(ctx, c.name, "GetPermissions", []interface{}{i0, i1}, []interface{}{&o0}, opts...)
 	return
 }
 
-func (c implTableClientStub) SetPermissions(ctx *context.T, i0 string, i1 access.Permissions, opts ...rpc.CallOpt) (err error) {
-	err = v23.GetClient(ctx).Call(ctx, c.name, "SetPermissions", []interface{}{i0, i1}, nil, opts...)
+func (c implTableClientStub) SetPermissions(ctx *context.T, i0 int32, i1 string, i2 access.Permissions, opts ...rpc.CallOpt) (err error) {
+	err = v23.GetClient(ctx).Call(ctx, c.name, "SetPermissions", []interface{}{i0, i1, i2}, nil, opts...)
 	return
 }
 
-func (c implTableClientStub) DeletePermissions(ctx *context.T, i0 string, opts ...rpc.CallOpt) (err error) {
-	err = v23.GetClient(ctx).Call(ctx, c.name, "DeletePermissions", []interface{}{i0}, nil, opts...)
+func (c implTableClientStub) DeletePermissions(ctx *context.T, i0 int32, i1 string, opts ...rpc.CallOpt) (err error) {
+	err = v23.GetClient(ctx).Call(ctx, c.name, "DeletePermissions", []interface{}{i0, i1}, nil, opts...)
 	return
 }
 
@@ -2258,30 +2285,32 @@ func (c *implTableScanClientCall) Finish() (err error) {
 //
 // Table represents a collection of Rows.
 // Table.Glob operates over the primary keys of Rows in the Table.
+// SchemaVersion is the version number that the client expects the database
+// to be at. To disable schema version checking, pass -1.
 type TableServerMethods interface {
 	// Create creates this Table.
 	// If perms is nil, we inherit (copy) the Database perms.
-	Create(ctx *context.T, call rpc.ServerCall, perms access.Permissions) error
+	Create(ctx *context.T, call rpc.ServerCall, schemaVersion int32, perms access.Permissions) error
 	// Delete deletes this Table.
-	Delete(*context.T, rpc.ServerCall) error
+	Delete(ctx *context.T, call rpc.ServerCall, schemaVersion int32) error
 	// Exists returns true only if this Table exists. Insufficient permissions
 	// cause Exists to return false instead of an error.
 	// TODO(ivanpi): Exists may fail with an error if higher levels of hierarchy
 	// do not exist.
-	Exists(*context.T, rpc.ServerCall) (bool, error)
+	Exists(ctx *context.T, call rpc.ServerCall, schemaVersion int32) (bool, error)
 	// Delete deletes all rows in the given half-open range [start, limit). If
 	// limit is "", all rows with keys >= start are included.
-	DeleteRowRange(ctx *context.T, call rpc.ServerCall, start []byte, limit []byte) error
+	DeleteRowRange(ctx *context.T, call rpc.ServerCall, schemaVersion int32, start []byte, limit []byte) error
 	// Scan returns all rows in the given half-open range [start, limit). If limit
 	// is "", all rows with keys >= start are included. Concurrency semantics are
 	// documented in model.go.
-	Scan(ctx *context.T, call TableScanServerCall, start []byte, limit []byte) error
+	Scan(ctx *context.T, call TableScanServerCall, schemaVersion int32, start []byte, limit []byte) error
 	// GetPermissions returns an array of (prefix, perms) pairs. The array is
 	// sorted from longest prefix to shortest, so element zero is the one that
 	// applies to the row with the given key. The last element is always the
 	// prefix "" which represents the table's permissions -- the array will always
 	// have at least one element.
-	GetPermissions(ctx *context.T, call rpc.ServerCall, key string) ([]PrefixPermissions, error)
+	GetPermissions(ctx *context.T, call rpc.ServerCall, schemaVersion int32, key string) ([]PrefixPermissions, error)
 	// SetPermissions sets the permissions for all current and future rows with
 	// the given prefix. If the prefix overlaps with an existing prefix, the
 	// longest prefix that matches a row applies. For example:
@@ -2289,11 +2318,11 @@ type TableServerMethods interface {
 	//     SetPermissions(ctx, Prefix("a/b/c"), perms2)
 	// The permissions for row "a/b/1" are perms1, and the permissions for row
 	// "a/b/c/1" are perms2.
-	SetPermissions(ctx *context.T, call rpc.ServerCall, prefix string, perms access.Permissions) error
+	SetPermissions(ctx *context.T, call rpc.ServerCall, schemaVersion int32, prefix string, perms access.Permissions) error
 	// DeletePermissions deletes the permissions for the specified prefix. Any
 	// rows covered by this prefix will use the next longest prefix's permissions
 	// (see the array returned by GetPermissions).
-	DeletePermissions(ctx *context.T, call rpc.ServerCall, prefix string) error
+	DeletePermissions(ctx *context.T, call rpc.ServerCall, schemaVersion int32, prefix string) error
 }
 
 // TableServerStubMethods is the server interface containing
@@ -2303,27 +2332,27 @@ type TableServerMethods interface {
 type TableServerStubMethods interface {
 	// Create creates this Table.
 	// If perms is nil, we inherit (copy) the Database perms.
-	Create(ctx *context.T, call rpc.ServerCall, perms access.Permissions) error
+	Create(ctx *context.T, call rpc.ServerCall, schemaVersion int32, perms access.Permissions) error
 	// Delete deletes this Table.
-	Delete(*context.T, rpc.ServerCall) error
+	Delete(ctx *context.T, call rpc.ServerCall, schemaVersion int32) error
 	// Exists returns true only if this Table exists. Insufficient permissions
 	// cause Exists to return false instead of an error.
 	// TODO(ivanpi): Exists may fail with an error if higher levels of hierarchy
 	// do not exist.
-	Exists(*context.T, rpc.ServerCall) (bool, error)
+	Exists(ctx *context.T, call rpc.ServerCall, schemaVersion int32) (bool, error)
 	// Delete deletes all rows in the given half-open range [start, limit). If
 	// limit is "", all rows with keys >= start are included.
-	DeleteRowRange(ctx *context.T, call rpc.ServerCall, start []byte, limit []byte) error
+	DeleteRowRange(ctx *context.T, call rpc.ServerCall, schemaVersion int32, start []byte, limit []byte) error
 	// Scan returns all rows in the given half-open range [start, limit). If limit
 	// is "", all rows with keys >= start are included. Concurrency semantics are
 	// documented in model.go.
-	Scan(ctx *context.T, call *TableScanServerCallStub, start []byte, limit []byte) error
+	Scan(ctx *context.T, call *TableScanServerCallStub, schemaVersion int32, start []byte, limit []byte) error
 	// GetPermissions returns an array of (prefix, perms) pairs. The array is
 	// sorted from longest prefix to shortest, so element zero is the one that
 	// applies to the row with the given key. The last element is always the
 	// prefix "" which represents the table's permissions -- the array will always
 	// have at least one element.
-	GetPermissions(ctx *context.T, call rpc.ServerCall, key string) ([]PrefixPermissions, error)
+	GetPermissions(ctx *context.T, call rpc.ServerCall, schemaVersion int32, key string) ([]PrefixPermissions, error)
 	// SetPermissions sets the permissions for all current and future rows with
 	// the given prefix. If the prefix overlaps with an existing prefix, the
 	// longest prefix that matches a row applies. For example:
@@ -2331,11 +2360,11 @@ type TableServerStubMethods interface {
 	//     SetPermissions(ctx, Prefix("a/b/c"), perms2)
 	// The permissions for row "a/b/1" are perms1, and the permissions for row
 	// "a/b/c/1" are perms2.
-	SetPermissions(ctx *context.T, call rpc.ServerCall, prefix string, perms access.Permissions) error
+	SetPermissions(ctx *context.T, call rpc.ServerCall, schemaVersion int32, prefix string, perms access.Permissions) error
 	// DeletePermissions deletes the permissions for the specified prefix. Any
 	// rows covered by this prefix will use the next longest prefix's permissions
 	// (see the array returned by GetPermissions).
-	DeletePermissions(ctx *context.T, call rpc.ServerCall, prefix string) error
+	DeletePermissions(ctx *context.T, call rpc.ServerCall, schemaVersion int32, prefix string) error
 }
 
 // TableServerStub adds universal methods to TableServerStubMethods.
@@ -2367,36 +2396,36 @@ type implTableServerStub struct {
 	gs   *rpc.GlobState
 }
 
-func (s implTableServerStub) Create(ctx *context.T, call rpc.ServerCall, i0 access.Permissions) error {
-	return s.impl.Create(ctx, call, i0)
+func (s implTableServerStub) Create(ctx *context.T, call rpc.ServerCall, i0 int32, i1 access.Permissions) error {
+	return s.impl.Create(ctx, call, i0, i1)
 }
 
-func (s implTableServerStub) Delete(ctx *context.T, call rpc.ServerCall) error {
-	return s.impl.Delete(ctx, call)
+func (s implTableServerStub) Delete(ctx *context.T, call rpc.ServerCall, i0 int32) error {
+	return s.impl.Delete(ctx, call, i0)
 }
 
-func (s implTableServerStub) Exists(ctx *context.T, call rpc.ServerCall) (bool, error) {
-	return s.impl.Exists(ctx, call)
+func (s implTableServerStub) Exists(ctx *context.T, call rpc.ServerCall, i0 int32) (bool, error) {
+	return s.impl.Exists(ctx, call, i0)
 }
 
-func (s implTableServerStub) DeleteRowRange(ctx *context.T, call rpc.ServerCall, i0 []byte, i1 []byte) error {
-	return s.impl.DeleteRowRange(ctx, call, i0, i1)
+func (s implTableServerStub) DeleteRowRange(ctx *context.T, call rpc.ServerCall, i0 int32, i1 []byte, i2 []byte) error {
+	return s.impl.DeleteRowRange(ctx, call, i0, i1, i2)
 }
 
-func (s implTableServerStub) Scan(ctx *context.T, call *TableScanServerCallStub, i0 []byte, i1 []byte) error {
-	return s.impl.Scan(ctx, call, i0, i1)
+func (s implTableServerStub) Scan(ctx *context.T, call *TableScanServerCallStub, i0 int32, i1 []byte, i2 []byte) error {
+	return s.impl.Scan(ctx, call, i0, i1, i2)
 }
 
-func (s implTableServerStub) GetPermissions(ctx *context.T, call rpc.ServerCall, i0 string) ([]PrefixPermissions, error) {
-	return s.impl.GetPermissions(ctx, call, i0)
+func (s implTableServerStub) GetPermissions(ctx *context.T, call rpc.ServerCall, i0 int32, i1 string) ([]PrefixPermissions, error) {
+	return s.impl.GetPermissions(ctx, call, i0, i1)
 }
 
-func (s implTableServerStub) SetPermissions(ctx *context.T, call rpc.ServerCall, i0 string, i1 access.Permissions) error {
-	return s.impl.SetPermissions(ctx, call, i0, i1)
+func (s implTableServerStub) SetPermissions(ctx *context.T, call rpc.ServerCall, i0 int32, i1 string, i2 access.Permissions) error {
+	return s.impl.SetPermissions(ctx, call, i0, i1, i2)
 }
 
-func (s implTableServerStub) DeletePermissions(ctx *context.T, call rpc.ServerCall, i0 string) error {
-	return s.impl.DeletePermissions(ctx, call, i0)
+func (s implTableServerStub) DeletePermissions(ctx *context.T, call rpc.ServerCall, i0 int32, i1 string) error {
+	return s.impl.DeletePermissions(ctx, call, i0, i1)
 }
 
 func (s implTableServerStub) Globber() *rpc.GlobState {
@@ -2414,24 +2443,31 @@ var TableDesc rpc.InterfaceDesc = descTable
 var descTable = rpc.InterfaceDesc{
 	Name:    "Table",
 	PkgPath: "v.io/syncbase/v23/services/syncbase/nosql",
-	Doc:     "// Table represents a collection of Rows.\n// Table.Glob operates over the primary keys of Rows in the Table.",
+	Doc:     "// Table represents a collection of Rows.\n// Table.Glob operates over the primary keys of Rows in the Table.\n// SchemaVersion is the version number that the client expects the database\n// to be at. To disable schema version checking, pass -1.",
 	Methods: []rpc.MethodDesc{
 		{
 			Name: "Create",
 			Doc:  "// Create creates this Table.\n// If perms is nil, we inherit (copy) the Database perms.",
 			InArgs: []rpc.ArgDesc{
-				{"perms", ``}, // access.Permissions
+				{"schemaVersion", ``}, // int32
+				{"perms", ``},         // access.Permissions
 			},
 			Tags: []*vdl.Value{vdl.ValueOf(access.Tag("Write"))},
 		},
 		{
 			Name: "Delete",
 			Doc:  "// Delete deletes this Table.",
+			InArgs: []rpc.ArgDesc{
+				{"schemaVersion", ``}, // int32
+			},
 			Tags: []*vdl.Value{vdl.ValueOf(access.Tag("Write"))},
 		},
 		{
 			Name: "Exists",
 			Doc:  "// Exists returns true only if this Table exists. Insufficient permissions\n// cause Exists to return false instead of an error.\n// TODO(ivanpi): Exists may fail with an error if higher levels of hierarchy\n// do not exist.",
+			InArgs: []rpc.ArgDesc{
+				{"schemaVersion", ``}, // int32
+			},
 			OutArgs: []rpc.ArgDesc{
 				{"", ``}, // bool
 			},
@@ -2441,8 +2477,9 @@ var descTable = rpc.InterfaceDesc{
 			Name: "DeleteRowRange",
 			Doc:  "// Delete deletes all rows in the given half-open range [start, limit). If\n// limit is \"\", all rows with keys >= start are included.",
 			InArgs: []rpc.ArgDesc{
-				{"start", ``}, // []byte
-				{"limit", ``}, // []byte
+				{"schemaVersion", ``}, // int32
+				{"start", ``},         // []byte
+				{"limit", ``},         // []byte
 			},
 			Tags: []*vdl.Value{vdl.ValueOf(access.Tag("Write"))},
 		},
@@ -2450,8 +2487,9 @@ var descTable = rpc.InterfaceDesc{
 			Name: "Scan",
 			Doc:  "// Scan returns all rows in the given half-open range [start, limit). If limit\n// is \"\", all rows with keys >= start are included. Concurrency semantics are\n// documented in model.go.",
 			InArgs: []rpc.ArgDesc{
-				{"start", ``}, // []byte
-				{"limit", ``}, // []byte
+				{"schemaVersion", ``}, // int32
+				{"start", ``},         // []byte
+				{"limit", ``},         // []byte
 			},
 			Tags: []*vdl.Value{vdl.ValueOf(access.Tag("Read"))},
 		},
@@ -2459,7 +2497,8 @@ var descTable = rpc.InterfaceDesc{
 			Name: "GetPermissions",
 			Doc:  "// GetPermissions returns an array of (prefix, perms) pairs. The array is\n// sorted from longest prefix to shortest, so element zero is the one that\n// applies to the row with the given key. The last element is always the\n// prefix \"\" which represents the table's permissions -- the array will always\n// have at least one element.",
 			InArgs: []rpc.ArgDesc{
-				{"key", ``}, // string
+				{"schemaVersion", ``}, // int32
+				{"key", ``},           // string
 			},
 			OutArgs: []rpc.ArgDesc{
 				{"", ``}, // []PrefixPermissions
@@ -2470,8 +2509,9 @@ var descTable = rpc.InterfaceDesc{
 			Name: "SetPermissions",
 			Doc:  "// SetPermissions sets the permissions for all current and future rows with\n// the given prefix. If the prefix overlaps with an existing prefix, the\n// longest prefix that matches a row applies. For example:\n//     SetPermissions(ctx, Prefix(\"a/b\"), perms1)\n//     SetPermissions(ctx, Prefix(\"a/b/c\"), perms2)\n// The permissions for row \"a/b/1\" are perms1, and the permissions for row\n// \"a/b/c/1\" are perms2.",
 			InArgs: []rpc.ArgDesc{
-				{"prefix", ``}, // string
-				{"perms", ``},  // access.Permissions
+				{"schemaVersion", ``}, // int32
+				{"prefix", ``},        // string
+				{"perms", ``},         // access.Permissions
 			},
 			Tags: []*vdl.Value{vdl.ValueOf(access.Tag("Admin"))},
 		},
@@ -2479,7 +2519,8 @@ var descTable = rpc.InterfaceDesc{
 			Name: "DeletePermissions",
 			Doc:  "// DeletePermissions deletes the permissions for the specified prefix. Any\n// rows covered by this prefix will use the next longest prefix's permissions\n// (see the array returned by GetPermissions).",
 			InArgs: []rpc.ArgDesc{
-				{"prefix", ``}, // string
+				{"schemaVersion", ``}, // int32
+				{"prefix", ``},        // string
 			},
 			Tags: []*vdl.Value{vdl.ValueOf(access.Tag("Admin"))},
 		},
@@ -2535,6 +2576,8 @@ func (s implTableScanServerCallSend) Send(item KeyValue) error {
 // Row represents a single row in a Table.
 // All access checks are performed against the most specific matching prefix
 // permissions in the Table.
+// SchemaVersion is the version number that the client expects the database
+// to be at. To disable schema version checking, pass -1.
 // NOTE(sadovsky): Currently we send []byte values over the wire for Get, Put,
 // and Scan. If there's a way to avoid encoding/decoding on the server side, we
 // can use vdl.Value everywhere without sacrificing performance.
@@ -2543,13 +2586,13 @@ type RowClientMethods interface {
 	// cause Exists to return false instead of an error.
 	// TODO(ivanpi): Exists may fail with an error if higher levels of hierarchy
 	// do not exist.
-	Exists(*context.T, ...rpc.CallOpt) (bool, error)
+	Exists(ctx *context.T, schemaVersion int32, opts ...rpc.CallOpt) (bool, error)
 	// Get returns the value for this Row.
-	Get(*context.T, ...rpc.CallOpt) ([]byte, error)
+	Get(ctx *context.T, schemaVersion int32, opts ...rpc.CallOpt) ([]byte, error)
 	// Put writes the given value for this Row.
-	Put(ctx *context.T, value []byte, opts ...rpc.CallOpt) error
+	Put(ctx *context.T, schemaVersion int32, value []byte, opts ...rpc.CallOpt) error
 	// Delete deletes this Row.
-	Delete(*context.T, ...rpc.CallOpt) error
+	Delete(ctx *context.T, schemaVersion int32, opts ...rpc.CallOpt) error
 }
 
 // RowClientStub adds universal methods to RowClientMethods.
@@ -2567,23 +2610,23 @@ type implRowClientStub struct {
 	name string
 }
 
-func (c implRowClientStub) Exists(ctx *context.T, opts ...rpc.CallOpt) (o0 bool, err error) {
-	err = v23.GetClient(ctx).Call(ctx, c.name, "Exists", nil, []interface{}{&o0}, opts...)
+func (c implRowClientStub) Exists(ctx *context.T, i0 int32, opts ...rpc.CallOpt) (o0 bool, err error) {
+	err = v23.GetClient(ctx).Call(ctx, c.name, "Exists", []interface{}{i0}, []interface{}{&o0}, opts...)
 	return
 }
 
-func (c implRowClientStub) Get(ctx *context.T, opts ...rpc.CallOpt) (o0 []byte, err error) {
-	err = v23.GetClient(ctx).Call(ctx, c.name, "Get", nil, []interface{}{&o0}, opts...)
+func (c implRowClientStub) Get(ctx *context.T, i0 int32, opts ...rpc.CallOpt) (o0 []byte, err error) {
+	err = v23.GetClient(ctx).Call(ctx, c.name, "Get", []interface{}{i0}, []interface{}{&o0}, opts...)
 	return
 }
 
-func (c implRowClientStub) Put(ctx *context.T, i0 []byte, opts ...rpc.CallOpt) (err error) {
-	err = v23.GetClient(ctx).Call(ctx, c.name, "Put", []interface{}{i0}, nil, opts...)
+func (c implRowClientStub) Put(ctx *context.T, i0 int32, i1 []byte, opts ...rpc.CallOpt) (err error) {
+	err = v23.GetClient(ctx).Call(ctx, c.name, "Put", []interface{}{i0, i1}, nil, opts...)
 	return
 }
 
-func (c implRowClientStub) Delete(ctx *context.T, opts ...rpc.CallOpt) (err error) {
-	err = v23.GetClient(ctx).Call(ctx, c.name, "Delete", nil, nil, opts...)
+func (c implRowClientStub) Delete(ctx *context.T, i0 int32, opts ...rpc.CallOpt) (err error) {
+	err = v23.GetClient(ctx).Call(ctx, c.name, "Delete", []interface{}{i0}, nil, opts...)
 	return
 }
 
@@ -2593,6 +2636,8 @@ func (c implRowClientStub) Delete(ctx *context.T, opts ...rpc.CallOpt) (err erro
 // Row represents a single row in a Table.
 // All access checks are performed against the most specific matching prefix
 // permissions in the Table.
+// SchemaVersion is the version number that the client expects the database
+// to be at. To disable schema version checking, pass -1.
 // NOTE(sadovsky): Currently we send []byte values over the wire for Get, Put,
 // and Scan. If there's a way to avoid encoding/decoding on the server side, we
 // can use vdl.Value everywhere without sacrificing performance.
@@ -2601,13 +2646,13 @@ type RowServerMethods interface {
 	// cause Exists to return false instead of an error.
 	// TODO(ivanpi): Exists may fail with an error if higher levels of hierarchy
 	// do not exist.
-	Exists(*context.T, rpc.ServerCall) (bool, error)
+	Exists(ctx *context.T, call rpc.ServerCall, schemaVersion int32) (bool, error)
 	// Get returns the value for this Row.
-	Get(*context.T, rpc.ServerCall) ([]byte, error)
+	Get(ctx *context.T, call rpc.ServerCall, schemaVersion int32) ([]byte, error)
 	// Put writes the given value for this Row.
-	Put(ctx *context.T, call rpc.ServerCall, value []byte) error
+	Put(ctx *context.T, call rpc.ServerCall, schemaVersion int32, value []byte) error
 	// Delete deletes this Row.
-	Delete(*context.T, rpc.ServerCall) error
+	Delete(ctx *context.T, call rpc.ServerCall, schemaVersion int32) error
 }
 
 // RowServerStubMethods is the server interface containing
@@ -2645,20 +2690,20 @@ type implRowServerStub struct {
 	gs   *rpc.GlobState
 }
 
-func (s implRowServerStub) Exists(ctx *context.T, call rpc.ServerCall) (bool, error) {
-	return s.impl.Exists(ctx, call)
+func (s implRowServerStub) Exists(ctx *context.T, call rpc.ServerCall, i0 int32) (bool, error) {
+	return s.impl.Exists(ctx, call, i0)
 }
 
-func (s implRowServerStub) Get(ctx *context.T, call rpc.ServerCall) ([]byte, error) {
-	return s.impl.Get(ctx, call)
+func (s implRowServerStub) Get(ctx *context.T, call rpc.ServerCall, i0 int32) ([]byte, error) {
+	return s.impl.Get(ctx, call, i0)
 }
 
-func (s implRowServerStub) Put(ctx *context.T, call rpc.ServerCall, i0 []byte) error {
-	return s.impl.Put(ctx, call, i0)
+func (s implRowServerStub) Put(ctx *context.T, call rpc.ServerCall, i0 int32, i1 []byte) error {
+	return s.impl.Put(ctx, call, i0, i1)
 }
 
-func (s implRowServerStub) Delete(ctx *context.T, call rpc.ServerCall) error {
-	return s.impl.Delete(ctx, call)
+func (s implRowServerStub) Delete(ctx *context.T, call rpc.ServerCall, i0 int32) error {
+	return s.impl.Delete(ctx, call, i0)
 }
 
 func (s implRowServerStub) Globber() *rpc.GlobState {
@@ -2676,11 +2721,14 @@ var RowDesc rpc.InterfaceDesc = descRow
 var descRow = rpc.InterfaceDesc{
 	Name:    "Row",
 	PkgPath: "v.io/syncbase/v23/services/syncbase/nosql",
-	Doc:     "// Row represents a single row in a Table.\n// All access checks are performed against the most specific matching prefix\n// permissions in the Table.\n// NOTE(sadovsky): Currently we send []byte values over the wire for Get, Put,\n// and Scan. If there's a way to avoid encoding/decoding on the server side, we\n// can use vdl.Value everywhere without sacrificing performance.",
+	Doc:     "// Row represents a single row in a Table.\n// All access checks are performed against the most specific matching prefix\n// permissions in the Table.\n// SchemaVersion is the version number that the client expects the database\n// to be at. To disable schema version checking, pass -1.\n// NOTE(sadovsky): Currently we send []byte values over the wire for Get, Put,\n// and Scan. If there's a way to avoid encoding/decoding on the server side, we\n// can use vdl.Value everywhere without sacrificing performance.",
 	Methods: []rpc.MethodDesc{
 		{
 			Name: "Exists",
 			Doc:  "// Exists returns true only if this Row exists. Insufficient permissions\n// cause Exists to return false instead of an error.\n// TODO(ivanpi): Exists may fail with an error if higher levels of hierarchy\n// do not exist.",
+			InArgs: []rpc.ArgDesc{
+				{"schemaVersion", ``}, // int32
+			},
 			OutArgs: []rpc.ArgDesc{
 				{"", ``}, // bool
 			},
@@ -2689,6 +2737,9 @@ var descRow = rpc.InterfaceDesc{
 		{
 			Name: "Get",
 			Doc:  "// Get returns the value for this Row.",
+			InArgs: []rpc.ArgDesc{
+				{"schemaVersion", ``}, // int32
+			},
 			OutArgs: []rpc.ArgDesc{
 				{"", ``}, // []byte
 			},
@@ -2698,13 +2749,17 @@ var descRow = rpc.InterfaceDesc{
 			Name: "Put",
 			Doc:  "// Put writes the given value for this Row.",
 			InArgs: []rpc.ArgDesc{
-				{"value", ``}, // []byte
+				{"schemaVersion", ``}, // int32
+				{"value", ``},         // []byte
 			},
 			Tags: []*vdl.Value{vdl.ValueOf(access.Tag("Write"))},
 		},
 		{
 			Name: "Delete",
 			Doc:  "// Delete deletes this Row.",
+			InArgs: []rpc.ArgDesc{
+				{"schemaVersion", ``}, // int32
+			},
 			Tags: []*vdl.Value{vdl.ValueOf(access.Tag("Write"))},
 		},
 	},

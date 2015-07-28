@@ -11,20 +11,22 @@ import (
 	"v.io/v23/vom"
 )
 
-func newRow(parentFullName, key string) Row {
+func newRow(parentFullName, key string, schemaVersion int32) Row {
 	// TODO(sadovsky): Escape delimiters in key?
 	fullName := naming.Join(parentFullName, key)
 	return &row{
-		c:        wire.RowClient(fullName),
-		fullName: fullName,
-		key:      key,
+		c:               wire.RowClient(fullName),
+		fullName:        fullName,
+		key:             key,
+		dbSchemaVersion: schemaVersion,
 	}
 }
 
 type row struct {
-	c        wire.RowClientMethods
-	fullName string
-	key      string
+	c               wire.RowClientMethods
+	fullName        string
+	key             string
+	dbSchemaVersion int32
 }
 
 var _ Row = (*row)(nil)
@@ -43,12 +45,12 @@ func (r *row) FullName() string {
 
 // Exists implements Row.Exists.
 func (r *row) Exists(ctx *context.T) (bool, error) {
-	return r.c.Exists(ctx)
+	return r.c.Exists(ctx, r.dbSchemaVersion)
 }
 
 // Get implements Row.Get.
 func (r *row) Get(ctx *context.T, value interface{}) error {
-	bytes, err := r.c.Get(ctx)
+	bytes, err := r.c.Get(ctx, r.dbSchemaVersion)
 	if err != nil {
 		return err
 	}
@@ -61,10 +63,10 @@ func (r *row) Put(ctx *context.T, value interface{}) error {
 	if err != nil {
 		return err
 	}
-	return r.c.Put(ctx, bytes)
+	return r.c.Put(ctx, r.dbSchemaVersion, bytes)
 }
 
 // Delete implements Row.Delete.
 func (r *row) Delete(ctx *context.T) error {
-	return r.c.Delete(ctx)
+	return r.c.Delete(ctx, r.dbSchemaVersion)
 }
