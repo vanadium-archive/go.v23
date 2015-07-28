@@ -41,6 +41,10 @@ func TestV23SyncbasedExchangeDeltas(t *testing.T) {
 	v23tests.RunTest(t, V23TestSyncbasedExchangeDeltas)
 }
 
+func TestV23SyncbasedExchangeDeltasWithConflicts(t *testing.T) {
+	v23tests.RunTest(t, V23TestSyncbasedExchangeDeltasWithConflicts)
+}
+
 func TestV23NestedSyncGroups(t *testing.T) {
 	v23tests.RunTest(t, V23TestNestedSyncGroups)
 }

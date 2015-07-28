@@ -6,6 +6,7 @@ package nosql_test
 
 import (
 	"fmt"
+	"math/rand"
 	"strconv"
 	"strings"
 	"time"
@@ -158,6 +159,72 @@ func V23TestSyncbasedExchangeDeltas(t *v23tests.T) {
 	tu.RunClient(t, client1Creds, runPopulateData, "sync1", "foo", "10")
 
 	tu.RunClient(t, client0Creds, runVerifyLocalAndRemoteData, "sync0")
+}
+
+// V23 TestSyncbasedExchangeDeltasWithConflicts tests the exchange of deltas
+// between two Syncbase instances and their clients in the presence of
+// conflicting updates. The 1st client creates a SyncGroup and puts some
+// database entries in it. The 2nd client joins that SyncGroup and reads the
+// database entries. Both clients then update a subset of existing keys
+// concurrently, and sync with each other. During sync, the following
+// possibilities arise: (1) Both clients make their local updates first, sync
+// with each other to detect conflicts. Resolution will cause one of the clients
+// to see a new value based on the timestamp. (2) One client's update is synced
+// before the other client has a chance to commit its update. The other client's
+// update will then not be a conflict but a valid update building on the first
+// one's change.
+//
+// Note that the verification done from the client side can have false positives
+// re. the test's success. Since we cannot accurately predict which client's
+// updates win, the test passes if we find either outcome. However, this could
+// also imply that the sync failed, and each client is merely reading its own
+// local value. The verification step mainly verifies that syncbased is still
+// responsive and that the data is not corrupt.
+//
+// TODO(hpucha): We could diff the states of the two clients and ensure they are
+// identical. Optionally we could expose inner state of syncbased via some
+// debug methods.
+func V23TestSyncbasedExchangeDeltasWithConflicts(t *v23tests.T) {
+	// Run it multiple times to exercise different interactions between sync
+	// and local updates that change every run due to timing.
+	for i := 0; i < 10; i++ {
+		testSyncbasedExchangeDeltasWithConflicts(t)
+	}
+}
+
+func testSyncbasedExchangeDeltasWithConflicts(t *v23tests.T) {
+	v23tests.RunRootMT(t, "--v23.tcp.address=127.0.0.1:0")
+	server0Creds, _ := t.Shell().NewChildCredentials("s0")
+	client0Creds, _ := t.Shell().NewChildCredentials("c0")
+	cleanSync0 := tu.StartSyncbased(t, server0Creds, "sync0", "",
+		`{"Read": {"In":["root/c0"]}, "Write": {"In":["root/c0"]}}`)
+	defer cleanSync0()
+
+	server1Creds, _ := t.Shell().NewChildCredentials("s1")
+	client1Creds, _ := t.Shell().NewChildCredentials("c1")
+	cleanSync1 := tu.StartSyncbased(t, server1Creds, "sync1", "",
+		`{"Read": {"In":["root/c1"]}, "Write": {"In":["root/c1"]}}`)
+	defer cleanSync1()
+
+	sgName := naming.Join("sync0", constants.SyncbaseSuffix, "SG1")
+
+	tu.RunClient(t, client0Creds, runSetupAppA, "sync0")
+	tu.RunClient(t, client0Creds, runCreateSyncGroup, "sync0", sgName, "tb:foo", "root/s0", "root/s1")
+	tu.RunClient(t, client0Creds, runPopulateData, "sync0", "foo", "0")
+
+	tu.RunClient(t, client1Creds, runSetupAppA, "sync1")
+	tu.RunClient(t, client1Creds, runJoinSyncGroup, "sync1", sgName)
+	tu.RunClient(t, client1Creds, runVerifySyncGroupData, "sync1", "foo", "0", "10")
+
+	go tu.RunClient(t, client0Creds, runUpdateData, "sync0", "5")
+	d := time.Duration(rand.Int63n(50)) * time.Millisecond
+	time.Sleep(d)
+	tu.RunClient(t, client1Creds, runUpdateData, "sync1", "5")
+
+	time.Sleep(10 * time.Second)
+
+	tu.RunClient(t, client0Creds, runVerifyConflictResolution, "sync0")
+	tu.RunClient(t, client1Creds, runVerifyConflictResolution, "sync1")
 }
 
 // V23TestNestedSyncGroups tests the exchange of deltas between two Syncbase
@@ -405,7 +472,7 @@ var runUpdateData = modules.Register(func(env *modules.Env, args ...string) erro
 	for i := start; i < start+5; i++ {
 		key := fmt.Sprintf("foo%d", i)
 		r := tb.Row(key)
-		if err := r.Put(ctx, "testkey1"+key); err != nil {
+		if err := r.Put(ctx, "testkey"+args[0]+key); err != nil {
 			return fmt.Errorf("r.Put() failed: %v\n", err)
 		}
 	}
@@ -544,6 +611,47 @@ var runVerifyDeletedData = modules.Register(func(env *modules.Env, args ...strin
 	return nil
 }, "runVerifyDeletedData")
 
+var runVerifyConflictResolution = modules.Register(func(env *modules.Env, args ...string) error {
+	ctx, shutdown := v23.Init()
+	defer shutdown()
+
+	a := syncbase.NewService(args[0]).App("a")
+	d := a.NoSQLDatabase("d", nil)
+	tb := d.Table("tb")
+
+	wantData := []struct {
+		start  uint64
+		count  uint64
+		valPfx []string
+	}{
+		{0, 5, []string{"testkey"}},
+		{5, 5, []string{"testkeysync0", "testkeysync1"}},
+	}
+
+	// Verify that all keys and values made it correctly.
+	for _, d := range wantData {
+		for i := d.start; i < d.start+d.count; i++ {
+			key := fmt.Sprintf("foo%d", i)
+			r := tb.Row(key)
+			var got string
+			if err := r.Get(ctx, &got); err != nil {
+				return fmt.Errorf("r.Get() failed: %v\n", err)
+			}
+			match := 0
+			for _, p := range d.valPfx {
+				want := p + key
+				if got == want {
+					match++
+				}
+			}
+			if match != 1 {
+				return fmt.Errorf("unexpected value: got %q, match %v, want %v\n", got, match, d.valPfx)
+			}
+		}
+	}
+	return nil
+}, "runVerifyConflictResolution")
+
 var runVerifyNonSyncGroupData = modules.Register(func(env *modules.Env, args ...string) error {
 	ctx, shutdown := v23.Init()
 	defer shutdown()
@@ -593,7 +701,7 @@ var runVerifyLocalAndRemoteData = modules.Register(func(env *modules.Env, args .
 		valPfx string
 	}{
 		{0, 5, "testkey"},
-		{5, 5, "testkey1"},
+		{5, 5, "testkeysync1"},
 		{10, 10, "testkey"},
 	}
 
