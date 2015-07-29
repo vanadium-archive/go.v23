@@ -92,7 +92,7 @@ type Conn interface {
 type MsgWriter interface {
 	// WriteMsg is like Write, but allows writing more than one buffer at a time.
 	// The data in each buffer is written sequentially onto the flow.  Returns the
-	// number of bytes written.  WriteV must return a non-nil error if it writes
+	// number of bytes written.  WriteMsg must return a non-nil error if it writes
 	// less than the total number of bytes from all buffers.
 	WriteMsg(data ...[]byte) (int, error)
 }
