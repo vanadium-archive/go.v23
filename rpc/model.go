@@ -498,6 +498,7 @@ type GlobState struct {
 // the entire namespace below the receiver object. Every object that implements
 // it must be able to handle glob requests that could match any object below
 // itself. E.g. "a/b".Glob__("*/*"), "a/b".Glob__("c/..."), etc.
+// This interface is DEPRECATED and will be removed soon.
 type AllGlobber interface {
 	// Glob__ returns a MountEntry for the objects that match the given
 	// pattern in the namespace below the receiver object. All the names
@@ -507,6 +508,7 @@ type AllGlobber interface {
 
 // ChildrenGlobber is a simple interface to publish the relationship between
 // nodes in the namespace graph.
+// This interface is DEPRECATED and will be removed soon.
 type ChildrenGlobber interface {
 	// GlobChildren__ returns the names of the receiver's immediate children
 	// on a channel.  It should return an error if the receiver doesn't
