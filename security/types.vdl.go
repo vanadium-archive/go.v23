@@ -262,19 +262,18 @@ const SHA384Hash = Hash("SHA384") // SHA384 cryptographic hash function defined 
 
 const SHA512Hash = Hash("SHA512") // SHA512 cryptographic hash function defined in FIPS 180-2.
 
-// TODO(ataly, ashankar): Switch the following purposes to version 1
-// once all binaries have transitioned to it.
-const SignatureForMessageSigning = "S" // Signature.Purpose used by a Principal to sign arbitrary messages.
+const SignatureForMessageSigning = "S1" // Signature.Purpose used by a Principal to sign arbitrary messages.
 
-const SignatureForBlessingCertificates = "B" // Signature.Purpose used by a Principal when signing Certificates for creating blessings.
+const SignatureForBlessingCertificates = "B1" // Signature.Purpose used by a Principal when signing Certificates for creating blessings.
 
-const SignatureForDischarge = "D" // Signature.Purpose used by a Principal when signing discharges for public-key based third-party caveats.
+const SignatureForDischarge = "D1" // Signature.Purpose used by a Principal when signing discharges for public-key based third-party caveats.
 
-const SignatureForMessageSigningV1 = "S1" // Signature.Purpose used by a Principal to sign arbitrary messages.
+// TODO(ashankar,atlay): Remove when resolving https://github.com/vanadium/issues/issues/619
+const SignatureForMessageSigningV0 = "S" // Signature.Purpose used by a Principal to sign arbitrary messages.
 
-const SignatureForBlessingCertificatesV1 = "B1" // Signature.Purpose used by a Principal when signing Certificates for creating blessings.
+const SignatureForBlessingCertificatesV0 = "B" // Signature.Purpose used by a Principal when signing Certificates for creating blessings.
 
-const SignatureForDischargeV1 = "D1" // Signature.Purpose used by a Principal when signing discharges for public-key based third-party caveats.
+const SignatureForDischargeV0 = "D" // Signature.Purpose used by a Principal when signing discharges for public-key based third-party caveats.
 
 var (
 	ErrUnrecognizedRoot             = verror.Register("v.io/v23/security.UnrecognizedRoot", verror.NoRetry, "{1:}{2:} unrecognized public key {3} in root certificate{:4}")

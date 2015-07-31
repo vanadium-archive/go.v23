@@ -208,11 +208,13 @@ func digestsForCertificateChain(chain []Certificate) (digest, contentDigest []by
 // resulting chain (and the final digest).
 func chainCertificate(signer Signer, chain []Certificate, cert Certificate) ([]Certificate, []byte, error) {
 	parentDigest, _ := digestsForCertificateChain(chain)
-	digest, cdigest := cert.chainedDigests(signer.PublicKey().hash(), parentDigest)
+	_, cdigest := cert.chainedDigests(signer.PublicKey().hash(), parentDigest)
 	var err error
 	if cert.Signature, err = signer.Sign(blessPurpose, cdigest); err != nil {
 		return nil, nil, err
 	}
+	// digest has to be recomputed now that the signature has been set in the certificate.
+	digest, _ := cert.chainedDigests(signer.PublicKey().hash(), parentDigest)
 	cpy := make([]Certificate, len(chain)+1)
 	copy(cpy, chain)
 	cpy[len(cpy)-1] = cert

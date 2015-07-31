@@ -45,9 +45,6 @@ var (
 	// For this to work, ALL private key operations by the Principal must
 	// use a distinct "purpose" and no two "purpose"s should share a prefix
 	// or suffix.
-
-	// TODO(ataly, ashankar): Switch the following purposes to version 1
-	// once all binaries have transitioned to it.
 	blessPurpose     = []byte(SignatureForBlessingCertificates)
 	signPurpose      = []byte(SignatureForMessageSigning)
 	dischargePurpose = []byte(SignatureForDischarge)
@@ -63,12 +60,6 @@ var (
 	errCantSignDischarge  = verror.Register(pkgPath+".errCantSignDischarge", verror.NoRetry, "{1:}{2:}failed to sign discharge: {3}{:_}")
 	errCantUnmarshalKey   = verror.Register(pkgPath+".errCantUnmarshalKey", verror.NoRetry, "{1:}{2:}failed to unmarshal public key in root certificate with Extension: {3}: {4}{:_}")
 	errCantAddRoot        = verror.Register(pkgPath+".errCantAddRoot", verror.NoRetry, "{1:}{2:}failed to Add root: {3} for pattern: {4} to this principal's roots: {5}{:_}")
-
-	// If true, Principal.BlessSelf will create certificates with the new
-	// signature scheme.
-	//
-	// TODO(ashankar): Remove to fully resolve https://github.com/vanadium/issues/issues/543
-	useNewCertificateSigningScheme = false
 )
 
 type errStore struct {
@@ -95,12 +86,13 @@ func (errRoots) Recognized(PublicKey, string) error    { return verror.New(errNi
 func (errRoots) Dump() map[BlessingPattern][]PublicKey { return nil }
 func (errRoots) DebugString() string                   { return verror.New(errNilRoots, nil).Error() }
 
+// TODO(ashankar,ataly): Remove when resolving https://github.com/vanadium/issues/issues/619
 func isValidBlessingPurpose(purpose []byte) bool {
-	return bytes.Equal(purpose, []byte(SignatureForBlessingCertificates)) || bytes.Equal(purpose, []byte(SignatureForBlessingCertificatesV1))
+	return bytes.Equal(purpose, []byte(SignatureForBlessingCertificates)) || bytes.Equal(purpose, []byte(SignatureForBlessingCertificatesV0))
 }
 
 func isValidDischargePurpose(purpose []byte) bool {
-	return bytes.Equal(purpose, []byte(SignatureForDischarge)) || bytes.Equal(purpose, []byte(SignatureForDischargeV1))
+	return bytes.Equal(purpose, []byte(SignatureForDischarge)) || bytes.Equal(purpose, []byte(SignatureForDischargeV0))
 }
 
 type principal struct {
@@ -154,30 +146,15 @@ func (p *principal) BlessSelf(name string, caveats ...Caveat) (Blessings, error)
 	if err != nil {
 		return Blessings{}, err
 	}
-	if useNewCertificateSigningScheme {
-		chain, digest, err := chainCertificate(p.signer, nil, *cert)
-		if err != nil {
-			return Blessings{}, err
-		}
-		ret := Blessings{
-			chains:    [][]Certificate{chain},
-			publicKey: p.PublicKey(),
-			digests:   [][]byte{digest},
-			newscheme: []bool{true},
-		}
-		ret.init()
-		return ret, nil
-	}
-	if err := cert.deprecatedSign(p.signer, Signature{}); err != nil {
+	chain, digest, err := chainCertificate(p.signer, nil, *cert)
+	if err != nil {
 		return Blessings{}, err
 	}
-	chain := []Certificate{*cert}
-	digest, _ := digestsForCertificateChain(chain)
 	ret := Blessings{
 		chains:    [][]Certificate{chain},
 		publicKey: p.PublicKey(),
 		digests:   [][]byte{digest},
-		newscheme: []bool{false},
+		newscheme: []bool{true},
 	}
 	ret.init()
 	return ret, nil

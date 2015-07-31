@@ -222,21 +222,11 @@ func deprecatedValidateCertificateChain(chain []Certificate) (PublicKey, error) 
 
 // TODO(ashankar): Remove to fully resolve https://github.com/vanadium/issues/issues/543
 func transitionalValidateCertificateChain(chain []Certificate) (PublicKey, []byte, error) {
-	if useNewCertificateSigningScheme {
-		// Try the new scheme first, then the old
-		if key, digest, err := validateCertificateChain(chain); err == nil {
-			return key, digest, nil
-		} else if oldkey, olderr := deprecatedValidateCertificateChain(chain); olderr == nil {
-			return oldkey, nil, nil
-		} else {
-			return nil, nil, err
-		}
-	}
-	// Try the old scheme first and then the new.
-	if key, err := deprecatedValidateCertificateChain(chain); err == nil {
-		return key, nil, nil
-	} else if newkey, digest, newerr := validateCertificateChain(chain); newerr == nil {
-		return newkey, digest, nil
+	// Try the new scheme first, then the old
+	if key, digest, err := validateCertificateChain(chain); err == nil {
+		return key, digest, nil
+	} else if oldkey, olderr := deprecatedValidateCertificateChain(chain); olderr == nil {
+		return oldkey, nil, nil
 	} else {
 		return nil, nil, err
 	}
@@ -392,7 +382,6 @@ func (b blessingsSorter) Swap(i, j int) {
 	b.newscheme[i], b.newscheme[j] = b.newscheme[j], b.newscheme[i]
 	b.digests[i], b.digests[j] = b.digests[j], b.digests[i]
 }
-
 func (b blessingsSorter) Less(i, j int) bool {
 	ci := b.chains[i]
 	cj := b.chains[j]
