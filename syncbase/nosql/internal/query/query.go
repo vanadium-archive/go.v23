@@ -48,7 +48,7 @@ func ComposeProjection(db query_db.Database, k string, v *vdl.Value, s *query_pa
 		switch selector.Type {
 		case query_parser.TypSelField:
 			// If field not found, nil is returned (as per specification).
-			f, _, _ := ResolveField(db, k, v, selector.Field)
+			f := ResolveField(db, k, v, selector.Field)
 			projection = append(projection, f)
 		case query_parser.TypSelFunc:
 			if selector.Function.Computed {

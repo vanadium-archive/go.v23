@@ -303,14 +303,24 @@ func compareUints(lhsValue, rhsValue *query_parser.Operand, oper *query_parser.B
 	}
 }
 
+// Return AltStr if available, else Str.
+// Must be called with an operand of type TypStr.
+func favorAltStr(strOp *query_parser.Operand) string {
+	if !strOp.HasAltStr {
+		return strOp.Str
+	}
+	return strOp.AltStr
+}
+
 func compareStrings(lhsValue, rhsValue *query_parser.Operand, oper *query_parser.BinaryOperator) bool {
 	switch oper.Type {
 	case query_parser.Equal:
 		r := lhsValue.Str == rhsValue.Str
-		// Handle special case for type equal clauses.
-		// Only the lhs can have the AltStr field set.
-		if !r && lhsValue.HasAltStr {
-			r = lhsValue.AltStr == rhsValue.Str
+		// If either side has an AltStr, compare AltStr.
+		// If both have AltStr, compare altStr to AltStr.
+		if !r && lhsValue.HasAltStr || rhsValue.HasAltStr {
+			// Handle special case for Type functions (which have AltStr)
+			r = favorAltStr(lhsValue) == favorAltStr(rhsValue)
 		}
 		return r
 	case query_parser.NotEqual:
@@ -397,7 +407,7 @@ func resolveOperand(db query_db.Database, k string, v *vdl.Value, o *query_parse
 	if o.Type != query_parser.TypField {
 		return o
 	}
-	value, hasAltStr, altStr := ResolveField(db, k, v, o.Column)
+	value := ResolveField(db, k, v, o.Column)
 	if value.IsNil() {
 		return nil
 	}
@@ -429,8 +439,7 @@ func resolveOperand(db query_db.Database, k string, v *vdl.Value, o *query_parse
 	case vdl.String:
 		newOp.Type = query_parser.TypStr
 		newOp.Str = value.RawString()
-		newOp.HasAltStr = hasAltStr
-		newOp.AltStr = altStr
+		newOp.HasAltStr = false
 	case vdl.Complex64, vdl.Complex128:
 		newOp.Type = query_parser.TypComplex
 		newOp.Complex = value.Complex()
@@ -551,23 +560,13 @@ func valueFromResolvedOperand(o *query_parser.Operand) interface{} {
 	return nil
 }
 
-// Resolve a field.  In the special case where a type is evaluated, in addition
-// to a string being returned, and alternate string is returned.  In this case,
-// <string-value>, true, <alt-string> is returned.  In all other cases,
-// <value>,false,"" is returned.
-func ResolveField(db query_db.Database, k string, v *vdl.Value, f *query_parser.Field) (*vdl.Value, bool, string) {
+// Resolve a field.
+func ResolveField(db query_db.Database, k string, v *vdl.Value, f *query_parser.Field) *vdl.Value {
 	if query_checker.IsKeyField(f) {
-		return vdl.StringValue(k), false, ""
+		return vdl.StringValue(k)
 	}
 	// Auto-dereference Any and Optional values
 	v = autoDereference(v)
-	t := v.Type()
-	if query_checker.IsTypeField(f) {
-		// Types evaluate to two strings, Str and AltStr.
-		// This is because types match on full path or just the name.
-		pkg, name := vdl.SplitIdent(t.Name())
-		return vdl.StringValue(pkg + "." + name), true, name
-	}
 
 	object := v
 	segments := f.Segments
@@ -581,7 +580,7 @@ func ResolveField(db query_db.Database, k string, v *vdl.Value, f *query_parser.
 		// object must be a struct in order to look for the next segment.
 		if object.Kind() == vdl.Struct {
 			if object = object.StructFieldByName(segments[i].Value); object == nil {
-				return vdl.ValueOf(nil), false, "" // field does not exist
+				return vdl.ValueOf(nil)
 			}
 			object = resolveWithKey(db, k, v, object, segments[i])
 		} else if object.Kind() == vdl.Union {
@@ -590,14 +589,14 @@ func ResolveField(db query_db.Database, k string, v *vdl.Value, f *query_parser.
 			if segments[i].Value == unionType.Field(idx).Name {
 				object = tempValue
 			} else {
-				return vdl.ValueOf(nil), false, "" // union field does not exist or is not set
+				return vdl.ValueOf(nil)
 			}
 			object = resolveWithKey(db, k, v, object, segments[i])
 		} else {
-			return vdl.ValueOf(nil), false, "" // can only traverse into structs and unions
+			return vdl.ValueOf(nil)
 		}
 	}
-	return object, false, ""
+	return object
 }
 
 // EvalWhereUsingOnlyKey return type.  See that function for details.
@@ -614,12 +613,12 @@ const (
 // INCLUDE: the row should included in the results
 // EXCLUDE: the row should NOT be included
 // FETCH_VALUE: the value and/or type of the value are required to determine if row should be included.
-// The above decision is accomplished by evaluating all expressions which reference the key and
-// substituing false for all other expressions.  If the result is true, INCLUDE is returned.
-// If the result is false, but no other expressions (i.e., expressions which refer to the type
-// of the value or the value itself) were encountered, EXCLUDE is returned; else, FETCH_VALUE is
-// returned indicating the value must be fetched in order to determine if the row should be included
-// in the results.
+// The above decision is accomplished by evaluating all expressions which compare the key
+// with a string literal and substituing false for all other expressions.  If the result is true,
+// INCLUDE is returned.
+// If the result is false, but no other expressions were encountered, EXCLUDE is returned; else,
+// FETCH_VALUE is returned indicating the value must be fetched in order to determine if the row
+// should be included in the results.
 func EvalWhereUsingOnlyKey(db query_db.Database, s *query_parser.SelectStatement, k string) EvalWithKeyResult {
 	if s.Where == nil { // all rows will be in result
 		return INCLUDE
@@ -651,11 +650,16 @@ func evalExprUsingOnlyKey(db query_db.Database, e *query_parser.Expression, k st
 		} else {
 			return FETCH_VALUE
 		}
-	default: // =, > >=, <, <=, Like, <>, NotLike
-		if !query_checker.IsKey(e.Operand1) {
+	default:
+		if !query_checker.ContainsKeyOperand(e) {
 			return FETCH_VALUE
 		} else {
-			if evalComparisonOperators(db, k, nil, e) {
+			// at least one operand is a key
+			// May still need to fetch the value (if
+			// one of the operands is a value field or a function).
+			if query_checker.ContainsFunctionOperand(e) || query_checker.ContainsValueFieldOperand(e) {
+				return FETCH_VALUE
+			} else if evalComparisonOperators(db, k, nil, e) {
 				return INCLUDE
 			} else {
 				return EXCLUDE

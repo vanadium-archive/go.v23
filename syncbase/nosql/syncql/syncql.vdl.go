@@ -15,12 +15,11 @@ import (
 )
 
 var (
-	ErrBadFieldInWhere                 = verror.Register("v.io/syncbase/v23/syncbase/nosql/syncql.BadFieldInWhere", verror.NoRetry, "{1:}{2:} [{3}]Where field must be 'k', 'v[{.<ident>}...]' or 't'.")
+	ErrBadFieldInWhere                 = verror.Register("v.io/syncbase/v23/syncbase/nosql/syncql.BadFieldInWhere", verror.NoRetry, "{1:}{2:} [{3}]Where field must be 'k' or 'v[{.<ident>}...]'.")
 	ErrBoolInvalidExpression           = verror.Register("v.io/syncbase/v23/syncbase/nosql/syncql.BoolInvalidExpression", verror.NoRetry, "{1:}{2:} [{3}]Boolean operands may only be used in equals and not equals expressions.")
 	ErrCheckOfUnknownStatementType     = verror.Register("v.io/syncbase/v23/syncbase/nosql/syncql.CheckOfUnknownStatementType", verror.NoRetry, "{1:}{2:} [{3}]Cannot semantically check unknown statement type.")
 	ErrCouldNotConvert                 = verror.Register("v.io/syncbase/v23/syncbase/nosql/syncql.CouldNotConvert", verror.NoRetry, "{1:}{2:} [{3}]Could not convert {4} to {5}.")
 	ErrDotNotationDisallowedForKey     = verror.Register("v.io/syncbase/v23/syncbase/nosql/syncql.DotNotationDisallowedForKey", verror.NoRetry, "{1:}{2:} [{3}]Dot notation may not be used on a key field.")
-	ErrDotNotationDisallowedForType    = verror.Register("v.io/syncbase/v23/syncbase/nosql/syncql.DotNotationDisallowedForType", verror.NoRetry, "{1:}{2:} [{3}]Dot notation may not be used with type.")
 	ErrErrorCompilingRegularExpression = verror.Register("v.io/syncbase/v23/syncbase/nosql/syncql.ErrorCompilingRegularExpression", verror.NoRetry, "{1:}{2:} [{3}]The following error encountered compiling regex '{4}': {5}")
 	ErrExecOfUnknownStatementType      = verror.Register("v.io/syncbase/v23/syncbase/nosql/syncql.ExecOfUnknownStatementType", verror.NoRetry, "{1:}{2:} [{3}]Cannot execute unknown statement type: {4}.")
 	ErrExpected                        = verror.Register("v.io/syncbase/v23/syncbase/nosql/syncql.Expected", verror.NoRetry, "{1:}{2:} [{3}]Expected '{4}'.")
@@ -31,12 +30,16 @@ var (
 	ErrFunctionArgCount                = verror.Register("v.io/syncbase/v23/syncbase/nosql/syncql.FunctionArgCount", verror.NoRetry, "{1:}{2:} [{3}]Function '{4}' expects {5} args, found: {6}.")
 	ErrFunctionArgBad                  = verror.Register("v.io/syncbase/v23/syncbase/nosql/syncql.FunctionArgBad", verror.NoRetry, "{1:}{2:} [{3}]Function '{4}' arg '{5}' could not be resolved.")
 	ErrFunctionNotFound                = verror.Register("v.io/syncbase/v23/syncbase/nosql/syncql.FunctionNotFound", verror.NoRetry, "{1:}{2:} [{3}]Function '{4}' not found.")
-	ErrFunctionReturnedError           = verror.Register("v.io/syncbase/v23/syncbase/nosql/syncql.FunctionReturnedError", verror.NoRetry, "{1:}{2:} [{3}]Function '{4}' returned error: {5}.")
+	ErrArgMustBeField                  = verror.Register("v.io/syncbase/v23/syncbase/nosql/syncql.ArgMustBeField", verror.NoRetry, "{1:}{2:} [{3}]Argument must be a value field (i.e., must begin with 'v').")
+	ErrTimeConversionError             = verror.Register("v.io/syncbase/v23/syncbase/nosql/syncql.TimeConversionError", verror.NoRetry, "{1:}{2:} [{3}]Can't convert to time: {4}.")
+	ErrLocationConversionError         = verror.Register("v.io/syncbase/v23/syncbase/nosql/syncql.LocationConversionError", verror.NoRetry, "{1:}{2:} [{3}]Can't convert to location: {4}.")
+	ErrStringConversionError           = verror.Register("v.io/syncbase/v23/syncbase/nosql/syncql.StringConversionError", verror.NoRetry, "{1:}{2:} [{3}]Can't convert to string: {4}.")
+	ErrFloatConversionError            = verror.Register("v.io/syncbase/v23/syncbase/nosql/syncql.FloatConversionError", verror.NoRetry, "{1:}{2:} [{3}]Can't convert to float: {4}.")
 	ErrIsIsNotRequireLhsValue          = verror.Register("v.io/syncbase/v23/syncbase/nosql/syncql.IsIsNotRequireLhsValue", verror.NoRetry, "{1:}{2:} [{3}]'Is/is not' expressions require left operand to be a value operand.")
 	ErrIsIsNotRequireRhsNil            = verror.Register("v.io/syncbase/v23/syncbase/nosql/syncql.IsIsNotRequireRhsNil", verror.NoRetry, "{1:}{2:} [{3}]'Is/is not' expressions require right operand to be nil.")
 	ErrInvalidEscapedChar              = verror.Register("v.io/syncbase/v23/syncbase/nosql/syncql.InvalidEscapedChar", verror.NoRetry, "{1:}{2:} [{3}Expected backslash, percent, or underscore after backslash.]")
 	ErrInvalidSelectField              = verror.Register("v.io/syncbase/v23/syncbase/nosql/syncql.InvalidSelectField", verror.NoRetry, "{1:}{2:} [{3}]Select field must be 'k' or 'v[{.<ident>}...]'.")
-	ErrKeyExpressionForm               = verror.Register("v.io/syncbase/v23/syncbase/nosql/syncql.KeyExpressionForm", verror.NoRetry, "{1:}{2:} [{3}]Key (i.e., 'k') expressions must be of form 'k  [=|<>|>|>=|<|<=|like|not like] <string-literal>'.")
+	ErrKeyExpressionLiteral            = verror.Register("v.io/syncbase/v23/syncbase/nosql/syncql.KeyExpressionLiteral", verror.NoRetry, "{1:}{2:} [{3}]Key (i.e., 'k') compares against literals must be string literal.")
 	ErrKeyValueStreamError             = verror.Register("v.io/syncbase/v23/syncbase/nosql/syncql.KeyValueStreamError", verror.NoRetry, "{1:}{2:} [{3}]KeyValueStream error: {4}.")
 	ErrLikeExpressionsRequireRhsString = verror.Register("v.io/syncbase/v23/syncbase/nosql/syncql.LikeExpressionsRequireRhsString", verror.NoRetry, "{1:}{2:} [{3}]Like expressions require right operand of type <string-literal>.")
 	ErrLimitMustBeGe0                  = verror.Register("v.io/syncbase/v23/syncbase/nosql/syncql.LimitMustBeGe0", verror.NoRetry, "{1:}{2:} [{3}]Limit must be > 0.")
@@ -44,19 +47,17 @@ var (
 	ErrOffsetMustBeGe0                 = verror.Register("v.io/syncbase/v23/syncbase/nosql/syncql.OffsetMustBeGe0", verror.NoRetry, "{1:}{2:} [{3}]Offset must be > 0.")
 	ErrScanError                       = verror.Register("v.io/syncbase/v23/syncbase/nosql/syncql.ScanError", verror.NoRetry, "{1:}{2:} [{3}]Scan error: {4}.")
 	ErrTableCantAccess                 = verror.Register("v.io/syncbase/v23/syncbase/nosql/syncql.TableCantAccess", verror.NoRetry, "{1:}{2:} [{3}]Table {4} does not exist (or cannot be accessed): {5}.")
-	ErrTypeExpressionForm              = verror.Register("v.io/syncbase/v23/syncbase/nosql/syncql.TypeExpressionForm", verror.NoRetry, "{1:}{2:} [{3}]Type expressions must be 't = <string-literal>'.")
 	ErrUnexpected                      = verror.Register("v.io/syncbase/v23/syncbase/nosql/syncql.Unexpected", verror.NoRetry, "{1:}{2:} [{3}]Unexpected: {4}.")
 	ErrUnexpectedEndOfStatement        = verror.Register("v.io/syncbase/v23/syncbase/nosql/syncql.UnexpectedEndOfStatement", verror.NoRetry, "{1:}{2:} [{3}]No statement found.")
 	ErrUnknownIdentifier               = verror.Register("v.io/syncbase/v23/syncbase/nosql/syncql.UnknownIdentifier", verror.NoRetry, "{1:}{2:} [{3}]Uknown identifier: {4}.")
 )
 
 func init() {
-	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrBadFieldInWhere.ID), "{1:}{2:} [{3}]Where field must be 'k', 'v[{.<ident>}...]' or 't'.")
+	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrBadFieldInWhere.ID), "{1:}{2:} [{3}]Where field must be 'k' or 'v[{.<ident>}...]'.")
 	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrBoolInvalidExpression.ID), "{1:}{2:} [{3}]Boolean operands may only be used in equals and not equals expressions.")
 	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrCheckOfUnknownStatementType.ID), "{1:}{2:} [{3}]Cannot semantically check unknown statement type.")
 	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrCouldNotConvert.ID), "{1:}{2:} [{3}]Could not convert {4} to {5}.")
 	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrDotNotationDisallowedForKey.ID), "{1:}{2:} [{3}]Dot notation may not be used on a key field.")
-	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrDotNotationDisallowedForType.ID), "{1:}{2:} [{3}]Dot notation may not be used with type.")
 	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrErrorCompilingRegularExpression.ID), "{1:}{2:} [{3}]The following error encountered compiling regex '{4}': {5}")
 	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrExecOfUnknownStatementType.ID), "{1:}{2:} [{3}]Cannot execute unknown statement type: {4}.")
 	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrExpected.ID), "{1:}{2:} [{3}]Expected '{4}'.")
@@ -67,12 +68,16 @@ func init() {
 	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrFunctionArgCount.ID), "{1:}{2:} [{3}]Function '{4}' expects {5} args, found: {6}.")
 	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrFunctionArgBad.ID), "{1:}{2:} [{3}]Function '{4}' arg '{5}' could not be resolved.")
 	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrFunctionNotFound.ID), "{1:}{2:} [{3}]Function '{4}' not found.")
-	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrFunctionReturnedError.ID), "{1:}{2:} [{3}]Function '{4}' returned error: {5}.")
+	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrArgMustBeField.ID), "{1:}{2:} [{3}]Argument must be a value field (i.e., must begin with 'v').")
+	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrTimeConversionError.ID), "{1:}{2:} [{3}]Can't convert to time: {4}.")
+	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrLocationConversionError.ID), "{1:}{2:} [{3}]Can't convert to location: {4}.")
+	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrStringConversionError.ID), "{1:}{2:} [{3}]Can't convert to string: {4}.")
+	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrFloatConversionError.ID), "{1:}{2:} [{3}]Can't convert to float: {4}.")
 	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrIsIsNotRequireLhsValue.ID), "{1:}{2:} [{3}]'Is/is not' expressions require left operand to be a value operand.")
 	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrIsIsNotRequireRhsNil.ID), "{1:}{2:} [{3}]'Is/is not' expressions require right operand to be nil.")
 	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrInvalidEscapedChar.ID), "{1:}{2:} [{3}Expected backslash, percent, or underscore after backslash.]")
 	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrInvalidSelectField.ID), "{1:}{2:} [{3}]Select field must be 'k' or 'v[{.<ident>}...]'.")
-	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrKeyExpressionForm.ID), "{1:}{2:} [{3}]Key (i.e., 'k') expressions must be of form 'k  [=|<>|>|>=|<|<=|like|not like] <string-literal>'.")
+	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrKeyExpressionLiteral.ID), "{1:}{2:} [{3}]Key (i.e., 'k') compares against literals must be string literal.")
 	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrKeyValueStreamError.ID), "{1:}{2:} [{3}]KeyValueStream error: {4}.")
 	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrLikeExpressionsRequireRhsString.ID), "{1:}{2:} [{3}]Like expressions require right operand of type <string-literal>.")
 	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrLimitMustBeGe0.ID), "{1:}{2:} [{3}]Limit must be > 0.")
@@ -80,7 +85,6 @@ func init() {
 	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrOffsetMustBeGe0.ID), "{1:}{2:} [{3}]Offset must be > 0.")
 	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrScanError.ID), "{1:}{2:} [{3}]Scan error: {4}.")
 	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrTableCantAccess.ID), "{1:}{2:} [{3}]Table {4} does not exist (or cannot be accessed): {5}.")
-	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrTypeExpressionForm.ID), "{1:}{2:} [{3}]Type expressions must be 't = <string-literal>'.")
 	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrUnexpected.ID), "{1:}{2:} [{3}]Unexpected: {4}.")
 	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrUnexpectedEndOfStatement.ID), "{1:}{2:} [{3}]No statement found.")
 	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrUnknownIdentifier.ID), "{1:}{2:} [{3}]Uknown identifier: {4}.")
@@ -109,11 +113,6 @@ func NewErrCouldNotConvert(ctx *context.T, off int64, from string, to string) er
 // NewErrDotNotationDisallowedForKey returns an error with the ErrDotNotationDisallowedForKey ID.
 func NewErrDotNotationDisallowedForKey(ctx *context.T, off int64) error {
 	return verror.New(ErrDotNotationDisallowedForKey, ctx, off)
-}
-
-// NewErrDotNotationDisallowedForType returns an error with the ErrDotNotationDisallowedForType ID.
-func NewErrDotNotationDisallowedForType(ctx *context.T, off int64) error {
-	return verror.New(ErrDotNotationDisallowedForType, ctx, off)
 }
 
 // NewErrErrorCompilingRegularExpression returns an error with the ErrErrorCompilingRegularExpression ID.
@@ -166,9 +165,29 @@ func NewErrFunctionNotFound(ctx *context.T, off int64, name string) error {
 	return verror.New(ErrFunctionNotFound, ctx, off, name)
 }
 
-// NewErrFunctionReturnedError returns an error with the ErrFunctionReturnedError ID.
-func NewErrFunctionReturnedError(ctx *context.T, off int64, name string, err error) error {
-	return verror.New(ErrFunctionReturnedError, ctx, off, name, err)
+// NewErrArgMustBeField returns an error with the ErrArgMustBeField ID.
+func NewErrArgMustBeField(ctx *context.T, off int64) error {
+	return verror.New(ErrArgMustBeField, ctx, off)
+}
+
+// NewErrTimeConversionError returns an error with the ErrTimeConversionError ID.
+func NewErrTimeConversionError(ctx *context.T, off int64, err error) error {
+	return verror.New(ErrTimeConversionError, ctx, off, err)
+}
+
+// NewErrLocationConversionError returns an error with the ErrLocationConversionError ID.
+func NewErrLocationConversionError(ctx *context.T, off int64, err error) error {
+	return verror.New(ErrLocationConversionError, ctx, off, err)
+}
+
+// NewErrStringConversionError returns an error with the ErrStringConversionError ID.
+func NewErrStringConversionError(ctx *context.T, off int64, err error) error {
+	return verror.New(ErrStringConversionError, ctx, off, err)
+}
+
+// NewErrFloatConversionError returns an error with the ErrFloatConversionError ID.
+func NewErrFloatConversionError(ctx *context.T, off int64, err error) error {
+	return verror.New(ErrFloatConversionError, ctx, off, err)
 }
 
 // NewErrIsIsNotRequireLhsValue returns an error with the ErrIsIsNotRequireLhsValue ID.
@@ -191,9 +210,9 @@ func NewErrInvalidSelectField(ctx *context.T, off int64) error {
 	return verror.New(ErrInvalidSelectField, ctx, off)
 }
 
-// NewErrKeyExpressionForm returns an error with the ErrKeyExpressionForm ID.
-func NewErrKeyExpressionForm(ctx *context.T, off int64) error {
-	return verror.New(ErrKeyExpressionForm, ctx, off)
+// NewErrKeyExpressionLiteral returns an error with the ErrKeyExpressionLiteral ID.
+func NewErrKeyExpressionLiteral(ctx *context.T, off int64) error {
+	return verror.New(ErrKeyExpressionLiteral, ctx, off)
 }
 
 // NewErrKeyValueStreamError returns an error with the ErrKeyValueStreamError ID.
@@ -229,11 +248,6 @@ func NewErrScanError(ctx *context.T, off int64, err error) error {
 // NewErrTableCantAccess returns an error with the ErrTableCantAccess ID.
 func NewErrTableCantAccess(ctx *context.T, off int64, table string, err error) error {
 	return verror.New(ErrTableCantAccess, ctx, off, table, err)
-}
-
-// NewErrTypeExpressionForm returns an error with the ErrTypeExpressionForm ID.
-func NewErrTypeExpressionForm(ctx *context.T, off int64) error {
-	return verror.New(ErrTypeExpressionForm, ctx, off)
 }
 
 // NewErrUnexpected returns an error with the ErrUnexpected ID.

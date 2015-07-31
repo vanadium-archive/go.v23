@@ -462,6 +462,15 @@ func (ManySets) __VDLReflect(struct {
 }) {
 }
 
+type BigData struct {
+	Key string // A dup of the key stored in the value.
+}
+
+func (BigData) __VDLReflect(struct {
+	Name string `vdl:"v.io/syncbase/v23/syncbase/nosql/internal/query/test.BigData"`
+}) {
+}
+
 func init() {
 	vdl.Register((*AddressInfo)(nil))
 	vdl.Register((*CreditAgency)(nil))
@@ -485,4 +494,5 @@ func init() {
 	vdl.Register((*FunWithMaps)(nil))
 	vdl.Register((*ManyMaps)(nil))
 	vdl.Register((*ManySets)(nil))
+	vdl.Register((*BigData)(nil))
 }

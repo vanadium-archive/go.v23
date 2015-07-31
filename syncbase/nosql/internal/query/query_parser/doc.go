@@ -58,7 +58,6 @@
 // <operand> ::=
 //   K
 //   | V[<period><field>]
-//   | T
 //   | <literal>
 //   | <function>
 //
@@ -81,5 +80,5 @@
 //   | <float_literal>
 //
 // Example:
-// select v.foo.bar, v.baz[2] from foobarbaz where (v.foo = 42 and v.bar not like "abc%) or (k >= "100" and  k < "200")
+// select v.foo.bar, v.baz[2] from foobarbaz where Type(v) = "Customer" and (v.foo = 42 and v.bar not like "abc%) or (k >= "100" and  k < "200")
 package query_parser

@@ -57,7 +57,7 @@ func checkSelectClause(db query_db.Database, s *query_parser.SelectClause) error
 	for _, selector := range s.Selectors {
 		switch selector.Type {
 		case query_parser.TypSelField:
-			switch selector.Field.Segments[0].Value {
+			switch strings.ToLower(selector.Field.Segments[0].Value) {
 			case "k":
 				if len(selector.Field.Segments) > 1 {
 					return syncql.NewErrDotNotationDisallowedForKey(db.GetContext(), selector.Field.Segments[1].Off)
@@ -135,9 +135,9 @@ func checkExpression(db query_db.Database, e *query_parser.Expression) error {
 		e.Operand2.CompRegex = compRegex
 	}
 
-	// Is/IsNot expressions require operand1 to be a value and operand2 to be nil.
+	// Is/IsNot expressions require operand1 to be a (value or function) and operand2 to be nil.
 	if e.Operator.Type == query_parser.Is || e.Operator.Type == query_parser.IsNot {
-		if !IsField(e.Operand1) {
+		if !IsField(e.Operand1) && !IsFunction(e.Operand1) {
 			return syncql.NewErrIsIsNotRequireLhsValue(db.GetContext(), e.Operand1.Off)
 		}
 		if e.Operand2.Type != query_parser.TypNil {
@@ -145,24 +145,15 @@ func checkExpression(db query_db.Database, e *query_parser.Expression) error {
 		}
 	}
 
-	// type as an operand must be the first operand, the operator must be = and the 2nd operand must be string literal.
-	if (IsType(e.Operand1) && (e.Operator.Type != query_parser.Equal || e.Operand2.Type != query_parser.TypStr)) || IsType(e.Operand2) {
-		return syncql.NewErrTypeExpressionForm(db.GetContext(), e.Off)
-	}
-
-	// k as an operand must be the first operand, the operator must be
-	// = | <> | > | >= | < | <= | like | not like and the 2nd operand must be a string literal.
-	if (IsKey(e.Operand1) &&
-		((e.Operator.Type != query_parser.Equal &&
-			e.Operator.Type != query_parser.GreaterThan &&
-			e.Operator.Type != query_parser.GreaterThanOrEqual &&
-			e.Operator.Type != query_parser.LessThan &&
-			e.Operator.Type != query_parser.LessThanOrEqual &&
-			e.Operator.Type != query_parser.Like &&
-			e.Operator.Type != query_parser.NotEqual &&
-			e.Operator.Type != query_parser.NotLike) ||
-			e.Operand2.Type != query_parser.TypStr)) || IsKey(e.Operand2) {
-		return syncql.NewErrKeyExpressionForm(db.GetContext(), e.Off)
+	// if an operand is k and the other operand is a literal, that literal must be a string
+	// literal.
+	if ContainsKeyOperand(e) && ((isLiteral(e.Operand1) && !isStringLiteral(e.Operand1)) ||
+		(isLiteral(e.Operand2) && !isStringLiteral(e.Operand2))) {
+		off := e.Operand1.Off
+		if isLiteral(e.Operand2) {
+			off = e.Operand2.Off
+		}
+		return syncql.NewErrKeyExpressionLiteral(db.GetContext(), off)
 	}
 
 	// If either operand is a bool, only = and <> operators are allowed.
@@ -178,16 +169,12 @@ func checkOperand(db query_db.Database, o *query_parser.Operand) error {
 	case query_parser.TypExpr:
 		return checkExpression(db, o.Expr)
 	case query_parser.TypField:
-		switch o.Column.Segments[0].Value {
+		switch strings.ToLower(o.Column.Segments[0].Value) {
 		case "k":
 			if len(o.Column.Segments) > 1 {
 				return syncql.NewErrDotNotationDisallowedForKey(db.GetContext(), o.Column.Segments[1].Off)
 			}
 		case "v":
-		case "t":
-			if len(o.Column.Segments) > 1 {
-				return syncql.NewErrDotNotationDisallowedForType(db.GetContext(), o.Column.Segments[1].Off)
-			}
 		default:
 			return syncql.NewErrBadFieldInWhere(db.GetContext(), o.Column.Segments[0].Off)
 		}
@@ -346,12 +333,42 @@ func IsField(o *query_parser.Operand) bool {
 	return o.Type == query_parser.TypField
 }
 
-func IsKey(o *query_parser.Operand) bool {
-	return IsField(o) && IsKeyField(o.Column)
+func IsFunction(o *query_parser.Operand) bool {
+	return o.Type == query_parser.TypFunction
 }
 
-func IsType(o *query_parser.Operand) bool {
-	return IsField(o) && IsTypeField(o.Column)
+func ContainsKeyOperand(expr *query_parser.Expression) bool {
+	return IsKey(expr.Operand1) || IsKey(expr.Operand2)
+}
+
+func ContainsFunctionOperand(expr *query_parser.Expression) bool {
+	return IsFunction(expr.Operand1) || IsFunction(expr.Operand2)
+}
+
+func ContainsValueFieldOperand(expr *query_parser.Expression) bool {
+	return (expr.Operand1.Type == query_parser.TypField && IsValueField(expr.Operand1.Column)) ||
+		(expr.Operand2.Type == query_parser.TypField && IsValueField(expr.Operand2.Column))
+
+}
+
+func isStringLiteral(o *query_parser.Operand) bool {
+	return o.Type == query_parser.TypStr
+}
+
+func isLiteral(o *query_parser.Operand) bool {
+	return o.Type == query_parser.TypBigInt ||
+		o.Type == query_parser.TypBigRat || // currently, no way to specify as literal
+		o.Type == query_parser.TypBool ||
+		o.Type == query_parser.TypComplex || // currently, no way to specify as literal ||
+		o.Type == query_parser.TypFloat ||
+		o.Type == query_parser.TypInt ||
+		o.Type == query_parser.TypStr ||
+		o.Type == query_parser.TypTime || // currently, no way to specify as literal
+		o.Type == query_parser.TypUint
+}
+
+func IsKey(o *query_parser.Operand) bool {
+	return IsField(o) && IsKeyField(o.Column)
 }
 
 func IsKeyField(f *query_parser.Field) bool {
@@ -360,10 +377,6 @@ func IsKeyField(f *query_parser.Field) bool {
 
 func IsValueField(f *query_parser.Field) bool {
 	return strings.ToLower(f.Segments[0].Value) == "v"
-}
-
-func IsTypeField(f *query_parser.Field) bool {
-	return strings.ToLower(f.Segments[0].Value) == "t"
 }
 
 func IsExpr(o *query_parser.Operand) bool {
@@ -476,27 +489,70 @@ func collectKeyRanges(expr *query_parser.Expression) *query_db.KeyRanges {
 			}
 			return lhsKeyRanges
 		}
-	} else if IsKey(expr.Operand1) {
-		switch expr.Operator.Type {
-		case query_parser.Equal:
-			return &query_db.KeyRanges{computeKeyRangeForSingleValue(expr.Operand2.Str)}
-		case query_parser.GreaterThan:
-			return &query_db.KeyRanges{query_db.KeyRange{string(append([]byte(expr.Operand2.Str), 0)), MaxRangeLimit}}
-		case query_parser.GreaterThanOrEqual:
-			return &query_db.KeyRanges{query_db.KeyRange{expr.Operand2.Str, MaxRangeLimit}}
-		case query_parser.Like:
-			return &query_db.KeyRanges{computeKeyRangeForLike(expr.Operand2.Prefix)}
-		case query_parser.NotLike:
-			return computeKeyRangesForNotLike(expr.Operand2.Prefix)
-		case query_parser.LessThan:
-			return &query_db.KeyRanges{query_db.KeyRange{"", expr.Operand2.Str}}
-		case query_parser.LessThanOrEqual:
-			return &query_db.KeyRanges{query_db.KeyRange{"", string(append([]byte(expr.Operand2.Str), 0))}}
-		default: // case query_parser.NotEqual:
-			return &query_db.KeyRanges{
-				query_db.KeyRange{"", expr.Operand2.Str},
-				query_db.KeyRange{string(append([]byte(expr.Operand2.Str), 0)), MaxRangeLimit},
+	} else if ContainsKeyOperand(expr) { // true if either operand is 'k'
+		if IsKey(expr.Operand1) && IsKey(expr.Operand2) {
+			//k <op> k
+			switch expr.Operator.Type {
+			case query_parser.Equal, query_parser.GreaterThanOrEqual, query_parser.LessThanOrEqual:
+				// True for all keys
+				return &query_db.KeyRanges{KeyRangeAll}
+			default: // query_parser.NotEqual, query_parser.GreaterThan, query_parser.LessThan:
+				// False for all keys
+				return &query_db.KeyRanges{}
 			}
+		} else if expr.Operator.Type == query_parser.Is {
+			// k is nil
+			// False for all keys
+			return &query_db.KeyRanges{}
+		} else if expr.Operator.Type == query_parser.IsNot {
+			// k is not nil
+			// True for all keys
+			return &query_db.KeyRanges{KeyRangeAll}
+		} else if isStringLiteral(expr.Operand2) {
+			// k <op> <string-literal>
+			switch expr.Operator.Type {
+			case query_parser.Equal:
+				return &query_db.KeyRanges{computeKeyRangeForSingleValue(expr.Operand2.Str)}
+			case query_parser.GreaterThan:
+				return &query_db.KeyRanges{query_db.KeyRange{string(append([]byte(expr.Operand2.Str), 0)), MaxRangeLimit}}
+			case query_parser.GreaterThanOrEqual:
+				return &query_db.KeyRanges{query_db.KeyRange{expr.Operand2.Str, MaxRangeLimit}}
+			case query_parser.Like:
+				return &query_db.KeyRanges{computeKeyRangeForLike(expr.Operand2.Prefix)}
+			case query_parser.NotLike:
+				return computeKeyRangesForNotLike(expr.Operand2.Prefix)
+			case query_parser.LessThan:
+				return &query_db.KeyRanges{query_db.KeyRange{"", expr.Operand2.Str}}
+			case query_parser.LessThanOrEqual:
+				return &query_db.KeyRanges{query_db.KeyRange{"", string(append([]byte(expr.Operand2.Str), 0))}}
+			default: // case query_parser.NotEqual:
+				return &query_db.KeyRanges{
+					query_db.KeyRange{"", expr.Operand2.Str},
+					query_db.KeyRange{string(append([]byte(expr.Operand2.Str), 0)), MaxRangeLimit},
+				}
+			}
+		} else if isStringLiteral(expr.Operand1) {
+			//<string-literal> <op> k
+			switch expr.Operator.Type {
+			case query_parser.Equal:
+				return &query_db.KeyRanges{computeKeyRangeForSingleValue(expr.Operand1.Str)}
+			case query_parser.GreaterThan:
+				return &query_db.KeyRanges{query_db.KeyRange{"", expr.Operand1.Str}}
+			case query_parser.GreaterThanOrEqual:
+				return &query_db.KeyRanges{query_db.KeyRange{"", string(append([]byte(expr.Operand1.Str), 0))}}
+			case query_parser.LessThan:
+				return &query_db.KeyRanges{query_db.KeyRange{string(append([]byte(expr.Operand1.Str), 0)), MaxRangeLimit}}
+			case query_parser.LessThanOrEqual:
+				return &query_db.KeyRanges{query_db.KeyRange{expr.Operand1.Str, MaxRangeLimit}}
+			default: // case query_parser.NotEqual:
+				return &query_db.KeyRanges{
+					query_db.KeyRange{"", expr.Operand1.Str},
+					query_db.KeyRange{string(append([]byte(expr.Operand1.Str), 0)), MaxRangeLimit},
+				}
+			}
+		} else {
+			// A function or a field s being compared to the key.
+			return &query_db.KeyRanges{KeyRangeAll}
 		}
 	} else { // not a key compare, so it applies to the entire key range
 		return &query_db.KeyRanges{KeyRangeAll}

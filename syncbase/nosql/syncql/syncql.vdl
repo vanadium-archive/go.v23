@@ -7,7 +7,7 @@ package syncql
 // SyncQL errors
 error (
 	BadFieldInWhere(off int64) {
-		"en": "[{off}]Where field must be 'k', 'v[{.<ident>}...]' or 't'.",
+		"en": "[{off}]Where field must be 'k' or 'v[{.<ident>}...]'.",
 	}
 	BoolInvalidExpression(off int64) {
 		"en": "[{off}]Boolean operands may only be used in equals and not equals expressions.",
@@ -20,9 +20,6 @@ error (
 	}
 	DotNotationDisallowedForKey(off int64) {
 		"en": "[{off}]Dot notation may not be used on a key field.",
-	}
-	DotNotationDisallowedForType(off int64) {
-		"en": "[{off}]Dot notation may not be used with type.",
 	}
 	ErrorCompilingRegularExpression(off int64, regex string, err error) {
 		"en": "[{off}]The following error encountered compiling regex '{regex}': {err}",
@@ -54,8 +51,20 @@ error (
 	FunctionNotFound(off int64, name string) {
 		"en": "[{off}]Function '{name}' not found.",
 	}
-	FunctionReturnedError(off int64, name string, err error) {
-		"en": "[{off}]Function '{name}' returned error: {err}.",
+	ArgMustBeField(off int64) {
+		"en": "[{off}]Argument must be a value field (i.e., must begin with 'v').",
+	}
+	TimeConversionError(off int64, err error) {
+		"en": "[{off}]Can't convert to time: {err}.",
+	}
+	LocationConversionError(off int64, err error) {
+		"en": "[{off}]Can't convert to location: {err}.",
+	}
+	StringConversionError(off int64, err error) {
+		"en": "[{off}]Can't convert to string: {err}.",
+	}
+	FloatConversionError(off int64, err error) {
+		"en": "[{off}]Can't convert to float: {err}.",
 	}
 	IsIsNotRequireLhsValue(off int64) {
 		"en": "[{off}]'Is/is not' expressions require left operand to be a value operand.",
@@ -70,8 +79,8 @@ error (
 	InvalidSelectField(off int64) {
 		"en": "[{off}]Select field must be 'k' or 'v[{.<ident>}...]'.",
 	}
-	KeyExpressionForm(off int64) {
-		"en": "[{off}]Key (i.e., 'k') expressions must be of form 'k  [=|<>|>|>=|<|<=|like|not like] <string-literal>'.",
+	KeyExpressionLiteral(off int64) {
+		"en": "[{off}]Key (i.e., 'k') compares against literals must be string literal.",
 	}
 	KeyValueStreamError(off int64, err error) {
 		"en": "[{off}]KeyValueStream error: {err}.",
@@ -93,9 +102,6 @@ error (
 	}
 	TableCantAccess(off int64, table string, err error) {
 		"en": "[{off}]Table {table} does not exist (or cannot be accessed): {err}.",
-	}
-	TypeExpressionForm(off int64) {
-		"en": "[{off}]Type expressions must be 't = <string-literal>'.",
 	}
 	Unexpected(off int64, found string) {
 		"en": "[{off}]Unexpected: {found}.",

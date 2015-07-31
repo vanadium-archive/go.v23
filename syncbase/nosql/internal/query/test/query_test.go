@@ -121,6 +121,7 @@ var previousRatingsTable table
 var previousAddressesTable table
 var manyMapsTable table
 var manySetsTable table
+var bigTable table
 
 type kv struct {
 	key   string
@@ -374,6 +375,15 @@ func init() {
 		},
 	}
 	db.tables = append(db.tables, manySetsTable)
+
+	bigTable.name = "BigTable"
+
+	for i := 100; i < 301; i++ {
+		k := fmt.Sprintf("%d", i)
+		b := vdl.ValueOf(BigData{k})
+		bigTable.rows = append(bigTable.rows, kv{k, b})
+	}
+	db.tables = append(db.tables, bigTable)
 }
 
 type keyRangesTest struct {
@@ -436,12 +446,102 @@ func TestQueryExec(t *testing.T) {
 	basic := []execSelectTest{
 		{
 			// Select values for all customer records.
-			"select v from Customer where t = \"Customer\"",
+			"select v from Customer where Type(v) = \"Customer\"",
 			[]string{"v"},
 			[][]*vdl.Value{
 				[]*vdl.Value{custTable.rows[0].value},
 				[]*vdl.Value{custTable.rows[4].value},
 				[]*vdl.Value{custTable.rows[9].value},
+			},
+		},
+		{
+			// Select values for all customer records.
+			"select v from Customer where Type(v) not like \"%Customer\"",
+			[]string{"v"},
+			[][]*vdl.Value{
+				[]*vdl.Value{custTable.rows[1].value},
+				[]*vdl.Value{custTable.rows[2].value},
+				[]*vdl.Value{custTable.rows[3].value},
+				[]*vdl.Value{custTable.rows[5].value},
+				[]*vdl.Value{custTable.rows[6].value},
+				[]*vdl.Value{custTable.rows[7].value},
+				[]*vdl.Value{custTable.rows[8].value},
+			},
+		},
+		{
+			// Select values for all customer records.
+			"select Type(v) from Customer where Type(v) not like \"%Customer\"",
+			[]string{"Type"},
+			[][]*vdl.Value{
+				[]*vdl.Value{vdl.ValueOf("v.io/syncbase/v23/syncbase/nosql/internal/query/test.Invoice")},
+				[]*vdl.Value{vdl.ValueOf("v.io/syncbase/v23/syncbase/nosql/internal/query/test.Invoice")},
+				[]*vdl.Value{vdl.ValueOf("v.io/syncbase/v23/syncbase/nosql/internal/query/test.Invoice")},
+				[]*vdl.Value{vdl.ValueOf("v.io/syncbase/v23/syncbase/nosql/internal/query/test.Invoice")},
+				[]*vdl.Value{vdl.ValueOf("v.io/syncbase/v23/syncbase/nosql/internal/query/test.Invoice")},
+				[]*vdl.Value{vdl.ValueOf("v.io/syncbase/v23/syncbase/nosql/internal/query/test.Invoice")},
+				[]*vdl.Value{vdl.ValueOf("v.io/syncbase/v23/syncbase/nosql/internal/query/test.Invoice")},
+			},
+		},
+		{
+			// All customers have a v.Credit with type CreditReport.
+			"select v from Customer where Type(v.Credit) = \"CreditReport\"",
+			[]string{"v"},
+			[][]*vdl.Value{
+				[]*vdl.Value{custTable.rows[0].value},
+				[]*vdl.Value{custTable.rows[4].value},
+				[]*vdl.Value{custTable.rows[9].value},
+			},
+		},
+		{
+			// Only customer "001" has an equifax report.
+			"select v from Customer where Type(v.Credit.Report.EquifaxReport) = \"EquifaxCreditReport\"",
+			[]string{"v"},
+			[][]*vdl.Value{
+				[]*vdl.Value{custTable.rows[0].value},
+			},
+		},
+		{
+			// Print the types of every record
+			"select Type(v) from Customer",
+			[]string{"Type"},
+			[][]*vdl.Value{
+				[]*vdl.Value{vdl.ValueOf("v.io/syncbase/v23/syncbase/nosql/internal/query/test.Customer")},
+				[]*vdl.Value{vdl.ValueOf("v.io/syncbase/v23/syncbase/nosql/internal/query/test.Invoice")},
+				[]*vdl.Value{vdl.ValueOf("v.io/syncbase/v23/syncbase/nosql/internal/query/test.Invoice")},
+				[]*vdl.Value{vdl.ValueOf("v.io/syncbase/v23/syncbase/nosql/internal/query/test.Invoice")},
+				[]*vdl.Value{vdl.ValueOf("v.io/syncbase/v23/syncbase/nosql/internal/query/test.Customer")},
+				[]*vdl.Value{vdl.ValueOf("v.io/syncbase/v23/syncbase/nosql/internal/query/test.Invoice")},
+				[]*vdl.Value{vdl.ValueOf("v.io/syncbase/v23/syncbase/nosql/internal/query/test.Invoice")},
+				[]*vdl.Value{vdl.ValueOf("v.io/syncbase/v23/syncbase/nosql/internal/query/test.Invoice")},
+				[]*vdl.Value{vdl.ValueOf("v.io/syncbase/v23/syncbase/nosql/internal/query/test.Invoice")},
+				[]*vdl.Value{vdl.ValueOf("v.io/syncbase/v23/syncbase/nosql/internal/query/test.Customer")},
+			},
+		},
+		{
+			// Print the types of every credit report
+			"select Type(v.Credit.Report) from Customer",
+			[]string{"Type"},
+			[][]*vdl.Value{
+				[]*vdl.Value{vdl.ValueOf("v.io/syncbase/v23/syncbase/nosql/internal/query/test.AgencyReport")},
+				[]*vdl.Value{vdl.ValueOf(nil)},
+				[]*vdl.Value{vdl.ValueOf(nil)},
+				[]*vdl.Value{vdl.ValueOf(nil)},
+				[]*vdl.Value{vdl.ValueOf("v.io/syncbase/v23/syncbase/nosql/internal/query/test.AgencyReport")},
+				[]*vdl.Value{vdl.ValueOf(nil)},
+				[]*vdl.Value{vdl.ValueOf(nil)},
+				[]*vdl.Value{vdl.ValueOf(nil)},
+				[]*vdl.Value{vdl.ValueOf(nil)},
+				[]*vdl.Value{vdl.ValueOf("v.io/syncbase/v23/syncbase/nosql/internal/query/test.AgencyReport")},
+			},
+		},
+		{
+			// Print the types of every cusomer's v.Credit.Report.EquifaxReport
+			"select Type(v.Credit.Report.EquifaxReport) from Customer where Type(v) = \"Customer\"",
+			[]string{"Type"},
+			[][]*vdl.Value{
+				[]*vdl.Value{vdl.ValueOf("v.io/syncbase/v23/syncbase/nosql/internal/query/test.EquifaxCreditReport")},
+				[]*vdl.Value{vdl.ValueOf(vdl.ValueOf(nil))},
+				[]*vdl.Value{vdl.ValueOf(vdl.ValueOf(nil))},
 			},
 		},
 		{
@@ -536,7 +636,7 @@ func TestQueryExec(t *testing.T) {
 		},
 		{
 			// Select keys & values for all customer records.
-			"select k, v from Customer where t = \"Customer\"",
+			"select k, v from Customer where \"Customer\" = Type(v)",
 			[]string{"k", "v"},
 			[][]*vdl.Value{
 				[]*vdl.Value{vdl.ValueOf(custTable.rows[0].key), custTable.rows[0].value},
@@ -546,7 +646,7 @@ func TestQueryExec(t *testing.T) {
 		},
 		{
 			// Select keys & names for all customer records.
-			"select k, v.Name from Customer where t = \"Customer\"",
+			"select k, v.Name from Customer where Type(v) = \"Customer\"",
 			[]string{"k", "v.Name"},
 			[][]*vdl.Value{
 				[]*vdl.Value{vdl.ValueOf(custTable.rows[0].key), vdl.ValueOf("John Smith")},
@@ -575,7 +675,7 @@ func TestQueryExec(t *testing.T) {
 		},
 		{
 			// Select keys & values fo all invoice records.
-			"select k, v from Customer where t = \"Invoice\"",
+			"select k, v from Customer where Type(v) = \"Invoice\"",
 			[]string{"k", "v"},
 			[][]*vdl.Value{
 				[]*vdl.Value{vdl.ValueOf(custTable.rows[1].key), custTable.rows[1].value},
@@ -589,7 +689,7 @@ func TestQueryExec(t *testing.T) {
 		},
 		{
 			// Select key, cust id, invoice number and amount for $88 invoices.
-			"select k, v.CustId as ID, v.InvoiceNum as InvoiceNumber, v.Amount as Amt from Customer where t = \"Invoice\" and v.Amount = 88",
+			"select k, v.CustId as ID, v.InvoiceNum as InvoiceNumber, v.Amount as Amt from Customer where Type(v) = \"Invoice\" and v.Amount = 88",
 			[]string{"k", "ID", "InvoiceNumber", "Amt"},
 			[][]*vdl.Value{
 				[]*vdl.Value{vdl.ValueOf(custTable.rows[3].key), vdl.ValueOf(int64(1)), vdl.ValueOf(int64(1005)), vdl.ValueOf(int64(88))},
@@ -717,7 +817,7 @@ func TestQueryExec(t *testing.T) {
 		},
 		{
 			// Select id, name for customers whose last name is Masterson.
-			"select v.Id as ID, v.Name as Name from Customer where t = \"Customer\" and v.Name like \"%Masterson\"",
+			"select v.Id as ID, v.Name as Name from Customer where Type(v) = \"Customer\" and v.Name like \"%Masterson\"",
 			[]string{"ID", "Name"},
 			[][]*vdl.Value{
 				[]*vdl.Value{vdl.ValueOf(int64(2)), vdl.ValueOf("Bat Masterson")},
@@ -725,7 +825,7 @@ func TestQueryExec(t *testing.T) {
 		},
 		{
 			// Select records where v.Address.City is "Collins" or type is Invoice.
-			"select v from Customer where v.Address.City = \"Collins\" or t = \"Invoice\"",
+			"select v from Customer where v.Address.City = \"Collins\" or Type(v) = \"Invoice\"",
 			[]string{"v"},
 			[][]*vdl.Value{
 				[]*vdl.Value{custTable.rows[1].value},
@@ -844,7 +944,7 @@ func TestQueryExec(t *testing.T) {
 		},
 		{
 			// Select customer name for customer Id (i.e., key) "001".
-			"select v.Name as Name from Customer where t = \"Customer\" and k = \"001\"",
+			"select v.Name as Name from Customer where Type(v) = \"Customer\" and k = \"001\"",
 			[]string{"Name"},
 			[][]*vdl.Value{
 				[]*vdl.Value{vdl.ValueOf("John Smith")},
@@ -893,7 +993,7 @@ func TestQueryExec(t *testing.T) {
 		{
 			// Select records where v.Address.City = "Collins" or type is Invoice.
 			// Limit 3
-			"select v from Customer where v.Address.City = \"Collins\" or t = \"Invoice\" limit 3",
+			"select v from Customer where v.Address.City = \"Collins\" or Type(v) = \"Invoice\" limit 3",
 			[]string{"v"},
 			[][]*vdl.Value{
 				[]*vdl.Value{custTable.rows[1].value},
@@ -904,7 +1004,7 @@ func TestQueryExec(t *testing.T) {
 		{
 			// Select records where v.Address.City = "Collins" or type is Invoice.
 			// Offset 5
-			"select v from Customer where v.Address.City = \"Collins\" or t = \"Invoice\" offset 5",
+			"select v from Customer where v.Address.City = \"Collins\" or Type(v) = \"Invoice\" offset 5",
 			[]string{"v"},
 			[][]*vdl.Value{
 				[]*vdl.Value{custTable.rows[6].value},
@@ -921,21 +1021,21 @@ func TestQueryExec(t *testing.T) {
 		{
 			// Select records where v.Address.City = "Collins" or type is Invoice.
 			// Offset 8
-			"select v from Customer where v.Address.City = \"Collins\" or t = \"Invoice\" offset 8",
+			"select v from Customer where v.Address.City = \"Collins\" or Type(v) = \"Invoice\" offset 8",
 			[]string{"v"},
 			[][]*vdl.Value{},
 		},
 		{
 			// Select records where v.Address.City = "Collins" or type is Invoice.
 			// Offset 23
-			"select v from Customer where v.Address.City = \"Collins\" or t = \"Invoice\" offset 23",
+			"select v from Customer where v.Address.City = \"Collins\" or Type(v) = \"Invoice\" offset 23",
 			[]string{"v"},
 			[][]*vdl.Value{},
 		},
 		{
 			// Select records where v.Address.City = "Collins" is 84 or type is Invoice.
 			// Limit 3 Offset 2
-			"select v from Customer where v.Address.City = \"Collins\" or t = \"Invoice\" limit 3 offset 2",
+			"select v from Customer where v.Address.City = \"Collins\" or Type(v) = \"Invoice\" limit 3 offset 2",
 			[]string{"v"},
 			[][]*vdl.Value{
 				[]*vdl.Value{custTable.rows[3].value},
@@ -946,7 +1046,7 @@ func TestQueryExec(t *testing.T) {
 		{
 			// Select records where v.Address.City = "Collins" or (type is Invoice and v.InvoiceNum is not nil).
 			// Limit 3 Offset 2
-			"select v from Customer where v.Address.City = \"Collins\" or (t = \"Invoice\" and v.InvoiceNum is not nil) limit 3 offset 2",
+			"select v from Customer where v.Address.City = \"Collins\" or (Type(v) = \"Invoice\" and v.InvoiceNum is not nil) limit 3 offset 2",
 			[]string{"v"},
 			[][]*vdl.Value{
 				[]*vdl.Value{custTable.rows[3].value},
@@ -957,14 +1057,14 @@ func TestQueryExec(t *testing.T) {
 		{
 			// Select records where v.Address.City = "Collins" or (type is Invoice and v.InvoiceNum is nil).
 			// Limit 3 Offset 2
-			"select v from Customer where v.Address.City = \"Collins\" or (t = \"Invoice\" and v.InvoiceNum is nil) limit 3 offset 2",
+			"select v from Customer where v.Address.City = \"Collins\" or (Type(v) = \"Invoice\" and v.InvoiceNum is nil) limit 3 offset 2",
 			[]string{"v"},
 			[][]*vdl.Value{},
 		},
 		// Test functions.
 		{
 			// Select invoice records where date is 2015-03-17
-			"select v from Customer where t = \"Invoice\" and YMD(v.InvoiceDate, \"America/Los_Angeles\") = Date(\"2015-03-17 PDT\")",
+			"select v from Customer where Type(v) = \"Invoice\" and YMD(v.InvoiceDate, \"America/Los_Angeles\") = Date(\"2015-03-17 PDT\")",
 			[]string{"v"},
 			[][]*vdl.Value{
 				[]*vdl.Value{custTable.rows[5].value},
@@ -1060,7 +1160,7 @@ func TestQueryExec(t *testing.T) {
 		// Test string functions in where clause.
 		{
 			// Select invoices shipped to Any street -- using LowerCase.
-			"select k from Customer where t = \"Invoice\" and LowerCase(v.ShipTo.Street) like \"%any%\"",
+			"select k from Customer where Type(v) = \"Invoice\" and LowerCase(v.ShipTo.Street) like \"%any%\"",
 			[]string{"k"},
 			[][]*vdl.Value{
 				[]*vdl.Value{vdl.ValueOf(custTable.rows[5].key)},
@@ -1071,7 +1171,7 @@ func TestQueryExec(t *testing.T) {
 		},
 		{
 			// Select invoices shipped to Any street -- using UpperCase.
-			"select k from Customer where t = \"Invoice\" and UpperCase(v.ShipTo.Street) like \"%ANY%\"",
+			"select k from Customer where Type(v) = \"Invoice\" and UpperCase(v.ShipTo.Street) like \"%ANY%\"",
 			[]string{"k"},
 			[][]*vdl.Value{
 				[]*vdl.Value{vdl.ValueOf(custTable.rows[5].key)},
@@ -1117,7 +1217,7 @@ func TestQueryExec(t *testing.T) {
 		},
 		// LowerCase function
 		{
-			"select LowerCase(v.Name) as name from Customer where t = \"Customer\"",
+			"select LowerCase(v.Name) as name from Customer where Type(v) = \"Customer\"",
 			[]string{"name"},
 			[][]*vdl.Value{
 				[]*vdl.Value{vdl.ValueOf("john smith")},
@@ -1127,7 +1227,7 @@ func TestQueryExec(t *testing.T) {
 		},
 		// UpperCase function
 		{
-			"select UpperCase(v.Name) as NAME from Customer where t = \"Customer\"",
+			"select UpperCase(v.Name) as NAME from Customer where Type(v) = \"Customer\"",
 			[]string{"NAME"},
 			[][]*vdl.Value{
 				[]*vdl.Value{vdl.ValueOf("JOHN SMITH")},
@@ -1137,7 +1237,7 @@ func TestQueryExec(t *testing.T) {
 		},
 		// YMDHMS function
 		{
-			"select k, YMDHMS(v.InvoiceDate, \"America/Los_Angeles\") from Customer where t = \"Invoice\" and k = \"002003\"",
+			"select k, YMDHMS(v.InvoiceDate, \"America/Los_Angeles\") from Customer where Type(v) = \"Invoice\" and k = \"002003\"",
 			[]string{
 				"k",
 				"YMDHMS",
@@ -1148,7 +1248,7 @@ func TestQueryExec(t *testing.T) {
 		},
 		// YMDHM function
 		{
-			"select k, YMDHM(v.InvoiceDate, \"America/Los_Angeles\") from Customer where t = \"Invoice\" and k = \"002003\"",
+			"select k, YMDHM(v.InvoiceDate, \"America/Los_Angeles\") from Customer where Type(v) = \"Invoice\" and k = \"002003\"",
 			[]string{
 				"k",
 				"YMDHM",
@@ -1159,7 +1259,7 @@ func TestQueryExec(t *testing.T) {
 		},
 		// YMDH function
 		{
-			"select k, YMDH(v.InvoiceDate, \"America/Los_Angeles\") from Customer where t = \"Invoice\" and k = \"002003\"",
+			"select k, YMDH(v.InvoiceDate, \"America/Los_Angeles\") from Customer where Type(v) = \"Invoice\" and k = \"002003\"",
 			[]string{
 				"k",
 				"YMDH",
@@ -1170,7 +1270,7 @@ func TestQueryExec(t *testing.T) {
 		},
 		// YMD function
 		{
-			"select k, YMD(v.InvoiceDate, \"America/Los_Angeles\") from Customer where t = \"Invoice\" and k = \"002003\"",
+			"select k, YMD(v.InvoiceDate, \"America/Los_Angeles\") from Customer where Type(v) = \"Invoice\" and k = \"002003\"",
 			[]string{
 				"k",
 				"YMD",
@@ -1181,7 +1281,7 @@ func TestQueryExec(t *testing.T) {
 		},
 		// YM function
 		{
-			"select k, YM(v.InvoiceDate, \"America/Los_Angeles\") from Customer where t = \"Invoice\" and k = \"002003\"",
+			"select k, YM(v.InvoiceDate, \"America/Los_Angeles\") from Customer where Type(v) = \"Invoice\" and k = \"002003\"",
 			[]string{
 				"k",
 				"YM",
@@ -1192,7 +1292,7 @@ func TestQueryExec(t *testing.T) {
 		},
 		// Y function
 		{
-			"select k, Y(v.InvoiceDate, \"America/Los_Angeles\") from Customer where t = \"Invoice\" and k = \"001001\"",
+			"select k, Y(v.InvoiceDate, \"America/Los_Angeles\") from Customer where Type(v) = \"Invoice\" and k = \"001001\"",
 			[]string{
 				"k",
 				"Y",
@@ -1203,7 +1303,7 @@ func TestQueryExec(t *testing.T) {
 		},
 		// Nested functions
 		{
-			"select Y(YM(YMD(YMDH(YMDHM(YMDHMS(v.InvoiceDate, \"America/Los_Angeles\"), \"America/Los_Angeles\"), \"America/Los_Angeles\"), \"America/Los_Angeles\"), \"America/Los_Angeles\"), \"America/Los_Angeles\")  from Customer where t = \"Invoice\" and k = \"001001\"",
+			"select Y(YM(YMD(YMDH(YMDHM(YMDHMS(v.InvoiceDate, \"America/Los_Angeles\"), \"America/Los_Angeles\"), \"America/Los_Angeles\"), \"America/Los_Angeles\"), \"America/Los_Angeles\"), \"America/Los_Angeles\")  from Customer where Type(v) = \"Invoice\" and k = \"001001\"",
 			[]string{"Y"},
 			[][]*vdl.Value{
 				[]*vdl.Value{vdl.ValueOf(t2015)},
@@ -1211,7 +1311,7 @@ func TestQueryExec(t *testing.T) {
 		},
 		// Bad arg to function.  Expression is false.
 		{
-			"select v from Customer where t = \"Invoice\" and YMD(v.InvoiceDate, v.Foo) = v.InvoiceDate",
+			"select v from Customer where Type(v) = \"Invoice\" and YMD(v.InvoiceDate, v.Foo) = v.InvoiceDate",
 			[]string{"v"},
 			[][]*vdl.Value{},
 		},
@@ -1465,6 +1565,318 @@ func TestQueryExec(t *testing.T) {
 				},
 			},
 		},
+		{
+			"select k, v.Key from BigTable where k < \"101\" or k = \"200\" or k like \"300%\"",
+			[]string{"k", "v.Key"},
+			[][]*vdl.Value{svPair("100"), svPair("200"), svPair("300")},
+		},
+		{
+			"select k, v.Key from BigTable where \"101\" > k or \"200\" = k or k like \"300%\"",
+			[]string{"k", "v.Key"},
+			[][]*vdl.Value{svPair("100"), svPair("200"), svPair("300")},
+		},
+		{
+			"select k, v.Key from BigTable where k is nil",
+			[]string{"k", "v.Key"},
+			[][]*vdl.Value{},
+		},
+		{
+			"select k, v.Key from BigTable where k is not nil and \"103\" = v.Key",
+			[]string{"k", "v.Key"},
+			[][]*vdl.Value{svPair("103")},
+		},
+		{
+			"select k, v.Key from BigTable where k like \"10_\" or k like \"20_\"",
+			[]string{"k", "v.Key"},
+			[][]*vdl.Value{
+				svPair("100"),
+				svPair("101"),
+				svPair("102"),
+				svPair("103"),
+				svPair("104"),
+				svPair("105"),
+				svPair("106"),
+				svPair("107"),
+				svPair("108"),
+				svPair("109"),
+				svPair("200"),
+				svPair("201"),
+				svPair("202"),
+				svPair("203"),
+				svPair("204"),
+				svPair("205"),
+				svPair("206"),
+				svPair("207"),
+				svPair("208"),
+				svPair("209"),
+			},
+		},
+		{
+			"select k, v.Key from BigTable where k like \"_%9\"",
+			[]string{"k", "v.Key"},
+			[][]*vdl.Value{
+				svPair("109"),
+				svPair("119"),
+				svPair("129"),
+				svPair("139"),
+				svPair("149"),
+				svPair("159"),
+				svPair("169"),
+				svPair("179"),
+				svPair("189"),
+				svPair("199"),
+				svPair("209"),
+				svPair("219"),
+				svPair("229"),
+				svPair("239"),
+				svPair("249"),
+				svPair("259"),
+				svPair("269"),
+				svPair("279"),
+				svPair("289"),
+				svPair("299"),
+			},
+		},
+		{
+			"select k, v.Key from BigTable where k like \"__0\"",
+			[]string{"k", "v.Key"},
+			[][]*vdl.Value{
+				svPair("100"),
+				svPair("110"),
+				svPair("120"),
+				svPair("130"),
+				svPair("140"),
+				svPair("150"),
+				svPair("160"),
+				svPair("170"),
+				svPair("180"),
+				svPair("190"),
+				svPair("200"),
+				svPair("210"),
+				svPair("220"),
+				svPair("230"),
+				svPair("240"),
+				svPair("250"),
+				svPair("260"),
+				svPair("270"),
+				svPair("280"),
+				svPair("290"),
+				svPair("300"),
+			},
+		},
+		{
+			"select k, v.Key from BigTable where k like \"10%\" or  k like \"20%\" or  k like \"30%\"",
+			[]string{"k", "v.Key"},
+			[][]*vdl.Value{
+				svPair("100"),
+				svPair("101"),
+				svPair("102"),
+				svPair("103"),
+				svPair("104"),
+				svPair("105"),
+				svPair("106"),
+				svPair("107"),
+				svPair("108"),
+				svPair("109"),
+				svPair("200"),
+				svPair("201"),
+				svPair("202"),
+				svPair("203"),
+				svPair("204"),
+				svPair("205"),
+				svPair("206"),
+				svPair("207"),
+				svPair("208"),
+				svPair("209"),
+				svPair("300"),
+			},
+		},
+		{
+			"select k, v.Key from BigTable where k like \"1__\" and  k like \"_2_\" and  k like \"__3\"",
+			[]string{"k", "v.Key"},
+			[][]*vdl.Value{svPair("123")},
+		},
+		{
+			"select k, v.Key from BigTable where (k >  \"100\" and k < \"103\") or (k > \"205\" and k < \"208\")",
+			[]string{"k", "v.Key"},
+			[][]*vdl.Value{
+				svPair("101"),
+				svPair("102"),
+				svPair("206"),
+				svPair("207"),
+			},
+		},
+		{
+			"select k, v.Key from BigTable where ( \"100\" < k and \"103\" > k) or (\"205\" < k and \"208\" > k)",
+			[]string{"k", "v.Key"},
+			[][]*vdl.Value{
+				svPair("101"),
+				svPair("102"),
+				svPair("206"),
+				svPair("207"),
+			},
+		},
+		{
+			"select k, v.Key from BigTable where k <=  \"100\" or k = \"101\" or k >= \"300\" or (k <> \"299\" and k not like \"300\" and k >= \"298\")",
+			[]string{"k", "v.Key"},
+			[][]*vdl.Value{
+				svPair("100"),
+				svPair("101"),
+				svPair("298"),
+				svPair("300"),
+			},
+		},
+		{
+			"select k, v.Key from BigTable where \"100\" >= k or \"101\" = k or \"300\" <= k or (\"299\" <> k and k not like \"300\" and \"298\" <= k)",
+			[]string{"k", "v.Key"},
+			[][]*vdl.Value{
+				svPair("100"),
+				svPair("101"),
+				svPair("298"),
+				svPair("300"),
+			},
+		},
+		{
+			"select k, v.Key from BigTable where k like  \"1%\" and k like \"%9\"",
+			[]string{"k", "v.Key"},
+			[][]*vdl.Value{
+				svPair("109"),
+				svPair("119"),
+				svPair("129"),
+				svPair("139"),
+				svPair("149"),
+				svPair("159"),
+				svPair("169"),
+				svPair("179"),
+				svPair("189"),
+				svPair("199"),
+			},
+		},
+		{
+			"select k, v.Key from BigTable where k like  \"3%\" and k like \"30%\" and k like \"300%\"",
+			[]string{"k", "v.Key"},
+			[][]*vdl.Value{svPair("300")},
+		},
+		{
+			"select k, v.Key from BigTable where \"110\" > k",
+			[]string{"k", "v.Key"},
+			svPairs(100, 109),
+		},
+		{
+			"select k, v.Key from BigTable where \"110\" < k and \"205\" > k",
+			[]string{"k", "v.Key"},
+			svPairs(111, 204),
+		},
+		{
+			"select k, v.Key from BigTable where \"110\" <= k and \"205\" >= k",
+			[]string{"k", "v.Key"},
+			svPairs(110, 205),
+		},
+		{
+			"select k, v.Key from BigTable where k is nil",
+			[]string{"k", "v.Key"},
+			[][]*vdl.Value{},
+		},
+		{
+			"select k, v.Key from BigTable where k is not nil",
+			[]string{"k", "v.Key"},
+			svPairs(100, 300),
+		},
+		{
+			"select k, v.Key from BigTable where k <> k",
+			[]string{"k", "v.Key"},
+			[][]*vdl.Value{},
+		},
+		{
+			"select k, v.Key from BigTable where k < k",
+			[]string{"k", "v.Key"},
+			[][]*vdl.Value{},
+		},
+		{
+			"select k, v.Key from BigTable where k > k",
+			[]string{"k", "v.Key"},
+			[][]*vdl.Value{},
+		},
+		{
+			"select k, v.Key from BigTable where k = k",
+			[]string{"k", "v.Key"},
+			svPairs(100, 300),
+		},
+		{
+			"select k, v.Key from BigTable where k <= k",
+			[]string{"k", "v.Key"},
+			svPairs(100, 300),
+		},
+		{
+			"select k, v.Key from BigTable where k >= k",
+			[]string{"k", "v.Key"},
+			svPairs(100, 300),
+		},
+		{
+			"select k, v.Key from BigTable where k = v.Key",
+			[]string{"k", "v.Key"},
+			svPairs(100, 300),
+		},
+		{
+			"select k, v.Key from BigTable where v.Key = k",
+			[]string{"k", "v.Key"},
+			svPairs(100, 300),
+		},
+		{
+			"select k, v.Key from BigTable where V.Key = K",
+			[]string{"k", "v.Key"},
+			svPairs(100, 300),
+		},
+		{
+			"select k, v.Key from BigTable where k <> v.key",
+			[]string{"k", "v.Key"},
+			[][]*vdl.Value{},
+		},
+		{
+			"select k, v.Key from BigTable where v.key <> k",
+			[]string{"k", "v.Key"},
+			[][]*vdl.Value{},
+		},
+		{
+			"select k, v.Key from BigTable where k < v.key",
+			[]string{"k", "v.Key"},
+			[][]*vdl.Value{},
+		},
+		{
+			"select k, v.Key from BigTable where v.key < k",
+			[]string{"k", "v.Key"},
+			[][]*vdl.Value{},
+		},
+		{
+			"select k, v.Key from BigTable where k > v.key",
+			[]string{"k", "v.Key"},
+			[][]*vdl.Value{},
+		},
+		{
+			"select k, v.Key from BigTable where v.key > k",
+			[]string{"k", "v.Key"},
+			[][]*vdl.Value{},
+		},
+		{
+			"select K, V.Key from BigTable where k >= v.Key",
+			[]string{"K", "V.Key"},
+			svPairs(100, 300),
+		},
+		{
+			"select k, v.Key from BigTable where v.Key >= k",
+			[]string{"k", "v.Key"},
+			svPairs(100, 300),
+		},
+		{
+			"select K, V.Key from BigTable where k <= v.Key",
+			[]string{"K", "V.Key"},
+			svPairs(100, 300),
+		},
+		{
+			"select k, v.Key from BigTable where v.Key <= k",
+			[]string{"k", "v.Key"},
+			svPairs(100, 300),
+		},
 	}
 
 	for _, test := range basic {
@@ -1485,6 +1897,21 @@ func TestQueryExec(t *testing.T) {
 			}
 		}
 	}
+}
+
+func svPair(s string) []*vdl.Value {
+	v := vdl.ValueOf(s)
+	return []*vdl.Value{v, v}
+}
+
+// Genearate k,v pairs for start to finish (*INCLUSIVE*)
+func svPairs(start, finish int64) [][]*vdl.Value {
+	retVal := [][]*vdl.Value{}
+	for i := start; i <= finish; i++ {
+		v := vdl.ValueOf(fmt.Sprintf("%d", i))
+		retVal = append(retVal, []*vdl.Value{v, v})
+	}
+	return retVal
 }
 
 // Use Now to verify it is "pre" executed such that all the rows
@@ -1584,7 +2011,7 @@ func TestKeyRanges(t *testing.T) {
 		},
 		{
 			// All selected rows will have key prefix of "abc".
-			"select k, v from Customer where t = \"Foo.Bar\" and k like \"abc%\"",
+			"select k, v from Customer where Type(v) = \"Foo.Bar\" and k like \"abc%\"",
 			&query_db.KeyRanges{
 				query_db.KeyRange{"abc", plusOne("abc")},
 			},
@@ -1592,7 +2019,7 @@ func TestKeyRanges(t *testing.T) {
 		},
 		{
 			// Need all keys
-			"select k, v from Customer where t = \"Foo.Bar\" or k like \"abc%\"",
+			"select k, v from Customer where Type(v) = \"Foo.Bar\" or k like \"abc%\"",
 			&query_db.KeyRanges{
 				query_db.KeyRange{"", ""},
 			},
@@ -1608,7 +2035,7 @@ func TestKeyRanges(t *testing.T) {
 		},
 		{
 			// All selected rows will have key prefix of "foo".
-			"select k, v from Customer where t = \"Foo.Bar\" and k like \"foo_bar\"",
+			"select k, v from Customer where Type(v) = \"Foo.Bar\" and k like \"foo_bar\"",
 			&query_db.KeyRanges{
 				query_db.KeyRange{"foo", plusOne("foo")},
 			},
@@ -1778,7 +2205,7 @@ func TestEvalWhereUsingOnlyKey(t *testing.T) {
 		},
 		{
 			// Need value (i.e., its type) to determine if row should be selected.
-			"select k, v from Customer where k = \"xyz\" or t = \"foo.Bar\"",
+			"select k, v from Customer where k = \"xyz\" or Type(v) = \"foo.Bar\"",
 			"wxyz",
 			query.FETCH_VALUE,
 		},
@@ -1818,11 +2245,11 @@ func TestEvalWhereUsingOnlyKey(t *testing.T) {
 func TestEval(t *testing.T) {
 	basic := []evalTest{
 		{
-			"select k, v from Customer where t = \"v.io/syncbase/v23/syncbase/nosql/internal/query/test.Customer\"",
+			"select k, v from Customer where Type(v) = \"v.io/syncbase/v23/syncbase/nosql/internal/query/test.Customer\"",
 			custTable.rows[0].key, custTable.rows[0].value, true,
 		},
 		{
-			"select k, v from Customer where t = \"Customer\"",
+			"select k, v from Customer where Type(v) = \"Customer\"",
 			numTable.rows[0].key, custTable.rows[0].value, true,
 		},
 		{
@@ -2057,7 +2484,7 @@ func TestEval(t *testing.T) {
 func TestProjection(t *testing.T) {
 	basic := []projectionTest{
 		{
-			"select k, v from Customer where t = \"Customer\"",
+			"select k, v from Customer where Type(v) = \"Customer\"",
 			"123456", custTable.rows[0].value,
 			[]*vdl.Value{
 				vdl.ValueOf("123456"),
@@ -2065,7 +2492,7 @@ func TestProjection(t *testing.T) {
 			},
 		},
 		{
-			"select k, v, v.Name, v.Id, v.Active, v.Credit.Agency, v.Credit.Report.EquifaxReport.Rating, v.Address.Street, v.Address.City, v.Address.State, v.Address.Zip from Customer where t = \"Customer\"",
+			"select k, v, v.Name, v.Id, v.Active, v.Credit.Agency, v.Credit.Report.EquifaxReport.Rating, v.Address.Street, v.Address.City, v.Address.State, v.Address.Zip from Customer where Type(v) = \"Customer\"",
 			custTable.rows[0].key, custTable.rows[0].value,
 			[]*vdl.Value{
 				vdl.ValueOf(custTable.rows[0].key),
@@ -2111,7 +2538,7 @@ func TestProjection(t *testing.T) {
 func TestExecSelectSingleRow(t *testing.T) {
 	basic := []execSelectSingleRowTest{
 		{
-			"select k, v from Customer where t = \"Customer\"",
+			"select k, v from Customer where Type(v) = \"Customer\"",
 			"123456", custTable.rows[0].value,
 			[]*vdl.Value{
 				vdl.ValueOf("123456"),
@@ -2119,7 +2546,7 @@ func TestExecSelectSingleRow(t *testing.T) {
 			},
 		},
 		{
-			"select k, v from Customer where t = \"Customer\" and k like \"123%\"",
+			"select k, v from Customer where Type(v) = \"Customer\" and k like \"123%\"",
 			"123456", custTable.rows[0].value,
 			[]*vdl.Value{
 				vdl.ValueOf("123456"),
@@ -2127,12 +2554,12 @@ func TestExecSelectSingleRow(t *testing.T) {
 			},
 		},
 		{
-			"select k, v from Customer where t = \"Invoice\" and k like \"123%\"",
+			"select k, v from Customer where Type(v) = \"Invoice\" and k like \"123%\"",
 			"123456", custTable.rows[0].value,
 			[]*vdl.Value{},
 		},
 		{
-			"select k, v from Customer where t = \"Customer\" and k like \"456%\"",
+			"select k, v from Customer where Type(v) = \"Customer\" and k like \"456%\"",
 			"123456", custTable.rows[0].value,
 			[]*vdl.Value{},
 		},
@@ -2149,7 +2576,7 @@ func TestExecSelectSingleRow(t *testing.T) {
 			[]*vdl.Value{},
 		},
 		{
-			"select k, v, v.Name, v.Id, v.Active, v.Credit.Report.EquifaxReport.Rating, v.Credit.Report.ExperianReport.Rating, v.Credit.Report.TransUnionReport.Rating, v.Address.Street, v.Address.City, v.Address.State, v.Address.Zip from Customer where t = \"Customer\"",
+			"select k, v, v.Name, v.Id, v.Active, v.Credit.Report.EquifaxReport.Rating, v.Credit.Report.ExperianReport.Rating, v.Credit.Report.TransUnionReport.Rating, v.Address.Street, v.Address.City, v.Address.State, v.Address.Zip from Customer where Type(v) = \"Customer\"",
 			custTable.rows[0].key, custTable.rows[0].value,
 			[]*vdl.Value{
 				vdl.ValueOf(custTable.rows[0].key),
@@ -2210,6 +2637,14 @@ func TestExecErrors(t *testing.T) {
 			// The following error text is dependent on implementation of Database.
 			syncql.NewErrExpected(db.GetContext(), 30, "positive integer literal"),
 		},
+		{
+			"select k, v.Key from BigTable where 110 <= k and 205 >= k",
+			syncql.NewErrKeyExpressionLiteral(db.GetContext(), 36),
+		},
+		{
+			"select k, v.Key from BigTable where Type(k) = \"BigData\"",
+			syncql.NewErrArgMustBeField(db.GetContext(), 41),
+		},
 	}
 
 	for _, test := range basic {
@@ -2223,20 +2658,6 @@ func TestExecErrors(t *testing.T) {
 
 func TestResolveField(t *testing.T) {
 	basic := []execResolveFieldTest{
-		{
-			custTable.rows[0].key,
-			custTable.rows[0].value,
-			query_parser.Field{
-				Segments: []query_parser.Segment{
-					query_parser.Segment{
-						Value: "t",
-						Node:  query_parser.Node{Off: 7},
-					},
-				},
-				Node: query_parser.Node{Off: 7},
-			},
-			vdl.ValueOf("v.io/syncbase/v23/syncbase/nosql/internal/query/test.Customer"),
-		},
 		{
 			custTable.rows[0].key,
 			custTable.rows[0].value,
@@ -2276,7 +2697,7 @@ func TestResolveField(t *testing.T) {
 	}
 
 	for _, test := range basic {
-		r, _, _ := query.ResolveField(db, test.k, test.v, &test.f)
+		r := query.ResolveField(db, test.k, test.v, &test.f)
 		if !reflect.DeepEqual(r, test.r) {
 			t.Errorf("got %v(%s), want %v(%s)", r, r.Type(), test.r, test.r.Type())
 		}
