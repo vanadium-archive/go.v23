@@ -1528,6 +1528,9 @@ type DatabaseClientMethods interface {
 	// TODO(ivanpi): Exists may fail with an error if higher levels of hierarchy
 	// do not exist.
 	Exists(ctx *context.T, schemaVersion int32, opts ...rpc.CallOpt) (bool, error)
+	// Exec executes a syncQL query and returns all results as specified by in the
+	// query's select clause. Concurrency semantics are documented in model.go.
+	Exec(ctx *context.T, schemaVersion int32, query string, opts ...rpc.CallOpt) (DatabaseExecClientCall, error)
 	// BeginBatch creates a new batch. It returns an App-relative name for a
 	// Database handle bound to this batch. If this Database is already bound to a
 	// batch, BeginBatch() will fail with ErrBoundToBatch. Concurrency semantics
@@ -1538,9 +1541,6 @@ type DatabaseClientMethods interface {
 	// If this Database is not bound to a batch, Commit() will fail with
 	// ErrNotBoundToBatch.
 	Commit(ctx *context.T, schemaVersion int32, opts ...rpc.CallOpt) error
-	// Exec executes a syncQL query and returns all results as specified by in the
-	// query's select clause. Concurrency semantics are documented in model.go.
-	Exec(ctx *context.T, schemaVersion int32, query string, opts ...rpc.CallOpt) (DatabaseExecClientCall, error)
 	// Abort notifies the server that any pending changes can be discarded.
 	// It is not strictly required, but it may allow the server to release locks
 	// or other resources sooner than if it was not called.
@@ -1585,6 +1585,15 @@ func (c implDatabaseClientStub) Exists(ctx *context.T, i0 int32, opts ...rpc.Cal
 	return
 }
 
+func (c implDatabaseClientStub) Exec(ctx *context.T, i0 int32, i1 string, opts ...rpc.CallOpt) (ocall DatabaseExecClientCall, err error) {
+	var call rpc.ClientCall
+	if call, err = v23.GetClient(ctx).StartCall(ctx, c.name, "Exec", []interface{}{i0, i1}, opts...); err != nil {
+		return
+	}
+	ocall = &implDatabaseExecClientCall{ClientCall: call}
+	return
+}
+
 func (c implDatabaseClientStub) BeginBatch(ctx *context.T, i0 int32, i1 BatchOptions, opts ...rpc.CallOpt) (o0 string, err error) {
 	err = v23.GetClient(ctx).Call(ctx, c.name, "BeginBatch", []interface{}{i0, i1}, []interface{}{&o0}, opts...)
 	return
@@ -1592,15 +1601,6 @@ func (c implDatabaseClientStub) BeginBatch(ctx *context.T, i0 int32, i1 BatchOpt
 
 func (c implDatabaseClientStub) Commit(ctx *context.T, i0 int32, opts ...rpc.CallOpt) (err error) {
 	err = v23.GetClient(ctx).Call(ctx, c.name, "Commit", []interface{}{i0}, nil, opts...)
-	return
-}
-
-func (c implDatabaseClientStub) Exec(ctx *context.T, i0 int32, i1 string, opts ...rpc.CallOpt) (ocall DatabaseExecClientCall, err error) {
-	var call rpc.ClientCall
-	if call, err = v23.GetClient(ctx).StartCall(ctx, c.name, "Exec", []interface{}{i0, i1}, opts...); err != nil {
-		return
-	}
-	ocall = &implDatabaseExecClientCall{ClientCall: call}
 	return
 }
 
@@ -1773,6 +1773,9 @@ type DatabaseServerMethods interface {
 	// TODO(ivanpi): Exists may fail with an error if higher levels of hierarchy
 	// do not exist.
 	Exists(ctx *context.T, call rpc.ServerCall, schemaVersion int32) (bool, error)
+	// Exec executes a syncQL query and returns all results as specified by in the
+	// query's select clause. Concurrency semantics are documented in model.go.
+	Exec(ctx *context.T, call DatabaseExecServerCall, schemaVersion int32, query string) error
 	// BeginBatch creates a new batch. It returns an App-relative name for a
 	// Database handle bound to this batch. If this Database is already bound to a
 	// batch, BeginBatch() will fail with ErrBoundToBatch. Concurrency semantics
@@ -1783,9 +1786,6 @@ type DatabaseServerMethods interface {
 	// If this Database is not bound to a batch, Commit() will fail with
 	// ErrNotBoundToBatch.
 	Commit(ctx *context.T, call rpc.ServerCall, schemaVersion int32) error
-	// Exec executes a syncQL query and returns all results as specified by in the
-	// query's select clause. Concurrency semantics are documented in model.go.
-	Exec(ctx *context.T, call DatabaseExecServerCall, schemaVersion int32, query string) error
 	// Abort notifies the server that any pending changes can be discarded.
 	// It is not strictly required, but it may allow the server to release locks
 	// or other resources sooner than if it was not called.
@@ -1884,6 +1884,9 @@ type DatabaseServerStubMethods interface {
 	// TODO(ivanpi): Exists may fail with an error if higher levels of hierarchy
 	// do not exist.
 	Exists(ctx *context.T, call rpc.ServerCall, schemaVersion int32) (bool, error)
+	// Exec executes a syncQL query and returns all results as specified by in the
+	// query's select clause. Concurrency semantics are documented in model.go.
+	Exec(ctx *context.T, call *DatabaseExecServerCallStub, schemaVersion int32, query string) error
 	// BeginBatch creates a new batch. It returns an App-relative name for a
 	// Database handle bound to this batch. If this Database is already bound to a
 	// batch, BeginBatch() will fail with ErrBoundToBatch. Concurrency semantics
@@ -1894,9 +1897,6 @@ type DatabaseServerStubMethods interface {
 	// If this Database is not bound to a batch, Commit() will fail with
 	// ErrNotBoundToBatch.
 	Commit(ctx *context.T, call rpc.ServerCall, schemaVersion int32) error
-	// Exec executes a syncQL query and returns all results as specified by in the
-	// query's select clause. Concurrency semantics are documented in model.go.
-	Exec(ctx *context.T, call *DatabaseExecServerCallStub, schemaVersion int32, query string) error
 	// Abort notifies the server that any pending changes can be discarded.
 	// It is not strictly required, but it may allow the server to release locks
 	// or other resources sooner than if it was not called.
@@ -1956,16 +1956,16 @@ func (s implDatabaseServerStub) Exists(ctx *context.T, call rpc.ServerCall, i0 i
 	return s.impl.Exists(ctx, call, i0)
 }
 
+func (s implDatabaseServerStub) Exec(ctx *context.T, call *DatabaseExecServerCallStub, i0 int32, i1 string) error {
+	return s.impl.Exec(ctx, call, i0, i1)
+}
+
 func (s implDatabaseServerStub) BeginBatch(ctx *context.T, call rpc.ServerCall, i0 int32, i1 BatchOptions) (string, error) {
 	return s.impl.BeginBatch(ctx, call, i0, i1)
 }
 
 func (s implDatabaseServerStub) Commit(ctx *context.T, call rpc.ServerCall, i0 int32) error {
 	return s.impl.Commit(ctx, call, i0)
-}
-
-func (s implDatabaseServerStub) Exec(ctx *context.T, call *DatabaseExecServerCallStub, i0 int32, i1 string) error {
-	return s.impl.Exec(ctx, call, i0, i1)
 }
 
 func (s implDatabaseServerStub) Abort(ctx *context.T, call rpc.ServerCall, i0 int32) error {
@@ -2025,6 +2025,15 @@ var descDatabase = rpc.InterfaceDesc{
 			Tags: []*vdl.Value{vdl.ValueOf(access.Tag("Read"))},
 		},
 		{
+			Name: "Exec",
+			Doc:  "// Exec executes a syncQL query and returns all results as specified by in the\n// query's select clause. Concurrency semantics are documented in model.go.",
+			InArgs: []rpc.ArgDesc{
+				{"schemaVersion", ``}, // int32
+				{"query", ``},         // string
+			},
+			Tags: []*vdl.Value{vdl.ValueOf(access.Tag("Read"))},
+		},
+		{
 			Name: "BeginBatch",
 			Doc:  "// BeginBatch creates a new batch. It returns an App-relative name for a\n// Database handle bound to this batch. If this Database is already bound to a\n// batch, BeginBatch() will fail with ErrBoundToBatch. Concurrency semantics\n// are documented in model.go.\n// TODO(sadovsky): make BatchOptions optional",
 			InArgs: []rpc.ArgDesc{
@@ -2041,15 +2050,6 @@ var descDatabase = rpc.InterfaceDesc{
 			Doc:  "// Commit persists the pending changes to the database.\n// If this Database is not bound to a batch, Commit() will fail with\n// ErrNotBoundToBatch.",
 			InArgs: []rpc.ArgDesc{
 				{"schemaVersion", ``}, // int32
-			},
-			Tags: []*vdl.Value{vdl.ValueOf(access.Tag("Read"))},
-		},
-		{
-			Name: "Exec",
-			Doc:  "// Exec executes a syncQL query and returns all results as specified by in the\n// query's select clause. Concurrency semantics are documented in model.go.",
-			InArgs: []rpc.ArgDesc{
-				{"schemaVersion", ``}, // int32
-				{"query", ``},         // string
 			},
 			Tags: []*vdl.Value{vdl.ValueOf(access.Tag("Read"))},
 		},
@@ -2127,6 +2127,7 @@ type TableClientMethods interface {
 	Exists(ctx *context.T, schemaVersion int32, opts ...rpc.CallOpt) (bool, error)
 	// Delete deletes all rows in the given half-open range [start, limit). If
 	// limit is "", all rows with keys >= start are included.
+	// TODO(sadovsky): Delete prefix perms fully covered by the row range?
 	DeleteRowRange(ctx *context.T, schemaVersion int32, start []byte, limit []byte, opts ...rpc.CallOpt) error
 	// Scan returns all rows in the given half-open range [start, limit). If limit
 	// is "", all rows with keys >= start are included. Concurrency semantics are
@@ -2300,6 +2301,7 @@ type TableServerMethods interface {
 	Exists(ctx *context.T, call rpc.ServerCall, schemaVersion int32) (bool, error)
 	// Delete deletes all rows in the given half-open range [start, limit). If
 	// limit is "", all rows with keys >= start are included.
+	// TODO(sadovsky): Delete prefix perms fully covered by the row range?
 	DeleteRowRange(ctx *context.T, call rpc.ServerCall, schemaVersion int32, start []byte, limit []byte) error
 	// Scan returns all rows in the given half-open range [start, limit). If limit
 	// is "", all rows with keys >= start are included. Concurrency semantics are
@@ -2342,6 +2344,7 @@ type TableServerStubMethods interface {
 	Exists(ctx *context.T, call rpc.ServerCall, schemaVersion int32) (bool, error)
 	// Delete deletes all rows in the given half-open range [start, limit). If
 	// limit is "", all rows with keys >= start are included.
+	// TODO(sadovsky): Delete prefix perms fully covered by the row range?
 	DeleteRowRange(ctx *context.T, call rpc.ServerCall, schemaVersion int32, start []byte, limit []byte) error
 	// Scan returns all rows in the given half-open range [start, limit). If limit
 	// is "", all rows with keys >= start are included. Concurrency semantics are
@@ -2475,7 +2478,7 @@ var descTable = rpc.InterfaceDesc{
 		},
 		{
 			Name: "DeleteRowRange",
-			Doc:  "// Delete deletes all rows in the given half-open range [start, limit). If\n// limit is \"\", all rows with keys >= start are included.",
+			Doc:  "// Delete deletes all rows in the given half-open range [start, limit). If\n// limit is \"\", all rows with keys >= start are included.\n// TODO(sadovsky): Delete prefix perms fully covered by the row range?",
 			InArgs: []rpc.ArgDesc{
 				{"schemaVersion", ``}, // int32
 				{"start", ``},         // []byte

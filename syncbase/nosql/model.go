@@ -177,6 +177,7 @@ type Table interface {
 
 	// Delete deletes all rows in the given half-open range [start, limit). If
 	// limit is "", all rows with keys >= start are included.
+	// TODO(sadovsky): Delete prefix perms fully covered by the row range?
 	// See helpers nosql.Prefix(), nosql.Range(), nosql.SingleRow().
 	Delete(ctx *context.T, r RowRange) error
 

@@ -33,6 +33,10 @@ type Database interface {
 	// do not exist.
 	Exists(schemaVersion int32) (bool | error) {access.Read}
 
+	// Exec executes a syncQL query and returns all results as specified by in the
+	// query's select clause. Concurrency semantics are documented in model.go.
+	Exec(schemaVersion int32, query string) stream<_, []any> error {access.Read}
+
 	// BeginBatch creates a new batch. It returns an App-relative name for a
 	// Database handle bound to this batch. If this Database is already bound to a
 	// batch, BeginBatch() will fail with ErrBoundToBatch. Concurrency semantics
@@ -44,10 +48,6 @@ type Database interface {
 	// If this Database is not bound to a batch, Commit() will fail with
 	// ErrNotBoundToBatch.
 	Commit(schemaVersion int32) error {access.Read}
-
-	// Exec executes a syncQL query and returns all results as specified by in the
-	// query's select clause. Concurrency semantics are documented in model.go.
-	Exec(schemaVersion int32, query string) stream<_, []any> error {access.Read}
 
 	// Abort notifies the server that any pending changes can be discarded.
 	// It is not strictly required, but it may allow the server to release locks
@@ -95,6 +95,7 @@ type Table interface {
 
 	// Delete deletes all rows in the given half-open range [start, limit). If
 	// limit is "", all rows with keys >= start are included.
+	// TODO(sadovsky): Delete prefix perms fully covered by the row range?
 	DeleteRowRange(schemaVersion int32, start, limit []byte) error {access.Write}
 
 	// Scan returns all rows in the given half-open range [start, limit). If limit
