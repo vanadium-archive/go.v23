@@ -75,8 +75,16 @@ func (c *Certificate) chainedDigests(hashfn Hash, chain []byte) (digest, content
 	digest = hashfn.sum(append(contentDigest, c.Signature.digest(hashfn)...))
 	if len(chain) > 0 {
 		// c is not the "root" of the chain
-		contentDigest = hashfn.sum(append(chain, contentDigest...))
-		digest = hashfn.sum(append(chain, digest...))
+		// We hash (using 'hashfn') 'chain' and then append it to 'digest'
+		// (or 'contentDigest'). Hashing 'chain' is important as it may be
+		// of a different length from 'digest'. While the length of 'digest'
+		// is the length of the output of 'hashfn', the length of 'chain'
+		// would depend on the size of the public key in the last
+		// certificate of the chain represented by it. Hashing 'chain'
+		// using 'hasfn' guarantees that it will have the same length
+		// as 'digest'.
+		contentDigest = hashfn.sum(append(hashfn.sum(chain), contentDigest...))
+		digest = hashfn.sum(append(hashfn.sum(chain), digest...))
 	}
 	return
 }
