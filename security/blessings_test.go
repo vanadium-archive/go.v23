@@ -5,6 +5,7 @@
 package security
 
 import (
+	"bytes"
 	"crypto/ecdsa"
 	"crypto/elliptic"
 	"crypto/rand"
@@ -163,24 +164,49 @@ func TestBlessingsExpiry(t *testing.T) {
 	}
 }
 
-func BenchmarkBlessingsSingleCertificateEquality(b *testing.B) {
-	p, err := CreatePrincipal(newSigner(), nil, nil)
-	if err != nil {
-		b.Fatal(err)
-	}
-	caveat, err := NewExpiryCaveat(time.Now().Add(time.Hour))
-	if err != nil {
-		b.Fatal(err)
-	}
-	blessings, err := p.BlessSelf("self", caveat)
-	if err != nil {
-		b.Fatal(err)
-	}
-	b.ResetTimer()
-	for i := 0; i < b.N; i++ {
-		if equals := blessings.Equivalent(blessings); !equals {
-			b.Fatalf("blessings should be equal")
+func TestBlessingsUniqueID(t *testing.T) {
+	var (
+		palice = newPrincipal(t)
+		pbob   = newPrincipal(t)
+
+		// Create blessings using all the methods available to create
+		// them: Bless, BlessSelf, UnionOfBlessings.
+		alice        = blessSelf(t, palice, "alice")
+		bob          = blessSelf(t, pbob, "bob")
+		bobfriend, _ = pbob.Bless(alice.PublicKey(), bob, "friend", UnconstrainedUse())
+		bobspouse, _ = pbob.Bless(alice.PublicKey(), bob, "spouse", UnconstrainedUse())
+
+		u1, _ = UnionOfBlessings(alice, bobfriend, bobspouse)
+		u2, _ = UnionOfBlessings(bobfriend, bobspouse, alice)
+
+		all = []Blessings{alice, bob, bobfriend, bobspouse, u1}
+	)
+	// Each individual blessing should have a different UniqueID, and different from u1
+	for i := 0; i < len(all); i++ {
+		b1 := all[i]
+		for j := i + 1; j < len(all); j++ {
+			if b2 := all[j]; bytes.Equal(b1.UniqueID(), b2.UniqueID()) {
+				t.Errorf("%q and %q have the same UniqueID!", b1, b2)
+			}
 		}
+		// Each blessings object must have a unique ID (whether created
+		// by blessing self, blessed by another principal, or
+		// roundtripped through VOM)
+		if len(b1.UniqueID()) == 0 {
+			t.Errorf("%q has no UniqueID", b1)
+		}
+		serialized, err := vom.Encode(b1)
+		if err != nil {
+			t.Errorf("%q failed VOM encoding: %v", b1, err)
+		}
+		var deserialized Blessings
+		if err := vom.Decode(serialized, &deserialized); err != nil || !bytes.Equal(b1.UniqueID(), deserialized.UniqueID()) {
+			t.Errorf("%q: UniqueID mismatch after VOM round-tripping. VOM decode error: %v", b1, err)
+		}
+	}
+	// u1 and u2 should have the same UniqueID
+	if !bytes.Equal(u1.UniqueID(), u2.UniqueID()) {
+		t.Errorf("%q and %q have different UniqueIDs", u1, u2)
 	}
 }
 

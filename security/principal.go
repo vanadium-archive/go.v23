@@ -123,9 +123,10 @@ func (p *principal) Bless(key PublicKey, with Blessings, extension string, cavea
 	}
 	chains := with.chains
 	newchains := make([][]Certificate, len(chains))
+	newdigests := make([][]byte, len(chains))
 	for idx, chain := range chains {
 		if with.newscheme[idx] {
-			if newchains[idx], err = chainCertificate(p.signer, chain, *cert); err != nil {
+			if newchains[idx], newdigests[idx], err = chainCertificate(p.signer, chain, *cert); err != nil {
 				return Blessings{}, err
 			}
 		} else if err := cert.deprecatedSign(p.signer, chain[len(chain)-1].Signature); err != nil {
@@ -135,13 +136,17 @@ func (p *principal) Bless(key PublicKey, with Blessings, extension string, cavea
 			copy(cpy, chain)
 			cpy[len(cpy)-1] = *cert
 			newchains[idx] = cpy
+			newdigests[idx], _ = digestsForCertificateChain(cpy)
 		}
 	}
-	return Blessings{
+	ret := Blessings{
 		chains:    newchains,
 		publicKey: key,
+		digests:   newdigests,
 		newscheme: with.newscheme,
-	}, nil
+	}
+	ret.init()
+	return ret, nil
 }
 
 func (p *principal) BlessSelf(name string, caveats ...Caveat) (Blessings, error) {
@@ -150,24 +155,32 @@ func (p *principal) BlessSelf(name string, caveats ...Caveat) (Blessings, error)
 		return Blessings{}, err
 	}
 	if useNewCertificateSigningScheme {
-		chain, err := chainCertificate(p.signer, nil, *cert)
+		chain, digest, err := chainCertificate(p.signer, nil, *cert)
 		if err != nil {
 			return Blessings{}, err
 		}
-		return Blessings{
+		ret := Blessings{
 			chains:    [][]Certificate{chain},
 			publicKey: p.PublicKey(),
+			digests:   [][]byte{digest},
 			newscheme: []bool{true},
-		}, nil
+		}
+		ret.init()
+		return ret, nil
 	}
 	if err := cert.deprecatedSign(p.signer, Signature{}); err != nil {
 		return Blessings{}, err
 	}
-	return Blessings{
-		chains:    [][]Certificate{[]Certificate{*cert}},
+	chain := []Certificate{*cert}
+	digest, _ := digestsForCertificateChain(chain)
+	ret := Blessings{
+		chains:    [][]Certificate{chain},
 		publicKey: p.PublicKey(),
+		digests:   [][]byte{digest},
 		newscheme: []bool{false},
-	}, nil
+	}
+	ret.init()
+	return ret, nil
 }
 
 func (p *principal) Sign(message []byte) (Signature, error) {

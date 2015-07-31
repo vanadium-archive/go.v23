@@ -61,6 +61,7 @@ pkg security, method (Blessings) IsZero() bool
 pkg security, method (Blessings) PublicKey() PublicKey
 pkg security, method (Blessings) String() string
 pkg security, method (Blessings) ThirdPartyCaveats() []Caveat
+pkg security, method (Blessings) UniqueID() []byte
 pkg security, method (Caveat) String() string
 pkg security, method (Discharge) Equivalent(Discharge) bool
 pkg security, method (Discharge) Expiry() time.Time

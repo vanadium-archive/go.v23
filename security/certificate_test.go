@@ -178,7 +178,7 @@ func TestChainSignatureUsesDigestWithStrengthComparableToSigningKey(t *testing.T
 			continue
 		}
 		signer := newECDSASigner(t, test.curve)
-		chain, err := chainCertificate(signer, nil, cert)
+		chain, _, err := chainCertificate(signer, nil, cert)
 		if err != nil {
 			t.Errorf("chainCertificate for test #%d (hash:%q) failed: %v", idx, test.hash, err)
 			continue
@@ -207,11 +207,11 @@ func TestChainMixing(t *testing.T) {
 		cDelegate = Certificate{Extension: "delegate", PublicKey: pDelegate}
 
 		// Certificate chains
-		C1, _   = chainCertificate(sRoot, nil, cRoot1)                            // alpha
-		C2, _   = chainCertificate(sRoot, nil, cRoot2)                            // beta
-		C3, _   = chainCertificate(sRoot, C1, cUser)                              // alpha/user
-		C4, _   = chainCertificate(sUser, C3, cDelegate)                          // alpha/user/delegate
-		Cbad, _ = chainCertificate(sUser, []Certificate{C2[0], C3[1]}, cDelegate) // malformed beta/user/delegate
+		C1, _, _   = chainCertificate(sRoot, nil, cRoot1)                            // alpha
+		C2, _, _   = chainCertificate(sRoot, nil, cRoot2)                            // beta
+		C3, _, _   = chainCertificate(sRoot, C1, cUser)                              // alpha/user
+		C4, _, _   = chainCertificate(sUser, C3, cDelegate)                          // alpha/user/delegate
+		Cbad, _, _ = chainCertificate(sUser, []Certificate{C2[0], C3[1]}, cDelegate) // malformed beta/user/delegate
 
 		validate = func(chain []Certificate, expectedKeyBytes []byte, expectedError verror.ID) error {
 			var expectedKey PublicKey
@@ -223,12 +223,15 @@ func TestChainMixing(t *testing.T) {
 			}
 			// Run all validations twice to account for caching of certificate verifications.
 			for i := 1; i <= 2; i++ {
-				p, err := validateCertificateChain(chain)
+				p, digest, err := validateCertificateChain(chain)
 				if !reflect.DeepEqual(expectedKey, p) {
 					return fmt.Errorf("Got (%v, %v) wanted (%v, %q) on call #%d to validateCertificateChain", p, err, expectedKey, expectedError, i)
 				}
 				if got, want := verror.ErrorID(err), expectedError; got != want {
 					return fmt.Errorf("Got error %v (id=%q) want error id=%q on call #%d to validateCertificateChain", err, got, want, i)
+				}
+				if got, want := (err == nil), (len(digest) != 0); got != want {
+					return fmt.Errorf("Validation error:%v, Digest:%v on call #%d to validateCertificateChain", got, want, i)
 				}
 			}
 			return nil
@@ -260,4 +263,22 @@ func TestChainMixing(t *testing.T) {
 			t.Errorf("Test #%d: %v", idx, err)
 		}
 	}
+}
+
+func benchmarkDigestsForCertificateChain(b *testing.B, ncerts int) {
+	chain := makeBlessings(b, ncerts).chains[0]
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		digestsForCertificateChain(chain)
+	}
+}
+
+func BenchmarkDigestsForCertificateChain_1Cert(b *testing.B) {
+	benchmarkDigestsForCertificateChain(b, 1)
+}
+func BenchmarkDigestsForCertificateChain_3Certs(b *testing.B) {
+	benchmarkDigestsForCertificateChain(b, 3)
+}
+func BenchmarkDigestsForCertificateChain_4Certs(b *testing.B) {
+	benchmarkDigestsForCertificateChain(b, 4)
 }

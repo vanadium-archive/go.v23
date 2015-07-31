@@ -148,10 +148,10 @@ func validateExtension(extension string) error {
 
 // Validation algorithm as specified in:
 // https://docs.google.com/document/d/1jGbhwKw2SRFUIV_C55GdAwd_UzZtRoSEnnskt0GzNw4/edit?usp=sharing
-func validateCertificateChain(chain []Certificate) (PublicKey, error) {
+func validateCertificateChain(chain []Certificate) (PublicKey, []byte, error) {
 	pubkey, err := UnmarshalPublicKey(chain[len(chain)-1].PublicKey)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 	var (
 		digest        = make([][]byte, len(chain))
@@ -161,6 +161,7 @@ func validateCertificateChain(chain []Certificate) (PublicKey, error) {
 	for i := 1; i < len(chain); i++ {
 		digest[i], contentDigest[i] = chain[i].chainedDigests(chain[i].Signature.Hash, digest[i-1])
 	}
+	chaindigest := digest[len(digest)-1]
 	// Verify certificates in reverse order as per the algorithm linked to above.
 	for i := len(chain) - 1; i >= 0; i-- {
 		c := chain[i]
@@ -169,14 +170,14 @@ func validateCertificateChain(chain []Certificate) (PublicKey, error) {
 			// chain[0:i] has been validated before
 			// and chain[i:] has been validated in this for loop.
 			signatureCache.cache(digest[i:])
-			return pubkey, nil
+			return pubkey, chaindigest, nil
 		}
 		// Some basic sanity checks on the certificate.
 		if !isValidBlessingPurpose(c.Signature.Purpose) {
-			return nil, verror.New(errInapproriateCertSignature, nil, c.Extension, c.Signature.Purpose)
+			return nil, nil, verror.New(errInapproriateCertSignature, nil, c.Extension, c.Signature.Purpose)
 		}
 		if err := validateExtension(c.Extension); err != nil {
-			return nil, verror.New(errBadBlessingExtensionInCert, nil, c.Extension, err)
+			return nil, nil, verror.New(errBadBlessingExtensionInCert, nil, c.Extension, err)
 		}
 		// Verify the signature.
 		var signer PublicKey
@@ -186,31 +187,36 @@ func validateCertificateChain(chain []Certificate) (PublicKey, error) {
 			signer, err = UnmarshalPublicKey(chain[i-1].PublicKey)
 		}
 		if err != nil {
-			return nil, err
+			return nil, nil, err
 		}
 		if !chain[i].Signature.Verify(signer, contentDigest[i]) {
-			return nil, verror.New(errBadCertSignature, nil, chain[i].Extension, signer)
+			return nil, nil, verror.New(errBadCertSignature, nil, chain[i].Extension, signer)
 		}
 	}
 	signatureCache.cache(digest)
-	return pubkey, nil
+	return pubkey, chaindigest, nil
 }
 
-// chainCertificate binds cert to an existing certificate chain and returns the resulting chain.
-func chainCertificate(signer Signer, chain []Certificate, cert Certificate) ([]Certificate, error) {
-	var digest []byte
+func digestsForCertificateChain(chain []Certificate) (digest, contentDigest []byte) {
 	for _, c := range chain {
-		digest, _ = c.chainedDigests(c.Signature.Hash, digest)
+		digest, contentDigest = c.chainedDigests(c.Signature.Hash, digest)
 	}
-	_, cdigest := cert.chainedDigests(signer.PublicKey().hash(), digest)
+	return
+}
+
+// chainCertificate binds cert to an existing certificate chain and returns the
+// resulting chain (and the final digest).
+func chainCertificate(signer Signer, chain []Certificate, cert Certificate) ([]Certificate, []byte, error) {
+	parentDigest, _ := digestsForCertificateChain(chain)
+	digest, cdigest := cert.chainedDigests(signer.PublicKey().hash(), parentDigest)
 	var err error
 	if cert.Signature, err = signer.Sign(blessPurpose, cdigest); err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 	cpy := make([]Certificate, len(chain)+1)
 	copy(cpy, chain)
 	cpy[len(cpy)-1] = cert
-	return cpy, nil
+	return cpy, digest, nil
 }
 
 // Concurrent access friendly map of previously verified certificate chains

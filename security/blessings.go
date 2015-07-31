@@ -7,7 +7,6 @@ package security
 import (
 	"bytes"
 	"fmt"
-	"reflect"
 	"sort"
 	"strings"
 	"sync"
@@ -40,6 +39,8 @@ var (
 type Blessings struct {
 	chains    [][]Certificate
 	publicKey PublicKey
+	digests   [][]byte // digests[i] is the digest of chains[i]
+	uniqueID  []byte
 
 	// newscheme[i] is true iff chains[i] contains certificates where certificate signatures
 	// are as per
@@ -82,7 +83,26 @@ func (b Blessings) IsZero() bool {
 // Equivalent returns true if 'b' and 'blessings' can be used interchangeably,
 // i.e., 'b' will be authorized wherever 'blessings' is and vice-versa.
 func (b Blessings) Equivalent(blessings Blessings) bool {
-	return reflect.DeepEqual(b, blessings)
+	return bytes.Equal(b.UniqueID(), blessings.UniqueID())
+}
+
+// UniqueID returns an identifier of the set of blessings. Two blessings
+// objects with the same UniqueID are interchangeable for any authorization
+// decisions.
+//
+// The converse is not guaranteed at this time. Two interchangeable blessings
+// objects may in theory have different UniqueIDs.
+func (b Blessings) UniqueID() []byte { return b.uniqueID }
+
+func (b *Blessings) init() {
+	if len(b.digests) == 0 {
+		return
+	}
+	tohash := make([]byte, 0, len(b.digests[0])*len(b.digests))
+	for _, d := range b.digests {
+		tohash = append(tohash, d...)
+	}
+	b.uniqueID = b.publicKey.hash().sum(tohash)
 }
 
 // CouldHaveNames returns true iff the blessings 'b' encapsulates the provided
@@ -201,24 +221,24 @@ func deprecatedValidateCertificateChain(chain []Certificate) (PublicKey, error) 
 }
 
 // TODO(ashankar): Remove to fully resolve https://github.com/vanadium/issues/issues/543
-func transitionalValidateCertificateChain(chain []Certificate) (PublicKey, bool, error) {
+func transitionalValidateCertificateChain(chain []Certificate) (PublicKey, []byte, error) {
 	if useNewCertificateSigningScheme {
 		// Try the new scheme first, then the old
-		if key, err := validateCertificateChain(chain); err == nil {
-			return key, true, nil
+		if key, digest, err := validateCertificateChain(chain); err == nil {
+			return key, digest, nil
 		} else if oldkey, olderr := deprecatedValidateCertificateChain(chain); olderr == nil {
-			return oldkey, false, nil
+			return oldkey, nil, nil
 		} else {
-			return nil, false, err
+			return nil, nil, err
 		}
 	}
 	// Try the old scheme first and then the new.
 	if key, err := deprecatedValidateCertificateChain(chain); err == nil {
-		return key, false, nil
-	} else if newkey, newerr := validateCertificateChain(chain); newerr == nil {
-		return newkey, true, nil
+		return key, nil, nil
+	} else if newkey, digest, newerr := validateCertificateChain(chain); newerr == nil {
+		return newkey, digest, nil
 	} else {
-		return nil, false, err
+		return nil, nil, err
 	}
 }
 
@@ -284,13 +304,16 @@ func wireBlessingsToNative(wire WireBlessings, native *Blessings) error {
 	}
 	// Public keys should match for all chains.
 	marshaledkey := certchains[0][len(certchains[0])-1].PublicKey
+	digests := make([][]byte, len(certchains))
 	newscheme := make([]bool, len(certchains))
 
 	var key PublicKey
 	var err error
-	key, newscheme[0], err = transitionalValidateCertificateChain(certchains[0])
-	if err != nil {
+	if key, digests[0], err = transitionalValidateCertificateChain(certchains[0]); err != nil {
 		return err
+	}
+	if newscheme[0] = digests[0] != nil; !newscheme[0] {
+		digests[0], _ = digestsForCertificateChain(certchains[0])
 	}
 	for i := 1; i < len(certchains); i++ {
 		chain := certchains[i]
@@ -301,13 +324,18 @@ func wireBlessingsToNative(wire WireBlessings, native *Blessings) error {
 		if !bytes.Equal(marshaledkey, cert.PublicKey) {
 			return verror.New(errMultiplePublicKeys, nil)
 		}
-		if _, newscheme[i], err = transitionalValidateCertificateChain(chain); err != nil {
+		if _, digests[i], err = transitionalValidateCertificateChain(chain); err != nil {
 			return err
+		}
+		if newscheme[i] = digests[i] != nil; !newscheme[i] {
+			digests[i], _ = digestsForCertificateChain(chain)
 		}
 	}
 	native.chains = certchains
 	native.publicKey = key
+	native.digests = digests
 	native.newscheme = newscheme
+	native.init()
 	return nil
 }
 
@@ -343,24 +371,31 @@ func UnionOfBlessings(blessings ...Blessings) (Blessings, error) {
 		}
 		ret.chains = append(ret.chains, b.chains...)
 		ret.newscheme = append(ret.newscheme, b.newscheme...)
+		ret.digests = append(ret.digests, b.digests...)
 	}
 	var err error
 	if ret.publicKey, err = UnmarshalPublicKey(key0); err != nil {
 		return Blessings{}, err
 	}
 	// For pretty printing, sort the certificate chains so that there is a consistent
-	// ordering, irrespective of the ordering of arugments to UnionOfBlessings.
-	sort.Stable(certificateChainsSorter(ret.chains))
+	// ordering, irrespective of the ordering of arguments to UnionOfBlessings.
+	sort.Stable(blessingsSorter(ret))
+	ret.init()
 	return ret, nil
 }
 
-type certificateChainsSorter [][]Certificate
+type blessingsSorter Blessings
 
-func (c certificateChainsSorter) Len() int      { return len(c) }
-func (c certificateChainsSorter) Swap(i, j int) { c[i], c[j] = c[j], c[i] }
-func (c certificateChainsSorter) Less(i, j int) bool {
-	ci := c[i]
-	cj := c[j]
+func (b blessingsSorter) Len() int { return len(b.chains) }
+func (b blessingsSorter) Swap(i, j int) {
+	b.chains[i], b.chains[j] = b.chains[j], b.chains[i]
+	b.newscheme[i], b.newscheme[j] = b.newscheme[j], b.newscheme[i]
+	b.digests[i], b.digests[j] = b.digests[j], b.digests[i]
+}
+
+func (b blessingsSorter) Less(i, j int) bool {
+	ci := b.chains[i]
+	cj := b.chains[j]
 	if len(ci) < len(cj) {
 		return true
 	}
