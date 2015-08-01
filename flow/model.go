@@ -115,7 +115,7 @@ type Flow interface {
 	io.ReadWriter
 	MsgReadWriter
 
-	// WriteVAndClose performs WriteMsg and then closes the flow.
+	// WriteMsgAndClose performs WriteMsg and then closes the flow.
 	WriteMsgAndClose(data ...[]byte) (int, error)
 
 	// SetContext sets the context associated with the flow.  Typically this is
