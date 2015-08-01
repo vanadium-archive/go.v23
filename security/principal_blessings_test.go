@@ -737,9 +737,9 @@ func TestBlessingsOnWireWithMissingCertificates(t *testing.T) {
 		{C{}, "empty certificate chain"}, // Empty chain
 		{C{C1, C3}, "invalid Signature"}, // Missing link in the chain
 		{C{C2, C3}, "invalid Signature"},
-		{C{CX, C2, C3}, "syntax error"},
-		{C{C1, CX, C3}, "signature"},
-		{C{C1, C2, CX}, "signature"},
+		{C{CX, C2, C3}, "invalid Signature"},
+		{C{C1, CX, C3}, "syntax error"},
+		{C{C1, C2, CX}, "syntax error"},
 		{C{C1, C2, C3}, ""}, // Valid chain
 	}
 	for idx, test := range tests {

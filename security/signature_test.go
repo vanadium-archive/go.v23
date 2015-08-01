@@ -28,7 +28,7 @@ func TestSignature(t *testing.T) {
 			continue
 		}
 		// Test that the defined signing purposes work as expected.
-		purposes := [][]byte{[]byte(SignatureForMessageSigningV1), []byte(SignatureForBlessingCertificatesV1), []byte(SignatureForDischargeV1)}
+		purposes := [][]byte{[]byte(SignatureForMessageSigning), []byte(SignatureForBlessingCertificates), []byte(SignatureForDischarge)}
 		message := []byte("test")
 		signer := NewInMemoryECDSASigner(key)
 		for _, p := range purposes {

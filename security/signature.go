@@ -141,9 +141,9 @@ func (hash Hash) sum(data []byte) []byte {
 
 func isV1Purpose(purpose []byte) bool {
 	switch string(purpose) {
-	case SignatureForMessageSigningV1, SignatureForBlessingCertificatesV1, SignatureForDischargeV1:
-		return true
-	default:
+	case SignatureForMessageSigningV0, SignatureForBlessingCertificatesV0, SignatureForDischargeV0:
 		return false
+	default:
+		return true
 	}
 }
