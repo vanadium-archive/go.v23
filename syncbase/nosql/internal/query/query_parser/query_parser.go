@@ -121,8 +121,6 @@ type Operand struct {
 	Time      time.Time
 	Prefix    string // Computed by checker for Like expressions
 	Regex     string // Computed by checker for Like expressions
-	HasAltStr bool   // set true when evaluating type = expressions
-	AltStr    string // set when evaluating type = expressions
 	Uint      uint64
 	CompRegex *regexp.Regexp
 	Expr      *Expression

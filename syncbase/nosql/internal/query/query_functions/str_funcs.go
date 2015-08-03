@@ -36,5 +36,5 @@ func typeFunc(off int64, args []*query_parser.Operand) (*query_parser.Operand, e
 	}
 	t := args[0].Object.Type()
 	pkg, name := vdl.SplitIdent(t.Name())
-	return makeStrOpWithAlt(off, pkg+"."+name, name), nil
+	return makeStrOp(off, pkg+"."+name), nil
 }

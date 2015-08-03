@@ -303,26 +303,10 @@ func compareUints(lhsValue, rhsValue *query_parser.Operand, oper *query_parser.B
 	}
 }
 
-// Return AltStr if available, else Str.
-// Must be called with an operand of type TypStr.
-func favorAltStr(strOp *query_parser.Operand) string {
-	if !strOp.HasAltStr {
-		return strOp.Str
-	}
-	return strOp.AltStr
-}
-
 func compareStrings(lhsValue, rhsValue *query_parser.Operand, oper *query_parser.BinaryOperator) bool {
 	switch oper.Type {
 	case query_parser.Equal:
-		r := lhsValue.Str == rhsValue.Str
-		// If either side has an AltStr, compare AltStr.
-		// If both have AltStr, compare altStr to AltStr.
-		if !r && lhsValue.HasAltStr || rhsValue.HasAltStr {
-			// Handle special case for Type functions (which have AltStr)
-			r = favorAltStr(lhsValue) == favorAltStr(rhsValue)
-		}
-		return r
+		return lhsValue.Str == rhsValue.Str
 	case query_parser.NotEqual:
 		return lhsValue.Str != rhsValue.Str
 	case query_parser.LessThan:
@@ -426,7 +410,6 @@ func resolveOperand(db query_db.Database, k string, v *vdl.Value, o *query_parse
 	case vdl.Enum:
 		newOp.Type = query_parser.TypStr
 		newOp.Str = value.EnumLabel()
-		newOp.HasAltStr = false
 	case vdl.Int16, vdl.Int32, vdl.Int64:
 		newOp.Type = query_parser.TypInt
 		newOp.Int = value.Int()
@@ -439,7 +422,6 @@ func resolveOperand(db query_db.Database, k string, v *vdl.Value, o *query_parse
 	case vdl.String:
 		newOp.Type = query_parser.TypStr
 		newOp.Str = value.RawString()
-		newOp.HasAltStr = false
 	case vdl.Complex64, vdl.Complex128:
 		newOp.Type = query_parser.TypComplex
 		newOp.Complex = value.Complex()

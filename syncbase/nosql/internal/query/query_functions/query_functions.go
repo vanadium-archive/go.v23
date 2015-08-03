@@ -161,13 +161,6 @@ func makeStrOp(off int64, s string) *query_parser.Operand {
 	return &o
 }
 
-func makeStrOpWithAlt(off int64, s string, alt string) *query_parser.Operand {
-	o := makeStrOp(off, s)
-	o.HasAltStr = true
-	o.AltStr = alt
-	return o
-}
-
 func makeComplexOp(off int64, c complex128) *query_parser.Operand {
 	var o query_parser.Operand
 	o.Off = off

@@ -80,5 +80,5 @@
 //   | <float_literal>
 //
 // Example:
-// select v.foo.bar, v.baz[2] from foobarbaz where Type(v) = "Customer" and (v.foo = 42 and v.bar not like "abc%) or (k >= "100" and  k < "200")
+// select v.Foo.Far, v.Baz[2] from Foobarbaz where Type(v) like "%.Customer" and (v.Foo = 42 and v.Bar not like "abc%) or (k >= "100" and  k < "200")
 package query_parser

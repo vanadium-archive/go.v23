@@ -84,7 +84,7 @@ func TestExec(t *testing.T) {
 		t.Fatalf("tb.Put() failed: %v", err)
 	}
 
-	tu.CheckExec(t, ctx, d, "select k, v.Name from tb where Type(v) = \"Baz\"",
+	tu.CheckExec(t, ctx, d, "select k, v.Name from tb where Type(v) like \"%.Baz\"",
 		[]string{"k", "v.Name"},
 		[][]*vdl.Value{
 			[]*vdl.Value{vdl.ValueOf("baz"), vdl.ValueOf(baz.Name)},
@@ -111,7 +111,7 @@ func TestExec(t *testing.T) {
 			[]*vdl.Value{vdl.ValueOf("baz"), vdl.ValueOf(baz)},
 		})
 
-	tu.CheckExec(t, ctx, d, "select k, v from tb where Type(v) = \"Bar\"",
+	tu.CheckExec(t, ctx, d, "select k, v from tb where Type(v) like \"%.Bar\"",
 		[]string{"k", "v"},
 		[][]*vdl.Value{
 			[]*vdl.Value{vdl.ValueOf("bar"), vdl.ValueOf(bar)},
@@ -123,7 +123,7 @@ func TestExec(t *testing.T) {
 			[]*vdl.Value{vdl.ValueOf("bar"), vdl.ValueOf(bar)},
 		})
 
-	tu.CheckExec(t, ctx, d, "select k, v from tb where Type(v) = \"Baz\"",
+	tu.CheckExec(t, ctx, d, "select k, v from tb where Type(v) like \"%.Baz\"",
 		[]string{"k", "v"},
 		[][]*vdl.Value{
 			[]*vdl.Value{vdl.ValueOf("baz"), vdl.ValueOf(baz)},

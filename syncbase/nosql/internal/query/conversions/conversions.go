@@ -32,8 +32,6 @@ func ConvertValueToString(o *query_parser.Operand) (*query_parser.Operand, error
 		c.Str = strconv.FormatInt(o.Int, 10)
 	case query_parser.TypStr:
 		c.Str = o.Str
-		c.HasAltStr = o.HasAltStr // true for type = expressions
-		c.AltStr = o.AltStr
 		c.Regex = o.Regex         // non-empty for rhs of like expressions
 		c.CompRegex = o.CompRegex // non-nil for rhs of like expressions
 	case query_parser.TypUint:
