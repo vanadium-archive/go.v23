@@ -81,6 +81,23 @@ func testDecodeVDL(t *testing.T, name, bin string, value *vdl.Value) {
 			return
 		}
 	}
+	// Test single-shot vom.Decode twice, to ensure we test the cache hit case.
+	testDecodeVDLSingleShot(t, name, bin, value)
+	testDecodeVDLSingleShot(t, name, bin, value)
+}
+
+func testDecodeVDLSingleShot(t *testing.T, name, bin string, value *vdl.Value) {
+	// Test the single-shot vom.Decode.
+	head := fmt.Sprintf("%s (single-shot)", name)
+	got := vdl.ZeroValue(value.Type())
+	if err := Decode([]byte(bin), got); err != nil {
+		t.Errorf("%s: Decode failed: %v", head, err)
+		return
+	}
+	if want := value; !vdl.EqualValue(got, want) {
+		t.Errorf("%s: Decode mismatch\nGOT %v\nWANT %v", head, got, want)
+		return
+	}
 }
 
 func testDecodeVDLWithTypeDecoder(t *testing.T, name, binversion, bintype, binvalue string, value *vdl.Value) {
@@ -113,6 +130,22 @@ func testDecodeGo(t *testing.T, name, bin string, rt reflect.Type, want interfac
 			t.Errorf("%s: Decode mismatch\nGOT %T %#v\nWANT %T %#v", head, got, got, want, want)
 			return
 		}
+	}
+	// Test single-shot vom.Decode twice, to ensure we test the cache hit case.
+	testDecodeGoSingleShot(t, name, bin, rt, want)
+	testDecodeGoSingleShot(t, name, bin, rt, want)
+}
+
+func testDecodeGoSingleShot(t *testing.T, name, bin string, rt reflect.Type, want interface{}) {
+	head := fmt.Sprintf("%s (single-shot)", name)
+	rvGot := reflect.New(rt)
+	if err := Decode([]byte(bin), rvGot.Interface()); err != nil {
+		t.Errorf("%s: Decode failed: %v", head, err)
+		return
+	}
+	if got := rvGot.Elem().Interface(); !reflect.DeepEqual(got, want) {
+		t.Errorf("%s: Decode mismatch\nGOT %T %#v\nWANT %T %#v", head, got, got, want, want)
+		return
 	}
 }
 

@@ -393,6 +393,17 @@ func binaryDecodeInt(buf *decbuf) (int64, error) {
 	return int64(uval >> 1), nil
 }
 
+func binaryPeekInt(buf *decbuf) (int64, int, error) {
+	uval, bytelen, err := binaryPeekUint(buf)
+	if err != nil {
+		return 0, 0, err
+	}
+	if uval&1 == 1 {
+		return ^int64(uval >> 1), bytelen, nil
+	}
+	return int64(uval >> 1), bytelen, nil
+}
+
 // Floating point numbers are encoded as byte-reversed ieee754.
 func binaryEncodeFloat(buf *encbuf, v float64) {
 	ieee := math.Float64bits(v)

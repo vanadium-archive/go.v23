@@ -88,6 +88,12 @@ func (abc *abcRead) Read(p []byte) (int, error) {
 	return startlen - len(p), nil
 }
 
+func abcBytes(lim int) []byte {
+	b := make([]byte, lim)
+	io.ReadFull(abcReader(lim), b)
+	return b
+}
+
 // matchHexPat compares the given target and pat hex codes, and returns true if
 // they match.  We allow special syntax in the pat code; in addition to regular
 // string matching, we allow sequences that may appear in any order.

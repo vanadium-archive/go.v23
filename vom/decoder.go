@@ -6,6 +6,7 @@ package vom
 
 import (
 	"io"
+	"os"
 	"reflect"
 
 	"v.io/v23/vdl"
@@ -30,6 +31,13 @@ type Decoder struct {
 	buf                 *decbuf
 	typeDec             *TypeDecoder
 	receivedVersionByte bool
+}
+
+// This is only used for debugging; add this as the first line of NewDecoder to
+// dump formatted vom bytes to stdout:
+//   r = teeDump(r)
+func teeDump(r io.Reader) io.Reader {
+	return io.TeeReader(r, NewDumper(NewDumpWriter(os.Stdout)))
 }
 
 // NewDecoder returns a new Decoder that reads from the given reader. The

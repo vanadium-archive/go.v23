@@ -12,8 +12,8 @@ const minBufFree = 1024 // buffers always have at least 1K free after growth
 // bytes.Buffer, but the implementation is simplified to only deal with many
 // writes followed by a read of the whole buffer.
 type encbuf struct {
-	buf []byte // INVARIANT: len(buf) == cap(buf)
-	end int    // [0, end) is data that's already written
+	buf []byte
+	end int // [0, end) is data that's already written
 
 	// It's faster to hold end than to use both the len and cap properties of buf,
 	// since end is cheaper to update than buf.
@@ -88,15 +88,16 @@ func (b *encbuf) WriteString(s string) {
 // decbuf manages the read buffer for decoders.  The approach is similar to
 // bufio.Reader, but the API is better suited for fast decoding.
 type decbuf struct {
-	buf      []byte // INVARIANT: len(buf) == cap(buf)
-	beg, end int    // [beg, end) is data read from reader but unread by the user
-	lim      int    // number of bytes left in limit, or -1 for no limit
+	buf      []byte
+	beg, end int // [beg, end) is data read from reader but unread by the user
+	lim      int // number of bytes left in limit, or -1 for no limit
 	reader   io.Reader
 
 	// It's faster to hold end than to use the len and cap properties of buf,
 	// since end is cheaper to update than buf.
 }
 
+// newDecbuf returns a new decbuf that fills its internal buffer by reading r.
 func newDecbuf(r io.Reader) *decbuf {
 	return &decbuf{
 		buf:    make([]byte, minBufFree),
@@ -104,6 +105,20 @@ func newDecbuf(r io.Reader) *decbuf {
 		reader: r,
 	}
 }
+
+// newDecbufFromBytes returns a new decbuf that reads directly from b.
+func newDecbufFromBytes(b []byte) *decbuf {
+	return &decbuf{
+		buf:    b,
+		end:    len(b),
+		lim:    -1,
+		reader: alwaysEOFReader{},
+	}
+}
+
+type alwaysEOFReader struct{}
+
+func (alwaysEOFReader) Read([]byte) (int, error) { return 0, io.EOF }
 
 // Reset resets the buffer so it has no data.
 func (b *decbuf) Reset() {

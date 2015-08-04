@@ -34,19 +34,32 @@ func TestEncoder(t *testing.T) {
 }
 
 func testEncode(t *testing.T, name string, value interface{}, hex string) {
-	var buf bytes.Buffer
-	encoder := NewEncoder(&buf)
-	if err := encoder.Encode(value); err != nil {
-		t.Errorf("%s: Encode(%#v) failed: %v", name, value, err)
-		return
-	}
-	got, want := fmt.Sprintf("%x", buf.Bytes()), hex
-	match, err := matchHexPat(got, want)
-	if err != nil {
-		t.Error(err)
-	}
-	if !match {
-		t.Errorf("%s: Encode(%#v)\nGOT %s\nWANT %s", name, value, got, want)
+	for _, singleShot := range []bool{false, true} {
+		var bin []byte
+		if !singleShot {
+			var buf bytes.Buffer
+			encoder := NewEncoder(&buf)
+			if err := encoder.Encode(value); err != nil {
+				t.Errorf("%s: Encode(%#v) failed: %v", name, value, err)
+				return
+			}
+			bin = buf.Bytes()
+		} else {
+			name += " (single-shot)"
+			var err error
+			if bin, err = Encode(value); err != nil {
+				t.Errorf("%s: Encode(%#v) failed: %v", name, value, err)
+				return
+			}
+		}
+		got, want := fmt.Sprintf("%x", bin), hex
+		match, err := matchHexPat(got, want)
+		if err != nil {
+			t.Error(err)
+		}
+		if !match {
+			t.Errorf("%s: Encode(%#v)\nGOT %s\nWANT %s", name, value, got, want)
+		}
 	}
 }
 
