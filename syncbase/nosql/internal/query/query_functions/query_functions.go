@@ -14,7 +14,7 @@ import (
 	"v.io/v23/vdl"
 )
 
-type queryFunc func(int64, []*query_parser.Operand) (*query_parser.Operand, error)
+type queryFunc func(query_db.Database, int64, []*query_parser.Operand) (*query_parser.Operand, error)
 type checkArgsFunc func(query_db.Database, int64, []*query_parser.Operand) error
 
 type function struct {
@@ -40,10 +40,13 @@ func init() {
 	functions["now"] = function{[]query_parser.OperandType{}, query_parser.TypTime, now, nil}
 
 	functions["lowercase"] = function{[]query_parser.OperandType{query_parser.TypStr}, query_parser.TypStr, lowerCase, singleStringArgCheck}
+	functions["split"] = function{[]query_parser.OperandType{query_parser.TypStr, query_parser.TypStr}, query_parser.TypObject, split, twoStringArgsCheck}
 	functions["type"] = function{[]query_parser.OperandType{query_parser.TypObject}, query_parser.TypStr, typeFunc, singleFieldArgCheck}
 	functions["uppercase"] = function{[]query_parser.OperandType{query_parser.TypStr}, query_parser.TypStr, upperCase, singleStringArgCheck}
 
 	functions["complex"] = function{[]query_parser.OperandType{query_parser.TypFloat, query_parser.TypFloat}, query_parser.TypComplex, complexFunc, twoFloatsArgsCheck}
+
+	functions["len"] = function{[]query_parser.OperandType{query_parser.TypObject}, query_parser.TypInt, lenFunc, nil}
 }
 
 // Check that function exists and that the number of args passed matches the spec.
@@ -115,7 +118,7 @@ func ExecFunction(db query_db.Database, f *query_parser.Function, args []*query_
 	if entry, ok := functions[strings.ToLower(f.Name)]; !ok {
 		return nil, syncql.NewErrFunctionNotFound(db.GetContext(), f.Off, f.Name)
 	} else {
-		retValue, err := entry.funcAddr(f.Off, args)
+		retValue, err := entry.funcAddr(db, f.Off, args)
 		if err != nil {
 			return nil, err
 		} else {
@@ -169,8 +172,23 @@ func makeComplexOp(off int64, c complex128) *query_parser.Operand {
 	return &o
 }
 
+func makeIntOp(off int64, i int64) *query_parser.Operand {
+	var o query_parser.Operand
+	o.Off = off
+	o.Type = query_parser.TypInt
+	o.Int = i
+	return &o
+}
+
 func singleStringArgCheck(db query_db.Database, off int64, args []*query_parser.Operand) error {
 	return checkIfPossibleThatArgIsConvertableToString(db, args[0])
+}
+
+func twoStringArgsCheck(db query_db.Database, off int64, args []*query_parser.Operand) error {
+	if err := checkIfPossibleThatArgIsConvertableToString(db, args[0]); err != nil {
+		return err
+	}
+	return checkIfPossibleThatArgIsConvertableToString(db, args[1])
 }
 
 func singleFieldArgCheck(db query_db.Database, off int64, args []*query_parser.Operand) error {

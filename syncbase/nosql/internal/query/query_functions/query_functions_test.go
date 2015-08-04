@@ -15,6 +15,7 @@ import (
 	"v.io/syncbase/v23/syncbase/nosql/query_db"
 	"v.io/v23"
 	"v.io/v23/context"
+	"v.io/v23/vdl"
 	_ "v.io/x/ref/runtime/factories/generic"
 	"v.io/x/ref/test"
 )
@@ -399,6 +400,153 @@ func TestFunctions(t *testing.T) {
 			&query_parser.Operand{
 				Type: query_parser.TypStr,
 				Str:  "FOOBAR",
+			},
+		},
+		// Split
+		functionsTest{
+			&query_parser.Function{
+				Name: "Split",
+				Args: []*query_parser.Operand{
+					&query_parser.Operand{
+						Type: query_parser.TypStr,
+						Str:  "alpha.bravo.charlie.delta.echo",
+					},
+					&query_parser.Operand{
+						Type: query_parser.TypStr,
+						Str:  ".",
+					},
+				},
+				ArgTypes: []query_parser.OperandType{
+					query_parser.TypStr,
+					query_parser.TypStr,
+				},
+				RetType:  query_parser.TypObject,
+				Computed: false,
+				RetValue: nil,
+			},
+			[]*query_parser.Operand{
+				&query_parser.Operand{
+					Type: query_parser.TypStr,
+					Str:  "alpha.bravo.charlie.delta.echo",
+				},
+				&query_parser.Operand{
+					Type: query_parser.TypStr,
+					Str:  ".",
+				},
+			},
+			&query_parser.Operand{
+				Type:   query_parser.TypObject,
+				Object: vdl.ValueOf([]string{"alpha", "bravo", "charlie", "delta", "echo"}),
+			},
+		},
+		// Len (of list)
+		functionsTest{
+			&query_parser.Function{
+				Name: "Len",
+				Args: []*query_parser.Operand{
+					&query_parser.Operand{
+						Type:   query_parser.TypObject,
+						Object: vdl.ValueOf([]string{"alpha", "bravo"}),
+					},
+				},
+				ArgTypes: []query_parser.OperandType{
+					query_parser.TypObject,
+				},
+				RetType:  query_parser.TypInt,
+				Computed: false,
+				RetValue: nil,
+			},
+			[]*query_parser.Operand{
+				&query_parser.Operand{
+					Type:   query_parser.TypObject,
+					Object: vdl.ValueOf([]string{"alpha", "bravo"}),
+				},
+			},
+			&query_parser.Operand{
+				Type: query_parser.TypInt,
+				Int:  2,
+			},
+		},
+		// Len (of nil)
+		functionsTest{
+			&query_parser.Function{
+				Name: "Len",
+				Args: []*query_parser.Operand{
+					&query_parser.Operand{
+						Type: query_parser.TypNil,
+					},
+				},
+				ArgTypes: []query_parser.OperandType{
+					query_parser.TypObject,
+				},
+				RetType:  query_parser.TypInt,
+				Computed: false,
+				RetValue: nil,
+			},
+			[]*query_parser.Operand{
+				&query_parser.Operand{
+					Type: query_parser.TypNil,
+				},
+			},
+			&query_parser.Operand{
+				Type: query_parser.TypInt,
+				Int:  0,
+			},
+		},
+		// Len (of string)
+		functionsTest{
+			&query_parser.Function{
+				Name: "Len",
+				Args: []*query_parser.Operand{
+					&query_parser.Operand{
+						Type: query_parser.TypStr,
+						Str:  "foo",
+					},
+				},
+				ArgTypes: []query_parser.OperandType{
+					query_parser.TypObject,
+				},
+				RetType:  query_parser.TypInt,
+				Computed: false,
+				RetValue: nil,
+			},
+			[]*query_parser.Operand{
+				&query_parser.Operand{
+					Type: query_parser.TypStr,
+					Str:  "foo",
+				},
+			},
+			&query_parser.Operand{
+				Type: query_parser.TypInt,
+				Int:  3,
+			},
+		},
+		// Len (of map)
+		functionsTest{
+			&query_parser.Function{
+				Name: "Len",
+				Args: []*query_parser.Operand{
+					&query_parser.Operand{
+						Type:   query_parser.TypObject,
+						Object: vdl.ValueOf(map[string]string{"alpha": "ALPHA", "bravo": "BRAVO"}),
+					},
+				},
+				ArgTypes: []query_parser.OperandType{
+					query_parser.TypObject,
+				},
+				RetType:  query_parser.TypInt,
+				Computed: false,
+				RetValue: nil,
+			},
+			[]*query_parser.Operand{
+				&query_parser.Operand{
+					Type:   query_parser.TypObject,
+					Object: vdl.ValueOf(map[string]string{"alpha": "ALPHA", "bravo": "BRAVO"}),
+				},
+			},
+			&query_parser.Operand{
+				Type: query_parser.TypInt,
+				Int:  2,
 			},
 		},
 	}

@@ -80,7 +80,7 @@ func checkIfPossibleThatArgIsConvertableToLocation(db query_db.Database, arg *qu
 
 // Input: "YYYY-MM-DD TZ"
 // "2015-03-17 PDT"
-func date(off int64, args []*query_parser.Operand) (*query_parser.Operand, error) {
+func date(db query_db.Database, off int64, args []*query_parser.Operand) (*query_parser.Operand, error) {
 	dateStrOp, err := conversions.ConvertValueToString(args[0])
 	if err != nil {
 		return nil, err
@@ -95,7 +95,7 @@ func date(off int64, args []*query_parser.Operand) (*query_parser.Operand, error
 
 // "YYYY-MM-DD HH:MI:SS TZ"
 // "2015-03-17 13:22:17 PDT"
-func dateTime(off int64, args []*query_parser.Operand) (*query_parser.Operand, error) {
+func dateTime(db query_db.Database, off int64, args []*query_parser.Operand) (*query_parser.Operand, error) {
 	dateStrOp, err := conversions.ConvertValueToString(args[0])
 	if err != nil {
 		return nil, err
@@ -109,7 +109,7 @@ func dateTime(off int64, args []*query_parser.Operand) (*query_parser.Operand, e
 }
 
 // y(v.InvoiceDate, "America/Los_Angeles")
-func y(off int64, args []*query_parser.Operand) (*query_parser.Operand, error) {
+func y(db query_db.Database, off int64, args []*query_parser.Operand) (*query_parser.Operand, error) {
 	var timeOp *query_parser.Operand
 	var locOp *query_parser.Operand
 	var err error
@@ -132,7 +132,7 @@ func y(off int64, args []*query_parser.Operand) (*query_parser.Operand, error) {
 }
 
 // ym(v.InvoiceDate, "America/Los_Angeles")
-func ym(off int64, args []*query_parser.Operand) (*query_parser.Operand, error) {
+func ym(db query_db.Database, off int64, args []*query_parser.Operand) (*query_parser.Operand, error) {
 	var timeOp *query_parser.Operand
 	var locOp *query_parser.Operand
 	var err error
@@ -155,7 +155,7 @@ func ym(off int64, args []*query_parser.Operand) (*query_parser.Operand, error) 
 }
 
 // ymd(v.InvoiceDate, "America/Los_Angeles")
-func ymd(off int64, args []*query_parser.Operand) (*query_parser.Operand, error) {
+func ymd(db query_db.Database, off int64, args []*query_parser.Operand) (*query_parser.Operand, error) {
 	var timeOp *query_parser.Operand
 	var locOp *query_parser.Operand
 	var err error
@@ -178,7 +178,7 @@ func ymd(off int64, args []*query_parser.Operand) (*query_parser.Operand, error)
 }
 
 // ymdh(v.InvoiceDate, "America/Los_Angeles")
-func ymdh(off int64, args []*query_parser.Operand) (*query_parser.Operand, error) {
+func ymdh(db query_db.Database, off int64, args []*query_parser.Operand) (*query_parser.Operand, error) {
 	var timeOp *query_parser.Operand
 	var locOp *query_parser.Operand
 	var err error
@@ -201,7 +201,7 @@ func ymdh(off int64, args []*query_parser.Operand) (*query_parser.Operand, error
 }
 
 // ymdhm(v.InvoiceDate, "America/Los_Angeles")
-func ymdhm(off int64, args []*query_parser.Operand) (*query_parser.Operand, error) {
+func ymdhm(db query_db.Database, off int64, args []*query_parser.Operand) (*query_parser.Operand, error) {
 	var timeOp *query_parser.Operand
 	var locOp *query_parser.Operand
 	var err error
@@ -224,7 +224,7 @@ func ymdhm(off int64, args []*query_parser.Operand) (*query_parser.Operand, erro
 }
 
 // ymdhms(v.InvoiceDate, "America/Los_Angeles")
-func ymdhms(off int64, args []*query_parser.Operand) (*query_parser.Operand, error) {
+func ymdhms(db query_db.Database, off int64, args []*query_parser.Operand) (*query_parser.Operand, error) {
 	var timeOp *query_parser.Operand
 	var locOp *query_parser.Operand
 	var err error
@@ -247,7 +247,7 @@ func ymdhms(off int64, args []*query_parser.Operand) (*query_parser.Operand, err
 }
 
 // now()
-func now(off int64, args []*query_parser.Operand) (*query_parser.Operand, error) {
+func now(db query_db.Database, off int64, args []*query_parser.Operand) (*query_parser.Operand, error) {
 	return makeTimeOp(off, time.Now()), nil
 }
 

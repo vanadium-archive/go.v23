@@ -11,7 +11,7 @@ import (
 	"v.io/syncbase/v23/syncbase/nosql/syncql"
 )
 
-func complexFunc(off int64, args []*query_parser.Operand) (*query_parser.Operand, error) {
+func complexFunc(db query_db.Database, off int64, args []*query_parser.Operand) (*query_parser.Operand, error) {
 	r, err := conversions.ConvertValueToFloat(args[0])
 	if err != nil {
 		return nil, err

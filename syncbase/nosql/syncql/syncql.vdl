@@ -45,6 +45,12 @@ error (
 	FunctionArgCount(off int64, name string, expected int64, found int64) {
 		"en": "[{off}]Function '{name}' expects {expected} args, found: {found}.",
 	}
+	FunctionTypeInvalidArg(off int64) {
+		"en": "[{off}]Function 'Type()' cannot get type of argument -- expecting object.",
+	}
+	FunctionLenInvalidArg(off int64) {
+		"en": "[{off}]Function 'Len()' expects array, list, set, map, string or nil.",
+	}
 	FunctionArgBad(off int64, funcName, argName string) {
 		"en": "[{off}]Function '{funcName}' arg '{argName}' could not be resolved.",
 	}

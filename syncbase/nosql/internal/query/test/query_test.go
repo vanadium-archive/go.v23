@@ -1877,6 +1877,65 @@ func TestQueryExec(t *testing.T) {
 			[]string{"k", "v.Key"},
 			svPairs(100, 300),
 		},
+		{
+			// Split on .
+			"select Split(Type(v), \".\") from Customer where k = \"001\"",
+			[]string{"Split"},
+			[][]*vdl.Value{
+				[]*vdl.Value{vdl.ValueOf([]string{"v", "io/syncbase/v23/syncbase/nosql/internal/query/test", "Customer"})},
+			},
+		},
+		{
+			// Split on /
+			"select Split(Type(v), \"/\") from Customer where k = \"001\"",
+			[]string{"Split"},
+			[][]*vdl.Value{
+				[]*vdl.Value{vdl.ValueOf([]string{"v.io", "syncbase", "v23", "syncbase", "nosql", "internal", "query", "test.Customer"})},
+			},
+		},
+		{
+			// Split on /, Len of array
+			"select Len(Split(Type(v), \"/\")) from Customer where k = \"001\"",
+			[]string{"Len"},
+			[][]*vdl.Value{
+				[]*vdl.Value{vdl.ValueOf(int64(8))},
+			},
+		},
+		{
+			// Split on empty string, Len of array
+			// Split with sep == empty string splits on chars.
+			"select Len(Split(Type(v), \"\")) from Customer where k = \"001\"",
+			[]string{"Len"},
+			[][]*vdl.Value{
+				[]*vdl.Value{vdl.ValueOf(int64(len("v.io/syncbase/v23/syncbase/nosql/internal/query/test.Customer")))},
+			},
+		},
+		{
+			// Len of string, list and struct.
+			// returns len of string, elements in list and nil for struct.
+			"select Len(v.Name), Len(v.PreviousAddresses), Len(v.Credit) from Customer where k = \"002\"",
+			[]string{"Len", "Len", "Len"},
+			[][]*vdl.Value{
+				[]*vdl.Value{vdl.ValueOf(int64(13)), vdl.ValueOf(int64(2)), vdl.ValueOf(nil)},
+			},
+		},
+		{
+			// Len of set
+			"select Len(v.Credit.Report.ExperianReport.TdhApprovals) from Customer where Type(v) like \"%.Customer\" and k = \"003\"",
+			[]string{"Len"},
+			[][]*vdl.Value{
+				[]*vdl.Value{vdl.ValueOf(int64(2))},
+			},
+		},
+		{
+			// Len of map
+			"select Len(v.Map) from FunWithMaps",
+			[]string{"Len"},
+			[][]*vdl.Value{
+				[]*vdl.Value{vdl.ValueOf(int64(2))},
+				[]*vdl.Value{vdl.ValueOf(int64(2))},
+			},
+		},
 	}
 
 	for _, test := range basic {
@@ -2644,6 +2703,10 @@ func TestExecErrors(t *testing.T) {
 		{
 			"select k, v.Key from BigTable where Type(k) = \"BigData\"",
 			syncql.NewErrArgMustBeField(db.GetContext(), 41),
+		},
+		{
+			"select v from Customer where Len(10) = 3",
+			syncql.NewErrFunctionLenInvalidArg(db.GetContext(), 33),
 		},
 	}
 

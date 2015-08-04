@@ -28,6 +28,8 @@ var (
 	ErrExpectedOperand                 = verror.Register("v.io/syncbase/v23/syncbase/nosql/syncql.ExpectedOperand", verror.NoRetry, "{1:}{2:} [{3}]Expected operand, found {4}.")
 	ErrExpectedOperator                = verror.Register("v.io/syncbase/v23/syncbase/nosql/syncql.ExpectedOperator", verror.NoRetry, "{1:}{2:} [{3}]Expected operator, found {4}.")
 	ErrFunctionArgCount                = verror.Register("v.io/syncbase/v23/syncbase/nosql/syncql.FunctionArgCount", verror.NoRetry, "{1:}{2:} [{3}]Function '{4}' expects {5} args, found: {6}.")
+	ErrFunctionTypeInvalidArg          = verror.Register("v.io/syncbase/v23/syncbase/nosql/syncql.FunctionTypeInvalidArg", verror.NoRetry, "{1:}{2:} [{3}]Function 'Type()' cannot get type of argument -- expecting object.")
+	ErrFunctionLenInvalidArg           = verror.Register("v.io/syncbase/v23/syncbase/nosql/syncql.FunctionLenInvalidArg", verror.NoRetry, "{1:}{2:} [{3}]Function 'Len()' expects array, list, set, map, string or nil.")
 	ErrFunctionArgBad                  = verror.Register("v.io/syncbase/v23/syncbase/nosql/syncql.FunctionArgBad", verror.NoRetry, "{1:}{2:} [{3}]Function '{4}' arg '{5}' could not be resolved.")
 	ErrFunctionNotFound                = verror.Register("v.io/syncbase/v23/syncbase/nosql/syncql.FunctionNotFound", verror.NoRetry, "{1:}{2:} [{3}]Function '{4}' not found.")
 	ErrArgMustBeField                  = verror.Register("v.io/syncbase/v23/syncbase/nosql/syncql.ArgMustBeField", verror.NoRetry, "{1:}{2:} [{3}]Argument must be a value field (i.e., must begin with 'v').")
@@ -66,6 +68,8 @@ func init() {
 	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrExpectedOperand.ID), "{1:}{2:} [{3}]Expected operand, found {4}.")
 	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrExpectedOperator.ID), "{1:}{2:} [{3}]Expected operator, found {4}.")
 	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrFunctionArgCount.ID), "{1:}{2:} [{3}]Function '{4}' expects {5} args, found: {6}.")
+	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrFunctionTypeInvalidArg.ID), "{1:}{2:} [{3}]Function 'Type()' cannot get type of argument -- expecting object.")
+	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrFunctionLenInvalidArg.ID), "{1:}{2:} [{3}]Function 'Len()' expects array, list, set, map, string or nil.")
 	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrFunctionArgBad.ID), "{1:}{2:} [{3}]Function '{4}' arg '{5}' could not be resolved.")
 	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrFunctionNotFound.ID), "{1:}{2:} [{3}]Function '{4}' not found.")
 	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrArgMustBeField.ID), "{1:}{2:} [{3}]Argument must be a value field (i.e., must begin with 'v').")
@@ -153,6 +157,16 @@ func NewErrExpectedOperator(ctx *context.T, off int64, found string) error {
 // NewErrFunctionArgCount returns an error with the ErrFunctionArgCount ID.
 func NewErrFunctionArgCount(ctx *context.T, off int64, name string, expected int64, found int64) error {
 	return verror.New(ErrFunctionArgCount, ctx, off, name, expected, found)
+}
+
+// NewErrFunctionTypeInvalidArg returns an error with the ErrFunctionTypeInvalidArg ID.
+func NewErrFunctionTypeInvalidArg(ctx *context.T, off int64) error {
+	return verror.New(ErrFunctionTypeInvalidArg, ctx, off)
+}
+
+// NewErrFunctionLenInvalidArg returns an error with the ErrFunctionLenInvalidArg ID.
+func NewErrFunctionLenInvalidArg(ctx *context.T, off int64) error {
+	return verror.New(ErrFunctionLenInvalidArg, ctx, off)
 }
 
 // NewErrFunctionArgBad returns an error with the ErrFunctionArgBad ID.
