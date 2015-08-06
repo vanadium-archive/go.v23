@@ -451,7 +451,10 @@ func getCaveatValidation() func(ctx *context.T, call Call, sets [][]Caveat) []er
 }
 
 func isSigningBlessingCaveat(cav Caveat) bool {
-	if cav.Id == ExpiryCaveat.Id {
+	switch cav.Id {
+	case ExpiryCaveat.Id:
+		return true
+	case ConstCaveat.Id:
 		return true
 	}
 	// TODO(ataly): Figure out what revocation caveats can be supported

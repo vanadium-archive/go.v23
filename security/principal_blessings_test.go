@@ -922,13 +922,16 @@ func TestSigningBlessings(t *testing.T) {
 
 		googleB, _ = google.BlessSelf("google")
 
-		peerCav, _ = NewCaveat(PeerBlessingsCaveat, []BlessingPattern{"youtube"})
+		peerCav, _  = NewCaveat(PeerBlessingsCaveat, []BlessingPattern{"youtube"})
+		trueCav, _  = NewCaveat(ConstCaveat, true)
+		falseCav, _ = NewCaveat(ConstCaveat, false)
 
 		aliceSelf, _          = alice.BlessSelf("alice")
 		googleYoutubeUser, _  = google.Bless(alice.PublicKey(), googleB, "youtube/user", peerCav)
 		googleAliceExpired, _ = google.Bless(alice.PublicKey(), googleB, "alice/expired", newCaveat(NewExpiryCaveat(time.Now().Add(-time.Second))))
-		googleAlice, _        = google.Bless(alice.PublicKey(), googleB, "alice", newCaveat(NewExpiryCaveat(time.Now().Add(time.Hour))))
-		aliceB, _             = UnionOfBlessings(aliceSelf, googleYoutubeUser, googleAliceExpired, googleAlice)
+		googleAliceFalse, _   = google.Bless(alice.PublicKey(), googleB, "alice/false", falseCav)
+		googleAlice, _        = google.Bless(alice.PublicKey(), googleB, "alice", newCaveat(NewExpiryCaveat(time.Now().Add(time.Hour))), trueCav)
+		aliceB, _             = UnionOfBlessings(aliceSelf, googleYoutubeUser, googleAliceExpired, googleAliceFalse, googleAlice)
 
 		// rawNames returns the blessing names encapsulated in the provided blessings, without
 		// validating any caveats and blessing roots.
@@ -960,7 +963,7 @@ func TestSigningBlessings(t *testing.T) {
 		t.Fatal("SigningBlessings returned blessings with different public key")
 	}
 
-	got, want := rawNames(aliceSigning), []string{"alice", "google/alice/expired", "google/alice"}
+	got, want := rawNames(aliceSigning), []string{"alice", "google/alice/expired", "google/alice/false", "google/alice"}
 	sort.Strings(got)
 	sort.Strings(want)
 	if !reflect.DeepEqual(got, want) {
@@ -977,13 +980,17 @@ func TestSigningBlessings(t *testing.T) {
 	if want := []string{"google/alice"}; !reflect.DeepEqual(names, want) {
 		t.Fatalf("SigningBlessingNames(%v): got names %v, want %v", aliceB, names, want)
 	}
-	if got := len(rejected); got != 3 {
-		t.Fatalf("SigningBlessingNames(%v): got %d rejected blessing names, want 3", aliceB, got)
+	if got := len(rejected); got != 4 {
+		t.Fatalf("SigningBlessingNames(%v): got %d rejected blessing names, want 4", aliceB, got)
 	}
 	for _, r := range rejected {
 		switch r.Blessing {
 		case "alice":
 			if got, want := verror.ErrorID(r.Err), ErrUnrecognizedRoot.ID; got != want {
+				t.Errorf("SigningBlessingNames(%v): rejected blessing %v with errorID %v, want errorID %v", aliceB, r.Blessing, got, want)
+			}
+		case "google/alice/false":
+			if got, want := verror.ErrorID(r.Err), ErrCaveatValidation.ID; got != want {
 				t.Errorf("SigningBlessingNames(%v): rejected blessing %v with errorID %v, want errorID %v", aliceB, r.Blessing, got, want)
 			}
 		case "google/alice/expired":
