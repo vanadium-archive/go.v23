@@ -9,6 +9,7 @@ import (
 	"testing"
 
 	"v.io/v23/context"
+	"v.io/v23/flow"
 	"v.io/v23/namespace"
 	"v.io/v23/naming"
 	"v.io/v23/rpc"
@@ -53,6 +54,7 @@ func (*mockRuntime) WithReservedNameDispatcher(ctx *context.T, d rpc.Dispatcher)
 
 func (*mockRuntime) GetReservedNameDispatcher(ctx *context.T) rpc.Dispatcher    { return nil }
 func (*mockRuntime) WithListenSpec(ctx *context.T, _ rpc.ListenSpec) *context.T { return ctx }
+func (*mockRuntime) ExperimentalGetFlowManager(ctx *context.T) flow.Manager     { return nil }
 
 func TestPanicOnInitWithNoRuntimeFactory(t *testing.T) {
 	clear()

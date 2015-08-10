@@ -22,6 +22,7 @@ import (
 	"sync"
 
 	"v.io/v23/context"
+	"v.io/v23/flow"
 	"v.io/v23/namespace"
 	"v.io/v23/naming"
 	"v.io/v23/rpc"
@@ -181,6 +182,9 @@ type Runtime interface {
 	// GetReservedNameDispatcher returns the dispatcher used for
 	// reserved names.
 	GetReservedNameDispatcher(ctx *context.T) rpc.Dispatcher
+
+	// ExperimentalGetFlowManager returns the current flow.Manager attached to ctx.
+	ExperimentalGetFlowManager(ctx *context.T) flow.Manager
 }
 
 // NewEndpoint returns an Endpoint by parsing the supplied endpoint
@@ -292,6 +296,11 @@ func WithReservedNameDispatcher(ctx *context.T, d rpc.Dispatcher) *context.T {
 // reserved names.
 func GetReservedNameDispatcher(ctx *context.T) rpc.Dispatcher {
 	return initState.currentRuntime().GetReservedNameDispatcher(ctx)
+}
+
+// ExperimentalGetFlowManager returns the current flow.Manager to ctx.
+func ExperimentalGetFlowManager(ctx *context.T) flow.Manager {
+	return initState.currentRuntime().ExperimentalGetFlowManager(ctx)
 }
 
 var initState = &initStateData{}
