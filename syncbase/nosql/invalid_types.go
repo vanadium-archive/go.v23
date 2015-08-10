@@ -4,38 +4,38 @@
 
 package nosql
 
-// InvalidStream is a nosql.Stream for which all methods return errors.
-type InvalidStream struct {
+// InvalidScanStream is a nosql.ScanStream for which all methods return errors.
+type InvalidScanStream struct {
 	Error error // returned by all methods
 }
 
 var (
-	_ Stream = (*InvalidStream)(nil)
+	_ ScanStream = (*InvalidScanStream)(nil)
 )
 
 ////////////////////////////////////////////////////////////
-// InvalidStream
+// InvalidScanStream
 
-// Advance implements Stream.Advance.
-func (s *InvalidStream) Advance() bool {
+// Advance implements the Stream interface.
+func (s *InvalidScanStream) Advance() bool {
 	return false
 }
 
-// Key implements Stream.Key.
-func (s *InvalidStream) Key() string {
-	panic(s.Error)
-}
-
-// Value implements Stream.Value.
-func (s *InvalidStream) Value(value interface{}) error {
-	panic(s.Error)
-}
-
-// Err implements Stream.Err.
-func (s *InvalidStream) Err() error {
+// Err implements the Stream interface.
+func (s *InvalidScanStream) Err() error {
 	return s.Error
 }
 
-// Cancel implements Stream.Cancel.
-func (s *InvalidStream) Cancel() {
+// Cancel implements the Stream interface.
+func (s *InvalidScanStream) Cancel() {
+}
+
+// Key implements the ScanStream interface.
+func (s *InvalidScanStream) Key() string {
+	panic(s.Error)
+}
+
+// Value implements the ScanStream interface.
+func (s *InvalidScanStream) Value(value interface{}) error {
+	panic(s.Error)
 }

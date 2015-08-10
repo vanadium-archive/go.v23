@@ -188,7 +188,7 @@ type Table interface {
 	// time of the RPC (or at the time of BeginBatch, if in a batch), and will not
 	// reflect subsequent writes to keys not yet reached by the stream.
 	// See helpers nosql.Prefix(), nosql.Range(), nosql.SingleRow().
-	Scan(ctx *context.T, r RowRange) Stream
+	Scan(ctx *context.T, r RowRange) ScanStream
 
 	// GetPermissions returns an array of (prefix, perms) pairs. The array is
 	// sorted from longest prefix to shortest, so element zero is the one that
@@ -236,14 +236,30 @@ type Row interface {
 	Delete(ctx *context.T) error
 }
 
-// Stream is an interface for iterating through a collection of key-value pairs.
+// Stream is an interface for iterating through a collection of elements.
 type Stream interface {
-	// Advance stages an element so the client can retrieve it with Key or Value.
-	// Advance returns true iff there is an element to retrieve. The client must
-	// call Advance before calling Key or Value. The client must call Cancel if it
-	// does not iterate through all elements (i.e. until Advance returns false).
+	// Advance stages an element so the client can retrieve it. Advance returns
+	// true iff there is an element to retrieve. The client must call Advance
+	// before retrieving the element. The client must call Cancel if it does not
+	// iterate through all elements (i.e. until Advance returns false).
 	// Advance may block if an element is not immediately available.
 	Advance() bool
+
+	// Err returns a non-nil error iff the stream encountered any errors. Err does
+	// not block.
+	Err() error
+
+	// Cancel notifies the stream provider that it can stop producing elements.
+	// The client must call Cancel if it does not iterate through all elements
+	// (i.e. until Advance returns false). Cancel is idempotent and can be called
+	// concurrently with a goroutine that is iterating via Advance.
+	// Cancel causes Advance to subsequently return false. Cancel does not block.
+	Cancel()
+}
+
+// ScanStream is an interface for iterating through a collection of key-value pairs.
+type ScanStream interface {
+	Stream
 
 	// Key returns the key of the element that was staged by Advance.
 	// Key may panic if Advance returned false or was not called at all.
@@ -255,44 +271,17 @@ type Stream interface {
 	// Value may panic if Advance returned false or was not called at all.
 	// Value does not block.
 	Value(value interface{}) error
-
-	// Err returns a non-nil error iff the stream encountered any errors. Err does
-	// not block.
-	Err() error
-
-	// Cancel notifies the stream provider that it can stop producing elements.
-	// The client must call Cancel if it does not iterate through all elements
-	// (i.e. until Advance returns false). Cancel is idempotent and can be called
-	// concurrently with a goroutine that is iterating via Advance/Key/Value.
-	// Cancel causes Advance to subsequently return false. Cancel does not block.
-	Cancel()
 }
 
 // ResultStream is an interface for iterating through rows resulting from an
 // Exec.
 type ResultStream interface {
-	// Advance stages an result so the client can retrieve it with Result.
-	// Advance returns true iff there is a result to retrieve. The client must
-	// call Advance before calling Result. The client must call Cancel if it
-	// does not iterate through all results (i.e. until Advance returns false).
-	// Advance may block if a result is not immediately available.
-	Advance() bool
+	Stream
 
 	// Result returns the result that was staged by Advance.
 	// Result may panic if Advance returned false or was not called at all.
 	// Result does not block.
 	Result() []*vdl.Value
-
-	// Err returns a non-nil error iff the stream encountered any errors. Err does
-	// not block.
-	Err() error
-
-	// Cancel notifies the stream provider that it can stop producing results.
-	// The client must call Cancel if it does not iterate through all results
-	// (i.e. until Advance returns false). Cancel is idempotent and can be called
-	// concurrently with a goroutine that is iterating via Advance/Result.
-	// Cancel causes Advance to subsequently return false. Cancel does not block.
-	Cancel()
 }
 
 // SyncGroup is the interface for a SyncGroup in the store.

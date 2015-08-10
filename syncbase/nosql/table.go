@@ -68,13 +68,13 @@ func (t *table) Delete(ctx *context.T, r RowRange) error {
 }
 
 // Scan implements Table.Scan.
-func (t *table) Scan(ctx *context.T, r RowRange) Stream {
+func (t *table) Scan(ctx *context.T, r RowRange) ScanStream {
 	ctx, cancel := context.WithCancel(ctx)
 	call, err := t.c.Scan(ctx, t.dbSchemaVersion, []byte(r.Start()), []byte(r.Limit()))
 	if err != nil {
-		return &InvalidStream{Error: err}
+		return &InvalidScanStream{Error: err}
 	}
-	return newStream(cancel, call)
+	return newScanStream(cancel, call)
 }
 
 // GetPermissions implements Table.GetPermissions.

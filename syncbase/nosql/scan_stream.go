@@ -13,7 +13,7 @@ import (
 	"v.io/v23/vom"
 )
 
-type stream struct {
+type scanStream struct {
 	mu sync.Mutex
 	// cancel cancels the RPC stream.
 	cancel context.CancelFunc
@@ -28,17 +28,17 @@ type stream struct {
 	finished bool
 }
 
-var _ Stream = (*stream)(nil)
+var _ ScanStream = (*scanStream)(nil)
 
-func newStream(cancel context.CancelFunc, call wire.TableScanClientCall) *stream {
-	return &stream{
+func newScanStream(cancel context.CancelFunc, call wire.TableScanClientCall) *scanStream {
+	return &scanStream{
 		cancel: cancel,
 		call:   call,
 	}
 }
 
-// Advance implements Stream.Advance.
-func (s *stream) Advance() bool {
+// Advance implements the Stream interface.
+func (s *scanStream) Advance() bool {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 	if s.err != nil || s.finished {
@@ -59,8 +59,8 @@ func (s *stream) Advance() bool {
 	return true
 }
 
-// Key implements Stream.Key.
-func (s *stream) Key() string {
+// Key implements the ScanStream interface.
+func (s *scanStream) Key() string {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 	if s.curr == nil {
@@ -69,8 +69,8 @@ func (s *stream) Key() string {
 	return s.curr.Key
 }
 
-// Value implements Stream.Value.
-func (s *stream) Value(value interface{}) error {
+// Value implements the ScanStream interface.
+func (s *scanStream) Value(value interface{}) error {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 	if s.curr == nil {
@@ -79,8 +79,8 @@ func (s *stream) Value(value interface{}) error {
 	return vom.Decode(s.curr.Value, value)
 }
 
-// Err implements Stream.Err.
-func (s *stream) Err() error {
+// Err implements the Stream interface.
+func (s *scanStream) Err() error {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 	if s.err == nil {
@@ -89,9 +89,9 @@ func (s *stream) Err() error {
 	return verror.Convert(verror.IDAction{}, nil, s.err)
 }
 
-// Cancel implements Stream.Cancel.
+// Cancel implements the Stream interface.
 // TODO(sadovsky): Make Cancel non-blocking.
-func (s *stream) Cancel() {
+func (s *scanStream) Cancel() {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 	s.cancel()
