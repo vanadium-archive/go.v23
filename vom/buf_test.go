@@ -28,7 +28,7 @@ func TestEncbuf(t *testing.T) {
 	expectEncbufBytes(t, b, "abcde")
 	b.Truncate(3)
 	expectEncbufBytes(t, b, "abc")
-	b.WriteByte('1')
+	b.WriteOneByte('1')
 	expectEncbufBytes(t, b, "abc1")
 	b.Write([]byte("def"))
 	expectEncbufBytes(t, b, "abc1def")
@@ -53,7 +53,7 @@ func testEncbufReserve(t *testing.T, base int) {
 		expectEncbufBytes(t, b, str+str)
 		// Test starting with one byte and writing size.
 		b = newEncbuf()
-		b.WriteByte('A')
+		b.WriteOneByte('A')
 		expectEncbufBytes(t, b, "A")
 		b.WriteString(str)
 		expectEncbufBytes(t, b, "A"+str)

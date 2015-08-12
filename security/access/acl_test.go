@@ -81,7 +81,7 @@ func TestPermissionsSerialization(t *testing.T) {
 	}
 	// And round-trip (don't compare with 'txt' because indentation/spacing might differ).
 	var buf bytes.Buffer
-	if err := obj.WriteTo(&buf); err != nil {
+	if err := WritePermissions(&buf, obj); err != nil {
 		t.Fatal(err)
 	}
 	if got, err := ReadPermissions(&buf); err != nil || !reflect.DeepEqual(got, obj) {
