@@ -26,7 +26,7 @@ pkg rpc, type AddressChooser interface { ChooseAddress }
 pkg rpc, type AddressChooser interface, ChooseAddress(string, []net.Addr) ([]net.Addr, error)
 pkg rpc, type AddressChooserFunc func(protocol string, candidates []net.Addr) ([]net.Addr, error)
 pkg rpc, type AllGlobber interface { Glob__ }
-pkg rpc, type AllGlobber interface, Glob__(*context.T, ServerCall, string) (<-chan naming.GlobReply, error)
+pkg rpc, type AllGlobber interface, Glob__(*context.T, GlobServerCall, *glob.Glob) error
 pkg rpc, type AllGlobberX interface { Glob__ }
 pkg rpc, type AllGlobberX interface, Glob__(*context.T, GlobServerCall, *glob.Glob) error
 pkg rpc, type ArgDesc struct
@@ -38,7 +38,7 @@ pkg rpc, type BlessingsRequest struct, Key uint64
 pkg rpc, type CallOpt interface { RPCCallOpt }
 pkg rpc, type CallOpt interface, RPCCallOpt()
 pkg rpc, type ChildrenGlobber interface { GlobChildren__ }
-pkg rpc, type ChildrenGlobber interface, GlobChildren__(*context.T, ServerCall) (<-chan string, error)
+pkg rpc, type ChildrenGlobber interface, GlobChildren__(*context.T, GlobChildrenServerCall, *glob.Element) error
 pkg rpc, type ChildrenGlobberX interface { GlobChildren__ }
 pkg rpc, type ChildrenGlobberX interface, GlobChildren__(*context.T, GlobChildrenServerCall, *glob.Element) error
 pkg rpc, type Client interface { Call, Close, StartCall }

@@ -15,14 +15,12 @@ import (
 func NewGlobState(obj interface{}) *GlobState {
 	a, ok1 := obj.(AllGlobber)
 	c, ok2 := obj.(ChildrenGlobber)
-	ax, ok3 := obj.(AllGlobberX)
-	cx, ok4 := obj.(ChildrenGlobberX)
-	if ok1 || ok2 || ok3 || ok4 {
+	if ok1 || ok2 {
 		return &GlobState{
 			AllGlobber:       a,
 			ChildrenGlobber:  c,
-			AllGlobberX:      ax,
-			ChildrenGlobberX: cx,
+			AllGlobberX:      a,
+			ChildrenGlobberX: c,
 		}
 	}
 	return nil

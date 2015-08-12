@@ -11,7 +11,6 @@ import (
 
 	"v.io/v23/context"
 	"v.io/v23/glob"
-	"v.io/v23/naming"
 	"v.io/v23/vdl"
 	"v.io/v23/vdlroot/signature"
 	"v.io/v23/verror"
@@ -392,9 +391,6 @@ var (
 	rtGlobChildrenServerCall = reflect.TypeOf((*GlobChildrenServerCall)(nil)).Elem()
 	rtBool                   = reflect.TypeOf(bool(false))
 	rtError                  = reflect.TypeOf((*error)(nil)).Elem()
-	rtString                 = reflect.TypeOf("")
-	rtStringChan             = reflect.TypeOf((<-chan string)(nil))
-	rtGlobReplyChan          = reflect.TypeOf((<-chan naming.GlobReply)(nil))
 	rtPtrToGlobState         = reflect.TypeOf((*GlobState)(nil))
 	rtSliceOfInterfaceDesc   = reflect.TypeOf([]InterfaceDesc{})
 	rtPtrToGlobGlob          = reflect.TypeOf((*glob.Glob)(nil))
@@ -495,33 +491,21 @@ func typeCheckReservedMethod(method reflect.Method) error {
 		}
 		return verror.New(verror.ErrInternal, nil, verror.New(errReservedMethod, nil))
 	case "Glob__":
-		// Glob__(*context.T, rpc.ServerCall, string) (<-chan naming.GlobReply, error)
-		if t := method.Type; t.NumIn() == 4 && t.NumOut() == 2 &&
-			t.In(1) == rtPtrToContext && t.In(2) == rtServerCall && t.In(3) == rtString &&
-			t.Out(0) == rtGlobReplyChan && t.Out(1) == rtError {
-			return verror.New(verror.ErrInternal, nil, verror.New(errReservedMethod, nil))
-		}
 		// Glob__(ctx *context.T, call GlobServerCall, g *glob.Glob) error
-		if t := method.Type; t.NumIn() == 4 && t.NumOut() == 1 &&
-			t.In(1) == rtPtrToContext && t.In(2) == rtGlobServerCall && t.In(3) == rtPtrToGlobGlob &&
-			t.Out(0) == rtError {
-			return verror.New(verror.ErrInternal, nil, verror.New(errReservedMethod, nil))
+		if t := method.Type; t.NumIn() != 4 || t.NumOut() != 1 ||
+			t.In(1) != rtPtrToContext || t.In(2) != rtGlobServerCall || t.In(3) != rtPtrToGlobGlob ||
+			t.Out(0) != rtError {
+			return abortedf(errBadGlob)
 		}
-		return abortedf(errBadGlob)
+		return verror.New(verror.ErrInternal, nil, verror.New(errReservedMethod, nil))
 	case "GlobChildren__":
-		// GlobChildren__(*context.T, rpc.ServerCall) (<-chan string, error)
-		if t := method.Type; t.NumIn() == 3 && t.NumOut() == 2 &&
-			t.In(1) == rtPtrToContext && t.In(2) == rtServerCall &&
-			t.Out(0) == rtStringChan && t.Out(1) == rtError {
-			return verror.New(verror.ErrInternal, nil, verror.New(errReservedMethod, nil))
-		}
 		// GlobChildren__(ctx *context.T, call GlobChildrenServerCall, matcher *glob.Element) error
-		if t := method.Type; t.NumIn() == 4 && t.NumOut() == 1 &&
-			t.In(1) == rtPtrToContext && t.In(2) == rtGlobChildrenServerCall && t.In(3) == rtPtrToGlobElement &&
-			t.Out(0) == rtError {
-			return verror.New(verror.ErrInternal, nil, verror.New(errReservedMethod, nil))
+		if t := method.Type; t.NumIn() != 4 || t.NumOut() != 1 ||
+			t.In(1) != rtPtrToContext || t.In(2) != rtGlobChildrenServerCall || t.In(3) != rtPtrToGlobElement ||
+			t.Out(0) != rtError {
+			return abortedf(errBadGlobChildren)
 		}
-		return abortedf(errBadGlobChildren)
+		return verror.New(verror.ErrInternal, nil, verror.New(errReservedMethod, nil))
 	}
 	return nil
 }

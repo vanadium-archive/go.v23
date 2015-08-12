@@ -591,20 +591,18 @@ func (badoutargs) NoFinalError2(*context.T, rpc.ServerCall) string          { re
 func (badoutargs) NoFinalError3(*context.T, rpc.ServerCall) (bool, string)  { return false, "" }
 func (badoutargs) NoFinalError4(*context.T, rpc.ServerCall) (error, string) { return nil, "" }
 
-func (badGlobber) Globber()                                                        {}
-func (badGlob1) Glob__()                                                           {}
-func (badGlob2) Glob__(*context.T)                                                 {}
-func (badGlob3) Glob__(*context.T, rpc.ServerCall)                                 {}
-func (badGlob4) Glob__(*context.T, rpc.ServerCall, string)                         {}
-func (badGlob5) Glob__(*context.T, rpc.ServerCall, string) <-chan naming.GlobReply { return nil }
-func (badGlob6) Glob__(*context.T, rpc.ServerCall, string) error                   { return nil }
-func (badGlob7) Glob__() (<-chan naming.GlobReply, error)                          { return nil, nil }
-func (badGlobChildren1) GlobChildren__()                                           {}
-func (badGlobChildren2) GlobChildren__(*context.T)                                 {}
-func (badGlobChildren3) GlobChildren__(*context.T, rpc.ServerCall)                 {}
-func (badGlobChildren4) GlobChildren__(*context.T, rpc.ServerCall) <-chan string   { return nil }
-func (badGlobChildren5) GlobChildren__(*context.T, rpc.ServerCall) error           { return nil }
-func (badGlobChildren6) GlobChildren__() (<-chan string, error)                    { return nil, nil }
+func (badGlobber) Globber()                                                                   {}
+func (badGlob1) Glob__()                                                                      {}
+func (badGlob2) Glob__(*context.T)                                                            {}
+func (badGlob3) Glob__(*context.T, rpc.GlobServerCall)                                        {}
+func (badGlob4) Glob__(*context.T, rpc.GlobServerCall, *glob.Glob)                            {}
+func (badGlob5) Glob__(*context.T, rpc.ServerCall, *glob.Glob) error                          { return nil }
+func (badGlob6) Glob__() error                                                                { return nil }
+func (badGlobChildren1) GlobChildren__()                                                      {}
+func (badGlobChildren2) GlobChildren__(*context.T)                                            {}
+func (badGlobChildren3) GlobChildren__(*context.T, rpc.GlobChildrenServerCall)                {}
+func (badGlobChildren4) GlobChildren__(*context.T, rpc.GlobChildrenServerCall, *glob.Element) {}
+func (badGlobChildren5) GlobChildren__(*context.T, rpc.GlobChildrenServerCall) error          { return nil }
 
 func TestReflectInvokerPanic(t *testing.T) {
 	type testcase struct {
@@ -623,13 +621,11 @@ func TestReflectInvokerPanic(t *testing.T) {
 		{badGlob4{}, "Glob__ must have signature"},
 		{badGlob5{}, "Glob__ must have signature"},
 		{badGlob6{}, "Glob__ must have signature"},
-		{badGlob7{}, "Glob__ must have signature"},
 		{badGlobChildren1{}, "GlobChildren__ must have signature"},
 		{badGlobChildren2{}, "GlobChildren__ must have signature"},
 		{badGlobChildren3{}, "GlobChildren__ must have signature"},
 		{badGlobChildren4{}, "GlobChildren__ must have signature"},
 		{badGlobChildren5{}, "GlobChildren__ must have signature"},
-		{badGlobChildren6{}, "GlobChildren__ must have signature"},
 	}
 	for _, test := range tests {
 		re := regexp.MustCompile(test.regexp)
@@ -698,33 +694,19 @@ func (o *vGlobberObject) Globber() *rpc.GlobState {
 
 type allGlobberObject struct{}
 
-func (allGlobberObject) Glob__(_ *context.T, _ rpc.ServerCall, pattern string) (<-chan naming.GlobReply, error) {
-	return nil, nil
+func (allGlobberObject) Glob__(*context.T, rpc.GlobServerCall, *glob.Glob) error {
+	return nil
 }
 
 type childrenGlobberObject struct{}
 
-func (childrenGlobberObject) GlobChildren__(*context.T, rpc.ServerCall) (<-chan string, error) {
-	return nil, nil
-}
-
-type allGlobberXObject struct{}
-
-func (allGlobberXObject) Glob__(*context.T, rpc.GlobServerCall, *glob.Glob) error {
-	return nil
-}
-
-type childrenGlobberXObject struct{}
-
-func (childrenGlobberXObject) GlobChildren__(*context.T, rpc.GlobChildrenServerCall, *glob.Element) error {
+func (childrenGlobberObject) GlobChildren__(*context.T, rpc.GlobChildrenServerCall, *glob.Element) error {
 	return nil
 }
 
 func TestReflectInvokerGlobber(t *testing.T) {
 	allGlobber := allGlobberObject{}
 	childrenGlobber := childrenGlobberObject{}
-	allGlobberX := allGlobberXObject{}
-	childrenGlobberX := childrenGlobberXObject{}
 	gs := &rpc.GlobState{AllGlobber: allGlobber}
 	vGlobber := &vGlobberObject{gs}
 
@@ -733,10 +715,8 @@ func TestReflectInvokerGlobber(t *testing.T) {
 		expected *rpc.GlobState
 	}{
 		{vGlobber, gs},
-		{allGlobber, &rpc.GlobState{AllGlobber: allGlobber}},
-		{childrenGlobber, &rpc.GlobState{ChildrenGlobber: childrenGlobber}},
-		{allGlobberX, &rpc.GlobState{AllGlobberX: allGlobberX}},
-		{childrenGlobberX, &rpc.GlobState{ChildrenGlobberX: childrenGlobberX}},
+		{allGlobber, &rpc.GlobState{AllGlobber: allGlobber, AllGlobberX: allGlobber}},
+		{childrenGlobber, &rpc.GlobState{ChildrenGlobber: childrenGlobber, ChildrenGlobberX: childrenGlobber}},
 	}
 
 	for _, tc := range testcases {
