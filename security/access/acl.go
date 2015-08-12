@@ -106,8 +106,8 @@ func (acl AccessList) isOpen() bool {
 	return false
 }
 
-// WriteTo writes the JSON-encoded representation of a Permissions to w.
-func (m Permissions) WriteTo(w io.Writer) error {
+// WritePermissions writes the JSON-encoded representation of a Permissions to w.
+func WritePermissions(w io.Writer, m Permissions) error {
 	return json.NewEncoder(w).Encode(m.Normalize())
 }
 

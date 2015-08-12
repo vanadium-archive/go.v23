@@ -392,7 +392,7 @@ func testTypeFromReflect(t *testing.T, prefix string) {
 var rtErrorTests = []rtErrorTest{
 	{reflect.TypeOf(make(chan int64)), `type "chan int64" not supported`},
 	{reflect.TypeOf(func() {}), `type "func()" not supported`},
-	{reflect.TypeOf(unsafe.Pointer(uintptr(0))), `type "unsafe.Pointer" not supported`},
+	{reflect.TypeOf(unsafe.Pointer(nil)), `type "unsafe.Pointer" not supported`},
 	{reflect.TypeOf(map[*int64]string{}), `invalid key "*int64" in "map[*int64]string"`},
 	{reflect.TypeOf(struct{ a int64 }{}), `type "struct { a int64 }" only has unexported fields`},
 }

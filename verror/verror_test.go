@@ -21,9 +21,18 @@ import (
 
 var (
 	// Some error IDActions.
-	idActionA = verror.IDAction{"A", verror.NoRetry}
-	idActionB = verror.IDAction{"B", verror.RetryBackoff}
-	idActionC = verror.IDAction{"C", verror.NoRetry}
+	idActionA = verror.IDAction{
+		ID:     "A",
+		Action: verror.NoRetry,
+	}
+	idActionB = verror.IDAction{
+		ID:     "B",
+		Action: verror.RetryBackoff,
+	}
+	idActionC = verror.IDAction{
+		ID:     "C",
+		Action: verror.NoRetry,
+	}
 
 	// Some languages
 	en = i18n.LangID("en")
@@ -74,12 +83,24 @@ var (
 // reduces the chances that its line numbers will change.
 func TestSubordinateErrors(t *testing.T) {
 	p := verror.ExplicitNew(idActionA, en, "server", "aEN0", 0)
-	p1 := verror.AddSubErrs(p, nil, verror.SubErr{"a=1", aEN1, verror.Print}, verror.SubErr{"a=2", aFR0, verror.Print})
+	p1 := verror.AddSubErrs(p, nil, verror.SubErr{
+		Name:    "a=1",
+		Err:     aEN1,
+		Options: verror.Print,
+	}, verror.SubErr{
+		Name:    "a=2",
+		Err:     aFR0,
+		Options: verror.Print,
+	})
 	r1 := "server aEN0 error A 0 [a=1: server aEN1 error A 1 2], [a=2: server aFR0 erreur A 0]"
 	if got, want := p1.Error(), r1; got != want {
 		t.Errorf("got %q, want %q", got, want)
 	}
-	p2 := verror.AddSubErrs(p, nil, verror.SubErr{"go_err=1", fmt.Errorf("Oh"), verror.Print})
+	p2 := verror.AddSubErrs(p, nil, verror.SubErr{
+		Name:    "go_err=1",
+		Err:     fmt.Errorf("Oh"),
+		Options: verror.Print,
+	})
 	r2 := "server aEN0 error A 0 [go_err=1: verror.test  unknown error Oh]"
 	if got, want := p2.Error(), r2; got != want {
 		t.Errorf("got %q, want %q", got, want)
@@ -88,10 +109,14 @@ func TestSubordinateErrors(t *testing.T) {
 	if !strings.Contains(p2str, r2) {
 		t.Errorf("debug string missing error message: %q, %q", p2str, r2)
 	}
-	if !(strings.Contains(p2str, "verror_test.go:76") && strings.Contains(p2str, "verror_test.go:82")) {
+	if !(strings.Contains(p2str, "verror_test.go:85") && strings.Contains(p2str, "verror_test.go:103")) {
 		t.Errorf("debug string missing correct line #: %s", p2str)
 	}
-	p3 := verror.AddSubErrs(p, nil, verror.SubErr{"go_err=2", fmt.Errorf("Oh"), 0})
+	p3 := verror.AddSubErrs(p, nil, verror.SubErr{
+		Name:    "go_err=2",
+		Err:     fmt.Errorf("Oh"),
+		Options: 0,
+	})
 	r3 := "server aEN0 error A 0 "
 	if got, want := p3.Error(), r3; got != want {
 		t.Errorf("got %q, want %q", got, want)
@@ -101,9 +126,18 @@ func TestSubordinateErrors(t *testing.T) {
 // This function comes first because it has line numbers embedded in it, and putting it first
 // reduces the chances that its line numbers will change.
 func TestChained(t *testing.T) {
-	first := verror.IDAction{"first", verror.NoRetry}
-	second := verror.IDAction{"second", verror.NoRetry}
-	third := verror.IDAction{"third", verror.NoRetry}
+	first := verror.IDAction{
+		ID:     "first",
+		Action: verror.NoRetry,
+	}
+	second := verror.IDAction{
+		ID:     "second",
+		Action: verror.NoRetry,
+	}
+	third := verror.IDAction{
+		ID:     "third",
+		Action: verror.NoRetry,
+	}
 	cat := i18n.Cat()
 	cat.Set(en, i18n.MsgID(first.ID), "first {_}")
 	cat.Set(en, i18n.MsgID(second.ID), "second {3}")
@@ -122,13 +156,13 @@ func TestChained(t *testing.T) {
 		t.Fatalf("got %v, want %v", got, want)
 	}
 	lines := strings.Split(verror.Stack(l3).String(), "\n")
-	if got, want := lines[0], "verror_test.go:120"; !strings.Contains(got, want) {
+	if got, want := lines[0], "verror_test.go:154"; !strings.Contains(got, want) {
 		t.Fatalf("%q, doesn't contain %q", got, want)
 	}
-	if got, want := lines[4], "verror_test.go:116"; !strings.Contains(got, want) {
+	if got, want := lines[4], "verror_test.go:150"; !strings.Contains(got, want) {
 		t.Fatalf("%q, doesn't contain %q", got, want)
 	}
-	if got, want := lines[8], "verror_test.go:112"; !strings.Contains(got, want) {
+	if got, want := lines[8], "verror_test.go:146"; !strings.Contains(got, want) {
 		t.Fatalf("%q, doesn't contain %q", got, want)
 	}
 	for _, i := range []int{3, 7} {

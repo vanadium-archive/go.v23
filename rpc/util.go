@@ -42,7 +42,7 @@ func (o obj) GlobChildren__(_ *context.T, call GlobChildrenServerCall, matcher *
 	sender := call.SendStream()
 	for _, v := range o.children {
 		if matcher.Match(v) {
-			sender.Send(naming.GlobChildrenReplyName{v})
+			sender.Send(naming.GlobChildrenReplyName{Value: v})
 		}
 	}
 	return nil

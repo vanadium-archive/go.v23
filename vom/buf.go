@@ -67,7 +67,7 @@ func (b *encbuf) Grow(n int) []byte {
 }
 
 // WriteByte writes byte c into the buffer.
-func (b *encbuf) WriteByte(c byte) {
+func (b *encbuf) WriteOneByte(c byte) {
 	b.reserve(1)
 	b.buf[b.end] = c
 	b.end++

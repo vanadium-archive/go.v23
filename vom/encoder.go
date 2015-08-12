@@ -289,7 +289,7 @@ func (e *encoder) FromUint(src uint64, tt *vdl.Type) error {
 		return nil
 	}
 	if tt.Kind() == vdl.Byte {
-		e.buf.WriteByte(byte(src))
+		e.buf.WriteOneByte(byte(src))
 	} else {
 		binaryEncodeUint(e.buf, src)
 	}

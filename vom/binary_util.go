@@ -53,7 +53,7 @@ func binaryEncodeControl(buf *encbuf, v byte) {
 	if v < 0x80 || v > 0xef {
 		panic(verror.New(errBadControlCode, nil, v))
 	}
-	buf.WriteByte(v)
+	buf.WriteOneByte(v)
 }
 
 // If the byte is not a control, this will return 0.
@@ -71,9 +71,9 @@ func binaryPeekControl(buf *decbuf) (byte, error) {
 // Bools are encoded as a byte where 0 = false and anything else is true.
 func binaryEncodeBool(buf *encbuf, v bool) {
 	if v {
-		buf.WriteByte(1)
+		buf.WriteOneByte(1)
 	} else {
-		buf.WriteByte(0)
+		buf.WriteOneByte(0)
 	}
 }
 
