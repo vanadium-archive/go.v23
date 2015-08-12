@@ -16,6 +16,7 @@ import (
 	"v.io/syncbase/v23/syncbase/nosql"
 	tu "v.io/syncbase/v23/syncbase/testutil"
 	"v.io/v23"
+	"v.io/v23/security/access"
 	_ "v.io/x/ref/runtime/factories/generic"
 	"v.io/x/ref/test/modules"
 	"v.io/x/ref/test/v23tests"
@@ -88,7 +89,7 @@ func V23TestServiceRestart(t *v23tests.T) {
 
 	perms := tu.DefaultPerms("root/server/client")
 	buf := new(bytes.Buffer)
-	perms.WriteTo(buf)
+	access.WritePermissions(buf, perms)
 	permsLiteral := buf.String()
 
 	cleanup := tu.StartSyncbased(t, serverCreds, syncbaseName, rootDir, permsLiteral)
