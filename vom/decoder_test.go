@@ -248,9 +248,9 @@ func testRoundtrip(t *testing.T, withTypeEncoderDecoder bool, concurrency int) {
 		{struct{ M map[uint64]struct{} }{make(map[uint64]struct{})}, struct{ M map[uint64]struct{} }{}},
 		{struct{ M map[uint64]string }{make(map[uint64]string)}, struct{ M map[uint64]string }{}},
 		{struct{ N struct{ A int64 } }{struct{ A int64 }{0}}, struct{ N struct{ A int64 } }{}},
-		{struct{ N *testdata.NStruct }{&testdata.NStruct{false, "", 0}}, struct{ N *testdata.NStruct }{&testdata.NStruct{}}},
+		{struct{ N *testdata.NStruct }{&testdata.NStruct{A: false, B: "", C: 0}}, struct{ N *testdata.NStruct }{&testdata.NStruct{}}},
 		{struct{ N *testdata.NStruct }{nil}, struct{ N *testdata.NStruct }{}},
-		{testdata.NUnion(testdata.NUnionA{false}), testdata.NUnion(testdata.NUnionA{})},
+		{testdata.NUnion(testdata.NUnionA{Value: false}), testdata.NUnion(testdata.NUnionA{})},
 		{testdata.RecA{}, testdata.RecA(nil)},
 		{testdata.RecStruct{}, testdata.RecStruct{}},
 		// Test for verifying correctness when encoding/decoding shared types concurrently.
