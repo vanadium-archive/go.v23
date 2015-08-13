@@ -105,6 +105,12 @@ type Database interface {
 	// this database.
 	GetSyncGroupNames(ctx *context.T) ([]string, error)
 
+	// CreateBlob returns a handle to the new Blob instantiated by Syncbase.
+	CreateBlob(ctx *context.T) (Blob, error)
+
+	// Blob returns a handle to the blob with the given BlobRef.
+	Blob(br wire.BlobRef) Blob
+
 	// This method compares the current schema version of the database with the
 	// schema version provided while creating this database handle. If the
 	// current database schema version is lower, then the SchemaUpdater is
@@ -340,6 +346,104 @@ type SyncGroup interface {
 	// Requires: Client must have at least Read access on the Database and on the
 	// SyncGroup ACL.
 	GetMembers(ctx *context.T) (map[string]wire.SyncGroupMemberInfo, error)
+}
+
+// Blob is the interface for a Blob in the store.
+type Blob interface {
+	// Ref returns Syncbase's BlobRef for this blob.
+	Ref() wire.BlobRef
+
+	// Put appends the byte stream to the blob.
+	Put(ctx *context.T) (BlobWriter, error)
+
+	// Commit marks the blob as immutable.
+	Commit(ctx *context.T) error
+
+	// Size returns the count of bytes written as part of the blob
+	// (committed or uncommitted).
+	Size(ctx *context.T) (int64, error)
+
+	// Delete locally deletes the blob (committed or uncommitted).
+	Delete(ctx *context.T) error
+
+	// Get returns the byte stream from a committed blob starting at offset.
+	Get(ctx *context.T, offset int64) (BlobReader, error)
+
+	// Fetch initiates fetching a blob if not locally found. priority
+	// controls the network priority of the blob. Higher priority blobs are
+	// fetched before the lower priority ones. However an ongoing blob
+	// transfer is not interrupted. Status updates are streamed back to the
+	// client as fetch is in progress.
+	Fetch(ctx *context.T, priority uint64) (BlobStatus, error)
+
+	// Pin locally pins the blob so that it is not evicted.
+	Pin(ctx *context.T) error
+
+	// Unpin locally unpins the blob so that it can be evicted if needed.
+	Unpin(ctx *context.T) error
+
+	// Keep locally caches the blob with the specified rank. Lower
+	// ranked blobs are more eagerly evicted.
+	Keep(ctx *context.T, rank uint64) error
+}
+
+// BlobWriter is an interface for putting a blob.
+type BlobWriter interface {
+	// Send places the bytes given by the client onto the output
+	// stream. Returns errors encountered while sending. Blocks if there is
+	// no buffer space.
+	Send([]byte) error
+
+	// Close indicates that no more bytes will be sent.
+	Close() error
+}
+
+// BlobReader is an interface for getting a blob.
+type BlobReader interface {
+	// Advance() stages bytes so that they may be retrieved via
+	// Value(). Returns true iff there are bytes to retrieve. Advance() must
+	// be called before Value() is called. The caller is expected to read
+	// until Advance() returns false, or to call Cancel().
+	Advance() bool
+
+	// Value() returns the bytes that were staged by Advance(). May panic if
+	// Advance() returned false or was not called. Never blocks.
+	Value() []byte
+
+	// Err() returns any error encountered by Advance. Never blocks.
+	Err() error
+
+	// Cancel notifies the stream provider that it can stop producing
+	// elements.  The client must call Cancel if it does not iterate through
+	// all elements (i.e. until Advance returns false). Cancel is idempotent
+	// and can be called concurrently with a goroutine that is iterating via
+	// Advance.  Cancel causes Advance to subsequently return false. Cancel
+	// does not block.
+	Cancel()
+}
+
+// BlobStatus is an interface for getting the status of a blob transfer.
+type BlobStatus interface {
+	// Advance() stages an item so that it may be retrieved via
+	// Value(). Returns true iff there are items to retrieve. Advance() must
+	// be called before Value() is called. The caller is expected to read
+	// until Advance() returns false, or to call Cancel().
+	Advance() bool
+
+	// Value() returns the item that was staged by Advance(). May panic if
+	// Advance() returned false or was not called. Never blocks.
+	Value() wire.BlobFetchStatus
+
+	// Err() returns any error encountered by Advance. Never blocks.
+	Err() error
+
+	// Cancel notifies the stream provider that it can stop producing
+	// elements.  The client must call Cancel if it does not iterate through
+	// all elements (i.e. until Advance returns false). Cancel is idempotent
+	// and can be called concurrently with a goroutine that is iterating via
+	// Advance.  Cancel causes Advance to subsequently return false. Cancel
+	// does not block.
+	Cancel()
 }
 
 // SchemaUpgrader interface must be implemented by the App in order to upgrade

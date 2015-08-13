@@ -224,75 +224,75 @@ func (BlobRef) __VDLReflect(struct {
 }) {
 }
 
-// FetchState represents the state transitions of a blob fetch.
-type FetchState int
+// BlobFetchState represents the state transitions of a blob fetch.
+type BlobFetchState int
 
 const (
-	FetchStatePending FetchState = iota
-	FetchStateLocating
-	FetchStateFetching
-	FetchStateDone
+	BlobFetchStatePending BlobFetchState = iota
+	BlobFetchStateLocating
+	BlobFetchStateFetching
+	BlobFetchStateDone
 )
 
-// FetchStateAll holds all labels for FetchState.
-var FetchStateAll = [...]FetchState{FetchStatePending, FetchStateLocating, FetchStateFetching, FetchStateDone}
+// BlobFetchStateAll holds all labels for BlobFetchState.
+var BlobFetchStateAll = [...]BlobFetchState{BlobFetchStatePending, BlobFetchStateLocating, BlobFetchStateFetching, BlobFetchStateDone}
 
-// FetchStateFromString creates a FetchState from a string label.
-func FetchStateFromString(label string) (x FetchState, err error) {
+// BlobFetchStateFromString creates a BlobFetchState from a string label.
+func BlobFetchStateFromString(label string) (x BlobFetchState, err error) {
 	err = x.Set(label)
 	return
 }
 
 // Set assigns label to x.
-func (x *FetchState) Set(label string) error {
+func (x *BlobFetchState) Set(label string) error {
 	switch label {
 	case "Pending", "pending":
-		*x = FetchStatePending
+		*x = BlobFetchStatePending
 		return nil
 	case "Locating", "locating":
-		*x = FetchStateLocating
+		*x = BlobFetchStateLocating
 		return nil
 	case "Fetching", "fetching":
-		*x = FetchStateFetching
+		*x = BlobFetchStateFetching
 		return nil
 	case "Done", "done":
-		*x = FetchStateDone
+		*x = BlobFetchStateDone
 		return nil
 	}
 	*x = -1
-	return fmt.Errorf("unknown label %q in nosql.FetchState", label)
+	return fmt.Errorf("unknown label %q in nosql.BlobFetchState", label)
 }
 
 // String returns the string label of x.
-func (x FetchState) String() string {
+func (x BlobFetchState) String() string {
 	switch x {
-	case FetchStatePending:
+	case BlobFetchStatePending:
 		return "Pending"
-	case FetchStateLocating:
+	case BlobFetchStateLocating:
 		return "Locating"
-	case FetchStateFetching:
+	case BlobFetchStateFetching:
 		return "Fetching"
-	case FetchStateDone:
+	case BlobFetchStateDone:
 		return "Done"
 	}
 	return ""
 }
 
-func (FetchState) __VDLReflect(struct {
-	Name string `vdl:"v.io/syncbase/v23/services/syncbase/nosql.FetchState"`
+func (BlobFetchState) __VDLReflect(struct {
+	Name string `vdl:"v.io/syncbase/v23/services/syncbase/nosql.BlobFetchState"`
 	Enum struct{ Pending, Locating, Fetching, Done string }
 }) {
 }
 
-// FetchStatus describes the progress of an asynchronous blob fetch.
-type FetchStatus struct {
-	State    FetchState // State of the blob fetch request.
-	Received uint64     // Total number of bytes received.
-	Total    uint64     // Blob size.
+// BlobFetchStatus describes the progress of an asynchronous blob fetch.
+type BlobFetchStatus struct {
+	State    BlobFetchState // State of the blob fetch request.
+	Received int64          // Total number of bytes received.
+	Total    int64          // Blob size.
 }
 
-func (FetchStatus) __VDLReflect(struct {
-	Name string `vdl:"v.io/syncbase/v23/services/syncbase/nosql.FetchStatus"`
+func (BlobFetchStatus) __VDLReflect(struct {
+	Name string `vdl:"v.io/syncbase/v23/services/syncbase/nosql.BlobFetchStatus"`
 }) {
 }
 
@@ -323,8 +323,8 @@ func init() {
 	vdl.Register((*CrPolicy)(nil))
 	vdl.Register((*CrRule)(nil))
 	vdl.Register((*BlobRef)(nil))
-	vdl.Register((*FetchState)(nil))
-	vdl.Register((*FetchStatus)(nil))
+	vdl.Register((*BlobFetchState)(nil))
+	vdl.Register((*BlobFetchStatus)(nil))
 	vdl.Register((*StoreChange)(nil))
 }
 

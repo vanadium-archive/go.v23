@@ -139,6 +139,16 @@ func (d *database) GetSyncGroupNames(ctx *context.T) ([]string, error) {
 	return d.c.GetSyncGroupNames(ctx)
 }
 
+// Blob implements Database.Blob.
+func (d *database) Blob(br wire.BlobRef) Blob {
+	return newBlob(d.fullName, br)
+}
+
+// CreateBlob implements Database.CreateBlob.
+func (d *database) CreateBlob(ctx *context.T) (Blob, error) {
+	return createBlob(ctx, d.fullName)
+}
+
 // UpgradeIfOutdated implements Database.UpgradeIfOutdated.
 func (d *database) UpgradeIfOutdated(ctx *context.T) (bool, error) {
 	var schema *Schema = d.schema

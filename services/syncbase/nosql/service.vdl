@@ -264,7 +264,7 @@ type BlobManager interface {
 	// fetched before the lower priority ones. However an ongoing blob
 	// transfer is not interrupted. Status updates are streamed back to the
 	// client as fetch is in progress.
-	FetchBlob(br BlobRef, priority uint64) stream<_, FetchStatus> error {access.Read}
+	FetchBlob(br BlobRef, priority uint64) stream<_, BlobFetchStatus> error {access.Read}
 
 	// PinBlob locally pins the blob so that it is not evicted.
 	PinBlob(br BlobRef) error {access.Write}
@@ -322,4 +322,5 @@ error (
 	ReadOnlyBatch() {"en": "batch is read-only"}
 	ConcurrentBatch() {"en": "concurrent batch"}
 	SchemaVersionMismatch() {"en": "actual schema version does not match the provided one"}
+	BlobNotCommitted() {"en": "blob is not yet committed"}
 )

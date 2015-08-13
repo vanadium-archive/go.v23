@@ -30,6 +30,7 @@ var (
 	ErrReadOnlyBatch         = verror.Register("v.io/syncbase/v23/services/syncbase/nosql.ReadOnlyBatch", verror.NoRetry, "{1:}{2:} batch is read-only")
 	ErrConcurrentBatch       = verror.Register("v.io/syncbase/v23/services/syncbase/nosql.ConcurrentBatch", verror.NoRetry, "{1:}{2:} concurrent batch")
 	ErrSchemaVersionMismatch = verror.Register("v.io/syncbase/v23/services/syncbase/nosql.SchemaVersionMismatch", verror.NoRetry, "{1:}{2:} actual schema version does not match the provided one")
+	ErrBlobNotCommitted      = verror.Register("v.io/syncbase/v23/services/syncbase/nosql.BlobNotCommitted", verror.NoRetry, "{1:}{2:} blob is not yet committed")
 )
 
 func init() {
@@ -38,6 +39,7 @@ func init() {
 	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrReadOnlyBatch.ID), "{1:}{2:} batch is read-only")
 	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrConcurrentBatch.ID), "{1:}{2:} concurrent batch")
 	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrSchemaVersionMismatch.ID), "{1:}{2:} actual schema version does not match the provided one")
+	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrBlobNotCommitted.ID), "{1:}{2:} blob is not yet committed")
 }
 
 // NewErrBoundToBatch returns an error with the ErrBoundToBatch ID.
@@ -63,6 +65,11 @@ func NewErrConcurrentBatch(ctx *context.T) error {
 // NewErrSchemaVersionMismatch returns an error with the ErrSchemaVersionMismatch ID.
 func NewErrSchemaVersionMismatch(ctx *context.T) error {
 	return verror.New(ErrSchemaVersionMismatch, ctx)
+}
+
+// NewErrBlobNotCommitted returns an error with the ErrBlobNotCommitted ID.
+func NewErrBlobNotCommitted(ctx *context.T) error {
+	return verror.New(ErrBlobNotCommitted, ctx)
 }
 
 // DatabaseWatcherClientMethods is the client interface
@@ -840,7 +847,7 @@ type BlobManagerFetchBlobClientStream interface {
 		Advance() bool
 		// Value returns the item that was staged by Advance.  May panic if Advance
 		// returned false or was not called.  Never blocks.
-		Value() FetchStatus
+		Value() BlobFetchStatus
 		// Err returns any error encountered by Advance.  Never blocks.
 		Err() error
 	}
@@ -864,13 +871,13 @@ type BlobManagerFetchBlobClientCall interface {
 
 type implBlobManagerFetchBlobClientCall struct {
 	rpc.ClientCall
-	valRecv FetchStatus
+	valRecv BlobFetchStatus
 	errRecv error
 }
 
 func (c *implBlobManagerFetchBlobClientCall) RecvStream() interface {
 	Advance() bool
-	Value() FetchStatus
+	Value() BlobFetchStatus
 	Err() error
 } {
 	return implBlobManagerFetchBlobClientCallRecv{c}
@@ -881,11 +888,11 @@ type implBlobManagerFetchBlobClientCallRecv struct {
 }
 
 func (c implBlobManagerFetchBlobClientCallRecv) Advance() bool {
-	c.c.valRecv = FetchStatus{}
+	c.c.valRecv = BlobFetchStatus{}
 	c.c.errRecv = c.c.Recv(&c.c.valRecv)
 	return c.c.errRecv == nil
 }
-func (c implBlobManagerFetchBlobClientCallRecv) Value() FetchStatus {
+func (c implBlobManagerFetchBlobClientCallRecv) Value() BlobFetchStatus {
 	return c.c.valRecv
 }
 func (c implBlobManagerFetchBlobClientCallRecv) Err() error {
@@ -1260,7 +1267,7 @@ type BlobManagerFetchBlobServerStream interface {
 		// Send places the item onto the output stream.  Returns errors encountered
 		// while sending.  Blocks if there is no buffer space; will unblock when
 		// buffer space is available.
-		Send(item FetchStatus) error
+		Send(item BlobFetchStatus) error
 	}
 }
 
@@ -1283,7 +1290,7 @@ func (s *BlobManagerFetchBlobServerCallStub) Init(call rpc.StreamServerCall) {
 
 // SendStream returns the send side of the BlobManager.FetchBlob server stream.
 func (s *BlobManagerFetchBlobServerCallStub) SendStream() interface {
-	Send(item FetchStatus) error
+	Send(item BlobFetchStatus) error
 } {
 	return implBlobManagerFetchBlobServerCallSend{s}
 }
@@ -1292,7 +1299,7 @@ type implBlobManagerFetchBlobServerCallSend struct {
 	s *BlobManagerFetchBlobServerCallStub
 }
 
-func (s implBlobManagerFetchBlobServerCallSend) Send(item FetchStatus) error {
+func (s implBlobManagerFetchBlobServerCallSend) Send(item BlobFetchStatus) error {
 	return s.s.Send(item)
 }
 

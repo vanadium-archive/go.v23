@@ -25,6 +25,10 @@ func TestMain(m *testing.M) {
 	os.Exit(r)
 }
 
+func TestV23SyncbasedWholeBlobTransfer(t *testing.T) {
+	v23tests.RunTest(t, V23TestSyncbasedWholeBlobTransfer)
+}
+
 func TestV23SyncbasedJoinSyncGroup(t *testing.T) {
 	v23tests.RunTest(t, V23TestSyncbasedJoinSyncGroup)
 }

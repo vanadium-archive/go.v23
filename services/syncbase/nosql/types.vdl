@@ -156,19 +156,19 @@ const (
 	NullBlobRef = BlobRef("")
 )
 
-// FetchState represents the state transitions of a blob fetch.
-type FetchState enum {
+// BlobFetchState represents the state transitions of a blob fetch.
+type BlobFetchState enum {
 	Pending // Fetch request is queued.
 	Locating // Blob discovery is in progress to find a source for the blob.
 	Fetching // Blob transfer is in progress.
 	Done // Blob is locally cached.
 }
 
-// FetchStatus describes the progress of an asynchronous blob fetch.
-type FetchStatus struct {
-	State FetchState // State of the blob fetch request.
-	Received uint64 // Total number of bytes received.
-	Total uint64 // Blob size.
+// BlobFetchStatus describes the progress of an asynchronous blob fetch.
+type BlobFetchStatus struct {
+	State BlobFetchState // State of the blob fetch request.
+	Received int64 // Total number of bytes received.
+	Total int64 // Blob size.
 }
 
 // StoreChange is the new value for a watched entity.
