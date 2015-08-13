@@ -177,66 +177,66 @@ func TestKeyRanges(t *testing.T) {
 		{
 			"select k, v from Customer",
 			&query_db.KeyRanges{
-				query_db.KeyRange{"", ""},
+				query_db.KeyRange{Start: "", Limit: ""},
 			},
 		},
 		{
 			"select k, v from Customer where k = \"abc\" or k = \"def\"",
 			&query_db.KeyRanges{
-				query_db.KeyRange{"abc", appendZeroByte("abc")},
-				query_db.KeyRange{"def", appendZeroByte("def")},
+				query_db.KeyRange{Start: "abc", Limit: appendZeroByte("abc")},
+				query_db.KeyRange{Start: "def", Limit: appendZeroByte("def")},
 			},
 		},
 		{
 			"select k, v from Customer where \"abc\" = k or \"def\" = k",
 			&query_db.KeyRanges{
-				query_db.KeyRange{"abc", appendZeroByte("abc")},
-				query_db.KeyRange{"def", appendZeroByte("def")},
+				query_db.KeyRange{Start: "abc", Limit: appendZeroByte("abc")},
+				query_db.KeyRange{Start: "def", Limit: appendZeroByte("def")},
 			},
 		},
 		{
 			"select k, v from Customer where k >= \"foo\" and k < \"goo\"",
 			&query_db.KeyRanges{
-				query_db.KeyRange{"foo", "goo"},
+				query_db.KeyRange{Start: "foo", Limit: "goo"},
 			},
 		},
 		{
 			"select k, v from Customer where \"foo\" <= k and \"goo\" >= k",
 			&query_db.KeyRanges{
-				query_db.KeyRange{"foo", appendZeroByte("goo")},
+				query_db.KeyRange{Start: "foo", Limit: appendZeroByte("goo")},
 			},
 		},
 		{
 			"select k, v from Customer where k <> \"foo\"",
 			&query_db.KeyRanges{
-				query_db.KeyRange{"", "foo"},
-				query_db.KeyRange{appendZeroByte("foo"), ""},
+				query_db.KeyRange{Start: "", Limit: "foo"},
+				query_db.KeyRange{Start: appendZeroByte("foo"), Limit: ""},
 			},
 		},
 		{
 			"select k, v from Customer where k <> \"foo\" and k > \"bar\"",
 			&query_db.KeyRanges{
-				query_db.KeyRange{appendZeroByte("bar"), "foo"},
-				query_db.KeyRange{appendZeroByte("foo"), ""},
+				query_db.KeyRange{Start: appendZeroByte("bar"), Limit: "foo"},
+				query_db.KeyRange{Start: appendZeroByte("foo"), Limit: ""},
 			},
 		},
 		{
 			"select k, v from Customer where k <> \"foo\" or k > \"bar\"",
 			&query_db.KeyRanges{
-				query_db.KeyRange{"", ""},
+				query_db.KeyRange{Start: "", Limit: ""},
 			},
 		},
 		{
 			"select k, v from Customer where k <> \"bar\" or k > \"foo\"",
 			&query_db.KeyRanges{
-				query_db.KeyRange{"", "bar"},
-				query_db.KeyRange{appendZeroByte("bar"), ""},
+				query_db.KeyRange{Start: "", Limit: "bar"},
+				query_db.KeyRange{Start: appendZeroByte("bar"), Limit: ""},
 			},
 		},
 		{
 			"select v from Customer where Type(v) = \"Foo.Bar\" and k >= \"100\" and k < \"200\" and v.foo > 50 and v.bar <= 1000 and v.baz <> -20.7",
 			&query_db.KeyRanges{
-				query_db.KeyRange{"100", "200"},
+				query_db.KeyRange{Start: "100", Limit: "200"},
 			},
 		},
 		{
@@ -246,13 +246,13 @@ func TestKeyRanges(t *testing.T) {
 		{
 			"select k, v from Customer where Type(v) = \"Foo.Bar\" and k like \"abc%\" limit 100 offset 200",
 			&query_db.KeyRanges{
-				query_db.KeyRange{"abc", "abd"},
+				query_db.KeyRange{Start: "abc", Limit: "abd"},
 			},
 		},
 		{
 			"select  k,  v from \n  Customer where k like \"002%\" or k like \"001%\" or k like \"%\"",
 			&query_db.KeyRanges{
-				query_db.KeyRange{"", ""},
+				query_db.KeyRange{Start: "", Limit: ""},
 			},
 		},
 		{
@@ -266,45 +266,45 @@ func TestKeyRanges(t *testing.T) {
 		{
 			"select k, v from Customer where k like \"foo%\" or k like \"bar%\"",
 			&query_db.KeyRanges{
-				query_db.KeyRange{"bar", "bas"},
-				query_db.KeyRange{"foo", "fop"},
+				query_db.KeyRange{Start: "bar", Limit: "bas"},
+				query_db.KeyRange{Start: "foo", Limit: "fop"},
 			},
 		},
 		{
 			// Note: 'like "Foo"' is optimized to '= "Foo"
 			"select k, v from Customer where k = \"Foo.Bar\" or k like \"Foo\" or k like \"abc%\" limit 100 offset 200",
 			&query_db.KeyRanges{
-				query_db.KeyRange{"Foo", appendZeroByte("Foo")},
-				query_db.KeyRange{"Foo.Bar", appendZeroByte("Foo.Bar")},
-				query_db.KeyRange{"abc", "abd"},
+				query_db.KeyRange{Start: "Foo", Limit: appendZeroByte("Foo")},
+				query_db.KeyRange{Start: "Foo.Bar", Limit: appendZeroByte("Foo.Bar")},
+				query_db.KeyRange{Start: "abc", Limit: "abd"},
 			},
 		},
 		{
 			"select k, v from Customer where k like \"Foo\\%Bar\" or k like \"abc%\" limit 100 offset 200",
 			&query_db.KeyRanges{
-				query_db.KeyRange{"Foo%Bar", appendZeroByte("Foo%Bar")},
-				query_db.KeyRange{"abc", "abd"},
+				query_db.KeyRange{Start: "Foo%Bar", Limit: appendZeroByte("Foo%Bar")},
+				query_db.KeyRange{Start: "abc", Limit: "abd"},
 			},
 		},
 		{
 			"select k, v from Customer where k like \"Foo\\\\%Bar\" or k like \"abc%\" limit 100 offset 200",
 			&query_db.KeyRanges{
-				query_db.KeyRange{"Foo\\", "Foo]"},
-				query_db.KeyRange{"abc", "abd"},
+				query_db.KeyRange{Start: "Foo\\", Limit: "Foo]"},
+				query_db.KeyRange{Start: "abc", Limit: "abd"},
 			},
 		},
 		{
 			"select k, v from Customer where k like \"Foo\\\\\\%Bar\" or k like \"abc%\" limit 100 offset 200",
 			&query_db.KeyRanges{
-				query_db.KeyRange{"Foo\\%Bar", appendZeroByte("Foo\\%Bar")},
-				query_db.KeyRange{"abc", "abd"},
+				query_db.KeyRange{Start: "Foo\\%Bar", Limit: appendZeroByte("Foo\\%Bar")},
+				query_db.KeyRange{Start: "abc", Limit: "abd"},
 			},
 		},
 		{
 			"select k, v from Customer where k not like \"002%\"",
 			&query_db.KeyRanges{
-				query_db.KeyRange{"", "002"},
-				query_db.KeyRange{"003", ""},
+				query_db.KeyRange{Start: "", Limit: "002"},
+				query_db.KeyRange{Start: "003", Limit: ""},
 			},
 		},
 	}
