@@ -285,6 +285,28 @@ func V23TestDeviceManager(i *v23tests.T) {
 	appBlessing := mfrBlessing + "/a/" + pubBlessing + "," + ownerBlessing + "/a/" + pubBlessing
 	inv = debugBin.Start("stats", "read", instanceName+"/stats/security/principal/*/blessingstore")
 	inv.ExpectSetEventuallyRE(".*Default Blessings[ ]+"+userBlessing+"$", "[.][.][.][ ]+"+userBlessing+","+appBlessing)
+
+	// Kill and delete the instance.
+	deviceBin.Run("kill", instanceName)
+	deviceBin.Run("delete", instanceName)
+
+	// Shut down the device manager.
+	deviceScript.Run("stop")
+
+	// Wait for the mounttable entry to go away.
+	resolveGone := func(name string) string {
+		resolver := func() (interface{}, error) {
+			inv := namespaceBin.Start("resolve", name)
+			defer inv.Wait(nil, os.Stderr)
+			if r := strings.TrimRight(inv.Output(), "\n"); len(r) == 0 {
+				return r, nil
+			}
+			return nil, nil
+		}
+		return i.WaitFor(resolver, 100*time.Millisecond, time.Minute).(string)
+	}
+	resolveGone(mtName)
+	deviceScript.Run("uninstall")
 }
 
 func buildAndCopyBinaries(i *v23tests.T, destinationDir string, packages ...string) {
