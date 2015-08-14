@@ -10,20 +10,21 @@ import (
 	"sync"
 	"time"
 
+	"v.io/v23/context"
 	"v.io/v23/naming"
 )
 
 // DialerFunc is the function used to create net.Conn objects given a
 // protocol-specific string representation of an address.
-type DialerFunc func(protocol, address string, timeout time.Duration) (net.Conn, error)
+type DialerFunc func(ctx *context.T, protocol, address string, timeout time.Duration) (net.Conn, error)
 
 // ResolverFunc is the function used for protocol-specific address normalization.
 // e.g. the TCP resolve performs DNS resolution.
-type ResolverFunc func(protocol, address string) (string, string, error)
+type ResolverFunc func(ctx *context.T, protocol, address string) (string, string, error)
 
 // ListenerFunc is the function used to create net.Listener objects given a
 // protocol-specific string representation of the address a server will listen on.
-type ListenerFunc func(protocol, address string) (net.Listener, error)
+type ListenerFunc func(ctx *context.T, protocol, address string) (net.Listener, error)
 
 // RegisterProtocol makes available a Dialer, Resolver, and Listener to RegisteredNetwork.
 // If the protocol represents other actual protocols, you need to specify all the
@@ -65,14 +66,14 @@ func RegisterUnknownProtocol(protocol string, dialer DialerFunc, resolver Resolv
 	}
 	p = r.p
 	registryLock.RUnlock()
-	wrappedDialer := func(_, address string, timeout time.Duration) (net.Conn, error) {
-		return dialer(protocol, address, timeout)
+	wrappedDialer := func(ctx *context.T, _, address string, timeout time.Duration) (net.Conn, error) {
+		return dialer(ctx, protocol, address, timeout)
 	}
-	wrappedResolver := func(_, address string) (string, string, error) {
-		return resolver(protocol, address)
+	wrappedResolver := func(ctx *context.T, _, address string) (string, string, error) {
+		return resolver(ctx, protocol, address)
 	}
-	wrappedListener := func(_, address string) (net.Listener, error) {
-		return listener(protocol, address)
+	wrappedListener := func(ctx *context.T, _, address string) (net.Listener, error) {
+		return listener(ctx, protocol, address)
 	}
 	return RegisterProtocol(naming.UnknownProtocol, wrappedDialer, wrappedResolver, wrappedListener, p...)
 }
