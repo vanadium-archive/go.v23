@@ -21,7 +21,7 @@ const (
 )
 
 var (
-	KeyRangeAll = query_db.KeyRange{"", MaxRangeLimit}
+	KeyRangeAll = query_db.KeyRange{Start: "", Limit: MaxRangeLimit}
 )
 
 func Check(db query_db.Database, s *query_parser.Statement) error {
@@ -401,7 +401,7 @@ func computeKeyRangeForLike(prefix string) query_db.KeyRange {
 	if prefix == "" {
 		return KeyRangeAll
 	}
-	return query_db.KeyRange{prefix, afterPrefix(prefix)}
+	return query_db.KeyRange{Start: prefix, Limit: afterPrefix(prefix)}
 }
 
 func computeKeyRangesForNotLike(prefix string) *query_db.KeyRanges {
@@ -409,8 +409,8 @@ func computeKeyRangesForNotLike(prefix string) *query_db.KeyRanges {
 		return &query_db.KeyRanges{KeyRangeAll}
 	}
 	return &query_db.KeyRanges{
-		query_db.KeyRange{"", prefix},
-		query_db.KeyRange{afterPrefix(prefix), ""},
+		query_db.KeyRange{Start: "", Limit: prefix},
+		query_db.KeyRange{Start: afterPrefix(prefix), Limit: ""},
 	}
 }
 
@@ -420,7 +420,7 @@ func computeKeyRangesForNotLike(prefix string) *query_db.KeyRanges {
 func computeKeyRangeForSingleValue(start string) query_db.KeyRange {
 	limit := []byte(start)
 	limit = append(limit, 0)
-	return query_db.KeyRange{start, string(limit)}
+	return query_db.KeyRange{Start: start, Limit: string(limit)}
 }
 
 // Compute a list of key ranges to be used by query_db's Table.Scan implementation.
@@ -446,7 +446,7 @@ func computeIntersection(lhs, rhs query_db.KeyRange) *query_db.KeyRange {
 		} else {
 			limit = rhs.Limit
 		}
-		return &query_db.KeyRange{start, limit}
+		return &query_db.KeyRange{Start: start, Limit: limit}
 	}
 	return nil
 }
@@ -514,21 +514,21 @@ func collectKeyRanges(expr *query_parser.Expression) *query_db.KeyRanges {
 			case query_parser.Equal:
 				return &query_db.KeyRanges{computeKeyRangeForSingleValue(expr.Operand2.Str)}
 			case query_parser.GreaterThan:
-				return &query_db.KeyRanges{query_db.KeyRange{string(append([]byte(expr.Operand2.Str), 0)), MaxRangeLimit}}
+				return &query_db.KeyRanges{query_db.KeyRange{Start: string(append([]byte(expr.Operand2.Str), 0)), Limit: MaxRangeLimit}}
 			case query_parser.GreaterThanOrEqual:
-				return &query_db.KeyRanges{query_db.KeyRange{expr.Operand2.Str, MaxRangeLimit}}
+				return &query_db.KeyRanges{query_db.KeyRange{Start: expr.Operand2.Str, Limit: MaxRangeLimit}}
 			case query_parser.Like:
 				return &query_db.KeyRanges{computeKeyRangeForLike(expr.Operand2.Prefix)}
 			case query_parser.NotLike:
 				return computeKeyRangesForNotLike(expr.Operand2.Prefix)
 			case query_parser.LessThan:
-				return &query_db.KeyRanges{query_db.KeyRange{"", expr.Operand2.Str}}
+				return &query_db.KeyRanges{query_db.KeyRange{Start: "", Limit: expr.Operand2.Str}}
 			case query_parser.LessThanOrEqual:
-				return &query_db.KeyRanges{query_db.KeyRange{"", string(append([]byte(expr.Operand2.Str), 0))}}
+				return &query_db.KeyRanges{query_db.KeyRange{Start: "", Limit: string(append([]byte(expr.Operand2.Str), 0))}}
 			default: // case query_parser.NotEqual:
 				return &query_db.KeyRanges{
-					query_db.KeyRange{"", expr.Operand2.Str},
-					query_db.KeyRange{string(append([]byte(expr.Operand2.Str), 0)), MaxRangeLimit},
+					query_db.KeyRange{Start: "", Limit: expr.Operand2.Str},
+					query_db.KeyRange{Start: string(append([]byte(expr.Operand2.Str), 0)), Limit: MaxRangeLimit},
 				}
 			}
 		} else if isStringLiteral(expr.Operand1) {
@@ -537,17 +537,17 @@ func collectKeyRanges(expr *query_parser.Expression) *query_db.KeyRanges {
 			case query_parser.Equal:
 				return &query_db.KeyRanges{computeKeyRangeForSingleValue(expr.Operand1.Str)}
 			case query_parser.GreaterThan:
-				return &query_db.KeyRanges{query_db.KeyRange{"", expr.Operand1.Str}}
+				return &query_db.KeyRanges{query_db.KeyRange{Start: "", Limit: expr.Operand1.Str}}
 			case query_parser.GreaterThanOrEqual:
-				return &query_db.KeyRanges{query_db.KeyRange{"", string(append([]byte(expr.Operand1.Str), 0))}}
+				return &query_db.KeyRanges{query_db.KeyRange{Start: "", Limit: string(append([]byte(expr.Operand1.Str), 0))}}
 			case query_parser.LessThan:
-				return &query_db.KeyRanges{query_db.KeyRange{string(append([]byte(expr.Operand1.Str), 0)), MaxRangeLimit}}
+				return &query_db.KeyRanges{query_db.KeyRange{Start: string(append([]byte(expr.Operand1.Str), 0)), Limit: MaxRangeLimit}}
 			case query_parser.LessThanOrEqual:
-				return &query_db.KeyRanges{query_db.KeyRange{expr.Operand1.Str, MaxRangeLimit}}
+				return &query_db.KeyRanges{query_db.KeyRange{Start: expr.Operand1.Str, Limit: MaxRangeLimit}}
 			default: // case query_parser.NotEqual:
 				return &query_db.KeyRanges{
-					query_db.KeyRange{"", expr.Operand1.Str},
-					query_db.KeyRange{string(append([]byte(expr.Operand1.Str), 0)), MaxRangeLimit},
+					query_db.KeyRange{Start: "", Limit: expr.Operand1.Str},
+					query_db.KeyRange{Start: string(append([]byte(expr.Operand1.Str), 0)), Limit: MaxRangeLimit},
 				}
 			}
 		} else {
