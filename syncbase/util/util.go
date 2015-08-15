@@ -6,9 +6,12 @@ package util
 
 import (
 	"regexp"
+	"strings"
 
+	wire "v.io/syncbase/v23/services/syncbase"
 	"v.io/v23/context"
 	"v.io/v23/security/access"
+	"v.io/v23/verror"
 )
 
 // TODO(sadovsky): Expand the allowed charset. We should probably switch to a
@@ -19,6 +22,23 @@ var nameRegexp *regexp.Regexp = regexp.MustCompile("^[a-zA-Z0-9_.-]+$")
 // ValidName returns true iff the given Syncbase component name is valid.
 func ValidName(s string) bool {
 	return nameRegexp.MatchString(s)
+}
+
+// ParseTableRowPair splits the given pattern of the form 'table/row' into
+// the table part and the row part. The row part might be empty.
+func ParseTableRowPair(ctx *context.T, pattern string) (string, string, error) {
+	parts := strings.Split(pattern, "/")
+	if len(parts) != 2 {
+		return "", "", verror.New(verror.ErrBadArg, ctx, pattern)
+	}
+	table, prefix := parts[0], parts[1]
+	if !ValidName(table) {
+		return "", "", verror.New(wire.ErrInvalidName, ctx, table)
+	}
+	if prefix != "" && !ValidName(prefix) {
+		return "", "", verror.New(wire.ErrInvalidName, ctx, prefix)
+	}
+	return table, prefix, nil
 }
 
 // PrefixRangeStart returns the start of the row range for the given prefix.

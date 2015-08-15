@@ -181,6 +181,19 @@ func CheckExecError(t *testing.T, ctx *context.T, db nosql.DatabaseHandle, q str
 	}
 }
 
+// CheckWatch checks that the sequence of elements from the watch stream starts
+// with the given slice of watch changes.
+func CheckWatch(t *testing.T, wstream nosql.WatchStream, changes []nosql.WatchChange) {
+	for _, want := range changes {
+		if !wstream.Advance() {
+			Fatalf(t, "wstream.Advance() reached the end: %v", wstream.Err())
+		}
+		if got := wstream.Change(); !reflect.DeepEqual(got, want) {
+			Fatalf(t, "unexpected watch change: got %v, want %v", got, want)
+		}
+	}
+}
+
 type MockSchemaUpgrader struct {
 	CallCount int
 }

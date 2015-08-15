@@ -10,6 +10,7 @@ import (
 	"v.io/v23/context"
 	"v.io/v23/naming"
 	"v.io/v23/security/access"
+	"v.io/v23/services/watch"
 	"v.io/v23/verror"
 	"v.io/x/lib/vlog"
 )
@@ -127,6 +128,24 @@ func (d *database) SetPermissions(ctx *context.T, perms access.Permissions, vers
 // GetPermissions implements Database.GetPermissions.
 func (d *database) GetPermissions(ctx *context.T) (perms access.Permissions, version string, err error) {
 	return d.c.GetPermissions(ctx)
+}
+
+// Watch implements the Database interface.
+func (d *database) Watch(ctx *context.T, table, prefix string, resumeMarker watch.ResumeMarker) (WatchStream, error) {
+	ctx, cancel := context.WithCancel(ctx)
+	call, err := d.c.WatchGlob(ctx, watch.GlobRequest{
+		Pattern:      naming.Join(table, prefix+"*"),
+		ResumeMarker: resumeMarker,
+	})
+	if err != nil {
+		return nil, err
+	}
+	return newWatchStream(cancel, call), nil
+}
+
+// GetResumeMarker implements the Database interface.
+func (d *database) GetResumeMarker(ctx *context.T) (watch.ResumeMarker, error) {
+	return d.c.GetResumeMarker(ctx)
 }
 
 // SyncGroup implements Database.SyncGroup.

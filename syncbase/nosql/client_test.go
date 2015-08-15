@@ -7,14 +7,19 @@ package nosql_test
 import (
 	"reflect"
 	"testing"
+	"time"
 
+	wire "v.io/syncbase/v23/services/syncbase/nosql"
 	"v.io/syncbase/v23/syncbase"
 	"v.io/syncbase/v23/syncbase/nosql"
 	"v.io/syncbase/v23/syncbase/nosql/syncql"
 	tu "v.io/syncbase/v23/syncbase/testutil"
+	"v.io/v23/context"
 	"v.io/v23/naming"
+	"v.io/v23/services/watch"
 	"v.io/v23/vdl"
 	"v.io/v23/verror"
+	"v.io/v23/vom"
 	_ "v.io/x/ref/runtime/factories/generic"
 )
 
@@ -575,5 +580,217 @@ func TestRowPermissions(t *testing.T) {
 	}
 	if err := s.Err(); verror.ErrorID(err) != verror.ErrNoAccess.ID {
 		t.Fatalf("Unexpected stream error: %v", err)
+	}
+}
+
+// TestWatchBasic test the basic client watch functionality: no perms,
+// no batches.
+func TestWatchBasic(t *testing.T) {
+	ctx, sName, cleanup := tu.SetupOrDie(nil)
+	defer cleanup()
+	a := tu.CreateApp(t, ctx, syncbase.NewService(sName), "a")
+	d := tu.CreateNoSQLDatabase(t, ctx, a, "d")
+	tb := tu.CreateTable(t, ctx, d, "tb")
+	var resumeMarkers []watch.ResumeMarker
+
+	// Generate the data and resume markers.
+	// Initial state.
+	resumeMarker, err := d.GetResumeMarker(ctx)
+	if err != nil {
+		t.Fatalf("d.GetResumeMarker() failed: %v", err)
+	}
+	resumeMarkers = append(resumeMarkers, resumeMarker)
+	// Put "abc".
+	r := tb.Row("abc")
+	if err := r.Put(ctx, "value"); err != nil {
+		t.Fatalf("r.Put() failed: %v", err)
+	}
+	if resumeMarker, err = d.GetResumeMarker(ctx); err != nil {
+		t.Fatalf("d.GetResumeMarker() failed: %v", err)
+	}
+	resumeMarkers = append(resumeMarkers, resumeMarker)
+	// Delete "abc".
+	if err := r.Delete(ctx); err != nil {
+		t.Fatalf("r.Delete() failed: %v", err)
+	}
+	if resumeMarker, err = d.GetResumeMarker(ctx); err != nil {
+		t.Fatalf("d.GetResumeMarker() failed: %v", err)
+	}
+	resumeMarkers = append(resumeMarkers, resumeMarker)
+	// Put "a".
+	r = tb.Row("a")
+	if err := r.Put(ctx, "value"); err != nil {
+		t.Fatalf("r.Put() failed: %v", err)
+	}
+	if resumeMarker, err = d.GetResumeMarker(ctx); err != nil {
+		t.Fatalf("d.GetResumeMarker() failed: %v", err)
+	}
+	resumeMarkers = append(resumeMarkers, resumeMarker)
+
+	vomValue, _ := vom.Encode("value")
+	allChanges := []nosql.WatchChange{
+		nosql.WatchChange{
+			Table:        "tb",
+			Row:          "abc",
+			ChangeType:   nosql.PutChange,
+			ValueBytes:   vomValue,
+			ResumeMarker: resumeMarkers[1],
+		},
+		nosql.WatchChange{
+			Table:        "tb",
+			Row:          "abc",
+			ChangeType:   nosql.DeleteChange,
+			ResumeMarker: resumeMarkers[2],
+		},
+		nosql.WatchChange{
+			Table:        "tb",
+			Row:          "a",
+			ChangeType:   nosql.PutChange,
+			ValueBytes:   vomValue,
+			ResumeMarker: resumeMarkers[3],
+		},
+	}
+	ctxWithTimeout, _ := context.WithTimeout(ctx, 10*time.Second)
+	wstream, _ := d.Watch(ctxWithTimeout, "tb", "a", resumeMarkers[0])
+	tu.CheckWatch(t, wstream, allChanges)
+	wstream, _ = d.Watch(ctxWithTimeout, "tb", "a", resumeMarkers[1])
+	tu.CheckWatch(t, wstream, allChanges[1:])
+	wstream, _ = d.Watch(ctxWithTimeout, "tb", "a", resumeMarkers[2])
+	tu.CheckWatch(t, wstream, allChanges[2:])
+
+	wstream, _ = d.Watch(ctxWithTimeout, "tb", "abc", resumeMarkers[0])
+	tu.CheckWatch(t, wstream, allChanges[:2])
+	wstream, _ = d.Watch(ctxWithTimeout, "tb", "abc", resumeMarkers[1])
+	tu.CheckWatch(t, wstream, allChanges[1:2])
+}
+
+// TestWatchWithBatchAndPerms test that the client watch correctly handles
+// batches and prefix perms.
+func TestWatchWithBatchAndPerms(t *testing.T) {
+	ctx, clientACtx, sName, rootp, cleanup := tu.SetupOrDieCustom("clientA", "server", nil)
+	defer cleanup()
+	clientBCtx := tu.NewCtx(ctx, rootp, "clientB")
+	a := tu.CreateApp(t, clientACtx, syncbase.NewService(sName), "a")
+	d := tu.CreateNoSQLDatabase(t, clientACtx, a, "d")
+	tb := tu.CreateTable(t, clientACtx, d, "tb")
+
+	// Set initial permissions.
+	aAndB := tu.DefaultPerms("root/clientA", "root/clientB")
+	aOnly := tu.DefaultPerms("root/clientA")
+	if err := tb.SetPermissions(clientACtx, nosql.Prefix(""), aAndB); err != nil {
+		t.Fatalf("tb.SetPermissions() failed: %v", err)
+	}
+	if err := tb.SetPermissions(clientACtx, nosql.Prefix("a"), aOnly); err != nil {
+		t.Fatalf("tb.SetPermissions() failed: %v", err)
+	}
+	// Get the initial resume marker.
+	resumeMarker, err := d.GetResumeMarker(clientACtx)
+	if err != nil {
+		t.Fatalf("d.GetResumeMarker() failed: %v", err)
+	}
+	initMarker := resumeMarker
+	// Do two puts in a batch.
+	if err := nosql.RunInBatch(clientACtx, d, wire.BatchOptions{}, func(b nosql.BatchDatabase) error {
+		tb := b.Table("tb")
+		if err := tb.Put(clientACtx, "a", "value"); err != nil {
+			return err
+		}
+		return tb.Put(clientACtx, "b", "value")
+	}); err != nil {
+		t.Fatalf("RunInBatch failed: %v", err)
+	}
+
+	if resumeMarker, err = d.GetResumeMarker(clientACtx); err != nil {
+		t.Fatalf("d.GetResumeMarker() failed: %v", err)
+	}
+	vomValue, _ := vom.Encode("value")
+	allChanges := []nosql.WatchChange{
+		nosql.WatchChange{
+			Table:        "tb",
+			Row:          "a",
+			ChangeType:   nosql.PutChange,
+			ValueBytes:   vomValue,
+			ResumeMarker: nil,
+			Continued:    true,
+		},
+		nosql.WatchChange{
+			Table:        "tb",
+			Row:          "b",
+			ChangeType:   nosql.PutChange,
+			ValueBytes:   vomValue,
+			ResumeMarker: resumeMarker,
+		},
+	}
+
+	ctxAWithTimeout, _ := context.WithTimeout(clientACtx, 10*time.Second)
+	ctxBWithTimeout, _ := context.WithTimeout(clientBCtx, 10*time.Second)
+	// ClientA should see both changes as one batch.
+	wstream, _ := d.Watch(ctxAWithTimeout, "tb", "", initMarker)
+	tu.CheckWatch(t, wstream, allChanges)
+	// ClientB should see only one change.
+	wstream, _ = d.Watch(ctxBWithTimeout, "tb", "", initMarker)
+	tu.CheckWatch(t, wstream, allChanges[1:])
+}
+
+// TestBlockingWatch tests that the server side of the client watch correctly
+// blocks until new updates to the database arrive.
+func TestBlockingWatch(t *testing.T) {
+	ctx, sName, cleanup := tu.SetupOrDie(nil)
+	defer cleanup()
+	a := tu.CreateApp(t, ctx, syncbase.NewService(sName), "a")
+	d := tu.CreateNoSQLDatabase(t, ctx, a, "d")
+	tb := tu.CreateTable(t, ctx, d, "tb")
+
+	resumeMarker, err := d.GetResumeMarker(ctx)
+	if err != nil {
+		t.Fatalf("d.GetResumeMarker() failed: %v", err)
+	}
+	ctxWithTimeout, _ := context.WithTimeout(ctx, 10*time.Second)
+	wstream, _ := d.Watch(ctxWithTimeout, "tb", "a", resumeMarker)
+	vomValue, _ := vom.Encode("value")
+	for i := 0; i < 10; i++ {
+		// Put "abc".
+		r := tb.Row("abc")
+		if err := r.Put(ctx, "value"); err != nil {
+			t.Fatalf("r.Put() failed: %v", err)
+		}
+		if resumeMarker, err = d.GetResumeMarker(ctx); err != nil {
+			t.Fatalf("d.GetResumeMarker() failed: %v", err)
+		}
+		if !wstream.Advance() {
+			t.Fatalf("wstream.Advance() reached the end: %v", wstream.Err())
+		}
+		want := nosql.WatchChange{
+			Table:        "tb",
+			Row:          "abc",
+			ChangeType:   nosql.PutChange,
+			ValueBytes:   vomValue,
+			ResumeMarker: resumeMarker,
+		}
+		if got := wstream.Change(); !reflect.DeepEqual(got, want) {
+			t.Fatalf("unexpected watch change: got %v, want %v", got, want)
+		}
+	}
+}
+
+// TestBlockedWatchCancel tests that the watch call blocked on the server side
+// can be successfully canceled from the client.
+func TestBlockedWatchCancel(t *testing.T) {
+	ctx, sName, cleanup := tu.SetupOrDie(nil)
+	defer cleanup()
+	a := tu.CreateApp(t, ctx, syncbase.NewService(sName), "a")
+	d := tu.CreateNoSQLDatabase(t, ctx, a, "d")
+
+	resumeMarker, err := d.GetResumeMarker(ctx)
+	if err != nil {
+		t.Fatalf("d.GetResumeMarker() failed: %v", err)
+	}
+	ctxWithTimeout, _ := context.WithTimeout(ctx, 100*time.Millisecond)
+	wstream, _ := d.Watch(ctxWithTimeout, "tb", "a", resumeMarker)
+	if wstream.Advance() {
+		t.Fatalf("wstream advanced")
+	}
+	if got, want := verror.ErrorID(wstream.Err()), verror.ErrTimeout.ID; got != want {
+		t.Fatalf("unexpected wstream error ID: got %v, want %v", got, want)
 	}
 }

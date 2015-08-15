@@ -288,10 +288,12 @@ type BlobManager interface {
 	// blob upload.
 }
 
-// Watch allows a client to watch for updates in the database. For each watched
-// request, the client will receive a reliable stream of watch events without
-// re-ordering. See watch.GlobWatcher for a detailed explanation of the
-// behavior.
+// DatabaseWatcher allows a client to watch for updates in the database.
+// For each watched request, the client will receive a reliable stream of watch
+// events without re-ordering. See watch.GlobWatcher for a detailed explanation
+// of the behavior.
+// TODO(rogulenko): Currently the only supported watch patterns are
+// 'table/row*'. Consider changing that.
 //
 // The watching is done by starting a streaming RPC. The argument to the RPC
 // contains the ResumeMarker that points to a particular place in the database

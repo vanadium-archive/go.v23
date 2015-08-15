@@ -10,7 +10,9 @@ import (
 	"v.io/syncbase/v23/syncbase/util"
 	"v.io/v23/context"
 	"v.io/v23/security/access"
+	"v.io/v23/services/watch"
 	"v.io/v23/vdl"
+	"v.io/v23/vom"
 )
 
 // TODO(sadovsky): Document the access control policy for every method where
@@ -97,6 +99,24 @@ type Database interface {
 	// SetPermissions and GetPermissions are included from the AccessController
 	// interface.
 	util.AccessController
+
+	// Watch allows a client to watch for updates to the database. For each watch
+	// request, the client will receive a reliable stream of watch events without
+	// re-ordering. See watch.GlobWatcher for a detailed explanation of the
+	// behavior.
+	//
+	// This method is designed to be used in the following way:
+	// 1) begin a read-only batch
+	// 2) read all information your app needs
+	// 3) read the ResumeMarker
+	// 4) abort the batch
+	// 5) start watching for changes to the data using the ResumeMarker
+	// In this configuration the client doesn't miss any changes.
+	Watch(ctx *context.T, table, prefix string, resumeMarker watch.ResumeMarker) (WatchStream, error)
+
+	// GetResumeMarker returns the ResumeMarker that points to the current end
+	// of the event log.
+	GetResumeMarker(ctx *context.T) (watch.ResumeMarker, error)
 
 	// SyncGroup returns a handle to the SyncGroup with the given name.
 	SyncGroup(sgName string) SyncGroup
@@ -288,6 +308,69 @@ type ResultStream interface {
 	// Result may panic if Advance returned false or was not called at all.
 	// Result does not block.
 	Result() []*vdl.Value
+}
+
+// WatchStream is an interface for receiving database updates.
+type WatchStream interface {
+	Stream
+
+	// Change returns the element that was staged by Advance.
+	// Change may panic if Advance returned false or was not called at all.
+	// Change does not block.
+	Change() WatchChange
+}
+
+// ChangeType describes the type of the row change: Put or Delete.
+// TODO(rogulenko): Add types for changes to syncgroups in this database,
+// as well as ACLs. Consider adding the Shell type.
+type ChangeType uint32
+
+const (
+	PutChange ChangeType = iota
+	DeleteChange
+)
+
+// WatchChange is the new value for a watched entity.
+type WatchChange struct {
+	// Table is the name of the table that contains the changed row.
+	Table string
+
+	// Row is the key of the changed row.
+	Row string
+
+	// ChangeType describes the type of the change. If the ChangeType equals to
+	// PutChange, then the row exists in the table and the Value contains the new
+	// value for this row. If the state equals to DeleteChange, then the row was
+	// removed from the table.
+	ChangeType ChangeType
+
+	// ValueBytes is the new VOM-encoded value for the row if the ChangeType is
+	// Put or nil otherwise.
+	ValueBytes []byte
+
+	// ResumeMarker provides a compact representation of all the messages
+	// that have been received by the caller for the given Watch call.
+	// This marker can be provided in the Request message to allow the caller
+	// to resume the stream watching at a specific point without fetching the
+	// initial state.
+	ResumeMarker watch.ResumeMarker
+
+	// FromSync indicates whether the change came from sync. If FromSync is
+	// false, then the change originated from the local device.
+	FromSync bool
+
+	// If true, this WatchChange is followed by more WatchChanges that are in the
+	// same batch as this WatchChange.
+	Continued bool
+}
+
+// Value decodes the new value of the watched element. Panics if the change type
+// is DeleteChange.
+func (c *WatchChange) Value(value interface{}) error {
+	if c.ChangeType == DeleteChange {
+		panic("invalid change type")
+	}
+	return vom.Decode(c.ValueBytes, value)
 }
 
 // SyncGroup is the interface for a SyncGroup in the store.
