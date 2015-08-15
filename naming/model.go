@@ -53,6 +53,10 @@ type Endpoint interface {
 	// RoutingID returns the RoutingID associated with this Endpoint.
 	RoutingID() RoutingID
 
+	// Routes returns the local routing identifiers used for proxying connections
+	// with multiple proxies.
+	Routes() []string
+
 	// Addrs returns a net.Addr whose String method will return the
 	// the underlying network address encoded in the endpoint rather than
 	// the endpoint string itself.
