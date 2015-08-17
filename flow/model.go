@@ -72,9 +72,14 @@ type Manager interface {
 // BlessingsForPeer is the type of a callback used in performing security
 // authorization.  The remote end reveals its blessings first in the
 // authorization protocol, so the callback should first authorize the remote
-// blessings in the call.  Once authorized, the callback should return the
+// blessings.  Once authorized, the callback should return the
 // blessings that will be revealed to the remote end.
-type BlessingsForPeer func(ctx *context.T, call security.Call) (security.Blessings, error)
+type BlessingsForPeer func(
+	ctx *context.T,
+	localEndpoint, remoteEndpoint naming.Endpoint,
+	remoteBlessings security.Blessings,
+	remoteDischarges map[string]security.Discharge,
+) (security.Blessings, error)
 
 // Conn represents the connection onto which this flow is multiplexed.
 // Since this Conn may be shared between many flows it wouldn't be safe

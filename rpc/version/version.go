@@ -5,6 +5,10 @@
 // Package version defines a mechanism for versioning the RPC protocol.
 package version
 
+import (
+	"v.io/v23/context"
+)
+
 // RPCVersion represents a version of the RPC protocol.
 type RPCVersion uint32
 
@@ -39,4 +43,16 @@ const (
 // use when calling FormatEndpoint
 type RPCVersionRange struct {
 	Min, Max RPCVersion
+}
+
+func CommonVersion(ctx *context.T, l, r RPCVersionRange) (RPCVersion, error) {
+	minMax := l.Max
+	if r.Max < minMax {
+		minMax = r.Max
+	}
+	if l.Min > minMax || r.Min > minMax {
+		return 0, NewErrNoCompatibleVersion(ctx,
+			uint64(l.Min), uint64(l.Max), uint64(r.Min), uint64(r.Max))
+	}
+	return minMax, nil
 }
