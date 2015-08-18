@@ -715,8 +715,8 @@ func TestReflectInvokerGlobber(t *testing.T) {
 		expected *rpc.GlobState
 	}{
 		{vGlobber, gs},
-		{allGlobber, &rpc.GlobState{AllGlobber: allGlobber, AllGlobberX: allGlobber}},
-		{childrenGlobber, &rpc.GlobState{ChildrenGlobber: childrenGlobber, ChildrenGlobberX: childrenGlobber}},
+		{allGlobber, &rpc.GlobState{AllGlobber: allGlobber}},
+		{childrenGlobber, &rpc.GlobState{ChildrenGlobber: childrenGlobber}},
 	}
 
 	for _, tc := range testcases {

@@ -27,8 +27,6 @@ pkg rpc, type AddressChooser interface, ChooseAddress(string, []net.Addr) ([]net
 pkg rpc, type AddressChooserFunc func(protocol string, candidates []net.Addr) ([]net.Addr, error)
 pkg rpc, type AllGlobber interface { Glob__ }
 pkg rpc, type AllGlobber interface, Glob__(*context.T, GlobServerCall, *glob.Glob) error
-pkg rpc, type AllGlobberX interface { Glob__ }
-pkg rpc, type AllGlobberX interface, Glob__(*context.T, GlobServerCall, *glob.Glob) error
 pkg rpc, type ArgDesc struct
 pkg rpc, type ArgDesc struct, Doc string
 pkg rpc, type ArgDesc struct, Name string
@@ -39,8 +37,6 @@ pkg rpc, type CallOpt interface { RPCCallOpt }
 pkg rpc, type CallOpt interface, RPCCallOpt()
 pkg rpc, type ChildrenGlobber interface { GlobChildren__ }
 pkg rpc, type ChildrenGlobber interface, GlobChildren__(*context.T, GlobChildrenServerCall, *glob.Element) error
-pkg rpc, type ChildrenGlobberX interface { GlobChildren__ }
-pkg rpc, type ChildrenGlobberX interface, GlobChildren__(*context.T, GlobChildrenServerCall, *glob.Element) error
 pkg rpc, type Client interface { Call, Close, StartCall }
 pkg rpc, type Client interface, Call(*context.T, string, string, []interface{}, []interface{}, ...CallOpt) error
 pkg rpc, type Client interface, Close()
@@ -80,9 +76,7 @@ pkg rpc, type GlobServerCall interface, Server() Server
 pkg rpc, type GlobServerCall interface, Suffix() string
 pkg rpc, type GlobState struct
 pkg rpc, type GlobState struct, AllGlobber AllGlobber
-pkg rpc, type GlobState struct, AllGlobberX AllGlobberX
 pkg rpc, type GlobState struct, ChildrenGlobber ChildrenGlobber
-pkg rpc, type GlobState struct, ChildrenGlobberX ChildrenGlobberX
 pkg rpc, type Globber interface { Globber }
 pkg rpc, type Globber interface, Globber() *GlobState
 pkg rpc, type Granter interface { Grant, RPCCallOpt }

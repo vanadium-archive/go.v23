@@ -494,10 +494,8 @@ type Globber interface {
 
 // GlobState indicates which Glob interface the object implements.
 type GlobState struct {
-	AllGlobber       AllGlobber
-	ChildrenGlobber  ChildrenGlobber
-	AllGlobberX      AllGlobberX
-	ChildrenGlobberX ChildrenGlobberX
+	AllGlobber      AllGlobber
+	ChildrenGlobber ChildrenGlobber
 }
 
 // AllGlobber is a powerful interface that allows the object to enumerate the
@@ -509,11 +507,6 @@ type AllGlobber interface {
 	// glob pattern in the namespace below the receiver object. All the
 	// names returned are relative to the receiver.
 	Glob__(ctx *context.T, call GlobServerCall, g *glob.Glob) error
-}
-
-// AllGlobberX is DEPRECATED and will be removed soon.
-type AllGlobberX interface {
-	AllGlobber
 }
 
 // GlobServerCall defines the in-flight context for a Glob__ call, including the
@@ -532,11 +525,6 @@ type ChildrenGlobber interface {
 	// immediate children that match the glob pattern element.
 	// It should return an error if the receiver doesn't exist.
 	GlobChildren__(ctx *context.T, call GlobChildrenServerCall, matcher *glob.Element) error
-}
-
-// ChildrenGlobberX is DEPRECATED and will be removed soon.
-type ChildrenGlobberX interface {
-	ChildrenGlobber
 }
 
 // GlobChildrenServerCall defines the in-flight context for a GlobChildren__

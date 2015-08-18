@@ -17,10 +17,8 @@ func NewGlobState(obj interface{}) *GlobState {
 	c, ok2 := obj.(ChildrenGlobber)
 	if ok1 || ok2 {
 		return &GlobState{
-			AllGlobber:       a,
-			ChildrenGlobber:  c,
-			AllGlobberX:      a,
-			ChildrenGlobberX: c,
+			AllGlobber:      a,
+			ChildrenGlobber: c,
 		}
 	}
 	return nil
