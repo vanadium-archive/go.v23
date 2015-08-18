@@ -185,6 +185,10 @@ type Runtime interface {
 
 	// ExperimentalGetFlowManager returns the current flow.Manager attached to ctx.
 	ExperimentalGetFlowManager(ctx *context.T) flow.Manager
+
+	// ExperimentalWithNewFlowManager creates a new flow.Manager instaces and
+	// attaches it to ctx.
+	ExperimentalWithNewFlowManager(ctx *context.T) (*context.T, flow.Manager, error)
 }
 
 // NewEndpoint returns an Endpoint by parsing the supplied endpoint
@@ -301,6 +305,12 @@ func GetReservedNameDispatcher(ctx *context.T) rpc.Dispatcher {
 // ExperimentalGetFlowManager returns the current flow.Manager to ctx.
 func ExperimentalGetFlowManager(ctx *context.T) flow.Manager {
 	return initState.currentRuntime().ExperimentalGetFlowManager(ctx)
+}
+
+// ExperimentalWithNewFlowManager creates a new flow.Manager instance and
+// attaches it to ctx.
+func ExperimentalWithNewFlowManager(ctx *context.T) (*context.T, flow.Manager, error) {
+	return initState.currentRuntime().ExperimentalWithNewFlowManager(ctx)
 }
 
 var initState = &initStateData{}
