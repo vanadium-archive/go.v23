@@ -1,0 +1,30 @@
+pkg discovery, method (UpdateFound) Index() int
+pkg discovery, method (UpdateFound) Interface() interface{}
+pkg discovery, method (UpdateFound) Name() string
+pkg discovery, method (UpdateLost) Index() int
+pkg discovery, method (UpdateLost) Interface() interface{}
+pkg discovery, method (UpdateLost) Name() string
+pkg discovery, type Advertiser interface { Advertise }
+pkg discovery, type Advertiser interface, Advertise(*context.T, Service, access.Permissions) error
+pkg discovery, type Attributes map[string]string
+pkg discovery, type Found struct
+pkg discovery, type Found struct, Service Service
+pkg discovery, type Lost struct
+pkg discovery, type Lost struct, Service Service
+pkg discovery, type Scanner interface { Scan }
+pkg discovery, type Scanner interface, Scan(*context.T, string) (<-chan Update, error)
+pkg discovery, type Service struct
+pkg discovery, type Service struct, Addrs []string
+pkg discovery, type Service struct, Attrs Attributes
+pkg discovery, type Service struct, InterfaceNames []string
+pkg discovery, type T interface { Advertise, Scan }
+pkg discovery, type T interface, Advertise(*context.T, Service, access.Permissions) error
+pkg discovery, type T interface, Scan(*context.T, string) (<-chan Update, error)
+pkg discovery, type Update interface, Index() int
+pkg discovery, type Update interface, Interface() interface{}
+pkg discovery, type Update interface, Name() string
+pkg discovery, type Update interface, unexported methods
+pkg discovery, type UpdateFound struct
+pkg discovery, type UpdateFound struct, Value Found
+pkg discovery, type UpdateLost struct
+pkg discovery, type UpdateLost struct, Value Lost

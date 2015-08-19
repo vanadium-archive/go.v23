@@ -1,0 +1,38 @@
+// Copyright 2015 The Vanadium Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style
+// license that can be found in the LICENSE file.
+
+package discovery
+
+// Service represents service information for service discovery.
+type Service struct {
+	// The interfaces that the service implements.
+	// E.g., 'v.io/v23/services/vtrace.Store'.
+	InterfaceNames []string
+	// The service attributes.
+	// E.g., {'resolution': '1024x768'}.
+	Attrs Attributes
+	// The addresses that the service is served on.
+	// E.g., '/host:port/a/b/c'.
+	Addrs []string
+}
+
+// Attributes represents service attributes as a key/value pair.
+type Attributes map[string]string
+
+// Found represents a service that is discovered by scan.
+type Found struct {
+	Service Service
+	// TODO(jhahn): Add proximity.
+}
+
+// Lost represents a service that is lost during scan.
+type Lost struct {
+	Service Service
+}
+
+// Update represents a discovery update.
+type Update union {
+	Found Found
+	Lost  Lost
+}
