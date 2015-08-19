@@ -650,7 +650,8 @@ func TestWatchBasic(t *testing.T) {
 			ResumeMarker: resumeMarkers[3],
 		},
 	}
-	ctxWithTimeout, _ := context.WithTimeout(ctx, 10*time.Second)
+	ctxWithTimeout, cancel := context.WithTimeout(ctx, 10*time.Second)
+	defer cancel()
 	wstream, _ := d.Watch(ctxWithTimeout, "tb", "a", resumeMarkers[0])
 	tu.CheckWatch(t, wstream, allChanges)
 	wstream, _ = d.Watch(ctxWithTimeout, "tb", "a", resumeMarkers[1])
@@ -722,8 +723,10 @@ func TestWatchWithBatchAndPerms(t *testing.T) {
 		},
 	}
 
-	ctxAWithTimeout, _ := context.WithTimeout(clientACtx, 10*time.Second)
-	ctxBWithTimeout, _ := context.WithTimeout(clientBCtx, 10*time.Second)
+	ctxAWithTimeout, cancelA := context.WithTimeout(clientACtx, 10*time.Second)
+	defer cancelA()
+	ctxBWithTimeout, cancelB := context.WithTimeout(clientBCtx, 10*time.Second)
+	defer cancelB()
 	// ClientA should see both changes as one batch.
 	wstream, _ := d.Watch(ctxAWithTimeout, "tb", "", initMarker)
 	tu.CheckWatch(t, wstream, allChanges)
@@ -745,7 +748,8 @@ func TestBlockingWatch(t *testing.T) {
 	if err != nil {
 		t.Fatalf("d.GetResumeMarker() failed: %v", err)
 	}
-	ctxWithTimeout, _ := context.WithTimeout(ctx, 10*time.Second)
+	ctxWithTimeout, cancel := context.WithTimeout(ctx, 10*time.Second)
+	defer cancel()
 	wstream, _ := d.Watch(ctxWithTimeout, "tb", "a", resumeMarker)
 	vomValue, _ := vom.Encode("value")
 	for i := 0; i < 10; i++ {
@@ -785,7 +789,8 @@ func TestBlockedWatchCancel(t *testing.T) {
 	if err != nil {
 		t.Fatalf("d.GetResumeMarker() failed: %v", err)
 	}
-	ctxWithTimeout, _ := context.WithTimeout(ctx, 100*time.Millisecond)
+	ctxWithTimeout, cancel := context.WithTimeout(ctx, 100*time.Millisecond)
+	defer cancel()
 	wstream, _ := d.Watch(ctxWithTimeout, "tb", "a", resumeMarker)
 	if wstream.Advance() {
 		t.Fatalf("wstream advanced")
