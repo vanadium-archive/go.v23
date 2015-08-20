@@ -79,7 +79,7 @@ type BlessingsForPeer func(
 	localEndpoint, remoteEndpoint naming.Endpoint,
 	remoteBlessings security.Blessings,
 	remoteDischarges map[string]security.Discharge,
-) (security.Blessings, error)
+) (security.Blessings, map[string]security.Discharge, error)
 
 // Conn represents the connection onto which this flow is multiplexed.
 // Since this Conn may be shared between many flows it wouldn't be safe
