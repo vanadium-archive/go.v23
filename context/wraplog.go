@@ -49,14 +49,24 @@ func (t *T) Panicf(format string, args ...interface{}) {
 	t.logger.PanicDepth(1, fmt.Sprintf(format, args...))
 }
 
-func (t *T) V(level int) bool { return t.logger.V(level) }
+func (t *T) V(level int) bool                 { return t.logger.VDepth(1, level) }
+func (t *T) VDepth(depth int, level int) bool { return t.logger.VDepth(depth+1, level) }
+
 func (t *T) VI(level int) interface {
 	Info(args ...interface{})
 	Infof(format string, args ...interface{})
 	InfoDepth(depth int, args ...interface{})
 	InfoStack(all bool)
 } {
-	return t.logger.VI(level)
+	return t.logger.VIDepth(1, level)
+}
+func (t *T) VIDepth(depth int, level int) interface {
+	Info(args ...interface{})
+	Infof(format string, args ...interface{})
+	InfoDepth(depth int, args ...interface{})
+	InfoStack(all bool)
+} {
+	return t.logger.VIDepth(depth+1, level)
 }
 
 func (t *T) FlushLog() { t.logger.FlushLog() }

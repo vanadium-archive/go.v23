@@ -247,8 +247,18 @@ func (*stringLogger) Panic(args ...interface{})                 {}
 func (*stringLogger) PanicDepth(depth int, args ...interface{}) {}
 func (*stringLogger) Panicf(format string, args ...interface{}) {}
 
-func (*stringLogger) V(level int) bool { return false }
+func (*stringLogger) V(level int) bool                 { return false }
+func (*stringLogger) VDepth(depth int, level int) bool { return false }
+
 func (d *stringLogger) VI(level int) interface {
+	Info(args ...interface{})
+	Infof(format string, args ...interface{})
+	InfoDepth(depth int, args ...interface{})
+	InfoStack(all bool)
+} {
+	return d
+}
+func (d *stringLogger) VIDepth(depth int, level int) interface {
 	Info(args ...interface{})
 	Infof(format string, args ...interface{})
 	InfoDepth(depth int, args ...interface{})
