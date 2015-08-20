@@ -57,13 +57,19 @@ func checkSelectClause(db query_db.Database, s *query_parser.SelectClause) error
 	for _, selector := range s.Selectors {
 		switch selector.Type {
 		case query_parser.TypSelField:
-			switch strings.ToLower(selector.Field.Segments[0].Value) {
+			switch selector.Field.Segments[0].Value {
 			case "k":
 				if len(selector.Field.Segments) > 1 {
 					return syncql.NewErrDotNotationDisallowedForKey(db.GetContext(), selector.Field.Segments[1].Off)
 				}
 			case "v":
 				// Nothing to check.
+			case "K":
+				// Be nice and warn of mistakenly capped 'K'.
+				return syncql.NewErrDidYouMeanLowercaseK(db.GetContext(), selector.Field.Segments[0].Off)
+			case "V":
+				// Be nice and warn of mistakenly capped 'V'.
+				return syncql.NewErrDidYouMeanLowercaseV(db.GetContext(), selector.Field.Segments[0].Off)
 			default:
 				return syncql.NewErrInvalidSelectField(db.GetContext(), selector.Field.Segments[0].Off)
 			}
@@ -169,12 +175,19 @@ func checkOperand(db query_db.Database, o *query_parser.Operand) error {
 	case query_parser.TypExpr:
 		return checkExpression(db, o.Expr)
 	case query_parser.TypField:
-		switch strings.ToLower(o.Column.Segments[0].Value) {
+		switch o.Column.Segments[0].Value {
 		case "k":
 			if len(o.Column.Segments) > 1 {
 				return syncql.NewErrDotNotationDisallowedForKey(db.GetContext(), o.Column.Segments[1].Off)
 			}
 		case "v":
+			// Nothing to do.
+		case "K":
+			// Be nice and warn of mistakenly capped 'K'.
+			return syncql.NewErrDidYouMeanLowercaseK(db.GetContext(), o.Column.Segments[0].Off)
+		case "V":
+			// Be nice and warn of mistakenly capped 'V'.
+			return syncql.NewErrDidYouMeanLowercaseV(db.GetContext(), o.Column.Segments[0].Off)
 		default:
 			return syncql.NewErrBadFieldInWhere(db.GetContext(), o.Column.Segments[0].Off)
 		}
@@ -372,11 +385,11 @@ func IsKey(o *query_parser.Operand) bool {
 }
 
 func IsKeyField(f *query_parser.Field) bool {
-	return strings.ToLower(f.Segments[0].Value) == "k"
+	return f.Segments[0].Value == "k"
 }
 
 func IsValueField(f *query_parser.Field) bool {
-	return strings.ToLower(f.Segments[0].Value) == "v"
+	return f.Segments[0].Value == "v"
 }
 
 func IsExpr(o *query_parser.Operand) bool {

@@ -13,9 +13,11 @@ import (
 	"v.io/syncbase/v23/syncbase/nosql/internal/query/query_functions"
 	"v.io/syncbase/v23/syncbase/nosql/internal/query/query_parser"
 	"v.io/syncbase/v23/syncbase/nosql/query_db"
+	"v.io/syncbase/v23/syncbase/nosql/syncql"
 	"v.io/v23"
 	"v.io/v23/context"
 	"v.io/v23/vdl"
+	"v.io/v23/verror"
 	_ "v.io/x/ref/runtime/factories/generic"
 	"v.io/x/ref/test"
 )
@@ -47,6 +49,12 @@ type functionsTest struct {
 	f      *query_parser.Function
 	args   []*query_parser.Operand
 	result *query_parser.Operand
+}
+
+type functionsErrorTest struct {
+	f      *query_parser.Function
+	args   []*query_parser.Operand
+	err    error
 }
 
 var t_2015 time.Time
@@ -346,10 +354,10 @@ func TestFunctions(t *testing.T) {
 				Time: t_2015_06_21_01_23_45,
 			},
 		},
-		// LowerCase
+		// Lowercase
 		functionsTest{
 			&query_parser.Function{
-				Name: "LowerCase",
+				Name: "Lowercase",
 				Args: []*query_parser.Operand{
 					&query_parser.Operand{
 						Type: query_parser.TypStr,
@@ -374,10 +382,10 @@ func TestFunctions(t *testing.T) {
 				Str:  "foobar",
 			},
 		},
-		// UpperCase
+		// Uppercase
 		functionsTest{
 			&query_parser.Function{
-				Name: "UpperCase",
+				Name: "Uppercase",
 				Args: []*query_parser.Operand{
 					&query_parser.Operand{
 						Type: query_parser.TypStr,
@@ -558,6 +566,44 @@ func TestFunctions(t *testing.T) {
 		}
 		if !reflect.DeepEqual(test.result, r) {
 			t.Errorf("function: %v; got %v, want %v", test.f, r, test.result)
+		}
+	}
+}
+
+func TestErrorFunctions(t *testing.T) {
+	tests := []functionsErrorTest{
+		// date
+		functionsErrorTest{
+			&query_parser.Function{
+				Name: "date",
+				Args: []*query_parser.Operand{
+					&query_parser.Operand{
+						Type: query_parser.TypStr,
+						Str:  "2015-06-21 PDT",
+					},
+				},
+				ArgTypes: []query_parser.OperandType{
+					query_parser.TypStr,
+				},
+				RetType:  query_parser.TypTime,
+				Computed: false,
+				RetValue: nil,
+				Node:  query_parser.Node{Off: 42},
+			},
+			[]*query_parser.Operand{
+				&query_parser.Operand{
+					Type: query_parser.TypStr,
+					Str:  "2015-06-21 PDT",
+				},
+			},
+			syncql.NewErrDidYouMeanFunction(db.GetContext(), int64(42), "Date"),
+		},
+	}
+
+	for _, test := range tests {
+		_, err := query_functions.ExecFunction(&db, test.f, test.args)
+                if verror.ErrorID(err) != verror.ErrorID(test.err) || err.Error() != test.err.Error() {
+			t.Errorf("function: %v; got %v, want %v", test.f, err, test.err)
 		}
 	}
 }

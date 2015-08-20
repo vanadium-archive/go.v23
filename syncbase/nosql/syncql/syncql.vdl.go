@@ -52,6 +52,9 @@ var (
 	ErrUnexpected                      = verror.Register("v.io/syncbase/v23/syncbase/nosql/syncql.Unexpected", verror.NoRetry, "{1:}{2:} [{3}]Unexpected: {4}.")
 	ErrUnexpectedEndOfStatement        = verror.Register("v.io/syncbase/v23/syncbase/nosql/syncql.UnexpectedEndOfStatement", verror.NoRetry, "{1:}{2:} [{3}]No statement found.")
 	ErrUnknownIdentifier               = verror.Register("v.io/syncbase/v23/syncbase/nosql/syncql.UnknownIdentifier", verror.NoRetry, "{1:}{2:} [{3}]Uknown identifier: {4}.")
+	ErrDidYouMeanLowercaseK            = verror.Register("v.io/syncbase/v23/syncbase/nosql/syncql.DidYouMeanLowercaseK", verror.NoRetry, "{1:}{2:} [{3}]Did you mean: 'k'?")
+	ErrDidYouMeanLowercaseV            = verror.Register("v.io/syncbase/v23/syncbase/nosql/syncql.DidYouMeanLowercaseV", verror.NoRetry, "{1:}{2:} [{3}]Did you mean: 'v'?")
+	ErrDidYouMeanFunction              = verror.Register("v.io/syncbase/v23/syncbase/nosql/syncql.DidYouMeanFunction", verror.NoRetry, "{1:}{2:} [{3}]Did you mean: '{4}'?")
 )
 
 func init() {
@@ -92,6 +95,9 @@ func init() {
 	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrUnexpected.ID), "{1:}{2:} [{3}]Unexpected: {4}.")
 	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrUnexpectedEndOfStatement.ID), "{1:}{2:} [{3}]No statement found.")
 	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrUnknownIdentifier.ID), "{1:}{2:} [{3}]Uknown identifier: {4}.")
+	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrDidYouMeanLowercaseK.ID), "{1:}{2:} [{3}]Did you mean: 'k'?")
+	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrDidYouMeanLowercaseV.ID), "{1:}{2:} [{3}]Did you mean: 'v'?")
+	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrDidYouMeanFunction.ID), "{1:}{2:} [{3}]Did you mean: '{4}'?")
 }
 
 // NewErrBadFieldInWhere returns an error with the ErrBadFieldInWhere ID.
@@ -277,4 +283,19 @@ func NewErrUnexpectedEndOfStatement(ctx *context.T, off int64) error {
 // NewErrUnknownIdentifier returns an error with the ErrUnknownIdentifier ID.
 func NewErrUnknownIdentifier(ctx *context.T, off int64, found string) error {
 	return verror.New(ErrUnknownIdentifier, ctx, off, found)
+}
+
+// NewErrDidYouMeanLowercaseK returns an error with the ErrDidYouMeanLowercaseK ID.
+func NewErrDidYouMeanLowercaseK(ctx *context.T, off int64) error {
+	return verror.New(ErrDidYouMeanLowercaseK, ctx, off)
+}
+
+// NewErrDidYouMeanLowercaseV returns an error with the ErrDidYouMeanLowercaseV ID.
+func NewErrDidYouMeanLowercaseV(ctx *context.T, off int64) error {
+	return verror.New(ErrDidYouMeanLowercaseV, ctx, off)
+}
+
+// NewErrDidYouMeanFunction returns an error with the ErrDidYouMeanFunction ID.
+func NewErrDidYouMeanFunction(ctx *context.T, off int64, correctName string) error {
+	return verror.New(ErrDidYouMeanFunction, ctx, off, correctName)
 }

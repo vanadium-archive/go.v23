@@ -762,8 +762,8 @@ func TestQueryExec(t *testing.T) {
 		},
 		// Test string functions in where clause.
 		{
-			// Select invoices shipped to Any street -- using LowerCase.
-			"select k from Customer where Type(v) like \"%.Invoice\" and LowerCase(v.ShipTo.Street) like \"%any%\"",
+			// Select invoices shipped to Any street -- using Lowercase.
+			"select k from Customer where Type(v) like \"%.Invoice\" and Lowercase(v.ShipTo.Street) like \"%any%\"",
 			[]string{"k"},
 			[][]*vdl.Value{
 				[]*vdl.Value{vdl.ValueOf(customerEntries[5].key)},
@@ -773,8 +773,8 @@ func TestQueryExec(t *testing.T) {
 			},
 		},
 		{
-			// Select invoices shipped to Any street -- using UpperCase.
-			"select k from Customer where Type(v) like \"%.Invoice\" and UpperCase(v.ShipTo.Street) like \"%ANY%\"",
+			// Select invoices shipped to Any street -- using Uppercase.
+			"select k from Customer where Type(v) like \"%.Invoice\" and Uppercase(v.ShipTo.Street) like \"%ANY%\"",
 			[]string{"k"},
 			[][]*vdl.Value{
 				[]*vdl.Value{vdl.ValueOf(customerEntries[5].key)},
@@ -818,9 +818,9 @@ func TestQueryExec(t *testing.T) {
 				[]*vdl.Value{vdl.ValueOf(t2015_07_01_01_23_45)},
 			},
 		},
-		// LowerCase function
+		// Lowercase function
 		{
-			"select LowerCase(v.Name) as name from Customer where Type(v) like \"%.Customer\"",
+			"select Lowercase(v.Name) as name from Customer where Type(v) like \"%.Customer\"",
 			[]string{"name"},
 			[][]*vdl.Value{
 				[]*vdl.Value{vdl.ValueOf("john smith")},
@@ -828,9 +828,9 @@ func TestQueryExec(t *testing.T) {
 				[]*vdl.Value{vdl.ValueOf("john steed")},
 			},
 		},
-		// UpperCase function
+		// Uppercase function
 		{
-			"select UpperCase(v.Name) as NAME from Customer where Type(v) like \"%.Customer\"",
+			"select Uppercase(v.Name) as NAME from Customer where Type(v) like \"%.Customer\"",
 			[]string{"NAME"},
 			[][]*vdl.Value{
 				[]*vdl.Value{vdl.ValueOf("JOHN SMITH")},

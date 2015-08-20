@@ -23,8 +23,8 @@
 // <selector> ::= <column> [AS <string_literal>]
 //
 // <column> ::=
-//   K
-//   | V[<period><field>]
+//   k
+//   | v[<period><field>]
 //   | <function>
 //
 // <field> ::= <segment>[{<period><segment>}...]
@@ -53,11 +53,11 @@
 //
 // <binary_expression> ::=
 //   <operand> <binary_op> <operand>
-//   | V[<period><field>] IS [NOT] NIL
+//   | v[<period><field>] IS [NOT] NIL
 //
 // <operand> ::=
-//   K
-//   | V[<period><field>]
+//   k
+//   | v[<period><field>]
 //   | <literal>
 //   | <function>
 //

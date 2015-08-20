@@ -118,4 +118,13 @@ error (
 	UnknownIdentifier(off int64, found string) {
 		"en": "[{off}]Uknown identifier: {found}.",
 	}
+	DidYouMeanLowercaseK(off int64) {
+		"en": "[{off}]Did you mean: 'k'?",
+	}
+	DidYouMeanLowercaseV(off int64) {
+		"en": "[{off}]Did you mean: 'v'?",
+	}
+	DidYouMeanFunction(off int64, correctName string) {
+		"en": "[{off}]Did you mean: '{correctName}'?",
+	}
 )

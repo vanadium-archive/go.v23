@@ -25,28 +25,35 @@ type function struct {
 }
 
 var functions map[string]function
+var lowercaseFunctions map[string]string // map of lowercase(funcName)->funcName
 
 func init() {
 	functions = make(map[string]function)
 
-	functions["date"] = function{[]query_parser.OperandType{query_parser.TypStr}, query_parser.TypTime, date, singleTimeArgCheck}
-	functions["datetime"] = function{[]query_parser.OperandType{query_parser.TypStr}, query_parser.TypTime, dateTime, singleTimeArgCheck}
-	functions["y"] = function{[]query_parser.OperandType{query_parser.TypStr, query_parser.TypStr}, query_parser.TypTime, y, timeAndStringArgsCheck}
-	functions["ym"] = function{[]query_parser.OperandType{query_parser.TypStr, query_parser.TypStr}, query_parser.TypTime, ym, timeAndStringArgsCheck}
-	functions["ymd"] = function{[]query_parser.OperandType{query_parser.TypStr, query_parser.TypStr}, query_parser.TypTime, ymd, timeAndStringArgsCheck}
-	functions["ymdh"] = function{[]query_parser.OperandType{query_parser.TypStr, query_parser.TypStr}, query_parser.TypTime, ymdh, timeAndStringArgsCheck}
-	functions["ymdhm"] = function{[]query_parser.OperandType{query_parser.TypStr, query_parser.TypStr}, query_parser.TypTime, ymdhm, timeAndStringArgsCheck}
-	functions["ymdhms"] = function{[]query_parser.OperandType{query_parser.TypStr, query_parser.TypStr}, query_parser.TypTime, ymdhms, timeAndStringArgsCheck}
-	functions["now"] = function{[]query_parser.OperandType{}, query_parser.TypTime, now, nil}
+	functions["Date"] = function{[]query_parser.OperandType{query_parser.TypStr}, query_parser.TypTime, date, singleTimeArgCheck}
+	functions["DateTime"] = function{[]query_parser.OperandType{query_parser.TypStr}, query_parser.TypTime, dateTime, singleTimeArgCheck}
+	functions["Y"] = function{[]query_parser.OperandType{query_parser.TypStr, query_parser.TypStr}, query_parser.TypTime, y, timeAndStringArgsCheck}
+	functions["YM"] = function{[]query_parser.OperandType{query_parser.TypStr, query_parser.TypStr}, query_parser.TypTime, ym, timeAndStringArgsCheck}
+	functions["YMD"] = function{[]query_parser.OperandType{query_parser.TypStr, query_parser.TypStr}, query_parser.TypTime, ymd, timeAndStringArgsCheck}
+	functions["YMDH"] = function{[]query_parser.OperandType{query_parser.TypStr, query_parser.TypStr}, query_parser.TypTime, ymdh, timeAndStringArgsCheck}
+	functions["YMDHM"] = function{[]query_parser.OperandType{query_parser.TypStr, query_parser.TypStr}, query_parser.TypTime, ymdhm, timeAndStringArgsCheck}
+	functions["YMDHMS"] = function{[]query_parser.OperandType{query_parser.TypStr, query_parser.TypStr}, query_parser.TypTime, ymdhms, timeAndStringArgsCheck}
+	functions["Now"] = function{[]query_parser.OperandType{}, query_parser.TypTime, now, nil}
 
-	functions["lowercase"] = function{[]query_parser.OperandType{query_parser.TypStr}, query_parser.TypStr, lowerCase, singleStringArgCheck}
-	functions["split"] = function{[]query_parser.OperandType{query_parser.TypStr, query_parser.TypStr}, query_parser.TypObject, split, twoStringArgsCheck}
-	functions["type"] = function{[]query_parser.OperandType{query_parser.TypObject}, query_parser.TypStr, typeFunc, singleFieldArgCheck}
-	functions["uppercase"] = function{[]query_parser.OperandType{query_parser.TypStr}, query_parser.TypStr, upperCase, singleStringArgCheck}
+	functions["Lowercase"] = function{[]query_parser.OperandType{query_parser.TypStr}, query_parser.TypStr, lowerCase, singleStringArgCheck}
+	functions["Split"] = function{[]query_parser.OperandType{query_parser.TypStr, query_parser.TypStr}, query_parser.TypObject, split, twoStringArgsCheck}
+	functions["Type"] = function{[]query_parser.OperandType{query_parser.TypObject}, query_parser.TypStr, typeFunc, singleFieldArgCheck}
+	functions["Uppercase"] = function{[]query_parser.OperandType{query_parser.TypStr}, query_parser.TypStr, upperCase, singleStringArgCheck}
 
-	functions["complex"] = function{[]query_parser.OperandType{query_parser.TypFloat, query_parser.TypFloat}, query_parser.TypComplex, complexFunc, twoFloatsArgsCheck}
+	functions["Complex"] = function{[]query_parser.OperandType{query_parser.TypFloat, query_parser.TypFloat}, query_parser.TypComplex, complexFunc, twoFloatsArgsCheck}
 
-	functions["len"] = function{[]query_parser.OperandType{query_parser.TypObject}, query_parser.TypInt, lenFunc, nil}
+	functions["Len"] = function{[]query_parser.OperandType{query_parser.TypObject}, query_parser.TypInt, lenFunc, nil}
+
+	// Build lowercaseFuncName->funcName
+	lowercaseFunctions = make(map[string]string)
+	for f := range functions {
+		lowercaseFunctions[strings.ToLower(f)] = f
+	}
 }
 
 // Check that function exists and that the number of args passed matches the spec.
@@ -57,8 +64,8 @@ func init() {
 // early).  CheckFunction will fill in arg types, return types and may fill in
 // Computed and RetValue.
 func CheckFunction(db query_db.Database, f *query_parser.Function) error {
-	if entry, ok := functions[strings.ToLower(f.Name)]; !ok {
-		return syncql.NewErrFunctionNotFound(db.GetContext(), f.Off, f.Name)
+	if entry, err := lookupFuncName(db, f); err != nil {
+		return err
 	} else {
 		f.ArgTypes = entry.argTypes
 		f.RetType = entry.returnType
@@ -101,9 +108,23 @@ func CheckFunction(db query_db.Database, f *query_parser.Function) error {
 	}
 }
 
+func lookupFuncName(db query_db.Database, f *query_parser.Function) (*function, error) {
+	if entry, ok := functions[f.Name]; !ok {
+		// No such function, is the case wrong?
+		if correctCase, ok := lowercaseFunctions[strings.ToLower(f.Name)]; !ok {
+			return nil, syncql.NewErrFunctionNotFound(db.GetContext(), f.Off, f.Name)
+		} else {
+			// the case is wrong
+			return nil, syncql.NewErrDidYouMeanFunction(db.GetContext(), f.Off, correctCase)
+		}
+	} else {
+		return &entry, nil
+	}
+}
+
 func FuncCheck(db query_db.Database, f *query_parser.Function, args []*query_parser.Operand) error {
-	if entry, ok := functions[strings.ToLower(f.Name)]; !ok {
-		return syncql.NewErrFunctionNotFound(db.GetContext(), f.Off, f.Name)
+	if entry, err := lookupFuncName(db, f); err != nil {
+		return err
 	} else {
 		if entry.checkArgsAddr != nil {
 			if err := entry.checkArgsAddr(db, f.Off, args); err != nil {
@@ -115,8 +136,8 @@ func FuncCheck(db query_db.Database, f *query_parser.Function, args []*query_par
 }
 
 func ExecFunction(db query_db.Database, f *query_parser.Function, args []*query_parser.Operand) (*query_parser.Operand, error) {
-	if entry, ok := functions[strings.ToLower(f.Name)]; !ok {
-		return nil, syncql.NewErrFunctionNotFound(db.GetContext(), f.Off, f.Name)
+	if entry, err := lookupFuncName(db, f); err != nil {
+		return nil, err
 	} else {
 		retValue, err := entry.funcAddr(db, f.Off, args)
 		if err != nil {
@@ -194,7 +215,7 @@ func twoStringArgsCheck(db query_db.Database, off int64, args []*query_parser.Op
 func singleFieldArgCheck(db query_db.Database, off int64, args []*query_parser.Operand) error {
 	// single argument must be of type field
 	// It must begin with a v segment.
-	if args[0].Type != query_parser.TypField || len(args[0].Column.Segments) < 1 || strings.ToLower(args[0].Column.Segments[0].Value) != "v" {
+	if args[0].Type != query_parser.TypField || len(args[0].Column.Segments) < 1 || args[0].Column.Segments[0].Value != "v" {
 		return syncql.NewErrArgMustBeField(db.GetContext(), args[0].Off)
 	}
 	return nil

@@ -1159,8 +1159,8 @@ func TestQueryExec(t *testing.T) {
 		},
 		// Test string functions in where clause.
 		{
-			// Select invoices shipped to Any street -- using LowerCase.
-			"select k from Customer where Type(v) like \"%.Invoice\" and LowerCase(v.ShipTo.Street) like \"%any%\"",
+			// Select invoices shipped to Any street -- using Lowercase.
+			"select k from Customer where Type(v) like \"%.Invoice\" and Lowercase(v.ShipTo.Street) like \"%any%\"",
 			[]string{"k"},
 			[][]*vdl.Value{
 				[]*vdl.Value{vdl.ValueOf(custTable.rows[5].key)},
@@ -1170,8 +1170,8 @@ func TestQueryExec(t *testing.T) {
 			},
 		},
 		{
-			// Select invoices shipped to Any street -- using UpperCase.
-			"select k from Customer where Type(v) like \"%.Invoice\" and UpperCase(v.ShipTo.Street) like \"%ANY%\"",
+			// Select invoices shipped to Any street -- using Uppercase.
+			"select k from Customer where Type(v) like \"%.Invoice\" and Uppercase(v.ShipTo.Street) like \"%ANY%\"",
 			[]string{"k"},
 			[][]*vdl.Value{
 				[]*vdl.Value{vdl.ValueOf(custTable.rows[5].key)},
@@ -1215,9 +1215,9 @@ func TestQueryExec(t *testing.T) {
 				[]*vdl.Value{vdl.ValueOf(t2015_07_01_01_23_45)},
 			},
 		},
-		// LowerCase function
+		// Lowercase function
 		{
-			"select LowerCase(v.Name) as name from Customer where Type(v) like \"%.Customer\"",
+			"select Lowercase(v.Name) as name from Customer where Type(v) like \"%.Customer\"",
 			[]string{"name"},
 			[][]*vdl.Value{
 				[]*vdl.Value{vdl.ValueOf("john smith")},
@@ -1225,9 +1225,9 @@ func TestQueryExec(t *testing.T) {
 				[]*vdl.Value{vdl.ValueOf("john steed")},
 			},
 		},
-		// UpperCase function
+		// Uppercase function
 		{
-			"select UpperCase(v.Name) as NAME from Customer where Type(v) like \"%.Customer\"",
+			"select Uppercase(v.Name) as NAME from Customer where Type(v) like \"%.Customer\"",
 			[]string{"NAME"},
 			[][]*vdl.Value{
 				[]*vdl.Value{vdl.ValueOf("JOHN SMITH")},
@@ -1325,8 +1325,8 @@ func TestQueryExec(t *testing.T) {
 		},
 		// Map in selection using function as key.
 		{
-			"select v.Credit.Report.TransUnionReport.PreviousRatings[UpperCase(\"2015q2\")] from Customer where v.Name = \"Bat Masterson\"",
-			[]string{"v.Credit.Report.TransUnionReport.PreviousRatings[UpperCase]"},
+			"select v.Credit.Report.TransUnionReport.PreviousRatings[Uppercase(\"2015q2\")] from Customer where v.Name = \"Bat Masterson\"",
+			[]string{"v.Credit.Report.TransUnionReport.PreviousRatings[Uppercase]"},
 			[][]*vdl.Value{
 				[]*vdl.Value{vdl.ValueOf(int16(40))},
 			},
@@ -1351,8 +1351,8 @@ func TestQueryExec(t *testing.T) {
 		},
 		// Function using a map lookup as arg
 		{
-			"select UpperCase(v.B[true]) from ManyMaps",
-			[]string{"UpperCase"},
+			"select Uppercase(v.B[true]) from ManyMaps",
+			[]string{"Uppercase"},
 			[][]*vdl.Value{
 				[]*vdl.Value{vdl.ValueOf("IT WAS THE BEST OF TIMES,")},
 			},
@@ -1823,7 +1823,7 @@ func TestQueryExec(t *testing.T) {
 			svPairs(100, 300),
 		},
 		{
-			"select k, v.Key from BigTable where V.Key = K",
+			"select k, v.Key from BigTable where v.Key = k",
 			[]string{"k", "v.Key"},
 			svPairs(100, 300),
 		},
@@ -1858,8 +1858,8 @@ func TestQueryExec(t *testing.T) {
 			[][]*vdl.Value{},
 		},
 		{
-			"select K, V.Key from BigTable where k >= v.Key",
-			[]string{"K", "V.Key"},
+			"select k, v.Key from BigTable where k >= v.Key",
+			[]string{"k", "v.Key"},
 			svPairs(100, 300),
 		},
 		{
@@ -1868,8 +1868,8 @@ func TestQueryExec(t *testing.T) {
 			svPairs(100, 300),
 		},
 		{
-			"select K, V.Key from BigTable where k <= v.Key",
-			[]string{"K", "V.Key"},
+			"select k, v.Key from BigTable where k <= v.Key",
+			[]string{"k", "v.Key"},
 			svPairs(100, 300),
 		},
 		{
@@ -2707,6 +2707,94 @@ func TestExecErrors(t *testing.T) {
 		{
 			"select v from Customer where Len(10) = 3",
 			syncql.NewErrFunctionLenInvalidArg(db.GetContext(), 33),
+		},
+		{
+			"select K from Customer where Type(v) = \"Invoice\"",
+			syncql.NewErrDidYouMeanLowercaseK(db.GetContext(), 7),
+		},
+		{
+			"select V from Customer where Type(v) = \"Invoice\"",
+			syncql.NewErrDidYouMeanLowercaseV(db.GetContext(), 7),
+		},
+		{
+			"select k from Customer where K = \"001\"",
+			syncql.NewErrDidYouMeanLowercaseK(db.GetContext(), 29),
+		},
+		{
+			"select v from Customer where Type(V) = \"Invoice\"",
+			syncql.NewErrDidYouMeanLowercaseV(db.GetContext(), 34),
+		},
+		{
+			"select K, V from Customer where Type(V) = \"Invoice\" and K = \"001\"",
+			syncql.NewErrDidYouMeanLowercaseK(db.GetContext(), 7),
+		},
+		{
+			"select type(v) from Customer where Type(v) = \"Invoice\"",
+			syncql.NewErrDidYouMeanFunction(db.GetContext(), 7, "Type"),
+		},
+		{
+			"select Type(v) from Customer where type(v) = \"Invoice\"",
+			syncql.NewErrDidYouMeanFunction(db.GetContext(), 35, "Type"),
+		},
+		{
+			"select type(v) from Customer where type(v) = \"Invoice\"",
+			syncql.NewErrDidYouMeanFunction(db.GetContext(), 7, "Type"),
+		},
+		{
+			"select date(\"foo\") from Customer",
+			syncql.NewErrDidYouMeanFunction(db.GetContext(), 7, "Date"),
+		},
+		{
+			"select Datetime(\"foo\") from Customer",
+			syncql.NewErrDidYouMeanFunction(db.GetContext(), 7, "DateTime"),
+		},
+		{
+			"select y(\"foo\") from Customer",
+			syncql.NewErrDidYouMeanFunction(db.GetContext(), 7, "Y"),
+		},
+		{
+			"select ym(\"foo\") from Customer",
+			syncql.NewErrDidYouMeanFunction(db.GetContext(), 7, "YM"),
+		},
+		{
+			"select ymd(\"foo\") from Customer",
+			syncql.NewErrDidYouMeanFunction(db.GetContext(), 7, "YMD"),
+		},
+		{
+			"select ymdh(\"foo\") from Customer",
+			syncql.NewErrDidYouMeanFunction(db.GetContext(), 7, "YMDH"),
+		},
+		{
+			"select ymdhm(\"foo\") from Customer",
+			syncql.NewErrDidYouMeanFunction(db.GetContext(), 7, "YMDHM"),
+		},
+		{
+			"select ymdhms(\"foo\") from Customer",
+			syncql.NewErrDidYouMeanFunction(db.GetContext(), 7, "YMDHMS"),
+		},
+		{
+			"select now() from Customer",
+			syncql.NewErrDidYouMeanFunction(db.GetContext(), 7, "Now"),
+		},
+		{
+			"select LowerCase(\"foo\") from Customer",
+			syncql.NewErrDidYouMeanFunction(db.GetContext(), 7, "Lowercase"),
+		},
+		{
+			"select UPPERCASE(\"foo\") from Customer",
+			syncql.NewErrDidYouMeanFunction(db.GetContext(), 7, "Uppercase"),
+		},
+		{
+			"select spliT(\"foo:bar\", \":\") from Customer",
+			syncql.NewErrDidYouMeanFunction(db.GetContext(), 7, "Split"),
+		},
+		{
+			"select comPLex(1.0, 2.0) from Customer",
+			syncql.NewErrDidYouMeanFunction(db.GetContext(), 7, "Complex"),
+		},
+		{
+			"select len(\"foo\") from Customer",
+			syncql.NewErrDidYouMeanFunction(db.GetContext(), 7, "Len"),
 		},
 	}
 
