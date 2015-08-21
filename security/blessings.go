@@ -116,8 +116,9 @@ func (b Blessings) CouldHaveNames(names []string) bool {
 	return true
 }
 
-// Expiry returns the time at which b will no longer be valid, or the zero
-// value of time.Time if the blessing does not expire.
+// Expiry returns the time at which at least one of the blessings in the set b
+// will no longer be valid, or the zero value of time.Time if none of the
+// blessings in b expire.
 func (b Blessings) Expiry() time.Time {
 	var min time.Time
 	for _, chain := range b.chains {
