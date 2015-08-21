@@ -41,13 +41,6 @@ type Blessings struct {
 	publicKey PublicKey
 	digests   [][]byte // digests[i] is the digest of chains[i]
 	uniqueID  []byte
-
-	// newscheme[i] is true iff chains[i] contains certificates where certificate signatures
-	// are as per
-	// https://docs.google.com/document/d/1jGbhwKw2SRFUIV_C55GdAwd_UzZtRoSEnnskt0GzNw4/edit?usp=sharing
-	//
-	// TODO(ashankar): Remove when closing out https://github.com/vanadium/issues/issues/543
-	newscheme []bool
 }
 
 // PublicKey returns the public key of the principal to which
@@ -202,36 +195,6 @@ func nameForPrincipal(p Principal, chain []Certificate) string {
 	return blessing
 }
 
-func deprecatedValidateCertificateChain(chain []Certificate) (PublicKey, error) {
-	parent := &Signature{}
-	key, err := UnmarshalPublicKey(chain[0].PublicKey)
-	if err != nil {
-		return nil, err
-	}
-	for idx, cert := range chain {
-		if err := cert.deprecatedValidate(*parent, key); err != nil {
-			return nil, err
-		}
-		if key, err = UnmarshalPublicKey(cert.PublicKey); err != nil {
-			return nil, err
-		}
-		parent = &(chain[idx].Signature)
-	}
-	return key, nil
-}
-
-// TODO(ashankar): Remove to fully resolve https://github.com/vanadium/issues/issues/543
-func transitionalValidateCertificateChain(chain []Certificate) (PublicKey, []byte, error) {
-	// Try the new scheme first, then the old
-	if key, digest, err := validateCertificateChain(chain); err == nil {
-		return key, digest, nil
-	} else if oldkey, olderr := deprecatedValidateCertificateChain(chain); olderr == nil {
-		return oldkey, nil, nil
-	} else {
-		return nil, nil, err
-	}
-}
-
 // chainName returns the blessing name represented by 'chain' for the provided
 // context and principal, ignoring any caveats on the validity of the blessing
 // name.
@@ -295,15 +258,11 @@ func wireBlessingsToNative(wire WireBlessings, native *Blessings) error {
 	// Public keys should match for all chains.
 	marshaledkey := certchains[0][len(certchains[0])-1].PublicKey
 	digests := make([][]byte, len(certchains))
-	newscheme := make([]bool, len(certchains))
 
 	var key PublicKey
 	var err error
-	if key, digests[0], err = transitionalValidateCertificateChain(certchains[0]); err != nil {
+	if key, digests[0], err = validateCertificateChain(certchains[0]); err != nil {
 		return err
-	}
-	if newscheme[0] = digests[0] != nil; !newscheme[0] {
-		digests[0], _ = digestsForCertificateChain(certchains[0])
 	}
 	for i := 1; i < len(certchains); i++ {
 		chain := certchains[i]
@@ -314,17 +273,13 @@ func wireBlessingsToNative(wire WireBlessings, native *Blessings) error {
 		if !bytes.Equal(marshaledkey, cert.PublicKey) {
 			return verror.New(errMultiplePublicKeys, nil)
 		}
-		if _, digests[i], err = transitionalValidateCertificateChain(chain); err != nil {
+		if _, digests[i], err = validateCertificateChain(chain); err != nil {
 			return err
-		}
-		if newscheme[i] = digests[i] != nil; !newscheme[i] {
-			digests[i], _ = digestsForCertificateChain(chain)
 		}
 	}
 	native.chains = certchains
 	native.publicKey = key
 	native.digests = digests
-	native.newscheme = newscheme
 	native.init()
 	return nil
 }
@@ -360,7 +315,6 @@ func UnionOfBlessings(blessings ...Blessings) (Blessings, error) {
 			return Blessings{}, verror.New(errInvalidUnion, nil)
 		}
 		ret.chains = append(ret.chains, b.chains...)
-		ret.newscheme = append(ret.newscheme, b.newscheme...)
 		ret.digests = append(ret.digests, b.digests...)
 	}
 	var err error
@@ -379,7 +333,6 @@ type blessingsSorter Blessings
 func (b blessingsSorter) Len() int { return len(b.chains) }
 func (b blessingsSorter) Swap(i, j int) {
 	b.chains[i], b.chains[j] = b.chains[j], b.chains[i]
-	b.newscheme[i], b.newscheme[j] = b.newscheme[j], b.newscheme[i]
 	b.digests[i], b.digests[j] = b.digests[j], b.digests[i]
 }
 func (b blessingsSorter) Less(i, j int) bool {
@@ -489,7 +442,7 @@ func validateCaveatsForSigning(ctx *context.T, call Call, chain []Certificate) e
 // 'SigningNames' function.
 func SigningBlessings(blessings Blessings) Blessings {
 	ret := Blessings{}
-	for i, chain := range blessings.chains {
+	for _, chain := range blessings.chains {
 		suitableForSigning := true
 		for _, cav := range chainCaveats(chain) {
 			if !isSigningBlessingCaveat(cav) {
@@ -499,7 +452,6 @@ func SigningBlessings(blessings Blessings) Blessings {
 		}
 		if suitableForSigning {
 			ret.chains = append(ret.chains, chain)
-			ret.newscheme = append(ret.newscheme, blessings.newscheme[i])
 		}
 	}
 	if len(ret.chains) > 0 {

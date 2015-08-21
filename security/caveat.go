@@ -5,6 +5,7 @@
 package security
 
 import (
+	"bytes"
 	"crypto/rand"
 	"crypto/sha256"
 	"encoding/base64"
@@ -317,7 +318,7 @@ func (d *publicKeyDischarge) digest(hash Hash) []byte {
 }
 
 func (d *publicKeyDischarge) verify(cxt *context.T, key PublicKey) error {
-	if !isValidDischargePurpose(d.Signature.Purpose) {
+	if !bytes.Equal(d.Signature.Purpose, dischargePurpose) {
 		return verror.New(errInapproriateDischargeSignature, cxt, d.ThirdPartyCaveatId, d.Signature.Purpose)
 	}
 	digest := d.digest(key.hash())

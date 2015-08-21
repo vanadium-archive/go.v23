@@ -46,11 +46,6 @@ const (
 	SignatureForMessageSigning       = "S1" // Signature.Purpose used by a Principal to sign arbitrary messages.
 	SignatureForBlessingCertificates = "B1" // Signature.Purpose used by a Principal when signing Certificates for creating blessings.
 	SignatureForDischarge            = "D1" // Signature.Purpose used by a Principal when signing discharges for public-key based third-party caveats.
-
-	// TODO(ashankar,atlay): Remove when resolving https://github.com/vanadium/issues/issues/619
-	SignatureForMessageSigningV0       = "S" // Signature.Purpose used by a Principal to sign arbitrary messages.
-	SignatureForBlessingCertificatesV0 = "B" // Signature.Purpose used by a Principal when signing Certificates for creating blessings.
-	SignatureForDischargeV0            = "D" // Signature.Purpose used by a Principal when signing discharges for public-key based third-party caveats.
 )
 
 // Signature represents a digital signature.

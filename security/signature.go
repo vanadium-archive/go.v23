@@ -97,18 +97,16 @@ func messageDigest(hash Hash, purpose, message []byte, key PublicKey) []byte {
 		fields = append(fields, h...)
 		return true
 	}
-	if isV1Purpose(purpose) {
-		// In order to defend agains "Duplicate Signature Key Selection (DSKS)" attacks
-		// as defined in the paper "Another look at Security Definition" by Neal Koblitz
-		// and Alfred Menzes, we also include the public key of the signer in the message
-		// being signed.
-		keybytes, err := key.MarshalBinary()
-		if err != nil {
-			return nil
-		}
-		if !w(keybytes) {
-			return nil
-		}
+	// In order to defend agains "Duplicate Signature Key Selection (DSKS)" attacks
+	// as defined in the paper "Another look at Security Definition" by Neal Koblitz
+	// and Alfred Menzes, we also include the public key of the signer in the message
+	// being signed.
+	keybytes, err := key.MarshalBinary()
+	if err != nil {
+		return nil
+	}
+	if !w(keybytes) {
+		return nil
 	}
 	if !w(message) {
 		return nil
@@ -137,13 +135,4 @@ func (hash Hash) sum(data []byte) []byte {
 		return h[:]
 	}
 	return nil
-}
-
-func isV1Purpose(purpose []byte) bool {
-	switch string(purpose) {
-	case SignatureForMessageSigningV0, SignatureForBlessingCertificatesV0, SignatureForDischargeV0:
-		return false
-	default:
-		return true
-	}
 }

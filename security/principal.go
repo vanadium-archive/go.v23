@@ -5,7 +5,6 @@
 package security
 
 import (
-	"bytes"
 	"reflect"
 	"v.io/v23/verror"
 )
@@ -86,15 +85,6 @@ func (errRoots) Recognized(PublicKey, string) error    { return verror.New(errNi
 func (errRoots) Dump() map[BlessingPattern][]PublicKey { return nil }
 func (errRoots) DebugString() string                   { return verror.New(errNilRoots, nil).Error() }
 
-// TODO(ashankar,ataly): Remove when resolving https://github.com/vanadium/issues/issues/619
-func isValidBlessingPurpose(purpose []byte) bool {
-	return bytes.Equal(purpose, []byte(SignatureForBlessingCertificates)) || bytes.Equal(purpose, []byte(SignatureForBlessingCertificatesV0))
-}
-
-func isValidDischargePurpose(purpose []byte) bool {
-	return bytes.Equal(purpose, []byte(SignatureForDischarge)) || bytes.Equal(purpose, []byte(SignatureForDischargeV0))
-}
-
 type principal struct {
 	signer Signer
 	roots  BlessingRoots
@@ -117,25 +107,14 @@ func (p *principal) Bless(key PublicKey, with Blessings, extension string, cavea
 	newchains := make([][]Certificate, len(chains))
 	newdigests := make([][]byte, len(chains))
 	for idx, chain := range chains {
-		if with.newscheme[idx] {
-			if newchains[idx], newdigests[idx], err = chainCertificate(p.signer, chain, *cert); err != nil {
-				return Blessings{}, err
-			}
-		} else if err := cert.deprecatedSign(p.signer, chain[len(chain)-1].Signature); err != nil {
+		if newchains[idx], newdigests[idx], err = chainCertificate(p.signer, chain, *cert); err != nil {
 			return Blessings{}, err
-		} else {
-			cpy := make([]Certificate, len(chain)+1)
-			copy(cpy, chain)
-			cpy[len(cpy)-1] = *cert
-			newchains[idx] = cpy
-			newdigests[idx], _ = digestsForCertificateChain(cpy)
 		}
 	}
 	ret := Blessings{
 		chains:    newchains,
 		publicKey: key,
 		digests:   newdigests,
-		newscheme: with.newscheme,
 	}
 	ret.init()
 	return ret, nil
@@ -154,7 +133,6 @@ func (p *principal) BlessSelf(name string, caveats ...Caveat) (Blessings, error)
 		chains:    [][]Certificate{chain},
 		publicKey: p.PublicKey(),
 		digests:   [][]byte{digest},
-		newscheme: []bool{true},
 	}
 	ret.init()
 	return ret, nil

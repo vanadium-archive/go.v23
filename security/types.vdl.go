@@ -268,13 +268,6 @@ const SignatureForBlessingCertificates = "B1" // Signature.Purpose used by a Pri
 
 const SignatureForDischarge = "D1" // Signature.Purpose used by a Principal when signing discharges for public-key based third-party caveats.
 
-// TODO(ashankar,atlay): Remove when resolving https://github.com/vanadium/issues/issues/619
-const SignatureForMessageSigningV0 = "S" // Signature.Purpose used by a Principal to sign arbitrary messages.
-
-const SignatureForBlessingCertificatesV0 = "B" // Signature.Purpose used by a Principal when signing Certificates for creating blessings.
-
-const SignatureForDischargeV0 = "D" // Signature.Purpose used by a Principal when signing discharges for public-key based third-party caveats.
-
 var (
 	ErrUnrecognizedRoot             = verror.Register("v.io/v23/security.UnrecognizedRoot", verror.NoRetry, "{1:}{2:} unrecognized public key {3} in root certificate{:4}")
 	ErrAuthorizationFailed          = verror.Register("v.io/v23/security.AuthorizationFailed", verror.NoRetry, "{1:}{2:} principal with blessings {3} (rejected {4}) is not authorized by principal with blessings {5}")

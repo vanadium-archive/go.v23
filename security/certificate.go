@@ -5,6 +5,7 @@
 package security
 
 import (
+	"bytes"
 	"crypto/sha256"
 	"strings"
 	"sync"
@@ -89,48 +90,6 @@ func (c *Certificate) chainedDigests(hashfn Hash, chain []byte) (digest, content
 	return
 }
 
-// TODO(ashankar): Remove this to complete resolution of https://github.com/vanadium/issues/issues/543
-func (c *Certificate) deprecatedDigest(hash Hash, parent Signature) []byte {
-	var fields []byte
-	w := func(data []byte) {
-		fields = append(fields, hash.sum(data)...)
-	}
-	// Fields of the Certificate type.
-	w([]byte(c.Extension))
-	w(c.PublicKey)
-	for _, cav := range c.Caveats {
-		fields = append(fields, cav.digest(hash)...)
-	}
-	// Bind to the parent Certificate by including parent certificate's signature.
-	w([]byte(parent.Hash))
-	w(parent.Purpose)
-	w([]byte("ECDSA")) // Type of signature
-	w(parent.R)
-	w(parent.S)
-	return hash.sum(fields)
-}
-
-// TODO(ashankar): Remove this to complete resolution of https://github.com/vanadium/issues/issues/543
-func (c *Certificate) deprecatedValidate(parentSignature Signature, parentKey PublicKey) error {
-	if !isValidBlessingPurpose(c.Signature.Purpose) {
-		return verror.New(errInapproriateCertSignature, nil, c.Extension, c.Signature.Purpose)
-	}
-	if err := validateExtension(c.Extension); err != nil {
-		return verror.New(errBadBlessingExtensionInCert, nil, c.Extension, err)
-	}
-	if !c.Signature.Verify(parentKey, c.deprecatedDigest(c.Signature.Hash, parentSignature)) {
-		return verror.New(errBadCertSignature, nil, c.Extension, parentKey)
-	}
-	return nil
-}
-
-// TODO(ashankar): Remove this to complete resolution of https://github.com/vanadium/issues/issues/543
-func (c *Certificate) deprecatedSign(signer Signer, parentSignature Signature) error {
-	var err error
-	c.Signature, err = signer.Sign(blessPurpose, c.deprecatedDigest(signer.PublicKey().hash(), parentSignature))
-	return err
-}
-
 func validateExtension(extension string) error {
 	if len(extension) == 0 {
 		return verror.New(errBadBlessingEmptyExtension, nil)
@@ -181,7 +140,7 @@ func validateCertificateChain(chain []Certificate) (PublicKey, []byte, error) {
 			return pubkey, chaindigest, nil
 		}
 		// Some basic sanity checks on the certificate.
-		if !isValidBlessingPurpose(c.Signature.Purpose) {
+		if !bytes.Equal(c.Signature.Purpose, blessPurpose) {
 			return nil, nil, verror.New(errInapproriateCertSignature, nil, c.Extension, c.Signature.Purpose)
 		}
 		if err := validateExtension(c.Extension); err != nil {
