@@ -27,8 +27,19 @@ func (*discard) Panic(args ...interface{})                 {}
 func (*discard) PanicDepth(depth int, args ...interface{}) {}
 func (*discard) Panicf(format string, args ...interface{}) {}
 
-func (*discard) V(level int) bool { return false }
+func (*discard) V(level int) bool                 { return false }
+func (*discard) VDepth(depth int, level int) bool { return false }
+
 func (d *discard) VI(level int) interface {
+	Info(args ...interface{})
+	Infof(format string, args ...interface{})
+	InfoDepth(depth int, args ...interface{})
+	InfoStack(all bool)
+} {
+	return d
+}
+
+func (d *discard) VIDepth(depth int, level int) interface {
 	Info(args ...interface{})
 	Infof(format string, args ...interface{})
 	InfoDepth(depth int, args ...interface{})
