@@ -63,6 +63,9 @@ type Manager interface {
 	// otherwise an error is returned.
 	Dial(ctx *context.T, remote naming.Endpoint, fn BlessingsForPeer) (Flow, error)
 
+	// RoutingID returns the naming.Routing of the flow.Manager.
+	RoutingID() naming.RoutingID
+
 	// Closed returns a channel that remains open for the lifetime of the Manager
 	// object. Once the channel is closed any operations on the Manager will
 	// necessarily fail.
