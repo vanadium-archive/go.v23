@@ -1936,6 +1936,70 @@ func TestQueryExec(t *testing.T) {
 				[]*vdl.Value{vdl.ValueOf(int64(2))},
 			},
 		},
+		{
+			// StrCat
+			"select StrCat(v.Address.City, v.Address.State) from Customer where v.Name = \"John Smith\"",
+			[]string{"StrCat"},
+			[][]*vdl.Value{
+				[]*vdl.Value{vdl.ValueOf("Palo AltoCA")},
+			},
+		},
+		{
+			// StrIndex
+			"select StrIndex(v.Address.City, \"lo\") from Customer where v.Name = \"John Smith\"",
+			[]string{"StrIndex"},
+			[][]*vdl.Value{
+				[]*vdl.Value{vdl.ValueOf(int64(2))},
+			},
+		},
+		{
+			// StrLastIndex
+			"select StrLastIndex(v.Address.City, \"l\") from Customer where v.Name = \"John Smith\"",
+			[]string{"StrLastIndex"},
+			[][]*vdl.Value{
+				[]*vdl.Value{vdl.ValueOf(int64(6))},
+			},
+		},
+		{
+			// StrRepeat
+			"select StrRepeat(v.Address.City, 3) from Customer where v.Name = \"John Smith\"",
+			[]string{"StrRepeat"},
+			[][]*vdl.Value{
+				[]*vdl.Value{vdl.ValueOf("Palo AltoPalo AltoPalo Alto")},
+			},
+		},
+		{
+			// StrReplace
+			"select StrReplace(v.Address.City, \"Palo\", \"Shallow\") from Customer where v.Name = \"John Smith\"",
+			[]string{"StrReplace"},
+			[][]*vdl.Value{
+				[]*vdl.Value{vdl.ValueOf("Shallow Alto")},
+			},
+		},
+		{
+			// Trim
+			"select Trim(\"   Foo     \") from Customer where v.Name = \"John Smith\"",
+			[]string{"Trim"},
+			[][]*vdl.Value{
+				[]*vdl.Value{vdl.ValueOf("Foo")},
+			},
+		},
+		{
+			// TrimLeft
+			"select TrimLeft(\"   Foo     \") from Customer where v.Name = \"John Smith\"",
+			[]string{"TrimLeft"},
+			[][]*vdl.Value{
+				[]*vdl.Value{vdl.ValueOf("Foo     ")},
+			},
+		},
+		{
+			// TrimRight
+			"select TrimRight(\"   Foo     \") from Customer where v.Name = \"John Smith\"",
+			[]string{"TrimRight"},
+			[][]*vdl.Value{
+				[]*vdl.Value{vdl.ValueOf("   Foo")},
+			},
+		},
 	}
 
 	for _, test := range basic {

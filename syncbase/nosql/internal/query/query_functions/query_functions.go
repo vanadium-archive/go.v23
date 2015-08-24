@@ -40,10 +40,19 @@ func init() {
 	functions["YMDHMS"] = function{[]query_parser.OperandType{query_parser.TypStr, query_parser.TypStr}, query_parser.TypTime, ymdhms, timeAndStringArgsCheck}
 	functions["Now"] = function{[]query_parser.OperandType{}, query_parser.TypTime, now, nil}
 
+	// String Functions
 	functions["Lowercase"] = function{[]query_parser.OperandType{query_parser.TypStr}, query_parser.TypStr, lowerCase, singleStringArgCheck}
 	functions["Split"] = function{[]query_parser.OperandType{query_parser.TypStr, query_parser.TypStr}, query_parser.TypObject, split, twoStringArgsCheck}
 	functions["Type"] = function{[]query_parser.OperandType{query_parser.TypObject}, query_parser.TypStr, typeFunc, singleFieldArgCheck}
 	functions["Uppercase"] = function{[]query_parser.OperandType{query_parser.TypStr}, query_parser.TypStr, upperCase, singleStringArgCheck}
+	functions["StrCat"] = function{[]query_parser.OperandType{query_parser.TypStr, query_parser.TypStr}, query_parser.TypStr, strCat, twoStringArgsCheck}
+	functions["StrIndex"] = function{[]query_parser.OperandType{query_parser.TypStr, query_parser.TypStr}, query_parser.TypInt, strIndex, twoStringArgsCheck}
+	functions["StrRepeat"] = function{[]query_parser.OperandType{query_parser.TypStr, query_parser.TypInt}, query_parser.TypStr, strRepeat, stringIntArgsCheck}
+	functions["StrReplace"] = function{[]query_parser.OperandType{query_parser.TypStr, query_parser.TypStr, query_parser.TypStr}, query_parser.TypStr, strReplace, threeStringArgsCheck}
+	functions["StrLastIndex"] = function{[]query_parser.OperandType{query_parser.TypStr, query_parser.TypStr}, query_parser.TypInt, strLastIndex, twoStringArgsCheck}
+	functions["Trim"] = function{[]query_parser.OperandType{query_parser.TypStr}, query_parser.TypStr, trim, singleStringArgCheck}
+	functions["TrimLeft"] = function{[]query_parser.OperandType{query_parser.TypStr}, query_parser.TypStr, trimLeft, singleStringArgCheck}
+	functions["TrimRight"] = function{[]query_parser.OperandType{query_parser.TypStr}, query_parser.TypStr, trimRight, singleStringArgCheck}
 
 	functions["Complex"] = function{[]query_parser.OperandType{query_parser.TypFloat, query_parser.TypFloat}, query_parser.TypComplex, complexFunc, twoFloatsArgsCheck}
 
@@ -185,6 +194,14 @@ func makeStrOp(off int64, s string) *query_parser.Operand {
 	return &o
 }
 
+func makeBoolOp(off int64, b bool) *query_parser.Operand {
+	var o query_parser.Operand
+	o.Off = off
+	o.Type = query_parser.TypBool
+	o.Bool = b
+	return &o
+}
+
 func makeComplexOp(off int64, c complex128) *query_parser.Operand {
 	var o query_parser.Operand
 	o.Off = off
@@ -210,6 +227,23 @@ func twoStringArgsCheck(db query_db.Database, off int64, args []*query_parser.Op
 		return err
 	}
 	return checkIfPossibleThatArgIsConvertableToString(db, args[1])
+}
+
+func threeStringArgsCheck(db query_db.Database, off int64, args []*query_parser.Operand) error {
+	if err := checkIfPossibleThatArgIsConvertableToString(db, args[0]); err != nil {
+		return err
+	}
+	if err := checkIfPossibleThatArgIsConvertableToString(db, args[1]); err != nil {
+		return err
+	}
+	return checkIfPossibleThatArgIsConvertableToString(db, args[2])
+}
+
+func stringIntArgsCheck(db query_db.Database, off int64, args []*query_parser.Operand) error {
+	if err := checkIfPossibleThatArgIsConvertableToString(db, args[0]); err != nil {
+		return err
+	}
+	return checkIfPossibleThatArgIsConvertableToInt(db, args[1])
 }
 
 func singleFieldArgCheck(db query_db.Database, off int64, args []*query_parser.Operand) error {
@@ -239,6 +273,58 @@ func checkIfPossibleThatArgIsConvertableToString(db query_db.Database, arg *quer
 			_, err := conversions.ConvertValueToString(arg.Function.RetValue)
 			if err != nil {
 				return syncql.NewErrStringConversionError(db.GetContext(), arg.Off, err)
+			} else {
+				return nil
+			}
+		}
+	}
+	return nil
+}
+
+// If possible, check if arg is convertable to an int.  Fields and not yet computed
+// functions cannot be checked and will just return nil.
+func checkIfPossibleThatArgIsConvertableToInt(db query_db.Database, arg *query_parser.Operand) error {
+	// If arg is a literal or an already computed function,
+	// make sure it can be converted to a int.
+	switch arg.Type {
+	case query_parser.TypBigInt, query_parser.TypBigRat, query_parser.TypBool, query_parser.TypComplex, query_parser.TypFloat, query_parser.TypInt, query_parser.TypStr, query_parser.TypTime, query_parser.TypUint:
+		_, err := conversions.ConvertValueToInt(arg)
+		if err != nil {
+			return syncql.NewErrIntConversionError(db.GetContext(), arg.Off, err)
+		} else {
+			return nil
+		}
+	case query_parser.TypFunction:
+		if arg.Function.Computed {
+			_, err := conversions.ConvertValueToInt(arg.Function.RetValue)
+			if err != nil {
+				return syncql.NewErrIntConversionError(db.GetContext(), arg.Off, err)
+			} else {
+				return nil
+			}
+		}
+	}
+	return nil
+}
+
+// If possible, check if arg is convertable to a float.  Fields and not yet computed
+// functions cannot be checked and will just return nil.
+func checkIfPossibleThatArgIsConvertableToFloat(db query_db.Database, arg *query_parser.Operand) error {
+	// If arg is a literal or an already computed function,
+	// make sure it can be converted to a float.
+	switch arg.Type {
+	case query_parser.TypBigInt, query_parser.TypBigRat, query_parser.TypBool, query_parser.TypComplex, query_parser.TypFloat, query_parser.TypInt, query_parser.TypStr, query_parser.TypTime, query_parser.TypUint:
+		_, err := conversions.ConvertValueToFloat(arg)
+		if err != nil {
+			return syncql.NewErrFloatConversionError(db.GetContext(), arg.Off, err)
+		} else {
+			return nil
+		}
+	case query_parser.TypFunction:
+		if arg.Function.Computed {
+			_, err := conversions.ConvertValueToFloat(arg.Function.RetValue)
+			if err != nil {
+				return syncql.NewErrFloatConversionError(db.GetContext(), arg.Off, err)
 			} else {
 				return nil
 			}

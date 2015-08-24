@@ -37,6 +37,7 @@ var (
 	ErrLocationConversionError         = verror.Register("v.io/syncbase/v23/syncbase/nosql/syncql.LocationConversionError", verror.NoRetry, "{1:}{2:} [{3}]Can't convert to location: {4}.")
 	ErrStringConversionError           = verror.Register("v.io/syncbase/v23/syncbase/nosql/syncql.StringConversionError", verror.NoRetry, "{1:}{2:} [{3}]Can't convert to string: {4}.")
 	ErrFloatConversionError            = verror.Register("v.io/syncbase/v23/syncbase/nosql/syncql.FloatConversionError", verror.NoRetry, "{1:}{2:} [{3}]Can't convert to float: {4}.")
+	ErrIntConversionError              = verror.Register("v.io/syncbase/v23/syncbase/nosql/syncql.IntConversionError", verror.NoRetry, "{1:}{2:} [{3}]Can't convert to int: {4}.")
 	ErrIsIsNotRequireLhsValue          = verror.Register("v.io/syncbase/v23/syncbase/nosql/syncql.IsIsNotRequireLhsValue", verror.NoRetry, "{1:}{2:} [{3}]'Is/is not' expressions require left operand to be a value operand.")
 	ErrIsIsNotRequireRhsNil            = verror.Register("v.io/syncbase/v23/syncbase/nosql/syncql.IsIsNotRequireRhsNil", verror.NoRetry, "{1:}{2:} [{3}]'Is/is not' expressions require right operand to be nil.")
 	ErrInvalidEscapedChar              = verror.Register("v.io/syncbase/v23/syncbase/nosql/syncql.InvalidEscapedChar", verror.NoRetry, "{1:}{2:} [{3}Expected backslash, percent, or underscore after backslash.]")
@@ -80,6 +81,7 @@ func init() {
 	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrLocationConversionError.ID), "{1:}{2:} [{3}]Can't convert to location: {4}.")
 	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrStringConversionError.ID), "{1:}{2:} [{3}]Can't convert to string: {4}.")
 	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrFloatConversionError.ID), "{1:}{2:} [{3}]Can't convert to float: {4}.")
+	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrIntConversionError.ID), "{1:}{2:} [{3}]Can't convert to int: {4}.")
 	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrIsIsNotRequireLhsValue.ID), "{1:}{2:} [{3}]'Is/is not' expressions require left operand to be a value operand.")
 	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrIsIsNotRequireRhsNil.ID), "{1:}{2:} [{3}]'Is/is not' expressions require right operand to be nil.")
 	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrInvalidEscapedChar.ID), "{1:}{2:} [{3}Expected backslash, percent, or underscore after backslash.]")
@@ -208,6 +210,11 @@ func NewErrStringConversionError(ctx *context.T, off int64, err error) error {
 // NewErrFloatConversionError returns an error with the ErrFloatConversionError ID.
 func NewErrFloatConversionError(ctx *context.T, off int64, err error) error {
 	return verror.New(ErrFloatConversionError, ctx, off, err)
+}
+
+// NewErrIntConversionError returns an error with the ErrIntConversionError ID.
+func NewErrIntConversionError(ctx *context.T, off int64, err error) error {
+	return verror.New(ErrIntConversionError, ctx, off, err)
 }
 
 // NewErrIsIsNotRequireLhsValue returns an error with the ErrIsIsNotRequireLhsValue ID.

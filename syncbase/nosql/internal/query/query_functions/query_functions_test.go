@@ -52,9 +52,9 @@ type functionsTest struct {
 }
 
 type functionsErrorTest struct {
-	f      *query_parser.Function
-	args   []*query_parser.Operand
-	err    error
+	f    *query_parser.Function
+	args []*query_parser.Operand
+	err  error
 }
 
 var t_2015 time.Time
@@ -367,7 +367,7 @@ func TestFunctions(t *testing.T) {
 				ArgTypes: []query_parser.OperandType{
 					query_parser.TypStr,
 				},
-				RetType:  query_parser.TypTime,
+				RetType:  query_parser.TypStr,
 				Computed: false,
 				RetValue: nil,
 			},
@@ -395,7 +395,7 @@ func TestFunctions(t *testing.T) {
 				ArgTypes: []query_parser.OperandType{
 					query_parser.TypStr,
 				},
-				RetType:  query_parser.TypTime,
+				RetType:  query_parser.TypStr,
 				Computed: false,
 				RetValue: nil,
 			},
@@ -557,6 +557,562 @@ func TestFunctions(t *testing.T) {
 				Int:  2,
 			},
 		},
+		// StrCat
+		functionsTest{
+			&query_parser.Function{
+				Name: "StrCat",
+				Args: []*query_parser.Operand{
+					&query_parser.Operand{
+						Type: query_parser.TypStr,
+						Str:  "Foo",
+					},
+					&query_parser.Operand{
+						Type: query_parser.TypStr,
+						Str:  "Bar",
+					},
+				},
+				ArgTypes: []query_parser.OperandType{
+					query_parser.TypStr,
+					query_parser.TypStr,
+				},
+				RetType:  query_parser.TypStr,
+				Computed: false,
+				RetValue: nil,
+			},
+			[]*query_parser.Operand{
+				&query_parser.Operand{
+					Type: query_parser.TypStr,
+					Str:  "Foo",
+				},
+				&query_parser.Operand{
+					Type: query_parser.TypStr,
+					Str:  "Bar",
+				},
+			},
+			&query_parser.Operand{
+				Type: query_parser.TypStr,
+				Str:  "FooBar",
+			},
+		},
+		// StrIndex
+		functionsTest{
+			&query_parser.Function{
+				Name: "StrIndex",
+				Args: []*query_parser.Operand{
+					&query_parser.Operand{
+						Type: query_parser.TypStr,
+						Str:  "FooBar",
+					},
+					&query_parser.Operand{
+						Type: query_parser.TypStr,
+						Str:  "Bar",
+					},
+				},
+				ArgTypes: []query_parser.OperandType{
+					query_parser.TypStr,
+					query_parser.TypStr,
+				},
+				RetType:  query_parser.TypInt,
+				Computed: false,
+				RetValue: nil,
+			},
+			[]*query_parser.Operand{
+				&query_parser.Operand{
+					Type: query_parser.TypStr,
+					Str:  "FooBar",
+				},
+				&query_parser.Operand{
+					Type: query_parser.TypStr,
+					Str:  "Bar",
+				},
+			},
+			&query_parser.Operand{
+				Type: query_parser.TypInt,
+				Int:  3,
+			},
+		},
+		// StrIndex
+		functionsTest{
+			&query_parser.Function{
+				Name: "StrIndex",
+				Args: []*query_parser.Operand{
+					&query_parser.Operand{
+						Type: query_parser.TypStr,
+						Str:  "FooBar",
+					},
+					&query_parser.Operand{
+						Type: query_parser.TypStr,
+						Str:  "Baz",
+					},
+				},
+				ArgTypes: []query_parser.OperandType{
+					query_parser.TypStr,
+					query_parser.TypStr,
+				},
+				RetType:  query_parser.TypInt,
+				Computed: false,
+				RetValue: nil,
+			},
+			[]*query_parser.Operand{
+				&query_parser.Operand{
+					Type: query_parser.TypStr,
+					Str:  "FooBar",
+				},
+				&query_parser.Operand{
+					Type: query_parser.TypStr,
+					Str:  "Baz",
+				},
+			},
+			&query_parser.Operand{
+				Type: query_parser.TypInt,
+				Int:  -1,
+			},
+		},
+		// StrLastIndex
+		functionsTest{
+			&query_parser.Function{
+				Name: "StrLastIndex",
+				Args: []*query_parser.Operand{
+					&query_parser.Operand{
+						Type: query_parser.TypStr,
+						Str:  "FooBarBar",
+					},
+					&query_parser.Operand{
+						Type: query_parser.TypStr,
+						Str:  "Bar",
+					},
+				},
+				ArgTypes: []query_parser.OperandType{
+					query_parser.TypStr,
+					query_parser.TypStr,
+				},
+				RetType:  query_parser.TypInt,
+				Computed: false,
+				RetValue: nil,
+			},
+			[]*query_parser.Operand{
+				&query_parser.Operand{
+					Type: query_parser.TypStr,
+					Str:  "FooBarBar",
+				},
+				&query_parser.Operand{
+					Type: query_parser.TypStr,
+					Str:  "Bar",
+				},
+			},
+			&query_parser.Operand{
+				Type: query_parser.TypInt,
+				Int:  6,
+			},
+		},
+		// StrLastIndex
+		functionsTest{
+			&query_parser.Function{
+				Name: "StrLastIndex",
+				Args: []*query_parser.Operand{
+					&query_parser.Operand{
+						Type: query_parser.TypStr,
+						Str:  "FooBar",
+					},
+					&query_parser.Operand{
+						Type: query_parser.TypStr,
+						Str:  "Baz",
+					},
+				},
+				ArgTypes: []query_parser.OperandType{
+					query_parser.TypStr,
+					query_parser.TypStr,
+				},
+				RetType:  query_parser.TypInt,
+				Computed: false,
+				RetValue: nil,
+			},
+			[]*query_parser.Operand{
+				&query_parser.Operand{
+					Type: query_parser.TypStr,
+					Str:  "FooBar",
+				},
+				&query_parser.Operand{
+					Type: query_parser.TypStr,
+					Str:  "Baz",
+				},
+			},
+			&query_parser.Operand{
+				Type: query_parser.TypInt,
+				Int:  -1,
+			},
+		},
+		// StrRepeat
+		functionsTest{
+			&query_parser.Function{
+				Name: "StrRepeat",
+				Args: []*query_parser.Operand{
+					&query_parser.Operand{
+						Type: query_parser.TypStr,
+						Str:  "FooBar",
+					},
+					&query_parser.Operand{
+						Type: query_parser.TypInt,
+						Int:  2,
+					},
+				},
+				ArgTypes: []query_parser.OperandType{
+					query_parser.TypStr,
+					query_parser.TypInt,
+				},
+				RetType:  query_parser.TypStr,
+				Computed: false,
+				RetValue: nil,
+			},
+			[]*query_parser.Operand{
+				&query_parser.Operand{
+					Type: query_parser.TypStr,
+					Str:  "FooBar",
+				},
+				&query_parser.Operand{
+					Type: query_parser.TypInt,
+					Int:  2,
+				},
+			},
+			&query_parser.Operand{
+				Type: query_parser.TypStr,
+				Str:  "FooBarFooBar",
+			},
+		},
+		// StrRepeat
+		functionsTest{
+			&query_parser.Function{
+				Name: "StrRepeat",
+				Args: []*query_parser.Operand{
+					&query_parser.Operand{
+						Type: query_parser.TypStr,
+						Str:  "FooBar",
+					},
+					&query_parser.Operand{
+						Type: query_parser.TypInt,
+						Int:  0,
+					},
+				},
+				ArgTypes: []query_parser.OperandType{
+					query_parser.TypStr,
+					query_parser.TypInt,
+				},
+				RetType:  query_parser.TypStr,
+				Computed: false,
+				RetValue: nil,
+			},
+			[]*query_parser.Operand{
+				&query_parser.Operand{
+					Type: query_parser.TypStr,
+					Str:  "FooBar",
+				},
+				&query_parser.Operand{
+					Type: query_parser.TypInt,
+					Int:  0,
+				},
+			},
+			&query_parser.Operand{
+				Type: query_parser.TypStr,
+				Str:  "",
+			},
+		},
+		// StrRepeat
+		functionsTest{
+			&query_parser.Function{
+				Name: "StrRepeat",
+				Args: []*query_parser.Operand{
+					&query_parser.Operand{
+						Type: query_parser.TypStr,
+						Str:  "FooBar",
+					},
+					&query_parser.Operand{
+						Type: query_parser.TypInt,
+						Int:  -1,
+					},
+				},
+				ArgTypes: []query_parser.OperandType{
+					query_parser.TypStr,
+					query_parser.TypInt,
+				},
+				RetType:  query_parser.TypStr,
+				Computed: false,
+				RetValue: nil,
+			},
+			[]*query_parser.Operand{
+				&query_parser.Operand{
+					Type: query_parser.TypStr,
+					Str:  "FooBar",
+				},
+				&query_parser.Operand{
+					Type: query_parser.TypInt,
+					Int:  -1,
+				},
+			},
+			&query_parser.Operand{
+				Type: query_parser.TypStr,
+				Str:  "",
+			},
+		},
+		// StrReplace
+		functionsTest{
+			&query_parser.Function{
+				Name: "StrReplace",
+				Args: []*query_parser.Operand{
+					&query_parser.Operand{
+						Type: query_parser.TypStr,
+						Str:  "FooBar",
+					},
+					&query_parser.Operand{
+						Type: query_parser.TypStr,
+						Str:  "B",
+					},
+					&query_parser.Operand{
+						Type: query_parser.TypStr,
+						Str:  "ZZZ",
+					},
+				},
+				ArgTypes: []query_parser.OperandType{
+					query_parser.TypStr,
+					query_parser.TypStr,
+					query_parser.TypStr,
+				},
+				RetType:  query_parser.TypStr,
+				Computed: false,
+				RetValue: nil,
+			},
+			[]*query_parser.Operand{
+				&query_parser.Operand{
+					Type: query_parser.TypStr,
+					Str:  "FooBar",
+				},
+				&query_parser.Operand{
+					Type: query_parser.TypStr,
+					Str:  "B",
+				},
+				&query_parser.Operand{
+					Type: query_parser.TypStr,
+					Str:  "ZZZ",
+				},
+			},
+			&query_parser.Operand{
+				Type: query_parser.TypStr,
+				Str:  "FooZZZar",
+			},
+		},
+		// StrReplace
+		functionsTest{
+			&query_parser.Function{
+				Name: "StrReplace",
+				Args: []*query_parser.Operand{
+					&query_parser.Operand{
+						Type: query_parser.TypStr,
+						Str:  "FooBar",
+					},
+					&query_parser.Operand{
+						Type: query_parser.TypStr,
+						Str:  "X",
+					},
+					&query_parser.Operand{
+						Type: query_parser.TypStr,
+						Str:  "ZZZ",
+					},
+				},
+				ArgTypes: []query_parser.OperandType{
+					query_parser.TypStr,
+					query_parser.TypStr,
+					query_parser.TypStr,
+				},
+				RetType:  query_parser.TypStr,
+				Computed: false,
+				RetValue: nil,
+			},
+			[]*query_parser.Operand{
+				&query_parser.Operand{
+					Type: query_parser.TypStr,
+					Str:  "FooBar",
+				},
+				&query_parser.Operand{
+					Type: query_parser.TypStr,
+					Str:  "X",
+				},
+				&query_parser.Operand{
+					Type: query_parser.TypStr,
+					Str:  "ZZZ",
+				},
+			},
+			&query_parser.Operand{
+				Type: query_parser.TypStr,
+				Str:  "FooBar",
+			},
+		},
+		// Trim
+		functionsTest{
+			&query_parser.Function{
+				Name: "Trim",
+				Args: []*query_parser.Operand{
+					&query_parser.Operand{
+						Type: query_parser.TypStr,
+						Str:  "     Foo  ",
+					},
+				},
+				ArgTypes: []query_parser.OperandType{
+					query_parser.TypStr,
+				},
+				RetType:  query_parser.TypStr,
+				Computed: false,
+				RetValue: nil,
+			},
+			[]*query_parser.Operand{
+				&query_parser.Operand{
+					Type: query_parser.TypStr,
+					Str:  "     Foo  ",
+				},
+			},
+			&query_parser.Operand{
+				Type: query_parser.TypStr,
+				Str:  "Foo",
+			},
+		},
+		// Trim
+		functionsTest{
+			&query_parser.Function{
+				Name: "Trim",
+				Args: []*query_parser.Operand{
+					&query_parser.Operand{
+						Type: query_parser.TypStr,
+						Str:  "Foo",
+					},
+				},
+				ArgTypes: []query_parser.OperandType{
+					query_parser.TypStr,
+				},
+				RetType:  query_parser.TypStr,
+				Computed: false,
+				RetValue: nil,
+			},
+			[]*query_parser.Operand{
+				&query_parser.Operand{
+					Type: query_parser.TypStr,
+					Str:  "Foo",
+				},
+			},
+			&query_parser.Operand{
+				Type: query_parser.TypStr,
+				Str:  "Foo",
+			},
+		},
+		// TrimLeft
+		functionsTest{
+			&query_parser.Function{
+				Name: "TrimLeft",
+				Args: []*query_parser.Operand{
+					&query_parser.Operand{
+						Type: query_parser.TypStr,
+						Str:  "     Foo  ",
+					},
+				},
+				ArgTypes: []query_parser.OperandType{
+					query_parser.TypStr,
+				},
+				RetType:  query_parser.TypStr,
+				Computed: false,
+				RetValue: nil,
+			},
+			[]*query_parser.Operand{
+				&query_parser.Operand{
+					Type: query_parser.TypStr,
+					Str:  "     Foo  ",
+				},
+			},
+			&query_parser.Operand{
+				Type: query_parser.TypStr,
+				Str:  "Foo  ",
+			},
+		},
+		// TrimLeft
+		functionsTest{
+			&query_parser.Function{
+				Name: "TrimLeft",
+				Args: []*query_parser.Operand{
+					&query_parser.Operand{
+						Type: query_parser.TypStr,
+						Str:  "Foo",
+					},
+				},
+				ArgTypes: []query_parser.OperandType{
+					query_parser.TypStr,
+				},
+				RetType:  query_parser.TypStr,
+				Computed: false,
+				RetValue: nil,
+			},
+			[]*query_parser.Operand{
+				&query_parser.Operand{
+					Type: query_parser.TypStr,
+					Str:  "Foo",
+				},
+			},
+			&query_parser.Operand{
+				Type: query_parser.TypStr,
+				Str:  "Foo",
+			},
+		},
+		// TrimRight
+		functionsTest{
+			&query_parser.Function{
+				Name: "TrimRight",
+				Args: []*query_parser.Operand{
+					&query_parser.Operand{
+						Type: query_parser.TypStr,
+						Str:  "     Foo  ",
+					},
+				},
+				ArgTypes: []query_parser.OperandType{
+					query_parser.TypStr,
+				},
+				RetType:  query_parser.TypStr,
+				Computed: false,
+				RetValue: nil,
+			},
+			[]*query_parser.Operand{
+				&query_parser.Operand{
+					Type: query_parser.TypStr,
+					Str:  "     Foo  ",
+				},
+			},
+			&query_parser.Operand{
+				Type: query_parser.TypStr,
+				Str:  "     Foo",
+			},
+		},
+		// TrimLeft
+		functionsTest{
+			&query_parser.Function{
+				Name: "TrimLeft",
+				Args: []*query_parser.Operand{
+					&query_parser.Operand{
+						Type: query_parser.TypStr,
+						Str:  "Foo",
+					},
+				},
+				ArgTypes: []query_parser.OperandType{
+					query_parser.TypStr,
+				},
+				RetType:  query_parser.TypStr,
+				Computed: false,
+				RetValue: nil,
+			},
+			[]*query_parser.Operand{
+				&query_parser.Operand{
+					Type: query_parser.TypStr,
+					Str:  "Foo",
+				},
+			},
+			&query_parser.Operand{
+				Type: query_parser.TypStr,
+				Str:  "Foo",
+			},
+		},
 	}
 
 	for _, test := range tests {
@@ -588,7 +1144,7 @@ func TestErrorFunctions(t *testing.T) {
 				RetType:  query_parser.TypTime,
 				Computed: false,
 				RetValue: nil,
-				Node:  query_parser.Node{Off: 42},
+				Node:     query_parser.Node{Off: 42},
 			},
 			[]*query_parser.Operand{
 				&query_parser.Operand{
@@ -602,7 +1158,7 @@ func TestErrorFunctions(t *testing.T) {
 
 	for _, test := range tests {
 		_, err := query_functions.ExecFunction(&db, test.f, test.args)
-                if verror.ErrorID(err) != verror.ErrorID(test.err) || err.Error() != test.err.Error() {
+		if verror.ErrorID(err) != verror.ErrorID(test.err) || err.Error() != test.err.Error() {
 			t.Errorf("function: %v; got %v, want %v", test.f, err, test.err)
 		}
 	}

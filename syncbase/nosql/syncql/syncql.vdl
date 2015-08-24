@@ -72,6 +72,9 @@ error (
 	FloatConversionError(off int64, err error) {
 		"en": "[{off}]Can't convert to float: {err}.",
 	}
+	IntConversionError(off int64, err error) {
+		"en": "[{off}]Can't convert to int: {err}.",
+	}
 	IsIsNotRequireLhsValue(off int64) {
 		"en": "[{off}]'Is/is not' expressions require left operand to be a value operand.",
 	}
