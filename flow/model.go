@@ -112,16 +112,21 @@ type MsgReader interface {
 	ReadMsg() ([]byte, error)
 }
 
-// MsgReadWriter combines the MsgReader and MsgWriter interfaces
-type MsgReadWriter interface {
+// MsgReadWriteCloser combines the MsgReader and MsgWriter interfaces and
+// adds the Close method.
+type MsgReadWriteCloser interface {
 	MsgWriter
 	MsgReader
+
+	// Close closes the MsgReadWriteCloser. After Close is called all writes will
+	// return an error, but reads of already queued data may succeed.
+	Close() error
 }
 
 // Flow is the interface for a flow-controlled channel multiplexed over a Conn.
 type Flow interface {
 	io.ReadWriter
-	MsgReadWriter
+	MsgReadWriteCloser
 
 	// WriteMsgAndClose performs WriteMsg and then closes the flow.
 	WriteMsgAndClose(data ...[]byte) (int, error)
