@@ -238,7 +238,10 @@ type SchemaManager interface {
 type BlobManager interface {
 	// API for resumable blob creation (append-only). After commit, a blob
 	// is immutable. Before commit, the BlobRef can be used with PutBlob,
-	// GetBlobSize, DeleteBlob, and CommitBlob.
+	// GetBlobSize, DeleteBlob, and CommitBlob. After commit, PutBlob and
+	// CommitBlob can no longer be used. Blob creation can be resumed by
+	// obtaining the current blob size with GetBlobSize and appending to the
+	// blob via PutBlob.
 	//
 	// CreateBlob returns a BlobRef for a newly created blob.
 	CreateBlob() (br BlobRef | error) {access.Write}
@@ -276,16 +279,16 @@ type BlobManager interface {
 	// ranked blobs are more eagerly evicted.
 	KeepBlob(br BlobRef, rank uint64) error {access.Write}
 
-	// TODO(hpucha): Add API for efficient blob cloning. Options include:
-	// (1) CloneBlob RPC with an array of mods that sepcify the offset and
-	// len for the new bytes. This might need two len fields to support
-	// growing a blob in the middle instead of just replacing byte for byte
-	// in the src blob. Or perhaps Offset>=0 to mean "read from old blob at
-	// this offset for Length bytes", and Offset<0 to mean "read the next
-	// Length Bytes from the PutBlob() stream". (2) We could adopt API
-	// similar to the local blob store with BlockOrFile segments, giving a
-	// more flexible way to clone blobs. Also provide support for parallel
-	// blob upload.
+	// TODO(hpucha): Clarify how to pick priority and rank. Add API for
+	// efficient blob cloning. Options include: (1) CloneBlob RPC with an
+	// array of mods that specify the offset and len for the new bytes. This
+	// might need two len fields to support growing a blob in the middle
+	// instead of just replacing byte for byte in the src blob. Or perhaps
+	// Offset>=0 to mean "read from old blob at this offset for Length
+	// bytes", and Offset<0 to mean "read the next Length Bytes from the
+	// PutBlob() stream". (2) We could adopt API similar to the local blob
+	// store with BlockOrFile segments, giving a more flexible way to clone
+	// blobs. Also provide support for parallel blob upload.
 }
 
 // DatabaseWatcher allows a client to watch for updates in the database.

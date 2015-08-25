@@ -603,7 +603,10 @@ var descSyncGroupManager = rpc.InterfaceDesc{
 type BlobManagerClientMethods interface {
 	// API for resumable blob creation (append-only). After commit, a blob
 	// is immutable. Before commit, the BlobRef can be used with PutBlob,
-	// GetBlobSize, DeleteBlob, and CommitBlob.
+	// GetBlobSize, DeleteBlob, and CommitBlob. After commit, PutBlob and
+	// CommitBlob can no longer be used. Blob creation can be resumed by
+	// obtaining the current blob size with GetBlobSize and appending to the
+	// blob via PutBlob.
 	//
 	// CreateBlob returns a BlobRef for a newly created blob.
 	CreateBlob(*context.T, ...rpc.CallOpt) (br BlobRef, err error)
@@ -917,7 +920,10 @@ func (c *implBlobManagerFetchBlobClientCall) Finish() (err error) {
 type BlobManagerServerMethods interface {
 	// API for resumable blob creation (append-only). After commit, a blob
 	// is immutable. Before commit, the BlobRef can be used with PutBlob,
-	// GetBlobSize, DeleteBlob, and CommitBlob.
+	// GetBlobSize, DeleteBlob, and CommitBlob. After commit, PutBlob and
+	// CommitBlob can no longer be used. Blob creation can be resumed by
+	// obtaining the current blob size with GetBlobSize and appending to the
+	// blob via PutBlob.
 	//
 	// CreateBlob returns a BlobRef for a newly created blob.
 	CreateBlob(*context.T, rpc.ServerCall) (br BlobRef, err error)
@@ -954,7 +960,10 @@ type BlobManagerServerMethods interface {
 type BlobManagerServerStubMethods interface {
 	// API for resumable blob creation (append-only). After commit, a blob
 	// is immutable. Before commit, the BlobRef can be used with PutBlob,
-	// GetBlobSize, DeleteBlob, and CommitBlob.
+	// GetBlobSize, DeleteBlob, and CommitBlob. After commit, PutBlob and
+	// CommitBlob can no longer be used. Blob creation can be resumed by
+	// obtaining the current blob size with GetBlobSize and appending to the
+	// blob via PutBlob.
 	//
 	// CreateBlob returns a BlobRef for a newly created blob.
 	CreateBlob(*context.T, rpc.ServerCall) (br BlobRef, err error)
@@ -1072,7 +1081,7 @@ var descBlobManager = rpc.InterfaceDesc{
 	Methods: []rpc.MethodDesc{
 		{
 			Name: "CreateBlob",
-			Doc:  "// API for resumable blob creation (append-only). After commit, a blob\n// is immutable. Before commit, the BlobRef can be used with PutBlob,\n// GetBlobSize, DeleteBlob, and CommitBlob.\n//\n// CreateBlob returns a BlobRef for a newly created blob.",
+			Doc:  "// API for resumable blob creation (append-only). After commit, a blob\n// is immutable. Before commit, the BlobRef can be used with PutBlob,\n// GetBlobSize, DeleteBlob, and CommitBlob. After commit, PutBlob and\n// CommitBlob can no longer be used. Blob creation can be resumed by\n// obtaining the current blob size with GetBlobSize and appending to the\n// blob via PutBlob.\n//\n// CreateBlob returns a BlobRef for a newly created blob.",
 			OutArgs: []rpc.ArgDesc{
 				{"br", ``}, // BlobRef
 			},
