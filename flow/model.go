@@ -16,6 +16,7 @@ package flow
 
 import (
 	"io"
+	"net"
 
 	"v.io/v23/context"
 	"v.io/v23/naming"
@@ -121,6 +122,14 @@ type MsgReadWriteCloser interface {
 	// Close closes the MsgReadWriteCloser. After Close is called all writes will
 	// return an error, but reads of already queued data may succeed.
 	Close() error
+}
+
+// MsgListener provides methods for accepting new MsgReadWriteClosers.
+type MsgListener interface {
+	// Accept waits for and are returns new MsgReadWriteClosers.
+	Accept(ctx *context.T) (MsgReadWriteCloser, error)
+	// Addr returns MsgListener's network address.
+	Addr() net.Addr
 }
 
 // Flow is the interface for a flow-controlled channel multiplexed over a Conn.

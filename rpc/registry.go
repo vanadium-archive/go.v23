@@ -14,6 +14,11 @@ import (
 	"v.io/v23/naming"
 )
 
+// This file is DEPRECATED. If you wish to add new protocols please you the
+// v23/flow.RegisterProtocol methods.
+// TODO(suharshs): Remove this file and corresponding protocols once the transition
+// to the new rpc implementation is complete.
+
 // DialerFunc is the function used to create net.Conn objects given a
 // protocol-specific string representation of an address.
 type DialerFunc func(ctx *context.T, protocol, address string, timeout time.Duration) (net.Conn, error)
