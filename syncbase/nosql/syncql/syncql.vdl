@@ -45,6 +45,9 @@ error (
 	FunctionArgCount(off int64, name string, expected int64, found int64) {
 		"en": "[{off}]Function '{name}' expects {expected} args, found: {found}.",
 	}
+	FunctionAtLeastArgCount(off int64, name string, expected int64, found int64) {
+		"en": "[{off}]Function '{name}' expects at least {expected} args, found: {found}.",
+	}
 	FunctionTypeInvalidArg(off int64) {
 		"en": "[{off}]Function 'Type()' cannot get type of argument -- expecting object.",
 	}
@@ -59,6 +62,21 @@ error (
 	}
 	ArgMustBeField(off int64) {
 		"en": "[{off}]Argument must be a value field (i.e., must begin with 'v').",
+	}
+	BigIntConversionError(off int64, err error) {
+		"en": "[{off}]Can't convert to BigInt: {err}.",
+	}
+	BigRatConversionError(off int64, err error) {
+		"en": "[{off}]Can't convert to BigRat: {err}.",
+	}
+	BoolConversionError(off int64, err error) {
+		"en": "[{off}]Can't convert to Bool: {err}.",
+	}
+	ComplexConversionError(off int64, err error) {
+		"en": "[{off}]Can't convert to Complex: {err}.",
+	}
+	UintConversionError(off int64, err error) {
+		"en": "[{off}]Can't convert to Uint: {err}.",
 	}
 	TimeConversionError(off int64, err error) {
 		"en": "[{off}]Can't convert to time: {err}.",

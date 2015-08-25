@@ -28,11 +28,17 @@ var (
 	ErrExpectedOperand                 = verror.Register("v.io/syncbase/v23/syncbase/nosql/syncql.ExpectedOperand", verror.NoRetry, "{1:}{2:} [{3}]Expected operand, found {4}.")
 	ErrExpectedOperator                = verror.Register("v.io/syncbase/v23/syncbase/nosql/syncql.ExpectedOperator", verror.NoRetry, "{1:}{2:} [{3}]Expected operator, found {4}.")
 	ErrFunctionArgCount                = verror.Register("v.io/syncbase/v23/syncbase/nosql/syncql.FunctionArgCount", verror.NoRetry, "{1:}{2:} [{3}]Function '{4}' expects {5} args, found: {6}.")
+	ErrFunctionAtLeastArgCount         = verror.Register("v.io/syncbase/v23/syncbase/nosql/syncql.FunctionAtLeastArgCount", verror.NoRetry, "{1:}{2:} [{3}]Function '{4}' expects at least {5} args, found: {6}.")
 	ErrFunctionTypeInvalidArg          = verror.Register("v.io/syncbase/v23/syncbase/nosql/syncql.FunctionTypeInvalidArg", verror.NoRetry, "{1:}{2:} [{3}]Function 'Type()' cannot get type of argument -- expecting object.")
 	ErrFunctionLenInvalidArg           = verror.Register("v.io/syncbase/v23/syncbase/nosql/syncql.FunctionLenInvalidArg", verror.NoRetry, "{1:}{2:} [{3}]Function 'Len()' expects array, list, set, map, string or nil.")
 	ErrFunctionArgBad                  = verror.Register("v.io/syncbase/v23/syncbase/nosql/syncql.FunctionArgBad", verror.NoRetry, "{1:}{2:} [{3}]Function '{4}' arg '{5}' could not be resolved.")
 	ErrFunctionNotFound                = verror.Register("v.io/syncbase/v23/syncbase/nosql/syncql.FunctionNotFound", verror.NoRetry, "{1:}{2:} [{3}]Function '{4}' not found.")
 	ErrArgMustBeField                  = verror.Register("v.io/syncbase/v23/syncbase/nosql/syncql.ArgMustBeField", verror.NoRetry, "{1:}{2:} [{3}]Argument must be a value field (i.e., must begin with 'v').")
+	ErrBigIntConversionError           = verror.Register("v.io/syncbase/v23/syncbase/nosql/syncql.BigIntConversionError", verror.NoRetry, "{1:}{2:} [{3}]Can't convert to BigInt: {4}.")
+	ErrBigRatConversionError           = verror.Register("v.io/syncbase/v23/syncbase/nosql/syncql.BigRatConversionError", verror.NoRetry, "{1:}{2:} [{3}]Can't convert to BigRat: {4}.")
+	ErrBoolConversionError             = verror.Register("v.io/syncbase/v23/syncbase/nosql/syncql.BoolConversionError", verror.NoRetry, "{1:}{2:} [{3}]Can't convert to Bool: {4}.")
+	ErrComplexConversionError          = verror.Register("v.io/syncbase/v23/syncbase/nosql/syncql.ComplexConversionError", verror.NoRetry, "{1:}{2:} [{3}]Can't convert to Complex: {4}.")
+	ErrUintConversionError             = verror.Register("v.io/syncbase/v23/syncbase/nosql/syncql.UintConversionError", verror.NoRetry, "{1:}{2:} [{3}]Can't convert to Uint: {4}.")
 	ErrTimeConversionError             = verror.Register("v.io/syncbase/v23/syncbase/nosql/syncql.TimeConversionError", verror.NoRetry, "{1:}{2:} [{3}]Can't convert to time: {4}.")
 	ErrLocationConversionError         = verror.Register("v.io/syncbase/v23/syncbase/nosql/syncql.LocationConversionError", verror.NoRetry, "{1:}{2:} [{3}]Can't convert to location: {4}.")
 	ErrStringConversionError           = verror.Register("v.io/syncbase/v23/syncbase/nosql/syncql.StringConversionError", verror.NoRetry, "{1:}{2:} [{3}]Can't convert to string: {4}.")
@@ -72,11 +78,17 @@ func init() {
 	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrExpectedOperand.ID), "{1:}{2:} [{3}]Expected operand, found {4}.")
 	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrExpectedOperator.ID), "{1:}{2:} [{3}]Expected operator, found {4}.")
 	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrFunctionArgCount.ID), "{1:}{2:} [{3}]Function '{4}' expects {5} args, found: {6}.")
+	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrFunctionAtLeastArgCount.ID), "{1:}{2:} [{3}]Function '{4}' expects at least {5} args, found: {6}.")
 	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrFunctionTypeInvalidArg.ID), "{1:}{2:} [{3}]Function 'Type()' cannot get type of argument -- expecting object.")
 	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrFunctionLenInvalidArg.ID), "{1:}{2:} [{3}]Function 'Len()' expects array, list, set, map, string or nil.")
 	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrFunctionArgBad.ID), "{1:}{2:} [{3}]Function '{4}' arg '{5}' could not be resolved.")
 	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrFunctionNotFound.ID), "{1:}{2:} [{3}]Function '{4}' not found.")
 	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrArgMustBeField.ID), "{1:}{2:} [{3}]Argument must be a value field (i.e., must begin with 'v').")
+	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrBigIntConversionError.ID), "{1:}{2:} [{3}]Can't convert to BigInt: {4}.")
+	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrBigRatConversionError.ID), "{1:}{2:} [{3}]Can't convert to BigRat: {4}.")
+	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrBoolConversionError.ID), "{1:}{2:} [{3}]Can't convert to Bool: {4}.")
+	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrComplexConversionError.ID), "{1:}{2:} [{3}]Can't convert to Complex: {4}.")
+	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrUintConversionError.ID), "{1:}{2:} [{3}]Can't convert to Uint: {4}.")
 	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrTimeConversionError.ID), "{1:}{2:} [{3}]Can't convert to time: {4}.")
 	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrLocationConversionError.ID), "{1:}{2:} [{3}]Can't convert to location: {4}.")
 	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrStringConversionError.ID), "{1:}{2:} [{3}]Can't convert to string: {4}.")
@@ -167,6 +179,11 @@ func NewErrFunctionArgCount(ctx *context.T, off int64, name string, expected int
 	return verror.New(ErrFunctionArgCount, ctx, off, name, expected, found)
 }
 
+// NewErrFunctionAtLeastArgCount returns an error with the ErrFunctionAtLeastArgCount ID.
+func NewErrFunctionAtLeastArgCount(ctx *context.T, off int64, name string, expected int64, found int64) error {
+	return verror.New(ErrFunctionAtLeastArgCount, ctx, off, name, expected, found)
+}
+
 // NewErrFunctionTypeInvalidArg returns an error with the ErrFunctionTypeInvalidArg ID.
 func NewErrFunctionTypeInvalidArg(ctx *context.T, off int64) error {
 	return verror.New(ErrFunctionTypeInvalidArg, ctx, off)
@@ -190,6 +207,31 @@ func NewErrFunctionNotFound(ctx *context.T, off int64, name string) error {
 // NewErrArgMustBeField returns an error with the ErrArgMustBeField ID.
 func NewErrArgMustBeField(ctx *context.T, off int64) error {
 	return verror.New(ErrArgMustBeField, ctx, off)
+}
+
+// NewErrBigIntConversionError returns an error with the ErrBigIntConversionError ID.
+func NewErrBigIntConversionError(ctx *context.T, off int64, err error) error {
+	return verror.New(ErrBigIntConversionError, ctx, off, err)
+}
+
+// NewErrBigRatConversionError returns an error with the ErrBigRatConversionError ID.
+func NewErrBigRatConversionError(ctx *context.T, off int64, err error) error {
+	return verror.New(ErrBigRatConversionError, ctx, off, err)
+}
+
+// NewErrBoolConversionError returns an error with the ErrBoolConversionError ID.
+func NewErrBoolConversionError(ctx *context.T, off int64, err error) error {
+	return verror.New(ErrBoolConversionError, ctx, off, err)
+}
+
+// NewErrComplexConversionError returns an error with the ErrComplexConversionError ID.
+func NewErrComplexConversionError(ctx *context.T, off int64, err error) error {
+	return verror.New(ErrComplexConversionError, ctx, off, err)
+}
+
+// NewErrUintConversionError returns an error with the ErrUintConversionError ID.
+func NewErrUintConversionError(ctx *context.T, off int64, err error) error {
+	return verror.New(ErrUintConversionError, ctx, off, err)
 }
 
 // NewErrTimeConversionError returns an error with the ErrTimeConversionError ID.

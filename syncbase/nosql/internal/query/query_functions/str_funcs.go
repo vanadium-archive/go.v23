@@ -39,6 +39,15 @@ func typeFunc(db query_db.Database, off int64, args []*query_parser.Operand) (*q
 	return makeStrOp(off, args[0].Object.Type().Name()), nil
 }
 
+func typeFuncFieldCheck(db query_db.Database, off int64, args []*query_parser.Operand) error {
+	// At this point, it is known that there is one arg. Make sure it is of type field
+	// and is a value field (i.e., it must begin with a v segment).
+	if args[0].Type != query_parser.TypField || len(args[0].Column.Segments) < 1 || args[0].Column.Segments[0].Value != "v" {
+		return syncql.NewErrArgMustBeField(db.GetContext(), args[0].Off)
+	}
+	return nil
+}
+
 // Split splits str (arg[0]) into substrings separated by sep (arg[1]) and returns an
 // array of substrings between those separators. If sep is empty, Split splits after each
 // UTF-8 sequence.
@@ -60,20 +69,19 @@ func split(db query_db.Database, off int64, args []*query_parser.Operand) (*quer
 	return &o, nil
 }
 
-// StrCat(left, right string) string
-// StrCat returns the concatenation of two strings.
-// e.g., StrCat("abc", "def") returns "abcdef"
-// TODO(jkline): Allow a variable number of args?
+// StrCat(str1, str2,... string) string
+// StrCat returns the concatenation of all the string args.
+// e.g., StrCat("abc", ",", "def") returns "abc,def"
 func strCat(db query_db.Database, off int64, args []*query_parser.Operand) (*query_parser.Operand, error) {
-	left, err := conversions.ConvertValueToString(args[0])
-	if err != nil {
-		return nil, err
+	val := ""
+	for _, arg := range args {
+		str, err := conversions.ConvertValueToString(arg)
+		if err != nil {
+			return nil, err
+		}
+		val += str.Str
 	}
-	right, err := conversions.ConvertValueToString(args[1])
-	if err != nil {
-		return nil, err
-	}
-	return makeStrOp(off, left.Str+right.Str), nil
+	return makeStrOp(off, val), nil
 }
 
 // StrIndex(s, sep string) int

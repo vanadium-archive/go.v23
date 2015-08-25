@@ -8,7 +8,6 @@ import (
 	"v.io/syncbase/v23/syncbase/nosql/internal/query/conversions"
 	"v.io/syncbase/v23/syncbase/nosql/internal/query/query_parser"
 	"v.io/syncbase/v23/syncbase/nosql/query_db"
-	"v.io/syncbase/v23/syncbase/nosql/syncql"
 )
 
 func complexFunc(db query_db.Database, off int64, args []*query_parser.Operand) (*query_parser.Operand, error) {
@@ -23,14 +22,4 @@ func complexFunc(db query_db.Database, off int64, args []*query_parser.Operand) 
 	}
 
 	return makeComplexOp(off, complex(r.Float, i.Float)), nil
-}
-
-func twoFloatsArgsCheck(db query_db.Database, off int64, args []*query_parser.Operand) error {
-	// The two args must be convertable to floats.
-	for i := 0; i < 2; i++ {
-		if err := checkIfPossibleThatArgIsConvertableToFloat(db, args[i]); err != nil {
-			return syncql.NewErrFloatConversionError(db.GetContext(), args[i].Off, err)
-		}
-	}
-	return nil
 }

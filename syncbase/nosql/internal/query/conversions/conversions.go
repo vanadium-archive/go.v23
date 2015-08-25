@@ -9,6 +9,7 @@ import (
 	"fmt"
 	"math/big"
 	"strconv"
+	"strings"
 
 	"v.io/syncbase/v23/syncbase/nosql/internal/query/query_parser"
 )
@@ -121,6 +122,27 @@ func ConvertValueToFloat(o *query_parser.Operand) (*query_parser.Operand, error)
 	default:
 		// TODO(jkline): Log this logic error and all other similar cases.
 		return nil, errors.New("Cannot convert operand to float64.")
+	}
+	return &c, nil
+}
+
+func ConvertValueToBool(o *query_parser.Operand) (*query_parser.Operand, error) {
+	var c query_parser.Operand
+	c.Type = query_parser.TypBool
+	switch o.Type {
+	case query_parser.TypBool:
+		c.Bool = o.Bool
+	case query_parser.TypStr:
+		switch strings.ToLower(o.Str) {
+		case "true":
+			c.Bool = true
+		case "false":
+			c.Bool = false
+		default:
+			return nil, errors.New("Cannot convert object to bool.")
+		}
+	default:
+		return nil, errors.New("Cannot convert operand to bool.")
 	}
 	return &c, nil
 }

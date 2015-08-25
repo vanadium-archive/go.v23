@@ -1945,6 +1945,22 @@ func TestQueryExec(t *testing.T) {
 			},
 		},
 		{
+			// StrCat
+			"select StrCat(v.Address.City, \", \", v.Address.State) from Customer where v.Name = \"John Smith\"",
+			[]string{"StrCat"},
+			[][]*vdl.Value{
+				[]*vdl.Value{vdl.ValueOf("Palo Alto, CA")},
+			},
+		},
+		{
+			// StrCat
+			"select StrCat(v.Address.City, 42) from Customer where v.Name = \"John Smith\"",
+			[]string{"StrCat"},
+			[][]*vdl.Value{
+				[]*vdl.Value{vdl.ValueOf("Palo Alto42")},
+			},
+		},
+		{
 			// StrIndex
 			"select StrIndex(v.Address.City, \"lo\") from Customer where v.Name = \"John Smith\"",
 			[]string{"StrIndex"},
@@ -2859,6 +2875,18 @@ func TestExecErrors(t *testing.T) {
 		{
 			"select len(\"foo\") from Customer",
 			syncql.NewErrDidYouMeanFunction(db.GetContext(), 7, "Len"),
+		},
+		{
+			"select StrRepeat(\"foo\", \"x\") from Customer",
+			syncql.NewErrIntConversionError(db.GetContext(), 24, errors.New("Cannot convert operand to int64.")),
+		},
+		{
+			"select Complex(23, \"foo\") from Customer",
+			syncql.NewErrFloatConversionError(db.GetContext(), 19, errors.New("Cannot convert operand to float64.")),
+		},
+		{
+			"select Complex(\"foo\", 42) from Customer",
+			syncql.NewErrFloatConversionError(db.GetContext(), 15, errors.New("Cannot convert operand to float64.")),
 		},
 	}
 

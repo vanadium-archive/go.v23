@@ -13,32 +13,6 @@ import (
 	"v.io/syncbase/v23/syncbase/nosql/syncql"
 )
 
-// If possible, check if arg is convertable to a time.  Fields and not yet computed
-// functions cannot be checked and will just return nil.
-func checkIfPossibleThatArgIsConvertableToTime(db query_db.Database, arg *query_parser.Operand) error {
-	// If arg is a literal or an already computed function,
-	// make sure it can be converted to a time.
-	switch arg.Type {
-	case query_parser.TypBigInt, query_parser.TypBigRat, query_parser.TypBool, query_parser.TypComplex, query_parser.TypFloat, query_parser.TypInt, query_parser.TypStr, query_parser.TypTime, query_parser.TypUint:
-		_, err := conversions.ConvertValueToTime(arg)
-		if err != nil {
-			return syncql.NewErrTimeConversionError(db.GetContext(), arg.Off, err)
-		} else {
-			return nil
-		}
-	case query_parser.TypFunction:
-		if arg.Function.Computed {
-			_, err := conversions.ConvertValueToTime(arg.Function.RetValue)
-			if err != nil {
-				return syncql.NewErrTimeConversionError(db.GetContext(), arg.Off, err)
-			} else {
-				return nil
-			}
-		}
-	}
-	return nil
-}
-
 // If possible, check if arg is convertable to a location.  Fields and not yet computed
 // functions cannot be checked and will just return nil.
 func checkIfPossibleThatArgIsConvertableToLocation(db query_db.Database, arg *query_parser.Operand) error {
@@ -259,18 +233,12 @@ func makeTimeOp(off int64, tim time.Time) *query_parser.Operand {
 	return &o
 }
 
-func timeAndStringArgsCheck(db query_db.Database, off int64, args []*query_parser.Operand) error {
-	// The first arg must be a time.
-	if err := checkIfPossibleThatArgIsConvertableToTime(db, args[0]); err != nil {
-		return err
-	}
-	// The second arg must be a string and convertable to a location.
+func secondArgLocationCheck(db query_db.Database, off int64, args []*query_parser.Operand) error {
+	// At this point, for the args that can be evaluated before execution, it is known that
+	// there are two args, a time followed by a string.
+	// Just need to check that the 2nd arg is convertable to a location.
 	if err := checkIfPossibleThatArgIsConvertableToLocation(db, args[1]); err != nil {
 		return err
 	}
 	return nil
-}
-
-func singleTimeArgCheck(db query_db.Database, off int64, args []*query_parser.Operand) error {
-	return checkIfPossibleThatArgIsConvertableToString(db, args[0])
 }
