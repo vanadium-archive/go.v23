@@ -33,26 +33,11 @@ type PublicKey interface {
 	// 512-bit hash function, whilst a key with a 256-bit curve would be
 	// happy with a 256-bit hash function.
 	hash() Hash
-	implementationsOnlyInThisPackage()
-}
 
-type ecdsaPublicKey struct {
-	key *ecdsa.PublicKey
-}
-
-func (pk *ecdsaPublicKey) MarshalBinary() ([]byte, error)    { return x509.MarshalPKIXPublicKey(pk.key) }
-func (pk *ecdsaPublicKey) String() string                    { return publicKeyString(pk) }
-func (pk *ecdsaPublicKey) implementationsOnlyInThisPackage() {}
-func (pk *ecdsaPublicKey) hash() Hash {
-	if nbits := pk.key.Curve.Params().BitSize; nbits <= 160 {
-		return SHA1Hash
-	} else if nbits <= 256 {
-		return SHA256Hash
-	} else if nbits <= 384 {
-		return SHA384Hash
-	} else {
-		return SHA512Hash
-	}
+	// verify returns true iff signature was created by the corresponding
+	// private key when signing the provided message digest (obtained by
+	// the messageDigest function).
+	verify(digest []byte, signature *Signature) bool
 }
 
 func publicKeyString(pk PublicKey) string {
@@ -80,13 +65,8 @@ func UnmarshalPublicKey(bytes []byte) (PublicKey, error) {
 	}
 	switch v := key.(type) {
 	case *ecdsa.PublicKey:
-		return &ecdsaPublicKey{v}, nil
+		return NewECDSAPublicKey(v), nil
 	default:
 		return nil, verror.New(errUnrecognizedKey, nil, fmt.Sprintf("%T", key))
 	}
-}
-
-// NewECDSAPublicKey creates a PublicKey object that uses the ECDSA algorithm and the provided ECDSA public key.
-func NewECDSAPublicKey(key *ecdsa.PublicKey) PublicKey {
-	return &ecdsaPublicKey{key}
 }

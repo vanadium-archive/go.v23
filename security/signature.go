@@ -5,12 +5,9 @@
 package security
 
 import (
-	"crypto/ecdsa"
-	"crypto/rand"
 	"crypto/sha1"
 	"crypto/sha256"
 	"crypto/sha512"
-	"math/big"
 	"v.io/v23/verror"
 )
 
@@ -23,13 +20,7 @@ func (sig *Signature) Verify(key PublicKey, message []byte) bool {
 	if message = messageDigest(sig.Hash, sig.Purpose, message, key); message == nil {
 		return false
 	}
-	switch v := key.(type) {
-	case *ecdsaPublicKey:
-		var r, s big.Int
-		return ecdsa.Verify(v.key, message, r.SetBytes(sig.R), s.SetBytes(sig.S))
-	default:
-		return false
-	}
+	return key.verify(message, sig)
 }
 
 func (sig *Signature) digest(hashfn Hash) []byte {
@@ -43,48 +34,6 @@ func (sig *Signature) digest(hashfn Hash) []byte {
 	w(sig.R)
 	w(sig.S)
 	return hashfn.sum(fields)
-}
-
-// NewInMemoryECDSASigner creates a Signer that uses the provided ECDSA private
-// key to sign messages.  This private key is kept in the clear in the memory
-// of the running process.
-func NewInMemoryECDSASigner(key *ecdsa.PrivateKey) Signer {
-	sign := func(data []byte) (r, s *big.Int, err error) {
-		return ecdsa.Sign(rand.Reader, key, data)
-	}
-	return NewECDSASigner(&key.PublicKey, sign)
-}
-
-// NewECDSASigner creates a Signer that uses the provided function to sign
-// messages.
-func NewECDSASigner(key *ecdsa.PublicKey, sign func(data []byte) (r, s *big.Int, err error)) Signer {
-	return &ecdsaSigner{sign: sign, pubkey: NewECDSAPublicKey(key)}
-}
-
-type ecdsaSigner struct {
-	sign   func(data []byte) (r, s *big.Int, err error)
-	pubkey PublicKey
-}
-
-func (c *ecdsaSigner) Sign(purpose, message []byte) (Signature, error) {
-	hash := c.pubkey.hash()
-	if message = messageDigest(hash, purpose, message, c.pubkey); message == nil {
-		return Signature{}, verror.New(errSignCantHash, nil, hash)
-	}
-	r, s, err := c.sign(message)
-	if err != nil {
-		return Signature{}, err
-	}
-	return Signature{
-		Purpose: purpose,
-		Hash:    hash,
-		R:       r.Bytes(),
-		S:       s.Bytes(),
-	}, nil
-}
-
-func (c *ecdsaSigner) PublicKey() PublicKey {
-	return c.pubkey
 }
 
 func messageDigest(hash Hash, purpose, message []byte, key PublicKey) []byte {
