@@ -80,10 +80,16 @@ const (
 // setup is the first message over the wire.  It negotiates protocol version
 // and encryption options for connection.
 type Setup struct {
-	Versions           version.RPCVersionRange
-	PeerNaClPublicKey  *[32]byte
-	PeerRemoteEndpoint naming.Endpoint
-	PeerLocalEndpoint  naming.Endpoint
+	Versions             version.RPCVersionRange
+	PeerNaClPublicKey    *[32]byte
+	PeerRemoteEndpoint   naming.Endpoint
+	PeerLocalEndpoint    naming.Endpoint
+	uninterpretedOptions []option
+}
+
+type option struct {
+	opt     uint64
+	payload []byte
 }
 
 func appendSetupOption(option uint64, payload, buf []byte) []byte {
@@ -115,6 +121,9 @@ func (m *Setup) append(ctx *context.T, data []byte) ([]byte, error) {
 		data = appendSetupOption(peerLocalEndpointOption,
 			[]byte(m.PeerLocalEndpoint.String()), data)
 	}
+	for _, o := range m.uninterpretedOptions {
+		data = appendSetupOption(o.opt, o.payload, data)
+	}
 	return data, nil
 }
 func (m *Setup) read(ctx *context.T, orig []byte) error {
@@ -134,13 +143,13 @@ func (m *Setup) read(ctx *context.T, orig []byte) error {
 	for field := uint64(2); len(data) > 0; field++ {
 		var (
 			payload []byte
-			option  uint64
+			opt     uint64
 			err     error
 		)
-		if option, payload, data, err = readSetupOption(ctx, data); err != nil {
+		if opt, payload, data, err = readSetupOption(ctx, data); err != nil {
 			return NewErrInvalidMsg(ctx, setupType, uint64(len(orig)), field, err)
 		}
-		switch option {
+		switch opt {
 		case peerNaClPublicKeyOption:
 			m.PeerNaClPublicKey = new([32]byte)
 			copy(m.PeerNaClPublicKey[:], payload)
@@ -149,7 +158,7 @@ func (m *Setup) read(ctx *context.T, orig []byte) error {
 		case peerLocalEndpointOption:
 			m.PeerLocalEndpoint, err = v23.NewEndpoint(string(payload))
 		default:
-			// Ignore unknown setup options.
+			m.uninterpretedOptions = append(m.uninterpretedOptions, option{opt, payload})
 		}
 		if err != nil {
 			return NewErrInvalidMsg(ctx, setupType, uint64(len(orig)), field, err)
