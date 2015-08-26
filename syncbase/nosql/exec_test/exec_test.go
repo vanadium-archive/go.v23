@@ -667,7 +667,7 @@ func TestQueryExec(t *testing.T) {
 		// Test functions.
 		{
 			// Select invoice records where date is 2015-03-17
-			"select v from Customer where Type(v) like \"%.Invoice\" and YMD(v.InvoiceDate, \"America/Los_Angeles\") = Date(\"2015-03-17 PDT\")",
+			"select v from Customer where Type(v) like \"%.Invoice\" and Year(v.InvoiceDate, \"America/Los_Angeles\") = 2015 and Month(v.InvoiceDate, \"America/Los_Angeles\") = 3 and Day(v.InvoiceDate, \"America/Los_Angeles\") = 17",
 			[]string{"v"},
 			[][]*vdl.Value{
 				[]*vdl.Value{customerEntries[5].value},
@@ -676,7 +676,7 @@ func TestQueryExec(t *testing.T) {
 		},
 		{
 			// Now will always be > 2012, so all customer records will be returned.
-			"select v from Customer where Now() > Date(\"2012-03-17 PDT\")",
+			"select v from Customer where Now() > Time(\"2006-01-02 MST\", \"2012-03-17 PDT\")",
 			[]string{"v"},
 			[][]*vdl.Value{
 				[]*vdl.Value{customerEntries[0].value},
@@ -696,7 +696,7 @@ func TestQueryExec(t *testing.T) {
 			// Note: this wouldn't work for March as daylight saving occurs March 8
 			// and causes comparisons for those days to be off 1 hour.
 			// It would work to use UTC -- see next test.
-			"select k from Customer where YM(v.InvoiceDate, \"America/Los_Angeles\") = YM(Date(\"2015-04-01 PDT\"), \"America/Los_Angeles\")",
+			"select k from Customer where Year(v.InvoiceDate, \"America/Los_Angeles\") = 2015 and Month(v.InvoiceDate, \"America/Los_Angeles\") = 4",
 			[]string{"k"},
 			[][]*vdl.Value{
 				[]*vdl.Value{vdl.ValueOf(customerEntries[7].key)},
@@ -705,7 +705,7 @@ func TestQueryExec(t *testing.T) {
 		},
 		{
 			// Select March 2015 UTC invoices.
-			"select k from Customer where YM(v.InvoiceDate, \"UTC\") = YM(Date(\"2015-03-01 UTC\"), \"UTC\")",
+			"select k from Customer where Year(v.InvoiceDate, \"UTC\") = 2015 and Month(v.InvoiceDate, \"UTC\") = 3",
 			[]string{"k"},
 			[][]*vdl.Value{
 				[]*vdl.Value{vdl.ValueOf(customerEntries[3].key)},
@@ -715,7 +715,7 @@ func TestQueryExec(t *testing.T) {
 		},
 		{
 			// Select 2015 UTC invoices.
-			"select k from Customer where Y(v.InvoiceDate, \"UTC\") = Y(Date(\"2015-01-01 UTC\"), \"UTC\")",
+			"select k from Customer where Year(v.InvoiceDate, \"UTC\") = 2015",
 			[]string{"k"},
 			[][]*vdl.Value{
 				[]*vdl.Value{vdl.ValueOf(customerEntries[1].key)},
@@ -729,7 +729,7 @@ func TestQueryExec(t *testing.T) {
 		},
 		{
 			// Select the Mar 17 2015 11:14:04 America/Los_Angeles invoice.
-			"select k from Customer where v.InvoiceDate = DateTime(\"2015-03-17 11:14:04 PDT\")",
+			"select k from Customer where v.InvoiceDate = Time(\"2006-01-02 15:04:05 MST\", \"2015-03-17 11:14:04 PDT\")",
 			[]string{"k"},
 			[][]*vdl.Value{
 				[]*vdl.Value{vdl.ValueOf(customerEntries[5].key)},
@@ -737,7 +737,7 @@ func TestQueryExec(t *testing.T) {
 		},
 		{
 			// Select invoices in the minute Mar 17 2015 11:14 America/Los_Angeles invoice.
-			"select k from Customer where YMDHM(v.InvoiceDate, \"America/Los_Angeles\") = YMDHM(DateTime(\"2015-03-17 11:14:00 PDT\"), \"America/Los_Angeles\")",
+			"select k from Customer where Year(v.InvoiceDate, \"America/Los_Angeles\") = 2015 and Month(v.InvoiceDate, \"America/Los_Angeles\") = 3 and Day(v.InvoiceDate, \"America/Los_Angeles\") = 17 and Hour(v.InvoiceDate, \"America/Los_Angeles\") = 11 and Minute(v.InvoiceDate, \"America/Los_Angeles\") = 14",
 			[]string{"k"},
 			[][]*vdl.Value{
 				[]*vdl.Value{vdl.ValueOf(customerEntries[5].key)},
@@ -745,7 +745,7 @@ func TestQueryExec(t *testing.T) {
 		},
 		{
 			// Select invoices in the hour Mar 17 2015 11 hundred America/Los_Angeles invoice.
-			"select k from Customer where YMDH(v.InvoiceDate, \"America/Los_Angeles\") = YMDH(DateTime(\"2015-03-17 11:00:00 PDT\"), \"America/Los_Angeles\")",
+			"select k from Customer where Year(v.InvoiceDate, \"America/Los_Angeles\") = 2015 and Month(v.InvoiceDate, \"America/Los_Angeles\") = 3 and Day(v.InvoiceDate, \"America/Los_Angeles\") = 17 and Hour(v.InvoiceDate, \"America/Los_Angeles\") = 11",
 			[]string{"k"},
 			[][]*vdl.Value{
 				[]*vdl.Value{vdl.ValueOf(customerEntries[5].key)},
@@ -753,7 +753,7 @@ func TestQueryExec(t *testing.T) {
 		},
 		{
 			// Select invoices on the day Mar 17 2015 America/Los_Angeles invoice.
-			"select k from Customer where YMD(v.InvoiceDate, \"America/Los_Angeles\") = YMD(Date(\"2015-03-17 PDT\"), \"America/Los_Angeles\")",
+			"select k from Customer where Year(v.InvoiceDate, \"America/Los_Angeles\") = 2015 and Month(v.InvoiceDate, \"America/Los_Angeles\") = 3 and Day(v.InvoiceDate, \"America/Los_Angeles\") = 17",
 			[]string{"k"},
 			[][]*vdl.Value{
 				[]*vdl.Value{vdl.ValueOf(customerEntries[5].key)},
@@ -784,10 +784,10 @@ func TestQueryExec(t *testing.T) {
 			},
 		},
 		// Select clause functions.
-		// Date function
+		// Time function
 		{
-			"select Date(\"2015-07-01 PDT\") from Customer",
-			[]string{"Date"},
+			"select Time(\"2006-01-02 MST\", \"2015-07-01 PDT\") from Customer",
+			[]string{"Time"},
 			[][]*vdl.Value{
 				[]*vdl.Value{vdl.ValueOf(t2015_07_01)},
 				[]*vdl.Value{vdl.ValueOf(t2015_07_01)},
@@ -801,10 +801,10 @@ func TestQueryExec(t *testing.T) {
 				[]*vdl.Value{vdl.ValueOf(t2015_07_01)},
 			},
 		},
-		// DateTime function
+		// Time function
 		{
-			"select DateTime(\"2015-07-01 01:23:45 PDT\") from Customer",
-			[]string{"DateTime"},
+			"select Time(\"2006-01-02 15:04:05 MST\", \"2015-07-01 01:23:45 PDT\") from Customer",
+			[]string{"Time"},
 			[][]*vdl.Value{
 				[]*vdl.Value{vdl.ValueOf(t2015_07_01_01_23_45)},
 				[]*vdl.Value{vdl.ValueOf(t2015_07_01_01_23_45)},
@@ -838,83 +838,83 @@ func TestQueryExec(t *testing.T) {
 				[]*vdl.Value{vdl.ValueOf("JOHN STEED")},
 			},
 		},
-		// YMDHMS function
+		// Second function
 		{
-			"select k, YMDHMS(v.InvoiceDate, \"America/Los_Angeles\") from Customer where Type(v) like \"%.Invoice\" and k = \"002003\"",
+			"select k, Second(v.InvoiceDate, \"America/Los_Angeles\") from Customer where Type(v) like \"%.Invoice\" and k = \"002003\"",
 			[]string{
 				"k",
-				"YMDHMS",
+				"Second",
 			},
 			[][]*vdl.Value{
-				[]*vdl.Value{vdl.ValueOf("002003"), vdl.ValueOf(t2015_04_12_22_16_06)},
+				[]*vdl.Value{vdl.ValueOf("002003"), vdl.ValueOf(int64(6))},
 			},
 		},
-		// YMDHM function
+		// Minute function
 		{
-			"select k, YMDHM(v.InvoiceDate, \"America/Los_Angeles\") from Customer where Type(v) like \"%.Invoice\" and k = \"002003\"",
+			"select k, Minute(v.InvoiceDate, \"America/Los_Angeles\") from Customer where Type(v) like \"%.Invoice\" and k = \"002003\"",
 			[]string{
 				"k",
-				"YMDHM",
+				"Minute",
 			},
 			[][]*vdl.Value{
-				[]*vdl.Value{vdl.ValueOf("002003"), vdl.ValueOf(t2015_04_12_22_16)},
+				[]*vdl.Value{vdl.ValueOf("002003"), vdl.ValueOf(int64(16))},
 			},
 		},
-		// YMDH function
+		// Hour function
 		{
-			"select k, YMDH(v.InvoiceDate, \"America/Los_Angeles\") from Customer where Type(v) like \"%.Invoice\" and k = \"002003\"",
+			"select k, Hour(v.InvoiceDate, \"America/Los_Angeles\") from Customer where Type(v) like \"%.Invoice\" and k = \"002003\"",
 			[]string{
 				"k",
-				"YMDH",
+				"Hour",
 			},
 			[][]*vdl.Value{
-				[]*vdl.Value{vdl.ValueOf("002003"), vdl.ValueOf(t2015_04_12_22)},
+				[]*vdl.Value{vdl.ValueOf("002003"), vdl.ValueOf(int64(22))},
 			},
 		},
-		// YMD function
+		// Day function
 		{
-			"select k, YMD(v.InvoiceDate, \"America/Los_Angeles\") from Customer where Type(v) like \"%.Invoice\" and k = \"002003\"",
+			"select k, Day(v.InvoiceDate, \"America/Los_Angeles\") from Customer where Type(v) like \"%.Invoice\" and k = \"002003\"",
 			[]string{
 				"k",
-				"YMD",
+				"Day",
 			},
 			[][]*vdl.Value{
-				[]*vdl.Value{vdl.ValueOf("002003"), vdl.ValueOf(t2015_04_12)},
+				[]*vdl.Value{vdl.ValueOf("002003"), vdl.ValueOf(int64(12))},
 			},
 		},
-		// YM function
+		// Month function
 		{
-			"select k, YM(v.InvoiceDate, \"America/Los_Angeles\") from Customer where Type(v) like \"%.Invoice\" and k = \"002003\"",
+			"select k, Month(v.InvoiceDate, \"America/Los_Angeles\") from Customer where Type(v) like \"%.Invoice\" and k = \"002003\"",
 			[]string{
 				"k",
-				"YM",
+				"Month",
 			},
 			[][]*vdl.Value{
-				[]*vdl.Value{vdl.ValueOf("002003"), vdl.ValueOf(t2015_04)},
+				[]*vdl.Value{vdl.ValueOf("002003"), vdl.ValueOf(int64(4))},
 			},
 		},
-		// Y function
+		// Year function
 		{
-			"select k, Y(v.InvoiceDate, \"America/Los_Angeles\") from Customer where Type(v) like \"%.Invoice\" and k = \"001001\"",
+			"select k, Year(v.InvoiceDate, \"America/Los_Angeles\") from Customer where Type(v) like \"%.Invoice\" and k = \"001001\"",
 			[]string{
 				"k",
-				"Y",
+				"Year",
 			},
 			[][]*vdl.Value{
-				[]*vdl.Value{vdl.ValueOf("001001"), vdl.ValueOf(t2015)},
+				[]*vdl.Value{vdl.ValueOf("001001"), vdl.ValueOf(int64(2015))},
 			},
 		},
 		// Nested functions
 		{
-			"select Y(YM(YMD(YMDH(YMDHM(YMDHMS(v.InvoiceDate, \"America/Los_Angeles\"), \"America/Los_Angeles\"), \"America/Los_Angeles\"), \"America/Los_Angeles\"), \"America/Los_Angeles\"), \"America/Los_Angeles\")  from Customer where Type(v) like \"%.Invoice\" and k = \"001001\"",
-			[]string{"Y"},
+			"select Year(Time(\"2006-01-02 15:04:05 MST\", \"2015-07-01 01:23:45 PDT\"), \"America/Los_Angeles\")  from Customer where Type(v) like \"%.Invoice\" and k = \"001001\"",
+			[]string{"Year"},
 			[][]*vdl.Value{
-				[]*vdl.Value{vdl.ValueOf(t2015)},
+				[]*vdl.Value{vdl.ValueOf(int64(2015))},
 			},
 		},
 		// Bad arg to function.  Expression is false.
 		{
-			"select v from Customer where Type(v) like \"%.Invoice\" and YMD(v.InvoiceDate, v.Foo) = v.InvoiceDate",
+			"select v from Customer where Type(v) like \"%.Invoice\" and Day(v.InvoiceDate, v.Foo) = v.InvoiceDate",
 			[]string{"v"},
 			[][]*vdl.Value{},
 		},

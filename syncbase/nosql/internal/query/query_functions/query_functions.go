@@ -32,15 +32,18 @@ var lowercaseFunctions map[string]string // map of lowercase(funcName)->funcName
 func init() {
 	functions = make(map[string]function)
 
-	functions["Date"] = function{[]query_parser.OperandType{query_parser.TypStr}, false, query_parser.TypNil, query_parser.TypTime, date, nil}
-	functions["DateTime"] = function{[]query_parser.OperandType{query_parser.TypStr}, false, query_parser.TypNil, query_parser.TypTime, dateTime, nil}
-	functions["Y"] = function{[]query_parser.OperandType{query_parser.TypTime, query_parser.TypStr}, false, query_parser.TypNil, query_parser.TypTime, y, secondArgLocationCheck}
-	functions["YM"] = function{[]query_parser.OperandType{query_parser.TypTime, query_parser.TypStr}, false, query_parser.TypNil, query_parser.TypTime, ym, secondArgLocationCheck}
-	functions["YMD"] = function{[]query_parser.OperandType{query_parser.TypTime, query_parser.TypStr}, false, query_parser.TypNil, query_parser.TypTime, ymd, secondArgLocationCheck}
-	functions["YMDH"] = function{[]query_parser.OperandType{query_parser.TypTime, query_parser.TypStr}, false, query_parser.TypNil, query_parser.TypTime, ymdh, secondArgLocationCheck}
-	functions["YMDHM"] = function{[]query_parser.OperandType{query_parser.TypTime, query_parser.TypStr}, false, query_parser.TypNil, query_parser.TypTime, ymdhm, secondArgLocationCheck}
-	functions["YMDHMS"] = function{[]query_parser.OperandType{query_parser.TypTime, query_parser.TypStr}, false, query_parser.TypNil, query_parser.TypTime, ymdhms, secondArgLocationCheck}
+	// Time Functions
+	functions["Time"] = function{[]query_parser.OperandType{query_parser.TypStr, query_parser.TypStr}, false, query_parser.TypNil, query_parser.TypTime, timeFunc, nil}
 	functions["Now"] = function{[]query_parser.OperandType{}, false, query_parser.TypNil, query_parser.TypTime, now, nil}
+	functions["Year"] = function{[]query_parser.OperandType{query_parser.TypTime, query_parser.TypStr}, false, query_parser.TypNil, query_parser.TypInt, year, secondArgLocationCheck}
+	functions["Month"] = function{[]query_parser.OperandType{query_parser.TypTime, query_parser.TypStr}, false, query_parser.TypNil, query_parser.TypInt, month, secondArgLocationCheck}
+	functions["Day"] = function{[]query_parser.OperandType{query_parser.TypTime, query_parser.TypStr}, false, query_parser.TypNil, query_parser.TypInt, day, secondArgLocationCheck}
+	functions["Hour"] = function{[]query_parser.OperandType{query_parser.TypTime, query_parser.TypStr}, false, query_parser.TypNil, query_parser.TypInt, hour, secondArgLocationCheck}
+	functions["Minute"] = function{[]query_parser.OperandType{query_parser.TypTime, query_parser.TypStr}, false, query_parser.TypNil, query_parser.TypInt, minute, secondArgLocationCheck}
+	functions["Second"] = function{[]query_parser.OperandType{query_parser.TypTime, query_parser.TypStr}, false, query_parser.TypNil, query_parser.TypInt, second, secondArgLocationCheck}
+	functions["Nanosecond"] = function{[]query_parser.OperandType{query_parser.TypTime, query_parser.TypStr}, false, query_parser.TypNil, query_parser.TypInt, nanosecond, secondArgLocationCheck}
+	functions["Weekday"] = function{[]query_parser.OperandType{query_parser.TypTime, query_parser.TypStr}, false, query_parser.TypNil, query_parser.TypInt, weekday, secondArgLocationCheck}
+	functions["YearDay"] = function{[]query_parser.OperandType{query_parser.TypTime, query_parser.TypStr}, false, query_parser.TypNil, query_parser.TypInt, yearDay, secondArgLocationCheck}
 
 	// String Functions
 	functions["Lowercase"] = function{[]query_parser.OperandType{query_parser.TypStr}, false, query_parser.TypNil, query_parser.TypStr, lowerCase, nil}

@@ -57,30 +57,30 @@ type functionsErrorTest struct {
 	err  error
 }
 
-var t_2015 time.Time
-var t_2015_06 time.Time
 var t_2015_06_21 time.Time
-var t_2015_06_21_01 time.Time
-var t_2015_06_21_01_23 time.Time
 var t_2015_06_21_01_23_45 time.Time
+var t_2015_06_09_01_23_45_8327 time.Time
 
 func init() {
-	// Mon Jan 2 15:04:05 -0700 MST 2006
-	t_2015, _ = time.Parse("2006 MST", "2015 PDT")
-	t_2015_06, _ = time.Parse("2006/01 MST", "2015/06 PDT")
 	t_2015_06_21, _ = time.Parse("2006/01/02 MST", "2015/06/21 PDT")
-	t_2015_06_21_01, _ = time.Parse("2006/01/02 15 MST", "2015/06/21 01 PDT")
-	t_2015_06_21_01_23, _ = time.Parse("2006/01/02 15:04 MST", "2015/06/21 01:23 PDT")
+
 	t_2015_06_21_01_23_45, _ = time.Parse("2006/01/02 15:04:05 MST", "2015/06/21 01:23:45 PDT")
+
+	loc, _ := time.LoadLocation("America/Los_Angeles")
+	t_2015_06_09_01_23_45_8327 = time.Date(2015, 6, 9, 1, 23, 45, 8327, loc)
 }
 
 func TestFunctions(t *testing.T) {
 	tests := []functionsTest{
-		// Date
+		// Time
 		functionsTest{
 			&query_parser.Function{
-				Name: "Date",
+				Name: "Time",
 				Args: []*query_parser.Operand{
+					&query_parser.Operand{
+						Type: query_parser.TypStr,
+						Str:  "2006-01-02 MST",
+					},
 					&query_parser.Operand{
 						Type: query_parser.TypStr,
 						Str:  "2015-06-21 PDT",
@@ -96,6 +96,10 @@ func TestFunctions(t *testing.T) {
 			[]*query_parser.Operand{
 				&query_parser.Operand{
 					Type: query_parser.TypStr,
+					Str:  "2006-01-02 MST",
+				},
+				&query_parser.Operand{
+					Type: query_parser.TypStr,
 					Str:  "2015-06-21 PDT",
 				},
 			},
@@ -104,11 +108,15 @@ func TestFunctions(t *testing.T) {
 				Time: t_2015_06_21,
 			},
 		},
-		// DateTime
+		// Time
 		functionsTest{
 			&query_parser.Function{
-				Name: "DateTime",
+				Name: "Time",
 				Args: []*query_parser.Operand{
+					&query_parser.Operand{
+						Type: query_parser.TypStr,
+						Str:  "2006-01-02 15:04:05 MST",
+					},
 					&query_parser.Operand{
 						Type: query_parser.TypStr,
 						Str:  "2015-06-21 01:23:45 PDT",
@@ -124,6 +132,10 @@ func TestFunctions(t *testing.T) {
 			[]*query_parser.Operand{
 				&query_parser.Operand{
 					Type: query_parser.TypStr,
+					Str:  "2006-01-02 15:04:05 MST",
+				},
+				&query_parser.Operand{
+					Type: query_parser.TypStr,
 					Str:  "2015-06-21 01:23:45 PDT",
 				},
 			},
@@ -132,14 +144,14 @@ func TestFunctions(t *testing.T) {
 				Time: t_2015_06_21_01_23_45,
 			},
 		},
-		// Y
+		// Year
 		functionsTest{
 			&query_parser.Function{
-				Name: "Y",
+				Name: "Year",
 				Args: []*query_parser.Operand{
 					&query_parser.Operand{
 						Type: query_parser.TypTime,
-						Time: t_2015_06_21_01_23_45,
+						Time: t_2015_06_09_01_23_45_8327,
 					},
 					&query_parser.Operand{
 						Type: query_parser.TypStr,
@@ -147,17 +159,17 @@ func TestFunctions(t *testing.T) {
 					},
 				},
 				ArgTypes: []query_parser.OperandType{
-					query_parser.TypStr,
+					query_parser.TypTime,
 					query_parser.TypStr,
 				},
-				RetType:  query_parser.TypTime,
+				RetType:  query_parser.TypInt,
 				Computed: false,
 				RetValue: nil,
 			},
 			[]*query_parser.Operand{
 				&query_parser.Operand{
 					Type: query_parser.TypTime,
-					Time: t_2015_06_21_01_23_45,
+					Time: t_2015_06_09_01_23_45_8327,
 				},
 				&query_parser.Operand{
 					Type: query_parser.TypStr,
@@ -165,18 +177,18 @@ func TestFunctions(t *testing.T) {
 				},
 			},
 			&query_parser.Operand{
-				Type: query_parser.TypTime,
-				Time: t_2015,
+				Type: query_parser.TypInt,
+				Int:  2015,
 			},
 		},
-		// YM
+		// Month
 		functionsTest{
 			&query_parser.Function{
-				Name: "YM",
+				Name: "Month",
 				Args: []*query_parser.Operand{
 					&query_parser.Operand{
 						Type: query_parser.TypTime,
-						Time: t_2015_06_21_01_23_45,
+						Time: t_2015_06_09_01_23_45_8327,
 					},
 					&query_parser.Operand{
 						Type: query_parser.TypStr,
@@ -184,17 +196,17 @@ func TestFunctions(t *testing.T) {
 					},
 				},
 				ArgTypes: []query_parser.OperandType{
-					query_parser.TypStr,
+					query_parser.TypTime,
 					query_parser.TypStr,
 				},
-				RetType:  query_parser.TypTime,
+				RetType:  query_parser.TypInt,
 				Computed: false,
 				RetValue: nil,
 			},
 			[]*query_parser.Operand{
 				&query_parser.Operand{
 					Type: query_parser.TypTime,
-					Time: t_2015_06_21_01_23_45,
+					Time: t_2015_06_09_01_23_45_8327,
 				},
 				&query_parser.Operand{
 					Type: query_parser.TypStr,
@@ -202,18 +214,18 @@ func TestFunctions(t *testing.T) {
 				},
 			},
 			&query_parser.Operand{
-				Type: query_parser.TypTime,
-				Time: t_2015_06,
+				Type: query_parser.TypInt,
+				Int:  6,
 			},
 		},
-		// YMD
+		// Day
 		functionsTest{
 			&query_parser.Function{
-				Name: "YMD",
+				Name: "Day",
 				Args: []*query_parser.Operand{
 					&query_parser.Operand{
 						Type: query_parser.TypTime,
-						Time: t_2015_06_21_01_23_45,
+						Time: t_2015_06_09_01_23_45_8327,
 					},
 					&query_parser.Operand{
 						Type: query_parser.TypStr,
@@ -221,17 +233,17 @@ func TestFunctions(t *testing.T) {
 					},
 				},
 				ArgTypes: []query_parser.OperandType{
-					query_parser.TypStr,
+					query_parser.TypTime,
 					query_parser.TypStr,
 				},
-				RetType:  query_parser.TypTime,
+				RetType:  query_parser.TypInt,
 				Computed: false,
 				RetValue: nil,
 			},
 			[]*query_parser.Operand{
 				&query_parser.Operand{
 					Type: query_parser.TypTime,
-					Time: t_2015_06_21_01_23_45,
+					Time: t_2015_06_09_01_23_45_8327,
 				},
 				&query_parser.Operand{
 					Type: query_parser.TypStr,
@@ -239,18 +251,18 @@ func TestFunctions(t *testing.T) {
 				},
 			},
 			&query_parser.Operand{
-				Type: query_parser.TypTime,
-				Time: t_2015_06_21,
+				Type: query_parser.TypInt,
+				Int:  9,
 			},
 		},
-		// YMDH
+		// Hour
 		functionsTest{
 			&query_parser.Function{
-				Name: "YMDH",
+				Name: "Hour",
 				Args: []*query_parser.Operand{
 					&query_parser.Operand{
 						Type: query_parser.TypTime,
-						Time: t_2015_06_21_01_23_45,
+						Time: t_2015_06_09_01_23_45_8327,
 					},
 					&query_parser.Operand{
 						Type: query_parser.TypStr,
@@ -258,17 +270,17 @@ func TestFunctions(t *testing.T) {
 					},
 				},
 				ArgTypes: []query_parser.OperandType{
-					query_parser.TypStr,
+					query_parser.TypTime,
 					query_parser.TypStr,
 				},
-				RetType:  query_parser.TypTime,
+				RetType:  query_parser.TypInt,
 				Computed: false,
 				RetValue: nil,
 			},
 			[]*query_parser.Operand{
 				&query_parser.Operand{
 					Type: query_parser.TypTime,
-					Time: t_2015_06_21_01_23_45,
+					Time: t_2015_06_09_01_23_45_8327,
 				},
 				&query_parser.Operand{
 					Type: query_parser.TypStr,
@@ -276,18 +288,18 @@ func TestFunctions(t *testing.T) {
 				},
 			},
 			&query_parser.Operand{
-				Type: query_parser.TypTime,
-				Time: t_2015_06_21_01,
+				Type: query_parser.TypInt,
+				Int:  1,
 			},
 		},
-		// YMDHM
+		// Minute
 		functionsTest{
 			&query_parser.Function{
-				Name: "YMDHM",
+				Name: "Minute",
 				Args: []*query_parser.Operand{
 					&query_parser.Operand{
 						Type: query_parser.TypTime,
-						Time: t_2015_06_21_01_23_45,
+						Time: t_2015_06_09_01_23_45_8327,
 					},
 					&query_parser.Operand{
 						Type: query_parser.TypStr,
@@ -295,17 +307,17 @@ func TestFunctions(t *testing.T) {
 					},
 				},
 				ArgTypes: []query_parser.OperandType{
-					query_parser.TypStr,
+					query_parser.TypTime,
 					query_parser.TypStr,
 				},
-				RetType:  query_parser.TypTime,
+				RetType:  query_parser.TypInt,
 				Computed: false,
 				RetValue: nil,
 			},
 			[]*query_parser.Operand{
 				&query_parser.Operand{
 					Type: query_parser.TypTime,
-					Time: t_2015_06_21_01_23_45,
+					Time: t_2015_06_09_01_23_45_8327,
 				},
 				&query_parser.Operand{
 					Type: query_parser.TypStr,
@@ -313,18 +325,18 @@ func TestFunctions(t *testing.T) {
 				},
 			},
 			&query_parser.Operand{
-				Type: query_parser.TypTime,
-				Time: t_2015_06_21_01_23,
+				Type: query_parser.TypInt,
+				Int:  23,
 			},
 		},
-		// YMDHMS
+		// Second
 		functionsTest{
 			&query_parser.Function{
-				Name: "YMDHMS",
+				Name: "Second",
 				Args: []*query_parser.Operand{
 					&query_parser.Operand{
 						Type: query_parser.TypTime,
-						Time: t_2015_06_21_01_23_45,
+						Time: t_2015_06_09_01_23_45_8327,
 					},
 					&query_parser.Operand{
 						Type: query_parser.TypStr,
@@ -332,17 +344,17 @@ func TestFunctions(t *testing.T) {
 					},
 				},
 				ArgTypes: []query_parser.OperandType{
-					query_parser.TypStr,
+					query_parser.TypTime,
 					query_parser.TypStr,
 				},
-				RetType:  query_parser.TypTime,
+				RetType:  query_parser.TypInt,
 				Computed: false,
 				RetValue: nil,
 			},
 			[]*query_parser.Operand{
 				&query_parser.Operand{
 					Type: query_parser.TypTime,
-					Time: t_2015_06_21_01_23_45,
+					Time: t_2015_06_09_01_23_45_8327,
 				},
 				&query_parser.Operand{
 					Type: query_parser.TypStr,
@@ -350,8 +362,119 @@ func TestFunctions(t *testing.T) {
 				},
 			},
 			&query_parser.Operand{
-				Type: query_parser.TypTime,
-				Time: t_2015_06_21_01_23_45,
+				Type: query_parser.TypInt,
+				Int:  45,
+			},
+		},
+		// Nanosecond
+		functionsTest{
+			&query_parser.Function{
+				Name: "Nanosecond",
+				Args: []*query_parser.Operand{
+					&query_parser.Operand{
+						Type: query_parser.TypTime,
+						Time: t_2015_06_09_01_23_45_8327,
+					},
+					&query_parser.Operand{
+						Type: query_parser.TypStr,
+						Str:  "America/Los_Angeles",
+					},
+				},
+				ArgTypes: []query_parser.OperandType{
+					query_parser.TypTime,
+					query_parser.TypStr,
+				},
+				RetType:  query_parser.TypInt,
+				Computed: false,
+				RetValue: nil,
+			},
+			[]*query_parser.Operand{
+				&query_parser.Operand{
+					Type: query_parser.TypTime,
+					Time: t_2015_06_09_01_23_45_8327,
+				},
+				&query_parser.Operand{
+					Type: query_parser.TypStr,
+					Str:  "America/Los_Angeles",
+				},
+			},
+			&query_parser.Operand{
+				Type: query_parser.TypInt,
+				Int:  8327,
+			},
+		},
+		// Weekday
+		functionsTest{
+			&query_parser.Function{
+				Name: "Weekday",
+				Args: []*query_parser.Operand{
+					&query_parser.Operand{
+						Type: query_parser.TypTime,
+						Time: t_2015_06_09_01_23_45_8327,
+					},
+					&query_parser.Operand{
+						Type: query_parser.TypStr,
+						Str:  "America/Los_Angeles",
+					},
+				},
+				ArgTypes: []query_parser.OperandType{
+					query_parser.TypTime,
+					query_parser.TypStr,
+				},
+				RetType:  query_parser.TypInt,
+				Computed: false,
+				RetValue: nil,
+			},
+			[]*query_parser.Operand{
+				&query_parser.Operand{
+					Type: query_parser.TypTime,
+					Time: t_2015_06_09_01_23_45_8327,
+				},
+				&query_parser.Operand{
+					Type: query_parser.TypStr,
+					Str:  "America/Los_Angeles",
+				},
+			},
+			&query_parser.Operand{
+				Type: query_parser.TypInt,
+				Int:  2,
+			},
+		},
+		// YearDay
+		functionsTest{
+			&query_parser.Function{
+				Name: "YearDay",
+				Args: []*query_parser.Operand{
+					&query_parser.Operand{
+						Type: query_parser.TypTime,
+						Time: t_2015_06_09_01_23_45_8327,
+					},
+					&query_parser.Operand{
+						Type: query_parser.TypStr,
+						Str:  "America/Los_Angeles",
+					},
+				},
+				ArgTypes: []query_parser.OperandType{
+					query_parser.TypTime,
+					query_parser.TypStr,
+				},
+				RetType:  query_parser.TypInt,
+				Computed: false,
+				RetValue: nil,
+			},
+			[]*query_parser.Operand{
+				&query_parser.Operand{
+					Type: query_parser.TypTime,
+					Time: t_2015_06_09_01_23_45_8327,
+				},
+				&query_parser.Operand{
+					Type: query_parser.TypStr,
+					Str:  "America/Los_Angeles",
+				},
+			},
+			&query_parser.Operand{
+				Type: query_parser.TypInt,
+				Int:  160,
 			},
 		},
 		// Lowercase
@@ -1242,11 +1365,15 @@ func TestFunctions(t *testing.T) {
 
 func TestErrorFunctions(t *testing.T) {
 	tests := []functionsErrorTest{
-		// date
+		// time
 		functionsErrorTest{
 			&query_parser.Function{
-				Name: "date",
+				Name: "time",
 				Args: []*query_parser.Operand{
+					&query_parser.Operand{
+						Type: query_parser.TypStr,
+						Str:  "2006-01-02 MST",
+					},
 					&query_parser.Operand{
 						Type: query_parser.TypStr,
 						Str:  "2015-06-21 PDT",
@@ -1263,10 +1390,14 @@ func TestErrorFunctions(t *testing.T) {
 			[]*query_parser.Operand{
 				&query_parser.Operand{
 					Type: query_parser.TypStr,
+					Str:  "2006-01-02 MST",
+				},
+				&query_parser.Operand{
+					Type: query_parser.TypStr,
 					Str:  "2015-06-21 PDT",
 				},
 			},
-			syncql.NewErrDidYouMeanFunction(db.GetContext(), int64(42), "Date"),
+			syncql.NewErrDidYouMeanFunction(db.GetContext(), int64(42), "Time"),
 		},
 	}
 
