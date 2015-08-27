@@ -26,6 +26,8 @@ import (
 //go:generate v23 test generate
 
 func V23TestSyncbasedWholeBlobTransfer(t *v23tests.T) {
+	t.Skip("https://github.com/vanadium/issues/issues/667")
+
 	v23tests.RunRootMT(t, "--v23.tcp.address=127.0.0.1:0")
 	server0Creds, _ := t.Shell().NewChildCredentials("s0")
 	client0Creds, _ := t.Shell().NewChildCredentials("c0")
