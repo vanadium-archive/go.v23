@@ -85,10 +85,10 @@ type BlessingsForPeer func(
 	remoteDischarges map[string]security.Discharge,
 ) (security.Blessings, map[string]security.Discharge, error)
 
-// Conn represents the connection onto which this flow is multiplexed.
-// Since this Conn may be shared between many flows it wouldn't be safe
+// ManagedConn represents the connection onto which this flow is multiplexed.
+// Since this ManagedConn may be shared between many flows it wouldn't be safe
 // to read and write to it directly.  We just provide some metadata.
-type Conn interface {
+type ManagedConn interface {
 	// LocalEndpoint returns the local vanadium Endpoint
 	LocalEndpoint() naming.Endpoint
 	// RemoteEndpoint returns the remote vanadium Endpoint
@@ -122,14 +122,6 @@ type MsgReadWriteCloser interface {
 	// Close closes the MsgReadWriteCloser. After Close is called all writes will
 	// return an error, but reads of already queued data may succeed.
 	Close() error
-}
-
-// MsgListener provides methods for accepting new MsgReadWriteClosers.
-type MsgListener interface {
-	// Accept waits for and are returns new MsgReadWriteClosers.
-	Accept(ctx *context.T) (MsgReadWriteCloser, error)
-	// Addr returns MsgListener's network address.
-	Addr() net.Addr
 }
 
 // Flow is the interface for a flow-controlled channel multiplexed over a Conn.
@@ -166,9 +158,27 @@ type Flow interface {
 	RemoteDischarges() map[string]security.Discharge
 
 	// Conn returns the connection the flow is multiplexed on.
-	Conn() Conn
+	Conn() ManagedConn
 
 	// Closed returns a channel that remains open until the flow has been closed or
 	// the ctx to the Dial or Accept call used to create the flow has been cancelled.
 	Closed() <-chan struct{}
+}
+
+// Conn is the connection onto which flows are mulitplexed.
+// It contains information of the Conn's local network address. Other infomation
+// is not available until the authentication handshake is complete.
+type Conn interface {
+	MsgReadWriteCloser
+
+	// LocalAddr returns the Conn's network address.
+	LocalAddr() net.Addr
+}
+
+// Listener provides methods for accepting new Conns.
+type Listener interface {
+	// Accept waits for and are returns new Conns.
+	Accept(ctx *context.T) (Conn, error)
+	// Addr returns Listener's network address.
+	Addr() net.Addr
 }
