@@ -15,17 +15,17 @@ import (
 
 // Protocol is the interface that protocols for use with vanadium RPCs must implement.
 type Protocol interface {
-	// Dial is the function used to create MsgReadWriteCloser objects given a
+	// Dial is the function used to create Conn objects given a
 	// protocol-specific string representation of an address.
-	// The returned MsgReadWriteCloser must also frame the connection.
-	Dial(ctx *context.T, protocol, address string, timeout time.Duration) (MsgReadWriteCloser, error)
+	// The returned Conn must also frame the connection.
+	Dial(ctx *context.T, protocol, address string, timeout time.Duration) (Conn, error)
 	// Resolve is the function used for protocol-specific address normalization.
 	// e.g. the TCP resolve performs DNS resolution.
 	Resolve(ctx *context.T, proctocol, address string) (string, string, error)
-	// Listen is the function used to create MsgListener objects given a
+	// Listen is the function used to create Listener objects given a
 	// protocol-specific string representation of the address a server will listen on.
-	// The MsgReadWriteClosers returned from MsgListener must frame connections.
-	Listen(ctx *context.T, protocol, address string) (MsgListener, error)
+	// The Conns returned from Listener must frame connections.
+	Listen(ctx *context.T, protocol, address string) (Listener, error)
 }
 
 // RegisterProtocol makes available a Protocol to RegisteredProtocol.
@@ -76,7 +76,7 @@ type wrappedProtocol struct {
 	obj      Protocol
 }
 
-func (p wrappedProtocol) Dial(ctx *context.T, _, address string, timeout time.Duration) (MsgReadWriteCloser, error) {
+func (p wrappedProtocol) Dial(ctx *context.T, _, address string, timeout time.Duration) (Conn, error) {
 	return p.obj.Dial(ctx, p.protocol, address, timeout)
 }
 
@@ -84,7 +84,7 @@ func (p wrappedProtocol) Resolve(ctx *context.T, _, address string) (string, str
 	return p.obj.Resolve(ctx, p.protocol, address)
 }
 
-func (p wrappedProtocol) Listen(ctx *context.T, _, address string) (MsgListener, error) {
+func (p wrappedProtocol) Listen(ctx *context.T, _, address string) (Listener, error) {
 	return p.obj.Listen(ctx, p.protocol, address)
 }
 
