@@ -14,4 +14,7 @@ error (
   InvalidSetupOption(option, field uint64) {
     "en": "setup option{:option} failed decoding at field{:field}."}
   UnknownMsg(typ byte) {"en":"unknown message type{:typ}."}
+
+  // TODO(mattr): Remove this after the transition is complete.
+  WrongProtocol() {"en": "A message of the incorrect protocol version was detected."}
 )
