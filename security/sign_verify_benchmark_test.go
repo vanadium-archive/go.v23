@@ -27,7 +27,10 @@ func init() {
 	if err != nil {
 		panic(err)
 	}
-	signer := NewInMemoryECDSASigner(key)
+	signer, err := newGoStdlibSigner(key)
+	if err != nil {
+		panic(err)
+	}
 	signature, err := signer.Sign(purpose, message)
 	if err != nil {
 		panic(err)
