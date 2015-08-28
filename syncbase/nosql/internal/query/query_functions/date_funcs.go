@@ -15,9 +15,9 @@ import (
 	"v.io/syncbase/v23/syncbase/nosql/syncql"
 )
 
-// If possible, check if arg is convertable to a location.  Fields and not yet computed
+// If possible, check if arg is convertible to a location.  Fields and not yet computed
 // functions cannot be checked and will just return nil.
-func checkIfPossibleThatArgIsConvertableToLocation(db query_db.Database, arg *query_parser.Operand) error {
+func checkIfPossibleThatArgIsConvertibleToLocation(db query_db.Database, arg *query_parser.Operand) error {
 	var locStr *query_parser.Operand
 	var err error
 	switch arg.Type {
@@ -187,8 +187,8 @@ func makeTimeOp(off int64, tim time.Time) *query_parser.Operand {
 func secondArgLocationCheck(db query_db.Database, off int64, args []*query_parser.Operand) error {
 	// At this point, for the args that can be evaluated before execution, it is known that
 	// there are two args, a time followed by a string.
-	// Just need to check that the 2nd arg is convertable to a location.
-	if err := checkIfPossibleThatArgIsConvertableToLocation(db, args[1]); err != nil {
+	// Just need to check that the 2nd arg is convertible to a location.
+	if err := checkIfPossibleThatArgIsConvertibleToLocation(db, args[1]); err != nil {
 		return err
 	}
 	return nil

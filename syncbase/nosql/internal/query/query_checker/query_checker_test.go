@@ -19,7 +19,60 @@ import (
 	"v.io/v23/verror"
 	_ "v.io/x/ref/runtime/factories/generic"
 	"v.io/x/ref/test"
+	"strings"
 )
+
+// oneOf represents an expectation that more than one type of error may be
+// returned by the corresponding test.
+type oneOf []interface{}
+
+func (o oneOf) matches(err error) bool {
+	for _, e := range o {
+		switch e := e.(type) {
+		case error:
+			if e.Error() == err.Error() {
+				return true
+			}
+		case vErrorContaining:
+			vErr, ok := err.(verror.E)
+			if !ok {
+				continue
+			}
+			if e.matches(vErr) {
+				return true
+			}
+		}
+	}
+	return false
+}
+
+// containing represents an expectation that an error will be of the given
+// VError type and will contain the given string.
+type vErrorContaining struct {
+	id verror.ID
+	message string
+}
+
+func newVErrorContaining(id verror.ID, message string) vErrorContaining {
+	return vErrorContaining{
+		id: id,
+		message: message,
+	}
+}
+
+func (v vErrorContaining) matches(err verror.E) bool {
+	if err.ID != v.id {
+		return false
+	}
+	if !strings.Contains(err.Error(), v.message) {
+		return false
+	}
+	return true
+}
+
+func (v vErrorContaining) String() string {
+	return fmt.Sprintf("VError containing ID=%s, message=%s", v.id, v.message)
+}
 
 type mockDB struct {
 	ctx *context.T
@@ -80,7 +133,7 @@ type regularExpressionsTest struct {
 
 type parseSelectErrorTest struct {
 	query string
-	err   error
+	err   interface{}
 }
 
 func TestQueryChecker(t *testing.T) {
@@ -432,17 +485,53 @@ func TestQueryCheckerErrors(t *testing.T) {
 		{"select v from Customer where v.ZipCode is not 94303", syncql.NewErrIsIsNotRequireRhsNil(db.GetContext(), 46)},
 		{"select v from Customer where v.ZipCode is not true", syncql.NewErrIsIsNotRequireRhsNil(db.GetContext(), 46)},
 		{"select v from Customer where v.ZipCode is not 943.03", syncql.NewErrIsIsNotRequireRhsNil(db.GetContext(), 46)},
-		{"select v from Customer where Type(v) = \"Customer\" and Year(v.InvoiceDate, \"ABC\") = 2015", syncql.NewErrLocationConversionError(db.GetContext(), 74, errors.New("unknown time zone ABC"))},
-		{"select v from Customer where Type(v) = \"Customer\" and Month(v.InvoiceDate, \"ABC\") = 2015", syncql.NewErrLocationConversionError(db.GetContext(), 75, errors.New("unknown time zone ABC"))},
-		{"select v from Customer where Type(v) = \"Customer\" and Day(v.InvoiceDate, \"ABC\") = 2015", syncql.NewErrLocationConversionError(db.GetContext(), 73, errors.New("unknown time zone ABC"))},
-		{"select v from Customer where Type(v) = \"Customer\" and Hour(v.InvoiceDate, \"ABC\") = 2015", syncql.NewErrLocationConversionError(db.GetContext(), 74, errors.New("unknown time zone ABC"))},
-		{"select v from Customer where Type(v) = \"Customer\" and Minute(v.InvoiceDate, \"ABC\") = 2015", syncql.NewErrLocationConversionError(db.GetContext(), 76, errors.New("unknown time zone ABC"))},
-		{"select v from Customer where Type(v) = \"Customer\" and Second(v.InvoiceDate, \"ABC\") = 2015", syncql.NewErrLocationConversionError(db.GetContext(), 76, errors.New("unknown time zone ABC"))},
+		// TODO(jkline): check offset for the 1.5 tests.
+		{"select v from Customer where Type(v) = \"Customer\" and Year(v.InvoiceDate, \"ABC\") = 2015", oneOf([]interface{}{
+			// Go1.4
+			syncql.NewErrLocationConversionError(db.GetContext(), 74, errors.New("unknown time zone ABC")),
+			// Go1.5
+			newVErrorContaining(syncql.ErrLocationConversionError.ID, "cannot find ABC in zip file"),
+		})},
+		{"select v from Customer where Type(v) = \"Customer\" and Month(v.InvoiceDate, \"ABC\") = 2015", oneOf([]interface{} {
+			// Go1.4
+			syncql.NewErrLocationConversionError(db.GetContext(), 75, errors.New("unknown time zone ABC")),
+			// Go1.5
+			newVErrorContaining(syncql.ErrLocationConversionError.ID, "cannot find ABC in zip file"),
+		})},
+		{"select v from Customer where Type(v) = \"Customer\" and Day(v.InvoiceDate, \"ABC\") = 2015", oneOf([]interface{} {
+			// Go1.4
+			syncql.NewErrLocationConversionError(db.GetContext(), 73, errors.New("unknown time zone ABC")),
+			// Go1.5
+			newVErrorContaining(syncql.ErrLocationConversionError.ID, "cannot find ABC in zip file"),
+		})},
+		{"select v from Customer where Type(v) = \"Customer\" and Hour(v.InvoiceDate, \"ABC\") = 2015", oneOf([]interface{} {
+			// Go1.4
+			syncql.NewErrLocationConversionError(db.GetContext(), 74, errors.New("unknown time zone ABC")),
+			// Go1.5
+			newVErrorContaining(syncql.ErrLocationConversionError.ID, "cannot find ABC in zip file"),
+		})},
+		{"select v from Customer where Type(v) = \"Customer\" and Minute(v.InvoiceDate, \"ABC\") = 2015", oneOf([]interface{} {
+			// Go1.4
+			syncql.NewErrLocationConversionError(db.GetContext(), 76, errors.New("unknown time zone ABC")),
+			// Go1.5
+			newVErrorContaining(syncql.ErrLocationConversionError.ID, "cannot find ABC in zip file"),
+		})},
+		{"select v from Customer where Type(v) = \"Customer\" and Second(v.InvoiceDate, \"ABC\") = 2015", oneOf([]interface{} {
+			// Go1.4
+			syncql.NewErrLocationConversionError(db.GetContext(), 76, errors.New("unknown time zone ABC")),
+			// Go1.5
+			newVErrorContaining(syncql.ErrLocationConversionError.ID, "cannot find ABC in zip file"),
+		})},
 		{"select v from Customer where Type(v) = \"Customer\" and Now(v.InvoiceDate, \"ABC\") = 2015", syncql.NewErrFunctionArgCount(db.GetContext(), 54, "Now", 0, 2)},
 		{"select v from Customer where Type(v) = \"Customer\" and Lowercase(v.Name, 2) = \"smith\"", syncql.NewErrFunctionArgCount(db.GetContext(), 54, "Lowercase", 1, 2)},
 		{"select v from Customer where Type(v) = \"Customer\" and Uppercase(v.Name, 2) = \"SMITH\"", syncql.NewErrFunctionArgCount(db.GetContext(), 54, "Uppercase", 1, 2)},
 		{"select Time() from Customer", syncql.NewErrFunctionArgCount(db.GetContext(), 7, "Time", 2, 0)},
-		{"select Year(v.InvoiceDate, \"Foo\") from Customer where Type(v) = \"Invoice\"", syncql.NewErrLocationConversionError(db.GetContext(), 27, errors.New("unknown time zone Foo"))},
+		{"select Year(v.InvoiceDate, \"Foo\") from Customer where Type(v) = \"Invoice\"", oneOf([]interface{}{
+			// Go1.4
+			syncql.NewErrLocationConversionError(db.GetContext(), 27, errors.New("unknown time zone Foo")),
+			// Go1.5
+			newVErrorContaining(syncql.ErrLocationConversionError.ID, "cannot find Foo in zip file"),
+		})},
 		{"select K from Customer where Type(v) = \"Invoice\"", syncql.NewErrDidYouMeanLowercaseK(db.GetContext(), 7)},
 		{"select V from Customer where Type(v) = \"Invoice\"", syncql.NewErrDidYouMeanLowercaseV(db.GetContext(), 7)},
 		{"select k from Customer where K = \"001\"", syncql.NewErrDidYouMeanLowercaseK(db.GetContext(), 29)},
@@ -457,8 +546,15 @@ func TestQueryCheckerErrors(t *testing.T) {
 		} else {
 			err := query_checker.Check(&db, s)
 			// Test both that the IDs compare and the text compares (since the offset needs to match).
-			if verror.ErrorID(err) != verror.ErrorID(test.err) || err.Error() != test.err.Error() {
-				t.Errorf("query: %s; got %v, want %v", test.query, err, test.err)
+			switch e := test.err.(type) {
+			case error:
+				if verror.ErrorID(err) != verror.ErrorID(e) || err.Error() != e.Error() {
+					t.Errorf("query: %s; got %v, want %v", test.query, err, test.err)
+				}
+			case oneOf:
+				if !e.matches(err) {
+					t.Errorf("query: %s; got %v, want one of %s", test.query, err, e)
+				}
 			}
 		}
 	}
