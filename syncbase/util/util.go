@@ -64,6 +64,12 @@ func PrefixRangeLimit(p string) string {
 	return string(x)
 }
 
+// IsPrefix returns true if start and limit strings together represent a prefix
+// range. If true, start represents the prefix.
+func IsPrefix(start string, limit string) bool {
+	return PrefixRangeLimit(start) == limit
+}
+
 // AccessController provides access control for various syncbase objects.
 type AccessController interface {
 	// SetPermissions replaces the current Permissions for an object.

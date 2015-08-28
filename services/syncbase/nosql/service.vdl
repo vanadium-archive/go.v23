@@ -73,6 +73,10 @@ type Database interface {
 	// SchemaManager implements the API for managing schema metadata attached
 	// to a Database.
 	SchemaManager
+
+	// ConflictManager implements the API for registering resolvers, receiving
+	// conflicts and sending resolutions.
+	ConflictManager
 }
 
 // Table represents a collection of Rows.
@@ -232,6 +236,30 @@ type SchemaManager interface {
 	//
 	// Requires: Client must have at least Write access on the Database.
 	SetSchemaMetadata(metadata SchemaMetadata) error {access.Write}
+}
+
+// ConflictManager interface provides all the methods necessary to handle
+// conflict resolution for a given database.
+type ConflictManager interface {
+	// StartConflictResolver registers a resolver for the database that is
+	// associated with this ConflictManager and creates a stream to receive
+	// conflicts and send resolutions.
+	// Batches of ConflictInfos will be sent over with the Continued field
+	// within the ConflictInfo representing the batch boundary. Client must
+	// respond with a batch of ResolutionInfos in the same fashion.
+	// A key is under conflict if two different values were written to it
+	// concurrently (in logical time), i.e. neither value is an ancestor of the
+	// other in the history graph.
+	// A key under conflict can be a part of a batch committed on local or
+	// remote or both syncbases. ConflictInfos for all keys in these two batches
+	// are grouped together. These keys may themselves be under conflict; the
+	// presented batch is a transitive closure of all batches containing keys
+	// under conflict.
+	// For example, for local batch {key1, key2} and remote batch {key1, key3},
+	// the batch sent for conflict resolution will be {key1, key2, key3}.
+	// If there was another concurrent batch {key2, key4}, then the batch sent
+	// for conflict resolution will be {key1, key2, key3, key4}.
+	StartConflictResolver() stream<ResolutionInfo, ConflictInfo> error {access.Write}
 }
 
 // BlobManager is the interface for blob operations.

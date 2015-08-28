@@ -111,6 +111,158 @@ type ResolverType enum {
 	Defer
 }
 
+// ConflictInfo contains information to fully specify a conflict
+// for a key, providing the (local, remote, ancestor) tuple.
+// A key under conflict can be a part of a batch in local, remote or both
+// updates. Since the batches can have more than one key, all ConflictInfos
+// for the keys within the batches are grouped together into a single conflict
+// batch and sent as a stream with the Continued field representing conflict
+// batch boundaries.
+type ConflictInfo struct {
+	// Data is a unit chunk of ConflictInfo which can be sent over the conflict
+	// stream.
+	Data ConflictData
+
+	// Continued represents whether the batch of ConflictInfos has ended.
+	Continued bool
+}
+
+// ConflictData represents a unit of conflict data sent over the stream. It
+// can either contain information about a Batch or about an operation done
+// on a row.
+type ConflictData union {
+	Batch BatchInfo
+	Row RowInfo
+}
+
+type BatchInfo struct {
+	// Id is an identifier for a batch contained in a conflict. It is
+	// unique only in the context of a given conflict. Its purpose is solely to
+	// group one or more RowInfo objects together to represent a batch that
+	// was committed by the client.
+	Id uint16
+
+	// Hint is the hint provided by the client when this batch was committed.
+	Hint string
+
+	// Source states where the batch comes from.
+	Source BatchSource
+}
+
+// BatchSource represents where the batch was committed.
+type BatchSource enum {
+	// Local represents that the batch was committed on local syncbase.
+	Local
+
+	// Remote represents that the batch was committed on remote syncbase.
+	Remote
+}
+
+// RowInfo contains a single operation performed on a row (in case of read or
+// write) or a range or rows (in case of scan) along with a mapping to each
+// of the batches that this operation belongs to.
+// For example, if Row1 was updated on local syncbase conflicting with a write
+// on remote syncbase as part of two separate batches, then it will be
+// represented by a single RowInfo with Write Operation containing the
+// respective local and remote values along with the batch id for both batches
+// stored in the BatchIds field.
+type RowInfo struct {
+	// Op is a specific operation represented by RowInfo
+	Op Operation
+	// BatchIds contains ids of all batches that this RowInfo is a part of.
+	BatchIds []uint16
+}
+
+// Operation represents a specific operation on a row or a set of rows that is
+// a part of the conflict.
+type Operation union {
+	// Read represents a read operation performed on a specific row. For a given
+	// row key there can only be at max one Read operation within a conflict.
+	Read  RowOp
+
+	// Write represents a write operation performed on a specific row. For a
+	// given row key there can only be at max one Write operation within a
+	// conflict.
+	Write RowOp
+
+	// Scan represents a scan operation performed over a specific range of keys.
+	// For a given key range there can be at max one ScanOp within the Conflict.
+	Scan  ScanOp
+}
+
+// RowOp represents a read or write operation on a row corresponding to the
+// given key.
+type RowOp struct {
+	// The key under conflict.
+	Key string
+
+	// LocalValue contains the value read or written by local syncbase or nil.
+	LocalValue ?Value
+
+	// RemoteValue contains the value read or written by remote syncbase or nil.
+	RemoteValue ?Value
+
+	// AncestorValue contains the value for the key which is the lowest common
+	// ancestor of the two values represented by LocalValue and RemoteValue or
+	// nil if no ancestor exists or if the operation was read.
+	AncestorValue ?Value
+}
+
+// ScanOp provides details of a scan operation.
+type ScanOp struct {
+	// Start contains the starting key for a range scan.
+	Start string
+
+	// Limit contains the end key for a range scan.
+	Limit string
+}
+
+// Value contains the encoded bytes for a row's value stored in syncbase.
+type Value struct {
+	// VOM encoded bytes for a row's value
+	Bytes []byte
+
+	// Write timestamp for this value in nanoseconds.
+	// TODO(jlodhia): change the timestamp to vdl.time here, in commit timestamp
+	// and clock data.
+	WriteTs int64
+}
+
+// ValueSelection represents the value that was selected as the final resolution
+// for a conflict.
+type ValueSelection enum {
+	// Local should be used if local value is picked as the final result.
+	Local
+
+	// Remote should be used if remote value is picked as the final result.
+	Remote
+
+	// Other should be used if a new value different from local and remote is
+	// used as the final result.
+	Other
+}
+
+// ResolutionInfo contains the application’s reply to a conflict for a key,
+// providing the resolution value. The resolution may be over a group of keys
+// in which case the application must send a stream of ResolutionInfos with
+// the Continued field for the last ResolutionInfo representing the end of the
+// batch with a value false. ResolutionInfos sent as part of a batch will be
+// committed as a batch. If the commit fails, the Conflict will be re-sent.
+type ResolutionInfo struct {
+	// Key is the key under conflict.
+	Key	string
+
+	// Selection represents the value that was selected as resolution.
+	Selection ValueSelection
+
+	// Result is the resolved value for the key. This field should be used only
+	// if value of Selection field is 'Other'
+	Result ?Value
+
+	// Continued represents whether the batch of ResolutionInfos has ended.
+	Continued bool
+}
+
 // SchemaMetadata maintains metadata related to the schema of a given database.
 // There is one SchemaMetadata per database.
 type SchemaMetadata struct {

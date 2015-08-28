@@ -21,14 +21,12 @@ func NewSchema(metadata wire.SchemaMetadata, upgrader SchemaUpgrader) *Schema {
 // Implementation of SchemaManager (Not part of public client API)
 
 type schemaManagerImpl struct {
-	dbName string
-	c      wire.DatabaseClientMethods
+	c wire.DatabaseClientMethods
 }
 
-func newSchemaManager(dbName string) schemaManagerImpl {
+func newSchemaManager(client wire.DatabaseClientMethods) schemaManagerImpl {
 	return schemaManagerImpl{
-		dbName: dbName,
-		c:      wire.DatabaseClient(dbName),
+		c: client,
 	}
 }
 

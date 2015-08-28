@@ -6,12 +6,15 @@
 package nosql
 
 import (
+	"time"
+
 	wire "v.io/syncbase/v23/services/syncbase/nosql"
 	"v.io/syncbase/v23/syncbase/util"
 	"v.io/v23/context"
 	"v.io/v23/security/access"
 	"v.io/v23/services/watch"
 	"v.io/v23/vdl"
+	"v.io/v23/verror"
 	"v.io/v23/vom"
 )
 
@@ -45,6 +48,10 @@ type DatabaseHandle interface {
 	// time of the RPC, and will not reflect subsequent writes to keys not yet
 	// reached by the stream.
 	Exec(ctx *context.T, query string) ([]string, ResultStream, error)
+
+	// Close cleans up any state associated with this client handle including
+	// shutting down any open conflict resolution stream.
+	Close()
 }
 
 // Database represents a collection of Tables. Batches, queries, sync, watch,
@@ -131,14 +138,15 @@ type Database interface {
 	// Blob returns a handle to the blob with the given BlobRef.
 	Blob(br wire.BlobRef) Blob
 
-	// This method compares the current schema version of the database with the
-	// schema version provided while creating this database handle. If the
-	// current database schema version is lower, then the SchemaUpdater is
+	// EnforceSchema compares the current schema version of the database
+	// with the schema version provided while creating this database handle. If
+	// the current database schema version is lower, then the SchemaUpdater is
 	// called. If SchemaUpdater is successful this method stores the new schema
 	// metadata in database.
-	// Note: schema can be nil, in which case this method skips schema check
-	// and the caller is responsible for maintaining schema sanity.
-	UpgradeIfOutdated(ctx *context.T) (bool, error)
+	// This method also registers a conflict resolver with syncbase to receive
+	// conflicts. Note: schema can be nil, in which case this method skips
+	// schema check and the caller is responsible for maintaining schema sanity.
+	EnforceSchema(ctx *context.T) error
 }
 
 // BatchDatabase is a handle to a set of reads and writes to the database that
@@ -550,4 +558,114 @@ type SchemaUpgrader interface {
 type Schema struct {
 	Metadata wire.SchemaMetadata
 	Upgrader SchemaUpgrader
+	Resolver ConflictResolver
+}
+
+// ConflictResolver interface allows the App to define resolution of conflicts
+// that it requested to handle.
+type ConflictResolver interface {
+	OnConflict(ctx *context.T, conflict *Conflict) Resolution
+}
+
+// Conflict contains information to fully specify a conflict. Since syncbase
+// supports batches there can be one or more rows within the batch that has a
+// conflict. Each of these rows will be sent together as part of a single
+// conflict. Each row contains an Id of the batch to which it belongs,
+// enabling the client to group together rows that are part of a batch. Note
+// that a single row can be part of more than one batch.
+//
+// WriteSet contains rows that were written.
+// ReadSet contains rows that were read within a batch corresponding to a row
+// within the write set.
+// ScanSet contains scans performed within a batch corresponding to a row
+// within the write set.
+// Batches is a map of unique ids to BatchInfo objects. The id is unique only in
+// the context of a given conflict and is otherwise meaningless.
+type Conflict struct {
+	ReadSet       *ConflictRowSet
+	WriteSet      *ConflictRowSet
+	ScanSet       *ConflictScanSet
+	Batches       map[uint16]wire.BatchInfo
+}
+
+// ConflictRowSet contains a set of rows under conflict. It provides two different
+// ways to access the same set.
+// ByKey is a map of ConflictRows keyed by the row key.
+// ByBatch is a map of []ConflictRows keyed by batch id. This map lets the client
+// access all ConflictRows within this set that contain a given hint.
+type ConflictRowSet struct {
+	ByKey  map[string]ConflictRow
+	ByBatch map[uint16][]ConflictRow
+}
+
+// ConflictScanSet contains a set of scans under conflict.
+// ByBatch is a map of array of ScanOps keyed by batch id.
+type ConflictScanSet struct {
+	ByBatch map[uint16][]wire.ScanOp
+}
+
+// ConflictRow represents a row under conflict.
+// Key is the key for the row.
+// LocalValue is the value present in the local db.
+// RemoteValue is the value received via sync.
+// AncestorValue is the value for the key which is the lowest common
+// ancestor of the two values represented by LocalValue and RemoteValue.
+// AncestorValue is nil if the ConflictRow is a part of the read set.
+// BatchIds is a list of ids of all the batches that this row belongs to.
+type ConflictRow struct {
+	Key           string
+	LocalValue    *Value
+	RemoteValue   *Value
+	AncestorValue *Value
+	BatchIds      []uint16
+}
+
+// Resolution contains the application’s reply to a conflict. It must contain a
+// resolved value for each conflict row within the WriteSet of the given
+// conflict.
+// ResultSet is a map of row key to ResolvedRow.
+type Resolution struct {
+	ResultSet map[string]ResolvedRow
+	// TODO(jlodhia): Hint []string
+}
+
+// ResolvedRow represents a result of resolution of a row under conflict.
+// Key is the key for the row.
+// Selection represents the value that was selected for resolution.
+// Value is the resolved value for the key. This field should be used only
+// if value of Selection field is 'Other'.
+type ResolvedRow struct {
+	Key    string
+	Result *Value
+}
+
+// Value contains a specific version of data for the row under conflict along
+// with the write timestamp and hints associated with the version.
+// WriteTs is the write timestamp for this value.
+type Value struct {
+	val       []byte
+	WriteTs   time.Time
+	selection wire.ValueSelection
+}
+
+// Get takes a reference to an instance of a type that is expected to be
+// represented by Value.
+func (v *Value) Get(value interface{}) error {
+	return vom.Decode(v.val, value)
+}
+
+// NewValue creates a new Value to be added to Resolution.
+func NewValue(ctx *context.T, data interface{}) (*Value, error) {
+	if data == nil {
+		return nil, verror.New(verror.ErrBadArg, ctx, "data cannot be nil")
+	}
+	bytes, err := vom.Encode(data)
+	if err != nil {
+		return nil, err
+	}
+	return &Value{
+		val:       bytes,
+		WriteTs:   time.Now(),  // ignored by syncbase
+		selection: wire.ValueSelectionOther,
+	}, nil
 }

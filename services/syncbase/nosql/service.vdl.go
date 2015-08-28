@@ -1452,6 +1452,356 @@ var descSchemaManager = rpc.InterfaceDesc{
 	},
 }
 
+// ConflictManagerClientMethods is the client interface
+// containing ConflictManager methods.
+//
+// ConflictManager interface provides all the methods necessary to handle
+// conflict resolution for a given database.
+type ConflictManagerClientMethods interface {
+	// StartConflictResolver registers a resolver for the database that is
+	// associated with this ConflictManager and creates a stream to receive
+	// conflicts and send resolutions.
+	// Batches of ConflictInfos will be sent over with the Continued field
+	// within the ConflictInfo representing the batch boundary. Client must
+	// respond with a batch of ResolutionInfos in the same fashion.
+	// A key is under conflict if two different values were written to it
+	// concurrently (in logical time), i.e. neither value is an ancestor of the
+	// other in the history graph.
+	// A key under conflict can be a part of a batch committed on local or
+	// remote or both syncbases. ConflictInfos for all keys in these two batches
+	// are grouped together. These keys may themselves be under conflict; the
+	// presented batch is a transitive closure of all batches containing keys
+	// under conflict.
+	// For example, for local batch {key1, key2} and remote batch {key1, key3},
+	// the batch sent for conflict resolution will be {key1, key2, key3}.
+	// If there was another concurrent batch {key2, key4}, then the batch sent
+	// for conflict resolution will be {key1, key2, key3, key4}.
+	StartConflictResolver(*context.T, ...rpc.CallOpt) (ConflictManagerStartConflictResolverClientCall, error)
+}
+
+// ConflictManagerClientStub adds universal methods to ConflictManagerClientMethods.
+type ConflictManagerClientStub interface {
+	ConflictManagerClientMethods
+	rpc.UniversalServiceMethods
+}
+
+// ConflictManagerClient returns a client stub for ConflictManager.
+func ConflictManagerClient(name string) ConflictManagerClientStub {
+	return implConflictManagerClientStub{name}
+}
+
+type implConflictManagerClientStub struct {
+	name string
+}
+
+func (c implConflictManagerClientStub) StartConflictResolver(ctx *context.T, opts ...rpc.CallOpt) (ocall ConflictManagerStartConflictResolverClientCall, err error) {
+	var call rpc.ClientCall
+	if call, err = v23.GetClient(ctx).StartCall(ctx, c.name, "StartConflictResolver", nil, opts...); err != nil {
+		return
+	}
+	ocall = &implConflictManagerStartConflictResolverClientCall{ClientCall: call}
+	return
+}
+
+// ConflictManagerStartConflictResolverClientStream is the client stream for ConflictManager.StartConflictResolver.
+type ConflictManagerStartConflictResolverClientStream interface {
+	// RecvStream returns the receiver side of the ConflictManager.StartConflictResolver client stream.
+	RecvStream() interface {
+		// Advance stages an item so that it may be retrieved via Value.  Returns
+		// true iff there is an item to retrieve.  Advance must be called before
+		// Value is called.  May block if an item is not available.
+		Advance() bool
+		// Value returns the item that was staged by Advance.  May panic if Advance
+		// returned false or was not called.  Never blocks.
+		Value() ConflictInfo
+		// Err returns any error encountered by Advance.  Never blocks.
+		Err() error
+	}
+	// SendStream returns the send side of the ConflictManager.StartConflictResolver client stream.
+	SendStream() interface {
+		// Send places the item onto the output stream.  Returns errors
+		// encountered while sending, or if Send is called after Close or
+		// the stream has been canceled.  Blocks if there is no buffer
+		// space; will unblock when buffer space is available or after
+		// the stream has been canceled.
+		Send(item ResolutionInfo) error
+		// Close indicates to the server that no more items will be sent;
+		// server Recv calls will receive io.EOF after all sent items.
+		// This is an optional call - e.g. a client might call Close if it
+		// needs to continue receiving items from the server after it's
+		// done sending.  Returns errors encountered while closing, or if
+		// Close is called after the stream has been canceled.  Like Send,
+		// blocks if there is no buffer space available.
+		Close() error
+	}
+}
+
+// ConflictManagerStartConflictResolverClientCall represents the call returned from ConflictManager.StartConflictResolver.
+type ConflictManagerStartConflictResolverClientCall interface {
+	ConflictManagerStartConflictResolverClientStream
+	// Finish performs the equivalent of SendStream().Close, then blocks until
+	// the server is done, and returns the positional return values for the call.
+	//
+	// Finish returns immediately if the call has been canceled; depending on the
+	// timing the output could either be an error signaling cancelation, or the
+	// valid positional return values from the server.
+	//
+	// Calling Finish is mandatory for releasing stream resources, unless the call
+	// has been canceled or any of the other methods return an error.  Finish should
+	// be called at most once.
+	Finish() error
+}
+
+type implConflictManagerStartConflictResolverClientCall struct {
+	rpc.ClientCall
+	valRecv ConflictInfo
+	errRecv error
+}
+
+func (c *implConflictManagerStartConflictResolverClientCall) RecvStream() interface {
+	Advance() bool
+	Value() ConflictInfo
+	Err() error
+} {
+	return implConflictManagerStartConflictResolverClientCallRecv{c}
+}
+
+type implConflictManagerStartConflictResolverClientCallRecv struct {
+	c *implConflictManagerStartConflictResolverClientCall
+}
+
+func (c implConflictManagerStartConflictResolverClientCallRecv) Advance() bool {
+	c.c.valRecv = ConflictInfo{}
+	c.c.errRecv = c.c.Recv(&c.c.valRecv)
+	return c.c.errRecv == nil
+}
+func (c implConflictManagerStartConflictResolverClientCallRecv) Value() ConflictInfo {
+	return c.c.valRecv
+}
+func (c implConflictManagerStartConflictResolverClientCallRecv) Err() error {
+	if c.c.errRecv == io.EOF {
+		return nil
+	}
+	return c.c.errRecv
+}
+func (c *implConflictManagerStartConflictResolverClientCall) SendStream() interface {
+	Send(item ResolutionInfo) error
+	Close() error
+} {
+	return implConflictManagerStartConflictResolverClientCallSend{c}
+}
+
+type implConflictManagerStartConflictResolverClientCallSend struct {
+	c *implConflictManagerStartConflictResolverClientCall
+}
+
+func (c implConflictManagerStartConflictResolverClientCallSend) Send(item ResolutionInfo) error {
+	return c.c.Send(item)
+}
+func (c implConflictManagerStartConflictResolverClientCallSend) Close() error {
+	return c.c.CloseSend()
+}
+func (c *implConflictManagerStartConflictResolverClientCall) Finish() (err error) {
+	err = c.ClientCall.Finish()
+	return
+}
+
+// ConflictManagerServerMethods is the interface a server writer
+// implements for ConflictManager.
+//
+// ConflictManager interface provides all the methods necessary to handle
+// conflict resolution for a given database.
+type ConflictManagerServerMethods interface {
+	// StartConflictResolver registers a resolver for the database that is
+	// associated with this ConflictManager and creates a stream to receive
+	// conflicts and send resolutions.
+	// Batches of ConflictInfos will be sent over with the Continued field
+	// within the ConflictInfo representing the batch boundary. Client must
+	// respond with a batch of ResolutionInfos in the same fashion.
+	// A key is under conflict if two different values were written to it
+	// concurrently (in logical time), i.e. neither value is an ancestor of the
+	// other in the history graph.
+	// A key under conflict can be a part of a batch committed on local or
+	// remote or both syncbases. ConflictInfos for all keys in these two batches
+	// are grouped together. These keys may themselves be under conflict; the
+	// presented batch is a transitive closure of all batches containing keys
+	// under conflict.
+	// For example, for local batch {key1, key2} and remote batch {key1, key3},
+	// the batch sent for conflict resolution will be {key1, key2, key3}.
+	// If there was another concurrent batch {key2, key4}, then the batch sent
+	// for conflict resolution will be {key1, key2, key3, key4}.
+	StartConflictResolver(*context.T, ConflictManagerStartConflictResolverServerCall) error
+}
+
+// ConflictManagerServerStubMethods is the server interface containing
+// ConflictManager methods, as expected by rpc.Server.
+// The only difference between this interface and ConflictManagerServerMethods
+// is the streaming methods.
+type ConflictManagerServerStubMethods interface {
+	// StartConflictResolver registers a resolver for the database that is
+	// associated with this ConflictManager and creates a stream to receive
+	// conflicts and send resolutions.
+	// Batches of ConflictInfos will be sent over with the Continued field
+	// within the ConflictInfo representing the batch boundary. Client must
+	// respond with a batch of ResolutionInfos in the same fashion.
+	// A key is under conflict if two different values were written to it
+	// concurrently (in logical time), i.e. neither value is an ancestor of the
+	// other in the history graph.
+	// A key under conflict can be a part of a batch committed on local or
+	// remote or both syncbases. ConflictInfos for all keys in these two batches
+	// are grouped together. These keys may themselves be under conflict; the
+	// presented batch is a transitive closure of all batches containing keys
+	// under conflict.
+	// For example, for local batch {key1, key2} and remote batch {key1, key3},
+	// the batch sent for conflict resolution will be {key1, key2, key3}.
+	// If there was another concurrent batch {key2, key4}, then the batch sent
+	// for conflict resolution will be {key1, key2, key3, key4}.
+	StartConflictResolver(*context.T, *ConflictManagerStartConflictResolverServerCallStub) error
+}
+
+// ConflictManagerServerStub adds universal methods to ConflictManagerServerStubMethods.
+type ConflictManagerServerStub interface {
+	ConflictManagerServerStubMethods
+	// Describe the ConflictManager interfaces.
+	Describe__() []rpc.InterfaceDesc
+}
+
+// ConflictManagerServer returns a server stub for ConflictManager.
+// It converts an implementation of ConflictManagerServerMethods into
+// an object that may be used by rpc.Server.
+func ConflictManagerServer(impl ConflictManagerServerMethods) ConflictManagerServerStub {
+	stub := implConflictManagerServerStub{
+		impl: impl,
+	}
+	// Initialize GlobState; always check the stub itself first, to handle the
+	// case where the user has the Glob method defined in their VDL source.
+	if gs := rpc.NewGlobState(stub); gs != nil {
+		stub.gs = gs
+	} else if gs := rpc.NewGlobState(impl); gs != nil {
+		stub.gs = gs
+	}
+	return stub
+}
+
+type implConflictManagerServerStub struct {
+	impl ConflictManagerServerMethods
+	gs   *rpc.GlobState
+}
+
+func (s implConflictManagerServerStub) StartConflictResolver(ctx *context.T, call *ConflictManagerStartConflictResolverServerCallStub) error {
+	return s.impl.StartConflictResolver(ctx, call)
+}
+
+func (s implConflictManagerServerStub) Globber() *rpc.GlobState {
+	return s.gs
+}
+
+func (s implConflictManagerServerStub) Describe__() []rpc.InterfaceDesc {
+	return []rpc.InterfaceDesc{ConflictManagerDesc}
+}
+
+// ConflictManagerDesc describes the ConflictManager interface.
+var ConflictManagerDesc rpc.InterfaceDesc = descConflictManager
+
+// descConflictManager hides the desc to keep godoc clean.
+var descConflictManager = rpc.InterfaceDesc{
+	Name:    "ConflictManager",
+	PkgPath: "v.io/syncbase/v23/services/syncbase/nosql",
+	Doc:     "// ConflictManager interface provides all the methods necessary to handle\n// conflict resolution for a given database.",
+	Methods: []rpc.MethodDesc{
+		{
+			Name: "StartConflictResolver",
+			Doc:  "// StartConflictResolver registers a resolver for the database that is\n// associated with this ConflictManager and creates a stream to receive\n// conflicts and send resolutions.\n// Batches of ConflictInfos will be sent over with the Continued field\n// within the ConflictInfo representing the batch boundary. Client must\n// respond with a batch of ResolutionInfos in the same fashion.\n// A key is under conflict if two different values were written to it\n// concurrently (in logical time), i.e. neither value is an ancestor of the\n// other in the history graph.\n// A key under conflict can be a part of a batch committed on local or\n// remote or both syncbases. ConflictInfos for all keys in these two batches\n// are grouped together. These keys may themselves be under conflict; the\n// presented batch is a transitive closure of all batches containing keys\n// under conflict.\n// For example, for local batch {key1, key2} and remote batch {key1, key3},\n// the batch sent for conflict resolution will be {key1, key2, key3}.\n// If there was another concurrent batch {key2, key4}, then the batch sent\n// for conflict resolution will be {key1, key2, key3, key4}.",
+			Tags: []*vdl.Value{vdl.ValueOf(access.Tag("Write"))},
+		},
+	},
+}
+
+// ConflictManagerStartConflictResolverServerStream is the server stream for ConflictManager.StartConflictResolver.
+type ConflictManagerStartConflictResolverServerStream interface {
+	// RecvStream returns the receiver side of the ConflictManager.StartConflictResolver server stream.
+	RecvStream() interface {
+		// Advance stages an item so that it may be retrieved via Value.  Returns
+		// true iff there is an item to retrieve.  Advance must be called before
+		// Value is called.  May block if an item is not available.
+		Advance() bool
+		// Value returns the item that was staged by Advance.  May panic if Advance
+		// returned false or was not called.  Never blocks.
+		Value() ResolutionInfo
+		// Err returns any error encountered by Advance.  Never blocks.
+		Err() error
+	}
+	// SendStream returns the send side of the ConflictManager.StartConflictResolver server stream.
+	SendStream() interface {
+		// Send places the item onto the output stream.  Returns errors encountered
+		// while sending.  Blocks if there is no buffer space; will unblock when
+		// buffer space is available.
+		Send(item ConflictInfo) error
+	}
+}
+
+// ConflictManagerStartConflictResolverServerCall represents the context passed to ConflictManager.StartConflictResolver.
+type ConflictManagerStartConflictResolverServerCall interface {
+	rpc.ServerCall
+	ConflictManagerStartConflictResolverServerStream
+}
+
+// ConflictManagerStartConflictResolverServerCallStub is a wrapper that converts rpc.StreamServerCall into
+// a typesafe stub that implements ConflictManagerStartConflictResolverServerCall.
+type ConflictManagerStartConflictResolverServerCallStub struct {
+	rpc.StreamServerCall
+	valRecv ResolutionInfo
+	errRecv error
+}
+
+// Init initializes ConflictManagerStartConflictResolverServerCallStub from rpc.StreamServerCall.
+func (s *ConflictManagerStartConflictResolverServerCallStub) Init(call rpc.StreamServerCall) {
+	s.StreamServerCall = call
+}
+
+// RecvStream returns the receiver side of the ConflictManager.StartConflictResolver server stream.
+func (s *ConflictManagerStartConflictResolverServerCallStub) RecvStream() interface {
+	Advance() bool
+	Value() ResolutionInfo
+	Err() error
+} {
+	return implConflictManagerStartConflictResolverServerCallRecv{s}
+}
+
+type implConflictManagerStartConflictResolverServerCallRecv struct {
+	s *ConflictManagerStartConflictResolverServerCallStub
+}
+
+func (s implConflictManagerStartConflictResolverServerCallRecv) Advance() bool {
+	s.s.valRecv = ResolutionInfo{}
+	s.s.errRecv = s.s.Recv(&s.s.valRecv)
+	return s.s.errRecv == nil
+}
+func (s implConflictManagerStartConflictResolverServerCallRecv) Value() ResolutionInfo {
+	return s.s.valRecv
+}
+func (s implConflictManagerStartConflictResolverServerCallRecv) Err() error {
+	if s.s.errRecv == io.EOF {
+		return nil
+	}
+	return s.s.errRecv
+}
+
+// SendStream returns the send side of the ConflictManager.StartConflictResolver server stream.
+func (s *ConflictManagerStartConflictResolverServerCallStub) SendStream() interface {
+	Send(item ConflictInfo) error
+} {
+	return implConflictManagerStartConflictResolverServerCallSend{s}
+}
+
+type implConflictManagerStartConflictResolverServerCallSend struct {
+	s *ConflictManagerStartConflictResolverServerCallStub
+}
+
+func (s implConflictManagerStartConflictResolverServerCallSend) Send(item ConflictInfo) error {
+	return s.s.Send(item)
+}
+
 // DatabaseClientMethods is the client interface
 // containing Database methods.
 //
@@ -1539,6 +1889,9 @@ type DatabaseClientMethods interface {
 	// SchemaManager implements the API for managing schema metadata attached
 	// to a Database.
 	SchemaManagerClientMethods
+	// ConflictManager interface provides all the methods necessary to handle
+	// conflict resolution for a given database.
+	ConflictManagerClientMethods
 	// Create creates this Database.
 	// If perms is nil, we inherit (copy) the App perms.
 	// Create requires the caller to have Write permission at the App.
@@ -1579,7 +1932,7 @@ type DatabaseClientStub interface {
 
 // DatabaseClient returns a client stub for Database.
 func DatabaseClient(name string) DatabaseClientStub {
-	return implDatabaseClientStub{name, permissions.ObjectClient(name), DatabaseWatcherClient(name), SyncGroupManagerClient(name), BlobManagerClient(name), SchemaManagerClient(name)}
+	return implDatabaseClientStub{name, permissions.ObjectClient(name), DatabaseWatcherClient(name), SyncGroupManagerClient(name), BlobManagerClient(name), SchemaManagerClient(name), ConflictManagerClient(name)}
 }
 
 type implDatabaseClientStub struct {
@@ -1590,6 +1943,7 @@ type implDatabaseClientStub struct {
 	SyncGroupManagerClientStub
 	BlobManagerClientStub
 	SchemaManagerClientStub
+	ConflictManagerClientStub
 }
 
 func (c implDatabaseClientStub) Create(ctx *context.T, i0 *SchemaMetadata, i1 access.Permissions, opts ...rpc.CallOpt) (err error) {
@@ -1786,6 +2140,9 @@ type DatabaseServerMethods interface {
 	// SchemaManager implements the API for managing schema metadata attached
 	// to a Database.
 	SchemaManagerServerMethods
+	// ConflictManager interface provides all the methods necessary to handle
+	// conflict resolution for a given database.
+	ConflictManagerServerMethods
 	// Create creates this Database.
 	// If perms is nil, we inherit (copy) the App perms.
 	// Create requires the caller to have Write permission at the App.
@@ -1899,6 +2256,9 @@ type DatabaseServerStubMethods interface {
 	// SchemaManager implements the API for managing schema metadata attached
 	// to a Database.
 	SchemaManagerServerStubMethods
+	// ConflictManager interface provides all the methods necessary to handle
+	// conflict resolution for a given database.
+	ConflictManagerServerStubMethods
 	// Create creates this Database.
 	// If perms is nil, we inherit (copy) the App perms.
 	// Create requires the caller to have Write permission at the App.
@@ -1949,6 +2309,7 @@ func DatabaseServer(impl DatabaseServerMethods) DatabaseServerStub {
 		SyncGroupManagerServerStub: SyncGroupManagerServer(impl),
 		BlobManagerServerStub:      BlobManagerServer(impl),
 		SchemaManagerServerStub:    SchemaManagerServer(impl),
+		ConflictManagerServerStub:  ConflictManagerServer(impl),
 	}
 	// Initialize GlobState; always check the stub itself first, to handle the
 	// case where the user has the Glob method defined in their VDL source.
@@ -1967,6 +2328,7 @@ type implDatabaseServerStub struct {
 	SyncGroupManagerServerStub
 	BlobManagerServerStub
 	SchemaManagerServerStub
+	ConflictManagerServerStub
 	gs *rpc.GlobState
 }
 
@@ -2003,7 +2365,7 @@ func (s implDatabaseServerStub) Globber() *rpc.GlobState {
 }
 
 func (s implDatabaseServerStub) Describe__() []rpc.InterfaceDesc {
-	return []rpc.InterfaceDesc{DatabaseDesc, permissions.ObjectDesc, DatabaseWatcherDesc, watch.GlobWatcherDesc, SyncGroupManagerDesc, BlobManagerDesc, SchemaManagerDesc}
+	return []rpc.InterfaceDesc{DatabaseDesc, permissions.ObjectDesc, DatabaseWatcherDesc, watch.GlobWatcherDesc, SyncGroupManagerDesc, BlobManagerDesc, SchemaManagerDesc, ConflictManagerDesc}
 }
 
 // DatabaseDesc describes the Database interface.
@@ -2020,6 +2382,7 @@ var descDatabase = rpc.InterfaceDesc{
 		{"SyncGroupManager", "v.io/syncbase/v23/services/syncbase/nosql", "// SyncGroupManager is the interface for SyncGroup operations.\n// TODO(hpucha): Add blessings to create/join and add a refresh method."},
 		{"BlobManager", "v.io/syncbase/v23/services/syncbase/nosql", "// BlobManager is the interface for blob operations."},
 		{"SchemaManager", "v.io/syncbase/v23/services/syncbase/nosql", "// SchemaManager implements the API for managing schema metadata attached\n// to a Database."},
+		{"ConflictManager", "v.io/syncbase/v23/services/syncbase/nosql", "// ConflictManager interface provides all the methods necessary to handle\n// conflict resolution for a given database."},
 	},
 	Methods: []rpc.MethodDesc{
 		{
