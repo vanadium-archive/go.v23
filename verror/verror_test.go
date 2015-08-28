@@ -109,7 +109,13 @@ func TestSubordinateErrors(t *testing.T) {
 	if !strings.Contains(p2str, r2) {
 		t.Errorf("debug string missing error message: %q, %q", p2str, r2)
 	}
-	if !(strings.Contains(p2str, "verror_test.go:85") && strings.Contains(p2str, "verror_test.go:103")) {
+	if !strings.Contains(p2str, "verror_test.go:85") {
+		t.Errorf("debug string missing correct line #: %s", p2str)
+	}
+	// When Go1.4 generates stack traces, it reports the last line of the
+	// expression. Go1.5 reports the first line. We check for both so the
+	// test passes on either version.
+	if !strings.Contains(p2str, "verror_test.go:99") && !strings.Contains(p2str, "verror_test.go:103") {
 		t.Errorf("debug string missing correct line #: %s", p2str)
 	}
 	p3 := verror.AddSubErrs(p, nil, verror.SubErr{
@@ -156,13 +162,13 @@ func TestChained(t *testing.T) {
 		t.Fatalf("got %v, want %v", got, want)
 	}
 	lines := strings.Split(verror.Stack(l3).String(), "\n")
-	if got, want := lines[0], "verror_test.go:154"; !strings.Contains(got, want) {
+	if got, want := lines[0], "verror_test.go:160"; !strings.Contains(got, want) {
 		t.Fatalf("%q, doesn't contain %q", got, want)
 	}
-	if got, want := lines[4], "verror_test.go:150"; !strings.Contains(got, want) {
+	if got, want := lines[4], "verror_test.go:156"; !strings.Contains(got, want) {
 		t.Fatalf("%q, doesn't contain %q", got, want)
 	}
-	if got, want := lines[8], "verror_test.go:146"; !strings.Contains(got, want) {
+	if got, want := lines[8], "verror_test.go:152"; !strings.Contains(got, want) {
 		t.Fatalf("%q, doesn't contain %q", got, want)
 	}
 	for _, i := range []int{3, 7} {
