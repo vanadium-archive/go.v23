@@ -186,9 +186,17 @@ type Runtime interface {
 	// ExperimentalGetFlowManager returns the current flow.Manager attached to ctx.
 	ExperimentalGetFlowManager(ctx *context.T) flow.Manager
 
-	// ExperimentalWithNewFlowManager creates a new flow.Manager instaces and
+	// ExperimentalWithNewFlowManager creates a new flow.Manager instance and
 	// attaches it to ctx.
 	ExperimentalWithNewFlowManager(ctx *context.T) (*context.T, flow.Manager, error)
+
+	// XWithNewServer creates a new flow.Manager instance and attaches it to ctx,
+	// and creates a new server on that flow.Manager.
+	XWithNewServer(ctx *context.T, name string, object interface{}, auth security.Authorizer, opts ...rpc.ServerOpt) (*context.T, rpc.XServer, error)
+
+	// XWithNewDispatchingServer creates a new flow.Manager instance and attaches
+	// it to ctx, and creates a new server on that flow.Manager.
+	XWithNewDispatchingServer(ctx *context.T, name string, disp rpc.Dispatcher, opts ...rpc.ServerOpt) (*context.T, rpc.XServer, error)
 }
 
 // NewEndpoint returns an Endpoint by parsing the supplied endpoint
@@ -311,6 +319,18 @@ func ExperimentalGetFlowManager(ctx *context.T) flow.Manager {
 // attaches it to ctx.
 func ExperimentalWithNewFlowManager(ctx *context.T) (*context.T, flow.Manager, error) {
 	return initState.currentRuntime().ExperimentalWithNewFlowManager(ctx)
+}
+
+// XWithNewServer creates a new flow.Manager instance and attaches it to ctx,
+// and creates a new server on that flow.Manager.
+func XWithNewServer(ctx *context.T, name string, object interface{}, auth security.Authorizer, opts ...rpc.ServerOpt) (*context.T, rpc.XServer, error) {
+	return initState.currentRuntime().XWithNewServer(ctx, name, object, auth, opts...)
+}
+
+// XWithNewDispatchingServer creates a new flow.Manager instance and attaches it
+// to ctx, and creates a new server on that flow.Manager.
+func XWithNewDispatchingServer(ctx *context.T, name string, disp rpc.Dispatcher, opts ...rpc.ServerOpt) (*context.T, rpc.XServer, error) {
+	return initState.currentRuntime().XWithNewDispatchingServer(ctx, name, disp, opts...)
 }
 
 var initState = &initStateData{}

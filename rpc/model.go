@@ -138,6 +138,39 @@ func (l ListenSpec) Copy() ListenSpec {
 	return l
 }
 
+// XServer defines the interface for managing a server that receives RPC calls.
+//
+// TODO(toddw): This interface is experimental, and may change without notice.
+type XServer interface {
+	// AddName adds the specified name to the mount table for this server.
+	// AddName may be called multiple times.
+	AddName(name string) error
+
+	// RemoveName removes the specified name from the mount table.  RemoveName may
+	// be called multiple times.
+	RemoveName(name string)
+
+	// Status returns the current status of the server, see ServerStatus for
+	// details.
+	Status() ServerStatus
+
+	// WatchNetwork registers a channel over which NetworkChange's will be
+	// sent. The Server will not block sending data over this channel and hence
+	// change events may be lost if the caller doesn't ensure there is sufficient
+	// buffering in the channel.
+	WatchNetwork(ch chan<- NetworkChange)
+
+	// UnwatchNetwork unregisters a channel previously registered using
+	// WatchNetwork.
+	UnwatchNetwork(ch chan<- NetworkChange)
+
+	// Stop gracefully stops all services on this Server.  New calls are rejected,
+	// but any in-flight calls are allowed to complete.  All published mountpoints
+	// are unmounted.  This call waits for this process to complete, and returns
+	// once the server has been shut down.
+	Stop() error
+}
+
 // Server defines the interface for managing a collection of services.
 type Server interface {
 	// Listen creates a listening network endpoint for the Server
