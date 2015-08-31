@@ -1882,7 +1882,7 @@ func TestQueryExec(t *testing.T) {
 			"select Split(Type(v), \".\") from Customer where k = \"001\"",
 			[]string{"Split"},
 			[][]*vdl.Value{
-				[]*vdl.Value{vdl.ValueOf([]string{"v", "io/syncbase/v23/syncbase/nosql/internal/query/test", "Customer"})},
+				[]*vdl.Value{vdl.ValueOf([]string{"v", "io/v23/syncbase/nosql/internal/query/test", "Customer"})},
 			},
 		},
 		{
@@ -1890,7 +1890,7 @@ func TestQueryExec(t *testing.T) {
 			"select Split(Type(v), \"/\") from Customer where k = \"001\"",
 			[]string{"Split"},
 			[][]*vdl.Value{
-				[]*vdl.Value{vdl.ValueOf([]string{"v.io", "syncbase", "v23", "syncbase", "nosql", "internal", "query", "test.Customer"})},
+				[]*vdl.Value{vdl.ValueOf([]string{"v.io", "v23", "syncbase", "nosql", "internal", "query", "test.Customer"})},
 			},
 		},
 		{
@@ -1898,7 +1898,7 @@ func TestQueryExec(t *testing.T) {
 			"select Len(Split(Type(v), \"/\")) from Customer where k = \"001\"",
 			[]string{"Len"},
 			[][]*vdl.Value{
-				[]*vdl.Value{vdl.ValueOf(int64(8))},
+				[]*vdl.Value{vdl.ValueOf(int64(7))},
 			},
 		},
 		{
