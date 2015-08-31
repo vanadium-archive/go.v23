@@ -26,7 +26,7 @@ import (
 )
 
 var (
-	ErrInvalidName = verror.Register("v.io/syncbase/v23/services/syncbase.InvalidName", verror.NoRetry, "{1:}{2:} invalid name: {3}")
+	ErrInvalidName = verror.Register("v.io/v23/services/syncbase.InvalidName", verror.NoRetry, "{1:}{2:} invalid name: {3}")
 )
 
 func init() {
@@ -212,7 +212,7 @@ var ServiceDesc rpc.InterfaceDesc = descService
 // descService hides the desc to keep godoc clean.
 var descService = rpc.InterfaceDesc{
 	Name:    "Service",
-	PkgPath: "v.io/syncbase/v23/services/syncbase",
+	PkgPath: "v.io/v23/services/syncbase",
 	Doc:     "// Service represents a Vanadium Syncbase service.\n// Service.Glob operates over App names.",
 	Embeds: []rpc.EmbedDesc{
 		{"Object", "v.io/v23/services/permissions", "// Object provides access control for Vanadium objects.\n//\n// Vanadium services implementing dynamic access control would typically embed\n// this interface and tag additional methods defined by the service with one of\n// Admin, Read, Write, Resolve etc. For example, the VDL definition of the\n// object would be:\n//\n//   package mypackage\n//\n//   import \"v.io/v23/security/access\"\n//   import \"v.io/v23/services/permissions\"\n//\n//   type MyObject interface {\n//     permissions.Object\n//     MyRead() (string, error) {access.Read}\n//     MyWrite(string) error    {access.Write}\n//   }\n//\n// If the set of pre-defined tags is insufficient, services may define their\n// own tag type and annotate all methods with this new type.\n//\n// Instead of embedding this Object interface, define SetPermissions and\n// GetPermissions in their own interface. Authorization policies will typically\n// respect annotations of a single type. For example, the VDL definition of an\n// object would be:\n//\n//  package mypackage\n//\n//  import \"v.io/v23/security/access\"\n//\n//  type MyTag string\n//\n//  const (\n//    Blue = MyTag(\"Blue\")\n//    Red  = MyTag(\"Red\")\n//  )\n//\n//  type MyObject interface {\n//    MyMethod() (string, error) {Blue}\n//\n//    // Allow clients to change access via the access.Object interface:\n//    SetPermissions(perms access.Permissions, version string) error         {Red}\n//    GetPermissions() (perms access.Permissions, version string, err error) {Blue}\n//  }"},
@@ -440,7 +440,7 @@ var AppDesc rpc.InterfaceDesc = descApp
 // descApp hides the desc to keep godoc clean.
 var descApp = rpc.InterfaceDesc{
 	Name:    "App",
-	PkgPath: "v.io/syncbase/v23/services/syncbase",
+	PkgPath: "v.io/v23/services/syncbase",
 	Doc:     "// App represents the data for a specific app instance (possibly a combination\n// of user, device, and app).\n// App.Glob operates over Database names.",
 	Embeds: []rpc.EmbedDesc{
 		{"Object", "v.io/v23/services/permissions", "// Object provides access control for Vanadium objects.\n//\n// Vanadium services implementing dynamic access control would typically embed\n// this interface and tag additional methods defined by the service with one of\n// Admin, Read, Write, Resolve etc. For example, the VDL definition of the\n// object would be:\n//\n//   package mypackage\n//\n//   import \"v.io/v23/security/access\"\n//   import \"v.io/v23/services/permissions\"\n//\n//   type MyObject interface {\n//     permissions.Object\n//     MyRead() (string, error) {access.Read}\n//     MyWrite(string) error    {access.Write}\n//   }\n//\n// If the set of pre-defined tags is insufficient, services may define their\n// own tag type and annotate all methods with this new type.\n//\n// Instead of embedding this Object interface, define SetPermissions and\n// GetPermissions in their own interface. Authorization policies will typically\n// respect annotations of a single type. For example, the VDL definition of an\n// object would be:\n//\n//  package mypackage\n//\n//  import \"v.io/v23/security/access\"\n//\n//  type MyTag string\n//\n//  const (\n//    Blue = MyTag(\"Blue\")\n//    Red  = MyTag(\"Red\")\n//  )\n//\n//  type MyObject interface {\n//    MyMethod() (string, error) {Blue}\n//\n//    // Allow clients to change access via the access.Object interface:\n//    SetPermissions(perms access.Permissions, version string) error         {Red}\n//    GetPermissions() (perms access.Permissions, version string, err error) {Blue}\n//  }"},

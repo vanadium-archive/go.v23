@@ -36,7 +36,7 @@ type BatchOptions struct {
 }
 
 func (BatchOptions) __VDLReflect(struct {
-	Name string `vdl:"v.io/syncbase/v23/services/syncbase/nosql.BatchOptions"`
+	Name string `vdl:"v.io/v23/services/syncbase/nosql.BatchOptions"`
 }) {
 }
 
@@ -47,7 +47,7 @@ type PrefixPermissions struct {
 }
 
 func (PrefixPermissions) __VDLReflect(struct {
-	Name string `vdl:"v.io/syncbase/v23/services/syncbase/nosql.PrefixPermissions"`
+	Name string `vdl:"v.io/v23/services/syncbase/nosql.PrefixPermissions"`
 }) {
 }
 
@@ -58,7 +58,7 @@ type KeyValue struct {
 }
 
 func (KeyValue) __VDLReflect(struct {
-	Name string `vdl:"v.io/syncbase/v23/services/syncbase/nosql.KeyValue"`
+	Name string `vdl:"v.io/v23/services/syncbase/nosql.KeyValue"`
 }) {
 }
 
@@ -88,7 +88,7 @@ type SyncGroupSpec struct {
 }
 
 func (SyncGroupSpec) __VDLReflect(struct {
-	Name string `vdl:"v.io/syncbase/v23/services/syncbase/nosql.SyncGroupSpec"`
+	Name string `vdl:"v.io/v23/services/syncbase/nosql.SyncGroupSpec"`
 }) {
 }
 
@@ -98,7 +98,7 @@ type SyncGroupMemberInfo struct {
 }
 
 func (SyncGroupMemberInfo) __VDLReflect(struct {
-	Name string `vdl:"v.io/syncbase/v23/services/syncbase/nosql.SyncGroupMemberInfo"`
+	Name string `vdl:"v.io/v23/services/syncbase/nosql.SyncGroupMemberInfo"`
 }) {
 }
 
@@ -161,7 +161,7 @@ func (x ResolverType) String() string {
 }
 
 func (ResolverType) __VDLReflect(struct {
-	Name string `vdl:"v.io/syncbase/v23/services/syncbase/nosql.ResolverType"`
+	Name string `vdl:"v.io/v23/services/syncbase/nosql.ResolverType"`
 	Enum struct{ LastWins, AppResolves, Defer string }
 }) {
 }
@@ -182,7 +182,7 @@ type ConflictInfo struct {
 }
 
 func (ConflictInfo) __VDLReflect(struct {
-	Name string `vdl:"v.io/syncbase/v23/services/syncbase/nosql.ConflictInfo"`
+	Name string `vdl:"v.io/v23/services/syncbase/nosql.ConflictInfo"`
 }) {
 }
 
@@ -208,7 +208,7 @@ type (
 	ConflictDataRow struct{ Value RowInfo }
 	// __ConflictDataReflect describes the ConflictData union type.
 	__ConflictDataReflect struct {
-		Name  string `vdl:"v.io/syncbase/v23/services/syncbase/nosql.ConflictData"`
+		Name  string `vdl:"v.io/v23/services/syncbase/nosql.ConflictData"`
 		Type  ConflictData
 		Union struct {
 			Batch ConflictDataBatch
@@ -240,7 +240,7 @@ type BatchInfo struct {
 }
 
 func (BatchInfo) __VDLReflect(struct {
-	Name string `vdl:"v.io/syncbase/v23/services/syncbase/nosql.BatchInfo"`
+	Name string `vdl:"v.io/v23/services/syncbase/nosql.BatchInfo"`
 }) {
 }
 
@@ -287,7 +287,7 @@ func (x BatchSource) String() string {
 }
 
 func (BatchSource) __VDLReflect(struct {
-	Name string `vdl:"v.io/syncbase/v23/services/syncbase/nosql.BatchSource"`
+	Name string `vdl:"v.io/v23/services/syncbase/nosql.BatchSource"`
 	Enum struct{ Local, Remote string }
 }) {
 }
@@ -308,7 +308,7 @@ type RowInfo struct {
 }
 
 func (RowInfo) __VDLReflect(struct {
-	Name string `vdl:"v.io/syncbase/v23/services/syncbase/nosql.RowInfo"`
+	Name string `vdl:"v.io/v23/services/syncbase/nosql.RowInfo"`
 }) {
 }
 
@@ -345,7 +345,7 @@ type (
 	OperationScan struct{ Value ScanOp }
 	// __OperationReflect describes the Operation union type.
 	__OperationReflect struct {
-		Name  string `vdl:"v.io/syncbase/v23/services/syncbase/nosql.Operation"`
+		Name  string `vdl:"v.io/v23/services/syncbase/nosql.Operation"`
 		Type  Operation
 		Union struct {
 			Read  OperationRead
@@ -386,7 +386,7 @@ type RowOp struct {
 }
 
 func (RowOp) __VDLReflect(struct {
-	Name string `vdl:"v.io/syncbase/v23/services/syncbase/nosql.RowOp"`
+	Name string `vdl:"v.io/v23/services/syncbase/nosql.RowOp"`
 }) {
 }
 
@@ -399,7 +399,7 @@ type ScanOp struct {
 }
 
 func (ScanOp) __VDLReflect(struct {
-	Name string `vdl:"v.io/syncbase/v23/services/syncbase/nosql.ScanOp"`
+	Name string `vdl:"v.io/v23/services/syncbase/nosql.ScanOp"`
 }) {
 }
 
@@ -414,7 +414,7 @@ type Value struct {
 }
 
 func (Value) __VDLReflect(struct {
-	Name string `vdl:"v.io/syncbase/v23/services/syncbase/nosql.Value"`
+	Name string `vdl:"v.io/v23/services/syncbase/nosql.Value"`
 }) {
 }
 
@@ -468,7 +468,7 @@ func (x ValueSelection) String() string {
 }
 
 func (ValueSelection) __VDLReflect(struct {
-	Name string `vdl:"v.io/syncbase/v23/services/syncbase/nosql.ValueSelection"`
+	Name string `vdl:"v.io/v23/services/syncbase/nosql.ValueSelection"`
 	Enum struct{ Local, Remote, Other string }
 }) {
 }
@@ -492,7 +492,7 @@ type ResolutionInfo struct {
 }
 
 func (ResolutionInfo) __VDLReflect(struct {
-	Name string `vdl:"v.io/syncbase/v23/services/syncbase/nosql.ResolutionInfo"`
+	Name string `vdl:"v.io/v23/services/syncbase/nosql.ResolutionInfo"`
 }) {
 }
 
@@ -507,7 +507,7 @@ type SchemaMetadata struct {
 }
 
 func (SchemaMetadata) __VDLReflect(struct {
-	Name string `vdl:"v.io/syncbase/v23/services/syncbase/nosql.SchemaMetadata"`
+	Name string `vdl:"v.io/v23/services/syncbase/nosql.SchemaMetadata"`
 }) {
 }
 
@@ -522,7 +522,7 @@ type CrPolicy struct {
 }
 
 func (CrPolicy) __VDLReflect(struct {
-	Name string `vdl:"v.io/syncbase/v23/services/syncbase/nosql.CrPolicy"`
+	Name string `vdl:"v.io/v23/services/syncbase/nosql.CrPolicy"`
 }) {
 }
 
@@ -542,7 +542,7 @@ type CrRule struct {
 }
 
 func (CrRule) __VDLReflect(struct {
-	Name string `vdl:"v.io/syncbase/v23/services/syncbase/nosql.CrRule"`
+	Name string `vdl:"v.io/v23/services/syncbase/nosql.CrRule"`
 }) {
 }
 
@@ -550,7 +550,7 @@ func (CrRule) __VDLReflect(struct {
 type BlobRef string
 
 func (BlobRef) __VDLReflect(struct {
-	Name string `vdl:"v.io/syncbase/v23/services/syncbase/nosql.BlobRef"`
+	Name string `vdl:"v.io/v23/services/syncbase/nosql.BlobRef"`
 }) {
 }
 
@@ -609,7 +609,7 @@ func (x BlobFetchState) String() string {
 }
 
 func (BlobFetchState) __VDLReflect(struct {
-	Name string `vdl:"v.io/syncbase/v23/services/syncbase/nosql.BlobFetchState"`
+	Name string `vdl:"v.io/v23/services/syncbase/nosql.BlobFetchState"`
 	Enum struct{ Pending, Locating, Fetching, Done string }
 }) {
 }
@@ -622,7 +622,7 @@ type BlobFetchStatus struct {
 }
 
 func (BlobFetchStatus) __VDLReflect(struct {
-	Name string `vdl:"v.io/syncbase/v23/services/syncbase/nosql.BlobFetchStatus"`
+	Name string `vdl:"v.io/v23/services/syncbase/nosql.BlobFetchStatus"`
 }) {
 }
 
@@ -638,7 +638,7 @@ type StoreChange struct {
 }
 
 func (StoreChange) __VDLReflect(struct {
-	Name string `vdl:"v.io/syncbase/v23/services/syncbase/nosql.StoreChange"`
+	Name string `vdl:"v.io/v23/services/syncbase/nosql.StoreChange"`
 }) {
 }
 

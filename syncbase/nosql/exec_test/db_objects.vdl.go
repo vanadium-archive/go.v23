@@ -25,7 +25,7 @@ type AddressInfo struct {
 }
 
 func (AddressInfo) __VDLReflect(struct {
-	Name string `vdl:"v.io/syncbase/v23/syncbase/nosql/exec_test.AddressInfo"`
+	Name string `vdl:"v.io/v23/syncbase/nosql/exec_test.AddressInfo"`
 }) {
 }
 
@@ -77,7 +77,7 @@ func (x CreditAgency) String() string {
 }
 
 func (CreditAgency) __VDLReflect(struct {
-	Name string `vdl:"v.io/syncbase/v23/syncbase/nosql/exec_test.CreditAgency"`
+	Name string `vdl:"v.io/v23/syncbase/nosql/exec_test.CreditAgency"`
 	Enum struct{ Equifax, Experian, TransUnion string }
 }) {
 }
@@ -124,7 +124,7 @@ func (x ExperianRating) String() string {
 }
 
 func (ExperianRating) __VDLReflect(struct {
-	Name string `vdl:"v.io/syncbase/v23/syncbase/nosql/exec_test.ExperianRating"`
+	Name string `vdl:"v.io/v23/syncbase/nosql/exec_test.ExperianRating"`
 	Enum struct{ Good, Bad string }
 }) {
 }
@@ -134,7 +134,7 @@ type EquifaxCreditReport struct {
 }
 
 func (EquifaxCreditReport) __VDLReflect(struct {
-	Name string `vdl:"v.io/syncbase/v23/syncbase/nosql/exec_test.EquifaxCreditReport"`
+	Name string `vdl:"v.io/v23/syncbase/nosql/exec_test.EquifaxCreditReport"`
 }) {
 }
 
@@ -143,7 +143,7 @@ type ExperianCreditReport struct {
 }
 
 func (ExperianCreditReport) __VDLReflect(struct {
-	Name string `vdl:"v.io/syncbase/v23/syncbase/nosql/exec_test.ExperianCreditReport"`
+	Name string `vdl:"v.io/v23/syncbase/nosql/exec_test.ExperianCreditReport"`
 }) {
 }
 
@@ -152,7 +152,7 @@ type TransUnionCreditReport struct {
 }
 
 func (TransUnionCreditReport) __VDLReflect(struct {
-	Name string `vdl:"v.io/syncbase/v23/syncbase/nosql/exec_test.TransUnionCreditReport"`
+	Name string `vdl:"v.io/v23/syncbase/nosql/exec_test.TransUnionCreditReport"`
 }) {
 }
 
@@ -176,7 +176,7 @@ type (
 	AgencyReportTransUnionReport struct{ Value TransUnionCreditReport }
 	// __AgencyReportReflect describes the AgencyReport union type.
 	__AgencyReportReflect struct {
-		Name  string `vdl:"v.io/syncbase/v23/syncbase/nosql/exec_test.AgencyReport"`
+		Name  string `vdl:"v.io/v23/syncbase/nosql/exec_test.AgencyReport"`
 		Type  AgencyReport
 		Union struct {
 			EquifaxReport    AgencyReportEquifaxReport
@@ -207,7 +207,7 @@ type CreditReport struct {
 }
 
 func (CreditReport) __VDLReflect(struct {
-	Name string `vdl:"v.io/syncbase/v23/syncbase/nosql/exec_test.CreditReport"`
+	Name string `vdl:"v.io/v23/syncbase/nosql/exec_test.CreditReport"`
 }) {
 }
 
@@ -220,7 +220,7 @@ type Customer struct {
 }
 
 func (Customer) __VDLReflect(struct {
-	Name string `vdl:"v.io/syncbase/v23/syncbase/nosql/exec_test.Customer"`
+	Name string `vdl:"v.io/v23/syncbase/nosql/exec_test.Customer"`
 }) {
 }
 
@@ -233,7 +233,7 @@ type Invoice struct {
 }
 
 func (Invoice) __VDLReflect(struct {
-	Name string `vdl:"v.io/syncbase/v23/syncbase/nosql/exec_test.Invoice"`
+	Name string `vdl:"v.io/v23/syncbase/nosql/exec_test.Invoice"`
 }) {
 }
 
@@ -252,7 +252,7 @@ type Numbers struct {
 }
 
 func (Numbers) __VDLReflect(struct {
-	Name string `vdl:"v.io/syncbase/v23/syncbase/nosql/exec_test.Numbers"`
+	Name string `vdl:"v.io/v23/syncbase/nosql/exec_test.Numbers"`
 }) {
 }
 
@@ -261,7 +261,7 @@ type FooType struct {
 }
 
 func (FooType) __VDLReflect(struct {
-	Name string `vdl:"v.io/syncbase/v23/syncbase/nosql/exec_test.FooType"`
+	Name string `vdl:"v.io/v23/syncbase/nosql/exec_test.FooType"`
 }) {
 }
 
@@ -270,7 +270,7 @@ type BarType struct {
 }
 
 func (BarType) __VDLReflect(struct {
-	Name string `vdl:"v.io/syncbase/v23/syncbase/nosql/exec_test.BarType"`
+	Name string `vdl:"v.io/v23/syncbase/nosql/exec_test.BarType"`
 }) {
 }
 
@@ -292,7 +292,7 @@ type (
 	TitleOrValueTypeValue struct{ Value int64 }
 	// __TitleOrValueTypeReflect describes the TitleOrValueType union type.
 	__TitleOrValueTypeReflect struct {
-		Name  string `vdl:"v.io/syncbase/v23/syncbase/nosql/exec_test.TitleOrValueType"`
+		Name  string `vdl:"v.io/v23/syncbase/nosql/exec_test.TitleOrValueType"`
 		Type  TitleOrValueType
 		Union struct {
 			Title TitleOrValueTypeTitle
@@ -317,14 +317,14 @@ type BazType struct {
 }
 
 func (BazType) __VDLReflect(struct {
-	Name string `vdl:"v.io/syncbase/v23/syncbase/nosql/exec_test.BazType"`
+	Name string `vdl:"v.io/v23/syncbase/nosql/exec_test.BazType"`
 }) {
 }
 
 type ArrayOfFour [4]string
 
 func (ArrayOfFour) __VDLReflect(struct {
-	Name string `vdl:"v.io/syncbase/v23/syncbase/nosql/exec_test.ArrayOfFour"`
+	Name string `vdl:"v.io/v23/syncbase/nosql/exec_test.ArrayOfFour"`
 }) {
 }
 
@@ -336,7 +336,7 @@ type KeyIndexData struct {
 }
 
 func (KeyIndexData) __VDLReflect(struct {
-	Name string `vdl:"v.io/syncbase/v23/syncbase/nosql/exec_test.KeyIndexData"`
+	Name string `vdl:"v.io/v23/syncbase/nosql/exec_test.KeyIndexData"`
 }) {
 }
 
@@ -345,7 +345,7 @@ type BigData struct {
 }
 
 func (BigData) __VDLReflect(struct {
-	Name string `vdl:"v.io/syncbase/v23/syncbase/nosql/exec_test.BigData"`
+	Name string `vdl:"v.io/v23/syncbase/nosql/exec_test.BigData"`
 }) {
 }
 

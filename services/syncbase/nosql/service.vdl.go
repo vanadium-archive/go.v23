@@ -25,12 +25,12 @@ import (
 )
 
 var (
-	ErrBoundToBatch          = verror.Register("v.io/syncbase/v23/services/syncbase/nosql.BoundToBatch", verror.NoRetry, "{1:}{2:} bound to batch")
-	ErrNotBoundToBatch       = verror.Register("v.io/syncbase/v23/services/syncbase/nosql.NotBoundToBatch", verror.NoRetry, "{1:}{2:} not bound to batch")
-	ErrReadOnlyBatch         = verror.Register("v.io/syncbase/v23/services/syncbase/nosql.ReadOnlyBatch", verror.NoRetry, "{1:}{2:} batch is read-only")
-	ErrConcurrentBatch       = verror.Register("v.io/syncbase/v23/services/syncbase/nosql.ConcurrentBatch", verror.NoRetry, "{1:}{2:} concurrent batch")
-	ErrSchemaVersionMismatch = verror.Register("v.io/syncbase/v23/services/syncbase/nosql.SchemaVersionMismatch", verror.NoRetry, "{1:}{2:} actual schema version does not match the provided one")
-	ErrBlobNotCommitted      = verror.Register("v.io/syncbase/v23/services/syncbase/nosql.BlobNotCommitted", verror.NoRetry, "{1:}{2:} blob is not yet committed")
+	ErrBoundToBatch          = verror.Register("v.io/v23/services/syncbase/nosql.BoundToBatch", verror.NoRetry, "{1:}{2:} bound to batch")
+	ErrNotBoundToBatch       = verror.Register("v.io/v23/services/syncbase/nosql.NotBoundToBatch", verror.NoRetry, "{1:}{2:} not bound to batch")
+	ErrReadOnlyBatch         = verror.Register("v.io/v23/services/syncbase/nosql.ReadOnlyBatch", verror.NoRetry, "{1:}{2:} batch is read-only")
+	ErrConcurrentBatch       = verror.Register("v.io/v23/services/syncbase/nosql.ConcurrentBatch", verror.NoRetry, "{1:}{2:} concurrent batch")
+	ErrSchemaVersionMismatch = verror.Register("v.io/v23/services/syncbase/nosql.SchemaVersionMismatch", verror.NoRetry, "{1:}{2:} actual schema version does not match the provided one")
+	ErrBlobNotCommitted      = verror.Register("v.io/v23/services/syncbase/nosql.BlobNotCommitted", verror.NoRetry, "{1:}{2:} blob is not yet committed")
 )
 
 func init() {
@@ -224,7 +224,7 @@ var DatabaseWatcherDesc rpc.InterfaceDesc = descDatabaseWatcher
 // descDatabaseWatcher hides the desc to keep godoc clean.
 var descDatabaseWatcher = rpc.InterfaceDesc{
 	Name:    "DatabaseWatcher",
-	PkgPath: "v.io/syncbase/v23/services/syncbase/nosql",
+	PkgPath: "v.io/v23/services/syncbase/nosql",
 	Doc:     "// DatabaseWatcher allows a client to watch for updates in the database.\n// For each watched request, the client will receive a reliable stream of watch\n// events without re-ordering. See watch.GlobWatcher for a detailed explanation\n// of the behavior.\n// TODO(rogulenko): Currently the only supported watch patterns are\n// 'table/row*'. Consider changing that.\n//\n// The watching is done by starting a streaming RPC. The argument to the RPC\n// contains the ResumeMarker that points to a particular place in the database\n// event log. The result stream consists of a never-ending sequence of Change\n// messages (until the call fails or is canceled). Each Change contains the\n// Name field in the form \"<tableName>/<rowKey>\" and the Value field of the\n// StoreChange type. If the client has no access to a row specified in a change,\n// that change is excluded from the result stream.\n//\n// The DatabaseWatcher is designed to be used in the following way:\n// 1) begin a read-only batch\n// 2) read all information your app needs\n// 3) read the ResumeMarker\n// 4) abort the batch\n// 5) start watching changes to the data using the ResumeMarker\n// In this configuration the client doesn't miss any changes.",
 	Embeds: []rpc.EmbedDesc{
 		{"GlobWatcher", "v.io/v23/services/watch", "// GlobWatcher allows a client to receive updates for changes to objects\n// that match a pattern.  See the package comments for details."},
@@ -502,7 +502,7 @@ var SyncGroupManagerDesc rpc.InterfaceDesc = descSyncGroupManager
 // descSyncGroupManager hides the desc to keep godoc clean.
 var descSyncGroupManager = rpc.InterfaceDesc{
 	Name:    "SyncGroupManager",
-	PkgPath: "v.io/syncbase/v23/services/syncbase/nosql",
+	PkgPath: "v.io/v23/services/syncbase/nosql",
 	Doc:     "// SyncGroupManager is the interface for SyncGroup operations.\n// TODO(hpucha): Add blessings to create/join and add a refresh method.",
 	Methods: []rpc.MethodDesc{
 		{
@@ -1076,7 +1076,7 @@ var BlobManagerDesc rpc.InterfaceDesc = descBlobManager
 // descBlobManager hides the desc to keep godoc clean.
 var descBlobManager = rpc.InterfaceDesc{
 	Name:    "BlobManager",
-	PkgPath: "v.io/syncbase/v23/services/syncbase/nosql",
+	PkgPath: "v.io/v23/services/syncbase/nosql",
 	Doc:     "// BlobManager is the interface for blob operations.",
 	Methods: []rpc.MethodDesc{
 		{
@@ -1430,7 +1430,7 @@ var SchemaManagerDesc rpc.InterfaceDesc = descSchemaManager
 // descSchemaManager hides the desc to keep godoc clean.
 var descSchemaManager = rpc.InterfaceDesc{
 	Name:    "SchemaManager",
-	PkgPath: "v.io/syncbase/v23/services/syncbase/nosql",
+	PkgPath: "v.io/v23/services/syncbase/nosql",
 	Doc:     "// SchemaManager implements the API for managing schema metadata attached\n// to a Database.",
 	Methods: []rpc.MethodDesc{
 		{
@@ -1706,7 +1706,7 @@ var ConflictManagerDesc rpc.InterfaceDesc = descConflictManager
 // descConflictManager hides the desc to keep godoc clean.
 var descConflictManager = rpc.InterfaceDesc{
 	Name:    "ConflictManager",
-	PkgPath: "v.io/syncbase/v23/services/syncbase/nosql",
+	PkgPath: "v.io/v23/services/syncbase/nosql",
 	Doc:     "// ConflictManager interface provides all the methods necessary to handle\n// conflict resolution for a given database.",
 	Methods: []rpc.MethodDesc{
 		{
@@ -2374,15 +2374,15 @@ var DatabaseDesc rpc.InterfaceDesc = descDatabase
 // descDatabase hides the desc to keep godoc clean.
 var descDatabase = rpc.InterfaceDesc{
 	Name:    "Database",
-	PkgPath: "v.io/syncbase/v23/services/syncbase/nosql",
+	PkgPath: "v.io/v23/services/syncbase/nosql",
 	Doc:     "// Database represents a collection of Tables. Batches, queries, sync, watch,\n// etc. all operate at the Database level.\n// Database.Glob operates over Table names.\n// Param schemaVersion is the version number that the client expects the database\n// to be at. To disable schema version checking, pass -1.\n//\n// TODO(sadovsky): Add Watch method.",
 	Embeds: []rpc.EmbedDesc{
 		{"Object", "v.io/v23/services/permissions", "// Object provides access control for Vanadium objects.\n//\n// Vanadium services implementing dynamic access control would typically embed\n// this interface and tag additional methods defined by the service with one of\n// Admin, Read, Write, Resolve etc. For example, the VDL definition of the\n// object would be:\n//\n//   package mypackage\n//\n//   import \"v.io/v23/security/access\"\n//   import \"v.io/v23/services/permissions\"\n//\n//   type MyObject interface {\n//     permissions.Object\n//     MyRead() (string, error) {access.Read}\n//     MyWrite(string) error    {access.Write}\n//   }\n//\n// If the set of pre-defined tags is insufficient, services may define their\n// own tag type and annotate all methods with this new type.\n//\n// Instead of embedding this Object interface, define SetPermissions and\n// GetPermissions in their own interface. Authorization policies will typically\n// respect annotations of a single type. For example, the VDL definition of an\n// object would be:\n//\n//  package mypackage\n//\n//  import \"v.io/v23/security/access\"\n//\n//  type MyTag string\n//\n//  const (\n//    Blue = MyTag(\"Blue\")\n//    Red  = MyTag(\"Red\")\n//  )\n//\n//  type MyObject interface {\n//    MyMethod() (string, error) {Blue}\n//\n//    // Allow clients to change access via the access.Object interface:\n//    SetPermissions(perms access.Permissions, version string) error         {Red}\n//    GetPermissions() (perms access.Permissions, version string, err error) {Blue}\n//  }"},
-		{"DatabaseWatcher", "v.io/syncbase/v23/services/syncbase/nosql", "// DatabaseWatcher allows a client to watch for updates in the database.\n// For each watched request, the client will receive a reliable stream of watch\n// events without re-ordering. See watch.GlobWatcher for a detailed explanation\n// of the behavior.\n// TODO(rogulenko): Currently the only supported watch patterns are\n// 'table/row*'. Consider changing that.\n//\n// The watching is done by starting a streaming RPC. The argument to the RPC\n// contains the ResumeMarker that points to a particular place in the database\n// event log. The result stream consists of a never-ending sequence of Change\n// messages (until the call fails or is canceled). Each Change contains the\n// Name field in the form \"<tableName>/<rowKey>\" and the Value field of the\n// StoreChange type. If the client has no access to a row specified in a change,\n// that change is excluded from the result stream.\n//\n// The DatabaseWatcher is designed to be used in the following way:\n// 1) begin a read-only batch\n// 2) read all information your app needs\n// 3) read the ResumeMarker\n// 4) abort the batch\n// 5) start watching changes to the data using the ResumeMarker\n// In this configuration the client doesn't miss any changes."},
-		{"SyncGroupManager", "v.io/syncbase/v23/services/syncbase/nosql", "// SyncGroupManager is the interface for SyncGroup operations.\n// TODO(hpucha): Add blessings to create/join and add a refresh method."},
-		{"BlobManager", "v.io/syncbase/v23/services/syncbase/nosql", "// BlobManager is the interface for blob operations."},
-		{"SchemaManager", "v.io/syncbase/v23/services/syncbase/nosql", "// SchemaManager implements the API for managing schema metadata attached\n// to a Database."},
-		{"ConflictManager", "v.io/syncbase/v23/services/syncbase/nosql", "// ConflictManager interface provides all the methods necessary to handle\n// conflict resolution for a given database."},
+		{"DatabaseWatcher", "v.io/v23/services/syncbase/nosql", "// DatabaseWatcher allows a client to watch for updates in the database.\n// For each watched request, the client will receive a reliable stream of watch\n// events without re-ordering. See watch.GlobWatcher for a detailed explanation\n// of the behavior.\n// TODO(rogulenko): Currently the only supported watch patterns are\n// 'table/row*'. Consider changing that.\n//\n// The watching is done by starting a streaming RPC. The argument to the RPC\n// contains the ResumeMarker that points to a particular place in the database\n// event log. The result stream consists of a never-ending sequence of Change\n// messages (until the call fails or is canceled). Each Change contains the\n// Name field in the form \"<tableName>/<rowKey>\" and the Value field of the\n// StoreChange type. If the client has no access to a row specified in a change,\n// that change is excluded from the result stream.\n//\n// The DatabaseWatcher is designed to be used in the following way:\n// 1) begin a read-only batch\n// 2) read all information your app needs\n// 3) read the ResumeMarker\n// 4) abort the batch\n// 5) start watching changes to the data using the ResumeMarker\n// In this configuration the client doesn't miss any changes."},
+		{"SyncGroupManager", "v.io/v23/services/syncbase/nosql", "// SyncGroupManager is the interface for SyncGroup operations.\n// TODO(hpucha): Add blessings to create/join and add a refresh method."},
+		{"BlobManager", "v.io/v23/services/syncbase/nosql", "// BlobManager is the interface for blob operations."},
+		{"SchemaManager", "v.io/v23/services/syncbase/nosql", "// SchemaManager implements the API for managing schema metadata attached\n// to a Database."},
+		{"ConflictManager", "v.io/v23/services/syncbase/nosql", "// ConflictManager interface provides all the methods necessary to handle\n// conflict resolution for a given database."},
 	},
 	Methods: []rpc.MethodDesc{
 		{
@@ -2834,7 +2834,7 @@ var TableDesc rpc.InterfaceDesc = descTable
 // descTable hides the desc to keep godoc clean.
 var descTable = rpc.InterfaceDesc{
 	Name:    "Table",
-	PkgPath: "v.io/syncbase/v23/services/syncbase/nosql",
+	PkgPath: "v.io/v23/services/syncbase/nosql",
 	Doc:     "// Table represents a collection of Rows.\n// Table.Glob operates over the primary keys of Rows in the Table.\n// SchemaVersion is the version number that the client expects the database\n// to be at. To disable schema version checking, pass -1.",
 	Methods: []rpc.MethodDesc{
 		{
@@ -3112,7 +3112,7 @@ var RowDesc rpc.InterfaceDesc = descRow
 // descRow hides the desc to keep godoc clean.
 var descRow = rpc.InterfaceDesc{
 	Name:    "Row",
-	PkgPath: "v.io/syncbase/v23/services/syncbase/nosql",
+	PkgPath: "v.io/v23/services/syncbase/nosql",
 	Doc:     "// Row represents a single row in a Table.\n// All access checks are performed against the most specific matching prefix\n// permissions in the Table.\n// SchemaVersion is the version number that the client expects the database\n// to be at. To disable schema version checking, pass -1.\n// NOTE(sadovsky): Currently we send []byte values over the wire for Get, Put,\n// and Scan. If there's a way to avoid encoding/decoding on the server side, we\n// can use vdl.Value everywhere without sacrificing performance.",
 	Methods: []rpc.MethodDesc{
 		{
