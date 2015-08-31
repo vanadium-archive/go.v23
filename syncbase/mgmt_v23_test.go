@@ -60,7 +60,7 @@ func V23TestDeviceManager(i *v23tests.T) {
 		deviceBin       = i.BuildV23Pkg("v.io/x/ref/services/device/device").WithStartOpts(aliceOpts)
 		binarydBin      = i.BuildV23Pkg("v.io/x/ref/services/binary/binaryd").WithStartOpts(aliceOpts)
 		applicationdBin = i.BuildV23Pkg("v.io/x/ref/services/application/applicationd").WithStartOpts(aliceOpts)
-		syncbasedBin    = i.BuildV23Pkg("v.io/syncbase/x/ref/services/syncbase/syncbased")
+		syncbasedBin    = i.BuildV23Pkg("v.io/x/ref/services/syncbase/syncbased")
 
 		// The devicex script is not provided with any credentials, it
 		// will generate its own.  This means that on "devicex start"

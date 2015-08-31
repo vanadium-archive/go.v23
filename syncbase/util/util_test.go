@@ -7,7 +7,7 @@ package util_test
 import (
 	"testing"
 
-	"v.io/syncbase/v23/syncbase/util"
+	"v.io/v23/syncbase/util"
 )
 
 func TestValidName(t *testing.T) {
@@ -65,8 +65,8 @@ func TestPrefixRange(t *testing.T) {
 func TestIsPrefix(t *testing.T) {
 	tests := []struct {
 		isPrefix bool
-		start  string
-		limit  string
+		start    string
+		limit    string
 	}{
 		{true, "", ""},
 		{true, "a", "b"},

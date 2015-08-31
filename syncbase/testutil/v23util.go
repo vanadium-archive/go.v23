@@ -20,7 +20,7 @@ import (
 // integration test (run using --v23.tests). The returned cleanup function
 // should be called once the syncbased process is no longer needed.
 func StartSyncbased(t *v23tests.T, creds *modules.CustomCredentials, name, rootDir, permsLiteral string) (cleanup func()) {
-	syncbased := t.BuildV23Pkg("v.io/syncbase/x/ref/services/syncbase/syncbased")
+	syncbased := t.BuildV23Pkg("v.io/x/ref/services/syncbase/syncbased")
 	// Create root dir for the store.
 	rmRootDir := false
 	if rootDir == "" {

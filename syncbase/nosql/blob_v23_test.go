@@ -12,13 +12,13 @@ import (
 	"strconv"
 	"time"
 
-	wire "v.io/syncbase/v23/services/syncbase/nosql"
-	"v.io/syncbase/v23/syncbase"
-	tu "v.io/syncbase/v23/syncbase/testutil"
-	constants "v.io/syncbase/x/ref/services/syncbase/server/util"
 	"v.io/v23"
 	"v.io/v23/naming"
+	wire "v.io/v23/services/syncbase/nosql"
+	"v.io/v23/syncbase"
+	tu "v.io/v23/syncbase/testutil"
 	_ "v.io/x/ref/runtime/factories/generic"
+	constants "v.io/x/ref/services/syncbase/server/util"
 	"v.io/x/ref/test/modules"
 	"v.io/x/ref/test/v23tests"
 )

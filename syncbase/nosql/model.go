@@ -8,11 +8,11 @@ package nosql
 import (
 	"time"
 
-	wire "v.io/syncbase/v23/services/syncbase/nosql"
-	"v.io/syncbase/v23/syncbase/util"
 	"v.io/v23/context"
 	"v.io/v23/security/access"
+	wire "v.io/v23/services/syncbase/nosql"
 	"v.io/v23/services/watch"
+	"v.io/v23/syncbase/util"
 	"v.io/v23/vdl"
 	"v.io/v23/verror"
 	"v.io/v23/vom"
@@ -582,10 +582,10 @@ type ConflictResolver interface {
 // Batches is a map of unique ids to BatchInfo objects. The id is unique only in
 // the context of a given conflict and is otherwise meaningless.
 type Conflict struct {
-	ReadSet       *ConflictRowSet
-	WriteSet      *ConflictRowSet
-	ScanSet       *ConflictScanSet
-	Batches       map[uint16]wire.BatchInfo
+	ReadSet  *ConflictRowSet
+	WriteSet *ConflictRowSet
+	ScanSet  *ConflictScanSet
+	Batches  map[uint16]wire.BatchInfo
 }
 
 // ConflictRowSet contains a set of rows under conflict. It provides two different
@@ -594,7 +594,7 @@ type Conflict struct {
 // ByBatch is a map of []ConflictRows keyed by batch id. This map lets the client
 // access all ConflictRows within this set that contain a given hint.
 type ConflictRowSet struct {
-	ByKey  map[string]ConflictRow
+	ByKey   map[string]ConflictRow
 	ByBatch map[uint16][]ConflictRow
 }
 
@@ -665,7 +665,7 @@ func NewValue(ctx *context.T, data interface{}) (*Value, error) {
 	}
 	return &Value{
 		val:       bytes,
-		WriteTs:   time.Now(),  // ignored by syncbase
+		WriteTs:   time.Now(), // ignored by syncbase
 		selection: wire.ValueSelectionOther,
 	}, nil
 }

@@ -5,7 +5,7 @@
 package nosql
 
 import (
-	"v.io/syncbase/v23/syncbase/util"
+	"v.io/v23/syncbase/util"
 )
 
 // RowRange represents all rows with keys in [start, limit). If limit is "", all

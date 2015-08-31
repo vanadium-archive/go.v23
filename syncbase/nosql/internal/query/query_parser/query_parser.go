@@ -14,8 +14,8 @@ import (
 	"time"
 	"unicode/utf8"
 
-	"v.io/syncbase/v23/syncbase/nosql/query_db"
-	"v.io/syncbase/v23/syncbase/nosql/syncql"
+	"v.io/v23/syncbase/nosql/query_db"
+	"v.io/v23/syncbase/nosql/syncql"
 	"v.io/v23/vdl"
 )
 

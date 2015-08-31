@@ -11,7 +11,7 @@ import (
 	"strconv"
 	"strings"
 
-	"v.io/syncbase/v23/syncbase/nosql/internal/query/query_parser"
+	"v.io/v23/syncbase/nosql/internal/query/query_parser"
 )
 
 func ConvertValueToString(o *query_parser.Operand) (*query_parser.Operand, error) {

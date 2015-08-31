@@ -9,10 +9,10 @@
 package syncbase
 
 import (
-	"v.io/syncbase/v23/syncbase/nosql"
-	"v.io/syncbase/v23/syncbase/util"
 	"v.io/v23/context"
 	"v.io/v23/security/access"
+	"v.io/v23/syncbase/nosql"
+	"v.io/v23/syncbase/util"
 )
 
 // NOTE(sadovsky): Various methods below may end up needing additional options.

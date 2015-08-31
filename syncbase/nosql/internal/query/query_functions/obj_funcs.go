@@ -5,9 +5,9 @@
 package query_functions
 
 import (
-	"v.io/syncbase/v23/syncbase/nosql/internal/query/query_parser"
-	"v.io/syncbase/v23/syncbase/nosql/query_db"
-	"v.io/syncbase/v23/syncbase/nosql/syncql"
+	"v.io/v23/syncbase/nosql/internal/query/query_parser"
+	"v.io/v23/syncbase/nosql/query_db"
+	"v.io/v23/syncbase/nosql/syncql"
 	"v.io/v23/vdl"
 )
 

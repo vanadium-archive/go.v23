@@ -8,12 +8,12 @@ import (
 	"sync"
 	"time"
 
-	wire "v.io/syncbase/v23/services/syncbase/nosql"
-	"v.io/syncbase/v23/syncbase/util"
 	"v.io/v23/context"
 	"v.io/v23/naming"
 	"v.io/v23/security/access"
+	wire "v.io/v23/services/syncbase/nosql"
 	"v.io/v23/services/watch"
+	"v.io/v23/syncbase/util"
 	"v.io/v23/verror"
 	"v.io/x/lib/vlog"
 )
@@ -21,7 +21,7 @@ import (
 const (
 	// Wait time before we try to reconnect a broken conflict resolution stream.
 	waitBeforeReconnectInMillis = 2 * time.Second
-	reconnectionCount = "rcc"
+	reconnectionCount           = "rcc"
 )
 
 func NewDatabase(parentFullName, relativeName string, schema *Schema) *database {
@@ -327,7 +327,7 @@ func (d *database) listenForConflicts(ctx *context.T) error {
 			if err := sendResolution(resolutionStream, resolution); err != nil {
 				return err
 			}
-			c = &Conflict{}  // create a new conflict object for the next batch
+			c = &Conflict{} // create a new conflict object for the next batch
 		}
 	}
 	if err := conflictStream.Err(); err != nil {
@@ -429,8 +429,8 @@ func toConflictRow(op wire.RowOp, batchIds []uint16) ConflictRow {
 // of int64
 func toTime(unixNanos int64) time.Time {
 	return time.Unix(
-		unixNanos / 1e9,  // seconds
-		unixNanos % 1e9)  // nanoseconds
+		unixNanos/1e9, // seconds
+		unixNanos%1e9) // nanoseconds
 }
 
 func toResolutionInfo(r ResolvedRow, lastRow bool) wire.ResolutionInfo {
@@ -440,7 +440,7 @@ func toResolutionInfo(r ResolvedRow, lastRow bool) wire.ResolutionInfo {
 		sel = r.Result.selection
 		resVal = &wire.Value{
 			Bytes:   r.Result.val,
-			WriteTs: r.Result.WriteTs.UnixNano(),  // this timestamp is ignored by syncbase
+			WriteTs: r.Result.WriteTs.UnixNano(), // this timestamp is ignored by syncbase
 		}
 	}
 	return wire.ResolutionInfo{

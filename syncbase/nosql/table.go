@@ -5,10 +5,10 @@
 package nosql
 
 import (
-	wire "v.io/syncbase/v23/services/syncbase/nosql"
 	"v.io/v23/context"
 	"v.io/v23/naming"
 	"v.io/v23/security/access"
+	wire "v.io/v23/services/syncbase/nosql"
 )
 
 func newTable(parentFullName, relativeName string, schemaVersion int32) Table {

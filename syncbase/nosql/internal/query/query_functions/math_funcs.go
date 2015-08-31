@@ -5,9 +5,9 @@
 package query_functions
 
 import (
-	"v.io/syncbase/v23/syncbase/nosql/internal/query/conversions"
-	"v.io/syncbase/v23/syncbase/nosql/internal/query/query_parser"
-	"v.io/syncbase/v23/syncbase/nosql/query_db"
+	"v.io/v23/syncbase/nosql/internal/query/conversions"
+	"v.io/v23/syncbase/nosql/internal/query/query_parser"
+	"v.io/v23/syncbase/nosql/query_db"
 )
 
 func complexFunc(db query_db.Database, off int64, args []*query_parser.Operand) (*query_parser.Operand, error) {

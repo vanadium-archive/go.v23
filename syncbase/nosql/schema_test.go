@@ -7,11 +7,11 @@ package nosql_test
 import (
 	"testing"
 
-	wire "v.io/syncbase/v23/services/syncbase/nosql"
-	"v.io/syncbase/v23/syncbase"
-	"v.io/syncbase/v23/syncbase/nosql"
-	tu "v.io/syncbase/v23/syncbase/testutil"
 	"v.io/v23/context"
+	wire "v.io/v23/services/syncbase/nosql"
+	"v.io/v23/syncbase"
+	"v.io/v23/syncbase/nosql"
+	tu "v.io/v23/syncbase/testutil"
 	"v.io/v23/verror"
 )
 

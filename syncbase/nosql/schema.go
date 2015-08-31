@@ -5,8 +5,8 @@
 package nosql
 
 import (
-	wire "v.io/syncbase/v23/services/syncbase/nosql"
 	"v.io/v23/context"
+	wire "v.io/v23/services/syncbase/nosql"
 )
 
 // NewSchema creates a new Schema object.

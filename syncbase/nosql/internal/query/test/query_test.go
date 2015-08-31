@@ -11,13 +11,13 @@ import (
 	"testing"
 	"time"
 
-	"v.io/syncbase/v23/syncbase/nosql/internal/query"
-	"v.io/syncbase/v23/syncbase/nosql/internal/query/query_checker"
-	"v.io/syncbase/v23/syncbase/nosql/internal/query/query_parser"
-	"v.io/syncbase/v23/syncbase/nosql/query_db"
-	"v.io/syncbase/v23/syncbase/nosql/syncql"
 	"v.io/v23"
 	"v.io/v23/context"
+	"v.io/v23/syncbase/nosql/internal/query"
+	"v.io/v23/syncbase/nosql/internal/query/query_checker"
+	"v.io/v23/syncbase/nosql/internal/query/query_parser"
+	"v.io/v23/syncbase/nosql/query_db"
+	"v.io/v23/syncbase/nosql/syncql"
 	"v.io/v23/vdl"
 	"v.io/v23/verror"
 	_ "v.io/x/ref/runtime/factories/generic"
@@ -473,13 +473,13 @@ func TestQueryExec(t *testing.T) {
 			"select Type(v) from Customer where Type(v) not like \"%Customer\"",
 			[]string{"Type"},
 			[][]*vdl.Value{
-				[]*vdl.Value{vdl.ValueOf("v.io/syncbase/v23/syncbase/nosql/internal/query/test.Invoice")},
-				[]*vdl.Value{vdl.ValueOf("v.io/syncbase/v23/syncbase/nosql/internal/query/test.Invoice")},
-				[]*vdl.Value{vdl.ValueOf("v.io/syncbase/v23/syncbase/nosql/internal/query/test.Invoice")},
-				[]*vdl.Value{vdl.ValueOf("v.io/syncbase/v23/syncbase/nosql/internal/query/test.Invoice")},
-				[]*vdl.Value{vdl.ValueOf("v.io/syncbase/v23/syncbase/nosql/internal/query/test.Invoice")},
-				[]*vdl.Value{vdl.ValueOf("v.io/syncbase/v23/syncbase/nosql/internal/query/test.Invoice")},
-				[]*vdl.Value{vdl.ValueOf("v.io/syncbase/v23/syncbase/nosql/internal/query/test.Invoice")},
+				[]*vdl.Value{vdl.ValueOf("v.io/v23/syncbase/nosql/internal/query/test.Invoice")},
+				[]*vdl.Value{vdl.ValueOf("v.io/v23/syncbase/nosql/internal/query/test.Invoice")},
+				[]*vdl.Value{vdl.ValueOf("v.io/v23/syncbase/nosql/internal/query/test.Invoice")},
+				[]*vdl.Value{vdl.ValueOf("v.io/v23/syncbase/nosql/internal/query/test.Invoice")},
+				[]*vdl.Value{vdl.ValueOf("v.io/v23/syncbase/nosql/internal/query/test.Invoice")},
+				[]*vdl.Value{vdl.ValueOf("v.io/v23/syncbase/nosql/internal/query/test.Invoice")},
+				[]*vdl.Value{vdl.ValueOf("v.io/v23/syncbase/nosql/internal/query/test.Invoice")},
 			},
 		},
 		{
@@ -505,16 +505,16 @@ func TestQueryExec(t *testing.T) {
 			"select Type(v) from Customer",
 			[]string{"Type"},
 			[][]*vdl.Value{
-				[]*vdl.Value{vdl.ValueOf("v.io/syncbase/v23/syncbase/nosql/internal/query/test.Customer")},
-				[]*vdl.Value{vdl.ValueOf("v.io/syncbase/v23/syncbase/nosql/internal/query/test.Invoice")},
-				[]*vdl.Value{vdl.ValueOf("v.io/syncbase/v23/syncbase/nosql/internal/query/test.Invoice")},
-				[]*vdl.Value{vdl.ValueOf("v.io/syncbase/v23/syncbase/nosql/internal/query/test.Invoice")},
-				[]*vdl.Value{vdl.ValueOf("v.io/syncbase/v23/syncbase/nosql/internal/query/test.Customer")},
-				[]*vdl.Value{vdl.ValueOf("v.io/syncbase/v23/syncbase/nosql/internal/query/test.Invoice")},
-				[]*vdl.Value{vdl.ValueOf("v.io/syncbase/v23/syncbase/nosql/internal/query/test.Invoice")},
-				[]*vdl.Value{vdl.ValueOf("v.io/syncbase/v23/syncbase/nosql/internal/query/test.Invoice")},
-				[]*vdl.Value{vdl.ValueOf("v.io/syncbase/v23/syncbase/nosql/internal/query/test.Invoice")},
-				[]*vdl.Value{vdl.ValueOf("v.io/syncbase/v23/syncbase/nosql/internal/query/test.Customer")},
+				[]*vdl.Value{vdl.ValueOf("v.io/v23/syncbase/nosql/internal/query/test.Customer")},
+				[]*vdl.Value{vdl.ValueOf("v.io/v23/syncbase/nosql/internal/query/test.Invoice")},
+				[]*vdl.Value{vdl.ValueOf("v.io/v23/syncbase/nosql/internal/query/test.Invoice")},
+				[]*vdl.Value{vdl.ValueOf("v.io/v23/syncbase/nosql/internal/query/test.Invoice")},
+				[]*vdl.Value{vdl.ValueOf("v.io/v23/syncbase/nosql/internal/query/test.Customer")},
+				[]*vdl.Value{vdl.ValueOf("v.io/v23/syncbase/nosql/internal/query/test.Invoice")},
+				[]*vdl.Value{vdl.ValueOf("v.io/v23/syncbase/nosql/internal/query/test.Invoice")},
+				[]*vdl.Value{vdl.ValueOf("v.io/v23/syncbase/nosql/internal/query/test.Invoice")},
+				[]*vdl.Value{vdl.ValueOf("v.io/v23/syncbase/nosql/internal/query/test.Invoice")},
+				[]*vdl.Value{vdl.ValueOf("v.io/v23/syncbase/nosql/internal/query/test.Customer")},
 			},
 		},
 		{
@@ -522,16 +522,16 @@ func TestQueryExec(t *testing.T) {
 			"select Type(v.Credit.Report) from Customer",
 			[]string{"Type"},
 			[][]*vdl.Value{
-				[]*vdl.Value{vdl.ValueOf("v.io/syncbase/v23/syncbase/nosql/internal/query/test.AgencyReport")},
+				[]*vdl.Value{vdl.ValueOf("v.io/v23/syncbase/nosql/internal/query/test.AgencyReport")},
 				[]*vdl.Value{vdl.ValueOf(nil)},
 				[]*vdl.Value{vdl.ValueOf(nil)},
 				[]*vdl.Value{vdl.ValueOf(nil)},
-				[]*vdl.Value{vdl.ValueOf("v.io/syncbase/v23/syncbase/nosql/internal/query/test.AgencyReport")},
+				[]*vdl.Value{vdl.ValueOf("v.io/v23/syncbase/nosql/internal/query/test.AgencyReport")},
 				[]*vdl.Value{vdl.ValueOf(nil)},
 				[]*vdl.Value{vdl.ValueOf(nil)},
 				[]*vdl.Value{vdl.ValueOf(nil)},
 				[]*vdl.Value{vdl.ValueOf(nil)},
-				[]*vdl.Value{vdl.ValueOf("v.io/syncbase/v23/syncbase/nosql/internal/query/test.AgencyReport")},
+				[]*vdl.Value{vdl.ValueOf("v.io/v23/syncbase/nosql/internal/query/test.AgencyReport")},
 			},
 		},
 		{
@@ -539,7 +539,7 @@ func TestQueryExec(t *testing.T) {
 			"select Type(v.Credit.Report.EquifaxReport) from Customer where Type(v) like \"%.Customer\"",
 			[]string{"Type"},
 			[][]*vdl.Value{
-				[]*vdl.Value{vdl.ValueOf("v.io/syncbase/v23/syncbase/nosql/internal/query/test.EquifaxCreditReport")},
+				[]*vdl.Value{vdl.ValueOf("v.io/v23/syncbase/nosql/internal/query/test.EquifaxCreditReport")},
 				[]*vdl.Value{vdl.ValueOf(vdl.ValueOf(nil))},
 				[]*vdl.Value{vdl.ValueOf(vdl.ValueOf(nil))},
 			},
@@ -636,7 +636,7 @@ func TestQueryExec(t *testing.T) {
 		},
 		{
 			// Select keys & values for all customer records.
-			"select k, v from Customer where \"v.io/syncbase/v23/syncbase/nosql/internal/query/test.Customer\" = Type(v)",
+			"select k, v from Customer where \"v.io/v23/syncbase/nosql/internal/query/test.Customer\" = Type(v)",
 			[]string{"k", "v"},
 			[][]*vdl.Value{
 				[]*vdl.Value{vdl.ValueOf(custTable.rows[0].key), custTable.rows[0].value},
@@ -1907,7 +1907,7 @@ func TestQueryExec(t *testing.T) {
 			"select Len(Split(Type(v), \"\")) from Customer where k = \"001\"",
 			[]string{"Len"},
 			[][]*vdl.Value{
-				[]*vdl.Value{vdl.ValueOf(int64(len("v.io/syncbase/v23/syncbase/nosql/internal/query/test.Customer")))},
+				[]*vdl.Value{vdl.ValueOf(int64(len("v.io/v23/syncbase/nosql/internal/query/test.Customer")))},
 			},
 		},
 		{
@@ -2384,7 +2384,7 @@ func TestEvalWhereUsingOnlyKey(t *testing.T) {
 func TestEval(t *testing.T) {
 	basic := []evalTest{
 		{
-			"select k, v from Customer where Type(v) = \"v.io/syncbase/v23/syncbase/nosql/internal/query/test.Customer\"",
+			"select k, v from Customer where Type(v) = \"v.io/v23/syncbase/nosql/internal/query/test.Customer\"",
 			custTable.rows[0].key, custTable.rows[0].value, true,
 		},
 		{

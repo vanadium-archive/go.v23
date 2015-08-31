@@ -9,10 +9,10 @@ import (
 	"reflect"
 	"sync"
 
-	wire "v.io/syncbase/v23/services/syncbase/nosql"
-	"v.io/syncbase/v23/syncbase/util"
 	"v.io/v23/context"
+	wire "v.io/v23/services/syncbase/nosql"
 	"v.io/v23/services/watch"
+	"v.io/v23/syncbase/util"
 	"v.io/v23/vdl"
 	"v.io/v23/verror"
 )

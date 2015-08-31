@@ -5,12 +5,12 @@
 package syncbase
 
 import (
-	wire "v.io/syncbase/v23/services/syncbase"
-	"v.io/syncbase/v23/syncbase/nosql"
-	"v.io/syncbase/v23/syncbase/util"
 	"v.io/v23/context"
 	"v.io/v23/naming"
 	"v.io/v23/security/access"
+	wire "v.io/v23/services/syncbase"
+	"v.io/v23/syncbase/nosql"
+	"v.io/v23/syncbase/util"
 )
 
 func newApp(parentFullName, relativeName string) App {

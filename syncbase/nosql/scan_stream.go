@@ -7,8 +7,8 @@ package nosql
 import (
 	"sync"
 
-	wire "v.io/syncbase/v23/services/syncbase/nosql"
 	"v.io/v23/context"
+	wire "v.io/v23/services/syncbase/nosql"
 	"v.io/v23/verror"
 	"v.io/v23/vom"
 )

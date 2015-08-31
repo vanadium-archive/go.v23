@@ -8,9 +8,9 @@ import (
 	"regexp"
 	"strings"
 
-	wire "v.io/syncbase/v23/services/syncbase"
 	"v.io/v23/context"
 	"v.io/v23/security/access"
+	wire "v.io/v23/services/syncbase"
 	"v.io/v23/verror"
 )
 

@@ -9,11 +9,11 @@ import (
 	"reflect"
 	"strconv"
 
-	"v.io/syncbase/v23/syncbase/nosql/internal/query/query_checker"
-	"v.io/syncbase/v23/syncbase/nosql/internal/query/query_functions"
-	"v.io/syncbase/v23/syncbase/nosql/internal/query/query_parser"
-	"v.io/syncbase/v23/syncbase/nosql/query_db"
-	"v.io/syncbase/v23/syncbase/nosql/syncql"
+	"v.io/v23/syncbase/nosql/internal/query/query_checker"
+	"v.io/v23/syncbase/nosql/internal/query/query_functions"
+	"v.io/v23/syncbase/nosql/internal/query/query_parser"
+	"v.io/v23/syncbase/nosql/query_db"
+	"v.io/v23/syncbase/nosql/syncql"
 	"v.io/v23/vdl"
 )
 

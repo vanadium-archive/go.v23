@@ -7,9 +7,9 @@ package query_exec
 import (
 	"strconv"
 	"strings"
-	"v.io/syncbase/v23/syncbase/nosql"
-	"v.io/syncbase/v23/syncbase/nosql/internal/query"
-	"v.io/syncbase/v23/syncbase/nosql/query_db"
+	"v.io/v23/syncbase/nosql"
+	"v.io/v23/syncbase/nosql/internal/query"
+	"v.io/v23/syncbase/nosql/query_db"
 )
 
 // Exec executes a syncQL query and returns all results as specified by

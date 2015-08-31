@@ -7,9 +7,9 @@ package syncbase_test
 import (
 	"testing"
 
-	"v.io/syncbase/v23/syncbase"
-	tu "v.io/syncbase/v23/syncbase/testutil"
 	"v.io/v23/naming"
+	"v.io/v23/syncbase"
+	tu "v.io/v23/syncbase/testutil"
 	_ "v.io/x/ref/runtime/factories/generic"
 )
 

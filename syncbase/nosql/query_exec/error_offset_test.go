@@ -9,10 +9,10 @@ import (
 	"fmt"
 	"testing"
 
-	"v.io/syncbase/v23/syncbase/nosql/query_db"
-	"v.io/syncbase/v23/syncbase/nosql/syncql"
 	"v.io/v23"
 	"v.io/v23/context"
+	"v.io/v23/syncbase/nosql/query_db"
+	"v.io/v23/syncbase/nosql/syncql"
 	_ "v.io/x/ref/runtime/factories/generic"
 	"v.io/x/ref/test"
 )

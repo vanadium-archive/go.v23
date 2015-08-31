@@ -10,15 +10,14 @@ import (
 	"testing"
 	"time"
 
-	wire "v.io/syncbase/v23/services/syncbase/nosql"
-	"v.io/syncbase/v23/syncbase/nosql/crtestutil"
 	"v.io/v23/context"
+	wire "v.io/v23/services/syncbase/nosql"
+	"v.io/v23/syncbase/nosql/crtestutil"
 	"v.io/v23/vom"
 )
 
 // TODO(jlodhia): extract this test (along with the crtest helpers) to
 // nosql_test, or alternatively, move the crtest helper to an internal dir.
-
 
 ////////////////////////////////////////
 // Client Code
@@ -368,7 +367,6 @@ func addDeleteConflictStream(t *testing.T) ([]wire.ConflictInfo, map[string]wire
 	row1.BatchIds = []uint16{1}
 	c1 := makeConflictInfo(row1, true)
 
-
 	// Expected result
 	r1 := makeResolution(Task1, nil, wire.ValueSelectionOther)
 
@@ -541,7 +539,7 @@ func makeConflictBatch(id uint16, hint string, source wire.BatchSource, continue
 
 func makeConflictInfo(row wire.RowInfo, continued bool) wire.ConflictInfo {
 	return wire.ConflictInfo{
-		Data: wire.ConflictDataRow{Value: row},
+		Data:      wire.ConflictDataRow{Value: row},
 		Continued: continued,
 	}
 }

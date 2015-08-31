@@ -7,7 +7,7 @@ package crtestutil
 import (
 	"sync"
 
-	wire "v.io/syncbase/v23/services/syncbase/nosql"
+	wire "v.io/v23/services/syncbase/nosql"
 )
 
 var _ wire.ConflictManagerStartConflictResolverClientCall = (*CrStreamImpl)(nil)
