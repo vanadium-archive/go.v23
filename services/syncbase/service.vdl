@@ -1,0 +1,47 @@
+// Copyright 2015 The Vanadium Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style
+// license that can be found in the LICENSE file.
+
+// Package syncbase defines the wire API for a structured store that supports
+// peer-to-peer synchronization.
+//
+// TODO(sadovsky): Write a detailed package description.
+package syncbase
+
+import (
+  "v.io/v23/security/access"
+  "v.io/v23/services/permissions"
+)
+
+// NOTE(sadovsky): Various methods below may end up needing additional options.
+
+// Service represents a Vanadium Syncbase service.
+// Service.Glob operates over App names.
+type Service interface {
+	// SetPermissions and GetPermissions are included from the Object interface.
+	permissions.Object
+}
+
+// App represents the data for a specific app instance (possibly a combination
+// of user, device, and app).
+// App.Glob operates over Database names.
+type App interface {
+	// Create creates this App.
+	// If perms is nil, we inherit (copy) the Service perms.
+	// Create requires the caller to have Write permission at the Service.
+	Create(perms access.Permissions) error {access.Write}
+
+	// Delete deletes this App.
+	Delete() error {access.Write}
+
+	// Exists returns true only if this App exists. Insufficient permissions
+	// cause Exists to return false instead of an error.
+	Exists() (bool | error) {access.Read}
+
+	// SetPermissions and GetPermissions are included from the Object interface.
+	permissions.Object
+}
+
+error (
+	InvalidName(name string) {"en": "invalid name: {name}"}
+)

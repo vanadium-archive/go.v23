@@ -1,0 +1,359 @@
+// Copyright 2015 The Vanadium Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style
+// license that can be found in the LICENSE file.
+
+// Package nosql defines the wire API for the NoSQL part of Syncbase.
+package nosql
+
+import (
+	"v.io/v23/security/access"
+	"v.io/v23/services/permissions"
+	"v.io/v23/services/watch"
+)
+
+// Database represents a collection of Tables. Batches, queries, sync, watch,
+// etc. all operate at the Database level.
+// Database.Glob operates over Table names.
+// Param schemaVersion is the version number that the client expects the database
+// to be at. To disable schema version checking, pass -1.
+//
+// TODO(sadovsky): Add Watch method.
+type Database interface {
+	// Create creates this Database.
+	// If perms is nil, we inherit (copy) the App perms.
+	// Create requires the caller to have Write permission at the App.
+	Create(metadata ?SchemaMetadata, perms access.Permissions) error {access.Write}
+
+	// Delete deletes this Database.
+	Delete(schemaVersion int32) error {access.Write}
+
+	// Exists returns true only if this Database exists. Insufficient permissions
+	// cause Exists to return false instead of an error.
+	// TODO(ivanpi): Exists may fail with an error if higher levels of hierarchy
+	// do not exist.
+	Exists(schemaVersion int32) (bool | error) {access.Read}
+
+	// Exec executes a syncQL query and returns all results as specified by in the
+	// query's select clause. Concurrency semantics are documented in model.go.
+	Exec(schemaVersion int32, query string) stream<_, []any> error {access.Read}
+
+	// BeginBatch creates a new batch. It returns an App-relative name for a
+	// Database handle bound to this batch. If this Database is already bound to a
+	// batch, BeginBatch() will fail with ErrBoundToBatch. Concurrency semantics
+	// are documented in model.go.
+	// TODO(sadovsky): make BatchOptions optional
+	BeginBatch(schemaVersion int32, bo BatchOptions) (string | error) {access.Read}
+
+	// Commit persists the pending changes to the database.
+	// If this Database is not bound to a batch, Commit() will fail with
+	// ErrNotBoundToBatch.
+	Commit(schemaVersion int32) error {access.Read}
+
+	// Abort notifies the server that any pending changes can be discarded.
+	// It is not strictly required, but it may allow the server to release locks
+	// or other resources sooner than if it was not called.
+	// If this Database is not bound to a batch, Abort() will fail with
+	// ErrNotBoundToBatch.
+	Abort(schemaVersion int32) error {access.Read}
+
+	// SetPermissions and GetPermissions are included from the Object interface.
+	permissions.Object
+
+	// DatabaseWatcher implements the API to watch for updates in the database.
+	DatabaseWatcher
+
+	// SyncGroupManager implements the API for managing SyncGroups attached to a
+	// Database.
+	SyncGroupManager
+
+	// BlobManager implements the API for managing blobs attached to rows in
+	// a Database.
+	BlobManager
+
+	// SchemaManager implements the API for managing schema metadata attached
+	// to a Database.
+	SchemaManager
+
+	// ConflictManager implements the API for registering resolvers, receiving
+	// conflicts and sending resolutions.
+	ConflictManager
+}
+
+// Table represents a collection of Rows.
+// Table.Glob operates over the primary keys of Rows in the Table.
+// SchemaVersion is the version number that the client expects the database
+// to be at. To disable schema version checking, pass -1.
+type Table interface {
+	// Create creates this Table.
+	// If perms is nil, we inherit (copy) the Database perms.
+	Create(schemaVersion int32, perms access.Permissions) error {access.Write}
+
+	// Delete deletes this Table.
+	Delete(schemaVersion int32) error {access.Write}
+
+	// Exists returns true only if this Table exists. Insufficient permissions
+	// cause Exists to return false instead of an error.
+	// TODO(ivanpi): Exists may fail with an error if higher levels of hierarchy
+	// do not exist.
+	Exists(schemaVersion int32) (bool | error) {access.Read}
+
+	// Delete deletes all rows in the given half-open range [start, limit). If
+	// limit is "", all rows with keys >= start are included.
+	// TODO(sadovsky): Delete prefix perms fully covered by the row range?
+	DeleteRowRange(schemaVersion int32, start, limit []byte) error {access.Write}
+
+	// Scan returns all rows in the given half-open range [start, limit). If limit
+	// is "", all rows with keys >= start are included. Concurrency semantics are
+	// documented in model.go.
+	Scan(schemaVersion int32, start, limit []byte) stream<_, KeyValue> error {access.Read}
+
+	// GetPermissions returns an array of (prefix, perms) pairs. The array is
+	// sorted from longest prefix to shortest, so element zero is the one that
+	// applies to the row with the given key. The last element is always the
+	// prefix "" which represents the table's permissions -- the array will always
+	// have at least one element.
+	GetPermissions(schemaVersion int32, key string) ([]PrefixPermissions | error) {access.Admin}
+
+	// SetPermissions sets the permissions for all current and future rows with
+	// the given prefix. If the prefix overlaps with an existing prefix, the
+	// longest prefix that matches a row applies. For example:
+	//     SetPermissions(ctx, Prefix("a/b"), perms1)
+	//     SetPermissions(ctx, Prefix("a/b/c"), perms2)
+	// The permissions for row "a/b/1" are perms1, and the permissions for row
+	// "a/b/c/1" are perms2.
+	SetPermissions(schemaVersion int32, prefix string, perms access.Permissions) error {access.Admin}
+
+	// DeletePermissions deletes the permissions for the specified prefix. Any
+	// rows covered by this prefix will use the next longest prefix's permissions
+	// (see the array returned by GetPermissions).
+	DeletePermissions(schemaVersion int32, prefix string) error {access.Admin}
+}
+
+// Row represents a single row in a Table.
+// All access checks are performed against the most specific matching prefix
+// permissions in the Table.
+// SchemaVersion is the version number that the client expects the database
+// to be at. To disable schema version checking, pass -1.
+// NOTE(sadovsky): Currently we send []byte values over the wire for Get, Put,
+// and Scan. If there's a way to avoid encoding/decoding on the server side, we
+// can use vdl.Value everywhere without sacrificing performance.
+type Row interface {
+	// Exists returns true only if this Row exists. Insufficient permissions
+	// cause Exists to return false instead of an error.
+	// TODO(ivanpi): Exists may fail with an error if higher levels of hierarchy
+	// do not exist.
+	Exists(schemaVersion int32) (bool | error) {access.Read}
+
+	// Get returns the value for this Row.
+	Get(schemaVersion int32) ([]byte | error) {access.Read}
+
+	// Put writes the given value for this Row.
+	Put(schemaVersion int32, value []byte) error {access.Write}
+
+	// Delete deletes this Row.
+	Delete(schemaVersion int32) error {access.Write}
+}
+
+// SyncGroupManager is the interface for SyncGroup operations.
+// TODO(hpucha): Add blessings to create/join and add a refresh method.
+type SyncGroupManager interface {
+	// GetSyncGroupNames returns the global names of all SyncGroups attached to
+	// this database.
+	GetSyncGroupNames() ([]string | error) {access.Read}
+
+	// CreateSyncGroup creates a new SyncGroup with the given spec.
+	//
+	// Requires: Client must have at least Read access on the Database; prefix ACL
+	// must exist at each SyncGroup prefix; Client must have at least Read access
+	// on each of these prefix ACLs.
+	CreateSyncGroup(sgName string, spec SyncGroupSpec, myInfo SyncGroupMemberInfo) error {access.Read}
+
+	// JoinSyncGroup joins the SyncGroup.
+	//
+	// Requires: Client must have at least Read access on the Database and on the
+	// SyncGroup ACL.
+	JoinSyncGroup(sgName string, myInfo SyncGroupMemberInfo) (spec SyncGroupSpec | error) {access.Read}
+
+	// LeaveSyncGroup leaves the SyncGroup. Previously synced data will continue
+	// to be available.
+	//
+	// Requires: Client must have at least Read access on the Database.
+	LeaveSyncGroup(sgName string) error {access.Read}
+
+	// DestroySyncGroup destroys the SyncGroup. Previously synced data will
+	// continue to be available to all members.
+	//
+	// Requires: Client must have at least Read access on the Database, and must
+	// have Admin access on the SyncGroup ACL.
+	DestroySyncGroup(sgName string) error {access.Read}
+
+	// EjectFromSyncGroup ejects a member from the SyncGroup. The ejected member
+	// will not be able to sync further, but will retain any data it has already
+	// synced.
+	//
+	// Requires: Client must have at least Read access on the Database, and must
+	// have Admin access on the SyncGroup ACL.
+	EjectFromSyncGroup(sgName, member string) error {access.Read}
+
+	// GetSyncGroupSpec gets the SyncGroup spec. version allows for atomic
+	// read-modify-write of the spec - see comment for SetSyncGroupSpec.
+	//
+	// Requires: Client must have at least Read access on the Database and on the
+	// SyncGroup ACL.
+	GetSyncGroupSpec(sgName string) (spec SyncGroupSpec, version string | error) {access.Read}
+
+	// SetSyncGroupSpec sets the SyncGroup spec. version may be either empty or
+	// the value from a previous Get. If not empty, Set will only succeed if the
+	// current version matches the specified one.
+	//
+	// Requires: Client must have at least Read access on the Database, and must
+	// have Admin access on the SyncGroup ACL.
+	SetSyncGroupSpec(sgName string, spec SyncGroupSpec, version string) error {access.Read}
+
+	// GetSyncGroupMembers gets the info objects for members of the SyncGroup.
+	//
+	// Requires: Client must have at least Read access on the Database and on the
+	// SyncGroup ACL.
+	GetSyncGroupMembers(sgName string) (members map[string]SyncGroupMemberInfo | error) {access.Read}
+
+	// TODO(hpucha): Add support for client-side conflict resolution and sync
+	// policies.
+	// StartConflictResolution(name string) stream<ResolutionInfo, ConflictInfo> error
+	// Suspend/ResumeSync
+	// Get/SetSyncPolicy with policies such as "sync only via wifi", "sync
+	// aggressively", "sync once per day".
+}
+
+// SchemaManager implements the API for managing schema metadata attached
+// to a Database.
+type SchemaManager interface {
+	// GetSchemaMetadata retrieves schema metadata for this database.
+	//
+	// Requires: Client must have at least Read access on the Database.
+	GetSchemaMetadata() (SchemaMetadata | error) {access.Read}
+
+	// SetSchemaMetadata stores schema metadata for this database.
+	//
+	// Requires: Client must have at least Write access on the Database.
+	SetSchemaMetadata(metadata SchemaMetadata) error {access.Write}
+}
+
+// ConflictManager interface provides all the methods necessary to handle
+// conflict resolution for a given database.
+type ConflictManager interface {
+	// StartConflictResolver registers a resolver for the database that is
+	// associated with this ConflictManager and creates a stream to receive
+	// conflicts and send resolutions.
+	// Batches of ConflictInfos will be sent over with the Continued field
+	// within the ConflictInfo representing the batch boundary. Client must
+	// respond with a batch of ResolutionInfos in the same fashion.
+	// A key is under conflict if two different values were written to it
+	// concurrently (in logical time), i.e. neither value is an ancestor of the
+	// other in the history graph.
+	// A key under conflict can be a part of a batch committed on local or
+	// remote or both syncbases. ConflictInfos for all keys in these two batches
+	// are grouped together. These keys may themselves be under conflict; the
+	// presented batch is a transitive closure of all batches containing keys
+	// under conflict.
+	// For example, for local batch {key1, key2} and remote batch {key1, key3},
+	// the batch sent for conflict resolution will be {key1, key2, key3}.
+	// If there was another concurrent batch {key2, key4}, then the batch sent
+	// for conflict resolution will be {key1, key2, key3, key4}.
+	StartConflictResolver() stream<ResolutionInfo, ConflictInfo> error {access.Write}
+}
+
+// BlobManager is the interface for blob operations.
+type BlobManager interface {
+	// API for resumable blob creation (append-only). After commit, a blob
+	// is immutable. Before commit, the BlobRef can be used with PutBlob,
+	// GetBlobSize, DeleteBlob, and CommitBlob. After commit, PutBlob and
+	// CommitBlob can no longer be used. Blob creation can be resumed by
+	// obtaining the current blob size with GetBlobSize and appending to the
+	// blob via PutBlob.
+	//
+	// CreateBlob returns a BlobRef for a newly created blob.
+	CreateBlob() (br BlobRef | error) {access.Write}
+
+	// PutBlob appends the byte stream to the blob.
+	PutBlob(br BlobRef) stream<[]byte, _> error {access.Write}
+
+	// CommitBlob marks the blob as immutable.
+	CommitBlob(br BlobRef) error {access.Write}
+
+	// GetBlobSize returns the count of bytes written as part of the blob
+	// (committed or uncommitted).
+	GetBlobSize(br BlobRef) (int64 | error) {access.Read}
+
+	// DeleteBlob locally deletes the blob (committed or uncommitted).
+	DeleteBlob(br BlobRef) error {access.Write}
+
+	// GetBlob returns the byte stream from a committed blob starting at offset.
+	GetBlob(br BlobRef, offset int64) stream<_, []byte> error {access.Read}
+
+	// FetchBlob initiates fetching a blob if not locally found. priority
+	// controls the network priority of the blob. Higher priority blobs are
+	// fetched before the lower priority ones. However an ongoing blob
+	// transfer is not interrupted. Status updates are streamed back to the
+	// client as fetch is in progress.
+	FetchBlob(br BlobRef, priority uint64) stream<_, BlobFetchStatus> error {access.Read}
+
+	// PinBlob locally pins the blob so that it is not evicted.
+	PinBlob(br BlobRef) error {access.Write}
+
+	// UnpinBlob locally unpins the blob so that it can be evicted if needed.
+	UnpinBlob(br BlobRef) error {access.Write}
+
+	// KeepBlob locally caches the blob with the specified rank. Lower
+	// ranked blobs are more eagerly evicted.
+	KeepBlob(br BlobRef, rank uint64) error {access.Write}
+
+	// TODO(hpucha): Clarify how to pick priority and rank. Add API for
+	// efficient blob cloning. Options include: (1) CloneBlob RPC with an
+	// array of mods that specify the offset and len for the new bytes. This
+	// might need two len fields to support growing a blob in the middle
+	// instead of just replacing byte for byte in the src blob. Or perhaps
+	// Offset>=0 to mean "read from old blob at this offset for Length
+	// bytes", and Offset<0 to mean "read the next Length Bytes from the
+	// PutBlob() stream". (2) We could adopt API similar to the local blob
+	// store with BlockOrFile segments, giving a more flexible way to clone
+	// blobs. Also provide support for parallel blob upload.
+}
+
+// DatabaseWatcher allows a client to watch for updates in the database.
+// For each watched request, the client will receive a reliable stream of watch
+// events without re-ordering. See watch.GlobWatcher for a detailed explanation
+// of the behavior.
+// TODO(rogulenko): Currently the only supported watch patterns are
+// 'table/row*'. Consider changing that.
+//
+// The watching is done by starting a streaming RPC. The argument to the RPC
+// contains the ResumeMarker that points to a particular place in the database
+// event log. The result stream consists of a never-ending sequence of Change
+// messages (until the call fails or is canceled). Each Change contains the
+// Name field in the form "<tableName>/<rowKey>" and the Value field of the
+// StoreChange type. If the client has no access to a row specified in a change,
+// that change is excluded from the result stream.
+//
+// The DatabaseWatcher is designed to be used in the following way:
+// 1) begin a read-only batch
+// 2) read all information your app needs
+// 3) read the ResumeMarker
+// 4) abort the batch
+// 5) start watching changes to the data using the ResumeMarker
+// In this configuration the client doesn't miss any changes.
+type DatabaseWatcher interface {
+	watch.GlobWatcher
+
+	// GetResumeMarker returns the ResumeMarker that points to the current end
+	// of the event log. GetResumeMarker() can be called on a batch.
+	GetResumeMarker() (watch.ResumeMarker | error) {access.Read}
+}
+
+error (
+	BoundToBatch() {"en": "bound to batch"}
+	NotBoundToBatch() {"en": "not bound to batch"}
+	ReadOnlyBatch() {"en": "batch is read-only"}
+	ConcurrentBatch() {"en": "concurrent batch"}
+	SchemaVersionMismatch() {"en": "actual schema version does not match the provided one"}
+	BlobNotCommitted() {"en": "blob is not yet committed"}
+)
