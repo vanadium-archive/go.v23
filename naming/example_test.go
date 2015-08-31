@@ -35,9 +35,9 @@ func ExampleMakeName() {
 	fmt.Printf("Rooted join: %q\n", naming.Join("/a", "b"))
 
 	// Output:
-	// Name: "/@5@tcp@localhost:0@@@@@/example/foo"
-	// Name for you: "/@5@tcp@v.google.com:8080@@@@@/users/you/yourservice"
-	// Same name for you: "/@5@tcp@v.google.com:8080@@@@@/users/you/yourservice"
+	// Name: "/@6@tcp@localhost:0@@@@@@/example/foo"
+	// Name for you: "/@6@tcp@v.google.com:8080@@@@@@/users/you/yourservice"
+	// Same name for you: "/@6@tcp@v.google.com:8080@@@@@@/users/you/yourservice"
 	// Simple join: "a/b"
 	// Rooted join: "/a/b"
 }
