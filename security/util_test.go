@@ -79,7 +79,7 @@ var suffixCaveat = CaveatDescriptor{
 
 func newSuffixCaveat(suffix string) Caveat { return newCaveat(NewCaveat(suffixCaveat, suffix)) }
 
-func newECDSASigner(t *testing.T, curve elliptic.Curve) Signer {
+func newECDSASigner(t testing.TB, curve elliptic.Curve) Signer {
 	key, err := ecdsa.GenerateKey(curve, rand.Reader)
 	if err != nil {
 		t.Fatalf("Failed to generate ECDSA key: %v", err)
@@ -87,7 +87,7 @@ func newECDSASigner(t *testing.T, curve elliptic.Curve) Signer {
 	return NewInMemoryECDSASigner(key)
 }
 
-func newPrincipal(t *testing.T) Principal {
+func newPrincipal(t testing.TB) Principal {
 	p, err := CreatePrincipal(newECDSASigner(t, elliptic.P256()), nil, &roots{})
 	if err != nil {
 		t.Fatalf("CreatePrincipal failed: %v", err)
