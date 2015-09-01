@@ -914,6 +914,29 @@ func TestRemoteBlessingNames(t *testing.T) {
 	}
 }
 
+func BenchmarkRemoteBlessingNames(b *testing.B) {
+	p := newPrincipal(b)
+	local, err := p.BlessSelf("local")
+	if err != nil {
+		b.Fatal(err)
+	}
+	remote, err := p.Bless(newPrincipal(b).PublicKey(), local, "delegate", UnconstrainedUse())
+	if err != nil {
+		b.Fatal(err)
+	}
+	p.AddToRoots(remote)
+	ctx, cancel := context.RootContext()
+	defer cancel()
+	call := NewCall(&CallParams{
+		LocalPrincipal:  p,
+		RemoteBlessings: remote})
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		RemoteBlessingNames(ctx, call)
+	}
+	b.StopTimer() // So the cancel() call isn't included.
+}
+
 func TestSigningBlessings(t *testing.T) {
 	var (
 		google = newPrincipal(t)
