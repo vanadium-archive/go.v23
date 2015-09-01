@@ -602,7 +602,7 @@ type ServerCall interface {
 	// and LocalBlessings respectively).
 	GrantedBlessings() security.Blessings
 	// Server returns the Server that this context is associated with.
-	Server() Server
+	Server() XServer
 }
 
 // CallOpt is the interface for all Call options.
