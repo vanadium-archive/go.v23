@@ -118,6 +118,9 @@ error (
 	LimitMustBeGe0(off int64) {
 		"en": "[{off}]Limit must be > 0.",
 	}
+	MaxStatementLenExceeded(off, max, found int64) {
+		"en": "[{off}]Maximum length of statements is {max}; found {found}.",
+	}
 	NoStatementFound(off int64) {
 		"en": "[{off}]No statement found.",
 	}

@@ -52,6 +52,7 @@ var (
 	ErrKeyValueStreamError             = verror.Register("v.io/v23/syncbase/nosql/syncql.KeyValueStreamError", verror.NoRetry, "{1:}{2:} [{3}]KeyValueStream error: {4}.")
 	ErrLikeExpressionsRequireRhsString = verror.Register("v.io/v23/syncbase/nosql/syncql.LikeExpressionsRequireRhsString", verror.NoRetry, "{1:}{2:} [{3}]Like expressions require right operand of type <string-literal>.")
 	ErrLimitMustBeGe0                  = verror.Register("v.io/v23/syncbase/nosql/syncql.LimitMustBeGe0", verror.NoRetry, "{1:}{2:} [{3}]Limit must be > 0.")
+	ErrMaxStatementLenExceeded         = verror.Register("v.io/v23/syncbase/nosql/syncql.MaxStatementLenExceeded", verror.NoRetry, "{1:}{2:} [{3}]Maximum length of statements is {4}; found {5}.")
 	ErrNoStatementFound                = verror.Register("v.io/v23/syncbase/nosql/syncql.NoStatementFound", verror.NoRetry, "{1:}{2:} [{3}]No statement found.")
 	ErrOffsetMustBeGe0                 = verror.Register("v.io/v23/syncbase/nosql/syncql.OffsetMustBeGe0", verror.NoRetry, "{1:}{2:} [{3}]Offset must be > 0.")
 	ErrScanError                       = verror.Register("v.io/v23/syncbase/nosql/syncql.ScanError", verror.NoRetry, "{1:}{2:} [{3}]Scan error: {4}.")
@@ -102,6 +103,7 @@ func init() {
 	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrKeyValueStreamError.ID), "{1:}{2:} [{3}]KeyValueStream error: {4}.")
 	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrLikeExpressionsRequireRhsString.ID), "{1:}{2:} [{3}]Like expressions require right operand of type <string-literal>.")
 	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrLimitMustBeGe0.ID), "{1:}{2:} [{3}]Limit must be > 0.")
+	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrMaxStatementLenExceeded.ID), "{1:}{2:} [{3}]Maximum length of statements is {4}; found {5}.")
 	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrNoStatementFound.ID), "{1:}{2:} [{3}]No statement found.")
 	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrOffsetMustBeGe0.ID), "{1:}{2:} [{3}]Offset must be > 0.")
 	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrScanError.ID), "{1:}{2:} [{3}]Scan error: {4}.")
@@ -297,6 +299,11 @@ func NewErrLikeExpressionsRequireRhsString(ctx *context.T, off int64) error {
 // NewErrLimitMustBeGe0 returns an error with the ErrLimitMustBeGe0 ID.
 func NewErrLimitMustBeGe0(ctx *context.T, off int64) error {
 	return verror.New(ErrLimitMustBeGe0, ctx, off)
+}
+
+// NewErrMaxStatementLenExceeded returns an error with the ErrMaxStatementLenExceeded ID.
+func NewErrMaxStatementLenExceeded(ctx *context.T, off int64, max int64, found int64) error {
+	return verror.New(ErrMaxStatementLenExceeded, ctx, off, max, found)
 }
 
 // NewErrNoStatementFound returns an error with the ErrNoStatementFound ID.

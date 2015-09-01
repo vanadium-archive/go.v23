@@ -5,7 +5,9 @@
 package query_parser_test
 
 import (
+	"fmt"
 	"reflect"
+	"strings"
 	"testing"
 
 	"v.io/v23"
@@ -2687,5 +2689,14 @@ func TestQueryParserErrors(t *testing.T) {
 		if verror.ErrorID(err) != verror.ErrorID(test.err) || err.Error() != test.err.Error() {
 			t.Errorf("query: %s; got %v, want %v", test.query, err, test.err)
 		}
+	}
+}
+
+func TestStatementSizeExceeded(t *testing.T) {
+	q := fmt.Sprintf("select a from b where c = \"%s\"", strings.Repeat("x", 12000))
+	_, err := query_parser.Parse(&db, q)
+	expectedErr := syncql.NewErrMaxStatementLenExceeded(db.GetContext(), int64(0), query_parser.MaxStatementLen, int64(len(q)))
+	if verror.ErrorID(err) != verror.ErrorID(expectedErr) || err.Error() != expectedErr.Error() {
+		t.Errorf("query: %s; got %v, want %v", q, err, expectedErr)
 	}
 }

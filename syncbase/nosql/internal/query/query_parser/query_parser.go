@@ -40,6 +40,10 @@ const (
 	TokSTRING
 )
 
+const (
+	MaxStatementLen = 10000
+)
+
 type Token struct {
 	Tok   TokenType
 	Value string
@@ -279,6 +283,9 @@ func scannerError(s *scanner.Scanner, msg string) {
 
 // Parse a statement.  Return it or an error.
 func Parse(db query_db.Database, src string) (*Statement, error) {
+	if len(src) > MaxStatementLen {
+		return nil, syncql.NewErrMaxStatementLenExceeded(db.GetContext(), int64(0), MaxStatementLen, int64(len(src)))
+	}
 	r := strings.NewReader(src)
 	var s scanner.Scanner
 	s.Init(r)
@@ -304,7 +311,6 @@ func Parse(db query_db.Database, src string) (*Statement, error) {
 
 // Parse the [currently] one and only supported statement: select.
 func selectStatement(db query_db.Database, s *scanner.Scanner, token *Token) (Statement, *Token, error) {
-	// TODO(jkline): keep a count of recursions and limit it to some arbitrary number.
 	var st SelectStatement
 	st.Off = token.Off
 
