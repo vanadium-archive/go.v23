@@ -334,6 +334,58 @@ func TestTablePerms(t *testing.T) {
 	}
 }
 
+// Tests that Table.{Set,Get}Permissions methods work as expected.
+func TestTablePermsDifferentOrder(t *testing.T) {
+	ctx, clientACtx, sName, rootp, cleanup := tu.SetupOrDieCustom("clientA", "server", nil)
+	defer cleanup()
+	clientBCtx := tu.NewCtx(ctx, rootp, "clientB")
+	a := tu.CreateApp(t, clientACtx, syncbase.NewService(sName), "a")
+	d := tu.CreateNoSQLDatabase(t, clientACtx, a, "d")
+	tb := tu.CreateTable(t, clientACtx, d, "tb")
+
+	// Permission objects.
+	aAndB := tu.DefaultPerms("root/clientA", "root/clientB")
+	aOnly := tu.DefaultPerms("root/clientA")
+	bOnly := tu.DefaultPerms("root/clientB")
+
+	// Set initial permissions.
+	if err := tb.SetPermissions(clientACtx, nosql.Prefix(""), aAndB); err != nil {
+		t.Fatalf("tb.SetPermissions() failed: %v", err)
+	}
+	if err := tb.SetPermissions(clientACtx, nosql.Prefix("prefix"), aAndB); err != nil {
+		t.Fatalf("tb.SetPermissions() failed: %v", err)
+	}
+	if err := tb.SetPermissions(clientBCtx, nosql.Prefix("prefix_b"), bOnly); err != nil {
+		t.Fatalf("tb.SetPermissions() failed: %v", err)
+	}
+	if err := tb.SetPermissions(clientACtx, nosql.Prefix("prefix_a"), aOnly); err != nil {
+		t.Fatalf("tb.SetPermissions() failed: %v", err)
+	}
+
+	wantPerms := []nosql.PrefixPermissions{
+		nosql.PrefixPermissions{Prefix: nosql.Prefix("prefix_a"), Perms: aOnly},
+		nosql.PrefixPermissions{Prefix: nosql.Prefix("prefix"), Perms: aAndB},
+		nosql.PrefixPermissions{Prefix: nosql.Prefix(""), Perms: aAndB},
+	}
+	if got, _ := tb.GetPermissions(clientACtx, "prefix_a"); !reflect.DeepEqual(got, wantPerms) {
+		t.Fatalf("Unexpected permissions: got %v, want %v", got, wantPerms)
+	}
+	if got, _ := tb.GetPermissions(clientACtx, "prefix_a_suffix"); !reflect.DeepEqual(got, wantPerms) {
+		t.Fatalf("Unexpected permissions: got %v, want %v", got, wantPerms)
+	}
+	wantPerms = []nosql.PrefixPermissions{
+		nosql.PrefixPermissions{Prefix: nosql.Prefix("prefix_b"), Perms: bOnly},
+		nosql.PrefixPermissions{Prefix: nosql.Prefix("prefix"), Perms: aAndB},
+		nosql.PrefixPermissions{Prefix: nosql.Prefix(""), Perms: aAndB},
+	}
+	if got, _ := tb.GetPermissions(clientACtx, "prefix_b"); !reflect.DeepEqual(got, wantPerms) {
+		t.Fatalf("Unexpected permissions: got %v, want %v", got, wantPerms)
+	}
+	if got, _ := tb.GetPermissions(clientACtx, "prefix_b_suffix"); !reflect.DeepEqual(got, wantPerms) {
+		t.Fatalf("Unexpected permissions: got %v, want %v", got, wantPerms)
+	}
+}
+
 ////////////////////////////////////////
 // Tests involving rows
 
