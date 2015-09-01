@@ -18,13 +18,13 @@ type EndpointOpt interface {
 // RoutingID, RPCVersionRange and ServesMountTable can be specified
 // as options.
 func FormatEndpoint(network, address string, opts ...EndpointOpt) string {
-	rid := "@"
+	var rid string
 	var blessings []string
 	mounttable := ""
 	for _, o := range opts {
 		switch v := o.(type) {
 		case RoutingID:
-			rid = "@" + v.String()
+			rid = v.String()
 		case ServesMountTable:
 			if bool(v) {
 				mounttable = "m"
@@ -36,5 +36,5 @@ func FormatEndpoint(network, address string, opts ...EndpointOpt) string {
 		}
 	}
 
-	return "@5@" + network + "@" + address + rid + "@" + mounttable + "@" + strings.Join(blessings, ",") + "@@"
+	return "@6@" + network + "@" + address + "@" + "@" + rid + "@" + mounttable + "@" + strings.Join(blessings, ",") + "@@"
 }
