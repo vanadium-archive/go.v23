@@ -1157,7 +1157,21 @@ func TestQueryExec(t *testing.T) {
 				[]*vdl.Value{vdl.ValueOf(custTable.rows[6].key)},
 			},
 		},
+		{
+			"select Str(v.Address) from Customer where Str(v.Id) = \"1\"",
+			[]string{"Str"},
+			[][]*vdl.Value{
+				[]*vdl.Value{vdl.ValueOf("v.io/v23/syncbase/nosql/internal/query/test.AddressInfo struct{Street string;City string;State string;Zip string}{Street: \"1 Main St.\", City: \"Palo Alto\", State: \"CA\", Zip: \"94303\"}")},
+			},
+		},
 		// Test string functions in where clause.
+		{
+			"select k from Customer where Str(v.Id) = \"1\"",
+			[]string{"k"},
+			[][]*vdl.Value{
+				[]*vdl.Value{vdl.ValueOf(custTable.rows[0].key)},
+			},
+		},
 		{
 			// Select invoices shipped to Any street -- using Lowercase.
 			"select k from Customer where Type(v) like \"%.Invoice\" and Lowercase(v.ShipTo.Street) like \"%any%\"",
@@ -1954,7 +1968,7 @@ func TestQueryExec(t *testing.T) {
 		},
 		{
 			// StrCat
-			"select StrCat(v.Address.City, 42) from Customer where v.Name = \"John Smith\"",
+			"select StrCat(v.Address.City, \"42\") from Customer where v.Name = \"John Smith\"",
 			[]string{"StrCat"},
 			[][]*vdl.Value{
 				[]*vdl.Value{vdl.ValueOf("Palo Alto42")},
@@ -2492,7 +2506,7 @@ func TestEval(t *testing.T) {
 			numTable.rows[0].key, numTable.rows[0].value, true,
 		},
 		{
-			"select k, v from Numbers where v.C64 = \"(123+7i)\"",
+			"select k, v from Numbers where Str(v.C64) = \"(123+7i)\"",
 			numTable.rows[0].key, numTable.rows[0].value, true,
 		},
 		{
@@ -2500,7 +2514,7 @@ func TestEval(t *testing.T) {
 			numTable.rows[0].key, numTable.rows[0].value, true,
 		},
 		{
-			"select k, v from Numbers where v.C128 = \"(456.789+10.1112i)\"",
+			"select k, v from Numbers where Str(v.C128) = \"(456.789+10.1112i)\"",
 			numTable.rows[0].key, numTable.rows[0].value, true,
 		},
 		{
@@ -2530,12 +2544,17 @@ func TestEval(t *testing.T) {
 		},
 		{
 			// Convert int64 to string
-			"select v from Customer where v.CustId = \"1\"",
+			"select v from Customer where Str(v.CustId) = \"1\"",
 			numTable.rows[0].key, custTable.rows[1].value, true,
 		},
 		{
 			// Convert bool to string
-			"select v from Customer where v.Active = \"true\"",
+			"select v from Customer where Str(v.Active) = \"true\"",
+			numTable.rows[0].key, custTable.rows[0].value, true,
+		},
+		{
+			// Compare bool
+			"select v from Customer where v.Active = true",
 			numTable.rows[0].key, custTable.rows[0].value, true,
 		},
 		{
@@ -2590,7 +2609,7 @@ func TestEval(t *testing.T) {
 			numTable.rows[0].key, numTable.rows[0].value, false,
 		},
 		{
-			"select v from Numbers where v.C128 = \"(456.789+10.1112i)\"",
+			"select v from Numbers where Str(v.C128) = \"(456.789+10.1112i)\"",
 			numTable.rows[0].key, numTable.rows[0].value, true,
 		},
 	}
@@ -2887,6 +2906,10 @@ func TestExecErrors(t *testing.T) {
 		{
 			"select Complex(\"foo\", 42) from Customer",
 			syncql.NewErrFloatConversionError(db.GetContext(), 15, errors.New("Cannot convert operand to float64.")),
+		},
+		{
+			"select StrCat(v.Address.City, 42) from Customer",
+			syncql.NewErrStringConversionError(db.GetContext(), 30, errors.New("Cannot convert operand to string.")),
 		},
 	}
 

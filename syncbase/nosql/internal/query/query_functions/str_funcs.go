@@ -5,6 +5,8 @@
 package query_functions
 
 import (
+	"fmt"
+	"strconv"
 	"strings"
 	"unicode"
 
@@ -14,6 +16,38 @@ import (
 	"v.io/v23/syncbase/nosql/syncql"
 	"v.io/v23/vdl"
 )
+
+func str(db query_db.Database, off int64, args []*query_parser.Operand) (*query_parser.Operand, error) {
+	o := args[0]
+	if strOp, err := conversions.ConvertValueToString(o); err == nil {
+		return strOp, nil
+	} else {
+		var c query_parser.Operand
+		c.Type = query_parser.TypStr
+		c.Off = o.Off
+		switch args[0].Type {
+		case query_parser.TypBigInt:
+			c.Str = o.BigInt.String()
+		case query_parser.TypBigRat:
+			c.Str = o.BigRat.String()
+		case query_parser.TypBool:
+			c.Str = strconv.FormatBool(o.Bool)
+		case query_parser.TypComplex:
+			c.Str = fmt.Sprintf("%g", o.Complex)
+		case query_parser.TypFloat:
+			c.Str = strconv.FormatFloat(o.Float, 'f', -1, 64)
+		case query_parser.TypInt:
+			c.Str = strconv.FormatInt(o.Int, 10)
+		case query_parser.TypTime:
+			c.Str = o.Time.Format("Mon Jan 2 15:04:05 -0700 MST 2006")
+		case query_parser.TypUint:
+			c.Str = strconv.FormatUint(o.Uint, 10)
+		case query_parser.TypObject:
+			c.Str = fmt.Sprintf("%v", o.Object)
+		}
+		return &c, nil
+	}
+}
 
 func lowerCase(db query_db.Database, off int64, args []*query_parser.Operand) (*query_parser.Operand, error) {
 	strOp, err := conversions.ConvertValueToString(args[0])

@@ -6,41 +6,23 @@ package conversions
 
 import (
 	"errors"
-	"fmt"
 	"math/big"
-	"strconv"
 	"strings"
 
 	"v.io/v23/syncbase/nosql/internal/query/query_parser"
 )
 
 func ConvertValueToString(o *query_parser.Operand) (*query_parser.Operand, error) {
+	// Other types must be explicitly converted to string with the Str() function.
 	var c query_parser.Operand
 	c.Type = query_parser.TypStr
 	c.Off = o.Off
 	switch o.Type {
-	case query_parser.TypBigInt:
-		c.Str = o.BigInt.String()
-	case query_parser.TypBigRat:
-		c.Str = o.BigRat.String()
-	case query_parser.TypBool:
-		c.Str = strconv.FormatBool(o.Bool)
-	case query_parser.TypComplex:
-		c.Str = fmt.Sprintf("%g", o.Complex)
-	case query_parser.TypFloat:
-		c.Str = strconv.FormatFloat(o.Float, 'f', -1, 64)
-	case query_parser.TypInt:
-		c.Str = strconv.FormatInt(o.Int, 10)
 	case query_parser.TypStr:
 		c.Str = o.Str
 		c.Regex = o.Regex         // non-empty for rhs of like expressions
 		c.CompRegex = o.CompRegex // non-nil for rhs of like expressions
-	case query_parser.TypUint:
-		c.Str = strconv.FormatUint(o.Uint, 10)
-	case query_parser.TypObject:
-		return nil, errors.New("Cannot convert object to string.")
 	default:
-		// TODO(jkline): Log this logic error and all other similar cases.
 		return nil, errors.New("Cannot convert operand to string.")
 	}
 	return &c, nil
