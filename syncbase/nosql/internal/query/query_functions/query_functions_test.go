@@ -680,6 +680,117 @@ func TestFunctions(t *testing.T) {
 				Int:  2,
 			},
 		},
+		// Sprintf
+		functionsTest{
+			&query_parser.Function{
+				Name: "Sprintf",
+				Args: []*query_parser.Operand{
+					&query_parser.Operand{
+						Type: query_parser.TypStr,
+						Str:  "abc%sghi%s",
+					},
+					&query_parser.Operand{
+						Type: query_parser.TypStr,
+						Str:  "def",
+					},
+					&query_parser.Operand{
+						Type: query_parser.TypStr,
+						Str:  "jkl",
+					},
+				},
+				ArgTypes: []query_parser.OperandType{
+					query_parser.TypStr,
+					query_parser.TypStr,
+					query_parser.TypStr,
+				},
+				RetType:  query_parser.TypStr,
+				Computed: false,
+				RetValue: nil,
+			},
+			[]*query_parser.Operand{
+				&query_parser.Operand{
+					Type: query_parser.TypStr,
+					Str:  "abc%sghi%s",
+				},
+				&query_parser.Operand{
+					Type: query_parser.TypStr,
+					Str:  "def",
+				},
+				&query_parser.Operand{
+					Type: query_parser.TypStr,
+					Str:  "jkl",
+				},
+			},
+			&query_parser.Operand{
+				Type: query_parser.TypStr,
+				Str:  "abcdefghijkl",
+			},
+		},
+		// Sprintf
+		functionsTest{
+			&query_parser.Function{
+				Name: "Sprintf",
+				Args: []*query_parser.Operand{
+					&query_parser.Operand{
+						Type: query_parser.TypStr,
+						Str:  "The meaning of life is %d.",
+					},
+					&query_parser.Operand{
+						Type: query_parser.TypInt,
+						Int:  42,
+					},
+				},
+				ArgTypes: []query_parser.OperandType{
+					query_parser.TypStr,
+					query_parser.TypStr,
+				},
+				RetType:  query_parser.TypStr,
+				Computed: false,
+				RetValue: nil,
+			},
+			[]*query_parser.Operand{
+				&query_parser.Operand{
+					Type: query_parser.TypStr,
+					Str:  "The meaning of life is %d.",
+				},
+				&query_parser.Operand{
+					Type: query_parser.TypInt,
+					Int:  42,
+				},
+			},
+			&query_parser.Operand{
+				Type: query_parser.TypStr,
+				Str:  "The meaning of life is 42.",
+			},
+		},
+		// Sprintf
+		functionsTest{
+			&query_parser.Function{
+				Name: "Sprintf",
+				Args: []*query_parser.Operand{
+					&query_parser.Operand{
+						Type: query_parser.TypStr,
+						Str:  "foo",
+					},
+				},
+				ArgTypes: []query_parser.OperandType{
+					query_parser.TypStr,
+				},
+				RetType:  query_parser.TypStr,
+				Computed: false,
+				RetValue: nil,
+			},
+			[]*query_parser.Operand{
+				&query_parser.Operand{
+					Type: query_parser.TypStr,
+					Str:  "foo",
+				},
+			},
+			&query_parser.Operand{
+				Type: query_parser.TypStr,
+				Str:  "foo",
+			},
+		},
 		// StrCat (2 args)
 		functionsTest{
 			&query_parser.Function{
@@ -736,6 +847,7 @@ func TestFunctions(t *testing.T) {
 					},
 				},
 				ArgTypes: []query_parser.OperandType{
+					query_parser.TypStr,
 					query_parser.TypStr,
 					query_parser.TypStr,
 				},

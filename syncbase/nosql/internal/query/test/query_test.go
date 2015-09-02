@@ -1951,6 +1951,22 @@ func TestQueryExec(t *testing.T) {
 			},
 		},
 		{
+			// Sprintf
+			"select Sprintf(\"%d, %d, %d, %d, %d, %d, %d, %g, %g, %g, %g\", v.B, v.Ui16, v.Ui32, v.Ui64, v.I16, v.I32, v.I64, v.F32, v.F64, v.C64, v.C128) from Numbers where k = \"001\"",
+			[]string{"Sprintf"},
+			[][]*vdl.Value{
+				[]*vdl.Value{vdl.ValueOf("12, 1234, 5678, 999888777666, 9876, 876543, 128, 3.141590118408203, 2.71828182846, (123+7i), (456.789+10.1112i)")},
+			},
+		},
+		{
+			// Sprintf
+			"select Sprintf(\"%s, %s %s\", v.Address.City, v.Address.State, v.Address.Zip) from Customer where v.Name = \"John Smith\"",
+			[]string{"Sprintf"},
+			[][]*vdl.Value{
+				[]*vdl.Value{vdl.ValueOf("Palo Alto, CA 94303")},
+			},
+		},
+		{
 			// StrCat
 			"select StrCat(v.Address.City, v.Address.State) from Customer where v.Name = \"John Smith\"",
 			[]string{"StrCat"},

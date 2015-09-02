@@ -103,6 +103,40 @@ func split(db query_db.Database, off int64, args []*query_parser.Operand) (*quer
 	return &o, nil
 }
 
+// Sprintf(<format-str>, arg...) string
+// Sprintf is golang's Sprintf.
+// e.g., Sprintf("The meaning of life is %s.", v.LifeMeaning) returns "The meaning of life is 42."
+func sprintf(db query_db.Database, off int64, args []*query_parser.Operand) (*query_parser.Operand, error) {
+	sprintfArgs := []interface{}{}
+	for _, arg := range args[1:] {
+		switch arg.Type {
+		case query_parser.TypBigInt:
+			sprintfArgs = append(sprintfArgs, arg.BigInt)
+		case query_parser.TypBigRat:
+			sprintfArgs = append(sprintfArgs, arg.BigRat)
+		case query_parser.TypBool:
+			sprintfArgs = append(sprintfArgs, arg.Bool)
+		case query_parser.TypComplex:
+			sprintfArgs = append(sprintfArgs, arg.Complex)
+		case query_parser.TypFloat:
+			sprintfArgs = append(sprintfArgs, arg.Float)
+		case query_parser.TypInt:
+			sprintfArgs = append(sprintfArgs, arg.Int)
+		case query_parser.TypStr:
+			sprintfArgs = append(sprintfArgs, arg.Str)
+		case query_parser.TypTime:
+			sprintfArgs = append(sprintfArgs, arg.Time)
+		case query_parser.TypObject:
+			sprintfArgs = append(sprintfArgs, arg.Object)
+		case query_parser.TypUint:
+			sprintfArgs = append(sprintfArgs, arg.Uint)
+		default:
+			sprintfArgs = append(sprintfArgs, nil)
+		}
+	}
+	return makeStrOp(off, fmt.Sprintf(args[0].Str, sprintfArgs...)), nil
+}
+
 // StrCat(str1, str2,... string) string
 // StrCat returns the concatenation of all the string args.
 // e.g., StrCat("abc", ",", "def") returns "abc,def"
