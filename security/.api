@@ -72,10 +72,10 @@ pkg security, type Authorizer interface { Authorize }
 pkg security, type Authorizer interface, Authorize(*context.T, Call) error
 pkg security, type BlessingPattern string
 pkg security, type BlessingRoots interface { Add, DebugString, Dump, Recognized }
-pkg security, type BlessingRoots interface, Add(PublicKey, BlessingPattern) error
+pkg security, type BlessingRoots interface, Add([]byte, BlessingPattern) error
 pkg security, type BlessingRoots interface, DebugString() string
 pkg security, type BlessingRoots interface, Dump() map[BlessingPattern][]PublicKey
-pkg security, type BlessingRoots interface, Recognized(PublicKey, string) error
+pkg security, type BlessingRoots interface, Recognized([]byte, string) error
 pkg security, type BlessingStore interface { CacheDischarge, ClearDischarges, DebugString, Default, Discharge, ForPeer, PeerBlessings, PublicKey, Set, SetDefault }
 pkg security, type BlessingStore interface, CacheDischarge(Discharge, Caveat, DischargeImpetus)
 pkg security, type BlessingStore interface, ClearDischarges(...Discharge)

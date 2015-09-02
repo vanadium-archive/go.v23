@@ -108,11 +108,15 @@ type trustAllRoots struct {
 	dump map[security.BlessingPattern][]security.PublicKey
 }
 
-func (r *trustAllRoots) Add(root security.PublicKey, pattern security.BlessingPattern) error {
-	r.dump[pattern] = append(r.dump[pattern], root)
+func (r *trustAllRoots) Add(root []byte, pattern security.BlessingPattern) error {
+	key, err := security.UnmarshalPublicKey(root)
+	if err != nil {
+		return err
+	}
+	r.dump[pattern] = append(r.dump[pattern], key)
 	return nil
 }
-func (r *trustAllRoots) Recognized(root security.PublicKey, blessing string) error {
+func (r *trustAllRoots) Recognized(root []byte, blessing string) error {
 	return nil
 }
 func (r *trustAllRoots) Dump() map[security.BlessingPattern][]security.PublicKey {

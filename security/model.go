@@ -278,17 +278,17 @@ type BlessingStore interface {
 //
 // See also: https://v.io/glossary.html#blessing-root
 type BlessingRoots interface {
-	// Add marks 'root' as an authoritative key for blessings that
-	// match 'pattern'.
+	// Add marks 'root' (a DER-encoded public key) as an authoritative key
+	// for blessings that match 'pattern'.
 	//
 	// Multiple keys can be added for the same pattern, in which
 	// case all those keys are considered authoritative for
 	// blessings that match the pattern.
-	Add(root PublicKey, pattern BlessingPattern) error
+	Add(root []byte, pattern BlessingPattern) error
 
-	// Recognized returns nil iff the provided root is recognized
-	// as an authority on a pattern that is matched by blessing.
-	Recognized(root PublicKey, blessing string) error
+	// Recognized returns nil iff the provided (DER-encoded) root public
+	// key as an authority on a pattern that is matched by blessing.
+	Recognized(root []byte, blessing string) error
 
 	// Dump returns the set of recognized roots as a map from
 	// blessing patterns to the set of authoritative keys for that

@@ -80,8 +80,8 @@ func (s errStore) PublicKey() PublicKey                             { return s.k
 
 type errRoots struct{}
 
-func (errRoots) Add(PublicKey, BlessingPattern) error  { return verror.New(errNilRoots, nil) }
-func (errRoots) Recognized(PublicKey, string) error    { return verror.New(errNilRoots, nil) }
+func (errRoots) Add([]byte, BlessingPattern) error     { return verror.New(errNilRoots, nil) }
+func (errRoots) Recognized([]byte, string) error       { return verror.New(errNilRoots, nil) }
 func (errRoots) Dump() map[BlessingPattern][]PublicKey { return nil }
 func (errRoots) DebugString() string                   { return verror.New(errNilRoots, nil).Error() }
 
@@ -161,8 +161,12 @@ func (p *principal) PublicKey() PublicKey {
 
 func (p *principal) BlessingsInfo(b Blessings) map[string][]Caveat {
 	var bInfo map[string][]Caveat
+	pKey, err := p.PublicKey().MarshalBinary()
+	if err != nil {
+		return bInfo
+	}
 	for _, chain := range b.chains {
-		name := nameForPrincipal(p, chain)
+		name := nameForPrincipal(pKey, p.Roots(), chain)
 		if len(name) > 0 {
 			if bInfo == nil {
 				bInfo = make(map[string][]Caveat)
@@ -200,11 +204,8 @@ func (p *principal) AddToRoots(blessings Blessings) error {
 	}
 	chains := blessings.chains
 	for _, chain := range chains {
-		root, err := UnmarshalPublicKey(chain[0].PublicKey)
-		if err != nil {
-			return verror.New(errCantUnmarshalKey, nil, chain[0].Extension, err)
-		}
 		pattern := BlessingPattern(chain[0].Extension)
+		root := chain[0].PublicKey
 		if err := p.roots.Add(root, pattern); err != nil {
 			return verror.New(errCantAddRoot, nil, root, pattern, err)
 		}
