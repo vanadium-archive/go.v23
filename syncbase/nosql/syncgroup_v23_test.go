@@ -161,6 +161,49 @@ func V23TestSyncbasedExchangeDeltas(t *v23tests.T) {
 	tu.RunClient(t, client0Creds, runVerifyLocalAndRemoteData, "sync0")
 }
 
+// V23TestSyncbasedExchangeDeltasWithAcls tests the exchange of deltas including
+// acls between two Syncbase instances and their clients.  The 1st client
+// creates a SyncGroup at "foo", sets an acl, and puts some database entries in
+// it.  The 2nd client joins that SyncGroup and reads the database entries.  The
+// 2nd client then adds a prefix acl with access to only itself at "foobar".
+// The 1st client should be unable to access the subset of keys under
+// "foobar". The 2nd client then modifies the prefix acl at "foobar" with access
+// to both clients. The 1st client should regain access.
+func V23TestSyncbasedExchangeDeltasWithAcls(t *v23tests.T) {
+	v23tests.RunRootMT(t, "--v23.tcp.address=127.0.0.1:0")
+	server0Creds, _ := t.Shell().NewChildCredentials("s0")
+	client0Creds, _ := t.Shell().NewChildCredentials("c0")
+	cleanSync0 := tu.StartSyncbased(t, server0Creds, "sync0", "",
+		`{"Read": {"In":["root/c0"]}, "Write": {"In":["root/c0"]}, "Admin": {"In":["root/c0"]}}`)
+	defer cleanSync0()
+
+	server1Creds, _ := t.Shell().NewChildCredentials("s1")
+	client1Creds, _ := t.Shell().NewChildCredentials("c1")
+	cleanSync1 := tu.StartSyncbased(t, server1Creds, "sync1", "",
+		`{"Read": {"In":["root/c1"]}, "Write": {"In":["root/c1"]}, "Admin": {"In":["root/c1"]}}`)
+	defer cleanSync1()
+
+	sgName := naming.Join("sync0", constants.SyncbaseSuffix, "SG1")
+
+	tu.RunClient(t, client0Creds, runSetupAppA, "sync0")
+	tu.RunClient(t, client0Creds, runCreateSyncGroup, "sync0", sgName, "tb:foo", "root/s0", "root/s1")
+	tu.RunClient(t, client0Creds, runPopulateData, "sync0", "foobarbaz", "0")
+	tu.RunClient(t, client0Creds, runPopulateData, "sync0", "foo", "0")
+	tu.RunClient(t, client0Creds, runSetPermissions, "sync0", "foo", "root/c0", "root/c1")
+
+	tu.RunClient(t, client1Creds, runSetupAppA, "sync1")
+	tu.RunClient(t, client1Creds, runJoinSyncGroup, "sync1", sgName)
+	tu.RunClient(t, client1Creds, runVerifySyncGroupData, "sync1", "foobarbaz", "0", "10")
+	tu.RunClient(t, client1Creds, runVerifySyncGroupDataNoScan, "sync1", "foo", "0", "10")
+
+	tu.RunClient(t, client1Creds, runSetPermissions, "sync1", "foobar", "root/c1")
+	tu.RunClient(t, client0Creds, runVerifyLostAccess, "sync0", "foobarbaz", "0", "10")
+	tu.RunClient(t, client0Creds, runVerifySyncGroupDataNoScan, "sync0", "foo", "0", "10")
+
+	tu.RunClient(t, client1Creds, runSetPermissions, "sync1", "foobar", "root/c0", "root/c1")
+	tu.RunClient(t, client0Creds, runVerifySyncGroupData, "sync0", "foobarbaz", "0", "10")
+}
+
 // V23 TestSyncbasedExchangeDeltasWithConflicts tests the exchange of deltas
 // between two Syncbase instances and their clients in the presence of
 // conflicting updates. The 1st client creates a SyncGroup and puts some
@@ -502,6 +545,24 @@ var runDeleteData = modules.Register(func(env *modules.Env, args ...string) erro
 	return nil
 }, "runDeleteData")
 
+// Arguments: 0: syncbase name, 1: key prefix, 2: blessing for acl.
+var runSetPermissions = modules.Register(func(env *modules.Env, args ...string) error {
+	ctx, shutdown := v23.Init()
+	defer shutdown()
+
+	a := syncbase.NewService(args[0]).App("a")
+	d := a.NoSQLDatabase("d", nil)
+
+	// Set acl.
+	tb := d.Table("tb")
+
+	if err := tb.SetPermissions(ctx, nosql.Prefix(args[1]), perms(args[2:]...)); err != nil {
+		return fmt.Errorf("tb.SetPermissions() failed: %v\n", err)
+	}
+
+	return nil
+}, "runSetPermissions")
+
 var runVerifySyncGroupData = modules.Register(func(env *modules.Env, args ...string) error {
 	ctx, shutdown := v23.Init()
 	defer shutdown()
@@ -722,6 +783,83 @@ var runVerifyLocalAndRemoteData = modules.Register(func(env *modules.Env, args .
 	}
 	return nil
 }, "runVerifyLocalAndRemoteData")
+
+// Arguments: 0: syncbase name, 1: key prefix, 2: start pos for key, 3: number of keys.
+var runVerifyLostAccess = modules.Register(func(env *modules.Env, args ...string) error {
+	ctx, shutdown := v23.Init()
+	defer shutdown()
+
+	a := syncbase.NewService(args[0]).App("a")
+	d := a.NoSQLDatabase("d", nil)
+
+	// Wait for a bit (up to 4 sec) until the last key disappears.
+	tb := d.Table("tb")
+
+	start, _ := strconv.ParseUint(args[2], 10, 64)
+	count, _ := strconv.ParseUint(args[3], 10, 64)
+	lastKey := fmt.Sprintf("%s%d", args[1], start+count-1)
+
+	r := tb.Row(lastKey)
+	for i := 0; i < 8; i++ {
+		time.Sleep(500 * time.Millisecond)
+		var value string
+		if err := r.Get(ctx, &value); verror.ErrorID(err) == verror.ErrNoAccess.ID {
+			break
+		}
+	}
+
+	// Verify that all keys and values have lost access.
+	for i := start; i < start+count; i++ {
+		key := fmt.Sprintf("%s%d", args[1], i)
+		r := tb.Row(key)
+		var got string
+		if err := r.Get(ctx, &got); verror.ErrorID(err) != verror.ErrNoAccess.ID {
+			return fmt.Errorf("r.Get() didn't fail: %v\n", err)
+		}
+	}
+
+	return nil
+}, "runVerifyLostAccess")
+
+var runVerifySyncGroupDataNoScan = modules.Register(func(env *modules.Env, args ...string) error {
+	ctx, shutdown := v23.Init()
+	defer shutdown()
+
+	a := syncbase.NewService(args[0]).App("a")
+	d := a.NoSQLDatabase("d", nil)
+
+	// Wait for a bit (up to 4 sec) until the last key appears.
+	tb := d.Table("tb")
+
+	start, _ := strconv.ParseUint(args[2], 10, 64)
+	count, _ := strconv.ParseUint(args[3], 10, 64)
+	lastKey := fmt.Sprintf("%s%d", args[1], start+count-1)
+
+	r := tb.Row(lastKey)
+	for i := 0; i < 8; i++ {
+		time.Sleep(500 * time.Millisecond)
+		var value string
+		if err := r.Get(ctx, &value); err == nil {
+			break
+		}
+	}
+
+	// Verify that all keys and values made it correctly.
+	for i := start; i < start+count; i++ {
+		key := fmt.Sprintf("%s%d", args[1], i)
+		r := tb.Row(key)
+		var got string
+		if err := r.Get(ctx, &got); err != nil {
+			return fmt.Errorf("r.Get() failed: %v\n", err)
+		}
+		want := "testkey" + key
+		if got != want {
+			return fmt.Errorf("unexpected value: got %q, want %q\n", got, want)
+		}
+	}
+
+	return nil
+}, "runVerifySyncGroupDataNoScan")
 
 var runVerifyNestedSyncGroupData = modules.Register(func(env *modules.Env, args ...string) error {
 	ctx, shutdown := v23.Init()
