@@ -14,10 +14,14 @@ import (
 
 // TODO(mattr): Link to protocol doc.
 
+// Append serializes the message m and appends it to the given byte slice.
+// The resulting slice is returned, as well as any error that occurs during
+// serialization.
 func Append(ctx *context.T, m Message, to []byte) ([]byte, error) {
 	return m.append(ctx, to)
 }
 
+// Read reads a message contained in the byte slice 'from'.
 func Read(ctx *context.T, from []byte) (Message, error) {
 	if len(from) == 0 {
 		return nil, NewErrInvalidMsg(ctx, invalidType, 0, 0, nil)
@@ -43,6 +47,7 @@ func Read(ctx *context.T, from []byte) (Message, error) {
 	return m, m.read(ctx, from)
 }
 
+// Message is implemented by all low-level messages defined by this package.
 type Message interface {
 	append(ctx *context.T, data []byte) ([]byte, error)
 	read(ctx *context.T, data []byte) error
@@ -69,7 +74,19 @@ const (
 
 // data flags.
 const (
+	// CloseFlag, when set on a Data message, indicates that the flow
+	// should be closed after the payload for that message has been
+	// processed.
 	CloseFlag = 1 << iota
+	// DisableEncryptionFlag, when set on a Data message, causes Append
+	// and Read to behave specially.  During Append everything but the
+	// Payload is serialized normally, but the Payload is left for the
+	// caller to deal with.  Typically the caller will encrypt the
+	// serialized result and send the unencrypted bytes as a raw follow
+	// on message.  Read will expect to not find a payload, and the
+	// caller will typically attach it by examining the next message on
+	// the Conn.
+	DisableEncryptionFlag
 )
 
 // random consts.
@@ -77,7 +94,7 @@ const (
 	maxVarUint64Size = 9
 )
 
-// setup is the first message over the wire.  It negotiates protocol version
+// Setup is the first message over the wire.  It negotiates protocol version
 // and encryption options for connection.
 type Setup struct {
 	Versions             version.RPCVersionRange
@@ -167,7 +184,7 @@ func (m *Setup) read(ctx *context.T, orig []byte) error {
 	return nil
 }
 
-// tearDown is sent over the wire before a connection is closed.
+// TearDown is sent over the wire before a connection is closed.
 type TearDown struct {
 	Message string
 }
@@ -235,7 +252,7 @@ func (m *Auth) read(ctx *context.T, orig []byte) error {
 	return nil
 }
 
-// openFlow is sent at the beginning of every new flow.
+// OpenFlow is sent at the beginning of every new flow.
 type OpenFlow struct {
 	ID                         uint64
 	InitialCounters            uint64
@@ -269,7 +286,7 @@ func (m *OpenFlow) read(ctx *context.T, orig []byte) error {
 	return nil
 }
 
-// release is sent as flows are read from locally.  The counters
+// Release is sent as flows are read from locally.  The counters
 // inform remote writers that there is local buffer space available.
 type Release struct {
 	Counters map[uint64]uint64
@@ -307,7 +324,7 @@ func (m *Release) read(ctx *context.T, orig []byte) error {
 	return nil
 }
 
-// data carries encrypted data for a specific flow.
+// Data carries encrypted data for a specific flow.
 type Data struct {
 	ID      uint64
 	Flags   uint64
@@ -318,8 +335,10 @@ func (m *Data) append(ctx *context.T, data []byte) ([]byte, error) {
 	data = append(data, dataType)
 	data = writeVarUint64(m.ID, data)
 	data = writeVarUint64(m.Flags, data)
-	for _, p := range m.Payload {
-		data = append(data, p...)
+	if m.Flags&DisableEncryptionFlag == 0 {
+		for _, p := range m.Payload {
+			data = append(data, p...)
+		}
 	}
 	return data, nil
 }
@@ -334,7 +353,7 @@ func (m *Data) read(ctx *context.T, orig []byte) error {
 	if m.Flags, data, valid = readVarUint64(ctx, data); !valid {
 		return NewErrInvalidMsg(ctx, dataType, uint64(len(orig)), 1, nil)
 	}
-	if len(data) > 0 {
+	if m.Flags&DisableEncryptionFlag == 0 && len(data) > 0 {
 		m.Payload = [][]byte{data}
 	}
 	return nil

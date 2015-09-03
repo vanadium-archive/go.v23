@@ -21,10 +21,15 @@ func init() {
 }
 
 func testMessages(t *testing.T, ctx *context.T, cases []message.Message) {
-	for _, want := range cases {
-		encoded, err := message.Append(ctx, want, nil)
+	testMessagesWithResults(t, ctx, cases, cases)
+}
+
+func testMessagesWithResults(t *testing.T, ctx *context.T, cases []message.Message, results []message.Message) {
+	for i, orig := range cases {
+		want := results[i]
+		encoded, err := message.Append(ctx, orig, nil)
 		if err != nil {
-			t.Errorf("unexpected error for %#v: %v", want, err)
+			t.Errorf("unexpected error for %#v: %v", orig, err)
 		}
 		got, err := message.Read(ctx, encoded)
 		if err != nil {
@@ -112,7 +117,14 @@ func TestData(t *testing.T) {
 	ctx, shutdown := v23.Init()
 	defer shutdown()
 	testMessages(t, ctx, []message.Message{
-		&message.Data{ID: 1123, Flags: 232, Payload: [][]byte{[]byte("fake payload")}},
+		&message.Data{ID: 1123, Flags: message.CloseFlag, Payload: [][]byte{[]byte("fake payload")}},
 		&message.Data{},
 	})
+	testMessagesWithResults(t, ctx,
+		[]message.Message{
+			&message.Data{ID: 1123, Flags: message.DisableEncryptionFlag, Payload: [][]byte{[]byte("fake payload")}},
+		},
+		[]message.Message{
+			&message.Data{ID: 1123, Flags: message.DisableEncryptionFlag},
+		})
 }
