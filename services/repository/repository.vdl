@@ -35,6 +35,12 @@ type Application interface {
 	// object name suffix) and if so, returns this envelope. If multiple
 	// profile matches are possible, the method returns the first
 	// matching profile, respecting the order of the input argument.
+	//
+	// If the version is not specified in the suffix, the envelope
+	// corresponding to the latest version that matches any of the given
+	// profiles is returned.  If several profiles match this version, the
+	// envelope for the first matching profile is returned, respecting the
+	// order of the input argument.
 	Match(profiles []string) (application.Envelope | error) {access.Read}
 }
 
