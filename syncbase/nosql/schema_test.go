@@ -122,7 +122,7 @@ func TestRPCSchemaCheckError(t *testing.T) {
 	if err := dbHandle2.DeleteTable(ctx, "table1"); !isVersionMismatchErr(err) {
 		t.Fatal("Expected ErrDatabaseVersionMismatch, found: " + toString(err))
 	}
-	if err := dbHandle2.Delete(ctx); !isVersionMismatchErr(err) {
+	if err := dbHandle2.Destroy(ctx); !isVersionMismatchErr(err) {
 		t.Fatal("Expected ErrDatabaseVersionMismatch, found: " + toString(err))
 	}
 	if _, err := dbHandle2.Exists(ctx); !isVersionMismatchErr(err) {

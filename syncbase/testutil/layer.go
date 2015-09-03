@@ -314,6 +314,7 @@ const notAvailable = "not available"
 type layer interface {
 	util.AccessController
 	Create(ctx *context.T, perms access.Permissions) error
+	//TODO(aghassemi): Rename to Destroy after Table.Delete is renamed to Destroy
 	Delete(ctx *context.T) error
 	Exists(ctx *context.T) (bool, error)
 	ListChildren(ctx *context.T) ([]string, error)
@@ -350,6 +351,9 @@ func (a *app) ListChildren(ctx *context.T) ([]string, error) {
 func (a *app) Child(childName string) layer {
 	return makeLayer(a.NoSQLDatabase(childName, nil))
 }
+func (a *app) Delete(ctx *context.T) error {
+	return a.Destroy(ctx)
+}
 
 type database struct {
 	nosql.Database
@@ -360,6 +364,9 @@ func (d *database) ListChildren(ctx *context.T) ([]string, error) {
 }
 func (d *database) Child(childName string) layer {
 	return &table{Table: d.Table(childName), d: d}
+}
+func (d *database) Delete(ctx *context.T) error {
+	return d.Destroy(ctx)
 }
 
 type table struct {

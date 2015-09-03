@@ -1,0 +1,17 @@
+pkg syncbase, func NewService(string) Service
+pkg syncbase, type App interface { Create, Destroy, Exists, FullName, GetPermissions, ListDatabases, Name, NoSQLDatabase, SetPermissions }
+pkg syncbase, type App interface, Create(*context.T, access.Permissions) error
+pkg syncbase, type App interface, Destroy(*context.T) error
+pkg syncbase, type App interface, Exists(*context.T) (bool, error)
+pkg syncbase, type App interface, FullName() string
+pkg syncbase, type App interface, GetPermissions(*context.T) (access.Permissions, string, error)
+pkg syncbase, type App interface, ListDatabases(*context.T) ([]string, error)
+pkg syncbase, type App interface, Name() string
+pkg syncbase, type App interface, NoSQLDatabase(string, *nosql.Schema) nosql.Database
+pkg syncbase, type App interface, SetPermissions(*context.T, access.Permissions, string) error
+pkg syncbase, type Service interface { App, FullName, GetPermissions, ListApps, SetPermissions }
+pkg syncbase, type Service interface, App(string) App
+pkg syncbase, type Service interface, FullName() string
+pkg syncbase, type Service interface, GetPermissions(*context.T) (access.Permissions, string, error)
+pkg syncbase, type Service interface, ListApps(*context.T) ([]string, error)
+pkg syncbase, type Service interface, SetPermissions(*context.T, access.Permissions, string) error

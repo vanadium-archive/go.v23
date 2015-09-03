@@ -62,9 +62,9 @@ func (a *app) Create(ctx *context.T, perms access.Permissions) error {
 	return a.c.Create(ctx, perms)
 }
 
-// Delete implements App.Delete.
-func (a *app) Delete(ctx *context.T) error {
-	return a.c.Delete(ctx)
+// Destroy implements App.Destroy.
+func (a *app) Destroy(ctx *context.T) error {
+	return a.c.Destroy(ctx)
 }
 
 // SetPermissions implements App.SetPermissions.

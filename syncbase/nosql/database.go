@@ -109,9 +109,9 @@ func (d *database) Create(ctx *context.T, perms access.Permissions) error {
 	return d.c.Create(ctx, schemaMetadata, perms)
 }
 
-// Delete implements Database.Delete.
-func (d *database) Delete(ctx *context.T) error {
-	return d.c.Delete(ctx, d.schemaVersion())
+// Destroy implements Database.Destroy.
+func (d *database) Destroy(ctx *context.T) error {
+	return d.c.Destroy(ctx, d.schemaVersion())
 }
 
 // CreateTable implements Database.CreateTable.

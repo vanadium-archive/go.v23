@@ -31,8 +31,8 @@ type App interface {
 	// Create requires the caller to have Write permission at the Service.
 	Create(perms access.Permissions) error {access.Write}
 
-	// Delete deletes this App.
-	Delete() error {access.Write}
+	// Destroy destroys this App.
+	Destroy() error {access.Write}
 
 	// Exists returns true only if this App exists. Insufficient permissions
 	// cause Exists to return false instead of an error.

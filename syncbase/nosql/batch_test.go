@@ -513,8 +513,8 @@ func TestDisallowedMethods(t *testing.T) {
 	if err := bc.Create(ctx, nil, nil); err == nil {
 		t.Fatalf("bc.Create() should have failed: %v", err)
 	}
-	if err := bc.Delete(ctx, -1); verror.ErrorID(err) != wire.ErrBoundToBatch.ID {
-		t.Fatalf("bc.Delete() should have failed: %v", err)
+	if err := bc.Destroy(ctx, -1); verror.ErrorID(err) != wire.ErrBoundToBatch.ID {
+		t.Fatalf("bc.Destroy() should have failed: %v", err)
 	}
 	if _, err := bc.BeginBatch(ctx, -1, wire.BatchOptions{}); verror.ErrorID(err) != wire.ErrBoundToBatch.ID {
 		t.Fatalf("bc.BeginBatch() should have failed: %v", err)

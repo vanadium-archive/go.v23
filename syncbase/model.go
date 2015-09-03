@@ -67,8 +67,8 @@ type App interface {
 	// If perms is nil, we inherit (copy) the Service perms.
 	Create(ctx *context.T, perms access.Permissions) error
 
-	// Delete deletes this App.
-	Delete(ctx *context.T) error
+	// Destroy destroys this App.
+	Destroy(ctx *context.T) error
 
 	// SetPermissions and GetPermissions are included from the AccessController
 	// interface.

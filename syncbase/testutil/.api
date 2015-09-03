@@ -1,0 +1,25 @@
+pkg testutil, func CheckExec(*testing.T, *context.T, nosql.DatabaseHandle, string, []string, [][]*vdl.Value)
+pkg testutil, func CheckExecError(*testing.T, *context.T, nosql.DatabaseHandle, string, verror.ID)
+pkg testutil, func CheckScan(*testing.T, *context.T, nosql.Table, nosql.RowRange, []string, []interface{})
+pkg testutil, func CheckWatch(*testing.T, nosql.WatchStream, []nosql.WatchChange)
+pkg testutil, func CreateApp(*testing.T, *context.T, syncbase.Service, string) syncbase.App
+pkg testutil, func CreateNoSQLDatabase(*testing.T, *context.T, syncbase.App, string) nosql.Database
+pkg testutil, func CreateTable(*testing.T, *context.T, nosql.Database, string) nosql.Table
+pkg testutil, func DefaultPerms(...string) access.Permissions
+pkg testutil, func DefaultSchema(int32) *nosql.Schema
+pkg testutil, func Fatal(*testing.T, ...interface{})
+pkg testutil, func Fatalf(*testing.T, string, ...interface{})
+pkg testutil, func NewCtx(*context.T, security.Principal, string) *context.T
+pkg testutil, func RunClient(*v23tests.T, *modules.CustomCredentials, modules.Program, ...string)
+pkg testutil, func ScanMatches(*context.T, nosql.Table, nosql.RowRange, []string, []interface{}) error
+pkg testutil, func SetupOrDie(access.Permissions) (*context.T, string, func())
+pkg testutil, func SetupOrDieCustom(string, string, access.Permissions) (*context.T, *context.T, string, security.Principal, func())
+pkg testutil, func StartSyncbased(*v23tests.T, *modules.CustomCredentials, string, string, string) func()
+pkg testutil, func TestCreate(*testing.T, *context.T, interface{})
+pkg testutil, func TestDelete(*testing.T, *context.T, interface{})
+pkg testutil, func TestListChildren(*testing.T, *context.T, interface{})
+pkg testutil, func TestPerms(*testing.T, *context.T, util.AccessController)
+pkg testutil, func V23Fatalf(*v23tests.T, string, ...interface{})
+pkg testutil, method (*MockSchemaUpgrader) Run(nosql.Database, int32, int32) error
+pkg testutil, type MockSchemaUpgrader struct
+pkg testutil, type MockSchemaUpgrader struct, CallCount int

@@ -24,8 +24,8 @@ type Database interface {
 	// Create requires the caller to have Write permission at the App.
 	Create(metadata ?SchemaMetadata, perms access.Permissions) error {access.Write}
 
-	// Delete deletes this Database.
-	Delete(schemaVersion int32) error {access.Write}
+	// Destroy destroys this Database, permanently removing all of its data.
+	Destroy(schemaVersion int32) error {access.Write}
 
 	// Exists returns true only if this Database exists. Insufficient permissions
 	// cause Exists to return false instead of an error.

@@ -1,0 +1,619 @@
+pkg nosql, const BatchSourceLocal BatchSource
+pkg nosql, const BatchSourceRemote BatchSource
+pkg nosql, const BlobFetchStateDone BlobFetchState
+pkg nosql, const BlobFetchStateFetching BlobFetchState
+pkg nosql, const BlobFetchStateLocating BlobFetchState
+pkg nosql, const BlobFetchStatePending BlobFetchState
+pkg nosql, const NullBlobRef BlobRef
+pkg nosql, const ResolverTypeAppResolves ResolverType
+pkg nosql, const ResolverTypeDefer ResolverType
+pkg nosql, const ResolverTypeLastWins ResolverType
+pkg nosql, const ValueSelectionLocal ValueSelection
+pkg nosql, const ValueSelectionOther ValueSelection
+pkg nosql, const ValueSelectionRemote ValueSelection
+pkg nosql, func BatchSourceFromString(string) (BatchSource, error)
+pkg nosql, func BlobFetchStateFromString(string) (BlobFetchState, error)
+pkg nosql, func BlobManagerClient(string) BlobManagerClientStub
+pkg nosql, func BlobManagerServer(BlobManagerServerMethods) BlobManagerServerStub
+pkg nosql, func ConflictManagerClient(string) ConflictManagerClientStub
+pkg nosql, func ConflictManagerServer(ConflictManagerServerMethods) ConflictManagerServerStub
+pkg nosql, func DatabaseClient(string) DatabaseClientStub
+pkg nosql, func DatabaseServer(DatabaseServerMethods) DatabaseServerStub
+pkg nosql, func DatabaseWatcherClient(string) DatabaseWatcherClientStub
+pkg nosql, func DatabaseWatcherServer(DatabaseWatcherServerMethods) DatabaseWatcherServerStub
+pkg nosql, func NewErrBlobNotCommitted(*context.T) error
+pkg nosql, func NewErrBoundToBatch(*context.T) error
+pkg nosql, func NewErrConcurrentBatch(*context.T) error
+pkg nosql, func NewErrNotBoundToBatch(*context.T) error
+pkg nosql, func NewErrReadOnlyBatch(*context.T) error
+pkg nosql, func NewErrSchemaVersionMismatch(*context.T) error
+pkg nosql, func ResolverTypeFromString(string) (ResolverType, error)
+pkg nosql, func RowClient(string) RowClientStub
+pkg nosql, func RowServer(RowServerMethods) RowServerStub
+pkg nosql, func SchemaManagerClient(string) SchemaManagerClientStub
+pkg nosql, func SchemaManagerServer(SchemaManagerServerMethods) SchemaManagerServerStub
+pkg nosql, func SyncGroupManagerClient(string) SyncGroupManagerClientStub
+pkg nosql, func SyncGroupManagerServer(SyncGroupManagerServerMethods) SyncGroupManagerServerStub
+pkg nosql, func TableClient(string) TableClientStub
+pkg nosql, func TableServer(TableServerMethods) TableServerStub
+pkg nosql, func ValueSelectionFromString(string) (ValueSelection, error)
+pkg nosql, method (*BatchSource) Set(string) error
+pkg nosql, method (*BlobFetchState) Set(string) error
+pkg nosql, method (*BlobManagerFetchBlobServerCallStub) Init(rpc.StreamServerCall)
+pkg nosql, method (*BlobManagerFetchBlobServerCallStub) SendStream() interface {  Send(item BlobFetchStatus) error;}
+pkg nosql, method (*BlobManagerGetBlobServerCallStub) Init(rpc.StreamServerCall)
+pkg nosql, method (*BlobManagerGetBlobServerCallStub) SendStream() interface {  Send(item []byte) error;}
+pkg nosql, method (*BlobManagerPutBlobServerCallStub) Init(rpc.StreamServerCall)
+pkg nosql, method (*BlobManagerPutBlobServerCallStub) RecvStream() interface {  Advance() bool; Value() []byte; Err() error;}
+pkg nosql, method (*ConflictManagerStartConflictResolverServerCallStub) Init(rpc.StreamServerCall)
+pkg nosql, method (*ConflictManagerStartConflictResolverServerCallStub) RecvStream() interface {  Advance() bool; Value() ResolutionInfo; Err() error;}
+pkg nosql, method (*ConflictManagerStartConflictResolverServerCallStub) SendStream() interface {  Send(item ConflictInfo) error;}
+pkg nosql, method (*DatabaseExecServerCallStub) Init(rpc.StreamServerCall)
+pkg nosql, method (*DatabaseExecServerCallStub) SendStream() interface {  Send(item []*vdl.Value) error;}
+pkg nosql, method (*ResolverType) Set(string) error
+pkg nosql, method (*TableScanServerCallStub) Init(rpc.StreamServerCall)
+pkg nosql, method (*TableScanServerCallStub) SendStream() interface {  Send(item KeyValue) error;}
+pkg nosql, method (*ValueSelection) Set(string) error
+pkg nosql, method (BatchSource) String() string
+pkg nosql, method (BlobFetchState) String() string
+pkg nosql, method (ConflictDataBatch) Index() int
+pkg nosql, method (ConflictDataBatch) Interface() interface{}
+pkg nosql, method (ConflictDataBatch) Name() string
+pkg nosql, method (ConflictDataRow) Index() int
+pkg nosql, method (ConflictDataRow) Interface() interface{}
+pkg nosql, method (ConflictDataRow) Name() string
+pkg nosql, method (OperationRead) Index() int
+pkg nosql, method (OperationRead) Interface() interface{}
+pkg nosql, method (OperationRead) Name() string
+pkg nosql, method (OperationScan) Index() int
+pkg nosql, method (OperationScan) Interface() interface{}
+pkg nosql, method (OperationScan) Name() string
+pkg nosql, method (OperationWrite) Index() int
+pkg nosql, method (OperationWrite) Interface() interface{}
+pkg nosql, method (OperationWrite) Name() string
+pkg nosql, method (ResolverType) String() string
+pkg nosql, method (ValueSelection) String() string
+pkg nosql, type BatchInfo struct
+pkg nosql, type BatchInfo struct, Hint string
+pkg nosql, type BatchInfo struct, Id uint16
+pkg nosql, type BatchInfo struct, Source BatchSource
+pkg nosql, type BatchOptions struct
+pkg nosql, type BatchOptions struct, Hint string
+pkg nosql, type BatchOptions struct, ReadOnly bool
+pkg nosql, type BatchSource int
+pkg nosql, type BlobFetchState int
+pkg nosql, type BlobFetchStatus struct
+pkg nosql, type BlobFetchStatus struct, Received int64
+pkg nosql, type BlobFetchStatus struct, State BlobFetchState
+pkg nosql, type BlobFetchStatus struct, Total int64
+pkg nosql, type BlobManagerClientMethods interface { CommitBlob, CreateBlob, DeleteBlob, FetchBlob, GetBlob, GetBlobSize, KeepBlob, PinBlob, PutBlob, UnpinBlob }
+pkg nosql, type BlobManagerClientMethods interface, CommitBlob(*context.T, BlobRef, ...rpc.CallOpt) error
+pkg nosql, type BlobManagerClientMethods interface, CreateBlob(*context.T, ...rpc.CallOpt) (BlobRef, error)
+pkg nosql, type BlobManagerClientMethods interface, DeleteBlob(*context.T, BlobRef, ...rpc.CallOpt) error
+pkg nosql, type BlobManagerClientMethods interface, FetchBlob(*context.T, BlobRef, uint64, ...rpc.CallOpt) (BlobManagerFetchBlobClientCall, error)
+pkg nosql, type BlobManagerClientMethods interface, GetBlob(*context.T, BlobRef, int64, ...rpc.CallOpt) (BlobManagerGetBlobClientCall, error)
+pkg nosql, type BlobManagerClientMethods interface, GetBlobSize(*context.T, BlobRef, ...rpc.CallOpt) (int64, error)
+pkg nosql, type BlobManagerClientMethods interface, KeepBlob(*context.T, BlobRef, uint64, ...rpc.CallOpt) error
+pkg nosql, type BlobManagerClientMethods interface, PinBlob(*context.T, BlobRef, ...rpc.CallOpt) error
+pkg nosql, type BlobManagerClientMethods interface, PutBlob(*context.T, BlobRef, ...rpc.CallOpt) (BlobManagerPutBlobClientCall, error)
+pkg nosql, type BlobManagerClientMethods interface, UnpinBlob(*context.T, BlobRef, ...rpc.CallOpt) error
+pkg nosql, type BlobManagerClientStub interface { CommitBlob, CreateBlob, DeleteBlob, FetchBlob, GetBlob, GetBlobSize, KeepBlob, PinBlob, PutBlob, UnpinBlob }
+pkg nosql, type BlobManagerClientStub interface, CommitBlob(*context.T, BlobRef, ...rpc.CallOpt) error
+pkg nosql, type BlobManagerClientStub interface, CreateBlob(*context.T, ...rpc.CallOpt) (BlobRef, error)
+pkg nosql, type BlobManagerClientStub interface, DeleteBlob(*context.T, BlobRef, ...rpc.CallOpt) error
+pkg nosql, type BlobManagerClientStub interface, FetchBlob(*context.T, BlobRef, uint64, ...rpc.CallOpt) (BlobManagerFetchBlobClientCall, error)
+pkg nosql, type BlobManagerClientStub interface, GetBlob(*context.T, BlobRef, int64, ...rpc.CallOpt) (BlobManagerGetBlobClientCall, error)
+pkg nosql, type BlobManagerClientStub interface, GetBlobSize(*context.T, BlobRef, ...rpc.CallOpt) (int64, error)
+pkg nosql, type BlobManagerClientStub interface, KeepBlob(*context.T, BlobRef, uint64, ...rpc.CallOpt) error
+pkg nosql, type BlobManagerClientStub interface, PinBlob(*context.T, BlobRef, ...rpc.CallOpt) error
+pkg nosql, type BlobManagerClientStub interface, PutBlob(*context.T, BlobRef, ...rpc.CallOpt) (BlobManagerPutBlobClientCall, error)
+pkg nosql, type BlobManagerClientStub interface, UnpinBlob(*context.T, BlobRef, ...rpc.CallOpt) error
+pkg nosql, type BlobManagerFetchBlobClientCall interface { Finish, RecvStream }
+pkg nosql, type BlobManagerFetchBlobClientCall interface, Finish() error
+pkg nosql, type BlobManagerFetchBlobClientCall interface, RecvStream() interface {  Advance() bool;; Value() BlobFetchStatus;; Err() error;}
+pkg nosql, type BlobManagerFetchBlobClientStream interface { RecvStream }
+pkg nosql, type BlobManagerFetchBlobClientStream interface, RecvStream() interface {  Advance() bool;; Value() BlobFetchStatus;; Err() error;}
+pkg nosql, type BlobManagerFetchBlobServerCall interface { GrantedBlessings, LocalEndpoint, RemoteEndpoint, Security, SendStream, Server, Suffix }
+pkg nosql, type BlobManagerFetchBlobServerCall interface, GrantedBlessings() security.Blessings
+pkg nosql, type BlobManagerFetchBlobServerCall interface, LocalEndpoint() naming.Endpoint
+pkg nosql, type BlobManagerFetchBlobServerCall interface, RemoteEndpoint() naming.Endpoint
+pkg nosql, type BlobManagerFetchBlobServerCall interface, Security() security.Call
+pkg nosql, type BlobManagerFetchBlobServerCall interface, SendStream() interface {  Send(item BlobFetchStatus) error;}
+pkg nosql, type BlobManagerFetchBlobServerCall interface, Server() XServer
+pkg nosql, type BlobManagerFetchBlobServerCall interface, Suffix() string
+pkg nosql, type BlobManagerFetchBlobServerCallStub struct
+pkg nosql, type BlobManagerFetchBlobServerCallStub struct, embedded rpc.StreamServerCall
+pkg nosql, type BlobManagerFetchBlobServerStream interface { SendStream }
+pkg nosql, type BlobManagerFetchBlobServerStream interface, SendStream() interface {  Send(item BlobFetchStatus) error;}
+pkg nosql, type BlobManagerGetBlobClientCall interface { Finish, RecvStream }
+pkg nosql, type BlobManagerGetBlobClientCall interface, Finish() error
+pkg nosql, type BlobManagerGetBlobClientCall interface, RecvStream() interface {  Advance() bool;; Value() []byte;; Err() error;}
+pkg nosql, type BlobManagerGetBlobClientStream interface { RecvStream }
+pkg nosql, type BlobManagerGetBlobClientStream interface, RecvStream() interface {  Advance() bool;; Value() []byte;; Err() error;}
+pkg nosql, type BlobManagerGetBlobServerCall interface { GrantedBlessings, LocalEndpoint, RemoteEndpoint, Security, SendStream, Server, Suffix }
+pkg nosql, type BlobManagerGetBlobServerCall interface, GrantedBlessings() security.Blessings
+pkg nosql, type BlobManagerGetBlobServerCall interface, LocalEndpoint() naming.Endpoint
+pkg nosql, type BlobManagerGetBlobServerCall interface, RemoteEndpoint() naming.Endpoint
+pkg nosql, type BlobManagerGetBlobServerCall interface, Security() security.Call
+pkg nosql, type BlobManagerGetBlobServerCall interface, SendStream() interface {  Send(item []byte) error;}
+pkg nosql, type BlobManagerGetBlobServerCall interface, Server() XServer
+pkg nosql, type BlobManagerGetBlobServerCall interface, Suffix() string
+pkg nosql, type BlobManagerGetBlobServerCallStub struct
+pkg nosql, type BlobManagerGetBlobServerCallStub struct, embedded rpc.StreamServerCall
+pkg nosql, type BlobManagerGetBlobServerStream interface { SendStream }
+pkg nosql, type BlobManagerGetBlobServerStream interface, SendStream() interface {  Send(item []byte) error;}
+pkg nosql, type BlobManagerPutBlobClientCall interface { Finish, SendStream }
+pkg nosql, type BlobManagerPutBlobClientCall interface, Finish() error
+pkg nosql, type BlobManagerPutBlobClientCall interface, SendStream() interface {  Send(item []byte) error;; Close() error;}
+pkg nosql, type BlobManagerPutBlobClientStream interface { SendStream }
+pkg nosql, type BlobManagerPutBlobClientStream interface, SendStream() interface {  Send(item []byte) error;; Close() error;}
+pkg nosql, type BlobManagerPutBlobServerCall interface { GrantedBlessings, LocalEndpoint, RecvStream, RemoteEndpoint, Security, Server, Suffix }
+pkg nosql, type BlobManagerPutBlobServerCall interface, GrantedBlessings() security.Blessings
+pkg nosql, type BlobManagerPutBlobServerCall interface, LocalEndpoint() naming.Endpoint
+pkg nosql, type BlobManagerPutBlobServerCall interface, RecvStream() interface {  Advance() bool;; Value() []byte;; Err() error;}
+pkg nosql, type BlobManagerPutBlobServerCall interface, RemoteEndpoint() naming.Endpoint
+pkg nosql, type BlobManagerPutBlobServerCall interface, Security() security.Call
+pkg nosql, type BlobManagerPutBlobServerCall interface, Server() XServer
+pkg nosql, type BlobManagerPutBlobServerCall interface, Suffix() string
+pkg nosql, type BlobManagerPutBlobServerCallStub struct
+pkg nosql, type BlobManagerPutBlobServerCallStub struct, embedded rpc.StreamServerCall
+pkg nosql, type BlobManagerPutBlobServerStream interface { RecvStream }
+pkg nosql, type BlobManagerPutBlobServerStream interface, RecvStream() interface {  Advance() bool;; Value() []byte;; Err() error;}
+pkg nosql, type BlobManagerServerMethods interface { CommitBlob, CreateBlob, DeleteBlob, FetchBlob, GetBlob, GetBlobSize, KeepBlob, PinBlob, PutBlob, UnpinBlob }
+pkg nosql, type BlobManagerServerMethods interface, CommitBlob(*context.T, rpc.ServerCall, BlobRef) error
+pkg nosql, type BlobManagerServerMethods interface, CreateBlob(*context.T, rpc.ServerCall) (BlobRef, error)
+pkg nosql, type BlobManagerServerMethods interface, DeleteBlob(*context.T, rpc.ServerCall, BlobRef) error
+pkg nosql, type BlobManagerServerMethods interface, FetchBlob(*context.T, BlobManagerFetchBlobServerCall, BlobRef, uint64) error
+pkg nosql, type BlobManagerServerMethods interface, GetBlob(*context.T, BlobManagerGetBlobServerCall, BlobRef, int64) error
+pkg nosql, type BlobManagerServerMethods interface, GetBlobSize(*context.T, rpc.ServerCall, BlobRef) (int64, error)
+pkg nosql, type BlobManagerServerMethods interface, KeepBlob(*context.T, rpc.ServerCall, BlobRef, uint64) error
+pkg nosql, type BlobManagerServerMethods interface, PinBlob(*context.T, rpc.ServerCall, BlobRef) error
+pkg nosql, type BlobManagerServerMethods interface, PutBlob(*context.T, BlobManagerPutBlobServerCall, BlobRef) error
+pkg nosql, type BlobManagerServerMethods interface, UnpinBlob(*context.T, rpc.ServerCall, BlobRef) error
+pkg nosql, type BlobManagerServerStub interface { CommitBlob, CreateBlob, DeleteBlob, Describe__, FetchBlob, GetBlob, GetBlobSize, KeepBlob, PinBlob, PutBlob, UnpinBlob }
+pkg nosql, type BlobManagerServerStub interface, CommitBlob(*context.T, rpc.ServerCall, BlobRef) error
+pkg nosql, type BlobManagerServerStub interface, CreateBlob(*context.T, rpc.ServerCall) (BlobRef, error)
+pkg nosql, type BlobManagerServerStub interface, DeleteBlob(*context.T, rpc.ServerCall, BlobRef) error
+pkg nosql, type BlobManagerServerStub interface, Describe__() []rpc.InterfaceDesc
+pkg nosql, type BlobManagerServerStub interface, FetchBlob(*context.T, *BlobManagerFetchBlobServerCallStub, BlobRef, uint64) error
+pkg nosql, type BlobManagerServerStub interface, GetBlob(*context.T, *BlobManagerGetBlobServerCallStub, BlobRef, int64) error
+pkg nosql, type BlobManagerServerStub interface, GetBlobSize(*context.T, rpc.ServerCall, BlobRef) (int64, error)
+pkg nosql, type BlobManagerServerStub interface, KeepBlob(*context.T, rpc.ServerCall, BlobRef, uint64) error
+pkg nosql, type BlobManagerServerStub interface, PinBlob(*context.T, rpc.ServerCall, BlobRef) error
+pkg nosql, type BlobManagerServerStub interface, PutBlob(*context.T, *BlobManagerPutBlobServerCallStub, BlobRef) error
+pkg nosql, type BlobManagerServerStub interface, UnpinBlob(*context.T, rpc.ServerCall, BlobRef) error
+pkg nosql, type BlobManagerServerStubMethods interface { CommitBlob, CreateBlob, DeleteBlob, FetchBlob, GetBlob, GetBlobSize, KeepBlob, PinBlob, PutBlob, UnpinBlob }
+pkg nosql, type BlobManagerServerStubMethods interface, CommitBlob(*context.T, rpc.ServerCall, BlobRef) error
+pkg nosql, type BlobManagerServerStubMethods interface, CreateBlob(*context.T, rpc.ServerCall) (BlobRef, error)
+pkg nosql, type BlobManagerServerStubMethods interface, DeleteBlob(*context.T, rpc.ServerCall, BlobRef) error
+pkg nosql, type BlobManagerServerStubMethods interface, FetchBlob(*context.T, *BlobManagerFetchBlobServerCallStub, BlobRef, uint64) error
+pkg nosql, type BlobManagerServerStubMethods interface, GetBlob(*context.T, *BlobManagerGetBlobServerCallStub, BlobRef, int64) error
+pkg nosql, type BlobManagerServerStubMethods interface, GetBlobSize(*context.T, rpc.ServerCall, BlobRef) (int64, error)
+pkg nosql, type BlobManagerServerStubMethods interface, KeepBlob(*context.T, rpc.ServerCall, BlobRef, uint64) error
+pkg nosql, type BlobManagerServerStubMethods interface, PinBlob(*context.T, rpc.ServerCall, BlobRef) error
+pkg nosql, type BlobManagerServerStubMethods interface, PutBlob(*context.T, *BlobManagerPutBlobServerCallStub, BlobRef) error
+pkg nosql, type BlobManagerServerStubMethods interface, UnpinBlob(*context.T, rpc.ServerCall, BlobRef) error
+pkg nosql, type BlobRef string
+pkg nosql, type ConflictData interface, Index() int
+pkg nosql, type ConflictData interface, Interface() interface{}
+pkg nosql, type ConflictData interface, Name() string
+pkg nosql, type ConflictData interface, unexported methods
+pkg nosql, type ConflictDataBatch struct
+pkg nosql, type ConflictDataBatch struct, Value BatchInfo
+pkg nosql, type ConflictDataRow struct
+pkg nosql, type ConflictDataRow struct, Value RowInfo
+pkg nosql, type ConflictInfo struct
+pkg nosql, type ConflictInfo struct, Continued bool
+pkg nosql, type ConflictInfo struct, Data ConflictData
+pkg nosql, type ConflictManagerClientMethods interface { StartConflictResolver }
+pkg nosql, type ConflictManagerClientMethods interface, StartConflictResolver(*context.T, ...rpc.CallOpt) (ConflictManagerStartConflictResolverClientCall, error)
+pkg nosql, type ConflictManagerClientStub interface { StartConflictResolver }
+pkg nosql, type ConflictManagerClientStub interface, StartConflictResolver(*context.T, ...rpc.CallOpt) (ConflictManagerStartConflictResolverClientCall, error)
+pkg nosql, type ConflictManagerServerMethods interface { StartConflictResolver }
+pkg nosql, type ConflictManagerServerMethods interface, StartConflictResolver(*context.T, ConflictManagerStartConflictResolverServerCall) error
+pkg nosql, type ConflictManagerServerStub interface { Describe__, StartConflictResolver }
+pkg nosql, type ConflictManagerServerStub interface, Describe__() []rpc.InterfaceDesc
+pkg nosql, type ConflictManagerServerStub interface, StartConflictResolver(*context.T, *ConflictManagerStartConflictResolverServerCallStub) error
+pkg nosql, type ConflictManagerServerStubMethods interface { StartConflictResolver }
+pkg nosql, type ConflictManagerServerStubMethods interface, StartConflictResolver(*context.T, *ConflictManagerStartConflictResolverServerCallStub) error
+pkg nosql, type ConflictManagerStartConflictResolverClientCall interface { Finish, RecvStream, SendStream }
+pkg nosql, type ConflictManagerStartConflictResolverClientCall interface, Finish() error
+pkg nosql, type ConflictManagerStartConflictResolverClientCall interface, RecvStream() interface {  Advance() bool;; Value() ConflictInfo;; Err() error;}
+pkg nosql, type ConflictManagerStartConflictResolverClientCall interface, SendStream() interface {  Send(item ResolutionInfo) error;; Close() error;}
+pkg nosql, type ConflictManagerStartConflictResolverClientStream interface { RecvStream, SendStream }
+pkg nosql, type ConflictManagerStartConflictResolverClientStream interface, RecvStream() interface {  Advance() bool;; Value() ConflictInfo;; Err() error;}
+pkg nosql, type ConflictManagerStartConflictResolverClientStream interface, SendStream() interface {  Send(item ResolutionInfo) error;; Close() error;}
+pkg nosql, type ConflictManagerStartConflictResolverServerCall interface { GrantedBlessings, LocalEndpoint, RecvStream, RemoteEndpoint, Security, SendStream, Server, Suffix }
+pkg nosql, type ConflictManagerStartConflictResolverServerCall interface, GrantedBlessings() security.Blessings
+pkg nosql, type ConflictManagerStartConflictResolverServerCall interface, LocalEndpoint() naming.Endpoint
+pkg nosql, type ConflictManagerStartConflictResolverServerCall interface, RecvStream() interface {  Advance() bool;; Value() ResolutionInfo;; Err() error;}
+pkg nosql, type ConflictManagerStartConflictResolverServerCall interface, RemoteEndpoint() naming.Endpoint
+pkg nosql, type ConflictManagerStartConflictResolverServerCall interface, Security() security.Call
+pkg nosql, type ConflictManagerStartConflictResolverServerCall interface, SendStream() interface {  Send(item ConflictInfo) error;}
+pkg nosql, type ConflictManagerStartConflictResolverServerCall interface, Server() XServer
+pkg nosql, type ConflictManagerStartConflictResolverServerCall interface, Suffix() string
+pkg nosql, type ConflictManagerStartConflictResolverServerCallStub struct
+pkg nosql, type ConflictManagerStartConflictResolverServerCallStub struct, embedded rpc.StreamServerCall
+pkg nosql, type ConflictManagerStartConflictResolverServerStream interface { RecvStream, SendStream }
+pkg nosql, type ConflictManagerStartConflictResolverServerStream interface, RecvStream() interface {  Advance() bool;; Value() ResolutionInfo;; Err() error;}
+pkg nosql, type ConflictManagerStartConflictResolverServerStream interface, SendStream() interface {  Send(item ConflictInfo) error;}
+pkg nosql, type CrPolicy struct
+pkg nosql, type CrPolicy struct, Rules []CrRule
+pkg nosql, type CrRule struct
+pkg nosql, type CrRule struct, KeyPrefix string
+pkg nosql, type CrRule struct, Resolver ResolverType
+pkg nosql, type CrRule struct, TableName string
+pkg nosql, type CrRule struct, Type string
+pkg nosql, type DatabaseClientMethods interface { Abort, BeginBatch, Commit, CommitBlob, Create, CreateBlob, CreateSyncGroup, DeleteBlob, Destroy, DestroySyncGroup, EjectFromSyncGroup, Exec, Exists, FetchBlob, GetBlob, GetBlobSize, GetPermissions, GetResumeMarker, GetSchemaMetadata, GetSyncGroupMembers, GetSyncGroupNames, GetSyncGroupSpec, JoinSyncGroup, KeepBlob, LeaveSyncGroup, PinBlob, PutBlob, SetPermissions, SetSchemaMetadata, SetSyncGroupSpec, StartConflictResolver, UnpinBlob, WatchGlob }
+pkg nosql, type DatabaseClientMethods interface, Abort(*context.T, int32, ...rpc.CallOpt) error
+pkg nosql, type DatabaseClientMethods interface, BeginBatch(*context.T, int32, BatchOptions, ...rpc.CallOpt) (string, error)
+pkg nosql, type DatabaseClientMethods interface, Commit(*context.T, int32, ...rpc.CallOpt) error
+pkg nosql, type DatabaseClientMethods interface, CommitBlob(*context.T, BlobRef, ...rpc.CallOpt) error
+pkg nosql, type DatabaseClientMethods interface, Create(*context.T, *SchemaMetadata, access.Permissions, ...rpc.CallOpt) error
+pkg nosql, type DatabaseClientMethods interface, CreateBlob(*context.T, ...rpc.CallOpt) (BlobRef, error)
+pkg nosql, type DatabaseClientMethods interface, CreateSyncGroup(*context.T, string, SyncGroupSpec, SyncGroupMemberInfo, ...rpc.CallOpt) error
+pkg nosql, type DatabaseClientMethods interface, DeleteBlob(*context.T, BlobRef, ...rpc.CallOpt) error
+pkg nosql, type DatabaseClientMethods interface, Destroy(*context.T, int32, ...rpc.CallOpt) error
+pkg nosql, type DatabaseClientMethods interface, DestroySyncGroup(*context.T, string, ...rpc.CallOpt) error
+pkg nosql, type DatabaseClientMethods interface, EjectFromSyncGroup(*context.T, string, string, ...rpc.CallOpt) error
+pkg nosql, type DatabaseClientMethods interface, Exec(*context.T, int32, string, ...rpc.CallOpt) (DatabaseExecClientCall, error)
+pkg nosql, type DatabaseClientMethods interface, Exists(*context.T, int32, ...rpc.CallOpt) (bool, error)
+pkg nosql, type DatabaseClientMethods interface, FetchBlob(*context.T, BlobRef, uint64, ...rpc.CallOpt) (BlobManagerFetchBlobClientCall, error)
+pkg nosql, type DatabaseClientMethods interface, GetBlob(*context.T, BlobRef, int64, ...rpc.CallOpt) (BlobManagerGetBlobClientCall, error)
+pkg nosql, type DatabaseClientMethods interface, GetBlobSize(*context.T, BlobRef, ...rpc.CallOpt) (int64, error)
+pkg nosql, type DatabaseClientMethods interface, GetPermissions(*context.T, ...rpc.CallOpt) (access.Permissions, string, error)
+pkg nosql, type DatabaseClientMethods interface, GetResumeMarker(*context.T, ...rpc.CallOpt) (watch.ResumeMarker, error)
+pkg nosql, type DatabaseClientMethods interface, GetSchemaMetadata(*context.T, ...rpc.CallOpt) (SchemaMetadata, error)
+pkg nosql, type DatabaseClientMethods interface, GetSyncGroupMembers(*context.T, string, ...rpc.CallOpt) (map[string]SyncGroupMemberInfo, error)
+pkg nosql, type DatabaseClientMethods interface, GetSyncGroupNames(*context.T, ...rpc.CallOpt) ([]string, error)
+pkg nosql, type DatabaseClientMethods interface, GetSyncGroupSpec(*context.T, string, ...rpc.CallOpt) (SyncGroupSpec, string, error)
+pkg nosql, type DatabaseClientMethods interface, JoinSyncGroup(*context.T, string, SyncGroupMemberInfo, ...rpc.CallOpt) (SyncGroupSpec, error)
+pkg nosql, type DatabaseClientMethods interface, KeepBlob(*context.T, BlobRef, uint64, ...rpc.CallOpt) error
+pkg nosql, type DatabaseClientMethods interface, LeaveSyncGroup(*context.T, string, ...rpc.CallOpt) error
+pkg nosql, type DatabaseClientMethods interface, PinBlob(*context.T, BlobRef, ...rpc.CallOpt) error
+pkg nosql, type DatabaseClientMethods interface, PutBlob(*context.T, BlobRef, ...rpc.CallOpt) (BlobManagerPutBlobClientCall, error)
+pkg nosql, type DatabaseClientMethods interface, SetPermissions(*context.T, access.Permissions, string, ...rpc.CallOpt) error
+pkg nosql, type DatabaseClientMethods interface, SetSchemaMetadata(*context.T, SchemaMetadata, ...rpc.CallOpt) error
+pkg nosql, type DatabaseClientMethods interface, SetSyncGroupSpec(*context.T, string, SyncGroupSpec, string, ...rpc.CallOpt) error
+pkg nosql, type DatabaseClientMethods interface, StartConflictResolver(*context.T, ...rpc.CallOpt) (ConflictManagerStartConflictResolverClientCall, error)
+pkg nosql, type DatabaseClientMethods interface, UnpinBlob(*context.T, BlobRef, ...rpc.CallOpt) error
+pkg nosql, type DatabaseClientMethods interface, WatchGlob(*context.T, GlobRequest, ...rpc.CallOpt) (GlobWatcherWatchGlobClientCall, error)
+pkg nosql, type DatabaseClientStub interface { Abort, BeginBatch, Commit, CommitBlob, Create, CreateBlob, CreateSyncGroup, DeleteBlob, Destroy, DestroySyncGroup, EjectFromSyncGroup, Exec, Exists, FetchBlob, GetBlob, GetBlobSize, GetPermissions, GetResumeMarker, GetSchemaMetadata, GetSyncGroupMembers, GetSyncGroupNames, GetSyncGroupSpec, JoinSyncGroup, KeepBlob, LeaveSyncGroup, PinBlob, PutBlob, SetPermissions, SetSchemaMetadata, SetSyncGroupSpec, StartConflictResolver, UnpinBlob, WatchGlob }
+pkg nosql, type DatabaseClientStub interface, Abort(*context.T, int32, ...rpc.CallOpt) error
+pkg nosql, type DatabaseClientStub interface, BeginBatch(*context.T, int32, BatchOptions, ...rpc.CallOpt) (string, error)
+pkg nosql, type DatabaseClientStub interface, Commit(*context.T, int32, ...rpc.CallOpt) error
+pkg nosql, type DatabaseClientStub interface, CommitBlob(*context.T, BlobRef, ...rpc.CallOpt) error
+pkg nosql, type DatabaseClientStub interface, Create(*context.T, *SchemaMetadata, access.Permissions, ...rpc.CallOpt) error
+pkg nosql, type DatabaseClientStub interface, CreateBlob(*context.T, ...rpc.CallOpt) (BlobRef, error)
+pkg nosql, type DatabaseClientStub interface, CreateSyncGroup(*context.T, string, SyncGroupSpec, SyncGroupMemberInfo, ...rpc.CallOpt) error
+pkg nosql, type DatabaseClientStub interface, DeleteBlob(*context.T, BlobRef, ...rpc.CallOpt) error
+pkg nosql, type DatabaseClientStub interface, Destroy(*context.T, int32, ...rpc.CallOpt) error
+pkg nosql, type DatabaseClientStub interface, DestroySyncGroup(*context.T, string, ...rpc.CallOpt) error
+pkg nosql, type DatabaseClientStub interface, EjectFromSyncGroup(*context.T, string, string, ...rpc.CallOpt) error
+pkg nosql, type DatabaseClientStub interface, Exec(*context.T, int32, string, ...rpc.CallOpt) (DatabaseExecClientCall, error)
+pkg nosql, type DatabaseClientStub interface, Exists(*context.T, int32, ...rpc.CallOpt) (bool, error)
+pkg nosql, type DatabaseClientStub interface, FetchBlob(*context.T, BlobRef, uint64, ...rpc.CallOpt) (BlobManagerFetchBlobClientCall, error)
+pkg nosql, type DatabaseClientStub interface, GetBlob(*context.T, BlobRef, int64, ...rpc.CallOpt) (BlobManagerGetBlobClientCall, error)
+pkg nosql, type DatabaseClientStub interface, GetBlobSize(*context.T, BlobRef, ...rpc.CallOpt) (int64, error)
+pkg nosql, type DatabaseClientStub interface, GetPermissions(*context.T, ...rpc.CallOpt) (access.Permissions, string, error)
+pkg nosql, type DatabaseClientStub interface, GetResumeMarker(*context.T, ...rpc.CallOpt) (watch.ResumeMarker, error)
+pkg nosql, type DatabaseClientStub interface, GetSchemaMetadata(*context.T, ...rpc.CallOpt) (SchemaMetadata, error)
+pkg nosql, type DatabaseClientStub interface, GetSyncGroupMembers(*context.T, string, ...rpc.CallOpt) (map[string]SyncGroupMemberInfo, error)
+pkg nosql, type DatabaseClientStub interface, GetSyncGroupNames(*context.T, ...rpc.CallOpt) ([]string, error)
+pkg nosql, type DatabaseClientStub interface, GetSyncGroupSpec(*context.T, string, ...rpc.CallOpt) (SyncGroupSpec, string, error)
+pkg nosql, type DatabaseClientStub interface, JoinSyncGroup(*context.T, string, SyncGroupMemberInfo, ...rpc.CallOpt) (SyncGroupSpec, error)
+pkg nosql, type DatabaseClientStub interface, KeepBlob(*context.T, BlobRef, uint64, ...rpc.CallOpt) error
+pkg nosql, type DatabaseClientStub interface, LeaveSyncGroup(*context.T, string, ...rpc.CallOpt) error
+pkg nosql, type DatabaseClientStub interface, PinBlob(*context.T, BlobRef, ...rpc.CallOpt) error
+pkg nosql, type DatabaseClientStub interface, PutBlob(*context.T, BlobRef, ...rpc.CallOpt) (BlobManagerPutBlobClientCall, error)
+pkg nosql, type DatabaseClientStub interface, SetPermissions(*context.T, access.Permissions, string, ...rpc.CallOpt) error
+pkg nosql, type DatabaseClientStub interface, SetSchemaMetadata(*context.T, SchemaMetadata, ...rpc.CallOpt) error
+pkg nosql, type DatabaseClientStub interface, SetSyncGroupSpec(*context.T, string, SyncGroupSpec, string, ...rpc.CallOpt) error
+pkg nosql, type DatabaseClientStub interface, StartConflictResolver(*context.T, ...rpc.CallOpt) (ConflictManagerStartConflictResolverClientCall, error)
+pkg nosql, type DatabaseClientStub interface, UnpinBlob(*context.T, BlobRef, ...rpc.CallOpt) error
+pkg nosql, type DatabaseClientStub interface, WatchGlob(*context.T, GlobRequest, ...rpc.CallOpt) (GlobWatcherWatchGlobClientCall, error)
+pkg nosql, type DatabaseExecClientCall interface { Finish, RecvStream }
+pkg nosql, type DatabaseExecClientCall interface, Finish() error
+pkg nosql, type DatabaseExecClientCall interface, RecvStream() interface {  Advance() bool;; Value() []*vdl.Value;; Err() error;}
+pkg nosql, type DatabaseExecClientStream interface { RecvStream }
+pkg nosql, type DatabaseExecClientStream interface, RecvStream() interface {  Advance() bool;; Value() []*vdl.Value;; Err() error;}
+pkg nosql, type DatabaseExecServerCall interface { GrantedBlessings, LocalEndpoint, RemoteEndpoint, Security, SendStream, Server, Suffix }
+pkg nosql, type DatabaseExecServerCall interface, GrantedBlessings() security.Blessings
+pkg nosql, type DatabaseExecServerCall interface, LocalEndpoint() naming.Endpoint
+pkg nosql, type DatabaseExecServerCall interface, RemoteEndpoint() naming.Endpoint
+pkg nosql, type DatabaseExecServerCall interface, Security() security.Call
+pkg nosql, type DatabaseExecServerCall interface, SendStream() interface {  Send(item []*vdl.Value) error;}
+pkg nosql, type DatabaseExecServerCall interface, Server() XServer
+pkg nosql, type DatabaseExecServerCall interface, Suffix() string
+pkg nosql, type DatabaseExecServerCallStub struct
+pkg nosql, type DatabaseExecServerCallStub struct, embedded rpc.StreamServerCall
+pkg nosql, type DatabaseExecServerStream interface { SendStream }
+pkg nosql, type DatabaseExecServerStream interface, SendStream() interface {  Send(item []*vdl.Value) error;}
+pkg nosql, type DatabaseServerMethods interface { Abort, BeginBatch, Commit, CommitBlob, Create, CreateBlob, CreateSyncGroup, DeleteBlob, Destroy, DestroySyncGroup, EjectFromSyncGroup, Exec, Exists, FetchBlob, GetBlob, GetBlobSize, GetPermissions, GetResumeMarker, GetSchemaMetadata, GetSyncGroupMembers, GetSyncGroupNames, GetSyncGroupSpec, JoinSyncGroup, KeepBlob, LeaveSyncGroup, PinBlob, PutBlob, SetPermissions, SetSchemaMetadata, SetSyncGroupSpec, StartConflictResolver, UnpinBlob, WatchGlob }
+pkg nosql, type DatabaseServerMethods interface, Abort(*context.T, rpc.ServerCall, int32) error
+pkg nosql, type DatabaseServerMethods interface, BeginBatch(*context.T, rpc.ServerCall, int32, BatchOptions) (string, error)
+pkg nosql, type DatabaseServerMethods interface, Commit(*context.T, rpc.ServerCall, int32) error
+pkg nosql, type DatabaseServerMethods interface, CommitBlob(*context.T, rpc.ServerCall, BlobRef) error
+pkg nosql, type DatabaseServerMethods interface, Create(*context.T, rpc.ServerCall, *SchemaMetadata, access.Permissions) error
+pkg nosql, type DatabaseServerMethods interface, CreateBlob(*context.T, rpc.ServerCall) (BlobRef, error)
+pkg nosql, type DatabaseServerMethods interface, CreateSyncGroup(*context.T, rpc.ServerCall, string, SyncGroupSpec, SyncGroupMemberInfo) error
+pkg nosql, type DatabaseServerMethods interface, DeleteBlob(*context.T, rpc.ServerCall, BlobRef) error
+pkg nosql, type DatabaseServerMethods interface, Destroy(*context.T, rpc.ServerCall, int32) error
+pkg nosql, type DatabaseServerMethods interface, DestroySyncGroup(*context.T, rpc.ServerCall, string) error
+pkg nosql, type DatabaseServerMethods interface, EjectFromSyncGroup(*context.T, rpc.ServerCall, string, string) error
+pkg nosql, type DatabaseServerMethods interface, Exec(*context.T, DatabaseExecServerCall, int32, string) error
+pkg nosql, type DatabaseServerMethods interface, Exists(*context.T, rpc.ServerCall, int32) (bool, error)
+pkg nosql, type DatabaseServerMethods interface, FetchBlob(*context.T, BlobManagerFetchBlobServerCall, BlobRef, uint64) error
+pkg nosql, type DatabaseServerMethods interface, GetBlob(*context.T, BlobManagerGetBlobServerCall, BlobRef, int64) error
+pkg nosql, type DatabaseServerMethods interface, GetBlobSize(*context.T, rpc.ServerCall, BlobRef) (int64, error)
+pkg nosql, type DatabaseServerMethods interface, GetPermissions(*context.T, rpc.ServerCall) (access.Permissions, string, error)
+pkg nosql, type DatabaseServerMethods interface, GetResumeMarker(*context.T, rpc.ServerCall) (watch.ResumeMarker, error)
+pkg nosql, type DatabaseServerMethods interface, GetSchemaMetadata(*context.T, rpc.ServerCall) (SchemaMetadata, error)
+pkg nosql, type DatabaseServerMethods interface, GetSyncGroupMembers(*context.T, rpc.ServerCall, string) (map[string]SyncGroupMemberInfo, error)
+pkg nosql, type DatabaseServerMethods interface, GetSyncGroupNames(*context.T, rpc.ServerCall) ([]string, error)
+pkg nosql, type DatabaseServerMethods interface, GetSyncGroupSpec(*context.T, rpc.ServerCall, string) (SyncGroupSpec, string, error)
+pkg nosql, type DatabaseServerMethods interface, JoinSyncGroup(*context.T, rpc.ServerCall, string, SyncGroupMemberInfo) (SyncGroupSpec, error)
+pkg nosql, type DatabaseServerMethods interface, KeepBlob(*context.T, rpc.ServerCall, BlobRef, uint64) error
+pkg nosql, type DatabaseServerMethods interface, LeaveSyncGroup(*context.T, rpc.ServerCall, string) error
+pkg nosql, type DatabaseServerMethods interface, PinBlob(*context.T, rpc.ServerCall, BlobRef) error
+pkg nosql, type DatabaseServerMethods interface, PutBlob(*context.T, BlobManagerPutBlobServerCall, BlobRef) error
+pkg nosql, type DatabaseServerMethods interface, SetPermissions(*context.T, rpc.ServerCall, access.Permissions, string) error
+pkg nosql, type DatabaseServerMethods interface, SetSchemaMetadata(*context.T, rpc.ServerCall, SchemaMetadata) error
+pkg nosql, type DatabaseServerMethods interface, SetSyncGroupSpec(*context.T, rpc.ServerCall, string, SyncGroupSpec, string) error
+pkg nosql, type DatabaseServerMethods interface, StartConflictResolver(*context.T, ConflictManagerStartConflictResolverServerCall) error
+pkg nosql, type DatabaseServerMethods interface, UnpinBlob(*context.T, rpc.ServerCall, BlobRef) error
+pkg nosql, type DatabaseServerMethods interface, WatchGlob(*context.T, GlobWatcherWatchGlobServerCall, GlobRequest) error
+pkg nosql, type DatabaseServerStub interface, Abort(*context.T, rpc.ServerCall, int32) error
+pkg nosql, type DatabaseServerStub interface, BeginBatch(*context.T, rpc.ServerCall, int32, BatchOptions) (string, error)
+pkg nosql, type DatabaseServerStub interface, Commit(*context.T, rpc.ServerCall, int32) error
+pkg nosql, type DatabaseServerStub interface, CommitBlob(*context.T, rpc.ServerCall, BlobRef) error
+pkg nosql, type DatabaseServerStub interface, Create(*context.T, rpc.ServerCall, *SchemaMetadata, access.Permissions) error
+pkg nosql, type DatabaseServerStub interface, CreateBlob(*context.T, rpc.ServerCall) (BlobRef, error)
+pkg nosql, type DatabaseServerStub interface, DeleteBlob(*context.T, rpc.ServerCall, BlobRef) error
+pkg nosql, type DatabaseServerStub interface, Describe__() []rpc.InterfaceDesc
+pkg nosql, type DatabaseServerStub interface, Destroy(*context.T, rpc.ServerCall, int32) error
+pkg nosql, type DatabaseServerStub interface, Exec(*context.T, *DatabaseExecServerCallStub, int32, string) error
+pkg nosql, type DatabaseServerStub interface, Exists(*context.T, rpc.ServerCall, int32) (bool, error)
+pkg nosql, type DatabaseServerStub interface, FetchBlob(*context.T, *BlobManagerFetchBlobServerCallStub, BlobRef, uint64) error
+pkg nosql, type DatabaseServerStub interface, GetBlob(*context.T, *BlobManagerGetBlobServerCallStub, BlobRef, int64) error
+pkg nosql, type DatabaseServerStub interface, GetBlobSize(*context.T, rpc.ServerCall, BlobRef) (int64, error)
+pkg nosql, type DatabaseServerStub interface, GetResumeMarker(*context.T, rpc.ServerCall) (watch.ResumeMarker, error)
+pkg nosql, type DatabaseServerStub interface, KeepBlob(*context.T, rpc.ServerCall, BlobRef, uint64) error
+pkg nosql, type DatabaseServerStub interface, PinBlob(*context.T, rpc.ServerCall, BlobRef) error
+pkg nosql, type DatabaseServerStub interface, PutBlob(*context.T, *BlobManagerPutBlobServerCallStub, BlobRef) error
+pkg nosql, type DatabaseServerStub interface, StartConflictResolver(*context.T, *ConflictManagerStartConflictResolverServerCallStub) error
+pkg nosql, type DatabaseServerStub interface, UnpinBlob(*context.T, rpc.ServerCall, BlobRef) error
+pkg nosql, type DatabaseServerStub interface, WatchGlob(*context.T, *GlobWatcherWatchGlobServerCallStub, GlobRequest) error
+pkg nosql, type DatabaseServerStub interface, unexported methods
+pkg nosql, type DatabaseServerStubMethods interface, Abort(*context.T, rpc.ServerCall, int32) error
+pkg nosql, type DatabaseServerStubMethods interface, BeginBatch(*context.T, rpc.ServerCall, int32, BatchOptions) (string, error)
+pkg nosql, type DatabaseServerStubMethods interface, Commit(*context.T, rpc.ServerCall, int32) error
+pkg nosql, type DatabaseServerStubMethods interface, CommitBlob(*context.T, rpc.ServerCall, BlobRef) error
+pkg nosql, type DatabaseServerStubMethods interface, Create(*context.T, rpc.ServerCall, *SchemaMetadata, access.Permissions) error
+pkg nosql, type DatabaseServerStubMethods interface, CreateBlob(*context.T, rpc.ServerCall) (BlobRef, error)
+pkg nosql, type DatabaseServerStubMethods interface, DeleteBlob(*context.T, rpc.ServerCall, BlobRef) error
+pkg nosql, type DatabaseServerStubMethods interface, Destroy(*context.T, rpc.ServerCall, int32) error
+pkg nosql, type DatabaseServerStubMethods interface, Exec(*context.T, *DatabaseExecServerCallStub, int32, string) error
+pkg nosql, type DatabaseServerStubMethods interface, Exists(*context.T, rpc.ServerCall, int32) (bool, error)
+pkg nosql, type DatabaseServerStubMethods interface, FetchBlob(*context.T, *BlobManagerFetchBlobServerCallStub, BlobRef, uint64) error
+pkg nosql, type DatabaseServerStubMethods interface, GetBlob(*context.T, *BlobManagerGetBlobServerCallStub, BlobRef, int64) error
+pkg nosql, type DatabaseServerStubMethods interface, GetBlobSize(*context.T, rpc.ServerCall, BlobRef) (int64, error)
+pkg nosql, type DatabaseServerStubMethods interface, GetResumeMarker(*context.T, rpc.ServerCall) (watch.ResumeMarker, error)
+pkg nosql, type DatabaseServerStubMethods interface, KeepBlob(*context.T, rpc.ServerCall, BlobRef, uint64) error
+pkg nosql, type DatabaseServerStubMethods interface, PinBlob(*context.T, rpc.ServerCall, BlobRef) error
+pkg nosql, type DatabaseServerStubMethods interface, PutBlob(*context.T, *BlobManagerPutBlobServerCallStub, BlobRef) error
+pkg nosql, type DatabaseServerStubMethods interface, StartConflictResolver(*context.T, *ConflictManagerStartConflictResolverServerCallStub) error
+pkg nosql, type DatabaseServerStubMethods interface, UnpinBlob(*context.T, rpc.ServerCall, BlobRef) error
+pkg nosql, type DatabaseServerStubMethods interface, WatchGlob(*context.T, *GlobWatcherWatchGlobServerCallStub, GlobRequest) error
+pkg nosql, type DatabaseServerStubMethods interface, unexported methods
+pkg nosql, type DatabaseWatcherClientMethods interface { GetResumeMarker, WatchGlob }
+pkg nosql, type DatabaseWatcherClientMethods interface, GetResumeMarker(*context.T, ...rpc.CallOpt) (watch.ResumeMarker, error)
+pkg nosql, type DatabaseWatcherClientMethods interface, WatchGlob(*context.T, GlobRequest, ...rpc.CallOpt) (GlobWatcherWatchGlobClientCall, error)
+pkg nosql, type DatabaseWatcherClientStub interface { GetResumeMarker, WatchGlob }
+pkg nosql, type DatabaseWatcherClientStub interface, GetResumeMarker(*context.T, ...rpc.CallOpt) (watch.ResumeMarker, error)
+pkg nosql, type DatabaseWatcherClientStub interface, WatchGlob(*context.T, GlobRequest, ...rpc.CallOpt) (GlobWatcherWatchGlobClientCall, error)
+pkg nosql, type DatabaseWatcherServerMethods interface { GetResumeMarker, WatchGlob }
+pkg nosql, type DatabaseWatcherServerMethods interface, GetResumeMarker(*context.T, rpc.ServerCall) (watch.ResumeMarker, error)
+pkg nosql, type DatabaseWatcherServerMethods interface, WatchGlob(*context.T, GlobWatcherWatchGlobServerCall, GlobRequest) error
+pkg nosql, type DatabaseWatcherServerStub interface { Describe__, GetResumeMarker, WatchGlob }
+pkg nosql, type DatabaseWatcherServerStub interface, Describe__() []rpc.InterfaceDesc
+pkg nosql, type DatabaseWatcherServerStub interface, GetResumeMarker(*context.T, rpc.ServerCall) (watch.ResumeMarker, error)
+pkg nosql, type DatabaseWatcherServerStub interface, WatchGlob(*context.T, *GlobWatcherWatchGlobServerCallStub, GlobRequest) error
+pkg nosql, type DatabaseWatcherServerStubMethods interface { GetResumeMarker, WatchGlob }
+pkg nosql, type DatabaseWatcherServerStubMethods interface, GetResumeMarker(*context.T, rpc.ServerCall) (watch.ResumeMarker, error)
+pkg nosql, type DatabaseWatcherServerStubMethods interface, WatchGlob(*context.T, *GlobWatcherWatchGlobServerCallStub, GlobRequest) error
+pkg nosql, type KeyValue struct
+pkg nosql, type KeyValue struct, Key string
+pkg nosql, type KeyValue struct, Value []byte
+pkg nosql, type Operation interface, Index() int
+pkg nosql, type Operation interface, Interface() interface{}
+pkg nosql, type Operation interface, Name() string
+pkg nosql, type Operation interface, unexported methods
+pkg nosql, type OperationRead struct
+pkg nosql, type OperationRead struct, Value RowOp
+pkg nosql, type OperationScan struct
+pkg nosql, type OperationScan struct, Value ScanOp
+pkg nosql, type OperationWrite struct
+pkg nosql, type OperationWrite struct, Value RowOp
+pkg nosql, type PrefixPermissions struct
+pkg nosql, type PrefixPermissions struct, Perms access.Permissions
+pkg nosql, type PrefixPermissions struct, Prefix string
+pkg nosql, type ResolutionInfo struct
+pkg nosql, type ResolutionInfo struct, Continued bool
+pkg nosql, type ResolutionInfo struct, Key string
+pkg nosql, type ResolutionInfo struct, Result *Value
+pkg nosql, type ResolutionInfo struct, Selection ValueSelection
+pkg nosql, type ResolverType int
+pkg nosql, type RowClientMethods interface { Delete, Exists, Get, Put }
+pkg nosql, type RowClientMethods interface, Delete(*context.T, int32, ...rpc.CallOpt) error
+pkg nosql, type RowClientMethods interface, Exists(*context.T, int32, ...rpc.CallOpt) (bool, error)
+pkg nosql, type RowClientMethods interface, Get(*context.T, int32, ...rpc.CallOpt) ([]byte, error)
+pkg nosql, type RowClientMethods interface, Put(*context.T, int32, []byte, ...rpc.CallOpt) error
+pkg nosql, type RowClientStub interface { Delete, Exists, Get, Put }
+pkg nosql, type RowClientStub interface, Delete(*context.T, int32, ...rpc.CallOpt) error
+pkg nosql, type RowClientStub interface, Exists(*context.T, int32, ...rpc.CallOpt) (bool, error)
+pkg nosql, type RowClientStub interface, Get(*context.T, int32, ...rpc.CallOpt) ([]byte, error)
+pkg nosql, type RowClientStub interface, Put(*context.T, int32, []byte, ...rpc.CallOpt) error
+pkg nosql, type RowInfo struct
+pkg nosql, type RowInfo struct, BatchIds []uint16
+pkg nosql, type RowInfo struct, Op Operation
+pkg nosql, type RowOp struct
+pkg nosql, type RowOp struct, AncestorValue *Value
+pkg nosql, type RowOp struct, Key string
+pkg nosql, type RowOp struct, LocalValue *Value
+pkg nosql, type RowOp struct, RemoteValue *Value
+pkg nosql, type RowServerMethods interface { Delete, Exists, Get, Put }
+pkg nosql, type RowServerMethods interface, Delete(*context.T, rpc.ServerCall, int32) error
+pkg nosql, type RowServerMethods interface, Exists(*context.T, rpc.ServerCall, int32) (bool, error)
+pkg nosql, type RowServerMethods interface, Get(*context.T, rpc.ServerCall, int32) ([]byte, error)
+pkg nosql, type RowServerMethods interface, Put(*context.T, rpc.ServerCall, int32, []byte) error
+pkg nosql, type RowServerStub interface, Describe__() []rpc.InterfaceDesc
+pkg nosql, type RowServerStub interface, unexported methods
+pkg nosql, type RowServerStubMethods RowServerMethods
+pkg nosql, type ScanOp struct
+pkg nosql, type ScanOp struct, Limit string
+pkg nosql, type ScanOp struct, Start string
+pkg nosql, type SchemaManagerClientMethods interface { GetSchemaMetadata, SetSchemaMetadata }
+pkg nosql, type SchemaManagerClientMethods interface, GetSchemaMetadata(*context.T, ...rpc.CallOpt) (SchemaMetadata, error)
+pkg nosql, type SchemaManagerClientMethods interface, SetSchemaMetadata(*context.T, SchemaMetadata, ...rpc.CallOpt) error
+pkg nosql, type SchemaManagerClientStub interface { GetSchemaMetadata, SetSchemaMetadata }
+pkg nosql, type SchemaManagerClientStub interface, GetSchemaMetadata(*context.T, ...rpc.CallOpt) (SchemaMetadata, error)
+pkg nosql, type SchemaManagerClientStub interface, SetSchemaMetadata(*context.T, SchemaMetadata, ...rpc.CallOpt) error
+pkg nosql, type SchemaManagerServerMethods interface { GetSchemaMetadata, SetSchemaMetadata }
+pkg nosql, type SchemaManagerServerMethods interface, GetSchemaMetadata(*context.T, rpc.ServerCall) (SchemaMetadata, error)
+pkg nosql, type SchemaManagerServerMethods interface, SetSchemaMetadata(*context.T, rpc.ServerCall, SchemaMetadata) error
+pkg nosql, type SchemaManagerServerStub interface, Describe__() []rpc.InterfaceDesc
+pkg nosql, type SchemaManagerServerStub interface, unexported methods
+pkg nosql, type SchemaManagerServerStubMethods SchemaManagerServerMethods
+pkg nosql, type SchemaMetadata struct
+pkg nosql, type SchemaMetadata struct, Policy CrPolicy
+pkg nosql, type SchemaMetadata struct, Version int32
+pkg nosql, type StoreChange struct
+pkg nosql, type StoreChange struct, FromSync bool
+pkg nosql, type StoreChange struct, Value []byte
+pkg nosql, type SyncGroupManagerClientMethods interface { CreateSyncGroup, DestroySyncGroup, EjectFromSyncGroup, GetSyncGroupMembers, GetSyncGroupNames, GetSyncGroupSpec, JoinSyncGroup, LeaveSyncGroup, SetSyncGroupSpec }
+pkg nosql, type SyncGroupManagerClientMethods interface, CreateSyncGroup(*context.T, string, SyncGroupSpec, SyncGroupMemberInfo, ...rpc.CallOpt) error
+pkg nosql, type SyncGroupManagerClientMethods interface, DestroySyncGroup(*context.T, string, ...rpc.CallOpt) error
+pkg nosql, type SyncGroupManagerClientMethods interface, EjectFromSyncGroup(*context.T, string, string, ...rpc.CallOpt) error
+pkg nosql, type SyncGroupManagerClientMethods interface, GetSyncGroupMembers(*context.T, string, ...rpc.CallOpt) (map[string]SyncGroupMemberInfo, error)
+pkg nosql, type SyncGroupManagerClientMethods interface, GetSyncGroupNames(*context.T, ...rpc.CallOpt) ([]string, error)
+pkg nosql, type SyncGroupManagerClientMethods interface, GetSyncGroupSpec(*context.T, string, ...rpc.CallOpt) (SyncGroupSpec, string, error)
+pkg nosql, type SyncGroupManagerClientMethods interface, JoinSyncGroup(*context.T, string, SyncGroupMemberInfo, ...rpc.CallOpt) (SyncGroupSpec, error)
+pkg nosql, type SyncGroupManagerClientMethods interface, LeaveSyncGroup(*context.T, string, ...rpc.CallOpt) error
+pkg nosql, type SyncGroupManagerClientMethods interface, SetSyncGroupSpec(*context.T, string, SyncGroupSpec, string, ...rpc.CallOpt) error
+pkg nosql, type SyncGroupManagerClientStub interface { CreateSyncGroup, DestroySyncGroup, EjectFromSyncGroup, GetSyncGroupMembers, GetSyncGroupNames, GetSyncGroupSpec, JoinSyncGroup, LeaveSyncGroup, SetSyncGroupSpec }
+pkg nosql, type SyncGroupManagerClientStub interface, CreateSyncGroup(*context.T, string, SyncGroupSpec, SyncGroupMemberInfo, ...rpc.CallOpt) error
+pkg nosql, type SyncGroupManagerClientStub interface, DestroySyncGroup(*context.T, string, ...rpc.CallOpt) error
+pkg nosql, type SyncGroupManagerClientStub interface, EjectFromSyncGroup(*context.T, string, string, ...rpc.CallOpt) error
+pkg nosql, type SyncGroupManagerClientStub interface, GetSyncGroupMembers(*context.T, string, ...rpc.CallOpt) (map[string]SyncGroupMemberInfo, error)
+pkg nosql, type SyncGroupManagerClientStub interface, GetSyncGroupNames(*context.T, ...rpc.CallOpt) ([]string, error)
+pkg nosql, type SyncGroupManagerClientStub interface, GetSyncGroupSpec(*context.T, string, ...rpc.CallOpt) (SyncGroupSpec, string, error)
+pkg nosql, type SyncGroupManagerClientStub interface, JoinSyncGroup(*context.T, string, SyncGroupMemberInfo, ...rpc.CallOpt) (SyncGroupSpec, error)
+pkg nosql, type SyncGroupManagerClientStub interface, LeaveSyncGroup(*context.T, string, ...rpc.CallOpt) error
+pkg nosql, type SyncGroupManagerClientStub interface, SetSyncGroupSpec(*context.T, string, SyncGroupSpec, string, ...rpc.CallOpt) error
+pkg nosql, type SyncGroupManagerServerMethods interface { CreateSyncGroup, DestroySyncGroup, EjectFromSyncGroup, GetSyncGroupMembers, GetSyncGroupNames, GetSyncGroupSpec, JoinSyncGroup, LeaveSyncGroup, SetSyncGroupSpec }
+pkg nosql, type SyncGroupManagerServerMethods interface, CreateSyncGroup(*context.T, rpc.ServerCall, string, SyncGroupSpec, SyncGroupMemberInfo) error
+pkg nosql, type SyncGroupManagerServerMethods interface, DestroySyncGroup(*context.T, rpc.ServerCall, string) error
+pkg nosql, type SyncGroupManagerServerMethods interface, EjectFromSyncGroup(*context.T, rpc.ServerCall, string, string) error
+pkg nosql, type SyncGroupManagerServerMethods interface, GetSyncGroupMembers(*context.T, rpc.ServerCall, string) (map[string]SyncGroupMemberInfo, error)
+pkg nosql, type SyncGroupManagerServerMethods interface, GetSyncGroupNames(*context.T, rpc.ServerCall) ([]string, error)
+pkg nosql, type SyncGroupManagerServerMethods interface, GetSyncGroupSpec(*context.T, rpc.ServerCall, string) (SyncGroupSpec, string, error)
+pkg nosql, type SyncGroupManagerServerMethods interface, JoinSyncGroup(*context.T, rpc.ServerCall, string, SyncGroupMemberInfo) (SyncGroupSpec, error)
+pkg nosql, type SyncGroupManagerServerMethods interface, LeaveSyncGroup(*context.T, rpc.ServerCall, string) error
+pkg nosql, type SyncGroupManagerServerMethods interface, SetSyncGroupSpec(*context.T, rpc.ServerCall, string, SyncGroupSpec, string) error
+pkg nosql, type SyncGroupManagerServerStub interface, Describe__() []rpc.InterfaceDesc
+pkg nosql, type SyncGroupManagerServerStub interface, unexported methods
+pkg nosql, type SyncGroupManagerServerStubMethods SyncGroupManagerServerMethods
+pkg nosql, type SyncGroupMemberInfo struct
+pkg nosql, type SyncGroupMemberInfo struct, SyncPriority byte
+pkg nosql, type SyncGroupSpec struct
+pkg nosql, type SyncGroupSpec struct, Description string
+pkg nosql, type SyncGroupSpec struct, IsPrivate bool
+pkg nosql, type SyncGroupSpec struct, MountTables []string
+pkg nosql, type SyncGroupSpec struct, Perms access.Permissions
+pkg nosql, type SyncGroupSpec struct, Prefixes []string
+pkg nosql, type TableClientMethods interface { Create, Delete, DeletePermissions, DeleteRowRange, Exists, GetPermissions, Scan, SetPermissions }
+pkg nosql, type TableClientMethods interface, Create(*context.T, int32, access.Permissions, ...rpc.CallOpt) error
+pkg nosql, type TableClientMethods interface, Delete(*context.T, int32, ...rpc.CallOpt) error
+pkg nosql, type TableClientMethods interface, DeletePermissions(*context.T, int32, string, ...rpc.CallOpt) error
+pkg nosql, type TableClientMethods interface, DeleteRowRange(*context.T, int32, []byte, []byte, ...rpc.CallOpt) error
+pkg nosql, type TableClientMethods interface, Exists(*context.T, int32, ...rpc.CallOpt) (bool, error)
+pkg nosql, type TableClientMethods interface, GetPermissions(*context.T, int32, string, ...rpc.CallOpt) ([]PrefixPermissions, error)
+pkg nosql, type TableClientMethods interface, Scan(*context.T, int32, []byte, []byte, ...rpc.CallOpt) (TableScanClientCall, error)
+pkg nosql, type TableClientMethods interface, SetPermissions(*context.T, int32, string, access.Permissions, ...rpc.CallOpt) error
+pkg nosql, type TableClientStub interface { Create, Delete, DeletePermissions, DeleteRowRange, Exists, GetPermissions, Scan, SetPermissions }
+pkg nosql, type TableClientStub interface, Create(*context.T, int32, access.Permissions, ...rpc.CallOpt) error
+pkg nosql, type TableClientStub interface, Delete(*context.T, int32, ...rpc.CallOpt) error
+pkg nosql, type TableClientStub interface, DeletePermissions(*context.T, int32, string, ...rpc.CallOpt) error
+pkg nosql, type TableClientStub interface, DeleteRowRange(*context.T, int32, []byte, []byte, ...rpc.CallOpt) error
+pkg nosql, type TableClientStub interface, Exists(*context.T, int32, ...rpc.CallOpt) (bool, error)
+pkg nosql, type TableClientStub interface, GetPermissions(*context.T, int32, string, ...rpc.CallOpt) ([]PrefixPermissions, error)
+pkg nosql, type TableClientStub interface, Scan(*context.T, int32, []byte, []byte, ...rpc.CallOpt) (TableScanClientCall, error)
+pkg nosql, type TableClientStub interface, SetPermissions(*context.T, int32, string, access.Permissions, ...rpc.CallOpt) error
+pkg nosql, type TableScanClientCall interface { Finish, RecvStream }
+pkg nosql, type TableScanClientCall interface, Finish() error
+pkg nosql, type TableScanClientCall interface, RecvStream() interface {  Advance() bool;; Value() KeyValue;; Err() error;}
+pkg nosql, type TableScanClientStream interface { RecvStream }
+pkg nosql, type TableScanClientStream interface, RecvStream() interface {  Advance() bool;; Value() KeyValue;; Err() error;}
+pkg nosql, type TableScanServerCall interface { GrantedBlessings, LocalEndpoint, RemoteEndpoint, Security, SendStream, Server, Suffix }
+pkg nosql, type TableScanServerCall interface, GrantedBlessings() security.Blessings
+pkg nosql, type TableScanServerCall interface, LocalEndpoint() naming.Endpoint
+pkg nosql, type TableScanServerCall interface, RemoteEndpoint() naming.Endpoint
+pkg nosql, type TableScanServerCall interface, Security() security.Call
+pkg nosql, type TableScanServerCall interface, SendStream() interface {  Send(item KeyValue) error;}
+pkg nosql, type TableScanServerCall interface, Server() XServer
+pkg nosql, type TableScanServerCall interface, Suffix() string
+pkg nosql, type TableScanServerCallStub struct
+pkg nosql, type TableScanServerCallStub struct, embedded rpc.StreamServerCall
+pkg nosql, type TableScanServerStream interface { SendStream }
+pkg nosql, type TableScanServerStream interface, SendStream() interface {  Send(item KeyValue) error;}
+pkg nosql, type TableServerMethods interface { Create, Delete, DeletePermissions, DeleteRowRange, Exists, GetPermissions, Scan, SetPermissions }
+pkg nosql, type TableServerMethods interface, Create(*context.T, rpc.ServerCall, int32, access.Permissions) error
+pkg nosql, type TableServerMethods interface, Delete(*context.T, rpc.ServerCall, int32) error
+pkg nosql, type TableServerMethods interface, DeletePermissions(*context.T, rpc.ServerCall, int32, string) error
+pkg nosql, type TableServerMethods interface, DeleteRowRange(*context.T, rpc.ServerCall, int32, []byte, []byte) error
+pkg nosql, type TableServerMethods interface, Exists(*context.T, rpc.ServerCall, int32) (bool, error)
+pkg nosql, type TableServerMethods interface, GetPermissions(*context.T, rpc.ServerCall, int32, string) ([]PrefixPermissions, error)
+pkg nosql, type TableServerMethods interface, Scan(*context.T, TableScanServerCall, int32, []byte, []byte) error
+pkg nosql, type TableServerMethods interface, SetPermissions(*context.T, rpc.ServerCall, int32, string, access.Permissions) error
+pkg nosql, type TableServerStub interface { Create, Delete, DeletePermissions, DeleteRowRange, Describe__, Exists, GetPermissions, Scan, SetPermissions }
+pkg nosql, type TableServerStub interface, Create(*context.T, rpc.ServerCall, int32, access.Permissions) error
+pkg nosql, type TableServerStub interface, Delete(*context.T, rpc.ServerCall, int32) error
+pkg nosql, type TableServerStub interface, DeletePermissions(*context.T, rpc.ServerCall, int32, string) error
+pkg nosql, type TableServerStub interface, DeleteRowRange(*context.T, rpc.ServerCall, int32, []byte, []byte) error
+pkg nosql, type TableServerStub interface, Describe__() []rpc.InterfaceDesc
+pkg nosql, type TableServerStub interface, Exists(*context.T, rpc.ServerCall, int32) (bool, error)
+pkg nosql, type TableServerStub interface, GetPermissions(*context.T, rpc.ServerCall, int32, string) ([]PrefixPermissions, error)
+pkg nosql, type TableServerStub interface, Scan(*context.T, *TableScanServerCallStub, int32, []byte, []byte) error
+pkg nosql, type TableServerStub interface, SetPermissions(*context.T, rpc.ServerCall, int32, string, access.Permissions) error
+pkg nosql, type TableServerStubMethods interface { Create, Delete, DeletePermissions, DeleteRowRange, Exists, GetPermissions, Scan, SetPermissions }
+pkg nosql, type TableServerStubMethods interface, Create(*context.T, rpc.ServerCall, int32, access.Permissions) error
+pkg nosql, type TableServerStubMethods interface, Delete(*context.T, rpc.ServerCall, int32) error
+pkg nosql, type TableServerStubMethods interface, DeletePermissions(*context.T, rpc.ServerCall, int32, string) error
+pkg nosql, type TableServerStubMethods interface, DeleteRowRange(*context.T, rpc.ServerCall, int32, []byte, []byte) error
+pkg nosql, type TableServerStubMethods interface, Exists(*context.T, rpc.ServerCall, int32) (bool, error)
+pkg nosql, type TableServerStubMethods interface, GetPermissions(*context.T, rpc.ServerCall, int32, string) ([]PrefixPermissions, error)
+pkg nosql, type TableServerStubMethods interface, Scan(*context.T, *TableScanServerCallStub, int32, []byte, []byte) error
+pkg nosql, type TableServerStubMethods interface, SetPermissions(*context.T, rpc.ServerCall, int32, string, access.Permissions) error
+pkg nosql, type Value struct
+pkg nosql, type Value struct, Bytes []byte
+pkg nosql, type Value struct, WriteTs int64
+pkg nosql, type ValueSelection int
+pkg nosql, var BatchSourceAll [...]BatchSource
+pkg nosql, var BlobFetchStateAll [...]BlobFetchState
+pkg nosql, var BlobManagerDesc rpc.InterfaceDesc
+pkg nosql, var ConflictManagerDesc rpc.InterfaceDesc
+pkg nosql, var DatabaseDesc rpc.InterfaceDesc
+pkg nosql, var DatabaseWatcherDesc rpc.InterfaceDesc
+pkg nosql, var ErrBlobNotCommitted verror.IDAction
+pkg nosql, var ErrBoundToBatch verror.IDAction
+pkg nosql, var ErrConcurrentBatch verror.IDAction
+pkg nosql, var ErrNotBoundToBatch verror.IDAction
+pkg nosql, var ErrReadOnlyBatch verror.IDAction
+pkg nosql, var ErrSchemaVersionMismatch verror.IDAction
+pkg nosql, var ResolverTypeAll [...]ResolverType
+pkg nosql, var RowDesc rpc.InterfaceDesc
+pkg nosql, var SchemaManagerDesc rpc.InterfaceDesc
+pkg nosql, var SyncGroupManagerDesc rpc.InterfaceDesc
+pkg nosql, var TableDesc rpc.InterfaceDesc
+pkg nosql, var ValueSelectionAll [...]ValueSelection

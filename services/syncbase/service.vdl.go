@@ -275,8 +275,8 @@ type AppClientMethods interface {
 	// If perms is nil, we inherit (copy) the Service perms.
 	// Create requires the caller to have Write permission at the Service.
 	Create(ctx *context.T, perms access.Permissions, opts ...rpc.CallOpt) error
-	// Delete deletes this App.
-	Delete(*context.T, ...rpc.CallOpt) error
+	// Destroy destroys this App.
+	Destroy(*context.T, ...rpc.CallOpt) error
 	// Exists returns true only if this App exists. Insufficient permissions
 	// cause Exists to return false instead of an error.
 	Exists(*context.T, ...rpc.CallOpt) (bool, error)
@@ -304,8 +304,8 @@ func (c implAppClientStub) Create(ctx *context.T, i0 access.Permissions, opts ..
 	return
 }
 
-func (c implAppClientStub) Delete(ctx *context.T, opts ...rpc.CallOpt) (err error) {
-	err = v23.GetClient(ctx).Call(ctx, c.name, "Delete", nil, nil, opts...)
+func (c implAppClientStub) Destroy(ctx *context.T, opts ...rpc.CallOpt) (err error) {
+	err = v23.GetClient(ctx).Call(ctx, c.name, "Destroy", nil, nil, opts...)
 	return
 }
 
@@ -370,8 +370,8 @@ type AppServerMethods interface {
 	// If perms is nil, we inherit (copy) the Service perms.
 	// Create requires the caller to have Write permission at the Service.
 	Create(ctx *context.T, call rpc.ServerCall, perms access.Permissions) error
-	// Delete deletes this App.
-	Delete(*context.T, rpc.ServerCall) error
+	// Destroy destroys this App.
+	Destroy(*context.T, rpc.ServerCall) error
 	// Exists returns true only if this App exists. Insufficient permissions
 	// cause Exists to return false instead of an error.
 	Exists(*context.T, rpc.ServerCall) (bool, error)
@@ -418,8 +418,8 @@ func (s implAppServerStub) Create(ctx *context.T, call rpc.ServerCall, i0 access
 	return s.impl.Create(ctx, call, i0)
 }
 
-func (s implAppServerStub) Delete(ctx *context.T, call rpc.ServerCall) error {
-	return s.impl.Delete(ctx, call)
+func (s implAppServerStub) Destroy(ctx *context.T, call rpc.ServerCall) error {
+	return s.impl.Destroy(ctx, call)
 }
 
 func (s implAppServerStub) Exists(ctx *context.T, call rpc.ServerCall) (bool, error) {
@@ -455,8 +455,8 @@ var descApp = rpc.InterfaceDesc{
 			Tags: []*vdl.Value{vdl.ValueOf(access.Tag("Write"))},
 		},
 		{
-			Name: "Delete",
-			Doc:  "// Delete deletes this App.",
+			Name: "Destroy",
+			Doc:  "// Destroy destroys this App.",
 			Tags: []*vdl.Value{vdl.ValueOf(access.Tag("Write"))},
 		},
 		{

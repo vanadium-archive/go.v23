@@ -65,8 +65,8 @@ type Database interface {
 	// If perms is nil, we inherit (copy) the App perms.
 	Create(ctx *context.T, perms access.Permissions) error
 
-	// Delete deletes this Database.
-	Delete(ctx *context.T) error
+	// Destroy destroys this Database, permanently removing all of its data.
+	Destroy(ctx *context.T) error
 
 	// Exists returns true only if this Database exists. Insufficient permissions
 	// cause Exists to return false instead of an error.

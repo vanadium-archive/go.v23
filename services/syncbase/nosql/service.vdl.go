@@ -1896,8 +1896,8 @@ type DatabaseClientMethods interface {
 	// If perms is nil, we inherit (copy) the App perms.
 	// Create requires the caller to have Write permission at the App.
 	Create(ctx *context.T, metadata *SchemaMetadata, perms access.Permissions, opts ...rpc.CallOpt) error
-	// Delete deletes this Database.
-	Delete(ctx *context.T, schemaVersion int32, opts ...rpc.CallOpt) error
+	// Destroy destroys this Database, permanently removing all of its data.
+	Destroy(ctx *context.T, schemaVersion int32, opts ...rpc.CallOpt) error
 	// Exists returns true only if this Database exists. Insufficient permissions
 	// cause Exists to return false instead of an error.
 	// TODO(ivanpi): Exists may fail with an error if higher levels of hierarchy
@@ -1951,8 +1951,8 @@ func (c implDatabaseClientStub) Create(ctx *context.T, i0 *SchemaMetadata, i1 ac
 	return
 }
 
-func (c implDatabaseClientStub) Delete(ctx *context.T, i0 int32, opts ...rpc.CallOpt) (err error) {
-	err = v23.GetClient(ctx).Call(ctx, c.name, "Delete", []interface{}{i0}, nil, opts...)
+func (c implDatabaseClientStub) Destroy(ctx *context.T, i0 int32, opts ...rpc.CallOpt) (err error) {
+	err = v23.GetClient(ctx).Call(ctx, c.name, "Destroy", []interface{}{i0}, nil, opts...)
 	return
 }
 
@@ -2147,8 +2147,8 @@ type DatabaseServerMethods interface {
 	// If perms is nil, we inherit (copy) the App perms.
 	// Create requires the caller to have Write permission at the App.
 	Create(ctx *context.T, call rpc.ServerCall, metadata *SchemaMetadata, perms access.Permissions) error
-	// Delete deletes this Database.
-	Delete(ctx *context.T, call rpc.ServerCall, schemaVersion int32) error
+	// Destroy destroys this Database, permanently removing all of its data.
+	Destroy(ctx *context.T, call rpc.ServerCall, schemaVersion int32) error
 	// Exists returns true only if this Database exists. Insufficient permissions
 	// cause Exists to return false instead of an error.
 	// TODO(ivanpi): Exists may fail with an error if higher levels of hierarchy
@@ -2263,8 +2263,8 @@ type DatabaseServerStubMethods interface {
 	// If perms is nil, we inherit (copy) the App perms.
 	// Create requires the caller to have Write permission at the App.
 	Create(ctx *context.T, call rpc.ServerCall, metadata *SchemaMetadata, perms access.Permissions) error
-	// Delete deletes this Database.
-	Delete(ctx *context.T, call rpc.ServerCall, schemaVersion int32) error
+	// Destroy destroys this Database, permanently removing all of its data.
+	Destroy(ctx *context.T, call rpc.ServerCall, schemaVersion int32) error
 	// Exists returns true only if this Database exists. Insufficient permissions
 	// cause Exists to return false instead of an error.
 	// TODO(ivanpi): Exists may fail with an error if higher levels of hierarchy
@@ -2336,8 +2336,8 @@ func (s implDatabaseServerStub) Create(ctx *context.T, call rpc.ServerCall, i0 *
 	return s.impl.Create(ctx, call, i0, i1)
 }
 
-func (s implDatabaseServerStub) Delete(ctx *context.T, call rpc.ServerCall, i0 int32) error {
-	return s.impl.Delete(ctx, call, i0)
+func (s implDatabaseServerStub) Destroy(ctx *context.T, call rpc.ServerCall, i0 int32) error {
+	return s.impl.Destroy(ctx, call, i0)
 }
 
 func (s implDatabaseServerStub) Exists(ctx *context.T, call rpc.ServerCall, i0 int32) (bool, error) {
@@ -2395,8 +2395,8 @@ var descDatabase = rpc.InterfaceDesc{
 			Tags: []*vdl.Value{vdl.ValueOf(access.Tag("Write"))},
 		},
 		{
-			Name: "Delete",
-			Doc:  "// Delete deletes this Database.",
+			Name: "Destroy",
+			Doc:  "// Destroy destroys this Database, permanently removing all of its data.",
 			InArgs: []rpc.ArgDesc{
 				{"schemaVersion", ``}, // int32
 			},
