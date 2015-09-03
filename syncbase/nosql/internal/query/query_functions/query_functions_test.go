@@ -6,6 +6,7 @@ package query_functions_test
 
 import (
 	"errors"
+	"math"
 	"reflect"
 	"testing"
 	"time"
@@ -503,6 +504,62 @@ func TestFunctions(t *testing.T) {
 			&query_parser.Operand{
 				Type: query_parser.TypStr,
 				Str:  "foobar",
+			},
+		},
+		// HtmlEscape
+		functionsTest{
+			&query_parser.Function{
+				Name: "HtmlEscape",
+				Args: []*query_parser.Operand{
+					&query_parser.Operand{
+						Type: query_parser.TypStr,
+						Str:  "<a>FooBar</a>",
+					},
+				},
+				ArgTypes: []query_parser.OperandType{
+					query_parser.TypStr,
+				},
+				RetType:  query_parser.TypStr,
+				Computed: false,
+				RetValue: nil,
+			},
+			[]*query_parser.Operand{
+				&query_parser.Operand{
+					Type: query_parser.TypStr,
+					Str:  "<a>FooBar</a>",
+				},
+			},
+			&query_parser.Operand{
+				Type: query_parser.TypStr,
+				Str:  "&lt;a&gt;FooBar&lt;/a&gt;",
+			},
+		},
+		// HtmlUnescape
+		functionsTest{
+			&query_parser.Function{
+				Name: "HtmlUnescape",
+				Args: []*query_parser.Operand{
+					&query_parser.Operand{
+						Type: query_parser.TypStr,
+						Str:  "&lt;a&gt;FooBar&lt;/a&gt;",
+					},
+				},
+				ArgTypes: []query_parser.OperandType{
+					query_parser.TypStr,
+				},
+				RetType:  query_parser.TypStr,
+				Computed: false,
+				RetValue: nil,
+			},
+			[]*query_parser.Operand{
+				&query_parser.Operand{
+					Type: query_parser.TypStr,
+					Str:  "&lt;a&gt;FooBar&lt;/a&gt;",
+				},
+			},
+			&query_parser.Operand{
+				Type: query_parser.TypStr,
+				Str:  "<a>FooBar</a>",
 			},
 		},
 		// Uppercase
@@ -1460,6 +1517,610 @@ func TestFunctions(t *testing.T) {
 			&query_parser.Operand{
 				Type: query_parser.TypStr,
 				Str:  "Foo",
+			},
+		},
+		// Ceiling
+		functionsTest{
+			&query_parser.Function{
+				Name: "Ceiling",
+				Args: []*query_parser.Operand{
+					&query_parser.Operand{
+						Type:  query_parser.TypFloat,
+						Float: 123.567,
+					},
+				},
+				ArgTypes: []query_parser.OperandType{
+					query_parser.TypFloat,
+				},
+				RetType:  query_parser.TypFloat,
+				Computed: false,
+				RetValue: nil,
+			},
+			[]*query_parser.Operand{
+				&query_parser.Operand{
+					Type:  query_parser.TypFloat,
+					Float: 123.567,
+				},
+			},
+			&query_parser.Operand{
+				Type:  query_parser.TypFloat,
+				Float: 124.0,
+			},
+		},
+		// Ceiling
+		functionsTest{
+			&query_parser.Function{
+				Name: "Ceiling",
+				Args: []*query_parser.Operand{
+					&query_parser.Operand{
+						Type:  query_parser.TypFloat,
+						Float: -123.567,
+					},
+				},
+				ArgTypes: []query_parser.OperandType{
+					query_parser.TypFloat,
+				},
+				RetType:  query_parser.TypFloat,
+				Computed: false,
+				RetValue: nil,
+			},
+			[]*query_parser.Operand{
+				&query_parser.Operand{
+					Type:  query_parser.TypFloat,
+					Float: -123.567,
+				},
+			},
+			&query_parser.Operand{
+				Type:  query_parser.TypFloat,
+				Float: -123.0,
+			},
+		},
+		// Floor
+		functionsTest{
+			&query_parser.Function{
+				Name: "Floor",
+				Args: []*query_parser.Operand{
+					&query_parser.Operand{
+						Type:  query_parser.TypFloat,
+						Float: 123.567,
+					},
+				},
+				ArgTypes: []query_parser.OperandType{
+					query_parser.TypFloat,
+				},
+				RetType:  query_parser.TypFloat,
+				Computed: false,
+				RetValue: nil,
+			},
+			[]*query_parser.Operand{
+				&query_parser.Operand{
+					Type:  query_parser.TypFloat,
+					Float: 123.567,
+				},
+			},
+			&query_parser.Operand{
+				Type:  query_parser.TypFloat,
+				Float: 123.0,
+			},
+		},
+		// Floor
+		functionsTest{
+			&query_parser.Function{
+				Name: "Floor",
+				Args: []*query_parser.Operand{
+					&query_parser.Operand{
+						Type:  query_parser.TypFloat,
+						Float: -123.567,
+					},
+				},
+				ArgTypes: []query_parser.OperandType{
+					query_parser.TypFloat,
+				},
+				RetType:  query_parser.TypFloat,
+				Computed: false,
+				RetValue: nil,
+			},
+			[]*query_parser.Operand{
+				&query_parser.Operand{
+					Type:  query_parser.TypFloat,
+					Float: -123.567,
+				},
+			},
+			&query_parser.Operand{
+				Type:  query_parser.TypFloat,
+				Float: -124.0,
+			},
+		},
+		// Truncate
+		functionsTest{
+			&query_parser.Function{
+				Name: "Truncate",
+				Args: []*query_parser.Operand{
+					&query_parser.Operand{
+						Type:  query_parser.TypFloat,
+						Float: 123.567,
+					},
+				},
+				ArgTypes: []query_parser.OperandType{
+					query_parser.TypFloat,
+				},
+				RetType:  query_parser.TypFloat,
+				Computed: false,
+				RetValue: nil,
+			},
+			[]*query_parser.Operand{
+				&query_parser.Operand{
+					Type:  query_parser.TypFloat,
+					Float: 123.567,
+				},
+			},
+			&query_parser.Operand{
+				Type:  query_parser.TypFloat,
+				Float: 123.0,
+			},
+		},
+		// Truncate
+		functionsTest{
+			&query_parser.Function{
+				Name: "Truncate",
+				Args: []*query_parser.Operand{
+					&query_parser.Operand{
+						Type:  query_parser.TypFloat,
+						Float: -123.567,
+					},
+				},
+				ArgTypes: []query_parser.OperandType{
+					query_parser.TypFloat,
+				},
+				RetType:  query_parser.TypFloat,
+				Computed: false,
+				RetValue: nil,
+			},
+			[]*query_parser.Operand{
+				&query_parser.Operand{
+					Type:  query_parser.TypFloat,
+					Float: -123.567,
+				},
+			},
+			&query_parser.Operand{
+				Type:  query_parser.TypFloat,
+				Float: -123.0,
+			},
+		},
+		// IsNaN
+		functionsTest{
+			&query_parser.Function{
+				Name: "IsNaN",
+				Args: []*query_parser.Operand{
+					&query_parser.Operand{
+						Type:  query_parser.TypFloat,
+						Float: math.NaN(),
+					},
+				},
+				ArgTypes: []query_parser.OperandType{
+					query_parser.TypFloat,
+				},
+				RetType:  query_parser.TypBool,
+				Computed: false,
+				RetValue: nil,
+			},
+			[]*query_parser.Operand{
+				&query_parser.Operand{
+					Type:  query_parser.TypFloat,
+					Float: math.NaN(),
+				},
+			},
+			&query_parser.Operand{
+				Type: query_parser.TypBool,
+				Bool: true,
+			},
+		},
+		// IsNaN
+		functionsTest{
+			&query_parser.Function{
+				Name: "IsNaN",
+				Args: []*query_parser.Operand{
+					&query_parser.Operand{
+						Type:  query_parser.TypFloat,
+						Float: 123.456,
+					},
+				},
+				ArgTypes: []query_parser.OperandType{
+					query_parser.TypFloat,
+				},
+				RetType:  query_parser.TypBool,
+				Computed: false,
+				RetValue: nil,
+			},
+			[]*query_parser.Operand{
+				&query_parser.Operand{
+					Type:  query_parser.TypFloat,
+					Float: 123.456,
+				},
+			},
+			&query_parser.Operand{
+				Type: query_parser.TypBool,
+				Bool: false,
+			},
+		},
+		// IsInf
+		functionsTest{
+			&query_parser.Function{
+				Name: "IsInf",
+				Args: []*query_parser.Operand{
+					&query_parser.Operand{
+						Type:  query_parser.TypFloat,
+						Float: math.Inf(1),
+					},
+					&query_parser.Operand{
+						Type: query_parser.TypInt,
+						Int:  1,
+					},
+				},
+				ArgTypes: []query_parser.OperandType{
+					query_parser.TypFloat,
+					query_parser.TypInt,
+				},
+				RetType:  query_parser.TypBool,
+				Computed: false,
+				RetValue: nil,
+			},
+			[]*query_parser.Operand{
+				&query_parser.Operand{
+					Type:  query_parser.TypFloat,
+					Float: math.Inf(1),
+				},
+				&query_parser.Operand{
+					Type: query_parser.TypInt,
+					Int:  1,
+				},
+			},
+			&query_parser.Operand{
+				Type: query_parser.TypBool,
+				Bool: true,
+			},
+		},
+		// IsInf
+		functionsTest{
+			&query_parser.Function{
+				Name: "IsInf",
+				Args: []*query_parser.Operand{
+					&query_parser.Operand{
+						Type:  query_parser.TypFloat,
+						Float: math.Inf(-1),
+					},
+					&query_parser.Operand{
+						Type: query_parser.TypInt,
+						Int:  -1,
+					},
+				},
+				ArgTypes: []query_parser.OperandType{
+					query_parser.TypFloat,
+					query_parser.TypInt,
+				},
+				RetType:  query_parser.TypBool,
+				Computed: false,
+				RetValue: nil,
+			},
+			[]*query_parser.Operand{
+				&query_parser.Operand{
+					Type:  query_parser.TypFloat,
+					Float: math.Inf(-1),
+				},
+				&query_parser.Operand{
+					Type: query_parser.TypInt,
+					Int:  -1,
+				},
+			},
+			&query_parser.Operand{
+				Type: query_parser.TypBool,
+				Bool: true,
+			},
+		},
+		// IsInf
+		functionsTest{
+			&query_parser.Function{
+				Name: "IsInf",
+				Args: []*query_parser.Operand{
+					&query_parser.Operand{
+						Type:  query_parser.TypFloat,
+						Float: 123.456,
+					},
+					&query_parser.Operand{
+						Type: query_parser.TypInt,
+						Int:  0,
+					},
+				},
+				ArgTypes: []query_parser.OperandType{
+					query_parser.TypFloat,
+					query_parser.TypInt,
+				},
+				RetType:  query_parser.TypBool,
+				Computed: false,
+				RetValue: nil,
+			},
+			[]*query_parser.Operand{
+				&query_parser.Operand{
+					Type:  query_parser.TypFloat,
+					Float: 123.456,
+				},
+				&query_parser.Operand{
+					Type: query_parser.TypInt,
+					Int:  0,
+				},
+			},
+			&query_parser.Operand{
+				Type: query_parser.TypBool,
+				Bool: false,
+			},
+		},
+		// Log
+		functionsTest{
+			&query_parser.Function{
+				Name: "Log",
+				Args: []*query_parser.Operand{
+					&query_parser.Operand{
+						Type:  query_parser.TypFloat,
+						Float: 10.5,
+					},
+				},
+				ArgTypes: []query_parser.OperandType{
+					query_parser.TypFloat,
+				},
+				RetType:  query_parser.TypFloat,
+				Computed: false,
+				RetValue: nil,
+			},
+			[]*query_parser.Operand{
+				&query_parser.Operand{
+					Type:  query_parser.TypFloat,
+					Float: 10.5,
+				},
+			},
+			&query_parser.Operand{
+				Type:  query_parser.TypFloat,
+				Float: 2.3513752571634776,
+			},
+		},
+		// Log10
+		functionsTest{
+			&query_parser.Function{
+				Name: "Log10",
+				Args: []*query_parser.Operand{
+					&query_parser.Operand{
+						Type:  query_parser.TypFloat,
+						Float: 10.5,
+					},
+				},
+				ArgTypes: []query_parser.OperandType{
+					query_parser.TypFloat,
+				},
+				RetType:  query_parser.TypFloat,
+				Computed: false,
+				RetValue: nil,
+			},
+			[]*query_parser.Operand{
+				&query_parser.Operand{
+					Type:  query_parser.TypFloat,
+					Float: 10.5,
+				},
+			},
+			&query_parser.Operand{
+				Type:  query_parser.TypFloat,
+				Float: 1.021189299069938,
+			},
+		},
+		// Pow
+		functionsTest{
+			&query_parser.Function{
+				Name: "Pow",
+				Args: []*query_parser.Operand{
+					&query_parser.Operand{
+						Type:  query_parser.TypFloat,
+						Float: 10.0,
+					},
+					&query_parser.Operand{
+						Type:  query_parser.TypFloat,
+						Float: 2.0,
+					},
+				},
+				ArgTypes: []query_parser.OperandType{
+					query_parser.TypFloat,
+					query_parser.TypFloat,
+				},
+				RetType:  query_parser.TypFloat,
+				Computed: false,
+				RetValue: nil,
+			},
+			[]*query_parser.Operand{
+				&query_parser.Operand{
+					Type:  query_parser.TypFloat,
+					Float: 10.0,
+				},
+				&query_parser.Operand{
+					Type:  query_parser.TypFloat,
+					Float: 2.0,
+				},
+			},
+			&query_parser.Operand{
+				Type:  query_parser.TypFloat,
+				Float: float64(100.0),
+			},
+		},
+		// Pow10
+		functionsTest{
+			&query_parser.Function{
+				Name: "Pow10",
+				Args: []*query_parser.Operand{
+					&query_parser.Operand{
+						Type: query_parser.TypInt,
+						Int:  3,
+					},
+				},
+				ArgTypes: []query_parser.OperandType{
+					query_parser.TypInt,
+				},
+				RetType:  query_parser.TypFloat,
+				Computed: false,
+				RetValue: nil,
+			},
+			[]*query_parser.Operand{
+				&query_parser.Operand{
+					Type: query_parser.TypInt,
+					Int:  3,
+				},
+			},
+			&query_parser.Operand{
+				Type:  query_parser.TypFloat,
+				Float: float64(1000.0),
+			},
+		},
+		// Mod
+		functionsTest{
+			&query_parser.Function{
+				Name: "Mod",
+				Args: []*query_parser.Operand{
+					&query_parser.Operand{
+						Type:  query_parser.TypFloat,
+						Float: 10.5,
+					},
+					&query_parser.Operand{
+						Type:  query_parser.TypFloat,
+						Float: 3.2,
+					},
+				},
+				ArgTypes: []query_parser.OperandType{
+					query_parser.TypFloat,
+					query_parser.TypFloat,
+				},
+				RetType:  query_parser.TypFloat,
+				Computed: false,
+				RetValue: nil,
+			},
+			[]*query_parser.Operand{
+				&query_parser.Operand{
+					Type:  query_parser.TypFloat,
+					Float: 10.5,
+				},
+				&query_parser.Operand{
+					Type:  query_parser.TypFloat,
+					Float: 3.2,
+				},
+			},
+			&query_parser.Operand{
+				Type:  query_parser.TypFloat,
+				Float: 0.8999999999999995,
+			},
+		},
+		// Mod
+		functionsTest{
+			&query_parser.Function{
+				Name: "Mod",
+				Args: []*query_parser.Operand{
+					&query_parser.Operand{
+						Type:  query_parser.TypFloat,
+						Float: -10.5,
+					},
+					&query_parser.Operand{
+						Type:  query_parser.TypFloat,
+						Float: 3.2,
+					},
+				},
+				ArgTypes: []query_parser.OperandType{
+					query_parser.TypFloat,
+					query_parser.TypFloat,
+				},
+				RetType:  query_parser.TypFloat,
+				Computed: false,
+				RetValue: nil,
+			},
+			[]*query_parser.Operand{
+				&query_parser.Operand{
+					Type:  query_parser.TypFloat,
+					Float: -10.5,
+				},
+				&query_parser.Operand{
+					Type:  query_parser.TypFloat,
+					Float: 3.2,
+				},
+			},
+			&query_parser.Operand{
+				Type:  query_parser.TypFloat,
+				Float: -0.8999999999999995,
+			},
+		},
+		// Remainder
+		functionsTest{
+			&query_parser.Function{
+				Name: "Remainder",
+				Args: []*query_parser.Operand{
+					&query_parser.Operand{
+						Type:  query_parser.TypFloat,
+						Float: 10.5,
+					},
+					&query_parser.Operand{
+						Type:  query_parser.TypFloat,
+						Float: 3.2,
+					},
+				},
+				ArgTypes: []query_parser.OperandType{
+					query_parser.TypFloat,
+					query_parser.TypFloat,
+				},
+				RetType:  query_parser.TypFloat,
+				Computed: false,
+				RetValue: nil,
+			},
+			[]*query_parser.Operand{
+				&query_parser.Operand{
+					Type:  query_parser.TypFloat,
+					Float: 10.5,
+				},
+				&query_parser.Operand{
+					Type:  query_parser.TypFloat,
+					Float: 3.2,
+				},
+			},
+			&query_parser.Operand{
+				Type:  query_parser.TypFloat,
+				Float: 0.8999999999999995,
+			},
+		},
+		// Remainder
+		functionsTest{
+			&query_parser.Function{
+				Name: "Remainder",
+				Args: []*query_parser.Operand{
+					&query_parser.Operand{
+						Type:  query_parser.TypFloat,
+						Float: -10.5,
+					},
+					&query_parser.Operand{
+						Type:  query_parser.TypFloat,
+						Float: 3.2,
+					},
+				},
+				ArgTypes: []query_parser.OperandType{
+					query_parser.TypFloat,
+					query_parser.TypFloat,
+				},
+				RetType:  query_parser.TypFloat,
+				Computed: false,
+				RetValue: nil,
+			},
+			[]*query_parser.Operand{
+				&query_parser.Operand{
+					Type:  query_parser.TypFloat,
+					Float: -10.5,
+				},
+				&query_parser.Operand{
+					Type:  query_parser.TypFloat,
+					Float: 3.2,
+				},
+			},
+			&query_parser.Operand{
+				Type:  query_parser.TypFloat,
+				Float: -0.8999999999999995,
 			},
 		},
 	}

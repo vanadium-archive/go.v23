@@ -6,6 +6,7 @@ package query_functions
 
 import (
 	"fmt"
+	"html"
 	"strconv"
 	"strings"
 	"unicode"
@@ -47,6 +48,22 @@ func str(db query_db.Database, off int64, args []*query_parser.Operand) (*query_
 		}
 		return &c, nil
 	}
+}
+
+func htmlEscapeFunc(db query_db.Database, off int64, args []*query_parser.Operand) (*query_parser.Operand, error) {
+	strOp, err := conversions.ConvertValueToString(args[0])
+	if err != nil {
+		return nil, err
+	}
+	return makeStrOp(off, html.EscapeString(strOp.Str)), nil
+}
+
+func htmlUnescapeFunc(db query_db.Database, off int64, args []*query_parser.Operand) (*query_parser.Operand, error) {
+	strOp, err := conversions.ConvertValueToString(args[0])
+	if err != nil {
+		return nil, err
+	}
+	return makeStrOp(off, html.UnescapeString(strOp.Str)), nil
 }
 
 func lowerCase(db query_db.Database, off int64, args []*query_parser.Operand) (*query_parser.Operand, error) {

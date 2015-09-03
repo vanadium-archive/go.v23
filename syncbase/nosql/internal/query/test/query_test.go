@@ -1184,6 +1184,20 @@ func TestQueryExec(t *testing.T) {
 			},
 		},
 		{
+			"select HtmlEscape(\"<a img='foo'>Foo Image</a>\") from Customer where k = \"001\"",
+			[]string{"HtmlEscape"},
+			[][]*vdl.Value{
+				[]*vdl.Value{vdl.ValueOf("&lt;a img=&#39;foo&#39;&gt;Foo Image&lt;/a&gt;")},
+			},
+		},
+		{
+			"select HtmlUnescape(\"&lt;a img=&#39;foo&#39;&gt;Foo Image&lt;/a&gt;\") from Customer where k = \"001\"",
+			[]string{"HtmlUnescape"},
+			[][]*vdl.Value{
+				[]*vdl.Value{vdl.ValueOf("<a img='foo'>Foo Image</a>")},
+			},
+		},
+		{
 			// Select invoices shipped to Any street -- using Uppercase.
 			"select k from Customer where Type(v) like \"%.Invoice\" and Uppercase(v.ShipTo.Street) like \"%ANY%\"",
 			[]string{"k"},
@@ -1948,6 +1962,94 @@ func TestQueryExec(t *testing.T) {
 			[][]*vdl.Value{
 				[]*vdl.Value{vdl.ValueOf(int64(2))},
 				[]*vdl.Value{vdl.ValueOf(int64(2))},
+			},
+		},
+		{
+			// Real
+			"select k, Real(v.C64) from Numbers where v.C64 = Complex(123, 7)",
+			[]string{"k", "Real"},
+			[][]*vdl.Value{
+				[]*vdl.Value{vdl.ValueOf("001"), vdl.ValueOf(float64(123.0))},
+			},
+		},
+		{
+			// Real
+			"select k, Real(v.C128) from Numbers where v.C128 = Complex(456.789, 10.1112)",
+			[]string{"k", "Real"},
+			[][]*vdl.Value{
+				[]*vdl.Value{vdl.ValueOf("001"), vdl.ValueOf(float64(456.789))},
+			},
+		},
+		{
+			// Ceiling
+			"select k, Ceiling(v.F64) from Numbers where k = \"001\"",
+			[]string{"k", "Ceiling"},
+			[][]*vdl.Value{
+				[]*vdl.Value{vdl.ValueOf("001"), vdl.ValueOf(float64(3.0))},
+			},
+		},
+		{
+			// Floor
+			"select k, Floor(v.F64) from Numbers where k = \"001\"",
+			[]string{"k", "Floor"},
+			[][]*vdl.Value{
+				[]*vdl.Value{vdl.ValueOf("001"), vdl.ValueOf(float64(2.0))},
+			},
+		},
+		{
+			// Truncate
+			"select k, Truncate(v.F64) from Numbers where k = \"001\"",
+			[]string{"k", "Truncate"},
+			[][]*vdl.Value{
+				[]*vdl.Value{vdl.ValueOf("001"), vdl.ValueOf(float64(2.0))},
+			},
+		},
+		{
+			// Log
+			"select k, Log(v.F64) from Numbers where k = \"001\"",
+			[]string{"k", "Log"},
+			[][]*vdl.Value{
+				[]*vdl.Value{vdl.ValueOf("001"), vdl.ValueOf(float64(1.0000000000003513))},
+			},
+		},
+		{
+			// Log10
+			"select k, Log10(v.F64) from Numbers where k = \"001\"",
+			[]string{"k", "Log10"},
+			[][]*vdl.Value{
+				[]*vdl.Value{vdl.ValueOf("001"), vdl.ValueOf(float64(0.43429448190340436))},
+			},
+		},
+		{
+			// Pow
+			"select k, Pow(10.0, 4.0) from Numbers where k = \"001\"",
+			[]string{"k", "Pow"},
+			[][]*vdl.Value{
+				[]*vdl.Value{vdl.ValueOf("001"), vdl.ValueOf(float64(10000))},
+			},
+		},
+		{
+			// Pow10
+			"select k, Pow10(5) from Numbers where k = \"001\"",
+			[]string{"k", "Pow10"},
+			[][]*vdl.Value{
+				[]*vdl.Value{vdl.ValueOf("001"), vdl.ValueOf(float64(100000))},
+			},
+		},
+		{
+			// Mod
+			"select k, Mod(v.F32, v.F64) from Numbers where k = \"001\"",
+			[]string{"k", "Mod"},
+			[][]*vdl.Value{
+				[]*vdl.Value{vdl.ValueOf("001"), vdl.ValueOf(float64(0.42330828994820324))},
+			},
+		},
+		{
+			// Remainder
+			"select k, Remainder(v.F32, v.F64) from Numbers where k = \"001\"",
+			[]string{"k", "Remainder"},
+			[][]*vdl.Value{
+				[]*vdl.Value{vdl.ValueOf("001"), vdl.ValueOf(float64(0.42330828994820324))},
 			},
 		},
 		{
@@ -2922,6 +3024,10 @@ func TestExecErrors(t *testing.T) {
 		{
 			"select Complex(\"foo\", 42) from Customer",
 			syncql.NewErrFloatConversionError(db.GetContext(), 15, errors.New("Cannot convert operand to float64.")),
+		},
+		{
+			"select Complex(42.0) from Customer",
+			syncql.NewErrFunctionArgCount(db.GetContext(), 7, "Complex", 2, 1),
 		},
 		{
 			"select StrCat(v.Address.City, 42) from Customer",
