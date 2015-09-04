@@ -131,7 +131,7 @@ type Runtime interface {
 	//
 	// It accepts at least the following options:
 	// ServesMountTable and ServerBlessings.
-	NewServer(ctx *context.T, opts ...rpc.ServerOpt) (rpc.Server, error)
+	NewServer(ctx *context.T, opts ...rpc.ServerOpt) (rpc.DeprecatedServer, error)
 
 	// WithNewStreamManager creates a new StreamManager instance and context
 	// with that StreamManager attached.
@@ -190,13 +190,13 @@ type Runtime interface {
 	// attaches it to ctx.
 	ExperimentalWithNewFlowManager(ctx *context.T) (*context.T, flow.Manager, error)
 
-	// XWithNewServer creates a new flow.Manager instance and attaches it to ctx,
+	// WithNewServer creates a new flow.Manager instance and attaches it to ctx,
 	// and creates a new server on that flow.Manager.
-	XWithNewServer(ctx *context.T, name string, object interface{}, auth security.Authorizer, opts ...rpc.ServerOpt) (*context.T, rpc.XServer, error)
+	WithNewServer(ctx *context.T, name string, object interface{}, auth security.Authorizer, opts ...rpc.ServerOpt) (*context.T, rpc.Server, error)
 
-	// XWithNewDispatchingServer creates a new flow.Manager instance and attaches
+	// WithNewDispatchingServer creates a new flow.Manager instance and attaches
 	// it to ctx, and creates a new server on that flow.Manager.
-	XWithNewDispatchingServer(ctx *context.T, name string, disp rpc.Dispatcher, opts ...rpc.ServerOpt) (*context.T, rpc.XServer, error)
+	WithNewDispatchingServer(ctx *context.T, name string, disp rpc.Dispatcher, opts ...rpc.ServerOpt) (*context.T, rpc.Server, error)
 }
 
 // NewEndpoint returns an Endpoint by parsing the supplied endpoint
@@ -221,14 +221,16 @@ func NewEndpoint(ep string) (naming.Endpoint, error) {
 	return initState.currentRuntime().NewEndpoint(ep)
 }
 
-// NewServer creates a new Server instance.
+// <DEPRICATED> NewServer creates a new Server instance.
+// This method is deprecated and should not be used.  Use
+// WithNew*Server instead.
 //
 // It accepts at least the following options:
 // ServesMountTable and ServerBlessings.
 //
 // ServerBlessings defaults to v23.GetPrincipal(ctx).BlessingStore().Default().
 // These Blessings are the Server's Blessings for its lifetime.
-func NewServer(ctx *context.T, opts ...rpc.ServerOpt) (rpc.Server, error) {
+func NewServer(ctx *context.T, opts ...rpc.ServerOpt) (rpc.DeprecatedServer, error) {
 	return initState.currentRuntime().NewServer(ctx, opts...)
 }
 
@@ -321,16 +323,16 @@ func ExperimentalWithNewFlowManager(ctx *context.T) (*context.T, flow.Manager, e
 	return initState.currentRuntime().ExperimentalWithNewFlowManager(ctx)
 }
 
-// XWithNewServer creates a new flow.Manager instance and attaches it to ctx,
+// WithNewServer creates a new flow.Manager instance and attaches it to ctx,
 // and creates a new server on that flow.Manager.
-func XWithNewServer(ctx *context.T, name string, object interface{}, auth security.Authorizer, opts ...rpc.ServerOpt) (*context.T, rpc.XServer, error) {
-	return initState.currentRuntime().XWithNewServer(ctx, name, object, auth, opts...)
+func WithNewServer(ctx *context.T, name string, object interface{}, auth security.Authorizer, opts ...rpc.ServerOpt) (*context.T, rpc.Server, error) {
+	return initState.currentRuntime().WithNewServer(ctx, name, object, auth, opts...)
 }
 
-// XWithNewDispatchingServer creates a new flow.Manager instance and attaches it
+// WithNewDispatchingServer creates a new flow.Manager instance and attaches it
 // to ctx, and creates a new server on that flow.Manager.
-func XWithNewDispatchingServer(ctx *context.T, name string, disp rpc.Dispatcher, opts ...rpc.ServerOpt) (*context.T, rpc.XServer, error) {
-	return initState.currentRuntime().XWithNewDispatchingServer(ctx, name, disp, opts...)
+func WithNewDispatchingServer(ctx *context.T, name string, disp rpc.Dispatcher, opts ...rpc.ServerOpt) (*context.T, rpc.Server, error) {
+	return initState.currentRuntime().WithNewDispatchingServer(ctx, name, disp, opts...)
 }
 
 var initState = &initStateData{}

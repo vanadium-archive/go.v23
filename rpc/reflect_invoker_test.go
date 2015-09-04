@@ -47,7 +47,7 @@ type FakeStreamServerCall struct{}
 
 var _ rpc.StreamServerCall = (*FakeStreamServerCall)(nil)
 
-func (*FakeStreamServerCall) Server() rpc.XServer                             { return nil }
+func (*FakeStreamServerCall) Server() rpc.Server                              { return nil }
 func (*FakeStreamServerCall) GrantedBlessings() security.Blessings            { return security.Blessings{} }
 func (*FakeStreamServerCall) Closed() <-chan struct{}                         { return nil }
 func (*FakeStreamServerCall) IsClosed() bool                                  { return false }

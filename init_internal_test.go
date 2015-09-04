@@ -25,7 +25,7 @@ type mockRuntime struct{}
 
 func (*mockRuntime) Init(ctx *context.T) error                      { return nil }
 func (*mockRuntime) NewEndpoint(ep string) (naming.Endpoint, error) { return nil, nil }
-func (*mockRuntime) NewServer(ctx *context.T, opts ...rpc.ServerOpt) (rpc.Server, error) {
+func (*mockRuntime) NewServer(ctx *context.T, opts ...rpc.ServerOpt) (rpc.DeprecatedServer, error) {
 	return nil, nil
 }
 func (*mockRuntime) WithNewStreamManager(ctx *context.T) (*context.T, error) {
@@ -58,10 +58,10 @@ func (*mockRuntime) ExperimentalGetFlowManager(ctx *context.T) flow.Manager     
 func (*mockRuntime) ExperimentalWithNewFlowManager(ctx *context.T) (*context.T, flow.Manager, error) {
 	return nil, nil, nil
 }
-func (*mockRuntime) XWithNewServer(ctx *context.T, name string, object interface{}, auth security.Authorizer, opts ...rpc.ServerOpt) (*context.T, rpc.XServer, error) {
+func (*mockRuntime) WithNewServer(ctx *context.T, name string, object interface{}, auth security.Authorizer, opts ...rpc.ServerOpt) (*context.T, rpc.Server, error) {
 	return nil, nil, nil
 }
-func (*mockRuntime) XWithNewDispatchingServer(ctx *context.T, name string, disp rpc.Dispatcher, opts ...rpc.ServerOpt) (*context.T, rpc.XServer, error) {
+func (*mockRuntime) WithNewDispatchingServer(ctx *context.T, name string, disp rpc.Dispatcher, opts ...rpc.ServerOpt) (*context.T, rpc.Server, error) {
 	return nil, nil, nil
 }
 

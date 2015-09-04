@@ -138,10 +138,8 @@ func (l ListenSpec) Copy() ListenSpec {
 	return l
 }
 
-// XServer defines the interface for managing a server that receives RPC calls.
-//
-// TODO(toddw): This interface is experimental, and may change without notice.
-type XServer interface {
+// Server defines the interface for managing a server that receives RPC calls.
+type Server interface {
 	// AddName adds the specified name to the mount table for this server.
 	// AddName may be called multiple times.
 	AddName(name string) error
@@ -171,8 +169,8 @@ type XServer interface {
 	Stop() error
 }
 
-// Server defines the interface for managing a collection of services.
-type Server interface {
+// DeprecatedServer defines the interface for managing a collection of services.
+type DeprecatedServer interface {
 	// Listen creates a listening network endpoint for the Server
 	// as specified by its ListenSpec parameter. If any of the listen
 	// addresses passed in the ListenSpec are 'unspecified' (e.g. don't
@@ -237,36 +235,7 @@ type Server interface {
 	// It is considered an error to call Listen after ServeDispatcher.
 	ServeDispatcher(name string, disp Dispatcher) error
 
-	// AddName adds the specified name to the mount table for the object or
-	// Dispatcher served by this server.
-	// AddName may be called multiple times, but only after Serve or
-	// ServeDispatcher have been called.
-	AddName(name string) error
-
-	// RemoveName removes the specified name from the mount table.
-	// RemoveName may be called multiple times, but only after Serve or
-	// ServeDispatcher have been called.
-	RemoveName(name string)
-
-	// Status returns the current status of the server, see ServerStatus
-	// for details.
-	Status() ServerStatus
-
-	// WatchNetwork registers a channel over which NetworkChange's will
-	// be sent. The Server will not block sending data over this channel
-	// and hence change events may be lost if the caller doesn't ensure
-	// there is sufficient buffering in the channel.
-	WatchNetwork(ch chan<- NetworkChange)
-
-	// UnwatchNetwork unregisters a channel previously registered using
-	// WatchNetwork.
-	UnwatchNetwork(ch chan<- NetworkChange)
-
-	// Stop gracefully stops all services on this Server.  New calls are
-	// rejected, but any in-flight calls are allowed to complete.  All
-	// published mountpoints are unmounted.  This call waits for this
-	// process to complete, and returns once the server has been shut down.
-	Stop() error
+	Server
 }
 
 type ProxyStatus struct {
@@ -602,7 +571,7 @@ type ServerCall interface {
 	// and LocalBlessings respectively).
 	GrantedBlessings() security.Blessings
 	// Server returns the Server that this context is associated with.
-	Server() XServer
+	Server() Server
 }
 
 // CallOpt is the interface for all Call options.
