@@ -180,7 +180,6 @@ func TestSetSpecSyncGroup(t *testing.T) {
 	verifySyncGroupNames(t, ctx, d, wantNames, verror.ID(""))
 	verifySyncGroupInfo(t, ctx, d, sgName, spec, 1)
 
-	spec.Prefixes = []string{"t1:foo", "t2:bar"}
 	spec.Description = "test syncgroup sg1 update"
 	spec.Perms = perms("root/client1")
 
