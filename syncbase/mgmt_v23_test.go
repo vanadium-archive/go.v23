@@ -236,7 +236,7 @@ func V23TestDeviceManager(i *v23tests.T) {
 	defer os.Remove(syncbasedEnvelopeFilename)
 
 	output := applicationBin.Run("put", syncbasedName, deviceProfile, syncbasedEnvelopeFilename)
-	if got, want := output, "Application envelope added successfully."; got != want {
+	if got, want := output, fmt.Sprintf("Application envelope added for profile %s.", deviceProfile); got != want {
 		i.Fatalf("got %q, want %q", got, want)
 	}
 

@@ -106,6 +106,12 @@ type ApplicationClientMethods interface {
 	// object name suffix) and if so, returns this envelope. If multiple
 	// profile matches are possible, the method returns the first
 	// matching profile, respecting the order of the input argument.
+	//
+	// If the version is not specified in the suffix, the envelope
+	// corresponding to the latest version that matches any of the given
+	// profiles is returned.  If several profiles match this version, the
+	// envelope for the first matching profile is returned, respecting the
+	// order of the input argument.
 	Match(ctx *context.T, profiles []string, opts ...rpc.CallOpt) (application.Envelope, error)
 }
 
@@ -198,6 +204,12 @@ type ApplicationServerMethods interface {
 	// object name suffix) and if so, returns this envelope. If multiple
 	// profile matches are possible, the method returns the first
 	// matching profile, respecting the order of the input argument.
+	//
+	// If the version is not specified in the suffix, the envelope
+	// corresponding to the latest version that matches any of the given
+	// profiles is returned.  If several profiles match this version, the
+	// envelope for the first matching profile is returned, respecting the
+	// order of the input argument.
 	Match(ctx *context.T, call rpc.ServerCall, profiles []string) (application.Envelope, error)
 }
 
@@ -267,7 +279,7 @@ var descApplication = rpc.InterfaceDesc{
 	Methods: []rpc.MethodDesc{
 		{
 			Name: "Match",
-			Doc:  "// Match checks if any of the given profiles contains an application\n// envelope for the given application version (specified through the\n// object name suffix) and if so, returns this envelope. If multiple\n// profile matches are possible, the method returns the first\n// matching profile, respecting the order of the input argument.",
+			Doc:  "// Match checks if any of the given profiles contains an application\n// envelope for the given application version (specified through the\n// object name suffix) and if so, returns this envelope. If multiple\n// profile matches are possible, the method returns the first\n// matching profile, respecting the order of the input argument.\n//\n// If the version is not specified in the suffix, the envelope\n// corresponding to the latest version that matches any of the given\n// profiles is returned.  If several profiles match this version, the\n// envelope for the first matching profile is returned, respecting the\n// order of the input argument.",
 			InArgs: []rpc.ArgDesc{
 				{"profiles", ``}, // []string
 			},
