@@ -2507,8 +2507,8 @@ type TableClientMethods interface {
 	// Create creates this Table.
 	// If perms is nil, we inherit (copy) the Database perms.
 	Create(ctx *context.T, schemaVersion int32, perms access.Permissions, opts ...rpc.CallOpt) error
-	// Delete deletes this Table.
-	Delete(ctx *context.T, schemaVersion int32, opts ...rpc.CallOpt) error
+	// Destroy destroys this Table.
+	Destroy(ctx *context.T, schemaVersion int32, opts ...rpc.CallOpt) error
 	// Exists returns true only if this Table exists. Insufficient permissions
 	// cause Exists to return false instead of an error.
 	// TODO(ivanpi): Exists may fail with an error if higher levels of hierarchy
@@ -2562,8 +2562,8 @@ func (c implTableClientStub) Create(ctx *context.T, i0 int32, i1 access.Permissi
 	return
 }
 
-func (c implTableClientStub) Delete(ctx *context.T, i0 int32, opts ...rpc.CallOpt) (err error) {
-	err = v23.GetClient(ctx).Call(ctx, c.name, "Delete", []interface{}{i0}, nil, opts...)
+func (c implTableClientStub) Destroy(ctx *context.T, i0 int32, opts ...rpc.CallOpt) (err error) {
+	err = v23.GetClient(ctx).Call(ctx, c.name, "Destroy", []interface{}{i0}, nil, opts...)
 	return
 }
 
@@ -2681,8 +2681,8 @@ type TableServerMethods interface {
 	// Create creates this Table.
 	// If perms is nil, we inherit (copy) the Database perms.
 	Create(ctx *context.T, call rpc.ServerCall, schemaVersion int32, perms access.Permissions) error
-	// Delete deletes this Table.
-	Delete(ctx *context.T, call rpc.ServerCall, schemaVersion int32) error
+	// Destroy destroys this Table.
+	Destroy(ctx *context.T, call rpc.ServerCall, schemaVersion int32) error
 	// Exists returns true only if this Table exists. Insufficient permissions
 	// cause Exists to return false instead of an error.
 	// TODO(ivanpi): Exists may fail with an error if higher levels of hierarchy
@@ -2724,8 +2724,8 @@ type TableServerStubMethods interface {
 	// Create creates this Table.
 	// If perms is nil, we inherit (copy) the Database perms.
 	Create(ctx *context.T, call rpc.ServerCall, schemaVersion int32, perms access.Permissions) error
-	// Delete deletes this Table.
-	Delete(ctx *context.T, call rpc.ServerCall, schemaVersion int32) error
+	// Destroy destroys this Table.
+	Destroy(ctx *context.T, call rpc.ServerCall, schemaVersion int32) error
 	// Exists returns true only if this Table exists. Insufficient permissions
 	// cause Exists to return false instead of an error.
 	// TODO(ivanpi): Exists may fail with an error if higher levels of hierarchy
@@ -2792,8 +2792,8 @@ func (s implTableServerStub) Create(ctx *context.T, call rpc.ServerCall, i0 int3
 	return s.impl.Create(ctx, call, i0, i1)
 }
 
-func (s implTableServerStub) Delete(ctx *context.T, call rpc.ServerCall, i0 int32) error {
-	return s.impl.Delete(ctx, call, i0)
+func (s implTableServerStub) Destroy(ctx *context.T, call rpc.ServerCall, i0 int32) error {
+	return s.impl.Destroy(ctx, call, i0)
 }
 
 func (s implTableServerStub) Exists(ctx *context.T, call rpc.ServerCall, i0 int32) (bool, error) {
@@ -2847,8 +2847,8 @@ var descTable = rpc.InterfaceDesc{
 			Tags: []*vdl.Value{vdl.ValueOf(access.Tag("Write"))},
 		},
 		{
-			Name: "Delete",
-			Doc:  "// Delete deletes this Table.",
+			Name: "Destroy",
+			Doc:  "// Destroy destroys this Table.",
 			InArgs: []rpc.ArgDesc{
 				{"schemaVersion", ``}, // int32
 			},

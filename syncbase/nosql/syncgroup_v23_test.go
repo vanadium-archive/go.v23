@@ -437,7 +437,7 @@ var runSetupAppA = modules.Register(func(env *modules.Env, args ...string) error
 	a.Create(ctx, nil)
 	d := a.NoSQLDatabase("d", nil)
 	d.Create(ctx, nil)
-	d.CreateTable(ctx, "tb", nil)
+	d.Table("tb").Create(ctx, nil)
 
 	return nil
 }, "runSetupAppA")
@@ -927,7 +927,7 @@ var runSetupAppMulti = modules.Register(func(env *modules.Env, args ...string) e
 
 			for k := 0; k < numTbs; k++ {
 				tbName := fmt.Sprintf("tb%d", k)
-				d.CreateTable(ctx, tbName, nil)
+				d.Table(tbName).Create(ctx, nil)
 			}
 		}
 	}

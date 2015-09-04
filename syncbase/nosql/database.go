@@ -114,16 +114,6 @@ func (d *database) Destroy(ctx *context.T) error {
 	return d.c.Destroy(ctx, d.schemaVersion())
 }
 
-// CreateTable implements Database.CreateTable.
-func (d *database) CreateTable(ctx *context.T, relativeName string, perms access.Permissions) error {
-	return wire.TableClient(naming.Join(d.fullName, relativeName)).Create(ctx, d.schemaVersion(), perms)
-}
-
-// DeleteTable implements Database.DeleteTable.
-func (d *database) DeleteTable(ctx *context.T, relativeName string) error {
-	return wire.TableClient(naming.Join(d.fullName, relativeName)).Delete(ctx, d.schemaVersion())
-}
-
 // Exec implements Database.Exec.
 func (d *database) Exec(ctx *context.T, query string) ([]string, ResultStream, error) {
 	ctx, cancel := context.WithCancel(ctx)

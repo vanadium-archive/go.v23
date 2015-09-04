@@ -74,14 +74,6 @@ type Database interface {
 	// do not exist.
 	Exists(ctx *context.T) (bool, error)
 
-	// Create creates the specified Table.
-	// If perms is nil, we inherit (copy) the Database perms.
-	// relativeName must not contain slashes.
-	CreateTable(ctx *context.T, relativeName string, perms access.Permissions) error
-
-	// DeleteTable deletes the specified Table.
-	DeleteTable(ctx *context.T, relativeName string) error
-
 	// BeginBatch creates a new batch. Instead of calling this function directly,
 	// clients are encouraged to use the RunInBatch() helper function, which
 	// detects "concurrent batch" errors and handles retries internally.
@@ -189,6 +181,15 @@ type Table interface {
 	// TODO(ivanpi): Exists may fail with an error if higher levels of hierarchy
 	// do not exist.
 	Exists(ctx *context.T) (bool, error)
+
+	// Create creates this Table.
+	// If perms is nil, we inherit (copy) the Database perms.
+	// Create must not be called from within a batch.
+	Create(ctx *context.T, perms access.Permissions) error
+
+	// Destroy destroys this Table, permanently removing all of its data.
+	// Destroy must not be called from within a batch.
+	Destroy(ctx *context.T) error
 
 	// Row returns the Row with the given primary key.
 	Row(key string) Row

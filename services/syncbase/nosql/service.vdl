@@ -88,8 +88,8 @@ type Table interface {
 	// If perms is nil, we inherit (copy) the Database perms.
 	Create(schemaVersion int32, perms access.Permissions) error {access.Write}
 
-	// Delete deletes this Table.
-	Delete(schemaVersion int32) error {access.Write}
+	// Destroy destroys this Table.
+	Destroy(schemaVersion int32) error {access.Write}
 
 	// Exists returns true only if this Table exists. Insufficient permissions
 	// cause Exists to return false instead of an error.

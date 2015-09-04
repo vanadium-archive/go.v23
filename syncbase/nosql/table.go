@@ -47,6 +47,16 @@ func (t *table) Exists(ctx *context.T) (bool, error) {
 	return t.c.Exists(ctx, t.dbSchemaVersion)
 }
 
+// Create implements Table.Create.
+func (t *table) Create(ctx *context.T, perms access.Permissions) error {
+	return t.c.Create(ctx, t.dbSchemaVersion, perms)
+}
+
+// Destroy implements Table.Destroy.
+func (t *table) Destroy(ctx *context.T) error {
+	return t.c.Destroy(ctx, t.dbSchemaVersion)
+}
+
 // Row implements Table.Row.
 func (t *table) Row(key string) Row {
 	return newRow(t.fullName, key, t.dbSchemaVersion)

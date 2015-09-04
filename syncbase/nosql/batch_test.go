@@ -530,13 +530,13 @@ func TestDisallowedMethods(t *testing.T) {
 		t.Fatalf("bc.GetSyncGroupNames() should have failed: %v", err)
 	}
 
-	// Test that Table.{Create,Delete} fail with ErrBoundToBatch.
+	// Test that Table.{Create,Destroy} fail with ErrBoundToBatch.
 	tc := wire.TableClient(naming.Join(b.FullName(), "tb"))
 	if err := tc.Create(ctx, -1, nil); verror.ErrorID(err) != wire.ErrBoundToBatch.ID {
 		t.Fatalf("tc.Create() should have failed: %v", err)
 	}
-	if err := tc.Delete(ctx, -1); verror.ErrorID(err) != wire.ErrBoundToBatch.ID {
-		t.Fatalf("tc.Delete() should have failed: %v", err)
+	if err := tc.Destroy(ctx, -1); verror.ErrorID(err) != wire.ErrBoundToBatch.ID {
+		t.Fatalf("tc.Destroy() should have failed: %v", err)
 	}
 }
 

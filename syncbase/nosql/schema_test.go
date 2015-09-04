@@ -104,7 +104,7 @@ func TestRPCSchemaCheckError(t *testing.T) {
 	if err := dbHandle1.Create(ctx, nil); err != nil {
 		t.Fatalf("db1.Create() failed: %v", err)
 	}
-	if err := dbHandle1.CreateTable(ctx, "table1", nil); err != nil {
+	if err := dbHandle1.Table("table1").Create(ctx, nil); err != nil {
 		t.Fatalf("db1.CreateTable() failed: %v", err)
 	}
 	if err := dbHandle1.Table("table1").Put(ctx, "row1", "value1"); err != nil {
@@ -116,10 +116,10 @@ func TestRPCSchemaCheckError(t *testing.T) {
 	dbHandle2 := a.NoSQLDatabase("db1", schema2)
 
 	// verify write rpcs for Database
-	if err := dbHandle2.CreateTable(ctx, "table1", nil); !isVersionMismatchErr(err) {
+	if err := dbHandle2.Table("table1").Create(ctx, nil); !isVersionMismatchErr(err) {
 		t.Fatal("Expected ErrDatabaseVersionMismatch, found: " + toString(err))
 	}
-	if err := dbHandle2.DeleteTable(ctx, "table1"); !isVersionMismatchErr(err) {
+	if err := dbHandle2.Table("table1").Destroy(ctx); !isVersionMismatchErr(err) {
 		t.Fatal("Expected ErrDatabaseVersionMismatch, found: " + toString(err))
 	}
 	if err := dbHandle2.Destroy(ctx); !isVersionMismatchErr(err) {
@@ -189,7 +189,7 @@ func TestRPCSchemaCheckErrorForBatch(t *testing.T) {
 	if err := dbHandle1.Create(ctx, nil); err != nil {
 		t.Fatalf("db1.Create() failed: %v", err)
 	}
-	if err := dbHandle1.CreateTable(ctx, "table1", nil); err != nil {
+	if err := dbHandle1.Table("table1").Create(ctx, nil); err != nil {
 		t.Fatalf("db1.CreateTable() failed: %v", err)
 	}
 	if err := dbHandle1.Table("table1").Put(ctx, "row1", "value1"); err != nil {

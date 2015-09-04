@@ -57,7 +57,7 @@ var runTestSyncbasedPutGet = modules.Register(func(env *modules.Env, args ...str
 	if err := d.Create(ctx, nil); err != nil {
 		return fmt.Errorf("unable to create a database: %v", err)
 	}
-	if err := d.CreateTable(ctx, "tb", nil); err != nil {
+	if err := d.Table("tb").Create(ctx, nil); err != nil {
 		return fmt.Errorf("unable to create a table: %v", err)
 	}
 	tb := d.Table("tb")
@@ -129,7 +129,7 @@ var runCreateHierarchy = modules.Register(func(env *modules.Env, args ...string)
 				return fmt.Errorf("d.Create() failed: %v", err)
 			}
 			for _, tb := range []nosql.Table{d.Table("tb1"), d.Table("tb2")} {
-				if err := d.CreateTable(ctx, tb.Name(), nil); err != nil {
+				if err := d.Table(tb.Name()).Create(ctx, nil); err != nil {
 					return fmt.Errorf("d.CreateTable() failed: %v", err)
 				}
 				for _, k := range []string{"foo", "bar"} {
