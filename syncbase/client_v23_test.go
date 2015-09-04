@@ -16,8 +16,8 @@ import (
 	"v.io/v23/security/access"
 	"v.io/v23/syncbase"
 	"v.io/v23/syncbase/nosql"
-	tu "v.io/v23/syncbase/testutil"
 	_ "v.io/x/ref/runtime/factories/generic"
+	tu "v.io/x/ref/services/syncbase/testutil"
 	"v.io/x/ref/test/modules"
 	"v.io/x/ref/test/v23tests"
 )

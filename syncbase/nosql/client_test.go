@@ -15,12 +15,12 @@ import (
 	"v.io/v23/services/watch"
 	"v.io/v23/syncbase"
 	"v.io/v23/syncbase/nosql"
-	"v.io/v23/syncbase/nosql/syncql"
-	tu "v.io/v23/syncbase/testutil"
+	"v.io/v23/syncbase/nosql/query"
 	"v.io/v23/vdl"
 	"v.io/v23/verror"
 	"v.io/v23/vom"
 	_ "v.io/x/ref/runtime/factories/generic"
+	tu "v.io/x/ref/services/syncbase/testutil"
 )
 
 // TODO(sadovsky): Finish writing tests.
@@ -134,7 +134,7 @@ func TestExec(t *testing.T) {
 			[]*vdl.Value{vdl.ValueOf("baz"), vdl.ValueOf(baz)},
 		})
 
-	tu.CheckExecError(t, ctx, d, "select k, v from foo", syncql.ErrTableCantAccess.ID)
+	tu.CheckExecError(t, ctx, d, "select k, v from foo", query.ErrTableCantAccess.ID)
 }
 
 // Tests that Database.Delete works as expected.

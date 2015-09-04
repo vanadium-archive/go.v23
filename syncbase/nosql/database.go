@@ -290,7 +290,7 @@ func (d *database) establishConflictResolution(ctx *context.T) {
 	count := 0
 	for {
 		count++
-		vlog.Infof("Starting a new conflict resolution connection. Re-Connection count: %d", count)
+		vlog.Infof("Starting a new conflict resolution connection. Reconnection count: %d", count)
 		childCtx := context.WithValue(ctx, reconnectionCount, count)
 		// listenForConflicts is a blocking method which returns only when the
 		// conflict stream is broken.

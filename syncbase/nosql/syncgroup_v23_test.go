@@ -16,11 +16,11 @@ import (
 	wire "v.io/v23/services/syncbase/nosql"
 	"v.io/v23/syncbase"
 	"v.io/v23/syncbase/nosql"
-	tu "v.io/v23/syncbase/testutil"
 	"v.io/v23/verror"
 	"v.io/x/ref"
 	_ "v.io/x/ref/runtime/factories/generic"
 	constants "v.io/x/ref/services/syncbase/server/util"
+	tu "v.io/x/ref/services/syncbase/testutil"
 	"v.io/x/ref/test/modules"
 	"v.io/x/ref/test/v23tests"
 )

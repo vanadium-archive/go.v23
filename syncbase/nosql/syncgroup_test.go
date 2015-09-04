@@ -15,9 +15,9 @@ import (
 	wire "v.io/v23/services/syncbase/nosql"
 	"v.io/v23/syncbase"
 	"v.io/v23/syncbase/nosql"
-	tu "v.io/v23/syncbase/testutil"
 	"v.io/v23/verror"
 	"v.io/x/ref/services/syncbase/server/util"
+	tu "v.io/x/ref/services/syncbase/testutil"
 )
 
 // Tests that SyncGroup.Create works as expected.
