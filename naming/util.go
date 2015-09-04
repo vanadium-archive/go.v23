@@ -20,6 +20,7 @@ type EndpointOpt interface {
 func FormatEndpoint(network, address string, opts ...EndpointOpt) string {
 	var rid string
 	var blessings []string
+	var routes []string
 	mounttable := ""
 	for _, o := range opts {
 		switch v := o.(type) {
@@ -31,10 +32,12 @@ func FormatEndpoint(network, address string, opts ...EndpointOpt) string {
 			} else {
 				mounttable = "s"
 			}
+		case RouteOpt:
+			routes = append(routes, string(v))
 		case BlessingOpt:
 			blessings = append(blessings, string(v))
 		}
 	}
 
-	return "@6@" + network + "@" + address + "@" + "@" + rid + "@" + mounttable + "@" + strings.Join(blessings, ",") + "@@"
+	return "@6@" + network + "@" + address + "@" + strings.Join(routes, ",") + "@" + rid + "@" + mounttable + "@" + strings.Join(blessings, ",") + "@@"
 }

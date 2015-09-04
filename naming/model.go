@@ -123,6 +123,11 @@ type BlessingOpt string
 
 func (BlessingOpt) EndpointOpt() {}
 
+// RouteOpt is used to add a route to the endpoint.
+type RouteOpt string
+
+func (RouteOpt) EndpointOpt() {}
+
 // When this prefix is present at the beginning of an object name suffix, the
 // server may intercept the request and handle it internally. This is used to
 // provide debugging, monitoring and other common functionality across all
