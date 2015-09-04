@@ -9,8 +9,8 @@ import (
 
 	"v.io/v23/naming"
 	"v.io/v23/syncbase"
-	tu "v.io/v23/syncbase/testutil"
 	_ "v.io/x/ref/runtime/factories/generic"
+	tu "v.io/x/ref/services/syncbase/testutil"
 )
 
 // Tests various Name and FullName methods.

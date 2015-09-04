@@ -1,14 +1,7 @@
 <godepcop>
-  <!-- Temporarily allow all dependencies, to make the vanadium-go-depcop test
-       green until Syncbase dependencies are cleaned up.
-
-       TODO(sadovsky): This should go away by Sep 14, 2015, and hopefully much
-       sooner. -->
+  <!-- TODO(sadovsky): Figure out what to do about vlog deps in client libs.
+  Note, the namespace client lib defines interfaces in v23, and impl in x/ref.
+  Is that what we should do, too? -->
   <pkg allow="github.com/cosnicolaou/llog"/>
-  <pkg allow="github.com/gorilla/websocket"/>
-  <pkg allow="github.com/presotto/go-mdns-sd/..."/>
-  <pkg allow="golang.org/x/crypto/..."/>
-  <pkg allow="v.io/v23/..."/>
-  <pkg allow="v.io/x/lib/..."/>
-  <pkg allow="v.io/x/ref/..."/>
+  <pkg allow="v.io/x/lib/vlog"/>
 </godepcop>
