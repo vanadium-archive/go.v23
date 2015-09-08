@@ -34,7 +34,9 @@ type Manager interface {
 
 	// ListeningEndpoints returns the endpoints that the Manager has explicitly
 	// listened on. The Manager will accept new flows on these endpoints.
-	// Returned endpoints all have a RoutingID unique to the Acceptor.
+	// If the Manager is not listening on any endpoints, an endpoint with the
+	// Manager's RoutingID will be returned for use in bidirectional RPC.
+	// Returned endpoints all have the Manager's unique RoutingID.
 	ListeningEndpoints() []naming.Endpoint
 
 	// Accept blocks until a new Flow has been initiated by a remote process.
