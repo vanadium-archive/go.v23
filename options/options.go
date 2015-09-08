@@ -53,6 +53,7 @@ package options
 import (
 	"time"
 
+	"v.io/v23/naming"
 	"v.io/v23/security"
 )
 
@@ -121,11 +122,16 @@ type RetryTimeout time.Duration
 
 func (RetryTimeout) RPCCallOpt() {}
 
-// NoResolve specifies that the RPC call should not further Resolve the name.
-type NoResolve struct{}
+// Preresolved specifies that the RPC call should not further Resolve the name.
+// If a MountEntry is provided, use it.  Otherwise use the name passed in the
+// RPC call.  If the name is relative, it will be made global using 
+// the roots in the namespace.
+type Preresolved struct {
+	Resolution *naming.MountEntry
+}
 
-func (NoResolve) RPCCallOpt() {}
-func (NoResolve) NSOpt()      {}
+func (Preresolved) RPCCallOpt() {}
+func (Preresolved) NSOpt()      {}
 
 // Create a server that will be used to serve a MountTable. This server
 // cannot be used for any other purpose.
