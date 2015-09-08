@@ -9,7 +9,13 @@
 
 package security
 
-import "crypto/ecdsa"
+import (
+	"crypto/ecdsa"
+	"crypto/x509"
+	"fmt"
+
+	"v.io/v23/verror"
+)
 
 func newInMemoryECDSASignerImpl(key *ecdsa.PrivateKey) (Signer, error) {
 	return newGoStdlibSigner(key)
@@ -17,4 +23,17 @@ func newInMemoryECDSASignerImpl(key *ecdsa.PrivateKey) (Signer, error) {
 
 func newECDSAPublicKeyImpl(key *ecdsa.PublicKey) PublicKey {
 	return newGoStdlibPublicKey(key)
+}
+
+func unmarshalPublicKeyImpl(bytes []byte) (PublicKey, error) {
+	key, err := x509.ParsePKIXPublicKey(bytes)
+	if err != nil {
+		return nil, err
+	}
+	switch v := key.(type) {
+	case *ecdsa.PublicKey:
+		return newGoStdlibPublicKey(v), nil
+	default:
+		return nil, verror.New(errUnrecognizedKey, nil, fmt.Sprintf("%T", key))
+	}
 }
