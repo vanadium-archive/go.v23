@@ -29,13 +29,13 @@ func testCancel(t *testing.T, ctx *context.T, cancel context.CancelFunc) {
 	select {
 	case <-ch:
 	case <-time.After(3 * time.Second):
-		t.Fatal("timed out witing for cancel.")
+		t.Fatal("timed out waiting for cancel.")
 	}
 
 	select {
 	case <-ctx.Done():
 	case <-time.After(3 * time.Second):
-		t.Fatal("timed out witing for cancellation.")
+		t.Fatal("timed out waiting for cancellation.")
 	}
 	if err := ctx.Err(); err != context.Canceled {
 		t.Errorf("Unexpected error want %v, got %v", context.Canceled, err)
