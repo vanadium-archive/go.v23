@@ -45,3 +45,20 @@ func TestPublicKeyString(t *testing.T) {
 		t.Errorf("Two keys produced the same string representation")
 	}
 }
+
+func BenchmarkUnmarshalPublicKey(b *testing.B) {
+	key, err := ecdsa.GenerateKey(elliptic.P256(), rand.Reader)
+	if err != nil {
+		b.Fatal(err)
+	}
+	der, err := NewECDSAPublicKey(&key.PublicKey).MarshalBinary()
+	if err != nil {
+		b.Fatal(err)
+	}
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		if _, err := UnmarshalPublicKey(der); err != nil {
+			b.Fatal(err)
+		}
+	}
+}

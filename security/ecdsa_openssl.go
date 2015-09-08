@@ -33,6 +33,7 @@ package security
 // #include <openssl/ec.h>
 // #include <openssl/ecdsa.h>
 // #include <openssl/err.h>
+// #include <openssl/objects.h>
 // #include <openssl/opensslv.h>
 // #include <openssl/x509.h>
 //
@@ -55,8 +56,9 @@ import (
 )
 
 var (
-	errOpenSSL   = verror.Register(pkgPath+".errOpenSSL", verror.NoRetry, "{1:}{2:} OpenSSL error ({3}): {4} in {5}:{6}")
-	opensslLocks []sync.RWMutex
+	errOpenSSL          = verror.Register(pkgPath+".errOpenSSL", verror.NoRetry, "{1:}{2:} OpenSSL error ({3}): {4} in {5}:{6}")
+	errUnsupportedCurve = verror.Register(pkgPath+".errUnsupportedCurve", verror.NoRetry, "{1:}{2:} elliptic curve {3} is not supported")
+	opensslLocks        []sync.RWMutex
 )
 
 func init() {
@@ -86,12 +88,16 @@ func openssl_lock(mode, n C.int) {
 type opensslECPublicKey struct {
 	k   *C.EC_KEY
 	h   Hash
-	goK ecdsa.PublicKey
+	der []byte
 }
 
-func (k *opensslECPublicKey) MarshalBinary() ([]byte, error) { return x509.MarshalPKIXPublicKey(&k.goK) }
-func (k *opensslECPublicKey) String() string                 { return publicKeyString(k) }
-func (k *opensslECPublicKey) hash() Hash                     { return k.h }
+func (k *opensslECPublicKey) MarshalBinary() ([]byte, error) {
+	cpy := make([]byte, len(k.der))
+	copy(cpy, k.der)
+	return cpy, nil
+}
+func (k *opensslECPublicKey) String() string { return publicKeyString(k) }
+func (k *opensslECPublicKey) hash() Hash     { return k.h }
 func (k *opensslECPublicKey) verify(digest []byte, signature *Signature) bool {
 	sig := C.ECDSA_SIG_new()
 	sig.r = C.BN_bin2bn(uchar(signature.R), C.int(len(signature.R)), sig.r)
@@ -106,19 +112,7 @@ func newOpenSSLPublicKey(golang *ecdsa.PublicKey) (PublicKey, error) {
 	if err != nil {
 		return nil, err
 	}
-	var errno C.ulong
-	in := uchar(der)
-	k := C.openssl_d2i_EC_PUBKEY(&in, C.long(len(der)), &errno)
-	if k == nil {
-		return nil, opensslMakeError(errno)
-	}
-	ret := &opensslECPublicKey{
-		k:   k,
-		h:   (&ecdsaPublicKey{golang}).hash(),
-		goK: *golang,
-	}
-	runtime.SetFinalizer(ret, func(k *opensslECPublicKey) { C.EC_KEY_free(k.k) })
-	return ret, nil
+	return unmarshalPublicKeyImpl(der)
 }
 
 type opensslSigner struct {
@@ -178,7 +172,28 @@ func opensslMakeError(errno C.ulong) error {
 }
 
 func uchar(b []byte) *C.uchar {
+	if len(b) == 0 {
+		return nil
+	}
 	return (*C.uchar)(unsafe.Pointer(&b[0]))
+}
+
+func openssl_version() string {
+	return fmt.Sprintf("%v (CFLAGS:%v)", C.GoString(C.SSLeay_version(C.SSLEAY_VERSION)), C.GoString(C.SSLeay_version(C.SSLEAY_CFLAGS)))
+}
+
+func openssl_hash_for_key(k *C.EC_KEY) (Hash, error) {
+	switch nid := C.EC_GROUP_get_curve_name(C.EC_KEY_get0_group(k)); nid {
+	case C.NID_secp224r1, C.NID_X9_62_prime256v1:
+		return SHA256Hash, nil
+	case C.NID_secp384r1:
+		return SHA384Hash, nil
+	case C.NID_secp521r1:
+		return SHA512Hash, nil
+	default:
+		var h Hash
+		return h, verror.New(errUnsupportedCurve, nil, C.GoString(C.OBJ_nid2sn(C.int(nid))))
+	}
 }
 
 func newInMemoryECDSASignerImpl(key *ecdsa.PrivateKey) (Signer, error) {
@@ -192,6 +207,20 @@ func newECDSAPublicKeyImpl(key *ecdsa.PublicKey) PublicKey {
 	return newGoStdlibPublicKey(key)
 }
 
-func openssl_version() string {
-	return fmt.Sprintf("%v (CFLAGS:%v)", C.GoString(C.SSLeay_version(C.SSLEAY_VERSION)), C.GoString(C.SSLeay_version(C.SSLEAY_CFLAGS)))
+func unmarshalPublicKeyImpl(der []byte) (PublicKey, error) {
+	var errno C.ulong
+	in := uchar(der)
+	k := C.openssl_d2i_EC_PUBKEY(&in, C.long(len(der)), &errno)
+	if k == nil {
+		return nil, opensslMakeError(errno)
+	}
+	h, err := openssl_hash_for_key(k)
+	if err != nil {
+		return nil, err
+	}
+	dercpy := make([]byte, len(der))
+	copy(dercpy, der)
+	ret := &opensslECPublicKey{k, h, dercpy}
+	runtime.SetFinalizer(ret, func(k *opensslECPublicKey) { C.EC_KEY_free(k.k) })
+	return ret, nil
 }

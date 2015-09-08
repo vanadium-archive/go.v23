@@ -11,6 +11,7 @@ import (
 	"crypto/ecdsa"
 	"crypto/elliptic"
 	"crypto/rand"
+	"reflect"
 	"testing"
 )
 
@@ -70,6 +71,17 @@ func TestOpenSSLCompatibility(t *testing.T) {
 			continue
 		}
 		signers := []Signer{golang, openssl}
+		// Sanity check: Ensure that the implementations are indeed different.
+		for i := 0; i < len(signers); i++ {
+			si := signers[i]
+			for j := i + 1; j < len(signers); j++ {
+				sj := signers[j]
+				if pi, pj := si.PublicKey(), sj.PublicKey(); reflect.TypeOf(pi) == reflect.TypeOf(pj) {
+					t.Errorf("PublicKey %d and %d have the same type: %T", i, j, pi)
+				}
+			}
+		}
+		// Signatures by any one implementation should be by all.
 		for _, signer := range signers {
 			signature, err := signer.Sign(purpose, message)
 			if err != nil {
@@ -104,6 +116,9 @@ func TestOpenSSLCompatibility(t *testing.T) {
 			}
 			if !bytes.Equal(bin0, bini) {
 				t.Errorf("Curve #%d: MarshalBinary for %T and %T do not match (%v vs %v)", curveidx, pubi, pub0, bini, bin0)
+			}
+			if got, want := pubi.hash(), pub0.hash(); got != want {
+				t.Errorf("Curve #%d: hash for %T(=%v) and %T(=%v) do not match", curveidx, pubi, got, pub0, want)
 			}
 		}
 	}
