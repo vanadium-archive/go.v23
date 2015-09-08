@@ -171,12 +171,13 @@ func (b Blessings) String() string {
 // have (i.e., ignoring any caveats or recognition of the root public key as an
 // authority on the namespace).
 func claimedName(chain []Certificate) string {
-	blessing := chain[0].Extension
+	var buf bytes.Buffer
+	buf.WriteString(chain[0].Extension)
 	for i := 1; i < len(chain); i++ {
-		blessing += ChainSeparator
-		blessing += chain[i].Extension
+		buf.WriteString(ChainSeparator)
+		buf.WriteString(chain[i].Extension)
 	}
-	return blessing
+	return buf.String()
 }
 
 func nameForPrincipal(pubkey []byte, roots BlessingRoots, chain []Certificate) string {
