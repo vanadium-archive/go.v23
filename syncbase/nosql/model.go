@@ -49,6 +49,10 @@ type DatabaseHandle interface {
 	// reached by the stream.
 	Exec(ctx *context.T, query string) ([]string, ResultStream, error)
 
+	// GetResumeMarker returns the ResumeMarker that points to the current end
+	// of the event log.
+	GetResumeMarker(ctx *context.T) (watch.ResumeMarker, error)
+
 	// Close cleans up any state associated with this client handle including
 	// shutting down any open conflict resolution stream.
 	Close()
@@ -112,10 +116,6 @@ type Database interface {
 	// 5) start watching for changes to the data using the ResumeMarker
 	// In this configuration the client doesn't miss any changes.
 	Watch(ctx *context.T, table, prefix string, resumeMarker watch.ResumeMarker) (WatchStream, error)
-
-	// GetResumeMarker returns the ResumeMarker that points to the current end
-	// of the event log.
-	GetResumeMarker(ctx *context.T) (watch.ResumeMarker, error)
 
 	// SyncGroup returns a handle to the SyncGroup with the given name.
 	SyncGroup(sgName string) SyncGroup
