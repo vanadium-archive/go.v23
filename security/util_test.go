@@ -7,6 +7,7 @@
 package security
 
 import (
+	"bytes"
 	"crypto/ecdsa"
 	"crypto/elliptic"
 	"crypto/rand"
@@ -22,7 +23,7 @@ import (
 )
 
 type markedRoot struct {
-	root    PublicKey
+	root    []byte
 	pattern BlessingPattern
 }
 
@@ -30,7 +31,7 @@ type roots struct {
 	data []markedRoot
 }
 
-func (r *roots) Add(root PublicKey, pattern BlessingPattern) error {
+func (r *roots) Add(root []byte, pattern BlessingPattern) error {
 	if !pattern.IsValid() {
 		return fmt.Errorf("pattern %q is invalid", pattern)
 	}
@@ -38,19 +39,26 @@ func (r *roots) Add(root PublicKey, pattern BlessingPattern) error {
 	return nil
 }
 
-func (r *roots) Recognized(root PublicKey, blessing string) error {
+func (r *roots) Recognized(root []byte, blessing string) error {
 	for _, mr := range r.data {
-		if reflect.DeepEqual(root, mr.root) && mr.pattern.MatchedBy(blessing) {
+		if bytes.Equal(root, mr.root) && mr.pattern.MatchedBy(blessing) {
 			return nil
 		}
 	}
-	return NewErrUnrecognizedRoot(nil, root.String(), nil)
+	key, err := UnmarshalPublicKey(root)
+	if err != nil {
+		return err
+	}
+	return NewErrUnrecognizedRoot(nil, key.String(), nil)
 }
 
 func (r *roots) Dump() map[BlessingPattern][]PublicKey {
 	ret := make(map[BlessingPattern][]PublicKey)
 	for _, mr := range r.data {
-		ret[mr.pattern] = append(ret[mr.pattern], mr.root)
+		key, err := UnmarshalPublicKey(mr.root)
+		if err != nil {
+			ret[mr.pattern] = append(ret[mr.pattern], key)
+		}
 	}
 	return ret
 }

@@ -106,7 +106,7 @@ func (b *Blessings) init() {
 func (b Blessings) CouldHaveNames(names []string) bool {
 	hasNames := make(map[string]bool)
 	for _, chain := range b.chains {
-		hasNames[name(chain)] = true
+		hasNames[claimedName(chain)] = true
 	}
 	for _, n := range names {
 		if !hasNames[n] {
@@ -138,9 +138,13 @@ func (b Blessings) publicKeyDER() []byte {
 }
 
 func (b Blessings) blessingsByNameForPrincipal(p Principal, pattern BlessingPattern) Blessings {
+	pKey, err := p.PublicKey().MarshalBinary()
+	if err != nil {
+		return Blessings{}
+	}
 	ret := Blessings{publicKey: b.publicKey}
 	for _, chain := range b.chains {
-		blessing := nameForPrincipal(p, chain)
+		blessing := nameForPrincipal(pKey, p.Roots(), chain)
 		if len(blessing) > 0 && pattern.MatchedBy(blessing) {
 			ret.chains = append(ret.chains, chain)
 		}
@@ -163,7 +167,10 @@ func (b Blessings) String() string {
 	return strings.Join(blessings, ",")
 }
 
-func name(chain []Certificate) string {
+// claimedName returns the blessing name that the certificate chain claims to
+// have (i.e., ignoring any caveats or recognition of the root public key as an
+// authority on the namespace).
+func claimedName(chain []Certificate) string {
 	blessing := chain[0].Extension
 	for i := 1; i < len(chain); i++ {
 		blessing += ChainSeparator
@@ -172,50 +179,18 @@ func name(chain []Certificate) string {
 	return blessing
 }
 
-func nameForPrincipal(p Principal, chain []Certificate) string {
+func nameForPrincipal(pubkey []byte, roots BlessingRoots, chain []Certificate) string {
 	// Verify the chain belongs to this principal
-	pKey, err := p.PublicKey().MarshalBinary()
-	if err != nil || !bytes.Equal(chain[len(chain)-1].PublicKey, pKey) {
+	if !bytes.Equal(chain[len(chain)-1].PublicKey, pubkey) {
 		return ""
 	}
-	// Verify that the root of the chain is recognized as an authority
-	// on blessing.
-	rootKey, err := UnmarshalPublicKey(chain[0].PublicKey)
-	if err != nil {
-		return ""
-	}
-	if p.Roots() == nil {
-		return ""
-	}
-
-	blessing := name(chain)
-	if err := p.Roots().Recognized(rootKey, blessing); err != nil {
+	// Verify that the root of the chain is recognized as an authority on
+	// blessing.
+	blessing := claimedName(chain)
+	if err := roots.Recognized(chain[0].PublicKey, blessing); err != nil {
 		return ""
 	}
 	return blessing
-}
-
-// chainName returns the blessing name represented by 'chain' for the provided
-// context and principal, ignoring any caveats on the validity of the blessing
-// name.
-func chainName(ctx *context.T, p Principal, chain []Certificate) (string, error) {
-	blessing := name(chain)
-	// Root of the chain must be recognized as an authority on the blessing.
-	root, err := UnmarshalPublicKey(chain[0].PublicKey)
-	if err != nil {
-		return blessing, err
-	}
-	if p == nil {
-		return blessing, NewErrUnrecognizedRoot(ctx, root.String(), verror.New(errMisconfiguredRoots, ctx))
-	}
-	if p.Roots() == nil {
-		return blessing, NewErrUnrecognizedRoot(ctx, root.String(), verror.New(errMisconfiguredRoots, ctx))
-	}
-	if err := p.Roots().Recognized(root, blessing); err != nil {
-		return blessing, err
-	}
-
-	return blessing, nil
 }
 
 // chainCaveats returns the union of the set of caveats in the  certificates present
@@ -479,14 +454,14 @@ func SigningBlessingNames(ctx *context.T, p Principal, blessings Blessings) ([]s
 	var (
 		validatedNames []string
 		rejected       []RejectedBlessing
+		call           = NewCall(&CallParams{LocalPrincipal: p, RemoteBlessings: blessings})
 	)
 	for _, chain := range blessings.chains {
-		name, err := chainName(ctx, p, chain)
-		if err != nil {
+		name := claimedName(chain)
+		if err := p.Roots().Recognized(chain[0].PublicKey, name); err != nil {
 			rejected = append(rejected, RejectedBlessing{name, err})
 			continue
 		}
-		call := NewCall(&CallParams{LocalPrincipal: p, RemoteBlessings: blessings})
 		if err := validateCaveatsForSigning(ctx, call, chain); err != nil {
 			rejected = append(rejected, RejectedBlessing{name, err})
 			continue
@@ -522,16 +497,24 @@ func RemoteBlessingNames(ctx *context.T, call Call) ([]string, []RejectedBlessin
 		rejected          []RejectedBlessing
 		pendingNames      []string
 		pendingCaveatSets [][]Caveat
+		rootsErr          error
 	)
+	if p := call.LocalPrincipal(); p == nil || p.Roots() == nil {
+		// These conditions should not be possible: Here only for
+		// unittests where the Call object is intentionally limited.
+		rootsErr = verror.New(errMisconfiguredRoots, ctx)
+	}
 	for _, chain := range b.chains {
-		name, err := chainName(ctx, call.LocalPrincipal(), chain)
+		name := claimedName(chain)
+		err := rootsErr
+		if err == nil {
+			err = call.LocalPrincipal().Roots().Recognized(chain[0].PublicKey, name)
+		}
 		if err != nil {
 			rejected = append(rejected, RejectedBlessing{name, err})
 			continue
 		}
-
 		cavs := chainCaveats(chain)
-
 		if len(cavs) == 0 {
 			validatedNames = append(validatedNames, name) // No caveats to validate, add it to blessingNames.
 		} else {

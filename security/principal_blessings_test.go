@@ -381,13 +381,17 @@ func TestAddToRoots(t *testing.T) {
 			t.Error(err)
 			continue
 		}
+		testroot, err := test.root.MarshalBinary()
+		if err != nil {
+			t.Fatal(err)
+		}
 		for _, b := range test.recognized {
-			if tp.Roots().Recognized(test.root, b) != nil {
+			if tp.Roots().Recognized(testroot, b) != nil {
 				t.Errorf("added roots for: %v but did not recognize blessing: %v", test.add, b)
 			}
 		}
 		for _, b := range test.notRecognized {
-			if tp.Roots().Recognized(test.root, b) == nil {
+			if tp.Roots().Recognized(testroot, b) == nil {
 				t.Errorf("added roots for: %v but recognized blessing: %v", test.add, b)
 			}
 		}

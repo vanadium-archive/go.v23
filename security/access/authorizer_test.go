@@ -87,18 +87,16 @@ func TestAccessListAuthorizer(t *testing.T) {
 }
 
 func TestAccessListEnforceable(t *testing.T) {
-	var (
-		p          = newPrincipal(t)
-		roots      = p.Roots()
-		key        = p.PublicKey()
-		addToRoots = func(roots security.BlessingRoots, k security.PublicKey, p security.BlessingPattern) {
-			if err := roots.Add(k, p); err != nil {
+	p := newPrincipal(t)
+	if key, err := p.PublicKey().MarshalBinary(); err != nil {
+		t.Fatal(err)
+	} else {
+		for _, pattern := range []security.BlessingPattern{"ali/spouse/$", "bob/friend"} {
+			if err := p.Roots().Add(key, pattern); err != nil {
 				t.Fatal(err)
 			}
 		}
-	)
-	addToRoots(roots, key, "ali/spouse/$")
-	addToRoots(roots, key, "bob/friend")
+	}
 
 	type (
 		bp []security.BlessingPattern // shorthand
@@ -438,11 +436,15 @@ type trustAllRoots struct {
 	dump map[security.BlessingPattern][]security.PublicKey
 }
 
-func (r *trustAllRoots) Add(root security.PublicKey, pattern security.BlessingPattern) error {
-	r.dump[pattern] = append(r.dump[pattern], root)
+func (r *trustAllRoots) Add(root []byte, pattern security.BlessingPattern) error {
+	key, err := security.UnmarshalPublicKey(root)
+	if err != nil {
+		return err
+	}
+	r.dump[pattern] = append(r.dump[pattern], key)
 	return nil
 }
-func (r *trustAllRoots) Recognized(root security.PublicKey, blessing string) error {
+func (r *trustAllRoots) Recognized(root []byte, blessing string) error {
 	return nil
 }
 func (r *trustAllRoots) Dump() map[security.BlessingPattern][]security.PublicKey {
