@@ -140,7 +140,7 @@ func TestRPCSchemaCheckError(t *testing.T) {
 	if _, err := table.Exists(ctx); !isVersionMismatchErr(err) {
 		t.Fatal("Expected ErrDatabaseVersionMismatch, found: " + toString(err))
 	}
-	if err := table.Delete(ctx, nosql.SingleRow("row1")); !isVersionMismatchErr(err) {
+	if err := table.Delete(ctx, "row1"); !isVersionMismatchErr(err) {
 		t.Fatal("Expected ErrDatabaseVersionMismatch, found: " + toString(err))
 	}
 	stream := table.Scan(ctx, nosql.SingleRow("row1"))

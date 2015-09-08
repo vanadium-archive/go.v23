@@ -97,10 +97,10 @@ type Table interface {
 	// do not exist.
 	Exists(schemaVersion int32) (bool | error) {access.Read}
 
-	// Delete deletes all rows in the given half-open range [start, limit). If
-	// limit is "", all rows with keys >= start are included.
+	// DeleteRange deletes all rows in the given half-open range [start, limit).
+	// If limit is "", all rows with keys >= start are included.
 	// TODO(sadovsky): Delete prefix perms fully covered by the row range?
-	DeleteRowRange(schemaVersion int32, start, limit []byte) error {access.Write}
+	DeleteRange(schemaVersion int32, start, limit []byte) error {access.Write}
 
 	// Scan returns all rows in the given half-open range [start, limit). If limit
 	// is "", all rows with keys >= start are included. Concurrency semantics are

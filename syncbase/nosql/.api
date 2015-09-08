@@ -68,14 +68,12 @@ pkg nosql, type ConflictRowSet struct, ByBatch map[uint16][]ConflictRow
 pkg nosql, type ConflictRowSet struct, ByKey map[string]ConflictRow
 pkg nosql, type ConflictScanSet struct
 pkg nosql, type ConflictScanSet struct, ByBatch map[uint16][]wire.ScanOp
-pkg nosql, type Database interface { BeginBatch, Blob, Close, Create, CreateBlob, CreateTable, DeleteTable, Destroy, EnforceSchema, Exec, Exists, FullName, GetPermissions, GetResumeMarker, GetSyncGroupNames, ListTables, Name, SetPermissions, SyncGroup, Table, Watch }
+pkg nosql, type Database interface { BeginBatch, Blob, Close, Create, CreateBlob, Destroy, EnforceSchema, Exec, Exists, FullName, GetPermissions, GetResumeMarker, GetSyncGroupNames, ListTables, Name, SetPermissions, SyncGroup, Table, Watch }
 pkg nosql, type Database interface, BeginBatch(*context.T, wire.BatchOptions) (BatchDatabase, error)
 pkg nosql, type Database interface, Blob(wire.BlobRef) Blob
 pkg nosql, type Database interface, Close()
 pkg nosql, type Database interface, Create(*context.T, access.Permissions) error
 pkg nosql, type Database interface, CreateBlob(*context.T) (Blob, error)
-pkg nosql, type Database interface, CreateTable(*context.T, string, access.Permissions) error
-pkg nosql, type Database interface, DeleteTable(*context.T, string) error
 pkg nosql, type Database interface, Destroy(*context.T) error
 pkg nosql, type Database interface, EnforceSchema(*context.T) error
 pkg nosql, type Database interface, Exec(*context.T, string) ([]string, ResultStream, error)
@@ -151,9 +149,12 @@ pkg nosql, type SyncGroup interface, GetSpec(*context.T) (wire.SyncGroupSpec, st
 pkg nosql, type SyncGroup interface, Join(*context.T, wire.SyncGroupMemberInfo) (wire.SyncGroupSpec, error)
 pkg nosql, type SyncGroup interface, Leave(*context.T) error
 pkg nosql, type SyncGroup interface, SetSpec(*context.T, wire.SyncGroupSpec, string) error
-pkg nosql, type Table interface { Delete, DeletePermissions, Exists, FullName, Get, GetPermissions, Name, Put, Row, Scan, SetPermissions }
-pkg nosql, type Table interface, Delete(*context.T, RowRange) error
+pkg nosql, type Table interface { Create, Delete, DeletePermissions, DeleteRange, Destroy, Exists, FullName, Get, GetPermissions, Name, Put, Row, Scan, SetPermissions }
+pkg nosql, type Table interface, Create(*context.T, access.Permissions) error
+pkg nosql, type Table interface, Delete(*context.T, string) error
 pkg nosql, type Table interface, DeletePermissions(*context.T, PrefixRange) error
+pkg nosql, type Table interface, DeleteRange(*context.T, RowRange) error
+pkg nosql, type Table interface, Destroy(*context.T) error
 pkg nosql, type Table interface, Exists(*context.T) (bool, error)
 pkg nosql, type Table interface, FullName() string
 pkg nosql, type Table interface, Get(*context.T, string, interface{}) error

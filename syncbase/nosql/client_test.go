@@ -449,8 +449,8 @@ func TestTableScan(t *testing.T) {
 	tu.CheckScan(t, ctx, tb, nosql.Prefix("z"), []string{}, []interface{}{})
 }
 
-// Tests that Table.Delete works as expected.
-func TestTableDeleteRowRange(t *testing.T) {
+// Tests that Table.DeleteRange works as expected.
+func TestTableDeleteRange(t *testing.T) {
 	ctx, sName, cleanup := tu.SetupOrDie(nil)
 	defer cleanup()
 	a := tu.CreateApp(t, ctx, syncbase.NewService(sName), "a")
@@ -471,8 +471,8 @@ func TestTableDeleteRowRange(t *testing.T) {
 	tu.CheckScan(t, ctx, tb, nosql.Prefix(""), []string{"bar", "foo"}, []interface{}{&barWant, &fooWant})
 
 	// Delete foo.
-	if err := tb.Delete(ctx, nosql.Prefix("f")); err != nil {
-		t.Fatalf("tb.Delete() failed: %v", err)
+	if err := tb.DeleteRange(ctx, nosql.Prefix("f")); err != nil {
+		t.Fatalf("tb.DeleteRange() failed: %v", err)
 	}
 	tu.CheckScan(t, ctx, tb, nosql.Prefix(""), []string{"bar"}, []interface{}{&barWant})
 
@@ -483,8 +483,8 @@ func TestTableDeleteRowRange(t *testing.T) {
 	tu.CheckScan(t, ctx, tb, nosql.Prefix(""), []string{"bar", "foo"}, []interface{}{&barWant, &fooWant})
 
 	// Delete everything.
-	if err := tb.Delete(ctx, nosql.Prefix("")); err != nil {
-		t.Fatalf("tb.Delete() failed: %v", err)
+	if err := tb.DeleteRange(ctx, nosql.Prefix("")); err != nil {
+		t.Fatalf("tb.DeleteRange() failed: %v", err)
 	}
 	tu.CheckScan(t, ctx, tb, nosql.Prefix(""), []string{}, []interface{}{})
 }
@@ -521,8 +521,8 @@ func TestTableRowMethods(t *testing.T) {
 	if !reflect.DeepEqual(got, want) {
 		t.Fatalf("Values do not match: got %v, want %v", got, want)
 	}
-	if err := tb.Delete(ctx, nosql.Prefix("f")); err != nil {
-		t.Fatalf("tb.Delete() failed: %v", err)
+	if err := tb.DeleteRange(ctx, nosql.Prefix("f")); err != nil {
+		t.Fatalf("tb.DeleteRange() failed: %v", err)
 	}
 	if err := tb.Get(ctx, "f", &got); verror.ErrorID(err) != verror.ErrNoExist.ID {
 		t.Fatalf("r.Get() should have failed: %v", err)
@@ -571,7 +571,7 @@ func TestRowMethods(t *testing.T) {
 }
 
 // Test permission checking in Row.{Get,Put,Delete} and
-// Table.{Scan, DeleteRowRange}.
+// Table.{Scan, DeleteRange}.
 func TestRowPermissions(t *testing.T) {
 	ctx, clientACtx, sName, rootp, cleanup := tu.SetupOrDieCustom("clientA", "server", nil)
 	defer cleanup()
@@ -617,8 +617,8 @@ func TestRowPermissions(t *testing.T) {
 		t.Fatalf("rb.Delete() should have failed: %v", err)
 	}
 	// Test Table.Delete and Scan.
-	if err := tb.Delete(clientACtx, nosql.Prefix("")); verror.ErrorID(err) != verror.ErrNoAccess.ID {
-		t.Fatalf("tb.Delete should have failed: %v", err)
+	if err := tb.DeleteRange(clientACtx, nosql.Prefix("")); verror.ErrorID(err) != verror.ErrNoAccess.ID {
+		t.Fatalf("tb.DeleteRange should have failed: %v", err)
 	}
 	s := tb.Scan(clientACtx, nosql.Prefix(""))
 	if !s.Advance() {

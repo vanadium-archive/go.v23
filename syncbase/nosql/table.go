@@ -73,8 +73,13 @@ func (t *table) Put(ctx *context.T, key string, value interface{}) error {
 }
 
 // Delete implements Table.Delete.
-func (t *table) Delete(ctx *context.T, r RowRange) error {
-	return t.c.DeleteRowRange(ctx, t.dbSchemaVersion, []byte(r.Start()), []byte(r.Limit()))
+func (t *table) Delete(ctx *context.T, key string) error {
+	return t.Row(key).Delete(ctx)
+}
+
+// DeleteRange implements Table.DeleteRange.
+func (t *table) DeleteRange(ctx *context.T, r RowRange) error {
+	return t.c.DeleteRange(ctx, t.dbSchemaVersion, []byte(r.Start()), []byte(r.Limit()))
 }
 
 // Scan implements Table.Scan.

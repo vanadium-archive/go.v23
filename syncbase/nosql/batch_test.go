@@ -307,10 +307,10 @@ func TestBatchExec(t *testing.T) {
 	// Delete the first row (bar) and the last row (newRow).
 	// Change the baz row.  Confirm these rows are no longer fetched and that
 	// the change to baz is seen.
-	if err := rwBatchTb.Delete(ctx, nosql.SingleRow("bar")); err != nil {
+	if err := rwBatchTb.Delete(ctx, "bar"); err != nil {
 		t.Fatalf("rwBatchTb.Delete(bar) failed: %v", err)
 	}
-	if err := rwBatchTb.Delete(ctx, nosql.SingleRow("newRow")); err != nil {
+	if err := rwBatchTb.Delete(ctx, "newRow"); err != nil {
 		t.Fatalf("rwBatchTb.Delete(newRow) failed: %v", err)
 	}
 	baz2 := Baz{Name: "Batman", Active: false}
@@ -336,10 +336,10 @@ func TestBatchExec(t *testing.T) {
 	if err := rwBatchTb.Put(ctx, "newRow", newRow2); err != nil {
 		t.Fatalf("rwBatchTb.Put() failed: %v", err)
 	}
-	if err := rwBatchTb.Delete(ctx, nosql.SingleRow("baz")); err != nil {
+	if err := rwBatchTb.Delete(ctx, "baz"); err != nil {
 		t.Fatalf("rwBatchTb.Delete(baz) failed: %v", err)
 	}
-	if err := rwBatchTb.Delete(ctx, nosql.SingleRow("foo")); err != nil {
+	if err := rwBatchTb.Delete(ctx, "foo"); err != nil {
 		t.Fatalf("rwBatchTb.Delete(foo) failed: %v", err)
 	}
 	tu.CheckExec(t, ctx, rwBatch, "select k, v from tb",
@@ -390,8 +390,8 @@ func TestReadOnlyBatch(t *testing.T) {
 	if err := b1tb.Put(ctx, "barKey", "barValue"); verror.ErrorID(err) != wire.ErrReadOnlyBatch.ID {
 		t.Fatalf("Put() should have failed: %v", err)
 	}
-	if err := b1tb.Delete(ctx, nosql.Prefix("fooKey")); verror.ErrorID(err) != wire.ErrReadOnlyBatch.ID {
-		t.Fatalf("Table.Delete() should have failed: %v", err)
+	if err := b1tb.DeleteRange(ctx, nosql.Prefix("fooKey")); verror.ErrorID(err) != wire.ErrReadOnlyBatch.ID {
+		t.Fatalf("Table.DeleteRange() should have failed: %v", err)
 	}
 	if err := b1tb.Row("fooKey").Delete(ctx); verror.ErrorID(err) != wire.ErrReadOnlyBatch.ID {
 		t.Fatalf("Row.Delete() should have failed: %v", err)
@@ -422,8 +422,8 @@ func TestOpAfterFinalize(t *testing.T) {
 		if err := btb.Put(ctx, "barKey", "barValue"); err == nil {
 			tu.Fatal(t, "Put() should have failed")
 		}
-		if err := btb.Delete(ctx, nosql.Prefix("fooKey")); err == nil {
-			tu.Fatal(t, "Table.Delete() should have failed: %v", err)
+		if err := btb.DeleteRange(ctx, nosql.Prefix("fooKey")); err == nil {
+			tu.Fatal(t, "Table.DeleteRange() should have failed: %v", err)
 		}
 		if err := btb.Row("fooKey").Delete(ctx); err == nil {
 			tu.Fatal(t, "Row.Delete() should have failed: %v", err)

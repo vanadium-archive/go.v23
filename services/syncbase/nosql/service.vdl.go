@@ -2514,10 +2514,10 @@ type TableClientMethods interface {
 	// TODO(ivanpi): Exists may fail with an error if higher levels of hierarchy
 	// do not exist.
 	Exists(ctx *context.T, schemaVersion int32, opts ...rpc.CallOpt) (bool, error)
-	// Delete deletes all rows in the given half-open range [start, limit). If
-	// limit is "", all rows with keys >= start are included.
+	// DeleteRange deletes all rows in the given half-open range [start, limit).
+	// If limit is "", all rows with keys >= start are included.
 	// TODO(sadovsky): Delete prefix perms fully covered by the row range?
-	DeleteRowRange(ctx *context.T, schemaVersion int32, start []byte, limit []byte, opts ...rpc.CallOpt) error
+	DeleteRange(ctx *context.T, schemaVersion int32, start []byte, limit []byte, opts ...rpc.CallOpt) error
 	// Scan returns all rows in the given half-open range [start, limit). If limit
 	// is "", all rows with keys >= start are included. Concurrency semantics are
 	// documented in model.go.
@@ -2572,8 +2572,8 @@ func (c implTableClientStub) Exists(ctx *context.T, i0 int32, opts ...rpc.CallOp
 	return
 }
 
-func (c implTableClientStub) DeleteRowRange(ctx *context.T, i0 int32, i1 []byte, i2 []byte, opts ...rpc.CallOpt) (err error) {
-	err = v23.GetClient(ctx).Call(ctx, c.name, "DeleteRowRange", []interface{}{i0, i1, i2}, nil, opts...)
+func (c implTableClientStub) DeleteRange(ctx *context.T, i0 int32, i1 []byte, i2 []byte, opts ...rpc.CallOpt) (err error) {
+	err = v23.GetClient(ctx).Call(ctx, c.name, "DeleteRange", []interface{}{i0, i1, i2}, nil, opts...)
 	return
 }
 
@@ -2688,10 +2688,10 @@ type TableServerMethods interface {
 	// TODO(ivanpi): Exists may fail with an error if higher levels of hierarchy
 	// do not exist.
 	Exists(ctx *context.T, call rpc.ServerCall, schemaVersion int32) (bool, error)
-	// Delete deletes all rows in the given half-open range [start, limit). If
-	// limit is "", all rows with keys >= start are included.
+	// DeleteRange deletes all rows in the given half-open range [start, limit).
+	// If limit is "", all rows with keys >= start are included.
 	// TODO(sadovsky): Delete prefix perms fully covered by the row range?
-	DeleteRowRange(ctx *context.T, call rpc.ServerCall, schemaVersion int32, start []byte, limit []byte) error
+	DeleteRange(ctx *context.T, call rpc.ServerCall, schemaVersion int32, start []byte, limit []byte) error
 	// Scan returns all rows in the given half-open range [start, limit). If limit
 	// is "", all rows with keys >= start are included. Concurrency semantics are
 	// documented in model.go.
@@ -2731,10 +2731,10 @@ type TableServerStubMethods interface {
 	// TODO(ivanpi): Exists may fail with an error if higher levels of hierarchy
 	// do not exist.
 	Exists(ctx *context.T, call rpc.ServerCall, schemaVersion int32) (bool, error)
-	// Delete deletes all rows in the given half-open range [start, limit). If
-	// limit is "", all rows with keys >= start are included.
+	// DeleteRange deletes all rows in the given half-open range [start, limit).
+	// If limit is "", all rows with keys >= start are included.
 	// TODO(sadovsky): Delete prefix perms fully covered by the row range?
-	DeleteRowRange(ctx *context.T, call rpc.ServerCall, schemaVersion int32, start []byte, limit []byte) error
+	DeleteRange(ctx *context.T, call rpc.ServerCall, schemaVersion int32, start []byte, limit []byte) error
 	// Scan returns all rows in the given half-open range [start, limit). If limit
 	// is "", all rows with keys >= start are included. Concurrency semantics are
 	// documented in model.go.
@@ -2800,8 +2800,8 @@ func (s implTableServerStub) Exists(ctx *context.T, call rpc.ServerCall, i0 int3
 	return s.impl.Exists(ctx, call, i0)
 }
 
-func (s implTableServerStub) DeleteRowRange(ctx *context.T, call rpc.ServerCall, i0 int32, i1 []byte, i2 []byte) error {
-	return s.impl.DeleteRowRange(ctx, call, i0, i1, i2)
+func (s implTableServerStub) DeleteRange(ctx *context.T, call rpc.ServerCall, i0 int32, i1 []byte, i2 []byte) error {
+	return s.impl.DeleteRange(ctx, call, i0, i1, i2)
 }
 
 func (s implTableServerStub) Scan(ctx *context.T, call *TableScanServerCallStub, i0 int32, i1 []byte, i2 []byte) error {
@@ -2866,8 +2866,8 @@ var descTable = rpc.InterfaceDesc{
 			Tags: []*vdl.Value{vdl.ValueOf(access.Tag("Read"))},
 		},
 		{
-			Name: "DeleteRowRange",
-			Doc:  "// Delete deletes all rows in the given half-open range [start, limit). If\n// limit is \"\", all rows with keys >= start are included.\n// TODO(sadovsky): Delete prefix perms fully covered by the row range?",
+			Name: "DeleteRange",
+			Doc:  "// DeleteRange deletes all rows in the given half-open range [start, limit).\n// If limit is \"\", all rows with keys >= start are included.\n// TODO(sadovsky): Delete prefix perms fully covered by the row range?",
 			InArgs: []rpc.ArgDesc{
 				{"schemaVersion", ``}, // int32
 				{"start", ``},         // []byte

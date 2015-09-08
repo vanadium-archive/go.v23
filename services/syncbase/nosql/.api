@@ -119,7 +119,7 @@ pkg nosql, type BlobManagerFetchBlobServerCall interface, LocalEndpoint() naming
 pkg nosql, type BlobManagerFetchBlobServerCall interface, RemoteEndpoint() naming.Endpoint
 pkg nosql, type BlobManagerFetchBlobServerCall interface, Security() security.Call
 pkg nosql, type BlobManagerFetchBlobServerCall interface, SendStream() interface {  Send(item BlobFetchStatus) error;}
-pkg nosql, type BlobManagerFetchBlobServerCall interface, Server() XServer
+pkg nosql, type BlobManagerFetchBlobServerCall interface, Server() Server
 pkg nosql, type BlobManagerFetchBlobServerCall interface, Suffix() string
 pkg nosql, type BlobManagerFetchBlobServerCallStub struct
 pkg nosql, type BlobManagerFetchBlobServerCallStub struct, embedded rpc.StreamServerCall
@@ -136,7 +136,7 @@ pkg nosql, type BlobManagerGetBlobServerCall interface, LocalEndpoint() naming.E
 pkg nosql, type BlobManagerGetBlobServerCall interface, RemoteEndpoint() naming.Endpoint
 pkg nosql, type BlobManagerGetBlobServerCall interface, Security() security.Call
 pkg nosql, type BlobManagerGetBlobServerCall interface, SendStream() interface {  Send(item []byte) error;}
-pkg nosql, type BlobManagerGetBlobServerCall interface, Server() XServer
+pkg nosql, type BlobManagerGetBlobServerCall interface, Server() Server
 pkg nosql, type BlobManagerGetBlobServerCall interface, Suffix() string
 pkg nosql, type BlobManagerGetBlobServerCallStub struct
 pkg nosql, type BlobManagerGetBlobServerCallStub struct, embedded rpc.StreamServerCall
@@ -153,7 +153,7 @@ pkg nosql, type BlobManagerPutBlobServerCall interface, LocalEndpoint() naming.E
 pkg nosql, type BlobManagerPutBlobServerCall interface, RecvStream() interface {  Advance() bool;; Value() []byte;; Err() error;}
 pkg nosql, type BlobManagerPutBlobServerCall interface, RemoteEndpoint() naming.Endpoint
 pkg nosql, type BlobManagerPutBlobServerCall interface, Security() security.Call
-pkg nosql, type BlobManagerPutBlobServerCall interface, Server() XServer
+pkg nosql, type BlobManagerPutBlobServerCall interface, Server() Server
 pkg nosql, type BlobManagerPutBlobServerCall interface, Suffix() string
 pkg nosql, type BlobManagerPutBlobServerCallStub struct
 pkg nosql, type BlobManagerPutBlobServerCallStub struct, embedded rpc.StreamServerCall
@@ -230,7 +230,7 @@ pkg nosql, type ConflictManagerStartConflictResolverServerCall interface, RecvSt
 pkg nosql, type ConflictManagerStartConflictResolverServerCall interface, RemoteEndpoint() naming.Endpoint
 pkg nosql, type ConflictManagerStartConflictResolverServerCall interface, Security() security.Call
 pkg nosql, type ConflictManagerStartConflictResolverServerCall interface, SendStream() interface {  Send(item ConflictInfo) error;}
-pkg nosql, type ConflictManagerStartConflictResolverServerCall interface, Server() XServer
+pkg nosql, type ConflictManagerStartConflictResolverServerCall interface, Server() Server
 pkg nosql, type ConflictManagerStartConflictResolverServerCall interface, Suffix() string
 pkg nosql, type ConflictManagerStartConflictResolverServerCallStub struct
 pkg nosql, type ConflictManagerStartConflictResolverServerCallStub struct, embedded rpc.StreamServerCall
@@ -323,7 +323,7 @@ pkg nosql, type DatabaseExecServerCall interface, LocalEndpoint() naming.Endpoin
 pkg nosql, type DatabaseExecServerCall interface, RemoteEndpoint() naming.Endpoint
 pkg nosql, type DatabaseExecServerCall interface, Security() security.Call
 pkg nosql, type DatabaseExecServerCall interface, SendStream() interface {  Send(item []*vdl.Value) error;}
-pkg nosql, type DatabaseExecServerCall interface, Server() XServer
+pkg nosql, type DatabaseExecServerCall interface, Server() Server
 pkg nosql, type DatabaseExecServerCall interface, Suffix() string
 pkg nosql, type DatabaseExecServerCallStub struct
 pkg nosql, type DatabaseExecServerCallStub struct, embedded rpc.StreamServerCall
@@ -532,20 +532,20 @@ pkg nosql, type SyncGroupSpec struct, IsPrivate bool
 pkg nosql, type SyncGroupSpec struct, MountTables []string
 pkg nosql, type SyncGroupSpec struct, Perms access.Permissions
 pkg nosql, type SyncGroupSpec struct, Prefixes []string
-pkg nosql, type TableClientMethods interface { Create, Delete, DeletePermissions, DeleteRowRange, Exists, GetPermissions, Scan, SetPermissions }
+pkg nosql, type TableClientMethods interface { Create, DeletePermissions, DeleteRange, Destroy, Exists, GetPermissions, Scan, SetPermissions }
 pkg nosql, type TableClientMethods interface, Create(*context.T, int32, access.Permissions, ...rpc.CallOpt) error
-pkg nosql, type TableClientMethods interface, Delete(*context.T, int32, ...rpc.CallOpt) error
 pkg nosql, type TableClientMethods interface, DeletePermissions(*context.T, int32, string, ...rpc.CallOpt) error
-pkg nosql, type TableClientMethods interface, DeleteRowRange(*context.T, int32, []byte, []byte, ...rpc.CallOpt) error
+pkg nosql, type TableClientMethods interface, DeleteRange(*context.T, int32, []byte, []byte, ...rpc.CallOpt) error
+pkg nosql, type TableClientMethods interface, Destroy(*context.T, int32, ...rpc.CallOpt) error
 pkg nosql, type TableClientMethods interface, Exists(*context.T, int32, ...rpc.CallOpt) (bool, error)
 pkg nosql, type TableClientMethods interface, GetPermissions(*context.T, int32, string, ...rpc.CallOpt) ([]PrefixPermissions, error)
 pkg nosql, type TableClientMethods interface, Scan(*context.T, int32, []byte, []byte, ...rpc.CallOpt) (TableScanClientCall, error)
 pkg nosql, type TableClientMethods interface, SetPermissions(*context.T, int32, string, access.Permissions, ...rpc.CallOpt) error
-pkg nosql, type TableClientStub interface { Create, Delete, DeletePermissions, DeleteRowRange, Exists, GetPermissions, Scan, SetPermissions }
+pkg nosql, type TableClientStub interface { Create, DeletePermissions, DeleteRange, Destroy, Exists, GetPermissions, Scan, SetPermissions }
 pkg nosql, type TableClientStub interface, Create(*context.T, int32, access.Permissions, ...rpc.CallOpt) error
-pkg nosql, type TableClientStub interface, Delete(*context.T, int32, ...rpc.CallOpt) error
 pkg nosql, type TableClientStub interface, DeletePermissions(*context.T, int32, string, ...rpc.CallOpt) error
-pkg nosql, type TableClientStub interface, DeleteRowRange(*context.T, int32, []byte, []byte, ...rpc.CallOpt) error
+pkg nosql, type TableClientStub interface, DeleteRange(*context.T, int32, []byte, []byte, ...rpc.CallOpt) error
+pkg nosql, type TableClientStub interface, Destroy(*context.T, int32, ...rpc.CallOpt) error
 pkg nosql, type TableClientStub interface, Exists(*context.T, int32, ...rpc.CallOpt) (bool, error)
 pkg nosql, type TableClientStub interface, GetPermissions(*context.T, int32, string, ...rpc.CallOpt) ([]PrefixPermissions, error)
 pkg nosql, type TableClientStub interface, Scan(*context.T, int32, []byte, []byte, ...rpc.CallOpt) (TableScanClientCall, error)
@@ -561,36 +561,36 @@ pkg nosql, type TableScanServerCall interface, LocalEndpoint() naming.Endpoint
 pkg nosql, type TableScanServerCall interface, RemoteEndpoint() naming.Endpoint
 pkg nosql, type TableScanServerCall interface, Security() security.Call
 pkg nosql, type TableScanServerCall interface, SendStream() interface {  Send(item KeyValue) error;}
-pkg nosql, type TableScanServerCall interface, Server() XServer
+pkg nosql, type TableScanServerCall interface, Server() Server
 pkg nosql, type TableScanServerCall interface, Suffix() string
 pkg nosql, type TableScanServerCallStub struct
 pkg nosql, type TableScanServerCallStub struct, embedded rpc.StreamServerCall
 pkg nosql, type TableScanServerStream interface { SendStream }
 pkg nosql, type TableScanServerStream interface, SendStream() interface {  Send(item KeyValue) error;}
-pkg nosql, type TableServerMethods interface { Create, Delete, DeletePermissions, DeleteRowRange, Exists, GetPermissions, Scan, SetPermissions }
+pkg nosql, type TableServerMethods interface { Create, DeletePermissions, DeleteRange, Destroy, Exists, GetPermissions, Scan, SetPermissions }
 pkg nosql, type TableServerMethods interface, Create(*context.T, rpc.ServerCall, int32, access.Permissions) error
-pkg nosql, type TableServerMethods interface, Delete(*context.T, rpc.ServerCall, int32) error
 pkg nosql, type TableServerMethods interface, DeletePermissions(*context.T, rpc.ServerCall, int32, string) error
-pkg nosql, type TableServerMethods interface, DeleteRowRange(*context.T, rpc.ServerCall, int32, []byte, []byte) error
+pkg nosql, type TableServerMethods interface, DeleteRange(*context.T, rpc.ServerCall, int32, []byte, []byte) error
+pkg nosql, type TableServerMethods interface, Destroy(*context.T, rpc.ServerCall, int32) error
 pkg nosql, type TableServerMethods interface, Exists(*context.T, rpc.ServerCall, int32) (bool, error)
 pkg nosql, type TableServerMethods interface, GetPermissions(*context.T, rpc.ServerCall, int32, string) ([]PrefixPermissions, error)
 pkg nosql, type TableServerMethods interface, Scan(*context.T, TableScanServerCall, int32, []byte, []byte) error
 pkg nosql, type TableServerMethods interface, SetPermissions(*context.T, rpc.ServerCall, int32, string, access.Permissions) error
-pkg nosql, type TableServerStub interface { Create, Delete, DeletePermissions, DeleteRowRange, Describe__, Exists, GetPermissions, Scan, SetPermissions }
+pkg nosql, type TableServerStub interface { Create, DeletePermissions, DeleteRange, Describe__, Destroy, Exists, GetPermissions, Scan, SetPermissions }
 pkg nosql, type TableServerStub interface, Create(*context.T, rpc.ServerCall, int32, access.Permissions) error
-pkg nosql, type TableServerStub interface, Delete(*context.T, rpc.ServerCall, int32) error
 pkg nosql, type TableServerStub interface, DeletePermissions(*context.T, rpc.ServerCall, int32, string) error
-pkg nosql, type TableServerStub interface, DeleteRowRange(*context.T, rpc.ServerCall, int32, []byte, []byte) error
+pkg nosql, type TableServerStub interface, DeleteRange(*context.T, rpc.ServerCall, int32, []byte, []byte) error
 pkg nosql, type TableServerStub interface, Describe__() []rpc.InterfaceDesc
+pkg nosql, type TableServerStub interface, Destroy(*context.T, rpc.ServerCall, int32) error
 pkg nosql, type TableServerStub interface, Exists(*context.T, rpc.ServerCall, int32) (bool, error)
 pkg nosql, type TableServerStub interface, GetPermissions(*context.T, rpc.ServerCall, int32, string) ([]PrefixPermissions, error)
 pkg nosql, type TableServerStub interface, Scan(*context.T, *TableScanServerCallStub, int32, []byte, []byte) error
 pkg nosql, type TableServerStub interface, SetPermissions(*context.T, rpc.ServerCall, int32, string, access.Permissions) error
-pkg nosql, type TableServerStubMethods interface { Create, Delete, DeletePermissions, DeleteRowRange, Exists, GetPermissions, Scan, SetPermissions }
+pkg nosql, type TableServerStubMethods interface { Create, DeletePermissions, DeleteRange, Destroy, Exists, GetPermissions, Scan, SetPermissions }
 pkg nosql, type TableServerStubMethods interface, Create(*context.T, rpc.ServerCall, int32, access.Permissions) error
-pkg nosql, type TableServerStubMethods interface, Delete(*context.T, rpc.ServerCall, int32) error
 pkg nosql, type TableServerStubMethods interface, DeletePermissions(*context.T, rpc.ServerCall, int32, string) error
-pkg nosql, type TableServerStubMethods interface, DeleteRowRange(*context.T, rpc.ServerCall, int32, []byte, []byte) error
+pkg nosql, type TableServerStubMethods interface, DeleteRange(*context.T, rpc.ServerCall, int32, []byte, []byte) error
+pkg nosql, type TableServerStubMethods interface, Destroy(*context.T, rpc.ServerCall, int32) error
 pkg nosql, type TableServerStubMethods interface, Exists(*context.T, rpc.ServerCall, int32) (bool, error)
 pkg nosql, type TableServerStubMethods interface, GetPermissions(*context.T, rpc.ServerCall, int32, string) ([]PrefixPermissions, error)
 pkg nosql, type TableServerStubMethods interface, Scan(*context.T, *TableScanServerCallStub, int32, []byte, []byte) error

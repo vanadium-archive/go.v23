@@ -210,11 +210,14 @@ type Table interface {
 	// upsert) so that last-one-wins can have deletes trump updates.
 	Put(ctx *context.T, key string, value interface{}) error
 
-	// Delete deletes all rows in the given half-open range [start, limit). If
-	// limit is "", all rows with keys >= start are included.
+	// Delete deletes the row for the given primary key.
+	Delete(ctx *context.T, key string) error
+
+	// DeleteRange deletes all rows in the given half-open range [start, limit).
+	// If limit is "", all rows with keys >= start are included.
 	// TODO(sadovsky): Delete prefix perms fully covered by the row range?
 	// See helpers nosql.Prefix(), nosql.Range(), nosql.SingleRow().
-	Delete(ctx *context.T, r RowRange) error
+	DeleteRange(ctx *context.T, r RowRange) error
 
 	// Scan returns all rows in the given half-open range [start, limit). If limit
 	// is "", all rows with keys >= start are included.
