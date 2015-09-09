@@ -63,6 +63,9 @@ func (s *watchStream) Advance() bool {
 	if err != nil {
 		panic(err)
 	}
+	if row == "" {
+		panic("empty row name")
+	}
 	// Parse the store change.
 	var storeChange wire.StoreChange
 	rtarget, err := vdl.ReflectTarget(reflect.ValueOf(&storeChange))
