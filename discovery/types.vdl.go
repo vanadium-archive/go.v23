@@ -13,10 +13,15 @@ import (
 )
 
 // Service represents service information for service discovery.
+//
+// TODO(jhahn): Add descriptive name for a service instance.
 type Service struct {
-	// The interfaces that the service implements.
+	// The 128 bit (16 byte) universal unique identifier of a service instance.
+	// If this is not specified, a random UUID will be used.
+	InstanceUuid []byte
+	// The interface that the service implements.
 	// E.g., 'v.io/v23/services/vtrace.Store'.
-	InterfaceNames []string
+	InterfaceName string
 	// The service attributes.
 	// E.g., {'resolution': '1024x768'}.
 	Attrs Attributes
