@@ -137,12 +137,12 @@ func TestExec(t *testing.T) {
 	tu.CheckExecError(t, ctx, d, "select k, v from foo", query.ErrTableCantAccess.ID)
 }
 
-// Tests that Database.Delete works as expected.
-func TestDatabaseDelete(t *testing.T) {
+// Tests that Database.Destroy works as expected.
+func TestDatabaseDestroy(t *testing.T) {
 	ctx, sName, cleanup := tu.SetupOrDie(nil)
 	defer cleanup()
 	a := tu.CreateApp(t, ctx, syncbase.NewService(sName), "a")
-	tu.TestDelete(t, ctx, a)
+	tu.TestDestroy(t, ctx, a)
 }
 
 // Tests that Database.ListTables works as expected.
@@ -163,7 +163,7 @@ func TestDatabasePerms(t *testing.T) {
 	tu.TestPerms(t, ctx, d)
 }
 
-// Tests that Database.CreateTable works as expected.
+// Tests that Table.Create works as expected.
 func TestTableCreate(t *testing.T) {
 	ctx, sName, cleanup := tu.SetupOrDie(nil)
 	defer cleanup()
@@ -172,13 +172,13 @@ func TestTableCreate(t *testing.T) {
 	tu.TestCreate(t, ctx, d)
 }
 
-// Tests that Database.DeleteTable works as expected.
-func TestTableDelete(t *testing.T) {
+// Tests that Table.Destroy works as expected.
+func TestTableDestroy(t *testing.T) {
 	ctx, sName, cleanup := tu.SetupOrDie(nil)
 	defer cleanup()
 	a := tu.CreateApp(t, ctx, syncbase.NewService(sName), "a")
 	d := tu.CreateNoSQLDatabase(t, ctx, a, "d")
-	tu.TestDelete(t, ctx, d)
+	tu.TestDestroy(t, ctx, d)
 }
 
 // Tests that Table.{Set,Get,Delete}Permissions methods work as expected.
@@ -521,8 +521,8 @@ func TestTableRowMethods(t *testing.T) {
 	if !reflect.DeepEqual(got, want) {
 		t.Fatalf("Values do not match: got %v, want %v", got, want)
 	}
-	if err := tb.DeleteRange(ctx, nosql.Prefix("f")); err != nil {
-		t.Fatalf("tb.DeleteRange() failed: %v", err)
+	if err := tb.Delete(ctx, "f"); err != nil {
+		t.Fatalf("tb.Delete() failed: %v", err)
 	}
 	if err := tb.Get(ctx, "f", &got); verror.ErrorID(err) != verror.ErrNoExist.ID {
 		t.Fatalf("r.Get() should have failed: %v", err)
@@ -616,7 +616,7 @@ func TestRowPermissions(t *testing.T) {
 	if err := rb.Delete(clientACtx); verror.ErrorID(err) != verror.ErrNoAccess.ID {
 		t.Fatalf("rb.Delete() should have failed: %v", err)
 	}
-	// Test Table.Delete and Scan.
+	// Test Table.DeleteRange and Scan.
 	if err := tb.DeleteRange(clientACtx, nosql.Prefix("")); verror.ErrorID(err) != verror.ErrNoAccess.ID {
 		t.Fatalf("tb.DeleteRange should have failed: %v", err)
 	}
