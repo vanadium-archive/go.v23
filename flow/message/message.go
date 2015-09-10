@@ -41,6 +41,12 @@ func Read(ctx *context.T, from []byte) (Message, error) {
 		m = &Release{}
 	case dataType:
 		m = &Data{}
+	case multiProxyType:
+		m = &MultiProxyRequest{}
+	case proxyServerType:
+		m = &ProxyServerRequest{}
+	case proxyResponseType:
+		m = &ProxyResponse{}
 	default:
 		return nil, NewErrUnknownMsg(ctx, msgType)
 	}
@@ -62,6 +68,9 @@ const (
 	openFlowType
 	releaseType
 	dataType
+	multiProxyType
+	proxyServerType
+	proxyResponseType
 )
 
 // setup options.
@@ -355,6 +364,59 @@ func (m *Data) read(ctx *context.T, orig []byte) error {
 	}
 	if m.Flags&DisableEncryptionFlag == 0 && len(data) > 0 {
 		m.Payload = [][]byte{data}
+	}
+	return nil
+}
+
+// MultiProxyRequest is sent when a proxy wants to accept connections from another proxy.
+type MultiProxyRequest struct{}
+
+func (m *MultiProxyRequest) append(ctx *context.T, data []byte) ([]byte, error) {
+	return append(data, multiProxyType), nil
+}
+func (m *MultiProxyRequest) read(ctx *context.T, orig []byte) error {
+	return nil
+}
+
+// ProxyServerRequest is sent when a server wants to listen through a proxy.
+type ProxyServerRequest struct{}
+
+func (m *ProxyServerRequest) append(ctx *context.T, data []byte) ([]byte, error) {
+	return append(data, proxyServerType), nil
+}
+func (m *ProxyServerRequest) read(ctx *context.T, orig []byte) error {
+	return nil
+}
+
+// ProxyResponse is sent by a proxy in response to a ProxyServerRequest or
+// MultiProxyRequest. It notifies the server of the endpoints it should publish.
+// Or, it notifies a requesting proxy of the endpoints it accepts connections from.
+type ProxyResponse struct {
+	Endpoints []naming.Endpoint
+}
+
+func (m *ProxyResponse) append(ctx *context.T, data []byte) ([]byte, error) {
+	data = append(data, proxyResponseType)
+	for _, ep := range m.Endpoints {
+		data = appendLenBytes([]byte(ep.String()), data)
+	}
+	return data, nil
+}
+func (m *ProxyResponse) read(ctx *context.T, orig []byte) error {
+	var (
+		data    = orig
+		epBytes []byte
+		valid   bool
+	)
+	for i := 0; len(data) > 0; i++ {
+		if epBytes, data, valid = readLenBytes(ctx, data); !valid {
+			return NewErrInvalidMsg(ctx, proxyResponseType, uint64(len(orig)), uint64(i), nil)
+		}
+		ep, err := v23.NewEndpoint(string(epBytes))
+		if err != nil {
+			return NewErrInvalidMsg(ctx, proxyResponseType, uint64(len(orig)), uint64(i), err)
+		}
+		m.Endpoints = append(m.Endpoints, ep)
 	}
 	return nil
 }

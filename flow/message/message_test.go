@@ -11,6 +11,7 @@ import (
 	"v.io/v23"
 	"v.io/v23/context"
 	"v.io/v23/flow/message"
+	"v.io/v23/naming"
 	"v.io/v23/rpc/version"
 	_ "v.io/x/ref/runtime/factories/fake"
 	"v.io/x/ref/test"
@@ -45,12 +46,12 @@ func TestSetup(t *testing.T) {
 	ctx, shutdown := v23.Init()
 	defer shutdown()
 	ep1, err := v23.NewEndpoint(
-		"@5@tcp@foo.com:1234@00112233445566778899aabbccddeeff@m@v.io/foo")
+		"@6@tcp@foo.com:1234@a,b@00112233445566778899aabbccddeeff@m@v.io/foo")
 	if err != nil {
 		t.Fatal(err)
 	}
 	ep2, err := v23.NewEndpoint(
-		"@5@tcp@bar.com:1234@00112233445566778899aabbccddeeff@m@v.io/bar")
+		"@6@tcp@bar.com:1234@a,b@00112233445566778899aabbccddeeff@m@v.io/bar")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -127,4 +128,25 @@ func TestData(t *testing.T) {
 		[]message.Message{
 			&message.Data{ID: 1123, Flags: message.DisableEncryptionFlag},
 		})
+}
+
+func TestProxy(t *testing.T) {
+	ctx, shutdown := v23.Init()
+	defer shutdown()
+	ep1, err := v23.NewEndpoint(
+		"@6@tcp@foo.com:1234@a,b@00112233445566778899aabbccddeeff@m@v.io/foo")
+	if err != nil {
+		t.Fatal(err)
+	}
+	ep2, err := v23.NewEndpoint(
+		"@6@tcp@bar.com:1234@a,b@00112233445566778899aabbccddeeff@m@v.io/bar")
+	if err != nil {
+		t.Fatal(err)
+	}
+	testMessages(t, ctx, []message.Message{
+		&message.MultiProxyRequest{},
+		&message.ProxyServerRequest{},
+		&message.ProxyResponse{},
+		&message.ProxyResponse{Endpoints: []naming.Endpoint{ep1, ep2}},
+	})
 }
