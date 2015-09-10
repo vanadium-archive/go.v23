@@ -386,6 +386,85 @@ func TestTablePermsDifferentOrder(t *testing.T) {
 	}
 }
 
+// bitmaskToPrefix converts first length bits of bitmask to a string.
+// Bits are converted the following way: 0 -> 'b', 1 -> 'a'.
+// The lowest bit becomes the first character in the string.
+// For example, (0x8, 4) -> "bbba".
+func bitmaskToPrefix(bitmask, length int) string {
+	prefix := ""
+	for k := 0; k < length; k++ {
+		prefix += string('b' - ((bitmask >> uint32(k)) & 1))
+	}
+	return prefix
+}
+
+func checkGetPermissions(t *testing.T, ctx *context.T, tb nosql.Table, prefix string, max, min int) {
+	perms := tu.DefaultPerms("root/client")
+	for len(prefix) < max {
+		prefix += "a"
+	}
+	var wantPerms []nosql.PrefixPermissions
+	for k := max; k >= min; k-- {
+		wantPerms = append(wantPerms, nosql.PrefixPermissions{Prefix: nosql.Prefix(prefix[:k]), Perms: perms})
+	}
+	wantPerms = append(wantPerms, nosql.PrefixPermissions{Prefix: nosql.Prefix(""), Perms: perms})
+	if gotPerms, _ := tb.GetPermissions(ctx, prefix); !reflect.DeepEqual(gotPerms, wantPerms) {
+		tu.Fatalf(t, "Unexpected permissions for %q: got %v, want %v", prefix, gotPerms, wantPerms)
+	}
+}
+
+// Tests that Table.{Set,Get,Delete}Permissions methods work as expected
+// for nested prefixes.
+func TestTablePermsNested(t *testing.T) {
+	ctx, sName, cleanup := tu.SetupOrDie(nil)
+	defer cleanup()
+	a := tu.CreateApp(t, ctx, syncbase.NewService(sName), "a")
+	d := tu.CreateNoSQLDatabase(t, ctx, a, "d")
+	tb := tu.CreateTable(t, ctx, d, "tb")
+	// The permission object.
+	perms := tu.DefaultPerms("root/client")
+	depth := 4
+	// Set permissions in order b, a, bb, ba, ab, aa, ...
+	for i := 1; i <= depth; i++ {
+		for j := 0; j < 1<<uint32(i); j++ {
+			prefix := bitmaskToPrefix(j, i)
+			if err := tb.SetPermissions(ctx, nosql.Prefix(prefix), perms); err != nil {
+				t.Fatalf("tb.SetPermissions() failed for %q: %v", prefix, err)
+			}
+			checkGetPermissions(t, ctx, tb, prefix, i, 1)
+		}
+	}
+	// Delete permissions in the reverse order.
+	for i := depth; i >= 1; i-- {
+		for j := 0; j < 1<<uint32(i); j++ {
+			prefix := bitmaskToPrefix(j, i)
+			if err := tb.DeletePermissions(ctx, nosql.Prefix(prefix)); err != nil {
+				t.Fatalf("tb.DeletePermissions() failed for %q: %v", prefix, err)
+			}
+			checkGetPermissions(t, ctx, tb, prefix, i-1, 1)
+		}
+	}
+	// Do again the first two steps in the reverse order.
+	for i := depth; i >= 1; i-- {
+		for j := 0; j < 1<<uint32(i); j++ {
+			prefix := bitmaskToPrefix(j, i)
+			if err := tb.SetPermissions(ctx, nosql.Prefix(prefix), perms); err != nil {
+				t.Fatalf("tb.SetPermissions() failed for %q: %v", prefix, err)
+			}
+			checkGetPermissions(t, ctx, tb, prefix, depth, i)
+		}
+	}
+	for i := 1; i <= depth; i++ {
+		for j := 0; j < 1<<uint32(i); j++ {
+			prefix := bitmaskToPrefix(j, i)
+			if err := tb.DeletePermissions(ctx, nosql.Prefix(prefix)); err != nil {
+				t.Fatalf("tb.DeletePermissions() failed for %q: %v", prefix, err)
+			}
+			checkGetPermissions(t, ctx, tb, prefix, depth, i+1)
+		}
+	}
+}
+
 ////////////////////////////////////////
 // Tests involving rows
 
