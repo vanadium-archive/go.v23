@@ -20,6 +20,7 @@ import (
 
 	"v.io/v23/context"
 	"v.io/v23/naming"
+	"v.io/v23/rpc/version"
 	"v.io/v23/security"
 )
 
@@ -95,6 +96,8 @@ type ManagedConn interface {
 	LocalEndpoint() naming.Endpoint
 	// RemoteEndpoint returns the remote vanadium Endpoint
 	RemoteEndpoint() naming.Endpoint
+	// CommonVersion returns the RPCVersion negotiated between the local and remote endpoints.
+	CommonVersion() version.RPCVersion
 	// Closed returns a channel that remains open until the connection has been closed.
 	Closed() <-chan struct{}
 }
