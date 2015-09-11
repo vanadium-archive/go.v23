@@ -261,11 +261,13 @@ func (m *Auth) read(ctx *context.T, orig []byte) error {
 	return nil
 }
 
-// OpenFlow is sent at the beginning of every new flow.
+// OpenFlow is sent at the beginning of every new flow, it optionally contains payload.
 type OpenFlow struct {
 	ID                         uint64
 	InitialCounters            uint64
 	BlessingsKey, DischargeKey uint64
+	Flags                      uint64
+	Payload                    [][]byte
 }
 
 func (m *OpenFlow) append(ctx *context.T, data []byte) ([]byte, error) {
@@ -273,7 +275,14 @@ func (m *OpenFlow) append(ctx *context.T, data []byte) ([]byte, error) {
 	data = writeVarUint64(m.ID, data)
 	data = writeVarUint64(m.InitialCounters, data)
 	data = writeVarUint64(m.BlessingsKey, data)
-	return writeVarUint64(m.DischargeKey, data), nil
+	data = writeVarUint64(m.DischargeKey, data)
+	data = writeVarUint64(m.Flags, data)
+	if m.Flags&DisableEncryptionFlag == 0 {
+		for _, p := range m.Payload {
+			data = append(data, p...)
+		}
+	}
+	return data, nil
 }
 func (m *OpenFlow) read(ctx *context.T, orig []byte) error {
 	var (
@@ -291,6 +300,12 @@ func (m *OpenFlow) read(ctx *context.T, orig []byte) error {
 	}
 	if m.DischargeKey, data, valid = readVarUint64(ctx, data); !valid {
 		return NewErrInvalidMsg(ctx, openFlowType, uint64(len(orig)), 3, nil)
+	}
+	if m.Flags, data, valid = readVarUint64(ctx, data); !valid {
+		return NewErrInvalidMsg(ctx, dataType, uint64(len(orig)), 1, nil)
+	}
+	if m.Flags&DisableEncryptionFlag == 0 && len(data) > 0 {
+		m.Payload = [][]byte{data}
 	}
 	return nil
 }

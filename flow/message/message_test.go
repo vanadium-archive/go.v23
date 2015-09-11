@@ -97,6 +97,14 @@ func TestOpenFlow(t *testing.T) {
 	ctx, shutdown := v23.Init()
 	defer shutdown()
 	testMessages(t, ctx, []message.Message{
+		&message.OpenFlow{
+			ID:              23,
+			InitialCounters: 1 << 20,
+			BlessingsKey:    42,
+			DischargeKey:    55,
+			Flags:           message.CloseFlag,
+			Payload:         [][]byte{[]byte("fake payload")},
+		},
 		&message.OpenFlow{ID: 23, InitialCounters: 1 << 20, BlessingsKey: 42, DischargeKey: 55},
 		&message.OpenFlow{},
 	})
