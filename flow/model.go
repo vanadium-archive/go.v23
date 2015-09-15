@@ -186,4 +186,6 @@ type Listener interface {
 	Accept(ctx *context.T) (Conn, error)
 	// Addr returns Listener's network address.
 	Addr() net.Addr
+	// Close closes the Listener. After Close is called all Accept calls will fail.
+	Close() error
 }
