@@ -226,7 +226,7 @@ func V23TestDeviceManager(i *v23tests.T) {
 	// Allow publishers to create and update envelopes
 	deviceBin.Run("acl", "set", appDName, "root/a", "Read,Write,Resolve")
 
-	syncbasedName := appDName + "/syncbased/0"
+	syncbasedName := appDName + "/syncbased"
 	syncbasedBinName := binarydName + "/syncbased"
 	syncbasedEnvelopeFilename := filepath.Join(workDir, "syncbased.envelope")
 	syncbasedEnvelope := fmt.Sprintf("{\"Title\":\"syncbased\","+
@@ -235,7 +235,7 @@ func V23TestDeviceManager(i *v23tests.T) {
 	ioutil.WriteFile(syncbasedEnvelopeFilename, []byte(syncbasedEnvelope), 0666)
 	defer os.Remove(syncbasedEnvelopeFilename)
 
-	output := applicationBin.Run("put", syncbasedName, deviceProfile, syncbasedEnvelopeFilename)
+	output := applicationBin.Run("put", syncbasedName+"/0", deviceProfile, syncbasedEnvelopeFilename)
 	if got, want := output, fmt.Sprintf("Application envelope added for profile %s.", deviceProfile); got != want {
 		i.Fatalf("got %q, want %q", got, want)
 	}
