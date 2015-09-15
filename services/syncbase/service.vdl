@@ -20,6 +20,10 @@ import (
 type Service interface {
 	// SetPermissions and GetPermissions are included from the Object interface.
 	permissions.Object
+
+	// ListApps returns a list of all App names.
+	// TODO(sadovsky): Maybe switch to streaming RPC.
+	ListApps() ([]string | error) {access.Read}
 }
 
 // App represents the data for a specific app instance (possibly a combination
@@ -37,6 +41,11 @@ type App interface {
 	// Exists returns true only if this App exists. Insufficient permissions
 	// cause Exists to return false instead of an error.
 	Exists() (bool | error) {access.Read}
+
+	// ListDatabases returns a list of all Database names.
+	// TODO(kash): Include the database type (NoSQL vs. SQL).
+	// TODO(sadovsky): Maybe switch to streaming RPC.
+	ListDatabases() ([]string | error) {access.Read}
 
 	// SetPermissions and GetPermissions are included from the Object interface.
 	permissions.Object

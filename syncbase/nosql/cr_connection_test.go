@@ -5,7 +5,6 @@
 package nosql
 
 import (
-	"fmt"
 	"testing"
 	"time"
 
@@ -36,11 +35,9 @@ func (ri *resolverImpl1) OnConflict(ctx *context.T, conflict *Conflict) (r Resol
 func TestCrConnectionClose(t *testing.T) {
 	db := NewDatabase("parentName", "db1", getSchema(&resolverImpl1{}))
 	advance := func(st *crtestutil.State) bool {
-		fmt.Println("Advance() for ConflictStreamImpl called")
 		st.IsBlocked = true
 		st.Mu.Lock()
 		defer st.Mu.Unlock()
-		fmt.Println("Advance() for ConflictStreamImpl returning")
 		st.IsBlocked = false
 		return false
 	}
@@ -89,7 +86,6 @@ func TestCrConnectionClose(t *testing.T) {
 func TestCrConnectionReestablish(t *testing.T) {
 	db := NewDatabase("parentName", "db1", getSchema(&resolverImpl1{}))
 	advance := func(st *crtestutil.State) bool {
-		fmt.Println("Advance() for ConflictStreamImpl called")
 		st.AdvanceCount++
 		if st.AdvanceCount > 2 {
 			// Connection stays stable after 3 attempts
@@ -97,7 +93,6 @@ func TestCrConnectionReestablish(t *testing.T) {
 			st.Mu.Lock()
 			defer st.Mu.Unlock()
 		}
-		fmt.Println("Advance() for ConflictStreamImpl returning")
 		st.IsBlocked = false
 		return false
 	}

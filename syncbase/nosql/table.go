@@ -9,10 +9,11 @@ import (
 	"v.io/v23/naming"
 	"v.io/v23/security/access"
 	wire "v.io/v23/services/syncbase/nosql"
+	"v.io/v23/syncbase/util"
 )
 
 func newTable(parentFullName, relativeName string, schemaVersion int32) Table {
-	fullName := naming.Join(parentFullName, relativeName)
+	fullName := naming.Join(parentFullName, util.NameSep, relativeName)
 	return &table{
 		c:               wire.TableClient(fullName),
 		fullName:        fullName,

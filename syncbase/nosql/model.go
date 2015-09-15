@@ -60,8 +60,6 @@ type DatabaseHandle interface {
 
 // Database represents a collection of Tables. Batches, queries, sync, watch,
 // etc. all operate at the Database level.
-//
-// TODO(sadovsky): Add Watch method.
 type Database interface {
 	DatabaseHandle
 
@@ -110,11 +108,11 @@ type Database interface {
 	//
 	// This method is designed to be used in the following way:
 	// 1) begin a read-only batch
-	// 2) read all information your app needs
+	// 2) read all data your app needs
 	// 3) read the ResumeMarker
 	// 4) abort the batch
 	// 5) start watching for changes to the data using the ResumeMarker
-	// In this configuration the client doesn't miss any changes.
+	// In this configuration the client will not miss any changes to the data.
 	Watch(ctx *context.T, table, prefix string, resumeMarker watch.ResumeMarker) (WatchStream, error)
 
 	// SyncGroup returns a handle to the SyncGroup with the given name.
@@ -215,7 +213,8 @@ type Table interface {
 
 	// DeleteRange deletes all rows in the given half-open range [start, limit).
 	// If limit is "", all rows with keys >= start are included.
-	// TODO(sadovsky): Delete prefix perms fully covered by the row range?
+	// TODO(sadovsky): Maybe add option to delete prefix perms fully covered by
+	// the row range.
 	// See helpers nosql.Prefix(), nosql.Range(), nosql.SingleRow().
 	DeleteRange(ctx *context.T, r RowRange) error
 

@@ -33,6 +33,10 @@ type Database interface {
 	// do not exist.
 	Exists(schemaVersion int32) (bool | error) {access.Read}
 
+	// ListTables returns a list of all Table names.
+	// TODO(sadovsky): Maybe switch to streaming RPC.
+	ListTables() ([]string | error) {access.Read}
+
 	// Exec executes a syncQL query and returns all results as specified by in the
 	// query's select clause. Concurrency semantics are documented in model.go.
 	Exec(schemaVersion int32, query string) stream<_, []any> error {access.Read}
@@ -41,7 +45,7 @@ type Database interface {
 	// Database handle bound to this batch. If this Database is already bound to a
 	// batch, BeginBatch() will fail with ErrBoundToBatch. Concurrency semantics
 	// are documented in model.go.
-	// TODO(sadovsky): make BatchOptions optional
+	// TODO(sadovsky): Maybe make BatchOptions optional.
 	BeginBatch(schemaVersion int32, bo BatchOptions) (string | error) {access.Read}
 
 	// Commit persists the pending changes to the database.
@@ -99,7 +103,8 @@ type Table interface {
 
 	// DeleteRange deletes all rows in the given half-open range [start, limit).
 	// If limit is "", all rows with keys >= start are included.
-	// TODO(sadovsky): Delete prefix perms fully covered by the row range?
+	// TODO(sadovsky): Maybe add option to delete prefix perms fully covered by
+	// the row range.
 	DeleteRange(schemaVersion int32, start, limit []byte) error {access.Write}
 
 	// Scan returns all rows in the given half-open range [start, limit). If limit
@@ -263,14 +268,16 @@ type ConflictManager interface {
 }
 
 // BlobManager is the interface for blob operations.
+//
+// Description of API for resumable blob creation (append-only):
+// - Up until commit, a BlobRef may be used with PutBlob, GetBlobSize,
+//   DeleteBlob, and CommitBlob. Blob creation may be resumed by obtaining the
+//   current blob size via GetBlobSize and appending to the blob via PutBlob.
+// - After commit, a blob is immutable, at which point PutBlob and CommitBlob
+//   may no longer be used.
+// - All other methods (GetBlob, FetchBlob, PinBlob, etc.) may only be used
+//   after commit.
 type BlobManager interface {
-	// API for resumable blob creation (append-only). After commit, a blob
-	// is immutable. Before commit, the BlobRef can be used with PutBlob,
-	// GetBlobSize, DeleteBlob, and CommitBlob. After commit, PutBlob and
-	// CommitBlob can no longer be used. Blob creation can be resumed by
-	// obtaining the current blob size with GetBlobSize and appending to the
-	// blob via PutBlob.
-	//
 	// CreateBlob returns a BlobRef for a newly created blob.
 	CreateBlob() (br BlobRef | error) {access.Write}
 
@@ -292,7 +299,7 @@ type BlobManager interface {
 
 	// FetchBlob initiates fetching a blob if not locally found. priority
 	// controls the network priority of the blob. Higher priority blobs are
-	// fetched before the lower priority ones. However an ongoing blob
+	// fetched before the lower priority ones. However, an ongoing blob
 	// transfer is not interrupted. Status updates are streamed back to the
 	// client as fetch is in progress.
 	FetchBlob(br BlobRef, priority uint64) stream<_, BlobFetchStatus> error {access.Read}
@@ -319,28 +326,28 @@ type BlobManager interface {
 	// blobs. Also provide support for parallel blob upload.
 }
 
-// DatabaseWatcher allows a client to watch for updates in the database.
-// For each watched request, the client will receive a reliable stream of watch
-// events without re-ordering. See watch.GlobWatcher for a detailed explanation
-// of the behavior.
+// DatabaseWatcher allows a client to watch for updates to the database. For
+// each watch request, the client will receive a reliable stream of watch events
+// without re-ordering. See watch.GlobWatcher for a detailed explanation of the
+// behavior.
 // TODO(rogulenko): Currently the only supported watch patterns are
-// 'table/row*'. Consider changing that.
+// "<tableName>/$/<rowPrefix>*". Consider changing that.
 //
 // The watching is done by starting a streaming RPC. The argument to the RPC
 // contains the ResumeMarker that points to a particular place in the database
 // event log. The result stream consists of a never-ending sequence of Change
-// messages (until the call fails or is canceled). Each Change contains the
-// Name field in the form "<tableName>/<rowKey>" and the Value field of the
+// messages (until the call fails or is canceled). Each Change contains the Name
+// field in the form "<tableName>/$/<rowKey>" and the Value field of the
 // StoreChange type. If the client has no access to a row specified in a change,
 // that change is excluded from the result stream.
 //
-// The DatabaseWatcher is designed to be used in the following way:
+// DatabaseWatcher is designed to be used in the following way:
 // 1) begin a read-only batch
-// 2) read all information your app needs
+// 2) read all data your app needs
 // 3) read the ResumeMarker
 // 4) abort the batch
-// 5) start watching changes to the data using the ResumeMarker
-// In this configuration the client doesn't miss any changes.
+// 5) start watching for changes to the data using the ResumeMarker
+// In this configuration the client will not miss any changes to the data.
 type DatabaseWatcher interface {
 	watch.GlobWatcher
 

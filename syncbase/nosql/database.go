@@ -25,7 +25,7 @@ const (
 )
 
 func NewDatabase(parentFullName, relativeName string, schema *Schema) *database {
-	fullName := naming.Join(parentFullName, relativeName)
+	fullName := naming.Join(parentFullName, util.NameSep, relativeName)
 	return &database{
 		c:              wire.DatabaseClient(fullName),
 		parentFullName: parentFullName,
@@ -97,7 +97,7 @@ func (d *database) Table(relativeName string) Table {
 
 // ListTables implements Database.ListTables.
 func (d *database) ListTables(ctx *context.T) ([]string, error) {
-	return util.List(ctx, d.fullName)
+	return d.c.ListTables(ctx)
 }
 
 // Create implements Database.Create.
@@ -161,7 +161,7 @@ func (d *database) GetPermissions(ctx *context.T) (perms access.Permissions, ver
 func (d *database) Watch(ctx *context.T, table, prefix string, resumeMarker watch.ResumeMarker) (WatchStream, error) {
 	ctx, cancel := context.WithCancel(ctx)
 	call, err := d.c.WatchGlob(ctx, watch.GlobRequest{
-		Pattern:      naming.Join(table, prefix+"*"),
+		Pattern:      naming.Join(table, util.NameSep, prefix+"*"),
 		ResumeMarker: resumeMarker,
 	})
 	if err != nil {

@@ -8,7 +8,6 @@ import (
 	"v.io/v23/context"
 	"v.io/v23/security/access"
 	wire "v.io/v23/services/syncbase"
-	"v.io/v23/syncbase/util"
 )
 
 func NewService(fullName string) Service {
@@ -36,7 +35,7 @@ func (s *service) App(relativeName string) App {
 
 // ListApps implements Service.ListApps.
 func (s *service) ListApps(ctx *context.T) ([]string, error) {
-	return util.List(ctx, s.fullName)
+	return s.c.ListApps(ctx)
 }
 
 // SetPermissions implements Service.SetPermissions.

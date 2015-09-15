@@ -1172,7 +1172,7 @@ func TestExecErrors(t *testing.T) {
 		{
 			"select v from Unknown",
 			// The following error text is dependent on the implementation of the query.Database interface.
-			query.NewErrTableCantAccess(ctx, 14, "Unknown", errors.New("nosql.test:\"a/db\".Exec: Does not exist: $table:Unknown")),
+			query.NewErrTableCantAccess(ctx, 14, "Unknown", errors.New("nosql.test:\"a/$/db\".Exec: Does not exist: $table:Unknown")),
 		},
 		{
 			"select v from Customer offset -1",

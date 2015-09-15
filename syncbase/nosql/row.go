@@ -8,12 +8,12 @@ import (
 	"v.io/v23/context"
 	"v.io/v23/naming"
 	wire "v.io/v23/services/syncbase/nosql"
+	"v.io/v23/syncbase/util"
 	"v.io/v23/vom"
 )
 
 func newRow(parentFullName, key string, schemaVersion int32) Row {
-	// TODO(sadovsky): Escape delimiters in key?
-	fullName := naming.Join(parentFullName, key)
+	fullName := naming.Join(parentFullName, util.NameSep, key)
 	return &row{
 		c:               wire.RowClient(fullName),
 		fullName:        fullName,

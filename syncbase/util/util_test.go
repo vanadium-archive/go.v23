@@ -15,17 +15,44 @@ func TestValidName(t *testing.T) {
 		name string
 		res  bool
 	}{
-		{"", false},
-		{"*", false},
-		{"a*", false},
-		{"*a", false},
-		{"a*b", false},
-		{"/", false},
-		{"a/", false},
-		{"/a", false},
-		{"a/b", false},
+		{"", false},          // empty
+		{"\xff", false},      // not valid UTF-8
+		{"\x00", false},      // contains "\x00"
+		{"a\x00", false},     // contains "\x00"
+		{"\x00a", false},     // contains "\x00"
+		{"@@", false},        // contains "@@"
+		{"a@@", false},       // contains "@@"
+		{"@@a", false},       // contains "@@"
+		{"/", false},         // slash-separated component equal to ""
+		{"//", false},        // slash-separated component equal to ""
+		{"a/", false},        // slash-separated component equal to ""
+		{"/a", false},        // slash-separated component equal to ""
+		{"a//b", false},      // slash-separated component equal to ""
+		{"$", false},         // slash-separated component equal to "$"
+		{"a/$", false},       // slash-separated component equal to "$"
+		{"$/a", false},       // slash-separated component equal to "$"
+		{"a/$/b", false},     // slash-separated component equal to "$"
+		{"__", false},        // slash-separated component starts with "__"
+		{"__foo", false},     // slash-separated component starts with "__"
+		{"a/__foo", false},   // slash-separated component starts with "__"
+		{"a/__foo/b", false}, // slash-separated component starts with "__"
+		{":", false},         // TODO(sadovsky): Temporary hack.
+		{"a:b", false},       // TODO(sadovsky): Temporary hack.
 		{"a", true},
 		{"aa", true},
+		{"*", true},
+		{"a*", true},
+		{"*a", true},
+		{"a*b", true},
+		{"a__", true},
+		{"a/b__", true},
+		{"a/b", true},
+		{"alice/bob", true},
+		{"a/$$", true},
+		{"$$/a", true},
+		{"a/$$/b", true},
+		{"dev.v.io/a/admin@myapp.com", true},
+		{"안녕하세요", true},
 	}
 	for _, test := range tests {
 		res := util.ValidName(test.name)

@@ -89,6 +89,9 @@ type ServiceClientMethods interface {
 	//    GetPermissions() (perms access.Permissions, version string, err error) {Blue}
 	//  }
 	permissions.ObjectClientMethods
+	// ListApps returns a list of all App names.
+	// TODO(sadovsky): Maybe switch to streaming RPC.
+	ListApps(*context.T, ...rpc.CallOpt) ([]string, error)
 }
 
 // ServiceClientStub adds universal methods to ServiceClientMethods.
@@ -106,6 +109,11 @@ type implServiceClientStub struct {
 	name string
 
 	permissions.ObjectClientStub
+}
+
+func (c implServiceClientStub) ListApps(ctx *context.T, opts ...rpc.CallOpt) (o0 []string, err error) {
+	err = v23.GetClient(ctx).Call(ctx, c.name, "ListApps", nil, []interface{}{&o0}, opts...)
+	return
 }
 
 // ServiceServerMethods is the interface a server writer
@@ -159,6 +167,9 @@ type ServiceServerMethods interface {
 	//    GetPermissions() (perms access.Permissions, version string, err error) {Blue}
 	//  }
 	permissions.ObjectServerMethods
+	// ListApps returns a list of all App names.
+	// TODO(sadovsky): Maybe switch to streaming RPC.
+	ListApps(*context.T, rpc.ServerCall) ([]string, error)
 }
 
 // ServiceServerStubMethods is the server interface containing
@@ -198,6 +209,10 @@ type implServiceServerStub struct {
 	gs *rpc.GlobState
 }
 
+func (s implServiceServerStub) ListApps(ctx *context.T, call rpc.ServerCall) ([]string, error) {
+	return s.impl.ListApps(ctx, call)
+}
+
 func (s implServiceServerStub) Globber() *rpc.GlobState {
 	return s.gs
 }
@@ -216,6 +231,16 @@ var descService = rpc.InterfaceDesc{
 	Doc:     "// Service represents a Vanadium Syncbase service.\n// Service.Glob operates over App names.",
 	Embeds: []rpc.EmbedDesc{
 		{"Object", "v.io/v23/services/permissions", "// Object provides access control for Vanadium objects.\n//\n// Vanadium services implementing dynamic access control would typically embed\n// this interface and tag additional methods defined by the service with one of\n// Admin, Read, Write, Resolve etc. For example, the VDL definition of the\n// object would be:\n//\n//   package mypackage\n//\n//   import \"v.io/v23/security/access\"\n//   import \"v.io/v23/services/permissions\"\n//\n//   type MyObject interface {\n//     permissions.Object\n//     MyRead() (string, error) {access.Read}\n//     MyWrite(string) error    {access.Write}\n//   }\n//\n// If the set of pre-defined tags is insufficient, services may define their\n// own tag type and annotate all methods with this new type.\n//\n// Instead of embedding this Object interface, define SetPermissions and\n// GetPermissions in their own interface. Authorization policies will typically\n// respect annotations of a single type. For example, the VDL definition of an\n// object would be:\n//\n//  package mypackage\n//\n//  import \"v.io/v23/security/access\"\n//\n//  type MyTag string\n//\n//  const (\n//    Blue = MyTag(\"Blue\")\n//    Red  = MyTag(\"Red\")\n//  )\n//\n//  type MyObject interface {\n//    MyMethod() (string, error) {Blue}\n//\n//    // Allow clients to change access via the access.Object interface:\n//    SetPermissions(perms access.Permissions, version string) error         {Red}\n//    GetPermissions() (perms access.Permissions, version string, err error) {Blue}\n//  }"},
+	},
+	Methods: []rpc.MethodDesc{
+		{
+			Name: "ListApps",
+			Doc:  "// ListApps returns a list of all App names.\n// TODO(sadovsky): Maybe switch to streaming RPC.",
+			OutArgs: []rpc.ArgDesc{
+				{"", ``}, // []string
+			},
+			Tags: []*vdl.Value{vdl.ValueOf(access.Tag("Read"))},
+		},
 	},
 }
 
@@ -280,6 +305,10 @@ type AppClientMethods interface {
 	// Exists returns true only if this App exists. Insufficient permissions
 	// cause Exists to return false instead of an error.
 	Exists(*context.T, ...rpc.CallOpt) (bool, error)
+	// ListDatabases returns a list of all Database names.
+	// TODO(kash): Include the database type (NoSQL vs. SQL).
+	// TODO(sadovsky): Maybe switch to streaming RPC.
+	ListDatabases(*context.T, ...rpc.CallOpt) ([]string, error)
 }
 
 // AppClientStub adds universal methods to AppClientMethods.
@@ -311,6 +340,11 @@ func (c implAppClientStub) Destroy(ctx *context.T, opts ...rpc.CallOpt) (err err
 
 func (c implAppClientStub) Exists(ctx *context.T, opts ...rpc.CallOpt) (o0 bool, err error) {
 	err = v23.GetClient(ctx).Call(ctx, c.name, "Exists", nil, []interface{}{&o0}, opts...)
+	return
+}
+
+func (c implAppClientStub) ListDatabases(ctx *context.T, opts ...rpc.CallOpt) (o0 []string, err error) {
+	err = v23.GetClient(ctx).Call(ctx, c.name, "ListDatabases", nil, []interface{}{&o0}, opts...)
 	return
 }
 
@@ -375,6 +409,10 @@ type AppServerMethods interface {
 	// Exists returns true only if this App exists. Insufficient permissions
 	// cause Exists to return false instead of an error.
 	Exists(*context.T, rpc.ServerCall) (bool, error)
+	// ListDatabases returns a list of all Database names.
+	// TODO(kash): Include the database type (NoSQL vs. SQL).
+	// TODO(sadovsky): Maybe switch to streaming RPC.
+	ListDatabases(*context.T, rpc.ServerCall) ([]string, error)
 }
 
 // AppServerStubMethods is the server interface containing
@@ -426,6 +464,10 @@ func (s implAppServerStub) Exists(ctx *context.T, call rpc.ServerCall) (bool, er
 	return s.impl.Exists(ctx, call)
 }
 
+func (s implAppServerStub) ListDatabases(ctx *context.T, call rpc.ServerCall) ([]string, error) {
+	return s.impl.ListDatabases(ctx, call)
+}
+
 func (s implAppServerStub) Globber() *rpc.GlobState {
 	return s.gs
 }
@@ -464,6 +506,14 @@ var descApp = rpc.InterfaceDesc{
 			Doc:  "// Exists returns true only if this App exists. Insufficient permissions\n// cause Exists to return false instead of an error.",
 			OutArgs: []rpc.ArgDesc{
 				{"", ``}, // bool
+			},
+			Tags: []*vdl.Value{vdl.ValueOf(access.Tag("Read"))},
+		},
+		{
+			Name: "ListDatabases",
+			Doc:  "// ListDatabases returns a list of all Database names.\n// TODO(kash): Include the database type (NoSQL vs. SQL).\n// TODO(sadovsky): Maybe switch to streaming RPC.",
+			OutArgs: []rpc.ArgDesc{
+				{"", ``}, // []string
 			},
 			Tags: []*vdl.Value{vdl.ValueOf(access.Tag("Read"))},
 		},

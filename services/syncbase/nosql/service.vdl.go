@@ -75,28 +75,28 @@ func NewErrBlobNotCommitted(ctx *context.T) error {
 // DatabaseWatcherClientMethods is the client interface
 // containing DatabaseWatcher methods.
 //
-// DatabaseWatcher allows a client to watch for updates in the database.
-// For each watched request, the client will receive a reliable stream of watch
-// events without re-ordering. See watch.GlobWatcher for a detailed explanation
-// of the behavior.
+// DatabaseWatcher allows a client to watch for updates to the database. For
+// each watch request, the client will receive a reliable stream of watch events
+// without re-ordering. See watch.GlobWatcher for a detailed explanation of the
+// behavior.
 // TODO(rogulenko): Currently the only supported watch patterns are
-// 'table/row*'. Consider changing that.
+// "<tableName>/$/<rowPrefix>*". Consider changing that.
 //
 // The watching is done by starting a streaming RPC. The argument to the RPC
 // contains the ResumeMarker that points to a particular place in the database
 // event log. The result stream consists of a never-ending sequence of Change
-// messages (until the call fails or is canceled). Each Change contains the
-// Name field in the form "<tableName>/<rowKey>" and the Value field of the
+// messages (until the call fails or is canceled). Each Change contains the Name
+// field in the form "<tableName>/$/<rowKey>" and the Value field of the
 // StoreChange type. If the client has no access to a row specified in a change,
 // that change is excluded from the result stream.
 //
-// The DatabaseWatcher is designed to be used in the following way:
+// DatabaseWatcher is designed to be used in the following way:
 // 1) begin a read-only batch
-// 2) read all information your app needs
+// 2) read all data your app needs
 // 3) read the ResumeMarker
 // 4) abort the batch
-// 5) start watching changes to the data using the ResumeMarker
-// In this configuration the client doesn't miss any changes.
+// 5) start watching for changes to the data using the ResumeMarker
+// In this configuration the client will not miss any changes to the data.
 type DatabaseWatcherClientMethods interface {
 	// GlobWatcher allows a client to receive updates for changes to objects
 	// that match a pattern.  See the package comments for details.
@@ -131,28 +131,28 @@ func (c implDatabaseWatcherClientStub) GetResumeMarker(ctx *context.T, opts ...r
 // DatabaseWatcherServerMethods is the interface a server writer
 // implements for DatabaseWatcher.
 //
-// DatabaseWatcher allows a client to watch for updates in the database.
-// For each watched request, the client will receive a reliable stream of watch
-// events without re-ordering. See watch.GlobWatcher for a detailed explanation
-// of the behavior.
+// DatabaseWatcher allows a client to watch for updates to the database. For
+// each watch request, the client will receive a reliable stream of watch events
+// without re-ordering. See watch.GlobWatcher for a detailed explanation of the
+// behavior.
 // TODO(rogulenko): Currently the only supported watch patterns are
-// 'table/row*'. Consider changing that.
+// "<tableName>/$/<rowPrefix>*". Consider changing that.
 //
 // The watching is done by starting a streaming RPC. The argument to the RPC
 // contains the ResumeMarker that points to a particular place in the database
 // event log. The result stream consists of a never-ending sequence of Change
-// messages (until the call fails or is canceled). Each Change contains the
-// Name field in the form "<tableName>/<rowKey>" and the Value field of the
+// messages (until the call fails or is canceled). Each Change contains the Name
+// field in the form "<tableName>/$/<rowKey>" and the Value field of the
 // StoreChange type. If the client has no access to a row specified in a change,
 // that change is excluded from the result stream.
 //
-// The DatabaseWatcher is designed to be used in the following way:
+// DatabaseWatcher is designed to be used in the following way:
 // 1) begin a read-only batch
-// 2) read all information your app needs
+// 2) read all data your app needs
 // 3) read the ResumeMarker
 // 4) abort the batch
-// 5) start watching changes to the data using the ResumeMarker
-// In this configuration the client doesn't miss any changes.
+// 5) start watching for changes to the data using the ResumeMarker
+// In this configuration the client will not miss any changes to the data.
 type DatabaseWatcherServerMethods interface {
 	// GlobWatcher allows a client to receive updates for changes to objects
 	// that match a pattern.  See the package comments for details.
@@ -225,7 +225,7 @@ var DatabaseWatcherDesc rpc.InterfaceDesc = descDatabaseWatcher
 var descDatabaseWatcher = rpc.InterfaceDesc{
 	Name:    "DatabaseWatcher",
 	PkgPath: "v.io/v23/services/syncbase/nosql",
-	Doc:     "// DatabaseWatcher allows a client to watch for updates in the database.\n// For each watched request, the client will receive a reliable stream of watch\n// events without re-ordering. See watch.GlobWatcher for a detailed explanation\n// of the behavior.\n// TODO(rogulenko): Currently the only supported watch patterns are\n// 'table/row*'. Consider changing that.\n//\n// The watching is done by starting a streaming RPC. The argument to the RPC\n// contains the ResumeMarker that points to a particular place in the database\n// event log. The result stream consists of a never-ending sequence of Change\n// messages (until the call fails or is canceled). Each Change contains the\n// Name field in the form \"<tableName>/<rowKey>\" and the Value field of the\n// StoreChange type. If the client has no access to a row specified in a change,\n// that change is excluded from the result stream.\n//\n// The DatabaseWatcher is designed to be used in the following way:\n// 1) begin a read-only batch\n// 2) read all information your app needs\n// 3) read the ResumeMarker\n// 4) abort the batch\n// 5) start watching changes to the data using the ResumeMarker\n// In this configuration the client doesn't miss any changes.",
+	Doc:     "// DatabaseWatcher allows a client to watch for updates to the database. For\n// each watch request, the client will receive a reliable stream of watch events\n// without re-ordering. See watch.GlobWatcher for a detailed explanation of the\n// behavior.\n// TODO(rogulenko): Currently the only supported watch patterns are\n// \"<tableName>/$/<rowPrefix>*\". Consider changing that.\n//\n// The watching is done by starting a streaming RPC. The argument to the RPC\n// contains the ResumeMarker that points to a particular place in the database\n// event log. The result stream consists of a never-ending sequence of Change\n// messages (until the call fails or is canceled). Each Change contains the Name\n// field in the form \"<tableName>/$/<rowKey>\" and the Value field of the\n// StoreChange type. If the client has no access to a row specified in a change,\n// that change is excluded from the result stream.\n//\n// DatabaseWatcher is designed to be used in the following way:\n// 1) begin a read-only batch\n// 2) read all data your app needs\n// 3) read the ResumeMarker\n// 4) abort the batch\n// 5) start watching for changes to the data using the ResumeMarker\n// In this configuration the client will not miss any changes to the data.",
 	Embeds: []rpc.EmbedDesc{
 		{"GlobWatcher", "v.io/v23/services/watch", "// GlobWatcher allows a client to receive updates for changes to objects\n// that match a pattern.  See the package comments for details."},
 	},
@@ -600,14 +600,16 @@ var descSyncGroupManager = rpc.InterfaceDesc{
 // containing BlobManager methods.
 //
 // BlobManager is the interface for blob operations.
+//
+// Description of API for resumable blob creation (append-only):
+// - Up until commit, a BlobRef may be used with PutBlob, GetBlobSize,
+//   DeleteBlob, and CommitBlob. Blob creation may be resumed by obtaining the
+//   current blob size via GetBlobSize and appending to the blob via PutBlob.
+// - After commit, a blob is immutable, at which point PutBlob and CommitBlob
+//   may no longer be used.
+// - All other methods (GetBlob, FetchBlob, PinBlob, etc.) may only be used
+//   after commit.
 type BlobManagerClientMethods interface {
-	// API for resumable blob creation (append-only). After commit, a blob
-	// is immutable. Before commit, the BlobRef can be used with PutBlob,
-	// GetBlobSize, DeleteBlob, and CommitBlob. After commit, PutBlob and
-	// CommitBlob can no longer be used. Blob creation can be resumed by
-	// obtaining the current blob size with GetBlobSize and appending to the
-	// blob via PutBlob.
-	//
 	// CreateBlob returns a BlobRef for a newly created blob.
 	CreateBlob(*context.T, ...rpc.CallOpt) (br BlobRef, err error)
 	// PutBlob appends the byte stream to the blob.
@@ -623,7 +625,7 @@ type BlobManagerClientMethods interface {
 	GetBlob(ctx *context.T, br BlobRef, offset int64, opts ...rpc.CallOpt) (BlobManagerGetBlobClientCall, error)
 	// FetchBlob initiates fetching a blob if not locally found. priority
 	// controls the network priority of the blob. Higher priority blobs are
-	// fetched before the lower priority ones. However an ongoing blob
+	// fetched before the lower priority ones. However, an ongoing blob
 	// transfer is not interrupted. Status updates are streamed back to the
 	// client as fetch is in progress.
 	FetchBlob(ctx *context.T, br BlobRef, priority uint64, opts ...rpc.CallOpt) (BlobManagerFetchBlobClientCall, error)
@@ -917,14 +919,16 @@ func (c *implBlobManagerFetchBlobClientCall) Finish() (err error) {
 // implements for BlobManager.
 //
 // BlobManager is the interface for blob operations.
+//
+// Description of API for resumable blob creation (append-only):
+// - Up until commit, a BlobRef may be used with PutBlob, GetBlobSize,
+//   DeleteBlob, and CommitBlob. Blob creation may be resumed by obtaining the
+//   current blob size via GetBlobSize and appending to the blob via PutBlob.
+// - After commit, a blob is immutable, at which point PutBlob and CommitBlob
+//   may no longer be used.
+// - All other methods (GetBlob, FetchBlob, PinBlob, etc.) may only be used
+//   after commit.
 type BlobManagerServerMethods interface {
-	// API for resumable blob creation (append-only). After commit, a blob
-	// is immutable. Before commit, the BlobRef can be used with PutBlob,
-	// GetBlobSize, DeleteBlob, and CommitBlob. After commit, PutBlob and
-	// CommitBlob can no longer be used. Blob creation can be resumed by
-	// obtaining the current blob size with GetBlobSize and appending to the
-	// blob via PutBlob.
-	//
 	// CreateBlob returns a BlobRef for a newly created blob.
 	CreateBlob(*context.T, rpc.ServerCall) (br BlobRef, err error)
 	// PutBlob appends the byte stream to the blob.
@@ -940,7 +944,7 @@ type BlobManagerServerMethods interface {
 	GetBlob(ctx *context.T, call BlobManagerGetBlobServerCall, br BlobRef, offset int64) error
 	// FetchBlob initiates fetching a blob if not locally found. priority
 	// controls the network priority of the blob. Higher priority blobs are
-	// fetched before the lower priority ones. However an ongoing blob
+	// fetched before the lower priority ones. However, an ongoing blob
 	// transfer is not interrupted. Status updates are streamed back to the
 	// client as fetch is in progress.
 	FetchBlob(ctx *context.T, call BlobManagerFetchBlobServerCall, br BlobRef, priority uint64) error
@@ -958,13 +962,6 @@ type BlobManagerServerMethods interface {
 // The only difference between this interface and BlobManagerServerMethods
 // is the streaming methods.
 type BlobManagerServerStubMethods interface {
-	// API for resumable blob creation (append-only). After commit, a blob
-	// is immutable. Before commit, the BlobRef can be used with PutBlob,
-	// GetBlobSize, DeleteBlob, and CommitBlob. After commit, PutBlob and
-	// CommitBlob can no longer be used. Blob creation can be resumed by
-	// obtaining the current blob size with GetBlobSize and appending to the
-	// blob via PutBlob.
-	//
 	// CreateBlob returns a BlobRef for a newly created blob.
 	CreateBlob(*context.T, rpc.ServerCall) (br BlobRef, err error)
 	// PutBlob appends the byte stream to the blob.
@@ -980,7 +977,7 @@ type BlobManagerServerStubMethods interface {
 	GetBlob(ctx *context.T, call *BlobManagerGetBlobServerCallStub, br BlobRef, offset int64) error
 	// FetchBlob initiates fetching a blob if not locally found. priority
 	// controls the network priority of the blob. Higher priority blobs are
-	// fetched before the lower priority ones. However an ongoing blob
+	// fetched before the lower priority ones. However, an ongoing blob
 	// transfer is not interrupted. Status updates are streamed back to the
 	// client as fetch is in progress.
 	FetchBlob(ctx *context.T, call *BlobManagerFetchBlobServerCallStub, br BlobRef, priority uint64) error
@@ -1077,11 +1074,11 @@ var BlobManagerDesc rpc.InterfaceDesc = descBlobManager
 var descBlobManager = rpc.InterfaceDesc{
 	Name:    "BlobManager",
 	PkgPath: "v.io/v23/services/syncbase/nosql",
-	Doc:     "// BlobManager is the interface for blob operations.",
+	Doc:     "// BlobManager is the interface for blob operations.\n//\n// Description of API for resumable blob creation (append-only):\n// - Up until commit, a BlobRef may be used with PutBlob, GetBlobSize,\n//   DeleteBlob, and CommitBlob. Blob creation may be resumed by obtaining the\n//   current blob size via GetBlobSize and appending to the blob via PutBlob.\n// - After commit, a blob is immutable, at which point PutBlob and CommitBlob\n//   may no longer be used.\n// - All other methods (GetBlob, FetchBlob, PinBlob, etc.) may only be used\n//   after commit.",
 	Methods: []rpc.MethodDesc{
 		{
 			Name: "CreateBlob",
-			Doc:  "// API for resumable blob creation (append-only). After commit, a blob\n// is immutable. Before commit, the BlobRef can be used with PutBlob,\n// GetBlobSize, DeleteBlob, and CommitBlob. After commit, PutBlob and\n// CommitBlob can no longer be used. Blob creation can be resumed by\n// obtaining the current blob size with GetBlobSize and appending to the\n// blob via PutBlob.\n//\n// CreateBlob returns a BlobRef for a newly created blob.",
+			Doc:  "// CreateBlob returns a BlobRef for a newly created blob.",
 			OutArgs: []rpc.ArgDesc{
 				{"br", ``}, // BlobRef
 			},
@@ -1133,7 +1130,7 @@ var descBlobManager = rpc.InterfaceDesc{
 		},
 		{
 			Name: "FetchBlob",
-			Doc:  "// FetchBlob initiates fetching a blob if not locally found. priority\n// controls the network priority of the blob. Higher priority blobs are\n// fetched before the lower priority ones. However an ongoing blob\n// transfer is not interrupted. Status updates are streamed back to the\n// client as fetch is in progress.",
+			Doc:  "// FetchBlob initiates fetching a blob if not locally found. priority\n// controls the network priority of the blob. Higher priority blobs are\n// fetched before the lower priority ones. However, an ongoing blob\n// transfer is not interrupted. Status updates are streamed back to the\n// client as fetch is in progress.",
 			InArgs: []rpc.ArgDesc{
 				{"br", ``},       // BlobRef
 				{"priority", ``}, // uint64
@@ -1858,33 +1855,42 @@ type DatabaseClientMethods interface {
 	//    GetPermissions() (perms access.Permissions, version string, err error) {Blue}
 	//  }
 	permissions.ObjectClientMethods
-	// DatabaseWatcher allows a client to watch for updates in the database.
-	// For each watched request, the client will receive a reliable stream of watch
-	// events without re-ordering. See watch.GlobWatcher for a detailed explanation
-	// of the behavior.
+	// DatabaseWatcher allows a client to watch for updates to the database. For
+	// each watch request, the client will receive a reliable stream of watch events
+	// without re-ordering. See watch.GlobWatcher for a detailed explanation of the
+	// behavior.
 	// TODO(rogulenko): Currently the only supported watch patterns are
-	// 'table/row*'. Consider changing that.
+	// "<tableName>/$/<rowPrefix>*". Consider changing that.
 	//
 	// The watching is done by starting a streaming RPC. The argument to the RPC
 	// contains the ResumeMarker that points to a particular place in the database
 	// event log. The result stream consists of a never-ending sequence of Change
-	// messages (until the call fails or is canceled). Each Change contains the
-	// Name field in the form "<tableName>/<rowKey>" and the Value field of the
+	// messages (until the call fails or is canceled). Each Change contains the Name
+	// field in the form "<tableName>/$/<rowKey>" and the Value field of the
 	// StoreChange type. If the client has no access to a row specified in a change,
 	// that change is excluded from the result stream.
 	//
-	// The DatabaseWatcher is designed to be used in the following way:
+	// DatabaseWatcher is designed to be used in the following way:
 	// 1) begin a read-only batch
-	// 2) read all information your app needs
+	// 2) read all data your app needs
 	// 3) read the ResumeMarker
 	// 4) abort the batch
-	// 5) start watching changes to the data using the ResumeMarker
-	// In this configuration the client doesn't miss any changes.
+	// 5) start watching for changes to the data using the ResumeMarker
+	// In this configuration the client will not miss any changes to the data.
 	DatabaseWatcherClientMethods
 	// SyncGroupManager is the interface for SyncGroup operations.
 	// TODO(hpucha): Add blessings to create/join and add a refresh method.
 	SyncGroupManagerClientMethods
 	// BlobManager is the interface for blob operations.
+	//
+	// Description of API for resumable blob creation (append-only):
+	// - Up until commit, a BlobRef may be used with PutBlob, GetBlobSize,
+	//   DeleteBlob, and CommitBlob. Blob creation may be resumed by obtaining the
+	//   current blob size via GetBlobSize and appending to the blob via PutBlob.
+	// - After commit, a blob is immutable, at which point PutBlob and CommitBlob
+	//   may no longer be used.
+	// - All other methods (GetBlob, FetchBlob, PinBlob, etc.) may only be used
+	//   after commit.
 	BlobManagerClientMethods
 	// SchemaManager implements the API for managing schema metadata attached
 	// to a Database.
@@ -1903,6 +1909,9 @@ type DatabaseClientMethods interface {
 	// TODO(ivanpi): Exists may fail with an error if higher levels of hierarchy
 	// do not exist.
 	Exists(ctx *context.T, schemaVersion int32, opts ...rpc.CallOpt) (bool, error)
+	// ListTables returns a list of all Table names.
+	// TODO(sadovsky): Maybe switch to streaming RPC.
+	ListTables(*context.T, ...rpc.CallOpt) ([]string, error)
 	// Exec executes a syncQL query and returns all results as specified by in the
 	// query's select clause. Concurrency semantics are documented in model.go.
 	Exec(ctx *context.T, schemaVersion int32, query string, opts ...rpc.CallOpt) (DatabaseExecClientCall, error)
@@ -1910,7 +1919,7 @@ type DatabaseClientMethods interface {
 	// Database handle bound to this batch. If this Database is already bound to a
 	// batch, BeginBatch() will fail with ErrBoundToBatch. Concurrency semantics
 	// are documented in model.go.
-	// TODO(sadovsky): make BatchOptions optional
+	// TODO(sadovsky): Maybe make BatchOptions optional.
 	BeginBatch(ctx *context.T, schemaVersion int32, bo BatchOptions, opts ...rpc.CallOpt) (string, error)
 	// Commit persists the pending changes to the database.
 	// If this Database is not bound to a batch, Commit() will fail with
@@ -1958,6 +1967,11 @@ func (c implDatabaseClientStub) Destroy(ctx *context.T, i0 int32, opts ...rpc.Ca
 
 func (c implDatabaseClientStub) Exists(ctx *context.T, i0 int32, opts ...rpc.CallOpt) (o0 bool, err error) {
 	err = v23.GetClient(ctx).Call(ctx, c.name, "Exists", []interface{}{i0}, []interface{}{&o0}, opts...)
+	return
+}
+
+func (c implDatabaseClientStub) ListTables(ctx *context.T, opts ...rpc.CallOpt) (o0 []string, err error) {
+	err = v23.GetClient(ctx).Call(ctx, c.name, "ListTables", nil, []interface{}{&o0}, opts...)
 	return
 }
 
@@ -2109,33 +2123,42 @@ type DatabaseServerMethods interface {
 	//    GetPermissions() (perms access.Permissions, version string, err error) {Blue}
 	//  }
 	permissions.ObjectServerMethods
-	// DatabaseWatcher allows a client to watch for updates in the database.
-	// For each watched request, the client will receive a reliable stream of watch
-	// events without re-ordering. See watch.GlobWatcher for a detailed explanation
-	// of the behavior.
+	// DatabaseWatcher allows a client to watch for updates to the database. For
+	// each watch request, the client will receive a reliable stream of watch events
+	// without re-ordering. See watch.GlobWatcher for a detailed explanation of the
+	// behavior.
 	// TODO(rogulenko): Currently the only supported watch patterns are
-	// 'table/row*'. Consider changing that.
+	// "<tableName>/$/<rowPrefix>*". Consider changing that.
 	//
 	// The watching is done by starting a streaming RPC. The argument to the RPC
 	// contains the ResumeMarker that points to a particular place in the database
 	// event log. The result stream consists of a never-ending sequence of Change
-	// messages (until the call fails or is canceled). Each Change contains the
-	// Name field in the form "<tableName>/<rowKey>" and the Value field of the
+	// messages (until the call fails or is canceled). Each Change contains the Name
+	// field in the form "<tableName>/$/<rowKey>" and the Value field of the
 	// StoreChange type. If the client has no access to a row specified in a change,
 	// that change is excluded from the result stream.
 	//
-	// The DatabaseWatcher is designed to be used in the following way:
+	// DatabaseWatcher is designed to be used in the following way:
 	// 1) begin a read-only batch
-	// 2) read all information your app needs
+	// 2) read all data your app needs
 	// 3) read the ResumeMarker
 	// 4) abort the batch
-	// 5) start watching changes to the data using the ResumeMarker
-	// In this configuration the client doesn't miss any changes.
+	// 5) start watching for changes to the data using the ResumeMarker
+	// In this configuration the client will not miss any changes to the data.
 	DatabaseWatcherServerMethods
 	// SyncGroupManager is the interface for SyncGroup operations.
 	// TODO(hpucha): Add blessings to create/join and add a refresh method.
 	SyncGroupManagerServerMethods
 	// BlobManager is the interface for blob operations.
+	//
+	// Description of API for resumable blob creation (append-only):
+	// - Up until commit, a BlobRef may be used with PutBlob, GetBlobSize,
+	//   DeleteBlob, and CommitBlob. Blob creation may be resumed by obtaining the
+	//   current blob size via GetBlobSize and appending to the blob via PutBlob.
+	// - After commit, a blob is immutable, at which point PutBlob and CommitBlob
+	//   may no longer be used.
+	// - All other methods (GetBlob, FetchBlob, PinBlob, etc.) may only be used
+	//   after commit.
 	BlobManagerServerMethods
 	// SchemaManager implements the API for managing schema metadata attached
 	// to a Database.
@@ -2154,6 +2177,9 @@ type DatabaseServerMethods interface {
 	// TODO(ivanpi): Exists may fail with an error if higher levels of hierarchy
 	// do not exist.
 	Exists(ctx *context.T, call rpc.ServerCall, schemaVersion int32) (bool, error)
+	// ListTables returns a list of all Table names.
+	// TODO(sadovsky): Maybe switch to streaming RPC.
+	ListTables(*context.T, rpc.ServerCall) ([]string, error)
 	// Exec executes a syncQL query and returns all results as specified by in the
 	// query's select clause. Concurrency semantics are documented in model.go.
 	Exec(ctx *context.T, call DatabaseExecServerCall, schemaVersion int32, query string) error
@@ -2161,7 +2187,7 @@ type DatabaseServerMethods interface {
 	// Database handle bound to this batch. If this Database is already bound to a
 	// batch, BeginBatch() will fail with ErrBoundToBatch. Concurrency semantics
 	// are documented in model.go.
-	// TODO(sadovsky): make BatchOptions optional
+	// TODO(sadovsky): Maybe make BatchOptions optional.
 	BeginBatch(ctx *context.T, call rpc.ServerCall, schemaVersion int32, bo BatchOptions) (string, error)
 	// Commit persists the pending changes to the database.
 	// If this Database is not bound to a batch, Commit() will fail with
@@ -2225,33 +2251,42 @@ type DatabaseServerStubMethods interface {
 	//    GetPermissions() (perms access.Permissions, version string, err error) {Blue}
 	//  }
 	permissions.ObjectServerStubMethods
-	// DatabaseWatcher allows a client to watch for updates in the database.
-	// For each watched request, the client will receive a reliable stream of watch
-	// events without re-ordering. See watch.GlobWatcher for a detailed explanation
-	// of the behavior.
+	// DatabaseWatcher allows a client to watch for updates to the database. For
+	// each watch request, the client will receive a reliable stream of watch events
+	// without re-ordering. See watch.GlobWatcher for a detailed explanation of the
+	// behavior.
 	// TODO(rogulenko): Currently the only supported watch patterns are
-	// 'table/row*'. Consider changing that.
+	// "<tableName>/$/<rowPrefix>*". Consider changing that.
 	//
 	// The watching is done by starting a streaming RPC. The argument to the RPC
 	// contains the ResumeMarker that points to a particular place in the database
 	// event log. The result stream consists of a never-ending sequence of Change
-	// messages (until the call fails or is canceled). Each Change contains the
-	// Name field in the form "<tableName>/<rowKey>" and the Value field of the
+	// messages (until the call fails or is canceled). Each Change contains the Name
+	// field in the form "<tableName>/$/<rowKey>" and the Value field of the
 	// StoreChange type. If the client has no access to a row specified in a change,
 	// that change is excluded from the result stream.
 	//
-	// The DatabaseWatcher is designed to be used in the following way:
+	// DatabaseWatcher is designed to be used in the following way:
 	// 1) begin a read-only batch
-	// 2) read all information your app needs
+	// 2) read all data your app needs
 	// 3) read the ResumeMarker
 	// 4) abort the batch
-	// 5) start watching changes to the data using the ResumeMarker
-	// In this configuration the client doesn't miss any changes.
+	// 5) start watching for changes to the data using the ResumeMarker
+	// In this configuration the client will not miss any changes to the data.
 	DatabaseWatcherServerStubMethods
 	// SyncGroupManager is the interface for SyncGroup operations.
 	// TODO(hpucha): Add blessings to create/join and add a refresh method.
 	SyncGroupManagerServerStubMethods
 	// BlobManager is the interface for blob operations.
+	//
+	// Description of API for resumable blob creation (append-only):
+	// - Up until commit, a BlobRef may be used with PutBlob, GetBlobSize,
+	//   DeleteBlob, and CommitBlob. Blob creation may be resumed by obtaining the
+	//   current blob size via GetBlobSize and appending to the blob via PutBlob.
+	// - After commit, a blob is immutable, at which point PutBlob and CommitBlob
+	//   may no longer be used.
+	// - All other methods (GetBlob, FetchBlob, PinBlob, etc.) may only be used
+	//   after commit.
 	BlobManagerServerStubMethods
 	// SchemaManager implements the API for managing schema metadata attached
 	// to a Database.
@@ -2270,6 +2305,9 @@ type DatabaseServerStubMethods interface {
 	// TODO(ivanpi): Exists may fail with an error if higher levels of hierarchy
 	// do not exist.
 	Exists(ctx *context.T, call rpc.ServerCall, schemaVersion int32) (bool, error)
+	// ListTables returns a list of all Table names.
+	// TODO(sadovsky): Maybe switch to streaming RPC.
+	ListTables(*context.T, rpc.ServerCall) ([]string, error)
 	// Exec executes a syncQL query and returns all results as specified by in the
 	// query's select clause. Concurrency semantics are documented in model.go.
 	Exec(ctx *context.T, call *DatabaseExecServerCallStub, schemaVersion int32, query string) error
@@ -2277,7 +2315,7 @@ type DatabaseServerStubMethods interface {
 	// Database handle bound to this batch. If this Database is already bound to a
 	// batch, BeginBatch() will fail with ErrBoundToBatch. Concurrency semantics
 	// are documented in model.go.
-	// TODO(sadovsky): make BatchOptions optional
+	// TODO(sadovsky): Maybe make BatchOptions optional.
 	BeginBatch(ctx *context.T, call rpc.ServerCall, schemaVersion int32, bo BatchOptions) (string, error)
 	// Commit persists the pending changes to the database.
 	// If this Database is not bound to a batch, Commit() will fail with
@@ -2344,6 +2382,10 @@ func (s implDatabaseServerStub) Exists(ctx *context.T, call rpc.ServerCall, i0 i
 	return s.impl.Exists(ctx, call, i0)
 }
 
+func (s implDatabaseServerStub) ListTables(ctx *context.T, call rpc.ServerCall) ([]string, error) {
+	return s.impl.ListTables(ctx, call)
+}
+
 func (s implDatabaseServerStub) Exec(ctx *context.T, call *DatabaseExecServerCallStub, i0 int32, i1 string) error {
 	return s.impl.Exec(ctx, call, i0, i1)
 }
@@ -2378,9 +2420,9 @@ var descDatabase = rpc.InterfaceDesc{
 	Doc:     "// Database represents a collection of Tables. Batches, queries, sync, watch,\n// etc. all operate at the Database level.\n// Database.Glob operates over Table names.\n// Param schemaVersion is the version number that the client expects the database\n// to be at. To disable schema version checking, pass -1.\n//\n// TODO(sadovsky): Add Watch method.",
 	Embeds: []rpc.EmbedDesc{
 		{"Object", "v.io/v23/services/permissions", "// Object provides access control for Vanadium objects.\n//\n// Vanadium services implementing dynamic access control would typically embed\n// this interface and tag additional methods defined by the service with one of\n// Admin, Read, Write, Resolve etc. For example, the VDL definition of the\n// object would be:\n//\n//   package mypackage\n//\n//   import \"v.io/v23/security/access\"\n//   import \"v.io/v23/services/permissions\"\n//\n//   type MyObject interface {\n//     permissions.Object\n//     MyRead() (string, error) {access.Read}\n//     MyWrite(string) error    {access.Write}\n//   }\n//\n// If the set of pre-defined tags is insufficient, services may define their\n// own tag type and annotate all methods with this new type.\n//\n// Instead of embedding this Object interface, define SetPermissions and\n// GetPermissions in their own interface. Authorization policies will typically\n// respect annotations of a single type. For example, the VDL definition of an\n// object would be:\n//\n//  package mypackage\n//\n//  import \"v.io/v23/security/access\"\n//\n//  type MyTag string\n//\n//  const (\n//    Blue = MyTag(\"Blue\")\n//    Red  = MyTag(\"Red\")\n//  )\n//\n//  type MyObject interface {\n//    MyMethod() (string, error) {Blue}\n//\n//    // Allow clients to change access via the access.Object interface:\n//    SetPermissions(perms access.Permissions, version string) error         {Red}\n//    GetPermissions() (perms access.Permissions, version string, err error) {Blue}\n//  }"},
-		{"DatabaseWatcher", "v.io/v23/services/syncbase/nosql", "// DatabaseWatcher allows a client to watch for updates in the database.\n// For each watched request, the client will receive a reliable stream of watch\n// events without re-ordering. See watch.GlobWatcher for a detailed explanation\n// of the behavior.\n// TODO(rogulenko): Currently the only supported watch patterns are\n// 'table/row*'. Consider changing that.\n//\n// The watching is done by starting a streaming RPC. The argument to the RPC\n// contains the ResumeMarker that points to a particular place in the database\n// event log. The result stream consists of a never-ending sequence of Change\n// messages (until the call fails or is canceled). Each Change contains the\n// Name field in the form \"<tableName>/<rowKey>\" and the Value field of the\n// StoreChange type. If the client has no access to a row specified in a change,\n// that change is excluded from the result stream.\n//\n// The DatabaseWatcher is designed to be used in the following way:\n// 1) begin a read-only batch\n// 2) read all information your app needs\n// 3) read the ResumeMarker\n// 4) abort the batch\n// 5) start watching changes to the data using the ResumeMarker\n// In this configuration the client doesn't miss any changes."},
+		{"DatabaseWatcher", "v.io/v23/services/syncbase/nosql", "// DatabaseWatcher allows a client to watch for updates to the database. For\n// each watch request, the client will receive a reliable stream of watch events\n// without re-ordering. See watch.GlobWatcher for a detailed explanation of the\n// behavior.\n// TODO(rogulenko): Currently the only supported watch patterns are\n// \"<tableName>/$/<rowPrefix>*\". Consider changing that.\n//\n// The watching is done by starting a streaming RPC. The argument to the RPC\n// contains the ResumeMarker that points to a particular place in the database\n// event log. The result stream consists of a never-ending sequence of Change\n// messages (until the call fails or is canceled). Each Change contains the Name\n// field in the form \"<tableName>/$/<rowKey>\" and the Value field of the\n// StoreChange type. If the client has no access to a row specified in a change,\n// that change is excluded from the result stream.\n//\n// DatabaseWatcher is designed to be used in the following way:\n// 1) begin a read-only batch\n// 2) read all data your app needs\n// 3) read the ResumeMarker\n// 4) abort the batch\n// 5) start watching for changes to the data using the ResumeMarker\n// In this configuration the client will not miss any changes to the data."},
 		{"SyncGroupManager", "v.io/v23/services/syncbase/nosql", "// SyncGroupManager is the interface for SyncGroup operations.\n// TODO(hpucha): Add blessings to create/join and add a refresh method."},
-		{"BlobManager", "v.io/v23/services/syncbase/nosql", "// BlobManager is the interface for blob operations."},
+		{"BlobManager", "v.io/v23/services/syncbase/nosql", "// BlobManager is the interface for blob operations.\n//\n// Description of API for resumable blob creation (append-only):\n// - Up until commit, a BlobRef may be used with PutBlob, GetBlobSize,\n//   DeleteBlob, and CommitBlob. Blob creation may be resumed by obtaining the\n//   current blob size via GetBlobSize and appending to the blob via PutBlob.\n// - After commit, a blob is immutable, at which point PutBlob and CommitBlob\n//   may no longer be used.\n// - All other methods (GetBlob, FetchBlob, PinBlob, etc.) may only be used\n//   after commit."},
 		{"SchemaManager", "v.io/v23/services/syncbase/nosql", "// SchemaManager implements the API for managing schema metadata attached\n// to a Database."},
 		{"ConflictManager", "v.io/v23/services/syncbase/nosql", "// ConflictManager interface provides all the methods necessary to handle\n// conflict resolution for a given database."},
 	},
@@ -2414,6 +2456,14 @@ var descDatabase = rpc.InterfaceDesc{
 			Tags: []*vdl.Value{vdl.ValueOf(access.Tag("Read"))},
 		},
 		{
+			Name: "ListTables",
+			Doc:  "// ListTables returns a list of all Table names.\n// TODO(sadovsky): Maybe switch to streaming RPC.",
+			OutArgs: []rpc.ArgDesc{
+				{"", ``}, // []string
+			},
+			Tags: []*vdl.Value{vdl.ValueOf(access.Tag("Read"))},
+		},
+		{
 			Name: "Exec",
 			Doc:  "// Exec executes a syncQL query and returns all results as specified by in the\n// query's select clause. Concurrency semantics are documented in model.go.",
 			InArgs: []rpc.ArgDesc{
@@ -2424,7 +2474,7 @@ var descDatabase = rpc.InterfaceDesc{
 		},
 		{
 			Name: "BeginBatch",
-			Doc:  "// BeginBatch creates a new batch. It returns an App-relative name for a\n// Database handle bound to this batch. If this Database is already bound to a\n// batch, BeginBatch() will fail with ErrBoundToBatch. Concurrency semantics\n// are documented in model.go.\n// TODO(sadovsky): make BatchOptions optional",
+			Doc:  "// BeginBatch creates a new batch. It returns an App-relative name for a\n// Database handle bound to this batch. If this Database is already bound to a\n// batch, BeginBatch() will fail with ErrBoundToBatch. Concurrency semantics\n// are documented in model.go.\n// TODO(sadovsky): Maybe make BatchOptions optional.",
 			InArgs: []rpc.ArgDesc{
 				{"schemaVersion", ``}, // int32
 				{"bo", ``},            // BatchOptions
@@ -2516,7 +2566,8 @@ type TableClientMethods interface {
 	Exists(ctx *context.T, schemaVersion int32, opts ...rpc.CallOpt) (bool, error)
 	// DeleteRange deletes all rows in the given half-open range [start, limit).
 	// If limit is "", all rows with keys >= start are included.
-	// TODO(sadovsky): Delete prefix perms fully covered by the row range?
+	// TODO(sadovsky): Maybe add option to delete prefix perms fully covered by
+	// the row range.
 	DeleteRange(ctx *context.T, schemaVersion int32, start []byte, limit []byte, opts ...rpc.CallOpt) error
 	// Scan returns all rows in the given half-open range [start, limit). If limit
 	// is "", all rows with keys >= start are included. Concurrency semantics are
@@ -2690,7 +2741,8 @@ type TableServerMethods interface {
 	Exists(ctx *context.T, call rpc.ServerCall, schemaVersion int32) (bool, error)
 	// DeleteRange deletes all rows in the given half-open range [start, limit).
 	// If limit is "", all rows with keys >= start are included.
-	// TODO(sadovsky): Delete prefix perms fully covered by the row range?
+	// TODO(sadovsky): Maybe add option to delete prefix perms fully covered by
+	// the row range.
 	DeleteRange(ctx *context.T, call rpc.ServerCall, schemaVersion int32, start []byte, limit []byte) error
 	// Scan returns all rows in the given half-open range [start, limit). If limit
 	// is "", all rows with keys >= start are included. Concurrency semantics are
@@ -2733,7 +2785,8 @@ type TableServerStubMethods interface {
 	Exists(ctx *context.T, call rpc.ServerCall, schemaVersion int32) (bool, error)
 	// DeleteRange deletes all rows in the given half-open range [start, limit).
 	// If limit is "", all rows with keys >= start are included.
-	// TODO(sadovsky): Delete prefix perms fully covered by the row range?
+	// TODO(sadovsky): Maybe add option to delete prefix perms fully covered by
+	// the row range.
 	DeleteRange(ctx *context.T, call rpc.ServerCall, schemaVersion int32, start []byte, limit []byte) error
 	// Scan returns all rows in the given half-open range [start, limit). If limit
 	// is "", all rows with keys >= start are included. Concurrency semantics are
@@ -2867,7 +2920,7 @@ var descTable = rpc.InterfaceDesc{
 		},
 		{
 			Name: "DeleteRange",
-			Doc:  "// DeleteRange deletes all rows in the given half-open range [start, limit).\n// If limit is \"\", all rows with keys >= start are included.\n// TODO(sadovsky): Delete prefix perms fully covered by the row range?",
+			Doc:  "// DeleteRange deletes all rows in the given half-open range [start, limit).\n// If limit is \"\", all rows with keys >= start are included.\n// TODO(sadovsky): Maybe add option to delete prefix perms fully covered by\n// the row range.",
 			InArgs: []rpc.ArgDesc{
 				{"schemaVersion", ``}, // int32
 				{"start", ``},         // []byte

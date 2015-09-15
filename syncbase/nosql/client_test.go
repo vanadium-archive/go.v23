@@ -16,6 +16,7 @@ import (
 	"v.io/v23/syncbase"
 	"v.io/v23/syncbase/nosql"
 	"v.io/v23/syncbase/nosql/query"
+	"v.io/v23/syncbase/util"
 	"v.io/v23/vdl"
 	"v.io/v23/verror"
 	"v.io/v23/vom"
@@ -23,7 +24,6 @@ import (
 	tu "v.io/x/ref/services/syncbase/testutil"
 )
 
-// TODO(sadovsky): Finish writing tests.
 // TODO(rogulenko): Test perms checking for Glob and Exec.
 
 // Tests various Name, FullName, and Key methods.
@@ -35,19 +35,19 @@ func TestNameAndKey(t *testing.T) {
 	if d.Name() != "d" {
 		t.Errorf("Wrong name: %q", d.Name())
 	}
-	if d.FullName() != naming.Join("s", "a", "d") {
+	if d.FullName() != naming.Join("s", "a", util.NameSep, "d") {
 		t.Errorf("Wrong full name: %q", d.FullName())
 	}
 	if tb.Name() != "tb" {
 		t.Errorf("Wrong name: %q", tb.Name())
 	}
-	if tb.FullName() != naming.Join("s", "a", "d", "tb") {
+	if tb.FullName() != naming.Join("s", "a", util.NameSep, "d", util.NameSep, "tb") {
 		t.Errorf("Wrong full name: %q", tb.FullName())
 	}
 	if r.Key() != "r" {
 		t.Errorf("Wrong key: %q", r.Key())
 	}
-	if r.FullName() != naming.Join("s", "a", "d", "tb", "r") {
+	if r.FullName() != naming.Join("s", "a", util.NameSep, "d", util.NameSep, "tb", util.NameSep, "r") {
 		t.Errorf("Wrong full name: %q", r.FullName())
 	}
 }
@@ -60,10 +60,26 @@ func TestDatabaseCreate(t *testing.T) {
 	tu.TestCreate(t, ctx, a)
 }
 
+// Tests name-checking on database creation.
+func TestDatabaseCreateNameValidation(t *testing.T) {
+	ctx, sName, cleanup := tu.SetupOrDie(nil)
+	defer cleanup()
+	a := tu.CreateApp(t, ctx, syncbase.NewService(sName), "a")
+	tu.TestCreateNameValidation(t, ctx, a)
+}
+
+// Tests that Database.Destroy works as expected.
+func TestDatabaseDestroy(t *testing.T) {
+	ctx, sName, cleanup := tu.SetupOrDie(nil)
+	defer cleanup()
+	a := tu.CreateApp(t, ctx, syncbase.NewService(sName), "a")
+	tu.TestDestroy(t, ctx, a)
+}
+
 // Tests that Database.Exec works as expected.
-// Note: More comprehensive client/server tests are in the exec_test
-// directory.  Also, exec is tested in its entirety in
-// v23/syncbase/nosql/internal/query/...
+// Note: The Exec method is tested more thoroughly in exec_test.go.
+// Also, the query package is tested in its entirety in
+// v23/syncbase/nosql/query/...
 func TestExec(t *testing.T) {
 	ctx, sName, cleanup := tu.SetupOrDie(nil)
 	defer cleanup()
@@ -137,14 +153,6 @@ func TestExec(t *testing.T) {
 	tu.CheckExecError(t, ctx, d, "select k, v from foo", query.ErrTableCantAccess.ID)
 }
 
-// Tests that Database.Destroy works as expected.
-func TestDatabaseDestroy(t *testing.T) {
-	ctx, sName, cleanup := tu.SetupOrDie(nil)
-	defer cleanup()
-	a := tu.CreateApp(t, ctx, syncbase.NewService(sName), "a")
-	tu.TestDestroy(t, ctx, a)
-}
-
 // Tests that Database.ListTables works as expected.
 func TestListTables(t *testing.T) {
 	ctx, sName, cleanup := tu.SetupOrDie(nil)
@@ -170,6 +178,15 @@ func TestTableCreate(t *testing.T) {
 	a := tu.CreateApp(t, ctx, syncbase.NewService(sName), "a")
 	d := tu.CreateNoSQLDatabase(t, ctx, a, "d")
 	tu.TestCreate(t, ctx, d)
+}
+
+// Tests name-checking on table creation.
+func TestTableCreateNameValidation(t *testing.T) {
+	ctx, sName, cleanup := tu.SetupOrDie(nil)
+	defer cleanup()
+	a := tu.CreateApp(t, ctx, syncbase.NewService(sName), "a")
+	d := tu.CreateNoSQLDatabase(t, ctx, a, "d")
+	tu.TestCreateNameValidation(t, ctx, d)
 }
 
 // Tests that Table.Destroy works as expected.
@@ -647,6 +664,16 @@ func TestRowMethods(t *testing.T) {
 	if err := r.Get(ctx, &got); verror.ErrorID(err) != verror.ErrNoExist.ID {
 		t.Fatalf("r.Get() should have failed: %v", err)
 	}
+}
+
+// Tests name-checking on row creation.
+func TestRowKeyValidation(t *testing.T) {
+	ctx, sName, cleanup := tu.SetupOrDie(nil)
+	defer cleanup()
+	a := tu.CreateApp(t, ctx, syncbase.NewService(sName), "a")
+	d := tu.CreateNoSQLDatabase(t, ctx, a, "d")
+	tb := tu.CreateTable(t, ctx, d, "tb")
+	tu.TestCreateNameValidation(t, ctx, tb)
 }
 
 // Test permission checking in Row.{Get,Put,Delete} and
