@@ -127,12 +127,6 @@ type Runtime interface {
 	//   supported by the runtime implementation hosting NewEndpoint
 	NewEndpoint(ep string) (naming.Endpoint, error)
 
-	// NewServer creates a new Server instance.
-	//
-	// It accepts at least the following options:
-	// ServesMountTable and ServerBlessings.
-	NewServer(ctx *context.T, opts ...rpc.ServerOpt) (rpc.DeprecatedServer, error)
-
 	// WithNewStreamManager creates a new StreamManager instance and context
 	// with that StreamManager attached.
 	WithNewStreamManager(ctx *context.T) (*context.T, error)
@@ -246,19 +240,6 @@ type Runtime interface {
 //   supported by the runtime implementation hosting NewEndpoint
 func NewEndpoint(ep string) (naming.Endpoint, error) {
 	return initState.currentRuntime().NewEndpoint(ep)
-}
-
-// <DEPRICATED> NewServer creates a new Server instance.
-// This method is deprecated and should not be used.  Use
-// WithNew*Server instead.
-//
-// It accepts at least the following options:
-// ServesMountTable and ServerBlessings.
-//
-// ServerBlessings defaults to v23.GetPrincipal(ctx).BlessingStore().Default().
-// These Blessings are the Server's Blessings for its lifetime.
-func NewServer(ctx *context.T, opts ...rpc.ServerOpt) (rpc.DeprecatedServer, error) {
-	return initState.currentRuntime().NewServer(ctx, opts...)
 }
 
 // WithNewStreamManager creates a new StreamManager instance and context

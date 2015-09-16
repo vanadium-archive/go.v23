@@ -25,9 +25,6 @@ type mockRuntime struct{}
 
 func (*mockRuntime) Init(ctx *context.T) error                      { return nil }
 func (*mockRuntime) NewEndpoint(ep string) (naming.Endpoint, error) { return nil, nil }
-func (*mockRuntime) NewServer(ctx *context.T, opts ...rpc.ServerOpt) (rpc.DeprecatedServer, error) {
-	return nil, nil
-}
 func (*mockRuntime) WithNewStreamManager(ctx *context.T) (*context.T, error) {
 	return nil, nil
 }
