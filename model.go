@@ -190,12 +190,39 @@ type Runtime interface {
 	// attaches it to ctx.
 	ExperimentalWithNewFlowManager(ctx *context.T) (*context.T, flow.Manager, error)
 
-	// WithNewServer creates a new flow.Manager instance and attaches it to ctx,
-	// and creates a new server on that flow.Manager.
+	// WithNewServer creates a new Server instance to serve a service object.
+	//
+	// The server will listen for network connections as specified by the
+	// ListenSpec attached to ctx. Depending on your RuntimeFactory, 'roaming'
+	// support may be enabled. In this mode the server will listen for
+	// changes in the network configuration using a Stream created on the
+	// supplied Publisher and change the set of Endpoints it publishes to
+	// the mount table accordingly.
+	//
+	// The server associates object with name by publishing the address of
+	// this server in the namespace under the supplied name and using
+	// authorizer to authorize access to it. RPCs invoked on the supplied
+	// name will be delivered to methods implemented by the supplied
+	// object.  Reflection is used to match requests to the object's
+	// method set.  As a special-case, if the object implements the
+	// Invoker interface, the Invoker is used to invoke methods directly,
+	// without reflection.  If name is an empty string, no attempt will
+	// made to publish.
+	//
+	// WithNewServer will create a new flow.Manager to back the server
+	// and return a new context with that flow.Manager attached.  This
+	// means that clients who use the returned context will be able to
+	// share connections with the server, enabling bidirectional RPC.
 	WithNewServer(ctx *context.T, name string, object interface{}, auth security.Authorizer, opts ...rpc.ServerOpt) (*context.T, rpc.Server, error)
 
-	// WithNewDispatchingServer creates a new flow.Manager instance and attaches
-	// it to ctx, and creates a new server on that flow.Manager.
+	// WithNewDispatchingServer creates a new Server instance to serve a given dispatcher.
+	//
+	// WithNewDispatchingServer is similar to WithNewServer except it
+	// allows users to specify a dispatcher, which provides control over
+	// which object and authorizer are used for each method call.  RPCs
+	// invoked on the supplied name will be delivered to the supplied
+	// Dispatcher's Lookup method which will returns the object and
+	// security.Authorizer used to serve the actual RPC call.
 	WithNewDispatchingServer(ctx *context.T, name string, disp rpc.Dispatcher, opts ...rpc.ServerOpt) (*context.T, rpc.Server, error)
 }
 

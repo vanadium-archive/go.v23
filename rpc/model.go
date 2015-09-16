@@ -254,12 +254,8 @@ type ProxyStatus struct {
 type ServerState int
 
 const (
-	// ServerInit is the initial state of the server.
-	ServerInit ServerState = iota
-	// ServerActive indicates that the server is 'active' - i.e. its
-	// Listen, Serve, ServeDispatcher, AddName or RemoveName methods
-	// have been called.
-	ServerActive
+	// ServerActive indicates that the server is 'active'.
+	ServerActive ServerState = iota
 	// ServerStopping indicates that the server has been asked to stop and is
 	// in the process of doing so. It may take a while for the server to
 	// complete this process since it will wait for outstanding operations
@@ -272,8 +268,6 @@ const (
 
 func (i ServerState) String() string {
 	switch i {
-	case ServerInit:
-		return "Initialized"
 	case ServerActive:
 		return "Active"
 	case ServerStopping:
