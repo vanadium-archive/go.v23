@@ -3,35 +3,41 @@ pkg syncbase, func AppServer(AppServerMethods) AppServerStub
 pkg syncbase, func NewErrInvalidName(*context.T, string) error
 pkg syncbase, func ServiceClient(string) ServiceClientStub
 pkg syncbase, func ServiceServer(ServiceServerMethods) ServiceServerStub
-pkg syncbase, type AppClientMethods interface { Create, Destroy, Exists, GetPermissions, SetPermissions }
+pkg syncbase, type AppClientMethods interface { Create, Destroy, Exists, GetPermissions, ListDatabases, SetPermissions }
 pkg syncbase, type AppClientMethods interface, Create(*context.T, access.Permissions, ...rpc.CallOpt) error
 pkg syncbase, type AppClientMethods interface, Destroy(*context.T, ...rpc.CallOpt) error
 pkg syncbase, type AppClientMethods interface, Exists(*context.T, ...rpc.CallOpt) (bool, error)
 pkg syncbase, type AppClientMethods interface, GetPermissions(*context.T, ...rpc.CallOpt) (access.Permissions, string, error)
+pkg syncbase, type AppClientMethods interface, ListDatabases(*context.T, ...rpc.CallOpt) ([]string, error)
 pkg syncbase, type AppClientMethods interface, SetPermissions(*context.T, access.Permissions, string, ...rpc.CallOpt) error
-pkg syncbase, type AppClientStub interface { Create, Destroy, Exists, GetPermissions, SetPermissions }
+pkg syncbase, type AppClientStub interface { Create, Destroy, Exists, GetPermissions, ListDatabases, SetPermissions }
 pkg syncbase, type AppClientStub interface, Create(*context.T, access.Permissions, ...rpc.CallOpt) error
 pkg syncbase, type AppClientStub interface, Destroy(*context.T, ...rpc.CallOpt) error
 pkg syncbase, type AppClientStub interface, Exists(*context.T, ...rpc.CallOpt) (bool, error)
 pkg syncbase, type AppClientStub interface, GetPermissions(*context.T, ...rpc.CallOpt) (access.Permissions, string, error)
+pkg syncbase, type AppClientStub interface, ListDatabases(*context.T, ...rpc.CallOpt) ([]string, error)
 pkg syncbase, type AppClientStub interface, SetPermissions(*context.T, access.Permissions, string, ...rpc.CallOpt) error
-pkg syncbase, type AppServerMethods interface { Create, Destroy, Exists, GetPermissions, SetPermissions }
+pkg syncbase, type AppServerMethods interface { Create, Destroy, Exists, GetPermissions, ListDatabases, SetPermissions }
 pkg syncbase, type AppServerMethods interface, Create(*context.T, rpc.ServerCall, access.Permissions) error
 pkg syncbase, type AppServerMethods interface, Destroy(*context.T, rpc.ServerCall) error
 pkg syncbase, type AppServerMethods interface, Exists(*context.T, rpc.ServerCall) (bool, error)
 pkg syncbase, type AppServerMethods interface, GetPermissions(*context.T, rpc.ServerCall) (access.Permissions, string, error)
+pkg syncbase, type AppServerMethods interface, ListDatabases(*context.T, rpc.ServerCall) ([]string, error)
 pkg syncbase, type AppServerMethods interface, SetPermissions(*context.T, rpc.ServerCall, access.Permissions, string) error
 pkg syncbase, type AppServerStub interface, Describe__() []rpc.InterfaceDesc
 pkg syncbase, type AppServerStub interface, unexported methods
 pkg syncbase, type AppServerStubMethods AppServerMethods
-pkg syncbase, type ServiceClientMethods interface { GetPermissions, SetPermissions }
+pkg syncbase, type ServiceClientMethods interface { GetPermissions, ListApps, SetPermissions }
 pkg syncbase, type ServiceClientMethods interface, GetPermissions(*context.T, ...rpc.CallOpt) (access.Permissions, string, error)
+pkg syncbase, type ServiceClientMethods interface, ListApps(*context.T, ...rpc.CallOpt) ([]string, error)
 pkg syncbase, type ServiceClientMethods interface, SetPermissions(*context.T, access.Permissions, string, ...rpc.CallOpt) error
-pkg syncbase, type ServiceClientStub interface { GetPermissions, SetPermissions }
+pkg syncbase, type ServiceClientStub interface { GetPermissions, ListApps, SetPermissions }
 pkg syncbase, type ServiceClientStub interface, GetPermissions(*context.T, ...rpc.CallOpt) (access.Permissions, string, error)
+pkg syncbase, type ServiceClientStub interface, ListApps(*context.T, ...rpc.CallOpt) ([]string, error)
 pkg syncbase, type ServiceClientStub interface, SetPermissions(*context.T, access.Permissions, string, ...rpc.CallOpt) error
-pkg syncbase, type ServiceServerMethods interface { GetPermissions, SetPermissions }
+pkg syncbase, type ServiceServerMethods interface { GetPermissions, ListApps, SetPermissions }
 pkg syncbase, type ServiceServerMethods interface, GetPermissions(*context.T, rpc.ServerCall) (access.Permissions, string, error)
+pkg syncbase, type ServiceServerMethods interface, ListApps(*context.T, rpc.ServerCall) ([]string, error)
 pkg syncbase, type ServiceServerMethods interface, SetPermissions(*context.T, rpc.ServerCall, access.Permissions, string) error
 pkg syncbase, type ServiceServerStub interface, Describe__() []rpc.InterfaceDesc
 pkg syncbase, type ServiceServerStub interface, unexported methods

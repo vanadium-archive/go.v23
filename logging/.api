@@ -11,7 +11,7 @@ pkg logging, type InfoLog interface, Info(...interface{})
 pkg logging, type InfoLog interface, InfoDepth(int, ...interface{})
 pkg logging, type InfoLog interface, InfoStack(bool)
 pkg logging, type InfoLog interface, Infof(string, ...interface{})
-pkg logging, type Logger interface { Error, ErrorDepth, Errorf, Fatal, FatalDepth, Fatalf, FlushLog, Info, InfoDepth, InfoStack, Infof, Panic, PanicDepth, Panicf, V, VI }
+pkg logging, type Logger interface { Error, ErrorDepth, Errorf, Fatal, FatalDepth, Fatalf, FlushLog, Info, InfoDepth, InfoStack, Infof, Panic, PanicDepth, Panicf, V, VDepth, VI, VIDepth }
 pkg logging, type Logger interface, Error(...interface{})
 pkg logging, type Logger interface, ErrorDepth(int, ...interface{})
 pkg logging, type Logger interface, Errorf(string, ...interface{})
@@ -27,12 +27,16 @@ pkg logging, type Logger interface, Panic(...interface{})
 pkg logging, type Logger interface, PanicDepth(int, ...interface{})
 pkg logging, type Logger interface, Panicf(string, ...interface{})
 pkg logging, type Logger interface, V(int) bool
+pkg logging, type Logger interface, VDepth(int, int) bool
 pkg logging, type Logger interface, VI(int) interface {  Info(args ...interface{});; Infof(format string, args ...interface{});; InfoDepth(depth int, args ...interface{});; InfoStack(all bool);}
+pkg logging, type Logger interface, VIDepth(int, int) interface {  Info(args ...interface{});; Infof(format string, args ...interface{});; InfoDepth(depth int, args ...interface{});; InfoStack(all bool);}
 pkg logging, type PanicLog interface { Panic, PanicDepth, Panicf }
 pkg logging, type PanicLog interface, Panic(...interface{})
 pkg logging, type PanicLog interface, PanicDepth(int, ...interface{})
 pkg logging, type PanicLog interface, Panicf(string, ...interface{})
-pkg logging, type Verbosity interface { V, VI }
+pkg logging, type Verbosity interface { V, VDepth, VI, VIDepth }
 pkg logging, type Verbosity interface, V(int) bool
+pkg logging, type Verbosity interface, VDepth(int, int) bool
 pkg logging, type Verbosity interface, VI(int) interface {  Info(args ...interface{});; Infof(format string, args ...interface{});; InfoDepth(depth int, args ...interface{});; InfoStack(all bool);}
+pkg logging, type Verbosity interface, VIDepth(int, int) interface {  Info(args ...interface{});; Infof(format string, args ...interface{});; InfoDepth(depth int, args ...interface{});; InfoStack(all bool);}
 pkg logging, var Discard Logger

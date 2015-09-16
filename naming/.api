@@ -38,6 +38,7 @@ pkg naming, method (GlobReplyError) Interface() interface{}
 pkg naming, method (GlobReplyError) Name() string
 pkg naming, method (IsLeaf) NSOpt()
 pkg naming, method (ReplaceMount) NSOpt()
+pkg naming, method (RouteOpt) EndpointOpt()
 pkg naming, method (RoutingID) EndpointOpt()
 pkg naming, method (RoutingID) IsReserved() bool
 pkg naming, method (RoutingID) String() string
@@ -48,11 +49,12 @@ pkg naming, type BlessingOpt string
 pkg naming, type CacheCtl interface { CacheCtl }
 pkg naming, type CacheCtl interface, CacheCtl()
 pkg naming, type DisableCache bool
-pkg naming, type Endpoint interface { Addr, BlessingNames, Name, Network, RoutingID, ServesLeaf, ServesMountTable, String, VersionedString }
+pkg naming, type Endpoint interface { Addr, BlessingNames, Name, Network, Routes, RoutingID, ServesLeaf, ServesMountTable, String, VersionedString }
 pkg naming, type Endpoint interface, Addr() net.Addr
 pkg naming, type Endpoint interface, BlessingNames() []string
 pkg naming, type Endpoint interface, Name() string
 pkg naming, type Endpoint interface, Network() string
+pkg naming, type Endpoint interface, Routes() []string
 pkg naming, type Endpoint interface, RoutingID() RoutingID
 pkg naming, type Endpoint interface, ServesLeaf() bool
 pkg naming, type Endpoint interface, ServesMountTable() bool
@@ -92,6 +94,7 @@ pkg naming, type MountedServer struct, Server string
 pkg naming, type NamespaceOpt interface { NSOpt }
 pkg naming, type NamespaceOpt interface, NSOpt()
 pkg naming, type ReplaceMount bool
+pkg naming, type RouteOpt string
 pkg naming, type RoutingID struct
 pkg naming, type ServesMountTable bool
 pkg naming, var ErrNameExists verror.IDAction

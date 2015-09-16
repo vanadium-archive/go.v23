@@ -25,7 +25,9 @@ pkg context, method (*T) Panic(...interface{})
 pkg context, method (*T) PanicDepth(int, ...interface{})
 pkg context, method (*T) Panicf(string, ...interface{})
 pkg context, method (*T) V(int) bool
+pkg context, method (*T) VDepth(int, int) bool
 pkg context, method (*T) VI(int) interface {  Info(args ...interface{}); Infof(format string, args ...interface{}); InfoDepth(depth int, args ...interface{}); InfoStack(all bool);}
+pkg context, method (*T) VIDepth(int, int) interface {  Info(args ...interface{}); Infof(format string, args ...interface{}); InfoDepth(depth int, args ...interface{}); InfoStack(all bool);}
 pkg context, method (*T) Value(interface{}) interface{}
 pkg context, type CancelFunc func()
 pkg context, type T struct
