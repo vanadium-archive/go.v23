@@ -4,8 +4,8 @@
 
 // Package rpc defines interfaces for communication via remote procedure call.
 //
-//   Concept: https://v.io/concepts/rpc.html
-//   Tutorial: https://v.io/tutorials/basics.html
+//   Concept: https://github.com/vanadium/docs/blob/master/concepts/rpc.md
+//   Tutorial: (forthcoming)
 //
 // There are two actors in the system, clients and servers.  Clients invoke
 // methods on Servers, using the StartCall method provided by the Client

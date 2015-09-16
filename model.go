@@ -12,7 +12,8 @@
 // This is version 0.1 - we will do our best to maintain backwards
 // compatibility, but there's no guarantee until version 1.0.
 //
-// For more details about the Vanadium project, please visit https://v.io.
+// For more information about the Vanadium project, please visit
+// https://github.com/vanadium/docs.
 package v23
 
 import (

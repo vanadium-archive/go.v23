@@ -19,7 +19,7 @@ import (
 // Discharge objects are immutable and multiple goroutines may invoke methods
 // on a Discharge simultaneously.
 //
-// See also: https://v.io/glossary.html#discharge
+// See also: https://github.com/vanadium/docs/blob/master/glossary.md#discharge
 type Discharge struct {
 	wire WireDischarge
 }

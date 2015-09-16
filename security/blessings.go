@@ -35,7 +35,7 @@ var (
 // Blessings objects are immutable and multiple goroutines may invoke methods
 // on them simultaneously.
 //
-// See also: https://v.io/glossary.html#blessing
+// See also: https://github.com/vanadium/docs/blob/master/glossary.md#blessing
 type Blessings struct {
 	chains    [][]Certificate
 	publicKey PublicKey

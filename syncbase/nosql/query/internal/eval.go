@@ -89,7 +89,7 @@ func evalComparisonOperators(db query.Database, k string, v *vdl.Value, e *query
 }
 
 func coerceValues(lhsValue, rhsValue *query_parser.Operand) (*query_parser.Operand, *query_parser.Operand, error) {
-	// TODO(jkline): explore using vdl for coercions ( https://v.io/designdocs/vdl-spec.html#conversions ).
+	// TODO(jkline): explore using vdl for coercions ( https://github.com/vanadium/docs/blob/master/designdocs/vdl-spec.md#conversions ).
 	var err error
 	// If either operand is a string, convert the other to a string.
 	if lhsValue.Type == query_parser.TypStr || rhsValue.Type == query_parser.TypStr {

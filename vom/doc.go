@@ -4,8 +4,8 @@
 
 // Package vom implements the Vanadium Object Marshaling serialization format.
 //
-//   Concept: https://v.io/concepts/rpc.html#vom
-//   Specification: https://v.io/designdocs/vom-spec.html
+//   Concept: https://github.com/vanadium/docs/blob/master/concepts/rpc.md#vom
+//   Specification: https://github.com/vanadium/docs/blob/master/designdocs/vom-spec.md
 //
 // VOM supports serialization of all types representable by v.io/v23/vdl, and is
 // a self-describing format that retains full type information.  It is the
