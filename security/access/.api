@@ -15,6 +15,7 @@ pkg access, func PermissionsAuthorizerFromFile(string, *vdl.Type) (security.Auth
 pkg access, func ReadPermissions(io.Reader) (Permissions, error)
 pkg access, func TypicalTagType() *vdl.Type
 pkg access, func TypicalTagTypePermissionsAuthorizer(Permissions) security.Authorizer
+pkg access, func WritePermissions(io.Writer, Permissions) error
 pkg access, method (AccessList) Authorize(*context.T, security.Call) error
 pkg access, method (AccessList) Enforceable(*context.T, security.Principal) error
 pkg access, method (AccessList) Includes(...string) bool
@@ -23,7 +24,6 @@ pkg access, method (Permissions) Blacklist(string, string)
 pkg access, method (Permissions) Clear(string, ...string)
 pkg access, method (Permissions) Copy() Permissions
 pkg access, method (Permissions) Normalize() Permissions
-pkg access, method (Permissions) WriteTo(io.Writer) error
 pkg access, type AccessList struct
 pkg access, type AccessList struct, In []security.BlessingPattern
 pkg access, type AccessList struct, NotIn []string

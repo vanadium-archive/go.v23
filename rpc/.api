@@ -2,7 +2,6 @@ pkg rpc, const GlobMethod ideal-string
 pkg rpc, const ReservedMethodSignature ideal-string
 pkg rpc, const ReservedSignature ideal-string
 pkg rpc, const ServerActive ServerState
-pkg rpc, const ServerInit ServerState
 pkg rpc, const ServerStopped ServerState
 pkg rpc, const ServerStopping ServerState
 pkg rpc, func ChildrenGlobberInvoker(...string) Invoker
@@ -51,7 +50,7 @@ pkg rpc, type ClientOpt interface { RPCClientOpt }
 pkg rpc, type ClientOpt interface, RPCClientOpt()
 pkg rpc, type Describer interface { Describe__ }
 pkg rpc, type Describer interface, Describe__() []InterfaceDesc
-pkg rpc, type DialerFunc func(protocol, address string, timeout time.Duration) (net.Conn, error)
+pkg rpc, type DialerFunc func(ctx *context.T, protocol, address string, timeout time.Duration) (net.Conn, error)
 pkg rpc, type Dispatcher interface { Lookup }
 pkg rpc, type Dispatcher interface, Lookup(*context.T, string) (interface{}, security.Authorizer, error)
 pkg rpc, type EmbedDesc struct
@@ -99,7 +98,7 @@ pkg rpc, type ListenSpec struct
 pkg rpc, type ListenSpec struct, Addrs ListenAddrs
 pkg rpc, type ListenSpec struct, Proxy string
 pkg rpc, type ListenSpec struct, embedded AddressChooser
-pkg rpc, type ListenerFunc func(protocol, address string) (net.Listener, error)
+pkg rpc, type ListenerFunc func(ctx *context.T, protocol, address string) (net.Listener, error)
 pkg rpc, type MethodDesc struct
 pkg rpc, type MethodDesc struct, Doc string
 pkg rpc, type MethodDesc struct, InArgs []ArgDesc
@@ -139,19 +138,16 @@ pkg rpc, type Request struct, Method string
 pkg rpc, type Request struct, NumPosArgs uint64
 pkg rpc, type Request struct, Suffix string
 pkg rpc, type Request struct, TraceRequest vtrace.Request
-pkg rpc, type ResolverFunc func(protocol, address string) (string, string, error)
+pkg rpc, type ResolverFunc func(ctx *context.T, protocol, address string) (string, string, error)
 pkg rpc, type Response struct
 pkg rpc, type Response struct, AckBlessings bool
 pkg rpc, type Response struct, EndStreamResults bool
 pkg rpc, type Response struct, Error error
 pkg rpc, type Response struct, NumPosResults uint64
 pkg rpc, type Response struct, TraceResponse vtrace.Response
-pkg rpc, type Server interface { AddName, Listen, RemoveName, Serve, ServeDispatcher, Status, Stop, UnwatchNetwork, WatchNetwork }
+pkg rpc, type Server interface { AddName, RemoveName, Status, Stop, UnwatchNetwork, WatchNetwork }
 pkg rpc, type Server interface, AddName(string) error
-pkg rpc, type Server interface, Listen(ListenSpec) ([]naming.Endpoint, error)
 pkg rpc, type Server interface, RemoveName(string)
-pkg rpc, type Server interface, Serve(string, interface{}, security.Authorizer) error
-pkg rpc, type Server interface, ServeDispatcher(string, Dispatcher) error
 pkg rpc, type Server interface, Status() ServerStatus
 pkg rpc, type Server interface, Stop() error
 pkg rpc, type Server interface, UnwatchNetwork(chan<- NetworkChange)

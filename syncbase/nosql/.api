@@ -1,6 +1,5 @@
 pkg nosql, const DeleteChange ChangeType
 pkg nosql, const PutChange ChangeType
-pkg nosql, func Key(...string) string
 pkg nosql, func NewDatabase(string, string, *Schema) *database
 pkg nosql, func NewSchema(wire.SchemaMetadata, SchemaUpgrader) *Schema
 pkg nosql, func NewValue(*context.T, interface{}) (*Value, error)
@@ -16,12 +15,13 @@ pkg nosql, method (*InvalidScanStream) Key() string
 pkg nosql, method (*InvalidScanStream) Value(interface{}) error
 pkg nosql, method (*Value) Get(interface{}) error
 pkg nosql, method (*WatchChange) Value(interface{}) error
-pkg nosql, type BatchDatabase interface { Abort, Close, Commit, Exec, FullName, ListTables, Name, Table }
+pkg nosql, type BatchDatabase interface { Abort, Close, Commit, Exec, FullName, GetResumeMarker, ListTables, Name, Table }
 pkg nosql, type BatchDatabase interface, Abort(*context.T) error
 pkg nosql, type BatchDatabase interface, Close()
 pkg nosql, type BatchDatabase interface, Commit(*context.T) error
 pkg nosql, type BatchDatabase interface, Exec(*context.T, string) ([]string, ResultStream, error)
 pkg nosql, type BatchDatabase interface, FullName() string
+pkg nosql, type BatchDatabase interface, GetResumeMarker(*context.T) (watch.ResumeMarker, error)
 pkg nosql, type BatchDatabase interface, ListTables(*context.T) ([]string, error)
 pkg nosql, type BatchDatabase interface, Name() string
 pkg nosql, type BatchDatabase interface, Table(string) Table
@@ -88,10 +88,11 @@ pkg nosql, type Database interface, SetPermissions(*context.T, access.Permission
 pkg nosql, type Database interface, SyncGroup(string) SyncGroup
 pkg nosql, type Database interface, Table(string) Table
 pkg nosql, type Database interface, Watch(*context.T, string, string, watch.ResumeMarker) (WatchStream, error)
-pkg nosql, type DatabaseHandle interface { Close, Exec, FullName, ListTables, Name, Table }
+pkg nosql, type DatabaseHandle interface { Close, Exec, FullName, GetResumeMarker, ListTables, Name, Table }
 pkg nosql, type DatabaseHandle interface, Close()
 pkg nosql, type DatabaseHandle interface, Exec(*context.T, string) ([]string, ResultStream, error)
 pkg nosql, type DatabaseHandle interface, FullName() string
+pkg nosql, type DatabaseHandle interface, GetResumeMarker(*context.T) (watch.ResumeMarker, error)
 pkg nosql, type DatabaseHandle interface, ListTables(*context.T) ([]string, error)
 pkg nosql, type DatabaseHandle interface, Name() string
 pkg nosql, type DatabaseHandle interface, Table(string) Table
