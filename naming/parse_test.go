@@ -270,6 +270,9 @@ func TestEncodeDecode(t *testing.T) {
 		{"/", "%2F"},
 		{"%", "%25"},
 		{"/The % rain in /% Spain", "%2FThe %25 rain in %2F%25 Spain"},
+		{"/%/%", "%2F%25%2F%25"},
+		{"ᚸӲ읔קAل", "ᚸӲ읔קAل"},
+		{"ᚸ/Ӳ%읔/ק%A+ل", "ᚸ%2FӲ%25읔%2Fק%25A+ل"},
 	}
 	for _, c := range cases {
 		if want, got := c.enc, EncodeAsNameElement(c.unenc); got != want {
