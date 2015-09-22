@@ -303,7 +303,10 @@ func newReflectInfo(obj interface{}) (*reflectInfo, error) {
 	case err != nil:
 		return nil, err
 	case len(methodInfos) == 0 && determineGlobState(obj) == nil:
-		return nil, verror.New(errNoCompatibleMethods, nil, rt, TypeCheckMethods(obj))
+		if m := TypeCheckMethods(obj); len(m) > 0 {
+			return nil, verror.New(errNoCompatibleMethods, nil, rt, TypeCheckMethods(obj))
+		}
+		return nil, verror.New(errNoCompatibleMethods, nil, rt, "no exported methods")
 	}
 	// Now attach method tags to each methodInfo.  Since this is based on the desc
 	// provided by the user, there's no guarantee it's "correct", but if the same
