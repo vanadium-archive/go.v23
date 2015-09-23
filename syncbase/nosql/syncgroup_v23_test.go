@@ -194,18 +194,18 @@ func V23TestSyncbasedExchangeDeltasWithAcls(t *v23tests.T) {
 	tu.RunClient(t, client0Creds, runCreateSyncGroup, "sync0", sgName, "tb:foo", "root/s0", "root/s1")
 	tu.RunClient(t, client0Creds, runPopulateData, "sync0", "foobarbaz", "0")
 	tu.RunClient(t, client0Creds, runPopulateData, "sync0", "foo", "0")
-	tu.RunClient(t, client0Creds, runSetPermissions, "sync0", "foo", "root/c0", "root/c1")
+	tu.RunClient(t, client0Creds, runSetPrefixPermissions, "sync0", "foo", "root/c0", "root/c1")
 
 	tu.RunClient(t, client1Creds, runSetupAppA, "sync1")
 	tu.RunClient(t, client1Creds, runJoinSyncGroup, "sync1", sgName)
 	tu.RunClient(t, client1Creds, runVerifySyncGroupData, "sync1", "foobarbaz", "0", "10")
 	tu.RunClient(t, client1Creds, runVerifySyncGroupDataNoScan, "sync1", "foo", "0", "10")
 
-	tu.RunClient(t, client1Creds, runSetPermissions, "sync1", "foobar", "root/c1")
+	tu.RunClient(t, client1Creds, runSetPrefixPermissions, "sync1", "foobar", "root/c1")
 	tu.RunClient(t, client0Creds, runVerifyLostAccess, "sync0", "foobarbaz", "0", "10")
 	tu.RunClient(t, client0Creds, runVerifySyncGroupDataNoScan, "sync0", "foo", "0", "10")
 
-	tu.RunClient(t, client1Creds, runSetPermissions, "sync1", "foobar", "root/c0", "root/c1")
+	tu.RunClient(t, client1Creds, runSetPrefixPermissions, "sync1", "foobar", "root/c0", "root/c1")
 	tu.RunClient(t, client0Creds, runVerifySyncGroupData, "sync0", "foobarbaz", "0", "10")
 }
 
@@ -551,7 +551,7 @@ var runDeleteData = modules.Register(func(env *modules.Env, args ...string) erro
 }, "runDeleteData")
 
 // Arguments: 0: syncbase name, 1: key prefix, 2: blessing for acl.
-var runSetPermissions = modules.Register(func(env *modules.Env, args ...string) error {
+var runSetPrefixPermissions = modules.Register(func(env *modules.Env, args ...string) error {
 	ctx, shutdown := v23.Init()
 	defer shutdown()
 
@@ -561,12 +561,12 @@ var runSetPermissions = modules.Register(func(env *modules.Env, args ...string) 
 	// Set acl.
 	tb := d.Table("tb")
 
-	if err := tb.SetPermissions(ctx, nosql.Prefix(args[1]), perms(args[2:]...)); err != nil {
-		return fmt.Errorf("tb.SetPermissions() failed: %v\n", err)
+	if err := tb.SetPrefixPermissions(ctx, nosql.Prefix(args[1]), perms(args[2:]...)); err != nil {
+		return fmt.Errorf("tb.SetPrefixPermissions() failed: %v\n", err)
 	}
 
 	return nil
-}, "runSetPermissions")
+}, "runSetPrefixPermissions")
 
 var runVerifySyncGroupData = modules.Register(func(env *modules.Env, args ...string) error {
 	ctx, shutdown := v23.Init()

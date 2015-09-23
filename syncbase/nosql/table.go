@@ -58,6 +58,16 @@ func (t *table) Destroy(ctx *context.T) error {
 	return t.c.Destroy(ctx, t.dbSchemaVersion)
 }
 
+// GetPermissions implements Table.GetPermissions.
+func (t *table) GetPermissions(ctx *context.T) (access.Permissions, error) {
+	return t.c.GetPermissions(ctx, t.dbSchemaVersion)
+}
+
+// SetPermissions implements Table.SetPermissions.
+func (t *table) SetPermissions(ctx *context.T, perms access.Permissions) error {
+	return t.c.SetPermissions(ctx, t.dbSchemaVersion, perms)
+}
+
 // Row implements Table.Row.
 func (t *table) Row(key string) Row {
 	return newRow(t.fullName, key, t.dbSchemaVersion)
@@ -93,9 +103,9 @@ func (t *table) Scan(ctx *context.T, r RowRange) ScanStream {
 	return newScanStream(cancel, call)
 }
 
-// GetPermissions implements Table.GetPermissions.
-func (t *table) GetPermissions(ctx *context.T, key string) ([]PrefixPermissions, error) {
-	wirePermsList, err := t.c.GetPermissions(ctx, t.dbSchemaVersion, key)
+// GetPrefixPermissions implements Table.GetPrefixPermissions.
+func (t *table) GetPrefixPermissions(ctx *context.T, key string) ([]PrefixPermissions, error) {
+	wirePermsList, err := t.c.GetPrefixPermissions(ctx, t.dbSchemaVersion, key)
 	permsList := []PrefixPermissions{}
 	for _, v := range wirePermsList {
 		permsList = append(permsList, PrefixPermissions{Prefix: Prefix(v.Prefix), Perms: v.Perms})
@@ -103,12 +113,12 @@ func (t *table) GetPermissions(ctx *context.T, key string) ([]PrefixPermissions,
 	return permsList, err
 }
 
-// SetPermissions implements Table.SetPermissions.
-func (t *table) SetPermissions(ctx *context.T, prefix PrefixRange, perms access.Permissions) error {
-	return t.c.SetPermissions(ctx, t.dbSchemaVersion, prefix.Prefix(), perms)
+// SetPrefixPermissions implements Table.SetPrefixPermissions.
+func (t *table) SetPrefixPermissions(ctx *context.T, prefix PrefixRange, perms access.Permissions) error {
+	return t.c.SetPrefixPermissions(ctx, t.dbSchemaVersion, prefix.Prefix(), perms)
 }
 
-// DeletePermissions implements Table.DeletePermissions.
-func (t *table) DeletePermissions(ctx *context.T, prefix PrefixRange) error {
-	return t.c.DeletePermissions(ctx, t.dbSchemaVersion, prefix.Prefix())
+// DeletePrefixPermissions implements Table.DeletePrefixPermissions.
+func (t *table) DeletePrefixPermissions(ctx *context.T, prefix PrefixRange) error {
+	return t.c.DeletePrefixPermissions(ctx, t.dbSchemaVersion, prefix.Prefix())
 }

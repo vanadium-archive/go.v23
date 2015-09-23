@@ -2564,6 +2564,10 @@ type TableClientMethods interface {
 	// TODO(ivanpi): Exists may fail with an error if higher levels of hierarchy
 	// do not exist.
 	Exists(ctx *context.T, schemaVersion int32, opts ...rpc.CallOpt) (bool, error)
+	// GetPermissions returns the current Permissions for the Table.
+	GetPermissions(ctx *context.T, schemaVersion int32, opts ...rpc.CallOpt) (access.Permissions, error)
+	// SetPermissions replaces the current Permissions for the Table.
+	SetPermissions(ctx *context.T, schemaVersion int32, perms access.Permissions, opts ...rpc.CallOpt) error
 	// DeleteRange deletes all rows in the given half-open range [start, limit).
 	// If limit is "", all rows with keys >= start are included.
 	// TODO(sadovsky): Maybe add option to delete prefix perms fully covered by
@@ -2573,24 +2577,24 @@ type TableClientMethods interface {
 	// is "", all rows with keys >= start are included. Concurrency semantics are
 	// documented in model.go.
 	Scan(ctx *context.T, schemaVersion int32, start []byte, limit []byte, opts ...rpc.CallOpt) (TableScanClientCall, error)
-	// GetPermissions returns an array of (prefix, perms) pairs. The array is
+	// GetPrefixPermissions returns an array of (prefix, perms) pairs. The array is
 	// sorted from longest prefix to shortest, so element zero is the one that
 	// applies to the row with the given key. The last element is always the
 	// prefix "" which represents the table's permissions -- the array will always
 	// have at least one element.
-	GetPermissions(ctx *context.T, schemaVersion int32, key string, opts ...rpc.CallOpt) ([]PrefixPermissions, error)
-	// SetPermissions sets the permissions for all current and future rows with
+	GetPrefixPermissions(ctx *context.T, schemaVersion int32, key string, opts ...rpc.CallOpt) ([]PrefixPermissions, error)
+	// SetPrefixPermissions sets the permissions for all current and future rows with
 	// the given prefix. If the prefix overlaps with an existing prefix, the
 	// longest prefix that matches a row applies. For example:
-	//     SetPermissions(ctx, Prefix("a/b"), perms1)
-	//     SetPermissions(ctx, Prefix("a/b/c"), perms2)
+	//     SetPrefixPermissions(ctx, Prefix("a/b"), perms1)
+	//     SetPrefixPermissions(ctx, Prefix("a/b/c"), perms2)
 	// The permissions for row "a/b/1" are perms1, and the permissions for row
 	// "a/b/c/1" are perms2.
-	SetPermissions(ctx *context.T, schemaVersion int32, prefix string, perms access.Permissions, opts ...rpc.CallOpt) error
-	// DeletePermissions deletes the permissions for the specified prefix. Any
+	SetPrefixPermissions(ctx *context.T, schemaVersion int32, prefix string, perms access.Permissions, opts ...rpc.CallOpt) error
+	// DeletePrefixPermissions deletes the permissions for the specified prefix. Any
 	// rows covered by this prefix will use the next longest prefix's permissions
-	// (see the array returned by GetPermissions).
-	DeletePermissions(ctx *context.T, schemaVersion int32, prefix string, opts ...rpc.CallOpt) error
+	// (see the array returned by GetPrefixPermissions).
+	DeletePrefixPermissions(ctx *context.T, schemaVersion int32, prefix string, opts ...rpc.CallOpt) error
 }
 
 // TableClientStub adds universal methods to TableClientMethods.
@@ -2623,6 +2627,16 @@ func (c implTableClientStub) Exists(ctx *context.T, i0 int32, opts ...rpc.CallOp
 	return
 }
 
+func (c implTableClientStub) GetPermissions(ctx *context.T, i0 int32, opts ...rpc.CallOpt) (o0 access.Permissions, err error) {
+	err = v23.GetClient(ctx).Call(ctx, c.name, "GetPermissions", []interface{}{i0}, []interface{}{&o0}, opts...)
+	return
+}
+
+func (c implTableClientStub) SetPermissions(ctx *context.T, i0 int32, i1 access.Permissions, opts ...rpc.CallOpt) (err error) {
+	err = v23.GetClient(ctx).Call(ctx, c.name, "SetPermissions", []interface{}{i0, i1}, nil, opts...)
+	return
+}
+
 func (c implTableClientStub) DeleteRange(ctx *context.T, i0 int32, i1 []byte, i2 []byte, opts ...rpc.CallOpt) (err error) {
 	err = v23.GetClient(ctx).Call(ctx, c.name, "DeleteRange", []interface{}{i0, i1, i2}, nil, opts...)
 	return
@@ -2637,18 +2651,18 @@ func (c implTableClientStub) Scan(ctx *context.T, i0 int32, i1 []byte, i2 []byte
 	return
 }
 
-func (c implTableClientStub) GetPermissions(ctx *context.T, i0 int32, i1 string, opts ...rpc.CallOpt) (o0 []PrefixPermissions, err error) {
-	err = v23.GetClient(ctx).Call(ctx, c.name, "GetPermissions", []interface{}{i0, i1}, []interface{}{&o0}, opts...)
+func (c implTableClientStub) GetPrefixPermissions(ctx *context.T, i0 int32, i1 string, opts ...rpc.CallOpt) (o0 []PrefixPermissions, err error) {
+	err = v23.GetClient(ctx).Call(ctx, c.name, "GetPrefixPermissions", []interface{}{i0, i1}, []interface{}{&o0}, opts...)
 	return
 }
 
-func (c implTableClientStub) SetPermissions(ctx *context.T, i0 int32, i1 string, i2 access.Permissions, opts ...rpc.CallOpt) (err error) {
-	err = v23.GetClient(ctx).Call(ctx, c.name, "SetPermissions", []interface{}{i0, i1, i2}, nil, opts...)
+func (c implTableClientStub) SetPrefixPermissions(ctx *context.T, i0 int32, i1 string, i2 access.Permissions, opts ...rpc.CallOpt) (err error) {
+	err = v23.GetClient(ctx).Call(ctx, c.name, "SetPrefixPermissions", []interface{}{i0, i1, i2}, nil, opts...)
 	return
 }
 
-func (c implTableClientStub) DeletePermissions(ctx *context.T, i0 int32, i1 string, opts ...rpc.CallOpt) (err error) {
-	err = v23.GetClient(ctx).Call(ctx, c.name, "DeletePermissions", []interface{}{i0, i1}, nil, opts...)
+func (c implTableClientStub) DeletePrefixPermissions(ctx *context.T, i0 int32, i1 string, opts ...rpc.CallOpt) (err error) {
+	err = v23.GetClient(ctx).Call(ctx, c.name, "DeletePrefixPermissions", []interface{}{i0, i1}, nil, opts...)
 	return
 }
 
@@ -2739,6 +2753,10 @@ type TableServerMethods interface {
 	// TODO(ivanpi): Exists may fail with an error if higher levels of hierarchy
 	// do not exist.
 	Exists(ctx *context.T, call rpc.ServerCall, schemaVersion int32) (bool, error)
+	// GetPermissions returns the current Permissions for the Table.
+	GetPermissions(ctx *context.T, call rpc.ServerCall, schemaVersion int32) (access.Permissions, error)
+	// SetPermissions replaces the current Permissions for the Table.
+	SetPermissions(ctx *context.T, call rpc.ServerCall, schemaVersion int32, perms access.Permissions) error
 	// DeleteRange deletes all rows in the given half-open range [start, limit).
 	// If limit is "", all rows with keys >= start are included.
 	// TODO(sadovsky): Maybe add option to delete prefix perms fully covered by
@@ -2748,24 +2766,24 @@ type TableServerMethods interface {
 	// is "", all rows with keys >= start are included. Concurrency semantics are
 	// documented in model.go.
 	Scan(ctx *context.T, call TableScanServerCall, schemaVersion int32, start []byte, limit []byte) error
-	// GetPermissions returns an array of (prefix, perms) pairs. The array is
+	// GetPrefixPermissions returns an array of (prefix, perms) pairs. The array is
 	// sorted from longest prefix to shortest, so element zero is the one that
 	// applies to the row with the given key. The last element is always the
 	// prefix "" which represents the table's permissions -- the array will always
 	// have at least one element.
-	GetPermissions(ctx *context.T, call rpc.ServerCall, schemaVersion int32, key string) ([]PrefixPermissions, error)
-	// SetPermissions sets the permissions for all current and future rows with
+	GetPrefixPermissions(ctx *context.T, call rpc.ServerCall, schemaVersion int32, key string) ([]PrefixPermissions, error)
+	// SetPrefixPermissions sets the permissions for all current and future rows with
 	// the given prefix. If the prefix overlaps with an existing prefix, the
 	// longest prefix that matches a row applies. For example:
-	//     SetPermissions(ctx, Prefix("a/b"), perms1)
-	//     SetPermissions(ctx, Prefix("a/b/c"), perms2)
+	//     SetPrefixPermissions(ctx, Prefix("a/b"), perms1)
+	//     SetPrefixPermissions(ctx, Prefix("a/b/c"), perms2)
 	// The permissions for row "a/b/1" are perms1, and the permissions for row
 	// "a/b/c/1" are perms2.
-	SetPermissions(ctx *context.T, call rpc.ServerCall, schemaVersion int32, prefix string, perms access.Permissions) error
-	// DeletePermissions deletes the permissions for the specified prefix. Any
+	SetPrefixPermissions(ctx *context.T, call rpc.ServerCall, schemaVersion int32, prefix string, perms access.Permissions) error
+	// DeletePrefixPermissions deletes the permissions for the specified prefix. Any
 	// rows covered by this prefix will use the next longest prefix's permissions
-	// (see the array returned by GetPermissions).
-	DeletePermissions(ctx *context.T, call rpc.ServerCall, schemaVersion int32, prefix string) error
+	// (see the array returned by GetPrefixPermissions).
+	DeletePrefixPermissions(ctx *context.T, call rpc.ServerCall, schemaVersion int32, prefix string) error
 }
 
 // TableServerStubMethods is the server interface containing
@@ -2783,6 +2801,10 @@ type TableServerStubMethods interface {
 	// TODO(ivanpi): Exists may fail with an error if higher levels of hierarchy
 	// do not exist.
 	Exists(ctx *context.T, call rpc.ServerCall, schemaVersion int32) (bool, error)
+	// GetPermissions returns the current Permissions for the Table.
+	GetPermissions(ctx *context.T, call rpc.ServerCall, schemaVersion int32) (access.Permissions, error)
+	// SetPermissions replaces the current Permissions for the Table.
+	SetPermissions(ctx *context.T, call rpc.ServerCall, schemaVersion int32, perms access.Permissions) error
 	// DeleteRange deletes all rows in the given half-open range [start, limit).
 	// If limit is "", all rows with keys >= start are included.
 	// TODO(sadovsky): Maybe add option to delete prefix perms fully covered by
@@ -2792,24 +2814,24 @@ type TableServerStubMethods interface {
 	// is "", all rows with keys >= start are included. Concurrency semantics are
 	// documented in model.go.
 	Scan(ctx *context.T, call *TableScanServerCallStub, schemaVersion int32, start []byte, limit []byte) error
-	// GetPermissions returns an array of (prefix, perms) pairs. The array is
+	// GetPrefixPermissions returns an array of (prefix, perms) pairs. The array is
 	// sorted from longest prefix to shortest, so element zero is the one that
 	// applies to the row with the given key. The last element is always the
 	// prefix "" which represents the table's permissions -- the array will always
 	// have at least one element.
-	GetPermissions(ctx *context.T, call rpc.ServerCall, schemaVersion int32, key string) ([]PrefixPermissions, error)
-	// SetPermissions sets the permissions for all current and future rows with
+	GetPrefixPermissions(ctx *context.T, call rpc.ServerCall, schemaVersion int32, key string) ([]PrefixPermissions, error)
+	// SetPrefixPermissions sets the permissions for all current and future rows with
 	// the given prefix. If the prefix overlaps with an existing prefix, the
 	// longest prefix that matches a row applies. For example:
-	//     SetPermissions(ctx, Prefix("a/b"), perms1)
-	//     SetPermissions(ctx, Prefix("a/b/c"), perms2)
+	//     SetPrefixPermissions(ctx, Prefix("a/b"), perms1)
+	//     SetPrefixPermissions(ctx, Prefix("a/b/c"), perms2)
 	// The permissions for row "a/b/1" are perms1, and the permissions for row
 	// "a/b/c/1" are perms2.
-	SetPermissions(ctx *context.T, call rpc.ServerCall, schemaVersion int32, prefix string, perms access.Permissions) error
-	// DeletePermissions deletes the permissions for the specified prefix. Any
+	SetPrefixPermissions(ctx *context.T, call rpc.ServerCall, schemaVersion int32, prefix string, perms access.Permissions) error
+	// DeletePrefixPermissions deletes the permissions for the specified prefix. Any
 	// rows covered by this prefix will use the next longest prefix's permissions
-	// (see the array returned by GetPermissions).
-	DeletePermissions(ctx *context.T, call rpc.ServerCall, schemaVersion int32, prefix string) error
+	// (see the array returned by GetPrefixPermissions).
+	DeletePrefixPermissions(ctx *context.T, call rpc.ServerCall, schemaVersion int32, prefix string) error
 }
 
 // TableServerStub adds universal methods to TableServerStubMethods.
@@ -2853,6 +2875,14 @@ func (s implTableServerStub) Exists(ctx *context.T, call rpc.ServerCall, i0 int3
 	return s.impl.Exists(ctx, call, i0)
 }
 
+func (s implTableServerStub) GetPermissions(ctx *context.T, call rpc.ServerCall, i0 int32) (access.Permissions, error) {
+	return s.impl.GetPermissions(ctx, call, i0)
+}
+
+func (s implTableServerStub) SetPermissions(ctx *context.T, call rpc.ServerCall, i0 int32, i1 access.Permissions) error {
+	return s.impl.SetPermissions(ctx, call, i0, i1)
+}
+
 func (s implTableServerStub) DeleteRange(ctx *context.T, call rpc.ServerCall, i0 int32, i1 []byte, i2 []byte) error {
 	return s.impl.DeleteRange(ctx, call, i0, i1, i2)
 }
@@ -2861,16 +2891,16 @@ func (s implTableServerStub) Scan(ctx *context.T, call *TableScanServerCallStub,
 	return s.impl.Scan(ctx, call, i0, i1, i2)
 }
 
-func (s implTableServerStub) GetPermissions(ctx *context.T, call rpc.ServerCall, i0 int32, i1 string) ([]PrefixPermissions, error) {
-	return s.impl.GetPermissions(ctx, call, i0, i1)
+func (s implTableServerStub) GetPrefixPermissions(ctx *context.T, call rpc.ServerCall, i0 int32, i1 string) ([]PrefixPermissions, error) {
+	return s.impl.GetPrefixPermissions(ctx, call, i0, i1)
 }
 
-func (s implTableServerStub) SetPermissions(ctx *context.T, call rpc.ServerCall, i0 int32, i1 string, i2 access.Permissions) error {
-	return s.impl.SetPermissions(ctx, call, i0, i1, i2)
+func (s implTableServerStub) SetPrefixPermissions(ctx *context.T, call rpc.ServerCall, i0 int32, i1 string, i2 access.Permissions) error {
+	return s.impl.SetPrefixPermissions(ctx, call, i0, i1, i2)
 }
 
-func (s implTableServerStub) DeletePermissions(ctx *context.T, call rpc.ServerCall, i0 int32, i1 string) error {
-	return s.impl.DeletePermissions(ctx, call, i0, i1)
+func (s implTableServerStub) DeletePrefixPermissions(ctx *context.T, call rpc.ServerCall, i0 int32, i1 string) error {
+	return s.impl.DeletePrefixPermissions(ctx, call, i0, i1)
 }
 
 func (s implTableServerStub) Globber() *rpc.GlobState {
@@ -2919,6 +2949,26 @@ var descTable = rpc.InterfaceDesc{
 			Tags: []*vdl.Value{vdl.ValueOf(access.Tag("Read"))},
 		},
 		{
+			Name: "GetPermissions",
+			Doc:  "// GetPermissions returns the current Permissions for the Table.",
+			InArgs: []rpc.ArgDesc{
+				{"schemaVersion", ``}, // int32
+			},
+			OutArgs: []rpc.ArgDesc{
+				{"", ``}, // access.Permissions
+			},
+			Tags: []*vdl.Value{vdl.ValueOf(access.Tag("Admin"))},
+		},
+		{
+			Name: "SetPermissions",
+			Doc:  "// SetPermissions replaces the current Permissions for the Table.",
+			InArgs: []rpc.ArgDesc{
+				{"schemaVersion", ``}, // int32
+				{"perms", ``},         // access.Permissions
+			},
+			Tags: []*vdl.Value{vdl.ValueOf(access.Tag("Admin"))},
+		},
+		{
 			Name: "DeleteRange",
 			Doc:  "// DeleteRange deletes all rows in the given half-open range [start, limit).\n// If limit is \"\", all rows with keys >= start are included.\n// TODO(sadovsky): Maybe add option to delete prefix perms fully covered by\n// the row range.",
 			InArgs: []rpc.ArgDesc{
@@ -2939,8 +2989,8 @@ var descTable = rpc.InterfaceDesc{
 			Tags: []*vdl.Value{vdl.ValueOf(access.Tag("Read"))},
 		},
 		{
-			Name: "GetPermissions",
-			Doc:  "// GetPermissions returns an array of (prefix, perms) pairs. The array is\n// sorted from longest prefix to shortest, so element zero is the one that\n// applies to the row with the given key. The last element is always the\n// prefix \"\" which represents the table's permissions -- the array will always\n// have at least one element.",
+			Name: "GetPrefixPermissions",
+			Doc:  "// GetPrefixPermissions returns an array of (prefix, perms) pairs. The array is\n// sorted from longest prefix to shortest, so element zero is the one that\n// applies to the row with the given key. The last element is always the\n// prefix \"\" which represents the table's permissions -- the array will always\n// have at least one element.",
 			InArgs: []rpc.ArgDesc{
 				{"schemaVersion", ``}, // int32
 				{"key", ``},           // string
@@ -2951,8 +3001,8 @@ var descTable = rpc.InterfaceDesc{
 			Tags: []*vdl.Value{vdl.ValueOf(access.Tag("Admin"))},
 		},
 		{
-			Name: "SetPermissions",
-			Doc:  "// SetPermissions sets the permissions for all current and future rows with\n// the given prefix. If the prefix overlaps with an existing prefix, the\n// longest prefix that matches a row applies. For example:\n//     SetPermissions(ctx, Prefix(\"a/b\"), perms1)\n//     SetPermissions(ctx, Prefix(\"a/b/c\"), perms2)\n// The permissions for row \"a/b/1\" are perms1, and the permissions for row\n// \"a/b/c/1\" are perms2.",
+			Name: "SetPrefixPermissions",
+			Doc:  "// SetPrefixPermissions sets the permissions for all current and future rows with\n// the given prefix. If the prefix overlaps with an existing prefix, the\n// longest prefix that matches a row applies. For example:\n//     SetPrefixPermissions(ctx, Prefix(\"a/b\"), perms1)\n//     SetPrefixPermissions(ctx, Prefix(\"a/b/c\"), perms2)\n// The permissions for row \"a/b/1\" are perms1, and the permissions for row\n// \"a/b/c/1\" are perms2.",
 			InArgs: []rpc.ArgDesc{
 				{"schemaVersion", ``}, // int32
 				{"prefix", ``},        // string
@@ -2961,8 +3011,8 @@ var descTable = rpc.InterfaceDesc{
 			Tags: []*vdl.Value{vdl.ValueOf(access.Tag("Admin"))},
 		},
 		{
-			Name: "DeletePermissions",
-			Doc:  "// DeletePermissions deletes the permissions for the specified prefix. Any\n// rows covered by this prefix will use the next longest prefix's permissions\n// (see the array returned by GetPermissions).",
+			Name: "DeletePrefixPermissions",
+			Doc:  "// DeletePrefixPermissions deletes the permissions for the specified prefix. Any\n// rows covered by this prefix will use the next longest prefix's permissions\n// (see the array returned by GetPrefixPermissions).",
 			InArgs: []rpc.ArgDesc{
 				{"schemaVersion", ``}, // int32
 				{"prefix", ``},        // string

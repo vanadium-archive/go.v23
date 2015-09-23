@@ -151,21 +151,23 @@ pkg nosql, type SyncGroup interface, GetSpec(*context.T) (wire.SyncGroupSpec, st
 pkg nosql, type SyncGroup interface, Join(*context.T, wire.SyncGroupMemberInfo) (wire.SyncGroupSpec, error)
 pkg nosql, type SyncGroup interface, Leave(*context.T) error
 pkg nosql, type SyncGroup interface, SetSpec(*context.T, wire.SyncGroupSpec, string) error
-pkg nosql, type Table interface { Create, Delete, DeletePermissions, DeleteRange, Destroy, Exists, FullName, Get, GetPermissions, Name, Put, Row, Scan, SetPermissions }
+pkg nosql, type Table interface { Create, Delete, DeletePrefixPermissions, DeleteRange, Destroy, Exists, FullName, Get, GetPermissions, GetPrefixPermissions, Name, Put, Row, Scan, SetPermissions, SetPrefixPermissions }
 pkg nosql, type Table interface, Create(*context.T, access.Permissions) error
 pkg nosql, type Table interface, Delete(*context.T, string) error
-pkg nosql, type Table interface, DeletePermissions(*context.T, PrefixRange) error
+pkg nosql, type Table interface, DeletePrefixPermissions(*context.T, PrefixRange) error
 pkg nosql, type Table interface, DeleteRange(*context.T, RowRange) error
 pkg nosql, type Table interface, Destroy(*context.T) error
 pkg nosql, type Table interface, Exists(*context.T) (bool, error)
 pkg nosql, type Table interface, FullName() string
 pkg nosql, type Table interface, Get(*context.T, string, interface{}) error
-pkg nosql, type Table interface, GetPermissions(*context.T, string) ([]PrefixPermissions, error)
+pkg nosql, type Table interface, GetPermissions(*context.T) (access.Permissions, error)
+pkg nosql, type Table interface, GetPrefixPermissions(*context.T, string) ([]PrefixPermissions, error)
 pkg nosql, type Table interface, Name() string
 pkg nosql, type Table interface, Put(*context.T, string, interface{}) error
 pkg nosql, type Table interface, Row(string) Row
 pkg nosql, type Table interface, Scan(*context.T, RowRange) ScanStream
-pkg nosql, type Table interface, SetPermissions(*context.T, PrefixRange, access.Permissions) error
+pkg nosql, type Table interface, SetPermissions(*context.T, access.Permissions) error
+pkg nosql, type Table interface, SetPrefixPermissions(*context.T, PrefixRange, access.Permissions) error
 pkg nosql, type Value struct
 pkg nosql, type Value struct, WriteTs time.Time
 pkg nosql, type WatchChange struct

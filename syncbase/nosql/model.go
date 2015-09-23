@@ -189,6 +189,12 @@ type Table interface {
 	// Destroy must not be called from within a batch.
 	Destroy(ctx *context.T) error
 
+	// GetPermissions returns the current Permissions for the Table.
+	GetPermissions(ctx *context.T) (access.Permissions, error)
+
+	// SetPermissions replaces the current Permissions for the Table.
+	SetPermissions(ctx *context.T, perms access.Permissions) error
+
 	// Row returns the Row with the given primary key.
 	Row(key string) Row
 
@@ -227,26 +233,26 @@ type Table interface {
 	// See helpers nosql.Prefix(), nosql.Range(), nosql.SingleRow().
 	Scan(ctx *context.T, r RowRange) ScanStream
 
-	// GetPermissions returns an array of (prefix, perms) pairs. The array is
+	// GetPrefixPermissions returns an array of (prefix, perms) pairs. The array is
 	// sorted from longest prefix to shortest, so element zero is the one that
 	// applies to the row with the given key. The last element is always the
 	// prefix "" which represents the table's permissions -- the array will always
 	// have at least one element.
-	GetPermissions(ctx *context.T, key string) ([]PrefixPermissions, error)
+	GetPrefixPermissions(ctx *context.T, key string) ([]PrefixPermissions, error)
 
-	// SetPermissions sets the permissions for all current and future rows with
+	// SetPrefixPermissions sets the permissions for all current and future rows with
 	// the given prefix. If the prefix overlaps with an existing prefix, the
 	// longest prefix that matches a row applies. For example:
-	//     SetPermissions(ctx, Prefix("a/b"), perms1)
-	//     SetPermissions(ctx, Prefix("a/b/c"), perms2)
+	//     SetPrefixPermissions(ctx, Prefix("a/b"), perms1)
+	//     SetPrefixPermissions(ctx, Prefix("a/b/c"), perms2)
 	// The permissions for row "a/b/1" are perms1, and the permissions for row
 	// "a/b/c/1" are perms2.
-	SetPermissions(ctx *context.T, prefix PrefixRange, perms access.Permissions) error
+	SetPrefixPermissions(ctx *context.T, prefix PrefixRange, perms access.Permissions) error
 
-	// DeletePermissions deletes the permissions for the specified prefix. Any
+	// DeletePrefixPermissions deletes the permissions for the specified prefix. Any
 	// rows covered by this prefix will use the next longest prefix's permissions
-	// (see the array returned by GetPermissions).
-	DeletePermissions(ctx *context.T, prefix PrefixRange) error
+	// (see the array returned by GetPrefixPermissions).
+	DeletePrefixPermissions(ctx *context.T, prefix PrefixRange) error
 }
 
 // Row represents a single row in a Table.

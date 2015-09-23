@@ -150,13 +150,19 @@ func TestRPCSchemaCheckError(t *testing.T) {
 	if !isVersionMismatchErr(stream.Err()) {
 		t.Fatal("Expected ErrDatabaseVersionMismatch, found: " + toString(stream.Err()))
 	}
-	if _, err := table.GetPermissions(ctx, "row1"); !isVersionMismatchErr(err) {
+	if _, err := table.GetPermissions(ctx); !isVersionMismatchErr(err) {
 		t.Fatal("Expected ErrDatabaseVersionMismatch, found: " + toString(err))
 	}
-	if err := table.SetPermissions(ctx, nosql.Prefix("row"), nil); !isVersionMismatchErr(err) {
+	if err := table.SetPermissions(ctx, nil); !isVersionMismatchErr(err) {
 		t.Fatal("Expected ErrDatabaseVersionMismatch, found: " + toString(err))
 	}
-	if err := table.DeletePermissions(ctx, nosql.Prefix("row")); !isVersionMismatchErr(err) {
+	if _, err := table.GetPrefixPermissions(ctx, "row1"); !isVersionMismatchErr(err) {
+		t.Fatal("Expected ErrDatabaseVersionMismatch, found: " + toString(err))
+	}
+	if err := table.SetPrefixPermissions(ctx, nosql.Prefix("row"), nil); !isVersionMismatchErr(err) {
+		t.Fatal("Expected ErrDatabaseVersionMismatch, found: " + toString(err))
+	}
+	if err := table.DeletePrefixPermissions(ctx, nosql.Prefix("row")); !isVersionMismatchErr(err) {
 		t.Fatal("Expected ErrDatabaseVersionMismatch, found: " + toString(err))
 	}
 
