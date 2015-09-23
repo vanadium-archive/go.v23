@@ -56,44 +56,9 @@ func (s *watchStream) Advance() bool {
 		}
 		return false
 	}
-	watchChange := s.call.RecvStream().Value()
+	watchChange := ToWatchChange(s.call.RecvStream().Value())
+	s.curr = &watchChange
 
-	// Parse the table and the row.
-	table, row, err := util.ParseTableRowPair(nil, watchChange.Name)
-	if err != nil {
-		panic(err)
-	}
-	if row == "" {
-		panic("empty row name")
-	}
-	// Parse the store change.
-	var storeChange wire.StoreChange
-	rtarget, err := vdl.ReflectTarget(reflect.ValueOf(&storeChange))
-	if err != nil {
-		panic(err)
-	}
-	if err := vdl.FromValue(rtarget, watchChange.Value); err != nil {
-		panic(err)
-	}
-	// Parse the state.
-	var changeType ChangeType
-	switch watchChange.State {
-	case watch.Exists:
-		changeType = PutChange
-	case watch.DoesNotExist:
-		changeType = DeleteChange
-	default:
-		panic(fmt.Sprintf("unsupported watch change state: %v", watchChange.State))
-	}
-	s.curr = &WatchChange{
-		Table:        table,
-		Row:          row,
-		ChangeType:   changeType,
-		ValueBytes:   storeChange.Value,
-		ResumeMarker: watchChange.ResumeMarker,
-		FromSync:     storeChange.FromSync,
-		Continued:    watchChange.Continued,
-	}
 	return true
 }
 
@@ -124,4 +89,45 @@ func (s *watchStream) Cancel() {
 	defer s.mu.Unlock()
 	s.cancel()
 	s.err = verror.New(verror.ErrCanceled, nil)
+}
+
+// ToWatchChange converts a generic Change struct as defined in v.io/v23/services/watch
+// to a Syncbase-specific WatchChange struct as defined in v.io/v23/syncbase/nosql.
+func ToWatchChange(c watch.Change) WatchChange {
+	// Parse the table and the row.
+	table, row, err := util.ParseTableRowPair(nil, c.Name)
+	if err != nil {
+		panic(err)
+	}
+	if row == "" {
+		panic("empty row name")
+	}
+	// Parse the store change.
+	var storeChange wire.StoreChange
+	rtarget, err := vdl.ReflectTarget(reflect.ValueOf(&storeChange))
+	if err != nil {
+		panic(err)
+	}
+	if err := vdl.FromValue(rtarget, c.Value); err != nil {
+		panic(err)
+	}
+	// Parse the state.
+	var changeType ChangeType
+	switch c.State {
+	case watch.Exists:
+		changeType = PutChange
+	case watch.DoesNotExist:
+		changeType = DeleteChange
+	default:
+		panic(fmt.Sprintf("unsupported watch change state: %v", c.State))
+	}
+	return WatchChange{
+		Table:        table,
+		Row:          row,
+		ChangeType:   changeType,
+		ValueBytes:   storeChange.Value,
+		ResumeMarker: c.ResumeMarker,
+		FromSync:     storeChange.FromSync,
+		Continued:    c.Continued,
+	}
 }

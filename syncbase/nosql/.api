@@ -7,6 +7,7 @@ pkg nosql, func Prefix(string) PrefixRange
 pkg nosql, func Range(string, string) RowRange
 pkg nosql, func RunInBatch(*context.T, Database, wire.BatchOptions, func(BatchDatabase) error) error
 pkg nosql, func SingleRow(string) RowRange
+pkg nosql, func ToWatchChange(watch.Change) WatchChange
 pkg nosql, func UUID() string
 pkg nosql, method (*InvalidScanStream) Advance() bool
 pkg nosql, method (*InvalidScanStream) Cancel()
