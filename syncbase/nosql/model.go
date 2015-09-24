@@ -28,7 +28,7 @@ type DatabaseHandle interface {
 	// Name returns the relative name of this DatabaseHandle.
 	Name() string
 
-	// FullName returns the full name (object name) of this DatabaseHandle.
+	// FullName returns the object name (escaped) of this DatabaseHandle.
 	FullName() string
 
 	// Table returns the Table with the given name.
@@ -171,7 +171,7 @@ type Table interface {
 	// Name returns the relative name of this Table.
 	Name() string
 
-	// FullName returns the full name (object name) of this Table.
+	// FullName returns the object name (escaped) of this Table.
 	FullName() string
 
 	// Exists returns true only if this Table exists. Insufficient permissions
@@ -260,7 +260,7 @@ type Row interface {
 	// Key returns the primary key for this Row.
 	Key() string
 
-	// FullName returns the full name (object name) of this Row.
+	// FullName returns the object name (escaped) of this Row.
 	FullName() string
 
 	// Exists returns true only if this Row exists. Insufficient permissions
@@ -300,7 +300,8 @@ type Stream interface {
 	Cancel()
 }
 
-// ScanStream is an interface for iterating through a collection of key-value pairs.
+// ScanStream is an interface for iterating through a collection of key-value
+// pairs.
 type ScanStream interface {
 	Stream
 
@@ -338,8 +339,8 @@ type WatchStream interface {
 }
 
 // ChangeType describes the type of the row change: Put or Delete.
-// TODO(rogulenko): Add types for changes to syncgroups in this database,
-// as well as ACLs. Consider adding the Shell type.
+// TODO(rogulenko): Add types to represent changes to ACLs and SyncGroups in
+// this database. Also, consider adding the Shell type.
 type ChangeType uint32
 
 const (

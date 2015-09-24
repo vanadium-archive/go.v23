@@ -16,7 +16,6 @@ import (
 	"v.io/v23/syncbase"
 	"v.io/v23/syncbase/nosql"
 	"v.io/v23/syncbase/nosql/query"
-	"v.io/v23/syncbase/util"
 	"v.io/v23/vdl"
 	"v.io/v23/verror"
 	_ "v.io/x/ref/runtime/factories/generic"
@@ -38,11 +37,11 @@ func TestName(t *testing.T) {
 	if d.Name() != "d" {
 		t.Errorf("Wrong name: %q", d.Name())
 	}
-	if d.FullName() != naming.Join(sName, "a", util.NameSep, "d") {
+	if d.FullName() != naming.Join(sName, "a", "d") {
 		t.Errorf("Wrong full name: %q", d.FullName())
 	}
-	if b.Name() == d.Name() {
-		t.Errorf("Names should not match: %q", b.Name())
+	if b.Name() != d.Name() {
+		t.Errorf("Names should match: %q, %q", b.Name(), d.Name())
 	}
 	if b.FullName() == d.FullName() {
 		t.Errorf("Full names should not match: %q", b.FullName())
@@ -532,7 +531,7 @@ func TestDisallowedMethods(t *testing.T) {
 	}
 
 	// Test that Table.{Create,Destroy} fail with ErrBoundToBatch.
-	tc := wire.TableClient(naming.Join(b.FullName(), util.NameSep, "tb"))
+	tc := wire.TableClient(naming.Join(b.FullName(), "tb"))
 	if err := tc.Create(ctx, -1, nil); verror.ErrorID(err) != wire.ErrBoundToBatch.ID {
 		t.Fatalf("tc.Create() should have failed: %v", err)
 	}

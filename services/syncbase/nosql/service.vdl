@@ -33,18 +33,17 @@ type Database interface {
 	// do not exist.
 	Exists(schemaVersion int32) (bool | error) {access.Read}
 
-	// ListTables returns a list of all Table names.
-	// TODO(sadovsky): Maybe switch to streaming RPC.
-	ListTables() ([]string | error) {access.Read}
-
 	// Exec executes a syncQL query and returns all results as specified by in the
 	// query's select clause. Concurrency semantics are documented in model.go.
 	Exec(schemaVersion int32, query string) stream<_, []any> error {access.Read}
 
-	// BeginBatch creates a new batch. It returns an App-relative name for a
-	// Database handle bound to this batch. If this Database is already bound to a
-	// batch, BeginBatch() will fail with ErrBoundToBatch. Concurrency semantics
-	// are documented in model.go.
+	// BeginBatch creates a new batch. It returns a "batch suffix" string to
+	// append to the object name of this Database, yielding an object name for the
+	// Database bound to the created batch. (For example, if this Database is
+	// named "/path/to/db" and BeginBatch returns "##abc", the client should
+	// construct batch Database object name "/path/to/db##abc".) If this Database
+	// is already bound to a batch, BeginBatch() will fail with ErrBoundToBatch.
+	// Concurrency semantics are documented in model.go.
 	// TODO(sadovsky): Maybe make BatchOptions optional.
 	BeginBatch(schemaVersion int32, bo BatchOptions) (string | error) {access.Read}
 
@@ -337,13 +336,13 @@ type BlobManager interface {
 // without re-ordering. See watch.GlobWatcher for a detailed explanation of the
 // behavior.
 // TODO(rogulenko): Currently the only supported watch patterns are
-// "<tableName>/$/<rowPrefix>*". Consider changing that.
+// "<tableName>/<rowPrefix>*". Consider changing that.
 //
 // The watching is done by starting a streaming RPC. The argument to the RPC
 // contains the ResumeMarker that points to a particular place in the database
 // event log. The result stream consists of a never-ending sequence of Change
 // messages (until the call fails or is canceled). Each Change contains the Name
-// field in the form "<tableName>/$/<rowKey>" and the Value field of the
+// field in the form "<tableName>/<rowKey>" and the Value field of the
 // StoreChange type. If the client has no access to a row specified in a change,
 // that change is excluded from the result stream.
 //

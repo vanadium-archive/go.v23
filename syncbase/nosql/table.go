@@ -13,7 +13,11 @@ import (
 )
 
 func newTable(parentFullName, relativeName string, schemaVersion int32) Table {
-	fullName := naming.Join(parentFullName, util.NameSep, relativeName)
+	// Escape relativeName so that any forward slashes get dropped, thus ensuring
+	// that the server will interpret fullName as referring to a table object.
+	// Note that the server will still reject this name if util.ValidTableName
+	// returns false.
+	fullName := naming.Join(parentFullName, util.Escape(relativeName))
 	return &table{
 		c:               wire.TableClient(fullName),
 		fullName:        fullName,

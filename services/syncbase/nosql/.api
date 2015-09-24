@@ -244,7 +244,7 @@ pkg nosql, type CrRule struct, KeyPrefix string
 pkg nosql, type CrRule struct, Resolver ResolverType
 pkg nosql, type CrRule struct, TableName string
 pkg nosql, type CrRule struct, Type string
-pkg nosql, type DatabaseClientMethods interface { Abort, BeginBatch, Commit, CommitBlob, Create, CreateBlob, CreateSyncGroup, DeleteBlob, Destroy, DestroySyncGroup, EjectFromSyncGroup, Exec, Exists, FetchBlob, GetBlob, GetBlobSize, GetPermissions, GetResumeMarker, GetSchemaMetadata, GetSyncGroupMembers, GetSyncGroupNames, GetSyncGroupSpec, JoinSyncGroup, KeepBlob, LeaveSyncGroup, ListTables, PinBlob, PutBlob, SetPermissions, SetSchemaMetadata, SetSyncGroupSpec, StartConflictResolver, UnpinBlob, WatchGlob }
+pkg nosql, type DatabaseClientMethods interface { Abort, BeginBatch, Commit, CommitBlob, Create, CreateBlob, CreateSyncGroup, DeleteBlob, Destroy, DestroySyncGroup, EjectFromSyncGroup, Exec, Exists, FetchBlob, GetBlob, GetBlobSize, GetPermissions, GetResumeMarker, GetSchemaMetadata, GetSyncGroupMembers, GetSyncGroupNames, GetSyncGroupSpec, JoinSyncGroup, KeepBlob, LeaveSyncGroup, PinBlob, PutBlob, SetPermissions, SetSchemaMetadata, SetSyncGroupSpec, StartConflictResolver, UnpinBlob, WatchGlob }
 pkg nosql, type DatabaseClientMethods interface, Abort(*context.T, int32, ...rpc.CallOpt) error
 pkg nosql, type DatabaseClientMethods interface, BeginBatch(*context.T, int32, BatchOptions, ...rpc.CallOpt) (string, error)
 pkg nosql, type DatabaseClientMethods interface, Commit(*context.T, int32, ...rpc.CallOpt) error
@@ -270,7 +270,6 @@ pkg nosql, type DatabaseClientMethods interface, GetSyncGroupSpec(*context.T, st
 pkg nosql, type DatabaseClientMethods interface, JoinSyncGroup(*context.T, string, SyncGroupMemberInfo, ...rpc.CallOpt) (SyncGroupSpec, error)
 pkg nosql, type DatabaseClientMethods interface, KeepBlob(*context.T, BlobRef, uint64, ...rpc.CallOpt) error
 pkg nosql, type DatabaseClientMethods interface, LeaveSyncGroup(*context.T, string, ...rpc.CallOpt) error
-pkg nosql, type DatabaseClientMethods interface, ListTables(*context.T, ...rpc.CallOpt) ([]string, error)
 pkg nosql, type DatabaseClientMethods interface, PinBlob(*context.T, BlobRef, ...rpc.CallOpt) error
 pkg nosql, type DatabaseClientMethods interface, PutBlob(*context.T, BlobRef, ...rpc.CallOpt) (BlobManagerPutBlobClientCall, error)
 pkg nosql, type DatabaseClientMethods interface, SetPermissions(*context.T, access.Permissions, string, ...rpc.CallOpt) error
@@ -279,7 +278,7 @@ pkg nosql, type DatabaseClientMethods interface, SetSyncGroupSpec(*context.T, st
 pkg nosql, type DatabaseClientMethods interface, StartConflictResolver(*context.T, ...rpc.CallOpt) (ConflictManagerStartConflictResolverClientCall, error)
 pkg nosql, type DatabaseClientMethods interface, UnpinBlob(*context.T, BlobRef, ...rpc.CallOpt) error
 pkg nosql, type DatabaseClientMethods interface, WatchGlob(*context.T, GlobRequest, ...rpc.CallOpt) (GlobWatcherWatchGlobClientCall, error)
-pkg nosql, type DatabaseClientStub interface { Abort, BeginBatch, Commit, CommitBlob, Create, CreateBlob, CreateSyncGroup, DeleteBlob, Destroy, DestroySyncGroup, EjectFromSyncGroup, Exec, Exists, FetchBlob, GetBlob, GetBlobSize, GetPermissions, GetResumeMarker, GetSchemaMetadata, GetSyncGroupMembers, GetSyncGroupNames, GetSyncGroupSpec, JoinSyncGroup, KeepBlob, LeaveSyncGroup, ListTables, PinBlob, PutBlob, SetPermissions, SetSchemaMetadata, SetSyncGroupSpec, StartConflictResolver, UnpinBlob, WatchGlob }
+pkg nosql, type DatabaseClientStub interface { Abort, BeginBatch, Commit, CommitBlob, Create, CreateBlob, CreateSyncGroup, DeleteBlob, Destroy, DestroySyncGroup, EjectFromSyncGroup, Exec, Exists, FetchBlob, GetBlob, GetBlobSize, GetPermissions, GetResumeMarker, GetSchemaMetadata, GetSyncGroupMembers, GetSyncGroupNames, GetSyncGroupSpec, JoinSyncGroup, KeepBlob, LeaveSyncGroup, PinBlob, PutBlob, SetPermissions, SetSchemaMetadata, SetSyncGroupSpec, StartConflictResolver, UnpinBlob, WatchGlob }
 pkg nosql, type DatabaseClientStub interface, Abort(*context.T, int32, ...rpc.CallOpt) error
 pkg nosql, type DatabaseClientStub interface, BeginBatch(*context.T, int32, BatchOptions, ...rpc.CallOpt) (string, error)
 pkg nosql, type DatabaseClientStub interface, Commit(*context.T, int32, ...rpc.CallOpt) error
@@ -305,7 +304,6 @@ pkg nosql, type DatabaseClientStub interface, GetSyncGroupSpec(*context.T, strin
 pkg nosql, type DatabaseClientStub interface, JoinSyncGroup(*context.T, string, SyncGroupMemberInfo, ...rpc.CallOpt) (SyncGroupSpec, error)
 pkg nosql, type DatabaseClientStub interface, KeepBlob(*context.T, BlobRef, uint64, ...rpc.CallOpt) error
 pkg nosql, type DatabaseClientStub interface, LeaveSyncGroup(*context.T, string, ...rpc.CallOpt) error
-pkg nosql, type DatabaseClientStub interface, ListTables(*context.T, ...rpc.CallOpt) ([]string, error)
 pkg nosql, type DatabaseClientStub interface, PinBlob(*context.T, BlobRef, ...rpc.CallOpt) error
 pkg nosql, type DatabaseClientStub interface, PutBlob(*context.T, BlobRef, ...rpc.CallOpt) (BlobManagerPutBlobClientCall, error)
 pkg nosql, type DatabaseClientStub interface, SetPermissions(*context.T, access.Permissions, string, ...rpc.CallOpt) error
@@ -331,7 +329,7 @@ pkg nosql, type DatabaseExecServerCallStub struct
 pkg nosql, type DatabaseExecServerCallStub struct, embedded rpc.StreamServerCall
 pkg nosql, type DatabaseExecServerStream interface { SendStream }
 pkg nosql, type DatabaseExecServerStream interface, SendStream() interface {  Send(item []*vdl.Value) error;}
-pkg nosql, type DatabaseServerMethods interface { Abort, BeginBatch, Commit, CommitBlob, Create, CreateBlob, CreateSyncGroup, DeleteBlob, Destroy, DestroySyncGroup, EjectFromSyncGroup, Exec, Exists, FetchBlob, GetBlob, GetBlobSize, GetPermissions, GetResumeMarker, GetSchemaMetadata, GetSyncGroupMembers, GetSyncGroupNames, GetSyncGroupSpec, JoinSyncGroup, KeepBlob, LeaveSyncGroup, ListTables, PinBlob, PutBlob, SetPermissions, SetSchemaMetadata, SetSyncGroupSpec, StartConflictResolver, UnpinBlob, WatchGlob }
+pkg nosql, type DatabaseServerMethods interface { Abort, BeginBatch, Commit, CommitBlob, Create, CreateBlob, CreateSyncGroup, DeleteBlob, Destroy, DestroySyncGroup, EjectFromSyncGroup, Exec, Exists, FetchBlob, GetBlob, GetBlobSize, GetPermissions, GetResumeMarker, GetSchemaMetadata, GetSyncGroupMembers, GetSyncGroupNames, GetSyncGroupSpec, JoinSyncGroup, KeepBlob, LeaveSyncGroup, PinBlob, PutBlob, SetPermissions, SetSchemaMetadata, SetSyncGroupSpec, StartConflictResolver, UnpinBlob, WatchGlob }
 pkg nosql, type DatabaseServerMethods interface, Abort(*context.T, rpc.ServerCall, int32) error
 pkg nosql, type DatabaseServerMethods interface, BeginBatch(*context.T, rpc.ServerCall, int32, BatchOptions) (string, error)
 pkg nosql, type DatabaseServerMethods interface, Commit(*context.T, rpc.ServerCall, int32) error
@@ -357,7 +355,6 @@ pkg nosql, type DatabaseServerMethods interface, GetSyncGroupSpec(*context.T, rp
 pkg nosql, type DatabaseServerMethods interface, JoinSyncGroup(*context.T, rpc.ServerCall, string, SyncGroupMemberInfo) (SyncGroupSpec, error)
 pkg nosql, type DatabaseServerMethods interface, KeepBlob(*context.T, rpc.ServerCall, BlobRef, uint64) error
 pkg nosql, type DatabaseServerMethods interface, LeaveSyncGroup(*context.T, rpc.ServerCall, string) error
-pkg nosql, type DatabaseServerMethods interface, ListTables(*context.T, rpc.ServerCall) ([]string, error)
 pkg nosql, type DatabaseServerMethods interface, PinBlob(*context.T, rpc.ServerCall, BlobRef) error
 pkg nosql, type DatabaseServerMethods interface, PutBlob(*context.T, BlobManagerPutBlobServerCall, BlobRef) error
 pkg nosql, type DatabaseServerMethods interface, SetPermissions(*context.T, rpc.ServerCall, access.Permissions, string) error
@@ -382,7 +379,6 @@ pkg nosql, type DatabaseServerStub interface, GetBlob(*context.T, *BlobManagerGe
 pkg nosql, type DatabaseServerStub interface, GetBlobSize(*context.T, rpc.ServerCall, BlobRef) (int64, error)
 pkg nosql, type DatabaseServerStub interface, GetResumeMarker(*context.T, rpc.ServerCall) (watch.ResumeMarker, error)
 pkg nosql, type DatabaseServerStub interface, KeepBlob(*context.T, rpc.ServerCall, BlobRef, uint64) error
-pkg nosql, type DatabaseServerStub interface, ListTables(*context.T, rpc.ServerCall) ([]string, error)
 pkg nosql, type DatabaseServerStub interface, PinBlob(*context.T, rpc.ServerCall, BlobRef) error
 pkg nosql, type DatabaseServerStub interface, PutBlob(*context.T, *BlobManagerPutBlobServerCallStub, BlobRef) error
 pkg nosql, type DatabaseServerStub interface, StartConflictResolver(*context.T, *ConflictManagerStartConflictResolverServerCallStub) error
@@ -404,7 +400,6 @@ pkg nosql, type DatabaseServerStubMethods interface, GetBlob(*context.T, *BlobMa
 pkg nosql, type DatabaseServerStubMethods interface, GetBlobSize(*context.T, rpc.ServerCall, BlobRef) (int64, error)
 pkg nosql, type DatabaseServerStubMethods interface, GetResumeMarker(*context.T, rpc.ServerCall) (watch.ResumeMarker, error)
 pkg nosql, type DatabaseServerStubMethods interface, KeepBlob(*context.T, rpc.ServerCall, BlobRef, uint64) error
-pkg nosql, type DatabaseServerStubMethods interface, ListTables(*context.T, rpc.ServerCall) ([]string, error)
 pkg nosql, type DatabaseServerStubMethods interface, PinBlob(*context.T, rpc.ServerCall, BlobRef) error
 pkg nosql, type DatabaseServerStubMethods interface, PutBlob(*context.T, *BlobManagerPutBlobServerCallStub, BlobRef) error
 pkg nosql, type DatabaseServerStubMethods interface, StartConflictResolver(*context.T, *ConflictManagerStartConflictResolverServerCallStub) error

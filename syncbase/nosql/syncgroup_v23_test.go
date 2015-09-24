@@ -16,7 +16,6 @@ import (
 	wire "v.io/v23/services/syncbase/nosql"
 	"v.io/v23/syncbase"
 	"v.io/v23/syncbase/nosql"
-	"v.io/v23/syncbase/util"
 	"v.io/v23/verror"
 	"v.io/x/ref"
 	_ "v.io/x/ref/runtime/factories/generic"
@@ -986,7 +985,7 @@ var runPopulateSyncGroupMulti = modules.Register(func(env *modules.Env, args ...
 
 			// Create one SyncGroup per database across all tables
 			// and prefixes.
-			sgName := naming.Join(sgNamePrefix, appName, util.NameSep, dbName)
+			sgName := naming.Join(sgNamePrefix, appName, dbName)
 			spec := wire.SyncGroupSpec{
 				Description: fmt.Sprintf("test sg %s/%s", appName, dbName),
 				Perms:       perms("root/s0", "root/s1"),
@@ -1022,7 +1021,7 @@ var runJoinSyncGroupMulti = modules.Register(func(env *modules.Env, args ...stri
 			dbName := fmt.Sprintf("d%d", j)
 			d := a.NoSQLDatabase(dbName, nil)
 
-			sgName := naming.Join(sgNamePrefix, appName, util.NameSep, dbName)
+			sgName := naming.Join(sgNamePrefix, appName, dbName)
 			sg := d.SyncGroup(sgName)
 			info := wire.SyncGroupMemberInfo{10}
 			if _, err := sg.Join(ctx, info); err != nil {

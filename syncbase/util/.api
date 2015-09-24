@@ -1,0 +1,14 @@
+pkg util, func Escape(string) string
+pkg util, func IsPrefix(string, string) bool
+pkg util, func ListChildren(*context.T, string) ([]string, error)
+pkg util, func ParseTableRowPair(*context.T, string) (string, string, error)
+pkg util, func PrefixRangeLimit(string) string
+pkg util, func PrefixRangeStart(string) string
+pkg util, func Unescape(string) (string, bool)
+pkg util, func ValidAppName(string) bool
+pkg util, func ValidDatabaseName(string) bool
+pkg util, func ValidRowKey(string) bool
+pkg util, func ValidTableName(string) bool
+pkg util, type AccessController interface { GetPermissions, SetPermissions }
+pkg util, type AccessController interface, GetPermissions(*context.T) (access.Permissions, string, error)
+pkg util, type AccessController interface, SetPermissions(*context.T, access.Permissions, string) error

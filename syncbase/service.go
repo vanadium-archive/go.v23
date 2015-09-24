@@ -8,10 +8,14 @@ import (
 	"v.io/v23/context"
 	"v.io/v23/security/access"
 	wire "v.io/v23/services/syncbase"
+	"v.io/v23/syncbase/util"
 )
 
 func NewService(fullName string) Service {
-	return &service{wire.ServiceClient(fullName), fullName}
+	return &service{
+		c:        wire.ServiceClient(fullName),
+		fullName: fullName,
+	}
 }
 
 type service struct {
@@ -35,7 +39,7 @@ func (s *service) App(relativeName string) App {
 
 // ListApps implements Service.ListApps.
 func (s *service) ListApps(ctx *context.T) ([]string, error) {
-	return s.c.ListApps(ctx)
+	return util.ListChildren(ctx, s.fullName)
 }
 
 // SetPermissions implements Service.SetPermissions.

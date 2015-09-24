@@ -13,7 +13,9 @@ import (
 )
 
 func newRow(parentFullName, key string, schemaVersion int32) Row {
-	fullName := naming.Join(parentFullName, util.NameSep, key)
+	// Note, we immediately unescape row keys on the server side. See comment in
+	// server/nosql/dispatcher.go for explanation.
+	fullName := naming.Join(parentFullName, util.Escape(key))
 	return &row{
 		c:               wire.RowClient(fullName),
 		fullName:        fullName,

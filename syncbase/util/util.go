@@ -5,8 +5,8 @@
 package util
 
 import (
+	"regexp"
 	"strings"
-	"unicode/utf8"
 
 	"v.io/v23/context"
 	"v.io/v23/naming"
@@ -15,58 +15,68 @@ import (
 	"v.io/v23/verror"
 )
 
-// NameSepWithSlashes is the component name separator used in Syncbase object
-// names. For example, rows in Syncbase have object names of the form:
-//     <syncbase>/<app>/$/<database>/$/<table>/$/<row>
-//
-// Note that component names may include "$" characters, e.g. an app may be
-// named "foo$bar".
-//
-// TODO(sadovsky): Consider adding /$/ between <syncbase> and <app>. This would
-// have the side effect of making non-app/db/tb/row suffixes less ugly, e.g.
-// eliminating the need for "@@" prefix in "@@sync". (But note, we should also
-// make it so clients using the client library never have to specify absolute
-// names beyond <syncbase>.)
-const NameSep = "$"
-const NameSepWithSlashes = "/" + NameSep + "/"
-
-// ValidName returns true iff the given Syncbase component name (i.e. app,
-// database, table, or row name) is valid. Component names:
-//   must be valid UTF-8;
-//   must not contain "\x00" or "@@";
-//   must not have any slash-separated parts equal to "" or "$"; and
-//   must not have any slash-separated parts that start with "__".
-func ValidName(s string) bool {
-	// TODO(sadovsky): Temporary hack to avoid updating lots of internal tests as
-	// part of the change that switches us over to the /$/ hierarchy separator
-	// scheme. This check should go away by Sept 21, 2015.
-	if strings.Contains(s, ":") {
-		return false
-	}
-	if strings.Contains(s, "\x00") || strings.Contains(s, "@@") || !utf8.ValidString(s) {
-		return false
-	}
-	parts := strings.Split(s, "/")
-	for _, v := range parts {
-		if v == "" || v == NameSep || strings.HasPrefix(v, naming.ReservedNamePrefix /* __ */) {
-			return false
-		}
-	}
-	return true
+// Escape escapes a component name for use in a Syncbase object name. In
+// particular, it replaces bytes "%" and "/" with the "%" character followed by
+// the byte's two-digit hex code. Clients using the client library need not
+// escape names themselves; the client library does so on their behalf.
+func Escape(s string) string {
+	return naming.Escape(s, "/")
 }
 
-// ParseTableRowPair splits the "<table>/$/<row>" part of a Syncbase object name
-// into the table name and the row key. The row key may be empty.
+// Unescape applies the inverse of Escape. It returns false if the given string
+// is not a valid escaped string.
+func Unescape(s string) (string, bool) {
+	return naming.Unescape(s)
+}
+
+var identifierRegexp *regexp.Regexp = regexp.MustCompile("^[a-zA-Z][a-zA-Z0-9_]*$")
+
+func validIdentifier(s string) bool {
+	return identifierRegexp.MatchString(s)
+}
+
+// ValidAppName returns true iff the given string is a valid app name.
+func ValidAppName(s string) bool {
+	if s == "" {
+		return false
+	}
+	// TODO(sadovsky): The inclusion of ":" is a temporary hack, needed until we
+	// update SplitKeyParts to use SplitN instead of Split.
+	return !strings.ContainsAny(s, ":\x00\xff")
+}
+
+// ValidDatabaseName returns true iff the given string is a valid database name.
+func ValidDatabaseName(s string) bool {
+	return validIdentifier(s)
+}
+
+// ValidTableName returns true iff the given string is a valid table name.
+func ValidTableName(s string) bool {
+	return validIdentifier(s)
+}
+
+// ValidRowKey returns true iff the given string is a valid row key.
+func ValidRowKey(s string) bool {
+	if s == "" {
+		return false
+	}
+	// TODO(sadovsky): The inclusion of ":" is a temporary hack, needed until we
+	// update SplitKeyParts to use SplitN instead of Split.
+	return !strings.ContainsAny(s, ":\x00\xff")
+}
+
+// ParseTableRowPair splits the "<table>/<row>" part of a Syncbase object name
+// into the table name and the row key or prefix.
 func ParseTableRowPair(ctx *context.T, pattern string) (string, string, error) {
-	parts := strings.Split(pattern, NameSepWithSlashes)
-	if len(parts) != 2 {
+	parts := strings.SplitN(pattern, "/", 2)
+	if len(parts) != 2 { // require both table and row parts
 		return "", "", verror.New(verror.ErrBadArg, ctx, pattern)
 	}
 	table, row := parts[0], parts[1]
-	if !ValidName(table) {
+	if !ValidTableName(table) {
 		return "", "", verror.New(wire.ErrInvalidName, ctx, table)
 	}
-	if row != "" && !ValidName(row) {
+	if row != "" && !ValidRowKey(row) {
 		return "", "", verror.New(wire.ErrInvalidName, ctx, row)
 	}
 	return table, row, nil

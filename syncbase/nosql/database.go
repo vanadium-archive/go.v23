@@ -11,6 +11,7 @@ import (
 	"v.io/v23/context"
 	"v.io/v23/naming"
 	"v.io/v23/security/access"
+	svcwire "v.io/v23/services/syncbase"
 	wire "v.io/v23/services/syncbase/nosql"
 	"v.io/v23/services/watch"
 	"v.io/v23/syncbase/util"
@@ -24,8 +25,12 @@ const (
 	reconnectionCount           = "rcc"
 )
 
-func NewDatabase(parentFullName, relativeName string, schema *Schema) *database {
-	fullName := naming.Join(parentFullName, util.NameSep, relativeName)
+func newDatabaseImpl(parentFullName, relativeName, batchSuffix string, schema *Schema) *database {
+	// Escape relativeName so that any forward slashes get dropped, thus ensuring
+	// that the server will interpret fullName as referring to a database object.
+	// Note that the server will still reject this name if util.ValidDatabaseName
+	// returns false.
+	fullName := naming.Join(parentFullName, util.Escape(relativeName)+batchSuffix)
 	return &database{
 		c:              wire.DatabaseClient(fullName),
 		parentFullName: parentFullName,
@@ -38,6 +43,10 @@ func NewDatabase(parentFullName, relativeName string, schema *Schema) *database 
 	}
 }
 
+func NewDatabase(parentFullName, relativeName string, schema *Schema) *database {
+	return newDatabaseImpl(parentFullName, relativeName, "", schema)
+}
+
 type database struct {
 	c              wire.DatabaseClientMethods
 	parentFullName string
@@ -47,9 +56,9 @@ type database struct {
 	crState        conflictResolutionState
 }
 
-// conflictResolutionState maintains data about the connection of
-// conflict resolution stream with syncbase. It provides a way to disconnect
-// an existing open stream.
+// conflictResolutionState maintains data about the connection of a conflict
+// resolution stream with syncbase. It provides a way to disconnect an existing
+// open stream.
 type conflictResolutionState struct {
 	mu                sync.Mutex // guards access to all fields in this struct
 	crContext         *context.T
@@ -97,7 +106,7 @@ func (d *database) Table(relativeName string) Table {
 
 // ListTables implements Database.ListTables.
 func (d *database) ListTables(ctx *context.T) ([]string, error) {
-	return d.c.ListTables(ctx)
+	return util.ListChildren(ctx, d.fullName)
 }
 
 // Create implements Database.Create.
@@ -122,7 +131,7 @@ func (d *database) Exec(ctx *context.T, query string) ([]string, ResultStream, e
 		return nil, nil, err
 	}
 	resultStream := newResultStream(cancel, call)
-	// The first row contains headers, pull them off the stream
+	// The first row contains column headers. Pull them off the stream
 	// and return them separately.
 	var headers []string
 	if !resultStream.Advance() {
@@ -140,11 +149,11 @@ func (d *database) Exec(ctx *context.T, query string) ([]string, ResultStream, e
 
 // BeginBatch implements Database.BeginBatch.
 func (d *database) BeginBatch(ctx *context.T, opts wire.BatchOptions) (BatchDatabase, error) {
-	relativeName, err := d.c.BeginBatch(ctx, d.schemaVersion(), opts)
+	batchSuffix, err := d.c.BeginBatch(ctx, d.schemaVersion(), opts)
 	if err != nil {
 		return nil, err
 	}
-	return &batch{database: *NewDatabase(d.parentFullName, relativeName, d.schema)}, nil
+	return &batch{database: *newDatabaseImpl(d.parentFullName, d.name, batchSuffix, d.schema)}, nil
 }
 
 // SetPermissions implements Database.SetPermissions.
@@ -159,9 +168,12 @@ func (d *database) GetPermissions(ctx *context.T) (perms access.Permissions, ver
 
 // Watch implements the Database interface.
 func (d *database) Watch(ctx *context.T, table, prefix string, resumeMarker watch.ResumeMarker) (WatchStream, error) {
+	if !util.ValidTableName(table) {
+		return nil, verror.New(svcwire.ErrInvalidName, ctx, table)
+	}
 	ctx, cancel := context.WithCancel(ctx)
 	call, err := d.c.WatchGlob(ctx, watch.GlobRequest{
-		Pattern:      naming.Join(table, util.NameSep, prefix+"*"),
+		Pattern:      naming.Join(table, prefix+"*"),
 		ResumeMarker: resumeMarker,
 	})
 	if err != nil {
@@ -236,14 +248,14 @@ func (d *database) upgradeIfOutdated(ctx *context.T) (bool, error) {
 	schemaMgr := d.getSchemaManager()
 	currMeta, err := schemaMgr.getSchemaMetadata(ctx)
 	if err != nil {
-		// If the client app did not set a schema as part of create db
-		// getSchemaMetadata() will return ErrNoExist. If so we set the schema
-		// here.
+		// If the client app did not set a schema as part of database creation,
+		// getSchemaMetadata() will return ErrNoExist. In this case, we set the
+		// schema here.
 		if verror.ErrorID(err) == verror.ErrNoExist.ID {
 			err := schemaMgr.setSchemaMetadata(ctx, schema.Metadata)
-			// The database may not yet exist. If so above call will return
-			// ErrNoExist and we return db without error. If the error
-			// is different then return the error to the caller.
+			// The database may not yet exist. If so, the above call will return
+			// ErrNoExist, and here we return (false, nil). If the error is anything
+			// other than ErrNoExist, here we return (false, err).
 			if (err != nil) && (verror.ErrorID(err) != verror.ErrNoExist.ID) {
 				return false, err
 			}
@@ -282,7 +294,7 @@ func (d *database) establishConflictResolution(ctx *context.T) {
 		count++
 		vlog.Infof("Starting a new conflict resolution connection. Reconnection count: %d", count)
 		childCtx := context.WithValue(ctx, reconnectionCount, count)
-		// listenForConflicts is a blocking method which returns only when the
+		// listenForConflicts is a blocking method that returns only when the
 		// conflict stream is broken.
 		if err := d.listenForConflicts(childCtx); err != nil {
 			vlog.Errorf("Conflict resolution connection ended with error: %v", err)
@@ -295,7 +307,7 @@ func (d *database) establishConflictResolution(ctx *context.T) {
 			break
 		}
 
-		// The connection might have broken because syncbase service went down.
+		// The connection might have broken because the syncbase server went down.
 		// Sleep for a few seconds to allow syncbase to come back up.
 		time.Sleep(d.crState.reconnectWaitTime)
 	}
@@ -326,8 +338,8 @@ func (d *database) listenForConflicts(ctx *context.T) error {
 	return resolver.Finish()
 }
 
-// TODO(jlodhia): Should we check if the Resolution received addresses all
-// conflicts in write set?
+// TODO(jlodhia): Should we check that the Resolution provided by the
+// application resolves all conflicts in the write set?
 func sendResolution(stream interface {
 	Send(item wire.ResolutionInfo) error
 }, resolution Resolution) error {
@@ -416,7 +428,7 @@ func toConflictRow(op wire.RowOp, batchIds []uint16) ConflictRow {
 }
 
 // TODO(jlodhia): remove this method once time is stored as time.Time instead
-// of int64
+// of int64.
 func toTime(unixNanos int64) time.Time {
 	return time.Unix(
 		unixNanos/1e9, // seconds
@@ -430,7 +442,7 @@ func toResolutionInfo(r ResolvedRow, lastRow bool) wire.ResolutionInfo {
 		sel = r.Result.selection
 		resVal = &wire.Value{
 			Bytes:   r.Result.val,
-			WriteTs: r.Result.WriteTs.UnixNano(), // this timestamp is ignored by syncbase
+			WriteTs: r.Result.WriteTs.UnixNano(), // ignored by syncbase
 		}
 	}
 	return wire.ResolutionInfo{

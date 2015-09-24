@@ -5,59 +5,66 @@
 package util_test
 
 import (
+	"strings"
 	"testing"
 
 	"v.io/v23/syncbase/util"
+	tu "v.io/x/ref/services/syncbase/testutil"
 )
 
-func TestValidName(t *testing.T) {
-	tests := []struct {
-		name string
-		res  bool
-	}{
-		{"", false},          // empty
-		{"\xff", false},      // not valid UTF-8
-		{"\x00", false},      // contains "\x00"
-		{"a\x00", false},     // contains "\x00"
-		{"\x00a", false},     // contains "\x00"
-		{"@@", false},        // contains "@@"
-		{"a@@", false},       // contains "@@"
-		{"@@a", false},       // contains "@@"
-		{"/", false},         // slash-separated component equal to ""
-		{"//", false},        // slash-separated component equal to ""
-		{"a/", false},        // slash-separated component equal to ""
-		{"/a", false},        // slash-separated component equal to ""
-		{"a//b", false},      // slash-separated component equal to ""
-		{"$", false},         // slash-separated component equal to "$"
-		{"a/$", false},       // slash-separated component equal to "$"
-		{"$/a", false},       // slash-separated component equal to "$"
-		{"a/$/b", false},     // slash-separated component equal to "$"
-		{"__", false},        // slash-separated component starts with "__"
-		{"__foo", false},     // slash-separated component starts with "__"
-		{"a/__foo", false},   // slash-separated component starts with "__"
-		{"a/__foo/b", false}, // slash-separated component starts with "__"
-		{":", false},         // TODO(sadovsky): Temporary hack.
-		{"a:b", false},       // TODO(sadovsky): Temporary hack.
-		{"a", true},
-		{"aa", true},
-		{"*", true},
-		{"a*", true},
-		{"*a", true},
-		{"a*b", true},
-		{"a__", true},
-		{"a/b__", true},
-		{"a/b", true},
-		{"alice/bob", true},
-		{"a/$$", true},
-		{"$$/a", true},
-		{"a/$$/b", true},
-		{"dev.v.io/a/admin@myapp.com", true},
-		{"안녕하세요", true},
+func TestEscapeUnescape(t *testing.T) {
+	strs := []string{}
+	copy(strs, tu.OkAppRowNames)
+	strs = append(strs, tu.NotOkAppRowNames...)
+	for _, s := range strs {
+		esc := util.Escape(s)
+		unesc, ok := util.Unescape(esc)
+		if !ok {
+			t.Fatalf("unescape failed: %q, %q", s, esc)
+		}
+		if strings.ContainsAny(esc, "/") {
+			t.Errorf("%q was escaped to %q, which contains bad chars", s, esc)
+		}
+		if !strings.ContainsAny(s, "%/") && s != esc {
+			t.Errorf("%q should equal %q", s, esc)
+		}
+		if s != unesc {
+			t.Errorf("%q should equal %q", s, unesc)
+		}
 	}
-	for _, test := range tests {
-		res := util.ValidName(test.name)
-		if res != test.res {
-			t.Errorf("%q: got %v, want %v", test.name, res, test.res)
+}
+
+func TestValidNameFuncs(t *testing.T) {
+	for _, s := range tu.OkAppRowNames {
+		if !util.ValidAppName(s) {
+			t.Errorf("%q should be valid", s)
+		}
+		if !util.ValidRowKey(s) {
+			t.Errorf("%q should be valid", s)
+		}
+	}
+	for _, s := range tu.NotOkAppRowNames {
+		if util.ValidAppName(s) {
+			t.Errorf("%q should be invalid", s)
+		}
+		if util.ValidRowKey(s) {
+			t.Errorf("%q should be invalid", s)
+		}
+	}
+	for _, s := range tu.OkDbTableNames {
+		if !util.ValidDatabaseName(s) {
+			t.Errorf("%q should be valid", s)
+		}
+		if !util.ValidTableName(s) {
+			t.Errorf("%q should be valid", s)
+		}
+	}
+	for _, s := range tu.NotOkDbTableNames {
+		if util.ValidDatabaseName(s) {
+			t.Errorf("%q should be invalid", s)
+		}
+		if util.ValidTableName(s) {
+			t.Errorf("%q should be invalid", s)
 		}
 	}
 }

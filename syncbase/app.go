@@ -10,10 +10,11 @@ import (
 	"v.io/v23/security/access"
 	wire "v.io/v23/services/syncbase"
 	"v.io/v23/syncbase/nosql"
+	"v.io/v23/syncbase/util"
 )
 
 func newApp(parentFullName, relativeName string) App {
-	fullName := naming.Join(parentFullName, relativeName)
+	fullName := naming.Join(parentFullName, util.Escape(relativeName))
 	return &app{
 		c:        wire.AppClient(fullName),
 		fullName: fullName,
@@ -53,7 +54,7 @@ func (a *app) NoSQLDatabase(relativeName string, schema *nosql.Schema) nosql.Dat
 
 // ListDatabases implements App.ListDatabases.
 func (a *app) ListDatabases(ctx *context.T) ([]string, error) {
-	return a.c.ListDatabases(ctx)
+	return util.ListChildren(ctx, a.fullName)
 }
 
 // Create implements App.Create.

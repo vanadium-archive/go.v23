@@ -25,11 +25,10 @@ import (
 // Service represents a Vanadium Syncbase service.
 // Use syncbase.NewService to get a Service.
 type Service interface {
-	// FullName returns the full name (object name) of this Service.
+	// FullName returns the object name (escaped) of this Service.
 	FullName() string
 
 	// App returns the App with the given name.
-	// relativeName must not contain slashes.
 	App(relativeName string) App
 
 	// ListApps returns a list of all App names.
@@ -46,7 +45,7 @@ type App interface {
 	// Name returns the relative name of this App.
 	Name() string
 
-	// FullName returns the full name (object name) of this App.
+	// FullName returns the object name (escaped) of this App.
 	FullName() string
 
 	// Exists returns true only if this App exists. Insufficient permissions

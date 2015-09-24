@@ -16,7 +16,6 @@ import (
 	"v.io/v23/syncbase"
 	"v.io/v23/syncbase/nosql"
 	"v.io/v23/syncbase/nosql/query"
-	"v.io/v23/syncbase/util"
 	"v.io/v23/vdl"
 	"v.io/v23/verror"
 	"v.io/v23/vom"
@@ -35,19 +34,19 @@ func TestNameAndKey(t *testing.T) {
 	if d.Name() != "d" {
 		t.Errorf("Wrong name: %q", d.Name())
 	}
-	if d.FullName() != naming.Join("s", "a", util.NameSep, "d") {
+	if d.FullName() != naming.Join("s", "a", "d") {
 		t.Errorf("Wrong full name: %q", d.FullName())
 	}
 	if tb.Name() != "tb" {
 		t.Errorf("Wrong name: %q", tb.Name())
 	}
-	if tb.FullName() != naming.Join("s", "a", util.NameSep, "d", util.NameSep, "tb") {
+	if tb.FullName() != naming.Join("s", "a", "d", "tb") {
 		t.Errorf("Wrong full name: %q", tb.FullName())
 	}
 	if r.Key() != "r" {
 		t.Errorf("Wrong key: %q", r.Key())
 	}
-	if r.FullName() != naming.Join("s", "a", util.NameSep, "d", util.NameSep, "tb", util.NameSep, "r") {
+	if r.FullName() != naming.Join("s", "a", "d", "tb", "r") {
 		t.Errorf("Wrong full name: %q", r.FullName())
 	}
 }
@@ -65,7 +64,7 @@ func TestDatabaseCreateNameValidation(t *testing.T) {
 	ctx, sName, cleanup := tu.SetupOrDie(nil)
 	defer cleanup()
 	a := tu.CreateApp(t, ctx, syncbase.NewService(sName), "a")
-	tu.TestCreateNameValidation(t, ctx, a)
+	tu.TestCreateNameValidation(t, ctx, a, tu.OkDbTableNames, tu.NotOkDbTableNames)
 }
 
 // Tests that Database.Destroy works as expected.
@@ -186,7 +185,7 @@ func TestTableCreateNameValidation(t *testing.T) {
 	defer cleanup()
 	a := tu.CreateApp(t, ctx, syncbase.NewService(sName), "a")
 	d := tu.CreateNoSQLDatabase(t, ctx, a, "d")
-	tu.TestCreateNameValidation(t, ctx, d)
+	tu.TestCreateNameValidation(t, ctx, d, tu.OkDbTableNames, tu.NotOkDbTableNames)
 }
 
 // Tests that Table.Destroy works as expected.
@@ -676,13 +675,13 @@ func TestRowMethods(t *testing.T) {
 }
 
 // Tests name-checking on row creation.
-func TestRowKeyValidation(t *testing.T) {
+func TestRowNameValidation(t *testing.T) {
 	ctx, sName, cleanup := tu.SetupOrDie(nil)
 	defer cleanup()
 	a := tu.CreateApp(t, ctx, syncbase.NewService(sName), "a")
 	d := tu.CreateNoSQLDatabase(t, ctx, a, "d")
 	tb := tu.CreateTable(t, ctx, d, "tb")
-	tu.TestCreateNameValidation(t, ctx, tb)
+	tu.TestCreateNameValidation(t, ctx, tb, tu.OkAppRowNames, tu.NotOkAppRowNames)
 }
 
 // Test permission checking in Row.{Get,Put,Delete} and

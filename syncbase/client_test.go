@@ -51,11 +51,11 @@ func TestAppCreate(t *testing.T) {
 	tu.TestCreate(t, ctx, syncbase.NewService(sName))
 }
 
-// Tests name-checking on app creation.
+// Tests that App.Create checks names as expected.
 func TestAppCreateNameValidation(t *testing.T) {
 	ctx, sName, cleanup := tu.SetupOrDie(nil)
 	defer cleanup()
-	tu.TestCreateNameValidation(t, ctx, syncbase.NewService(sName))
+	tu.TestCreateNameValidation(t, ctx, syncbase.NewService(sName), tu.OkAppRowNames, tu.NotOkAppRowNames)
 }
 
 // Tests that App.Destroy works as expected.
