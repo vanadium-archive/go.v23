@@ -2444,7 +2444,7 @@ var descDatabase = rpc.InterfaceDesc{
 			OutArgs: []rpc.ArgDesc{
 				{"", ``}, // bool
 			},
-			Tags: []*vdl.Value{vdl.ValueOf(access.Tag("Read"))},
+			Tags: []*vdl.Value{vdl.ValueOf(access.Tag("Resolve"))},
 		},
 		{
 			Name: "Exec",
@@ -2929,7 +2929,7 @@ var descTable = rpc.InterfaceDesc{
 			OutArgs: []rpc.ArgDesc{
 				{"", ``}, // bool
 			},
-			Tags: []*vdl.Value{vdl.ValueOf(access.Tag("Read"))},
+			Tags: []*vdl.Value{vdl.ValueOf(access.Tag("Resolve"))},
 		},
 		{
 			Name: "GetPermissions",
@@ -3062,6 +3062,9 @@ func (s implTableScanServerCallSend) Send(item KeyValue) error {
 type RowClientMethods interface {
 	// Exists returns true only if this Row exists. Insufficient permissions
 	// cause Exists to return false instead of an error.
+	// Note, Exists on Row requires read permissions, unlike higher levels of
+	// hierarchy which require resolve, because Row existence usually carries
+	// more information.
 	// TODO(ivanpi): Exists may fail with an error if higher levels of hierarchy
 	// do not exist.
 	Exists(ctx *context.T, schemaVersion int32, opts ...rpc.CallOpt) (bool, error)
@@ -3122,6 +3125,9 @@ func (c implRowClientStub) Delete(ctx *context.T, i0 int32, opts ...rpc.CallOpt)
 type RowServerMethods interface {
 	// Exists returns true only if this Row exists. Insufficient permissions
 	// cause Exists to return false instead of an error.
+	// Note, Exists on Row requires read permissions, unlike higher levels of
+	// hierarchy which require resolve, because Row existence usually carries
+	// more information.
 	// TODO(ivanpi): Exists may fail with an error if higher levels of hierarchy
 	// do not exist.
 	Exists(ctx *context.T, call rpc.ServerCall, schemaVersion int32) (bool, error)
@@ -3203,7 +3209,7 @@ var descRow = rpc.InterfaceDesc{
 	Methods: []rpc.MethodDesc{
 		{
 			Name: "Exists",
-			Doc:  "// Exists returns true only if this Row exists. Insufficient permissions\n// cause Exists to return false instead of an error.\n// TODO(ivanpi): Exists may fail with an error if higher levels of hierarchy\n// do not exist.",
+			Doc:  "// Exists returns true only if this Row exists. Insufficient permissions\n// cause Exists to return false instead of an error.\n// Note, Exists on Row requires read permissions, unlike higher levels of\n// hierarchy which require resolve, because Row existence usually carries\n// more information.\n// TODO(ivanpi): Exists may fail with an error if higher levels of hierarchy\n// do not exist.",
 			InArgs: []rpc.ArgDesc{
 				{"schemaVersion", ``}, // int32
 			},

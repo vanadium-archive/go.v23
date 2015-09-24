@@ -36,7 +36,7 @@ type App interface {
 
 	// Exists returns true only if this App exists. Insufficient permissions
 	// cause Exists to return false instead of an error.
-	Exists() (bool | error) {access.Read}
+	Exists() (bool | error) {access.Resolve}
 
 	// SetPermissions and GetPermissions are included from the Object interface.
 	permissions.Object

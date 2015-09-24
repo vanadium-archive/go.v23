@@ -31,7 +31,7 @@ type Database interface {
 	// cause Exists to return false instead of an error.
 	// TODO(ivanpi): Exists may fail with an error if higher levels of hierarchy
 	// do not exist.
-	Exists(schemaVersion int32) (bool | error) {access.Read}
+	Exists(schemaVersion int32) (bool | error) {access.Resolve}
 
 	// Exec executes a syncQL query and returns all results as specified by in the
 	// query's select clause. Concurrency semantics are documented in model.go.
@@ -98,7 +98,7 @@ type Table interface {
 	// cause Exists to return false instead of an error.
 	// TODO(ivanpi): Exists may fail with an error if higher levels of hierarchy
 	// do not exist.
-	Exists(schemaVersion int32) (bool | error) {access.Read}
+	Exists(schemaVersion int32) (bool | error) {access.Resolve}
 
 	// GetPermissions returns the current Permissions for the Table.
 	GetPermissions(schemaVersion int32) (access.Permissions | error) {access.Admin}
@@ -150,6 +150,9 @@ type Table interface {
 type Row interface {
 	// Exists returns true only if this Row exists. Insufficient permissions
 	// cause Exists to return false instead of an error.
+	// Note, Exists on Row requires read permissions, unlike higher levels of
+	// hierarchy which require resolve, because Row existence usually carries
+	// more information.
 	// TODO(ivanpi): Exists may fail with an error if higher levels of hierarchy
 	// do not exist.
 	Exists(schemaVersion int32) (bool | error) {access.Read}

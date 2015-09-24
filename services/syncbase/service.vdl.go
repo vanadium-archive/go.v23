@@ -465,7 +465,7 @@ var descApp = rpc.InterfaceDesc{
 			OutArgs: []rpc.ArgDesc{
 				{"", ``}, // bool
 			},
-			Tags: []*vdl.Value{vdl.ValueOf(access.Tag("Read"))},
+			Tags: []*vdl.Value{vdl.ValueOf(access.Tag("Resolve"))},
 		},
 	},
 }
