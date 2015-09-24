@@ -69,7 +69,7 @@ func V23TestDeviceManager(i *v23tests.T) {
 		// waiting to be claimed.
 		//
 		// Other binaries, like applicationd and binaryd will be run by alice.
-		deviceScriptPath = filepath.Join(os.Getenv("V23_ROOT"), "release", "go", "src", "v.io", "x", "ref", "services", "device", "devicex")
+		deviceScriptPath = filepath.Join(os.Getenv("JIRI_ROOT"), "release", "go", "src", "v.io", "x", "ref", "services", "device", "devicex")
 		deviceScript     = i.BinaryFromPath(deviceScriptPath).WithEnv("V23_DEVICE_DIR=" + dmInstallDir)
 
 		mtName = "devices/" + hostname // Name under which the device manager will publish itself.
