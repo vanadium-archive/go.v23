@@ -22,7 +22,7 @@ import (
 	"v.io/x/ref/test/v23tests"
 )
 
-//go:generate v23 test generate
+//go:generate jiri test generate
 
 const (
 	syncbaseName = "syncbase" // Name that syncbase mounts itself at.
