@@ -33,8 +33,19 @@ type Manager interface {
 	// otherwise an error is returned.
 	Listen(ctx *context.T, protocol, address string) error
 
+	// ProxyListen causes the Manager to accept flows from the specified endpoint.
+	// The endpoint must correspond to a vanadium proxy.
+	//
+	// update get passed the complete set of endpoints for the proxy every time it
+	// is called.
+	//
+	// The flow.Manager associated with ctx must be the receiver of the method,
+	// otherwise an error is returned.
+	ProxyListen(ctx *context.T, endpoint naming.Endpoint, update func(eps []naming.Endpoint)) error
+
 	// ListeningEndpoints returns the endpoints that the Manager has explicitly
-	// listened on. The Manager will accept new flows on these endpoints.
+	// called Listen on. The Manager will accept new flows on these endpoints.
+	// Proxied endpoints are not returned.
 	// If the Manager is not listening on any endpoints, an endpoint with the
 	// Manager's RoutingID will be returned for use in bidirectional RPC.
 	// Returned endpoints all have the Manager's unique RoutingID.

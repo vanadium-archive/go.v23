@@ -40,12 +40,13 @@ pkg flow, type ManagedConn interface, Closed() <-chan struct{}
 pkg flow, type ManagedConn interface, CommonVersion() version.RPCVersion
 pkg flow, type ManagedConn interface, LocalEndpoint() naming.Endpoint
 pkg flow, type ManagedConn interface, RemoteEndpoint() naming.Endpoint
-pkg flow, type Manager interface { Accept, Closed, Dial, Listen, ListeningEndpoints, RoutingID }
+pkg flow, type Manager interface { Accept, Closed, Dial, Listen, ListeningEndpoints, ProxyListen, RoutingID }
 pkg flow, type Manager interface, Accept(*context.T) (Flow, error)
 pkg flow, type Manager interface, Closed() <-chan struct{}
 pkg flow, type Manager interface, Dial(*context.T, naming.Endpoint, BlessingsForPeer) (Flow, error)
 pkg flow, type Manager interface, Listen(*context.T, string, string) error
 pkg flow, type Manager interface, ListeningEndpoints() []naming.Endpoint
+pkg flow, type Manager interface, ProxyListen(*context.T, naming.Endpoint, func([]naming.Endpoint)) error
 pkg flow, type Manager interface, RoutingID() naming.RoutingID
 pkg flow, type MsgReadWriteCloser interface { Close, ReadMsg, WriteMsg }
 pkg flow, type MsgReadWriteCloser interface, Close() error
