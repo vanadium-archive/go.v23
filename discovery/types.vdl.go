@@ -25,8 +25,8 @@ type Service struct {
 	// The service attributes.
 	// E.g., {'resolution': '1024x768'}.
 	Attrs Attributes
-	// The addresses that the service is served on.
-	// E.g., '/host:port/a/b/c'.
+	// The addresses (vanadium object names) that the service is served on.
+	// E.g., '/host:port/a/b/c', '/ns.dev.v.io:8101/blah/blah'.
 	Addrs []string
 }
 
@@ -36,6 +36,7 @@ func (Service) __VDLReflect(struct {
 }
 
 // Attributes represents service attributes as a key/value pair.
+// A key should not start with '_' or include '='.
 type Attributes map[string]string
 
 func (Attributes) __VDLReflect(struct {
@@ -55,6 +56,9 @@ func (Found) __VDLReflect(struct {
 
 // Lost represents a service that is lost during scan.
 type Lost struct {
+	// Only InstanceUuid is guaranteed to be set in Lost.
+	//
+	// TODO(jhahn): Change Serice to InstanceUuid.
 	Service Service
 }
 

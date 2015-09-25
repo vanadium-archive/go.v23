@@ -9,7 +9,7 @@ package discovery
 
 import (
 	"v.io/v23/context"
-	"v.io/v23/security/access"
+	"v.io/v23/security"
 )
 
 // T is the interface for discovery operations; it is the client side library
@@ -24,7 +24,7 @@ type Advertiser interface {
 	// Advertise advertises the service. perms is used to limit the advertisement
 	// of the service. Advertising will continue until the context is canceled or
 	// exceeds its deadline.
-	Advertise(ctx *context.T, service Service, perms access.Permissions) error
+	Advertise(ctx *context.T, service Service, perms []security.BlessingPattern) error
 }
 
 // Scanner is the interface for scanning services.
