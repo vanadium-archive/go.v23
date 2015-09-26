@@ -20,13 +20,13 @@ import (
 // the byte's two-digit hex code. Clients using the client library need not
 // escape names themselves; the client library does so on their behalf.
 func Escape(s string) string {
-	return naming.Escape(s, "/")
+	return naming.EncodeAsNameElement(s)
 }
 
 // Unescape applies the inverse of Escape. It returns false if the given string
 // is not a valid escaped string.
 func Unescape(s string) (string, bool) {
-	return naming.Unescape(s)
+	return naming.DecodeFromNameElement(s)
 }
 
 var identifierRegexp *regexp.Regexp = regexp.MustCompile("^[a-zA-Z][a-zA-Z0-9_]*$")

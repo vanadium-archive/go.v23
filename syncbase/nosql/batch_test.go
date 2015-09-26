@@ -9,6 +9,7 @@
 package nosql_test
 
 import (
+	"reflect"
 	"testing"
 
 	"v.io/v23/naming"
@@ -160,7 +161,62 @@ func TestBatchBasics(t *testing.T) {
 	tu.CheckScan(t, ctx, tb, nosql.Prefix(""), []string{"barKey", "bazKey", "fooKey", "zzzKey"}, []interface{}{"barValue", "bazValue", "fooValue", "zzzValue"})
 }
 
-// Tests that BatchDatabase.Exec doesn't see changes committed outside the batch.
+// Tests that BatchDatabase.ListTables does not see the effect of concurrent
+// table creation.
+// Note, this test fails if Database.ListTables is implemented using glob,
+// because b.ListTables() does not see "tb". The glob client library issues glob
+// on each point along the path to check for Resolve access. Glob("a") returns
+// "a/d" but not "a/d%%batchInfo", so the glob client library does not recurse
+// further.
+func TestBatchListTables(t *testing.T) {
+	ctx, sName, cleanup := tu.SetupOrDie(nil)
+	defer cleanup()
+	a := tu.CreateApp(t, ctx, syncbase.NewService(sName), "a")
+	d := tu.CreateNoSQLDatabase(t, ctx, a, "d")
+	tu.CreateTable(t, ctx, d, "tb")
+	b, err := d.BeginBatch(ctx, wire.BatchOptions{})
+
+	got, err := d.ListTables(ctx)
+	want := []string{"tb"}
+	if err != nil {
+		t.Fatalf("self.ListTables() failed: %v", err)
+	}
+	if !reflect.DeepEqual(got, want) {
+		t.Fatalf("Lists do not match: got %v, want %v", got, want)
+	}
+
+	// Table creation/destruction is not allowed within a batch.
+	if err := b.Table("tb_batch").Create(ctx, nil); verror.ErrorID(err) != wire.ErrBoundToBatch.ID {
+		t.Fatalf("b.tb_batch.Create() should have failed: %v", err)
+	}
+	if err := b.Table("tb").Destroy(ctx); verror.ErrorID(err) != wire.ErrBoundToBatch.ID {
+		t.Fatalf("b.tb.Destroy() should have failed: %v", err)
+	}
+
+	tu.CreateTable(t, ctx, d, "tb_nonbatch")
+
+	// Non-batch should see tb_nonbatch; batch should only see tb.
+	got, err = d.ListTables(ctx)
+	want = []string{"tb", "tb_nonbatch"}
+	if err != nil {
+		t.Fatalf("self.ListChildren() failed: %v", err)
+	}
+	if !reflect.DeepEqual(got, want) {
+		t.Fatalf("Lists do not match: got %v, want %v", got, want)
+	}
+
+	got, err = b.ListTables(ctx)
+	want = []string{"tb"}
+	if err != nil {
+		t.Fatalf("self.ListChildren() failed: %v", err)
+	}
+	if !reflect.DeepEqual(got, want) {
+		t.Fatalf("Lists do not match: got %v, want %v", got, want)
+	}
+}
+
+// Tests that BatchDatabase.Exec doesn't see changes committed outside the
+// batch.
 // 1. Create a read only batch.
 // 2. query all rows in the table
 // 3. commit a new row outside of the batch
@@ -244,8 +300,8 @@ func TestBatchExecIsolation(t *testing.T) {
 	tu.CheckExecError(t, ctx, roBatch, "select k, v from foo", query.ErrTableCantAccess.ID)
 }
 
-// Tests that BatchDatabase.Exec DOES see changes made inside the transaction but before
-// Exec is called.
+// Tests that BatchDatabase.Exec DOES see changes made inside the transaction
+// but before Exec is called.
 func TestBatchExec(t *testing.T) {
 	ctx, sName, cleanup := tu.SetupOrDie(nil)
 	defer cleanup()

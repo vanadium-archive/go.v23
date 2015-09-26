@@ -156,9 +156,9 @@ func TestExec(t *testing.T) {
 func TestListTables(t *testing.T) {
 	ctx, sName, cleanup := tu.SetupOrDie(nil)
 	defer cleanup()
-	a := tu.CreateApp(t, ctx, syncbase.NewService(sName), "a")
+	a := tu.CreateApp(t, ctx, syncbase.NewService(sName), "app/a#%b")
 	d := tu.CreateNoSQLDatabase(t, ctx, a, "d")
-	tu.TestListChildren(t, ctx, d)
+	tu.TestListChildren(t, ctx, d, tu.OkDbTableNames)
 }
 
 // Tests that Database.{Set,Get}Permissions work as expected.

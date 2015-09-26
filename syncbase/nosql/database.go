@@ -106,7 +106,9 @@ func (d *database) Table(relativeName string) Table {
 
 // ListTables implements Database.ListTables.
 func (d *database) ListTables(ctx *context.T) ([]string, error) {
-	return util.ListChildren(ctx, d.fullName)
+	// See comment in v.io/v23/services/syncbase/nosql/service.vdl for why we
+	// can't implement ListTables using Glob (via util.ListChildren).
+	return d.c.ListTables(ctx)
 }
 
 // Create implements Database.Create.

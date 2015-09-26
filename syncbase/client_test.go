@@ -34,7 +34,7 @@ func TestListApps(t *testing.T) {
 	ctx, sName, cleanup := tu.SetupOrDie(nil)
 	defer cleanup()
 	s := syncbase.NewService(sName)
-	tu.TestListChildren(t, ctx, s)
+	tu.TestListChildren(t, ctx, s, tu.OkAppRowNames)
 }
 
 // Tests that Service.{Set,Get}Permissions work as expected.
@@ -69,8 +69,8 @@ func TestAppDestroy(t *testing.T) {
 func TestListDatabases(t *testing.T) {
 	ctx, sName, cleanup := tu.SetupOrDie(nil)
 	defer cleanup()
-	a := tu.CreateApp(t, ctx, syncbase.NewService(sName), "a")
-	tu.TestListChildren(t, ctx, a)
+	a := tu.CreateApp(t, ctx, syncbase.NewService(sName), "app/a#%b")
+	tu.TestListChildren(t, ctx, a, tu.OkDbTableNames)
 }
 
 // Tests that App.{Set,Get}Permissions work as expected.

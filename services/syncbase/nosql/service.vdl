@@ -14,10 +14,8 @@ import (
 // Database represents a collection of Tables. Batches, queries, sync, watch,
 // etc. all operate at the Database level.
 // Database.Glob operates over Table names.
-// Param schemaVersion is the version number that the client expects the database
-// to be at. To disable schema version checking, pass -1.
-//
-// TODO(sadovsky): Add Watch method.
+// Param schemaVersion is the version number that the client expects the
+// database to be at. To disable schema version checking, pass -1.
 type Database interface {
 	// Create creates this Database.
 	// If perms is nil, we inherit (copy) the App perms.
@@ -32,6 +30,21 @@ type Database interface {
 	// TODO(ivanpi): Exists may fail with an error if higher levels of hierarchy
 	// do not exist.
 	Exists(schemaVersion int32) (bool | error) {access.Resolve}
+
+	// ListTables returns a list of all Table names.
+	// This method exists on Database but not on Service or App because for the
+	// latter we can simply use glob, while for the former glob fails on
+	// BatchDatabase since we encode the batch id in the BatchDatabase object
+	// name. More specifically, the glob client library appears to have two odd
+	// behaviors:
+	// 1) It checks Resolve access on every component along the path (by doing a
+	//    Dispatcher.Lookup), whereas this doesn't happen for other RPCs.
+	// 2) It does a Glob(<prefix>/*) for every prefix path, and only proceeds to
+	//    the next path component if that component appeared in its parent's Glob
+	//    results. This is inefficient in general, and broken for us since
+	//    Glob("app/*") does not return batch database names like "a/d##bId".
+	// TODO(sadovsky): Maybe switch to streaming RPC.
+	ListTables() ([]string | error) {access.Read}
 
 	// Exec executes a syncQL query and returns all results as specified by in the
 	// query's select clause. Concurrency semantics are documented in model.go.

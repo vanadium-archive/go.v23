@@ -1805,10 +1805,8 @@ func (s implConflictManagerStartConflictResolverServerCallSend) Send(item Confli
 // Database represents a collection of Tables. Batches, queries, sync, watch,
 // etc. all operate at the Database level.
 // Database.Glob operates over Table names.
-// Param schemaVersion is the version number that the client expects the database
-// to be at. To disable schema version checking, pass -1.
-//
-// TODO(sadovsky): Add Watch method.
+// Param schemaVersion is the version number that the client expects the
+// database to be at. To disable schema version checking, pass -1.
 type DatabaseClientMethods interface {
 	// Object provides access control for Vanadium objects.
 	//
@@ -1909,6 +1907,20 @@ type DatabaseClientMethods interface {
 	// TODO(ivanpi): Exists may fail with an error if higher levels of hierarchy
 	// do not exist.
 	Exists(ctx *context.T, schemaVersion int32, opts ...rpc.CallOpt) (bool, error)
+	// ListTables returns a list of all Table names.
+	// This method exists on Database but not on Service or App because for the
+	// latter we can simply use glob, while for the former glob fails on
+	// BatchDatabase since we encode the batch id in the BatchDatabase object
+	// name. More specifically, the glob client library appears to have two odd
+	// behaviors:
+	// 1) It checks Resolve access on every component along the path (by doing a
+	//    Dispatcher.Lookup), whereas this doesn't happen for other RPCs.
+	// 2) It does a Glob(<prefix>/*) for every prefix path, and only proceeds to
+	//    the next path component if that component appeared in its parent's Glob
+	//    results. This is inefficient in general, and broken for us since
+	//    Glob("app/*") does not return batch database names like "a/d##bId".
+	// TODO(sadovsky): Maybe switch to streaming RPC.
+	ListTables(*context.T, ...rpc.CallOpt) ([]string, error)
 	// Exec executes a syncQL query and returns all results as specified by in the
 	// query's select clause. Concurrency semantics are documented in model.go.
 	Exec(ctx *context.T, schemaVersion int32, query string, opts ...rpc.CallOpt) (DatabaseExecClientCall, error)
@@ -1967,6 +1979,11 @@ func (c implDatabaseClientStub) Destroy(ctx *context.T, i0 int32, opts ...rpc.Ca
 
 func (c implDatabaseClientStub) Exists(ctx *context.T, i0 int32, opts ...rpc.CallOpt) (o0 bool, err error) {
 	err = v23.GetClient(ctx).Call(ctx, c.name, "Exists", []interface{}{i0}, []interface{}{&o0}, opts...)
+	return
+}
+
+func (c implDatabaseClientStub) ListTables(ctx *context.T, opts ...rpc.CallOpt) (o0 []string, err error) {
+	err = v23.GetClient(ctx).Call(ctx, c.name, "ListTables", nil, []interface{}{&o0}, opts...)
 	return
 }
 
@@ -2068,10 +2085,8 @@ func (c *implDatabaseExecClientCall) Finish() (err error) {
 // Database represents a collection of Tables. Batches, queries, sync, watch,
 // etc. all operate at the Database level.
 // Database.Glob operates over Table names.
-// Param schemaVersion is the version number that the client expects the database
-// to be at. To disable schema version checking, pass -1.
-//
-// TODO(sadovsky): Add Watch method.
+// Param schemaVersion is the version number that the client expects the
+// database to be at. To disable schema version checking, pass -1.
 type DatabaseServerMethods interface {
 	// Object provides access control for Vanadium objects.
 	//
@@ -2172,6 +2187,20 @@ type DatabaseServerMethods interface {
 	// TODO(ivanpi): Exists may fail with an error if higher levels of hierarchy
 	// do not exist.
 	Exists(ctx *context.T, call rpc.ServerCall, schemaVersion int32) (bool, error)
+	// ListTables returns a list of all Table names.
+	// This method exists on Database but not on Service or App because for the
+	// latter we can simply use glob, while for the former glob fails on
+	// BatchDatabase since we encode the batch id in the BatchDatabase object
+	// name. More specifically, the glob client library appears to have two odd
+	// behaviors:
+	// 1) It checks Resolve access on every component along the path (by doing a
+	//    Dispatcher.Lookup), whereas this doesn't happen for other RPCs.
+	// 2) It does a Glob(<prefix>/*) for every prefix path, and only proceeds to
+	//    the next path component if that component appeared in its parent's Glob
+	//    results. This is inefficient in general, and broken for us since
+	//    Glob("app/*") does not return batch database names like "a/d##bId".
+	// TODO(sadovsky): Maybe switch to streaming RPC.
+	ListTables(*context.T, rpc.ServerCall) ([]string, error)
 	// Exec executes a syncQL query and returns all results as specified by in the
 	// query's select clause. Concurrency semantics are documented in model.go.
 	Exec(ctx *context.T, call DatabaseExecServerCall, schemaVersion int32, query string) error
@@ -2300,6 +2329,20 @@ type DatabaseServerStubMethods interface {
 	// TODO(ivanpi): Exists may fail with an error if higher levels of hierarchy
 	// do not exist.
 	Exists(ctx *context.T, call rpc.ServerCall, schemaVersion int32) (bool, error)
+	// ListTables returns a list of all Table names.
+	// This method exists on Database but not on Service or App because for the
+	// latter we can simply use glob, while for the former glob fails on
+	// BatchDatabase since we encode the batch id in the BatchDatabase object
+	// name. More specifically, the glob client library appears to have two odd
+	// behaviors:
+	// 1) It checks Resolve access on every component along the path (by doing a
+	//    Dispatcher.Lookup), whereas this doesn't happen for other RPCs.
+	// 2) It does a Glob(<prefix>/*) for every prefix path, and only proceeds to
+	//    the next path component if that component appeared in its parent's Glob
+	//    results. This is inefficient in general, and broken for us since
+	//    Glob("app/*") does not return batch database names like "a/d##bId".
+	// TODO(sadovsky): Maybe switch to streaming RPC.
+	ListTables(*context.T, rpc.ServerCall) ([]string, error)
 	// Exec executes a syncQL query and returns all results as specified by in the
 	// query's select clause. Concurrency semantics are documented in model.go.
 	Exec(ctx *context.T, call *DatabaseExecServerCallStub, schemaVersion int32, query string) error
@@ -2377,6 +2420,10 @@ func (s implDatabaseServerStub) Exists(ctx *context.T, call rpc.ServerCall, i0 i
 	return s.impl.Exists(ctx, call, i0)
 }
 
+func (s implDatabaseServerStub) ListTables(ctx *context.T, call rpc.ServerCall) ([]string, error) {
+	return s.impl.ListTables(ctx, call)
+}
+
 func (s implDatabaseServerStub) Exec(ctx *context.T, call *DatabaseExecServerCallStub, i0 int32, i1 string) error {
 	return s.impl.Exec(ctx, call, i0, i1)
 }
@@ -2408,7 +2455,7 @@ var DatabaseDesc rpc.InterfaceDesc = descDatabase
 var descDatabase = rpc.InterfaceDesc{
 	Name:    "Database",
 	PkgPath: "v.io/v23/services/syncbase/nosql",
-	Doc:     "// Database represents a collection of Tables. Batches, queries, sync, watch,\n// etc. all operate at the Database level.\n// Database.Glob operates over Table names.\n// Param schemaVersion is the version number that the client expects the database\n// to be at. To disable schema version checking, pass -1.\n//\n// TODO(sadovsky): Add Watch method.",
+	Doc:     "// Database represents a collection of Tables. Batches, queries, sync, watch,\n// etc. all operate at the Database level.\n// Database.Glob operates over Table names.\n// Param schemaVersion is the version number that the client expects the\n// database to be at. To disable schema version checking, pass -1.",
 	Embeds: []rpc.EmbedDesc{
 		{"Object", "v.io/v23/services/permissions", "// Object provides access control for Vanadium objects.\n//\n// Vanadium services implementing dynamic access control would typically embed\n// this interface and tag additional methods defined by the service with one of\n// Admin, Read, Write, Resolve etc. For example, the VDL definition of the\n// object would be:\n//\n//   package mypackage\n//\n//   import \"v.io/v23/security/access\"\n//   import \"v.io/v23/services/permissions\"\n//\n//   type MyObject interface {\n//     permissions.Object\n//     MyRead() (string, error) {access.Read}\n//     MyWrite(string) error    {access.Write}\n//   }\n//\n// If the set of pre-defined tags is insufficient, services may define their\n// own tag type and annotate all methods with this new type.\n//\n// Instead of embedding this Object interface, define SetPermissions and\n// GetPermissions in their own interface. Authorization policies will typically\n// respect annotations of a single type. For example, the VDL definition of an\n// object would be:\n//\n//  package mypackage\n//\n//  import \"v.io/v23/security/access\"\n//\n//  type MyTag string\n//\n//  const (\n//    Blue = MyTag(\"Blue\")\n//    Red  = MyTag(\"Red\")\n//  )\n//\n//  type MyObject interface {\n//    MyMethod() (string, error) {Blue}\n//\n//    // Allow clients to change access via the access.Object interface:\n//    SetPermissions(perms access.Permissions, version string) error         {Red}\n//    GetPermissions() (perms access.Permissions, version string, err error) {Blue}\n//  }"},
 		{"DatabaseWatcher", "v.io/v23/services/syncbase/nosql", "// DatabaseWatcher allows a client to watch for updates to the database. For\n// each watch request, the client will receive a reliable stream of watch events\n// without re-ordering. See watch.GlobWatcher for a detailed explanation of the\n// behavior.\n// TODO(rogulenko): Currently the only supported watch patterns are\n// \"<tableName>/<rowPrefix>*\". Consider changing that.\n//\n// The watching is done by starting a streaming RPC. The argument to the RPC\n// contains the ResumeMarker that points to a particular place in the database\n// event log. The result stream consists of a never-ending sequence of Change\n// messages (until the call fails or is canceled). Each Change contains the Name\n// field in the form \"<tableName>/<rowKey>\" and the Value field of the\n// StoreChange type. If the client has no access to a row specified in a change,\n// that change is excluded from the result stream.\n//\n// DatabaseWatcher is designed to be used in the following way:\n// 1) begin a read-only batch\n// 2) read all data your app needs\n// 3) read the ResumeMarker\n// 4) abort the batch\n// 5) start watching for changes to the data using the ResumeMarker\n// In this configuration the client will not miss any changes to the data."},
@@ -2445,6 +2492,14 @@ var descDatabase = rpc.InterfaceDesc{
 				{"", ``}, // bool
 			},
 			Tags: []*vdl.Value{vdl.ValueOf(access.Tag("Resolve"))},
+		},
+		{
+			Name: "ListTables",
+			Doc:  "// ListTables returns a list of all Table names.\n// This method exists on Database but not on Service or App because for the\n// latter we can simply use glob, while for the former glob fails on\n// BatchDatabase since we encode the batch id in the BatchDatabase object\n// name. More specifically, the glob client library appears to have two odd\n// behaviors:\n// 1) It checks Resolve access on every component along the path (by doing a\n//    Dispatcher.Lookup), whereas this doesn't happen for other RPCs.\n// 2) It does a Glob(<prefix>/*) for every prefix path, and only proceeds to\n//    the next path component if that component appeared in its parent's Glob\n//    results. This is inefficient in general, and broken for us since\n//    Glob(\"app/*\") does not return batch database names like \"a/d##bId\".\n// TODO(sadovsky): Maybe switch to streaming RPC.",
+			OutArgs: []rpc.ArgDesc{
+				{"", ``}, // []string
+			},
+			Tags: []*vdl.Value{vdl.ValueOf(access.Tag("Read"))},
 		},
 		{
 			Name: "Exec",
