@@ -33,6 +33,10 @@ func Read(ctx *context.T, from []byte) (Message, error) {
 		m = &Setup{}
 	case tearDownType:
 		m = &TearDown{}
+	case enterLameDuckType:
+		m = &EnterLameDuck{}
+	case ackLameDuckType:
+		m = &AckLameDuck{}
 	case authType:
 		m = &Auth{}
 	case openFlowType:
@@ -64,6 +68,8 @@ const (
 	invalidType = iota
 	setupType
 	tearDownType
+	enterLameDuckType
+	ackLameDuckType
 	authType
 	openFlowType
 	releaseType
@@ -204,6 +210,29 @@ func (m *TearDown) append(ctx *context.T, data []byte) ([]byte, error) {
 }
 func (m *TearDown) read(ctx *context.T, data []byte) error {
 	m.Message = string(data)
+	return nil
+}
+
+// EnterLameDuck is sent as notification that the sender is entering lameduck mode.
+// The receiver should stop opening new flows on this connection and respond
+// with an AckLameDuck message.
+type EnterLameDuck struct{}
+
+func (m *EnterLameDuck) append(ctx *context.T, data []byte) ([]byte, error) {
+	return append(data, enterLameDuckType), nil
+}
+func (m *EnterLameDuck) read(ctx *context.T, data []byte) error {
+	return nil
+}
+
+// AckLameDuck is sent in response to an EnterLameDuck message.  After
+// this message is received no more OpenFlow messages should arrive.
+type AckLameDuck struct{}
+
+func (m *AckLameDuck) append(ctx *context.T, data []byte) ([]byte, error) {
+	return append(data, ackLameDuckType), nil
+}
+func (m *AckLameDuck) read(ctx *context.T, data []byte) error {
 	return nil
 }
 
