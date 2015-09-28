@@ -6,7 +6,7 @@ package internal
 
 // This module contains performance benchmarks.
 // Run with
-//    v23 go test -bench . v.io/v23/vom/internal
+//    jiri go test -bench . v.io/v23/vom/internal
 
 // The following are the results of a typical run on a desktop machine on 2015/08/04,
 // together with the results from comparable tests using protocol buffers in

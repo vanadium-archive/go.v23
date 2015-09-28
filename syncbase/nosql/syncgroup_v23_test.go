@@ -29,7 +29,7 @@ import (
 // on my Macbook Pro! Various instances of time.Sleep() below likely contribute
 // to the problem.
 
-//go:generate v23 test generate
+//go:generate jiri test generate
 
 // V23TestSyncbasedJoinSyncGroup tests the creation and joining of a
 // SyncGroup. Client0 creates a SyncGroup at Syncbase0. Client1 requests to join
