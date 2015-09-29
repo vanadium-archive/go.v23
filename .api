@@ -2,8 +2,6 @@ pkg v23, const ForceStopExitCode ideal-int
 pkg v23, const LocalStop ideal-string
 pkg v23, const RemoteStop ideal-string
 pkg v23, const UnhandledStopExitCode ideal-int
-pkg v23, func ExperimentalGetFlowManager(*context.T) flow.Manager
-pkg v23, func ExperimentalWithNewFlowManager(*context.T) (*context.T, flow.Manager, error)
 pkg v23, func GetAppCycle(*context.T) AppCycle
 pkg v23, func GetBackgroundContext(*context.T) *context.T
 pkg v23, func GetClient(*context.T) rpc.Client
@@ -13,6 +11,7 @@ pkg v23, func GetPrincipal(*context.T) security.Principal
 pkg v23, func GetReservedNameDispatcher(*context.T) rpc.Dispatcher
 pkg v23, func Init() (*context.T, Shutdown)
 pkg v23, func NewEndpoint(string) (naming.Endpoint, error)
+pkg v23, func NewFlowManager(*context.T) (flow.Manager, error)
 pkg v23, func RegisterRuntimeFactory(RuntimeFactory)
 pkg v23, func WithBackgroundContext(*context.T) *context.T
 pkg v23, func WithListenSpec(*context.T, rpc.ListenSpec) *context.T
@@ -31,9 +30,7 @@ pkg v23, type AppCycle interface, Remote() interface{}
 pkg v23, type AppCycle interface, Stop(*context.T)
 pkg v23, type AppCycle interface, TrackTask(chan<- Task)
 pkg v23, type AppCycle interface, WaitForStop(*context.T, chan<- string)
-pkg v23, type Runtime interface { ExperimentalGetFlowManager, ExperimentalWithNewFlowManager, GetAppCycle, GetBackgroundContext, GetClient, GetListenSpec, GetNamespace, GetPrincipal, GetReservedNameDispatcher, Init, NewEndpoint, WithBackgroundContext, WithListenSpec, WithNewClient, WithNewDispatchingServer, WithNewNamespace, WithNewServer, WithNewStreamManager, WithPrincipal, WithReservedNameDispatcher }
-pkg v23, type Runtime interface, ExperimentalGetFlowManager(*context.T) flow.Manager
-pkg v23, type Runtime interface, ExperimentalWithNewFlowManager(*context.T) (*context.T, flow.Manager, error)
+pkg v23, type Runtime interface { GetAppCycle, GetBackgroundContext, GetClient, GetListenSpec, GetNamespace, GetPrincipal, GetReservedNameDispatcher, Init, NewEndpoint, NewFlowManager, WithBackgroundContext, WithListenSpec, WithNewClient, WithNewDispatchingServer, WithNewNamespace, WithNewServer, WithNewStreamManager, WithPrincipal, WithReservedNameDispatcher }
 pkg v23, type Runtime interface, GetAppCycle(*context.T) AppCycle
 pkg v23, type Runtime interface, GetBackgroundContext(*context.T) *context.T
 pkg v23, type Runtime interface, GetClient(*context.T) rpc.Client
@@ -43,6 +40,7 @@ pkg v23, type Runtime interface, GetPrincipal(*context.T) security.Principal
 pkg v23, type Runtime interface, GetReservedNameDispatcher(*context.T) rpc.Dispatcher
 pkg v23, type Runtime interface, Init(*context.T) error
 pkg v23, type Runtime interface, NewEndpoint(string) (naming.Endpoint, error)
+pkg v23, type Runtime interface, NewFlowManager(*context.T) (flow.Manager, error)
 pkg v23, type Runtime interface, WithBackgroundContext(*context.T) *context.T
 pkg v23, type Runtime interface, WithListenSpec(*context.T, rpc.ListenSpec) *context.T
 pkg v23, type Runtime interface, WithNewClient(*context.T, ...rpc.ClientOpt) (*context.T, rpc.Client, error)

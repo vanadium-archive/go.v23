@@ -36,9 +36,10 @@ pkg rpc, type CallOpt interface { RPCCallOpt }
 pkg rpc, type CallOpt interface, RPCCallOpt()
 pkg rpc, type ChildrenGlobber interface { GlobChildren__ }
 pkg rpc, type ChildrenGlobber interface, GlobChildren__(*context.T, GlobChildrenServerCall, *glob.Element) error
-pkg rpc, type Client interface { Call, Close, StartCall }
+pkg rpc, type Client interface { Call, Close, Closed, StartCall }
 pkg rpc, type Client interface, Call(*context.T, string, string, []interface{}, []interface{}, ...CallOpt) error
 pkg rpc, type Client interface, Close()
+pkg rpc, type Client interface, Closed() <-chan struct{}
 pkg rpc, type Client interface, StartCall(*context.T, string, string, []interface{}, ...CallOpt) (ClientCall, error)
 pkg rpc, type ClientCall interface { CloseSend, Finish, Recv, RemoteBlessings, Send }
 pkg rpc, type ClientCall interface, CloseSend() error
@@ -145,8 +146,9 @@ pkg rpc, type Response struct, EndStreamResults bool
 pkg rpc, type Response struct, Error error
 pkg rpc, type Response struct, NumPosResults uint64
 pkg rpc, type Response struct, TraceResponse vtrace.Response
-pkg rpc, type Server interface { AddName, RemoveName, Status, Stop, UnwatchNetwork, WatchNetwork }
+pkg rpc, type Server interface { AddName, Closed, RemoveName, Status, Stop, UnwatchNetwork, WatchNetwork }
 pkg rpc, type Server interface, AddName(string) error
+pkg rpc, type Server interface, Closed() <-chan struct{}
 pkg rpc, type Server interface, RemoveName(string)
 pkg rpc, type Server interface, Status() ServerStatus
 pkg rpc, type Server interface, Stop() error

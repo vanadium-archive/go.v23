@@ -51,9 +51,8 @@ func (*mockRuntime) WithReservedNameDispatcher(ctx *context.T, d rpc.Dispatcher)
 
 func (*mockRuntime) GetReservedNameDispatcher(ctx *context.T) rpc.Dispatcher    { return nil }
 func (*mockRuntime) WithListenSpec(ctx *context.T, _ rpc.ListenSpec) *context.T { return ctx }
-func (*mockRuntime) ExperimentalGetFlowManager(ctx *context.T) flow.Manager     { return nil }
-func (*mockRuntime) ExperimentalWithNewFlowManager(ctx *context.T) (*context.T, flow.Manager, error) {
-	return nil, nil, nil
+func (*mockRuntime) NewFlowManager(ctx *context.T) (flow.Manager, error) {
+	return nil, nil
 }
 func (*mockRuntime) WithNewServer(ctx *context.T, name string, object interface{}, auth security.Authorizer, opts ...rpc.ServerOpt) (*context.T, rpc.Server, error) {
 	return nil, nil, nil

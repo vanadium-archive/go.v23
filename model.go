@@ -178,12 +178,8 @@ type Runtime interface {
 	// reserved names.
 	GetReservedNameDispatcher(ctx *context.T) rpc.Dispatcher
 
-	// ExperimentalGetFlowManager returns the current flow.Manager attached to ctx.
-	ExperimentalGetFlowManager(ctx *context.T) flow.Manager
-
-	// ExperimentalWithNewFlowManager creates a new flow.Manager instance and
-	// attaches it to ctx.
-	ExperimentalWithNewFlowManager(ctx *context.T) (*context.T, flow.Manager, error)
+	// NewFlowManager creates a new flow.Manager instance.
+	NewFlowManager(ctx *context.T) (flow.Manager, error)
 
 	// WithNewServer creates a new Server instance to serve a service object.
 	//
@@ -321,15 +317,9 @@ func GetReservedNameDispatcher(ctx *context.T) rpc.Dispatcher {
 	return initState.currentRuntime().GetReservedNameDispatcher(ctx)
 }
 
-// ExperimentalGetFlowManager returns the current flow.Manager to ctx.
-func ExperimentalGetFlowManager(ctx *context.T) flow.Manager {
-	return initState.currentRuntime().ExperimentalGetFlowManager(ctx)
-}
-
-// ExperimentalWithNewFlowManager creates a new flow.Manager instance and
-// attaches it to ctx.
-func ExperimentalWithNewFlowManager(ctx *context.T) (*context.T, flow.Manager, error) {
-	return initState.currentRuntime().ExperimentalWithNewFlowManager(ctx)
+// NewFlowManager creates a new flow.Manager instance.
+func NewFlowManager(ctx *context.T) (flow.Manager, error) {
+	return initState.currentRuntime().NewFlowManager(ctx)
 }
 
 // WithNewServer creates a new flow.Manager instance and attaches it to ctx,

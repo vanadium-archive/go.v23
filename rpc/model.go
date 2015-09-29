@@ -37,7 +37,11 @@ type Client interface {
 
 	// Close discards all state associated with this Client.  In-flight calls may
 	// be terminated with an error.
+	// TODO(mattr): This method is deprecated with the new RPC system.
 	Close()
+
+	// Closed returns a channel that will be closed after the client is shut down.
+	Closed() <-chan struct{}
 }
 
 // Call defines the interface for each in-flight call on the client.
@@ -166,7 +170,11 @@ type Server interface {
 	// but any in-flight calls are allowed to complete.  All published mountpoints
 	// are unmounted.  This call waits for this process to complete, and returns
 	// once the server has been shut down.
+	// TODO(mattr): This method is deprecated in the new RPC system.
 	Stop() error
+
+	// Closed returns a channel that will be closed after the server is shut down.
+	Closed() <-chan struct{}
 }
 
 type ProxyStatus struct {

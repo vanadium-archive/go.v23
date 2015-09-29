@@ -17,6 +17,7 @@ package flow
 import (
 	"io"
 	"net"
+	"time"
 
 	"v.io/v23/context"
 	"v.io/v23/naming"
@@ -28,9 +29,6 @@ import (
 type Manager interface {
 	// Listen causes the Manager to accept flows from the provided protocol and address.
 	// Listen may be called muliple times.
-	//
-	// The flow.Manager associated with ctx must be the receiver of the method,
-	// otherwise an error is returned.
 	Listen(ctx *context.T, protocol, address string) error
 
 	// ProxyListen causes the Manager to accept flows from the specified endpoint.
@@ -38,9 +36,6 @@ type Manager interface {
 	//
 	// update get passed the complete set of endpoints for the proxy every time it
 	// is called.
-	//
-	// The flow.Manager associated with ctx must be the receiver of the method,
-	// otherwise an error is returned.
 	ProxyListen(ctx *context.T, endpoint naming.Endpoint, update func(eps []naming.Endpoint)) error
 
 	// ListeningEndpoints returns the endpoints that the Manager has explicitly
@@ -68,9 +63,6 @@ type Manager interface {
 	//   }
 	//
 	// can be used to accept Flows initiated by remote processes.
-	//
-	// The flow.Manager associated with ctx must be the receiver of the method,
-	// otherwise an error is returned.
 	Accept(ctx *context.T) (Flow, error)
 
 	// Dial creates a Flow to the provided remote endpoint, using 'fn' to
@@ -78,9 +70,6 @@ type Manager interface {
 	//
 	// To maximize re-use of connections, the Manager will also Listen on Dialed
 	// connections for the lifetime of the connection.
-	//
-	// The flow.Manager associated with ctx must be the receiver of the method,
-	// otherwise an error is returned.
 	Dial(ctx *context.T, remote naming.Endpoint, fn BlessingsForPeer) (Flow, error)
 
 	// RoutingID returns the naming.Routing of the flow.Manager.
@@ -153,13 +142,11 @@ type Flow interface {
 	// WriteMsgAndClose performs WriteMsg and then closes the flow.
 	WriteMsgAndClose(data ...[]byte) (int, error)
 
-	// SetContext sets the context associated with the flow.  Typically this is
-	// used to set state that is only available after the flow is connected, such
-	// as a more restricted flow timeout, or the language of the request.
-	//
-	// The flow.Manager associated with ctx must be the same flow.Manager that the
-	// flow was dialed or accepted from, otherwise an error is returned.
-	SetContext(ctx *context.T) error
+	// SetDeadlineContext sets the context associated with the flow.
+	// It derives a context from the passed in context and the passed in deadline.
+	// Typically this is used to set state that is only available after
+	// the flow is connected, such as the language of the request.
+	SetDeadlineContext(ctx *context.T, deadline time.Time) *context.T
 
 	// LocalBlessings returns the blessings presented by the local end of the flow
 	// during authentication.
