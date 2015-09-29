@@ -51,6 +51,11 @@ type Manager interface {
 	// Returned endpoints all have the Manager's unique RoutingID.
 	ListeningEndpoints() []naming.Endpoint
 
+	// StopListening stops listening on all currently listening addresses and proxies.
+	// All outstanding calls to Accept will return an error.
+	// It is safe to begin listening again.
+	StopListening(ctx *context.T)
+
 	// Accept blocks until a new Flow has been initiated by a remote process.
 	// Flows are accepted from addresses that the Manager is listening on,
 	// including outgoing dialed connections.
