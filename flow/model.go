@@ -65,12 +65,12 @@ type Manager interface {
 	// can be used to accept Flows initiated by remote processes.
 	Accept(ctx *context.T) (Flow, error)
 
-	// Dial creates a Flow to the provided remote endpoint, using 'fn' to
+	// Dial creates a Flow to the provided remote endpoint, using 'auth' to
 	// determine the blessings that will be sent to the remote end.
 	//
 	// To maximize re-use of connections, the Manager will also Listen on Dialed
 	// connections for the lifetime of the connection.
-	Dial(ctx *context.T, remote naming.Endpoint, fn BlessingsForPeer) (Flow, error)
+	Dial(ctx *context.T, remote naming.Endpoint, auth PeerAuthorizer) (Flow, error)
 
 	// RoutingID returns the naming.Routing of the flow.Manager.
 	RoutingID() naming.RoutingID
@@ -81,17 +81,22 @@ type Manager interface {
 	Closed() <-chan struct{}
 }
 
-// BlessingsForPeer is the type of a callback used in performing security
-// authorization.  The remote end reveals its blessings first in the
-// authorization protocol, so the callback should first authorize the remote
-// blessings.  Once authorized, the callback should return the
-// blessings that will be revealed to the remote end.
-type BlessingsForPeer func(
-	ctx *context.T,
-	localEndpoint, remoteEndpoint naming.Endpoint,
-	remoteBlessings security.Blessings,
-	remoteDischarges map[string]security.Discharge,
-) (security.Blessings, map[string]security.Discharge, error)
+// PeerAuthorizer is the interface used in performing security authorization.
+type PeerAuthorizer interface {
+	// AuthorizePeer authorizes the remote blessings and returns the remote
+	// blessing names, and those names rejected.
+	AuthorizePeer(ctx *context.T,
+		localEndpoint naming.Endpoint,
+		remoteEndpoint naming.Endpoint,
+		remoteBlessings security.Blessings,
+		remoteDischarges map[string]security.Discharge,
+	) (peerBlessingNames []string, rejectedPeerNames []security.RejectedBlessing, _ error)
+
+	// BlessingsForPeer returns the blessings and discharges that should be
+	// presented to the remote end with peerBlessingNames.
+	BlessingsForPeer(ctx *context.T, peerBlessingNames []string) (
+		security.Blessings, map[string]security.Discharge, error)
+}
 
 // ManagedConn represents the connection onto which this flow is multiplexed.
 // Since this ManagedConn may be shared between many flows it wouldn't be safe
