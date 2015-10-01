@@ -1,0 +1,36 @@
+// Copyright 2015 The Vanadium Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style
+// license that can be found in the LICENSE file.
+
+// Package discovery defines the wire interfaces for discovering services.
+package discovery
+
+import (
+	"v.io/v23/discovery"
+	"v.io/v23/security"
+	"v.io/v23/security/access"
+)
+
+// Used to unregister a service.
+type ServiceHandle uint32
+
+// Advertiser is the interface for advertising services.
+type Advertiser interface {
+	// RegisterService registers a service to be discovered by "Scanner" implementations.
+	// visibility is used to limit the principals that can see the advertisement. An empty
+	// set means that there are no restrictions on visibility (i.e, equivalent to
+	// []security.BlessingPattern{security.AllPrincipals}).
+	RegisterService(service discovery.Service, visibility []security.BlessingPattern) (ServiceHandle | error) {access.Write}
+
+	// UnregisterService unregisters a registered service from advertising.
+	UnregisterService(handle ServiceHandle) error {access.Write}
+}
+
+// Scanner is the interface for scanning services.
+type Scanner interface {
+	// Scan scans services that match the query and returns the stream of discovered
+	// services. Scanning will continue until the client finishes or cancels the call.
+	//
+	// TODO(jhahn): Add query syntax and examples.
+	Scan(query string) stream<_, discovery.Update> error {access.Read}
+}

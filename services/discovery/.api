@@ -1,0 +1,49 @@
+pkg discovery, func AdvertiserClient(string) AdvertiserClientStub
+pkg discovery, func AdvertiserServer(AdvertiserServerMethods) AdvertiserServerStub
+pkg discovery, func ScannerClient(string) ScannerClientStub
+pkg discovery, func ScannerServer(ScannerServerMethods) ScannerServerStub
+pkg discovery, method (*ScannerScanServerCallStub) Init(rpc.StreamServerCall)
+pkg discovery, method (*ScannerScanServerCallStub) SendStream() interface {  Send(item discovery.Update) error;}
+pkg discovery, type AdvertiserClientMethods interface { RegisterService, UnregisterService }
+pkg discovery, type AdvertiserClientMethods interface, RegisterService(*context.T, discovery.Service, []security.BlessingPattern, ...rpc.CallOpt) (ServiceHandle, error)
+pkg discovery, type AdvertiserClientMethods interface, UnregisterService(*context.T, ServiceHandle, ...rpc.CallOpt) error
+pkg discovery, type AdvertiserClientStub interface { RegisterService, UnregisterService }
+pkg discovery, type AdvertiserClientStub interface, RegisterService(*context.T, discovery.Service, []security.BlessingPattern, ...rpc.CallOpt) (ServiceHandle, error)
+pkg discovery, type AdvertiserClientStub interface, UnregisterService(*context.T, ServiceHandle, ...rpc.CallOpt) error
+pkg discovery, type AdvertiserServerMethods interface { RegisterService, UnregisterService }
+pkg discovery, type AdvertiserServerMethods interface, RegisterService(*context.T, rpc.ServerCall, discovery.Service, []security.BlessingPattern) (ServiceHandle, error)
+pkg discovery, type AdvertiserServerMethods interface, UnregisterService(*context.T, rpc.ServerCall, ServiceHandle) error
+pkg discovery, type AdvertiserServerStub interface, Describe__() []rpc.InterfaceDesc
+pkg discovery, type AdvertiserServerStub interface, unexported methods
+pkg discovery, type AdvertiserServerStubMethods AdvertiserServerMethods
+pkg discovery, type ScannerClientMethods interface { Scan }
+pkg discovery, type ScannerClientMethods interface, Scan(*context.T, string, ...rpc.CallOpt) (ScannerScanClientCall, error)
+pkg discovery, type ScannerClientStub interface { Scan }
+pkg discovery, type ScannerClientStub interface, Scan(*context.T, string, ...rpc.CallOpt) (ScannerScanClientCall, error)
+pkg discovery, type ScannerScanClientCall interface { Finish, RecvStream }
+pkg discovery, type ScannerScanClientCall interface, Finish() error
+pkg discovery, type ScannerScanClientCall interface, RecvStream() interface {  Advance() bool;; Value() discovery.Update;; Err() error;}
+pkg discovery, type ScannerScanClientStream interface { RecvStream }
+pkg discovery, type ScannerScanClientStream interface, RecvStream() interface {  Advance() bool;; Value() discovery.Update;; Err() error;}
+pkg discovery, type ScannerScanServerCall interface { GrantedBlessings, LocalEndpoint, RemoteEndpoint, Security, SendStream, Server, Suffix }
+pkg discovery, type ScannerScanServerCall interface, GrantedBlessings() security.Blessings
+pkg discovery, type ScannerScanServerCall interface, LocalEndpoint() naming.Endpoint
+pkg discovery, type ScannerScanServerCall interface, RemoteEndpoint() naming.Endpoint
+pkg discovery, type ScannerScanServerCall interface, Security() security.Call
+pkg discovery, type ScannerScanServerCall interface, SendStream() interface {  Send(item discovery.Update) error;}
+pkg discovery, type ScannerScanServerCall interface, Server() Server
+pkg discovery, type ScannerScanServerCall interface, Suffix() string
+pkg discovery, type ScannerScanServerCallStub struct
+pkg discovery, type ScannerScanServerCallStub struct, embedded rpc.StreamServerCall
+pkg discovery, type ScannerScanServerStream interface { SendStream }
+pkg discovery, type ScannerScanServerStream interface, SendStream() interface {  Send(item discovery.Update) error;}
+pkg discovery, type ScannerServerMethods interface { Scan }
+pkg discovery, type ScannerServerMethods interface, Scan(*context.T, ScannerScanServerCall, string) error
+pkg discovery, type ScannerServerStub interface { Describe__, Scan }
+pkg discovery, type ScannerServerStub interface, Describe__() []rpc.InterfaceDesc
+pkg discovery, type ScannerServerStub interface, Scan(*context.T, *ScannerScanServerCallStub, string) error
+pkg discovery, type ScannerServerStubMethods interface { Scan }
+pkg discovery, type ScannerServerStubMethods interface, Scan(*context.T, *ScannerScanServerCallStub, string) error
+pkg discovery, type ServiceHandle uint32
+pkg discovery, var AdvertiserDesc rpc.InterfaceDesc
+pkg discovery, var ScannerDesc rpc.InterfaceDesc
