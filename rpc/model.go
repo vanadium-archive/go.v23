@@ -85,12 +85,6 @@ type Stream interface {
 // For TCP, the address must be in <ip>:<port> format. The <ip> may be
 // omitted, but the <port> can not (choose a port of 0 to have the system
 // allocate one).
-//
-// TODO(toddw): Using an anonymous struct leads to having to use the
-// following ugly syntax to work around "go vet":
-//
-// localhost := []struct{ Protocol, Address string }{{"tcp", "127.0.0.1:0"}}
-// addrs := rpc.ListenAddrs(localhost)
 type ListenAddrs []struct {
 	Protocol, Address string
 }
@@ -138,7 +132,7 @@ func (l ListenSpec) String() string {
 // Copy clones a ListenSpec. The cloned spec has its own copy of the array of
 // addresses to listen on.
 func (l ListenSpec) Copy() ListenSpec {
-	l.Addrs = append(ListenAddrs{}, l.Addrs...)
+	l.Addrs = append(ListenAddrs(nil), l.Addrs...)
 	return l
 }
 
