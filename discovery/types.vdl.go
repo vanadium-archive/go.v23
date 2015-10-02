@@ -19,6 +19,8 @@ type Service struct {
 	// The 128 bit (16 byte) universal unique identifier of a service instance.
 	// If this is not specified, a random UUID will be used.
 	InstanceUuid []byte
+	// Optional name of the service instance.
+	InstanceName string
 	// The interface that the service implements.
 	// E.g., 'v.io/v23/services/vtrace.Store'.
 	InterfaceName string
@@ -36,7 +38,9 @@ func (Service) __VDLReflect(struct {
 }
 
 // Attributes represents service attributes as a key/value pair.
-// A key should not start with '_' or include '='.
+//
+// The key must be US-ASCII printable characters, excluding the '=' character
+// and should not start with '_' character.
 type Attributes map[string]string
 
 func (Attributes) __VDLReflect(struct {

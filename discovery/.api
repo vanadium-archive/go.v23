@@ -16,6 +16,7 @@ pkg discovery, type Scanner interface, Scan(*context.T, string) (<-chan Update, 
 pkg discovery, type Service struct
 pkg discovery, type Service struct, Addrs []string
 pkg discovery, type Service struct, Attrs Attributes
+pkg discovery, type Service struct, InstanceName string
 pkg discovery, type Service struct, InstanceUuid []byte
 pkg discovery, type Service struct, InterfaceName string
 pkg discovery, type T interface { Advertise, Scan }
