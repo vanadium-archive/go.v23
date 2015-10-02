@@ -4,6 +4,7 @@ pkg build, const ArchitectureX86 Architecture
 pkg build, const FormatElf Format
 pkg build, const FormatMach Format
 pkg build, const FormatPe Format
+pkg build, const OperatingSystemAndroid OperatingSystem
 pkg build, const OperatingSystemDarwin OperatingSystem
 pkg build, const OperatingSystemLinux OperatingSystem
 pkg build, const OperatingSystemWindows OperatingSystem

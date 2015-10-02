@@ -28,6 +28,7 @@ type OperatingSystem enum {
 	Darwin
 	Linux
 	Windows
+	Android
 }
 
 // File records the name and contents of a file.

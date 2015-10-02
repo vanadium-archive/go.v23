@@ -136,10 +136,11 @@ const (
 	OperatingSystemDarwin OperatingSystem = iota
 	OperatingSystemLinux
 	OperatingSystemWindows
+	OperatingSystemAndroid
 )
 
 // OperatingSystemAll holds all labels for OperatingSystem.
-var OperatingSystemAll = [...]OperatingSystem{OperatingSystemDarwin, OperatingSystemLinux, OperatingSystemWindows}
+var OperatingSystemAll = [...]OperatingSystem{OperatingSystemDarwin, OperatingSystemLinux, OperatingSystemWindows, OperatingSystemAndroid}
 
 // OperatingSystemFromString creates a OperatingSystem from a string label.
 func OperatingSystemFromString(label string) (x OperatingSystem, err error) {
@@ -159,6 +160,9 @@ func (x *OperatingSystem) Set(label string) error {
 	case "Windows", "windows":
 		*x = OperatingSystemWindows
 		return nil
+	case "Android", "android":
+		*x = OperatingSystemAndroid
+		return nil
 	}
 	*x = -1
 	return fmt.Errorf("unknown label %q in build.OperatingSystem", label)
@@ -173,13 +177,15 @@ func (x OperatingSystem) String() string {
 		return "Linux"
 	case OperatingSystemWindows:
 		return "Windows"
+	case OperatingSystemAndroid:
+		return "Android"
 	}
 	return ""
 }
 
 func (OperatingSystem) __VDLReflect(struct {
 	Name string `vdl:"v.io/v23/services/build.OperatingSystem"`
-	Enum struct{ Darwin, Linux, Windows string }
+	Enum struct{ Darwin, Linux, Windows, Android string }
 }) {
 }
 

@@ -46,6 +46,8 @@ func (os OperatingSystem) ToGoOS() string {
 		return "linux"
 	case OperatingSystemWindows:
 		return "windows"
+	case OperatingSystemAndroid:
+		return "android"
 	default:
 		return "unknown"
 	}
