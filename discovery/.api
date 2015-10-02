@@ -10,7 +10,7 @@ pkg discovery, type Attributes map[string]string
 pkg discovery, type Found struct
 pkg discovery, type Found struct, Service Service
 pkg discovery, type Lost struct
-pkg discovery, type Lost struct, Service Service
+pkg discovery, type Lost struct, InstanceUuid []byte
 pkg discovery, type Scanner interface { Scan }
 pkg discovery, type Scanner interface, Scan(*context.T, string) (<-chan Update, error)
 pkg discovery, type Service struct

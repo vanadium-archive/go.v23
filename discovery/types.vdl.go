@@ -16,8 +16,8 @@ import (
 //
 // TODO(jhahn): Add descriptive name for a service instance.
 type Service struct {
-	// The 128 bit (16 byte) universal unique identifier of a service instance.
-	// If this is not specified, a random UUID will be used.
+	// The universal unique identifier of a service instance.
+	// If this is not specified, a random 128 bit (16 byte) UUID will be used.
 	InstanceUuid []byte
 	// Optional name of the service instance.
 	InstanceName string
@@ -60,10 +60,7 @@ func (Found) __VDLReflect(struct {
 
 // Lost represents a service that is lost during scan.
 type Lost struct {
-	// Only InstanceUuid is guaranteed to be set in Lost.
-	//
-	// TODO(jhahn): Change Serice to InstanceUuid.
-	Service Service
+	InstanceUuid []byte
 }
 
 func (Lost) __VDLReflect(struct {
