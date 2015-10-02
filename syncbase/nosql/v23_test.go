@@ -68,3 +68,7 @@ func TestV23SyncbasedGetDeltasPrePopulate(t *testing.T) {
 func TestV23SyncbasedGetDeltasMultiApp(t *testing.T) {
 	v23tests.RunTest(t, V23TestSyncbasedGetDeltasMultiApp)
 }
+
+func TestV23SyncGroupSync(t *testing.T) {
+	v23tests.RunTest(t, V23TestSyncGroupSync)
+}

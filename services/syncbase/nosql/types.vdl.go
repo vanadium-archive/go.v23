@@ -69,7 +69,7 @@ type SyncGroupSpec struct {
 	// Permissions for the SyncGroup.
 	Perms access.Permissions
 	// SyncGroup prefixes (relative to the database).  Prefixes
-	// must take the form "<tableName>/<rowKeyPrefix>" where
+	// must take the form "<tableName>:<rowKeyPrefix>" where
 	// tableName is non-empty.
 	Prefixes []string
 	// Mount tables at which to advertise this SyncGroup. These

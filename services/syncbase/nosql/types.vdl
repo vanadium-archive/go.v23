@@ -49,7 +49,7 @@ type SyncGroupSpec struct {
 	Perms access.Permissions
 
 	// SyncGroup prefixes (relative to the database).  Prefixes
-	// must take the form "<tableName>/<rowKeyPrefix>" where
+	// must take the form "<tableName>:<rowKeyPrefix>" where
 	// tableName is non-empty.
 	Prefixes []string
 
