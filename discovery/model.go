@@ -17,14 +17,23 @@ import (
 type T interface {
 	Advertiser
 	Scanner
+	Closer
 }
 
 // Advertiser is the interface for advertising services.
 type Advertiser interface {
-	// Advertise advertises the service. perms is used to limit the advertisement
-	// of the service. Advertising will continue until the context is canceled or
-	// exceeds its deadline.
+	// Advertise advertises the service to be discovered by "Scanner" implementations.
+	// visibility is used to limit the principals that can see the advertisement. An
+	// empty set means that there are no restrictions on visibility (i.e, equivalent
+	// to []security.BlessingPattern{security.AllPrincipals}). Advertising will continue
+	// until the context is canceled or exceeds its deadline.
 	Advertise(ctx *context.T, service Service, perms []security.BlessingPattern) error
+}
+
+// AdvertiseCloser is the interface that groups the Advertise and Close methods.
+type AdvertiseCloser interface {
+	Advertiser
+	Closer
 }
 
 // Scanner is the interface for scanning services.
@@ -35,4 +44,16 @@ type Scanner interface {
 	//
 	// TODO(jhahn): Add query syntax and examples.
 	Scan(ctx *context.T, query string) (<-chan Update, error)
+}
+
+// ScanCloser is the interface that groups the Scan and Close methods.
+type ScanCloser interface {
+	Scanner
+	Closer
+}
+
+// Closer is the interface that wraps the Close method.
+type Closer interface {
+	// Close closes all active tasks.
+	Close()
 }
