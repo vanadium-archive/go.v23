@@ -417,6 +417,16 @@ func (FunWithMaps) __VDLReflect(struct {
 }) {
 }
 
+type FunWithTypes struct {
+	T1 *vdl.Type
+	T2 *vdl.Type
+}
+
+func (FunWithTypes) __VDLReflect(struct {
+	Name string `vdl:"v.io/v23/syncbase/nosql/query/internal/testdata.FunWithTypes"`
+}) {
+}
+
 type ManyMaps struct {
 	B    map[bool]string
 	By   map[byte]string
@@ -492,6 +502,7 @@ func init() {
 	vdl.Register((*K)(nil))
 	vdl.Register((*V)(nil))
 	vdl.Register((*FunWithMaps)(nil))
+	vdl.Register((*FunWithTypes)(nil))
 	vdl.Register((*ManyMaps)(nil))
 	vdl.Register((*ManySets)(nil))
 	vdl.Register((*BigData)(nil))

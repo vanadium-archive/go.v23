@@ -43,7 +43,13 @@ func str(db query.Database, off int64, args []*query_parser.Operand) (*query_par
 		case query_parser.TypUint:
 			c.Str = strconv.FormatUint(o.Uint, 10)
 		case query_parser.TypObject:
-			c.Str = fmt.Sprintf("%v", o.Object)
+			// A vdl.TypeObject?
+			// In this case, TypeObject().Name() is used (rather than Type().Name()
+			if o.Object.Kind() == vdl.TypeObject {
+				c.Str = o.Object.TypeObject().Name()
+			} else {
+				c.Str = fmt.Sprintf("%v", o.Object)
+			}
 		}
 		return &c, nil
 	}
@@ -86,7 +92,12 @@ func typeFunc(db query.Database, off int64, args []*query_parser.Operand) (*quer
 	if args[0].Type != query_parser.TypObject {
 		return nil, query.NewErrFunctionTypeInvalidArg(db.GetContext(), args[0].Off)
 	}
-	return makeStrOp(off, args[0].Object.Type().Name()), nil
+	if args[0].Object.Kind() == vdl.TypeObject {
+		// Believe it or not, Name() doesn't return the name of the type if the type is TypeObject.
+		return makeStrOp(off, args[0].Object.Type().String()), nil
+	} else {
+		return makeStrOp(off, args[0].Object.Type().Name()), nil
+	}
 }
 
 func typeFuncFieldCheck(db query.Database, off int64, args []*query_parser.Operand) error {

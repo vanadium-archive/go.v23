@@ -17,9 +17,7 @@ import (
 	"v.io/v23/syncbase/nosql/query/internal"
 	"v.io/v23/syncbase/nosql/query/internal/query_checker"
 	"v.io/v23/syncbase/nosql/query/internal/query_parser"
-	// TODO(sadovsky): For legacy reasons, we import all testdata identifiers into
-	// the top-level namespace.
-	. "v.io/v23/syncbase/nosql/query/internal/testdata"
+	td "v.io/v23/syncbase/nosql/query/internal/testdata"
 	"v.io/v23/vdl"
 	"v.io/v23/verror"
 	_ "v.io/x/ref/runtime/factories/generic"
@@ -124,6 +122,7 @@ var previousAddressesTable table
 var manyMapsTable table
 var manySetsTable table
 var bigTable table
+var funWithTypesTable table
 
 type kv struct {
 	key   string
@@ -172,43 +171,43 @@ func init() {
 	custTable.rows = []kv{
 		kv{
 			"001",
-			vdl.ValueOf(Customer{"John Smith", 1, true, AddressInfo{"1 Main St.", "Palo Alto", "CA", "94303"}, []AddressInfo{AddressInfo{"10 Brown St.", "Mountain View", "CA", "94043"}}, CreditReport{Agency: CreditAgencyEquifax, Report: AgencyReportEquifaxReport{EquifaxCreditReport{'A', [4]int16{87, 81, 42, 2}}}}}),
+			vdl.ValueOf(td.Customer{"John Smith", 1, true, td.AddressInfo{"1 Main St.", "Palo Alto", "CA", "94303"}, []td.AddressInfo{td.AddressInfo{"10 Brown St.", "Mountain View", "CA", "94043"}}, td.CreditReport{Agency: td.CreditAgencyEquifax, Report: td.AgencyReportEquifaxReport{td.EquifaxCreditReport{'A', [4]int16{87, 81, 42, 2}}}}}),
 		},
 		kv{
 			"001001",
-			vdl.ValueOf(Invoice{1, 1000, t20150122131101, 42, AddressInfo{"1 Main St.", "Palo Alto", "CA", "94303"}}),
+			vdl.ValueOf(td.Invoice{1, 1000, t20150122131101, 42, td.AddressInfo{"1 Main St.", "Palo Alto", "CA", "94303"}}),
 		},
 		kv{
 			"001002",
-			vdl.ValueOf(Invoice{1, 1003, t20150210161202, 7, AddressInfo{"2 Main St.", "Palo Alto", "CA", "94303"}}),
+			vdl.ValueOf(td.Invoice{1, 1003, t20150210161202, 7, td.AddressInfo{"2 Main St.", "Palo Alto", "CA", "94303"}}),
 		},
 		kv{
 			"001003",
-			vdl.ValueOf(Invoice{1, 1005, t20150311101303, 88, AddressInfo{"3 Main St.", "Palo Alto", "CA", "94303"}}),
+			vdl.ValueOf(td.Invoice{1, 1005, t20150311101303, 88, td.AddressInfo{"3 Main St.", "Palo Alto", "CA", "94303"}}),
 		},
 		kv{
 			"002",
-			vdl.ValueOf(Customer{"Bat Masterson", 2, true, AddressInfo{"777 Any St.", "Collins", "IA", "50055"}, []AddressInfo{AddressInfo{"19 Green St.", "Boulder", "CO", "80301"}, AddressInfo{"558 W. Orange St.", "Lancaster", "PA", "17603"}}, CreditReport{Agency: CreditAgencyTransUnion, Report: AgencyReportTransUnionReport{TransUnionCreditReport{80, map[string]int16{"2015Q2": 40, "2015Q1": 60}}}}}),
+			vdl.ValueOf(td.Customer{"Bat Masterson", 2, true, td.AddressInfo{"777 Any St.", "Collins", "IA", "50055"}, []td.AddressInfo{td.AddressInfo{"19 Green St.", "Boulder", "CO", "80301"}, td.AddressInfo{"558 W. Orange St.", "Lancaster", "PA", "17603"}}, td.CreditReport{Agency: td.CreditAgencyTransUnion, Report: td.AgencyReportTransUnionReport{td.TransUnionCreditReport{80, map[string]int16{"2015Q2": 40, "2015Q1": 60}}}}}),
 		},
 		kv{
 			"002001",
-			vdl.ValueOf(Invoice{2, 1001, t20150317111404, 166, AddressInfo{"777 Any St.", "collins", "IA", "50055"}}),
+			vdl.ValueOf(td.Invoice{2, 1001, t20150317111404, 166, td.AddressInfo{"777 Any St.", "collins", "IA", "50055"}}),
 		},
 		kv{
 			"002002",
-			vdl.ValueOf(Invoice{2, 1002, t20150317131505, 243, AddressInfo{"888 Any St.", "collins", "IA", "50055"}}),
+			vdl.ValueOf(td.Invoice{2, 1002, t20150317131505, 243, td.AddressInfo{"888 Any St.", "collins", "IA", "50055"}}),
 		},
 		kv{
 			"002003",
-			vdl.ValueOf(Invoice{2, 1004, t20150412221606, 787, AddressInfo{"999 Any St.", "collins", "IA", "50055"}}),
+			vdl.ValueOf(td.Invoice{2, 1004, t20150412221606, 787, td.AddressInfo{"999 Any St.", "collins", "IA", "50055"}}),
 		},
 		kv{
 			"002004",
-			vdl.ValueOf(Invoice{2, 1006, t20150413141707, 88, AddressInfo{"101010 Any St.", "collins", "IA", "50055"}}),
+			vdl.ValueOf(td.Invoice{2, 1006, t20150413141707, 88, td.AddressInfo{"101010 Any St.", "collins", "IA", "50055"}}),
 		},
 		kv{
 			"003",
-			vdl.ValueOf(Customer{"John Steed", 3, true, AddressInfo{"100 Queen St.", "New London", "CT", "06320"}, []AddressInfo{}, CreditReport{Agency: CreditAgencyExperian, Report: AgencyReportExperianReport{ExperianCreditReport{ExperianRatingGood, map[Tdh]struct{}{TdhTom: {}, TdhHarry: {}}, TdhTom}}}}),
+			vdl.ValueOf(td.Customer{"John Steed", 3, true, td.AddressInfo{"100 Queen St.", "New London", "CT", "06320"}, []td.AddressInfo{}, td.CreditReport{Agency: td.CreditAgencyExperian, Report: td.AgencyReportExperianReport{td.ExperianCreditReport{td.ExperianRatingGood, map[td.Tdh]struct{}{td.TdhTom: {}, td.TdhHarry: {}}, td.TdhTom}}}}),
 		},
 	}
 	db.tables = append(db.tables, custTable)
@@ -217,15 +216,15 @@ func init() {
 	numTable.rows = []kv{
 		kv{
 			"001",
-			vdl.ValueOf(Numbers{byte(12), uint16(1234), uint32(5678), uint64(999888777666), int16(9876), int32(876543), int64(128), float32(3.14159), float64(2.71828182846), complex64(123.0 + 7.0i), complex128(456.789 + 10.1112i)}),
+			vdl.ValueOf(td.Numbers{byte(12), uint16(1234), uint32(5678), uint64(999888777666), int16(9876), int32(876543), int64(128), float32(3.14159), float64(2.71828182846), complex64(123.0 + 7.0i), complex128(456.789 + 10.1112i)}),
 		},
 		kv{
 			"002",
-			vdl.ValueOf(Numbers{byte(9), uint16(99), uint32(999), uint64(9999999), int16(9), int32(99), int64(88), float32(1.41421356237), float64(1.73205080757), complex64(9.87 + 7.65i), complex128(4.32 + 1.0i)}),
+			vdl.ValueOf(td.Numbers{byte(9), uint16(99), uint32(999), uint64(9999999), int16(9), int32(99), int64(88), float32(1.41421356237), float64(1.73205080757), complex64(9.87 + 7.65i), complex128(4.32 + 1.0i)}),
 		},
 		kv{
 			"003",
-			vdl.ValueOf(Numbers{byte(210), uint16(210), uint32(210), uint64(210), int16(210), int32(210), int64(210), float32(210.0), float64(210.0), complex64(210.0 + 0.0i), complex128(210.0 + 0.0i)}),
+			vdl.ValueOf(td.Numbers{byte(210), uint16(210), uint32(210), uint64(210), int16(210), int32(210), int64(210), float32(210.0), float64(210.0), complex64(210.0 + 0.0i), complex128(210.0 + 0.0i)}),
 		},
 	}
 	db.tables = append(db.tables, numTable)
@@ -234,11 +233,11 @@ func init() {
 	fooTable.rows = []kv{
 		kv{
 			"001",
-			vdl.ValueOf(FooType{BarType{BazType{"FooBarBaz", TitleOrValueTypeTitle{"Vice President"}}}}),
+			vdl.ValueOf(td.FooType{td.BarType{td.BazType{"FooBarBaz", td.TitleOrValueTypeTitle{"Vice President"}}}}),
 		},
 		kv{
 			"002",
-			vdl.ValueOf(FooType{BarType{BazType{"BazBarFoo", TitleOrValueTypeValue{42}}}}),
+			vdl.ValueOf(td.FooType{td.BarType{td.BazType{"BazBarFoo", td.TitleOrValueTypeValue{42}}}}),
 		},
 	}
 	db.tables = append(db.tables, fooTable)
@@ -247,7 +246,7 @@ func init() {
 	funWithMapsTable.rows = []kv{
 		kv{
 			"AAA",
-			vdl.ValueOf(FunWithMaps{K{'a', "bbb"}, map[K]V{K{'a', "aaa"}: V{"bbb", 23.0}, K{'a', "bbb"}: V{"ccc", 14.7}},
+			vdl.ValueOf(td.FunWithMaps{td.K{'a', "bbb"}, map[td.K]td.V{td.K{'a', "aaa"}: td.V{"bbb", 23.0}, td.K{'a', "bbb"}: td.V{"ccc", 14.7}},
 				map[int16][]map[string]struct{}{
 					23: []map[string]struct{}{
 						map[string]struct{}{"foo": {}, "bar": {}},
@@ -257,7 +256,7 @@ func init() {
 		},
 		kv{
 			"BBB",
-			vdl.ValueOf(FunWithMaps{K{'x', "zzz"}, map[K]V{K{'x', "zzz"}: V{"yyy", 17.1}, K{'r', "sss"}: V{"qqq", 7.8}},
+			vdl.ValueOf(td.FunWithMaps{td.K{'x', "zzz"}, map[td.K]td.V{td.K{'x', "zzz"}: td.V{"yyy", 17.1}, td.K{'r', "sss"}: td.V{"qqq", 7.8}},
 				map[int16][]map[string]struct{}{
 					42: []map[string]struct{}{
 						map[string]struct{}{"great": {}, "dane": {}},
@@ -273,11 +272,11 @@ func init() {
 	ratingsArrayTable.rows = []kv{
 		kv{
 			"000",
-			vdl.ValueOf(RatingsArray{40, 20, 10, 0}),
+			vdl.ValueOf(td.RatingsArray{40, 20, 10, 0}),
 		},
 		kv{
 			"111",
-			vdl.ValueOf(RatingsArray{17, 18, 19, 20}),
+			vdl.ValueOf(td.RatingsArray{17, 18, 19, 20}),
 		},
 	}
 	db.tables = append(db.tables, ratingsArrayTable)
@@ -286,11 +285,11 @@ func init() {
 	tdhApprovalsTable.rows = []kv{
 		kv{
 			"yyy",
-			vdl.ValueOf(map[Tdh]struct{}{TdhTom: {}}),
+			vdl.ValueOf(map[td.Tdh]struct{}{td.TdhTom: {}}),
 		},
 		kv{
 			"zzz",
-			vdl.ValueOf(map[Tdh]struct{}{TdhDick: {}, TdhHarry: {}}),
+			vdl.ValueOf(map[td.Tdh]struct{}{td.TdhDick: {}, td.TdhHarry: {}}),
 		},
 	}
 	db.tables = append(db.tables, tdhApprovalsTable)
@@ -312,16 +311,16 @@ func init() {
 	previousAddressesTable.rows = []kv{
 		kv{
 			"a1",
-			vdl.ValueOf([]AddressInfo{
-				AddressInfo{"100 Main St.", "Anytown", "CA", "94303"},
-				AddressInfo{"200 Main St.", "Othertown", "IA", "51050"},
+			vdl.ValueOf([]td.AddressInfo{
+				td.AddressInfo{"100 Main St.", "Anytown", "CA", "94303"},
+				td.AddressInfo{"200 Main St.", "Othertown", "IA", "51050"},
 			}),
 		},
 		kv{
 			"a2",
-			vdl.ValueOf([]AddressInfo{
-				AddressInfo{"500 Orange St", "Uptown", "ID", "83209"},
-				AddressInfo{"200 Fulton St", "Downtown", "MT", "59001"},
+			vdl.ValueOf([]td.AddressInfo{
+				td.AddressInfo{"500 Orange St", "Uptown", "ID", "83209"},
+				td.AddressInfo{"200 Fulton St", "Downtown", "MT", "59001"},
 			}),
 		},
 	}
@@ -331,7 +330,7 @@ func init() {
 	manyMapsTable.rows = []kv{
 		kv{
 			"0",
-			vdl.ValueOf(ManyMaps{
+			vdl.ValueOf(td.ManyMaps{
 				map[bool]string{true: "It was the best of times,"},
 				map[byte]string{10: "it was the worst of times,"},
 				map[uint16]string{16: "it was the age of wisdom,"},
@@ -358,7 +357,7 @@ func init() {
 	manySetsTable.rows = []kv{
 		kv{
 			"0",
-			vdl.ValueOf(ManySets{
+			vdl.ValueOf(td.ManySets{
 				map[bool]struct{}{true: {}},
 				map[byte]struct{}{10: {}},
 				map[uint16]struct{}{16: {}},
@@ -382,10 +381,26 @@ func init() {
 
 	for i := 100; i < 301; i++ {
 		k := fmt.Sprintf("%d", i)
-		b := vdl.ValueOf(BigData{k})
+		b := vdl.ValueOf(td.BigData{k})
 		bigTable.rows = append(bigTable.rows, kv{k, b})
 	}
 	db.tables = append(db.tables, bigTable)
+
+	custType := vdl.ValueOf(td.Customer{"John Steed", 3, true, td.AddressInfo{"100 Queen St.", "New London", "CT", "06320"}, []td.AddressInfo{}, td.CreditReport{Agency: td.CreditAgencyExperian, Report: td.AgencyReportExperianReport{td.ExperianCreditReport{td.ExperianRatingGood, map[td.Tdh]struct{}{td.TdhTom: {}, td.TdhHarry: {}}, td.TdhTom}}}}).Type()
+	invType := vdl.ValueOf(td.Invoice{2, 1006, t20150413141707, 88, td.AddressInfo{"101010 Any St.", "collins", "IA", "50055"}}).Type()
+
+	funWithTypesTable.name = "FunWithTypes"
+	funWithTypesTable.rows = []kv{
+		kv{
+			"1",
+			vdl.ValueOf(td.FunWithTypes{T1: custType, T2: invType}),
+		},
+		kv{
+			"2",
+			vdl.ValueOf(td.FunWithTypes{T1: custType, T2: custType}),
+		},
+	}
+	db.tables = append(db.tables, funWithTypesTable)
 }
 
 type keyRangesTest struct {
@@ -1366,8 +1381,8 @@ func TestQueryExec(t *testing.T) {
 			"select v.Map[v.Key] from FunWithMaps",
 			[]string{"v.Map[v.Key]"},
 			[][]*vdl.Value{
-				[]*vdl.Value{vdl.ValueOf(V{"ccc", 14.7})},
-				[]*vdl.Value{vdl.ValueOf(V{"yyy", 17.1})},
+				[]*vdl.Value{vdl.ValueOf(td.V{"ccc", 14.7})},
+				[]*vdl.Value{vdl.ValueOf(td.V{"yyy", 17.1})},
 			},
 		},
 		// map of int16 to array of sets of strings
@@ -1377,6 +1392,49 @@ func TestQueryExec(t *testing.T) {
 			[][]*vdl.Value{
 				[]*vdl.Value{vdl.ValueOf(true)},
 				[]*vdl.Value{vdl.ValueOf(nil)},
+			},
+		},
+		// FunWithTypes
+		{
+			"select Type(v.T1), Type(v.T2) from FunWithTypes",
+			[]string{"Type", "Type"},
+			[][]*vdl.Value{
+				[]*vdl.Value{vdl.ValueOf("typeobject"), vdl.ValueOf("typeobject")},
+				[]*vdl.Value{vdl.ValueOf("typeobject"), vdl.ValueOf("typeobject")},
+			},
+		},
+		// FunWithTypes
+		{
+			"select Str(v.T1), Str(v.T2) from FunWithTypes",
+			[]string{"Str", "Str"},
+			[][]*vdl.Value{
+				[]*vdl.Value{vdl.ValueOf("v.io/v23/syncbase/nosql/query/internal/testdata.Customer"), vdl.ValueOf("v.io/v23/syncbase/nosql/query/internal/testdata.Invoice")},
+				[]*vdl.Value{vdl.ValueOf("v.io/v23/syncbase/nosql/query/internal/testdata.Customer"), vdl.ValueOf("v.io/v23/syncbase/nosql/query/internal/testdata.Customer")},
+			},
+		},
+		// FunWithTypes
+		{
+			"select Str(v.T1), Str(v.T2) from FunWithTypes where v.T1 = v.T2",
+			[]string{"Str", "Str"},
+			[][]*vdl.Value{
+				[]*vdl.Value{vdl.ValueOf("v.io/v23/syncbase/nosql/query/internal/testdata.Customer"), vdl.ValueOf("v.io/v23/syncbase/nosql/query/internal/testdata.Customer")},
+			},
+		},
+		// FunWithTypes
+		{
+			"select Str(v.T1), Str(v.T2) from FunWithTypes where Str(v.T1) = Str(v.T2)",
+			[]string{"Str", "Str"},
+			[][]*vdl.Value{
+				[]*vdl.Value{vdl.ValueOf("v.io/v23/syncbase/nosql/query/internal/testdata.Customer"), vdl.ValueOf("v.io/v23/syncbase/nosql/query/internal/testdata.Customer")},
+			},
+		},
+		// FunWithTypes
+		{
+			"select Str(v.T1), Str(v.T2) from FunWithTypes where Type(v.T1) = Type(v.T2)",
+			[]string{"Str", "Str"},
+			[][]*vdl.Value{
+				[]*vdl.Value{vdl.ValueOf("v.io/v23/syncbase/nosql/query/internal/testdata.Customer"), vdl.ValueOf("v.io/v23/syncbase/nosql/query/internal/testdata.Invoice")},
+				[]*vdl.Value{vdl.ValueOf("v.io/v23/syncbase/nosql/query/internal/testdata.Customer"), vdl.ValueOf("v.io/v23/syncbase/nosql/query/internal/testdata.Customer")},
 			},
 		},
 		// Function using a map lookup as arg
@@ -2778,7 +2836,7 @@ func TestProjection(t *testing.T) {
 				vdl.ValueOf("John Smith"),
 				vdl.ValueOf(int64(1)),
 				vdl.ValueOf(true),
-				vdl.ValueOf(CreditAgencyEquifax),
+				vdl.ValueOf(td.CreditAgencyEquifax),
 				vdl.ValueOf(byte('A')),
 				vdl.ValueOf("1 Main St."),
 				vdl.ValueOf("Palo Alto"),

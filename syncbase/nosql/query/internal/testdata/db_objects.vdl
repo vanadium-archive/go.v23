@@ -124,6 +124,11 @@ type FunWithMaps struct {
 	Confusing map[int16][]set[string]
 }
 
+type FunWithTypes struct {
+	T1 typeobject
+	T2 typeobject
+}
+
 type ManyMaps struct {
 	B    map[bool]string
 	By   map[byte]string

@@ -72,7 +72,6 @@ func init() {
 	functions["Log10"] = function{[]query_parser.OperandType{query_parser.TypFloat}, false, query_parser.TypNil, query_parser.TypFloat, log10Func, nil}
 	functions["Pow"] = function{[]query_parser.OperandType{query_parser.TypFloat, query_parser.TypFloat}, false, query_parser.TypNil, query_parser.TypFloat, powFunc, nil}
 	functions["Pow10"] = function{[]query_parser.OperandType{query_parser.TypInt}, false, query_parser.TypNil, query_parser.TypFloat, pow10Func, nil}
-	functions["Log10"] = function{[]query_parser.OperandType{query_parser.TypFloat}, false, query_parser.TypNil, query_parser.TypFloat, log10Func, nil}
 	functions["Mod"] = function{[]query_parser.OperandType{query_parser.TypFloat, query_parser.TypFloat}, false, query_parser.TypNil, query_parser.TypFloat, modFunc, nil}
 	functions["Real"] = function{[]query_parser.OperandType{query_parser.TypComplex}, false, query_parser.TypNil, query_parser.TypFloat, realFunc, nil}
 	functions["Truncate"] = function{[]query_parser.OperandType{query_parser.TypFloat}, false, query_parser.TypNil, query_parser.TypFloat, truncateFunc, nil}
