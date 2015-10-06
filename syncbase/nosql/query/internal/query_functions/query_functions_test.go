@@ -2122,6 +2122,66 @@ func TestFunctions(t *testing.T) {
 				Float: -0.8999999999999995,
 			},
 		},
+		// RuneCount
+		functionsTest{
+			&query_parser.Function{
+				Name: "RuneCount",
+				Args: []*query_parser.Operand{
+					&query_parser.Operand{
+						Type: query_parser.TypStr,
+						Str:  "Hello, 世界",
+					},
+				},
+				ArgTypes: []query_parser.OperandType{
+					query_parser.TypStr,
+				},
+				RetType:  query_parser.TypInt,
+				Computed: false,
+				RetValue: nil,
+			},
+			[]*query_parser.Operand{
+				&query_parser.Operand{
+					Type: query_parser.TypStr,
+					Str:  "Hello, 世界",
+				},
+			},
+			&query_parser.Operand{
+				Type: query_parser.TypInt,
+				Int:  9,
+			},
+		},
+		// Len
+		functionsTest{
+			&query_parser.Function{
+				Name: "Len",
+				Args: []*query_parser.Operand{
+					&query_parser.Operand{
+						Type: query_parser.TypStr,
+						Str:  "Hello, 世界",
+					},
+				},
+				ArgTypes: []query_parser.OperandType{
+					query_parser.TypStr,
+				},
+				RetType:  query_parser.TypInt,
+				Computed: false,
+				RetValue: nil,
+			},
+			[]*query_parser.Operand{
+				&query_parser.Operand{
+					Type: query_parser.TypStr,
+					Str:  "Hello, 世界",
+				},
+				&query_parser.Operand{
+					Type:  query_parser.TypInt,
+					Float: 13,
+				},
+			},
+			&query_parser.Operand{
+				Type: query_parser.TypInt,
+				Int:  13,
+			},
+		},
 	}
 
 	for _, test := range tests {

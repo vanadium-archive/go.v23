@@ -10,6 +10,7 @@ import (
 	"strconv"
 	"strings"
 	"unicode"
+	"unicode/utf8"
 
 	"v.io/v23/syncbase/nosql/query"
 	"v.io/v23/syncbase/nosql/query/internal/conversions"
@@ -279,4 +280,15 @@ func trimRight(db query.Database, off int64, args []*query_parser.Operand) (*que
 		return nil, err
 	}
 	return makeStrOp(off, strings.TrimRightFunc(s.Str, unicode.IsSpace)), nil
+}
+
+// RuneCount(s string) int
+// RuneCount returns the number of runes in s.
+// e.g., RuneCount("abc") returns 3.
+func runeCount(db query.Database, off int64, args []*query_parser.Operand) (*query_parser.Operand, error) {
+	s, err := conversions.ConvertValueToString(args[0])
+	if err != nil {
+		return nil, err
+	}
+	return makeIntOp(off, int64(utf8.RuneCountInString(s.Str))), nil
 }

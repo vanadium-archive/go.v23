@@ -51,6 +51,7 @@ func init() {
 	functions["Split"] = function{[]query_parser.OperandType{query_parser.TypStr, query_parser.TypStr}, false, query_parser.TypNil, query_parser.TypObject, split, nil}
 	functions["Type"] = function{[]query_parser.OperandType{query_parser.TypObject}, false, query_parser.TypNil, query_parser.TypStr, typeFunc, typeFuncFieldCheck}
 	functions["Uppercase"] = function{[]query_parser.OperandType{query_parser.TypStr}, false, query_parser.TypNil, query_parser.TypStr, upperCase, nil}
+	functions["RuneCount"] = function{[]query_parser.OperandType{query_parser.TypStr}, false, query_parser.TypNil, query_parser.TypInt, runeCount, nil}
 	functions["Sprintf"] = function{[]query_parser.OperandType{query_parser.TypStr}, true, query_parser.TypNil, query_parser.TypStr, sprintf, nil}
 	functions["Str"] = function{[]query_parser.OperandType{query_parser.TypStr}, false, query_parser.TypNil, query_parser.TypStr, str, nil}
 	functions["StrCat"] = function{[]query_parser.OperandType{query_parser.TypStr, query_parser.TypStr}, true, query_parser.TypStr, query_parser.TypStr, strCat, nil}

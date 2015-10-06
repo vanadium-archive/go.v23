@@ -2208,6 +2208,14 @@ func TestQueryExec(t *testing.T) {
 				[]*vdl.Value{vdl.ValueOf("   Foo")},
 			},
 		},
+		{
+			// RuneCount
+			"select Len(\"Hello, 世界\"), RuneCount(\"Hello, 世界\") from Customer where v.Name = \"John Smith\"",
+			[]string{"Len", "RuneCount"},
+			[][]*vdl.Value{
+				[]*vdl.Value{vdl.ValueOf(13), vdl.ValueOf(9)},
+			},
+		},
 	}
 
 	for _, test := range basic {
