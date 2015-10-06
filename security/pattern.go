@@ -23,18 +23,41 @@ func (p BlessingPattern) MatchedBy(blessings ...string) bool {
 	if p == AllPrincipals {
 		return true
 	}
-	parts := strings.Split(string(p), ChainSeparator)
-	glob := true
-	if parts[len(parts)-1] == string(NoExtension) {
-		glob = false
-		parts = parts[:len(parts)-1]
+	pstr, glob := trimNoExtension(string(p))
+	if pstr == "" {
+		return false
 	}
 	for _, b := range blessings {
-		if matchedByBlessing(parts, glob, b) {
+		if b == pstr {
+			return true
+		}
+		if glob && strings.HasPrefix(b, pstr) && strings.HasPrefix(b[len(pstr):], ChainSeparator) {
 			return true
 		}
 	}
 	return false
+}
+
+// trimNoExtension removes the trailing NoExtension component from pattern.
+// Returns true if nothing was trimmed.
+func trimNoExtension(pattern string) (string, bool) {
+	if suffix := string(NoExtension); pattern == suffix {
+		return "", false
+	}
+	if suffix := ChainSeparator + string(NoExtension); strings.HasSuffix(pattern, suffix) {
+		return pattern[0 : len(pattern)-len(suffix)], false
+	}
+	return pattern, true
+}
+
+// splitBlessing splits in into the first component upto the ChainSeparator and
+// the rest.
+func splitBlessing(in string) (prefix, rest string) {
+	idx := strings.Index(in, ChainSeparator)
+	if idx == -1 {
+		return in, ""
+	}
+	return in[0:idx], in[idx+1:]
 }
 
 // IsValid returns true iff the BlessingPattern is well formed, as per the
@@ -46,14 +69,16 @@ func (p BlessingPattern) IsValid() bool {
 	if p == AllPrincipals {
 		return true
 	}
-	parts := strings.Split(string(p), ChainSeparator)
-	if parts[len(parts)-1] == string(NoExtension) {
-		parts = parts[:len(parts)-1]
+	pstr, _ := trimNoExtension(string(p))
+	if strings.HasSuffix(pstr, ChainSeparator) {
+		return false
 	}
-	for _, e := range parts {
-		if validateExtension(e) != nil {
+	for len(pstr) > 0 {
+		prefix, rest := splitBlessing(pstr)
+		if validateExtension(prefix) != nil {
 			return false
 		}
+		pstr = rest
 	}
 	return true
 }
@@ -103,28 +128,6 @@ func (p BlessingPattern) PrefixPatterns() []BlessingPattern {
 		ret = append(ret, BlessingPattern(strings.Join(parts[:i+1], ChainSeparator)).MakeNonExtendable())
 	}
 	return append(ret, p)
-}
-
-func matchedByBlessing(patternchain []string, glob bool, b string) bool {
-	// links of the delegation chain in a blessing
-	blessingchain := strings.Split(b, ChainSeparator)
-	if len(blessingchain) < len(patternchain) {
-		return false
-	}
-	if glob && len(blessingchain) > len(patternchain) {
-		// Ignore parts of the blessing chain that will match extensions of the pattern.
-		blessingchain = blessingchain[:len(patternchain)]
-	}
-	if len(blessingchain) > len(patternchain) {
-		return false
-	}
-	// At this point, len(blessingchain) == len(patternchain)
-	for i, part := range blessingchain {
-		if patternchain[i] != part {
-			return false
-		}
-	}
-	return true
 }
 
 // SplitPatternName takes an object name and parses out the server blessing pattern.
