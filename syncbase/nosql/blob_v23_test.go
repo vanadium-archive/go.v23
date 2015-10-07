@@ -47,7 +47,7 @@ func V23TestSyncbasedWholeBlobTransfer(t *v23tests.T) {
 
 	tu.RunClient(t, client1Creds, runSetupAppA, "sync1")
 	tu.RunClient(t, client1Creds, runJoinSyncGroup, "sync1", sgName)
-	tu.RunClient(t, client1Creds, runVerifySyncGroupData, "sync1", "foo", "0", "10")
+	tu.RunClient(t, client1Creds, runVerifySyncGroupData, "sync1", "foo", "0", "10", "false")
 
 	// FetchBlob first.
 	tu.RunClient(t, client0Creds, runGenerateBlob, "sync0", "foo", "0", "foobarbaz")
