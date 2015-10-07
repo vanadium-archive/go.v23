@@ -36,7 +36,9 @@ const (
 	LocalStop = "localstop"
 	// RemoteStop is the message received on AppCycle.WaitForStop when the stop was
 	// initiated via an RPC call (AppCycle.Stop).
-	RemoteStop            = "remotestop"
+	RemoteStop = "remotestop"
+	// Default values for exit codes returned by the process when exiting
+	// via the AppCycle component.
 	UnhandledStopExitCode = 1
 	ForceStopExitCode     = 1
 )
