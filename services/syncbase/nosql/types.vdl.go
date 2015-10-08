@@ -62,28 +62,37 @@ func (KeyValue) __VDLReflect(struct {
 }) {
 }
 
+// SyncGroupPrefix is a tableName-rowPrefix pair.
+type SyncGroupPrefix struct {
+	TableName string
+	RowPrefix string
+}
+
+func (SyncGroupPrefix) __VDLReflect(struct {
+	Name string `vdl:"v.io/v23/services/syncbase/nosql.SyncGroupPrefix"`
+}) {
+}
+
 // SyncGroupSpec contains the specification for a SyncGroup.
 type SyncGroupSpec struct {
-	// Human readable description.
+	// Human-readable description of this SyncGroup.
 	Description string
-	// Permissions for the SyncGroup.
+	// Permissions governing access to this SyncGroup.
 	Perms access.Permissions
-	// SyncGroup prefixes (relative to the database).  Prefixes
-	// must take the form "<tableName>:<rowKeyPrefix>" where
-	// tableName is non-empty.
-	Prefixes []string
-	// Mount tables at which to advertise this SyncGroup. These
-	// are the mount tables used for rendezvous in addition to the
-	// one in the neighborhood. Typically, we will have only one
-	// entry.  However, an array allows mount tables to be changed
-	// over time.
-	//
-	// TODO(hpucha): Figure out a convention for
-	// advertising SyncGroups in the mount table.
+	// Data (tableName-rowPrefix pairs) covered by this SyncGroup.
+	Prefixes []SyncGroupPrefix
+	// Mount tables at which to advertise this SyncGroup, for rendezvous purposes.
+	// (Note that in addition to these mount tables, Syncbase also uses
+	// network-neighborhood-based discovery for rendezvous.)
+	// We expect most clients to specify a single mount table, but we accept an
+	// array of mount tables to permit the mount table to be changed over time
+	// without disruption.
+	// TODO(hpucha): Figure out a convention for advertising SyncGroups in the
+	// mount table.
 	MountTables []string
-	// Option to change the privacy of the SyncGroup. Configures
-	// whether blobs in a SyncGroup can be served to clients
-	// holding blobrefs obtained from other SyncGroups.
+	// Specifies the privacy of this SyncGroup. More specifically, specifies
+	// whether blobs in this SyncGroup can be served to clients presenting
+	// blobrefs obtained from other SyncGroups.
 	IsPrivate bool
 }
 
@@ -646,6 +655,7 @@ func init() {
 	vdl.Register((*BatchOptions)(nil))
 	vdl.Register((*PrefixPermissions)(nil))
 	vdl.Register((*KeyValue)(nil))
+	vdl.Register((*SyncGroupPrefix)(nil))
 	vdl.Register((*SyncGroupSpec)(nil))
 	vdl.Register((*SyncGroupMemberInfo)(nil))
 	vdl.Register((*ResolverType)(nil))

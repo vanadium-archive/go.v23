@@ -518,6 +518,21 @@ func V23TestSyncGroupSync(t *v23tests.T) {
 ////////////////////////////////////
 // Helpers.
 
+// toSgPrefixes converts, for example, "a:b,c:" to
+// [{TableName: "a", RowPrefix: "b"}, {TableName: "c", RowPrefix: ""}].
+func toSgPrefixes(csv string) []wire.SyncGroupPrefix {
+	strs := strings.Split(csv, ",")
+	res := make([]wire.SyncGroupPrefix, len(strs))
+	for i, v := range strs {
+		parts := strings.SplitN(v, ":", 2)
+		if len(parts) != 2 {
+			panic(fmt.Sprintf("invalid prefix string: %q", v))
+		}
+		res[i] = wire.SyncGroupPrefix{TableName: parts[0], RowPrefix: parts[1]}
+	}
+	return res
+}
+
 // TODO(hpucha): Look into refactoring scan logic out of the helpers, and
 // avoiding gets when we can scan.
 
@@ -545,7 +560,7 @@ var runCreateSyncGroup = modules.Register(func(env *modules.Env, args ...string)
 	spec := wire.SyncGroupSpec{
 		Description: "test syncgroup sg",
 		Perms:       perms(args[3:]...),
-		Prefixes:    strings.Split(args[2], ","),
+		Prefixes:    toSgPrefixes(args[2]),
 		MountTables: []string{mtName},
 	}
 
@@ -572,8 +587,8 @@ var runJoinSyncGroup = modules.Register(func(env *modules.Env, args ...string) e
 	return nil
 }, "runJoinSyncGroup")
 
-// Arguments: 0: Syncbase name, 1: SyncGroup name, 2: SyncGroup description, 3: prefixes,
-// 4 onwards: SyncGroup permission blessings.
+// Arguments: 0: Syncbase name, 1: SyncGroup name, 2: SyncGroup description, 3:
+// prefixes, 4 onwards: SyncGroup permission blessings.
 var runSetSyncGroupSpec = modules.Register(func(env *modules.Env, args ...string) error {
 	ctx, shutdown := v23.Init()
 	defer shutdown()
@@ -586,7 +601,7 @@ var runSetSyncGroupSpec = modules.Register(func(env *modules.Env, args ...string
 	mtName := env.Vars[ref.EnvNamespacePrefix]
 	spec := wire.SyncGroupSpec{
 		Description: args[2],
-		Prefixes:    []string{args[3]},
+		Prefixes:    toSgPrefixes(args[3]),
 		Perms:       perms(args[4:]...),
 		MountTables: []string{mtName},
 	}
@@ -597,8 +612,8 @@ var runSetSyncGroupSpec = modules.Register(func(env *modules.Env, args ...string
 	return nil
 }, "runSetSyncGroupSpec")
 
-// Arguments: 0: Syncbase name, 1: SyncGroup name, 2: SyncGroup description, 3: prefixes,
-// 4 onwards: SyncGroup permission blessings.
+// Arguments: 0: Syncbase name, 1: SyncGroup name, 2: SyncGroup description, 3:
+// prefixes, 4 onwards: SyncGroup permission blessings.
 var runGetSyncGroupSpec = modules.Register(func(env *modules.Env, args ...string) error {
 	ctx, shutdown := v23.Init()
 	defer shutdown()
@@ -609,7 +624,7 @@ var runGetSyncGroupSpec = modules.Register(func(env *modules.Env, args ...string
 	sg := d.SyncGroup(args[1])
 
 	wantDesc := args[2]
-	wantPfxs := []string{args[3]}
+	wantPfxs := toSgPrefixes(args[3])
 	wantPerms := perms(args[4:]...)
 
 	var spec wire.SyncGroupSpec
@@ -1131,7 +1146,7 @@ var runPopulateSyncGroupMulti = modules.Register(func(env *modules.Env, args ...
 			spec := wire.SyncGroupSpec{
 				Description: fmt.Sprintf("test sg %s/%s", appName, dbName),
 				Perms:       perms("root/s0", "root/s1"),
-				Prefixes:    sgPrefixes,
+				Prefixes:    toSgPrefixes(strings.Join(sgPrefixes, ",")),
 				MountTables: []string{mtName},
 			}
 

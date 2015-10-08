@@ -531,12 +531,15 @@ pkg nosql, type SyncGroupManagerServerStub interface, unexported methods
 pkg nosql, type SyncGroupManagerServerStubMethods SyncGroupManagerServerMethods
 pkg nosql, type SyncGroupMemberInfo struct
 pkg nosql, type SyncGroupMemberInfo struct, SyncPriority byte
+pkg nosql, type SyncGroupPrefix struct
+pkg nosql, type SyncGroupPrefix struct, RowPrefix string
+pkg nosql, type SyncGroupPrefix struct, TableName string
 pkg nosql, type SyncGroupSpec struct
 pkg nosql, type SyncGroupSpec struct, Description string
 pkg nosql, type SyncGroupSpec struct, IsPrivate bool
 pkg nosql, type SyncGroupSpec struct, MountTables []string
 pkg nosql, type SyncGroupSpec struct, Perms access.Permissions
-pkg nosql, type SyncGroupSpec struct, Prefixes []string
+pkg nosql, type SyncGroupSpec struct, Prefixes []SyncGroupPrefix
 pkg nosql, type TableClientMethods interface { Create, DeletePrefixPermissions, DeleteRange, Destroy, Exists, GetPermissions, GetPrefixPermissions, Scan, SetPermissions, SetPrefixPermissions }
 pkg nosql, type TableClientMethods interface, Create(*context.T, int32, access.Permissions, ...rpc.CallOpt) error
 pkg nosql, type TableClientMethods interface, DeletePrefixPermissions(*context.T, int32, string, ...rpc.CallOpt) error
