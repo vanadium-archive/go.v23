@@ -23,6 +23,7 @@ import (
 	"sync"
 
 	"v.io/v23/context"
+	"v.io/v23/discovery"
 	"v.io/v23/flow"
 	"v.io/v23/namespace"
 	"v.io/v23/naming"
@@ -163,6 +164,9 @@ type Runtime interface {
 	// WithListenSpec attaches a ListenSpec to the returned context.
 	WithListenSpec(ctx *context.T, ls rpc.ListenSpec) *context.T
 
+	// GetDiscovery returns the Discovery in 'ctx'.
+	GetDiscovery(ctx *context.T) discovery.T
+
 	// WithBackgroundContext creates a new context derived from 'ctx'
 	// with the given context set as the background context.
 	WithBackgroundContext(ctx *context.T) *context.T
@@ -292,6 +296,11 @@ func GetListenSpec(ctx *context.T) rpc.ListenSpec {
 // WithListenSpec attaches a ListenSpec to the returned context.
 func WithListenSpec(ctx *context.T, ls rpc.ListenSpec) *context.T {
 	return initState.currentRuntime().WithListenSpec(ctx, ls)
+}
+
+// GetDiscovery returns the Discovery in 'ctx'.
+func GetDiscovery(ctx *context.T) discovery.T {
+	return initState.currentRuntime().GetDiscovery(ctx)
 }
 
 // WithBackgroundContext creates a new context derived from 'ctx'
