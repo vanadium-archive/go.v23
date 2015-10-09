@@ -219,6 +219,9 @@ func V23TestSyncbasedCompEval(t *v23tests.T) {
 // "foobar". The 2nd client then modifies the prefix acl at "foobar" with access
 // to both clients. The 1st client should regain access.
 func V23TestSyncbasedExchangeDeltasWithAcls(t *v23tests.T) {
+	// TODO(rogulenko): Unable this test again after the end of perms index
+	// transition.
+	t.SkipNow()
 	v23tests.RunRootMT(t, "--v23.tcp.address=127.0.0.1:0")
 	server0Creds, _ := t.Shell().NewChildCredentials("s0")
 	client0Creds, _ := t.Shell().NewChildCredentials("c0")
