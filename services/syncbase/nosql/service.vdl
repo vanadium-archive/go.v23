@@ -78,9 +78,9 @@ type Database interface {
 	// DatabaseWatcher implements the API to watch for updates in the database.
 	DatabaseWatcher
 
-	// SyncGroupManager implements the API for managing SyncGroups attached to a
+	// SyncgroupManager implements the API for managing syncgroups attached to a
 	// Database.
-	SyncGroupManager
+	SyncgroupManager
 
 	// BlobManager implements the API for managing blobs attached to rows in
 	// a Database.
@@ -180,74 +180,72 @@ type Row interface {
 	Delete(schemaVersion int32) error {access.Write}
 }
 
-// SyncGroupManager is the interface for SyncGroup operations.
+// SyncgroupManager is the interface for syncgroup operations.
 // TODO(hpucha): Add blessings to create/join and add a refresh method.
-type SyncGroupManager interface {
-	// GetSyncGroupNames returns the global names of all SyncGroups attached to
+type SyncgroupManager interface {
+	// GetSyncgroupNames returns the global names of all syncgroups attached to
 	// this database.
-	GetSyncGroupNames() ([]string | error) {access.Read}
+	GetSyncgroupNames() ([]string | error) {access.Read}
 
-	// CreateSyncGroup creates a new SyncGroup with the given spec.
+	// CreateSyncgroup creates a new syncgroup with the given spec.
 	//
 	// Requires: Client must have at least Read access on the Database; prefix ACL
-	// must exist at each SyncGroup prefix; Client must have at least Read access
+	// must exist at each syncgroup prefix; Client must have at least Read access
 	// on each of these prefix ACLs.
-	CreateSyncGroup(sgName string, spec SyncGroupSpec, myInfo SyncGroupMemberInfo) error {access.Read}
+	CreateSyncgroup(sgName string, spec SyncgroupSpec, myInfo SyncgroupMemberInfo) error {access.Read}
 
-	// JoinSyncGroup joins the SyncGroup.
+	// JoinSyncgroup joins the syncgroup.
 	//
 	// Requires: Client must have at least Read access on the Database and on the
-	// SyncGroup ACL.
-	JoinSyncGroup(sgName string, myInfo SyncGroupMemberInfo) (spec SyncGroupSpec | error) {access.Read}
+	// syncgroup ACL.
+	JoinSyncgroup(sgName string, myInfo SyncgroupMemberInfo) (spec SyncgroupSpec | error) {access.Read}
 
-	// LeaveSyncGroup leaves the SyncGroup. Previously synced data will continue
+	// LeaveSyncgroup leaves the syncgroup. Previously synced data will continue
 	// to be available.
 	//
 	// Requires: Client must have at least Read access on the Database.
-	LeaveSyncGroup(sgName string) error {access.Read}
+	LeaveSyncgroup(sgName string) error {access.Read}
 
-	// DestroySyncGroup destroys the SyncGroup. Previously synced data will
+	// DestroySyncgroup destroys the syncgroup. Previously synced data will
 	// continue to be available to all members.
 	//
 	// Requires: Client must have at least Read access on the Database, and must
-	// have Admin access on the SyncGroup ACL.
-	DestroySyncGroup(sgName string) error {access.Read}
+	// have Admin access on the syncgroup ACL.
+	DestroySyncgroup(sgName string) error {access.Read}
 
-	// EjectFromSyncGroup ejects a member from the SyncGroup. The ejected member
+	// EjectFromSyncgroup ejects a member from the syncgroup. The ejected member
 	// will not be able to sync further, but will retain any data it has already
 	// synced.
 	//
 	// Requires: Client must have at least Read access on the Database, and must
-	// have Admin access on the SyncGroup ACL.
-	EjectFromSyncGroup(sgName, member string) error {access.Read}
+	// have Admin access on the syncgroup ACL.
+	EjectFromSyncgroup(sgName, member string) error {access.Read}
 
-	// GetSyncGroupSpec gets the SyncGroup spec. version allows for atomic
-	// read-modify-write of the spec - see comment for SetSyncGroupSpec.
+	// GetSyncgroupSpec gets the syncgroup spec. version allows for atomic
+	// read-modify-write of the spec - see comment for SetSyncgroupSpec.
 	//
 	// Requires: Client must have at least Read access on the Database and on the
-	// SyncGroup ACL.
-	GetSyncGroupSpec(sgName string) (spec SyncGroupSpec, version string | error) {access.Read}
+	// syncgroup ACL.
+	GetSyncgroupSpec(sgName string) (spec SyncgroupSpec, version string | error) {access.Read}
 
-	// SetSyncGroupSpec sets the SyncGroup spec. version may be either empty or
+	// SetSyncgroupSpec sets the syncgroup spec. version may be either empty or
 	// the value from a previous Get. If not empty, Set will only succeed if the
 	// current version matches the specified one.
 	//
 	// Requires: Client must have at least Read access on the Database, and must
-	// have Admin access on the SyncGroup ACL.
-	SetSyncGroupSpec(sgName string, spec SyncGroupSpec, version string) error {access.Read}
+	// have Admin access on the syncgroup ACL.
+	SetSyncgroupSpec(sgName string, spec SyncgroupSpec, version string) error {access.Read}
 
-	// GetSyncGroupMembers gets the info objects for members of the SyncGroup.
+	// GetSyncgroupMembers gets the info objects for members of the syncgroup.
 	//
 	// Requires: Client must have at least Read access on the Database and on the
-	// SyncGroup ACL.
-	GetSyncGroupMembers(sgName string) (members map[string]SyncGroupMemberInfo | error) {access.Read}
+	// syncgroup ACL.
+	GetSyncgroupMembers(sgName string) (members map[string]SyncgroupMemberInfo | error) {access.Read}
 
-	// TODO(hpucha): Add support for client-side conflict resolution and sync
-	// policies.
-	// StartConflictResolution(name string) stream<ResolutionInfo, ConflictInfo> error
-	// Suspend/ResumeSync
-	// Get/SetSyncPolicy with policies such as "sync only via wifi", "sync
-	// aggressively", "sync once per day".
+	// TODO(hpucha): Allow clients to tune the behavior of sync.
+	// - Suspend/ResumeSync
+	// - Get/SetSyncPolicy with policies such as "sync only via wifi", "sync
+	//   aggressively", "sync once per day"
 }
 
 // SchemaManager implements the API for managing schema metadata attached

@@ -40,41 +40,41 @@ type KeyValue struct {
 	Value []byte
 }
 
-// SyncGroupPrefix is a tableName-rowPrefix pair.
-type SyncGroupPrefix struct {
+// SyncgroupPrefix is a tableName-rowPrefix pair.
+type SyncgroupPrefix struct {
 	TableName string
 	RowPrefix string
 }
 
-// SyncGroupSpec contains the specification for a SyncGroup.
-type SyncGroupSpec struct {
-	// Human-readable description of this SyncGroup.
+// SyncgroupSpec contains the specification for a syncgroup.
+type SyncgroupSpec struct {
+	// Human-readable description of this syncgroup.
 	Description string
 
-	// Permissions governing access to this SyncGroup.
+	// Permissions governing access to this syncgroup.
 	Perms access.Permissions
 
-	// Data (tableName-rowPrefix pairs) covered by this SyncGroup.
-	Prefixes []SyncGroupPrefix
+	// Data (tableName-rowPrefix pairs) covered by this syncgroup.
+	Prefixes []SyncgroupPrefix
 
-	// Mount tables at which to advertise this SyncGroup, for rendezvous purposes.
+	// Mount tables at which to advertise this syncgroup, for rendezvous purposes.
 	// (Note that in addition to these mount tables, Syncbase also uses
 	// network-neighborhood-based discovery for rendezvous.)
 	// We expect most clients to specify a single mount table, but we accept an
 	// array of mount tables to permit the mount table to be changed over time
 	// without disruption.
-	// TODO(hpucha): Figure out a convention for advertising SyncGroups in the
+	// TODO(hpucha): Figure out a convention for advertising syncgroups in the
 	// mount table.
 	MountTables []string
 
-	// Specifies the privacy of this SyncGroup. More specifically, specifies
-	// whether blobs in this SyncGroup can be served to clients presenting
-	// blobrefs obtained from other SyncGroups.
+	// Specifies the privacy of this syncgroup. More specifically, specifies
+	// whether blobs in this syncgroup can be served to clients presenting
+	// blobrefs obtained from other syncgroups.
 	IsPrivate bool
 }
 
-// SyncGroupMemberInfo contains per-member metadata.
-type SyncGroupMemberInfo struct {
+// SyncgroupMemberInfo contains per-member metadata.
+type SyncgroupMemberInfo struct {
 	SyncPriority byte
 }
 

@@ -34,11 +34,11 @@ import (
 
 //go:generate jiri test generate
 
-// V23TestSyncbasedJoinSyncGroup tests the creation and joining of a
-// SyncGroup. Client0 creates a SyncGroup at Syncbase0. Client1 requests to join
-// the SyncGroup at Syncbase1. Syncbase1 in turn requests Syncbase0 to join the
-// SyncGroup.
-func V23TestSyncbasedJoinSyncGroup(t *v23tests.T) {
+// V23TestSyncbasedJoinSyncgroup tests the creation and joining of a syncgroup.
+// Client0 creates a syncgroup at Syncbase0. Client1 requests to join the
+// syncgroup at Syncbase1. Syncbase1 in turn requests Syncbase0 to join the
+// syncgroup.
+func V23TestSyncbasedJoinSyncgroup(t *v23tests.T) {
 	v23tests.RunRootMT(t, "--v23.tcp.address=127.0.0.1:0")
 	server0Creds, _ := t.Shell().NewChildCredentials("s0")
 	client0Creds, _ := t.Shell().NewChildCredentials("c0")
@@ -55,15 +55,15 @@ func V23TestSyncbasedJoinSyncGroup(t *v23tests.T) {
 	sgName := naming.Join("sync0", constants.SyncbaseSuffix, "SG1")
 
 	tu.RunClient(t, client0Creds, runSetupAppA, "sync0")
-	tu.RunClient(t, client0Creds, runCreateSyncGroup, "sync0", sgName, "tb:foo", "root/s0", "root/s1")
+	tu.RunClient(t, client0Creds, runCreateSyncgroup, "sync0", sgName, "tb:foo", "root/s0", "root/s1")
 
 	tu.RunClient(t, client1Creds, runSetupAppA, "sync1")
-	tu.RunClient(t, client1Creds, runJoinSyncGroup, "sync1", sgName)
+	tu.RunClient(t, client1Creds, runJoinSyncgroup, "sync1", sgName)
 }
 
 // V23TestSyncbasedGetDeltas tests the sending of deltas between two Syncbase
-// instances and their clients.  The 1st client creates a SyncGroup and puts
-// some database entries in it.  The 2nd client joins that SyncGroup and reads
+// instances and their clients.  The 1st client creates a syncgroup and puts
+// some database entries in it.  The 2nd client joins that syncgroup and reads
 // the database entries.  This verifies the end-to-end synchronization of data
 // along the path: client0--Syncbase0--Syncbase1--client1.
 func V23TestSyncbasedGetDeltas(t *v23tests.T) {
@@ -83,17 +83,17 @@ func V23TestSyncbasedGetDeltas(t *v23tests.T) {
 	sgName := naming.Join("sync0", constants.SyncbaseSuffix, "SG1")
 
 	tu.RunClient(t, client0Creds, runSetupAppA, "sync0")
-	tu.RunClient(t, client0Creds, runCreateSyncGroup, "sync0", sgName, "tb:foo", "root/s0", "root/s1")
+	tu.RunClient(t, client0Creds, runCreateSyncgroup, "sync0", sgName, "tb:foo", "root/s0", "root/s1")
 	tu.RunClient(t, client0Creds, runPopulateData, "sync0", "foo", "0")
 
 	tu.RunClient(t, client1Creds, runSetupAppA, "sync1")
-	tu.RunClient(t, client1Creds, runJoinSyncGroup, "sync1", sgName)
-	tu.RunClient(t, client1Creds, runVerifySyncGroupData, "sync1", "foo", "0", "10", "false")
+	tu.RunClient(t, client1Creds, runJoinSyncgroup, "sync1", sgName)
+	tu.RunClient(t, client1Creds, runVerifySyncgroupData, "sync1", "foo", "0", "10", "false")
 }
 
 // V23TestSyncbasedGetDeltasWithDel tests the sending of deltas between two
-// Syncbase instances and their clients. The 1st client creates a SyncGroup and
-// puts some database entries in it. The 2nd client joins that SyncGroup and
+// Syncbase instances and their clients. The 1st client creates a syncgroup and
+// puts some database entries in it. The 2nd client joins that syncgroup and
 // reads the database entries. The 1st client then deletes a portion of this
 // data, and adds new entries. The 2nd client verifies that these changes are
 // correctly synced. This verifies the end-to-end synchronization of data along
@@ -116,30 +116,30 @@ func V23TestSyncbasedGetDeltasWithDel(t *v23tests.T) {
 	sgName := naming.Join("sync0", constants.SyncbaseSuffix, "SG1")
 
 	tu.RunClient(t, client0Creds, runSetupAppA, "sync0")
-	tu.RunClient(t, client0Creds, runCreateSyncGroup, "sync0", sgName, "tb:foo,tb:bar", "root/s0", "root/s1")
+	tu.RunClient(t, client0Creds, runCreateSyncgroup, "sync0", sgName, "tb:foo,tb:bar", "root/s0", "root/s1")
 	tu.RunClient(t, client0Creds, runPopulateData, "sync0", "foo", "0")
 
 	tu.RunClient(t, client1Creds, runSetupAppA, "sync1")
-	tu.RunClient(t, client1Creds, runJoinSyncGroup, "sync1", sgName)
-	tu.RunClient(t, client1Creds, runVerifySyncGroupData, "sync1", "foo", "0", "10", "false")
+	tu.RunClient(t, client1Creds, runJoinSyncgroup, "sync1", sgName)
+	tu.RunClient(t, client1Creds, runVerifySyncgroupData, "sync1", "foo", "0", "10", "false")
 
 	tu.RunClient(t, client0Creds, runDeleteData, "sync0", "foo", "0")
 	tu.RunClient(t, client0Creds, runVerifyDeletedData, "sync0", "foo")
 	tu.RunClient(t, client1Creds, runVerifyDeletedData, "sync1", "foo")
 
 	tu.RunClient(t, client0Creds, runPopulateData, "sync0", "bar", "0")
-	tu.RunClient(t, client1Creds, runVerifySyncGroupData, "sync1", "bar", "0", "10", "false")
+	tu.RunClient(t, client1Creds, runVerifySyncgroupData, "sync1", "bar", "0", "10", "false")
 }
 
 // V23TestSyncbasedCompEval is a comprehensive sniff test for core sync
 // functionality. It tests the exchange of deltas between two Syncbase instances
-// and their clients. The 1st client creates a SyncGroup and puts some database
-// entries in it. The 2nd client joins that SyncGroup and reads the database
+// and their clients. The 1st client creates a syncgroup and puts some database
+// entries in it. The 2nd client joins that syncgroup and reads the database
 // entries. The 2nd client then updates a subset of existing keys and adds more
 // keys and the 1st client verifies that it can read these keys. This verifies
 // the end-to-end bi-directional synchronization of data along the path:
 // client0--Syncbase0--Syncbase1--client1. In addition, this test also verifies
-// the bi-directional exchange of SyncGroup deltas. After the first phase is
+// the bi-directional exchange of syncgroup deltas. After the first phase is
 // done, both Syncbase instances are shutdown and restarted, and new data is
 // synced once again.
 func V23TestSyncbasedCompEval(t *v23tests.T) {
@@ -165,25 +165,25 @@ func V23TestSyncbasedCompEval(t *v23tests.T) {
 	sgName := naming.Join("sync0", constants.SyncbaseSuffix, "SG1")
 
 	tu.RunClient(t, client0Creds, runSetupAppA, "sync0")
-	tu.RunClient(t, client0Creds, runCreateSyncGroup, "sync0", sgName, "tb:foo", "root/s0", "root/s1")
+	tu.RunClient(t, client0Creds, runCreateSyncgroup, "sync0", sgName, "tb:foo", "root/s0", "root/s1")
 	tu.RunClient(t, client0Creds, runPopulateData, "sync0", "foo", "0")
 
 	tu.RunClient(t, client1Creds, runSetupAppA, "sync1")
-	tu.RunClient(t, client1Creds, runJoinSyncGroup, "sync1", sgName)
-	tu.RunClient(t, client1Creds, runVerifySyncGroupData, "sync1", "foo", "0", "10", "false")
+	tu.RunClient(t, client1Creds, runJoinSyncgroup, "sync1", sgName)
+	tu.RunClient(t, client1Creds, runVerifySyncgroupData, "sync1", "foo", "0", "10", "false")
 
-	tu.RunClient(t, client0Creds, runSetSyncGroupSpec, "sync0", sgName, "v2", "tb:foo", "root/s0", "root/s1", "root/s3")
-	tu.RunClient(t, client1Creds, runGetSyncGroupSpec, "sync1", sgName, "v2", "tb:foo", "root/s0", "root/s1", "root/s3")
+	tu.RunClient(t, client0Creds, runSetSyncgroupSpec, "sync0", sgName, "v2", "tb:foo", "root/s0", "root/s1", "root/s3")
+	tu.RunClient(t, client1Creds, runGetSyncgroupSpec, "sync1", sgName, "v2", "tb:foo", "root/s0", "root/s1", "root/s3")
 
-	tu.RunClient(t, client0Creds, runSetSyncGroupSpec, "sync0", sgName, "v2", "tb:foo", "root/s0", "root/s1", "root/s3")
-	tu.RunClient(t, client1Creds, runGetSyncGroupSpec, "sync1", sgName, "v2", "tb:foo", "root/s0", "root/s1", "root/s3")
+	tu.RunClient(t, client0Creds, runSetSyncgroupSpec, "sync0", sgName, "v2", "tb:foo", "root/s0", "root/s1", "root/s3")
+	tu.RunClient(t, client1Creds, runGetSyncgroupSpec, "sync1", sgName, "v2", "tb:foo", "root/s0", "root/s1", "root/s3")
 
 	tu.RunClient(t, client1Creds, runUpdateData, "sync1", "5")
 	tu.RunClient(t, client1Creds, runPopulateData, "sync1", "foo", "10")
-	tu.RunClient(t, client1Creds, runSetSyncGroupSpec, "sync1", sgName, "v3", "tb:foo", "root/s0", "root/s1", "root/s4")
+	tu.RunClient(t, client1Creds, runSetSyncgroupSpec, "sync1", sgName, "v3", "tb:foo", "root/s0", "root/s1", "root/s4")
 
 	tu.RunClient(t, client0Creds, runVerifyLocalAndRemoteData, "sync0")
-	tu.RunClient(t, client0Creds, runGetSyncGroupSpec, "sync0", sgName, "v3", "tb:foo", "root/s0", "root/s1", "root/s4")
+	tu.RunClient(t, client0Creds, runGetSyncgroupSpec, "sync0", sgName, "v3", "tb:foo", "root/s0", "root/s1", "root/s4")
 
 	// Shutdown and restart Syncbase instances.
 	cleanSync0()
@@ -194,10 +194,10 @@ func V23TestSyncbasedCompEval(t *v23tests.T) {
 	cleanSync1 = tu.StartSyncbased(t, server1Creds, "sync1", server1RDir,
 		`{"Read": {"In":["root/c1"]}, "Write": {"In":["root/c1"]}}`)
 
-	tu.RunClient(t, client0Creds, runGetSyncGroupSpec, "sync0", sgName, "v3", "tb:foo", "root/s0", "root/s1", "root/s4")
-	tu.RunClient(t, client1Creds, runGetSyncGroupSpec, "sync1", sgName, "v3", "tb:foo", "root/s0", "root/s1", "root/s4")
+	tu.RunClient(t, client0Creds, runGetSyncgroupSpec, "sync0", sgName, "v3", "tb:foo", "root/s0", "root/s1", "root/s4")
+	tu.RunClient(t, client1Creds, runGetSyncgroupSpec, "sync1", sgName, "v3", "tb:foo", "root/s0", "root/s1", "root/s4")
 	tu.RunClient(t, client0Creds, runPopulateData, "sync0", "foo", "20")
-	tu.RunClient(t, client1Creds, runVerifySyncGroupData, "sync1", "foo", "20", "10", "true")
+	tu.RunClient(t, client1Creds, runVerifySyncgroupData, "sync1", "foo", "20", "10", "true")
 
 	cleanSync0()
 	cleanSync1()
@@ -212,8 +212,8 @@ func V23TestSyncbasedCompEval(t *v23tests.T) {
 
 // V23TestSyncbasedExchangeDeltasWithAcls tests the exchange of deltas including
 // acls between two Syncbase instances and their clients.  The 1st client
-// creates a SyncGroup at "foo", sets an acl, and puts some database entries in
-// it.  The 2nd client joins that SyncGroup and reads the database entries.  The
+// creates a syncgroup at "foo", sets an acl, and puts some database entries in
+// it.  The 2nd client joins that syncgroup and reads the database entries.  The
 // 2nd client then adds a prefix acl with access to only itself at "foobar".
 // The 1st client should be unable to access the subset of keys under
 // "foobar". The 2nd client then modifies the prefix acl at "foobar" with access
@@ -235,28 +235,28 @@ func V23TestSyncbasedExchangeDeltasWithAcls(t *v23tests.T) {
 	sgName := naming.Join("sync0", constants.SyncbaseSuffix, "SG1")
 
 	tu.RunClient(t, client0Creds, runSetupAppA, "sync0")
-	tu.RunClient(t, client0Creds, runCreateSyncGroup, "sync0", sgName, "tb:foo", "root/s0", "root/s1")
+	tu.RunClient(t, client0Creds, runCreateSyncgroup, "sync0", sgName, "tb:foo", "root/s0", "root/s1")
 	tu.RunClient(t, client0Creds, runPopulateData, "sync0", "foobarbaz", "0")
 	tu.RunClient(t, client0Creds, runPopulateData, "sync0", "foo", "0")
 	tu.RunClient(t, client0Creds, runSetPrefixPermissions, "sync0", "foo", "root/c0", "root/c1")
 
 	tu.RunClient(t, client1Creds, runSetupAppA, "sync1")
-	tu.RunClient(t, client1Creds, runJoinSyncGroup, "sync1", sgName)
-	tu.RunClient(t, client1Creds, runVerifySyncGroupData, "sync1", "foobarbaz", "0", "10", "false")
-	tu.RunClient(t, client1Creds, runVerifySyncGroupData, "sync1", "foo", "0", "10", "true")
+	tu.RunClient(t, client1Creds, runJoinSyncgroup, "sync1", sgName)
+	tu.RunClient(t, client1Creds, runVerifySyncgroupData, "sync1", "foobarbaz", "0", "10", "false")
+	tu.RunClient(t, client1Creds, runVerifySyncgroupData, "sync1", "foo", "0", "10", "true")
 
 	tu.RunClient(t, client1Creds, runSetPrefixPermissions, "sync1", "foobar", "root/c1")
 	tu.RunClient(t, client0Creds, runVerifyLostAccess, "sync0", "foobarbaz", "0", "10")
-	tu.RunClient(t, client0Creds, runVerifySyncGroupData, "sync0", "foo", "0", "10", "true")
+	tu.RunClient(t, client0Creds, runVerifySyncgroupData, "sync0", "foo", "0", "10", "true")
 
 	tu.RunClient(t, client1Creds, runSetPrefixPermissions, "sync1", "foobar", "root/c0", "root/c1")
-	tu.RunClient(t, client0Creds, runVerifySyncGroupData, "sync0", "foobarbaz", "0", "10", "false")
+	tu.RunClient(t, client0Creds, runVerifySyncgroupData, "sync0", "foobarbaz", "0", "10", "false")
 }
 
 // V23 TestSyncbasedExchangeDeltasWithConflicts tests the exchange of deltas
 // between two Syncbase instances and their clients in the presence of
-// conflicting updates. The 1st client creates a SyncGroup and puts some
-// database entries in it. The 2nd client joins that SyncGroup and reads the
+// conflicting updates. The 1st client creates a syncgroup and puts some
+// database entries in it. The 2nd client joins that syncgroup and reads the
 // database entries. Both clients then update a subset of existing keys
 // concurrently, and sync with each other. During sync, the following
 // possibilities arise: (1) Both clients make their local updates first, sync
@@ -301,12 +301,12 @@ func testSyncbasedExchangeDeltasWithConflicts(t *v23tests.T) {
 	sgName := naming.Join("sync0", constants.SyncbaseSuffix, "SG1")
 
 	tu.RunClient(t, client0Creds, runSetupAppA, "sync0")
-	tu.RunClient(t, client0Creds, runCreateSyncGroup, "sync0", sgName, "tb:foo", "root/s0", "root/s1")
+	tu.RunClient(t, client0Creds, runCreateSyncgroup, "sync0", sgName, "tb:foo", "root/s0", "root/s1")
 	tu.RunClient(t, client0Creds, runPopulateData, "sync0", "foo", "0")
 
 	tu.RunClient(t, client1Creds, runSetupAppA, "sync1")
-	tu.RunClient(t, client1Creds, runJoinSyncGroup, "sync1", sgName)
-	tu.RunClient(t, client1Creds, runVerifySyncGroupData, "sync1", "foo", "0", "10", "false")
+	tu.RunClient(t, client1Creds, runJoinSyncgroup, "sync1", sgName)
+	tu.RunClient(t, client1Creds, runVerifySyncgroupData, "sync1", "foo", "0", "10", "false")
 
 	go tu.RunClient(t, client0Creds, runUpdateData, "sync0", "5")
 	d := time.Duration(rand.Int63n(50)) * time.Millisecond
@@ -319,14 +319,14 @@ func testSyncbasedExchangeDeltasWithConflicts(t *v23tests.T) {
 	tu.RunClient(t, client1Creds, runVerifyConflictResolution, "sync1")
 }
 
-// V23TestNestedSyncGroups tests the exchange of deltas between two Syncbase
-// instances and their clients with nested SyncGroups. The 1st client creates
-// two SyncGroups at prefixes "f" and "foo" and puts some database entries in
-// both of them.  The 2nd client first joins the SyncGroup with prefix "foo" and
+// V23TestNestedSyncgroups tests the exchange of deltas between two Syncbase
+// instances and their clients with nested syncgroups. The 1st client creates
+// two syncgroups at prefixes "f" and "foo" and puts some database entries in
+// both of them.  The 2nd client first joins the syncgroup with prefix "foo" and
 // verifies that it reads the corresponding database entries.  The 2nd client
-// then joins the SyncGroup with prefix "f" and verifies that it can read the
+// then joins the syncgroup with prefix "f" and verifies that it can read the
 // "f" keys.
-func V23TestNestedSyncGroups(t *v23tests.T) {
+func V23TestNestedSyncgroups(t *v23tests.T) {
 	v23tests.RunRootMT(t, "--v23.tcp.address=127.0.0.1:0")
 	server0Creds, _ := t.Shell().NewChildCredentials("s0")
 	client0Creds, _ := t.Shell().NewChildCredentials("c0")
@@ -344,28 +344,28 @@ func V23TestNestedSyncGroups(t *v23tests.T) {
 	sg2Name := naming.Join("sync0", constants.SyncbaseSuffix, "SG2")
 
 	tu.RunClient(t, client0Creds, runSetupAppA, "sync0")
-	tu.RunClient(t, client0Creds, runCreateSyncGroup, "sync0", sg1Name, "tb:foo", "root/s0", "root/s1")
-	tu.RunClient(t, client0Creds, runCreateSyncGroup, "sync0", sg2Name, "tb:f", "root/s0", "root/s1")
+	tu.RunClient(t, client0Creds, runCreateSyncgroup, "sync0", sg1Name, "tb:foo", "root/s0", "root/s1")
+	tu.RunClient(t, client0Creds, runCreateSyncgroup, "sync0", sg2Name, "tb:f", "root/s0", "root/s1")
 	tu.RunClient(t, client0Creds, runPopulateData, "sync0", "f", "0")
 	tu.RunClient(t, client0Creds, runPopulateData, "sync0", "foo", "0")
 
 	tu.RunClient(t, client1Creds, runSetupAppA, "sync1")
-	tu.RunClient(t, client1Creds, runJoinSyncGroup, "sync1", sg1Name)
-	tu.RunClient(t, client1Creds, runVerifySyncGroupData, "sync1", "foo", "0", "10", "false")
-	tu.RunClient(t, client1Creds, runJoinSyncGroup, "sync1", sg2Name)
-	tu.RunClient(t, client1Creds, runVerifyNestedSyncGroupData, "sync1")
+	tu.RunClient(t, client1Creds, runJoinSyncgroup, "sync1", sg1Name)
+	tu.RunClient(t, client1Creds, runVerifySyncgroupData, "sync1", "foo", "0", "10", "false")
+	tu.RunClient(t, client1Creds, runJoinSyncgroup, "sync1", sg2Name)
+	tu.RunClient(t, client1Creds, runVerifyNestedSyncgroupData, "sync1")
 }
 
-// V23TestNestedAndPeerSyncGroups tests the exchange of deltas between three
+// V23TestNestedAndPeerSyncgroups tests the exchange of deltas between three
 // Syncbase instances and their clients consisting of nested/peer
-// SyncGroups. The 1st client creates two SyncGroups: SG1 at prefix "foo" and
+// syncgroups. The 1st client creates two syncgroups: SG1 at prefix "foo" and
 // SG2 at "f" and puts some database entries in both of them.  The 2nd client
-// joins the SyncGroup SG1 and verifies that it reads the corresponding database
+// joins the syncgroup SG1 and verifies that it reads the corresponding database
 // entries. Client 2 then creates SG3 at prefix "f". The 3rd client joins the
-// SyncGroups SG2 and SG3 and verifies that it can read all the "f" and "foo"
+// syncgroups SG2 and SG3 and verifies that it can read all the "f" and "foo"
 // keys created by client 1. Client 2 also verifies that it can read all the "f"
 // and "foo" keys created by client 1.
-func V23TestNestedAndPeerSyncGroups(t *v23tests.T) {
+func V23TestNestedAndPeerSyncgroups(t *v23tests.T) {
 	v23tests.RunRootMT(t, "--v23.tcp.address=127.0.0.1:0")
 	server0Creds, _ := t.Shell().NewChildCredentials("s0")
 	client0Creds, _ := t.Shell().NewChildCredentials("c0")
@@ -390,28 +390,28 @@ func V23TestNestedAndPeerSyncGroups(t *v23tests.T) {
 	sg3Name := naming.Join("sync1", constants.SyncbaseSuffix, "SG3")
 
 	tu.RunClient(t, client0Creds, runSetupAppA, "sync0")
-	tu.RunClient(t, client0Creds, runCreateSyncGroup, "sync0", sg1Name, "tb:foo", "root/s0", "root/s1", "root/s2")
-	tu.RunClient(t, client0Creds, runCreateSyncGroup, "sync0", sg2Name, "tb:f", "root/s0", "root/s2")
+	tu.RunClient(t, client0Creds, runCreateSyncgroup, "sync0", sg1Name, "tb:foo", "root/s0", "root/s1", "root/s2")
+	tu.RunClient(t, client0Creds, runCreateSyncgroup, "sync0", sg2Name, "tb:f", "root/s0", "root/s2")
 	tu.RunClient(t, client0Creds, runPopulateData, "sync0", "f", "0")
 	tu.RunClient(t, client0Creds, runPopulateData, "sync0", "foo", "0")
 
 	tu.RunClient(t, client1Creds, runSetupAppA, "sync1")
-	tu.RunClient(t, client1Creds, runJoinSyncGroup, "sync1", sg1Name)
-	tu.RunClient(t, client1Creds, runVerifySyncGroupData, "sync1", "foo", "0", "10", "false")
-	tu.RunClient(t, client1Creds, runCreateSyncGroup, "sync1", sg3Name, "tb:f", "root/s1", "root/s2")
+	tu.RunClient(t, client1Creds, runJoinSyncgroup, "sync1", sg1Name)
+	tu.RunClient(t, client1Creds, runVerifySyncgroupData, "sync1", "foo", "0", "10", "false")
+	tu.RunClient(t, client1Creds, runCreateSyncgroup, "sync1", sg3Name, "tb:f", "root/s1", "root/s2")
 
 	tu.RunClient(t, client2Creds, runSetupAppA, "sync2")
-	tu.RunClient(t, client2Creds, runJoinSyncGroup, "sync2", sg2Name)
-	tu.RunClient(t, client2Creds, runJoinSyncGroup, "sync2", sg3Name)
-	tu.RunClient(t, client2Creds, runVerifyNestedSyncGroupData, "sync2")
+	tu.RunClient(t, client2Creds, runJoinSyncgroup, "sync2", sg2Name)
+	tu.RunClient(t, client2Creds, runJoinSyncgroup, "sync2", sg3Name)
+	tu.RunClient(t, client2Creds, runVerifyNestedSyncgroupData, "sync2")
 
-	tu.RunClient(t, client1Creds, runVerifyNestedSyncGroupData, "sync1")
+	tu.RunClient(t, client1Creds, runVerifyNestedSyncgroupData, "sync1")
 }
 
 // V23TestSyncbasedGetDeltasPrePopulate tests the sending of deltas between two
 // Syncbase instances and their clients with data existing before the creation
-// of a SyncGroup.  The 1st client puts entries in a database then creates a
-// SyncGroup over that data.  The 2nd client joins that SyncGroup and reads the
+// of a syncgroup.  The 1st client puts entries in a database then creates a
+// syncgroup over that data.  The 2nd client joins that syncgroup and reads the
 // database entries.
 func V23TestSyncbasedGetDeltasPrePopulate(t *v23tests.T) {
 	v23tests.RunRootMT(t, "--v23.tcp.address=127.0.0.1:0")
@@ -429,24 +429,24 @@ func V23TestSyncbasedGetDeltasPrePopulate(t *v23tests.T) {
 
 	sgName := naming.Join("sync0", constants.SyncbaseSuffix, "SG1")
 
-	// Populate table data before creating the SyncGroup.  Also populate
-	// with data that is not part of the SyncGroup to verify filtering.
+	// Populate table data before creating the syncgroup.  Also populate
+	// with data that is not part of the syncgroup to verify filtering.
 	tu.RunClient(t, client0Creds, runSetupAppA, "sync0")
 	tu.RunClient(t, client0Creds, runPopulateData, "sync0", "foo", "0")
 	tu.RunClient(t, client0Creds, runPopulateData, "sync0", "bar", "0")
-	tu.RunClient(t, client0Creds, runCreateSyncGroup, "sync0", sgName, "tb:foo", "root/s0", "root/s1")
+	tu.RunClient(t, client0Creds, runCreateSyncgroup, "sync0", sgName, "tb:foo", "root/s0", "root/s1")
 
 	tu.RunClient(t, client1Creds, runSetupAppA, "sync1")
-	tu.RunClient(t, client1Creds, runJoinSyncGroup, "sync1", sgName)
-	tu.RunClient(t, client1Creds, runVerifySyncGroupData, "sync1", "foo", "0", "10", "false")
-	tu.RunClient(t, client1Creds, runVerifyNonSyncGroupData, "sync1", "bar")
+	tu.RunClient(t, client1Creds, runJoinSyncgroup, "sync1", sgName)
+	tu.RunClient(t, client1Creds, runVerifySyncgroupData, "sync1", "foo", "0", "10", "false")
+	tu.RunClient(t, client1Creds, runVerifyNonSyncgroupData, "sync1", "bar")
 }
 
 // V23TestSyncbasedGetDeltasMultiApp tests the sending of deltas between two
 // Syncbase instances and their clients across multiple apps, databases, and
 // tables.  The 1st client puts entries in multiple tables across multiple
-// app databases then creates multiple SyncGroups (one per database) over that
-// data.  The 2nd client joins these SyncGroups and reads all the data.
+// app databases then creates multiple syncgroups (one per database) over that
+// data.  The 2nd client joins these syncgroups and reads all the data.
 func V23TestSyncbasedGetDeltasMultiApp(t *v23tests.T) {
 	v23tests.RunRootMT(t, "--v23.tcp.address=127.0.0.1:0")
 	server0Creds, _ := t.Shell().NewChildCredentials("s0")
@@ -465,18 +465,18 @@ func V23TestSyncbasedGetDeltasMultiApp(t *v23tests.T) {
 	na, nd, nt := "2", "2", "2" // number of apps, dbs, tables
 
 	tu.RunClient(t, client0Creds, runSetupAppMulti, "sync0", na, nd, nt)
-	tu.RunClient(t, client0Creds, runPopulateSyncGroupMulti, "sync0", sgNamePrefix, na, nd, nt, "foo", "bar")
+	tu.RunClient(t, client0Creds, runPopulateSyncgroupMulti, "sync0", sgNamePrefix, na, nd, nt, "foo", "bar")
 
 	tu.RunClient(t, client1Creds, runSetupAppMulti, "sync1", na, nd, nt)
-	tu.RunClient(t, client1Creds, runJoinSyncGroupMulti, "sync1", sgNamePrefix, na, nd)
-	tu.RunClient(t, client1Creds, runVerifySyncGroupDataMulti, "sync1", na, nd, nt, "foo", "bar")
+	tu.RunClient(t, client1Creds, runJoinSyncgroupMulti, "sync1", sgNamePrefix, na, nd)
+	tu.RunClient(t, client1Creds, runVerifySyncgroupDataMulti, "sync1", na, nd, nt, "foo", "bar")
 }
 
-// V23TestSyncGroupSync tests the syncing of SyncGroup metadata. The 1st client
-// creates the SyncGroup SG1, and clients 2 and 3 join this SyncGroup. All three
+// V23TestSyncgroupSync tests the syncing of syncgroup metadata. The 1st client
+// creates the syncgroup SG1, and clients 2 and 3 join this syncgroup. All three
 // clients must learn of the remaining two. Note that client 2 relies on
-// SyncGroup metadata syncing to learn of client 3 .
-func V23TestSyncGroupSync(t *v23tests.T) {
+// syncgroup metadata syncing to learn of client 3 .
+func V23TestSyncgroupSync(t *v23tests.T) {
 	v23tests.RunRootMT(t, "--v23.tcp.address=127.0.0.1:0")
 	server0Creds, _ := t.Shell().NewChildCredentials("s0")
 	client0Creds, _ := t.Shell().NewChildCredentials("c0")
@@ -499,20 +499,20 @@ func V23TestSyncGroupSync(t *v23tests.T) {
 	sgName := naming.Join("sync0", constants.SyncbaseSuffix, "SG1")
 
 	tu.RunClient(t, client0Creds, runSetupAppA, "sync0")
-	tu.RunClient(t, client0Creds, runCreateSyncGroup, "sync0", sgName, "tb:foo", "root/s0", "root/s1", "root/s2")
+	tu.RunClient(t, client0Creds, runCreateSyncgroup, "sync0", sgName, "tb:foo", "root/s0", "root/s1", "root/s2")
 	tu.RunClient(t, client0Creds, runPopulateData, "sync0", "foo", "0")
 
 	tu.RunClient(t, client1Creds, runSetupAppA, "sync1")
-	tu.RunClient(t, client1Creds, runJoinSyncGroup, "sync1", sgName)
+	tu.RunClient(t, client1Creds, runJoinSyncgroup, "sync1", sgName)
 
 	tu.RunClient(t, client2Creds, runSetupAppA, "sync2")
-	tu.RunClient(t, client2Creds, runJoinSyncGroup, "sync2", sgName)
+	tu.RunClient(t, client2Creds, runJoinSyncgroup, "sync2", sgName)
 
-	tu.RunClient(t, client1Creds, runGetSyncGroupMembers, "sync1", sgName, "3")
-	tu.RunClient(t, client2Creds, runGetSyncGroupMembers, "sync2", sgName, "3")
+	tu.RunClient(t, client1Creds, runGetSyncgroupMembers, "sync1", sgName, "3")
+	tu.RunClient(t, client2Creds, runGetSyncgroupMembers, "sync2", sgName, "3")
 
-	tu.RunClient(t, client1Creds, runVerifySyncGroupData, "sync1", "foo", "0", "10", "false")
-	tu.RunClient(t, client2Creds, runVerifySyncGroupData, "sync2", "foo", "0", "10", "false")
+	tu.RunClient(t, client1Creds, runVerifySyncgroupData, "sync1", "foo", "0", "10", "false")
+	tu.RunClient(t, client2Creds, runVerifySyncgroupData, "sync2", "foo", "0", "10", "false")
 }
 
 ////////////////////////////////////
@@ -520,15 +520,15 @@ func V23TestSyncGroupSync(t *v23tests.T) {
 
 // toSgPrefixes converts, for example, "a:b,c:" to
 // [{TableName: "a", RowPrefix: "b"}, {TableName: "c", RowPrefix: ""}].
-func toSgPrefixes(csv string) []wire.SyncGroupPrefix {
+func toSgPrefixes(csv string) []wire.SyncgroupPrefix {
 	strs := strings.Split(csv, ",")
-	res := make([]wire.SyncGroupPrefix, len(strs))
+	res := make([]wire.SyncgroupPrefix, len(strs))
 	for i, v := range strs {
 		parts := strings.SplitN(v, ":", 2)
 		if len(parts) != 2 {
 			panic(fmt.Sprintf("invalid prefix string: %q", v))
 		}
-		res[i] = wire.SyncGroupPrefix{TableName: parts[0], RowPrefix: parts[1]}
+		res[i] = wire.SyncgroupPrefix{TableName: parts[0], RowPrefix: parts[1]}
 	}
 	return res
 }
@@ -549,7 +549,7 @@ var runSetupAppA = modules.Register(func(env *modules.Env, args ...string) error
 	return nil
 }, "runSetupAppA")
 
-var runCreateSyncGroup = modules.Register(func(env *modules.Env, args ...string) error {
+var runCreateSyncgroup = modules.Register(func(env *modules.Env, args ...string) error {
 	ctx, shutdown := v23.Init()
 	defer shutdown()
 
@@ -557,49 +557,49 @@ var runCreateSyncGroup = modules.Register(func(env *modules.Env, args ...string)
 	d := a.NoSQLDatabase("d", nil)
 
 	mtName := env.Vars[ref.EnvNamespacePrefix]
-	spec := wire.SyncGroupSpec{
+	spec := wire.SyncgroupSpec{
 		Description: "test syncgroup sg",
 		Perms:       perms(args[3:]...),
 		Prefixes:    toSgPrefixes(args[2]),
 		MountTables: []string{mtName},
 	}
 
-	sg := d.SyncGroup(args[1])
-	info := wire.SyncGroupMemberInfo{8}
+	sg := d.Syncgroup(args[1])
+	info := wire.SyncgroupMemberInfo{8}
 	if err := sg.Create(ctx, spec, info); err != nil {
 		return fmt.Errorf("Create SG %q failed: %v\n", args[1], err)
 	}
 	return nil
-}, "runCreateSyncGroup")
+}, "runCreateSyncgroup")
 
-var runJoinSyncGroup = modules.Register(func(env *modules.Env, args ...string) error {
+var runJoinSyncgroup = modules.Register(func(env *modules.Env, args ...string) error {
 	ctx, shutdown := v23.Init()
 	defer shutdown()
 
 	a := syncbase.NewService(args[0]).App("a")
 	d := a.NoSQLDatabase("d", nil)
 
-	sg := d.SyncGroup(args[1])
-	info := wire.SyncGroupMemberInfo{10}
+	sg := d.Syncgroup(args[1])
+	info := wire.SyncgroupMemberInfo{10}
 	if _, err := sg.Join(ctx, info); err != nil {
 		return fmt.Errorf("Join SG %q failed: %v\n", args[1], err)
 	}
 	return nil
-}, "runJoinSyncGroup")
+}, "runJoinSyncgroup")
 
-// Arguments: 0: Syncbase name, 1: SyncGroup name, 2: SyncGroup description, 3:
-// prefixes, 4 onwards: SyncGroup permission blessings.
-var runSetSyncGroupSpec = modules.Register(func(env *modules.Env, args ...string) error {
+// Arguments: 0: Syncbase name, 1: syncgroup name, 2: syncgroup description, 3:
+// prefixes, 4 onwards: syncgroup permission blessings.
+var runSetSyncgroupSpec = modules.Register(func(env *modules.Env, args ...string) error {
 	ctx, shutdown := v23.Init()
 	defer shutdown()
 
 	a := syncbase.NewService(args[0]).App("a")
 	d := a.NoSQLDatabase("d", nil)
 
-	sg := d.SyncGroup(args[1])
+	sg := d.Syncgroup(args[1])
 
 	mtName := env.Vars[ref.EnvNamespacePrefix]
-	spec := wire.SyncGroupSpec{
+	spec := wire.SyncgroupSpec{
 		Description: args[2],
 		Prefixes:    toSgPrefixes(args[3]),
 		Perms:       perms(args[4:]...),
@@ -610,24 +610,24 @@ var runSetSyncGroupSpec = modules.Register(func(env *modules.Env, args ...string
 		return fmt.Errorf("SetSpec SG %q failed: %v\n", args[1], err)
 	}
 	return nil
-}, "runSetSyncGroupSpec")
+}, "runSetSyncgroupSpec")
 
-// Arguments: 0: Syncbase name, 1: SyncGroup name, 2: SyncGroup description, 3:
-// prefixes, 4 onwards: SyncGroup permission blessings.
-var runGetSyncGroupSpec = modules.Register(func(env *modules.Env, args ...string) error {
+// Arguments: 0: Syncbase name, 1: syncgroup name, 2: syncgroup description, 3:
+// prefixes, 4 onwards: syncgroup permission blessings.
+var runGetSyncgroupSpec = modules.Register(func(env *modules.Env, args ...string) error {
 	ctx, shutdown := v23.Init()
 	defer shutdown()
 
 	a := syncbase.NewService(args[0]).App("a")
 	d := a.NoSQLDatabase("d", nil)
 
-	sg := d.SyncGroup(args[1])
+	sg := d.Syncgroup(args[1])
 
 	wantDesc := args[2]
 	wantPfxs := toSgPrefixes(args[3])
 	wantPerms := perms(args[4:]...)
 
-	var spec wire.SyncGroupSpec
+	var spec wire.SyncgroupSpec
 	var err error
 	for i := 0; i < 8; i++ {
 		time.Sleep(500 * time.Millisecond)
@@ -643,18 +643,18 @@ var runGetSyncGroupSpec = modules.Register(func(env *modules.Env, args ...string
 		return fmt.Errorf("GetSpec SG %q failed: description got %v, want %v, prefixes got %v, want %v, perms got %v, want %v\n", args[1], spec.Description, wantDesc, spec.Prefixes, wantPfxs, spec.Perms, wantPerms)
 	}
 	return nil
-}, "runGetSyncGroupSpec")
+}, "runGetSyncgroupSpec")
 
-// Arguments: 0: Syncbase name, 1: SyncGroup name, 2: number of SyncGroup
+// Arguments: 0: Syncbase name, 1: syncgroup name, 2: number of syncgroup
 // members.
-var runGetSyncGroupMembers = modules.Register(func(env *modules.Env, args ...string) error {
+var runGetSyncgroupMembers = modules.Register(func(env *modules.Env, args ...string) error {
 	ctx, shutdown := v23.Init()
 	defer shutdown()
 
 	a := syncbase.NewService(args[0]).App("a")
 	d := a.NoSQLDatabase("d", nil)
 
-	sg := d.SyncGroup(args[1])
+	sg := d.Syncgroup(args[1])
 
 	wantMembers, _ := strconv.ParseUint(args[2], 10, 64)
 	var gotMembers uint64
@@ -674,7 +674,7 @@ var runGetSyncGroupMembers = modules.Register(func(env *modules.Env, args ...str
 		return fmt.Errorf("GetMembers SG %q failed: members got %v, want %v\n", args[1], gotMembers, wantMembers)
 	}
 	return nil
-}, "runGetSyncGroupMembers")
+}, "runGetSyncgroupMembers")
 
 // Arguments: 0: Syncbase name, 1: key prefix, 2: start index.
 var runPopulateData = modules.Register(func(env *modules.Env, args ...string) error {
@@ -761,7 +761,7 @@ var runSetPrefixPermissions = modules.Register(func(env *modules.Env, args ...st
 }, "runSetPrefixPermissions")
 
 // Arguments: 0: syncbase name, 1: key prefix, 2: start index, 3: number of keys, 4: skip scan.
-var runVerifySyncGroupData = modules.Register(func(env *modules.Env, args ...string) error {
+var runVerifySyncgroupData = modules.Register(func(env *modules.Env, args ...string) error {
 	ctx, shutdown := v23.Init()
 	defer shutdown()
 
@@ -822,7 +822,7 @@ var runVerifySyncGroupData = modules.Register(func(env *modules.Env, args ...str
 		}
 	}
 	return nil
-}, "runVerifySyncGroupData")
+}, "runVerifySyncgroupData")
 
 var runVerifyDeletedData = modules.Register(func(env *modules.Env, args ...string) error {
 	ctx, shutdown := v23.Init()
@@ -914,7 +914,7 @@ var runVerifyConflictResolution = modules.Register(func(env *modules.Env, args .
 	return nil
 }, "runVerifyConflictResolution")
 
-var runVerifyNonSyncGroupData = modules.Register(func(env *modules.Env, args ...string) error {
+var runVerifyNonSyncgroupData = modules.Register(func(env *modules.Env, args ...string) error {
 	ctx, shutdown := v23.Init()
 	defer shutdown()
 
@@ -937,7 +937,7 @@ var runVerifyNonSyncGroupData = modules.Register(func(env *modules.Env, args ...
 	}
 
 	return nil
-}, "runVerifyNonSyncGroupData")
+}, "runVerifyNonSyncgroupData")
 
 var runVerifyLocalAndRemoteData = modules.Register(func(env *modules.Env, args ...string) error {
 	ctx, shutdown := v23.Init()
@@ -1022,7 +1022,7 @@ var runVerifyLostAccess = modules.Register(func(env *modules.Env, args ...string
 	return nil
 }, "runVerifyLostAccess")
 
-var runVerifyNestedSyncGroupData = modules.Register(func(env *modules.Env, args ...string) error {
+var runVerifyNestedSyncgroupData = modules.Register(func(env *modules.Env, args ...string) error {
 	ctx, shutdown := v23.Init()
 	defer shutdown()
 
@@ -1065,7 +1065,7 @@ var runVerifyNestedSyncGroupData = modules.Register(func(env *modules.Env, args 
 		}
 	}
 	return nil
-}, "runVerifyNestedSyncGroupData")
+}, "runVerifyNestedSyncgroupData")
 
 var runSetupAppMulti = modules.Register(func(env *modules.Env, args ...string) error {
 	ctx, shutdown := v23.Init()
@@ -1096,7 +1096,7 @@ var runSetupAppMulti = modules.Register(func(env *modules.Env, args ...string) e
 	return nil
 }, "runSetupAppMulti")
 
-var runPopulateSyncGroupMulti = modules.Register(func(env *modules.Env, args ...string) error {
+var runPopulateSyncgroupMulti = modules.Register(func(env *modules.Env, args ...string) error {
 	ctx, shutdown := v23.Init()
 	defer shutdown()
 
@@ -1120,7 +1120,7 @@ var runPopulateSyncGroupMulti = modules.Register(func(env *modules.Env, args ...
 			d := a.NoSQLDatabase(dbName, nil)
 
 			// For each table, pre-populate entries on each prefix.
-			// Also determine the SyncGroup prefixes.
+			// Also determine the syncgroup prefixes.
 			var sgPrefixes []string
 			for k := 0; k < numTbs; k++ {
 				tbName := fmt.Sprintf("tb%d", k)
@@ -1140,18 +1140,18 @@ var runPopulateSyncGroupMulti = modules.Register(func(env *modules.Env, args ...
 				}
 			}
 
-			// Create one SyncGroup per database across all tables
+			// Create one syncgroup per database across all tables
 			// and prefixes.
 			sgName := naming.Join(sgNamePrefix, appName, dbName)
-			spec := wire.SyncGroupSpec{
+			spec := wire.SyncgroupSpec{
 				Description: fmt.Sprintf("test sg %s/%s", appName, dbName),
 				Perms:       perms("root/s0", "root/s1"),
 				Prefixes:    toSgPrefixes(strings.Join(sgPrefixes, ",")),
 				MountTables: []string{mtName},
 			}
 
-			sg := d.SyncGroup(sgName)
-			info := wire.SyncGroupMemberInfo{8}
+			sg := d.Syncgroup(sgName)
+			info := wire.SyncgroupMemberInfo{8}
 			if err := sg.Create(ctx, spec, info); err != nil {
 				return fmt.Errorf("Create SG %q failed: %v\n", sgName, err)
 			}
@@ -1159,9 +1159,9 @@ var runPopulateSyncGroupMulti = modules.Register(func(env *modules.Env, args ...
 	}
 
 	return nil
-}, "runPopulateSyncGroupMulti")
+}, "runPopulateSyncgroupMulti")
 
-var runJoinSyncGroupMulti = modules.Register(func(env *modules.Env, args ...string) error {
+var runJoinSyncgroupMulti = modules.Register(func(env *modules.Env, args ...string) error {
 	ctx, shutdown := v23.Init()
 	defer shutdown()
 
@@ -1179,8 +1179,8 @@ var runJoinSyncGroupMulti = modules.Register(func(env *modules.Env, args ...stri
 			d := a.NoSQLDatabase(dbName, nil)
 
 			sgName := naming.Join(sgNamePrefix, appName, dbName)
-			sg := d.SyncGroup(sgName)
-			info := wire.SyncGroupMemberInfo{10}
+			sg := d.Syncgroup(sgName)
+			info := wire.SyncgroupMemberInfo{10}
 			if _, err := sg.Join(ctx, info); err != nil {
 				return fmt.Errorf("Join SG %q failed: %v\n", sgName, err)
 			}
@@ -1188,9 +1188,9 @@ var runJoinSyncGroupMulti = modules.Register(func(env *modules.Env, args ...stri
 	}
 
 	return nil
-}, "runJoinSyncGroupMulti")
+}, "runJoinSyncgroupMulti")
 
-var runVerifySyncGroupDataMulti = modules.Register(func(env *modules.Env, args ...string) error {
+var runVerifySyncgroupDataMulti = modules.Register(func(env *modules.Env, args ...string) error {
 	ctx, shutdown := v23.Init()
 	defer shutdown()
 
@@ -1234,4 +1234,4 @@ var runVerifySyncGroupDataMulti = modules.Register(func(env *modules.Env, args .
 	}
 
 	return nil
-}, "runVerifySyncGroupDataMulti")
+}, "runVerifySyncgroupDataMulti")

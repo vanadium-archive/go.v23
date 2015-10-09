@@ -581,9 +581,9 @@ func TestDisallowedMethods(t *testing.T) {
 	if err := bc.SetPermissions(ctx, nil, ""); verror.ErrorID(err) != wire.ErrBoundToBatch.ID {
 		t.Fatalf("bc.SetPermissions() should have failed: %v", err)
 	}
-	// TODO(sadovsky): Test all other SyncGroupManager methods.
-	if _, err := bc.GetSyncGroupNames(ctx); verror.ErrorID(err) != wire.ErrBoundToBatch.ID {
-		t.Fatalf("bc.GetSyncGroupNames() should have failed: %v", err)
+	// TODO(sadovsky): Test all other SyncgroupManager methods.
+	if _, err := bc.GetSyncgroupNames(ctx); verror.ErrorID(err) != wire.ErrBoundToBatch.ID {
+		t.Fatalf("bc.GetSyncgroupNames() should have failed: %v", err)
 	}
 
 	// Test that Table.{Create,Destroy} fail with ErrBoundToBatch.

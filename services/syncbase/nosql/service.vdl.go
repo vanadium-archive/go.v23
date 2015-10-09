@@ -241,200 +241,200 @@ var descDatabaseWatcher = rpc.InterfaceDesc{
 	},
 }
 
-// SyncGroupManagerClientMethods is the client interface
-// containing SyncGroupManager methods.
+// SyncgroupManagerClientMethods is the client interface
+// containing SyncgroupManager methods.
 //
-// SyncGroupManager is the interface for SyncGroup operations.
+// SyncgroupManager is the interface for syncgroup operations.
 // TODO(hpucha): Add blessings to create/join and add a refresh method.
-type SyncGroupManagerClientMethods interface {
-	// GetSyncGroupNames returns the global names of all SyncGroups attached to
+type SyncgroupManagerClientMethods interface {
+	// GetSyncgroupNames returns the global names of all syncgroups attached to
 	// this database.
-	GetSyncGroupNames(*context.T, ...rpc.CallOpt) ([]string, error)
-	// CreateSyncGroup creates a new SyncGroup with the given spec.
+	GetSyncgroupNames(*context.T, ...rpc.CallOpt) ([]string, error)
+	// CreateSyncgroup creates a new syncgroup with the given spec.
 	//
 	// Requires: Client must have at least Read access on the Database; prefix ACL
-	// must exist at each SyncGroup prefix; Client must have at least Read access
+	// must exist at each syncgroup prefix; Client must have at least Read access
 	// on each of these prefix ACLs.
-	CreateSyncGroup(ctx *context.T, sgName string, spec SyncGroupSpec, myInfo SyncGroupMemberInfo, opts ...rpc.CallOpt) error
-	// JoinSyncGroup joins the SyncGroup.
+	CreateSyncgroup(ctx *context.T, sgName string, spec SyncgroupSpec, myInfo SyncgroupMemberInfo, opts ...rpc.CallOpt) error
+	// JoinSyncgroup joins the syncgroup.
 	//
 	// Requires: Client must have at least Read access on the Database and on the
-	// SyncGroup ACL.
-	JoinSyncGroup(ctx *context.T, sgName string, myInfo SyncGroupMemberInfo, opts ...rpc.CallOpt) (spec SyncGroupSpec, err error)
-	// LeaveSyncGroup leaves the SyncGroup. Previously synced data will continue
+	// syncgroup ACL.
+	JoinSyncgroup(ctx *context.T, sgName string, myInfo SyncgroupMemberInfo, opts ...rpc.CallOpt) (spec SyncgroupSpec, err error)
+	// LeaveSyncgroup leaves the syncgroup. Previously synced data will continue
 	// to be available.
 	//
 	// Requires: Client must have at least Read access on the Database.
-	LeaveSyncGroup(ctx *context.T, sgName string, opts ...rpc.CallOpt) error
-	// DestroySyncGroup destroys the SyncGroup. Previously synced data will
+	LeaveSyncgroup(ctx *context.T, sgName string, opts ...rpc.CallOpt) error
+	// DestroySyncgroup destroys the syncgroup. Previously synced data will
 	// continue to be available to all members.
 	//
 	// Requires: Client must have at least Read access on the Database, and must
-	// have Admin access on the SyncGroup ACL.
-	DestroySyncGroup(ctx *context.T, sgName string, opts ...rpc.CallOpt) error
-	// EjectFromSyncGroup ejects a member from the SyncGroup. The ejected member
+	// have Admin access on the syncgroup ACL.
+	DestroySyncgroup(ctx *context.T, sgName string, opts ...rpc.CallOpt) error
+	// EjectFromSyncgroup ejects a member from the syncgroup. The ejected member
 	// will not be able to sync further, but will retain any data it has already
 	// synced.
 	//
 	// Requires: Client must have at least Read access on the Database, and must
-	// have Admin access on the SyncGroup ACL.
-	EjectFromSyncGroup(ctx *context.T, sgName string, member string, opts ...rpc.CallOpt) error
-	// GetSyncGroupSpec gets the SyncGroup spec. version allows for atomic
-	// read-modify-write of the spec - see comment for SetSyncGroupSpec.
+	// have Admin access on the syncgroup ACL.
+	EjectFromSyncgroup(ctx *context.T, sgName string, member string, opts ...rpc.CallOpt) error
+	// GetSyncgroupSpec gets the syncgroup spec. version allows for atomic
+	// read-modify-write of the spec - see comment for SetSyncgroupSpec.
 	//
 	// Requires: Client must have at least Read access on the Database and on the
-	// SyncGroup ACL.
-	GetSyncGroupSpec(ctx *context.T, sgName string, opts ...rpc.CallOpt) (spec SyncGroupSpec, version string, err error)
-	// SetSyncGroupSpec sets the SyncGroup spec. version may be either empty or
+	// syncgroup ACL.
+	GetSyncgroupSpec(ctx *context.T, sgName string, opts ...rpc.CallOpt) (spec SyncgroupSpec, version string, err error)
+	// SetSyncgroupSpec sets the syncgroup spec. version may be either empty or
 	// the value from a previous Get. If not empty, Set will only succeed if the
 	// current version matches the specified one.
 	//
 	// Requires: Client must have at least Read access on the Database, and must
-	// have Admin access on the SyncGroup ACL.
-	SetSyncGroupSpec(ctx *context.T, sgName string, spec SyncGroupSpec, version string, opts ...rpc.CallOpt) error
-	// GetSyncGroupMembers gets the info objects for members of the SyncGroup.
+	// have Admin access on the syncgroup ACL.
+	SetSyncgroupSpec(ctx *context.T, sgName string, spec SyncgroupSpec, version string, opts ...rpc.CallOpt) error
+	// GetSyncgroupMembers gets the info objects for members of the syncgroup.
 	//
 	// Requires: Client must have at least Read access on the Database and on the
-	// SyncGroup ACL.
-	GetSyncGroupMembers(ctx *context.T, sgName string, opts ...rpc.CallOpt) (members map[string]SyncGroupMemberInfo, err error)
+	// syncgroup ACL.
+	GetSyncgroupMembers(ctx *context.T, sgName string, opts ...rpc.CallOpt) (members map[string]SyncgroupMemberInfo, err error)
 }
 
-// SyncGroupManagerClientStub adds universal methods to SyncGroupManagerClientMethods.
-type SyncGroupManagerClientStub interface {
-	SyncGroupManagerClientMethods
+// SyncgroupManagerClientStub adds universal methods to SyncgroupManagerClientMethods.
+type SyncgroupManagerClientStub interface {
+	SyncgroupManagerClientMethods
 	rpc.UniversalServiceMethods
 }
 
-// SyncGroupManagerClient returns a client stub for SyncGroupManager.
-func SyncGroupManagerClient(name string) SyncGroupManagerClientStub {
-	return implSyncGroupManagerClientStub{name}
+// SyncgroupManagerClient returns a client stub for SyncgroupManager.
+func SyncgroupManagerClient(name string) SyncgroupManagerClientStub {
+	return implSyncgroupManagerClientStub{name}
 }
 
-type implSyncGroupManagerClientStub struct {
+type implSyncgroupManagerClientStub struct {
 	name string
 }
 
-func (c implSyncGroupManagerClientStub) GetSyncGroupNames(ctx *context.T, opts ...rpc.CallOpt) (o0 []string, err error) {
-	err = v23.GetClient(ctx).Call(ctx, c.name, "GetSyncGroupNames", nil, []interface{}{&o0}, opts...)
+func (c implSyncgroupManagerClientStub) GetSyncgroupNames(ctx *context.T, opts ...rpc.CallOpt) (o0 []string, err error) {
+	err = v23.GetClient(ctx).Call(ctx, c.name, "GetSyncgroupNames", nil, []interface{}{&o0}, opts...)
 	return
 }
 
-func (c implSyncGroupManagerClientStub) CreateSyncGroup(ctx *context.T, i0 string, i1 SyncGroupSpec, i2 SyncGroupMemberInfo, opts ...rpc.CallOpt) (err error) {
-	err = v23.GetClient(ctx).Call(ctx, c.name, "CreateSyncGroup", []interface{}{i0, i1, i2}, nil, opts...)
+func (c implSyncgroupManagerClientStub) CreateSyncgroup(ctx *context.T, i0 string, i1 SyncgroupSpec, i2 SyncgroupMemberInfo, opts ...rpc.CallOpt) (err error) {
+	err = v23.GetClient(ctx).Call(ctx, c.name, "CreateSyncgroup", []interface{}{i0, i1, i2}, nil, opts...)
 	return
 }
 
-func (c implSyncGroupManagerClientStub) JoinSyncGroup(ctx *context.T, i0 string, i1 SyncGroupMemberInfo, opts ...rpc.CallOpt) (o0 SyncGroupSpec, err error) {
-	err = v23.GetClient(ctx).Call(ctx, c.name, "JoinSyncGroup", []interface{}{i0, i1}, []interface{}{&o0}, opts...)
+func (c implSyncgroupManagerClientStub) JoinSyncgroup(ctx *context.T, i0 string, i1 SyncgroupMemberInfo, opts ...rpc.CallOpt) (o0 SyncgroupSpec, err error) {
+	err = v23.GetClient(ctx).Call(ctx, c.name, "JoinSyncgroup", []interface{}{i0, i1}, []interface{}{&o0}, opts...)
 	return
 }
 
-func (c implSyncGroupManagerClientStub) LeaveSyncGroup(ctx *context.T, i0 string, opts ...rpc.CallOpt) (err error) {
-	err = v23.GetClient(ctx).Call(ctx, c.name, "LeaveSyncGroup", []interface{}{i0}, nil, opts...)
+func (c implSyncgroupManagerClientStub) LeaveSyncgroup(ctx *context.T, i0 string, opts ...rpc.CallOpt) (err error) {
+	err = v23.GetClient(ctx).Call(ctx, c.name, "LeaveSyncgroup", []interface{}{i0}, nil, opts...)
 	return
 }
 
-func (c implSyncGroupManagerClientStub) DestroySyncGroup(ctx *context.T, i0 string, opts ...rpc.CallOpt) (err error) {
-	err = v23.GetClient(ctx).Call(ctx, c.name, "DestroySyncGroup", []interface{}{i0}, nil, opts...)
+func (c implSyncgroupManagerClientStub) DestroySyncgroup(ctx *context.T, i0 string, opts ...rpc.CallOpt) (err error) {
+	err = v23.GetClient(ctx).Call(ctx, c.name, "DestroySyncgroup", []interface{}{i0}, nil, opts...)
 	return
 }
 
-func (c implSyncGroupManagerClientStub) EjectFromSyncGroup(ctx *context.T, i0 string, i1 string, opts ...rpc.CallOpt) (err error) {
-	err = v23.GetClient(ctx).Call(ctx, c.name, "EjectFromSyncGroup", []interface{}{i0, i1}, nil, opts...)
+func (c implSyncgroupManagerClientStub) EjectFromSyncgroup(ctx *context.T, i0 string, i1 string, opts ...rpc.CallOpt) (err error) {
+	err = v23.GetClient(ctx).Call(ctx, c.name, "EjectFromSyncgroup", []interface{}{i0, i1}, nil, opts...)
 	return
 }
 
-func (c implSyncGroupManagerClientStub) GetSyncGroupSpec(ctx *context.T, i0 string, opts ...rpc.CallOpt) (o0 SyncGroupSpec, o1 string, err error) {
-	err = v23.GetClient(ctx).Call(ctx, c.name, "GetSyncGroupSpec", []interface{}{i0}, []interface{}{&o0, &o1}, opts...)
+func (c implSyncgroupManagerClientStub) GetSyncgroupSpec(ctx *context.T, i0 string, opts ...rpc.CallOpt) (o0 SyncgroupSpec, o1 string, err error) {
+	err = v23.GetClient(ctx).Call(ctx, c.name, "GetSyncgroupSpec", []interface{}{i0}, []interface{}{&o0, &o1}, opts...)
 	return
 }
 
-func (c implSyncGroupManagerClientStub) SetSyncGroupSpec(ctx *context.T, i0 string, i1 SyncGroupSpec, i2 string, opts ...rpc.CallOpt) (err error) {
-	err = v23.GetClient(ctx).Call(ctx, c.name, "SetSyncGroupSpec", []interface{}{i0, i1, i2}, nil, opts...)
+func (c implSyncgroupManagerClientStub) SetSyncgroupSpec(ctx *context.T, i0 string, i1 SyncgroupSpec, i2 string, opts ...rpc.CallOpt) (err error) {
+	err = v23.GetClient(ctx).Call(ctx, c.name, "SetSyncgroupSpec", []interface{}{i0, i1, i2}, nil, opts...)
 	return
 }
 
-func (c implSyncGroupManagerClientStub) GetSyncGroupMembers(ctx *context.T, i0 string, opts ...rpc.CallOpt) (o0 map[string]SyncGroupMemberInfo, err error) {
-	err = v23.GetClient(ctx).Call(ctx, c.name, "GetSyncGroupMembers", []interface{}{i0}, []interface{}{&o0}, opts...)
+func (c implSyncgroupManagerClientStub) GetSyncgroupMembers(ctx *context.T, i0 string, opts ...rpc.CallOpt) (o0 map[string]SyncgroupMemberInfo, err error) {
+	err = v23.GetClient(ctx).Call(ctx, c.name, "GetSyncgroupMembers", []interface{}{i0}, []interface{}{&o0}, opts...)
 	return
 }
 
-// SyncGroupManagerServerMethods is the interface a server writer
-// implements for SyncGroupManager.
+// SyncgroupManagerServerMethods is the interface a server writer
+// implements for SyncgroupManager.
 //
-// SyncGroupManager is the interface for SyncGroup operations.
+// SyncgroupManager is the interface for syncgroup operations.
 // TODO(hpucha): Add blessings to create/join and add a refresh method.
-type SyncGroupManagerServerMethods interface {
-	// GetSyncGroupNames returns the global names of all SyncGroups attached to
+type SyncgroupManagerServerMethods interface {
+	// GetSyncgroupNames returns the global names of all syncgroups attached to
 	// this database.
-	GetSyncGroupNames(*context.T, rpc.ServerCall) ([]string, error)
-	// CreateSyncGroup creates a new SyncGroup with the given spec.
+	GetSyncgroupNames(*context.T, rpc.ServerCall) ([]string, error)
+	// CreateSyncgroup creates a new syncgroup with the given spec.
 	//
 	// Requires: Client must have at least Read access on the Database; prefix ACL
-	// must exist at each SyncGroup prefix; Client must have at least Read access
+	// must exist at each syncgroup prefix; Client must have at least Read access
 	// on each of these prefix ACLs.
-	CreateSyncGroup(ctx *context.T, call rpc.ServerCall, sgName string, spec SyncGroupSpec, myInfo SyncGroupMemberInfo) error
-	// JoinSyncGroup joins the SyncGroup.
+	CreateSyncgroup(ctx *context.T, call rpc.ServerCall, sgName string, spec SyncgroupSpec, myInfo SyncgroupMemberInfo) error
+	// JoinSyncgroup joins the syncgroup.
 	//
 	// Requires: Client must have at least Read access on the Database and on the
-	// SyncGroup ACL.
-	JoinSyncGroup(ctx *context.T, call rpc.ServerCall, sgName string, myInfo SyncGroupMemberInfo) (spec SyncGroupSpec, err error)
-	// LeaveSyncGroup leaves the SyncGroup. Previously synced data will continue
+	// syncgroup ACL.
+	JoinSyncgroup(ctx *context.T, call rpc.ServerCall, sgName string, myInfo SyncgroupMemberInfo) (spec SyncgroupSpec, err error)
+	// LeaveSyncgroup leaves the syncgroup. Previously synced data will continue
 	// to be available.
 	//
 	// Requires: Client must have at least Read access on the Database.
-	LeaveSyncGroup(ctx *context.T, call rpc.ServerCall, sgName string) error
-	// DestroySyncGroup destroys the SyncGroup. Previously synced data will
+	LeaveSyncgroup(ctx *context.T, call rpc.ServerCall, sgName string) error
+	// DestroySyncgroup destroys the syncgroup. Previously synced data will
 	// continue to be available to all members.
 	//
 	// Requires: Client must have at least Read access on the Database, and must
-	// have Admin access on the SyncGroup ACL.
-	DestroySyncGroup(ctx *context.T, call rpc.ServerCall, sgName string) error
-	// EjectFromSyncGroup ejects a member from the SyncGroup. The ejected member
+	// have Admin access on the syncgroup ACL.
+	DestroySyncgroup(ctx *context.T, call rpc.ServerCall, sgName string) error
+	// EjectFromSyncgroup ejects a member from the syncgroup. The ejected member
 	// will not be able to sync further, but will retain any data it has already
 	// synced.
 	//
 	// Requires: Client must have at least Read access on the Database, and must
-	// have Admin access on the SyncGroup ACL.
-	EjectFromSyncGroup(ctx *context.T, call rpc.ServerCall, sgName string, member string) error
-	// GetSyncGroupSpec gets the SyncGroup spec. version allows for atomic
-	// read-modify-write of the spec - see comment for SetSyncGroupSpec.
+	// have Admin access on the syncgroup ACL.
+	EjectFromSyncgroup(ctx *context.T, call rpc.ServerCall, sgName string, member string) error
+	// GetSyncgroupSpec gets the syncgroup spec. version allows for atomic
+	// read-modify-write of the spec - see comment for SetSyncgroupSpec.
 	//
 	// Requires: Client must have at least Read access on the Database and on the
-	// SyncGroup ACL.
-	GetSyncGroupSpec(ctx *context.T, call rpc.ServerCall, sgName string) (spec SyncGroupSpec, version string, err error)
-	// SetSyncGroupSpec sets the SyncGroup spec. version may be either empty or
+	// syncgroup ACL.
+	GetSyncgroupSpec(ctx *context.T, call rpc.ServerCall, sgName string) (spec SyncgroupSpec, version string, err error)
+	// SetSyncgroupSpec sets the syncgroup spec. version may be either empty or
 	// the value from a previous Get. If not empty, Set will only succeed if the
 	// current version matches the specified one.
 	//
 	// Requires: Client must have at least Read access on the Database, and must
-	// have Admin access on the SyncGroup ACL.
-	SetSyncGroupSpec(ctx *context.T, call rpc.ServerCall, sgName string, spec SyncGroupSpec, version string) error
-	// GetSyncGroupMembers gets the info objects for members of the SyncGroup.
+	// have Admin access on the syncgroup ACL.
+	SetSyncgroupSpec(ctx *context.T, call rpc.ServerCall, sgName string, spec SyncgroupSpec, version string) error
+	// GetSyncgroupMembers gets the info objects for members of the syncgroup.
 	//
 	// Requires: Client must have at least Read access on the Database and on the
-	// SyncGroup ACL.
-	GetSyncGroupMembers(ctx *context.T, call rpc.ServerCall, sgName string) (members map[string]SyncGroupMemberInfo, err error)
+	// syncgroup ACL.
+	GetSyncgroupMembers(ctx *context.T, call rpc.ServerCall, sgName string) (members map[string]SyncgroupMemberInfo, err error)
 }
 
-// SyncGroupManagerServerStubMethods is the server interface containing
-// SyncGroupManager methods, as expected by rpc.Server.
-// There is no difference between this interface and SyncGroupManagerServerMethods
+// SyncgroupManagerServerStubMethods is the server interface containing
+// SyncgroupManager methods, as expected by rpc.Server.
+// There is no difference between this interface and SyncgroupManagerServerMethods
 // since there are no streaming methods.
-type SyncGroupManagerServerStubMethods SyncGroupManagerServerMethods
+type SyncgroupManagerServerStubMethods SyncgroupManagerServerMethods
 
-// SyncGroupManagerServerStub adds universal methods to SyncGroupManagerServerStubMethods.
-type SyncGroupManagerServerStub interface {
-	SyncGroupManagerServerStubMethods
-	// Describe the SyncGroupManager interfaces.
+// SyncgroupManagerServerStub adds universal methods to SyncgroupManagerServerStubMethods.
+type SyncgroupManagerServerStub interface {
+	SyncgroupManagerServerStubMethods
+	// Describe the SyncgroupManager interfaces.
 	Describe__() []rpc.InterfaceDesc
 }
 
-// SyncGroupManagerServer returns a server stub for SyncGroupManager.
-// It converts an implementation of SyncGroupManagerServerMethods into
+// SyncgroupManagerServer returns a server stub for SyncgroupManager.
+// It converts an implementation of SyncgroupManagerServerMethods into
 // an object that may be used by rpc.Server.
-func SyncGroupManagerServer(impl SyncGroupManagerServerMethods) SyncGroupManagerServerStub {
-	stub := implSyncGroupManagerServerStub{
+func SyncgroupManagerServer(impl SyncgroupManagerServerMethods) SyncgroupManagerServerStub {
+	stub := implSyncgroupManagerServerStub{
 		impl: impl,
 	}
 	// Initialize GlobState; always check the stub itself first, to handle the
@@ -447,113 +447,113 @@ func SyncGroupManagerServer(impl SyncGroupManagerServerMethods) SyncGroupManager
 	return stub
 }
 
-type implSyncGroupManagerServerStub struct {
-	impl SyncGroupManagerServerMethods
+type implSyncgroupManagerServerStub struct {
+	impl SyncgroupManagerServerMethods
 	gs   *rpc.GlobState
 }
 
-func (s implSyncGroupManagerServerStub) GetSyncGroupNames(ctx *context.T, call rpc.ServerCall) ([]string, error) {
-	return s.impl.GetSyncGroupNames(ctx, call)
+func (s implSyncgroupManagerServerStub) GetSyncgroupNames(ctx *context.T, call rpc.ServerCall) ([]string, error) {
+	return s.impl.GetSyncgroupNames(ctx, call)
 }
 
-func (s implSyncGroupManagerServerStub) CreateSyncGroup(ctx *context.T, call rpc.ServerCall, i0 string, i1 SyncGroupSpec, i2 SyncGroupMemberInfo) error {
-	return s.impl.CreateSyncGroup(ctx, call, i0, i1, i2)
+func (s implSyncgroupManagerServerStub) CreateSyncgroup(ctx *context.T, call rpc.ServerCall, i0 string, i1 SyncgroupSpec, i2 SyncgroupMemberInfo) error {
+	return s.impl.CreateSyncgroup(ctx, call, i0, i1, i2)
 }
 
-func (s implSyncGroupManagerServerStub) JoinSyncGroup(ctx *context.T, call rpc.ServerCall, i0 string, i1 SyncGroupMemberInfo) (SyncGroupSpec, error) {
-	return s.impl.JoinSyncGroup(ctx, call, i0, i1)
+func (s implSyncgroupManagerServerStub) JoinSyncgroup(ctx *context.T, call rpc.ServerCall, i0 string, i1 SyncgroupMemberInfo) (SyncgroupSpec, error) {
+	return s.impl.JoinSyncgroup(ctx, call, i0, i1)
 }
 
-func (s implSyncGroupManagerServerStub) LeaveSyncGroup(ctx *context.T, call rpc.ServerCall, i0 string) error {
-	return s.impl.LeaveSyncGroup(ctx, call, i0)
+func (s implSyncgroupManagerServerStub) LeaveSyncgroup(ctx *context.T, call rpc.ServerCall, i0 string) error {
+	return s.impl.LeaveSyncgroup(ctx, call, i0)
 }
 
-func (s implSyncGroupManagerServerStub) DestroySyncGroup(ctx *context.T, call rpc.ServerCall, i0 string) error {
-	return s.impl.DestroySyncGroup(ctx, call, i0)
+func (s implSyncgroupManagerServerStub) DestroySyncgroup(ctx *context.T, call rpc.ServerCall, i0 string) error {
+	return s.impl.DestroySyncgroup(ctx, call, i0)
 }
 
-func (s implSyncGroupManagerServerStub) EjectFromSyncGroup(ctx *context.T, call rpc.ServerCall, i0 string, i1 string) error {
-	return s.impl.EjectFromSyncGroup(ctx, call, i0, i1)
+func (s implSyncgroupManagerServerStub) EjectFromSyncgroup(ctx *context.T, call rpc.ServerCall, i0 string, i1 string) error {
+	return s.impl.EjectFromSyncgroup(ctx, call, i0, i1)
 }
 
-func (s implSyncGroupManagerServerStub) GetSyncGroupSpec(ctx *context.T, call rpc.ServerCall, i0 string) (SyncGroupSpec, string, error) {
-	return s.impl.GetSyncGroupSpec(ctx, call, i0)
+func (s implSyncgroupManagerServerStub) GetSyncgroupSpec(ctx *context.T, call rpc.ServerCall, i0 string) (SyncgroupSpec, string, error) {
+	return s.impl.GetSyncgroupSpec(ctx, call, i0)
 }
 
-func (s implSyncGroupManagerServerStub) SetSyncGroupSpec(ctx *context.T, call rpc.ServerCall, i0 string, i1 SyncGroupSpec, i2 string) error {
-	return s.impl.SetSyncGroupSpec(ctx, call, i0, i1, i2)
+func (s implSyncgroupManagerServerStub) SetSyncgroupSpec(ctx *context.T, call rpc.ServerCall, i0 string, i1 SyncgroupSpec, i2 string) error {
+	return s.impl.SetSyncgroupSpec(ctx, call, i0, i1, i2)
 }
 
-func (s implSyncGroupManagerServerStub) GetSyncGroupMembers(ctx *context.T, call rpc.ServerCall, i0 string) (map[string]SyncGroupMemberInfo, error) {
-	return s.impl.GetSyncGroupMembers(ctx, call, i0)
+func (s implSyncgroupManagerServerStub) GetSyncgroupMembers(ctx *context.T, call rpc.ServerCall, i0 string) (map[string]SyncgroupMemberInfo, error) {
+	return s.impl.GetSyncgroupMembers(ctx, call, i0)
 }
 
-func (s implSyncGroupManagerServerStub) Globber() *rpc.GlobState {
+func (s implSyncgroupManagerServerStub) Globber() *rpc.GlobState {
 	return s.gs
 }
 
-func (s implSyncGroupManagerServerStub) Describe__() []rpc.InterfaceDesc {
-	return []rpc.InterfaceDesc{SyncGroupManagerDesc}
+func (s implSyncgroupManagerServerStub) Describe__() []rpc.InterfaceDesc {
+	return []rpc.InterfaceDesc{SyncgroupManagerDesc}
 }
 
-// SyncGroupManagerDesc describes the SyncGroupManager interface.
-var SyncGroupManagerDesc rpc.InterfaceDesc = descSyncGroupManager
+// SyncgroupManagerDesc describes the SyncgroupManager interface.
+var SyncgroupManagerDesc rpc.InterfaceDesc = descSyncgroupManager
 
-// descSyncGroupManager hides the desc to keep godoc clean.
-var descSyncGroupManager = rpc.InterfaceDesc{
-	Name:    "SyncGroupManager",
+// descSyncgroupManager hides the desc to keep godoc clean.
+var descSyncgroupManager = rpc.InterfaceDesc{
+	Name:    "SyncgroupManager",
 	PkgPath: "v.io/v23/services/syncbase/nosql",
-	Doc:     "// SyncGroupManager is the interface for SyncGroup operations.\n// TODO(hpucha): Add blessings to create/join and add a refresh method.",
+	Doc:     "// SyncgroupManager is the interface for syncgroup operations.\n// TODO(hpucha): Add blessings to create/join and add a refresh method.",
 	Methods: []rpc.MethodDesc{
 		{
-			Name: "GetSyncGroupNames",
-			Doc:  "// GetSyncGroupNames returns the global names of all SyncGroups attached to\n// this database.",
+			Name: "GetSyncgroupNames",
+			Doc:  "// GetSyncgroupNames returns the global names of all syncgroups attached to\n// this database.",
 			OutArgs: []rpc.ArgDesc{
 				{"", ``}, // []string
 			},
 			Tags: []*vdl.Value{vdl.ValueOf(access.Tag("Read"))},
 		},
 		{
-			Name: "CreateSyncGroup",
-			Doc:  "// CreateSyncGroup creates a new SyncGroup with the given spec.\n//\n// Requires: Client must have at least Read access on the Database; prefix ACL\n// must exist at each SyncGroup prefix; Client must have at least Read access\n// on each of these prefix ACLs.",
+			Name: "CreateSyncgroup",
+			Doc:  "// CreateSyncgroup creates a new syncgroup with the given spec.\n//\n// Requires: Client must have at least Read access on the Database; prefix ACL\n// must exist at each syncgroup prefix; Client must have at least Read access\n// on each of these prefix ACLs.",
 			InArgs: []rpc.ArgDesc{
 				{"sgName", ``}, // string
-				{"spec", ``},   // SyncGroupSpec
-				{"myInfo", ``}, // SyncGroupMemberInfo
+				{"spec", ``},   // SyncgroupSpec
+				{"myInfo", ``}, // SyncgroupMemberInfo
 			},
 			Tags: []*vdl.Value{vdl.ValueOf(access.Tag("Read"))},
 		},
 		{
-			Name: "JoinSyncGroup",
-			Doc:  "// JoinSyncGroup joins the SyncGroup.\n//\n// Requires: Client must have at least Read access on the Database and on the\n// SyncGroup ACL.",
+			Name: "JoinSyncgroup",
+			Doc:  "// JoinSyncgroup joins the syncgroup.\n//\n// Requires: Client must have at least Read access on the Database and on the\n// syncgroup ACL.",
 			InArgs: []rpc.ArgDesc{
 				{"sgName", ``}, // string
-				{"myInfo", ``}, // SyncGroupMemberInfo
+				{"myInfo", ``}, // SyncgroupMemberInfo
 			},
 			OutArgs: []rpc.ArgDesc{
-				{"spec", ``}, // SyncGroupSpec
+				{"spec", ``}, // SyncgroupSpec
 			},
 			Tags: []*vdl.Value{vdl.ValueOf(access.Tag("Read"))},
 		},
 		{
-			Name: "LeaveSyncGroup",
-			Doc:  "// LeaveSyncGroup leaves the SyncGroup. Previously synced data will continue\n// to be available.\n//\n// Requires: Client must have at least Read access on the Database.",
+			Name: "LeaveSyncgroup",
+			Doc:  "// LeaveSyncgroup leaves the syncgroup. Previously synced data will continue\n// to be available.\n//\n// Requires: Client must have at least Read access on the Database.",
 			InArgs: []rpc.ArgDesc{
 				{"sgName", ``}, // string
 			},
 			Tags: []*vdl.Value{vdl.ValueOf(access.Tag("Read"))},
 		},
 		{
-			Name: "DestroySyncGroup",
-			Doc:  "// DestroySyncGroup destroys the SyncGroup. Previously synced data will\n// continue to be available to all members.\n//\n// Requires: Client must have at least Read access on the Database, and must\n// have Admin access on the SyncGroup ACL.",
+			Name: "DestroySyncgroup",
+			Doc:  "// DestroySyncgroup destroys the syncgroup. Previously synced data will\n// continue to be available to all members.\n//\n// Requires: Client must have at least Read access on the Database, and must\n// have Admin access on the syncgroup ACL.",
 			InArgs: []rpc.ArgDesc{
 				{"sgName", ``}, // string
 			},
 			Tags: []*vdl.Value{vdl.ValueOf(access.Tag("Read"))},
 		},
 		{
-			Name: "EjectFromSyncGroup",
-			Doc:  "// EjectFromSyncGroup ejects a member from the SyncGroup. The ejected member\n// will not be able to sync further, but will retain any data it has already\n// synced.\n//\n// Requires: Client must have at least Read access on the Database, and must\n// have Admin access on the SyncGroup ACL.",
+			Name: "EjectFromSyncgroup",
+			Doc:  "// EjectFromSyncgroup ejects a member from the syncgroup. The ejected member\n// will not be able to sync further, but will retain any data it has already\n// synced.\n//\n// Requires: Client must have at least Read access on the Database, and must\n// have Admin access on the syncgroup ACL.",
 			InArgs: []rpc.ArgDesc{
 				{"sgName", ``}, // string
 				{"member", ``}, // string
@@ -561,35 +561,35 @@ var descSyncGroupManager = rpc.InterfaceDesc{
 			Tags: []*vdl.Value{vdl.ValueOf(access.Tag("Read"))},
 		},
 		{
-			Name: "GetSyncGroupSpec",
-			Doc:  "// GetSyncGroupSpec gets the SyncGroup spec. version allows for atomic\n// read-modify-write of the spec - see comment for SetSyncGroupSpec.\n//\n// Requires: Client must have at least Read access on the Database and on the\n// SyncGroup ACL.",
+			Name: "GetSyncgroupSpec",
+			Doc:  "// GetSyncgroupSpec gets the syncgroup spec. version allows for atomic\n// read-modify-write of the spec - see comment for SetSyncgroupSpec.\n//\n// Requires: Client must have at least Read access on the Database and on the\n// syncgroup ACL.",
 			InArgs: []rpc.ArgDesc{
 				{"sgName", ``}, // string
 			},
 			OutArgs: []rpc.ArgDesc{
-				{"spec", ``},    // SyncGroupSpec
+				{"spec", ``},    // SyncgroupSpec
 				{"version", ``}, // string
 			},
 			Tags: []*vdl.Value{vdl.ValueOf(access.Tag("Read"))},
 		},
 		{
-			Name: "SetSyncGroupSpec",
-			Doc:  "// SetSyncGroupSpec sets the SyncGroup spec. version may be either empty or\n// the value from a previous Get. If not empty, Set will only succeed if the\n// current version matches the specified one.\n//\n// Requires: Client must have at least Read access on the Database, and must\n// have Admin access on the SyncGroup ACL.",
+			Name: "SetSyncgroupSpec",
+			Doc:  "// SetSyncgroupSpec sets the syncgroup spec. version may be either empty or\n// the value from a previous Get. If not empty, Set will only succeed if the\n// current version matches the specified one.\n//\n// Requires: Client must have at least Read access on the Database, and must\n// have Admin access on the syncgroup ACL.",
 			InArgs: []rpc.ArgDesc{
 				{"sgName", ``},  // string
-				{"spec", ``},    // SyncGroupSpec
+				{"spec", ``},    // SyncgroupSpec
 				{"version", ``}, // string
 			},
 			Tags: []*vdl.Value{vdl.ValueOf(access.Tag("Read"))},
 		},
 		{
-			Name: "GetSyncGroupMembers",
-			Doc:  "// GetSyncGroupMembers gets the info objects for members of the SyncGroup.\n//\n// Requires: Client must have at least Read access on the Database and on the\n// SyncGroup ACL.",
+			Name: "GetSyncgroupMembers",
+			Doc:  "// GetSyncgroupMembers gets the info objects for members of the syncgroup.\n//\n// Requires: Client must have at least Read access on the Database and on the\n// syncgroup ACL.",
 			InArgs: []rpc.ArgDesc{
 				{"sgName", ``}, // string
 			},
 			OutArgs: []rpc.ArgDesc{
-				{"members", ``}, // map[string]SyncGroupMemberInfo
+				{"members", ``}, // map[string]SyncgroupMemberInfo
 			},
 			Tags: []*vdl.Value{vdl.ValueOf(access.Tag("Read"))},
 		},
@@ -1876,9 +1876,9 @@ type DatabaseClientMethods interface {
 	// 5) start watching for changes to the data using the ResumeMarker
 	// In this configuration the client will not miss any changes to the data.
 	DatabaseWatcherClientMethods
-	// SyncGroupManager is the interface for SyncGroup operations.
+	// SyncgroupManager is the interface for syncgroup operations.
 	// TODO(hpucha): Add blessings to create/join and add a refresh method.
-	SyncGroupManagerClientMethods
+	SyncgroupManagerClientMethods
 	// BlobManager is the interface for blob operations.
 	//
 	// Description of API for resumable blob creation (append-only):
@@ -1953,7 +1953,7 @@ type DatabaseClientStub interface {
 
 // DatabaseClient returns a client stub for Database.
 func DatabaseClient(name string) DatabaseClientStub {
-	return implDatabaseClientStub{name, permissions.ObjectClient(name), DatabaseWatcherClient(name), SyncGroupManagerClient(name), BlobManagerClient(name), SchemaManagerClient(name), ConflictManagerClient(name)}
+	return implDatabaseClientStub{name, permissions.ObjectClient(name), DatabaseWatcherClient(name), SyncgroupManagerClient(name), BlobManagerClient(name), SchemaManagerClient(name), ConflictManagerClient(name)}
 }
 
 type implDatabaseClientStub struct {
@@ -1961,7 +1961,7 @@ type implDatabaseClientStub struct {
 
 	permissions.ObjectClientStub
 	DatabaseWatcherClientStub
-	SyncGroupManagerClientStub
+	SyncgroupManagerClientStub
 	BlobManagerClientStub
 	SchemaManagerClientStub
 	ConflictManagerClientStub
@@ -2156,9 +2156,9 @@ type DatabaseServerMethods interface {
 	// 5) start watching for changes to the data using the ResumeMarker
 	// In this configuration the client will not miss any changes to the data.
 	DatabaseWatcherServerMethods
-	// SyncGroupManager is the interface for SyncGroup operations.
+	// SyncgroupManager is the interface for syncgroup operations.
 	// TODO(hpucha): Add blessings to create/join and add a refresh method.
-	SyncGroupManagerServerMethods
+	SyncgroupManagerServerMethods
 	// BlobManager is the interface for blob operations.
 	//
 	// Description of API for resumable blob creation (append-only):
@@ -2298,9 +2298,9 @@ type DatabaseServerStubMethods interface {
 	// 5) start watching for changes to the data using the ResumeMarker
 	// In this configuration the client will not miss any changes to the data.
 	DatabaseWatcherServerStubMethods
-	// SyncGroupManager is the interface for SyncGroup operations.
+	// SyncgroupManager is the interface for syncgroup operations.
 	// TODO(hpucha): Add blessings to create/join and add a refresh method.
-	SyncGroupManagerServerStubMethods
+	SyncgroupManagerServerStubMethods
 	// BlobManager is the interface for blob operations.
 	//
 	// Description of API for resumable blob creation (append-only):
@@ -2382,7 +2382,7 @@ func DatabaseServer(impl DatabaseServerMethods) DatabaseServerStub {
 		impl:                       impl,
 		ObjectServerStub:           permissions.ObjectServer(impl),
 		DatabaseWatcherServerStub:  DatabaseWatcherServer(impl),
-		SyncGroupManagerServerStub: SyncGroupManagerServer(impl),
+		SyncgroupManagerServerStub: SyncgroupManagerServer(impl),
 		BlobManagerServerStub:      BlobManagerServer(impl),
 		SchemaManagerServerStub:    SchemaManagerServer(impl),
 		ConflictManagerServerStub:  ConflictManagerServer(impl),
@@ -2401,7 +2401,7 @@ type implDatabaseServerStub struct {
 	impl DatabaseServerMethods
 	permissions.ObjectServerStub
 	DatabaseWatcherServerStub
-	SyncGroupManagerServerStub
+	SyncgroupManagerServerStub
 	BlobManagerServerStub
 	SchemaManagerServerStub
 	ConflictManagerServerStub
@@ -2445,7 +2445,7 @@ func (s implDatabaseServerStub) Globber() *rpc.GlobState {
 }
 
 func (s implDatabaseServerStub) Describe__() []rpc.InterfaceDesc {
-	return []rpc.InterfaceDesc{DatabaseDesc, permissions.ObjectDesc, DatabaseWatcherDesc, watch.GlobWatcherDesc, SyncGroupManagerDesc, BlobManagerDesc, SchemaManagerDesc, ConflictManagerDesc}
+	return []rpc.InterfaceDesc{DatabaseDesc, permissions.ObjectDesc, DatabaseWatcherDesc, watch.GlobWatcherDesc, SyncgroupManagerDesc, BlobManagerDesc, SchemaManagerDesc, ConflictManagerDesc}
 }
 
 // DatabaseDesc describes the Database interface.
@@ -2459,7 +2459,7 @@ var descDatabase = rpc.InterfaceDesc{
 	Embeds: []rpc.EmbedDesc{
 		{"Object", "v.io/v23/services/permissions", "// Object provides access control for Vanadium objects.\n//\n// Vanadium services implementing dynamic access control would typically embed\n// this interface and tag additional methods defined by the service with one of\n// Admin, Read, Write, Resolve etc. For example, the VDL definition of the\n// object would be:\n//\n//   package mypackage\n//\n//   import \"v.io/v23/security/access\"\n//   import \"v.io/v23/services/permissions\"\n//\n//   type MyObject interface {\n//     permissions.Object\n//     MyRead() (string, error) {access.Read}\n//     MyWrite(string) error    {access.Write}\n//   }\n//\n// If the set of pre-defined tags is insufficient, services may define their\n// own tag type and annotate all methods with this new type.\n//\n// Instead of embedding this Object interface, define SetPermissions and\n// GetPermissions in their own interface. Authorization policies will typically\n// respect annotations of a single type. For example, the VDL definition of an\n// object would be:\n//\n//  package mypackage\n//\n//  import \"v.io/v23/security/access\"\n//\n//  type MyTag string\n//\n//  const (\n//    Blue = MyTag(\"Blue\")\n//    Red  = MyTag(\"Red\")\n//  )\n//\n//  type MyObject interface {\n//    MyMethod() (string, error) {Blue}\n//\n//    // Allow clients to change access via the access.Object interface:\n//    SetPermissions(perms access.Permissions, version string) error         {Red}\n//    GetPermissions() (perms access.Permissions, version string, err error) {Blue}\n//  }"},
 		{"DatabaseWatcher", "v.io/v23/services/syncbase/nosql", "// DatabaseWatcher allows a client to watch for updates to the database. For\n// each watch request, the client will receive a reliable stream of watch events\n// without re-ordering. See watch.GlobWatcher for a detailed explanation of the\n// behavior.\n// TODO(rogulenko): Currently the only supported watch patterns are\n// \"<tableName>/<rowPrefix>*\". Consider changing that.\n//\n// The watching is done by starting a streaming RPC. The argument to the RPC\n// contains the ResumeMarker that points to a particular place in the database\n// event log. The result stream consists of a never-ending sequence of Change\n// messages (until the call fails or is canceled). Each Change contains the Name\n// field in the form \"<tableName>/<rowKey>\" and the Value field of the\n// StoreChange type. If the client has no access to a row specified in a change,\n// that change is excluded from the result stream.\n//\n// DatabaseWatcher is designed to be used in the following way:\n// 1) begin a read-only batch\n// 2) read all data your app needs\n// 3) read the ResumeMarker\n// 4) abort the batch\n// 5) start watching for changes to the data using the ResumeMarker\n// In this configuration the client will not miss any changes to the data."},
-		{"SyncGroupManager", "v.io/v23/services/syncbase/nosql", "// SyncGroupManager is the interface for SyncGroup operations.\n// TODO(hpucha): Add blessings to create/join and add a refresh method."},
+		{"SyncgroupManager", "v.io/v23/services/syncbase/nosql", "// SyncgroupManager is the interface for syncgroup operations.\n// TODO(hpucha): Add blessings to create/join and add a refresh method."},
 		{"BlobManager", "v.io/v23/services/syncbase/nosql", "// BlobManager is the interface for blob operations.\n//\n// Description of API for resumable blob creation (append-only):\n// - Up until commit, a BlobRef may be used with PutBlob, GetBlobSize,\n//   DeleteBlob, and CommitBlob. Blob creation may be resumed by obtaining the\n//   current blob size via GetBlobSize and appending to the blob via PutBlob.\n// - After commit, a blob is immutable, at which point PutBlob and CommitBlob\n//   may no longer be used.\n// - All other methods (GetBlob, FetchBlob, PinBlob, etc.) may only be used\n//   after commit."},
 		{"SchemaManager", "v.io/v23/services/syncbase/nosql", "// SchemaManager implements the API for managing schema metadata attached\n// to a Database."},
 		{"ConflictManager", "v.io/v23/services/syncbase/nosql", "// ConflictManager interface provides all the methods necessary to handle\n// conflict resolution for a given database."},

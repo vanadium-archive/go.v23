@@ -62,52 +62,52 @@ func (KeyValue) __VDLReflect(struct {
 }) {
 }
 
-// SyncGroupPrefix is a tableName-rowPrefix pair.
-type SyncGroupPrefix struct {
+// SyncgroupPrefix is a tableName-rowPrefix pair.
+type SyncgroupPrefix struct {
 	TableName string
 	RowPrefix string
 }
 
-func (SyncGroupPrefix) __VDLReflect(struct {
-	Name string `vdl:"v.io/v23/services/syncbase/nosql.SyncGroupPrefix"`
+func (SyncgroupPrefix) __VDLReflect(struct {
+	Name string `vdl:"v.io/v23/services/syncbase/nosql.SyncgroupPrefix"`
 }) {
 }
 
-// SyncGroupSpec contains the specification for a SyncGroup.
-type SyncGroupSpec struct {
-	// Human-readable description of this SyncGroup.
+// SyncgroupSpec contains the specification for a syncgroup.
+type SyncgroupSpec struct {
+	// Human-readable description of this syncgroup.
 	Description string
-	// Permissions governing access to this SyncGroup.
+	// Permissions governing access to this syncgroup.
 	Perms access.Permissions
-	// Data (tableName-rowPrefix pairs) covered by this SyncGroup.
-	Prefixes []SyncGroupPrefix
-	// Mount tables at which to advertise this SyncGroup, for rendezvous purposes.
+	// Data (tableName-rowPrefix pairs) covered by this syncgroup.
+	Prefixes []SyncgroupPrefix
+	// Mount tables at which to advertise this syncgroup, for rendezvous purposes.
 	// (Note that in addition to these mount tables, Syncbase also uses
 	// network-neighborhood-based discovery for rendezvous.)
 	// We expect most clients to specify a single mount table, but we accept an
 	// array of mount tables to permit the mount table to be changed over time
 	// without disruption.
-	// TODO(hpucha): Figure out a convention for advertising SyncGroups in the
+	// TODO(hpucha): Figure out a convention for advertising syncgroups in the
 	// mount table.
 	MountTables []string
-	// Specifies the privacy of this SyncGroup. More specifically, specifies
-	// whether blobs in this SyncGroup can be served to clients presenting
-	// blobrefs obtained from other SyncGroups.
+	// Specifies the privacy of this syncgroup. More specifically, specifies
+	// whether blobs in this syncgroup can be served to clients presenting
+	// blobrefs obtained from other syncgroups.
 	IsPrivate bool
 }
 
-func (SyncGroupSpec) __VDLReflect(struct {
-	Name string `vdl:"v.io/v23/services/syncbase/nosql.SyncGroupSpec"`
+func (SyncgroupSpec) __VDLReflect(struct {
+	Name string `vdl:"v.io/v23/services/syncbase/nosql.SyncgroupSpec"`
 }) {
 }
 
-// SyncGroupMemberInfo contains per-member metadata.
-type SyncGroupMemberInfo struct {
+// SyncgroupMemberInfo contains per-member metadata.
+type SyncgroupMemberInfo struct {
 	SyncPriority byte
 }
 
-func (SyncGroupMemberInfo) __VDLReflect(struct {
-	Name string `vdl:"v.io/v23/services/syncbase/nosql.SyncGroupMemberInfo"`
+func (SyncgroupMemberInfo) __VDLReflect(struct {
+	Name string `vdl:"v.io/v23/services/syncbase/nosql.SyncgroupMemberInfo"`
 }) {
 }
 
@@ -655,9 +655,9 @@ func init() {
 	vdl.Register((*BatchOptions)(nil))
 	vdl.Register((*PrefixPermissions)(nil))
 	vdl.Register((*KeyValue)(nil))
-	vdl.Register((*SyncGroupPrefix)(nil))
-	vdl.Register((*SyncGroupSpec)(nil))
-	vdl.Register((*SyncGroupMemberInfo)(nil))
+	vdl.Register((*SyncgroupPrefix)(nil))
+	vdl.Register((*SyncgroupSpec)(nil))
+	vdl.Register((*SyncgroupMemberInfo)(nil))
 	vdl.Register((*ResolverType)(nil))
 	vdl.Register((*ConflictInfo)(nil))
 	vdl.Register((*ConflictData)(nil))

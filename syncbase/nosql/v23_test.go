@@ -29,8 +29,8 @@ func TestV23SyncbasedWholeBlobTransfer(t *testing.T) {
 	v23tests.RunTest(t, V23TestSyncbasedWholeBlobTransfer)
 }
 
-func TestV23SyncbasedJoinSyncGroup(t *testing.T) {
-	v23tests.RunTest(t, V23TestSyncbasedJoinSyncGroup)
+func TestV23SyncbasedJoinSyncgroup(t *testing.T) {
+	v23tests.RunTest(t, V23TestSyncbasedJoinSyncgroup)
 }
 
 func TestV23SyncbasedGetDeltas(t *testing.T) {
@@ -53,12 +53,12 @@ func TestV23SyncbasedExchangeDeltasWithConflicts(t *testing.T) {
 	v23tests.RunTest(t, V23TestSyncbasedExchangeDeltasWithConflicts)
 }
 
-func TestV23NestedSyncGroups(t *testing.T) {
-	v23tests.RunTest(t, V23TestNestedSyncGroups)
+func TestV23NestedSyncgroups(t *testing.T) {
+	v23tests.RunTest(t, V23TestNestedSyncgroups)
 }
 
-func TestV23NestedAndPeerSyncGroups(t *testing.T) {
-	v23tests.RunTest(t, V23TestNestedAndPeerSyncGroups)
+func TestV23NestedAndPeerSyncgroups(t *testing.T) {
+	v23tests.RunTest(t, V23TestNestedAndPeerSyncgroups)
 }
 
 func TestV23SyncbasedGetDeltasPrePopulate(t *testing.T) {
@@ -69,6 +69,6 @@ func TestV23SyncbasedGetDeltasMultiApp(t *testing.T) {
 	v23tests.RunTest(t, V23TestSyncbasedGetDeltasMultiApp)
 }
 
-func TestV23SyncGroupSync(t *testing.T) {
-	v23tests.RunTest(t, V23TestSyncGroupSync)
+func TestV23SyncgroupSync(t *testing.T) {
+	v23tests.RunTest(t, V23TestSyncgroupSync)
 }

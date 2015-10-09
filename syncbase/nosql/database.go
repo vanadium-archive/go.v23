@@ -189,14 +189,14 @@ func (d *database) GetResumeMarker(ctx *context.T) (watch.ResumeMarker, error) {
 	return d.c.GetResumeMarker(ctx)
 }
 
-// SyncGroup implements Database.SyncGroup.
-func (d *database) SyncGroup(sgName string) SyncGroup {
-	return newSyncGroup(d.fullName, sgName)
+// Syncgroup implements Database.Syncgroup.
+func (d *database) Syncgroup(sgName string) Syncgroup {
+	return newSyncgroup(d.fullName, sgName)
 }
 
-// GetSyncGroupNames implements Database.GetSyncGroupNames.
-func (d *database) GetSyncGroupNames(ctx *context.T) ([]string, error) {
-	return d.c.GetSyncGroupNames(ctx)
+// GetSyncgroupNames implements Database.GetSyncgroupNames.
+func (d *database) GetSyncgroupNames(ctx *context.T) ([]string, error) {
+	return d.c.GetSyncgroupNames(ctx)
 }
 
 // Blob implements Database.Blob.
