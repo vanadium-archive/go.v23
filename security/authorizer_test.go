@@ -5,9 +5,11 @@
 package security
 
 import (
+	"net"
 	"testing"
 
 	"v.io/v23/context"
+	"v.io/v23/naming"
 )
 
 func TestDefaultAuthorizer(t *testing.T) {
@@ -161,5 +163,85 @@ func TestAllowEveryone(t *testing.T) {
 		RemoteBlessings: bob,
 	})); err != nil {
 		t.Fatal(err)
+	}
+}
+
+func TestPublicKeyAuthorizer(t *testing.T) {
+	var (
+		pali = newPrincipal(t)
+		pbob = newPrincipal(t)
+
+		ali, _ = pali.BlessSelf("ali")
+		bob, _ = pbob.BlessSelf("bob")
+
+		ctx, cancel = context.RootContext()
+	)
+	defer cancel()
+	if err := PublicKeyAuthorizer(pbob.PublicKey()).Authorize(ctx, NewCall(&CallParams{
+		RemoteBlessings: bob,
+	})); err != nil {
+		t.Fatal(err)
+	}
+	if err := PublicKeyAuthorizer(pbob.PublicKey()).Authorize(ctx, NewCall(&CallParams{
+		RemoteBlessings: ali,
+	})); err == nil {
+		t.Fatal("Expected error")
+	}
+}
+
+// implementation of naming.Endpoint.
+// TODO(ashankar): naming.Endpoint should either not be an interface or at the
+// very least have an implementation in v23.
+type endpoint struct {
+	blessings []string
+}
+
+func (e endpoint) Network() string { return "v23" }
+func (e endpoint) String() string {
+	var opts []naming.EndpointOpt
+	for _, b := range e.blessings {
+		opts = append(opts, naming.BlessingOpt(b))
+	}
+	return naming.FormatEndpoint("tcp", "localhost:14141", opts...)
+}
+func (e endpoint) Name() string                { return naming.JoinAddressName(e.String(), "") }
+func (e endpoint) VersionedString(int) string  { return e.String() }
+func (e endpoint) RoutingID() naming.RoutingID { return naming.FixedRoutingID(0xacbdef) }
+func (e endpoint) Routes() []string            { return nil }
+func (e endpoint) Addr() net.Addr              { return nil }
+func (e endpoint) ServesMountTable() bool      { return false }
+func (e endpoint) ServesLeaf() bool            { return true }
+func (e endpoint) BlessingNames() []string     { return e.blessings }
+
+func TestEndpointAuthorizer(t *testing.T) {
+	var (
+		pali = newPrincipal(t)
+		pbob = newPrincipal(t)
+
+		ali, _       = pali.BlessSelf("ali")
+		alifriend, _ = pali.Bless(pbob.PublicKey(), ali, "friend", UnconstrainedUse())
+
+		tests = []struct {
+			ep naming.Endpoint
+			ok bool
+		}{
+			{endpoint{}, true},
+			{endpoint{blessings: []string{"foo", "bar"}}, false},
+			{endpoint{blessings: []string{"foo", "ali", "bar"}}, true},
+		}
+
+		ctx, cancel = context.RootContext()
+	)
+	defer cancel()
+	pali.AddToRoots(ali)
+	for _, test := range tests {
+		err := EndpointAuthorizer().Authorize(ctx, NewCall(&CallParams{
+			RemoteEndpoint:  test.ep,
+			LocalPrincipal:  pali,
+			RemoteBlessings: alifriend,
+		}))
+		if (err == nil) != test.ok {
+			t.Errorf("%v: Got error (%v), want error %v", test.ep, err, !test.ok)
+		}
 	}
 }

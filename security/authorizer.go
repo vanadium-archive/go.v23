@@ -4,7 +4,11 @@
 
 package security
 
-import "v.io/v23/context"
+import (
+	"reflect"
+
+	"v.io/v23/context"
+)
 
 // DefaultAuthorizer returns an Authorizer that implements a "reasonably secure"
 // authorization policy that can be used whenever in doubt.
@@ -50,3 +54,49 @@ func AllowEveryone() Authorizer {
 type allowEveryone struct{}
 
 func (allowEveryone) Authorize(*context.T, Call) error { return nil }
+
+// PublicKeyAuthorizer only authorizes principals with a specific public key.
+//
+// Normally, authorizations in Vanadium should be based on blessing names and not
+// public keys, since the former are resilient to key rotations and process
+// replication. However, in rare circumstances it may be possible that blessing names
+// cannot be used (for example, if the local end does not recognize the remote end's
+// blessing root), and the PublicKey might be usable instead.
+func PublicKeyAuthorizer(key PublicKey) Authorizer {
+	return publicKeyAuthorizer{key}
+}
+
+type publicKeyAuthorizer struct{ key PublicKey }
+
+func (a publicKeyAuthorizer) Authorize(ctx *context.T, call Call) error {
+	remote := call.RemoteBlessings().PublicKey()
+	if remote == nil {
+		return NewErrPublicKeyNotAllowed(ctx, "", a.key.String())
+	}
+	if !reflect.DeepEqual(remote, a.key) {
+		return NewErrPublicKeyNotAllowed(ctx, remote.String(), a.key.String())
+	}
+	return nil
+}
+
+// EndpointAuthorizer authorizes principals iff they present blessings that
+// match those specified in call.RemoteEndpoint().
+func EndpointAuthorizer() Authorizer {
+	return endpointAuthorizer{}
+}
+
+type endpointAuthorizer struct{}
+
+func (endpointAuthorizer) Authorize(ctx *context.T, call Call) error {
+	patterns := call.RemoteEndpoint().BlessingNames()
+	if len(patterns) == 0 {
+		return nil
+	}
+	names, rejected := RemoteBlessingNames(ctx, call)
+	for _, p := range patterns {
+		if BlessingPattern(p).MatchedBy(names...) {
+			return nil
+		}
+	}
+	return NewErrEndpointAuthorizationFailed(ctx, call.RemoteEndpoint().String(), names, rejected)
+}

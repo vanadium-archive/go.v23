@@ -272,12 +272,16 @@ var (
 	ErrUnrecognizedRoot             = verror.Register("v.io/v23/security.UnrecognizedRoot", verror.NoRetry, "{1:}{2:} unrecognized public key {3} in root certificate{:4}")
 	ErrAuthorizationFailed          = verror.Register("v.io/v23/security.AuthorizationFailed", verror.NoRetry, "{1:}{2:} principal with blessings {3} (rejected {4}) is not authorized by principal with blessings {5}")
 	ErrInvalidSigningBlessingCaveat = verror.Register("v.io/v23/security.InvalidSigningBlessingCaveat", verror.NoRetry, "{1:}{2:} blessing has caveat with UUID {3} which makes it unsuitable for signing -- please use blessings with just Expiry caveats")
+	ErrPublicKeyNotAllowed          = verror.Register("v.io/v23/security.PublicKeyNotAllowed", verror.NoRetry, "{1:}{2:} peer has public key {3}, not the authorized public key {4}")
+	ErrEndpointAuthorizationFailed  = verror.Register("v.io/v23/security.EndpointAuthorizationFailed", verror.NoRetry, "{1:}{2:} blessings in endpoint {3} not matched by blessings presented: {4} (rejected {5})")
 )
 
 func init() {
 	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrUnrecognizedRoot.ID), "{1:}{2:} unrecognized public key {3} in root certificate{:4}")
 	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrAuthorizationFailed.ID), "{1:}{2:} principal with blessings {3} (rejected {4}) is not authorized by principal with blessings {5}")
 	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrInvalidSigningBlessingCaveat.ID), "{1:}{2:} blessing has caveat with UUID {3} which makes it unsuitable for signing -- please use blessings with just Expiry caveats")
+	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrPublicKeyNotAllowed.ID), "{1:}{2:} peer has public key {3}, not the authorized public key {4}")
+	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrEndpointAuthorizationFailed.ID), "{1:}{2:} blessings in endpoint {3} not matched by blessings presented: {4} (rejected {5})")
 }
 
 // NewErrUnrecognizedRoot returns an error with the ErrUnrecognizedRoot ID.
@@ -293,4 +297,14 @@ func NewErrAuthorizationFailed(ctx *context.T, remote []string, remoteErr []Reje
 // NewErrInvalidSigningBlessingCaveat returns an error with the ErrInvalidSigningBlessingCaveat ID.
 func NewErrInvalidSigningBlessingCaveat(ctx *context.T, id uniqueid.Id) error {
 	return verror.New(ErrInvalidSigningBlessingCaveat, ctx, id)
+}
+
+// NewErrPublicKeyNotAllowed returns an error with the ErrPublicKeyNotAllowed ID.
+func NewErrPublicKeyNotAllowed(ctx *context.T, got string, want string) error {
+	return verror.New(ErrPublicKeyNotAllowed, ctx, got, want)
+}
+
+// NewErrEndpointAuthorizationFailed returns an error with the ErrEndpointAuthorizationFailed ID.
+func NewErrEndpointAuthorizationFailed(ctx *context.T, endpoint string, remote []string, rejected []RejectedBlessing) error {
+	return verror.New(ErrEndpointAuthorizationFailed, ctx, endpoint, remote, rejected)
 }

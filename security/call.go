@@ -36,7 +36,7 @@ type CallParams struct {
 	RemoteBlessings  Blessings            // Blessings presented by the remote end.
 	RemoteDischarges map[string]Discharge // Map of third-party caveat identifiers to corresponding discharges shared by the remote end.
 	LocalDischarges  map[string]Discharge // Map of third-party caveat identifiers to corresponding discharges shared by the local end.
-	RemoteEndpoint   naming.Endpoint      // Endpoint of the remote end of communication
+	RemoteEndpoint   naming.Endpoint      // Endpoint of the remote end of communication (as seen by the local end)
 }
 
 // Copy fills in p with a copy of the values in c.

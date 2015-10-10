@@ -83,38 +83,34 @@ const (
 	SecurityNone SecurityLevel = 1
 )
 
-// AllowedServersPolicy specifies a policy used by clients to authenticate
-// servers when making an RPC.
+// ServerAuthorizer encapsulates the authorization policy used by a client to
+// authorize the end server of an RPC.
 //
-// This policy is specified as a set of patterns. At least one of these
-// patterns must be matched by the blessings presented by the server
-// before the client sends the contents of the RPC request (which
-// include the method name, the arguments etc.).
+// This policy is applied before the client sends information about itself
+// (public key, blessings, the RPC request) to the server. Thus, if a server
+// does not satisfy this policy then the client will abort the request.
 //
-// Not providing this option to StartCall is equivalent to providing
-// AllowedServersPolicy{security.AllPrincipals}.
-type AllowedServersPolicy []security.BlessingPattern
-
-func (AllowedServersPolicy) RPCCallOpt() {}
-
-// When ServerPublicKey is specified, the client will refuse to connect to
-// servers with a different PublicKey.
-type ServerPublicKey struct{ security.PublicKey }
-
-func (ServerPublicKey) RPCCallOpt() {}
-
-// SkipServerEndpointAuthorization causes clients to ignore the blessings in
-// remote (server) endpoint during authorization. With this option enabled,
-// clients are susceptible to man-in-the-middle attacks where an imposter
-// server has taken over the network address of a real server.
+// Authorization of other servers communicated with in the process of
+// contacting the end server are controlled by other options, like
+// NameResolutionAuthorizer.
 //
-// Thus, use of this option should typically be accompanied by an
-// alternative policy for server authorization like AllowedServersPolicy
-// or ServerPublicKey.
-type SkipServerEndpointAuthorization struct{}
+// Runtime implementations are expected to use security.EndpointAuthorizer
+// if no explicit ServerAuthorizer has been provided for the call.
+type ServerAuthorizer struct{ security.Authorizer }
 
-func (SkipServerEndpointAuthorization) RPCCallOpt() {}
-func (SkipServerEndpointAuthorization) NSOpt()      {}
+func (ServerAuthorizer) RPCCallOpt() {}
+
+// NameResolutionAuthorizer encapsulates the authorization policy used by a
+// client to authorize mounttable servers before sending them a name resolution
+// request. By specifying this policy, clients avoid revealing the names they
+// are interested in resolving to unauthorized mounttables.
+//
+// If no such option is provided, then runtime implementations are expected to
+// default to security.EndpointAuthorizer.
+type NameResolutionAuthorizer struct{ security.Authorizer }
+
+func (NameResolutionAuthorizer) RPCCallOpt() {}
+func (NameResolutionAuthorizer) NSOpt()      {}
 
 // RetryTimeout is the duration during which we will retry starting
 // an RPC call.  Zero means don't retry.
@@ -124,7 +120,7 @@ func (RetryTimeout) RPCCallOpt() {}
 
 // Preresolved specifies that the RPC call should not further Resolve the name.
 // If a MountEntry is provided, use it.  Otherwise use the name passed in the
-// RPC call.  If the name is relative, it will be made global using 
+// RPC call.  If the name is relative, it will be made global using
 // the roots in the namespace.
 type Preresolved struct {
 	Resolution *naming.MountEntry
