@@ -411,6 +411,43 @@ func validateCaveatsForSigning(ctx *context.T, call Call, chain []Certificate) e
 	return nil
 }
 
+// RootBlessings returns the blessings of the roots of b.
+// In other words, RootBlessings returns the blessings of the identity
+// providers encapsulated in b.
+//
+// In particular:
+//     var p Principal
+//     p.AddToRoots(b)
+// is equivalent to:
+//     for _, root := range RootBlessings(b) {
+//         p.AddToRoots(root)
+//     }
+// Why would you use the latter? Only to share roots with another process,
+// without revealing your complete blessings and using fewer bytes.
+func RootBlessings(b Blessings) []Blessings {
+	ret := make([]Blessings, len(b.chains))
+	for i, chain := range b.chains {
+		// One option is to convert to WireBlessings and back.
+		// But that involves a lot of crypto verification that has
+		// already been done, so why bother.
+		if len(chain) == 0 {
+			continue
+		}
+		var (
+			cert      = chain[0]
+			digest, _ = cert.chainedDigests(cert.Signature.Hash, nil)
+			ptr       = &ret[i]
+		)
+		ptr.chains = [][]Certificate{[]Certificate{cert}}
+		ptr.digests = [][]byte{digest}
+		// The public key must parse because there is no way to create
+		// b without a valid certificate chain.
+		ptr.publicKey, _ = UnmarshalPublicKey(cert.PublicKey)
+		ptr.init()
+	}
+	return ret
+}
+
 // SigningBlessings returns a blessings object that encapsulates the subset of
 // names of the provided blessings object that can be used to sign data at rest.
 //

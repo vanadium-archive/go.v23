@@ -37,6 +37,7 @@ pkg security, func NewMethodCaveat(string, ...string) (Caveat, error)
 pkg security, func NewPublicKeyCaveat(PublicKey, string, ThirdPartyRequirements, Caveat, ...Caveat) (Caveat, error)
 pkg security, func RegisterCaveatValidator(CaveatDescriptor, interface{})
 pkg security, func RemoteBlessingNames(*context.T, Call) ([]string, []RejectedBlessing)
+pkg security, func RootBlessings(Blessings) []Blessings
 pkg security, func SigningBlessingNames(*context.T, Principal, Blessings) ([]string, []RejectedBlessing)
 pkg security, func SigningBlessings(Blessings) Blessings
 pkg security, func SplitPatternName(string) (BlessingPattern, string)

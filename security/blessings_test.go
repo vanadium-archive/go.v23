@@ -9,6 +9,7 @@ import (
 	"crypto/ecdsa"
 	"crypto/elliptic"
 	"crypto/rand"
+	"reflect"
 	"testing"
 	"time"
 
@@ -208,6 +209,72 @@ func TestBlessingsUniqueID(t *testing.T) {
 	if !bytes.Equal(u1.UniqueID(), u2.UniqueID()) {
 		t.Errorf("%q and %q have different UniqueIDs", u1, u2)
 	}
+}
+
+func TestRootBlessings(t *testing.T) {
+	falseCaveat, err := NewCaveat(ConstCaveat, false)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	bless := func(p Principal, key PublicKey, with Blessings, extension string) Blessings {
+		b, err := p.Bless(key, with, extension, falseCaveat)
+		if err != nil {
+			t.Fatal(err)
+		}
+		return b
+	}
+
+	union := func(b ...Blessings) Blessings {
+		ret, err := UnionOfBlessings(b...)
+		if err != nil {
+			t.Fatal(err)
+		}
+		return ret
+	}
+
+	var (
+		alpha = newPrincipal(t)
+		beta  = newPrincipal(t)
+		gamma = newPrincipal(t)
+		alice = newPrincipal(t)
+
+		balpha = blessSelf(t, alpha, "alpha")
+		bbeta  = blessSelf(t, beta, "beta")
+		bgamma = blessSelf(t, gamma, "gamma")
+		balice = blessSelf(t, alice, "alice")
+
+		bAlphaFriend             = bless(alpha, alice.PublicKey(), balpha, "friend")
+		bBetaEnemy               = bless(beta, alice.PublicKey(), bbeta, "enemy")
+		bGammaAcquaintanceFriend = bless(alpha, alice.PublicKey(), bless(gamma, alpha.PublicKey(), bgamma, "acquaintance"), "friend")
+
+		tests = []struct {
+			b Blessings
+			r []Blessings
+		}{
+			{balice, []Blessings{balice}},
+			{bAlphaFriend, []Blessings{balpha}},
+			{union(balice, bAlphaFriend), []Blessings{balice, balpha}},
+			{union(bAlphaFriend, bBetaEnemy, bGammaAcquaintanceFriend), []Blessings{balpha, bbeta, bgamma}},
+		}
+	)
+	for _, test := range tests {
+		roots := RootBlessings(test.b)
+		if got, want := roots, test.r; !reflect.DeepEqual(got, want) {
+			t.Errorf("%v: Got %#v, want %#v", test.b, got, want)
+		}
+		// Since these RootBlessings are carefully constructed, use a
+		// VOM-roundtrip to ensure they are properly so.
+		serialized, err := vom.Encode(roots)
+		if err != nil {
+			t.Errorf("%v: vom encoding error: %v", test.b, err)
+		}
+		var deserialized []Blessings
+		if err := vom.Decode(serialized, &deserialized); err != nil || !reflect.DeepEqual(roots, deserialized) {
+			t.Errorf("%v: Failed roundtripping: Got %#v want %#v", test.b, roots, deserialized)
+		}
+	}
+
 }
 
 func BenchmarkBless(b *testing.B) {
