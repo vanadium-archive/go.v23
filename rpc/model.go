@@ -89,17 +89,17 @@ type ListenAddrs []struct {
 	Protocol, Address string
 }
 
-// AddressChooser determines the preferred address to publish with the mount
+// AddressChooser determines the preferred addresses to publish with the mount
 // table when one is not otherwise specified.
 type AddressChooser interface {
-	ChooseAddress(protocol string, candidates []net.Addr) ([]net.Addr, error)
+	ChooseAddresses(protocol string, candidates []net.Addr) ([]net.Addr, error)
 }
 
 // AddressChooserFunc is a convenience for implementations that wish to supply
 // a function literal implementation of AddressChooser.
 type AddressChooserFunc func(protocol string, candidates []net.Addr) ([]net.Addr, error)
 
-func (f AddressChooserFunc) ChooseAddress(protocol string, candidates []net.Addr) ([]net.Addr, error) {
+func (f AddressChooserFunc) ChooseAddresses(protocol string, candidates []net.Addr) ([]net.Addr, error) {
 	return f(protocol, candidates)
 }
 
