@@ -176,7 +176,7 @@ var descAdvertiser = rpc.InterfaceDesc{
 // Scanner is the interface for scanning services.
 type ScannerClientMethods interface {
 	// Scan scans services that match the query and returns the stream of discovered
-	// services. Scanning will continue until the client finishes or cancels the call.
+	// services. Scanning will continue until the client cancels the call.
 	//
 	// TODO(jhahn): Add query syntax and examples.
 	Scan(ctx *context.T, query string, opts ...rpc.CallOpt) (ScannerScanClientCall, error)
@@ -280,7 +280,7 @@ func (c *implScannerScanClientCall) Finish() (err error) {
 // Scanner is the interface for scanning services.
 type ScannerServerMethods interface {
 	// Scan scans services that match the query and returns the stream of discovered
-	// services. Scanning will continue until the client finishes or cancels the call.
+	// services. Scanning will continue until the client cancels the call.
 	//
 	// TODO(jhahn): Add query syntax and examples.
 	Scan(ctx *context.T, call ScannerScanServerCall, query string) error
@@ -292,7 +292,7 @@ type ScannerServerMethods interface {
 // is the streaming methods.
 type ScannerServerStubMethods interface {
 	// Scan scans services that match the query and returns the stream of discovered
-	// services. Scanning will continue until the client finishes or cancels the call.
+	// services. Scanning will continue until the client cancels the call.
 	//
 	// TODO(jhahn): Add query syntax and examples.
 	Scan(ctx *context.T, call *ScannerScanServerCallStub, query string) error
@@ -350,7 +350,7 @@ var descScanner = rpc.InterfaceDesc{
 	Methods: []rpc.MethodDesc{
 		{
 			Name: "Scan",
-			Doc:  "// Scan scans services that match the query and returns the stream of discovered\n// services. Scanning will continue until the client finishes or cancels the call.\n//\n// TODO(jhahn): Add query syntax and examples.",
+			Doc:  "// Scan scans services that match the query and returns the stream of discovered\n// services. Scanning will continue until the client cancels the call.\n//\n// TODO(jhahn): Add query syntax and examples.",
 			InArgs: []rpc.ArgDesc{
 				{"query", ``}, // string
 			},
@@ -400,4 +400,110 @@ type implScannerScanServerCallSend struct {
 
 func (s implScannerScanServerCallSend) Send(item discovery.Update) error {
 	return s.s.Send(item)
+}
+
+// DiscoveryClientMethods is the client interface
+// containing Discovery methods.
+//
+// Discovery is the interface for discovery operations.
+type DiscoveryClientMethods interface {
+	// Advertiser is the interface for advertising services.
+	AdvertiserClientMethods
+	// Scanner is the interface for scanning services.
+	ScannerClientMethods
+}
+
+// DiscoveryClientStub adds universal methods to DiscoveryClientMethods.
+type DiscoveryClientStub interface {
+	DiscoveryClientMethods
+	rpc.UniversalServiceMethods
+}
+
+// DiscoveryClient returns a client stub for Discovery.
+func DiscoveryClient(name string) DiscoveryClientStub {
+	return implDiscoveryClientStub{name, AdvertiserClient(name), ScannerClient(name)}
+}
+
+type implDiscoveryClientStub struct {
+	name string
+
+	AdvertiserClientStub
+	ScannerClientStub
+}
+
+// DiscoveryServerMethods is the interface a server writer
+// implements for Discovery.
+//
+// Discovery is the interface for discovery operations.
+type DiscoveryServerMethods interface {
+	// Advertiser is the interface for advertising services.
+	AdvertiserServerMethods
+	// Scanner is the interface for scanning services.
+	ScannerServerMethods
+}
+
+// DiscoveryServerStubMethods is the server interface containing
+// Discovery methods, as expected by rpc.Server.
+// The only difference between this interface and DiscoveryServerMethods
+// is the streaming methods.
+type DiscoveryServerStubMethods interface {
+	// Advertiser is the interface for advertising services.
+	AdvertiserServerStubMethods
+	// Scanner is the interface for scanning services.
+	ScannerServerStubMethods
+}
+
+// DiscoveryServerStub adds universal methods to DiscoveryServerStubMethods.
+type DiscoveryServerStub interface {
+	DiscoveryServerStubMethods
+	// Describe the Discovery interfaces.
+	Describe__() []rpc.InterfaceDesc
+}
+
+// DiscoveryServer returns a server stub for Discovery.
+// It converts an implementation of DiscoveryServerMethods into
+// an object that may be used by rpc.Server.
+func DiscoveryServer(impl DiscoveryServerMethods) DiscoveryServerStub {
+	stub := implDiscoveryServerStub{
+		impl:                 impl,
+		AdvertiserServerStub: AdvertiserServer(impl),
+		ScannerServerStub:    ScannerServer(impl),
+	}
+	// Initialize GlobState; always check the stub itself first, to handle the
+	// case where the user has the Glob method defined in their VDL source.
+	if gs := rpc.NewGlobState(stub); gs != nil {
+		stub.gs = gs
+	} else if gs := rpc.NewGlobState(impl); gs != nil {
+		stub.gs = gs
+	}
+	return stub
+}
+
+type implDiscoveryServerStub struct {
+	impl DiscoveryServerMethods
+	AdvertiserServerStub
+	ScannerServerStub
+	gs *rpc.GlobState
+}
+
+func (s implDiscoveryServerStub) Globber() *rpc.GlobState {
+	return s.gs
+}
+
+func (s implDiscoveryServerStub) Describe__() []rpc.InterfaceDesc {
+	return []rpc.InterfaceDesc{DiscoveryDesc, AdvertiserDesc, ScannerDesc}
+}
+
+// DiscoveryDesc describes the Discovery interface.
+var DiscoveryDesc rpc.InterfaceDesc = descDiscovery
+
+// descDiscovery hides the desc to keep godoc clean.
+var descDiscovery = rpc.InterfaceDesc{
+	Name:    "Discovery",
+	PkgPath: "v.io/v23/services/discovery",
+	Doc:     "// Discovery is the interface for discovery operations.",
+	Embeds: []rpc.EmbedDesc{
+		{"Advertiser", "v.io/v23/services/discovery", "// Advertiser is the interface for advertising services."},
+		{"Scanner", "v.io/v23/services/discovery", "// Scanner is the interface for scanning services."},
+	},
 }
