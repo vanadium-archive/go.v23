@@ -69,7 +69,7 @@ pkg nosql, type ConflictRowSet struct, ByBatch map[uint16][]ConflictRow
 pkg nosql, type ConflictRowSet struct, ByKey map[string]ConflictRow
 pkg nosql, type ConflictScanSet struct
 pkg nosql, type ConflictScanSet struct, ByBatch map[uint16][]wire.ScanOp
-pkg nosql, type Database interface { BeginBatch, Blob, Close, Create, CreateBlob, Destroy, EnforceSchema, Exec, Exists, FullName, GetPermissions, GetResumeMarker, GetSyncGroupNames, ListTables, Name, SetPermissions, SyncGroup, Table, Watch }
+pkg nosql, type Database interface { BeginBatch, Blob, Close, Create, CreateBlob, Destroy, EnforceSchema, Exec, Exists, FullName, GetPermissions, GetResumeMarker, GetSyncgroupNames, ListTables, Name, SetPermissions, Syncgroup, Table, Watch }
 pkg nosql, type Database interface, BeginBatch(*context.T, wire.BatchOptions) (BatchDatabase, error)
 pkg nosql, type Database interface, Blob(wire.BlobRef) Blob
 pkg nosql, type Database interface, Close()
@@ -82,11 +82,11 @@ pkg nosql, type Database interface, Exists(*context.T) (bool, error)
 pkg nosql, type Database interface, FullName() string
 pkg nosql, type Database interface, GetPermissions(*context.T) (access.Permissions, string, error)
 pkg nosql, type Database interface, GetResumeMarker(*context.T) (watch.ResumeMarker, error)
-pkg nosql, type Database interface, GetSyncGroupNames(*context.T) ([]string, error)
+pkg nosql, type Database interface, GetSyncgroupNames(*context.T) ([]string, error)
 pkg nosql, type Database interface, ListTables(*context.T) ([]string, error)
 pkg nosql, type Database interface, Name() string
 pkg nosql, type Database interface, SetPermissions(*context.T, access.Permissions, string) error
-pkg nosql, type Database interface, SyncGroup(string) SyncGroup
+pkg nosql, type Database interface, Syncgroup(string) Syncgroup
 pkg nosql, type Database interface, Table(string) Table
 pkg nosql, type Database interface, Watch(*context.T, string, string, watch.ResumeMarker) (WatchStream, error)
 pkg nosql, type DatabaseHandle interface { Close, Exec, FullName, GetResumeMarker, ListTables, Name, Table }
@@ -142,15 +142,15 @@ pkg nosql, type Stream interface { Advance, Cancel, Err }
 pkg nosql, type Stream interface, Advance() bool
 pkg nosql, type Stream interface, Cancel()
 pkg nosql, type Stream interface, Err() error
-pkg nosql, type SyncGroup interface { Create, Destroy, Eject, GetMembers, GetSpec, Join, Leave, SetSpec }
-pkg nosql, type SyncGroup interface, Create(*context.T, wire.SyncGroupSpec, wire.SyncGroupMemberInfo) error
-pkg nosql, type SyncGroup interface, Destroy(*context.T) error
-pkg nosql, type SyncGroup interface, Eject(*context.T, string) error
-pkg nosql, type SyncGroup interface, GetMembers(*context.T) (map[string]wire.SyncGroupMemberInfo, error)
-pkg nosql, type SyncGroup interface, GetSpec(*context.T) (wire.SyncGroupSpec, string, error)
-pkg nosql, type SyncGroup interface, Join(*context.T, wire.SyncGroupMemberInfo) (wire.SyncGroupSpec, error)
-pkg nosql, type SyncGroup interface, Leave(*context.T) error
-pkg nosql, type SyncGroup interface, SetSpec(*context.T, wire.SyncGroupSpec, string) error
+pkg nosql, type Syncgroup interface { Create, Destroy, Eject, GetMembers, GetSpec, Join, Leave, SetSpec }
+pkg nosql, type Syncgroup interface, Create(*context.T, wire.SyncgroupSpec, wire.SyncgroupMemberInfo) error
+pkg nosql, type Syncgroup interface, Destroy(*context.T) error
+pkg nosql, type Syncgroup interface, Eject(*context.T, string) error
+pkg nosql, type Syncgroup interface, GetMembers(*context.T) (map[string]wire.SyncgroupMemberInfo, error)
+pkg nosql, type Syncgroup interface, GetSpec(*context.T) (wire.SyncgroupSpec, string, error)
+pkg nosql, type Syncgroup interface, Join(*context.T, wire.SyncgroupMemberInfo) (wire.SyncgroupSpec, error)
+pkg nosql, type Syncgroup interface, Leave(*context.T) error
+pkg nosql, type Syncgroup interface, SetSpec(*context.T, wire.SyncgroupSpec, string) error
 pkg nosql, type Table interface { Create, Delete, DeletePrefixPermissions, DeleteRange, Destroy, Exists, FullName, Get, GetPermissions, GetPrefixPermissions, Name, Put, Row, Scan, SetPermissions, SetPrefixPermissions }
 pkg nosql, type Table interface, Create(*context.T, access.Permissions) error
 pkg nosql, type Table interface, Delete(*context.T, string) error
