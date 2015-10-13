@@ -364,7 +364,7 @@ func addDeleteConflictStream(t *testing.T) ([]wire.ConflictInfo, map[string]wire
 		encode(&Task{"TaskToBeRemoved", false, -1, List1}), 1, // ancestor
 		nil, -1, // local
 		encode(&Task{"TaskToBeRemoved", false, -1, List1}), 1) // remote
-	row1.BatchIds = []uint16{1}
+	row1.BatchIds = []uint64{1}
 	c1 := makeConflictInfo(row1, true)
 
 	// Expected result
@@ -375,7 +375,7 @@ func addDeleteConflictStream(t *testing.T) ([]wire.ConflictInfo, map[string]wire
 		nil, -1, // ancestor value
 		nil, -1, // local value
 		encode(&Task{"AddedTask", false, -1, List1}), 2) // remote value
-	row2.BatchIds = []uint16{2}
+	row2.BatchIds = []uint64{2}
 	c2 := makeConflictInfo(row2, true)
 
 	// Expected result
@@ -387,7 +387,7 @@ func addDeleteConflictStream(t *testing.T) ([]wire.ConflictInfo, map[string]wire
 		encode(&List{listName, 8, 0}), 25, // ancestor value
 		encode(&List{listName, 7, 0}), 33, // local value
 		encode(&List{listName, 9, 0}), 44) // remote value
-	row3.BatchIds = []uint16{1, 2}
+	row3.BatchIds = []uint64{1, 2}
 	c3 := makeConflictInfo(row3, false)
 
 	// Expected result
@@ -428,7 +428,7 @@ func twoIntersectingBatchesConflictStream(t *testing.T) ([]wire.ConflictInfo, ma
 		encode(&Task{"TaskOrig", false, -1, List1}), 1, // ancestor
 		encode(&Task{"TaskOrig", true, 204, List1}), 5, // local
 		encode(&Task{"TaskEdit", false, -1, List1}), 3) // remote
-	row1.BatchIds = []uint16{1, 3}
+	row1.BatchIds = []uint64{1, 3}
 	c1 := makeConflictInfo(row1, true)
 
 	// Expected result
@@ -439,7 +439,7 @@ func twoIntersectingBatchesConflictStream(t *testing.T) ([]wire.ConflictInfo, ma
 		encode(&Task{"TaskOrig", false, -1, List1}), 2, // ancestor
 		encode(&Task{"TaskOrig", true, 204, List1}), 5, // local
 		encode(&Task{"TaskEdit", false, -1, List1}), 3) // remote
-	row2.BatchIds = []uint16{2, 4}
+	row2.BatchIds = []uint64{2, 4}
 	c2 := makeConflictInfo(row2, true)
 
 	// Expected result
@@ -451,7 +451,7 @@ func twoIntersectingBatchesConflictStream(t *testing.T) ([]wire.ConflictInfo, ma
 		encode(&List{listName, 8, 0}), 1, // ancestor value
 		encode(&List{listName, 8, 2}), 5, // local value
 		encode(&List{listName, 8, 0}), 3) // remote value
-	row3.BatchIds = []uint16{1, 2}
+	row3.BatchIds = []uint64{1, 2}
 	c3 := makeConflictInfo(row3, false)
 
 	// Expected result
@@ -483,7 +483,7 @@ func listDeleteConflictsWithTaskAdd(t *testing.T) ([]wire.ConflictInfo, map[stri
 		encode(&List{listName, 1, 0}), 1, // ancestor value
 		nil, 5, // local value
 		encode(&List{listName, 2, 0}), 3) // remote value
-	row0.BatchIds = []uint16{1, 2}
+	row0.BatchIds = []uint64{1, 2}
 	c0 := makeConflictInfo(row0, true)
 
 	// Expected result
@@ -494,7 +494,7 @@ func listDeleteConflictsWithTaskAdd(t *testing.T) ([]wire.ConflictInfo, map[stri
 		encode(&Task{"TaskToBeRemoved", false, -1, List1}), 1, // ancestor
 		nil, -1, // local
 		encode(&Task{"TaskToBeRemoved", false, -1, List1}), 1) // remote
-	row1.BatchIds = []uint16{1}
+	row1.BatchIds = []uint64{1}
 	c1 := makeConflictInfo(row1, true)
 
 	// Expected result
@@ -505,7 +505,7 @@ func listDeleteConflictsWithTaskAdd(t *testing.T) ([]wire.ConflictInfo, map[stri
 		nil, -1, // ancestor value
 		nil, -1, // local value
 		encode(&Task{"AddedTask", false, -1, List1}), 2) // remote value
-	row2.BatchIds = []uint16{2}
+	row2.BatchIds = []uint64{2}
 	c2 := makeConflictInfo(row2, false)
 
 	// Expected result
@@ -532,7 +532,7 @@ func makeResolution(key string, result []byte, selection wire.ValueSelection) wi
 	return r
 }
 
-func makeConflictBatch(id uint16, hint string, source wire.BatchSource, continued bool) wire.ConflictInfo {
+func makeConflictBatch(id uint64, hint string, source wire.BatchSource, continued bool) wire.ConflictInfo {
 	batch := wire.BatchInfo{Id: id, Hint: hint, Source: source}
 	return wire.ConflictInfo{Data: wire.ConflictDataBatch{Value: batch}, Continued: continued}
 }

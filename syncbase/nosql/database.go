@@ -362,7 +362,7 @@ func addRowToConflict(c *Conflict, ci *wire.ConflictInfo) {
 	switch v := ci.Data.(type) {
 	case wire.ConflictDataBatch:
 		if c.Batches == nil {
-			c.Batches = map[uint16]wire.BatchInfo{}
+			c.Batches = map[uint64]wire.BatchInfo{}
 		}
 		c.Batches[v.Value.Id] = v.Value
 	case wire.ConflictDataRow:
@@ -370,7 +370,7 @@ func addRowToConflict(c *Conflict, ci *wire.ConflictInfo) {
 		switch op := rowInfo.Op.(type) {
 		case wire.OperationWrite:
 			if c.WriteSet == nil {
-				c.WriteSet = &ConflictRowSet{map[string]ConflictRow{}, map[uint16][]ConflictRow{}}
+				c.WriteSet = &ConflictRowSet{map[string]ConflictRow{}, map[uint64][]ConflictRow{}}
 			}
 			cr := toConflictRow(op.Value, rowInfo.BatchIds)
 			c.WriteSet.ByKey[cr.Key] = cr
@@ -379,7 +379,7 @@ func addRowToConflict(c *Conflict, ci *wire.ConflictInfo) {
 			}
 		case wire.OperationRead:
 			if c.ReadSet == nil {
-				c.ReadSet = &ConflictRowSet{map[string]ConflictRow{}, map[uint16][]ConflictRow{}}
+				c.ReadSet = &ConflictRowSet{map[string]ConflictRow{}, map[uint64][]ConflictRow{}}
 			}
 			cr := toConflictRow(op.Value, rowInfo.BatchIds)
 			c.ReadSet.ByKey[cr.Key] = cr
@@ -388,7 +388,7 @@ func addRowToConflict(c *Conflict, ci *wire.ConflictInfo) {
 			}
 		case wire.OperationScan:
 			if c.ScanSet == nil {
-				c.ScanSet = &ConflictScanSet{map[uint16][]wire.ScanOp{}}
+				c.ScanSet = &ConflictScanSet{map[uint64][]wire.ScanOp{}}
 			}
 			for _, bid := range rowInfo.BatchIds {
 				c.ScanSet.ByBatch[bid] = append(c.ScanSet.ByBatch[bid], op.Value)
@@ -397,7 +397,7 @@ func addRowToConflict(c *Conflict, ci *wire.ConflictInfo) {
 	}
 }
 
-func toConflictRow(op wire.RowOp, batchIds []uint16) ConflictRow {
+func toConflictRow(op wire.RowOp, batchIds []uint64) ConflictRow {
 	var local, remote, ancestor *Value
 	if op.LocalValue != nil {
 		local = &Value{

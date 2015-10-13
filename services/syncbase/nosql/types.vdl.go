@@ -241,7 +241,7 @@ type BatchInfo struct {
 	// unique only in the context of a given conflict. Its purpose is solely to
 	// group one or more RowInfo objects together to represent a batch that
 	// was committed by the client.
-	Id uint16
+	Id uint64
 	// Hint is the hint provided by the client when this batch was committed.
 	Hint string
 	// Source states where the batch comes from.
@@ -313,7 +313,7 @@ type RowInfo struct {
 	// Op is a specific operation represented by RowInfo
 	Op Operation
 	// BatchIds contains ids of all batches that this RowInfo is a part of.
-	BatchIds []uint16
+	BatchIds []uint64
 }
 
 func (RowInfo) __VDLReflect(struct {
@@ -414,7 +414,7 @@ func (ScanOp) __VDLReflect(struct {
 
 // Value contains the encoded bytes for a row's value stored in syncbase.
 type Value struct {
-	// VOM encoded bytes for a row's value
+	// VOM encoded bytes for a row's value or nil if the row was deleted.
 	Bytes []byte
 	// Write timestamp for this value in nanoseconds.
 	// TODO(jlodhia): change the timestamp to vdl.time here, in commit timestamp
@@ -494,7 +494,8 @@ type ResolutionInfo struct {
 	// Selection represents the value that was selected as resolution.
 	Selection ValueSelection
 	// Result is the resolved value for the key. This field should be used only
-	// if value of Selection field is 'Other'
+	// if value of Selection field is 'Other'. If the result of a resolution is
+	// delete for this key then add Value with nil Bytes.
 	Result *Value
 	// Continued represents whether the batch of ResolutionInfos has ended.
 	Continued bool

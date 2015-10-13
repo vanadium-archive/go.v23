@@ -75,7 +75,7 @@ pkg nosql, method (ResolverType) String() string
 pkg nosql, method (ValueSelection) String() string
 pkg nosql, type BatchInfo struct
 pkg nosql, type BatchInfo struct, Hint string
-pkg nosql, type BatchInfo struct, Id uint16
+pkg nosql, type BatchInfo struct, Id uint64
 pkg nosql, type BatchInfo struct, Source BatchSource
 pkg nosql, type BatchOptions struct
 pkg nosql, type BatchOptions struct, Hint string
@@ -460,7 +460,7 @@ pkg nosql, type RowClientStub interface, Exists(*context.T, int32, ...rpc.CallOp
 pkg nosql, type RowClientStub interface, Get(*context.T, int32, ...rpc.CallOpt) ([]byte, error)
 pkg nosql, type RowClientStub interface, Put(*context.T, int32, []byte, ...rpc.CallOpt) error
 pkg nosql, type RowInfo struct
-pkg nosql, type RowInfo struct, BatchIds []uint16
+pkg nosql, type RowInfo struct, BatchIds []uint64
 pkg nosql, type RowInfo struct, Op Operation
 pkg nosql, type RowOp struct
 pkg nosql, type RowOp struct, AncestorValue *Value
