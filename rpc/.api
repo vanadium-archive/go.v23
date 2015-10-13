@@ -13,7 +13,7 @@ pkg rpc, func RegisterUnknownProtocol(string, DialerFunc, ResolverFunc, Listener
 pkg rpc, func RegisteredProtocol(string) (DialerFunc, ResolverFunc, ListenerFunc, []string)
 pkg rpc, func RegisteredProtocols() []string
 pkg rpc, func TypeCheckMethods(interface{}) map[string]error
-pkg rpc, method (AddressChooserFunc) ChooseAddress(string, []net.Addr) ([]net.Addr, error)
+pkg rpc, method (AddressChooserFunc) ChooseAddresses(string, []net.Addr) ([]net.Addr, error)
 pkg rpc, method (ListenSpec) Copy() ListenSpec
 pkg rpc, method (ListenSpec) String() string
 pkg rpc, method (MountState) Names() []string
@@ -21,8 +21,8 @@ pkg rpc, method (MountState) Servers() []string
 pkg rpc, method (MountStatus) String() string
 pkg rpc, method (NetworkChange) DebugString() string
 pkg rpc, method (ServerState) String() string
-pkg rpc, type AddressChooser interface { ChooseAddress }
-pkg rpc, type AddressChooser interface, ChooseAddress(string, []net.Addr) ([]net.Addr, error)
+pkg rpc, type AddressChooser interface { ChooseAddresses }
+pkg rpc, type AddressChooser interface, ChooseAddresses(string, []net.Addr) ([]net.Addr, error)
 pkg rpc, type AddressChooserFunc func(protocol string, candidates []net.Addr) ([]net.Addr, error)
 pkg rpc, type AllGlobber interface { Glob__ }
 pkg rpc, type AllGlobber interface, Glob__(*context.T, GlobServerCall, *glob.Glob) error
