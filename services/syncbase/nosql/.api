@@ -32,8 +32,8 @@ pkg nosql, func RowClient(string) RowClientStub
 pkg nosql, func RowServer(RowServerMethods) RowServerStub
 pkg nosql, func SchemaManagerClient(string) SchemaManagerClientStub
 pkg nosql, func SchemaManagerServer(SchemaManagerServerMethods) SchemaManagerServerStub
-pkg nosql, func SyncGroupManagerClient(string) SyncGroupManagerClientStub
-pkg nosql, func SyncGroupManagerServer(SyncGroupManagerServerMethods) SyncGroupManagerServerStub
+pkg nosql, func SyncgroupManagerClient(string) SyncgroupManagerClientStub
+pkg nosql, func SyncgroupManagerServer(SyncgroupManagerServerMethods) SyncgroupManagerServerStub
 pkg nosql, func TableClient(string) TableClientStub
 pkg nosql, func TableServer(TableServerMethods) TableServerStub
 pkg nosql, func ValueSelectionFromString(string) (ValueSelection, error)
@@ -244,18 +244,18 @@ pkg nosql, type CrRule struct, KeyPrefix string
 pkg nosql, type CrRule struct, Resolver ResolverType
 pkg nosql, type CrRule struct, TableName string
 pkg nosql, type CrRule struct, Type string
-pkg nosql, type DatabaseClientMethods interface { Abort, BeginBatch, Commit, CommitBlob, Create, CreateBlob, CreateSyncGroup, DeleteBlob, Destroy, DestroySyncGroup, EjectFromSyncGroup, Exec, Exists, FetchBlob, GetBlob, GetBlobSize, GetPermissions, GetResumeMarker, GetSchemaMetadata, GetSyncGroupMembers, GetSyncGroupNames, GetSyncGroupSpec, JoinSyncGroup, KeepBlob, LeaveSyncGroup, ListTables, PinBlob, PutBlob, SetPermissions, SetSchemaMetadata, SetSyncGroupSpec, StartConflictResolver, UnpinBlob, WatchGlob }
+pkg nosql, type DatabaseClientMethods interface { Abort, BeginBatch, Commit, CommitBlob, Create, CreateBlob, CreateSyncgroup, DeleteBlob, Destroy, DestroySyncgroup, EjectFromSyncgroup, Exec, Exists, FetchBlob, GetBlob, GetBlobSize, GetPermissions, GetResumeMarker, GetSchemaMetadata, GetSyncgroupMembers, GetSyncgroupNames, GetSyncgroupSpec, JoinSyncgroup, KeepBlob, LeaveSyncgroup, ListTables, PinBlob, PutBlob, SetPermissions, SetSchemaMetadata, SetSyncgroupSpec, StartConflictResolver, UnpinBlob, WatchGlob }
 pkg nosql, type DatabaseClientMethods interface, Abort(*context.T, int32, ...rpc.CallOpt) error
 pkg nosql, type DatabaseClientMethods interface, BeginBatch(*context.T, int32, BatchOptions, ...rpc.CallOpt) (string, error)
 pkg nosql, type DatabaseClientMethods interface, Commit(*context.T, int32, ...rpc.CallOpt) error
 pkg nosql, type DatabaseClientMethods interface, CommitBlob(*context.T, BlobRef, ...rpc.CallOpt) error
 pkg nosql, type DatabaseClientMethods interface, Create(*context.T, *SchemaMetadata, access.Permissions, ...rpc.CallOpt) error
 pkg nosql, type DatabaseClientMethods interface, CreateBlob(*context.T, ...rpc.CallOpt) (BlobRef, error)
-pkg nosql, type DatabaseClientMethods interface, CreateSyncGroup(*context.T, string, SyncGroupSpec, SyncGroupMemberInfo, ...rpc.CallOpt) error
+pkg nosql, type DatabaseClientMethods interface, CreateSyncgroup(*context.T, string, SyncgroupSpec, SyncgroupMemberInfo, ...rpc.CallOpt) error
 pkg nosql, type DatabaseClientMethods interface, DeleteBlob(*context.T, BlobRef, ...rpc.CallOpt) error
 pkg nosql, type DatabaseClientMethods interface, Destroy(*context.T, int32, ...rpc.CallOpt) error
-pkg nosql, type DatabaseClientMethods interface, DestroySyncGroup(*context.T, string, ...rpc.CallOpt) error
-pkg nosql, type DatabaseClientMethods interface, EjectFromSyncGroup(*context.T, string, string, ...rpc.CallOpt) error
+pkg nosql, type DatabaseClientMethods interface, DestroySyncgroup(*context.T, string, ...rpc.CallOpt) error
+pkg nosql, type DatabaseClientMethods interface, EjectFromSyncgroup(*context.T, string, string, ...rpc.CallOpt) error
 pkg nosql, type DatabaseClientMethods interface, Exec(*context.T, int32, string, ...rpc.CallOpt) (DatabaseExecClientCall, error)
 pkg nosql, type DatabaseClientMethods interface, Exists(*context.T, int32, ...rpc.CallOpt) (bool, error)
 pkg nosql, type DatabaseClientMethods interface, FetchBlob(*context.T, BlobRef, uint64, ...rpc.CallOpt) (BlobManagerFetchBlobClientCall, error)
@@ -264,33 +264,33 @@ pkg nosql, type DatabaseClientMethods interface, GetBlobSize(*context.T, BlobRef
 pkg nosql, type DatabaseClientMethods interface, GetPermissions(*context.T, ...rpc.CallOpt) (access.Permissions, string, error)
 pkg nosql, type DatabaseClientMethods interface, GetResumeMarker(*context.T, ...rpc.CallOpt) (watch.ResumeMarker, error)
 pkg nosql, type DatabaseClientMethods interface, GetSchemaMetadata(*context.T, ...rpc.CallOpt) (SchemaMetadata, error)
-pkg nosql, type DatabaseClientMethods interface, GetSyncGroupMembers(*context.T, string, ...rpc.CallOpt) (map[string]SyncGroupMemberInfo, error)
-pkg nosql, type DatabaseClientMethods interface, GetSyncGroupNames(*context.T, ...rpc.CallOpt) ([]string, error)
-pkg nosql, type DatabaseClientMethods interface, GetSyncGroupSpec(*context.T, string, ...rpc.CallOpt) (SyncGroupSpec, string, error)
-pkg nosql, type DatabaseClientMethods interface, JoinSyncGroup(*context.T, string, SyncGroupMemberInfo, ...rpc.CallOpt) (SyncGroupSpec, error)
+pkg nosql, type DatabaseClientMethods interface, GetSyncgroupMembers(*context.T, string, ...rpc.CallOpt) (map[string]SyncgroupMemberInfo, error)
+pkg nosql, type DatabaseClientMethods interface, GetSyncgroupNames(*context.T, ...rpc.CallOpt) ([]string, error)
+pkg nosql, type DatabaseClientMethods interface, GetSyncgroupSpec(*context.T, string, ...rpc.CallOpt) (SyncgroupSpec, string, error)
+pkg nosql, type DatabaseClientMethods interface, JoinSyncgroup(*context.T, string, SyncgroupMemberInfo, ...rpc.CallOpt) (SyncgroupSpec, error)
 pkg nosql, type DatabaseClientMethods interface, KeepBlob(*context.T, BlobRef, uint64, ...rpc.CallOpt) error
-pkg nosql, type DatabaseClientMethods interface, LeaveSyncGroup(*context.T, string, ...rpc.CallOpt) error
+pkg nosql, type DatabaseClientMethods interface, LeaveSyncgroup(*context.T, string, ...rpc.CallOpt) error
 pkg nosql, type DatabaseClientMethods interface, ListTables(*context.T, ...rpc.CallOpt) ([]string, error)
 pkg nosql, type DatabaseClientMethods interface, PinBlob(*context.T, BlobRef, ...rpc.CallOpt) error
 pkg nosql, type DatabaseClientMethods interface, PutBlob(*context.T, BlobRef, ...rpc.CallOpt) (BlobManagerPutBlobClientCall, error)
 pkg nosql, type DatabaseClientMethods interface, SetPermissions(*context.T, access.Permissions, string, ...rpc.CallOpt) error
 pkg nosql, type DatabaseClientMethods interface, SetSchemaMetadata(*context.T, SchemaMetadata, ...rpc.CallOpt) error
-pkg nosql, type DatabaseClientMethods interface, SetSyncGroupSpec(*context.T, string, SyncGroupSpec, string, ...rpc.CallOpt) error
+pkg nosql, type DatabaseClientMethods interface, SetSyncgroupSpec(*context.T, string, SyncgroupSpec, string, ...rpc.CallOpt) error
 pkg nosql, type DatabaseClientMethods interface, StartConflictResolver(*context.T, ...rpc.CallOpt) (ConflictManagerStartConflictResolverClientCall, error)
 pkg nosql, type DatabaseClientMethods interface, UnpinBlob(*context.T, BlobRef, ...rpc.CallOpt) error
 pkg nosql, type DatabaseClientMethods interface, WatchGlob(*context.T, GlobRequest, ...rpc.CallOpt) (GlobWatcherWatchGlobClientCall, error)
-pkg nosql, type DatabaseClientStub interface { Abort, BeginBatch, Commit, CommitBlob, Create, CreateBlob, CreateSyncGroup, DeleteBlob, Destroy, DestroySyncGroup, EjectFromSyncGroup, Exec, Exists, FetchBlob, GetBlob, GetBlobSize, GetPermissions, GetResumeMarker, GetSchemaMetadata, GetSyncGroupMembers, GetSyncGroupNames, GetSyncGroupSpec, JoinSyncGroup, KeepBlob, LeaveSyncGroup, ListTables, PinBlob, PutBlob, SetPermissions, SetSchemaMetadata, SetSyncGroupSpec, StartConflictResolver, UnpinBlob, WatchGlob }
+pkg nosql, type DatabaseClientStub interface { Abort, BeginBatch, Commit, CommitBlob, Create, CreateBlob, CreateSyncgroup, DeleteBlob, Destroy, DestroySyncgroup, EjectFromSyncgroup, Exec, Exists, FetchBlob, GetBlob, GetBlobSize, GetPermissions, GetResumeMarker, GetSchemaMetadata, GetSyncgroupMembers, GetSyncgroupNames, GetSyncgroupSpec, JoinSyncgroup, KeepBlob, LeaveSyncgroup, ListTables, PinBlob, PutBlob, SetPermissions, SetSchemaMetadata, SetSyncgroupSpec, StartConflictResolver, UnpinBlob, WatchGlob }
 pkg nosql, type DatabaseClientStub interface, Abort(*context.T, int32, ...rpc.CallOpt) error
 pkg nosql, type DatabaseClientStub interface, BeginBatch(*context.T, int32, BatchOptions, ...rpc.CallOpt) (string, error)
 pkg nosql, type DatabaseClientStub interface, Commit(*context.T, int32, ...rpc.CallOpt) error
 pkg nosql, type DatabaseClientStub interface, CommitBlob(*context.T, BlobRef, ...rpc.CallOpt) error
 pkg nosql, type DatabaseClientStub interface, Create(*context.T, *SchemaMetadata, access.Permissions, ...rpc.CallOpt) error
 pkg nosql, type DatabaseClientStub interface, CreateBlob(*context.T, ...rpc.CallOpt) (BlobRef, error)
-pkg nosql, type DatabaseClientStub interface, CreateSyncGroup(*context.T, string, SyncGroupSpec, SyncGroupMemberInfo, ...rpc.CallOpt) error
+pkg nosql, type DatabaseClientStub interface, CreateSyncgroup(*context.T, string, SyncgroupSpec, SyncgroupMemberInfo, ...rpc.CallOpt) error
 pkg nosql, type DatabaseClientStub interface, DeleteBlob(*context.T, BlobRef, ...rpc.CallOpt) error
 pkg nosql, type DatabaseClientStub interface, Destroy(*context.T, int32, ...rpc.CallOpt) error
-pkg nosql, type DatabaseClientStub interface, DestroySyncGroup(*context.T, string, ...rpc.CallOpt) error
-pkg nosql, type DatabaseClientStub interface, EjectFromSyncGroup(*context.T, string, string, ...rpc.CallOpt) error
+pkg nosql, type DatabaseClientStub interface, DestroySyncgroup(*context.T, string, ...rpc.CallOpt) error
+pkg nosql, type DatabaseClientStub interface, EjectFromSyncgroup(*context.T, string, string, ...rpc.CallOpt) error
 pkg nosql, type DatabaseClientStub interface, Exec(*context.T, int32, string, ...rpc.CallOpt) (DatabaseExecClientCall, error)
 pkg nosql, type DatabaseClientStub interface, Exists(*context.T, int32, ...rpc.CallOpt) (bool, error)
 pkg nosql, type DatabaseClientStub interface, FetchBlob(*context.T, BlobRef, uint64, ...rpc.CallOpt) (BlobManagerFetchBlobClientCall, error)
@@ -299,18 +299,18 @@ pkg nosql, type DatabaseClientStub interface, GetBlobSize(*context.T, BlobRef, .
 pkg nosql, type DatabaseClientStub interface, GetPermissions(*context.T, ...rpc.CallOpt) (access.Permissions, string, error)
 pkg nosql, type DatabaseClientStub interface, GetResumeMarker(*context.T, ...rpc.CallOpt) (watch.ResumeMarker, error)
 pkg nosql, type DatabaseClientStub interface, GetSchemaMetadata(*context.T, ...rpc.CallOpt) (SchemaMetadata, error)
-pkg nosql, type DatabaseClientStub interface, GetSyncGroupMembers(*context.T, string, ...rpc.CallOpt) (map[string]SyncGroupMemberInfo, error)
-pkg nosql, type DatabaseClientStub interface, GetSyncGroupNames(*context.T, ...rpc.CallOpt) ([]string, error)
-pkg nosql, type DatabaseClientStub interface, GetSyncGroupSpec(*context.T, string, ...rpc.CallOpt) (SyncGroupSpec, string, error)
-pkg nosql, type DatabaseClientStub interface, JoinSyncGroup(*context.T, string, SyncGroupMemberInfo, ...rpc.CallOpt) (SyncGroupSpec, error)
+pkg nosql, type DatabaseClientStub interface, GetSyncgroupMembers(*context.T, string, ...rpc.CallOpt) (map[string]SyncgroupMemberInfo, error)
+pkg nosql, type DatabaseClientStub interface, GetSyncgroupNames(*context.T, ...rpc.CallOpt) ([]string, error)
+pkg nosql, type DatabaseClientStub interface, GetSyncgroupSpec(*context.T, string, ...rpc.CallOpt) (SyncgroupSpec, string, error)
+pkg nosql, type DatabaseClientStub interface, JoinSyncgroup(*context.T, string, SyncgroupMemberInfo, ...rpc.CallOpt) (SyncgroupSpec, error)
 pkg nosql, type DatabaseClientStub interface, KeepBlob(*context.T, BlobRef, uint64, ...rpc.CallOpt) error
-pkg nosql, type DatabaseClientStub interface, LeaveSyncGroup(*context.T, string, ...rpc.CallOpt) error
+pkg nosql, type DatabaseClientStub interface, LeaveSyncgroup(*context.T, string, ...rpc.CallOpt) error
 pkg nosql, type DatabaseClientStub interface, ListTables(*context.T, ...rpc.CallOpt) ([]string, error)
 pkg nosql, type DatabaseClientStub interface, PinBlob(*context.T, BlobRef, ...rpc.CallOpt) error
 pkg nosql, type DatabaseClientStub interface, PutBlob(*context.T, BlobRef, ...rpc.CallOpt) (BlobManagerPutBlobClientCall, error)
 pkg nosql, type DatabaseClientStub interface, SetPermissions(*context.T, access.Permissions, string, ...rpc.CallOpt) error
 pkg nosql, type DatabaseClientStub interface, SetSchemaMetadata(*context.T, SchemaMetadata, ...rpc.CallOpt) error
-pkg nosql, type DatabaseClientStub interface, SetSyncGroupSpec(*context.T, string, SyncGroupSpec, string, ...rpc.CallOpt) error
+pkg nosql, type DatabaseClientStub interface, SetSyncgroupSpec(*context.T, string, SyncgroupSpec, string, ...rpc.CallOpt) error
 pkg nosql, type DatabaseClientStub interface, StartConflictResolver(*context.T, ...rpc.CallOpt) (ConflictManagerStartConflictResolverClientCall, error)
 pkg nosql, type DatabaseClientStub interface, UnpinBlob(*context.T, BlobRef, ...rpc.CallOpt) error
 pkg nosql, type DatabaseClientStub interface, WatchGlob(*context.T, GlobRequest, ...rpc.CallOpt) (GlobWatcherWatchGlobClientCall, error)
@@ -331,18 +331,18 @@ pkg nosql, type DatabaseExecServerCallStub struct
 pkg nosql, type DatabaseExecServerCallStub struct, embedded rpc.StreamServerCall
 pkg nosql, type DatabaseExecServerStream interface { SendStream }
 pkg nosql, type DatabaseExecServerStream interface, SendStream() interface {  Send(item []*vdl.Value) error;}
-pkg nosql, type DatabaseServerMethods interface { Abort, BeginBatch, Commit, CommitBlob, Create, CreateBlob, CreateSyncGroup, DeleteBlob, Destroy, DestroySyncGroup, EjectFromSyncGroup, Exec, Exists, FetchBlob, GetBlob, GetBlobSize, GetPermissions, GetResumeMarker, GetSchemaMetadata, GetSyncGroupMembers, GetSyncGroupNames, GetSyncGroupSpec, JoinSyncGroup, KeepBlob, LeaveSyncGroup, ListTables, PinBlob, PutBlob, SetPermissions, SetSchemaMetadata, SetSyncGroupSpec, StartConflictResolver, UnpinBlob, WatchGlob }
+pkg nosql, type DatabaseServerMethods interface { Abort, BeginBatch, Commit, CommitBlob, Create, CreateBlob, CreateSyncgroup, DeleteBlob, Destroy, DestroySyncgroup, EjectFromSyncgroup, Exec, Exists, FetchBlob, GetBlob, GetBlobSize, GetPermissions, GetResumeMarker, GetSchemaMetadata, GetSyncgroupMembers, GetSyncgroupNames, GetSyncgroupSpec, JoinSyncgroup, KeepBlob, LeaveSyncgroup, ListTables, PinBlob, PutBlob, SetPermissions, SetSchemaMetadata, SetSyncgroupSpec, StartConflictResolver, UnpinBlob, WatchGlob }
 pkg nosql, type DatabaseServerMethods interface, Abort(*context.T, rpc.ServerCall, int32) error
 pkg nosql, type DatabaseServerMethods interface, BeginBatch(*context.T, rpc.ServerCall, int32, BatchOptions) (string, error)
 pkg nosql, type DatabaseServerMethods interface, Commit(*context.T, rpc.ServerCall, int32) error
 pkg nosql, type DatabaseServerMethods interface, CommitBlob(*context.T, rpc.ServerCall, BlobRef) error
 pkg nosql, type DatabaseServerMethods interface, Create(*context.T, rpc.ServerCall, *SchemaMetadata, access.Permissions) error
 pkg nosql, type DatabaseServerMethods interface, CreateBlob(*context.T, rpc.ServerCall) (BlobRef, error)
-pkg nosql, type DatabaseServerMethods interface, CreateSyncGroup(*context.T, rpc.ServerCall, string, SyncGroupSpec, SyncGroupMemberInfo) error
+pkg nosql, type DatabaseServerMethods interface, CreateSyncgroup(*context.T, rpc.ServerCall, string, SyncgroupSpec, SyncgroupMemberInfo) error
 pkg nosql, type DatabaseServerMethods interface, DeleteBlob(*context.T, rpc.ServerCall, BlobRef) error
 pkg nosql, type DatabaseServerMethods interface, Destroy(*context.T, rpc.ServerCall, int32) error
-pkg nosql, type DatabaseServerMethods interface, DestroySyncGroup(*context.T, rpc.ServerCall, string) error
-pkg nosql, type DatabaseServerMethods interface, EjectFromSyncGroup(*context.T, rpc.ServerCall, string, string) error
+pkg nosql, type DatabaseServerMethods interface, DestroySyncgroup(*context.T, rpc.ServerCall, string) error
+pkg nosql, type DatabaseServerMethods interface, EjectFromSyncgroup(*context.T, rpc.ServerCall, string, string) error
 pkg nosql, type DatabaseServerMethods interface, Exec(*context.T, DatabaseExecServerCall, int32, string) error
 pkg nosql, type DatabaseServerMethods interface, Exists(*context.T, rpc.ServerCall, int32) (bool, error)
 pkg nosql, type DatabaseServerMethods interface, FetchBlob(*context.T, BlobManagerFetchBlobServerCall, BlobRef, uint64) error
@@ -351,18 +351,18 @@ pkg nosql, type DatabaseServerMethods interface, GetBlobSize(*context.T, rpc.Ser
 pkg nosql, type DatabaseServerMethods interface, GetPermissions(*context.T, rpc.ServerCall) (access.Permissions, string, error)
 pkg nosql, type DatabaseServerMethods interface, GetResumeMarker(*context.T, rpc.ServerCall) (watch.ResumeMarker, error)
 pkg nosql, type DatabaseServerMethods interface, GetSchemaMetadata(*context.T, rpc.ServerCall) (SchemaMetadata, error)
-pkg nosql, type DatabaseServerMethods interface, GetSyncGroupMembers(*context.T, rpc.ServerCall, string) (map[string]SyncGroupMemberInfo, error)
-pkg nosql, type DatabaseServerMethods interface, GetSyncGroupNames(*context.T, rpc.ServerCall) ([]string, error)
-pkg nosql, type DatabaseServerMethods interface, GetSyncGroupSpec(*context.T, rpc.ServerCall, string) (SyncGroupSpec, string, error)
-pkg nosql, type DatabaseServerMethods interface, JoinSyncGroup(*context.T, rpc.ServerCall, string, SyncGroupMemberInfo) (SyncGroupSpec, error)
+pkg nosql, type DatabaseServerMethods interface, GetSyncgroupMembers(*context.T, rpc.ServerCall, string) (map[string]SyncgroupMemberInfo, error)
+pkg nosql, type DatabaseServerMethods interface, GetSyncgroupNames(*context.T, rpc.ServerCall) ([]string, error)
+pkg nosql, type DatabaseServerMethods interface, GetSyncgroupSpec(*context.T, rpc.ServerCall, string) (SyncgroupSpec, string, error)
+pkg nosql, type DatabaseServerMethods interface, JoinSyncgroup(*context.T, rpc.ServerCall, string, SyncgroupMemberInfo) (SyncgroupSpec, error)
 pkg nosql, type DatabaseServerMethods interface, KeepBlob(*context.T, rpc.ServerCall, BlobRef, uint64) error
-pkg nosql, type DatabaseServerMethods interface, LeaveSyncGroup(*context.T, rpc.ServerCall, string) error
+pkg nosql, type DatabaseServerMethods interface, LeaveSyncgroup(*context.T, rpc.ServerCall, string) error
 pkg nosql, type DatabaseServerMethods interface, ListTables(*context.T, rpc.ServerCall) ([]string, error)
 pkg nosql, type DatabaseServerMethods interface, PinBlob(*context.T, rpc.ServerCall, BlobRef) error
 pkg nosql, type DatabaseServerMethods interface, PutBlob(*context.T, BlobManagerPutBlobServerCall, BlobRef) error
 pkg nosql, type DatabaseServerMethods interface, SetPermissions(*context.T, rpc.ServerCall, access.Permissions, string) error
 pkg nosql, type DatabaseServerMethods interface, SetSchemaMetadata(*context.T, rpc.ServerCall, SchemaMetadata) error
-pkg nosql, type DatabaseServerMethods interface, SetSyncGroupSpec(*context.T, rpc.ServerCall, string, SyncGroupSpec, string) error
+pkg nosql, type DatabaseServerMethods interface, SetSyncgroupSpec(*context.T, rpc.ServerCall, string, SyncgroupSpec, string) error
 pkg nosql, type DatabaseServerMethods interface, StartConflictResolver(*context.T, ConflictManagerStartConflictResolverServerCall) error
 pkg nosql, type DatabaseServerMethods interface, UnpinBlob(*context.T, rpc.ServerCall, BlobRef) error
 pkg nosql, type DatabaseServerMethods interface, WatchGlob(*context.T, GlobWatcherWatchGlobServerCall, GlobRequest) error
@@ -496,50 +496,50 @@ pkg nosql, type SchemaMetadata struct, Version int32
 pkg nosql, type StoreChange struct
 pkg nosql, type StoreChange struct, FromSync bool
 pkg nosql, type StoreChange struct, Value []byte
-pkg nosql, type SyncGroupManagerClientMethods interface { CreateSyncGroup, DestroySyncGroup, EjectFromSyncGroup, GetSyncGroupMembers, GetSyncGroupNames, GetSyncGroupSpec, JoinSyncGroup, LeaveSyncGroup, SetSyncGroupSpec }
-pkg nosql, type SyncGroupManagerClientMethods interface, CreateSyncGroup(*context.T, string, SyncGroupSpec, SyncGroupMemberInfo, ...rpc.CallOpt) error
-pkg nosql, type SyncGroupManagerClientMethods interface, DestroySyncGroup(*context.T, string, ...rpc.CallOpt) error
-pkg nosql, type SyncGroupManagerClientMethods interface, EjectFromSyncGroup(*context.T, string, string, ...rpc.CallOpt) error
-pkg nosql, type SyncGroupManagerClientMethods interface, GetSyncGroupMembers(*context.T, string, ...rpc.CallOpt) (map[string]SyncGroupMemberInfo, error)
-pkg nosql, type SyncGroupManagerClientMethods interface, GetSyncGroupNames(*context.T, ...rpc.CallOpt) ([]string, error)
-pkg nosql, type SyncGroupManagerClientMethods interface, GetSyncGroupSpec(*context.T, string, ...rpc.CallOpt) (SyncGroupSpec, string, error)
-pkg nosql, type SyncGroupManagerClientMethods interface, JoinSyncGroup(*context.T, string, SyncGroupMemberInfo, ...rpc.CallOpt) (SyncGroupSpec, error)
-pkg nosql, type SyncGroupManagerClientMethods interface, LeaveSyncGroup(*context.T, string, ...rpc.CallOpt) error
-pkg nosql, type SyncGroupManagerClientMethods interface, SetSyncGroupSpec(*context.T, string, SyncGroupSpec, string, ...rpc.CallOpt) error
-pkg nosql, type SyncGroupManagerClientStub interface { CreateSyncGroup, DestroySyncGroup, EjectFromSyncGroup, GetSyncGroupMembers, GetSyncGroupNames, GetSyncGroupSpec, JoinSyncGroup, LeaveSyncGroup, SetSyncGroupSpec }
-pkg nosql, type SyncGroupManagerClientStub interface, CreateSyncGroup(*context.T, string, SyncGroupSpec, SyncGroupMemberInfo, ...rpc.CallOpt) error
-pkg nosql, type SyncGroupManagerClientStub interface, DestroySyncGroup(*context.T, string, ...rpc.CallOpt) error
-pkg nosql, type SyncGroupManagerClientStub interface, EjectFromSyncGroup(*context.T, string, string, ...rpc.CallOpt) error
-pkg nosql, type SyncGroupManagerClientStub interface, GetSyncGroupMembers(*context.T, string, ...rpc.CallOpt) (map[string]SyncGroupMemberInfo, error)
-pkg nosql, type SyncGroupManagerClientStub interface, GetSyncGroupNames(*context.T, ...rpc.CallOpt) ([]string, error)
-pkg nosql, type SyncGroupManagerClientStub interface, GetSyncGroupSpec(*context.T, string, ...rpc.CallOpt) (SyncGroupSpec, string, error)
-pkg nosql, type SyncGroupManagerClientStub interface, JoinSyncGroup(*context.T, string, SyncGroupMemberInfo, ...rpc.CallOpt) (SyncGroupSpec, error)
-pkg nosql, type SyncGroupManagerClientStub interface, LeaveSyncGroup(*context.T, string, ...rpc.CallOpt) error
-pkg nosql, type SyncGroupManagerClientStub interface, SetSyncGroupSpec(*context.T, string, SyncGroupSpec, string, ...rpc.CallOpt) error
-pkg nosql, type SyncGroupManagerServerMethods interface { CreateSyncGroup, DestroySyncGroup, EjectFromSyncGroup, GetSyncGroupMembers, GetSyncGroupNames, GetSyncGroupSpec, JoinSyncGroup, LeaveSyncGroup, SetSyncGroupSpec }
-pkg nosql, type SyncGroupManagerServerMethods interface, CreateSyncGroup(*context.T, rpc.ServerCall, string, SyncGroupSpec, SyncGroupMemberInfo) error
-pkg nosql, type SyncGroupManagerServerMethods interface, DestroySyncGroup(*context.T, rpc.ServerCall, string) error
-pkg nosql, type SyncGroupManagerServerMethods interface, EjectFromSyncGroup(*context.T, rpc.ServerCall, string, string) error
-pkg nosql, type SyncGroupManagerServerMethods interface, GetSyncGroupMembers(*context.T, rpc.ServerCall, string) (map[string]SyncGroupMemberInfo, error)
-pkg nosql, type SyncGroupManagerServerMethods interface, GetSyncGroupNames(*context.T, rpc.ServerCall) ([]string, error)
-pkg nosql, type SyncGroupManagerServerMethods interface, GetSyncGroupSpec(*context.T, rpc.ServerCall, string) (SyncGroupSpec, string, error)
-pkg nosql, type SyncGroupManagerServerMethods interface, JoinSyncGroup(*context.T, rpc.ServerCall, string, SyncGroupMemberInfo) (SyncGroupSpec, error)
-pkg nosql, type SyncGroupManagerServerMethods interface, LeaveSyncGroup(*context.T, rpc.ServerCall, string) error
-pkg nosql, type SyncGroupManagerServerMethods interface, SetSyncGroupSpec(*context.T, rpc.ServerCall, string, SyncGroupSpec, string) error
-pkg nosql, type SyncGroupManagerServerStub interface, Describe__() []rpc.InterfaceDesc
-pkg nosql, type SyncGroupManagerServerStub interface, unexported methods
-pkg nosql, type SyncGroupManagerServerStubMethods SyncGroupManagerServerMethods
-pkg nosql, type SyncGroupMemberInfo struct
-pkg nosql, type SyncGroupMemberInfo struct, SyncPriority byte
-pkg nosql, type SyncGroupPrefix struct
-pkg nosql, type SyncGroupPrefix struct, RowPrefix string
-pkg nosql, type SyncGroupPrefix struct, TableName string
-pkg nosql, type SyncGroupSpec struct
-pkg nosql, type SyncGroupSpec struct, Description string
-pkg nosql, type SyncGroupSpec struct, IsPrivate bool
-pkg nosql, type SyncGroupSpec struct, MountTables []string
-pkg nosql, type SyncGroupSpec struct, Perms access.Permissions
-pkg nosql, type SyncGroupSpec struct, Prefixes []SyncGroupPrefix
+pkg nosql, type SyncgroupManagerClientMethods interface { CreateSyncgroup, DestroySyncgroup, EjectFromSyncgroup, GetSyncgroupMembers, GetSyncgroupNames, GetSyncgroupSpec, JoinSyncgroup, LeaveSyncgroup, SetSyncgroupSpec }
+pkg nosql, type SyncgroupManagerClientMethods interface, CreateSyncgroup(*context.T, string, SyncgroupSpec, SyncgroupMemberInfo, ...rpc.CallOpt) error
+pkg nosql, type SyncgroupManagerClientMethods interface, DestroySyncgroup(*context.T, string, ...rpc.CallOpt) error
+pkg nosql, type SyncgroupManagerClientMethods interface, EjectFromSyncgroup(*context.T, string, string, ...rpc.CallOpt) error
+pkg nosql, type SyncgroupManagerClientMethods interface, GetSyncgroupMembers(*context.T, string, ...rpc.CallOpt) (map[string]SyncgroupMemberInfo, error)
+pkg nosql, type SyncgroupManagerClientMethods interface, GetSyncgroupNames(*context.T, ...rpc.CallOpt) ([]string, error)
+pkg nosql, type SyncgroupManagerClientMethods interface, GetSyncgroupSpec(*context.T, string, ...rpc.CallOpt) (SyncgroupSpec, string, error)
+pkg nosql, type SyncgroupManagerClientMethods interface, JoinSyncgroup(*context.T, string, SyncgroupMemberInfo, ...rpc.CallOpt) (SyncgroupSpec, error)
+pkg nosql, type SyncgroupManagerClientMethods interface, LeaveSyncgroup(*context.T, string, ...rpc.CallOpt) error
+pkg nosql, type SyncgroupManagerClientMethods interface, SetSyncgroupSpec(*context.T, string, SyncgroupSpec, string, ...rpc.CallOpt) error
+pkg nosql, type SyncgroupManagerClientStub interface { CreateSyncgroup, DestroySyncgroup, EjectFromSyncgroup, GetSyncgroupMembers, GetSyncgroupNames, GetSyncgroupSpec, JoinSyncgroup, LeaveSyncgroup, SetSyncgroupSpec }
+pkg nosql, type SyncgroupManagerClientStub interface, CreateSyncgroup(*context.T, string, SyncgroupSpec, SyncgroupMemberInfo, ...rpc.CallOpt) error
+pkg nosql, type SyncgroupManagerClientStub interface, DestroySyncgroup(*context.T, string, ...rpc.CallOpt) error
+pkg nosql, type SyncgroupManagerClientStub interface, EjectFromSyncgroup(*context.T, string, string, ...rpc.CallOpt) error
+pkg nosql, type SyncgroupManagerClientStub interface, GetSyncgroupMembers(*context.T, string, ...rpc.CallOpt) (map[string]SyncgroupMemberInfo, error)
+pkg nosql, type SyncgroupManagerClientStub interface, GetSyncgroupNames(*context.T, ...rpc.CallOpt) ([]string, error)
+pkg nosql, type SyncgroupManagerClientStub interface, GetSyncgroupSpec(*context.T, string, ...rpc.CallOpt) (SyncgroupSpec, string, error)
+pkg nosql, type SyncgroupManagerClientStub interface, JoinSyncgroup(*context.T, string, SyncgroupMemberInfo, ...rpc.CallOpt) (SyncgroupSpec, error)
+pkg nosql, type SyncgroupManagerClientStub interface, LeaveSyncgroup(*context.T, string, ...rpc.CallOpt) error
+pkg nosql, type SyncgroupManagerClientStub interface, SetSyncgroupSpec(*context.T, string, SyncgroupSpec, string, ...rpc.CallOpt) error
+pkg nosql, type SyncgroupManagerServerMethods interface { CreateSyncgroup, DestroySyncgroup, EjectFromSyncgroup, GetSyncgroupMembers, GetSyncgroupNames, GetSyncgroupSpec, JoinSyncgroup, LeaveSyncgroup, SetSyncgroupSpec }
+pkg nosql, type SyncgroupManagerServerMethods interface, CreateSyncgroup(*context.T, rpc.ServerCall, string, SyncgroupSpec, SyncgroupMemberInfo) error
+pkg nosql, type SyncgroupManagerServerMethods interface, DestroySyncgroup(*context.T, rpc.ServerCall, string) error
+pkg nosql, type SyncgroupManagerServerMethods interface, EjectFromSyncgroup(*context.T, rpc.ServerCall, string, string) error
+pkg nosql, type SyncgroupManagerServerMethods interface, GetSyncgroupMembers(*context.T, rpc.ServerCall, string) (map[string]SyncgroupMemberInfo, error)
+pkg nosql, type SyncgroupManagerServerMethods interface, GetSyncgroupNames(*context.T, rpc.ServerCall) ([]string, error)
+pkg nosql, type SyncgroupManagerServerMethods interface, GetSyncgroupSpec(*context.T, rpc.ServerCall, string) (SyncgroupSpec, string, error)
+pkg nosql, type SyncgroupManagerServerMethods interface, JoinSyncgroup(*context.T, rpc.ServerCall, string, SyncgroupMemberInfo) (SyncgroupSpec, error)
+pkg nosql, type SyncgroupManagerServerMethods interface, LeaveSyncgroup(*context.T, rpc.ServerCall, string) error
+pkg nosql, type SyncgroupManagerServerMethods interface, SetSyncgroupSpec(*context.T, rpc.ServerCall, string, SyncgroupSpec, string) error
+pkg nosql, type SyncgroupManagerServerStub interface, Describe__() []rpc.InterfaceDesc
+pkg nosql, type SyncgroupManagerServerStub interface, unexported methods
+pkg nosql, type SyncgroupManagerServerStubMethods SyncgroupManagerServerMethods
+pkg nosql, type SyncgroupMemberInfo struct
+pkg nosql, type SyncgroupMemberInfo struct, SyncPriority byte
+pkg nosql, type SyncgroupPrefix struct
+pkg nosql, type SyncgroupPrefix struct, RowPrefix string
+pkg nosql, type SyncgroupPrefix struct, TableName string
+pkg nosql, type SyncgroupSpec struct
+pkg nosql, type SyncgroupSpec struct, Description string
+pkg nosql, type SyncgroupSpec struct, IsPrivate bool
+pkg nosql, type SyncgroupSpec struct, MountTables []string
+pkg nosql, type SyncgroupSpec struct, Perms access.Permissions
+pkg nosql, type SyncgroupSpec struct, Prefixes []SyncgroupPrefix
 pkg nosql, type TableClientMethods interface { Create, DeletePrefixPermissions, DeleteRange, Destroy, Exists, GetPermissions, GetPrefixPermissions, Scan, SetPermissions, SetPrefixPermissions }
 pkg nosql, type TableClientMethods interface, Create(*context.T, int32, access.Permissions, ...rpc.CallOpt) error
 pkg nosql, type TableClientMethods interface, DeletePrefixPermissions(*context.T, int32, string, ...rpc.CallOpt) error
@@ -632,6 +632,6 @@ pkg nosql, var ErrSchemaVersionMismatch verror.IDAction
 pkg nosql, var ResolverTypeAll [...]ResolverType
 pkg nosql, var RowDesc rpc.InterfaceDesc
 pkg nosql, var SchemaManagerDesc rpc.InterfaceDesc
-pkg nosql, var SyncGroupManagerDesc rpc.InterfaceDesc
+pkg nosql, var SyncgroupManagerDesc rpc.InterfaceDesc
 pkg nosql, var TableDesc rpc.InterfaceDesc
 pkg nosql, var ValueSelectionAll [...]ValueSelection
