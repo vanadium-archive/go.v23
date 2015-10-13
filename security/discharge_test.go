@@ -72,7 +72,7 @@ func TestDischargeSignatureCaching(t *testing.T) {
 }
 
 func BenchmarkDischargeEquality(b *testing.B) {
-	p, err := CreatePrincipal(newSigner(), nil, nil)
+	p, err := CreatePrincipal(newSigner(), nil, nil, nil, nil)
 	if err != nil {
 		b.Fatal(err)
 	}
@@ -92,7 +92,7 @@ func benchmarkPublicKeyDischargeVerification(caching bool, b *testing.B) {
 		dischargeSignatureCache.disable()
 		defer dischargeSignatureCache.enable()
 	}
-	p, err := CreatePrincipal(newSigner(), nil, nil)
+	p, err := CreatePrincipal(newSigner(), nil, nil, nil, nil)
 	if err != nil {
 		b.Fatal(err)
 	}

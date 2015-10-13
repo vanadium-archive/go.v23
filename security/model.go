@@ -190,6 +190,21 @@ type Principal interface {
 	// "charlie/family/daughter" as an authority on all blessings that
 	// match the pattern "charlie".
 	AddToRoots(blessings Blessings) error
+
+	// Encrypter returns an encrypter for encrypting messages that can only be
+	// decrypted by principals with specific blessings.
+	//
+	// This is an experiemental inteface and may change over time.
+	Encrypter() BlessingsBasedEncrypter
+
+	// Decrypter returns a decrypter that will decrypt messages encrypted for any
+	// blessing held by this principal.
+	//
+	// More specifically, decrypter would be constructed based on certain decryption
+	// private keys corresponding to the blessings.
+	//
+	// This is an experiemental inteface and may change over time.
+	Decrypter() BlessingsBasedDecrypter
 }
 
 // BlessingStore is the interface for storing blessings bound to a
@@ -315,6 +330,31 @@ type Signer interface {
 
 	// PublicKey returns the public key corresponding to the Signer's private key.
 	PublicKey() PublicKey
+}
+
+// BlessingsBasedEncrypter is the interface for encrypting a fixed-length plaintext
+// under a set of BlessingPatterns.
+//
+// The resulting ciphertexts can only be decrypted by a BlessingsBasedDecrypter
+// constructed for a blessing matching one of the patterns.
+//
+// Typically, this interface would be used for encrypting a symmetric key
+// which in turn would be used to encrypt an arbitrary length data message.
+type BlessingsBasedEncrypter interface {
+	// Encrypt encrypts the provided 'plaintext' for the provided blessing
+	// patterns, and returns the ciphertext (or nil if an error is returned).
+	Encrypt(ctx *context.T, forPatterns []BlessingPattern, plaintext *[32]byte) (*Ciphertext, error)
+}
+
+// BlessingsBasedDecrypter is the interface for decrypting ciphertexts produced by a
+// BlessingsBasedEncrypter.
+//
+// This object would typically be constructed for one or more blessings, and can thus
+// be used to decrypt messages encrypted for a pattern matched by these blessings.
+type BlessingsBasedDecrypter interface {
+	// Decrypt decrypts the provided 'ciphertext' and returns the corresponding
+	// plaintext (or nil if an error is returned).
+	Decrypt(ctx *context.T, ciphertext *Ciphertext) (*[32]byte, error)
 }
 
 // ThirdPartyCaveat is a restriction on the applicability of a blessing that is

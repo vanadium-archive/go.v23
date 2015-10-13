@@ -97,7 +97,10 @@ func newPrincipal(t *testing.T) security.Principal {
 	p, err := security.CreatePrincipal(
 		security.NewInMemoryECDSASigner(key),
 		nil,
-		&trustAllRoots{dump: make(map[security.BlessingPattern][]security.PublicKey)})
+		&trustAllRoots{dump: make(map[security.BlessingPattern][]security.PublicKey)},
+		nil,
+		nil,
+	)
 	if err != nil {
 		t.Fatal(err)
 	}

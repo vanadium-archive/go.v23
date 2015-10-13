@@ -56,7 +56,7 @@ func newBlessing(t *testing.T, name string) security.Blessings {
 	if err != nil {
 		t.Fatal(err)
 	}
-	p, err := security.CreatePrincipal(security.NewInMemoryECDSASigner(key), nil, nil)
+	p, err := security.CreatePrincipal(security.NewInMemoryECDSASigner(key), nil, nil, nil, nil)
 	if err != nil {
 		t.Fatal(err)
 	}

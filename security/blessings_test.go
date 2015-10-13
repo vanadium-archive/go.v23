@@ -124,7 +124,7 @@ func TestBlessingCouldHaveNames(t *testing.T) {
 }
 
 func TestBlessingsExpiry(t *testing.T) {
-	p, err := CreatePrincipal(newSigner(), nil, nil)
+	p, err := CreatePrincipal(newSigner(), nil, nil, nil, nil)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -278,7 +278,7 @@ func TestRootBlessings(t *testing.T) {
 }
 
 func BenchmarkBless(b *testing.B) {
-	p, err := CreatePrincipal(newSigner(), nil, nil)
+	p, err := CreatePrincipal(newSigner(), nil, nil, nil, nil)
 	if err != nil {
 		b.Fatal(err)
 	}
@@ -321,7 +321,7 @@ func BenchmarkVerifyCertificateIntegrity_NoCaching(b *testing.B) {
 }
 
 func makeBlessings(t testing.TB, ncerts int) Blessings {
-	p, err := CreatePrincipal(newSigner(), nil, nil)
+	p, err := CreatePrincipal(newSigner(), nil, nil, nil, nil)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -330,7 +330,7 @@ func makeBlessings(t testing.TB, ncerts int) Blessings {
 		t.Fatal(err)
 	}
 	for i := 1; i < ncerts; i++ {
-		p2, err := CreatePrincipal(newSigner(), nil, nil)
+		p2, err := CreatePrincipal(newSigner(), nil, nil, nil, nil)
 		if err != nil {
 			t.Fatalf("%d: %v", i, err)
 		}
