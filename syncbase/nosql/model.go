@@ -595,7 +595,7 @@ type Conflict struct {
 	ReadSet  *ConflictRowSet
 	WriteSet *ConflictRowSet
 	ScanSet  *ConflictScanSet
-	Batches  map[uint16]wire.BatchInfo
+	Batches  map[uint64]wire.BatchInfo
 }
 
 // ConflictRowSet contains a set of rows under conflict. It provides two different
@@ -605,13 +605,13 @@ type Conflict struct {
 // access all ConflictRows within this set that contain a given hint.
 type ConflictRowSet struct {
 	ByKey   map[string]ConflictRow
-	ByBatch map[uint16][]ConflictRow
+	ByBatch map[uint64][]ConflictRow
 }
 
 // ConflictScanSet contains a set of scans under conflict.
 // ByBatch is a map of array of ScanOps keyed by batch id.
 type ConflictScanSet struct {
-	ByBatch map[uint16][]wire.ScanOp
+	ByBatch map[uint64][]wire.ScanOp
 }
 
 // ConflictRow represents a row under conflict.
@@ -627,7 +627,7 @@ type ConflictRow struct {
 	LocalValue    *Value
 	RemoteValue   *Value
 	AncestorValue *Value
-	BatchIds      []uint16
+	BatchIds      []uint64
 }
 
 // Resolution contains the application’s reply to a conflict. It must contain a
