@@ -83,12 +83,14 @@ func V23TestSyncbasedGetDeltas(t *v23tests.T) {
 	sgName := naming.Join("sync0", constants.SyncbaseSuffix, "SG1")
 
 	tu.RunClient(t, client0Creds, runSetupAppA, "sync0")
-	tu.RunClient(t, client0Creds, runCreateSyncgroup, "sync0", sgName, "tb:foo", "root/s0", "root/s1")
+	tu.RunClient(t, client0Creds, runCreateSyncgroup, "sync0", sgName, "tb:foo,tb:bar", "root/s0", "root/s1")
 	tu.RunClient(t, client0Creds, runPopulateData, "sync0", "foo", "0")
+	tu.RunClient(t, client0Creds, runPopulateNonVOMData, "sync0", "bar", "0")
 
 	tu.RunClient(t, client1Creds, runSetupAppA, "sync1")
 	tu.RunClient(t, client1Creds, runJoinSyncgroup, "sync1", sgName)
 	tu.RunClient(t, client1Creds, runVerifySyncgroupData, "sync1", "foo", "0", "10", "false")
+	tu.RunClient(t, client1Creds, runVerifySyncgroupNonVOMData, "sync1", "bar", "0", "10")
 }
 
 // V23TestSyncbasedGetDeltasWithDel tests the sending of deltas between two
@@ -172,8 +174,14 @@ func V23TestSyncbasedCompEval(t *v23tests.T) {
 	tu.RunClient(t, client1Creds, runJoinSyncgroup, "sync1", sgName)
 	tu.RunClient(t, client1Creds, runVerifySyncgroupData, "sync1", "foo", "0", "10", "false")
 
-	tu.RunClient(t, client0Creds, runSetSyncgroupSpec, "sync0", sgName, "v2", "tb:foo", "root/s0", "root/s1", "root/s3")
-	tu.RunClient(t, client1Creds, runGetSyncgroupSpec, "sync1", sgName, "v2", "tb:foo", "root/s0", "root/s1", "root/s3")
+	// Shutdown and restart Syncbase instances.
+	cleanSync0()
+	cleanSync1()
+
+	cleanSync0 = tu.StartSyncbased(t, server0Creds, "sync0", server0RDir,
+		`{"Read": {"In":["root/c0"]}, "Write": {"In":["root/c0"]}}`)
+	cleanSync1 = tu.StartSyncbased(t, server1Creds, "sync1", server1RDir,
+		`{"Read": {"In":["root/c1"]}, "Write": {"In":["root/c1"]}}`)
 
 	tu.RunClient(t, client0Creds, runSetSyncgroupSpec, "sync0", sgName, "v2", "tb:foo", "root/s0", "root/s1", "root/s3")
 	tu.RunClient(t, client1Creds, runGetSyncgroupSpec, "sync1", sgName, "v2", "tb:foo", "root/s0", "root/s1", "root/s3")
@@ -698,6 +706,30 @@ var runPopulateData = modules.Register(func(env *modules.Env, args ...string) er
 	return nil
 }, "runPopulateData")
 
+// Arguments: 0: Syncbase name, 1: key prefix, 2: start index.
+var runPopulateNonVOMData = modules.Register(func(env *modules.Env, args ...string) error {
+	ctx, shutdown := v23.Init()
+	defer shutdown()
+
+	a := syncbase.NewService(args[0]).App("a")
+	d := a.NoSQLDatabase("d", nil)
+
+	// Do Puts.
+	tb := d.Table("tb")
+	start, _ := strconv.ParseUint(args[2], 10, 64)
+
+	for i := start; i < start+10; i++ {
+		key := fmt.Sprintf("%s%d", args[1], i)
+		r := tb.Row(key)
+		c := wire.RowClient(r.FullName())
+		val := []byte("nonvomtestkey" + key)
+		if err := c.Put(ctx, -1, val); err != nil {
+			return fmt.Errorf("c.Put() failed: %v\n", err)
+		}
+	}
+	return nil
+}, "runPopulateNonVOMData")
+
 var runUpdateData = modules.Register(func(env *modules.Env, args ...string) error {
 	ctx, shutdown := v23.Init()
 	defer shutdown()
@@ -823,6 +855,49 @@ var runVerifySyncgroupData = modules.Register(func(env *modules.Env, args ...str
 	}
 	return nil
 }, "runVerifySyncgroupData")
+
+// Arguments: 0: syncbase name, 1: key prefix, 2: start index, 3: number of keys.
+var runVerifySyncgroupNonVOMData = modules.Register(func(env *modules.Env, args ...string) error {
+	ctx, shutdown := v23.Init()
+	defer shutdown()
+
+	a := syncbase.NewService(args[0]).App("a")
+	d := a.NoSQLDatabase("d", nil)
+
+	// Wait for a bit (up to 4 sec) until the last key appears.
+	tb := d.Table("tb")
+
+	start, _ := strconv.ParseUint(args[2], 10, 64)
+	count, _ := strconv.ParseUint(args[3], 10, 64)
+	lastKey := fmt.Sprintf("%s%d", args[1], start+count-1)
+
+	r := tb.Row(lastKey)
+	c := wire.RowClient(r.FullName())
+	for i := 0; i < 8; i++ {
+		time.Sleep(500 * time.Millisecond)
+		if _, err := c.Get(ctx, -1); err == nil {
+			break
+		}
+	}
+
+	// Verify that all keys and values made it correctly.
+	for i := start; i < start+count; i++ {
+		key := fmt.Sprintf("%s%d", args[1], i)
+		r := tb.Row(key)
+		c := wire.RowClient(r.FullName())
+		var got string
+		val, err := c.Get(ctx, -1)
+		if err != nil {
+			return fmt.Errorf("c.Get() failed: %v\n", err)
+		}
+		got = string(val)
+		want := "nonvomtestkey" + key
+		if got != want {
+			return fmt.Errorf("unexpected value: got %q, want %q\n", got, want)
+		}
+	}
+	return nil
+}, "runVerifySyncgroupNonVOMData")
 
 var runVerifyDeletedData = modules.Register(func(env *modules.Env, args ...string) error {
 	ctx, shutdown := v23.Init()
