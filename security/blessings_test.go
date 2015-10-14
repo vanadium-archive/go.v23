@@ -209,6 +209,17 @@ func TestBlessingsUniqueID(t *testing.T) {
 	if !bytes.Equal(u1.UniqueID(), u2.UniqueID()) {
 		t.Errorf("%q and %q have different UniqueIDs", u1, u2)
 	}
+
+	// Finally, two blessings with the same name but different public keys
+	// should not have the same unique id.
+	const commonName = "alice"
+	var (
+		alice1 = blessSelf(t, palice, commonName)
+		alice2 = blessSelf(t, pbob, commonName)
+	)
+	if bytes.Equal(alice1.UniqueID(), alice2.UniqueID()) {
+		t.Errorf("Blessings for different public keys but the same name have the same unique id!")
+	}
 }
 
 func TestRootBlessings(t *testing.T) {
