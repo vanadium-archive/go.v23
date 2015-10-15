@@ -377,7 +377,7 @@ func TestAddToRoots(t *testing.T) {
 	}
 	for _, test := range tests {
 		tp := newPrincipal(t) // principal where roots are tested.
-		if err := tp.AddToRoots(test.add); err != nil {
+		if err := AddToRoots(tp, test.add); err != nil {
 			t.Error(err)
 			continue
 		}
@@ -844,7 +844,7 @@ func TestOverrideCaveatValidation(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if err := p.AddToRoots(bunion); err != nil {
+	if err := AddToRoots(p, bunion); err != nil {
 		t.Fatal(err)
 	}
 
@@ -894,7 +894,7 @@ func TestRemoteBlessingNames(t *testing.T) {
 				Method:          method}))
 		}
 	)
-	if err := p.AddToRoots(b1); err != nil {
+	if err := AddToRoots(p, b1); err != nil {
 		t.Fatal(err)
 	}
 
@@ -928,7 +928,7 @@ func BenchmarkRemoteBlessingNames(b *testing.B) {
 	if err != nil {
 		b.Fatal(err)
 	}
-	p.AddToRoots(remote)
+	AddToRoots(p, remote)
 	ctx, cancel := context.RootContext()
 	defer cancel()
 	call := NewCall(&CallParams{
@@ -978,7 +978,7 @@ func TestSigningBlessings(t *testing.T) {
 			return ret
 		}
 	)
-	if err := bob.AddToRoots(googleB); err != nil {
+	if err := AddToRoots(bob, googleB); err != nil {
 		t.Fatal(err)
 	}
 

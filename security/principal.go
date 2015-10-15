@@ -57,19 +57,16 @@ var (
 	signPurpose      = []byte(SignatureForMessageSigning)
 	dischargePurpose = []byte(SignatureForDischarge)
 
-	errNilStore     = verror.Register(pkgPath+".errNilStore", verror.NoRetry, "{1:}{2:}underlying BlessingStore object is nil{:_}")
-	errNilRoots     = verror.Register(pkgPath+".errNilRoots", verror.NoRetry, "{1:}{2:}underlying BlessingRoots object is nil{:_}")
-	errNilEncrypter = verror.Register(pkgPath+".errNilEncrypter", verror.NoRetry, "{1:}{2:}underlying BlessingsBasedEncrypter object is nil{:_}")
-	errNilDecrypter = verror.Register(pkgPath+".errNilDecrypter", verror.NoRetry, "{1:}{2:}underlying BlessingsBasedDecrypter object is nil{:_}")
-	errNeedCert     = verror.Register(pkgPath+".errNeedCert", verror.NoRetry, "{1:}{2:}the Blessings to bless 'with' must have at least one certificate{:_}")
-	errNeedRoots    = verror.Register(pkgPath+".errNeedRoots", verror.NoRetry, "{1:}{2:}principal does not have any BlessingRoots{:_}")
-
+	errNilStore           = verror.Register(pkgPath+".errNilStore", verror.NoRetry, "{1:}{2:}underlying BlessingStore object is nil{:_}")
+	errNilRoots           = verror.Register(pkgPath+".errNilRoots", verror.NoRetry, "{1:}{2:}underlying BlessingRoots object is nil{:_}")
+	errNilEncrypter       = verror.Register(pkgPath+".errNilEncrypter", verror.NoRetry, "{1:}{2:}underlying BlessingsBasedEncrypter object is nil{:_}")
+	errNilDecrypter       = verror.Register(pkgPath+".errNilDecrypter", verror.NoRetry, "{1:}{2:}underlying BlessingsBasedDecrypter object is nil{:_}")
+	errNeedCert           = verror.Register(pkgPath+".errNeedCert", verror.NoRetry, "{1:}{2:}the Blessings to bless 'with' must have at least one certificate{:_}")
 	errBadStoreKey        = verror.Register(pkgPath+".errBadStoreKey", verror.NoRetry, "{1:}{2:}store's public key: {3} does not match signer's public key: {4}{:_}")
 	errCantExtendBlessing = verror.Register(pkgPath+".errCantExtendBlessing", verror.NoRetry, "{1:}{2:}Principal with public key {3} cannot extend blessing with public key {4}{:_}")
 	errCantMintDischarges = verror.Register(pkgPath+".errCantMintDischarges", verror.NoRetry, "{1:}{2:}cannot mint discharges for {3}{:_}")
 	errCantSignDischarge  = verror.Register(pkgPath+".errCantSignDischarge", verror.NoRetry, "{1:}{2:}failed to sign discharge: {3}{:_}")
 	errCantUnmarshalKey   = verror.Register(pkgPath+".errCantUnmarshalKey", verror.NoRetry, "{1:}{2:}failed to unmarshal public key in root certificate with Extension: {3}: {4}{:_}")
-	errCantAddRoot        = verror.Register(pkgPath+".errCantAddRoot", verror.NoRetry, "{1:}{2:}failed to Add root: {3} for pattern: {4} to this principal's roots: {5}{:_}")
 )
 
 type errStore struct {
@@ -211,21 +208,6 @@ func (p *principal) BlessingStore() BlessingStore {
 
 func (p *principal) Roots() BlessingRoots {
 	return p.roots
-}
-
-func (p *principal) AddToRoots(blessings Blessings) error {
-	if p.roots == nil {
-		return verror.New(errNeedRoots, nil)
-	}
-	chains := blessings.chains
-	for _, chain := range chains {
-		pattern := BlessingPattern(chain[0].Extension)
-		root := chain[0].PublicKey
-		if err := p.roots.Add(root, pattern); err != nil {
-			return verror.New(errCantAddRoot, nil, root, pattern, err)
-		}
-	}
-	return nil
 }
 
 func (p *principal) Encrypter() BlessingsBasedEncrypter {

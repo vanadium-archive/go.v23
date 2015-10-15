@@ -71,7 +71,7 @@ func TestDefaultAuthorizer(t *testing.T) {
 	// Make ali, bob (the two ends) recognize all three blessings
 	for ip, p := range []Principal{pali, pbob} {
 		for _, b := range []Blessings{ali, bob, che} {
-			if err := p.AddToRoots(b); err != nil {
+			if err := AddToRoots(p, b); err != nil {
 				t.Fatalf("%d: %v - %v", ip, b, err)
 			}
 		}
@@ -233,7 +233,7 @@ func TestEndpointAuthorizer(t *testing.T) {
 		ctx, cancel = context.RootContext()
 	)
 	defer cancel()
-	pali.AddToRoots(ali)
+	AddToRoots(pali, ali)
 	for _, test := range tests {
 		err := EndpointAuthorizer().Authorize(ctx, NewCall(&CallParams{
 			RemoteEndpoint:  test.ep,

@@ -213,7 +213,7 @@ func TestPermissionsAuthorizer(t *testing.T) {
 					t.Fatalf("%q: %v", name, err)
 				}
 				// Since this test uses trustAllRoots, no need
-				// to call pserver.AddToRoots(b) to get the server
+				// to call AddToRoots(pserver, b) to get the server
 				// to recognize the client.
 				if ret, err = security.UnionOfBlessings(ret, b); err != nil {
 					t.Fatal(err)
@@ -338,7 +338,7 @@ func TestPermissionsAuthorizerFromFile(t *testing.T) {
 		}
 	)
 	// Since this test is using trustAllRoots{}, do not need
-	// pserver.AddToRoots(server) to make pserver recognize itself as an
+	// AddToRoots(pserver, server) to make pserver recognize itself as an
 	// authority on blessings matching "alice".
 
 	// "alice/friend/bob" should not have access to internal.Read methods like Get.

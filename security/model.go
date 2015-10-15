@@ -70,7 +70,7 @@
 // However, p2 can decide to trust the roots of the "alice" blessing and then it
 // will be able to recognize her delegates as well:
 //  // (in process B)
-//  p2.AddToRoots(call.RemoteBlessings())
+//  AddToRoots(p2, call.RemoteBlessings())
 //  names, rejected := RemoteBlessingNames(ctx, call)
 //  fmt.Printf("%v %v", names, rejected) // Will print ["alice"] []
 //
@@ -171,19 +171,6 @@ type Principal interface {
 	// Roots returns the set of recognized authorities (identified by their
 	// public keys) on blessings that match specific patterns
 	Roots() BlessingRoots
-
-	// AddToRoots marks the root principals of all blessing chains
-	// represented by 'blessings' as an authority on blessing chains
-	// beginning at that root.
-	//
-	// For example, if blessings represents the blessing chains
-	// ["alice/friend/spouse", "charlie/family/daughter"] then
-	// AddToRoots(blessing) will mark the root public key of the chain
-	// "alice/friend/bob" as the as authority on all blessings that
-	// match the pattern "alice", and root public key of the chain
-	// "charlie/family/daughter" as an authority on all blessings that
-	// match the pattern "charlie".
-	AddToRoots(blessings Blessings) error
 
 	// Encrypter returns an encrypter for encrypting messages that can only be
 	// decrypted by principals with specific blessings.

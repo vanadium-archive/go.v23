@@ -112,7 +112,7 @@ func blessSelf(t *testing.T, p Principal, name string, caveats ...Caveat) Blessi
 }
 
 func addToRoots(t *testing.T, p Principal, b Blessings) {
-	if err := p.AddToRoots(b); err != nil {
+	if err := AddToRoots(p, b); err != nil {
 		t.Fatal(err)
 	}
 }

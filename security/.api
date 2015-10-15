@@ -9,6 +9,7 @@ pkg security, const SHA512Hash Hash
 pkg security, const SignatureForBlessingCertificates ideal-string
 pkg security, const SignatureForDischarge ideal-string
 pkg security, const SignatureForMessageSigning ideal-string
+pkg security, func AddToRoots(Principal, Blessings) error
 pkg security, func AllowEveryone() Authorizer
 pkg security, func CreatePrincipal(Signer, BlessingStore, BlessingRoots, BlessingsBasedEncrypter, BlessingsBasedDecrypter) (Principal, error)
 pkg security, func DefaultAuthorizer() Authorizer
@@ -142,8 +143,7 @@ pkg security, type DischargeImpetus struct, Arguments []*vdl.Value
 pkg security, type DischargeImpetus struct, Method string
 pkg security, type DischargeImpetus struct, Server []BlessingPattern
 pkg security, type Hash string
-pkg security, type Principal interface { AddToRoots, Bless, BlessSelf, BlessingStore, BlessingsInfo, Decrypter, Encrypter, MintDischarge, PublicKey, Roots, Sign }
-pkg security, type Principal interface, AddToRoots(Blessings) error
+pkg security, type Principal interface { Bless, BlessSelf, BlessingStore, BlessingsInfo, Decrypter, Encrypter, MintDischarge, PublicKey, Roots, Sign }
 pkg security, type Principal interface, Bless(PublicKey, Blessings, string, Caveat, ...Caveat) (Blessings, error)
 pkg security, type Principal interface, BlessSelf(string, ...Caveat) (Blessings, error)
 pkg security, type Principal interface, BlessingStore() BlessingStore

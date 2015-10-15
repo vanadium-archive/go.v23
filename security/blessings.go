@@ -21,6 +21,8 @@ var (
 	errMisconfiguredRoots = verror.Register(pkgPath+".errMisconfiguredRoots", verror.NoRetry, "recognized root certificates not configured")
 	errMultiplePublicKeys = verror.Register(pkgPath+".errMultiplePublicKeys", verror.NoRetry, "invalid blessings: two certificate chains that bind to different public keys")
 	errInvalidUnion       = verror.Register(pkgPath+".errInvalidUnion", verror.NoRetry, "cannot create union of blessings bound to different public keys")
+	errNeedRoots          = verror.Register(pkgPath+".errNeedRoots", verror.NoRetry, "{1:}{2:}principal does not have any BlessingRoots{:_}")
+	errCantAddRoot        = verror.Register(pkgPath+".errCantAddRoot", verror.NoRetry, "{1:}{2:}failed to Add root: {3} for pattern: {4} to this principal's roots: {5}{:_}")
 )
 
 // Blessings encapsulates all cryptographic operations required to
@@ -398,11 +400,10 @@ func validateCaveatsForSigning(ctx *context.T, call Call, chain []Certificate) e
 // providers encapsulated in b.
 //
 // In particular:
-//     var p Principal
-//     p.AddToRoots(b)
+//     AddToRoots(p, b)
 // is equivalent to:
 //     for _, root := range RootBlessings(b) {
-//         p.AddToRoots(root)
+//         AddToRoots(p, root)
 //     }
 // Why would you use the latter? Only to share roots with another process,
 // without revealing your complete blessings and using fewer bytes.
@@ -576,4 +577,34 @@ func LocalBlessingNames(ctx *context.T, call Call) []string {
 		names = append(names, n)
 	}
 	return names
+}
+
+// AddToRoots marks the root principals of all blessing chains
+// represented by 'blessings' as an authority on blessing chains
+// beginning at that root in p.BlessingRoots().
+//
+// For example, if blessings represents the blessing chains
+// ["alice/friend/spouse", "charlie/family/daughter"] then
+// AddToRoots(blessing) will mark the root public key of the chain
+// "alice/friend/bob" as the as authority on all blessings that
+// match the pattern "alice", and root public key of the chain
+// "charlie/family/daughter" as an authority on all blessings that
+// match the pattern "charlie".
+//
+// This is a convenience function over extracting the names
+// and public keys of the roots of blessings and invoking
+// p.Roots().Add(...).
+func AddToRoots(p Principal, blessings Blessings) error {
+	if p.Roots() == nil {
+		return verror.New(errNeedRoots, nil)
+	}
+	chains := blessings.chains
+	for _, chain := range chains {
+		pattern := BlessingPattern(chain[0].Extension)
+		root := chain[0].PublicKey
+		if err := p.Roots().Add(root, pattern); err != nil {
+			return verror.New(errCantAddRoot, nil, root, pattern, err)
+		}
+	}
+	return nil
 }

@@ -50,7 +50,7 @@ func TestStandardCaveatFactories(t *testing.T) {
 		}
 	)
 
-	self.AddToRoots(balice)
+	AddToRoots(self, balice)
 
 	ctx, cancel := context.RootContext()
 	defer cancel()
