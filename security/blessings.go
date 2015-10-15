@@ -579,21 +579,19 @@ func LocalBlessingNames(ctx *context.T, call Call) []string {
 	return names
 }
 
-// AddToRoots marks the root principals of all blessing chains
-// represented by 'blessings' as an authority on blessing chains
-// beginning at that root in p.BlessingRoots().
+// AddToRoots marks the root principals of all blessing chains represented by
+// 'blessings' as an authority on blessing chains beginning at that root in
+// p.BlessingRoots().
 //
 // For example, if blessings represents the blessing chains
-// ["alice/friend/spouse", "charlie/family/daughter"] then
-// AddToRoots(blessing) will mark the root public key of the chain
-// "alice/friend/bob" as the as authority on all blessings that
-// match the pattern "alice", and root public key of the chain
-// "charlie/family/daughter" as an authority on all blessings that
-// match the pattern "charlie".
+// ["alice/friend/spouse", "charlie/family/daughter"] then AddToRoots(blessing)
+// will mark the root public key of the chain "alice/friend/bob" as the
+// authority on all blessings that match the pattern "alice", and root public
+// key of the chain "charlie/family/daughter" as an authority on all blessings
+// that match the pattern "charlie".
 //
-// This is a convenience function over extracting the names
-// and public keys of the roots of blessings and invoking
-// p.Roots().Add(...).
+// This is a convenience function over extracting the names and public keys of
+// the roots of blessings and invoking p.Roots().Add(...).
 func AddToRoots(p Principal, blessings Blessings) error {
 	if p.Roots() == nil {
 		return verror.New(errNeedRoots, nil)
