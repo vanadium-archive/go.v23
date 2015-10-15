@@ -137,24 +137,6 @@ func (b Blessings) publicKeyDER() []byte {
 	return chain[len(chain)-1].PublicKey
 }
 
-func (b Blessings) blessingsByNameForPrincipal(p Principal, pattern BlessingPattern) Blessings {
-	pKey, err := p.PublicKey().MarshalBinary()
-	if err != nil {
-		return Blessings{}
-	}
-	ret := Blessings{publicKey: b.publicKey}
-	for _, chain := range b.chains {
-		blessing := nameForPrincipal(pKey, p.Roots(), chain)
-		if len(blessing) > 0 && pattern.MatchedBy(blessing) {
-			ret.chains = append(ret.chains, chain)
-		}
-	}
-	if len(ret.chains) == 0 {
-		return Blessings{}
-	}
-	return ret
-}
-
 func (b Blessings) String() string {
 	blessings := make([]string, len(b.chains))
 	for chainidx, chain := range b.chains {

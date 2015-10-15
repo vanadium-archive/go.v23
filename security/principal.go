@@ -205,16 +205,6 @@ func (p *principal) BlessingsInfo(b Blessings) map[string][]Caveat {
 	return bInfo
 }
 
-func (p *principal) BlessingsByName(name BlessingPattern) []Blessings {
-	var matched []Blessings
-	for _, b := range p.store.PeerBlessings() {
-		if m := b.blessingsByNameForPrincipal(p, name); !m.IsZero() {
-			matched = append(matched, b)
-		}
-	}
-	return matched
-}
-
 func (p *principal) BlessingStore() BlessingStore {
 	return p.store
 }

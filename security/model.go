@@ -156,12 +156,6 @@ type Principal interface {
 	// by the Principal.
 	PublicKey() PublicKey
 
-	// BlessingsByName returns Blessings granted to this Principal from
-	// recongized authorities and whose human-readable strings match a
-	// given name pattern. BlessingsByName does not check the validity
-	// of the caveats in the returned Blessings.
-	BlessingsByName(name BlessingPattern) []Blessings
-
 	// BlessingsInfo returns a map from human-readable blessing names
 	// granted to this Principal from recognized authorites to the Caveats
 	// associated with the names. BlessingInfo does not validate caveats

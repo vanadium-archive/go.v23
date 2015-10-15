@@ -142,12 +142,11 @@ pkg security, type DischargeImpetus struct, Arguments []*vdl.Value
 pkg security, type DischargeImpetus struct, Method string
 pkg security, type DischargeImpetus struct, Server []BlessingPattern
 pkg security, type Hash string
-pkg security, type Principal interface { AddToRoots, Bless, BlessSelf, BlessingStore, BlessingsByName, BlessingsInfo, Decrypter, Encrypter, MintDischarge, PublicKey, Roots, Sign }
+pkg security, type Principal interface { AddToRoots, Bless, BlessSelf, BlessingStore, BlessingsInfo, Decrypter, Encrypter, MintDischarge, PublicKey, Roots, Sign }
 pkg security, type Principal interface, AddToRoots(Blessings) error
 pkg security, type Principal interface, Bless(PublicKey, Blessings, string, Caveat, ...Caveat) (Blessings, error)
 pkg security, type Principal interface, BlessSelf(string, ...Caveat) (Blessings, error)
 pkg security, type Principal interface, BlessingStore() BlessingStore
-pkg security, type Principal interface, BlessingsByName(BlessingPattern) []Blessings
 pkg security, type Principal interface, BlessingsInfo(Blessings) map[string][]Caveat
 pkg security, type Principal interface, Decrypter() BlessingsBasedDecrypter
 pkg security, type Principal interface, Encrypter() BlessingsBasedEncrypter
