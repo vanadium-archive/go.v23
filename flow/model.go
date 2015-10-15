@@ -102,10 +102,6 @@ type PeerAuthorizer interface {
 // Since this ManagedConn may be shared between many flows it wouldn't be safe
 // to read and write to it directly.  We just provide some metadata.
 type ManagedConn interface {
-	// LocalEndpoint returns the local vanadium Endpoint
-	LocalEndpoint() naming.Endpoint
-	// RemoteEndpoint returns the remote vanadium Endpoint
-	RemoteEndpoint() naming.Endpoint
 	// CommonVersion returns the RPCVersion negotiated between the local and remote endpoints.
 	CommonVersion() version.RPCVersion
 	// Closed returns a channel that remains open until the connection has been closed.
@@ -153,6 +149,10 @@ type Flow interface {
 	// the flow is connected, such as the language of the request.
 	SetDeadlineContext(ctx *context.T, deadline time.Time) *context.T
 
+	// LocalEndpoint returns the local vanadium Endpoint.
+	LocalEndpoint() naming.Endpoint
+	// RemoteEndpoint returns the remote vanadium Endpoint.
+	RemoteEndpoint() naming.Endpoint
 	// LocalBlessings returns the blessings presented by the local end of the flow
 	// during authentication.
 	LocalBlessings() security.Blessings

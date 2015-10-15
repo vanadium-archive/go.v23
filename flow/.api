@@ -16,16 +16,18 @@ pkg flow, type Conn interface, Close() error
 pkg flow, type Conn interface, LocalAddr() net.Addr
 pkg flow, type Conn interface, ReadMsg() ([]byte, error)
 pkg flow, type Conn interface, WriteMsg(...[]byte) (int, error)
-pkg flow, type Flow interface { Close, Closed, Conn, LocalBlessings, LocalDischarges, Read, ReadMsg, RemoteBlessings, RemoteDischarges, SetDeadlineContext, Write, WriteMsg, WriteMsgAndClose }
+pkg flow, type Flow interface { Close, Closed, Conn, LocalBlessings, LocalDischarges, LocalEndpoint, Read, ReadMsg, RemoteBlessings, RemoteDischarges, RemoteEndpoint, SetDeadlineContext, Write, WriteMsg, WriteMsgAndClose }
 pkg flow, type Flow interface, Close() error
 pkg flow, type Flow interface, Closed() <-chan struct{}
 pkg flow, type Flow interface, Conn() ManagedConn
 pkg flow, type Flow interface, LocalBlessings() security.Blessings
 pkg flow, type Flow interface, LocalDischarges() map[string]security.Discharge
+pkg flow, type Flow interface, LocalEndpoint() naming.Endpoint
 pkg flow, type Flow interface, Read([]byte) (int, error)
 pkg flow, type Flow interface, ReadMsg() ([]byte, error)
 pkg flow, type Flow interface, RemoteBlessings() security.Blessings
 pkg flow, type Flow interface, RemoteDischarges() map[string]security.Discharge
+pkg flow, type Flow interface, RemoteEndpoint() naming.Endpoint
 pkg flow, type Flow interface, SetDeadlineContext(*context.T, time.Time) *context.T
 pkg flow, type Flow interface, Write([]byte) (int, error)
 pkg flow, type Flow interface, WriteMsg(...[]byte) (int, error)
@@ -34,11 +36,9 @@ pkg flow, type Listener interface { Accept, Addr, Close }
 pkg flow, type Listener interface, Accept(*context.T) (Conn, error)
 pkg flow, type Listener interface, Addr() net.Addr
 pkg flow, type Listener interface, Close() error
-pkg flow, type ManagedConn interface { Closed, CommonVersion, LocalEndpoint, RemoteEndpoint }
+pkg flow, type ManagedConn interface { Closed, CommonVersion }
 pkg flow, type ManagedConn interface, Closed() <-chan struct{}
 pkg flow, type ManagedConn interface, CommonVersion() version.RPCVersion
-pkg flow, type ManagedConn interface, LocalEndpoint() naming.Endpoint
-pkg flow, type ManagedConn interface, RemoteEndpoint() naming.Endpoint
 pkg flow, type Manager interface { Accept, Closed, Dial, Listen, ListeningEndpoints, ProxyListen, RoutingID, StopListening }
 pkg flow, type Manager interface, Accept(*context.T) (Flow, error)
 pkg flow, type Manager interface, Closed() <-chan struct{}
