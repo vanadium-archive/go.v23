@@ -170,6 +170,16 @@ func V23TestSyncbasedCompEval(t *v23tests.T) {
 	tu.RunClient(t, client0Creds, runCreateSyncgroup, "sync0", sgName, "tb:foo", "root/s0", "root/s1")
 	tu.RunClient(t, client0Creds, runPopulateData, "sync0", "foo", "0")
 
+	// This is a decoy syncgroup that no other Syncbase joins, but is on the
+	// same database as the first syncgroup. Populating it after the first
+	// syncgroup causes the database generations to go up, but the joiners
+	// on the first syncgroup do not get any data belonging to this
+	// syncgroup. This triggers the handling of filtered log records in the
+	// restartability code.
+	sgName1 := naming.Join("sync0", constants.SyncbaseSuffix, "SG2")
+	tu.RunClient(t, client0Creds, runCreateSyncgroup, "sync0", sgName1, "tb:bar", "root/s0", "root/s1")
+	tu.RunClient(t, client0Creds, runPopulateData, "sync0", "bar", "0")
+
 	tu.RunClient(t, client1Creds, runSetupAppA, "sync1")
 	tu.RunClient(t, client1Creds, runJoinSyncgroup, "sync1", sgName)
 	tu.RunClient(t, client1Creds, runVerifySyncgroupData, "sync1", "foo", "0", "10", "false")
