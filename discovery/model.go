@@ -27,6 +27,9 @@ type Advertiser interface {
 	// empty set means that there are no restrictions on visibility (i.e, equivalent
 	// to []security.BlessingPattern{security.AllPrincipals}). Advertising will continue
 	// until the context is canceled or exceeds its deadline.
+	//
+	// It is an error to have simultaneously active advertisements for two identical
+	// instances (service.InstanceUuid).
 	Advertise(ctx *context.T, service Service, perms []security.BlessingPattern) error
 }
 
