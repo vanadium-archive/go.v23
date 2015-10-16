@@ -156,8 +156,7 @@ type Caveat struct {
 // This structure is the "wire" format for sending and receiving blessings
 // in RPCs or marshaling to persistent storage. Typically, languages will
 // provide a factory function that converts this wire representation to
-// a more usable object to inspect and manipulate these blessings. For
-// example, the NewBlessings factory function in Go.
+// a more usable object to inspect and manipulate these blessings.
 type WireBlessings struct {
 	// CertificateChains is an array of chains of certificates that bind
 	// a blessing to the public key in the last certificate of the chain.

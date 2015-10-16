@@ -7,6 +7,7 @@ package security
 import (
 	"bytes"
 	"fmt"
+	"reflect"
 	"sort"
 	"strings"
 	"sync"
@@ -215,6 +216,22 @@ func wireBlessingsToNative(wire WireBlessings, native *Blessings) error {
 	if len(certchains) == 0 || len(certchains[0]) == 0 {
 		return verror.New(errEmptyChain, nil)
 	}
+	// if this is a nameless blessing
+	if isNamelessChains(certchains) {
+		cert := certchains[0][0]
+		pk, err := UnmarshalPublicKey(cert.PublicKey)
+		if err != nil {
+			return err
+		}
+		digest, _ := cert.chainedDigests(pk.hash(), nil)
+		*native = Blessings{
+			chains:    [][]Certificate{{cert}},
+			publicKey: pk,
+			digests:   [][]byte{digest},
+		}
+		native.init()
+		return nil
+	}
 	// Public keys should match for all chains.
 	marshaledkey := certchains[0][len(certchains[0])-1].PublicKey
 	digests := make([][]byte, len(certchains))
@@ -266,16 +283,21 @@ func UnionOfBlessings(blessings ...Blessings) (Blessings, error) {
 		return blessings[0], nil
 	}
 	key0 := blessings[0].publicKeyDER()
+	onlyNameless := blessings[0].isNamelessBlessing()
 	var ret Blessings
 	for idx, b := range blessings {
-		if b.IsZero() {
+		if b.IsZero() || b.isNamelessBlessing() {
 			continue
 		}
+		onlyNameless = false
 		if idx > 0 && !bytes.Equal(key0, b.publicKeyDER()) {
 			return Blessings{}, verror.New(errInvalidUnion, nil)
 		}
 		ret.chains = append(ret.chains, b.chains...)
 		ret.digests = append(ret.digests, b.digests...)
+	}
+	if onlyNameless {
+		return blessings[0], nil
 	}
 	var err error
 	if ret.publicKey, err = UnmarshalPublicKey(key0); err != nil {
@@ -408,6 +430,9 @@ func validateCaveatsForSigning(ctx *context.T, call Call, chain []Certificate) e
 // Why would you use the latter? Only to share roots with another process,
 // without revealing your complete blessings and using fewer bytes.
 func RootBlessings(b Blessings) []Blessings {
+	if b.isNamelessBlessing() {
+		return nil
+	}
 	ret := make([]Blessings, len(b.chains))
 	for i, chain := range b.chains {
 		// One option is to convert to WireBlessings and back.
@@ -428,6 +453,9 @@ func RootBlessings(b Blessings) []Blessings {
 		ptr.publicKey, _ = UnmarshalPublicKey(cert.PublicKey)
 		ptr.init()
 	}
+	if len(ret) == 0 {
+		return nil
+	}
 	return ret
 }
 
@@ -438,6 +466,9 @@ func RootBlessings(b Blessings) []Blessings {
 // 'SigningNames' function.
 func SigningBlessings(blessings Blessings) Blessings {
 	ret := Blessings{}
+	if blessings.IsZero() || blessings.isNamelessBlessing() {
+		return ret
+	}
 	for _, chain := range blessings.chains {
 		suitableForSigning := true
 		for _, cav := range chainCaveats(chain) {
@@ -469,7 +500,7 @@ func SigningBlessingNames(ctx *context.T, p Principal, blessings Blessings) ([]s
 	if ctx == nil || p == nil {
 		return nil, nil
 	}
-	if blessings.IsZero() {
+	if blessings.IsZero() || blessings.isNamelessBlessing() {
 		return nil, nil
 	}
 	var (
@@ -510,7 +541,7 @@ func RemoteBlessingNames(ctx *context.T, call Call) ([]string, []RejectedBlessin
 		return nil, nil
 	}
 	b := call.RemoteBlessings()
-	if b.IsZero() {
+	if b.IsZero() || b.isNamelessBlessing() {
 		return nil, nil
 	}
 	var (
@@ -579,9 +610,41 @@ func LocalBlessingNames(ctx *context.T, call Call) []string {
 	return names
 }
 
+// NamelessBlessing returns a blessings object that has no names, only the
+// provided public key.
+func NamelessBlessing(pk PublicKey) (Blessings, error) {
+	pkbytes, err := pk.MarshalBinary()
+	if err != nil {
+		return Blessings{}, err
+	}
+	cert := Certificate{PublicKey: pkbytes}
+	digest, _ := cert.chainedDigests(pk.hash(), nil)
+	b := Blessings{
+		chains:    [][]Certificate{{cert}},
+		publicKey: pk,
+		digests:   [][]byte{digest},
+	}
+	b.init()
+	return b, nil
+}
+
+func (b Blessings) isNamelessBlessing() bool {
+	return b.publicKey != nil && isNamelessChains(b.chains)
+}
+
+func isNamelessChains(chains [][]Certificate) bool {
+	var emptyCert Certificate
+	if len(chains) != 1 || len(chains[0]) != 1 {
+		return false
+	}
+	cert := chains[0][0]
+	cert.PublicKey = nil
+	return reflect.DeepEqual(cert, emptyCert)
+}
+
 // AddToRoots marks the root principals of all blessing chains represented by
-// 'blessings' as an authority on blessing chains beginning at that root in
-// p.BlessingRoots().
+// 'blessings' as an authority on blessing chains beginning at that root name
+// in p.BlessingRoots().
 //
 // For example, if blessings represents the blessing chains
 // ["alice/friend/spouse", "charlie/family/daughter"] then AddToRoots(blessing)
@@ -595,6 +658,9 @@ func LocalBlessingNames(ctx *context.T, call Call) []string {
 func AddToRoots(p Principal, blessings Blessings) error {
 	if p.Roots() == nil {
 		return verror.New(errNeedRoots, nil)
+	}
+	if blessings.isNamelessBlessing() {
+		return nil
 	}
 	chains := blessings.chains
 	for _, chain := range chains {

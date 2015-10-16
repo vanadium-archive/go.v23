@@ -11,7 +11,6 @@ pkg message, type Auth struct
 pkg message, type Auth struct, BlessingsKey uint64
 pkg message, type Auth struct, ChannelBinding security.Signature
 pkg message, type Auth struct, DischargeKey uint64
-pkg message, type Auth struct, PublicKey security.PublicKey
 pkg message, type Data struct
 pkg message, type Data struct, Flags uint64
 pkg message, type Data struct, ID uint64

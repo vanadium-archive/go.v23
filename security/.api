@@ -18,6 +18,7 @@ pkg security, func EndpointAuthorizer() Authorizer
 pkg security, func JoinPatternName(BlessingPattern, string) string
 pkg security, func LocalBlessingNames(*context.T, Call) []string
 pkg security, func MarshalBlessings(Blessings) WireBlessings
+pkg security, func NamelessBlessing(PublicKey) (Blessings, error)
 pkg security, func NewCall(*CallParams) Call
 pkg security, func NewCaveat(CaveatDescriptor, interface{}) (Caveat, error)
 pkg security, func NewECDSAPublicKey(*ecdsa.PublicKey) PublicKey

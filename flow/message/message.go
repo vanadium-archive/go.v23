@@ -240,7 +240,6 @@ func (m *AckLameDuck) read(ctx *context.T, data []byte) error {
 type Auth struct {
 	BlessingsKey, DischargeKey uint64
 	ChannelBinding             security.Signature
-	PublicKey                  security.PublicKey
 }
 
 func (m *Auth) append(ctx *context.T, data []byte) ([]byte, error) {
@@ -251,13 +250,6 @@ func (m *Auth) append(ctx *context.T, data []byte) ([]byte, error) {
 	data = appendLenBytes([]byte(m.ChannelBinding.Hash), data)
 	data = appendLenBytes(m.ChannelBinding.R, data)
 	data = appendLenBytes(m.ChannelBinding.S, data)
-	if m.PublicKey != nil {
-		pk, err := m.PublicKey.MarshalBinary()
-		if err != nil {
-			return data, err
-		}
-		data = append(data, pk...)
-	}
 	return data, nil
 }
 func (m *Auth) read(ctx *context.T, orig []byte) error {
@@ -281,11 +273,6 @@ func (m *Auth) read(ctx *context.T, orig []byte) error {
 	}
 	if m.ChannelBinding.S, data, valid = readLenBytes(ctx, data); !valid {
 		return NewErrInvalidMsg(ctx, openFlowType, uint64(len(orig)), 5, nil)
-	}
-	if len(data) > 0 {
-		var err error
-		m.PublicKey, err = security.UnmarshalPublicKey(data)
-		return err
 	}
 	return nil
 }

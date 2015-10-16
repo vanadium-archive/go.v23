@@ -86,9 +86,7 @@ func TestAuth(t *testing.T) {
 		t.Fatal(err)
 	}
 	testMessages(t, ctx, []message.Message{
-		&message.Auth{BlessingsKey: 1, DischargeKey: 5, ChannelBinding: sig, PublicKey: p.PublicKey()},
 		&message.Auth{BlessingsKey: 1, DischargeKey: 5, ChannelBinding: sig},
-		&message.Auth{ChannelBinding: sig, PublicKey: p.PublicKey()},
 		&message.Auth{},
 	})
 }

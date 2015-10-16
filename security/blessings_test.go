@@ -13,6 +13,7 @@ import (
 	"testing"
 	"time"
 
+	"v.io/v23/context"
 	"v.io/v23/vom"
 )
 
@@ -171,7 +172,8 @@ func TestBlessingsUniqueID(t *testing.T) {
 		pbob   = newPrincipal(t)
 
 		// Create blessings using all the methods available to create
-		// them: Bless, BlessSelf, UnionOfBlessings.
+		// them: Bless, BlessSelf, UnionOfBlessings, NamelessBlessings.
+		nameless, _  = NamelessBlessing(palice.PublicKey())
 		alice        = blessSelf(t, palice, "alice")
 		bob          = blessSelf(t, pbob, "bob")
 		bobfriend, _ = pbob.Bless(alice.PublicKey(), bob, "friend", UnconstrainedUse())
@@ -180,7 +182,7 @@ func TestBlessingsUniqueID(t *testing.T) {
 		u1, _ = UnionOfBlessings(alice, bobfriend, bobspouse)
 		u2, _ = UnionOfBlessings(bobfriend, bobspouse, alice)
 
-		all = []Blessings{alice, bob, bobfriend, bobspouse, u1}
+		all = []Blessings{nameless, alice, bob, bobfriend, bobspouse, u1}
 	)
 	// Each individual blessing should have a different UniqueID, and different from u1
 	for i := 0; i < len(all); i++ {
@@ -285,7 +287,96 @@ func TestRootBlessings(t *testing.T) {
 			t.Errorf("%v: Failed roundtripping: Got %#v want %#v", test.b, roots, deserialized)
 		}
 	}
+}
 
+func TestNamelessBlessing(t *testing.T) {
+	var (
+		alice          = newPrincipal(t)
+		bob            = newPrincipal(t)
+		balice, _      = NamelessBlessing(alice.PublicKey())
+		baliceagain, _ = NamelessBlessing(alice.PublicKey())
+		bbob, _        = NamelessBlessing(bob.PublicKey())
+	)
+	if got, want := balice.PublicKey(), alice.PublicKey(); !reflect.DeepEqual(got, want) {
+		t.Errorf("got %v, want %v", got, want)
+	}
+	if got, want := len(balice.ThirdPartyCaveats()), 0; got != want {
+		t.Errorf("got %v tpcavs, want %v", got, want)
+	}
+	if !balice.Equivalent(baliceagain) {
+		t.Errorf("expected blessings to be equivalent")
+	}
+	if balice.Equivalent(bbob) {
+		t.Errorf("expected blessings to differ")
+	}
+	if ua, ub := balice.UniqueID(), bbob.UniqueID(); bytes.Equal(ua, ub) {
+		t.Errorf("%q and %q should not be equal", ua, ub)
+	}
+	if ua, uaa := balice.UniqueID(), baliceagain.UniqueID(); !bytes.Equal(ua, uaa) {
+		t.Errorf("balice and baliceagain uniqueid should be equal")
+	}
+	if balice.CouldHaveNames([]string{"alice"}) {
+		t.Errorf("blessing should not have names")
+	}
+	if !balice.Expiry().IsZero() {
+		t.Errorf("blessing should not expire")
+	}
+	if got, want := balice.String(), ""; got != want {
+		t.Errorf("got %v, want %v", got, want)
+	}
+	if got, want := len(RootBlessings(balice)), 0; got != want {
+		t.Errorf("got %v, want %v", got, want)
+	}
+	if got := SigningBlessings(balice); !got.IsZero() {
+		t.Errorf("got %v, want zero blessings", got)
+	}
+	ctx, _ := context.RootContext()
+	if gotname, gotrejected := SigningBlessingNames(ctx, alice, balice); len(gotname)+len(gotrejected) > 0 {
+		t.Errorf("got %v, %v, want nil, nil", gotname, gotrejected)
+	}
+	call := NewCall(&CallParams{
+		LocalPrincipal:  alice,
+		RemoteBlessings: bbob,
+	})
+	if gotname, gotrejected := RemoteBlessingNames(ctx, call); len(gotname)+len(gotrejected) > 0 {
+		t.Errorf("got %v, %v, want nil, nil", gotname, gotrejected)
+	}
+	call = NewCall(&CallParams{
+		LocalPrincipal: alice,
+		LocalBlessings: balice,
+	})
+	if got := LocalBlessingNames(ctx, call); len(got) > 0 {
+		t.Errorf("got %v, want nil", got)
+	}
+	if got := alice.BlessingsInfo(balice); len(got) > 0 {
+		t.Errorf("got %v, want nil", got)
+	}
+	var b Blessings
+	if err := roundTrip(balice, &b); err != nil {
+		t.Fatal(err)
+	}
+	if !balice.Equivalent(b) {
+		t.Errorf("got %#v, want %#v", b, balice)
+	}
+	if _, err := alice.Bless(bob.PublicKey(), balice, "friend", UnconstrainedUse()); err == nil {
+		t.Errorf("bless operation should have failed")
+	}
+	// Union of two nameless blessings should be nameless.
+	if got, err := UnionOfBlessings(balice, baliceagain); err != nil || !got.Equivalent(balice) {
+		t.Errorf("got %#v want %#v, (err = %v)", got, balice, err)
+	}
+	// Union of zero and nameless blessings hsoudl be nameless.
+	if got, err := UnionOfBlessings(balice, Blessings{}); err != nil || !got.Equivalent(balice) {
+		t.Errorf("got %#v want %#v, (err = %v)", got, balice, err)
+	}
+	// Union of zero, nameless, and named blessings should be the named blessings.
+	named, err := alice.BlessSelf("named")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if got, err := UnionOfBlessings(balice, Blessings{}, named); err != nil || !got.Equivalent(named) {
+		t.Errorf("got %#v want %#v, (err = %v)", got, named, err)
+	}
 }
 
 func BenchmarkBless(b *testing.B) {

@@ -114,7 +114,7 @@ type principal struct {
 }
 
 func (p *principal) Bless(key PublicKey, with Blessings, extension string, caveat Caveat, additionalCaveats ...Caveat) (Blessings, error) {
-	if with.IsZero() {
+	if with.IsZero() || with.isNamelessBlessing() {
 		return Blessings{}, verror.New(errNeedCert, nil)
 	}
 	if !reflect.DeepEqual(with.PublicKey(), p.PublicKey()) {
