@@ -14,6 +14,12 @@ import (
 // Used to unregister a service.
 type ServiceHandle uint32
 
+// Discovery is the interface for discovery operations.
+type Discovery interface {
+	Advertiser
+	Scanner
+}
+
 // Advertiser is the interface for advertising services.
 type Advertiser interface {
 	// RegisterService registers a service to be discovered by "Scanner" implementations.
@@ -29,7 +35,7 @@ type Advertiser interface {
 // Scanner is the interface for scanning services.
 type Scanner interface {
 	// Scan scans services that match the query and returns the stream of discovered
-	// services. Scanning will continue until the client finishes or cancels the call.
+	// services. Scanning will continue until the client cancels the call.
 	//
 	// TODO(jhahn): Add query syntax and examples.
 	Scan(query string) stream<_, discovery.Update> error {access.Read}

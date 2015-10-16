@@ -1,5 +1,7 @@
 pkg discovery, func AdvertiserClient(string) AdvertiserClientStub
 pkg discovery, func AdvertiserServer(AdvertiserServerMethods) AdvertiserServerStub
+pkg discovery, func DiscoveryClient(string) DiscoveryClientStub
+pkg discovery, func DiscoveryServer(DiscoveryServerMethods) DiscoveryServerStub
 pkg discovery, func ScannerClient(string) ScannerClientStub
 pkg discovery, func ScannerServer(ScannerServerMethods) ScannerServerStub
 pkg discovery, method (*ScannerScanServerCallStub) Init(rpc.StreamServerCall)
@@ -16,6 +18,23 @@ pkg discovery, type AdvertiserServerMethods interface, UnregisterService(*contex
 pkg discovery, type AdvertiserServerStub interface, Describe__() []rpc.InterfaceDesc
 pkg discovery, type AdvertiserServerStub interface, unexported methods
 pkg discovery, type AdvertiserServerStubMethods AdvertiserServerMethods
+pkg discovery, type DiscoveryClientMethods interface { RegisterService, Scan, UnregisterService }
+pkg discovery, type DiscoveryClientMethods interface, RegisterService(*context.T, discovery.Service, []security.BlessingPattern, ...rpc.CallOpt) (ServiceHandle, error)
+pkg discovery, type DiscoveryClientMethods interface, Scan(*context.T, string, ...rpc.CallOpt) (ScannerScanClientCall, error)
+pkg discovery, type DiscoveryClientMethods interface, UnregisterService(*context.T, ServiceHandle, ...rpc.CallOpt) error
+pkg discovery, type DiscoveryClientStub interface { RegisterService, Scan, UnregisterService }
+pkg discovery, type DiscoveryClientStub interface, RegisterService(*context.T, discovery.Service, []security.BlessingPattern, ...rpc.CallOpt) (ServiceHandle, error)
+pkg discovery, type DiscoveryClientStub interface, Scan(*context.T, string, ...rpc.CallOpt) (ScannerScanClientCall, error)
+pkg discovery, type DiscoveryClientStub interface, UnregisterService(*context.T, ServiceHandle, ...rpc.CallOpt) error
+pkg discovery, type DiscoveryServerMethods interface { RegisterService, Scan, UnregisterService }
+pkg discovery, type DiscoveryServerMethods interface, RegisterService(*context.T, rpc.ServerCall, discovery.Service, []security.BlessingPattern) (ServiceHandle, error)
+pkg discovery, type DiscoveryServerMethods interface, Scan(*context.T, ScannerScanServerCall, string) error
+pkg discovery, type DiscoveryServerMethods interface, UnregisterService(*context.T, rpc.ServerCall, ServiceHandle) error
+pkg discovery, type DiscoveryServerStub interface, Describe__() []rpc.InterfaceDesc
+pkg discovery, type DiscoveryServerStub interface, Scan(*context.T, *ScannerScanServerCallStub, string) error
+pkg discovery, type DiscoveryServerStub interface, unexported methods
+pkg discovery, type DiscoveryServerStubMethods interface, Scan(*context.T, *ScannerScanServerCallStub, string) error
+pkg discovery, type DiscoveryServerStubMethods interface, unexported methods
 pkg discovery, type ScannerClientMethods interface { Scan }
 pkg discovery, type ScannerClientMethods interface, Scan(*context.T, string, ...rpc.CallOpt) (ScannerScanClientCall, error)
 pkg discovery, type ScannerClientStub interface { Scan }
@@ -46,4 +65,5 @@ pkg discovery, type ScannerServerStubMethods interface { Scan }
 pkg discovery, type ScannerServerStubMethods interface, Scan(*context.T, *ScannerScanServerCallStub, string) error
 pkg discovery, type ServiceHandle uint32
 pkg discovery, var AdvertiserDesc rpc.InterfaceDesc
+pkg discovery, var DiscoveryDesc rpc.InterfaceDesc
 pkg discovery, var ScannerDesc rpc.InterfaceDesc
