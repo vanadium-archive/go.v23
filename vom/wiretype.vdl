@@ -122,4 +122,6 @@ type wireOptional struct {
 const (
   WireCtrlNil = byte(0xe0)
   WireCtrlEnd = byte(0xe1)
+  WireCtrlTypeCont = byte(0xe2)
+  WireCtrlValueCont = byte(0xe3)
 )

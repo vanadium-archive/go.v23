@@ -77,6 +77,7 @@ pkg vdl, method (*Type) CanBeKey() bool
 pkg vdl, method (*Type) CanBeNamed() bool
 pkg vdl, method (*Type) CanBeNil() bool
 pkg vdl, method (*Type) CanBeOptional() bool
+pkg vdl, method (*Type) ContainsAnyOrTypeObject() bool
 pkg vdl, method (*Type) ContainsKind(WalkMode, ...Kind) bool
 pkg vdl, method (*Type) ContainsType(WalkMode, ...*Type) bool
 pkg vdl, method (*Type) Elem() *Type

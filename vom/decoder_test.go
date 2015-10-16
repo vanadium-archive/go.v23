@@ -16,11 +16,13 @@ import (
 	"testing"
 
 	"v.io/v23/vdl"
-	"v.io/v23/vom/testdata"
+	"v.io/v23/vom/testdata/data80"
+	"v.io/v23/vom/testdata/data81"
+	"v.io/v23/vom/testdata/types"
 )
 
 func TestDecoder(t *testing.T) {
-	for _, test := range testdata.Tests {
+	for _, test := range append(data80.Tests, data81.Tests...) {
 		// Decode hex patterns into binary data.
 		binversion, err := binFromHexPat(test.HexVersion)
 		if err != nil {
@@ -42,7 +44,6 @@ func TestDecoder(t *testing.T) {
 		testDecodeVDL(t, name, binversion+bintype+binvalue, test.Value)
 		name = test.Name + " [vdl.Value] (with TypeDecoder)"
 		testDecodeVDLWithTypeDecoder(t, name, binversion, bintype, binvalue, test.Value)
-
 		name = test.Name + " [vdl.Any]"
 		testDecodeVDL(t, name, binversion+bintype+binvalue, vdl.AnyValue(test.Value))
 		name = test.Name + " [vdl.Any] (with TypeDecoder)"
@@ -71,6 +72,9 @@ func testDecodeVDL(t *testing.T, name, bin string, value *vdl.Value) {
 	for _, mode := range allReadModes {
 		head := fmt.Sprintf("%s (%s)", name, mode)
 		decoder := NewDecoder(mode.testReader(strings.NewReader(bin)))
+		if value == nil {
+			value = vdl.ZeroValue(vdl.AnyType)
+		}
 		got := vdl.ZeroValue(value.Type())
 		if err := decoder.Decode(got); err != nil {
 			t.Errorf("%s: Decode failed: %v", head, err)
@@ -104,7 +108,11 @@ func testDecodeVDLWithTypeDecoder(t *testing.T, name, binversion, bintype, binva
 	for _, mode := range allReadModes {
 		head := fmt.Sprintf("%s (%s)", name, mode)
 		typedec := NewTypeDecoder(mode.testReader(strings.NewReader(binversion + bintype)))
+		typedec.Start()
 		decoder := NewDecoderWithTypeDecoder(mode.testReader(strings.NewReader(binversion+binvalue)), typedec)
+		if value == nil {
+			value = vdl.ZeroValue(vdl.AnyType)
+		}
 		got := vdl.ZeroValue(value.Type())
 		if err := decoder.Decode(got); err != nil {
 			t.Errorf("%s: Decode failed: %v", head, err)
@@ -114,6 +122,7 @@ func testDecodeVDLWithTypeDecoder(t *testing.T, name, binversion, bintype, binva
 			t.Errorf("%s: Decode mismatch\nGOT %v\nWANT %v", head, got, want)
 			return
 		}
+		typedec.Stop()
 	}
 }
 
@@ -121,12 +130,15 @@ func testDecodeGo(t *testing.T, name, bin string, rt reflect.Type, want interfac
 	for _, mode := range allReadModes {
 		head := fmt.Sprintf("%s (%s)", name, mode)
 		decoder := NewDecoder(mode.testReader(strings.NewReader(bin)))
-		rvGot := reflect.New(rt)
-		if err := decoder.Decode(rvGot.Interface()); err != nil {
+		var got interface{}
+		if rt != nil {
+			got = reflect.New(rt).Elem().Interface()
+		}
+		if err := decoder.Decode(&got); err != nil {
 			t.Errorf("%s: Decode failed: %v", head, err)
 			return
 		}
-		if got := rvGot.Elem().Interface(); !reflect.DeepEqual(got, want) {
+		if !reflect.DeepEqual(got, want) {
 			t.Errorf("%s: Decode mismatch\nGOT %T %#v\nWANT %T %#v", head, got, got, want, want)
 			return
 		}
@@ -138,12 +150,15 @@ func testDecodeGo(t *testing.T, name, bin string, rt reflect.Type, want interfac
 
 func testDecodeGoSingleShot(t *testing.T, name, bin string, rt reflect.Type, want interface{}) {
 	head := fmt.Sprintf("%s (single-shot)", name)
-	rvGot := reflect.New(rt)
-	if err := Decode([]byte(bin), rvGot.Interface()); err != nil {
+	var got interface{}
+	if rt != nil {
+		got = reflect.New(rt).Elem().Interface()
+	}
+	if err := Decode([]byte(bin), &got); err != nil {
 		t.Errorf("%s: Decode failed: %v", head, err)
 		return
 	}
-	if got := rvGot.Elem().Interface(); !reflect.DeepEqual(got, want) {
+	if !reflect.DeepEqual(got, want) {
 		t.Errorf("%s: Decode mismatch\nGOT %T %#v\nWANT %T %#v", head, got, got, want, want)
 		return
 	}
@@ -153,48 +168,22 @@ func testDecodeGoWithTypeDecoder(t *testing.T, name, binversion, bintype, binval
 	for _, mode := range allReadModes {
 		head := fmt.Sprintf("%s (%s)", name, mode)
 		typedec := NewTypeDecoder(mode.testReader(strings.NewReader(binversion + bintype)))
+		typedec.Start()
 		decoder := NewDecoderWithTypeDecoder(mode.testReader(strings.NewReader(binversion+binvalue)), typedec)
-		rv := reflect.New(rt)
-		if err := decoder.Decode(rv.Interface()); err != nil {
+		var got interface{}
+		if rt != nil {
+			got = reflect.New(rt).Elem().Interface()
+		}
+		if err := decoder.Decode(&got); err != nil {
 			t.Errorf("%s: Decode failed: %v", head, err)
 			return
 		}
-		if got := rv.Elem().Interface(); !reflect.DeepEqual(got, want) {
+		if !reflect.DeepEqual(got, want) {
 			t.Errorf("%s: Decode mismatch\nGOT %T %#v\nWANT %T %#v", head, got, got, want, want)
 			return
 		}
+		typedec.Stop()
 	}
-}
-
-// In concurrent modes, one goroutine may try to read vom types before they are
-// actually sent by other goroutine. We use a simple buffered pipe to provide
-// blocking read since bytes.Buffer will return EOF in this case.
-type pipe struct {
-	b bytes.Buffer
-	m sync.Mutex
-	c sync.Cond
-}
-
-func newPipe() (io.Reader, io.Writer) {
-	p := &pipe{}
-	p.c.L = &p.m
-	return p, p
-}
-
-func (r *pipe) Read(p []byte) (n int, err error) {
-	r.m.Lock()
-	defer r.m.Unlock()
-	for r.b.Len() == 0 {
-		r.c.Wait()
-	}
-	return r.b.Read(p)
-}
-
-func (w *pipe) Write(p []byte) (n int, err error) {
-	w.m.Lock()
-	defer w.m.Unlock()
-	defer w.c.Signal()
-	return w.b.Write(p)
 }
 
 // TestRoundtrip* tests test encoding and then decoding results in various modes.
@@ -248,18 +237,18 @@ func testRoundtrip(t *testing.T, withTypeEncoderDecoder bool, concurrency int) {
 		{struct{ M map[uint64]struct{} }{make(map[uint64]struct{})}, struct{ M map[uint64]struct{} }{}},
 		{struct{ M map[uint64]string }{make(map[uint64]string)}, struct{ M map[uint64]string }{}},
 		{struct{ N struct{ A int64 } }{struct{ A int64 }{0}}, struct{ N struct{ A int64 } }{}},
-		{struct{ N *testdata.NStruct }{&testdata.NStruct{A: false, B: "", C: 0}}, struct{ N *testdata.NStruct }{&testdata.NStruct{}}},
-		{struct{ N *testdata.NStruct }{nil}, struct{ N *testdata.NStruct }{}},
-		{testdata.NUnion(testdata.NUnionA{Value: false}), testdata.NUnion(testdata.NUnionA{})},
-		{testdata.RecA{}, testdata.RecA(nil)},
-		{testdata.RecStruct{}, testdata.RecStruct{}},
+		{struct{ N *types.NStruct }{&types.NStruct{A: false, B: "", C: 0}}, struct{ N *types.NStruct }{&types.NStruct{}}},
+		{struct{ N *types.NStruct }{nil}, struct{ N *types.NStruct }{}},
+		{types.NUnion(types.NUnionA{Value: false}), types.NUnion(types.NUnionA{})},
+		{types.RecA{}, types.RecA(nil)},
+		{types.RecStruct{}, types.RecStruct{}},
 		// Test for verifying correctness when encoding/decoding shared types concurrently.
-		{testdata.MStruct{}, testdata.MStruct{E: vdl.AnyType, F: vdl.AnyValue(nil)}},
-		{testdata.NStruct{}, testdata.NStruct{}},
-		{testdata.XyzStruct{}, testdata.XyzStruct{}},
-		{testdata.YzStruct{}, testdata.YzStruct{}},
-		{testdata.MBool(false), testdata.MBool(false)},
-		{testdata.NString(""), testdata.NString("")},
+		{types.MStruct{}, types.MStruct{E: vdl.AnyType, F: vdl.AnyValue(nil)}},
+		{types.NStruct{}, types.NStruct{}},
+		{types.XyzStruct{}, types.XyzStruct{}},
+		{types.YzStruct{}, types.YzStruct{}},
+		{types.MBool(false), types.MBool(false)},
+		{types.NString(""), types.NString("")},
 	}
 
 	var (
@@ -270,6 +259,8 @@ func testRoundtrip(t *testing.T, withTypeEncoderDecoder bool, concurrency int) {
 		r, w := newPipe()
 		typeenc = NewTypeEncoder(w)
 		typedec = NewTypeDecoder(r)
+		typedec.Start()
+		defer typedec.Stop()
 	}
 
 	var wg sync.WaitGroup
@@ -311,4 +302,163 @@ func testRoundtrip(t *testing.T, withTypeEncoderDecoder bool, concurrency int) {
 		}(n)
 	}
 	wg.Wait()
+}
+
+// waitingReader is a reader wrapper that waits until it is signalled before
+// beginning to read.
+type waitingReader struct {
+	lock      sync.Mutex
+	cond      *sync.Cond
+	activated bool
+	r         io.Reader
+}
+
+func newWaitingReader(r io.Reader) *waitingReader {
+	wr := &waitingReader{
+		r: r,
+	}
+	wr.cond = sync.NewCond(&wr.lock)
+	return wr
+}
+
+func (wr *waitingReader) Read(p []byte) (int, error) {
+	wr.lock.Lock()
+	for !wr.activated {
+		wr.cond.Wait()
+	}
+	wr.lock.Unlock()
+	return wr.r.Read(p)
+}
+
+func (wr *waitingReader) Activate() {
+	wr.lock.Lock()
+	wr.activated = true
+	wr.cond.Broadcast()
+	wr.lock.Unlock()
+}
+
+type extractErrReader struct {
+	lock sync.Mutex
+	cond *sync.Cond
+	err  error
+	r    io.Reader
+}
+
+func newExtractErrReader(r io.Reader) *extractErrReader {
+	er := &extractErrReader{
+		r: r,
+	}
+	er.cond = sync.NewCond(&er.lock)
+	return er
+}
+
+func (er *extractErrReader) Read(p []byte) (int, error) {
+	n, err := er.r.Read(p)
+	if err != nil {
+		er.lock.Lock()
+		er.err = err
+		er.cond.Broadcast()
+		er.lock.Unlock()
+	}
+	return n, err
+}
+
+func (er *extractErrReader) WaitForError() error {
+	er.lock.Lock()
+	for er.err == nil {
+		er.cond.Wait()
+	}
+	err := er.err
+	er.lock.Unlock()
+	return err
+}
+
+// Test that no EOF is returned from Decode() if the type stream finished before the value stream.
+func TestTypeStreamEndsFirst(t *testing.T) {
+	hexversion := "80"
+	hextype := "5137060029762e696f2f7632332f766f6d2f74657374646174612f7465737474797065732e537472756374416e7901010003416e79010fe1e1533502002d762e696f2f7632332f766f6d2f74657374646174612f7465737474797065732e4e41727261793255696e74363401060202e1"
+	hexvalue := "5206002a000001e1"
+	binversion := string(hex2Bin(t, hexversion))
+	bintype := string(hex2Bin(t, hextype))
+	binvalue := string(hex2Bin(t, hexvalue))
+	// Ensure EOF isn't returned if the type decode stream ends first
+	tr := newExtractErrReader(strings.NewReader(binversion + bintype))
+	typedec := NewTypeDecoder(tr)
+	typedec.Start()
+	wr := newWaitingReader(strings.NewReader(binversion + binvalue))
+	decoder := NewDecoderWithTypeDecoder(wr, typedec)
+	var v interface{}
+	go func() {
+		if tr.WaitForError() == nil {
+			t.Fatalf("expected EOF after reaching end of type stream, but didn't occur")
+		}
+		wr.Activate()
+	}()
+	if err := decoder.Decode(&v); err != nil {
+		t.Errorf("expected no error in decode, but got: %v", err)
+	}
+}
+
+// Return an error on all reads.
+type errorReader struct {
+}
+
+func (er *errorReader) Read(p []byte) (int, error) {
+	return 0, fmt.Errorf("errorReader error\n")
+}
+
+// Test that non-EOF errors on the value stream are returned from Decode() calls.
+func TestReceiveTypeStreamError(t *testing.T) {
+	hexversion := "80"
+	hexvalue := "5206002a000001e1"
+	binversion := string(hex2Bin(t, hexversion))
+	binvalue := string(hex2Bin(t, hexvalue))
+	// Ensure EOF isn't returned if the type decode stream ends first
+	typedec := NewTypeDecoder(&errorReader{})
+	typedec.Start()
+	decoder := NewDecoderWithTypeDecoder(strings.NewReader(binversion+binvalue), typedec)
+	var v interface{}
+	if err := decoder.Decode(&v); err == nil {
+		t.Errorf("expected error in decode, but got none")
+	}
+}
+
+// In concurrent modes, one goroutine may try to read vom types before they are
+// actually sent by other goroutine. We use a simple buffered pipe to provide
+// blocking read since bytes.Buffer will return EOF in this case.
+type pipe struct {
+	b         bytes.Buffer
+	m         sync.Mutex
+	c         sync.Cond
+	cancelled bool
+}
+
+func newPipe() (io.ReadCloser, io.WriteCloser) {
+	p := &pipe{}
+	p.c.L = &p.m
+	return p, p
+}
+
+func (r *pipe) Read(p []byte) (n int, err error) {
+	r.m.Lock()
+	defer r.m.Unlock()
+	for r.b.Len() == 0 || r.cancelled {
+		r.c.Wait()
+	}
+	return r.b.Read(p)
+}
+
+func (p *pipe) Close() error {
+	p.m.Lock()
+	p.cancelled = true
+	p.c.Broadcast()
+	p.m.Unlock()
+	return nil
+}
+
+func (w *pipe) Write(p []byte) (n int, err error) {
+	w.m.Lock()
+	defer w.m.Unlock()
+	defer w.c.Signal()
+	return w.b.Write(p)
 }

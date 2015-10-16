@@ -4,7 +4,10 @@
 
 package vom
 
-import "io"
+import (
+	"fmt"
+	"io"
+)
 
 const minBufFree = 1024 // buffers always have at least 1K free after growth
 
@@ -17,11 +20,13 @@ type encbuf struct {
 
 	// It's faster to hold end than to use both the len and cap properties of buf,
 	// since end is cheaper to update than buf.
+	maxSize int
 }
 
-func newEncbuf() *encbuf {
+func newEncbuf(maxSize int) *encbuf {
 	return &encbuf{
-		buf: make([]byte, minBufFree),
+		buf:     make([]byte, minBufFree),
+		maxSize: maxSize,
 	}
 }
 
@@ -34,19 +39,31 @@ func (b *encbuf) Len() int { return b.end }
 // Reset the length to 0 to start a new round of writes.
 func (b *encbuf) Reset() { b.end = 0 }
 
-// Truncate the length to n.
-//
-// REQUIRES: n in the range [0, Len]
-func (b *encbuf) Truncate(n int) {
-	b.end = n
+// SpaceAvailable returns the amount of space available on the buffer for writing.
+func (b *encbuf) SpaceAvailable() int {
+	return b.maxSize - b.end
+}
+
+// assertEnoughSpace if there is not enough space to write the value.
+// TODO(bprosnitz) Consider removing this after things stabilize
+func (b *encbuf) assertEnoughSpace(size int) {
+	if size > b.SpaceAvailable() {
+		panic(fmt.Sprintf("insufficient space to write %d bytes", size))
+	}
 }
 
 // reserve at least min free bytes in the buffer.
-func (b *encbuf) reserve(min int) {
+func (b *encbuf) tryReserve(min int) {
+	if len(b.buf) == b.maxSize {
+		return // can't expand further
+	}
 	if len(b.buf)-b.end < min {
 		newlen := len(b.buf) * 2
 		if newlen-b.end < min {
 			newlen = b.end + min + minBufFree
+		}
+		if newlen > b.maxSize {
+			newlen = b.maxSize
 		}
 		newbuf := make([]byte, newlen)
 		copy(newbuf, b.buf[:b.end])
@@ -57,32 +74,31 @@ func (b *encbuf) reserve(min int) {
 // Grow the buffer by n bytes, and returns those bytes.
 //
 // Different from bytes.Buffer.Grow, which doesn't return the bytes.  Although
-// this makes encbuf slightly easier to misuse, it helps to improve performance
+// this makes expandingEncbuf slightly easier to misuse, it helps to improve performance
 // by avoiding unnecessary copying.
 func (b *encbuf) Grow(n int) []byte {
-	b.reserve(n)
+	b.assertEnoughSpace(n)
+	b.tryReserve(n)
 	oldend := b.end
 	b.end += n
 	return b.buf[oldend:b.end]
 }
 
-// WriteByte writes byte c into the buffer.
+// WriteOneByte writes byte c into the buffer.
 func (b *encbuf) WriteOneByte(c byte) {
-	b.reserve(1)
+	b.assertEnoughSpace(1)
+	b.tryReserve(1)
 	b.buf[b.end] = c
 	b.end++
 }
 
-// Write writes slice p into the buffer.
-func (b *encbuf) Write(p []byte) {
-	b.reserve(len(p))
-	b.end += copy(b.buf[b.end:], p)
-}
-
-// WriteString writes string s into the buffer.
-func (b *encbuf) WriteString(s string) {
-	b.reserve(len(s))
-	b.end += copy(b.buf[b.end:], s)
+// WriteMaximumPossible writes the maximum possible length of slice p, given
+// limit constraints, into the buffer.
+func (b *encbuf) WriteMaximumPossible(p []byte) (amtWritten int) {
+	b.tryReserve(len(p))
+	amtWritten = copy(b.buf[b.end:], p)
+	b.end += amtWritten
+	return
 }
 
 // decbuf manages the read buffer for decoders.  The approach is similar to
@@ -137,6 +153,10 @@ func (b *decbuf) SetLimit(limit int) {
 	b.lim = limit
 }
 
+func (b *decbuf) HasDataAvailable() bool {
+	return b.lim != 0 // -1 or positive
+}
+
 // RemoveLimit removes the limit, and returns the number of leftover bytes.
 // Returns -1 if no limit was set.
 func (b *decbuf) RemoveLimit() int {
@@ -188,7 +208,7 @@ func (b *decbuf) moveDataToFront() {
 	b.beg = 0
 }
 
-// ReadBuf returns a buffer with the next n bytes, and increments the read
+// ReadSmall returns a buffer with the next n bytes, and increments the read
 // position past those bytes.  Returns an error if fewer than n bytes are
 // available.
 //
@@ -196,7 +216,7 @@ func (b *decbuf) moveDataToFront() {
 // until the next decbuf call.
 //
 // REQUIRES: n >= 0
-func (b *decbuf) ReadBuf(n int) ([]byte, error) {
+func (b *decbuf) ReadSmall(n int) ([]byte, error) {
 	if b.lim > -1 {
 		if b.lim < n {
 			b.lim = 0
@@ -212,7 +232,7 @@ func (b *decbuf) ReadBuf(n int) ([]byte, error) {
 	return buf, nil
 }
 
-// PeekAtLeast returns a buffer with at least the next n bytes, but possibly
+// PeekSmall returns a buffer with at least the next n bytes, but possibly
 // more.  The read position isn't incremented.  Returns an error if fewer than
 // min bytes are available.
 //
@@ -220,7 +240,7 @@ func (b *decbuf) ReadBuf(n int) ([]byte, error) {
 // until the next decbuf call.
 //
 // REQUIRES: min >= 0
-func (b *decbuf) PeekAtLeast(min int) ([]byte, error) {
+func (b *decbuf) PeekSmall(min int) ([]byte, error) {
 	if b.lim > -1 && b.lim < min {
 		return nil, io.EOF
 	}
@@ -234,11 +254,12 @@ func (b *decbuf) PeekAtLeast(min int) ([]byte, error) {
 // fewer than n bytes are available.
 //
 // REQUIRES: n >= 0
-func (b *decbuf) Skip(n int) error {
+func (b *decbuf) Skip(n int) (int, error) {
+	readAmt := n
 	if b.lim > -1 {
 		if b.lim < n {
-			b.lim = 0
-			return io.EOF
+			n = b.lim
+			readAmt = n
 		}
 		b.lim -= n
 	}
@@ -246,7 +267,7 @@ func (b *decbuf) Skip(n int) error {
 	avail := b.end - b.beg
 	if avail >= n {
 		b.beg += n
-		return nil
+		return readAmt, nil
 	}
 	n -= avail
 	// Keep reading into buf until we've read enough bytes.
@@ -256,11 +277,11 @@ func (b *decbuf) Skip(n int) error {
 			if nread >= n {
 				b.beg = n
 				b.end = nread
-				return nil
+				return readAmt, nil
 			}
 			n -= nread
 		case err != nil:
-			return err
+			return 0, err
 		}
 	}
 }
@@ -292,15 +313,16 @@ func (b *decbuf) PeekByte() (byte, error) {
 	return b.buf[b.beg], nil
 }
 
-// ReadFull reads the next len(p) bytes into p, and increments the read position
+// ReadIntoBuf reads the next len(p) bytes into p, and increments the read position
 // past those bytes.  Returns an error if fewer than len(p) bytes are available.
-func (b *decbuf) ReadFull(p []byte) error {
+func (b *decbuf) ReadIntoBuf(p []byte) (int, error) {
 	if b.lim > -1 {
 		if b.lim < len(p) {
-			return io.EOF
+			p = p[:b.lim]
 		}
 		b.lim -= len(p)
 	}
+	amtRead := len(p)
 	// Copy bytes from the buffer.
 	ncopy := copy(p, b.buf[b.beg:b.end])
 	b.beg += ncopy
@@ -311,8 +333,8 @@ func (b *decbuf) ReadFull(p []byte) error {
 		case nread > 0:
 			p = p[nread:]
 		case err != nil:
-			return err
+			return 0, err
 		}
 	}
-	return nil
+	return amtRead, nil
 }

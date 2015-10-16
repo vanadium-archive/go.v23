@@ -1112,6 +1112,52 @@ func TestUniqueTypeNames(t *testing.T) {
 	}
 }
 
+func TestContainsAnyOrTypeObject(t *testing.T) {
+	type testCase struct {
+		t    *Type
+		want bool
+	}
+	tests := []testCase{
+		{AnyType, true},
+		{BoolType, false},
+		{ByteType, false},
+		{Uint16Type, false},
+		{Uint32Type, false},
+		{Uint64Type, false},
+		{Int16Type, false},
+		{Int32Type, false},
+		{Int64Type, false},
+		{Float32Type, false},
+		{Float64Type, false},
+		{Complex64Type, false},
+		{Complex128Type, false},
+		{StringType, false},
+		{EnumType("A", "B"), false},
+		{TypeObjectType, true},
+	}
+	prevLen := 0
+	for i := 0; i < 2; i++ {
+		testsLen := len(tests) // Note: this doesn't increase as we are adding items
+		for j := prevLen; j < testsLen; j++ {
+			test := tests[j]
+			tests = append(tests, testCase{ArrayType(2, test.t), test.want})
+			tests = append(tests, testCase{ListType(test.t), test.want})
+			if test.t.CanBeKey() {
+				tests = append(tests, testCase{SetType(test.t), test.want})
+			}
+			tests = append(tests, testCase{MapType(Int16Type, test.t), test.want})
+			tests = append(tests, testCase{StructType(Field{"A", test.t}), test.want})
+			tests = append(tests, testCase{UnionType(Field{"A", test.t}), test.want})
+		}
+		prevLen = testsLen
+	}
+	for _, test := range tests {
+		if got, want := test.t.ContainsAnyOrTypeObject(), test.want; got != want {
+			t.Errorf("%v.ContainsAnyOrTypeObject() was %v, but expected %v", test.t, got, want)
+		}
+	}
+}
+
 func makeAllPending(builder *TypeBuilder) []PendingType {
 	var ret []PendingType
 	for _, test := range singletons {

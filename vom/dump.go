@@ -179,7 +179,7 @@ func startDumpWorker(cmd <-chan dumpCmd, close chan<- struct{}, w DumpWriter) {
 		cmdChan:   cmd,
 		closeChan: close,
 		w:         w,
-		typeDec:   newTypeDecoderWithoutVersionByte(nil),
+		typeDec:   newTypeDecoderInternal(nil),
 	}
 	worker.buf = newDecbuf(worker)
 	go worker.decodeLoop()
@@ -405,13 +405,13 @@ func (d *dumpWorker) decodeValueType() (*vdl.Type, error) {
 		switch versionByte, err := d.buf.PeekByte(); {
 		case err != nil:
 			return nil, err
-		case versionByte == binaryVersionByte:
+		case versionByte == 0x80:
 			d.buf.Skip(1)
 			d.writeAtom(DumpKindVersion, PrimitivePByte{versionByte}, "vom version 0")
 			d.writeStatus(nil, true)
 		}
 		d.prepareAtom("waiting for message ID")
-		id, err := binaryDecodeInt(d.buf)
+		id, err := decbufBinaryDecodeInt(d.buf)
 		if err != nil {
 			return nil, err
 		}
@@ -454,9 +454,9 @@ func (d *dumpWorker) decodeValueType() (*vdl.Type, error) {
 // decodeValueMsg decodes the rest of the message assuming type t, handling the
 // optional message length.
 func (d *dumpWorker) decodeValueMsg(tt *vdl.Type, target vdl.Target) error {
-	if hasBinaryMsgLen(tt) {
+	if hasChunkLen(tt) {
 		d.prepareAtom("waiting for message len")
-		msgLen, err := binaryDecodeLen(d.buf)
+		msgLen, err := decbufBinaryDecodeLen(d.buf)
 		if err != nil {
 			return err
 		}
@@ -483,7 +483,7 @@ func (d *dumpWorker) decodeValue(tt *vdl.Type, target vdl.Target) error {
 		d.prepareAtom("waiting for optional control byte")
 		// If the type is optional, we expect to see either WireCtrlNil or the actual
 		// value, but not both.  And thus, we can just peek for the WireCtrlNil here.
-		switch ctrl, err := binaryPeekControl(d.buf); {
+		switch ctrl, err := decbufBinaryPeekControl(d.buf); {
 		case err != nil:
 			return err
 		case ctrl == WireCtrlNil:
@@ -495,13 +495,13 @@ func (d *dumpWorker) decodeValue(tt *vdl.Type, target vdl.Target) error {
 	}
 	if tt.IsBytes() {
 		d.prepareAtom("waiting for bytes len")
-		len, err := binaryDecodeLenOrArrayLen(d.buf, ttFrom)
+		len, err := decbufBinaryDecodeLenOrArrayLen(d.buf, ttFrom)
 		if err != nil {
 			return err
 		}
 		d.writeAtom(DumpKindByteLen, PrimitivePUint{uint64(len)}, "bytes len")
 		d.prepareAtom("waiting for bytes data")
-		bytes, err := d.buf.ReadBuf(len)
+		bytes, err := d.buf.ReadSmall(len)
 		if err != nil {
 			return err
 		}
@@ -512,7 +512,7 @@ func (d *dumpWorker) decodeValue(tt *vdl.Type, target vdl.Target) error {
 	switch kind := tt.Kind(); kind {
 	case vdl.Bool:
 		d.prepareAtom("waiting for bool value")
-		v, err := binaryDecodeBool(d.buf)
+		v, err := decbufBinaryDecodeBool(d.buf)
 		if err != nil {
 			return err
 		}
@@ -528,7 +528,7 @@ func (d *dumpWorker) decodeValue(tt *vdl.Type, target vdl.Target) error {
 		return target.FromUint(uint64(v), ttFrom)
 	case vdl.Uint16, vdl.Uint32, vdl.Uint64:
 		d.prepareAtom("waiting for uint value")
-		v, err := binaryDecodeUint(d.buf)
+		v, err := decbufBinaryDecodeUint(d.buf)
 		if err != nil {
 			return err
 		}
@@ -536,7 +536,7 @@ func (d *dumpWorker) decodeValue(tt *vdl.Type, target vdl.Target) error {
 		return target.FromUint(v, ttFrom)
 	case vdl.Int16, vdl.Int32, vdl.Int64:
 		d.prepareAtom("waiting for int value")
-		v, err := binaryDecodeInt(d.buf)
+		v, err := decbufBinaryDecodeInt(d.buf)
 		if err != nil {
 			return err
 		}
@@ -544,7 +544,7 @@ func (d *dumpWorker) decodeValue(tt *vdl.Type, target vdl.Target) error {
 		return target.FromInt(v, ttFrom)
 	case vdl.Float32, vdl.Float64:
 		d.prepareAtom("waiting for float value")
-		v, err := binaryDecodeFloat(d.buf)
+		v, err := decbufBinaryDecodeFloat(d.buf)
 		if err != nil {
 			return err
 		}
@@ -552,13 +552,13 @@ func (d *dumpWorker) decodeValue(tt *vdl.Type, target vdl.Target) error {
 		return target.FromFloat(v, ttFrom)
 	case vdl.Complex64, vdl.Complex128:
 		d.prepareAtom("waiting for complex real value")
-		re, err := binaryDecodeFloat(d.buf)
+		re, err := decbufBinaryDecodeFloat(d.buf)
 		if err != nil {
 			return err
 		}
 		d.writeAtom(DumpKindPrimValue, PrimitivePFloat{re}, "complex real")
 		d.prepareAtom("waiting for complex imag value")
-		im, err := binaryDecodeFloat(d.buf)
+		im, err := decbufBinaryDecodeFloat(d.buf)
 		if err != nil {
 			return err
 		}
@@ -566,13 +566,13 @@ func (d *dumpWorker) decodeValue(tt *vdl.Type, target vdl.Target) error {
 		return target.FromComplex(complex(re, im), ttFrom)
 	case vdl.String:
 		d.prepareAtom("waiting for string len")
-		len, err := binaryDecodeLen(d.buf)
+		len, err := decbufBinaryDecodeLen(d.buf)
 		if err != nil {
 			return err
 		}
 		d.writeAtom(DumpKindByteLen, PrimitivePUint{uint64(len)}, "string len")
 		d.prepareAtom("waiting for string data")
-		bytes, err := d.buf.ReadBuf(len)
+		bytes, err := d.buf.ReadSmall(len)
 		if err != nil {
 			return err
 		}
@@ -581,7 +581,7 @@ func (d *dumpWorker) decodeValue(tt *vdl.Type, target vdl.Target) error {
 		return target.FromString(str, ttFrom)
 	case vdl.Enum:
 		d.prepareAtom("waiting for enum index")
-		index, err := binaryDecodeUint(d.buf)
+		index, err := decbufBinaryDecodeUint(d.buf)
 		if err != nil {
 			return err
 		}
@@ -594,7 +594,7 @@ func (d *dumpWorker) decodeValue(tt *vdl.Type, target vdl.Target) error {
 		return target.FromEnumLabel(label, ttFrom)
 	case vdl.TypeObject:
 		d.prepareAtom("waiting for typeobject ID")
-		id, err := binaryDecodeUint(d.buf)
+		id, err := decbufBinaryDecodeUint(d.buf)
 		if err != nil {
 			return err
 		}
@@ -607,7 +607,7 @@ func (d *dumpWorker) decodeValue(tt *vdl.Type, target vdl.Target) error {
 		return target.FromTypeObject(typeobj)
 	case vdl.Array, vdl.List:
 		d.prepareAtom("waiting for list len")
-		len, err := binaryDecodeLenOrArrayLen(d.buf, tt)
+		len, err := decbufBinaryDecodeLenOrArrayLen(d.buf, tt)
 		if err != nil {
 			return err
 		}
@@ -631,7 +631,7 @@ func (d *dumpWorker) decodeValue(tt *vdl.Type, target vdl.Target) error {
 		return target.FinishList(listTarget)
 	case vdl.Set:
 		d.prepareAtom("waiting for set len")
-		len, err := binaryDecodeLen(d.buf)
+		len, err := decbufBinaryDecodeLen(d.buf)
 		if err != nil {
 			return err
 		}
@@ -655,7 +655,7 @@ func (d *dumpWorker) decodeValue(tt *vdl.Type, target vdl.Target) error {
 		return target.FinishSet(setTarget)
 	case vdl.Map:
 		d.prepareAtom("waiting for map len")
-		len, err := binaryDecodeLen(d.buf)
+		len, err := decbufBinaryDecodeLen(d.buf)
 		if err != nil {
 			return err
 		}
@@ -692,7 +692,7 @@ func (d *dumpWorker) decodeValue(tt *vdl.Type, target vdl.Target) error {
 		// Loop through decoding the 0-based field index and corresponding field.
 		for {
 			d.prepareAtom("waiting for struct field index")
-			index, ctrl, err := binaryDecodeUintWithControl(d.buf)
+			index, ctrl, err := decbufBinaryDecodeUintWithControl(d.buf)
 			switch {
 			case err != nil:
 				return err
@@ -724,7 +724,7 @@ func (d *dumpWorker) decodeValue(tt *vdl.Type, target vdl.Target) error {
 			return err
 		}
 		d.prepareAtom("waiting for union field index")
-		index, err := binaryDecodeUint(d.buf)
+		index, err := decbufBinaryDecodeUint(d.buf)
 		switch {
 		case err != nil:
 			return err
@@ -752,7 +752,7 @@ func (d *dumpWorker) decodeValue(tt *vdl.Type, target vdl.Target) error {
 		return target.FinishFields(fieldsTarget)
 	case vdl.Any:
 		d.prepareAtom("waiting for any typeID")
-		switch id, ctrl, err := binaryDecodeUintWithControl(d.buf); {
+		switch id, ctrl, err := decbufBinaryDecodeUintWithControl(d.buf); {
 		case err != nil:
 			return err
 		case ctrl == WireCtrlNil:

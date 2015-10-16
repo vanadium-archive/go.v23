@@ -123,14 +123,15 @@ func SplitIdent(ident string) (pkgpath, name string) {
 //     Children []Node
 //   }
 type Type struct {
-	kind   Kind     // used by all kinds
-	name   string   // used by all kinds
-	labels []string // used by Enum
-	len    int      // used by Array
-	elem   *Type    // used by Optional, Array, List, Map
-	key    *Type    // used by Set, Map
-	fields []Field  // used by Struct, Union
-	unique string   // used by all kinds, filled in by typeCons
+	kind                    Kind     // used by all kinds
+	name                    string   // used by all kinds
+	labels                  []string // used by Enum
+	len                     int      // used by Array
+	elem                    *Type    // used by Optional, Array, List, Map
+	key                     *Type    // used by Set, Map
+	fields                  []Field  // used by Struct, Union
+	unique                  string   // used by all kinds, filled in by typeCons
+	containsAnyOrTypeObject bool     // used by all kinds
 }
 
 // Field describes a single field in a Struct or Union.
@@ -327,6 +328,11 @@ func (t *Type) ContainsType(mode WalkMode, types ...*Type) bool {
 		}
 		return true
 	})
+}
+
+// ContainsAnyOrTypeObject returns true iff t or subtypes of t match any or typeobject.
+func (t *Type) ContainsAnyOrTypeObject() bool {
+	return t.containsAnyOrTypeObject
 }
 
 // Walk performs a DFS walk through the type graph starting from t, calling fn
