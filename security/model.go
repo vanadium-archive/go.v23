@@ -156,14 +156,6 @@ type Principal interface {
 	// by the Principal.
 	PublicKey() PublicKey
 
-	// BlessingsInfo returns a map from human-readable blessing names
-	// granted to this Principal from recognized authorites to the Caveats
-	// associated with the names. BlessingInfo does not validate caveats
-	// on 'blessings' and thus may NOT be valid in the context of certain calls.
-	// Use RemoteBlessingNames(call) to determine the set of valid blessing names
-	// presented by the remote end in particular call.
-	BlessingsInfo(blessings Blessings) map[string][]Caveat
-
 	// BlessingStore provides access to the BlessingStore containing blessings
 	// that have been granted to this principal.
 	BlessingStore() BlessingStore

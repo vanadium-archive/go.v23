@@ -348,7 +348,7 @@ func (i RejectedBlessing) String() string {
 // DefaultBlessingPatterns returns the BlessingsPatterns of the Default Blessings
 // of the provided Principal.
 func DefaultBlessingPatterns(p Principal) (patterns []BlessingPattern) {
-	for b, _ := range p.BlessingsInfo(p.BlessingStore().Default()) {
+	for _, b := range BlessingNames(p, p.BlessingStore().Default()) {
 		patterns = append(patterns, BlessingPattern(b))
 	}
 	return
@@ -523,7 +523,7 @@ func SigningBlessingNames(ctx *context.T, p Principal, blessings Blessings) ([]s
 	return validatedNames, rejected
 }
 
-// ReturnBlessingNames returns the validated set of human-readable blessing names
+// RemoteBlessingNames returns the validated set of human-readable blessing names
 // encapsulated in the blessings object presented by the remote end of a call.
 //
 // The blessing names are guaranteed to:
@@ -593,21 +593,51 @@ func RemoteBlessingNames(ctx *context.T, call Call) ([]string, []RejectedBlessin
 	return validatedNames, rejected
 }
 
-// LocalBlessingNames returns the set of human-readable blessing names encapsulated
-// in the blessings object presented by the local end of the call.
+// LocalBlessingNames returns the set of human-readable blessing names
+// encapsulated in the blessings object presented by the local end of the call.
 //
-// The blessing names are guaranteed to be rooted in call.LocalPrincipal.Roots.
-//
-// LocalBlessingNames does not validate caveats on the blessing names.
+// This is just a convenience function over:
+//     BlessingNames(call.LocalPrincipal(), call.LocalBlessings())
 func LocalBlessingNames(ctx *context.T, call Call) []string {
 	if ctx == nil || call == nil {
 		return nil
 	}
-	var names []string
-	for n, _ := range call.LocalPrincipal().BlessingsInfo(call.LocalBlessings()) {
-		names = append(names, n)
+	return BlessingNames(call.LocalPrincipal(), call.LocalBlessings())
+}
+
+// BlessingNames returns the set of human-readable blessing names encapsulated
+// in blessings.
+//
+// The returned names are guaranteed to be rooted in principal.Roots, though
+// caveats may not be validated.
+//
+// The blessings must be bound to principal. There is intentionally no API to
+// obtain blessing names bound to other principals by ignoring caveats.  This
+// is to prevent accidental authorization based on potentially invalid names
+// (since caveats are not validated).
+func BlessingNames(principal Principal, blessings Blessings) []string {
+	pKey, err := principal.PublicKey().MarshalBinary()
+	if err != nil {
+		return nil
 	}
-	return names
+	chains := blessings.chains
+	if len(chains) == 0 {
+		return nil
+	}
+	// Blessings objects contain multiple certificate chains all bound to
+	// the same public key, so checking that any one of them is bound to
+	// pKey is sufficient.
+	if !bytes.Equal(chains[0][len(chains[0])-1].PublicKey, pKey) {
+		return nil
+	}
+	var ret []string
+	for _, chain := range blessings.chains {
+		name := claimedName(chain)
+		if err := principal.Roots().Recognized(chain[0].PublicKey, name); err == nil {
+			ret = append(ret, name)
+		}
+	}
+	return ret
 }
 
 // NamelessBlessing returns a blessings object that has no names, only the

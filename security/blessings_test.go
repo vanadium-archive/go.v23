@@ -348,7 +348,7 @@ func TestNamelessBlessing(t *testing.T) {
 	if got := LocalBlessingNames(ctx, call); len(got) > 0 {
 		t.Errorf("got %v, want nil", got)
 	}
-	if got := alice.BlessingsInfo(balice); len(got) > 0 {
+	if got := BlessingNames(alice, balice); len(got) > 0 {
 		t.Errorf("got %v, want nil", got)
 	}
 	var b Blessings

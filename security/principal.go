@@ -181,27 +181,6 @@ func (p *principal) PublicKey() PublicKey {
 	return p.signer.PublicKey()
 }
 
-func (p *principal) BlessingsInfo(b Blessings) map[string][]Caveat {
-	var bInfo map[string][]Caveat
-	pKey, err := p.PublicKey().MarshalBinary()
-	if err != nil {
-		return bInfo
-	}
-	for _, chain := range b.chains {
-		name := nameForPrincipal(pKey, p.Roots(), chain)
-		if len(name) > 0 {
-			if bInfo == nil {
-				bInfo = make(map[string][]Caveat)
-			}
-			bInfo[name] = nil
-			for _, cert := range chain {
-				bInfo[name] = append(bInfo[name], cert.Caveats...)
-			}
-		}
-	}
-	return bInfo
-}
-
 func (p *principal) BlessingStore() BlessingStore {
 	return p.store
 }

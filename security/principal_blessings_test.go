@@ -131,7 +131,7 @@ func TestThirdPartyCaveats(t *testing.T) {
 	}
 }
 
-func TestBlessingsInfoAndLocalBlessingNames(t *testing.T) {
+func TestBlessingNames(t *testing.T) {
 	expiryCaveat, err := NewExpiryCaveat(time.Now().Add(time.Minute))
 	if err != nil {
 		t.Fatal(err)
@@ -166,40 +166,26 @@ func TestBlessingsInfoAndLocalBlessingNames(t *testing.T) {
 
 	ctx, cf := context.RootContext()
 	defer cf()
-	// BlessingsInfo and LocalBlessingNames are evaluated with p2 as the LocalPrincipal.
+	// BlessingNames, LocalBlessingNames are evaluated with p2 as the LocalPrincipal.
 	tests := []struct {
-		blessings          Blessings
-		blessingsInfo      map[string][]Caveat
-		localBlessingNames []string
+		blessings Blessings
+		names     []string
 	}{
 		{
 			blessings: bob,
-			blessingsInfo: map[string][]Caveat{
-				"bob": []Caveat{noCaveat},
-			},
-			localBlessingNames: []string{"bob"},
+			names:     []string{"bob"},
 		},
 		{
 			blessings: alicefriend,
-			blessingsInfo: map[string][]Caveat{
-				"alice/friend": []Caveat{expiryCaveat, methodCaveat},
-			},
-			localBlessingNames: []string{"alice/friend"},
+			names:     []string{"alice/friend"},
 		},
 		{
 			blessings: bobfriend,
-			blessingsInfo: map[string][]Caveat{
-				"bob/friend": []Caveat{noCaveat, methodCaveat},
-			},
-			localBlessingNames: []string{"bob/friend"},
+			names:     []string{"bob/friend"},
 		},
 		{
 			blessings: aliceAndBobFriend,
-			blessingsInfo: map[string][]Caveat{
-				"alice/friend": []Caveat{expiryCaveat, methodCaveat},
-				"bob/friend":   []Caveat{noCaveat, methodCaveat},
-			},
-			localBlessingNames: []string{"alice/friend", "bob/friend"},
+			names:     []string{"alice/friend", "bob/friend"},
 		},
 		{
 			blessings: alice, // not a blessing for principal p2.
@@ -209,13 +195,18 @@ func TestBlessingsInfoAndLocalBlessingNames(t *testing.T) {
 		},
 	}
 	for _, test := range tests {
-		if got, want := p2.BlessingsInfo(test.blessings), test.blessingsInfo; !reflect.DeepEqual(got, want) {
-			t.Errorf("BlessingsInfo(%v) got:%v, want:%v", test.blessings, got, want)
-		}
-		call := NewCall(&CallParams{LocalPrincipal: p2, LocalBlessings: test.blessings})
-		got, want := LocalBlessingNames(ctx, call), test.localBlessingNames
-		sort.Strings(got)
+		want := test.names
 		sort.Strings(want)
+
+		got := BlessingNames(p2, test.blessings)
+		sort.Strings(got)
+		if !reflect.DeepEqual(got, want) {
+			t.Errorf("BlessingNames(%v) got:%v, want:%v", test.blessings, got, want)
+		}
+
+		call := NewCall(&CallParams{LocalPrincipal: p2, LocalBlessings: test.blessings})
+		got = LocalBlessingNames(ctx, call)
+		sort.Strings(got)
 		if !reflect.DeepEqual(got, want) {
 			t.Errorf("LocalBlessingNames(%v) got:%v, want:%v", test.blessings, got, want)
 		}
