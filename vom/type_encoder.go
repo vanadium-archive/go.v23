@@ -33,19 +33,29 @@ type TypeEncoder struct {
 // NewTypeEncoder returns a new TypeEncoder that writes types to the given
 // writer in the binary format.
 func NewTypeEncoder(w io.Writer) *TypeEncoder {
+	return NewVersionedTypeEncoder(Version80, w)
+}
+
+// NewTypeEncoderVersion returns a new TypeEncoder that writes types to the given
+// writer in the specified VOM version.
+func NewVersionedTypeEncoder(version Version, w io.Writer) *TypeEncoder {
+	return newTypeEncoderWithVersionByte(version, w)
+}
+
+func newTypeEncoderWithVersionByte(version Version, w io.Writer) *TypeEncoder {
 	return &TypeEncoder{
 		typeToId:        make(map[*vdl.Type]typeId),
 		nextId:          WireIdFirstUserType,
-		enc:             newEncoderWithoutVersionByte(w, nil),
+		enc:             newEncoderWithoutVersionByte(version, w, nil),
 		sentVersionByte: false,
 	}
 }
 
-func newTypeEncoderWithoutVersionByte(w io.Writer) *TypeEncoder {
+func newTypeEncoderWithoutVersionByte(version Version, w io.Writer) *TypeEncoder {
 	return &TypeEncoder{
 		typeToId:        make(map[*vdl.Type]typeId),
 		nextId:          WireIdFirstUserType,
-		enc:             newEncoderWithoutVersionByte(w, nil),
+		enc:             newEncoderWithoutVersionByte(version, w, nil),
 		sentVersionByte: true,
 	}
 }
@@ -77,7 +87,7 @@ func (e *TypeEncoder) encode(tt *vdl.Type) (typeId, error) {
 	e.encMu.Lock()
 	defer e.encMu.Unlock()
 	if !e.sentVersionByte {
-		if err := writeVersionByte(e.enc.writer); err != nil {
+		if _, err := e.enc.writer.Write([]byte{byte(e.enc.version)}); err != nil {
 			return 0, err
 		}
 		e.sentVersionByte = true

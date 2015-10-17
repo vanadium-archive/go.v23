@@ -625,6 +625,7 @@ func typeConsLocked(t *Type) *Type {
 	for index := range t.fields {
 		t.fields[index].Type = typeConsLocked(t.fields[index].Type)
 	}
+	t.containsAnyOrTypeObject = t.ContainsKind(WalkAll, Any, TypeObject)
 	return t
 }
 

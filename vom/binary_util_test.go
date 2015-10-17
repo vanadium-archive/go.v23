@@ -5,6 +5,7 @@
 package vom
 
 import (
+	"bytes"
 	"fmt"
 	"io"
 	"math"
@@ -12,6 +13,14 @@ import (
 	"strings"
 	"testing"
 )
+
+func hex2Bin(t *testing.T, hex string) []byte {
+	binStr, err := binFromHexPat(hex)
+	if err != nil {
+		t.Fatalf("error converting %q to binary: %v", hex, err)
+	}
+	return []byte(binStr)
+}
 
 func TestBinaryEncodeDecode(t *testing.T) {
 	tests := []struct {
@@ -80,33 +89,30 @@ func TestBinaryEncodeDecode(t *testing.T) {
 	}
 	for _, test := range tests {
 		// Test encode
-		encbuf := newEncbuf()
-		var buf []byte
+		var byteBuf bytes.Buffer
+		sb := newSwitchedEncbuf(&byteBuf, 0x81)
+		msgID := int64(0x12)
+		sb.StartMessage(false, false, msgID)
 		switch val := test.v.(type) {
 		case byte:
-			binaryEncodeControl(encbuf, val)
+			binaryEncodeControl(sb, val)
 		case bool:
-			binaryEncodeBool(encbuf, val)
+			binaryEncodeBool(sb, val)
 		case uint64:
-			binaryEncodeUint(encbuf, val)
-			buf = make([]byte, maxEncodedUintBytes)
-			buf = buf[binaryEncodeUintEnd(buf, val):]
+			binaryEncodeUint(sb, val)
 		case int64:
-			binaryEncodeInt(encbuf, val)
-			buf = make([]byte, maxEncodedUintBytes)
-			buf = buf[binaryEncodeIntEnd(buf, val):]
+			binaryEncodeInt(sb, val)
 		case float64:
-			binaryEncodeFloat(encbuf, val)
+			binaryEncodeFloat(sb, val)
 		case string:
-			binaryEncodeString(encbuf, val)
+			binaryEncodeString(sb, val)
 		}
-		if got, want := fmt.Sprintf("%x", encbuf.Bytes()), test.hex; got != want {
+		if err := sb.chunked.finishChunk(); err != nil {
+			t.Fatalf("Error finishing chunk\n")
+		}
+		expectedHex := fmt.Sprintf("%x", msgID*2) + test.hex // message id is prepended to hex
+		if got, want := fmt.Sprintf("%x", byteBuf.Bytes()), expectedHex; got != want {
 			t.Errorf("binary encode %T(%v): GOT 0x%v WANT 0x%v", test.v, test.v, got, want)
-		}
-		if buf != nil {
-			if got, want := fmt.Sprintf("%x", buf), test.hex; got != want {
-				t.Errorf("binary encode end %T(%v): GOT 0x%v WANT 0x%v", test.v, test.v, got, want)
-			}
 		}
 		// Test decode
 		var bin string
@@ -114,40 +120,67 @@ func TestBinaryEncodeDecode(t *testing.T) {
 			t.Errorf("couldn't scan 0x%v as hex: %v", test.hex, err)
 			continue
 		}
+
+		mr := newBinaryUtilTestMessageReader(strings.NewReader(bin))
+		mr2 := newBinaryUtilTestMessageReader(strings.NewReader(bin))
+		mr3 := newBinaryUtilTestMessageReader(strings.NewReader(bin))
 		decbuf := newDecbuf(strings.NewReader(bin))
 		decbuf2 := newDecbuf(strings.NewReader(bin))
-		decbuf3 := newDecbuf(strings.NewReader(bin))
 		var v, v2 interface{}
 		var err, err2, err3 error
+		var vmr, vmr2 interface{}
+		var errmr, errmr2, errmr3 error
 		switch test.v.(type) {
 		case byte:
-			v, err = binaryPeekControl(decbuf)
-			decbuf.Skip(1)
-			_, v2, err2 = binaryDecodeUintWithControl(decbuf2)
-			err3 = binaryIgnoreUint(decbuf3)
+			_, v, err = decbufBinaryDecodeUintWithControl(decbuf)
+			decbuf2.Skip(1)
+			vmr, err = binaryPeekControl(mr)
+			mr.Skip(1)
+			_, vmr2, errmr2 = binaryDecodeUintWithControl(mr2)
+			errmr3 = binaryIgnoreUint(mr3)
 		case bool:
-			v, err = binaryDecodeBool(decbuf)
-			err2 = binaryIgnoreUint(decbuf2)
+			decbuf.Skip(1)
+			decbuf2.Skip(1)
+			vmr, errmr = binaryDecodeBool(mr)
+			errmr2 = binaryIgnoreUint(mr2)
 		case uint64:
-			v, err = binaryDecodeUint(decbuf)
-			v2, _, err2 = binaryDecodeUintWithControl(decbuf2)
-			err3 = binaryIgnoreUint(decbuf3)
+			v, err = decbufBinaryDecodeUint(decbuf)
+			v2, _, err2 = decbufBinaryDecodeUintWithControl(decbuf2)
+			vmr, errmr = binaryDecodeUint(mr)
+			vmr2, _, errmr2 = binaryDecodeUintWithControl(mr2)
+			errmr3 = binaryIgnoreUint(mr3)
 		case int64:
-			v, err = binaryDecodeInt(decbuf)
-			err2 = binaryIgnoreUint(decbuf2)
+			v, err = decbufBinaryDecodeInt(decbuf)
+			v2, err2 = decbufBinaryDecodeInt(decbuf2)
+			vmr, errmr = binaryDecodeInt(mr)
+			errmr2 = binaryIgnoreUint(mr2)
 		case float64:
-			v, err = binaryDecodeFloat(decbuf)
-			err2 = binaryIgnoreUint(decbuf2)
+			decbufBinaryDecodeUint(decbuf)  // skip
+			decbufBinaryDecodeUint(decbuf2) // skip
+			vmr, errmr = binaryDecodeFloat(mr)
+			errmr2 = binaryIgnoreUint(mr2)
 		case string:
-			v, err = binaryDecodeString(decbuf)
-			err2 = binaryIgnoreString(decbuf2)
+			l, _ := decbufBinaryDecodeUint(decbuf)
+			decbuf.Skip(int(l))
+			l, _ = decbufBinaryDecodeUint(decbuf2)
+			decbuf2.Skip(int(l))
+			vmr, errmr = binaryDecodeString(mr)
+			errmr2 = binaryIgnoreString(mr2)
 		}
 		if v2 != nil && v != v2 {
 			t.Errorf("binary decode %T(0x%v) differently: %v %v", test.v, test.hex, v, v2)
 			continue
 		}
+		if vmr2 != nil && vmr != vmr2 {
+			t.Errorf("message reader binary decode %T(0x%v) differently: %v %v", test.v, test.hex, v, v2)
+			continue
+		}
 		if err != nil || err2 != nil || err3 != nil {
 			t.Errorf("binary decode %T(0x%v): %v %v %v", test.v, test.hex, err, err2, err3)
+			continue
+		}
+		if errmr != nil || errmr2 != nil || errmr3 != nil {
+			t.Errorf("message reader binary decode %T(0x%v): %v %v %v", test.v, test.hex, errmr, errmr2, errmr3)
 			continue
 		}
 		if b, err := decbuf.ReadByte(); err != io.EOF {
@@ -158,8 +191,21 @@ func TestBinaryEncodeDecode(t *testing.T) {
 			t.Errorf("binary decode %T(0x%v) leftover byte r2=%x", test.v, test.hex, b)
 			continue
 		}
-		if !reflect.DeepEqual(v, test.v) {
-			t.Errorf("binary decode %T(0x%v): GOT %v WANT %v", test.v, test.hex, v, test.v)
+		if v != nil {
+			if !reflect.DeepEqual(v, test.v) {
+				t.Errorf("binary decode %T(0x%v): GOT %v WANT %v", test.v, test.hex, v, test.v)
+			}
+		}
+		if vmr != nil {
+			if !reflect.DeepEqual(vmr, test.v) {
+				t.Errorf("binary decode %T(0x%v): GOT %v WANT %v", test.v, test.hex, vmr, test.v)
+			}
 		}
 	}
+}
+
+func newBinaryUtilTestMessageReader(r io.Reader) *messageReader {
+	buf := newDecbuf(r)
+	buf.SetLimit(1000)
+	return newMessageReader(buf)
 }

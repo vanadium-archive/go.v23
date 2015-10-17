@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package testdata
+package types
 
 type (
 	// vomdata config types
@@ -56,6 +56,7 @@ type (
 	}
 	MList []NListUint64
 	MMap  map[NFloat32]NListUint64
+	MByteSlice []byte
 
 	// Recursive Type Definitions
 	RecA []RecA
@@ -135,5 +136,46 @@ type (
 
 	StructMap struct {
 		Map map[int64]int64
+	}
+
+	// Since the encoding changes if struct fields are zero values,
+	// test each of the kinds in a struct both as zero and non-zero values.
+	StructManyTypes struct {
+		Bool bool
+		AByte byte
+		Int16 int16
+		Int32 int32
+		Int64 int64
+		Uint16 uint16
+		Uint32 uint32
+		Uint64 uint64
+		String string
+		Bytes []byte
+		Float32 float32
+		Float64 float64
+		Complex64 complex64
+		Complex128 complex128
+		FoodEnum FoodEnum
+		NEnum NEnum
+		NListUint64 NListUint64
+		NByteArray NByteArray
+		NArray2Uint64 NArray2Uint64
+		NSetUint64 NSetUint64
+		NMapUint64String NMapUint64String
+		NStruct NStruct
+		NUnion NUnion
+		TypeObject typeobject
+	}
+
+	AnySlice []any
+
+	LargeMessageType struct {
+		Payload []byte
+		Next ?LargeMessageType
+	}
+
+	LargeAnyMessageType struct {
+		Payload any
+		Next ?LargeAnyMessageType
 	}
 )

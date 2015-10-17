@@ -12,8 +12,12 @@ pkg vom, const DumpKindValueLen DumpKind
 pkg vom, const DumpKindValueMsg DumpKind
 pkg vom, const DumpKindVersion DumpKind
 pkg vom, const DumpKindWireTypeIndex DumpKind
+pkg vom, const Version80 Version
+pkg vom, const Version81 Version
 pkg vom, const WireCtrlEnd byte
 pkg vom, const WireCtrlNil byte
+pkg vom, const WireCtrlTypeCont byte
+pkg vom, const WireCtrlValueCont byte
 pkg vom, const WireIdAny typeId
 pkg vom, const WireIdBool typeId
 pkg vom, const WireIdByte typeId
@@ -45,6 +49,10 @@ pkg vom, func NewEncoder(io.Writer) *Encoder
 pkg vom, func NewEncoderWithTypeEncoder(io.Writer, *TypeEncoder) *Encoder
 pkg vom, func NewTypeDecoder(io.Reader) *TypeDecoder
 pkg vom, func NewTypeEncoder(io.Writer) *TypeEncoder
+pkg vom, func NewVersionedEncoder(Version, io.Writer) *Encoder
+pkg vom, func NewVersionedEncoderWithTypeEncoder(Version, io.Writer, *TypeEncoder) *Encoder
+pkg vom, func NewVersionedTypeEncoder(Version, io.Writer) *TypeEncoder
+pkg vom, func VersionedEncode(Version, interface{}) ([]byte, error)
 pkg vom, method (*ControlKind) Set(string) error
 pkg vom, method (*Decoder) Decode(interface{}) error
 pkg vom, method (*Decoder) Ignore() error
@@ -54,6 +62,8 @@ pkg vom, method (*Dumper) Flush() error
 pkg vom, method (*Dumper) Status()
 pkg vom, method (*Dumper) Write([]byte) (int, error)
 pkg vom, method (*Encoder) Encode(interface{}) error
+pkg vom, method (*TypeDecoder) Start()
+pkg vom, method (*TypeDecoder) Stop()
 pkg vom, method (ControlKind) String() string
 pkg vom, method (DumpAtom) String() string
 pkg vom, method (DumpKind) String() string
@@ -121,5 +131,6 @@ pkg vom, type PrimitivePUint struct, Value uint64
 pkg vom, type RawValue struct
 pkg vom, type TypeDecoder struct
 pkg vom, type TypeEncoder struct
+pkg vom, type Version byte
 pkg vom, var ControlKindAll [...]ControlKind
 pkg vom, var DumpKindAll [...]DumpKind

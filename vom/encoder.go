@@ -8,20 +8,30 @@ import (
 	"io"
 	"reflect"
 
+	"fmt"
+
 	"v.io/v23/vdl"
 	"v.io/v23/verror"
 )
 
-const pkgPath = "v.io/v23/vom"
+type Version byte
+
+const (
+	Version80 = Version(0x80)
+	Version81 = Version(0x81)
+)
 
 var (
 	errEncodeBadTypeStack   = verror.Register(pkgPath+".errEncodeBadTypeStack", verror.NoRetry, "{1:}{2:} vom: encoder has bad type stack{:_}")
 	errEncodeNilType        = verror.Register(pkgPath+".errEncodeNilType", verror.NoRetry, "{1:}{2:} vom: encoder finished with nil type{:_}")
-	errEncodeZeroTypeId     = verror.Register(pkgPath+".errEncodeZeroTypeId", verror.NoRetry, "{1:}{2:} vom: encoder finished with type Id 0{:_}")
 	errEncoderTypeMismatch  = verror.Register(pkgPath+".errEncoderTypeMismatch", verror.NoRetry, "{1:}{2:} encoder type mismatch, got {3}, want {4}{:_}")
 	errEncoderWantBytesType = verror.Register(pkgPath+".errEncoderWantBytesType", verror.NoRetry, "{1:}{2:} encoder type mismatch, got {3}, want bytes{:_}")
 	errLabelNotInType       = verror.Register(pkgPath+".errLabelNotInType", verror.NoRetry, "{1:}{2:} enum label {3} doesn't exist in type {4}{:_}")
 	errFieldNotInTopType    = verror.Register(pkgPath+".errFieldNotInTopType", verror.NoRetry, "{1:}{2:} field name {3} doesn't exist in top type {4}{:_}")
+)
+
+var (
+	rtPtrToValue = reflect.TypeOf((*vdl.Value)(nil))
 )
 
 var (
@@ -45,7 +55,7 @@ type encoder struct {
 	writer io.Writer
 	// We use buf to buffer up the encoded value. The buffering is necessary so
 	// that we can compute the total message length.
-	buf *encbuf
+	buf *switchedEncbuf
 	// We maintain a typeStack, where typeStack[0] holds the type of the top-level
 	// value being encoded, and subsequent layers of the stack holds type information
 	// for composites and subtypes. Each entry also holds the start position of the
@@ -54,22 +64,33 @@ type encoder struct {
 	// All types are sent through typeEnc.
 	typeEnc         *TypeEncoder
 	sentVersionByte bool
+	version         Version
 }
 
 type typeStackEntry struct {
-	tt  *vdl.Type
-	pos int
+	tt         *vdl.Type
+	fieldIndex int // -1 for if it is not in a struct
 }
 
 // NewEncoder returns a new Encoder that writes to the given writer in the
 // binary format. The binary format is compact and fast.
 func NewEncoder(w io.Writer) *Encoder {
+	return NewVersionedEncoder(Version80, w)
+}
+
+// NewVersionedEncoder returns a new Encoder that writes to the given writer with
+// the specified VOM version.
+func NewVersionedEncoder(version Version, w io.Writer) *Encoder {
+	if !isAllowedVersion(version) {
+		panic(fmt.Sprintf("unsupported VOM version: %x", version))
+	}
 	return &Encoder{encoder{
 		writer:          w,
-		buf:             newEncbuf(),
+		buf:             newSwitchedEncbuf(w, version),
 		typeStack:       make([]typeStackEntry, 0, 10),
-		typeEnc:         newTypeEncoderWithoutVersionByte(w),
+		typeEnc:         newTypeEncoderWithoutVersionByte(version, w),
 		sentVersionByte: false,
+		version:         version,
 	}}
 }
 
@@ -77,22 +98,37 @@ func NewEncoder(w io.Writer) *Encoder {
 // writer in the binary format. Types will be encoded separately through the
 // given typeEncoder.
 func NewEncoderWithTypeEncoder(w io.Writer, typeEnc *TypeEncoder) *Encoder {
+	return NewVersionedEncoderWithTypeEncoder(Version80, w, typeEnc)
+}
+
+// NewVersionedEncoderWithTypeEncoder returns a new Encoder that writes to the given
+// writer in the binary format. Types will be encoded separately through the
+// given typeEncoder.
+func NewVersionedEncoderWithTypeEncoder(version Version, w io.Writer, typeEnc *TypeEncoder) *Encoder {
+	if !isAllowedVersion(version) {
+		panic(fmt.Sprintf("unsupported VOM version: %x", version))
+	}
 	return &Encoder{encoder{
 		writer:          w,
-		buf:             newEncbuf(),
+		buf:             newSwitchedEncbuf(w, version),
 		typeStack:       make([]typeStackEntry, 0, 10),
 		typeEnc:         typeEnc,
 		sentVersionByte: false,
+		version:         version,
 	}}
 }
 
-func newEncoderWithoutVersionByte(w io.Writer, typeEnc *TypeEncoder) *encoder {
+func newEncoderWithoutVersionByte(version Version, w io.Writer, typeEnc *TypeEncoder) *encoder {
+	if !isAllowedVersion(version) {
+		panic(fmt.Sprintf("unsupported VOM version: %x", version))
+	}
 	return &encoder{
 		writer:          w,
-		buf:             newEncbuf(),
+		buf:             newSwitchedEncbuf(w, version),
 		typeStack:       make([]typeStackEntry, 0, 10),
 		typeEnc:         typeEnc,
 		sentVersionByte: true,
+		version:         version,
 	}
 }
 
@@ -116,73 +152,64 @@ func (e *Encoder) Encode(v interface{}) error {
 		panic("Encode(RawValue) NOT IMPLEMENTED")
 	}
 	if !e.enc.sentVersionByte {
-		if err := writeVersionByte(e.enc.writer); err != nil {
+		if _, err := e.enc.writer.Write([]byte{byte(e.enc.version)}); err != nil {
 			return err
 		}
 		e.enc.sentVersionByte = true
 	}
-	if err := e.enc.startEncode(); err != nil {
+	vdlType := extractType(v)
+	tid, err := e.enc.typeEnc.encode(vdlType)
+	if err != nil {
+		return err
+	}
+	if err := e.enc.startEncode(vdlType.ContainsAnyOrTypeObject(), hasChunkLen(vdlType), int64(tid)); err != nil {
 		return err
 	}
 	if err := vdl.FromReflect(&e.enc, reflect.ValueOf(v)); err != nil {
 		return err
 	}
-	return e.enc.finishEncode(0)
+	return e.enc.finishEncode()
+}
+
+// TODO(bprosnitz) Remove -- this is copied from vdl
+func extractType(v interface{}) *vdl.Type {
+	rv := reflect.ValueOf(v)
+	for rv.Kind() == reflect.Ptr && !rv.IsNil() {
+		if rv.Type().ConvertibleTo(rtPtrToValue) {
+			return rv.Convert(rtPtrToValue).Interface().(*vdl.Value).Type()
+		}
+		rv = rv.Elem()
+	}
+	return vdl.TypeOf(v)
 }
 
 func (e *encoder) encodeWireType(tid typeId, wt wireType) error {
-	if err := e.startEncode(); err != nil {
+	if err := e.startEncode(false, true, int64(-tid)); err != nil {
 		return err
 	}
 	if err := vdl.FromReflect(e, reflect.ValueOf(wt)); err != nil {
 		return err
 	}
 	// We encode the negative id for type definitions.
-	return e.finishEncode(-tid)
+	return e.finishEncode()
 }
 
-// paddingLen must be large enough to hold the header in writeMsg.
-const paddingLen = maxEncodedUintBytes * 2
-
-func (e *encoder) startEncode() error {
-	e.buf.Reset()
-	e.buf.Grow(paddingLen)
+func (e *encoder) startEncode(hasAny, hasLen bool, mid int64) error {
+	if err := e.buf.StartMessage(hasAny, hasLen, int64(mid)); err != nil {
+		return err
+	}
 	e.typeStack = e.typeStack[:0]
 	return nil
 }
 
-func (e *encoder) finishEncode(tid typeId) error {
+func (e *encoder) finishEncode() error {
 	switch {
 	case len(e.typeStack) > 1:
 		return verror.New(errEncodeBadTypeStack, nil)
 	case len(e.typeStack) == 0:
 		return verror.New(errEncodeNilType, nil)
 	}
-	encType := e.typeStack[0].tt
-	if tid == 0 {
-		if tid = e.typeEnc.lookupTypeId(encType); tid == 0 {
-			return verror.New(errEncodeZeroTypeId, nil)
-		}
-	}
-	// Binary messages always start with a typeId, sometimes followed by the byte
-	// length of the rest of the message. We only know the byte length after
-	// we've encoded the rest of the message. To make this reasonably efficient,
-	// the buffer is initialized with enough padding to hold the id and length,
-	// and we go back and fill them in here.
-	//
-	// The binaryEncode*End methods fill in the trailing bytes of the buffer and
-	// return the start index of the encoded data. Thus the binaryEncode*End
-	// calls here are in the opposite order they appear in the encoded message.
-	msg := e.buf.Bytes()
-	header := msg[:paddingLen]
-	if hasBinaryMsgLen(encType) {
-		start := binaryEncodeUintEnd(header, uint64(len(msg)-paddingLen))
-		header = header[:start]
-	}
-	// Note that we encode the negative id for type definitions.
-	start := binaryEncodeIntEnd(header, int64(tid))
-	_, err := e.writer.Write(msg[start:])
-	return err
+	return e.buf.FinishMessage()
 }
 
 func errTypeMismatch(t *vdl.Type, kinds ...vdl.Kind) error {
@@ -221,13 +248,24 @@ func (e *encoder) prepareTypeHelper(tt *vdl.Type, fromNil bool) error {
 		// is called, to handle positive and negative ids, and the message length.
 		e.pushType(tt)
 	case !fromNil && e.topType().Kind() == vdl.Any:
-		binaryEncodeUint(e.buf, uint64(tid))
+		if e.isStructFieldValue() {
+			binaryEncodeUint(e.buf, uint64(e.topTypeFieldIndex()))
+		}
+		if e.version == Version80 {
+			binaryEncodeUint(e.buf, uint64(tid))
+		} else {
+			binaryEncodeUint(e.buf, e.buf.ReferenceTypeID(tid))
+		}
 	}
 	return nil
 }
 
 func (e *encoder) pushType(tt *vdl.Type) {
-	e.typeStack = append(e.typeStack, typeStackEntry{tt, e.buf.Len()})
+	e.typeStack = append(e.typeStack, typeStackEntry{tt, -1})
+}
+
+func (e *encoder) pushFieldType(tt *vdl.Type, index int) {
+	e.typeStack = append(e.typeStack, typeStackEntry{tt, index})
 }
 
 func (e *encoder) popType() error {
@@ -242,9 +280,15 @@ func (e *encoder) topType() *vdl.Type {
 	return e.typeStack[len(e.typeStack)-1].tt
 }
 
-func (e *encoder) topTypeAndPos() (*vdl.Type, int) {
-	entry := e.typeStack[len(e.typeStack)-1]
-	return entry.tt, entry.pos
+func (e *encoder) isStructFieldValue() bool {
+	return e.topTypeFieldIndex() >= 0
+}
+
+func (e *encoder) topTypeFieldIndex() int {
+	if len(e.typeStack) == 0 {
+		return -1
+	}
+	return e.typeStack[len(e.typeStack)-1].fieldIndex
 }
 
 // canIgnoreField returns true iff a zero-value field can be ignored.
@@ -261,20 +305,18 @@ func (e *encoder) canIgnoreField(fromNil bool) bool {
 	return top2.Kind() == vdl.Struct || (top2.Kind() == vdl.Optional && top2.Elem().Kind() == vdl.Struct)
 }
 
-// ignoreField ignores the encoding output for the current field.
-func (e *encoder) ignoreField() {
-	e.buf.Truncate(e.typeStack[len(e.typeStack)-1].pos)
-}
-
 // Implementation of vdl.Target interface.
 
 func (e *encoder) FromBool(src bool, tt *vdl.Type) error {
 	if err := e.prepareType(tt, vdl.Bool); err != nil {
 		return err
 	}
-	if src == false && e.canIgnoreField(false) {
-		e.ignoreField()
-		return nil
+	if e.isStructFieldValue() && e.topType().Kind() != vdl.Any {
+		if src == true || !e.canIgnoreField(false) {
+			binaryEncodeUint(e.buf, uint64(e.topTypeFieldIndex()))
+		} else {
+			return nil
+		}
 	}
 	binaryEncodeBool(e.buf, src)
 	return nil
@@ -284,9 +326,12 @@ func (e *encoder) FromUint(src uint64, tt *vdl.Type) error {
 	if err := e.prepareType(tt, vdl.Byte, vdl.Uint16, vdl.Uint32, vdl.Uint64); err != nil {
 		return err
 	}
-	if src == 0 && e.canIgnoreField(false) {
-		e.ignoreField()
-		return nil
+	if e.isStructFieldValue() && e.topType().Kind() != vdl.Any {
+		if src != 0 || !e.canIgnoreField(false) {
+			binaryEncodeUint(e.buf, uint64(e.topTypeFieldIndex()))
+		} else {
+			return nil
+		}
 	}
 	if tt.Kind() == vdl.Byte {
 		e.buf.WriteOneByte(byte(src))
@@ -300,9 +345,12 @@ func (e *encoder) FromInt(src int64, tt *vdl.Type) error {
 	if err := e.prepareType(tt, vdl.Int16, vdl.Int32, vdl.Int64); err != nil {
 		return err
 	}
-	if src == 0 && e.canIgnoreField(false) {
-		e.ignoreField()
-		return nil
+	if e.isStructFieldValue() && e.topType().Kind() != vdl.Any {
+		if src != 0 || !e.canIgnoreField(false) {
+			binaryEncodeUint(e.buf, uint64(e.topTypeFieldIndex()))
+		} else {
+			return nil
+		}
 	}
 	binaryEncodeInt(e.buf, src)
 	return nil
@@ -312,9 +360,12 @@ func (e *encoder) FromFloat(src float64, tt *vdl.Type) error {
 	if err := e.prepareType(tt, vdl.Float32, vdl.Float64); err != nil {
 		return err
 	}
-	if src == 0 && e.canIgnoreField(false) {
-		e.ignoreField()
-		return nil
+	if e.isStructFieldValue() && e.topType().Kind() != vdl.Any {
+		if src != 0 || !e.canIgnoreField(false) {
+			binaryEncodeUint(e.buf, uint64(e.topTypeFieldIndex()))
+		} else {
+			return nil
+		}
 	}
 	binaryEncodeFloat(e.buf, src)
 	return nil
@@ -324,9 +375,12 @@ func (e *encoder) FromComplex(src complex128, tt *vdl.Type) error {
 	if err := e.prepareType(tt, vdl.Complex64, vdl.Complex128); err != nil {
 		return err
 	}
-	if src == 0 && e.canIgnoreField(false) {
-		e.ignoreField()
-		return nil
+	if e.isStructFieldValue() && e.topType().Kind() != vdl.Any {
+		if src != 0 || !e.canIgnoreField(false) {
+			binaryEncodeUint(e.buf, uint64(e.topTypeFieldIndex()))
+		} else {
+			return nil
+		}
 	}
 	binaryEncodeFloat(e.buf, real(src))
 	binaryEncodeFloat(e.buf, imag(src))
@@ -341,14 +395,28 @@ func (e *encoder) FromBytes(src []byte, tt *vdl.Type) error {
 		return err
 	}
 	if tt.Kind() == vdl.List {
-		if len(src) == 0 && e.canIgnoreField(false) {
-			e.ignoreField()
-			return nil
+		if e.isStructFieldValue() && e.topType().Kind() != vdl.Any {
+			if len(src) != 0 || !e.canIgnoreField(false) {
+				binaryEncodeUint(e.buf, uint64(e.topTypeFieldIndex()))
+			} else {
+				return nil
+			}
 		}
 		binaryEncodeUint(e.buf, uint64(len(src)))
 	} else {
 		// We always encode array length to 0.
-		binaryEncodeUint(e.buf, 0)
+		if e.isStructFieldValue() && e.topType().Kind() != vdl.Any {
+			var orData byte
+			for _, b := range src {
+				orData |= b
+			}
+			if orData != 0 || !e.canIgnoreField(false) {
+				binaryEncodeUint(e.buf, uint64(e.topTypeFieldIndex()))
+			} else {
+				return nil
+			}
+		}
+		binaryEncodeUint(e.buf, uint64(0))
 	}
 
 	e.buf.Write(src)
@@ -359,9 +427,12 @@ func (e *encoder) FromString(src string, tt *vdl.Type) error {
 	if err := e.prepareType(tt, vdl.String); err != nil {
 		return err
 	}
-	if len(src) == 0 && e.canIgnoreField(false) {
-		e.ignoreField()
-		return nil
+	if e.isStructFieldValue() && e.topType().Kind() != vdl.Any {
+		if len(src) != 0 || !e.canIgnoreField(false) {
+			binaryEncodeUint(e.buf, uint64(e.topTypeFieldIndex()))
+		} else {
+			return nil
+		}
 	}
 	binaryEncodeString(e.buf, src)
 	return nil
@@ -375,9 +446,12 @@ func (e *encoder) FromEnumLabel(src string, tt *vdl.Type) error {
 	if index < 0 {
 		return verror.New(errLabelNotInType, nil, src, tt)
 	}
-	if index == 0 && e.canIgnoreField(false) {
-		e.ignoreField()
-		return nil
+	if e.isStructFieldValue() && e.topType().Kind() != vdl.Any {
+		if index != 0 || !e.canIgnoreField(false) {
+			binaryEncodeUint(e.buf, uint64(e.topTypeFieldIndex()))
+		} else {
+			return nil
+		}
 	}
 	binaryEncodeUint(e.buf, uint64(index))
 	return nil
@@ -392,11 +466,25 @@ func (e *encoder) FromTypeObject(src *vdl.Type) error {
 	if err != nil {
 		return err
 	}
-	if src.Kind() == vdl.Any && e.canIgnoreField(false) {
-		e.ignoreField()
-		return nil
+	if e.version == Version80 {
+		if e.isStructFieldValue() && e.topType().Kind() != vdl.Any {
+			if src.Kind() != vdl.Any || !e.canIgnoreField(true) {
+				binaryEncodeUint(e.buf, uint64(e.topTypeFieldIndex()))
+				binaryEncodeUint(e.buf, uint64(tid))
+			}
+		} else {
+			binaryEncodeUint(e.buf, uint64(tid))
+		}
+	} else {
+		if e.isStructFieldValue() && e.topType().Kind() != vdl.Any {
+			if src.Kind() != vdl.Any || !e.canIgnoreField(true) {
+				binaryEncodeUint(e.buf, uint64(e.topTypeFieldIndex()))
+				binaryEncodeUint(e.buf, e.buf.ReferenceTypeID(tid))
+			}
+		} else {
+			binaryEncodeUint(e.buf, e.buf.ReferenceTypeID(tid))
+		}
 	}
-	binaryEncodeUint(e.buf, uint64(tid))
 	return nil
 }
 
@@ -407,11 +495,25 @@ func (e *encoder) FromNil(tt *vdl.Type) error {
 	if err := e.prepareTypeHelper(tt, true); err != nil {
 		return err
 	}
-	if e.canIgnoreField(true) {
-		e.ignoreField()
-		return nil
+	switch tt.Kind() {
+	case vdl.Optional:
+		if e.isStructFieldValue() {
+			if !e.canIgnoreField(true) && e.topType().Kind() != vdl.Any {
+				binaryEncodeUint(e.buf, uint64(e.topTypeFieldIndex()))
+				e.buf.WriteOneByte(WireCtrlNil)
+			}
+		} else {
+			e.buf.WriteOneByte(WireCtrlNil)
+		}
+	case vdl.Any:
+		if e.isStructFieldValue() {
+			if !e.canIgnoreField(true) && e.topType().Kind() != vdl.Any {
+				e.buf.WriteOneByte(WireCtrlNil)
+			}
+		} else {
+			e.buf.WriteOneByte(WireCtrlNil)
+		}
 	}
-	binaryEncodeControl(e.buf, WireCtrlNil)
 	return nil
 }
 
@@ -420,14 +522,24 @@ func (e *encoder) StartList(tt *vdl.Type, len int) (vdl.ListTarget, error) {
 		return nil, err
 	}
 	if tt.Kind() == vdl.List {
-		if len == 0 && e.canIgnoreField(false) {
-			e.ignoreField()
+		if e.isStructFieldValue() && e.topType().Kind() != vdl.Any {
+			if len != 0 || !e.canIgnoreField(false) {
+				binaryEncodeUint(e.buf, uint64(e.topTypeFieldIndex()))
+				binaryEncodeUint(e.buf, uint64(len))
+			}
 		} else {
 			binaryEncodeUint(e.buf, uint64(len))
 		}
 	} else {
 		// We always encode array length to 0.
-		binaryEncodeUint(e.buf, 0)
+		if e.isStructFieldValue() && e.topType().Kind() != vdl.Any {
+			if len != 0 || !e.canIgnoreField(false) {
+				binaryEncodeUint(e.buf, uint64(e.topTypeFieldIndex()))
+				binaryEncodeUint(e.buf, uint64(0))
+			}
+		} else {
+			binaryEncodeUint(e.buf, uint64(0))
+		}
 	}
 	e.pushType(tt)
 	return e, nil
@@ -437,8 +549,11 @@ func (e *encoder) StartSet(tt *vdl.Type, len int) (vdl.SetTarget, error) {
 	if err := e.prepareType(tt, vdl.Set); err != nil {
 		return nil, err
 	}
-	if len == 0 && e.canIgnoreField(false) {
-		e.ignoreField()
+	if e.isStructFieldValue() && e.topType().Kind() != vdl.Any {
+		if len != 0 || !e.canIgnoreField(false) {
+			binaryEncodeUint(e.buf, uint64(e.topTypeFieldIndex()))
+			binaryEncodeUint(e.buf, uint64(len))
+		}
 	} else {
 		binaryEncodeUint(e.buf, uint64(len))
 	}
@@ -450,8 +565,11 @@ func (e *encoder) StartMap(tt *vdl.Type, len int) (vdl.MapTarget, error) {
 	if err := e.prepareType(tt, vdl.Map); err != nil {
 		return nil, err
 	}
-	if len == 0 && e.canIgnoreField(false) {
-		e.ignoreField()
+	if e.isStructFieldValue() && e.topType().Kind() != vdl.Any {
+		if len != 0 || !e.canIgnoreField(false) {
+			binaryEncodeUint(e.buf, uint64(e.topTypeFieldIndex()))
+			binaryEncodeUint(e.buf, uint64(len))
+		}
 	} else {
 		binaryEncodeUint(e.buf, uint64(len))
 	}
@@ -460,6 +578,10 @@ func (e *encoder) StartMap(tt *vdl.Type, len int) (vdl.MapTarget, error) {
 }
 
 func (e *encoder) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
+	if e.isStructFieldValue() && e.topType().Kind() != vdl.Any {
+		// TODO(bprosnitz) We shouldn't need to write the struct field index for fields that are empty structs/unions
+		binaryEncodeUint(e.buf, uint64(e.topTypeFieldIndex()))
+	}
 	if err := e.prepareType(tt, vdl.Struct, vdl.Union); err != nil {
 		return nil, err
 	}
@@ -480,7 +602,7 @@ func (e *encoder) FinishMap(vdl.MapTarget) error {
 }
 
 func (e *encoder) FinishFields(vdl.FieldsTarget) error {
-	top, pos := e.topTypeAndPos()
+	top := e.topType()
 	// Pop the type stack first to let canIgnoreField() see the correct
 	// parent type.
 	if err := e.popType(); err != nil {
@@ -488,14 +610,7 @@ func (e *encoder) FinishFields(vdl.FieldsTarget) error {
 	}
 	if top.Kind() == vdl.Struct || (top.Kind() == vdl.Optional && top.Elem().Kind() == vdl.Struct) {
 		// Write the struct terminator; don't write for union.
-		if pos == e.buf.Len() && top.Kind() != vdl.Optional && e.canIgnoreField(false) {
-			// Ignore the zero value only if it is not optional since we should
-			// distinguish between empty and non-existent value. If we arrive here,
-			// it means the current struct is empty, but not non-existent.
-			e.ignoreField()
-		} else {
-			binaryEncodeControl(e.buf, WireCtrlEnd)
-		}
+		e.buf.WriteOneByte(WireCtrlEnd)
 	}
 	return nil
 }
@@ -538,8 +653,7 @@ func (e *encoder) StartField(name string) (_, _ vdl.Target, _ error) {
 	// field starts with its absolute 0-based index, followed by the value.  Union
 	// always consists of a single field, while structs use a CtrlEnd terminator.
 	if vfield, index := top.FieldByName(name); index >= 0 {
-		e.pushType(vfield.Type)
-		binaryEncodeUint(e.buf, uint64(index))
+		e.pushFieldType(vfield.Type, index)
 		return nil, e, nil
 	}
 	return nil, nil, verror.New(errFieldNotInTopType, nil, name, top)

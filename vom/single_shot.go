@@ -6,6 +6,7 @@ package vom
 
 import (
 	"bytes"
+	"io"
 	"sync"
 
 	"v.io/v23/verror"
@@ -17,8 +18,13 @@ import (
 // This is a "single-shot" encoding; full type information is always included in
 // the returned encoding, as if a new encoder were used for each call.
 func Encode(v interface{}) ([]byte, error) {
+	return VersionedEncode(Version80, v)
+}
+
+// VersionedEncode performs single-shot encoding to a specific version of VOM
+func VersionedEncode(version Version, v interface{}) ([]byte, error) {
 	var buf bytes.Buffer
-	if err := NewEncoder(&buf).Encode(v); err != nil {
+	if err := NewVersionedEncoder(version, &buf).Encode(v); err != nil {
 		return nil, err
 	}
 	return buf.Bytes(), nil
@@ -35,27 +41,32 @@ func Decode(data []byte, v interface{}) error {
 	//
 	// However decoding type messages is expensive, so we cache typeDecoders to
 	// skip the decoding in the common case.
-	buf := newDecbufFromBytes(data)
-	if err := readVersionByte(buf); err != nil {
-		return err
-	}
-	startTypeMsgs := buf.beg
-	// Check for hits in the typeDecoder cache.
-	key, err := computeTypeDecoderCacheKey(buf)
+	key, err := computeTypeDecoderCacheKey(data)
 	if err != nil {
 		return err
 	}
+	var mr *messageReader
 	typeDec := singleShotTypeDecoderCache.lookup(key)
 	cacheMiss := false
 	if typeDec == nil {
 		// Cache miss; start decoding at the beginning of all type messages with a
 		// new TypeDecoder.
 		cacheMiss = true
-		buf.beg = startTypeMsgs
-		typeDec = newTypeDecoderWithoutVersionByte(nil)
+		mr = newMessageReader(newDecbufFromBytes(data))
+		typeDec = newTypeDecoderInternal(mr)
+	} else {
+		version := Version(data[0])
+		data = data[len(key):] // skip the already-read types
+		mr = newMessageReader(newDecbufFromBytes(data))
+		mr.version = version // skip the version byte
+		typeDec = newDerivedTypeDecoderInternal(mr, typeDec)
 	}
+	mr.SetCallbacks(typeDec.lookupType, typeDec.readSingleType)
 	// Decode the value message.
-	decoder := newDecoderWithoutVersionByte(buf, typeDec)
+	decoder := &Decoder{
+		mr:      mr,
+		typeDec: typeDec,
+	}
 	if err := decoder.Decode(v); err != nil {
 		return err
 	}
@@ -105,30 +116,39 @@ func (x *typeDecoderCache) lookup(key string) *TypeDecoder {
 
 // computeTypeDecoderCacheKey computes the cache key for the typeDecoderCache.
 // The logic is similar to Decoder.decodeValueType.
-func computeTypeDecoderCacheKey(buf *decbuf) (string, error) {
-	// Walk through buf until we get to a value message.
+func computeTypeDecoderCacheKey(message []byte) (string, error) {
+	// TODO(bprosnitz) Should we canonicalize the cache key by stripping the continuation control codes?
+	readPos := 0
+	if len(message) == 0 {
+		return "", io.EOF
+	}
+	if !isAllowedVersion(Version(message[0])) {
+		return "", verror.New(errBadVersionByte, nil, message[0])
+	}
+	readPos++
+	// Walk through bytes until we get to a value message.
 	for {
-		switch id, bytelen, err := binaryPeekInt(buf); {
+		switch id, cr, byteLen, err := byteSliceBinaryPeekIntWithControl(message[readPos:]); {
 		case err != nil:
 			return "", err
-		case id > 0:
+		case cr != 0 && cr != WireCtrlTypeCont && cr != WireCtrlValueCont:
+			return "", verror.New(errBadControlCode, nil)
+		case id > 0 || cr == WireCtrlValueCont:
 			// This is a value message.  The bytes read so far include the version
 			// byte and all type messages; use all of these bytes as the cache key.
 			//
 			// TODO(toddw): Take a fingerprint of these bytes to reduce memory usage.
-			return string(buf.buf[0:buf.beg]), nil
-		case id < 0:
+			return string(message[:readPos]), nil
+		case id < 0 || cr == WireCtrlTypeCont:
 			// This is a type message.  Skip the bytes for the id, and decode the
 			// message length (which always exists for wireType), and skip those bytes
 			// too to move to the next message.
-			buf.Skip(bytelen)
-			msgLen, err := binaryDecodeLen(buf)
+			readPos += byteLen
+			msgLen, byteLen, err := byteSliceBinaryPeekLen(message[readPos:])
 			if err != nil {
 				return "", err
 			}
-			if err := buf.Skip(msgLen); err != nil {
-				return "", err
-			}
+			readPos += byteLen + msgLen
 		case id == 0:
 			return "", verror.New(errDecodeZeroTypeID, nil)
 		}
