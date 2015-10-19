@@ -1,6 +1,5 @@
 pkg security, const AllPrincipals BlessingPattern
 pkg security, const ChainSeparator ideal-string
-pkg security, const IBE int32
 pkg security, const NoExtension BlessingPattern
 pkg security, const SHA1Hash Hash
 pkg security, const SHA256Hash Hash
@@ -12,7 +11,7 @@ pkg security, const SignatureForMessageSigning ideal-string
 pkg security, func AddToRoots(Principal, Blessings) error
 pkg security, func AllowEveryone() Authorizer
 pkg security, func BlessingNames(Principal, Blessings) []string
-pkg security, func CreatePrincipal(Signer, BlessingStore, BlessingRoots, BlessingsBasedEncrypter, BlessingsBasedDecrypter) (Principal, error)
+pkg security, func CreatePrincipal(Signer, BlessingStore, BlessingRoots) (Principal, error)
 pkg security, func DefaultAuthorizer() Authorizer
 pkg security, func DefaultBlessingPatterns(Principal) []BlessingPattern
 pkg security, func EndpointAuthorizer() Authorizer
@@ -97,10 +96,6 @@ pkg security, type BlessingStore interface, PublicKey() PublicKey
 pkg security, type BlessingStore interface, Set(Blessings, BlessingPattern) (Blessings, error)
 pkg security, type BlessingStore interface, SetDefault(Blessings) error
 pkg security, type Blessings struct
-pkg security, type BlessingsBasedDecrypter interface { Decrypt }
-pkg security, type BlessingsBasedDecrypter interface, Decrypt(*context.T, *Ciphertext) (*[32]byte, error)
-pkg security, type BlessingsBasedEncrypter interface { Encrypt }
-pkg security, type BlessingsBasedEncrypter interface, Encrypt(*context.T, []BlessingPattern, *[32]byte) (*Ciphertext, error)
 pkg security, type Call interface { LocalBlessings, LocalDischarges, LocalEndpoint, LocalPrincipal, Method, MethodTags, RemoteBlessings, RemoteDischarges, RemoteEndpoint, Suffix, Timestamp }
 pkg security, type Call interface, LocalBlessings() Blessings
 pkg security, type Call interface, LocalDischarges() map[string]Discharge
@@ -136,21 +131,16 @@ pkg security, type Certificate struct, Caveats []Caveat
 pkg security, type Certificate struct, Extension string
 pkg security, type Certificate struct, PublicKey []byte
 pkg security, type Certificate struct, Signature Signature
-pkg security, type Ciphertext struct
-pkg security, type Ciphertext struct, Ciphertexts map[string][]byte
-pkg security, type Ciphertext struct, Scheme int32
 pkg security, type Discharge struct
 pkg security, type DischargeImpetus struct
 pkg security, type DischargeImpetus struct, Arguments []*vdl.Value
 pkg security, type DischargeImpetus struct, Method string
 pkg security, type DischargeImpetus struct, Server []BlessingPattern
 pkg security, type Hash string
-pkg security, type Principal interface { Bless, BlessSelf, BlessingStore, Decrypter, Encrypter, MintDischarge, PublicKey, Roots, Sign }
+pkg security, type Principal interface { Bless, BlessSelf, BlessingStore, MintDischarge, PublicKey, Roots, Sign }
 pkg security, type Principal interface, Bless(PublicKey, Blessings, string, Caveat, ...Caveat) (Blessings, error)
 pkg security, type Principal interface, BlessSelf(string, ...Caveat) (Blessings, error)
 pkg security, type Principal interface, BlessingStore() BlessingStore
-pkg security, type Principal interface, Decrypter() BlessingsBasedDecrypter
-pkg security, type Principal interface, Encrypter() BlessingsBasedEncrypter
 pkg security, type Principal interface, MintDischarge(Caveat, Caveat, ...Caveat) (Discharge, error)
 pkg security, type Principal interface, PublicKey() PublicKey
 pkg security, type Principal interface, Roots() BlessingRoots

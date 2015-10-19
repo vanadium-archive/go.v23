@@ -6,16 +6,13 @@ package security
 
 import (
 	"reflect"
-	"v.io/v23/context"
 	"v.io/v23/verror"
 )
 
 // CreatePrincipal returns a Principal that uses 'signer' for all
 // private key operations, 'store' for storing blessings bound
-// to the Principal, 'roots' for the set of authoritative public
-// keys on blessings recognized by this Principal, 'encrypter' for
-// encrypting messages under blessing patterns, and 'decrypter' for
-// decrypting messages encrypted under blessing patterns.
+// to the Principal and 'roots' for the set of authoritative public
+// keys on blessings recognized by this Principal.
 //
 // If provided 'roots' is nil then the Principal does not trust any
 // public keys and all subsequent 'AddToRoots' operations fail.
@@ -24,23 +21,17 @@ import (
 //
 // NOTE: v.io/x/ref/lib/testutil/security provides utility methods for creating
 // principals for testing purposes.
-func CreatePrincipal(signer Signer, store BlessingStore, roots BlessingRoots, encrypter BlessingsBasedEncrypter, decrypter BlessingsBasedDecrypter) (Principal, error) {
+func CreatePrincipal(signer Signer, store BlessingStore, roots BlessingRoots) (Principal, error) {
 	if store == nil {
 		store = errStore{signer.PublicKey()}
 	}
 	if roots == nil {
 		roots = errRoots{}
 	}
-	if encrypter == nil {
-		encrypter = errEncrypter{}
-	}
-	if decrypter == nil {
-		decrypter = errDecrypter{}
-	}
 	if got, want := store.PublicKey(), signer.PublicKey(); !reflect.DeepEqual(got, want) {
 		return nil, verror.New(errBadStoreKey, nil, got, want)
 	}
-	return &principal{signer: signer, store: store, roots: roots, encrypter: encrypter, decrypter: decrypter}, nil
+	return &principal{signer: signer, store: store, roots: roots}, nil
 }
 
 var (
@@ -59,8 +50,6 @@ var (
 
 	errNilStore           = verror.Register(pkgPath+".errNilStore", verror.NoRetry, "{1:}{2:}underlying BlessingStore object is nil{:_}")
 	errNilRoots           = verror.Register(pkgPath+".errNilRoots", verror.NoRetry, "{1:}{2:}underlying BlessingRoots object is nil{:_}")
-	errNilEncrypter       = verror.Register(pkgPath+".errNilEncrypter", verror.NoRetry, "{1:}{2:}underlying BlessingsBasedEncrypter object is nil{:_}")
-	errNilDecrypter       = verror.Register(pkgPath+".errNilDecrypter", verror.NoRetry, "{1:}{2:}underlying BlessingsBasedDecrypter object is nil{:_}")
 	errNeedCert           = verror.Register(pkgPath+".errNeedCert", verror.NoRetry, "{1:}{2:}the Blessings to bless 'with' must have at least one certificate{:_}")
 	errBadStoreKey        = verror.Register(pkgPath+".errBadStoreKey", verror.NoRetry, "{1:}{2:}store's public key: {3} does not match signer's public key: {4}{:_}")
 	errCantExtendBlessing = verror.Register(pkgPath+".errCantExtendBlessing", verror.NoRetry, "{1:}{2:}Principal with public key {3} cannot extend blessing with public key {4}{:_}")
@@ -93,24 +82,10 @@ func (errRoots) Recognized([]byte, string) error       { return verror.New(errNi
 func (errRoots) Dump() map[BlessingPattern][]PublicKey { return nil }
 func (errRoots) DebugString() string                   { return verror.New(errNilRoots, nil).Error() }
 
-type errEncrypter struct{}
-
-func (errEncrypter) Encrypt(*context.T, []BlessingPattern, *[32]byte) (*Ciphertext, error) {
-	return nil, verror.New(errNilEncrypter, nil)
-}
-
-type errDecrypter struct{}
-
-func (errDecrypter) Decrypt(*context.T, *Ciphertext) (*[32]byte, error) {
-	return nil, verror.New(errNilDecrypter, nil)
-}
-
 type principal struct {
-	signer    Signer
-	roots     BlessingRoots
-	store     BlessingStore
-	encrypter BlessingsBasedEncrypter
-	decrypter BlessingsBasedDecrypter
+	signer Signer
+	roots  BlessingRoots
+	store  BlessingStore
 }
 
 func (p *principal) Bless(key PublicKey, with Blessings, extension string, caveat Caveat, additionalCaveats ...Caveat) (Blessings, error) {
@@ -187,12 +162,4 @@ func (p *principal) BlessingStore() BlessingStore {
 
 func (p *principal) Roots() BlessingRoots {
 	return p.roots
-}
-
-func (p *principal) Encrypter() BlessingsBasedEncrypter {
-	return p.encrypter
-}
-
-func (p *principal) Decrypter() BlessingsBasedDecrypter {
-	return p.decrypter
 }

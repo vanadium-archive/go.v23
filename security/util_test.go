@@ -96,7 +96,7 @@ func newECDSASigner(t testing.TB, curve elliptic.Curve) Signer {
 }
 
 func newPrincipal(t testing.TB) Principal {
-	p, err := CreatePrincipal(newECDSASigner(t, elliptic.P256()), nil, &roots{}, nil, nil)
+	p, err := CreatePrincipal(newECDSASigner(t, elliptic.P256()), nil, &roots{})
 	if err != nil {
 		t.Fatalf("CreatePrincipal failed: %v", err)
 	}

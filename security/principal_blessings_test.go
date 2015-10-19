@@ -278,7 +278,7 @@ func TestBlessings(t *testing.T) {
 }
 
 func TestCreatePrincipalWithNilStoreAndRoots(t *testing.T) {
-	p, err := CreatePrincipal(newECDSASigner(t, elliptic.P256()), nil, nil, nil, nil)
+	p, err := CreatePrincipal(newECDSASigner(t, elliptic.P256()), nil, nil)
 	if err != nil {
 		t.Fatalf("CreatePrincipal failed: %v", err)
 	}
