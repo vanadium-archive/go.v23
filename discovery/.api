@@ -5,10 +5,10 @@ pkg discovery, method (UpdateLost) Index() int
 pkg discovery, method (UpdateLost) Interface() interface{}
 pkg discovery, method (UpdateLost) Name() string
 pkg discovery, type AdvertiseCloser interface { Advertise, Close }
-pkg discovery, type AdvertiseCloser interface, Advertise(*context.T, Service, []security.BlessingPattern) error
+pkg discovery, type AdvertiseCloser interface, Advertise(*context.T, Service, []security.BlessingPattern) (<-chan struct{}, error)
 pkg discovery, type AdvertiseCloser interface, Close()
 pkg discovery, type Advertiser interface { Advertise }
-pkg discovery, type Advertiser interface, Advertise(*context.T, Service, []security.BlessingPattern) error
+pkg discovery, type Advertiser interface, Advertise(*context.T, Service, []security.BlessingPattern) (<-chan struct{}, error)
 pkg discovery, type Attributes map[string]string
 pkg discovery, type Closer interface { Close }
 pkg discovery, type Closer interface, Close()
@@ -28,7 +28,7 @@ pkg discovery, type Service struct, InstanceName string
 pkg discovery, type Service struct, InstanceUuid []byte
 pkg discovery, type Service struct, InterfaceName string
 pkg discovery, type T interface { Advertise, Close, Scan }
-pkg discovery, type T interface, Advertise(*context.T, Service, []security.BlessingPattern) error
+pkg discovery, type T interface, Advertise(*context.T, Service, []security.BlessingPattern) (<-chan struct{}, error)
 pkg discovery, type T interface, Close()
 pkg discovery, type T interface, Scan(*context.T, string) (<-chan Update, error)
 pkg discovery, type Update interface, Index() int
