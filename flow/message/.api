@@ -3,6 +3,7 @@ pkg message, const DisableEncryptionFlag ideal-int
 pkg message, func Append(*context.T, Message, []byte) ([]byte, error)
 pkg message, func NewErrInvalidMsg(*context.T, byte, uint64, uint64, error) error
 pkg message, func NewErrInvalidSetupOption(*context.T, uint64, uint64) error
+pkg message, func NewErrMissingBlessings(*context.T, byte) error
 pkg message, func NewErrUnknownMsg(*context.T, byte) error
 pkg message, func NewErrWrongProtocol(*context.T) error
 pkg message, func Read(*context.T, []byte) (Message, error)
@@ -39,5 +40,6 @@ pkg message, type TearDown struct
 pkg message, type TearDown struct, Message string
 pkg message, var ErrInvalidMsg verror.IDAction
 pkg message, var ErrInvalidSetupOption verror.IDAction
+pkg message, var ErrMissingBlessings verror.IDAction
 pkg message, var ErrUnknownMsg verror.IDAction
 pkg message, var ErrWrongProtocol verror.IDAction

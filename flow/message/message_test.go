@@ -13,6 +13,7 @@ import (
 	"v.io/v23/flow/message"
 	"v.io/v23/naming"
 	"v.io/v23/rpc/version"
+	"v.io/v23/verror"
 	_ "v.io/x/ref/runtime/factories/fake"
 	"v.io/x/ref/test"
 )
@@ -87,7 +88,6 @@ func TestAuth(t *testing.T) {
 	}
 	testMessages(t, ctx, []message.Message{
 		&message.Auth{BlessingsKey: 1, DischargeKey: 5, ChannelBinding: sig},
-		&message.Auth{},
 	})
 }
 
@@ -104,8 +104,26 @@ func TestOpenFlow(t *testing.T) {
 			Payload:         [][]byte{[]byte("fake payload")},
 		},
 		&message.OpenFlow{ID: 23, InitialCounters: 1 << 20, BlessingsKey: 42, DischargeKey: 55},
-		&message.OpenFlow{},
 	})
+}
+
+func TestMissingBlessings(t *testing.T) {
+	ctx, shutdown := v23.Init()
+	defer shutdown()
+	cases := []message.Message{
+		&message.OpenFlow{},
+		&message.Auth{},
+	}
+	for _, m := range cases {
+		encoded, err := message.Append(ctx, m, nil)
+		if err != nil {
+			t.Errorf("unexpected error for %#v: %v", m, err)
+		}
+		_, err = message.Read(ctx, encoded)
+		if verror.ErrorID(err) != message.ErrMissingBlessings.ID {
+			t.Errorf("unexpected error for %#v: got %v want MissingBlessings", m, err)
+		}
+	}
 }
 
 func TestAddReceiveBuffers(t *testing.T) {
