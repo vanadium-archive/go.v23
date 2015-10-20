@@ -146,3 +146,11 @@ type NoRetry struct{}
 
 func (NoRetry) NSOpt()      {}
 func (NoRetry) RPCCallOpt() {}
+
+// ChannelTimeout is the amount of time before we notice that a channel is
+// not responsive and close it.  Note that ChannelTimeout(0) is the same as
+// not setting a timeout.
+type ChannelTimeout time.Duration
+
+func (ChannelTimeout) RPCCallOpt()   {}
+func (ChannelTimeout) RPCServerOpt() {}

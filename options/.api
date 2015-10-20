@@ -1,5 +1,7 @@
 pkg options, const SecurityConfidential SecurityLevel
 pkg options, const SecurityNone SecurityLevel
+pkg options, method (ChannelTimeout) RPCCallOpt()
+pkg options, method (ChannelTimeout) RPCServerOpt()
 pkg options, method (IsLeaf) RPCServerOpt()
 pkg options, method (NameResolutionAuthorizer) NSOpt()
 pkg options, method (NameResolutionAuthorizer) RPCCallOpt()
@@ -14,6 +16,7 @@ pkg options, method (SecurityLevel) RPCServerOpt()
 pkg options, method (ServerAuthorizer) RPCCallOpt()
 pkg options, method (ServerBlessings) RPCServerOpt()
 pkg options, method (ServesMountTable) RPCServerOpt()
+pkg options, type ChannelTimeout time.Duration
 pkg options, type IsLeaf bool
 pkg options, type NameResolutionAuthorizer struct
 pkg options, type NameResolutionAuthorizer struct, embedded security.Authorizer

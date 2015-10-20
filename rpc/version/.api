@@ -1,6 +1,7 @@
 pkg version, const DeprecatedRPCVersion RPCVersion
 pkg version, const RPCVersion10 RPCVersion
 pkg version, const RPCVersion11 RPCVersion
+pkg version, const RPCVersion12 RPCVersion
 pkg version, const UnknownRPCVersion RPCVersion
 pkg version, func CommonVersion(*context.T, RPCVersionRange, RPCVersionRange) (RPCVersion, error)
 pkg version, func NewErrNoCompatibleVersion(*context.T, uint64, uint64, uint64, uint64) error

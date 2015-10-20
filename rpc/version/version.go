@@ -31,12 +31,15 @@ const (
 	rPCVersion8
 	rPCVersion9
 
-	// Open a special flow over which discharges for third-party
+	// RPCVersion10 opens a special flow over which discharges for third-party
 	// caveats on the server's blessings are sent.
 	RPCVersion10
 
-	// Optimized authentication.
+	// RPCVersion11 Optimized authentication.
 	RPCVersion11
+
+	// RPCVersion12 adds periodic healthchecks on the channel.
+	RPCVersion12
 )
 
 // RPCVersionRange allows you to optionally specify a range of versions to
