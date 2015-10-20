@@ -258,6 +258,9 @@ func (m *Auth) read(ctx *context.T, orig []byte) error {
 	if m.BlessingsKey, data, valid = readVarUint64(ctx, orig); !valid {
 		return NewErrInvalidMsg(ctx, openFlowType, uint64(len(orig)), 0, nil)
 	}
+	if m.BlessingsKey == 0 {
+		return NewErrMissingBlessings(ctx, openFlowType)
+	}
 	if m.DischargeKey, data, valid = readVarUint64(ctx, data); !valid {
 		return NewErrInvalidMsg(ctx, openFlowType, uint64(len(orig)), 1, nil)
 	}
@@ -313,6 +316,9 @@ func (m *OpenFlow) read(ctx *context.T, orig []byte) error {
 	}
 	if m.BlessingsKey, data, valid = readVarUint64(ctx, data); !valid {
 		return NewErrInvalidMsg(ctx, openFlowType, uint64(len(orig)), 2, nil)
+	}
+	if m.BlessingsKey == 0 {
+		return NewErrMissingBlessings(ctx, openFlowType)
 	}
 	if m.DischargeKey, data, valid = readVarUint64(ctx, data); !valid {
 		return NewErrInvalidMsg(ctx, openFlowType, uint64(len(orig)), 3, nil)
