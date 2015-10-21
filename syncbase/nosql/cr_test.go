@@ -262,11 +262,11 @@ func RunTest(t *testing.T, mockConflit []wire.ConflictInfo, expResult map[string
 	db := NewDatabase("parentName", "db1", getSchema(&ConflictResolverImpl{}))
 	advance := func(st *crtestutil.State) bool {
 		if st.ValIndex >= len(mockConflit) {
-			st.IsBlocked = true
+			st.SetIsBlocked(true)
 			st.Mu.Lock()
 			defer st.Mu.Unlock()
 		}
-		st.IsBlocked = false
+		st.SetIsBlocked(false)
 		st.Val = mockConflit[st.ValIndex]
 		st.ValIndex++
 		return true
@@ -283,16 +283,16 @@ func RunTest(t *testing.T, mockConflit []wire.ConflictInfo, expResult map[string
 	ctx, _ := context.RootContext()
 	st.Mu.Lock() // causes Advance() to block
 	db.EnforceSchema(ctx)
-	for i := 0; i < 100 && (len(st.Result) != len(expResult)); i++ {
+	for i := 0; i < 100 && (len(st.GetResult()) != len(expResult)); i++ {
 		time.Sleep(time.Millisecond) // wait till Advance() call is blocked
 	}
-	if len(st.Result) != len(expResult) {
-		t.Errorf("\n Unexpected number of results. Expected: %d, actual: %d", len(expResult), len(st.Result))
+	if len(st.GetResult()) != len(expResult) {
+		t.Errorf("\n Unexpected number of results. Expected: %d, actual: %d", len(expResult), len(st.GetResult()))
 	}
-	for i, result := range st.Result {
+	for i, result := range st.GetResult() {
 		compareResult(t, expResult[result.Key], result)
 		if singleBatch {
-			if result.Continued != (i < len(st.Result)-1) {
+			if result.Continued != (i < len(st.GetResult())-1) {
 				t.Error("\nUnexpected value for continued in single batch")
 			}
 		} else {

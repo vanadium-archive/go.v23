@@ -35,10 +35,10 @@ func (ri *resolverImpl1) OnConflict(ctx *context.T, conflict *Conflict) (r Resol
 func TestCrConnectionClose(t *testing.T) {
 	db := NewDatabase("parentName", "db1", getSchema(&resolverImpl1{}))
 	advance := func(st *crtestutil.State) bool {
-		st.IsBlocked = true
+		st.SetIsBlocked(true)
 		st.Mu.Lock()
 		defer st.Mu.Unlock()
-		st.IsBlocked = false
+		st.SetIsBlocked(false)
 		return false
 	}
 
@@ -51,14 +51,14 @@ func TestCrConnectionClose(t *testing.T) {
 	db.crState.reconnectWaitTime = 10 * time.Millisecond
 
 	ctx, _ := context.RootContext()
-	st.Mu.Lock()                                // causes Advance() to block
-	db.EnforceSchema(ctx)                       // kicks off the CR thread
-	for i := 0; i < 100 && !st.IsBlocked; i++ { // wait till Advance() call is blocked
+	st.Mu.Lock()                                     // causes Advance() to block
+	db.EnforceSchema(ctx)                            // kicks off the CR thread
+	for i := 0; i < 100 && !st.GetIsBlocked(); i++ { // wait till Advance() call is blocked
 		time.Sleep(time.Millisecond)
 	}
 	db.Close()
 	st.Mu.Unlock() // simulate ctx cancel()
-	for i := 0; i < 100 && st.IsBlocked; i++ {
+	for i := 0; i < 100 && st.GetIsBlocked(); i++ {
 		time.Sleep(time.Millisecond)
 	}
 
@@ -67,7 +67,7 @@ func TestCrConnectionClose(t *testing.T) {
 	// If the code does not work as intended then it will end up reconnecting
 	// the stream and blocking on the mutex
 	time.Sleep(time.Millisecond)
-	if st.IsBlocked {
+	if st.GetIsBlocked() {
 		t.Error("Error: The conflict resolution routine did not die")
 	}
 }
@@ -82,18 +82,18 @@ func TestCrConnectionClose(t *testing.T) {
 //     CR thread. This simulates a stable connection between CR and syncbase.
 // Expected result:
 //   - Advance() should get blocked after some time.
-//   - st.AdvanceCount should be equal to 3
+//   - st.advanceCount should be equal to 3
 func TestCrConnectionReestablish(t *testing.T) {
 	db := NewDatabase("parentName", "db1", getSchema(&resolverImpl1{}))
 	advance := func(st *crtestutil.State) bool {
-		st.AdvanceCount++
-		if st.AdvanceCount > 2 {
+		st.IncrementAdvanceCount()
+		if st.GetAdvanceCount() > 2 {
 			// Connection stays stable after 3 attempts
-			st.IsBlocked = true
+			st.SetIsBlocked(true)
 			st.Mu.Lock()
 			defer st.Mu.Unlock()
 		}
-		st.IsBlocked = false
+		st.SetIsBlocked(false)
 		return false
 	}
 
@@ -108,15 +108,15 @@ func TestCrConnectionReestablish(t *testing.T) {
 	ctx, _ := context.RootContext()
 	st.Mu.Lock() // causes Advance() to block
 	db.EnforceSchema(ctx)
-	for i := 0; i < 100 && !st.IsBlocked; i++ {
+	for i := 0; i < 100 && !st.GetIsBlocked(); i++ {
 		time.Sleep(time.Millisecond) // wait till Advance() call is blocked
 	}
 
-	if !st.IsBlocked {
+	if !st.GetIsBlocked() {
 		t.Error("Error: Advance() did not block")
 	}
-	if st.AdvanceCount != 3 {
-		t.Errorf("Error: Advance() expected to be called 3 times, instead called %d times", st.AdvanceCount)
+	if st.GetAdvanceCount() != 3 {
+		t.Errorf("Error: Advance() expected to be called 3 times, instead called %d times", st.GetAdvanceCount())
 	}
 
 	// Shutdown the cr routine

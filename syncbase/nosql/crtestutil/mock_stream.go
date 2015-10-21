@@ -14,13 +14,46 @@ var _ wire.ConflictManagerStartConflictResolverClientCall = (*CrStreamImpl)(nil)
 
 type State struct {
 	// ConflictStream state
-	IsBlocked    bool
+	isBlocked    bool
+	dataLock     sync.Mutex
 	Mu           sync.Mutex
 	Val          wire.ConflictInfo
-	AdvanceCount int
+	advanceCount int
 	ValIndex     int
 	// ResolutionStream state variables
-	Result []wire.ResolutionInfo
+	result []wire.ResolutionInfo
+}
+
+func (st *State) GetIsBlocked() bool {
+	st.dataLock.Lock()
+	defer st.dataLock.Unlock()
+	return st.isBlocked
+}
+
+func (st *State) SetIsBlocked(isBlocked bool) {
+	st.dataLock.Lock()
+	defer st.dataLock.Unlock()
+	st.isBlocked = isBlocked
+}
+
+func (st *State) GetAdvanceCount() int {
+	st.dataLock.Lock()
+	defer st.dataLock.Unlock()
+	return st.advanceCount
+}
+
+func (st *State) IncrementAdvanceCount() {
+	st.dataLock.Lock()
+	defer st.dataLock.Unlock()
+	st.advanceCount++
+}
+
+func (st *State) GetResult() []wire.ResolutionInfo {
+	st.dataLock.Lock()
+	defer st.dataLock.Unlock()
+	resultCopy := make([]wire.ResolutionInfo, len(st.result))
+	copy(resultCopy, st.result)
+	return resultCopy
 }
 
 type CrStreamImpl struct {
@@ -102,11 +135,14 @@ type ResolutionStreamImpl struct {
 }
 
 func (rs *ResolutionStreamImpl) Send(item wire.ResolutionInfo) error {
-	if rs.St.Result == nil {
-		rs.St.Result = []wire.ResolutionInfo{item}
-		return nil
-	}
-	rs.St.Result = append(rs.St.Result, item)
+	// protect read/write to st.Result
+	rs.St.dataLock.Lock()
+	defer rs.St.dataLock.Unlock()
+//	if rs.St.result == nil {
+//		rs.St.result = []wire.ResolutionInfo{item}
+//		return nil
+//	}
+	rs.St.result = append(rs.St.result, item)
 	return nil
 }
 
