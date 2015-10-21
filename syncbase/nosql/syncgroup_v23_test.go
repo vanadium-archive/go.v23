@@ -28,6 +28,10 @@ import (
 	"v.io/x/ref/test/v23tests"
 )
 
+const (
+	testTable = "tb"
+)
+
 // NOTE(sadovsky): These tests take a very long time to run - nearly 4 minutes
 // on my Macbook Pro! Various instances of time.Sleep() below likely contribute
 // to the problem.
@@ -562,7 +566,7 @@ var runSetupAppA = modules.Register(func(env *modules.Env, args ...string) error
 	a.Create(ctx, nil)
 	d := a.NoSQLDatabase("d", nil)
 	d.Create(ctx, nil)
-	d.Table("tb").Create(ctx, nil)
+	d.Table(testTable).Create(ctx, nil)
 
 	return nil
 }, "runSetupAppA")
@@ -703,7 +707,7 @@ var runPopulateData = modules.Register(func(env *modules.Env, args ...string) er
 	d := a.NoSQLDatabase("d", nil)
 
 	// Do Puts.
-	tb := d.Table("tb")
+	tb := d.Table(testTable)
 	start, _ := strconv.ParseUint(args[2], 10, 64)
 
 	for i := start; i < start+10; i++ {
@@ -740,27 +744,85 @@ var runPopulateNonVOMData = modules.Register(func(env *modules.Env, args ...stri
 	return nil
 }, "runPopulateNonVOMData")
 
+// Arguments: 0: Syncbase name, 1: start index.
+// Optional args: 2: end index, 3: value prefix.
+// Values are from [start,end) or [start, start+5) depending on whether end
+// param was provided.
 var runUpdateData = modules.Register(func(env *modules.Env, args ...string) error {
 	ctx, shutdown := v23.Init()
 	defer shutdown()
 
-	a := syncbase.NewService(args[0]).App("a")
+	serviceName, startStr := args[0], args[1]
+	start, _ := strconv.ParseUint(startStr, 10, 64)
+	end, prefix := start+5, "testkey"
+	if len(args) > 2 {
+		end, _ = strconv.ParseUint(args[2], 10, 64)
+		if end <= start {
+			return fmt.Errorf("Test error: end <= start. start: %d, end: %d", start, end)
+		}
+	}
+	if len(args) > 3 {
+		prefix = args[3]
+	}
+
+	a := syncbase.NewService(serviceName).App("a")
 	d := a.NoSQLDatabase("d", nil)
 
 	// Do Puts.
-	tb := d.Table("tb")
-	start, _ := strconv.ParseUint(args[1], 10, 64)
+	tb := d.Table(testTable)
 
-	for i := start; i < start+5; i++ {
+	for i := start; i < end; i++ {
 		key := fmt.Sprintf("foo%d", i)
 		r := tb.Row(key)
-		if err := r.Put(ctx, "testkey"+args[0]+key); err != nil {
+		if err := r.Put(ctx, prefix+serviceName+key); err != nil {
 			return fmt.Errorf("r.Put() failed: %v\n", err)
 		}
 	}
 
 	return nil
 }, "runUpdateData")
+
+// Updates data within a batch.
+// Arguments: 0: Syncbase name, 1: start index.
+// Optional args: 2: end index, 3: value prefix.
+// Values are from [start,end) or [start, start+5) depending on whether end
+// param was provided.
+var runUpdateBatchData = modules.Register(func(env *modules.Env, args ...string) error {
+	ctx, shutdown := v23.Init()
+	defer shutdown()
+
+	serviceName, startStr := args[0], args[1]
+	start, _ := strconv.ParseUint(startStr, 10, 64)
+	end, prefix := start+5, "testkey"
+	if len(args) > 2 {
+		end, _ = strconv.ParseUint(args[2], 10, 64)
+		if end <= start {
+			return fmt.Errorf("Test error: end <= start. start: %d, end: %d", start, end)
+		}
+	}
+	if len(args) > 3 {
+		prefix = args[3]
+	}
+
+	a := syncbase.NewService(serviceName).App("a")
+	d := a.NoSQLDatabase("d", nil)
+
+	// Do Puts.
+	batch, err := d.BeginBatch(ctx, wire.BatchOptions{})
+	if err != nil {
+		return fmt.Errorf("BeginBatch failed: %v\n", err)
+	}
+	tb := batch.Table(testTable)
+	for i := start; i < end; i++ {
+		key := fmt.Sprintf("foo%d", i)
+		r := tb.Row(key)
+		if err := r.Put(ctx, prefix+serviceName+key); err != nil {
+			batch.Abort(ctx)
+			return fmt.Errorf("r.Put() failed: %v\n", err)
+		}
+	}
+	return batch.Commit(ctx)
+}, "runUpdateBatchData")
 
 var runDeleteData = modules.Register(func(env *modules.Env, args ...string) error {
 	ctx, shutdown := v23.Init()
@@ -770,7 +832,7 @@ var runDeleteData = modules.Register(func(env *modules.Env, args ...string) erro
 	d := a.NoSQLDatabase("d", nil)
 
 	// Do Puts.
-	tb := d.Table("tb")
+	tb := d.Table(testTable)
 	start, _ := strconv.ParseUint(args[1], 10, 64)
 
 	for i := start; i < start+5; i++ {
@@ -793,7 +855,7 @@ var runSetPrefixPermissions = modules.Register(func(env *modules.Env, args ...st
 	d := a.NoSQLDatabase("d", nil)
 
 	// Set acl.
-	tb := d.Table("tb")
+	tb := d.Table(testTable)
 
 	if err := tb.SetPrefixPermissions(ctx, nosql.Prefix(args[1]), perms(args[2:]...)); err != nil {
 		return fmt.Errorf("tb.SetPrefixPermissions() failed: %v\n", err)
@@ -811,7 +873,7 @@ var runVerifySyncgroupData = modules.Register(func(env *modules.Env, args ...str
 	d := a.NoSQLDatabase("d", nil)
 
 	// Wait for a bit (up to 4 sec) until the last key appears.
-	tb := d.Table("tb")
+	tb := d.Table(testTable)
 
 	start, _ := strconv.ParseUint(args[2], 10, 64)
 	count, _ := strconv.ParseUint(args[3], 10, 64)
@@ -917,7 +979,7 @@ var runVerifyDeletedData = modules.Register(func(env *modules.Env, args ...strin
 	d := a.NoSQLDatabase("d", nil)
 
 	// Wait for a bit for deletions to propagate.
-	tb := d.Table("tb")
+	tb := d.Table(testTable)
 
 	r := tb.Row("foo4")
 	for i := 0; i < 8; i++ {
@@ -964,7 +1026,7 @@ var runVerifyConflictResolution = modules.Register(func(env *modules.Env, args .
 
 	a := syncbase.NewService(args[0]).App("a")
 	d := a.NoSQLDatabase("d", nil)
-	tb := d.Table("tb")
+	tb := d.Table(testTable)
 
 	wantData := []struct {
 		start  uint64
@@ -1005,7 +1067,7 @@ var runVerifyNonSyncgroupData = modules.Register(func(env *modules.Env, args ...
 
 	a := syncbase.NewService(args[0]).App("a")
 	d := a.NoSQLDatabase("d", nil)
-	tb := d.Table("tb")
+	tb := d.Table(testTable)
 
 	// Verify through a scan that none of that data exists.
 	count := 0
@@ -1030,7 +1092,7 @@ var runVerifyLocalAndRemoteData = modules.Register(func(env *modules.Env, args .
 
 	a := syncbase.NewService(args[0]).App("a")
 	d := a.NoSQLDatabase("d", nil)
-	tb := d.Table("tb")
+	tb := d.Table(testTable)
 
 	// Wait for a bit (up to 4 sec) until the last key appears.
 	r := tb.Row("foo19")
@@ -1079,7 +1141,7 @@ var runVerifyLostAccess = modules.Register(func(env *modules.Env, args ...string
 	d := a.NoSQLDatabase("d", nil)
 
 	// Wait for a bit (up to 4 sec) until the last key disappears.
-	tb := d.Table("tb")
+	tb := d.Table(testTable)
 
 	start, _ := strconv.ParseUint(args[2], 10, 64)
 	count, _ := strconv.ParseUint(args[3], 10, 64)
@@ -1122,7 +1184,7 @@ var runVerifyNestedSyncgroupData = modules.Register(func(env *modules.Env, args 
 	// conditions. Note that we wait longer than the 2 node tests since more
 	// nodes implies more pair-wise communication before achieving steady
 	// state.
-	tb := d.Table("tb")
+	tb := d.Table(testTable)
 
 	r := tb.Row("f9")
 	for i := 0; i < 8; i++ {
