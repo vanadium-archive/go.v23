@@ -26,11 +26,12 @@ type Advertiser interface {
 	// visibility is used to limit the principals that can see the advertisement. An
 	// empty set means that there are no restrictions on visibility (i.e, equivalent
 	// to []security.BlessingPattern{security.AllPrincipals}). Advertising will continue
-	// until the context is canceled or exceeds its deadline.
+	// until the context is canceled or exceeds its deadline and the returned channel
+	// will be closed when it stops.
 	//
 	// It is an error to have simultaneously active advertisements for two identical
 	// instances (service.InstanceUuid).
-	Advertise(ctx *context.T, service Service, perms []security.BlessingPattern) error
+	Advertise(ctx *context.T, service Service, perms []security.BlessingPattern) (<-chan struct{}, error)
 }
 
 // AdvertiseCloser is the interface that groups the Advertise and Close methods.
