@@ -80,9 +80,7 @@ func V23TestSyncbasedSyncWithAppResolvedConflicts(t *v23tests.T) {
 	// sync's cr code handles duplicate resolutions internally.
 	go tu.RunClient(t, client0Creds, runConflictResolver, "sync0", "foo", "endKey", "12")
 	go tu.RunClient(t, client1Creds, runConflictResolver, "sync1", "foo", "endKey", "12")
-	// runEndTest signals above thread to exit.
-	defer tu.RunClient(t, client0Creds, runEndTest, "sync0", "foo", "endKey")
-	defer tu.RunClient(t, client1Creds, runEndTest, "sync1", "foo", "endKey")
+
 	time.Sleep(1 * time.Millisecond) // let the above go routine get scheduled.
 
 	// Re enable sync between the two syncbases and wait for a bit to let the
@@ -98,6 +96,14 @@ func V23TestSyncbasedSyncWithAppResolvedConflicts(t *v23tests.T) {
 	tu.RunClient(t, client1Creds, runWaitForValue, "sync1", "foo", keyUnderConflict, "AppResolvedVal")
 	tu.RunClient(t, client1Creds, runVerifyConflictResolvedData, "sync1", "foo", "0", "5", "AppResolvedVal")
 	tu.RunClient(t, client1Creds, runVerifyConflictResolvedData, "sync1", "foo", "5", "10", "AppResolvedVal")
+
+	// runEndTest signals conflict resolution thread to exit.
+	tu.RunClient(t, client0Creds, runEndTest, "sync0", "foo", "endKey")
+	tu.RunClient(t, client1Creds, runEndTest, "sync1", "foo", "endKey")
+
+	// wait for conflict resolution thread to exit
+	tu.RunClient(t, client0Creds, runWaitSignal, "sync0", "foo", "endKeyAck")
+	tu.RunClient(t, client1Creds, runWaitSignal, "sync1", "foo", "endKeyAck")
 }
 
 // Arguments: 0: Syncbase name, 1: conflict prefix, 2: signalKey, 3: max onConflict call count.
@@ -111,20 +117,25 @@ var runConflictResolver = modules.Register(func(env *modules.Env, args ...string
 	a := syncbase.NewService(serviceName).App("a")
 	resolver := &CRImpl{serviceName: serviceName}
 	d := a.NoSQLDatabase("d", makeSchema(prefix, resolver))
+	defer d.Close()
 	d.EnforceSchema(ctx)
 
 	// Wait till end of test is signalled. The above statement starts a go
 	// routine with a cr connection to the server which needs to stay alive
 	// till the life of the test in order to receive conflicts.
-	err := waitSignal(ctx, d, signalKey)
-	d.Close()
+	if err := waitSignal(ctx, d, signalKey); err != nil {
+		return err
+	}
+	if err := sendSignal(ctx, d, signalKey+"Ack"); err != nil {
+		return err
+	}
 
 	// Check that the onConflict() was called exactly as many times as was
 	// expected.
 	if resolver.onConflictCallCount > maxCallCount {
 		return fmt.Errorf("Unexpected OnConflict call count. Max: %d, Actual: %d\n", maxCallCount, resolver.onConflictCallCount)
 	}
-	return err
+	return nil
 }, "runConflictResolver")
 
 // Arguments: 0: Syncbase name, 1: Syncgroup name, 2 onwards: Syncgroup permission blessings.
@@ -189,7 +200,7 @@ var runWaitForValue = modules.Register(func(env *modules.Env, args ...string) er
 	want := valuePrefix + key
 
 	// Wait upto 5 seconds for the correct key and value to appear.
-	sleepTimeMs, maxAttempts := 100, 500
+	sleepTimeMs, maxAttempts := 50, 100
 	for i := 0; i < maxAttempts; i++ {
 		var value string
 		if err := r.Get(ctx, &value); (err == nil) && (value == want) {
@@ -214,12 +225,26 @@ var runEndTest = modules.Register(func(env *modules.Env, args ...string) error {
 	return sendSignal(ctx, d, signalKey)
 }, "runEndTest")
 
+// Arguments: 0: Syncbase name, 1: conflict prefix, 2: signalKey.
+var runWaitSignal = modules.Register(func(env *modules.Env, args ...string) error {
+	ctx, shutdown := v23.Init()
+	defer shutdown()
+
+	serviceName, prefix, signalKey := args[0], args[1], args[2]
+
+	a := syncbase.NewService(serviceName).App("a")
+	d := a.NoSQLDatabase("d", makeSchema(prefix, &CRImpl{serviceName: serviceName}))
+
+	// wait for signal.
+	return waitSignal(ctx, d, signalKey)
+}, "runEndTest")
+
 func waitSignal(ctx *context.T, d nosql.Database, signalKey string) error {
 	tb := d.Table(testTable)
 	r := tb.Row(signalKey)
 
 	var end bool
-	sleepTimeMs, maxAttempts := 50, 500
+	sleepTimeMs, maxAttempts := 50, 100 // Max wait time of 5 seconds.
 	for cnt := 0; cnt < maxAttempts; cnt++ {
 		time.Sleep(time.Duration(sleepTimeMs) * time.Millisecond)
 		if err := r.Get(ctx, &end); err != nil {
