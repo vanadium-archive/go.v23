@@ -1,0 +1,17 @@
+pkg datasource, method (KeyRanges) Len() int
+pkg datasource, method (KeyRanges) Less(int, int) bool
+pkg datasource, method (KeyRanges) Swap(int, int)
+pkg datasource, type Database interface { GetContext, GetTable }
+pkg datasource, type Database interface, GetContext() *context.T
+pkg datasource, type Database interface, GetTable(string) (Table, error)
+pkg datasource, type KeyRange struct
+pkg datasource, type KeyRange struct, Limit string
+pkg datasource, type KeyRange struct, Start string
+pkg datasource, type KeyRanges []KeyRange
+pkg datasource, type KeyValueStream interface { Advance, Cancel, Err, KeyValue }
+pkg datasource, type KeyValueStream interface, Advance() bool
+pkg datasource, type KeyValueStream interface, Cancel()
+pkg datasource, type KeyValueStream interface, Err() error
+pkg datasource, type KeyValueStream interface, KeyValue() (string, *vdl.Value)
+pkg datasource, type Table interface { Scan }
+pkg datasource, type Table interface, Scan(KeyRanges) (KeyValueStream, error)

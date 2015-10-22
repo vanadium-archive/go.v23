@@ -15,10 +15,8 @@ import (
 	"v.io/v23/context"
 	"v.io/v23/syncbase"
 	"v.io/v23/syncbase/nosql"
-	"v.io/v23/syncbase/nosql/query"
-	// TODO(sadovsky): For legacy reasons, we import all testdata identifiers into
-	// the top-level namespace.
-	. "v.io/v23/syncbase/nosql/testdata"
+	"v.io/v23/query/syncql"
+	"v.io/v23/syncbase/nosql/testdata"
 	"v.io/v23/vdl"
 	"v.io/v23/verror"
 	_ "v.io/x/ref/runtime/factories/generic"
@@ -86,111 +84,111 @@ func setup(t *testing.T) {
 	t2015_07_01_01_23_45, _ = time.Parse("Jan 2 2006 15:04:05 MST", "Jul 01 2015 01:23:45 PDT")
 
 	k := "001"
-	c := Customer{"John Smith", 1, true, AddressInfo{"1 Main St.", "Palo Alto", "CA", "94303"}, CreditReport{Agency: CreditAgencyEquifax, Report: AgencyReportEquifaxReport{EquifaxCreditReport{'A'}}}}
+	c := testdata.Customer{"John Smith", 1, true, testdata.AddressInfo{"1 Main St.", "Palo Alto", "CA", "94303"}, testdata.CreditReport{Agency: testdata.CreditAgencyEquifax, Report: testdata.AgencyReportEquifaxReport{testdata.EquifaxCreditReport{'A'}}}}
 	customerEntries = append(customerEntries, kv{k, vdl.ValueOf(c)})
 	if err := customerTable.Put(ctx, k, c); err != nil {
 		t.Fatalf("customerTable.Put() failed: %v", err)
 	}
 	k = "001001"
-	i := Invoice{1, 1000, t20150122131101, 42, AddressInfo{"1 Main St.", "Palo Alto", "CA", "94303"}}
+	i := testdata.Invoice{1, 1000, t20150122131101, 42, testdata.AddressInfo{"1 Main St.", "Palo Alto", "CA", "94303"}}
 	customerEntries = append(customerEntries, kv{k, vdl.ValueOf(i)})
 	if err := customerTable.Put(ctx, k, i); err != nil {
 		t.Fatalf("customerTable.Put() failed: %v", err)
 	}
 
 	k = "001002"
-	i = Invoice{1, 1003, t20150210161202, 7, AddressInfo{"2 Main St.", "Palo Alto", "CA", "94303"}}
+	i = testdata.Invoice{1, 1003, t20150210161202, 7, testdata.AddressInfo{"2 Main St.", "Palo Alto", "CA", "94303"}}
 	customerEntries = append(customerEntries, kv{k, vdl.ValueOf(i)})
 	if err := customerTable.Put(ctx, k, i); err != nil {
 		t.Fatalf("customerTable.Put() failed: %v", err)
 	}
 
 	k = "001003"
-	i = Invoice{1, 1005, t20150311101303, 88, AddressInfo{"3 Main St.", "Palo Alto", "CA", "94303"}}
+	i = testdata.Invoice{1, 1005, t20150311101303, 88, testdata.AddressInfo{"3 Main St.", "Palo Alto", "CA", "94303"}}
 	customerEntries = append(customerEntries, kv{k, vdl.ValueOf(i)})
 	if err := customerTable.Put(ctx, k, i); err != nil {
 		t.Fatalf("customerTable.Put() failed: %v", err)
 	}
 
 	k = "002"
-	c = Customer{"Bat Masterson", 2, true, AddressInfo{"777 Any St.", "Collins", "IA", "50055"}, CreditReport{Agency: CreditAgencyTransUnion, Report: AgencyReportTransUnionReport{TransUnionCreditReport{80}}}}
+	c = testdata.Customer{"Bat Masterson", 2, true, testdata.AddressInfo{"777 Any St.", "Collins", "IA", "50055"}, testdata.CreditReport{Agency: testdata.CreditAgencyTransUnion, Report: testdata.AgencyReportTransUnionReport{testdata.TransUnionCreditReport{80}}}}
 	customerEntries = append(customerEntries, kv{k, vdl.ValueOf(c)})
 	if err := customerTable.Put(ctx, k, c); err != nil {
 		t.Fatalf("customerTable.Put() failed: %v", err)
 	}
 
 	k = "002001"
-	i = Invoice{2, 1001, t20150317111404, 166, AddressInfo{"777 Any St.", "collins", "IA", "50055"}}
+	i = testdata.Invoice{2, 1001, t20150317111404, 166, testdata.AddressInfo{"777 Any St.", "collins", "IA", "50055"}}
 	customerEntries = append(customerEntries, kv{k, vdl.ValueOf(i)})
 	if err := customerTable.Put(ctx, k, i); err != nil {
 		t.Fatalf("customerTable.Put() failed: %v", err)
 	}
 
 	k = "002002"
-	i = Invoice{2, 1002, t20150317131505, 243, AddressInfo{"888 Any St.", "collins", "IA", "50055"}}
+	i = testdata.Invoice{2, 1002, t20150317131505, 243, testdata.AddressInfo{"888 Any St.", "collins", "IA", "50055"}}
 	customerEntries = append(customerEntries, kv{k, vdl.ValueOf(i)})
 	if err := customerTable.Put(ctx, k, i); err != nil {
 		t.Fatalf("customerTable.Put() failed: %v", err)
 	}
 
 	k = "002003"
-	i = Invoice{2, 1004, t20150412221606, 787, AddressInfo{"999 Any St.", "collins", "IA", "50055"}}
+	i = testdata.Invoice{2, 1004, t20150412221606, 787, testdata.AddressInfo{"999 Any St.", "collins", "IA", "50055"}}
 	customerEntries = append(customerEntries, kv{k, vdl.ValueOf(i)})
 	if err := customerTable.Put(ctx, k, i); err != nil {
 		t.Fatalf("customerTable.Put() failed: %v", err)
 	}
 
 	k = "002004"
-	i = Invoice{2, 1006, t20150413141707, 88, AddressInfo{"101010 Any St.", "collins", "IA", "50055"}}
+	i = testdata.Invoice{2, 1006, t20150413141707, 88, testdata.AddressInfo{"101010 Any St.", "collins", "IA", "50055"}}
 	customerEntries = append(customerEntries, kv{k, vdl.ValueOf(i)})
 	if err := customerTable.Put(ctx, k, i); err != nil {
 		t.Fatalf("customerTable.Put() failed: %v", err)
 	}
 
 	k = "003"
-	c = Customer{"John Steed", 3, true, AddressInfo{"100 Queen St.", "New London", "CT", "06320"}, CreditReport{Agency: CreditAgencyExperian, Report: AgencyReportExperianReport{ExperianCreditReport{ExperianRatingGood}}}}
+	c = testdata.Customer{"John Steed", 3, true, testdata.AddressInfo{"100 Queen St.", "New London", "CT", "06320"}, testdata.CreditReport{Agency: testdata.CreditAgencyExperian, Report: testdata.AgencyReportExperianReport{testdata.ExperianCreditReport{testdata.ExperianRatingGood}}}}
 	customerEntries = append(customerEntries, kv{k, vdl.ValueOf(c)})
 	if err := customerTable.Put(ctx, k, c); err != nil {
 		t.Fatalf("customerTable.Put() failed: %v", err)
 	}
 
 	k = "001"
-	n := Numbers{byte(12), uint16(1234), uint32(5678), uint64(999888777666), int16(9876), int32(876543), int64(128), float32(3.14159), float64(2.71828182846), complex64(123.0 + 7.0i), complex128(456.789 + 10.1112i)}
+	n := testdata.Numbers{byte(12), uint16(1234), uint32(5678), uint64(999888777666), int16(9876), int32(876543), int64(128), float32(3.14159), float64(2.71828182846), complex64(123.0 + 7.0i), complex128(456.789 + 10.1112i)}
 	numbersEntries = append(numbersEntries, kv{k, vdl.ValueOf(n)})
 	if err := numbersTable.Put(ctx, k, n); err != nil {
 		t.Fatalf("numbersTable.Put() failed: %v", err)
 	}
 
 	k = "002"
-	n = Numbers{byte(9), uint16(99), uint32(999), uint64(9999999), int16(9), int32(99), int64(88), float32(1.41421356237), float64(1.73205080757), complex64(9.87 + 7.65i), complex128(4.32 + 1.0i)}
+	n = testdata.Numbers{byte(9), uint16(99), uint32(999), uint64(9999999), int16(9), int32(99), int64(88), float32(1.41421356237), float64(1.73205080757), complex64(9.87 + 7.65i), complex128(4.32 + 1.0i)}
 	numbersEntries = append(numbersEntries, kv{k, vdl.ValueOf(n)})
 	if err := numbersTable.Put(ctx, k, n); err != nil {
 		t.Fatalf("numbersTable.Put() failed: %v", err)
 	}
 
 	k = "003"
-	n = Numbers{byte(210), uint16(210), uint32(210), uint64(210), int16(210), int32(210), int64(210), float32(210.0), float64(210.0), complex64(210.0 + 0.0i), complex128(210.0 + 0.0i)}
+	n = testdata.Numbers{byte(210), uint16(210), uint32(210), uint64(210), int16(210), int32(210), int64(210), float32(210.0), float64(210.0), complex64(210.0 + 0.0i), complex128(210.0 + 0.0i)}
 	numbersEntries = append(numbersEntries, kv{k, vdl.ValueOf(n)})
 	if err := numbersTable.Put(ctx, k, n); err != nil {
 		t.Fatalf("numbersTable.Put() failed: %v", err)
 	}
 
 	k = "001"
-	f := FooType{BarType{BazType{"FooBarBaz", TitleOrValueTypeTitle{"Vice President"}}}}
+	f := testdata.FooType{testdata.BarType{testdata.BazType{"FooBarBaz", testdata.TitleOrValueTypeTitle{"Vice President"}}}}
 	fooEntries = append(fooEntries, kv{k, vdl.ValueOf(f)})
 	if err := fooTable.Put(ctx, k, f); err != nil {
 		t.Fatalf("fooTable.Put() failed: %v", err)
 	}
 
 	k = "002"
-	f = FooType{BarType{BazType{"BazBarFoo", TitleOrValueTypeValue{42}}}}
+	f = testdata.FooType{testdata.BarType{testdata.BazType{"BazBarFoo", testdata.TitleOrValueTypeValue{42}}}}
 	fooEntries = append(fooEntries, kv{k, vdl.ValueOf(f)})
 	if err := fooTable.Put(ctx, k, f); err != nil {
 		t.Fatalf("fooTable.Put() failed: %v", err)
 	}
 
 	k = "aaa"
-	kid := KeyIndexData{
+	kid := testdata.KeyIndexData{
 		[4]string{"Fee", "Fi", "Fo", "Fum"},
 		[]string{"I", "smell", "the", "blood", "of", "an", "Englishman"},
 		map[complex128]string{complex(1.1, 2.2): "Be he living, or be he dead"},
@@ -203,7 +201,7 @@ func setup(t *testing.T) {
 
 	for i := 100; i < 301; i++ {
 		k = fmt.Sprintf("%d", i)
-		b := BigData{k}
+		b := testdata.BigData{k}
 		if err := bigTable.Put(ctx, k, b); err != nil {
 			t.Fatalf("bigTable.Put() failed: %v", err)
 		}
@@ -1167,17 +1165,17 @@ func TestExecErrors(t *testing.T) {
 	basic := []execSelectErrorTest{
 		{
 			"select a from Customer",
-			query.NewErrInvalidSelectField(ctx, 7),
+			syncql.NewErrInvalidSelectField(ctx, 7),
 		},
 		{
 			"select v from Unknown",
 			// The following error text is dependent on the implementation of the query.Database interface.
-			query.NewErrTableCantAccess(ctx, 14, "Unknown", errors.New("nosql.test:\"a/db\".Exec: Does not exist: $table:Unknown")),
+			syncql.NewErrTableCantAccess(ctx, 14, "Unknown", errors.New("nosql.test:\"a/db\".Exec: Does not exist: $table:Unknown")),
 		},
 		{
 			"select v from Customer offset -1",
 			// The following error text is dependent on implementation of Database.
-			query.NewErrExpected(ctx, 30, "positive integer literal"),
+			syncql.NewErrExpected(ctx, 30, "positive integer literal"),
 		},
 	}
 
