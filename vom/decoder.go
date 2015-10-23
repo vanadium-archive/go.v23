@@ -169,11 +169,11 @@ func (d *Decoder) decodeWireType(wt *wireType) (typeId, error) {
 func (d *Decoder) decodeValueByteLen(tt *vdl.Type) (int, error) {
 	if hasChunkLen(tt) {
 		// Use the explicit message length.
-		msgLen, err := binaryDecodeLen(d.mr)
-		if err != nil {
-			return 0, err
+		if d.mr.version == Version81 {
+			// TODO(bprosnitz) Implement this for version 81
+			panic("not yet implemented for version 81")
 		}
-		return msgLen, nil
+		return d.mr.buf.lim, nil
 	}
 	// No explicit message length, but the length can be computed.
 	switch {
