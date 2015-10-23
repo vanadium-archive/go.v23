@@ -1,6 +1,0 @@
-<godepcop>
-  <!-- The query pkg is meant to be standalone (for now, at least) and should
-  not depend on syncbase. -->
-  <pkg deny="v.io/v23/syncbase"/>
-  <pkg deny="v.io/v23/syncbase/nosql"/>
-</godepcop>

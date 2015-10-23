@@ -16,7 +16,7 @@ import (
 	wire "v.io/v23/services/syncbase/nosql"
 	"v.io/v23/syncbase"
 	"v.io/v23/syncbase/nosql"
-	"v.io/v23/syncbase/nosql/query"
+	"v.io/v23/query/syncql"
 	"v.io/v23/vdl"
 	"v.io/v23/verror"
 	_ "v.io/x/ref/runtime/factories/generic"
@@ -297,7 +297,7 @@ func TestBatchExecIsolation(t *testing.T) {
 		})
 
 	// test error condition on batch
-	tu.CheckExecError(t, ctx, roBatch, "select k, v from foo", query.ErrTableCantAccess.ID)
+	tu.CheckExecError(t, ctx, roBatch, "select k, v from foo", syncql.ErrTableCantAccess.ID)
 }
 
 // Tests that BatchDatabase.Exec DOES see changes made inside the transaction

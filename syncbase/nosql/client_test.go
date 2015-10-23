@@ -11,11 +11,11 @@ import (
 
 	"v.io/v23/context"
 	"v.io/v23/naming"
+	"v.io/v23/query/syncql"
 	wire "v.io/v23/services/syncbase/nosql"
 	"v.io/v23/services/watch"
 	"v.io/v23/syncbase"
 	"v.io/v23/syncbase/nosql"
-	"v.io/v23/syncbase/nosql/query"
 	"v.io/v23/vdl"
 	"v.io/v23/verror"
 	"v.io/v23/vom"
@@ -149,7 +149,7 @@ func TestExec(t *testing.T) {
 			[]*vdl.Value{vdl.ValueOf("baz"), vdl.ValueOf(baz)},
 		})
 
-	tu.CheckExecError(t, ctx, d, "select k, v from foo", query.ErrTableCantAccess.ID)
+	tu.CheckExecError(t, ctx, d, "select k, v from foo", syncql.ErrTableCantAccess.ID)
 }
 
 // Tests that Database.ListTables works as expected.
