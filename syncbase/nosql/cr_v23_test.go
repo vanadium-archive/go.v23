@@ -17,7 +17,7 @@ import (
 	"v.io/v23/syncbase/nosql"
 	"v.io/v23/verror"
 	_ "v.io/x/ref/runtime/factories/generic"
-	constants "v.io/x/ref/services/syncbase/server/util"
+	"v.io/x/ref/services/syncbase/server/util"
 	tu "v.io/x/ref/services/syncbase/testutil"
 	"v.io/x/ref/test/modules"
 	"v.io/x/ref/test/v23tests"
@@ -44,7 +44,7 @@ func V23TestSyncbasedSyncWithAppResolvedConflicts(t *v23tests.T) {
 		`{"Read": {"In":["root/c1"]}, "Write": {"In":["root/c1"]}}`)
 	defer cleanSync1()
 
-	sgName := naming.Join("sync0", constants.SyncbaseSuffix, "SG1")
+	sgName := naming.Join("sync0", util.SyncbaseSuffix, "SG1")
 
 	// Setup database for App on sync0, create a syncgroup with sync0 and sync1
 	// and populate some initial data.
@@ -325,5 +325,5 @@ func (ri *CRImpl) OnConflict(ctx *context.T, conflict *nosql.Conflict) nosql.Res
 }
 
 func keyPart(rowKey string) string {
-	return constants.SplitKeyParts(rowKey)[1]
+	return util.SplitKeyParts(rowKey)[1]
 }

@@ -13,9 +13,9 @@ import (
 	"time"
 
 	"v.io/v23/context"
+	"v.io/v23/query/syncql"
 	"v.io/v23/syncbase"
 	"v.io/v23/syncbase/nosql"
-	"v.io/v23/query/syncql"
 	"v.io/v23/syncbase/nosql/testdata"
 	"v.io/v23/vdl"
 	"v.io/v23/verror"
@@ -1170,7 +1170,9 @@ func TestExecErrors(t *testing.T) {
 		{
 			"select v from Unknown",
 			// The following error text is dependent on the implementation of the query.Database interface.
-			syncql.NewErrTableCantAccess(ctx, 14, "Unknown", errors.New("nosql.test:\"a/db\".Exec: Does not exist: $table:Unknown")),
+			// TODO(sadovsky): Error messages should never contain storage engine
+			// prefixes ("$table") and delimiters ("\xfe").
+			syncql.NewErrTableCantAccess(ctx, 14, "Unknown", errors.New("nosql.test:\"a/db\".Exec: Does not exist: $table\xfeUnknown")),
 		},
 		{
 			"select v from Customer offset -1",

@@ -29,6 +29,22 @@ func Unescape(s string) (string, bool) {
 	return naming.DecodeFromNameElement(s)
 }
 
+// Currently we use \xff for perms index storage and \xfe as a component
+// separator in storage engine keys. \xfc and \xfd are not used. In the future
+// we might use \xfc followed by "c", "d", "e", or "f" as an order-preserving
+// 2-byte encoding of our reserved bytes. Note that all valid UTF-8 byte
+// sequences are allowed.
+var reservedBytes = []string{"\xfc", "\xfd", "\xfe", "\xff"}
+
+func containsReservedByte(s string) bool {
+	for _, v := range reservedBytes {
+		if strings.Contains(s, v) {
+			return true
+		}
+	}
+	return false
+}
+
 var identifierRegexp *regexp.Regexp = regexp.MustCompile("^[a-zA-Z][a-zA-Z0-9_]*$")
 
 func validIdentifier(s string) bool {
@@ -37,12 +53,7 @@ func validIdentifier(s string) bool {
 
 // ValidAppName returns true iff the given string is a valid app name.
 func ValidAppName(s string) bool {
-	if s == "" {
-		return false
-	}
-	// TODO(sadovsky): The inclusion of ":" is a temporary hack, needed until we
-	// update SplitKeyParts to use SplitN instead of Split.
-	return !strings.ContainsAny(s, ":\x00\xff")
+	return s != "" && !containsReservedByte(s)
 }
 
 // ValidDatabaseName returns true iff the given string is a valid database name.
@@ -57,12 +68,7 @@ func ValidTableName(s string) bool {
 
 // ValidRowKey returns true iff the given string is a valid row key.
 func ValidRowKey(s string) bool {
-	if s == "" {
-		return false
-	}
-	// TODO(sadovsky): The inclusion of ":" is a temporary hack, needed until we
-	// update SplitKeyParts to use SplitN instead of Split.
-	return !strings.ContainsAny(s, ":\x00\xff")
+	return s != "" && !containsReservedByte(s)
 }
 
 // ParseTableRowPair splits the "<table>/<row>" part of a Syncbase object name
