@@ -33,18 +33,18 @@ type Manager interface {
 
 	// ProxyListen causes the Manager to accept flows from the specified endpoint.
 	// The endpoint must correspond to a vanadium proxy.
-	//
-	// update get passed the complete set of endpoints for the proxy every time it
-	// is called.
-	ProxyListen(ctx *context.T, endpoint naming.Endpoint, update func(eps []naming.Endpoint)) error
+	ProxyListen(ctx *context.T, endpoint naming.Endpoint) error
 
 	// ListeningEndpoints returns the endpoints that the Manager has explicitly
 	// called Listen on. The Manager will accept new flows on these endpoints.
-	// Proxied endpoints are not returned.
+	// Proxied endpoints are included in the results.
 	// If the Manager is not listening on any endpoints, an endpoint with the
 	// Manager's RoutingID will be returned for use in bidirectional RPC.
 	// Returned endpoints all have the Manager's unique RoutingID.
-	ListeningEndpoints() []naming.Endpoint
+	// Closing of the returned channel indicates that the endpoints have changed
+	// and ListeningEndpoints must be called to receive the fresh endpoints.
+	// Once the manager is closed the returned channel will be nil.
+	ListeningEndpoints() ([]naming.Endpoint, <-chan struct{})
 
 	// StopListening stops listening on all currently listening addresses and proxies.
 	// All outstanding calls to Accept will return an error.
