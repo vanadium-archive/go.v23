@@ -14,8 +14,8 @@ import (
 	"time"
 	"unicode/utf8"
 
-	"v.io/v23/query/syncql"
 	ds "v.io/v23/query/engine/datasource"
+	"v.io/v23/query/syncql"
 	"v.io/v23/vdl"
 )
 
@@ -38,6 +38,7 @@ const (
 	TokRIGHTBRACKET
 	TokRIGHTPAREN
 	TokSTRING
+	TokERROR
 )
 
 const (
@@ -226,9 +227,19 @@ type SelectStatement struct {
 func scanToken(s *scanner.Scanner) *Token {
 	// TODO(jkline): Replace golang text/scanner.
 	var token Token
+	prevErrorCount := s.ErrorCount
 	tok := s.Scan()
 	token.Value = s.TokenText()
 	token.Off = int64(s.Position.Offset)
+
+	// If another scanner error just happened, return
+	// TokERROR, BUT ONLY IF NOT A STRING!
+	// See case scanner.String for the reason why we can't
+	// honor it for string.
+	if s.ErrorCount > prevErrorCount && tok != scanner.String {
+		token.Tok = TokERROR
+		return &token
+	}
 
 	switch tok {
 	case '.':
@@ -263,8 +274,17 @@ func scanToken(s *scanner.Scanner) *Token {
 		token.Tok = TokCHAR
 		token.Value = token.Value[1 : len(token.Value)-1]
 	case scanner.String:
-		token.Tok = TokSTRING
-		token.Value = token.Value[1 : len(token.Value)-1]
+		// We can't rely on error because the parser reports
+		// errors on such things as \%, which we need
+		// for wildcards.  As such, check to see if the string
+		// is terminated.  There is already a TODO to replace
+		// golang's text/scanner.
+		if len(token.Value) < 2 || !strings.HasSuffix(token.Value, "\"") {
+			token.Tok = TokERROR
+		} else {
+			token.Tok = TokSTRING
+			token.Value = token.Value[1 : len(token.Value)-1]
+		}
 	}
 	return &token
 }

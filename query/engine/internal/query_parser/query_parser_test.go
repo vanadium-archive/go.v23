@@ -12,9 +12,9 @@ import (
 
 	"v.io/v23"
 	"v.io/v23/context"
-	"v.io/v23/query/syncql"
 	ds "v.io/v23/query/engine/datasource"
 	"v.io/v23/query/engine/internal/query_parser"
+	"v.io/v23/query/syncql"
 	"v.io/v23/verror"
 	_ "v.io/x/ref/runtime/factories/generic"
 	"v.io/x/ref/test"
@@ -1070,6 +1070,66 @@ func TestQueryParser(t *testing.T) {
 						Node:  query_parser.Node{Off: 37},
 					},
 					Node: query_parser.Node{Off: 30},
+				},
+				Node: query_parser.Node{Off: 0},
+			},
+			nil,
+		},
+		{
+			"select v from Customer where k like \"Foo\\%Bar\"",
+			query_parser.SelectStatement{
+				Select: &query_parser.SelectClause{
+					Selectors: []query_parser.Selector{
+						query_parser.Selector{
+							Type: query_parser.TypSelField,
+							Field: &query_parser.Field{
+								Segments: []query_parser.Segment{
+									query_parser.Segment{
+										Value: "v",
+										Node:  query_parser.Node{Off: 7},
+									},
+								},
+								Node: query_parser.Node{Off: 7},
+							},
+							Node: query_parser.Node{Off: 7},
+						},
+					},
+					Node: query_parser.Node{Off: 0},
+				},
+				From: &query_parser.FromClause{
+					Table: query_parser.TableEntry{
+						Name: "Customer",
+						Node: query_parser.Node{Off: 14},
+					},
+					Node: query_parser.Node{Off: 9},
+				},
+				Where: &query_parser.WhereClause{
+					Expr: &query_parser.Expression{
+						Operand1: &query_parser.Operand{
+							Type: query_parser.TypField,
+							Column: &query_parser.Field{
+								Segments: []query_parser.Segment{
+									query_parser.Segment{
+										Value: "k",
+										Node:  query_parser.Node{Off: 29},
+									},
+								},
+								Node: query_parser.Node{Off: 29},
+							},
+							Node: query_parser.Node{Off: 29},
+						},
+						Operator: &query_parser.BinaryOperator{
+							Type: query_parser.Like,
+							Node: query_parser.Node{Off: 31},
+						},
+						Operand2: &query_parser.Operand{
+							Type: query_parser.TypStr,
+							Str:  "Foo\\%Bar",
+							Node: query_parser.Node{Off: 36},
+						},
+						Node: query_parser.Node{Off: 29},
+					},
+					Node: query_parser.Node{Off: 23},
 				},
 				Node: query_parser.Node{Off: 0},
 			},
@@ -2681,6 +2741,13 @@ func TestQueryParserErrors(t *testing.T) {
 		{"select v from Customer where v is", syncql.NewErrUnexpectedEndOfStatement(db.GetContext(), 33)},
 		{"select v from Customer where v = 1.0 is k = \"abc\"", syncql.NewErrUnexpected(db.GetContext(), 37, "is")},
 		{"select v as from Customer", syncql.NewErrExpectedFrom(db.GetContext(), 17, "Customer")},
+		{"select v from Customer where v.Foo = \"", syncql.NewErrExpectedOperand(db.GetContext(), 37, "\"")},
+		{"select v from Customer where v.Foo = \"Bar", syncql.NewErrExpectedOperand(db.GetContext(), 37, "\"Bar")},
+		{"select v from Customer where v.Foo = '", syncql.NewErrExpectedOperand(db.GetContext(), 37, "'")},
+		{"select v from Customer where v.Foo = 'a", syncql.NewErrExpectedOperand(db.GetContext(), 37, "'a")},
+		{"select v from Customer where v.Foo = 'abc", syncql.NewErrExpectedOperand(db.GetContext(), 37, "'abc")},
+		{"select v from Customer where v.Foo = 'abc'", syncql.NewErrExpectedOperand(db.GetContext(), 37, "'abc'")},
+		{"select v from Customer where v.Foo = 10.10.10", syncql.NewErrUnexpected(db.GetContext(), 42, ".10")},
 	}
 
 	for _, test := range basic {
