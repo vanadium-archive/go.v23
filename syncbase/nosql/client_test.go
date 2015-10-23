@@ -61,6 +61,9 @@ func TestDatabaseCreate(t *testing.T) {
 
 // Tests name-checking on database creation.
 func TestDatabaseCreateNameValidation(t *testing.T) {
+	// TODO(sadovsky): This test is inexplicably flaky, unlike
+	// Test{App,Table}CreateNameValidation, so we skip it for now.
+	t.Skip("Flaky; see v.io/i/825.")
 	ctx, sName, cleanup := tu.SetupOrDie(nil)
 	defer cleanup()
 	a := tu.CreateApp(t, ctx, syncbase.NewService(sName), "a")
