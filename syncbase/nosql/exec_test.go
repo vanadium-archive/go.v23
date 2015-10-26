@@ -1171,8 +1171,8 @@ func TestExecErrors(t *testing.T) {
 			"select v from Unknown",
 			// The following error text is dependent on the implementation of the query.Database interface.
 			// TODO(sadovsky): Error messages should never contain storage engine
-			// prefixes ("$table") and delimiters ("\xfe").
-			syncql.NewErrTableCantAccess(ctx, 14, "Unknown", errors.New("nosql.test:\"a/db\".Exec: Does not exist: $table\xfeUnknown")),
+			// prefixes ("t") and delimiters ("\xfe").
+			syncql.NewErrTableCantAccess(ctx, 14, "Unknown", errors.New("nosql.test:\"a/db\".Exec: Does not exist: t\xfeUnknown")),
 		},
 		{
 			"select v from Customer offset -1",
