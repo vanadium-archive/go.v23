@@ -6,12 +6,15 @@ package nosql_test
 
 import (
 	"reflect"
+	"strings"
 	"testing"
 	"time"
 
 	"v.io/v23/context"
 	"v.io/v23/naming"
 	"v.io/v23/query/syncql"
+	"v.io/v23/security"
+	"v.io/v23/security/access"
 	wire "v.io/v23/services/syncbase/nosql"
 	"v.io/v23/services/watch"
 	"v.io/v23/syncbase"
@@ -77,8 +80,7 @@ func TestDatabaseDestroy(t *testing.T) {
 
 // Tests that Database.Exec works as expected.
 // Note: The Exec method is tested more thoroughly in exec_test.go.
-// Also, the query package is tested in its entirety in
-// v23/syncbase/nosql/query/...
+// Also, the query package is tested in its entirety in v23/query/...
 func TestExec(t *testing.T) {
 	ctx, sName, cleanup := tu.SetupOrDie(nil)
 	defer cleanup()
@@ -749,6 +751,150 @@ func TestRowPermissions(t *testing.T) {
 	}
 	if err := s.Err(); verror.ErrorID(err) != verror.ErrNoAccess.ID {
 		t.Fatalf("Unexpected stream error: %v", err)
+	}
+}
+
+// Tests prefix perms where get is allowed but put is not.
+func TestMixedPrefixPerms(t *testing.T) {
+	ctx, clientACtx, sName, rootp, cleanup := tu.SetupOrDieCustom("clientA", "server", nil)
+	defer cleanup()
+	clientBCtx := tu.NewCtx(ctx, rootp, "clientB")
+	a := tu.CreateApp(t, clientACtx, syncbase.NewService(sName), "a")
+	d := tu.CreateNoSQLDatabase(t, clientACtx, a, "d")
+	tb := tu.CreateTable(t, clientACtx, d, "tb")
+
+	// Permission objects.
+	aAndB := tu.DefaultPerms("root/clientA", "root/clientB")
+	aAllBRead := tu.DefaultPerms("root/clientA")
+	aAllBRead.Add(security.BlessingPattern("root/clientB"), string(access.Read))
+
+	// Set initial permissions.
+	if err := tb.SetPermissions(clientACtx, aAndB); err != nil {
+		t.Fatalf("tb.SetPermissions() failed: %v", err)
+	}
+	if err := tb.SetPrefixPermissions(clientACtx, nosql.Prefix(""), aAndB); err != nil {
+		t.Fatalf("tb.SetPrefixPermissions() failed: %v", err)
+	}
+	if err := tb.SetPrefixPermissions(clientACtx, nosql.Prefix("a"), aAllBRead); err != nil {
+		t.Fatalf("tb.SetPrefixPermissions() failed: %v", err)
+	}
+
+	// Both A and B can read and write row key "z".
+	r := tb.Row("z")
+	if err := r.Put(clientACtx, Foo{}); err != nil {
+		t.Fatalf("client A r.Put() failed: %v", err)
+	}
+	if err := r.Put(clientBCtx, Foo{}); err != nil {
+		t.Fatalf("client B r.Put() failed: %v", err)
+	}
+	if err := r.Get(clientACtx, &Foo{}); err != nil {
+		t.Fatalf("client A r.Get() failed: %v", err)
+	}
+	if err := r.Get(clientBCtx, &Foo{}); err != nil {
+		t.Fatalf("client B r.Get() failed: %v", err)
+	}
+
+	// Both A and B can read row key "a", but only A can write it.
+	r = tb.Row("a")
+	if err := r.Put(clientACtx, Foo{}); err != nil {
+		t.Fatalf("client A r.Put() failed: %v", err)
+	}
+	if err := r.Put(clientBCtx, Foo{}); verror.ErrorID(err) != verror.ErrNoAccess.ID {
+		t.Fatalf("client B r.Put() should have failed: %v", err)
+	}
+	if err := r.Get(clientACtx, &Foo{}); err != nil {
+		t.Fatalf("client A r.Get() failed: %v", err)
+	}
+	if err := r.Get(clientBCtx, &Foo{}); err != nil {
+		t.Fatalf("client B r.Get() failed: %v", err)
+	}
+
+	// Same for a/foo.
+	r = tb.Row("a/foo")
+	if err := r.Put(clientACtx, Foo{}); err != nil {
+		t.Fatalf("client A r.Put() failed: %v", err)
+	}
+	if err := r.Put(clientBCtx, Foo{}); verror.ErrorID(err) != verror.ErrNoAccess.ID {
+		t.Fatalf("client B r.Put() should have failed: %v", err)
+	}
+	if err := r.Get(clientACtx, &Foo{}); err != nil {
+		t.Fatalf("client A r.Get() failed: %v", err)
+	}
+	if err := r.Get(clientBCtx, &Foo{}); err != nil {
+		t.Fatalf("client B r.Get() failed: %v", err)
+	}
+}
+
+// Tests prefix perms where client A has full access to everything except for a
+// particular prefix, while client B can only read/write that prefix.
+// Originally inspired by syncslides example app.
+func TestNestedMixedPrefixPerms(t *testing.T) {
+	ctx, clientACtx, sName, rootp, cleanup := tu.SetupOrDieCustom("clientA", "server", nil)
+	defer cleanup()
+	clientBCtx := tu.NewCtx(ctx, rootp, "clientB")
+	a := tu.CreateApp(t, clientACtx, syncbase.NewService(sName), "a")
+	d := tu.CreateNoSQLDatabase(t, clientACtx, a, "d")
+	tb := tu.CreateTable(t, clientACtx, d, "tb")
+
+	// On "", resolve should be open, and only A should have read/write/admin.
+	// On "b", read/resolve should be open, and only B should have write/admin.
+	prefixEmpty, err := access.ReadPermissions(strings.NewReader(`{"Read":{"In":["root/clientA"],"NotIn":[]},"Admin":{"In":["root/clientA"],"NotIn":[]},"Resolve":{"In":["..."],"NotIn":[]},"Write":{"In":["root/clientA"],"NotIn":[]}}`))
+	if err != nil {
+		t.Fatalf("ReadPermissions failed: %v", err)
+	}
+	prefixB, err := access.ReadPermissions(strings.NewReader(`{"Admin":{"In":["root/clientB"],"NotIn":[]},"Read":{"In":["..."],"NotIn":[]},"Write":{"In":["root/clientB"],"NotIn":[]},"Resolve":{"In":["..."],"NotIn":[]}}}`))
+	if err != nil {
+		t.Fatalf("ReadPermissions failed: %v", err)
+	}
+
+	// Set initial permissions.
+	aAndB := tu.DefaultPerms("root/clientA", "root/clientB")
+	if err := tb.SetPermissions(clientACtx, aAndB); err != nil {
+		t.Fatalf("tb.SetPermissions() failed: %v", err)
+	}
+	if err := tb.SetPrefixPermissions(clientACtx, nosql.Prefix(""), prefixEmpty); err != nil {
+		t.Fatalf("tb.SetPrefixPermissions() failed: %v", err)
+	}
+	// Note that with the current perms, A must write these perms on B's behalf.
+	if err := tb.SetPrefixPermissions(clientACtx, nosql.Prefix("b"), prefixB); err != nil {
+		t.Fatalf("tb.SetPrefixPermissions() failed: %v", err)
+	}
+
+	// A should be able to read/write "a".
+	// B should be able to to read/write "b".
+	// B should not be able to read/write "a".
+	// A should not be able to write "b", but should be able to read it.
+
+	r := tb.Row("a")
+	if err := r.Put(clientACtx, Foo{}); err != nil {
+		t.Fatalf("client A r.Put() failed: %v", err)
+	}
+	if err := r.Get(clientACtx, &Foo{}); err != nil {
+		t.Fatalf("client A r.Get() failed: %v", err)
+	}
+
+	r = tb.Row("b")
+	if err := r.Put(clientBCtx, Foo{}); err != nil {
+		t.Fatalf("client B r.Put() failed: %v", err)
+	}
+	if err := r.Get(clientBCtx, &Foo{}); err != nil {
+		t.Fatalf("client B r.Get() failed: %v", err)
+	}
+
+	r = tb.Row("a")
+	if err := r.Put(clientBCtx, Foo{}); verror.ErrorID(err) != verror.ErrNoAccess.ID {
+		t.Fatalf("client B r.Put() should have failed: %v", err)
+	}
+	if err := r.Get(clientBCtx, &Foo{}); verror.ErrorID(err) != verror.ErrNoAccess.ID {
+		t.Fatalf("client B r.Get() should have failed: %v", err)
+	}
+
+	r = tb.Row("b")
+	if err := r.Put(clientACtx, Foo{}); verror.ErrorID(err) != verror.ErrNoAccess.ID {
+		t.Fatalf("client A r.Put() should have failed: %v", err)
+	}
+	if err := r.Get(clientACtx, &Foo{}); err != nil {
+		t.Fatalf("client A r.Get() failed: %v", err)
 	}
 }
 
