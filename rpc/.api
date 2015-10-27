@@ -19,7 +19,6 @@ pkg rpc, method (ListenSpec) String() string
 pkg rpc, method (MountState) Names() []string
 pkg rpc, method (MountState) Servers() []string
 pkg rpc, method (MountStatus) String() string
-pkg rpc, method (NetworkChange) DebugString() string
 pkg rpc, method (ServerState) String() string
 pkg rpc, type AddressChooser interface { ChooseAddresses }
 pkg rpc, type AddressChooser interface, ChooseAddresses(string, []net.Addr) ([]net.Addr, error)
@@ -117,13 +116,6 @@ pkg rpc, type MountStatus struct, LastUnmountErr error
 pkg rpc, type MountStatus struct, Name string
 pkg rpc, type MountStatus struct, Server string
 pkg rpc, type MountStatus struct, TTL time.Duration
-pkg rpc, type NetworkChange struct
-pkg rpc, type NetworkChange struct, AddedAddrs []net.Addr
-pkg rpc, type NetworkChange struct, Changed []naming.Endpoint
-pkg rpc, type NetworkChange struct, Error error
-pkg rpc, type NetworkChange struct, RemovedAddrs []net.Addr
-pkg rpc, type NetworkChange struct, State ServerState
-pkg rpc, type NetworkChange struct, Time time.Time
 pkg rpc, type ProxyStatus struct
 pkg rpc, type ProxyStatus struct, Endpoint naming.Endpoint
 pkg rpc, type ProxyStatus struct, Error error
@@ -146,14 +138,12 @@ pkg rpc, type Response struct, EndStreamResults bool
 pkg rpc, type Response struct, Error error
 pkg rpc, type Response struct, NumPosResults uint64
 pkg rpc, type Response struct, TraceResponse vtrace.Response
-pkg rpc, type Server interface { AddName, Closed, RemoveName, Status, Stop, UnwatchNetwork, WatchNetwork }
+pkg rpc, type Server interface { AddName, Closed, RemoveName, Status, Stop }
 pkg rpc, type Server interface, AddName(string) error
 pkg rpc, type Server interface, Closed() <-chan struct{}
 pkg rpc, type Server interface, RemoveName(string)
 pkg rpc, type Server interface, Status() ServerStatus
 pkg rpc, type Server interface, Stop() error
-pkg rpc, type Server interface, UnwatchNetwork(chan<- NetworkChange)
-pkg rpc, type Server interface, WatchNetwork(chan<- NetworkChange)
 pkg rpc, type ServerCall interface { GrantedBlessings, LocalEndpoint, RemoteEndpoint, Security, Server, Suffix }
 pkg rpc, type ServerCall interface, GrantedBlessings() security.Blessings
 pkg rpc, type ServerCall interface, LocalEndpoint() naming.Endpoint
@@ -171,6 +161,7 @@ pkg rpc, type ServerStatus struct, Mounts MountState
 pkg rpc, type ServerStatus struct, Proxies []ProxyStatus
 pkg rpc, type ServerStatus struct, ServesMountTable bool
 pkg rpc, type ServerStatus struct, State ServerState
+pkg rpc, type ServerStatus struct, Valid <-chan struct{}
 pkg rpc, type Stream interface { Recv, Send }
 pkg rpc, type Stream interface, Recv(interface{}) error
 pkg rpc, type Stream interface, Send(interface{}) error

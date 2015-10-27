@@ -150,16 +150,6 @@ type Server interface {
 	// details.
 	Status() ServerStatus
 
-	// WatchNetwork registers a channel over which NetworkChange's will be
-	// sent. The Server will not block sending data over this channel and hence
-	// change events may be lost if the caller doesn't ensure there is sufficient
-	// buffering in the channel.
-	WatchNetwork(ch chan<- NetworkChange)
-
-	// UnwatchNetwork unregisters a channel previously registered using
-	// WatchNetwork.
-	UnwatchNetwork(ch chan<- NetworkChange)
-
 	// Stop gracefully stops all services on this Server.  New calls are rejected,
 	// but any in-flight calls are allowed to complete.  All published mountpoints
 	// are unmounted.  This call waits for this process to complete, and returns
@@ -247,33 +237,6 @@ func (ms MountStatus) String() string {
 
 type MountState []MountStatus
 
-// NetworkChange represents the changes made in response to a network
-// Setting change being received.
-type NetworkChange struct {
-	Time         time.Time         // Time of last change.
-	State        ServerState       // The current state of the server.
-	AddedAddrs   []net.Addr        // Addresses added sinced the last change.
-	RemovedAddrs []net.Addr        // Addresses removed since the last change.
-	Changed      []naming.Endpoint // The set of endpoints added/removed as a result of this change.
-	Error        error             // Any error that encountered.
-}
-
-func (nc NetworkChange) DebugString() string {
-	s := fmt.Sprintf("NetworkChange @ %s\n", nc.Time)
-	s += fmt.Sprintf("  Added: %s\n", nc.AddedAddrs)
-	s += fmt.Sprintf("  Removed: %s\n", nc.RemovedAddrs)
-	if nc.Error != nil {
-		s += fmt.Sprintf("  Error: %s", nc.Error)
-	}
-	if len(nc.Changed) > 0 {
-		s += fmt.Sprintf("  Endpoints: %d changes\n", len(nc.Changed))
-		for i, ep := range nc.Changed {
-			s += fmt.Sprintf("  %d:%s\n", i, ep)
-		}
-	}
-	return s
-}
-
 type ServerStatus struct {
 	// The current state of the server.
 	State ServerState
@@ -297,7 +260,14 @@ type ServerStatus struct {
 
 	// Proxies contains the status of any proxy connections maintained by
 	// this server.
+	// TODO(suharshs): Deprecate this in the new RPC system.
 	Proxies []ProxyStatus
+
+	// Valid will be closed if a status change occurs. Callers should
+	// requery server.Status() to get the fresh server status.
+	// Currently, Valid is closed only when Endpoints change.
+	// TODO(suharshs): Make this close when State and Mounts change as well.
+	Valid <-chan struct{}
 }
 
 func (st MountState) dedup(str func(MountStatus) string) []string {
