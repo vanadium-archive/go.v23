@@ -40,10 +40,10 @@ type KeyValue struct {
 	Value []byte
 }
 
-// SyncgroupPrefix is a tableName-rowPrefix pair.
-type SyncgroupPrefix struct {
+// TableRow encapsulates the table name and row key or row prefix.
+type TableRow struct {
 	TableName string
-	RowPrefix string
+	Row       string
 }
 
 // SyncgroupSpec contains the specification for a syncgroup.
@@ -55,7 +55,7 @@ type SyncgroupSpec struct {
 	Perms access.Permissions
 
 	// Data (tableName-rowPrefix pairs) covered by this syncgroup.
-	Prefixes []SyncgroupPrefix
+	Prefixes []TableRow
 
 	// Mount tables at which to advertise this syncgroup, for rendezvous purposes.
 	// (Note that in addition to these mount tables, Syncbase also uses

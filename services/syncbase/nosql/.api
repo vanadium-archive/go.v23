@@ -531,15 +531,12 @@ pkg nosql, type SyncgroupManagerServerStub interface, unexported methods
 pkg nosql, type SyncgroupManagerServerStubMethods SyncgroupManagerServerMethods
 pkg nosql, type SyncgroupMemberInfo struct
 pkg nosql, type SyncgroupMemberInfo struct, SyncPriority byte
-pkg nosql, type SyncgroupPrefix struct
-pkg nosql, type SyncgroupPrefix struct, RowPrefix string
-pkg nosql, type SyncgroupPrefix struct, TableName string
 pkg nosql, type SyncgroupSpec struct
 pkg nosql, type SyncgroupSpec struct, Description string
 pkg nosql, type SyncgroupSpec struct, IsPrivate bool
 pkg nosql, type SyncgroupSpec struct, MountTables []string
 pkg nosql, type SyncgroupSpec struct, Perms access.Permissions
-pkg nosql, type SyncgroupSpec struct, Prefixes []SyncgroupPrefix
+pkg nosql, type SyncgroupSpec struct, Prefixes []TableRow
 pkg nosql, type TableClientMethods interface { Create, DeletePrefixPermissions, DeleteRange, Destroy, Exists, GetPermissions, GetPrefixPermissions, Scan, SetPermissions, SetPrefixPermissions }
 pkg nosql, type TableClientMethods interface, Create(*context.T, int32, access.Permissions, ...rpc.CallOpt) error
 pkg nosql, type TableClientMethods interface, DeletePrefixPermissions(*context.T, int32, string, ...rpc.CallOpt) error
@@ -562,6 +559,9 @@ pkg nosql, type TableClientStub interface, GetPrefixPermissions(*context.T, int3
 pkg nosql, type TableClientStub interface, Scan(*context.T, int32, []byte, []byte, ...rpc.CallOpt) (TableScanClientCall, error)
 pkg nosql, type TableClientStub interface, SetPermissions(*context.T, int32, access.Permissions, ...rpc.CallOpt) error
 pkg nosql, type TableClientStub interface, SetPrefixPermissions(*context.T, int32, string, access.Permissions, ...rpc.CallOpt) error
+pkg nosql, type TableRow struct
+pkg nosql, type TableRow struct, Row string
+pkg nosql, type TableRow struct, TableName string
 pkg nosql, type TableScanClientCall interface { Finish, RecvStream }
 pkg nosql, type TableScanClientCall interface, Finish() error
 pkg nosql, type TableScanClientCall interface, RecvStream() interface {  Advance() bool;; Value() KeyValue;; Err() error;}

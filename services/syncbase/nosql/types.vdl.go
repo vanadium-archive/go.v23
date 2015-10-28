@@ -62,14 +62,14 @@ func (KeyValue) __VDLReflect(struct {
 }) {
 }
 
-// SyncgroupPrefix is a tableName-rowPrefix pair.
-type SyncgroupPrefix struct {
+// TableRow encapsulates the table name and row key or row prefix.
+type TableRow struct {
 	TableName string
-	RowPrefix string
+	Row       string
 }
 
-func (SyncgroupPrefix) __VDLReflect(struct {
-	Name string `vdl:"v.io/v23/services/syncbase/nosql.SyncgroupPrefix"`
+func (TableRow) __VDLReflect(struct {
+	Name string `vdl:"v.io/v23/services/syncbase/nosql.TableRow"`
 }) {
 }
 
@@ -80,7 +80,7 @@ type SyncgroupSpec struct {
 	// Permissions governing access to this syncgroup.
 	Perms access.Permissions
 	// Data (tableName-rowPrefix pairs) covered by this syncgroup.
-	Prefixes []SyncgroupPrefix
+	Prefixes []TableRow
 	// Mount tables at which to advertise this syncgroup, for rendezvous purposes.
 	// (Note that in addition to these mount tables, Syncbase also uses
 	// network-neighborhood-based discovery for rendezvous.)
@@ -656,7 +656,7 @@ func init() {
 	vdl.Register((*BatchOptions)(nil))
 	vdl.Register((*PrefixPermissions)(nil))
 	vdl.Register((*KeyValue)(nil))
-	vdl.Register((*SyncgroupPrefix)(nil))
+	vdl.Register((*TableRow)(nil))
 	vdl.Register((*SyncgroupSpec)(nil))
 	vdl.Register((*SyncgroupMemberInfo)(nil))
 	vdl.Register((*ResolverType)(nil))

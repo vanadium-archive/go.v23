@@ -541,16 +541,16 @@ func V23TestSyncgroupSync(t *v23tests.T) {
 // Helpers.
 
 // toSgPrefixes converts, for example, "a:b,c:" to
-// [{TableName: "a", RowPrefix: "b"}, {TableName: "c", RowPrefix: ""}].
-func toSgPrefixes(csv string) []wire.SyncgroupPrefix {
+// [{TableName: "a", Row: "b"}, {TableName: "c", Row: ""}].
+func toSgPrefixes(csv string) []wire.TableRow {
 	strs := strings.Split(csv, ",")
-	res := make([]wire.SyncgroupPrefix, len(strs))
+	res := make([]wire.TableRow, len(strs))
 	for i, v := range strs {
 		parts := strings.SplitN(v, ":", 2)
 		if len(parts) != 2 {
 			panic(fmt.Sprintf("invalid prefix string: %q", v))
 		}
-		res[i] = wire.SyncgroupPrefix{TableName: parts[0], RowPrefix: parts[1]}
+		res[i] = wire.TableRow{TableName: parts[0], Row: parts[1]}
 	}
 	return res
 }

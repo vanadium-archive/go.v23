@@ -50,7 +50,7 @@ func TestCreateSyncgroup(t *testing.T) {
 	spec = wire.SyncgroupSpec{
 		Description: "test syncgroup sg1",
 		Perms:       nil,
-		Prefixes:    []wire.SyncgroupPrefix{{TableName: "t1", RowPrefix: "foo"}},
+		Prefixes:    []wire.TableRow{{TableName: "t1", Row: "foo"}},
 	}
 	createSyncgroup(t, ctx, d, sg1, spec, verror.ID(""))
 
@@ -74,7 +74,7 @@ func TestCreateSyncgroup(t *testing.T) {
 
 	// Create a nested syncgroup.
 	spec.Description = "test syncgroup sg3"
-	spec.Prefixes = []wire.SyncgroupPrefix{{TableName: "t1", RowPrefix: "foobar"}}
+	spec.Prefixes = []wire.TableRow{{TableName: "t1", Row: "foobar"}}
 	sg3 := naming.Join(sName, util.SyncbaseSuffix, "sg3")
 	createSyncgroup(t, ctx, d, sg3, spec, verror.ID(""))
 
@@ -107,7 +107,7 @@ func TestJoinSyncgroup(t *testing.T) {
 	specA := wire.SyncgroupSpec{
 		Description: "test syncgroup sgA",
 		Perms:       perms("root/client1"),
-		Prefixes:    []wire.SyncgroupPrefix{{TableName: "t1", RowPrefix: "foo"}},
+		Prefixes:    []wire.TableRow{{TableName: "t1", Row: "foo"}},
 	}
 	sgNameA := naming.Join(sName, util.SyncbaseSuffix, "sgA")
 	createSyncgroup(t, ctx1, d1, sgNameA, specA, verror.ID(""))
@@ -142,7 +142,7 @@ func TestJoinSyncgroup(t *testing.T) {
 	specB := wire.SyncgroupSpec{
 		Description: "test syncgroup sgB",
 		Perms:       perms("root/client1", "root/client2"),
-		Prefixes:    []wire.SyncgroupPrefix{{TableName: "t1", RowPrefix: "foo"}},
+		Prefixes:    []wire.TableRow{{TableName: "t1", Row: "foo"}},
 	}
 	sgNameB := naming.Join(sName, util.SyncbaseSuffix, "sgB")
 	createSyncgroup(t, ctx1, d1, sgNameB, specB, verror.ID(""))
@@ -171,7 +171,7 @@ func TestSetSpecSyncgroup(t *testing.T) {
 	spec := wire.SyncgroupSpec{
 		Description: "test syncgroup sg1",
 		Perms:       nil,
-		Prefixes:    []wire.SyncgroupPrefix{{TableName: "t1", RowPrefix: "foo"}},
+		Prefixes:    []wire.TableRow{{TableName: "t1", Row: "foo"}},
 	}
 	createSyncgroup(t, ctx, d, sgName, spec, verror.ID(""))
 
