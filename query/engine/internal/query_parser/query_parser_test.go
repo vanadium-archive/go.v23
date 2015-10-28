@@ -1076,7 +1076,7 @@ func TestQueryParser(t *testing.T) {
 			nil,
 		},
 		{
-			"select v from Customer where k like \"Foo\\%Bar\"",
+			"select v from Customer where k like \"Foo^%Bar\" escape '^'",
 			query_parser.SelectStatement{
 				Select: &query_parser.SelectClause{
 					Selectors: []query_parser.Selector{
@@ -1124,12 +1124,19 @@ func TestQueryParser(t *testing.T) {
 						},
 						Operand2: &query_parser.Operand{
 							Type: query_parser.TypStr,
-							Str:  "Foo\\%Bar",
+							Str:  "Foo^%Bar",
 							Node: query_parser.Node{Off: 36},
 						},
 						Node: query_parser.Node{Off: 29},
 					},
 					Node: query_parser.Node{Off: 23},
+				},
+				Escape: &query_parser.EscapeClause{
+					EscapeChar: &query_parser.CharValue{
+						Value: '^',
+						Node:  query_parser.Node{Off: 54},
+					},
+					Node: query_parser.Node{Off: 47},
 				},
 				Node: query_parser.Node{Off: 0},
 			},
@@ -2232,79 +2239,6 @@ func TestQueryParser(t *testing.T) {
 						Node: query_parser.Node{Off: 31},
 					},
 					Node: query_parser.Node{Off: 25},
-				},
-				Node: query_parser.Node{Off: 0},
-			},
-			nil,
-		},
-		{
-			"select k, v from Customer where k = \"\\\"",
-			query_parser.SelectStatement{
-				Select: &query_parser.SelectClause{
-					Selectors: []query_parser.Selector{
-						query_parser.Selector{
-							Type: query_parser.TypSelField,
-							Field: &query_parser.Field{
-								Segments: []query_parser.Segment{
-									query_parser.Segment{
-										Value: "k",
-										Node:  query_parser.Node{Off: 7},
-									},
-								},
-								Node: query_parser.Node{Off: 7},
-							},
-							Node: query_parser.Node{Off: 7},
-						},
-						query_parser.Selector{
-							Type: query_parser.TypSelField,
-							Field: &query_parser.Field{
-								Segments: []query_parser.Segment{
-									query_parser.Segment{
-										Value: "v",
-										Node:  query_parser.Node{Off: 10},
-									},
-								},
-								Node: query_parser.Node{Off: 10},
-							},
-							Node: query_parser.Node{Off: 10},
-						},
-					},
-					Node: query_parser.Node{Off: 0},
-				},
-				From: &query_parser.FromClause{
-					Table: query_parser.TableEntry{
-						Name: "Customer",
-						Node: query_parser.Node{Off: 17},
-					},
-					Node: query_parser.Node{Off: 12},
-				},
-				Where: &query_parser.WhereClause{
-					Expr: &query_parser.Expression{
-						Operand1: &query_parser.Operand{
-							Type: query_parser.TypField,
-							Column: &query_parser.Field{
-								Segments: []query_parser.Segment{
-									query_parser.Segment{
-										Value: "k",
-										Node:  query_parser.Node{Off: 32},
-									},
-								},
-								Node: query_parser.Node{Off: 32},
-							},
-							Node: query_parser.Node{Off: 32},
-						},
-						Operator: &query_parser.BinaryOperator{
-							Type: query_parser.Equal,
-							Node: query_parser.Node{Off: 34},
-						},
-						Operand2: &query_parser.Operand{
-							Type: query_parser.TypStr,
-							Str:  "\\",
-							Node: query_parser.Node{Off: 36},
-						},
-						Node: query_parser.Node{Off: 32},
-					},
-					Node: query_parser.Node{Off: 26},
 				},
 				Node: query_parser.Node{Off: 0},
 			},

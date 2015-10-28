@@ -12,10 +12,10 @@ import (
 
 	"v.io/v23"
 	"v.io/v23/context"
-	"v.io/v23/query/syncql"
 	ds "v.io/v23/query/engine/datasource"
 	"v.io/v23/query/engine/internal/query_checker"
 	"v.io/v23/query/engine/internal/query_parser"
+	"v.io/v23/query/syncql"
 	"v.io/v23/verror"
 	_ "v.io/x/ref/runtime/factories/generic"
 	"v.io/x/ref/test"
@@ -280,23 +280,23 @@ func TestKeyRanges(t *testing.T) {
 			},
 		},
 		{
-			"select k, v from Customer where k like \"Foo\\%Bar\" or k like \"abc%\" limit 100 offset 200",
+			"select k, v from Customer where k like \"Foo@%Bar\" or k like \"abc%\" limit 100 offset 200 escape '@'",
 			&ds.KeyRanges{
 				ds.KeyRange{Start: "Foo%Bar", Limit: appendZeroByte("Foo%Bar")},
 				ds.KeyRange{Start: "abc", Limit: "abd"},
 			},
 		},
 		{
-			"select k, v from Customer where k like \"Foo\\\\%Bar\" or k like \"abc%\" limit 100 offset 200",
+			"select k, v from Customer where k like \"Foo%Bar\" or k like \"abc%\" limit 100 offset 200",
 			&ds.KeyRanges{
-				ds.KeyRange{Start: "Foo\\", Limit: "Foo]"},
+				ds.KeyRange{Start: "Foo", Limit: "Fop"},
 				ds.KeyRange{Start: "abc", Limit: "abd"},
 			},
 		},
 		{
-			"select k, v from Customer where k like \"Foo\\\\\\%Bar\" or k like \"abc%\" limit 100 offset 200",
+			"select k, v from Customer where k like \"Foo#%Bar\" or k like \"abc%\" escape '#' limit 100 offset 200",
 			&ds.KeyRanges{
-				ds.KeyRange{Start: "Foo\\%Bar", Limit: appendZeroByte("Foo\\%Bar")},
+				ds.KeyRange{Start: "Foo%Bar", Limit: appendZeroByte("Foo%Bar")},
 				ds.KeyRange{Start: "abc", Limit: "abd"},
 			},
 		},
@@ -345,16 +345,28 @@ func TestRegularExpressions(t *testing.T) {
 			[]string{"abc", "xabcd", "abcde"},
 		},
 		{
+			"select v from Customer where v like \"*%*_%\" escape '*'",
+			"^%_.*?$",
+			[]string{"%_", "%_abc"},
+			[]string{"%a", "abc%_abc"},
+		},
+		{
+			"select v from Customer where v like \"abc^_\" escape '^'",
+			"^abc_$",
+			[]string{"abc_"},
+			[]string{"abc", "xabcd", "abcde"},
+		},
+		{
+			"select v from Customer where v like \"abc^%\" escape '^'",
+			"^abc%$",
+			[]string{"abc%"},
+			[]string{"abc", "xabcd", "abcde"},
+		},
+		{
 			"select v from Customer where v like \"abc_efg\"",
 			"^abc.efg$",
 			[]string{"abcdefg"},
 			[]string{"abc", "xabcd", "abcde", "abcdefgh"},
-		},
-		{
-			"select v from Customer where v like \"abc\\\\efg\"",
-			"^abc\\\\efg$",
-			[]string{"abc\\efg"},
-			[]string{"abc\\", "xabc\\efg", "abc\\de", "abc\\defgh"},
 		},
 		{
 			"select v from Customer where v like \"abc%def\"",
@@ -367,12 +379,6 @@ func TestRegularExpressions(t *testing.T) {
 			"^\\[0-9\\]\\*abc.*?def$",
 			[]string{"[0-9]*abcdefdef", "[0-9]*abcdef", "[0-9]*abcdefghidef"},
 			[]string{"0abcdefg", "9abcdefde", "[0-9]abcdefg", "[0-9]abcdefg", "[0-9]abcdefg"},
-		},
-		{
-			"select v from Customer where v like \"[0-9]*a\\\\b\\\\c%def\"",
-			"^\\[0-9\\]\\*a\\\\b\\\\c.*?def$",
-			[]string{"[0-9]*a\\b\\cdefdef", "[0-9]*a\\b\\cdef", "[0-9]*a\\b\\cdefghidef"},
-			[]string{"0a\\b\\cdefg", "9a\\\b\\cdefde", "[0-9]a\\\b\\cdefg", "[0-9]a\\b\\cdefg", "[0-9]a\\b\\cdefg"},
 		},
 	}
 
@@ -418,7 +424,7 @@ func TestQueryCheckerErrors(t *testing.T) {
 		{"select v from Customer where a=1", syncql.NewErrBadFieldInWhere(db.GetContext(), 29)},
 		{"select v from Customer limit 0", syncql.NewErrLimitMustBeGe0(db.GetContext(), 29)},
 		{"select v.z from Customer where v.x like v.y", syncql.NewErrLikeExpressionsRequireRhsString(db.GetContext(), 31)},
-		{"select v.z from Customer where k like \"a\\bc%\"", syncql.NewErrInvalidEscapedChar(db.GetContext(), 38)},
+		{"select v.z from Customer where k like \"a^bc%\" escape '^'", syncql.NewErrInvalidEscapeSequence(db.GetContext(), 38)},
 		{"select v from Customer where v.A > false", syncql.NewErrBoolInvalidExpression(db.GetContext(), 33)},
 		{"select v from Customer where true <= v.A", syncql.NewErrBoolInvalidExpression(db.GetContext(), 34)},
 		{"select v from Customer where Foo(\"2015/07/22\", true, 3.14157) = true", syncql.NewErrFunctionNotFound(db.GetContext(), 29, "Foo")},

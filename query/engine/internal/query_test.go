@@ -13,12 +13,12 @@ import (
 
 	"v.io/v23"
 	"v.io/v23/context"
-	"v.io/v23/query/syncql"
 	ds "v.io/v23/query/engine/datasource"
 	"v.io/v23/query/engine/internal"
 	"v.io/v23/query/engine/internal/query_checker"
 	"v.io/v23/query/engine/internal/query_parser"
 	td "v.io/v23/query/engine/internal/testdata"
+	"v.io/v23/query/syncql"
 	"v.io/v23/vdl"
 	"v.io/v23/verror"
 	_ "v.io/x/ref/runtime/factories/generic"
@@ -208,7 +208,7 @@ func init() {
 		},
 		kv{
 			"003",
-			vdl.ValueOf(td.Customer{"John Steed", 3, true, td.AddressInfo{"100 Queen St.", "New London", "CT", "06320"}, []td.AddressInfo{}, td.CreditReport{Agency: td.CreditAgencyExperian, Report: td.AgencyReportExperianReport{td.ExperianCreditReport{td.ExperianRatingGood, map[td.Tdh]struct{}{td.TdhTom: {}, td.TdhHarry: {}}, td.TdhTom}}}}),
+			vdl.ValueOf(td.Customer{"John Steed", 3, true, td.AddressInfo{"100 Queen St.", "New%London", "CT", "06320"}, []td.AddressInfo{}, td.CreditReport{Agency: td.CreditAgencyExperian, Report: td.AgencyReportExperianReport{td.ExperianCreditReport{td.ExperianRatingGood, map[td.Tdh]struct{}{td.TdhTom: {}, td.TdhHarry: {}}, td.TdhTom}}}}),
 		},
 	}
 	db.tables = append(db.tables, custTable)
@@ -470,6 +470,14 @@ func TestQueryExec(t *testing.T) {
 				[]*vdl.Value{custTable.rows[0].value},
 				[]*vdl.Value{custTable.rows[4].value},
 				[]*vdl.Value{custTable.rows[9].value},
+			},
+		},
+		{
+			// Find a city that contains the literal '%' character in it.
+			"select v.Address.City from Customer where Type(v) like \"%.Customer\" and v.Address.City like \"%^%%\" escape '^'",
+			[]string{"v.Address.City"},
+			[][]*vdl.Value{
+				[]*vdl.Value{vdl.ValueOf("New%London")},
 			},
 		},
 		{
@@ -2418,7 +2426,7 @@ func TestKeyRanges(t *testing.T) {
 		},
 		{
 			// Select "foo\bar" row.
-			"select k, v from Customer where k like \"foo\\\\bar\"",
+			"select k, v from Customer where k like \"foo\\bar\"",
 			&ds.KeyRanges{
 				ds.KeyRange{Start: "foo\\bar", Limit: appendZeroByte("foo\\bar")},
 			},
@@ -2426,17 +2434,17 @@ func TestKeyRanges(t *testing.T) {
 		},
 		{
 			// Select "foo%bar" row.
-			"select k, v from Customer where k like \"foo\\%bar\"",
+			"select k, v from Customer where k like \"foo#%bar\" escape '#'",
 			&ds.KeyRanges{
 				ds.KeyRange{Start: "foo%bar", Limit: appendZeroByte("foo%bar")},
 			},
 			nil,
 		},
 		{
-			// Select "foo\%bar" row.
-			"select k, v from Customer where k like \"foo\\\\\\%bar\"",
+			// Select "foo_%bar" row.
+			"select k, v from Customer where k like \"foo^_^%bar\" escape '^'",
 			&ds.KeyRanges{
-				ds.KeyRange{Start: "foo\\%bar", Limit: appendZeroByte("foo\\%bar")},
+				ds.KeyRange{Start: "foo_%bar", Limit: appendZeroByte("foo_%bar")},
 			},
 			nil,
 		},
@@ -2458,7 +2466,7 @@ func TestKeyRanges(t *testing.T) {
 		},
 		{
 			// Select "foo_bar" row.
-			"select k, v from Customer where k like \"foo\\_bar\"",
+			"select k, v from Customer where k like \"foo#_bar\" escape '#'",
 			&ds.KeyRanges{
 				ds.KeyRange{Start: "foo_bar", Limit: appendZeroByte("foo_bar")},
 			},
@@ -2466,7 +2474,7 @@ func TestKeyRanges(t *testing.T) {
 		},
 		{
 			// Select "foobar%" row.
-			"select k, v from Customer where k like \"foobar\\%\"",
+			"select k, v from Customer where k like \"foobar$%\" escape '$'",
 			&ds.KeyRanges{
 				ds.KeyRange{Start: "foobar%", Limit: appendZeroByte("foobar%")},
 			},
@@ -2474,25 +2482,33 @@ func TestKeyRanges(t *testing.T) {
 		},
 		{
 			// Select "foobar_" row.
-			"select k, v from Customer where k like \"foobar\\_\"",
+			"select k, v from Customer where k like \"foobar&_\" escape '&'",
 			&ds.KeyRanges{
 				ds.KeyRange{Start: "foobar_", Limit: appendZeroByte("foobar_")},
 			},
 			nil,
 		},
 		{
-			// Select "\%_" row.
-			"select k, v from Customer where k like \"\\\\\\%\\_\"",
+			// Select "%_" row.
+			"select k, v from Customer where k like \"*%*_\" escape '*'",
 			&ds.KeyRanges{
-				ds.KeyRange{Start: "\\%_", Limit: appendZeroByte("\\%_")},
+				ds.KeyRange{Start: "%_", Limit: appendZeroByte("%_")},
 			},
 			nil,
 		},
 		{
-			// Select "%_abc\" row.
-			"select k, v from Customer where k = \"%_abc\\\"",
+			// Select rows with "%_" prefix.
+			"select k, v from Customer where k like \"*%*_%\" escape '*'",
 			&ds.KeyRanges{
-				ds.KeyRange{Start: "%_abc\\", Limit: appendZeroByte("%_abc\\")},
+				ds.KeyRange{Start: "%_", Limit: "%`"},
+			},
+			nil,
+		},
+		{
+			// Select "%_abc" row.
+			"select k, v from Customer where k = \"%_abc\"",
+			&ds.KeyRanges{
+				ds.KeyRange{Start: "%_abc", Limit: appendZeroByte("%_abc")},
 			},
 			nil,
 		},
@@ -3101,6 +3117,10 @@ func TestExecErrors(t *testing.T) {
 		{
 			"select StrCat(v.Address.City, 42) from Customer",
 			syncql.NewErrStringConversionError(db.GetContext(), 30, errors.New("Cannot convert operand to string.")),
+		},
+		{
+			"select v from Customer where k like \"abc %\" escape ' '",
+			syncql.NewErrInvalidEscapeChar(db.GetContext(), 51),
 		},
 	}
 

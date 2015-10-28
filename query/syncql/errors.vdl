@@ -98,9 +98,8 @@ error (
 	IsIsNotRequireRhsNil(off int64) {
 		"en": "[{off}]'Is/is not' expressions require right operand to be nil.",
 	}
-	InvalidEscapedChar(off int64) {
-		// TODO(jkline): get the actual characters to compile (e.g., '\\').
-		"en": "[{off}Expected backslash, percent, or underscore after backslash.]",
+	InvalidEscapeSequence(off int64) {
+		"en": "[{off}Expected percent, or underscore after escape character.]",
 	}
 	InvalidSelectField(off int64) {
 		"en": "[{off}]Select field must be 'k' or 'v[{.<ident>}...]'.",
@@ -140,6 +139,9 @@ error (
 	}
 	UnknownIdentifier(off int64, found string) {
 		"en": "[{off}]Uknown identifier: {found}.",
+	}
+	InvalidEscapeChar(off int64) {
+		"en": "[{off}]Invalid escape character cannot be space or backslash.",
 	}
 	DidYouMeanLowercaseK(off int64) {
 		"en": "[{off}]Did you mean: 'k'?",

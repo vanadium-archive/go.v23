@@ -200,8 +200,18 @@ type WhereClause struct {
 	Node
 }
 
+type CharValue struct {
+	Value rune
+	Node
+}
+
 type Int64Value struct {
 	Value int64
+	Node
+}
+
+type EscapeClause struct {
+	EscapeChar *CharValue
 	Node
 }
 
@@ -219,6 +229,7 @@ type SelectStatement struct {
 	Select        *SelectClause
 	From          *FromClause
 	Where         *WhereClause
+	Escape        *EscapeClause
 	Limit         *LimitClause
 	ResultsOffset *ResultsOffsetClause
 	Node
@@ -227,16 +238,11 @@ type SelectStatement struct {
 func scanToken(s *scanner.Scanner) *Token {
 	// TODO(jkline): Replace golang text/scanner.
 	var token Token
-	prevErrorCount := s.ErrorCount
 	tok := s.Scan()
 	token.Value = s.TokenText()
 	token.Off = int64(s.Position.Offset)
 
-	// If another scanner error just happened, return
-	// TokERROR, BUT ONLY IF NOT A STRING!
-	// See case scanner.String for the reason why we can't
-	// honor it for string.
-	if s.ErrorCount > prevErrorCount && tok != scanner.String {
+	if s.ErrorCount > 0 {
 		token.Tok = TokERROR
 		return &token
 	}
@@ -274,17 +280,8 @@ func scanToken(s *scanner.Scanner) *Token {
 		token.Tok = TokCHAR
 		token.Value = token.Value[1 : len(token.Value)-1]
 	case scanner.String:
-		// We can't rely on error because the parser reports
-		// errors on such things as \%, which we need
-		// for wildcards.  As such, check to see if the string
-		// is terminated.  There is already a TODO to replace
-		// golang's text/scanner.
-		if len(token.Value) < 2 || !strings.HasSuffix(token.Value, "\"") {
-			token.Tok = TokERROR
-		} else {
-			token.Tok = TokSTRING
-			token.Value = token.Value[1 : len(token.Value)-1]
-		}
+		token.Tok = TokSTRING
+		token.Value = token.Value[1 : len(token.Value)-1]
 	}
 	return &token
 }
@@ -351,7 +348,7 @@ func selectStatement(db ds.Database, s *scanner.Scanner, token *Token) (Statemen
 		return nil, nil, err
 	}
 
-	st.Limit, st.ResultsOffset, token, err = parseLimitResultsOffsetClauses(db, s, token)
+	st.Escape, st.Limit, st.ResultsOffset, token, err = parseEscapeLimitResultsOffsetClauses(db, s, token)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -872,25 +869,47 @@ func parseLogicalOperator(db ds.Database, s *scanner.Scanner, token *Token) (*Bi
 	return &operator, token, nil
 }
 
-// Parse and return LimitClause and ResultsOffsetClause (one or both can be nil) and next token (or error)
-func parseLimitResultsOffsetClauses(db ds.Database, s *scanner.Scanner, token *Token) (*LimitClause, *ResultsOffsetClause, *Token, error) {
+// Parse and return EscapeClause, LimitClause and ResultsOffsetClause (any or all can be nil) and next token (or error)
+func parseEscapeLimitResultsOffsetClauses(db ds.Database, s *scanner.Scanner, token *Token) (*EscapeClause, *LimitClause, *ResultsOffsetClause, *Token, error) {
 	var err error
+	var ec *EscapeClause
 	var lc *LimitClause
 	var oc *ResultsOffsetClause
 	for token.Tok != TokEOF {
 		// Note: Can be in any order.  If more than one limit or offset clause, the last one wins
-		if token.Tok == TokIDENT && strings.ToLower(token.Value) == "limit" {
+		if token.Tok == TokIDENT && strings.ToLower(token.Value) == "escape" {
+			ec, token, err = parseEscapeClause(db, s, token)
+		} else if token.Tok == TokIDENT && strings.ToLower(token.Value) == "limit" {
 			lc, token, err = parseLimitClause(db, s, token)
 		} else if token.Tok == TokIDENT && strings.ToLower(token.Value) == "offset" {
 			oc, token, err = parseResultsOffsetClause(db, s, token)
 		} else {
-			return lc, oc, token, nil
+			return ec, lc, oc, token, nil
 		}
 		if err != nil {
-			return nil, nil, nil, err
+			return nil, nil, nil, nil, err
 		}
 	}
-	return lc, oc, token, nil
+	return ec, lc, oc, token, nil
+}
+
+// Parse the escape clause.  Return the EscapeClause and the next Token (or error).
+func parseEscapeClause(db ds.Database, s *scanner.Scanner, token *Token) (*EscapeClause, *Token, error) {
+	var ec EscapeClause
+	ec.Off = token.Off
+	token = scanToken(s)
+	if token.Tok == TokEOF {
+		return nil, nil, syncql.NewErrUnexpectedEndOfStatement(db.GetContext(), token.Off)
+	}
+	if token.Tok != TokCHAR {
+		return nil, nil, syncql.NewErrExpected(db.GetContext(), token.Off, "char literal")
+	}
+	var v CharValue
+	v.Off = token.Off
+	v.Value, _ = utf8.DecodeRuneInString(token.Value)
+	ec.EscapeChar = &v
+	token = scanToken(s)
+	return &ec, token, nil
 }
 
 // Parse the limit clause.  Return the LimitClause and the next Token (or error).
@@ -958,6 +977,9 @@ func (st SelectStatement) String() string {
 	}
 	if st.Where != nil {
 		val += " " + st.Where.String()
+	}
+	if st.Escape != nil {
+		val += " " + st.Escape.String()
 	}
 	if st.Limit != nil {
 		val += " " + st.Limit.String()
@@ -1047,6 +1069,10 @@ func (t TableEntry) String() string {
 
 func (w WhereClause) String() string {
 	return fmt.Sprintf(" Off(%d):WHERE %s", w.Off, w.Expr.String())
+}
+
+func (e EscapeClause) String() string {
+	return fmt.Sprintf(" Off(%d):ESCAPE %c", e.Off, e.EscapeChar)
 }
 
 func (l LimitClause) String() string {

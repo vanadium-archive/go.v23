@@ -8,7 +8,7 @@
 // The select is of the form:
 //
 // <query_specification> ::=
-//   <select_clause> <from_clause> [<where_clause>] [<limit_offset_clause>]
+//   <select_clause> <from_clause> [<where_clause>] [<escape_limit_offset_clause>...]
 //
 // <select_clause> ::= SELECT <selector> [{<comma><selector>}...]
 //
@@ -16,9 +16,10 @@
 //
 // <where_clause> ::= WHERE <expression>
 //
-// <limit_offset_clause> ::=
-//   LIMIT <int_literal> [OFFSET <int_literal>]
-//   | OFFSET <int_literal> [LIMIT <int_literal>]
+// <escape_limit_offset_clause> ::=
+//   ESCAPE <char_literal>
+//   | LIMIT <int_literal>
+//   | OFFSET <int_literal>
 //
 // <selector> ::= <column> [AS <string_literal>]
 //

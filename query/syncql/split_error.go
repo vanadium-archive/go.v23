@@ -12,7 +12,11 @@ import (
 // SplitError splits an error message into an offset and the remaining (i.e.,
 // rhs of offset) message.
 // The query error convention is "<module><optional-rpc>[offset]<remaining-message>".
+// If err is nil, (0, "") are returned.
 func SplitError(err error) (int64, string) {
+	if err == nil {
+		return 0, ""
+	}
 	errMsg := err.Error()
 	idx1 := strings.Index(errMsg, "[")
 	idx2 := strings.Index(errMsg, "]")
