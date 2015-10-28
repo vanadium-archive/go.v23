@@ -68,11 +68,13 @@ type Manager interface {
 	// Dial creates a Flow to the provided remote endpoint, using 'auth' to
 	// determine the blessings that will be sent to the remote end.
 	//
-	// To maximize re-use of connections, the Manager will also Listen on Dialed
-	// connections for the lifetime of the connection.
+	// If the manager has a non-null RoutingID, the Manager will re-use connections
+	// by Listening on Dialed connections for the lifetime of the Dialed connection.
 	Dial(ctx *context.T, remote naming.Endpoint, auth PeerAuthorizer) (Flow, error)
 
 	// RoutingID returns the naming.Routing of the flow.Manager.
+	// If the RoutingID of the manager is naming.NullRoutingID, the manager can
+	// only be used to Dial outgoing calls.
 	RoutingID() naming.RoutingID
 
 	// Closed returns a channel that remains open for the lifetime of the Manager
