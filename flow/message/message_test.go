@@ -15,12 +15,7 @@ import (
 	"v.io/v23/rpc/version"
 	"v.io/v23/verror"
 	_ "v.io/x/ref/runtime/factories/fake"
-	"v.io/x/ref/test"
 )
-
-func init() {
-	test.Init()
-}
 
 func testMessages(t *testing.T, ctx *context.T, cases []message.Message) {
 	testMessagesWithResults(t, ctx, cases, cases)

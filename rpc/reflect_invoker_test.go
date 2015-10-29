@@ -10,7 +10,6 @@ package rpc_test
 import (
 	"errors"
 	"fmt"
-	"os"
 	"reflect"
 	"regexp"
 	"testing"
@@ -30,13 +29,6 @@ import (
 )
 
 // TODO(toddw): Add multi-goroutine tests of reflectCache locking.
-
-// We call our own TestMain here because jiri test generate causes an import cycle
-// with this package.
-func TestMain(m *testing.M) {
-	test.Init()
-	os.Exit(m.Run())
-}
 
 func testContext() *context.T {
 	ctx, _ := context.RootContext()

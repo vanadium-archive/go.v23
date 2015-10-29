@@ -11,13 +11,11 @@ import (
 	"os"
 	"testing"
 
-	"v.io/x/ref/test"
 	"v.io/x/ref/test/modules"
 	"v.io/x/ref/test/v23tests"
 )
 
 func TestMain(m *testing.M) {
-	test.Init()
 	modules.DispatchAndExitIfChild()
 	cleanup := v23tests.UseSharedBinDir()
 	r := m.Run()
