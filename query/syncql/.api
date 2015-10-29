@@ -26,7 +26,8 @@ pkg syncql, func NewErrFunctionLenInvalidArg(*context.T, int64) error
 pkg syncql, func NewErrFunctionNotFound(*context.T, int64, string) error
 pkg syncql, func NewErrFunctionTypeInvalidArg(*context.T, int64) error
 pkg syncql, func NewErrIntConversionError(*context.T, int64, error) error
-pkg syncql, func NewErrInvalidEscapedChar(*context.T, int64) error
+pkg syncql, func NewErrInvalidEscapeChar(*context.T, int64) error
+pkg syncql, func NewErrInvalidEscapeSequence(*context.T, int64) error
 pkg syncql, func NewErrInvalidSelectField(*context.T, int64) error
 pkg syncql, func NewErrIsIsNotRequireLhsValue(*context.T, int64) error
 pkg syncql, func NewErrIsIsNotRequireRhsNil(*context.T, int64) error
@@ -80,7 +81,8 @@ pkg syncql, var ErrFunctionLenInvalidArg verror.IDAction
 pkg syncql, var ErrFunctionNotFound verror.IDAction
 pkg syncql, var ErrFunctionTypeInvalidArg verror.IDAction
 pkg syncql, var ErrIntConversionError verror.IDAction
-pkg syncql, var ErrInvalidEscapedChar verror.IDAction
+pkg syncql, var ErrInvalidEscapeChar verror.IDAction
+pkg syncql, var ErrInvalidEscapeSequence verror.IDAction
 pkg syncql, var ErrInvalidSelectField verror.IDAction
 pkg syncql, var ErrIsIsNotRequireLhsValue verror.IDAction
 pkg syncql, var ErrIsIsNotRequireRhsNil verror.IDAction

@@ -46,7 +46,7 @@ var (
 	ErrIntConversionError              = verror.Register("v.io/v23/query/syncql.IntConversionError", verror.NoRetry, "{1:}{2:} [{3}]Can't convert to int: {4}.")
 	ErrIsIsNotRequireLhsValue          = verror.Register("v.io/v23/query/syncql.IsIsNotRequireLhsValue", verror.NoRetry, "{1:}{2:} [{3}]'Is/is not' expressions require left operand to be a value operand.")
 	ErrIsIsNotRequireRhsNil            = verror.Register("v.io/v23/query/syncql.IsIsNotRequireRhsNil", verror.NoRetry, "{1:}{2:} [{3}]'Is/is not' expressions require right operand to be nil.")
-	ErrInvalidEscapedChar              = verror.Register("v.io/v23/query/syncql.InvalidEscapedChar", verror.NoRetry, "{1:}{2:} [{3}Expected backslash, percent, or underscore after backslash.]")
+	ErrInvalidEscapeSequence           = verror.Register("v.io/v23/query/syncql.InvalidEscapeSequence", verror.NoRetry, "{1:}{2:} [{3}Expected percent, or underscore after escape character.]")
 	ErrInvalidSelectField              = verror.Register("v.io/v23/query/syncql.InvalidSelectField", verror.NoRetry, "{1:}{2:} [{3}]Select field must be 'k' or 'v[{.<ident>}...]'.")
 	ErrKeyExpressionLiteral            = verror.Register("v.io/v23/query/syncql.KeyExpressionLiteral", verror.NoRetry, "{1:}{2:} [{3}]Key (i.e., 'k') compares against literals must be string literal.")
 	ErrKeyValueStreamError             = verror.Register("v.io/v23/query/syncql.KeyValueStreamError", verror.NoRetry, "{1:}{2:} [{3}]KeyValueStream error: {4}.")
@@ -60,6 +60,7 @@ var (
 	ErrUnexpected                      = verror.Register("v.io/v23/query/syncql.Unexpected", verror.NoRetry, "{1:}{2:} [{3}]Unexpected: {4}.")
 	ErrUnexpectedEndOfStatement        = verror.Register("v.io/v23/query/syncql.UnexpectedEndOfStatement", verror.NoRetry, "{1:}{2:} [{3}]No statement found.")
 	ErrUnknownIdentifier               = verror.Register("v.io/v23/query/syncql.UnknownIdentifier", verror.NoRetry, "{1:}{2:} [{3}]Uknown identifier: {4}.")
+	ErrInvalidEscapeChar               = verror.Register("v.io/v23/query/syncql.InvalidEscapeChar", verror.NoRetry, "{1:}{2:} [{3}]Invalid escape character cannot be space or backslash.")
 	ErrDidYouMeanLowercaseK            = verror.Register("v.io/v23/query/syncql.DidYouMeanLowercaseK", verror.NoRetry, "{1:}{2:} [{3}]Did you mean: 'k'?")
 	ErrDidYouMeanLowercaseV            = verror.Register("v.io/v23/query/syncql.DidYouMeanLowercaseV", verror.NoRetry, "{1:}{2:} [{3}]Did you mean: 'v'?")
 	ErrDidYouMeanFunction              = verror.Register("v.io/v23/query/syncql.DidYouMeanFunction", verror.NoRetry, "{1:}{2:} [{3}]Did you mean: '{4}'?")
@@ -97,7 +98,7 @@ func init() {
 	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrIntConversionError.ID), "{1:}{2:} [{3}]Can't convert to int: {4}.")
 	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrIsIsNotRequireLhsValue.ID), "{1:}{2:} [{3}]'Is/is not' expressions require left operand to be a value operand.")
 	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrIsIsNotRequireRhsNil.ID), "{1:}{2:} [{3}]'Is/is not' expressions require right operand to be nil.")
-	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrInvalidEscapedChar.ID), "{1:}{2:} [{3}Expected backslash, percent, or underscore after backslash.]")
+	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrInvalidEscapeSequence.ID), "{1:}{2:} [{3}Expected percent, or underscore after escape character.]")
 	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrInvalidSelectField.ID), "{1:}{2:} [{3}]Select field must be 'k' or 'v[{.<ident>}...]'.")
 	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrKeyExpressionLiteral.ID), "{1:}{2:} [{3}]Key (i.e., 'k') compares against literals must be string literal.")
 	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrKeyValueStreamError.ID), "{1:}{2:} [{3}]KeyValueStream error: {4}.")
@@ -111,6 +112,7 @@ func init() {
 	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrUnexpected.ID), "{1:}{2:} [{3}]Unexpected: {4}.")
 	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrUnexpectedEndOfStatement.ID), "{1:}{2:} [{3}]No statement found.")
 	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrUnknownIdentifier.ID), "{1:}{2:} [{3}]Uknown identifier: {4}.")
+	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrInvalidEscapeChar.ID), "{1:}{2:} [{3}]Invalid escape character cannot be space or backslash.")
 	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrDidYouMeanLowercaseK.ID), "{1:}{2:} [{3}]Did you mean: 'k'?")
 	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrDidYouMeanLowercaseV.ID), "{1:}{2:} [{3}]Did you mean: 'v'?")
 	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrDidYouMeanFunction.ID), "{1:}{2:} [{3}]Did you mean: '{4}'?")
@@ -271,9 +273,9 @@ func NewErrIsIsNotRequireRhsNil(ctx *context.T, off int64) error {
 	return verror.New(ErrIsIsNotRequireRhsNil, ctx, off)
 }
 
-// NewErrInvalidEscapedChar returns an error with the ErrInvalidEscapedChar ID.
-func NewErrInvalidEscapedChar(ctx *context.T, off int64) error {
-	return verror.New(ErrInvalidEscapedChar, ctx, off)
+// NewErrInvalidEscapeSequence returns an error with the ErrInvalidEscapeSequence ID.
+func NewErrInvalidEscapeSequence(ctx *context.T, off int64) error {
+	return verror.New(ErrInvalidEscapeSequence, ctx, off)
 }
 
 // NewErrInvalidSelectField returns an error with the ErrInvalidSelectField ID.
@@ -339,6 +341,11 @@ func NewErrUnexpectedEndOfStatement(ctx *context.T, off int64) error {
 // NewErrUnknownIdentifier returns an error with the ErrUnknownIdentifier ID.
 func NewErrUnknownIdentifier(ctx *context.T, off int64, found string) error {
 	return verror.New(ErrUnknownIdentifier, ctx, off, found)
+}
+
+// NewErrInvalidEscapeChar returns an error with the ErrInvalidEscapeChar ID.
+func NewErrInvalidEscapeChar(ctx *context.T, off int64) error {
+	return verror.New(ErrInvalidEscapeChar, ctx, off)
 }
 
 // NewErrDidYouMeanLowercaseK returns an error with the ErrDidYouMeanLowercaseK ID.
