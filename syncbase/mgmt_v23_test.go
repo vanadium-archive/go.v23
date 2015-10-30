@@ -186,7 +186,7 @@ func V23TestDeviceManager(i *v23tests.T) {
 	// Verify the device's default blessing is as expected.
 	mfrBlessing := "root/m/orange/zphone5/ime-i007/myworkstation"
 	ownerBlessing := "root/r/admin/myworkstation"
-	inv := debugBin.Start("stats", "read", mtName+"/devmgr/__debug/stats/security/principal/*/blessingstore")
+	inv := debugBin.Start("stats", "read", mtName+"/devmgr/__debug/stats/security/principal/*/blessingstore/*")
 	inv.ExpectSetEventuallyRE(".*Default Blessings[ ]+" + mfrBlessing + "," + ownerBlessing)
 
 	// Get the device's profile, which should be set to non-empty string
@@ -283,7 +283,7 @@ func V23TestDeviceManager(i *v23tests.T) {
 	// mfrBlessing   = "root/m/orange/zphone5/ime-i007/myworkstation"
 	// ownerBlessing = "root/r/admin/myworkstation"
 	appBlessing := mfrBlessing + "/a/" + pubBlessing + "," + ownerBlessing + "/a/" + pubBlessing
-	inv = debugBin.Start("stats", "read", instanceName+"/stats/security/principal/*/blessingstore")
+	inv = debugBin.Start("stats", "read", instanceName+"/stats/security/principal/*/blessingstore/*")
 	inv.ExpectSetEventuallyRE(".*Default Blessings[ ]+"+userBlessing+"$", "[.][.][.][ ]+"+userBlessing+","+appBlessing)
 
 	// Kill and delete the instance.
