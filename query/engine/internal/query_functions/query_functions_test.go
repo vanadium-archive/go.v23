@@ -13,12 +13,13 @@ import (
 
 	"v.io/v23"
 	"v.io/v23/context"
-	"v.io/v23/query/syncql"
 	ds "v.io/v23/query/engine/datasource"
 	"v.io/v23/query/engine/internal/query_functions"
 	"v.io/v23/query/engine/internal/query_parser"
+	"v.io/v23/query/syncql"
 	"v.io/v23/vdl"
 	"v.io/v23/verror"
+
 	_ "v.io/x/ref/runtime/factories/generic"
 	"v.io/x/ref/test"
 )
@@ -476,6 +477,62 @@ func TestFunctions(t *testing.T) {
 			&query_parser.Operand{
 				Type: query_parser.TypInt,
 				Int:  160,
+			},
+		},
+		// Atoi
+		functionsTest{
+			&query_parser.Function{
+				Name: "Atoi",
+				Args: []*query_parser.Operand{
+					&query_parser.Operand{
+						Type: query_parser.TypStr,
+						Str:  "12345",
+					},
+				},
+				ArgTypes: []query_parser.OperandType{
+					query_parser.TypStr,
+				},
+				RetType:  query_parser.TypInt,
+				Computed: false,
+				RetValue: nil,
+			},
+			[]*query_parser.Operand{
+				&query_parser.Operand{
+					Type: query_parser.TypStr,
+					Str:  "12345",
+				},
+			},
+			&query_parser.Operand{
+				Type: query_parser.TypInt,
+				Int:  12345,
+			},
+		},
+		// Atof
+		functionsTest{
+			&query_parser.Function{
+				Name: "Atof",
+				Args: []*query_parser.Operand{
+					&query_parser.Operand{
+						Type: query_parser.TypStr,
+						Str:  "1234.5",
+					},
+				},
+				ArgTypes: []query_parser.OperandType{
+					query_parser.TypStr,
+				},
+				RetType:  query_parser.TypFloat,
+				Computed: false,
+				RetValue: nil,
+			},
+			[]*query_parser.Operand{
+				&query_parser.Operand{
+					Type: query_parser.TypStr,
+					Str:  "1234.5",
+				},
+			},
+			&query_parser.Operand{
+				Type:  query_parser.TypFloat,
+				Float: 1234.5,
 			},
 		},
 		// Lowercase

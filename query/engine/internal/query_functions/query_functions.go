@@ -7,10 +7,10 @@ package query_functions
 import (
 	"strings"
 
-	"v.io/v23/query/syncql"
 	ds "v.io/v23/query/engine/datasource"
 	"v.io/v23/query/engine/internal/conversions"
 	"v.io/v23/query/engine/internal/query_parser"
+	"v.io/v23/query/syncql"
 	"v.io/v23/vdl"
 )
 
@@ -46,6 +46,8 @@ func init() {
 	functions["YearDay"] = function{[]query_parser.OperandType{query_parser.TypTime, query_parser.TypStr}, false, query_parser.TypNil, query_parser.TypInt, yearDay, secondArgLocationCheck}
 
 	// String Functions
+	functions["Atoi"] = function{[]query_parser.OperandType{query_parser.TypStr}, false, query_parser.TypNil, query_parser.TypInt, atoi, nil}
+	functions["Atof"] = function{[]query_parser.OperandType{query_parser.TypStr}, false, query_parser.TypNil, query_parser.TypFloat, atof, nil}
 	functions["HtmlEscape"] = function{[]query_parser.OperandType{query_parser.TypStr}, false, query_parser.TypNil, query_parser.TypStr, htmlEscapeFunc, nil}
 	functions["HtmlUnescape"] = function{[]query_parser.OperandType{query_parser.TypStr}, false, query_parser.TypNil, query_parser.TypStr, htmlUnescapeFunc, nil}
 	functions["Lowercase"] = function{[]query_parser.OperandType{query_parser.TypStr}, false, query_parser.TypNil, query_parser.TypStr, lowerCase, nil}

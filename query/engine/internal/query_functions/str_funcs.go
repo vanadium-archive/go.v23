@@ -5,6 +5,7 @@
 package query_functions
 
 import (
+	"errors"
 	"fmt"
 	"html"
 	"strconv"
@@ -12,10 +13,10 @@ import (
 	"unicode"
 	"unicode/utf8"
 
-	"v.io/v23/query/syncql"
 	ds "v.io/v23/query/engine/datasource"
 	"v.io/v23/query/engine/internal/conversions"
 	"v.io/v23/query/engine/internal/query_parser"
+	"v.io/v23/query/syncql"
 	"v.io/v23/vdl"
 )
 
@@ -54,6 +55,34 @@ func str(db ds.Database, off int64, args []*query_parser.Operand) (*query_parser
 			}
 		}
 		return &c, nil
+	}
+}
+
+func atoi(db ds.Database, off int64, args []*query_parser.Operand) (*query_parser.Operand, error) {
+	o := args[0]
+	switch o.Type {
+	case query_parser.TypStr:
+		i, err := strconv.ParseInt(o.Str, 10, 64)
+		if err != nil {
+			return nil, err
+		}
+		return makeIntOp(off, i), nil
+	default:
+		return nil, errors.New("Cannot convert operand to int.")
+	}
+}
+
+func atof(db ds.Database, off int64, args []*query_parser.Operand) (*query_parser.Operand, error) {
+	o := args[0]
+	switch o.Type {
+	case query_parser.TypStr:
+		f, err := strconv.ParseFloat(o.Str, 64)
+		if err != nil {
+			return nil, err
+		}
+		return makeFloatOp(off, f), nil
+	default:
+		return nil, errors.New("Cannot convert operand to float.")
 	}
 }
 

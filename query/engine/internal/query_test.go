@@ -2122,6 +2122,22 @@ func TestQueryExec(t *testing.T) {
 			},
 		},
 		{
+			// Atoi
+			"select Atoi(\"12345\") from Customer where k = \"001\"",
+			[]string{"Atoi"},
+			[][]*vdl.Value{
+				[]*vdl.Value{vdl.ValueOf(int64(12345))},
+			},
+		},
+		{
+			// Atof
+			"select Atof(\"1234.5\") from Customer where k = \"001\"",
+			[]string{"Atof"},
+			[][]*vdl.Value{
+				[]*vdl.Value{vdl.ValueOf(float64(1234.5))},
+			},
+		},
+		{
 			// Sprintf
 			"select Sprintf(\"%d, %d, %d, %d, %d, %d, %d, %g, %g, %g, %g\", v.B, v.Ui16, v.Ui32, v.Ui64, v.I16, v.I32, v.I64, v.F32, v.F64, v.C64, v.C128) from Numbers where k = \"001\"",
 			[]string{"Sprintf"},
