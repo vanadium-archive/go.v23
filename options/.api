@@ -14,7 +14,6 @@ pkg options, method (SecurityLevel) NSOpt()
 pkg options, method (SecurityLevel) RPCCallOpt()
 pkg options, method (SecurityLevel) RPCServerOpt()
 pkg options, method (ServerAuthorizer) RPCCallOpt()
-pkg options, method (ServerBlessings) RPCServerOpt()
 pkg options, method (ServesMountTable) RPCServerOpt()
 pkg options, type ChannelTimeout time.Duration
 pkg options, type IsLeaf bool
@@ -27,6 +26,4 @@ pkg options, type RetryTimeout time.Duration
 pkg options, type SecurityLevel int
 pkg options, type ServerAuthorizer struct
 pkg options, type ServerAuthorizer struct, embedded security.Authorizer
-pkg options, type ServerBlessings struct
-pkg options, type ServerBlessings struct, embedded security.Blessings
 pkg options, type ServesMountTable bool

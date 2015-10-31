@@ -57,15 +57,6 @@ import (
 	"v.io/v23/security"
 )
 
-// ServerBlessings is the blessings that should be presented by a process (a
-// "server") accepting network connections from other processes ("clients").
-//
-// If none is provided, implementations typically use the "default" blessings
-// from the BlessingStore of the Principal.
-type ServerBlessings struct{ security.Blessings }
-
-func (ServerBlessings) RPCServerOpt() {}
-
 // SecurityLevel represents the level of confidentiality of data transmitted
 // and received over a connection.
 type SecurityLevel int
