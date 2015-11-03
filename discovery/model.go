@@ -46,7 +46,17 @@ type Scanner interface {
 	// new discovered services can be read. Scanning will continue until the context
 	// is canceled or exceeds its deadline.
 	//
-	// TODO(jhahn): Add query syntax and examples.
+	// The query is a WHERE expression of syncQL query against scanned services, where
+	// keys are InstanceUuids and values are Service.
+	//
+	// Examples
+	//
+	//    v.InstanceName = "v.io/i"
+	//    v.InstanceName = "v.io/i" AND v.Attrs["a"] = "v"
+	//    v.Attrs["a"] = "v1" OR v.Attrs["a"] = "v2"
+	//
+	// SyncQL tutorial at:
+	//    https://github.com/vanadium/docs/blob/master/tutorials/syncql-tutorial.md
 	Scan(ctx *context.T, query string) (<-chan Update, error)
 }
 

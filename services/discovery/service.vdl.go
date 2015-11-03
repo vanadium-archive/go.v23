@@ -178,7 +178,17 @@ type ScannerClientMethods interface {
 	// Scan scans services that match the query and returns the stream of discovered
 	// services. Scanning will continue until the client cancels the call.
 	//
-	// TODO(jhahn): Add query syntax and examples.
+	// The query is a WHERE expression of syncQL query against scanned services, where
+	// keys are InstanceUuids and values are Service.
+	//
+	// Examples
+	//
+	//    v.InstanceName = "v.io/i"
+	//    v.InstanceName = "v.io/i" AND v.Attrs["a"] = "v"
+	//    v.Attrs["a"] = "v1" OR v.Attrs["a"] = "v2"
+	//
+	// SyncQL tutorial at:
+	//    https://github.com/vanadium/docs/blob/master/tutorials/syncql-tutorial.md
 	Scan(ctx *context.T, query string, opts ...rpc.CallOpt) (ScannerScanClientCall, error)
 }
 
@@ -282,7 +292,17 @@ type ScannerServerMethods interface {
 	// Scan scans services that match the query and returns the stream of discovered
 	// services. Scanning will continue until the client cancels the call.
 	//
-	// TODO(jhahn): Add query syntax and examples.
+	// The query is a WHERE expression of syncQL query against scanned services, where
+	// keys are InstanceUuids and values are Service.
+	//
+	// Examples
+	//
+	//    v.InstanceName = "v.io/i"
+	//    v.InstanceName = "v.io/i" AND v.Attrs["a"] = "v"
+	//    v.Attrs["a"] = "v1" OR v.Attrs["a"] = "v2"
+	//
+	// SyncQL tutorial at:
+	//    https://github.com/vanadium/docs/blob/master/tutorials/syncql-tutorial.md
 	Scan(ctx *context.T, call ScannerScanServerCall, query string) error
 }
 
@@ -294,7 +314,17 @@ type ScannerServerStubMethods interface {
 	// Scan scans services that match the query and returns the stream of discovered
 	// services. Scanning will continue until the client cancels the call.
 	//
-	// TODO(jhahn): Add query syntax and examples.
+	// The query is a WHERE expression of syncQL query against scanned services, where
+	// keys are InstanceUuids and values are Service.
+	//
+	// Examples
+	//
+	//    v.InstanceName = "v.io/i"
+	//    v.InstanceName = "v.io/i" AND v.Attrs["a"] = "v"
+	//    v.Attrs["a"] = "v1" OR v.Attrs["a"] = "v2"
+	//
+	// SyncQL tutorial at:
+	//    https://github.com/vanadium/docs/blob/master/tutorials/syncql-tutorial.md
 	Scan(ctx *context.T, call *ScannerScanServerCallStub, query string) error
 }
 
@@ -350,7 +380,7 @@ var descScanner = rpc.InterfaceDesc{
 	Methods: []rpc.MethodDesc{
 		{
 			Name: "Scan",
-			Doc:  "// Scan scans services that match the query and returns the stream of discovered\n// services. Scanning will continue until the client cancels the call.\n//\n// TODO(jhahn): Add query syntax and examples.",
+			Doc:  "// Scan scans services that match the query and returns the stream of discovered\n// services. Scanning will continue until the client cancels the call.\n//\n// The query is a WHERE expression of syncQL query against scanned services, where\n// keys are InstanceUuids and values are Service.\n//\n// Examples\n//\n//    v.InstanceName = \"v.io/i\"\n//    v.InstanceName = \"v.io/i\" AND v.Attrs[\"a\"] = \"v\"\n//    v.Attrs[\"a\"] = \"v1\" OR v.Attrs[\"a\"] = \"v2\"\n//\n// SyncQL tutorial at:\n//    https://github.com/vanadium/docs/blob/master/tutorials/syncql-tutorial.md",
 			InArgs: []rpc.ArgDesc{
 				{"query", ``}, // string
 			},
