@@ -2234,7 +2234,7 @@ func TestQueryExec(t *testing.T) {
 		v := p.ToVdlValue()
 		p2, err := qe.GetPreparedStatement(v)
 
-		headers, rs, err := p2.Exec([]*vdl.Value{})
+		headers, rs, err := p2.Exec()
 		if err != nil {
 			t.Errorf("query: %s; got %v, want nil", test.query, err)
 		} else {
@@ -2335,45 +2335,52 @@ func TestQueryPrepare(t *testing.T) {
 
 	qe := engine.Create(db)
 
+	// Prepare all of the statements ahead of time.
+	preparedStatements := []ds.PreparedStatement{}
 	for _, test := range basic {
 		p, err := qe.PrepareStatement(test.query)
 		if err != nil {
 			t.Errorf("query: %s; got %v, want nil", test.query, err)
 		}
+		preparedStatements = append(preparedStatements, p)
+	}
 
-		// First execution
-		headers, rs, err := p.Exec(test.paramValues1)
+	// First execution
+	for i, p := range preparedStatements {
+		headers, rs, err := p.Exec(basic[i].paramValues1...)
 		if err != nil {
-			t.Errorf("query: %s; got %v, want nil", test.query, err)
+			t.Errorf("query: %s; got %v, want nil", basic[i].query, err)
 		} else {
 			// Collect results.
 			r := [][]*vdl.Value{}
 			for rs.Advance() {
 				r = append(r, rs.Result())
 			}
-			if !reflect.DeepEqual(test.r1, r) {
-				t.Errorf("query: %s; got %v, want %v", test.query, r, test.r1)
+			if !reflect.DeepEqual(basic[i].r1, r) {
+				t.Errorf("query: %s; got %v, want %v", basic[i].query, r, basic[i].r1)
 			}
-			if !reflect.DeepEqual(test.headers, headers) {
-				t.Errorf("query: %s; got %v, want %v", test.query, headers, test.headers)
+			if !reflect.DeepEqual(basic[i].headers, headers) {
+				t.Errorf("query: %s; got %v, want %v", basic[i].query, headers, basic[i].headers)
 			}
 		}
+	}
 
-		// Second execution
-		headers, rs, err = p.Exec(test.paramValues2)
+	// Second execution
+	for i, p := range preparedStatements {
+		headers, rs, err := p.Exec(basic[i].paramValues2...)
 		if err != nil {
-			t.Errorf("query: %s; got %v, want nil", test.query, err)
+			t.Errorf("query: %s; got %v, want nil", basic[i].query, err)
 		} else {
 			// Collect results.
 			r := [][]*vdl.Value{}
 			for rs.Advance() {
 				r = append(r, rs.Result())
 			}
-			if !reflect.DeepEqual(test.r2, r) {
-				t.Errorf("query: %s; got %v, want %v", test.query, r, test.r2)
+			if !reflect.DeepEqual(basic[i].r2, r) {
+				t.Errorf("query: %s; got %v, want %v", basic[i].query, r, basic[i].r2)
 			}
-			if !reflect.DeepEqual(test.headers, headers) {
-				t.Errorf("query: %s; got %v, want %v", test.query, headers, test.headers)
+			if !reflect.DeepEqual(basic[i].headers, headers) {
+				t.Errorf("query: %s; got %v, want %v", basic[i].query, headers, basic[i].headers)
 			}
 		}
 	}
@@ -2591,7 +2598,7 @@ func TestErrorOnPrepareExec(t *testing.T) {
 		if err != nil {
 			t.Errorf("query: %s; got %v, want nil", test.query, err)
 		}
-		_, _, err = ps.Exec(test.paramValues)
+		_, _, err = ps.Exec(test.paramValues...)
 		// Test both that the IDs compare and the text compares (since the offset needs to match).
 		if verror.ErrorID(err) != verror.ErrorID(test.err) || err.Error() != test.err.Error() {
 			t.Errorf("query: %s; got %v, want %v", test.query, err, test.err)

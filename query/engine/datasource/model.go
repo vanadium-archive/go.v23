@@ -22,13 +22,12 @@ import (
 type QueryEngine interface {
 	// Exec executes a syncQL query and returns the results. Headers (i.e., column
 	// names) are returned separately from results (i.e., values).
-	// db: an implementation of datasource.Database
 	// q : the query (e.g., select v from Customers
 	Exec(q string) ([]string, syncql.ResultStream, error)
 
-	// Parse statement q and return a PreparedStatement.  Queries passed to PrepareStatement
-	// contain zero or more formal parameters (specified with a ?) for operands in where
-	// clause expressions.
+	// PrepareStatement parses query q and returns a PreparedStatement.  Queries passed to
+	// PrepareStatement contain zero or more formal parameters (specified with a ?) for
+	// operands in where clause expressions.
 	// e.g., select k from Customer where Type(v) like ? and k like ?
 	PrepareStatement(q string) (PreparedStatement, error)
 
@@ -38,11 +37,11 @@ type QueryEngine interface {
 }
 
 type PreparedStatement interface {
-	// Execute the already prepared statement with the supplied parameter values.
+	// Exec executes the already prepared statement with the supplied parameter values.
 	// The number of paramValues supplied must match the number of formal parameters
 	// specified in the query (else NotEnoughParamValuesSpecified or
 	// TooManyParamValuesSpecified errors are returned).
-	Exec(paramValues []*vdl.Value) ([]string, syncql.ResultStream, error)
+	Exec(paramValues ...*vdl.Value) ([]string, syncql.ResultStream, error)
 
 	// ToVdlValue returns a value that can be passed to the QueryEngine.GetPreparedStatement
 	// function.  This is useful for modules implementing query support as vdl.Values

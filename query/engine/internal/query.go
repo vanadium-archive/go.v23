@@ -27,8 +27,8 @@ type queryEngineImpl struct {
 }
 
 type preparedStatementImpl struct {
-	qe queryEngineImpl
-	id int64 // key to ast stored in queryEngineImpl.
+	qe *queryEngineImpl
+	id int64 // key to AST stored in queryEngineImpl.
 }
 
 type paramInfo struct {
@@ -37,14 +37,14 @@ type paramInfo struct {
 }
 
 func Create(db ds.Database) ds.QueryEngine {
-	return queryEngineImpl{db: db, nextID: 0, preparedStatements: map[int64]*query_parser.Statement{}}
+	return &queryEngineImpl{db: db, nextID: 0, preparedStatements: map[int64]*query_parser.Statement{}}
 }
 
-func (qe queryEngineImpl) Exec(q string) ([]string, syncql.ResultStream, error) {
+func (qe *queryEngineImpl) Exec(q string) ([]string, syncql.ResultStream, error) {
 	return Exec(qe.db, q)
 }
 
-func (qe queryEngineImpl) GetPreparedStatement(v *vdl.Value) (ds.PreparedStatement, error) {
+func (qe *queryEngineImpl) GetPreparedStatement(v *vdl.Value) (ds.PreparedStatement, error) {
 	if v == nil || v.Kind() != vdl.Int64 {
 		return nil, syncql.NewErrPreparedStatementNotFound(qe.db.GetContext())
 	}
@@ -52,13 +52,13 @@ func (qe queryEngineImpl) GetPreparedStatement(v *vdl.Value) (ds.PreparedStateme
 	_, ok := qe.preparedStatements[v.Int()]
 	qe.mutexPreparedStatements.Unlock()
 	if ok {
-		return preparedStatementImpl{qe, v.Int()}, nil
+		return &preparedStatementImpl{qe, v.Int()}, nil
 	} else {
 		return nil, syncql.NewErrPreparedStatementNotFound(qe.db.GetContext())
 	}
 }
 
-func (qe queryEngineImpl) PrepareStatement(q string) (ds.PreparedStatement, error) {
+func (qe *queryEngineImpl) PrepareStatement(q string) (ds.PreparedStatement, error) {
 	s, err := query_parser.Parse(qe.db, q)
 	if err != nil {
 		return nil, err
@@ -70,10 +70,10 @@ func (qe queryEngineImpl) PrepareStatement(q string) (ds.PreparedStatement, erro
 	qe.mutexPreparedStatements.Lock()
 	qe.preparedStatements[id] = s
 	qe.mutexPreparedStatements.Unlock()
-	return preparedStatementImpl{qe, id}, nil
+	return &preparedStatementImpl{qe, id}, nil
 }
 
-func (p preparedStatementImpl) Exec(paramValues []*vdl.Value) ([]string, syncql.ResultStream, error) {
+func (p *preparedStatementImpl) Exec(paramValues ...*vdl.Value) ([]string, syncql.ResultStream, error) {
 	// Find the AST
 	p.qe.mutexPreparedStatements.Lock()
 	s := p.qe.preparedStatements[p.id]
@@ -90,11 +90,11 @@ func (p preparedStatementImpl) Exec(paramValues []*vdl.Value) ([]string, syncql.
 	return checkAndExec(p.qe.db, &sCopy)
 }
 
-func (p preparedStatementImpl) ToVdlValue() *vdl.Value {
+func (p *preparedStatementImpl) ToVdlValue() *vdl.Value {
 	return vdl.Int64Value(p.id)
 }
 
-func (p preparedStatementImpl) Close() {
+func (p *preparedStatementImpl) Close() {
 	p.qe.mutexPreparedStatements.Lock()
 	delete(p.qe.preparedStatements, p.id)
 	p.qe.mutexPreparedStatements.Unlock()
