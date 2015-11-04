@@ -115,7 +115,7 @@ func checkExpression(db ds.Database, e *query_parser.Expression, ec *query_parse
 	// Like expressions require operand2 to be a string literal that must be validated.
 	if e.Operator.Type == query_parser.Like || e.Operator.Type == query_parser.NotLike {
 		if e.Operand2.Type != query_parser.TypStr {
-			return syncql.NewErrLikeExpressionsRequireRhsString(db.GetContext(), e.Off)
+			return syncql.NewErrLikeExpressionsRequireRhsString(db.GetContext(), e.Operand2.Off)
 		}
 		prefix, err := computePrefix(db, e.Operand2.Off, e.Operand2.Str, ec)
 		if err != nil {

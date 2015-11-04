@@ -3,7 +3,9 @@
 // license that can be found in the LICENSE file.
 
 // Package query defines the interfaces a system must implement to support
-// querying.
+// querying.  It also defines the QueryEngine interface which is returned
+// from calling v.io/v23/query/engine.Create and PreparedStatement which is
+// returned from the engine.PrepareStatement function.
 //
 // The Database interface is used to get Table interfaces (by name).
 // The Table interface is used to get a KeyValueStream (by key prefixes).
@@ -13,8 +15,47 @@ package datasource
 
 import (
 	"v.io/v23/context"
+	"v.io/v23/query/syncql"
 	"v.io/v23/vdl"
 )
+
+type QueryEngine interface {
+	// Exec executes a syncQL query and returns the results. Headers (i.e., column
+	// names) are returned separately from results (i.e., values).
+	// db: an implementation of datasource.Database
+	// q : the query (e.g., select v from Customers
+	Exec(q string) ([]string, syncql.ResultStream, error)
+
+	// Parse statement q and return a PreparedStatement.  Queries passed to PrepareStatement
+	// contain zero or more formal parameters (specified with a ?) for operands in where
+	// clause expressions.
+	// e.g., select k from Customer where Type(v) like ? and k like ?
+	PrepareStatement(q string) (PreparedStatement, error)
+
+	// Get an existing PreparedStatement from the value returned from calling
+	// PreparedStatement.ToVdlValue.
+	GetPreparedStatement(v *vdl.Value) (PreparedStatement, error)
+}
+
+type PreparedStatement interface {
+	// Execute the already prepared statement with the supplied parameter values.
+	// The number of paramValues supplied must match the number of formal parameters
+	// specified in the query (else NotEnoughParamValuesSpecified or
+	// TooManyParamValuesSpecified errors are returned).
+	Exec(paramValues []*vdl.Value) ([]string, syncql.ResultStream, error)
+
+	// ToVdlValue returns a value that can be passed to the QueryEngine.GetPreparedStatement
+	// function.  This is useful for modules implementing query support as vdl.Values
+	// are serializable.  As such, they can be passed to the client and returned
+	// for executions (rather than the module having to keep track of the prepared
+	// statements).
+	ToVdlValue() *vdl.Value
+
+	// Call close to free up the space taken by the PreparedStatement when no longer
+	// needed.  If close is not called, the space will be freed when the containing
+	// QueryEngine is garbage collected.
+	Close()
+}
 
 type Database interface {
 	GetContext() *context.T

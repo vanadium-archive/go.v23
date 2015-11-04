@@ -38,11 +38,14 @@ pkg syncql, func NewErrLimitMustBeGe0(*context.T, int64) error
 pkg syncql, func NewErrLocationConversionError(*context.T, int64, error) error
 pkg syncql, func NewErrMaxStatementLenExceeded(*context.T, int64, int64, int64) error
 pkg syncql, func NewErrNoStatementFound(*context.T, int64) error
+pkg syncql, func NewErrNotEnoughParamValuesSpecified(*context.T, int64) error
 pkg syncql, func NewErrOffsetMustBeGe0(*context.T, int64) error
+pkg syncql, func NewErrPreparedStatementNotFound(*context.T) error
 pkg syncql, func NewErrScanError(*context.T, int64, error) error
 pkg syncql, func NewErrStringConversionError(*context.T, int64, error) error
 pkg syncql, func NewErrTableCantAccess(*context.T, int64, string, error) error
 pkg syncql, func NewErrTimeConversionError(*context.T, int64, error) error
+pkg syncql, func NewErrTooManyParamValuesSpecified(*context.T, int64) error
 pkg syncql, func NewErrUintConversionError(*context.T, int64, error) error
 pkg syncql, func NewErrUnexpected(*context.T, int64, string) error
 pkg syncql, func NewErrUnexpectedEndOfStatement(*context.T, int64) error
@@ -93,11 +96,14 @@ pkg syncql, var ErrLimitMustBeGe0 verror.IDAction
 pkg syncql, var ErrLocationConversionError verror.IDAction
 pkg syncql, var ErrMaxStatementLenExceeded verror.IDAction
 pkg syncql, var ErrNoStatementFound verror.IDAction
+pkg syncql, var ErrNotEnoughParamValuesSpecified verror.IDAction
 pkg syncql, var ErrOffsetMustBeGe0 verror.IDAction
+pkg syncql, var ErrPreparedStatementNotFound verror.IDAction
 pkg syncql, var ErrScanError verror.IDAction
 pkg syncql, var ErrStringConversionError verror.IDAction
 pkg syncql, var ErrTableCantAccess verror.IDAction
 pkg syncql, var ErrTimeConversionError verror.IDAction
+pkg syncql, var ErrTooManyParamValuesSpecified verror.IDAction
 pkg syncql, var ErrUintConversionError verror.IDAction
 pkg syncql, var ErrUnexpected verror.IDAction
 pkg syncql, var ErrUnexpectedEndOfStatement verror.IDAction

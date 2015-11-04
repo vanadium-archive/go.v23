@@ -9,12 +9,12 @@ import (
 	"fmt"
 	"reflect"
 
-	"v.io/v23/query/syncql"
 	ds "v.io/v23/query/engine/datasource"
 	"v.io/v23/query/engine/internal/conversions"
 	"v.io/v23/query/engine/internal/query_checker"
 	"v.io/v23/query/engine/internal/query_functions"
 	"v.io/v23/query/engine/internal/query_parser"
+	"v.io/v23/query/syncql"
 	"v.io/v23/vdl"
 )
 
@@ -396,48 +396,11 @@ func resolveOperand(db ds.Database, k string, v *vdl.Value, o *query_parser.Oper
 		return nil
 	}
 
-	// Convert value to an operand
-	var newOp query_parser.Operand
-	newOp.Off = o.Off
-
-	switch value.Kind() {
-	case vdl.Bool:
-		newOp.Type = query_parser.TypBool
-		newOp.Bool = value.Bool()
-	case vdl.Byte:
-		newOp.Type = query_parser.TypInt
-		newOp.Int = int64(value.Byte())
-	case vdl.Enum:
-		newOp.Type = query_parser.TypStr
-		newOp.Str = value.EnumLabel()
-	case vdl.Int16, vdl.Int32, vdl.Int64:
-		newOp.Type = query_parser.TypInt
-		newOp.Int = value.Int()
-	case vdl.Uint16, vdl.Uint32, vdl.Uint64:
-		newOp.Type = query_parser.TypInt
-		newOp.Int = int64(value.Uint())
-	case vdl.Float32, vdl.Float64:
-		newOp.Type = query_parser.TypFloat
-		newOp.Float = value.Float()
-	case vdl.String:
-		newOp.Type = query_parser.TypStr
-		newOp.Str = value.RawString()
-	case vdl.Complex64, vdl.Complex128:
-		newOp.Type = query_parser.TypComplex
-		newOp.Complex = value.Complex()
-	default: // OpObject for structs, arrays, maps, ...
-		if value.Kind() == vdl.Struct && value.Type().Name() == "time.Time" {
-			newOp.Type = query_parser.TypTime
-			err := vdl.Convert(&newOp.Time, value)
-			if err != nil {
-				return nil
-			}
-		} else {
-			newOp.Type = query_parser.TypObject
-			newOp.Object = value
-		}
+	if newOp, err := query_parser.ConvertValueToAnOperand(value, o.Off); err != nil {
+		return nil
+	} else {
+		return newOp
 	}
-	return &newOp
 }
 
 // Auto-dereference Any and Optional values

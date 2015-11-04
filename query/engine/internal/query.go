@@ -8,20 +8,107 @@ import (
 	"fmt"
 	"reflect"
 	"strconv"
+	"sync"
 
-	"v.io/v23/query/syncql"
 	ds "v.io/v23/query/engine/datasource"
 	"v.io/v23/query/engine/internal/query_checker"
 	"v.io/v23/query/engine/internal/query_functions"
 	"v.io/v23/query/engine/internal/query_parser"
+	"v.io/v23/query/syncql"
 	"v.io/v23/vdl"
 )
+
+type queryEngineImpl struct {
+	db                      ds.Database
+	mutexNextID             sync.Mutex
+	nextID                  int64
+	mutexPreparedStatements sync.Mutex
+	preparedStatements      map[int64]*query_parser.Statement
+}
+
+type preparedStatementImpl struct {
+	qe queryEngineImpl
+	id int64 // key to ast stored in queryEngineImpl.
+}
+
+type paramInfo struct {
+	paramValues []*vdl.Value
+	cursor      int64
+}
+
+func Create(db ds.Database) ds.QueryEngine {
+	return queryEngineImpl{db: db, nextID: 0, preparedStatements: map[int64]*query_parser.Statement{}}
+}
+
+func (qe queryEngineImpl) Exec(q string) ([]string, syncql.ResultStream, error) {
+	return Exec(qe.db, q)
+}
+
+func (qe queryEngineImpl) GetPreparedStatement(v *vdl.Value) (ds.PreparedStatement, error) {
+	if v == nil || v.Kind() != vdl.Int64 {
+		return nil, syncql.NewErrPreparedStatementNotFound(qe.db.GetContext())
+	}
+	qe.mutexPreparedStatements.Lock()
+	_, ok := qe.preparedStatements[v.Int()]
+	qe.mutexPreparedStatements.Unlock()
+	if ok {
+		return preparedStatementImpl{qe, v.Int()}, nil
+	} else {
+		return nil, syncql.NewErrPreparedStatementNotFound(qe.db.GetContext())
+	}
+}
+
+func (qe queryEngineImpl) PrepareStatement(q string) (ds.PreparedStatement, error) {
+	s, err := query_parser.Parse(qe.db, q)
+	if err != nil {
+		return nil, err
+	}
+	qe.mutexNextID.Lock()
+	id := qe.nextID
+	qe.nextID++
+	qe.mutexNextID.Unlock()
+	qe.mutexPreparedStatements.Lock()
+	qe.preparedStatements[id] = s
+	qe.mutexPreparedStatements.Unlock()
+	return preparedStatementImpl{qe, id}, nil
+}
+
+func (p preparedStatementImpl) Exec(paramValues []*vdl.Value) ([]string, syncql.ResultStream, error) {
+	// Find the AST
+	p.qe.mutexPreparedStatements.Lock()
+	s := p.qe.preparedStatements[p.id]
+	p.qe.mutexPreparedStatements.Unlock()
+
+	// Copy the AST and substitute any parameters with actual values.
+	// Note: Not all of the AST is copied as most parts are immutable.
+	sCopy, err := (*s).CopyAndSubstitute(p.qe.db, paramValues)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	// Sematnically check the copied AST and then execute it.
+	return checkAndExec(p.qe.db, &sCopy)
+}
+
+func (p preparedStatementImpl) ToVdlValue() *vdl.Value {
+	return vdl.Int64Value(p.id)
+}
+
+func (p preparedStatementImpl) Close() {
+	p.qe.mutexPreparedStatements.Lock()
+	delete(p.qe.preparedStatements, p.id)
+	p.qe.mutexPreparedStatements.Unlock()
+}
 
 func Exec(db ds.Database, q string) ([]string, syncql.ResultStream, error) {
 	s, err := query_parser.Parse(db, q)
 	if err != nil {
 		return nil, nil, err
 	}
+	return checkAndExec(db, s)
+}
+
+func checkAndExec(db ds.Database, s *query_parser.Statement) ([]string, syncql.ResultStream, error) {
 	if err := query_checker.Check(db, s); err != nil {
 		return nil, nil, err
 	}

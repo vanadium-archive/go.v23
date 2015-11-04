@@ -33,6 +33,7 @@ const (
 	TokLEFTBRACKET
 	TokLEFTPAREN
 	TokMINUS
+	TokParameter // allowed only in prepared statements
 	TokPERIOD
 	TokRIGHTANGLEBRACKET
 	TokRIGHTBRACKET
@@ -58,6 +59,7 @@ type Node struct {
 type Statement interface {
 	Offset() int64
 	String() string
+	CopyAndSubstitute(db ds.Database, paramValues []*vdl.Value) (Statement, error)
 }
 
 type Segment struct {
@@ -106,6 +108,7 @@ const (
 	TypFunction
 	TypInt
 	TypNil
+	TypParameter
 	TypStr
 	TypTime
 	TypObject // Only as the result of a ResolveOperand.
@@ -268,6 +271,8 @@ func scanToken(s *scanner.Scanner) *Token {
 		token.Tok = TokLEFTBRACKET
 	case ']':
 		token.Tok = TokRIGHTBRACKET
+	case '?':
+		token.Tok = TokParameter
 	case scanner.EOF:
 		token.Tok = TokEOF
 	case scanner.Ident:
@@ -769,6 +774,9 @@ func parseOperand(db ds.Database, s *scanner.Scanner, token *Token) (*Operand, *
 			return nil, nil, syncql.NewErrExpected(db.GetContext(), token.Off, "int or float")
 		}
 		token = scanToken(s)
+	case TokParameter:
+		operand.Type = TypParameter
+		token = scanToken(s)
 	default:
 		return nil, nil, syncql.NewErrExpectedOperand(db.GetContext(), token.Off, token.Value)
 	}
@@ -990,6 +998,38 @@ func (st SelectStatement) String() string {
 	return val
 }
 
+func (st SelectStatement) CopyAndSubstitute(db ds.Database, paramValues []*vdl.Value) (Statement, error) {
+	var copy SelectStatement
+	copy.Off = st.Off
+	if st.Select != nil {
+		copy.Select = st.Select
+	}
+	if st.From != nil {
+		copy.From = st.From
+	}
+	if st.Where != nil {
+		var err error
+		if copy.Where, err = st.Where.CopyAndSubstitute(db, paramValues); err != nil {
+			return nil, err
+		}
+	} else {
+		// There is no where clause.  If any paramValues suppied, we have too many.
+		if len(paramValues) > 0 {
+			return nil, syncql.NewErrTooManyParamValuesSpecified(db.GetContext(), copy.Off)
+		}
+	}
+	if st.Escape != nil {
+		copy.Escape = st.Escape
+	}
+	if st.Limit != nil {
+		copy.Limit = st.Limit
+	}
+	if st.ResultsOffset != nil {
+		copy.ResultsOffset = st.ResultsOffset
+	}
+	return copy, nil
+}
+
 func (sel SelectClause) String() string {
 	val := fmt.Sprintf(" Off(%d):SELECT Columns(", sel.Off)
 	sep := ""
@@ -1124,6 +1164,8 @@ func (o Operand) String() string {
 	case TypObject:
 		val += "(object)"
 		val += fmt.Sprintf("%v", o.Object)
+	case TypParameter:
+		val += "?"
 	default:
 		val += "<operand-type-undefined>"
 
@@ -1166,4 +1208,146 @@ func (o BinaryOperator) String() string {
 
 func (e Expression) String() string {
 	return fmt.Sprintf("(Off(%d):%s %s %s)", e.Off, e.Operand1.String(), e.Operator.String(), e.Operand2.String())
+}
+
+// paramInfo is used to keep track of supplied values for parameter markers.
+type paramInfo struct {
+	paramValues []*vdl.Value
+	cursor      int // Index into paramValues pointing to next value to substitute.
+}
+
+func (w WhereClause) CopyAndSubstitute(db ds.Database, paramValues []*vdl.Value) (*WhereClause, error) {
+	var copy WhereClause
+	copy.Off = w.Off
+	var err error
+	pi := paramInfo{paramValues: paramValues, cursor: 0}
+
+	if copy.Expr, err = w.Expr.CopyAndSubstitute(db, &pi); err != nil {
+		return nil, err
+	}
+
+	// Did any of the supplied values go unused?
+	if pi.cursor < len(paramValues) {
+		return nil, syncql.NewErrTooManyParamValuesSpecified(db.GetContext(), w.Off)
+	}
+
+	return &copy, nil
+}
+
+func (e Expression) CopyAndSubstitute(db ds.Database, pi *paramInfo) (*Expression, error) {
+	var copy Expression
+	copy.Off = e.Off
+	copy.Operator = e.Operator
+	var err error
+	if copy.Operand1, err = e.Operand1.CopyAndSubstitute(db, pi); err != nil {
+		return nil, err
+	}
+	if copy.Operand2, err = e.Operand2.CopyAndSubstitute(db, pi); err != nil {
+		return nil, err
+	}
+	return &copy, nil
+}
+
+func (o Operand) CopyAndSubstitute(db ds.Database, pi *paramInfo) (*Operand, error) {
+	switch o.Type {
+	case TypExpr:
+		var copy Operand
+		copy.Type = TypExpr
+		copy.Off = o.Off
+		var err error
+		if copy.Expr, err = o.Expr.CopyAndSubstitute(db, pi); err != nil {
+			return nil, err
+		}
+		return &copy, nil
+	case TypFunction:
+		var copy Operand
+		copy.Type = TypFunction
+		copy.Off = o.Off
+		var err error
+		if copy.Function, err = o.Function.CopyAndSubstitute(db, pi); err != nil {
+			return nil, err
+		}
+		return &copy, nil
+	case TypParameter:
+		if pi.cursor >= len(pi.paramValues) {
+			// not enough paramater values specified
+			return nil, syncql.NewErrNotEnoughParamValuesSpecified(db.GetContext(), o.Off)
+		}
+		if cpOp, err := ConvertValueToAnOperand(pi.paramValues[pi.cursor], o.Off); err == nil {
+			pi.cursor++
+			return cpOp, nil
+		} else {
+			return nil, err
+		}
+	default:
+		// No need to copy the operand.
+		return &o, nil
+	}
+}
+
+func (f Function) CopyAndSubstitute(db ds.Database, pi *paramInfo) (*Function, error) {
+	var copy Function
+	copy.Name = f.Name
+	copy.Off = f.Off
+
+	for _, a := range f.Args {
+		if newArg, err := a.CopyAndSubstitute(db, pi); err == nil {
+			copy.Args = append(copy.Args, newArg)
+		} else {
+			return nil, err
+		}
+	}
+
+	copy.RetType = f.RetType
+	copy.Computed = f.Computed
+	if copy.Computed {
+		var err error
+		if copy.RetValue, err = f.RetValue.CopyAndSubstitute(db, pi); err != nil {
+			return nil, err
+		}
+	}
+	return &copy, nil
+}
+
+func ConvertValueToAnOperand(value *vdl.Value, off int64) (*Operand, error) {
+	var op Operand
+	op.Off = off
+
+	switch value.Kind() {
+	case vdl.Bool:
+		op.Type = TypBool
+		op.Bool = value.Bool()
+	case vdl.Byte:
+		op.Type = TypInt
+		op.Int = int64(value.Byte())
+	case vdl.Enum:
+		op.Type = TypStr
+		op.Str = value.EnumLabel()
+	case vdl.Int16, vdl.Int32, vdl.Int64:
+		op.Type = TypInt
+		op.Int = value.Int()
+	case vdl.Uint16, vdl.Uint32, vdl.Uint64:
+		op.Type = TypInt
+		op.Int = int64(value.Uint())
+	case vdl.Float32, vdl.Float64:
+		op.Type = TypFloat
+		op.Float = value.Float()
+	case vdl.String:
+		op.Type = TypStr
+		op.Str = value.RawString()
+	case vdl.Complex64, vdl.Complex128:
+		op.Type = TypComplex
+		op.Complex = value.Complex()
+	default: // OpObject for structs, arrays, maps, ...
+		if value.Kind() == vdl.Struct && value.Type().Name() == "time.Time" {
+			op.Type = TypTime
+			if err := vdl.Convert(&op.Time, value); err != nil {
+				return nil, err
+			}
+		} else {
+			op.Type = TypObject
+			op.Object = value
+		}
+	}
+	return &op, nil
 }

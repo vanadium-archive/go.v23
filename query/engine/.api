@@ -1,1 +1,1 @@
-pkg engine, func Exec(ds.Database, string) ([]string, syncql.ResultStream, error)
+pkg engine, func Create(ds.Database) ds.QueryEngine

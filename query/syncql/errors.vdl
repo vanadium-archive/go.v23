@@ -135,7 +135,7 @@ error (
 		"en": "[{off}]Unexpected: {found}.",
 	}
 	UnexpectedEndOfStatement(off int64) {
-		"en": "[{off}]No statement found.",
+		"en": "[{off}]Unexpected end of statement.",
 	}
 	UnknownIdentifier(off int64, found string) {
 		"en": "[{off}]Uknown identifier: {found}.",
@@ -151,5 +151,14 @@ error (
 	}
 	DidYouMeanFunction(off int64, correctName string) {
 		"en": "[{off}]Did you mean: '{correctName}'?",
+	}
+	NotEnoughParamValuesSpecified(off int64) {
+		"en": "[{off}]Not enough parameter values specified.",
+        }
+	TooManyParamValuesSpecified(off int64) {
+		"en": "[{off}]Too many parameter values specified.",
+        }
+	PreparedStatementNotFound() {
+		"en": "[0]Prepared statement not found.",
 	}
 )

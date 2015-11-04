@@ -490,6 +490,197 @@ func TestQueryParser(t *testing.T) {
 			nil,
 		},
 		{
+			"select v from Customer where v.Value = ?",
+			query_parser.SelectStatement{
+				Select: &query_parser.SelectClause{
+					Selectors: []query_parser.Selector{
+						query_parser.Selector{
+							Type: query_parser.TypSelField,
+							Field: &query_parser.Field{
+								Segments: []query_parser.Segment{
+									query_parser.Segment{
+										Value: "v",
+										Node:  query_parser.Node{Off: 7},
+									},
+								},
+								Node: query_parser.Node{Off: 7},
+							},
+							Node: query_parser.Node{Off: 7},
+						},
+					},
+					Node: query_parser.Node{Off: 0},
+				},
+				From: &query_parser.FromClause{
+					Table: query_parser.TableEntry{
+						Name: "Customer",
+						Node: query_parser.Node{Off: 14},
+					},
+					Node: query_parser.Node{Off: 9},
+				},
+				Where: &query_parser.WhereClause{
+					Expr: &query_parser.Expression{
+						Operand1: &query_parser.Operand{
+							Type: query_parser.TypField,
+							Column: &query_parser.Field{
+								Segments: []query_parser.Segment{
+									query_parser.Segment{
+										Value: "v",
+										Node:  query_parser.Node{Off: 29},
+									},
+									query_parser.Segment{
+										Value: "Value",
+										Node:  query_parser.Node{Off: 31},
+									},
+								},
+								Node: query_parser.Node{Off: 29},
+							},
+							Node: query_parser.Node{Off: 29},
+						},
+						Operator: &query_parser.BinaryOperator{
+							Type: query_parser.Equal,
+							Node: query_parser.Node{Off: 37},
+						},
+						Operand2: &query_parser.Operand{
+							Type: query_parser.TypParameter,
+							Node: query_parser.Node{Off: 39},
+						},
+						Node: query_parser.Node{Off: 29},
+					},
+					Node: query_parser.Node{Off: 23},
+				},
+				Node: query_parser.Node{Off: 0},
+			},
+			nil,
+		},
+		{
+			"select v from Customer where Now() < Time(?) and Foo(10,?,v.Bar) = true",
+			query_parser.SelectStatement{
+				Select: &query_parser.SelectClause{
+					Selectors: []query_parser.Selector{
+						query_parser.Selector{
+							Type: query_parser.TypSelField,
+							Field: &query_parser.Field{
+								Segments: []query_parser.Segment{
+									query_parser.Segment{
+										Value: "v",
+										Node:  query_parser.Node{Off: 7},
+									},
+								},
+								Node: query_parser.Node{Off: 7},
+							},
+							Node: query_parser.Node{Off: 7},
+						},
+					},
+					Node: query_parser.Node{Off: 0},
+				},
+				From: &query_parser.FromClause{
+					Table: query_parser.TableEntry{
+						Name: "Customer",
+						Node: query_parser.Node{Off: 14},
+					},
+					Node: query_parser.Node{Off: 9},
+				},
+				Where: &query_parser.WhereClause{
+					Expr: &query_parser.Expression{
+						Operand1: &query_parser.Operand{
+							Type: query_parser.TypExpr,
+							Expr: &query_parser.Expression{
+								Operand1: &query_parser.Operand{
+									Type: query_parser.TypFunction,
+									Function: &query_parser.Function{
+										Name: "Now",
+										Args: nil,
+										Node: query_parser.Node{Off: 29},
+									},
+									Node: query_parser.Node{Off: 29},
+								},
+								Operator: &query_parser.BinaryOperator{
+									Type: query_parser.LessThan,
+									Node: query_parser.Node{Off: 35},
+								},
+								Operand2: &query_parser.Operand{
+									Type: query_parser.TypFunction,
+									Function: &query_parser.Function{
+										Name: "Time",
+										Args: []*query_parser.Operand{
+											&query_parser.Operand{
+												Type: query_parser.TypParameter,
+												Node: query_parser.Node{Off: 42},
+											},
+										},
+										Node: query_parser.Node{Off: 37},
+									},
+									Node: query_parser.Node{Off: 37},
+								},
+								Node: query_parser.Node{Off: 29},
+							},
+							Node: query_parser.Node{Off: 29},
+						},
+						Node: query_parser.Node{Off: 29},
+						Operator: &query_parser.BinaryOperator{
+							Type: query_parser.And,
+							Node: query_parser.Node{Off: 45},
+						},
+						Operand2: &query_parser.Operand{
+							Type: query_parser.TypExpr,
+							Expr: &query_parser.Expression{
+								Operand1: &query_parser.Operand{
+									Type: query_parser.TypFunction,
+									Function: &query_parser.Function{
+										Name: "Foo",
+										Args: []*query_parser.Operand{
+											&query_parser.Operand{
+												Type: query_parser.TypInt,
+												Int:  10,
+												Node: query_parser.Node{Off: 53},
+											},
+											&query_parser.Operand{
+												Type: query_parser.TypParameter,
+												Node: query_parser.Node{Off: 56},
+											},
+											&query_parser.Operand{
+												Type: query_parser.TypField,
+												Column: &query_parser.Field{
+													Segments: []query_parser.Segment{
+														query_parser.Segment{
+															Value: "v",
+															Node:  query_parser.Node{Off: 58},
+														},
+														query_parser.Segment{
+															Value: "Bar",
+															Node:  query_parser.Node{Off: 60},
+														},
+													},
+													Node: query_parser.Node{Off: 58},
+												},
+												Node: query_parser.Node{Off: 58},
+											},
+										},
+										Node: query_parser.Node{Off: 49},
+									},
+									Node: query_parser.Node{Off: 49},
+								},
+								Operator: &query_parser.BinaryOperator{
+									Type: query_parser.Equal,
+									Node: query_parser.Node{Off: 65},
+								},
+								Operand2: &query_parser.Operand{
+									Type: query_parser.TypBool,
+									Bool: true,
+									Node: query_parser.Node{Off: 67},
+								},
+								Node: query_parser.Node{Off: 49},
+							},
+							Node: query_parser.Node{Off: 49},
+						},
+					},
+					Node: query_parser.Node{Off: 23},
+				},
+				Node: query_parser.Node{Off: 0},
+			},
+			nil,
+		},
+		{
 			"select v from Customer where v.ZipCode is nil",
 			query_parser.SelectStatement{
 				Select: &query_parser.SelectClause{
@@ -2682,6 +2873,10 @@ func TestQueryParserErrors(t *testing.T) {
 		{"select v from Customer where v.Foo = 'abc", syncql.NewErrExpectedOperand(db.GetContext(), 37, "'abc")},
 		{"select v from Customer where v.Foo = 'abc'", syncql.NewErrExpectedOperand(db.GetContext(), 37, "'abc'")},
 		{"select v from Customer where v.Foo = 10.10.10", syncql.NewErrUnexpected(db.GetContext(), 42, ".10")},
+		// Parameters can only appear as operands in the where clause
+		{"select ? from Customer", syncql.NewErrExpectedIdentifier(db.GetContext(), 7, "?")},
+		// Parameters can only appear as operands in the where clause
+		{"select v from Customer where k ? v", syncql.NewErrExpectedOperator(db.GetContext(), 31, "?")},
 	}
 
 	for _, test := range basic {

@@ -58,12 +58,15 @@ var (
 	ErrScanError                       = verror.Register("v.io/v23/query/syncql.ScanError", verror.NoRetry, "{1:}{2:} [{3}]Scan error: {4}.")
 	ErrTableCantAccess                 = verror.Register("v.io/v23/query/syncql.TableCantAccess", verror.NoRetry, "{1:}{2:} [{3}]Table {4} does not exist (or cannot be accessed): {5}.")
 	ErrUnexpected                      = verror.Register("v.io/v23/query/syncql.Unexpected", verror.NoRetry, "{1:}{2:} [{3}]Unexpected: {4}.")
-	ErrUnexpectedEndOfStatement        = verror.Register("v.io/v23/query/syncql.UnexpectedEndOfStatement", verror.NoRetry, "{1:}{2:} [{3}]No statement found.")
+	ErrUnexpectedEndOfStatement        = verror.Register("v.io/v23/query/syncql.UnexpectedEndOfStatement", verror.NoRetry, "{1:}{2:} [{3}]Unexpected end of statement.")
 	ErrUnknownIdentifier               = verror.Register("v.io/v23/query/syncql.UnknownIdentifier", verror.NoRetry, "{1:}{2:} [{3}]Uknown identifier: {4}.")
 	ErrInvalidEscapeChar               = verror.Register("v.io/v23/query/syncql.InvalidEscapeChar", verror.NoRetry, "{1:}{2:} [{3}]Invalid escape character cannot be space or backslash.")
 	ErrDidYouMeanLowercaseK            = verror.Register("v.io/v23/query/syncql.DidYouMeanLowercaseK", verror.NoRetry, "{1:}{2:} [{3}]Did you mean: 'k'?")
 	ErrDidYouMeanLowercaseV            = verror.Register("v.io/v23/query/syncql.DidYouMeanLowercaseV", verror.NoRetry, "{1:}{2:} [{3}]Did you mean: 'v'?")
 	ErrDidYouMeanFunction              = verror.Register("v.io/v23/query/syncql.DidYouMeanFunction", verror.NoRetry, "{1:}{2:} [{3}]Did you mean: '{4}'?")
+	ErrNotEnoughParamValuesSpecified   = verror.Register("v.io/v23/query/syncql.NotEnoughParamValuesSpecified", verror.NoRetry, "{1:}{2:} [{3}]Not enough parameter values specified.")
+	ErrTooManyParamValuesSpecified     = verror.Register("v.io/v23/query/syncql.TooManyParamValuesSpecified", verror.NoRetry, "{1:}{2:} [{3}]Too many parameter values specified.")
+	ErrPreparedStatementNotFound       = verror.Register("v.io/v23/query/syncql.PreparedStatementNotFound", verror.NoRetry, "{1:}{2:} [0]Prepared statement not found.")
 )
 
 func init() {
@@ -110,12 +113,15 @@ func init() {
 	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrScanError.ID), "{1:}{2:} [{3}]Scan error: {4}.")
 	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrTableCantAccess.ID), "{1:}{2:} [{3}]Table {4} does not exist (or cannot be accessed): {5}.")
 	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrUnexpected.ID), "{1:}{2:} [{3}]Unexpected: {4}.")
-	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrUnexpectedEndOfStatement.ID), "{1:}{2:} [{3}]No statement found.")
+	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrUnexpectedEndOfStatement.ID), "{1:}{2:} [{3}]Unexpected end of statement.")
 	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrUnknownIdentifier.ID), "{1:}{2:} [{3}]Uknown identifier: {4}.")
 	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrInvalidEscapeChar.ID), "{1:}{2:} [{3}]Invalid escape character cannot be space or backslash.")
 	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrDidYouMeanLowercaseK.ID), "{1:}{2:} [{3}]Did you mean: 'k'?")
 	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrDidYouMeanLowercaseV.ID), "{1:}{2:} [{3}]Did you mean: 'v'?")
 	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrDidYouMeanFunction.ID), "{1:}{2:} [{3}]Did you mean: '{4}'?")
+	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrNotEnoughParamValuesSpecified.ID), "{1:}{2:} [{3}]Not enough parameter values specified.")
+	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrTooManyParamValuesSpecified.ID), "{1:}{2:} [{3}]Too many parameter values specified.")
+	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrPreparedStatementNotFound.ID), "{1:}{2:} [0]Prepared statement not found.")
 }
 
 // NewErrBadFieldInWhere returns an error with the ErrBadFieldInWhere ID.
@@ -361,4 +367,19 @@ func NewErrDidYouMeanLowercaseV(ctx *context.T, off int64) error {
 // NewErrDidYouMeanFunction returns an error with the ErrDidYouMeanFunction ID.
 func NewErrDidYouMeanFunction(ctx *context.T, off int64, correctName string) error {
 	return verror.New(ErrDidYouMeanFunction, ctx, off, correctName)
+}
+
+// NewErrNotEnoughParamValuesSpecified returns an error with the ErrNotEnoughParamValuesSpecified ID.
+func NewErrNotEnoughParamValuesSpecified(ctx *context.T, off int64) error {
+	return verror.New(ErrNotEnoughParamValuesSpecified, ctx, off)
+}
+
+// NewErrTooManyParamValuesSpecified returns an error with the ErrTooManyParamValuesSpecified ID.
+func NewErrTooManyParamValuesSpecified(ctx *context.T, off int64) error {
+	return verror.New(ErrTooManyParamValuesSpecified, ctx, off)
+}
+
+// NewErrPreparedStatementNotFound returns an error with the ErrPreparedStatementNotFound ID.
+func NewErrPreparedStatementNotFound(ctx *context.T) error {
+	return verror.New(ErrPreparedStatementNotFound, ctx)
 }
