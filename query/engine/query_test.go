@@ -16,6 +16,7 @@ import (
 	"v.io/v23/query/engine"
 	ds "v.io/v23/query/engine/datasource"
 	td "v.io/v23/query/engine/internal/testdata"
+	"v.io/v23/query/engine/public"
 	"v.io/v23/query/syncql"
 	"v.io/v23/vdl"
 	"v.io/v23/verror"
@@ -2225,14 +2226,14 @@ func TestQueryExec(t *testing.T) {
 
 	// Do the same thing with a prepared statement.  (Even though there are no parameters, it's
 	// good to know that all will still work.  Supplying parameters is a separate test.)
-	// For good measure, excersize the ToVdlValue() and GetPreparedStatement functions.
+	// For good measure, exersize the Handle() and GetPreparedStatement functions.
 	for _, test := range basic {
 		p, err := qe.PrepareStatement(test.query)
 		if err != nil {
 			t.Errorf("query: %s; got %v, want nil", test.query, err)
 		}
-		v := p.ToVdlValue()
-		p2, err := qe.GetPreparedStatement(v)
+		h := p.Handle()
+		p2, err := qe.GetPreparedStatement(h)
 
 		headers, rs, err := p2.Exec()
 		if err != nil {
@@ -2331,12 +2332,142 @@ func TestQueryPrepare(t *testing.T) {
 			},
 			[][]*vdl.Value{},
 		},
+		{
+			// Nested expresions, do we get the values in the right order?
+			"select k from Customer where 1 = ? and (2 = ? and (3 = ? and 4 = ?) and 5 = ?) and k like ?",
+			[]*vdl.Value{vdl.ValueOf(1), vdl.ValueOf(2), vdl.ValueOf(3), vdl.ValueOf(4), vdl.ValueOf(5), vdl.ValueOf("001")},
+			[]*vdl.Value{vdl.ValueOf(1), vdl.ValueOf(2), vdl.ValueOf(3), vdl.ValueOf(4), vdl.ValueOf(5), vdl.ValueOf("002")},
+			[]string{"k"},
+			[][]*vdl.Value{
+				[]*vdl.Value{vdl.ValueOf("001")},
+			},
+			[][]*vdl.Value{
+				[]*vdl.Value{vdl.ValueOf("002")},
+			},
+		},
+		{
+			// Nested expresions, do we get the values in the right order?
+			"select k from Customer where (1 = ? and 2 = ?) and (3 = ? and 4 = ? and 5 = ?) and k like ?",
+			[]*vdl.Value{vdl.ValueOf(1), vdl.ValueOf(2), vdl.ValueOf(3), vdl.ValueOf(4), vdl.ValueOf(5), vdl.ValueOf("001")},
+			[]*vdl.Value{vdl.ValueOf(1), vdl.ValueOf(2), vdl.ValueOf(3), vdl.ValueOf(4), vdl.ValueOf(5), vdl.ValueOf("002")},
+			[]string{"k"},
+			[][]*vdl.Value{
+				[]*vdl.Value{vdl.ValueOf("001")},
+			},
+			[][]*vdl.Value{
+				[]*vdl.Value{vdl.ValueOf("002")},
+			},
+		},
+		{
+			// Nested expresions, do we get the values in the right order?
+			"select k from Customer where ((1 = ? and 2 = ? and 3 = ? and 4 = ?) and 5 = ?) and k like ?",
+			[]*vdl.Value{vdl.ValueOf(1), vdl.ValueOf(2), vdl.ValueOf(3), vdl.ValueOf(4), vdl.ValueOf(5), vdl.ValueOf("001")},
+			[]*vdl.Value{vdl.ValueOf(1), vdl.ValueOf(2), vdl.ValueOf(3), vdl.ValueOf(4), vdl.ValueOf(5), vdl.ValueOf("002")},
+			[]string{"k"},
+			[][]*vdl.Value{
+				[]*vdl.Value{vdl.ValueOf("001")},
+			},
+			[][]*vdl.Value{
+				[]*vdl.Value{vdl.ValueOf("002")},
+			},
+		},
+		{
+			// Nested expresions, do we get the values in the right order?
+			"select k from Customer where ? = 1 and (2 = ? and (? = 3 and 4 = ?) and ? = 5) and k like ?",
+			[]*vdl.Value{vdl.ValueOf(1), vdl.ValueOf(2), vdl.ValueOf(3), vdl.ValueOf(4), vdl.ValueOf(5), vdl.ValueOf("001")},
+			[]*vdl.Value{vdl.ValueOf(1), vdl.ValueOf(2), vdl.ValueOf(3), vdl.ValueOf(4), vdl.ValueOf(5), vdl.ValueOf("002")},
+			[]string{"k"},
+			[][]*vdl.Value{
+				[]*vdl.Value{vdl.ValueOf("001")},
+			},
+			[][]*vdl.Value{
+				[]*vdl.Value{vdl.ValueOf("002")},
+			},
+		},
+		{
+			// Nested expresions, do we get the values in the right order?
+			"select k from Customer where (1 = ? and ? = 2) and (3 = ? and ? = 4 and 5 = ?) and ? = k",
+			[]*vdl.Value{vdl.ValueOf(1), vdl.ValueOf(2), vdl.ValueOf(3), vdl.ValueOf(4), vdl.ValueOf(5), vdl.ValueOf("001")},
+			[]*vdl.Value{vdl.ValueOf(1), vdl.ValueOf(2), vdl.ValueOf(3), vdl.ValueOf(4), vdl.ValueOf(5), vdl.ValueOf("002")},
+			[]string{"k"},
+			[][]*vdl.Value{
+				[]*vdl.Value{vdl.ValueOf("001")},
+			},
+			[][]*vdl.Value{
+				[]*vdl.Value{vdl.ValueOf("002")},
+			},
+		},
+		{
+			// Nested expresions, do we get the values in the right order?
+			"select k from Customer where ((? = 1 and ? = 2 and ? = 3 and ? = 4) and ? = 5) and ? = k",
+			[]*vdl.Value{vdl.ValueOf(1), vdl.ValueOf(2), vdl.ValueOf(3), vdl.ValueOf(4), vdl.ValueOf(5), vdl.ValueOf("001")},
+			[]*vdl.Value{vdl.ValueOf(1), vdl.ValueOf(2), vdl.ValueOf(3), vdl.ValueOf(4), vdl.ValueOf(5), vdl.ValueOf("002")},
+			[]string{"k"},
+			[][]*vdl.Value{
+				[]*vdl.Value{vdl.ValueOf("001")},
+			},
+			[][]*vdl.Value{
+				[]*vdl.Value{vdl.ValueOf("002")},
+			},
+		},
+		{
+			// Nested expresions, do we get the values in the right order?
+			"select k from Customer where (? = 1 and ? = 2) and ? = 3 and (? = 4 and ? = 5) and ? = k",
+			[]*vdl.Value{vdl.ValueOf(1), vdl.ValueOf(2), vdl.ValueOf(3), vdl.ValueOf(4), vdl.ValueOf(5), vdl.ValueOf("001")},
+			[]*vdl.Value{vdl.ValueOf(1), vdl.ValueOf(2), vdl.ValueOf(3), vdl.ValueOf(4), vdl.ValueOf(5), vdl.ValueOf("002")},
+			[]string{"k"},
+			[][]*vdl.Value{
+				[]*vdl.Value{vdl.ValueOf("001")},
+			},
+			[][]*vdl.Value{
+				[]*vdl.Value{vdl.ValueOf("002")},
+			},
+		},
+		{
+			// Nested expresions, do we get the values in the right order?
+			"select k from Customer where (1 = ? and 2 = ?) and 3 = ? and (4 = ? and 5 = ?) and k = ?",
+			[]*vdl.Value{vdl.ValueOf(1), vdl.ValueOf(2), vdl.ValueOf(3), vdl.ValueOf(4), vdl.ValueOf(5), vdl.ValueOf("001")},
+			[]*vdl.Value{vdl.ValueOf(1), vdl.ValueOf(2), vdl.ValueOf(3), vdl.ValueOf(4), vdl.ValueOf(5), vdl.ValueOf("002")},
+			[]string{"k"},
+			[][]*vdl.Value{
+				[]*vdl.Value{vdl.ValueOf("001")},
+			},
+			[][]*vdl.Value{
+				[]*vdl.Value{vdl.ValueOf("002")},
+			},
+		},
+		{
+			// Nested expresions, do we get the values in the right order?
+			"select k from Customer where (? = 1 and 2 = ?) and ? = 3 and (4 = ? and ? = 5) and k = ?",
+			[]*vdl.Value{vdl.ValueOf(1), vdl.ValueOf(2), vdl.ValueOf(3), vdl.ValueOf(4), vdl.ValueOf(5), vdl.ValueOf("001")},
+			[]*vdl.Value{vdl.ValueOf(1), vdl.ValueOf(2), vdl.ValueOf(3), vdl.ValueOf(4), vdl.ValueOf(5), vdl.ValueOf("002")},
+			[]string{"k"},
+			[][]*vdl.Value{
+				[]*vdl.Value{vdl.ValueOf("001")},
+			},
+			[][]*vdl.Value{
+				[]*vdl.Value{vdl.ValueOf("002")},
+			},
+		},
+		{
+			// Nested expresions, do we get the values in the right order?
+			"select k from Customer where (1 = ? and ? = 2) and 3 = ? and (? = 4 and 5 = ?) and k = ?",
+			[]*vdl.Value{vdl.ValueOf(1), vdl.ValueOf(2), vdl.ValueOf(3), vdl.ValueOf(4), vdl.ValueOf(5), vdl.ValueOf("001")},
+			[]*vdl.Value{vdl.ValueOf(1), vdl.ValueOf(2), vdl.ValueOf(3), vdl.ValueOf(4), vdl.ValueOf(5), vdl.ValueOf("002")},
+			[]string{"k"},
+			[][]*vdl.Value{
+				[]*vdl.Value{vdl.ValueOf("001")},
+			},
+			[][]*vdl.Value{
+				[]*vdl.Value{vdl.ValueOf("002")},
+			},
+		},
 	}
 
 	qe := engine.Create(db)
 
 	// Prepare all of the statements ahead of time.
-	preparedStatements := []ds.PreparedStatement{}
+	preparedStatements := []public.PreparedStatement{}
 	for _, test := range basic {
 		p, err := qe.PrepareStatement(test.query)
 		if err != nil {

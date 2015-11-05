@@ -7,10 +7,11 @@ package engine
 
 import (
 	ds "v.io/v23/query/engine/datasource"
+	"v.io/v23/query/engine/public"
 	"v.io/v23/query/engine/internal"
 )
 
 // Create returns an instance of datasource.QueryEngine
-func Create(db ds.Database) ds.QueryEngine {
+func Create(db ds.Database) public.QueryEngine {
 	return internal.Create(db)
 }

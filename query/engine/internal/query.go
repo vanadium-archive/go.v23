@@ -11,6 +11,7 @@ import (
 	"sync"
 
 	ds "v.io/v23/query/engine/datasource"
+	"v.io/v23/query/engine/public"
 	"v.io/v23/query/engine/internal/query_checker"
 	"v.io/v23/query/engine/internal/query_functions"
 	"v.io/v23/query/engine/internal/query_parser"
@@ -36,7 +37,7 @@ type paramInfo struct {
 	cursor      int64
 }
 
-func Create(db ds.Database) ds.QueryEngine {
+func Create(db ds.Database) public.QueryEngine {
 	return &queryEngineImpl{db: db, nextID: 0, preparedStatements: map[int64]*query_parser.Statement{}}
 }
 
@@ -44,21 +45,18 @@ func (qe *queryEngineImpl) Exec(q string) ([]string, syncql.ResultStream, error)
 	return Exec(qe.db, q)
 }
 
-func (qe *queryEngineImpl) GetPreparedStatement(v *vdl.Value) (ds.PreparedStatement, error) {
-	if v == nil || v.Kind() != vdl.Int64 {
-		return nil, syncql.NewErrPreparedStatementNotFound(qe.db.GetContext())
-	}
+func (qe *queryEngineImpl) GetPreparedStatement(handle int64) (public.PreparedStatement, error) {
 	qe.mutexPreparedStatements.Lock()
-	_, ok := qe.preparedStatements[v.Int()]
+	_, ok := qe.preparedStatements[handle]
 	qe.mutexPreparedStatements.Unlock()
 	if ok {
-		return &preparedStatementImpl{qe, v.Int()}, nil
+		return &preparedStatementImpl{qe, handle}, nil
 	} else {
 		return nil, syncql.NewErrPreparedStatementNotFound(qe.db.GetContext())
 	}
 }
 
-func (qe *queryEngineImpl) PrepareStatement(q string) (ds.PreparedStatement, error) {
+func (qe *queryEngineImpl) PrepareStatement(q string) (public.PreparedStatement, error) {
 	s, err := query_parser.Parse(qe.db, q)
 	if err != nil {
 		return nil, err
@@ -90,8 +88,8 @@ func (p *preparedStatementImpl) Exec(paramValues ...*vdl.Value) ([]string, syncq
 	return checkAndExec(p.qe.db, &sCopy)
 }
 
-func (p *preparedStatementImpl) ToVdlValue() *vdl.Value {
-	return vdl.Int64Value(p.id)
+func (p *preparedStatementImpl) Handle() int64 {
+	return p.id
 }
 
 func (p *preparedStatementImpl) Close() {

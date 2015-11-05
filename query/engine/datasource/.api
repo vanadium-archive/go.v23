@@ -13,13 +13,5 @@ pkg datasource, type KeyValueStream interface, Advance() bool
 pkg datasource, type KeyValueStream interface, Cancel()
 pkg datasource, type KeyValueStream interface, Err() error
 pkg datasource, type KeyValueStream interface, KeyValue() (string, *vdl.Value)
-pkg datasource, type PreparedStatement interface { Close, Exec, ToVdlValue }
-pkg datasource, type PreparedStatement interface, Close()
-pkg datasource, type PreparedStatement interface, Exec(...*vdl.Value) ([]string, syncql.ResultStream, error)
-pkg datasource, type PreparedStatement interface, ToVdlValue() *vdl.Value
-pkg datasource, type QueryEngine interface { Exec, GetPreparedStatement, PrepareStatement }
-pkg datasource, type QueryEngine interface, Exec(string) ([]string, syncql.ResultStream, error)
-pkg datasource, type QueryEngine interface, GetPreparedStatement(*vdl.Value) (PreparedStatement, error)
-pkg datasource, type QueryEngine interface, PrepareStatement(string) (PreparedStatement, error)
 pkg datasource, type Table interface { Scan }
 pkg datasource, type Table interface, Scan(KeyRanges) (KeyValueStream, error)
