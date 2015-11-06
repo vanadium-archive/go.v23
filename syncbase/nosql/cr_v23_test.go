@@ -69,7 +69,7 @@ func V23TestSyncbasedSyncWithAppResolvedConflicts(t *v23tests.T) {
 	tu.RunClient(t, client0Creds, runUpdateBatchData, "sync0", "5", "10", "concurrentBatchUpdate")
 	tu.RunClient(t, client1Creds, runUpdateBatchData, "sync1", "5", "10", "concurrentBatchUpdate")
 
-	// Create and hold a conflict resolution connection on sync0 to receive
+	// Create and hold a conflict resolution connection on sync0 and sync 1 to receive
 	// future conflicts. The expected call count is 2 * the number of batches
 	// because each batch is being concurrently resolved on sync0 and sync1
 	// creating new values on each side. Later when the next round of sync
@@ -86,6 +86,7 @@ func V23TestSyncbasedSyncWithAppResolvedConflicts(t *v23tests.T) {
 	// Re enable sync between the two syncbases and wait for a bit to let the
 	// syncbases sync and call conflict resolution.
 	tu.RunClient(t, client0Creds, runToggleSync, "sync0", sgName, "root/s0", "root/s1")
+	tu.RunClient(t, client1Creds, runToggleSync, "sync1", sgName, "root/s0", "root/s1")
 
 	// Verify that the resolved data looks correct.
 	keyUnderConflict := "foo8" // one of the keys under conflict
