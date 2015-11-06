@@ -31,7 +31,7 @@ type Advertiser interface {
 	//
 	// It is an error to have simultaneously active advertisements for two identical
 	// instances (service.InstanceUuid).
-	Advertise(ctx *context.T, service Service, perms []security.BlessingPattern) (<-chan struct{}, error)
+	Advertise(ctx *context.T, service Service, visibility []security.BlessingPattern) (<-chan struct{}, error)
 }
 
 // AdvertiseCloser is the interface that groups the Advertise and Close methods.
