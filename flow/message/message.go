@@ -51,6 +51,10 @@ func Read(ctx *context.T, from []byte) (Message, error) {
 		m = &ProxyServerRequest{}
 	case proxyResponseType:
 		m = &ProxyResponse{}
+	case healthCheckRequestType:
+		m = &HealthCheckRequest{}
+	case healthCheckResponseType:
+		m = &HealthCheckResponse{}
 	default:
 		return nil, NewErrUnknownMsg(ctx, msgType)
 	}
@@ -77,6 +81,8 @@ const (
 	multiProxyType
 	proxyServerType
 	proxyResponseType
+	healthCheckRequestType
+	healthCheckResponseType
 )
 
 // setup options.
@@ -455,6 +461,26 @@ func (m *ProxyResponse) read(ctx *context.T, orig []byte) error {
 		}
 		m.Endpoints = append(m.Endpoints, ep)
 	}
+	return nil
+}
+
+// HealthCheckRequest is periodically sent to test the health of a channel.
+type HealthCheckRequest struct{}
+
+func (m *HealthCheckRequest) append(ctx *context.T, data []byte) ([]byte, error) {
+	return append(data, healthCheckRequestType), nil
+}
+func (m *HealthCheckRequest) read(ctx *context.T, data []byte) error {
+	return nil
+}
+
+// HealthCheckResponse messages are sent in response to HealthCheckRequest messages.
+type HealthCheckResponse struct{}
+
+func (m *HealthCheckResponse) append(ctx *context.T, data []byte) ([]byte, error) {
+	return append(data, healthCheckResponseType), nil
+}
+func (m *HealthCheckResponse) read(ctx *context.T, data []byte) error {
 	return nil
 }
 

@@ -21,6 +21,7 @@ import (
 	"fmt"
 	"runtime"
 	"sync"
+	"time"
 
 	"v.io/v23/context"
 	"v.io/v23/discovery"
@@ -185,7 +186,10 @@ type Runtime interface {
 	GetReservedNameDispatcher(ctx *context.T) rpc.Dispatcher
 
 	// NewFlowManager creates a new flow.Manager instance.
-	NewFlowManager(ctx *context.T) (flow.Manager, error)
+	// channelTimeout specifies the duration we are willing to wait before determining
+	// that connections managed by this FlowManager are unhealthy and should be
+	// closed.
+	NewFlowManager(ctx *context.T, channelTimeout time.Duration) (flow.Manager, error)
 
 	// WithNewServer creates a new Server instance to serve a service object.
 	//
@@ -329,8 +333,11 @@ func GetReservedNameDispatcher(ctx *context.T) rpc.Dispatcher {
 }
 
 // NewFlowManager creates a new flow.Manager instance.
-func NewFlowManager(ctx *context.T) (flow.Manager, error) {
-	return initState.currentRuntime().NewFlowManager(ctx)
+// channelTimeout specifies the duration we are willing to wait before determining
+// that connections managed by this FlowManager are unhealthy and should be
+// closed.
+func NewFlowManager(ctx *context.T, channelTimeout time.Duration) (flow.Manager, error) {
+	return initState.currentRuntime().NewFlowManager(ctx, channelTimeout)
 }
 
 // WithNewServer creates a new flow.Manager instance and attaches it to ctx,

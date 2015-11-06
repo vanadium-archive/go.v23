@@ -42,7 +42,7 @@ pkg flow, type ManagedConn interface, CommonVersion() version.RPCVersion
 pkg flow, type Manager interface { Accept, Closed, Dial, Listen, ListeningEndpoints, ProxyListen, RoutingID, StopListening }
 pkg flow, type Manager interface, Accept(*context.T) (Flow, error)
 pkg flow, type Manager interface, Closed() <-chan struct{}
-pkg flow, type Manager interface, Dial(*context.T, naming.Endpoint, PeerAuthorizer) (Flow, error)
+pkg flow, type Manager interface, Dial(*context.T, naming.Endpoint, PeerAuthorizer, time.Duration) (Flow, error)
 pkg flow, type Manager interface, Listen(*context.T, string, string) error
 pkg flow, type Manager interface, ListeningEndpoints() ([]naming.Endpoint, <-chan struct{})
 pkg flow, type Manager interface, ProxyListen(*context.T, naming.Endpoint) error

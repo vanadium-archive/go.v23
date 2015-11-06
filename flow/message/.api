@@ -17,6 +17,8 @@ pkg message, type Data struct, Flags uint64
 pkg message, type Data struct, ID uint64
 pkg message, type Data struct, Payload [][]byte
 pkg message, type EnterLameDuck struct
+pkg message, type HealthCheckRequest struct
+pkg message, type HealthCheckResponse struct
 pkg message, type Message interface, unexported methods
 pkg message, type MultiProxyRequest struct
 pkg message, type OpenFlow struct
