@@ -57,6 +57,17 @@ import (
 	"v.io/v23/security"
 )
 
+// ServerPeers is the set of peers to whom a process (a "server") accepting
+// network connections must reveal its blessings.
+//
+// If this option is not provided, then the server's blessings will be revealed
+// to all processes (clients) from whom the server accepts network connections.
+//
+// NOTE: This is an experimental option and may go away at any time.
+type ServerPeers []security.BlessingPattern
+
+func (ServerPeers) RPCServerOpt() {}
+
 // SecurityLevel represents the level of confidentiality of data transmitted
 // and received over a connection.
 type SecurityLevel int
