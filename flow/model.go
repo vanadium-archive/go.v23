@@ -72,7 +72,11 @@ type Manager interface {
 	//
 	// If the manager has a non-null RoutingID, the Manager will re-use connections
 	// by Listening on Dialed connections for the lifetime of the Dialed connection.
-	Dial(ctx *context.T, remote naming.Endpoint, auth PeerAuthorizer) (Flow, error)
+	//
+	// channelTimeout specifies the duration we are willing to wait before determining
+	// that connections managed by this FlowManager are unhealthy and should be
+	// closed.
+	Dial(ctx *context.T, remote naming.Endpoint, auth PeerAuthorizer, channelTimeout time.Duration) (Flow, error)
 
 	// RoutingID returns the naming.Routing of the flow.Manager.
 	// If the RoutingID of the manager is naming.NullRoutingID, the manager can

@@ -12,7 +12,7 @@ pkg v23, func GetPrincipal(*context.T) security.Principal
 pkg v23, func GetReservedNameDispatcher(*context.T) rpc.Dispatcher
 pkg v23, func Init() (*context.T, Shutdown)
 pkg v23, func NewEndpoint(string) (naming.Endpoint, error)
-pkg v23, func NewFlowManager(*context.T) (flow.Manager, error)
+pkg v23, func NewFlowManager(*context.T, time.Duration) (flow.Manager, error)
 pkg v23, func RegisterRuntimeFactory(RuntimeFactory)
 pkg v23, func WithBackgroundContext(*context.T) *context.T
 pkg v23, func WithListenSpec(*context.T, rpc.ListenSpec) *context.T
@@ -42,7 +42,7 @@ pkg v23, type Runtime interface, GetPrincipal(*context.T) security.Principal
 pkg v23, type Runtime interface, GetReservedNameDispatcher(*context.T) rpc.Dispatcher
 pkg v23, type Runtime interface, Init(*context.T) error
 pkg v23, type Runtime interface, NewEndpoint(string) (naming.Endpoint, error)
-pkg v23, type Runtime interface, NewFlowManager(*context.T) (flow.Manager, error)
+pkg v23, type Runtime interface, NewFlowManager(*context.T, time.Duration) (flow.Manager, error)
 pkg v23, type Runtime interface, WithBackgroundContext(*context.T) *context.T
 pkg v23, type Runtime interface, WithListenSpec(*context.T, rpc.ListenSpec) *context.T
 pkg v23, type Runtime interface, WithNewClient(*context.T, ...rpc.ClientOpt) (*context.T, rpc.Client, error)
