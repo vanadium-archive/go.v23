@@ -104,6 +104,7 @@ func (SyncgroupSpec) __VDLReflect(struct {
 // SyncgroupMemberInfo contains per-member metadata.
 type SyncgroupMemberInfo struct {
 	SyncPriority byte
+	IsServer     bool // This member should be given blob ownership preferentially.
 }
 
 func (SyncgroupMemberInfo) __VDLReflect(struct {

@@ -195,7 +195,7 @@ func TestSetSpecSyncgroup(t *testing.T) {
 
 func createSyncgroup(t *testing.T, ctx *context.T, d nosql.Database, sgName string, spec wire.SyncgroupSpec, errID verror.ID) nosql.Syncgroup {
 	sg := d.Syncgroup(sgName)
-	info := wire.SyncgroupMemberInfo{8}
+	info := wire.SyncgroupMemberInfo{SyncPriority: 8}
 	if err := sg.Create(ctx, spec, info); verror.ErrorID(err) != errID {
 		tu.Fatalf(t, "Create SG %q failed: %v", sgName, err)
 	}
@@ -204,7 +204,7 @@ func createSyncgroup(t *testing.T, ctx *context.T, d nosql.Database, sgName stri
 
 func joinSyncgroup(t *testing.T, ctx *context.T, d nosql.Database, sgName string, wantErr verror.ID) nosql.Syncgroup {
 	sg := d.Syncgroup(sgName)
-	info := wire.SyncgroupMemberInfo{10}
+	info := wire.SyncgroupMemberInfo{SyncPriority: 10}
 	if _, err := sg.Join(ctx, info); verror.ErrorID(err) != wantErr {
 		tu.Fatalf(t, "Join SG %v failed: %v", sgName, err)
 	}

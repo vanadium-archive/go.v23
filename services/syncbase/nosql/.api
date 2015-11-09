@@ -530,6 +530,7 @@ pkg nosql, type SyncgroupManagerServerStub interface, Describe__() []rpc.Interfa
 pkg nosql, type SyncgroupManagerServerStub interface, unexported methods
 pkg nosql, type SyncgroupManagerServerStubMethods SyncgroupManagerServerMethods
 pkg nosql, type SyncgroupMemberInfo struct
+pkg nosql, type SyncgroupMemberInfo struct, IsServer bool
 pkg nosql, type SyncgroupMemberInfo struct, SyncPriority byte
 pkg nosql, type SyncgroupSpec struct
 pkg nosql, type SyncgroupSpec struct, Description string

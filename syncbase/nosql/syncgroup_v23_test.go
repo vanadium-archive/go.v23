@@ -587,7 +587,7 @@ var runCreateSyncgroup = modules.Register(func(env *modules.Env, args ...string)
 	}
 
 	sg := d.Syncgroup(args[1])
-	info := wire.SyncgroupMemberInfo{8}
+	info := wire.SyncgroupMemberInfo{SyncPriority: 8}
 	if err := sg.Create(ctx, spec, info); err != nil {
 		return fmt.Errorf("Create SG %q failed: %v\n", args[1], err)
 	}
@@ -602,7 +602,7 @@ var runJoinSyncgroup = modules.Register(func(env *modules.Env, args ...string) e
 	d := a.NoSQLDatabase("d", nil)
 
 	sg := d.Syncgroup(args[1])
-	info := wire.SyncgroupMemberInfo{10}
+	info := wire.SyncgroupMemberInfo{SyncPriority: 10}
 	if _, err := sg.Join(ctx, info); err != nil {
 		return fmt.Errorf("Join SG %q failed: %v\n", args[1], err)
 	}
@@ -1298,7 +1298,7 @@ var runPopulateSyncgroupMulti = modules.Register(func(env *modules.Env, args ...
 			}
 
 			sg := d.Syncgroup(sgName)
-			info := wire.SyncgroupMemberInfo{8}
+			info := wire.SyncgroupMemberInfo{SyncPriority: 8}
 			if err := sg.Create(ctx, spec, info); err != nil {
 				return fmt.Errorf("Create SG %q failed: %v\n", sgName, err)
 			}
@@ -1327,7 +1327,7 @@ var runJoinSyncgroupMulti = modules.Register(func(env *modules.Env, args ...stri
 
 			sgName := naming.Join(sgNamePrefix, appName, dbName)
 			sg := d.Syncgroup(sgName)
-			info := wire.SyncgroupMemberInfo{10}
+			info := wire.SyncgroupMemberInfo{SyncPriority: 10}
 			if _, err := sg.Join(ctx, info); err != nil {
 				return fmt.Errorf("Join SG %q failed: %v\n", sgName, err)
 			}

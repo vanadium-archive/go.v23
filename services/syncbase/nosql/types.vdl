@@ -76,6 +76,7 @@ type SyncgroupSpec struct {
 // SyncgroupMemberInfo contains per-member metadata.
 type SyncgroupMemberInfo struct {
 	SyncPriority byte
+	IsServer     bool  // This member should be given blob ownership preferentially.
 }
 
 // ResolverType defines the possible conflict resolution policies.
