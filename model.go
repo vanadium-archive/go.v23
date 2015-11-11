@@ -455,12 +455,7 @@ func getStack(skip int) string {
 	return buf.String()
 }
 
-// Init should be called once for each vanadium executable, providing
-// the setup of the initial context.T and a Shutdown function that can
-// be used to clean up the runtime.  We allow calling Init multiple
-// times (useful in tests), but only as long as you call the Shutdown
-// returned previously before calling Init the second time.
-func Init() (*context.T, Shutdown) {
+func internalInit() (*context.T, Shutdown) {
 	initState.mu.Lock()
 	runtimeFactory := initState.runtimeFactory
 	if initState.runtimeFactory == nil {
