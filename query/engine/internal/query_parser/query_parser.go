@@ -1112,15 +1112,23 @@ func (w WhereClause) String() string {
 }
 
 func (e EscapeClause) String() string {
-	return fmt.Sprintf(" Off(%d):ESCAPE %c", e.Off, e.EscapeChar)
+	return fmt.Sprintf(" Off(%d):ESCAPE %s", e.Off, e.EscapeChar.String())
+}
+
+func (i Int64Value) String() string {
+	return fmt.Sprintf(" Off(%d): %d", i.Off, i.Value)
+}
+
+func (c CharValue) String() string {
+	return fmt.Sprintf(" Off(%d): %c", c.Off, c.Value)
 }
 
 func (l LimitClause) String() string {
-	return fmt.Sprintf(" Off(%d):LIMIT %d", l.Off, l.Limit)
+	return fmt.Sprintf(" Off(%d):LIMIT %s", l.Off, l.Limit.String())
 }
 
 func (l ResultsOffsetClause) String() string {
-	return fmt.Sprintf(" Off(%d):OFFSET %d", l.Off, l.ResultsOffset)
+	return fmt.Sprintf(" Off(%d):OFFSET %s", l.Off, l.ResultsOffset.String())
 }
 
 func (o Operand) String() string {

@@ -11,10 +11,10 @@ import (
 	"sync"
 
 	ds "v.io/v23/query/engine/datasource"
-	"v.io/v23/query/engine/public"
 	"v.io/v23/query/engine/internal/query_checker"
 	"v.io/v23/query/engine/internal/query_functions"
 	"v.io/v23/query/engine/internal/query_parser"
+	"v.io/v23/query/engine/public"
 	"v.io/v23/query/syncql"
 	"v.io/v23/vdl"
 )

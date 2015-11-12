@@ -15,6 +15,7 @@ import (
 	ds "v.io/v23/query/engine/datasource"
 	"v.io/v23/query/engine/internal/query_parser"
 	"v.io/v23/query/syncql"
+	"v.io/v23/vdl"
 	"v.io/v23/verror"
 	_ "v.io/x/ref/runtime/factories/generic"
 	"v.io/x/ref/test"
@@ -29,6 +30,23 @@ type parseSelectTest struct {
 type parseSelectErrorTest struct {
 	query string
 	err   error
+}
+
+type toStringTest struct {
+	query string
+	s     string
+}
+
+type copyAndSubstituteTest struct {
+	query     string
+	subValues []*vdl.Value
+	statement query_parser.SelectStatement
+}
+
+type copyAndSubstituteErrorTest struct {
+	query     string
+	subValues []*vdl.Value
+	err       error
 }
 
 type mockDB struct {
@@ -2877,10 +2895,469 @@ func TestQueryParserErrors(t *testing.T) {
 		{"select ? from Customer", syncql.NewErrExpectedIdentifier(db.GetContext(), 7, "?")},
 		// Parameters can only appear as operands in the where clause
 		{"select v from Customer where k ? v", syncql.NewErrExpectedOperator(db.GetContext(), 31, "?")},
+		{"select a,", syncql.NewErrExpectedIdentifier(db.GetContext(), 9, "")},
+		{"select a from b escape", syncql.NewErrUnexpectedEndOfStatement(db.GetContext(), 22)},
+		{"select a from b escape 123", syncql.NewErrExpected(db.GetContext(), 23, "char literal")},
+		{"select v[1](foo) from b", syncql.NewErrUnexpected(db.GetContext(), 11, "(")},
+		{"select v[1] as 123 from b", syncql.NewErrExpectedIdentifier(db.GetContext(), 15, "123")},
+		{"select v.", syncql.NewErrExpectedIdentifier(db.GetContext(), 9, "")},
+		{"select Foo(abc def) from Customers", syncql.NewErrUnexpected(db.GetContext(), 15, "def")},
+		{"select v.abc.\"8\" from Customers", syncql.NewErrExpectedIdentifier(db.GetContext(), 13, "8")},
+		{"select v[abc from Customers", syncql.NewErrExpected(db.GetContext(), 13, "]")},
+		{"select v[* from Customers", syncql.NewErrExpectedOperand(db.GetContext(), 9, "*")},
+		{"select v from 123", syncql.NewErrExpectedIdentifier(db.GetContext(), 14, "123")},
+		{"select v from Customers where (a = b *", syncql.NewErrExpected(db.GetContext(), 37, ")")},
 	}
 
 	for _, test := range basic {
 		_, err := query_parser.Parse(&db, test.query)
+		// Test both that the IDs compare and the text compares (since the offset needs to match).
+		if verror.ErrorID(err) != verror.ErrorID(test.err) || err.Error() != test.err.Error() {
+			t.Errorf("query: %s; got %v, want %v", test.query, err, test.err)
+		}
+	}
+}
+
+func TestToString(t *testing.T) {
+	basic := []toStringTest{
+		{
+			"select Upper(v.Name) from Customers where Upper(v.Name) = \"SMITH\"",
+			"Off(0): Off(0):SELECT Columns( Off(7):Off(7):Upper(Off(13):(field) Off(13): Off(13):v. Off(15):Name)) Off(21):FROM Off(26):Customers  Off(36):WHERE (Off(42):Off(42):(function)Off(42):Upper(Off(48):(field) Off(48): Off(48):v. Off(50):Name) Off(56):= Off(58):(string)SMITH)",
+		},
+		{
+			"select v.Address[0] from Customers",
+			"Off(0): Off(0):SELECT Columns( Off(7): Off(7): Off(7):v. Off(9):Address[Off(17):(int)0]) Off(20):FROM Off(25):Customers",
+		},
+		{
+			"select k from Customers where v like \"Foo^%%\" escape '^'",
+			"Off(0): Off(0):SELECT Columns( Off(7): Off(7): Off(7):k) Off(9):FROM Off(14):Customers  Off(24):WHERE (Off(30):Off(30):(field) Off(30): Off(30):v Off(32):LIKE Off(37):(string)Foo^%%)  Off(46):ESCAPE  Off(53): ^",
+		},
+		{
+			"select k from Customers limit 100 offset 200",
+			"Off(0): Off(0):SELECT Columns( Off(7): Off(7): Off(7):k) Off(9):FROM Off(14):Customers  Off(24):LIMIT  Off(30): 100  Off(34):OFFSET  Off(41): 200",
+		},
+		{
+			"select k from Customers where v.A = 10 and v.B <> 20",
+			"Off(0): Off(0):SELECT Columns( Off(7): Off(7): Off(7):k) Off(9):FROM Off(14):Customers  Off(24):WHERE (Off(30):Off(30):(expr)(Off(30):Off(30):(field) Off(30): Off(30):v. Off(32):A Off(34):= Off(36):(int)10) Off(39):AND Off(43):(expr)(Off(43):Off(43):(field) Off(43): Off(43):v. Off(45):B Off(47):<> Off(50):(int)20))",
+		},
+		{
+			"select k from Customers where Lower(v.A) < \"abc\" and v.B <= 'a'",
+			"Off(0): Off(0):SELECT Columns( Off(7): Off(7): Off(7):k) Off(9):FROM Off(14):Customers  Off(24):WHERE (Off(30):Off(30):(expr)(Off(30):Off(30):(function)Off(30):Lower(Off(36):(field) Off(36): Off(36):v. Off(38):A) Off(41):< Off(43):(string)abc) Off(49):AND Off(53):(expr)(Off(53):Off(53):(field) Off(53): Off(53):v. Off(55):B Off(57):<= Off(60):(int)97))",
+		},
+		{
+			"select k from Customers where v.A > 2.0 and v.B >= 10",
+			"Off(0): Off(0):SELECT Columns( Off(7): Off(7): Off(7):k) Off(9):FROM Off(14):Customers  Off(24):WHERE (Off(30):Off(30):(expr)(Off(30):Off(30):(field) Off(30): Off(30):v. Off(32):A Off(34):> Off(36):(float)2) Off(40):AND Off(44):(expr)(Off(44):Off(44):(field) Off(44): Off(44):v. Off(46):B Off(48):>= Off(51):(int)10))",
+		},
+		{
+			"select k from Customers where v.A = false and v.B is nil and v.C is not nil",
+			"Off(0): Off(0):SELECT Columns( Off(7): Off(7): Off(7):k) Off(9):FROM Off(14):Customers  Off(24):WHERE (Off(30):Off(30):(expr)(Off(30):Off(30):(expr)(Off(30):Off(30):(field) Off(30): Off(30):v. Off(32):A Off(34):= Off(36):(bool)false) Off(42):AND Off(46):(expr)(Off(46):Off(46):(field) Off(46): Off(46):v. Off(48):B Off(50):IS Off(53):<nil>)) Off(57):AND Off(61):(expr)(Off(61):Off(61):(field) Off(61): Off(61):v. Off(63):C Off(65):IS NOT Off(72):<nil>))",
+		},
+		{
+			"select v.Foo as Foo from Customers where v.A not like \"foo%\" or v.B = ?",
+			"Off(0): Off(0):SELECT Columns( Off(7): Off(7): Off(7):v. Off(9):Foo Off(13): Off(16):Foo) Off(20):FROM Off(25):Customers  Off(35):WHERE (Off(41):Off(41):(expr)(Off(41):Off(41):(field) Off(41): Off(41):v. Off(43):A Off(45):NOT LIKE Off(54):(string)foo%) Off(61):OR Off(64):(expr)(Off(64):Off(64):(field) Off(64): Off(64):v. Off(66):B Off(68):= Off(70):?))",
+		},
+		{
+			"select v.Foo as Foo from Customers where v.A not like \"foo%\" or v.B = ?",
+			"Off(0): Off(0):SELECT Columns( Off(7): Off(7): Off(7):v. Off(9):Foo Off(13): Off(16):Foo) Off(20):FROM Off(25):Customers  Off(35):WHERE (Off(41):Off(41):(expr)(Off(41):Off(41):(field) Off(41): Off(41):v. Off(43):A Off(45):NOT LIKE Off(54):(string)foo%) Off(61):OR Off(64):(expr)(Off(64):Off(64):(field) Off(64): Off(64):v. Off(66):B Off(68):= Off(70):?))",
+		},
+	}
+	for _, test := range basic {
+		st, err := query_parser.Parse(&db, test.query)
+		if err != nil {
+			t.Errorf("query: %s; unexpected error: got %v, want nil", test.query, err)
+		}
+		s := (*st).String()
+		if s != test.s {
+			t.Errorf("query: %s; got %s, want %s", test.query, s, test.s)
+		}
+	}
+}
+
+func TestCopyAndSubstitute(t *testing.T) {
+	basic := []copyAndSubstituteTest{
+		{
+			"select v from Customer where v.Value = ?",
+			[]*vdl.Value{vdl.ValueOf(10)},
+			query_parser.SelectStatement{
+				Select: &query_parser.SelectClause{
+					Selectors: []query_parser.Selector{
+						query_parser.Selector{
+							Type: query_parser.TypSelField,
+							Field: &query_parser.Field{
+								Segments: []query_parser.Segment{
+									query_parser.Segment{
+										Value: "v",
+										Node:  query_parser.Node{Off: 7},
+									},
+								},
+								Node: query_parser.Node{Off: 7},
+							},
+							Node: query_parser.Node{Off: 7},
+						},
+					},
+					Node: query_parser.Node{Off: 0},
+				},
+				From: &query_parser.FromClause{
+					Table: query_parser.TableEntry{
+						Name: "Customer",
+						Node: query_parser.Node{Off: 14},
+					},
+					Node: query_parser.Node{Off: 9},
+				},
+				Where: &query_parser.WhereClause{
+					Expr: &query_parser.Expression{
+						Operand1: &query_parser.Operand{
+							Type: query_parser.TypField,
+							Column: &query_parser.Field{
+								Segments: []query_parser.Segment{
+									query_parser.Segment{
+										Value: "v",
+										Node:  query_parser.Node{Off: 29},
+									},
+									query_parser.Segment{
+										Value: "Value",
+										Node:  query_parser.Node{Off: 31},
+									},
+								},
+								Node: query_parser.Node{Off: 29},
+							},
+							Node: query_parser.Node{Off: 29},
+						},
+						Operator: &query_parser.BinaryOperator{
+							Type: query_parser.Equal,
+							Node: query_parser.Node{Off: 37},
+						},
+						Operand2: &query_parser.Operand{
+							Type: query_parser.TypInt,
+							Int:  10,
+							Node: query_parser.Node{Off: 39},
+						},
+						Node: query_parser.Node{Off: 29},
+					},
+					Node: query_parser.Node{Off: 23},
+				},
+				Node: query_parser.Node{Off: 0},
+			},
+		},
+		{
+			"select v from Customer where v.Value = ?",
+			[]*vdl.Value{vdl.ValueOf(true)},
+			query_parser.SelectStatement{
+				Select: &query_parser.SelectClause{
+					Selectors: []query_parser.Selector{
+						query_parser.Selector{
+							Type: query_parser.TypSelField,
+							Field: &query_parser.Field{
+								Segments: []query_parser.Segment{
+									query_parser.Segment{
+										Value: "v",
+										Node:  query_parser.Node{Off: 7},
+									},
+								},
+								Node: query_parser.Node{Off: 7},
+							},
+							Node: query_parser.Node{Off: 7},
+						},
+					},
+					Node: query_parser.Node{Off: 0},
+				},
+				From: &query_parser.FromClause{
+					Table: query_parser.TableEntry{
+						Name: "Customer",
+						Node: query_parser.Node{Off: 14},
+					},
+					Node: query_parser.Node{Off: 9},
+				},
+				Where: &query_parser.WhereClause{
+					Expr: &query_parser.Expression{
+						Operand1: &query_parser.Operand{
+							Type: query_parser.TypField,
+							Column: &query_parser.Field{
+								Segments: []query_parser.Segment{
+									query_parser.Segment{
+										Value: "v",
+										Node:  query_parser.Node{Off: 29},
+									},
+									query_parser.Segment{
+										Value: "Value",
+										Node:  query_parser.Node{Off: 31},
+									},
+								},
+								Node: query_parser.Node{Off: 29},
+							},
+							Node: query_parser.Node{Off: 29},
+						},
+						Operator: &query_parser.BinaryOperator{
+							Type: query_parser.Equal,
+							Node: query_parser.Node{Off: 37},
+						},
+						Operand2: &query_parser.Operand{
+							Type: query_parser.TypBool,
+							Bool: true,
+							Node: query_parser.Node{Off: 39},
+						},
+						Node: query_parser.Node{Off: 29},
+					},
+					Node: query_parser.Node{Off: 23},
+				},
+				Node: query_parser.Node{Off: 0},
+			},
+		},
+		{
+			"select v from Customer where Now() < Time(?) and Foo(10,?,v.Bar) = true",
+			[]*vdl.Value{vdl.ValueOf("abc"), vdl.ValueOf(42.0)},
+			query_parser.SelectStatement{
+				Select: &query_parser.SelectClause{
+					Selectors: []query_parser.Selector{
+						query_parser.Selector{
+							Type: query_parser.TypSelField,
+							Field: &query_parser.Field{
+								Segments: []query_parser.Segment{
+									query_parser.Segment{
+										Value: "v",
+										Node:  query_parser.Node{Off: 7},
+									},
+								},
+								Node: query_parser.Node{Off: 7},
+							},
+							Node: query_parser.Node{Off: 7},
+						},
+					},
+					Node: query_parser.Node{Off: 0},
+				},
+				From: &query_parser.FromClause{
+					Table: query_parser.TableEntry{
+						Name: "Customer",
+						Node: query_parser.Node{Off: 14},
+					},
+					Node: query_parser.Node{Off: 9},
+				},
+				Where: &query_parser.WhereClause{
+					Expr: &query_parser.Expression{
+						Operand1: &query_parser.Operand{
+							Type: query_parser.TypExpr,
+							Expr: &query_parser.Expression{
+								Operand1: &query_parser.Operand{
+									Type: query_parser.TypFunction,
+									Function: &query_parser.Function{
+										Name: "Now",
+										Args: nil,
+										Node: query_parser.Node{Off: 29},
+									},
+									Node: query_parser.Node{Off: 29},
+								},
+								Operator: &query_parser.BinaryOperator{
+									Type: query_parser.LessThan,
+									Node: query_parser.Node{Off: 35},
+								},
+								Operand2: &query_parser.Operand{
+									Type: query_parser.TypFunction,
+									Function: &query_parser.Function{
+										Name: "Time",
+										Args: []*query_parser.Operand{
+											&query_parser.Operand{
+												Type: query_parser.TypStr,
+												Str:  "abc",
+												Node: query_parser.Node{Off: 42},
+											},
+										},
+										Node: query_parser.Node{Off: 37},
+									},
+									Node: query_parser.Node{Off: 37},
+								},
+								Node: query_parser.Node{Off: 29},
+							},
+							Node: query_parser.Node{Off: 29},
+						},
+						Node: query_parser.Node{Off: 29},
+						Operator: &query_parser.BinaryOperator{
+							Type: query_parser.And,
+							Node: query_parser.Node{Off: 45},
+						},
+						Operand2: &query_parser.Operand{
+							Type: query_parser.TypExpr,
+							Expr: &query_parser.Expression{
+								Operand1: &query_parser.Operand{
+									Type: query_parser.TypFunction,
+									Function: &query_parser.Function{
+										Name: "Foo",
+										Args: []*query_parser.Operand{
+											&query_parser.Operand{
+												Type: query_parser.TypInt,
+												Int:  10,
+												Node: query_parser.Node{Off: 53},
+											},
+											&query_parser.Operand{
+												Type:  query_parser.TypFloat,
+												Float: 42.0,
+												Node:  query_parser.Node{Off: 56},
+											},
+											&query_parser.Operand{
+												Type: query_parser.TypField,
+												Column: &query_parser.Field{
+													Segments: []query_parser.Segment{
+														query_parser.Segment{
+															Value: "v",
+															Node:  query_parser.Node{Off: 58},
+														},
+														query_parser.Segment{
+															Value: "Bar",
+															Node:  query_parser.Node{Off: 60},
+														},
+													},
+													Node: query_parser.Node{Off: 58},
+												},
+												Node: query_parser.Node{Off: 58},
+											},
+										},
+										Node: query_parser.Node{Off: 49},
+									},
+									Node: query_parser.Node{Off: 49},
+								},
+								Operator: &query_parser.BinaryOperator{
+									Type: query_parser.Equal,
+									Node: query_parser.Node{Off: 65},
+								},
+								Operand2: &query_parser.Operand{
+									Type: query_parser.TypBool,
+									Bool: true,
+									Node: query_parser.Node{Off: 67},
+								},
+								Node: query_parser.Node{Off: 49},
+							},
+							Node: query_parser.Node{Off: 49},
+						},
+					},
+					Node: query_parser.Node{Off: 23},
+				},
+				Node: query_parser.Node{Off: 0},
+			},
+		},
+		{
+			"select v from Customer where k like ? limit 10 offset 20 escape '^'",
+			[]*vdl.Value{vdl.ValueOf("abc^%%")},
+			query_parser.SelectStatement{
+				Select: &query_parser.SelectClause{
+					Selectors: []query_parser.Selector{
+						query_parser.Selector{
+							Type: query_parser.TypSelField,
+							Field: &query_parser.Field{
+								Segments: []query_parser.Segment{
+									query_parser.Segment{
+										Value: "v",
+										Node:  query_parser.Node{Off: 7},
+									},
+								},
+								Node: query_parser.Node{Off: 7},
+							},
+							Node: query_parser.Node{Off: 7},
+						},
+					},
+					Node: query_parser.Node{Off: 0},
+				},
+				From: &query_parser.FromClause{
+					Table: query_parser.TableEntry{
+						Name: "Customer",
+						Node: query_parser.Node{Off: 14},
+					},
+					Node: query_parser.Node{Off: 9},
+				},
+				Where: &query_parser.WhereClause{
+					Expr: &query_parser.Expression{
+						Operand1: &query_parser.Operand{
+							Type: query_parser.TypField,
+							Column: &query_parser.Field{
+								Segments: []query_parser.Segment{
+									query_parser.Segment{
+										Value: "k",
+										Node:  query_parser.Node{Off: 29},
+									},
+								},
+								Node: query_parser.Node{Off: 29},
+							},
+							Node: query_parser.Node{Off: 29},
+						},
+						Operator: &query_parser.BinaryOperator{
+							Type: query_parser.Like,
+							Node: query_parser.Node{Off: 31},
+						},
+						Operand2: &query_parser.Operand{
+							Type: query_parser.TypStr,
+							Str:  "abc^%%",
+							Node: query_parser.Node{Off: 36},
+						},
+						Node: query_parser.Node{Off: 29},
+					},
+					Node: query_parser.Node{Off: 23},
+				},
+				Limit: &query_parser.LimitClause{
+					Limit: &query_parser.Int64Value{
+						Value: 10,
+						Node:  query_parser.Node{Off: 44},
+					},
+					Node: query_parser.Node{Off: 38},
+				},
+				ResultsOffset: &query_parser.ResultsOffsetClause{
+					ResultsOffset: &query_parser.Int64Value{
+						Value: 20,
+						Node:  query_parser.Node{Off: 54},
+					},
+					Node: query_parser.Node{Off: 47},
+				},
+				Escape: &query_parser.EscapeClause{
+					EscapeChar: &query_parser.CharValue{
+						Value: '^',
+						Node:  query_parser.Node{Off: 64},
+					},
+					Node: query_parser.Node{Off: 57},
+				},
+				Node: query_parser.Node{Off: 0},
+			},
+		},
+	}
+	for _, test := range basic {
+		st, err := query_parser.Parse(&db, test.query)
+		if err != nil {
+			t.Errorf("query: %s; unexpected parse error: got %v, want nil", test.query, err)
+		}
+		st2, err := (*st).CopyAndSubstitute(&db, test.subValues)
+		if err != nil {
+			t.Errorf("query: %s; unexpected error on st.CopyAndSubstitute: got %v, want nil", test.query, err)
+		}
+		switch (st2).(type) {
+		case query_parser.SelectStatement:
+			if !reflect.DeepEqual(test.statement, st2) {
+				t.Errorf("query: %s;\nGOT  %s\nWANT %s", test.query, st2, test.statement)
+			}
+		}
+	}
+}
+
+func TestCopyAndSubstituteError(t *testing.T) {
+	basic := []copyAndSubstituteErrorTest{
+		{
+			"select v from Customers",
+			[]*vdl.Value{vdl.ValueOf(10)},
+			syncql.NewErrTooManyParamValuesSpecified(db.GetContext(), 0),
+		},
+		{
+			"select v from Customers where v.A = 10",
+			[]*vdl.Value{vdl.ValueOf(10)},
+			syncql.NewErrTooManyParamValuesSpecified(db.GetContext(), 24),
+		},
+		{
+			"select v from Customers where v.A = ? and v.B = ?",
+			[]*vdl.Value{vdl.ValueOf(10)},
+			syncql.NewErrNotEnoughParamValuesSpecified(db.GetContext(), 48),
+		},
+	}
+
+	for _, test := range basic {
+		st, err := query_parser.Parse(&db, test.query)
+		if err != nil {
+			t.Errorf("query: %s; unexpected parse error: got %v, want nil", test.query, err)
+		}
+		_, err = (*st).CopyAndSubstitute(&db, test.subValues)
 		// Test both that the IDs compare and the text compares (since the offset needs to match).
 		if verror.ErrorID(err) != verror.ErrorID(test.err) || err.Error() != test.err.Error() {
 			t.Errorf("query: %s; got %v, want %v", test.query, err, test.err)
