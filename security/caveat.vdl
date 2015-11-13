@@ -61,7 +61,7 @@ error (
   ConstCaveatValidation() {
     "en": "false const caveat always fails validation",
   }
-  ExpiryCaveatValidation(expiryTime, currentTime time.Time) {
+  ExpiryCaveatValidation(currentTime, expiryTime time.Time) {
     "en": "now({currentTime}) is after expiry({expiryTime})",
   }
   MethodCaveatValidation(invokedMethod string, permittedMethods []string) {

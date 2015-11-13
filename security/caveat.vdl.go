@@ -192,7 +192,7 @@ var (
 	ErrCaveatParamCoding             = verror.Register("v.io/v23/security.CaveatParamCoding", verror.NoRetry, "{1:}{2:} unable to encode/decode caveat param(type={4}) for caveat {3}: {5}")
 	ErrCaveatValidation              = verror.Register("v.io/v23/security.CaveatValidation", verror.NoRetry, "{1:}{2:} caveat validation failed: {3}")
 	ErrConstCaveatValidation         = verror.Register("v.io/v23/security.ConstCaveatValidation", verror.NoRetry, "{1:}{2:} false const caveat always fails validation")
-	ErrExpiryCaveatValidation        = verror.Register("v.io/v23/security.ExpiryCaveatValidation", verror.NoRetry, "{1:}{2:} now({4}) is after expiry({3})")
+	ErrExpiryCaveatValidation        = verror.Register("v.io/v23/security.ExpiryCaveatValidation", verror.NoRetry, "{1:}{2:} now({3}) is after expiry({4})")
 	ErrMethodCaveatValidation        = verror.Register("v.io/v23/security.MethodCaveatValidation", verror.NoRetry, "{1:}{2:} method {3} not in list {4}")
 	ErrPeerBlessingsCaveatValidation = verror.Register("v.io/v23/security.PeerBlessingsCaveatValidation", verror.NoRetry, "{1:}{2:} patterns in peer blessings caveat {4} not matched by the peer {3}")
 )
@@ -204,7 +204,7 @@ func init() {
 	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrCaveatParamCoding.ID), "{1:}{2:} unable to encode/decode caveat param(type={4}) for caveat {3}: {5}")
 	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrCaveatValidation.ID), "{1:}{2:} caveat validation failed: {3}")
 	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrConstCaveatValidation.ID), "{1:}{2:} false const caveat always fails validation")
-	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrExpiryCaveatValidation.ID), "{1:}{2:} now({4}) is after expiry({3})")
+	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrExpiryCaveatValidation.ID), "{1:}{2:} now({3}) is after expiry({4})")
 	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrMethodCaveatValidation.ID), "{1:}{2:} method {3} not in list {4}")
 	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrPeerBlessingsCaveatValidation.ID), "{1:}{2:} patterns in peer blessings caveat {4} not matched by the peer {3}")
 }
@@ -240,8 +240,8 @@ func NewErrConstCaveatValidation(ctx *context.T) error {
 }
 
 // NewErrExpiryCaveatValidation returns an error with the ErrExpiryCaveatValidation ID.
-func NewErrExpiryCaveatValidation(ctx *context.T, expiryTime time.Time, currentTime time.Time) error {
-	return verror.New(ErrExpiryCaveatValidation, ctx, expiryTime, currentTime)
+func NewErrExpiryCaveatValidation(ctx *context.T, currentTime time.Time, expiryTime time.Time) error {
+	return verror.New(ErrExpiryCaveatValidation, ctx, currentTime, expiryTime)
 }
 
 // NewErrMethodCaveatValidation returns an error with the ErrMethodCaveatValidation ID.
