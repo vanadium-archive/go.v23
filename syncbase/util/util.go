@@ -51,18 +51,30 @@ func validIdentifier(s string) bool {
 	return identifierRegexp.MatchString(s)
 }
 
+// maxNameLen is the max allowed number of bytes in app, db, and table names.
+const maxNameLen = 64
+
 // ValidAppName returns true iff the given string is a valid app name.
 func ValidAppName(s string) bool {
+	if len([]byte(s)) > maxNameLen {
+		return false
+	}
 	return s != "" && !containsReservedByte(s)
 }
 
 // ValidDatabaseName returns true iff the given string is a valid database name.
 func ValidDatabaseName(s string) bool {
+	if len([]byte(s)) > maxNameLen {
+		return false
+	}
 	return validIdentifier(s)
 }
 
 // ValidTableName returns true iff the given string is a valid table name.
 func ValidTableName(s string) bool {
+	if len([]byte(s)) > maxNameLen {
+		return false
+	}
 	return validIdentifier(s)
 }
 

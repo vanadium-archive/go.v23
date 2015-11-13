@@ -25,8 +25,6 @@ type service struct {
 
 var _ Service = (*service)(nil)
 
-// TODO(sadovsky): Validate names before sending RPCs.
-
 // FullName implements Service.FullName.
 func (s *service) FullName() string {
 	return s.fullName

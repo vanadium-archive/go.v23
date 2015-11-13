@@ -35,8 +35,6 @@ type table struct {
 
 var _ Table = (*table)(nil)
 
-// TODO(sadovsky): Validate names before sending RPCs.
-
 // Name implements Table.Name.
 func (t *table) Name() string {
 	return t.name

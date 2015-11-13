@@ -33,8 +33,6 @@ type row struct {
 
 var _ Row = (*row)(nil)
 
-// TODO(sadovsky): Validate names before sending RPCs.
-
 // Key implements Row.Key.
 func (r *row) Key() string {
 	return r.key

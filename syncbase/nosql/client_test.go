@@ -683,7 +683,7 @@ func TestRowNameValidation(t *testing.T) {
 	a := tu.CreateApp(t, ctx, syncbase.NewService(sName), "a")
 	d := tu.CreateNoSQLDatabase(t, ctx, a, "d")
 	tb := tu.CreateTable(t, ctx, d, "tb")
-	tu.TestCreateNameValidation(t, ctx, tb, tu.OkAppRowNames, tu.NotOkAppRowNames)
+	tu.TestCreateNameValidation(t, ctx, tb, tu.OkRowNames, tu.NotOkRowNames)
 }
 
 // Test permission checking in Row.{Get,Put,Delete} and

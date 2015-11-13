@@ -34,7 +34,7 @@ func TestListApps(t *testing.T) {
 	ctx, sName, cleanup := tu.SetupOrDie(nil)
 	defer cleanup()
 	s := syncbase.NewService(sName)
-	tu.TestListChildren(t, ctx, s, tu.OkAppRowNames)
+	tu.TestListChildren(t, ctx, s, tu.OkAppNames)
 }
 
 // Tests that Service.{Set,Get}Permissions work as expected.
@@ -55,7 +55,7 @@ func TestAppCreate(t *testing.T) {
 func TestAppCreateNameValidation(t *testing.T) {
 	ctx, sName, cleanup := tu.SetupOrDie(nil)
 	defer cleanup()
-	tu.TestCreateNameValidation(t, ctx, syncbase.NewService(sName), tu.OkAppRowNames, tu.NotOkAppRowNames)
+	tu.TestCreateNameValidation(t, ctx, syncbase.NewService(sName), tu.OkAppNames, tu.NotOkAppNames)
 }
 
 // Tests that App.Destroy works as expected.

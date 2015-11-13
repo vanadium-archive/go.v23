@@ -14,8 +14,8 @@ import (
 
 func TestEscapeUnescape(t *testing.T) {
 	strs := []string{}
-	copy(strs, tu.OkAppRowNames)
-	strs = append(strs, tu.NotOkAppRowNames...)
+	copy(strs, tu.OkRowNames)
+	strs = append(strs, tu.NotOkRowNames...)
 	for _, s := range strs {
 		esc := util.Escape(s)
 		unesc, ok := util.Unescape(esc)
@@ -35,18 +35,22 @@ func TestEscapeUnescape(t *testing.T) {
 }
 
 func TestValidNameFuncs(t *testing.T) {
-	for _, s := range tu.OkAppRowNames {
+	for _, s := range tu.OkAppNames {
 		if !util.ValidAppName(s) {
 			t.Errorf("%q should be valid", s)
 		}
+	}
+	for _, s := range tu.NotOkAppNames {
+		if util.ValidAppName(s) {
+			t.Errorf("%q should be invalid", s)
+		}
+	}
+	for _, s := range tu.OkRowNames {
 		if !util.ValidRowKey(s) {
 			t.Errorf("%q should be valid", s)
 		}
 	}
-	for _, s := range tu.NotOkAppRowNames {
-		if util.ValidAppName(s) {
-			t.Errorf("%q should be invalid", s)
-		}
+	for _, s := range tu.NotOkRowNames {
 		if util.ValidRowKey(s) {
 			t.Errorf("%q should be invalid", s)
 		}

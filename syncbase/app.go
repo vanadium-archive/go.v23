@@ -30,8 +30,6 @@ type app struct {
 
 var _ App = (*app)(nil)
 
-// TODO(sadovsky): Validate names before sending RPCs.
-
 // Name implements App.Name.
 func (a *app) Name() string {
 	return a.name

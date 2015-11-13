@@ -82,8 +82,6 @@ func (crs *conflictResolutionState) isDisconnected() bool {
 
 var _ Database = (*database)(nil)
 
-// TODO(sadovsky): Validate names before sending RPCs.
-
 // Name implements Database.Name.
 func (d *database) Name() string {
 	return d.name
