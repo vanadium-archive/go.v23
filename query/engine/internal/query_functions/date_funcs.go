@@ -9,10 +9,10 @@ package query_functions
 import (
 	"time"
 
-	"v.io/v23/query/syncql"
 	ds "v.io/v23/query/engine/datasource"
 	"v.io/v23/query/engine/internal/conversions"
 	"v.io/v23/query/engine/internal/query_parser"
+	"v.io/v23/query/syncql"
 )
 
 // If possible, check if arg is convertible to a location.  Fields and not yet computed

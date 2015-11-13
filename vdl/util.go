@@ -33,6 +33,7 @@ var (
 		Uint16:     16,
 		Uint32:     32,
 		Uint64:     64,
+		Int8:       8,
 		Int16:      16,
 		Int32:      32,
 		Int64:      64,

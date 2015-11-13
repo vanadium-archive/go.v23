@@ -30,6 +30,7 @@ pkg vom, const WireIdFloat64 typeId
 pkg vom, const WireIdInt16 typeId
 pkg vom, const WireIdInt32 typeId
 pkg vom, const WireIdInt64 typeId
+pkg vom, const WireIdInt8 typeId
 pkg vom, const WireIdString typeId
 pkg vom, const WireIdStringList typeId
 pkg vom, const WireIdTypeObject typeId

@@ -83,6 +83,7 @@ func init() {
 		WireIdUint16:     vdl.Uint16Type,
 		WireIdUint32:     vdl.Uint32Type,
 		WireIdUint64:     vdl.Uint64Type,
+		WireIdInt8:       vdl.Int8Type,
 		WireIdInt16:      vdl.Int16Type,
 		WireIdInt32:      vdl.Int32Type,
 		WireIdInt64:      vdl.Int64Type,

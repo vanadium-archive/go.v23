@@ -8,7 +8,7 @@ type (
 	// vomdata config types
 	ConvertGroup	struct{ Name string; PrimaryType typeobject; Values []any }
 	VomdataStruct struct{
-		EncodeDecodeData []any
+		EncodeDecodeData map[byte][]any // map from min required VOM version to test values
 		CompatData			 map[string][]typeobject
 		ConvertData			map[string][]ConvertGroup
 	}
@@ -22,6 +22,7 @@ type (
 	NUint16     uint16
 	NUint32     uint32
 	NUint64     uint64
+	NInt8       int8
 	NInt16      int16
 	NInt32      int32
 	NInt64      int64
@@ -57,6 +58,7 @@ type (
 	MList []NListUint64
 	MMap  map[NFloat32]NListUint64
 	MByteSlice []byte
+	MInt8Slice []int8
 
 	// Recursive Type Definitions
 	RecA []RecA

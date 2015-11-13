@@ -77,14 +77,14 @@ var (
 	}
 	vvStrABC = []*vdl.Value{
 		vdl.StringValue("ABC"), vdl.ZeroValue(vdl.StringTypeN).AssignString("ABC"),
-		vdl.ZeroValue(vdl.BytesType).AssignBytes([]byte("ABC")), vdl.ZeroValue(vdl.BytesTypeN).AssignBytes([]byte("ABC")),
-		vdl.ZeroValue(vdl.Bytes3Type).AssignBytes([]byte("ABC")), vdl.ZeroValue(vdl.Bytes3TypeN).AssignBytes([]byte("ABC")),
 		vdl.ZeroValue(vdl.EnumTypeN).AssignEnumLabel("ABC"),
 	}
 	vvTypeObjectBool = []*vdl.Value{
 		vdl.TypeObjectValue(vdl.BoolType),
 	}
 	vvSeq123 = []*vdl.Value{
+		vdl.SeqNumValue(vdl.Array3ByteType, 1, 2, 3),
+		vdl.SeqNumValue(vdl.Array3ByteTypeN, 1, 2, 3),
 		vdl.SeqNumValue(vdl.Array3Uint64Type, 1, 2, 3),
 		vdl.SeqNumValue(vdl.Array3Uint64TypeN, 1, 2, 3),
 		vdl.SeqNumValue(vdl.Array3Int64Type, 1, 2, 3),
@@ -93,6 +93,8 @@ var (
 		vdl.SeqNumValue(vdl.Array3Float64TypeN, 1, 2, 3),
 		vdl.SeqNumValue(vdl.Array3Complex64Type, 1, 2, 3),
 		vdl.SeqNumValue(vdl.Array3Complex64TypeN, 1, 2, 3),
+		vdl.SeqNumValue(vdl.ListByteType, 1, 2, 3),
+		vdl.SeqNumValue(vdl.ListByteTypeN, 1, 2, 3),
 		vdl.SeqNumValue(vdl.ListUint64Type, 1, 2, 3),
 		vdl.SeqNumValue(vdl.ListUint64TypeN, 1, 2, 3),
 		vdl.SeqNumValue(vdl.ListInt64Type, 1, 2, 3),
@@ -209,14 +211,13 @@ var (
 		bool(true), vdl.NBool(true),
 	}
 	rvStrABC = []interface{}{
-		string("ABC"), []byte("ABC"), [3]byte{'A', 'B', 'C'},
-		vdl.NString("ABC"), vdl.NSliceByte("ABC"), vdl.NArray3Byte{'A', 'B', 'C'},
-		vdl.NEnumABC,
+		string("ABC"), vdl.NString("ABC"), vdl.NEnumABC,
 	}
 	rvTypeObjectBool = []interface{}{
 		vdl.BoolType, vdl.NType(vdl.BoolType),
 	}
 	rvSeq123 = []interface{}{
+		[3]byte{1, 2, 3}, []byte{1, 2, 3}, vdl.NArray3Byte{1, 2, 3}, vdl.NSliceByte{1, 2, 3},
 		[3]uint64{1, 2, 3}, []uint64{1, 2, 3}, vdl.NArray3Uint64{1, 2, 3}, vdl.NSliceUint64{1, 2, 3},
 		[3]int64{1, 2, 3}, []int64{1, 2, 3}, vdl.NArray3Int64{1, 2, 3}, vdl.NSliceInt64{1, 2, 3},
 		[3]float64{1, 2, 3}, []float64{1, 2, 3}, vdl.NArray3Float64{1, 2, 3}, vdl.NSliceFloat64{1, 2, 3},
@@ -372,6 +373,7 @@ var (
 		vdl.Uint64Type, vdl.Uint64TypeN,
 	}
 	ttInts = []*vdl.Type{
+		vdl.Int8Type, vdl.Int8TypeN,
 		vdl.Int16Type, vdl.Int16TypeN,
 		vdl.Int32Type, vdl.Int32TypeN,
 		vdl.Int64Type, vdl.Int64TypeN,
@@ -545,14 +547,17 @@ func rvOnlyFrom(values []interface{}, from []reflect.Type) (result []interface{}
 
 // vvFromUint returns all *Values that can represent u without loss of precision.
 func vvFromUint(u uint64) (result []*vdl.Value) {
-	b, i, f, c := byte(u), int64(u), float64(u), complex(float64(u), 0)
+	i, f, c := int64(u), float64(u), complex(float64(u), 0)
 	switch {
 	case u <= math.MaxInt8:
+		result = append(result,
+			vdl.ZeroValue(vdl.Int8Type).AssignInt(i),
+			vdl.ZeroValue(vdl.Int8TypeN).AssignInt(i))
 		fallthrough
 	case u <= math.MaxUint8:
 		result = append(result,
-			vdl.ZeroValue(vdl.ByteType).AssignByte(b),
-			vdl.ZeroValue(vdl.ByteTypeN).AssignByte(b))
+			vdl.ZeroValue(vdl.ByteType).AssignUint(u),
+			vdl.ZeroValue(vdl.ByteTypeN).AssignUint(u))
 		fallthrough
 	case u <= math.MaxInt16:
 		result = append(result,
@@ -644,9 +649,12 @@ func rvFromUint(u uint64) (result []interface{}) {
 
 // vvFromInt returns all *Values that can represent i without loss of precision.
 func vvFromInt(i int64) (result []*vdl.Value) {
-	b, u, f, c := byte(i), uint64(i), float64(i), complex(float64(i), 0)
+	u, f, c := uint64(i), float64(i), complex(float64(i), 0)
 	switch {
 	case math.MinInt8 <= i && i <= math.MaxInt8:
+		result = append(result,
+			vdl.ZeroValue(vdl.Int8Type).AssignInt(i),
+			vdl.ZeroValue(vdl.Int8TypeN).AssignInt(i))
 		fallthrough
 	case math.MinInt16 <= i && i <= math.MaxInt16:
 		result = append(result,
@@ -685,8 +693,8 @@ func vvFromInt(i int64) (result []*vdl.Value) {
 	switch {
 	case i <= math.MaxUint8:
 		result = append(result,
-			vdl.ZeroValue(vdl.ByteType).AssignByte(b),
-			vdl.ZeroValue(vdl.ByteTypeN).AssignByte(b))
+			vdl.ZeroValue(vdl.ByteType).AssignUint(u),
+			vdl.ZeroValue(vdl.ByteTypeN).AssignUint(u))
 		fallthrough
 	case i <= math.MaxUint16:
 		result = append(result,
@@ -1090,11 +1098,7 @@ func testConverterWantSrc(t *testing.T, vvrvWant, vvrvSrc vvrv) {
 		var dst interface{}
 		var want interface{} = src
 		// Handle special-cases for want values.
-		srcInt8, isInt8 := src.(int8)
 		switch {
-		case isInt8:
-			// VDL represents int8 as int16, so set our expectations accordingly.
-			want = int16(srcInt8)
 		case rtSrc != rtPtrToType && rtSrc.ConvertibleTo(rtPtrToType):
 			// VDL doesn't represent named TypeObject, so our converter automatically
 			// creates *vdl.Type.

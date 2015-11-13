@@ -138,10 +138,10 @@ func (rs *ResolutionStreamImpl) Send(item wire.ResolutionInfo) error {
 	// protect read/write to st.Result
 	rs.St.dataLock.Lock()
 	defer rs.St.dataLock.Unlock()
-//	if rs.St.result == nil {
-//		rs.St.result = []wire.ResolutionInfo{item}
-//		return nil
-//	}
+	//	if rs.St.result == nil {
+	//		rs.St.result = []wire.ResolutionInfo{item}
+	//		return nil
+	//	}
 	rs.St.result = append(rs.St.result, item)
 	return nil
 }

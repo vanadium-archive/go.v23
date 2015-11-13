@@ -29,7 +29,7 @@ import (
 //   o Bool is only compatible with Bool.
 //   o TypeObject is only compatible with TypeObject.
 //   o Numbers are mutually compatible.
-//   o String, enum, []byte and [N]byte are mutually compatible.
+//   o String, enum are mutually compatible.
 //   o Array and list are compatible if their elems are compatible.
 //   o Set, map and struct are compatible if all keys K* are compatible,
 //     and all fields F* are compatible:
@@ -145,11 +145,8 @@ func compat(a, b *Type, seenA, seenB map[*Type]bool) bool {
 	if ax, bx := a.Kind() == TypeObject, b.Kind() == TypeObject; ax || bx {
 		return ax && bx
 	}
-	// We must check if either a or b is []byte and handle it here first, to
-	// ensure it doesn't fall through to the standard array/list handling.  This
-	// ensures that []byte isn't compatible with []uint16 and other lists or
-	// arrays of numbers.
-	if ax, bx := ttIsStringEnumBytes(a), ttIsStringEnumBytes(b); ax || bx {
+	// String and enum are compatible.
+	if ax, bx := ttIsStringEnum(a), ttIsStringEnum(b); ax || bx {
 		return ax && bx
 	}
 	// Handle composite
@@ -206,14 +203,14 @@ func compat(a, b *Type, seenA, seenB map[*Type]bool) bool {
 
 func ttIsNumber(tt *Type) bool {
 	switch tt.Kind() {
-	case Byte, Uint16, Uint32, Uint64, Int16, Int32, Int64, Float32, Float64, Complex64, Complex128:
+	case Byte, Uint16, Uint32, Uint64, Int8, Int16, Int32, Int64, Float32, Float64, Complex64, Complex128:
 		return true
 	}
 	return false
 }
 
-func ttIsStringEnumBytes(tt *Type) bool {
-	return tt.Kind() == String || tt.Kind() == Enum || tt.IsBytes()
+func ttIsStringEnum(tt *Type) bool {
+	return tt.Kind() == String || tt.Kind() == Enum
 }
 
 func ttIsEmptyStruct(tt *Type) bool {

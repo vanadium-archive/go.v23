@@ -50,6 +50,7 @@ func TestValue(t *testing.T) {
 		{Uint16, Uint16Type, "uint16(0)"},
 		{Uint32, Uint32Type, "uint32(0)"},
 		{Uint64, Uint64Type, "uint64(0)"},
+		{Int8, Int8Type, "int8(0)"},
 		{Int16, Int16Type, "int16(0)"},
 		{Int32, Int32Type, "int32(0)"},
 		{Int64, Int64Type, "int64(0)"},
@@ -109,7 +110,6 @@ func TestValue(t *testing.T) {
 		// Invariant here: x == y == 0
 		// The assign[KIND] functions assign a nonzero value.
 		assignBool(t, x)
-		assignByte(t, x)
 		assignUint(t, x)
 		assignInt(t, x)
 		assignFloat(t, x)
@@ -241,30 +241,10 @@ func assignBool(t *testing.T, x *Value) {
 	}
 }
 
-func assignByte(t *testing.T, x *Value) {
-	newval := byte(123)
-	switch x.Kind() {
-	case Byte:
-		if got, want := x.Byte(), byte(0); got != want {
-			t.Errorf(`Byte value got %v, want %v`, got, want)
-		}
-		x.AssignByte(newval)
-		if got, want := x.Byte(), newval; got != want {
-			t.Errorf(`Byte assign value got %v, want %v`, got, want)
-		}
-		if got, want := x.String(), x.Kind().String()+"(123)"; got != want {
-			t.Errorf(`Byte string got %v, want %v`, got, want)
-		}
-	default:
-		ExpectMismatchedKind(t, func() { x.Byte() })
-		ExpectMismatchedKind(t, func() { x.AssignByte(newval) })
-	}
-}
-
 func assignUint(t *testing.T, x *Value) {
 	newval := uint64(123)
 	switch x.Kind() {
-	case Uint16, Uint32, Uint64:
+	case Byte, Uint16, Uint32, Uint64:
 		if got, want := x.Uint(), uint64(0); got != want {
 			t.Errorf(`Uint zero value got %v, want %v`, got, want)
 		}
@@ -284,7 +264,7 @@ func assignUint(t *testing.T, x *Value) {
 func assignInt(t *testing.T, x *Value) {
 	newval := int64(123)
 	switch x.Kind() {
-	case Int16, Int32, Int64:
+	case Int8, Int16, Int32, Int64:
 		if got, want := x.Int(), int64(0); got != want {
 			t.Errorf(`Int zero value got %v, want %v`, got, want)
 		}
@@ -582,17 +562,17 @@ func assignBytes(t *testing.T, x *Value) {
 	if got, want := index.String(), fmt.Sprintf("byte(%d)", 'Z'); got != want {
 		t.Errorf(`Bytes index string got %v, want %v`, got, want)
 	}
-	if got, want := index.Byte(), byte('Z'); got != want {
+	if got, want := index.Uint(), uint64('Z'); got != want {
 		t.Errorf(`Bytes index Byte got %v, want %v`, got, want)
 	}
 	if got, want := index, ByteValue('Z'); !EqualValue(got, want) {
 		t.Errorf(`Bytes index value got %v, want %v`, got, want)
 	}
-	index.AssignByte('Y')
+	index.AssignUint(uint64('Y'))
 	if got, want := index.String(), fmt.Sprintf("byte(%d)", 'Y'); got != want {
 		t.Errorf(`Bytes index string got %v, want %v`, got, want)
 	}
-	if got, want := index.Byte(), byte('Y'); got != want {
+	if got, want := index.Uint(), uint64('Y'); got != want {
 		t.Errorf(`Bytes index Byte got %v, want %v`, got, want)
 	}
 	if got, want := index, ByteValue('Y'); !EqualValue(got, want) {

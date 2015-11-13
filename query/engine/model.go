@@ -7,8 +7,8 @@ package engine
 
 import (
 	ds "v.io/v23/query/engine/datasource"
-	"v.io/v23/query/engine/public"
 	"v.io/v23/query/engine/internal"
+	"v.io/v23/query/engine/public"
 )
 
 // Create returns an instance of datasource.QueryEngine

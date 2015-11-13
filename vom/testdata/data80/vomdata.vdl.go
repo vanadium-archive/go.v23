@@ -58,12 +58,12 @@ var Tests = []types.TestCase{
 		HexValue:   "4e00",
 	},
 	{
-		Name:       "[]byte(\"\\x01\\x02\\x03\")",
-		Value:      vdl.ValueOf([]byte("\x01\x02\x03")),
+		Name:       "[]byte(\"\\xff\\x00\\x01\")",
+		Value:      vdl.ValueOf([]byte("\xff\x00\x01")),
 		TypeString: "[]byte",
-		Hex:        "804e03010203",
+		Hex:        "804e03ff0001",
 		HexVersion: "80",
-		HexValue:   "4e03010203",
+		HexValue:   "4e03ff0001",
 	},
 	{
 		Name:       "[]byte(\"adef\")",
@@ -1087,13 +1087,13 @@ var Tests = []types.TestCase{
 		HexValue:   "5200",
 	},
 	{
-		Name:       "types.NByteSlice(\"\\x01\\x02\\x03\")",
-		Value:      vdl.ValueOf(types.NByteSlice("\x01\x02\x03")),
+		Name:       "types.NByteSlice(\"\\xff\\x00\\x01\")",
+		Value:      vdl.ValueOf(types.NByteSlice("\xff\x00\x01")),
 		TypeString: "v.io/v23/vom/testdata/types.NByteSlice []byte",
-		Hex:        "80512c030026762e696f2f7632332f766f6d2f74657374646174612f74797065732e4e42797465536c6963650102e15203010203",
+		Hex:        "80512c030026762e696f2f7632332f766f6d2f74657374646174612f74797065732e4e42797465536c6963650102e15203ff0001",
 		HexVersion: "80",
 		HexType:    "512c030026762e696f2f7632332f766f6d2f74657374646174612f74797065732e4e42797465536c6963650102e1",
-		HexValue:   "5203010203",
+		HexValue:   "5203ff0001",
 	},
 	{
 		Name:       "types.NByteSlice(\"abc\")",
@@ -1114,18 +1114,18 @@ var Tests = []types.TestCase{
 		HexValue:   "520000000000",
 	},
 	{
-		Name: "types.NByteArray(\"\\x01\\x02\\x03\\x00\")",
+		Name: "types.NByteArray(\"\\xff\\x00\\x01\\x00\")",
 		Value: vdl.ValueOf(types.NByteArray{
+			255,
+			0,
 			1,
-			2,
-			3,
 			0,
 		}),
 		TypeString: "v.io/v23/vom/testdata/types.NByteArray [4]byte",
-		Hex:        "80512e020026762e696f2f7632332f766f6d2f74657374646174612f74797065732e4e42797465417272617901020204e1520001020300",
+		Hex:        "80512e020026762e696f2f7632332f766f6d2f74657374646174612f74797065732e4e42797465417272617901020204e15200ff000100",
 		HexVersion: "80",
 		HexType:    "512e020026762e696f2f7632332f766f6d2f74657374646174612f74797065732e4e42797465417272617901020204e1",
-		HexValue:   "520001020300",
+		HexValue:   "5200ff000100",
 	},
 	{
 		Name: "types.NByteArray(\"abcd\")",
@@ -3439,7 +3439,7 @@ var ConvertTests = map[string][]types.ConvertGroup{
 			},
 		},
 	},
-	"string, []byte, [n]byte, and enum": {
+	"string and enum": {
 		{
 			Name:        "enum (A)",
 			PrimaryType: vdl.TypeOf(types.NEnumA),
@@ -3447,7 +3447,6 @@ var ConvertTests = map[string][]types.ConvertGroup{
 				vdl.ValueOf("A"),
 				vdl.ValueOf(types.NString("A")),
 				vdl.ValueOf(types.NEnumA),
-				vdl.ValueOf([]byte("A")),
 			},
 		},
 		{
@@ -3458,30 +3457,6 @@ var ConvertTests = map[string][]types.ConvertGroup{
 				vdl.ValueOf(types.NString("Brie")),
 				vdl.ValueOf(types.BrieEnumBrie),
 				vdl.ValueOf(types.FoodEnumBrie),
-				vdl.ValueOf([]byte("Brie")),
-				vdl.ValueOf(types.NByteArray{
-					66,
-					114,
-					105,
-					101,
-				}),
-			},
-		},
-		{
-			Name:        "[4]byte",
-			PrimaryType: vdl.TypeOf(types.NByteArray{}),
-			Values: []*vdl.Value{
-				vdl.ValueOf("Bean"),
-				vdl.ValueOf(types.NString("Bean")),
-				vdl.ValueOf(types.BeanEnumBean),
-				vdl.ValueOf(types.FoodEnumBean),
-				vdl.ValueOf([]byte("Bean")),
-				vdl.ValueOf(types.NByteArray{
-					66,
-					101,
-					97,
-					110,
-				}),
 			},
 		},
 		{
@@ -3491,8 +3466,6 @@ var ConvertTests = map[string][]types.ConvertGroup{
 				vdl.ValueOf("Cherry"),
 				vdl.ValueOf(types.NString("Cherry")),
 				vdl.ValueOf(types.FoodEnumCherry),
-				vdl.ValueOf([]byte("Cherry")),
-				vdl.ValueOf(types.NByteSlice("Cherry")),
 			},
 		},
 	},

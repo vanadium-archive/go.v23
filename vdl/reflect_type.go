@@ -405,6 +405,7 @@ var (
 	rtUint16             = reflect.TypeOf(uint16(0))
 	rtUint32             = reflect.TypeOf(uint32(0))
 	rtUint64             = reflect.TypeOf(uint64(0))
+	rtInt8               = reflect.TypeOf(int8(0))
 	rtInt16              = reflect.TypeOf(int16(0))
 	rtInt32              = reflect.TypeOf(int32(0))
 	rtInt64              = reflect.TypeOf(int64(0))
@@ -430,7 +431,7 @@ var (
 		reflect.Uint64:     Uint64Type,
 		reflect.Uint:       uintType(8 * unsafe.Sizeof(uint(0))),
 		reflect.Uintptr:    uintType(8 * unsafe.Sizeof(uintptr(0))),
-		reflect.Int8:       Int16Type,
+		reflect.Int8:       Int8Type,
 		reflect.Int16:      Int16Type,
 		reflect.Int32:      Int32Type,
 		reflect.Int64:      Int64Type,

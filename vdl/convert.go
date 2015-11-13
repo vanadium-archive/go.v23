@@ -638,7 +638,7 @@ func (c convTarget) FromBytes(src []byte, tt *Type) error {
 	if err != nil {
 		return err
 	}
-	if err := fill.fromBytes(src); err != nil {
+	if err := fill.fromBytes(src, tt); err != nil {
 		return err
 	}
 	return finishConvert(fin, fill)
@@ -646,8 +646,14 @@ func (c convTarget) FromBytes(src []byte, tt *Type) error {
 
 // FromString implements the Target interface method.
 func (c convTarget) FromString(src string, tt *Type) error {
-	// TODO(toddw): Speed this up.
-	return c.FromBytes([]byte(src), tt)
+	fin, fill, err := startConvert(c, tt)
+	if err != nil {
+		return err
+	}
+	if err := fill.fromString(src); err != nil {
+		return err
+	}
+	return finishConvert(fin, fill)
 }
 
 // FromEnumLabel implements the Target interface method.
@@ -708,17 +714,12 @@ func (c convTarget) fromUint(src uint64) error {
 		}
 	} else {
 		switch kind := c.vv.Kind(); kind {
-		case Byte:
-			if !overflowUint(src, bitlenV(kind)) {
-				c.vv.AssignByte(byte(src))
-				return nil
-			}
-		case Uint16, Uint32, Uint64:
+		case Byte, Uint16, Uint32, Uint64:
 			if !overflowUint(src, bitlenV(kind)) {
 				c.vv.AssignUint(src)
 				return nil
 			}
-		case Int16, Int32, Int64:
+		case Int8, Int16, Int32, Int64:
 			if isrc, ok := convertUintToInt(src, bitlenV(kind)); ok {
 				c.vv.AssignInt(isrc)
 				return nil
@@ -764,17 +765,12 @@ func (c convTarget) fromInt(src int64) error {
 		}
 	} else {
 		switch kind := c.vv.Kind(); kind {
-		case Byte:
-			if usrc, ok := convertIntToUint(src, bitlenV(kind)); ok {
-				c.vv.AssignByte(byte(usrc))
-				return nil
-			}
-		case Uint16, Uint32, Uint64:
+		case Byte, Uint16, Uint32, Uint64:
 			if usrc, ok := convertIntToUint(src, bitlenV(kind)); ok {
 				c.vv.AssignUint(usrc)
 				return nil
 			}
-		case Int16, Int32, Int64:
+		case Int8, Int16, Int32, Int64:
 			if !overflowInt(src, bitlenV(kind)) {
 				c.vv.AssignInt(src)
 				return nil
@@ -816,17 +812,12 @@ func (c convTarget) fromFloat(src float64) error {
 		}
 	} else {
 		switch kind := c.vv.Kind(); kind {
-		case Byte:
-			if usrc, ok := convertFloatToUint(src, bitlenV(kind)); ok {
-				c.vv.AssignByte(byte(usrc))
-				return nil
-			}
-		case Uint16, Uint32, Uint64:
+		case Byte, Uint16, Uint32, Uint64:
 			if usrc, ok := convertFloatToUint(src, bitlenV(kind)); ok {
 				c.vv.AssignUint(usrc)
 				return nil
 			}
-		case Int16, Int32, Int64:
+		case Int8, Int16, Int32, Int64:
 			if isrc, ok := convertFloatToInt(src, bitlenV(kind)); ok {
 				c.vv.AssignInt(isrc)
 				return nil
@@ -868,17 +859,12 @@ func (c convTarget) fromComplex(src complex128) error {
 		}
 	} else {
 		switch kind := c.vv.Kind(); kind {
-		case Byte:
-			if usrc, ok := convertComplexToUint(src, bitlenV(kind)); ok {
-				c.vv.AssignByte(byte(usrc))
-				return nil
-			}
-		case Uint16, Uint32, Uint64:
+		case Byte, Uint16, Uint32, Uint64:
 			if usrc, ok := convertComplexToUint(src, bitlenV(kind)); ok {
 				c.vv.AssignUint(usrc)
 				return nil
 			}
-		case Int16, Int32, Int64:
+		case Int8, Int16, Int32, Int64:
 			if isrc, ok := convertComplexToInt(src, bitlenV(kind)); ok {
 				c.vv.AssignInt(isrc)
 				return nil
@@ -898,25 +884,29 @@ func (c convTarget) fromComplex(src complex128) error {
 	return fmt.Errorf("invalid conversion from complex(%g) to %v", src, c.tt)
 }
 
-func (c convTarget) fromBytes(src []byte) error {
+func (c convTarget) fromBytes(src []byte, tt *Type) error {
+	if c.tt.IsBytes() {
+		return c.fromBytesToBytes(src)
+	}
+	elemType := tt.Elem()
+	for i, b := range src {
+		elem, err := c.startElem(i)
+		if err != nil {
+			return err
+		}
+		if err := elem.FromUint(uint64(b), elemType); err != nil {
+			return err
+		}
+		if err := c.finishElem(elem); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func (c convTarget) fromBytesToBytes(src []byte) error {
 	if c.vv == nil {
-		tt := removeOptional(c.tt)
 		switch {
-		case tt.Kind() == Enum:
-			// Handle special-case enum first, by calling the Assign method.  Note
-			// that TypeFromReflect has already validated the Assign method, so we
-			// can call without error checking.
-			if c.rv.CanAddr() {
-				in := []reflect.Value{reflect.ValueOf(string(src))}
-				out := c.rv.Addr().MethodByName("Set").Call(in)
-				if ierr := out[0].Interface(); ierr != nil {
-					return ierr.(error)
-				}
-				return nil
-			}
-		case c.rv.Kind() == reflect.String:
-			c.rv.SetString(string(src)) // TODO(toddw): check utf8
-			return nil
 		case c.rv.Kind() == reflect.Array:
 			if c.rv.Type().Elem() == rtByte && c.rv.Len() == len(src) {
 				reflect.Copy(c.rv, reflect.ValueOf(src))
@@ -936,27 +926,52 @@ func (c convTarget) fromBytes(src []byte) error {
 		}
 	} else {
 		switch c.vv.Kind() {
-		case String:
-			c.vv.AssignString(string(src)) // TODO(toddw): check utf8
-			return nil
 		case Array:
-			if c.vv.Type().IsBytes() && c.vv.Type().Len() == len(src) {
+			if c.vv.Type().Len() == len(src) {
 				c.vv.AssignBytes(src)
 				return nil
 			}
 		case List:
-			if c.vv.Type().IsBytes() {
-				c.vv.AssignBytes(src)
+			c.vv.AssignBytes(src)
+			return nil
+		}
+	}
+	return fmt.Errorf("invalid conversion from bytes to %v", c.tt)
+}
+
+func (c convTarget) fromString(src string) error {
+	if c.vv == nil {
+		tt := removeOptional(c.tt)
+		switch {
+		case tt.Kind() == Enum:
+			// Handle special-case enum first, by calling the Assign method.  Note
+			// that TypeFromReflect has already validated the Assign method, so we
+			// can call without error checking.
+			if c.rv.CanAddr() {
+				in := []reflect.Value{reflect.ValueOf(src)}
+				out := c.rv.Addr().MethodByName("Set").Call(in)
+				if ierr := out[0].Interface(); ierr != nil {
+					return ierr.(error)
+				}
 				return nil
 			}
+		case c.rv.Kind() == reflect.String:
+			c.rv.SetString(src) // TODO(toddw): check utf8
+			return nil
+		}
+	} else {
+		switch c.vv.Kind() {
+		case String:
+			c.vv.AssignString(src) // TODO(toddw): check utf8
+			return nil
 		case Enum:
-			if index := c.vv.Type().EnumIndex(string(src)); index >= 0 {
+			if index := c.vv.Type().EnumIndex(src); index >= 0 {
 				c.vv.AssignEnumIndex(index)
 				return nil
 			}
 		}
 	}
-	return fmt.Errorf("invalid conversion from []byte to %v", c.tt)
+	return fmt.Errorf("invalid conversion from string or enum to %v", c.tt)
 }
 
 func (c convTarget) fromTypeObject(src *Type) error {

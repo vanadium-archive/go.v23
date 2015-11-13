@@ -1325,16 +1325,13 @@ func ConvertValueToAnOperand(value *vdl.Value, off int64) (*Operand, error) {
 	case vdl.Bool:
 		op.Type = TypBool
 		op.Bool = value.Bool()
-	case vdl.Byte:
-		op.Type = TypInt
-		op.Int = int64(value.Byte())
 	case vdl.Enum:
 		op.Type = TypStr
 		op.Str = value.EnumLabel()
-	case vdl.Int16, vdl.Int32, vdl.Int64:
+	case vdl.Int8, vdl.Int16, vdl.Int32, vdl.Int64:
 		op.Type = TypInt
 		op.Int = value.Int()
-	case vdl.Uint16, vdl.Uint32, vdl.Uint64:
+	case vdl.Byte, vdl.Uint16, vdl.Uint32, vdl.Uint64:
 		op.Type = TypInt
 		op.Int = int64(value.Uint())
 	case vdl.Float32, vdl.Float64:

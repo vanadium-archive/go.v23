@@ -56,11 +56,11 @@ const Tests = []types.TestCase {
 	},
 
 	{
-		`[]byte("\x01\x02\x03")`,
-		[]byte("\x01\x02\x03"),
+		`[]byte("\xff\x00\x01")`,
+		[]byte("\xff\x00\x01"),
 		"[]byte",
-		"814e03010203",
-		"81", "", "4e03010203",
+		"814e03ff0001",
+		"81", "", "4e03ff0001",
 	},
 
 	{
@@ -91,8 +91,8 @@ const Tests = []types.TestCase {
 		`byte(255)`,
 		byte(255),
 		"byte",
-		"8104ff",
-		"81", "", "04ff",
+		"8104ffff",
+		"81", "", "04ffff",
 	},
 
 	{
@@ -1080,11 +1080,11 @@ const Tests = []types.TestCase {
 	},
 
 	{
-		`types.NByteSlice("\x01\x02\x03")`,
-		types.NByteSlice("\x01\x02\x03"),
+		`types.NByteSlice("\xff\x00\x01")`,
+		types.NByteSlice("\xff\x00\x01"),
 		"v.io/v23/vom/testdata/types.NByteSlice []byte",
-		"81512c030026762e696f2f7632332f766f6d2f74657374646174612f74797065732e4e42797465536c6963650102e15203010203",
-		"81", "512c030026762e696f2f7632332f766f6d2f74657374646174612f74797065732e4e42797465536c6963650102e1", "5203010203",
+		"81512c030026762e696f2f7632332f766f6d2f74657374646174612f74797065732e4e42797465536c6963650102e15203ff0001",
+		"81", "512c030026762e696f2f7632332f766f6d2f74657374646174612f74797065732e4e42797465536c6963650102e1", "5203ff0001",
 	},
 
 	{
@@ -1104,11 +1104,11 @@ const Tests = []types.TestCase {
 	},
 
 	{
-		`types.NByteArray("\x01\x02\x03\x00")`,
-		types.NByteArray("\x01\x02\x03\x00"),
+		`types.NByteArray("\xff\x00\x01\x00")`,
+		types.NByteArray("\xff\x00\x01\x00"),
 		"v.io/v23/vom/testdata/types.NByteArray [4]byte",
-		"81512e020026762e696f2f7632332f766f6d2f74657374646174612f74797065732e4e42797465417272617901020204e1520001020300",
-		"81", "512e020026762e696f2f7632332f766f6d2f74657374646174612f74797065732e4e42797465417272617901020204e1", "520001020300",
+		"81512e020026762e696f2f7632332f766f6d2f74657374646174612f74797065732e4e42797465417272617901020204e15200ff000100",
+		"81", "512e020026762e696f2f7632332f766f6d2f74657374646174612f74797065732e4e42797465417272617901020204e1", "5200ff000100",
 	},
 
 	{
@@ -1139,8 +1139,8 @@ const Tests = []types.TestCase {
 		`types.NByte(255)`,
 		types.NByte(255),
 		"v.io/v23/vom/testdata/types.NByte byte",
-		"815127000021762e696f2f7632332f766f6d2f74657374646174612f74797065732e4e427974650102e152ff",
-		"81", "5127000021762e696f2f7632332f766f6d2f74657374646174612f74797065732e4e427974650102e1", "52ff",
+		"815127000021762e696f2f7632332f766f6d2f74657374646174612f74797065732e4e427974650102e152ffff",
+		"81", "5127000021762e696f2f7632332f766f6d2f74657374646174612f74797065732e4e427974650102e1", "52ffff",
 	},
 
 	{
@@ -2766,6 +2766,94 @@ const Tests = []types.TestCase {
 		"815333060025762e696f2f7632332f766f6d2f74657374646174612f74797065732e537472756374416e7901010003416e79010fe1e1510403012ae15528000022762e696f2f7632332f766f6d2f74657374646174612f74797065732e4e496e7431360107e15728000022762e696f2f7632332f766f6d2f74657374646174612f74797065732e4e496e7433320108e15928000022762e696f2f7632332f766f6d2f74657374646174612f74797065732e4e496e7436340109e152032b2c2d1104000002e1000104e1000206e1000108e1",
 		"81", "5333060025762e696f2f7632332f766f6d2f74657374646174612f74797065732e537472756374416e7901010003416e79010fe1e1510403012ae15528000022762e696f2f7632332f766f6d2f74657374646174612f74797065732e4e496e7431360107e15728000022762e696f2f7632332f766f6d2f74657374646174612f74797065732e4e496e7433320108e15928000022762e696f2f7632332f766f6d2f74657374646174612f74797065732e4e496e7436340109e1", "52032b2c2d1104000002e1000104e1000206e1000108e1",
 	},
+
+	{
+		`int8(0)`,
+		int8(0),
+		"int8",
+		"812000",
+		"81", "", "2000",
+	},
+
+	{
+		`int8(-128)`,
+		int8(-128),
+		"int8",
+		"8120ffff",
+		"81", "", "20ffff",
+	},
+
+	{
+		`int8(127)`,
+		int8(127),
+		"int8",
+		"8120fffe",
+		"81", "", "20fffe",
+	},
+
+	{
+		`types.NInt8(0)`,
+		types.NInt8(0),
+		"v.io/v23/vom/testdata/types.NInt8 int8",
+		"815127000021762e696f2f7632332f766f6d2f74657374646174612f74797065732e4e496e74380110e15200",
+		"81", "5127000021762e696f2f7632332f766f6d2f74657374646174612f74797065732e4e496e74380110e1", "5200",
+	},
+
+	{
+		`types.NInt8(-128)`,
+		types.NInt8(-128),
+		"v.io/v23/vom/testdata/types.NInt8 int8",
+		"815127000021762e696f2f7632332f766f6d2f74657374646174612f74797065732e4e496e74380110e152ffff",
+		"81", "5127000021762e696f2f7632332f766f6d2f74657374646174612f74797065732e4e496e74380110e1", "52ffff",
+	},
+
+	{
+		`types.NInt8(127)`,
+		types.NInt8(127),
+		"v.io/v23/vom/testdata/types.NInt8 int8",
+		"815127000021762e696f2f7632332f766f6d2f74657374646174612f74797065732e4e496e74380110e152fffe",
+		"81", "5127000021762e696f2f7632332f766f6d2f74657374646174612f74797065732e4e496e74380110e1", "52fffe",
+	},
+
+	{
+		`int8(0)`,
+		int8(0),
+		"int8",
+		"812000",
+		"81", "", "2000",
+	},
+
+	{
+		`int8(1)`,
+		int8(1),
+		"int8",
+		"812002",
+		"81", "", "2002",
+	},
+
+	{
+		`typeobject(int8)`,
+		typeobject(int8),
+		"typeobject",
+		"811c011000",
+		"81", "", "1c011000",
+	},
+
+	{
+		`types.MInt8Slice{-128, -1, 0, 127}`,
+		types.MInt8Slice{-128, -1, 0, 127},
+		"v.io/v23/vom/testdata/types.MInt8Slice []int8",
+		"81512c030026762e696f2f7632332f766f6d2f74657374646174612f74797065732e4d496e7438536c6963650110e1520704ffff0100fffe",
+		"81", "512c030026762e696f2f7632332f766f6d2f74657374646174612f74797065732e4d496e7438536c6963650110e1", "520704ffff0100fffe",
+	},
+
+	{
+		`types.StructAny{Any: int8(1)}`,
+		types.StructAny{Any: int8(1)},
+		"v.io/v23/vom/testdata/types.StructAny struct{Any any}",
+		"815133060025762e696f2f7632332f766f6d2f74657374646174612f74797065732e537472756374416e7901010003416e79010fe1e152011004000002e1",
+		"81", "5133060025762e696f2f7632332f766f6d2f74657374646174612f74797065732e537472756374416e7901010003416e79010fe1e1", "52011004000002e1",
+	},
 }
 
 // CompatTests contains the testcases to use to test vom type compatibility.
@@ -2850,26 +2938,21 @@ const ConvertTests = map[string][]types.ConvertGroup{
 			{ complex128(1.5-1i), },
 		},
 	},
-	"string, []byte, [n]byte, and enum": {
+	"string and enum": {
 		{
 			"enum (A)",
 			typeobject(types.NEnum),
-			{ "A", types.NString("A"), types.NEnum.A, []byte("A"), },
+			{ "A", types.NString("A"), types.NEnum.A, },
 		},
 		{
 			"enum (brie)",
 			typeobject(types.BrieEnum),
-			{ "Brie", types.NString("Brie"), types.BrieEnum.Brie, types.FoodEnum.Brie, []byte("Brie"), types.NByteArray("Brie"), },
-		},
-		{
-			"[4]byte",
-			typeobject(types.NByteArray),
-			{ "Bean", types.NString("Bean"), types.BeanEnum.Bean, types.FoodEnum.Bean, []byte("Bean"), types.NByteArray("Bean"), },
+			{ "Brie", types.NString("Brie"), types.BrieEnum.Brie, types.FoodEnum.Brie, },
 		},
 		{
 			"string",
 			typeobject(types.NString),
-			{ "Cherry", types.NString("Cherry"), types.FoodEnum.Cherry, []byte("Cherry"), types.NByteSlice("Cherry"), },
+			{ "Cherry", types.NString("Cherry"), types.FoodEnum.Cherry, },
 		},
 	},
 	"struct, map, and set": {

@@ -279,6 +279,8 @@ const WireIdTypeObject = typeId(14)
 
 const WireIdAny = typeId(15)
 
+const WireIdInt8 = typeId(16)
+
 // Other commonly used composites.
 const WireIdByteList = typeId(39)
 

@@ -420,6 +420,7 @@ var rtFromKind = [...]reflect.Type{
 	Uint16:     rtUint16,
 	Uint32:     rtUint32,
 	Uint64:     rtUint64,
+	Int8:       rtInt8,
 	Int16:      rtInt16,
 	Int32:      rtInt32,
 	Int64:      rtInt64,
