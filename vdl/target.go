@@ -427,11 +427,9 @@ func FromValue(target Target, vv *Value) error {
 	switch vv.Kind() {
 	case Bool:
 		return target.FromBool(vv.Bool(), tt)
-	case Byte:
-		return target.FromUint(uint64(vv.Byte()), tt)
-	case Uint16, Uint32, Uint64:
+	case Byte, Uint16, Uint32, Uint64:
 		return target.FromUint(vv.Uint(), tt)
-	case Int16, Int32, Int64:
+	case Int8, Int16, Int32, Int64:
 		return target.FromInt(vv.Int(), tt)
 	case Float32, Float64:
 		return target.FromFloat(vv.Float(), tt)

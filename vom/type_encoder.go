@@ -108,7 +108,7 @@ func (e *TypeEncoder) encodeType(tt *vdl.Type) (typeId, error) {
 	// Construct the wireType.
 	var wt wireType
 	switch kind := tt.Kind(); kind {
-	case vdl.Bool, vdl.Byte, vdl.String, vdl.Uint16, vdl.Uint32, vdl.Uint64, vdl.Int16, vdl.Int32, vdl.Int64, vdl.Float32, vdl.Float64, vdl.Complex64, vdl.Complex128:
+	case vdl.Bool, vdl.Byte, vdl.String, vdl.Uint16, vdl.Uint32, vdl.Uint64, vdl.Int8, vdl.Int16, vdl.Int32, vdl.Int64, vdl.Float32, vdl.Float64, vdl.Complex64, vdl.Complex128:
 		wt = wireTypeNamedT{wireNamed{tt.Name(), bootstrapKindToId[kind]}}
 	case vdl.Enum:
 		wireEnum := wireEnum{tt.Name(), make([]string, tt.NumEnumLabel())}

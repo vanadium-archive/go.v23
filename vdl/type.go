@@ -22,6 +22,7 @@ const (
 	Uint16     // 16 bit unsigned integer
 	Uint32     // 32 bit unsigned integer
 	Uint64     // 64 bit unsigned integer
+	Int8       // 8 bit signed integer
 	Int16      // 16 bit signed integer
 	Int32      // 32 bit signed integer
 	Int64      // 64 bit signed integer
@@ -60,6 +61,8 @@ func (k Kind) String() string {
 		return "uint32"
 	case Uint64:
 		return "uint64"
+	case Int8:
+		return "int8"
 	case Int16:
 		return "int16"
 	case Int32:

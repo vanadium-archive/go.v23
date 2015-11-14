@@ -26,7 +26,7 @@ func (ConvertGroup) __VDLReflect(struct {
 }
 
 type VomdataStruct struct {
-	EncodeDecodeData []*vdl.Value
+	EncodeDecodeData map[byte][]*vdl.Value // map from min required VOM version to test values
 	CompatData       map[string][]*vdl.Type
 	ConvertData      map[string][]ConvertGroup
 }
@@ -90,6 +90,13 @@ type NUint64 uint64
 
 func (NUint64) __VDLReflect(struct {
 	Name string `vdl:"v.io/v23/vom/testdata/types.NUint64"`
+}) {
+}
+
+type NInt8 int8
+
+func (NInt8) __VDLReflect(struct {
+	Name string `vdl:"v.io/v23/vom/testdata/types.NInt8"`
 }) {
 }
 
@@ -319,6 +326,13 @@ type MByteSlice []byte
 
 func (MByteSlice) __VDLReflect(struct {
 	Name string `vdl:"v.io/v23/vom/testdata/types.MByteSlice"`
+}) {
+}
+
+type MInt8Slice []int8
+
+func (MInt8Slice) __VDLReflect(struct {
+	Name string `vdl:"v.io/v23/vom/testdata/types.MInt8Slice"`
 }) {
 }
 
@@ -829,6 +843,7 @@ func init() {
 	vdl.Register((*NUint16)(nil))
 	vdl.Register((*NUint32)(nil))
 	vdl.Register((*NUint64)(nil))
+	vdl.Register((*NInt8)(nil))
 	vdl.Register((*NInt16)(nil))
 	vdl.Register((*NInt32)(nil))
 	vdl.Register((*NInt64)(nil))
@@ -848,6 +863,7 @@ func init() {
 	vdl.Register((*MList)(nil))
 	vdl.Register((*MMap)(nil))
 	vdl.Register((*MByteSlice)(nil))
+	vdl.Register((*MInt8Slice)(nil))
 	vdl.Register((*RecA)(nil))
 	vdl.Register((*RecX)(nil))
 	vdl.Register((*RecY)(nil))

@@ -50,7 +50,7 @@ func zeroRep(t *Type) interface{} {
 		return false
 	case Byte, Uint16, Uint32, Uint64:
 		return uint64(0)
-	case Int16, Int32, Int64:
+	case Int8, Int16, Int32, Int64:
 		return int64(0)
 	case Float32, Float64:
 		return float64(0)
@@ -185,7 +185,7 @@ func OptionalValue(x *Value) *Value { return &Value{OptionalType(x.t), x} }
 func BoolValue(x bool) *Value { return ZeroValue(BoolType).AssignBool(x) }
 
 // ByteValue is a convenience to create an Byte value.
-func ByteValue(x byte) *Value { return ZeroValue(ByteType).AssignByte(x) }
+func ByteValue(x byte) *Value { return ZeroValue(ByteType).AssignUint(uint64(x)) }
 
 // Uint16Value is a convenience to create an Uint16 value.
 func Uint16Value(x uint16) *Value { return ZeroValue(Uint16Type).AssignUint(uint64(x)) }
@@ -195,6 +195,9 @@ func Uint32Value(x uint32) *Value { return ZeroValue(Uint32Type).AssignUint(uint
 
 // Uint64Value is a convenience to create an Uint64 value.
 func Uint64Value(x uint64) *Value { return ZeroValue(Uint64Type).AssignUint(x) }
+
+// Int8Value is a convenience to create an Int8 value.
+func Int8Value(x int8) *Value { return ZeroValue(Int8Type).AssignInt(int64(x)) }
 
 // Int16Value is a convenience to create an Int16 value.
 func Int16Value(x int16) *Value { return ZeroValue(Int16Type).AssignInt(int64(x)) }
@@ -285,7 +288,7 @@ func EqualValue(a, b *Value) bool {
 	}
 	if a.t == ByteType {
 		// ByteType has two representations, either uint64 or *byte.
-		return a.Byte() == b.Byte()
+		return a.Uint() == b.Uint()
 	}
 	switch arep := a.rep.(type) {
 	case bool:
@@ -348,27 +351,21 @@ func (v *Value) Bool() bool {
 	return v.rep.(bool)
 }
 
-// Byte returns the underlying value of a Byte.
-func (v *Value) Byte() byte {
-	v.t.checkKind("Byte", Byte)
+// Uint returns the underlying value of a Byte or Uint{16,32,64}.
+func (v *Value) Uint() uint64 {
+	v.t.checkKind("Uint", Byte, Uint16, Uint32, Uint64)
 	switch trep := v.rep.(type) {
 	case uint64:
-		return byte(trep)
+		return trep
 	case *byte:
-		return *trep
+		return uint64(*trep)
 	}
-	panic(fmt.Errorf("vdl: Byte mismatched rep %v %T %v", v.t, v.rep, v.rep))
+	panic(fmt.Errorf("vdl: Uint mismatched rep %v %T %v", v.t, v.rep, v.rep))
 }
 
-// Uint returns the underlying value of a Uint{16,32,64}.
-func (v *Value) Uint() uint64 {
-	v.t.checkKind("Uint", Uint16, Uint32, Uint64)
-	return v.rep.(uint64)
-}
-
-// Int returns the underlying value of an Int{16,32,64}.
+// Int returns the underlying value of an Int{8,16,32,64}.
 func (v *Value) Int() int64 {
-	v.t.checkKind("Int", Int16, Int32, Int64)
+	v.t.checkKind("Int", Int8, Int16, Int32, Int64)
 	return v.rep.(int64)
 }
 
@@ -532,11 +529,16 @@ func (v *Value) Assign(x *Value) *Value {
 	switch {
 	case x == nil:
 		// Assign(nil) sets the zero value.
-		v.rep = zeroRep(v.t)
+		if v.t.kind == Byte {
+			// Use AssignUint to handle both the value and pointer cases.
+			v.AssignUint(0)
+		} else {
+			v.rep = zeroRep(v.t)
+		}
 	case v.t == x.t:
 		if v.t.kind == Byte {
-			// Use AssignByte to handle both the value and pointer cases.
-			v.AssignByte(x.Byte())
+			// Use AssignUint to handle both the value and pointer cases.
+			v.AssignUint(x.Uint())
 		} else {
 			// Types are identical, v is assigned a copy of the underlying rep.
 			v.rep = copyRep(x.t, x.rep)
@@ -568,33 +570,26 @@ func (v *Value) AssignBool(x bool) *Value {
 	return v
 }
 
-// AssignByte assigns the underlying Byte to x.
-func (v *Value) AssignByte(x byte) *Value {
-	v.t.checkKind("AssignByte", Byte)
+// AssignUint assigns the underlying Uint{16,32,64} or Byte to x.
+func (v *Value) AssignUint(x uint64) *Value {
+	v.t.checkKind("AssignUint", Byte, Uint16, Uint32, Uint64)
 	switch trep := v.rep.(type) {
 	case uint64, nil:
 		// Handle cases where v.rep is a standalone number, or where v.rep == nil.
-		// The nil case occurs when typedCopy is used to copy a byte value.
-		v.rep = uint64(x)
+		// The nil case occurs when typedCopy is used to copy a uint value.
+		v.rep = x
 	case *byte:
 		// Handle case where v.rep represents a byte in a list or array.
-		*trep = x
+		*trep = byte(x)
 	default:
-		panic(fmt.Errorf("vdl: AssignByte mismatched rep %v %T %v", v.t, v.rep, v.rep))
+		panic(fmt.Errorf("vdl: AssignUint mismatched rep %v %T %v", v.t, v.rep, v.rep))
 	}
 	return v
 }
 
-// AssignUint assigns the underlying Uint{16,32,64} to x.
-func (v *Value) AssignUint(x uint64) *Value {
-	v.t.checkKind("AssignUint", Uint16, Uint32, Uint64)
-	v.rep = x
-	return v
-}
-
-// AssignInt assigns the underlying Int{16,32,64} to x.
+// AssignInt assigns the underlying Int{8,16,32,64} to x.
 func (v *Value) AssignInt(x int64) *Value {
-	v.t.checkKind("AssignInt", Int16, Int32, Int64)
+	v.t.checkKind("AssignInt", Int8, Int16, Int32, Int64)
 	v.rep = x
 	return v
 }

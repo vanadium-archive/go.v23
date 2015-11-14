@@ -22,6 +22,7 @@ const (
 	WireIdComplex128 = typeId(13)
 	WireIdTypeObject = typeId(14)
 	WireIdAny        = typeId(15)
+	WireIdInt8       = typeId(16)
 
 	// Other commonly used composites.
 	WireIdByteList   = typeId(39)

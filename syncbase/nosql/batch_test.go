@@ -13,10 +13,10 @@ import (
 	"testing"
 
 	"v.io/v23/naming"
+	"v.io/v23/query/syncql"
 	wire "v.io/v23/services/syncbase/nosql"
 	"v.io/v23/syncbase"
 	"v.io/v23/syncbase/nosql"
-	"v.io/v23/query/syncql"
 	"v.io/v23/vdl"
 	"v.io/v23/verror"
 	_ "v.io/x/ref/runtime/factories/generic"

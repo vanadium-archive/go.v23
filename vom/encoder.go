@@ -22,12 +22,13 @@ const (
 )
 
 var (
-	errEncodeBadTypeStack   = verror.Register(pkgPath+".errEncodeBadTypeStack", verror.NoRetry, "{1:}{2:} vom: encoder has bad type stack{:_}")
-	errEncodeNilType        = verror.Register(pkgPath+".errEncodeNilType", verror.NoRetry, "{1:}{2:} vom: encoder finished with nil type{:_}")
-	errEncoderTypeMismatch  = verror.Register(pkgPath+".errEncoderTypeMismatch", verror.NoRetry, "{1:}{2:} encoder type mismatch, got {3}, want {4}{:_}")
-	errEncoderWantBytesType = verror.Register(pkgPath+".errEncoderWantBytesType", verror.NoRetry, "{1:}{2:} encoder type mismatch, got {3}, want bytes{:_}")
-	errLabelNotInType       = verror.Register(pkgPath+".errLabelNotInType", verror.NoRetry, "{1:}{2:} enum label {3} doesn't exist in type {4}{:_}")
-	errFieldNotInTopType    = verror.Register(pkgPath+".errFieldNotInTopType", verror.NoRetry, "{1:}{2:} field name {3} doesn't exist in top type {4}{:_}")
+	errEncodeBadTypeStack      = verror.Register(pkgPath+".errEncodeBadTypeStack", verror.NoRetry, "{1:}{2:} vom: encoder has bad type stack{:_}")
+	errEncodeNilType           = verror.Register(pkgPath+".errEncodeNilType", verror.NoRetry, "{1:}{2:} vom: encoder finished with nil type{:_}")
+	errEncoderTypeMismatch     = verror.Register(pkgPath+".errEncoderTypeMismatch", verror.NoRetry, "{1:}{2:} encoder type mismatch, got {3}, want {4}{:_}")
+	errEncoderWantBytesType    = verror.Register(pkgPath+".errEncoderWantBytesType", verror.NoRetry, "{1:}{2:} encoder type mismatch, got {3}, want bytes{:_}")
+	errLabelNotInType          = verror.Register(pkgPath+".errLabelNotInType", verror.NoRetry, "{1:}{2:} enum label {3} doesn't exist in type {4}{:_}")
+	errFieldNotInTopType       = verror.Register(pkgPath+".errFieldNotInTopType", verror.NoRetry, "{1:}{2:} field name {3} doesn't exist in top type {4}{:_}")
+	errUnsupportedInVOMVersion = verror.Register(pkgPath+".errUnsupportedInVOMVersion", verror.NoRetry, "{1:}{2:} {3} unsupported in vom version {4}{:_}")
 )
 
 var (
@@ -333,7 +334,7 @@ func (e *encoder) FromUint(src uint64, tt *vdl.Type) error {
 			return nil
 		}
 	}
-	if tt.Kind() == vdl.Byte {
+	if e.version == Version80 && tt.Kind() == vdl.Byte {
 		e.buf.WriteOneByte(byte(src))
 	} else {
 		binaryEncodeUint(e.buf, src)
@@ -342,8 +343,11 @@ func (e *encoder) FromUint(src uint64, tt *vdl.Type) error {
 }
 
 func (e *encoder) FromInt(src int64, tt *vdl.Type) error {
-	if err := e.prepareType(tt, vdl.Int16, vdl.Int32, vdl.Int64); err != nil {
+	if err := e.prepareType(tt, vdl.Int8, vdl.Int16, vdl.Int32, vdl.Int64); err != nil {
 		return err
+	}
+	if e.version == Version80 && tt.Kind() == vdl.Int8 {
+		return verror.New(errUnsupportedInVOMVersion, nil, "int8", e.version)
 	}
 	if e.isStructFieldValue() && e.topType().Kind() != vdl.Any {
 		if src != 0 || !e.canIgnoreField(false) {

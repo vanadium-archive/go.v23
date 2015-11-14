@@ -40,6 +40,7 @@ var (
 	Uint16Type     = primitiveType(Uint16)
 	Uint32Type     = primitiveType(Uint32)
 	Uint64Type     = primitiveType(Uint64)
+	Int8Type       = primitiveType(Int8)
 	Int16Type      = primitiveType(Int16)
 	Int32Type      = primitiveType(Int32)
 	Int64Type      = primitiveType(Int64)

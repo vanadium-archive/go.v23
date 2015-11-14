@@ -83,18 +83,18 @@ const Tests = []types.TestCase {
 		"80", "", "4e00",
 	},
 	// 80                   Version                          128 [vom version 0]
-	// DumpStatus{MsgId: 0, MsgN: 1, Buf(5): "4e03010203"}
+	// DumpStatus{MsgId: 0, MsgN: 1, Buf(5): "4e03ff0001"}
 	// 4e                   MsgId                             39
 	//                      ValueMsg                          39 [[]byte]
 	// 03                   ByteLen                            3 [bytes len]
-	// 010203               PrimValue             "\x01\x02\x03" [bytes]
-	// DumpStatus{MsgId: 39, MsgN: 5, Value: []byte("\x01\x02\x03")}
+	// ff0001               PrimValue             "\xff\x00\x01" [bytes]
+	// DumpStatus{MsgId: 39, MsgN: 5, Value: []byte("\xff\x00\x01")}
 	{
-		`[]byte("\x01\x02\x03")`,
-		[]byte("\x01\x02\x03"),
+		`[]byte("\xff\x00\x01")`,
+		[]byte("\xff\x00\x01"),
 		"[]byte",
-		"804e03010203",
-		"80", "", "4e03010203",
+		"804e03ff0001",
+		"80", "", "4e03ff0001",
 	},
 	// 80                   Version                          128 [vom version 0]
 	// DumpStatus{MsgId: 0, MsgN: 1, Buf(6): "4e0461646566"}
@@ -1819,7 +1819,7 @@ const Tests = []types.TestCase {
 		"80", "512c030026762e696f2f7632332f766f6d2f74657374646174612f74797065732e4e42797465536c6963650102e1", "5200",
 	},
 	// 80                   Version                          128 [vom version 0]
-	// DumpStatus{MsgId: 0, MsgN: 1, Buf(51): "512c030026762e696f2f7632332f766f6d2f74657374646174612f74797065732e4e42797465536c6963650102e15203010203"}
+	// DumpStatus{MsgId: 0, MsgN: 1, Buf(51): "512c030026762e696f2f7632332f766f6d2f74657374646174612f74797065732e4e42797465536c6963650102e15203ff0001"}
 	// 51                   MsgId                            -41
 	//                      TypeMsg                           41
 	// 2c                   MsgLen                            44
@@ -1830,18 +1830,18 @@ const Tests = []types.TestCase {
 	// 01                   Index                              1 [v.io/v23/vom.wireList.Elem]
 	// 02                   PrimValue                          2 [uint]
 	// e1                   Control                          End [v.io/v23/vom.wireList END]
-	// DumpStatus{MsgId: -41, MsgLen: 44, MsgN: 44, Buf(5): "5203010203"}
+	// DumpStatus{MsgId: -41, MsgLen: 44, MsgN: 44, Buf(5): "5203ff0001"}
 	// 52                   MsgId                             41
 	//                      ValueMsg                          41 [v.io/v23/vom/testdata/types.NByteSlice []byte]
 	// 03                   ByteLen                            3 [bytes len]
-	// 010203               PrimValue             "\x01\x02\x03" [bytes]
-	// DumpStatus{MsgId: 41, MsgN: 5, Value: v.io/v23/vom/testdata/types.NByteSlice []byte("\x01\x02\x03")}
+	// ff0001               PrimValue             "\xff\x00\x01" [bytes]
+	// DumpStatus{MsgId: 41, MsgN: 5, Value: v.io/v23/vom/testdata/types.NByteSlice []byte("\xff\x00\x01")}
 	{
-		`types.NByteSlice("\x01\x02\x03")`,
-		types.NByteSlice("\x01\x02\x03"),
+		`types.NByteSlice("\xff\x00\x01")`,
+		types.NByteSlice("\xff\x00\x01"),
 		"v.io/v23/vom/testdata/types.NByteSlice []byte",
-		"80512c030026762e696f2f7632332f766f6d2f74657374646174612f74797065732e4e42797465536c6963650102e15203010203",
-		"80", "512c030026762e696f2f7632332f766f6d2f74657374646174612f74797065732e4e42797465536c6963650102e1", "5203010203",
+		"80512c030026762e696f2f7632332f766f6d2f74657374646174612f74797065732e4e42797465536c6963650102e15203ff0001",
+		"80", "512c030026762e696f2f7632332f766f6d2f74657374646174612f74797065732e4e42797465536c6963650102e1", "5203ff0001",
 	},
 	// 80                   Version                          128 [vom version 0]
 	// DumpStatus{MsgId: 0, MsgN: 1, Buf(51): "512c030026762e696f2f7632332f766f6d2f74657374646174612f74797065732e4e42797465536c6963650102e15203616263"}
@@ -1896,7 +1896,7 @@ const Tests = []types.TestCase {
 		"80", "512e020026762e696f2f7632332f766f6d2f74657374646174612f74797065732e4e42797465417272617901020204e1", "520000000000",
 	},
 	// 80                   Version                          128 [vom version 0]
-	// DumpStatus{MsgId: 0, MsgN: 1, Buf(54): "512e020026762e696f2f7632332f766f6d2f74657374646174612f74797065732e4e42797465417272617901020204e1520001020300"}
+	// DumpStatus{MsgId: 0, MsgN: 1, Buf(54): "512e020026762e696f2f7632332f766f6d2f74657374646174612f74797065732e4e42797465417272617901020204e15200ff000100"}
 	// 51                   MsgId                            -41
 	//                      TypeMsg                           41
 	// 2e                   MsgLen                            46
@@ -1909,18 +1909,18 @@ const Tests = []types.TestCase {
 	// 02                   Index                              2 [v.io/v23/vom.wireArray.Len]
 	// 04                   PrimValue                          4 [uint]
 	// e1                   Control                          End [v.io/v23/vom.wireArray END]
-	// DumpStatus{MsgId: -41, MsgLen: 46, MsgN: 46, Buf(6): "520001020300"}
+	// DumpStatus{MsgId: -41, MsgLen: 46, MsgN: 46, Buf(6): "5200ff000100"}
 	// 52                   MsgId                             41
 	//                      ValueMsg                          41 [v.io/v23/vom/testdata/types.NByteArray [4]byte]
 	// 00                   ByteLen                            4 [bytes len]
-	// 01020300             PrimValue         "\x01\x02\x03\x00" [bytes]
-	// DumpStatus{MsgId: 41, MsgN: 6, Value: v.io/v23/vom/testdata/types.NByteArray [4]byte("\x01\x02\x03\x00")}
+	// ff000100             PrimValue         "\xff\x00\x01\x00" [bytes]
+	// DumpStatus{MsgId: 41, MsgN: 6, Value: v.io/v23/vom/testdata/types.NByteArray [4]byte("\xff\x00\x01\x00")}
 	{
-		`types.NByteArray("\x01\x02\x03\x00")`,
-		types.NByteArray("\x01\x02\x03\x00"),
+		`types.NByteArray("\xff\x00\x01\x00")`,
+		types.NByteArray("\xff\x00\x01\x00"),
 		"v.io/v23/vom/testdata/types.NByteArray [4]byte",
-		"80512e020026762e696f2f7632332f766f6d2f74657374646174612f74797065732e4e42797465417272617901020204e1520001020300",
-		"80", "512e020026762e696f2f7632332f766f6d2f74657374646174612f74797065732e4e42797465417272617901020204e1", "520001020300",
+		"80512e020026762e696f2f7632332f766f6d2f74657374646174612f74797065732e4e42797465417272617901020204e15200ff000100",
+		"80", "512e020026762e696f2f7632332f766f6d2f74657374646174612f74797065732e4e42797465417272617901020204e1", "5200ff000100",
 	},
 	// 80                   Version                          128 [vom version 0]
 	// DumpStatus{MsgId: 0, MsgN: 1, Buf(54): "512e020026762e696f2f7632332f766f6d2f74657374646174612f74797065732e4e42797465417272617901020204e1520061626364"}
@@ -9192,26 +9192,21 @@ const ConvertTests = map[string][]types.ConvertGroup{
 			{ complex128(1.5-1i), },
 		},
 	},
-	"string, []byte, [n]byte, and enum": {
+	"string and enum": {
 		{
 			"enum (A)",
 			typeobject(types.NEnum),
-			{ "A", types.NString("A"), types.NEnum.A, []byte("A"), },
+			{ "A", types.NString("A"), types.NEnum.A, },
 		},
 		{
 			"enum (brie)",
 			typeobject(types.BrieEnum),
-			{ "Brie", types.NString("Brie"), types.BrieEnum.Brie, types.FoodEnum.Brie, []byte("Brie"), types.NByteArray("Brie"), },
-		},
-		{
-			"[4]byte",
-			typeobject(types.NByteArray),
-			{ "Bean", types.NString("Bean"), types.BeanEnum.Bean, types.FoodEnum.Bean, []byte("Bean"), types.NByteArray("Bean"), },
+			{ "Brie", types.NString("Brie"), types.BrieEnum.Brie, types.FoodEnum.Brie, },
 		},
 		{
 			"string",
 			typeobject(types.NString),
-			{ "Cherry", types.NString("Cherry"), types.FoodEnum.Cherry, []byte("Cherry"), types.NByteSlice("Cherry"), },
+			{ "Cherry", types.NString("Cherry"), types.FoodEnum.Cherry, },
 		},
 	},
 	"struct, map, and set": {

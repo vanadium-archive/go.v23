@@ -242,19 +242,26 @@ func (d *Decoder) decodeValue(tt *vdl.Type, target vdl.Target) error {
 			return err
 		}
 		return target.FromBool(v, ttFrom)
-	case vdl.Byte:
-		v, err := d.mr.ReadByte()
-		if err != nil {
-			return err
-		}
-		return target.FromUint(uint64(v), ttFrom)
-	case vdl.Uint16, vdl.Uint32, vdl.Uint64:
-		v, err := binaryDecodeUint(d.mr)
-		if err != nil {
-			return err
+	case vdl.Byte, vdl.Uint16, vdl.Uint32, vdl.Uint64:
+		var v uint64
+		if tt.Kind() == vdl.Byte && d.mr.version == Version80 {
+			b, err := d.mr.ReadByte()
+			if err != nil {
+				return err
+			}
+			v = uint64(b)
+		} else {
+			var err error
+			v, err = binaryDecodeUint(d.mr)
+			if err != nil {
+				return err
+			}
 		}
 		return target.FromUint(v, ttFrom)
-	case vdl.Int16, vdl.Int32, vdl.Int64:
+	case vdl.Int8, vdl.Int16, vdl.Int32, vdl.Int64:
+		if d.mr.version == Version80 && tt.Kind() == vdl.Int8 {
+			return verror.New(errUnsupportedInVOMVersion, nil, "int8", d.mr.version)
+		}
 		v, err := binaryDecodeInt(d.mr)
 		if err != nil {
 			return err
@@ -503,9 +510,18 @@ func (d *Decoder) ignoreValue(tt *vdl.Type) error {
 		return d.mr.Skip(len)
 	}
 	switch kind := tt.Kind(); kind {
-	case vdl.Bool, vdl.Byte:
+	case vdl.Bool:
 		return d.mr.Skip(1)
-	case vdl.Uint16, vdl.Uint32, vdl.Uint64, vdl.Int16, vdl.Int32, vdl.Int64, vdl.Float32, vdl.Float64, vdl.Enum, vdl.TypeObject:
+	case vdl.Byte:
+		if d.mr.version == Version80 {
+			return d.mr.Skip(1)
+		} else {
+			return binaryIgnoreUint(d.mr)
+		}
+	case vdl.Uint16, vdl.Uint32, vdl.Uint64, vdl.Int8, vdl.Int16, vdl.Int32, vdl.Int64, vdl.Float32, vdl.Float64, vdl.Enum, vdl.TypeObject:
+		if d.mr.version == Version80 && tt.Kind() == vdl.Int8 {
+			return verror.New(errUnsupportedInVOMVersion, nil, "int8", d.mr.version)
+		}
 		// The underlying encoding of all these types is based on uint.
 		return binaryIgnoreUint(d.mr)
 	case vdl.Complex64, vdl.Complex128:

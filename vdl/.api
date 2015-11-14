@@ -10,6 +10,7 @@ pkg vdl, const Float64 Kind
 pkg vdl, const Int16 Kind
 pkg vdl, const Int32 Kind
 pkg vdl, const Int64 Kind
+pkg vdl, const Int8 Kind
 pkg vdl, const List Kind
 pkg vdl, const Map Kind
 pkg vdl, const Optional Kind
@@ -45,6 +46,7 @@ pkg vdl, func FromValue(Target, *Value) error
 pkg vdl, func Int16Value(int16) *Value
 pkg vdl, func Int32Value(int32) *Value
 pkg vdl, func Int64Value(int64) *Value
+pkg vdl, func Int8Value(int8) *Value
 pkg vdl, func ListType(*Type) *Type
 pkg vdl, func MapType(*Type, *Type) *Type
 pkg vdl, func NamedType(string, *Type) *Type
@@ -106,7 +108,6 @@ pkg vdl, method (*TypeBuilder) Struct() PendingStruct
 pkg vdl, method (*TypeBuilder) Union() PendingUnion
 pkg vdl, method (*Value) Assign(*Value) *Value
 pkg vdl, method (*Value) AssignBool(bool) *Value
-pkg vdl, method (*Value) AssignByte(byte) *Value
 pkg vdl, method (*Value) AssignBytes([]byte) *Value
 pkg vdl, method (*Value) AssignComplex(complex128) *Value
 pkg vdl, method (*Value) AssignEnumIndex(int) *Value
@@ -121,7 +122,6 @@ pkg vdl, method (*Value) AssignTypeObject(*Type) *Value
 pkg vdl, method (*Value) AssignUint(uint64) *Value
 pkg vdl, method (*Value) AssignUnionField(int, *Value) *Value
 pkg vdl, method (*Value) Bool() bool
-pkg vdl, method (*Value) Byte() byte
 pkg vdl, method (*Value) Bytes() []byte
 pkg vdl, method (*Value) Complex() complex128
 pkg vdl, method (*Value) ContainsKey(*Value) bool
@@ -243,6 +243,7 @@ pkg vdl, var Float64Type *Type
 pkg vdl, var Int16Type *Type
 pkg vdl, var Int32Type *Type
 pkg vdl, var Int64Type *Type
+pkg vdl, var Int8Type *Type
 pkg vdl, var StringType *Type
 pkg vdl, var TypeObjectType *Type
 pkg vdl, var Uint16Type *Type

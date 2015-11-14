@@ -508,6 +508,7 @@ var (
 	Uint16TypeN     = NamedType("NUint16", Uint16Type)
 	Uint32TypeN     = NamedType("NUint32", Uint32Type)
 	Uint64TypeN     = NamedType("NUint64", Uint64Type)
+	Int8TypeN       = NamedType("NInt8", Int8Type)
 	Int16TypeN      = NamedType("NInt16", Int16Type)
 	Int32TypeN      = NamedType("NInt32", Int32Type)
 	Int64TypeN      = NamedType("NInt64", Int64Type)
@@ -517,12 +518,9 @@ var (
 	Complex128TypeN = NamedType("NComplex128", Complex128Type)
 	StringTypeN     = NamedType("NString", StringType)
 
-	// Composite types representing strings and bytes.
-	BytesType   = ListType(ByteType)
-	BytesTypeN  = NamedType("NBytes", BytesType)
-	Bytes3Type  = ArrayType(3, ByteType)
-	Bytes3TypeN = NamedType("NBytes3", Bytes3Type)
 	// Composite types representing sequences of numbers.
+	Array3ByteType       = ArrayType(3, ByteType)
+	Array3ByteTypeN      = NamedType("NArray3Byte", ArrayType(3, ByteTypeN))
 	Array3Uint64Type     = ArrayType(3, Uint64Type)
 	Array3Uint64TypeN    = NamedType("NArray3Uint64", ArrayType(3, Uint64TypeN))
 	Array3Int64Type      = ArrayType(3, Int64Type)
@@ -531,6 +529,8 @@ var (
 	Array3Float64TypeN   = NamedType("NArray3Float64", ArrayType(3, Float64TypeN))
 	Array3Complex64Type  = ArrayType(3, Complex64Type)
 	Array3Complex64TypeN = NamedType("NArray3Complex64", ArrayType(3, Complex64TypeN))
+	ListByteType         = ListType(ByteType)
+	ListByteTypeN        = NamedType("NListByte", ListType(ByteTypeN))
 	ListUint64Type       = ListType(Uint64Type)
 	ListUint64TypeN      = NamedType("NListUint64", ListType(Uint64TypeN))
 	ListInt64Type        = ListType(Int64Type)
@@ -695,11 +695,9 @@ func StructBoolValue(t *Type, x ...SB) *Value {
 
 func AssignNum(v *Value, num float64) *Value {
 	switch v.Kind() {
-	case Byte:
-		v.AssignByte(byte(num))
-	case Uint16, Uint32, Uint64:
+	case Byte, Uint16, Uint32, Uint64:
 		v.AssignUint(uint64(num))
-	case Int16, Int32, Int64:
+	case Int8, Int16, Int32, Int64:
 		v.AssignInt(int64(num))
 	case Float32, Float64:
 		v.AssignFloat(num)
