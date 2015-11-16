@@ -21,7 +21,7 @@ package vom
 TODO: Describe user-defined coders (VomEncode?)
 TODO: Describe wire format, something like this:
 
-Wire protocol. // IMPLEMENTED PROTOCOL
+Wire protocol. Version 0x80
 
 The protocol consists of a stream of messages, where each message describes
 either a type or a value.  All values are typed.  Here's the protocol grammar:
@@ -58,27 +58,48 @@ either a type or a value.  All values are typed.  Here's the protocol grammar:
     NIL
   | +typeID Value
 
+Wire protocol. Version 0x81
 
+The protocol consists of a stream of interleaved messages, broken
+into into atomic chunks. Each message describes either a typed
+value or a type definition. The grammar for chunked type and value
+messages takes the following form:
 
-Wire protocol. // NEW PROTOCOL, NOT IMPLEMENTED YET
-
-The protocol consists of a stream of messages, where each message describes
-either a type or a value.  All values are typed.  Here's the protocol grammar:
   VOM:
-    Message*
-  Message:
-    (TypeMsg | ValueMsg)
-  TypeMsg:
-    TypeID WireType
-  ValueMsg:
-    TypeID primitive
-  | TypeID CompositeV
+    TypeMessage | ValueMessage
+  ValueMessage:
+  	TypeId MessageData |
+  	WireCtrlValueFirstChunk TypeId MessageData
+  	  (WireCtrlValueChunk MessageData)*
+  	  WireCtrlValueLastChunk MessageData |
+  	WireCtrlValueFirstChunk TypeId ReferencedTypeIds MessageData TypeMessage*
+  	  (WireCtrlValueChunk ReferencedTypeIds MessageData TypeMessage*)*
+  	  WireCtrlValueLastChunk ReferencedTypeIds MessageData
+  TypeMessage:
+    -TypeId MessageData |
+    WireCtrlTypeFirstChunk -TypeId MessageData
+    	(WireCtrlTypeChunk MessageData)*
+    	WireCtrlValueLastChunk MessageData
+  ReferencedTypeIds:
+    TypeId*
+
+The MessageData from each TypeMessage or ValueMessage is concatenated
+together to form the corresponding TypeMessageBody or ValueMessageBody.
+In addition, any ReferencedTypeIds that are sent in a value message are
+concatenated to form the ReferencedTypeLookupTable for that message.
+Here is the grammar for the contents:
+  ValueMessageBody:
+  	primitive | len CompositeV
+  TypeMessageBody:
+  	WireType (handled as a Value)
   Value:
     primitive |  CompositeV
   CompositeV:
-    ArrayV | ListV | SetV | MapV | StructV | UnionV | AnyV
+    ArrayV | ListV | SetV | MapV | StructV | UnionV | OptionalV | AnyV
   ArrayV:
     len Value*len
+    // len is always 0 for array since we know the exact size of the array. This
+    // prefix is to ensure the decoder can distinguish NIL from the array value.
   ListV:
     len Value*len
   SetV:
@@ -86,11 +107,16 @@ either a type or a value.  All values are typed.  Here's the protocol grammar:
   MapV:
     len (Value Value)*len
   StructV:
-    (index Value)* END  // index is the 0-based field index.
+    (index Value)* EOF  // index is the 0-based field index and
+                        // zero value fields can be skipped.
   UnionV:
     index Value         // index is the 0-based field index.
+  OptionalV:
+    NIL
+  | Value
   AnyV:
-    typeID Value
+    NIL
+  | Index into ReferencedTypeLookupTable.
 
 TODO(toddw): We need the message lengths for fast binary->binary transcoding.
 

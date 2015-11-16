@@ -147,16 +147,14 @@ func newEncoderWithoutVersionByte(version Version, w io.Writer, typeEnc *TypeEnc
 // Encode(nil) is a special case that encodes the zero value of the any type.
 // See the discussion of zero values in the Value documentation.
 func (e *Encoder) Encode(v interface{}) error {
-	if raw, ok := v.(*RawValue); ok && raw != nil {
-		// TODO(toddw): Decode from RawValue, encoding into e.enc.
-		_ = raw
-		panic("Encode(RawValue) NOT IMPLEMENTED")
-	}
 	if !e.enc.sentVersionByte {
 		if _, err := e.enc.writer.Write([]byte{byte(e.enc.version)}); err != nil {
 			return err
 		}
 		e.enc.sentVersionByte = true
+	}
+	if raw, ok := v.(*RawValue); ok && raw != nil {
+		return e.encodeRaw(raw)
 	}
 	vdlType := extractType(v)
 	tid, err := e.enc.typeEnc.encode(vdlType)
@@ -170,6 +168,32 @@ func (e *Encoder) Encode(v interface{}) error {
 		return err
 	}
 	return e.enc.finishEncode()
+}
+
+func (e *Encoder) encodeRaw(raw *RawValue) error {
+	if e.enc.version == Version80 {
+		return verror.New(errUnsupportedInVOMVersion, nil, e.enc.version, "RawValue")
+	}
+	tid, err := e.enc.typeEnc.encode(raw.t)
+	if err != nil {
+		return err
+	}
+	if err := e.enc.buf.StartMessage(raw.t.ContainsAnyOrTypeObject(), hasChunkLen(raw.t), int64(tid)); err != nil {
+		return err
+	}
+	for i, refType := range raw.refTypes {
+		mid, err := e.enc.typeEnc.encode(refType)
+		if err != nil {
+			return err
+		}
+		if index := e.enc.buf.ReferenceTypeID(mid); index != uint64(i) {
+			return verror.New(verror.ErrInternal, nil, "index unexpectedly out of order")
+		}
+	}
+	if err := e.enc.buf.Write(raw.value); err != nil {
+		return err
+	}
+	return e.enc.buf.FinishMessage()
 }
 
 // TODO(bprosnitz) Remove -- this is copied from vdl

@@ -5,6 +5,8 @@
 package vom
 
 import (
+	"fmt"
+
 	"v.io/v23/vdl"
 	"v.io/v23/verror"
 )
@@ -66,6 +68,8 @@ type messageReader struct {
 	typeMsg    messageData
 	valueMsg   messageData
 
+	finalChunk bool // current chunk is flagged as the final chunk of the message
+
 	lookupType     func(tid typeId) (*vdl.Type, error)
 	readSingleType func() error
 }
@@ -81,9 +85,8 @@ func (mr *messageReader) hasInterleavedTypesAndValues() bool {
 
 func (mr *messageReader) startChunk() (msgConsumed bool, err error) {
 	if leftover := mr.buf.RemoveLimit(); leftover > 0 {
-		return false, verror.New(errLeftOverBytes, nil)
+		return false, verror.New(errLeftOverBytes, nil, leftover)
 	}
-
 	if mr.version == 0 {
 		version, err := mr.buf.ReadByte()
 		if err != nil {
@@ -102,16 +105,37 @@ func (mr *messageReader) startChunk() (msgConsumed bool, err error) {
 
 	var activeMsg *messageData
 	switch cr {
-	case 0:
+	case 0, WireCtrlTypeFirstChunk, WireCtrlValueFirstChunk:
+		origCr := cr
+		if cr != 0 {
+			// This is the start of a continuation - read the type id that follows.
+			mr.finalChunk = false
+			mid, cr, err = decbufBinaryDecodeIntWithControl(mr.buf)
+			if err != nil {
+				return false, err
+			}
+			if cr != 0 {
+				return false, verror.New(errInvalid, nil)
+			}
+		} else {
+			mr.finalChunk = true
+		}
+
 		var tid typeId
 		if mid < 0 {
 			mr.curMsgKind = typeMessage
 			activeMsg = &mr.typeMsg
 			tid = typeId(-mid)
+			if origCr == WireCtrlValueFirstChunk {
+				return false, verror.New(errInvalid, nil)
+			}
 		} else if mid > 0 {
 			mr.curMsgKind = valueMessage
 			activeMsg = &mr.valueMsg
 			tid = typeId(mid)
+			if origCr == WireCtrlTypeFirstChunk {
+				return false, verror.New(errInvalid, nil)
+			}
 		} else {
 			return false, verror.New(errDecodeZeroTypeID, nil)
 		}
@@ -120,17 +144,23 @@ func (mr *messageReader) startChunk() (msgConsumed bool, err error) {
 			return false, verror.New(errInvalid, nil)
 		}
 		activeMsg.tid = tid
-	case WireCtrlTypeCont:
+	case WireCtrlTypeChunk, WireCtrlTypeLastChunk:
 		mr.curMsgKind = typeMessage
 		activeMsg = &mr.typeMsg
 		if !activeMsg.HasMessage() {
 			return false, verror.New(errContChunkBeforeNew, nil)
 		}
-	case WireCtrlValueCont:
+		if cr == WireCtrlTypeLastChunk {
+			mr.finalChunk = true
+		}
+	case WireCtrlValueChunk, WireCtrlValueLastChunk:
 		mr.curMsgKind = valueMessage
 		activeMsg = &mr.valueMsg
 		if !activeMsg.HasMessage() {
 			return false, verror.New(errContChunkBeforeNew, nil)
+		}
+		if cr == WireCtrlValueLastChunk {
+			mr.finalChunk = true
 		}
 	default:
 		return false, verror.New(errBadControlCode, nil)
@@ -235,7 +265,7 @@ func (mr *messageReader) StartValueMessage() (typeId, error) {
 
 func (mr *messageReader) EndMessage() error {
 	if leftover := mr.buf.RemoveLimit(); leftover > 0 {
-		return verror.New(errLeftOverBytes, nil)
+		return verror.New(errLeftOverBytes, nil, leftover)
 	}
 	switch mr.curMsgKind {
 	case typeMessage:
@@ -332,6 +362,92 @@ func (mr *messageReader) ReadIntoBuf(p []byte) error {
 	return nil
 }
 
+// ReadAllValueBytes reads all of the bytes in a value message.
+// TODO(bprosnitz) We currently read all of the value bytes into a single buffer. We may want to change our strategy.
+func (mr *messageReader) ReadAllValueBytes() ([]byte, error) {
+	if err := mr.nextReadableChunk(); err != nil {
+		return nil, err
+	}
+	if mr.curMsgKind == typeMessage {
+		return nil, verror.New(verror.ErrInternal, nil, "ReadAllValueBytes() only works with value messages")
+	}
+	t, err := mr.lookupType(mr.valueMsg.tid)
+	if err != nil {
+		return nil, err
+	}
+
+	// Immediately read the body of types without lengths -- they cannot be chunked.
+	if !hasChunkLen(t) {
+		switch t.Kind() {
+		case vdl.Byte, vdl.Bool, vdl.Uint16, vdl.Uint32, vdl.Uint64, vdl.Int8, vdl.Int16, vdl.Int32, vdl.Int64, vdl.Float32, vdl.Float64, vdl.TypeObject, vdl.Enum:
+			_, byteLen, err := binaryPeekUint(mr)
+			if err != nil {
+				return nil, err
+			}
+			buf := make([]byte, byteLen)
+			err = mr.ReadIntoBuf(buf)
+			return buf, err
+		case vdl.String, vdl.List: // string, []byte
+			len, byteLen, err := binaryPeekUint(mr)
+			if err != nil {
+				return nil, err
+			}
+			copyLen := byteLen + int(len)
+			buf := make([]byte, copyLen)
+			err = mr.ReadIntoBuf(buf)
+			return buf, err
+		case vdl.Array: // [N]byte
+			b, err := mr.PeekByte()
+			if err != nil {
+				return nil, err
+			}
+			if b != 0 {
+				return nil, fmt.Errorf("got illegal value for array 'len' field - expected 0")
+			}
+			buf := make([]byte, t.Len()+1)
+			err = mr.ReadIntoBuf(buf)
+			return buf, err
+		default:
+			panic(fmt.Sprintf("unhandled primitive kind: %v", t.Kind()))
+		}
+	}
+
+	// Copy each chunk until the end of the message is reached.
+	// Use buf as an expanding buffer, growing in powers of 2.
+	// length is the length of valid data within buf.
+	var buf []byte
+	var length int
+	for {
+		toRead := mr.buf.Limit()
+		if length+toRead > len(buf) {
+			lenToUse := 1
+			for lenToUse < length+toRead {
+				lenToUse *= 2
+			}
+			newBuf := make([]byte, lenToUse)
+			copy(newBuf, buf)
+			buf = newBuf
+		}
+
+		n, err := mr.buf.ReadIntoBuf(buf[length : length+toRead])
+		if err != nil {
+			return nil, err
+		}
+		if n != toRead {
+			return nil, fmt.Errorf("unexpectedly received partial read")
+		}
+		length += toRead
+
+		if mr.finalChunk {
+			return buf[:length], nil
+		}
+
+		if err := mr.nextChunk(); err != nil {
+			return nil, err
+		}
+	}
+}
+
 func (mr *messageReader) ReferencedType(index uint64) (t *vdl.Type, err error) {
 	if mr.version == Version80 {
 		panic("type references shouldn't be used for version 0x80")
@@ -351,6 +467,18 @@ func (mr *messageReader) ReferencedType(index uint64) (t *vdl.Type, err error) {
 	}
 	t, err = mr.lookupType(tid)
 	return
+}
+
+// AllReferencedTypes returns a list of all types referenced in this message.
+func (mr *messageReader) AllReferencedTypes() []typeId {
+	switch mr.curMsgKind {
+	case typeMessage:
+		return mr.typeMsg.refTypes.tids
+	case valueMessage:
+		return mr.valueMsg.refTypes.tids
+	default:
+		panic("unknown message kind")
+	}
 }
 
 type referencedTypes struct {

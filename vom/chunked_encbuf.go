@@ -58,7 +58,7 @@ func (b *chunkedEncbuf) StartMessage(hasAnyOrTypeObject, hasLen bool, typeID int
 }
 
 func (b *chunkedEncbuf) FinishMessage() error {
-	return b.finishChunk()
+	return b.finishChunk(true)
 }
 
 // Grow allocates the specified amount of space in the current buffer.
@@ -67,7 +67,7 @@ func (b *chunkedEncbuf) FinishMessage() error {
 // they may be have been sent.
 func (b *chunkedEncbuf) Grow(n int) ([]byte, error) {
 	if b.encBuf.SpaceAvailable() < n {
-		if err := b.finishChunk(); err != nil {
+		if err := b.finishChunk(false); err != nil {
 			return nil, err
 		}
 	}
@@ -77,7 +77,7 @@ func (b *chunkedEncbuf) Grow(n int) ([]byte, error) {
 // WriteOneByte writes byte c into the buffer.
 func (b *chunkedEncbuf) WriteOneByte(c byte) error {
 	if b.encBuf.SpaceAvailable() < 1 {
-		if err := b.finishChunk(); err != nil {
+		if err := b.finishChunk(false); err != nil {
 			return err
 		}
 	}
@@ -92,7 +92,7 @@ func (b *chunkedEncbuf) Write(p []byte) error {
 		amt := b.encBuf.WriteMaximumPossible(p)
 		p = p[amt:]
 		if b.encBuf.SpaceAvailable() == 0 {
-			if err := b.finishChunk(); err != nil {
+			if err := b.finishChunk(false); err != nil {
 				return err
 			}
 		}
@@ -117,15 +117,31 @@ func (b *chunkedEncbuf) writeMessageHeaderContents() {
 
 }
 
-func (b *chunkedEncbuf) writeChunkHeaderContents() {
+func (b *chunkedEncbuf) writeChunkHeaderContents(finalChunk bool) {
 	if !b.messageStartHeaderSent {
+		// First chunk of message
+		if !finalChunk {
+			if b.typeID > 0 {
+				b.headerBuf.WriteOneByte(WireCtrlValueFirstChunk)
+			} else {
+				b.headerBuf.WriteOneByte(WireCtrlTypeFirstChunk)
+			}
+		}
 		binaryEncodeIntEncBuf(b.headerBuf, int64(b.typeID))
 		b.messageStartHeaderSent = true
 	} else {
-		if b.typeID > 0 {
-			b.headerBuf.WriteOneByte(WireCtrlValueCont)
+		if finalChunk {
+			if b.typeID > 0 {
+				b.headerBuf.WriteOneByte(WireCtrlValueLastChunk)
+			} else {
+				b.headerBuf.WriteOneByte(WireCtrlTypeLastChunk)
+			}
 		} else {
-			b.headerBuf.WriteOneByte(WireCtrlTypeCont)
+			if b.typeID > 0 {
+				b.headerBuf.WriteOneByte(WireCtrlValueChunk)
+			} else {
+				b.headerBuf.WriteOneByte(WireCtrlTypeChunk)
+			}
 		}
 	}
 	if b.hasAnyOrTypeObject {
@@ -140,14 +156,14 @@ func (b *chunkedEncbuf) writeChunkHeaderContents() {
 	}
 }
 
-func (b *chunkedEncbuf) finishChunk() error {
+func (b *chunkedEncbuf) finishChunk(finalChunk bool) error {
 	if b.encBuf.Len() == 0 && b.messageStartHeaderSent {
 		// Don't send empty messages that aren't the initial chunk.
 		b.encBuf.Reset()
 		return nil
 	}
 	b.headerBuf.Reset()
-	b.writeChunkHeaderContents()
+	b.writeChunkHeaderContents(finalChunk)
 	if _, err := b.writer.Write(b.headerBuf.Bytes()); err != nil {
 		b.encBuf.Reset()
 		return err

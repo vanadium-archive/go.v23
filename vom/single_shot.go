@@ -131,25 +131,26 @@ func computeTypeDecoderCacheKey(message []byte) (string, error) {
 		switch id, cr, byteLen, err := byteSliceBinaryPeekIntWithControl(message[readPos:]); {
 		case err != nil:
 			return "", err
-		case cr != 0 && cr != WireCtrlTypeCont && cr != WireCtrlValueCont:
-			return "", verror.New(errBadControlCode, nil)
-		case id > 0 || cr == WireCtrlValueCont:
+		case id > 0 || cr == WireCtrlValueFirstChunk:
 			// This is a value message.  The bytes read so far include the version
 			// byte and all type messages; use all of these bytes as the cache key.
 			//
 			// TODO(toddw): Take a fingerprint of these bytes to reduce memory usage.
 			return string(message[:readPos]), nil
-		case id < 0 || cr == WireCtrlTypeCont:
-			// This is a type message.  Skip the bytes for the id, and decode the
-			// message length (which always exists for wireType), and skip those bytes
-			// too to move to the next message.
+		case id < 0 || cr == WireCtrlTypeFirstChunk || cr == WireCtrlTypeChunk || cr == WireCtrlTypeLastChunk:
+
+			// This is a type message.  Skip the bytes for the id or control code, and
+			// decode the message length (which always exists for wireType), and skip
+			// those bytes too to move to the next message.
 			readPos += byteLen
 			msgLen, byteLen, err := byteSliceBinaryPeekLen(message[readPos:])
 			if err != nil {
 				return "", err
 			}
 			readPos += byteLen + msgLen
-		case id == 0:
+		case cr > 0:
+			return "", verror.New(errBadControlCode, nil)
+		default:
 			return "", verror.New(errDecodeZeroTypeID, nil)
 		}
 	}

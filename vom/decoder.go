@@ -130,23 +130,22 @@ func (d *Decoder) decodeRaw(raw *RawValue) error {
 	if err != nil {
 		return err
 	}
-	valType, err := d.typeDec.lookupType(tid)
-	if err != nil {
+	if raw.t, err = d.typeDec.lookupType(tid); err != nil {
 		return err
 	}
-	valLen, err := d.decodeValueByteLen(valType)
-	if err != nil {
+	if raw.value, err = d.mr.ReadAllValueBytes(); err != nil {
 		return err
 	}
-	raw.typeDec = d.typeDec
-	raw.valType = valType
-	if cap(raw.data) >= valLen {
-		raw.data = raw.data[:valLen]
+	refTypeLen := len(d.mr.AllReferencedTypes())
+	if cap(raw.refTypes) >= refTypeLen {
+		raw.refTypes = raw.refTypes[:refTypeLen]
 	} else {
-		raw.data = make([]byte, valLen)
+		raw.refTypes = make([]*vdl.Type, refTypeLen)
 	}
-	if err := d.mr.ReadIntoBuf(raw.data); err != nil {
-		return err
+	for i, tid := range d.mr.AllReferencedTypes() {
+		if raw.refTypes[i], err = d.typeDec.lookupType(tid); err != nil {
+			return err
+		}
 	}
 	return d.mr.EndMessage()
 }

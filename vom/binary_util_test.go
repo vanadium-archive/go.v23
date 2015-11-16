@@ -107,7 +107,7 @@ func TestBinaryEncodeDecode(t *testing.T) {
 		case string:
 			binaryEncodeString(sb, val)
 		}
-		if err := sb.chunked.finishChunk(); err != nil {
+		if err := sb.chunked.finishChunk(true); err != nil {
 			t.Fatalf("Error finishing chunk\n")
 		}
 		expectedHex := fmt.Sprintf("%x", msgID*2) + test.hex // message id is prepended to hex

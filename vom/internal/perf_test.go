@@ -134,6 +134,8 @@ func TestVomEncoder(t *testing.T) {
 		testing.AllocsPerRun(10, func() { vomEncoderEncode(t, 1) }))
 	fmt.Printf("Allocations per vom.Encoder.Encode (1000 Customers): %6.0f\n",
 		testing.AllocsPerRun(10, func() { vomEncoderEncode(t, 1000) }))
+	fmt.Printf("Allocations per vom.Encoder.Encode (1000 RawValues): %6.0f\n",
+		testing.AllocsPerRun(10, func() { vomEncoderEncodeRawValue(t, 1000, makeCustomerRawValue(t)) }))
 }
 
 func BenchmarkVomEncoder1Customer(b *testing.B) {
@@ -145,6 +147,38 @@ func BenchmarkVomEncoder1Customer(b *testing.B) {
 func BenchmarkVomEncoder1000Customer(b *testing.B) {
 	for i := 0; i != b.N; i++ {
 		vomEncoderEncode(b, 1000)
+	}
+}
+
+// vom.Encoder.Encode RawValue benchmarking
+func vomEncoderEncodeRawValue(t testing.TB, n int, rv *vom.RawValue) {
+	var buf bytes.Buffer
+	encoder := vom.NewVersionedEncoder(vom.Version81, &buf)
+	for j := 0; j != n; j++ {
+		err := encoder.Encode(rv)
+		if err != nil {
+			t.Fatalf("encoder.Encode failed: %v", err)
+		}
+	}
+}
+
+func makeCustomerRawValue(tb testing.TB) *vom.RawValue {
+	bytes, err := vom.Encode(customer)
+	if err != nil {
+		tb.Fatalf("vom.Encode failed: %v", err)
+	}
+	var rv vom.RawValue
+	if err := vom.Decode(bytes, &rv); err != nil {
+		tb.Fatalf("vom.Decode failed: %v", err)
+	}
+	return &rv
+}
+
+func BenchmarkVomEncoder1000RawValue(b *testing.B) {
+	rv := makeCustomerRawValue(b)
+	b.ResetTimer()
+	for i := 0; i != b.N; i++ {
+		vomEncoderEncodeRawValue(b, 1000, rv)
 	}
 }
 
@@ -176,6 +210,8 @@ func TestVomDecoder(t *testing.T) {
 		testing.AllocsPerRun(10, func() { vomDecoderDecode(t, 1, data) }))
 	fmt.Printf("Allocations per vom.Decoder.Decode (1000 Customers): %6.0f\n",
 		testing.AllocsPerRun(10, func() { vomDecoderDecode(t, 1000, data) }))
+	fmt.Printf("Allocations per vom.Decoder.Decode (1000 RawValues): %6.0f\n",
+		testing.AllocsPerRun(10, func() { vomDecoderDecodeRawValue(t, 1000, data) }))
 }
 
 func BenchmarkVomDecoder1Customer(b *testing.B) {
@@ -205,6 +241,34 @@ func BenchmarkVomDecoder1000Customer(b *testing.B) {
 	b.ResetTimer()
 	for i := 0; i != b.N; i++ {
 		vomDecoderDecode(b, 1000, data)
+	}
+}
+
+// vom.Decoder.Decode RawValue benchmarking
+func vomDecoderDecodeRawValue(t testing.TB, n int, buf []byte) {
+	var rv vom.RawValue
+	decoder := vom.NewDecoder(bytes.NewReader(buf))
+	for j := 0; j != n; j++ {
+		err := decoder.Decode(&rv)
+		if err != nil {
+			t.Fatalf("decoder.Decode into raw value failed: %v", err)
+		}
+	}
+}
+
+func BenchmarkVomDecoder1000RawValue(b *testing.B) {
+	var buf bytes.Buffer
+	encoder := vom.NewVersionedEncoder(vom.Version81, &buf)
+	for j := 0; j != 1000; j++ {
+		err := encoder.Encode(customer)
+		if err != nil {
+			b.Fatalf("encoder.Encode failed")
+		}
+	}
+	data := buf.Bytes()
+	b.ResetTimer()
+	for i := 0; i != b.N; i++ {
+		vomDecoderDecodeRawValue(b, 1000, data)
 	}
 }
 

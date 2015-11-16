@@ -72,37 +72,37 @@ func TestChunkedBufStartMessageParamsWithChunking(t *testing.T) {
 			0x20,
 			false,
 			false,
-			combineBytes(0x20*2, inBytes1, WireCtrlValueCont, inBytes2),
+			combineBytes(WireCtrlValueFirstChunk, 0x20*2, inBytes1, WireCtrlValueLastChunk, inBytes2),
 		},
 		{
 			0x20,
 			false,
 			true,
-			combineBytes(0x20*2, len(inBytes1), inBytes1, WireCtrlValueCont, len(inBytes2), inBytes2),
+			combineBytes(WireCtrlValueFirstChunk, 0x20*2, len(inBytes1), inBytes1, WireCtrlValueLastChunk, len(inBytes2), inBytes2),
 		},
 		{
 			0x20,
 			true,
 			true,
-			combineBytes(0x20*2, len(typeIdsToInject1), typeIdsToInject1, len(inBytes1), inBytes1, WireCtrlValueCont, len(typeIdsToInject2), typeIdsToInject2, len(inBytes2), inBytes2),
+			combineBytes(WireCtrlValueFirstChunk, 0x20*2, len(typeIdsToInject1), typeIdsToInject1, len(inBytes1), inBytes1, WireCtrlValueLastChunk, len(typeIdsToInject2), typeIdsToInject2, len(inBytes2), inBytes2),
 		},
 		{
 			-0x20,
 			false,
 			false,
-			combineBytes(intToUint(-0x20), inBytes1, WireCtrlTypeCont, inBytes2),
+			combineBytes(WireCtrlTypeFirstChunk, intToUint(-0x20), inBytes1, WireCtrlTypeLastChunk, inBytes2),
 		},
 		{
 			-0x20,
 			false,
 			true,
-			combineBytes(intToUint(-0x20), len(inBytes1), inBytes1, WireCtrlTypeCont, len(inBytes2), inBytes2),
+			combineBytes(WireCtrlTypeFirstChunk, intToUint(-0x20), len(inBytes1), inBytes1, WireCtrlTypeLastChunk, len(inBytes2), inBytes2),
 		},
 		{
 			-0x20,
 			true,
 			true,
-			combineBytes(intToUint(-0x20), len(typeIdsToInject1), typeIdsToInject1, len(inBytes1), inBytes1, WireCtrlTypeCont, len(typeIdsToInject2), typeIdsToInject2, len(inBytes2), inBytes2),
+			combineBytes(WireCtrlTypeFirstChunk, intToUint(-0x20), len(typeIdsToInject1), typeIdsToInject1, len(inBytes1), inBytes1, WireCtrlTypeLastChunk, len(typeIdsToInject2), typeIdsToInject2, len(inBytes2), inBytes2),
 		},
 	}
 	for _, test := range tests {
@@ -117,7 +117,7 @@ func TestChunkedBufStartMessageParamsWithChunking(t *testing.T) {
 		for _, tid := range typeIdsToInject1 {
 			cb.ReferenceTypeID(typeId(tid))
 		}
-		if err := cb.finishChunk(); err != nil {
+		if err := cb.finishChunk(false); err != nil {
 			t.Errorf("error while finishing chunk: %v", err)
 		}
 		if err := cb.Write(inBytes2); err != nil {
@@ -155,7 +155,7 @@ func TestBytesAutoChunking(t *testing.T) {
 
 	cb.FinishMessage()
 
-	expectedOutput := combineBytes(0x22, uintAsBytes(encodeBufSize), input[:encodeBufSize], WireCtrlValueCont, uintAsBytes(encodeBufSize), input[encodeBufSize:2*encodeBufSize], WireCtrlValueCont, uintAsBytes(50), input[2*encodeBufSize:])
+	expectedOutput := combineBytes(WireCtrlValueFirstChunk, 0x22, uintAsBytes(encodeBufSize), input[:encodeBufSize], WireCtrlValueChunk, uintAsBytes(encodeBufSize), input[encodeBufSize:2*encodeBufSize], WireCtrlValueLastChunk, uintAsBytes(50), input[2*encodeBufSize:])
 	if got, want := buf.Bytes(), expectedOutput; !bytes.Equal(got, want) {
 		t.Errorf("bytes don't match:\n got      %v\n expected %v", got, want)
 	}

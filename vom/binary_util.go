@@ -445,6 +445,13 @@ func decbufBinaryPeekUintWithControl(buf *decbuf) (uint64, byte, int, error) {
 	return v, 0, byteLen, nil
 }
 
+func decbufBinaryPeekIntWithControl(buf *decbuf) (val int64, cr byte, lenRead int, err error) {
+	var uval uint64
+	uval, cr, lenRead, err = decbufBinaryPeekUintWithControl(buf)
+	val = uintToInt(uval)
+	return
+}
+
 func binaryPeekUintWithControl(mr *messageReader) (uint64, byte, int, error) {
 	firstByte, err := mr.PeekByte()
 	if err != nil {

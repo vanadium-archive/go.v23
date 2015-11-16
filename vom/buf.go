@@ -157,6 +157,10 @@ func (b *decbuf) HasDataAvailable() bool {
 	return b.lim != 0 // -1 or positive
 }
 
+func (b *decbuf) Limit() int {
+	return b.lim
+}
+
 // RemoveLimit removes the limit, and returns the number of leftover bytes.
 // Returns -1 if no limit was set.
 func (b *decbuf) RemoveLimit() int {
