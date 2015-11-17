@@ -31,6 +31,10 @@ func TestV23ServiceRestart(t *testing.T) {
 	v23tests.RunTest(t, V23TestServiceRestart)
 }
 
+func TestV23ServiceCrashRestart(t *testing.T) {
+	v23tests.RunTest(t, V23TestServiceCrashRestart)
+}
+
 func TestV23DeviceManager(t *testing.T) {
 	v23tests.RunTest(t, V23TestDeviceManager)
 }

@@ -10,7 +10,7 @@ import (
 	"io/ioutil"
 	"os"
 	"reflect"
-	"time"
+	"syscall"
 
 	"v.io/v23"
 	"v.io/v23/security/access"
@@ -98,15 +98,37 @@ func V23TestServiceRestart(t *v23tests.T) {
 	cleanup()
 
 	cleanup = tu.StartSyncbased(t, serverCreds, syncbaseName, rootDir, permsLiteral)
-	// TODO(sadovsky): This time.Sleep() is needed so that we wait for the
-	// syncbased server to initialize before sending it RPCs from
-	// runCheckHierarchy. Without this sleep, we get errors like "Apps do not
-	// match: got [], want [a1 a2]". It'd be nice if tu.StartSyncbased would wait
-	// until the server reports that it's ready, and/or if Glob wouldn't return an
-	// empty result set before the server is ready. (Perhaps the latter happens
-	// because the mount table doesn't care that the glob receiver itself doesn't
-	// exist?)
-	time.Sleep(2 * time.Second)
+	tu.RunClient(t, clientCreds, runCheckHierarchy)
+	cleanup()
+
+	if err := os.RemoveAll(rootDir); err != nil {
+		tu.V23Fatalf(t, "can't remove dir %v: %v", rootDir, err)
+	}
+}
+
+// Same as V23TestServiceRestart except syncbase is killed with SIGKILL instead of
+// SIGINT.
+func V23TestServiceCrashRestart(t *v23tests.T) {
+	v23tests.RunRootMT(t, "--v23.tcp.address=127.0.0.1:0")
+	clientCreds, _ := t.Shell().NewChildCredentials("server/client")
+	serverCreds, _ := t.Shell().NewChildCredentials("server")
+
+	rootDir, err := ioutil.TempDir("", "syncbase_leveldb")
+	if err != nil {
+		tu.V23Fatalf(t, "can't create temp dir: %v", err)
+	}
+
+	perms := tu.DefaultPerms("root/server/client")
+	buf := new(bytes.Buffer)
+	access.WritePermissions(buf, perms)
+	permsLiteral := buf.String()
+
+	cleanupKill := tu.StartKillableSyncbased(t, serverCreds, syncbaseName, rootDir, permsLiteral)
+	tu.RunClient(t, clientCreds, runCreateHierarchy)
+	tu.RunClient(t, clientCreds, runCheckHierarchy)
+	cleanupKill(syscall.SIGKILL)
+
+	cleanup := tu.StartSyncbased(t, serverCreds, syncbaseName, rootDir, permsLiteral)
 	tu.RunClient(t, clientCreds, runCheckHierarchy)
 	cleanup()
 
