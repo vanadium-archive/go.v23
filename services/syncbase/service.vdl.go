@@ -274,7 +274,7 @@ type AppClientMethods interface {
 	// Create creates this App.
 	// If perms is nil, we inherit (copy) the Service perms.
 	// Create requires the caller to have Write permission at the Service.
-	Create(ctx *context.T, perms access.Permissions, opts ...rpc.CallOpt) error
+	Create(_ *context.T, perms access.Permissions, _ ...rpc.CallOpt) error
 	// Destroy destroys this App.
 	Destroy(*context.T, ...rpc.CallOpt) error
 	// Exists returns true only if this App exists. Insufficient permissions
@@ -369,7 +369,7 @@ type AppServerMethods interface {
 	// Create creates this App.
 	// If perms is nil, we inherit (copy) the Service perms.
 	// Create requires the caller to have Write permission at the Service.
-	Create(ctx *context.T, call rpc.ServerCall, perms access.Permissions) error
+	Create(_ *context.T, _ rpc.ServerCall, perms access.Permissions) error
 	// Destroy destroys this App.
 	Destroy(*context.T, rpc.ServerCall) error
 	// Exists returns true only if this App exists. Insufficient permissions

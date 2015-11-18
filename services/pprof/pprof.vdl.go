@@ -35,13 +35,13 @@ type PProfClientMethods interface {
 	// addresses that pprof needs. Passing debug=1 adds comments translating
 	// addresses to function names and line numbers, so that a programmer
 	// can read the profile without tools.
-	Profile(ctx *context.T, name string, debug int32, opts ...rpc.CallOpt) (PProfProfileClientCall, error)
+	Profile(_ *context.T, name string, debug int32, _ ...rpc.CallOpt) (PProfProfileClientCall, error)
 	// CpuProfile enables CPU profiling for the requested duration and
 	// streams the profile data.
-	CpuProfile(ctx *context.T, seconds int32, opts ...rpc.CallOpt) (PProfCpuProfileClientCall, error)
+	CpuProfile(_ *context.T, seconds int32, _ ...rpc.CallOpt) (PProfCpuProfileClientCall, error)
 	// Symbol looks up the program counters and returns their respective
 	// function names.
-	Symbol(ctx *context.T, programCounters []uint64, opts ...rpc.CallOpt) ([]string, error)
+	Symbol(_ *context.T, programCounters []uint64, _ ...rpc.CallOpt) ([]string, error)
 }
 
 // PProfClientStub adds universal methods to PProfClientMethods.
@@ -241,13 +241,13 @@ type PProfServerMethods interface {
 	// addresses that pprof needs. Passing debug=1 adds comments translating
 	// addresses to function names and line numbers, so that a programmer
 	// can read the profile without tools.
-	Profile(ctx *context.T, call PProfProfileServerCall, name string, debug int32) error
+	Profile(_ *context.T, _ PProfProfileServerCall, name string, debug int32) error
 	// CpuProfile enables CPU profiling for the requested duration and
 	// streams the profile data.
-	CpuProfile(ctx *context.T, call PProfCpuProfileServerCall, seconds int32) error
+	CpuProfile(_ *context.T, _ PProfCpuProfileServerCall, seconds int32) error
 	// Symbol looks up the program counters and returns their respective
 	// function names.
-	Symbol(ctx *context.T, call rpc.ServerCall, programCounters []uint64) ([]string, error)
+	Symbol(_ *context.T, _ rpc.ServerCall, programCounters []uint64) ([]string, error)
 }
 
 // PProfServerStubMethods is the server interface containing
@@ -265,13 +265,13 @@ type PProfServerStubMethods interface {
 	// addresses that pprof needs. Passing debug=1 adds comments translating
 	// addresses to function names and line numbers, so that a programmer
 	// can read the profile without tools.
-	Profile(ctx *context.T, call *PProfProfileServerCallStub, name string, debug int32) error
+	Profile(_ *context.T, _ *PProfProfileServerCallStub, name string, debug int32) error
 	// CpuProfile enables CPU profiling for the requested duration and
 	// streams the profile data.
-	CpuProfile(ctx *context.T, call *PProfCpuProfileServerCallStub, seconds int32) error
+	CpuProfile(_ *context.T, _ *PProfCpuProfileServerCallStub, seconds int32) error
 	// Symbol looks up the program counters and returns their respective
 	// function names.
-	Symbol(ctx *context.T, call rpc.ServerCall, programCounters []uint64) ([]string, error)
+	Symbol(_ *context.T, _ rpc.ServerCall, programCounters []uint64) ([]string, error)
 }
 
 // PProfServerStub adds universal methods to PProfServerStubMethods.

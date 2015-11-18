@@ -255,48 +255,48 @@ type SyncgroupManagerClientMethods interface {
 	// Requires: Client must have at least Read access on the Database; prefix ACL
 	// must exist at each syncgroup prefix; Client must have at least Read access
 	// on each of these prefix ACLs.
-	CreateSyncgroup(ctx *context.T, sgName string, spec SyncgroupSpec, myInfo SyncgroupMemberInfo, opts ...rpc.CallOpt) error
+	CreateSyncgroup(_ *context.T, sgName string, spec SyncgroupSpec, myInfo SyncgroupMemberInfo, _ ...rpc.CallOpt) error
 	// JoinSyncgroup joins the syncgroup.
 	//
 	// Requires: Client must have at least Read access on the Database and on the
 	// syncgroup ACL.
-	JoinSyncgroup(ctx *context.T, sgName string, myInfo SyncgroupMemberInfo, opts ...rpc.CallOpt) (spec SyncgroupSpec, err error)
+	JoinSyncgroup(_ *context.T, sgName string, myInfo SyncgroupMemberInfo, _ ...rpc.CallOpt) (spec SyncgroupSpec, _ error)
 	// LeaveSyncgroup leaves the syncgroup. Previously synced data will continue
 	// to be available.
 	//
 	// Requires: Client must have at least Read access on the Database.
-	LeaveSyncgroup(ctx *context.T, sgName string, opts ...rpc.CallOpt) error
+	LeaveSyncgroup(_ *context.T, sgName string, _ ...rpc.CallOpt) error
 	// DestroySyncgroup destroys the syncgroup. Previously synced data will
 	// continue to be available to all members.
 	//
 	// Requires: Client must have at least Read access on the Database, and must
 	// have Admin access on the syncgroup ACL.
-	DestroySyncgroup(ctx *context.T, sgName string, opts ...rpc.CallOpt) error
+	DestroySyncgroup(_ *context.T, sgName string, _ ...rpc.CallOpt) error
 	// EjectFromSyncgroup ejects a member from the syncgroup. The ejected member
 	// will not be able to sync further, but will retain any data it has already
 	// synced.
 	//
 	// Requires: Client must have at least Read access on the Database, and must
 	// have Admin access on the syncgroup ACL.
-	EjectFromSyncgroup(ctx *context.T, sgName string, member string, opts ...rpc.CallOpt) error
+	EjectFromSyncgroup(_ *context.T, sgName string, member string, _ ...rpc.CallOpt) error
 	// GetSyncgroupSpec gets the syncgroup spec. version allows for atomic
 	// read-modify-write of the spec - see comment for SetSyncgroupSpec.
 	//
 	// Requires: Client must have at least Read access on the Database and on the
 	// syncgroup ACL.
-	GetSyncgroupSpec(ctx *context.T, sgName string, opts ...rpc.CallOpt) (spec SyncgroupSpec, version string, err error)
+	GetSyncgroupSpec(_ *context.T, sgName string, _ ...rpc.CallOpt) (spec SyncgroupSpec, version string, _ error)
 	// SetSyncgroupSpec sets the syncgroup spec. version may be either empty or
 	// the value from a previous Get. If not empty, Set will only succeed if the
 	// current version matches the specified one.
 	//
 	// Requires: Client must have at least Read access on the Database, and must
 	// have Admin access on the syncgroup ACL.
-	SetSyncgroupSpec(ctx *context.T, sgName string, spec SyncgroupSpec, version string, opts ...rpc.CallOpt) error
+	SetSyncgroupSpec(_ *context.T, sgName string, spec SyncgroupSpec, version string, _ ...rpc.CallOpt) error
 	// GetSyncgroupMembers gets the info objects for members of the syncgroup.
 	//
 	// Requires: Client must have at least Read access on the Database and on the
 	// syncgroup ACL.
-	GetSyncgroupMembers(ctx *context.T, sgName string, opts ...rpc.CallOpt) (members map[string]SyncgroupMemberInfo, err error)
+	GetSyncgroupMembers(_ *context.T, sgName string, _ ...rpc.CallOpt) (members map[string]SyncgroupMemberInfo, _ error)
 }
 
 // SyncgroupManagerClientStub adds universal methods to SyncgroupManagerClientMethods.
@@ -373,48 +373,48 @@ type SyncgroupManagerServerMethods interface {
 	// Requires: Client must have at least Read access on the Database; prefix ACL
 	// must exist at each syncgroup prefix; Client must have at least Read access
 	// on each of these prefix ACLs.
-	CreateSyncgroup(ctx *context.T, call rpc.ServerCall, sgName string, spec SyncgroupSpec, myInfo SyncgroupMemberInfo) error
+	CreateSyncgroup(_ *context.T, _ rpc.ServerCall, sgName string, spec SyncgroupSpec, myInfo SyncgroupMemberInfo) error
 	// JoinSyncgroup joins the syncgroup.
 	//
 	// Requires: Client must have at least Read access on the Database and on the
 	// syncgroup ACL.
-	JoinSyncgroup(ctx *context.T, call rpc.ServerCall, sgName string, myInfo SyncgroupMemberInfo) (spec SyncgroupSpec, err error)
+	JoinSyncgroup(_ *context.T, _ rpc.ServerCall, sgName string, myInfo SyncgroupMemberInfo) (spec SyncgroupSpec, _ error)
 	// LeaveSyncgroup leaves the syncgroup. Previously synced data will continue
 	// to be available.
 	//
 	// Requires: Client must have at least Read access on the Database.
-	LeaveSyncgroup(ctx *context.T, call rpc.ServerCall, sgName string) error
+	LeaveSyncgroup(_ *context.T, _ rpc.ServerCall, sgName string) error
 	// DestroySyncgroup destroys the syncgroup. Previously synced data will
 	// continue to be available to all members.
 	//
 	// Requires: Client must have at least Read access on the Database, and must
 	// have Admin access on the syncgroup ACL.
-	DestroySyncgroup(ctx *context.T, call rpc.ServerCall, sgName string) error
+	DestroySyncgroup(_ *context.T, _ rpc.ServerCall, sgName string) error
 	// EjectFromSyncgroup ejects a member from the syncgroup. The ejected member
 	// will not be able to sync further, but will retain any data it has already
 	// synced.
 	//
 	// Requires: Client must have at least Read access on the Database, and must
 	// have Admin access on the syncgroup ACL.
-	EjectFromSyncgroup(ctx *context.T, call rpc.ServerCall, sgName string, member string) error
+	EjectFromSyncgroup(_ *context.T, _ rpc.ServerCall, sgName string, member string) error
 	// GetSyncgroupSpec gets the syncgroup spec. version allows for atomic
 	// read-modify-write of the spec - see comment for SetSyncgroupSpec.
 	//
 	// Requires: Client must have at least Read access on the Database and on the
 	// syncgroup ACL.
-	GetSyncgroupSpec(ctx *context.T, call rpc.ServerCall, sgName string) (spec SyncgroupSpec, version string, err error)
+	GetSyncgroupSpec(_ *context.T, _ rpc.ServerCall, sgName string) (spec SyncgroupSpec, version string, _ error)
 	// SetSyncgroupSpec sets the syncgroup spec. version may be either empty or
 	// the value from a previous Get. If not empty, Set will only succeed if the
 	// current version matches the specified one.
 	//
 	// Requires: Client must have at least Read access on the Database, and must
 	// have Admin access on the syncgroup ACL.
-	SetSyncgroupSpec(ctx *context.T, call rpc.ServerCall, sgName string, spec SyncgroupSpec, version string) error
+	SetSyncgroupSpec(_ *context.T, _ rpc.ServerCall, sgName string, spec SyncgroupSpec, version string) error
 	// GetSyncgroupMembers gets the info objects for members of the syncgroup.
 	//
 	// Requires: Client must have at least Read access on the Database and on the
 	// syncgroup ACL.
-	GetSyncgroupMembers(ctx *context.T, call rpc.ServerCall, sgName string) (members map[string]SyncgroupMemberInfo, err error)
+	GetSyncgroupMembers(_ *context.T, _ rpc.ServerCall, sgName string) (members map[string]SyncgroupMemberInfo, _ error)
 }
 
 // SyncgroupManagerServerStubMethods is the server interface containing
@@ -611,31 +611,31 @@ var descSyncgroupManager = rpc.InterfaceDesc{
 //   after commit.
 type BlobManagerClientMethods interface {
 	// CreateBlob returns a BlobRef for a newly created blob.
-	CreateBlob(*context.T, ...rpc.CallOpt) (br BlobRef, err error)
+	CreateBlob(*context.T, ...rpc.CallOpt) (br BlobRef, _ error)
 	// PutBlob appends the byte stream to the blob.
-	PutBlob(ctx *context.T, br BlobRef, opts ...rpc.CallOpt) (BlobManagerPutBlobClientCall, error)
+	PutBlob(_ *context.T, br BlobRef, _ ...rpc.CallOpt) (BlobManagerPutBlobClientCall, error)
 	// CommitBlob marks the blob as immutable.
-	CommitBlob(ctx *context.T, br BlobRef, opts ...rpc.CallOpt) error
+	CommitBlob(_ *context.T, br BlobRef, _ ...rpc.CallOpt) error
 	// GetBlobSize returns the count of bytes written as part of the blob
 	// (committed or uncommitted).
-	GetBlobSize(ctx *context.T, br BlobRef, opts ...rpc.CallOpt) (int64, error)
+	GetBlobSize(_ *context.T, br BlobRef, _ ...rpc.CallOpt) (int64, error)
 	// DeleteBlob locally deletes the blob (committed or uncommitted).
-	DeleteBlob(ctx *context.T, br BlobRef, opts ...rpc.CallOpt) error
+	DeleteBlob(_ *context.T, br BlobRef, _ ...rpc.CallOpt) error
 	// GetBlob returns the byte stream from a committed blob starting at offset.
-	GetBlob(ctx *context.T, br BlobRef, offset int64, opts ...rpc.CallOpt) (BlobManagerGetBlobClientCall, error)
+	GetBlob(_ *context.T, br BlobRef, offset int64, _ ...rpc.CallOpt) (BlobManagerGetBlobClientCall, error)
 	// FetchBlob initiates fetching a blob if not locally found. priority
 	// controls the network priority of the blob. Higher priority blobs are
 	// fetched before the lower priority ones. However, an ongoing blob
 	// transfer is not interrupted. Status updates are streamed back to the
 	// client as fetch is in progress.
-	FetchBlob(ctx *context.T, br BlobRef, priority uint64, opts ...rpc.CallOpt) (BlobManagerFetchBlobClientCall, error)
+	FetchBlob(_ *context.T, br BlobRef, priority uint64, _ ...rpc.CallOpt) (BlobManagerFetchBlobClientCall, error)
 	// PinBlob locally pins the blob so that it is not evicted.
-	PinBlob(ctx *context.T, br BlobRef, opts ...rpc.CallOpt) error
+	PinBlob(_ *context.T, br BlobRef, _ ...rpc.CallOpt) error
 	// UnpinBlob locally unpins the blob so that it can be evicted if needed.
-	UnpinBlob(ctx *context.T, br BlobRef, opts ...rpc.CallOpt) error
+	UnpinBlob(_ *context.T, br BlobRef, _ ...rpc.CallOpt) error
 	// KeepBlob locally caches the blob with the specified rank. Lower
 	// ranked blobs are more eagerly evicted.
-	KeepBlob(ctx *context.T, br BlobRef, rank uint64, opts ...rpc.CallOpt) error
+	KeepBlob(_ *context.T, br BlobRef, rank uint64, _ ...rpc.CallOpt) error
 }
 
 // BlobManagerClientStub adds universal methods to BlobManagerClientMethods.
@@ -930,31 +930,31 @@ func (c *implBlobManagerFetchBlobClientCall) Finish() (err error) {
 //   after commit.
 type BlobManagerServerMethods interface {
 	// CreateBlob returns a BlobRef for a newly created blob.
-	CreateBlob(*context.T, rpc.ServerCall) (br BlobRef, err error)
+	CreateBlob(*context.T, rpc.ServerCall) (br BlobRef, _ error)
 	// PutBlob appends the byte stream to the blob.
-	PutBlob(ctx *context.T, call BlobManagerPutBlobServerCall, br BlobRef) error
+	PutBlob(_ *context.T, _ BlobManagerPutBlobServerCall, br BlobRef) error
 	// CommitBlob marks the blob as immutable.
-	CommitBlob(ctx *context.T, call rpc.ServerCall, br BlobRef) error
+	CommitBlob(_ *context.T, _ rpc.ServerCall, br BlobRef) error
 	// GetBlobSize returns the count of bytes written as part of the blob
 	// (committed or uncommitted).
-	GetBlobSize(ctx *context.T, call rpc.ServerCall, br BlobRef) (int64, error)
+	GetBlobSize(_ *context.T, _ rpc.ServerCall, br BlobRef) (int64, error)
 	// DeleteBlob locally deletes the blob (committed or uncommitted).
-	DeleteBlob(ctx *context.T, call rpc.ServerCall, br BlobRef) error
+	DeleteBlob(_ *context.T, _ rpc.ServerCall, br BlobRef) error
 	// GetBlob returns the byte stream from a committed blob starting at offset.
-	GetBlob(ctx *context.T, call BlobManagerGetBlobServerCall, br BlobRef, offset int64) error
+	GetBlob(_ *context.T, _ BlobManagerGetBlobServerCall, br BlobRef, offset int64) error
 	// FetchBlob initiates fetching a blob if not locally found. priority
 	// controls the network priority of the blob. Higher priority blobs are
 	// fetched before the lower priority ones. However, an ongoing blob
 	// transfer is not interrupted. Status updates are streamed back to the
 	// client as fetch is in progress.
-	FetchBlob(ctx *context.T, call BlobManagerFetchBlobServerCall, br BlobRef, priority uint64) error
+	FetchBlob(_ *context.T, _ BlobManagerFetchBlobServerCall, br BlobRef, priority uint64) error
 	// PinBlob locally pins the blob so that it is not evicted.
-	PinBlob(ctx *context.T, call rpc.ServerCall, br BlobRef) error
+	PinBlob(_ *context.T, _ rpc.ServerCall, br BlobRef) error
 	// UnpinBlob locally unpins the blob so that it can be evicted if needed.
-	UnpinBlob(ctx *context.T, call rpc.ServerCall, br BlobRef) error
+	UnpinBlob(_ *context.T, _ rpc.ServerCall, br BlobRef) error
 	// KeepBlob locally caches the blob with the specified rank. Lower
 	// ranked blobs are more eagerly evicted.
-	KeepBlob(ctx *context.T, call rpc.ServerCall, br BlobRef, rank uint64) error
+	KeepBlob(_ *context.T, _ rpc.ServerCall, br BlobRef, rank uint64) error
 }
 
 // BlobManagerServerStubMethods is the server interface containing
@@ -963,31 +963,31 @@ type BlobManagerServerMethods interface {
 // is the streaming methods.
 type BlobManagerServerStubMethods interface {
 	// CreateBlob returns a BlobRef for a newly created blob.
-	CreateBlob(*context.T, rpc.ServerCall) (br BlobRef, err error)
+	CreateBlob(*context.T, rpc.ServerCall) (br BlobRef, _ error)
 	// PutBlob appends the byte stream to the blob.
-	PutBlob(ctx *context.T, call *BlobManagerPutBlobServerCallStub, br BlobRef) error
+	PutBlob(_ *context.T, _ *BlobManagerPutBlobServerCallStub, br BlobRef) error
 	// CommitBlob marks the blob as immutable.
-	CommitBlob(ctx *context.T, call rpc.ServerCall, br BlobRef) error
+	CommitBlob(_ *context.T, _ rpc.ServerCall, br BlobRef) error
 	// GetBlobSize returns the count of bytes written as part of the blob
 	// (committed or uncommitted).
-	GetBlobSize(ctx *context.T, call rpc.ServerCall, br BlobRef) (int64, error)
+	GetBlobSize(_ *context.T, _ rpc.ServerCall, br BlobRef) (int64, error)
 	// DeleteBlob locally deletes the blob (committed or uncommitted).
-	DeleteBlob(ctx *context.T, call rpc.ServerCall, br BlobRef) error
+	DeleteBlob(_ *context.T, _ rpc.ServerCall, br BlobRef) error
 	// GetBlob returns the byte stream from a committed blob starting at offset.
-	GetBlob(ctx *context.T, call *BlobManagerGetBlobServerCallStub, br BlobRef, offset int64) error
+	GetBlob(_ *context.T, _ *BlobManagerGetBlobServerCallStub, br BlobRef, offset int64) error
 	// FetchBlob initiates fetching a blob if not locally found. priority
 	// controls the network priority of the blob. Higher priority blobs are
 	// fetched before the lower priority ones. However, an ongoing blob
 	// transfer is not interrupted. Status updates are streamed back to the
 	// client as fetch is in progress.
-	FetchBlob(ctx *context.T, call *BlobManagerFetchBlobServerCallStub, br BlobRef, priority uint64) error
+	FetchBlob(_ *context.T, _ *BlobManagerFetchBlobServerCallStub, br BlobRef, priority uint64) error
 	// PinBlob locally pins the blob so that it is not evicted.
-	PinBlob(ctx *context.T, call rpc.ServerCall, br BlobRef) error
+	PinBlob(_ *context.T, _ rpc.ServerCall, br BlobRef) error
 	// UnpinBlob locally unpins the blob so that it can be evicted if needed.
-	UnpinBlob(ctx *context.T, call rpc.ServerCall, br BlobRef) error
+	UnpinBlob(_ *context.T, _ rpc.ServerCall, br BlobRef) error
 	// KeepBlob locally caches the blob with the specified rank. Lower
 	// ranked blobs are more eagerly evicted.
-	KeepBlob(ctx *context.T, call rpc.ServerCall, br BlobRef, rank uint64) error
+	KeepBlob(_ *context.T, _ rpc.ServerCall, br BlobRef, rank uint64) error
 }
 
 // BlobManagerServerStub adds universal methods to BlobManagerServerStubMethods.
@@ -1326,7 +1326,7 @@ type SchemaManagerClientMethods interface {
 	// SetSchemaMetadata stores schema metadata for this database.
 	//
 	// Requires: Client must have at least Write access on the Database.
-	SetSchemaMetadata(ctx *context.T, metadata SchemaMetadata, opts ...rpc.CallOpt) error
+	SetSchemaMetadata(_ *context.T, metadata SchemaMetadata, _ ...rpc.CallOpt) error
 }
 
 // SchemaManagerClientStub adds universal methods to SchemaManagerClientMethods.
@@ -1367,7 +1367,7 @@ type SchemaManagerServerMethods interface {
 	// SetSchemaMetadata stores schema metadata for this database.
 	//
 	// Requires: Client must have at least Write access on the Database.
-	SetSchemaMetadata(ctx *context.T, call rpc.ServerCall, metadata SchemaMetadata) error
+	SetSchemaMetadata(_ *context.T, _ rpc.ServerCall, metadata SchemaMetadata) error
 }
 
 // SchemaManagerServerStubMethods is the server interface containing
@@ -1899,14 +1899,14 @@ type DatabaseClientMethods interface {
 	// Create creates this Database.
 	// If perms is nil, we inherit (copy) the App perms.
 	// Create requires the caller to have Write permission at the App.
-	Create(ctx *context.T, metadata *SchemaMetadata, perms access.Permissions, opts ...rpc.CallOpt) error
+	Create(_ *context.T, metadata *SchemaMetadata, perms access.Permissions, _ ...rpc.CallOpt) error
 	// Destroy destroys this Database, permanently removing all of its data.
-	Destroy(ctx *context.T, schemaVersion int32, opts ...rpc.CallOpt) error
+	Destroy(_ *context.T, schemaVersion int32, _ ...rpc.CallOpt) error
 	// Exists returns true only if this Database exists. Insufficient permissions
 	// cause Exists to return false instead of an error.
 	// TODO(ivanpi): Exists may fail with an error if higher levels of hierarchy
 	// do not exist.
-	Exists(ctx *context.T, schemaVersion int32, opts ...rpc.CallOpt) (bool, error)
+	Exists(_ *context.T, schemaVersion int32, _ ...rpc.CallOpt) (bool, error)
 	// ListTables returns a list of all Table names.
 	// This method exists on Database but not on Service or App because for the
 	// latter we can simply use glob, while for the former glob fails on
@@ -1923,7 +1923,7 @@ type DatabaseClientMethods interface {
 	ListTables(*context.T, ...rpc.CallOpt) ([]string, error)
 	// Exec executes a syncQL query and returns all results as specified by in the
 	// query's select clause. Concurrency semantics are documented in model.go.
-	Exec(ctx *context.T, schemaVersion int32, query string, opts ...rpc.CallOpt) (DatabaseExecClientCall, error)
+	Exec(_ *context.T, schemaVersion int32, query string, _ ...rpc.CallOpt) (DatabaseExecClientCall, error)
 	// BeginBatch creates a new batch. It returns a "batch suffix" string to
 	// append to the object name of this Database, yielding an object name for the
 	// Database bound to the created batch. (For example, if this Database is
@@ -1932,17 +1932,17 @@ type DatabaseClientMethods interface {
 	// is already bound to a batch, BeginBatch() will fail with ErrBoundToBatch.
 	// Concurrency semantics are documented in model.go.
 	// TODO(sadovsky): Maybe make BatchOptions optional.
-	BeginBatch(ctx *context.T, schemaVersion int32, bo BatchOptions, opts ...rpc.CallOpt) (string, error)
+	BeginBatch(_ *context.T, schemaVersion int32, bo BatchOptions, _ ...rpc.CallOpt) (string, error)
 	// Commit persists the pending changes to the database.
 	// If this Database is not bound to a batch, Commit() will fail with
 	// ErrNotBoundToBatch.
-	Commit(ctx *context.T, schemaVersion int32, opts ...rpc.CallOpt) error
+	Commit(_ *context.T, schemaVersion int32, _ ...rpc.CallOpt) error
 	// Abort notifies the server that any pending changes can be discarded.
 	// It is not strictly required, but it may allow the server to release locks
 	// or other resources sooner than if it was not called.
 	// If this Database is not bound to a batch, Abort() will fail with
 	// ErrNotBoundToBatch.
-	Abort(ctx *context.T, schemaVersion int32, opts ...rpc.CallOpt) error
+	Abort(_ *context.T, schemaVersion int32, _ ...rpc.CallOpt) error
 }
 
 // DatabaseClientStub adds universal methods to DatabaseClientMethods.
@@ -2179,14 +2179,14 @@ type DatabaseServerMethods interface {
 	// Create creates this Database.
 	// If perms is nil, we inherit (copy) the App perms.
 	// Create requires the caller to have Write permission at the App.
-	Create(ctx *context.T, call rpc.ServerCall, metadata *SchemaMetadata, perms access.Permissions) error
+	Create(_ *context.T, _ rpc.ServerCall, metadata *SchemaMetadata, perms access.Permissions) error
 	// Destroy destroys this Database, permanently removing all of its data.
-	Destroy(ctx *context.T, call rpc.ServerCall, schemaVersion int32) error
+	Destroy(_ *context.T, _ rpc.ServerCall, schemaVersion int32) error
 	// Exists returns true only if this Database exists. Insufficient permissions
 	// cause Exists to return false instead of an error.
 	// TODO(ivanpi): Exists may fail with an error if higher levels of hierarchy
 	// do not exist.
-	Exists(ctx *context.T, call rpc.ServerCall, schemaVersion int32) (bool, error)
+	Exists(_ *context.T, _ rpc.ServerCall, schemaVersion int32) (bool, error)
 	// ListTables returns a list of all Table names.
 	// This method exists on Database but not on Service or App because for the
 	// latter we can simply use glob, while for the former glob fails on
@@ -2203,7 +2203,7 @@ type DatabaseServerMethods interface {
 	ListTables(*context.T, rpc.ServerCall) ([]string, error)
 	// Exec executes a syncQL query and returns all results as specified by in the
 	// query's select clause. Concurrency semantics are documented in model.go.
-	Exec(ctx *context.T, call DatabaseExecServerCall, schemaVersion int32, query string) error
+	Exec(_ *context.T, _ DatabaseExecServerCall, schemaVersion int32, query string) error
 	// BeginBatch creates a new batch. It returns a "batch suffix" string to
 	// append to the object name of this Database, yielding an object name for the
 	// Database bound to the created batch. (For example, if this Database is
@@ -2212,17 +2212,17 @@ type DatabaseServerMethods interface {
 	// is already bound to a batch, BeginBatch() will fail with ErrBoundToBatch.
 	// Concurrency semantics are documented in model.go.
 	// TODO(sadovsky): Maybe make BatchOptions optional.
-	BeginBatch(ctx *context.T, call rpc.ServerCall, schemaVersion int32, bo BatchOptions) (string, error)
+	BeginBatch(_ *context.T, _ rpc.ServerCall, schemaVersion int32, bo BatchOptions) (string, error)
 	// Commit persists the pending changes to the database.
 	// If this Database is not bound to a batch, Commit() will fail with
 	// ErrNotBoundToBatch.
-	Commit(ctx *context.T, call rpc.ServerCall, schemaVersion int32) error
+	Commit(_ *context.T, _ rpc.ServerCall, schemaVersion int32) error
 	// Abort notifies the server that any pending changes can be discarded.
 	// It is not strictly required, but it may allow the server to release locks
 	// or other resources sooner than if it was not called.
 	// If this Database is not bound to a batch, Abort() will fail with
 	// ErrNotBoundToBatch.
-	Abort(ctx *context.T, call rpc.ServerCall, schemaVersion int32) error
+	Abort(_ *context.T, _ rpc.ServerCall, schemaVersion int32) error
 }
 
 // DatabaseServerStubMethods is the server interface containing
@@ -2321,14 +2321,14 @@ type DatabaseServerStubMethods interface {
 	// Create creates this Database.
 	// If perms is nil, we inherit (copy) the App perms.
 	// Create requires the caller to have Write permission at the App.
-	Create(ctx *context.T, call rpc.ServerCall, metadata *SchemaMetadata, perms access.Permissions) error
+	Create(_ *context.T, _ rpc.ServerCall, metadata *SchemaMetadata, perms access.Permissions) error
 	// Destroy destroys this Database, permanently removing all of its data.
-	Destroy(ctx *context.T, call rpc.ServerCall, schemaVersion int32) error
+	Destroy(_ *context.T, _ rpc.ServerCall, schemaVersion int32) error
 	// Exists returns true only if this Database exists. Insufficient permissions
 	// cause Exists to return false instead of an error.
 	// TODO(ivanpi): Exists may fail with an error if higher levels of hierarchy
 	// do not exist.
-	Exists(ctx *context.T, call rpc.ServerCall, schemaVersion int32) (bool, error)
+	Exists(_ *context.T, _ rpc.ServerCall, schemaVersion int32) (bool, error)
 	// ListTables returns a list of all Table names.
 	// This method exists on Database but not on Service or App because for the
 	// latter we can simply use glob, while for the former glob fails on
@@ -2345,7 +2345,7 @@ type DatabaseServerStubMethods interface {
 	ListTables(*context.T, rpc.ServerCall) ([]string, error)
 	// Exec executes a syncQL query and returns all results as specified by in the
 	// query's select clause. Concurrency semantics are documented in model.go.
-	Exec(ctx *context.T, call *DatabaseExecServerCallStub, schemaVersion int32, query string) error
+	Exec(_ *context.T, _ *DatabaseExecServerCallStub, schemaVersion int32, query string) error
 	// BeginBatch creates a new batch. It returns a "batch suffix" string to
 	// append to the object name of this Database, yielding an object name for the
 	// Database bound to the created batch. (For example, if this Database is
@@ -2354,17 +2354,17 @@ type DatabaseServerStubMethods interface {
 	// is already bound to a batch, BeginBatch() will fail with ErrBoundToBatch.
 	// Concurrency semantics are documented in model.go.
 	// TODO(sadovsky): Maybe make BatchOptions optional.
-	BeginBatch(ctx *context.T, call rpc.ServerCall, schemaVersion int32, bo BatchOptions) (string, error)
+	BeginBatch(_ *context.T, _ rpc.ServerCall, schemaVersion int32, bo BatchOptions) (string, error)
 	// Commit persists the pending changes to the database.
 	// If this Database is not bound to a batch, Commit() will fail with
 	// ErrNotBoundToBatch.
-	Commit(ctx *context.T, call rpc.ServerCall, schemaVersion int32) error
+	Commit(_ *context.T, _ rpc.ServerCall, schemaVersion int32) error
 	// Abort notifies the server that any pending changes can be discarded.
 	// It is not strictly required, but it may allow the server to release locks
 	// or other resources sooner than if it was not called.
 	// If this Database is not bound to a batch, Abort() will fail with
 	// ErrNotBoundToBatch.
-	Abort(ctx *context.T, call rpc.ServerCall, schemaVersion int32) error
+	Abort(_ *context.T, _ rpc.ServerCall, schemaVersion int32) error
 }
 
 // DatabaseServerStub adds universal methods to DatabaseServerStubMethods.
@@ -2594,33 +2594,33 @@ func (s implDatabaseExecServerCallSend) Send(item []*vdl.Value) error {
 type TableClientMethods interface {
 	// Create creates this Table.
 	// If perms is nil, we inherit (copy) the Database perms.
-	Create(ctx *context.T, schemaVersion int32, perms access.Permissions, opts ...rpc.CallOpt) error
+	Create(_ *context.T, schemaVersion int32, perms access.Permissions, _ ...rpc.CallOpt) error
 	// Destroy destroys this Table.
-	Destroy(ctx *context.T, schemaVersion int32, opts ...rpc.CallOpt) error
+	Destroy(_ *context.T, schemaVersion int32, _ ...rpc.CallOpt) error
 	// Exists returns true only if this Table exists. Insufficient permissions
 	// cause Exists to return false instead of an error.
 	// TODO(ivanpi): Exists may fail with an error if higher levels of hierarchy
 	// do not exist.
-	Exists(ctx *context.T, schemaVersion int32, opts ...rpc.CallOpt) (bool, error)
+	Exists(_ *context.T, schemaVersion int32, _ ...rpc.CallOpt) (bool, error)
 	// GetPermissions returns the current Permissions for the Table.
-	GetPermissions(ctx *context.T, schemaVersion int32, opts ...rpc.CallOpt) (access.Permissions, error)
+	GetPermissions(_ *context.T, schemaVersion int32, _ ...rpc.CallOpt) (access.Permissions, error)
 	// SetPermissions replaces the current Permissions for the Table.
-	SetPermissions(ctx *context.T, schemaVersion int32, perms access.Permissions, opts ...rpc.CallOpt) error
+	SetPermissions(_ *context.T, schemaVersion int32, perms access.Permissions, _ ...rpc.CallOpt) error
 	// DeleteRange deletes all rows in the given half-open range [start, limit).
 	// If limit is "", all rows with keys >= start are included.
 	// TODO(sadovsky): Maybe add option to delete prefix perms fully covered by
 	// the row range.
-	DeleteRange(ctx *context.T, schemaVersion int32, start []byte, limit []byte, opts ...rpc.CallOpt) error
+	DeleteRange(_ *context.T, schemaVersion int32, start []byte, limit []byte, _ ...rpc.CallOpt) error
 	// Scan returns all rows in the given half-open range [start, limit). If limit
 	// is "", all rows with keys >= start are included. Concurrency semantics are
 	// documented in model.go.
-	Scan(ctx *context.T, schemaVersion int32, start []byte, limit []byte, opts ...rpc.CallOpt) (TableScanClientCall, error)
+	Scan(_ *context.T, schemaVersion int32, start []byte, limit []byte, _ ...rpc.CallOpt) (TableScanClientCall, error)
 	// GetPrefixPermissions returns an array of (prefix, perms) pairs. The array is
 	// sorted from longest prefix to shortest, so element zero is the one that
 	// applies to the row with the given key. The last element is always the
 	// prefix "" which represents the table's permissions -- the array will always
 	// have at least one element.
-	GetPrefixPermissions(ctx *context.T, schemaVersion int32, key string, opts ...rpc.CallOpt) ([]PrefixPermissions, error)
+	GetPrefixPermissions(_ *context.T, schemaVersion int32, key string, _ ...rpc.CallOpt) ([]PrefixPermissions, error)
 	// SetPrefixPermissions sets the permissions for all current and future rows with
 	// the given prefix. If the prefix overlaps with an existing prefix, the
 	// longest prefix that matches a row applies. For example:
@@ -2628,11 +2628,11 @@ type TableClientMethods interface {
 	//     SetPrefixPermissions(ctx, Prefix("a/b/c"), perms2)
 	// The permissions for row "a/b/1" are perms1, and the permissions for row
 	// "a/b/c/1" are perms2.
-	SetPrefixPermissions(ctx *context.T, schemaVersion int32, prefix string, perms access.Permissions, opts ...rpc.CallOpt) error
+	SetPrefixPermissions(_ *context.T, schemaVersion int32, prefix string, perms access.Permissions, _ ...rpc.CallOpt) error
 	// DeletePrefixPermissions deletes the permissions for the specified prefix. Any
 	// rows covered by this prefix will use the next longest prefix's permissions
 	// (see the array returned by GetPrefixPermissions).
-	DeletePrefixPermissions(ctx *context.T, schemaVersion int32, prefix string, opts ...rpc.CallOpt) error
+	DeletePrefixPermissions(_ *context.T, schemaVersion int32, prefix string, _ ...rpc.CallOpt) error
 }
 
 // TableClientStub adds universal methods to TableClientMethods.
@@ -2783,33 +2783,33 @@ func (c *implTableScanClientCall) Finish() (err error) {
 type TableServerMethods interface {
 	// Create creates this Table.
 	// If perms is nil, we inherit (copy) the Database perms.
-	Create(ctx *context.T, call rpc.ServerCall, schemaVersion int32, perms access.Permissions) error
+	Create(_ *context.T, _ rpc.ServerCall, schemaVersion int32, perms access.Permissions) error
 	// Destroy destroys this Table.
-	Destroy(ctx *context.T, call rpc.ServerCall, schemaVersion int32) error
+	Destroy(_ *context.T, _ rpc.ServerCall, schemaVersion int32) error
 	// Exists returns true only if this Table exists. Insufficient permissions
 	// cause Exists to return false instead of an error.
 	// TODO(ivanpi): Exists may fail with an error if higher levels of hierarchy
 	// do not exist.
-	Exists(ctx *context.T, call rpc.ServerCall, schemaVersion int32) (bool, error)
+	Exists(_ *context.T, _ rpc.ServerCall, schemaVersion int32) (bool, error)
 	// GetPermissions returns the current Permissions for the Table.
-	GetPermissions(ctx *context.T, call rpc.ServerCall, schemaVersion int32) (access.Permissions, error)
+	GetPermissions(_ *context.T, _ rpc.ServerCall, schemaVersion int32) (access.Permissions, error)
 	// SetPermissions replaces the current Permissions for the Table.
-	SetPermissions(ctx *context.T, call rpc.ServerCall, schemaVersion int32, perms access.Permissions) error
+	SetPermissions(_ *context.T, _ rpc.ServerCall, schemaVersion int32, perms access.Permissions) error
 	// DeleteRange deletes all rows in the given half-open range [start, limit).
 	// If limit is "", all rows with keys >= start are included.
 	// TODO(sadovsky): Maybe add option to delete prefix perms fully covered by
 	// the row range.
-	DeleteRange(ctx *context.T, call rpc.ServerCall, schemaVersion int32, start []byte, limit []byte) error
+	DeleteRange(_ *context.T, _ rpc.ServerCall, schemaVersion int32, start []byte, limit []byte) error
 	// Scan returns all rows in the given half-open range [start, limit). If limit
 	// is "", all rows with keys >= start are included. Concurrency semantics are
 	// documented in model.go.
-	Scan(ctx *context.T, call TableScanServerCall, schemaVersion int32, start []byte, limit []byte) error
+	Scan(_ *context.T, _ TableScanServerCall, schemaVersion int32, start []byte, limit []byte) error
 	// GetPrefixPermissions returns an array of (prefix, perms) pairs. The array is
 	// sorted from longest prefix to shortest, so element zero is the one that
 	// applies to the row with the given key. The last element is always the
 	// prefix "" which represents the table's permissions -- the array will always
 	// have at least one element.
-	GetPrefixPermissions(ctx *context.T, call rpc.ServerCall, schemaVersion int32, key string) ([]PrefixPermissions, error)
+	GetPrefixPermissions(_ *context.T, _ rpc.ServerCall, schemaVersion int32, key string) ([]PrefixPermissions, error)
 	// SetPrefixPermissions sets the permissions for all current and future rows with
 	// the given prefix. If the prefix overlaps with an existing prefix, the
 	// longest prefix that matches a row applies. For example:
@@ -2817,11 +2817,11 @@ type TableServerMethods interface {
 	//     SetPrefixPermissions(ctx, Prefix("a/b/c"), perms2)
 	// The permissions for row "a/b/1" are perms1, and the permissions for row
 	// "a/b/c/1" are perms2.
-	SetPrefixPermissions(ctx *context.T, call rpc.ServerCall, schemaVersion int32, prefix string, perms access.Permissions) error
+	SetPrefixPermissions(_ *context.T, _ rpc.ServerCall, schemaVersion int32, prefix string, perms access.Permissions) error
 	// DeletePrefixPermissions deletes the permissions for the specified prefix. Any
 	// rows covered by this prefix will use the next longest prefix's permissions
 	// (see the array returned by GetPrefixPermissions).
-	DeletePrefixPermissions(ctx *context.T, call rpc.ServerCall, schemaVersion int32, prefix string) error
+	DeletePrefixPermissions(_ *context.T, _ rpc.ServerCall, schemaVersion int32, prefix string) error
 }
 
 // TableServerStubMethods is the server interface containing
@@ -2831,33 +2831,33 @@ type TableServerMethods interface {
 type TableServerStubMethods interface {
 	// Create creates this Table.
 	// If perms is nil, we inherit (copy) the Database perms.
-	Create(ctx *context.T, call rpc.ServerCall, schemaVersion int32, perms access.Permissions) error
+	Create(_ *context.T, _ rpc.ServerCall, schemaVersion int32, perms access.Permissions) error
 	// Destroy destroys this Table.
-	Destroy(ctx *context.T, call rpc.ServerCall, schemaVersion int32) error
+	Destroy(_ *context.T, _ rpc.ServerCall, schemaVersion int32) error
 	// Exists returns true only if this Table exists. Insufficient permissions
 	// cause Exists to return false instead of an error.
 	// TODO(ivanpi): Exists may fail with an error if higher levels of hierarchy
 	// do not exist.
-	Exists(ctx *context.T, call rpc.ServerCall, schemaVersion int32) (bool, error)
+	Exists(_ *context.T, _ rpc.ServerCall, schemaVersion int32) (bool, error)
 	// GetPermissions returns the current Permissions for the Table.
-	GetPermissions(ctx *context.T, call rpc.ServerCall, schemaVersion int32) (access.Permissions, error)
+	GetPermissions(_ *context.T, _ rpc.ServerCall, schemaVersion int32) (access.Permissions, error)
 	// SetPermissions replaces the current Permissions for the Table.
-	SetPermissions(ctx *context.T, call rpc.ServerCall, schemaVersion int32, perms access.Permissions) error
+	SetPermissions(_ *context.T, _ rpc.ServerCall, schemaVersion int32, perms access.Permissions) error
 	// DeleteRange deletes all rows in the given half-open range [start, limit).
 	// If limit is "", all rows with keys >= start are included.
 	// TODO(sadovsky): Maybe add option to delete prefix perms fully covered by
 	// the row range.
-	DeleteRange(ctx *context.T, call rpc.ServerCall, schemaVersion int32, start []byte, limit []byte) error
+	DeleteRange(_ *context.T, _ rpc.ServerCall, schemaVersion int32, start []byte, limit []byte) error
 	// Scan returns all rows in the given half-open range [start, limit). If limit
 	// is "", all rows with keys >= start are included. Concurrency semantics are
 	// documented in model.go.
-	Scan(ctx *context.T, call *TableScanServerCallStub, schemaVersion int32, start []byte, limit []byte) error
+	Scan(_ *context.T, _ *TableScanServerCallStub, schemaVersion int32, start []byte, limit []byte) error
 	// GetPrefixPermissions returns an array of (prefix, perms) pairs. The array is
 	// sorted from longest prefix to shortest, so element zero is the one that
 	// applies to the row with the given key. The last element is always the
 	// prefix "" which represents the table's permissions -- the array will always
 	// have at least one element.
-	GetPrefixPermissions(ctx *context.T, call rpc.ServerCall, schemaVersion int32, key string) ([]PrefixPermissions, error)
+	GetPrefixPermissions(_ *context.T, _ rpc.ServerCall, schemaVersion int32, key string) ([]PrefixPermissions, error)
 	// SetPrefixPermissions sets the permissions for all current and future rows with
 	// the given prefix. If the prefix overlaps with an existing prefix, the
 	// longest prefix that matches a row applies. For example:
@@ -2865,11 +2865,11 @@ type TableServerStubMethods interface {
 	//     SetPrefixPermissions(ctx, Prefix("a/b/c"), perms2)
 	// The permissions for row "a/b/1" are perms1, and the permissions for row
 	// "a/b/c/1" are perms2.
-	SetPrefixPermissions(ctx *context.T, call rpc.ServerCall, schemaVersion int32, prefix string, perms access.Permissions) error
+	SetPrefixPermissions(_ *context.T, _ rpc.ServerCall, schemaVersion int32, prefix string, perms access.Permissions) error
 	// DeletePrefixPermissions deletes the permissions for the specified prefix. Any
 	// rows covered by this prefix will use the next longest prefix's permissions
 	// (see the array returned by GetPrefixPermissions).
-	DeletePrefixPermissions(ctx *context.T, call rpc.ServerCall, schemaVersion int32, prefix string) error
+	DeletePrefixPermissions(_ *context.T, _ rpc.ServerCall, schemaVersion int32, prefix string) error
 }
 
 // TableServerStub adds universal methods to TableServerStubMethods.
@@ -3122,13 +3122,13 @@ type RowClientMethods interface {
 	// more information.
 	// TODO(ivanpi): Exists may fail with an error if higher levels of hierarchy
 	// do not exist.
-	Exists(ctx *context.T, schemaVersion int32, opts ...rpc.CallOpt) (bool, error)
+	Exists(_ *context.T, schemaVersion int32, _ ...rpc.CallOpt) (bool, error)
 	// Get returns the value for this Row.
-	Get(ctx *context.T, schemaVersion int32, opts ...rpc.CallOpt) ([]byte, error)
+	Get(_ *context.T, schemaVersion int32, _ ...rpc.CallOpt) ([]byte, error)
 	// Put writes the given value for this Row.
-	Put(ctx *context.T, schemaVersion int32, value []byte, opts ...rpc.CallOpt) error
+	Put(_ *context.T, schemaVersion int32, value []byte, _ ...rpc.CallOpt) error
 	// Delete deletes this Row.
-	Delete(ctx *context.T, schemaVersion int32, opts ...rpc.CallOpt) error
+	Delete(_ *context.T, schemaVersion int32, _ ...rpc.CallOpt) error
 }
 
 // RowClientStub adds universal methods to RowClientMethods.
@@ -3185,13 +3185,13 @@ type RowServerMethods interface {
 	// more information.
 	// TODO(ivanpi): Exists may fail with an error if higher levels of hierarchy
 	// do not exist.
-	Exists(ctx *context.T, call rpc.ServerCall, schemaVersion int32) (bool, error)
+	Exists(_ *context.T, _ rpc.ServerCall, schemaVersion int32) (bool, error)
 	// Get returns the value for this Row.
-	Get(ctx *context.T, call rpc.ServerCall, schemaVersion int32) ([]byte, error)
+	Get(_ *context.T, _ rpc.ServerCall, schemaVersion int32) ([]byte, error)
 	// Put writes the given value for this Row.
-	Put(ctx *context.T, call rpc.ServerCall, schemaVersion int32, value []byte) error
+	Put(_ *context.T, _ rpc.ServerCall, schemaVersion int32, value []byte) error
 	// Delete deletes this Row.
-	Delete(ctx *context.T, call rpc.ServerCall, schemaVersion int32) error
+	Delete(_ *context.T, _ rpc.ServerCall, schemaVersion int32) error
 }
 
 // RowServerStubMethods is the server interface containing

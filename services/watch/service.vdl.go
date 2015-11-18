@@ -239,7 +239,7 @@ func NewErrUnknownResumeMarker(ctx *context.T) error {
 // that match a pattern.  See the package comments for details.
 type GlobWatcherClientMethods interface {
 	// WatchGlob returns a stream of changes that match a pattern.
-	WatchGlob(ctx *context.T, req GlobRequest, opts ...rpc.CallOpt) (GlobWatcherWatchGlobClientCall, error)
+	WatchGlob(_ *context.T, req GlobRequest, _ ...rpc.CallOpt) (GlobWatcherWatchGlobClientCall, error)
 }
 
 // GlobWatcherClientStub adds universal methods to GlobWatcherClientMethods.
@@ -342,7 +342,7 @@ func (c *implGlobWatcherWatchGlobClientCall) Finish() (err error) {
 // that match a pattern.  See the package comments for details.
 type GlobWatcherServerMethods interface {
 	// WatchGlob returns a stream of changes that match a pattern.
-	WatchGlob(ctx *context.T, call GlobWatcherWatchGlobServerCall, req GlobRequest) error
+	WatchGlob(_ *context.T, _ GlobWatcherWatchGlobServerCall, req GlobRequest) error
 }
 
 // GlobWatcherServerStubMethods is the server interface containing
@@ -351,7 +351,7 @@ type GlobWatcherServerMethods interface {
 // is the streaming methods.
 type GlobWatcherServerStubMethods interface {
 	// WatchGlob returns a stream of changes that match a pattern.
-	WatchGlob(ctx *context.T, call *GlobWatcherWatchGlobServerCallStub, req GlobRequest) error
+	WatchGlob(_ *context.T, _ *GlobWatcherWatchGlobServerCallStub, req GlobRequest) error
 }
 
 // GlobWatcherServerStub adds universal methods to GlobWatcherServerStubMethods.

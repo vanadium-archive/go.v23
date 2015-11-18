@@ -61,7 +61,7 @@ type LogFileClientMethods interface {
 	//
 	// The returned error will be EndOfFile if and only if ReadLog reached the
 	// end of the file and no log entries were returned.
-	ReadLog(ctx *context.T, startPos int64, numEntries int32, follow bool, opts ...rpc.CallOpt) (LogFileReadLogClientCall, error)
+	ReadLog(_ *context.T, startPos int64, numEntries int32, follow bool, _ ...rpc.CallOpt) (LogFileReadLogClientCall, error)
 }
 
 // LogFileClientStub adds universal methods to LogFileClientMethods.
@@ -182,7 +182,7 @@ type LogFileServerMethods interface {
 	//
 	// The returned error will be EndOfFile if and only if ReadLog reached the
 	// end of the file and no log entries were returned.
-	ReadLog(ctx *context.T, call LogFileReadLogServerCall, startPos int64, numEntries int32, follow bool) (int64, error)
+	ReadLog(_ *context.T, _ LogFileReadLogServerCall, startPos int64, numEntries int32, follow bool) (int64, error)
 }
 
 // LogFileServerStubMethods is the server interface containing
@@ -205,7 +205,7 @@ type LogFileServerStubMethods interface {
 	//
 	// The returned error will be EndOfFile if and only if ReadLog reached the
 	// end of the file and no log entries were returned.
-	ReadLog(ctx *context.T, call *LogFileReadLogServerCallStub, startPos int64, numEntries int32, follow bool) (int64, error)
+	ReadLog(_ *context.T, _ *LogFileReadLogServerCallStub, startPos int64, numEntries int32, follow bool) (int64, error)
 }
 
 // LogFileServerStub adds universal methods to LogFileServerStubMethods.

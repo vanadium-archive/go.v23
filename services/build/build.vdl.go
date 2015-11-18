@@ -214,10 +214,10 @@ func init() {
 type BuilderClientMethods interface {
 	// Build streams sources to the build server, which then attempts to
 	// build the sources and streams back the compiled binaries.
-	Build(ctx *context.T, arch Architecture, os OperatingSystem, opts ...rpc.CallOpt) (BuilderBuildClientCall, error)
+	Build(_ *context.T, arch Architecture, os OperatingSystem, _ ...rpc.CallOpt) (BuilderBuildClientCall, error)
 	// Describe generates a description for a binary identified by
 	// the given Object name.
-	Describe(ctx *context.T, name string, opts ...rpc.CallOpt) (binary.Description, error)
+	Describe(_ *context.T, name string, _ ...rpc.CallOpt) (binary.Description, error)
 }
 
 // BuilderClientStub adds universal methods to BuilderClientMethods.
@@ -359,10 +359,10 @@ func (c *implBuilderBuildClientCall) Finish() (o0 []byte, err error) {
 type BuilderServerMethods interface {
 	// Build streams sources to the build server, which then attempts to
 	// build the sources and streams back the compiled binaries.
-	Build(ctx *context.T, call BuilderBuildServerCall, arch Architecture, os OperatingSystem) ([]byte, error)
+	Build(_ *context.T, _ BuilderBuildServerCall, arch Architecture, os OperatingSystem) ([]byte, error)
 	// Describe generates a description for a binary identified by
 	// the given Object name.
-	Describe(ctx *context.T, call rpc.ServerCall, name string) (binary.Description, error)
+	Describe(_ *context.T, _ rpc.ServerCall, name string) (binary.Description, error)
 }
 
 // BuilderServerStubMethods is the server interface containing
@@ -372,10 +372,10 @@ type BuilderServerMethods interface {
 type BuilderServerStubMethods interface {
 	// Build streams sources to the build server, which then attempts to
 	// build the sources and streams back the compiled binaries.
-	Build(ctx *context.T, call *BuilderBuildServerCallStub, arch Architecture, os OperatingSystem) ([]byte, error)
+	Build(_ *context.T, _ *BuilderBuildServerCallStub, arch Architecture, os OperatingSystem) ([]byte, error)
 	// Describe generates a description for a binary identified by
 	// the given Object name.
-	Describe(ctx *context.T, call rpc.ServerCall, name string) (binary.Description, error)
+	Describe(_ *context.T, _ rpc.ServerCall, name string) (binary.Description, error)
 }
 
 // BuilderServerStub adds universal methods to BuilderServerStubMethods.

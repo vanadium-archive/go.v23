@@ -187,10 +187,10 @@ type GroupReaderClientMethods interface {
 	// versioning out further. Other args we may need: option to Get() the
 	// membership set when allowed (to avoid an extra RPC), options related
 	// to caching this information.
-	Relate(ctx *context.T, blessings map[string]struct{}, hint ApproximationType, reqVersion string, visitedGroups map[string]struct{}, opts ...rpc.CallOpt) (remainder map[string]struct{}, approximations []Approximation, version string, err error)
+	Relate(_ *context.T, blessings map[string]struct{}, hint ApproximationType, reqVersion string, visitedGroups map[string]struct{}, _ ...rpc.CallOpt) (remainder map[string]struct{}, approximations []Approximation, version string, _ error)
 	// Get returns all entries in the group.
 	// TODO(sadovsky): Flesh out this API.
-	Get(ctx *context.T, req GetRequest, reqVersion string, opts ...rpc.CallOpt) (res GetResponse, version string, err error)
+	Get(_ *context.T, req GetRequest, reqVersion string, _ ...rpc.CallOpt) (res GetResponse, version string, _ error)
 }
 
 // GroupReaderClientStub adds universal methods to GroupReaderClientMethods.
@@ -253,10 +253,10 @@ type GroupReaderServerMethods interface {
 	// versioning out further. Other args we may need: option to Get() the
 	// membership set when allowed (to avoid an extra RPC), options related
 	// to caching this information.
-	Relate(ctx *context.T, call rpc.ServerCall, blessings map[string]struct{}, hint ApproximationType, reqVersion string, visitedGroups map[string]struct{}) (remainder map[string]struct{}, approximations []Approximation, version string, err error)
+	Relate(_ *context.T, _ rpc.ServerCall, blessings map[string]struct{}, hint ApproximationType, reqVersion string, visitedGroups map[string]struct{}) (remainder map[string]struct{}, approximations []Approximation, version string, _ error)
 	// Get returns all entries in the group.
 	// TODO(sadovsky): Flesh out this API.
-	Get(ctx *context.T, call rpc.ServerCall, req GetRequest, reqVersion string) (res GetResponse, version string, err error)
+	Get(_ *context.T, _ rpc.ServerCall, req GetRequest, reqVersion string) (res GetResponse, version string, _ error)
 }
 
 // GroupReaderServerStubMethods is the server interface containing
@@ -411,15 +411,15 @@ type GroupClientMethods interface {
 	// If perms is nil, a default Permissions is used, providing Admin access to
 	// the caller.
 	// Create requires the caller to have Write permission at the GroupServer.
-	Create(ctx *context.T, perms access.Permissions, entries []BlessingPatternChunk, opts ...rpc.CallOpt) error
+	Create(_ *context.T, perms access.Permissions, entries []BlessingPatternChunk, _ ...rpc.CallOpt) error
 	// Delete deletes the group.
 	// Permissions for all group-related methods except Create() are checked
 	// against the Group object.
-	Delete(ctx *context.T, version string, opts ...rpc.CallOpt) error
+	Delete(_ *context.T, version string, _ ...rpc.CallOpt) error
 	// Add adds an entry to the group.
-	Add(ctx *context.T, entry BlessingPatternChunk, version string, opts ...rpc.CallOpt) error
+	Add(_ *context.T, entry BlessingPatternChunk, version string, _ ...rpc.CallOpt) error
 	// Remove removes an entry from the group.
-	Remove(ctx *context.T, entry BlessingPatternChunk, version string, opts ...rpc.CallOpt) error
+	Remove(_ *context.T, entry BlessingPatternChunk, version string, _ ...rpc.CallOpt) error
 }
 
 // GroupClientStub adds universal methods to GroupClientMethods.
@@ -520,15 +520,15 @@ type GroupServerMethods interface {
 	// If perms is nil, a default Permissions is used, providing Admin access to
 	// the caller.
 	// Create requires the caller to have Write permission at the GroupServer.
-	Create(ctx *context.T, call rpc.ServerCall, perms access.Permissions, entries []BlessingPatternChunk) error
+	Create(_ *context.T, _ rpc.ServerCall, perms access.Permissions, entries []BlessingPatternChunk) error
 	// Delete deletes the group.
 	// Permissions for all group-related methods except Create() are checked
 	// against the Group object.
-	Delete(ctx *context.T, call rpc.ServerCall, version string) error
+	Delete(_ *context.T, _ rpc.ServerCall, version string) error
 	// Add adds an entry to the group.
-	Add(ctx *context.T, call rpc.ServerCall, entry BlessingPatternChunk, version string) error
+	Add(_ *context.T, _ rpc.ServerCall, entry BlessingPatternChunk, version string) error
 	// Remove removes an entry from the group.
-	Remove(ctx *context.T, call rpc.ServerCall, entry BlessingPatternChunk, version string) error
+	Remove(_ *context.T, _ rpc.ServerCall, entry BlessingPatternChunk, version string) error
 }
 
 // GroupServerStubMethods is the server interface containing

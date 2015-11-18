@@ -87,13 +87,13 @@ type ObjectClientMethods interface {
 	// ResolveToMountTable to get an endpoint and call SetPermissions on that.
 	// This means that clients must know when a name refers to a mount point to
 	// change its Permissions.
-	SetPermissions(ctx *context.T, perms access.Permissions, version string, opts ...rpc.CallOpt) error
+	SetPermissions(_ *context.T, perms access.Permissions, version string, _ ...rpc.CallOpt) error
 	// GetPermissions returns the complete, current Permissions for an object. The
 	// returned version can be passed to a subsequent call to SetPermissions for
 	// optimistic concurrency control. A successful call to SetPermissions will
 	// invalidate version, and the client must call GetPermissions again to get
 	// the current version.
-	GetPermissions(*context.T, ...rpc.CallOpt) (perms access.Permissions, version string, err error)
+	GetPermissions(*context.T, ...rpc.CallOpt) (perms access.Permissions, version string, _ error)
 }
 
 // ObjectClientStub adds universal methods to ObjectClientMethods.
@@ -188,13 +188,13 @@ type ObjectServerMethods interface {
 	// ResolveToMountTable to get an endpoint and call SetPermissions on that.
 	// This means that clients must know when a name refers to a mount point to
 	// change its Permissions.
-	SetPermissions(ctx *context.T, call rpc.ServerCall, perms access.Permissions, version string) error
+	SetPermissions(_ *context.T, _ rpc.ServerCall, perms access.Permissions, version string) error
 	// GetPermissions returns the complete, current Permissions for an object. The
 	// returned version can be passed to a subsequent call to SetPermissions for
 	// optimistic concurrency control. A successful call to SetPermissions will
 	// invalidate version, and the client must call GetPermissions again to get
 	// the current version.
-	GetPermissions(*context.T, rpc.ServerCall) (perms access.Permissions, version string, err error)
+	GetPermissions(*context.T, rpc.ServerCall) (perms access.Permissions, version string, _ error)
 }
 
 // ObjectServerStubMethods is the server interface containing

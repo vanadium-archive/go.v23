@@ -524,7 +524,7 @@ type ApplicationClientMethods interface {
 	// which can then be used to control all the installations of the given
 	// application.
 	// TODO(rjkroege): Use customized labels.
-	Install(ctx *context.T, name string, config Config, packages application.Packages, opts ...rpc.CallOpt) (string, error)
+	Install(_ *context.T, name string, config Config, packages application.Packages, _ ...rpc.CallOpt) (string, error)
 	// Uninstall uninstalls an application installation.
 	// The installation must be in state Active.
 	Uninstall(*context.T, ...rpc.CallOpt) error
@@ -561,7 +561,7 @@ type ApplicationClientMethods interface {
 	// If called against a Device, causes the Device to stop itself (which
 	// may or may not result in a restart depending on the device manager
 	// setup).
-	Kill(ctx *context.T, deadline time.Duration, opts ...rpc.CallOpt) error
+	Kill(_ *context.T, deadline time.Duration, _ ...rpc.CallOpt) error
 	// Update updates an application installation's version to a new version
 	// created from the envelope at the object name provided during Install.
 	// If the new application envelope contains a different application
@@ -576,7 +576,7 @@ type ApplicationClientMethods interface {
 	// envelope contains a different application title, the update does not
 	// occur, and an error is returned.
 	// The installation must be in state Active.
-	UpdateTo(ctx *context.T, name string, opts ...rpc.CallOpt) error
+	UpdateTo(_ *context.T, name string, _ ...rpc.CallOpt) error
 	// Revert reverts an application installation's version to the previous
 	// version of its current version.  The installation must be in state
 	// Active.
@@ -941,7 +941,7 @@ type ApplicationServerMethods interface {
 	// which can then be used to control all the installations of the given
 	// application.
 	// TODO(rjkroege): Use customized labels.
-	Install(ctx *context.T, call rpc.ServerCall, name string, config Config, packages application.Packages) (string, error)
+	Install(_ *context.T, _ rpc.ServerCall, name string, config Config, packages application.Packages) (string, error)
 	// Uninstall uninstalls an application installation.
 	// The installation must be in state Active.
 	Uninstall(*context.T, rpc.ServerCall) error
@@ -978,7 +978,7 @@ type ApplicationServerMethods interface {
 	// If called against a Device, causes the Device to stop itself (which
 	// may or may not result in a restart depending on the device manager
 	// setup).
-	Kill(ctx *context.T, call rpc.ServerCall, deadline time.Duration) error
+	Kill(_ *context.T, _ rpc.ServerCall, deadline time.Duration) error
 	// Update updates an application installation's version to a new version
 	// created from the envelope at the object name provided during Install.
 	// If the new application envelope contains a different application
@@ -993,7 +993,7 @@ type ApplicationServerMethods interface {
 	// envelope contains a different application title, the update does not
 	// occur, and an error is returned.
 	// The installation must be in state Active.
-	UpdateTo(ctx *context.T, call rpc.ServerCall, name string) error
+	UpdateTo(_ *context.T, _ rpc.ServerCall, name string) error
 	// Revert reverts an application installation's version to the previous
 	// version of its current version.  The installation must be in state
 	// Active.
@@ -1088,7 +1088,7 @@ type ApplicationServerStubMethods interface {
 	// which can then be used to control all the installations of the given
 	// application.
 	// TODO(rjkroege): Use customized labels.
-	Install(ctx *context.T, call rpc.ServerCall, name string, config Config, packages application.Packages) (string, error)
+	Install(_ *context.T, _ rpc.ServerCall, name string, config Config, packages application.Packages) (string, error)
 	// Uninstall uninstalls an application installation.
 	// The installation must be in state Active.
 	Uninstall(*context.T, rpc.ServerCall) error
@@ -1125,7 +1125,7 @@ type ApplicationServerStubMethods interface {
 	// If called against a Device, causes the Device to stop itself (which
 	// may or may not result in a restart depending on the device manager
 	// setup).
-	Kill(ctx *context.T, call rpc.ServerCall, deadline time.Duration) error
+	Kill(_ *context.T, _ rpc.ServerCall, deadline time.Duration) error
 	// Update updates an application installation's version to a new version
 	// created from the envelope at the object name provided during Install.
 	// If the new application envelope contains a different application
@@ -1140,7 +1140,7 @@ type ApplicationServerStubMethods interface {
 	// envelope contains a different application title, the update does not
 	// occur, and an error is returned.
 	// The installation must be in state Active.
-	UpdateTo(ctx *context.T, call rpc.ServerCall, name string) error
+	UpdateTo(_ *context.T, _ rpc.ServerCall, name string) error
 	// Revert reverts an application installation's version to the previous
 	// version of its current version.  The installation must be in state
 	// Active.
@@ -1437,7 +1437,7 @@ func (s implApplicationInstantiateServerCallSend) Send(item BlessServerMessage) 
 // The blessings that the device is to be claimed with is provided
 // via the ipc.Granter option in Go.
 type ClaimableClientMethods interface {
-	Claim(ctx *context.T, pairingToken string, opts ...rpc.CallOpt) error
+	Claim(_ *context.T, pairingToken string, _ ...rpc.CallOpt) error
 }
 
 // ClaimableClientStub adds universal methods to ClaimableClientMethods.
@@ -1477,7 +1477,7 @@ func (c implClaimableClientStub) Claim(ctx *context.T, i0 string, opts ...rpc.Ca
 // The blessings that the device is to be claimed with is provided
 // via the ipc.Granter option in Go.
 type ClaimableServerMethods interface {
-	Claim(ctx *context.T, call rpc.ServerCall, pairingToken string) error
+	Claim(_ *context.T, _ rpc.ServerCall, pairingToken string) error
 }
 
 // ClaimableServerStubMethods is the server interface containing
@@ -1651,16 +1651,16 @@ type DeviceClientMethods interface {
 	// Describe generates a description of the device.
 	Describe(*context.T, ...rpc.CallOpt) (Description, error)
 	// IsRunnable checks if the device can execute the given binary.
-	IsRunnable(ctx *context.T, description binary.Description, opts ...rpc.CallOpt) (bool, error)
+	IsRunnable(_ *context.T, description binary.Description, _ ...rpc.CallOpt) (bool, error)
 	// Reset resets the device. If the deadline is non-zero and the device
 	// in question is still running after the given deadline expired,
 	// reset of the device is enforced.
-	Reset(ctx *context.T, deadline time.Duration, opts ...rpc.CallOpt) error
+	Reset(_ *context.T, deadline time.Duration, _ ...rpc.CallOpt) error
 	// AssociateAccount associates a local  system account name with the provided
 	// Vanadium identities. It replaces the existing association if one already exists for that
 	// identity. Setting an AccountName to "" removes the association for each
 	// listed identity.
-	AssociateAccount(ctx *context.T, identityNames []string, accountName string, opts ...rpc.CallOpt) error
+	AssociateAccount(_ *context.T, identityNames []string, accountName string, _ ...rpc.CallOpt) error
 	// ListAssociations returns all of the associations between Vanadium identities
 	// and system names.
 	ListAssociations(*context.T, ...rpc.CallOpt) ([]Association, error)
@@ -1814,16 +1814,16 @@ type DeviceServerMethods interface {
 	// Describe generates a description of the device.
 	Describe(*context.T, rpc.ServerCall) (Description, error)
 	// IsRunnable checks if the device can execute the given binary.
-	IsRunnable(ctx *context.T, call rpc.ServerCall, description binary.Description) (bool, error)
+	IsRunnable(_ *context.T, _ rpc.ServerCall, description binary.Description) (bool, error)
 	// Reset resets the device. If the deadline is non-zero and the device
 	// in question is still running after the given deadline expired,
 	// reset of the device is enforced.
-	Reset(ctx *context.T, call rpc.ServerCall, deadline time.Duration) error
+	Reset(_ *context.T, _ rpc.ServerCall, deadline time.Duration) error
 	// AssociateAccount associates a local  system account name with the provided
 	// Vanadium identities. It replaces the existing association if one already exists for that
 	// identity. Setting an AccountName to "" removes the association for each
 	// listed identity.
-	AssociateAccount(ctx *context.T, call rpc.ServerCall, identityNames []string, accountName string) error
+	AssociateAccount(_ *context.T, _ rpc.ServerCall, identityNames []string, accountName string) error
 	// ListAssociations returns all of the associations between Vanadium identities
 	// and system names.
 	ListAssociations(*context.T, rpc.ServerCall) ([]Association, error)
@@ -1933,16 +1933,16 @@ type DeviceServerStubMethods interface {
 	// Describe generates a description of the device.
 	Describe(*context.T, rpc.ServerCall) (Description, error)
 	// IsRunnable checks if the device can execute the given binary.
-	IsRunnable(ctx *context.T, call rpc.ServerCall, description binary.Description) (bool, error)
+	IsRunnable(_ *context.T, _ rpc.ServerCall, description binary.Description) (bool, error)
 	// Reset resets the device. If the deadline is non-zero and the device
 	// in question is still running after the given deadline expired,
 	// reset of the device is enforced.
-	Reset(ctx *context.T, call rpc.ServerCall, deadline time.Duration) error
+	Reset(_ *context.T, _ rpc.ServerCall, deadline time.Duration) error
 	// AssociateAccount associates a local  system account name with the provided
 	// Vanadium identities. It replaces the existing association if one already exists for that
 	// identity. Setting an AccountName to "" removes the association for each
 	// listed identity.
-	AssociateAccount(ctx *context.T, call rpc.ServerCall, identityNames []string, accountName string) error
+	AssociateAccount(_ *context.T, _ rpc.ServerCall, identityNames []string, accountName string) error
 	// ListAssociations returns all of the associations between Vanadium identities
 	// and system names.
 	ListAssociations(*context.T, rpc.ServerCall) ([]Association, error)

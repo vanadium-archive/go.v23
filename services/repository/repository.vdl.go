@@ -112,7 +112,7 @@ type ApplicationClientMethods interface {
 	// profiles is returned.  If several profiles match this version, the
 	// envelope for the first matching profile is returned, respecting the
 	// order of the input argument.
-	Match(ctx *context.T, profiles []string, opts ...rpc.CallOpt) (application.Envelope, error)
+	Match(_ *context.T, profiles []string, _ ...rpc.CallOpt) (application.Envelope, error)
 }
 
 // ApplicationClientStub adds universal methods to ApplicationClientMethods.
@@ -210,7 +210,7 @@ type ApplicationServerMethods interface {
 	// profiles is returned.  If several profiles match this version, the
 	// envelope for the first matching profile is returned, respecting the
 	// order of the input argument.
-	Match(ctx *context.T, call rpc.ServerCall, profiles []string) (application.Envelope, error)
+	Match(_ *context.T, _ rpc.ServerCall, profiles []string) (application.Envelope, error)
 }
 
 // ApplicationServerStubMethods is the server interface containing
@@ -364,7 +364,7 @@ type BinaryClientMethods interface {
 	// mediaInfo argument contains metadata for the binary. If the suffix
 	// identifies a binary that has already been created, the method
 	// returns an error.
-	Create(ctx *context.T, nparts int32, mediaInfo MediaInfo, opts ...rpc.CallOpt) error
+	Create(_ *context.T, nparts int32, mediaInfo MediaInfo, _ ...rpc.CallOpt) error
 	// Delete deletes the binary identified by the object name
 	// suffix. If the binary that has not been created, the method
 	// returns an error.
@@ -375,23 +375,23 @@ type BinaryClientMethods interface {
 	// error. If the Delete() method is invoked when the Download()
 	// method is in progress, the outcome the Download() method is
 	// undefined.
-	Download(ctx *context.T, part int32, opts ...rpc.CallOpt) (BinaryDownloadClientCall, error)
+	Download(_ *context.T, part int32, _ ...rpc.CallOpt) (BinaryDownloadClientCall, error)
 	// DownloadUrl returns a transient URL from which the binary
 	// identified by the object name suffix can be downloaded using the
 	// HTTP protocol. If not all parts of the binary have been uploaded,
 	// the method returns an error.
-	DownloadUrl(*context.T, ...rpc.CallOpt) (url string, ttl int64, err error)
+	DownloadUrl(*context.T, ...rpc.CallOpt) (url string, ttl int64, _ error)
 	// Stat returns information describing the parts of the binary
 	// identified by the object name suffix, and its RFC 2046 media type.
 	// If the binary has not been created, the method returns an error.
-	Stat(*context.T, ...rpc.CallOpt) (Parts []binary.PartInfo, MediaInfo MediaInfo, err error)
+	Stat(*context.T, ...rpc.CallOpt) (Parts []binary.PartInfo, MediaInfo MediaInfo, _ error)
 	// Upload opens a stream that can be used for uploading the given
 	// part of the binary identified by the object name suffix. If the
 	// binary has not been created, the method returns an error. If the
 	// binary part has been uploaded, the method returns an error. If
 	// the same binary part is being uploaded by another caller, the
 	// method returns an error.
-	Upload(ctx *context.T, part int32, opts ...rpc.CallOpt) (BinaryUploadClientCall, error)
+	Upload(_ *context.T, part int32, _ ...rpc.CallOpt) (BinaryUploadClientCall, error)
 }
 
 // BinaryClientStub adds universal methods to BinaryClientMethods.
@@ -653,7 +653,7 @@ type BinaryServerMethods interface {
 	// mediaInfo argument contains metadata for the binary. If the suffix
 	// identifies a binary that has already been created, the method
 	// returns an error.
-	Create(ctx *context.T, call rpc.ServerCall, nparts int32, mediaInfo MediaInfo) error
+	Create(_ *context.T, _ rpc.ServerCall, nparts int32, mediaInfo MediaInfo) error
 	// Delete deletes the binary identified by the object name
 	// suffix. If the binary that has not been created, the method
 	// returns an error.
@@ -664,23 +664,23 @@ type BinaryServerMethods interface {
 	// error. If the Delete() method is invoked when the Download()
 	// method is in progress, the outcome the Download() method is
 	// undefined.
-	Download(ctx *context.T, call BinaryDownloadServerCall, part int32) error
+	Download(_ *context.T, _ BinaryDownloadServerCall, part int32) error
 	// DownloadUrl returns a transient URL from which the binary
 	// identified by the object name suffix can be downloaded using the
 	// HTTP protocol. If not all parts of the binary have been uploaded,
 	// the method returns an error.
-	DownloadUrl(*context.T, rpc.ServerCall) (url string, ttl int64, err error)
+	DownloadUrl(*context.T, rpc.ServerCall) (url string, ttl int64, _ error)
 	// Stat returns information describing the parts of the binary
 	// identified by the object name suffix, and its RFC 2046 media type.
 	// If the binary has not been created, the method returns an error.
-	Stat(*context.T, rpc.ServerCall) (Parts []binary.PartInfo, MediaInfo MediaInfo, err error)
+	Stat(*context.T, rpc.ServerCall) (Parts []binary.PartInfo, MediaInfo MediaInfo, _ error)
 	// Upload opens a stream that can be used for uploading the given
 	// part of the binary identified by the object name suffix. If the
 	// binary has not been created, the method returns an error. If the
 	// binary part has been uploaded, the method returns an error. If
 	// the same binary part is being uploaded by another caller, the
 	// method returns an error.
-	Upload(ctx *context.T, call BinaryUploadServerCall, part int32) error
+	Upload(_ *context.T, _ BinaryUploadServerCall, part int32) error
 }
 
 // BinaryServerStubMethods is the server interface containing
@@ -738,7 +738,7 @@ type BinaryServerStubMethods interface {
 	// mediaInfo argument contains metadata for the binary. If the suffix
 	// identifies a binary that has already been created, the method
 	// returns an error.
-	Create(ctx *context.T, call rpc.ServerCall, nparts int32, mediaInfo MediaInfo) error
+	Create(_ *context.T, _ rpc.ServerCall, nparts int32, mediaInfo MediaInfo) error
 	// Delete deletes the binary identified by the object name
 	// suffix. If the binary that has not been created, the method
 	// returns an error.
@@ -749,23 +749,23 @@ type BinaryServerStubMethods interface {
 	// error. If the Delete() method is invoked when the Download()
 	// method is in progress, the outcome the Download() method is
 	// undefined.
-	Download(ctx *context.T, call *BinaryDownloadServerCallStub, part int32) error
+	Download(_ *context.T, _ *BinaryDownloadServerCallStub, part int32) error
 	// DownloadUrl returns a transient URL from which the binary
 	// identified by the object name suffix can be downloaded using the
 	// HTTP protocol. If not all parts of the binary have been uploaded,
 	// the method returns an error.
-	DownloadUrl(*context.T, rpc.ServerCall) (url string, ttl int64, err error)
+	DownloadUrl(*context.T, rpc.ServerCall) (url string, ttl int64, _ error)
 	// Stat returns information describing the parts of the binary
 	// identified by the object name suffix, and its RFC 2046 media type.
 	// If the binary has not been created, the method returns an error.
-	Stat(*context.T, rpc.ServerCall) (Parts []binary.PartInfo, MediaInfo MediaInfo, err error)
+	Stat(*context.T, rpc.ServerCall) (Parts []binary.PartInfo, MediaInfo MediaInfo, _ error)
 	// Upload opens a stream that can be used for uploading the given
 	// part of the binary identified by the object name suffix. If the
 	// binary has not been created, the method returns an error. If the
 	// binary part has been uploaded, the method returns an error. If
 	// the same binary part is being uploaded by another caller, the
 	// method returns an error.
-	Upload(ctx *context.T, call *BinaryUploadServerCallStub, part int32) error
+	Upload(_ *context.T, _ *BinaryUploadServerCallStub, part int32) error
 }
 
 // BinaryServerStub adds universal methods to BinaryServerStubMethods.

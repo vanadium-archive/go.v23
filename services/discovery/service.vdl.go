@@ -45,9 +45,9 @@ type AdvertiserClientMethods interface {
 	// visibility is used to limit the principals that can see the advertisement. An empty
 	// set means that there are no restrictions on visibility (i.e, equivalent to
 	// []security.BlessingPattern{security.AllPrincipals}).
-	RegisterService(ctx *context.T, service discovery.Service, visibility []security.BlessingPattern, opts ...rpc.CallOpt) (handle ServiceHandle, instanceId string, err error)
+	RegisterService(_ *context.T, service discovery.Service, visibility []security.BlessingPattern, _ ...rpc.CallOpt) (handle ServiceHandle, instanceId string, _ error)
 	// UnregisterService unregisters a registered service from advertising.
-	UnregisterService(ctx *context.T, handle ServiceHandle, opts ...rpc.CallOpt) error
+	UnregisterService(_ *context.T, handle ServiceHandle, _ ...rpc.CallOpt) error
 }
 
 // AdvertiserClientStub adds universal methods to AdvertiserClientMethods.
@@ -86,9 +86,9 @@ type AdvertiserServerMethods interface {
 	// visibility is used to limit the principals that can see the advertisement. An empty
 	// set means that there are no restrictions on visibility (i.e, equivalent to
 	// []security.BlessingPattern{security.AllPrincipals}).
-	RegisterService(ctx *context.T, call rpc.ServerCall, service discovery.Service, visibility []security.BlessingPattern) (handle ServiceHandle, instanceId string, err error)
+	RegisterService(_ *context.T, _ rpc.ServerCall, service discovery.Service, visibility []security.BlessingPattern) (handle ServiceHandle, instanceId string, _ error)
 	// UnregisterService unregisters a registered service from advertising.
-	UnregisterService(ctx *context.T, call rpc.ServerCall, handle ServiceHandle) error
+	UnregisterService(_ *context.T, _ rpc.ServerCall, handle ServiceHandle) error
 }
 
 // AdvertiserServerStubMethods is the server interface containing
@@ -194,7 +194,7 @@ type ScannerClientMethods interface {
 	//
 	// SyncQL tutorial at:
 	//    https://github.com/vanadium/docs/blob/master/tutorials/syncql-tutorial.md
-	Scan(ctx *context.T, query string, opts ...rpc.CallOpt) (ScannerScanClientCall, error)
+	Scan(_ *context.T, query string, _ ...rpc.CallOpt) (ScannerScanClientCall, error)
 }
 
 // ScannerClientStub adds universal methods to ScannerClientMethods.
@@ -308,7 +308,7 @@ type ScannerServerMethods interface {
 	//
 	// SyncQL tutorial at:
 	//    https://github.com/vanadium/docs/blob/master/tutorials/syncql-tutorial.md
-	Scan(ctx *context.T, call ScannerScanServerCall, query string) error
+	Scan(_ *context.T, _ ScannerScanServerCall, query string) error
 }
 
 // ScannerServerStubMethods is the server interface containing
@@ -330,7 +330,7 @@ type ScannerServerStubMethods interface {
 	//
 	// SyncQL tutorial at:
 	//    https://github.com/vanadium/docs/blob/master/tutorials/syncql-tutorial.md
-	Scan(ctx *context.T, call *ScannerScanServerCallStub, query string) error
+	Scan(_ *context.T, _ *ScannerScanServerCallStub, query string) error
 }
 
 // ScannerServerStub adds universal methods to ScannerServerStubMethods.

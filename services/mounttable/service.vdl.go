@@ -128,15 +128,15 @@ type MountTableClientMethods interface {
 	// was never present as far as the interface is concerned.
 	//
 	// The flags represent a bit mask of options.
-	Mount(ctx *context.T, server string, ttl uint32, flags naming.MountFlag, opts ...rpc.CallOpt) error
+	Mount(_ *context.T, server string, ttl uint32, flags naming.MountFlag, _ ...rpc.CallOpt) error
 	// Unmount removes server from the receiver.  If server is empty, remove all
 	// servers mounted there.  Returns a non-nil error iff server remains mounted
 	// at the mount point.
-	Unmount(ctx *context.T, server string, opts ...rpc.CallOpt) error
+	Unmount(_ *context.T, server string, _ ...rpc.CallOpt) error
 	// Delete removes the receiver.  If the receiver has children, it will not
 	// be removed unless deleteSubtree is true in which case the whole subtree is
 	// removed.
-	Delete(ctx *context.T, deleteSubtree bool, opts ...rpc.CallOpt) error
+	Delete(_ *context.T, deleteSubtree bool, _ ...rpc.CallOpt) error
 	// ResolveStep takes the next step in resolving a name.  Returns the next
 	// servers to query and the suffix at those servers.
 	ResolveStep(*context.T, ...rpc.CallOpt) (naming.MountEntry, error)
@@ -244,15 +244,15 @@ type MountTableServerMethods interface {
 	// was never present as far as the interface is concerned.
 	//
 	// The flags represent a bit mask of options.
-	Mount(ctx *context.T, call rpc.ServerCall, server string, ttl uint32, flags naming.MountFlag) error
+	Mount(_ *context.T, _ rpc.ServerCall, server string, ttl uint32, flags naming.MountFlag) error
 	// Unmount removes server from the receiver.  If server is empty, remove all
 	// servers mounted there.  Returns a non-nil error iff server remains mounted
 	// at the mount point.
-	Unmount(ctx *context.T, call rpc.ServerCall, server string) error
+	Unmount(_ *context.T, _ rpc.ServerCall, server string) error
 	// Delete removes the receiver.  If the receiver has children, it will not
 	// be removed unless deleteSubtree is true in which case the whole subtree is
 	// removed.
-	Delete(ctx *context.T, call rpc.ServerCall, deleteSubtree bool) error
+	Delete(_ *context.T, _ rpc.ServerCall, deleteSubtree bool) error
 	// ResolveStep takes the next step in resolving a name.  Returns the next
 	// servers to query and the suffix at those servers.
 	ResolveStep(*context.T, rpc.ServerCall) (naming.MountEntry, error)
