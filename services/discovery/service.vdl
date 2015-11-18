@@ -22,11 +22,13 @@ type Discovery interface {
 
 // Advertiser is the interface for advertising services.
 type Advertiser interface {
-	// RegisterService registers a service to be discovered by "Scanner" implementations.
+	// RegisterService registers a service to be discovered by "Scanner" implementations
+	// and returns a handle to the advertisement and instance id of the service.
+	//
 	// visibility is used to limit the principals that can see the advertisement. An empty
 	// set means that there are no restrictions on visibility (i.e, equivalent to
 	// []security.BlessingPattern{security.AllPrincipals}).
-	RegisterService(service discovery.Service, visibility []security.BlessingPattern) (ServiceHandle | error) {access.Write}
+	RegisterService(service discovery.Service, visibility []security.BlessingPattern) (handle ServiceHandle, instanceId string | error) {access.Write}
 
 	// UnregisterService unregisters a registered service from advertising.
 	UnregisterService(handle ServiceHandle) error {access.Write}

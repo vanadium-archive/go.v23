@@ -29,9 +29,12 @@ type Advertiser interface {
 	// until the context is canceled or exceeds its deadline and the returned channel
 	// will be closed when it stops.
 	//
+	// If service.InstanceId is not specified, a random 128 bit (16 byte) UUID will be
+	// assigned to it. Any change to service will not be applied after advertising starts.
+	//
 	// It is an error to have simultaneously active advertisements for two identical
-	// instances (service.InstanceUuid).
-	Advertise(ctx *context.T, service Service, visibility []security.BlessingPattern) (<-chan struct{}, error)
+	// instances (service.InstanceId).
+	Advertise(ctx *context.T, service *Service, visibility []security.BlessingPattern) (<-chan struct{}, error)
 }
 
 // AdvertiseCloser is the interface that groups the Advertise and Close methods.
@@ -47,7 +50,7 @@ type Scanner interface {
 	// is canceled or exceeds its deadline.
 	//
 	// The query is a WHERE expression of syncQL query against scanned services, where
-	// keys are InstanceUuids and values are Service.
+	// keys are InstanceIds and values are Services.
 	//
 	// Examples
 	//

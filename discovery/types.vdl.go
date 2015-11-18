@@ -15,8 +15,8 @@ import (
 // Service represents service information for service discovery.
 type Service struct {
 	// The universal unique identifier of a service instance.
-	// If this is not specified, a random 128 bit (16 byte) UUID will be used.
-	InstanceUuid []byte
+	// If this is not specified, a random unique identifier will be assigned.
+	InstanceId string
 	// Optional name of the service instance.
 	InstanceName string
 	// The interface that the service implements.
@@ -58,7 +58,7 @@ func (Found) __VDLReflect(struct {
 
 // Lost represents a service that is lost during scan.
 type Lost struct {
-	InstanceUuid []byte
+	InstanceId string
 }
 
 func (Lost) __VDLReflect(struct {

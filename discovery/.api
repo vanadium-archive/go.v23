@@ -5,17 +5,17 @@ pkg discovery, method (UpdateLost) Index() int
 pkg discovery, method (UpdateLost) Interface() interface{}
 pkg discovery, method (UpdateLost) Name() string
 pkg discovery, type AdvertiseCloser interface { Advertise, Close }
-pkg discovery, type AdvertiseCloser interface, Advertise(*context.T, Service, []security.BlessingPattern) (<-chan struct{}, error)
+pkg discovery, type AdvertiseCloser interface, Advertise(*context.T, *Service, []security.BlessingPattern) (<-chan struct{}, error)
 pkg discovery, type AdvertiseCloser interface, Close()
 pkg discovery, type Advertiser interface { Advertise }
-pkg discovery, type Advertiser interface, Advertise(*context.T, Service, []security.BlessingPattern) (<-chan struct{}, error)
+pkg discovery, type Advertiser interface, Advertise(*context.T, *Service, []security.BlessingPattern) (<-chan struct{}, error)
 pkg discovery, type Attributes map[string]string
 pkg discovery, type Closer interface { Close }
 pkg discovery, type Closer interface, Close()
 pkg discovery, type Found struct
 pkg discovery, type Found struct, Service Service
 pkg discovery, type Lost struct
-pkg discovery, type Lost struct, InstanceUuid []byte
+pkg discovery, type Lost struct, InstanceId string
 pkg discovery, type ScanCloser interface { Close, Scan }
 pkg discovery, type ScanCloser interface, Close()
 pkg discovery, type ScanCloser interface, Scan(*context.T, string) (<-chan Update, error)
@@ -24,11 +24,11 @@ pkg discovery, type Scanner interface, Scan(*context.T, string) (<-chan Update, 
 pkg discovery, type Service struct
 pkg discovery, type Service struct, Addrs []string
 pkg discovery, type Service struct, Attrs Attributes
+pkg discovery, type Service struct, InstanceId string
 pkg discovery, type Service struct, InstanceName string
-pkg discovery, type Service struct, InstanceUuid []byte
 pkg discovery, type Service struct, InterfaceName string
 pkg discovery, type T interface { Advertise, Close, Scan }
-pkg discovery, type T interface, Advertise(*context.T, Service, []security.BlessingPattern) (<-chan struct{}, error)
+pkg discovery, type T interface, Advertise(*context.T, *Service, []security.BlessingPattern) (<-chan struct{}, error)
 pkg discovery, type T interface, Close()
 pkg discovery, type T interface, Scan(*context.T, string) (<-chan Update, error)
 pkg discovery, type Update interface, Index() int

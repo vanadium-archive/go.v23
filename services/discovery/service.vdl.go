@@ -39,11 +39,13 @@ func init() {
 //
 // Advertiser is the interface for advertising services.
 type AdvertiserClientMethods interface {
-	// RegisterService registers a service to be discovered by "Scanner" implementations.
+	// RegisterService registers a service to be discovered by "Scanner" implementations
+	// and returns a handle to the advertisement and instance id of the service.
+	//
 	// visibility is used to limit the principals that can see the advertisement. An empty
 	// set means that there are no restrictions on visibility (i.e, equivalent to
 	// []security.BlessingPattern{security.AllPrincipals}).
-	RegisterService(ctx *context.T, service discovery.Service, visibility []security.BlessingPattern, opts ...rpc.CallOpt) (ServiceHandle, error)
+	RegisterService(ctx *context.T, service discovery.Service, visibility []security.BlessingPattern, opts ...rpc.CallOpt) (handle ServiceHandle, instanceId string, err error)
 	// UnregisterService unregisters a registered service from advertising.
 	UnregisterService(ctx *context.T, handle ServiceHandle, opts ...rpc.CallOpt) error
 }
@@ -63,8 +65,8 @@ type implAdvertiserClientStub struct {
 	name string
 }
 
-func (c implAdvertiserClientStub) RegisterService(ctx *context.T, i0 discovery.Service, i1 []security.BlessingPattern, opts ...rpc.CallOpt) (o0 ServiceHandle, err error) {
-	err = v23.GetClient(ctx).Call(ctx, c.name, "RegisterService", []interface{}{i0, i1}, []interface{}{&o0}, opts...)
+func (c implAdvertiserClientStub) RegisterService(ctx *context.T, i0 discovery.Service, i1 []security.BlessingPattern, opts ...rpc.CallOpt) (o0 ServiceHandle, o1 string, err error) {
+	err = v23.GetClient(ctx).Call(ctx, c.name, "RegisterService", []interface{}{i0, i1}, []interface{}{&o0, &o1}, opts...)
 	return
 }
 
@@ -78,11 +80,13 @@ func (c implAdvertiserClientStub) UnregisterService(ctx *context.T, i0 ServiceHa
 //
 // Advertiser is the interface for advertising services.
 type AdvertiserServerMethods interface {
-	// RegisterService registers a service to be discovered by "Scanner" implementations.
+	// RegisterService registers a service to be discovered by "Scanner" implementations
+	// and returns a handle to the advertisement and instance id of the service.
+	//
 	// visibility is used to limit the principals that can see the advertisement. An empty
 	// set means that there are no restrictions on visibility (i.e, equivalent to
 	// []security.BlessingPattern{security.AllPrincipals}).
-	RegisterService(ctx *context.T, call rpc.ServerCall, service discovery.Service, visibility []security.BlessingPattern) (ServiceHandle, error)
+	RegisterService(ctx *context.T, call rpc.ServerCall, service discovery.Service, visibility []security.BlessingPattern) (handle ServiceHandle, instanceId string, err error)
 	// UnregisterService unregisters a registered service from advertising.
 	UnregisterService(ctx *context.T, call rpc.ServerCall, handle ServiceHandle) error
 }
@@ -122,7 +126,7 @@ type implAdvertiserServerStub struct {
 	gs   *rpc.GlobState
 }
 
-func (s implAdvertiserServerStub) RegisterService(ctx *context.T, call rpc.ServerCall, i0 discovery.Service, i1 []security.BlessingPattern) (ServiceHandle, error) {
+func (s implAdvertiserServerStub) RegisterService(ctx *context.T, call rpc.ServerCall, i0 discovery.Service, i1 []security.BlessingPattern) (ServiceHandle, string, error) {
 	return s.impl.RegisterService(ctx, call, i0, i1)
 }
 
@@ -149,13 +153,14 @@ var descAdvertiser = rpc.InterfaceDesc{
 	Methods: []rpc.MethodDesc{
 		{
 			Name: "RegisterService",
-			Doc:  "// RegisterService registers a service to be discovered by \"Scanner\" implementations.\n// visibility is used to limit the principals that can see the advertisement. An empty\n// set means that there are no restrictions on visibility (i.e, equivalent to\n// []security.BlessingPattern{security.AllPrincipals}).",
+			Doc:  "// RegisterService registers a service to be discovered by \"Scanner\" implementations\n// and returns a handle to the advertisement and instance id of the service.\n//\n// visibility is used to limit the principals that can see the advertisement. An empty\n// set means that there are no restrictions on visibility (i.e, equivalent to\n// []security.BlessingPattern{security.AllPrincipals}).",
 			InArgs: []rpc.ArgDesc{
 				{"service", ``},    // discovery.Service
 				{"visibility", ``}, // []security.BlessingPattern
 			},
 			OutArgs: []rpc.ArgDesc{
-				{"", ``}, // ServiceHandle
+				{"handle", ``},     // ServiceHandle
+				{"instanceId", ``}, // string
 			},
 			Tags: []*vdl.Value{vdl.ValueOf(access.Tag("Write"))},
 		},
