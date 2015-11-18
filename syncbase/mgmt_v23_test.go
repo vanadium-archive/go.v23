@@ -161,7 +161,7 @@ func V23TestDeviceManager(i *v23tests.T) {
 		break
 	}
 	// Claim the device as "root/u/alice/myworkstation".
-	claimDeviceBin.Start("claim", claimableEP, "myworkstation")
+	claimDeviceBin.Start("claim", claimableEP, "myworkstation").WaitOrDie(os.Stdout, os.Stderr)
 
 	resolve := func(name string) string {
 		resolver := func() (interface{}, error) {
@@ -188,11 +188,13 @@ func V23TestDeviceManager(i *v23tests.T) {
 	ownerBlessing := "root/r/admin/myworkstation"
 	inv := debugBin.Start("stats", "read", mtName+"/devmgr/__debug/stats/security/principal/*/blessingstore/*")
 	inv.ExpectSetEventuallyRE(".*Default Blessings[ ]+" + mfrBlessing + "," + ownerBlessing)
+	inv.Wait(nil, os.Stderr)
 
 	// Get the device's profile, which should be set to non-empty string
 	inv = adminDeviceBin.Start("describe", mtName+"/devmgr/device")
 
 	parts := inv.ExpectRE(`{Profiles:map\[(.*):{}\]}`, 1)
+	inv.Wait(nil, os.Stderr)
 	expectOneMatch := func(parts [][]string) string {
 		if len(parts) != 1 || len(parts[0]) != 2 {
 			loc := v23tests.Caller(1)
@@ -249,6 +251,7 @@ func V23TestDeviceManager(i *v23tests.T) {
 	// Install the app on the device.
 	inv = deviceBin.Start("install", mtName+"/devmgr/apps", syncbasedName)
 	installationName := inv.ReadLine()
+	inv.WaitOrDie(os.Stdout, os.Stderr)
 	if installationName == "" {
 		i.Fatalf("got empty installation name from install")
 	}
@@ -262,10 +265,11 @@ func V23TestDeviceManager(i *v23tests.T) {
 	// Start an instance of the app, granting it blessing extension syncbased.
 	inv = deviceBin.Start("instantiate", installationName, "syncbased")
 	instanceName := inv.ReadLine()
+	inv.WaitOrDie(os.Stdout, os.Stderr)
 	if instanceName == "" {
 		i.Fatalf("got empty instance name from new")
 	}
-	deviceBin.Start("run", instanceName).Wait(os.Stdout, os.Stderr)
+	deviceBin.Start("run", instanceName).WaitOrDie(os.Stdout, os.Stderr)
 
 	resolve(mtName + "/syncbased")
 
@@ -285,6 +289,7 @@ func V23TestDeviceManager(i *v23tests.T) {
 	appBlessing := mfrBlessing + "/a/" + pubBlessing + "," + ownerBlessing + "/a/" + pubBlessing
 	inv = debugBin.Start("stats", "read", instanceName+"/stats/security/principal/*/blessingstore/*")
 	inv.ExpectSetEventuallyRE(".*Default Blessings[ ]+"+userBlessing+"$", "[.][.][.][ ]+"+userBlessing+","+appBlessing)
+	inv.Wait(nil, os.Stderr)
 
 	// Kill and delete the instance.
 	deviceBin.Run("kill", instanceName)
