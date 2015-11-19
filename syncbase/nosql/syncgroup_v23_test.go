@@ -821,48 +821,6 @@ var runUpdateData = modules.Register(func(env *modules.Env, args ...string) erro
 	return nil
 }, "runUpdateData")
 
-// Updates data within a batch.
-// Arguments: 0: Syncbase name, 1: start index.
-// Optional args: 2: end index, 3: value prefix.
-// Values are from [start,end) or [start, start+5) depending on whether end
-// param was provided.
-var runUpdateBatchData = modules.Register(func(env *modules.Env, args ...string) error {
-	ctx, shutdown := v23.Init()
-	defer shutdown()
-
-	serviceName, startStr := args[0], args[1]
-	start, _ := strconv.ParseUint(startStr, 10, 64)
-	end, prefix := start+5, "testkey"
-	if len(args) > 2 {
-		end, _ = strconv.ParseUint(args[2], 10, 64)
-		if end <= start {
-			return fmt.Errorf("Test error: end <= start. start: %d, end: %d", start, end)
-		}
-	}
-	if len(args) > 3 {
-		prefix = args[3]
-	}
-
-	a := syncbase.NewService(serviceName).App("a")
-	d := a.NoSQLDatabase("d", nil)
-
-	// Do Puts.
-	batch, err := d.BeginBatch(ctx, wire.BatchOptions{})
-	if err != nil {
-		return fmt.Errorf("BeginBatch failed: %v\n", err)
-	}
-	tb := batch.Table(testTable)
-	for i := start; i < end; i++ {
-		key := fmt.Sprintf("foo%d", i)
-		r := tb.Row(key)
-		if err := r.Put(ctx, prefix+serviceName+key); err != nil {
-			batch.Abort(ctx)
-			return fmt.Errorf("r.Put() failed: %v\n", err)
-		}
-	}
-	return batch.Commit(ctx)
-}, "runUpdateBatchData")
-
 var runDeleteData = modules.Register(func(env *modules.Env, args ...string) error {
 	ctx, shutdown := v23.Init()
 	defer shutdown()

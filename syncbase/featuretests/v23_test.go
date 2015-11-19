@@ -23,6 +23,14 @@ func TestMain(m *testing.M) {
 	os.Exit(r)
 }
 
+func TestV23DefaultCR(t *testing.T) {
+	v23tests.RunTest(t, V23TestDefaultCR)
+}
+
+func TestV23SyncbasedSyncWithAppResolvedConflicts(t *testing.T) {
+	v23tests.RunTest(t, V23TestSyncbasedSyncWithAppResolvedConflicts)
+}
+
 func TestV23SyncbasedJoinSyncgroup(t *testing.T) {
 	v23tests.RunTest(t, V23TestSyncbasedJoinSyncgroup)
 }

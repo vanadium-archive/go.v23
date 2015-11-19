@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package nosql_test
+package featuretests_test
 
 import (
 	"fmt"
@@ -22,6 +22,52 @@ import (
 	"v.io/x/ref/test/modules"
 	"v.io/x/ref/test/v23tests"
 )
+
+func V23TestDefaultCR(t *v23tests.T) {
+	v23tests.RunRootMT(t, "--v23.tcp.address=127.0.0.1:0")
+	server0Creds, _ := t.Shell().NewChildCredentials("s0")
+	client0Creds, _ := t.Shell().NewChildCredentials("c0")
+	cleanSync0 := tu.StartSyncbased(t, server0Creds, "sync0", "",
+		`{"Read": {"In":["root/c0"]}, "Write": {"In":["root/c0"]}}`)
+	defer cleanSync0()
+
+	server1Creds, _ := t.Shell().NewChildCredentials("s1")
+	client1Creds, _ := t.Shell().NewChildCredentials("c1")
+	cleanSync1 := tu.StartSyncbased(t, server1Creds, "sync1", "",
+		`{"Read": {"In":["root/c1"]}, "Write": {"In":["root/c1"]}}`)
+	defer cleanSync1()
+
+	sgName := naming.Join("sync0", util.SyncbaseSuffix, "SG1")
+
+	// Setup database for App on sync0, create a syncgroup with sync0 and sync1
+	// and populate some initial data.
+	tu.RunClient(t, client0Creds, runSetupAppA, "sync0")
+	tu.RunClient(t, client0Creds, runCreateSyncgroup, "sync0", sgName, "tb:foo", "", "root/s0", "root/s1")
+	tu.RunClient(t, client0Creds, runPopulateData, "sync0", "foo", "0", "1")
+
+	// Setup database for App on sync1, join the syncgroup created above and
+	// verify if the initial data was synced or not.
+	tu.RunClient(t, client1Creds, runSetupAppA, "sync1")
+	tu.RunClient(t, client1Creds, runJoinSyncgroup, "sync1", sgName)
+	tu.RunClient(t, client1Creds, runVerifySyncgroupData, "sync1", "foo", "0", "1", "true")
+
+	// Turn off syncing on both s0 and s1 by removing each other from syncgroup ACLs.
+	tu.RunClient(t, client0Creds, runToggleSync, "sync0", sgName, "root/s0")
+	tu.RunClient(t, client1Creds, runToggleSync, "sync1", sgName, "root/s1")
+
+	// Since sync is paused, the following updates are concurrent.
+	tu.RunClient(t, client0Creds, runUpdateData, "sync0", "0", "1", "concurrentUpdate")
+	tu.RunClient(t, client1Creds, runUpdateData, "sync1", "0", "1", "concurrentUpdate")
+
+	// Re enable sync between the two syncbases and wait for a bit to let the
+	// syncbases sync and call conflict resolution.
+	tu.RunClient(t, client0Creds, runToggleSync, "sync0", sgName, "root/s0", "root/s1")
+	tu.RunClient(t, client1Creds, runToggleSync, "sync1", sgName, "root/s0", "root/s1")
+
+	// Verify that the resolved data looks correct.
+	tu.RunClient(t, client0Creds, runWaitForValue, "sync0", "foo0", "concurrentUpdate"+"sync1")
+	tu.RunClient(t, client1Creds, runWaitForValue, "sync1", "foo0", "concurrentUpdate"+"sync1")
+}
 
 // V23TestSyncbasedSyncWithAppResolvedConflicts tests AppResolves resolution
 // policy by creating conflicts for rows that will be resolved by the
@@ -90,11 +136,11 @@ func V23TestSyncbasedSyncWithAppResolvedConflicts(t *v23tests.T) {
 
 	// Verify that the resolved data looks correct.
 	keyUnderConflict := "foo8" // one of the keys under conflict
-	tu.RunClient(t, client0Creds, runWaitForValue, "sync0", "foo", keyUnderConflict, "AppResolvedVal")
+	tu.RunClient(t, client0Creds, runWaitForValue, "sync0", keyUnderConflict, "AppResolvedVal", "foo")
 	tu.RunClient(t, client0Creds, runVerifyConflictResolvedData, "sync0", "foo", "0", "5", "AppResolvedVal")
 	tu.RunClient(t, client0Creds, runVerifyConflictResolvedData, "sync0", "foo", "5", "10", "AppResolvedVal")
 
-	tu.RunClient(t, client1Creds, runWaitForValue, "sync1", "foo", keyUnderConflict, "AppResolvedVal")
+	tu.RunClient(t, client1Creds, runWaitForValue, "sync1", keyUnderConflict, "AppResolvedVal", "foo")
 	tu.RunClient(t, client1Creds, runVerifyConflictResolvedData, "sync1", "foo", "0", "5", "AppResolvedVal")
 	tu.RunClient(t, client1Creds, runVerifyConflictResolvedData, "sync1", "foo", "5", "10", "AppResolvedVal")
 
@@ -106,6 +152,9 @@ func V23TestSyncbasedSyncWithAppResolvedConflicts(t *v23tests.T) {
 	tu.RunClient(t, client0Creds, runWaitSignal, "sync0", "foo", "endKeyAck")
 	tu.RunClient(t, client1Creds, runWaitSignal, "sync1", "foo", "endKeyAck")
 }
+
+//////////////////////////////////////////////
+// Helpers specific to ConflictResolution
 
 // Arguments: 0: Syncbase name, 1: conflict prefix, 2: signalKey, 3: max onConflict call count.
 var runConflictResolver = modules.Register(func(env *modules.Env, args ...string) error {
@@ -139,26 +188,6 @@ var runConflictResolver = modules.Register(func(env *modules.Env, args ...string
 	return nil
 }, "runConflictResolver")
 
-// Arguments: 0: Syncbase name, 1: Syncgroup name, 2 onwards: Syncgroup permission blessings.
-var runToggleSync = modules.Register(func(env *modules.Env, args ...string) error {
-	ctx, shutdown := v23.Init()
-	defer shutdown()
-
-	serviceName, sgName, blessings := args[0], args[1], args[2:]
-
-	a := syncbase.NewService(serviceName).App("a")
-	d := a.NoSQLDatabase("d", nil)
-
-	sg := d.Syncgroup(sgName)
-	spec, ver, err := sg.GetSpec(ctx)
-	if err != nil {
-		return err
-	}
-	spec.Perms = perms(blessings...)
-
-	return sg.SetSpec(ctx, spec, ver)
-}, "runToggleSync")
-
 // Arguments: 0: Syncbase name, 1: schema prefix, 2: start index, 3: end index (not included), 4: valuePrefix.
 var runVerifyConflictResolvedData = modules.Register(func(env *modules.Env, args ...string) error {
 	ctx, shutdown := v23.Init()
@@ -186,15 +215,20 @@ var runVerifyConflictResolvedData = modules.Register(func(env *modules.Env, args
 	return nil
 }, "runVerifyConflictResolvedData")
 
-// Arguments: 0: Syncbase name, 1: schema prefix, 2: key, 3: valuePrefix.
+// Arguments: 0: Syncbase name, 1: key, 2: valuePrefix.
+// Optional Args: 3: schema prefix.
 var runWaitForValue = modules.Register(func(env *modules.Env, args ...string) error {
 	ctx, shutdown := v23.Init()
 	defer shutdown()
 
-	serviceName, schemaPrefix, key, valuePrefix := args[0], args[1], args[2], args[3]
+	var schema *nosql.Schema = nil
+	serviceName, key, valuePrefix := args[0], args[1], args[2]
+	if len(args) > 3 {
+		schema = makeSchema(args[3], &CRImpl{serviceName: serviceName})
+	}
 
 	a := syncbase.NewService(serviceName).App("a")
-	d := a.NoSQLDatabase("d", makeSchema(schemaPrefix, &CRImpl{serviceName: serviceName}))
+	d := a.NoSQLDatabase("d", schema)
 
 	tb := d.Table(testTable)
 	r := tb.Row(key)
@@ -202,14 +236,16 @@ var runWaitForValue = modules.Register(func(env *modules.Env, args ...string) er
 
 	// Wait upto 5 seconds for the correct key and value to appear.
 	sleepTimeMs, maxAttempts := 50, 100
+	var value string
 	for i := 0; i < maxAttempts; i++ {
-		var value string
 		if err := r.Get(ctx, &value); (err == nil) && (value == want) {
 			return nil
+		} else if err != nil {
+			return fmt.Errorf("Syncbase Error while fetching key %v: %v", key, err)
 		}
 		time.Sleep(time.Duration(sleepTimeMs) * time.Millisecond)
 	}
-	return fmt.Errorf("Timed out waiting for value %v after %d milliseconds.", want, maxAttempts*sleepTimeMs)
+	return fmt.Errorf("Timed out waiting for value %v but found %v after %d milliseconds.", want, value, maxAttempts*sleepTimeMs)
 }, "runWaitForValue")
 
 // Arguments: 0: Syncbase name, 1: conflict prefix, 2: signalKey.

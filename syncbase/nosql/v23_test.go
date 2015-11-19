@@ -27,10 +27,6 @@ func TestV23SyncbasedWholeBlobTransfer(t *testing.T) {
 	v23tests.RunTest(t, V23TestSyncbasedWholeBlobTransfer)
 }
 
-func TestV23SyncbasedSyncWithAppResolvedConflicts(t *testing.T) {
-	v23tests.RunTest(t, V23TestSyncbasedSyncWithAppResolvedConflicts)
-}
-
 func TestV23SyncbasedJoinSyncgroup(t *testing.T) {
 	v23tests.RunTest(t, V23TestSyncbasedJoinSyncgroup)
 }
