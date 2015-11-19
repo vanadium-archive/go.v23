@@ -64,9 +64,10 @@ type messageReader struct {
 	version Version
 
 	// Message data:
-	curMsgKind messageKind
-	typeMsg    messageData
-	valueMsg   messageData
+	curMsgKind     messageKind
+	typeIncomplete bool // Type message was flagged as having dependencies on unsent types.
+	typeMsg        messageData
+	valueMsg       messageData
 
 	finalChunk bool // current chunk is flagged as the final chunk of the message
 
@@ -87,6 +88,7 @@ func (mr *messageReader) startChunk() (msgConsumed bool, err error) {
 	if leftover := mr.buf.RemoveLimit(); leftover > 0 {
 		return false, verror.New(errLeftOverBytes, nil, leftover)
 	}
+
 	if mr.version == 0 {
 		version, err := mr.buf.ReadByte()
 		if err != nil {
@@ -101,6 +103,22 @@ func (mr *messageReader) startChunk() (msgConsumed bool, err error) {
 	mid, cr, err := decbufBinaryDecodeIntWithControl(mr.buf)
 	if err != nil {
 		return false, err
+	}
+
+	if cr == WireCtrlTypeIncomplete {
+		mid, cr, err = decbufBinaryDecodeIntWithControl(mr.buf)
+		if err != nil {
+			return false, err
+		}
+
+		if cr != 0 || mid >= 0 {
+			// only can have incomplete types on new type messages
+			return false, verror.New(errInvalid, nil)
+		}
+
+		mr.typeIncomplete = true
+	} else if mid < 0 {
+		mr.typeIncomplete = false
 	}
 
 	var activeMsg *messageData

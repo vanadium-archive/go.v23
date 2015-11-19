@@ -36,11 +36,12 @@ type chunkedEncbuf struct {
 	typeID                 int
 	hasLen                 bool
 	hasAnyOrTypeObject     bool
+	typeIncomplete         bool
 	messageStartHeaderSent bool
 	headerBuf              *encbuf
 }
 
-func (b *chunkedEncbuf) StartMessage(hasAnyOrTypeObject, hasLen bool, typeID int) error {
+func (b *chunkedEncbuf) StartMessage(hasAnyOrTypeObject, hasLen, typeIncomplete bool, typeID int) error {
 	if b.encBuf.Len() != 0 {
 		panic("unsent outstanding message")
 	}
@@ -52,6 +53,7 @@ func (b *chunkedEncbuf) StartMessage(hasAnyOrTypeObject, hasLen bool, typeID int
 		b.typeIDs.Reset()
 	}
 	b.hasLen = hasLen
+	b.typeIncomplete = typeIncomplete
 	b.typeID = typeID
 	b.messageStartHeaderSent = false
 	return nil
@@ -120,6 +122,9 @@ func (b *chunkedEncbuf) writeMessageHeaderContents() {
 func (b *chunkedEncbuf) writeChunkHeaderContents(finalChunk bool) {
 	if !b.messageStartHeaderSent {
 		// First chunk of message
+		if b.typeIncomplete {
+			b.headerBuf.WriteOneByte(WireCtrlTypeIncomplete)
+		}
 		if !finalChunk {
 			if b.typeID > 0 {
 				b.headerBuf.WriteOneByte(WireCtrlValueFirstChunk)

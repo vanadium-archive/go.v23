@@ -40,7 +40,7 @@ type switchedEncbuf struct {
 	chunked *chunkedEncbuf
 }
 
-func (b *switchedEncbuf) StartMessage(hasAnyOrTypeObject, hasLen bool, mid int64) error {
+func (b *switchedEncbuf) StartMessage(hasAnyOrTypeObject, hasLen, typeIncomplete bool, mid int64) error {
 	if b.version == Version80 {
 		b.expanding.Reset()
 		b.expanding.Grow(paddingLen)
@@ -48,7 +48,7 @@ func (b *switchedEncbuf) StartMessage(hasAnyOrTypeObject, hasLen bool, mid int64
 		b.mid = mid
 		return nil
 	} else {
-		return b.chunked.StartMessage(hasAnyOrTypeObject, hasLen, int(mid))
+		return b.chunked.StartMessage(hasAnyOrTypeObject, hasLen, typeIncomplete, int(mid))
 	}
 }
 

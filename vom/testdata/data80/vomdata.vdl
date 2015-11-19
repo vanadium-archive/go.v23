@@ -4559,6 +4559,68 @@ const Tests = []types.TestCase {
 		"80", "5326030020762e696f2f7632332f766f6d2f74657374646174612f74797065732e526563590129e15126030020762e696f2f7632332f766f6d2f74657374646174612f74797065732e52656358012ae1", "52050200020000",
 	},
 	// 80                   Version                          128 [vom version 0]
+	// DumpStatus{MsgId: 0, MsgN: 1, Buf(167): "5726030020762e696f2f7632332f766f6d2f74657374646174612f74797065732e526563340129e15526030020762e696f2f7632332f766f6d2f74657374646174612f74797065732e52656333012ce15326030020762e696f2f7632332f766f6d2f74657374646174612f74797065732e52656332012be15126030020762e696f2f7632332f766f6d2f74657374646174612f74797065732e52656331012ae152050101010100"}
+	// 57                   MsgId                            -44
+	//                      TypeMsg                           44
+	// 26                   MsgLen                            38
+	// 03                   WireTypeIndex                      3 [v.io/v23/vom.wireList]
+	// 00                   Index                              0 [v.io/v23/vom.wireList.Name]
+	// 20                   ByteLen                           32 [string len]
+	// 762e696f2f7632332f766f6d2f74657374646174612f74797065732e52656334 PrimValue       "v.io/v23/vom/testdata/types.Rec4" [string]
+	// 01                   Index                              1 [v.io/v23/vom.wireList.Elem]
+	// 29                   PrimValue                         41 [uint]
+	// e1                   Control                          End [v.io/v23/vom.wireList END]
+	// DumpStatus{MsgId: -44, MsgLen: 38, MsgN: 38, Buf(127): "5526030020762e696f2f7632332f766f6d2f74657374646174612f74797065732e52656333012ce15326030020762e696f2f7632332f766f6d2f74657374646174612f74797065732e52656332012be15126030020762e696f2f7632332f766f6d2f74657374646174612f74797065732e52656331012ae152050101010100"}
+	// 55                   MsgId                            -43
+	//                      TypeMsg                           43
+	// 26                   MsgLen                            38
+	// 03                   WireTypeIndex                      3 [v.io/v23/vom.wireList]
+	// 00                   Index                              0 [v.io/v23/vom.wireList.Name]
+	// 20                   ByteLen                           32 [string len]
+	// 762e696f2f7632332f766f6d2f74657374646174612f74797065732e52656333 PrimValue       "v.io/v23/vom/testdata/types.Rec3" [string]
+	// 01                   Index                              1 [v.io/v23/vom.wireList.Elem]
+	// 2c                   PrimValue                         44 [uint]
+	// e1                   Control                          End [v.io/v23/vom.wireList END]
+	// DumpStatus{MsgId: -43, MsgLen: 38, MsgN: 38, Buf(87): "5326030020762e696f2f7632332f766f6d2f74657374646174612f74797065732e52656332012be15126030020762e696f2f7632332f766f6d2f74657374646174612f74797065732e52656331012ae152050101010100"}
+	// 53                   MsgId                            -42
+	//                      TypeMsg                           42
+	// 26                   MsgLen                            38
+	// 03                   WireTypeIndex                      3 [v.io/v23/vom.wireList]
+	// 00                   Index                              0 [v.io/v23/vom.wireList.Name]
+	// 20                   ByteLen                           32 [string len]
+	// 762e696f2f7632332f766f6d2f74657374646174612f74797065732e52656332 PrimValue       "v.io/v23/vom/testdata/types.Rec2" [string]
+	// 01                   Index                              1 [v.io/v23/vom.wireList.Elem]
+	// 2b                   PrimValue                         43 [uint]
+	// e1                   Control                          End [v.io/v23/vom.wireList END]
+	// DumpStatus{MsgId: -42, MsgLen: 38, MsgN: 38, Buf(47): "5126030020762e696f2f7632332f766f6d2f74657374646174612f74797065732e52656331012ae152050101010100"}
+	// 51                   MsgId                            -41
+	//                      TypeMsg                           41
+	// 26                   MsgLen                            38
+	// 03                   WireTypeIndex                      3 [v.io/v23/vom.wireList]
+	// 00                   Index                              0 [v.io/v23/vom.wireList.Name]
+	// 20                   ByteLen                           32 [string len]
+	// 762e696f2f7632332f766f6d2f74657374646174612f74797065732e52656331 PrimValue       "v.io/v23/vom/testdata/types.Rec1" [string]
+	// 01                   Index                              1 [v.io/v23/vom.wireList.Elem]
+	// 2a                   PrimValue                         42 [uint]
+	// e1                   Control                          End [v.io/v23/vom.wireList END]
+	// DumpStatus{MsgId: -41, MsgLen: 38, MsgN: 38, Buf(7): "52050101010100"}
+	// 52                   MsgId                             41
+	//                      ValueMsg                          41 [v.io/v23/vom/testdata/types.Rec1 []v.io/v23/vom/testdata/types.Rec2 []v.io/v23/vom/testdata/types.Rec3 []v.io/v23/vom/testdata/types.Rec4 []v.io/v23/vom/testdata/types.Rec1]
+	// 05                   MsgLen                             5
+	// 01                   ValueLen                           1 [list len]
+	// 01                   ValueLen                           1 [list len]
+	// 01                   ValueLen                           1 [list len]
+	// 01                   ValueLen                           1 [list len]
+	// 00                   ValueLen                           0 [list len]
+	// DumpStatus{MsgId: 41, MsgLen: 5, MsgN: 5, Value: v.io/v23/vom/testdata/types.Rec1 []v.io/v23/vom/testdata/types.Rec2 []v.io/v23/vom/testdata/types.Rec3 []v.io/v23/vom/testdata/types.Rec4 []v.io/v23/vom/testdata/types.Rec1{{{{{}}}}}}
+	{
+		`types.Rec1{{{{{}}}}}`,
+		types.Rec1{{{{{}}}}},
+		"v.io/v23/vom/testdata/types.Rec1 []v.io/v23/vom/testdata/types.Rec2 []v.io/v23/vom/testdata/types.Rec3 []v.io/v23/vom/testdata/types.Rec4 []v.io/v23/vom/testdata/types.Rec1",
+		"805726030020762e696f2f7632332f766f6d2f74657374646174612f74797065732e526563340129e15526030020762e696f2f7632332f766f6d2f74657374646174612f74797065732e52656333012ce15326030020762e696f2f7632332f766f6d2f74657374646174612f74797065732e52656332012be15126030020762e696f2f7632332f766f6d2f74657374646174612f74797065732e52656331012ae152050101010100",
+		"80", "5726030020762e696f2f7632332f766f6d2f74657374646174612f74797065732e526563340129e15526030020762e696f2f7632332f766f6d2f74657374646174612f74797065732e52656333012ce15326030020762e696f2f7632332f766f6d2f74657374646174612f74797065732e52656332012be15126030020762e696f2f7632332f766f6d2f74657374646174612f74797065732e52656331012ae1", "52050101010100",
+	},
+	// 80                   Version                          128 [vom version 0]
 	// DumpStatus{MsgId: 0, MsgN: 1, Buf(62): "5304080129e15131060025762e696f2f7632332f766f6d2f74657374646174612f74797065732e5265635374727563740101000141012ae1e1520300e1e1"}
 	// 53                   MsgId                            -42
 	//                      TypeMsg                           42
@@ -4641,6 +4703,211 @@ const Tests = []types.TestCase {
 		"v.io/v23/vom/testdata/types.RecStruct struct{A ?v.io/v23/vom/testdata/types.RecStruct}",
 		"805304080129e15131060025762e696f2f7632332f766f6d2f74657374646174612f74797065732e5265635374727563740101000141012ae1e152050000e1e1e1",
 		"80", "5304080129e15131060025762e696f2f7632332f766f6d2f74657374646174612f74797065732e5265635374727563740101000141012ae1e1", "52050000e1e1e1",
+	},
+	// 80                   Version                          128 [vom version 0]
+	// DumpStatus{MsgId: 0, MsgN: 1, Buf(453): "550403012ae16126030020762e696f2f7632332f766f6d2f74657374646174612f74797065732e52656334012ee15f26030020762e696f2f7632332f766f6d2f74657374646174612f74797065732e526563330131e15d26030020762e696f2f7632332f766f6d2f74657374646174612f74797065732e526563320130e15b26030020762e696f2f7632332f766f6d2f74657374646174612f74797065732e52656331012fe15945060023762e696f2f7632332f766f6d2f74657374646174612f74797065732e52656331323334010400025231012ee100025232012fe1000252330130e1000252340131e1e1570403012de1533c060024762e696f2f7632332f766f6d2f74657374646174612f74797065732e52656331323334410102000141012be1000752656331323334012ce1e16504030132e1633c060024762e696f2f7632332f766f6d2f74657374646174612f74797065732e526563313233344201020001420133e1000752656331323334012ce1e15138060026762e696f2f7632332f766f6d2f74657374646174612f74797065732e52656331323334416c6c0102000141012ae10001420132e1e15214000001e10101e1e1010001e10101010100e1e1e1"}
+	// 55                   MsgId                            -43
+	//                      TypeMsg                           43
+	// 04                   MsgLen                             4
+	// 03                   WireTypeIndex                      3 [v.io/v23/vom.wireList]
+	// 01                   Index                              1 [v.io/v23/vom.wireList.Elem]
+	// 2a                   PrimValue                         42 [uint]
+	// e1                   Control                          End [v.io/v23/vom.wireList END]
+	// DumpStatus{MsgId: -43, MsgLen: 4, MsgN: 4, Buf(447): "6126030020762e696f2f7632332f766f6d2f74657374646174612f74797065732e52656334012ee15f26030020762e696f2f7632332f766f6d2f74657374646174612f74797065732e526563330131e15d26030020762e696f2f7632332f766f6d2f74657374646174612f74797065732e526563320130e15b26030020762e696f2f7632332f766f6d2f74657374646174612f74797065732e52656331012fe15945060023762e696f2f7632332f766f6d2f74657374646174612f74797065732e52656331323334010400025231012ee100025232012fe1000252330130e1000252340131e1e1570403012de1533c060024762e696f2f7632332f766f6d2f74657374646174612f74797065732e52656331323334410102000141012be1000752656331323334012ce1e16504030132e1633c060024762e696f2f7632332f766f6d2f74657374646174612f74797065732e526563313233344201020001420133e1000752656331323334012ce1e15138060026762e696f2f7632332f766f6d2f74657374646174612f74797065732e52656331323334416c6c0102000141012ae10001420132e1e15214000001e10101e1e1010001e10101010100e1e1e1"}
+	// 61                   MsgId                            -49
+	//                      TypeMsg                           49
+	// 26                   MsgLen                            38
+	// 03                   WireTypeIndex                      3 [v.io/v23/vom.wireList]
+	// 00                   Index                              0 [v.io/v23/vom.wireList.Name]
+	// 20                   ByteLen                           32 [string len]
+	// 762e696f2f7632332f766f6d2f74657374646174612f74797065732e52656334 PrimValue       "v.io/v23/vom/testdata/types.Rec4" [string]
+	// 01                   Index                              1 [v.io/v23/vom.wireList.Elem]
+	// 2e                   PrimValue                         46 [uint]
+	// e1                   Control                          End [v.io/v23/vom.wireList END]
+	// DumpStatus{MsgId: -49, MsgLen: 38, MsgN: 38, Buf(407): "5f26030020762e696f2f7632332f766f6d2f74657374646174612f74797065732e526563330131e15d26030020762e696f2f7632332f766f6d2f74657374646174612f74797065732e526563320130e15b26030020762e696f2f7632332f766f6d2f74657374646174612f74797065732e52656331012fe15945060023762e696f2f7632332f766f6d2f74657374646174612f74797065732e52656331323334010400025231012ee100025232012fe1000252330130e1000252340131e1e1570403012de1533c060024762e696f2f7632332f766f6d2f74657374646174612f74797065732e52656331323334410102000141012be1000752656331323334012ce1e16504030132e1633c060024762e696f2f7632332f766f6d2f74657374646174612f74797065732e526563313233344201020001420133e1000752656331323334012ce1e15138060026762e696f2f7632332f766f6d2f74657374646174612f74797065732e52656331323334416c6c0102000141012ae10001420132e1e15214000001e10101e1e1010001e10101010100e1e1e1"}
+	// 5f                   MsgId                            -48
+	//                      TypeMsg                           48
+	// 26                   MsgLen                            38
+	// 03                   WireTypeIndex                      3 [v.io/v23/vom.wireList]
+	// 00                   Index                              0 [v.io/v23/vom.wireList.Name]
+	// 20                   ByteLen                           32 [string len]
+	// 762e696f2f7632332f766f6d2f74657374646174612f74797065732e52656333 PrimValue       "v.io/v23/vom/testdata/types.Rec3" [string]
+	// 01                   Index                              1 [v.io/v23/vom.wireList.Elem]
+	// 31                   PrimValue                         49 [uint]
+	// e1                   Control                          End [v.io/v23/vom.wireList END]
+	// DumpStatus{MsgId: -48, MsgLen: 38, MsgN: 38, Buf(367): "5d26030020762e696f2f7632332f766f6d2f74657374646174612f74797065732e526563320130e15b26030020762e696f2f7632332f766f6d2f74657374646174612f74797065732e52656331012fe15945060023762e696f2f7632332f766f6d2f74657374646174612f74797065732e52656331323334010400025231012ee100025232012fe1000252330130e1000252340131e1e1570403012de1533c060024762e696f2f7632332f766f6d2f74657374646174612f74797065732e52656331323334410102000141012be1000752656331323334012ce1e16504030132e1633c060024762e696f2f7632332f766f6d2f74657374646174612f74797065732e526563313233344201020001420133e1000752656331323334012ce1e15138060026762e696f2f7632332f766f6d2f74657374646174612f74797065732e52656331323334416c6c0102000141012ae10001420132e1e15214000001e10101e1e1010001e10101010100e1e1e1"}
+	// 5d                   MsgId                            -47
+	//                      TypeMsg                           47
+	// 26                   MsgLen                            38
+	// 03                   WireTypeIndex                      3 [v.io/v23/vom.wireList]
+	// 00                   Index                              0 [v.io/v23/vom.wireList.Name]
+	// 20                   ByteLen                           32 [string len]
+	// 762e696f2f7632332f766f6d2f74657374646174612f74797065732e52656332 PrimValue       "v.io/v23/vom/testdata/types.Rec2" [string]
+	// 01                   Index                              1 [v.io/v23/vom.wireList.Elem]
+	// 30                   PrimValue                         48 [uint]
+	// e1                   Control                          End [v.io/v23/vom.wireList END]
+	// DumpStatus{MsgId: -47, MsgLen: 38, MsgN: 38, Buf(327): "5b26030020762e696f2f7632332f766f6d2f74657374646174612f74797065732e52656331012fe15945060023762e696f2f7632332f766f6d2f74657374646174612f74797065732e52656331323334010400025231012ee100025232012fe1000252330130e1000252340131e1e1570403012de1533c060024762e696f2f7632332f766f6d2f74657374646174612f74797065732e52656331323334410102000141012be1000752656331323334012ce1e16504030132e1633c060024762e696f2f7632332f766f6d2f74657374646174612f74797065732e526563313233344201020001420133e1000752656331323334012ce1e15138060026762e696f2f7632332f766f6d2f74657374646174612f74797065732e52656331323334416c6c0102000141012ae10001420132e1e15214000001e10101e1e1010001e10101010100e1e1e1"}
+	// 5b                   MsgId                            -46
+	//                      TypeMsg                           46
+	// 26                   MsgLen                            38
+	// 03                   WireTypeIndex                      3 [v.io/v23/vom.wireList]
+	// 00                   Index                              0 [v.io/v23/vom.wireList.Name]
+	// 20                   ByteLen                           32 [string len]
+	// 762e696f2f7632332f766f6d2f74657374646174612f74797065732e52656331 PrimValue       "v.io/v23/vom/testdata/types.Rec1" [string]
+	// 01                   Index                              1 [v.io/v23/vom.wireList.Elem]
+	// 2f                   PrimValue                         47 [uint]
+	// e1                   Control                          End [v.io/v23/vom.wireList END]
+	// DumpStatus{MsgId: -46, MsgLen: 38, MsgN: 38, Buf(287): "5945060023762e696f2f7632332f766f6d2f74657374646174612f74797065732e52656331323334010400025231012ee100025232012fe1000252330130e1000252340131e1e1570403012de1533c060024762e696f2f7632332f766f6d2f74657374646174612f74797065732e52656331323334410102000141012be1000752656331323334012ce1e16504030132e1633c060024762e696f2f7632332f766f6d2f74657374646174612f74797065732e526563313233344201020001420133e1000752656331323334012ce1e15138060026762e696f2f7632332f766f6d2f74657374646174612f74797065732e52656331323334416c6c0102000141012ae10001420132e1e15214000001e10101e1e1010001e10101010100e1e1e1"}
+	// 59                   MsgId                            -45
+	//                      TypeMsg                           45
+	// 45                   MsgLen                            69
+	// 06                   WireTypeIndex                      6 [v.io/v23/vom.wireStruct]
+	// 00                   Index                              0 [v.io/v23/vom.wireStruct.Name]
+	// 23                   ByteLen                           35 [string len]
+	// 762e696f2f7632332f766f6d2f74657374646174612f74797065732e52656331323334 PrimValue       "v.io/v23/vom/testdata/types.Rec1234" [string]
+	// 01                   Index                              1 [v.io/v23/vom.wireStruct.Fields]
+	// 04                   ValueLen                           4 [list len]
+	// 00                   Index                              0 [v.io/v23/vom.wireField.Name]
+	// 02                   ByteLen                            2 [string len]
+	// 5231                 PrimValue                       "R1" [string]
+	// 01                   Index                              1 [v.io/v23/vom.wireField.Type]
+	// 2e                   PrimValue                         46 [uint]
+	// e1                   Control                          End [v.io/v23/vom.wireField END]
+	// 00                   Index                              0 [v.io/v23/vom.wireField.Name]
+	// 02                   ByteLen                            2 [string len]
+	// 5232                 PrimValue                       "R2" [string]
+	// 01                   Index                              1 [v.io/v23/vom.wireField.Type]
+	// 2f                   PrimValue                         47 [uint]
+	// e1                   Control                          End [v.io/v23/vom.wireField END]
+	// 00                   Index                              0 [v.io/v23/vom.wireField.Name]
+	// 02                   ByteLen                            2 [string len]
+	// 5233                 PrimValue                       "R3" [string]
+	// 01                   Index                              1 [v.io/v23/vom.wireField.Type]
+	// 30                   PrimValue                         48 [uint]
+	// e1                   Control                          End [v.io/v23/vom.wireField END]
+	// 00                   Index                              0 [v.io/v23/vom.wireField.Name]
+	// 02                   ByteLen                            2 [string len]
+	// 5234                 PrimValue                       "R4" [string]
+	// 01                   Index                              1 [v.io/v23/vom.wireField.Type]
+	// 31                   PrimValue                         49 [uint]
+	// e1                   Control                          End [v.io/v23/vom.wireField END]
+	// e1                   Control                          End [v.io/v23/vom.wireStruct END]
+	// DumpStatus{MsgId: -45, MsgLen: 69, MsgN: 69, Buf(216): "570403012de1533c060024762e696f2f7632332f766f6d2f74657374646174612f74797065732e52656331323334410102000141012be1000752656331323334012ce1e16504030132e1633c060024762e696f2f7632332f766f6d2f74657374646174612f74797065732e526563313233344201020001420133e1000752656331323334012ce1e15138060026762e696f2f7632332f766f6d2f74657374646174612f74797065732e52656331323334416c6c0102000141012ae10001420132e1e15214000001e10101e1e1010001e10101010100e1e1e1"}
+	// 57                   MsgId                            -44
+	//                      TypeMsg                           44
+	// 04                   MsgLen                             4
+	// 03                   WireTypeIndex                      3 [v.io/v23/vom.wireList]
+	// 01                   Index                              1 [v.io/v23/vom.wireList.Elem]
+	// 2d                   PrimValue                         45 [uint]
+	// e1                   Control                          End [v.io/v23/vom.wireList END]
+	// DumpStatus{MsgId: -44, MsgLen: 4, MsgN: 4, Buf(210): "533c060024762e696f2f7632332f766f6d2f74657374646174612f74797065732e52656331323334410102000141012be1000752656331323334012ce1e16504030132e1633c060024762e696f2f7632332f766f6d2f74657374646174612f74797065732e526563313233344201020001420133e1000752656331323334012ce1e15138060026762e696f2f7632332f766f6d2f74657374646174612f74797065732e52656331323334416c6c0102000141012ae10001420132e1e15214000001e10101e1e1010001e10101010100e1e1e1"}
+	// 53                   MsgId                            -42
+	//                      TypeMsg                           42
+	// 3c                   MsgLen                            60
+	// 06                   WireTypeIndex                      6 [v.io/v23/vom.wireStruct]
+	// 00                   Index                              0 [v.io/v23/vom.wireStruct.Name]
+	// 24                   ByteLen                           36 [string len]
+	// 762e696f2f7632332f766f6d2f74657374646174612f74797065732e5265633132333441 PrimValue       "v.io/v23/vom/testdata/types.Rec1234A" [string]
+	// 01                   Index                              1 [v.io/v23/vom.wireStruct.Fields]
+	// 02                   ValueLen                           2 [list len]
+	// 00                   Index                              0 [v.io/v23/vom.wireField.Name]
+	// 01                   ByteLen                            1 [string len]
+	// 41                   PrimValue                        "A" [string]
+	// 01                   Index                              1 [v.io/v23/vom.wireField.Type]
+	// 2b                   PrimValue                         43 [uint]
+	// e1                   Control                          End [v.io/v23/vom.wireField END]
+	// 00                   Index                              0 [v.io/v23/vom.wireField.Name]
+	// 07                   ByteLen                            7 [string len]
+	// 52656331323334       PrimValue                  "Rec1234" [string]
+	// 01                   Index                              1 [v.io/v23/vom.wireField.Type]
+	// 2c                   PrimValue                         44 [uint]
+	// e1                   Control                          End [v.io/v23/vom.wireField END]
+	// e1                   Control                          End [v.io/v23/vom.wireStruct END]
+	// DumpStatus{MsgId: -42, MsgLen: 60, MsgN: 60, Buf(148): "6504030132e1633c060024762e696f2f7632332f766f6d2f74657374646174612f74797065732e526563313233344201020001420133e1000752656331323334012ce1e15138060026762e696f2f7632332f766f6d2f74657374646174612f74797065732e52656331323334416c6c0102000141012ae10001420132e1e15214000001e10101e1e1010001e10101010100e1e1e1"}
+	// 65                   MsgId                            -51
+	//                      TypeMsg                           51
+	// 04                   MsgLen                             4
+	// 03                   WireTypeIndex                      3 [v.io/v23/vom.wireList]
+	// 01                   Index                              1 [v.io/v23/vom.wireList.Elem]
+	// 32                   PrimValue                         50 [uint]
+	// e1                   Control                          End [v.io/v23/vom.wireList END]
+	// DumpStatus{MsgId: -51, MsgLen: 4, MsgN: 4, Buf(142): "633c060024762e696f2f7632332f766f6d2f74657374646174612f74797065732e526563313233344201020001420133e1000752656331323334012ce1e15138060026762e696f2f7632332f766f6d2f74657374646174612f74797065732e52656331323334416c6c0102000141012ae10001420132e1e15214000001e10101e1e1010001e10101010100e1e1e1"}
+	// 63                   MsgId                            -50
+	//                      TypeMsg                           50
+	// 3c                   MsgLen                            60
+	// 06                   WireTypeIndex                      6 [v.io/v23/vom.wireStruct]
+	// 00                   Index                              0 [v.io/v23/vom.wireStruct.Name]
+	// 24                   ByteLen                           36 [string len]
+	// 762e696f2f7632332f766f6d2f74657374646174612f74797065732e5265633132333442 PrimValue       "v.io/v23/vom/testdata/types.Rec1234B" [string]
+	// 01                   Index                              1 [v.io/v23/vom.wireStruct.Fields]
+	// 02                   ValueLen                           2 [list len]
+	// 00                   Index                              0 [v.io/v23/vom.wireField.Name]
+	// 01                   ByteLen                            1 [string len]
+	// 42                   PrimValue                        "B" [string]
+	// 01                   Index                              1 [v.io/v23/vom.wireField.Type]
+	// 33                   PrimValue                         51 [uint]
+	// e1                   Control                          End [v.io/v23/vom.wireField END]
+	// 00                   Index                              0 [v.io/v23/vom.wireField.Name]
+	// 07                   ByteLen                            7 [string len]
+	// 52656331323334       PrimValue                  "Rec1234" [string]
+	// 01                   Index                              1 [v.io/v23/vom.wireField.Type]
+	// 2c                   PrimValue                         44 [uint]
+	// e1                   Control                          End [v.io/v23/vom.wireField END]
+	// e1                   Control                          End [v.io/v23/vom.wireStruct END]
+	// DumpStatus{MsgId: -50, MsgLen: 60, MsgN: 60, Buf(80): "5138060026762e696f2f7632332f766f6d2f74657374646174612f74797065732e52656331323334416c6c0102000141012ae10001420132e1e15214000001e10101e1e1010001e10101010100e1e1e1"}
+	// 51                   MsgId                            -41
+	//                      TypeMsg                           41
+	// 38                   MsgLen                            56
+	// 06                   WireTypeIndex                      6 [v.io/v23/vom.wireStruct]
+	// 00                   Index                              0 [v.io/v23/vom.wireStruct.Name]
+	// 26                   ByteLen                           38 [string len]
+	// 762e696f2f7632332f766f6d2f74657374646174612f74797065732e52656331323334416c6c PrimValue       "v.io/v23/vom/testdata/types.Rec1234All" [string]
+	// 01                   Index                              1 [v.io/v23/vom.wireStruct.Fields]
+	// 02                   ValueLen                           2 [list len]
+	// 00                   Index                              0 [v.io/v23/vom.wireField.Name]
+	// 01                   ByteLen                            1 [string len]
+	// 41                   PrimValue                        "A" [string]
+	// 01                   Index                              1 [v.io/v23/vom.wireField.Type]
+	// 2a                   PrimValue                         42 [uint]
+	// e1                   Control                          End [v.io/v23/vom.wireField END]
+	// 00                   Index                              0 [v.io/v23/vom.wireField.Name]
+	// 01                   ByteLen                            1 [string len]
+	// 42                   PrimValue                        "B" [string]
+	// 01                   Index                              1 [v.io/v23/vom.wireField.Type]
+	// 32                   PrimValue                         50 [uint]
+	// e1                   Control                          End [v.io/v23/vom.wireField END]
+	// e1                   Control                          End [v.io/v23/vom.wireStruct END]
+	// DumpStatus{MsgId: -41, MsgLen: 56, MsgN: 56, Buf(22): "5214000001e10101e1e1010001e10101010100e1e1e1"}
+	// 52                   MsgId                             41
+	//                      ValueMsg                          41 [v.io/v23/vom/testdata/types.Rec1234All struct{A v.io/v23/vom/testdata/types.Rec1234A struct{A []v.io/v23/vom/testdata/types.Rec1234A;Rec1234 []v.io/v23/vom/testdata/types.Rec1234 struct{R1 v.io/v23/vom/testdata/types.Rec1 []v.io/v23/vom/testdata/types.Rec2 []v.io/v23/vom/testdata/types.Rec3 []v.io/v23/vom/testdata/types.Rec4 []v.io/v23/vom/testdata/types.Rec1;R2 v.io/v23/vom/testdata/types.Rec2;R3 v.io/v23/vom/testdata/types.Rec3;R4 v.io/v23/vom/testdata/types.Rec4}};B v.io/v23/vom/testdata/types.Rec1234B struct{B []v.io/v23/vom/testdata/types.Rec1234B;Rec1234 []v.io/v23/vom/testdata/types.Rec1234}}]
+	// 14                   MsgLen                            20
+	// 00                   Index                              0 [v.io/v23/vom/testdata/types.Rec1234All.A]
+	// 00                   Index                              0 [v.io/v23/vom/testdata/types.Rec1234A.A]
+	// 01                   ValueLen                           1 [list len]
+	// e1                   Control                          End [v.io/v23/vom/testdata/types.Rec1234A END]
+	// 01                   Index                              1 [v.io/v23/vom/testdata/types.Rec1234A.Rec1234]
+	// 01                   ValueLen                           1 [list len]
+	// e1                   Control                          End [v.io/v23/vom/testdata/types.Rec1234 END]
+	// e1                   Control                          End [v.io/v23/vom/testdata/types.Rec1234A END]
+	// 01                   Index                              1 [v.io/v23/vom/testdata/types.Rec1234All.B]
+	// 00                   Index                              0 [v.io/v23/vom/testdata/types.Rec1234B.B]
+	// 01                   ValueLen                           1 [list len]
+	// e1                   Control                          End [v.io/v23/vom/testdata/types.Rec1234B END]
+	// 01                   Index                              1 [v.io/v23/vom/testdata/types.Rec1234B.Rec1234]
+	// 01                   ValueLen                           1 [list len]
+	// 01                   Index                              1 [v.io/v23/vom/testdata/types.Rec1234.R2]
+	// 01                   ValueLen                           1 [list len]
+	// 00                   ValueLen                           0 [list len]
+	// e1                   Control                          End [v.io/v23/vom/testdata/types.Rec1234 END]
+	// e1                   Control                          End [v.io/v23/vom/testdata/types.Rec1234B END]
+	// e1                   Control                          End [v.io/v23/vom/testdata/types.Rec1234All END]
+	// DumpStatus{MsgId: 41, MsgLen: 20, MsgN: 20, Value: v.io/v23/vom/testdata/types.Rec1234All struct{A v.io/v23/vom/testdata/types.Rec1234A struct{A []v.io/v23/vom/testdata/types.Rec1234A;Rec1234 []v.io/v23/vom/testdata/types.Rec1234 struct{R1 v.io/v23/vom/testdata/types.Rec1 []v.io/v23/vom/testdata/types.Rec2 []v.io/v23/vom/testdata/types.Rec3 []v.io/v23/vom/testdata/types.Rec4 []v.io/v23/vom/testdata/types.Rec1;R2 v.io/v23/vom/testdata/types.Rec2;R3 v.io/v23/vom/testdata/types.Rec3;R4 v.io/v23/vom/testdata/types.Rec4}};B v.io/v23/vom/testdata/types.Rec1234B struct{B []v.io/v23/vom/testdata/types.Rec1234B;Rec1234 []v.io/v23/vom/testdata/types.Rec1234}}{A: {A: {{A: {}, Rec1234: {}}}, Rec1234: {{R1: {}, R2: {}, R3: {}, R4: {}}}}, B: {B: {{B: {}, Rec1234: {}}}, Rec1234: {{R1: {}, R2: {{}}, R3: {}, R4: {}}}}}}
+	{
+		`types.Rec1234All{A: {A: {{}}, Rec1234: {{}}}, B: {B: {{}}, Rec1234: {{R2: {{}}}}}}`,
+		types.Rec1234All{A: {A: {{}}, Rec1234: {{}}}, B: {B: {{}}, Rec1234: {{R2: {{}}}}}},
+		"v.io/v23/vom/testdata/types.Rec1234All struct{A v.io/v23/vom/testdata/types.Rec1234A struct{A []v.io/v23/vom/testdata/types.Rec1234A;Rec1234 []v.io/v23/vom/testdata/types.Rec1234 struct{R1 v.io/v23/vom/testdata/types.Rec1 []v.io/v23/vom/testdata/types.Rec2 []v.io/v23/vom/testdata/types.Rec3 []v.io/v23/vom/testdata/types.Rec4 []v.io/v23/vom/testdata/types.Rec1;R2 v.io/v23/vom/testdata/types.Rec2;R3 v.io/v23/vom/testdata/types.Rec3;R4 v.io/v23/vom/testdata/types.Rec4}};B v.io/v23/vom/testdata/types.Rec1234B struct{B []v.io/v23/vom/testdata/types.Rec1234B;Rec1234 []v.io/v23/vom/testdata/types.Rec1234}}",
+		"80550403012ae16126030020762e696f2f7632332f766f6d2f74657374646174612f74797065732e52656334012ee15f26030020762e696f2f7632332f766f6d2f74657374646174612f74797065732e526563330131e15d26030020762e696f2f7632332f766f6d2f74657374646174612f74797065732e526563320130e15b26030020762e696f2f7632332f766f6d2f74657374646174612f74797065732e52656331012fe15945060023762e696f2f7632332f766f6d2f74657374646174612f74797065732e52656331323334010400025231012ee100025232012fe1000252330130e1000252340131e1e1570403012de1533c060024762e696f2f7632332f766f6d2f74657374646174612f74797065732e52656331323334410102000141012be1000752656331323334012ce1e16504030132e1633c060024762e696f2f7632332f766f6d2f74657374646174612f74797065732e526563313233344201020001420133e1000752656331323334012ce1e15138060026762e696f2f7632332f766f6d2f74657374646174612f74797065732e52656331323334416c6c0102000141012ae10001420132e1e15214000001e10101e1e1010001e10101010100e1e1e1",
+		"80", "550403012ae16126030020762e696f2f7632332f766f6d2f74657374646174612f74797065732e52656334012ee15f26030020762e696f2f7632332f766f6d2f74657374646174612f74797065732e526563330131e15d26030020762e696f2f7632332f766f6d2f74657374646174612f74797065732e526563320130e15b26030020762e696f2f7632332f766f6d2f74657374646174612f74797065732e52656331012fe15945060023762e696f2f7632332f766f6d2f74657374646174612f74797065732e52656331323334010400025231012ee100025232012fe1000252330130e1000252340131e1e1570403012de1533c060024762e696f2f7632332f766f6d2f74657374646174612f74797065732e52656331323334410102000141012be1000752656331323334012ce1e16504030132e1633c060024762e696f2f7632332f766f6d2f74657374646174612f74797065732e526563313233344201020001420133e1000752656331323334012ce1e15138060026762e696f2f7632332f766f6d2f74657374646174612f74797065732e52656331323334416c6c0102000141012ae10001420132e1e1", "5214000001e10101e1e1010001e10101010100e1e1e1",
 	},
 	// 80                   Version                          128 [vom version 0]
 	// DumpStatus{MsgId: 0, MsgN: 1, Buf(2): "1c0f"}

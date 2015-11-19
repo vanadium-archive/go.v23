@@ -39,7 +39,7 @@ func TestChunkedBufStartMessageParams(t *testing.T) {
 	for _, test := range tests {
 		var buf bytes.Buffer
 		cb := newChunkedEncbuf(&buf)
-		if err := cb.StartMessage(test.hasAny, test.hasLen, int(msgTypeId)); err != nil {
+		if err := cb.StartMessage(test.hasAny, test.hasLen, false, int(msgTypeId)); err != nil {
 			t.Errorf("error in start message: %v", err)
 		}
 		if err := cb.Write(inBytes); err != nil {
@@ -108,7 +108,7 @@ func TestChunkedBufStartMessageParamsWithChunking(t *testing.T) {
 	for _, test := range tests {
 		var buf bytes.Buffer
 		cb := newChunkedEncbuf(&buf)
-		if err := cb.StartMessage(test.hasAny, test.hasLen, int(test.tid)); err != nil {
+		if err := cb.StartMessage(test.hasAny, test.hasLen, false, int(test.tid)); err != nil {
 			t.Errorf("error in start message: %v", err)
 		}
 		if err := cb.Write(inBytes1); err != nil {
@@ -144,7 +144,7 @@ func TestBytesAutoChunking(t *testing.T) {
 	var buf bytes.Buffer
 	cb := newChunkedEncbuf(&buf)
 
-	if err := cb.StartMessage(false, true, 0x11); err != nil {
+	if err := cb.StartMessage(false, true, false, 0x11); err != nil {
 		t.Fatalf("error in start message: %v", err)
 
 	}

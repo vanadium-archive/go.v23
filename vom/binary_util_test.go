@@ -92,7 +92,7 @@ func TestBinaryEncodeDecode(t *testing.T) {
 		var byteBuf bytes.Buffer
 		sb := newSwitchedEncbuf(&byteBuf, 0x81)
 		msgID := int64(0x12)
-		sb.StartMessage(false, false, msgID)
+		sb.StartMessage(false, false, false, msgID)
 		switch val := test.v.(type) {
 		case byte:
 			binaryEncodeControl(sb, val)

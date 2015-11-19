@@ -161,7 +161,7 @@ func (e *Encoder) Encode(v interface{}) error {
 	if err != nil {
 		return err
 	}
-	if err := e.enc.startEncode(vdlType.ContainsAnyOrTypeObject(), hasChunkLen(vdlType), int64(tid)); err != nil {
+	if err := e.enc.startEncode(vdlType.ContainsAnyOrTypeObject(), hasChunkLen(vdlType), false, int64(tid)); err != nil {
 		return err
 	}
 	if err := vdl.FromReflect(&e.enc, reflect.ValueOf(v)); err != nil {
@@ -178,7 +178,7 @@ func (e *Encoder) encodeRaw(raw *RawValue) error {
 	if err != nil {
 		return err
 	}
-	if err := e.enc.buf.StartMessage(raw.t.ContainsAnyOrTypeObject(), hasChunkLen(raw.t), int64(tid)); err != nil {
+	if err := e.enc.buf.StartMessage(raw.t.ContainsAnyOrTypeObject(), hasChunkLen(raw.t), false, int64(tid)); err != nil {
 		return err
 	}
 	for i, refType := range raw.refTypes {
@@ -208,8 +208,8 @@ func extractType(v interface{}) *vdl.Type {
 	return vdl.TypeOf(v)
 }
 
-func (e *encoder) encodeWireType(tid typeId, wt wireType) error {
-	if err := e.startEncode(false, true, int64(-tid)); err != nil {
+func (e *encoder) encodeWireType(tid typeId, wt wireType, typeIncomplete bool) error {
+	if err := e.startEncode(false, true, typeIncomplete, int64(-tid)); err != nil {
 		return err
 	}
 	if err := vdl.FromReflect(e, reflect.ValueOf(wt)); err != nil {
@@ -219,8 +219,8 @@ func (e *encoder) encodeWireType(tid typeId, wt wireType) error {
 	return e.finishEncode()
 }
 
-func (e *encoder) startEncode(hasAny, hasLen bool, mid int64) error {
-	if err := e.buf.StartMessage(hasAny, hasLen, int64(mid)); err != nil {
+func (e *encoder) startEncode(hasAny, hasLen, typeIncomplete bool, mid int64) error {
+	if err := e.buf.StartMessage(hasAny, hasLen, typeIncomplete, int64(mid)); err != nil {
 		return err
 	}
 	e.typeStack = e.typeStack[:0]

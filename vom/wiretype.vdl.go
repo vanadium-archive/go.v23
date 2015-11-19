@@ -308,3 +308,5 @@ const WireCtrlTypeFirstChunk = byte(229) // First chunk in a multi-chunk type me
 const WireCtrlTypeChunk = byte(230) // Continuation of a multi-chunk type message
 
 const WireCtrlTypeLastChunk = byte(231) // Final chunk in a multi-chunk type message
+
+const WireCtrlTypeIncomplete = byte(232) // Marks that the type message is incomplete until future messages are received

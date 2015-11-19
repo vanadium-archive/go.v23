@@ -358,12 +358,82 @@ func (RecY) __VDLReflect(struct {
 }) {
 }
 
+type Rec1 []Rec2
+
+func (Rec1) __VDLReflect(struct {
+	Name string `vdl:"v.io/v23/vom/testdata/types.Rec1"`
+}) {
+}
+
+type Rec2 []Rec3
+
+func (Rec2) __VDLReflect(struct {
+	Name string `vdl:"v.io/v23/vom/testdata/types.Rec2"`
+}) {
+}
+
+type Rec3 []Rec4
+
+func (Rec3) __VDLReflect(struct {
+	Name string `vdl:"v.io/v23/vom/testdata/types.Rec3"`
+}) {
+}
+
+type Rec4 []Rec1
+
+func (Rec4) __VDLReflect(struct {
+	Name string `vdl:"v.io/v23/vom/testdata/types.Rec4"`
+}) {
+}
+
 type RecStruct struct {
 	A *RecStruct
 }
 
 func (RecStruct) __VDLReflect(struct {
 	Name string `vdl:"v.io/v23/vom/testdata/types.RecStruct"`
+}) {
+}
+
+type Rec1234 struct {
+	R1 Rec1
+	R2 Rec2
+	R3 Rec3
+	R4 Rec4
+}
+
+func (Rec1234) __VDLReflect(struct {
+	Name string `vdl:"v.io/v23/vom/testdata/types.Rec1234"`
+}) {
+}
+
+type Rec1234A struct {
+	A       []Rec1234A
+	Rec1234 []Rec1234
+}
+
+func (Rec1234A) __VDLReflect(struct {
+	Name string `vdl:"v.io/v23/vom/testdata/types.Rec1234A"`
+}) {
+}
+
+type Rec1234B struct {
+	B       []Rec1234B
+	Rec1234 []Rec1234
+}
+
+func (Rec1234B) __VDLReflect(struct {
+	Name string `vdl:"v.io/v23/vom/testdata/types.Rec1234B"`
+}) {
+}
+
+type Rec1234All struct {
+	A Rec1234A
+	B Rec1234B
+}
+
+func (Rec1234All) __VDLReflect(struct {
+	Name string `vdl:"v.io/v23/vom/testdata/types.Rec1234All"`
 }) {
 }
 
@@ -867,7 +937,15 @@ func init() {
 	vdl.Register((*RecA)(nil))
 	vdl.Register((*RecX)(nil))
 	vdl.Register((*RecY)(nil))
+	vdl.Register((*Rec1)(nil))
+	vdl.Register((*Rec2)(nil))
+	vdl.Register((*Rec3)(nil))
+	vdl.Register((*Rec4)(nil))
 	vdl.Register((*RecStruct)(nil))
+	vdl.Register((*Rec1234)(nil))
+	vdl.Register((*Rec1234A)(nil))
+	vdl.Register((*Rec1234B)(nil))
+	vdl.Register((*Rec1234All)(nil))
 	vdl.Register((*ListString)(nil))
 	vdl.Register((*Array3String)(nil))
 	vdl.Register((*Array4String)(nil))

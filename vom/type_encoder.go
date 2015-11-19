@@ -92,10 +92,11 @@ func (e *TypeEncoder) encode(tt *vdl.Type) (typeId, error) {
 		}
 		e.sentVersionByte = true
 	}
-	return e.encodeType(tt)
+	return e.encodeType(tt, map[*vdl.Type]bool{})
 }
 
-func (e *TypeEncoder) encodeType(tt *vdl.Type) (typeId, error) {
+// encodeType encodes the type
+func (e *TypeEncoder) encodeType(tt *vdl.Type, pending map[*vdl.Type]bool) (typeId, error) {
 	// Lookup a type Id for tt or assign a new one.
 	tid, isNew, err := e.lookupOrAssignTypeId(tt)
 	if err != nil {
@@ -104,6 +105,7 @@ func (e *TypeEncoder) encodeType(tt *vdl.Type) (typeId, error) {
 	if !isNew {
 		return tid, nil
 	}
+	pending[tt] = true
 
 	// Construct the wireType.
 	var wt wireType
@@ -117,29 +119,29 @@ func (e *TypeEncoder) encodeType(tt *vdl.Type) (typeId, error) {
 		}
 		wt = wireTypeEnumT{wireEnum}
 	case vdl.Array:
-		elm, err := e.encodeType(tt.Elem())
+		elm, err := e.encodeType(tt.Elem(), pending)
 		if err != nil {
 			return 0, err
 		}
 		wt = wireTypeArrayT{wireArray{tt.Name(), elm, uint64(tt.Len())}}
 	case vdl.List:
-		elm, err := e.encodeType(tt.Elem())
+		elm, err := e.encodeType(tt.Elem(), pending)
 		if err != nil {
 			return 0, err
 		}
 		wt = wireTypeListT{wireList{tt.Name(), elm}}
 	case vdl.Set:
-		key, err := e.encodeType(tt.Key())
+		key, err := e.encodeType(tt.Key(), pending)
 		if err != nil {
 			return 0, err
 		}
 		wt = wireTypeSetT{wireSet{tt.Name(), key}}
 	case vdl.Map:
-		key, err := e.encodeType(tt.Key())
+		key, err := e.encodeType(tt.Key(), pending)
 		if err != nil {
 			return 0, err
 		}
-		elm, err := e.encodeType(tt.Elem())
+		elm, err := e.encodeType(tt.Elem(), pending)
 		if err != nil {
 			return 0, err
 		}
@@ -147,7 +149,7 @@ func (e *TypeEncoder) encodeType(tt *vdl.Type) (typeId, error) {
 	case vdl.Struct:
 		wireStruct := wireStruct{tt.Name(), make([]wireField, tt.NumField())}
 		for ix := 0; ix < tt.NumField(); ix++ {
-			field, err := e.encodeType(tt.Field(ix).Type)
+			field, err := e.encodeType(tt.Field(ix).Type, pending)
 			if err != nil {
 				return 0, err
 			}
@@ -157,7 +159,7 @@ func (e *TypeEncoder) encodeType(tt *vdl.Type) (typeId, error) {
 	case vdl.Union:
 		wireUnion := wireUnion{tt.Name(), make([]wireField, tt.NumField())}
 		for ix := 0; ix < tt.NumField(); ix++ {
-			field, err := e.encodeType(tt.Field(ix).Type)
+			field, err := e.encodeType(tt.Field(ix).Type, pending)
 			if err != nil {
 				return 0, err
 			}
@@ -165,7 +167,7 @@ func (e *TypeEncoder) encodeType(tt *vdl.Type) (typeId, error) {
 		}
 		wt = wireTypeUnionT{wireUnion}
 	case vdl.Optional:
-		elm, err := e.encodeType(tt.Elem())
+		elm, err := e.encodeType(tt.Elem(), pending)
 		if err != nil {
 			return 0, err
 		}
@@ -174,11 +176,18 @@ func (e *TypeEncoder) encodeType(tt *vdl.Type) (typeId, error) {
 		panic(verror.New(errUnhandledType, nil, tt))
 	}
 
+	// TODO(bprosnitz) Only perform the walk when there are cycles or otherwise optimize this
+	delete(pending, tt)
+	typeComplete := tt.Walk(vdl.WalkAll, func(t *vdl.Type) bool {
+		return !pending[t]
+	})
+
 	// Encode and write the wire type definition using the same
 	// binary encoder as values for wire types.
-	if err := e.enc.encodeWireType(tid, wt); err != nil {
+	if err := e.enc.encodeWireType(tid, wt, !typeComplete); err != nil {
 		return 0, err
 	}
+
 	return tid, nil
 }
 

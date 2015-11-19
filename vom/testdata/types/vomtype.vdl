@@ -64,8 +64,30 @@ type (
 	RecA []RecA
 	RecX []RecY
 	RecY []RecX
+	Rec1 []Rec2
+	Rec2 []Rec3
+	Rec3 []Rec4
+	Rec4 []Rec1
 	RecStruct struct {
 		A ?RecStruct
+	}
+	Rec1234 struct {
+	    R1 Rec1
+	    R2 Rec2
+	    R3 Rec3
+	    R4 Rec4
+	}
+	Rec1234A struct {
+	    A []Rec1234A
+	    Rec1234 []Rec1234
+	}
+	Rec1234B struct {
+	    B []Rec1234B
+	    Rec1234 []Rec1234
+	}
+	Rec1234All struct {
+	    A Rec1234A
+	    B Rec1234B
 	}
 
 	// Additional types for compatibility and conversion checks

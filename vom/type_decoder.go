@@ -129,8 +129,18 @@ func (d *TypeDecoder) readSingleType() error {
 		return err
 	}
 
-	// Add the wire type and wake up waiters.
-	return d.addWireType(curTypeID, wt)
+	// Add the wire type.
+	if err := d.addWireType(curTypeID, wt); err != nil {
+		return err
+	}
+
+	if !d.dec.mr.typeIncomplete {
+		if err := d.buildType(curTypeID); d.dec.mr.version != Version80 && err != nil {
+			return err
+		}
+	}
+
+	return nil
 }
 
 // LookupType returns the type for tid. If the type is not yet available,
@@ -151,19 +161,6 @@ func (d *TypeDecoder) lookupType(tid typeId) (*vdl.Type, error) {
 
 		if tt := d.lookupKnownType(tid); tt != nil {
 			return tt, nil
-		}
-
-		// If the wire type is available, build it now.
-		if _, exists := d.idToWire[tid]; exists {
-			if err := d.buildType(tid); err != nil {
-				// TODO(bprosnitz) This will fail if we receive types out of order. We should reconsider our type
-				// format and ensure that we have all types that we need.
-				return nil, err
-			}
-
-			if tt := d.lookupKnownType(tid); tt != nil {
-				return tt, nil
-			}
 		}
 
 		if d.err != nil {
@@ -228,6 +225,7 @@ func (d *TypeDecoder) buildType(tid typeId) error {
 	// Add the types to idToType map.
 	d.typeMu.Lock()
 	for tid, tt := range types {
+		delete(d.idToWire, tid)
 		d.idToType[tid] = tt
 	}
 	d.typeMu.Unlock()
@@ -240,10 +238,9 @@ func (d *TypeDecoder) makeType(tid typeId, builder *vdl.TypeBuilder, pending map
 	if wt == nil {
 		return nil, verror.New(errUnknownType, nil, tid)
 	}
-	// Make the type from its wireType representation. First remove it from
-	// dt.idToWire, and add it to pending, so that subsequent lookups will get the
-	// pending type. Eventually the built type will be added to dt.idToType.
-	delete(d.idToWire, tid)
+	// Make the type from its wireType representation, adding
+	// it to pending so that subsequent lookups get the pending
+	// type.  Eventually the built type will be added to dt.idToType.
 	if name := wt.(wireTypeGeneric).TypeName(); name != "" {
 		// Named types may be recursive, so we must create the named type first and
 		// add it to pending, before we make the base type. The base type may refer

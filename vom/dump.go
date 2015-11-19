@@ -447,6 +447,8 @@ func (d *dumpWorker) decodeValueType() (*vdl.Type, error) {
 		if err := d.typeDec.addWireType(tid, wt); err != nil {
 			return nil, err
 		}
+		// Note: We are only ignoring error below because this dump tool is for version 80 and type incomplete is only for 81+
+		d.typeDec.buildType(tid)
 		d.writeStatus(nil, true)
 	}
 }
