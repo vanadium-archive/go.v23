@@ -59,7 +59,7 @@ func V23TestSyncbasedJoinSyncgroup(t *v23tests.T) {
 	sgName := naming.Join("sync0", constants.SyncbaseSuffix, "SG1")
 
 	tu.RunClient(t, client0Creds, runSetupAppA, "sync0")
-	tu.RunClient(t, client0Creds, runCreateSyncgroup, "sync0", sgName, "tb:foo", "root/s0", "root/s1")
+	tu.RunClient(t, client0Creds, runCreateSyncgroup, "sync0", sgName, "tb:foo", "", "root/s0", "root/s1")
 
 	tu.RunClient(t, client1Creds, runSetupAppA, "sync1")
 	tu.RunClient(t, client1Creds, runJoinSyncgroup, "sync1", sgName)
@@ -87,14 +87,47 @@ func V23TestSyncbasedGetDeltas(t *v23tests.T) {
 	sgName := naming.Join("sync0", constants.SyncbaseSuffix, "SG1")
 
 	tu.RunClient(t, client0Creds, runSetupAppA, "sync0")
-	tu.RunClient(t, client0Creds, runCreateSyncgroup, "sync0", sgName, "tb:foo,tb:bar", "root/s0", "root/s1")
+	tu.RunClient(t, client0Creds, runCreateSyncgroup, "sync0", sgName, "tb:foo,tb:bar", "", "root/s0", "root/s1")
 	tu.RunClient(t, client0Creds, runPopulateData, "sync0", "foo", "0")
-	tu.RunClient(t, client0Creds, runPopulateNonVOMData, "sync0", "bar", "0")
+	tu.RunClient(t, client0Creds, runPopulateNonVomData, "sync0", "bar", "0")
 
 	tu.RunClient(t, client1Creds, runSetupAppA, "sync1")
 	tu.RunClient(t, client1Creds, runJoinSyncgroup, "sync1", sgName)
 	tu.RunClient(t, client1Creds, runVerifySyncgroupData, "sync1", "foo", "0", "10", "false")
-	tu.RunClient(t, client1Creds, runVerifySyncgroupNonVOMData, "sync1", "bar", "0", "10")
+	tu.RunClient(t, client1Creds, runVerifySyncgroupNonVomData, "sync1", "bar", "0", "10")
+}
+
+// V23TestSyncbasedExchangeDeltasNeighborhood tests the sending of deltas
+// between two Syncbase instances and their clients via neighborhood discovery,
+// without the syncgroup mount table being available.
+func V23TestSyncbasedExchangeDeltasNeighborhood(t *v23tests.T) {
+	v23tests.RunRootMT(t, "--v23.tcp.address=127.0.0.1:0")
+	server0Creds, _ := t.Shell().NewChildCredentials("s0")
+	client0Creds, _ := t.Shell().NewChildCredentials("c0")
+	cleanSync0 := tu.StartSyncbased(t, server0Creds, "sync0", "",
+		`{"Read": {"In":["root/c0"]}, "Write": {"In":["root/c0"]}}`)
+	defer cleanSync0()
+
+	server1Creds, _ := t.Shell().NewChildCredentials("s1")
+	client1Creds, _ := t.Shell().NewChildCredentials("c1")
+	cleanSync1 := tu.StartSyncbased(t, server1Creds, "sync1", "",
+		`{"Read": {"In":["root/c1"]}, "Write": {"In":["root/c1"]}}`)
+	defer cleanSync1()
+
+	sgName := naming.Join("sync0", constants.SyncbaseSuffix, "SG1")
+
+	tu.RunClient(t, client0Creds, runSetupAppA, "sync0")
+	// We are using a fake mount table so that the peers are forced to find
+	// each other over neighborhood.
+	tu.RunClient(t, client0Creds, runCreateSyncgroup, "sync0", sgName, "tb:foo", "/mttable", "root/s0", "root/s1")
+	tu.RunClient(t, client0Creds, runPopulateData, "sync0", "foo", "0")
+
+	tu.RunClient(t, client1Creds, runSetupAppA, "sync1")
+	tu.RunClient(t, client1Creds, runJoinSyncgroup, "sync1", sgName)
+	tu.RunClient(t, client1Creds, runVerifySyncgroupData, "sync1", "foo", "0", "10", "false")
+
+	tu.RunClient(t, client1Creds, runPopulateData, "sync1", "foo", "10")
+	tu.RunClient(t, client0Creds, runVerifySyncgroupData, "sync0", "foo", "0", "20", "true")
 }
 
 // V23TestSyncbasedGetDeltasWithDel tests the sending of deltas between two
@@ -122,7 +155,7 @@ func V23TestSyncbasedGetDeltasWithDel(t *v23tests.T) {
 	sgName := naming.Join("sync0", constants.SyncbaseSuffix, "SG1")
 
 	tu.RunClient(t, client0Creds, runSetupAppA, "sync0")
-	tu.RunClient(t, client0Creds, runCreateSyncgroup, "sync0", sgName, "tb:foo,tb:bar", "root/s0", "root/s1")
+	tu.RunClient(t, client0Creds, runCreateSyncgroup, "sync0", sgName, "tb:foo,tb:bar", "", "root/s0", "root/s1")
 	tu.RunClient(t, client0Creds, runPopulateData, "sync0", "foo", "0")
 
 	tu.RunClient(t, client1Creds, runSetupAppA, "sync1")
@@ -171,7 +204,7 @@ func V23TestSyncbasedCompEval(t *v23tests.T) {
 	sgName := naming.Join("sync0", constants.SyncbaseSuffix, "SG1")
 
 	tu.RunClient(t, client0Creds, runSetupAppA, "sync0")
-	tu.RunClient(t, client0Creds, runCreateSyncgroup, "sync0", sgName, "tb:foo", "root/s0", "root/s1")
+	tu.RunClient(t, client0Creds, runCreateSyncgroup, "sync0", sgName, "tb:foo", "", "root/s0", "root/s1")
 	tu.RunClient(t, client0Creds, runPopulateData, "sync0", "foo", "0")
 
 	// This is a decoy syncgroup that no other Syncbase joins, but is on the
@@ -181,7 +214,7 @@ func V23TestSyncbasedCompEval(t *v23tests.T) {
 	// syncgroup. This triggers the handling of filtered log records in the
 	// restartability code.
 	sgName1 := naming.Join("sync0", constants.SyncbaseSuffix, "SG2")
-	tu.RunClient(t, client0Creds, runCreateSyncgroup, "sync0", sgName1, "tb:bar", "root/s0", "root/s1")
+	tu.RunClient(t, client0Creds, runCreateSyncgroup, "sync0", sgName1, "tb:bar", "", "root/s0", "root/s1")
 	tu.RunClient(t, client0Creds, runPopulateData, "sync0", "bar", "0")
 
 	tu.RunClient(t, client1Creds, runSetupAppA, "sync1")
@@ -257,7 +290,7 @@ func V23TestSyncbasedExchangeDeltasWithAcls(t *v23tests.T) {
 	sgName := naming.Join("sync0", constants.SyncbaseSuffix, "SG1")
 
 	tu.RunClient(t, client0Creds, runSetupAppA, "sync0")
-	tu.RunClient(t, client0Creds, runCreateSyncgroup, "sync0", sgName, "tb:foo", "root/s0", "root/s1")
+	tu.RunClient(t, client0Creds, runCreateSyncgroup, "sync0", sgName, "tb:foo", "", "root/s0", "root/s1")
 	tu.RunClient(t, client0Creds, runPopulateData, "sync0", "foobarbaz", "0")
 	tu.RunClient(t, client0Creds, runPopulateData, "sync0", "foo", "0")
 	tu.RunClient(t, client0Creds, runSetPrefixPermissions, "sync0", "foo", "root/c0", "root/c1")
@@ -323,7 +356,7 @@ func testSyncbasedExchangeDeltasWithConflicts(t *v23tests.T) {
 	sgName := naming.Join("sync0", constants.SyncbaseSuffix, "SG1")
 
 	tu.RunClient(t, client0Creds, runSetupAppA, "sync0")
-	tu.RunClient(t, client0Creds, runCreateSyncgroup, "sync0", sgName, "tb:foo", "root/s0", "root/s1")
+	tu.RunClient(t, client0Creds, runCreateSyncgroup, "sync0", sgName, "tb:foo", "", "root/s0", "root/s1")
 	tu.RunClient(t, client0Creds, runPopulateData, "sync0", "foo", "0")
 
 	tu.RunClient(t, client1Creds, runSetupAppA, "sync1")
@@ -366,8 +399,8 @@ func V23TestNestedSyncgroups(t *v23tests.T) {
 	sg2Name := naming.Join("sync0", constants.SyncbaseSuffix, "SG2")
 
 	tu.RunClient(t, client0Creds, runSetupAppA, "sync0")
-	tu.RunClient(t, client0Creds, runCreateSyncgroup, "sync0", sg1Name, "tb:foo", "root/s0", "root/s1")
-	tu.RunClient(t, client0Creds, runCreateSyncgroup, "sync0", sg2Name, "tb:f", "root/s0", "root/s1")
+	tu.RunClient(t, client0Creds, runCreateSyncgroup, "sync0", sg1Name, "tb:foo", "", "root/s0", "root/s1")
+	tu.RunClient(t, client0Creds, runCreateSyncgroup, "sync0", sg2Name, "tb:f", "", "root/s0", "root/s1")
 	tu.RunClient(t, client0Creds, runPopulateData, "sync0", "f", "0")
 	tu.RunClient(t, client0Creds, runPopulateData, "sync0", "foo", "0")
 
@@ -412,15 +445,15 @@ func V23TestNestedAndPeerSyncgroups(t *v23tests.T) {
 	sg3Name := naming.Join("sync1", constants.SyncbaseSuffix, "SG3")
 
 	tu.RunClient(t, client0Creds, runSetupAppA, "sync0")
-	tu.RunClient(t, client0Creds, runCreateSyncgroup, "sync0", sg1Name, "tb:foo", "root/s0", "root/s1", "root/s2")
-	tu.RunClient(t, client0Creds, runCreateSyncgroup, "sync0", sg2Name, "tb:f", "root/s0", "root/s2")
+	tu.RunClient(t, client0Creds, runCreateSyncgroup, "sync0", sg1Name, "tb:foo", "", "root/s0", "root/s1", "root/s2")
+	tu.RunClient(t, client0Creds, runCreateSyncgroup, "sync0", sg2Name, "tb:f", "", "root/s0", "root/s2")
 	tu.RunClient(t, client0Creds, runPopulateData, "sync0", "f", "0")
 	tu.RunClient(t, client0Creds, runPopulateData, "sync0", "foo", "0")
 
 	tu.RunClient(t, client1Creds, runSetupAppA, "sync1")
 	tu.RunClient(t, client1Creds, runJoinSyncgroup, "sync1", sg1Name)
 	tu.RunClient(t, client1Creds, runVerifySyncgroupData, "sync1", "foo", "0", "10", "false")
-	tu.RunClient(t, client1Creds, runCreateSyncgroup, "sync1", sg3Name, "tb:f", "root/s1", "root/s2")
+	tu.RunClient(t, client1Creds, runCreateSyncgroup, "sync1", sg3Name, "tb:f", "", "root/s1", "root/s2")
 
 	tu.RunClient(t, client2Creds, runSetupAppA, "sync2")
 	tu.RunClient(t, client2Creds, runJoinSyncgroup, "sync2", sg2Name)
@@ -456,7 +489,7 @@ func V23TestSyncbasedGetDeltasPrePopulate(t *v23tests.T) {
 	tu.RunClient(t, client0Creds, runSetupAppA, "sync0")
 	tu.RunClient(t, client0Creds, runPopulateData, "sync0", "foo", "0")
 	tu.RunClient(t, client0Creds, runPopulateData, "sync0", "bar", "0")
-	tu.RunClient(t, client0Creds, runCreateSyncgroup, "sync0", sgName, "tb:foo", "root/s0", "root/s1")
+	tu.RunClient(t, client0Creds, runCreateSyncgroup, "sync0", sgName, "tb:foo", "", "root/s0", "root/s1")
 
 	tu.RunClient(t, client1Creds, runSetupAppA, "sync1")
 	tu.RunClient(t, client1Creds, runJoinSyncgroup, "sync1", sgName)
@@ -521,7 +554,7 @@ func V23TestSyncgroupSync(t *v23tests.T) {
 	sgName := naming.Join("sync0", constants.SyncbaseSuffix, "SG1")
 
 	tu.RunClient(t, client0Creds, runSetupAppA, "sync0")
-	tu.RunClient(t, client0Creds, runCreateSyncgroup, "sync0", sgName, "tb:foo", "root/s0", "root/s1", "root/s2")
+	tu.RunClient(t, client0Creds, runCreateSyncgroup, "sync0", sgName, "tb:foo", "", "root/s0", "root/s1", "root/s2")
 	tu.RunClient(t, client0Creds, runPopulateData, "sync0", "foo", "0")
 
 	tu.RunClient(t, client1Creds, runSetupAppA, "sync1")
@@ -571,6 +604,8 @@ var runSetupAppA = modules.Register(func(env *modules.Env, args ...string) error
 	return nil
 }, "runSetupAppA")
 
+// Arguments: 0: Syncbase name, 1: syncgroup name, 2: prefixes, 3: mount table,
+// 4 onwards: syncgroup permission blessings.
 var runCreateSyncgroup = modules.Register(func(env *modules.Env, args ...string) error {
 	ctx, shutdown := v23.Init()
 	defer shutdown()
@@ -578,10 +613,14 @@ var runCreateSyncgroup = modules.Register(func(env *modules.Env, args ...string)
 	a := syncbase.NewService(args[0]).App("a")
 	d := a.NoSQLDatabase("d", nil)
 
-	mtName := env.Vars[ref.EnvNamespacePrefix]
+	mtName := args[3]
+	if mtName == "" {
+		mtName = env.Vars[ref.EnvNamespacePrefix]
+	}
+
 	spec := wire.SyncgroupSpec{
 		Description: "test syncgroup sg",
-		Perms:       perms(args[3:]...),
+		Perms:       perms(args[4:]...),
 		Prefixes:    toSgPrefixes(args[2]),
 		MountTables: []string{mtName},
 	}
@@ -721,7 +760,7 @@ var runPopulateData = modules.Register(func(env *modules.Env, args ...string) er
 }, "runPopulateData")
 
 // Arguments: 0: Syncbase name, 1: key prefix, 2: start index.
-var runPopulateNonVOMData = modules.Register(func(env *modules.Env, args ...string) error {
+var runPopulateNonVomData = modules.Register(func(env *modules.Env, args ...string) error {
 	ctx, shutdown := v23.Init()
 	defer shutdown()
 
@@ -742,7 +781,7 @@ var runPopulateNonVOMData = modules.Register(func(env *modules.Env, args ...stri
 		}
 	}
 	return nil
-}, "runPopulateNonVOMData")
+}, "runPopulateNonVomData")
 
 // Arguments: 0: Syncbase name, 1: start index.
 // Optional args: 2: end index, 3: value prefix.
@@ -929,7 +968,7 @@ var runVerifySyncgroupData = modules.Register(func(env *modules.Env, args ...str
 }, "runVerifySyncgroupData")
 
 // Arguments: 0: syncbase name, 1: key prefix, 2: start index, 3: number of keys.
-var runVerifySyncgroupNonVOMData = modules.Register(func(env *modules.Env, args ...string) error {
+var runVerifySyncgroupNonVomData = modules.Register(func(env *modules.Env, args ...string) error {
 	ctx, shutdown := v23.Init()
 	defer shutdown()
 
@@ -969,7 +1008,7 @@ var runVerifySyncgroupNonVOMData = modules.Register(func(env *modules.Env, args 
 		}
 	}
 	return nil
-}, "runVerifySyncgroupNonVOMData")
+}, "runVerifySyncgroupNonVomData")
 
 var runVerifyDeletedData = modules.Register(func(env *modules.Env, args ...string) error {
 	ctx, shutdown := v23.Init()
