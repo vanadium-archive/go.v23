@@ -32,9 +32,9 @@ func newSigner() Signer {
 //   Major components of an ECDSA signature     :   64 bytes
 //   VOM type information overhead for blessings:  354 bytes
 //   Blessing with 1 certificates               :  536 bytes (a)
-//   Blessing with 2 certificates               :  741 bytes (a/a)
-//   Blessing with 3 certificates               :  945 bytes (a/a/a)
-//   Blessing with 4 certificates               : 1149 bytes (a/a/a/a)
+//   Blessing with 2 certificates               :  741 bytes (a:a)
+//   Blessing with 3 certificates               :  945 bytes (a:a:a)
+//   Blessing with 4 certificates               : 1149 bytes (a:a:a:a)
 //   Marshaled caveat                           :   55 bytes (0xa64c2d0119fba3348071feeb2f308000(time.Time=0001-01-01 00:00:00 +0000 UTC))
 //   Marshaled caveat                           :    6 bytes (0x54a676398137187ecdb26d2d69ba0003([]string=[m]))
 func TestByteSize(t *testing.T) {
@@ -92,10 +92,10 @@ func TestBlessingCouldHaveNames(t *testing.T) {
 		alice = newPrincipal(t)
 		bob   = newPrincipal(t)
 
-		bbob = blessSelf(t, bob, "bob/tablet")
+		bbob = blessSelf(t, bob, "bob:tablet")
 
 		balice1   = blessSelf(t, alice, "alice")
-		balice2   = blessSelf(t, alice, "alice/phone/youtube", falseCaveat)
+		balice2   = blessSelf(t, alice, "alice:phone:youtube", falseCaveat)
 		balice3   = bless(bob, alice.PublicKey(), bbob, "friend")
 		balice, _ = UnionOfBlessings(balice1, balice2, balice3)
 	)
@@ -104,18 +104,18 @@ func TestBlessingCouldHaveNames(t *testing.T) {
 		names  []string
 		result bool
 	}{
-		{[]string{"alice", "alice/phone/youtube", "bob/tablet/friend"}, true},
-		{[]string{"alice", "alice/phone/youtube"}, true},
-		{[]string{"alice/phone/youtube", "bob/tablet/friend"}, true},
-		{[]string{"alice", "bob/tablet/friend"}, true},
+		{[]string{"alice", "alice:phone:youtube", "bob:tablet:friend"}, true},
+		{[]string{"alice", "alice:phone:youtube"}, true},
+		{[]string{"alice:phone:youtube", "bob:tablet:friend"}, true},
+		{[]string{"alice", "bob:tablet:friend"}, true},
 		{[]string{"alice"}, true},
-		{[]string{"alice/phone/youtube"}, true},
-		{[]string{"bob/tablet/friend"}, true},
-		{[]string{"alice/tablet"}, false},
-		{[]string{"alice/phone"}, false},
-		{[]string{"bob/tablet"}, false},
-		{[]string{"bob/tablet/friend/spouse"}, false},
-		{[]string{"carol/phone"}, false},
+		{[]string{"alice:phone:youtube"}, true},
+		{[]string{"bob:tablet:friend"}, true},
+		{[]string{"alice:tablet"}, false},
+		{[]string{"alice:phone"}, false},
+		{[]string{"bob:tablet"}, false},
+		{[]string{"bob:tablet:friend:spouse"}, false},
+		{[]string{"carol:phone"}, false},
 	}
 	for _, test := range tests {
 		if got, want := balice.CouldHaveNames(test.names), test.result; got != want {

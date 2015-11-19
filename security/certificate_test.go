@@ -209,9 +209,9 @@ func TestChainMixing(t *testing.T) {
 		// Certificate chains
 		C1, _, _   = chainCertificate(sRoot, nil, cRoot1)                            // alpha
 		C2, _, _   = chainCertificate(sRoot, nil, cRoot2)                            // beta
-		C3, _, _   = chainCertificate(sRoot, C1, cUser)                              // alpha/user
-		C4, _, _   = chainCertificate(sUser, C3, cDelegate)                          // alpha/user/delegate
-		Cbad, _, _ = chainCertificate(sUser, []Certificate{C2[0], C3[1]}, cDelegate) // malformed beta/user/delegate
+		C3, _, _   = chainCertificate(sRoot, C1, cUser)                              // alpha:user
+		C4, _, _   = chainCertificate(sUser, C3, cDelegate)                          // alpha:user:delegate
+		Cbad, _, _ = chainCertificate(sUser, []Certificate{C2[0], C3[1]}, cDelegate) // malformed beta:user:delegate
 
 		validate = func(chain []Certificate, expectedKeyBytes []byte, expectedError verror.ID) error {
 			var expectedKey PublicKey

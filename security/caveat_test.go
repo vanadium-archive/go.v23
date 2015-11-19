@@ -19,7 +19,7 @@ import (
 func TestStandardCaveatFactories(t *testing.T) {
 	var (
 		self      = newPrincipal(t)
-		balice, _ = UnionOfBlessings(blessSelf(t, self, "alice/phone"), blessSelf(t, self, "alice/tablet"))
+		balice, _ = UnionOfBlessings(blessSelf(t, self, "alice:phone"), blessSelf(t, self, "alice:tablet"))
 		bother    = blessSelf(t, self, "other")
 		b, _      = UnionOfBlessings(balice, bother)
 		now       = time.Now()
@@ -43,10 +43,10 @@ func TestStandardCaveatFactories(t *testing.T) {
 			{C(NewMethodCaveat("Foo", "Bar")), true},
 			{C(NewMethodCaveat("Bar", "Baz")), false},
 			// PeerBlesingsCaveat
-			{C(NewCaveat(PeerBlessingsCaveat, []BlessingPattern{"alice/phone"})), true},
-			{C(NewCaveat(PeerBlessingsCaveat, []BlessingPattern{"alice/tablet", "other"})), true},
-			{C(NewCaveat(PeerBlessingsCaveat, []BlessingPattern{"alice/laptop", "other", "alice/$"})), false},
-			{C(NewCaveat(PeerBlessingsCaveat, []BlessingPattern{"alice/laptop", "other", "alice"})), true},
+			{C(NewCaveat(PeerBlessingsCaveat, []BlessingPattern{"alice:phone"})), true},
+			{C(NewCaveat(PeerBlessingsCaveat, []BlessingPattern{"alice:tablet", "other"})), true},
+			{C(NewCaveat(PeerBlessingsCaveat, []BlessingPattern{"alice:laptop", "other", "alice:$"})), false},
+			{C(NewCaveat(PeerBlessingsCaveat, []BlessingPattern{"alice:laptop", "other", "alice"})), true},
 		}
 	)
 

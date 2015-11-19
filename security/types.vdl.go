@@ -251,7 +251,7 @@ const NoExtension = BlessingPattern("$")
 // We need to sort this out.
 const AllPrincipals = BlessingPattern("...") // Glob pattern that matches all blessings.
 
-const ChainSeparator = "/" // ChainSeparator joins blessing names to form a blessing chain name.
+const ChainSeparator = ":" // ChainSeparator joins blessing names to form a blessing chain name.
 
 const SHA1Hash = Hash("SHA1") // SHA1 cryptographic hash function defined in RFC3174.
 

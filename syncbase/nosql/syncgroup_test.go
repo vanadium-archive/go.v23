@@ -22,7 +22,7 @@ import (
 
 // Tests that Syncgroup.Create works as expected.
 func TestCreateSyncgroup(t *testing.T) {
-	ctx, sName, cleanup := tu.SetupOrDie(perms("root/client"))
+	ctx, sName, cleanup := tu.SetupOrDie(perms("root:client"))
 	defer cleanup()
 	a := tu.CreateApp(t, ctx, syncbase.NewService(sName), "a")
 	d := tu.CreateNoSQLDatabase(t, ctx, a, "d")
@@ -83,8 +83,8 @@ func TestCreateSyncgroup(t *testing.T) {
 	verifySyncgroupInfo(t, ctx, d, sg3, spec, 1)
 
 	// Check that create fails if the perms disallow access.
-	perms := perms("root/client")
-	perms.Blacklist("root/client", string(access.Read))
+	perms := perms("root:client")
+	perms.Blacklist("root:client", string(access.Read))
 	if err := d.SetPermissions(ctx, perms, ""); err != nil {
 		t.Fatalf("d.SetPermissions() failed: %v", err)
 	}
@@ -99,14 +99,14 @@ func TestCreateSyncgroup(t *testing.T) {
 // join it.
 func TestJoinSyncgroup(t *testing.T) {
 	// Create client1-server pair.
-	ctx, ctx1, sName, rootp, cleanup := tu.SetupOrDieCustom("client1", "server", perms("root/client1"))
+	ctx, ctx1, sName, rootp, cleanup := tu.SetupOrDieCustom("client1", "server", perms("root:client1"))
 	defer cleanup()
 
 	a1 := tu.CreateApp(t, ctx1, syncbase.NewService(sName), "a")
 	d1 := tu.CreateNoSQLDatabase(t, ctx1, a1, "d")
 	specA := wire.SyncgroupSpec{
 		Description: "test syncgroup sgA",
-		Perms:       perms("root/client1"),
+		Perms:       perms("root:client1"),
 		Prefixes:    []wire.TableRow{{TableName: "t1", Row: "foo"}},
 	}
 	sgNameA := naming.Join(sName, util.SyncbaseSuffix, "sgA")
@@ -126,12 +126,12 @@ func TestJoinSyncgroup(t *testing.T) {
 	verifySyncgroupNames(t, ctx2, d2, nil, verror.ErrNoAccess.ID)
 
 	// Client1 gives access to client2.
-	if err := d1.SetPermissions(ctx1, perms("root/client1", "root/client2"), ""); err != nil {
+	if err := d1.SetPermissions(ctx1, perms("root:client1", "root:client2"), ""); err != nil {
 		t.Fatalf("d.SetPermissions() failed: %v", err)
 	}
 
 	// Verify client2 has access.
-	if err := d2.SetPermissions(ctx2, perms("root/client1", "root/client2"), ""); err != nil {
+	if err := d2.SetPermissions(ctx2, perms("root:client1", "root:client2"), ""); err != nil {
 		t.Fatalf("d.SetPermissions() failed: %v", err)
 	}
 
@@ -141,7 +141,7 @@ func TestJoinSyncgroup(t *testing.T) {
 	// Create a different syncgroup.
 	specB := wire.SyncgroupSpec{
 		Description: "test syncgroup sgB",
-		Perms:       perms("root/client1", "root/client2"),
+		Perms:       perms("root:client1", "root:client2"),
 		Prefixes:    []wire.TableRow{{TableName: "t1", Row: "foo"}},
 	}
 	sgNameB := naming.Join(sName, util.SyncbaseSuffix, "sgB")
@@ -161,7 +161,7 @@ func TestJoinSyncgroup(t *testing.T) {
 
 // Tests that Syncgroup.SetSpec works as expected.
 func TestSetSpecSyncgroup(t *testing.T) {
-	ctx, sName, cleanup := tu.SetupOrDie(perms("root/client"))
+	ctx, sName, cleanup := tu.SetupOrDie(perms("root:client"))
 	defer cleanup()
 	a := tu.CreateApp(t, ctx, syncbase.NewService(sName), "a")
 	d := tu.CreateNoSQLDatabase(t, ctx, a, "d")
@@ -181,7 +181,7 @@ func TestSetSpecSyncgroup(t *testing.T) {
 	verifySyncgroupInfo(t, ctx, d, sgName, spec, 1)
 
 	spec.Description = "test syncgroup sg1 update"
-	spec.Perms = perms("root/client1")
+	spec.Perms = perms("root:client1")
 
 	sg := d.Syncgroup(sgName)
 	if err := sg.SetSpec(ctx, spec, ""); err != nil {

@@ -16,8 +16,8 @@ import (
 
 func TestInclude(t *testing.T) {
 	acl := access.AccessList{
-		In:    []security.BlessingPattern{"alice/$", "alice/friend", "bob/family"},
-		NotIn: []string{"alice/friend/carol", "bob/family/mallory"},
+		In:    []security.BlessingPattern{"alice:$", "alice:friend", "bob:family"},
+		NotIn: []string{"alice:friend:carol", "bob:family:mallory"},
 	}
 	type V []string // shorthand
 	tests := []struct {
@@ -29,14 +29,14 @@ func TestInclude(t *testing.T) {
 		{V{"alice"}, true},
 		{V{"bob"}, false},
 		{V{"carol"}, false},
-		{V{"alice/colleague"}, false},
-		{V{"alice", "carol/friend"}, true}, // Presenting one blessing that grants access is sufficient
-		{V{"alice/friend/bob"}, true},
-		{V{"alice/friend/carol"}, false},        // alice/friend/carol is blacklisted
-		{V{"alice/friend/carol/family"}, false}, // alice/friend/carol is blacklisted, thus her delegates must be too.
-		{V{"alice/friend/bob", "alice/friend/carol"}, true},
-		{V{"bob/family/eve", "bob/family/mallory"}, true},
-		{V{"bob/family/mallory", "alice/friend/carol"}, false},
+		{V{"alice:colleague"}, false},
+		{V{"alice", "carol:friend"}, true}, // Presenting one blessing that grants access is sufficient
+		{V{"alice:friend:bob"}, true},
+		{V{"alice:friend:carol"}, false},        // alice:friend:carol is blacklisted
+		{V{"alice:friend:carol:family"}, false}, // alice:friend:carol is blacklisted, thus her delegates must be too.
+		{V{"alice:friend:bob", "alice:friend:carol"}, true},
+		{V{"bob:family:eve", "bob:family:mallory"}, true},
+		{V{"bob:family:mallory", "alice:friend:carol"}, false},
 	}
 	for _, test := range tests {
 		if got, want := includes(nil, acl, convertToSet(test.Blessings...)), test.Want; got != want {

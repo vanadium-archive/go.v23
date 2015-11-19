@@ -23,7 +23,7 @@ func TestSplitPattern(t *testing.T) {
 		Parts   []string
 	}{
 		{
-			Pattern: "a/b/c",
+			Pattern: "a:b:c",
 			Parts:   []string{"a", "b", "c"},
 		},
 		{
@@ -31,15 +31,15 @@ func TestSplitPattern(t *testing.T) {
 			Parts:   []string{"a"},
 		},
 		{
-			Pattern: "a/<grp:1/2/3>/c",
+			Pattern: "a:<grp:1/2/3>:c",
 			Parts:   []string{"a", "<grp:1/2/3>", "c"},
 		},
 		{
-			Pattern: "a/<grp:1/2/3>/c/<grp:4/5/6>",
+			Pattern: "a:<grp:1/2/3>:c:<grp:4/5/6>",
 			Parts:   []string{"a", "<grp:1/2/3>", "c", "<grp:4/5/6>"},
 		},
 		{
-			Pattern: "a/<grp:1/2/3>/<grp:4/5/6>/<grp:/7/8/9>",
+			Pattern: "a:<grp:1/2/3>:<grp:4/5/6>:<grp:/7/8/9>",
 			Parts:   []string{"a", "<grp:1/2/3>", "<grp:4/5/6>", "<grp:/7/8/9>"},
 		},
 		{
@@ -52,7 +52,7 @@ func TestSplitPattern(t *testing.T) {
 		},
 	}
 
-	invalid := []security.BlessingPattern{"a/UV<grp:1/2/3>/c/<grp:4/5/6>WXY", "a/<grp:1/2/3><grp:4/5/6>", "a/<grp:1/2/3<>grp:4/5/6>", "<grp:1/2/3>/", "a/UV<grp:1/2/3>", "a/<grp:>/b"}
+	invalid := []security.BlessingPattern{"a:UV<grp:1/2/3>:c:<grp:4/5/6>WXY", "a:<grp:1/2/3><grp:4/5/6>", "a:<grp:1/2/3<>grp:4/5/6>", "<grp:1/2/3>:", "a:UV<grp:1/2/3>", "a:<grp:>:b"}
 
 	for _, test := range valid {
 		want := test.Parts
@@ -75,9 +75,9 @@ func TestSplitPattern(t *testing.T) {
 // Portion of test copied from v23/security/pattern_test.go.
 func TestIsValid(t *testing.T) {
 	var (
-		valid = []security.BlessingPattern{security.AllPrincipals, "alice", "al$ice", "alice/$", "alice.jones/$", "alice@google/$", "v23/alice@google/$", "v23/alice@google/bob/$", "alice", "alice/bob", "alice/bob/<grp:vndm/bob/allmydevs>/app1", "alice/bob/<grp:vndm/bob/allmydevs>/<grp:vndm/bob/corpapps>", "<grp:vndm/bob/allmydevs>", "<grp:vndm/bob/allmydevs>/app1"}
+		valid = []security.BlessingPattern{security.AllPrincipals, "alice", "al$ice", "alice:$", "alice.jones:$", "alice@google:$", "v23:alice@google:$", "v23:alice@google:bob:$", "alice", "alice:bob", "alice:bob:<grp:vndm/bob/allmydevs>:app1", "alice:bob:<grp:vndm/bob/allmydevs>:<grp:vndm/bob/corpapps>", "<grp:vndm/bob/allmydevs>", "<grp:vndm/bob/allmydevs>:app1"}
 
-		invalid = []security.BlessingPattern{"", "alice...", "...alice", "alice...bob", "/alice", "alice/", "...alice/bob", "alice.../bob", "alice/.../bob", "alice/$/bob", "alice/$/$", "alice/.../$", "alice/...", "alice<", "alice<>", "alice>", "alice<grp:>", "alice/<grp:vndm/bob/allmydevs<>grp:vndm/bob/corpapps>", "alice/UV<grp:vndm/bob/allmydevs>/c/<grp:vndm/bob/corpapps>WXY", "a/<grp:vndm/bob/corpapps><grp:vndm/bob/allmydevs>", "alice/<grp:>"}
+		invalid = []security.BlessingPattern{"", "alice...", "...alice", "alice...bob", ":alice", "alice:", "...alice:bob", "alice...:bob", "alice:...:bob", "alice:$:bob", "alice:$:$", "alice:...:$", "alice:...", "alice<", "alice<>", "alice>", "alice<grp:>", "alice:<grp:vndm/bob/allmydevs<>grp:vndm/bob/corpapps>", "alice:UV<grp:vndm/bob/allmydevs>:c:<grp:vndm/bob/corpapps>WXY", "a:<grp:vndm/bob/corpapps><grp:vndm/bob/allmydevs>", "alice:<grp:>"}
 	)
 	for _, p := range valid {
 		if _, err := splitPattern(p); err != nil {
@@ -102,34 +102,34 @@ func TestMatch(t *testing.T) {
 	}{
 		{
 			Pattern:      "",
-			DoesNotMatch: v{"", "ann", "bob", "ann/friend"},
+			DoesNotMatch: v{"", "ann", "bob", "ann:friend"},
 		},
 		{
 			Pattern:      "$",
-			DoesNotMatch: v{"$", "ann", "bob", "ann/friend"},
+			DoesNotMatch: v{"$", "ann", "bob", "ann:friend"},
 		},
 		{
 			Pattern:   security.AllPrincipals,
-			Matches:   v{"", "ann", "bob", "ann/friend"},
+			Matches:   v{"", "ann", "bob", "ann:friend"},
 			Remainder: v{"", "", "", ""},
 		},
 		{
 			Pattern:      "ann",
-			Matches:      v{"ann", "ann/friend", "ann/enemy", "ann/friend/spouse"},
-			Remainder:    v{"", "friend", "enemy", "friend/spouse"},
-			DoesNotMatch: v{"", "bob", "bob/ann"},
+			Matches:      v{"ann", "ann:friend", "ann:enemy", "ann:friend:spouse"},
+			Remainder:    v{"", "friend", "enemy", "friend:spouse"},
+			DoesNotMatch: v{"", "bob", "bob:ann"},
 		},
 		{
-			Pattern:      "ann/friend",
-			Matches:      v{"ann/friend", "ann/friend/spouse"},
+			Pattern:      "ann:friend",
+			Matches:      v{"ann:friend", "ann:friend:spouse"},
 			Remainder:    v{"", "spouse"},
-			DoesNotMatch: v{"", "ann", "ann/enemy", "bob", "bob/ann"},
+			DoesNotMatch: v{"", "ann", "ann:enemy", "bob", "bob:ann"},
 		},
 		{
-			Pattern:      "ann/friend/$",
-			Matches:      v{"ann/friend"},
+			Pattern:      "ann:friend:$",
+			Matches:      v{"ann:friend"},
 			Remainder:    v{""},
-			DoesNotMatch: v{"", "ann", "ann/enemy", "ann/friend/spouse", "bob", "bob/friend", "bob/ann"},
+			DoesNotMatch: v{"", "ann", "ann:enemy", "ann:friend:spouse", "bob", "bob:friend", "bob:ann"},
 		},
 	}
 
@@ -172,8 +172,8 @@ func TestMatch(t *testing.T) {
 		DoesNotMatch v
 	}{
 		{
-			Pattern:      "ann/$/$",
-			DoesNotMatch: v{"", "ann", "bob", "ann/friend", "ann/friend/spouse"},
+			Pattern:      "ann:$:$",
+			DoesNotMatch: v{"", "ann", "bob", "ann:friend", "ann:friend:spouse"},
 		},
 	}
 
@@ -203,8 +203,8 @@ func TestMatchCornerCases(t *testing.T) {
 	/*if remainder := match(security.NoExtension, "", nil); remainder != nil {
 		t.Errorf("%q.match(%q) returned remainder %v", security.NoExtension, "", remainder)
 	}*/
-	if remainder := g.match(nil, security.BlessingPattern("ann/$"), emptyBlessing); len(remainder) != 0 || g.apprxs != nil {
-		t.Errorf("%q.match(%q) returned remainder %v, errs %v", "ann/$", "", remainder, g.apprxs)
+	if remainder := g.match(nil, security.BlessingPattern("ann:$"), emptyBlessing); len(remainder) != 0 || g.apprxs != nil {
+		t.Errorf("%q.match(%q) returned remainder %v, errs %v", "ann:$", "", remainder, g.apprxs)
 	}
 	if remainder := g.match(nil, security.BlessingPattern("ann"), emptyBlessing); len(remainder) != 0 || g.apprxs != nil {
 		t.Errorf("%q.match(%q) returned remainder %v, errs %v", "ann", "", remainder, g.apprxs)
@@ -224,151 +224,151 @@ func TestMatchWithGrps(t *testing.T) {
 		Remainder []string
 	}{
 		{
-			Pattern:  "a/b/<grp:v/g1>",
-			Blessing: "a/b/c",
+			Pattern:  "a:b:<grp:v/g1>",
+			Blessing: "a:b:c",
 			Groups: groupClientRPCTest{
-				"v/g1": []string{"c/d"},
+				"v/g1": []string{"c:d"},
 			},
 			Remainder: noMatch,
 		},
 		{
-			Pattern:  "a/b/<grp:v/g1>",
-			Blessing: "a/b/c",
+			Pattern:  "a:b:<grp:v/g1>",
+			Blessing: "a:b:c",
 			Groups: groupClientRPCTest{
-				"v/g1": []string{"d/e/f", "c/d"},
+				"v/g1": []string{"d:e:f", "c:d"},
 			},
 			Remainder: noMatch,
 		},
 		{
-			Pattern:  "a/b/<grp:v/g1>",
-			Blessing: "a/b/c",
+			Pattern:  "a:b:<grp:v/g1>",
+			Blessing: "a:b:c",
 			Groups: groupClientRPCTest{
 				"v/g1": []string{"c"},
 			},
 			Remainder: exactMatch,
 		},
 		{
-			Pattern:  "a/b/<grp:v/g1>",
-			Blessing: "a/b/c",
+			Pattern:  "a:b:<grp:v/g1>",
+			Blessing: "a:b:c",
 			Groups: groupClientRPCTest{
-				"v/g1": []string{"c/d", "c"},
+				"v/g1": []string{"c:d", "c"},
 			},
 			Remainder: exactMatch,
 		},
 		{
-			Pattern:  "a/b/<grp:v/g1>",
-			Blessing: "a/b/c/d/e",
+			Pattern:  "a:b:<grp:v/g1>",
+			Blessing: "a:b:c:d:e",
 			Groups: groupClientRPCTest{
 				"v/g1": []string{"c"},
 			},
-			Remainder: []string{"d/e"},
+			Remainder: []string{"d:e"},
 		},
 		{
-			Pattern:  "a/b/<grp:v/g1>",
-			Blessing: "a/b/c/d/e",
+			Pattern:  "a:b:<grp:v/g1>",
+			Blessing: "a:b:c:d:e",
 			Groups: groupClientRPCTest{
-				"v/g1": []string{"c/d"},
+				"v/g1": []string{"c:d"},
 			},
 			Remainder: []string{"e"},
 		},
 		{
-			Pattern:  "a/b/<grp:v/g1>",
-			Blessing: "a/b/c/d/e",
+			Pattern:  "a:b:<grp:v/g1>",
+			Blessing: "a:b:c:d:e",
 			Groups: groupClientRPCTest{
-				"v/g1": []string{"c/d", "c"},
+				"v/g1": []string{"c:d", "c"},
 			},
-			Remainder: []string{"e", "d/e"},
+			Remainder: []string{"e", "d:e"},
 		},
 		{
-			Pattern:  "a/b/<grp:v/g1>",
-			Blessing: "a/b/c/d/e",
+			Pattern:  "a:b:<grp:v/g1>",
+			Blessing: "a:b:c:d:e",
 			Groups: groupClientRPCTest{
-				"v/g1": []string{"c/d/e", "c/d", "c"},
+				"v/g1": []string{"c:d:e", "c:d", "c"},
 			},
-			Remainder: []string{"", "e", "d/e"},
+			Remainder: []string{"", "e", "d:e"},
 		},
 		{
-			Pattern:  "a/b/<grp:v/g1>/$",
-			Blessing: "a/b/c/d/e",
+			Pattern:  "a:b:<grp:v/g1>:$",
+			Blessing: "a:b:c:d:e",
 			Groups: groupClientRPCTest{
-				"v/g1": []string{"c/d", "c"},
+				"v/g1": []string{"c:d", "c"},
 			},
 			Remainder: noMatch,
 		},
 		{
-			Pattern:  "a/b/<grp:v/g1>/$",
-			Blessing: "a/b/c/d/e",
+			Pattern:  "a:b:<grp:v/g1>:$",
+			Blessing: "a:b:c:d:e",
 			Groups: groupClientRPCTest{
-				"v/g1": []string{"c/d/e", "c/d", "c"},
+				"v/g1": []string{"c:d:e", "c:d", "c"},
 			},
 			Remainder: exactMatch,
 		},
 		{
-			Pattern:  "a/b/<grp:v/g1>/e",
-			Blessing: "a/b/c/d/e",
+			Pattern:  "a:b:<grp:v/g1>:e",
+			Blessing: "a:b:c:d:e",
 			Groups: groupClientRPCTest{
 				"v/g1": []string{"c"},
 			},
 			Remainder: noMatch,
 		},
 		{
-			Pattern:  "a/b/<grp:v/g1>/e",
-			Blessing: "a/b/c/d/e",
+			Pattern:  "a:b:<grp:v/g1>:e",
+			Blessing: "a:b:c:d:e",
 			Groups: groupClientRPCTest{
-				"v/g1": []string{"c/d", "c"},
+				"v/g1": []string{"c:d", "c"},
 			},
 			Remainder: exactMatch,
 		},
 		{
-			Pattern:  "a/b/<grp:v/g1>/<grp:v/g2>",
-			Blessing: "a/b/c/d/e",
+			Pattern:  "a:b:<grp:v/g1>:<grp:v/g2>",
+			Blessing: "a:b:c:d:e",
 			Groups: groupClientRPCTest{
-				"v/g1": []string{"c/d", "c"},
+				"v/g1": []string{"c:d", "c"},
 				"v/g2": []string{"e"},
 			},
 			Remainder: exactMatch,
 		},
 		{
-			Pattern:  "a/b/<grp:v/g1>/<grp:v/g2>",
-			Blessing: "a/b/c/d/e",
+			Pattern:  "a:b:<grp:v/g1>:<grp:v/g2>",
+			Blessing: "a:b:c:d:e",
 			Groups: groupClientRPCTest{
-				"v/g1": []string{"c/d", "c"},
-				"v/g2": []string{"d/e"},
+				"v/g1": []string{"c:d", "c"},
+				"v/g2": []string{"d:e"},
 			},
 			Remainder: exactMatch,
 		},
 		{
-			Pattern:  "a/b/<grp:v/g1>/<grp:v/g2>",
-			Blessing: "a/b/c/d/e",
+			Pattern:  "a:b:<grp:v/g1>:<grp:v/g2>",
+			Blessing: "a:b:c:d:e",
 			Groups: groupClientRPCTest{
-				"v/g1": []string{"c/d", "c"},
+				"v/g1": []string{"c:d", "c"},
 				"v/g2": []string{"d", "e"},
 			},
 			Remainder: []string{"", "e"},
 		},
 		{
-			Pattern:  "a/b/<grp:v/g1>/<grp:v/g2>",
-			Blessing: "a/b/c/d/e",
+			Pattern:  "a:b:<grp:v/g1>:<grp:v/g2>",
+			Blessing: "a:b:c:d:e",
 			Groups: groupClientRPCTest{
-				"v/g1": []string{"c/d", "c"},
-				"v/g2": []string{"d/e", "d", "e"},
+				"v/g1": []string{"c:d", "c"},
+				"v/g2": []string{"d:e", "d", "e"},
 			},
 			Remainder: []string{"", "e"},
 		},
 		{
-			Pattern:  "a/b/<grp:v/g1>/<grp:v/g2>/e",
-			Blessing: "a/b/c/d/e",
+			Pattern:  "a:b:<grp:v/g1>:<grp:v/g2>:e",
+			Blessing: "a:b:c:d:e",
 			Groups: groupClientRPCTest{
-				"v/g1": []string{"c/d", "c"},
-				"v/g2": []string{"d/e", "d", "e"},
+				"v/g1": []string{"c:d", "c"},
+				"v/g2": []string{"d:e", "d", "e"},
 			},
 			Remainder: exactMatch,
 		},
 		{
-			Pattern:  "a/b/<grp:v/g1>",
-			Blessing: "a/b/c/d/e",
+			Pattern:  "a:b:<grp:v/g1>",
+			Blessing: "a:b:c:d:e",
 			Groups: groupClientRPCTest{
-				"v/g1": []string{"c/d/<grp:v/g2>"},
+				"v/g1": []string{"c:d:<grp:v/g2>"},
 				"v/g2": []string{"e"},
 			},
 			Remainder: exactMatch,
@@ -396,45 +396,45 @@ func TestMatchWithApproxGrps(t *testing.T) {
 		RemainderUnder []string
 	}{
 		{
-			Pattern:        "a/b/<grp:v/g1>",
-			Blessing:       "a/b/c",
+			Pattern:        "a:b:<grp:v/g1>",
+			Blessing:       "a:b:c",
 			Groups:         groupClientRPCTest{},
 			RemainderOver:  exactMatch,
 			RemainderUnder: noMatch,
 		},
 		{
-			Pattern:        "a/b/<grp:v/g1>",
-			Blessing:       "a/b/c/d/e",
+			Pattern:        "a:b:<grp:v/g1>",
+			Blessing:       "a:b:c:d:e",
 			Groups:         groupClientRPCTest{},
-			RemainderOver:  []string{"", "e", "d/e"},
+			RemainderOver:  []string{"", "e", "d:e"},
 			RemainderUnder: noMatch,
 		},
 		{
-			Pattern:  "a/b/<grp:v/g1>/<grp:v/g2>",
-			Blessing: "a/b/c/d/e",
+			Pattern:  "a:b:<grp:v/g1>:<grp:v/g2>",
+			Blessing: "a:b:c:d:e",
 			Groups: groupClientRPCTest{
-				"v/g1": []string{"c/d", "c"},
+				"v/g1": []string{"c:d", "c"},
 			},
 			RemainderOver:  []string{"", "e"},
 			RemainderUnder: noMatch,
 		},
 		{
-			Pattern:  "a/b/<grp:v/g1>",
-			Blessing: "a/b/c/d/e",
+			Pattern:  "a:b:<grp:v/g1>",
+			Blessing: "a:b:c:d:e",
 			Groups: groupClientRPCTest{
-				"v/g1": []string{"c/d/<grp:v/g2>"},
+				"v/g1": []string{"c:d:<grp:v/g2>"},
 			},
 			RemainderOver:  exactMatch,
 			RemainderUnder: noMatch,
 		},
 		{
-			Pattern:  "a/b/<grp:v/g1>",
-			Blessing: "a/b/c/d/e",
+			Pattern:  "a:b:<grp:v/g1>",
+			Blessing: "a:b:c:d:e",
 			Groups: groupClientRPCTest{
-				"v/g1": []string{"c/d/<grp:v/g2>", "c"},
+				"v/g1": []string{"c:d:<grp:v/g2>", "c"},
 			},
-			RemainderOver:  []string{"", "d/e"},
-			RemainderUnder: []string{"d/e"},
+			RemainderOver:  []string{"", "d:e"},
+			RemainderUnder: []string{"d:e"},
 		},
 	}
 
@@ -470,8 +470,8 @@ func TestMatchWithCyclicGroups(t *testing.T) {
 		lenErrors      int
 	}{
 		{
-			Pattern:  "a/b/<grp:v/g1>",
-			Blessing: "a/b/c",
+			Pattern:  "a:b:<grp:v/g1>",
+			Blessing: "a:b:c",
 			Groups: groupClientRPCTest{
 				"v/g1": []string{"<grp:v/g1>"},
 			},
@@ -480,19 +480,19 @@ func TestMatchWithCyclicGroups(t *testing.T) {
 			lenErrors:      1,
 		},
 		{
-			Pattern:  "a/b/<grp:v/g1>",
-			Blessing: "a/b/c/d/e",
+			Pattern:  "a:b:<grp:v/g1>",
+			Blessing: "a:b:c:d:e",
 			Groups: groupClientRPCTest{
-				"v/g1": []string{"<grp:v/g2>"},
-				"v/g2": []string{"<grp:v/g1>"},
+				"v/g1": []string{"<grp:v:g2>"},
+				"v/g2": []string{"<grp:v:g1>"},
 			},
-			RemainderOver:  []string{"", "e", "d/e"},
+			RemainderOver:  []string{"", "e", "d:e"},
 			RemainderUnder: noMatch,
 			lenErrors:      1,
 		},
 		{
-			Pattern:  "a/b/<grp:v/g1>/<grp:v/g3>",
-			Blessing: "a/b/c/d/e",
+			Pattern:  "a:b:<grp:v/g1>:<grp:v/g3>",
+			Blessing: "a:b:c:d:e",
 			Groups: groupClientRPCTest{
 				"v/g1": []string{"<grp:v/g2>"},
 				"v/g2": []string{"<grp:v/g1>"},
@@ -503,10 +503,10 @@ func TestMatchWithCyclicGroups(t *testing.T) {
 			lenErrors:      1,
 		},
 		{
-			Pattern:  "a/b/<grp:v/g1>/<grp:v/g3>",
-			Blessing: "a/b/c/d/e",
+			Pattern:  "a:b:<grp:v/g1>:<grp:v/g3>",
+			Blessing: "a:b:c:d:e",
 			Groups: groupClientRPCTest{
-				"v/g1": []string{"f/<grp:v/g2>"},
+				"v/g1": []string{"f:<grp:v/g2>"},
 				"v/g2": []string{"<grp:v/g1>"},
 				"v/g3": []string{"d"},
 			},
@@ -515,25 +515,25 @@ func TestMatchWithCyclicGroups(t *testing.T) {
 			lenErrors:      0,
 		},
 		{
-			Pattern:  "a/b/<grp:v/g1>",
-			Blessing: "a/b/c/d/e",
+			Pattern:  "a:b:<grp:v/g1>",
+			Blessing: "a:b:c:d:e",
 			Groups: groupClientRPCTest{
-				"v/g1": []string{"f/<grp:v/g2>", "<grp:v/g2>/<grp:v/g3>", "c"},
+				"v/g1": []string{"f:<grp:v/g2>", "<grp:v/g2>:<grp:v/g3>", "c"},
 				"v/g2": []string{"<grp:v/g1>"},
 				"v/g3": []string{"d"},
 			},
-			RemainderOver:  []string{"e", "d/e"},
-			RemainderUnder: []string{"d/e"},
+			RemainderOver:  []string{"e", "d:e"},
+			RemainderUnder: []string{"d:e"},
 			lenErrors:      1,
 		},
 		{
-			Pattern:  "a/b/<grp:v/g1>",
-			Blessing: "a/b/c/d/e",
+			Pattern:  "a:b:<grp:v/g1>",
+			Blessing: "a:b:c:d:e",
 			Groups: groupClientRPCTest{
 				"v/g1": []string{"<grp:v/g2>", "<grp:v/g1>"},
 				"v/g2": []string{"<grp:v/g1>"},
 			},
-			RemainderOver:  []string{"", "e", "d/e"},
+			RemainderOver:  []string{"", "e", "d:e"},
 			RemainderUnder: noMatch,
 			lenErrors:      2,
 		},

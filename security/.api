@@ -11,6 +11,8 @@ pkg security, const SignatureForMessageSigning ideal-string
 pkg security, func AddToRoots(Principal, Blessings) error
 pkg security, func AllowEveryone() Authorizer
 pkg security, func BlessingNames(Principal, Blessings) []string
+pkg security, func Bug739Colon2Slash(string) string
+pkg security, func Bug739Slash2Colon(string) string
 pkg security, func CreatePrincipal(Signer, BlessingStore, BlessingRoots) (Principal, error)
 pkg security, func DefaultAuthorizer() Authorizer
 pkg security, func DefaultBlessingPatterns(Principal) []BlessingPattern

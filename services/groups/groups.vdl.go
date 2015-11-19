@@ -167,8 +167,8 @@ type GroupReaderClientMethods interface {
 	// such that there exists some B' for which B = B' B" and B' is in S,
 	// and "" if B is a member of S.
 	//
-	// For example, if a group is defined as S = {n1, n1/n2, n1/n2/n3}, then
-	// Relate(n1/n2) = {n2, ""}.
+	// For example, if a group is defined as S = {n1, n1:n2, n1:n2:n3}, then
+	// Relate(n1:n2) = {n2, ""}.
 	//
 	// reqVersion specifies the expected version of the group's membership
 	// information. If this version is set and matches the Group's current
@@ -233,8 +233,8 @@ type GroupReaderServerMethods interface {
 	// such that there exists some B' for which B = B' B" and B' is in S,
 	// and "" if B is a member of S.
 	//
-	// For example, if a group is defined as S = {n1, n1/n2, n1/n2/n3}, then
-	// Relate(n1/n2) = {n2, ""}.
+	// For example, if a group is defined as S = {n1, n1:n2, n1:n2:n3}, then
+	// Relate(n1:n2) = {n2, ""}.
 	//
 	// reqVersion specifies the expected version of the group's membership
 	// information. If this version is set and matches the Group's current
@@ -321,7 +321,7 @@ var descGroupReader = rpc.InterfaceDesc{
 	Methods: []rpc.MethodDesc{
 		{
 			Name: "Relate",
-			Doc:  "// Relate determines the relationships between the provided blessing\n// names and the members of the group.\n//\n// Given an input set of blessing names and a group defined by a set of\n// blessing patterns S, for each blessing name B in the input, Relate(B)\n// returns a set of \"remainders\" consisting of every blessing name B\"\n// such that there exists some B' for which B = B' B\" and B' is in S,\n// and \"\" if B is a member of S.\n//\n// For example, if a group is defined as S = {n1, n1/n2, n1/n2/n3}, then\n// Relate(n1/n2) = {n2, \"\"}.\n//\n// reqVersion specifies the expected version of the group's membership\n// information. If this version is set and matches the Group's current\n// version, the response will indicate that fact but will otherwise be\n// empty.\n//\n// visitedGroups is the set of groups already visited in a particular\n// chain of Relate calls, and is used to detect the presence of\n// cycles. When a cycle is detected, it is treated just like any other\n// error, and the result is approximated.\n//\n// Relate also returns information about all the errors encountered that\n// resulted in approximations, if any.\n//\n// TODO(hpucha): scrub \"Approximation\" for preserving privacy. Flesh\n// versioning out further. Other args we may need: option to Get() the\n// membership set when allowed (to avoid an extra RPC), options related\n// to caching this information.",
+			Doc:  "// Relate determines the relationships between the provided blessing\n// names and the members of the group.\n//\n// Given an input set of blessing names and a group defined by a set of\n// blessing patterns S, for each blessing name B in the input, Relate(B)\n// returns a set of \"remainders\" consisting of every blessing name B\"\n// such that there exists some B' for which B = B' B\" and B' is in S,\n// and \"\" if B is a member of S.\n//\n// For example, if a group is defined as S = {n1, n1:n2, n1:n2:n3}, then\n// Relate(n1:n2) = {n2, \"\"}.\n//\n// reqVersion specifies the expected version of the group's membership\n// information. If this version is set and matches the Group's current\n// version, the response will indicate that fact but will otherwise be\n// empty.\n//\n// visitedGroups is the set of groups already visited in a particular\n// chain of Relate calls, and is used to detect the presence of\n// cycles. When a cycle is detected, it is treated just like any other\n// error, and the result is approximated.\n//\n// Relate also returns information about all the errors encountered that\n// resulted in approximations, if any.\n//\n// TODO(hpucha): scrub \"Approximation\" for preserving privacy. Flesh\n// versioning out further. Other args we may need: option to Get() the\n// membership set when allowed (to avoid an extra RPC), options related\n// to caching this information.",
 			InArgs: []rpc.ArgDesc{
 				{"blessings", ``},     // map[string]struct{}
 				{"hint", ``},          // ApproximationType

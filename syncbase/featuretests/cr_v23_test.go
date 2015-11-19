@@ -28,13 +28,13 @@ func V23TestDefaultCR(t *v23tests.T) {
 	server0Creds, _ := t.Shell().NewChildCredentials("s0")
 	client0Creds, _ := t.Shell().NewChildCredentials("c0")
 	cleanSync0 := tu.StartSyncbased(t, server0Creds, "sync0", "",
-		`{"Read": {"In":["root/c0"]}, "Write": {"In":["root/c0"]}}`)
+		`{"Read": {"In":["root:c0"]}, "Write": {"In":["root:c0"]}}`)
 	defer cleanSync0()
 
 	server1Creds, _ := t.Shell().NewChildCredentials("s1")
 	client1Creds, _ := t.Shell().NewChildCredentials("c1")
 	cleanSync1 := tu.StartSyncbased(t, server1Creds, "sync1", "",
-		`{"Read": {"In":["root/c1"]}, "Write": {"In":["root/c1"]}}`)
+		`{"Read": {"In":["root:c1"]}, "Write": {"In":["root:c1"]}}`)
 	defer cleanSync1()
 
 	sgName := naming.Join("sync0", util.SyncbaseSuffix, "SG1")
@@ -42,7 +42,7 @@ func V23TestDefaultCR(t *v23tests.T) {
 	// Setup database for App on sync0, create a syncgroup with sync0 and sync1
 	// and populate some initial data.
 	tu.RunClient(t, client0Creds, runSetupAppA, "sync0")
-	tu.RunClient(t, client0Creds, runCreateSyncgroup, "sync0", sgName, "tb:foo", "", "root/s0", "root/s1")
+	tu.RunClient(t, client0Creds, runCreateSyncgroup, "sync0", sgName, "tb:foo", "", "root:s0", "root:s1")
 	tu.RunClient(t, client0Creds, runPopulateData, "sync0", "foo", "0", "1")
 
 	// Setup database for App on sync1, join the syncgroup created above and
@@ -52,8 +52,8 @@ func V23TestDefaultCR(t *v23tests.T) {
 	tu.RunClient(t, client1Creds, runVerifySyncgroupData, "sync1", "foo", "0", "1", "true")
 
 	// Turn off syncing on both s0 and s1 by removing each other from syncgroup ACLs.
-	tu.RunClient(t, client0Creds, runToggleSync, "sync0", sgName, "root/s0")
-	tu.RunClient(t, client1Creds, runToggleSync, "sync1", sgName, "root/s1")
+	tu.RunClient(t, client0Creds, runToggleSync, "sync0", sgName, "root:s0")
+	tu.RunClient(t, client1Creds, runToggleSync, "sync1", sgName, "root:s1")
 
 	// Since sync is paused, the following updates are concurrent.
 	tu.RunClient(t, client0Creds, runUpdateData, "sync0", "0", "1", "concurrentUpdate")
@@ -61,8 +61,8 @@ func V23TestDefaultCR(t *v23tests.T) {
 
 	// Re enable sync between the two syncbases and wait for a bit to let the
 	// syncbases sync and call conflict resolution.
-	tu.RunClient(t, client0Creds, runToggleSync, "sync0", sgName, "root/s0", "root/s1")
-	tu.RunClient(t, client1Creds, runToggleSync, "sync1", sgName, "root/s0", "root/s1")
+	tu.RunClient(t, client0Creds, runToggleSync, "sync0", sgName, "root:s0", "root:s1")
+	tu.RunClient(t, client1Creds, runToggleSync, "sync1", sgName, "root:s0", "root:s1")
 
 	// Verify that the resolved data looks correct.
 	tu.RunClient(t, client0Creds, runWaitForValue, "sync0", "foo0", "concurrentUpdate"+"sync1")
@@ -81,13 +81,13 @@ func V23TestSyncbasedSyncWithAppResolvedConflicts(t *v23tests.T) {
 	server0Creds, _ := t.Shell().NewChildCredentials("s0")
 	client0Creds, _ := t.Shell().NewChildCredentials("c0")
 	cleanSync0 := tu.StartSyncbased(t, server0Creds, "sync0", "",
-		`{"Read": {"In":["root/c0"]}, "Write": {"In":["root/c0"]}}`)
+		`{"Read": {"In":["root:c0"]}, "Write": {"In":["root:c0"]}}`)
 	defer cleanSync0()
 
 	server1Creds, _ := t.Shell().NewChildCredentials("s1")
 	client1Creds, _ := t.Shell().NewChildCredentials("c1")
 	cleanSync1 := tu.StartSyncbased(t, server1Creds, "sync1", "",
-		`{"Read": {"In":["root/c1"]}, "Write": {"In":["root/c1"]}}`)
+		`{"Read": {"In":["root:c1"]}, "Write": {"In":["root:c1"]}}`)
 	defer cleanSync1()
 
 	sgName := naming.Join("sync0", util.SyncbaseSuffix, "SG1")
@@ -95,7 +95,7 @@ func V23TestSyncbasedSyncWithAppResolvedConflicts(t *v23tests.T) {
 	// Setup database for App on sync0, create a syncgroup with sync0 and sync1
 	// and populate some initial data.
 	tu.RunClient(t, client0Creds, runSetupAppA, "sync0")
-	tu.RunClient(t, client0Creds, runCreateSyncgroup, "sync0", sgName, "tb:foo", "", "root/s0", "root/s1")
+	tu.RunClient(t, client0Creds, runCreateSyncgroup, "sync0", sgName, "tb:foo", "", "root:s0", "root:s1")
 	tu.RunClient(t, client0Creds, runPopulateData, "sync0", "foo", "0")
 
 	// Setup database for App on sync1, join the syncgroup created above and
@@ -105,8 +105,8 @@ func V23TestSyncbasedSyncWithAppResolvedConflicts(t *v23tests.T) {
 	tu.RunClient(t, client1Creds, runVerifySyncgroupData, "sync1", "foo", "0", "10", "false")
 
 	// Turn off syncing on both s0 and s1 by removing each other from syncgroup ACLs.
-	tu.RunClient(t, client0Creds, runToggleSync, "sync0", sgName, "root/s0")
-	tu.RunClient(t, client1Creds, runToggleSync, "sync1", sgName, "root/s1")
+	tu.RunClient(t, client0Creds, runToggleSync, "sync0", sgName, "root:s0")
+	tu.RunClient(t, client1Creds, runToggleSync, "sync1", sgName, "root:s1")
 
 	// Since sync is paused, the following updates are concurrent.
 	tu.RunClient(t, client0Creds, runUpdateData, "sync0", "0", "5", "concurrentUpdate")
@@ -131,8 +131,8 @@ func V23TestSyncbasedSyncWithAppResolvedConflicts(t *v23tests.T) {
 
 	// Re enable sync between the two syncbases and wait for a bit to let the
 	// syncbases sync and call conflict resolution.
-	tu.RunClient(t, client0Creds, runToggleSync, "sync0", sgName, "root/s0", "root/s1")
-	tu.RunClient(t, client1Creds, runToggleSync, "sync1", sgName, "root/s0", "root/s1")
+	tu.RunClient(t, client0Creds, runToggleSync, "sync0", sgName, "root:s0", "root:s1")
+	tu.RunClient(t, client1Creds, runToggleSync, "sync1", sgName, "root:s0", "root:s1")
 
 	// Verify that the resolved data looks correct.
 	keyUnderConflict := "foo8" // one of the keys under conflict

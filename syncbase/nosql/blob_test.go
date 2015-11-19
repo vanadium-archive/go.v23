@@ -18,7 +18,7 @@ import (
 
 // Tests local blob get following a put.
 func TestLocalBlobPutGet(t *testing.T) {
-	ctx, sName, cleanup := tu.SetupOrDie(perms("root/client"))
+	ctx, sName, cleanup := tu.SetupOrDie(perms("root:client"))
 	defer cleanup()
 	a := tu.CreateApp(t, ctx, syncbase.NewService(sName), "a")
 	d := tu.CreateNoSQLDatabase(t, ctx, a, "d")

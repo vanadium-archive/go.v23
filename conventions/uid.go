@@ -18,12 +18,12 @@ const pkgPath = "v.io/v23/conventions"
 // Special case user ids.  They all have the identity provider "self" meaning that the server is poviding
 // the identity and type "?" meaning that we don't know what type of Id this is.
 const (
-	ServerUser          = "self/?/ServerUser"      // a client that has our public key
-	UnauthenticatedUser = "self/?/Unauthenticated" // a client which presents no blessing we trust
+	ServerUser          = "self:?:ServerUser"      // a client that has our public key
+	UnauthenticatedUser = "self:?:Unauthenticated" // a client which presents no blessing we trust
 )
 
 // GetClientUserIds returns a slice of ids for the client.  Each Id is one of the special ones above or
-// the string <identity provider>/<single letter type>/<actor>.   Examples of types are "u" for user
+// the string <identity provider>:<single letter type>:<actor>.   Examples of types are "u" for user
 // and "r" for role and "?" for unknown.
 func GetClientUserIds(ctx *context.T, call security.Call) []string {
 	// If there is no call or context, we must be the user.
@@ -61,7 +61,7 @@ func ParseUserId(s string) []string {
 		// Identity provider doesn't conform.  Treat all his users as a single resource group.
 		//
 		// This has the side effect of making tests a bit easier to write since you can use
-		// "bob" and "alice" rather than "self/u/bob" and "self/u/alice" or some such.
+		// "bob" and "alice" rather than "self:u:bob" and "self:u:alice" or some such.
 		return c[0:1]
 	}
 	return nil

@@ -74,7 +74,7 @@ func TestBless(t *testing.T) {
 	if b, err := p1.Bless(p2.PublicKey(), Blessings{}, "friend", UnconstrainedUse()); err == nil {
 		t.Errorf("p1 was able to extend a nil blessing to produce: %v", b)
 	}
-	// p1 blessing p2 as "alice/friend" for "Suffix.Method"
+	// p1 blessing p2 as "alice:friend" for "Suffix.Method"
 	friend, err := p1.Bless(p2.PublicKey(), alice, "friend", newCaveat(NewMethodCaveat("Method")), newSuffixCaveat("Suffix"))
 	if err != nil {
 		t.Fatal(err)
@@ -88,7 +88,7 @@ func TestBless(t *testing.T) {
 	if err := checkBlessings(friend, call("OtherMethod", "Suffix")); err != nil {
 		t.Error(err)
 	}
-	if err := checkBlessings(friend, call("Method", "Suffix"), "alice/friend"); err != nil {
+	if err := checkBlessings(friend, call("Method", "Suffix"), "alice:friend"); err != nil {
 		t.Error(err)
 	}
 	// p1.Bless should not mess with the certificate chains of "alice" itself.
@@ -96,7 +96,7 @@ func TestBless(t *testing.T) {
 		t.Error(err)
 	}
 
-	// p2 should not be able to bless p3 as "alice/friend"
+	// p2 should not be able to bless p3 as "alice:friend"
 	blessings, err := p2.Bless(p3.PublicKey(), alice, "friend", UnconstrainedUse())
 	if !blessings.IsZero() {
 		t.Errorf("p2 was able to extend a blessing bound to p1 to produce: %v", blessings)
@@ -177,15 +177,15 @@ func TestBlessingNames(t *testing.T) {
 		},
 		{
 			blessings: alicefriend,
-			names:     []string{"alice/friend"},
+			names:     []string{"alice:friend"},
 		},
 		{
 			blessings: bobfriend,
-			names:     []string{"bob/friend"},
+			names:     []string{"bob:friend"},
 		},
 		{
 			blessings: aliceAndBobFriend,
-			names:     []string{"alice/friend", "bob/friend"},
+			names:     []string{"alice:friend", "bob:friend"},
 		},
 		{
 			blessings: alice, // not a blessing for principal p2.
@@ -227,17 +227,17 @@ func TestBlessings(t *testing.T) {
 			"john.doe",
 			"bruce@wayne.com",
 			"bugs..bunny",
-			"trusted/friends",
-			"friends/colleagues/work",
+			"trusted:friends",
+			"friends:colleagues:work",
 		}
 		invalid = s{
 			"",
 			"...",
-			"/",
+			":",
 			"bugs...bunny",
-			"/bruce",
-			"bruce/",
-			"trusted//friends",
+			":bruce",
+			"bruce:",
+			"trusted::friends",
 		}
 	)
 	addToRoots(t, tp, alice)
@@ -331,7 +331,7 @@ func TestAddToRoots(t *testing.T) {
 	type s []string
 	var (
 		p1          = newPrincipal(t)
-		aliceFriend = blessSelf(t, p1, "alice/friend")
+		aliceFriend = blessSelf(t, p1, "alice:friend")
 
 		p2      = newPrincipal(t)
 		charlie = blessSelf(t, p2, "charlie")
@@ -342,7 +342,7 @@ func TestAddToRoots(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	charlieFamilyDaughter, err := p2.Bless(p3, charlie, "family/daughter", UnconstrainedUse())
+	charlieFamilyDaughter, err := p2.Bless(p3, charlie, "family:daughter", UnconstrainedUse())
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -356,14 +356,14 @@ func TestAddToRoots(t *testing.T) {
 		{
 			add:           aliceFriendSpouse,
 			root:          p1.PublicKey(),
-			recognized:    s{"alice/friend", "alice/friend/device", "alice/friend/device/app", "alice/friend/spouse", "alice/friend/spouse/friend"},
-			notRecognized: s{"alice/device", "bob", "bob/friend", "bob/friend/spouse"},
+			recognized:    s{"alice:friend", "alice:friend:device", "alice:friend:device:app", "alice:friend:spouse", "alice:friend:spouse:friend"},
+			notRecognized: s{"alice:device", "bob", "bob:friend", "bob:friend:spouse"},
 		},
 		{
 			add:           charlieFamilyDaughter,
 			root:          p2.PublicKey(),
-			recognized:    s{"charlie", "charlie/friend", "charlie/friend/device", "charlie/family", "charlie/family/daughter", "charlie/family/friend", "charlie/family/friend/device"},
-			notRecognized: s{"alice", "bob", "alice/family", "alice/family/daughter"},
+			recognized:    s{"charlie", "charlie:friend", "charlie:friend:device", "charlie:family", "charlie:family:daughter", "charlie:family:friend", "charlie:family:friend:device"},
+			notRecognized: s{"alice", "bob", "alice:family", "alice:family:daughter"},
 		},
 	}
 	for _, test := range tests {
@@ -484,27 +484,27 @@ func TestUnionOfBlessings(t *testing.T) {
 		// No caveats on the recognized "carol" blessing.
 		t.Error(err)
 	}
-	if err := checkBlessings(friend, call("Method", "Suffix", alice), "alice/friend"); err != nil {
+	if err := checkBlessings(friend, call("Method", "Suffix", alice), "alice:friend"); err != nil {
 		// Caveats on the recognized blessing are satisfied.
 		t.Error(err)
 	}
-	if err := checkBlessings(friend, call("Method", "Suffix", alice, carol), "carol", "alice/friend"); err != nil {
+	if err := checkBlessings(friend, call("Method", "Suffix", alice, carol), "carol", "alice:friend"); err != nil {
 		t.Error(err)
 	}
-	if err := checkBlessings(friend, call("Method", "Suffix", bob), "bob/friend"); err != nil {
+	if err := checkBlessings(friend, call("Method", "Suffix", bob), "bob:friend"); err != nil {
 		t.Error(err)
 	}
-	if err := checkBlessings(friend, call("Method", "Suffix", bob, carol), "carol", "bob/friend"); err != nil {
+	if err := checkBlessings(friend, call("Method", "Suffix", bob, carol), "carol", "bob:friend"); err != nil {
 		t.Error(err)
 	}
-	if err := checkBlessings(friend, call("Method", "Suffix", alice, bob, carol), "carol", "alice/friend", "bob/friend"); err != nil {
+	if err := checkBlessings(friend, call("Method", "Suffix", alice, bob, carol), "carol", "alice:friend", "bob:friend"); err != nil {
 		t.Error(err)
 	}
-	if err := checkBlessings(friend, call("AliceMethod", "Suffix", alice, bob), "alice/friend"); err != nil {
+	if err := checkBlessings(friend, call("AliceMethod", "Suffix", alice, bob), "alice:friend"); err != nil {
 		// Caveats on only one of the two recognized blessings is satisfied.
 		t.Error(err)
 	}
-	if err := checkBlessings(friend, call("BobMethod", "Suffix", alice, bob), "bob/friend"); err != nil {
+	if err := checkBlessings(friend, call("BobMethod", "Suffix", alice, bob), "bob:friend"); err != nil {
 		// Caveats on only one of the two recognized blessings is satisfied.
 		t.Error(err)
 	}
@@ -514,13 +514,13 @@ func TestUnionOfBlessings(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if err := checkBlessings(spouse, call("Method", "Suffix", alice, bob, carol), "carol/spouse", "alice/friend/spouse", "bob/friend/spouse"); err != nil {
+	if err := checkBlessings(spouse, call("Method", "Suffix", alice, bob, carol), "carol:spouse", "alice:friend:spouse", "bob:friend:spouse"); err != nil {
 		t.Error(err)
 	}
 	if err := checkBlessings(spouse, call("Method", "OtherSuffix", alice, bob, carol)); err != nil {
 		t.Error(err)
 	}
-	if err := checkBlessings(spouse, call("AliceMethod", "Suffix", alice, bob, carol), "carol/spouse", "alice/friend/spouse"); err != nil {
+	if err := checkBlessings(spouse, call("AliceMethod", "Suffix", alice, bob, carol), "carol:spouse", "alice:friend:spouse"); err != nil {
 		t.Error(err)
 	}
 
@@ -544,8 +544,8 @@ func TestCertificateCompositionAttack(t *testing.T) {
 	)
 	addToRoots(t, tp, alice)
 	addToRoots(t, tp, bob)
-	// p3 has the blessings "alice/friend" and "bob/family" (from p1 and p2 respectively).
-	// It then blesses p4 as "alice/friend/spouse" with no caveat and as "bob/family/spouse"
+	// p3 has the blessings "alice:friend" and "bob:family" (from p1 and p2 respectively).
+	// It then blesses p4 as "alice:friend:spouse" with no caveat and as "bob:family:spouse"
 	// with a caveat.
 	alicefriend, err := p1.Bless(p3.PublicKey(), alice, "friend", UnconstrainedUse())
 	if err != nil {
@@ -565,16 +565,16 @@ func TestCertificateCompositionAttack(t *testing.T) {
 		t.Fatal(err)
 	}
 	// p4's blessings should be valid.
-	if err := checkBlessings(alicefriendspouse, cp, "alice/friend/spouse"); err != nil {
+	if err := checkBlessings(alicefriendspouse, cp, "alice:friend:spouse"); err != nil {
 		t.Fatal(err)
 	}
-	if err := checkBlessings(bobfamilyspouse, cp, "bob/family/spouse"); err != nil {
+	if err := checkBlessings(bobfamilyspouse, cp, "bob:family:spouse"); err != nil {
 		t.Fatal(err)
 	}
 
-	// p4 should be not to construct a valid "bob/family/spouse" blessing by
-	// using the "spouse" certificate from "alice/friend/spouse" (that has no caveats)
-	// and replacing the "spouse" certificate from "bob/family/spouse".
+	// p4 should be not to construct a valid "bob:family:spouse" blessing by
+	// using the "spouse" certificate from "alice:friend:spouse" (that has no caveats)
+	// and replacing the "spouse" certificate from "bob:family:spouse".
 	spousecert := alicefriendspouse.chains[0][2]
 	// sanity check
 	if spousecert.Extension != "spouse" || len(spousecert.Caveats) != 1 || spousecert.Caveats[0].Id != ConstCaveat.Id {
@@ -603,7 +603,7 @@ func TestCertificateTamperingAttack(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if err := checkBlessings(alicefriend, CallParams{LocalPrincipal: tp}, "alice/friend"); err != nil {
+	if err := checkBlessings(alicefriend, CallParams{LocalPrincipal: tp}, "alice:friend"); err != nil {
 		t.Fatal(err)
 	}
 	// p3 attempts to "steal" the blessing by constructing his own certificate.
@@ -611,7 +611,7 @@ func TestCertificateTamperingAttack(t *testing.T) {
 	if cert.PublicKey, err = p3.PublicKey().MarshalBinary(); err != nil {
 		t.Fatal(err)
 	}
-	if err := matchesError(checkBlessings(alicefriend, CallParams{LocalPrincipal: tp}, "alice/friend"), "invalid Signature in certificate(for \"friend\")"); err != nil {
+	if err := matchesError(checkBlessings(alicefriend, CallParams{LocalPrincipal: tp}, "alice:friend"), "invalid Signature in certificate(for \"friend\")"); err != nil {
 		t.Error(err)
 	}
 }
@@ -700,7 +700,7 @@ func TestBlessingsOnWireWithMissingCertificates(t *testing.T) {
 		}
 
 		// Create "leaf", a blessing involving three certificates that bind the name
-		// root/middleman/leaf to the leaf principal.
+		// root:middleman:leaf to the leaf principal.
 		rootP      = newPrincipal(t)
 		middlemanP = newPrincipal(t)
 		leafP      = newPrincipal(t)
@@ -845,7 +845,7 @@ func TestOverrideCaveatValidation(t *testing.T) {
 	}))
 	expectedFailInfos := map[string]error{
 		"falsetrue":  falseResultErr,
-		"true/false": falseResultErr,
+		"true:false": falseResultErr,
 	}
 	failInfos := map[string]error{}
 	for _, info := range infos {
@@ -854,7 +854,7 @@ func TestOverrideCaveatValidation(t *testing.T) {
 	if !reflect.DeepEqual(failInfos, expectedFailInfos) {
 		t.Fatalf("Unexpected failinfos from RemoteBlessingNames. Got %v, want %v", failInfos, expectedFailInfos)
 	}
-	expectedResults := []string{"unrestricted", "truetrue", "true/true"}
+	expectedResults := []string{"unrestricted", "truetrue", "true:true"}
 	sort.Strings(results)
 	sort.Strings(expectedResults)
 	if !reflect.DeepEqual(results, expectedResults) {
@@ -945,9 +945,9 @@ func TestSigningBlessings(t *testing.T) {
 		falseCav, _ = NewCaveat(ConstCaveat, false)
 
 		aliceSelf, _          = alice.BlessSelf("alice")
-		googleYoutubeUser, _  = google.Bless(alice.PublicKey(), googleB, "youtube/user", peerCav)
-		googleAliceExpired, _ = google.Bless(alice.PublicKey(), googleB, "alice/expired", newCaveat(NewExpiryCaveat(time.Now().Add(-time.Second))))
-		googleAliceFalse, _   = google.Bless(alice.PublicKey(), googleB, "alice/false", falseCav)
+		googleYoutubeUser, _  = google.Bless(alice.PublicKey(), googleB, "youtube:user", peerCav)
+		googleAliceExpired, _ = google.Bless(alice.PublicKey(), googleB, "alice:expired", newCaveat(NewExpiryCaveat(time.Now().Add(-time.Second))))
+		googleAliceFalse, _   = google.Bless(alice.PublicKey(), googleB, "alice:false", falseCav)
 		googleAlice, _        = google.Bless(alice.PublicKey(), googleB, "alice", newCaveat(NewExpiryCaveat(time.Now().Add(time.Hour))), trueCav)
 		aliceB, _             = UnionOfBlessings(aliceSelf, googleYoutubeUser, googleAliceExpired, googleAliceFalse, googleAlice)
 
@@ -959,12 +959,7 @@ func TestSigningBlessings(t *testing.T) {
 				if len(chain) == 0 {
 					continue
 				}
-				name := chain[0].Extension
-				for i := 1; i < len(chain); i++ {
-					name += ChainSeparator
-					name += chain[i].Extension
-				}
-				ret = append(ret, name)
+				ret = append(ret, claimedName(chain))
 			}
 			return ret
 		}
@@ -973,7 +968,7 @@ func TestSigningBlessings(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	// The blessing "google/youtube/user" should be dropped when calling
+	// The blessing "google:youtube:user" should be dropped when calling
 	// SigningBlessings on 'aliceB'
 	aliceSigning := SigningBlessings(aliceB)
 
@@ -981,7 +976,7 @@ func TestSigningBlessings(t *testing.T) {
 		t.Fatal("SigningBlessings returned blessings with different public key")
 	}
 
-	got, want := rawNames(aliceSigning), []string{"alice", "google/alice/expired", "google/alice/false", "google/alice"}
+	got, want := rawNames(aliceSigning), []string{"alice", "google:alice:expired", "google:alice:false", "google:alice"}
 	sort.Strings(got)
 	sort.Strings(want)
 	if !reflect.DeepEqual(got, want) {
@@ -995,7 +990,7 @@ func TestSigningBlessings(t *testing.T) {
 	defer cf()
 
 	names, rejected := SigningBlessingNames(ctx, bob, aliceB)
-	if want := []string{"google/alice"}; !reflect.DeepEqual(names, want) {
+	if want := []string{"google:alice"}; !reflect.DeepEqual(names, want) {
 		t.Fatalf("SigningBlessingNames(%v): got names %v, want %v", aliceB, names, want)
 	}
 	if got := len(rejected); got != 4 {
@@ -1007,15 +1002,15 @@ func TestSigningBlessings(t *testing.T) {
 			if got, want := verror.ErrorID(r.Err), ErrUnrecognizedRoot.ID; got != want {
 				t.Errorf("SigningBlessingNames(%v): rejected blessing %v with errorID %v, want errorID %v", aliceB, r.Blessing, got, want)
 			}
-		case "google/alice/false":
+		case "google:alice:false":
 			if got, want := verror.ErrorID(r.Err), ErrCaveatValidation.ID; got != want {
 				t.Errorf("SigningBlessingNames(%v): rejected blessing %v with errorID %v, want errorID %v", aliceB, r.Blessing, got, want)
 			}
-		case "google/alice/expired":
+		case "google:alice:expired":
 			if got, want := verror.ErrorID(r.Err), ErrCaveatValidation.ID; got != want {
 				t.Errorf("SigningBlessingNames(%v): rejected blessing %v with errorID %v, want errorID %v", aliceB, r.Blessing, got, want)
 			}
-		case "google/youtube/user":
+		case "google:youtube:user":
 			if got, want := verror.ErrorID(r.Err), ErrInvalidSigningBlessingCaveat.ID; got != want {
 				t.Errorf("SigningBlessingNames(%v): rejected blessing %v with errorID %v, want errorID %v", aliceB, r.Blessing, got, want)
 			}

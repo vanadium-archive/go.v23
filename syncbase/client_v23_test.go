@@ -29,16 +29,16 @@ const (
 )
 
 // TODO(sadovsky): All tests in this file should be updated so that the client
-// carries blessing "root/client", so that access is not granted anywhere just
+// carries blessing "root:client", so that access is not granted anywhere just
 // because the server blessing name is a prefix of the client blessing name or
 // vice versa.
 
 func V23TestSyncbasedPutGet(t *v23tests.T) {
 	v23tests.RunRootMT(t, "--v23.tcp.address=127.0.0.1:0")
-	clientCreds, _ := t.Shell().NewChildCredentials("server/client")
+	clientCreds, _ := t.Shell().NewChildCredentials("server:client")
 	serverCreds, _ := t.Shell().NewChildCredentials("server")
 	cleanup := tu.StartSyncbased(t, serverCreds, syncbaseName, "",
-		`{"Read": {"In":["root/server/client"]}, "Write": {"In":["root/server/client"]}}`)
+		`{"Read": {"In":["root:server:client"]}, "Write": {"In":["root:server:client"]}}`)
 	defer cleanup()
 
 	tu.RunClient(t, clientCreds, runTestSyncbasedPutGet)
@@ -79,7 +79,7 @@ var runTestSyncbasedPutGet = modules.Register(func(env *modules.Env, args ...str
 
 func V23TestServiceRestart(t *v23tests.T) {
 	v23tests.RunRootMT(t, "--v23.tcp.address=127.0.0.1:0")
-	clientCreds, _ := t.Shell().NewChildCredentials("server/client")
+	clientCreds, _ := t.Shell().NewChildCredentials("server:client")
 	serverCreds, _ := t.Shell().NewChildCredentials("server")
 
 	rootDir, err := ioutil.TempDir("", "syncbase_leveldb")
@@ -87,7 +87,7 @@ func V23TestServiceRestart(t *v23tests.T) {
 		tu.V23Fatalf(t, "can't create temp dir: %v", err)
 	}
 
-	perms := tu.DefaultPerms("root/server/client")
+	perms := tu.DefaultPerms("root:server:client")
 	buf := new(bytes.Buffer)
 	access.WritePermissions(buf, perms)
 	permsLiteral := buf.String()
@@ -110,7 +110,7 @@ func V23TestServiceRestart(t *v23tests.T) {
 // SIGINT.
 func V23TestServiceCrashRestart(t *v23tests.T) {
 	v23tests.RunRootMT(t, "--v23.tcp.address=127.0.0.1:0")
-	clientCreds, _ := t.Shell().NewChildCredentials("server/client")
+	clientCreds, _ := t.Shell().NewChildCredentials("server:client")
 	serverCreds, _ := t.Shell().NewChildCredentials("server")
 
 	rootDir, err := ioutil.TempDir("", "syncbase_leveldb")
@@ -118,7 +118,7 @@ func V23TestServiceCrashRestart(t *v23tests.T) {
 		tu.V23Fatalf(t, "can't create temp dir: %v", err)
 	}
 
-	perms := tu.DefaultPerms("root/server/client")
+	perms := tu.DefaultPerms("root:server:client")
 	buf := new(bytes.Buffer)
 	access.WritePermissions(buf, perms)
 	permsLiteral := buf.String()

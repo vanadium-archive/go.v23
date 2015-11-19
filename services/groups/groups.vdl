@@ -61,8 +61,8 @@ type GroupReader interface {
 	// such that there exists some B' for which B = B' B" and B' is in S,
 	// and "" if B is a member of S.
 	//
-	// For example, if a group is defined as S = {n1, n1/n2, n1/n2/n3}, then
-	// Relate(n1/n2) = {n2, ""}.
+	// For example, if a group is defined as S = {n1, n1:n2, n1:n2:n3}, then
+	// Relate(n1:n2) = {n2, ""}.
 	//
 	// reqVersion specifies the expected version of the group's membership
 	// information. If this version is set and matches the Group's current

@@ -24,8 +24,9 @@ const (
 )
 
 var (
-	exactMatch = convertToSet("")
-	grpRegexp  = regexp.MustCompile(GroupStart + "[^" + GroupEnd + "]*" + GroupEnd)
+	exactMatch    = convertToSet("")
+	grpRegexp     = regexp.MustCompile(GroupStart + "[^" + GroupEnd + "]*" + GroupEnd)
+	grpStartToken = strings.TrimSuffix(GroupStart, security.ChainSeparator)
 )
 
 // Match matches blessing names against a pattern. It returns an empty array if
@@ -158,23 +159,21 @@ func (g *grpClient) remainder(ctx *context.T, groupName string, blessingChunks m
 ///////////////////////////////
 // Helper functions
 
-// splitPattern splits a pattern into valid tokens separated by "/".
-// If any token in a pattern is invalid, it returns an error.
+// splitPattern splits a pattern into valid tokens separated by ":"
+// (security.ChainSeparator). If any token in a pattern is invalid, it returns
+// an error.
 //
-// A group token (<grp:[grpname]>) may contain "/", but is treated as
-// indivisible. A pattern token is valid if it is a valid blessing
-// extension or a single valid group token. A token that concatenates
-// two group tokens, or a group token concatenated with a valid
-// blessing extension, is invalid.
+// A group token (<grp:[grpname]>) is treated as indivisible. A pattern token
+// is valid if it is a valid blessing extension or a single valid group token.
+// A token that concatenates two group tokens, or a group token concatenated
+// with a valid blessing extension, is invalid.
 //
 // TODO(hpucha): Is there a better way to do this split using regex
 // matching?
 func splitPattern(p security.BlessingPattern) ([]string, error) {
-	pTmp := security.BlessingPattern(grpRegexp.ReplaceAllLiteralString(string(p), "X"))
-
 	// Check that the blessing pattern is valid without the
 	// presence of group tokens (see v23/security/pattern.go).
-	if !pTmp.IsValid() {
+	if pTmp := security.BlessingPattern(grpRegexp.ReplaceAllLiteralString(string(p), "X")); !pTmp.IsValid() {
 		return nil, errors.New("invalid pattern: non-group tokens are invalid")
 	}
 
@@ -184,7 +183,7 @@ func splitPattern(p security.BlessingPattern) ([]string, error) {
 	for pStr != "" {
 		tokens := strings.SplitN(pStr, security.ChainSeparator, 2)
 
-		if !strings.Contains(tokens[0], GroupStart) {
+		if !strings.Contains(tokens[0], grpStartToken) {
 			// Token is a blessing extension.
 			patTokens = append(patTokens, tokens[0])
 			if len(tokens) != 2 {
@@ -195,7 +194,7 @@ func splitPattern(p security.BlessingPattern) ([]string, error) {
 		}
 
 		// Check for a valid group token.
-		if !strings.HasPrefix(tokens[0], GroupStart) {
+		if !strings.HasPrefix(tokens[0], grpStartToken) {
 			// Invalid group token. <grp: is not at the beginning of a token.
 			return nil, errors.New("invalid pattern: group token has a prefix")
 		}

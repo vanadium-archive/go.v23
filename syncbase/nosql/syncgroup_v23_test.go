@@ -47,19 +47,19 @@ func V23TestSyncbasedJoinSyncgroup(t *v23tests.T) {
 	server0Creds, _ := t.Shell().NewChildCredentials("s0")
 	client0Creds, _ := t.Shell().NewChildCredentials("c0")
 	cleanSync0 := tu.StartSyncbased(t, server0Creds, "sync0", "",
-		`{"Read": {"In":["root/c0"]}, "Write": {"In":["root/c0"]}}`)
+		`{"Read": {"In":["root:c0"]}, "Write": {"In":["root:c0"]}}`)
 	defer cleanSync0()
 
 	server1Creds, _ := t.Shell().NewChildCredentials("s1")
 	client1Creds, _ := t.Shell().NewChildCredentials("c1")
 	cleanSync1 := tu.StartSyncbased(t, server1Creds, "sync1", "",
-		`{"Read": {"In":["root/c1"]}, "Write": {"In":["root/c1"]}}`)
+		`{"Read": {"In":["root:c1"]}, "Write": {"In":["root:c1"]}}`)
 	defer cleanSync1()
 
 	sgName := naming.Join("sync0", constants.SyncbaseSuffix, "SG1")
 
 	tu.RunClient(t, client0Creds, runSetupAppA, "sync0")
-	tu.RunClient(t, client0Creds, runCreateSyncgroup, "sync0", sgName, "tb:foo", "", "root/s0", "root/s1")
+	tu.RunClient(t, client0Creds, runCreateSyncgroup, "sync0", sgName, "tb:foo", "", "root:s0", "root:s1")
 
 	tu.RunClient(t, client1Creds, runSetupAppA, "sync1")
 	tu.RunClient(t, client1Creds, runJoinSyncgroup, "sync1", sgName)
@@ -75,19 +75,19 @@ func V23TestSyncbasedGetDeltas(t *v23tests.T) {
 	server0Creds, _ := t.Shell().NewChildCredentials("s0")
 	client0Creds, _ := t.Shell().NewChildCredentials("c0")
 	cleanSync0 := tu.StartSyncbased(t, server0Creds, "sync0", "",
-		`{"Read": {"In":["root/c0"]}, "Write": {"In":["root/c0"]}}`)
+		`{"Read": {"In":["root:c0"]}, "Write": {"In":["root:c0"]}}`)
 	defer cleanSync0()
 
 	server1Creds, _ := t.Shell().NewChildCredentials("s1")
 	client1Creds, _ := t.Shell().NewChildCredentials("c1")
 	cleanSync1 := tu.StartSyncbased(t, server1Creds, "sync1", "",
-		`{"Read": {"In":["root/c1"]}, "Write": {"In":["root/c1"]}}`)
+		`{"Read": {"In":["root:c1"]}, "Write": {"In":["root:c1"]}}`)
 	defer cleanSync1()
 
 	sgName := naming.Join("sync0", constants.SyncbaseSuffix, "SG1")
 
 	tu.RunClient(t, client0Creds, runSetupAppA, "sync0")
-	tu.RunClient(t, client0Creds, runCreateSyncgroup, "sync0", sgName, "tb:foo,tb:bar", "", "root/s0", "root/s1")
+	tu.RunClient(t, client0Creds, runCreateSyncgroup, "sync0", sgName, "tb:foo,tb:bar", "", "root:s0", "root:s1")
 	tu.RunClient(t, client0Creds, runPopulateData, "sync0", "foo", "0")
 	tu.RunClient(t, client0Creds, runPopulateNonVomData, "sync0", "bar", "0")
 
@@ -105,13 +105,13 @@ func V23TestSyncbasedExchangeDeltasNeighborhood(t *v23tests.T) {
 	server0Creds, _ := t.Shell().NewChildCredentials("s0")
 	client0Creds, _ := t.Shell().NewChildCredentials("c0")
 	cleanSync0 := tu.StartSyncbased(t, server0Creds, "sync0", "",
-		`{"Read": {"In":["root/c0"]}, "Write": {"In":["root/c0"]}}`)
+		`{"Read": {"In":["root:c0"]}, "Write": {"In":["root:c0"]}}`)
 	defer cleanSync0()
 
 	server1Creds, _ := t.Shell().NewChildCredentials("s1")
 	client1Creds, _ := t.Shell().NewChildCredentials("c1")
 	cleanSync1 := tu.StartSyncbased(t, server1Creds, "sync1", "",
-		`{"Read": {"In":["root/c1"]}, "Write": {"In":["root/c1"]}}`)
+		`{"Read": {"In":["root:c1"]}, "Write": {"In":["root:c1"]}}`)
 	defer cleanSync1()
 
 	sgName := naming.Join("sync0", constants.SyncbaseSuffix, "SG1")
@@ -119,7 +119,7 @@ func V23TestSyncbasedExchangeDeltasNeighborhood(t *v23tests.T) {
 	tu.RunClient(t, client0Creds, runSetupAppA, "sync0")
 	// We are using a fake mount table so that the peers are forced to find
 	// each other over neighborhood.
-	tu.RunClient(t, client0Creds, runCreateSyncgroup, "sync0", sgName, "tb:foo", "/mttable", "root/s0", "root/s1")
+	tu.RunClient(t, client0Creds, runCreateSyncgroup, "sync0", sgName, "tb:foo", "/mttable", "root:s0", "root:s1")
 	tu.RunClient(t, client0Creds, runPopulateData, "sync0", "foo", "0")
 
 	tu.RunClient(t, client1Creds, runSetupAppA, "sync1")
@@ -143,19 +143,19 @@ func V23TestSyncbasedGetDeltasWithDel(t *v23tests.T) {
 	server0Creds, _ := t.Shell().NewChildCredentials("s0")
 	client0Creds, _ := t.Shell().NewChildCredentials("c0")
 	cleanSync0 := tu.StartSyncbased(t, server0Creds, "sync0", "",
-		`{"Read": {"In":["root/c0"]}, "Write": {"In":["root/c0"]}}`)
+		`{"Read": {"In":["root:c0"]}, "Write": {"In":["root:c0"]}}`)
 	defer cleanSync0()
 
 	server1Creds, _ := t.Shell().NewChildCredentials("s1")
 	client1Creds, _ := t.Shell().NewChildCredentials("c1")
 	cleanSync1 := tu.StartSyncbased(t, server1Creds, "sync1", "",
-		`{"Read": {"In":["root/c1"]}, "Write": {"In":["root/c1"]}}`)
+		`{"Read": {"In":["root:c1"]}, "Write": {"In":["root:c1"]}}`)
 	defer cleanSync1()
 
 	sgName := naming.Join("sync0", constants.SyncbaseSuffix, "SG1")
 
 	tu.RunClient(t, client0Creds, runSetupAppA, "sync0")
-	tu.RunClient(t, client0Creds, runCreateSyncgroup, "sync0", sgName, "tb:foo,tb:bar", "", "root/s0", "root/s1")
+	tu.RunClient(t, client0Creds, runCreateSyncgroup, "sync0", sgName, "tb:foo,tb:bar", "", "root:s0", "root:s1")
 	tu.RunClient(t, client0Creds, runPopulateData, "sync0", "foo", "0")
 
 	tu.RunClient(t, client1Creds, runSetupAppA, "sync1")
@@ -190,7 +190,7 @@ func V23TestSyncbasedCompEval(t *v23tests.T) {
 		tu.V23Fatalf(t, "can't create temp dir: %v", err)
 	}
 	cleanSync0 := tu.StartSyncbased(t, server0Creds, "sync0", server0RDir,
-		`{"Read": {"In":["root/c0"]}, "Write": {"In":["root/c0"]}}`)
+		`{"Read": {"In":["root:c0"]}, "Write": {"In":["root:c0"]}}`)
 
 	server1Creds, _ := t.Shell().NewChildCredentials("s1")
 	client1Creds, _ := t.Shell().NewChildCredentials("c1")
@@ -199,12 +199,12 @@ func V23TestSyncbasedCompEval(t *v23tests.T) {
 		tu.V23Fatalf(t, "can't create temp dir: %v", err)
 	}
 	cleanSync1 := tu.StartSyncbased(t, server1Creds, "sync1", server1RDir,
-		`{"Read": {"In":["root/c1"]}, "Write": {"In":["root/c1"]}}`)
+		`{"Read": {"In":["root:c1"]}, "Write": {"In":["root:c1"]}}`)
 
 	sgName := naming.Join("sync0", constants.SyncbaseSuffix, "SG1")
 
 	tu.RunClient(t, client0Creds, runSetupAppA, "sync0")
-	tu.RunClient(t, client0Creds, runCreateSyncgroup, "sync0", sgName, "tb:foo", "", "root/s0", "root/s1")
+	tu.RunClient(t, client0Creds, runCreateSyncgroup, "sync0", sgName, "tb:foo", "", "root:s0", "root:s1")
 	tu.RunClient(t, client0Creds, runPopulateData, "sync0", "foo", "0")
 
 	// This is a decoy syncgroup that no other Syncbase joins, but is on the
@@ -214,7 +214,7 @@ func V23TestSyncbasedCompEval(t *v23tests.T) {
 	// syncgroup. This triggers the handling of filtered log records in the
 	// restartability code.
 	sgName1 := naming.Join("sync0", constants.SyncbaseSuffix, "SG2")
-	tu.RunClient(t, client0Creds, runCreateSyncgroup, "sync0", sgName1, "tb:bar", "", "root/s0", "root/s1")
+	tu.RunClient(t, client0Creds, runCreateSyncgroup, "sync0", sgName1, "tb:bar", "", "root:s0", "root:s1")
 	tu.RunClient(t, client0Creds, runPopulateData, "sync0", "bar", "0")
 
 	tu.RunClient(t, client1Creds, runSetupAppA, "sync1")
@@ -226,31 +226,31 @@ func V23TestSyncbasedCompEval(t *v23tests.T) {
 	cleanSync1()
 
 	cleanSync0 = tu.StartSyncbased(t, server0Creds, "sync0", server0RDir,
-		`{"Read": {"In":["root/c0"]}, "Write": {"In":["root/c0"]}}`)
+		`{"Read": {"In":["root:c0"]}, "Write": {"In":["root:c0"]}}`)
 	cleanSync1 = tu.StartSyncbased(t, server1Creds, "sync1", server1RDir,
-		`{"Read": {"In":["root/c1"]}, "Write": {"In":["root/c1"]}}`)
+		`{"Read": {"In":["root:c1"]}, "Write": {"In":["root:c1"]}}`)
 
-	tu.RunClient(t, client0Creds, runSetSyncgroupSpec, "sync0", sgName, "v2", "tb:foo", "root/s0", "root/s1", "root/s3")
-	tu.RunClient(t, client1Creds, runGetSyncgroupSpec, "sync1", sgName, "v2", "tb:foo", "root/s0", "root/s1", "root/s3")
+	tu.RunClient(t, client0Creds, runSetSyncgroupSpec, "sync0", sgName, "v2", "tb:foo", "root:s0", "root:s1", "root:s3")
+	tu.RunClient(t, client1Creds, runGetSyncgroupSpec, "sync1", sgName, "v2", "tb:foo", "root:s0", "root:s1", "root:s3")
 
 	tu.RunClient(t, client1Creds, runUpdateData, "sync1", "5")
 	tu.RunClient(t, client1Creds, runPopulateData, "sync1", "foo", "10")
-	tu.RunClient(t, client1Creds, runSetSyncgroupSpec, "sync1", sgName, "v3", "tb:foo", "root/s0", "root/s1", "root/s4")
+	tu.RunClient(t, client1Creds, runSetSyncgroupSpec, "sync1", sgName, "v3", "tb:foo", "root:s0", "root:s1", "root:s4")
 
 	tu.RunClient(t, client0Creds, runVerifyLocalAndRemoteData, "sync0")
-	tu.RunClient(t, client0Creds, runGetSyncgroupSpec, "sync0", sgName, "v3", "tb:foo", "root/s0", "root/s1", "root/s4")
+	tu.RunClient(t, client0Creds, runGetSyncgroupSpec, "sync0", sgName, "v3", "tb:foo", "root:s0", "root:s1", "root:s4")
 
 	// Shutdown and restart Syncbase instances.
 	cleanSync0()
 	cleanSync1()
 
 	cleanSync0 = tu.StartSyncbased(t, server0Creds, "sync0", server0RDir,
-		`{"Read": {"In":["root/c0"]}, "Write": {"In":["root/c0"]}}`)
+		`{"Read": {"In":["root:c0"]}, "Write": {"In":["root:c0"]}}`)
 	cleanSync1 = tu.StartSyncbased(t, server1Creds, "sync1", server1RDir,
-		`{"Read": {"In":["root/c1"]}, "Write": {"In":["root/c1"]}}`)
+		`{"Read": {"In":["root:c1"]}, "Write": {"In":["root:c1"]}}`)
 
-	tu.RunClient(t, client0Creds, runGetSyncgroupSpec, "sync0", sgName, "v3", "tb:foo", "root/s0", "root/s1", "root/s4")
-	tu.RunClient(t, client1Creds, runGetSyncgroupSpec, "sync1", sgName, "v3", "tb:foo", "root/s0", "root/s1", "root/s4")
+	tu.RunClient(t, client0Creds, runGetSyncgroupSpec, "sync0", sgName, "v3", "tb:foo", "root:s0", "root:s1", "root:s4")
+	tu.RunClient(t, client1Creds, runGetSyncgroupSpec, "sync1", sgName, "v3", "tb:foo", "root:s0", "root:s1", "root:s4")
 	tu.RunClient(t, client0Creds, runPopulateData, "sync0", "foo", "20")
 	tu.RunClient(t, client1Creds, runVerifySyncgroupData, "sync1", "foo", "20", "10", "true")
 
@@ -278,33 +278,33 @@ func V23TestSyncbasedExchangeDeltasWithAcls(t *v23tests.T) {
 	server0Creds, _ := t.Shell().NewChildCredentials("s0")
 	client0Creds, _ := t.Shell().NewChildCredentials("c0")
 	cleanSync0 := tu.StartSyncbased(t, server0Creds, "sync0", "",
-		`{"Read": {"In":["root/c0"]}, "Write": {"In":["root/c0"]}, "Admin": {"In":["root/c0"]}}`)
+		`{"Read": {"In":["root:c0"]}, "Write": {"In":["root:c0"]}, "Admin": {"In":["root:c0"]}}`)
 	defer cleanSync0()
 
 	server1Creds, _ := t.Shell().NewChildCredentials("s1")
 	client1Creds, _ := t.Shell().NewChildCredentials("c1")
 	cleanSync1 := tu.StartSyncbased(t, server1Creds, "sync1", "",
-		`{"Read": {"In":["root/c1"]}, "Write": {"In":["root/c1"]}, "Admin": {"In":["root/c1"]}}`)
+		`{"Read": {"In":["root:c1"]}, "Write": {"In":["root:c1"]}, "Admin": {"In":["root:c1"]}}`)
 	defer cleanSync1()
 
 	sgName := naming.Join("sync0", constants.SyncbaseSuffix, "SG1")
 
 	tu.RunClient(t, client0Creds, runSetupAppA, "sync0")
-	tu.RunClient(t, client0Creds, runCreateSyncgroup, "sync0", sgName, "tb:foo", "", "root/s0", "root/s1")
+	tu.RunClient(t, client0Creds, runCreateSyncgroup, "sync0", sgName, "tb:foo", "", "root:s0", "root:s1")
 	tu.RunClient(t, client0Creds, runPopulateData, "sync0", "foobarbaz", "0")
 	tu.RunClient(t, client0Creds, runPopulateData, "sync0", "foo", "0")
-	tu.RunClient(t, client0Creds, runSetPrefixPermissions, "sync0", "foo", "root/c0", "root/c1")
+	tu.RunClient(t, client0Creds, runSetPrefixPermissions, "sync0", "foo", "root:c0", "root:c1")
 
 	tu.RunClient(t, client1Creds, runSetupAppA, "sync1")
 	tu.RunClient(t, client1Creds, runJoinSyncgroup, "sync1", sgName)
 	tu.RunClient(t, client1Creds, runVerifySyncgroupData, "sync1", "foobarbaz", "0", "10", "false")
 	tu.RunClient(t, client1Creds, runVerifySyncgroupData, "sync1", "foo", "0", "10", "true")
 
-	tu.RunClient(t, client1Creds, runSetPrefixPermissions, "sync1", "foobar", "root/c1")
+	tu.RunClient(t, client1Creds, runSetPrefixPermissions, "sync1", "foobar", "root:c1")
 	tu.RunClient(t, client0Creds, runVerifyLostAccess, "sync0", "foobarbaz", "0", "10")
 	tu.RunClient(t, client0Creds, runVerifySyncgroupData, "sync0", "foo", "0", "10", "true")
 
-	tu.RunClient(t, client1Creds, runSetPrefixPermissions, "sync1", "foobar", "root/c0", "root/c1")
+	tu.RunClient(t, client1Creds, runSetPrefixPermissions, "sync1", "foobar", "root:c0", "root:c1")
 	tu.RunClient(t, client0Creds, runVerifySyncgroupData, "sync0", "foobarbaz", "0", "10", "false")
 }
 
@@ -344,19 +344,19 @@ func testSyncbasedExchangeDeltasWithConflicts(t *v23tests.T) {
 	server0Creds, _ := t.Shell().NewChildCredentials("s0")
 	client0Creds, _ := t.Shell().NewChildCredentials("c0")
 	cleanSync0 := tu.StartSyncbased(t, server0Creds, "sync0", "",
-		`{"Read": {"In":["root/c0"]}, "Write": {"In":["root/c0"]}}`)
+		`{"Read": {"In":["root:c0"]}, "Write": {"In":["root:c0"]}}`)
 	defer cleanSync0()
 
 	server1Creds, _ := t.Shell().NewChildCredentials("s1")
 	client1Creds, _ := t.Shell().NewChildCredentials("c1")
 	cleanSync1 := tu.StartSyncbased(t, server1Creds, "sync1", "",
-		`{"Read": {"In":["root/c1"]}, "Write": {"In":["root/c1"]}}`)
+		`{"Read": {"In":["root:c1"]}, "Write": {"In":["root:c1"]}}`)
 	defer cleanSync1()
 
 	sgName := naming.Join("sync0", constants.SyncbaseSuffix, "SG1")
 
 	tu.RunClient(t, client0Creds, runSetupAppA, "sync0")
-	tu.RunClient(t, client0Creds, runCreateSyncgroup, "sync0", sgName, "tb:foo", "", "root/s0", "root/s1")
+	tu.RunClient(t, client0Creds, runCreateSyncgroup, "sync0", sgName, "tb:foo", "", "root:s0", "root:s1")
 	tu.RunClient(t, client0Creds, runPopulateData, "sync0", "foo", "0")
 
 	tu.RunClient(t, client1Creds, runSetupAppA, "sync1")
@@ -386,21 +386,21 @@ func V23TestNestedSyncgroups(t *v23tests.T) {
 	server0Creds, _ := t.Shell().NewChildCredentials("s0")
 	client0Creds, _ := t.Shell().NewChildCredentials("c0")
 	cleanSync0 := tu.StartSyncbased(t, server0Creds, "sync0", "",
-		`{"Read": {"In":["root/c0"]}, "Write": {"In":["root/c0"]}}`)
+		`{"Read": {"In":["root:c0"]}, "Write": {"In":["root:c0"]}}`)
 	defer cleanSync0()
 
 	server1Creds, _ := t.Shell().NewChildCredentials("s1")
 	client1Creds, _ := t.Shell().NewChildCredentials("c1")
 	cleanSync1 := tu.StartSyncbased(t, server1Creds, "sync1", "",
-		`{"Read": {"In":["root/c1"]}, "Write": {"In":["root/c1"]}}`)
+		`{"Read": {"In":["root:c1"]}, "Write": {"In":["root:c1"]}}`)
 	defer cleanSync1()
 
 	sg1Name := naming.Join("sync0", constants.SyncbaseSuffix, "SG1")
 	sg2Name := naming.Join("sync0", constants.SyncbaseSuffix, "SG2")
 
 	tu.RunClient(t, client0Creds, runSetupAppA, "sync0")
-	tu.RunClient(t, client0Creds, runCreateSyncgroup, "sync0", sg1Name, "tb:foo", "", "root/s0", "root/s1")
-	tu.RunClient(t, client0Creds, runCreateSyncgroup, "sync0", sg2Name, "tb:f", "", "root/s0", "root/s1")
+	tu.RunClient(t, client0Creds, runCreateSyncgroup, "sync0", sg1Name, "tb:foo", "", "root:s0", "root:s1")
+	tu.RunClient(t, client0Creds, runCreateSyncgroup, "sync0", sg2Name, "tb:f", "", "root:s0", "root:s1")
 	tu.RunClient(t, client0Creds, runPopulateData, "sync0", "f", "0")
 	tu.RunClient(t, client0Creds, runPopulateData, "sync0", "foo", "0")
 
@@ -425,19 +425,19 @@ func V23TestNestedAndPeerSyncgroups(t *v23tests.T) {
 	server0Creds, _ := t.Shell().NewChildCredentials("s0")
 	client0Creds, _ := t.Shell().NewChildCredentials("c0")
 	cleanSync0 := tu.StartSyncbased(t, server0Creds, "sync0", "",
-		`{"Read": {"In":["root/c0"]}, "Write": {"In":["root/c0"]}}`)
+		`{"Read": {"In":["root:c0"]}, "Write": {"In":["root:c0"]}}`)
 	defer cleanSync0()
 
 	server1Creds, _ := t.Shell().NewChildCredentials("s1")
 	client1Creds, _ := t.Shell().NewChildCredentials("c1")
 	cleanSync1 := tu.StartSyncbased(t, server1Creds, "sync1", "",
-		`{"Read": {"In":["root/c1"]}, "Write": {"In":["root/c1"]}}`)
+		`{"Read": {"In":["root:c1"]}, "Write": {"In":["root:c1"]}}`)
 	defer cleanSync1()
 
 	server2Creds, _ := t.Shell().NewChildCredentials("s2")
 	client2Creds, _ := t.Shell().NewChildCredentials("c2")
 	cleanSync2 := tu.StartSyncbased(t, server2Creds, "sync2", "",
-		`{"Read": {"In":["root/c2"]}, "Write": {"In":["root/c2"]}}`)
+		`{"Read": {"In":["root:c2"]}, "Write": {"In":["root:c2"]}}`)
 	defer cleanSync2()
 
 	sg1Name := naming.Join("sync0", constants.SyncbaseSuffix, "SG1")
@@ -445,15 +445,15 @@ func V23TestNestedAndPeerSyncgroups(t *v23tests.T) {
 	sg3Name := naming.Join("sync1", constants.SyncbaseSuffix, "SG3")
 
 	tu.RunClient(t, client0Creds, runSetupAppA, "sync0")
-	tu.RunClient(t, client0Creds, runCreateSyncgroup, "sync0", sg1Name, "tb:foo", "", "root/s0", "root/s1", "root/s2")
-	tu.RunClient(t, client0Creds, runCreateSyncgroup, "sync0", sg2Name, "tb:f", "", "root/s0", "root/s2")
+	tu.RunClient(t, client0Creds, runCreateSyncgroup, "sync0", sg1Name, "tb:foo", "", "root:s0", "root:s1", "root:s2")
+	tu.RunClient(t, client0Creds, runCreateSyncgroup, "sync0", sg2Name, "tb:f", "", "root:s0", "root:s2")
 	tu.RunClient(t, client0Creds, runPopulateData, "sync0", "f", "0")
 	tu.RunClient(t, client0Creds, runPopulateData, "sync0", "foo", "0")
 
 	tu.RunClient(t, client1Creds, runSetupAppA, "sync1")
 	tu.RunClient(t, client1Creds, runJoinSyncgroup, "sync1", sg1Name)
 	tu.RunClient(t, client1Creds, runVerifySyncgroupData, "sync1", "foo", "0", "10", "false")
-	tu.RunClient(t, client1Creds, runCreateSyncgroup, "sync1", sg3Name, "tb:f", "", "root/s1", "root/s2")
+	tu.RunClient(t, client1Creds, runCreateSyncgroup, "sync1", sg3Name, "tb:f", "", "root:s1", "root:s2")
 
 	tu.RunClient(t, client2Creds, runSetupAppA, "sync2")
 	tu.RunClient(t, client2Creds, runJoinSyncgroup, "sync2", sg2Name)
@@ -473,13 +473,13 @@ func V23TestSyncbasedGetDeltasPrePopulate(t *v23tests.T) {
 	server0Creds, _ := t.Shell().NewChildCredentials("s0")
 	client0Creds, _ := t.Shell().NewChildCredentials("c0")
 	cleanSync0 := tu.StartSyncbased(t, server0Creds, "sync0", "",
-		`{"Read": {"In":["root/c0"]}, "Write": {"In":["root/c0"]}}`)
+		`{"Read": {"In":["root:c0"]}, "Write": {"In":["root:c0"]}}`)
 	defer cleanSync0()
 
 	server1Creds, _ := t.Shell().NewChildCredentials("s1")
 	client1Creds, _ := t.Shell().NewChildCredentials("c1")
 	cleanSync1 := tu.StartSyncbased(t, server1Creds, "sync1", "",
-		`{"Read": {"In":["root/c1"]}, "Write": {"In":["root/c1"]}}`)
+		`{"Read": {"In":["root:c1"]}, "Write": {"In":["root:c1"]}}`)
 	defer cleanSync1()
 
 	sgName := naming.Join("sync0", constants.SyncbaseSuffix, "SG1")
@@ -489,7 +489,7 @@ func V23TestSyncbasedGetDeltasPrePopulate(t *v23tests.T) {
 	tu.RunClient(t, client0Creds, runSetupAppA, "sync0")
 	tu.RunClient(t, client0Creds, runPopulateData, "sync0", "foo", "0")
 	tu.RunClient(t, client0Creds, runPopulateData, "sync0", "bar", "0")
-	tu.RunClient(t, client0Creds, runCreateSyncgroup, "sync0", sgName, "tb:foo", "", "root/s0", "root/s1")
+	tu.RunClient(t, client0Creds, runCreateSyncgroup, "sync0", sgName, "tb:foo", "", "root:s0", "root:s1")
 
 	tu.RunClient(t, client1Creds, runSetupAppA, "sync1")
 	tu.RunClient(t, client1Creds, runJoinSyncgroup, "sync1", sgName)
@@ -507,13 +507,13 @@ func V23TestSyncbasedGetDeltasMultiApp(t *v23tests.T) {
 	server0Creds, _ := t.Shell().NewChildCredentials("s0")
 	client0Creds, _ := t.Shell().NewChildCredentials("c0")
 	cleanSync0 := tu.StartSyncbased(t, server0Creds, "sync0", "",
-		`{"Read": {"In":["root/c0"]}, "Write": {"In":["root/c0"]}}`)
+		`{"Read": {"In":["root:c0"]}, "Write": {"In":["root:c0"]}}`)
 	defer cleanSync0()
 
 	server1Creds, _ := t.Shell().NewChildCredentials("s1")
 	client1Creds, _ := t.Shell().NewChildCredentials("c1")
 	cleanSync1 := tu.StartSyncbased(t, server1Creds, "sync1", "",
-		`{"Read": {"In":["root/c1"]}, "Write": {"In":["root/c1"]}}`)
+		`{"Read": {"In":["root:c1"]}, "Write": {"In":["root:c1"]}}`)
 	defer cleanSync1()
 
 	sgNamePrefix := naming.Join("sync0", constants.SyncbaseSuffix)
@@ -536,25 +536,25 @@ func V23TestSyncgroupSync(t *v23tests.T) {
 	server0Creds, _ := t.Shell().NewChildCredentials("s0")
 	client0Creds, _ := t.Shell().NewChildCredentials("c0")
 	cleanSync0 := tu.StartSyncbased(t, server0Creds, "sync0", "",
-		`{"Read": {"In":["root/c0"]}, "Write": {"In":["root/c0"]}}`)
+		`{"Read": {"In":["root:c0"]}, "Write": {"In":["root:c0"]}}`)
 	defer cleanSync0()
 
 	server1Creds, _ := t.Shell().NewChildCredentials("s1")
 	client1Creds, _ := t.Shell().NewChildCredentials("c1")
 	cleanSync1 := tu.StartSyncbased(t, server1Creds, "sync1", "",
-		`{"Read": {"In":["root/c1"]}, "Write": {"In":["root/c1"]}}`)
+		`{"Read": {"In":["root:c1"]}, "Write": {"In":["root:c1"]}}`)
 	defer cleanSync1()
 
 	server2Creds, _ := t.Shell().NewChildCredentials("s2")
 	client2Creds, _ := t.Shell().NewChildCredentials("c2")
 	cleanSync2 := tu.StartSyncbased(t, server2Creds, "sync2", "",
-		`{"Read": {"In":["root/c2"]}, "Write": {"In":["root/c2"]}}`)
+		`{"Read": {"In":["root:c2"]}, "Write": {"In":["root:c2"]}}`)
 	defer cleanSync2()
 
 	sgName := naming.Join("sync0", constants.SyncbaseSuffix, "SG1")
 
 	tu.RunClient(t, client0Creds, runSetupAppA, "sync0")
-	tu.RunClient(t, client0Creds, runCreateSyncgroup, "sync0", sgName, "tb:foo", "", "root/s0", "root/s1", "root/s2")
+	tu.RunClient(t, client0Creds, runCreateSyncgroup, "sync0", sgName, "tb:foo", "", "root:s0", "root:s1", "root:s2")
 	tu.RunClient(t, client0Creds, runPopulateData, "sync0", "foo", "0")
 
 	tu.RunClient(t, client1Creds, runSetupAppA, "sync1")
@@ -1289,7 +1289,7 @@ var runPopulateSyncgroupMulti = modules.Register(func(env *modules.Env, args ...
 			sgName := naming.Join(sgNamePrefix, appName, dbName)
 			spec := wire.SyncgroupSpec{
 				Description: fmt.Sprintf("test sg %s/%s", appName, dbName),
-				Perms:       perms("root/s0", "root/s1"),
+				Perms:       perms("root:s0", "root:s1"),
 				Prefixes:    toSgPrefixes(strings.Join(sgPrefixes, ",")),
 				MountTables: []string{mtName},
 			}

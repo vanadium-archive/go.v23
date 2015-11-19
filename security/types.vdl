@@ -36,7 +36,7 @@ const (
 	// We need to sort this out.
 	AllPrincipals = BlessingPattern("...") // Glob pattern that matches all blessings.
 
-	ChainSeparator = "/" // ChainSeparator joins blessing names to form a blessing chain name.
+	ChainSeparator = ":" // ChainSeparator joins blessing names to form a blessing chain name.
 
 	SHA1Hash   = Hash("SHA1")   // SHA1 cryptographic hash function defined in RFC3174.
 	SHA256Hash = Hash("SHA256") // SHA256 cryptographic hash function defined  in FIPS 180-4.

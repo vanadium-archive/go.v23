@@ -27,7 +27,7 @@ func TestDefaultAuthorizer(t *testing.T) {
 		dis, _ = pdis.MintDischarge(tpcav, UnconstrainedUse())
 		dismap = map[string]Discharge{dis.ID(): dis}
 
-		// bless(ali, bob, "friend") will generate a blessing for ali, calling him "bob/friend".
+		// bless(ali, bob, "friend") will generate a blessing for ali, calling him "bob:friend".
 		bless = func(target, extend Blessings, extension string, caveats ...Caveat) Blessings {
 			var p Principal
 			switch extend.PublicKey() {
@@ -93,34 +93,34 @@ func TestDefaultAuthorizer(t *testing.T) {
 			authorized: false,
 		},
 		{
-			// ali talking to ali/friend (invalid caveat)
+			// ali talking to ali:friend (invalid caveat)
 			local:      ali,
 			remote:     B(ali, "friend", tpcav),
 			authorized: false,
 		},
 		{
-			// ali talking to ali/friend
+			// ali talking to ali:friend
 			local:      ali,
 			remote:     B(ali, "friend", tpcav),
 			call:       CallParams{RemoteDischarges: dismap},
 			authorized: true,
 		},
 		{
-			// bob/friend talking to bob (local blessing has an invalid caveat, but it is not checked)
+			// bob:friend talking to bob (local blessing has an invalid caveat, but it is not checked)
 			local:      A(bob, "friend", tpcav),
 			remote:     bob,
 			authorized: true,
 		},
 		{
-			// che/friend talking to che/family
+			// che:friend talking to che:family
 			local:      A(che, "friend"),
 			remote:     B(che, "family"),
 			authorized: false,
 		},
 		{
-			// {ali, bob/friend, che/friend} talking to {bob/friend/spouse, che/family}
+			// {ali, bob:friend, che:friend} talking to {bob:friend:spouse, che:family}
 			local:      U(ali, A(bob, "friend"), A(che, "friend")),
-			remote:     U(B(bob, "friend/spouse", tpcav), B(che, "family")),
+			remote:     U(B(bob, "friend:spouse", tpcav), B(che, "family")),
 			call:       CallParams{RemoteDischarges: dismap},
 			authorized: true,
 		},

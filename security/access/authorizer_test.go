@@ -46,17 +46,17 @@ func TestAccessListAuthorizer(t *testing.T) {
 
 		ali, _                = pbob.BlessSelf("ali")
 		bob, _                = pbob.BlessSelf("bob")
-		bobSelf, _            = pbob.BlessSelf("bob/self")
-		bobDelegate, _        = pbob.Bless(pche.PublicKey(), bob, "delegate/che", security.UnconstrainedUse())
-		bobDelegateBad, _     = pbob.Bless(pche.PublicKey(), bob, "delegate/badman", security.UnconstrainedUse())
-		bobDelegateExpired, _ = pbob.Bless(pche.PublicKey(), bob, "delegate/che", expired)
+		bobSelf, _            = pbob.BlessSelf("bob:self")
+		bobDelegate, _        = pbob.Bless(pche.PublicKey(), bob, "delegate:che", security.UnconstrainedUse())
+		bobDelegateBad, _     = pbob.Bless(pche.PublicKey(), bob, "delegate:badman", security.UnconstrainedUse())
+		bobDelegateExpired, _ = pbob.Bless(pche.PublicKey(), bob, "delegate:che", expired)
 
 		bobUnion, _    = security.UnionOfBlessings(bobDelegate, bobDelegateExpired)
 		bobBadUnion, _ = security.UnionOfBlessings(bobDelegateBad, bobDelegateExpired)
 
 		acl = access.AccessList{
-			In:    []security.BlessingPattern{"bob/delegate", "bob/self"},
-			NotIn: []string{"bob/delegate/badman"},
+			In:    []security.BlessingPattern{"bob:delegate", "bob:self"},
+			NotIn: []string{"bob:delegate:badman"},
 		}
 
 		tests = []struct {
@@ -91,7 +91,7 @@ func TestAccessListEnforceable(t *testing.T) {
 	if key, err := p.PublicKey().MarshalBinary(); err != nil {
 		t.Fatal(err)
 	} else {
-		for _, pattern := range []security.BlessingPattern{"ali/spouse/$", "bob/friend"} {
+		for _, pattern := range []security.BlessingPattern{"ali:spouse:$", "bob:friend"} {
 			if err := p.Roots().Add(key, pattern); err != nil {
 				t.Fatal(err)
 			}
@@ -110,36 +110,36 @@ func TestAccessListEnforceable(t *testing.T) {
 	}{
 		{
 			al: access.AccessList{
-				In:    bp{"$", "ali/spouse/$", "bob/friend/$", "bob/friend/colleague"},
-				NotIn: s{"ali/spouse/friend", "bob"}, // NotIn patterns don't matter.
+				In:    bp{"$", "ali:spouse:$", "bob:friend:$", "bob:friend:colleague"},
+				NotIn: s{"ali:spouse:friend", "bob"}, // NotIn patterns don't matter.
 			},
 		},
 		{
 			al: access.AccessList{
-				In:    bp{"bob/friend/$", "ali/$/spouse", "bob//friend", "bob/..."}, // invalid patterns are rejected
-				NotIn: s{"ali/spouse/friend", "bob"},
+				In:    bp{"bob:friend:$", "ali:$:spouse", "bob::friend", "bob:..."}, // invalid patterns are rejected
+				NotIn: s{"ali:spouse:friend", "bob"},
 			},
 			errID:    access.ErrUnenforceablePatterns.ID,
-			rejected: bp{"ali/$/spouse", "bob//friend", "bob/..."},
+			rejected: bp{"ali:$:spouse", "bob::friend", "bob:..."},
 		},
 		{
 			al: access.AccessList{
-				In:    bp{"ali/spouse/$", "bob/friend/$", "ali", "ali/$", "ali/spouse", "ali/spouse/friend", "bob", "bob/$", "bob/spouse"}, // unrecognized patterns are rejected
-				NotIn: s{"ali/spouse/friend", "bob"},
+				In:    bp{"ali:spouse:$", "bob:friend:$", "ali", "ali:$", "ali:spouse", "ali:spouse:friend", "bob", "bob:$", "bob:spouse"}, // unrecognized patterns are rejected
+				NotIn: s{"ali:spouse:friend", "bob"},
 			},
 			errID:    access.ErrUnenforceablePatterns.ID,
-			rejected: bp{"ali", "ali/$", "ali/spouse", "ali/spouse/friend", "bob", "bob/$", "bob/spouse"},
+			rejected: bp{"ali", "ali:$", "ali:spouse", "ali:spouse:friend", "bob", "bob:$", "bob:spouse"},
 		},
 		{
 			al: access.AccessList{
 				In:    bp{"..."},
-				NotIn: s{"bob/friend"},
+				NotIn: s{"bob:friend"},
 			},
 			errID: access.ErrInvalidOpenAccessList.ID,
 		},
 		{
 			al: access.AccessList{
-				In: bp{"...", "bob/friend"},
+				In: bp{"...", "bob:friend"},
 			},
 			errID: access.ErrInvalidOpenAccessList.ID,
 		},
@@ -180,11 +180,11 @@ func TestPermissionsAuthorizer(t *testing.T) {
 			In: P{security.AllPrincipals},
 		},
 		"W": {
-			In:    P{"ali/family", "bob", "che/$"},
-			NotIn: S{"bob/acquaintances"},
+			In:    P{"ali:family", "bob", "che:$"},
+			NotIn: S{"bob:acquaintances"},
 		},
 		"X": {
-			In: P{"ali/family/boss/$", "superman/$"},
+			In: P{"ali:family:boss:$", "superman:$"},
 		},
 	}
 	type testcase struct {
@@ -238,14 +238,14 @@ func TestPermissionsAuthorizer(t *testing.T) {
 	for _, test := range []testcase{
 		{"Get", security.Blessings{}},
 		{"Get", B("ali")},
-		{"Get", B("bob/friend", "che/enemy")},
+		{"Get", B("bob:friend", "che:enemy")},
 
-		{"Put", B("ali/family/mom")},
-		{"Put", B("bob/friends")},
-		{"Put", B("bob/acquantainces/carol", "che")}, // Access granted because of "che"
+		{"Put", B("ali:family:mom")},
+		{"Put", B("bob:friends")},
+		{"Put", B("bob:acquantainces:carol", "che")}, // Access granted because of "che"
 
 		{"Resolve", B("superman")},
-		{"Resolve", B("ali/family/boss")},
+		{"Resolve", B("ali:family:boss")},
 	} {
 		if err := run(test); err != nil {
 			t.Errorf("Access denied to method %q to %v: %v", test.Method, test.Client, err)
@@ -254,11 +254,11 @@ func TestPermissionsAuthorizer(t *testing.T) {
 	// Test cases where access should be denied.
 	for _, test := range []testcase{
 		// Nobody is denied access to "Get"
-		{"Put", B("ali", "bob/acquaintances", "bob/acquaintances/dave", "che/friend", "dave")},
-		{"Resolve", B("ali", "ali/friend", "ali/family", "ali/family/friend", "alice/family/boss/friend", "superman/friend")},
+		{"Put", B("ali", "bob:acquaintances", "bob:acquaintances:dave", "che:friend", "dave")},
+		{"Resolve", B("ali", "ali:friend", "ali:family", "ali:family:friend", "alice:family:boss:friend", "superman:friend")},
 		// Since there are no tags on the NoTags method, it has an
 		// empty AccessList.  No client will have access.
-		{"NoTags", B("ali", "ali/family/boss", "bob", "che", "superman")},
+		{"NoTags", B("ali", "ali:family:boss", "bob", "che", "superman")},
 	} {
 		if err := run(test); err == nil {
 			t.Errorf("Access to %q granted to %v", test.Method, test.Client)
@@ -276,7 +276,7 @@ func TestPermissionsAuthorizerSelfRPCs(t *testing.T) {
 		// Authorizer with a access.Permissions that grants read access to
 		// anyone, write/execute access to noone.
 		typ           internal.MyTag
-		authorizer, _ = access.PermissionsAuthorizer(access.Permissions{"R": {In: []security.BlessingPattern{"nobody/$"}}}, vdl.TypeOf(typ))
+		authorizer, _ = access.PermissionsAuthorizer(access.Permissions{"R": {In: []security.BlessingPattern{"nobody:$"}}}, vdl.TypeOf(typ))
 	)
 	for _, test := range []string{"Put", "Get", "Resolve", "NoTags"} {
 		params := &security.CallParams{
@@ -328,7 +328,7 @@ func TestPermissionsAuthorizerFromFile(t *testing.T) {
 		pserver        = newPrincipal(t)
 		pclient        = newPrincipal(t)
 		server, _      = pserver.BlessSelf("alice")
-		alicefriend, _ = pserver.Bless(pclient.PublicKey(), server, "friend/bob", security.UnconstrainedUse())
+		alicefriend, _ = pserver.Bless(pclient.PublicKey(), server, "friend:bob", security.UnconstrainedUse())
 		params         = &security.CallParams{
 			LocalPrincipal:  pserver,
 			LocalBlessings:  server,
@@ -341,12 +341,12 @@ func TestPermissionsAuthorizerFromFile(t *testing.T) {
 	// AddToRoots(pserver, server) to make pserver recognize itself as an
 	// authority on blessings matching "alice".
 
-	// "alice/friend/bob" should not have access to internal.Read methods like Get.
+	// "alice:friend:bob" should not have access to internal.Read methods like Get.
 	if err := authorize(authorizer, params); err == nil {
 		t.Fatalf("Expected authorization error as %v is not on the AccessList for Read operations", alicefriend)
 	}
 	// Rewrite the file giving access
-	if err := ioutil.WriteFile(filename, []byte(`{"R": { "In":["alice/friend"] }}`), 0600); err != nil {
+	if err := ioutil.WriteFile(filename, []byte(`{"R": { "In":["alice:friend"] }}`), 0600); err != nil {
 		t.Fatal(err)
 	}
 	// Now should have access

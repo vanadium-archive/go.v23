@@ -18,34 +18,34 @@ func TestMatchedBy(t *testing.T) {
 	}{
 		{
 			Pattern:      "",
-			DoesNotMatch: v{"", "ann", "bob", "ann/friend"},
+			DoesNotMatch: v{"", "ann", "bob", "ann:friend"},
 		},
 		{
 			Pattern:      "$",
-			DoesNotMatch: v{"", "$", "ann", "bob", "ann/friend"},
+			DoesNotMatch: v{"", "$", "ann", "bob", "ann:friend"},
 		},
 		{
 			Pattern: AllPrincipals,
-			Matches: v{"", "ann", "bob", "ann/friend"},
+			Matches: v{"", "ann", "bob", "ann:friend"},
 		},
 		{
-			Pattern:      "ann/$/$",
-			DoesNotMatch: v{"", "ann", "bob", "ann/friend", "ann/friend/spouse"},
+			Pattern:      "ann:$:$",
+			DoesNotMatch: v{"", "ann", "bob", "ann:friend", "ann:friend:spouse"},
 		},
 		{
 			Pattern:      "ann",
-			Matches:      v{"ann", "ann/friend", "ann/enemy"},
-			DoesNotMatch: v{"", "bob", "bob/ann"},
+			Matches:      v{"ann", "ann:friend", "ann:enemy"},
+			DoesNotMatch: v{"", "bob", "bob:ann"},
 		},
 		{
-			Pattern:      "ann/friend",
-			Matches:      v{"ann/friend", "ann/friend/spouse"},
-			DoesNotMatch: v{"", "ann", "ann/enemy", "bob", "bob/ann"},
+			Pattern:      "ann:friend",
+			Matches:      v{"ann:friend", "ann:friend:spouse"},
+			DoesNotMatch: v{"", "ann", "ann:enemy", "bob", "bob:ann"},
 		},
 		{
-			Pattern:      "ann/friend/$",
-			Matches:      v{"ann/friend"},
-			DoesNotMatch: v{"", "ann", "ann/enemy", "ann/friend/spouse", "bob", "bob/friend", "bob/ann"},
+			Pattern:      "ann:friend:$",
+			Matches:      v{"ann:friend"},
+			DoesNotMatch: v{"", "ann", "ann:enemy", "ann:friend:spouse", "bob", "bob:friend", "bob:ann"},
 		},
 	}
 	for _, test := range tests {
@@ -77,8 +77,8 @@ func TestMatchedByCornerCases(t *testing.T) {
 	if NoExtension.MatchedBy() {
 		t.Errorf("%q.MatchedBy() returned true", NoExtension)
 	}
-	if BlessingPattern("ann/$").MatchedBy() {
-		t.Errorf("%q.MatchedBy() returned true", "ann/$")
+	if BlessingPattern("ann:$").MatchedBy() {
+		t.Errorf("%q.MatchedBy() returned true", "ann:$")
 	}
 	if BlessingPattern("ann").MatchedBy() {
 		t.Errorf("%q.MatchedBy() returned true", "ann")
@@ -89,8 +89,8 @@ func TestMatchedByCornerCases(t *testing.T) {
 	if NoExtension.MatchedBy("") {
 		t.Errorf("%q.MatchedBy(%q) returned true", NoExtension, "")
 	}
-	if BlessingPattern("ann/$").MatchedBy("") {
-		t.Errorf("%q.MatchedBy(%q) returned true", "ann/$", "")
+	if BlessingPattern("ann:$").MatchedBy("") {
+		t.Errorf("%q.MatchedBy(%q) returned true", "ann:$", "")
 	}
 	if BlessingPattern("ann").MatchedBy("") {
 		t.Errorf("%q.MatchedBy(%q) returned true", "ann", "")
@@ -99,8 +99,8 @@ func TestMatchedByCornerCases(t *testing.T) {
 
 func TestIsValid(t *testing.T) {
 	var (
-		valid   = []BlessingPattern{AllPrincipals, "alice", "al$ice", "alice/$", "alice.jones/$", "alice@google/$", "v23/alice@google/$", "v23/alice@google/bob/$", "alice", "alice/bob"}
-		invalid = []BlessingPattern{"", "alice...", "...alice", "alice...bob", "/alice", "alice/", "...alice/bob", "alice.../bob", "alice/.../bob", "alice/$/bob", "alice/$/$", "alice/.../$", "alice/..."}
+		valid   = []BlessingPattern{AllPrincipals, "alice", "al$ice", "alice:$", "alice.jones:$", "alice@google:$", "v23:alice@google:$", "v23:alice@google:bob:$", "alice", "alice:bob"}
+		invalid = []BlessingPattern{"", "alice...", "...alice", "alice...bob", ":alice", "alice:", "...alice:bob", "alice...:bob", "alice:...:bob", "alice:$:bob", "alice:$:$", "alice:...:$", "alice:..."}
 	)
 	for _, p := range valid {
 		if !p.IsValid() {
@@ -118,8 +118,8 @@ func TestMakeNonExtendable(t *testing.T) {
 	tests := []struct{ before, after BlessingPattern }{
 		{"", "$"},
 		{"$", "$"},
-		{"a", "a/$"},
-		{"a/$", "a/$"},
+		{"a", "a:$"},
+		{"a:$", "a:$"},
 	}
 	for _, test := range tests {
 		if got, want := test.before.MakeNonExtendable(), test.after; got != want {
@@ -135,9 +135,9 @@ func TestPrefixPatterns(t *testing.T) {
 	}{
 		{"$", []BlessingPattern{"$"}},
 		{"ann", []BlessingPattern{"ann"}},
-		{"ann/$", []BlessingPattern{"ann/$"}},
-		{"ann/friend", []BlessingPattern{"ann/$", "ann/friend"}},
-		{"ann/friend/$", []BlessingPattern{"ann/$", "ann/friend/$"}},
+		{"ann:$", []BlessingPattern{"ann:$"}},
+		{"ann:friend", []BlessingPattern{"ann:$", "ann:friend"}},
+		{"ann:friend:$", []BlessingPattern{"ann:$", "ann:friend:$"}},
 	}
 	for _, test := range tests {
 		if got, want := test.pattern.PrefixPatterns(), test.prefixes; !reflect.DeepEqual(got, want) {
@@ -155,10 +155,10 @@ func TestSplitPatternName(t *testing.T) {
 	}{
 		{"", notset, ""},
 		{"/", notset, "/"},
-		{"__(foo/bar)", "foo/bar", ""},
-		{"/__(foo/bar)", notset, "/__(foo/bar)"}, // Invalid name: no endpoint
-		{"/a/__(x/y)", "x/y", "/a"},
-		{"/__(x/y)/a/b", notset, "/__(x/y)/a/b"},
+		{"__(foo:bar)", "foo:bar", ""},
+		{"/__(foo:bar)", notset, "/__(foo:bar)"}, // Invalid name: no endpoint
+		{"/a/__(x:y)", "x:y", "/a"},
+		{"/__(x:y)/a/b", notset, "/__(x:y)/a/b"},
 		{"__(foo)/a", "foo", "a"},
 		{"/__(foo)a", notset, "/__(foo)a"},
 		{"/__(foo)a/__(bar)", "bar", "/__(foo)a"},

@@ -25,7 +25,7 @@ var (
 	errBadBlessingBadSubstring    = verror.Register(pkgPath+".errBadBlessingBadSubstring", verror.NoRetry, "{1:}{2:}invalid blessing extension({3} has {4} as a substring){:_}")
 
 	// invalidBlessingSubStrings are strings that a blessing extension cannot have as a substring.
-	invalidBlessingSubStrings = []string{string(AllPrincipals), ChainSeparator + ChainSeparator /* double slash not allowed */, ",", "@@", "(", ")", "<", ">"}
+	invalidBlessingSubStrings = []string{string(AllPrincipals), ChainSeparator + ChainSeparator /* double slash not allowed */, ",", "@@", "(", ")", "<", ">", "/"}
 	// invalidBlessingExtensions are strings that are disallowed as blessing extensions.
 	invalidBlessingExtensions = []string{string(NoExtension)}
 
@@ -45,7 +45,7 @@ func newUnsignedCertificate(extension string, key PublicKey, caveats ...Caveat) 
 	if err != nil {
 		return nil, err
 	}
-	cert := &Certificate{Extension: extension, Caveats: caveats}
+	cert := &Certificate{Extension: Bug739Colon2Slash(extension), Caveats: caveats}
 	if cert.PublicKey, err = key.MarshalBinary(); err != nil {
 		return nil, verror.New(errCantMarshalKey, nil, err)
 	}
@@ -91,6 +91,7 @@ func (c *Certificate) chainedDigests(hashfn Hash, chain []byte) (digest, content
 }
 
 func validateExtension(extension string) error {
+	extension = Bug739Slash2Colon(extension)
 	if len(extension) == 0 {
 		return verror.New(errBadBlessingEmptyExtension, nil)
 	}

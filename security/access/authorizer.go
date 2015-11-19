@@ -70,17 +70,17 @@ var (
 //   type dispatcher struct{}
 //   func (d dispatcher) Lookup(suffix, method) (rpc.Invoker, security.Authorizer, error) {
 //      perms := access.Permissions{
-//        "R": access.AccessList{In: []security.BlessingPattern{"alice/friends", "alice/family"} },
-//        "W": access.AccessList{In: []security.BlessingPattern{"alice/family", "alice/colleagues" } },
+//        "R": access.AccessList{In: []security.BlessingPattern{"alice:friends", "alice:family"} },
+//        "W": access.AccessList{In: []security.BlessingPattern{"alice:family", "alice:colleagues" } },
 //      }
 //      typ := reflect.TypeOf(ReadAccess)  // equivalently, reflect.TypeOf(WriteAccess)
 //      return newInvoker(), access.PermissionsAuthorizer(perms, typ), nil
 //   }
 //
 // With the above dispatcher, the server will grant access to a peer with the
-// blessing "alice/friend/bob" access only to the "Get" and "GetIndex" methods.
-// A peer presenting the blessing "alice/colleague/carol" will get access only
-// to the "Set" and "SetIndex" methods. A peer presenting "alice/family/mom"
+// blessing "alice:friend:bob" access only to the "Get" and "GetIndex" methods.
+// A peer presenting the blessing "alice:colleague:carol" will get access only
+// to the "Set" and "SetIndex" methods. A peer presenting "alice:family:mom"
 // will get access to all methods.
 func PermissionsAuthorizer(perms Permissions, tagType *vdl.Type) (security.Authorizer, error) {
 	if tagType.Kind() != vdl.String {

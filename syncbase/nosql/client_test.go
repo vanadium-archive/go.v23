@@ -209,9 +209,9 @@ func TestTablePerms(t *testing.T) {
 	tb := tu.CreateTable(t, clientACtx, d, "tb")
 
 	// Permission objects.
-	aAndB := tu.DefaultPerms("root/clientA", "root/clientB")
-	aOnly := tu.DefaultPerms("root/clientA")
-	bOnly := tu.DefaultPerms("root/clientB")
+	aAndB := tu.DefaultPerms("root:clientA", "root:clientB")
+	aOnly := tu.DefaultPerms("root:clientA")
+	bOnly := tu.DefaultPerms("root:clientB")
 
 	// Set initial permissions.
 	if err := tb.SetPermissions(clientACtx, aAndB); err != nil {
@@ -368,9 +368,9 @@ func TestTablePermsDifferentOrder(t *testing.T) {
 	tb := tu.CreateTable(t, clientACtx, d, "tb")
 
 	// Permission objects.
-	aAndB := tu.DefaultPerms("root/clientA", "root/clientB")
-	aOnly := tu.DefaultPerms("root/clientA")
-	bOnly := tu.DefaultPerms("root/clientB")
+	aAndB := tu.DefaultPerms("root:clientA", "root:clientB")
+	aOnly := tu.DefaultPerms("root:clientA")
+	bOnly := tu.DefaultPerms("root:clientB")
 
 	// Set initial permissions.
 	if err := tb.SetPermissions(clientACtx, aAndB); err != nil {
@@ -426,7 +426,7 @@ func bitmaskToPrefix(bitmask, length int) string {
 }
 
 func checkGetPermissions(t *testing.T, ctx *context.T, tb nosql.Table, prefix string, max, min int) {
-	perms := tu.DefaultPerms("root/client")
+	perms := tu.DefaultPerms("root:client")
 	for len(prefix) < max {
 		prefix += "a"
 	}
@@ -449,7 +449,7 @@ func TestTablePermsNested(t *testing.T) {
 	d := tu.CreateNoSQLDatabase(t, ctx, a, "d")
 	tb := tu.CreateTable(t, ctx, d, "tb")
 	// The permission object.
-	perms := tu.DefaultPerms("root/client")
+	perms := tu.DefaultPerms("root:client")
 	depth := 4
 	// Set permissions in order b, a, bb, ba, ab, aa, ...
 	for i := 1; i <= depth; i++ {
@@ -697,9 +697,9 @@ func TestRowPermissions(t *testing.T) {
 	tb := tu.CreateTable(t, clientACtx, d, "tb")
 
 	// Permission objects.
-	aAndB := tu.DefaultPerms("root/clientA", "root/clientB")
-	aOnly := tu.DefaultPerms("root/clientA")
-	bOnly := tu.DefaultPerms("root/clientB")
+	aAndB := tu.DefaultPerms("root:clientA", "root:clientB")
+	aOnly := tu.DefaultPerms("root:clientA")
+	bOnly := tu.DefaultPerms("root:clientB")
 
 	// Set initial permissions.
 	if err := tb.SetPermissions(clientACtx, aAndB); err != nil {
@@ -764,9 +764,9 @@ func TestMixedPrefixPerms(t *testing.T) {
 	tb := tu.CreateTable(t, clientACtx, d, "tb")
 
 	// Permission objects.
-	aAndB := tu.DefaultPerms("root/clientA", "root/clientB")
-	aAllBRead := tu.DefaultPerms("root/clientA")
-	aAllBRead.Add(security.BlessingPattern("root/clientB"), string(access.Read))
+	aAndB := tu.DefaultPerms("root:clientA", "root:clientB")
+	aAllBRead := tu.DefaultPerms("root:clientA")
+	aAllBRead.Add(security.BlessingPattern("root:clientB"), string(access.Read))
 
 	// Set initial permissions.
 	if err := tb.SetPermissions(clientACtx, aAndB); err != nil {
@@ -809,8 +809,8 @@ func TestMixedPrefixPerms(t *testing.T) {
 		t.Fatalf("client B r.Get() failed: %v", err)
 	}
 
-	// Same for a/foo.
-	r = tb.Row("a/foo")
+	// Same for a:foo.
+	r = tb.Row("a:foo")
 	if err := r.Put(clientACtx, Foo{}); err != nil {
 		t.Fatalf("client A r.Put() failed: %v", err)
 	}
@@ -838,17 +838,17 @@ func TestNestedMixedPrefixPerms(t *testing.T) {
 
 	// On "", resolve should be open, and only A should have read/write/admin.
 	// On "b", read/resolve should be open, and only B should have write/admin.
-	prefixEmpty, err := access.ReadPermissions(strings.NewReader(`{"Read":{"In":["root/clientA"],"NotIn":[]},"Admin":{"In":["root/clientA"],"NotIn":[]},"Resolve":{"In":["..."],"NotIn":[]},"Write":{"In":["root/clientA"],"NotIn":[]}}`))
+	prefixEmpty, err := access.ReadPermissions(strings.NewReader(`{"Read":{"In":["root:clientA"],"NotIn":[]},"Admin":{"In":["root:clientA"],"NotIn":[]},"Resolve":{"In":["..."],"NotIn":[]},"Write":{"In":["root:clientA"],"NotIn":[]}}`))
 	if err != nil {
 		t.Fatalf("ReadPermissions failed: %v", err)
 	}
-	prefixB, err := access.ReadPermissions(strings.NewReader(`{"Admin":{"In":["root/clientB"],"NotIn":[]},"Read":{"In":["..."],"NotIn":[]},"Write":{"In":["root/clientB"],"NotIn":[]},"Resolve":{"In":["..."],"NotIn":[]}}}`))
+	prefixB, err := access.ReadPermissions(strings.NewReader(`{"Admin":{"In":["root:clientB"],"NotIn":[]},"Read":{"In":["..."],"NotIn":[]},"Write":{"In":["root:clientB"],"NotIn":[]},"Resolve":{"In":["..."],"NotIn":[]}}}`))
 	if err != nil {
 		t.Fatalf("ReadPermissions failed: %v", err)
 	}
 
 	// Set initial permissions.
-	aAndB := tu.DefaultPerms("root/clientA", "root/clientB")
+	aAndB := tu.DefaultPerms("root:clientA", "root:clientB")
 	if err := tb.SetPermissions(clientACtx, aAndB); err != nil {
 		t.Fatalf("tb.SetPermissions() failed: %v", err)
 	}
@@ -991,8 +991,8 @@ func TestWatchWithBatchAndPerms(t *testing.T) {
 	tb := tu.CreateTable(t, clientACtx, d, "tb")
 
 	// Set initial permissions.
-	aAndB := tu.DefaultPerms("root/clientA", "root/clientB")
-	aOnly := tu.DefaultPerms("root/clientA")
+	aAndB := tu.DefaultPerms("root:clientA", "root:clientB")
+	aOnly := tu.DefaultPerms("root:clientA")
 	if err := tb.SetPermissions(clientACtx, aAndB); err != nil {
 		t.Fatalf("tb.SetPermissions() failed: %v", err)
 	}

@@ -145,7 +145,7 @@ func (b Blessings) String() string {
 	for chainidx, chain := range b.chains {
 		onechain := make([]string, len(chain))
 		for certidx, cert := range chain {
-			onechain[certidx] = cert.Extension
+			onechain[certidx] = Bug739Slash2Colon(cert.Extension)
 		}
 		blessings[chainidx] = fmt.Sprintf("%v", strings.Join(onechain, ChainSeparator))
 	}
@@ -162,7 +162,7 @@ func claimedName(chain []Certificate) string {
 		buf.WriteString(ChainSeparator)
 		buf.WriteString(chain[i].Extension)
 	}
-	return buf.String()
+	return Bug739Slash2Colon(buf.String())
 }
 
 func nameForPrincipal(pubkey []byte, roots BlessingRoots, chain []Certificate) string {
@@ -677,10 +677,10 @@ func isNamelessChains(chains [][]Certificate) bool {
 // in p.BlessingRoots().
 //
 // For example, if blessings represents the blessing chains
-// ["alice/friend/spouse", "charlie/family/daughter"] then AddToRoots(blessing)
-// will mark the root public key of the chain "alice/friend/bob" as the
+// ["alice:friend:spouse", "charlie:family:daughter"] then AddToRoots(blessing)
+// will mark the root public key of the chain "alice:friend:bob" as the
 // authority on all blessings that match the pattern "alice", and root public
-// key of the chain "charlie/family/daughter" as an authority on all blessings
+// key of the chain "charlie:family:daughter" as an authority on all blessings
 // that match the pattern "charlie".
 //
 // This is a convenience function over extracting the names and public keys of

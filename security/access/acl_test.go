@@ -14,8 +14,8 @@ import (
 
 func TestInclude(t *testing.T) {
 	acl := AccessList{
-		In:    []security.BlessingPattern{"alice/$", "alice/friend", "bob/family"},
-		NotIn: []string{"alice/friend/carol", "bob/family/mallory"},
+		In:    []security.BlessingPattern{"alice:$", "alice:friend", "bob:family"},
+		NotIn: []string{"alice:friend:carol", "bob:family:mallory"},
 	}
 	type V []string // shorthand
 	tests := []struct {
@@ -27,14 +27,14 @@ func TestInclude(t *testing.T) {
 		{V{"alice"}, true},
 		{V{"bob"}, false},
 		{V{"carol"}, false},
-		{V{"alice/colleague"}, false},
-		{V{"alice", "carol/friend"}, true}, // Presenting one blessing that grants access is sufficient
-		{V{"alice/friend/bob"}, true},
-		{V{"alice/friend/carol"}, false},        // alice/friend/carol is blacklisted
-		{V{"alice/friend/carol/family"}, false}, // alice/friend/carol is blacklisted, thus her delegates must be too.
-		{V{"alice/friend/bob", "alice/friend/carol"}, true},
-		{V{"bob/family/eve", "bob/family/mallory"}, true},
-		{V{"bob/family/mallory", "alice/friend/carol"}, false},
+		{V{"alice:colleague"}, false},
+		{V{"alice", "carol:friend"}, true}, // Presenting one blessing that grants access is sufficient
+		{V{"alice:friend:bob"}, true},
+		{V{"alice:friend:carol"}, false},        // alice:friend:carol is blacklisted
+		{V{"alice:friend:carol:family"}, false}, // alice:friend:carol is blacklisted, thus her delegates must be too.
+		{V{"alice:friend:bob", "alice:friend:carol"}, true},
+		{V{"bob:family:eve", "bob:family:mallory"}, true},
+		{V{"bob:family:mallory", "alice:friend:carol"}, false},
 	}
 	for _, test := range tests {
 		if got, want := acl.Includes(test.Blessings...), test.Want; got != want {
@@ -57,22 +57,22 @@ func TestPermissionsSerialization(t *testing.T) {
 	obj := Permissions{
 		"R": AccessList{
 			In:    []security.BlessingPattern{"foo", "bar"},
-			NotIn: []string{"bar/baz"},
+			NotIn: []string{"bar:baz"},
 		},
 		"W": AccessList{
-			In:    []security.BlessingPattern{"foo", "bar/$"},
-			NotIn: []string{"foo/bar", "foo/baz/boz"},
+			In:    []security.BlessingPattern{"foo", "bar:$"},
+			NotIn: []string{"foo:bar", "foo:baz:boz"},
 		},
 	}
 	txt := `
 {
 	"R": {
 		"In":["foo","bar"],
-		"NotIn":["bar/baz"]
+		"NotIn":["bar:baz"]
 	},
 	"W": {
-		"In":["foo","bar/$"],
-		"NotIn":["foo/bar","foo/baz/boz"]
+		"In":["foo","bar:$"],
+		"NotIn":["foo:bar","foo:baz:boz"]
 	}
 }
 `

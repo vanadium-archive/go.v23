@@ -22,11 +22,11 @@ func TestParseUserId(t *testing.T) {
 		want []string
 	}{
 		{"dev.v.io", []string{"dev.v.io"}},
-		{"dev.v.io/u", []string{"dev.v.io"}},
-		{"dev.v.io/u/p@google.com", []string{"dev.v.io", "u", "p@google.com"}},
-		{"dev.v.io/uu/p@google.com", []string{"dev.v.io"}},
-		{"dev.v.io/u/p@google.com/x", []string{"dev.v.io", "u", "p@google.com"}},
-		{"dev.v.io/uu/p@google.com/x", []string{"dev.v.io"}},
+		{"dev.v.io:u", []string{"dev.v.io"}},
+		{"dev.v.io:u:p@google.com", []string{"dev.v.io", "u", "p@google.com"}},
+		{"dev.v.io:uu:p@google.com", []string{"dev.v.io"}},
+		{"dev.v.io:u:p@google.com:x", []string{"dev.v.io", "u", "p@google.com"}},
+		{"dev.v.io:uu:p@google.com:x", []string{"dev.v.io"}},
 	}
 	for _, tt := range tests {
 		if got := ParseUserId(tt.in); !reflect.DeepEqual(got, tt.want) {
@@ -41,14 +41,14 @@ func TestGetClientUserIds(t *testing.T) {
 
 	// Bob is the remote principal (and the local one too)
 	bob := newPrincipal(t)
-	blessings, err := bob.BlessSelf("idt/u/bob/memyselfandi")
+	blessings, err := bob.BlessSelf("idt:u:bob:memyselfandi")
 	if err != nil {
 		t.Errorf("blessing myself %s", err)
 	}
 
 	// Server trust client.
 	call := security.NewCall(&security.CallParams{RemoteBlessings: blessings, LocalPrincipal: bob})
-	if want, got := []string{"idt/u/bob"}, GetClientUserIds(ctx, call); !reflect.DeepEqual(got, want) {
+	if want, got := []string{"idt:u:bob"}, GetClientUserIds(ctx, call); !reflect.DeepEqual(got, want) {
 		t.Errorf("GetClientUserIds() wanted %v, got %v", want, got)
 	}
 
@@ -59,7 +59,7 @@ func TestGetClientUserIds(t *testing.T) {
 	}
 
 	// Server trusts client but blessing is of the wrong format.
-	blessings, err = bob.BlessSelf("idt/u")
+	blessings, err = bob.BlessSelf("idt:u")
 	if err != nil {
 		t.Errorf("blessing myself %s", err)
 	}
@@ -69,7 +69,7 @@ func TestGetClientUserIds(t *testing.T) {
 	}
 
 	// Server trusts client and has same public key.
-	blessings, err = bob.BlessSelf("idt/u")
+	blessings, err = bob.BlessSelf("idt:u")
 	if err != nil {
 		t.Errorf("blessing myself %s", err)
 	}
@@ -79,12 +79,12 @@ func TestGetClientUserIds(t *testing.T) {
 	}
 
 	// Server trusts client and has same public key and client supplies a user id.
-	blessings, err = bob.BlessSelf("idt/u/bob")
+	blessings, err = bob.BlessSelf("idt:u:bob")
 	if err != nil {
 		t.Errorf("blessing myself %s", err)
 	}
 	call = security.NewCall(&security.CallParams{RemoteBlessings: blessings, LocalBlessings: blessings, LocalPrincipal: bob})
-	if want, got := []string{"idt/u/bob", ServerUser}, GetClientUserIds(ctx, call); !reflect.DeepEqual(got, want) {
+	if want, got := []string{"idt:u:bob", ServerUser}, GetClientUserIds(ctx, call); !reflect.DeepEqual(got, want) {
 		t.Errorf("GetClientUserIds() wanted %v, got %v", want, got)
 	}
 }
