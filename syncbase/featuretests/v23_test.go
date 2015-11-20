@@ -23,12 +23,40 @@ func TestMain(m *testing.M) {
 	os.Exit(r)
 }
 
+func TestV23SyncbasedPutGet(t *testing.T) {
+	v23tests.RunTest(t, V23TestSyncbasedPutGet)
+}
+
 func TestV23DefaultCR(t *testing.T) {
 	v23tests.RunTest(t, V23TestDefaultCR)
 }
 
 func TestV23SyncbasedSyncWithAppResolvedConflicts(t *testing.T) {
 	v23tests.RunTest(t, V23TestSyncbasedSyncWithAppResolvedConflicts)
+}
+
+func TestV23RestartabilityHierarchy(t *testing.T) {
+	v23tests.RunTest(t, V23TestRestartabilityHierarchy)
+}
+
+func TestV23RestartabilityCrash(t *testing.T) {
+	v23tests.RunTest(t, V23TestRestartabilityCrash)
+}
+
+func TestV23RestartabilityQuiescent(t *testing.T) {
+	v23tests.RunTest(t, V23TestRestartabilityQuiescent)
+}
+
+func TestV23RestartabilityReadOnlyBatch(t *testing.T) {
+	v23tests.RunTest(t, V23TestRestartabilityReadOnlyBatch)
+}
+
+func TestV23RestartabilityReadWriteBatch(t *testing.T) {
+	v23tests.RunTest(t, V23TestRestartabilityReadWriteBatch)
+}
+
+func TestV23RestartabilityWatch(t *testing.T) {
+	v23tests.RunTest(t, V23TestRestartabilityWatch)
 }
 
 func TestV23SyncbasedJoinSyncgroup(t *testing.T) {
