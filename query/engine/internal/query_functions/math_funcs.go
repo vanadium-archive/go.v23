@@ -28,12 +28,33 @@ func floorFunc(db ds.Database, off int64, args []*query_parser.Operand) (*query_
 	return makeFloatOp(off, math.Floor(f.Float)), nil
 }
 
+func nanFunc(db ds.Database, off int64, args []*query_parser.Operand) (*query_parser.Operand, error) {
+	return makeFloatOp(off, math.NaN()), nil
+}
+
 func isNanFunc(db ds.Database, off int64, args []*query_parser.Operand) (*query_parser.Operand, error) {
 	f, err := conversions.ConvertValueToFloat(args[0])
 	if err != nil {
 		return nil, err
 	}
 	return makeBoolOp(off, math.IsNaN(f.Float)), nil
+}
+
+func infFunc(db ds.Database, off int64, args []*query_parser.Operand) (*query_parser.Operand, error) {
+	i, err := conversions.ConvertValueToInt(args[0])
+	if err != nil {
+		return nil, err
+	}
+	var sign int
+	if i.Int < 0 {
+		sign = -1
+	} else if i.Int == 0 {
+		sign = 0
+	} else {
+		sign = 1
+	}
+
+	return makeFloatOp(off, math.Inf(sign)), nil
 }
 
 func isInfFunc(db ds.Database, off int64, args []*query_parser.Operand) (*query_parser.Operand, error) {

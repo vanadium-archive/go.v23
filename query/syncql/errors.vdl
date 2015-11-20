@@ -113,7 +113,7 @@ error (
 	LikeExpressionsRequireRhsString(off int64) {
 		"en": "[{off}]Like expressions require right operand of type <string-literal>.",
 	}
-	LimitMustBeGe0(off int64) {
+	LimitMustBeGt0(off int64) {
 		"en": "[{off}]Limit must be > 0.",
 	}
 	MaxStatementLenExceeded(off, max, found int64) {
@@ -138,7 +138,7 @@ error (
 		"en": "[{off}]Unexpected end of statement.",
 	}
 	UnknownIdentifier(off int64, found string) {
-		"en": "[{off}]Uknown identifier: {found}.",
+		"en": "[{off}]Unknown identifier: {found}.",
 	}
 	InvalidEscapeChar(off int64) {
 		"en": "[{off}]Invalid escape character cannot be space or backslash.",

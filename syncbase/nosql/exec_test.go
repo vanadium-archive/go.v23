@@ -224,7 +224,7 @@ type execSelectErrorTest struct {
 	err   error
 }
 
-func TestQueryExec(t *testing.T) {
+func TestExecSelect(t *testing.T) {
 	setup(t)
 	defer cleanup()
 	basic := []execSelectTest{
@@ -1117,6 +1117,668 @@ func TestQueryExec(t *testing.T) {
 	}
 }
 
+func TestQuerySelectClause(t *testing.T) {
+	setup(t)
+	defer cleanup()
+	basic := []execSelectTest{
+		{
+			// Select numeric types
+			"select v.B, v.Ui16, v.Ui32, v.Ui64, v.I16, v.I32, v.I64, v.F32, v.F64, v.C64, v.C128 from Numbers where k = \"001\"",
+			[]string{"v.B", "v.Ui16", "v.Ui32", "v.Ui64", "v.I16", "v.I32", "v.I64", "v.F32", "v.F64", "v.C64", "v.C128"},
+			[][]*vdl.Value{
+				[]*vdl.Value{
+					vdl.ValueOf(byte(12)),
+					vdl.ValueOf(uint16(1234)),
+					vdl.ValueOf(uint32(5678)),
+					vdl.ValueOf(uint64(999888777666)),
+					vdl.ValueOf(int16(9876)),
+					vdl.ValueOf(int32(876543)),
+					vdl.ValueOf(int64(128)),
+					vdl.ValueOf(float32(3.14159)),
+					vdl.ValueOf(float64(2.71828182846)),
+					vdl.ValueOf(complex64(123.0 + 7.0i)),
+					vdl.ValueOf(complex128(456.789 + 10.1112i)),
+				},
+			},
+		},
+		{
+			// Select struct, bool, string, enum, union
+			"select v, v.Active, v.Address.State, v.Credit.Report.ExperianReport.Rating, v.Credit.Report from Customer where k = \"003\"",
+			[]string{"v", "v.Active", "v.Address.State", "v.Credit.Report.ExperianReport.Rating", "v.Credit.Report"},
+			[][]*vdl.Value{
+				[]*vdl.Value{
+					vdl.ValueOf(customerEntries[9].value),
+					vdl.ValueOf(true),
+					vdl.ValueOf("CT"),
+					vdl.ValueOf(testdata.ExperianRatingGood),
+					vdl.ValueOf(testdata.AgencyReportExperianReport{testdata.ExperianCreditReport{testdata.ExperianRatingGood}}),
+				},
+			},
+		},
+		{
+			// Select array, list, set, map
+			"select v.A[1], v.L[6], v.M[Complex(1.1,2.2)], v.S[\"I’ll grind his bones to mix my bread\"] from KeyIndexData where k = \"aaa\"",
+			[]string{"v.A[1]", "v.L[6]", "v.M[Complex]", "v.S[I’ll grind his bones to mix my bread]"},
+			[][]*vdl.Value{
+				[]*vdl.Value{
+					vdl.ValueOf("Fi"),
+					vdl.ValueOf("Englishman"),
+					vdl.ValueOf("Be he living, or be he dead"),
+					vdl.ValueOf(true),
+				},
+			},
+		},
+		{
+			// Date functions.  Now is not included since its return value varies.
+			// Also note, cannot parse a time with nanoseconds, so Nanosecond() returns
+			// zero.
+			"select Time(\"Jan 2 2006 15:04:05 MST\", \"Apr 12 2015 22:16:06 PDT\"), Year(Time(\"Jan 2 2006 15:04:05 MST\", \"Apr 12 2015 22:16:06 PDT\"), \"America/Los_Angeles\"), Month(Time(\"Jan 2 2006 15:04:05 MST\", \"Apr 12 2015 22:16:06 PDT\"), \"America/Los_Angeles\"), Day(Time(\"Jan 2 2006 15:04:05 MST\", \"Apr 12 2015 22:16:06 PDT\"), \"America/Los_Angeles\"), Hour(Time(\"Jan 2 2006 15:04:05 MST\", \"Apr 12 2015 22:16:06 PDT\"), \"America/Los_Angeles\"), Minute(Time(\"Jan 2 2006 15:04:05 MST\", \"Apr 12 2015 22:16:06 PDT\"), \"America/Los_Angeles\"), Second(Time(\"Jan 2 2006 15:04:05 MST\", \"Apr 12 2015 22:16:06 PDT\"), \"America/Los_Angeles\"), Nanosecond(Time(\"Jan 2 2006 15:04:05 MST\", \"Apr 12 2015 22:16:06 PDT\"), \"America/Los_Angeles\"), Weekday(Time(\"Jan 2 2006 15:04:05 MST\", \"Apr 12 2015 22:16:06 PDT\"), \"America/Los_Angeles\"), YearDay(Time(\"Jan 2 2006 15:04:05 MST\", \"Apr 12 2015 22:16:06 PDT\"), \"America/Los_Angeles\") from Customer where k = \"001\"",
+			[]string{"Time", "Year", "Month", "Day", "Hour", "Minute", "Second", "Nanosecond", "Weekday", "YearDay"},
+			[][]*vdl.Value{
+				[]*vdl.Value{
+					vdl.ValueOf(t2015_04_12_22_16_06), // Time
+					vdl.ValueOf(int64(2015)),          // Year
+					vdl.ValueOf(int64(4)),             // Month
+					vdl.ValueOf(int64(12)),            // Day
+					vdl.ValueOf(int64(22)),            // Hour
+					vdl.ValueOf(int64(16)),            // Minute
+					vdl.ValueOf(int64(6)),             // Second
+					vdl.ValueOf(int64(0)),             // Nanosecond
+					vdl.ValueOf(int64(0)),             // Weekday
+					vdl.ValueOf(int64(102)),           // YearDay
+				},
+			},
+		},
+		{
+			// String functions.
+			"select Atoi(\"123\"), Atof(\"12.34\"), HtmlEscape(\"<a img='foo'>Foo Image</a>\"), HtmlUnescape(\"&lt;a img=&#39;foo&#39;&gt;Foo Image&lt;/a&gt;\"), Lowercase(\"AbCd\"), Split(\"ab,cd\", \",\"), Type(v), Uppercase(\"AbCd\"), RuneCount(\"Hello, 世界\"), Sprintf(\"abc: %s\", \"def\"), Str(123), StrCat(\"abc\", \"def\"), StrIndex(\"abcdef\", \"de\"), StrRepeat(\"abc\", 3), StrReplace(\"abczzzdef\", \"zzz\", \"ZZZ\"), StrLastIndex(\"abcabc\", \"abc\"), Trim(\"   abc   \"), TrimLeft(\"   abc   \"), TrimRight(\"   abc   \") from Customer where k = \"001\"",
+			[]string{"Atoi", "Atof", "HtmlEscape", "HtmlUnescape", "Lowercase", "Split", "Type", "Uppercase", "RuneCount", "Sprintf", "Str", "StrCat", "StrIndex", "StrRepeat", "StrReplace", "StrLastIndex", "Trim", "TrimLeft", "TrimRight"},
+			[][]*vdl.Value{
+				[]*vdl.Value{
+					vdl.ValueOf(int64(123)),                                       // Atoi
+					vdl.ValueOf(float64(12.34)),                                   // Atof
+					vdl.ValueOf("&lt;a img=&#39;foo&#39;&gt;Foo Image&lt;/a&gt;"), // HtmlEscape
+					vdl.ValueOf("<a img='foo'>Foo Image</a>"),                     // HtmlUnescape
+					vdl.ValueOf("abcd"),                                           // Lowercase
+					vdl.ValueOf([]string{"ab", "cd"}),                             // Split
+					vdl.ValueOf("v.io/v23/syncbase/nosql/testdata.Customer"),      // Type
+					vdl.ValueOf("ABCD"),                                           // Uppercase
+					vdl.ValueOf(9),                                                // RuneCount
+					vdl.ValueOf("abc: def"),                                       // Sprintf
+					vdl.ValueOf("123"),                                            // Str
+					vdl.ValueOf("abcdef"),                                         // StrCat
+					vdl.ValueOf(3),                                                // StrIndex
+					vdl.ValueOf("abcabcabc"),                                      // StrRepeat
+					vdl.ValueOf("abcZZZdef"),                                      // StrReplace
+					vdl.ValueOf(3),                                                // StrLastIndex
+					vdl.ValueOf("abc"),                                            // Trim
+					vdl.ValueOf("abc   "),                                         // TrimLeft
+					vdl.ValueOf("   abc"),                                         // TrimRight
+				},
+			},
+		},
+		{
+			// Math Functions
+			"select Ceiling(10.1), Ceiling(-10.1), Complex(1.1, 2.2), Floor(10.1), Floor(-10.1), IsInf(100, 1), IsInf(-100, -1), IsInf(Inf(1), 1), IsInf(Inf(-1), -1), IsNaN(100.0), IsNaN(NaN()), Log(2.3), Log10(3.1), Pow(4.3, 10.1), Pow10(12), Mod(12.6, 4.4), Real(Complex(1.1, 2.2)), Truncate(16.9), Truncate(-16.9), Remainder(16.9, 7.1) from Numbers where k = \"001\"",
+			[]string{"Ceiling", "Ceiling", "Complex", "Floor", "Floor", "IsInf", "IsInf", "IsInf", "IsInf", "IsNaN", "IsNaN", "Log", "Log10", "Pow", "Pow10", "Mod", "Real", "Truncate", "Truncate", "Remainder"},
+			[][]*vdl.Value{
+				[]*vdl.Value{
+					vdl.ValueOf(float64(11)),                     // Ceiling(10.1)
+					vdl.ValueOf(float64(-10)),                    // Ceiling(-10.1)
+					vdl.ValueOf(complex128(1.1 + 2.2i)),          // Complex(1.1, 1.2)
+					vdl.ValueOf(float64(10)),                     // Floor(10.1)
+					vdl.ValueOf(float64(-11)),                    // Floor(-10.1)
+					vdl.ValueOf(false),                           // IsInf(100, 1)
+					vdl.ValueOf(false),                           // IsInf(-100, -1)
+					vdl.ValueOf(true),                            // IsInf(Inf(1), 1)
+					vdl.ValueOf(true),                            // IsInf(Inf(-1), -1)
+					vdl.ValueOf(false),                           // IsNaN(100.0)
+					vdl.ValueOf(true),                            // IsNaN(NaN())
+					vdl.ValueOf(float64(0.832909122935104)),      // Log(2.3)
+					vdl.ValueOf(float64(0.4913616938342727)),     // Log10(3.1)
+					vdl.ValueOf(float64(2.5005261539265467e+06)), // Pow(4.3, 10.1)
+					vdl.ValueOf(float64(1e+12)),                  // Pow10(12)
+					vdl.ValueOf(float64(3.799999999999999)),      // Mod(12.6, 4.4)
+					vdl.ValueOf(float64(1.1)),                    // Real(Complex(1.1, 2.2))
+					vdl.ValueOf(float64(16)),                     // Truncate((16.9)
+					vdl.ValueOf(float64(-16)),                    // Truncate((-16.9)
+					vdl.ValueOf(float64(2.6999999999999993)),     // Remainder(16.9, 7.1)
+				},
+			},
+		},
+		{
+			// Len function
+			"select RuneCount(\"Hello, 世界\"), Len(\"Hello, 世界\"), Len(v.A), Len(v.L), Len(v.M), Len(v.S) from KeyIndexData where k = \"aaa\"",
+			[]string{"RuneCount", "Len", "Len", "Len", "Len", "Len"},
+			[][]*vdl.Value{
+				[]*vdl.Value{
+					vdl.ValueOf(int64(9)),  // RuneCount("Hello, 世界")
+					vdl.ValueOf(int64(13)), // Len("Hello, 世界")
+					vdl.ValueOf(int64(4)),  // Len(v.A)
+					vdl.ValueOf(int64(7)),  // Len(v.L)
+					vdl.ValueOf(int64(1)),  // Len(v.M)
+					vdl.ValueOf(int64(1)),  // Len(v.S)
+				},
+			},
+		},
+		{
+			// Nested Functions
+			"select Year(Time(\"Jan 2 2006 15:04:05 MST\", \"Apr 12 2015 22:16:06 PDT\"), Sprintf(\"%s/%s\", \"America\", \"Los_Angeles\")) from Customer where k = \"001\"",
+			[]string{"Year"},
+			[][]*vdl.Value{
+				[]*vdl.Value{
+					vdl.ValueOf(int64(2015)),
+				},
+			},
+		},
+		{
+			// Select with As Clause
+			"select v.B as Bee from Numbers where k = \"001\"",
+			[]string{"Bee"},
+			[][]*vdl.Value{
+				[]*vdl.Value{
+					vdl.ValueOf(byte(12)),
+				},
+			},
+		},
+	}
+
+	for _, test := range basic {
+		headers, rs, err := db.Exec(ctx, test.query)
+		if err != nil {
+			t.Errorf("query: %s; got %v, want nil", test.query, err)
+		} else {
+			// Collect results.
+			r := [][]*vdl.Value{}
+			for rs.Advance() {
+				r = append(r, rs.Result())
+			}
+			if !reflect.DeepEqual(test.r, r) {
+				t.Errorf("query: %s; got %v, want %v", test.query, r, test.r)
+			}
+			if !reflect.DeepEqual(test.headers, headers) {
+				t.Errorf("query: %s; got %v, want %v", test.query, headers, test.headers)
+			}
+		}
+	}
+}
+
+func TestQueryWhereClause(t *testing.T) {
+	setup(t)
+	defer cleanup()
+	basic := []execSelectTest{
+		{
+			// Select on numeric comparisons with equals
+			// (except, allow a range for F32 as the literal is interpreted as a float64.
+			"select k, v from Numbers where v.B = 12 and v.Ui16 = 1234 and v.Ui32 = 5678 and v.Ui64 = 999888777666 and v.I16 = 9876 and v.I32 = 876543 and v.I64 = 128 and v.F32 > 3.14158 and v.F32 < 3.1416 and v.F64 = 2.71828182846 and v.C64 = Complex(123.0, 7.0) and v.C128 = Complex(456.789, 10.1112) and k = \"001\"",
+			[]string{"k", "v"},
+			[][]*vdl.Value{
+				[]*vdl.Value{
+					vdl.ValueOf(numbersEntries[0].key),
+					numbersEntries[0].value,
+				},
+			},
+		},
+		{
+			// Select on numeric comparisons with >=
+			// Note: Complex does not support >=
+			"select k, v from Numbers where v.B >= 12 and v.Ui16 >= 1234 and v.Ui32 >= 5678 and v.Ui64 >= 999888777666 and v.I16 >= 9876 and v.I32 >= 876543 and v.I64 >= 128 and v.F32 >= 3.14159 and v.F64 >= 2.71828182846 and k = \"001\"",
+			[]string{"k", "v"},
+			[][]*vdl.Value{
+				[]*vdl.Value{
+					vdl.ValueOf(numbersEntries[0].key),
+					numbersEntries[0].value,
+				},
+			},
+		},
+		{
+			// Select on numeric comparisons with <=
+			// Note: Complex does not support <=
+			"select k, v from Numbers where v.B <= 12 and v.Ui16 <= 1234 and v.Ui32 <= 5678 and v.Ui64 <= 999888777666 and v.I16 <= 9876 and v.I32 <= 876543 and v.I64 <= 128 and v.F32 <= 3.14160 and v.F64 <= 2.71828182846 and k = \"001\"",
+			[]string{"k", "v"},
+			[][]*vdl.Value{
+				[]*vdl.Value{
+					vdl.ValueOf(numbersEntries[0].key),
+					numbersEntries[0].value,
+				},
+			},
+		},
+		// Lots of selects on numeric comparisons with <>
+		{
+			"select k from Numbers where v.B <> 12",
+			[]string{"k"},
+			[][]*vdl.Value{
+				[]*vdl.Value{vdl.ValueOf("002")},
+				[]*vdl.Value{vdl.ValueOf("003")},
+			},
+		},
+		{
+			"select k from Numbers where v.Ui16 <> 1234",
+			[]string{"k"},
+			[][]*vdl.Value{
+				[]*vdl.Value{vdl.ValueOf("002")},
+				[]*vdl.Value{vdl.ValueOf("003")},
+			},
+		},
+		{
+			"select k from Numbers where v.Ui32 <> 5678",
+			[]string{"k"},
+			[][]*vdl.Value{
+				[]*vdl.Value{vdl.ValueOf("002")},
+				[]*vdl.Value{vdl.ValueOf("003")},
+			},
+		},
+		{
+			"select k from Numbers where v.Ui64 <> 999888777666",
+			[]string{"k"},
+			[][]*vdl.Value{
+				[]*vdl.Value{vdl.ValueOf("002")},
+				[]*vdl.Value{vdl.ValueOf("003")},
+			},
+		},
+		{
+			"select k from Numbers where v.I16 <> 9876",
+			[]string{"k"},
+			[][]*vdl.Value{
+				[]*vdl.Value{vdl.ValueOf("002")},
+				[]*vdl.Value{vdl.ValueOf("003")},
+			},
+		},
+		{
+			"select k from Numbers where v.I32 <> 876543",
+			[]string{"k"},
+			[][]*vdl.Value{
+				[]*vdl.Value{vdl.ValueOf("002")},
+				[]*vdl.Value{vdl.ValueOf("003")},
+			},
+		},
+		{
+			"select k from Numbers where v.I64 <> 128",
+			[]string{"k"},
+			[][]*vdl.Value{
+				[]*vdl.Value{vdl.ValueOf("002")},
+				[]*vdl.Value{vdl.ValueOf("003")},
+			},
+		},
+		{
+			"select k from Numbers where v.F32 <> 3.14159",
+			[]string{"k"},
+			[][]*vdl.Value{
+				[]*vdl.Value{vdl.ValueOf("001")}, // float32 <> float64
+				[]*vdl.Value{vdl.ValueOf("002")},
+				[]*vdl.Value{vdl.ValueOf("003")},
+			},
+		},
+		{
+			"select k from Numbers where v.F64 <> 2.71828182846",
+			[]string{"k"},
+			[][]*vdl.Value{
+				[]*vdl.Value{vdl.ValueOf("002")},
+				[]*vdl.Value{vdl.ValueOf("003")},
+			},
+		},
+		{
+			"select k from Numbers where v.C64 <> Complex(123.0, 7.0)",
+			[]string{"k"},
+			[][]*vdl.Value{
+				[]*vdl.Value{vdl.ValueOf("002")},
+				[]*vdl.Value{vdl.ValueOf("003")},
+			},
+		},
+		{
+			"select k from Numbers where v.C128 <> Complex(456.789, 10.1112)",
+			[]string{"k"},
+			[][]*vdl.Value{
+				[]*vdl.Value{vdl.ValueOf("002")},
+				[]*vdl.Value{vdl.ValueOf("003")},
+			},
+		},
+		// bool =, <>
+		{
+			"select k from Customer where v.Active = true",
+			[]string{"k"},
+			[][]*vdl.Value{
+				[]*vdl.Value{vdl.ValueOf("001")},
+				[]*vdl.Value{vdl.ValueOf("002")},
+				[]*vdl.Value{vdl.ValueOf("003")},
+			},
+		},
+		{
+			"select k from Customer where v.Active <> false",
+			[]string{"k"},
+			[][]*vdl.Value{
+				[]*vdl.Value{vdl.ValueOf("001")},
+				[]*vdl.Value{vdl.ValueOf("002")},
+				[]*vdl.Value{vdl.ValueOf("003")},
+			},
+		},
+		// string =, <>, <, <=, >, >=, like, not like
+		{
+			"select k from Customer where v.Name = \"Bat Masterson\"",
+			[]string{"k"},
+			[][]*vdl.Value{
+				[]*vdl.Value{vdl.ValueOf("002")},
+			},
+		},
+		{
+			"select k from Customer where v.Name <> \"Bat Masterson\"",
+			[]string{"k"},
+			[][]*vdl.Value{
+				[]*vdl.Value{vdl.ValueOf("001")},
+				[]*vdl.Value{vdl.ValueOf("003")},
+			},
+		},
+		{
+			"select k from Customer where v.Name < \"Bat Masterson\"",
+			[]string{"k"},
+			[][]*vdl.Value{},
+		},
+		{
+			"select k from Customer where v.Name <= \"Bat Masterson\"",
+			[]string{"k"},
+			[][]*vdl.Value{
+				[]*vdl.Value{vdl.ValueOf("002")},
+			},
+		},
+		{
+			"select k from Customer where v.Name > \"Bat Masterson\"",
+			[]string{"k"},
+			[][]*vdl.Value{
+				[]*vdl.Value{vdl.ValueOf("001")},
+				[]*vdl.Value{vdl.ValueOf("003")},
+			},
+		},
+		{
+			"select k from Customer where v.Name >= \"Bat Masterson\"",
+			[]string{"k"},
+			[][]*vdl.Value{
+				[]*vdl.Value{vdl.ValueOf("001")},
+				[]*vdl.Value{vdl.ValueOf("002")},
+				[]*vdl.Value{vdl.ValueOf("003")},
+			},
+		},
+		{
+			"select k from Customer where v.Name like \"John %\"",
+			[]string{"k"},
+			[][]*vdl.Value{
+				[]*vdl.Value{vdl.ValueOf("001")},
+				[]*vdl.Value{vdl.ValueOf("003")},
+			},
+		},
+		{
+			"select k from Customer where v.Name not like \"John %\"",
+			[]string{"k"},
+			[][]*vdl.Value{
+				[]*vdl.Value{vdl.ValueOf("002")},
+			},
+		},
+		// enum =, <>
+		{
+			"select k from Customer where v.Credit.Agency = \"Equifax\"",
+			[]string{"k"},
+			[][]*vdl.Value{
+				[]*vdl.Value{vdl.ValueOf("001")},
+			},
+		},
+		{
+			"select k from Customer where v.Credit.Agency <> \"Equifax\"",
+			[]string{"k"},
+			[][]*vdl.Value{
+				[]*vdl.Value{vdl.ValueOf("002")},
+				[]*vdl.Value{vdl.ValueOf("003")},
+			},
+		},
+		// inspect into array, list, set and map in where clause
+		{
+			"select k from KeyIndexData where v.A[1] = \"Fi\" and v.L[3] = \"blood\" and v.M[Complex(1.1,2.2)] = \"Be he living, or be he dead\" and v.S[\"I’ll grind his bones to mix my bread\"] = true",
+			[]string{"k"},
+			[][]*vdl.Value{
+				[]*vdl.Value{vdl.ValueOf("aaa")},
+			},
+		},
+		{
+			// Use every date function in where clause.  Note: Now() requires that
+			// clock not be set to year less than 2015.
+			"select k from Customer where v.InvoiceDate = Time(\"Jan 2 2006 15:04:05 -0700 MST\", \"Jan 22 2015 13:11:01 -0800 PST\") and Year(v.InvoiceDate,  \"America/Los_Angeles\") = 2015 and Month(v.InvoiceDate, \"America/Los_Angeles\") = 1 and Day(v.InvoiceDate, \"America/Los_Angeles\") = 22 and Hour(v.InvoiceDate, \"America/Los_Angeles\") = 13 and Minute(v.InvoiceDate, \"America/Los_Angeles\") = 11 and Second(v.InvoiceDate, \"America/Los_Angeles\") = 1 and Nanosecond(v.InvoiceDate, \"America/Los_Angeles\") = 0 and Year(Now(), \"America/Los_Angeles\") >= 2015",
+
+			[]string{"k"},
+			[][]*vdl.Value{
+				[]*vdl.Value{vdl.ValueOf("001001")},
+			},
+		},
+		{
+			// Use string functions in where clause.
+			"select k from Customer where Atoi(\"3\") = 3 and Atof(\"3.1\") = 3.1 and HtmlEscape(\"<a img='foo'>Foo Image</a>\") = \"&lt;a img=&#39;foo&#39;&gt;Foo Image&lt;/a&gt;\" and HtmlUnescape(\"&lt;a img=&#39;foo&#39;&gt;Foo Image&lt;/a&gt;\") = \"<a img='foo'>Foo Image</a>\" and Lowercase(v.Name) = \"bat masterson\" and Type(v) like \"%.Customer\" and Uppercase(v.Name) = \"BAT MASTERSON\" and RuneCount(v.Name) = 13 and Sprintf(\"Name: %s\", v.Name) = \"Name: Bat Masterson\" and Str(v.Id) = \"2\" and StrCat(v.Name, Str(v.Id)) = \"Bat Masterson2\" and StrIndex(v.Name, \"M\") = 4 and StrRepeat(v.Name, 2) = \"Bat MastersonBat Masterson\" and StrReplace(v.Name, \"Master\", \"Amateur\") = \"Bat Amateurson\" and Trim(\"   xxx   \") = \"xxx\" and TrimLeft(\"   xxx   \") = \"xxx   \" and TrimRight(\"   xxx   \") = \"   xxx\"",
+
+			[]string{"k"},
+			[][]*vdl.Value{
+				[]*vdl.Value{vdl.ValueOf("002")},
+			},
+		},
+		{
+			// Use math functions in where clause.
+			"select k from Numbers where Ceiling(v.F64) = 2.0 and v.C128 = Complex(4.32, 1.0) and Floor(v.F64) = 1.0 and IsInf(v.F64, 1) = false and IsInf(Inf(1), 1) = true and IsInf(Inf(-1), -1) = true and IsNaN(v.F64) = false and IsNaN(NaN()) = true and Log(v.F64) = 0.5493061443347032 and Log10(v.F64) = 0.23856062736011277 and Pow(v.F64, 3.2) = 5.799546134807319 and Pow10(v.B) = 1e+09 and Pow10(v.Ui32) = Inf(1) and Mod(v.F64, v.F32) = 0.31783726940013923 and Real(v.C128) = 4.32 and Truncate(v.F64) = 1.0 and Remainder(v.F64, v.F32) = 0.31783726940013923",
+			[]string{"k"},
+			[][]*vdl.Value{
+				[]*vdl.Value{vdl.ValueOf("002")},
+			},
+		},
+		{
+			// Use Len on string, array, list and set-- in where clause.
+			"select k from KeyIndexData where Len(v.A[0]) = 3 and Len(v.A) = 4 and Len(v.L) = 7 and Len(v.M) = 1 and Len(v.S) = 1",
+			[]string{"k"},
+			[][]*vdl.Value{
+				[]*vdl.Value{vdl.ValueOf("aaa")},
+			},
+		},
+		// The next six tests exercise and, or and parens for precedence.
+		{
+			"select k from Customer where v.Name like \"%Smith\" and v.Active = false or v.Address.City = \"Palo Alto\"",
+			[]string{"k"},
+			[][]*vdl.Value{
+				[]*vdl.Value{vdl.ValueOf("001")},
+			},
+		},
+		{
+			"select k from Customer where (v.Name like \"%Smith\" and v.Active = false) or v.Address.City = \"Palo Alto\"",
+			[]string{"k"},
+			[][]*vdl.Value{
+				[]*vdl.Value{vdl.ValueOf("001")},
+			},
+		},
+		{
+			"select k from Customer where v.Name like \"%Smith\" and (v.Active = false or v.Address.City = \"Palo Alto\")",
+			[]string{"k"},
+			[][]*vdl.Value{
+				[]*vdl.Value{vdl.ValueOf("001")},
+			},
+		},
+		{
+			"select k from Customer where v.Name like \"%Smith\" and v.Active = false or v.Address.City = \"Palo Alto\" or v.Address.City = \"Mountain View\"",
+			[]string{"k"},
+			[][]*vdl.Value{
+				[]*vdl.Value{vdl.ValueOf("001")},
+			},
+		},
+		{
+			"select k from Customer where v.Name like \"%Smith\" and (v.Active = false or v.Address.City = \"Palo Alto\" or v.Address.City = \"Mountain View\")",
+			[]string{"k"},
+			[][]*vdl.Value{
+				[]*vdl.Value{vdl.ValueOf("001")},
+			},
+		},
+		{
+			"select k from Customer where v.Name like \"%Smith\" and v.Active = false and (v.Address.City = \"Palo Alto\" or v.Address.City = \"Mountain View\")",
+			[]string{"k"},
+			[][]*vdl.Value{},
+		},
+	}
+
+	for _, test := range basic {
+		headers, rs, err := db.Exec(ctx, test.query)
+		if err != nil {
+			t.Errorf("query: %s; got %v, want nil", test.query, err)
+		} else {
+			// Collect results.
+			r := [][]*vdl.Value{}
+			for rs.Advance() {
+				r = append(r, rs.Result())
+			}
+			if !reflect.DeepEqual(test.r, r) {
+				t.Errorf("query: %s; got %v, want %v", test.query, r, test.r)
+			}
+			if !reflect.DeepEqual(test.headers, headers) {
+				t.Errorf("query: %s; got %v, want %v", test.query, headers, test.headers)
+			}
+		}
+	}
+}
+
+func TestQueryEscapeClause(t *testing.T) {
+	setup(t)
+	defer cleanup()
+	basic := []execSelectTest{
+		{
+			"select k from Customer where \"abc%\" like \"abc^%\" escape '^'",
+			[]string{"k"},
+			[][]*vdl.Value{
+				[]*vdl.Value{vdl.ValueOf("001")},
+				[]*vdl.Value{vdl.ValueOf("001001")},
+				[]*vdl.Value{vdl.ValueOf("001002")},
+				[]*vdl.Value{vdl.ValueOf("001003")},
+				[]*vdl.Value{vdl.ValueOf("002")},
+				[]*vdl.Value{vdl.ValueOf("002001")},
+				[]*vdl.Value{vdl.ValueOf("002002")},
+				[]*vdl.Value{vdl.ValueOf("002003")},
+				[]*vdl.Value{vdl.ValueOf("002004")},
+				[]*vdl.Value{vdl.ValueOf("003")},
+			},
+		},
+		{
+			"select k from Customer where \"abc_\" like \"abc$_\" escape '$'",
+			[]string{"k"},
+			[][]*vdl.Value{
+				[]*vdl.Value{vdl.ValueOf("001")},
+				[]*vdl.Value{vdl.ValueOf("001001")},
+				[]*vdl.Value{vdl.ValueOf("001002")},
+				[]*vdl.Value{vdl.ValueOf("001003")},
+				[]*vdl.Value{vdl.ValueOf("002")},
+				[]*vdl.Value{vdl.ValueOf("002001")},
+				[]*vdl.Value{vdl.ValueOf("002002")},
+				[]*vdl.Value{vdl.ValueOf("002003")},
+				[]*vdl.Value{vdl.ValueOf("002004")},
+				[]*vdl.Value{vdl.ValueOf("003")},
+			},
+		},
+		{
+			"select k from Customer where \"abc%defghi\" like \"abc^%%\" escape '^'",
+			[]string{"k"},
+			[][]*vdl.Value{
+				[]*vdl.Value{vdl.ValueOf("001")},
+				[]*vdl.Value{vdl.ValueOf("001001")},
+				[]*vdl.Value{vdl.ValueOf("001002")},
+				[]*vdl.Value{vdl.ValueOf("001003")},
+				[]*vdl.Value{vdl.ValueOf("002")},
+				[]*vdl.Value{vdl.ValueOf("002001")},
+				[]*vdl.Value{vdl.ValueOf("002002")},
+				[]*vdl.Value{vdl.ValueOf("002003")},
+				[]*vdl.Value{vdl.ValueOf("002004")},
+				[]*vdl.Value{vdl.ValueOf("003")},
+			},
+		},
+		{
+			"select k from Customer where \"abc_defghi\" like \"abc^__efghi\" escape '^'",
+			[]string{"k"},
+			[][]*vdl.Value{
+				[]*vdl.Value{vdl.ValueOf("001")},
+				[]*vdl.Value{vdl.ValueOf("001001")},
+				[]*vdl.Value{vdl.ValueOf("001002")},
+				[]*vdl.Value{vdl.ValueOf("001003")},
+				[]*vdl.Value{vdl.ValueOf("002")},
+				[]*vdl.Value{vdl.ValueOf("002001")},
+				[]*vdl.Value{vdl.ValueOf("002002")},
+				[]*vdl.Value{vdl.ValueOf("002003")},
+				[]*vdl.Value{vdl.ValueOf("002004")},
+				[]*vdl.Value{vdl.ValueOf("003")},
+			},
+		},
+	}
+
+	for _, test := range basic {
+		headers, rs, err := db.Exec(ctx, test.query)
+		if err != nil {
+			t.Errorf("query: %s; got %v, want nil", test.query, err)
+		} else {
+			// Collect results.
+			r := [][]*vdl.Value{}
+			for rs.Advance() {
+				r = append(r, rs.Result())
+			}
+			if !reflect.DeepEqual(test.r, r) {
+				t.Errorf("query: %s; got %v, want %v", test.query, r, test.r)
+			}
+			if !reflect.DeepEqual(test.headers, headers) {
+				t.Errorf("query: %s; got %v, want %v", test.query, headers, test.headers)
+			}
+		}
+	}
+}
+
+func TestQueryLimitAndOffsetClauses(t *testing.T) {
+	setup(t)
+	defer cleanup()
+	basic := []execSelectTest{
+		{
+			"select k from Customer limit 2 offset 3",
+			[]string{"k"},
+			[][]*vdl.Value{
+				[]*vdl.Value{vdl.ValueOf("001003")},
+				[]*vdl.Value{vdl.ValueOf("002")},
+			},
+		},
+		{
+			"select k from Customer offset 9223372036854775807", // maxint64
+			[]string{"k"},
+			[][]*vdl.Value{},
+		},
+		{
+			"select k from Customer limit 9223372036854775807", // maxint64
+			[]string{"k"},
+			[][]*vdl.Value{
+				[]*vdl.Value{vdl.ValueOf("001")},
+				[]*vdl.Value{vdl.ValueOf("001001")},
+				[]*vdl.Value{vdl.ValueOf("001002")},
+				[]*vdl.Value{vdl.ValueOf("001003")},
+				[]*vdl.Value{vdl.ValueOf("002")},
+				[]*vdl.Value{vdl.ValueOf("002001")},
+				[]*vdl.Value{vdl.ValueOf("002002")},
+				[]*vdl.Value{vdl.ValueOf("002003")},
+				[]*vdl.Value{vdl.ValueOf("002004")},
+				[]*vdl.Value{vdl.ValueOf("003")},
+			},
+		},
+	}
+
+	for _, test := range basic {
+		headers, rs, err := db.Exec(ctx, test.query)
+		if err != nil {
+			t.Errorf("query: %s; got %v, want nil", test.query, err)
+		} else {
+			// Collect results.
+			r := [][]*vdl.Value{}
+			for rs.Advance() {
+				r = append(r, rs.Result())
+			}
+			if !reflect.DeepEqual(test.r, r) {
+				t.Errorf("query: %s; got %v, want %v", test.query, r, test.r)
+			}
+			if !reflect.DeepEqual(test.headers, headers) {
+				t.Errorf("query: %s; got %v, want %v", test.query, headers, test.headers)
+			}
+		}
+	}
+}
+
 func svPair(s string) []*vdl.Value {
 	v := vdl.ValueOf(s)
 	return []*vdl.Value{v, v}
@@ -1176,8 +1838,19 @@ func TestExecErrors(t *testing.T) {
 		},
 		{
 			"select v from Customer offset -1",
-			// The following error text is dependent on implementation of Database.
 			syncql.NewErrExpected(ctx, 30, "positive integer literal"),
+		},
+		{
+			"select v from Customer limit -1",
+			syncql.NewErrExpected(ctx, 29, "positive integer literal"),
+		},
+		{
+			"select v from Customer offset 9223372036854775808", // maxint64 + 1
+			syncql.NewErrCouldNotConvert(ctx, 30, "9223372036854775808", "int64"),
+		},
+		{
+			"select v from Customer limit 9223372036854775808", // maxint64 + 1
+			syncql.NewErrCouldNotConvert(ctx, 29, "9223372036854775808", "int64"),
 		},
 	}
 
@@ -1194,5 +1867,242 @@ func TestExecErrors(t *testing.T) {
 		if verror.ErrorID(err) != verror.ErrorID(test.err) || !strings.HasPrefix(err.Error(), wantPrefix) || !strings.HasSuffix(err.Error(), wantSuffix) {
 			t.Errorf("query: %s; got %v, want %v", test.query, err, test.err)
 		}
+	}
+}
+
+func TestQueryErrors(t *testing.T) {
+	setup(t)
+	defer cleanup()
+	basic := []execSelectErrorTest{
+		// Produce every error in the book (make that, every one that is possible to produce).
+		{
+			"select k from Customer where Amt = 100",
+			syncql.NewErrBadFieldInWhere(ctx, 29),
+		},
+		{
+			"select k from Customer where v.Active > false",
+			syncql.NewErrBoolInvalidExpression(ctx, 38),
+		},
+		// * CheckOfUnknownStatementType cannot be produced as the parser
+		// does not produce unknown statement types.
+		// * CouldNotConvert cannot be produced directly (it could be wrapped). The only
+		// unwrapped errors are produced by the parser and would only occur if golang's
+		// text/scanner liked to the parser.
+		{
+			"select k.a from Customer",
+			syncql.NewErrDotNotationDisallowedForKey(ctx, 9),
+		},
+		// * ErrorCompilingRegularExpression cannot be produced unless there is a bug
+		// in query_checker which should be escaping regex characters (by calling
+		// a library function).
+		// * ExecOfUnknownStatementType cannot be produced as the parser
+		// does not produce unknown statement types.
+		{
+			"select k, v from Customer limit a",
+			syncql.NewErrExpected(ctx, 32, "positive integer literal"),
+		},
+		{
+			"select k, v limit 100",
+			syncql.NewErrExpectedFrom(ctx, 12, "limit"),
+		},
+		{
+			"select 100 from Customer",
+			syncql.NewErrExpectedIdentifier(ctx, 7, "100"),
+		},
+		{
+			"select k from Customer where v.A ^ v.B",
+			syncql.NewErrExpectedOperator(ctx, 33, "^"),
+		},
+		{
+			"select k from Customer where Mod(12.1) = 0.1",
+			syncql.NewErrFunctionArgCount(ctx, 29, "Mod", 2, 1),
+		},
+		{
+			"select k from Customer where Sprintf() = \"abc\"",
+			syncql.NewErrFunctionAtLeastArgCount(ctx, 29, "Sprintf", 1, 0),
+		},
+		{
+			"select k from Customer where Type(100) = \"abc\"",
+			syncql.NewErrFunctionTypeInvalidArg(ctx, 34),
+		},
+		{
+			"select k from Customer where Len(100) = \"abc\"",
+			syncql.NewErrFunctionLenInvalidArg(ctx, 33),
+		},
+		// * FunctionArgBad error does not make it back to the client.
+		{
+			"select What(100) from Customer",
+			syncql.NewErrFunctionNotFound(ctx, 7, "What"),
+		},
+		{
+			"select Type(k) from Customer",
+			syncql.NewErrArgMustBeField(ctx, 12),
+		},
+		// *BigIntConversionError isn't produced as vdl doesn't have big ints
+		// *BigRatConversionError isn't produced as vdl doesn't have big rats
+		// *BoolConversionError isn't currently produced as no functions take a bool arg.
+		{
+			"select Real(\"abc\") from Customer",
+			syncql.NewErrComplexConversionError(ctx, 12, errors.New("Cannot convert operand to Complex.")),
+		},
+		// *UintConversionError isn't currently produced as no functions take a uint arg.
+		{
+			"select Year(\"abc\", \"America/Los_Angeles\") from Customer",
+			syncql.NewErrTimeConversionError(ctx, 12, errors.New("Cannot convert operand to time.")),
+		},
+		// * LocationConversionError - see TestQueryErrorsPlatformDependentText below.
+		{
+			"select Lowercase(100) from Customer",
+			syncql.NewErrStringConversionError(ctx, 17, errors.New("Cannot convert operand to string.")),
+		},
+		{
+			"select Complex(\"abc\", 3.1) from Customer",
+			syncql.NewErrFloatConversionError(ctx, 15, errors.New("Cannot convert operand to float64.")),
+		},
+		{
+			"select Pow10(3.1) from Customer",
+			syncql.NewErrIntConversionError(ctx, 13, errors.New("Cannot convert operand to int64.")),
+		},
+		{
+			"select k from Customer where nil is v.Name",
+			syncql.NewErrIsIsNotRequireLhsValue(ctx, 29),
+		},
+		{
+			"select k from Customer where v.Name is \"John Smith\"",
+			syncql.NewErrIsIsNotRequireRhsNil(ctx, 39),
+		},
+		{
+			"select k from Customer where v.Name like \"a^b%\" escape '^'",
+			syncql.NewErrInvalidEscapeSequence(ctx, 41),
+		},
+		{
+			"select k from Customer where v.Name like \"John^Smith\" escape '^'",
+			syncql.NewErrInvalidEscapeSequence(ctx, 41),
+		},
+		{
+			"select a from Customer",
+			syncql.NewErrInvalidSelectField(ctx, 7),
+		},
+		{
+			"select k from Customer where k = 100",
+			syncql.NewErrKeyExpressionLiteral(ctx, 33),
+		},
+		// *KeyValueStreamError Cannot produce a KeyValueStreamError.
+		{
+			"select k from Customer where v.Name like 100",
+			syncql.NewErrLikeExpressionsRequireRhsString(ctx, 41),
+		},
+		{
+			"select k from Customer limit 0",
+			syncql.NewErrLimitMustBeGt0(ctx, 29),
+		},
+		// *MaxStatementLenExceeded See TestQueryStatementSizeExceeded.
+		{
+			"",
+			syncql.NewErrNoStatementFound(ctx, 0),
+		},
+		// *OffsetMustBeGe0 cannot be produced because the parser won't produce
+		// an offset < 0.
+		// *ScanError Cannot produce a [table].ScanError.
+		{
+			"select k from Blah",
+			// TODO(sadovsky): Error messages should never contain storage engine
+			syncql.NewErrTableCantAccess(ctx, 14, "Blah", errors.New("nosql.test:\"a/db\".Exec: Does not exist: t\xfeBlah")),
+		},
+		{
+			"select k, v from Customer where a = b)",
+			syncql.NewErrUnexpected(ctx, 37, ")"),
+		},
+		{
+			"select k from Customer where",
+			syncql.NewErrUnexpectedEndOfStatement(ctx, 28),
+		},
+		{
+			"foo",
+			syncql.NewErrUnknownIdentifier(ctx, 0, "foo"),
+		},
+		{
+			"select k from Customer escape ' '",
+			syncql.NewErrInvalidEscapeChar(ctx, 30),
+		},
+		{
+			"select K from Customer",
+			syncql.NewErrDidYouMeanLowercaseK(ctx, 7),
+		},
+		{
+			"select V from Customer",
+			syncql.NewErrDidYouMeanLowercaseV(ctx, 7),
+		},
+		{
+			"select now() from Customer",
+			syncql.NewErrDidYouMeanFunction(ctx, 7, "Now"),
+		},
+		// *NotEnoughParamValuesSpecified Can't test from syncbase as PreparedStatement not
+		// exposed to syncbase.
+		// *TooManyParamValuesSpecified Can't test from syncbase as PreparedStatement not
+		// exposed to syncbase.
+		// *PreparedStatementNotFound Can't test from syncbase as PreparedStatement not
+		// exposed to syncbase.
+	}
+
+	for _, test := range basic {
+		_, rs, err := db.Exec(ctx, test.query)
+		if err == nil {
+			err = rs.Err()
+		}
+		// Test both that the IDs compare and the text compares (since the offset needs to match).
+		// Note: This is a little tricky because the actual error message will contain the calling
+		//       module.
+		wantPrefix := test.err.Error()[:strings.Index(test.err.Error(), ":")]
+		wantSuffix := test.err.Error()[len(wantPrefix)+1:]
+		if verror.ErrorID(err) != verror.ErrorID(test.err) || !strings.HasPrefix(err.Error(), wantPrefix) || !strings.HasSuffix(err.Error(), wantSuffix) {
+			t.Errorf("query: %s; got %v, want %v", test.query, err, test.err)
+		}
+	}
+}
+
+func TestQueryErrorsPlatformDependentText(t *testing.T) {
+	setup(t)
+	defer cleanup()
+	basic := []execSelectErrorTest{
+		// These errors contain installation dependent parts to the error.  The test is
+		// more relaxed (it doesn't check the suffix) in order to account for this.
+		{
+			"select Year(v.InvoiceDate, \"DummyTimeZone\") from Customer",
+			syncql.NewErrLocationConversionError(ctx, 27, errors.New("unknown time zone DummyTimeZone")),
+		},
+	}
+
+	for _, test := range basic {
+		_, rs, err := db.Exec(ctx, test.query)
+		if err == nil {
+			err = rs.Err()
+		}
+		// Test both that the IDs compare and the text prefix compares (since the offset needs to match).
+		// Note: This is a little tricky because the actual error message will contain the calling
+		//       module.
+		wantPrefix := test.err.Error()[:strings.Index(test.err.Error(), ":")]
+		if verror.ErrorID(err) != verror.ErrorID(test.err) || !strings.HasPrefix(err.Error(), wantPrefix) {
+			t.Errorf("query: %s; got %v, want %v", test.query, err, test.err)
+		}
+	}
+}
+
+func TestQueryStatementSizeExceeded(t *testing.T) {
+	setup(t)
+	defer cleanup()
+	q := fmt.Sprintf("select a from b where c = \"%s\"", strings.Repeat("x", 12000))
+
+	_, rs, err := db.Exec(ctx, q)
+	if err == nil {
+		err = rs.Err()
+	}
+
+	expectedErr := syncql.NewErrMaxStatementLenExceeded(ctx, int64(0), int64(10000), int64(len(q)))
+
+	wantPrefix := expectedErr.Error()[:strings.Index(expectedErr.Error(), ":")]
+	wantSuffix := expectedErr.Error()[len(wantPrefix)+1:]
+	if verror.ErrorID(err) != verror.ErrorID(expectedErr) || !strings.HasPrefix(err.Error(), wantPrefix) || !strings.HasSuffix(err.Error(), wantSuffix) {
+		t.Errorf("query: %s; got %v, want %v", q, err, expectedErr)
 	}
 }

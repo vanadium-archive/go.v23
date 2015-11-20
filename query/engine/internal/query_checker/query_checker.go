@@ -222,7 +222,7 @@ func checkOperand(db ds.Database, o *query_parser.Operand, ec *query_parser.Esca
 
 // Only include up to (but not including) a wildcard character ('%', '_').
 func computePrefix(db ds.Database, off int64, s string, ec *query_parser.EscapeClause) (string, error) {
-	if strings.Index(s, "%") == -1 && strings.Index(s, "_") == -1 && strings.Index(s, "\\") == -1 {
+	if strings.Index(s, "%") == -1 && strings.Index(s, "_") == -1 && (ec == nil || strings.IndexRune(s, ec.EscapeChar.Value) == -1) {
 		return s, nil
 	}
 	var s2 string
@@ -690,7 +690,7 @@ func checkLimitClause(db ds.Database, l *query_parser.LimitClause) error {
 		return nil
 	}
 	if l.Limit.Value < 1 {
-		return syncql.NewErrLimitMustBeGe0(db.GetContext(), l.Limit.Off)
+		return syncql.NewErrLimitMustBeGt0(db.GetContext(), l.Limit.Off)
 	}
 	return nil
 }

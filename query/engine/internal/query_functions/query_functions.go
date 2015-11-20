@@ -56,7 +56,7 @@ func init() {
 	functions["Uppercase"] = function{[]query_parser.OperandType{query_parser.TypStr}, false, query_parser.TypNil, query_parser.TypStr, upperCase, nil}
 	functions["RuneCount"] = function{[]query_parser.OperandType{query_parser.TypStr}, false, query_parser.TypNil, query_parser.TypInt, runeCount, nil}
 	functions["Sprintf"] = function{[]query_parser.OperandType{query_parser.TypStr}, true, query_parser.TypNil, query_parser.TypStr, sprintf, nil}
-	functions["Str"] = function{[]query_parser.OperandType{query_parser.TypStr}, false, query_parser.TypNil, query_parser.TypStr, str, nil}
+	functions["Str"] = function{[]query_parser.OperandType{query_parser.TypNil}, false, query_parser.TypNil, query_parser.TypStr, str, nil}
 	functions["StrCat"] = function{[]query_parser.OperandType{query_parser.TypStr, query_parser.TypStr}, true, query_parser.TypStr, query_parser.TypStr, strCat, nil}
 	functions["StrIndex"] = function{[]query_parser.OperandType{query_parser.TypStr, query_parser.TypStr}, false, query_parser.TypNil, query_parser.TypInt, strIndex, nil}
 	functions["StrRepeat"] = function{[]query_parser.OperandType{query_parser.TypStr, query_parser.TypInt}, false, query_parser.TypNil, query_parser.TypStr, strRepeat, nil}
@@ -70,10 +70,12 @@ func init() {
 	functions["Ceiling"] = function{[]query_parser.OperandType{query_parser.TypFloat}, false, query_parser.TypNil, query_parser.TypFloat, ceilingFunc, nil}
 	functions["Complex"] = function{[]query_parser.OperandType{query_parser.TypFloat, query_parser.TypFloat}, false, query_parser.TypNil, query_parser.TypComplex, complexFunc, nil}
 	functions["Floor"] = function{[]query_parser.OperandType{query_parser.TypFloat}, false, query_parser.TypNil, query_parser.TypFloat, floorFunc, nil}
+	functions["Inf"] = function{[]query_parser.OperandType{query_parser.TypInt}, false, query_parser.TypNil, query_parser.TypFloat, infFunc, nil}
 	functions["IsInf"] = function{[]query_parser.OperandType{query_parser.TypFloat, query_parser.TypInt}, false, query_parser.TypNil, query_parser.TypBool, isInfFunc, nil}
 	functions["IsNaN"] = function{[]query_parser.OperandType{query_parser.TypFloat}, false, query_parser.TypNil, query_parser.TypBool, isNanFunc, nil}
 	functions["Log"] = function{[]query_parser.OperandType{query_parser.TypFloat}, false, query_parser.TypNil, query_parser.TypFloat, logFunc, nil}
 	functions["Log10"] = function{[]query_parser.OperandType{query_parser.TypFloat}, false, query_parser.TypNil, query_parser.TypFloat, log10Func, nil}
+	functions["NaN"] = function{[]query_parser.OperandType{}, false, query_parser.TypNil, query_parser.TypFloat, nanFunc, nil}
 	functions["Pow"] = function{[]query_parser.OperandType{query_parser.TypFloat, query_parser.TypFloat}, false, query_parser.TypNil, query_parser.TypFloat, powFunc, nil}
 	functions["Pow10"] = function{[]query_parser.OperandType{query_parser.TypInt}, false, query_parser.TypNil, query_parser.TypFloat, pow10Func, nil}
 	functions["Mod"] = function{[]query_parser.OperandType{query_parser.TypFloat, query_parser.TypFloat}, false, query_parser.TypNil, query_parser.TypFloat, modFunc, nil}

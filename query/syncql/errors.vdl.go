@@ -51,7 +51,7 @@ var (
 	ErrKeyExpressionLiteral            = verror.Register("v.io/v23/query/syncql.KeyExpressionLiteral", verror.NoRetry, "{1:}{2:} [{3}]Key (i.e., 'k') compares against literals must be string literal.")
 	ErrKeyValueStreamError             = verror.Register("v.io/v23/query/syncql.KeyValueStreamError", verror.NoRetry, "{1:}{2:} [{3}]KeyValueStream error: {4}.")
 	ErrLikeExpressionsRequireRhsString = verror.Register("v.io/v23/query/syncql.LikeExpressionsRequireRhsString", verror.NoRetry, "{1:}{2:} [{3}]Like expressions require right operand of type <string-literal>.")
-	ErrLimitMustBeGe0                  = verror.Register("v.io/v23/query/syncql.LimitMustBeGe0", verror.NoRetry, "{1:}{2:} [{3}]Limit must be > 0.")
+	ErrLimitMustBeGt0                  = verror.Register("v.io/v23/query/syncql.LimitMustBeGt0", verror.NoRetry, "{1:}{2:} [{3}]Limit must be > 0.")
 	ErrMaxStatementLenExceeded         = verror.Register("v.io/v23/query/syncql.MaxStatementLenExceeded", verror.NoRetry, "{1:}{2:} [{3}]Maximum length of statements is {4}; found {5}.")
 	ErrNoStatementFound                = verror.Register("v.io/v23/query/syncql.NoStatementFound", verror.NoRetry, "{1:}{2:} [{3}]No statement found.")
 	ErrOffsetMustBeGe0                 = verror.Register("v.io/v23/query/syncql.OffsetMustBeGe0", verror.NoRetry, "{1:}{2:} [{3}]Offset must be > 0.")
@@ -59,7 +59,7 @@ var (
 	ErrTableCantAccess                 = verror.Register("v.io/v23/query/syncql.TableCantAccess", verror.NoRetry, "{1:}{2:} [{3}]Table {4} does not exist (or cannot be accessed): {5}.")
 	ErrUnexpected                      = verror.Register("v.io/v23/query/syncql.Unexpected", verror.NoRetry, "{1:}{2:} [{3}]Unexpected: {4}.")
 	ErrUnexpectedEndOfStatement        = verror.Register("v.io/v23/query/syncql.UnexpectedEndOfStatement", verror.NoRetry, "{1:}{2:} [{3}]Unexpected end of statement.")
-	ErrUnknownIdentifier               = verror.Register("v.io/v23/query/syncql.UnknownIdentifier", verror.NoRetry, "{1:}{2:} [{3}]Uknown identifier: {4}.")
+	ErrUnknownIdentifier               = verror.Register("v.io/v23/query/syncql.UnknownIdentifier", verror.NoRetry, "{1:}{2:} [{3}]Unknown identifier: {4}.")
 	ErrInvalidEscapeChar               = verror.Register("v.io/v23/query/syncql.InvalidEscapeChar", verror.NoRetry, "{1:}{2:} [{3}]Invalid escape character cannot be space or backslash.")
 	ErrDidYouMeanLowercaseK            = verror.Register("v.io/v23/query/syncql.DidYouMeanLowercaseK", verror.NoRetry, "{1:}{2:} [{3}]Did you mean: 'k'?")
 	ErrDidYouMeanLowercaseV            = verror.Register("v.io/v23/query/syncql.DidYouMeanLowercaseV", verror.NoRetry, "{1:}{2:} [{3}]Did you mean: 'v'?")
@@ -106,7 +106,7 @@ func init() {
 	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrKeyExpressionLiteral.ID), "{1:}{2:} [{3}]Key (i.e., 'k') compares against literals must be string literal.")
 	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrKeyValueStreamError.ID), "{1:}{2:} [{3}]KeyValueStream error: {4}.")
 	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrLikeExpressionsRequireRhsString.ID), "{1:}{2:} [{3}]Like expressions require right operand of type <string-literal>.")
-	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrLimitMustBeGe0.ID), "{1:}{2:} [{3}]Limit must be > 0.")
+	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrLimitMustBeGt0.ID), "{1:}{2:} [{3}]Limit must be > 0.")
 	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrMaxStatementLenExceeded.ID), "{1:}{2:} [{3}]Maximum length of statements is {4}; found {5}.")
 	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrNoStatementFound.ID), "{1:}{2:} [{3}]No statement found.")
 	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrOffsetMustBeGe0.ID), "{1:}{2:} [{3}]Offset must be > 0.")
@@ -114,7 +114,7 @@ func init() {
 	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrTableCantAccess.ID), "{1:}{2:} [{3}]Table {4} does not exist (or cannot be accessed): {5}.")
 	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrUnexpected.ID), "{1:}{2:} [{3}]Unexpected: {4}.")
 	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrUnexpectedEndOfStatement.ID), "{1:}{2:} [{3}]Unexpected end of statement.")
-	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrUnknownIdentifier.ID), "{1:}{2:} [{3}]Uknown identifier: {4}.")
+	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrUnknownIdentifier.ID), "{1:}{2:} [{3}]Unknown identifier: {4}.")
 	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrInvalidEscapeChar.ID), "{1:}{2:} [{3}]Invalid escape character cannot be space or backslash.")
 	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrDidYouMeanLowercaseK.ID), "{1:}{2:} [{3}]Did you mean: 'k'?")
 	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrDidYouMeanLowercaseV.ID), "{1:}{2:} [{3}]Did you mean: 'v'?")
@@ -304,9 +304,9 @@ func NewErrLikeExpressionsRequireRhsString(ctx *context.T, off int64) error {
 	return verror.New(ErrLikeExpressionsRequireRhsString, ctx, off)
 }
 
-// NewErrLimitMustBeGe0 returns an error with the ErrLimitMustBeGe0 ID.
-func NewErrLimitMustBeGe0(ctx *context.T, off int64) error {
-	return verror.New(ErrLimitMustBeGe0, ctx, off)
+// NewErrLimitMustBeGt0 returns an error with the ErrLimitMustBeGt0 ID.
+func NewErrLimitMustBeGt0(ctx *context.T, off int64) error {
+	return verror.New(ErrLimitMustBeGt0, ctx, off)
 }
 
 // NewErrMaxStatementLenExceeded returns an error with the ErrMaxStatementLenExceeded ID.

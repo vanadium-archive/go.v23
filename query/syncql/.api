@@ -34,7 +34,7 @@ pkg syncql, func NewErrIsIsNotRequireRhsNil(*context.T, int64) error
 pkg syncql, func NewErrKeyExpressionLiteral(*context.T, int64) error
 pkg syncql, func NewErrKeyValueStreamError(*context.T, int64, error) error
 pkg syncql, func NewErrLikeExpressionsRequireRhsString(*context.T, int64) error
-pkg syncql, func NewErrLimitMustBeGe0(*context.T, int64) error
+pkg syncql, func NewErrLimitMustBeGt0(*context.T, int64) error
 pkg syncql, func NewErrLocationConversionError(*context.T, int64, error) error
 pkg syncql, func NewErrMaxStatementLenExceeded(*context.T, int64, int64, int64) error
 pkg syncql, func NewErrNoStatementFound(*context.T, int64) error
@@ -92,7 +92,7 @@ pkg syncql, var ErrIsIsNotRequireRhsNil verror.IDAction
 pkg syncql, var ErrKeyExpressionLiteral verror.IDAction
 pkg syncql, var ErrKeyValueStreamError verror.IDAction
 pkg syncql, var ErrLikeExpressionsRequireRhsString verror.IDAction
-pkg syncql, var ErrLimitMustBeGe0 verror.IDAction
+pkg syncql, var ErrLimitMustBeGt0 verror.IDAction
 pkg syncql, var ErrLocationConversionError verror.IDAction
 pkg syncql, var ErrMaxStatementLenExceeded verror.IDAction
 pkg syncql, var ErrNoStatementFound verror.IDAction

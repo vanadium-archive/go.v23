@@ -421,7 +421,7 @@ func TestQueryCheckerErrors(t *testing.T) {
 		{"select k.a from Customer", syncql.NewErrDotNotationDisallowedForKey(db.GetContext(), 9)},
 		{"select k from Customer where t.a = \"Foo.Bar\"", syncql.NewErrBadFieldInWhere(db.GetContext(), 29)},
 		{"select v from Customer where a=1", syncql.NewErrBadFieldInWhere(db.GetContext(), 29)},
-		{"select v from Customer limit 0", syncql.NewErrLimitMustBeGe0(db.GetContext(), 29)},
+		{"select v from Customer limit 0", syncql.NewErrLimitMustBeGt0(db.GetContext(), 29)},
 		{"select v.z from Customer where v.x like v.y", syncql.NewErrLikeExpressionsRequireRhsString(db.GetContext(), 40)},
 		{"select v.z from Customer where k like \"a^bc%\" escape '^'", syncql.NewErrInvalidEscapeSequence(db.GetContext(), 38)},
 		{"select v from Customer where v.A > false", syncql.NewErrBoolInvalidExpression(db.GetContext(), 33)},
