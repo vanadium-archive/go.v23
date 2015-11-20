@@ -8,7 +8,8 @@
 // Package syncbase defines the wire API for a structured store that supports
 // peer-to-peer synchronization.
 //
-// TODO(sadovsky): Write a detailed package description.
+// TODO(sadovsky): Write a detailed package description, or provide a reference
+// to the Syncbase documentation.
 package syncbase
 
 import (
@@ -21,8 +22,10 @@ import (
 	"v.io/v23/verror"
 
 	// VDL user imports
+	"time"
 	"v.io/v23/security/access"
 	"v.io/v23/services/permissions"
+	_ "v.io/v23/vdlroot/time"
 )
 
 var (
@@ -89,6 +92,16 @@ type ServiceClientMethods interface {
 	//    GetPermissions() (perms access.Permissions, version string, err error) {Blue}
 	//  }
 	permissions.ObjectClientMethods
+	// DebugUpdateClock updates various bits of Syncbase virtual clock and clock
+	// daemon state based on the specified options.
+	// Requires --debug flag to be set (in addition to Admin check).
+	// Users of this function typically specify --debug-do-not-start-clockd when
+	// starting Syncbase so that they can configure the virtual clock before the
+	// daemon starts mucking with it.
+	DebugUpdateClock(_ *context.T, uco DebugUpdateClockOpts, _ ...rpc.CallOpt) error
+	// DebugNow returns the current time per the Syncbase clock.
+	// Requires --debug flag to be set (in addition to Admin check).
+	DebugNow(*context.T, ...rpc.CallOpt) (time.Time, error)
 }
 
 // ServiceClientStub adds universal methods to ServiceClientMethods.
@@ -106,6 +119,16 @@ type implServiceClientStub struct {
 	name string
 
 	permissions.ObjectClientStub
+}
+
+func (c implServiceClientStub) DebugUpdateClock(ctx *context.T, i0 DebugUpdateClockOpts, opts ...rpc.CallOpt) (err error) {
+	err = v23.GetClient(ctx).Call(ctx, c.name, "DebugUpdateClock", []interface{}{i0}, nil, opts...)
+	return
+}
+
+func (c implServiceClientStub) DebugNow(ctx *context.T, opts ...rpc.CallOpt) (o0 time.Time, err error) {
+	err = v23.GetClient(ctx).Call(ctx, c.name, "DebugNow", nil, []interface{}{&o0}, opts...)
+	return
 }
 
 // ServiceServerMethods is the interface a server writer
@@ -159,6 +182,16 @@ type ServiceServerMethods interface {
 	//    GetPermissions() (perms access.Permissions, version string, err error) {Blue}
 	//  }
 	permissions.ObjectServerMethods
+	// DebugUpdateClock updates various bits of Syncbase virtual clock and clock
+	// daemon state based on the specified options.
+	// Requires --debug flag to be set (in addition to Admin check).
+	// Users of this function typically specify --debug-do-not-start-clockd when
+	// starting Syncbase so that they can configure the virtual clock before the
+	// daemon starts mucking with it.
+	DebugUpdateClock(_ *context.T, _ rpc.ServerCall, uco DebugUpdateClockOpts) error
+	// DebugNow returns the current time per the Syncbase clock.
+	// Requires --debug flag to be set (in addition to Admin check).
+	DebugNow(*context.T, rpc.ServerCall) (time.Time, error)
 }
 
 // ServiceServerStubMethods is the server interface containing
@@ -198,6 +231,14 @@ type implServiceServerStub struct {
 	gs *rpc.GlobState
 }
 
+func (s implServiceServerStub) DebugUpdateClock(ctx *context.T, call rpc.ServerCall, i0 DebugUpdateClockOpts) error {
+	return s.impl.DebugUpdateClock(ctx, call, i0)
+}
+
+func (s implServiceServerStub) DebugNow(ctx *context.T, call rpc.ServerCall) (time.Time, error) {
+	return s.impl.DebugNow(ctx, call)
+}
+
 func (s implServiceServerStub) Globber() *rpc.GlobState {
 	return s.gs
 }
@@ -216,6 +257,24 @@ var descService = rpc.InterfaceDesc{
 	Doc:     "// Service represents a Vanadium Syncbase service.\n// Service.Glob operates over App names.",
 	Embeds: []rpc.EmbedDesc{
 		{"Object", "v.io/v23/services/permissions", "// Object provides access control for Vanadium objects.\n//\n// Vanadium services implementing dynamic access control would typically embed\n// this interface and tag additional methods defined by the service with one of\n// Admin, Read, Write, Resolve etc. For example, the VDL definition of the\n// object would be:\n//\n//   package mypackage\n//\n//   import \"v.io/v23/security/access\"\n//   import \"v.io/v23/services/permissions\"\n//\n//   type MyObject interface {\n//     permissions.Object\n//     MyRead() (string, error) {access.Read}\n//     MyWrite(string) error    {access.Write}\n//   }\n//\n// If the set of pre-defined tags is insufficient, services may define their\n// own tag type and annotate all methods with this new type.\n//\n// Instead of embedding this Object interface, define SetPermissions and\n// GetPermissions in their own interface. Authorization policies will typically\n// respect annotations of a single type. For example, the VDL definition of an\n// object would be:\n//\n//  package mypackage\n//\n//  import \"v.io/v23/security/access\"\n//\n//  type MyTag string\n//\n//  const (\n//    Blue = MyTag(\"Blue\")\n//    Red  = MyTag(\"Red\")\n//  )\n//\n//  type MyObject interface {\n//    MyMethod() (string, error) {Blue}\n//\n//    // Allow clients to change access via the access.Object interface:\n//    SetPermissions(perms access.Permissions, version string) error         {Red}\n//    GetPermissions() (perms access.Permissions, version string, err error) {Blue}\n//  }"},
+	},
+	Methods: []rpc.MethodDesc{
+		{
+			Name: "DebugUpdateClock",
+			Doc:  "// DebugUpdateClock updates various bits of Syncbase virtual clock and clock\n// daemon state based on the specified options.\n// Requires --debug flag to be set (in addition to Admin check).\n// Users of this function typically specify --debug-do-not-start-clockd when\n// starting Syncbase so that they can configure the virtual clock before the\n// daemon starts mucking with it.",
+			InArgs: []rpc.ArgDesc{
+				{"uco", ``}, // DebugUpdateClockOpts
+			},
+			Tags: []*vdl.Value{vdl.ValueOf(access.Tag("Admin"))},
+		},
+		{
+			Name: "DebugNow",
+			Doc:  "// DebugNow returns the current time per the Syncbase clock.\n// Requires --debug flag to be set (in addition to Admin check).",
+			OutArgs: []rpc.ArgDesc{
+				{"", ``}, // time.Time
+			},
+			Tags: []*vdl.Value{vdl.ValueOf(access.Tag("Admin"))},
+		},
 	},
 }
 

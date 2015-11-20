@@ -5,19 +5,43 @@
 // Package syncbase defines the wire API for a structured store that supports
 // peer-to-peer synchronization.
 //
-// TODO(sadovsky): Write a detailed package description.
+// TODO(sadovsky): Write a detailed package description, or provide a reference
+// to the Syncbase documentation.
 package syncbase
 
 import (
+	"time"
+
   "v.io/v23/security/access"
   "v.io/v23/services/permissions"
 )
 
 // NOTE(sadovsky): Various methods below may end up needing additional options.
 
+// TODO(sadovsky): Move "debug" methods elsewhere, so that they are completely
+// hidden from clients. Relatedly, configure the server to not even export these
+// RPC methods if the --debug flag is not set.
+
+// NOTE(sadovsky): We plan to add a --debug flag, along with various --debug-*
+// flags that only take effect if --debug was specified. In particular, we'll
+// add a --debug-do-not-start-clockd flag to configure whether clockd should be
+// started at service init time.
+
 // Service represents a Vanadium Syncbase service.
 // Service.Glob operates over App names.
 type Service interface {
+	// DebugUpdateClock updates various bits of Syncbase virtual clock and clock
+	// daemon state based on the specified options.
+	// Requires --debug flag to be set (in addition to Admin check).
+	// Users of this function typically specify --debug-do-not-start-clockd when
+	// starting Syncbase so that they can configure the virtual clock before the
+	// daemon starts mucking with it.
+	DebugUpdateClock(uco DebugUpdateClockOpts) error {access.Admin}
+
+	// DebugNow returns the current time per the Syncbase clock.
+	// Requires --debug flag to be set (in addition to Admin check).
+	DebugNow() (time.Time | error) {access.Admin}
+
 	// SetPermissions and GetPermissions are included from the Object interface.
 	permissions.Object
 }

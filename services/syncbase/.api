@@ -24,13 +24,26 @@ pkg syncbase, type AppServerMethods interface, SetPermissions(*context.T, rpc.Se
 pkg syncbase, type AppServerStub interface, Describe__() []rpc.InterfaceDesc
 pkg syncbase, type AppServerStub interface, unexported methods
 pkg syncbase, type AppServerStubMethods AppServerMethods
-pkg syncbase, type ServiceClientMethods interface { GetPermissions, SetPermissions }
+pkg syncbase, type DebugUpdateClockOpts struct
+pkg syncbase, type DebugUpdateClockOpts struct, DoLocalUpdate bool
+pkg syncbase, type DebugUpdateClockOpts struct, DoNtpUpdate bool
+pkg syncbase, type DebugUpdateClockOpts struct, ElapsedTime time.Duration
+pkg syncbase, type DebugUpdateClockOpts struct, Now time.Time
+pkg syncbase, type DebugUpdateClockOpts struct, NtpHost string
+pkg syncbase, type DebugUpdateClockOpts struct, StartClockD bool
+pkg syncbase, type ServiceClientMethods interface { DebugNow, DebugUpdateClock, GetPermissions, SetPermissions }
+pkg syncbase, type ServiceClientMethods interface, DebugNow(*context.T, ...rpc.CallOpt) (time.Time, error)
+pkg syncbase, type ServiceClientMethods interface, DebugUpdateClock(*context.T, DebugUpdateClockOpts, ...rpc.CallOpt) error
 pkg syncbase, type ServiceClientMethods interface, GetPermissions(*context.T, ...rpc.CallOpt) (access.Permissions, string, error)
 pkg syncbase, type ServiceClientMethods interface, SetPermissions(*context.T, access.Permissions, string, ...rpc.CallOpt) error
-pkg syncbase, type ServiceClientStub interface { GetPermissions, SetPermissions }
+pkg syncbase, type ServiceClientStub interface { DebugNow, DebugUpdateClock, GetPermissions, SetPermissions }
+pkg syncbase, type ServiceClientStub interface, DebugNow(*context.T, ...rpc.CallOpt) (time.Time, error)
+pkg syncbase, type ServiceClientStub interface, DebugUpdateClock(*context.T, DebugUpdateClockOpts, ...rpc.CallOpt) error
 pkg syncbase, type ServiceClientStub interface, GetPermissions(*context.T, ...rpc.CallOpt) (access.Permissions, string, error)
 pkg syncbase, type ServiceClientStub interface, SetPermissions(*context.T, access.Permissions, string, ...rpc.CallOpt) error
-pkg syncbase, type ServiceServerMethods interface { GetPermissions, SetPermissions }
+pkg syncbase, type ServiceServerMethods interface { DebugNow, DebugUpdateClock, GetPermissions, SetPermissions }
+pkg syncbase, type ServiceServerMethods interface, DebugNow(*context.T, rpc.ServerCall) (time.Time, error)
+pkg syncbase, type ServiceServerMethods interface, DebugUpdateClock(*context.T, rpc.ServerCall, DebugUpdateClockOpts) error
 pkg syncbase, type ServiceServerMethods interface, GetPermissions(*context.T, rpc.ServerCall) (access.Permissions, string, error)
 pkg syncbase, type ServiceServerMethods interface, SetPermissions(*context.T, rpc.ServerCall, access.Permissions, string) error
 pkg syncbase, type ServiceServerStub interface, Describe__() []rpc.InterfaceDesc
