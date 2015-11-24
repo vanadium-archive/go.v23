@@ -263,7 +263,12 @@ func withCancelState(parent *T) (*T, func(error)) {
 	if ok {
 		cancelParent.addChild(cs)
 	}
-	return WithValue(parent, cancelKey, cs), func(err error) {
+	t := WithValue(parent, cancelKey, cs)
+	return t, func(err error) {
+		if t.V(4) {
+			t.Infof("context being cancelled:")
+			t.InfoStack(false)
+		}
 		if ok {
 			cancelParent.removeChild(cs)
 		}
