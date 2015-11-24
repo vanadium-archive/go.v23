@@ -105,7 +105,6 @@ type AppCycle interface {
 // They will instead use the package level functions that mirror these
 // factories.
 type Runtime interface {
-
 	// Init is a chance to initialize state in the runtime implementation
 	// after the runtime has been registered in the v23 package.
 	// Code that runs in this routine, unlike the code in the runtimes

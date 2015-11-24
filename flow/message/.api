@@ -7,6 +7,11 @@ pkg message, func NewErrMissingBlessings(*context.T, byte) error
 pkg message, func NewErrUnknownMsg(*context.T, byte) error
 pkg message, func NewErrWrongProtocol(*context.T) error
 pkg message, func Read(*context.T, []byte) (Message, error)
+pkg message, method (*Data) String() string
+pkg message, method (*OpenFlow) String() string
+pkg message, method (*ProxyResponse) String() string
+pkg message, method (*Setup) String() string
+pkg message, method (*TearDown) String() string
 pkg message, type AckLameDuck struct
 pkg message, type Auth struct
 pkg message, type Auth struct, BlessingsKey uint64

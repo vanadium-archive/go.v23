@@ -5,6 +5,8 @@
 package message
 
 import (
+	"encoding/hex"
+	"fmt"
 	"v.io/v23"
 	"v.io/v23/context"
 	"v.io/v23/naming"
@@ -215,6 +217,15 @@ func (m *Setup) read(ctx *context.T, orig []byte) error {
 	}
 	return nil
 }
+func (m *Setup) String() string {
+	return fmt.Sprintf("Versions:[%d,%d] PeerNaClPublicKey:%v PeerRemoteEndpoint:%v PeerLocalEndpoint:%v options:%v",
+		m.Versions.Min,
+		m.Versions.Max,
+		hex.EncodeToString(m.PeerNaClPublicKey[:]),
+		m.PeerRemoteEndpoint,
+		m.PeerLocalEndpoint,
+		m.uninterpretedOptions)
+}
 
 // TearDown is sent over the wire before a connection is closed.
 type TearDown struct {
@@ -229,6 +240,7 @@ func (m *TearDown) read(ctx *context.T, data []byte) error {
 	m.Message = string(data)
 	return nil
 }
+func (m *TearDown) String() string { return m.Message }
 
 // EnterLameDuck is sent as notification that the sender is entering lameduck mode.
 // The receiver should stop opening new flows on this connection and respond
@@ -348,6 +360,16 @@ func (m *OpenFlow) read(ctx *context.T, orig []byte) error {
 	}
 	return nil
 }
+func (m *OpenFlow) String() string {
+	return fmt.Sprintf("ID:%d InitialCounters:%d BlessingsKey:0x%x DischargeKey:0x%x Flags:0x%x Payload:(%d bytes in %d slices)",
+		m.ID,
+		m.InitialCounters,
+		m.BlessingsKey,
+		m.DischargeKey,
+		m.Flags,
+		payloadSize(m.Payload),
+		len(m.Payload))
+}
 
 // Release is sent as flows are read from locally.  The counters
 // inform remote writers that there is local buffer space available.
@@ -421,6 +443,9 @@ func (m *Data) read(ctx *context.T, orig []byte) error {
 	}
 	return nil
 }
+func (m *Data) String() string {
+	return fmt.Sprintf("ID:%d Flags:0x%x Payload:(%d bytes in %d slices)", m.ID, m.Flags, payloadSize(m.Payload), len(m.Payload))
+}
 
 // MultiProxyRequest is sent when a proxy wants to accept connections from another proxy.
 type MultiProxyRequest struct{}
@@ -473,6 +498,13 @@ func (m *ProxyResponse) read(ctx *context.T, orig []byte) error {
 		m.Endpoints = append(m.Endpoints, ep)
 	}
 	return nil
+}
+func (m *ProxyResponse) String() string {
+	strs := make([]string, len(m.Endpoints))
+	for i, ep := range m.Endpoints {
+		strs[i] = ep.String()
+	}
+	return fmt.Sprintf("Endpoints:%v", strs)
 }
 
 // HealthCheckRequest is periodically sent to test the health of a channel.
@@ -542,4 +574,12 @@ func writeVarUint64(u uint64, buf []byte) []byte {
 		buf = append(buf, byte(u>>uint(shift))&0xff)
 	}
 	return buf
+}
+
+func payloadSize(payload [][]byte) int {
+	sz := 0
+	for _, p := range payload {
+		sz += len(p)
+	}
+	return sz
 }
