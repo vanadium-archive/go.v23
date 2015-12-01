@@ -1931,7 +1931,8 @@ type DatabaseClientMethods interface {
 	// construct batch Database object name "/path/to/db##abc".) If this Database
 	// is already bound to a batch, BeginBatch() will fail with ErrBoundToBatch.
 	// Concurrency semantics are documented in model.go.
-	// TODO(sadovsky): Maybe make BatchOptions optional.
+	// TODO(sadovsky): Maybe make BatchOptions optional. Also, rename it to 'opts'
+	// everywhere now that v.io/i/912 is resolved.
 	BeginBatch(_ *context.T, schemaVersion int32, bo BatchOptions, _ ...rpc.CallOpt) (string, error)
 	// Commit persists the pending changes to the database.
 	// If this Database is not bound to a batch, Commit() will fail with
@@ -2211,7 +2212,8 @@ type DatabaseServerMethods interface {
 	// construct batch Database object name "/path/to/db##abc".) If this Database
 	// is already bound to a batch, BeginBatch() will fail with ErrBoundToBatch.
 	// Concurrency semantics are documented in model.go.
-	// TODO(sadovsky): Maybe make BatchOptions optional.
+	// TODO(sadovsky): Maybe make BatchOptions optional. Also, rename it to 'opts'
+	// everywhere now that v.io/i/912 is resolved.
 	BeginBatch(_ *context.T, _ rpc.ServerCall, schemaVersion int32, bo BatchOptions) (string, error)
 	// Commit persists the pending changes to the database.
 	// If this Database is not bound to a batch, Commit() will fail with
@@ -2353,7 +2355,8 @@ type DatabaseServerStubMethods interface {
 	// construct batch Database object name "/path/to/db##abc".) If this Database
 	// is already bound to a batch, BeginBatch() will fail with ErrBoundToBatch.
 	// Concurrency semantics are documented in model.go.
-	// TODO(sadovsky): Maybe make BatchOptions optional.
+	// TODO(sadovsky): Maybe make BatchOptions optional. Also, rename it to 'opts'
+	// everywhere now that v.io/i/912 is resolved.
 	BeginBatch(_ *context.T, _ rpc.ServerCall, schemaVersion int32, bo BatchOptions) (string, error)
 	// Commit persists the pending changes to the database.
 	// If this Database is not bound to a batch, Commit() will fail with
@@ -2512,7 +2515,7 @@ var descDatabase = rpc.InterfaceDesc{
 		},
 		{
 			Name: "BeginBatch",
-			Doc:  "// BeginBatch creates a new batch. It returns a \"batch suffix\" string to\n// append to the object name of this Database, yielding an object name for the\n// Database bound to the created batch. (For example, if this Database is\n// named \"/path/to/db\" and BeginBatch returns \"##abc\", the client should\n// construct batch Database object name \"/path/to/db##abc\".) If this Database\n// is already bound to a batch, BeginBatch() will fail with ErrBoundToBatch.\n// Concurrency semantics are documented in model.go.\n// TODO(sadovsky): Maybe make BatchOptions optional.",
+			Doc:  "// BeginBatch creates a new batch. It returns a \"batch suffix\" string to\n// append to the object name of this Database, yielding an object name for the\n// Database bound to the created batch. (For example, if this Database is\n// named \"/path/to/db\" and BeginBatch returns \"##abc\", the client should\n// construct batch Database object name \"/path/to/db##abc\".) If this Database\n// is already bound to a batch, BeginBatch() will fail with ErrBoundToBatch.\n// Concurrency semantics are documented in model.go.\n// TODO(sadovsky): Maybe make BatchOptions optional. Also, rename it to 'opts'\n// everywhere now that v.io/i/912 is resolved.",
 			InArgs: []rpc.ArgDesc{
 				{"schemaVersion", ``}, // int32
 				{"bo", ``},            // BatchOptions

@@ -33,7 +33,6 @@ const (
 
 func restartabilityInit(t *v23tests.T) (
 	rootDir string, clientCtx *context.T, serverCreds *modules.CustomCredentials) {
-
 	v23tests.RunRootMT(t, "--v23.tcp.address=127.0.0.1:0")
 
 	var err error

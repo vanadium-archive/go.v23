@@ -11,6 +11,7 @@ import (
 	"v.io/v23/context"
 	"v.io/v23/security"
 	"v.io/v23/security/access"
+	wire "v.io/v23/services/syncbase"
 	"v.io/v23/syncbase"
 	"v.io/v23/syncbase/nosql"
 	"v.io/v23/verror"
@@ -54,6 +55,21 @@ type securitySpecTestGroup struct {
 // TODO(rogulenko): Add more test groups.
 var securitySpecTestGroups = []securitySpecTestGroup{
 	// Service tests.
+	{
+		layer: serviceTest{f: func(ctx *context.T, s syncbase.Service) error {
+			_, err := wire.ServiceClient(s.FullName()).DevModeGetTime(ctx)
+			return err
+		}},
+		name:     "service.DevModeGetTime",
+		patterns: []string{"A_____"},
+	},
+	{
+		layer: serviceTest{f: func(ctx *context.T, s syncbase.Service) error {
+			return wire.ServiceClient(s.FullName()).DevModeUpdateClock(ctx, wire.DevModeUpdateClockOpts{})
+		}},
+		name:     "service.DevModeUpdateClock",
+		patterns: []string{"A_____"},
+	},
 	{
 		layer: serviceTest{f: func(ctx *context.T, s syncbase.Service) error {
 			_, _, err := s.GetPermissions(ctx)
@@ -293,7 +309,7 @@ func runTests(t *testing.T, expectSuccess bool, tests ...securitySpecTest) {
 		if expectSuccess && err != nil {
 			tu.Fatalf(t, "test %v failed with non-nil error: %v", test, err)
 		} else if !expectSuccess && verror.ErrorID(err) != verror.ErrNoAccess.ID {
-			tu.Fatalf(t, "test %v didn't fail with access.ErrNoPermissions error: %v", test, err)
+			tu.Fatalf(t, "test %v didn't fail with ErrNoAccess error: %v", test, err)
 		}
 	}
 }

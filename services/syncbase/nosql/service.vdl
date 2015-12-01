@@ -57,7 +57,8 @@ type Database interface {
 	// construct batch Database object name "/path/to/db##abc".) If this Database
 	// is already bound to a batch, BeginBatch() will fail with ErrBoundToBatch.
 	// Concurrency semantics are documented in model.go.
-	// TODO(sadovsky): Maybe make BatchOptions optional.
+	// TODO(sadovsky): Maybe make BatchOptions optional. Also, rename it to 'opts'
+	// everywhere now that v.io/i/912 is resolved.
 	BeginBatch(schemaVersion int32, bo BatchOptions) (string | error) {access.Read}
 
 	// Commit persists the pending changes to the database.

@@ -62,3 +62,23 @@ func TestV23RestartabilityWatch(t *testing.T) {
 func TestV23SyncbasedJoinSyncgroup(t *testing.T) {
 	v23tests.RunTest(t, V23TestSyncbasedJoinSyncgroup)
 }
+
+func TestV23VClockMovesForward(t *testing.T) {
+	v23tests.RunTest(t, V23TestVClockMovesForward)
+}
+
+func TestV23VClockSystemClock(t *testing.T) {
+	v23tests.RunTest(t, V23TestVClockSystemClock)
+}
+
+func TestV23VClockSystemClockFrequency(t *testing.T) {
+	v23tests.RunTest(t, V23TestVClockSystemClockFrequency)
+}
+
+func TestV23VClockNtp(t *testing.T) {
+	v23tests.RunTest(t, V23TestVClockNtp)
+}
+
+func TestV23VClockNtpFrequency(t *testing.T) {
+	v23tests.RunTest(t, V23TestVClockNtpFrequency)
+}
