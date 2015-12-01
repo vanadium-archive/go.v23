@@ -42,7 +42,7 @@ func V23TestDefaultCR(t *v23tests.T) {
 	// Setup database for App on sync0, create a syncgroup with sync0 and sync1
 	// and populate some initial data.
 	tu.RunClient(t, client0Creds, runSetupAppA, "sync0")
-	tu.RunClient(t, client0Creds, runCreateSyncgroup, "sync0", sgName, "tb:foo", "", "root:s0", "root:s1")
+	tu.RunClient(t, client0Creds, runCreateSyncgroup, "sync0", sgName, "tb:foo", "", "root:s0;root:s1")
 	tu.RunClient(t, client0Creds, runPopulateData, "sync0", "foo", "0", "1")
 
 	// Setup database for App on sync1, join the syncgroup created above and
@@ -61,8 +61,8 @@ func V23TestDefaultCR(t *v23tests.T) {
 
 	// Re enable sync between the two syncbases and wait for a bit to let the
 	// syncbases sync and call conflict resolution.
-	tu.RunClient(t, client0Creds, runToggleSync, "sync0", sgName, "root:s0", "root:s1")
-	tu.RunClient(t, client1Creds, runToggleSync, "sync1", sgName, "root:s0", "root:s1")
+	tu.RunClient(t, client0Creds, runToggleSync, "sync0", sgName, "root:s0;root:s1")
+	tu.RunClient(t, client1Creds, runToggleSync, "sync1", sgName, "root:s0;root:s1")
 
 	// Verify that the resolved data looks correct.
 	tu.RunClient(t, client0Creds, runWaitForValue, "sync0", "foo0", "concurrentUpdate"+"sync1")
@@ -95,7 +95,7 @@ func V23TestSyncbasedSyncWithAppResolvedConflicts(t *v23tests.T) {
 	// Setup database for App on sync0, create a syncgroup with sync0 and sync1
 	// and populate some initial data.
 	tu.RunClient(t, client0Creds, runSetupAppA, "sync0")
-	tu.RunClient(t, client0Creds, runCreateSyncgroup, "sync0", sgName, "tb:foo", "", "root:s0", "root:s1")
+	tu.RunClient(t, client0Creds, runCreateSyncgroup, "sync0", sgName, "tb:foo", "", "root:s0;root:s1")
 	tu.RunClient(t, client0Creds, runPopulateData, "sync0", "foo", "0")
 
 	// Setup database for App on sync1, join the syncgroup created above and
@@ -131,8 +131,8 @@ func V23TestSyncbasedSyncWithAppResolvedConflicts(t *v23tests.T) {
 
 	// Re enable sync between the two syncbases and wait for a bit to let the
 	// syncbases sync and call conflict resolution.
-	tu.RunClient(t, client0Creds, runToggleSync, "sync0", sgName, "root:s0", "root:s1")
-	tu.RunClient(t, client1Creds, runToggleSync, "sync1", sgName, "root:s0", "root:s1")
+	tu.RunClient(t, client0Creds, runToggleSync, "sync0", sgName, "root:s0;root:s1")
+	tu.RunClient(t, client1Creds, runToggleSync, "sync1", sgName, "root:s0;root:s1")
 
 	// Verify that the resolved data looks correct.
 	keyUnderConflict := "foo8" // one of the keys under conflict
