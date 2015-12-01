@@ -16,18 +16,14 @@ import (
 	_ "v.io/v23/vdlroot/time"
 )
 
-// DebugUpdateClockOpts specifies what DebugUpdateClock should do, as described
-// below.
-type DebugUpdateClockOpts struct {
+// DevModeUpdateClockOpts specifies what DevModeUpdateClock should do, as
+// described below.
+type DevModeUpdateClockOpts struct {
 	// If specified, sets the NTP host to talk to for subsequent NTP requests.
 	NtpHost string
 	// If Now is specified, the fake system clock is updated to the given values
 	// of Now and ElapsedTime. If Now is not specified (i.e. takes the zero
-	// value), the system clock is not touched by DebugUpdateClock.
-	// TODO(sadovsky): Update the Syncbase clock implementation to allow for
-	// injecting a fake system clock. This fake system clock should use the actual
-	// system clock to determine how to respond to fakeClock.Now() and
-	// fakeClock.ElapsedTime() calls.
+	// value), the system clock is not touched by DevModeUpdateClock.
 	Now         time.Time
 	ElapsedTime time.Duration
 	// If specified, the clock daemon's local and/or NTP update code is triggered
@@ -36,17 +32,13 @@ type DebugUpdateClockOpts struct {
 	// clock daemon hasn't been started.
 	DoNtpUpdate   bool
 	DoLocalUpdate bool
-	// If true, instructs the server to start clockd. If clockd has already been
-	// started, DebugUpdateClock returns an error. Only useful if syncbased was
-	// started with --debug-do-not-start-clockd.
-	StartClockD bool
 }
 
-func (DebugUpdateClockOpts) __VDLReflect(struct {
-	Name string `vdl:"v.io/v23/services/syncbase.DebugUpdateClockOpts"`
+func (DevModeUpdateClockOpts) __VDLReflect(struct {
+	Name string `vdl:"v.io/v23/services/syncbase.DevModeUpdateClockOpts"`
 }) {
 }
 
 func init() {
-	vdl.Register((*DebugUpdateClockOpts)(nil))
+	vdl.Register((*DevModeUpdateClockOpts)(nil))
 }

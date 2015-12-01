@@ -70,3 +70,23 @@ func TestV23SyncgroupRendezvousOnlineCloud(t *testing.T) {
 func TestV23SyncgroupPreknownStaggered(t *testing.T) {
 	v23tests.RunTest(t, V23TestSyncgroupPreknownStaggered)
 }
+
+func TestV23VClockMovesForward(t *testing.T) {
+	v23tests.RunTest(t, V23TestVClockMovesForward)
+}
+
+func TestV23VClockSystemClock(t *testing.T) {
+	v23tests.RunTest(t, V23TestVClockSystemClock)
+}
+
+func TestV23VClockSystemClockFrequency(t *testing.T) {
+	v23tests.RunTest(t, V23TestVClockSystemClockFrequency)
+}
+
+func TestV23VClockNtp(t *testing.T) {
+	v23tests.RunTest(t, V23TestVClockNtp)
+}
+
+func TestV23VClockNtpFrequency(t *testing.T) {
+	v23tests.RunTest(t, V23TestVClockNtpFrequency)
+}

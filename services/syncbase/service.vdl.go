@@ -29,11 +29,18 @@ import (
 )
 
 var (
-	ErrInvalidName = verror.Register("v.io/v23/services/syncbase.InvalidName", verror.NoRetry, "{1:}{2:} invalid name: {3}")
+	ErrNotInDevMode = verror.Register("v.io/v23/services/syncbase.NotInDevMode", verror.NoRetry, "{1:}{2:} not running with --dev=true")
+	ErrInvalidName  = verror.Register("v.io/v23/services/syncbase.InvalidName", verror.NoRetry, "{1:}{2:} invalid name: {3}")
 )
 
 func init() {
+	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrNotInDevMode.ID), "{1:}{2:} not running with --dev=true")
 	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrInvalidName.ID), "{1:}{2:} invalid name: {3}")
+}
+
+// NewErrNotInDevMode returns an error with the ErrNotInDevMode ID.
+func NewErrNotInDevMode(ctx *context.T) error {
+	return verror.New(ErrNotInDevMode, ctx)
 }
 
 // NewErrInvalidName returns an error with the ErrInvalidName ID.
@@ -92,16 +99,13 @@ type ServiceClientMethods interface {
 	//    GetPermissions() (perms access.Permissions, version string, err error) {Blue}
 	//  }
 	permissions.ObjectClientMethods
-	// DebugUpdateClock updates various bits of Syncbase virtual clock and clock
+	// DevModeUpdateClock updates various bits of Syncbase virtual clock and clock
 	// daemon state based on the specified options.
-	// Requires --debug flag to be set (in addition to Admin check).
-	// Users of this function typically specify --debug-do-not-start-clockd when
-	// starting Syncbase so that they can configure the virtual clock before the
-	// daemon starts mucking with it.
-	DebugUpdateClock(_ *context.T, uco DebugUpdateClockOpts, _ ...rpc.CallOpt) error
-	// DebugNow returns the current time per the Syncbase clock.
-	// Requires --debug flag to be set (in addition to Admin check).
-	DebugNow(*context.T, ...rpc.CallOpt) (time.Time, error)
+	// Requires --dev flag to be set (in addition to Admin check).
+	DevModeUpdateClock(_ *context.T, uco DevModeUpdateClockOpts, _ ...rpc.CallOpt) error
+	// DevModeGetTime returns the current time per the Syncbase clock.
+	// Requires --dev flag to be set (in addition to Admin check).
+	DevModeGetTime(*context.T, ...rpc.CallOpt) (time.Time, error)
 }
 
 // ServiceClientStub adds universal methods to ServiceClientMethods.
@@ -121,13 +125,13 @@ type implServiceClientStub struct {
 	permissions.ObjectClientStub
 }
 
-func (c implServiceClientStub) DebugUpdateClock(ctx *context.T, i0 DebugUpdateClockOpts, opts ...rpc.CallOpt) (err error) {
-	err = v23.GetClient(ctx).Call(ctx, c.name, "DebugUpdateClock", []interface{}{i0}, nil, opts...)
+func (c implServiceClientStub) DevModeUpdateClock(ctx *context.T, i0 DevModeUpdateClockOpts, opts ...rpc.CallOpt) (err error) {
+	err = v23.GetClient(ctx).Call(ctx, c.name, "DevModeUpdateClock", []interface{}{i0}, nil, opts...)
 	return
 }
 
-func (c implServiceClientStub) DebugNow(ctx *context.T, opts ...rpc.CallOpt) (o0 time.Time, err error) {
-	err = v23.GetClient(ctx).Call(ctx, c.name, "DebugNow", nil, []interface{}{&o0}, opts...)
+func (c implServiceClientStub) DevModeGetTime(ctx *context.T, opts ...rpc.CallOpt) (o0 time.Time, err error) {
+	err = v23.GetClient(ctx).Call(ctx, c.name, "DevModeGetTime", nil, []interface{}{&o0}, opts...)
 	return
 }
 
@@ -182,16 +186,13 @@ type ServiceServerMethods interface {
 	//    GetPermissions() (perms access.Permissions, version string, err error) {Blue}
 	//  }
 	permissions.ObjectServerMethods
-	// DebugUpdateClock updates various bits of Syncbase virtual clock and clock
+	// DevModeUpdateClock updates various bits of Syncbase virtual clock and clock
 	// daemon state based on the specified options.
-	// Requires --debug flag to be set (in addition to Admin check).
-	// Users of this function typically specify --debug-do-not-start-clockd when
-	// starting Syncbase so that they can configure the virtual clock before the
-	// daemon starts mucking with it.
-	DebugUpdateClock(_ *context.T, _ rpc.ServerCall, uco DebugUpdateClockOpts) error
-	// DebugNow returns the current time per the Syncbase clock.
-	// Requires --debug flag to be set (in addition to Admin check).
-	DebugNow(*context.T, rpc.ServerCall) (time.Time, error)
+	// Requires --dev flag to be set (in addition to Admin check).
+	DevModeUpdateClock(_ *context.T, _ rpc.ServerCall, uco DevModeUpdateClockOpts) error
+	// DevModeGetTime returns the current time per the Syncbase clock.
+	// Requires --dev flag to be set (in addition to Admin check).
+	DevModeGetTime(*context.T, rpc.ServerCall) (time.Time, error)
 }
 
 // ServiceServerStubMethods is the server interface containing
@@ -231,12 +232,12 @@ type implServiceServerStub struct {
 	gs *rpc.GlobState
 }
 
-func (s implServiceServerStub) DebugUpdateClock(ctx *context.T, call rpc.ServerCall, i0 DebugUpdateClockOpts) error {
-	return s.impl.DebugUpdateClock(ctx, call, i0)
+func (s implServiceServerStub) DevModeUpdateClock(ctx *context.T, call rpc.ServerCall, i0 DevModeUpdateClockOpts) error {
+	return s.impl.DevModeUpdateClock(ctx, call, i0)
 }
 
-func (s implServiceServerStub) DebugNow(ctx *context.T, call rpc.ServerCall) (time.Time, error) {
-	return s.impl.DebugNow(ctx, call)
+func (s implServiceServerStub) DevModeGetTime(ctx *context.T, call rpc.ServerCall) (time.Time, error) {
+	return s.impl.DevModeGetTime(ctx, call)
 }
 
 func (s implServiceServerStub) Globber() *rpc.GlobState {
@@ -260,16 +261,16 @@ var descService = rpc.InterfaceDesc{
 	},
 	Methods: []rpc.MethodDesc{
 		{
-			Name: "DebugUpdateClock",
-			Doc:  "// DebugUpdateClock updates various bits of Syncbase virtual clock and clock\n// daemon state based on the specified options.\n// Requires --debug flag to be set (in addition to Admin check).\n// Users of this function typically specify --debug-do-not-start-clockd when\n// starting Syncbase so that they can configure the virtual clock before the\n// daemon starts mucking with it.",
+			Name: "DevModeUpdateClock",
+			Doc:  "// DevModeUpdateClock updates various bits of Syncbase virtual clock and clock\n// daemon state based on the specified options.\n// Requires --dev flag to be set (in addition to Admin check).",
 			InArgs: []rpc.ArgDesc{
-				{"uco", ``}, // DebugUpdateClockOpts
+				{"uco", ``}, // DevModeUpdateClockOpts
 			},
 			Tags: []*vdl.Value{vdl.ValueOf(access.Tag("Admin"))},
 		},
 		{
-			Name: "DebugNow",
-			Doc:  "// DebugNow returns the current time per the Syncbase clock.\n// Requires --debug flag to be set (in addition to Admin check).",
+			Name: "DevModeGetTime",
+			Doc:  "// DevModeGetTime returns the current time per the Syncbase clock.\n// Requires --dev flag to be set (in addition to Admin check).",
 			OutArgs: []rpc.ArgDesc{
 				{"", ``}, // time.Time
 			},
