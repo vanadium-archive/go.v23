@@ -13,7 +13,7 @@ const (
 	b739Stage2 b739stage = 2 // Use colons in all newly created certificates
 	b739Stage3 b739stage = 3 // Final stage: Stop recognizing slashes
 
-	b739 = b739Stage3
+	b739 = b739Stage2
 )
 
 // Bug739* is used to enable rolling out the change that switches the
