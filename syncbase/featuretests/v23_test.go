@@ -59,6 +59,14 @@ func TestV23RestartabilityWatch(t *testing.T) {
 	v23tests.RunTest(t, V23TestRestartabilityWatch)
 }
 
-func TestV23SyncbasedJoinSyncgroup(t *testing.T) {
-	v23tests.RunTest(t, V23TestSyncbasedJoinSyncgroup)
+func TestV23SyncgroupRendezvousOnline(t *testing.T) {
+	v23tests.RunTest(t, V23TestSyncgroupRendezvousOnline)
+}
+
+func TestV23SyncgroupRendezvousOnlineCloud(t *testing.T) {
+	v23tests.RunTest(t, V23TestSyncgroupRendezvousOnlineCloud)
+}
+
+func TestV23SyncgroupPreknownStaggered(t *testing.T) {
+	v23tests.RunTest(t, V23TestSyncgroupPreknownStaggered)
 }

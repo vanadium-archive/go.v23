@@ -42,13 +42,17 @@ var runSetupAppA = modules.Register(func(env *modules.Env, args ...string) error
 }, "runSetupAppA")
 
 /////////////////////////////////////////////////////////
-// Helpers for adding or updating data
+// Helpers for adding or updating data.
+
+var runPopulateData = modules.Register(func(env *modules.Env, args ...string) error {
+	return runPopulateDataInternal(args...)
+}, "runPopulateData")
 
 // Arguments: 0: Syncbase name, 1: key prefix, 2: start index
 // Optional args: 3: end index.
 // Values are from [start,end) or [start, start+10) depending on whether end
 // param was provided.
-var runPopulateData = modules.Register(func(env *modules.Env, args ...string) error {
+func runPopulateDataInternal(args ...string) error {
 	ctx, shutdown := v23.Init()
 	defer shutdown()
 
@@ -74,7 +78,7 @@ var runPopulateData = modules.Register(func(env *modules.Env, args ...string) er
 		}
 	}
 	return nil
-}, "runPopulateData")
+}
 
 // Arguments: 0: Syncbase name, 1: start index.
 // Optional args: 2: end index, 3: value prefix.
@@ -157,10 +161,14 @@ var runUpdateBatchData = modules.Register(func(env *modules.Env, args ...string)
 }, "runUpdateBatchData")
 
 //////////////////////////////////////////////
-// Helpers for verifying data
+// Helpers for verifying data.
 
 // Arguments: 0: syncbase name, 1: key prefix, 2: start index, 3: number of keys, 4: skip scan.
 var runVerifySyncgroupData = modules.Register(func(env *modules.Env, args ...string) error {
+	return runVerifySyncgroupDataInternal(args...)
+}, "runVerifySyncgroupData")
+
+func runVerifySyncgroupDataInternal(args ...string) error {
 	ctx, shutdown := v23.Init()
 	defer shutdown()
 
@@ -221,14 +229,18 @@ var runVerifySyncgroupData = modules.Register(func(env *modules.Env, args ...str
 		}
 	}
 	return nil
-}, "runVerifySyncgroupData")
+}
 
 //////////////////////////////////////////////
-// Helpers for managing syncgroups
+// Helpers for managing syncgroups.
 
 // Arguments: 0: Syncbase name, 1: syncgroup name, 2: prefixes, 3: mount table,
-// 4 onwards: syncgroup permission blessings.
+// 4: syncgroup permission blessings (; separated)
 var runCreateSyncgroup = modules.Register(func(env *modules.Env, args ...string) error {
+	return runCreateSyncgroupInternal(env, args...)
+}, "runCreateSyncgroup")
+
+func runCreateSyncgroupInternal(env *modules.Env, args ...string) error {
 	ctx, shutdown := v23.Init()
 	defer shutdown()
 
@@ -240,9 +252,11 @@ var runCreateSyncgroup = modules.Register(func(env *modules.Env, args ...string)
 		mtName = env.Vars[ref.EnvNamespacePrefix]
 	}
 
+	blessings := strings.Split(args[4], ";")
+
 	spec := wire.SyncgroupSpec{
 		Description: "test syncgroup sg",
-		Perms:       perms(args[4:]...),
+		Perms:       perms(blessings...),
 		Prefixes:    toSgPrefixes(args[2]),
 		MountTables: []string{mtName},
 	}
@@ -253,7 +267,86 @@ var runCreateSyncgroup = modules.Register(func(env *modules.Env, args ...string)
 		return fmt.Errorf("Create SG %q failed: %v\n", args[1], err)
 	}
 	return nil
-}, "runCreateSyncgroup")
+}
+
+var runJoinSyncgroup = modules.Register(func(env *modules.Env, args ...string) error {
+	return runJoinSyncGroupInternal(args...)
+}, "runJoinSyncgroup")
+
+// Arguments: 0: Syncbase name, 1: syncgroup name.
+func runJoinSyncGroupInternal(args ...string) error {
+	ctx, shutdown := v23.Init()
+	defer shutdown()
+
+	a := syncbase.NewService(args[0]).App("a")
+	d := a.NoSQLDatabase("d", nil)
+
+	sg := d.Syncgroup(args[1])
+	info := wire.SyncgroupMemberInfo{SyncPriority: 10}
+	if _, err := sg.Join(ctx, info); err != nil {
+		return fmt.Errorf("Join SG %q failed: %v\n", args[1], err)
+	}
+	return nil
+}
+
+// Arguments: 0: Syncbase name, 1: syncgroup name, 2: number of syncgroup
+// members.
+var runVerifySyncgroupMembers = modules.Register(func(env *modules.Env, args ...string) error {
+	ctx, shutdown := v23.Init()
+	defer shutdown()
+
+	a := syncbase.NewService(args[0]).App("a")
+	d := a.NoSQLDatabase("d", nil)
+
+	sg := d.Syncgroup(args[1])
+
+	wantMembers, err := strconv.ParseUint(args[2], 10, 64)
+	if err != nil {
+		return err
+	}
+	var gotMembers uint64
+
+	for i := 0; i < 8; i++ {
+		time.Sleep(500 * time.Millisecond)
+		members, err := sg.GetMembers(ctx)
+		if err != nil {
+			return fmt.Errorf("GetMembers %q SG %q failed: %v\n", args[0], args[1], err)
+		}
+		gotMembers = uint64(len(members))
+		if wantMembers == gotMembers {
+			break
+		}
+	}
+	if wantMembers != gotMembers {
+		return fmt.Errorf("GetMembers %q SG %q failed: members got %v, want %v\n", args[0], args[1], gotMembers, wantMembers)
+	}
+	return nil
+}, "runVerifySyncgroupMembers")
+
+// Arguments: 0: Syncbase name, 1: Syncgroup name, 2: syncgroup permission
+// blessings (; separated).
+var runToggleSync = modules.Register(func(env *modules.Env, args ...string) error {
+	ctx, shutdown := v23.Init()
+	defer shutdown()
+
+	serviceName, sgName := args[0], args[1]
+	blessings := strings.Split(args[2], ";")
+
+	a := syncbase.NewService(serviceName).App("a")
+	d := a.NoSQLDatabase("d", nil)
+
+	sg := d.Syncgroup(sgName)
+	spec, ver, err := sg.GetSpec(ctx)
+	if err != nil {
+		return err
+	}
+	spec.Perms = perms(blessings...)
+
+	return sg.SetSpec(ctx, spec, ver)
+}, "runToggleSync")
+
+//////////////////////////////
+// Helpers.
 
 func perms(bps ...string) access.Permissions {
 	perms := access.Permissions{}
@@ -279,38 +372,3 @@ func toSgPrefixes(csv string) []wire.TableRow {
 	}
 	return res
 }
-
-var runJoinSyncgroup = modules.Register(func(env *modules.Env, args ...string) error {
-	ctx, shutdown := v23.Init()
-	defer shutdown()
-
-	a := syncbase.NewService(args[0]).App("a")
-	d := a.NoSQLDatabase("d", nil)
-
-	sg := d.Syncgroup(args[1])
-	info := wire.SyncgroupMemberInfo{SyncPriority: 10}
-	if _, err := sg.Join(ctx, info); err != nil {
-		return fmt.Errorf("Join SG %q failed: %v\n", args[1], err)
-	}
-	return nil
-}, "runJoinSyncgroup")
-
-// Arguments: 0: Syncbase name, 1: Syncgroup name, 2 onwards: Syncgroup permission blessings.
-var runToggleSync = modules.Register(func(env *modules.Env, args ...string) error {
-	ctx, shutdown := v23.Init()
-	defer shutdown()
-
-	serviceName, sgName, blessings := args[0], args[1], args[2:]
-
-	a := syncbase.NewService(serviceName).App("a")
-	d := a.NoSQLDatabase("d", nil)
-
-	sg := d.Syncgroup(sgName)
-	spec, ver, err := sg.GetSpec(ctx)
-	if err != nil {
-		return err
-	}
-	spec.Perms = perms(blessings...)
-
-	return sg.SetSpec(ctx, spec, ver)
-}, "runToggleSync")
