@@ -131,10 +131,6 @@ type Runtime interface {
 	//   supported by the runtime implementation hosting NewEndpoint
 	NewEndpoint(ep string) (naming.Endpoint, error)
 
-	// WithNewStreamManager creates a new StreamManager instance and context
-	// with that StreamManager attached.
-	WithNewStreamManager(ctx *context.T) (*context.T, error)
-
 	// WithPrincipal attaches 'principal' to the returned context.
 	WithPrincipal(ctx *context.T, principal security.Principal) (*context.T, error)
 
@@ -246,12 +242,6 @@ type Runtime interface {
 //   supported by the runtime implementation hosting NewEndpoint
 func NewEndpoint(ep string) (naming.Endpoint, error) {
 	return initState.currentRuntime().NewEndpoint(ep)
-}
-
-// WithNewStreamManager creates a new StreamManager instance and context
-// with that StreamManager attached.
-func WithNewStreamManager(ctx *context.T) (*context.T, error) {
-	return initState.currentRuntime().WithNewStreamManager(ctx)
 }
 
 // WithPrincipal attaches 'principal' to the returned context.
