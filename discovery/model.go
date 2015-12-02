@@ -54,8 +54,8 @@ type Scanner interface {
 	//
 	// Examples
 	//
-	//    v.InstanceName = "v.io/i"
-	//    v.InstanceName = "v.io/i" AND v.Attrs["a"] = "v"
+	//    v.InterfaceName = "v.io/i"
+	//    v.InterfaceName = "v.io/i" AND v.Attrs["a"] = "v"
 	//    v.Attrs["a"] = "v1" OR v.Attrs["a"] = "v2"
 	//
 	// SyncQL tutorial at:
