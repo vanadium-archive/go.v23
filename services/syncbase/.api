@@ -2,6 +2,7 @@ pkg syncbase, func AppClient(string) AppClientStub
 pkg syncbase, func AppServer(AppServerMethods) AppServerStub
 pkg syncbase, func NewErrInvalidName(*context.T, string) error
 pkg syncbase, func NewErrNotInDevMode(*context.T) error
+pkg syncbase, func NewErrUnknownBatch(*context.T) error
 pkg syncbase, func ServiceClient(string) ServiceClientStub
 pkg syncbase, func ServiceServer(ServiceServerMethods) ServiceServerStub
 pkg syncbase, type AppClientMethods interface { Create, Destroy, Exists, GetPermissions, SetPermissions }
@@ -52,4 +53,5 @@ pkg syncbase, type ServiceServerStubMethods ServiceServerMethods
 pkg syncbase, var AppDesc rpc.InterfaceDesc
 pkg syncbase, var ErrInvalidName verror.IDAction
 pkg syncbase, var ErrNotInDevMode verror.IDAction
+pkg syncbase, var ErrUnknownBatch verror.IDAction
 pkg syncbase, var ServiceDesc rpc.InterfaceDesc
