@@ -40,6 +40,9 @@ const (
 
 	// RPCVersion12 adds periodic healthchecks on the channel.
 	RPCVersion12
+
+	// RPCVersion13 adds error messages in responses from proxies.
+	RPCVersion13
 )
 
 // RPCVersionRange allows you to optionally specify a range of versions to

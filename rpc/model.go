@@ -167,6 +167,8 @@ type ProxyStatus struct {
 	// Endpoint is the Endpoint that this server is using to receive proxied
 	// requests on. The Endpoint of the proxy itself can be obtained by
 	// resolving its name.
+	// DEPRECATED: This field is no longer in use. Instead you should just rely on
+	// rpc.Server.Status().Endpoints.
 	Endpoint naming.Endpoint
 	// The error status of the connection to the proxy, nil if the connection
 	// is currently correctly established, the most recent error otherwise.

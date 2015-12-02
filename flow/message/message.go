@@ -57,6 +57,8 @@ func Read(ctx *context.T, from []byte) (Message, error) {
 		m = &ProxyServerRequest{}
 	case proxyResponseType:
 		m = &ProxyResponse{}
+	case proxyErrorReponseType:
+		m = &ProxyErrorResponse{}
 	case healthCheckRequestType:
 		m = &HealthCheckRequest{}
 	case healthCheckResponseType:
@@ -96,6 +98,7 @@ const (
 	proxyResponseType
 	healthCheckRequestType
 	healthCheckResponseType
+	proxyErrorReponseType
 )
 
 // setup options.
@@ -505,6 +508,26 @@ func (m *ProxyResponse) String() string {
 		strs[i] = ep.String()
 	}
 	return fmt.Sprintf("Endpoints:%v", strs)
+}
+
+// ProxyErrorResponse is send by a proxy in response to a ProxyServerRequest or
+// MultiProxyRequest if the proxy encountered an error while responding to the
+// request. It should be sent in lieu of a ProxyResponse.
+type ProxyErrorResponse struct {
+	Error string
+}
+
+func (m *ProxyErrorResponse) append(ctx *context.T, data []byte) ([]byte, error) {
+	data = append(data, proxyErrorReponseType)
+	data = append(data, []byte(m.Error)...)
+	return data, nil
+}
+func (m *ProxyErrorResponse) read(ctx *context.T, orig []byte) error {
+	m.Error = string(orig)
+	return nil
+}
+func (m *ProxyErrorResponse) String() string {
+	return m.Error
 }
 
 // HealthCheckRequest is periodically sent to test the health of a channel.
