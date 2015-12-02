@@ -167,5 +167,7 @@ func TestProxy(t *testing.T) {
 		&message.ProxyServerRequest{},
 		&message.ProxyResponse{},
 		&message.ProxyResponse{Endpoints: []naming.Endpoint{ep1, ep2}},
+		&message.ProxyErrorResponse{},
+		&message.ProxyErrorResponse{Error: "error"},
 	})
 }

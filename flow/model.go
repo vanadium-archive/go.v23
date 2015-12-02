@@ -33,9 +33,11 @@ type Manager interface {
 
 	// ProxyListen causes the Manager to accept flows from the specified endpoint.
 	// The endpoint must correspond to a vanadium proxy.
-	// The call will block until the connection to the proxy endpoint fails. The
-	// caller may then choose to retry the connection.
-	ProxyListen(ctx *context.T, endpoint naming.Endpoint) error
+	// If error != nil, establishing a connection to the Proxy failed.
+	// Otherwise, if error == nil, the returned chan will block until the
+	// connection to the proxy endpoint fails. The caller may then choose to retry
+	// the connection.
+	ProxyListen(ctx *context.T, endpoint naming.Endpoint) (<-chan struct{}, error)
 
 	// ListeningEndpoints returns the endpoints that the Manager has explicitly
 	// called Listen on. The Manager will accept new flows on these endpoints.

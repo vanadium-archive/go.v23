@@ -9,6 +9,7 @@ pkg message, func NewErrWrongProtocol(*context.T) error
 pkg message, func Read(*context.T, []byte) (Message, error)
 pkg message, method (*Data) String() string
 pkg message, method (*OpenFlow) String() string
+pkg message, method (*ProxyErrorResponse) String() string
 pkg message, method (*ProxyResponse) String() string
 pkg message, method (*Setup) String() string
 pkg message, method (*TearDown) String() string
@@ -33,6 +34,8 @@ pkg message, type OpenFlow struct, Flags uint64
 pkg message, type OpenFlow struct, ID uint64
 pkg message, type OpenFlow struct, InitialCounters uint64
 pkg message, type OpenFlow struct, Payload [][]byte
+pkg message, type ProxyErrorResponse struct
+pkg message, type ProxyErrorResponse struct, Error string
 pkg message, type ProxyResponse struct
 pkg message, type ProxyResponse struct, Endpoints []naming.Endpoint
 pkg message, type ProxyServerRequest struct
