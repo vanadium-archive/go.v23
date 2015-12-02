@@ -31,11 +31,13 @@ import (
 var (
 	ErrNotInDevMode = verror.Register("v.io/v23/services/syncbase.NotInDevMode", verror.NoRetry, "{1:}{2:} not running with --dev=true")
 	ErrInvalidName  = verror.Register("v.io/v23/services/syncbase.InvalidName", verror.NoRetry, "{1:}{2:} invalid name: {3}")
+	ErrUnknownBatch = verror.Register("v.io/v23/services/syncbase.UnknownBatch", verror.NoRetry, "{1:}{2:} unknown batch, perhaps the server restarted")
 )
 
 func init() {
 	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrNotInDevMode.ID), "{1:}{2:} not running with --dev=true")
 	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrInvalidName.ID), "{1:}{2:} invalid name: {3}")
+	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrUnknownBatch.ID), "{1:}{2:} unknown batch, perhaps the server restarted")
 }
 
 // NewErrNotInDevMode returns an error with the ErrNotInDevMode ID.
@@ -46,6 +48,11 @@ func NewErrNotInDevMode(ctx *context.T) error {
 // NewErrInvalidName returns an error with the ErrInvalidName ID.
 func NewErrInvalidName(ctx *context.T, name string) error {
 	return verror.New(ErrInvalidName, ctx, name)
+}
+
+// NewErrUnknownBatch returns an error with the ErrUnknownBatch ID.
+func NewErrUnknownBatch(ctx *context.T) error {
+	return verror.New(ErrUnknownBatch, ctx)
 }
 
 // ServiceClientMethods is the client interface

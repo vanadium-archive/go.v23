@@ -22,7 +22,8 @@ import (
 
 	"v.io/v23"
 	"v.io/v23/context"
-	wire "v.io/v23/services/syncbase/nosql"
+	sbwire "v.io/v23/services/syncbase"
+	nosqlwire "v.io/v23/services/syncbase/nosql"
 	"v.io/v23/syncbase"
 	_ "v.io/x/ref/runtime/factories/generic"
 	tu "v.io/x/ref/services/syncbase/testutil"
@@ -203,7 +204,7 @@ func V23TestRestartabilityReadOnlyBatch(t *v23tests.T) {
 		t.Fatalf("r.Put() failed: %v", err)
 	}
 
-	batch, err := d.BeginBatch(clientCtx, wire.BatchOptions{ReadOnly: true})
+	batch, err := d.BeginBatch(clientCtx, nosqlwire.BatchOptions{ReadOnly: true})
 	if err != nil {
 		t.Fatalf("unable to start batch: %v", err)
 	}
@@ -230,16 +231,12 @@ func V23TestRestartabilityReadOnlyBatch(t *v23tests.T) {
 	cleanup = tu.StartKillableSyncbased(t, serverCreds, syncbaseName, rootDir, ACL)
 	defer cleanup(syscall.SIGINT)
 
-	// TODO(kash): The methods below currently fail with "invalid name" which
-	// isn't very helpful. We should return an error like "batch does not
-	// exist".
-	// if err := r.Get(clientCtx, &result); verror.ErrorID(err) != verror.ErrNoExist.ID {
-	// 	t.Fatalf("expected r.Get() to fail because of ErrNoExist.  got: %v", err)
-	// }
-
-	// if err := batch.Commit(clientCtx); err != nil {
-	// 	t.Fatalf("%v", err)
-	// }
+	if err := r.Get(clientCtx, &result); verror.ErrorID(err) != sbwire.ErrUnknownBatch.ID {
+		t.Fatalf("expected r.Get() to fail because of ErrUnknownBatch.  got: %v", err)
+	}
+	if err := batch.Commit(clientCtx); verror.ErrorID(err) != sbwire.ErrUnknownBatch.ID {
+		t.Fatalf("expected Commit() to fail because of ErrUnknownBatch.  got: %v", err)
+	}
 
 	// Try to get the row outside of a batch.  It should exist.
 	if err := d.Table("tb").Row("r").Get(clientCtx, &result); err != nil {
@@ -253,7 +250,7 @@ func V23TestRestartabilityReadWriteBatch(t *v23tests.T) {
 	cleanup := tu.StartKillableSyncbased(t, serverCreds, syncbaseName, rootDir, ACL)
 	d := createAppDatabaseTable(t, clientCtx)
 
-	batch, err := d.BeginBatch(clientCtx, wire.BatchOptions{})
+	batch, err := d.BeginBatch(clientCtx, nosqlwire.BatchOptions{})
 	if err != nil {
 		t.Fatalf("unable to start batch: %v", err)
 	}
@@ -284,16 +281,12 @@ func V23TestRestartabilityReadWriteBatch(t *v23tests.T) {
 	cleanup = tu.StartKillableSyncbased(t, serverCreds, syncbaseName, rootDir, ACL)
 	defer cleanup(syscall.SIGINT)
 
-	// TODO(kash): The methods below currently fail with "invalid name" which
-	// isn't very helpful. We should return an error like "batch does not
-	// exist".
-	// if err := r.Get(clientCtx, &result); verror.ErrorID(err) != verror.ErrNoExist.ID {
-	// 	t.Fatalf("expected r.Get() to fail because of ErrNoExist.  got: %v", err)
-	// }
-
-	// if err := batch.Commit(clientCtx); err != nil {
-	// 	t.Fatalf("%v", err)
-	// }
+	if err := r.Get(clientCtx, &result); verror.ErrorID(err) != sbwire.ErrUnknownBatch.ID {
+		t.Fatalf("expected r.Get() to fail because of ErrUnknownBatch.  got: %v", err)
+	}
+	if err := batch.Commit(clientCtx); verror.ErrorID(err) != sbwire.ErrUnknownBatch.ID {
+		t.Fatalf("expected Commit() to fail because of ErrUnknownBatch.  got: %v", err)
+	}
 
 	// Try to get the row outside of a batch.  It should not exist.
 	if err := d.Table("tb").Row("r").Get(clientCtx, &result); verror.ErrorID(err) != verror.ErrNoExist.ID {
@@ -315,7 +308,7 @@ func V23TestRestartabilityWatch(t *v23tests.T) {
 	d := createAppDatabaseTable(t, clientCtx)
 
 	// Put one row as well as get the initial ResumeMarker.
-	batch, err := d.BeginBatch(clientCtx, wire.BatchOptions{})
+	batch, err := d.BeginBatch(clientCtx, nosqlwire.BatchOptions{})
 	if err != nil {
 		t.Fatalf("unable to start batch: %v", err)
 	}

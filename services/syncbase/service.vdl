@@ -61,4 +61,5 @@ type App interface {
 error (
 	NotInDevMode() {"en": "not running with --dev=true"}
 	InvalidName(name string) {"en": "invalid name: {name}"}
+	UnknownBatch() {"en": "unknown batch, perhaps the server restarted"}
 )
