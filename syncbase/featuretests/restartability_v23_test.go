@@ -5,8 +5,14 @@
 package featuretests_test
 
 import (
+	"bytes"
+	"errors"
 	"io/ioutil"
+	"log"
+	"os"
+	"path/filepath"
 	"reflect"
+	"regexp"
 	"syscall"
 	"time"
 
@@ -380,4 +386,60 @@ func V23TestRestartabilityWatch(t *v23tests.T) {
 	if stream.Advance() {
 		t.Fatalf("unexpected Advance: %v", stream.Change())
 	}
+}
+func V23TestRestartabilityCorruption(t *v23tests.T) {
+	rootDir, clientCtx, serverCreds := restartabilityInit(t)
+	cleanup := tu.StartKillableSyncbased(t, serverCreds, syncbaseName, rootDir, ACL)
+
+	createHierarchy(t, clientCtx)
+	checkHierarchy(t, clientCtx)
+	cleanup(syscall.SIGKILL)
+
+	var fileToCorrupt string
+	filepath.Walk(rootDir, func(path string, info os.FileInfo, err error) error {
+		if fileToCorrupt != "" {
+			return nil
+		}
+		if match, _ := regexp.MatchString(`apps/[^/]*/dbs/[^/]*/leveldb/.*\.log`, path); match {
+			fileToCorrupt = path
+			return errors.New("found match, stop walking")
+		}
+		return nil
+	})
+	if fileToCorrupt == "" {
+		t.Fatalf("Could not find file")
+	}
+	fileBytes, err := ioutil.ReadFile(fileToCorrupt)
+	if err != nil {
+		t.Fatalf("Could not read log file: %v", err)
+	}
+	// Overwrite last 100 bytes.
+	offset := len(fileBytes) - 100 - 1
+	if offset < 0 {
+		t.Fatalf("Expected bigger log file.  Found: %d", len(fileBytes))
+	}
+	for i := 0; i < 100; i++ {
+		fileBytes[i+offset] = 0x80
+	}
+	if err := ioutil.WriteFile(fileToCorrupt, fileBytes, 0); err != nil {
+		t.Fatalf("Could not corrupt file: %v", err)
+	}
+
+	// Expect syncbase to fail to start.
+	syncbased := t.BuildV23Pkg("v.io/x/ref/services/syncbase/syncbased")
+	startOpts := syncbased.StartOpts().WithCustomCredentials(serverCreds)
+	invocation := syncbased.WithStartOpts(startOpts).Start(
+		"--alsologtostderr=true",
+		"--v23.tcp.address=127.0.0.1:0",
+		"--v23.permissions.literal", ACL,
+		"--name="+syncbaseName,
+		"--root-dir="+rootDir)
+	stdout, stderr := bytes.NewBuffer(nil), bytes.NewBuffer(nil)
+	if err := invocation.Wait(stdout, stderr); err == nil {
+		t.Fatalf("Expected syncbased to fail to start.")
+	}
+	log.Printf("syncbased terminated\nstdout: %v\nstderr: %v\n", stdout, stderr)
+	// TODO(kash): What should really happen is syncbased returns a specific
+	// error for the corruption and moves the corrupted leveldb aside.  That
+	// would cause the app to create a new one on restart.
 }
