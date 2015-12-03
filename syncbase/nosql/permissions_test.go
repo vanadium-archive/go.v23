@@ -65,9 +65,9 @@ var securitySpecTestGroups = []securitySpecTestGroup{
 	},
 	{
 		layer: serviceTest{f: func(ctx *context.T, s syncbase.Service) error {
-			return wire.ServiceClient(s.FullName()).DevModeUpdateClock(ctx, wire.DevModeUpdateClockOpts{})
+			return wire.ServiceClient(s.FullName()).DevModeUpdateVClock(ctx, wire.DevModeUpdateVClockOpts{})
 		}},
-		name:     "service.DevModeUpdateClock",
+		name:     "service.DevModeUpdateVClock",
 		patterns: []string{"A_____"},
 	},
 	{

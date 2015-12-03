@@ -16,14 +16,14 @@ import (
 	_ "v.io/v23/vdlroot/time"
 )
 
-// DevModeUpdateClockOpts specifies what DevModeUpdateClock should do, as
+// DevModeUpdateVClockOpts specifies what DevModeUpdateVClock should do, as
 // described below.
-type DevModeUpdateClockOpts struct {
+type DevModeUpdateVClockOpts struct {
 	// If specified, sets the NTP host to talk to for subsequent NTP requests.
 	NtpHost string
 	// If Now is specified, the fake system clock is updated to the given values
 	// of Now and ElapsedTime. If Now is not specified (i.e. takes the zero
-	// value), the system clock is not touched by DevModeUpdateClock.
+	// value), the system clock is not touched by DevModeUpdateVClock.
 	Now         time.Time
 	ElapsedTime time.Duration
 	// If specified, the clock daemon's local and/or NTP update code is triggered
@@ -34,11 +34,11 @@ type DevModeUpdateClockOpts struct {
 	DoLocalUpdate bool
 }
 
-func (DevModeUpdateClockOpts) __VDLReflect(struct {
-	Name string `vdl:"v.io/v23/services/syncbase.DevModeUpdateClockOpts"`
+func (DevModeUpdateVClockOpts) __VDLReflect(struct {
+	Name string `vdl:"v.io/v23/services/syncbase.DevModeUpdateVClockOpts"`
 }) {
 }
 
 func init() {
-	vdl.Register((*DevModeUpdateClockOpts)(nil))
+	vdl.Register((*DevModeUpdateVClockOpts)(nil))
 }

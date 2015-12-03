@@ -26,25 +26,25 @@ pkg syncbase, type AppServerMethods interface, SetPermissions(*context.T, rpc.Se
 pkg syncbase, type AppServerStub interface, Describe__() []rpc.InterfaceDesc
 pkg syncbase, type AppServerStub interface, unexported methods
 pkg syncbase, type AppServerStubMethods AppServerMethods
-pkg syncbase, type DevModeUpdateClockOpts struct
-pkg syncbase, type DevModeUpdateClockOpts struct, DoLocalUpdate bool
-pkg syncbase, type DevModeUpdateClockOpts struct, DoNtpUpdate bool
-pkg syncbase, type DevModeUpdateClockOpts struct, ElapsedTime time.Duration
-pkg syncbase, type DevModeUpdateClockOpts struct, Now time.Time
-pkg syncbase, type DevModeUpdateClockOpts struct, NtpHost string
-pkg syncbase, type ServiceClientMethods interface { DevModeGetTime, DevModeUpdateClock, GetPermissions, SetPermissions }
+pkg syncbase, type DevModeUpdateVClockOpts struct
+pkg syncbase, type DevModeUpdateVClockOpts struct, DoLocalUpdate bool
+pkg syncbase, type DevModeUpdateVClockOpts struct, DoNtpUpdate bool
+pkg syncbase, type DevModeUpdateVClockOpts struct, ElapsedTime time.Duration
+pkg syncbase, type DevModeUpdateVClockOpts struct, Now time.Time
+pkg syncbase, type DevModeUpdateVClockOpts struct, NtpHost string
+pkg syncbase, type ServiceClientMethods interface { DevModeGetTime, DevModeUpdateVClock, GetPermissions, SetPermissions }
 pkg syncbase, type ServiceClientMethods interface, DevModeGetTime(*context.T, ...rpc.CallOpt) (time.Time, error)
-pkg syncbase, type ServiceClientMethods interface, DevModeUpdateClock(*context.T, DevModeUpdateClockOpts, ...rpc.CallOpt) error
+pkg syncbase, type ServiceClientMethods interface, DevModeUpdateVClock(*context.T, DevModeUpdateVClockOpts, ...rpc.CallOpt) error
 pkg syncbase, type ServiceClientMethods interface, GetPermissions(*context.T, ...rpc.CallOpt) (access.Permissions, string, error)
 pkg syncbase, type ServiceClientMethods interface, SetPermissions(*context.T, access.Permissions, string, ...rpc.CallOpt) error
-pkg syncbase, type ServiceClientStub interface { DevModeGetTime, DevModeUpdateClock, GetPermissions, SetPermissions }
+pkg syncbase, type ServiceClientStub interface { DevModeGetTime, DevModeUpdateVClock, GetPermissions, SetPermissions }
 pkg syncbase, type ServiceClientStub interface, DevModeGetTime(*context.T, ...rpc.CallOpt) (time.Time, error)
-pkg syncbase, type ServiceClientStub interface, DevModeUpdateClock(*context.T, DevModeUpdateClockOpts, ...rpc.CallOpt) error
+pkg syncbase, type ServiceClientStub interface, DevModeUpdateVClock(*context.T, DevModeUpdateVClockOpts, ...rpc.CallOpt) error
 pkg syncbase, type ServiceClientStub interface, GetPermissions(*context.T, ...rpc.CallOpt) (access.Permissions, string, error)
 pkg syncbase, type ServiceClientStub interface, SetPermissions(*context.T, access.Permissions, string, ...rpc.CallOpt) error
-pkg syncbase, type ServiceServerMethods interface { DevModeGetTime, DevModeUpdateClock, GetPermissions, SetPermissions }
+pkg syncbase, type ServiceServerMethods interface { DevModeGetTime, DevModeUpdateVClock, GetPermissions, SetPermissions }
 pkg syncbase, type ServiceServerMethods interface, DevModeGetTime(*context.T, rpc.ServerCall) (time.Time, error)
-pkg syncbase, type ServiceServerMethods interface, DevModeUpdateClock(*context.T, rpc.ServerCall, DevModeUpdateClockOpts) error
+pkg syncbase, type ServiceServerMethods interface, DevModeUpdateVClock(*context.T, rpc.ServerCall, DevModeUpdateVClockOpts) error
 pkg syncbase, type ServiceServerMethods interface, GetPermissions(*context.T, rpc.ServerCall) (access.Permissions, string, error)
 pkg syncbase, type ServiceServerMethods interface, SetPermissions(*context.T, rpc.ServerCall, access.Permissions, string) error
 pkg syncbase, type ServiceServerStub interface, Describe__() []rpc.InterfaceDesc

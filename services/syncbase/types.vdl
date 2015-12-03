@@ -6,14 +6,14 @@ package syncbase
 
 import "time"
 
-// DevModeUpdateClockOpts specifies what DevModeUpdateClock should do, as
+// DevModeUpdateVClockOpts specifies what DevModeUpdateVClock should do, as
 // described below.
-type DevModeUpdateClockOpts struct {
+type DevModeUpdateVClockOpts struct {
 	// If specified, sets the NTP host to talk to for subsequent NTP requests.
 	NtpHost string
 	// If Now is specified, the fake system clock is updated to the given values
 	// of Now and ElapsedTime. If Now is not specified (i.e. takes the zero
-	// value), the system clock is not touched by DevModeUpdateClock.
+	// value), the system clock is not touched by DevModeUpdateVClock.
 	Now         time.Time
 	ElapsedTime time.Duration
 	// If specified, the clock daemon's local and/or NTP update code is triggered

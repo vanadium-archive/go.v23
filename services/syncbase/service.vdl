@@ -25,10 +25,10 @@ import (
 // Service represents a Vanadium Syncbase service.
 // Service.Glob operates over App names.
 type Service interface {
-	// DevModeUpdateClock updates various bits of Syncbase virtual clock and clock
+	// DevModeUpdateVClock updates various bits of Syncbase virtual clock and clock
 	// daemon state based on the specified options.
 	// Requires --dev flag to be set (in addition to Admin check).
-	DevModeUpdateClock(uco DevModeUpdateClockOpts) error {access.Admin}
+	DevModeUpdateVClock(uco DevModeUpdateVClockOpts) error {access.Admin}
 
 	// DevModeGetTime returns the current time per the Syncbase clock.
 	// Requires --dev flag to be set (in addition to Admin check).
