@@ -23,6 +23,10 @@ func TestMain(m *testing.M) {
 	os.Exit(r)
 }
 
+func TestV23BlobWholeTransfer(t *testing.T) {
+	v23tests.RunTest(t, V23TestBlobWholeTransfer)
+}
+
 func TestV23SyncbasedPutGet(t *testing.T) {
 	v23tests.RunTest(t, V23TestSyncbasedPutGet)
 }
@@ -33,6 +37,10 @@ func TestV23CRDefault(t *testing.T) {
 
 func TestV23CRAppResolved(t *testing.T) {
 	v23tests.RunTest(t, V23TestCRAppResolved)
+}
+
+func TestV23DeviceManager(t *testing.T) {
+	v23tests.RunTest(t, V23TestDeviceManager)
 }
 
 func TestV23RestartabilityHierarchy(t *testing.T) {
