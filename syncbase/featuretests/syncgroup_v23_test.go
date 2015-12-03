@@ -9,10 +9,10 @@ package featuretests_test
 
 import (
 	"fmt"
-	"strconv"
 	"strings"
 	"time"
 
+	"v.io/v23/context"
 	"v.io/v23/naming"
 	_ "v.io/x/ref/runtime/factories/generic"
 	constants "v.io/x/ref/services/syncbase/server/util"
@@ -39,26 +39,28 @@ func V23TestSyncgroupRendezvousOnline(t *v23tests.T) {
 
 	// Setup one app and one db at each of the Syncbases.
 	for _, sb := range sbs {
-		tu.RunClient(t, sb.client, runSetupAppA, sb.sbName)
+		ok(t, setupAppA(sb.client, sb.sbName))
 	}
 
 	// Syncbase s0 is the creator.
 	sgName := naming.Join(sbs[0].sbName, constants.SyncbaseSuffix, "SG1")
-	tu.RunClient(t, sbs[0].client, runCreateSyncgroup, sbs[0].sbName, sgName, "tb:foo", "", principals)
+	ok(t, createSyncgroup(sbs[0].client, sbs[0].sbName, sgName, "tb:foo", "", principals))
 
 	// Remaining syncbases run the specified workload concurrently.
 	for i := 1; i < len(sbs); i++ {
-		go tu.RunClient(t, sbs[i].client, runSyncWorkload, sbs[i].sbName, sgName, "foo")
+		go func(i int) {
+			ok(t, runSyncWorkload(sbs[i].client, sbs[i].sbName, sgName, "foo"))
+		}(i)
 	}
 
 	// Populate data on creator as well.
 	keypfx := "foo==" + sbs[0].sbName + "=="
-	tu.RunClient(t, sbs[0].client, runPopulateData, sbs[0].sbName, keypfx, "0", "5")
+	ok(t, populateData(sbs[0].client, sbs[0].sbName, keypfx, 0, 5))
 
 	// Verify steady state sequentially.
 	for _, sb := range sbs {
-		tu.RunClient(t, sb.client, runVerifySync, sb.sbName, strconv.Itoa(N), "foo")
-		tu.RunClient(t, sb.client, runVerifySyncgroupMembers, sb.sbName, sgName, strconv.Itoa(N))
+		ok(t, verifySync(sb.client, sb.sbName, N, "foo"))
+		ok(t, verifySyncgroupMembers(sb.client, sb.sbName, sgName, N))
 	}
 
 	fmt.Println("V23TestSyncgroupRendezvousOnline=====Phase 1 Done")
@@ -80,27 +82,29 @@ func V23TestSyncgroupRendezvousOnlineCloud(t *v23tests.T) {
 
 	// Setup one app and one db at each of the Syncbases.
 	for _, sb := range sbs {
-		tu.RunClient(t, sb.client, runSetupAppA, sb.sbName)
+		ok(t, setupAppA(sb.client, sb.sbName))
 	}
 
 	// Syncbase s0 is the creator, and sN is the cloud.
 	sgName := naming.Join(sbs[N].sbName, constants.SyncbaseSuffix, "SG1")
-	tu.RunClient(t, sbs[0].client, runCreateSyncgroup, sbs[0].sbName, sgName, "tb:foo", "", principals)
+	ok(t, createSyncgroup(sbs[0].client, sbs[0].sbName, sgName, "tb:foo", "", principals))
 
 	// Remaining N-1 syncbases run the specified workload concurrently.
 	for i := 1; i < N; i++ {
-		go tu.RunClient(t, sbs[i].client, runSyncWorkload, sbs[i].sbName, sgName, "foo")
+		go func(i int) {
+			ok(t, runSyncWorkload(sbs[i].client, sbs[i].sbName, sgName, "foo"))
+		}(i)
 	}
 
 	// Populate data on creator as well.
 	keypfx := "foo==" + sbs[0].sbName + "=="
-	tu.RunClient(t, sbs[0].client, runPopulateData, sbs[0].sbName, keypfx, "0", "5")
+	ok(t, populateData(sbs[0].client, sbs[0].sbName, keypfx, 0, 5))
 
 	// Verify steady state sequentially.
 	for i := 0; i < N; i++ {
-		tu.RunClient(t, sbs[i].client, runVerifySync, sbs[i].sbName, strconv.Itoa(N), "foo")
+		ok(t, verifySync(sbs[i].client, sbs[i].sbName, N, "foo"))
 		// TODO(hpucha): There is a bug that is currently preventing this verification.
-		// tu.RunClient(t, sbs[i].client, runVerifySyncgroupMembers, sbs[i].sbName, sgName, strconv.Itoa(N+1))
+		// ok(t, verifySyncgroupMembers(sbs[i].client, sbs[i].sbName, sgName, N+1))
 	}
 
 	fmt.Println("V23TestSyncgroupRendezvousOnlineCloud=====Phase 1 Done")
@@ -123,29 +127,33 @@ func V23TestSyncgroupPreknownStaggered(t *v23tests.T) {
 
 	// Setup one app and one db at each of the Syncbases.
 	for _, sb := range sbs {
-		tu.RunClient(t, sb.client, runSetupAppA, sb.sbName)
+		ok(t, setupAppA(sb.client, sb.sbName))
 	}
 
 	// Syncbase s0 is the first to join or create. Run s0 separately to
 	// stagger the process.
 	sgName := naming.Join(sbs[0].sbName, constants.SyncbaseSuffix, "SG1")
-	tu.RunClient(t, sbs[0].client, runJoinOrCreateSyncgroup, sbs[0].sbName, sgName, "tb:foo", "", principals)
+	ok(t, joinOrCreateSyncgroup(sbs[0].client, sbs[0].sbName, sgName, "tb:foo", "", principals))
 
 	// Remaining syncbases run the specified workload concurrently.
 	for i := 1; i < len(sbs); i++ {
-		go tu.RunClient(t, sbs[i].client, runJoinOrCreateSyncgroup, sbs[i].sbName, sgName, "tb:foo", "", principals)
+		go func(i int) {
+			ok(t, joinOrCreateSyncgroup(sbs[i].client, sbs[i].sbName, sgName, "tb:foo", "", principals))
+		}(i)
 	}
 
 	// Populate and join occur concurrently.
 	for _, sb := range sbs {
-		keypfx := "foo==" + sb.sbName + "=="
-		go tu.RunClient(t, sb.client, runPopulateData, sb.sbName, keypfx, "0", "5")
+		go func(sb *testSyncbase) {
+			keypfx := "foo==" + sb.sbName + "=="
+			ok(t, populateData(sb.client, sb.sbName, keypfx, 0, 5))
+		}(sb)
 	}
 
 	// Verify steady state sequentially.
 	for _, sb := range sbs {
-		tu.RunClient(t, sb.client, runVerifySync, sb.sbName, strconv.Itoa(N), "foo")
-		tu.RunClient(t, sb.client, runVerifySyncgroupMembers, sb.sbName, sgName, strconv.Itoa(N))
+		ok(t, verifySync(sb.client, sb.sbName, N, "foo"))
+		ok(t, verifySyncgroupMembers(sb.client, sb.sbName, sgName, N))
 	}
 
 	fmt.Println("V23TestSyncgroupPreknownStaggered=====Phase 1 Done")
@@ -157,11 +165,11 @@ func V23TestSyncgroupPreknownStaggered(t *v23tests.T) {
 type testSyncbase struct {
 	sb      *modules.CustomCredentials
 	sbName  string
-	client  *modules.CustomCredentials
+	client  *context.T
 	cleanup func()
 }
 
-// Spawns "num" syncbases. Returns handles to the Syncbases, and a ";" separated
+// Spawns "num" syncbases. Returns handles to the Syncbases, and a ";"-separated
 // list of Syncbase principals.
 func setupSyncbase(t *v23tests.T, num int) ([]*testSyncbase, string) {
 	sbs := make([]*testSyncbase, num)
@@ -171,10 +179,10 @@ func setupSyncbase(t *v23tests.T, num int) ([]*testSyncbase, string) {
 		sbs[i] = &testSyncbase{}
 
 		sbs[i].sbName = fmt.Sprintf("s%d", i)
-		sbs[i].sb, _ = t.Shell().NewChildCredentials(sbs[i].sbName)
+		sbs[i].sb = forkCredentials(t, sbs[i].sbName)
 
 		cName := fmt.Sprintf("c%d", i)
-		sbs[i].client, _ = t.Shell().NewChildCredentials(cName)
+		sbs[i].client = forkContext(t, cName)
 
 		// Give Read and Write permissions to the client at its
 		// respective Syncbase.
@@ -186,14 +194,11 @@ func setupSyncbase(t *v23tests.T, num int) ([]*testSyncbase, string) {
 	return sbs, strings.Join(principals, ";")
 }
 
-// Arguments: 0: Syncbase name, 1: syncgroup name, 2: data prefix.
-var runSyncWorkload = modules.Register(func(env *modules.Env, args ...string) error {
-	// Join the syncgroup. Retry for 4 seconds since the server may be in
-	// join pending state.
+func runSyncWorkload(ctx *context.T, syncbaseName, sgName, prefix string) error {
 	var err error
 	for i := 0; i < 8; i++ {
 		time.Sleep(500 * time.Millisecond)
-		if err = runJoinSyncGroupInternal(args[0], args[1]); err == nil {
+		if err = joinSyncgroup(ctx, syncbaseName, sgName); err == nil {
 			break
 		}
 	}
@@ -201,33 +206,24 @@ var runSyncWorkload = modules.Register(func(env *modules.Env, args ...string) er
 		return err
 	}
 
-	// Populate some data without colliding with other Syncbases.
-	keypfx := args[2] + "==" + args[0] + "=="
-	return runPopulateDataInternal(args[0], keypfx, "0", "5")
-}, "runSyncWorkload")
+	// Populate some data without colliding with data from other Syncbases.
+	keypfx := prefix + "==" + syncbaseName + "=="
+	return populateData(ctx, syncbaseName, keypfx, 0, 5)
+}
 
-// Arguments: 0: Syncbase name, 1: number of syncbases, 2: data prefix.
-var runVerifySync = modules.Register(func(env *modules.Env, args ...string) error {
-	N, err := strconv.ParseInt(args[1], 10, 64)
-	if err != nil {
-		return err
-	}
-
-	for i := N - 1; i >= 0; i-- {
-		keypfx := fmt.Sprintf("%s==s%d==", args[2], i)
-		if err := runVerifySyncgroupDataInternal(args[0], keypfx, "0", "5", "true"); err != nil {
+func verifySync(ctx *context.T, syncbaseName string, numSyncbases int, prefix string) error {
+	for i := numSyncbases - 1; i >= 0; i-- {
+		keypfx := fmt.Sprintf("%s==s%d==", prefix, i)
+		if err := verifySyncgroupData(ctx, syncbaseName, keypfx, 0, 5); err != nil {
 			return err
 		}
 	}
-
 	return nil
-}, "runVerifySync")
+}
 
-// Arguments: 0: Syncbase name, 1: syncgroup name, 2: prefixes, 3: mount table,
-// 4: syncgroup permission blessings (; separated)
-var runJoinOrCreateSyncgroup = modules.Register(func(env *modules.Env, args ...string) error {
-	if err := runJoinSyncGroupInternal(args[0], args[1]); err == nil {
+func joinOrCreateSyncgroup(ctx *context.T, syncbaseName, sgName, sgPrefixes, mtName, bps string) error {
+	if err := joinSyncgroup(ctx, syncbaseName, sgName); err == nil {
 		return nil
 	}
-	return runCreateSyncgroupInternal(env, args...)
-}, "runJoinOrCreateSyncgroup")
+	return createSyncgroup(ctx, syncbaseName, sgName, sgPrefixes, mtName, bps)
+}

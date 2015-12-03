@@ -5,63 +5,47 @@
 package featuretests_test
 
 import (
-	"fmt"
-
-	"v.io/v23"
 	"v.io/v23/syncbase"
 	_ "v.io/x/ref/runtime/factories/generic"
 	tu "v.io/x/ref/services/syncbase/testutil"
-	"v.io/x/ref/test/modules"
 	"v.io/x/ref/test/v23tests"
 )
 
 //go:generate jiri test generate
 
-// TODO(sadovsky): All tests in this file should be updated so that the client
-// carries blessing "root:client", so that access is not granted anywhere just
-// because the server blessing name is a prefix of the client blessing name or
-// vice versa.
-
 func V23TestSyncbasedPutGet(t *v23tests.T) {
 	v23tests.RunRootMT(t, "--v23.tcp.address=127.0.0.1:0")
-	clientCreds, _ := t.Shell().NewChildCredentials("server:client")
-	serverCreds, _ := t.Shell().NewChildCredentials("server")
-	cleanup := tu.StartSyncbased(t, serverCreds, syncbaseName, "",
-		`{"Read": {"In":["root:server:client"]}, "Write": {"In":["root:server:client"]}}`)
+
+	// Start syncbased.
+	serverCreds := forkCredentials(t, "server")
+	cleanup := tu.StartSyncbased(t, serverCreds, syncbaseName, "", `{"Read": {"In":["root:server", "root:client"]}, "Write": {"In":["root:server", "root:client"]}}`)
 	defer cleanup()
 
-	tu.RunClient(t, clientCreds, runTestSyncbasedPutGet)
-}
-
-var runTestSyncbasedPutGet = modules.Register(func(env *modules.Env, args ...string) error {
-	ctx, shutdown := v23.Init()
-	defer shutdown()
-
 	// Create app, database and table.
+	ctx := forkContext(t, "client")
 	a := syncbase.NewService(syncbaseName).App("a")
 	if err := a.Create(ctx, nil); err != nil {
-		return fmt.Errorf("unable to create an app: %v", err)
+		t.Fatalf("unable to create an app: %v", err)
 	}
 	d := a.NoSQLDatabase("d", nil)
 	if err := d.Create(ctx, nil); err != nil {
-		return fmt.Errorf("unable to create a database: %v", err)
+		t.Fatalf("unable to create a database: %v", err)
 	}
 	if err := d.Table("tb").Create(ctx, nil); err != nil {
-		return fmt.Errorf("unable to create a table: %v", err)
+		t.Fatalf("unable to create a table: %v", err)
 	}
 	tb := d.Table("tb")
 
 	// Do Put followed by Get on a row.
 	r := tb.Row("r")
 	if err := r.Put(ctx, "testkey"); err != nil {
-		return fmt.Errorf("r.Put() failed: %v", err)
+		t.Fatalf("r.Put() failed: %v", err)
 	}
 	var result string
 	if err := r.Get(ctx, &result); err != nil {
-		return fmt.Errorf("r.Get() failed: %v", err)
+		t.Fatalf("r.Get() failed: %v", err)
 	}
 	if got, want := result, "testkey"; got != want {
-		return fmt.Errorf("unexpected value: got %q, want %q", got, want)
+		t.Fatalf("unexpected value: got %q, want %q", got, want)
 	}
-	return nil
-}, "runTestSyncbasedPutGet")
+}

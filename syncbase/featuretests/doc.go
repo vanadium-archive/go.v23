@@ -2,5 +2,6 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 //
-// Package featuretests implements blackbox tests for various Syncbase features.
+// Package featuretests implements black-box tests for various Syncbase
+// features.
 package featuretests

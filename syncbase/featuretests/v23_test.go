@@ -27,12 +27,12 @@ func TestV23SyncbasedPutGet(t *testing.T) {
 	v23tests.RunTest(t, V23TestSyncbasedPutGet)
 }
 
-func TestV23DefaultCR(t *testing.T) {
-	v23tests.RunTest(t, V23TestDefaultCR)
+func TestV23CRDefault(t *testing.T) {
+	v23tests.RunTest(t, V23TestCRDefault)
 }
 
-func TestV23SyncbasedSyncWithAppResolvedConflicts(t *testing.T) {
-	v23tests.RunTest(t, V23TestSyncbasedSyncWithAppResolvedConflicts)
+func TestV23CRAppResolved(t *testing.T) {
+	v23tests.RunTest(t, V23TestCRAppResolved)
 }
 
 func TestV23RestartabilityHierarchy(t *testing.T) {

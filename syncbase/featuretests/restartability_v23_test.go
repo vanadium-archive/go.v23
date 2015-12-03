@@ -16,15 +16,13 @@ import (
 	"syscall"
 	"time"
 
-	"v.io/v23/syncbase/nosql"
-	"v.io/v23/verror"
-	"v.io/v23/vom"
-
-	"v.io/v23"
 	"v.io/v23/context"
 	sbwire "v.io/v23/services/syncbase"
 	nosqlwire "v.io/v23/services/syncbase/nosql"
 	"v.io/v23/syncbase"
+	"v.io/v23/syncbase/nosql"
+	"v.io/v23/verror"
+	"v.io/v23/vom"
 	_ "v.io/x/ref/runtime/factories/generic"
 	tu "v.io/x/ref/services/syncbase/testutil"
 	"v.io/x/ref/test/modules"
@@ -34,12 +32,10 @@ import (
 //go:generate jiri test generate
 
 const (
-	syncbaseName = "syncbase" // Name that syncbase mounts itself at.
-	ACL          = `{"Read": {"In":["root:u:client"]}, "Write": {"In":["root:u:client"]}, "Resolve": {"In":["root:u:client"]}}`
+	acl = `{"Read": {"In":["root:u:client"]}, "Write": {"In":["root:u:client"]}, "Resolve": {"In":["root:u:client"]}}`
 )
 
-func restartabilityInit(t *v23tests.T) (
-	rootDir string, clientCtx *context.T, serverCreds *modules.CustomCredentials) {
+func restartabilityInit(t *v23tests.T) (rootDir string, clientCtx *context.T, serverCreds *modules.CustomCredentials) {
 	v23tests.RunRootMT(t, "--v23.tcp.address=127.0.0.1:0")
 
 	var err error
@@ -48,8 +44,8 @@ func restartabilityInit(t *v23tests.T) (
 		tu.V23Fatalf(t, "can't create temp dir: %v", err)
 	}
 
-	clientCtx = tu.NewCtx(t.Context(), v23.GetPrincipal(t.Context()), "u:client")
-	serverCreds, _ = t.Shell().NewChildCredentials("r:server")
+	clientCtx = forkContext(t, "u:client")
+	serverCreds = forkCredentials(t, "r:server")
 	return
 }
 
@@ -70,30 +66,30 @@ func createAppDatabaseTable(t *v23tests.T, clientCtx *context.T) nosql.Database 
 
 func V23TestRestartabilityHierarchy(t *v23tests.T) {
 	rootDir, clientCtx, serverCreds := restartabilityInit(t)
-	cleanup := tu.StartSyncbased(t, serverCreds, syncbaseName, rootDir, ACL)
+	cleanup := tu.StartSyncbased(t, serverCreds, syncbaseName, rootDir, acl)
 
 	createHierarchy(t, clientCtx)
 	checkHierarchy(t, clientCtx)
 	cleanup()
 
-	cleanup = tu.StartSyncbased(t, serverCreds, syncbaseName, rootDir, ACL)
+	cleanup = tu.StartSyncbased(t, serverCreds, syncbaseName, rootDir, acl)
+	defer cleanup()
 	checkHierarchy(t, clientCtx)
-	cleanup()
 }
 
-// Same as V23TestRestartabilityHierarchy except syncbase is killed with SIGKILL instead of
-// SIGINT.
+// Same as V23TestRestartabilityHierarchy except the first syncbase is killed
+// with SIGKILL instead of SIGINT.
 func V23TestRestartabilityCrash(t *v23tests.T) {
 	rootDir, clientCtx, serverCreds := restartabilityInit(t)
-	cleanup := tu.StartKillableSyncbased(t, serverCreds, syncbaseName, rootDir, ACL)
+	cleanup := tu.StartKillableSyncbased(t, serverCreds, syncbaseName, rootDir, acl)
 
 	createHierarchy(t, clientCtx)
 	checkHierarchy(t, clientCtx)
 	cleanup(syscall.SIGKILL)
 
-	cleanup2 := tu.StartSyncbased(t, serverCreds, syncbaseName, rootDir, ACL)
+	cleanup2 := tu.StartSyncbased(t, serverCreds, syncbaseName, rootDir, acl)
+	defer cleanup2()
 	checkHierarchy(t, clientCtx)
-	cleanup2()
 }
 
 // Creates apps, dbs, tables, and rows.
@@ -163,7 +159,7 @@ func checkHierarchy(t *v23tests.T, ctx *context.T) {
 
 func V23TestRestartabilityQuiescent(t *v23tests.T) {
 	rootDir, clientCtx, serverCreds := restartabilityInit(t)
-	cleanup := tu.StartKillableSyncbased(t, serverCreds, syncbaseName, rootDir, ACL)
+	cleanup := tu.StartKillableSyncbased(t, serverCreds, syncbaseName, rootDir, acl)
 	d := createAppDatabaseTable(t, clientCtx)
 
 	tb := d.Table("tb")
@@ -183,7 +179,8 @@ func V23TestRestartabilityQuiescent(t *v23tests.T) {
 
 	cleanup(syscall.SIGKILL)
 	// Restart syncbase.
-	cleanup = tu.StartKillableSyncbased(t, serverCreds, syncbaseName, rootDir, ACL)
+	cleanup2 := tu.StartSyncbased(t, serverCreds, syncbaseName, rootDir, acl)
+	defer cleanup2()
 
 	if err := r.Get(clientCtx, &result); err != nil {
 		t.Fatalf("r.Get() failed: %v", err)
@@ -196,7 +193,7 @@ func V23TestRestartabilityQuiescent(t *v23tests.T) {
 // A read-only batch should fail if the server crashes in the middle.
 func V23TestRestartabilityReadOnlyBatch(t *v23tests.T) {
 	rootDir, clientCtx, serverCreds := restartabilityInit(t)
-	cleanup := tu.StartKillableSyncbased(t, serverCreds, syncbaseName, rootDir, ACL)
+	cleanup := tu.StartKillableSyncbased(t, serverCreds, syncbaseName, rootDir, acl)
 	d := createAppDatabaseTable(t, clientCtx)
 
 	// Add one row.
@@ -228,8 +225,8 @@ func V23TestRestartabilityReadOnlyBatch(t *v23tests.T) {
 	}
 
 	// Restart syncbase.
-	cleanup = tu.StartKillableSyncbased(t, serverCreds, syncbaseName, rootDir, ACL)
-	defer cleanup(syscall.SIGINT)
+	cleanup2 := tu.StartSyncbased(t, serverCreds, syncbaseName, rootDir, acl)
+	defer cleanup2()
 
 	if err := r.Get(clientCtx, &result); verror.ErrorID(err) != sbwire.ErrUnknownBatch.ID {
 		t.Fatalf("expected r.Get() to fail because of ErrUnknownBatch.  got: %v", err)
@@ -247,7 +244,7 @@ func V23TestRestartabilityReadOnlyBatch(t *v23tests.T) {
 // A read/write batch should fail if the server crashes in the middle.
 func V23TestRestartabilityReadWriteBatch(t *v23tests.T) {
 	rootDir, clientCtx, serverCreds := restartabilityInit(t)
-	cleanup := tu.StartKillableSyncbased(t, serverCreds, syncbaseName, rootDir, ACL)
+	cleanup := tu.StartKillableSyncbased(t, serverCreds, syncbaseName, rootDir, acl)
 	d := createAppDatabaseTable(t, clientCtx)
 
 	batch, err := d.BeginBatch(clientCtx, nosqlwire.BatchOptions{})
@@ -278,8 +275,8 @@ func V23TestRestartabilityReadWriteBatch(t *v23tests.T) {
 	}
 
 	// Restart syncbase.
-	cleanup = tu.StartKillableSyncbased(t, serverCreds, syncbaseName, rootDir, ACL)
-	defer cleanup(syscall.SIGINT)
+	cleanup2 := tu.StartSyncbased(t, serverCreds, syncbaseName, rootDir, acl)
+	defer cleanup2()
 
 	if err := r.Get(clientCtx, &result); verror.ErrorID(err) != sbwire.ErrUnknownBatch.ID {
 		t.Fatalf("expected r.Get() to fail because of ErrUnknownBatch.  got: %v", err)
@@ -304,7 +301,7 @@ func decodeString(t *v23tests.T, val []byte) string {
 
 func V23TestRestartabilityWatch(t *v23tests.T) {
 	rootDir, clientCtx, serverCreds := restartabilityInit(t)
-	cleanup := tu.StartKillableSyncbased(t, serverCreds, syncbaseName, rootDir, ACL)
+	cleanup := tu.StartKillableSyncbased(t, serverCreds, syncbaseName, rootDir, acl)
 	d := createAppDatabaseTable(t, clientCtx)
 
 	// Put one row as well as get the initial ResumeMarker.
@@ -350,7 +347,7 @@ func V23TestRestartabilityWatch(t *v23tests.T) {
 	}
 
 	// Restart syncbased.
-	cleanup = tu.StartKillableSyncbased(t, serverCreds, syncbaseName, rootDir, ACL)
+	cleanup = tu.StartKillableSyncbased(t, serverCreds, syncbaseName, rootDir, acl)
 
 	// Put another row.
 	r = d.Table("tb").Row("r")
@@ -382,7 +379,7 @@ func V23TestRestartabilityWatch(t *v23tests.T) {
 }
 func V23TestRestartabilityCorruption(t *v23tests.T) {
 	rootDir, clientCtx, serverCreds := restartabilityInit(t)
-	cleanup := tu.StartKillableSyncbased(t, serverCreds, syncbaseName, rootDir, ACL)
+	cleanup := tu.StartKillableSyncbased(t, serverCreds, syncbaseName, rootDir, acl)
 
 	createHierarchy(t, clientCtx)
 	checkHierarchy(t, clientCtx)
@@ -424,7 +421,7 @@ func V23TestRestartabilityCorruption(t *v23tests.T) {
 	invocation := syncbased.WithStartOpts(startOpts).Start(
 		"--alsologtostderr=true",
 		"--v23.tcp.address=127.0.0.1:0",
-		"--v23.permissions.literal", ACL,
+		"--v23.permissions.literal", acl,
 		"--name="+syncbaseName,
 		"--root-dir="+rootDir)
 	stdout, stderr := bytes.NewBuffer(nil), bytes.NewBuffer(nil)

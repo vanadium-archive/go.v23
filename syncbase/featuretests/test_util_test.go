@@ -5,352 +5,259 @@
 package featuretests_test
 
 import (
+	"errors"
 	"fmt"
-	"strconv"
+	"reflect"
+	"runtime/debug"
 	"strings"
 	"time"
 
 	"v.io/v23"
+	"v.io/v23/context"
 	"v.io/v23/security"
 	"v.io/v23/security/access"
 	wire "v.io/v23/services/syncbase/nosql"
 	"v.io/v23/syncbase"
 	"v.io/v23/syncbase/nosql"
-	"v.io/x/ref"
-	_ "v.io/x/ref/runtime/factories/generic"
+	tu "v.io/x/ref/services/syncbase/testutil"
 	"v.io/x/ref/test/modules"
+	"v.io/x/ref/test/v23tests"
 )
 
 const (
-	testTable = "tb"
+	syncbaseName = "syncbase" // Name that syncbase mounts itself at.
+	testApp      = "a"
+	testDb       = "d"
+	testTable    = "tb"
 )
 
-///////////////////////////////////////////////////////
-// Helpers for setting up App and db.
+// TODO(sadovsky): Noticed while updating this code: it's ignoring errors in
+// various places. Errors should generally not be ignored.
 
-var runSetupAppA = modules.Register(func(env *modules.Env, args ...string) error {
-	ctx, shutdown := v23.Init()
-	defer shutdown()
+////////////////////////////////////////////////////////////
+// Helpers for setting up app and db
 
-	a := syncbase.NewService(args[0]).App("a")
+func setupAppA(ctx *context.T, syncbaseName string) error {
+	a := syncbase.NewService(syncbaseName).App(testApp)
 	a.Create(ctx, nil)
-	d := a.NoSQLDatabase("d", nil)
+	d := a.NoSQLDatabase(testDb, nil)
 	d.Create(ctx, nil)
 	d.Table(testTable).Create(ctx, nil)
-
 	return nil
-}, "runSetupAppA")
+}
 
-/////////////////////////////////////////////////////////
-// Helpers for adding or updating data.
+////////////////////////////////////////////////////////////
+// Helpers for adding or updating data
 
-var runPopulateData = modules.Register(func(env *modules.Env, args ...string) error {
-	return runPopulateDataInternal(args...)
-}, "runPopulateData")
-
-// Arguments: 0: Syncbase name, 1: key prefix, 2: start index
-// Optional args: 3: end index.
-// Values are from [start,end) or [start, start+10) depending on whether end
-// param was provided.
-func runPopulateDataInternal(args ...string) error {
-	ctx, shutdown := v23.Init()
-	defer shutdown()
-
-	a := syncbase.NewService(args[0]).App("a")
-	d := a.NoSQLDatabase("d", nil)
-
-	// Do Puts.
-	tb := d.Table(testTable)
-	start, _ := strconv.ParseUint(args[2], 10, 64)
-	end := start + 10
-	if len(args) > 3 {
-		end, _ = strconv.ParseUint(args[3], 10, 64)
-		if end <= start {
-			return fmt.Errorf("Test error: end <= start. start: %d, end: %d", start, end)
-		}
+func populateData(ctx *context.T, syncbaseName, keyPrefix string, start, end int) error {
+	if end <= start {
+		return fmt.Errorf("end (%d) <= start (%d)", end, start)
 	}
 
+	a := syncbase.NewService(syncbaseName).App(testApp)
+	d := a.NoSQLDatabase(testDb, nil)
+	tb := d.Table(testTable)
+
 	for i := start; i < end; i++ {
-		key := fmt.Sprintf("%s%d", args[1], i)
-		r := tb.Row(key)
-		if err := r.Put(ctx, "testkey"+key); err != nil {
-			return fmt.Errorf("r.Put() failed: %v\n", err)
+		key := fmt.Sprintf("%s%d", keyPrefix, i)
+		if err := tb.Put(ctx, key, "testkey"+key); err != nil {
+			return fmt.Errorf("tb.Put() failed: %v", err)
 		}
 	}
 	return nil
 }
 
-// Arguments: 0: Syncbase name, 1: start index.
-// Optional args: 2: end index, 3: value prefix.
-// Values are from [start,end) or [start, start+5) depending on whether end
-// param was provided.
-var runUpdateData = modules.Register(func(env *modules.Env, args ...string) error {
-	ctx, shutdown := v23.Init()
-	defer shutdown()
-
-	serviceName, startStr := args[0], args[1]
-	start, _ := strconv.ParseUint(startStr, 10, 64)
-	end, prefix := start+5, "testkey"
-	if len(args) > 2 {
-		end, _ = strconv.ParseUint(args[2], 10, 64)
-		if end <= start {
-			return fmt.Errorf("Test error: end <= start. start: %d, end: %d", start, end)
-		}
+// Shared by updateData and updateBatchData.
+// TODO(sadovsky): This is eerily similar to populateData. We should strive to
+// avoid such redundancies by implementing common helpers and avoiding spurious
+// differences.
+func updateDataImpl(ctx *context.T, d nosql.DatabaseHandle, syncbaseName string, start, end int, valuePrefix string) error {
+	if end <= start {
+		return fmt.Errorf("end (%d) <= start (%d)", end, start)
 	}
-	if len(args) > 3 {
-		prefix = args[3]
+	if valuePrefix == "" {
+		valuePrefix = "testkey"
 	}
 
-	a := syncbase.NewService(serviceName).App("a")
-	d := a.NoSQLDatabase("d", nil)
-
-	// Do Puts.
 	tb := d.Table(testTable)
-
 	for i := start; i < end; i++ {
 		key := fmt.Sprintf("foo%d", i)
-		r := tb.Row(key)
-		if err := r.Put(ctx, prefix+serviceName+key); err != nil {
-			return fmt.Errorf("r.Put() failed: %v\n", err)
+		if err := tb.Put(ctx, key, valuePrefix+syncbaseName+key); err != nil {
+			return fmt.Errorf("tb.Put() failed: %v", err)
 		}
 	}
-
 	return nil
-}, "runUpdateData")
+}
 
-// Updates data within a batch.
-// Arguments: 0: Syncbase name, 1: start index.
-// Optional args: 2: end index, 3: value prefix.
-// Values are from [start,end) or [start, start+5) depending on whether end
-// param was provided.
-var runUpdateBatchData = modules.Register(func(env *modules.Env, args ...string) error {
-	ctx, shutdown := v23.Init()
-	defer shutdown()
+func updateData(ctx *context.T, syncbaseName string, start, end int, valuePrefix string) error {
+	a := syncbase.NewService(syncbaseName).App(testApp)
+	d := a.NoSQLDatabase(testDb, nil)
+	return updateDataImpl(ctx, d, syncbaseName, start, end, valuePrefix)
+}
 
-	serviceName, startStr := args[0], args[1]
-	start, _ := strconv.ParseUint(startStr, 10, 64)
-	end, prefix := start+5, "testkey"
-	if len(args) > 2 {
-		end, _ = strconv.ParseUint(args[2], 10, 64)
-		if end <= start {
-			return fmt.Errorf("Test error: end <= start. start: %d, end: %d", start, end)
-		}
-	}
-	if len(args) > 3 {
-		prefix = args[3]
-	}
-
-	a := syncbase.NewService(serviceName).App("a")
-	d := a.NoSQLDatabase("d", nil)
-
-	// Do Puts.
+func updateDataInBatch(ctx *context.T, syncbaseName string, start, end int, valuePrefix string) error {
+	a := syncbase.NewService(syncbaseName).App(testApp)
+	d := a.NoSQLDatabase(testDb, nil)
 	batch, err := d.BeginBatch(ctx, wire.BatchOptions{})
 	if err != nil {
-		return fmt.Errorf("BeginBatch failed: %v\n", err)
+		return fmt.Errorf("BeginBatch failed: %v", err)
 	}
-	tb := batch.Table(testTable)
-	for i := start; i < end; i++ {
-		key := fmt.Sprintf("foo%d", i)
-		r := tb.Row(key)
-		if err := r.Put(ctx, prefix+serviceName+key); err != nil {
-			batch.Abort(ctx)
-			return fmt.Errorf("r.Put() failed: %v\n", err)
-		}
+	if err = updateDataImpl(ctx, batch, syncbaseName, start, end, valuePrefix); err != nil {
+		return err
 	}
-	return batch.Commit(ctx)
-}, "runUpdateBatchData")
+	if err = batch.Commit(ctx); err != nil {
+		return fmt.Errorf("Commit failed: %v", err)
+	}
+	return nil
+}
 
-//////////////////////////////////////////////
-// Helpers for verifying data.
+////////////////////////////////////////////////////////////
+// Helpers for verifying data
 
-// Arguments: 0: syncbase name, 1: key prefix, 2: start index, 3: number of keys, 4: skip scan.
-var runVerifySyncgroupData = modules.Register(func(env *modules.Env, args ...string) error {
-	return runVerifySyncgroupDataInternal(args...)
-}, "runVerifySyncgroupData")
+const skipScan = true
 
-func runVerifySyncgroupDataInternal(args ...string) error {
-	ctx, shutdown := v23.Init()
-	defer shutdown()
-
-	a := syncbase.NewService(args[0]).App("a")
-	d := a.NoSQLDatabase("d", nil)
-
-	// Wait for a bit (up to 4 sec) until the last key appears.
+func verifySyncgroupData(ctx *context.T, syncbaseName, keyPrefix string, start, count int) error {
+	a := syncbase.NewService(syncbaseName).App(testApp)
+	d := a.NoSQLDatabase(testDb, nil)
 	tb := d.Table(testTable)
 
-	start, _ := strconv.ParseUint(args[2], 10, 64)
-	count, _ := strconv.ParseUint(args[3], 10, 64)
-	skipScan, _ := strconv.ParseBool(args[4])
-	lastKey := fmt.Sprintf("%s%d", args[1], start+count-1)
-
-	r := tb.Row(lastKey)
+	// Wait a bit (up to 4 seconds) for the last key to appear.
+	lastKey := fmt.Sprintf("%s%d", keyPrefix, start+count-1)
 	for i := 0; i < 8; i++ {
 		time.Sleep(500 * time.Millisecond)
 		var value string
-		if err := r.Get(ctx, &value); err == nil {
+		if err := tb.Get(ctx, lastKey, &value); err == nil {
 			break
 		}
 	}
 
-	// Verify that all keys and values made it correctly.
+	// Verify that all keys and values made it over correctly.
 	for i := start; i < start+count; i++ {
-		key := fmt.Sprintf("%s%d", args[1], i)
-		r := tb.Row(key)
+		key := fmt.Sprintf("%s%d", keyPrefix, i)
 		var got string
-		if err := r.Get(ctx, &got); err != nil {
-			return fmt.Errorf("r.Get() failed: %v\n", err)
+		if err := tb.Get(ctx, key, &got); err != nil {
+			return fmt.Errorf("tb.Get() failed: %v", err)
 		}
 		want := "testkey" + key
 		if got != want {
-			return fmt.Errorf("unexpected value: got %q, want %q\n", got, want)
+			return fmt.Errorf("unexpected value: got %q, want %q", got, want)
 		}
 	}
 
+	// TODO(sadovsky): Drop this? (Does it buy us much?)
 	if !skipScan {
 		// Re-verify using a scan operation.
-		stream := tb.Scan(ctx, nosql.Prefix(args[1]))
+		stream := tb.Scan(ctx, nosql.Prefix(keyPrefix))
 		for i := 0; stream.Advance(); i++ {
-			want := fmt.Sprintf("%s%d", args[1], i)
-			got := stream.Key()
+			got, want := stream.Key(), fmt.Sprintf("%s%d", keyPrefix, i)
 			if got != want {
-				return fmt.Errorf("unexpected key in scan: got %q, want %q\n", got, want)
+				return fmt.Errorf("unexpected key in scan: got %q, want %q", got, want)
 			}
 			want = "testkey" + want
 			if err := stream.Value(&got); err != nil {
 				return fmt.Errorf("cannot fetch value in scan: %v\n", err)
 			}
 			if got != want {
-				return fmt.Errorf("unexpected value in scan: got %q, want %q\n", got, want)
+				return fmt.Errorf("unexpected value in scan: got %q, want %q", got, want)
 			}
 		}
-
 		if err := stream.Err(); err != nil {
-			return fmt.Errorf("scan stream error: %v\n", err)
+			return fmt.Errorf("scan stream error: %v", err)
 		}
 	}
 	return nil
 }
 
-//////////////////////////////////////////////
-// Helpers for managing syncgroups.
+////////////////////////////////////////////////////////////
+// Helpers for managing syncgroups
 
-// Arguments: 0: Syncbase name, 1: syncgroup name, 2: prefixes, 3: mount table,
-// 4: syncgroup permission blessings (; separated)
-var runCreateSyncgroup = modules.Register(func(env *modules.Env, args ...string) error {
-	return runCreateSyncgroupInternal(env, args...)
-}, "runCreateSyncgroup")
-
-func runCreateSyncgroupInternal(env *modules.Env, args ...string) error {
-	ctx, shutdown := v23.Init()
-	defer shutdown()
-
-	a := syncbase.NewService(args[0]).App("a")
-	d := a.NoSQLDatabase("d", nil)
-
-	mtName := args[3]
+// blessingPatterns is a ";"-separated list of blessing patterns.
+func createSyncgroup(ctx *context.T, syncbaseName, sgName, sgPrefixes, mtName, blessingPatterns string) error {
 	if mtName == "" {
-		mtName = env.Vars[ref.EnvNamespacePrefix]
+		roots := v23.GetNamespace(ctx).Roots()
+		if len(roots) == 0 {
+			return errors.New("no namespace roots")
+		}
+		mtName = roots[0]
 	}
 
-	blessings := strings.Split(args[4], ";")
+	a := syncbase.NewService(syncbaseName).App(testApp)
+	d := a.NoSQLDatabase(testDb, nil)
 
 	spec := wire.SyncgroupSpec{
 		Description: "test syncgroup sg",
-		Perms:       perms(blessings...),
-		Prefixes:    toSgPrefixes(args[2]),
+		Perms:       perms(strings.Split(blessingPatterns, ";")...),
+		Prefixes:    parseSgPrefixes(sgPrefixes),
 		MountTables: []string{mtName},
 	}
 
-	sg := d.Syncgroup(args[1])
+	sg := d.Syncgroup(sgName)
 	info := wire.SyncgroupMemberInfo{SyncPriority: 8}
 	if err := sg.Create(ctx, spec, info); err != nil {
-		return fmt.Errorf("Create SG %q failed: %v\n", args[1], err)
+		return fmt.Errorf("{%q, %q} sg.Create() failed: %v", syncbaseName, sgName, err)
 	}
 	return nil
 }
 
-var runJoinSyncgroup = modules.Register(func(env *modules.Env, args ...string) error {
-	return runJoinSyncGroupInternal(args...)
-}, "runJoinSyncgroup")
+func joinSyncgroup(ctx *context.T, syncbaseName, sgName string) error {
+	a := syncbase.NewService(syncbaseName).App(testApp)
+	d := a.NoSQLDatabase(testDb, nil)
 
-// Arguments: 0: Syncbase name, 1: syncgroup name.
-func runJoinSyncGroupInternal(args ...string) error {
-	ctx, shutdown := v23.Init()
-	defer shutdown()
-
-	a := syncbase.NewService(args[0]).App("a")
-	d := a.NoSQLDatabase("d", nil)
-
-	sg := d.Syncgroup(args[1])
+	sg := d.Syncgroup(sgName)
 	info := wire.SyncgroupMemberInfo{SyncPriority: 10}
 	if _, err := sg.Join(ctx, info); err != nil {
-		return fmt.Errorf("Join SG %q failed: %v\n", args[1], err)
+		return fmt.Errorf("{%q, %q} sg.Join() failed: %v", syncbaseName, sgName, err)
 	}
 	return nil
 }
 
-// Arguments: 0: Syncbase name, 1: syncgroup name, 2: number of syncgroup
-// members.
-var runVerifySyncgroupMembers = modules.Register(func(env *modules.Env, args ...string) error {
-	ctx, shutdown := v23.Init()
-	defer shutdown()
+func verifySyncgroupMembers(ctx *context.T, syncbaseName, sgName string, wantMembers int) error {
+	a := syncbase.NewService(syncbaseName).App(testApp)
+	d := a.NoSQLDatabase(testDb, nil)
+	sg := d.Syncgroup(sgName)
 
-	a := syncbase.NewService(args[0]).App("a")
-	d := a.NoSQLDatabase("d", nil)
-
-	sg := d.Syncgroup(args[1])
-
-	wantMembers, err := strconv.ParseUint(args[2], 10, 64)
-	if err != nil {
-		return err
-	}
-	var gotMembers uint64
-
+	var gotMembers int
 	for i := 0; i < 8; i++ {
 		time.Sleep(500 * time.Millisecond)
 		members, err := sg.GetMembers(ctx)
 		if err != nil {
-			return fmt.Errorf("GetMembers %q SG %q failed: %v\n", args[0], args[1], err)
+			return fmt.Errorf("{%q, %q} sg.GetMembers() failed: %v", syncbaseName, sgName, err)
 		}
-		gotMembers = uint64(len(members))
-		if wantMembers == gotMembers {
+		gotMembers = len(members)
+		if gotMembers == wantMembers {
 			break
 		}
 	}
-	if wantMembers != gotMembers {
-		return fmt.Errorf("GetMembers %q SG %q failed: members got %v, want %v\n", args[0], args[1], gotMembers, wantMembers)
+	if gotMembers != wantMembers {
+		return fmt.Errorf("{%q, %q} verifySyncgroupMembers failed: got %d members, want %d members", syncbaseName, sgName, gotMembers, wantMembers)
 	}
 	return nil
-}, "runVerifySyncgroupMembers")
+}
 
-// Arguments: 0: Syncbase name, 1: Syncgroup name, 2: syncgroup permission
-// blessings (; separated).
-var runToggleSync = modules.Register(func(env *modules.Env, args ...string) error {
-	ctx, shutdown := v23.Init()
-	defer shutdown()
-
-	serviceName, sgName := args[0], args[1]
-	blessings := strings.Split(args[2], ";")
-
-	a := syncbase.NewService(serviceName).App("a")
-	d := a.NoSQLDatabase("d", nil)
+// blessingPatterns is a ";"-separated list of blessing patterns.
+func toggleSync(ctx *context.T, syncbaseName, sgName, blessingPatterns string) error {
+	a := syncbase.NewService(syncbaseName).App(testApp)
+	d := a.NoSQLDatabase(testDb, nil)
 
 	sg := d.Syncgroup(sgName)
-	spec, ver, err := sg.GetSpec(ctx)
+	spec, version, err := sg.GetSpec(ctx)
 	if err != nil {
 		return err
 	}
-	spec.Perms = perms(blessings...)
+	spec.Perms = perms(strings.Split(blessingPatterns, ";")...)
 
-	return sg.SetSpec(ctx, spec, ver)
-}, "runToggleSync")
+	return sg.SetSpec(ctx, spec, version)
+}
 
-//////////////////////////////
-// Helpers.
+////////////////////////////////////////////////////////////
+// Syncbase-specific testing helpers
 
-func perms(bps ...string) access.Permissions {
+// perms returns a Permissions that grants full access for the given blessing
+// patterns.
+// TODO(sadovsky): Duplicate of tu.DefaultPerms.
+func perms(blessingPatterns ...string) access.Permissions {
 	perms := access.Permissions{}
-	for _, bp := range bps {
+	for _, bp := range blessingPatterns {
 		for _, tag := range access.AllTypicalTags() {
 			perms.Add(security.BlessingPattern(bp), string(tag))
 		}
@@ -358,9 +265,9 @@ func perms(bps ...string) access.Permissions {
 	return perms
 }
 
-// toSgPrefixes converts, for example, "a:b,c:" to
-// [{TableName: "a", Row: "b"}, {TableName: "c", Row: ""}].
-func toSgPrefixes(csv string) []wire.TableRow {
+// parseSgPrefixes converts, for example, "a:b,c:" to
+// [{TableName: testApp, Row: "b"}, {TableName: "c", Row: ""}].
+func parseSgPrefixes(csv string) []wire.TableRow {
 	strs := strings.Split(csv, ",")
 	res := make([]wire.TableRow, len(strs))
 	for i, v := range strs {
@@ -371,4 +278,59 @@ func toSgPrefixes(csv string) []wire.TableRow {
 		res[i] = wire.TableRow{TableName: parts[0], Row: parts[1]}
 	}
 	return res
+}
+
+// forkCredentials returns a new *modules.CustomCredentials with a fresh
+// principal, blessed by t with the given extension.
+// TODO(sadovsky): Maybe move to tu.
+func forkCredentials(t *v23tests.T, extension string) *modules.CustomCredentials {
+	c, err := t.Shell().NewChildCredentials(extension)
+	if err != nil {
+		t.Fatal(err)
+	}
+	return c
+}
+
+// forkContext returns a new *context.T with a fresh principal, blessed by t
+// with the given extension.
+// TODO(sadovsky): Maybe move to tu.
+func forkContext(t *v23tests.T, extension string) *context.T {
+	return tu.NewCtx(t.Context(), v23.GetPrincipal(t.Context()), extension)
+}
+
+////////////////////////////////////////////////////////////
+// Generic testing helpers
+
+func fatal(t *v23tests.T, args ...interface{}) {
+	debug.PrintStack()
+	t.Fatal(args...)
+}
+
+func fatalf(t *v23tests.T, format string, args ...interface{}) {
+	debug.PrintStack()
+	t.Fatalf(format, args...)
+}
+
+func ok(t *v23tests.T, err error) {
+	if err != nil {
+		fatal(t, err)
+	}
+}
+
+func nok(t *v23tests.T, err error) {
+	if err == nil {
+		fatal(t, "nil err")
+	}
+}
+
+func eq(t *v23tests.T, got, want interface{}) {
+	if !reflect.DeepEqual(got, want) {
+		fatalf(t, "got %v, want %v", got, want)
+	}
+}
+
+func neq(t *v23tests.T, got, notWant interface{}) {
+	if reflect.DeepEqual(got, notWant) {
+		fatalf(t, "got %v", got)
+	}
 }
