@@ -18,12 +18,12 @@ func V23TestSyncbasedPutGet(t *v23tests.T) {
 
 	// Start syncbased.
 	serverCreds := forkCredentials(t, "server")
-	cleanup := tu.StartSyncbased(t, serverCreds, syncbaseName, "", `{"Read": {"In":["root:server", "root:client"]}, "Write": {"In":["root:server", "root:client"]}}`)
+	cleanup := tu.StartSyncbased(t, serverCreds, testSbName, "", `{"Read": {"In":["root:server", "root:client"]}, "Write": {"In":["root:server", "root:client"]}}`)
 	defer cleanup()
 
 	// Create app, database and table.
 	ctx := forkContext(t, "client")
-	a := syncbase.NewService(syncbaseName).App("a")
+	a := syncbase.NewService(testSbName).App("a")
 	if err := a.Create(ctx, nil); err != nil {
 		t.Fatalf("unable to create an app: %v", err)
 	}
@@ -31,12 +31,12 @@ func V23TestSyncbasedPutGet(t *v23tests.T) {
 	if err := d.Create(ctx, nil); err != nil {
 		t.Fatalf("unable to create a database: %v", err)
 	}
-	if err := d.Table("tb").Create(ctx, nil); err != nil {
+	tb := d.Table("tb")
+	if err := tb.Create(ctx, nil); err != nil {
 		t.Fatalf("unable to create a table: %v", err)
 	}
-	tb := d.Table("tb")
 
-	// Do Put followed by Get on a row.
+	// Do a Put followed by a Get.
 	r := tb.Row("r")
 	if err := r.Put(ctx, "testkey"); err != nil {
 		t.Fatalf("r.Put() failed: %v", err)

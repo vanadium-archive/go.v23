@@ -14,8 +14,6 @@ import (
 
 	"v.io/v23"
 	"v.io/v23/context"
-	"v.io/v23/security"
-	"v.io/v23/security/access"
 	wire "v.io/v23/services/syncbase/nosql"
 	"v.io/v23/syncbase"
 	"v.io/v23/syncbase/nosql"
@@ -25,25 +23,25 @@ import (
 )
 
 const (
-	syncbaseName = "syncbase" // Name that syncbase mounts itself at.
-	testApp      = "a"
-	testDb       = "d"
-	testTable    = "tb"
+	testSbName = "syncbase" // Name that syncbase mounts itself at.
+	testApp    = "a"
+	testDb     = "d"
+	testTable  = "tb"
 )
-
-// TODO(sadovsky): Noticed while updating this code: it's ignoring errors in
-// various places. Errors should generally not be ignored.
 
 ////////////////////////////////////////////////////////////
 // Helpers for setting up app and db
 
 func setupAppA(ctx *context.T, syncbaseName string) error {
 	a := syncbase.NewService(syncbaseName).App(testApp)
-	a.Create(ctx, nil)
+	if err := a.Create(ctx, nil); err != nil {
+		return err
+	}
 	d := a.NoSQLDatabase(testDb, nil)
-	d.Create(ctx, nil)
-	d.Table(testTable).Create(ctx, nil)
-	return nil
+	if err := d.Create(ctx, nil); err != nil {
+		return err
+	}
+	return d.Table(testTable).Create(ctx, nil)
 }
 
 ////////////////////////////////////////////////////////////
@@ -155,7 +153,7 @@ func verifySyncgroupData(ctx *context.T, syncbaseName, keyPrefix string, start, 
 			}
 			want = "testkey" + want
 			if err := stream.Value(&got); err != nil {
-				return fmt.Errorf("cannot fetch value in scan: %v\n", err)
+				return fmt.Errorf("failed to fetch value in scan: %v", err)
 			}
 			if got != want {
 				return fmt.Errorf("unexpected value in scan: got %q, want %q", got, want)
@@ -186,7 +184,7 @@ func createSyncgroup(ctx *context.T, syncbaseName, sgName, sgPrefixes, mtName, b
 
 	spec := wire.SyncgroupSpec{
 		Description: "test syncgroup sg",
-		Perms:       perms(strings.Split(blessingPatterns, ";")...),
+		Perms:       tu.DefaultPerms(strings.Split(blessingPatterns, ";")...),
 		Prefixes:    parseSgPrefixes(sgPrefixes),
 		MountTables: []string{mtName},
 	}
@@ -229,7 +227,7 @@ func verifySyncgroupMembers(ctx *context.T, syncbaseName, sgName string, wantMem
 		}
 	}
 	if gotMembers != wantMembers {
-		return fmt.Errorf("{%q, %q} verifySyncgroupMembers failed: got %d members, want %d members", syncbaseName, sgName, gotMembers, wantMembers)
+		return fmt.Errorf("{%q, %q} verifySyncgroupMembers failed: got %d members, want %d", syncbaseName, sgName, gotMembers, wantMembers)
 	}
 	return nil
 }
@@ -244,26 +242,13 @@ func toggleSync(ctx *context.T, syncbaseName, sgName, blessingPatterns string) e
 	if err != nil {
 		return err
 	}
-	spec.Perms = perms(strings.Split(blessingPatterns, ";")...)
+	spec.Perms = tu.DefaultPerms(strings.Split(blessingPatterns, ";")...)
 
 	return sg.SetSpec(ctx, spec, version)
 }
 
 ////////////////////////////////////////////////////////////
 // Syncbase-specific testing helpers
-
-// perms returns a Permissions that grants full access for the given blessing
-// patterns.
-// TODO(sadovsky): Duplicate of tu.DefaultPerms.
-func perms(blessingPatterns ...string) access.Permissions {
-	perms := access.Permissions{}
-	for _, bp := range blessingPatterns {
-		for _, tag := range access.AllTypicalTags() {
-			perms.Add(security.BlessingPattern(bp), string(tag))
-		}
-	}
-	return perms
-}
 
 // parseSgPrefixes converts, for example, "a:b,c:" to
 // [{TableName: testApp, Row: "b"}, {TableName: "c", Row: ""}].
