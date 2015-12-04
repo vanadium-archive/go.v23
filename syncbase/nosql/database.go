@@ -399,23 +399,23 @@ func toConflictRow(op wire.RowOp, batchIds []uint64) ConflictRow {
 	var local, remote, ancestor *Value
 	if op.LocalValue != nil {
 		local = &Value{
-			val:       op.LocalValue.Bytes,
+			Val:       op.LocalValue.Bytes,
 			WriteTs:   toTime(op.LocalValue.WriteTs),
-			selection: wire.ValueSelectionLocal,
+			Selection: wire.ValueSelectionLocal,
 		}
 	}
 	if op.RemoteValue != nil {
 		remote = &Value{
-			val:       op.RemoteValue.Bytes,
+			Val:       op.RemoteValue.Bytes,
 			WriteTs:   toTime(op.RemoteValue.WriteTs),
-			selection: wire.ValueSelectionRemote,
+			Selection: wire.ValueSelectionRemote,
 		}
 	}
 	if op.AncestorValue != nil {
 		ancestor = &Value{
-			val:       op.AncestorValue.Bytes,
+			Val:       op.AncestorValue.Bytes,
 			WriteTs:   toTime(op.AncestorValue.WriteTs),
-			selection: wire.ValueSelectionOther,
+			Selection: wire.ValueSelectionOther,
 		}
 	}
 	return ConflictRow{
@@ -439,9 +439,9 @@ func toResolutionInfo(r ResolvedRow, lastRow bool) wire.ResolutionInfo {
 	sel := wire.ValueSelectionOther
 	resVal := (*wire.Value)(nil)
 	if r.Result != nil {
-		sel = r.Result.selection
+		sel = r.Result.Selection
 		resVal = &wire.Value{
-			Bytes:   r.Result.val,
+			Bytes:   r.Result.Val,
 			WriteTs: r.Result.WriteTs.UnixNano(), // ignored by syncbase
 		}
 	}

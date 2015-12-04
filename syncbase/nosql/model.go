@@ -577,91 +577,10 @@ type ConflictResolver interface {
 	OnConflict(ctx *context.T, conflict *Conflict) Resolution
 }
 
-// Conflict contains information to fully specify a conflict. Since syncbase
-// supports batches there can be one or more rows within the batch that has a
-// conflict. Each of these rows will be sent together as part of a single
-// conflict. Each row contains an Id of the batch to which it belongs,
-// enabling the client to group together rows that are part of a batch. Note
-// that a single row can be part of more than one batch.
-//
-// WriteSet contains rows that were written.
-// ReadSet contains rows that were read within a batch corresponding to a row
-// within the write set.
-// ScanSet contains scans performed within a batch corresponding to a row
-// within the write set.
-// Batches is a map of unique ids to BatchInfo objects. The id is unique only in
-// the context of a given conflict and is otherwise meaningless.
-type Conflict struct {
-	ReadSet  *ConflictRowSet
-	WriteSet *ConflictRowSet
-	ScanSet  *ConflictScanSet
-	Batches  map[uint64]wire.BatchInfo
-}
-
-// ConflictRowSet contains a set of rows under conflict. It provides two different
-// ways to access the same set.
-// ByKey is a map of ConflictRows keyed by the row key.
-// ByBatch is a map of []ConflictRows keyed by batch id. This map lets the client
-// access all ConflictRows within this set that contain a given hint.
-type ConflictRowSet struct {
-	ByKey   map[string]ConflictRow
-	ByBatch map[uint64][]ConflictRow
-}
-
-// ConflictScanSet contains a set of scans under conflict.
-// ByBatch is a map of array of ScanOps keyed by batch id.
-type ConflictScanSet struct {
-	ByBatch map[uint64][]wire.ScanOp
-}
-
-// ConflictRow represents a row under conflict.
-// Key is the key for the row.
-// LocalValue is the value present in the local db.
-// RemoteValue is the value received via sync.
-// AncestorValue is the value for the key which is the lowest common
-// ancestor of the two values represented by LocalValue and RemoteValue.
-// AncestorValue is nil if the ConflictRow is a part of the read set.
-// BatchIds is a list of ids of all the batches that this row belongs to.
-type ConflictRow struct {
-	Key           string
-	LocalValue    *Value
-	RemoteValue   *Value
-	AncestorValue *Value
-	BatchIds      []uint64
-}
-
-// Resolution contains the application’s reply to a conflict. It must contain a
-// resolved value for each conflict row within the WriteSet of the given
-// conflict.
-// ResultSet is a map of row key to ResolvedRow.
-type Resolution struct {
-	ResultSet map[string]ResolvedRow
-	// TODO(jlodhia): Hint []string
-}
-
-// ResolvedRow represents a result of resolution of a row under conflict.
-// Key is the key for the row.
-// Selection represents the value that was selected for resolution.
-// Value is the resolved value for the key. This field should be used only
-// if value of Selection field is 'Other'.
-type ResolvedRow struct {
-	Key    string
-	Result *Value
-}
-
-// Value contains a specific version of data for the row under conflict along
-// with the write timestamp and hints associated with the version.
-// WriteTs is the write timestamp for this value.
-type Value struct {
-	val       []byte
-	WriteTs   time.Time
-	selection wire.ValueSelection
-}
-
 // Get takes a reference to an instance of a type that is expected to be
 // represented by Value.
 func (v *Value) Get(value interface{}) error {
-	return vom.Decode(v.val, value)
+	return vom.Decode(v.Val, value)
 }
 
 // NewValue creates a new Value to be added to Resolution.
@@ -674,8 +593,8 @@ func NewValue(ctx *context.T, data interface{}) (*Value, error) {
 		return nil, err
 	}
 	return &Value{
-		val:       bytes,
+		Val:       bytes,
 		WriteTs:   time.Now(), // ignored by syncbase
-		selection: wire.ValueSelectionOther,
+		Selection: wire.ValueSelectionOther,
 	}, nil
 }
