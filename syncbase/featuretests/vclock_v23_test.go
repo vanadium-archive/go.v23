@@ -91,7 +91,7 @@ func V23TestVClockSystemClock(t *v23tests.T) {
 	sc := wire.ServiceClient("s0")
 
 	// Initialize system time.
-	if err := sc.DevModeUpdateClock(ctx, wire.DevModeUpdateClockOpts{
+	if err := sc.DevModeUpdateVClock(ctx, wire.DevModeUpdateVClockOpts{
 		Now:           jan2015,
 		ElapsedTime:   0,
 		DoLocalUpdate: true,
@@ -109,7 +109,7 @@ func V23TestVClockSystemClock(t *v23tests.T) {
 
 	// Move time and elapsed time forward by equal amounts. Syncbase should not
 	// detect any anomalies, and should reflect the new time.
-	if err := sc.DevModeUpdateClock(ctx, wire.DevModeUpdateClockOpts{
+	if err := sc.DevModeUpdateVClock(ctx, wire.DevModeUpdateVClockOpts{
 		Now:           jan2015.Add(time.Hour),
 		ElapsedTime:   time.Hour,
 		DoLocalUpdate: true,
@@ -127,7 +127,7 @@ func V23TestVClockSystemClock(t *v23tests.T) {
 
 	// Move time backward, and reset elapsed time to 0. Syncbase should detect a
 	// reboot, and should reflect the new time.
-	if err := sc.DevModeUpdateClock(ctx, wire.DevModeUpdateClockOpts{
+	if err := sc.DevModeUpdateVClock(ctx, wire.DevModeUpdateVClockOpts{
 		Now:           jan2015.Add(-time.Hour),
 		ElapsedTime:   0,
 		DoLocalUpdate: true,
@@ -147,7 +147,7 @@ func V23TestVClockSystemClock(t *v23tests.T) {
 	// detect this as a system clock change (since the system clock time is not
 	// where it's expected to be) and adjust skew so that the new reported time is
 	// equal to the previous reported time plus the change in elapsed time.
-	if err := sc.DevModeUpdateClock(ctx, wire.DevModeUpdateClockOpts{
+	if err := sc.DevModeUpdateVClock(ctx, wire.DevModeUpdateVClockOpts{
 		Now:           jan2015.Add(5 * time.Hour),
 		ElapsedTime:   time.Hour,
 		DoLocalUpdate: true,

@@ -106,10 +106,10 @@ type ServiceClientMethods interface {
 	//    GetPermissions() (perms access.Permissions, version string, err error) {Blue}
 	//  }
 	permissions.ObjectClientMethods
-	// DevModeUpdateClock updates various bits of Syncbase virtual clock and clock
+	// DevModeUpdateVClock updates various bits of Syncbase virtual clock and clock
 	// daemon state based on the specified options.
 	// Requires --dev flag to be set (in addition to Admin check).
-	DevModeUpdateClock(_ *context.T, uco DevModeUpdateClockOpts, _ ...rpc.CallOpt) error
+	DevModeUpdateVClock(_ *context.T, uco DevModeUpdateVClockOpts, _ ...rpc.CallOpt) error
 	// DevModeGetTime returns the current time per the Syncbase clock.
 	// Requires --dev flag to be set (in addition to Admin check).
 	DevModeGetTime(*context.T, ...rpc.CallOpt) (time.Time, error)
@@ -132,8 +132,8 @@ type implServiceClientStub struct {
 	permissions.ObjectClientStub
 }
 
-func (c implServiceClientStub) DevModeUpdateClock(ctx *context.T, i0 DevModeUpdateClockOpts, opts ...rpc.CallOpt) (err error) {
-	err = v23.GetClient(ctx).Call(ctx, c.name, "DevModeUpdateClock", []interface{}{i0}, nil, opts...)
+func (c implServiceClientStub) DevModeUpdateVClock(ctx *context.T, i0 DevModeUpdateVClockOpts, opts ...rpc.CallOpt) (err error) {
+	err = v23.GetClient(ctx).Call(ctx, c.name, "DevModeUpdateVClock", []interface{}{i0}, nil, opts...)
 	return
 }
 
@@ -193,10 +193,10 @@ type ServiceServerMethods interface {
 	//    GetPermissions() (perms access.Permissions, version string, err error) {Blue}
 	//  }
 	permissions.ObjectServerMethods
-	// DevModeUpdateClock updates various bits of Syncbase virtual clock and clock
+	// DevModeUpdateVClock updates various bits of Syncbase virtual clock and clock
 	// daemon state based on the specified options.
 	// Requires --dev flag to be set (in addition to Admin check).
-	DevModeUpdateClock(_ *context.T, _ rpc.ServerCall, uco DevModeUpdateClockOpts) error
+	DevModeUpdateVClock(_ *context.T, _ rpc.ServerCall, uco DevModeUpdateVClockOpts) error
 	// DevModeGetTime returns the current time per the Syncbase clock.
 	// Requires --dev flag to be set (in addition to Admin check).
 	DevModeGetTime(*context.T, rpc.ServerCall) (time.Time, error)
@@ -239,8 +239,8 @@ type implServiceServerStub struct {
 	gs *rpc.GlobState
 }
 
-func (s implServiceServerStub) DevModeUpdateClock(ctx *context.T, call rpc.ServerCall, i0 DevModeUpdateClockOpts) error {
-	return s.impl.DevModeUpdateClock(ctx, call, i0)
+func (s implServiceServerStub) DevModeUpdateVClock(ctx *context.T, call rpc.ServerCall, i0 DevModeUpdateVClockOpts) error {
+	return s.impl.DevModeUpdateVClock(ctx, call, i0)
 }
 
 func (s implServiceServerStub) DevModeGetTime(ctx *context.T, call rpc.ServerCall) (time.Time, error) {
@@ -268,10 +268,10 @@ var descService = rpc.InterfaceDesc{
 	},
 	Methods: []rpc.MethodDesc{
 		{
-			Name: "DevModeUpdateClock",
-			Doc:  "// DevModeUpdateClock updates various bits of Syncbase virtual clock and clock\n// daemon state based on the specified options.\n// Requires --dev flag to be set (in addition to Admin check).",
+			Name: "DevModeUpdateVClock",
+			Doc:  "// DevModeUpdateVClock updates various bits of Syncbase virtual clock and clock\n// daemon state based on the specified options.\n// Requires --dev flag to be set (in addition to Admin check).",
 			InArgs: []rpc.ArgDesc{
-				{"uco", ``}, // DevModeUpdateClockOpts
+				{"uco", ``}, // DevModeUpdateVClockOpts
 			},
 			Tags: []*vdl.Value{vdl.ValueOf(access.Tag("Admin"))},
 		},
