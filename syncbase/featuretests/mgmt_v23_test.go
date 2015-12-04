@@ -147,17 +147,17 @@ func V23TestDeviceManager(i *v23tests.T) {
 			time.Sleep(time.Second)
 			continue
 		}
-		re := regexp.MustCompile(`Unclaimed device manager \((.*)\)`)
+		re := regexp.MustCompile(`Unclaimed device manager endpoint: (.*)`)
 		matches := re.FindSubmatch(startLog)
 		if len(matches) == 0 {
-			i.Logf("Couldn't find match in %v [%v]", dmLog, startLog)
+			i.Logf("Couldn't find match in %v [%s]", dmLog, startLog)
 			time.Sleep(time.Second)
 			continue
 		}
-		if len(matches) != 2 {
+		if len(matches) < 2 {
 			i.Fatalf("Wrong match in %v (%d) %v", dmLog, len(matches), string(matches[0]))
 		}
-		claimableEP = string(matches[1])
+		claimableEP = string(matches[len(matches)-1])
 		break
 	}
 	// Claim the device as "root:u:alice:myworkstation".
