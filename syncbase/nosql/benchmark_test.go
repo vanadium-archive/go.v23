@@ -27,6 +27,7 @@ import (
 	"testing"
 
 	"v.io/v23/context"
+	wire "v.io/v23/services/syncbase/nosql"
 	"v.io/v23/syncbase"
 	"v.io/v23/syncbase/nosql"
 	_ "v.io/x/ref/runtime/factories/generic"
@@ -52,6 +53,11 @@ func prepare() (*context.T, nosql.Database, nosql.Table, func()) {
 		panic(fmt.Sprintf("can't create a table: %v", err))
 	}
 	return ctx, d, tb, cleanup
+}
+
+type testStruct struct {
+	Val  string
+	Blob wire.BlobRef
 }
 
 type sampleStruct struct {
