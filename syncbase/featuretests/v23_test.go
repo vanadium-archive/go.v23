@@ -31,12 +31,28 @@ func TestV23SyncbasedPutGet(t *testing.T) {
 	v23tests.RunTest(t, V23TestSyncbasedPutGet)
 }
 
+func TestV23ResolutionRuleConfig(t *testing.T) {
+	v23tests.RunTest(t, V23TestResolutionRuleConfig)
+}
+
 func TestV23CRDefault(t *testing.T) {
 	v23tests.RunTest(t, V23TestCRDefault)
 }
 
+func TestV23ConflictResolutionWithAtomicBatch(t *testing.T) {
+	v23tests.RunTest(t, V23TestConflictResolutionWithAtomicBatch)
+}
+
 func TestV23CRAppResolved(t *testing.T) {
 	v23tests.RunTest(t, V23TestCRAppResolved)
+}
+
+func TestV23AppBasedResolutionOverridesOthers(t *testing.T) {
+	v23tests.RunTest(t, V23TestAppBasedResolutionOverridesOthers)
+}
+
+func TestV23ConflictResolutionMultipleBatchesAsSingleConflict(t *testing.T) {
+	v23tests.RunTest(t, V23TestConflictResolutionMultipleBatchesAsSingleConflict)
 }
 
 func TestV23DeviceManager(t *testing.T) {

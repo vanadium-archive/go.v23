@@ -93,7 +93,11 @@ func updateData(ctx *context.T, syncbaseName string, start, end int, valuePrefix
 	return updateDataImpl(ctx, d, syncbaseName, start, end, valuePrefix)
 }
 
-func updateDataInBatch(ctx *context.T, syncbaseName string, start, end int, valuePrefix string) error {
+// Signal key tells the module to send an end signal, using the signalKey
+// provided as the key, once the module finishes its execution. This is useful
+// if the module is run as a goroutine and the parent needs to wait for it to
+// end.
+func updateDataInBatch(ctx *context.T, syncbaseName string, start, end int, valuePrefix, signalKey string) error {
 	a := syncbase.NewService(syncbaseName).App(testApp)
 	d := a.NoSQLDatabase(testDb, nil)
 	batch, err := d.BeginBatch(ctx, wire.BatchOptions{})
@@ -105,6 +109,19 @@ func updateDataInBatch(ctx *context.T, syncbaseName string, start, end int, valu
 	}
 	if err = batch.Commit(ctx); err != nil {
 		return fmt.Errorf("Commit failed: %v", err)
+	}
+	if signalKey != "" {
+		return sendSignal(ctx, d, signalKey)
+	}
+	return nil
+}
+
+func sendSignal(ctx *context.T, d nosql.Database, signalKey string) error {
+	tb := d.Table(testTable)
+	r := tb.Row(signalKey)
+
+	if err := r.Put(ctx, true); err != nil {
+		return fmt.Errorf("r.Put() failed: %v", err)
 	}
 	return nil
 }
