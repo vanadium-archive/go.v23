@@ -14,6 +14,14 @@ import (
 	"v.io/v23/context"
 )
 
+func init() {
+	// musllibc does not sent an Arg[0] when dlopening() a shared library.  We
+	// must set Arg[0] manually if it does not exist.
+	if len(os.Args) < 1 {
+		os.Args = []string{""}
+	}
+}
+
 // Init should be called once for each vanadium mojo app, providing
 // the setup of the initial vanadium context and a shutdown function
 // that can be used to clean up the runtime. We allow calling Init
