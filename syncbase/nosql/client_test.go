@@ -492,6 +492,49 @@ func TestTablePermsNested(t *testing.T) {
 	}
 }
 
+// Tests that Table.Destroy deletes all rows and ACLs in the table.
+func TestTableDestroyAndRecreate(t *testing.T) {
+	ctx, sName, cleanup := tu.SetupOrDie(nil)
+	defer cleanup()
+	a := tu.CreateApp(t, ctx, syncbase.NewService(sName), "a")
+	d := tu.CreateNoSQLDatabase(t, ctx, a, "d")
+	tb := tu.CreateTable(t, ctx, d, "tb")
+	// Write some data.
+	if err := tb.Put(ctx, "bar/baz", "A"); err != nil {
+		t.Fatalf("tb.Put() failed: %v", err)
+	}
+	if err := tb.Put(ctx, "foo", "B"); err != nil {
+		t.Fatalf("tb.Put() failed: %v", err)
+	}
+	// Remove admin and write permissions from "bar".
+	fullPerms := tu.DefaultPerms("root:client").Normalize()
+	readPerms := fullPerms.Copy()
+	readPerms.Clear("root:client", string(access.Write), string(access.Admin))
+	readPerms.Normalize()
+	if err := tb.SetPrefixPermissions(ctx, nosql.Prefix("bar"), readPerms); err != nil {
+		t.Fatalf("tb.SetPrefixPermissions() failed: %v", err)
+	}
+	// Verify we have no write access to "bar" anymore.
+	if err := tb.Put(ctx, "bar/bat", "C"); verror.ErrorID(err) != verror.ErrNoAccess.ID {
+		t.Fatalf("tb.Put() should have failed with ErrNoAccess, got: %v", err)
+	}
+	// Destroy table. Destroy needs only admin permissions on the table, so it
+	// shouldn't be affected by the read-only prefix ACL.
+	if err := tb.Destroy(ctx); err != nil {
+		t.Fatalf("tb.Destroy() failed: %v", err)
+	}
+	// Recreate the table.
+	if err := tb.Create(ctx, nil); err != nil {
+		t.Fatalf("tb.Create() (recreate) failed: %v", err)
+	}
+	// Verify table is empty.
+	tu.CheckScan(t, ctx, tb, nosql.Prefix(""), []string{}, []interface{}{})
+	// Verify we again have write access to "bar".
+	if err := tb.Put(ctx, "bar/bat", "C"); err != nil {
+		t.Fatalf("tb.Put() failed: %v", err)
+	}
+}
+
 ////////////////////////////////////////
 // Tests involving rows
 
