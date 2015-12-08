@@ -16,6 +16,7 @@ import (
 	"v.io/v23/query/engine/internal/query_checker"
 	"v.io/v23/query/engine/internal/query_parser"
 	"v.io/v23/query/syncql"
+	"v.io/v23/vdl"
 	"v.io/v23/verror"
 	_ "v.io/x/ref/runtime/factories/generic"
 	"v.io/x/ref/test"
@@ -41,11 +42,19 @@ func init() {
 	defer shutdown()
 }
 
-func (t invoiceTable) Scan(keyRanges ds.KeyRanges) (ds.KeyValueStream, error) {
+func (t invoiceTable) GetIndexFields() []ds.Index {
+	return []ds.Index{}
+}
+
+func (t invoiceTable) Scan(indexRanges ...ds.IndexRanges) (ds.KeyValueStream, error) {
 	return nil, errors.New("unimplemented")
 }
 
-func (t customerTable) Scan(keyRanges ds.KeyRanges) (ds.KeyValueStream, error) {
+func (t customerTable) GetIndexFields() []ds.Index {
+	return []ds.Index{}
+}
+
+func (t customerTable) Scan(indexRanges ...ds.IndexRanges) (ds.KeyValueStream, error) {
 	return nil, errors.New("unimplemented")
 }
 
@@ -67,8 +76,14 @@ type checkSelectTest struct {
 }
 
 type keyRangesTest struct {
-	query     string
-	keyRanges *ds.KeyRanges
+	query       string
+	indexRanges *ds.IndexRanges
+}
+
+type indexRangesTest struct {
+	query       string
+	fieldNames  []string
+	indexRanges []*ds.IndexRanges
 }
 
 type regularExpressionsTest struct {
@@ -175,135 +190,240 @@ func TestKeyRanges(t *testing.T) {
 	basic := []keyRangesTest{
 		{
 			"select k, v from Customer",
-			&ds.KeyRanges{
-				ds.KeyRange{Start: "", Limit: ""},
+			&ds.IndexRanges{
+				FieldName:  "k",
+				Kind:       vdl.String,
+				NilAllowed: true,
+				StringRanges: &ds.StringFieldRanges{
+					ds.StringFieldRange{Start: "", Limit: ""},
+				},
 			},
 		},
 		{
 			"select k, v from Customer where k = \"abc\" or k = \"def\"",
-			&ds.KeyRanges{
-				ds.KeyRange{Start: "abc", Limit: appendZeroByte("abc")},
-				ds.KeyRange{Start: "def", Limit: appendZeroByte("def")},
+			&ds.IndexRanges{
+				FieldName:  "k",
+				Kind:       vdl.String,
+				NilAllowed: false,
+				StringRanges: &ds.StringFieldRanges{
+					ds.StringFieldRange{Start: "abc", Limit: appendZeroByte("abc")},
+					ds.StringFieldRange{Start: "def", Limit: appendZeroByte("def")},
+				},
 			},
 		},
 		{
 			"select k, v from Customer where \"abc\" = k or \"def\" = k",
-			&ds.KeyRanges{
-				ds.KeyRange{Start: "abc", Limit: appendZeroByte("abc")},
-				ds.KeyRange{Start: "def", Limit: appendZeroByte("def")},
+			&ds.IndexRanges{
+				FieldName:  "k",
+				Kind:       vdl.String,
+				NilAllowed: false,
+				StringRanges: &ds.StringFieldRanges{
+					ds.StringFieldRange{Start: "abc", Limit: appendZeroByte("abc")},
+					ds.StringFieldRange{Start: "def", Limit: appendZeroByte("def")},
+				},
 			},
 		},
 		{
 			"select k, v from Customer where k >= \"foo\" and k < \"goo\"",
-			&ds.KeyRanges{
-				ds.KeyRange{Start: "foo", Limit: "goo"},
+			&ds.IndexRanges{
+				FieldName:  "k",
+				Kind:       vdl.String,
+				NilAllowed: false,
+				StringRanges: &ds.StringFieldRanges{
+					ds.StringFieldRange{Start: "foo", Limit: "goo"},
+				},
 			},
 		},
 		{
 			"select k, v from Customer where \"foo\" <= k and \"goo\" >= k",
-			&ds.KeyRanges{
-				ds.KeyRange{Start: "foo", Limit: appendZeroByte("goo")},
+			&ds.IndexRanges{
+				FieldName:  "k",
+				Kind:       vdl.String,
+				NilAllowed: false,
+				StringRanges: &ds.StringFieldRanges{
+					ds.StringFieldRange{Start: "foo", Limit: appendZeroByte("goo")},
+				},
 			},
 		},
 		{
 			"select k, v from Customer where k <> \"foo\"",
-			&ds.KeyRanges{
-				ds.KeyRange{Start: "", Limit: "foo"},
-				ds.KeyRange{Start: appendZeroByte("foo"), Limit: ""},
+			&ds.IndexRanges{
+				FieldName:  "k",
+				Kind:       vdl.String,
+				NilAllowed: false,
+				StringRanges: &ds.StringFieldRanges{
+					ds.StringFieldRange{Start: "", Limit: "foo"},
+					ds.StringFieldRange{Start: appendZeroByte("foo"), Limit: ""},
+				},
 			},
 		},
 		{
 			"select k, v from Customer where k <> \"foo\" and k > \"bar\"",
-			&ds.KeyRanges{
-				ds.KeyRange{Start: appendZeroByte("bar"), Limit: "foo"},
-				ds.KeyRange{Start: appendZeroByte("foo"), Limit: ""},
+			&ds.IndexRanges{
+				FieldName:  "k",
+				Kind:       vdl.String,
+				NilAllowed: false,
+				StringRanges: &ds.StringFieldRanges{
+					ds.StringFieldRange{Start: appendZeroByte("bar"), Limit: "foo"},
+					ds.StringFieldRange{Start: appendZeroByte("foo"), Limit: ""},
+				},
 			},
 		},
 		{
 			"select k, v from Customer where k <> \"foo\" or k > \"bar\"",
-			&ds.KeyRanges{
-				ds.KeyRange{Start: "", Limit: ""},
+			&ds.IndexRanges{
+				FieldName:  "k",
+				Kind:       vdl.String,
+				NilAllowed: false,
+				StringRanges: &ds.StringFieldRanges{
+					ds.StringFieldRange{Start: "", Limit: ""},
+				},
 			},
 		},
 		{
 			"select k, v from Customer where k <> \"bar\" or k > \"foo\"",
-			&ds.KeyRanges{
-				ds.KeyRange{Start: "", Limit: "bar"},
-				ds.KeyRange{Start: appendZeroByte("bar"), Limit: ""},
+			&ds.IndexRanges{
+				FieldName:  "k",
+				Kind:       vdl.String,
+				NilAllowed: false,
+				StringRanges: &ds.StringFieldRanges{
+					ds.StringFieldRange{Start: "", Limit: "bar"},
+					ds.StringFieldRange{Start: appendZeroByte("bar"), Limit: ""},
+				},
 			},
 		},
 		{
 			"select v from Customer where Type(v) = \"Foo.Bar\" and k >= \"100\" and k < \"200\" and v.foo > 50 and v.bar <= 1000 and v.baz <> -20.7",
-			&ds.KeyRanges{
-				ds.KeyRange{Start: "100", Limit: "200"},
+			&ds.IndexRanges{
+				FieldName:  "k",
+				Kind:       vdl.String,
+				NilAllowed: false,
+				StringRanges: &ds.StringFieldRanges{
+					ds.StringFieldRange{Start: "100", Limit: "200"},
+				},
 			},
 		},
 		{
 			"select k, v from Customer where k = \"abc\" and k = \"def\"",
-			&ds.KeyRanges{},
+			&ds.IndexRanges{
+				FieldName:    "k",
+				Kind:         vdl.String,
+				NilAllowed:   false,
+				StringRanges: &ds.StringFieldRanges{},
+			},
 		},
 		{
 			"select k, v from Customer where Type(v) = \"Foo.Bar\" and k like \"abc%\" limit 100 offset 200",
-			&ds.KeyRanges{
-				ds.KeyRange{Start: "abc", Limit: "abd"},
+			&ds.IndexRanges{
+				FieldName:  "k",
+				Kind:       vdl.String,
+				NilAllowed: false,
+				StringRanges: &ds.StringFieldRanges{
+					ds.StringFieldRange{Start: "abc", Limit: "abd"},
+				},
 			},
 		},
 		{
 			"select  k,  v from \n  Customer where k like \"002%\" or k like \"001%\" or k like \"%\"",
-			&ds.KeyRanges{
-				ds.KeyRange{Start: "", Limit: ""},
+			&ds.IndexRanges{
+				FieldName:  "k",
+				Kind:       vdl.String,
+				NilAllowed: false,
+				StringRanges: &ds.StringFieldRanges{
+					ds.StringFieldRange{Start: "", Limit: ""},
+				},
 			},
 		},
 		{
 			"select k, v from Customer where k = \"Foo.Bar\" and k like \"abc%\" limit 100 offset 200",
-			&ds.KeyRanges{},
+			&ds.IndexRanges{
+				FieldName:    "k",
+				Kind:         vdl.String,
+				NilAllowed:   false,
+				StringRanges: &ds.StringFieldRanges{},
+			},
 		},
 		{
 			"select k, v from Customer where k like \"foo%\" and k like \"bar%\"",
-			&ds.KeyRanges{},
+			&ds.IndexRanges{
+				FieldName:    "k",
+				Kind:         vdl.String,
+				NilAllowed:   false,
+				StringRanges: &ds.StringFieldRanges{},
+			},
 		},
 		{
 			"select k, v from Customer where k like \"foo%\" or k like \"bar%\"",
-			&ds.KeyRanges{
-				ds.KeyRange{Start: "bar", Limit: "bas"},
-				ds.KeyRange{Start: "foo", Limit: "fop"},
+			&ds.IndexRanges{
+				FieldName:  "k",
+				Kind:       vdl.String,
+				NilAllowed: false,
+				StringRanges: &ds.StringFieldRanges{
+					ds.StringFieldRange{Start: "bar", Limit: "bas"},
+					ds.StringFieldRange{Start: "foo", Limit: "fop"},
+				},
 			},
 		},
 		{
 			// Note: 'like "Foo"' is optimized to '= "Foo"
 			"select k, v from Customer where k = \"Foo.Bar\" or k like \"Foo\" or k like \"abc%\" limit 100 offset 200",
-			&ds.KeyRanges{
-				ds.KeyRange{Start: "Foo", Limit: appendZeroByte("Foo")},
-				ds.KeyRange{Start: "Foo.Bar", Limit: appendZeroByte("Foo.Bar")},
-				ds.KeyRange{Start: "abc", Limit: "abd"},
+			&ds.IndexRanges{
+				FieldName:  "k",
+				Kind:       vdl.String,
+				NilAllowed: false,
+				StringRanges: &ds.StringFieldRanges{
+					ds.StringFieldRange{Start: "Foo", Limit: appendZeroByte("Foo")},
+					ds.StringFieldRange{Start: "Foo.Bar", Limit: appendZeroByte("Foo.Bar")},
+					ds.StringFieldRange{Start: "abc", Limit: "abd"},
+				},
 			},
 		},
 		{
 			"select k, v from Customer where k like \"Foo@%Bar\" or k like \"abc%\" limit 100 offset 200 escape '@'",
-			&ds.KeyRanges{
-				ds.KeyRange{Start: "Foo%Bar", Limit: appendZeroByte("Foo%Bar")},
-				ds.KeyRange{Start: "abc", Limit: "abd"},
+			&ds.IndexRanges{
+				FieldName:  "k",
+				Kind:       vdl.String,
+				NilAllowed: false,
+				StringRanges: &ds.StringFieldRanges{
+					ds.StringFieldRange{Start: "Foo%Bar", Limit: appendZeroByte("Foo%Bar")},
+					ds.StringFieldRange{Start: "abc", Limit: "abd"},
+				},
 			},
 		},
 		{
 			"select k, v from Customer where k like \"Foo%Bar\" or k like \"abc%\" limit 100 offset 200",
-			&ds.KeyRanges{
-				ds.KeyRange{Start: "Foo", Limit: "Fop"},
-				ds.KeyRange{Start: "abc", Limit: "abd"},
+			&ds.IndexRanges{
+				FieldName:  "k",
+				Kind:       vdl.String,
+				NilAllowed: false,
+				StringRanges: &ds.StringFieldRanges{
+					ds.StringFieldRange{Start: "Foo", Limit: "Fop"},
+					ds.StringFieldRange{Start: "abc", Limit: "abd"},
+				},
 			},
 		},
 		{
 			"select k, v from Customer where k like \"Foo#%Bar\" or k like \"abc%\" escape '#' limit 100 offset 200",
-			&ds.KeyRanges{
-				ds.KeyRange{Start: "Foo%Bar", Limit: appendZeroByte("Foo%Bar")},
-				ds.KeyRange{Start: "abc", Limit: "abd"},
+			&ds.IndexRanges{
+				FieldName:  "k",
+				Kind:       vdl.String,
+				NilAllowed: false,
+				StringRanges: &ds.StringFieldRanges{
+					ds.StringFieldRange{Start: "Foo%Bar", Limit: appendZeroByte("Foo%Bar")},
+					ds.StringFieldRange{Start: "abc", Limit: "abd"},
+				},
 			},
 		},
 		{
 			"select k, v from Customer where k not like \"002%\"",
-			&ds.KeyRanges{
-				ds.KeyRange{Start: "", Limit: "002"},
-				ds.KeyRange{Start: "003", Limit: ""},
+			&ds.IndexRanges{
+				FieldName:  "k",
+				Kind:       vdl.String,
+				NilAllowed: false,
+				StringRanges: &ds.StringFieldRanges{
+					ds.StringFieldRange{Start: "", Limit: "002"},
+					ds.StringFieldRange{Start: "003", Limit: ""},
+				},
 			},
 		},
 	}
@@ -319,9 +439,417 @@ func TestKeyRanges(t *testing.T) {
 		}
 		switch sel := (*s).(type) {
 		case query_parser.SelectStatement:
-			keyRanges := query_checker.CompileKeyRanges(sel.Where)
-			if !reflect.DeepEqual(test.keyRanges, keyRanges) {
-				t.Errorf("query: %s;\nGOT  %v\nWANT %v", test.query, keyRanges, test.keyRanges)
+			indexRanges := query_checker.CompileIndexRanges(&query_parser.Field{Segments: []query_parser.Segment{query_parser.Segment{Value: "k"}}}, vdl.String, sel.Where)
+			if !reflect.DeepEqual(test.indexRanges, indexRanges) {
+				t.Errorf("query: %s;\nGOT  %s\nWANT %s", test.query, indexRanges.String(), test.indexRanges.String())
+			}
+		default:
+			t.Errorf("query: %s;\nGOT  %v\nWANT query_parser.SelectStatement", test.query, *s)
+		}
+	}
+}
+
+func TestIndexRanges(t *testing.T) {
+	basic := []indexRangesTest{
+		{
+			"select k, v from Customer",
+			[]string{"v.InterfaceName"},
+			[]*ds.IndexRanges{
+				&ds.IndexRanges{
+					FieldName:  "v.InterfaceName",
+					Kind:       vdl.String,
+					NilAllowed: true,
+					StringRanges: &ds.StringFieldRanges{
+						ds.StringFieldRange{Start: "", Limit: ""},
+					},
+				},
+			},
+		},
+		{
+			"select k, v from Customer where v.Foo = 12",
+			[]string{"v.InterfaceName"},
+			[]*ds.IndexRanges{
+				&ds.IndexRanges{
+					FieldName:  "v.InterfaceName",
+					Kind:       vdl.String,
+					NilAllowed: true,
+					StringRanges: &ds.StringFieldRanges{
+						ds.StringFieldRange{Start: "", Limit: ""},
+					},
+				},
+			},
+		},
+		{
+			"select k, v from Customer where v.InterfaceName = \"FooBar\"",
+			[]string{"v.InterfaceName"},
+			[]*ds.IndexRanges{
+				&ds.IndexRanges{
+					FieldName:  "v.InterfaceName",
+					Kind:       vdl.String,
+					NilAllowed: false,
+					StringRanges: &ds.StringFieldRanges{
+						ds.StringFieldRange{Start: "FooBar", Limit: appendZeroByte("FooBar")},
+					},
+				},
+			},
+		},
+		{
+			"select k, v from Customer where v.InterfaceName = \"Foo\" or v.InterfaceName = \"Bar\"",
+			[]string{"v.InterfaceName"},
+			[]*ds.IndexRanges{
+				&ds.IndexRanges{
+					FieldName:  "v.InterfaceName",
+					Kind:       vdl.String,
+					NilAllowed: false,
+					StringRanges: &ds.StringFieldRanges{
+						ds.StringFieldRange{Start: "Bar", Limit: appendZeroByte("Bar")},
+						ds.StringFieldRange{Start: "Foo", Limit: appendZeroByte("Foo")},
+					},
+				},
+			},
+		},
+		{
+			"select k, v from Customer where v.InterfaceName = \"Foo\" and v.InterfaceName = \"Bar\"",
+			[]string{"v.InterfaceName"},
+			[]*ds.IndexRanges{
+				&ds.IndexRanges{
+					FieldName:    "v.InterfaceName",
+					Kind:         vdl.String,
+					NilAllowed:   false,
+					StringRanges: &ds.StringFieldRanges{},
+				},
+			},
+		},
+		{
+			"select k, v from Customer where v.InterfaceName like \"Foo%\"",
+			[]string{"v.InterfaceName"},
+			[]*ds.IndexRanges{
+				&ds.IndexRanges{
+					FieldName:  "v.InterfaceName",
+					Kind:       vdl.String,
+					NilAllowed: false,
+					StringRanges: &ds.StringFieldRanges{
+						ds.StringFieldRange{Start: "Foo", Limit: "Fop"},
+					},
+				},
+			},
+		},
+		{
+			"select k, v from Customer where v.InterfaceName like \"Foo%\" and v.Address like \"Bar%\"",
+			[]string{"v.InterfaceName", "v.Address"},
+			[]*ds.IndexRanges{
+				&ds.IndexRanges{
+					FieldName:  "v.InterfaceName",
+					Kind:       vdl.String,
+					NilAllowed: false,
+					StringRanges: &ds.StringFieldRanges{
+						ds.StringFieldRange{Start: "Foo", Limit: "Fop"},
+					},
+				},
+				&ds.IndexRanges{
+					FieldName:  "v.Address",
+					Kind:       vdl.String,
+					NilAllowed: false,
+					StringRanges: &ds.StringFieldRanges{
+						ds.StringFieldRange{Start: "Bar", Limit: "Bas"},
+					},
+				},
+			},
+		},
+		{
+			"select k, v from Customer where \"abc\" = v.Foo or \"def\" = v.Foo",
+			[]string{"v.Foo"},
+			[]*ds.IndexRanges{
+				&ds.IndexRanges{
+					FieldName:  "v.Foo",
+					Kind:       vdl.String,
+					NilAllowed: false,
+					StringRanges: &ds.StringFieldRanges{
+						ds.StringFieldRange{Start: "abc", Limit: appendZeroByte("abc")},
+						ds.StringFieldRange{Start: "def", Limit: appendZeroByte("def")},
+					},
+				},
+			},
+		},
+		{
+			"select k, v from Customer where v.Foo >= \"foo\" and v.Foo < \"goo\"",
+			[]string{"v.Foo"},
+			[]*ds.IndexRanges{
+				&ds.IndexRanges{
+					FieldName:  "v.Foo",
+					Kind:       vdl.String,
+					NilAllowed: false,
+					StringRanges: &ds.StringFieldRanges{
+						ds.StringFieldRange{Start: "foo", Limit: "goo"},
+					},
+				},
+			},
+		},
+		{
+			"select k, v from Customer where \"foo\" <= v.Foo and \"goo\" >= v.Foo",
+			[]string{"v.Foo"},
+			[]*ds.IndexRanges{
+				&ds.IndexRanges{
+					FieldName:  "v.Foo",
+					Kind:       vdl.String,
+					NilAllowed: false,
+					StringRanges: &ds.StringFieldRanges{
+						ds.StringFieldRange{Start: "foo", Limit: appendZeroByte("goo")},
+					},
+				},
+			},
+		},
+		{
+			"select k, v from Customer where v.Foo <> \"foo\"",
+			[]string{"v.Foo"},
+			[]*ds.IndexRanges{
+				&ds.IndexRanges{
+					FieldName:  "v.Foo",
+					Kind:       vdl.String,
+					NilAllowed: false,
+					StringRanges: &ds.StringFieldRanges{
+						ds.StringFieldRange{Start: "", Limit: "foo"},
+						ds.StringFieldRange{Start: appendZeroByte("foo"), Limit: ""},
+					},
+				},
+			},
+		},
+		{
+			"select k, v from Customer where v.Foo <> \"foo\" and v.Foo > \"bar\"",
+			[]string{"v.Foo"},
+			[]*ds.IndexRanges{
+				&ds.IndexRanges{
+					FieldName:  "v.Foo",
+					Kind:       vdl.String,
+					NilAllowed: false,
+					StringRanges: &ds.StringFieldRanges{
+						ds.StringFieldRange{Start: appendZeroByte("bar"), Limit: "foo"},
+						ds.StringFieldRange{Start: appendZeroByte("foo"), Limit: ""},
+					},
+				},
+			},
+		},
+		{
+			"select k, v from Customer where v.Foo <> \"foo\" or v.Foo > \"bar\"",
+			[]string{"v.Foo"},
+			[]*ds.IndexRanges{
+				&ds.IndexRanges{
+					FieldName:  "v.Foo",
+					Kind:       vdl.String,
+					NilAllowed: false,
+					StringRanges: &ds.StringFieldRanges{
+						ds.StringFieldRange{Start: "", Limit: ""},
+					},
+				},
+			},
+		},
+		{
+			"select k, v from Customer where v.Foo <> \"bar\" or v.Foo > \"foo\"",
+			[]string{"v.Foo"},
+			[]*ds.IndexRanges{
+				&ds.IndexRanges{
+					FieldName:  "v.Foo",
+					Kind:       vdl.String,
+					NilAllowed: false,
+					StringRanges: &ds.StringFieldRanges{
+						ds.StringFieldRange{Start: "", Limit: "bar"},
+						ds.StringFieldRange{Start: appendZeroByte("bar"), Limit: ""},
+					},
+				},
+			},
+		},
+		{
+			"select v from Customer where Type(v) = \"Foo.Bar\" and v.Foo >= \"100\" and v.Foo < \"200\" and v.foo > 50 and v.bar <= 1000 and v.baz <> -20.7",
+			[]string{"v.Foo"},
+			[]*ds.IndexRanges{
+				&ds.IndexRanges{
+					FieldName:  "v.Foo",
+					Kind:       vdl.String,
+					NilAllowed: false,
+					StringRanges: &ds.StringFieldRanges{
+						ds.StringFieldRange{Start: "100", Limit: "200"},
+					},
+				},
+			},
+		},
+		{
+			"select k, v from Customer where v.Foo = \"abc\" and v.Foo = \"def\"",
+			[]string{"v.Foo"},
+			[]*ds.IndexRanges{
+				&ds.IndexRanges{
+					FieldName:    "v.Foo",
+					Kind:         vdl.String,
+					NilAllowed:   false,
+					StringRanges: &ds.StringFieldRanges{},
+				},
+			},
+		},
+		{
+			"select k, v from Customer where Type(v) = \"Foo.Bar\" and v.Foo like \"abc%\" limit 100 offset 200",
+			[]string{"v.Foo"},
+			[]*ds.IndexRanges{
+				&ds.IndexRanges{
+					FieldName:  "v.Foo",
+					Kind:       vdl.String,
+					NilAllowed: false,
+					StringRanges: &ds.StringFieldRanges{
+						ds.StringFieldRange{Start: "abc", Limit: "abd"},
+					},
+				},
+			},
+		},
+		{
+			"select  k,  v from \n  Customer where v.Foo like \"002%\" or v.Foo like \"001%\" or v.Foo like \"%\"",
+			[]string{"v.Foo"},
+			[]*ds.IndexRanges{
+				&ds.IndexRanges{
+					FieldName:  "v.Foo",
+					Kind:       vdl.String,
+					NilAllowed: false,
+					StringRanges: &ds.StringFieldRanges{
+						ds.StringFieldRange{Start: "", Limit: ""},
+					},
+				},
+			},
+		},
+		{
+			"select k, v from Customer where v.Foo = \"Foo.Bar\" and v.Foo like \"abc%\" limit 100 offset 200",
+			[]string{"v.Foo"},
+			[]*ds.IndexRanges{
+				&ds.IndexRanges{
+					FieldName:    "v.Foo",
+					Kind:         vdl.String,
+					NilAllowed:   false,
+					StringRanges: &ds.StringFieldRanges{},
+				},
+			},
+		},
+		{
+			"select k, v from Customer where v.Foo like \"foo%\" and v.Foo like \"bar%\"",
+			[]string{"v.Foo"},
+			[]*ds.IndexRanges{
+				&ds.IndexRanges{
+					FieldName:    "v.Foo",
+					Kind:         vdl.String,
+					NilAllowed:   false,
+					StringRanges: &ds.StringFieldRanges{},
+				},
+			},
+		},
+		{
+			"select k, v from Customer where v.Foo like \"foo%\" or v.Foo like \"bar%\"",
+			[]string{"v.Foo"},
+			[]*ds.IndexRanges{
+				&ds.IndexRanges{
+					FieldName:  "v.Foo",
+					Kind:       vdl.String,
+					NilAllowed: false,
+					StringRanges: &ds.StringFieldRanges{
+						ds.StringFieldRange{Start: "bar", Limit: "bas"},
+						ds.StringFieldRange{Start: "foo", Limit: "fop"},
+					},
+				},
+			},
+		},
+		{
+			// Note: 'like "Foo"' is optimized to '= "Foo"
+			"select k, v from Customer where v.Foo = \"Foo.Bar\" or v.Foo like \"Foo\" or v.Foo like \"abc%\" limit 100 offset 200",
+			[]string{"v.Foo"},
+			[]*ds.IndexRanges{
+				&ds.IndexRanges{
+					FieldName:  "v.Foo",
+					Kind:       vdl.String,
+					NilAllowed: false,
+					StringRanges: &ds.StringFieldRanges{
+						ds.StringFieldRange{Start: "Foo", Limit: appendZeroByte("Foo")},
+						ds.StringFieldRange{Start: "Foo.Bar", Limit: appendZeroByte("Foo.Bar")},
+						ds.StringFieldRange{Start: "abc", Limit: "abd"},
+					},
+				},
+			},
+		},
+		{
+			"select k, v from Customer where v.Foo like \"Foo@%Bar\" or v.Foo like \"abc%\" limit 100 offset 200 escape '@'",
+			[]string{"v.Foo"},
+			[]*ds.IndexRanges{
+				&ds.IndexRanges{
+					FieldName:  "v.Foo",
+					Kind:       vdl.String,
+					NilAllowed: false,
+					StringRanges: &ds.StringFieldRanges{
+						ds.StringFieldRange{Start: "Foo%Bar", Limit: appendZeroByte("Foo%Bar")},
+						ds.StringFieldRange{Start: "abc", Limit: "abd"},
+					},
+				},
+			},
+		},
+		{
+			"select k, v from Customer where v.Foo like \"Foo%Bar\" or v.Foo like \"abc%\" limit 100 offset 200",
+			[]string{"v.Foo"},
+			[]*ds.IndexRanges{
+				&ds.IndexRanges{
+					FieldName:  "v.Foo",
+					Kind:       vdl.String,
+					NilAllowed: false,
+					StringRanges: &ds.StringFieldRanges{
+						ds.StringFieldRange{Start: "Foo", Limit: "Fop"},
+						ds.StringFieldRange{Start: "abc", Limit: "abd"},
+					},
+				},
+			},
+		},
+		{
+			"select k, v from Customer where v.Foo like \"Foo#%Bar\" or v.Foo like \"abc%\" escape '#' limit 100 offset 200",
+			[]string{"v.Foo"},
+			[]*ds.IndexRanges{
+				&ds.IndexRanges{
+					FieldName:  "v.Foo",
+					Kind:       vdl.String,
+					NilAllowed: false,
+					StringRanges: &ds.StringFieldRanges{
+						ds.StringFieldRange{Start: "Foo%Bar", Limit: appendZeroByte("Foo%Bar")},
+						ds.StringFieldRange{Start: "abc", Limit: "abd"},
+					},
+				},
+			},
+		},
+		{
+			"select k, v from Customer where v.Foo not like \"002%\"",
+			[]string{"v.Foo"},
+			[]*ds.IndexRanges{
+				&ds.IndexRanges{
+					FieldName:  "v.Foo",
+					Kind:       vdl.String,
+					NilAllowed: false,
+					StringRanges: &ds.StringFieldRanges{
+						ds.StringFieldRange{Start: "", Limit: "002"},
+						ds.StringFieldRange{Start: "003", Limit: ""},
+					},
+				},
+			},
+		},
+	}
+
+	for _, test := range basic {
+		s, syntaxErr := query_parser.Parse(&db, test.query)
+		if syntaxErr != nil {
+			t.Errorf("query: %s; unexpected error: got %v, want nil", test.query, syntaxErr)
+		}
+		err := query_checker.Check(&db, s)
+		if err != nil {
+			t.Errorf("query: %s; got %v, want: nil", test.query, err)
+		}
+		switch sel := (*s).(type) {
+		case query_parser.SelectStatement:
+			for i, fieldName := range test.fieldNames {
+				idxField, err := query_parser.ParseIndexField(&db, fieldName, "Services")
+				if err != nil {
+					t.Errorf("query: %s;\nGOT  %v\nWANT nil", test.query, err)
+				}
+				indexRanges := query_checker.CompileIndexRanges(idxField, vdl.String, sel.Where)
+				if !reflect.DeepEqual(test.indexRanges[i], indexRanges) {
+					t.Errorf("query: %s;\nGOT  %v\nWANT %v", test.query, indexRanges, test.indexRanges[i])
+				}
 			}
 		default:
 			t.Errorf("query: %s;\nGOT  %v\nWANT query_parser.SelectStatement", test.query, *s)

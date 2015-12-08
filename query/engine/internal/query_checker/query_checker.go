@@ -14,6 +14,7 @@ import (
 	"v.io/v23/query/engine/internal/query_functions"
 	"v.io/v23/query/engine/internal/query_parser"
 	"v.io/v23/query/syncql"
+	"v.io/v23/vdl"
 )
 
 const (
@@ -21,7 +22,7 @@ const (
 )
 
 var (
-	KeyRangeAll = ds.KeyRange{Start: "", Limit: MaxRangeLimit}
+	StringFieldRangeAll = ds.StringFieldRange{Start: "", Limit: MaxRangeLimit}
 )
 
 func Check(db ds.Database, s *query_parser.Statement) error {
@@ -369,6 +370,10 @@ func ContainsKeyOperand(expr *query_parser.Expression) bool {
 	return IsKey(expr.Operand1) || IsKey(expr.Operand2)
 }
 
+func ContainsFieldOperand(f *query_parser.Field, expr *query_parser.Expression) bool {
+	return IsExactField(f, expr.Operand1) || IsExactField(f, expr.Operand2)
+}
+
 func ContainsFunctionOperand(expr *query_parser.Expression) bool {
 	return IsFunction(expr.Operand1) || IsFunction(expr.Operand2)
 }
@@ -399,6 +404,23 @@ func IsKey(o *query_parser.Operand) bool {
 	return IsField(o) && IsKeyField(o.Column)
 }
 
+func IsExactField(f *query_parser.Field, o *query_parser.Operand) bool {
+	if !IsField(o) {
+		return false
+	}
+	oField := o.Column
+	// Can't test for equality as offsets will be different.
+	if len(f.Segments) != len(oField.Segments) {
+		return false
+	}
+	for i := range f.Segments {
+		if f.Segments[i].Value != oField.Segments[i].Value {
+			return false
+		}
+	}
+	return true
+}
+
 func IsKeyField(f *query_parser.Field) bool {
 	return f.Segments[0].Value == "k"
 }
@@ -425,41 +447,53 @@ func afterPrefix(prefix string) string {
 	return string(limit)
 }
 
-func computeKeyRangeForLike(prefix string) ds.KeyRange {
+func computeStringFieldRangeForLike(prefix string) ds.StringFieldRange {
 	if prefix == "" {
-		return KeyRangeAll
+		return StringFieldRangeAll
 	}
-	return ds.KeyRange{Start: prefix, Limit: afterPrefix(prefix)}
+	return ds.StringFieldRange{Start: prefix, Limit: afterPrefix(prefix)}
 }
 
-func computeKeyRangesForNotLike(prefix string) *ds.KeyRanges {
+func computeStringFieldRangesForNotLike(prefix string) *ds.StringFieldRanges {
 	if prefix == "" {
-		return &ds.KeyRanges{KeyRangeAll}
+		return &ds.StringFieldRanges{StringFieldRangeAll}
 	}
-	return &ds.KeyRanges{
-		ds.KeyRange{Start: "", Limit: prefix},
-		ds.KeyRange{Start: afterPrefix(prefix), Limit: ""},
+	return &ds.StringFieldRanges{
+		ds.StringFieldRange{Start: "", Limit: prefix},
+		ds.StringFieldRange{Start: afterPrefix(prefix), Limit: ""},
 	}
 }
 
 // The limit for a single value range is simply a zero byte appended.
-// In this way, only the single 'start' value will be returned (or nothing if that single
-// value is not present).
-func computeKeyRangeForSingleValue(start string) ds.KeyRange {
+func computeStringFieldRangeForSingleValue(start string) ds.StringFieldRange {
 	limit := []byte(start)
 	limit = append(limit, 0)
-	return ds.KeyRange{Start: start, Limit: string(limit)}
+	return ds.StringFieldRange{Start: start, Limit: string(limit)}
 }
 
-// Compute a list of key ranges to be used by query's Table.Scan implementation.
-func CompileKeyRanges(where *query_parser.WhereClause) *ds.KeyRanges {
-	if where == nil {
-		return &ds.KeyRanges{KeyRangeAll}
+// Compute a list of secondary index ranges to optionally be used by query's Table.Scan.
+func CompileIndexRanges(idxField *query_parser.Field, kind vdl.Kind, where *query_parser.WhereClause) *ds.IndexRanges {
+	var indexRanges ds.IndexRanges
+	// Reconstruct field name from the segments in the field.
+	sep := ""
+	for _, seg := range idxField.Segments {
+		indexRanges.FieldName += sep
+		indexRanges.FieldName += seg.Value
+		sep = "."
 	}
-	return collectKeyRanges(where.Expr)
+	indexRanges.Kind = kind
+	if where == nil {
+		// Currently, only string is supported, so no need to check.
+		indexRanges.StringRanges = &ds.StringFieldRanges{StringFieldRangeAll}
+		indexRanges.NilAllowed = true
+	} else {
+		indexRanges.StringRanges = collectStringFieldRanges(idxField, where.Expr)
+		indexRanges.NilAllowed = determineIfNilAllowed(idxField, where.Expr)
+	}
+	return &indexRanges
 }
 
-func computeIntersection(lhs, rhs ds.KeyRange) *ds.KeyRange {
+func computeRangeIntersection(lhs, rhs ds.StringFieldRange) *ds.StringFieldRange {
 	// Detect if lhs.Start is contained within rhs or rhs.Start is contained within lhs.
 	if (lhs.Start >= rhs.Start && compareStartToLimit(lhs.Start, rhs.Limit) < 0) ||
 		(rhs.Start >= lhs.Start && compareStartToLimit(rhs.Start, lhs.Limit) < 0) {
@@ -474,19 +508,19 @@ func computeIntersection(lhs, rhs ds.KeyRange) *ds.KeyRange {
 		} else {
 			limit = rhs.Limit
 		}
-		return &ds.KeyRange{Start: start, Limit: limit}
+		return &ds.StringFieldRange{Start: start, Limit: limit}
 	}
 	return nil
 }
 
-func keyRangeIntersection(lhs, rhs *ds.KeyRanges) *ds.KeyRanges {
-	keyRanges := &ds.KeyRanges{}
+func fieldRangeIntersection(lhs, rhs *ds.StringFieldRanges) *ds.StringFieldRanges {
+	fieldRanges := &ds.StringFieldRanges{}
 	lCur, rCur := 0, 0
 	for lCur < len(*lhs) && rCur < len(*rhs) {
 		// Any intersection at current cursors?
-		if intersection := computeIntersection((*lhs)[lCur], (*rhs)[rCur]); intersection != nil {
+		if intersection := computeRangeIntersection((*lhs)[lCur], (*rhs)[rCur]); intersection != nil {
 			// Add the intersection
-			addKeyRange(*intersection, keyRanges)
+			addStringFieldRange(*intersection, fieldRanges)
 		}
 		// increment the range with the lesser limit
 		c := compareLimits((*lhs)[lCur].Limit, (*rhs)[rCur].Limit)
@@ -500,90 +534,118 @@ func keyRangeIntersection(lhs, rhs *ds.KeyRanges) *ds.KeyRanges {
 			rCur++
 		}
 	}
-	return keyRanges
+	return fieldRanges
 }
 
-func collectKeyRanges(expr *query_parser.Expression) *ds.KeyRanges {
+func collectStringFieldRanges(idxField *query_parser.Field, expr *query_parser.Expression) *ds.StringFieldRanges {
 	if IsExpr(expr.Operand1) { // then both operands must be expressions
-		lhsKeyRanges := collectKeyRanges(expr.Operand1.Expr)
-		rhsKeyRanges := collectKeyRanges(expr.Operand2.Expr)
+		lhsStringFieldRanges := collectStringFieldRanges(idxField, expr.Operand1.Expr)
+		rhsStringFieldRanges := collectStringFieldRanges(idxField, expr.Operand2.Expr)
 		if expr.Operator.Type == query_parser.And {
-			// intersection of lhsKeyRanges and rhsKeyRanges
-			return keyRangeIntersection(lhsKeyRanges, rhsKeyRanges)
+			// intersection of lhsStringFieldRanges and rhsStringFieldRanges
+			return fieldRangeIntersection(lhsStringFieldRanges, rhsStringFieldRanges)
 		} else { // or
-			// union of lhsKeyRanges and rhsKeyRanges
-			for _, rhsKeyRange := range *rhsKeyRanges {
-				addKeyRange(rhsKeyRange, lhsKeyRanges)
+			// union of lhsStringFieldRanges and rhsStringFieldRanges
+			for _, rhsStringFieldRange := range *rhsStringFieldRanges {
+				addStringFieldRange(rhsStringFieldRange, lhsStringFieldRanges)
 			}
-			return lhsKeyRanges
+			return lhsStringFieldRanges
 		}
-	} else if ContainsKeyOperand(expr) { // true if either operand is 'k'
-		if IsKey(expr.Operand1) && IsKey(expr.Operand2) {
-			//k <op> k
+	} else if ContainsFieldOperand(idxField, expr) { // true if either operand is idxField
+		if IsField(expr.Operand1) && IsField(expr.Operand2) {
+			//<idx_field> <op> <idx_field>
 			switch expr.Operator.Type {
 			case query_parser.Equal, query_parser.GreaterThanOrEqual, query_parser.LessThanOrEqual:
-				// True for all keys
-				return &ds.KeyRanges{KeyRangeAll}
+				// True for all values of indexField
+				return &ds.StringFieldRanges{StringFieldRangeAll}
 			default: // query_parser.NotEqual, query_parser.GreaterThan, query_parser.LessThan:
-				// False for all keys
-				return &ds.KeyRanges{}
+				// False for all values of indexField
+				return &ds.StringFieldRanges{}
 			}
 		} else if expr.Operator.Type == query_parser.Is {
-			// k is nil
-			// False for all keys
-			return &ds.KeyRanges{}
+			// <idx_field> is nil
+			// False for entire range
+			// TODO(jkline): Should the Scan contract return values where
+			//               the index field is undefined?
+			return &ds.StringFieldRanges{}
 		} else if expr.Operator.Type == query_parser.IsNot {
 			// k is not nil
-			// True for all keys
-			return &ds.KeyRanges{KeyRangeAll}
+			// True for all all values of indexField.
+			return &ds.StringFieldRanges{StringFieldRangeAll}
 		} else if isStringLiteral(expr.Operand2) {
-			// k <op> <string-literal>
+			// indexField <op> <string-literal>
 			switch expr.Operator.Type {
 			case query_parser.Equal:
-				return &ds.KeyRanges{computeKeyRangeForSingleValue(expr.Operand2.Str)}
+				return &ds.StringFieldRanges{computeStringFieldRangeForSingleValue(expr.Operand2.Str)}
 			case query_parser.GreaterThan:
-				return &ds.KeyRanges{ds.KeyRange{Start: string(append([]byte(expr.Operand2.Str), 0)), Limit: MaxRangeLimit}}
+				return &ds.StringFieldRanges{ds.StringFieldRange{Start: string(append([]byte(expr.Operand2.Str), 0)), Limit: MaxRangeLimit}}
 			case query_parser.GreaterThanOrEqual:
-				return &ds.KeyRanges{ds.KeyRange{Start: expr.Operand2.Str, Limit: MaxRangeLimit}}
+				return &ds.StringFieldRanges{ds.StringFieldRange{Start: expr.Operand2.Str, Limit: MaxRangeLimit}}
 			case query_parser.Like:
-				return &ds.KeyRanges{computeKeyRangeForLike(expr.Operand2.Prefix)}
+				return &ds.StringFieldRanges{computeStringFieldRangeForLike(expr.Operand2.Prefix)}
 			case query_parser.NotLike:
-				return computeKeyRangesForNotLike(expr.Operand2.Prefix)
+				return computeStringFieldRangesForNotLike(expr.Operand2.Prefix)
 			case query_parser.LessThan:
-				return &ds.KeyRanges{ds.KeyRange{Start: "", Limit: expr.Operand2.Str}}
+				return &ds.StringFieldRanges{ds.StringFieldRange{Start: "", Limit: expr.Operand2.Str}}
 			case query_parser.LessThanOrEqual:
-				return &ds.KeyRanges{ds.KeyRange{Start: "", Limit: string(append([]byte(expr.Operand2.Str), 0))}}
+				return &ds.StringFieldRanges{ds.StringFieldRange{Start: "", Limit: string(append([]byte(expr.Operand2.Str), 0))}}
 			default: // case query_parser.NotEqual:
-				return &ds.KeyRanges{
-					ds.KeyRange{Start: "", Limit: expr.Operand2.Str},
-					ds.KeyRange{Start: string(append([]byte(expr.Operand2.Str), 0)), Limit: MaxRangeLimit},
+				return &ds.StringFieldRanges{
+					ds.StringFieldRange{Start: "", Limit: expr.Operand2.Str},
+					ds.StringFieldRange{Start: string(append([]byte(expr.Operand2.Str), 0)), Limit: MaxRangeLimit},
 				}
 			}
 		} else if isStringLiteral(expr.Operand1) {
 			//<string-literal> <op> k
 			switch expr.Operator.Type {
 			case query_parser.Equal:
-				return &ds.KeyRanges{computeKeyRangeForSingleValue(expr.Operand1.Str)}
+				return &ds.StringFieldRanges{computeStringFieldRangeForSingleValue(expr.Operand1.Str)}
 			case query_parser.GreaterThan:
-				return &ds.KeyRanges{ds.KeyRange{Start: "", Limit: expr.Operand1.Str}}
+				return &ds.StringFieldRanges{ds.StringFieldRange{Start: "", Limit: expr.Operand1.Str}}
 			case query_parser.GreaterThanOrEqual:
-				return &ds.KeyRanges{ds.KeyRange{Start: "", Limit: string(append([]byte(expr.Operand1.Str), 0))}}
+				return &ds.StringFieldRanges{ds.StringFieldRange{Start: "", Limit: string(append([]byte(expr.Operand1.Str), 0))}}
 			case query_parser.LessThan:
-				return &ds.KeyRanges{ds.KeyRange{Start: string(append([]byte(expr.Operand1.Str), 0)), Limit: MaxRangeLimit}}
+				return &ds.StringFieldRanges{ds.StringFieldRange{Start: string(append([]byte(expr.Operand1.Str), 0)), Limit: MaxRangeLimit}}
 			case query_parser.LessThanOrEqual:
-				return &ds.KeyRanges{ds.KeyRange{Start: expr.Operand1.Str, Limit: MaxRangeLimit}}
+				return &ds.StringFieldRanges{ds.StringFieldRange{Start: expr.Operand1.Str, Limit: MaxRangeLimit}}
 			default: // case query_parser.NotEqual:
-				return &ds.KeyRanges{
-					ds.KeyRange{Start: "", Limit: expr.Operand1.Str},
-					ds.KeyRange{Start: string(append([]byte(expr.Operand1.Str), 0)), Limit: MaxRangeLimit},
+				return &ds.StringFieldRanges{
+					ds.StringFieldRange{Start: "", Limit: expr.Operand1.Str},
+					ds.StringFieldRange{Start: string(append([]byte(expr.Operand1.Str), 0)), Limit: MaxRangeLimit},
 				}
 			}
 		} else {
-			// A function or a field s being compared to the key.
-			return &ds.KeyRanges{KeyRangeAll}
+			// A function or a field s being compared to the indexField;
+			// or, an indexField is being compared to a literal which
+			// is not a string.  The latter could be considered an error,
+			// but for now, just allow the full range.
+			return &ds.StringFieldRanges{StringFieldRangeAll}
 		}
 	} else { // not a key compare, so it applies to the entire key range
-		return &ds.KeyRanges{KeyRangeAll}
+		return &ds.StringFieldRanges{StringFieldRangeAll}
+	}
+}
+
+func determineIfNilAllowed(idxField *query_parser.Field, expr *query_parser.Expression) bool {
+	if IsExpr(expr.Operand1) { // then both operands must be expressions
+		lhsNilAllowed := determineIfNilAllowed(idxField, expr.Operand1.Expr)
+		rhsNilAllowed := determineIfNilAllowed(idxField, expr.Operand2.Expr)
+		if expr.Operator.Type == query_parser.And {
+			return lhsNilAllowed && rhsNilAllowed
+		} else { // or
+			return lhsNilAllowed || rhsNilAllowed
+		}
+	} else if ContainsFieldOperand(idxField, expr) { // true if either operand is idxField
+		// The only way nil in the index field will evaluate to true is in the
+		// Is Nil case.
+		if expr.Operator.Type == query_parser.Is {
+			// <idx_field> is nil
+			return true
+		} else {
+			return false
+		}
+	} else { // not an index field expresion; as such, nil is allowed for the idx field
+		return true
 	}
 }
 
@@ -627,46 +689,46 @@ func compareLimitToStart(limitA, startB string) int {
 	}
 }
 
-func addKeyRange(keyRange ds.KeyRange, keyRanges *ds.KeyRanges) {
+func addStringFieldRange(fieldRange ds.StringFieldRange, fieldRanges *ds.StringFieldRanges) {
 	handled := false
 	// Is there an overlap with an existing range?
-	for i, r := range *keyRanges {
+	for i, r := range *fieldRanges {
 		// In the following if,
 		// the first paren expr is true if the start of the range to be added is contained in r
 		// the second paren expr is true if the limit of the range to be added is contained in r
 		// the third paren expr is true if the range to be added entirely contains r
-		if (keyRange.Start >= r.Start && compareStartToLimit(keyRange.Start, r.Limit) <= 0) ||
-			(compareLimitToStart(keyRange.Limit, r.Start) >= 0 && compareLimits(keyRange.Limit, r.Limit) <= 0) ||
-			(keyRange.Start <= r.Start && compareLimits(keyRange.Limit, r.Limit) >= 0) {
+		if (fieldRange.Start >= r.Start && compareStartToLimit(fieldRange.Start, r.Limit) <= 0) ||
+			(compareLimitToStart(fieldRange.Limit, r.Start) >= 0 && compareLimits(fieldRange.Limit, r.Limit) <= 0) ||
+			(fieldRange.Start <= r.Start && compareLimits(fieldRange.Limit, r.Limit) >= 0) {
 
-			// keyRange overlaps with existing range at keyRanges[i]
-			// set newKeyRange to a range that ecompasses both
-			var newKeyRange ds.KeyRange
-			if keyRange.Start < r.Start {
-				newKeyRange.Start = keyRange.Start
+			// fieldRange overlaps with existing range at fieldRanges[i]
+			// set newFieldRange to a range that ecompasses both
+			var newFieldRange ds.StringFieldRange
+			if fieldRange.Start < r.Start {
+				newFieldRange.Start = fieldRange.Start
 			} else {
-				newKeyRange.Start = r.Start
+				newFieldRange.Start = r.Start
 			}
-			if compareLimits(keyRange.Limit, r.Limit) > 0 {
-				newKeyRange.Limit = keyRange.Limit
+			if compareLimits(fieldRange.Limit, r.Limit) > 0 {
+				newFieldRange.Limit = fieldRange.Limit
 			} else {
-				newKeyRange.Limit = r.Limit
+				newFieldRange.Limit = r.Limit
 			}
-			// The new range may overlap with other ranges in keyRanges
-			// delete the current range and call addKeyRange again
+			// The new range may overlap with other ranges in fieldRanges
+			// delete the current range and call addStringFieldRange again
 			// This recursion will continue until no ranges overlap.
-			*keyRanges = append((*keyRanges)[:i], (*keyRanges)[i+1:]...)
-			addKeyRange(newKeyRange, keyRanges)
-			handled = true // we don't want to add keyRange below
+			*fieldRanges = append((*fieldRanges)[:i], (*fieldRanges)[i+1:]...)
+			addStringFieldRange(newFieldRange, fieldRanges)
+			handled = true // we don't want to add fieldRange below
 			break
 		}
 	}
 	// no overlap, just add it
 	if !handled {
-		*keyRanges = append(*keyRanges, keyRange)
+		*fieldRanges = append(*fieldRanges, fieldRange)
 	}
 	// sort before returning
-	sort.Sort(*keyRanges)
+	sort.Sort(*fieldRanges)
 }
 
 // Check escape clause.  Escape char cannot be '\'.

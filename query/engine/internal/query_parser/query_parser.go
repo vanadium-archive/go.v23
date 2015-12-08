@@ -1356,3 +1356,40 @@ func ConvertValueToAnOperand(value *vdl.Value, off int64) (*Operand, error) {
 	}
 	return &op, nil
 }
+
+// ParseIndexField is used to parse datasource supplied index fields.  It creates a new
+// scanner with the contents of the field name and only succeeds if the result of
+// parsing the contents of the scan is a field and there is nothing left over.
+// Note: This function is NOT involved in the parsing of the AST.  Offsets of 0 are
+//       returned on error as these errors are unrelated to the input query.  They
+//       are configuration errors in the datasource.
+func ParseIndexField(db ds.Database, fieldName, tableName string) (*Field, error) {
+	// Set up a scanner and call the parser's parseOperand function.
+	r := strings.NewReader(fieldName)
+	var s scanner.Scanner
+	s.Init(r)
+	s.Error = scannerError
+
+	token := scanToken(&s)
+	if token.Tok == TokEOF {
+		return nil, syncql.NewErrInvalidIndexField(db.GetContext(), 0, fieldName, tableName)
+	}
+	var op *Operand
+	var err error
+	op, token, err = parseOperand(db, &s, token)
+	if err != nil {
+		return nil, syncql.NewErrInvalidIndexField(db.GetContext(), 0, fieldName, tableName)
+	}
+	if op.Type != TypField {
+		return nil, syncql.NewErrInvalidIndexField(db.GetContext(), 0, fieldName, tableName)
+	}
+	if token.Tok != TokEOF {
+		return nil, syncql.NewErrInvalidIndexField(db.GetContext(), 0, fieldName, tableName)
+	}
+	// Look at last segment.  If a key or index is supplied, it can't be used as an index.
+	if len(op.Column.Segments[len(op.Column.Segments)-1].Keys) != 0 {
+		return nil, syncql.NewErrInvalidIndexField(db.GetContext(), 0, fieldName, tableName)
+	}
+
+	return op.Column, nil
+}

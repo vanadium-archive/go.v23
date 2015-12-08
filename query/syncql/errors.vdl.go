@@ -67,6 +67,8 @@ var (
 	ErrNotEnoughParamValuesSpecified   = verror.Register("v.io/v23/query/syncql.NotEnoughParamValuesSpecified", verror.NoRetry, "{1:}{2:} [{3}]Not enough parameter values specified.")
 	ErrTooManyParamValuesSpecified     = verror.Register("v.io/v23/query/syncql.TooManyParamValuesSpecified", verror.NoRetry, "{1:}{2:} [{3}]Too many parameter values specified.")
 	ErrPreparedStatementNotFound       = verror.Register("v.io/v23/query/syncql.PreparedStatementNotFound", verror.NoRetry, "{1:}{2:} [0]Prepared statement not found.")
+	ErrIndexKindNotSupported           = verror.Register("v.io/v23/query/syncql.IndexKindNotSupported", verror.NoRetry, "{1:}{2:} [{3}]Index kind {4} of field {5} on table {6} not supported.")
+	ErrInvalidIndexField               = verror.Register("v.io/v23/query/syncql.InvalidIndexField", verror.NoRetry, "{1:}{2:} [{3}]Invalid index field {4} returned by table {5}.")
 )
 
 func init() {
@@ -122,6 +124,8 @@ func init() {
 	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrNotEnoughParamValuesSpecified.ID), "{1:}{2:} [{3}]Not enough parameter values specified.")
 	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrTooManyParamValuesSpecified.ID), "{1:}{2:} [{3}]Too many parameter values specified.")
 	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrPreparedStatementNotFound.ID), "{1:}{2:} [0]Prepared statement not found.")
+	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrIndexKindNotSupported.ID), "{1:}{2:} [{3}]Index kind {4} of field {5} on table {6} not supported.")
+	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrInvalidIndexField.ID), "{1:}{2:} [{3}]Invalid index field {4} returned by table {5}.")
 }
 
 // NewErrBadFieldInWhere returns an error with the ErrBadFieldInWhere ID.
@@ -382,4 +386,14 @@ func NewErrTooManyParamValuesSpecified(ctx *context.T, off int64) error {
 // NewErrPreparedStatementNotFound returns an error with the ErrPreparedStatementNotFound ID.
 func NewErrPreparedStatementNotFound(ctx *context.T) error {
 	return verror.New(ErrPreparedStatementNotFound, ctx)
+}
+
+// NewErrIndexKindNotSupported returns an error with the ErrIndexKindNotSupported ID.
+func NewErrIndexKindNotSupported(ctx *context.T, off int64, kind string, fieldName string, table string) error {
+	return verror.New(ErrIndexKindNotSupported, ctx, off, kind, fieldName, table)
+}
+
+// NewErrInvalidIndexField returns an error with the ErrInvalidIndexField ID.
+func NewErrInvalidIndexField(ctx *context.T, off int64, fieldName string, table string) error {
+	return verror.New(ErrInvalidIndexField, ctx, off, fieldName, table)
 }

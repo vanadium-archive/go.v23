@@ -70,7 +70,7 @@ type table struct {
 type keyValueStreamImpl struct {
 	table           table
 	cursor          int
-	keyRanges       ds.KeyRanges
+	keyIndexRanges  ds.IndexRanges
 	keyRangesCursor int
 }
 
@@ -91,15 +91,15 @@ func (kvs *keyValueStreamImpl) Advance() bool {
 			return false
 		}
 		// does it match any keyRange
-		for kvs.keyRangesCursor < len(kvs.keyRanges) {
-			if kvs.table.rows[kvs.cursor].key >= kvs.keyRanges[kvs.keyRangesCursor].Start && compareKeyToLimit(kvs.table.rows[kvs.cursor].key, kvs.keyRanges[kvs.keyRangesCursor].Limit) < 0 {
+		for kvs.keyRangesCursor < len(*kvs.keyIndexRanges.StringRanges) {
+			if kvs.table.rows[kvs.cursor].key >= (*kvs.keyIndexRanges.StringRanges)[kvs.keyRangesCursor].Start && compareKeyToLimit(kvs.table.rows[kvs.cursor].key, (*kvs.keyIndexRanges.StringRanges)[kvs.keyRangesCursor].Limit) < 0 {
 				return true
 			}
-			// Keys and keyRanges are both sorted low to high, so we can increment
-			// keyRangesCursor if the keyRange.Limit is < the key.
-			if compareKeyToLimit(kvs.table.rows[kvs.cursor].key, kvs.keyRanges[kvs.keyRangesCursor].Limit) > 0 {
+			// Keys and keyIndexRanges.StringRanges are both sorted low to high,
+			// so we can increment keyRangesCursor if the keyRange.Limit is < the key.
+			if compareKeyToLimit(kvs.table.rows[kvs.cursor].key, (*kvs.keyIndexRanges.StringRanges)[kvs.keyRangesCursor].Limit) > 0 {
 				kvs.keyRangesCursor++
-				if kvs.keyRangesCursor >= len(kvs.keyRanges) {
+				if kvs.keyRangesCursor >= len(*kvs.keyIndexRanges.StringRanges) {
 					return false
 				}
 			} else {
@@ -121,11 +121,15 @@ func (kvs *keyValueStreamImpl) Err() error {
 func (kvs *keyValueStreamImpl) Cancel() {
 }
 
-func (t table) Scan(keyRanges ds.KeyRanges) (ds.KeyValueStream, error) {
+func (t table) GetIndexFields() []ds.Index {
+	return []ds.Index{}
+}
+
+func (t table) Scan(indexRanges ...ds.IndexRanges) (ds.KeyValueStream, error) {
 	var keyValueStreamImpl keyValueStreamImpl
 	keyValueStreamImpl.table = t
 	keyValueStreamImpl.cursor = -1
-	keyValueStreamImpl.keyRanges = keyRanges
+	keyValueStreamImpl.keyIndexRanges = indexRanges[0]
 	return &keyValueStreamImpl, nil
 }
 

@@ -9,9 +9,14 @@
 // The Table interface is used to get a KeyValueStream (by key prefixes).
 // The KeyValueStream interface is used to iterate over key-value pairs from a
 // table.
+// Note: Order, Index, GetIndexFields and the indexRanges arg to Scan
+//       are being provided in beta form for use by discovery.  Currently only
+//       indexes of type string are supported and an index must comprise exactly
+//       one column.  This API will change when secondary indexes are fully supported.
 package datasource
 
 import (
+	"fmt"
 	"v.io/v23/context"
 	"v.io/v23/vdl"
 )
@@ -22,11 +27,32 @@ type Database interface {
 }
 
 type Table interface {
-	// Return a KeyValueStream where all keys start with one
-	// of the prefixes arguments.
+
+	// Return the fields on which there exist secondary indexes.
+	// The possible ranges for these fields will be passed to Scan.
+	// Example:
+	// return []datasource.Index{
+	//                datasource.Index{FieldName: "v.InterfaceName", Kind: vdl.String},
+	//                datasource.Index{FieldName: "v.Address", Kind: vdl.String},
+	// }
+	// At present, the Kind MUST BE vdl.String
+	GetIndexFields() []Index
+
+	// Return a KeyValueStream where all k/v pairs fall within the range
+	// of the index ranges passed in (the first of which is for the key).
 	// Note: an empty string prefix (""), matches all keys.
-	// The prefixes argument will be sorted (low to high).
-	Scan(keyRanges KeyRanges) (KeyValueStream, error)
+	// The index ranges will be sorted (low to high).  The first index range
+	// will be for the key.  After that will be ranges for any index returned
+	// from GetIndexFields.  These will be returned in the same order as was
+	// present in the return value for GetIndexFields.  Currently, only string indexes are
+	// supported. Index ranges include the index field name (in order to differentiate among
+	// multiple secondary indexes).  Again, the first will always be the "k" field.
+	// If NilAllowed is true, nil values for the index field should be included in the
+	// return k/v pairs from Scan.  If false, they should not be included.
+	// It's best to honor all index ranges.  The datasource should honor the
+	// the ranges by not passing in k/v pairs that the ranges exclude.  Future
+	// optimzation may cause incorrect answers if this contract is not kept.
+	Scan(indexRanges ...IndexRanges) (KeyValueStream, error)
 }
 
 type KeyValueStream interface {
@@ -58,27 +84,49 @@ type KeyValueStream interface {
 	Cancel()
 }
 
-type KeyRange struct {
+// Implement sort interface for StringFieldRanges.
+func (stringFieldRanges StringFieldRanges) Len() int {
+	return len(stringFieldRanges)
+}
+
+func (stringFieldRanges StringFieldRanges) Less(i, j int) bool {
+	return stringFieldRanges[i].Start < stringFieldRanges[j].Start
+}
+
+func (stringFieldRanges StringFieldRanges) Swap(i, j int) {
+	saveStart := stringFieldRanges[i].Start
+	saveLimit := stringFieldRanges[i].Limit
+	stringFieldRanges[i].Start = stringFieldRanges[j].Start
+	stringFieldRanges[i].Limit = stringFieldRanges[j].Limit
+	stringFieldRanges[j].Start = saveStart
+	stringFieldRanges[j].Limit = saveLimit
+}
+
+type StringFieldRange struct {
 	Start string
 	Limit string
 }
 
-type KeyRanges []KeyRange
-
-// Implement sort interface for KeyRanges.
-func (keyRanges KeyRanges) Len() int {
-	return len(keyRanges)
+type Index struct {
+	FieldName string
+	Kind      vdl.Kind
 }
 
-func (keyRanges KeyRanges) Less(i, j int) bool {
-	return keyRanges[i].Start < keyRanges[j].Start
+type StringFieldRanges []StringFieldRange
+type IndexRanges struct {
+	FieldName    string
+	Kind         vdl.Kind
+	NilAllowed   bool // true if query could be true for a nil index value
+	StringRanges *StringFieldRanges
+	// TODO(jkline): add fields for other types of indexes.
 }
 
-func (keyRanges KeyRanges) Swap(i, j int) {
-	saveStart := keyRanges[i].Start
-	saveLimit := keyRanges[i].Limit
-	keyRanges[i].Start = keyRanges[j].Start
-	keyRanges[i].Limit = keyRanges[j].Limit
-	keyRanges[j].Start = saveStart
-	keyRanges[j].Limit = saveLimit
+// String() used in tests.
+func (ir *IndexRanges) String() string {
+	str := fmt.Sprintf("IndexRanges{FieldName: %s, Kind: %v, NilAllowed: %v, ", ir.FieldName, ir.Kind, ir.NilAllowed)
+	for _, r := range *ir.StringRanges {
+		str += fmt.Sprintf("{%s,%s}", r.Start, r.Limit)
+	}
+	str += "}"
+	return str
 }

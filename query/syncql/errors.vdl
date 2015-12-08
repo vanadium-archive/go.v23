@@ -161,4 +161,10 @@ error (
 	PreparedStatementNotFound() {
 		"en": "[0]Prepared statement not found.",
 	}
+	IndexKindNotSupported(off int64, kind string, fieldName string, table string) {
+		"en": "[{off}]Index kind {kind} of field {fieldName} on table {table} not supported.",
+	}
+	InvalidIndexField(off int64, fieldName string, table string) {
+		"en": "[{off}]Invalid index field {fieldName} returned by table {table}.",
+	}
 )

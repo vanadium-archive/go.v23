@@ -38,7 +38,7 @@ type table struct {
 type keyValueStreamImpl struct {
 	table           table
 	cursor          int
-	keyRanges       ds.KeyRanges
+	indexRanges     []ds.IndexRanges
 	keyRangesCursor int
 }
 
@@ -59,15 +59,15 @@ func (kvs *keyValueStreamImpl) Advance() bool {
 			return false
 		}
 		// does it match any keyRange
-		for kvs.keyRangesCursor < len(kvs.keyRanges) {
-			if kvs.table.rows[kvs.cursor].key >= kvs.keyRanges[kvs.keyRangesCursor].Start && compareKeyToLimit(kvs.table.rows[kvs.cursor].key, kvs.keyRanges[kvs.keyRangesCursor].Limit) < 0 {
+		for kvs.keyRangesCursor < len(*kvs.indexRanges[0].StringRanges) {
+			if kvs.table.rows[kvs.cursor].key >= (*kvs.indexRanges[0].StringRanges)[kvs.keyRangesCursor].Start && compareKeyToLimit(kvs.table.rows[kvs.cursor].key, (*kvs.indexRanges[0].StringRanges)[kvs.keyRangesCursor].Limit) < 0 {
 				return true
 			}
 			// Keys and keyRanges are both sorted low to high, so we can increment
 			// keyRangesCursor if the keyRange.Limit is < the key.
-			if compareKeyToLimit(kvs.table.rows[kvs.cursor].key, kvs.keyRanges[kvs.keyRangesCursor].Limit) > 0 {
+			if compareKeyToLimit(kvs.table.rows[kvs.cursor].key, (*kvs.indexRanges[0].StringRanges)[kvs.keyRangesCursor].Limit) > 0 {
 				kvs.keyRangesCursor++
-				if kvs.keyRangesCursor >= len(kvs.keyRanges) {
+				if kvs.keyRangesCursor >= len(*kvs.indexRanges[0].StringRanges) {
 					return false
 				}
 			} else {
@@ -89,11 +89,15 @@ func (kvs *keyValueStreamImpl) Err() error {
 func (kvs *keyValueStreamImpl) Cancel() {
 }
 
-func (t table) Scan(keyRanges ds.KeyRanges) (ds.KeyValueStream, error) {
+func (t table) GetIndexFields() []ds.Index {
+	return []ds.Index{}
+}
+
+func (t table) Scan(indexRanges ...ds.IndexRanges) (ds.KeyValueStream, error) {
 	var keyValueStreamImpl keyValueStreamImpl
 	keyValueStreamImpl.table = t
 	keyValueStreamImpl.cursor = -1
-	keyValueStreamImpl.keyRanges = keyRanges
+	keyValueStreamImpl.indexRanges = indexRanges
 	return &keyValueStreamImpl, nil
 }
 
@@ -405,9 +409,9 @@ func init() {
 }
 
 type keyRangesTest struct {
-	query     string
-	keyRanges *ds.KeyRanges
-	err       error
+	query       string
+	indexRanges *ds.IndexRanges
+	err         error
 }
 
 type evalWhereUsingOnlyKeyTest struct {
@@ -2337,89 +2341,156 @@ func TestKeyRanges(t *testing.T) {
 		{
 			// Need all keys
 			"select k, v from Customer",
-			&ds.KeyRanges{
-				ds.KeyRange{Start: "", Limit: ""},
+			&ds.IndexRanges{
+				FieldName:  "k",
+				Kind:       vdl.String,
+				NilAllowed: true,
+				StringRanges: &ds.StringFieldRanges{
+					ds.StringFieldRange{Start: "", Limit: ""},
+				},
 			},
 			nil,
 		},
 		{
 			// Keys 001 or 003
 			"   select  k,  v from Customer where k = \"001\" or k = \"003\"",
-			&ds.KeyRanges{
-				ds.KeyRange{Start: "001", Limit: appendZeroByte("001")},
-				ds.KeyRange{Start: "003", Limit: appendZeroByte("003")},
+			&ds.IndexRanges{
+				FieldName:  "k",
+				Kind:       vdl.String,
+				NilAllowed: false,
+				StringRanges: &ds.StringFieldRanges{
+					ds.StringFieldRange{Start: "001", Limit: appendZeroByte("001")},
+					ds.StringFieldRange{Start: "003", Limit: appendZeroByte("003")},
+				},
 			},
 			nil,
 		},
 		{
 			// Keys 001 and 003 (resulting in no keys)
 			"   select  k,  v from Customer where k = \"001\" and k = \"003\"",
-			&ds.KeyRanges{},
+			&ds.IndexRanges{
+				FieldName:    "k",
+				Kind:         vdl.String,
+				NilAllowed:   false,
+				StringRanges: &ds.StringFieldRanges{},
+			},
 			nil,
 		},
 		{
 			// Need all keys
 			"select  k,  v from Customer where k like \"%\" or k like \"001%\" or k like \"002%\"",
-			&ds.KeyRanges{
-				ds.KeyRange{Start: "", Limit: ""},
+			&ds.IndexRanges{
+				FieldName:  "k",
+				Kind:       vdl.String,
+				NilAllowed: false,
+				StringRanges: &ds.StringFieldRanges{
+					ds.StringFieldRange{Start: "", Limit: ""},
+				},
 			},
 			nil,
 		},
 		{
 			// Need all keys, likes in where clause in different order
 			"select  k,  v from Customer where k like \"002%\" or k like \"001%\" or k like \"%\"",
-			&ds.KeyRanges{
-				ds.KeyRange{Start: "", Limit: ""},
+			&ds.IndexRanges{
+				FieldName:  "k",
+				Kind:       vdl.String,
+				NilAllowed: false,
+				StringRanges: &ds.StringFieldRanges{
+					ds.StringFieldRange{Start: "", Limit: ""},
+				},
 			},
 			nil,
 		},
 		{
 			// All selected rows will have key prefix of "abc".
+			"select  k,  v from Customer where k like \"abc%\"",
+			&ds.IndexRanges{
+				FieldName:  "k",
+				Kind:       vdl.String,
+				NilAllowed: false,
+				StringRanges: &ds.StringFieldRanges{
+					ds.StringFieldRange{Start: "abc", Limit: plusOne("abc")},
+				},
+			},
+			nil,
+		},
+		{
 			"select k, v from Customer where Type(v) like \"%.Foo.Bar\" and k like \"abc%\"",
-			&ds.KeyRanges{
-				ds.KeyRange{Start: "abc", Limit: plusOne("abc")},
+			&ds.IndexRanges{
+				FieldName:  "k",
+				Kind:       vdl.String,
+				NilAllowed: false,
+				StringRanges: &ds.StringFieldRanges{
+					ds.StringFieldRange{Start: "abc", Limit: plusOne("abc")},
+				},
 			},
 			nil,
 		},
 		{
 			// Need all keys
 			"select k, v from Customer where Type(v) like \"%.Foo.Bar\" or k like \"abc%\"",
-			&ds.KeyRanges{
-				ds.KeyRange{Start: "", Limit: ""},
+			&ds.IndexRanges{
+				FieldName:  "k",
+				Kind:       vdl.String,
+				NilAllowed: true,
+				StringRanges: &ds.StringFieldRanges{
+					ds.StringFieldRange{Start: "", Limit: ""},
+				},
 			},
 			nil,
 		},
 		{
 			// Need all keys
 			"select k, v from Customer where k like \"abc%\" or v.zip = \"94303\"",
-			&ds.KeyRanges{
-				ds.KeyRange{Start: "", Limit: ""},
+			&ds.IndexRanges{
+				FieldName:  "k",
+				Kind:       vdl.String,
+				NilAllowed: true,
+				StringRanges: &ds.StringFieldRanges{
+					ds.StringFieldRange{Start: "", Limit: ""},
+				},
 			},
 			nil,
 		},
 		{
 			// All selected rows will have key prefix of "foo".
 			"select k, v from Customer where Type(v) like \"%.Foo.Bar\" and k like \"foo_bar\"",
-			&ds.KeyRanges{
-				ds.KeyRange{Start: "foo", Limit: plusOne("foo")},
+			&ds.IndexRanges{
+				FieldName:  "k",
+				Kind:       vdl.String,
+				NilAllowed: false,
+				StringRanges: &ds.StringFieldRanges{
+					ds.StringFieldRange{Start: "foo", Limit: plusOne("foo")},
+				},
 			},
 			nil,
 		},
 		{
 			// All selected rows will have key == "baz" or prefix of "foo".
 			"select k, v from Customer where k like \"foo_bar\" or k = \"baz\"",
-			&ds.KeyRanges{
-				ds.KeyRange{Start: "baz", Limit: appendZeroByte("baz")},
-				ds.KeyRange{Start: "foo", Limit: plusOne("foo")},
+			&ds.IndexRanges{
+				FieldName:  "k",
+				Kind:       vdl.String,
+				NilAllowed: false,
+				StringRanges: &ds.StringFieldRanges{
+					ds.StringFieldRange{Start: "baz", Limit: appendZeroByte("baz")},
+					ds.StringFieldRange{Start: "foo", Limit: plusOne("foo")},
+				},
 			},
 			nil,
 		},
 		{
 			// All selected rows will have key == "fo" or prefix of "foo".
 			"select k, v from Customer where k like \"foo_bar\" or k = \"fo\"",
-			&ds.KeyRanges{
-				ds.KeyRange{Start: "fo", Limit: appendZeroByte("fo")},
-				ds.KeyRange{Start: "foo", Limit: plusOne("foo")},
+			&ds.IndexRanges{
+				FieldName:  "k",
+				Kind:       vdl.String,
+				NilAllowed: false,
+				StringRanges: &ds.StringFieldRanges{
+					ds.StringFieldRange{Start: "fo", Limit: appendZeroByte("fo")},
+					ds.StringFieldRange{Start: "foo", Limit: plusOne("foo")},
+				},
 			},
 			nil,
 		},
@@ -2427,104 +2498,169 @@ func TestKeyRanges(t *testing.T) {
 			// All selected rows will have prefix of "fo".
 			// k == foo is a subset of above prefix
 			"select k, v from Customer where k like \"fo_bar\" or k = \"foo\"",
-			&ds.KeyRanges{
-				ds.KeyRange{Start: "fo", Limit: plusOne("fo")},
+			&ds.IndexRanges{
+				FieldName:  "k",
+				Kind:       vdl.String,
+				NilAllowed: false,
+				StringRanges: &ds.StringFieldRanges{
+					ds.StringFieldRange{Start: "fo", Limit: plusOne("fo")},
+				},
 			},
 			nil,
 		},
 		{
 			// All selected rows will have key prefix of "foo".
 			"select k, v from Customer where k like \"foo%bar\"",
-			&ds.KeyRanges{
-				ds.KeyRange{Start: "foo", Limit: plusOne("foo")},
+			&ds.IndexRanges{
+				FieldName:  "k",
+				Kind:       vdl.String,
+				NilAllowed: false,
+				StringRanges: &ds.StringFieldRanges{
+					ds.StringFieldRange{Start: "foo", Limit: plusOne("foo")},
+				},
 			},
 			nil,
 		},
 		{
 			// Select "foo\bar" row.
 			"select k, v from Customer where k like \"foo\\bar\"",
-			&ds.KeyRanges{
-				ds.KeyRange{Start: "foo\\bar", Limit: appendZeroByte("foo\\bar")},
+			&ds.IndexRanges{
+				FieldName:  "k",
+				Kind:       vdl.String,
+				NilAllowed: false,
+				StringRanges: &ds.StringFieldRanges{
+					ds.StringFieldRange{Start: "foo\\bar", Limit: appendZeroByte("foo\\bar")},
+				},
 			},
 			nil,
 		},
 		{
 			// Select "foo%bar" row.
 			"select k, v from Customer where k like \"foo#%bar\" escape '#'",
-			&ds.KeyRanges{
-				ds.KeyRange{Start: "foo%bar", Limit: appendZeroByte("foo%bar")},
+			&ds.IndexRanges{
+				FieldName:  "k",
+				Kind:       vdl.String,
+				NilAllowed: false,
+				StringRanges: &ds.StringFieldRanges{
+					ds.StringFieldRange{Start: "foo%bar", Limit: appendZeroByte("foo%bar")},
+				},
 			},
 			nil,
 		},
 		{
 			// Select "foo_%bar" row.
 			"select k, v from Customer where k like \"foo^_^%bar\" escape '^'",
-			&ds.KeyRanges{
-				ds.KeyRange{Start: "foo_%bar", Limit: appendZeroByte("foo_%bar")},
+			&ds.IndexRanges{
+				FieldName:  "k",
+				Kind:       vdl.String,
+				NilAllowed: false,
+				StringRanges: &ds.StringFieldRanges{
+					ds.StringFieldRange{Start: "foo_%bar", Limit: appendZeroByte("foo_%bar")},
+				},
 			},
 			nil,
 		},
 		{
 			// Need all keys
 			"select k, v from Customer where k like \"%foo\"",
-			&ds.KeyRanges{
-				ds.KeyRange{Start: "", Limit: ""},
+			&ds.IndexRanges{
+				FieldName:  "k",
+				Kind:       vdl.String,
+				NilAllowed: false,
+				StringRanges: &ds.StringFieldRanges{
+					ds.StringFieldRange{Start: "", Limit: ""},
+				},
 			},
 			nil,
 		},
 		{
 			// Need all keys
 			"select k, v from Customer where k like \"_foo\"",
-			&ds.KeyRanges{
-				ds.KeyRange{Start: "", Limit: ""},
+			&ds.IndexRanges{
+				FieldName:  "k",
+				Kind:       vdl.String,
+				NilAllowed: false,
+				StringRanges: &ds.StringFieldRanges{
+					ds.StringFieldRange{Start: "", Limit: ""},
+				},
 			},
 			nil,
 		},
 		{
 			// Select "foo_bar" row.
 			"select k, v from Customer where k like \"foo#_bar\" escape '#'",
-			&ds.KeyRanges{
-				ds.KeyRange{Start: "foo_bar", Limit: appendZeroByte("foo_bar")},
+			&ds.IndexRanges{
+				FieldName:  "k",
+				Kind:       vdl.String,
+				NilAllowed: false,
+				StringRanges: &ds.StringFieldRanges{
+					ds.StringFieldRange{Start: "foo_bar", Limit: appendZeroByte("foo_bar")},
+				},
 			},
 			nil,
 		},
 		{
 			// Select "foobar%" row.
 			"select k, v from Customer where k like \"foobar$%\" escape '$'",
-			&ds.KeyRanges{
-				ds.KeyRange{Start: "foobar%", Limit: appendZeroByte("foobar%")},
+			&ds.IndexRanges{
+				FieldName:  "k",
+				Kind:       vdl.String,
+				NilAllowed: false,
+				StringRanges: &ds.StringFieldRanges{
+					ds.StringFieldRange{Start: "foobar%", Limit: appendZeroByte("foobar%")},
+				},
 			},
 			nil,
 		},
 		{
 			// Select "foobar_" row.
 			"select k, v from Customer where k like \"foobar&_\" escape '&'",
-			&ds.KeyRanges{
-				ds.KeyRange{Start: "foobar_", Limit: appendZeroByte("foobar_")},
+			&ds.IndexRanges{
+				FieldName:  "k",
+				Kind:       vdl.String,
+				NilAllowed: false,
+				StringRanges: &ds.StringFieldRanges{
+					ds.StringFieldRange{Start: "foobar_", Limit: appendZeroByte("foobar_")},
+				},
 			},
 			nil,
 		},
 		{
 			// Select "%_" row.
 			"select k, v from Customer where k like \"*%*_\" escape '*'",
-			&ds.KeyRanges{
-				ds.KeyRange{Start: "%_", Limit: appendZeroByte("%_")},
+			&ds.IndexRanges{
+				FieldName:  "k",
+				Kind:       vdl.String,
+				NilAllowed: false,
+				StringRanges: &ds.StringFieldRanges{
+					ds.StringFieldRange{Start: "%_", Limit: appendZeroByte("%_")},
+				},
 			},
 			nil,
 		},
 		{
 			// Select rows with "%_" prefix.
 			"select k, v from Customer where k like \"*%*_%\" escape '*'",
-			&ds.KeyRanges{
-				ds.KeyRange{Start: "%_", Limit: "%`"},
+			&ds.IndexRanges{
+				FieldName:  "k",
+				Kind:       vdl.String,
+				NilAllowed: false,
+				StringRanges: &ds.StringFieldRanges{
+					ds.StringFieldRange{Start: "%_", Limit: "%`"},
+				},
 			},
 			nil,
 		},
 		{
 			// Select "%_abc" row.
 			"select k, v from Customer where k = \"%_abc\"",
-			&ds.KeyRanges{
-				ds.KeyRange{Start: "%_abc", Limit: appendZeroByte("%_abc")},
+			&ds.IndexRanges{
+				FieldName:  "k",
+				Kind:       vdl.String,
+				NilAllowed: false,
+				StringRanges: &ds.StringFieldRanges{
+					ds.StringFieldRange{Start: "%_abc", Limit: appendZeroByte("%_abc")},
+				},
 			},
 			nil,
 		},
@@ -2543,9 +2679,9 @@ func TestKeyRanges(t *testing.T) {
 			if semErr == nil {
 				switch sel := (*s).(type) {
 				case query_parser.SelectStatement:
-					keyRanges := query_checker.CompileKeyRanges(sel.Where)
-					if !reflect.DeepEqual(test.keyRanges, keyRanges) {
-						t.Errorf("query: %s;\nGOT  %v\nWANT %v", test.query, keyRanges, test.keyRanges)
+					indexRanges := query_checker.CompileIndexRanges(&query_parser.Field{Segments: []query_parser.Segment{query_parser.Segment{Value: "k"}}}, vdl.String, sel.Where)
+					if !reflect.DeepEqual(test.indexRanges, indexRanges) {
+						t.Errorf("query: %s;\nGOT  %v\nWANT %v", test.query, indexRanges, test.indexRanges)
 					}
 				default:
 					t.Errorf("query: %s; got %v, want query_parser.SelectStatement", test.query, reflect.TypeOf(*s))

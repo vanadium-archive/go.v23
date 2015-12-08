@@ -290,7 +290,28 @@ func getSegmentKeyAsHeading(segKey *query_parser.Operand) string {
 }
 
 func execSelect(db ds.Database, s *query_parser.SelectStatement) ([]string, syncql.ResultStream, error) {
-	keyValueStream, err := s.From.Table.DBTable.Scan(*query_checker.CompileKeyRanges(s.Where))
+	indexes := []ds.IndexRanges{}
+
+	// Get IndexRanges for k
+	kField := &query_parser.Field{Segments: []query_parser.Segment{query_parser.Segment{Value: "k"}}}
+	idxRanges := *query_checker.CompileIndexRanges(kField, vdl.String, s.Where)
+	indexes = append(indexes, idxRanges)
+
+	// Get IndexRanges for secondary indexes.
+	for _, idx := range s.From.Table.DBTable.GetIndexFields() {
+		if idx.Kind != vdl.String {
+			return nil, nil, syncql.NewErrIndexKindNotSupported(db.GetContext(), s.From.Table.Off, idx.Kind.String(), idx.FieldName, s.From.Table.Name)
+		}
+		var err error
+		var idxField *query_parser.Field
+		// Construct a Field from the string.  Use the parser as it knows best.
+		if idxField, err = query_parser.ParseIndexField(db, idx.FieldName, s.From.Table.Name); err != nil {
+			return nil, nil, err
+		}
+		idxRanges := *query_checker.CompileIndexRanges(idxField, idx.Kind, s.Where)
+		indexes = append(indexes, idxRanges)
+	}
+	keyValueStream, err := s.From.Table.DBTable.Scan(indexes...)
 	if err != nil {
 		return nil, nil, syncql.NewErrScanError(db.GetContext(), s.Off, err)
 	}
