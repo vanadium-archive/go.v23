@@ -52,7 +52,7 @@ pkg nosql, type BlobWriter interface, Close() error
 pkg nosql, type BlobWriter interface, Send([]byte) error
 pkg nosql, type ChangeType uint32
 pkg nosql, type Conflict struct
-pkg nosql, type Conflict struct, Batches map[uint64]wire.BatchInfo
+pkg nosql, type Conflict struct, Batches map[uint64]nosql.BatchInfo
 pkg nosql, type Conflict struct, ReadSet *ConflictRowSet
 pkg nosql, type Conflict struct, ScanSet *ConflictScanSet
 pkg nosql, type Conflict struct, WriteSet *ConflictRowSet
@@ -68,7 +68,7 @@ pkg nosql, type ConflictRowSet struct
 pkg nosql, type ConflictRowSet struct, ByBatch map[uint64][]ConflictRow
 pkg nosql, type ConflictRowSet struct, ByKey map[string]ConflictRow
 pkg nosql, type ConflictScanSet struct
-pkg nosql, type ConflictScanSet struct, ByBatch map[uint64][]wire.ScanOp
+pkg nosql, type ConflictScanSet struct, ByBatch map[uint64][]nosql.ScanOp
 pkg nosql, type Database interface { BeginBatch, Blob, Close, Create, CreateBlob, Destroy, EnforceSchema, Exec, Exists, FullName, GetPermissions, GetResumeMarker, GetSyncgroupNames, ListTables, Name, SetPermissions, Syncgroup, Table, Watch }
 pkg nosql, type Database interface, BeginBatch(*context.T, wire.BatchOptions) (BatchDatabase, error)
 pkg nosql, type Database interface, Blob(wire.BlobRef) Blob
@@ -169,6 +169,8 @@ pkg nosql, type Table interface, Scan(*context.T, RowRange) ScanStream
 pkg nosql, type Table interface, SetPermissions(*context.T, access.Permissions) error
 pkg nosql, type Table interface, SetPrefixPermissions(*context.T, PrefixRange, access.Permissions) error
 pkg nosql, type Value struct
+pkg nosql, type Value struct, Selection nosql.ValueSelection
+pkg nosql, type Value struct, Val []byte
 pkg nosql, type Value struct, WriteTs time.Time
 pkg nosql, type WatchChange struct
 pkg nosql, type WatchChange struct, ChangeType ChangeType
