@@ -5,6 +5,7 @@
 package nosql
 
 import (
+	"time"
 	"v.io/v23/security/access"
 )
 
@@ -224,13 +225,36 @@ type ScanOp struct {
 
 // Value contains the encoded bytes for a row's value stored in syncbase.
 type Value struct {
+	// State provides information about whether the field Bytes is empty or
+	// not and if it is empty then why.
+	State ValueState
+
 	// VOM encoded bytes for a row's value or nil if the row was deleted.
 	Bytes []byte
 
-	// Write timestamp for this value in nanoseconds.
-	// TODO(jlodhia): change the timestamp to vdl.time here, in commit timestamp
-	// and clock data.
-	WriteTs int64
+	// Write timestamp for this value
+	WriteTs time.Time
+}
+
+// ValueState represents the state for Value object providing information about
+// whether the Value object's Byte field is empty or not.
+type ValueState enum {
+	// Exists means that the value can be obtained from Bytes field.
+	Exists
+
+	// NoExists means that the value is known not to exist and Bytes field is
+	// empty.
+	NoExists
+
+	// Deleted means that this value was deleted and the Bytes field is empty.
+	Deleted
+
+	// Unknown means that the Bytes field is empty but there may or may not be
+	// an associated value. This can happen if a local row, which does
+	// not have a conflict, was pulled into a conflict due to a batch. In such
+	// a case we don't have the corresponding value for remote and the
+	// RemoteValue will have "Unknown" state and empty Bytes field.
+	Unknown
 }
 
 // ValueSelection represents the value that was selected as the final resolution

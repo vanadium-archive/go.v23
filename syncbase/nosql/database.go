@@ -396,27 +396,23 @@ func addRowToConflict(c *Conflict, ci *wire.ConflictInfo) {
 }
 
 func toConflictRow(op wire.RowOp, batchIds []uint64) ConflictRow {
-	var local, remote, ancestor *Value
-	if op.LocalValue != nil {
-		local = &Value{
-			Val:       op.LocalValue.Bytes,
-			WriteTs:   toTime(op.LocalValue.WriteTs),
-			Selection: wire.ValueSelectionLocal,
-		}
+	local := Value{
+		State:     op.LocalValue.State,
+		Val:       op.LocalValue.Bytes,
+		WriteTs:   op.LocalValue.WriteTs,
+		Selection: wire.ValueSelectionLocal,
 	}
-	if op.RemoteValue != nil {
-		remote = &Value{
-			Val:       op.RemoteValue.Bytes,
-			WriteTs:   toTime(op.RemoteValue.WriteTs),
-			Selection: wire.ValueSelectionRemote,
-		}
+	remote := Value{
+		State:     op.RemoteValue.State,
+		Val:       op.RemoteValue.Bytes,
+		WriteTs:   op.RemoteValue.WriteTs,
+		Selection: wire.ValueSelectionRemote,
 	}
-	if op.AncestorValue != nil {
-		ancestor = &Value{
-			Val:       op.AncestorValue.Bytes,
-			WriteTs:   toTime(op.AncestorValue.WriteTs),
-			Selection: wire.ValueSelectionOther,
-		}
+	ancestor := Value{
+		State:     op.AncestorValue.State,
+		Val:       op.AncestorValue.Bytes,
+		WriteTs:   op.AncestorValue.WriteTs,
+		Selection: wire.ValueSelectionOther,
 	}
 	return ConflictRow{
 		Key:           op.Key,
@@ -427,14 +423,6 @@ func toConflictRow(op wire.RowOp, batchIds []uint64) ConflictRow {
 	}
 }
 
-// TODO(jlodhia): remove this method once time is stored as time.Time instead
-// of int64.
-func toTime(unixNanos int64) time.Time {
-	return time.Unix(
-		unixNanos/1e9, // seconds
-		unixNanos%1e9) // nanoseconds
-}
-
 func toResolutionInfo(r ResolvedRow, lastRow bool) wire.ResolutionInfo {
 	sel := wire.ValueSelectionOther
 	resVal := (*wire.Value)(nil)
@@ -442,7 +430,7 @@ func toResolutionInfo(r ResolvedRow, lastRow bool) wire.ResolutionInfo {
 		sel = r.Result.Selection
 		resVal = &wire.Value{
 			Bytes:   r.Result.Val,
-			WriteTs: r.Result.WriteTs.UnixNano(), // ignored by syncbase
+			WriteTs: r.Result.WriteTs, // ignored by syncbase
 		}
 	}
 	return wire.ResolutionInfo{

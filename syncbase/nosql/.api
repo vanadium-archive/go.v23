@@ -59,11 +59,11 @@ pkg nosql, type Conflict struct, WriteSet *ConflictRowSet
 pkg nosql, type ConflictResolver interface { OnConflict }
 pkg nosql, type ConflictResolver interface, OnConflict(*context.T, *Conflict) Resolution
 pkg nosql, type ConflictRow struct
-pkg nosql, type ConflictRow struct, AncestorValue *Value
+pkg nosql, type ConflictRow struct, AncestorValue Value
 pkg nosql, type ConflictRow struct, BatchIds []uint64
 pkg nosql, type ConflictRow struct, Key string
-pkg nosql, type ConflictRow struct, LocalValue *Value
-pkg nosql, type ConflictRow struct, RemoteValue *Value
+pkg nosql, type ConflictRow struct, LocalValue Value
+pkg nosql, type ConflictRow struct, RemoteValue Value
 pkg nosql, type ConflictRowSet struct
 pkg nosql, type ConflictRowSet struct, ByBatch map[uint64][]ConflictRow
 pkg nosql, type ConflictRowSet struct, ByKey map[string]ConflictRow
@@ -170,6 +170,7 @@ pkg nosql, type Table interface, SetPermissions(*context.T, access.Permissions) 
 pkg nosql, type Table interface, SetPrefixPermissions(*context.T, PrefixRange, access.Permissions) error
 pkg nosql, type Value struct
 pkg nosql, type Value struct, Selection nosql.ValueSelection
+pkg nosql, type Value struct, State nosql.ValueState
 pkg nosql, type Value struct, Val []byte
 pkg nosql, type Value struct, WriteTs time.Time
 pkg nosql, type WatchChange struct

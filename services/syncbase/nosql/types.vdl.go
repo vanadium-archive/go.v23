@@ -13,7 +13,9 @@ import (
 	"v.io/v23/vdl"
 
 	// VDL user imports
+	"time"
 	"v.io/v23/security/access"
+	_ "v.io/v23/vdlroot/time"
 )
 
 // BatchOptions configures a batch.
@@ -415,16 +417,78 @@ func (ScanOp) __VDLReflect(struct {
 
 // Value contains the encoded bytes for a row's value stored in syncbase.
 type Value struct {
+	// State provides information about whether the field Bytes is empty or
+	// not and if it is empty then why.
+	State ValueState
 	// VOM encoded bytes for a row's value or nil if the row was deleted.
 	Bytes []byte
-	// Write timestamp for this value in nanoseconds.
-	// TODO(jlodhia): change the timestamp to vdl.time here, in commit timestamp
-	// and clock data.
-	WriteTs int64
+	// Write timestamp for this value
+	WriteTs time.Time
 }
 
 func (Value) __VDLReflect(struct {
 	Name string `vdl:"v.io/v23/services/syncbase/nosql.Value"`
+}) {
+}
+
+// ValueState represents the state for Value object providing information about
+// whether the Value object's Byte field is empty or not.
+type ValueState int
+
+const (
+	ValueStateExists ValueState = iota
+	ValueStateNoExists
+	ValueStateDeleted
+	ValueStateUnknown
+)
+
+// ValueStateAll holds all labels for ValueState.
+var ValueStateAll = [...]ValueState{ValueStateExists, ValueStateNoExists, ValueStateDeleted, ValueStateUnknown}
+
+// ValueStateFromString creates a ValueState from a string label.
+func ValueStateFromString(label string) (x ValueState, err error) {
+	err = x.Set(label)
+	return
+}
+
+// Set assigns label to x.
+func (x *ValueState) Set(label string) error {
+	switch label {
+	case "Exists", "exists":
+		*x = ValueStateExists
+		return nil
+	case "NoExists", "noexists":
+		*x = ValueStateNoExists
+		return nil
+	case "Deleted", "deleted":
+		*x = ValueStateDeleted
+		return nil
+	case "Unknown", "unknown":
+		*x = ValueStateUnknown
+		return nil
+	}
+	*x = -1
+	return fmt.Errorf("unknown label %q in nosql.ValueState", label)
+}
+
+// String returns the string label of x.
+func (x ValueState) String() string {
+	switch x {
+	case ValueStateExists:
+		return "Exists"
+	case ValueStateNoExists:
+		return "NoExists"
+	case ValueStateDeleted:
+		return "Deleted"
+	case ValueStateUnknown:
+		return "Unknown"
+	}
+	return ""
+}
+
+func (ValueState) __VDLReflect(struct {
+	Name string `vdl:"v.io/v23/services/syncbase/nosql.ValueState"`
+	Enum struct{ Exists, NoExists, Deleted, Unknown string }
 }) {
 }
 
@@ -670,6 +734,7 @@ func init() {
 	vdl.Register((*RowOp)(nil))
 	vdl.Register((*ScanOp)(nil))
 	vdl.Register((*Value)(nil))
+	vdl.Register((*ValueState)(nil))
 	vdl.Register((*ValueSelection)(nil))
 	vdl.Register((*ResolutionInfo)(nil))
 	vdl.Register((*SchemaMetadata)(nil))

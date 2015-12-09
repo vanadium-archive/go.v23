@@ -15,7 +15,6 @@ import (
 	"v.io/v23/syncbase"
 	"v.io/v23/syncbase/nosql"
 	"v.io/v23/verror"
-	"v.io/x/lib/vlog"
 	_ "v.io/x/ref/runtime/factories/generic"
 	"v.io/x/ref/services/syncbase/server/util"
 	tu "v.io/x/ref/services/syncbase/testutil"
@@ -522,10 +521,9 @@ func (ri *CRImpl) OnConflict(ctx *context.T, conflict *nosql.Conflict) nosql.Res
 
 		// Handle objects that dont have conflict but were pulled in because of
 		// other conflicts in the same batch.
-		// For ease of testing, everything is resolved as new value with prefix
+		// For ease of testing, this is resolved as new value with prefix
 		// "AppResolvedVal".
-		if row.LocalValue == nil || row.RemoteValue == nil {
-			vlog.Errorf("one of the two values is nil")
+		if row.LocalValue.State == wire.ValueStateUnknown || row.RemoteValue.State == wire.ValueStateUnknown {
 			resolvedRow.Result, _ = nosql.NewValue(ctx, resolvedPrefix+keyPart(rowKey))
 			res.ResultSet[row.Key] = resolvedRow
 			continue
@@ -537,9 +535,9 @@ func (ri *CRImpl) OnConflict(ctx *context.T, conflict *nosql.Conflict) nosql.Res
 
 		if localVal == remoteVal {
 			if row.RemoteValue.WriteTs.After(row.LocalValue.WriteTs) {
-				resolvedRow.Result = row.RemoteValue
+				resolvedRow.Result = &row.RemoteValue
 			} else {
-				resolvedRow.Result = row.LocalValue
+				resolvedRow.Result = &row.LocalValue
 			}
 		} else {
 			resolvedRow.Result, _ = nosql.NewValue(ctx, resolvedPrefix+keyPart(rowKey))

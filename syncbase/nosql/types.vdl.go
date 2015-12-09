@@ -75,13 +75,13 @@ func (ConflictScanSet) __VDLReflect(struct {
 // RemoteValue is the value received via sync.
 // AncestorValue is the value for the key which is the lowest common
 // ancestor of the two values represented by LocalValue and RemoteValue.
-// AncestorValue is nil if the ConflictRow is a part of the read set.
+// AncestorValue's state is NoExists if the ConflictRow is a part of the read set.
 // BatchIds is a list of ids of all the batches that this row belongs to.
 type ConflictRow struct {
 	Key           string
-	LocalValue    *Value
-	RemoteValue   *Value
-	AncestorValue *Value
+	LocalValue    Value
+	RemoteValue   Value
+	AncestorValue Value
 	BatchIds      []uint64
 }
 
@@ -105,9 +105,8 @@ func (Resolution) __VDLReflect(struct {
 
 // ResolvedRow represents a result of resolution of a row under conflict.
 // Key is the key for the row.
-// Selection represents the value that was selected for resolution.
-// Value is the resolved value for the key. This field should be used only
-// if value of Selection field is 'Other'.
+// Result is the result of the conflict resolution. Delete is represented
+// by nil.
 type ResolvedRow struct {
 	Key    string
 	Result *Value
@@ -120,8 +119,11 @@ func (ResolvedRow) __VDLReflect(struct {
 
 // Value contains a specific version of data for the row under conflict along
 // with the write timestamp and hints associated with the version.
+// State defines whether the value is empty or not. It can be empty for
+// reasons like Deleted or Unknown.
 // WriteTs is the write timestamp for this value.
 type Value struct {
+	State   nosql.ValueState
 	Val     []byte
 	WriteTs time.Time
 	// TODO(jlodhia): Since field Selection cannot be package private in VDL,
