@@ -3274,6 +3274,11 @@ func TestExecErrors(t *testing.T) {
 			"select v from Customer where k like \"abc %\" escape ' '",
 			syncql.NewErrInvalidEscapeChar(db.GetContext(), 51),
 		},
+		// At present, delete is not a valid statement.  It only parses.
+		{
+			"delete from Customer",
+			syncql.NewErrCheckOfUnknownStatementType(db.GetContext(), 0),
+		},
 	}
 
 	for _, test := range basic {

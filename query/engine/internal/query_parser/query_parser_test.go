@@ -27,7 +27,13 @@ type parseSelectTest struct {
 	err       error
 }
 
-type parseSelectErrorTest struct {
+type parseDeleteTest struct {
+	query     string
+	statement query_parser.DeleteStatement
+	err       error
+}
+
+type parseErrorTest struct {
 	query string
 	err   error
 }
@@ -37,10 +43,16 @@ type toStringTest struct {
 	s     string
 }
 
-type copyAndSubstituteTest struct {
+type copyAndSubstituteSelectTest struct {
 	query     string
 	subValues []*vdl.Value
 	statement query_parser.SelectStatement
+}
+
+type copyAndSubstituteDeleteTest struct {
+	query     string
+	subValues []*vdl.Value
+	statement query_parser.DeleteStatement
 }
 
 type copyAndSubstituteErrorTest struct {
@@ -69,7 +81,7 @@ func init() {
 	defer shutdown()
 }
 
-func TestQueryParser(t *testing.T) {
+func TestSelectParser(t *testing.T) {
 	basic := []parseSelectTest{
 		{
 			"select v from Customer",
@@ -2831,17 +2843,1815 @@ func TestQueryParser(t *testing.T) {
 	}
 }
 
+func TestDeleteParser(t *testing.T) {
+	basic := []parseDeleteTest{
+		{
+			"delete from Customer",
+			query_parser.DeleteStatement{
+				From: &query_parser.FromClause{
+					Table: query_parser.TableEntry{
+						Name: "Customer",
+						Node: query_parser.Node{Off: 12},
+					},
+					Node: query_parser.Node{Off: 7},
+				},
+				Node: query_parser.Node{Off: 0},
+			},
+			nil,
+		},
+		{
+			"   delete from Customer",
+			query_parser.DeleteStatement{
+				From: &query_parser.FromClause{
+					Table: query_parser.TableEntry{
+						Name: "Customer",
+						Node: query_parser.Node{Off: 15},
+					},
+					Node: query_parser.Node{Off: 10},
+				},
+				Node: query_parser.Node{Off: 3},
+			},
+			nil,
+		},
+		{
+			"delete from Customer limit 100",
+			query_parser.DeleteStatement{
+				From: &query_parser.FromClause{
+					Table: query_parser.TableEntry{
+						Name: "Customer",
+						Node: query_parser.Node{Off: 12},
+					},
+					Node: query_parser.Node{Off: 7},
+				},
+				Limit: &query_parser.LimitClause{
+					Limit: &query_parser.Int64Value{
+						Value: 100,
+						Node:  query_parser.Node{Off: 27},
+					},
+					Node: query_parser.Node{Off: 21},
+				},
+				Node: query_parser.Node{Off: 0},
+			},
+			nil,
+		},
+		{
+			"delete from Customer limit 100 limit 1",
+			query_parser.DeleteStatement{
+				From: &query_parser.FromClause{
+					Table: query_parser.TableEntry{
+						Name: "Customer",
+						Node: query_parser.Node{Off: 12},
+					},
+					Node: query_parser.Node{Off: 7},
+				},
+				Limit: &query_parser.LimitClause{
+					Limit: &query_parser.Int64Value{
+						Value: 1,
+						Node:  query_parser.Node{Off: 37},
+					},
+					Node: query_parser.Node{Off: 31},
+				},
+				Node: query_parser.Node{Off: 0},
+			},
+			nil,
+		},
+		{
+			"delete from from where where equal 42",
+			query_parser.DeleteStatement{
+				From: &query_parser.FromClause{
+					Table: query_parser.TableEntry{
+						Name: "from",
+						Node: query_parser.Node{Off: 12},
+					},
+					Node: query_parser.Node{Off: 7},
+				},
+				Where: &query_parser.WhereClause{
+					Expr: &query_parser.Expression{
+						Operand1: &query_parser.Operand{
+							Type: query_parser.TypField,
+							Column: &query_parser.Field{
+								Segments: []query_parser.Segment{
+									query_parser.Segment{
+										Value: "where",
+										Node:  query_parser.Node{Off: 23},
+									},
+								},
+								Node: query_parser.Node{Off: 23},
+							},
+							Node: query_parser.Node{Off: 23},
+						},
+						Operator: &query_parser.BinaryOperator{
+							Type: query_parser.Equal,
+							Node: query_parser.Node{Off: 29},
+						},
+						Operand2: &query_parser.Operand{
+							Type: query_parser.TypInt,
+							Int:  42,
+							Node: query_parser.Node{Off: 35},
+						},
+						Node: query_parser.Node{Off: 23},
+					},
+					Node: query_parser.Node{Off: 17},
+				},
+				Node: query_parser.Node{Off: 0},
+			},
+			nil,
+		},
+		{
+			"delete from Customer where v.Value equal true",
+			query_parser.DeleteStatement{
+				From: &query_parser.FromClause{
+					Table: query_parser.TableEntry{
+						Name: "Customer",
+						Node: query_parser.Node{Off: 12},
+					},
+					Node: query_parser.Node{Off: 7},
+				},
+				Where: &query_parser.WhereClause{
+					Expr: &query_parser.Expression{
+						Operand1: &query_parser.Operand{
+							Type: query_parser.TypField,
+							Column: &query_parser.Field{
+								Segments: []query_parser.Segment{
+									query_parser.Segment{
+										Value: "v",
+										Node:  query_parser.Node{Off: 27},
+									},
+									query_parser.Segment{
+										Value: "Value",
+										Node:  query_parser.Node{Off: 29},
+									},
+								},
+								Node: query_parser.Node{Off: 27},
+							},
+							Node: query_parser.Node{Off: 27},
+						},
+						Operator: &query_parser.BinaryOperator{
+							Type: query_parser.Equal,
+							Node: query_parser.Node{Off: 35},
+						},
+						Operand2: &query_parser.Operand{
+							Type: query_parser.TypBool,
+							Bool: true,
+							Node: query_parser.Node{Off: 41},
+						},
+						Node: query_parser.Node{Off: 27},
+					},
+					Node: query_parser.Node{Off: 21},
+				},
+				Node: query_parser.Node{Off: 0},
+			},
+			nil,
+		},
+		{
+			"delete from Customer where v.Value = ?",
+			query_parser.DeleteStatement{
+				From: &query_parser.FromClause{
+					Table: query_parser.TableEntry{
+						Name: "Customer",
+						Node: query_parser.Node{Off: 12},
+					},
+					Node: query_parser.Node{Off: 7},
+				},
+				Where: &query_parser.WhereClause{
+					Expr: &query_parser.Expression{
+						Operand1: &query_parser.Operand{
+							Type: query_parser.TypField,
+							Column: &query_parser.Field{
+								Segments: []query_parser.Segment{
+									query_parser.Segment{
+										Value: "v",
+										Node:  query_parser.Node{Off: 27},
+									},
+									query_parser.Segment{
+										Value: "Value",
+										Node:  query_parser.Node{Off: 29},
+									},
+								},
+								Node: query_parser.Node{Off: 27},
+							},
+							Node: query_parser.Node{Off: 27},
+						},
+						Operator: &query_parser.BinaryOperator{
+							Type: query_parser.Equal,
+							Node: query_parser.Node{Off: 35},
+						},
+						Operand2: &query_parser.Operand{
+							Type: query_parser.TypParameter,
+							Node: query_parser.Node{Off: 37},
+						},
+						Node: query_parser.Node{Off: 27},
+					},
+					Node: query_parser.Node{Off: 21},
+				},
+				Node: query_parser.Node{Off: 0},
+			},
+			nil,
+		},
+		{
+			"delete from Customer where Now() < Time(?) and Foo(10,?,v.Bar) = true",
+			query_parser.DeleteStatement{
+				From: &query_parser.FromClause{
+					Table: query_parser.TableEntry{
+						Name: "Customer",
+						Node: query_parser.Node{Off: 12},
+					},
+					Node: query_parser.Node{Off: 7},
+				},
+				Where: &query_parser.WhereClause{
+					Expr: &query_parser.Expression{
+						Operand1: &query_parser.Operand{
+							Type: query_parser.TypExpr,
+							Expr: &query_parser.Expression{
+								Operand1: &query_parser.Operand{
+									Type: query_parser.TypFunction,
+									Function: &query_parser.Function{
+										Name: "Now",
+										Args: nil,
+										Node: query_parser.Node{Off: 27},
+									},
+									Node: query_parser.Node{Off: 27},
+								},
+								Operator: &query_parser.BinaryOperator{
+									Type: query_parser.LessThan,
+									Node: query_parser.Node{Off: 33},
+								},
+								Operand2: &query_parser.Operand{
+									Type: query_parser.TypFunction,
+									Function: &query_parser.Function{
+										Name: "Time",
+										Args: []*query_parser.Operand{
+											&query_parser.Operand{
+												Type: query_parser.TypParameter,
+												Node: query_parser.Node{Off: 40},
+											},
+										},
+										Node: query_parser.Node{Off: 35},
+									},
+									Node: query_parser.Node{Off: 35},
+								},
+								Node: query_parser.Node{Off: 27},
+							},
+							Node: query_parser.Node{Off: 27},
+						},
+						Node: query_parser.Node{Off: 27},
+						Operator: &query_parser.BinaryOperator{
+							Type: query_parser.And,
+							Node: query_parser.Node{Off: 43},
+						},
+						Operand2: &query_parser.Operand{
+							Type: query_parser.TypExpr,
+							Expr: &query_parser.Expression{
+								Operand1: &query_parser.Operand{
+									Type: query_parser.TypFunction,
+									Function: &query_parser.Function{
+										Name: "Foo",
+										Args: []*query_parser.Operand{
+											&query_parser.Operand{
+												Type: query_parser.TypInt,
+												Int:  10,
+												Node: query_parser.Node{Off: 51},
+											},
+											&query_parser.Operand{
+												Type: query_parser.TypParameter,
+												Node: query_parser.Node{Off: 54},
+											},
+											&query_parser.Operand{
+												Type: query_parser.TypField,
+												Column: &query_parser.Field{
+													Segments: []query_parser.Segment{
+														query_parser.Segment{
+															Value: "v",
+															Node:  query_parser.Node{Off: 56},
+														},
+														query_parser.Segment{
+															Value: "Bar",
+															Node:  query_parser.Node{Off: 58},
+														},
+													},
+													Node: query_parser.Node{Off: 56},
+												},
+												Node: query_parser.Node{Off: 56},
+											},
+										},
+										Node: query_parser.Node{Off: 47},
+									},
+									Node: query_parser.Node{Off: 47},
+								},
+								Operator: &query_parser.BinaryOperator{
+									Type: query_parser.Equal,
+									Node: query_parser.Node{Off: 63},
+								},
+								Operand2: &query_parser.Operand{
+									Type: query_parser.TypBool,
+									Bool: true,
+									Node: query_parser.Node{Off: 65},
+								},
+								Node: query_parser.Node{Off: 47},
+							},
+							Node: query_parser.Node{Off: 47},
+						},
+					},
+					Node: query_parser.Node{Off: 21},
+				},
+				Node: query_parser.Node{Off: 0},
+			},
+			nil,
+		},
+		{
+			"delete from Customer where v.ZipCode is nil",
+			query_parser.DeleteStatement{
+				From: &query_parser.FromClause{
+					Table: query_parser.TableEntry{
+						Name: "Customer",
+						Node: query_parser.Node{Off: 12},
+					},
+					Node: query_parser.Node{Off: 7},
+				},
+				Where: &query_parser.WhereClause{
+					Expr: &query_parser.Expression{
+						Operand1: &query_parser.Operand{
+							Type: query_parser.TypField,
+							Column: &query_parser.Field{
+								Segments: []query_parser.Segment{
+									query_parser.Segment{
+										Value: "v",
+										Node:  query_parser.Node{Off: 27},
+									},
+									query_parser.Segment{
+										Value: "ZipCode",
+										Node:  query_parser.Node{Off: 29},
+									},
+								},
+								Node: query_parser.Node{Off: 27},
+							},
+							Node: query_parser.Node{Off: 27},
+						},
+						Operator: &query_parser.BinaryOperator{
+							Type: query_parser.Is,
+							Node: query_parser.Node{Off: 37},
+						},
+						Operand2: &query_parser.Operand{
+							Type: query_parser.TypNil,
+							Node: query_parser.Node{Off: 40},
+						},
+						Node: query_parser.Node{Off: 27},
+					},
+					Node: query_parser.Node{Off: 21},
+				},
+				Node: query_parser.Node{Off: 0},
+			},
+			nil,
+		},
+		{
+			"delete from Customer where v.ZipCode is not nil",
+			query_parser.DeleteStatement{
+				From: &query_parser.FromClause{
+					Table: query_parser.TableEntry{
+						Name: "Customer",
+						Node: query_parser.Node{Off: 12},
+					},
+					Node: query_parser.Node{Off: 7},
+				},
+				Where: &query_parser.WhereClause{
+					Expr: &query_parser.Expression{
+						Operand1: &query_parser.Operand{
+							Type: query_parser.TypField,
+							Column: &query_parser.Field{
+								Segments: []query_parser.Segment{
+									query_parser.Segment{
+										Value: "v",
+										Node:  query_parser.Node{Off: 27},
+									},
+									query_parser.Segment{
+										Value: "ZipCode",
+										Node:  query_parser.Node{Off: 29},
+									},
+								},
+								Node: query_parser.Node{Off: 27},
+							},
+							Node: query_parser.Node{Off: 27},
+						},
+						Operator: &query_parser.BinaryOperator{
+							Type: query_parser.IsNot,
+							Node: query_parser.Node{Off: 37},
+						},
+						Operand2: &query_parser.Operand{
+							Type: query_parser.TypNil,
+							Node: query_parser.Node{Off: 44},
+						},
+						Node: query_parser.Node{Off: 27},
+					},
+					Node: query_parser.Node{Off: 21},
+				},
+				Node: query_parser.Node{Off: 0},
+			},
+			nil,
+		},
+		{
+			"delete from Customer where v.Value = false",
+			query_parser.DeleteStatement{
+				From: &query_parser.FromClause{
+					Table: query_parser.TableEntry{
+						Name: "Customer",
+						Node: query_parser.Node{Off: 12},
+					},
+					Node: query_parser.Node{Off: 7},
+				},
+				Where: &query_parser.WhereClause{
+					Expr: &query_parser.Expression{
+						Operand1: &query_parser.Operand{
+							Type: query_parser.TypField,
+							Column: &query_parser.Field{
+								Segments: []query_parser.Segment{
+									query_parser.Segment{
+										Value: "v",
+										Node:  query_parser.Node{Off: 27},
+									},
+									query_parser.Segment{
+										Value: "Value",
+										Node:  query_parser.Node{Off: 29},
+									},
+								},
+								Node: query_parser.Node{Off: 27},
+							},
+							Node: query_parser.Node{Off: 27},
+						},
+						Operator: &query_parser.BinaryOperator{
+							Type: query_parser.Equal,
+							Node: query_parser.Node{Off: 35},
+						},
+						Operand2: &query_parser.Operand{
+							Type: query_parser.TypBool,
+							Bool: false,
+							Node: query_parser.Node{Off: 37},
+						},
+						Node: query_parser.Node{Off: 27},
+					},
+					Node: query_parser.Node{Off: 21},
+				},
+				Node: query_parser.Node{Off: 0},
+			},
+			nil,
+		},
+		{
+			"delete from Customer where v.Value equal -42",
+			query_parser.DeleteStatement{
+				From: &query_parser.FromClause{
+					Table: query_parser.TableEntry{
+						Name: "Customer",
+						Node: query_parser.Node{Off: 12},
+					},
+					Node: query_parser.Node{Off: 7},
+				},
+				Where: &query_parser.WhereClause{
+					Expr: &query_parser.Expression{
+						Operand1: &query_parser.Operand{
+							Type: query_parser.TypField,
+							Column: &query_parser.Field{
+								Segments: []query_parser.Segment{
+									query_parser.Segment{
+										Value: "v",
+										Node:  query_parser.Node{Off: 27},
+									},
+									query_parser.Segment{
+										Value: "Value",
+										Node:  query_parser.Node{Off: 29},
+									},
+								},
+								Node: query_parser.Node{Off: 27},
+							},
+							Node: query_parser.Node{Off: 27},
+						},
+						Operator: &query_parser.BinaryOperator{
+							Type: query_parser.Equal,
+							Node: query_parser.Node{Off: 35},
+						},
+						Operand2: &query_parser.Operand{
+							Type: query_parser.TypInt,
+							Int:  -42,
+							Node: query_parser.Node{Off: 41},
+						},
+						Node: query_parser.Node{Off: 27},
+					},
+					Node: query_parser.Node{Off: 21},
+				},
+				Node: query_parser.Node{Off: 0},
+			},
+			nil,
+		},
+		{
+			"delete from Customer where v.Value equal -18.888",
+			query_parser.DeleteStatement{
+				From: &query_parser.FromClause{
+					Table: query_parser.TableEntry{
+						Name: "Customer",
+						Node: query_parser.Node{Off: 12},
+					},
+					Node: query_parser.Node{Off: 7},
+				},
+				Where: &query_parser.WhereClause{
+					Expr: &query_parser.Expression{
+						Operand1: &query_parser.Operand{
+							Type: query_parser.TypField,
+							Column: &query_parser.Field{
+								Segments: []query_parser.Segment{
+									query_parser.Segment{
+										Value: "v",
+										Node:  query_parser.Node{Off: 27},
+									},
+									query_parser.Segment{
+										Value: "Value",
+										Node:  query_parser.Node{Off: 29},
+									},
+								},
+								Node: query_parser.Node{Off: 27},
+							},
+							Node: query_parser.Node{Off: 27},
+						},
+						Operator: &query_parser.BinaryOperator{
+							Type: query_parser.Equal,
+							Node: query_parser.Node{Off: 35},
+						},
+						Operand2: &query_parser.Operand{
+							Type:  query_parser.TypFloat,
+							Float: -18.888,
+							Node:  query_parser.Node{Off: 41},
+						},
+						Node: query_parser.Node{Off: 27},
+					},
+					Node: query_parser.Node{Off: 21},
+				},
+				Node: query_parser.Node{Off: 0},
+			},
+			nil,
+		},
+		{
+			"delete from y where b = 'c'",
+			query_parser.DeleteStatement{
+				From: &query_parser.FromClause{
+					Table: query_parser.TableEntry{
+						Name: "y",
+						Node: query_parser.Node{Off: 12},
+					},
+					Node: query_parser.Node{Off: 7},
+				},
+				Where: &query_parser.WhereClause{
+					Expr: &query_parser.Expression{
+						Operand1: &query_parser.Operand{
+							Type: query_parser.TypField,
+							Column: &query_parser.Field{
+								Segments: []query_parser.Segment{
+									query_parser.Segment{
+										Value: "b",
+										Node:  query_parser.Node{Off: 20},
+									},
+								},
+								Node: query_parser.Node{Off: 20},
+							},
+							Node: query_parser.Node{Off: 20},
+						},
+						Operator: &query_parser.BinaryOperator{
+							Type: query_parser.Equal,
+							Node: query_parser.Node{Off: 22},
+						},
+						Operand2: &query_parser.Operand{
+							Type: query_parser.TypInt,
+							Int:  'c',
+							Node: query_parser.Node{Off: 24},
+						},
+						Node: query_parser.Node{Off: 20},
+					},
+					Node: query_parser.Node{Off: 14},
+				},
+				Node: query_parser.Node{Off: 0},
+			},
+			nil,
+		},
+		{
+			"delete from y where b = 'c' limit 10",
+			query_parser.DeleteStatement{
+				From: &query_parser.FromClause{
+					Table: query_parser.TableEntry{
+						Name: "y",
+						Node: query_parser.Node{Off: 12},
+					},
+					Node: query_parser.Node{Off: 7},
+				},
+				Where: &query_parser.WhereClause{
+					Expr: &query_parser.Expression{
+						Operand1: &query_parser.Operand{
+							Type: query_parser.TypField,
+							Column: &query_parser.Field{
+								Segments: []query_parser.Segment{
+									query_parser.Segment{
+										Value: "b",
+										Node:  query_parser.Node{Off: 20},
+									},
+								},
+								Node: query_parser.Node{Off: 20},
+							},
+							Node: query_parser.Node{Off: 20},
+						},
+						Operator: &query_parser.BinaryOperator{
+							Type: query_parser.Equal,
+							Node: query_parser.Node{Off: 22},
+						},
+						Operand2: &query_parser.Operand{
+							Type: query_parser.TypInt,
+							Int:  'c',
+							Node: query_parser.Node{Off: 24},
+						},
+						Node: query_parser.Node{Off: 20},
+					},
+					Node: query_parser.Node{Off: 14},
+				},
+				Limit: &query_parser.LimitClause{
+					Limit: &query_parser.Int64Value{
+						Value: 10,
+						Node:  query_parser.Node{Off: 34},
+					},
+					Node: query_parser.Node{Off: 28},
+				},
+				Node: query_parser.Node{Off: 0},
+			},
+			nil,
+		},
+		{
+			"delete from Customer where k like \"Foo^%Bar\" escape '^'",
+			query_parser.DeleteStatement{
+				From: &query_parser.FromClause{
+					Table: query_parser.TableEntry{
+						Name: "Customer",
+						Node: query_parser.Node{Off: 12},
+					},
+					Node: query_parser.Node{Off: 7},
+				},
+				Where: &query_parser.WhereClause{
+					Expr: &query_parser.Expression{
+						Operand1: &query_parser.Operand{
+							Type: query_parser.TypField,
+							Column: &query_parser.Field{
+								Segments: []query_parser.Segment{
+									query_parser.Segment{
+										Value: "k",
+										Node:  query_parser.Node{Off: 27},
+									},
+								},
+								Node: query_parser.Node{Off: 27},
+							},
+							Node: query_parser.Node{Off: 27},
+						},
+						Operator: &query_parser.BinaryOperator{
+							Type: query_parser.Like,
+							Node: query_parser.Node{Off: 29},
+						},
+						Operand2: &query_parser.Operand{
+							Type: query_parser.TypStr,
+							Str:  "Foo^%Bar",
+							Node: query_parser.Node{Off: 34},
+						},
+						Node: query_parser.Node{Off: 27},
+					},
+					Node: query_parser.Node{Off: 21},
+				},
+				Escape: &query_parser.EscapeClause{
+					EscapeChar: &query_parser.CharValue{
+						Value: '^',
+						Node:  query_parser.Node{Off: 52},
+					},
+					Node: query_parser.Node{Off: 45},
+				},
+				Node: query_parser.Node{Off: 0},
+			},
+			nil,
+		},
+		{
+			"delete from Customer where a.b.c = \"baz\" and d.e.f like \"%foobarbaz\"",
+			query_parser.DeleteStatement{
+				From: &query_parser.FromClause{
+					Table: query_parser.TableEntry{
+						Name: "Customer",
+						Node: query_parser.Node{Off: 12},
+					},
+					Node: query_parser.Node{Off: 7},
+				},
+				Where: &query_parser.WhereClause{
+					Expr: &query_parser.Expression{
+						Operand1: &query_parser.Operand{
+							Type: query_parser.TypExpr,
+							Expr: &query_parser.Expression{
+								Operand1: &query_parser.Operand{
+									Type: query_parser.TypField,
+									Column: &query_parser.Field{
+										Segments: []query_parser.Segment{
+											query_parser.Segment{
+												Value: "a",
+												Node:  query_parser.Node{Off: 27},
+											},
+											query_parser.Segment{
+												Value: "b",
+												Node:  query_parser.Node{Off: 29},
+											},
+											query_parser.Segment{
+												Value: "c",
+												Node:  query_parser.Node{Off: 31},
+											},
+										},
+										Node: query_parser.Node{Off: 27},
+									},
+									Node: query_parser.Node{Off: 27},
+								},
+								Operator: &query_parser.BinaryOperator{
+									Type: query_parser.Equal,
+									Node: query_parser.Node{Off: 33},
+								},
+								Operand2: &query_parser.Operand{
+									Type: query_parser.TypStr,
+									Str:  "baz",
+									Node: query_parser.Node{Off: 35},
+								},
+								Node: query_parser.Node{Off: 27},
+							},
+							Node: query_parser.Node{Off: 27},
+						},
+						Operator: &query_parser.BinaryOperator{
+							Type: query_parser.And,
+							Node: query_parser.Node{Off: 41},
+						},
+						Operand2: &query_parser.Operand{
+							Type: query_parser.TypExpr,
+							Expr: &query_parser.Expression{
+								Operand1: &query_parser.Operand{
+									Type: query_parser.TypField,
+									Column: &query_parser.Field{
+										Segments: []query_parser.Segment{
+											query_parser.Segment{
+												Value: "d",
+												Node:  query_parser.Node{Off: 45},
+											},
+											query_parser.Segment{
+												Value: "e",
+												Node:  query_parser.Node{Off: 47},
+											},
+											query_parser.Segment{
+												Value: "f",
+												Node:  query_parser.Node{Off: 49},
+											},
+										},
+										Node: query_parser.Node{Off: 45},
+									},
+									Node: query_parser.Node{Off: 45},
+								},
+								Operator: &query_parser.BinaryOperator{
+									Type: query_parser.Like,
+									Node: query_parser.Node{Off: 51},
+								},
+								Operand2: &query_parser.Operand{
+									Type: query_parser.TypStr,
+									Str:  "%foobarbaz",
+									Node: query_parser.Node{Off: 56},
+								},
+								Node: query_parser.Node{Off: 45},
+							},
+							Node: query_parser.Node{Off: 45},
+						},
+						Node: query_parser.Node{Off: 27},
+					},
+					Node: query_parser.Node{Off: 21},
+				},
+				Node: query_parser.Node{Off: 0},
+			},
+			nil,
+		},
+		{
+			"delete from Customer where CustRecord.CustID=123 or CustRecord.Name like \"f%\"",
+			query_parser.DeleteStatement{
+				From: &query_parser.FromClause{
+					Table: query_parser.TableEntry{
+						Name: "Customer",
+						Node: query_parser.Node{Off: 12},
+					},
+					Node: query_parser.Node{Off: 7},
+				},
+				Where: &query_parser.WhereClause{
+					Expr: &query_parser.Expression{
+						Operand1: &query_parser.Operand{
+							Type: query_parser.TypExpr,
+							Expr: &query_parser.Expression{
+								Operand1: &query_parser.Operand{
+									Type: query_parser.TypField,
+									Column: &query_parser.Field{
+										Segments: []query_parser.Segment{
+											query_parser.Segment{
+												Value: "CustRecord",
+												Node:  query_parser.Node{Off: 27},
+											},
+											query_parser.Segment{
+												Value: "CustID",
+												Node:  query_parser.Node{Off: 38},
+											},
+										},
+										Node: query_parser.Node{Off: 27},
+									},
+									Node: query_parser.Node{Off: 27},
+								},
+								Operator: &query_parser.BinaryOperator{
+									Type: query_parser.Equal,
+									Node: query_parser.Node{Off: 44},
+								},
+								Operand2: &query_parser.Operand{
+									Type: query_parser.TypInt,
+									Int:  123,
+									Node: query_parser.Node{Off: 45},
+								},
+								Node: query_parser.Node{Off: 27},
+							},
+							Node: query_parser.Node{Off: 27},
+						},
+						Operator: &query_parser.BinaryOperator{
+							Type: query_parser.Or,
+							Node: query_parser.Node{Off: 49},
+						},
+						Operand2: &query_parser.Operand{
+							Type: query_parser.TypExpr,
+							Expr: &query_parser.Expression{
+								Operand1: &query_parser.Operand{
+									Type: query_parser.TypField,
+									Column: &query_parser.Field{
+										Segments: []query_parser.Segment{
+											query_parser.Segment{
+												Value: "CustRecord",
+												Node:  query_parser.Node{Off: 52},
+											},
+											query_parser.Segment{
+												Value: "Name",
+												Node:  query_parser.Node{Off: 63},
+											},
+										},
+										Node: query_parser.Node{Off: 52},
+									},
+									Node: query_parser.Node{Off: 52},
+								},
+								Operator: &query_parser.BinaryOperator{
+									Type: query_parser.Like,
+									Node: query_parser.Node{Off: 68},
+								},
+								Operand2: &query_parser.Operand{
+									Type: query_parser.TypStr,
+									Str:  "f%",
+									Node: query_parser.Node{Off: 73},
+								},
+								Node: query_parser.Node{Off: 52},
+							},
+							Node: query_parser.Node{Off: 52},
+						},
+						Node: query_parser.Node{Off: 27},
+					},
+					Node: query_parser.Node{Off: 21},
+				},
+				Node: query_parser.Node{Off: 0},
+			},
+			nil,
+		},
+		{
+			"delete from Customer where A=123 or B=456 and C=789",
+			query_parser.DeleteStatement{
+				From: &query_parser.FromClause{
+					Table: query_parser.TableEntry{
+						Name: "Customer",
+						Node: query_parser.Node{Off: 12},
+					},
+					Node: query_parser.Node{Off: 7},
+				},
+				Where: &query_parser.WhereClause{
+					Expr: &query_parser.Expression{
+						Operand1: &query_parser.Operand{
+							Type: query_parser.TypExpr,
+							Expr: &query_parser.Expression{
+								Operand1: &query_parser.Operand{
+									Type: query_parser.TypExpr,
+									Expr: &query_parser.Expression{
+										Operand1: &query_parser.Operand{
+											Type: query_parser.TypField,
+											Column: &query_parser.Field{
+												Segments: []query_parser.Segment{
+													query_parser.Segment{
+														Value: "A",
+														Node:  query_parser.Node{Off: 27},
+													},
+												},
+												Node: query_parser.Node{Off: 27},
+											},
+											Node: query_parser.Node{Off: 27},
+										},
+										Operator: &query_parser.BinaryOperator{
+											Type: query_parser.Equal,
+											Node: query_parser.Node{Off: 28},
+										},
+										Operand2: &query_parser.Operand{
+											Type: query_parser.TypInt,
+											Int:  123,
+											Node: query_parser.Node{Off: 29},
+										},
+										Node: query_parser.Node{Off: 27},
+									},
+									Node: query_parser.Node{Off: 27},
+								},
+								Operator: &query_parser.BinaryOperator{
+									Type: query_parser.Or,
+									Node: query_parser.Node{Off: 33},
+								},
+								Operand2: &query_parser.Operand{
+									Type: query_parser.TypExpr,
+									Expr: &query_parser.Expression{
+										Operand1: &query_parser.Operand{
+											Type: query_parser.TypField,
+											Column: &query_parser.Field{
+												Segments: []query_parser.Segment{
+													query_parser.Segment{
+														Value: "B",
+														Node:  query_parser.Node{Off: 36},
+													},
+												},
+												Node: query_parser.Node{Off: 36},
+											},
+											Node: query_parser.Node{Off: 36},
+										},
+										Operator: &query_parser.BinaryOperator{
+											Type: query_parser.Equal,
+											Node: query_parser.Node{Off: 37},
+										},
+										Operand2: &query_parser.Operand{
+											Type: query_parser.TypInt,
+											Int:  456,
+											Node: query_parser.Node{Off: 38},
+										},
+										Node: query_parser.Node{Off: 36},
+									},
+									Node: query_parser.Node{Off: 36},
+								},
+								Node: query_parser.Node{Off: 27},
+							},
+							Node: query_parser.Node{Off: 27},
+						},
+						Operator: &query_parser.BinaryOperator{
+							Type: query_parser.And,
+							Node: query_parser.Node{Off: 42},
+						},
+						Operand2: &query_parser.Operand{
+							Type: query_parser.TypExpr,
+							Expr: &query_parser.Expression{
+								Operand1: &query_parser.Operand{
+									Type: query_parser.TypField,
+									Column: &query_parser.Field{
+										Segments: []query_parser.Segment{
+											query_parser.Segment{
+												Value: "C",
+												Node:  query_parser.Node{Off: 46},
+											},
+										},
+										Node: query_parser.Node{Off: 46},
+									},
+									Node: query_parser.Node{Off: 46},
+								},
+								Operator: &query_parser.BinaryOperator{
+									Type: query_parser.Equal,
+									Node: query_parser.Node{Off: 47},
+								},
+								Operand2: &query_parser.Operand{
+									Type: query_parser.TypInt,
+									Int:  789,
+									Node: query_parser.Node{Off: 48},
+								},
+								Node: query_parser.Node{Off: 46},
+							},
+							Node: query_parser.Node{Off: 46},
+						},
+						Node: query_parser.Node{Off: 27},
+					},
+					Node: query_parser.Node{Off: 21},
+				},
+				Node: query_parser.Node{Off: 0},
+			},
+			nil,
+		},
+		{
+			"delete from Customer where (A=123 or B=456) and C=789",
+			query_parser.DeleteStatement{
+				From: &query_parser.FromClause{
+					Table: query_parser.TableEntry{
+						Name: "Customer",
+						Node: query_parser.Node{Off: 12},
+					},
+					Node: query_parser.Node{Off: 7},
+				},
+				Where: &query_parser.WhereClause{
+					Expr: &query_parser.Expression{
+						Operand1: &query_parser.Operand{
+							Type: query_parser.TypExpr,
+							Expr: &query_parser.Expression{
+								Operand1: &query_parser.Operand{
+									Type: query_parser.TypExpr,
+									Expr: &query_parser.Expression{
+										Operand1: &query_parser.Operand{
+											Type: query_parser.TypField,
+											Column: &query_parser.Field{
+												Segments: []query_parser.Segment{
+													query_parser.Segment{
+														Value: "A",
+														Node:  query_parser.Node{Off: 28},
+													},
+												},
+												Node: query_parser.Node{Off: 28},
+											},
+											Node: query_parser.Node{Off: 28},
+										},
+										Operator: &query_parser.BinaryOperator{
+											Type: query_parser.Equal,
+											Node: query_parser.Node{Off: 29},
+										},
+										Operand2: &query_parser.Operand{
+											Type: query_parser.TypInt,
+											Int:  123,
+											Node: query_parser.Node{Off: 30},
+										},
+										Node: query_parser.Node{Off: 28},
+									},
+									Node: query_parser.Node{Off: 28},
+								},
+								Operator: &query_parser.BinaryOperator{
+									Type: query_parser.Or,
+									Node: query_parser.Node{Off: 34},
+								},
+								Operand2: &query_parser.Operand{
+									Type: query_parser.TypExpr,
+									Expr: &query_parser.Expression{
+										Operand1: &query_parser.Operand{
+											Type: query_parser.TypField,
+											Column: &query_parser.Field{
+												Segments: []query_parser.Segment{
+													query_parser.Segment{
+														Value: "B",
+														Node:  query_parser.Node{Off: 37},
+													},
+												},
+												Node: query_parser.Node{Off: 37},
+											},
+											Node: query_parser.Node{Off: 37},
+										},
+										Operator: &query_parser.BinaryOperator{
+											Type: query_parser.Equal,
+											Node: query_parser.Node{Off: 38},
+										},
+										Operand2: &query_parser.Operand{
+											Type: query_parser.TypInt,
+											Int:  456,
+											Node: query_parser.Node{Off: 39},
+										},
+										Node: query_parser.Node{Off: 37},
+									},
+									Node: query_parser.Node{Off: 37},
+								},
+								Node: query_parser.Node{Off: 28},
+							},
+							Node: query_parser.Node{Off: 28},
+						},
+						Operator: &query_parser.BinaryOperator{
+							Type: query_parser.And,
+							Node: query_parser.Node{Off: 44},
+						},
+						Operand2: &query_parser.Operand{
+							Type: query_parser.TypExpr,
+							Expr: &query_parser.Expression{
+								Operand1: &query_parser.Operand{
+									Type: query_parser.TypField,
+									Column: &query_parser.Field{
+										Segments: []query_parser.Segment{
+											query_parser.Segment{
+												Value: "C",
+												Node:  query_parser.Node{Off: 48},
+											},
+										},
+										Node: query_parser.Node{Off: 48},
+									},
+									Node: query_parser.Node{Off: 48},
+								},
+								Operator: &query_parser.BinaryOperator{
+									Type: query_parser.Equal,
+									Node: query_parser.Node{Off: 49},
+								},
+								Operand2: &query_parser.Operand{
+									Type: query_parser.TypInt,
+									Int:  789,
+									Node: query_parser.Node{Off: 50},
+								},
+								Node: query_parser.Node{Off: 48},
+							},
+							Node: query_parser.Node{Off: 48},
+						},
+						Node: query_parser.Node{Off: 28},
+					},
+					Node: query_parser.Node{Off: 21},
+				},
+				Node: query_parser.Node{Off: 0},
+			},
+			nil,
+		},
+		{
+			"delete from Customer where (A<=123 or B>456) and C>=789",
+			query_parser.DeleteStatement{
+				From: &query_parser.FromClause{
+					Table: query_parser.TableEntry{
+						Name: "Customer",
+						Node: query_parser.Node{Off: 12},
+					},
+					Node: query_parser.Node{Off: 7},
+				},
+				Where: &query_parser.WhereClause{
+					Expr: &query_parser.Expression{
+						Operand1: &query_parser.Operand{
+							Type: query_parser.TypExpr,
+							Expr: &query_parser.Expression{
+								Operand1: &query_parser.Operand{
+									Type: query_parser.TypExpr,
+									Expr: &query_parser.Expression{
+										Operand1: &query_parser.Operand{
+											Type: query_parser.TypField,
+											Column: &query_parser.Field{
+												Segments: []query_parser.Segment{
+													query_parser.Segment{
+														Value: "A",
+														Node:  query_parser.Node{Off: 28},
+													},
+												},
+												Node: query_parser.Node{Off: 28},
+											},
+											Node: query_parser.Node{Off: 28},
+										},
+										Operator: &query_parser.BinaryOperator{
+											Type: query_parser.LessThanOrEqual,
+											Node: query_parser.Node{Off: 29},
+										},
+										Operand2: &query_parser.Operand{
+											Type: query_parser.TypInt,
+											Int:  123,
+											Node: query_parser.Node{Off: 31},
+										},
+										Node: query_parser.Node{Off: 28},
+									},
+									Node: query_parser.Node{Off: 28},
+								},
+								Operator: &query_parser.BinaryOperator{
+									Type: query_parser.Or,
+									Node: query_parser.Node{Off: 35},
+								},
+								Operand2: &query_parser.Operand{
+									Type: query_parser.TypExpr,
+									Expr: &query_parser.Expression{
+										Operand1: &query_parser.Operand{
+											Type: query_parser.TypField,
+											Column: &query_parser.Field{
+												Segments: []query_parser.Segment{
+													query_parser.Segment{
+														Value: "B",
+														Node:  query_parser.Node{Off: 38},
+													},
+												},
+												Node: query_parser.Node{Off: 38},
+											},
+											Node: query_parser.Node{Off: 38},
+										},
+										Operator: &query_parser.BinaryOperator{
+											Type: query_parser.GreaterThan,
+											Node: query_parser.Node{Off: 39},
+										},
+										Operand2: &query_parser.Operand{
+											Type: query_parser.TypInt,
+											Int:  456,
+											Node: query_parser.Node{Off: 40},
+										},
+										Node: query_parser.Node{Off: 38},
+									},
+									Node: query_parser.Node{Off: 38},
+								},
+								Node: query_parser.Node{Off: 28},
+							},
+							Node: query_parser.Node{Off: 28},
+						},
+						Operator: &query_parser.BinaryOperator{
+							Type: query_parser.And,
+							Node: query_parser.Node{Off: 45},
+						},
+						Operand2: &query_parser.Operand{
+							Type: query_parser.TypExpr,
+							Expr: &query_parser.Expression{
+								Operand1: &query_parser.Operand{
+									Type: query_parser.TypField,
+									Column: &query_parser.Field{
+										Segments: []query_parser.Segment{
+											query_parser.Segment{
+												Value: "C",
+												Node:  query_parser.Node{Off: 49},
+											},
+										},
+										Node: query_parser.Node{Off: 49},
+									},
+									Node: query_parser.Node{Off: 49},
+								},
+								Operator: &query_parser.BinaryOperator{
+									Type: query_parser.GreaterThanOrEqual,
+									Node: query_parser.Node{Off: 50},
+								},
+								Operand2: &query_parser.Operand{
+									Type: query_parser.TypInt,
+									Int:  789,
+									Node: query_parser.Node{Off: 52},
+								},
+								Node: query_parser.Node{Off: 49},
+							},
+							Node: query_parser.Node{Off: 49},
+						},
+						Node: query_parser.Node{Off: 28},
+					},
+					Node: query_parser.Node{Off: 21},
+				},
+				Node: query_parser.Node{Off: 0},
+			},
+			nil,
+		},
+		{
+			"delete from Customer where A=123 or (B=456 and C=789)",
+			query_parser.DeleteStatement{
+				From: &query_parser.FromClause{
+					Table: query_parser.TableEntry{
+						Name: "Customer",
+						Node: query_parser.Node{Off: 12},
+					},
+					Node: query_parser.Node{Off: 7},
+				},
+				Where: &query_parser.WhereClause{
+					Expr: &query_parser.Expression{
+						Operand1: &query_parser.Operand{
+							Type: query_parser.TypExpr,
+							Expr: &query_parser.Expression{
+								Operand1: &query_parser.Operand{
+									Type: query_parser.TypField,
+									Column: &query_parser.Field{
+										Segments: []query_parser.Segment{
+											query_parser.Segment{
+												Value: "A",
+												Node:  query_parser.Node{Off: 27},
+											},
+										},
+										Node: query_parser.Node{Off: 27},
+									},
+									Node: query_parser.Node{Off: 27},
+								},
+								Operator: &query_parser.BinaryOperator{
+									Type: query_parser.Equal,
+									Node: query_parser.Node{Off: 28},
+								},
+								Operand2: &query_parser.Operand{
+									Type: query_parser.TypInt,
+									Int:  123,
+									Node: query_parser.Node{Off: 29},
+								},
+								Node: query_parser.Node{Off: 27},
+							},
+							Node: query_parser.Node{Off: 27},
+						},
+						Operator: &query_parser.BinaryOperator{
+							Type: query_parser.Or,
+							Node: query_parser.Node{Off: 33},
+						},
+						Operand2: &query_parser.Operand{
+							Type: query_parser.TypExpr,
+							Expr: &query_parser.Expression{
+								Operand1: &query_parser.Operand{
+									Type: query_parser.TypExpr,
+									Expr: &query_parser.Expression{
+										Operand1: &query_parser.Operand{
+											Type: query_parser.TypField,
+											Column: &query_parser.Field{
+												Segments: []query_parser.Segment{
+													query_parser.Segment{
+														Value: "B",
+														Node:  query_parser.Node{Off: 37},
+													},
+												},
+												Node: query_parser.Node{Off: 37},
+											},
+											Node: query_parser.Node{Off: 37},
+										},
+										Operator: &query_parser.BinaryOperator{
+											Type: query_parser.Equal,
+											Node: query_parser.Node{Off: 38},
+										},
+										Operand2: &query_parser.Operand{
+											Type: query_parser.TypInt,
+											Int:  456,
+											Node: query_parser.Node{Off: 39},
+										},
+										Node: query_parser.Node{Off: 37},
+									},
+									Node: query_parser.Node{Off: 37},
+								},
+								Operator: &query_parser.BinaryOperator{
+									Type: query_parser.And,
+									Node: query_parser.Node{Off: 43},
+								},
+								Operand2: &query_parser.Operand{
+									Type: query_parser.TypExpr,
+									Expr: &query_parser.Expression{
+										Operand1: &query_parser.Operand{
+											Type: query_parser.TypField,
+											Column: &query_parser.Field{
+												Segments: []query_parser.Segment{
+													query_parser.Segment{
+														Value: "C",
+														Node:  query_parser.Node{Off: 47},
+													},
+												},
+												Node: query_parser.Node{Off: 47},
+											},
+											Node: query_parser.Node{Off: 47},
+										},
+										Operator: &query_parser.BinaryOperator{
+											Type: query_parser.Equal,
+											Node: query_parser.Node{Off: 48},
+										},
+										Operand2: &query_parser.Operand{
+											Type: query_parser.TypInt,
+											Int:  789,
+											Node: query_parser.Node{Off: 49},
+										},
+										Node: query_parser.Node{Off: 47},
+									},
+									Node: query_parser.Node{Off: 47},
+								},
+								Node: query_parser.Node{Off: 37},
+							},
+							Node: query_parser.Node{Off: 37},
+						},
+						Node: query_parser.Node{Off: 27},
+					},
+					Node: query_parser.Node{Off: 21},
+				},
+				Node: query_parser.Node{Off: 0},
+			},
+			nil,
+		},
+		{
+			"delete from Customer where (A=123) or ((B=456) and (C=789))",
+			query_parser.DeleteStatement{
+				From: &query_parser.FromClause{
+					Table: query_parser.TableEntry{
+						Name: "Customer",
+						Node: query_parser.Node{Off: 12},
+					},
+					Node: query_parser.Node{Off: 7},
+				},
+				Where: &query_parser.WhereClause{
+					Expr: &query_parser.Expression{
+						Operand1: &query_parser.Operand{
+							Type: query_parser.TypExpr,
+							Expr: &query_parser.Expression{
+								Operand1: &query_parser.Operand{
+									Type: query_parser.TypField,
+									Column: &query_parser.Field{
+										Segments: []query_parser.Segment{
+											query_parser.Segment{
+												Value: "A",
+												Node:  query_parser.Node{Off: 28},
+											},
+										},
+										Node: query_parser.Node{Off: 28},
+									},
+									Node: query_parser.Node{Off: 28},
+								},
+								Operator: &query_parser.BinaryOperator{
+									Type: query_parser.Equal,
+									Node: query_parser.Node{Off: 29},
+								},
+								Operand2: &query_parser.Operand{
+									Type: query_parser.TypInt,
+									Int:  123,
+									Node: query_parser.Node{Off: 30},
+								},
+								Node: query_parser.Node{Off: 28},
+							},
+							Node: query_parser.Node{Off: 28},
+						},
+						Operator: &query_parser.BinaryOperator{
+							Type: query_parser.Or,
+							Node: query_parser.Node{Off: 35},
+						},
+						Operand2: &query_parser.Operand{
+							Type: query_parser.TypExpr,
+							Expr: &query_parser.Expression{
+								Operand1: &query_parser.Operand{
+									Type: query_parser.TypExpr,
+									Expr: &query_parser.Expression{
+										Operand1: &query_parser.Operand{
+											Type: query_parser.TypField,
+											Column: &query_parser.Field{
+												Segments: []query_parser.Segment{
+													query_parser.Segment{
+														Value: "B",
+														Node:  query_parser.Node{Off: 40},
+													},
+												},
+												Node: query_parser.Node{Off: 40},
+											},
+											Node: query_parser.Node{Off: 40},
+										},
+										Operator: &query_parser.BinaryOperator{
+											Type: query_parser.Equal,
+											Node: query_parser.Node{Off: 41},
+										},
+										Operand2: &query_parser.Operand{
+											Type: query_parser.TypInt,
+											Int:  456,
+											Node: query_parser.Node{Off: 42},
+										},
+										Node: query_parser.Node{Off: 40},
+									},
+									Node: query_parser.Node{Off: 40},
+								},
+								Operator: &query_parser.BinaryOperator{
+									Type: query_parser.And,
+									Node: query_parser.Node{Off: 47},
+								},
+								Operand2: &query_parser.Operand{
+									Type: query_parser.TypExpr,
+									Expr: &query_parser.Expression{
+										Operand1: &query_parser.Operand{
+											Type: query_parser.TypField,
+											Column: &query_parser.Field{
+												Segments: []query_parser.Segment{
+													query_parser.Segment{
+														Value: "C",
+														Node:  query_parser.Node{Off: 52},
+													},
+												},
+												Node: query_parser.Node{Off: 52},
+											},
+											Node: query_parser.Node{Off: 52},
+										},
+										Operator: &query_parser.BinaryOperator{
+											Type: query_parser.Equal,
+											Node: query_parser.Node{Off: 53},
+										},
+										Operand2: &query_parser.Operand{
+											Type: query_parser.TypInt,
+											Int:  789,
+											Node: query_parser.Node{Off: 54},
+										},
+										Node: query_parser.Node{Off: 52},
+									},
+									Node: query_parser.Node{Off: 52},
+								},
+								Node: query_parser.Node{Off: 40},
+							},
+							Node: query_parser.Node{Off: 40},
+						},
+						Node: query_parser.Node{Off: 28},
+					},
+					Node: query_parser.Node{Off: 21},
+				},
+				Node: query_parser.Node{Off: 0},
+			},
+			nil,
+		},
+		{
+			"delete from Customer where A<>123 or B not equal 456 and C not like \"abc%\"",
+			query_parser.DeleteStatement{
+				From: &query_parser.FromClause{
+					Table: query_parser.TableEntry{
+						Name: "Customer",
+						Node: query_parser.Node{Off: 12},
+					},
+					Node: query_parser.Node{Off: 7},
+				},
+				Where: &query_parser.WhereClause{
+					Expr: &query_parser.Expression{
+						Operand1: &query_parser.Operand{
+							Type: query_parser.TypExpr,
+							Expr: &query_parser.Expression{
+								Operand1: &query_parser.Operand{
+									Type: query_parser.TypExpr,
+									Expr: &query_parser.Expression{
+										Operand1: &query_parser.Operand{
+											Type: query_parser.TypField,
+											Column: &query_parser.Field{
+												Segments: []query_parser.Segment{
+													query_parser.Segment{
+														Value: "A",
+														Node:  query_parser.Node{Off: 27},
+													},
+												},
+												Node: query_parser.Node{Off: 27},
+											},
+											Node: query_parser.Node{Off: 27},
+										},
+										Operator: &query_parser.BinaryOperator{
+											Type: query_parser.NotEqual,
+											Node: query_parser.Node{Off: 28},
+										},
+										Operand2: &query_parser.Operand{
+											Type: query_parser.TypInt,
+											Int:  123,
+											Node: query_parser.Node{Off: 30},
+										},
+										Node: query_parser.Node{Off: 27},
+									},
+									Node: query_parser.Node{Off: 27},
+								},
+								Operator: &query_parser.BinaryOperator{
+									Type: query_parser.Or,
+									Node: query_parser.Node{Off: 34},
+								},
+								Operand2: &query_parser.Operand{
+									Type: query_parser.TypExpr,
+									Expr: &query_parser.Expression{
+										Operand1: &query_parser.Operand{
+											Type: query_parser.TypField,
+											Column: &query_parser.Field{
+												Segments: []query_parser.Segment{
+													query_parser.Segment{
+														Value: "B",
+														Node:  query_parser.Node{Off: 37},
+													},
+												},
+												Node: query_parser.Node{Off: 37},
+											},
+											Node: query_parser.Node{Off: 37},
+										},
+										Operator: &query_parser.BinaryOperator{
+											Type: query_parser.NotEqual,
+											Node: query_parser.Node{Off: 39},
+										},
+										Operand2: &query_parser.Operand{
+											Type: query_parser.TypInt,
+											Int:  456,
+											Node: query_parser.Node{Off: 49},
+										},
+										Node: query_parser.Node{Off: 37},
+									},
+									Node: query_parser.Node{Off: 37},
+								},
+								Node: query_parser.Node{Off: 27},
+							},
+							Node: query_parser.Node{Off: 27},
+						},
+						Operator: &query_parser.BinaryOperator{
+							Type: query_parser.And,
+							Node: query_parser.Node{Off: 53},
+						},
+						Operand2: &query_parser.Operand{
+							Type: query_parser.TypExpr,
+							Expr: &query_parser.Expression{
+								Operand1: &query_parser.Operand{
+									Type: query_parser.TypField,
+									Column: &query_parser.Field{
+										Segments: []query_parser.Segment{
+											query_parser.Segment{
+												Value: "C",
+												Node:  query_parser.Node{Off: 57},
+											},
+										},
+										Node: query_parser.Node{Off: 57},
+									},
+									Node: query_parser.Node{Off: 57},
+								},
+								Operator: &query_parser.BinaryOperator{
+									Type: query_parser.NotLike,
+									Node: query_parser.Node{Off: 59},
+								},
+								Operand2: &query_parser.Operand{
+									Type: query_parser.TypStr,
+									Str:  "abc%",
+									Node: query_parser.Node{Off: 68},
+								},
+								Node: query_parser.Node{Off: 57},
+							},
+							Node: query_parser.Node{Off: 57},
+						},
+						Node: query_parser.Node{Off: 27},
+					},
+					Node: query_parser.Node{Off: 21},
+				},
+				Node: query_parser.Node{Off: 0},
+			},
+			nil,
+		},
+		{
+			"delete from Customer where Now() < Time(\"2015/07/22\") and Foo(10,20.1,v.Bar) = true",
+			query_parser.DeleteStatement{
+				From: &query_parser.FromClause{
+					Table: query_parser.TableEntry{
+						Name: "Customer",
+						Node: query_parser.Node{Off: 12},
+					},
+					Node: query_parser.Node{Off: 7},
+				},
+				Where: &query_parser.WhereClause{
+					Expr: &query_parser.Expression{
+						Operand1: &query_parser.Operand{
+							Type: query_parser.TypExpr,
+							Expr: &query_parser.Expression{
+								Operand1: &query_parser.Operand{
+									Type: query_parser.TypFunction,
+									Function: &query_parser.Function{
+										Name: "Now",
+										Args: nil,
+										Node: query_parser.Node{Off: 27},
+									},
+									Node: query_parser.Node{Off: 27},
+								},
+								Operator: &query_parser.BinaryOperator{
+									Type: query_parser.LessThan,
+									Node: query_parser.Node{Off: 33},
+								},
+								Operand2: &query_parser.Operand{
+									Type: query_parser.TypFunction,
+									Function: &query_parser.Function{
+										Name: "Time",
+										Args: []*query_parser.Operand{
+											&query_parser.Operand{
+												Type: query_parser.TypStr,
+												Str:  "2015/07/22",
+												Node: query_parser.Node{Off: 40},
+											},
+										},
+										Node: query_parser.Node{Off: 35},
+									},
+									Node: query_parser.Node{Off: 35},
+								},
+								Node: query_parser.Node{Off: 27},
+							},
+							Node: query_parser.Node{Off: 27},
+						},
+						Node: query_parser.Node{Off: 27},
+						Operator: &query_parser.BinaryOperator{
+							Type: query_parser.And,
+							Node: query_parser.Node{Off: 54},
+						},
+						Operand2: &query_parser.Operand{
+							Type: query_parser.TypExpr,
+							Expr: &query_parser.Expression{
+								Operand1: &query_parser.Operand{
+									Type: query_parser.TypFunction,
+									Function: &query_parser.Function{
+										Name: "Foo",
+										Args: []*query_parser.Operand{
+											&query_parser.Operand{
+												Type: query_parser.TypInt,
+												Int:  10,
+												Node: query_parser.Node{Off: 62},
+											},
+											&query_parser.Operand{
+												Type:  query_parser.TypFloat,
+												Float: 20.1,
+												Node:  query_parser.Node{Off: 65},
+											},
+											&query_parser.Operand{
+												Type: query_parser.TypField,
+												Column: &query_parser.Field{
+													Segments: []query_parser.Segment{
+														query_parser.Segment{
+															Value: "v",
+															Node:  query_parser.Node{Off: 70},
+														},
+														query_parser.Segment{
+															Value: "Bar",
+															Node:  query_parser.Node{Off: 72},
+														},
+													},
+													Node: query_parser.Node{Off: 70},
+												},
+												Node: query_parser.Node{Off: 70},
+											},
+										},
+										Node: query_parser.Node{Off: 58},
+									},
+									Node: query_parser.Node{Off: 58},
+								},
+								Operator: &query_parser.BinaryOperator{
+									Type: query_parser.Equal,
+									Node: query_parser.Node{Off: 77},
+								},
+								Operand2: &query_parser.Operand{
+									Type: query_parser.TypBool,
+									Bool: true,
+									Node: query_parser.Node{Off: 79},
+								},
+								Node: query_parser.Node{Off: 58},
+							},
+							Node: query_parser.Node{Off: 58},
+						},
+					},
+					Node: query_parser.Node{Off: 21},
+				},
+				Node: query_parser.Node{Off: 0},
+			},
+			nil,
+		},
+		{
+			"delete from Customer where v.Foo[v.Bar] = \"abc\"",
+			query_parser.DeleteStatement{
+				From: &query_parser.FromClause{
+					Table: query_parser.TableEntry{
+						Name: "Customer",
+						Node: query_parser.Node{Off: 12},
+					},
+					Node: query_parser.Node{Off: 7},
+				},
+				Where: &query_parser.WhereClause{
+					Expr: &query_parser.Expression{
+						Operand1: &query_parser.Operand{
+							Type: query_parser.TypField,
+							Column: &query_parser.Field{
+								Segments: []query_parser.Segment{
+									query_parser.Segment{
+										Value: "v",
+										Node:  query_parser.Node{Off: 27},
+									},
+									query_parser.Segment{
+										Value: "Foo",
+										Keys: []*query_parser.Operand{
+											&query_parser.Operand{
+												Type: query_parser.TypField,
+												Column: &query_parser.Field{
+													Segments: []query_parser.Segment{
+														query_parser.Segment{
+															Value: "v",
+															Node:  query_parser.Node{Off: 33},
+														},
+														query_parser.Segment{
+															Value: "Bar",
+															Node:  query_parser.Node{Off: 35},
+														},
+													},
+													Node: query_parser.Node{Off: 33},
+												},
+												Node: query_parser.Node{Off: 33},
+											},
+										},
+										Node: query_parser.Node{Off: 29},
+									},
+								},
+								Node: query_parser.Node{Off: 27},
+							},
+							Node: query_parser.Node{Off: 27},
+						},
+						Operator: &query_parser.BinaryOperator{
+							Type: query_parser.Equal,
+							Node: query_parser.Node{Off: 40},
+						},
+						Operand2: &query_parser.Operand{
+							Type: query_parser.TypStr,
+							Str:  "abc",
+							Node: query_parser.Node{Off: 42},
+						},
+						Node: query_parser.Node{Off: 27},
+					},
+					Node: query_parser.Node{Off: 21},
+				},
+				Node: query_parser.Node{Off: 0},
+			},
+			nil,
+		},
+	}
+
+	for _, test := range basic {
+		st, err := query_parser.Parse(&db, test.query)
+		if err != nil {
+			t.Errorf("query: %s; unexpected error: got %v, want nil", test.query, err)
+		}
+		switch (*st).(type) {
+		case query_parser.DeleteStatement:
+			if !reflect.DeepEqual(test.statement, *st) {
+				t.Errorf("query: %s;\nGOT  %s\nWANT %s", test.query, *st, test.statement)
+			}
+		}
+	}
+}
+
 func TestQueryParserErrors(t *testing.T) {
-	basic := []parseSelectErrorTest{
+	basic := []parseErrorTest{
 		{"", syncql.NewErrNoStatementFound(db.GetContext(), 0)},
 		{";", syncql.NewErrExpectedIdentifier(db.GetContext(), 0, ";")},
 		{"foo", syncql.NewErrUnknownIdentifier(db.GetContext(), 0, "foo")},
 		{"(foo)", syncql.NewErrExpectedIdentifier(db.GetContext(), 0, "(")},
+		{"create table Customer (CustRecord cust_pkg.Cust, primary key(CustRecord.CustID))", syncql.NewErrUnknownIdentifier(db.GetContext(), 0, "create")},
+
+		// Select
 		{"select foo.", syncql.NewErrExpectedIdentifier(db.GetContext(), 11, "")},
 		{"select foo. from a", syncql.NewErrExpectedFrom(db.GetContext(), 17, "a")},
 		{"select (foo)", syncql.NewErrExpectedIdentifier(db.GetContext(), 7, "(")},
 		{"select from where", syncql.NewErrExpectedFrom(db.GetContext(), 12, "where")},
-		{"create table Customer (CustRecord cust_pkg.Cust, primary key(CustRecord.CustID))", syncql.NewErrUnknownIdentifier(db.GetContext(), 0, "create")},
 		{"select foo from Customer where (A=123 or B=456) and C=789)", syncql.NewErrUnexpected(db.GetContext(), 57, ")")},
 		{"select foo from Customer where ((A=123 or B=456) and C=789", syncql.NewErrUnexpectedEndOfStatement(db.GetContext(), 58)},
 		{"select foo from Customer where (((((A=123 or B=456 and C=789))))", syncql.NewErrUnexpectedEndOfStatement(db.GetContext(), 64)},
@@ -2907,6 +4717,69 @@ func TestQueryParserErrors(t *testing.T) {
 		{"select v[* from Customers", syncql.NewErrExpectedOperand(db.GetContext(), 9, "*")},
 		{"select v from 123", syncql.NewErrExpectedIdentifier(db.GetContext(), 14, "123")},
 		{"select v from Customers where (a = b *", syncql.NewErrExpected(db.GetContext(), 37, ")")},
+		// Delete
+		{"delete.", syncql.NewErrExpectedFrom(db.GetContext(), 6, ".")},
+		{"delete. from a", syncql.NewErrExpectedFrom(db.GetContext(), 6, ".")},
+		{"delete ", syncql.NewErrUnexpectedEndOfStatement(db.GetContext(), 7)},
+		{"delete from Customer where (A=123 or B=456) and C=789)", syncql.NewErrUnexpected(db.GetContext(), 53, ")")},
+		{"delete from Customer where ((A=123 or B=456) and C=789", syncql.NewErrUnexpectedEndOfStatement(db.GetContext(), 54)},
+		{"delete from Customer where (((((A=123 or B=456 and C=789))))", syncql.NewErrUnexpectedEndOfStatement(db.GetContext(), 60)},
+		{"delete from Customer where (A=123 or B=456) and C=789)))))", syncql.NewErrUnexpected(db.GetContext(), 53, ")")},
+		{"delete from Customer where", syncql.NewErrUnexpectedEndOfStatement(db.GetContext(), 26)},
+		{"delete from Customer where ", syncql.NewErrUnexpectedEndOfStatement(db.GetContext(), 27)},
+		{"delete from Customer where )", syncql.NewErrExpectedOperand(db.GetContext(), 27, ")")},
+		{"delete from Customer where )A=123 or B=456) and C=789", syncql.NewErrExpectedOperand(db.GetContext(), 27, ")")},
+		{"delete from Customer where ()A=123 or B=456) and C=789", syncql.NewErrExpectedOperand(db.GetContext(), 28, ")")},
+		{"delete from Customer where (A=123 or B=456) and C=789)", syncql.NewErrUnexpected(db.GetContext(), 53, ")")},
+		{"delete bar from Customer", syncql.NewErrExpectedFrom(db.GetContext(), 7, "bar")},
+		{"delete from Customer Invoice", syncql.NewErrUnexpected(db.GetContext(), 21, "Invoice")},
+		{"delete from (Customer)", syncql.NewErrExpectedIdentifier(db.GetContext(), 12, "(")},
+		{"delete from Customer where a = (b)", syncql.NewErrExpectedOperand(db.GetContext(), 31, "(")},
+		{"delete from Customer where a = b and (c) = d", syncql.NewErrExpectedOperator(db.GetContext(), 39, ")")},
+		{"delete from Customer where a = b and c =", syncql.NewErrUnexpectedEndOfStatement(db.GetContext(), 40)},
+		{"delete from Customer where a = ", syncql.NewErrUnexpectedEndOfStatement(db.GetContext(), 31)},
+		{"delete from Customer where a", syncql.NewErrUnexpectedEndOfStatement(db.GetContext(), 28)},
+		{"delete", syncql.NewErrUnexpectedEndOfStatement(db.GetContext(), 6)},
+		{"delete from", syncql.NewErrUnexpectedEndOfStatement(db.GetContext(), 11)},
+		{"delete from b where c = d and e =", syncql.NewErrUnexpectedEndOfStatement(db.GetContext(), 33)},
+		{"delete from b where c = d and f", syncql.NewErrUnexpectedEndOfStatement(db.GetContext(), 31)},
+		{"delete from b where c = d and f *", syncql.NewErrExpectedOperator(db.GetContext(), 32, "*")},
+		{"delete from b where c <", syncql.NewErrUnexpectedEndOfStatement(db.GetContext(), 23)},
+		{"delete from b where c not", syncql.NewErrExpected(db.GetContext(), 25, "'equal' or 'like'")},
+		{"delete from b where c not 8", syncql.NewErrExpected(db.GetContext(), 26, "'equal' or 'like'")},
+		{"delete from y where a and b = c", syncql.NewErrExpectedOperator(db.GetContext(), 22, "and")},
+		{"delete from Customer limit a", syncql.NewErrExpected(db.GetContext(), 27, "positive integer literal")},
+		{"delete from Customer limit -100", syncql.NewErrExpected(db.GetContext(), 27, "positive integer literal")},
+		{"delete from Customer limit", syncql.NewErrUnexpectedEndOfStatement(db.GetContext(), 26)},
+		{"delete from Customer, Invoice", syncql.NewErrUnexpected(db.GetContext(), 20, ",")},
+		{"delete from Customer As Cust where foo = bar", syncql.NewErrUnexpected(db.GetContext(), 21, "As")},
+		{"delete from Customer where Foo(1,) = true", syncql.NewErrExpectedOperand(db.GetContext(), 33, ")")},
+		{"delete from Customer where Foo(,1) = true", syncql.NewErrExpectedOperand(db.GetContext(), 31, ",")},
+		{"delete from Customer where Foo(1, 2.0 = true", syncql.NewErrUnexpected(db.GetContext(), 38, "=")},
+		{"delete from Customer where Foo(1, 2.0 limit 100", syncql.NewErrUnexpected(db.GetContext(), 38, "limit")},
+		{"delete from Customer where v is", syncql.NewErrUnexpectedEndOfStatement(db.GetContext(), 31)},
+		{"delete from Customer where v = 1.0 is k = \"abc\"", syncql.NewErrUnexpected(db.GetContext(), 35, "is")},
+		{"delete as from Customer", syncql.NewErrExpectedFrom(db.GetContext(), 7, "as")},
+		{"delete from Customer where v.Foo = \"", syncql.NewErrExpectedOperand(db.GetContext(), 35, "\"")},
+		{"delete from Customer where v.Foo = \"Bar", syncql.NewErrExpectedOperand(db.GetContext(), 35, "\"Bar")},
+		{"delete from Customer where v.Foo = '", syncql.NewErrExpectedOperand(db.GetContext(), 35, "'")},
+		{"delete from Customer where v.Foo = 'a", syncql.NewErrExpectedOperand(db.GetContext(), 35, "'a")},
+		{"delete from Customer where v.Foo = 'abc", syncql.NewErrExpectedOperand(db.GetContext(), 35, "'abc")},
+		{"delete from Customer where v.Foo = 'abc'", syncql.NewErrExpectedOperand(db.GetContext(), 35, "'abc'")},
+		{"delete from Customer where v.Foo = 10.10.10", syncql.NewErrUnexpected(db.GetContext(), 40, ".10")},
+		// Parameters can only appear as operands in the where clause
+		{"delete ? from Customer", syncql.NewErrExpectedFrom(db.GetContext(), 7, "?")},
+		// Parameters can only appear as operands in the where clause
+		{"delete from Customer where k ? v", syncql.NewErrExpectedOperator(db.GetContext(), 29, "?")},
+		{"delete from b escape", syncql.NewErrUnexpectedEndOfStatement(db.GetContext(), 20)},
+		{"delete from b escape 123", syncql.NewErrExpected(db.GetContext(), 21, "char literal")},
+		{"delete from b where v[1](foo) = 1", syncql.NewErrUnexpected(db.GetContext(), 24, "(")},
+		{"delete from Customers where Foo(abc def) = 1", syncql.NewErrUnexpected(db.GetContext(), 36, "def")},
+		{"delete from Customers where v.abc.\"8\" = 1", syncql.NewErrExpectedIdentifier(db.GetContext(), 34, "8")},
+		{"delete from Customers where v[abc = 1", syncql.NewErrExpected(db.GetContext(), 34, "]")},
+		{"delete from Customers where v[*", syncql.NewErrExpectedOperand(db.GetContext(), 30, "*")},
+		{"delete from 123", syncql.NewErrExpectedIdentifier(db.GetContext(), 12, "123")},
+		{"delete from Customers where (a = b *", syncql.NewErrExpected(db.GetContext(), 35, ")")},
 	}
 
 	for _, test := range basic {
@@ -2973,8 +4846,8 @@ func TestToString(t *testing.T) {
 	}
 }
 
-func TestCopyAndSubstitute(t *testing.T) {
-	basic := []copyAndSubstituteTest{
+func TestCopyAndSubstituteSelect(t *testing.T) {
+	basic := []copyAndSubstituteSelectTest{
 		{
 			"select v from Customer where v.Value = ?",
 			[]*vdl.Value{vdl.ValueOf(10)},
@@ -3333,6 +5206,287 @@ func TestCopyAndSubstitute(t *testing.T) {
 	}
 }
 
+func TestCopyAndSubstituteDelete(t *testing.T) {
+	basic := []copyAndSubstituteDeleteTest{
+		{
+			"delete from Customer where v.Value = ?",
+			[]*vdl.Value{vdl.ValueOf(10)},
+			query_parser.DeleteStatement{
+				From: &query_parser.FromClause{
+					Table: query_parser.TableEntry{
+						Name: "Customer",
+						Node: query_parser.Node{Off: 12},
+					},
+					Node: query_parser.Node{Off: 7},
+				},
+				Where: &query_parser.WhereClause{
+					Expr: &query_parser.Expression{
+						Operand1: &query_parser.Operand{
+							Type: query_parser.TypField,
+							Column: &query_parser.Field{
+								Segments: []query_parser.Segment{
+									query_parser.Segment{
+										Value: "v",
+										Node:  query_parser.Node{Off: 27},
+									},
+									query_parser.Segment{
+										Value: "Value",
+										Node:  query_parser.Node{Off: 29},
+									},
+								},
+								Node: query_parser.Node{Off: 27},
+							},
+							Node: query_parser.Node{Off: 27},
+						},
+						Operator: &query_parser.BinaryOperator{
+							Type: query_parser.Equal,
+							Node: query_parser.Node{Off: 35},
+						},
+						Operand2: &query_parser.Operand{
+							Type: query_parser.TypInt,
+							Int:  10,
+							Node: query_parser.Node{Off: 37},
+						},
+						Node: query_parser.Node{Off: 27},
+					},
+					Node: query_parser.Node{Off: 21},
+				},
+				Node: query_parser.Node{Off: 0},
+			},
+		},
+		{
+			"delete from Customer where v.Value = ?",
+			[]*vdl.Value{vdl.ValueOf(true)},
+			query_parser.DeleteStatement{
+				From: &query_parser.FromClause{
+					Table: query_parser.TableEntry{
+						Name: "Customer",
+						Node: query_parser.Node{Off: 12},
+					},
+					Node: query_parser.Node{Off: 7},
+				},
+				Where: &query_parser.WhereClause{
+					Expr: &query_parser.Expression{
+						Operand1: &query_parser.Operand{
+							Type: query_parser.TypField,
+							Column: &query_parser.Field{
+								Segments: []query_parser.Segment{
+									query_parser.Segment{
+										Value: "v",
+										Node:  query_parser.Node{Off: 27},
+									},
+									query_parser.Segment{
+										Value: "Value",
+										Node:  query_parser.Node{Off: 29},
+									},
+								},
+								Node: query_parser.Node{Off: 27},
+							},
+							Node: query_parser.Node{Off: 27},
+						},
+						Operator: &query_parser.BinaryOperator{
+							Type: query_parser.Equal,
+							Node: query_parser.Node{Off: 35},
+						},
+						Operand2: &query_parser.Operand{
+							Type: query_parser.TypBool,
+							Bool: true,
+							Node: query_parser.Node{Off: 37},
+						},
+						Node: query_parser.Node{Off: 27},
+					},
+					Node: query_parser.Node{Off: 21},
+				},
+				Node: query_parser.Node{Off: 0},
+			},
+		},
+		{
+			"delete from Customer where Now() < Time(?) and Foo(10,?,v.Bar) = true",
+			[]*vdl.Value{vdl.ValueOf("abc"), vdl.ValueOf(42.0)},
+			query_parser.DeleteStatement{
+				From: &query_parser.FromClause{
+					Table: query_parser.TableEntry{
+						Name: "Customer",
+						Node: query_parser.Node{Off: 12},
+					},
+					Node: query_parser.Node{Off: 7},
+				},
+				Where: &query_parser.WhereClause{
+					Expr: &query_parser.Expression{
+						Operand1: &query_parser.Operand{
+							Type: query_parser.TypExpr,
+							Expr: &query_parser.Expression{
+								Operand1: &query_parser.Operand{
+									Type: query_parser.TypFunction,
+									Function: &query_parser.Function{
+										Name: "Now",
+										Args: nil,
+										Node: query_parser.Node{Off: 27},
+									},
+									Node: query_parser.Node{Off: 27},
+								},
+								Operator: &query_parser.BinaryOperator{
+									Type: query_parser.LessThan,
+									Node: query_parser.Node{Off: 33},
+								},
+								Operand2: &query_parser.Operand{
+									Type: query_parser.TypFunction,
+									Function: &query_parser.Function{
+										Name: "Time",
+										Args: []*query_parser.Operand{
+											&query_parser.Operand{
+												Type: query_parser.TypStr,
+												Str:  "abc",
+												Node: query_parser.Node{Off: 40},
+											},
+										},
+										Node: query_parser.Node{Off: 35},
+									},
+									Node: query_parser.Node{Off: 35},
+								},
+								Node: query_parser.Node{Off: 27},
+							},
+							Node: query_parser.Node{Off: 27},
+						},
+						Node: query_parser.Node{Off: 27},
+						Operator: &query_parser.BinaryOperator{
+							Type: query_parser.And,
+							Node: query_parser.Node{Off: 43},
+						},
+						Operand2: &query_parser.Operand{
+							Type: query_parser.TypExpr,
+							Expr: &query_parser.Expression{
+								Operand1: &query_parser.Operand{
+									Type: query_parser.TypFunction,
+									Function: &query_parser.Function{
+										Name: "Foo",
+										Args: []*query_parser.Operand{
+											&query_parser.Operand{
+												Type: query_parser.TypInt,
+												Int:  10,
+												Node: query_parser.Node{Off: 51},
+											},
+											&query_parser.Operand{
+												Type:  query_parser.TypFloat,
+												Float: 42.0,
+												Node:  query_parser.Node{Off: 54},
+											},
+											&query_parser.Operand{
+												Type: query_parser.TypField,
+												Column: &query_parser.Field{
+													Segments: []query_parser.Segment{
+														query_parser.Segment{
+															Value: "v",
+															Node:  query_parser.Node{Off: 56},
+														},
+														query_parser.Segment{
+															Value: "Bar",
+															Node:  query_parser.Node{Off: 58},
+														},
+													},
+													Node: query_parser.Node{Off: 56},
+												},
+												Node: query_parser.Node{Off: 56},
+											},
+										},
+										Node: query_parser.Node{Off: 47},
+									},
+									Node: query_parser.Node{Off: 47},
+								},
+								Operator: &query_parser.BinaryOperator{
+									Type: query_parser.Equal,
+									Node: query_parser.Node{Off: 63},
+								},
+								Operand2: &query_parser.Operand{
+									Type: query_parser.TypBool,
+									Bool: true,
+									Node: query_parser.Node{Off: 65},
+								},
+								Node: query_parser.Node{Off: 47},
+							},
+							Node: query_parser.Node{Off: 47},
+						},
+					},
+					Node: query_parser.Node{Off: 21},
+				},
+				Node: query_parser.Node{Off: 0},
+			},
+		},
+		{
+			"delete from Customer where k like ? limit 10 escape '^'",
+			[]*vdl.Value{vdl.ValueOf("abc^%%")},
+			query_parser.DeleteStatement{
+				From: &query_parser.FromClause{
+					Table: query_parser.TableEntry{
+						Name: "Customer",
+						Node: query_parser.Node{Off: 12},
+					},
+					Node: query_parser.Node{Off: 7},
+				},
+				Where: &query_parser.WhereClause{
+					Expr: &query_parser.Expression{
+						Operand1: &query_parser.Operand{
+							Type: query_parser.TypField,
+							Column: &query_parser.Field{
+								Segments: []query_parser.Segment{
+									query_parser.Segment{
+										Value: "k",
+										Node:  query_parser.Node{Off: 29},
+									},
+								},
+								Node: query_parser.Node{Off: 29},
+							},
+							Node: query_parser.Node{Off: 29},
+						},
+						Operator: &query_parser.BinaryOperator{
+							Type: query_parser.Like,
+							Node: query_parser.Node{Off: 31},
+						},
+						Operand2: &query_parser.Operand{
+							Type: query_parser.TypStr,
+							Str:  "abc^%%",
+							Node: query_parser.Node{Off: 36},
+						},
+						Node: query_parser.Node{Off: 29},
+					},
+					Node: query_parser.Node{Off: 23},
+				},
+				Limit: &query_parser.LimitClause{
+					Limit: &query_parser.Int64Value{
+						Value: 10,
+						Node:  query_parser.Node{Off: 44},
+					},
+					Node: query_parser.Node{Off: 38},
+				},
+				Escape: &query_parser.EscapeClause{
+					EscapeChar: &query_parser.CharValue{
+						Value: '^',
+						Node:  query_parser.Node{Off: 54},
+					},
+					Node: query_parser.Node{Off: 47},
+				},
+				Node: query_parser.Node{Off: 0},
+			},
+		},
+	}
+	for _, test := range basic {
+		st, err := query_parser.Parse(&db, test.query)
+		if err != nil {
+			t.Errorf("query: %s; unexpected parse error: got %v, want nil", test.query, err)
+		}
+		st2, err := (*st).CopyAndSubstitute(&db, test.subValues)
+		if err != nil {
+			t.Errorf("query: %s; unexpected error on st.CopyAndSubstitute: got %v, want nil", test.query, err)
+		}
+		switch (st2).(type) {
+		case query_parser.SelectStatement:
+			if !reflect.DeepEqual(test.statement, st2) {
+				t.Errorf("query: %s;\nGOT  %s\nWANT %s", test.query, st2, test.statement)
+			}
+		}
+	}
+}
+
 func TestCopyAndSubstituteError(t *testing.T) {
 	basic := []copyAndSubstituteErrorTest{
 		{
@@ -3349,6 +5503,21 @@ func TestCopyAndSubstituteError(t *testing.T) {
 			"select v from Customers where v.A = ? and v.B = ?",
 			[]*vdl.Value{vdl.ValueOf(10)},
 			syncql.NewErrNotEnoughParamValuesSpecified(db.GetContext(), 48),
+		},
+		{
+			"delete from Customers",
+			[]*vdl.Value{vdl.ValueOf(10)},
+			syncql.NewErrTooManyParamValuesSpecified(db.GetContext(), 0),
+		},
+		{
+			"delete from Customers where v.A = 10",
+			[]*vdl.Value{vdl.ValueOf(10)},
+			syncql.NewErrTooManyParamValuesSpecified(db.GetContext(), 22),
+		},
+		{
+			"delete from Customers where v.A = ? and v.B = ?",
+			[]*vdl.Value{vdl.ValueOf(10)},
+			syncql.NewErrNotEnoughParamValuesSpecified(db.GetContext(), 46),
 		},
 	}
 

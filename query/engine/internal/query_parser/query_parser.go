@@ -238,6 +238,14 @@ type SelectStatement struct {
 	Node
 }
 
+type DeleteStatement struct {
+	From   *FromClause
+	Where  *WhereClause
+	Escape *EscapeClause
+	Limit  *LimitClause
+	Node
+}
+
 func scanToken(s *scanner.Scanner) *Token {
 	// TODO(jkline): Replace golang text/scanner.
 	var token Token
@@ -326,12 +334,17 @@ func Parse(db ds.Database, src string) (*Statement, error) {
 		var err error
 		st, token, err = selectStatement(db, &s, token)
 		return &st, err
+	case "delete":
+		var st Statement
+		var err error
+		st, token, err = deleteStatement(db, &s, token)
+		return &st, err
 	default:
 		return nil, syncql.NewErrUnknownIdentifier(db.GetContext(), token.Off, token.Value)
 	}
 }
 
-// Parse the [currently] one and only supported statement: select.
+// Parse select.
 func selectStatement(db ds.Database, s *scanner.Scanner, token *Token) (Statement, *Token, error) {
 	var st SelectStatement
 	st.Off = token.Off
@@ -354,6 +367,42 @@ func selectStatement(db ds.Database, s *scanner.Scanner, token *Token) (Statemen
 	}
 
 	st.Escape, st.Limit, st.ResultsOffset, token, err = parseEscapeLimitResultsOffsetClauses(db, s, token)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	// There can be nothing remaining for the current statement
+	if token.Tok != TokEOF {
+		return nil, nil, syncql.NewErrUnexpected(db.GetContext(), token.Off, token.Value)
+	}
+
+	return st, token, nil
+}
+
+// Parse delete.
+func deleteStatement(db ds.Database, s *scanner.Scanner, token *Token) (Statement, *Token, error) {
+	var st DeleteStatement
+	st.Off = token.Off
+
+	token = scanToken(s) // eat the delete
+	if token.Tok == TokEOF {
+		return nil, nil, syncql.NewErrUnexpectedEndOfStatement(db.GetContext(), token.Off)
+	}
+
+	// parse FromClause
+	var err error
+	st.From, token, err = parseFromClause(db, s, token)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	// parse WhereClause
+	st.Where, token, err = parseWhereClause(db, s, token)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	st.Escape, st.Limit, token, err = parseEscapeLimitClauses(db, s, token)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -884,7 +933,7 @@ func parseEscapeLimitResultsOffsetClauses(db ds.Database, s *scanner.Scanner, to
 	var lc *LimitClause
 	var oc *ResultsOffsetClause
 	for token.Tok != TokEOF {
-		// Note: Can be in any order.  If more than one limit or offset clause, the last one wins
+		// Note: Can be in any order.  If more than one, the last one wins
 		if token.Tok == TokIDENT && strings.ToLower(token.Value) == "escape" {
 			ec, token, err = parseEscapeClause(db, s, token)
 		} else if token.Tok == TokIDENT && strings.ToLower(token.Value) == "limit" {
@@ -899,6 +948,27 @@ func parseEscapeLimitResultsOffsetClauses(db ds.Database, s *scanner.Scanner, to
 		}
 	}
 	return ec, lc, oc, token, nil
+}
+
+// Parse and return the EscapeClause and LimitClause (any or all can be nil) and next token (or error)
+func parseEscapeLimitClauses(db ds.Database, s *scanner.Scanner, token *Token) (*EscapeClause, *LimitClause, *Token, error) {
+	var err error
+	var ec *EscapeClause
+	var lc *LimitClause
+	for token.Tok != TokEOF {
+		// Note: Can be in any order.  If more than one, the last one wins
+		if token.Tok == TokIDENT && strings.ToLower(token.Value) == "escape" {
+			ec, token, err = parseEscapeClause(db, s, token)
+		} else if token.Tok == TokIDENT && strings.ToLower(token.Value) == "limit" {
+			lc, token, err = parseLimitClause(db, s, token)
+		} else {
+			return ec, lc, token, nil
+		}
+		if err != nil {
+			return nil, nil, nil, err
+		}
+	}
+	return ec, lc, token, nil
 }
 
 // Parse the escape clause.  Return the EscapeClause and the next Token (or error).
@@ -974,6 +1044,10 @@ func (st SelectStatement) Offset() int64 {
 	return st.Off
 }
 
+func (st DeleteStatement) Offset() int64 {
+	return st.Off
+}
+
 // Pretty string of select statement.
 func (st SelectStatement) String() string {
 	val := fmt.Sprintf("Off(%d):", st.Off)
@@ -998,15 +1072,30 @@ func (st SelectStatement) String() string {
 	return val
 }
 
+// Pretty string of delete statement.
+func (st DeleteStatement) String() string {
+	val := fmt.Sprintf("Off(%d):", st.Off)
+	val += "DELETE"
+	if st.From != nil {
+		val += " " + st.From.String()
+	}
+	if st.Where != nil {
+		val += " " + st.Where.String()
+	}
+	if st.Escape != nil {
+		val += " " + st.Escape.String()
+	}
+	if st.Limit != nil {
+		val += " " + st.Limit.String()
+	}
+	return val
+}
+
 func (st SelectStatement) CopyAndSubstitute(db ds.Database, paramValues []*vdl.Value) (Statement, error) {
 	var copy SelectStatement
 	copy.Off = st.Off
-	if st.Select != nil {
-		copy.Select = st.Select
-	}
-	if st.From != nil {
-		copy.From = st.From
-	}
+	copy.Select = st.Select
+	copy.From = st.From
 	if st.Where != nil {
 		var err error
 		if copy.Where, err = st.Where.CopyAndSubstitute(db, paramValues); err != nil {
@@ -1018,15 +1107,29 @@ func (st SelectStatement) CopyAndSubstitute(db ds.Database, paramValues []*vdl.V
 			return nil, syncql.NewErrTooManyParamValuesSpecified(db.GetContext(), copy.Off)
 		}
 	}
-	if st.Escape != nil {
-		copy.Escape = st.Escape
+	copy.Escape = st.Escape
+	copy.Limit = st.Limit
+	copy.ResultsOffset = st.ResultsOffset
+	return copy, nil
+}
+
+func (st DeleteStatement) CopyAndSubstitute(db ds.Database, paramValues []*vdl.Value) (Statement, error) {
+	var copy DeleteStatement
+	copy.Off = st.Off
+	copy.From = st.From
+	if st.Where != nil {
+		var err error
+		if copy.Where, err = st.Where.CopyAndSubstitute(db, paramValues); err != nil {
+			return nil, err
+		}
+	} else {
+		// There is no where clause.  If any paramValues suppied, we have too many.
+		if len(paramValues) > 0 {
+			return nil, syncql.NewErrTooManyParamValuesSpecified(db.GetContext(), copy.Off)
+		}
 	}
-	if st.Limit != nil {
-		copy.Limit = st.Limit
-	}
-	if st.ResultsOffset != nil {
-		copy.ResultsOffset = st.ResultsOffset
-	}
+	copy.Escape = st.Escape
+	copy.Limit = st.Limit
 	return copy, nil
 }
 

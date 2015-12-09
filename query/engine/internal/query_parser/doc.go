@@ -8,7 +8,14 @@
 // The select is of the form:
 //
 // <query_specification> ::=
+//   <select_statement>
+//   | <delete_statement>
+//
+// <select_statement> ::=
 //   <select_clause> <from_clause> [<where_clause>] [<escape_limit_offset_clause>...]
+//
+// <delete_statement> ::=
+//   delete <from_clause> [<where_clause>] [<escape_limit_clause>...]
 //
 // <select_clause> ::= SELECT <selector> [{<comma><selector>}...]
 //
@@ -20,6 +27,10 @@
 //   ESCAPE <char_literal>
 //   | LIMIT <int_literal>
 //   | OFFSET <int_literal>
+//
+// <escape_limit_clause> ::=
+//   ESCAPE <char_literal>
+//   | LIMIT <int_literal>
 //
 // <selector> ::= <column> [AS <string_literal>]
 //
