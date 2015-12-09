@@ -76,11 +76,11 @@ func TestFormat(t *testing.T) {
 	var buf bytes.Buffer
 	vtrace.FormatTrace(&buf, &tr, time.UTC)
 	want := `Trace - 0x00000000000000000000000000000001 (2014-11-06 13:01:22.400000 UTC, ??)
-    Span - Child1 [id: 00000003 parent 00000002] (1s, 10s)
-        Span - GrandChild1 [id: 00000005 parent 00000003] (3s, 8s)
+    Span - Child1 [id: 00000003 parent 00000002] (1s, 10s: 9s)
+        Span - GrandChild1 [id: 00000005 parent 00000003] (3s, 8s: 5s)
             @4s First Annotation
             @6s Second Annotation
-    Span - Child2 [id: 00000004 parent 00000002] (20s, 30s)
+    Span - Child2 [id: 00000004 parent 00000002] (20s, 30s: 10s)
 `
 	if got := buf.String(); got != want {
 		t.Errorf("Incorrect output, want\n%sgot\n%s", want, got)
@@ -147,13 +147,13 @@ func TestFormatWithMissingSpans(t *testing.T) {
 	var buf bytes.Buffer
 	vtrace.FormatTrace(&buf, &tr, time.UTC)
 	want := `Trace - 0x00000000000000000000000000000006 (2014-11-06 13:01:22.400000 UTC, ??)
-    Span - Child1 [id: 00000008 parent 00000007] (1s, 10s)
-        Span - GrandChild1 [id: 0000000c parent 00000008] (3s, 8s)
+    Span - Child1 [id: 00000008 parent 00000007] (1s, 10s: 9s)
+        Span - GrandChild1 [id: 0000000c parent 00000008] (3s, 8s: 5s)
             @4s First Annotation
             @6s Second Annotation
-    Span - Missing Data [id: 00000000 parent 00000000] (??, ??)
-        Span - Decendant1 [id: 0000000b parent 00000009] (12s, 18s)
-        Span - Decendant2 [id: 0000000a parent 00000009] (15s, 24s)
+    Span - Missing Data [id: 00000000 parent 00000000] (??, ??: ??)
+        Span - Decendant1 [id: 0000000b parent 00000009] (12s, 18s: 6s)
+        Span - Decendant2 [id: 0000000a parent 00000009] (15s, 24s: 9s)
 `
 
 	if got := buf.String(); got != want {

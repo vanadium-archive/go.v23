@@ -110,20 +110,21 @@ func buildTree(trace *TraceRecord) *node {
 }
 
 func formatDelta(when, start time.Time) string {
-	if when.IsZero() {
+	if start.IsZero() || when.IsZero() {
 		return "??"
 	}
 	return when.Sub(start).String()
 }
 
 func formatNode(w io.Writer, n *node, traceStart time.Time, indent string) {
-	fmt.Fprintf(w, "%sSpan - %s [id: %x parent %x] (%s, %s)\n",
+	fmt.Fprintf(w, "%sSpan - %s [id: %x parent %x] (%s, %s: %s)\n",
 		indent,
 		n.span.Name,
 		n.span.Id[12:],
 		n.span.Parent[12:],
 		formatDelta(n.span.Start, traceStart),
-		formatDelta(n.span.End, traceStart))
+		formatDelta(n.span.End, traceStart),
+		formatDelta(n.span.End, n.span.Start))
 	indent += indentStep
 	for _, a := range n.span.Annotations {
 		fmt.Fprintf(w, "%s@%s %s\n", indent, formatDelta(a.When, traceStart), a.Message)
