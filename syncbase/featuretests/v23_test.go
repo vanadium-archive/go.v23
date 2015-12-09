@@ -103,16 +103,16 @@ func TestV23VClockMovesForward(t *testing.T) {
 	v23tests.RunTest(t, V23TestVClockMovesForward)
 }
 
-func TestV23VClockSystemClock(t *testing.T) {
-	v23tests.RunTest(t, V23TestVClockSystemClock)
+func TestV23VClockSystemClockUpdate(t *testing.T) {
+	v23tests.RunTest(t, V23TestVClockSystemClockUpdate)
 }
 
 func TestV23VClockSystemClockFrequency(t *testing.T) {
 	v23tests.RunTest(t, V23TestVClockSystemClockFrequency)
 }
 
-func TestV23VClockNtp(t *testing.T) {
-	v23tests.RunTest(t, V23TestVClockNtp)
+func TestV23VClockNtpUpdate(t *testing.T) {
+	v23tests.RunTest(t, V23TestVClockNtpUpdate)
 }
 
 func TestV23VClockNtpFrequency(t *testing.T) {

@@ -4,38 +4,9 @@
 
 package featuretests_test
 
-// To update v23_test.go:
-// jiri test generate v.io/v23/syncbase/featuretests
-
-// To run just the VClock tests:
-// jiri go test v.io/v23/syncbase/featuretests --v23.tests -test.run=TestV23VClock
-
-// TODO(sadovsky): Add a way to stop vclockd, or to instruct Syncbase not to
-// start vclockd in the first place. Otherwise, some of these tests can have
-// racy interactions with vclockd.
-
-// TODO(sadovsky): Implement the following tests (from the test plan).
-//
-// Single-machine
-// - Clock moves forward (barring system clock events and NTP sync events)
-// - System clock events affect virtual clock state
-// - System clock is checked at the expected frequency
-// - NTP sync affects virtual clock state (e.g. clock can move backward)
-// - NTP sync occurs at the expected frequency
-//
-// Multi-machine (sync)
-// - Peer is 0, 1, or 2 hops away from NTP-synced device, local is not
-//   NTP-synced
-// - Same, but local is NTP-synced (with varying times since sync, and varying
-//   number of hops away from NTP-synced device)
-// - Same, but peer has experienced 0, 1, or 2 reboots since obtaining its
-//   NTP-synced time
-
 import (
 	"time"
 
-	"v.io/v23"
-	"v.io/v23/context"
 	wire "v.io/v23/services/syncbase"
 	_ "v.io/x/ref/runtime/factories/generic"
 	tu "v.io/x/ref/services/syncbase/testutil"
@@ -52,17 +23,18 @@ var (
 	jan2015 = time.Date(2015, time.January, 1, 0, 0, 0, 0, time.UTC)
 )
 
-func testInit(t *v23tests.T) *context.T {
+func testInit(t *v23tests.T) {
 	v23tests.RunRootMT(t, "--v23.tcp.address=127.0.0.1:0")
-	return tu.NewCtx(t.Context(), v23.GetPrincipal(t.Context()), "u:client")
 }
 
 ////////////////////////////////////////
 // Tests for local vclock updates
 
+// Tests that the virtual clock moves forward.
 func V23TestVClockMovesForward(t *v23tests.T) {
-	ctx := testInit(t)
-	s0Creds, _ := t.Shell().NewChildCredentials("r:s0")
+	testInit(t)
+	ctx := forkContext(t, "c0")
+	s0Creds := forkCredentials(t, "s0")
 	cleanup := tu.StartSyncbased(t, s0Creds, "s0", "", openPerms)
 	defer cleanup()
 
@@ -82,9 +54,11 @@ func V23TestVClockMovesForward(t *v23tests.T) {
 	}
 }
 
-func V23TestVClockSystemClock(t *v23tests.T) {
-	ctx := testInit(t)
-	s0Creds, _ := t.Shell().NewChildCredentials("s0")
+// Tests that system clock updates affect the virtual clock.
+func V23TestVClockSystemClockUpdate(t *v23tests.T) {
+	testInit(t)
+	ctx := forkContext(t, "c0")
+	s0Creds := forkCredentials(t, "s0")
 	cleanup := tu.StartSyncbased(t, s0Creds, "s0", "", openPerms)
 	defer cleanup()
 
@@ -164,32 +138,183 @@ func V23TestVClockSystemClock(t *v23tests.T) {
 	}
 }
 
+// Tests that the virtual clock daemon checks for system clock updates at the
+// expected frequency (loosely speaking).
 func V23TestVClockSystemClockFrequency(t *v23tests.T) {
-	//clientCtx := testInit(t)
-	server0Creds, _ := t.Shell().NewChildCredentials("s0")
-	cleanup := tu.StartSyncbased(t, server0Creds, "s0", "", openPerms)
+	testInit(t)
+	ctx := forkContext(t, "c0")
+	s0Creds := forkCredentials(t, "s0")
+	cleanup := tu.StartSyncbased(t, s0Creds, "s0", "", openPerms)
 	defer cleanup()
+
+	sc := wire.ServiceClient("s0")
+
+	t0, err := sc.DevModeGetTime(ctx)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if t0.Sub(jan2015) < time.Hour {
+		t.Fatalf("unexpected time: %v", t0)
+	}
+
+	// Set system time but do not force a local update.
+	if err := sc.DevModeUpdateVClock(ctx, wire.DevModeUpdateVClockOpts{
+		Now:           jan2015,
+		ElapsedTime:   0,
+		DoLocalUpdate: false,
+	}); err != nil {
+		t.Fatal(err)
+	}
+
+	// Sleep for two seconds. Note, VClockD checks for sysclock changes once per
+	// second.
+	time.Sleep(2 * time.Second)
+
+	// t1 should reflect the sysclock change.
+	t1, err := sc.DevModeGetTime(ctx)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !isBarelyAfter(t1, jan2015) {
+		t.Fatalf("unexpected time: %v", t1)
+	}
 }
 
-func V23TestVClockNtp(t *v23tests.T) {
-	//clientCtx := testInit(t)
-	server0Creds, _ := t.Shell().NewChildCredentials("s0")
-	cleanup := tu.StartSyncbased(t, server0Creds, "s0", "", openPerms)
+// Tests that NTP sync affects virtual clock state (e.g. clock can move
+// backward).
+func V23TestVClockNtpUpdate(t *v23tests.T) {
+	testInit(t)
+	ctx := forkContext(t, "c0")
+	s0Creds := forkCredentials(t, "s0")
+	cleanup := tu.StartSyncbased(t, s0Creds, "s0", "", openPerms)
 	defer cleanup()
+
+	sc := wire.ServiceClient("s0")
+
+	t0, err := sc.DevModeGetTime(ctx)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if t0.Sub(jan2015) < time.Hour {
+		t.Fatalf("unexpected time: %v", t0)
+	}
+
+	// Use NTP to set the clock to jan2015.
+	if err := sc.DevModeUpdateVClock(ctx, wire.DevModeUpdateVClockOpts{
+		NtpHost:     startFakeNtpServer(t, jan2015),
+		DoNtpUpdate: true,
+	}); err != nil {
+		t.Fatal(err)
+	}
+
+	t1, err := sc.DevModeGetTime(ctx)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !isBarelyAfter(t1, jan2015) {
+		t.Fatalf("unexpected time: %v", t1)
+	}
+
+	// Use NTP to move the clock forward by 5 hours.
+	if err := sc.DevModeUpdateVClock(ctx, wire.DevModeUpdateVClockOpts{
+		NtpHost:     startFakeNtpServer(t, jan2015.Add(5*time.Hour)),
+		DoNtpUpdate: true,
+	}); err != nil {
+		t.Fatal(err)
+	}
+
+	t2, err := sc.DevModeGetTime(ctx)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !isBarelyAfter(t2, jan2015.Add(5*time.Hour)) {
+		t.Fatalf("unexpected time: %v", t2)
+	}
 }
 
+// Tests that the virtual clock daemon checks in with NTP at the expected
+// frequency (loosely speaking).
 func V23TestVClockNtpFrequency(t *v23tests.T) {
-	//clientCtx := testInit(t)
-	server0Creds, _ := t.Shell().NewChildCredentials("s0")
-	cleanup := tu.StartSyncbased(t, server0Creds, "s0", "", openPerms)
+	testInit(t)
+	ctx := forkContext(t, "c0")
+	s0Creds := forkCredentials(t, "s0")
+	cleanup := tu.StartSyncbased(t, s0Creds, "s0", "", openPerms)
 	defer cleanup()
+
+	sc := wire.ServiceClient("s0")
+
+	t0, err := sc.DevModeGetTime(ctx)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if t0.Sub(jan2015) < time.Hour {
+		t.Fatalf("unexpected time: %v", t0)
+	}
+
+	// Use NTP to set the clock to jan2015.
+	if err := sc.DevModeUpdateVClock(ctx, wire.DevModeUpdateVClockOpts{
+		NtpHost:     startFakeNtpServer(t, jan2015),
+		DoNtpUpdate: true,
+	}); err != nil {
+		t.Fatal(err)
+	}
+
+	t1, err := sc.DevModeGetTime(ctx)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !isBarelyAfter(t1, jan2015) {
+		t.Fatalf("unexpected time: %v", t1)
+	}
+
+	// Use NTP to move the clock forward by 5 hours, but do not run
+	// vclockd.DoNtpUpdate(). Since NTP sync happens only once per hour, the
+	// virtual clock should continue reporting the old time, even after we sleep
+	// for several seconds.
+	if err := sc.DevModeUpdateVClock(ctx, wire.DevModeUpdateVClockOpts{
+		NtpHost:     startFakeNtpServer(t, jan2015.Add(5*time.Hour)),
+		DoNtpUpdate: false,
+	}); err != nil {
+		t.Fatal(err)
+	}
+
+	time.Sleep(5 * time.Second)
+	t2, err := sc.DevModeGetTime(ctx)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !isBarelyAfter(t2, jan2015.Add(5*time.Second)) {
+		t.Fatalf("unexpected time: %v", t2)
+	}
 }
 
 ////////////////////////////////////////
 // Tests for p2p vclock updates
 
+// TODO(sadovsky): Implement the following tests (from the test plan):
+// - Peer is 0, 1, or 2 hops away from NTP-synced device, local is not
+//   NTP-synced
+// - Same, but local is NTP-synced (with varying times since sync, and varying
+//   number of hops away from NTP-synced device)
+// - Same, but peer has experienced 0, 1, or 2 reboots since obtaining its
+//   NTP-synced time
+
 ////////////////////////////////////////////////////////////////////////////////
 // Helper functions
+
+func startFakeNtpServer(t *v23tests.T, now time.Time) string {
+	nowBuf, err := now.MarshalText()
+	if err != nil {
+		t.Fatal(err)
+	}
+	ntpd := t.BuildV23Pkg("v.io/x/ref/services/syncbase/testutil/fake_ntp_server")
+	invocation := ntpd.WithStartOpts(ntpd.StartOpts().NoExecProgram().WithSessions(t, time.Second)).Start("--now=" + string(nowBuf))
+	host := invocation.ExpectVar("HOST")
+	if host == "" {
+		t.Fatalf("fake_ntp_server failed to start")
+	}
+	return host
+}
 
 // isBarelyAfter returns true if t is after target but before target + 10s.
 func isBarelyAfter(t time.Time, target time.Time) bool {
