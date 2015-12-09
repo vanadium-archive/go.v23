@@ -3277,7 +3277,7 @@ func TestExecErrors(t *testing.T) {
 		// At present, delete is not a valid statement.  It only parses.
 		{
 			"delete from Customer",
-			syncql.NewErrCheckOfUnknownStatementType(db.GetContext(), 0),
+			syncql.NewErrExecOfUnknownStatementType(db.GetContext(), 0, "DeleteStatement"),
 		},
 	}
 

@@ -29,6 +29,8 @@ func Check(db ds.Database, s *query_parser.Statement) error {
 	switch sel := (*s).(type) {
 	case query_parser.SelectStatement:
 		return checkSelectStatement(db, &sel)
+	case query_parser.DeleteStatement:
+		return checkDeleteStatement(db, &sel)
 	default:
 		return syncql.NewErrCheckOfUnknownStatementType(db.GetContext(), (*s).Offset())
 	}
@@ -51,6 +53,22 @@ func checkSelectStatement(db ds.Database, s *query_parser.SelectStatement) error
 		return err
 	}
 	if err := checkResultsOffsetClause(db, s.ResultsOffset); err != nil {
+		return err
+	}
+	return nil
+}
+
+func checkDeleteStatement(db ds.Database, s *query_parser.DeleteStatement) error {
+	if err := checkFromClause(db, s.From); err != nil {
+		return err
+	}
+	if err := checkEscapeClause(db, s.Escape); err != nil {
+		return err
+	}
+	if err := checkWhereClause(db, s.Where, s.Escape); err != nil {
+		return err
+	}
+	if err := checkLimitClause(db, s.Limit); err != nil {
 		return err
 	}
 	return nil

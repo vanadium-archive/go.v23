@@ -71,7 +71,7 @@ func (db *mockDB) GetTable(table string) (ds.Table, error) {
 
 var db mockDB
 
-type checkSelectTest struct {
+type checkTest struct {
 	query string
 }
 
@@ -93,13 +93,14 @@ type regularExpressionsTest struct {
 	nonMatches []string
 }
 
-type parseSelectErrorTest struct {
+type checkErrorTest struct {
 	query string
 	err   error
 }
 
 func TestQueryChecker(t *testing.T) {
-	basic := []checkSelectTest{
+	basic := []checkTest{
+		// Select
 		{"select k, v from Customer"},
 		{"select k, v.name from Customer"},
 		{"select k, v.name from Customer limit 200"},
@@ -165,6 +166,71 @@ func TestQueryChecker(t *testing.T) {
 		{"select v from Customer where Now() < 10"},
 		{"select Now() from Customer"},
 		{"select Time(\"2006-01-02 MST\", \"2015-06-01 PST\"), Time(\"2006-01-02 15:04:05 MST\", \"2015-06-01 12:34:56 PST\"), Year(Now(), \"America/Los_Angeles\") from Customer"},
+		// Delete
+		{"delete from Customer"},
+		{"delete from Customer where k = v.name"},
+		{"delete from Customer limit 200"},
+		{"delete from Customer where k = \"foo\""},
+		{"delete from Customer where k = v.y"},
+		{"delete from Customer where k <> v.y"},
+		{"delete from Customer where k < v.y"},
+		{"delete from Customer where k <= v.y"},
+		{"delete from Customer where k > v.y"},
+		{"delete from Customer where k >= v.y"},
+		{"delete from Customer where k is nil"},
+		{"delete from Customer where k is not nil"},
+		{"delete from Customer where \"foo\" = k"},
+		{"delete from Customer where v.y = k"},
+		{"delete from Customer where v.y <> k"},
+		{"delete from Customer where v.y < k"},
+		{"delete from Customer where v.y <= k"},
+		{"delete from Customer where v.y > k"},
+		{"delete from Customer where \"abc%\" = k"},
+		{"delete from Customer where k is nil"},
+		{"delete from Customer where k is not nil"},
+		{"delete from Customer where Type(v) = \"Foo.Bar\""},
+		{"delete from Customer where Type(v) <> \"Foo.Bar\""},
+		{"delete from Customer where Type(v) < \"Foo.Bar\""},
+		{"delete from Customer where Type(v) <= \"Foo.Bar\""},
+		{"delete from Customer where Type(v) > \"Foo.Bar\""},
+		{"delete from Customer where Type(v) >= \"Foo.Bar\""},
+		{"delete from Customer where Type(v) like \"%.Foo.Bar\""},
+		{"delete from Customer where Type(v) not like \"%.Foo.Bar\""},
+		{"delete from Customer where Type(v) is nil"},
+		{"delete from Customer where Type(v) is not nil"},
+		{"delete from Customer where \"Foo.Bar\" = Type(v)"},
+		{"delete from Customer where \"Foo.Bar\" <> Type(v)"},
+		{"delete from Customer where \"Foo.Bar\" < Type(v)"},
+		{"delete from Customer where \"Foo.Bar\" > Type(v)"},
+		{"delete from Customer where \"Foo.Bar\" <= Type(v)"},
+		{"delete from Customer where \"Foo.Bar\" >= Type(v)"},
+		{"delete from Customer where Type(v) = 2"},
+		{"delete from Customer where Type(v) <> \"foo\""},
+		{"delete from Customer where Type(v) < \"foo\""},
+		{"delete from Customer where Type(v) <= \"foo\""},
+		{"delete from Customer where Type(v) > \"foo\""},
+		{"delete from Customer where Type(v) >= \"foo\""},
+		{"delete from Customer where \"foo\" = Type(v)"},
+		{"delete from Customer where Type(v) = \"Foo.Bar\" and k like \"abc%\" limit 100"},
+		{"delete from Customer where Type(v) is nil"},
+		{"delete from Customer where Type(v) is not nil"},
+		{"delete from Customer where k not like \"foo\""},
+		{"delete from Customer where k not like \"foo%\""},
+		{"delete from Customer where v.A = true"},
+		{"delete from Customer where v.A <> true"},
+		{"delete from Customer where false = v.A"},
+		{"delete from Customer where false = false"},
+		{"delete from Customer where true = true"},
+		{"delete from Customer where false = true"},
+		{"delete from Customer where true = false"},
+		{"delete from Customer where false <> true"},
+		{"delete from Customer where v.ZipCode is nil"},
+		{"delete from Customer where v.ZipCode Is Nil"},
+		{"delete from Customer where v.ZipCode is not nil"},
+		{"delete from Customer where v.ZipCode IS NOT NIL"},
+		{"delete from Customer where Now() < 10"},
+		{"delete from Customer where Now() > 0"},
+		{"delete from Customer where Time(\"2006-01-02 MST\", \"2015-06-01 PST\") > 0 and Time(\"2006-01-02 15:04:05 MST\", \"2015-06-01 12:34:56 PST\") > 1 and Year(Now(), \"America/Los_Angeles\") > 3"},
 	}
 
 	for _, test := range basic {
@@ -188,6 +254,7 @@ func appendZeroByte(start string) string {
 
 func TestKeyRanges(t *testing.T) {
 	basic := []keyRangesTest{
+		// Select
 		{
 			"select k, v from Customer",
 			&ds.IndexRanges{
@@ -426,6 +493,245 @@ func TestKeyRanges(t *testing.T) {
 				},
 			},
 		},
+		// Delete
+		{
+			"delete from Customer",
+			&ds.IndexRanges{
+				FieldName:  "k",
+				Kind:       vdl.String,
+				NilAllowed: true,
+				StringRanges: &ds.StringFieldRanges{
+					ds.StringFieldRange{Start: "", Limit: ""},
+				},
+			},
+		},
+		{
+			"delete from Customer where k = \"abc\" or k = \"def\"",
+			&ds.IndexRanges{
+				FieldName:  "k",
+				Kind:       vdl.String,
+				NilAllowed: false,
+				StringRanges: &ds.StringFieldRanges{
+					ds.StringFieldRange{Start: "abc", Limit: appendZeroByte("abc")},
+					ds.StringFieldRange{Start: "def", Limit: appendZeroByte("def")},
+				},
+			},
+		},
+		{
+			"delete from Customer where \"abc\" = k or \"def\" = k",
+			&ds.IndexRanges{
+				FieldName:  "k",
+				Kind:       vdl.String,
+				NilAllowed: false,
+				StringRanges: &ds.StringFieldRanges{
+					ds.StringFieldRange{Start: "abc", Limit: appendZeroByte("abc")},
+					ds.StringFieldRange{Start: "def", Limit: appendZeroByte("def")},
+				},
+			},
+		},
+		{
+			"delete from Customer where k >= \"foo\" and k < \"goo\"",
+			&ds.IndexRanges{
+				FieldName:  "k",
+				Kind:       vdl.String,
+				NilAllowed: false,
+				StringRanges: &ds.StringFieldRanges{
+					ds.StringFieldRange{Start: "foo", Limit: "goo"},
+				},
+			},
+		},
+		{
+			"delete from Customer where \"foo\" <= k and \"goo\" >= k",
+			&ds.IndexRanges{
+				FieldName:  "k",
+				Kind:       vdl.String,
+				NilAllowed: false,
+				StringRanges: &ds.StringFieldRanges{
+					ds.StringFieldRange{Start: "foo", Limit: appendZeroByte("goo")},
+				},
+			},
+		},
+		{
+			"delete from Customer where k <> \"foo\"",
+			&ds.IndexRanges{
+				FieldName:  "k",
+				Kind:       vdl.String,
+				NilAllowed: false,
+				StringRanges: &ds.StringFieldRanges{
+					ds.StringFieldRange{Start: "", Limit: "foo"},
+					ds.StringFieldRange{Start: appendZeroByte("foo"), Limit: ""},
+				},
+			},
+		},
+		{
+			"delete from Customer where k <> \"foo\" and k > \"bar\"",
+			&ds.IndexRanges{
+				FieldName:  "k",
+				Kind:       vdl.String,
+				NilAllowed: false,
+				StringRanges: &ds.StringFieldRanges{
+					ds.StringFieldRange{Start: appendZeroByte("bar"), Limit: "foo"},
+					ds.StringFieldRange{Start: appendZeroByte("foo"), Limit: ""},
+				},
+			},
+		},
+		{
+			"delete from Customer where k <> \"foo\" or k > \"bar\"",
+			&ds.IndexRanges{
+				FieldName:  "k",
+				Kind:       vdl.String,
+				NilAllowed: false,
+				StringRanges: &ds.StringFieldRanges{
+					ds.StringFieldRange{Start: "", Limit: ""},
+				},
+			},
+		},
+		{
+			"delete from Customer where k <> \"bar\" or k > \"foo\"",
+			&ds.IndexRanges{
+				FieldName:  "k",
+				Kind:       vdl.String,
+				NilAllowed: false,
+				StringRanges: &ds.StringFieldRanges{
+					ds.StringFieldRange{Start: "", Limit: "bar"},
+					ds.StringFieldRange{Start: appendZeroByte("bar"), Limit: ""},
+				},
+			},
+		},
+		{
+			"select v from Customer where Type(v) = \"Foo.Bar\" and k >= \"100\" and k < \"200\" and v.foo > 50 and v.bar <= 1000 and v.baz <> -20.7",
+			&ds.IndexRanges{
+				FieldName:  "k",
+				Kind:       vdl.String,
+				NilAllowed: false,
+				StringRanges: &ds.StringFieldRanges{
+					ds.StringFieldRange{Start: "100", Limit: "200"},
+				},
+			},
+		},
+		{
+			"delete from Customer where k = \"abc\" and k = \"def\"",
+			&ds.IndexRanges{
+				FieldName:    "k",
+				Kind:         vdl.String,
+				NilAllowed:   false,
+				StringRanges: &ds.StringFieldRanges{},
+			},
+		},
+		{
+			"delete from Customer where Type(v) = \"Foo.Bar\" and k like \"abc%\" limit 100",
+			&ds.IndexRanges{
+				FieldName:  "k",
+				Kind:       vdl.String,
+				NilAllowed: false,
+				StringRanges: &ds.StringFieldRanges{
+					ds.StringFieldRange{Start: "abc", Limit: "abd"},
+				},
+			},
+		},
+		{
+			"select  k,  v from \n  Customer where k like \"002%\" or k like \"001%\" or k like \"%\"",
+			&ds.IndexRanges{
+				FieldName:  "k",
+				Kind:       vdl.String,
+				NilAllowed: false,
+				StringRanges: &ds.StringFieldRanges{
+					ds.StringFieldRange{Start: "", Limit: ""},
+				},
+			},
+		},
+		{
+			"delete from Customer where k = \"Foo.Bar\" and k like \"abc%\" limit 100",
+			&ds.IndexRanges{
+				FieldName:    "k",
+				Kind:         vdl.String,
+				NilAllowed:   false,
+				StringRanges: &ds.StringFieldRanges{},
+			},
+		},
+		{
+			"delete from Customer where k like \"foo%\" and k like \"bar%\"",
+			&ds.IndexRanges{
+				FieldName:    "k",
+				Kind:         vdl.String,
+				NilAllowed:   false,
+				StringRanges: &ds.StringFieldRanges{},
+			},
+		},
+		{
+			"delete from Customer where k like \"foo%\" or k like \"bar%\"",
+			&ds.IndexRanges{
+				FieldName:  "k",
+				Kind:       vdl.String,
+				NilAllowed: false,
+				StringRanges: &ds.StringFieldRanges{
+					ds.StringFieldRange{Start: "bar", Limit: "bas"},
+					ds.StringFieldRange{Start: "foo", Limit: "fop"},
+				},
+			},
+		},
+		{
+			// Note: 'like "Foo"' is optimized to '= "Foo"
+			"delete from Customer where k = \"Foo.Bar\" or k like \"Foo\" or k like \"abc%\" limit 100",
+			&ds.IndexRanges{
+				FieldName:  "k",
+				Kind:       vdl.String,
+				NilAllowed: false,
+				StringRanges: &ds.StringFieldRanges{
+					ds.StringFieldRange{Start: "Foo", Limit: appendZeroByte("Foo")},
+					ds.StringFieldRange{Start: "Foo.Bar", Limit: appendZeroByte("Foo.Bar")},
+					ds.StringFieldRange{Start: "abc", Limit: "abd"},
+				},
+			},
+		},
+		{
+			"delete from Customer where k like \"Foo@%Bar\" or k like \"abc%\" limit 100 escape '@'",
+			&ds.IndexRanges{
+				FieldName:  "k",
+				Kind:       vdl.String,
+				NilAllowed: false,
+				StringRanges: &ds.StringFieldRanges{
+					ds.StringFieldRange{Start: "Foo%Bar", Limit: appendZeroByte("Foo%Bar")},
+					ds.StringFieldRange{Start: "abc", Limit: "abd"},
+				},
+			},
+		},
+		{
+			"delete from Customer where k like \"Foo%Bar\" or k like \"abc%\" limit 100",
+			&ds.IndexRanges{
+				FieldName:  "k",
+				Kind:       vdl.String,
+				NilAllowed: false,
+				StringRanges: &ds.StringFieldRanges{
+					ds.StringFieldRange{Start: "Foo", Limit: "Fop"},
+					ds.StringFieldRange{Start: "abc", Limit: "abd"},
+				},
+			},
+		},
+		{
+			"delete from Customer where k like \"Foo#%Bar\" or k like \"abc%\" escape '#' limit 100",
+			&ds.IndexRanges{
+				FieldName:  "k",
+				Kind:       vdl.String,
+				NilAllowed: false,
+				StringRanges: &ds.StringFieldRanges{
+					ds.StringFieldRange{Start: "Foo%Bar", Limit: appendZeroByte("Foo%Bar")},
+					ds.StringFieldRange{Start: "abc", Limit: "abd"},
+				},
+			},
+		},
+		{
+			"delete from Customer where k not like \"002%\"",
+			&ds.IndexRanges{
+				FieldName:  "k",
+				Kind:       vdl.String,
+				NilAllowed: false,
+				StringRanges: &ds.StringFieldRanges{
+					ds.StringFieldRange{Start: "", Limit: "002"},
+					ds.StringFieldRange{Start: "003", Limit: ""},
+				},
+			},
+		},
 	}
 
 	for _, test := range basic {
@@ -443,14 +749,20 @@ func TestKeyRanges(t *testing.T) {
 			if !reflect.DeepEqual(test.indexRanges, indexRanges) {
 				t.Errorf("query: %s;\nGOT  %s\nWANT %s", test.query, indexRanges.String(), test.indexRanges.String())
 			}
+		case query_parser.DeleteStatement:
+			indexRanges := query_checker.CompileIndexRanges(&query_parser.Field{Segments: []query_parser.Segment{query_parser.Segment{Value: "k"}}}, vdl.String, sel.Where)
+			if !reflect.DeepEqual(test.indexRanges, indexRanges) {
+				t.Errorf("query: %s;\nGOT  %s\nWANT %s", test.query, indexRanges.String(), test.indexRanges.String())
+			}
 		default:
-			t.Errorf("query: %s;\nGOT  %v\nWANT query_parser.SelectStatement", test.query, *s)
+			t.Errorf("query: %s;\nGOT  %v\nWANT select or delete statement", test.query, *s)
 		}
 	}
 }
 
 func TestIndexRanges(t *testing.T) {
 	basic := []indexRangesTest{
+		// Select
 		{
 			"select k, v from Customer",
 			[]string{"v.InterfaceName"},
@@ -828,6 +1140,384 @@ func TestIndexRanges(t *testing.T) {
 				},
 			},
 		},
+		// delete
+		{
+			"delete from Customer",
+			[]string{"v.InterfaceName"},
+			[]*ds.IndexRanges{
+				&ds.IndexRanges{
+					FieldName:  "v.InterfaceName",
+					Kind:       vdl.String,
+					NilAllowed: true,
+					StringRanges: &ds.StringFieldRanges{
+						ds.StringFieldRange{Start: "", Limit: ""},
+					},
+				},
+			},
+		},
+		{
+			"delete from Customer where v.Foo = 12",
+			[]string{"v.InterfaceName"},
+			[]*ds.IndexRanges{
+				&ds.IndexRanges{
+					FieldName:  "v.InterfaceName",
+					Kind:       vdl.String,
+					NilAllowed: true,
+					StringRanges: &ds.StringFieldRanges{
+						ds.StringFieldRange{Start: "", Limit: ""},
+					},
+				},
+			},
+		},
+		{
+			"delete from Customer where v.InterfaceName = \"FooBar\"",
+			[]string{"v.InterfaceName"},
+			[]*ds.IndexRanges{
+				&ds.IndexRanges{
+					FieldName:  "v.InterfaceName",
+					Kind:       vdl.String,
+					NilAllowed: false,
+					StringRanges: &ds.StringFieldRanges{
+						ds.StringFieldRange{Start: "FooBar", Limit: appendZeroByte("FooBar")},
+					},
+				},
+			},
+		},
+		{
+			"delete from Customer where v.InterfaceName = \"Foo\" or v.InterfaceName = \"Bar\"",
+			[]string{"v.InterfaceName"},
+			[]*ds.IndexRanges{
+				&ds.IndexRanges{
+					FieldName:  "v.InterfaceName",
+					Kind:       vdl.String,
+					NilAllowed: false,
+					StringRanges: &ds.StringFieldRanges{
+						ds.StringFieldRange{Start: "Bar", Limit: appendZeroByte("Bar")},
+						ds.StringFieldRange{Start: "Foo", Limit: appendZeroByte("Foo")},
+					},
+				},
+			},
+		},
+		{
+			"delete from Customer where v.InterfaceName = \"Foo\" and v.InterfaceName = \"Bar\"",
+			[]string{"v.InterfaceName"},
+			[]*ds.IndexRanges{
+				&ds.IndexRanges{
+					FieldName:    "v.InterfaceName",
+					Kind:         vdl.String,
+					NilAllowed:   false,
+					StringRanges: &ds.StringFieldRanges{},
+				},
+			},
+		},
+		{
+			"delete from Customer where v.InterfaceName like \"Foo%\"",
+			[]string{"v.InterfaceName"},
+			[]*ds.IndexRanges{
+				&ds.IndexRanges{
+					FieldName:  "v.InterfaceName",
+					Kind:       vdl.String,
+					NilAllowed: false,
+					StringRanges: &ds.StringFieldRanges{
+						ds.StringFieldRange{Start: "Foo", Limit: "Fop"},
+					},
+				},
+			},
+		},
+		{
+			"delete from Customer where v.InterfaceName like \"Foo%\" and v.Address like \"Bar%\"",
+			[]string{"v.InterfaceName", "v.Address"},
+			[]*ds.IndexRanges{
+				&ds.IndexRanges{
+					FieldName:  "v.InterfaceName",
+					Kind:       vdl.String,
+					NilAllowed: false,
+					StringRanges: &ds.StringFieldRanges{
+						ds.StringFieldRange{Start: "Foo", Limit: "Fop"},
+					},
+				},
+				&ds.IndexRanges{
+					FieldName:  "v.Address",
+					Kind:       vdl.String,
+					NilAllowed: false,
+					StringRanges: &ds.StringFieldRanges{
+						ds.StringFieldRange{Start: "Bar", Limit: "Bas"},
+					},
+				},
+			},
+		},
+		{
+			"delete from Customer where \"abc\" = v.Foo or \"def\" = v.Foo",
+			[]string{"v.Foo"},
+			[]*ds.IndexRanges{
+				&ds.IndexRanges{
+					FieldName:  "v.Foo",
+					Kind:       vdl.String,
+					NilAllowed: false,
+					StringRanges: &ds.StringFieldRanges{
+						ds.StringFieldRange{Start: "abc", Limit: appendZeroByte("abc")},
+						ds.StringFieldRange{Start: "def", Limit: appendZeroByte("def")},
+					},
+				},
+			},
+		},
+		{
+			"delete from Customer where v.Foo >= \"foo\" and v.Foo < \"goo\"",
+			[]string{"v.Foo"},
+			[]*ds.IndexRanges{
+				&ds.IndexRanges{
+					FieldName:  "v.Foo",
+					Kind:       vdl.String,
+					NilAllowed: false,
+					StringRanges: &ds.StringFieldRanges{
+						ds.StringFieldRange{Start: "foo", Limit: "goo"},
+					},
+				},
+			},
+		},
+		{
+			"delete from Customer where \"foo\" <= v.Foo and \"goo\" >= v.Foo",
+			[]string{"v.Foo"},
+			[]*ds.IndexRanges{
+				&ds.IndexRanges{
+					FieldName:  "v.Foo",
+					Kind:       vdl.String,
+					NilAllowed: false,
+					StringRanges: &ds.StringFieldRanges{
+						ds.StringFieldRange{Start: "foo", Limit: appendZeroByte("goo")},
+					},
+				},
+			},
+		},
+		{
+			"delete from Customer where v.Foo <> \"foo\"",
+			[]string{"v.Foo"},
+			[]*ds.IndexRanges{
+				&ds.IndexRanges{
+					FieldName:  "v.Foo",
+					Kind:       vdl.String,
+					NilAllowed: false,
+					StringRanges: &ds.StringFieldRanges{
+						ds.StringFieldRange{Start: "", Limit: "foo"},
+						ds.StringFieldRange{Start: appendZeroByte("foo"), Limit: ""},
+					},
+				},
+			},
+		},
+		{
+			"delete from Customer where v.Foo <> \"foo\" and v.Foo > \"bar\"",
+			[]string{"v.Foo"},
+			[]*ds.IndexRanges{
+				&ds.IndexRanges{
+					FieldName:  "v.Foo",
+					Kind:       vdl.String,
+					NilAllowed: false,
+					StringRanges: &ds.StringFieldRanges{
+						ds.StringFieldRange{Start: appendZeroByte("bar"), Limit: "foo"},
+						ds.StringFieldRange{Start: appendZeroByte("foo"), Limit: ""},
+					},
+				},
+			},
+		},
+		{
+			"delete from Customer where v.Foo <> \"foo\" or v.Foo > \"bar\"",
+			[]string{"v.Foo"},
+			[]*ds.IndexRanges{
+				&ds.IndexRanges{
+					FieldName:  "v.Foo",
+					Kind:       vdl.String,
+					NilAllowed: false,
+					StringRanges: &ds.StringFieldRanges{
+						ds.StringFieldRange{Start: "", Limit: ""},
+					},
+				},
+			},
+		},
+		{
+			"delete from Customer where v.Foo <> \"bar\" or v.Foo > \"foo\"",
+			[]string{"v.Foo"},
+			[]*ds.IndexRanges{
+				&ds.IndexRanges{
+					FieldName:  "v.Foo",
+					Kind:       vdl.String,
+					NilAllowed: false,
+					StringRanges: &ds.StringFieldRanges{
+						ds.StringFieldRange{Start: "", Limit: "bar"},
+						ds.StringFieldRange{Start: appendZeroByte("bar"), Limit: ""},
+					},
+				},
+			},
+		},
+		{
+			"select v from Customer where Type(v) = \"Foo.Bar\" and v.Foo >= \"100\" and v.Foo < \"200\" and v.foo > 50 and v.bar <= 1000 and v.baz <> -20.7",
+			[]string{"v.Foo"},
+			[]*ds.IndexRanges{
+				&ds.IndexRanges{
+					FieldName:  "v.Foo",
+					Kind:       vdl.String,
+					NilAllowed: false,
+					StringRanges: &ds.StringFieldRanges{
+						ds.StringFieldRange{Start: "100", Limit: "200"},
+					},
+				},
+			},
+		},
+		{
+			"delete from Customer where v.Foo = \"abc\" and v.Foo = \"def\"",
+			[]string{"v.Foo"},
+			[]*ds.IndexRanges{
+				&ds.IndexRanges{
+					FieldName:    "v.Foo",
+					Kind:         vdl.String,
+					NilAllowed:   false,
+					StringRanges: &ds.StringFieldRanges{},
+				},
+			},
+		},
+		{
+			"delete from Customer where Type(v) = \"Foo.Bar\" and v.Foo like \"abc%\" limit 100",
+			[]string{"v.Foo"},
+			[]*ds.IndexRanges{
+				&ds.IndexRanges{
+					FieldName:  "v.Foo",
+					Kind:       vdl.String,
+					NilAllowed: false,
+					StringRanges: &ds.StringFieldRanges{
+						ds.StringFieldRange{Start: "abc", Limit: "abd"},
+					},
+				},
+			},
+		},
+		{
+			"select  k,  v from \n  Customer where v.Foo like \"002%\" or v.Foo like \"001%\" or v.Foo like \"%\"",
+			[]string{"v.Foo"},
+			[]*ds.IndexRanges{
+				&ds.IndexRanges{
+					FieldName:  "v.Foo",
+					Kind:       vdl.String,
+					NilAllowed: false,
+					StringRanges: &ds.StringFieldRanges{
+						ds.StringFieldRange{Start: "", Limit: ""},
+					},
+				},
+			},
+		},
+		{
+			"delete from Customer where v.Foo = \"Foo.Bar\" and v.Foo like \"abc%\" limit 100",
+			[]string{"v.Foo"},
+			[]*ds.IndexRanges{
+				&ds.IndexRanges{
+					FieldName:    "v.Foo",
+					Kind:         vdl.String,
+					NilAllowed:   false,
+					StringRanges: &ds.StringFieldRanges{},
+				},
+			},
+		},
+		{
+			"delete from Customer where v.Foo like \"foo%\" and v.Foo like \"bar%\"",
+			[]string{"v.Foo"},
+			[]*ds.IndexRanges{
+				&ds.IndexRanges{
+					FieldName:    "v.Foo",
+					Kind:         vdl.String,
+					NilAllowed:   false,
+					StringRanges: &ds.StringFieldRanges{},
+				},
+			},
+		},
+		{
+			"delete from Customer where v.Foo like \"foo%\" or v.Foo like \"bar%\"",
+			[]string{"v.Foo"},
+			[]*ds.IndexRanges{
+				&ds.IndexRanges{
+					FieldName:  "v.Foo",
+					Kind:       vdl.String,
+					NilAllowed: false,
+					StringRanges: &ds.StringFieldRanges{
+						ds.StringFieldRange{Start: "bar", Limit: "bas"},
+						ds.StringFieldRange{Start: "foo", Limit: "fop"},
+					},
+				},
+			},
+		},
+		{
+			// Note: 'like "Foo"' is optimized to '= "Foo"
+			"delete from Customer where v.Foo = \"Foo.Bar\" or v.Foo like \"Foo\" or v.Foo like \"abc%\" limit 100",
+			[]string{"v.Foo"},
+			[]*ds.IndexRanges{
+				&ds.IndexRanges{
+					FieldName:  "v.Foo",
+					Kind:       vdl.String,
+					NilAllowed: false,
+					StringRanges: &ds.StringFieldRanges{
+						ds.StringFieldRange{Start: "Foo", Limit: appendZeroByte("Foo")},
+						ds.StringFieldRange{Start: "Foo.Bar", Limit: appendZeroByte("Foo.Bar")},
+						ds.StringFieldRange{Start: "abc", Limit: "abd"},
+					},
+				},
+			},
+		},
+		{
+			"delete from Customer where v.Foo like \"Foo@%Bar\" or v.Foo like \"abc%\" limit 100 escape '@'",
+			[]string{"v.Foo"},
+			[]*ds.IndexRanges{
+				&ds.IndexRanges{
+					FieldName:  "v.Foo",
+					Kind:       vdl.String,
+					NilAllowed: false,
+					StringRanges: &ds.StringFieldRanges{
+						ds.StringFieldRange{Start: "Foo%Bar", Limit: appendZeroByte("Foo%Bar")},
+						ds.StringFieldRange{Start: "abc", Limit: "abd"},
+					},
+				},
+			},
+		},
+		{
+			"delete from Customer where v.Foo like \"Foo%Bar\" or v.Foo like \"abc%\" limit 100",
+			[]string{"v.Foo"},
+			[]*ds.IndexRanges{
+				&ds.IndexRanges{
+					FieldName:  "v.Foo",
+					Kind:       vdl.String,
+					NilAllowed: false,
+					StringRanges: &ds.StringFieldRanges{
+						ds.StringFieldRange{Start: "Foo", Limit: "Fop"},
+						ds.StringFieldRange{Start: "abc", Limit: "abd"},
+					},
+				},
+			},
+		},
+		{
+			"delete from Customer where v.Foo like \"Foo#%Bar\" or v.Foo like \"abc%\" escape '#' limit 100",
+			[]string{"v.Foo"},
+			[]*ds.IndexRanges{
+				&ds.IndexRanges{
+					FieldName:  "v.Foo",
+					Kind:       vdl.String,
+					NilAllowed: false,
+					StringRanges: &ds.StringFieldRanges{
+						ds.StringFieldRange{Start: "Foo%Bar", Limit: appendZeroByte("Foo%Bar")},
+						ds.StringFieldRange{Start: "abc", Limit: "abd"},
+					},
+				},
+			},
+		},
+		{
+			"delete from Customer where v.Foo not like \"002%\"",
+			[]string{"v.Foo"},
+			[]*ds.IndexRanges{
+				&ds.IndexRanges{
+					FieldName:  "v.Foo",
+					Kind:       vdl.String,
+					NilAllowed: false,
+					StringRanges: &ds.StringFieldRanges{
+						ds.StringFieldRange{Start: "", Limit: "002"},
+						ds.StringFieldRange{Start: "003", Limit: ""},
+					},
+				},
+			},
+		},
 	}
 
 	for _, test := range basic {
@@ -851,14 +1541,26 @@ func TestIndexRanges(t *testing.T) {
 					t.Errorf("query: %s;\nGOT  %v\nWANT %v", test.query, indexRanges, test.indexRanges[i])
 				}
 			}
+		case query_parser.DeleteStatement:
+			for i, fieldName := range test.fieldNames {
+				idxField, err := query_parser.ParseIndexField(&db, fieldName, "Services")
+				if err != nil {
+					t.Errorf("query: %s;\nGOT  %v\nWANT nil", test.query, err)
+				}
+				indexRanges := query_checker.CompileIndexRanges(idxField, vdl.String, sel.Where)
+				if !reflect.DeepEqual(test.indexRanges[i], indexRanges) {
+					t.Errorf("query: %s;\nGOT  %v\nWANT %v", test.query, indexRanges, test.indexRanges[i])
+				}
+			}
 		default:
-			t.Errorf("query: %s;\nGOT  %v\nWANT query_parser.SelectStatement", test.query, *s)
+			t.Errorf("query: %s;\nGOT  %v\nWANT select or delete statement", test.query, *s)
 		}
 	}
 }
 
 func TestRegularExpressions(t *testing.T) {
 	basic := []regularExpressionsTest{
+		// Select
 		{
 			"select v from Customer where v like \"abc%\"",
 			"^abc.*?$",
@@ -907,6 +1609,55 @@ func TestRegularExpressions(t *testing.T) {
 			[]string{"[0-9]*abcdefdef", "[0-9]*abcdef", "[0-9]*abcdefghidef"},
 			[]string{"0abcdefg", "9abcdefde", "[0-9]abcdefg", "[0-9]abcdefg", "[0-9]abcdefg"},
 		},
+		// Delete
+		{
+			"delete from Customer where v like \"abc%\"",
+			"^abc.*?$",
+			[]string{"abc", "abcd", "abcabc"},
+			[]string{"xabcd"},
+		},
+		{
+			"delete from Customer where v like \"abc_\"",
+			"^abc.$",
+			[]string{"abcd", "abc1"},
+			[]string{"abc", "xabcd", "abcde"},
+		},
+		{
+			"delete from Customer where v like \"*%*_%\" escape '*'",
+			"^%_.*?$",
+			[]string{"%_", "%_abc"},
+			[]string{"%a", "abc%_abc"},
+		},
+		{
+			"delete from Customer where v like \"abc^_\" escape '^'",
+			"^abc_$",
+			[]string{"abc_"},
+			[]string{"abc", "xabcd", "abcde"},
+		},
+		{
+			"delete from Customer where v like \"abc^%\" escape '^'",
+			"^abc%$",
+			[]string{"abc%"},
+			[]string{"abc", "xabcd", "abcde"},
+		},
+		{
+			"delete from Customer where v like \"abc_efg\"",
+			"^abc.efg$",
+			[]string{"abcdefg"},
+			[]string{"abc", "xabcd", "abcde", "abcdefgh"},
+		},
+		{
+			"delete from Customer where v like \"abc%def\"",
+			"^abc.*?def$",
+			[]string{"abcdefdef", "abcdef", "abcdefghidef"},
+			[]string{"abcdefg", "abcdefde"},
+		},
+		{
+			"delete from Customer where v like \"[0-9]*abc%def\"",
+			"^\\[0-9\\]\\*abc.*?def$",
+			[]string{"[0-9]*abcdefdef", "[0-9]*abcdef", "[0-9]*abcdefghidef"},
+			[]string{"0abcdefg", "9abcdefde", "[0-9]abcdefg", "[0-9]abcdefg", "[0-9]abcdefg"},
+		},
 	}
 
 	for _, test := range basic {
@@ -938,12 +1689,32 @@ func TestRegularExpressions(t *testing.T) {
 					t.Errorf("query: %s;Expected nonMatch: %s; \nGOT  true\nWANT false", test.query, n)
 				}
 			}
+		case query_parser.DeleteStatement:
+			// We know there is exactly one like expression and operand2 contains
+			// a regex and compiled regex.
+			if sel.Where.Expr.Operand2.Regex != test.regex {
+				t.Errorf("query: %s;\nGOT  %s\nWANT %s", test.query, sel.Where.Expr.Operand2.Regex, test.regex)
+			}
+			regexp := sel.Where.Expr.Operand2.CompRegex
+			// Make sure all matches actually match
+			for _, m := range test.matches {
+				if !regexp.MatchString(m) {
+					t.Errorf("query: %s;Expected match: %s; \nGOT  false\nWANT true", test.query, m)
+				}
+			}
+			// Make sure all nonMatches actually don't match
+			for _, n := range test.nonMatches {
+				if regexp.MatchString(n) {
+					t.Errorf("query: %s;Expected nonMatch: %s; \nGOT  true\nWANT false", test.query, n)
+				}
+			}
 		}
 	}
 }
 
 func TestQueryCheckerErrors(t *testing.T) {
-	basic := []parseSelectErrorTest{
+	basic := []checkErrorTest{
+		// Select
 		{"select a from Customer", syncql.NewErrInvalidSelectField(db.GetContext(), 7)},
 		{"select v from Bob", syncql.NewErrTableCantAccess(db.GetContext(), 14, "Bob", errors.New("No such table: Bob"))},
 		{"select k.a from Customer", syncql.NewErrDotNotationDisallowedForKey(db.GetContext(), 9)},
@@ -982,6 +1753,44 @@ func TestQueryCheckerErrors(t *testing.T) {
 		{"select k from Customer where K = \"001\"", syncql.NewErrDidYouMeanLowercaseK(db.GetContext(), 29)},
 		{"select v from Customer where Type(V) = \"Invoice\"", syncql.NewErrDidYouMeanLowercaseV(db.GetContext(), 34)},
 		{"select K, V from Customer where Type(V) = \"Invoice\" and K = \"001\"", syncql.NewErrDidYouMeanLowercaseK(db.GetContext(), 7)},
+		// Delete
+		{"delete from Bob", syncql.NewErrTableCantAccess(db.GetContext(), 12, "Bob", errors.New("No such table: Bob"))},
+		{"delete from Customer where k.a = \"a\"", syncql.NewErrDotNotationDisallowedForKey(db.GetContext(), 29)},
+		{"delete from Customer where t.a = \"Foo.Bar\"", syncql.NewErrBadFieldInWhere(db.GetContext(), 27)},
+		{"delete from Customer where a=1", syncql.NewErrBadFieldInWhere(db.GetContext(), 27)},
+		{"delete from Customer limit 0", syncql.NewErrLimitMustBeGt0(db.GetContext(), 27)},
+		{"delete from Customer where v.x like v.y", syncql.NewErrLikeExpressionsRequireRhsString(db.GetContext(), 36)},
+		{"delete from Customer where k like \"a^bc%\" escape '^'", syncql.NewErrInvalidEscapeSequence(db.GetContext(), 34)},
+		{"delete from Customer where v.A > false", syncql.NewErrBoolInvalidExpression(db.GetContext(), 31)},
+		{"delete from Customer where true <= v.A", syncql.NewErrBoolInvalidExpression(db.GetContext(), 32)},
+		{"delete from Customer where Foo(\"2015/07/22\", true, 3.14157) = true", syncql.NewErrFunctionNotFound(db.GetContext(), 27, "Foo")},
+		{"delete from Customer where nil is v.ZipCode", syncql.NewErrIsIsNotRequireLhsValue(db.GetContext(), 27)},
+		{"delete from Customer where v.ZipCode is \"94303\"", syncql.NewErrIsIsNotRequireRhsNil(db.GetContext(), 40)},
+		{"delete from Customer where v.ZipCode is 94303", syncql.NewErrIsIsNotRequireRhsNil(db.GetContext(), 40)},
+		{"delete from Customer where v.ZipCode is true", syncql.NewErrIsIsNotRequireRhsNil(db.GetContext(), 40)},
+		{"delete from Customer where v.ZipCode is 943.03", syncql.NewErrIsIsNotRequireRhsNil(db.GetContext(), 40)},
+		{"delete from Customer where nil is not v.ZipCode", syncql.NewErrIsIsNotRequireLhsValue(db.GetContext(), 27)},
+		{"delete from Customer where v.ZipCode is not \"94303\"", syncql.NewErrIsIsNotRequireRhsNil(db.GetContext(), 44)},
+		{"delete from Customer where v.ZipCode is not 94303", syncql.NewErrIsIsNotRequireRhsNil(db.GetContext(), 44)},
+		{"delete from Customer where v.ZipCode is not true", syncql.NewErrIsIsNotRequireRhsNil(db.GetContext(), 44)},
+		{"delete from Customer where v.ZipCode is not 943.03", syncql.NewErrIsIsNotRequireRhsNil(db.GetContext(), 44)},
+		{"delete from Customer where Type(v) = \"Customer\" and Year(v.InvoiceDate, \"ABC\") = 2015", syncql.NewErrLocationConversionError(db.GetContext(), 72, errors.New("unknown time zone ABC"))},
+		{"delete from Customer where Type(v) = \"Customer\" and Month(v.InvoiceDate, \"ABC\") = 2015", syncql.NewErrLocationConversionError(db.GetContext(), 73, errors.New("unknown time zone ABC"))},
+		{"delete from Customer where Type(v) = \"Customer\" and Day(v.InvoiceDate, \"ABC\") = 2015", syncql.NewErrLocationConversionError(db.GetContext(), 71, errors.New("unknown time zone ABC"))},
+		{"delete from Customer where Type(v) = \"Customer\" and Hour(v.InvoiceDate, \"ABC\") = 2015", syncql.NewErrLocationConversionError(db.GetContext(), 72, errors.New("unknown time zone ABC"))},
+		{"delete from Customer where Type(v) = \"Customer\" and Minute(v.InvoiceDate, \"ABC\") = 2015", syncql.NewErrLocationConversionError(db.GetContext(), 74, errors.New("unknown time zone ABC"))},
+		{"delete from Customer where Type(v) = \"Customer\" and Second(v.InvoiceDate, \"ABC\") = 2015", syncql.NewErrLocationConversionError(db.GetContext(), 74, errors.New("unknown time zone ABC"))},
+		{"delete from Customer where Type(v) = \"Customer\" and Now(v.InvoiceDate, \"ABC\") = 2015", syncql.NewErrFunctionArgCount(db.GetContext(), 52, "Now", 0, 2)},
+		{"delete from Customer where Type(v) = \"Customer\" and Lowercase(v.Name, 2) = \"smith\"", syncql.NewErrFunctionArgCount(db.GetContext(), 52, "Lowercase", 1, 2)},
+		{"delete from Customer where Type(v) = \"Customer\" and Uppercase(v.Name, 2) = \"SMITH\"", syncql.NewErrFunctionArgCount(db.GetContext(), 52, "Uppercase", 1, 2)},
+		{"delete from Customer where Time() > 0", syncql.NewErrFunctionArgCount(db.GetContext(), 27, "Time", 2, 0)},
+		{"delete from Customer where Year(v.InvoiceDate, \"Foo\") > 1 and Type(v) = \"Invoice\"",
+			syncql.NewErrLocationConversionError(db.GetContext(), 47, errors.New("unknown time zone Foo"))},
+		{"delete from Customer where K = \"1\" and Type(v) = \"Invoice\"", syncql.NewErrDidYouMeanLowercaseK(db.GetContext(), 27)},
+		{"delete from Customer where V = \"abc\" and Type(v) = \"Invoice\"", syncql.NewErrDidYouMeanLowercaseV(db.GetContext(), 27)},
+		{"delete from Customer where K = \"001\"", syncql.NewErrDidYouMeanLowercaseK(db.GetContext(), 27)},
+		{"delete from Customer where Type(V) = \"Invoice\"", syncql.NewErrDidYouMeanLowercaseV(db.GetContext(), 32)},
+		{"delete from Customer where Type(V) = \"Invoice\" and K = \"001\"", syncql.NewErrDidYouMeanLowercaseV(db.GetContext(), 32)},
 	}
 
 	for _, test := range basic {
