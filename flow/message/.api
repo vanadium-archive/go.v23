@@ -5,7 +5,6 @@ pkg message, func NewErrInvalidMsg(*context.T, byte, uint64, uint64, error) erro
 pkg message, func NewErrInvalidSetupOption(*context.T, uint64, uint64) error
 pkg message, func NewErrMissingBlessings(*context.T, byte) error
 pkg message, func NewErrUnknownMsg(*context.T, byte) error
-pkg message, func NewErrWrongProtocol(*context.T) error
 pkg message, func Read(*context.T, []byte) (Message, error)
 pkg message, method (*Data) String() string
 pkg message, method (*OpenFlow) String() string
@@ -52,4 +51,3 @@ pkg message, var ErrInvalidMsg verror.IDAction
 pkg message, var ErrInvalidSetupOption verror.IDAction
 pkg message, var ErrMissingBlessings verror.IDAction
 pkg message, var ErrUnknownMsg verror.IDAction
-pkg message, var ErrWrongProtocol verror.IDAction

@@ -28,12 +28,8 @@ func Read(ctx *context.T, from []byte) (Message, error) {
 	if len(from) == 0 {
 		return nil, NewErrInvalidMsg(ctx, invalidType, 0, 0, nil)
 	}
-	msgType, from := from[0], from[1:]
-
-	if msgType < oldRPCBoundary {
-		return nil, NewErrWrongProtocol(ctx)
-	}
 	var m Message
+	msgType, from := from[0], from[1:]
 	switch msgType {
 	case setupType:
 		m = &Setup{}
@@ -78,11 +74,7 @@ type Message interface {
 // message types.
 // Note that our types start from 0x7f and work their way down.
 // This is important for the RPC transition.  The old system had
-// messages that started from zero and worked their way up.  If
-// we see a message type < 0x3f (the halfway point between the old and
-// new starting points) we take that as a sign we are talking to
-// the old RPC system.
-const oldRPCBoundary = 0x3f
+// messages that started from zero and worked their way up.
 const (
 	invalidType = 0x7f - iota
 	setupType

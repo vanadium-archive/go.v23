@@ -15,7 +15,4 @@ error (
     "en": "setup option{:option} failed decoding at field{:field}."}
   UnknownMsg(typ byte) {"en":"unknown message type{:typ}."}
   MissingBlessings(typ byte) {"en": "{typ} message received with no blessings."}
-
-  // TODO(mattr): Remove this after the transition is complete.
-  WrongProtocol() {"en": "A message of the incorrect protocol version was detected."}
 )

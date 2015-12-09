@@ -19,8 +19,6 @@ var (
 	ErrInvalidSetupOption = verror.Register("v.io/v23/flow/message.InvalidSetupOption", verror.NoRetry, "{1:}{2:} setup option{:3} failed decoding at field{:4}.")
 	ErrUnknownMsg         = verror.Register("v.io/v23/flow/message.UnknownMsg", verror.NoRetry, "{1:}{2:} unknown message type{:3}.")
 	ErrMissingBlessings   = verror.Register("v.io/v23/flow/message.MissingBlessings", verror.NoRetry, "{1:}{2:} {3} message received with no blessings.")
-	// TODO(mattr): Remove this after the transition is complete.
-	ErrWrongProtocol = verror.Register("v.io/v23/flow/message.WrongProtocol", verror.NoRetry, "{1:}{2:} A message of the incorrect protocol version was detected.")
 )
 
 func init() {
@@ -28,7 +26,6 @@ func init() {
 	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrInvalidSetupOption.ID), "{1:}{2:} setup option{:3} failed decoding at field{:4}.")
 	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrUnknownMsg.ID), "{1:}{2:} unknown message type{:3}.")
 	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrMissingBlessings.ID), "{1:}{2:} {3} message received with no blessings.")
-	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrWrongProtocol.ID), "{1:}{2:} A message of the incorrect protocol version was detected.")
 }
 
 // NewErrInvalidMsg returns an error with the ErrInvalidMsg ID.
@@ -49,9 +46,4 @@ func NewErrUnknownMsg(ctx *context.T, typ byte) error {
 // NewErrMissingBlessings returns an error with the ErrMissingBlessings ID.
 func NewErrMissingBlessings(ctx *context.T, typ byte) error {
 	return verror.New(ErrMissingBlessings, ctx, typ)
-}
-
-// NewErrWrongProtocol returns an error with the ErrWrongProtocol ID.
-func NewErrWrongProtocol(ctx *context.T) error {
-	return verror.New(ErrWrongProtocol, ctx)
 }
