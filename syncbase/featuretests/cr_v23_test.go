@@ -72,12 +72,6 @@ func V23TestResolutionRuleConfig(t *v23tests.T) {
 // Result:
 // The value for foo0 after sync settles on what S1 wrote for both syncbases.
 func V23TestCRDefault(t *v23tests.T) {
-	// The Sync code that retries conflict resolution if it fails to commit
-	// data. The conflict resolution desicion that was taken
-	// in the previous round is not wiped out for the retry. This test becomes
-	// flaky due to the bug and hence is being skipped.
-	// TODO(hpucha): Unskip this test once the above bug is fixed.
-	t.Skip()
 	runTestWithSetup(t, 1, func(client0Ctx, client1Ctx *context.T, sgName string) {
 		// Turn off syncing on both s0 and s1 by removing each other from syncgroup ACLs.
 		ok(t, toggleSync(client0Ctx, "sync0", sgName, "root:s0"))
