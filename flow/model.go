@@ -37,18 +37,12 @@ type Manager interface {
 	// Otherwise, if error == nil, the returned chan will block until the
 	// connection to the proxy endpoint fails. The caller may then choose to retry
 	// the connection.
-	ProxyListen(ctx *context.T, endpoint naming.Endpoint) (<-chan struct{}, error)
+	// name is a identifier of the proxy. It can be used to access errors
+	// in ListenStatus.ProxyErrors.
+	ProxyListen(ctx *context.T, name string, endpoint naming.Endpoint) (<-chan struct{}, error)
 
-	// ListeningEndpoints returns the endpoints that the Manager has explicitly
-	// called Listen on. The Manager will accept new flows on these endpoints.
-	// Proxied endpoints are included in the results.
-	// If the Manager is not listening on any endpoints, an endpoint with the
-	// Manager's RoutingID will be returned for use in bidirectional RPC.
-	// Returned endpoints all have the Manager's unique RoutingID.
-	// Closing of the returned channel indicates that the endpoints have changed
-	// and ListeningEndpoints must be called to receive the fresh endpoints.
-	// Once the manager is closed the returned channel will be nil.
-	ListeningEndpoints() ([]naming.Endpoint, <-chan struct{})
+	// Status returns the current ListenStatus of the manager.
+	Status() ListenStatus
 
 	// StopListening stops listening on all currently listening addresses and proxies.
 	// All outstanding calls to Accept will return an error.
@@ -89,6 +83,26 @@ type Manager interface {
 	// object. Once the channel is closed any operations on the Manager will
 	// necessarily fail.
 	Closed() <-chan struct{}
+}
+
+type ListenStatus struct {
+	// ListeningEndpoints contains the endpoints that the Manager has explicitly
+	// called Listen on. The Manager will accept new flows on these endpoints.
+	// Proxied endpoints are included in the results.
+	// If the Manager is not listening on any endpoints, an endpoint with the
+	// Manager's RoutingID will be returned for use in bidirectional RPC.
+	// Returned endpoints all have the Manager's unique RoutingID.
+	Endpoints []naming.Endpoint
+
+	// ProxyErrors contains the set of errors encountered when listening on
+	// proxies. Entries are keyed by the name provided to ProxyListen. If the
+	// entry exists and is nil, the ProxyListen was successful.
+	ProxyErrors map[string]error
+
+	// Valid will be closed if a status change occurs. Callers should
+	// requery manager.Status() to get the fresh server status.
+	// Valid will be nil once the manager is Closed.
+	Valid <-chan struct{}
 }
 
 // PeerAuthorizer is the interface used in performing security authorization.

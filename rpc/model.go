@@ -161,20 +161,6 @@ type Server interface {
 	Closed() <-chan struct{}
 }
 
-type ProxyStatus struct {
-	// Name of the proxy.
-	Proxy string
-	// Endpoint is the Endpoint that this server is using to receive proxied
-	// requests on. The Endpoint of the proxy itself can be obtained by
-	// resolving its name.
-	// DEPRECATED: This field is no longer in use. Instead you should just rely on
-	// rpc.Server.Status().Endpoints.
-	Endpoint naming.Endpoint
-	// The error status of the connection to the proxy, nil if the connection
-	// is currently correctly established, the most recent error otherwise.
-	Error error
-}
-
 // ServerState represents the 'state' of the Server.
 type ServerState int
 
@@ -252,23 +238,24 @@ type ServerStatus struct {
 	Mounts MountState
 
 	// Endpoints contains the set of endpoints currently registered with the
-	// mount table for the names published using this server but excluding
-	// those used for serving proxied requests.
+	// mount table for the names published using this server including all
+	// proxied addresses.
 	Endpoints []naming.Endpoint
 
-	// Errors contains any errors encountered when creating new listeners
-	// or endpoints.
-	Errors []error
+	// ListenErrors contains the set of errors encountered when listening on
+	// the network. Entries are keyed by the protocol, address specified in
+	// the ListenSpec.
+	ListenErrors map[struct{ Protocol, Address string }]error
 
-	// Proxies contains the status of any proxy connections maintained by
-	// this server.
-	// TODO(suharshs): Deprecate this in the new RPC system.
-	Proxies []ProxyStatus
+	// ProxyErrors contains the set of errors encountered when listening on
+	// proxies. Entries are keyed by the name of the proxy specified in the
+	// ListenSpec.
+	ProxyErrors map[string]error
 
 	// Valid will be closed if a status change occurs. Callers should
 	// requery server.Status() to get the fresh server status.
 	// Currently, Valid is closed only when Endpoints change.
-	// TODO(suharshs): Make this close when State and Mounts change as well.
+	// TODO(suharshs): Make this close when Mounts change as well.
 	Valid <-chan struct{}
 }
 

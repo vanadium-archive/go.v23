@@ -32,6 +32,10 @@ pkg flow, type Flow interface, SetDeadlineContext(*context.T, time.Time) *contex
 pkg flow, type Flow interface, Write([]byte) (int, error)
 pkg flow, type Flow interface, WriteMsg(...[]byte) (int, error)
 pkg flow, type Flow interface, WriteMsgAndClose(...[]byte) (int, error)
+pkg flow, type ListenStatus struct
+pkg flow, type ListenStatus struct, Endpoints []naming.Endpoint
+pkg flow, type ListenStatus struct, ProxyErrors map[string]error
+pkg flow, type ListenStatus struct, Valid <-chan struct{}
 pkg flow, type Listener interface { Accept, Addr, Close }
 pkg flow, type Listener interface, Accept(*context.T) (Conn, error)
 pkg flow, type Listener interface, Addr() net.Addr
@@ -39,14 +43,14 @@ pkg flow, type Listener interface, Close() error
 pkg flow, type ManagedConn interface { Closed, CommonVersion }
 pkg flow, type ManagedConn interface, Closed() <-chan struct{}
 pkg flow, type ManagedConn interface, CommonVersion() version.RPCVersion
-pkg flow, type Manager interface { Accept, Closed, Dial, Listen, ListeningEndpoints, ProxyListen, RoutingID, StopListening }
+pkg flow, type Manager interface { Accept, Closed, Dial, Listen, ProxyListen, RoutingID, Status, StopListening }
 pkg flow, type Manager interface, Accept(*context.T) (Flow, error)
 pkg flow, type Manager interface, Closed() <-chan struct{}
 pkg flow, type Manager interface, Dial(*context.T, naming.Endpoint, PeerAuthorizer, time.Duration) (Flow, error)
 pkg flow, type Manager interface, Listen(*context.T, string, string) error
-pkg flow, type Manager interface, ListeningEndpoints() ([]naming.Endpoint, <-chan struct{})
-pkg flow, type Manager interface, ProxyListen(*context.T, naming.Endpoint) (<-chan struct{}, error)
+pkg flow, type Manager interface, ProxyListen(*context.T, string, naming.Endpoint) (<-chan struct{}, error)
 pkg flow, type Manager interface, RoutingID() naming.RoutingID
+pkg flow, type Manager interface, Status() ListenStatus
 pkg flow, type Manager interface, StopListening(*context.T)
 pkg flow, type MsgReadWriteCloser interface { Close, ReadMsg, WriteMsg }
 pkg flow, type MsgReadWriteCloser interface, Close() error
