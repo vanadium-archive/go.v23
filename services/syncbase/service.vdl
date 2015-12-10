@@ -61,5 +61,6 @@ type App interface {
 error (
 	NotInDevMode() {"en": "not running with --dev=true"}
 	InvalidName(name string) {"en": "invalid name: {name}"}
+	CorruptDatabase(path string) {"en": "database corrupt, moved to {path}; client must create a new database"}
 	UnknownBatch() {"en": "unknown batch, perhaps the server restarted"}
 )

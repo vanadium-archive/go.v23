@@ -1,5 +1,6 @@
 pkg syncbase, func AppClient(string) AppClientStub
 pkg syncbase, func AppServer(AppServerMethods) AppServerStub
+pkg syncbase, func NewErrCorruptDatabase(*context.T, string) error
 pkg syncbase, func NewErrInvalidName(*context.T, string) error
 pkg syncbase, func NewErrNotInDevMode(*context.T) error
 pkg syncbase, func NewErrUnknownBatch(*context.T) error
@@ -51,6 +52,7 @@ pkg syncbase, type ServiceServerStub interface, Describe__() []rpc.InterfaceDesc
 pkg syncbase, type ServiceServerStub interface, unexported methods
 pkg syncbase, type ServiceServerStubMethods ServiceServerMethods
 pkg syncbase, var AppDesc rpc.InterfaceDesc
+pkg syncbase, var ErrCorruptDatabase verror.IDAction
 pkg syncbase, var ErrInvalidName verror.IDAction
 pkg syncbase, var ErrNotInDevMode verror.IDAction
 pkg syncbase, var ErrUnknownBatch verror.IDAction

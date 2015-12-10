@@ -8,7 +8,6 @@ import (
 	"bytes"
 	"errors"
 	"io/ioutil"
-	"log"
 	"os"
 	"path/filepath"
 	"reflect"
@@ -377,20 +376,14 @@ func V23TestRestartabilityWatch(t *v23tests.T) {
 		t.Fatalf("unexpected Advance: %v", stream.Change())
 	}
 }
-func V23TestRestartabilityCorruption(t *v23tests.T) {
-	rootDir, clientCtx, serverCreds := restartabilityInit(t)
-	cleanup := tu.StartKillableSyncbased(t, serverCreds, testSbName, rootDir, acl)
 
-	createHierarchy(t, clientCtx)
-	checkHierarchy(t, clientCtx)
-	cleanup(syscall.SIGKILL)
-
+func corruptFile(t *v23tests.T, rootDir, pathRegex string) {
 	var fileToCorrupt string
 	filepath.Walk(rootDir, func(path string, info os.FileInfo, err error) error {
 		if fileToCorrupt != "" {
 			return nil
 		}
-		if match, _ := regexp.MatchString(`apps/[^/]*/dbs/[^/]*/leveldb/.*\.log`, path); match {
+		if match, _ := regexp.MatchString(pathRegex, path); match {
 			fileToCorrupt = path
 			return errors.New("found match, stop walking")
 		}
@@ -414,6 +407,17 @@ func V23TestRestartabilityCorruption(t *v23tests.T) {
 	if err := ioutil.WriteFile(fileToCorrupt, fileBytes, 0); err != nil {
 		t.Fatalf("Could not corrupt file: %v", err)
 	}
+}
+
+func V23TestRestartabilityServiceDBCorruption(t *v23tests.T) {
+	rootDir, clientCtx, serverCreds := restartabilityInit(t)
+	cleanup := tu.StartKillableSyncbased(t, serverCreds, testSbName, rootDir, acl)
+
+	createHierarchy(t, clientCtx)
+	checkHierarchy(t, clientCtx)
+	cleanup(syscall.SIGKILL)
+
+	corruptFile(t, rootDir, filepath.Join(rootDir, `leveldb/.*\.log`))
 
 	// Expect syncbase to fail to start.
 	syncbased := t.BuildV23Pkg("v.io/x/ref/services/syncbase/syncbased")
@@ -428,8 +432,58 @@ func V23TestRestartabilityCorruption(t *v23tests.T) {
 	if err := invocation.Wait(stdout, stderr); err == nil {
 		t.Fatalf("Expected syncbased to fail to start.")
 	}
-	log.Printf("syncbased terminated\nstdout: %v\nstderr: %v\n", stdout, stderr)
-	// TODO(kash): What should really happen is syncbased returns a specific
-	// error for the corruption and moves the corrupted leveldb aside.  That
-	// would cause the app to create a new one on restart.
+	t.Logf("syncbased terminated\nstdout: %v\nstderr: %v\n", stdout, stderr)
+
+	cleanup = tu.StartKillableSyncbased(t, serverCreds, testSbName, rootDir, acl)
+
+	createHierarchy(t, clientCtx)
+	checkHierarchy(t, clientCtx)
+	cleanup(syscall.SIGKILL)
+}
+
+func V23TestRestartabilityAppDBCorruption(t *v23tests.T) {
+	rootDir, clientCtx, serverCreds := restartabilityInit(t)
+	cleanup := tu.StartKillableSyncbased(t, serverCreds, testSbName, rootDir, acl)
+
+	createHierarchy(t, clientCtx)
+	checkHierarchy(t, clientCtx)
+	cleanup(syscall.SIGKILL)
+
+	corruptFile(t, rootDir, `apps/[^/]*/dbs/[^/]*/leveldb/.*\.log`)
+
+	// Expect syncbase to fail to start.
+	syncbased := t.BuildV23Pkg("v.io/x/ref/services/syncbase/syncbased")
+	startOpts := syncbased.StartOpts().WithCustomCredentials(serverCreds)
+	invocation := syncbased.WithStartOpts(startOpts).Start(
+		"--alsologtostderr=true",
+		"--v23.tcp.address=127.0.0.1:0",
+		"--v23.permissions.literal", acl,
+		"--name="+testSbName,
+		"--root-dir="+rootDir)
+	stdout, stderr := bytes.NewBuffer(nil), bytes.NewBuffer(nil)
+	if err := invocation.Wait(stdout, stderr); err == nil {
+		t.Fatalf("Expected syncbased to fail to start.")
+	}
+	t.Logf("syncbased terminated\nstdout: %v\nstderr: %v\n", stdout, stderr)
+
+	cleanup = tu.StartKillableSyncbased(t, serverCreds, testSbName, rootDir, acl)
+
+	// Recreate a1/d1 since that is the one that got corrupted.
+	d := syncbase.NewService(testSbName).App("a1").NoSQLDatabase("d1", nil)
+	if err := d.Create(clientCtx, nil); err != nil {
+		t.Fatalf("d.Create() failed: %v", err)
+	}
+	for _, tb := range []nosql.Table{d.Table("tb1"), d.Table("tb2")} {
+		if err := tb.Create(clientCtx, nil); err != nil {
+			t.Fatalf("d.CreateTable() failed: %v", err)
+		}
+		for _, k := range []string{"foo", "bar"} {
+			if err := tb.Put(clientCtx, k, k); err != nil {
+				t.Fatalf("tb.Put() failed: %v", err)
+			}
+		}
+	}
+
+	checkHierarchy(t, clientCtx)
+	cleanup(syscall.SIGKILL)
 }

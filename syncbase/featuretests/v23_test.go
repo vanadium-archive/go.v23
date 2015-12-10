@@ -83,8 +83,12 @@ func TestV23RestartabilityWatch(t *testing.T) {
 	v23tests.RunTest(t, V23TestRestartabilityWatch)
 }
 
-func TestV23RestartabilityCorruption(t *testing.T) {
-	v23tests.RunTest(t, V23TestRestartabilityCorruption)
+func TestV23RestartabilityServiceDBCorruption(t *testing.T) {
+	v23tests.RunTest(t, V23TestRestartabilityServiceDBCorruption)
+}
+
+func TestV23RestartabilityAppDBCorruption(t *testing.T) {
+	v23tests.RunTest(t, V23TestRestartabilityAppDBCorruption)
 }
 
 func TestV23SyncgroupRendezvousOnline(t *testing.T) {
