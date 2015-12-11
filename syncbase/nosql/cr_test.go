@@ -144,12 +144,21 @@ func (ri *ConflictResolverImpl) handleLists(ctx *context.T, lists []ConflictRow,
 			continue
 		}
 
+		if l.LocalValue.State == wire.ValueStateUnknown {
+			resolution[l.Key] = ResolvedRow{Key: l.Key, Result: &l.RemoteValue}
+			continue
+		}
+		if l.RemoteValue.State == wire.ValueStateUnknown {
+			resolution[l.Key] = ResolvedRow{Key: l.Key, Result: &l.LocalValue}
+			continue
+		}
+
 		var localList, remoteList, ancestorList, resolvedList List
 		l.LocalValue.Get(&localList)
 		l.RemoteValue.Get(&remoteList)
 		l.AncestorValue.Get(&ancestorList)
 
-		// prime the reolved task with local version for simplicity.
+		// prime the resolved task with local version for simplicity.
 		resolvedList = localList
 
 		// check field Name for conflict
@@ -199,28 +208,28 @@ func deleteTasksForList(resolution map[string]ResolvedRow, listKey string) {
 }
 
 func handleRowAdd(r ConflictRow) ResolvedRow {
-	var resolvedTask *Value
+	var resolvedTask Value
 	// first one to add wins
-	if r.RemoteValue == nil {
+	if r.RemoteValue.State != wire.ValueStateExists {
 		resolvedTask = r.LocalValue
-	} else if r.LocalValue == nil {
+	} else if r.LocalValue.State != wire.ValueStateExists {
 		resolvedTask = r.RemoteValue
 	} else if r.LocalValue.WriteTs.Before(r.RemoteValue.WriteTs) {
 		resolvedTask = r.LocalValue
 	} else {
 		resolvedTask = r.RemoteValue
 	}
-	return ResolvedRow{Key: r.Key, Result: resolvedTask}
+	return ResolvedRow{Key: r.Key, Result: &resolvedTask}
 }
 
 func isRowDeleted(r ConflictRow) bool {
-	return r.AncestorValue != nil &&
-		(r.LocalValue == nil || r.RemoteValue == nil)
+	return r.LocalValue.State == wire.ValueStateDeleted ||
+		r.RemoteValue.State == wire.ValueStateDeleted
 }
 
 func isRowAdded(r ConflictRow) bool {
-	return r.AncestorValue == nil &&
-		(r.LocalValue != nil || r.RemoteValue != nil)
+	return r.AncestorValue.State == wire.ValueStateNoExists &&
+		(r.LocalValue.State == wire.ValueStateExists || r.RemoteValue.State == wire.ValueStateExists)
 }
 
 func findRowsByType(conflict *Conflict, typePrefix string) []ConflictRow {
@@ -319,9 +328,9 @@ func RunTest(t *testing.T, mockConflit []wire.ConflictInfo, expResult map[string
 func simpleConflictStream(t *testing.T) ([]wire.ConflictInfo, map[string]wire.ResolutionInfo) {
 	// Conflict for task1
 	row1 := makeRowInfo(Task1,
-		encode(&Task{"OriginalText", false, -1, List1}), 1, // ancestor
-		encode(&Task{TextNew, false, -1, List1}), 3, // local
-		encode(&Task{"OriginalText", true, 20, List1}), 2) // remote
+		&wire.Value{Bytes: encode(&Task{"OriginalText", false, -1, List1}), WriteTs: toTime(1)}, // ancestor
+		&wire.Value{Bytes: encode(&Task{TextNew, false, -1, List1}), WriteTs: toTime(3)},        // local
+		&wire.Value{Bytes: encode(&Task{"OriginalText", true, 20, List1}), WriteTs: toTime(2)})  // remote
 	c1 := makeConflictInfo(row1, false)
 
 	// Expected result
@@ -329,9 +338,9 @@ func simpleConflictStream(t *testing.T) ([]wire.ConflictInfo, map[string]wire.Re
 
 	// Conflict for task2
 	row2 := makeRowInfo(Task2,
-		encode(&Task{"Text1", false, -1, List1}), 1, // ancestor
-		encode(&Task{"Text1", true, 100, List1}), 3, // local
-		encode(&Task{"Text1", true, 20, List1}), 2) // remote
+		&wire.Value{Bytes: encode(&Task{"Text1", false, -1, List1}), WriteTs: toTime(1)}, // ancestor
+		&wire.Value{Bytes: encode(&Task{"Text1", true, 100, List1}), WriteTs: toTime(3)}, // local
+		&wire.Value{Bytes: encode(&Task{"Text1", true, 20, List1}), WriteTs: toTime(2)})  // remote
 	c2 := makeConflictInfo(row2, false)
 
 	// Expected result
@@ -360,10 +369,12 @@ func addDeleteConflictStream(t *testing.T) ([]wire.ConflictInfo, map[string]wire
 	b2 := makeConflictBatch(2, HintTaskAdd, wire.BatchSourceRemote, true)
 
 	// Deletion for task1 on local syncbase
+
+	ancestorVal := encode(&Task{"TaskToBeRemoved", false, -1, List1})
 	row1 := makeRowInfo(Task1,
-		encode(&Task{"TaskToBeRemoved", false, -1, List1}), 1, // ancestor
-		nil, -1, // local
-		encode(&Task{"TaskToBeRemoved", false, -1, List1}), 1) // remote
+		&wire.Value{Bytes: ancestorVal, WriteTs: toTime(1)}, // ancestor
+		&wire.Value{State: wire.ValueStateDeleted},          // local
+		&wire.Value{State: wire.ValueStateUnknown})          // remote
 	row1.BatchIds = []uint64{1}
 	c1 := makeConflictInfo(row1, true)
 
@@ -371,10 +382,11 @@ func addDeleteConflictStream(t *testing.T) ([]wire.ConflictInfo, map[string]wire
 	r1 := makeResolution(Task1, nil, wire.ValueSelectionOther)
 
 	// Addition for task2 on remote syncbase
+	remoteVal := encode(&Task{"AddedTask", false, -1, List1})
 	row2 := makeRowInfo(Task2,
-		nil, -1, // ancestor value
-		nil, -1, // local value
-		encode(&Task{"AddedTask", false, -1, List1}), 2) // remote value
+		&wire.Value{State: wire.ValueStateNoExists},       // ancestor
+		&wire.Value{State: wire.ValueStateUnknown},        // local
+		&wire.Value{Bytes: remoteVal, WriteTs: toTime(2)}) // remote
 	row2.BatchIds = []uint64{2}
 	c2 := makeConflictInfo(row2, true)
 
@@ -384,9 +396,9 @@ func addDeleteConflictStream(t *testing.T) ([]wire.ConflictInfo, map[string]wire
 	// Update to List on both sided on filed TaskCount
 	listName := "Groceries"
 	row3 := makeRowInfo(List1,
-		encode(&List{listName, 8, 0}), 25, // ancestor value
-		encode(&List{listName, 7, 0}), 33, // local value
-		encode(&List{listName, 9, 0}), 44) // remote value
+		&wire.Value{Bytes: encode(&List{listName, 8, 0}), WriteTs: toTime(25)}, // ancestor value
+		&wire.Value{Bytes: encode(&List{listName, 7, 0}), WriteTs: toTime(33)}, // local value
+		&wire.Value{Bytes: encode(&List{listName, 9, 0}), WriteTs: toTime(44)}) // remote value
 	row3.BatchIds = []uint64{1, 2}
 	c3 := makeConflictInfo(row3, false)
 
@@ -425,9 +437,9 @@ func twoIntersectingBatchesConflictStream(t *testing.T) ([]wire.ConflictInfo, ma
 
 	// For task1, mark done on local and edit text on remote
 	row1 := makeRowInfo(Task1,
-		encode(&Task{"TaskOrig", false, -1, List1}), 1, // ancestor
-		encode(&Task{"TaskOrig", true, 204, List1}), 5, // local
-		encode(&Task{"TaskEdit", false, -1, List1}), 3) // remote
+		&wire.Value{Bytes: encode(&Task{"TaskOrig", false, -1, List1}), WriteTs: toTime(1)}, // ancestor
+		&wire.Value{Bytes: encode(&Task{"TaskOrig", true, 204, List1}), WriteTs: toTime(5)}, // local
+		&wire.Value{Bytes: encode(&Task{"TaskEdit", false, -1, List1}), WriteTs: toTime(3)}) // remote
 	row1.BatchIds = []uint64{1, 3}
 	c1 := makeConflictInfo(row1, true)
 
@@ -436,9 +448,9 @@ func twoIntersectingBatchesConflictStream(t *testing.T) ([]wire.ConflictInfo, ma
 
 	// For task2, mark done on local and edit text on remote
 	row2 := makeRowInfo(Task2,
-		encode(&Task{"TaskOrig", false, -1, List1}), 2, // ancestor
-		encode(&Task{"TaskOrig", true, 204, List1}), 5, // local
-		encode(&Task{"TaskEdit", false, -1, List1}), 3) // remote
+		&wire.Value{Bytes: encode(&Task{"TaskOrig", false, -1, List1}), WriteTs: toTime(2)}, // ancestor
+		&wire.Value{Bytes: encode(&Task{"TaskOrig", true, 204, List1}), WriteTs: toTime(5)}, // local
+		&wire.Value{Bytes: encode(&Task{"TaskEdit", false, -1, List1}), WriteTs: toTime(3)}) // remote
 	row2.BatchIds = []uint64{2, 4}
 	c2 := makeConflictInfo(row2, true)
 
@@ -448,14 +460,14 @@ func twoIntersectingBatchesConflictStream(t *testing.T) ([]wire.ConflictInfo, ma
 	// Update to List on Local for updating TaskDoneCount
 	listName := "Groceries"
 	row3 := makeRowInfo(List1,
-		encode(&List{listName, 8, 0}), 1, // ancestor value
-		encode(&List{listName, 8, 2}), 5, // local value
-		encode(&List{listName, 8, 0}), 3) // remote value
+		&wire.Value{Bytes: encode(&List{listName, 8, 0}), WriteTs: toTime(1)}, // ancestor value
+		&wire.Value{Bytes: encode(&List{listName, 8, 2}), WriteTs: toTime(5)}, // local value
+		&wire.Value{State: wire.ValueStateUnknown})                            // remote value
 	row3.BatchIds = []uint64{1, 2}
 	c3 := makeConflictInfo(row3, false)
 
 	// Expected result
-	r3 := makeResolution(List1, encode(&List{listName, 8, 2}), wire.ValueSelectionOther)
+	r3 := makeResolution(List1, encode(&List{listName, 8, 2}), wire.ValueSelectionLocal)
 
 	respMap := map[string]wire.ResolutionInfo{}
 	respMap[r1.Key] = r1
@@ -480,9 +492,9 @@ func listDeleteConflictsWithTaskAdd(t *testing.T) ([]wire.ConflictInfo, map[stri
 	// Delition for list1 on local syncbase
 	listName := "Groceries"
 	row0 := makeRowInfo(List1,
-		encode(&List{listName, 1, 0}), 1, // ancestor value
-		nil, 5, // local value
-		encode(&List{listName, 2, 0}), 3) // remote value
+		&wire.Value{Bytes: encode(&List{listName, 1, 0}), WriteTs: toTime(1)}, // ancestor value
+		&wire.Value{State: wire.ValueStateDeleted, WriteTs: toTime(5)},        // local value
+		&wire.Value{Bytes: encode(&List{listName, 2, 0}), WriteTs: toTime(3)}) // remote value
 	row0.BatchIds = []uint64{1, 2}
 	c0 := makeConflictInfo(row0, true)
 
@@ -491,9 +503,9 @@ func listDeleteConflictsWithTaskAdd(t *testing.T) ([]wire.ConflictInfo, map[stri
 
 	// Deletion for task1 on local syncbase along with list1
 	row1 := makeRowInfo(Task1,
-		encode(&Task{"TaskToBeRemoved", false, -1, List1}), 1, // ancestor
-		nil, -1, // local
-		encode(&Task{"TaskToBeRemoved", false, -1, List1}), 1) // remote
+		&wire.Value{Bytes: encode(&Task{"TaskToBeRemoved", false, -1, List1}), WriteTs: toTime(1)}, // ancestor
+		&wire.Value{State: wire.ValueStateDeleted, WriteTs: toTime(5)},                             // local
+		&wire.Value{State: wire.ValueStateUnknown})                                                 // remote
 	row1.BatchIds = []uint64{1}
 	c1 := makeConflictInfo(row1, true)
 
@@ -502,9 +514,9 @@ func listDeleteConflictsWithTaskAdd(t *testing.T) ([]wire.ConflictInfo, map[stri
 
 	// Addition for task2 on remote syncbase
 	row2 := makeRowInfo(Task2,
-		nil, -1, // ancestor value
-		nil, -1, // local value
-		encode(&Task{"AddedTask", false, -1, List1}), 2) // remote value
+		&wire.Value{State: wire.ValueStateNoExists},                                          // ancestor value
+		&wire.Value{State: wire.ValueStateUnknown},                                           // local value
+		&wire.Value{Bytes: encode(&Task{"AddedTask", false, -1, List1}), WriteTs: toTime(2)}) // remote value
 	row2.BatchIds = []uint64{2}
 	c2 := makeConflictInfo(row2, false)
 
@@ -525,7 +537,7 @@ func makeResolution(key string, result []byte, selection wire.ValueSelection) wi
 	if result != nil {
 		r.Result = &wire.Value{
 			Bytes:   result,
-			WriteTs: -1,
+			WriteTs: time.Time{},
 		}
 	}
 	r.Selection = selection
@@ -544,33 +556,23 @@ func makeConflictInfo(row wire.RowInfo, continued bool) wire.ConflictInfo {
 	}
 }
 
-func makeRowInfo(key string, ancestor []byte, ats int64, local []byte, lts int64, remote []byte, rts int64) wire.RowInfo {
+func makeRowInfo(key string, ancestor *wire.Value, local *wire.Value, remote *wire.Value) wire.RowInfo {
 	op := wire.RowOp{}
 	op.Key = key
 
-	if ancestor != nil {
-		op.AncestorValue = &wire.Value{
-			Bytes:   ancestor,
-			WriteTs: ats,
-		}
-	}
+	op.AncestorValue = ancestor
+	op.LocalValue = local
+	op.RemoteValue = remote
 
-	if local != nil {
-		op.LocalValue = &wire.Value{
-			Bytes:   local,
-			WriteTs: lts,
-		}
-	}
-
-	if remote != nil {
-		op.RemoteValue = &wire.Value{
-			Bytes:   remote,
-			WriteTs: rts,
-		}
-	}
 	return wire.RowInfo{
 		Op: wire.OperationWrite{Value: op},
 	}
+}
+
+func toTime(unixNanos int64) time.Time {
+	return time.Unix(
+		unixNanos/1e9, // seconds
+		unixNanos%1e9) // nanoseconds
 }
 
 func compareResult(t *testing.T, expected wire.ResolutionInfo, actual wire.ResolutionInfo) {
@@ -593,6 +595,9 @@ func compareResult(t *testing.T, expected wire.ResolutionInfo, actual wire.Resol
 		if bytes.Compare(actual.Result.Bytes, expected.Result.Bytes) != 0 {
 			t.Errorf("Key: %s", expected.Key)
 			t.Error("Result bytes do not match")
+			list := &List{}
+			vom.Decode(actual.Result.Bytes, list)
+			t.Errorf("Actual list: %#v", list)
 		}
 	}
 }

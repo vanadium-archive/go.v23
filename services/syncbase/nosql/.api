@@ -11,6 +11,10 @@ pkg nosql, const ResolverTypeLastWins ResolverType
 pkg nosql, const ValueSelectionLocal ValueSelection
 pkg nosql, const ValueSelectionOther ValueSelection
 pkg nosql, const ValueSelectionRemote ValueSelection
+pkg nosql, const ValueStateDeleted ValueState
+pkg nosql, const ValueStateExists ValueState
+pkg nosql, const ValueStateNoExists ValueState
+pkg nosql, const ValueStateUnknown ValueState
 pkg nosql, func BatchSourceFromString(string) (BatchSource, error)
 pkg nosql, func BlobFetchStateFromString(string) (BlobFetchState, error)
 pkg nosql, func BlobManagerClient(string) BlobManagerClientStub
@@ -37,6 +41,7 @@ pkg nosql, func SyncgroupManagerServer(SyncgroupManagerServerMethods) SyncgroupM
 pkg nosql, func TableClient(string) TableClientStub
 pkg nosql, func TableServer(TableServerMethods) TableServerStub
 pkg nosql, func ValueSelectionFromString(string) (ValueSelection, error)
+pkg nosql, func ValueStateFromString(string) (ValueState, error)
 pkg nosql, method (*BatchSource) Set(string) error
 pkg nosql, method (*BlobFetchState) Set(string) error
 pkg nosql, method (*BlobManagerFetchBlobServerCallStub) Init(rpc.StreamServerCall)
@@ -54,6 +59,7 @@ pkg nosql, method (*ResolverType) Set(string) error
 pkg nosql, method (*TableScanServerCallStub) Init(rpc.StreamServerCall)
 pkg nosql, method (*TableScanServerCallStub) SendStream() interface {  Send(item KeyValue) error;}
 pkg nosql, method (*ValueSelection) Set(string) error
+pkg nosql, method (*ValueState) Set(string) error
 pkg nosql, method (BatchSource) String() string
 pkg nosql, method (BlobFetchState) String() string
 pkg nosql, method (ConflictDataBatch) Index() int
@@ -73,6 +79,7 @@ pkg nosql, method (OperationWrite) Interface() interface{}
 pkg nosql, method (OperationWrite) Name() string
 pkg nosql, method (ResolverType) String() string
 pkg nosql, method (ValueSelection) String() string
+pkg nosql, method (ValueState) String() string
 pkg nosql, type BatchInfo struct
 pkg nosql, type BatchInfo struct, Hint string
 pkg nosql, type BatchInfo struct, Id uint64
@@ -616,8 +623,10 @@ pkg nosql, type TableServerStubMethods interface, SetPermissions(*context.T, rpc
 pkg nosql, type TableServerStubMethods interface, SetPrefixPermissions(*context.T, rpc.ServerCall, int32, string, access.Permissions) error
 pkg nosql, type Value struct
 pkg nosql, type Value struct, Bytes []byte
-pkg nosql, type Value struct, WriteTs int64
+pkg nosql, type Value struct, State ValueState
+pkg nosql, type Value struct, WriteTs time.Time
 pkg nosql, type ValueSelection int
+pkg nosql, type ValueState int
 pkg nosql, var BatchSourceAll [...]BatchSource
 pkg nosql, var BlobFetchStateAll [...]BlobFetchState
 pkg nosql, var BlobManagerDesc rpc.InterfaceDesc
@@ -636,3 +645,4 @@ pkg nosql, var SchemaManagerDesc rpc.InterfaceDesc
 pkg nosql, var SyncgroupManagerDesc rpc.InterfaceDesc
 pkg nosql, var TableDesc rpc.InterfaceDesc
 pkg nosql, var ValueSelectionAll [...]ValueSelection
+pkg nosql, var ValueStateAll [...]ValueState
