@@ -17,7 +17,6 @@ var namePatternRegexp = regexp.MustCompile(`^__\(([^)]*)\)($|/)(.*)`)
 // MatchedBy returns true iff one of the presented blessings matches
 // p as per the rules described in documentation for the BlessingPattern type.
 func (p BlessingPattern) MatchedBy(blessings ...string) bool {
-	p = BlessingPattern(Bug739Slash2Colon(string(p)))
 	if len(p) == 0 || !p.IsValid() {
 		return false
 	}
@@ -64,7 +63,6 @@ func splitBlessing(in string) (prefix, rest string) {
 // IsValid returns true iff the BlessingPattern is well formed, as per the
 // rules described in documentation for the BlessingPattern type.
 func (p BlessingPattern) IsValid() bool {
-	p = BlessingPattern(Bug739Slash2Colon(string(p)))
 	if len(p) == 0 {
 		return false
 	}
@@ -94,7 +92,6 @@ func (p BlessingPattern) IsValid() bool {
 //   onlyAlice.MatchedBy("google")  // Returns false
 //   onlyAlice.MatchedBy("google:alice:bob")  // Returns false
 func (p BlessingPattern) MakeNonExtendable() BlessingPattern {
-	p = BlessingPattern(Bug739Slash2Colon(string(p)))
 	if len(p) == 0 || p == BlessingPattern(NoExtension) {
 		return BlessingPattern(NoExtension)
 	}
@@ -117,7 +114,6 @@ func (p BlessingPattern) MakeNonExtendable() BlessingPattern {
 // The returned set of BlessingPatterns are ordered by the number of
 // ":"-separated components in the pattern.
 func (p BlessingPattern) PrefixPatterns() []BlessingPattern {
-	p = BlessingPattern(Bug739Slash2Colon(string(p)))
 	if p == NoExtension {
 		return []BlessingPattern{p}
 	}

@@ -45,7 +45,7 @@ func newUnsignedCertificate(extension string, key PublicKey, caveats ...Caveat) 
 	if err != nil {
 		return nil, err
 	}
-	cert := &Certificate{Extension: Bug739Colon2Slash(extension), Caveats: caveats}
+	cert := &Certificate{Extension: extension, Caveats: caveats}
 	if cert.PublicKey, err = key.MarshalBinary(); err != nil {
 		return nil, verror.New(errCantMarshalKey, nil, err)
 	}
@@ -91,7 +91,6 @@ func (c *Certificate) chainedDigests(hashfn Hash, chain []byte) (digest, content
 }
 
 func validateExtension(extension string) error {
-	extension = Bug739Slash2Colon(extension)
 	if len(extension) == 0 {
 		return verror.New(errBadBlessingEmptyExtension, nil)
 	}

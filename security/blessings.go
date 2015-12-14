@@ -145,7 +145,7 @@ func (b Blessings) String() string {
 	for chainidx, chain := range b.chains {
 		onechain := make([]string, len(chain))
 		for certidx, cert := range chain {
-			onechain[certidx] = Bug739Slash2Colon(cert.Extension)
+			onechain[certidx] = cert.Extension
 		}
 		blessings[chainidx] = fmt.Sprintf("%v", strings.Join(onechain, ChainSeparator))
 	}
@@ -162,7 +162,7 @@ func claimedName(chain []Certificate) string {
 		buf.WriteString(ChainSeparator)
 		buf.WriteString(chain[i].Extension)
 	}
-	return Bug739Slash2Colon(buf.String())
+	return buf.String()
 }
 
 func nameForPrincipal(pubkey []byte, roots BlessingRoots, chain []Certificate) string {
