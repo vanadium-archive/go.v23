@@ -148,7 +148,7 @@ func computeTypeDecoderCacheKey(message []byte) (string, error) {
 				return "", err
 			}
 			readPos += byteLen + msgLen
- 		case cr == WireCtrlTypeIncomplete:
+		case cr == WireCtrlTypeIncomplete:
 			readPos += byteLen
 		case cr > 0:
 			return "", verror.New(errBadControlCode, nil)

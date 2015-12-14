@@ -9,7 +9,7 @@ import (
 )
 
 type RawValue struct {
-	t *vdl.Type
-	value []byte
+	t        *vdl.Type
+	value    []byte
 	refTypes []*vdl.Type
 }

@@ -89,6 +89,25 @@ const (
 	deadlineKey
 )
 
+// ContextLogger is a logger that uses a passed in T to configure
+// the logging behavior.
+type ContextLogger interface {
+	// InfoDepth logs to the INFO log. depth is used to determine which call frame to log.
+	InfoDepth(ctx *T, depth int, args ...interface{})
+
+	// InfoStack logs the current goroutine's stack if the all parameter
+	// is false, or the stacks of all goroutines if it's true.
+	InfoStack(ctx *T, all bool)
+
+	// VDepth returns true if the configured logging level is greater than or equal to its parameter. depth
+	// is used to determine which call frame to test against.
+	VDepth(ctx *T, depth int, level int) bool
+
+	// VIDepth is like VDepth, except that it returns nil if there level is greater than the
+	// configured log level.
+	VIDepth(ctx *T, depth int, level int) ContextLogger
+}
+
 // CancelFunc is used to cancel a context.  The first call will
 // cause the paired context and all decendants to close their Done()
 // channels.  Further calls do nothing.
@@ -109,6 +128,7 @@ var DeadlineExceeded = errors.New("context deadline exceeded")
 type T struct {
 	parent     *T
 	logger     logging.Logger
+	ctxLogger  ContextLogger
 	key, value interface{}
 }
 
@@ -128,6 +148,14 @@ func RootContext() (*T, CancelFunc) {
 func WithLogger(parent *T, logger logging.Logger) *T {
 	child := *parent
 	child.logger = logger
+	return &child
+}
+
+// WithContextLogger returns a child of the current context that embeds the supplied
+// context logger
+func WithContextLogger(parent *T, logger ContextLogger) *T {
+	child := *parent
+	child.ctxLogger = logger
 	return &child
 }
 
@@ -254,7 +282,7 @@ func WithValue(parent *T, key interface{}, val interface{}) *T {
 	if key == nil {
 		panic("Attempting to store a context value with an untyped nil key.")
 	}
-	return &T{logger: parent.logger, parent: parent, key: key, value: val}
+	return &T{logger: parent.logger, ctxLogger: parent.ctxLogger, parent: parent, key: key, value: val}
 }
 
 func withCancelState(parent *T) (*T, func(error)) {
