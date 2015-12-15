@@ -27,7 +27,7 @@ import (
 
 type mockDB struct {
 	ctx    *context.T
-	tables []table
+	tables []*table
 }
 
 type table struct {
@@ -36,7 +36,7 @@ type table struct {
 }
 
 type keyValueStreamImpl struct {
-	table           table
+	table           *table
 	cursor          int
 	indexRanges     []ds.IndexRanges
 	keyRangesCursor int
@@ -50,6 +50,15 @@ func compareKeyToLimit(key, limit string) int {
 	} else {
 		return 1
 	}
+}
+
+func copyTable(src *table) *table {
+	var tgt table
+	tgt.name = src.name
+	for _, row := range src.rows {
+		tgt.rows = append(tgt.rows, row)
+	}
+	return &tgt
 }
 
 func (kvs *keyValueStreamImpl) Advance() bool {
@@ -89,23 +98,34 @@ func (kvs *keyValueStreamImpl) Err() error {
 func (kvs *keyValueStreamImpl) Cancel() {
 }
 
-func (t table) GetIndexFields() []ds.Index {
+func (t *table) GetIndexFields() []ds.Index {
 	return []ds.Index{}
 }
 
-func (t table) Scan(indexRanges ...ds.IndexRanges) (ds.KeyValueStream, error) {
+func (t *table) Scan(indexRanges ...ds.IndexRanges) (ds.KeyValueStream, error) {
 	var keyValueStreamImpl keyValueStreamImpl
-	keyValueStreamImpl.table = t
+	keyValueStreamImpl.table = copyTable(t)
 	keyValueStreamImpl.cursor = -1
 	keyValueStreamImpl.indexRanges = indexRanges
 	return &keyValueStreamImpl, nil
+}
+
+func (t *table) Delete(k string) (bool, error) {
+	for i, kv := range t.rows {
+		if kv.key == k {
+			t.rows = append(t.rows[:i], t.rows[i+1:]...)
+			return true, nil
+		}
+	}
+	// nothing to delete
+	return false, nil
 }
 
 func (db mockDB) GetContext() *context.T {
 	return db.ctx
 }
 
-func (db mockDB) GetTable(table string) (ds.Table, error) {
+func (db mockDB) GetTable(table string, writeAccessReq bool) (ds.Table, error) {
 	for _, t := range db.tables {
 		if t.name == table {
 			return t, nil
@@ -150,6 +170,22 @@ func init() {
 	var shutdown v23.Shutdown
 	db.ctx, shutdown = test.V23Init()
 	defer shutdown()
+}
+
+func initTables() {
+	db.tables = db.tables[:0]
+	custTable.rows = custTable.rows[:0]
+	numTable.rows = custTable.rows[:0]
+	fooTable.rows = custTable.rows[:0]
+	funWithMapsTable.rows = funWithMapsTable.rows[:0]
+	ratingsArrayTable.rows = ratingsArrayTable.rows[:0]
+	tdhApprovalsTable.rows = tdhApprovalsTable.rows[:0]
+	previousRatingsTable.rows = previousRatingsTable.rows[:0]
+	previousAddressesTable.rows = previousAddressesTable.rows[:0]
+	manyMapsTable.rows = manyMapsTable.rows[:0]
+	manySetsTable.rows = manySetsTable.rows[:0]
+	bigTable.rows = bigTable.rows[:0]
+	funWithTypesTable.rows = funWithTypesTable.rows[:0]
 
 	t20150122131101, _ := time.Parse("Jan 2 2006 15:04:05 -0700 MST", "Jan 22 2015 13:11:01 -0800 PST")
 	t20150210161202, _ := time.Parse("Jan 2 2006 15:04:05 -0700 MST", "Feb 10 2015 16:12:02 -0800 PST")
@@ -215,7 +251,7 @@ func init() {
 			vdl.ValueOf(td.Customer{"John Steed", 3, true, td.AddressInfo{"100 Queen St.", "New%London", "CT", "06320"}, []td.AddressInfo{}, td.CreditReport{Agency: td.CreditAgencyExperian, Report: td.AgencyReportExperianReport{td.ExperianCreditReport{td.ExperianRatingGood, map[td.Tdh]struct{}{td.TdhTom: {}, td.TdhHarry: {}}, td.TdhTom}}}}),
 		},
 	}
-	db.tables = append(db.tables, custTable)
+	db.tables = append(db.tables, &custTable)
 
 	numTable.name = "Numbers"
 	numTable.rows = []kv{
@@ -232,7 +268,7 @@ func init() {
 			vdl.ValueOf(td.Numbers{byte(210), uint16(210), uint32(210), uint64(210), int16(210), int32(210), int64(210), float32(210.0), float64(210.0), complex64(210.0 + 0.0i), complex128(210.0 + 0.0i)}),
 		},
 	}
-	db.tables = append(db.tables, numTable)
+	db.tables = append(db.tables, &numTable)
 
 	fooTable.name = "Foo"
 	fooTable.rows = []kv{
@@ -245,7 +281,7 @@ func init() {
 			vdl.ValueOf(td.FooType{td.BarType{td.BazType{"BazBarFoo", td.TitleOrValueTypeValue{42}}}}),
 		},
 	}
-	db.tables = append(db.tables, fooTable)
+	db.tables = append(db.tables, &fooTable)
 
 	funWithMapsTable.name = "FunWithMaps"
 	funWithMapsTable.rows = []kv{
@@ -271,7 +307,7 @@ func init() {
 			}),
 		},
 	}
-	db.tables = append(db.tables, funWithMapsTable)
+	db.tables = append(db.tables, &funWithMapsTable)
 
 	ratingsArrayTable.name = "RatingsArray"
 	ratingsArrayTable.rows = []kv{
@@ -284,7 +320,7 @@ func init() {
 			vdl.ValueOf(td.RatingsArray{17, 18, 19, 20}),
 		},
 	}
-	db.tables = append(db.tables, ratingsArrayTable)
+	db.tables = append(db.tables, &ratingsArrayTable)
 
 	tdhApprovalsTable.name = "TdhApprovals"
 	tdhApprovalsTable.rows = []kv{
@@ -297,7 +333,7 @@ func init() {
 			vdl.ValueOf(map[td.Tdh]struct{}{td.TdhDick: {}, td.TdhHarry: {}}),
 		},
 	}
-	db.tables = append(db.tables, tdhApprovalsTable)
+	db.tables = append(db.tables, &tdhApprovalsTable)
 
 	previousRatingsTable.name = "PreviousRatings"
 	previousRatingsTable.rows = []kv{
@@ -310,7 +346,7 @@ func init() {
 			vdl.ValueOf(map[string]int16{"2Q2015": 3}),
 		},
 	}
-	db.tables = append(db.tables, previousRatingsTable)
+	db.tables = append(db.tables, &previousRatingsTable)
 
 	previousAddressesTable.name = "PreviousAddresses"
 	previousAddressesTable.rows = []kv{
@@ -329,7 +365,7 @@ func init() {
 			}),
 		},
 	}
-	db.tables = append(db.tables, previousAddressesTable)
+	db.tables = append(db.tables, &previousAddressesTable)
 
 	manyMapsTable.name = "ManyMaps"
 	manyMapsTable.rows = []kv{
@@ -356,7 +392,7 @@ func init() {
 			}),
 		},
 	}
-	db.tables = append(db.tables, manyMapsTable)
+	db.tables = append(db.tables, &manyMapsTable)
 
 	manySetsTable.name = "ManySets"
 	manySetsTable.rows = []kv{
@@ -380,7 +416,7 @@ func init() {
 			}),
 		},
 	}
-	db.tables = append(db.tables, manySetsTable)
+	db.tables = append(db.tables, &manySetsTable)
 
 	bigTable.name = "BigTable"
 
@@ -389,7 +425,7 @@ func init() {
 		b := vdl.ValueOf(td.BigData{k})
 		bigTable.rows = append(bigTable.rows, kv{k, b})
 	}
-	db.tables = append(db.tables, bigTable)
+	db.tables = append(db.tables, &bigTable)
 
 	custType := vdl.ValueOf(td.Customer{"John Steed", 3, true, td.AddressInfo{"100 Queen St.", "New London", "CT", "06320"}, []td.AddressInfo{}, td.CreditReport{Agency: td.CreditAgencyExperian, Report: td.AgencyReportExperianReport{td.ExperianCreditReport{td.ExperianRatingGood, map[td.Tdh]struct{}{td.TdhTom: {}, td.TdhHarry: {}}, td.TdhTom}}}}).Type()
 	invType := vdl.ValueOf(td.Invoice{2, 1006, t20150413141707, 88, td.AddressInfo{"101010 Any St.", "collins", "IA", "50055"}}).Type()
@@ -405,7 +441,7 @@ func init() {
 			vdl.ValueOf(td.FunWithTypes{T1: custType, T2: custType}),
 		},
 	}
-	db.tables = append(db.tables, funWithTypesTable)
+	db.tables = append(db.tables, &funWithTypesTable)
 }
 
 type keyRangesTest struct {
@@ -440,6 +476,15 @@ type execSelectTest struct {
 	r       [][]*vdl.Value
 }
 
+type execDeleteTest struct {
+	delQuery   string
+	delHeaders []string
+	delResults [][]*vdl.Value
+	selQuery   string
+	selHeaders []string
+	selResults [][]*vdl.Value
+}
+
 type preExecFunctionTest struct {
 	query   string
 	headers []string
@@ -464,7 +509,8 @@ type execResolveFieldTest struct {
 	r *vdl.Value
 }
 
-func TestQueryExec(t *testing.T) {
+func TestSelect(t *testing.T) {
+	initTables()
 	basic := []execSelectTest{
 		{
 			// Select values for all customer records.
@@ -2267,6 +2313,107 @@ func TestQueryExec(t *testing.T) {
 	}
 }
 
+func TestDelete(t *testing.T) {
+	basic := []execDeleteTest{
+		{
+			"delete from Customer where k like \"001%\"",
+			[]string{"Count"},
+			[][]*vdl.Value{[]*vdl.Value{vdl.ValueOf(4)}},
+			"select k from Customer",
+			[]string{"k"},
+			[][]*vdl.Value{
+				[]*vdl.Value{vdl.ValueOf("002")},
+				[]*vdl.Value{vdl.ValueOf("002001")},
+				[]*vdl.Value{vdl.ValueOf("002002")},
+				[]*vdl.Value{vdl.ValueOf("002003")},
+				[]*vdl.Value{vdl.ValueOf("002004")},
+				[]*vdl.Value{vdl.ValueOf("003")},
+			},
+		},
+		{
+			"delete from Customer where k = \"001\"",
+			[]string{"Count"},
+			[][]*vdl.Value{[]*vdl.Value{vdl.ValueOf(1)}},
+			"select k from Customer",
+			[]string{"k"},
+			[][]*vdl.Value{
+				[]*vdl.Value{vdl.ValueOf("001001")},
+				[]*vdl.Value{vdl.ValueOf("001002")},
+				[]*vdl.Value{vdl.ValueOf("001003")},
+				[]*vdl.Value{vdl.ValueOf("002")},
+				[]*vdl.Value{vdl.ValueOf("002001")},
+				[]*vdl.Value{vdl.ValueOf("002002")},
+				[]*vdl.Value{vdl.ValueOf("002003")},
+				[]*vdl.Value{vdl.ValueOf("002004")},
+				[]*vdl.Value{vdl.ValueOf("003")},
+			},
+		},
+		{
+			"delete from Customer where Type(v) like \"%Customer\" and v.Name like \"%Masterson\"",
+			[]string{"Count"},
+			[][]*vdl.Value{[]*vdl.Value{vdl.ValueOf(1)}},
+			"select k from Customer where Type(v) like \"%Customer\"",
+			[]string{"k"},
+			[][]*vdl.Value{
+				[]*vdl.Value{vdl.ValueOf("001")},
+				[]*vdl.Value{vdl.ValueOf("003")},
+			},
+		},
+		{
+			"delete from Customer where Type(v) like \"%Invoice\" and v.CustId = 1 limit 2",
+			[]string{"Count"},
+			[][]*vdl.Value{[]*vdl.Value{vdl.ValueOf(2)}},
+			"select k from Customer where Type(v) like \"%Invoice\"",
+			[]string{"k"},
+			[][]*vdl.Value{
+				[]*vdl.Value{vdl.ValueOf("001003")},
+				[]*vdl.Value{vdl.ValueOf("002001")},
+				[]*vdl.Value{vdl.ValueOf("002002")},
+				[]*vdl.Value{vdl.ValueOf("002003")},
+				[]*vdl.Value{vdl.ValueOf("002004")},
+			},
+		},
+	}
+
+	for _, test := range basic {
+		initTables()
+		// Delete
+		headers, rs, err := internal.Exec(db, test.delQuery)
+		if err != nil {
+			t.Errorf("delQuery: %s; got %v, want nil", test.delQuery, err)
+		} else {
+			// Collect results.
+			r := [][]*vdl.Value{}
+			for rs.Advance() {
+				r = append(r, rs.Result())
+			}
+			if !reflect.DeepEqual(test.delResults, r) {
+				t.Errorf("delQuery: %s; got %v, want %v", test.delQuery, r, test.delResults)
+			}
+			if !reflect.DeepEqual(test.delHeaders, headers) {
+				t.Errorf("delQuery: %s; got %v, want %v", test.delQuery, headers, test.delHeaders)
+			}
+		}
+		// Select
+		headers, rs, err = internal.Exec(db, test.selQuery)
+		if err != nil {
+			t.Errorf("selQuery: %s; got %v, want nil", test.selQuery, err)
+		} else {
+			// Collect results.
+			r := [][]*vdl.Value{}
+			for rs.Advance() {
+				r = append(r, rs.Result())
+			}
+			if !reflect.DeepEqual(test.selResults, r) {
+				t.Errorf("selQuery: %s; got %v, want %v", test.selQuery, r, test.selResults)
+			}
+			if !reflect.DeepEqual(test.selHeaders, headers) {
+				t.Errorf("selQuery: %s; got %v, want %v", test.selQuery, headers, test.selHeaders)
+			}
+		}
+	}
+}
+
 func svPair(s string) []*vdl.Value {
 	v := vdl.ValueOf(s)
 	return []*vdl.Value{v, v}
@@ -2285,6 +2432,7 @@ func svPairs(start, finish int64) [][]*vdl.Value {
 // Use Now to verify it is "pre" executed such that all the rows
 // have the same time.
 func TestPreExecFunctions(t *testing.T) {
+	initTables()
 	basic := []preExecFunctionTest{
 		{
 			"select Now() from Customer",
@@ -2337,6 +2485,7 @@ func plusOne(start string) string {
 }
 
 func TestKeyRanges(t *testing.T) {
+	initTables()
 	basic := []keyRangesTest{
 		{
 			// Need all keys
@@ -2692,6 +2841,7 @@ func TestKeyRanges(t *testing.T) {
 }
 
 func TestEvalWhereUsingOnlyKey(t *testing.T) {
+	initTables()
 	basic := []evalWhereUsingOnlyKeyTest{
 		{
 			// Row will be selected using only the key.
@@ -2738,7 +2888,7 @@ func TestEvalWhereUsingOnlyKey(t *testing.T) {
 			if semErr == nil {
 				switch sel := (*s).(type) {
 				case query_parser.SelectStatement:
-					result := internal.EvalWhereUsingOnlyKey(db, &sel, test.key)
+					result := internal.EvalWhereUsingOnlyKey(db, sel.Where, test.key)
 					if result != test.result {
 						t.Errorf("query: %s; got %v, want %v", test.query, result, test.result)
 					}
@@ -2751,6 +2901,7 @@ func TestEvalWhereUsingOnlyKey(t *testing.T) {
 }
 
 func TestEval(t *testing.T) {
+	initTables()
 	basic := []evalTest{
 		{
 			"select k, v from Customer where Type(v) = \"v.io/v23/query/engine/internal/testdata.Customer\"",
@@ -2995,6 +3146,7 @@ func TestEval(t *testing.T) {
 }
 
 func TestProjection(t *testing.T) {
+	initTables()
 	basic := []projectionTest{
 		{
 			"select k, v from Customer where Type(v) like \"%.Customer\"",
@@ -3049,6 +3201,7 @@ func TestProjection(t *testing.T) {
 }
 
 func TestExecSelectSingleRow(t *testing.T) {
+	initTables()
 	basic := []execSelectSingleRowTest{
 		{
 			"select k, v from Customer where Type(v) like \"%.Customer\"",
@@ -3135,6 +3288,7 @@ func TestExecSelectSingleRow(t *testing.T) {
 
 // TODO(jkline): More negative tests here (even though they are tested elsewhere)?
 func TestExecErrors(t *testing.T) {
+	initTables()
 	basic := []execSelectErrorTest{
 		{
 			"select a from Customer",
@@ -3274,11 +3428,6 @@ func TestExecErrors(t *testing.T) {
 			"select v from Customer where k like \"abc %\" escape ' '",
 			syncql.NewErrInvalidEscapeChar(db.GetContext(), 51),
 		},
-		// At present, delete is not a valid statement.  It only parses.
-		{
-			"delete from Customer",
-			syncql.NewErrExecOfUnknownStatementType(db.GetContext(), 0, "DeleteStatement"),
-		},
 	}
 
 	for _, test := range basic {
@@ -3291,6 +3440,7 @@ func TestExecErrors(t *testing.T) {
 }
 
 func TestResolveField(t *testing.T) {
+	initTables()
 	basic := []execResolveFieldTest{
 		{
 			custTable.rows[0].key,

@@ -38,7 +38,7 @@ func init() {
 	defer shutdown()
 }
 
-func (db *mockDB) GetTable(table string) (ds.Table, error) {
+func (db *mockDB) GetTable(table string, writeAccessReq bool) (ds.Table, error) {
 	return nil, errors.New("unimplemented")
 }
 

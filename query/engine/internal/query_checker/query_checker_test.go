@@ -50,6 +50,10 @@ func (t invoiceTable) Scan(indexRanges ...ds.IndexRanges) (ds.KeyValueStream, er
 	return nil, errors.New("unimplemented")
 }
 
+func (t invoiceTable) Delete(k string) (bool, error) {
+	return false, errors.New("unimplemented")
+}
+
 func (t customerTable) GetIndexFields() []ds.Index {
 	return []ds.Index{}
 }
@@ -58,7 +62,11 @@ func (t customerTable) Scan(indexRanges ...ds.IndexRanges) (ds.KeyValueStream, e
 	return nil, errors.New("unimplemented")
 }
 
-func (db *mockDB) GetTable(table string) (ds.Table, error) {
+func (t customerTable) Delete(k string) (bool, error) {
+	return false, errors.New("unimplemented")
+}
+
+func (db *mockDB) GetTable(table string, writeAccessReq bool) (ds.Table, error) {
 	if table == "Customer" {
 		var t customerTable
 		return t, nil

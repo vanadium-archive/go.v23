@@ -40,7 +40,7 @@ func checkSelectStatement(db ds.Database, s *query_parser.SelectStatement) error
 	if err := checkSelectClause(db, s.Select); err != nil {
 		return err
 	}
-	if err := checkFromClause(db, s.From); err != nil {
+	if err := checkFromClause(db, s.From, false); err != nil {
 		return err
 	}
 	if err := checkEscapeClause(db, s.Escape); err != nil {
@@ -59,7 +59,7 @@ func checkSelectStatement(db ds.Database, s *query_parser.SelectStatement) error
 }
 
 func checkDeleteStatement(db ds.Database, s *query_parser.DeleteStatement) error {
-	if err := checkFromClause(db, s.From); err != nil {
+	if err := checkFromClause(db, s.From, true); err != nil {
 		return err
 	}
 	if err := checkEscapeClause(db, s.Escape); err != nil {
@@ -106,9 +106,9 @@ func checkSelectClause(db ds.Database, s *query_parser.SelectClause) error {
 }
 
 // Check from clause.  Table must exist in the database.
-func checkFromClause(db ds.Database, f *query_parser.FromClause) error {
+func checkFromClause(db ds.Database, f *query_parser.FromClause, writeAccessReq bool) error {
 	var err error
-	f.Table.DBTable, err = db.GetTable(f.Table.Name)
+	f.Table.DBTable, err = db.GetTable(f.Table.Name, writeAccessReq)
 	if err != nil {
 		return syncql.NewErrTableCantAccess(db.GetContext(), f.Table.Off, f.Table.Name, err)
 	}

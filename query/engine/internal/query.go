@@ -110,9 +110,9 @@ func checkAndExec(db ds.Database, s *query_parser.Statement) ([]string, syncql.R
 	if err := query_checker.Check(db, s); err != nil {
 		return nil, nil, err
 	}
-	switch sel := (*s).(type) {
-	case query_parser.SelectStatement:
-		return execSelect(db, &sel)
+	switch (*s).(type) {
+	case query_parser.SelectStatement, query_parser.DeleteStatement:
+		return execStatement(db, s)
 	default:
 		return nil, nil, syncql.NewErrExecOfUnknownStatementType(db.GetContext(), (*s).Offset(), reflect.TypeOf(*s).Name())
 	}
@@ -155,66 +155,6 @@ func ExecSelectSingleRow(db ds.Database, k string, v *vdl.Value, s *query_parser
 		return rs
 	}
 	return ComposeProjection(db, k, v, s.Select)
-}
-
-type resultStreamImpl struct {
-	db              ds.Database
-	selectStatement *query_parser.SelectStatement
-	resultCount     int64 // results served so far (needed for limit clause)
-	skippedCount    int64 // skipped so far (needed for offset clause)
-	keyValueStream  ds.KeyValueStream
-	k               string
-	v               *vdl.Value
-	err             error
-}
-
-func (rs *resultStreamImpl) Advance() bool {
-	if rs.selectStatement.Limit != nil && rs.resultCount >= rs.selectStatement.Limit.Limit.Value {
-		return false
-	}
-	for rs.keyValueStream.Advance() {
-		k, v := rs.keyValueStream.KeyValue()
-		// EvalWhereUsingOnlyKey
-		// INCLUDE: the row should be included in the results
-		// EXCLUDE: the row should NOT be included
-		// FETCH_VALUE: the value and/or type of the value are required to make determination.
-		rv := EvalWhereUsingOnlyKey(rs.db, rs.selectStatement, k)
-		var match bool
-		switch rv {
-		case INCLUDE:
-			match = true
-		case EXCLUDE:
-			match = false
-		case FETCH_VALUE:
-			match = Eval(rs.db, k, v, rs.selectStatement.Where.Expr)
-		}
-		if match {
-			if rs.selectStatement.ResultsOffset == nil || rs.selectStatement.ResultsOffset.ResultsOffset.Value <= rs.skippedCount {
-				rs.k = k
-				rs.v = v
-				rs.resultCount++
-				return true
-			} else {
-				rs.skippedCount++
-			}
-		}
-	}
-	if err := rs.keyValueStream.Err(); err != nil {
-		rs.err = syncql.NewErrKeyValueStreamError(rs.db.GetContext(), rs.selectStatement.Off, err)
-	}
-	return false
-}
-
-func (rs *resultStreamImpl) Result() []*vdl.Value {
-	return ComposeProjection(rs.db, rs.k, rs.v, rs.selectStatement.Select)
-}
-
-func (rs *resultStreamImpl) Err() error {
-	return rs.err
-}
-
-func (rs *resultStreamImpl) Cancel() {
-	rs.keyValueStream.Cancel()
 }
 
 func getColumnHeadings(s *query_parser.SelectStatement) []string {
@@ -289,35 +229,102 @@ func getSegmentKeyAsHeading(segKey *query_parser.Operand) string {
 	return val
 }
 
-func execSelect(db ds.Database, s *query_parser.SelectStatement) ([]string, syncql.ResultStream, error) {
+func getIndexRanges(db ds.Database, tableName string, tableOff int64, indexFields []ds.Index, w *query_parser.WhereClause) ([]ds.IndexRanges, error) {
 	indexes := []ds.IndexRanges{}
 
 	// Get IndexRanges for k
 	kField := &query_parser.Field{Segments: []query_parser.Segment{query_parser.Segment{Value: "k"}}}
-	idxRanges := *query_checker.CompileIndexRanges(kField, vdl.String, s.Where)
+	idxRanges := *query_checker.CompileIndexRanges(kField, vdl.String, w)
 	indexes = append(indexes, idxRanges)
 
 	// Get IndexRanges for secondary indexes.
-	for _, idx := range s.From.Table.DBTable.GetIndexFields() {
+	for _, idx := range indexFields {
 		if idx.Kind != vdl.String {
-			return nil, nil, syncql.NewErrIndexKindNotSupported(db.GetContext(), s.From.Table.Off, idx.Kind.String(), idx.FieldName, s.From.Table.Name)
+			return nil, syncql.NewErrIndexKindNotSupported(db.GetContext(), tableOff, idx.Kind.String(), idx.FieldName, tableName)
 		}
 		var err error
 		var idxField *query_parser.Field
 		// Construct a Field from the string.  Use the parser as it knows best.
-		if idxField, err = query_parser.ParseIndexField(db, idx.FieldName, s.From.Table.Name); err != nil {
-			return nil, nil, err
+		if idxField, err = query_parser.ParseIndexField(db, idx.FieldName, tableName); err != nil {
+			return nil, err
 		}
-		idxRanges := *query_checker.CompileIndexRanges(idxField, idx.Kind, s.Where)
+		idxRanges := *query_checker.CompileIndexRanges(idxField, idx.Kind, w)
 		indexes = append(indexes, idxRanges)
 	}
-	keyValueStream, err := s.From.Table.DBTable.Scan(indexes...)
-	if err != nil {
-		return nil, nil, syncql.NewErrScanError(db.GetContext(), s.Off, err)
+	return indexes, nil
+}
+
+func execStatement(db ds.Database, s *query_parser.Statement) ([]string, syncql.ResultStream, error) {
+	switch st := (*s).(type) {
+
+	// Select
+	case query_parser.SelectStatement:
+		indexes, err := getIndexRanges(db, st.From.Table.Name, st.From.Table.Off, st.From.Table.DBTable.GetIndexFields(), st.Where)
+		if err != nil {
+			return nil, nil, err
+		}
+
+		keyValueStream, err := st.From.Table.DBTable.Scan(indexes...)
+		if err != nil {
+			return nil, nil, syncql.NewErrScanError(db.GetContext(), st.Off, err)
+		}
+		var resultStream selectResultStreamImpl
+		resultStream.db = db
+		resultStream.selectStatement = &st
+		resultStream.keyValueStream = keyValueStream
+		return getColumnHeadings(&st), &resultStream, nil
+
+	// Delete
+	case query_parser.DeleteStatement:
+		indexes, err := getIndexRanges(db, st.From.Table.Name, st.From.Table.Off, st.From.Table.DBTable.GetIndexFields(), st.Where)
+		if err != nil {
+			return nil, nil, err
+		}
+
+		keyValueStream, err := st.From.Table.DBTable.Scan(indexes...)
+		if err != nil {
+			return nil, nil, syncql.NewErrScanError(db.GetContext(), st.Off, err)
+		}
+
+		deleteCount := int64(0)
+		for keyValueStream.Advance() {
+			if st.Limit != nil && deleteCount >= st.Limit.Limit.Value {
+				break
+			}
+			k, v := keyValueStream.KeyValue()
+			// EvalWhereUsingOnlyKey
+			// INCLUDE: the row should be included in the results
+			// EXCLUDE: the row should NOT be included
+			// FETCH_VALUE: the value and/or type of the value are required to make determination.
+			rv := EvalWhereUsingOnlyKey(db, st.Where, k)
+			var match bool
+			switch rv {
+			case INCLUDE:
+				match = true
+			case EXCLUDE:
+				match = false
+			case FETCH_VALUE:
+				match = Eval(db, k, v, st.Where.Expr)
+			}
+			if match {
+				b, err := st.From.Table.DBTable.Delete(k)
+				// May not have delete permission to delete this k/v pair.
+				// Continue, but don't increment delete count.
+				if err == nil && b {
+					deleteCount++
+				}
+			}
+		}
+		if err := keyValueStream.Err(); err != nil {
+			return nil, nil, syncql.NewErrKeyValueStreamError(db.GetContext(), st.Off, err)
+		}
+
+		var resultStream deleteResultStreamImpl
+		resultStream.db = db
+		resultStream.deleteStatement = &st
+		resultStream.deleteCursor = 0
+		resultStream.deleteCount = deleteCount
+		return []string{"Count"}, &resultStream, nil
 	}
-	var resultStream resultStreamImpl
-	resultStream.db = db
-	resultStream.selectStatement = s
-	resultStream.keyValueStream = keyValueStream
-	return getColumnHeadings(s), &resultStream, nil
+	return nil, nil, syncql.NewErrOperationNotSupported(db.GetContext(), "")
 }

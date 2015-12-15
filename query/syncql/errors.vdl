@@ -167,4 +167,10 @@ error (
 	InvalidIndexField(off int64, fieldName string, table string) {
 		"en": "[{off}]Invalid index field {fieldName} returned by table {table}.",
 	}
+	NotWritable(table string) {
+		"en": "[0]Can't write to table {table} (not supported on batch/connection).",
+	}
+	OperationNotSupported(operation string) {
+		"en": "[0]{operation} not supported.",
+	}
 )

@@ -41,7 +41,9 @@ pkg syncql, func NewErrLocationConversionError(*context.T, int64, error) error
 pkg syncql, func NewErrMaxStatementLenExceeded(*context.T, int64, int64, int64) error
 pkg syncql, func NewErrNoStatementFound(*context.T, int64) error
 pkg syncql, func NewErrNotEnoughParamValuesSpecified(*context.T, int64) error
+pkg syncql, func NewErrNotWritable(*context.T, string) error
 pkg syncql, func NewErrOffsetMustBeGe0(*context.T, int64) error
+pkg syncql, func NewErrOperationNotSupported(*context.T, string) error
 pkg syncql, func NewErrPreparedStatementNotFound(*context.T) error
 pkg syncql, func NewErrScanError(*context.T, int64, error) error
 pkg syncql, func NewErrStringConversionError(*context.T, int64, error) error
@@ -101,7 +103,9 @@ pkg syncql, var ErrLocationConversionError verror.IDAction
 pkg syncql, var ErrMaxStatementLenExceeded verror.IDAction
 pkg syncql, var ErrNoStatementFound verror.IDAction
 pkg syncql, var ErrNotEnoughParamValuesSpecified verror.IDAction
+pkg syncql, var ErrNotWritable verror.IDAction
 pkg syncql, var ErrOffsetMustBeGe0 verror.IDAction
+pkg syncql, var ErrOperationNotSupported verror.IDAction
 pkg syncql, var ErrPreparedStatementNotFound verror.IDAction
 pkg syncql, var ErrScanError verror.IDAction
 pkg syncql, var ErrStringConversionError verror.IDAction

@@ -69,7 +69,7 @@ func (db *mockDB) GetContext() *context.T {
 	return db.ctx
 }
 
-func (db *mockDB) GetTable(name string) (ds.Table, error) {
+func (db *mockDB) GetTable(name string, writeAccessReq bool) (ds.Table, error) {
 	return nil, nil
 }
 

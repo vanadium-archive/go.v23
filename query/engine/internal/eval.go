@@ -564,11 +564,11 @@ const (
 // If the result is false, but no other expressions were encountered, EXCLUDE is returned; else,
 // FETCH_VALUE is returned indicating the value must be fetched in order to determine if the row
 // should be included in the results.
-func EvalWhereUsingOnlyKey(db ds.Database, s *query_parser.SelectStatement, k string) EvalWithKeyResult {
-	if s.Where == nil { // all rows will be in result
+func EvalWhereUsingOnlyKey(db ds.Database, w *query_parser.WhereClause, k string) EvalWithKeyResult {
+	if w == nil { // all rows will be in result
 		return INCLUDE
 	}
-	return evalExprUsingOnlyKey(db, s.Where.Expr, k)
+	return evalExprUsingOnlyKey(db, w.Expr, k)
 }
 
 func evalExprUsingOnlyKey(db ds.Database, e *query_parser.Expression, k string) EvalWithKeyResult {

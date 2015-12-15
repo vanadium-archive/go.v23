@@ -69,6 +69,8 @@ var (
 	ErrPreparedStatementNotFound       = verror.Register("v.io/v23/query/syncql.PreparedStatementNotFound", verror.NoRetry, "{1:}{2:} [0]Prepared statement not found.")
 	ErrIndexKindNotSupported           = verror.Register("v.io/v23/query/syncql.IndexKindNotSupported", verror.NoRetry, "{1:}{2:} [{3}]Index kind {4} of field {5} on table {6} not supported.")
 	ErrInvalidIndexField               = verror.Register("v.io/v23/query/syncql.InvalidIndexField", verror.NoRetry, "{1:}{2:} [{3}]Invalid index field {4} returned by table {5}.")
+	ErrNotWritable                     = verror.Register("v.io/v23/query/syncql.NotWritable", verror.NoRetry, "{1:}{2:} [0]Can't write to table {3} (not supported on batch/connection).")
+	ErrOperationNotSupported           = verror.Register("v.io/v23/query/syncql.OperationNotSupported", verror.NoRetry, "{1:}{2:} [0]{3} not supported.")
 )
 
 func init() {
@@ -126,6 +128,8 @@ func init() {
 	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrPreparedStatementNotFound.ID), "{1:}{2:} [0]Prepared statement not found.")
 	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrIndexKindNotSupported.ID), "{1:}{2:} [{3}]Index kind {4} of field {5} on table {6} not supported.")
 	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrInvalidIndexField.ID), "{1:}{2:} [{3}]Invalid index field {4} returned by table {5}.")
+	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrNotWritable.ID), "{1:}{2:} [0]Can't write to table {3} (not supported on batch/connection).")
+	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrOperationNotSupported.ID), "{1:}{2:} [0]{3} not supported.")
 }
 
 // NewErrBadFieldInWhere returns an error with the ErrBadFieldInWhere ID.
@@ -396,4 +400,14 @@ func NewErrIndexKindNotSupported(ctx *context.T, off int64, kind string, fieldNa
 // NewErrInvalidIndexField returns an error with the ErrInvalidIndexField ID.
 func NewErrInvalidIndexField(ctx *context.T, off int64, fieldName string, table string) error {
 	return verror.New(ErrInvalidIndexField, ctx, off, fieldName, table)
+}
+
+// NewErrNotWritable returns an error with the ErrNotWritable ID.
+func NewErrNotWritable(ctx *context.T, table string) error {
+	return verror.New(ErrNotWritable, ctx, table)
+}
+
+// NewErrOperationNotSupported returns an error with the ErrOperationNotSupported ID.
+func NewErrOperationNotSupported(ctx *context.T, operation string) error {
+	return verror.New(ErrOperationNotSupported, ctx, operation)
 }

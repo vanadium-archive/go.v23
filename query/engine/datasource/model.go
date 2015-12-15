@@ -22,8 +22,14 @@ import (
 )
 
 type Database interface {
+	// GetContext returns a context (used for creating error messages).
 	GetContext() *context.T
-	GetTable(name string) (Table, error)
+
+	// GetTable returns an instance of the Table inteface for the table
+	// specified by name.  If writeAccessReq is true, the Table needs
+	// to support the Delete function.  If it cannot, the syncql.NotWritable
+	// error should be returned.
+	GetTable(name string, writeAccessReq bool) (Table, error)
 }
 
 type Table interface {
@@ -53,6 +59,13 @@ type Table interface {
 	// the ranges by not passing in k/v pairs that the ranges exclude.  Future
 	// optimzation may cause incorrect answers if this contract is not kept.
 	Scan(indexRanges ...IndexRanges) (KeyValueStream, error)
+
+	// Delete deletes the k/v pair for key k.
+	// This will only be called if GetTable was called with writeAccessReq == true.
+	// If Delete is not supported, GetTable should have returned an error.  If
+	// Delete is called anyway (logic error), the syncql.OperationNotSupported error
+	// should be returned.
+	Delete(k string) (bool, error)
 }
 
 type KeyValueStream interface {
