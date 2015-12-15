@@ -67,9 +67,10 @@ func (TraceFlags) __VDLReflect(struct {
 
 // Request is the object that carries trace informtion between processes.
 type Request struct {
-	SpanId  uniqueid.Id // The Id of the span that originated the RPC call.
-	TraceId uniqueid.Id // The Id of the trace this call is a part of.
-	Flags   TraceFlags
+	SpanId   uniqueid.Id // The Id of the span that originated the RPC call.
+	TraceId  uniqueid.Id // The Id of the trace this call is a part of.
+	Flags    TraceFlags
+	LogLevel int32
 }
 
 func (Request) __VDLReflect(struct {

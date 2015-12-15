@@ -50,6 +50,7 @@ type Request struct {
 	SpanId  uniqueid.Id // The Id of the span that originated the RPC call.
 	TraceId uniqueid.Id // The Id of the trace this call is a part of.
 	Flags   TraceFlags
+	LogLevel   int32
 }
 
 type Response struct {

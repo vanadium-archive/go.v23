@@ -24,6 +24,7 @@ pkg vtrace, type Manager interface, WithNewSpan(*context.T, string) (*context.T,
 pkg vtrace, type Manager interface, WithNewTrace(*context.T) (*context.T, Span)
 pkg vtrace, type Request struct
 pkg vtrace, type Request struct, Flags TraceFlags
+pkg vtrace, type Request struct, LogLevel int32
 pkg vtrace, type Request struct, SpanId uniqueid.Id
 pkg vtrace, type Request struct, TraceId uniqueid.Id
 pkg vtrace, type Response struct
