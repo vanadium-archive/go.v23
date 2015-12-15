@@ -200,17 +200,21 @@ func (t *Type) IsBytes() bool {
 	return (t.kind == List || t.kind == Array) && t.elem.kind == Byte
 }
 
+var enumLabelAllowed = []Kind{Enum}
+
 // EnumLabel returns the Enum label at the given index.  It panics if the index
 // is out of range.
 func (t *Type) EnumLabel(index int) string {
-	t.checkKind("EnumLabel", Enum)
+	t.checkKind("EnumLabel", enumLabelAllowed...)
 	return t.labels[index]
 }
+
+var enumIndexAllowed = []Kind{Enum}
 
 // EnumIndex returns the Enum index for the given label.  Returns -1 if the
 // label doesn't exist.
 func (t *Type) EnumIndex(label string) int {
-	t.checkKind("EnumIndex", Enum)
+	t.checkKind("EnumIndex", enumIndexAllowed...)
 	// We typically have a small number of labels, so linear search is fine.
 	for index, l := range t.labels {
 		if l == label {
@@ -220,40 +224,52 @@ func (t *Type) EnumIndex(label string) int {
 	return -1
 }
 
+var numEnumLabelAllowed = []Kind{Enum}
+
 // NumEnumLabel returns the number of labels in an Enum.
 func (t *Type) NumEnumLabel() int {
-	t.checkKind("NumEnumLabel", Enum)
+	t.checkKind("NumEnumLabel", numEnumLabelAllowed...)
 	return len(t.labels)
 }
 
+var lenAllowed = []Kind{Array}
+
 // Len returns the length of an Array.
 func (t *Type) Len() int {
-	t.checkKind("Len", Array)
+	t.checkKind("Len", lenAllowed...)
 	return t.len
 }
 
+var elemAllowed = []Kind{Optional, Array, List, Map}
+
 // Elem returns the element type of an Optional, Array, List or Map.
 func (t *Type) Elem() *Type {
-	t.checkKind("Elem", Optional, Array, List, Map)
+	t.checkKind("Elem", elemAllowed...)
 	return t.elem
 }
 
+var keyAllowed = []Kind{Set, Map}
+
 // Key returns the key type of a Set or Map.
 func (t *Type) Key() *Type {
-	t.checkKind("Key", Set, Map)
+	t.checkKind("Key", keyAllowed...)
 	return t.key
 }
 
+var fieldAllowed = []Kind{Struct, Union}
+
 // Field returns a description of the Struct or Union field at the given index.
 func (t *Type) Field(index int) Field {
-	t.checkKind("Field", Struct, Union)
+	t.checkKind("Field", fieldAllowed...)
 	return t.fields[index]
 }
+
+var fieldByNameAllowed = []Kind{Struct, Union}
 
 // FieldByName returns a description of the Struct or Union field with the given
 // name, and its integer field index.  Returns -1 if the name doesn't exist.
 func (t *Type) FieldByName(name string) (Field, int) {
-	t.checkKind("FieldByName", Struct, Union)
+	t.checkKind("FieldByName", fieldByNameAllowed...)
 	// We typically have a small number of fields, so linear search is fine.
 	for index, f := range t.fields {
 		if f.Name == name {
@@ -263,9 +279,11 @@ func (t *Type) FieldByName(name string) (Field, int) {
 	return Field{}, -1
 }
 
+var numFieldAllowed = []Kind{Struct, Union}
+
 // NumField returns the number of fields in a Struct or Union.
 func (t *Type) NumField() int {
-	t.checkKind("NumField", Struct, Union)
+	t.checkKind("NumField", numFieldAllowed...)
 	return len(t.fields)
 }
 
