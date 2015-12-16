@@ -8,7 +8,10 @@ import (
 	"testing"
 
 	"v.io/v23/naming"
+	"v.io/v23/security/access"
 	"v.io/v23/syncbase"
+	"v.io/v23/syncbase/nosql"
+	"v.io/v23/verror"
 	_ "v.io/x/ref/runtime/factories/generic"
 	tu "v.io/x/ref/services/syncbase/testutil"
 )
@@ -79,4 +82,57 @@ func TestAppPerms(t *testing.T) {
 	defer cleanup()
 	a := tu.CreateApp(t, ctx, syncbase.NewService(sName), "a")
 	tu.TestPerms(t, ctx, a)
+}
+
+// Tests that App.Destroy destroys all databases in the app.
+func TestAppDestroyAndRecreate(t *testing.T) {
+	ctx, sName, cleanup := tu.SetupOrDie(nil)
+	defer cleanup()
+	// Create the hierarchy.
+	a := tu.CreateApp(t, ctx, syncbase.NewService(sName), "a")
+	d := tu.CreateNoSQLDatabase(t, ctx, a, "d")
+	d2 := tu.CreateNoSQLDatabase(t, ctx, a, "d2")
+	tb := tu.CreateTable(t, ctx, d, "tb")
+	// Write some data.
+	if err := tb.Put(ctx, "bar/baz", "A"); err != nil {
+		t.Fatalf("tb.Put() failed: %v", err)
+	}
+	if err := tb.Put(ctx, "foo", "B"); err != nil {
+		t.Fatalf("tb.Put() failed: %v", err)
+	}
+	// Remove admin and write permissions from "bar" and d2.
+	fullPerms := tu.DefaultPerms("root:client").Normalize()
+	readPerms := fullPerms.Copy()
+	readPerms.Clear("root:client", string(access.Write), string(access.Admin))
+	readPerms.Normalize()
+	if err := tb.SetPrefixPermissions(ctx, nosql.Prefix("bar"), readPerms); err != nil {
+		t.Fatalf("tb.SetPrefixPermissions() failed: %v", err)
+	}
+	if err := d2.SetPermissions(ctx, readPerms, ""); err != nil {
+		t.Fatalf("d2.SetPermissions() failed: %v", err)
+	}
+	// Verify we have no write access to "bar" anymore.
+	if err := tb.Put(ctx, "bar/bat", "C"); verror.ErrorID(err) != verror.ErrNoAccess.ID {
+		t.Fatalf("tb.Put() should have failed with ErrNoAccess, got: %v", err)
+	}
+	// Verify we cannot destroy d2.
+	if err := d2.Destroy(ctx); verror.ErrorID(err) != verror.ErrNoAccess.ID {
+		t.Fatalf("d2.Destroy() should have failed with ErrNoAccess, got: %v", err)
+	}
+	// Destroy app. Destroy needs only admin permissions on the app, so it
+	// shouldn't be affected by the read-only prefix or database ACL.
+	if err := a.Destroy(ctx); err != nil {
+		t.Fatalf("a.Destroy() failed: %v", err)
+	}
+	// Recreate the hierarchy.
+	a = tu.CreateApp(t, ctx, syncbase.NewService(sName), "a")
+	d = tu.CreateNoSQLDatabase(t, ctx, a, "d")
+	d2 = tu.CreateNoSQLDatabase(t, ctx, a, "d2")
+	tb = tu.CreateTable(t, ctx, d, "tb")
+	// Verify table is empty.
+	tu.CheckScan(t, ctx, tb, nosql.Prefix(""), []string{}, []interface{}{})
+	// Verify we again have write access to "bar".
+	if err := tb.Put(ctx, "bar/bat", "C"); err != nil {
+		t.Fatalf("tb.Put() failed: %v", err)
+	}
 }
