@@ -31,6 +31,7 @@ pkg nosql, func NewErrConcurrentBatch(*context.T) error
 pkg nosql, func NewErrNotBoundToBatch(*context.T) error
 pkg nosql, func NewErrReadOnlyBatch(*context.T) error
 pkg nosql, func NewErrSchemaVersionMismatch(*context.T) error
+pkg nosql, func NewErrSyncgroupJoinFailed(*context.T) error
 pkg nosql, func ResolverTypeFromString(string) (ResolverType, error)
 pkg nosql, func RowClient(string) RowClientStub
 pkg nosql, func RowServer(RowServerMethods) RowServerStub
@@ -639,6 +640,7 @@ pkg nosql, var ErrConcurrentBatch verror.IDAction
 pkg nosql, var ErrNotBoundToBatch verror.IDAction
 pkg nosql, var ErrReadOnlyBatch verror.IDAction
 pkg nosql, var ErrSchemaVersionMismatch verror.IDAction
+pkg nosql, var ErrSyncgroupJoinFailed verror.IDAction
 pkg nosql, var ResolverTypeAll [...]ResolverType
 pkg nosql, var RowDesc rpc.InterfaceDesc
 pkg nosql, var SchemaManagerDesc rpc.InterfaceDesc

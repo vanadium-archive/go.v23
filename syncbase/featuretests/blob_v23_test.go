@@ -31,8 +31,7 @@ func V23TestBlobWholeTransfer(t *v23tests.T) {
 	sgName := naming.Join("s0", util.SyncbaseSuffix, "SG1")
 
 	ok(t, populateData(sbs[0].clientCtx, "s0", "foo", 0, 10))
-	ok(t, createSyncgroup(sbs[0].clientCtx, "s0", sgName, "tb:foo", "", "root:s0;root:s1"))
-
+	ok(t, createSyncgroup(sbs[0].clientCtx, "s0", sgName, "tb:foo", "", sbBlessings(sbs), nil))
 	ok(t, joinSyncgroup(sbs[1].clientCtx, "s1", sgName))
 	ok(t, verifySyncgroupData(sbs[1].clientCtx, "s1", "foo", 0, 10))
 

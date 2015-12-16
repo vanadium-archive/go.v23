@@ -14,6 +14,7 @@ import (
 
 	"v.io/v23"
 	"v.io/v23/context"
+	"v.io/v23/security/access"
 	wire "v.io/v23/services/syncbase/nosql"
 	"v.io/v23/syncbase"
 	"v.io/v23/syncbase/nosql"
@@ -181,9 +182,9 @@ func verifySyncgroupData(ctx *context.T, syncbaseName, keyPrefix string, start, 
 	d := a.NoSQLDatabase(testDb, nil)
 	tb := d.Table(testTable)
 
-	// Wait a bit (up to 4 seconds) for the last key to appear.
+	// Wait a bit (up to 8 seconds) for the last key to appear.
 	lastKey := fmt.Sprintf("%s%d", keyPrefix, start+count-1)
-	for i := 0; i < 8; i++ {
+	for i := 0; i < 16; i++ {
 		time.Sleep(500 * time.Millisecond)
 		var value string
 		if err := tb.Get(ctx, lastKey, &value); err == nil {
@@ -232,7 +233,7 @@ func verifySyncgroupData(ctx *context.T, syncbaseName, keyPrefix string, start, 
 // Helpers for managing syncgroups
 
 // blessingPatterns is a ";"-separated list of blessing patterns.
-func createSyncgroup(ctx *context.T, syncbaseName, sgName, sgPrefixes, mtName, blessingPatterns string) error {
+func createSyncgroup(ctx *context.T, syncbaseName, sgName, sgPrefixes, mtName, blessingPatterns string, perms access.Permissions) error {
 	if mtName == "" {
 		roots := v23.GetNamespace(ctx).Roots()
 		if len(roots) == 0 {
@@ -244,9 +245,13 @@ func createSyncgroup(ctx *context.T, syncbaseName, sgName, sgPrefixes, mtName, b
 	a := syncbase.NewService(syncbaseName).App(testApp)
 	d := a.NoSQLDatabase(testDb, nil)
 
+	if perms == nil {
+		perms = tu.DefaultPerms(strings.Split(blessingPatterns, ";")...)
+	}
+
 	spec := wire.SyncgroupSpec{
 		Description: "test syncgroup sg",
-		Perms:       tu.DefaultPerms(strings.Split(blessingPatterns, ";")...),
+		Perms:       perms,
 		Prefixes:    parseSgPrefixes(sgPrefixes),
 		MountTables: []string{mtName},
 	}

@@ -99,6 +99,10 @@ func TestV23SyncgroupRendezvousOnlineCloud(t *testing.T) {
 	v23tests.RunTest(t, V23TestSyncgroupRendezvousOnlineCloud)
 }
 
+func TestV23SyncgroupNeighborhoodOnly(t *testing.T) {
+	v23tests.RunTest(t, V23TestSyncgroupNeighborhoodOnly)
+}
+
 func TestV23SyncgroupPreknownStaggered(t *testing.T) {
 	v23tests.RunTest(t, V23TestSyncgroupPreknownStaggered)
 }

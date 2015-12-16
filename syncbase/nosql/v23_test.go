@@ -31,10 +31,6 @@ func TestV23SyncbasedGetDeltas(t *testing.T) {
 	v23tests.RunTest(t, V23TestSyncbasedGetDeltas)
 }
 
-func TestV23SyncbasedExchangeDeltasNeighborhood(t *testing.T) {
-	v23tests.RunTest(t, V23TestSyncbasedExchangeDeltasNeighborhood)
-}
-
 func TestV23SyncbasedGetDeltasWithDel(t *testing.T) {
 	v23tests.RunTest(t, V23TestSyncbasedGetDeltasWithDel)
 }

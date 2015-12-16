@@ -31,6 +31,7 @@ var (
 	ErrConcurrentBatch       = verror.Register("v.io/v23/services/syncbase/nosql.ConcurrentBatch", verror.NoRetry, "{1:}{2:} concurrent batch")
 	ErrSchemaVersionMismatch = verror.Register("v.io/v23/services/syncbase/nosql.SchemaVersionMismatch", verror.NoRetry, "{1:}{2:} actual schema version does not match the provided one")
 	ErrBlobNotCommitted      = verror.Register("v.io/v23/services/syncbase/nosql.BlobNotCommitted", verror.NoRetry, "{1:}{2:} blob is not yet committed")
+	ErrSyncgroupJoinFailed   = verror.Register("v.io/v23/services/syncbase/nosql.SyncgroupJoinFailed", verror.NoRetry, "{1:}{2:} syncgroup join failed")
 )
 
 func init() {
@@ -40,6 +41,7 @@ func init() {
 	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrConcurrentBatch.ID), "{1:}{2:} concurrent batch")
 	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrSchemaVersionMismatch.ID), "{1:}{2:} actual schema version does not match the provided one")
 	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrBlobNotCommitted.ID), "{1:}{2:} blob is not yet committed")
+	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrSyncgroupJoinFailed.ID), "{1:}{2:} syncgroup join failed")
 }
 
 // NewErrBoundToBatch returns an error with the ErrBoundToBatch ID.
@@ -70,6 +72,11 @@ func NewErrSchemaVersionMismatch(ctx *context.T) error {
 // NewErrBlobNotCommitted returns an error with the ErrBlobNotCommitted ID.
 func NewErrBlobNotCommitted(ctx *context.T) error {
 	return verror.New(ErrBlobNotCommitted, ctx)
+}
+
+// NewErrSyncgroupJoinFailed returns an error with the ErrSyncgroupJoinFailed ID.
+func NewErrSyncgroupJoinFailed(ctx *context.T) error {
+	return verror.New(ErrSyncgroupJoinFailed, ctx)
 }
 
 // DatabaseWatcherClientMethods is the client interface

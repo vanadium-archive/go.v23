@@ -97,39 +97,6 @@ func V23TestSyncbasedGetDeltas(t *v23tests.T) {
 	tu.RunClient(t, client1Creds, runVerifySyncgroupNonVomData, "sync1", "bar", "0", "10")
 }
 
-// V23TestSyncbasedExchangeDeltasNeighborhood tests the sending of deltas
-// between two Syncbase instances and their clients via neighborhood discovery,
-// without the syncgroup mount table being available.
-func V23TestSyncbasedExchangeDeltasNeighborhood(t *v23tests.T) {
-	v23tests.RunRootMT(t, "--v23.tcp.address=127.0.0.1:0")
-	server0Creds, _ := t.Shell().NewChildCredentials("s0")
-	client0Creds, _ := t.Shell().NewChildCredentials("c0")
-	cleanSync0 := tu.StartSyncbased(t, server0Creds, "sync0", "",
-		`{"Read": {"In":["root:c0"]}, "Write": {"In":["root:c0"]}}`)
-	defer cleanSync0()
-
-	server1Creds, _ := t.Shell().NewChildCredentials("s1")
-	client1Creds, _ := t.Shell().NewChildCredentials("c1")
-	cleanSync1 := tu.StartSyncbased(t, server1Creds, "sync1", "",
-		`{"Read": {"In":["root:c1"]}, "Write": {"In":["root:c1"]}}`)
-	defer cleanSync1()
-
-	sgName := naming.Join("sync0", constants.SyncbaseSuffix, "SG1")
-
-	tu.RunClient(t, client0Creds, runSetupAppA, "sync0")
-	// We are using a fake mount table so that the peers are forced to find
-	// each other over neighborhood.
-	tu.RunClient(t, client0Creds, runCreateSyncgroup, "sync0", sgName, "tb:foo", "/mttable", "root:s0", "root:s1")
-	tu.RunClient(t, client0Creds, runPopulateData, "sync0", "foo", "0")
-
-	tu.RunClient(t, client1Creds, runSetupAppA, "sync1")
-	tu.RunClient(t, client1Creds, runJoinSyncgroup, "sync1", sgName)
-	tu.RunClient(t, client1Creds, runVerifySyncgroupData, "sync1", "foo", "0", "10", "false")
-
-	tu.RunClient(t, client1Creds, runPopulateData, "sync1", "foo", "10")
-	tu.RunClient(t, client0Creds, runVerifySyncgroupData, "sync0", "foo", "0", "20", "true")
-}
-
 // V23TestSyncbasedGetDeltasWithDel tests the sending of deltas between two
 // Syncbase instances and their clients. The 1st client creates a syncgroup and
 // puts some database entries in it. The 2nd client joins that syncgroup and

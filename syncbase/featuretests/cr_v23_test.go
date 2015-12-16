@@ -290,7 +290,7 @@ func runTestWithSetup(t *v23tests.T, numInitRows int, fn func(client0, client1 *
 	sgName := naming.Join("s0", util.SyncbaseSuffix, "SG1")
 
 	// Create syncgroup and populate data on s0.
-	ok(t, createSyncgroup(sbs[0].clientCtx, "s0", sgName, "tb:foo", "", "root:s0;root:s1"))
+	ok(t, createSyncgroup(sbs[0].clientCtx, "s0", sgName, "tb:foo", "", sbBlessings(sbs), nil))
 	ok(t, populateData(sbs[0].clientCtx, "s0", "foo", 0, numInitRows))
 
 	// Join syncgroup and verify data on s1.

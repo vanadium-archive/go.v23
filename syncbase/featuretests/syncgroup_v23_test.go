@@ -9,10 +9,13 @@ package featuretests_test
 
 import (
 	"fmt"
+	"strings"
 	"time"
 
 	"v.io/v23/context"
 	"v.io/v23/naming"
+	"v.io/v23/security"
+	"v.io/v23/security/access"
 	_ "v.io/x/ref/runtime/factories/generic"
 	constants "v.io/x/ref/services/syncbase/server/util"
 	"v.io/x/ref/test/v23tests"
@@ -33,7 +36,8 @@ func V23TestSyncgroupRendezvousOnline(t *v23tests.T) {
 
 	// Syncbase s0 is the creator.
 	sgName := naming.Join(sbs[0].sbName, constants.SyncbaseSuffix, "SG1")
-	ok(t, createSyncgroup(sbs[0].clientCtx, sbs[0].sbName, sgName, "tb:foo", "", sbBlessings(sbs)))
+
+	ok(t, createSyncgroup(sbs[0].clientCtx, sbs[0].sbName, sgName, "tb:foo", "", sbBlessings(sbs), nil))
 
 	// Remaining syncbases run the specified workload concurrently.
 	for i := 1; i < len(sbs); i++ {
@@ -72,7 +76,8 @@ func V23TestSyncgroupRendezvousOnlineCloud(t *v23tests.T) {
 
 	// Syncbase s0 is the creator, and sN is the cloud.
 	sgName := naming.Join(sbs[N].sbName, constants.SyncbaseSuffix, "SG1")
-	ok(t, createSyncgroup(sbs[0].clientCtx, sbs[0].sbName, sgName, "tb:foo", "", sbBlessings(sbs)))
+
+	ok(t, createSyncgroup(sbs[0].clientCtx, sbs[0].sbName, sgName, "tb:foo", "", sbBlessings(sbs), nil))
 
 	// Remaining N-1 syncbases run the specified workload concurrently.
 	for i := 1; i < N; i++ {
@@ -92,6 +97,61 @@ func V23TestSyncgroupRendezvousOnlineCloud(t *v23tests.T) {
 	}
 
 	fmt.Println("V23TestSyncgroupRendezvousOnlineCloud=====Phase 1 Done")
+}
+
+// V23TestSyncgroupNeighborhoodOnly tests that Syncbases can join a syncgroup
+// when: all Syncbases do not have general connectivity but can reach each other
+// over neighborhood, and a creator creates the syncgroup and shares the
+// syncgroup name with all the joiners. Restricted connectivity is simulated by
+// picking a syncgroup name that is not reachable and a syncgroup mount table
+// that doesn't exist.
+func V23TestSyncgroupNeighborhoodOnly(t *v23tests.T) {
+	v23tests.RunRootMT(t, "--v23.tcp.address=127.0.0.1:0")
+
+	N := 5
+
+	// Setup N Syncbases.
+	sbs, cleanup := setupSyncbases(t, N)
+	defer cleanup()
+
+	// Syncbase s0 is the creator, but the syncgroup refers to non-existent
+	// Syncbase "s6".
+	sgName := naming.Join("s6", constants.SyncbaseSuffix, "SG1")
+
+	// For now, we set the permissions to have a single admin. Once we have
+	// syncgroup conflict resolution in place, we should be able to have
+	// multiple admins on the neighborhood.
+	//
+	// TODO(hpucha): Change it to multi-admin scenario.
+	principals := sbBlessings(sbs)
+	perms := access.Permissions{}
+	for _, tag := range []access.Tag{access.Read, access.Write} {
+		for _, pattern := range strings.Split(principals, ";") {
+			perms.Add(security.BlessingPattern(pattern), string(tag))
+		}
+	}
+	perms.Add(security.BlessingPattern("root:"+sbs[0].sbName), string(access.Admin))
+
+	ok(t, createSyncgroup(sbs[0].clientCtx, sbs[0].sbName, sgName, "tb:foo", "/mttable", "", perms))
+
+	// Remaining syncbases run the specified workload concurrently.
+	for i := 1; i < len(sbs); i++ {
+		go func(i int) {
+			ok(t, runSyncWorkload(sbs[i].clientCtx, sbs[i].sbName, sgName, "foo"))
+		}(i)
+	}
+
+	// Populate data on creator as well.
+	keypfx := "foo==" + sbs[0].sbName + "=="
+	ok(t, populateData(sbs[0].clientCtx, sbs[0].sbName, keypfx, 0, 5))
+
+	// Verify steady state sequentially.
+	for _, sb := range sbs {
+		ok(t, verifySync(sb.clientCtx, sb.sbName, N, "foo"))
+		ok(t, verifySyncgroupMembers(sb.clientCtx, sb.sbName, sgName, N))
+	}
+
+	fmt.Println("V23TestSyncgroupNeighborhoodOnly=====Phase 1 Done")
 }
 
 // V23TestSyncgroupPreknownStaggered tests that Syncbases can join a syncgroup
@@ -169,5 +229,5 @@ func joinOrCreateSyncgroup(ctx *context.T, syncbaseName, sgName, sgPrefixes, mtN
 	if err := joinSyncgroup(ctx, syncbaseName, sgName); err == nil {
 		return nil
 	}
-	return createSyncgroup(ctx, syncbaseName, sgName, sgPrefixes, mtName, bps)
+	return createSyncgroup(ctx, syncbaseName, sgName, sgPrefixes, mtName, bps, nil)
 }

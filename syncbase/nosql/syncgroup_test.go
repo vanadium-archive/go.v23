@@ -170,7 +170,7 @@ func TestSetSpecSyncgroup(t *testing.T) {
 	sgName := naming.Join(sName, util.SyncbaseSuffix, "sg1")
 	spec := wire.SyncgroupSpec{
 		Description: "test syncgroup sg1",
-		Perms:       nil,
+		Perms:       perms("root:client"),
 		Prefixes:    []wire.TableRow{{TableName: "t1", Row: "foo"}},
 	}
 	createSyncgroup(t, ctx, d, sgName, spec, verror.ID(""))
@@ -181,7 +181,7 @@ func TestSetSpecSyncgroup(t *testing.T) {
 	verifySyncgroupInfo(t, ctx, d, sgName, spec, 1)
 
 	spec.Description = "test syncgroup sg1 update"
-	spec.Perms = perms("root:client1")
+	spec.Perms = perms("root:client", "root:client1")
 
 	sg := d.Syncgroup(sgName)
 	if err := sg.SetSpec(ctx, spec, ""); err != nil {
