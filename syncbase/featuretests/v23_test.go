@@ -91,6 +91,10 @@ func TestV23RestartabilityAppDBCorruption(t *testing.T) {
 	v23tests.RunTest(t, V23TestRestartabilityAppDBCorruption)
 }
 
+func TestV23RestartabilityStoreGarbageCollect(t *testing.T) {
+	v23tests.RunTest(t, V23TestRestartabilityStoreGarbageCollect)
+}
+
 func TestV23SyncgroupRendezvousOnline(t *testing.T) {
 	v23tests.RunTest(t, V23TestSyncgroupRendezvousOnline)
 }

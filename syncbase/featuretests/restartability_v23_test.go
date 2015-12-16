@@ -487,3 +487,109 @@ func V23TestRestartabilityAppDBCorruption(t *v23tests.T) {
 	checkHierarchy(t, clientCtx)
 	cleanup(syscall.SIGKILL)
 }
+
+func V23TestRestartabilityStoreGarbageCollect(t *v23tests.T) {
+	// TODO(ivanpi): Fully testing store garbage collection requires fault
+	// injection or mocking out the store.
+	// NOTE: Test assumes that leveldb destroy is implemented as 'rm -r'.
+	rootDir, clientCtx, serverCreds := restartabilityInit(t)
+	cleanup := tu.StartKillableSyncbased(t, serverCreds, testSbName, rootDir, acl)
+
+	createHierarchy(t, clientCtx)
+	checkHierarchy(t, clientCtx)
+
+	const writeMask = 0220
+	// Find a leveldb directory for one of the database stores.
+	var leveldbDir string
+	var leveldbMode os.FileMode
+	filepath.Walk(rootDir, func(path string, info os.FileInfo, err error) error {
+		if leveldbDir != "" {
+			return nil
+		}
+		if match, _ := regexp.MatchString(`apps/[^/]*/dbs/[^/]*/leveldb`, path); match && info.IsDir() {
+			leveldbDir = path
+			leveldbMode = info.Mode()
+			return errors.New("found match, stop walking")
+		}
+		return nil
+	})
+	if leveldbDir == "" {
+		t.Fatalf("Could not find file")
+	}
+
+	// Create a subdirectory in the leveldb directory and populate it.
+	anchorDir := filepath.Join(leveldbDir, "test-anchor")
+	if err := os.Mkdir(anchorDir, leveldbMode); err != nil {
+		t.Fatalf("Mkdir() failed: %v", err)
+	}
+	if err := ioutil.WriteFile(filepath.Join(anchorDir, "a"), []byte("a"), 0644); err != nil {
+		t.Fatalf("WriteFile() failed: %v", err)
+	}
+	// Remove write permission from the subdir so that store destroy fails.
+	if err := os.Chmod(anchorDir, leveldbMode&^writeMask); err != nil {
+		t.Fatalf("Chmod() failed: %v", err)
+	}
+
+	s := syncbase.NewService(testSbName)
+
+	// Destroy all apps and their databases. Destroy() should not fail even
+	// though the database store destruction should fail for leveldbDir picked
+	// above.
+	if apps, err := s.ListApps(clientCtx); err != nil {
+		t.Fatalf("s.ListApps() failed: %v", err)
+	} else {
+		for _, aName := range apps {
+			if err := s.App(aName).Destroy(clientCtx); err != nil {
+				t.Fatalf("a.Destroy() failed: %v", err)
+			}
+		}
+	}
+	// TODO(ivanpi): Add Exists() checks.
+	// TODO(ivanpi): Destroy databases individually instead of apps.
+
+	// leveldbDir should still exist.
+	// TODO(ivanpi): Check that other stores have been destroyed.
+	if _, err := os.Stat(leveldbDir); err != nil {
+		t.Errorf("os.Stat() for old store failed: %v", err)
+	}
+
+	// Recreate the hierarchy. This should not be affected by the old store.
+	createHierarchy(t, clientCtx)
+	checkHierarchy(t, clientCtx)
+
+	cleanup(syscall.SIGKILL)
+
+	// leveldbDir should still exist.
+	if _, err := os.Stat(leveldbDir); err != nil {
+		t.Errorf("os.Stat() for old store failed: %v", err)
+	}
+
+	// Restarting syncbased should not affect the hierarchy. Garbage collection
+	// should again fail to destroy leveldbDir.
+	cleanup = tu.StartKillableSyncbased(t, serverCreds, testSbName, rootDir, acl)
+	checkHierarchy(t, clientCtx)
+	cleanup(syscall.SIGKILL)
+
+	// leveldbDir should still exist.
+	if _, err := os.Stat(leveldbDir); err != nil {
+		t.Errorf("os.Stat() for old store failed: %v", err)
+	}
+
+	// Reinstate write permission for the anchor subdir in leveldbDir.
+	if err := os.Chmod(anchorDir, leveldbMode|writeMask); err != nil {
+		t.Fatalf("Chmod() failed: %v", err)
+	}
+
+	// Restart syncbased. Garbage collection should now succeed.
+	cleanup2 := tu.StartSyncbased(t, serverCreds, testSbName, rootDir, acl)
+
+	// leveldbDir should not exist anymore.
+	if _, err := os.Stat(leveldbDir); !os.IsNotExist(err) {
+		t.Errorf("os.Stat() for old store should have failed with ErrNotExist, got: %v", err)
+	}
+
+	// The hierarchy should not have been affected.
+	checkHierarchy(t, clientCtx)
+
+	cleanup2()
+}
