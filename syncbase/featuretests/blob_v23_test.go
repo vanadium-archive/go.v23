@@ -17,7 +17,6 @@ import (
 	"v.io/v23/syncbase"
 	_ "v.io/x/ref/runtime/factories/generic"
 	"v.io/x/ref/services/syncbase/server/util"
-	tu "v.io/x/ref/services/syncbase/testutil"
 	"v.io/x/ref/test/v23tests"
 )
 
@@ -26,43 +25,32 @@ import (
 func V23TestBlobWholeTransfer(t *v23tests.T) {
 	v23tests.RunRootMT(t, "--v23.tcp.address=127.0.0.1:0")
 
-	server0Creds := forkCredentials(t, "s0")
-	client0Ctx := forkContext(t, "c0")
-	cleanup0 := tu.StartSyncbased(t, server0Creds, "sync0", "",
-		`{"Read": {"In":["root:c0"]}, "Write": {"In":["root:c0"]}}`)
-	defer cleanup0()
+	sbs, cleanup := setupSyncbases(t, 2)
+	defer cleanup()
 
-	server1Creds := forkCredentials(t, "s1")
-	client1Ctx := forkContext(t, "c1")
-	cleanup1 := tu.StartSyncbased(t, server1Creds, "sync1", "",
-		`{"Read": {"In":["root:c1"]}, "Write": {"In":["root:c1"]}}`)
-	defer cleanup1()
+	sgName := naming.Join("s0", util.SyncbaseSuffix, "SG1")
 
-	sgName := naming.Join("sync0", util.SyncbaseSuffix, "SG1")
+	ok(t, populateData(sbs[0].clientCtx, "s0", "foo", 0, 10))
+	ok(t, createSyncgroup(sbs[0].clientCtx, "s0", sgName, "tb:foo", "", "root:s0;root:s1"))
 
-	ok(t, setupAppA(client0Ctx, "sync0"))
-	ok(t, populateData(client0Ctx, "sync0", "foo", 0, 10))
-	ok(t, createSyncgroup(client0Ctx, "sync0", sgName, "tb:foo", "", "root:s0;root:s1"))
-
-	ok(t, setupAppA(client1Ctx, "sync1"))
-	ok(t, joinSyncgroup(client1Ctx, "sync1", sgName))
-	ok(t, verifySyncgroupData(client1Ctx, "sync1", "foo", 0, 10))
+	ok(t, joinSyncgroup(sbs[1].clientCtx, "s1", sgName))
+	ok(t, verifySyncgroupData(sbs[1].clientCtx, "s1", "foo", 0, 10))
 
 	// FetchBlob first.
-	ok(t, generateBlob(client0Ctx, "sync0", "foo", 0, []byte("foobarbaz")))
-	ok(t, fetchBlob(client1Ctx, "sync1", "foo", 0, 9, false))
-	ok(t, getBlob(client1Ctx, "sync1", "foo", 0, []byte("foobarbaz"), 0))
+	ok(t, generateBlob(sbs[0].clientCtx, "s0", "foo", 0, []byte("foobarbaz")))
+	ok(t, fetchBlob(sbs[1].clientCtx, "s1", "foo", 0, 9, false))
+	ok(t, getBlob(sbs[1].clientCtx, "s1", "foo", 0, []byte("foobarbaz"), 0))
 
 	// GetBlob directly.
-	ok(t, generateBlob(client1Ctx, "sync1", "foo", 0, []byte("abcdefghijklmn")))
+	ok(t, generateBlob(sbs[1].clientCtx, "s1", "foo", 0, []byte("abcdefghijklmn")))
 	// Sleep so that the update to key "foo0" makes it to the other side.
 	time.Sleep(10 * time.Second)
-	ok(t, getBlob(client0Ctx, "sync0", "foo", 0, []byte("fghijklmn"), 5))
-	ok(t, fetchBlob(client0Ctx, "sync0", "foo", 0, 14, true))
+	ok(t, getBlob(sbs[0].clientCtx, "s0", "foo", 0, []byte("fghijklmn"), 5))
+	ok(t, fetchBlob(sbs[0].clientCtx, "s0", "foo", 0, 14, true))
 
 	// Test with a big blob (1 MB).
-	ok(t, generateBigBlob(client0Ctx, "sync0", "foo", 1))
-	ok(t, getBigBlob(client1Ctx, "sync1", "foo", 1))
+	ok(t, generateBigBlob(sbs[0].clientCtx, "s0", "foo", 1))
+	ok(t, getBigBlob(sbs[1].clientCtx, "s1", "foo", 1))
 }
 
 ////////////////////////////////////

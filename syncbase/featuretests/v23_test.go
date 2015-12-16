@@ -31,28 +31,28 @@ func TestV23SyncbasedPutGet(t *testing.T) {
 	v23tests.RunTest(t, V23TestSyncbasedPutGet)
 }
 
-func TestV23ResolutionRuleConfig(t *testing.T) {
-	v23tests.RunTest(t, V23TestResolutionRuleConfig)
+func TestV23CRRuleConfig(t *testing.T) {
+	v23tests.RunTest(t, V23TestCRRuleConfig)
 }
 
 func TestV23CRDefault(t *testing.T) {
 	v23tests.RunTest(t, V23TestCRDefault)
 }
 
-func TestV23ConflictResolutionWithAtomicBatch(t *testing.T) {
-	v23tests.RunTest(t, V23TestConflictResolutionWithAtomicBatch)
+func TestV23CRWithAtomicBatch(t *testing.T) {
+	v23tests.RunTest(t, V23TestCRWithAtomicBatch)
 }
 
 func TestV23CRAppResolved(t *testing.T) {
 	v23tests.RunTest(t, V23TestCRAppResolved)
 }
 
-func TestV23AppBasedResolutionOverridesOthers(t *testing.T) {
-	v23tests.RunTest(t, V23TestAppBasedResolutionOverridesOthers)
+func TestV23CRAppBasedResolutionOverridesOthers(t *testing.T) {
+	v23tests.RunTest(t, V23TestCRAppBasedResolutionOverridesOthers)
 }
 
-func TestV23ConflictResolutionMultipleBatchesAsSingleConflict(t *testing.T) {
-	v23tests.RunTest(t, V23TestConflictResolutionMultipleBatchesAsSingleConflict)
+func TestV23CRMultipleBatchesAsSingleConflict(t *testing.T) {
+	v23tests.RunTest(t, V23TestCRMultipleBatchesAsSingleConflict)
 }
 
 func TestV23DeviceManager(t *testing.T) {
@@ -119,6 +119,22 @@ func TestV23VClockNtpUpdate(t *testing.T) {
 	v23tests.RunTest(t, V23TestVClockNtpUpdate)
 }
 
+func TestV23VClockNtpSkewAfterReboot(t *testing.T) {
+	v23tests.RunTest(t, V23TestVClockNtpSkewAfterReboot)
+}
+
 func TestV23VClockNtpFrequency(t *testing.T) {
 	v23tests.RunTest(t, V23TestVClockNtpFrequency)
+}
+
+func TestV23VClockSyncBasic(t *testing.T) {
+	v23tests.RunTest(t, V23TestVClockSyncBasic)
+}
+
+func TestV23VClockSyncWithLocalNtp(t *testing.T) {
+	v23tests.RunTest(t, V23TestVClockSyncWithLocalNtp)
+}
+
+func TestV23VClockSyncWithReboots(t *testing.T) {
+	v23tests.RunTest(t, V23TestVClockSyncWithReboots)
 }

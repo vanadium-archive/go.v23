@@ -30,9 +30,9 @@ const (
 )
 
 ////////////////////////////////////////////////////////////
-// Helpers for setting up app and db
+// Helpers for setting up Syncbases, apps, and dbs
 
-func setupAppA(ctx *context.T, syncbaseName string) error {
+func setupHierarchy(ctx *context.T, syncbaseName string) error {
 	a := syncbase.NewService(syncbaseName).App(testApp)
 	if err := a.Create(ctx, nil); err != nil {
 		return err
@@ -42,6 +42,51 @@ func setupAppA(ctx *context.T, syncbaseName string) error {
 		return err
 	}
 	return d.Table(testTable).Create(ctx, nil)
+}
+
+type testSyncbase struct {
+	sbName    string
+	sbCreds   *modules.CustomCredentials
+	clientId  string
+	clientCtx *context.T
+	cleanup   func()
+}
+
+// Spawns "num" Syncbase instances and returns handles to them, along with a
+// cleanup function.
+func setupSyncbases(t *v23tests.T, num int) ([]*testSyncbase, func()) {
+	sbs := make([]*testSyncbase, num)
+	for i, _ := range sbs {
+		sbName, clientId := fmt.Sprintf("s%d", i), fmt.Sprintf("c%d", i)
+		sbs[i] = &testSyncbase{
+			sbName:    sbName,
+			sbCreds:   forkCredentials(t, sbName),
+			clientId:  clientId,
+			clientCtx: forkContext(t, clientId),
+		}
+		// Give RWA permissions to this Syncbase's client.
+		acl := fmt.Sprintf(`{"Read":{"In":["root:%s"]},"Write":{"In":["root:%s"]},"Admin":{"In":["root:%s"]}}`, clientId, clientId, clientId)
+		sbs[i].cleanup = tu.StartSyncbased(t, sbs[i].sbCreds, sbs[i].sbName, "", acl)
+	}
+	// Call setupHierarchy on each Syncbase.
+	for _, sb := range sbs {
+		ok(t, setupHierarchy(sb.clientCtx, sb.sbName))
+	}
+	cleanup := func() {
+		for _, sb := range sbs {
+			sb.cleanup()
+		}
+	}
+	return sbs, cleanup
+}
+
+// Returns a ";"-separated list of Syncbase blessing names.
+func sbBlessings(sbs []*testSyncbase) string {
+	names := make([]string, len(sbs))
+	for i, sb := range sbs {
+		names[i] = "root:" + sb.sbName
+	}
+	return strings.Join(names, ";")
 }
 
 ////////////////////////////////////////////////////////////
