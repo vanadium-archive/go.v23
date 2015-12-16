@@ -236,9 +236,12 @@ type BlessingStore interface {
 	// discharge cache.
 	ClearDischarges(discharges ...Discharge)
 
-	// Discharge takes a caveat and DischargeImpetus and returns a cached discharge,
-	// returning a zero value if no corresponding cached discharge can be found.
-	Discharge(caveat Caveat, impetus DischargeImpetus) Discharge
+	// Discharge takes a caveat and DischargeImpetus and returns a cached discharge
+	// and the time at which it was cached.  Zero values are returned if no
+	// corresponding cached discharge can be found.  Note that in certain upgrade
+	// situations a zero cacheTime may be returned if the real cache time cannot
+	// be determined.
+	Discharge(caveat Caveat, impetus DischargeImpetus) (discharge Discharge, cacheTime time.Time)
 
 	// DebugString return a human-readable string description of the store.
 	// This description is detailed and lists out the contents of the store.
