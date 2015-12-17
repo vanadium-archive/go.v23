@@ -68,23 +68,6 @@ type ServerPeers []security.BlessingPattern
 
 func (ServerPeers) RPCServerOpt() {}
 
-// SecurityLevel represents the level of confidentiality of data transmitted
-// and received over a connection.
-type SecurityLevel int
-
-func (SecurityLevel) RPCServerOpt() {}
-func (SecurityLevel) RPCCallOpt()   {}
-func (SecurityLevel) NSOpt()        {}
-
-const (
-	// All user data transmitted over the connection is encrypted and can be
-	// interpreted only by processes at the two ends of the connection.
-	// This is the default level.
-	SecurityConfidential SecurityLevel = 0
-	// Data is transmitted over the connection in plain text and there is no authentication.
-	SecurityNone SecurityLevel = 1
-)
-
 // ServerAuthorizer encapsulates the authorization policy used by a client to
 // authorize the end server of an RPC.
 //

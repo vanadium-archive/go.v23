@@ -1,5 +1,3 @@
-pkg options, const SecurityConfidential SecurityLevel
-pkg options, const SecurityNone SecurityLevel
 pkg options, method (ChannelTimeout) RPCCallOpt()
 pkg options, method (ChannelTimeout) RPCServerOpt()
 pkg options, method (IsLeaf) RPCServerOpt()
@@ -10,9 +8,6 @@ pkg options, method (NoRetry) RPCCallOpt()
 pkg options, method (Preresolved) NSOpt()
 pkg options, method (Preresolved) RPCCallOpt()
 pkg options, method (RetryTimeout) RPCCallOpt()
-pkg options, method (SecurityLevel) NSOpt()
-pkg options, method (SecurityLevel) RPCCallOpt()
-pkg options, method (SecurityLevel) RPCServerOpt()
 pkg options, method (ServerAuthorizer) RPCCallOpt()
 pkg options, method (ServerPeers) RPCServerOpt()
 pkg options, method (ServesMountTable) RPCServerOpt()
@@ -24,7 +19,6 @@ pkg options, type NoRetry struct
 pkg options, type Preresolved struct
 pkg options, type Preresolved struct, Resolution *naming.MountEntry
 pkg options, type RetryTimeout time.Duration
-pkg options, type SecurityLevel int
 pkg options, type ServerAuthorizer struct
 pkg options, type ServerAuthorizer struct, embedded security.Authorizer
 pkg options, type ServerPeers []security.BlessingPattern
