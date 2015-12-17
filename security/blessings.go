@@ -152,17 +152,25 @@ func (b Blessings) String() string {
 	return strings.Join(blessings, ",")
 }
 
+// We keep a pool of buffers for claimedName, this saves a lot of allocations.
+var claimedPool = sync.Pool{New: func() interface{} {
+	return &bytes.Buffer{}
+}}
+
 // claimedName returns the blessing name that the certificate chain claims to
 // have (i.e., ignoring any caveats or recognition of the root public key as an
 // authority on the namespace).
 func claimedName(chain []Certificate) string {
-	var buf bytes.Buffer
+	buf := claimedPool.Get().(*bytes.Buffer)
+	buf.Reset()
 	buf.WriteString(chain[0].Extension)
 	for i := 1; i < len(chain); i++ {
 		buf.WriteString(ChainSeparator)
 		buf.WriteString(chain[i].Extension)
 	}
-	return buf.String()
+	ret := buf.String()
+	claimedPool.Put(buf)
+	return ret
 }
 
 func nameForPrincipal(pubkey []byte, roots BlessingRoots, chain []Certificate) string {
