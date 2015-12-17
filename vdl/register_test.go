@@ -77,7 +77,7 @@ var reflectInfoTests = []struct {
 // Test deriveReflectInfo success.
 func TestDeriveReflectInfo(t *testing.T) {
 	for _, test := range reflectInfoTests {
-		ri, err := deriveReflectInfo(test.rt)
+		ri, _, err := deriveReflectInfo(test.rt)
 		if ri == nil || err != nil {
 			t.Errorf("%s deriveReflectInfo failed: (%v, %v)", test.rt, ri, err)
 			continue
@@ -277,10 +277,38 @@ var reflectInfoErrorTests = []rtErrorTest{
 // Test deriveReflectInfo errors.
 func TestDeriveReflectInfoError(t *testing.T) {
 	for _, test := range reflectInfoErrorTests {
-		got, err := deriveReflectInfo(test.rt)
+		got, _, err := deriveReflectInfo(test.rt)
 		ExpectErr(t, err, test.errstr, "deriveReflectInfo(%v)", test.rt)
 		if got != nil {
 			t.Errorf("deriveReflectInfo(%v) got %v, want nil", test.rt, got)
 		}
 	}
+}
+
+type (
+	NameConflictType interface {
+		Index() int
+		Interface() interface{}
+		Name() string
+		__VDLReflect(__NameConflictReflect)
+	}
+	__NameConflictReflect struct {
+		Name  string `vdl:"v.io/v23/vdl.OtherNameConflictType"`
+		Type  NameConflictType
+		Union struct{ A NameConflictUnionField }
+	}
+	NameConflictUnionField struct{ Value int64 }
+	OtherNameConflictType  struct{}
+)
+
+func (x NameConflictUnionField) Index() int                         { return 0 }
+func (x NameConflictUnionField) Interface() interface{}             { return x.Value }
+func (x NameConflictUnionField) Name() string                       { return "A" }
+func (x NameConflictUnionField) __VDLReflect(__NameConflictReflect) {}
+
+func TestReflectNameConflicts(t *testing.T) {
+	Register(NameConflictUnionField{})
+	ExpectPanic(t, func() {
+		Register(OtherNameConflictType{})
+	}, "duplicate name", "")
 }

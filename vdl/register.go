@@ -39,20 +39,15 @@ func registerRecursive(rt reflect.Type) error {
 	for rt.Kind() == reflect.Ptr {
 		rt = rt.Elem()
 	}
-	ri, err := deriveReflectInfo(rt)
+	ri, added, err := deriveReflectInfo(rt)
 	if err != nil {
 		return err
 	}
-	// 2) Add reflect information to the registry.
-	first, err := riReg.addReflectInfo(rt, ri)
-	if err != nil {
-		return err
-	}
-	if !first {
-		// Break cycles for recursive types.
+	if !added {
+		// Break cyles for recursive types.
 		return nil
 	}
-	// 3) Register subtypes, if this is the first time we've seen the type.
+	// 2) Register subtypes, if this is the first time we've seen the type.
 	//
 	// Special-case to recurse on union fields.
 	if len(ri.UnionFields) > 0 {
@@ -95,28 +90,6 @@ type riRegistry struct {
 var riReg = &riRegistry{
 	fromName: make(map[string]*reflectInfo),
 	fromType: make(map[reflect.Type]*reflectInfo),
-}
-
-func (reg *riRegistry) addReflectInfo(rt reflect.Type, ri *reflectInfo) (bool, error) {
-	reg.Lock()
-	defer reg.Unlock()
-	// Allow duplicates only if they're identical, meaning the same type was
-	// registered multiple times.  Otherwise it indicates a non-bijective mapping.
-	if riDup := reg.fromType[ri.Type]; riDup != nil {
-		if !equalRI(ri, riDup) {
-			return false, fmt.Errorf("vdl: Register(%v) duplicate type %v: %#v and %#v", rt, ri.Type, ri, riDup)
-		}
-		// We've seen the wire type before.
-		return false, nil
-	}
-	reg.fromType[ri.Type] = ri
-	if ri.Name != "" {
-		if riDup := reg.fromName[ri.Name]; riDup != nil && !equalRI(ri, riDup) {
-			return false, fmt.Errorf("vdl: Register(%v) duplicate name %q: %#v and %#v", rt, ri.Name, ri, riDup)
-		}
-		reg.fromName[ri.Name] = ri
-	}
-	return true, nil
 }
 
 // reflectInfoFromName returns the reflectInfo for the given vdl type name, or
@@ -185,35 +158,16 @@ type reflectField struct {
 	RepType reflect.Type // Concrete type representing the field, e.g. FooA, FooB
 }
 
-func equalRI(a, b *reflectInfo) bool {
-	// Since all information is derived from the Type, that's all we compare.
-	return a.Type == b.Type
-}
-
-// isUnion returns true iff rt is a union vdl type; it runs a quicker form of
-// deriveReflectInfo, only to check for union.  It's used while normalizing types,
-// and is necessary since the generated union type is an interface, and must be
-// distinguished from the any type.
-func isUnion(rt reflect.Type) bool {
-	if method, ok := rt.MethodByName("__VDLReflect"); ok {
-		mtype := method.Type
-		offsetIn := 1
-		if rt.Kind() == reflect.Interface {
-			offsetIn = 0
-		}
-		if mtype.NumIn() == 1+offsetIn && mtype.In(offsetIn).Kind() == reflect.Struct {
-			rtReflect := mtype.In(offsetIn)
-			if _, ok := rtReflect.FieldByName("Union"); ok {
-				return true
-			}
-		}
-	}
-	return false
-}
-
 // deriveReflectInfo returns the reflectInfo corresponding to rt.
 // REQUIRES: rt has been normalized, and pointers have been flattened.
-func deriveReflectInfo(rt reflect.Type) (*reflectInfo, error) {
+func deriveReflectInfo(rt reflect.Type) (*reflectInfo, bool, error) {
+	riReg.RLock()
+	if ri, ok := riReg.fromType[rt]; ok {
+		riReg.RUnlock()
+		return ri, false, nil
+	}
+	riReg.RUnlock()
+
 	// Set reasonable defaults for types that don't have the __VDLReflect method.
 	ri := new(reflectInfo)
 	ri.Type = rt
@@ -230,7 +184,7 @@ func deriveReflectInfo(rt reflect.Type) (*reflectInfo, error) {
 	if method, ok := rt.MethodByName("__VDLReflect"); ok {
 		mtype := method.Type
 		if mtype.NumOut() != 0 || mtype.NumIn() != 1+offsetIn || mtype.In(offsetIn).Kind() != reflect.Struct {
-			return nil, fmt.Errorf("type %q invalid __VDLReflect (want __VDLReflect(struct{...}))", rt)
+			return nil, false, fmt.Errorf("type %q invalid __VDLReflect (want __VDLReflect(struct{...}))", rt)
 		}
 		// rtReflect corresponds to the argument to __VDLReflect.
 		rtReflect := mtype.In(offsetIn)
@@ -247,19 +201,33 @@ func deriveReflectInfo(rt reflect.Type) (*reflectInfo, error) {
 		}
 		if field, ok := rtReflect.FieldByName("Enum"); ok {
 			if err := describeEnum(field.Type, rt, ri); err != nil {
-				return nil, err
+				return nil, false, err
 			}
 		}
 		if field, ok := rtReflect.FieldByName("Union"); ok {
 			if err := describeUnion(field.Type, rt, ri); err != nil {
-				return nil, err
+				return nil, false, err
 			}
 		}
 		if len(ri.EnumLabels) > 0 && len(ri.UnionFields) > 0 {
-			return nil, fmt.Errorf("type %q is both an enum and a union", rt)
+			return nil, false, fmt.Errorf("type %q is both an enum and a union", rt)
 		}
 	}
-	return ri, nil
+
+	riReg.Lock()
+	defer riReg.Unlock()
+
+	if ri, ok := riReg.fromType[rt]; ok {
+		return ri, false, nil
+	}
+	if ri.Name != "" {
+		if riDup := riReg.fromName[ri.Name]; riDup != nil && ri.Type != riDup.Type {
+			return nil, false, fmt.Errorf("vdl: Register(%v) duplicate name %q: %#v and %#v", rt, ri.Name, ri, riDup)
+		}
+		riReg.fromName[ri.Name] = ri
+	}
+	riReg.fromType[rt] = ri
+	return ri, true, nil
 }
 
 // describeEnum fills in ri; we expect enumReflect has this format:

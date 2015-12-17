@@ -452,7 +452,7 @@ func rvSettableZeroValue(rt reflect.Type, tt *Type) reflect.Value {
 		}
 		// Union interface, which represents one of the fields.  Initialize with the
 		// zero value of the type at index 0.
-		ri, err := deriveReflectInfo(rt)
+		ri, _, err := deriveReflectInfo(rt)
 		if err != nil {
 			panic(fmt.Errorf("vdl: invalid union type rt: %v tt: %v err: %v", rt, tt, err))
 		}
@@ -484,13 +484,13 @@ func rvSettableZeroValue(rt reflect.Type, tt *Type) reflect.Value {
 // registration.
 func makeReflectUnion(rt reflect.Type, vv *Value) (reflect.Value, error) {
 	// TODO(toddw): Cache the field types for faster access.
-	ri, err := deriveReflectInfo(rt)
+	ri, _, err := deriveReflectInfo(rt)
 	if err != nil || len(ri.UnionFields) == 0 {
 		// If rt isn't a union interface type, it still might be registered, so we
 		// can get the reflect type from vv.
 		if rt2 := TypeToReflect(vv.Type()); rt2 != nil {
 			rt = rt2
-			ri, err = deriveReflectInfo(rt)
+			ri, _, err = deriveReflectInfo(rt)
 		}
 	}
 	switch {

@@ -104,7 +104,8 @@ func normalizeType(rt reflect.Type) reflect.Type {
 	}
 	// Handle special cases.  Union may be either an interface or a struct, and
 	// should be handled first.
-	if isUnion(rt) {
+	ri, _, _ := deriveReflectInfo(rt)
+	if ri != nil && len(ri.UnionFields) > 0 {
 		return rt
 	}
 	switch {
@@ -279,7 +280,7 @@ func makeTypeFromReflectLocked(rt reflect.Type, builder *TypeBuilder, pending ma
 		opt.AssignElem(elem)
 		return opt, nil
 	}
-	ri, err := deriveReflectInfo(rt)
+	ri,_, err := deriveReflectInfo(rt)
 	if err != nil {
 		return nil, err
 	}
