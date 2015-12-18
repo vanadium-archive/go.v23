@@ -1,6 +1,6 @@
 pkg vtrace, const CollectInMemory TraceFlags
 pkg vtrace, const Empty TraceFlags
-pkg vtrace, func ForceCollect(*context.T)
+pkg vtrace, func ForceCollect(*context.T, int)
 pkg vtrace, func FormatTrace(io.Writer, *TraceRecord, *time.Location)
 pkg vtrace, func FormatTraces(io.Writer, []TraceRecord, *time.Location)
 pkg vtrace, func GetRequest(*context.T) Request
@@ -46,7 +46,7 @@ pkg vtrace, type SpanRecord struct, Name string
 pkg vtrace, type SpanRecord struct, Parent uniqueid.Id
 pkg vtrace, type SpanRecord struct, Start time.Time
 pkg vtrace, type Store interface { ForceCollect, Merge, TraceRecord, TraceRecords }
-pkg vtrace, type Store interface, ForceCollect(uniqueid.Id)
+pkg vtrace, type Store interface, ForceCollect(uniqueid.Id, int)
 pkg vtrace, type Store interface, Merge(Response)
 pkg vtrace, type Store interface, TraceRecord(uniqueid.Id) *TraceRecord
 pkg vtrace, type Store interface, TraceRecords() []TraceRecord
