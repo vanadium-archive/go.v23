@@ -64,7 +64,13 @@ type ClientCall interface {
 	//
 	// It returns both the string blessings and a handle to the object that contains
 	// cryptographic proof of the validity of those blessings.
+	//
+	// TODO(ashankar): Make this RemoteBlessingNames and remove the second result
+	// since that is the same as ClientCall.Security().RemoteBlessings()
 	RemoteBlessings() ([]string, security.Blessings)
+
+	// Security returns the security-related state associated with the call.
+	Security() security.Call
 }
 
 // Stream defines the interface for a bidirectional FIFO stream of typed values.

@@ -40,11 +40,12 @@ pkg rpc, type Client interface, Call(*context.T, string, string, []interface{}, 
 pkg rpc, type Client interface, Close()
 pkg rpc, type Client interface, Closed() <-chan struct{}
 pkg rpc, type Client interface, StartCall(*context.T, string, string, []interface{}, ...CallOpt) (ClientCall, error)
-pkg rpc, type ClientCall interface { CloseSend, Finish, Recv, RemoteBlessings, Send }
+pkg rpc, type ClientCall interface { CloseSend, Finish, Recv, RemoteBlessings, Security, Send }
 pkg rpc, type ClientCall interface, CloseSend() error
 pkg rpc, type ClientCall interface, Finish(...interface{}) error
 pkg rpc, type ClientCall interface, Recv(interface{}) error
 pkg rpc, type ClientCall interface, RemoteBlessings() ([]string, security.Blessings)
+pkg rpc, type ClientCall interface, Security() security.Call
 pkg rpc, type ClientCall interface, Send(interface{}) error
 pkg rpc, type ClientOpt interface { RPCClientOpt }
 pkg rpc, type ClientOpt interface, RPCClientOpt()
