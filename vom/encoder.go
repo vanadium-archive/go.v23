@@ -331,9 +331,10 @@ func (e *encoder) canIgnoreField(fromNil bool) bool {
 }
 
 // Implementation of vdl.Target interface.
+var boolAllowed = []vdl.Kind{vdl.Bool}
 
 func (e *encoder) FromBool(src bool, tt *vdl.Type) error {
-	if err := e.prepareType(tt, vdl.Bool); err != nil {
+	if err := e.prepareType(tt, boolAllowed...); err != nil {
 		return err
 	}
 	if e.isStructFieldValue() && e.topType().Kind() != vdl.Any {
@@ -347,8 +348,10 @@ func (e *encoder) FromBool(src bool, tt *vdl.Type) error {
 	return nil
 }
 
+var uintAllowed = []vdl.Kind{vdl.Byte, vdl.Uint16, vdl.Uint32, vdl.Uint64}
+
 func (e *encoder) FromUint(src uint64, tt *vdl.Type) error {
-	if err := e.prepareType(tt, vdl.Byte, vdl.Uint16, vdl.Uint32, vdl.Uint64); err != nil {
+	if err := e.prepareType(tt, uintAllowed...); err != nil {
 		return err
 	}
 	if e.isStructFieldValue() && e.topType().Kind() != vdl.Any {
@@ -366,8 +369,10 @@ func (e *encoder) FromUint(src uint64, tt *vdl.Type) error {
 	return nil
 }
 
+var intAllowed = []vdl.Kind{vdl.Int8, vdl.Int16, vdl.Int32, vdl.Int64}
+
 func (e *encoder) FromInt(src int64, tt *vdl.Type) error {
-	if err := e.prepareType(tt, vdl.Int8, vdl.Int16, vdl.Int32, vdl.Int64); err != nil {
+	if err := e.prepareType(tt, intAllowed...); err != nil {
 		return err
 	}
 	if e.version == Version80 && tt.Kind() == vdl.Int8 {
@@ -384,8 +389,10 @@ func (e *encoder) FromInt(src int64, tt *vdl.Type) error {
 	return nil
 }
 
+var floatAllowed = []vdl.Kind{vdl.Float32, vdl.Float64}
+
 func (e *encoder) FromFloat(src float64, tt *vdl.Type) error {
-	if err := e.prepareType(tt, vdl.Float32, vdl.Float64); err != nil {
+	if err := e.prepareType(tt, floatAllowed...); err != nil {
 		return err
 	}
 	if e.isStructFieldValue() && e.topType().Kind() != vdl.Any {
@@ -399,8 +406,10 @@ func (e *encoder) FromFloat(src float64, tt *vdl.Type) error {
 	return nil
 }
 
+var complexAllowed = []vdl.Kind{vdl.Complex64, vdl.Complex128}
+
 func (e *encoder) FromComplex(src complex128, tt *vdl.Type) error {
-	if err := e.prepareType(tt, vdl.Complex64, vdl.Complex128); err != nil {
+	if err := e.prepareType(tt, complexAllowed...); err != nil {
 		return err
 	}
 	if e.isStructFieldValue() && e.topType().Kind() != vdl.Any {
@@ -451,8 +460,10 @@ func (e *encoder) FromBytes(src []byte, tt *vdl.Type) error {
 	return nil
 }
 
+var stringAllowed = []vdl.Kind{vdl.String}
+
 func (e *encoder) FromString(src string, tt *vdl.Type) error {
-	if err := e.prepareType(tt, vdl.String); err != nil {
+	if err := e.prepareType(tt, stringAllowed...); err != nil {
 		return err
 	}
 	if e.isStructFieldValue() && e.topType().Kind() != vdl.Any {
@@ -466,8 +477,10 @@ func (e *encoder) FromString(src string, tt *vdl.Type) error {
 	return nil
 }
 
+var enumAllowed = []vdl.Kind{vdl.Enum}
+
 func (e *encoder) FromEnumLabel(src string, tt *vdl.Type) error {
-	if err := e.prepareType(tt, vdl.Enum); err != nil {
+	if err := e.prepareType(tt, enumAllowed...); err != nil {
 		return err
 	}
 	index := tt.EnumIndex(src)
@@ -485,8 +498,10 @@ func (e *encoder) FromEnumLabel(src string, tt *vdl.Type) error {
 	return nil
 }
 
+var typeObjectAllowed = []vdl.Kind{vdl.TypeObject}
+
 func (e *encoder) FromTypeObject(src *vdl.Type) error {
-	if err := e.prepareType(vdl.TypeObjectType, vdl.TypeObject); err != nil {
+	if err := e.prepareType(vdl.TypeObjectType, typeObjectAllowed...); err != nil {
 		return err
 	}
 	// Note that this function should never be called for wire types.
@@ -516,9 +531,11 @@ func (e *encoder) FromTypeObject(src *vdl.Type) error {
 	return nil
 }
 
+var nilAllowed = []vdl.Kind{vdl.Any, vdl.Optional}
+
 func (e *encoder) FromNil(tt *vdl.Type) error {
 	if !tt.CanBeNil() {
-		return errTypeMismatch(tt, vdl.Any, vdl.Optional)
+		return errTypeMismatch(tt, nilAllowed...)
 	}
 	if err := e.prepareTypeHelper(tt, true); err != nil {
 		return err
@@ -545,8 +562,10 @@ func (e *encoder) FromNil(tt *vdl.Type) error {
 	return nil
 }
 
+var listAllowed = []vdl.Kind{vdl.Array, vdl.List}
+
 func (e *encoder) StartList(tt *vdl.Type, len int) (vdl.ListTarget, error) {
-	if err := e.prepareType(tt, vdl.Array, vdl.List); err != nil {
+	if err := e.prepareType(tt, listAllowed...); err != nil {
 		return nil, err
 	}
 	if tt.Kind() == vdl.List {
@@ -573,8 +592,10 @@ func (e *encoder) StartList(tt *vdl.Type, len int) (vdl.ListTarget, error) {
 	return e, nil
 }
 
+var setAllowed = []vdl.Kind{vdl.Set}
+
 func (e *encoder) StartSet(tt *vdl.Type, len int) (vdl.SetTarget, error) {
-	if err := e.prepareType(tt, vdl.Set); err != nil {
+	if err := e.prepareType(tt, setAllowed...); err != nil {
 		return nil, err
 	}
 	if e.isStructFieldValue() && e.topType().Kind() != vdl.Any {
@@ -589,8 +610,10 @@ func (e *encoder) StartSet(tt *vdl.Type, len int) (vdl.SetTarget, error) {
 	return e, nil
 }
 
+var mapAllowed = []vdl.Kind{vdl.Map}
+
 func (e *encoder) StartMap(tt *vdl.Type, len int) (vdl.MapTarget, error) {
-	if err := e.prepareType(tt, vdl.Map); err != nil {
+	if err := e.prepareType(tt, mapAllowed...); err != nil {
 		return nil, err
 	}
 	if e.isStructFieldValue() && e.topType().Kind() != vdl.Any {
@@ -604,13 +627,15 @@ func (e *encoder) StartMap(tt *vdl.Type, len int) (vdl.MapTarget, error) {
 	e.pushType(tt)
 	return e, nil
 }
+
+var fieldsAllowed = []vdl.Kind{vdl.Struct, vdl.Union}
 
 func (e *encoder) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
 	if e.isStructFieldValue() && e.topType().Kind() != vdl.Any {
 		// TODO(bprosnitz) We shouldn't need to write the struct field index for fields that are empty structs/unions
 		binaryEncodeUint(e.buf, uint64(e.topTypeFieldIndex()))
 	}
-	if err := e.prepareType(tt, vdl.Struct, vdl.Union); err != nil {
+	if err := e.prepareType(tt, fieldsAllowed...); err != nil {
 		return nil, err
 	}
 	e.pushType(tt)
