@@ -8,8 +8,8 @@ import (
 	"errors"
 	"fmt"
 	"reflect"
-	"runtime/debug"
 	"strings"
+	"testing"
 	"time"
 
 	"v.io/v23"
@@ -18,9 +18,8 @@ import (
 	wire "v.io/v23/services/syncbase/nosql"
 	"v.io/v23/syncbase"
 	"v.io/v23/syncbase/nosql"
+	"v.io/x/ref/lib/v23test"
 	tu "v.io/x/ref/services/syncbase/testutil"
-	"v.io/x/ref/test/modules"
-	"v.io/x/ref/test/v23tests"
 )
 
 const (
@@ -47,38 +46,31 @@ func setupHierarchy(ctx *context.T, syncbaseName string) error {
 
 type testSyncbase struct {
 	sbName    string
-	sbCreds   *modules.CustomCredentials
+	sbCreds   *v23test.Credentials
 	clientId  string
 	clientCtx *context.T
-	cleanup   func()
 }
 
-// Spawns "num" Syncbase instances and returns handles to them, along with a
-// cleanup function.
-func setupSyncbases(t *v23tests.T, num int) ([]*testSyncbase, func()) {
+// Spawns "num" Syncbase instances and returns handles to them.
+func setupSyncbases(t *testing.T, sh *v23test.Shell, num int, args ...string) []*testSyncbase {
 	sbs := make([]*testSyncbase, num)
 	for i, _ := range sbs {
 		sbName, clientId := fmt.Sprintf("s%d", i), fmt.Sprintf("c%d", i)
 		sbs[i] = &testSyncbase{
 			sbName:    sbName,
-			sbCreds:   forkCredentials(t, sbName),
+			sbCreds:   sh.ForkCredentials(sbName),
 			clientId:  clientId,
-			clientCtx: forkContext(t, clientId),
+			clientCtx: sh.ForkContext(clientId),
 		}
 		// Give RWA permissions to this Syncbase's client.
 		acl := fmt.Sprintf(`{"Read":{"In":["root:%s"]},"Write":{"In":["root:%s"]},"Admin":{"In":["root:%s"]}}`, clientId, clientId, clientId)
-		sbs[i].cleanup = tu.StartSyncbased(t, sbs[i].sbCreds, sbs[i].sbName, "", acl)
+		sh.StartSyncbase(sbs[i].sbCreds, sbs[i].sbName, "", acl, args...)
 	}
 	// Call setupHierarchy on each Syncbase.
 	for _, sb := range sbs {
 		ok(t, setupHierarchy(sb.clientCtx, sb.sbName))
 	}
-	cleanup := func() {
-		for _, sb := range sbs {
-			sb.cleanup()
-		}
-	}
-	return sbs, cleanup
+	return sbs
 }
 
 // Returns a ";"-separated list of Syncbase blessing names.
@@ -162,6 +154,8 @@ func updateDataInBatch(ctx *context.T, syncbaseName string, start, end int, valu
 	return nil
 }
 
+// TODO(ivanpi): Remove sendSignal now that all functions using it are in the
+// same process.
 func sendSignal(ctx *context.T, d nosql.Database, signalKey string) error {
 	tb := d.Table(testTable)
 	r := tb.Row(signalKey)
@@ -332,57 +326,29 @@ func parseSgPrefixes(csv string) []wire.TableRow {
 	return res
 }
 
-// forkCredentials returns a new *modules.CustomCredentials with a fresh
-// principal, blessed by t with the given extension.
-// TODO(sadovsky): Maybe move to tu.
-func forkCredentials(t *v23tests.T, extension string) *modules.CustomCredentials {
-	c, err := t.Shell().NewChildCredentials(extension)
-	if err != nil {
-		t.Fatal(err)
-	}
-	return c
-}
-
-// forkContext returns a new *context.T with a fresh principal, blessed by t
-// with the given extension.
-// TODO(sadovsky): Maybe move to tu.
-func forkContext(t *v23tests.T, extension string) *context.T {
-	return tu.NewCtx(t.Context(), v23.GetPrincipal(t.Context()), extension)
-}
-
 ////////////////////////////////////////////////////////////
 // Generic testing helpers
 
-func fatal(t *v23tests.T, args ...interface{}) {
-	debug.PrintStack()
-	t.Fatal(args...)
-}
-
-func fatalf(t *v23tests.T, format string, args ...interface{}) {
-	debug.PrintStack()
-	t.Fatalf(format, args...)
-}
-
-func ok(t *v23tests.T, err error) {
+func ok(t *testing.T, err error) {
 	if err != nil {
-		fatal(t, err)
+		tu.Fatal(t, err)
 	}
 }
 
-func nok(t *v23tests.T, err error) {
+func nok(t *testing.T, err error) {
 	if err == nil {
-		fatal(t, "nil err")
+		tu.Fatal(t, "nil err")
 	}
 }
 
-func eq(t *v23tests.T, got, want interface{}) {
+func eq(t *testing.T, got, want interface{}) {
 	if !reflect.DeepEqual(got, want) {
-		fatalf(t, "got %v, want %v", got, want)
+		tu.Fatalf(t, "got %v, want %v", got, want)
 	}
 }
 
-func neq(t *v23tests.T, got, notWant interface{}) {
+func neq(t *testing.T, got, notWant interface{}) {
 	if reflect.DeepEqual(got, notWant) {
-		fatalf(t, "got %v", got)
+		tu.Fatalf(t, "got %v", got)
 	}
 }
