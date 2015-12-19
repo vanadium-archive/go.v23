@@ -939,6 +939,12 @@ func (c convTarget) fromBytesToBytes(src []byte) error {
 	return fmt.Errorf("invalid conversion from bytes to %v", c.tt)
 }
 
+// settable exists to avoid a call to reflect.Call() to invoke Set()
+// which results in an allocation
+type settable interface {
+	Set(string) error
+}
+
 func (c convTarget) fromString(src string) error {
 	if c.vv == nil {
 		tt := removeOptional(c.tt)
@@ -948,10 +954,9 @@ func (c convTarget) fromString(src string) error {
 			// that TypeFromReflect has already validated the Assign method, so we
 			// can call without error checking.
 			if c.rv.CanAddr() {
-				in := []reflect.Value{reflect.ValueOf(src)}
-				out := c.rv.Addr().MethodByName("Set").Call(in)
-				if ierr := out[0].Interface(); ierr != nil {
-					return ierr.(error)
+				err := c.rv.Addr().Interface().(settable).Set(src)
+				if err != nil {
+					return err
 				}
 				return nil
 			}
@@ -1204,7 +1209,7 @@ func (c convTarget) finishKeyStartField(key convTarget) (convTarget, error) {
 			if tt.Kind() == Union {
 				// Special-case: the fill target is a union concrete field struct.  This
 				// means that we should only return a field if the field name matches.
-				name := c.rv.MethodByName("Name").Call(nil)[0].String()
+				name := c.rv.Interface().(nameable).Name()
 				if name != key.rv.String() {
 					return convTarget{}, ErrFieldNoExist
 				}
