@@ -46,11 +46,6 @@ type Request struct {
 	// GrantedBlessings are blessings bound to the principal running the server,
 	// provided by the client.
 	GrantedBlessings security.Blessings
-	// Blessings is the blessings of the Client used for the current RPC.
-	Blessings BlessingsRequest
-	// Discharges are third party caveat discharges that may be required
-	// to make Blessings valid.
-	Discharges []security.Discharge
 	// TraceRequest maintains the vtrace context between clients and servers
 	// and specifies additional parameters that control how tracing behaves.
 	TraceRequest vtrace.Request
@@ -92,31 +87,9 @@ func (Response) __VDLReflect(struct {
 }) {
 }
 
-// BlessingsRequest represents security.Blessings for a particular request.
-// Since multiple requests on the same authenticated connection often use the
-// same blessings, we implement a caching scheme, where the client picks an
-// unused key and sends it along with the blessings.  After the client receives
-// confirmation that the server has received the key, subsequent client requests
-// only send the key.
-//
-// If BlessingRequest.Key is 0, the Client is running in SecurityNone and the
-// Blessings information should ignored.
-type BlessingsRequest struct {
-	// Key is the required key that the Client has cached Blessings with.
-	Key uint64
-	// Blessings is optional if the Server has already been notified of Key.
-	Blessings *security.Blessings
-}
-
-func (BlessingsRequest) __VDLReflect(struct {
-	Name string `vdl:"v.io/v23/rpc.BlessingsRequest"`
-}) {
-}
-
 func init() {
 	vdl.Register((*Request)(nil))
 	vdl.Register((*Response)(nil))
-	vdl.Register((*BlessingsRequest)(nil))
 }
 
 // TODO(toddw): Rename GlobMethod to ReservedGlob.

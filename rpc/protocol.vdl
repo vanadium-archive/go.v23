@@ -108,13 +108,6 @@ type Request struct {
 	// provided by the client.
 	GrantedBlessings security.WireBlessings
 
-	// Blessings is the blessings of the Client used for the current RPC.
-	Blessings BlessingsRequest
-
-	// Discharges are third party caveat discharges that may be required
-	// to make Blessings valid.
-	Discharges []security.WireDischarge
-
 	// TraceRequest maintains the vtrace context between clients and servers
 	// and specifies additional parameters that control how tracing behaves.
 	TraceRequest vtrace.Request
@@ -149,23 +142,6 @@ type Response struct {
 	// AckBlessings is true if the server successfully recevied the client's
 	// blessings and stored them in the server's blessings cache.
 	AckBlessings bool
-}
-
-// BlessingsRequest represents security.Blessings for a particular request.
-// Since multiple requests on the same authenticated connection often use the
-// same blessings, we implement a caching scheme, where the client picks an
-// unused key and sends it along with the blessings.  After the client receives
-// confirmation that the server has received the key, subsequent client requests
-// only send the key.
-//
-// If BlessingRequest.Key is 0, the Client is running in SecurityNone and the
-// Blessings information should ignored.
-type BlessingsRequest struct {
-	// Key is the required key that the Client has cached Blessings with.
-	Key uint64
-
-	// Blessings is optional if the Server has already been notified of Key.
-	Blessings ?security.WireBlessings
 }
 
 // The reserved method names that we currently understand.

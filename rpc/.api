@@ -28,9 +28,6 @@ pkg rpc, type AllGlobber interface, Glob__(*context.T, GlobServerCall, *glob.Glo
 pkg rpc, type ArgDesc struct
 pkg rpc, type ArgDesc struct, Doc string
 pkg rpc, type ArgDesc struct, Name string
-pkg rpc, type BlessingsRequest struct
-pkg rpc, type BlessingsRequest struct, Blessings *security.Blessings
-pkg rpc, type BlessingsRequest struct, Key uint64
 pkg rpc, type CallOpt interface { RPCCallOpt }
 pkg rpc, type CallOpt interface, RPCCallOpt()
 pkg rpc, type ChildrenGlobber interface { GlobChildren__ }
@@ -118,9 +115,7 @@ pkg rpc, type MountStatus struct, Name string
 pkg rpc, type MountStatus struct, Server string
 pkg rpc, type MountStatus struct, TTL time.Duration
 pkg rpc, type Request struct
-pkg rpc, type Request struct, Blessings BlessingsRequest
 pkg rpc, type Request struct, Deadline time.Deadline
-pkg rpc, type Request struct, Discharges []security.Discharge
 pkg rpc, type Request struct, EndStreamArgs bool
 pkg rpc, type Request struct, GrantedBlessings security.Blessings
 pkg rpc, type Request struct, Language string
