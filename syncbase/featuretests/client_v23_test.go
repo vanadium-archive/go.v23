@@ -5,24 +5,24 @@
 package featuretests_test
 
 import (
+	"testing"
+
 	"v.io/v23/syncbase"
-	_ "v.io/x/ref/runtime/factories/generic"
-	tu "v.io/x/ref/services/syncbase/testutil"
-	"v.io/x/ref/test/v23tests"
+	"v.io/x/ref/lib/v23test"
 )
 
-//go:generate jiri test generate
-
-func V23TestSyncbasedPutGet(t *v23tests.T) {
-	v23tests.RunRootMT(t, "--v23.tcp.address=127.0.0.1:0")
+func TestV23SyncbasedPutGet(t *testing.T) {
+	sh := v23test.NewShell(t, v23test.Opts{Large: true})
+	defer sh.Cleanup()
+	sh.StartRootMountTable()
 
 	// Start syncbased.
-	serverCreds := forkCredentials(t, "server")
-	cleanup := tu.StartSyncbased(t, serverCreds, testSbName, "", `{"Read": {"In":["root:server", "root:client"]}, "Write": {"In":["root:server", "root:client"]}}`)
-	defer cleanup()
+	serverCreds := sh.ForkCredentials("server")
+	sh.StartSyncbase(serverCreds, testSbName, "", `{"Read": {"In":["root:server", "root:client"]}, "Write": {"In":["root:server", "root:client"]}}`)
 
 	// Create app, database and table.
-	ctx := forkContext(t, "client")
+	// TODO(ivanpi): Use setupAppA.
+	ctx := sh.ForkContext("client")
 	a := syncbase.NewService(testSbName).App("a")
 	if err := a.Create(ctx, nil); err != nil {
 		t.Fatalf("unable to create an app: %v", err)

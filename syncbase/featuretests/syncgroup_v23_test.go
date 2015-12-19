@@ -10,29 +10,28 @@ package featuretests_test
 import (
 	"fmt"
 	"strings"
+	"testing"
 	"time"
 
 	"v.io/v23/context"
 	"v.io/v23/naming"
 	"v.io/v23/security"
 	"v.io/v23/security/access"
-	_ "v.io/x/ref/runtime/factories/generic"
+	"v.io/x/ref/lib/v23test"
 	constants "v.io/x/ref/services/syncbase/server/util"
-	"v.io/x/ref/test/v23tests"
 )
 
-//go:generate jiri test generate
-
-// V23TestSyncgroupRendezvousOnline tests that Syncbases can join a syncgroup
+// TestV23SyncgroupRendezvousOnline tests that Syncbases can join a syncgroup
 // when: all Syncbases are online and a creator creates the syncgroup and shares
 // the syncgroup name with all the joiners.
-func V23TestSyncgroupRendezvousOnline(t *v23tests.T) {
-	v23tests.RunRootMT(t, "--v23.tcp.address=127.0.0.1:0")
+func TestV23SyncgroupRendezvousOnline(t *testing.T) {
+	sh := v23test.NewShell(t, v23test.Opts{Large: true})
+	defer sh.Cleanup()
+	sh.StartRootMountTable()
 
 	N := 5
 	// Setup N Syncbases.
-	sbs, cleanup := setupSyncbases(t, N)
-	defer cleanup()
+	sbs := setupSyncbases(t, sh, N)
 
 	// Syncbase s0 is the creator.
 	sgName := naming.Join(sbs[0].sbName, constants.SyncbaseSuffix, "SG1")
@@ -56,23 +55,24 @@ func V23TestSyncgroupRendezvousOnline(t *v23tests.T) {
 		ok(t, verifySyncgroupMembers(sb.clientCtx, sb.sbName, sgName, N))
 	}
 
-	fmt.Println("V23TestSyncgroupRendezvousOnline=====Phase 1 Done")
+	fmt.Println("TestV23SyncgroupRendezvousOnline=====Phase 1 Done")
 }
 
-// V23TestSyncgroupRendezvousOnlineCloud tests that Syncbases can join a
+// TestV23SyncgroupRendezvousOnlineCloud tests that Syncbases can join a
 // syncgroup when: all Syncbases are online and a creator creates the syncgroup
 // and nominates a cloud syncbase for the other joiners to join at.
-func V23TestSyncgroupRendezvousOnlineCloud(t *v23tests.T) {
+func TestV23SyncgroupRendezvousOnlineCloud(t *testing.T) {
 	// TODO(hpucha): There is a potential bug that is currently preventing
 	// this test from succeeding.
 	t.Skip()
 
-	v23tests.RunRootMT(t, "--v23.tcp.address=127.0.0.1:0")
+	sh := v23test.NewShell(t, v23test.Opts{Large: true})
+	defer sh.Cleanup()
+	sh.StartRootMountTable()
 
 	N := 5
 	// Setup N+1 Syncbases (1 for the cloud instance).
-	sbs, cleanup := setupSyncbases(t, N+1)
-	defer cleanup()
+	sbs := setupSyncbases(t, sh, N+1)
 
 	// Syncbase s0 is the creator, and sN is the cloud.
 	sgName := naming.Join(sbs[N].sbName, constants.SyncbaseSuffix, "SG1")
@@ -96,23 +96,24 @@ func V23TestSyncgroupRendezvousOnlineCloud(t *v23tests.T) {
 		// ok(t, verifySyncgroupMembers(sbs[i].clientCtx, sbs[i].sbName, sgName, N+1))
 	}
 
-	fmt.Println("V23TestSyncgroupRendezvousOnlineCloud=====Phase 1 Done")
+	fmt.Println("TestV23SyncgroupRendezvousOnlineCloud=====Phase 1 Done")
 }
 
-// V23TestSyncgroupNeighborhoodOnly tests that Syncbases can join a syncgroup
+// TestV23SyncgroupNeighborhoodOnly tests that Syncbases can join a syncgroup
 // when: all Syncbases do not have general connectivity but can reach each other
 // over neighborhood, and a creator creates the syncgroup and shares the
 // syncgroup name with all the joiners. Restricted connectivity is simulated by
 // picking a syncgroup name that is not reachable and a syncgroup mount table
 // that doesn't exist.
-func V23TestSyncgroupNeighborhoodOnly(t *v23tests.T) {
-	v23tests.RunRootMT(t, "--v23.tcp.address=127.0.0.1:0")
+func TestV23SyncgroupNeighborhoodOnly(t *testing.T) {
+	sh := v23test.NewShell(t, v23test.Opts{Large: true})
+	defer sh.Cleanup()
+	sh.StartRootMountTable()
 
 	N := 5
 
 	// Setup N Syncbases.
-	sbs, cleanup := setupSyncbases(t, N)
-	defer cleanup()
+	sbs := setupSyncbases(t, sh, N)
 
 	// Syncbase s0 is the creator, but the syncgroup refers to non-existent
 	// Syncbase "s6".
@@ -151,20 +152,21 @@ func V23TestSyncgroupNeighborhoodOnly(t *v23tests.T) {
 		ok(t, verifySyncgroupMembers(sb.clientCtx, sb.sbName, sgName, N))
 	}
 
-	fmt.Println("V23TestSyncgroupNeighborhoodOnly=====Phase 1 Done")
+	fmt.Println("TestV23SyncgroupNeighborhoodOnly=====Phase 1 Done")
 }
 
-// V23TestSyncgroupPreknownStaggered tests that Syncbases can join a syncgroup
+// TestV23SyncgroupPreknownStaggered tests that Syncbases can join a syncgroup
 // when: all Syncbases come online in a staggered fashion. Each Syncbase always
 // tries to join a syncgroup with a predetermined name, and if join fails,
 // creates the syncgroup.
-func V23TestSyncgroupPreknownStaggered(t *v23tests.T) {
-	v23tests.RunRootMT(t, "--v23.tcp.address=127.0.0.1:0")
+func TestV23SyncgroupPreknownStaggered(t *testing.T) {
+	sh := v23test.NewShell(t, v23test.Opts{Large: true})
+	defer sh.Cleanup()
+	sh.StartRootMountTable()
 
 	N := 5
 	// Setup N Syncbases.
-	sbs, cleanup := setupSyncbases(t, N)
-	defer cleanup()
+	sbs := setupSyncbases(t, sh, N)
 
 	// Syncbase s0 is the first to join or create. Run s0 separately to
 	// stagger the process.
@@ -192,7 +194,7 @@ func V23TestSyncgroupPreknownStaggered(t *v23tests.T) {
 		ok(t, verifySyncgroupMembers(sb.clientCtx, sb.sbName, sgName, N))
 	}
 
-	fmt.Println("V23TestSyncgroupPreknownStaggered=====Phase 1 Done")
+	fmt.Println("TestV23SyncgroupPreknownStaggered=====Phase 1 Done")
 }
 
 ////////////////////////////////////////

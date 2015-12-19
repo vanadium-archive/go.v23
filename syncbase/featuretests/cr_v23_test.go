@@ -7,6 +7,7 @@ package featuretests_test
 import (
 	"fmt"
 	"strings"
+	"testing"
 	"time"
 
 	"v.io/v23/context"
@@ -15,12 +16,9 @@ import (
 	"v.io/v23/syncbase"
 	"v.io/v23/syncbase/nosql"
 	"v.io/v23/verror"
-	_ "v.io/x/ref/runtime/factories/generic"
+	"v.io/x/ref/lib/v23test"
 	"v.io/x/ref/services/syncbase/server/util"
-	"v.io/x/ref/test/v23tests"
 )
-
-//go:generate jiri test generate
 
 // Tests the conflict resolution configuration rules.
 // Setup:
@@ -34,31 +32,33 @@ import (
 //
 // TODO(jlodhia): Add more rules based on value type and combination of key
 // prefix and value type once its implemented.
-func V23TestCRRuleConfig(t *v23tests.T) {
-	runTestWithSetup(t, 10, func(client0Ctx, client1Ctx *context.T, sgName string) {
-		// Turn off syncing on both s0 and s1 by removing each other from syncgroup ACLs.
-		ok(t, toggleSync(client0Ctx, "s0", sgName, "root:s0"))
-		ok(t, toggleSync(client1Ctx, "s1", sgName, "root:s1"))
+func TestV23CRRuleConfig(t *testing.T) {
+	sh := v23test.NewShell(t, v23test.Opts{Large: true})
+	defer sh.Cleanup()
+	client0Ctx, client1Ctx, sgName := setupCRTest(t, sh, 10)
 
-		// Since sync is paused, the following updates are concurrent and not
-		// racy as long as Put() is sufficiently synchronous.
-		ok(t, updateData(client0Ctx, "s0", 0, 10, "concurrentUpdate"))
-		ok(t, updateData(client1Ctx, "s1", 0, 10, "concurrentUpdate"))
+	// Turn off syncing on both s0 and s1 by removing each other from syncgroup ACLs.
+	ok(t, toggleSync(client0Ctx, "s0", sgName, "root:s0"))
+	ok(t, toggleSync(client1Ctx, "s1", sgName, "root:s1"))
 
-		schemaKeyPrefix := "foo0"
-		runWithAppBasedResolver(t, client0Ctx, client1Ctx, schemaKeyPrefix, 2, func() {
-			// Re enable sync between the two syncbases and wait for a bit to let the
-			// syncbases sync and call conflict resolution.
-			ok(t, toggleSync(client0Ctx, "s0", sgName, "root:s0;root:s1"))
-			ok(t, toggleSync(client1Ctx, "s1", sgName, "root:s0;root:s1"))
+	// Since sync is paused, the following updates are concurrent and not
+	// racy as long as Put() is sufficiently synchronous.
+	ok(t, updateData(client0Ctx, "s0", 0, 10, "concurrentUpdate"))
+	ok(t, updateData(client1Ctx, "s1", 0, 10, "concurrentUpdate"))
 
-			// Verify that the resolved data looks correct.
-			ok(t, waitForValue(client0Ctx, "s0", "foo0", "AppResolvedVal", schemaKeyPrefix))
-			ok(t, waitForValue(client0Ctx, "s0", "foo1", "concurrentUpdate"+"s1", schemaKeyPrefix))
+	schemaKeyPrefix := "foo0"
+	runWithAppBasedResolver(t, client0Ctx, client1Ctx, schemaKeyPrefix, 2, func() {
+		// Re enable sync between the two syncbases and wait for a bit to let the
+		// syncbases sync and call conflict resolution.
+		ok(t, toggleSync(client0Ctx, "s0", sgName, "root:s0;root:s1"))
+		ok(t, toggleSync(client1Ctx, "s1", sgName, "root:s0;root:s1"))
 
-			ok(t, waitForValue(client1Ctx, "s1", "foo0", "AppResolvedVal", schemaKeyPrefix))
-			ok(t, waitForValue(client1Ctx, "s1", "foo1", "concurrentUpdate"+"s1", schemaKeyPrefix))
-		})
+		// Verify that the resolved data looks correct.
+		ok(t, waitForValue(client0Ctx, "s0", "foo0", "AppResolvedVal", schemaKeyPrefix))
+		ok(t, waitForValue(client0Ctx, "s0", "foo1", "concurrentUpdate"+"s1", schemaKeyPrefix))
+
+		ok(t, waitForValue(client1Ctx, "s1", "foo0", "AppResolvedVal", schemaKeyPrefix))
+		ok(t, waitForValue(client1Ctx, "s1", "foo1", "concurrentUpdate"+"s1", schemaKeyPrefix))
 	})
 }
 
@@ -69,36 +69,38 @@ func V23TestCRRuleConfig(t *v23tests.T) {
 // value for foo0 concurrently where S1's write has a newer timestamp.
 // Result:
 // The value for foo0 after sync settles on what S1 wrote for both syncbases.
-func V23TestCRDefault(t *v23tests.T) {
-	runTestWithSetup(t, 1, func(client0Ctx, client1Ctx *context.T, sgName string) {
-		// Turn off syncing on both s0 and s1 by removing each other from syncgroup ACLs.
-		ok(t, toggleSync(client0Ctx, "s0", sgName, "root:s0"))
-		ok(t, toggleSync(client1Ctx, "s1", sgName, "root:s1"))
+func TestV23CRDefault(t *testing.T) {
+	sh := v23test.NewShell(t, v23test.Opts{Large: true})
+	defer sh.Cleanup()
+	client0Ctx, client1Ctx, sgName := setupCRTest(t, sh, 1)
 
-		// Since sync is paused, the following updates are concurrent and not
-		// racy as long as Put() is sufficiently synchronous.
-		ok(t, updateData(client0Ctx, "s0", 0, 1, "concurrentUpdate"))
-		time.Sleep(5 * time.Millisecond) // make sure that the clock moves forwared between the two updates.
-		ok(t, updateData(client1Ctx, "s1", 0, 1, "concurrentUpdate"))
+	// Turn off syncing on both s0 and s1 by removing each other from syncgroup ACLs.
+	ok(t, toggleSync(client0Ctx, "s0", sgName, "root:s0"))
+	ok(t, toggleSync(client1Ctx, "s1", sgName, "root:s1"))
 
-		// Add new seperate keys to each syncbase so that we can verify if sync
-		// has happened between the two syncbases by waiting on the other's key.
-		ok(t, populateData(client0Ctx, "s0", "foo", 22, 23))
-		ok(t, populateData(client1Ctx, "s1", "foo", 44, 45))
+	// Since sync is paused, the following updates are concurrent and not
+	// racy as long as Put() is sufficiently synchronous.
+	ok(t, updateData(client0Ctx, "s0", 0, 1, "concurrentUpdate"))
+	time.Sleep(5 * time.Millisecond) // make sure that the clock moves forwared between the two updates.
+	ok(t, updateData(client1Ctx, "s1", 0, 1, "concurrentUpdate"))
 
-		// Re enable sync between the two syncbases and wait for a bit to let the
-		// syncbases sync and call conflict resolution.
-		ok(t, toggleSync(client0Ctx, "s0", sgName, "root:s0;root:s1"))
-		ok(t, toggleSync(client1Ctx, "s1", sgName, "root:s0;root:s1"))
+	// Add new seperate keys to each syncbase so that we can verify if sync
+	// has happened between the two syncbases by waiting on the other's key.
+	ok(t, populateData(client0Ctx, "s0", "foo", 22, 23))
+	ok(t, populateData(client1Ctx, "s1", "foo", 44, 45))
 
-		// Verify that both sides have synced with the other.
-		ok(t, waitForValue(client0Ctx, "s0", "foo44", "testkey", "")) // 44 is written by S1
-		ok(t, waitForValue(client1Ctx, "s1", "foo22", "testkey", "")) // 22 is written by S0
+	// Re enable sync between the two syncbases and wait for a bit to let the
+	// syncbases sync and call conflict resolution.
+	ok(t, toggleSync(client0Ctx, "s0", sgName, "root:s0;root:s1"))
+	ok(t, toggleSync(client1Ctx, "s1", sgName, "root:s0;root:s1"))
 
-		// Verify that the resolved data looks correct.
-		ok(t, waitForValue(client0Ctx, "s0", "foo0", "concurrentUpdate"+"s1", ""))
-		ok(t, waitForValue(client1Ctx, "s1", "foo0", "concurrentUpdate"+"s1", ""))
-	})
+	// Verify that both sides have synced with the other.
+	ok(t, waitForValue(client0Ctx, "s0", "foo44", "testkey", "")) // 44 is written by S1
+	ok(t, waitForValue(client1Ctx, "s1", "foo22", "testkey", "")) // 22 is written by S0
+
+	// Verify that the resolved data looks correct.
+	ok(t, waitForValue(client0Ctx, "s0", "foo0", "concurrentUpdate"+"s1", ""))
+	ok(t, waitForValue(client1Ctx, "s1", "foo0", "concurrentUpdate"+"s1", ""))
 }
 
 // Tests last timestamp wins for batches under conflict.
@@ -110,33 +112,35 @@ func V23TestCRDefault(t *v23tests.T) {
 // Result:
 // After conflict resolution, final values for all rows within the batch must
 // come from either S0 or S1 but not a mixture of the two.
-func V23TestCRWithAtomicBatch(t *v23tests.T) {
-	runTestWithSetup(t, 100, func(client0Ctx, client1Ctx *context.T, sgName string) {
-		// Turn off syncing on both s0 and s1 by removing each other from syncgroup ACLs.
-		ok(t, toggleSync(client0Ctx, "s0", sgName, "root:s0"))
-		ok(t, toggleSync(client1Ctx, "s1", sgName, "root:s1"))
+func TestV23CRWithAtomicBatch(t *testing.T) {
+	sh := v23test.NewShell(t, v23test.Opts{Large: true})
+	defer sh.Cleanup()
+	client0Ctx, client1Ctx, sgName := setupCRTest(t, sh, 100)
 
-		// Since sync is paused, the following updates are concurrent and not
-		// racy as long as Put() is sufficiently synchronous.
-		go ok(t, updateDataInBatch(client0Ctx, "s0", 0, 100, "concurrentBatchUpdate", "batchDoneKey1"))
-		go ok(t, updateDataInBatch(client1Ctx, "s1", 0, 100, "concurrentBatchUpdate", "batchDoneKey2"))
-		time.Sleep(1 * time.Second) // let the above go routine get scheduled.
+	// Turn off syncing on both s0 and s1 by removing each other from syncgroup ACLs.
+	ok(t, toggleSync(client0Ctx, "s0", sgName, "root:s0"))
+	ok(t, toggleSync(client1Ctx, "s1", sgName, "root:s1"))
 
-		// Re enable sync between the two syncbases and wait for a bit to let the
-		// syncbases sync and call conflict resolution.
-		ok(t, toggleSync(client0Ctx, "s0", sgName, "root:s0;root:s1"))
-		ok(t, toggleSync(client1Ctx, "s1", sgName, "root:s0;root:s1"))
+	// Since sync is paused, the following updates are concurrent and not
+	// racy as long as Put() is sufficiently synchronous.
+	go ok(t, updateDataInBatch(client0Ctx, "s0", 0, 100, "concurrentBatchUpdate", "batchDoneKey1"))
+	go ok(t, updateDataInBatch(client1Ctx, "s1", 0, 100, "concurrentBatchUpdate", "batchDoneKey2"))
+	time.Sleep(1 * time.Second) // let the above go routine get scheduled.
 
-		// Make sure that the sync has completed by injecting a row on s0 and
-		// reading it on s1.
-		ok(t, populateData(client0Ctx, "s0", "foo", 200, 201))
-		ok(t, waitForValue(client1Ctx, "s1", "foo200", "testkey", ""))
-		ok(t, populateData(client1Ctx, "s1", "foo", 400, 401))
-		ok(t, waitForValue(client0Ctx, "s0", "foo400", "testkey", ""))
+	// Re enable sync between the two syncbases and wait for a bit to let the
+	// syncbases sync and call conflict resolution.
+	ok(t, toggleSync(client0Ctx, "s0", sgName, "root:s0;root:s1"))
+	ok(t, toggleSync(client1Ctx, "s1", sgName, "root:s0;root:s1"))
 
-		ok(t, verifyConflictResolvedBatch(client0Ctx, "s0", "foo", 0, 100, "concurrentBatchUpdate"))
-		ok(t, verifyConflictResolvedBatch(client1Ctx, "s1", "foo", 0, 100, "concurrentBatchUpdate"))
-	})
+	// Make sure that the sync has completed by injecting a row on s0 and
+	// reading it on s1.
+	ok(t, populateData(client0Ctx, "s0", "foo", 200, 201))
+	ok(t, waitForValue(client1Ctx, "s1", "foo200", "testkey", ""))
+	ok(t, populateData(client1Ctx, "s1", "foo", 400, 401))
+	ok(t, waitForValue(client0Ctx, "s0", "foo400", "testkey", ""))
+
+	ok(t, verifyConflictResolvedBatch(client0Ctx, "s0", "foo", 0, 100, "concurrentBatchUpdate"))
+	ok(t, verifyConflictResolvedBatch(client1Ctx, "s1", "foo", 0, 100, "concurrentBatchUpdate"))
 }
 
 // Tests AppResolves resolution policy by creating conflicts for rows that will
@@ -145,40 +149,42 @@ func V23TestCRWithAtomicBatch(t *v23tests.T) {
 //    calls to the app.
 // 2) 5 rows written as a single batch on both syncbases resulting into a
 //    single conflict for the batch.
-func V23TestCRAppResolved(t *v23tests.T) {
-	runTestWithSetup(t, 10, func(client0Ctx, client1Ctx *context.T, sgName string) {
-		// Turn off syncing on both s0 and s1 by removing each other from syncgroup ACLs.
-		ok(t, toggleSync(client0Ctx, "s0", sgName, "root:s0"))
-		ok(t, toggleSync(client1Ctx, "s1", sgName, "root:s1"))
+func TestV23CRAppResolved(t *testing.T) {
+	sh := v23test.NewShell(t, v23test.Opts{Large: true})
+	defer sh.Cleanup()
+	client0Ctx, client1Ctx, sgName := setupCRTest(t, sh, 10)
 
-		// Since sync is paused, the following updates are concurrent and not
-		// racy as long as Put() is sufficiently synchronous.
-		ok(t, updateData(client0Ctx, "s0", 0, 5, "concurrentUpdate"))
-		ok(t, updateData(client1Ctx, "s1", 0, 5, "concurrentUpdate"))
+	// Turn off syncing on both s0 and s1 by removing each other from syncgroup ACLs.
+	ok(t, toggleSync(client0Ctx, "s0", sgName, "root:s0"))
+	ok(t, toggleSync(client1Ctx, "s1", sgName, "root:s1"))
 
-		ok(t, updateDataInBatch(client0Ctx, "s0", 5, 10, "concurrentBatchUpdate", ""))
-		ok(t, updateDataInBatch(client1Ctx, "s1", 5, 10, "concurrentBatchUpdate", ""))
+	// Since sync is paused, the following updates are concurrent and not
+	// racy as long as Put() is sufficiently synchronous.
+	ok(t, updateData(client0Ctx, "s0", 0, 5, "concurrentUpdate"))
+	ok(t, updateData(client1Ctx, "s1", 0, 5, "concurrentUpdate"))
 
-		schemaPrefix := "foo"
-		keyPrefix := "foo"
-		// TODO(jlodhia): change the expected num conflicts from 12 to 6 once
-		// sync's cr code handles duplicate resolutions internally.
-		runWithAppBasedResolver(t, client0Ctx, client1Ctx, schemaPrefix, 12, func() {
-			// Re enable sync between the two syncbases and wait for a bit to let the
-			// syncbases sync and call conflict resolution.
-			ok(t, toggleSync(client0Ctx, "s0", sgName, "root:s0;root:s1"))
-			ok(t, toggleSync(client1Ctx, "s1", sgName, "root:s0;root:s1"))
+	ok(t, updateDataInBatch(client0Ctx, "s0", 5, 10, "concurrentBatchUpdate", ""))
+	ok(t, updateDataInBatch(client1Ctx, "s1", 5, 10, "concurrentBatchUpdate", ""))
 
-			// Verify that the resolved data looks correct.
-			keyUnderConflict := "foo8" // one of the keys under conflict
-			ok(t, waitForValue(client0Ctx, "s0", keyUnderConflict, "AppResolvedVal", schemaPrefix))
-			ok(t, verifyConflictResolvedData(client0Ctx, "s0", keyPrefix, schemaPrefix, 0, 5, "AppResolvedVal"))
-			ok(t, verifyConflictResolvedData(client0Ctx, "s0", keyPrefix, schemaPrefix, 5, 10, "AppResolvedVal"))
+	schemaPrefix := "foo"
+	keyPrefix := "foo"
+	// TODO(jlodhia): change the expected num conflicts from 12 to 6 once
+	// sync's cr code handles duplicate resolutions internally.
+	runWithAppBasedResolver(t, client0Ctx, client1Ctx, schemaPrefix, 12, func() {
+		// Re enable sync between the two syncbases and wait for a bit to let the
+		// syncbases sync and call conflict resolution.
+		ok(t, toggleSync(client0Ctx, "s0", sgName, "root:s0;root:s1"))
+		ok(t, toggleSync(client1Ctx, "s1", sgName, "root:s0;root:s1"))
 
-			ok(t, waitForValue(client1Ctx, "s1", keyUnderConflict, "AppResolvedVal", schemaPrefix))
-			ok(t, verifyConflictResolvedData(client1Ctx, "s1", keyPrefix, schemaPrefix, 0, 5, "AppResolvedVal"))
-			ok(t, verifyConflictResolvedData(client1Ctx, "s1", keyPrefix, schemaPrefix, 5, 10, "AppResolvedVal"))
-		})
+		// Verify that the resolved data looks correct.
+		keyUnderConflict := "foo8" // one of the keys under conflict
+		ok(t, waitForValue(client0Ctx, "s0", keyUnderConflict, "AppResolvedVal", schemaPrefix))
+		ok(t, verifyConflictResolvedData(client0Ctx, "s0", keyPrefix, schemaPrefix, 0, 5, "AppResolvedVal"))
+		ok(t, verifyConflictResolvedData(client0Ctx, "s0", keyPrefix, schemaPrefix, 5, 10, "AppResolvedVal"))
+
+		ok(t, waitForValue(client1Ctx, "s1", keyUnderConflict, "AppResolvedVal", schemaPrefix))
+		ok(t, verifyConflictResolvedData(client1Ctx, "s1", keyPrefix, schemaPrefix, 0, 5, "AppResolvedVal"))
+		ok(t, verifyConflictResolvedData(client1Ctx, "s1", keyPrefix, schemaPrefix, 5, 10, "AppResolvedVal"))
 	})
 }
 
@@ -193,35 +199,37 @@ func V23TestCRAppResolved(t *v23tests.T) {
 // are newer than S0's.
 // Result:
 // All rows are resolved via AppResolves.
-func V23TestCRAppBasedResolutionOverridesOthers(t *v23tests.T) {
-	runTestWithSetup(t, 20, func(client0Ctx, client1Ctx *context.T, sgName string) {
-		// Turn off syncing on both s0 and s1 by removing each other from syncgroup ACLs.
-		ok(t, toggleSync(client0Ctx, "s0", sgName, "root:s0"))
-		ok(t, toggleSync(client1Ctx, "s1", sgName, "root:s1"))
+func TestV23CRAppBasedResolutionOverridesOthers(t *testing.T) {
+	sh := v23test.NewShell(t, v23test.Opts{Large: true})
+	defer sh.Cleanup()
+	client0Ctx, client1Ctx, sgName := setupCRTest(t, sh, 20)
 
-		// Since sync is paused, the following updates are concurrent and not
-		// racy as long as Put() is sufficiently synchronous.
-		ok(t, updateDataInBatch(client0Ctx, "s0", 0, 20, "concurrentBatchUpdate", ""))
-		ok(t, updateDataInBatch(client1Ctx, "s1", 0, 20, "concurrentBatchUpdate", ""))
+	// Turn off syncing on both s0 and s1 by removing each other from syncgroup ACLs.
+	ok(t, toggleSync(client0Ctx, "s0", sgName, "root:s0"))
+	ok(t, toggleSync(client1Ctx, "s1", sgName, "root:s1"))
 
-		schemaPrefix := "foo1"
-		keyPrefix := "foo"
-		// TODO(jlodhia): change the expected num conflicts from 2 to 1 once
-		// sync's cr code handles duplicate resolutions internally.
-		runWithAppBasedResolver(t, client0Ctx, client1Ctx, schemaPrefix, 2, func() {
-			// Re enable sync between the two syncbases and wait for a bit to let the
-			// syncbases sync and call conflict resolution.
-			ok(t, toggleSync(client0Ctx, "s0", sgName, "root:s0;root:s1"))
-			ok(t, toggleSync(client1Ctx, "s1", sgName, "root:s0;root:s1"))
+	// Since sync is paused, the following updates are concurrent and not
+	// racy as long as Put() is sufficiently synchronous.
+	ok(t, updateDataInBatch(client0Ctx, "s0", 0, 20, "concurrentBatchUpdate", ""))
+	ok(t, updateDataInBatch(client1Ctx, "s1", 0, 20, "concurrentBatchUpdate", ""))
 
-			// Verify that the resolved data looks correct.
-			keyUnderConflict := "foo11" // one of the keys under conflict
-			ok(t, waitForValue(client0Ctx, "s0", keyUnderConflict, "AppResolvedVal", schemaPrefix))
-			ok(t, verifyConflictResolvedData(client0Ctx, "s0", keyPrefix, schemaPrefix, 0, 20, "AppResolvedVal"))
+	schemaPrefix := "foo1"
+	keyPrefix := "foo"
+	// TODO(jlodhia): change the expected num conflicts from 2 to 1 once
+	// sync's cr code handles duplicate resolutions internally.
+	runWithAppBasedResolver(t, client0Ctx, client1Ctx, schemaPrefix, 2, func() {
+		// Re enable sync between the two syncbases and wait for a bit to let the
+		// syncbases sync and call conflict resolution.
+		ok(t, toggleSync(client0Ctx, "s0", sgName, "root:s0;root:s1"))
+		ok(t, toggleSync(client1Ctx, "s1", sgName, "root:s0;root:s1"))
 
-			ok(t, waitForValue(client1Ctx, "s1", keyUnderConflict, "AppResolvedVal", schemaPrefix))
-			ok(t, verifyConflictResolvedData(client1Ctx, "s1", keyPrefix, schemaPrefix, 0, 20, "AppResolvedVal"))
-		})
+		// Verify that the resolved data looks correct.
+		keyUnderConflict := "foo11" // one of the keys under conflict
+		ok(t, waitForValue(client0Ctx, "s0", keyUnderConflict, "AppResolvedVal", schemaPrefix))
+		ok(t, verifyConflictResolvedData(client0Ctx, "s0", keyPrefix, schemaPrefix, 0, 20, "AppResolvedVal"))
+
+		ok(t, waitForValue(client1Ctx, "s1", keyUnderConflict, "AppResolvedVal", schemaPrefix))
+		ok(t, verifyConflictResolvedData(client1Ctx, "s1", keyPrefix, schemaPrefix, 0, 20, "AppResolvedVal"))
 	})
 }
 
@@ -235,59 +243,54 @@ func V23TestCRAppBasedResolutionOverridesOthers(t *v23tests.T) {
 // S1 concurrently writes batches B2{foo3 to foo6}
 // Result:
 // All rows are resolved via AppResolves as a single conflict call.
-func V23TestCRMultipleBatchesAsSingleConflict(t *v23tests.T) {
+func TestV23CRMultipleBatchesAsSingleConflict(t *testing.T) {
 	// TODO(hpucha): Start running this test once sync handles insertion of
 	// local objects by conflict resolution which originally were not under
 	// conflict.
 	t.Skip()
 
-	runTestWithSetup(t, 10, func(client0Ctx, client1Ctx *context.T, sgName string) {
-		// Turn off syncing on both s0 and s1 by removing each other from syncgroup ACLs.
-		ok(t, toggleSync(client0Ctx, "s0", sgName, "root:s0"))
-		ok(t, toggleSync(client1Ctx, "s1", sgName, "root:s1"))
+	sh := v23test.NewShell(t, v23test.Opts{Large: true})
+	defer sh.Cleanup()
+	client0Ctx, client1Ctx, sgName := setupCRTest(t, sh, 10)
 
-		// Since sync is paused, the following updates are concurrent and not
-		// racy as long as Put() is sufficiently synchronous.
-		// Batch1 has 0, 1, 2, 3 on S0
-		ok(t, updateDataInBatch(client0Ctx, "s0", 0, 4, "concurrentBatchUpdate", ""))
-		// Batch2 has 6, 7, 8, 9 on S0
-		ok(t, updateDataInBatch(client0Ctx, "s0", 6, 10, "concurrentBatchUpdate", ""))
-		// Batch3 has 3, 4, 5, 6 on S1
-		ok(t, updateDataInBatch(client1Ctx, "s1", 3, 7, "concurrentBatchUpdate", ""))
+	// Turn off syncing on both s0 and s1 by removing each other from syncgroup ACLs.
+	ok(t, toggleSync(client0Ctx, "s0", sgName, "root:s0"))
+	ok(t, toggleSync(client1Ctx, "s1", sgName, "root:s1"))
 
-		schemaPrefix := "foo"
-		keyPrefix := "foo"
-		// TODO(jlodhia): change the expected num conflicts from 2 to 1 once
-		// sync's cr code handles duplicate resolutions internally.
-		runWithAppBasedResolver(t, client0Ctx, client1Ctx, schemaPrefix, 2, func() {
-			// Re enable sync between the two syncbases and wait for a bit to let the
-			// syncbases sync and call conflict resolution.
-			ok(t, toggleSync(client0Ctx, "s0", sgName, "root:s0;root:s1"))
-			ok(t, toggleSync(client1Ctx, "s1", sgName, "root:s0;root:s1"))
+	// Since sync is paused, the following updates are concurrent and not
+	// racy as long as Put() is sufficiently synchronous.
+	// Batch1 has 0, 1, 2, 3 on S0
+	ok(t, updateDataInBatch(client0Ctx, "s0", 0, 4, "concurrentBatchUpdate", ""))
+	// Batch2 has 6, 7, 8, 9 on S0
+	ok(t, updateDataInBatch(client0Ctx, "s0", 6, 10, "concurrentBatchUpdate", ""))
+	// Batch3 has 3, 4, 5, 6 on S1
+	ok(t, updateDataInBatch(client1Ctx, "s1", 3, 7, "concurrentBatchUpdate", ""))
 
-			// Verify that the resolved data looks correct.
-			keyUnderConflict := "foo8" // one of the keys under conflict
-			ok(t, waitForValue(client0Ctx, "s0", keyUnderConflict, "AppResolvedVal", schemaPrefix))
-			ok(t, verifyConflictResolvedData(client0Ctx, "s0", keyPrefix, schemaPrefix, 0, 10, "AppResolvedVal"))
+	schemaPrefix := "foo"
+	keyPrefix := "foo"
+	// TODO(jlodhia): change the expected num conflicts from 2 to 1 once
+	// sync's cr code handles duplicate resolutions internally.
+	runWithAppBasedResolver(t, client0Ctx, client1Ctx, schemaPrefix, 2, func() {
+		// Re enable sync between the two syncbases and wait for a bit to let the
+		// syncbases sync and call conflict resolution.
+		ok(t, toggleSync(client0Ctx, "s0", sgName, "root:s0;root:s1"))
+		ok(t, toggleSync(client1Ctx, "s1", sgName, "root:s0;root:s1"))
 
-			ok(t, waitForValue(client1Ctx, "s1", keyUnderConflict, "AppResolvedVal", schemaPrefix))
-			ok(t, verifyConflictResolvedData(client1Ctx, "s1", keyPrefix, schemaPrefix, 0, 10, "AppResolvedVal"))
-		})
+		// Verify that the resolved data looks correct.
+		keyUnderConflict := "foo8" // one of the keys under conflict
+		ok(t, waitForValue(client0Ctx, "s0", keyUnderConflict, "AppResolvedVal", schemaPrefix))
+		ok(t, verifyConflictResolvedData(client0Ctx, "s0", keyPrefix, schemaPrefix, 0, 10, "AppResolvedVal"))
+
+		ok(t, waitForValue(client1Ctx, "s1", keyUnderConflict, "AppResolvedVal", schemaPrefix))
+		ok(t, verifyConflictResolvedData(client1Ctx, "s1", keyPrefix, schemaPrefix, 0, 10, "AppResolvedVal"))
 	})
 }
 
-// TODO(sadovsky): This "runTestWithSetup" pattern is not ideal; it would be
-// better to have tests do the following:
-//     client0, client1, sgName, cleanup := setup(t, numInitRows)
-//     defer cleanup()
-//     <implementation of fn>
-func runTestWithSetup(t *v23tests.T, numInitRows int, fn func(client0, client1 *context.T, sgName string)) {
-	v23tests.RunRootMT(t, "--v23.tcp.address=127.0.0.1:0")
+func setupCRTest(t *testing.T, sh *v23test.Shell, numInitRows int) (client0, client1 *context.T, sgName string) {
+	sh.StartRootMountTable()
+	sbs := setupSyncbases(t, sh, 2)
 
-	sbs, cleanup := setupSyncbases(t, 2)
-	defer cleanup()
-
-	sgName := naming.Join("s0", util.SyncbaseSuffix, "SG1")
+	sgName = naming.Join("s0", util.SyncbaseSuffix, "SG1")
 
 	// Create syncgroup and populate data on s0.
 	ok(t, createSyncgroup(sbs[0].clientCtx, "s0", sgName, "tb:foo", "", sbBlessings(sbs), nil))
@@ -297,15 +300,14 @@ func runTestWithSetup(t *v23tests.T, numInitRows int, fn func(client0, client1 *
 	ok(t, joinSyncgroup(sbs[1].clientCtx, "s1", sgName))
 	ok(t, verifySyncgroupData(sbs[1].clientCtx, "s1", "foo", 0, numInitRows))
 
-	fn(sbs[0].clientCtx, sbs[1].clientCtx, sgName)
+	return sbs[0].clientCtx, sbs[1].clientCtx, sgName
 }
 
-// TODO(sadovsky): As with runTestWithSetup, this pattern is not ideal in that
-// it makes the test code harder to follow. It would be better to define two
-// helper functions: one to do the stuff before fn(), and another to do the
-// stuff after fn(). (Also, switching to channel-based signalling should
-// simplify things substantially.)
-func runWithAppBasedResolver(t *v23tests.T, client0Ctx, client1Ctx *context.T, schemaPrefix string, maxCallCount int, fn func()) {
+// TODO(sadovsky): This pattern is not ideal in that it makes the test code
+// harder to follow. It would be better to define two helper functions: one
+// to do the stuff before fn(), and another to do the stuff after fn(). (Also,
+// switching to channel-based signalling should simplify things substantially.)
+func runWithAppBasedResolver(t *testing.T, client0Ctx, client1Ctx *context.T, schemaPrefix string, maxCallCount int, fn func()) {
 	// Create and hold a conflict resolution connection on s0 and s1 to receive
 	// future conflicts. The expected call count is 2 * the number of batches
 	// because each batch is being concurrently resolved on s0 and s1 creating new

@@ -5,18 +5,17 @@
 package featuretests_test
 
 import (
+	"testing"
 	"time"
 
 	"v.io/v23/context"
 	"v.io/v23/naming"
 	wire "v.io/v23/services/syncbase"
-	_ "v.io/x/ref/runtime/factories/generic"
+	"v.io/x/ref/lib/v23test"
 	"v.io/x/ref/services/syncbase/server/util"
 	tu "v.io/x/ref/services/syncbase/testutil"
-	"v.io/x/ref/test/v23tests"
+	"v.io/x/ref/test/expect"
 )
-
-//go:generate jiri test generate
 
 const (
 	openPerms = `{"Read": {"In":["..."]}, "Write": {"In":["..."]}, "Resolve": {"In":["..."]}, "Admin": {"In":["..."]}}`
@@ -29,20 +28,17 @@ var (
 	fiveSecs = 5 * time.Second
 )
 
-func testInit(t *v23tests.T) {
-	v23tests.RunRootMT(t, "--v23.tcp.address=127.0.0.1:0")
-}
-
 ////////////////////////////////////////////////////////////////////////////////
 // Tests for local vclock updates
 
 // Tests that the virtual clock moves forward.
-func V23TestVClockMovesForward(t *v23tests.T) {
-	testInit(t)
-	ctx := forkContext(t, "c0")
-	s0Creds := forkCredentials(t, "s0")
-	cleanup := tu.StartSyncbased(t, s0Creds, "s0", "", openPerms)
-	defer cleanup()
+func TestV23VClockMovesForward(t *testing.T) {
+	sh := v23test.NewShell(t, v23test.Opts{Large: true})
+	defer sh.Cleanup()
+	sh.StartRootMountTable()
+	ctx := sh.ForkContext("c0")
+	s0Creds := sh.ForkCredentials("s0")
+	sh.StartSyncbase(s0Creds, "s0", "", openPerms, "--dev")
 
 	t0, err := sc("s0").DevModeGetTime(ctx)
 	ok(t, err)
@@ -55,12 +51,13 @@ func V23TestVClockMovesForward(t *v23tests.T) {
 }
 
 // Tests that system clock updates affect the virtual clock.
-func V23TestVClockSystemClockUpdate(t *v23tests.T) {
-	testInit(t)
-	ctx := forkContext(t, "c0")
-	s0Creds := forkCredentials(t, "s0")
-	cleanup := tu.StartSyncbased(t, s0Creds, "s0", "", openPerms)
-	defer cleanup()
+func TestV23VClockSystemClockUpdate(t *testing.T) {
+	sh := v23test.NewShell(t, v23test.Opts{Large: true})
+	defer sh.Cleanup()
+	sh.StartRootMountTable()
+	ctx := sh.ForkContext("c0")
+	s0Creds := sh.ForkCredentials("s0")
+	sh.StartSyncbase(s0Creds, "s0", "", openPerms, "--dev")
 
 	// Initialize system time.
 	ok(t, sc("s0").DevModeUpdateVClock(ctx, wire.DevModeUpdateVClockOpts{
@@ -111,12 +108,13 @@ func V23TestVClockSystemClockUpdate(t *v23tests.T) {
 
 // Tests that the virtual clock daemon checks for system clock updates at the
 // expected frequency (loosely speaking).
-func V23TestVClockSystemClockFrequency(t *v23tests.T) {
-	testInit(t)
-	ctx := forkContext(t, "c0")
-	s0Creds := forkCredentials(t, "s0")
-	cleanup := tu.StartSyncbased(t, s0Creds, "s0", "", openPerms)
-	defer cleanup()
+func TestV23VClockSystemClockFrequency(t *testing.T) {
+	sh := v23test.NewShell(t, v23test.Opts{Large: true})
+	defer sh.Cleanup()
+	sh.StartRootMountTable()
+	ctx := sh.ForkContext("c0")
+	s0Creds := sh.ForkCredentials("s0")
+	sh.StartSyncbase(s0Creds, "s0", "", openPerms, "--dev")
 
 	checkSbTimeNotEq(t, "s0", ctx, jan2015)
 
@@ -140,37 +138,39 @@ func V23TestVClockSystemClockFrequency(t *v23tests.T) {
 
 // Tests that NTP sync affects virtual clock state (e.g. clock can move
 // backward).
-func V23TestVClockNtpUpdate(t *v23tests.T) {
-	testInit(t)
-	ctx := forkContext(t, "c0")
-	s0Creds := forkCredentials(t, "s0")
-	cleanup := tu.StartSyncbased(t, s0Creds, "s0", "", openPerms)
-	defer cleanup()
+func TestV23VClockNtpUpdate(t *testing.T) {
+	sh := v23test.NewShell(t, v23test.Opts{Large: true})
+	defer sh.Cleanup()
+	sh.StartRootMountTable()
+	ctx := sh.ForkContext("c0")
+	s0Creds := sh.ForkCredentials("s0")
+	sh.StartSyncbase(s0Creds, "s0", "", openPerms, "--dev")
 
 	checkSbTimeNotEq(t, "s0", ctx, jan2015)
 
 	// Use NTP to set the clock to jan2015.
 	ok(t, sc("s0").DevModeUpdateVClock(ctx, wire.DevModeUpdateVClockOpts{
-		NtpHost:     startFakeNtpServer(t, jan2015),
+		NtpHost:     startFakeNtpServer(t, sh, jan2015),
 		DoNtpUpdate: true,
 	}))
 	checkSbTimeApproxEq(t, "s0", ctx, jan2015)
 
 	// Use NTP to move the clock forward to feb2015.
 	ok(t, sc("s0").DevModeUpdateVClock(ctx, wire.DevModeUpdateVClockOpts{
-		NtpHost:     startFakeNtpServer(t, feb2015),
+		NtpHost:     startFakeNtpServer(t, sh, feb2015),
 		DoNtpUpdate: true,
 	}))
 	checkSbTimeApproxEq(t, "s0", ctx, feb2015)
 }
 
 // Tests that NTP skew persists across reboots.
-func V23TestVClockNtpSkewAfterReboot(t *v23tests.T) {
-	testInit(t)
-	ctx := forkContext(t, "c0")
-	s0Creds := forkCredentials(t, "s0")
-	cleanup := tu.StartSyncbased(t, s0Creds, "s0", "", openPerms)
-	defer cleanup()
+func TestV23VClockNtpSkewAfterReboot(t *testing.T) {
+	sh := v23test.NewShell(t, v23test.Opts{Large: true})
+	defer sh.Cleanup()
+	sh.StartRootMountTable()
+	ctx := sh.ForkContext("c0")
+	s0Creds := sh.ForkCredentials("s0")
+	sh.StartSyncbase(s0Creds, "s0", "", openPerms, "--dev")
 
 	// Set s0's local clock.
 	ok(t, sc("s0").DevModeUpdateVClock(ctx, wire.DevModeUpdateVClockOpts{
@@ -183,7 +183,7 @@ func V23TestVClockNtpSkewAfterReboot(t *v23tests.T) {
 	// Do NTP at s0. As a result, s0 will think it has a one hour NTP skew, i.e.
 	// NTP time minus system clock time equals one hour.
 	ok(t, sc("s0").DevModeUpdateVClock(ctx, wire.DevModeUpdateVClockOpts{
-		NtpHost:     startFakeNtpServer(t, jan2015),
+		NtpHost:     startFakeNtpServer(t, sh, jan2015),
 		DoNtpUpdate: true,
 	}))
 	checkSbTimeApproxEq(t, "s0", ctx, jan2015)
@@ -201,12 +201,13 @@ func V23TestVClockNtpSkewAfterReboot(t *v23tests.T) {
 
 // Tests that the virtual clock daemon checks in with NTP at the expected
 // frequency (loosely speaking).
-func V23TestVClockNtpFrequency(t *v23tests.T) {
-	testInit(t)
-	ctx := forkContext(t, "c0")
-	s0Creds := forkCredentials(t, "s0")
-	cleanup := tu.StartSyncbased(t, s0Creds, "s0", "", openPerms)
-	defer cleanup()
+func TestV23VClockNtpFrequency(t *testing.T) {
+	sh := v23test.NewShell(t, v23test.Opts{Large: true})
+	defer sh.Cleanup()
+	sh.StartRootMountTable()
+	ctx := sh.ForkContext("c0")
+	s0Creds := sh.ForkCredentials("s0")
+	sh.StartSyncbase(s0Creds, "s0", "", openPerms, "--dev")
 
 	t0, err := sc("s0").DevModeGetTime(ctx)
 	ok(t, err)
@@ -216,7 +217,7 @@ func V23TestVClockNtpFrequency(t *v23tests.T) {
 
 	// Use NTP to set the clock to jan2015.
 	ok(t, sc("s0").DevModeUpdateVClock(ctx, wire.DevModeUpdateVClockOpts{
-		NtpHost:     startFakeNtpServer(t, jan2015),
+		NtpHost:     startFakeNtpServer(t, sh, jan2015),
 		DoNtpUpdate: true,
 	}))
 	checkSbTimeApproxEq(t, "s0", ctx, jan2015)
@@ -226,7 +227,7 @@ func V23TestVClockNtpFrequency(t *v23tests.T) {
 	// virtual clock should continue reporting the old time, even after we sleep
 	// for several seconds.
 	ok(t, sc("s0").DevModeUpdateVClock(ctx, wire.DevModeUpdateVClockOpts{
-		NtpHost:     startFakeNtpServer(t, feb2015),
+		NtpHost:     startFakeNtpServer(t, sh, feb2015),
 		DoNtpUpdate: false,
 	}))
 
@@ -239,16 +240,17 @@ func V23TestVClockNtpFrequency(t *v23tests.T) {
 
 // Tests p2p clock sync where local is not NTP-synced and is 1, 2, or 3 hops
 // away from an NTP-synced device.
-func V23TestVClockSyncBasic(t *v23tests.T) {
-	testInit(t)
-	sbs, cleanup := setupSyncbases(t, 4)
-	defer cleanup()
+func TestV23VClockSyncBasic(t *testing.T) {
+	sh := v23test.NewShell(t, v23test.Opts{Large: true})
+	defer sh.Cleanup()
+	sh.StartRootMountTable()
+	sbs := setupSyncbases(t, sh, 4, "--dev")
 
 	checkSbTimeNotEq(t, "s0", sbs[0].clientCtx, jan2015)
 
 	// Do NTP at s0.
 	ok(t, sc("s0").DevModeUpdateVClock(sbs[0].clientCtx, wire.DevModeUpdateVClockOpts{
-		NtpHost:     startFakeNtpServer(t, jan2015),
+		NtpHost:     startFakeNtpServer(t, sh, jan2015),
 		DoNtpUpdate: true,
 	}))
 	checkSbTimeApproxEq(t, "s0", sbs[0].clientCtx, jan2015)
@@ -267,20 +269,21 @@ func V23TestVClockSyncBasic(t *v23tests.T) {
 }
 
 // Tests p2p clock sync where multiple devices are NTP-synced.
-func V23TestVClockSyncWithLocalNtp(t *v23tests.T) {
-	testInit(t)
-	sbs, cleanup := setupSyncbases(t, 3)
-	defer cleanup()
+func TestV23VClockSyncWithLocalNtp(t *testing.T) {
+	sh := v23test.NewShell(t, v23test.Opts{Large: true})
+	defer sh.Cleanup()
+	sh.StartRootMountTable()
+	sbs := setupSyncbases(t, sh, 3, "--dev")
 
 	// Do NTP at s0 and s2.
 	ok(t, sc("s0").DevModeUpdateVClock(sbs[0].clientCtx, wire.DevModeUpdateVClockOpts{
-		NtpHost:     startFakeNtpServer(t, jan2015),
+		NtpHost:     startFakeNtpServer(t, sh, jan2015),
 		DoNtpUpdate: true,
 	}))
 	checkSbTimeApproxEq(t, "s0", sbs[0].clientCtx, jan2015)
 
 	ok(t, sc("s2").DevModeUpdateVClock(sbs[2].clientCtx, wire.DevModeUpdateVClockOpts{
-		NtpHost:     startFakeNtpServer(t, feb2015),
+		NtpHost:     startFakeNtpServer(t, sh, feb2015),
 		DoNtpUpdate: true,
 	}))
 	checkSbTimeApproxEq(t, "s2", sbs[2].clientCtx, feb2015)
@@ -306,7 +309,7 @@ func V23TestVClockSyncWithLocalNtp(t *v23tests.T) {
 	// Do NTP at s0 again; the update should propagate through the existing
 	// syncgroups.
 	ok(t, sc("s0").DevModeUpdateVClock(sbs[0].clientCtx, wire.DevModeUpdateVClockOpts{
-		NtpHost:     startFakeNtpServer(t, mar2015),
+		NtpHost:     startFakeNtpServer(t, sh, mar2015),
 		DoNtpUpdate: true,
 	}))
 
@@ -318,10 +321,11 @@ func V23TestVClockSyncWithLocalNtp(t *v23tests.T) {
 
 // Tests p2p clock sync where local is not NTP-synced and is 1 hop away from an
 // NTP-synced device with >0 reboots.
-func V23TestVClockSyncWithReboots(t *v23tests.T) {
-	testInit(t)
-	sbs, cleanup := setupSyncbases(t, 2)
-	defer cleanup()
+func TestV23VClockSyncWithReboots(t *testing.T) {
+	sh := v23test.NewShell(t, v23test.Opts{Large: true})
+	defer sh.Cleanup()
+	sh.StartRootMountTable()
+	sbs := setupSyncbases(t, sh, 2, "--dev")
 
 	// Set s0's local clock.
 	ok(t, sc("s0").DevModeUpdateVClock(sbs[0].clientCtx, wire.DevModeUpdateVClockOpts{
@@ -334,7 +338,7 @@ func V23TestVClockSyncWithReboots(t *v23tests.T) {
 	// Do NTP at s0. As a result, s0 will think it has a one hour NTP skew, i.e.
 	// NTP time minus system clock time equals one hour.
 	ok(t, sc("s0").DevModeUpdateVClock(sbs[0].clientCtx, wire.DevModeUpdateVClockOpts{
-		NtpHost:     startFakeNtpServer(t, jan2015),
+		NtpHost:     startFakeNtpServer(t, sh, jan2015),
 		DoNtpUpdate: true,
 	}))
 	checkSbTimeApproxEq(t, "s0", sbs[0].clientCtx, jan2015)
@@ -373,7 +377,7 @@ func sc(name string) wire.ServiceClientStub {
 
 // Creates a "chain" of syncgroups, where each adjacent pair of Syncbases {A,B}
 // share a syncgroup with key prefix "AB".
-func setupChain(t *v23tests.T, sbs []*testSyncbase) {
+func setupChain(t *testing.T, sbs []*testSyncbase) {
 	for i, _ := range sbs {
 		if i == len(sbs)-1 {
 			break
@@ -387,12 +391,16 @@ func setupChain(t *v23tests.T, sbs []*testSyncbase) {
 	}
 }
 
-func startFakeNtpServer(t *v23tests.T, now time.Time) string {
+func startFakeNtpServer(t *testing.T, sh *v23test.Shell, now time.Time) string {
 	nowBuf, err := now.MarshalText()
 	ok(t, err)
-	ntpd := t.BuildV23Pkg("v.io/x/ref/services/syncbase/testutil/fake_ntp_server")
-	invocation := ntpd.WithStartOpts(ntpd.StartOpts().NoExecProgram().WithSessions(t, time.Second)).Start("--now=" + string(nowBuf))
-	host := invocation.ExpectVar("HOST")
+	ntpd := sh.JiriBuildGoPkg("v.io/x/ref/services/syncbase/testutil/fake_ntp_server")
+	inv := sh.Cmd(ntpd, "--now="+string(nowBuf))
+	// TODO(ivanpi): Use Session built into v23test.Shell when checked in.
+	// TODO(ivanpi): 1 second is potentially flaky, is it safe to bump?
+	exp := expect.NewSession(t, inv.StdoutPipe(), time.Second)
+	inv.Start()
+	host := exp.ExpectVar("HOST")
 	if host == "" {
 		t.Fatalf("fake_ntp_server failed to start")
 	}
@@ -400,7 +408,7 @@ func startFakeNtpServer(t *v23tests.T, now time.Time) string {
 }
 
 // sbTimeDelta returns sbTime, abs(target-sbTime).
-func sbTimeDelta(t *v23tests.T, sbName string, ctx *context.T, target time.Time) (time.Time, time.Duration) {
+func sbTimeDelta(t *testing.T, sbName string, ctx *context.T, target time.Time) (time.Time, time.Duration) {
 	sbTime, err := sc(sbName).DevModeGetTime(ctx)
 	ok(t, err)
 	delta := target.Sub(sbTime)
@@ -412,18 +420,18 @@ func sbTimeDelta(t *v23tests.T, sbName string, ctx *context.T, target time.Time)
 
 // checkSbTimeApproxEq checks that the given Syncbase's virtual clock time is
 // within 10 seconds of target.
-func checkSbTimeApproxEq(t *v23tests.T, sbName string, ctx *context.T, target time.Time) {
+func checkSbTimeApproxEq(t *testing.T, sbName string, ctx *context.T, target time.Time) {
 	sbTime, delta := sbTimeDelta(t, sbName, ctx, target)
 	if delta > 10*time.Second {
-		fatalf(t, "unexpected time: got %v, target %v", sbTime, target)
+		tu.Fatalf(t, "unexpected time: got %v, target %v", sbTime, target)
 	}
 }
 
 // checkSbTimeNotEq checks that the given Syncbase's virtual clock time is not
 // within 1 minute of target.
-func checkSbTimeNotEq(t *v23tests.T, sbName string, ctx *context.T, target time.Time) {
+func checkSbTimeNotEq(t *testing.T, sbName string, ctx *context.T, target time.Time) {
 	sbTime, delta := sbTimeDelta(t, sbName, ctx, target)
 	if delta < time.Minute {
-		fatalf(t, "expected different times: got %v, target %v", sbTime, target)
+		tu.Fatalf(t, "expected different times: got %v, target %v", sbTime, target)
 	}
 }

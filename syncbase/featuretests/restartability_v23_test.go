@@ -5,14 +5,13 @@
 package featuretests_test
 
 import (
-	"bytes"
 	"errors"
 	"io/ioutil"
 	"os"
 	"path/filepath"
 	"reflect"
 	"regexp"
-	"syscall"
+	"testing"
 	"time"
 
 	"v.io/v23/context"
@@ -22,33 +21,25 @@ import (
 	"v.io/v23/syncbase/nosql"
 	"v.io/v23/verror"
 	"v.io/v23/vom"
-	_ "v.io/x/ref/runtime/factories/generic"
+	"v.io/x/ref/lib/v23test"
 	tu "v.io/x/ref/services/syncbase/testutil"
-	"v.io/x/ref/test/modules"
-	"v.io/x/ref/test/v23tests"
 )
-
-//go:generate jiri test generate
 
 const (
 	acl = `{"Read": {"In":["root:u:client"]}, "Write": {"In":["root:u:client"]}, "Resolve": {"In":["root:u:client"]}}`
 )
 
-func restartabilityInit(t *v23tests.T) (rootDir string, clientCtx *context.T, serverCreds *modules.CustomCredentials) {
-	v23tests.RunRootMT(t, "--v23.tcp.address=127.0.0.1:0")
+func restartabilityInit(sh *v23test.Shell) (rootDir string, clientCtx *context.T, serverCreds *v23test.Credentials) {
+	sh.StartRootMountTable()
 
-	var err error
-	rootDir, err = ioutil.TempDir("", "syncbase_leveldb")
-	if err != nil {
-		tu.V23Fatalf(t, "can't create temp dir: %v", err)
-	}
-
-	clientCtx = forkContext(t, "u:client")
-	serverCreds = forkCredentials(t, "r:server")
+	rootDir = sh.MakeTempDir()
+	clientCtx = sh.ForkContext("u:client")
+	serverCreds = sh.ForkCredentials("r:server")
 	return
 }
 
-func createAppDatabaseTable(t *v23tests.T, clientCtx *context.T) nosql.Database {
+// TODO(ivanpi): Duplicate of setupAppA.
+func createAppDatabaseTable(t *testing.T, clientCtx *context.T) nosql.Database {
 	a := syncbase.NewService(testSbName).App("a")
 	if err := a.Create(clientCtx, nil); err != nil {
 		t.Fatalf("unable to create an app: %v", err)
@@ -63,36 +54,38 @@ func createAppDatabaseTable(t *v23tests.T, clientCtx *context.T) nosql.Database 
 	return d
 }
 
-func V23TestRestartabilityHierarchy(t *v23tests.T) {
-	rootDir, clientCtx, serverCreds := restartabilityInit(t)
-	cleanup := tu.StartSyncbased(t, serverCreds, testSbName, rootDir, acl)
+func TestV23RestartabilityHierarchy(t *testing.T) {
+	sh := v23test.NewShell(t, v23test.Opts{Large: true})
+	defer sh.Cleanup()
+	rootDir, clientCtx, serverCreds := restartabilityInit(sh)
+	cleanup := sh.StartSyncbase(serverCreds, testSbName, rootDir, acl)
 
 	createHierarchy(t, clientCtx)
 	checkHierarchy(t, clientCtx)
-	cleanup()
+	cleanup(os.Interrupt)
 
-	cleanup = tu.StartSyncbased(t, serverCreds, testSbName, rootDir, acl)
-	defer cleanup()
+	_ = sh.StartSyncbase(serverCreds, testSbName, rootDir, acl)
 	checkHierarchy(t, clientCtx)
 }
 
-// Same as V23TestRestartabilityHierarchy except the first syncbase is killed
+// Same as TestV23RestartabilityHierarchy except the first syncbase is killed
 // with SIGKILL instead of SIGINT.
-func V23TestRestartabilityCrash(t *v23tests.T) {
-	rootDir, clientCtx, serverCreds := restartabilityInit(t)
-	cleanup := tu.StartKillableSyncbased(t, serverCreds, testSbName, rootDir, acl)
+func TestV23RestartabilityCrash(t *testing.T) {
+	sh := v23test.NewShell(t, v23test.Opts{Large: true})
+	defer sh.Cleanup()
+	rootDir, clientCtx, serverCreds := restartabilityInit(sh)
+	cleanup := sh.StartSyncbase(serverCreds, testSbName, rootDir, acl)
 
 	createHierarchy(t, clientCtx)
 	checkHierarchy(t, clientCtx)
-	cleanup(syscall.SIGKILL)
+	cleanup(os.Kill)
 
-	cleanup2 := tu.StartSyncbased(t, serverCreds, testSbName, rootDir, acl)
-	defer cleanup2()
+	_ = sh.StartSyncbase(serverCreds, testSbName, rootDir, acl)
 	checkHierarchy(t, clientCtx)
 }
 
 // Creates apps, dbs, tables, and rows.
-func createHierarchy(t *v23tests.T, ctx *context.T) {
+func createHierarchy(t *testing.T, ctx *context.T) {
 	s := syncbase.NewService(testSbName)
 	for _, a := range []syncbase.App{s.App("a1"), s.App("a2")} {
 		if err := a.Create(ctx, nil); err != nil {
@@ -117,7 +110,7 @@ func createHierarchy(t *v23tests.T, ctx *context.T) {
 }
 
 // Checks for the apps, dbs, tables, and rows created by runCreateHierarchy.
-func checkHierarchy(t *v23tests.T, ctx *context.T) {
+func checkHierarchy(t *testing.T, ctx *context.T) {
 	s := syncbase.NewService(testSbName)
 	var got, want []string
 	var err error
@@ -156,9 +149,11 @@ func checkHierarchy(t *v23tests.T, ctx *context.T) {
 	}
 }
 
-func V23TestRestartabilityQuiescent(t *v23tests.T) {
-	rootDir, clientCtx, serverCreds := restartabilityInit(t)
-	cleanup := tu.StartKillableSyncbased(t, serverCreds, testSbName, rootDir, acl)
+func TestV23RestartabilityQuiescent(t *testing.T) {
+	sh := v23test.NewShell(t, v23test.Opts{Large: true})
+	defer sh.Cleanup()
+	rootDir, clientCtx, serverCreds := restartabilityInit(sh)
+	cleanup := sh.StartSyncbase(serverCreds, testSbName, rootDir, acl)
 	d := createAppDatabaseTable(t, clientCtx)
 
 	tb := d.Table("tb")
@@ -176,10 +171,9 @@ func V23TestRestartabilityQuiescent(t *v23tests.T) {
 		t.Fatalf("unexpected value: got %q, want %q", got, want)
 	}
 
-	cleanup(syscall.SIGKILL)
+	cleanup(os.Kill)
 	// Restart syncbase.
-	cleanup2 := tu.StartSyncbased(t, serverCreds, testSbName, rootDir, acl)
-	defer cleanup2()
+	_ = sh.StartSyncbase(serverCreds, testSbName, rootDir, acl)
 
 	if err := r.Get(clientCtx, &result); err != nil {
 		t.Fatalf("r.Get() failed: %v", err)
@@ -190,9 +184,11 @@ func V23TestRestartabilityQuiescent(t *v23tests.T) {
 }
 
 // A read-only batch should fail if the server crashes in the middle.
-func V23TestRestartabilityReadOnlyBatch(t *v23tests.T) {
-	rootDir, clientCtx, serverCreds := restartabilityInit(t)
-	cleanup := tu.StartKillableSyncbased(t, serverCreds, testSbName, rootDir, acl)
+func TestV23RestartabilityReadOnlyBatch(t *testing.T) {
+	sh := v23test.NewShell(t, v23test.Opts{Large: true})
+	defer sh.Cleanup()
+	rootDir, clientCtx, serverCreds := restartabilityInit(sh)
+	cleanup := sh.StartSyncbase(serverCreds, testSbName, rootDir, acl)
 	d := createAppDatabaseTable(t, clientCtx)
 
 	// Add one row.
@@ -215,7 +211,7 @@ func V23TestRestartabilityReadOnlyBatch(t *v23tests.T) {
 		t.Fatalf("unexpected value: got %q, want %q", got, want)
 	}
 
-	cleanup(syscall.SIGKILL)
+	cleanup(os.Kill)
 	expectedFailCtx, _ := context.WithTimeout(clientCtx, time.Second)
 	// We get a variety of errors depending on how much of the network state of
 	// syncbased has been reclaimed when this rpc goes out.
@@ -224,8 +220,7 @@ func V23TestRestartabilityReadOnlyBatch(t *v23tests.T) {
 	}
 
 	// Restart syncbase.
-	cleanup2 := tu.StartSyncbased(t, serverCreds, testSbName, rootDir, acl)
-	defer cleanup2()
+	_ = sh.StartSyncbase(serverCreds, testSbName, rootDir, acl)
 
 	if err := r.Get(clientCtx, &result); verror.ErrorID(err) != sbwire.ErrUnknownBatch.ID {
 		t.Fatalf("expected r.Get() to fail because of ErrUnknownBatch.  got: %v", err)
@@ -241,9 +236,11 @@ func V23TestRestartabilityReadOnlyBatch(t *v23tests.T) {
 }
 
 // A read/write batch should fail if the server crashes in the middle.
-func V23TestRestartabilityReadWriteBatch(t *v23tests.T) {
-	rootDir, clientCtx, serverCreds := restartabilityInit(t)
-	cleanup := tu.StartKillableSyncbased(t, serverCreds, testSbName, rootDir, acl)
+func TestV23RestartabilityReadWriteBatch(t *testing.T) {
+	sh := v23test.NewShell(t, v23test.Opts{Large: true})
+	defer sh.Cleanup()
+	rootDir, clientCtx, serverCreds := restartabilityInit(sh)
+	cleanup := sh.StartSyncbase(serverCreds, testSbName, rootDir, acl)
 	d := createAppDatabaseTable(t, clientCtx)
 
 	batch, err := d.BeginBatch(clientCtx, nosqlwire.BatchOptions{})
@@ -265,7 +262,7 @@ func V23TestRestartabilityReadWriteBatch(t *v23tests.T) {
 		t.Fatalf("unexpected value: got %q, want %q", got, want)
 	}
 
-	cleanup(syscall.SIGKILL)
+	cleanup(os.Kill)
 	expectedFailCtx, _ := context.WithTimeout(clientCtx, time.Second)
 	// We get a variety of errors depending on how much of the network state of
 	// syncbased has been reclaimed when this rpc goes out.
@@ -274,8 +271,7 @@ func V23TestRestartabilityReadWriteBatch(t *v23tests.T) {
 	}
 
 	// Restart syncbase.
-	cleanup2 := tu.StartSyncbased(t, serverCreds, testSbName, rootDir, acl)
-	defer cleanup2()
+	_ = sh.StartSyncbase(serverCreds, testSbName, rootDir, acl)
 
 	if err := r.Get(clientCtx, &result); verror.ErrorID(err) != sbwire.ErrUnknownBatch.ID {
 		t.Fatalf("expected r.Get() to fail because of ErrUnknownBatch.  got: %v", err)
@@ -290,7 +286,7 @@ func V23TestRestartabilityReadWriteBatch(t *v23tests.T) {
 	}
 }
 
-func decodeString(t *v23tests.T, val []byte) string {
+func decodeString(t *testing.T, val []byte) string {
 	var ret string
 	if err := vom.Decode(val, &ret); err != nil {
 		t.Fatalf("unable to decode: %v", err)
@@ -298,9 +294,11 @@ func decodeString(t *v23tests.T, val []byte) string {
 	return ret
 }
 
-func V23TestRestartabilityWatch(t *v23tests.T) {
-	rootDir, clientCtx, serverCreds := restartabilityInit(t)
-	cleanup := tu.StartKillableSyncbased(t, serverCreds, testSbName, rootDir, acl)
+func TestV23RestartabilityWatch(t *testing.T) {
+	sh := v23test.NewShell(t, v23test.Opts{Large: true})
+	defer sh.Cleanup()
+	rootDir, clientCtx, serverCreds := restartabilityInit(sh)
+	cleanup := sh.StartSyncbase(serverCreds, testSbName, rootDir, acl)
 	d := createAppDatabaseTable(t, clientCtx)
 
 	// Put one row as well as get the initial ResumeMarker.
@@ -327,7 +325,7 @@ func V23TestRestartabilityWatch(t *v23tests.T) {
 		t.Fatalf("unexpected error: %v", err)
 	}
 	if !stream.Advance() {
-		cleanup(syscall.SIGINT)
+		cleanup(os.Interrupt)
 		t.Fatalf("expected to be able to Advance: %v", stream.Err())
 	}
 	change := stream.Change()
@@ -338,7 +336,7 @@ func V23TestRestartabilityWatch(t *v23tests.T) {
 	marker = change.ResumeMarker
 
 	// Kill syncbased.
-	cleanup(syscall.SIGKILL)
+	cleanup(os.Kill)
 
 	// The stream should break when the server crashes.
 	if stream.Advance() {
@@ -346,7 +344,7 @@ func V23TestRestartabilityWatch(t *v23tests.T) {
 	}
 
 	// Restart syncbased.
-	cleanup = tu.StartKillableSyncbased(t, serverCreds, testSbName, rootDir, acl)
+	cleanup = sh.StartSyncbase(serverCreds, testSbName, rootDir, acl)
 
 	// Put another row.
 	r = d.Table("tb").Row("r")
@@ -369,7 +367,7 @@ func V23TestRestartabilityWatch(t *v23tests.T) {
 		t.Fatalf("unexpected row: %s, %s", change.Row, val)
 	}
 
-	cleanup(syscall.SIGKILL)
+	cleanup(os.Kill)
 
 	// The stream should break when the server crashes.
 	if stream.Advance() {
@@ -377,7 +375,7 @@ func V23TestRestartabilityWatch(t *v23tests.T) {
 	}
 }
 
-func corruptFile(t *v23tests.T, rootDir, pathRegex string) {
+func corruptFile(t *testing.T, rootDir, pathRegex string) {
 	var fileToCorrupt string
 	filepath.Walk(rootDir, func(path string, info os.FileInfo, err error) error {
 		if fileToCorrupt != "" {
@@ -409,64 +407,71 @@ func corruptFile(t *v23tests.T, rootDir, pathRegex string) {
 	}
 }
 
-func V23TestRestartabilityServiceDBCorruption(t *v23tests.T) {
-	rootDir, clientCtx, serverCreds := restartabilityInit(t)
-	cleanup := tu.StartKillableSyncbased(t, serverCreds, testSbName, rootDir, acl)
+func TestV23RestartabilityServiceDBCorruption(t *testing.T) {
+	sh := v23test.NewShell(t, v23test.Opts{Large: true})
+	defer sh.Cleanup()
+	rootDir, clientCtx, serverCreds := restartabilityInit(sh)
+	cleanup := sh.StartSyncbase(serverCreds, testSbName, rootDir, acl)
 
 	createHierarchy(t, clientCtx)
 	checkHierarchy(t, clientCtx)
-	cleanup(syscall.SIGKILL)
+	cleanup(os.Kill)
 
 	corruptFile(t, rootDir, filepath.Join(rootDir, `leveldb/.*\.log`))
 
+	// TODO(ivanpi): Repeated below, refactor into method.
 	// Expect syncbase to fail to start.
-	syncbased := t.BuildV23Pkg("v.io/x/ref/services/syncbase/syncbased")
-	startOpts := syncbased.StartOpts().WithCustomCredentials(serverCreds)
-	invocation := syncbased.WithStartOpts(startOpts).Start(
+	syncbasedPath := sh.JiriBuildGoPkg("v.io/x/ref/services/syncbase/syncbased")
+	syncbased := sh.Cmd(syncbasedPath,
 		"--alsologtostderr=true",
 		"--v23.tcp.address=127.0.0.1:0",
 		"--v23.permissions.literal", acl,
 		"--name="+testSbName,
 		"--root-dir="+rootDir)
-	stdout, stderr := bytes.NewBuffer(nil), bytes.NewBuffer(nil)
-	if err := invocation.Wait(stdout, stderr); err == nil {
-		t.Fatalf("Expected syncbased to fail to start.")
+	syncbased = syncbased.WithCredentials(serverCreds)
+	syncbased.ExitErrorIsOk = true
+	stdout, stderr := syncbased.Output()
+	if syncbased.Err == nil {
+		t.Fatal("Expected syncbased to fail to start.")
 	}
 	t.Logf("syncbased terminated\nstdout: %v\nstderr: %v\n", stdout, stderr)
 
-	cleanup = tu.StartKillableSyncbased(t, serverCreds, testSbName, rootDir, acl)
+	cleanup = sh.StartSyncbase(serverCreds, testSbName, rootDir, acl)
 
 	createHierarchy(t, clientCtx)
 	checkHierarchy(t, clientCtx)
-	cleanup(syscall.SIGKILL)
+	cleanup(os.Kill)
 }
 
-func V23TestRestartabilityAppDBCorruption(t *v23tests.T) {
-	rootDir, clientCtx, serverCreds := restartabilityInit(t)
-	cleanup := tu.StartKillableSyncbased(t, serverCreds, testSbName, rootDir, acl)
+func TestV23RestartabilityAppDBCorruption(t *testing.T) {
+	sh := v23test.NewShell(t, v23test.Opts{Large: true})
+	defer sh.Cleanup()
+	rootDir, clientCtx, serverCreds := restartabilityInit(sh)
+	cleanup := sh.StartSyncbase(serverCreds, testSbName, rootDir, acl)
 
 	createHierarchy(t, clientCtx)
 	checkHierarchy(t, clientCtx)
-	cleanup(syscall.SIGKILL)
+	cleanup(os.Kill)
 
 	corruptFile(t, rootDir, `apps/[^/]*/dbs/[^/]*/leveldb/.*\.log`)
 
 	// Expect syncbase to fail to start.
-	syncbased := t.BuildV23Pkg("v.io/x/ref/services/syncbase/syncbased")
-	startOpts := syncbased.StartOpts().WithCustomCredentials(serverCreds)
-	invocation := syncbased.WithStartOpts(startOpts).Start(
+	syncbasedPath := sh.JiriBuildGoPkg("v.io/x/ref/services/syncbase/syncbased")
+	syncbased := sh.Cmd(syncbasedPath,
 		"--alsologtostderr=true",
 		"--v23.tcp.address=127.0.0.1:0",
 		"--v23.permissions.literal", acl,
 		"--name="+testSbName,
 		"--root-dir="+rootDir)
-	stdout, stderr := bytes.NewBuffer(nil), bytes.NewBuffer(nil)
-	if err := invocation.Wait(stdout, stderr); err == nil {
-		t.Fatalf("Expected syncbased to fail to start.")
+	syncbased = syncbased.WithCredentials(serverCreds)
+	syncbased.ExitErrorIsOk = true
+	stdout, stderr := syncbased.Output()
+	if syncbased.Err == nil {
+		t.Fatal("Expected syncbased to fail to start.")
 	}
 	t.Logf("syncbased terminated\nstdout: %v\nstderr: %v\n", stdout, stderr)
 
-	cleanup = tu.StartKillableSyncbased(t, serverCreds, testSbName, rootDir, acl)
+	cleanup = sh.StartSyncbase(serverCreds, testSbName, rootDir, acl)
 
 	// Recreate a1/d1 since that is the one that got corrupted.
 	d := syncbase.NewService(testSbName).App("a1").NoSQLDatabase("d1", nil)
@@ -485,15 +490,17 @@ func V23TestRestartabilityAppDBCorruption(t *v23tests.T) {
 	}
 
 	checkHierarchy(t, clientCtx)
-	cleanup(syscall.SIGKILL)
+	cleanup(os.Kill)
 }
 
-func V23TestRestartabilityStoreGarbageCollect(t *v23tests.T) {
+func TestV23RestartabilityStoreGarbageCollect(t *testing.T) {
 	// TODO(ivanpi): Fully testing store garbage collection requires fault
 	// injection or mocking out the store.
 	// NOTE: Test assumes that leveldb destroy is implemented as 'rm -r'.
-	rootDir, clientCtx, serverCreds := restartabilityInit(t)
-	cleanup := tu.StartKillableSyncbased(t, serverCreds, testSbName, rootDir, acl)
+	sh := v23test.NewShell(t, v23test.Opts{Large: true})
+	defer sh.Cleanup()
+	rootDir, clientCtx, serverCreds := restartabilityInit(sh)
+	cleanup := sh.StartSyncbase(serverCreds, testSbName, rootDir, acl)
 
 	createHierarchy(t, clientCtx)
 	checkHierarchy(t, clientCtx)
@@ -557,7 +564,7 @@ func V23TestRestartabilityStoreGarbageCollect(t *v23tests.T) {
 	createHierarchy(t, clientCtx)
 	checkHierarchy(t, clientCtx)
 
-	cleanup(syscall.SIGKILL)
+	cleanup(os.Kill)
 
 	// leveldbDir should still exist.
 	if _, err := os.Stat(leveldbDir); err != nil {
@@ -566,9 +573,9 @@ func V23TestRestartabilityStoreGarbageCollect(t *v23tests.T) {
 
 	// Restarting syncbased should not affect the hierarchy. Garbage collection
 	// should again fail to destroy leveldbDir.
-	cleanup = tu.StartKillableSyncbased(t, serverCreds, testSbName, rootDir, acl)
+	cleanup = sh.StartSyncbase(serverCreds, testSbName, rootDir, acl)
 	checkHierarchy(t, clientCtx)
-	cleanup(syscall.SIGKILL)
+	cleanup(os.Kill)
 
 	// leveldbDir should still exist.
 	if _, err := os.Stat(leveldbDir); err != nil {
@@ -581,7 +588,7 @@ func V23TestRestartabilityStoreGarbageCollect(t *v23tests.T) {
 	}
 
 	// Restart syncbased. Garbage collection should now succeed.
-	cleanup2 := tu.StartSyncbased(t, serverCreds, testSbName, rootDir, acl)
+	_ = sh.StartSyncbase(serverCreds, testSbName, rootDir, acl)
 
 	// leveldbDir should not exist anymore.
 	if _, err := os.Stat(leveldbDir); !os.IsNotExist(err) {
@@ -590,6 +597,4 @@ func V23TestRestartabilityStoreGarbageCollect(t *v23tests.T) {
 
 	// The hierarchy should not have been affected.
 	checkHierarchy(t, clientCtx)
-
-	cleanup2()
 }

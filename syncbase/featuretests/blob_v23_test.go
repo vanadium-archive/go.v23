@@ -9,24 +9,23 @@ import (
 	"crypto/rand"
 	"fmt"
 	"reflect"
+	"testing"
 	"time"
 
 	"v.io/v23/context"
 	"v.io/v23/naming"
 	wire "v.io/v23/services/syncbase/nosql"
 	"v.io/v23/syncbase"
-	_ "v.io/x/ref/runtime/factories/generic"
+	"v.io/x/ref/lib/v23test"
 	"v.io/x/ref/services/syncbase/server/util"
-	"v.io/x/ref/test/v23tests"
 )
 
-//go:generate jiri test generate
+func TestV23BlobWholeTransfer(t *testing.T) {
+	sh := v23test.NewShell(t, v23test.Opts{Large: true})
+	defer sh.Cleanup()
+	sh.StartRootMountTable()
 
-func V23TestBlobWholeTransfer(t *v23tests.T) {
-	v23tests.RunRootMT(t, "--v23.tcp.address=127.0.0.1:0")
-
-	sbs, cleanup := setupSyncbases(t, 2)
-	defer cleanup()
+	sbs := setupSyncbases(t, sh, 2)
 
 	sgName := naming.Join("s0", util.SyncbaseSuffix, "SG1")
 

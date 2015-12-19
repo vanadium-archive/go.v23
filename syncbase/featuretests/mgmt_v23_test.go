@@ -4,6 +4,10 @@
 
 package featuretests_test
 
+// TODO(ivanpi): Port and reenable.
+
+// +build ignore
+
 import (
 	"errors"
 	"fmt"
@@ -18,8 +22,6 @@ import (
 	_ "v.io/x/ref/runtime/factories/generic"
 	"v.io/x/ref/test/v23tests"
 )
-
-//go:generate jiri test generate
 
 var (
 	hostname   string
