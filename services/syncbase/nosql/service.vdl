@@ -47,7 +47,7 @@ type Database interface {
 	ListTables() ([]string | error) {access.Read}
 
 	// Exec executes a syncQL query and returns all results as specified by in the
-	// query's select clause. Concurrency semantics are documented in model.go.
+	// query's select/delete statement. Concurrency semantics are documented in model.go.
 	Exec(schemaVersion int32, query string) stream<_, []any> error {access.Read}
 
 	// BeginBatch creates a new batch. It returns a "batch suffix" string to

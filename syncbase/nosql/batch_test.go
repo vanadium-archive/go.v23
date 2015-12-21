@@ -300,6 +300,45 @@ func TestBatchExecIsolation(t *testing.T) {
 	tu.CheckExecError(t, ctx, roBatch, "select k, v from foo", syncql.ErrTableCantAccess.ID)
 }
 
+// Test exec of delete statement in readonly batch (it should fail).
+func TestBatchReadonlyExecDelete(t *testing.T) {
+	ctx, sName, cleanup := tu.SetupOrDie(nil)
+	defer cleanup()
+	a := tu.CreateApp(t, ctx, syncbase.NewService(sName), "a")
+	d := tu.CreateNoSQLDatabase(t, ctx, a, "d")
+	tb := tu.CreateTable(t, ctx, d, "tb")
+
+	foo := Foo{I: 4, S: "f"}
+	if err := tb.Put(ctx, "foo", foo); err != nil {
+		t.Fatalf("tb.Put() failed: %v", err)
+	}
+
+	bar := Bar{F: 0.5, S: "b"}
+	// NOTE: not best practice, but store bar as
+	// optional (by passing the address of bar to Put).
+	// This tests auto-dereferencing.
+	if err := tb.Put(ctx, "bar", &bar); err != nil {
+		t.Fatalf("tb.Put() failed: %v", err)
+	}
+
+	baz := Baz{Name: "John Doe", Active: true}
+	if err := tb.Put(ctx, "baz", baz); err != nil {
+		t.Fatalf("tb.Put() failed: %v", err)
+	}
+
+	// Begin a readonly batch.
+	roBatch, err := d.BeginBatch(ctx, wire.BatchOptions{ReadOnly: true})
+	if err != nil {
+		t.Fatalf("d.BeginBatch() failed: %v", err)
+	}
+
+	// Attempt to delete "foo" k/v pair with a syncQL delete.
+	tu.CheckExecError(t, ctx, roBatch, "delete from tb where k = \"foo\"", syncql.ErrTableCantAccess.ID)
+
+	// start a new batch
+	roBatch.Abort(ctx)
+}
+
 // Tests that BatchDatabase.Exec DOES see changes made inside the transaction
 // but before Exec is called.
 func TestBatchExec(t *testing.T) {
@@ -363,12 +402,11 @@ func TestBatchExec(t *testing.T) {
 	// Delete the first row (bar) and the last row (newRow).
 	// Change the baz row.  Confirm these rows are no longer fetched and that
 	// the change to baz is seen.
-	if err := rwBatchTb.Delete(ctx, "bar"); err != nil {
-		t.Fatalf("rwBatchTb.Delete(bar) failed: %v", err)
-	}
-	if err := rwBatchTb.Delete(ctx, "newRow"); err != nil {
-		t.Fatalf("rwBatchTb.Delete(newRow) failed: %v", err)
-	}
+	tu.CheckExec(t, ctx, rwBatch, "delete from tb where k = \"bar\" or k = \"newRow\"",
+		[]string{"Count"},
+		[][]*vdl.Value{
+			[]*vdl.Value{vdl.ValueOf(2)},
+		})
 	baz2 := Baz{Name: "Batman", Active: false}
 	if err := rwBatchTb.Put(ctx, "baz", baz2); err != nil {
 		t.Fatalf("tb.Put() failed: %v", err)
@@ -392,12 +430,11 @@ func TestBatchExec(t *testing.T) {
 	if err := rwBatchTb.Put(ctx, "newRow", newRow2); err != nil {
 		t.Fatalf("rwBatchTb.Put() failed: %v", err)
 	}
-	if err := rwBatchTb.Delete(ctx, "baz"); err != nil {
-		t.Fatalf("rwBatchTb.Delete(baz) failed: %v", err)
-	}
-	if err := rwBatchTb.Delete(ctx, "foo"); err != nil {
-		t.Fatalf("rwBatchTb.Delete(foo) failed: %v", err)
-	}
+	tu.CheckExec(t, ctx, rwBatch, "delete from tb where k = \"baz\" or k = \"foo\"",
+		[]string{"Count"},
+		[][]*vdl.Value{
+			[]*vdl.Value{vdl.ValueOf(2)},
+		})
 	tu.CheckExec(t, ctx, rwBatch, "select k, v from tb",
 		[]string{"k", "v"},
 		[][]*vdl.Value{
@@ -416,7 +453,6 @@ func TestBatchExec(t *testing.T) {
 	defer roBatch.Abort(ctx)
 
 	// confirm fetching all rows gets the rows committed above
-	// as it was never committed
 	tu.CheckExec(t, ctx, roBatch, "select k, v from tb",
 		[]string{"k", "v"},
 		[][]*vdl.Value{

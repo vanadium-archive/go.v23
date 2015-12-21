@@ -51,17 +51,25 @@ var t2015_07 time.Time
 var t2015_07_01 time.Time
 var t2015_07_01_01_23_45 time.Time
 
+var customerTable nosql.Table
+var numbersTable nosql.Table
+var fooTable nosql.Table
+var keyIndexDataTable nosql.Table
+var bigTable nosql.Table
+
 func setup(t *testing.T) {
 	var sName string
 	ctx, sName, cleanup = tu.SetupOrDie(nil)
 	a := tu.CreateApp(t, ctx, syncbase.NewService(sName), "a")
 	db = tu.CreateNoSQLDatabase(t, ctx, a, "db")
-	customerTable := tu.CreateTable(t, ctx, db, "Customer")
-	numbersTable := tu.CreateTable(t, ctx, db, "Numbers")
-	fooTable := tu.CreateTable(t, ctx, db, "Foo")
-	keyIndexDataTable := tu.CreateTable(t, ctx, db, "KeyIndexData")
-	bigTable := tu.CreateTable(t, ctx, db, "BigTable")
+	customerTable = tu.CreateTable(t, ctx, db, "Customer")
+	numbersTable = tu.CreateTable(t, ctx, db, "Numbers")
+	fooTable = tu.CreateTable(t, ctx, db, "Foo")
+	keyIndexDataTable = tu.CreateTable(t, ctx, db, "KeyIndexData")
+	bigTable = tu.CreateTable(t, ctx, db, "BigTable")
+}
 
+func initTables(t *testing.T) {
 	t20150122131101, _ := time.Parse("Jan 2 2006 15:04:05 -0700 MST", "Jan 22 2015 13:11:01 -0800 PST")
 	t20150210161202, _ := time.Parse("Jan 2 2006 15:04:05 -0700 MST", "Feb 10 2015 16:12:02 -0800 PST")
 	t20150311101303, _ := time.Parse("Jan 2 2006 15:04:05 -0700 MST", "Mar 11 2015 10:13:03 -0700 PDT")
@@ -214,6 +222,15 @@ type execSelectTest struct {
 	r       [][]*vdl.Value
 }
 
+type execDeleteTest struct {
+	delQuery   string
+	delHeaders []string
+	delResults [][]*vdl.Value
+	selQuery   string
+	selHeaders []string
+	selResults [][]*vdl.Value
+}
+
 type preExecFunctionTest struct {
 	query   string
 	headers []string
@@ -227,6 +244,7 @@ type execSelectErrorTest struct {
 func TestExecSelect(t *testing.T) {
 	setup(t)
 	defer cleanup()
+	initTables(t)
 	basic := []execSelectTest{
 		{
 			// Select values for all customer records.
@@ -240,7 +258,7 @@ func TestExecSelect(t *testing.T) {
 		},
 		{
 			// Select values where v.InvoiceNum is nil
-			// Since InvoiceNum does not exist for Invoice,
+			// Since InvoiceNum does not exists for Customers,
 			// this will return just customers.
 			"select v from Customer where v.InvoiceNum is nil",
 			[]string{"v"},
@@ -1117,9 +1135,455 @@ func TestExecSelect(t *testing.T) {
 	}
 }
 
+func TestExecDelete(t *testing.T) {
+	basic := []execDeleteTest{
+		{
+			// Delete all k/v pairs in the customer table.
+			"delete from Customer",
+			[]string{"Count"},
+			[][]*vdl.Value{
+				[]*vdl.Value{vdl.ValueOf(10)},
+			},
+			"select k from Customer",
+			[]string{"k"},
+			[][]*vdl.Value{},
+		},
+		{
+			// Delete Customer type k/v pairs.
+			"delete from Customer where Type(v) like \"%.Customer\"",
+			[]string{"Count"},
+			[][]*vdl.Value{
+				[]*vdl.Value{vdl.ValueOf(3)},
+			},
+			"select k from Customer",
+			[]string{"k"},
+			[][]*vdl.Value{
+				[]*vdl.Value{vdl.ValueOf("001001")},
+				[]*vdl.Value{vdl.ValueOf("001002")},
+				[]*vdl.Value{vdl.ValueOf("001003")},
+				[]*vdl.Value{vdl.ValueOf("002001")},
+				[]*vdl.Value{vdl.ValueOf("002002")},
+				[]*vdl.Value{vdl.ValueOf("002003")},
+				[]*vdl.Value{vdl.ValueOf("002004")},
+			},
+		},
+		{
+			// Delete non-existant k/v pair.
+			"delete from Customer where k = \"foo\"",
+			[]string{"Count"},
+			[][]*vdl.Value{
+				[]*vdl.Value{vdl.ValueOf(0)},
+			},
+			"select k from Customer",
+			[]string{"k"},
+			[][]*vdl.Value{
+				[]*vdl.Value{vdl.ValueOf("001")},
+				[]*vdl.Value{vdl.ValueOf("001001")},
+				[]*vdl.Value{vdl.ValueOf("001002")},
+				[]*vdl.Value{vdl.ValueOf("001003")},
+				[]*vdl.Value{vdl.ValueOf("002")},
+				[]*vdl.Value{vdl.ValueOf("002001")},
+				[]*vdl.Value{vdl.ValueOf("002002")},
+				[]*vdl.Value{vdl.ValueOf("002003")},
+				[]*vdl.Value{vdl.ValueOf("002004")},
+				[]*vdl.Value{vdl.ValueOf("003")},
+			},
+		},
+		{
+			// Delete k/v pairs where v.InvoiceNum is nil
+			// Since InvoiceNum does not exist for Customers,
+			// this will delete all customer records.
+			"delete from Customer where v.InvoiceNum is nil",
+			[]string{"Count"},
+			[][]*vdl.Value{
+				[]*vdl.Value{vdl.ValueOf(3)},
+			},
+			"select k from Customer",
+			[]string{"k"},
+			[][]*vdl.Value{
+				[]*vdl.Value{vdl.ValueOf("001001")},
+				[]*vdl.Value{vdl.ValueOf("001002")},
+				[]*vdl.Value{vdl.ValueOf("001003")},
+				[]*vdl.Value{vdl.ValueOf("002001")},
+				[]*vdl.Value{vdl.ValueOf("002002")},
+				[]*vdl.Value{vdl.ValueOf("002003")},
+				[]*vdl.Value{vdl.ValueOf("002004")},
+			},
+		},
+		{
+			// Delete values where v.InvoiceNum is nil
+			// or v.Name is nil. This will deleteall customers
+			// with the former and all invoices with the latter.
+			// Hence, all k/v paris will be deleted.
+			"delete from Customer where v.InvoiceNum is nil or v.Name is nil",
+			[]string{"Count"},
+			[][]*vdl.Value{
+				[]*vdl.Value{vdl.ValueOf(10)},
+			},
+			"select k from Customer",
+			[]string{"k"},
+			[][]*vdl.Value{},
+		},
+		{
+			// Delete where v.InvoiceNum is nil AND v.Name is nil.
+			// Nothing should be deleted.
+			"delete from Customer where v.InvoiceNum is nil and v.Name is nil",
+			[]string{"Count"},
+			[][]*vdl.Value{
+				[]*vdl.Value{vdl.ValueOf(0)},
+			},
+			"select k from Customer",
+			[]string{"k"},
+			[][]*vdl.Value{
+				[]*vdl.Value{vdl.ValueOf("001")},
+				[]*vdl.Value{vdl.ValueOf("001001")},
+				[]*vdl.Value{vdl.ValueOf("001002")},
+				[]*vdl.Value{vdl.ValueOf("001003")},
+				[]*vdl.Value{vdl.ValueOf("002")},
+				[]*vdl.Value{vdl.ValueOf("002001")},
+				[]*vdl.Value{vdl.ValueOf("002002")},
+				[]*vdl.Value{vdl.ValueOf("002003")},
+				[]*vdl.Value{vdl.ValueOf("002004")},
+				[]*vdl.Value{vdl.ValueOf("003")},
+			},
+		},
+		{
+			// Delete where v.InvoiceNum is not nil
+			// This will delete all invoices.
+			"delete from Customer where v.InvoiceNum is not nil",
+			[]string{"Count"},
+			[][]*vdl.Value{
+				[]*vdl.Value{vdl.ValueOf(7)},
+			},
+			"select k from Customer",
+			[]string{"k"},
+			[][]*vdl.Value{
+				[]*vdl.Value{vdl.ValueOf("001")},
+				[]*vdl.Value{vdl.ValueOf("002")},
+				[]*vdl.Value{vdl.ValueOf("003")},
+			},
+		},
+		{
+			// Delete where v.InvoiceNum is not nil
+			// or v.Name is not nil. All records are deleted.
+			"delete from Customer where v.InvoiceNum is not nil or v.Name is not nil",
+			[]string{"Count"},
+			[][]*vdl.Value{
+				[]*vdl.Value{vdl.ValueOf(10)},
+			},
+			"select k from Customer",
+			[]string{"k"},
+			[][]*vdl.Value{},
+		},
+		{
+			// Delete where v.InvoiceNum is nil and v.Name is not nil.
+			// All customers are deleted.
+			"delete from Customer where v.InvoiceNum is nil and v.Name is not nil",
+			[]string{"Count"},
+			[][]*vdl.Value{
+				[]*vdl.Value{vdl.ValueOf(3)},
+			},
+			"select k from Customer",
+			[]string{"k"},
+			[][]*vdl.Value{
+				[]*vdl.Value{vdl.ValueOf("001001")},
+				[]*vdl.Value{vdl.ValueOf("001002")},
+				[]*vdl.Value{vdl.ValueOf("001003")},
+				[]*vdl.Value{vdl.ValueOf("002001")},
+				[]*vdl.Value{vdl.ValueOf("002002")},
+				[]*vdl.Value{vdl.ValueOf("002003")},
+				[]*vdl.Value{vdl.ValueOf("002004")},
+			},
+		},
+		{
+			// Delete where v.InvoiceNum is not nil
+			// and v.Name is not nil.  Expect nothing deleted.
+			"delete from Customer where v.InvoiceNum is not nil and v.Name is not nil",
+			[]string{"Count"},
+			[][]*vdl.Value{
+				[]*vdl.Value{vdl.ValueOf(0)},
+			},
+			"select k from Customer",
+			[]string{"k"},
+			[][]*vdl.Value{
+				[]*vdl.Value{vdl.ValueOf("001")},
+				[]*vdl.Value{vdl.ValueOf("001001")},
+				[]*vdl.Value{vdl.ValueOf("001002")},
+				[]*vdl.Value{vdl.ValueOf("001003")},
+				[]*vdl.Value{vdl.ValueOf("002")},
+				[]*vdl.Value{vdl.ValueOf("002001")},
+				[]*vdl.Value{vdl.ValueOf("002002")},
+				[]*vdl.Value{vdl.ValueOf("002003")},
+				[]*vdl.Value{vdl.ValueOf("002004")},
+				[]*vdl.Value{vdl.ValueOf("003")},
+			},
+		},
+		{
+			// Delete all $88 invoices.
+			"delete from Customer where Type(v) like \"%.Invoice\" and v.Amount = 88",
+			[]string{"Count"},
+			[][]*vdl.Value{
+				[]*vdl.Value{vdl.ValueOf(2)},
+			},
+			"select k from Customer",
+			[]string{"k"},
+			[][]*vdl.Value{
+				[]*vdl.Value{vdl.ValueOf("001")},
+				[]*vdl.Value{vdl.ValueOf("001001")},
+				[]*vdl.Value{vdl.ValueOf("001002")},
+				[]*vdl.Value{vdl.ValueOf("002")},
+				[]*vdl.Value{vdl.ValueOf("002001")},
+				[]*vdl.Value{vdl.ValueOf("002002")},
+				[]*vdl.Value{vdl.ValueOf("002003")},
+				[]*vdl.Value{vdl.ValueOf("003")},
+			},
+		},
+		{
+			// Delete all with a key prefix of "001".
+			"delete from Customer where k like \"001%\"",
+			[]string{"Count"},
+			[][]*vdl.Value{
+				[]*vdl.Value{vdl.ValueOf(4)},
+			},
+			"select k from Customer",
+			[]string{"k"},
+			[][]*vdl.Value{
+				[]*vdl.Value{vdl.ValueOf("002")},
+				[]*vdl.Value{vdl.ValueOf("002001")},
+				[]*vdl.Value{vdl.ValueOf("002002")},
+				[]*vdl.Value{vdl.ValueOf("002003")},
+				[]*vdl.Value{vdl.ValueOf("002004")},
+				[]*vdl.Value{vdl.ValueOf("003")},
+			},
+		},
+		{
+			// Delete all with a key prefix of "002".
+			"delete from Customer where k like \"002%\"",
+			[]string{"Count"},
+			[][]*vdl.Value{
+				[]*vdl.Value{vdl.ValueOf(5)},
+			},
+			"select k from Customer",
+			[]string{"k"},
+			[][]*vdl.Value{
+				[]*vdl.Value{vdl.ValueOf("001")},
+				[]*vdl.Value{vdl.ValueOf("001001")},
+				[]*vdl.Value{vdl.ValueOf("001002")},
+				[]*vdl.Value{vdl.ValueOf("001003")},
+				[]*vdl.Value{vdl.ValueOf("003")},
+			},
+		},
+		{
+			// Delete all with key prefix NOT like "002%".
+			"delete from Customer where k not like \"002%\"",
+			[]string{"Count"},
+			[][]*vdl.Value{
+				[]*vdl.Value{vdl.ValueOf(5)},
+			},
+			"select k from Customer",
+			[]string{"k"},
+			[][]*vdl.Value{
+				[]*vdl.Value{vdl.ValueOf("002")},
+				[]*vdl.Value{vdl.ValueOf("002001")},
+				[]*vdl.Value{vdl.ValueOf("002002")},
+				[]*vdl.Value{vdl.ValueOf("002003")},
+				[]*vdl.Value{vdl.ValueOf("002004")},
+			},
+		},
+		{
+			// delete all with a key prefix of "001" or a key prefix of "002".
+			"delete from Customer where k like \"001%\" or k like \"002%\"",
+			[]string{"Count"},
+			[][]*vdl.Value{
+				[]*vdl.Value{vdl.ValueOf(9)},
+			},
+			"select k from Customer",
+			[]string{"k"},
+			[][]*vdl.Value{
+				[]*vdl.Value{vdl.ValueOf("003")},
+			},
+		},
+		{
+			// Delete 002% or 001%
+			"delete from Customer where k like \"002%\" or k like \"001%\"",
+			[]string{"Count"},
+			[][]*vdl.Value{
+				[]*vdl.Value{vdl.ValueOf(9)},
+			},
+			"select k from Customer",
+			[]string{"k"},
+			[][]*vdl.Value{
+				[]*vdl.Value{vdl.ValueOf("003")},
+			},
+		},
+		{
+			// Let's play with whitespace and mixed case.
+			"   dElEtE  from \n  Customer WhErE k lIkE \"002%\" oR k LiKe \"001%\"",
+			[]string{"Count"},
+			[][]*vdl.Value{
+				[]*vdl.Value{vdl.ValueOf(9)},
+			},
+			"select k from Customer",
+			[]string{"k"},
+			[][]*vdl.Value{
+				[]*vdl.Value{vdl.ValueOf("003")},
+			},
+		},
+		{
+			// Add in a like clause that accepts all strings.
+			"   dElEtE  from \n  Customer WhErE k lIkE \"002%\" oR k LiKe \"001%\" or k lIkE \"%\"",
+			[]string{"Count"},
+			[][]*vdl.Value{
+				[]*vdl.Value{vdl.ValueOf(10)},
+			},
+			"select k from Customer",
+			[]string{"k"},
+			[][]*vdl.Value{},
+		},
+		{
+			// delete customers whose last name is Masterson.
+			"delete from Customer where Type(v) like \"%.Customer\" and v.Name like \"%Masterson\"",
+			[]string{"Count"},
+			[][]*vdl.Value{
+				[]*vdl.Value{vdl.ValueOf(1)},
+			},
+			"select k from Customer",
+			[]string{"k"},
+			[][]*vdl.Value{
+				[]*vdl.Value{vdl.ValueOf("001")},
+				[]*vdl.Value{vdl.ValueOf("001001")},
+				[]*vdl.Value{vdl.ValueOf("001002")},
+				[]*vdl.Value{vdl.ValueOf("001003")},
+				[]*vdl.Value{vdl.ValueOf("002001")},
+				[]*vdl.Value{vdl.ValueOf("002002")},
+				[]*vdl.Value{vdl.ValueOf("002003")},
+				[]*vdl.Value{vdl.ValueOf("002004")},
+				[]*vdl.Value{vdl.ValueOf("003")},
+			},
+		},
+		{
+			// delete where v.Address.City is "Collins" or type is Invoice.
+			"delete from Customer where v.Address.City = \"Collins\" or Type(v) like \"%.Invoice\"",
+			[]string{"Count"},
+			[][]*vdl.Value{
+				[]*vdl.Value{vdl.ValueOf(8)},
+			},
+			"select k from Customer",
+			[]string{"k"},
+			[][]*vdl.Value{
+				[]*vdl.Value{vdl.ValueOf("001")},
+				[]*vdl.Value{vdl.ValueOf("003")},
+			},
+		},
+		{
+			// delete where v.Bar.Baz.TitleOrValue.Value = 42
+			"delete from Foo where v.Bar.Baz.TitleOrValue.Value = 42",
+			[]string{"Count"},
+			[][]*vdl.Value{
+				[]*vdl.Value{vdl.ValueOf(1)},
+			},
+			"select k from Foo",
+			[]string{"k"},
+			[][]*vdl.Value{
+				[]*vdl.Value{vdl.ValueOf("001")},
+			},
+		},
+		{
+			// delete where v.Address.City = "Collins" or (type is Invoice and v.InvoiceNum is not nil).
+			// Limit 3
+			"delete from Customer where v.Address.City = \"Collins\" or (Type(v) like \"%.Invoice\" and v.InvoiceNum is not nil) limit 3",
+			[]string{"Count"},
+			[][]*vdl.Value{
+				[]*vdl.Value{vdl.ValueOf(3)},
+			},
+			"select k from Customer",
+			[]string{"k"},
+			[][]*vdl.Value{
+				[]*vdl.Value{vdl.ValueOf("001")},
+				[]*vdl.Value{vdl.ValueOf("002")},
+				[]*vdl.Value{vdl.ValueOf("002001")},
+				[]*vdl.Value{vdl.ValueOf("002002")},
+				[]*vdl.Value{vdl.ValueOf("002003")},
+				[]*vdl.Value{vdl.ValueOf("002004")},
+				[]*vdl.Value{vdl.ValueOf("003")},
+			},
+		},
+		{
+			// delete invoices where date is 2015-03-17
+			"delete from Customer where Type(v) like \"%.Invoice\" and Year(v.InvoiceDate, \"America/Los_Angeles\") = 2015 and Month(v.InvoiceDate, \"America/Los_Angeles\") = 3 and Day(v.InvoiceDate, \"America/Los_Angeles\") = 17",
+			[]string{"Count"},
+			[][]*vdl.Value{
+				[]*vdl.Value{vdl.ValueOf(2)},
+			},
+			"select k from Customer",
+			[]string{"k"},
+			[][]*vdl.Value{
+				[]*vdl.Value{vdl.ValueOf("001")},
+				[]*vdl.Value{vdl.ValueOf("001001")},
+				[]*vdl.Value{vdl.ValueOf("001002")},
+				[]*vdl.Value{vdl.ValueOf("001003")},
+				[]*vdl.Value{vdl.ValueOf("002")},
+				[]*vdl.Value{vdl.ValueOf("002003")},
+				[]*vdl.Value{vdl.ValueOf("002004")},
+				[]*vdl.Value{vdl.ValueOf("003")},
+			},
+		},
+		{
+			// Now will always be > 2012, so all customer records will be deleted.
+			"delete from Customer where Now() > Time(\"2006-01-02 MST\", \"2012-03-17 PDT\")",
+			[]string{"Count"},
+			[][]*vdl.Value{
+				[]*vdl.Value{vdl.ValueOf(10)},
+			},
+			"select k from Customer",
+			[]string{"k"},
+			[][]*vdl.Value{},
+		},
+	}
+
+	setup(t)
+	defer cleanup()
+	for _, test := range basic {
+		initTables(t)
+		headers, rs, err := db.Exec(ctx, test.delQuery)
+		if err != nil {
+			t.Errorf("delQuery: %s; got %v, want nil", test.delQuery, err)
+		} else {
+			// Collect results.
+			r := [][]*vdl.Value{}
+			for rs.Advance() {
+				r = append(r, rs.Result())
+			}
+			if !reflect.DeepEqual(test.delResults, r) {
+				t.Errorf("delQuery: %s; got %v, want %v", test.delQuery, r, test.delResults)
+			}
+			if !reflect.DeepEqual(test.delHeaders, headers) {
+				t.Errorf("delQuery: %s; got %v, want %v", test.delQuery, headers, test.delHeaders)
+			}
+		}
+		headers, rs, err = db.Exec(ctx, test.selQuery)
+		if err != nil {
+			t.Errorf("delQuery: %s; got %v, want nil", test.delQuery, err)
+		} else {
+			// Collect results.
+			r := [][]*vdl.Value{}
+			for rs.Advance() {
+				r = append(r, rs.Result())
+			}
+			if !reflect.DeepEqual(test.selResults, r) {
+				t.Errorf("delQuery: %s; got %v, want %v", test.delQuery, r, test.selResults)
+			}
+			if !reflect.DeepEqual(test.selHeaders, headers) {
+				t.Errorf("delQuery: %s; got %v, want %v", test.delQuery, headers, test.selHeaders)
+			}
+		}
+	}
+}
+
 func TestQuerySelectClause(t *testing.T) {
 	setup(t)
 	defer cleanup()
+	initTables(t)
 	basic := []execSelectTest{
 		{
 			// Select numeric types
@@ -1306,6 +1770,7 @@ func TestQuerySelectClause(t *testing.T) {
 func TestQueryWhereClause(t *testing.T) {
 	setup(t)
 	defer cleanup()
+	initTables(t)
 	basic := []execSelectTest{
 		{
 			// Select on numeric comparisons with equals
@@ -1637,6 +2102,7 @@ func TestQueryWhereClause(t *testing.T) {
 func TestQueryEscapeClause(t *testing.T) {
 	setup(t)
 	defer cleanup()
+	initTables(t)
 	basic := []execSelectTest{
 		{
 			"select k from Customer where \"abc%\" like \"abc^%\" escape '^'",
@@ -1727,6 +2193,7 @@ func TestQueryEscapeClause(t *testing.T) {
 func TestQueryLimitAndOffsetClauses(t *testing.T) {
 	setup(t)
 	defer cleanup()
+	initTables(t)
 	basic := []execSelectTest{
 		{
 			"select k from Customer limit 2 offset 3",
@@ -1789,6 +2256,7 @@ func svPair(s string) []*vdl.Value {
 func TestPreExecFunctions(t *testing.T) {
 	setup(t)
 	defer cleanup()
+	initTables(t)
 	basic := []preExecFunctionTest{
 		{
 			"select Now() from Customer",
@@ -1824,6 +2292,7 @@ func TestPreExecFunctions(t *testing.T) {
 func TestExecErrors(t *testing.T) {
 	setup(t)
 	defer cleanup()
+	initTables(t)
 	basic := []execSelectErrorTest{
 		{
 			"select a from Customer",
@@ -1873,6 +2342,7 @@ func TestExecErrors(t *testing.T) {
 func TestQueryErrors(t *testing.T) {
 	setup(t)
 	defer cleanup()
+	initTables(t)
 	basic := []execSelectErrorTest{
 		// Produce every error in the book (make that, every one that is possible to produce).
 		{
@@ -2064,6 +2534,7 @@ func TestQueryErrors(t *testing.T) {
 func TestQueryErrorsPlatformDependentText(t *testing.T) {
 	setup(t)
 	defer cleanup()
+	initTables(t)
 	basic := []execSelectErrorTest{
 		// These errors contain installation dependent parts to the error.  The test is
 		// more relaxed (it doesn't check the suffix) in order to account for this.
@@ -2091,6 +2562,7 @@ func TestQueryErrorsPlatformDependentText(t *testing.T) {
 func TestQueryStatementSizeExceeded(t *testing.T) {
 	setup(t)
 	defer cleanup()
+	initTables(t)
 	q := fmt.Sprintf("select a from b where c = \"%s\"", strings.Repeat("x", 12000))
 
 	_, rs, err := db.Exec(ctx, q)

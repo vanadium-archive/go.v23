@@ -39,10 +39,18 @@ type DatabaseHandle interface {
 	ListTables(ctx *context.T) ([]string, error)
 
 	// Exec executes a syncQL query.
+	// For select statements:
 	// If no error is returned, Exec returns an array of headers (i.e., column
 	// names) and a result stream which contains an array of values for each row
 	// that matches the query.  The number of values returned in each row of the
 	// result stream will match the size of the headers string array.
+	//
+	// For delete statements:
+	// If no error is returned, Exec returns an array of headers with exactly
+	// one column: "Count" and a result stream which contains an array of length
+	// one, with a single element of type vdl.Int64.  The value represents
+	// the number of k/v pairs deleted by the statement.
+	//
 	// Concurrency semantics: It is legal to perform writes concurrently with
 	// Exec. The returned stream reads from a consistent snapshot taken at the
 	// time of the RPC, and will not reflect subsequent writes to keys not yet

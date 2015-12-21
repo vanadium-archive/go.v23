@@ -16,6 +16,7 @@ type QueryEngine interface {
 	// Exec executes a syncQL query and returns the results. Headers (i.e., column
 	// names) are returned separately from results (i.e., values).
 	// q : the query (e.g., select v from Customers
+	//               (e.g., delete from Customers where k = "101")
 	Exec(q string) ([]string, syncql.ResultStream, error)
 
 	// PrepareStatement parses query q and returns a PreparedStatement.  Queries passed to

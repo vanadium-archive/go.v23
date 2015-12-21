@@ -1929,7 +1929,7 @@ type DatabaseClientMethods interface {
 	// TODO(sadovsky): Maybe switch to streaming RPC.
 	ListTables(*context.T, ...rpc.CallOpt) ([]string, error)
 	// Exec executes a syncQL query and returns all results as specified by in the
-	// query's select clause. Concurrency semantics are documented in model.go.
+	// query's select/delete statement. Concurrency semantics are documented in model.go.
 	Exec(_ *context.T, schemaVersion int32, query string, _ ...rpc.CallOpt) (DatabaseExecClientCall, error)
 	// BeginBatch creates a new batch. It returns a "batch suffix" string to
 	// append to the object name of this Database, yielding an object name for the
@@ -2210,7 +2210,7 @@ type DatabaseServerMethods interface {
 	// TODO(sadovsky): Maybe switch to streaming RPC.
 	ListTables(*context.T, rpc.ServerCall) ([]string, error)
 	// Exec executes a syncQL query and returns all results as specified by in the
-	// query's select clause. Concurrency semantics are documented in model.go.
+	// query's select/delete statement. Concurrency semantics are documented in model.go.
 	Exec(_ *context.T, _ DatabaseExecServerCall, schemaVersion int32, query string) error
 	// BeginBatch creates a new batch. It returns a "batch suffix" string to
 	// append to the object name of this Database, yielding an object name for the
@@ -2353,7 +2353,7 @@ type DatabaseServerStubMethods interface {
 	// TODO(sadovsky): Maybe switch to streaming RPC.
 	ListTables(*context.T, rpc.ServerCall) ([]string, error)
 	// Exec executes a syncQL query and returns all results as specified by in the
-	// query's select clause. Concurrency semantics are documented in model.go.
+	// query's select/delete statement. Concurrency semantics are documented in model.go.
 	Exec(_ *context.T, _ *DatabaseExecServerCallStub, schemaVersion int32, query string) error
 	// BeginBatch creates a new batch. It returns a "batch suffix" string to
 	// append to the object name of this Database, yielding an object name for the
@@ -2513,7 +2513,7 @@ var descDatabase = rpc.InterfaceDesc{
 		},
 		{
 			Name: "Exec",
-			Doc:  "// Exec executes a syncQL query and returns all results as specified by in the\n// query's select clause. Concurrency semantics are documented in model.go.",
+			Doc:  "// Exec executes a syncQL query and returns all results as specified by in the\n// query's select/delete statement. Concurrency semantics are documented in model.go.",
 			InArgs: []rpc.ArgDesc{
 				{"schemaVersion", ``}, // int32
 				{"query", ``},         // string

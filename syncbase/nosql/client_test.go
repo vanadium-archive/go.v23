@@ -151,6 +151,21 @@ func TestExec(t *testing.T) {
 			[]*vdl.Value{vdl.ValueOf("baz"), vdl.ValueOf(baz)},
 		})
 
+	// Delete baz
+	tu.CheckExec(t, ctx, d, "delete from tb where Type(v) like \"%.Baz\"",
+		[]string{"Count"},
+		[][]*vdl.Value{
+			[]*vdl.Value{vdl.ValueOf(1)},
+		})
+
+	// Check that bas is no longer in the table.
+	tu.CheckExec(t, ctx, d, "select k, v from tb",
+		[]string{"k", "v"},
+		[][]*vdl.Value{
+			[]*vdl.Value{vdl.ValueOf("bar"), vdl.ValueOf(bar)},
+			[]*vdl.Value{vdl.ValueOf("foo"), vdl.ValueOf(foo)},
+		})
+
 	tu.CheckExecError(t, ctx, d, "select k, v from foo", syncql.ErrTableCantAccess.ID)
 }
 
