@@ -21,7 +21,8 @@ import (
 )
 
 func TestV23BlobWholeTransfer(t *testing.T) {
-	sh := v23test.NewShell(t, v23test.Opts{Large: true})
+	v23test.SkipUnlessRunningIntegrationTests(t)
+	sh := v23test.NewShell(t, v23test.Opts{})
 	defer sh.Cleanup()
 	sh.StartRootMountTable()
 

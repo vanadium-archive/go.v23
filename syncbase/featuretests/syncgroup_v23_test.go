@@ -25,7 +25,8 @@ import (
 // when: all Syncbases are online and a creator creates the syncgroup and shares
 // the syncgroup name with all the joiners.
 func TestV23SyncgroupRendezvousOnline(t *testing.T) {
-	sh := v23test.NewShell(t, v23test.Opts{Large: true})
+	v23test.SkipUnlessRunningIntegrationTests(t)
+	sh := v23test.NewShell(t, v23test.Opts{})
 	defer sh.Cleanup()
 	sh.StartRootMountTable()
 
@@ -66,7 +67,8 @@ func TestV23SyncgroupRendezvousOnlineCloud(t *testing.T) {
 	// this test from succeeding.
 	t.Skip()
 
-	sh := v23test.NewShell(t, v23test.Opts{Large: true})
+	v23test.SkipUnlessRunningIntegrationTests(t)
+	sh := v23test.NewShell(t, v23test.Opts{})
 	defer sh.Cleanup()
 	sh.StartRootMountTable()
 
@@ -106,7 +108,8 @@ func TestV23SyncgroupRendezvousOnlineCloud(t *testing.T) {
 // picking a syncgroup name that is not reachable and a syncgroup mount table
 // that doesn't exist.
 func TestV23SyncgroupNeighborhoodOnly(t *testing.T) {
-	sh := v23test.NewShell(t, v23test.Opts{Large: true})
+	v23test.SkipUnlessRunningIntegrationTests(t)
+	sh := v23test.NewShell(t, v23test.Opts{})
 	defer sh.Cleanup()
 	sh.StartRootMountTable()
 
@@ -160,7 +163,8 @@ func TestV23SyncgroupNeighborhoodOnly(t *testing.T) {
 // tries to join a syncgroup with a predetermined name, and if join fails,
 // creates the syncgroup.
 func TestV23SyncgroupPreknownStaggered(t *testing.T) {
-	sh := v23test.NewShell(t, v23test.Opts{Large: true})
+	v23test.SkipUnlessRunningIntegrationTests(t)
+	sh := v23test.NewShell(t, v23test.Opts{})
 	defer sh.Cleanup()
 	sh.StartRootMountTable()
 

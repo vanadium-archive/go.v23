@@ -33,7 +33,8 @@ import (
 // TODO(jlodhia): Add more rules based on value type and combination of key
 // prefix and value type once its implemented.
 func TestV23CRRuleConfig(t *testing.T) {
-	sh := v23test.NewShell(t, v23test.Opts{Large: true})
+	v23test.SkipUnlessRunningIntegrationTests(t)
+	sh := v23test.NewShell(t, v23test.Opts{})
 	defer sh.Cleanup()
 	client0Ctx, client1Ctx, sgName := setupCRTest(t, sh, 10)
 
@@ -70,7 +71,8 @@ func TestV23CRRuleConfig(t *testing.T) {
 // Result:
 // The value for foo0 after sync settles on what S1 wrote for both syncbases.
 func TestV23CRDefault(t *testing.T) {
-	sh := v23test.NewShell(t, v23test.Opts{Large: true})
+	v23test.SkipUnlessRunningIntegrationTests(t)
+	sh := v23test.NewShell(t, v23test.Opts{})
 	defer sh.Cleanup()
 	client0Ctx, client1Ctx, sgName := setupCRTest(t, sh, 1)
 
@@ -113,7 +115,8 @@ func TestV23CRDefault(t *testing.T) {
 // After conflict resolution, final values for all rows within the batch must
 // come from either S0 or S1 but not a mixture of the two.
 func TestV23CRWithAtomicBatch(t *testing.T) {
-	sh := v23test.NewShell(t, v23test.Opts{Large: true})
+	v23test.SkipUnlessRunningIntegrationTests(t)
+	sh := v23test.NewShell(t, v23test.Opts{})
 	defer sh.Cleanup()
 	client0Ctx, client1Ctx, sgName := setupCRTest(t, sh, 100)
 
@@ -150,7 +153,8 @@ func TestV23CRWithAtomicBatch(t *testing.T) {
 // 2) 5 rows written as a single batch on both syncbases resulting into a
 //    single conflict for the batch.
 func TestV23CRAppResolved(t *testing.T) {
-	sh := v23test.NewShell(t, v23test.Opts{Large: true})
+	v23test.SkipUnlessRunningIntegrationTests(t)
+	sh := v23test.NewShell(t, v23test.Opts{})
 	defer sh.Cleanup()
 	client0Ctx, client1Ctx, sgName := setupCRTest(t, sh, 10)
 
@@ -200,7 +204,8 @@ func TestV23CRAppResolved(t *testing.T) {
 // Result:
 // All rows are resolved via AppResolves.
 func TestV23CRAppBasedResolutionOverridesOthers(t *testing.T) {
-	sh := v23test.NewShell(t, v23test.Opts{Large: true})
+	v23test.SkipUnlessRunningIntegrationTests(t)
+	sh := v23test.NewShell(t, v23test.Opts{})
 	defer sh.Cleanup()
 	client0Ctx, client1Ctx, sgName := setupCRTest(t, sh, 20)
 
@@ -249,7 +254,8 @@ func TestV23CRMultipleBatchesAsSingleConflict(t *testing.T) {
 	// conflict.
 	t.Skip()
 
-	sh := v23test.NewShell(t, v23test.Opts{Large: true})
+	v23test.SkipUnlessRunningIntegrationTests(t)
+	sh := v23test.NewShell(t, v23test.Opts{})
 	defer sh.Cleanup()
 	client0Ctx, client1Ctx, sgName := setupCRTest(t, sh, 10)
 

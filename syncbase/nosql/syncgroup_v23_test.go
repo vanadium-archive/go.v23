@@ -41,9 +41,11 @@ const (
 // syncgroup at Syncbase1. Syncbase1 in turn requests Syncbase0 to join the
 // syncgroup.
 func TestV23SyncbasedJoinSyncgroup(t *testing.T) {
-	sh := v23test.NewShell(t, v23test.Opts{Large: true})
+	v23test.SkipUnlessRunningIntegrationTests(t)
+	sh := v23test.NewShell(t, v23test.Opts{})
 	defer sh.Cleanup()
 	sh.StartRootMountTable()
+
 	server0Creds := sh.ForkCredentials("s0")
 	client0Ctx := sh.ForkContext("c0")
 	sh.StartSyncbase(server0Creds, "sync0", "",
@@ -69,9 +71,11 @@ func TestV23SyncbasedJoinSyncgroup(t *testing.T) {
 // the database entries.  This verifies the end-to-end synchronization of data
 // along the path: client0--Syncbase0--Syncbase1--client1.
 func TestV23SyncbasedGetDeltas(t *testing.T) {
-	sh := v23test.NewShell(t, v23test.Opts{Large: true})
+	v23test.SkipUnlessRunningIntegrationTests(t)
+	sh := v23test.NewShell(t, v23test.Opts{})
 	defer sh.Cleanup()
 	sh.StartRootMountTable()
+
 	server0Creds := sh.ForkCredentials("s0")
 	client0Ctx := sh.ForkContext("c0")
 	sh.StartSyncbase(server0Creds, "sync0", "",
@@ -104,9 +108,11 @@ func TestV23SyncbasedGetDeltas(t *testing.T) {
 // the path: client0--Syncbase0--Syncbase1--client1 with a workload of puts and
 // deletes.
 func TestV23SyncbasedGetDeltasWithDel(t *testing.T) {
-	sh := v23test.NewShell(t, v23test.Opts{Large: true})
+	v23test.SkipUnlessRunningIntegrationTests(t)
+	sh := v23test.NewShell(t, v23test.Opts{})
 	defer sh.Cleanup()
 	sh.StartRootMountTable()
+
 	server0Creds := sh.ForkCredentials("s0")
 	client0Ctx := sh.ForkContext("c0")
 	sh.StartSyncbase(server0Creds, "sync0", "",
@@ -147,9 +153,11 @@ func TestV23SyncbasedGetDeltasWithDel(t *testing.T) {
 // done, both Syncbase instances are shutdown and restarted, and new data is
 // synced once again.
 func TestV23SyncbasedCompEval(t *testing.T) {
-	sh := v23test.NewShell(t, v23test.Opts{Large: true})
+	v23test.SkipUnlessRunningIntegrationTests(t)
+	sh := v23test.NewShell(t, v23test.Opts{})
 	defer sh.Cleanup()
 	sh.StartRootMountTable()
+
 	server0Creds := sh.ForkCredentials("s0")
 	client0Ctx := sh.ForkContext("c0")
 	server0RDir := sh.MakeTempDir()
@@ -225,9 +233,11 @@ func TestV23SyncbasedCompEval(t *testing.T) {
 // "foobar". The 2nd client then modifies the prefix acl at "foobar" with access
 // to both clients. The 1st client should regain access.
 func TestV23SyncbasedExchangeDeltasWithAcls(t *testing.T) {
-	sh := v23test.NewShell(t, v23test.Opts{Large: true})
+	v23test.SkipUnlessRunningIntegrationTests(t)
+	sh := v23test.NewShell(t, v23test.Opts{})
 	defer sh.Cleanup()
 	sh.StartRootMountTable()
+
 	server0Creds := sh.ForkCredentials("s0")
 	client0Ctx := sh.ForkContext("c0")
 	sh.StartSyncbase(server0Creds, "sync0", "",
@@ -283,20 +293,20 @@ func TestV23SyncbasedExchangeDeltasWithAcls(t *testing.T) {
 // identical. Optionally we could expose inner state of syncbased via some
 // debug methods.
 func TestV23SyncbasedExchangeDeltasWithConflicts(t *testing.T) {
+	v23test.SkipUnlessRunningIntegrationTests(t)
+
 	// Run it multiple times to exercise different interactions between sync
 	// and local updates that change every run due to timing.
 	for i := 0; i < 10; i++ {
-		// TODO(ivanpi): hack: shell created here to satisfy requirement that
-		// NewShell for large tests is called directly from a TestV23* function.
-		sh := v23test.NewShell(t, v23test.Opts{Large: true})
-		defer sh.Cleanup()
-		testSyncbasedExchangeDeltasWithConflicts(t, sh)
-		sh.Cleanup()
+		testSyncbasedExchangeDeltasWithConflicts(t)
 	}
 }
 
-func testSyncbasedExchangeDeltasWithConflicts(t *testing.T, sh *v23test.Shell) {
+func testSyncbasedExchangeDeltasWithConflicts(t *testing.T) {
+	sh := v23test.NewShell(t, v23test.Opts{})
+	defer sh.Cleanup()
 	sh.StartRootMountTable()
+
 	server0Creds := sh.ForkCredentials("s0")
 	client0Ctx := sh.ForkContext("c0")
 	sh.StartSyncbase(server0Creds, "sync0", "",
@@ -336,9 +346,11 @@ func testSyncbasedExchangeDeltasWithConflicts(t *testing.T, sh *v23test.Shell) {
 // then joins the syncgroup with prefix "f" and verifies that it can read the
 // "f" keys.
 func TestV23NestedSyncgroups(t *testing.T) {
-	sh := v23test.NewShell(t, v23test.Opts{Large: true})
+	v23test.SkipUnlessRunningIntegrationTests(t)
+	sh := v23test.NewShell(t, v23test.Opts{})
 	defer sh.Cleanup()
 	sh.StartRootMountTable()
+
 	server0Creds := sh.ForkCredentials("s0")
 	client0Ctx := sh.ForkContext("c0")
 	sh.StartSyncbase(server0Creds, "sync0", "",
@@ -375,9 +387,11 @@ func TestV23NestedSyncgroups(t *testing.T) {
 // keys created by client 1. Client 2 also verifies that it can read all the "f"
 // and "foo" keys created by client 1.
 func TestV23NestedAndPeerSyncgroups(t *testing.T) {
-	sh := v23test.NewShell(t, v23test.Opts{Large: true})
+	v23test.SkipUnlessRunningIntegrationTests(t)
+	sh := v23test.NewShell(t, v23test.Opts{})
 	defer sh.Cleanup()
 	sh.StartRootMountTable()
+
 	server0Creds := sh.ForkCredentials("s0")
 	client0Ctx := sh.ForkContext("c0")
 	sh.StartSyncbase(server0Creds, "sync0", "",
@@ -422,9 +436,11 @@ func TestV23NestedAndPeerSyncgroups(t *testing.T) {
 // syncgroup over that data.  The 2nd client joins that syncgroup and reads the
 // database entries.
 func TestV23SyncbasedGetDeltasPrePopulate(t *testing.T) {
-	sh := v23test.NewShell(t, v23test.Opts{Large: true})
+	v23test.SkipUnlessRunningIntegrationTests(t)
+	sh := v23test.NewShell(t, v23test.Opts{})
 	defer sh.Cleanup()
 	sh.StartRootMountTable()
+
 	server0Creds := sh.ForkCredentials("s0")
 	client0Ctx := sh.ForkContext("c0")
 	sh.StartSyncbase(server0Creds, "sync0", "",
@@ -456,9 +472,11 @@ func TestV23SyncbasedGetDeltasPrePopulate(t *testing.T) {
 // app databases then creates multiple syncgroups (one per database) over that
 // data.  The 2nd client joins these syncgroups and reads all the data.
 func TestV23SyncbasedGetDeltasMultiApp(t *testing.T) {
-	sh := v23test.NewShell(t, v23test.Opts{Large: true})
+	v23test.SkipUnlessRunningIntegrationTests(t)
+	sh := v23test.NewShell(t, v23test.Opts{})
 	defer sh.Cleanup()
 	sh.StartRootMountTable()
+
 	server0Creds := sh.ForkCredentials("s0")
 	client0Ctx := sh.ForkContext("c0")
 	sh.StartSyncbase(server0Creds, "sync0", "",
@@ -485,9 +503,11 @@ func TestV23SyncbasedGetDeltasMultiApp(t *testing.T) {
 // clients must learn of the remaining two. Note that client 2 relies on
 // syncgroup metadata syncing to learn of client 3 .
 func TestV23SyncgroupSync(t *testing.T) {
-	sh := v23test.NewShell(t, v23test.Opts{Large: true})
+	v23test.SkipUnlessRunningIntegrationTests(t)
+	sh := v23test.NewShell(t, v23test.Opts{})
 	defer sh.Cleanup()
 	sh.StartRootMountTable()
+
 	server0Creds := sh.ForkCredentials("s0")
 	client0Ctx := sh.ForkContext("c0")
 	sh.StartSyncbase(server0Creds, "sync0", "",

@@ -14,7 +14,6 @@ import (
 	"v.io/x/ref/lib/v23test"
 	"v.io/x/ref/services/syncbase/server/util"
 	tu "v.io/x/ref/services/syncbase/testutil"
-	"v.io/x/ref/test/expect"
 )
 
 const (
@@ -33,9 +32,11 @@ var (
 
 // Tests that the virtual clock moves forward.
 func TestV23VClockMovesForward(t *testing.T) {
-	sh := v23test.NewShell(t, v23test.Opts{Large: true})
+	v23test.SkipUnlessRunningIntegrationTests(t)
+	sh := v23test.NewShell(t, v23test.Opts{})
 	defer sh.Cleanup()
 	sh.StartRootMountTable()
+
 	ctx := sh.ForkContext("c0")
 	s0Creds := sh.ForkCredentials("s0")
 	sh.StartSyncbase(s0Creds, "s0", "", openPerms, "--dev")
@@ -52,9 +53,11 @@ func TestV23VClockMovesForward(t *testing.T) {
 
 // Tests that system clock updates affect the virtual clock.
 func TestV23VClockSystemClockUpdate(t *testing.T) {
-	sh := v23test.NewShell(t, v23test.Opts{Large: true})
+	v23test.SkipUnlessRunningIntegrationTests(t)
+	sh := v23test.NewShell(t, v23test.Opts{})
 	defer sh.Cleanup()
 	sh.StartRootMountTable()
+
 	ctx := sh.ForkContext("c0")
 	s0Creds := sh.ForkCredentials("s0")
 	sh.StartSyncbase(s0Creds, "s0", "", openPerms, "--dev")
@@ -109,9 +112,11 @@ func TestV23VClockSystemClockUpdate(t *testing.T) {
 // Tests that the virtual clock daemon checks for system clock updates at the
 // expected frequency (loosely speaking).
 func TestV23VClockSystemClockFrequency(t *testing.T) {
-	sh := v23test.NewShell(t, v23test.Opts{Large: true})
+	v23test.SkipUnlessRunningIntegrationTests(t)
+	sh := v23test.NewShell(t, v23test.Opts{})
 	defer sh.Cleanup()
 	sh.StartRootMountTable()
+
 	ctx := sh.ForkContext("c0")
 	s0Creds := sh.ForkCredentials("s0")
 	sh.StartSyncbase(s0Creds, "s0", "", openPerms, "--dev")
@@ -139,9 +144,11 @@ func TestV23VClockSystemClockFrequency(t *testing.T) {
 // Tests that NTP sync affects virtual clock state (e.g. clock can move
 // backward).
 func TestV23VClockNtpUpdate(t *testing.T) {
-	sh := v23test.NewShell(t, v23test.Opts{Large: true})
+	v23test.SkipUnlessRunningIntegrationTests(t)
+	sh := v23test.NewShell(t, v23test.Opts{})
 	defer sh.Cleanup()
 	sh.StartRootMountTable()
+
 	ctx := sh.ForkContext("c0")
 	s0Creds := sh.ForkCredentials("s0")
 	sh.StartSyncbase(s0Creds, "s0", "", openPerms, "--dev")
@@ -165,9 +172,11 @@ func TestV23VClockNtpUpdate(t *testing.T) {
 
 // Tests that NTP skew persists across reboots.
 func TestV23VClockNtpSkewAfterReboot(t *testing.T) {
-	sh := v23test.NewShell(t, v23test.Opts{Large: true})
+	v23test.SkipUnlessRunningIntegrationTests(t)
+	sh := v23test.NewShell(t, v23test.Opts{})
 	defer sh.Cleanup()
 	sh.StartRootMountTable()
+
 	ctx := sh.ForkContext("c0")
 	s0Creds := sh.ForkCredentials("s0")
 	sh.StartSyncbase(s0Creds, "s0", "", openPerms, "--dev")
@@ -202,9 +211,11 @@ func TestV23VClockNtpSkewAfterReboot(t *testing.T) {
 // Tests that the virtual clock daemon checks in with NTP at the expected
 // frequency (loosely speaking).
 func TestV23VClockNtpFrequency(t *testing.T) {
-	sh := v23test.NewShell(t, v23test.Opts{Large: true})
+	v23test.SkipUnlessRunningIntegrationTests(t)
+	sh := v23test.NewShell(t, v23test.Opts{})
 	defer sh.Cleanup()
 	sh.StartRootMountTable()
+
 	ctx := sh.ForkContext("c0")
 	s0Creds := sh.ForkCredentials("s0")
 	sh.StartSyncbase(s0Creds, "s0", "", openPerms, "--dev")
@@ -241,9 +252,11 @@ func TestV23VClockNtpFrequency(t *testing.T) {
 // Tests p2p clock sync where local is not NTP-synced and is 1, 2, or 3 hops
 // away from an NTP-synced device.
 func TestV23VClockSyncBasic(t *testing.T) {
-	sh := v23test.NewShell(t, v23test.Opts{Large: true})
+	v23test.SkipUnlessRunningIntegrationTests(t)
+	sh := v23test.NewShell(t, v23test.Opts{})
 	defer sh.Cleanup()
 	sh.StartRootMountTable()
+
 	sbs := setupSyncbases(t, sh, 4, "--dev")
 
 	checkSbTimeNotEq(t, "s0", sbs[0].clientCtx, jan2015)
@@ -270,9 +283,11 @@ func TestV23VClockSyncBasic(t *testing.T) {
 
 // Tests p2p clock sync where multiple devices are NTP-synced.
 func TestV23VClockSyncWithLocalNtp(t *testing.T) {
-	sh := v23test.NewShell(t, v23test.Opts{Large: true})
+	v23test.SkipUnlessRunningIntegrationTests(t)
+	sh := v23test.NewShell(t, v23test.Opts{})
 	defer sh.Cleanup()
 	sh.StartRootMountTable()
+
 	sbs := setupSyncbases(t, sh, 3, "--dev")
 
 	// Do NTP at s0 and s2.
@@ -322,9 +337,11 @@ func TestV23VClockSyncWithLocalNtp(t *testing.T) {
 // Tests p2p clock sync where local is not NTP-synced and is 1 hop away from an
 // NTP-synced device with >0 reboots.
 func TestV23VClockSyncWithReboots(t *testing.T) {
-	sh := v23test.NewShell(t, v23test.Opts{Large: true})
+	v23test.SkipUnlessRunningIntegrationTests(t)
+	sh := v23test.NewShell(t, v23test.Opts{})
 	defer sh.Cleanup()
 	sh.StartRootMountTable()
+
 	sbs := setupSyncbases(t, sh, 2, "--dev")
 
 	// Set s0's local clock.
@@ -394,13 +411,10 @@ func setupChain(t *testing.T, sbs []*testSyncbase) {
 func startFakeNtpServer(t *testing.T, sh *v23test.Shell, now time.Time) string {
 	nowBuf, err := now.MarshalText()
 	ok(t, err)
-	ntpd := sh.JiriBuildGoPkg("v.io/x/ref/services/syncbase/testutil/fake_ntp_server")
-	inv := sh.Cmd(ntpd, "--now="+string(nowBuf))
-	// TODO(ivanpi): Use Session built into v23test.Shell when checked in.
-	// TODO(ivanpi): 1 second is potentially flaky, is it safe to bump?
-	exp := expect.NewSession(t, inv.StdoutPipe(), time.Second)
-	inv.Start()
-	host := exp.ExpectVar("HOST")
+	ntpd := sh.BuildGoPkg("v.io/x/ref/services/syncbase/testutil/fake_ntp_server")
+	c := sh.Cmd(ntpd, "--now="+string(nowBuf))
+	c.Start()
+	host := c.S.ExpectVar("HOST")
 	if host == "" {
 		t.Fatalf("fake_ntp_server failed to start")
 	}

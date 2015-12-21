@@ -55,7 +55,8 @@ func createAppDatabaseTable(t *testing.T, clientCtx *context.T) nosql.Database {
 }
 
 func TestV23RestartabilityHierarchy(t *testing.T) {
-	sh := v23test.NewShell(t, v23test.Opts{Large: true})
+	v23test.SkipUnlessRunningIntegrationTests(t)
+	sh := v23test.NewShell(t, v23test.Opts{})
 	defer sh.Cleanup()
 	rootDir, clientCtx, serverCreds := restartabilityInit(sh)
 	cleanup := sh.StartSyncbase(serverCreds, testSbName, rootDir, acl)
@@ -71,7 +72,8 @@ func TestV23RestartabilityHierarchy(t *testing.T) {
 // Same as TestV23RestartabilityHierarchy except the first syncbase is killed
 // with SIGKILL instead of SIGINT.
 func TestV23RestartabilityCrash(t *testing.T) {
-	sh := v23test.NewShell(t, v23test.Opts{Large: true})
+	v23test.SkipUnlessRunningIntegrationTests(t)
+	sh := v23test.NewShell(t, v23test.Opts{})
 	defer sh.Cleanup()
 	rootDir, clientCtx, serverCreds := restartabilityInit(sh)
 	cleanup := sh.StartSyncbase(serverCreds, testSbName, rootDir, acl)
@@ -150,7 +152,8 @@ func checkHierarchy(t *testing.T, ctx *context.T) {
 }
 
 func TestV23RestartabilityQuiescent(t *testing.T) {
-	sh := v23test.NewShell(t, v23test.Opts{Large: true})
+	v23test.SkipUnlessRunningIntegrationTests(t)
+	sh := v23test.NewShell(t, v23test.Opts{})
 	defer sh.Cleanup()
 	rootDir, clientCtx, serverCreds := restartabilityInit(sh)
 	cleanup := sh.StartSyncbase(serverCreds, testSbName, rootDir, acl)
@@ -185,7 +188,8 @@ func TestV23RestartabilityQuiescent(t *testing.T) {
 
 // A read-only batch should fail if the server crashes in the middle.
 func TestV23RestartabilityReadOnlyBatch(t *testing.T) {
-	sh := v23test.NewShell(t, v23test.Opts{Large: true})
+	v23test.SkipUnlessRunningIntegrationTests(t)
+	sh := v23test.NewShell(t, v23test.Opts{})
 	defer sh.Cleanup()
 	rootDir, clientCtx, serverCreds := restartabilityInit(sh)
 	cleanup := sh.StartSyncbase(serverCreds, testSbName, rootDir, acl)
@@ -237,7 +241,8 @@ func TestV23RestartabilityReadOnlyBatch(t *testing.T) {
 
 // A read/write batch should fail if the server crashes in the middle.
 func TestV23RestartabilityReadWriteBatch(t *testing.T) {
-	sh := v23test.NewShell(t, v23test.Opts{Large: true})
+	v23test.SkipUnlessRunningIntegrationTests(t)
+	sh := v23test.NewShell(t, v23test.Opts{})
 	defer sh.Cleanup()
 	rootDir, clientCtx, serverCreds := restartabilityInit(sh)
 	cleanup := sh.StartSyncbase(serverCreds, testSbName, rootDir, acl)
@@ -295,7 +300,8 @@ func decodeString(t *testing.T, val []byte) string {
 }
 
 func TestV23RestartabilityWatch(t *testing.T) {
-	sh := v23test.NewShell(t, v23test.Opts{Large: true})
+	v23test.SkipUnlessRunningIntegrationTests(t)
+	sh := v23test.NewShell(t, v23test.Opts{})
 	defer sh.Cleanup()
 	rootDir, clientCtx, serverCreds := restartabilityInit(sh)
 	cleanup := sh.StartSyncbase(serverCreds, testSbName, rootDir, acl)
@@ -408,7 +414,8 @@ func corruptFile(t *testing.T, rootDir, pathRegex string) {
 }
 
 func TestV23RestartabilityServiceDBCorruption(t *testing.T) {
-	sh := v23test.NewShell(t, v23test.Opts{Large: true})
+	v23test.SkipUnlessRunningIntegrationTests(t)
+	sh := v23test.NewShell(t, v23test.Opts{})
 	defer sh.Cleanup()
 	rootDir, clientCtx, serverCreds := restartabilityInit(sh)
 	cleanup := sh.StartSyncbase(serverCreds, testSbName, rootDir, acl)
@@ -421,7 +428,7 @@ func TestV23RestartabilityServiceDBCorruption(t *testing.T) {
 
 	// TODO(ivanpi): Repeated below, refactor into method.
 	// Expect syncbase to fail to start.
-	syncbasedPath := sh.JiriBuildGoPkg("v.io/x/ref/services/syncbase/syncbased")
+	syncbasedPath := sh.BuildGoPkg("v.io/x/ref/services/syncbase/syncbased")
 	syncbased := sh.Cmd(syncbasedPath,
 		"--alsologtostderr=true",
 		"--v23.tcp.address=127.0.0.1:0",
@@ -430,7 +437,7 @@ func TestV23RestartabilityServiceDBCorruption(t *testing.T) {
 		"--root-dir="+rootDir)
 	syncbased = syncbased.WithCredentials(serverCreds)
 	syncbased.ExitErrorIsOk = true
-	stdout, stderr := syncbased.Output()
+	stdout, stderr := syncbased.StdoutStderr()
 	if syncbased.Err == nil {
 		t.Fatal("Expected syncbased to fail to start.")
 	}
@@ -444,7 +451,8 @@ func TestV23RestartabilityServiceDBCorruption(t *testing.T) {
 }
 
 func TestV23RestartabilityAppDBCorruption(t *testing.T) {
-	sh := v23test.NewShell(t, v23test.Opts{Large: true})
+	v23test.SkipUnlessRunningIntegrationTests(t)
+	sh := v23test.NewShell(t, v23test.Opts{})
 	defer sh.Cleanup()
 	rootDir, clientCtx, serverCreds := restartabilityInit(sh)
 	cleanup := sh.StartSyncbase(serverCreds, testSbName, rootDir, acl)
@@ -456,7 +464,7 @@ func TestV23RestartabilityAppDBCorruption(t *testing.T) {
 	corruptFile(t, rootDir, `apps/[^/]*/dbs/[^/]*/leveldb/.*\.log`)
 
 	// Expect syncbase to fail to start.
-	syncbasedPath := sh.JiriBuildGoPkg("v.io/x/ref/services/syncbase/syncbased")
+	syncbasedPath := sh.BuildGoPkg("v.io/x/ref/services/syncbase/syncbased")
 	syncbased := sh.Cmd(syncbasedPath,
 		"--alsologtostderr=true",
 		"--v23.tcp.address=127.0.0.1:0",
@@ -465,7 +473,7 @@ func TestV23RestartabilityAppDBCorruption(t *testing.T) {
 		"--root-dir="+rootDir)
 	syncbased = syncbased.WithCredentials(serverCreds)
 	syncbased.ExitErrorIsOk = true
-	stdout, stderr := syncbased.Output()
+	stdout, stderr := syncbased.StdoutStderr()
 	if syncbased.Err == nil {
 		t.Fatal("Expected syncbased to fail to start.")
 	}
@@ -497,7 +505,8 @@ func TestV23RestartabilityStoreGarbageCollect(t *testing.T) {
 	// TODO(ivanpi): Fully testing store garbage collection requires fault
 	// injection or mocking out the store.
 	// NOTE: Test assumes that leveldb destroy is implemented as 'rm -r'.
-	sh := v23test.NewShell(t, v23test.Opts{Large: true})
+	v23test.SkipUnlessRunningIntegrationTests(t)
+	sh := v23test.NewShell(t, v23test.Opts{})
 	defer sh.Cleanup()
 	rootDir, clientCtx, serverCreds := restartabilityInit(sh)
 	cleanup := sh.StartSyncbase(serverCreds, testSbName, rootDir, acl)
