@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// +build linux,amd64,cgo,!noopenssl openssl,cgo
+// +build !android,linux,amd64,cgo,!noopenssl openssl,cgo
 
 // The purpose of this file is to improve performance, as demonstrated by
 // benchmarks when linked against openssl-1.0.1f (with further improvements in
