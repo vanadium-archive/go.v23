@@ -24,7 +24,7 @@ func spanNoPanic(span Span) {
 func storeNoPanic(store Store) {
 	store.TraceRecords()
 	store.TraceRecord(uniqueid.Id{})
-	store.ForceCollect(uniqueid.Id{})
+	store.ForceCollect(uniqueid.Id{}, 0)
 	store.Merge(Response{})
 }
 

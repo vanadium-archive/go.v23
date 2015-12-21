@@ -116,8 +116,9 @@ type Store interface {
 	// nil if the given id is not present.
 	TraceRecord(traceid uniqueid.Id) *TraceRecord
 
-	// ForceCollect forces the store to collect all information about a given trace.
-	ForceCollect(traceid uniqueid.Id)
+	// ForceCollect forces the store to collect all information about a given trace and to capture
+	// the log messages at the given log level.
+	ForceCollect(traceid uniqueid.Id, level int)
 
 	// Merge merges a vtrace.Response into the current store.
 	Merge(response Response)
@@ -205,9 +206,9 @@ func GetStore(ctx *context.T) Store {
 
 // ForceCollect forces the store to collect all information about the
 // current trace.
-func ForceCollect(ctx *context.T) {
+func ForceCollect(ctx *context.T, level int) {
 	m := manager(ctx)
-	m.GetStore(ctx).ForceCollect(m.GetSpan(ctx).Trace())
+	m.GetStore(ctx).ForceCollect(m.GetSpan(ctx).Trace(), level)
 }
 
 // Generate a Request from the current context.
@@ -248,5 +249,5 @@ type emptyStore struct{}
 
 func (emptyStore) TraceRecords() []TraceRecord                  { return nil }
 func (emptyStore) TraceRecord(traceid uniqueid.Id) *TraceRecord { return nil }
-func (emptyStore) ForceCollect(traceid uniqueid.Id)             {}
+func (emptyStore) ForceCollect(traceid uniqueid.Id, level int)  {}
 func (emptyStore) Merge(response Response)                      {}
