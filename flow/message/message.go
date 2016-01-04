@@ -125,6 +125,8 @@ const (
 
 // Setup is the first message over the wire.  It negotiates protocol version
 // and encryption options for connection.
+// New fields to Setup must be added in order of creation. i.e. the order of the fields
+// should not be changed.
 type Setup struct {
 	Versions             version.RPCVersionRange
 	PeerNaClPublicKey    *[32]byte

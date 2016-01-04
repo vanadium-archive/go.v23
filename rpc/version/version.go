@@ -43,6 +43,10 @@ const (
 
 	// RPCVersion13 adds error messages in responses from proxies.
 	RPCVersion13
+
+	// RPCVersion14 adds the setup message to the channel binding during
+	// connection setup.
+	RPCVersion14
 )
 
 // RPCVersionRange allows you to optionally specify a range of versions to
