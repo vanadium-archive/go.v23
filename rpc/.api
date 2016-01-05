@@ -8,10 +8,6 @@ pkg rpc, func ChildrenGlobberInvoker(...string) Invoker
 pkg rpc, func NewGlobState(interface{}) *GlobState
 pkg rpc, func ReflectInvoker(interface{}) (Invoker, error)
 pkg rpc, func ReflectInvokerOrDie(interface{}) Invoker
-pkg rpc, func RegisterProtocol(string, DialerFunc, ResolverFunc, ListenerFunc, ...string) bool
-pkg rpc, func RegisterUnknownProtocol(string, DialerFunc, ResolverFunc, ListenerFunc) bool
-pkg rpc, func RegisteredProtocol(string) (DialerFunc, ResolverFunc, ListenerFunc, []string)
-pkg rpc, func RegisteredProtocols() []string
 pkg rpc, func TypeCheckMethods(interface{}) map[string]error
 pkg rpc, method (AddressChooserFunc) ChooseAddresses(string, []net.Addr) ([]net.Addr, error)
 pkg rpc, method (ListenSpec) Copy() ListenSpec
@@ -48,7 +44,6 @@ pkg rpc, type ClientOpt interface { RPCClientOpt }
 pkg rpc, type ClientOpt interface, RPCClientOpt()
 pkg rpc, type Describer interface { Describe__ }
 pkg rpc, type Describer interface, Describe__() []InterfaceDesc
-pkg rpc, type DialerFunc func(ctx *context.T, protocol, address string, timeout time.Duration) (net.Conn, error)
 pkg rpc, type Dispatcher interface { Lookup }
 pkg rpc, type Dispatcher interface, Lookup(*context.T, string) (interface{}, security.Authorizer, error)
 pkg rpc, type EmbedDesc struct
@@ -96,7 +91,6 @@ pkg rpc, type ListenSpec struct
 pkg rpc, type ListenSpec struct, Addrs ListenAddrs
 pkg rpc, type ListenSpec struct, Proxy string
 pkg rpc, type ListenSpec struct, embedded AddressChooser
-pkg rpc, type ListenerFunc func(ctx *context.T, protocol, address string) (net.Listener, error)
 pkg rpc, type MethodDesc struct
 pkg rpc, type MethodDesc struct, Doc string
 pkg rpc, type MethodDesc struct, InArgs []ArgDesc
@@ -123,7 +117,6 @@ pkg rpc, type Request struct, Method string
 pkg rpc, type Request struct, NumPosArgs uint64
 pkg rpc, type Request struct, Suffix string
 pkg rpc, type Request struct, TraceRequest vtrace.Request
-pkg rpc, type ResolverFunc func(ctx *context.T, protocol, address string) (string, string, error)
 pkg rpc, type Response struct
 pkg rpc, type Response struct, AckBlessings bool
 pkg rpc, type Response struct, EndStreamResults bool
