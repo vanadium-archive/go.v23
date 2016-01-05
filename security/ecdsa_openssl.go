@@ -2,21 +2,23 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// +build !android,linux,amd64,cgo,!noopenssl openssl,cgo
+// +build !go1.6,!android,linux,amd64,cgo,!noopenssl openssl,cgo
 
 // The purpose of this file is to improve performance, as demonstrated by
 // benchmarks when linked against openssl-1.0.1f (with further improvements in
 // openssl-1.0.2, at the time this comment was written).
 //   go test -bench ECDSA v.io/v23/security
 //
-// See https://go-review.googlesource.com/#/c/8968/ for why the Go standard
-// library (as of Go 1.5) does not have performance on par with OpenSSL.
+// With Go 1.6, the Go standard library will have performance on-par with
+// OpenSSL for amd64 (see https://go-review.googlesource.com/#/c/8968/).
+// Prior to that however, using OpenSSL (via cgo) provides a significant
+// performance improvement.
 //
 // By default (without an explicit build tag), this is disabled for darwin
 // since OpenSSL has been marked deprecated on OS X since version 10.7.  The
 // last openssl release on OS X was version 0.9.8 and compiling this file will
 // show these deprecation warnings.  Those sensitive to performance are
-// encouraged to compile a later version of OpenSSL and set the build tag.
+// encouraged to move to Go 1.6.
 //
 // Currently, this file is disabled for linux/arm as a temporary hack.  In
 // practice, linux/arm binaries are often cross-compiled on a linux/amd64 host.
