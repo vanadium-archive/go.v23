@@ -60,6 +60,11 @@ func TestSetup(t *testing.T) {
 			PeerRemoteEndpoint: ep1,
 			PeerLocalEndpoint:  ep2,
 		},
+		&message.Setup{
+			Versions:     version.RPCVersionRange{Min: 3, Max: 5},
+			Mtu:          1 << 16,
+			SharedTokens: 1 << 20,
+		},
 		&message.Setup{},
 	})
 }

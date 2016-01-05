@@ -99,6 +99,8 @@ const (
 	peerNaClPublicKeyOption
 	peerRemoteEndpointOption
 	peerLocalEndpointOption
+	mtuOption
+	sharedTokensOption
 )
 
 // data flags.
@@ -132,6 +134,8 @@ type Setup struct {
 	PeerNaClPublicKey    *[32]byte
 	PeerRemoteEndpoint   naming.Endpoint
 	PeerLocalEndpoint    naming.Endpoint
+	Mtu                  uint64
+	SharedTokens         uint64
 	uninterpretedOptions []option
 }
 
@@ -169,6 +173,12 @@ func (m *Setup) append(ctx *context.T, data []byte) ([]byte, error) {
 		data = appendSetupOption(peerLocalEndpointOption,
 			[]byte(m.PeerLocalEndpoint.String()), data)
 	}
+	if m.Mtu != 0 {
+		data = appendSetupOption(mtuOption, writeVarUint64(m.Mtu, nil), data)
+	}
+	if m.SharedTokens != 0 {
+		data = appendSetupOption(sharedTokensOption, writeVarUint64(m.SharedTokens, nil), data)
+	}
 	for _, o := range m.uninterpretedOptions {
 		data = appendSetupOption(o.opt, o.payload, data)
 	}
@@ -205,6 +215,18 @@ func (m *Setup) read(ctx *context.T, orig []byte) error {
 			m.PeerRemoteEndpoint, err = v23.NewEndpoint(string(payload))
 		case peerLocalEndpointOption:
 			m.PeerLocalEndpoint, err = v23.NewEndpoint(string(payload))
+		case mtuOption:
+			if mtu, _, valid := readVarUint64(ctx, payload); valid {
+				m.Mtu = mtu
+			} else {
+				return NewErrInvalidSetupOption(ctx, opt, field)
+			}
+		case sharedTokensOption:
+			if t, _, valid := readVarUint64(ctx, payload); valid {
+				m.SharedTokens = t
+			} else {
+				return NewErrInvalidSetupOption(ctx, opt, field)
+			}
 		default:
 			m.uninterpretedOptions = append(m.uninterpretedOptions, option{opt, payload})
 		}

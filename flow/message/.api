@@ -41,9 +41,11 @@ pkg message, type ProxyServerRequest struct
 pkg message, type Release struct
 pkg message, type Release struct, Counters map[uint64]uint64
 pkg message, type Setup struct
+pkg message, type Setup struct, Mtu uint64
 pkg message, type Setup struct, PeerLocalEndpoint naming.Endpoint
 pkg message, type Setup struct, PeerNaClPublicKey *[32]byte
 pkg message, type Setup struct, PeerRemoteEndpoint naming.Endpoint
+pkg message, type Setup struct, SharedTokens uint64
 pkg message, type Setup struct, Versions version.RPCVersionRange
 pkg message, type TearDown struct
 pkg message, type TearDown struct, Message string
