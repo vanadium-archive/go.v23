@@ -120,6 +120,11 @@ type ServesMountTable bool
 
 func (ServesMountTable) RPCServerOpt() {}
 
+// LameDuckTimeout specifies the time to wait for all server operations to complete after Stop is called.
+type LameDuckTimeout time.Duration
+
+func (LameDuckTimeout) RPCServerOpt() {}
+
 // Create a server that will be used to serve a leaf service.
 type IsLeaf bool
 
