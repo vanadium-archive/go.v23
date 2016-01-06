@@ -33,6 +33,10 @@ import (
 // TODO(jlodhia): Add more rules based on value type and combination of key
 // prefix and value type once its implemented.
 func TestV23CRRuleConfig(t *testing.T) {
+	// TODO(jlodhia): Re-enable test after following issue is resolved.
+	// https://github.com/vanadium/issues/issues/1027
+	t.Skip()
+
 	v23test.SkipUnlessRunningIntegrationTests(t)
 	sh := v23test.NewShell(t, v23test.Opts{})
 	defer sh.Cleanup()
@@ -153,6 +157,10 @@ func TestV23CRWithAtomicBatch(t *testing.T) {
 // 2) 5 rows written as a single batch on both syncbases resulting into a
 //    single conflict for the batch.
 func TestV23CRAppResolved(t *testing.T) {
+	// TODO(jlodhia): Re-enable test after following issue is resolved.
+	// https://github.com/vanadium/issues/issues/1027
+	t.Skip()
+
 	v23test.SkipUnlessRunningIntegrationTests(t)
 	sh := v23test.NewShell(t, v23test.Opts{})
 	defer sh.Cleanup()
