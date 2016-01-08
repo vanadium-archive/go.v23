@@ -296,7 +296,7 @@ func (d *database) establishConflictResolution(ctx *context.T) {
 		childCtx := context.WithValue(ctx, reconnectionCount, count)
 		// listenForConflicts is a blocking method that returns only when the
 		// conflict stream is broken.
-		if err := d.listenForConflicts(childCtx); err != nil {
+		if err := d.listenForConflicts(childCtx); err != nil && !d.crState.isDisconnected() {
 			vlog.Errorf("Conflict resolution connection ended with error: %v", err)
 		}
 
@@ -349,7 +349,7 @@ func sendResolution(stream interface {
 		count++
 		ri := toResolutionInfo(v, count != size)
 		if err := stream.Send(ri); err != nil {
-			vlog.Error("Error while sending resolution")
+			vlog.Errorf("Error while sending resolution: %v", err)
 			return err
 		}
 	}
