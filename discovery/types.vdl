@@ -20,6 +20,11 @@ type Service struct {
 	// The addresses (vanadium object names) that the service is served on.
 	// E.g., '/host:port/a/b/c', '/ns.dev.v.io:8101/blah/blah'.
 	Addrs []string
+	// The service attachments.
+	// E.g., {'thumbnail': binary_data }.
+	//
+	// WARNING: THIS FIELD IS NOT SUPPORTED YET.
+	Attachments Attachments
 }
 
 // Attributes represents service attributes as a key/value pair.
@@ -27,6 +32,15 @@ type Service struct {
 // The key must be US-ASCII printable characters, excluding the '=' character
 // and should not start with '_' character.
 type Attributes map[string]string
+
+// Attachments represents service attachments as a key/value pair. Unlike
+// attributes, attachments are mostly for larger binary data and they are
+// not queryable. It is recommended to put as small attachments as possible
+// since it may require additional RPC calls causing delay in discovery.
+//
+// The key must be US-ASCII printable characters, excluding the '=' character
+// and should not start with '_' character.
+type Attachments map[string][]byte
 
 // Found represents a service that is discovered by scan.
 type Found struct {

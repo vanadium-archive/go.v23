@@ -9,6 +9,7 @@ pkg discovery, type AdvertiseCloser interface, Advertise(*context.T, *Service, [
 pkg discovery, type AdvertiseCloser interface, Close()
 pkg discovery, type Advertiser interface { Advertise }
 pkg discovery, type Advertiser interface, Advertise(*context.T, *Service, []security.BlessingPattern) (<-chan struct{}, error)
+pkg discovery, type Attachments map[string][]byte
 pkg discovery, type Attributes map[string]string
 pkg discovery, type Closer interface { Close }
 pkg discovery, type Closer interface, Close()
@@ -23,6 +24,7 @@ pkg discovery, type Scanner interface { Scan }
 pkg discovery, type Scanner interface, Scan(*context.T, string) (<-chan Update, error)
 pkg discovery, type Service struct
 pkg discovery, type Service struct, Addrs []string
+pkg discovery, type Service struct, Attachments Attachments
 pkg discovery, type Service struct, Attrs Attributes
 pkg discovery, type Service struct, InstanceId string
 pkg discovery, type Service struct, InstanceName string

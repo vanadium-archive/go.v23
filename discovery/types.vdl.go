@@ -28,6 +28,11 @@ type Service struct {
 	// The addresses (vanadium object names) that the service is served on.
 	// E.g., '/host:port/a/b/c', '/ns.dev.v.io:8101/blah/blah'.
 	Addrs []string
+	// The service attachments.
+	// E.g., {'thumbnail': binary_data }.
+	//
+	// WARNING: THIS FIELD IS NOT SUPPORTED YET.
+	Attachments Attachments
 }
 
 func (Service) __VDLReflect(struct {
@@ -43,6 +48,20 @@ type Attributes map[string]string
 
 func (Attributes) __VDLReflect(struct {
 	Name string `vdl:"v.io/v23/discovery.Attributes"`
+}) {
+}
+
+// Attachments represents service attachments as a key/value pair. Unlike
+// attributes, attachments are mostly for larger binary data and they are
+// not queryable. It is recommended to put as small attachments as possible
+// since it may require additional RPC calls causing delay in discovery.
+//
+// The key must be US-ASCII printable characters, excluding the '=' character
+// and should not start with '_' character.
+type Attachments map[string][]byte
+
+func (Attachments) __VDLReflect(struct {
+	Name string `vdl:"v.io/v23/discovery.Attachments"`
 }) {
 }
 
@@ -108,6 +127,7 @@ func (x UpdateLost) __VDLReflect(__UpdateReflect) {}
 func init() {
 	vdl.Register((*Service)(nil))
 	vdl.Register((*Attributes)(nil))
+	vdl.Register((*Attachments)(nil))
 	vdl.Register((*Found)(nil))
 	vdl.Register((*Lost)(nil))
 	vdl.Register((*Update)(nil))
