@@ -221,21 +221,13 @@ func UnconstrainedUse() Caveat {
 
 // NewExpiryCaveat returns a Caveat that validates iff the current time is before t.
 func NewExpiryCaveat(t time.Time) (Caveat, error) {
-	c, err := NewCaveat(ExpiryCaveat, t)
-	if err != nil {
-		return c, err
-	}
-	return c, nil
+	return NewCaveat(ExpiryCaveat, t)
 }
 
 // NewMethodCaveat returns a Caveat that validates iff the method being invoked by
 // the peer is listed in an argument to this function.
 func NewMethodCaveat(method string, additionalMethods ...string) (Caveat, error) {
-	c, err := NewCaveat(MethodCaveat, append(additionalMethods, method))
-	if err != nil {
-		return c, err
-	}
-	return c, nil
+	return NewCaveat(MethodCaveat, append(additionalMethods, method))
 }
 
 // NewPublicKeyCaveat returns a third-party caveat, i.e., the returned

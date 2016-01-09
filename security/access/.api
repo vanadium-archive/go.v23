@@ -5,7 +5,9 @@ pkg access, const Resolve Tag
 pkg access, const Write Tag
 pkg access, func AllTypicalTags() []Tag
 pkg access, func IsUnenforceablePatterns(error) []security.BlessingPattern
+pkg access, func NewAccessTagCaveat(...Tag) (security.Caveat, error)
 pkg access, func NewErrAccessListMatch(*context.T, []string, []security.RejectedBlessing) error
+pkg access, func NewErrAccessTagCaveatValidation(*context.T, []string, []Tag) error
 pkg access, func NewErrInvalidOpenAccessList(*context.T) error
 pkg access, func NewErrNoPermissions(*context.T, []string, []security.RejectedBlessing, string) error
 pkg access, func NewErrTooBig(*context.T) error
@@ -29,7 +31,9 @@ pkg access, type AccessList struct, In []security.BlessingPattern
 pkg access, type AccessList struct, NotIn []string
 pkg access, type Permissions map[string]AccessList
 pkg access, type Tag string
+pkg access, var AccessTagCaveat security.CaveatDescriptor
 pkg access, var ErrAccessListMatch verror.IDAction
+pkg access, var ErrAccessTagCaveatValidation verror.IDAction
 pkg access, var ErrInvalidOpenAccessList verror.IDAction
 pkg access, var ErrNoPermissions verror.IDAction
 pkg access, var ErrTooBig verror.IDAction

@@ -111,6 +111,7 @@ import (
 
 	// VDL user imports
 	"v.io/v23/security"
+	"v.io/v23/uniqueid"
 )
 
 // AccessList represents a set of blessings that should be granted access.
@@ -184,13 +185,38 @@ const Write = Tag("Write") // Operations that mutate the state of the object.
 
 const Resolve = Tag("Resolve") // Operations involving namespace navigation.
 
+// AccessTagCaveat represents a caveat that validates iff the method being invoked has
+// at least one of the tags listed in the caveat.
+var AccessTagCaveat = security.CaveatDescriptor{
+	Id: uniqueid.Id{
+		239,
+		205,
+		227,
+		117,
+		20,
+		22,
+		199,
+		59,
+		24,
+		156,
+		232,
+		156,
+		204,
+		147,
+		128,
+		0,
+	},
+	ParamType: vdl.TypeOf([]Tag(nil)),
+}
+
 var (
 	// The AccessList is too big.  Use groups to represent large sets of principals.
-	ErrTooBig                = verror.Register("v.io/v23/security/access.TooBig", verror.NoRetry, "{1:}{2:} AccessList is too big")
-	ErrNoPermissions         = verror.Register("v.io/v23/security/access.NoPermissions", verror.NoRetry, "{1:}{2:} {3} does not have {5} access (rejected blessings: {4})")
-	ErrAccessListMatch       = verror.Register("v.io/v23/security/access.AccessListMatch", verror.NoRetry, "{1:}{2:} {3} does not match the access list (rejected blessings: {4})")
-	ErrUnenforceablePatterns = verror.Register("v.io/v23/security/access.UnenforceablePatterns", verror.NoRetry, "{1:}{2:} AccessList contains the following invalid or unrecognized patterns in the In list: {3}")
-	ErrInvalidOpenAccessList = verror.Register("v.io/v23/security/access.InvalidOpenAccessList", verror.NoRetry, "{1:}{2:} AccessList with the pattern ... in its In list must have no other patterns in the In or NotIn lists")
+	ErrTooBig                    = verror.Register("v.io/v23/security/access.TooBig", verror.NoRetry, "{1:}{2:} AccessList is too big")
+	ErrNoPermissions             = verror.Register("v.io/v23/security/access.NoPermissions", verror.NoRetry, "{1:}{2:} {3} does not have {5} access (rejected blessings: {4})")
+	ErrAccessListMatch           = verror.Register("v.io/v23/security/access.AccessListMatch", verror.NoRetry, "{1:}{2:} {3} does not match the access list (rejected blessings: {4})")
+	ErrUnenforceablePatterns     = verror.Register("v.io/v23/security/access.UnenforceablePatterns", verror.NoRetry, "{1:}{2:} AccessList contains the following invalid or unrecognized patterns in the In list: {3}")
+	ErrInvalidOpenAccessList     = verror.Register("v.io/v23/security/access.InvalidOpenAccessList", verror.NoRetry, "{1:}{2:} AccessList with the pattern ... in its In list must have no other patterns in the In or NotIn lists")
+	ErrAccessTagCaveatValidation = verror.Register("v.io/v23/security/access.AccessTagCaveatValidation", verror.NoRetry, "{1:}{2:} access tags on method ({3}) do not include any of the ones in the caveat ({4}), or the method is using a different tag type")
 )
 
 func init() {
@@ -199,6 +225,7 @@ func init() {
 	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrAccessListMatch.ID), "{1:}{2:} {3} does not match the access list (rejected blessings: {4})")
 	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrUnenforceablePatterns.ID), "{1:}{2:} AccessList contains the following invalid or unrecognized patterns in the In list: {3}")
 	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrInvalidOpenAccessList.ID), "{1:}{2:} AccessList with the pattern ... in its In list must have no other patterns in the In or NotIn lists")
+	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrAccessTagCaveatValidation.ID), "{1:}{2:} access tags on method ({3}) do not include any of the ones in the caveat ({4}), or the method is using a different tag type")
 }
 
 // NewErrTooBig returns an error with the ErrTooBig ID.
@@ -224,4 +251,9 @@ func NewErrUnenforceablePatterns(ctx *context.T, rejectedPatterns []security.Ble
 // NewErrInvalidOpenAccessList returns an error with the ErrInvalidOpenAccessList ID.
 func NewErrInvalidOpenAccessList(ctx *context.T) error {
 	return verror.New(ErrInvalidOpenAccessList, ctx)
+}
+
+// NewErrAccessTagCaveatValidation returns an error with the ErrAccessTagCaveatValidation ID.
+func NewErrAccessTagCaveatValidation(ctx *context.T, methodTags []string, caveatTags []Tag) error {
+	return verror.New(ErrAccessTagCaveatValidation, ctx, methodTags, caveatTags)
 }
