@@ -100,6 +100,7 @@
 package access
 
 import "v.io/v23/security"
+import "v.io/v23/uniqueid"
 
 // AccessList represents a set of blessings that should be granted access.
 //
@@ -148,6 +149,13 @@ const (
   Read    = Tag("Read")     // Operations that do not mutate the state of the object.
   Write   = Tag("Write")    // Operations that mutate the state of the object.
   Resolve = Tag("Resolve")  // Operations involving namespace navigation.
+
+  // AccessTagCaveat represents a caveat that validates iff the method being invoked has
+  // at least one of the tags listed in the caveat.
+  AccessTagCaveat  = security.CaveatDescriptor{
+    Id:        uniqueid.Id{0xef, 0xcd, 0xe3, 0x75, 0x14, 0x16, 0xc7, 0x3b, 0x18, 0x9c, 0xe8, 0x9c, 0xcc, 0x93, 0x80, 0x0},
+    ParamType: typeobject([]Tag),
+  }
 )
 
 // Note: For "bad version" errors, use verror.ErrBadVersion.
@@ -162,4 +170,8 @@ error (
 	UnenforceablePatterns(rejectedPatterns []security.BlessingPattern){"en":"AccessList contains the following invalid or unrecognized patterns in the In list: {rejectedPatterns}"}
 
 	InvalidOpenAccessList(){"en": "AccessList with the pattern ... in its In list must have no other patterns in the In or NotIn lists"}
+
+	AccessTagCaveatValidation(methodTags []string, caveatTags []Tag){
+		"en": "access tags on method ({methodTags}) do not include any of the ones in the caveat ({caveatTags}), or the method is using a different tag type",
+	}
 )
