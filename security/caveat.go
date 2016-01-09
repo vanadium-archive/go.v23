@@ -297,10 +297,10 @@ func (c *publicKeyThirdPartyCaveatParam) Dischargeable(ctx *context.T, call Call
 	return nil
 }
 
-func (c *publicKeyThirdPartyCaveatParam) discharger(cxt *context.T) (PublicKey, error) {
+func (c *publicKeyThirdPartyCaveatParam) discharger(ctx *context.T) (PublicKey, error) {
 	key, err := UnmarshalPublicKey(c.DischargerKey)
 	if err != nil {
-		return nil, verror.New(errCantUnmarshalDischargeKey, cxt, fmt.Sprintf("%T", *c), err)
+		return nil, verror.New(errCantUnmarshalDischargeKey, ctx, fmt.Sprintf("%T", *c), err)
 	}
 	return key, nil
 }
@@ -317,9 +317,9 @@ func (d *publicKeyDischarge) digest(hash Hash) []byte {
 	return hash.sum(msg)
 }
 
-func (d *publicKeyDischarge) verify(cxt *context.T, key PublicKey) error {
+func (d *publicKeyDischarge) verify(ctx *context.T, key PublicKey) error {
 	if !bytes.Equal(d.Signature.Purpose, dischargePurpose) {
-		return verror.New(errInapproriateDischargeSignature, cxt, d.ThirdPartyCaveatId, d.Signature.Purpose)
+		return verror.New(errInapproriateDischargeSignature, ctx, d.ThirdPartyCaveatId, d.Signature.Purpose)
 	}
 	digest := d.digest(key.hash())
 	cachekey, err := d.signatureCacheKey(digest, key, d.Signature)
@@ -327,7 +327,7 @@ func (d *publicKeyDischarge) verify(cxt *context.T, key PublicKey) error {
 		return nil
 	}
 	if !d.Signature.Verify(key, digest) {
-		return verror.New(errBadDischargeSignature, cxt, d.ThirdPartyCaveatId)
+		return verror.New(errBadDischargeSignature, ctx, d.ThirdPartyCaveatId)
 	}
 	dischargeSignatureCache.cache([][]byte{cachekey})
 	return nil
