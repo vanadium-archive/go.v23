@@ -621,12 +621,19 @@ func typeConsLocked(t *Type) *Type {
 	// the outer type first to deal with recursive types; otherwise we'd have an
 	// infinite loop.
 	typeReg[t.unique] = t
+	t.containsKind.Set(t.kind)
 	t.elem = typeConsLocked(t.elem)
+	if t.elem != nil {
+		t.containsKind |= t.elem.containsKind
+	}
 	t.key = typeConsLocked(t.key)
+	if t.key != nil {
+		t.containsKind |= t.key.containsKind
+	}
 	for index := range t.fields {
 		t.fields[index].Type = typeConsLocked(t.fields[index].Type)
+		t.containsKind |= t.fields[index].Type.containsKind
 	}
-	t.containsAnyOrTypeObject = t.ContainsKind(WalkAll, Any, TypeObject)
 	return t
 }
 

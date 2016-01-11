@@ -413,6 +413,8 @@ func finishConvert(fin, fill convTarget) error {
 	return nil
 }
 
+var typeobjectOrUnionKind []Kind = []Kind{TypeObject, Union}
+
 // rvSettableZeroValue returns a settable zero value corresponding to rt / tt.
 // This isn't trivial since VDL and Go define zero values slightly differently.
 // In particular in VDL:
@@ -432,7 +434,7 @@ func rvSettableZeroValue(rt reflect.Type, tt *Type) reflect.Value {
 	rv := reflect.New(rt).Elem()
 	// Easy fastpath; if the type doesn't contain inline typeobject or union, the
 	// regular Go zero value is good enough.
-	if !tt.ContainsKind(WalkInline, TypeObject, Union) {
+	if !tt.ContainsKind(WalkInline, typeobjectOrUnionKind...) {
 		return rv
 	}
 	// Handle typeobject, which has the zero value of AnyType.

@@ -196,7 +196,7 @@ func (mr *messageReader) startChunk() (msgConsumed bool, err error) {
 			return false, err
 		}
 		hasLength = hasChunkLen(t)
-		hasAnyOrTypeObject = t.ContainsAnyOrTypeObject()
+		hasAnyOrTypeObject = containsAnyOrTypeObject(t)
 	}
 
 	if hasAnyOrTypeObject && mr.version != Version80 {

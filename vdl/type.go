@@ -99,6 +99,16 @@ func (k Kind) String() string {
 	panic(fmt.Errorf("vdl: unhandled kind: %d", k))
 }
 
+type kindBitMask uint32
+
+func (kindBitMask *kindBitMask) Set(kind Kind) {
+	*kindBitMask |= (1 << kind)
+}
+
+func (kindBitMask kindBitMask) IsSet(kind Kind) bool {
+	return (kindBitMask & (1 << kind)) != 0
+}
+
 // SplitIdent splits the given identifier into its package path and local name.
 //   a/b.Foo   -> (a/b, Foo)
 //   a.b/c.Foo -> (a.b/c, Foo)
@@ -126,15 +136,15 @@ func SplitIdent(ident string) (pkgpath, name string) {
 //     Children []Node
 //   }
 type Type struct {
-	kind                    Kind     // used by all kinds
-	name                    string   // used by all kinds
-	labels                  []string // used by Enum
-	len                     int      // used by Array
-	elem                    *Type    // used by Optional, Array, List, Map
-	key                     *Type    // used by Set, Map
-	fields                  []Field  // used by Struct, Union
-	unique                  string   // used by all kinds, filled in by typeCons
-	containsAnyOrTypeObject bool     // used by all kinds
+	kind         Kind        // used by all kinds
+	name         string      // used by all kinds
+	labels       []string    // used by Enum
+	len          int         // used by Array
+	elem         *Type       // used by Optional, Array, List, Map
+	key          *Type       // used by Set, Map
+	fields       []Field     // used by Struct, Union
+	unique       string      // used by all kinds, filled in by typeCons
+	containsKind kindBitMask // used to determine if this type recursively contains a kind
 }
 
 // Field describes a single field in a Struct or Union.
@@ -329,9 +339,19 @@ func (t *Type) checkIsBytes(method string) {
 
 // ContainsKind returns true iff t or subtypes of t match any of the kinds.
 func (t *Type) ContainsKind(mode WalkMode, kinds ...Kind) bool {
+	var containsKind bool
+	for _, kind := range kinds {
+		if t.containsKind.IsSet(kind) {
+			containsKind = true
+			break
+		}
+	}
+	if mode == WalkAll || containsKind == false {
+		return containsKind
+	}
 	return !t.Walk(mode, func(visit *Type) bool {
-		for _, k := range kinds {
-			if k == visit.Kind() {
+		for _, kind := range kinds {
+			if kind == visit.kind {
 				return false
 			}
 		}
@@ -349,11 +369,6 @@ func (t *Type) ContainsType(mode WalkMode, types ...*Type) bool {
 		}
 		return true
 	})
-}
-
-// ContainsAnyOrTypeObject returns true iff t or subtypes of t match any or typeobject.
-func (t *Type) ContainsAnyOrTypeObject() bool {
-	return t.containsAnyOrTypeObject
 }
 
 // Walk performs a DFS walk through the type graph starting from t, calling fn

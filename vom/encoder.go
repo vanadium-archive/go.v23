@@ -161,7 +161,7 @@ func (e *Encoder) Encode(v interface{}) error {
 	if err != nil {
 		return err
 	}
-	if err := e.enc.startEncode(vdlType.ContainsAnyOrTypeObject(), hasChunkLen(vdlType), false, int64(tid)); err != nil {
+	if err := e.enc.startEncode(containsAnyOrTypeObject(vdlType), hasChunkLen(vdlType), false, int64(tid)); err != nil {
 		return err
 	}
 	if err := vdl.FromReflect(&e.enc, reflect.ValueOf(v)); err != nil {
@@ -178,7 +178,7 @@ func (e *Encoder) encodeRaw(raw *RawValue) error {
 	if err != nil {
 		return err
 	}
-	if err := e.enc.buf.StartMessage(raw.t.ContainsAnyOrTypeObject(), hasChunkLen(raw.t), false, int64(tid)); err != nil {
+	if err := e.enc.buf.StartMessage(containsAnyOrTypeObject(raw.t), hasChunkLen(raw.t), false, int64(tid)); err != nil {
 		return err
 	}
 	for i, refType := range raw.refTypes {
