@@ -249,11 +249,6 @@ func TestV23CRAppBasedResolutionOverridesOthers(t *testing.T) {
 // Result:
 // All rows are resolved via AppResolves as a single conflict call.
 func TestV23CRMultipleBatchesAsSingleConflict(t *testing.T) {
-	// TODO(hpucha): Start running this test once sync handles insertion of
-	// local objects by conflict resolution which originally were not under
-	// conflict.
-	t.Skip()
-
 	v23test.SkipUnlessRunningIntegrationTests(t)
 	sh := v23test.NewShell(t, v23test.Opts{})
 	defer sh.Cleanup()
