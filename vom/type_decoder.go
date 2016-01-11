@@ -135,7 +135,7 @@ func (d *TypeDecoder) readSingleType() error {
 	}
 
 	if !d.dec.mr.typeIncomplete {
-		if err := d.buildType(curTypeID); d.dec.mr.version != Version80 && err != nil {
+		if err := d.buildType(curTypeID); d.dec.mr.version >= Version81 && err != nil {
 			return err
 		}
 	}

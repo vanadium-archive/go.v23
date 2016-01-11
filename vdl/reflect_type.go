@@ -280,7 +280,7 @@ func makeTypeFromReflectLocked(rt reflect.Type, builder *TypeBuilder, pending ma
 		opt.AssignElem(elem)
 		return opt, nil
 	}
-	ri,_, err := deriveReflectInfo(rt)
+	ri, _, err := deriveReflectInfo(rt)
 	if err != nil {
 		return nil, err
 	}

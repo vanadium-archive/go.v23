@@ -168,9 +168,9 @@ func (d *Decoder) decodeWireType(wt *wireType) (typeId, error) {
 func (d *Decoder) decodeValueByteLen(tt *vdl.Type) (int, error) {
 	if hasChunkLen(tt) {
 		// Use the explicit message length.
-		if d.mr.version == Version81 {
-			// TODO(bprosnitz) Implement this for version 81
-			panic("not yet implemented for version 81")
+		if d.mr.version == Version82 {
+			// TODO(bprosnitz) Implement this for version 82
+			panic("not yet implemented for version 82")
 		}
 		return d.mr.buf.lim, nil
 	}

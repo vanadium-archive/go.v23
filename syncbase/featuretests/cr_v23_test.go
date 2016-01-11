@@ -452,9 +452,9 @@ func waitForValue(ctx *context.T, syncbaseName, key, valuePrefix, schemaPrefix s
 	want := valuePrefix + key
 
 	var value string
-	return testutil.RetryFor(10 * time.Second, func() error {
+	return testutil.RetryFor(10*time.Second, func() error {
 		if err := r.Get(ctx, &value); (err == nil) && (value == want) {
-			return nil  // Value found.
+			return nil // Value found.
 		} else if err != nil && verror.ErrorID(err) != verror.ErrNoExist.ID {
 			return fmt.Errorf("Syncbase Error while fetching key %v: %v", key, err)
 		}
@@ -483,7 +483,7 @@ func waitSignal(ctx *context.T, d nosql.Database, signalKey string) error {
 	r := tb.Row(signalKey)
 
 	var end bool
-	return testutil.RetryFor(10 * time.Second, func() error {
+	return testutil.RetryFor(10*time.Second, func() error {
 		if err := r.Get(ctx, &end); err != nil {
 			if verror.ErrorID(err) != verror.ErrNoExist.ID {
 				return fmt.Errorf("r.Get() for endkey failed: %v", err)

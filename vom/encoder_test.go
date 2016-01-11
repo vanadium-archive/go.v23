@@ -11,6 +11,7 @@ import (
 
 	"v.io/v23/vom/testdata/data80"
 	"v.io/v23/vom/testdata/data81"
+	"v.io/v23/vom/testdata/data82"
 	"v.io/v23/vom/testdata/types"
 )
 
@@ -20,6 +21,10 @@ func TestEncoder80(t *testing.T) {
 
 func TestEncoder81(t *testing.T) {
 	testEncoder(t, Version81, data81.Tests)
+}
+
+func TestEncoder82(t *testing.T) {
+	testEncoder(t, Version82, data82.Tests)
 }
 
 func testEncoder(t *testing.T, version Version, tests []types.TestCase) {

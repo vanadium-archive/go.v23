@@ -22,7 +22,7 @@ func hasChunkLen(t *vdl.Type) bool {
 
 // isAllowedVersion returns true if the VOM version specified is supported.
 func isAllowedVersion(version Version) bool {
-	return version >= 0x80 && version <= 0x81
+	return version >= Version80 && version <= Version82
 }
 
 var anyOrTypeObject []vdl.Kind = []vdl.Kind{vdl.Any, vdl.TypeObject}

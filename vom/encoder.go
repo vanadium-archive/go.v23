@@ -19,6 +19,7 @@ type Version byte
 const (
 	Version80 = Version(0x80)
 	Version81 = Version(0x81)
+	Version82 = Version(0x82)
 )
 
 var (
@@ -509,24 +510,17 @@ func (e *encoder) FromTypeObject(src *vdl.Type) error {
 	if err != nil {
 		return err
 	}
-	if e.version == Version80 {
-		if e.isStructFieldValue() && e.topType().Kind() != vdl.Any {
-			if src.Kind() != vdl.Any || !e.canIgnoreField(true) {
-				binaryEncodeUint(e.buf, uint64(e.topTypeFieldIndex()))
-				binaryEncodeUint(e.buf, uint64(tid))
-			}
-		} else {
-			binaryEncodeUint(e.buf, uint64(tid))
+	if e.isStructFieldValue() && e.topType().Kind() != vdl.Any {
+		if src.Kind() == vdl.Any && e.canIgnoreField(true) {
+			return nil
 		}
-	} else {
-		if e.isStructFieldValue() && e.topType().Kind() != vdl.Any {
-			if src.Kind() != vdl.Any || !e.canIgnoreField(true) {
-				binaryEncodeUint(e.buf, uint64(e.topTypeFieldIndex()))
-				binaryEncodeUint(e.buf, e.buf.ReferenceTypeID(tid))
-			}
-		} else {
-			binaryEncodeUint(e.buf, e.buf.ReferenceTypeID(tid))
-		}
+		binaryEncodeUint(e.buf, uint64(e.topTypeFieldIndex()))
+	}
+	switch e.version {
+	case Version80:
+		binaryEncodeUint(e.buf, uint64(tid))
+	default:
+		binaryEncodeUint(e.buf, e.buf.ReferenceTypeID(tid))
 	}
 	return nil
 }

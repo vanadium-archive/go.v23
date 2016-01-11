@@ -90,7 +90,7 @@ func TestBinaryEncodeDecode(t *testing.T) {
 	for _, test := range tests {
 		// Test encode
 		var byteBuf bytes.Buffer
-		sb := newSwitchedEncbuf(&byteBuf, 0x81)
+		sb := newSwitchedEncbuf(&byteBuf, Version82)
 		msgID := int64(0x12)
 		sb.StartMessage(false, false, false, msgID)
 		switch val := test.v.(type) {
