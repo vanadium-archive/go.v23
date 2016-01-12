@@ -12,6 +12,7 @@ import (
 
 	"v.io/v23/context"
 	"v.io/v23/naming"
+	sbwire "v.io/v23/services/syncbase"
 	wire "v.io/v23/services/syncbase/nosql"
 	"v.io/v23/syncbase"
 	"v.io/v23/syncbase/nosql"
@@ -105,6 +106,61 @@ func TestV23CRDefault(t *testing.T) {
 	// Verify that the resolved data looks correct.
 	ok(t, waitForValue(client0Ctx, "s0", "foo0", "concurrentUpdate"+"s1", ""))
 	ok(t, waitForValue(client1Ctx, "s1", "foo0", "concurrentUpdate"+"s1", ""))
+}
+
+func TestV23CRGenVectorWinsOverVClock(t *testing.T) {
+	v23test.SkipUnlessRunningIntegrationTests(t)
+	sh := v23test.NewShell(t, v23test.Opts{})
+	defer sh.Cleanup()
+
+	// Creates S0 and S1 and populates S0 with foo0, foo1 and verifies that it
+	// synced to S1
+	client0Ctx, client1Ctx, sgName := setupCRTest(t, sh, 2, "--dev")
+
+	// Turn off syncing on both s0 and s1 by removing each other from syncgroup ACLs.
+	ok(t, toggleSync(client0Ctx, "s0", sgName, "root:s0"))
+	ok(t, toggleSync(client1Ctx, "s1", sgName, "root:s1"))
+
+	// Set S1's local clock back in time to begining of Jan 2015
+	ok(t, sc("s1").DevModeUpdateVClock(client1Ctx, sbwire.DevModeUpdateVClockOpts{
+		Now:           jan2015,
+		ElapsedTime:   0,
+		DoLocalUpdate: true,
+	}))
+	// Check if S1's clock is correctly set.
+	t0, err := sc("s0").DevModeGetTime(client0Ctx)
+	ok(t, err)
+	t1, err := sc("s1").DevModeGetTime(client1Ctx)
+	ok(t, err)
+	if !t1.Before(t0) {
+		t.Fatalf("expected timestamp of S1 < timestamp of S0: %v, %v", t1, t0)
+	}
+
+	// Update foo0 on S1 creating a new version for it with an older timestamp.
+	ok(t, updateData(client1Ctx, "s1", 0, 1, "newUpdateWithOldTimestamp"))
+
+	// Update foo1 on S0 followed, after a second, by an update on foo1 on S1.
+	// Since sync is paused, the two updates are concurrent from GenVector
+	// perspective.
+	ok(t, updateData(client0Ctx, "s0", 1, 2, "concurrentUpdate"))
+	time.Sleep(1 * time.Second)
+	ok(t, updateData(client1Ctx, "s1", 1, 2, "concurrentUpdate"))
+
+	// Re enable sync between the two syncbases and wait for a bit to let the
+	// syncbases sync.
+	ok(t, toggleSync(client0Ctx, "s0", sgName, "root:s0;root:s1"))
+	ok(t, toggleSync(client1Ctx, "s1", sgName, "root:s0;root:s1"))
+
+	// Verify that S1's write for foo0 is accepted as the latest version after
+	// sync.
+	ok(t, waitForValue(client0Ctx, "s0", "foo0", "newUpdateWithOldTimestamp"+"s1", ""))
+	ok(t, waitForValue(client1Ctx, "s1", "foo0", "newUpdateWithOldTimestamp"+"s1", ""))
+
+	// Since foo1 was updated concurrently from GenVector point of view and S1's
+	// clock is way behind S0's, even though in reality S1's write happened
+	// after S0, S0's clock was ahead and hence its write would win.
+	ok(t, waitForValue(client0Ctx, "s0", "foo1", "concurrentUpdate"+"s0", ""))
+	ok(t, waitForValue(client1Ctx, "s1", "foo1", "concurrentUpdate"+"s0", ""))
 }
 
 // Tests last timestamp wins for batches under conflict.
@@ -286,9 +342,9 @@ func TestV23CRMultipleBatchesAsSingleConflict(t *testing.T) {
 	})
 }
 
-func setupCRTest(t *testing.T, sh *v23test.Shell, numInitRows int) (client0, client1 *context.T, sgName string) {
+func setupCRTest(t *testing.T, sh *v23test.Shell, numInitRows int, args ...string) (client0, client1 *context.T, sgName string) {
 	sh.StartRootMountTable()
-	sbs := setupSyncbases(t, sh, 2)
+	sbs := setupSyncbases(t, sh, 2, args...)
 
 	sgName = naming.Join("s0", util.SyncbaseSuffix, "SG1")
 
