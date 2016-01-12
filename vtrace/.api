@@ -1,5 +1,6 @@
 pkg vtrace, const CollectInMemory TraceFlags
 pkg vtrace, const Empty TraceFlags
+pkg vtrace, func BuildTree(*TraceRecord) *Node
 pkg vtrace, func ForceCollect(*context.T, int)
 pkg vtrace, func FormatTrace(io.Writer, *TraceRecord, *time.Location)
 pkg vtrace, func FormatTraces(io.Writer, []TraceRecord, *time.Location)
@@ -22,6 +23,9 @@ pkg vtrace, type Manager interface, GetStore(*context.T) Store
 pkg vtrace, type Manager interface, WithContinuedTrace(*context.T, string, Request) (*context.T, Span)
 pkg vtrace, type Manager interface, WithNewSpan(*context.T, string) (*context.T, Span)
 pkg vtrace, type Manager interface, WithNewTrace(*context.T) (*context.T, Span)
+pkg vtrace, type Node struct
+pkg vtrace, type Node struct, Children []*Node
+pkg vtrace, type Node struct, Span *SpanRecord
 pkg vtrace, type Request struct
 pkg vtrace, type Request struct, Flags TraceFlags
 pkg vtrace, type Request struct, LogLevel int32
