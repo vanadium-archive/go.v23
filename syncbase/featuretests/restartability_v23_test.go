@@ -21,8 +21,8 @@ import (
 	"v.io/v23/syncbase/nosql"
 	"v.io/v23/verror"
 	"v.io/v23/vom"
-	"v.io/x/ref/lib/v23test"
 	tu "v.io/x/ref/services/syncbase/testutil"
+	"v.io/x/ref/test/v23test"
 )
 
 const (

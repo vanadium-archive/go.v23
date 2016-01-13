@@ -8,7 +8,7 @@ import (
 	"testing"
 
 	"v.io/v23/syncbase"
-	"v.io/x/ref/lib/v23test"
+	"v.io/x/ref/test/v23test"
 )
 
 func TestV23SyncbasedPutGet(t *testing.T) {

@@ -30,7 +30,7 @@ func (a annotations) Less(i, j int) bool { return a[i].When.Before(a[j].When) }
 func (a annotations) Swap(i, j int)      { a[i], a[j] = a[j], a[i] }
 
 type Node struct {
-	Span *SpanRecord
+	Span     *SpanRecord
 	Children []*Node
 }
 

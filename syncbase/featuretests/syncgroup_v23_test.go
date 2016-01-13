@@ -17,8 +17,8 @@ import (
 	"v.io/v23/naming"
 	"v.io/v23/security"
 	"v.io/v23/security/access"
-	"v.io/x/ref/lib/v23test"
 	constants "v.io/x/ref/services/syncbase/server/util"
+	"v.io/x/ref/test/v23test"
 )
 
 // TestV23SyncgroupRendezvousOnline tests that Syncbases can join a syncgroup

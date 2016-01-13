@@ -16,8 +16,8 @@ import (
 	"v.io/v23/naming"
 	wire "v.io/v23/services/syncbase/nosql"
 	"v.io/v23/syncbase"
-	"v.io/x/ref/lib/v23test"
 	"v.io/x/ref/services/syncbase/server/util"
+	"v.io/x/ref/test/v23test"
 )
 
 func TestV23BlobWholeTransfer(t *testing.T) {

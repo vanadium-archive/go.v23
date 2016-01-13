@@ -17,9 +17,9 @@ import (
 	"v.io/v23/syncbase"
 	"v.io/v23/syncbase/nosql"
 	"v.io/v23/verror"
-	"v.io/x/ref/lib/v23test"
 	"v.io/x/ref/services/syncbase/server/util"
 	"v.io/x/ref/test/testutil"
+	"v.io/x/ref/test/v23test"
 )
 
 // Tests the conflict resolution configuration rules.
