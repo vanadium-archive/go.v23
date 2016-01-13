@@ -33,6 +33,7 @@ type DumpKind enum {
 	TypeMsg       // [uint] Type message, describes the type identified by -MsgId.
 	ValueMsg      // [uint] Value message, describes a value of type +MsgId.
 	MsgLen        // [uint] Message length in bytes.
+	TypeIdsLen    // [uint] Length of referenced type id list.
 	TypeId        // [uint] Type Id.
 	PrimValue     // [*]    Primitive value.
 	ByteLen       // [uint] Length in bytes.
@@ -43,6 +44,7 @@ type DumpKind enum {
 
 // ControlKind enumerates the different kinds of control bytes.
 type ControlKind enum {
-	Nil // [byte] Nil, meaning non-existent.
-	End // [byte] End, terminator.
+	Nil            // [byte] Nil, meaning non-existent.
+	End            // [byte] End, terminator.
+	IncompleteType // [byte] Indicator that the following type is incomplete.
 }

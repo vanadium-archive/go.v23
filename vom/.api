@@ -1,4 +1,5 @@
 pkg vom, const ControlKindEnd ControlKind
+pkg vom, const ControlKindIncompleteType ControlKind
 pkg vom, const ControlKindNil ControlKind
 pkg vom, const DumpKindByteLen DumpKind
 pkg vom, const DumpKindControl DumpKind
@@ -7,6 +8,7 @@ pkg vom, const DumpKindMsgId DumpKind
 pkg vom, const DumpKindMsgLen DumpKind
 pkg vom, const DumpKindPrimValue DumpKind
 pkg vom, const DumpKindTypeId DumpKind
+pkg vom, const DumpKindTypeIdsLen DumpKind
 pkg vom, const DumpKindTypeMsg DumpKind
 pkg vom, const DumpKindValueLen DumpKind
 pkg vom, const DumpKindValueMsg DumpKind
@@ -45,7 +47,7 @@ pkg vom, const WireIdUint32 typeId
 pkg vom, const WireIdUint64 typeId
 pkg vom, func ControlKindFromString(string) (ControlKind, error)
 pkg vom, func Decode([]byte, interface{}) error
-pkg vom, func Dump([]byte) string
+pkg vom, func Dump([]byte) (string, error)
 pkg vom, func DumpKindFromString(string) (DumpKind, error)
 pkg vom, func Encode(interface{}) ([]byte, error)
 pkg vom, func NewDecoder(io.Reader) *Decoder
@@ -111,6 +113,7 @@ pkg vom, type DumpStatus struct, Err error
 pkg vom, type DumpStatus struct, MsgId int64
 pkg vom, type DumpStatus struct, MsgLen int
 pkg vom, type DumpStatus struct, MsgN int
+pkg vom, type DumpStatus struct, RefTypes []*vdl.Type
 pkg vom, type DumpStatus struct, Value *vdl.Value
 pkg vom, type DumpWriter interface { WriteAtom, WriteStatus }
 pkg vom, type DumpWriter interface, WriteAtom(DumpAtom)
