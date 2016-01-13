@@ -30,7 +30,7 @@ either a type or a value.  All values are typed.  Here's the protocol grammar:
   TypeMsg:
     -typeID len(WireType) WireType
   ValueMsg:
-    +typeID primitive
+    +typeID primitive // typeobject primitives are represented by their type id
   | +typeID len(ValueMsg) CompositeV
   Value:
     primitive |  CompositeV
@@ -59,6 +59,45 @@ either a type or a value.  All values are typed.  Here's the protocol grammar:
   | +typeID Value
 
 Wire protocol. Version 0x81
+
+The protocol consists of a stream of messages, where each message describes
+either a type or a value.  All values are typed.  Here's the protocol grammar:
+  VOM:
+    (TypeMsg | ValueMsg)*
+  TypeMsg:
+    incompleteFlag? -typeID len(WireType) WireType
+  ValueMsg:
+    +typeID primitive // non-typeobject primitive
+  | +typeID len(RefTypes) typeID* refTypesIndex // typeobject primitive
+  | +typeID len(ValueMsg) CompositeV
+  | +typeID len(RefTypes) typeID* len(ValueMsg) CompositeV
+  Value:
+    primitive |  CompositeV
+  CompositeV:
+    ArrayV | ListV | SetV | MapV | StructV | UnionV | OptionalV | AnyV
+  ArrayV:
+    len Value*len
+    // len is always 0 for array since we know the exact size of the array. This
+    // prefix is to ensure the decoder can distinguish NIL from the array value.
+  ListV:
+    len Value*len
+  SetV:
+    len Value*len
+  MapV:
+    len (Value Value)*len
+  StructV:
+    (index Value)* EOF  // index is the 0-based field index and
+                        // zero value fields can be skipped.
+  UnionV:
+    index Value         // index is the 0-based field index.
+  OptionalV:
+    NIL
+  | Value
+  AnyV:
+    NIL
+  | refTypesIndex Value
+
+Wire protocol. Version 0x82
 
 The protocol consists of a stream of interleaved messages, broken
 into into atomic chunks. Each message describes either a typed
