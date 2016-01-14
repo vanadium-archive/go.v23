@@ -101,12 +101,12 @@ func (k Kind) String() string {
 
 type kindBitMask uint32
 
-func (kindBitMask *kindBitMask) Set(kind Kind) {
-	*kindBitMask |= (1 << kind)
+func (k *kindBitMask) Set(kind Kind) {
+	*k |= (1 << kind)
 }
 
-func (kindBitMask kindBitMask) IsSet(kind Kind) bool {
-	return (kindBitMask & (1 << kind)) != 0
+func (k kindBitMask) IsSet(kind Kind) bool {
+	return (k & (1 << kind)) != 0
 }
 
 // SplitIdent splits the given identifier into its package path and local name.
