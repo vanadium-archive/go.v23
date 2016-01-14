@@ -18,6 +18,7 @@ var (
 	errUnknownType        = verror.Register(pkgPath+".errUnknownType", verror.NoRetry, "{1:}{2:} vom: unknown type id {3}{:_}")
 	errEmptyName          = verror.Register(pkgPath+".errEmptyName", verror.NoRetry, "{1:}{2:} vom: NamedType has empty name{:_}")
 	errUnknownWireTypeDef = verror.Register(pkgPath+".errUnknownWireTypeDef", verror.NoRetry, "{1:}{2:} vom: unknown wire type definition {3}{:_}")
+	errStartNotCalled     = verror.Register(pkgPath+".errStartNotCalled", verror.NoRetry, "{1:}{2:} vom: Start has not been called")
 )
 
 // TypeDecoder manages the receipt and unmarshalling of types from the other
@@ -165,6 +166,13 @@ func (d *TypeDecoder) lookupType(tid typeId) (*vdl.Type, error) {
 
 		if d.err != nil {
 			return nil, d.err
+		}
+
+		d.processingControlMu.Lock()
+		running := d.goroutineRunning
+		d.processingControlMu.Unlock()
+		if !running {
+			return nil, verror.New(errStartNotCalled, nil)
 		}
 
 		d.buildCond.Wait()

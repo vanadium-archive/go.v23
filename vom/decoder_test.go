@@ -424,6 +424,16 @@ func TestReceiveTypeStreamError(t *testing.T) {
 	}
 }
 
+// Test that using the type decoder incorrectly does not result
+// in a deadlock.
+func TestFuzzTypeDecodeDeadlock(t *testing.T) {
+	var v interface{}
+	d := NewDecoder(strings.NewReader("\x80\x30"))
+	// Before the fix, this line caused a deadlock and panic.
+	d.Decode(&v)
+	return
+}
+
 // In concurrent modes, one goroutine may try to read vom types before they are
 // actually sent by other goroutine. We use a simple buffered pipe to provide
 // blocking read since bytes.Buffer will return EOF in this case.
