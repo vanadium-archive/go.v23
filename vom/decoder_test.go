@@ -434,6 +434,16 @@ func TestFuzzTypeDecodeDeadlock(t *testing.T) {
 	return
 }
 
+// Tests that an input go-fuzz found will no longer cause a
+// panic over in package vdl.
+func TestFuzzVdlPanic(t *testing.T) {
+	var v interface{}
+	d := NewDecoder(strings.NewReader("\x80S*\x00\x00$000000000000000000000000000000000000\x01*\xe1U(\x05\x00 00000000000000000000000000000000\x01*\x02+\xe1"))
+	// Before this fix this line caused a panic.
+	d.Decode(&v)
+	return
+}
+
 // In concurrent modes, one goroutine may try to read vom types before they are
 // actually sent by other goroutine. We use a simple buffered pipe to provide
 // blocking read since bytes.Buffer will return EOF in this case.
