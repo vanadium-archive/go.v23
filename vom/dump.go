@@ -21,12 +21,12 @@ var (
 
 // Dump returns a human-readable dump of the given vom data, in the default
 // string format.
-func Dump(data []byte) string {
+func Dump(data []byte) (string, error) {
 	var buf bytes.Buffer
 	d := NewDumper(NewDumpWriter(&buf))
-	d.Write(data)
+	_, err := d.Write(data)
 	d.Close()
-	return string(buf.Bytes())
+	return string(buf.Bytes()), err
 }
 
 // DumpWriter is the interface that describes how to write out dumps produced by
@@ -102,17 +102,17 @@ func (d *Dumper) Close() error {
 // was corrupt, and subsequent data will be for new vom messages.  Previously
 // buffered type information remains intact.
 func (d *Dumper) Flush() error {
-	done := make(chan struct{})
+	done := make(chan error)
 	d.cmdChan <- dumpCmd{nil, done}
-	<-done
-	return nil
+	err := <-done
+	return err
 }
 
 // Status triggers an explicit dump of the current status of the dumper to the
 // DumpWriter.  Status is normally generated at the end of each each decoded
 // message; call Status to get extra information for partial dumps and errors.
 func (d *Dumper) Status() {
-	done := make(chan struct{})
+	done := make(chan error)
 	d.cmdChan <- dumpCmd{[]byte{}, done}
 	<-done
 }
@@ -125,17 +125,17 @@ func (d *Dumper) Write(data []byte) (int, error) {
 		// ensure that normal writes never send 0-length data.
 		return 0, nil
 	}
-	done := make(chan struct{})
+	done := make(chan error)
 	d.cmdChan <- dumpCmd{data, done}
-	<-done
-	return len(data), nil
+	err := <-done
+	return len(data), err
 }
 
 type dumpCmd struct {
 	// data holds Write data, except nil means Flush, and empty means Status.
 	data []byte
 	// done is closed when the worker has finished the command.
-	done chan struct{}
+	done chan error
 }
 
 // dumpWorker does all the actual work, in its own goroutine.  Commands are sent
@@ -162,16 +162,17 @@ type dumpWorker struct {
 	buf     *decbuf
 	typeDec *TypeDecoder
 	status  DumpStatus
+	version Version
 
 	// Each Write call on the Dumper is passed to us on the cmdChan.  When we get
 	// around to processing the Write data, we buffer any extra data, and hold on
 	// to the done channel so that we can close it when all the data is processed.
 	data      bytes.Buffer
-	lastWrite chan<- struct{}
+	lastWrite chan<- error
 
 	// Hold on to the done channel for Flush commands, so that we can close it
 	// when the worker actually finishes decoding the current message.
-	lastFlush chan<- struct{}
+	lastFlush chan<- error
 }
 
 func startDumpWorker(cmd <-chan dumpCmd, close chan<- struct{}, w DumpWriter) {
@@ -200,7 +201,7 @@ func (d *dumpWorker) Read(data []byte) (int, error) {
 	}
 	// Otherwise we're done with all the buffered data.  Signal the last Write
 	// call that all data has been processed.
-	d.lastWriteDone()
+	d.lastWriteDone(nil)
 	// Wait for commands on the the cmd channel.
 	for {
 		select {
@@ -218,6 +219,7 @@ func (d *dumpWorker) Read(data []byte) (int, error) {
 			case len(cmd.data) == 0:
 				// Status called.
 				d.writeStatus(nil, false)
+				cmd.done <- nil
 				close(cmd.done)
 			default:
 				// Write called.  Copy as much as we can into data, writing leftover
@@ -243,8 +245,8 @@ func (d *dumpWorker) decodeLoop() {
 		d.writeStatus(err, true)
 		switch {
 		case verror.ErrorID(err) == errDumperClosed.ID:
-			d.lastWriteDone()
-			d.lastFlushDone()
+			d.lastWriteDone(err)
+			d.lastFlushDone(err)
 			close(d.closeChan)
 			return
 		case err != nil:
@@ -252,21 +254,23 @@ func (d *dumpWorker) decodeLoop() {
 			// an infinite loop.
 			d.buf.Reset()
 			d.data.Reset()
-			d.lastWriteDone()
-			d.lastFlushDone()
+			d.lastWriteDone(err)
+			d.lastFlushDone(err)
 		}
 	}
 }
 
-func (d *dumpWorker) lastWriteDone() {
+func (d *dumpWorker) lastWriteDone(err error) {
 	if d.lastWrite != nil {
+		d.lastWrite <- err
 		close(d.lastWrite)
 		d.lastWrite = nil
 	}
 }
 
-func (d *dumpWorker) lastFlushDone() {
+func (d *dumpWorker) lastFlushDone(err error) {
 	if d.lastFlush != nil {
+		d.lastFlush <- err
 		close(d.lastFlush)
 		d.lastFlush = nil
 	}
@@ -276,13 +280,14 @@ func (d *dumpWorker) lastFlushDone() {
 // DumpWriter at the end of decoding each value, and may also be triggered
 // explicitly via Dumper.Status calls to get information for partial dumps.
 type DumpStatus struct {
-	MsgId  int64
-	MsgLen int
-	MsgN   int
-	Buf    []byte
-	Debug  string
-	Value  *vdl.Value
-	Err    error
+	MsgId    int64
+	MsgLen   int
+	MsgN     int
+	Buf      []byte
+	Debug    string
+	RefTypes []*vdl.Type
+	Value    *vdl.Value
+	Err      error
 }
 
 func (s DumpStatus) String() string {
@@ -401,19 +406,37 @@ func (d *dumpWorker) decodeValueType() (*vdl.Type, error) {
 		// data, the version byte is optional, and is allowed to appear before any
 		// type or value message. Note that this relies on 0x80 not being a valid
 		// first byte of regular messages.
-		d.prepareAtom("waiting for version byte or first byte of message")
-		switch versionByte, err := d.buf.PeekByte(); {
-		case err != nil:
-			return nil, err
-		case versionByte == 0x80:
-			d.buf.Skip(1)
-			d.writeAtom(DumpKindVersion, PrimitivePByte{versionByte}, "vom version 0")
-			d.writeStatus(nil, true)
+		if d.version == 0 {
+			d.prepareAtom("waiting for version byte")
+			switch versionByte, err := d.buf.PeekByte(); {
+			case err != nil:
+				return nil, err
+			case versionByte == byte(Version80) || versionByte == byte(Version81):
+				d.version = Version(versionByte)
+				d.buf.Skip(1)
+				d.writeAtom(DumpKindVersion, PrimitivePByte{versionByte}, "vom version %x", versionByte)
+				d.writeStatus(nil, true)
+			}
 		}
-		d.prepareAtom("waiting for message ID")
-		id, err := decbufBinaryDecodeInt(d.buf)
+		d.prepareAtom("waiting for message ID or control code")
+		id, cr, err := decbufBinaryDecodeIntWithControl(d.buf)
 		if err != nil {
 			return nil, err
+		}
+		var incompleteType bool
+		switch cr {
+		case 0:
+			// no control code
+		case WireCtrlTypeIncomplete:
+			incompleteType = true
+			d.writeAtom(DumpKindControl, PrimitivePControl{ControlKindIncompleteType}, "incomplete type")
+			d.prepareAtom("waiting for message ID")
+			id, err = decbufBinaryDecodeInt(d.buf)
+			if err != nil {
+				return nil, err
+			}
+		default:
+			return nil, fmt.Errorf("unexpected control code %x", cr)
 		}
 		d.writeAtom(DumpKindMsgId, PrimitivePInt{id}, "")
 		d.status.MsgId = id
@@ -447,8 +470,11 @@ func (d *dumpWorker) decodeValueType() (*vdl.Type, error) {
 		if err := d.typeDec.addWireType(tid, wt); err != nil {
 			return nil, err
 		}
-		// Note: We are only ignoring error below because this dump tool is for version 80 and type incomplete is only for 81+
-		d.typeDec.buildType(tid)
+		if !incompleteType {
+			if err := d.typeDec.buildType(tid); d.version >= Version81 && err != nil {
+				return nil, err
+			}
+		}
 		d.writeStatus(nil, true)
 	}
 }
@@ -456,6 +482,24 @@ func (d *dumpWorker) decodeValueType() (*vdl.Type, error) {
 // decodeValueMsg decodes the rest of the message assuming type t, handling the
 // optional message length.
 func (d *dumpWorker) decodeValueMsg(tt *vdl.Type, target vdl.Target) error {
+	if d.version >= Version81 && containsAnyOrTypeObject(tt) {
+		d.prepareAtom("waiting for reference type ids")
+		tidsLen, err := decbufBinaryDecodeLen(d.buf)
+		if err != nil {
+			return err
+		}
+		d.writeAtom(DumpKindTypeIdsLen, PrimitivePUint{uint64(tidsLen)}, "")
+		d.status.RefTypes = make([]*vdl.Type, tidsLen)
+		for i := range d.status.RefTypes {
+			d.prepareAtom("waiting for type id")
+			tid, err := decbufBinaryDecodeUint(d.buf)
+			if err != nil {
+				return err
+			}
+			d.status.RefTypes[i], err = d.typeDec.lookupType(typeId(tid))
+			d.writeAtom(DumpKindTypeId, PrimitivePUint{tid}, "")
+		}
+	}
 	if hasChunkLen(tt) {
 		d.prepareAtom("waiting for message len")
 		msgLen, err := decbufBinaryDecodeLen(d.buf)
@@ -514,7 +558,16 @@ func (d *dumpWorker) decodeValue(tt *vdl.Type, target vdl.Target) error {
 	switch kind := tt.Kind(); kind {
 	case vdl.Bool:
 		d.prepareAtom("waiting for bool value")
-		v, err := decbufBinaryDecodeBool(d.buf)
+		var v bool
+		var err error
+		switch d.version {
+		case Version80:
+			v, err = decbufBinaryDecodeBool(d.buf)
+		default:
+			var uv uint64
+			uv, err = decbufBinaryDecodeUint(d.buf)
+			v = (uv == 1)
+		}
 		if err != nil {
 			return err
 		}
@@ -522,7 +575,16 @@ func (d *dumpWorker) decodeValue(tt *vdl.Type, target vdl.Target) error {
 		return target.FromBool(v, ttFrom)
 	case vdl.Byte:
 		d.prepareAtom("waiting for byte value")
-		v, err := d.buf.ReadByte()
+		var v byte
+		var err error
+		switch d.version {
+		case Version80:
+			v, err = d.buf.ReadByte()
+		default:
+			var uv uint64
+			uv, err = decbufBinaryDecodeUint(d.buf)
+			v = byte(uv)
+		}
 		if err != nil {
 			return err
 		}
@@ -536,7 +598,7 @@ func (d *dumpWorker) decodeValue(tt *vdl.Type, target vdl.Target) error {
 		}
 		d.writeAtom(DumpKindPrimValue, PrimitivePUint{v}, "uint")
 		return target.FromUint(v, ttFrom)
-	case vdl.Int16, vdl.Int32, vdl.Int64:
+	case vdl.Int8, vdl.Int16, vdl.Int32, vdl.Int64:
 		d.prepareAtom("waiting for int value")
 		v, err := decbufBinaryDecodeInt(d.buf)
 		if err != nil {
@@ -600,7 +662,16 @@ func (d *dumpWorker) decodeValue(tt *vdl.Type, target vdl.Target) error {
 		if err != nil {
 			return err
 		}
-		typeobj, err := d.typeDec.lookupType(typeId(id))
+		var typeobj *vdl.Type
+		switch d.version {
+		case Version80:
+			typeobj, err = d.typeDec.lookupType(typeId(id))
+		default:
+			if id >= uint64(len(d.status.RefTypes)) {
+				return fmt.Errorf("type index %d out of bounds", id)
+			}
+			typeobj = d.status.RefTypes[id]
+		}
 		if err != nil {
 			d.writeAtom(DumpKindTypeId, PrimitivePUint{id}, "%v", err)
 			return err
@@ -763,7 +834,17 @@ func (d *dumpWorker) decodeValue(tt *vdl.Type, target vdl.Target) error {
 		case ctrl != 0:
 			return verror.New(errUnexpectedControlByte, nil, ctrl)
 		default:
-			elemType, err := d.typeDec.lookupType(typeId(id))
+			var err error
+			var elemType *vdl.Type
+			switch d.version {
+			case Version80:
+				elemType, err = d.typeDec.lookupType(typeId(id))
+			default:
+				if id >= uint64(len(d.status.RefTypes)) {
+					return fmt.Errorf("type index %d out of bounds", id)
+				}
+				elemType = d.status.RefTypes[id]
+			}
 			if err != nil {
 				d.writeAtom(DumpKindTypeId, PrimitivePUint{id}, "%v", err)
 				return err

@@ -117,6 +117,7 @@ const (
 	DumpKindTypeMsg
 	DumpKindValueMsg
 	DumpKindMsgLen
+	DumpKindTypeIdsLen
 	DumpKindTypeId
 	DumpKindPrimValue
 	DumpKindByteLen
@@ -126,7 +127,7 @@ const (
 )
 
 // DumpKindAll holds all labels for DumpKind.
-var DumpKindAll = [...]DumpKind{DumpKindVersion, DumpKindControl, DumpKindMsgId, DumpKindTypeMsg, DumpKindValueMsg, DumpKindMsgLen, DumpKindTypeId, DumpKindPrimValue, DumpKindByteLen, DumpKindValueLen, DumpKindIndex, DumpKindWireTypeIndex}
+var DumpKindAll = [...]DumpKind{DumpKindVersion, DumpKindControl, DumpKindMsgId, DumpKindTypeMsg, DumpKindValueMsg, DumpKindMsgLen, DumpKindTypeIdsLen, DumpKindTypeId, DumpKindPrimValue, DumpKindByteLen, DumpKindValueLen, DumpKindIndex, DumpKindWireTypeIndex}
 
 // DumpKindFromString creates a DumpKind from a string label.
 func DumpKindFromString(label string) (x DumpKind, err error) {
@@ -154,6 +155,9 @@ func (x *DumpKind) Set(label string) error {
 		return nil
 	case "MsgLen", "msglen":
 		*x = DumpKindMsgLen
+		return nil
+	case "TypeIdsLen", "typeidslen":
+		*x = DumpKindTypeIdsLen
 		return nil
 	case "TypeId", "typeid":
 		*x = DumpKindTypeId
@@ -193,6 +197,8 @@ func (x DumpKind) String() string {
 		return "ValueMsg"
 	case DumpKindMsgLen:
 		return "MsgLen"
+	case DumpKindTypeIdsLen:
+		return "TypeIdsLen"
 	case DumpKindTypeId:
 		return "TypeId"
 	case DumpKindPrimValue:
@@ -211,7 +217,7 @@ func (x DumpKind) String() string {
 
 func (DumpKind) __VDLReflect(struct {
 	Name string `vdl:"v.io/v23/vom.DumpKind"`
-	Enum struct{ Version, Control, MsgId, TypeMsg, ValueMsg, MsgLen, TypeId, PrimValue, ByteLen, ValueLen, Index, WireTypeIndex string }
+	Enum struct{ Version, Control, MsgId, TypeMsg, ValueMsg, MsgLen, TypeIdsLen, TypeId, PrimValue, ByteLen, ValueLen, Index, WireTypeIndex string }
 }) {
 }
 
@@ -221,10 +227,11 @@ type ControlKind int
 const (
 	ControlKindNil ControlKind = iota
 	ControlKindEnd
+	ControlKindIncompleteType
 )
 
 // ControlKindAll holds all labels for ControlKind.
-var ControlKindAll = [...]ControlKind{ControlKindNil, ControlKindEnd}
+var ControlKindAll = [...]ControlKind{ControlKindNil, ControlKindEnd, ControlKindIncompleteType}
 
 // ControlKindFromString creates a ControlKind from a string label.
 func ControlKindFromString(label string) (x ControlKind, err error) {
@@ -241,6 +248,9 @@ func (x *ControlKind) Set(label string) error {
 	case "End", "end":
 		*x = ControlKindEnd
 		return nil
+	case "IncompleteType", "incompletetype":
+		*x = ControlKindIncompleteType
+		return nil
 	}
 	*x = -1
 	return fmt.Errorf("unknown label %q in vom.ControlKind", label)
@@ -253,13 +263,15 @@ func (x ControlKind) String() string {
 		return "Nil"
 	case ControlKindEnd:
 		return "End"
+	case ControlKindIncompleteType:
+		return "IncompleteType"
 	}
 	return ""
 }
 
 func (ControlKind) __VDLReflect(struct {
 	Name string `vdl:"v.io/v23/vom.ControlKind"`
-	Enum struct{ Nil, End string }
+	Enum struct{ Nil, End, IncompleteType string }
 }) {
 }
 
