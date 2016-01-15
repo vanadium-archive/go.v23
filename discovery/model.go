@@ -49,7 +49,7 @@ type Scanner interface {
 	// new discovered services can be read. Scanning will continue until the context
 	// is canceled or exceeds its deadline.
 	//
-	// The query is a WHERE expression of syncQL query against scanned services, where
+	// The query is a WHERE expression of a syncQL query against advertised services, where
 	// keys are InstanceIds and values are Services.
 	//
 	// Examples
