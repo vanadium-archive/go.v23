@@ -36,8 +36,8 @@ type Endpoint interface {
 	//   @<version>@<version specific fields>@@
 	// Where version is an unsigned integer.
 	//
-	// Version 5 is the current version for RPC:
-	//   @5@<protocol>@<address>@<routingid>@m|s@[<blessing>[,<blessing>]...]@@
+	// Version 6 is the current version for RPC:
+	//   @6@<protocol>@<address>@<route>[,<route>]...@<routingid>@m|s@[<blessing>[,<blessing>]...]@@
 	//
 	// Along with Network, this method ensures that Endpoint implements net.Addr.
 	String() string
