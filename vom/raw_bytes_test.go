@@ -12,9 +12,10 @@ import (
 	"v.io/v23/vom/testdata/data81"
 	"v.io/v23/vom/testdata/data82"
 	"v.io/v23/vom/testdata/types"
+	"v.io/v23/vdl"
 )
 
-func TestRawValueDecodeEncode(t *testing.T) {
+func TestRawBytesDecodeEncode(t *testing.T) {
 	versions := []struct {
 		Version Version
 		Tests   []types.TestCase
@@ -25,7 +26,7 @@ func TestRawValueDecodeEncode(t *testing.T) {
 	for _, testVersion := range versions {
 		for _, test := range testVersion.Tests {
 			// Interleaved
-			rv := RawValue{}
+			rv := RawBytes{}
 			interleavedReader := bytes.NewReader(hex2Bin(t, test.Hex))
 			if err := NewDecoder(interleavedReader).Decode(&rv); err != nil {
 				t.Errorf("unexpected error decoding %s: %v", test.Name, err)
@@ -47,7 +48,7 @@ func TestRawValueDecodeEncode(t *testing.T) {
 			}
 
 			// Split type and value stream.
-			rv = RawValue{}
+			rv = RawBytes{}
 			typeReader := bytes.NewReader(hex2Bin(t, test.HexVersion+test.HexType))
 			typeDec := NewTypeDecoder(typeReader)
 			typeDec.Start()
@@ -87,6 +88,37 @@ func TestRawValueDecodeEncode(t *testing.T) {
 			}
 			if !bytes.Equal(out.Bytes(), hex2Bin(t, test.HexVersion+test.HexValue)) {
 				t.Errorf("got value bytes: %x but expected %s", out.Bytes(), test.HexVersion+test.HexValue)
+			}
+		}
+	}
+}
+
+func TestRawBytesToFromValue(t *testing.T) {
+	versions := []struct {
+		Version Version
+		Tests   []types.TestCase
+	}{
+		{Version81, data81.Tests},
+		{Version82, data82.Tests},
+	}
+	for _, testVersion := range versions {
+		for _, test := range testVersion.Tests {
+			rb, err := RawBytesFromValue(test.Value)
+			if err != nil {
+				t.Fatalf("%v %s: error in RawBytesFromValue %v", testVersion.Version, test.Name, err)
+			}
+			var vv *vdl.Value
+			if err := rb.ToValue(&vv); err != nil {
+				t.Fatalf("%v %s: error in rb.ToValue %v", testVersion.Version, test.Name, err)
+			}
+			if (test.Name == "any(nil)") {
+				// Skip any(nil)
+				// TODO(bprosnitz) any(nil) results in two different nil representations. This shouldn't be the case.
+				continue
+			}
+			if got, want := vv, test.Value; !vdl.EqualValue(got, want) {
+				t.Errorf("%v %s: error in converting to and from raw value. got %v, but want %v", testVersion.Version,
+					test.Name, got, want)
 			}
 		}
 	}

@@ -134,8 +134,8 @@ func TestVomEncoder(t *testing.T) {
 		testing.AllocsPerRun(10, func() { vomEncoderEncode(t, 1) }))
 	fmt.Printf("Allocations per vom.Encoder.Encode (1000 Customers): %6.0f\n",
 		testing.AllocsPerRun(10, func() { vomEncoderEncode(t, 1000) }))
-	fmt.Printf("Allocations per vom.Encoder.Encode (1000 RawValues): %6.0f\n",
-		testing.AllocsPerRun(10, func() { vomEncoderEncodeRawValue(t, 1000, makeCustomerRawValue(t)) }))
+	fmt.Printf("Allocations per vom.Encoder.Encode (1000 RawBytes): %6.0f\n",
+		testing.AllocsPerRun(10, func() { vomEncoderEncodeRawBytes(t, 1000, makeCustomerRawBytes(t)) }))
 }
 
 func BenchmarkVomEncoder1Customer(b *testing.B) {
@@ -150,8 +150,8 @@ func BenchmarkVomEncoder1000Customer(b *testing.B) {
 	}
 }
 
-// vom.Encoder.Encode RawValue benchmarking
-func vomEncoderEncodeRawValue(t testing.TB, n int, rv *vom.RawValue) {
+// vom.Encoder.Encode RawBytes benchmarking
+func vomEncoderEncodeRawBytes(t testing.TB, n int, rv *vom.RawBytes) {
 	var buf bytes.Buffer
 	encoder := vom.NewVersionedEncoder(vom.Version81, &buf)
 	for j := 0; j != n; j++ {
@@ -162,23 +162,23 @@ func vomEncoderEncodeRawValue(t testing.TB, n int, rv *vom.RawValue) {
 	}
 }
 
-func makeCustomerRawValue(tb testing.TB) *vom.RawValue {
+func makeCustomerRawBytes(tb testing.TB) *vom.RawBytes {
 	bytes, err := vom.Encode(customer)
 	if err != nil {
 		tb.Fatalf("vom.Encode failed: %v", err)
 	}
-	var rv vom.RawValue
+	var rv vom.RawBytes
 	if err := vom.Decode(bytes, &rv); err != nil {
 		tb.Fatalf("vom.Decode failed: %v", err)
 	}
 	return &rv
 }
 
-func BenchmarkVomEncoder1000RawValue(b *testing.B) {
-	rv := makeCustomerRawValue(b)
+func BenchmarkVomEncoder1000RawBytes(b *testing.B) {
+	rv := makeCustomerRawBytes(b)
 	b.ResetTimer()
 	for i := 0; i != b.N; i++ {
-		vomEncoderEncodeRawValue(b, 1000, rv)
+		vomEncoderEncodeRawBytes(b, 1000, rv)
 	}
 }
 
@@ -210,8 +210,8 @@ func TestVomDecoder(t *testing.T) {
 		testing.AllocsPerRun(10, func() { vomDecoderDecode(t, 1, data) }))
 	fmt.Printf("Allocations per vom.Decoder.Decode (1000 Customers): %6.0f\n",
 		testing.AllocsPerRun(10, func() { vomDecoderDecode(t, 1000, data) }))
-	fmt.Printf("Allocations per vom.Decoder.Decode (1000 RawValues): %6.0f\n",
-		testing.AllocsPerRun(10, func() { vomDecoderDecodeRawValue(t, 1000, data) }))
+	fmt.Printf("Allocations per vom.Decoder.Decode (1000 RawBytess): %6.0f\n",
+		testing.AllocsPerRun(10, func() { vomDecoderDecodeRawBytes(t, 1000, data) }))
 }
 
 func BenchmarkVomDecoder1Customer(b *testing.B) {
@@ -244,9 +244,9 @@ func BenchmarkVomDecoder1000Customer(b *testing.B) {
 	}
 }
 
-// vom.Decoder.Decode RawValue benchmarking
-func vomDecoderDecodeRawValue(t testing.TB, n int, buf []byte) {
-	var rv vom.RawValue
+// vom.Decoder.Decode RawBytes benchmarking
+func vomDecoderDecodeRawBytes(t testing.TB, n int, buf []byte) {
+	var rv vom.RawBytes
 	decoder := vom.NewDecoder(bytes.NewReader(buf))
 	for j := 0; j != n; j++ {
 		err := decoder.Decode(&rv)
@@ -256,7 +256,7 @@ func vomDecoderDecodeRawValue(t testing.TB, n int, buf []byte) {
 	}
 }
 
-func BenchmarkVomDecoder1000RawValue(b *testing.B) {
+func BenchmarkVomDecoder1000RawBytes(b *testing.B) {
 	var buf bytes.Buffer
 	encoder := vom.NewVersionedEncoder(vom.Version81, &buf)
 	for j := 0; j != 1000; j++ {
@@ -268,7 +268,7 @@ func BenchmarkVomDecoder1000RawValue(b *testing.B) {
 	data := buf.Bytes()
 	b.ResetTimer()
 	for i := 0; i != b.N; i++ {
-		vomDecoderDecodeRawValue(b, 1000, data)
+		vomDecoderDecodeRawBytes(b, 1000, data)
 	}
 }
 

@@ -15,7 +15,7 @@ import (
 
 var (
 	errDecodeNil                = verror.Register(pkgPath+".errDecodeNil", verror.NoRetry, "{1:}{2:} vom: invalid decode into nil interface{}{:_}")
-	errDecodeNilRawValue        = verror.Register(pkgPath+".errDecodeNilRawValue", verror.NoRetry, "{1:}{2:} vom: invalid decode into nil *RawValue{:_}")
+	errDecodeNilRawBytes = verror.Register(pkgPath+".errDecodeNilRawBytes", verror.NoRetry, "{1:}{2:} vom: invalid decode into nil *RawBytes{:_}")
 	errDecodeZeroTypeID         = verror.Register(pkgPath+".errDecodeZeroTypeID", verror.NoRetry, "{1:}{2:} vom: zero type id{:_}")
 	errIndexOutOfRange          = verror.Register(pkgPath+".errIndexOutOfRange", verror.NoRetry, "{1:}{2:} vom: index out of range{:_}")
 	errLeftOverBytes            = verror.Register(pkgPath+".errLeftOverBytes", verror.NoRetry, "{1:}{2:} vom: {3} leftover bytes{:_}")
@@ -70,13 +70,13 @@ func NewDecoderWithTypeDecoder(r io.Reader, typeDec *TypeDecoder) *Decoder {
 // value; decoding succeeds as long as the values are compatible.
 //
 //   Types that are special-cased, only for v:
-//     *RawValue  - Store raw (uninterpreted) bytes in v.
+//     *RawBytes  - Store raw (uninterpreted) bytes in v.
 //
 //   Types that are special-cased, recursively throughout v:
 //     *vdl.Value    - Decode into v.
 //     reflect.Value - Decode into v, which must be settable.
 //
-// Decoding into a RawValue captures the value in a raw form, which may be
+// Decoding into a RawBytes captures the value in a raw form, which may be
 // subsequently passed to an Encoder for transcoding.
 //
 // Decode(nil) always returns an error.  Use Ignore() to ignore the next value.
@@ -84,9 +84,9 @@ func (d *Decoder) Decode(v interface{}) error {
 	switch tv := v.(type) {
 	case nil:
 		return verror.New(errDecodeNil, nil)
-	case *RawValue:
+	case *RawBytes:
 		if tv == nil {
-			return verror.New(errDecodeNilRawValue, nil)
+			return verror.New(errDecodeNilRawBytes, nil)
 		}
 		return d.decodeRaw(tv)
 	}
@@ -125,25 +125,25 @@ func (d *Decoder) Ignore() error {
 	return d.mr.EndMessage()
 }
 
-func (d *Decoder) decodeRaw(raw *RawValue) error {
+func (d *Decoder) decodeRaw(raw *RawBytes) error {
 	tid, err := d.mr.StartValueMessage()
 	if err != nil {
 		return err
 	}
-	if raw.t, err = d.typeDec.lookupType(tid); err != nil {
+	if raw.Type, err = d.typeDec.lookupType(tid); err != nil {
 		return err
 	}
-	if raw.value, err = d.mr.ReadAllValueBytes(); err != nil {
+	if raw.Data, err = d.mr.ReadAllValueBytes(); err != nil {
 		return err
 	}
 	refTypeLen := len(d.mr.AllReferencedTypes())
-	if cap(raw.refTypes) >= refTypeLen {
-		raw.refTypes = raw.refTypes[:refTypeLen]
+	if cap(raw.RefTypes) >= refTypeLen {
+		raw.RefTypes = raw.RefTypes[:refTypeLen]
 	} else {
-		raw.refTypes = make([]*vdl.Type, refTypeLen)
+		raw.RefTypes = make([]*vdl.Type, refTypeLen)
 	}
 	for i, tid := range d.mr.AllReferencedTypes() {
-		if raw.refTypes[i], err = d.typeDec.lookupType(tid); err != nil {
+		if raw.RefTypes[i], err = d.typeDec.lookupType(tid); err != nil {
 			return err
 		}
 	}

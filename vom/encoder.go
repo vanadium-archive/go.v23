@@ -22,6 +22,10 @@ const (
 	Version82 = Version(0x82)
 )
 
+func (v Version) String() string {
+	return fmt.Sprintf("Version%x", byte(v))
+}
+
 var (
 	errEncodeBadTypeStack      = verror.Register(pkgPath+".errEncodeBadTypeStack", verror.NoRetry, "{1:}{2:} vom: encoder has bad type stack{:_}")
 	errEncodeNilType           = verror.Register(pkgPath+".errEncodeNilType", verror.NoRetry, "{1:}{2:} vom: encoder finished with nil type{:_}")
@@ -139,7 +143,7 @@ func newEncoderWithoutVersionByte(version Version, w io.Writer, typeEnc *TypeEnc
 // otherwise an error is returned.
 //
 //   Types that are special-cased, only for v:
-//     *RawValue     - Transcode v into the appropriate output format.
+//     *RawBytes     - Transcode v into the appropriate output format.
 //
 //   Types that are special-cased, recursively throughout v:
 //     *vdl.Value    - Encode the semantic value represented by v.
@@ -154,7 +158,7 @@ func (e *Encoder) Encode(v interface{}) error {
 		}
 		e.enc.sentVersionByte = true
 	}
-	if raw, ok := v.(*RawValue); ok && raw != nil {
+	if raw, ok := v.(*RawBytes); ok && raw != nil {
 		return e.encodeRaw(raw)
 	}
 	vdlType := extractType(v)
@@ -171,18 +175,18 @@ func (e *Encoder) Encode(v interface{}) error {
 	return e.enc.finishEncode()
 }
 
-func (e *Encoder) encodeRaw(raw *RawValue) error {
+func (e *Encoder) encodeRaw(raw *RawBytes) error {
 	if e.enc.version == Version80 {
-		return verror.New(errUnsupportedInVOMVersion, nil, e.enc.version, "RawValue")
+		return verror.New(errUnsupportedInVOMVersion, nil, e.enc.version, "RawBytes")
 	}
-	tid, err := e.enc.typeEnc.encode(raw.t)
+	tid, err := e.enc.typeEnc.encode(raw.Type)
 	if err != nil {
 		return err
 	}
-	if err := e.enc.buf.StartMessage(containsAnyOrTypeObject(raw.t), hasChunkLen(raw.t), false, int64(tid)); err != nil {
+	if err := e.enc.buf.StartMessage(containsAnyOrTypeObject(raw.Type), hasChunkLen(raw.Type), false, int64(tid)); err != nil {
 		return err
 	}
-	for i, refType := range raw.refTypes {
+	for i, refType := range raw.RefTypes {
 		mid, err := e.enc.typeEnc.encode(refType)
 		if err != nil {
 			return err
@@ -191,7 +195,7 @@ func (e *Encoder) encodeRaw(raw *RawValue) error {
 			return verror.New(verror.ErrInternal, nil, "index unexpectedly out of order")
 		}
 	}
-	if err := e.enc.buf.Write(raw.value); err != nil {
+	if err := e.enc.buf.Write(raw.Data); err != nil {
 		return err
 	}
 	return e.enc.buf.FinishMessage()

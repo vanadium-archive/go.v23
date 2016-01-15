@@ -291,7 +291,7 @@ func TestReadAllValueBytes(t *testing.T) {
 		NumMessages   int
 	}
 
-	// NOTE: More types are tested in raw_value_test.go -- this just tests broad classes.
+	// NOTE: More types are tested in raw_bytes_test.go -- this just tests broad classes.
 	tests := []testCase{
 		{
 			Name:          "Bool",
