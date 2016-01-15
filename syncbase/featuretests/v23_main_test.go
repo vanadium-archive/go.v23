@@ -5,7 +5,6 @@
 package featuretests_test
 
 import (
-	"os"
 	"testing"
 
 	_ "v.io/x/ref/runtime/factories/generic"
@@ -13,5 +12,5 @@ import (
 )
 
 func TestMain(m *testing.M) {
-	os.Exit(v23test.Run(m.Run))
+	v23test.TestMain(m)
 }
