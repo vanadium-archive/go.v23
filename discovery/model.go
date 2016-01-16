@@ -29,8 +29,8 @@ type Advertiser interface {
 	// until the context is canceled or exceeds its deadline and the returned channel
 	// will be closed when it stops.
 	//
-	// If service.InstanceId is not specified, a random 128 bit (16 byte) UUID will be
-	// assigned to it. Any change to service will not be applied after advertising starts.
+	// If service.InstanceId is not specified, a random unique identifier will be assigned
+	// to it. Any change to service will not be applied after advertising starts.
 	//
 	// It is an error to have simultaneously active advertisements for two identical
 	// instances (service.InstanceId).

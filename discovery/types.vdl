@@ -50,7 +50,7 @@ type Found struct {
 
 // Lost represents a service that is lost during scan.
 type Lost struct {
-	InstanceId string
+	Service Service
 }
 
 // Update represents a discovery update.
