@@ -8,20 +8,18 @@ package vom
 
 // To use go-fuzz:
 //
-// $ go get github.com/dvyukov/go-fuzz/go-fuzz{,-build}
+// $ jiri go get github.com/dvyukov/go-fuzz/go-fuzz{,-build}
 // $ cd $JIRI_ROOT/release/go/src/v.io/v23/vom
-// $ $JIRI_ROOT/release/go/bin/go-fuzz-build v.io/v23/vom
-// $ $JIRI_ROOT/release/go/bin/go-fuzz -bin vom-fuzz.zip -workdir workdir
+// $ jiri go test -tags fuzzdump
+// $ jiri run go-fuzz-build v.io/v23/vom
+// $ jiri run go-fuzz -bin vom-fuzz.zip -workdir workdir
 //
 // Inputs resulting in crashes will be in workdir/crashers.
 //
 // go-fuzz will explore the space of possible input faster if
-// you put bigger inputs into workdir/corpus to help it. One way to
-// do this is to hack testDecodeVDL to dump parameter "bin" to a
-// new file on every call, then run "go test" once. With an empty
-// corpus directory, go-fuzz will reverse engineer for itself what
-// valid VOM looks like as it explores the input space looking
-// for inputs that increase coverage. Magic!
+// you put bigger inputs into workdir/corpus to help it. To do so,
+// run "jiri go test -tags fuzzdump" once. This will copy all inputs
+// used by the tests into workdir/corpus (see fuzzdump_test.go).
 
 import "bytes"
 
