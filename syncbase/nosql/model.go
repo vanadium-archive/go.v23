@@ -121,6 +121,9 @@ type Database interface {
 	// 4) abort the batch
 	// 5) start watching for changes to the data using the ResumeMarker
 	// In this configuration the client will not miss any changes to the data.
+	//
+	// TODO(sadovsky): Watch should return just a WatchStream, similar to how Scan
+	// returns just a ScanStream.
 	Watch(ctx *context.T, table, prefix string, resumeMarker watch.ResumeMarker) (WatchStream, error)
 
 	// Syncgroup returns a handle to the syncgroup with the given name.
