@@ -16,7 +16,7 @@ pkg discovery, type Closer interface, Close()
 pkg discovery, type Found struct
 pkg discovery, type Found struct, Service Service
 pkg discovery, type Lost struct
-pkg discovery, type Lost struct, InstanceId string
+pkg discovery, type Lost struct, Service Service
 pkg discovery, type ScanCloser interface { Close, Scan }
 pkg discovery, type ScanCloser interface, Close()
 pkg discovery, type ScanCloser interface, Scan(*context.T, string) (<-chan Update, error)

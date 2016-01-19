@@ -77,7 +77,7 @@ func (Found) __VDLReflect(struct {
 
 // Lost represents a service that is lost during scan.
 type Lost struct {
-	InstanceId string
+	Service Service
 }
 
 func (Lost) __VDLReflect(struct {
