@@ -13,12 +13,13 @@ import (
 )
 
 var (
-	errTypeInvalid        = verror.Register(pkgPath+".errTypeInvalid", verror.NoRetry, "{1:}{2:} vom: type {3} id {4} invalid, the min user type id is {5}{:_}")
-	errAlreadyDefined     = verror.Register(pkgPath+".errAlreadyDefined", verror.NoRetry, "{1:}{2:} vom: type {3} id {4} already defined as {5}{:_}")
-	errUnknownType        = verror.Register(pkgPath+".errUnknownType", verror.NoRetry, "{1:}{2:} vom: unknown type id {3}{:_}")
-	errEmptyName          = verror.Register(pkgPath+".errEmptyName", verror.NoRetry, "{1:}{2:} vom: NamedType has empty name{:_}")
-	errUnknownWireTypeDef = verror.Register(pkgPath+".errUnknownWireTypeDef", verror.NoRetry, "{1:}{2:} vom: unknown wire type definition {3}{:_}")
-	errStartNotCalled     = verror.Register(pkgPath+".errStartNotCalled", verror.NoRetry, "{1:}{2:} vom: Start has not been called")
+	errTypeInvalid          = verror.Register(pkgPath+".errTypeInvalid", verror.NoRetry, "{1:}{2:} vom: type {3} id {4} invalid, the min user type id is {5}{:_}")
+	errAlreadyDefined       = verror.Register(pkgPath+".errAlreadyDefined", verror.NoRetry, "{1:}{2:} vom: type {3} id {4} already defined as {5}{:_}")
+	errUnknownType          = verror.Register(pkgPath+".errUnknownType", verror.NoRetry, "{1:}{2:} vom: unknown type id {3}{:_}")
+	errEmptyName            = verror.Register(pkgPath+".errEmptyName", verror.NoRetry, "{1:}{2:} vom: NamedType has empty name{:_}")
+	errUnknownWireTypeDef   = verror.Register(pkgPath+".errUnknownWireTypeDef", verror.NoRetry, "{1:}{2:} vom: unknown wire type definition {3}{:_}")
+	errStartNotCalled       = verror.Register(pkgPath+".errStartNotCalled", verror.NoRetry, "{1:}{2:} vom: Start has not been called")
+	errUnnamedRecursiveType = verror.Register(pkgPath+".errUnnamedRecursiveType", verror.NoRetry, "{1:}{2:} vom: unnamed recursive type id {3}{:_}")
 )
 
 // TypeDecoder manages the receipt and unmarshalling of types from the other
@@ -274,7 +275,11 @@ func (d *TypeDecoder) makeType(tid typeId, builder *vdl.TypeBuilder, pending map
 	}
 	// Unnamed types are made directly from their base type.  It's fine to update
 	// pending after making the base type, since there's no way to create a
-	// recursive type based solely on unnamed vdl.
+	// recursive type based solely on unnamed vdl. To prevent infinite loops, we set
+	// a placeholder entry in the pending map, which will result
+	// in an error in lookupOrMakeType if we encounter an unnamed
+	// recursive type.
+	pending[tid] = nil
 	baseType, err := d.makeBaseType(wt, builder, pending)
 	if err != nil {
 		return nil, err
@@ -356,8 +361,13 @@ func (d *TypeDecoder) lookupOrMakeType(tid typeId, builder *vdl.TypeBuilder, pen
 	if tt := d.lookupKnownType(tid); tt != nil {
 		return tt, nil
 	}
+
 	if p, ok := pending[tid]; ok {
+		if p == nil {
+			return nil, verror.New(errUnnamedRecursiveType, nil, tid)
+		}
 		return p, nil
 	}
+
 	return d.makeType(tid, builder, pending)
 }
