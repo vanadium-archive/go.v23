@@ -16,6 +16,7 @@ import (
 	"testing"
 
 	"v.io/v23/vdl"
+	"v.io/v23/verror"
 	"v.io/v23/vom/testdata/data80"
 	"v.io/v23/vom/testdata/data81"
 	"v.io/v23/vom/testdata/data82"
@@ -472,4 +473,20 @@ func (w *pipe) Write(p []byte) (n int, err error) {
 	defer w.m.Unlock()
 	defer w.c.Signal()
 	return w.b.Write(p)
+}
+
+// Test that input found by go-fuzz cannot cause a stack overflow.
+func TestFuzzDecodeOverflow(t *testing.T) {
+	var v interface{}
+	d := NewDecoder(strings.NewReader("\x81\x51\x04\x03\x01\x29\xe1"))
+
+	// Before the fix, this line caused a stack overflow.
+	err := d.Decode(&v)
+
+	// With the fix, we expect to get a specific error.
+	if err != nil {
+		if verror.ErrorID(err) != errUnnamedRecursiveType.ID {
+			t.Fatal("unexepcted error: ", err)
+		}
+	}
 }
