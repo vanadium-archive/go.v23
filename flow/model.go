@@ -126,8 +126,35 @@ type PeerAuthorizer interface {
 // Since this ManagedConn may be shared between many flows it wouldn't be safe
 // to read and write to it directly.  We just provide some metadata.
 type ManagedConn interface {
+	// LocalEndpoint returns the local vanadium Endpoint.
+	LocalEndpoint() naming.Endpoint
+	// RemoteEndpoint returns the remote vanadium Endpoint.
+	RemoteEndpoint() naming.Endpoint
+
+	// RemoteBlessings returns the remote end's blessings presented during connection
+	// establishment. These may be different than those presented during flow creation.
+	RemoteBlessings() security.Blessings
+	// LocalBlessings returns the local end's blessings presented during connection
+	// establishment. These may be different than those presented during flow creation.
+	LocalBlessings() security.Blessings
+	// RemoteDischarges returns the discharges presented by the remote end of the
+	// connection during authentication.
+	//
+	// Discharges are organized in a map keyed by the discharge-identifier.
+	RemoteDischarges() map[string]security.Discharge
+	// LocalDischarges returns the discharges presented by the local end of the
+	// connection during authentication.
+	//
+	// Discharges are organized in a map keyed by the discharge-identifier.
+	LocalDischarges() map[string]security.Discharge
+
 	// CommonVersion returns the RPCVersion negotiated between the local and remote endpoints.
 	CommonVersion() version.RPCVersion
+	// RTT returns the last round-trip-time of the health-check sent on this connection.
+	// A zero duration is returned if a RTT is unavailable.
+	RTT() time.Duration
+	// LastUsed returns the last time the connection had bytes read or written on it.
+	LastUsed() time.Time
 	// Closed returns a channel that remains open until the connection has been closed.
 	Closed() <-chan struct{}
 }

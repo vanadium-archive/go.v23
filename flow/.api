@@ -40,9 +40,17 @@ pkg flow, type Listener interface { Accept, Addr, Close }
 pkg flow, type Listener interface, Accept(*context.T) (Conn, error)
 pkg flow, type Listener interface, Addr() net.Addr
 pkg flow, type Listener interface, Close() error
-pkg flow, type ManagedConn interface { Closed, CommonVersion }
+pkg flow, type ManagedConn interface { Closed, CommonVersion, LastUsed, LocalBlessings, LocalDischarges, LocalEndpoint, RTT, RemoteBlessings, RemoteDischarges, RemoteEndpoint }
 pkg flow, type ManagedConn interface, Closed() <-chan struct{}
 pkg flow, type ManagedConn interface, CommonVersion() version.RPCVersion
+pkg flow, type ManagedConn interface, LastUsed() time.Time
+pkg flow, type ManagedConn interface, LocalBlessings() security.Blessings
+pkg flow, type ManagedConn interface, LocalDischarges() map[string]security.Discharge
+pkg flow, type ManagedConn interface, LocalEndpoint() naming.Endpoint
+pkg flow, type ManagedConn interface, RTT() time.Duration
+pkg flow, type ManagedConn interface, RemoteBlessings() security.Blessings
+pkg flow, type ManagedConn interface, RemoteDischarges() map[string]security.Discharge
+pkg flow, type ManagedConn interface, RemoteEndpoint() naming.Endpoint
 pkg flow, type Manager interface { Accept, Closed, Dial, Listen, ProxyListen, RoutingID, Status, StopListening }
 pkg flow, type Manager interface, Accept(*context.T) (Flow, error)
 pkg flow, type Manager interface, Closed() <-chan struct{}
