@@ -21,9 +21,9 @@ pkg access, func WritePermissions(io.Writer, Permissions) error
 pkg access, method (AccessList) Authorize(*context.T, security.Call) error
 pkg access, method (AccessList) Enforceable(*context.T, security.Principal) error
 pkg access, method (AccessList) Includes(...string) bool
-pkg access, method (Permissions) Add(security.BlessingPattern, string)
-pkg access, method (Permissions) Blacklist(string, string)
-pkg access, method (Permissions) Clear(string, ...string)
+pkg access, method (Permissions) Add(security.BlessingPattern, ...string) Permissions
+pkg access, method (Permissions) Blacklist(string, ...string) Permissions
+pkg access, method (Permissions) Clear(string, ...string) Permissions
 pkg access, method (Permissions) Copy() Permissions
 pkg access, method (Permissions) Normalize() Permissions
 pkg access, type AccessList struct

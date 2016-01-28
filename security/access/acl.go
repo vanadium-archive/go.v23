@@ -118,29 +118,36 @@ func ReadPermissions(r io.Reader) (m Permissions, err error) {
 }
 
 // Add updates m to so that blessings matching pattern will be included in the
-// access list for the provided tag (by adding to the "In" list).
-//
-func (m Permissions) Add(pattern security.BlessingPattern, tag string) {
-	list := m[tag]
-	list.In = append(list.In, pattern)
-	list.In = removeDuplicatePatterns(list.In)
-	sort.Sort(byPattern(list.In))
-	m[tag] = list
+// access lists for the provided tags (by adding to the "In" lists).
+// It returns m.
+func (m Permissions) Add(pattern security.BlessingPattern, tags ...string) Permissions {
+	for _, tag := range tags {
+		list := m[tag]
+		list.In = append(list.In, pattern)
+		list.In = removeDuplicatePatterns(list.In)
+		sort.Sort(byPattern(list.In))
+		m[tag] = list
+	}
+	return m
 }
 
 // Blacklist updates m so that the provided blessing will be excluded from
-// the access list for the provided tag (via m[tag].NotIn).
-func (m Permissions) Blacklist(blessing string, tag string) {
-	list := m[tag]
-	list.NotIn = append(list.NotIn, blessing)
-	list.NotIn = removeDuplicateStrings(list.NotIn)
-	sort.Strings(list.NotIn)
-	m[tag] = list
+// the access lists for the provided tags (by adding to the "NotIn" lists).
+// It returns m.
+func (m Permissions) Blacklist(blessing string, tags ...string) Permissions {
+	for _, tag := range tags {
+		list := m[tag]
+		list.NotIn = append(list.NotIn, blessing)
+		list.NotIn = removeDuplicateStrings(list.NotIn)
+		sort.Strings(list.NotIn)
+		m[tag] = list
+	}
+	return m
 }
 
 // Clear removes all references to blessingOrPattern from all the provided
-// tags in the AccessList, or all tags if len(tags) = 0.
-func (m Permissions) Clear(blessingOrPattern string, tags ...string) {
+// tags in the AccessList, or all tags if len(tags) = 0. It returns m.
+func (m Permissions) Clear(blessingOrPattern string, tags ...string) Permissions {
 	if len(tags) == 0 {
 		tags = make([]string, 0, len(m))
 		for t, _ := range m {
@@ -162,6 +169,7 @@ func (m Permissions) Clear(blessingOrPattern string, tags ...string) {
 		}
 		m[t] = newList
 	}
+	return m
 }
 
 // Copy returns a new Permissions that is a copy of m.
