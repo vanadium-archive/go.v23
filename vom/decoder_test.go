@@ -490,3 +490,25 @@ func TestFuzzDecodeOverflow(t *testing.T) {
 		}
 	}
 }
+
+// Test that input discovered by go-fuzz does not result in a hang anymore.
+func TestFuzzTypeDecodeHang(t *testing.T) {
+	var v interface{}
+	d := NewDecoder(strings.NewReader(
+		"\x80W&\x03\x00 v.io/v23/vom/t" +
+			"estdata/types.Rec4\x01)" +
+			"\xe1U&\x03\x00 v.io/v23/vom/t" +
+			"estdata/types.Rec3\x01," +
+			"\xe1S&\x00\x00 v.io/v23/v\x04\x00/t" +
+			"estdata/types.Rec2\x01*" +
+			"\xe1Q&\x00\x00 v.io/v23/vom/t" +
+			"estdataPtypesIRec1\x01*" +
+			"\xe1"))
+
+	// Before the fix, this line caused a hang. With the fix, it should
+	// give an error.
+	err := d.Decode(&v)
+	if err != io.EOF {
+		t.Fatal("unexpected success")
+	}
+}

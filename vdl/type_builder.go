@@ -387,17 +387,20 @@ func (p *pending) finalize() error {
 			return fmt.Errorf("PendingNamed used to build unnamed type based on %v", base)
 		}
 		// There may be a chain of named types, in which case we'll need to follow
-		// the chain to the first type that's not internalNamed.
+		// the chain to the first type that's not internalNamed. Watch out for
+		// cycles, which could arise due to corrupt input.
+		seen := map[*Type]bool{p.Type: true}
 		for {
 			if base == nil {
 				return errBaseNil
 			}
-			if base == p.Type {
-				return errBaseCycle
-			}
 			if base.kind != internalNamed {
 				break
 			}
+			if seen[base] {
+				return errBaseCycle
+			}
+			seen[base] = true
 			base = base.elem
 		}
 		*p.Type = *base
