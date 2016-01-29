@@ -105,9 +105,11 @@ func TestPermissionsAdd(t *testing.T) {
 		"R": AccessList{
 			In: []security.BlessingPattern{"bar", "foo"},
 		},
+		"W": AccessList{
+			In: []security.BlessingPattern{"bar"},
+		},
 	}
-
-	if obj.Add("bar", "R"); !reflect.DeepEqual(obj, want) {
+	if obj.Add("bar", "R", "W"); !reflect.DeepEqual(obj, want) {
 		t.Errorf("got %#v, want %#v", obj, want)
 	}
 }
@@ -128,9 +130,12 @@ func TestPermissionsBlacklist(t *testing.T) {
 		"R": AccessList{
 			NotIn: []string{"bar", "foo"},
 		},
+		"W": AccessList{
+			NotIn: []string{"bar"},
+		},
 	}
-	if obj.Blacklist("bar", "R"); !reflect.DeepEqual(obj, want) {
-		t.Errorf("blacklisting 'foo' multiple times should not modify obj")
+	if obj.Blacklist("bar", "R", "W"); !reflect.DeepEqual(obj, want) {
+		t.Errorf("got %#v, want %#v", obj, want)
 	}
 }
 
