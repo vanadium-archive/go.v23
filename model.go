@@ -160,9 +160,6 @@ type Runtime interface {
 	// WithListenSpec attaches a ListenSpec to the returned context.
 	WithListenSpec(ctx *context.T, ls rpc.ListenSpec) *context.T
 
-	// GetDiscovery returns the Discovery in 'ctx'.
-	GetDiscovery(ctx *context.T) discovery.T
-
 	// WithBackgroundContext creates a new context derived from 'ctx'
 	// with the given context set as the background context.
 	WithBackgroundContext(ctx *context.T) *context.T
@@ -170,6 +167,9 @@ type Runtime interface {
 	// GetBackgroundContext returns a background context. This context can be used
 	// for general background activities.
 	GetBackgroundContext(ctx *context.T) *context.T
+
+	// NewDiscovery returns a new Discovery.T instance.
+	NewDiscovery(ctx *context.T) (discovery.T, error)
 
 	// WithReservedNameDispatcher returns a context that uses the
 	// provided dispatcher to control access to the framework managed
@@ -291,11 +291,6 @@ func WithListenSpec(ctx *context.T, ls rpc.ListenSpec) *context.T {
 	return initState.currentRuntime().WithListenSpec(ctx, ls)
 }
 
-// GetDiscovery returns the Discovery in 'ctx'.
-func GetDiscovery(ctx *context.T) discovery.T {
-	return initState.currentRuntime().GetDiscovery(ctx)
-}
-
 // WithBackgroundContext creates a new context derived from 'ctx'
 // with the given context set as the background context.
 func WithBackgroundContext(ctx *context.T) *context.T {
@@ -306,6 +301,11 @@ func WithBackgroundContext(ctx *context.T) *context.T {
 // for general background activities.
 func GetBackgroundContext(ctx *context.T) *context.T {
 	return initState.runtime.GetBackgroundContext(ctx)
+}
+
+// NewDiscovery returns a new Discovery.T instance.
+func NewDiscovery(ctx *context.T) (discovery.T, error) {
+	return initState.currentRuntime().NewDiscovery(ctx)
 }
 
 // WithReservedNameDispatcher returns a context that uses the

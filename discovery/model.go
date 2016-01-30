@@ -15,14 +15,7 @@ import (
 // T is the interface for discovery operations; it is the client side library
 // for the discovery service.
 type T interface {
-	Advertiser
-	Scanner
-	Closer
-}
-
-// Advertiser is the interface for advertising services.
-type Advertiser interface {
-	// Advertise advertises the service to be discovered by "Scanner" implementations.
+	// Advertise advertises the service to be discovered by "Scan" operations.
 	// visibility is used to limit the principals that can see the advertisement. An
 	// empty set means that there are no restrictions on visibility (i.e, equivalent
 	// to []security.BlessingPattern{security.AllPrincipals}). Advertising will continue
@@ -35,19 +28,12 @@ type Advertiser interface {
 	// It is an error to have simultaneously active advertisements for two identical
 	// instances (service.InstanceId).
 	Advertise(ctx *context.T, service *Service, visibility []security.BlessingPattern) (<-chan struct{}, error)
-}
 
-// AdvertiseCloser is the interface that groups the Advertise and Close methods.
-type AdvertiseCloser interface {
-	Advertiser
-	Closer
-}
-
-// Scanner is the interface for scanning services.
-type Scanner interface {
 	// Scan scans services that match the query and returns the channel on which
 	// new discovered services can be read. Scanning will continue until the context
 	// is canceled or exceeds its deadline.
+	//
+	// Scan excludes the services that are advertised from the same T instance.
 	//
 	// The query is a WHERE expression of a syncQL query against advertised services, where
 	// keys are InstanceIds and values are Services.
@@ -61,16 +47,4 @@ type Scanner interface {
 	// SyncQL tutorial at:
 	//    https://github.com/vanadium/docs/blob/master/tutorials/syncql-tutorial.md
 	Scan(ctx *context.T, query string) (<-chan Update, error)
-}
-
-// ScanCloser is the interface that groups the Scan and Close methods.
-type ScanCloser interface {
-	Scanner
-	Closer
-}
-
-// Closer is the interface that wraps the Close method.
-type Closer interface {
-	// Close closes all active tasks.
-	Close()
 }
