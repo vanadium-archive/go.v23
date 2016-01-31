@@ -737,7 +737,7 @@ func verifyAndCollectAllTypes(t *Type, allTypes map[*Type]bool) error {
 	// Check kind
 	switch t.kind {
 	case internalNamed:
-		panic(fmt.Errorf("internal kind %d used in verifyAndCollectAllTypes", t.kind))
+		return fmt.Errorf("internal kind %d used in verifyAndCollectAllTypes", t.kind)
 	}
 	// Check name
 	switch t.kind {
