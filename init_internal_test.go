@@ -41,9 +41,10 @@ func (*mockRuntime) WithNewNamespace(ctx *context.T, roots ...string) (*context.
 func (*mockRuntime) GetNamespace(ctx *context.T) namespace.T         { return nil }
 func (*mockRuntime) GetAppCycle(ctx *context.T) AppCycle             { return nil }
 func (*mockRuntime) GetListenSpec(ctx *context.T) rpc.ListenSpec     { return rpc.ListenSpec{} }
-func (*mockRuntime) GetDiscovery(ctx *context.T) discovery.T         { return nil }
 func (*mockRuntime) WithBackgroundContext(ctx *context.T) *context.T { return nil }
 func (*mockRuntime) GetBackgroundContext(ctx *context.T) *context.T  { return nil }
+
+func (*mockRuntime) NewDiscovery(ctx *context.T) (discovery.T, error) { return nil, nil }
 
 func (*mockRuntime) WithReservedNameDispatcher(ctx *context.T, d rpc.Dispatcher) *context.T {
 	return nil
