@@ -33,7 +33,7 @@ type Client interface {
 
 	// Call makes a synchronous call that will retry application level
 	// verrors that have verror.ActionCode RetryBackoff.
-	Call(ctx *context.T, name, method string, inArgs, outArgs []interface{}, callOpts ...CallOpt) error
+	Call(ctx *context.T, name, method string, inArgs, outArgs []interface{}, opts ...CallOpt) error
 
 	// Close discards all state associated with this Client.  In-flight calls may
 	// be terminated with an error.

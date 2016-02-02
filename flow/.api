@@ -51,9 +51,10 @@ pkg flow, type ManagedConn interface, RTT() time.Duration
 pkg flow, type ManagedConn interface, RemoteBlessings() security.Blessings
 pkg flow, type ManagedConn interface, RemoteDischarges() map[string]security.Discharge
 pkg flow, type ManagedConn interface, RemoteEndpoint() naming.Endpoint
-pkg flow, type Manager interface { Accept, Closed, Dial, Listen, ProxyListen, RoutingID, Status, StopListening }
+pkg flow, type Manager interface { Accept, Closed, Connection, Dial, Listen, ProxyListen, RoutingID, Status, StopListening }
 pkg flow, type Manager interface, Accept(*context.T) (Flow, error)
 pkg flow, type Manager interface, Closed() <-chan struct{}
+pkg flow, type Manager interface, Connection(*context.T, naming.Endpoint, PeerAuthorizer, time.Duration) (ManagedConn, error)
 pkg flow, type Manager interface, Dial(*context.T, naming.Endpoint, PeerAuthorizer, time.Duration) (Flow, error)
 pkg flow, type Manager interface, Listen(*context.T, string, string) error
 pkg flow, type Manager interface, ProxyListen(*context.T, string, naming.Endpoint) (<-chan struct{}, error)
