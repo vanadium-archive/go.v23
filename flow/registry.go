@@ -21,7 +21,8 @@ type Protocol interface {
 	Dial(ctx *context.T, protocol, address string, timeout time.Duration) (Conn, error)
 	// Resolve is the function used for protocol-specific address normalization.
 	// e.g. the TCP resolve performs DNS resolution.
-	Resolve(ctx *context.T, proctocol, address string) (string, string, error)
+	// Resolve returns the protocol and resolved addresses.
+	Resolve(ctx *context.T, protocol, address string) (string, []string, error)
 	// Listen is the function used to create Listener objects given a
 	// protocol-specific string representation of the address a server will listen on.
 	// The Conns returned from Listener must frame connections.
@@ -80,7 +81,7 @@ func (p wrappedProtocol) Dial(ctx *context.T, _, address string, timeout time.Du
 	return p.obj.Dial(ctx, p.protocol, address, timeout)
 }
 
-func (p wrappedProtocol) Resolve(ctx *context.T, _, address string) (string, string, error) {
+func (p wrappedProtocol) Resolve(ctx *context.T, _, address string) (string, []string, error) {
 	return p.obj.Resolve(ctx, p.protocol, address)
 }
 
