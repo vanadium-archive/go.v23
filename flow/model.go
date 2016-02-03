@@ -74,17 +74,6 @@ type Manager interface {
 	// closed.
 	Dial(ctx *context.T, remote naming.Endpoint, auth PeerAuthorizer, channelTimeout time.Duration) (Flow, error)
 
-	// Connection returns a ManagedConn to the provided remote endpoint, using
-	// 'auth' to authorize the remote end.
-	//
-	// If the manager has a non-null RoutingID, the Manager will re-use connections
-	// by Listening on Dialed connections for the lifetime of the Dialed connection.
-	//
-	// channelTimeout specifies the duration we are willing to wait before determining
-	// that connections managed by this Manager are unhealthy and should be
-	// closed.
-	Connection(ctx *context.T, remote naming.Endpoint, auth PeerAuthorizer, channelTimeout time.Duration) (ManagedConn, error)
-
 	// RoutingID returns the naming.Routing of the flow.Manager.
 	// If the RoutingID of the manager is naming.NullRoutingID, the manager can
 	// only be used to Dial outgoing calls.
