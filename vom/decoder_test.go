@@ -19,12 +19,11 @@ import (
 	"v.io/v23/verror"
 	"v.io/v23/vom/testdata/data80"
 	"v.io/v23/vom/testdata/data81"
-	"v.io/v23/vom/testdata/data82"
 	"v.io/v23/vom/testdata/types"
 )
 
 func TestDecoder(t *testing.T) {
-	for _, test := range append(append(data80.Tests, data81.Tests...), data82.Tests...) {
+	for _, test := range append(data80.Tests, data81.Tests...) {
 		// Decode hex patterns into binary data.
 		binversion, err := binFromHexPat(test.HexVersion)
 		if err != nil {

@@ -22,13 +22,18 @@ func hasChunkLen(t *vdl.Type) bool {
 
 // isAllowedVersion returns true if the VOM version specified is supported.
 func isAllowedVersion(version Version) bool {
-	return version >= Version80 && version <= Version82
+	return version >= Version80 && version <= Version81
 }
 
-var anyOrTypeObject []vdl.Kind = []vdl.Kind{vdl.Any, vdl.TypeObject}
+var anyKindList []vdl.Kind = []vdl.Kind{vdl.Any}
+var typeObjectKindList []vdl.Kind = []vdl.Kind{vdl.TypeObject}
 
-// containsAnyOrTypeObject returns true if the provided type contains an any or type object
-// recursively within it.
-func containsAnyOrTypeObject(t *vdl.Type) bool {
-	return t.ContainsKind(vdl.WalkAll, anyOrTypeObject...)
+// containsAny returns true if the provided type contains an any recursively within it.
+func containsAny(t *vdl.Type) bool {
+	return t.ContainsKind(vdl.WalkAll, anyKindList...)
+}
+
+// containsTypeObject returns true if the provided type contains an any recursively within it.
+func containsTypeObject(t *vdl.Type) bool {
+	return t.ContainsKind(vdl.WalkAll, typeObjectKindList...)
 }

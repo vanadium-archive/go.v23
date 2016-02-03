@@ -5,8 +5,6 @@
 package vom
 
 import (
-	"fmt"
-
 	"v.io/v23/vdl"
 	"v.io/v23/verror"
 )
@@ -16,6 +14,7 @@ var (
 	errGotTypeWantValue   = verror.Register(pkgPath+".errGotTypeWantValue", verror.NoRetry, "{1:}{2:} vom: got type chunk, expected value chunk {:_}")
 	errContChunkBeforeNew = verror.Register(pkgPath+".errContChunkBeforeNew", verror.NoRetry, "{1:}{2:} vom: received continuation chunk before new message {:_}")
 	errInvalidTypeIdIndex = verror.Register(pkgPath+".errInvalidTypeIdIndex", verror.NoRetry, "{1:}{2:} vom: value referenced invalid index into type id table {:_}")
+	errInvalidAnyIndex    = verror.Register(pkgPath+".errInvalidAnyIndex", verror.NoRetry, "{1:}{2:} vom: value referenced invalid index into anyLen table {:_}")
 )
 
 // Create a messageReader with the specified decbuf.
@@ -44,8 +43,9 @@ func (mk messageKind) String() string {
 }
 
 type messageData struct {
-	tid      typeId
-	refTypes referencedTypes
+	tid        typeId
+	refTypes   referencedTypes
+	refAnyLens referencedAnyLens
 }
 
 func (m *messageData) Reset() error {
@@ -184,22 +184,24 @@ func (mr *messageReader) startChunk() (msgConsumed bool, err error) {
 		return false, verror.New(errBadControlCode, nil)
 	}
 
-	var hasAnyOrTypeObject bool
+	var hasAny, hasTypeObject bool
 	var hasLength bool
 	switch mr.curMsgKind {
 	case typeMessage:
 		hasLength = true
-		hasAnyOrTypeObject = false
+		hasAny = false
+		hasTypeObject = false
 	case valueMessage:
 		t, err := mr.lookupType(activeMsg.tid)
 		if err != nil {
 			return false, err
 		}
 		hasLength = hasChunkLen(t)
-		hasAnyOrTypeObject = containsAnyOrTypeObject(t)
+		hasAny = containsAny(t)
+		hasTypeObject = containsTypeObject(t)
 	}
 
-	if hasAnyOrTypeObject && mr.version != Version80 {
+	if (hasAny || hasTypeObject) && mr.version != Version80 {
 		l, err := decbufBinaryDecodeUint(mr.buf)
 		if err != nil {
 			return false, err
@@ -210,6 +212,19 @@ func (mr *messageReader) startChunk() (msgConsumed bool, err error) {
 				return false, err
 			}
 			activeMsg.refTypes.AddTypeID(typeId(refId))
+		}
+	}
+	if hasAny && mr.version != Version80 {
+		l, err := decbufBinaryDecodeUint(mr.buf)
+		if err != nil {
+			return false, err
+		}
+		for i := 0; i < int(l); i++ {
+			refAnyLen, err := decbufBinaryDecodeUint(mr.buf)
+			if err != nil {
+				return false, err
+			}
+			activeMsg.refAnyLens.AddAnyLen(refAnyLen)
 		}
 	}
 
@@ -380,92 +395,6 @@ func (mr *messageReader) ReadIntoBuf(p []byte) error {
 	return nil
 }
 
-// ReadAllValueBytes reads all of the bytes in a value message.
-// TODO(bprosnitz) We currently read all of the value bytes into a single buffer. We may want to change our strategy.
-func (mr *messageReader) ReadAllValueBytes() ([]byte, error) {
-	if err := mr.nextReadableChunk(); err != nil {
-		return nil, err
-	}
-	if mr.curMsgKind == typeMessage {
-		return nil, verror.New(verror.ErrInternal, nil, "ReadAllValueBytes() only works with value messages")
-	}
-	t, err := mr.lookupType(mr.valueMsg.tid)
-	if err != nil {
-		return nil, err
-	}
-
-	// Immediately read the body of types without lengths -- they cannot be chunked.
-	if !hasChunkLen(t) {
-		switch t.Kind() {
-		case vdl.Byte, vdl.Bool, vdl.Uint16, vdl.Uint32, vdl.Uint64, vdl.Int8, vdl.Int16, vdl.Int32, vdl.Int64, vdl.Float32, vdl.Float64, vdl.TypeObject, vdl.Enum:
-			_, byteLen, err := binaryPeekUint(mr)
-			if err != nil {
-				return nil, err
-			}
-			buf := make([]byte, byteLen)
-			err = mr.ReadIntoBuf(buf)
-			return buf, err
-		case vdl.String, vdl.List: // string, []byte
-			len, byteLen, err := binaryPeekUint(mr)
-			if err != nil {
-				return nil, err
-			}
-			copyLen := byteLen + int(len)
-			buf := make([]byte, copyLen)
-			err = mr.ReadIntoBuf(buf)
-			return buf, err
-		case vdl.Array: // [N]byte
-			b, err := mr.PeekByte()
-			if err != nil {
-				return nil, err
-			}
-			if b != 0 {
-				return nil, fmt.Errorf("got illegal value for array 'len' field - expected 0")
-			}
-			buf := make([]byte, t.Len()+1)
-			err = mr.ReadIntoBuf(buf)
-			return buf, err
-		default:
-			panic(fmt.Sprintf("unhandled primitive kind: %v", t.Kind()))
-		}
-	}
-
-	// Copy each chunk until the end of the message is reached.
-	// Use buf as an expanding buffer, growing in powers of 2.
-	// length is the length of valid data within buf.
-	var buf []byte
-	var length int
-	for {
-		toRead := mr.buf.Limit()
-		if length+toRead > len(buf) {
-			lenToUse := 1
-			for lenToUse < length+toRead {
-				lenToUse *= 2
-			}
-			newBuf := make([]byte, lenToUse)
-			copy(newBuf, buf)
-			buf = newBuf
-		}
-
-		n, err := mr.buf.ReadIntoBuf(buf[length : length+toRead])
-		if err != nil {
-			return nil, err
-		}
-		if n != toRead {
-			return nil, fmt.Errorf("unexpectedly received partial read")
-		}
-		length += toRead
-
-		if mr.finalChunk {
-			return buf[:length], nil
-		}
-
-		if err := mr.nextChunk(); err != nil {
-			return nil, err
-		}
-	}
-}
-
 func (mr *messageReader) ReferencedType(index uint64) (t *vdl.Type, err error) {
 	if mr.version == Version80 {
 		panic("type references shouldn't be used for version 0x80")
@@ -487,6 +416,22 @@ func (mr *messageReader) ReferencedType(index uint64) (t *vdl.Type, err error) {
 	return
 }
 
+func (mr *messageReader) ReferencedAnyLen(index uint64) (length uint64, err error) {
+	if mr.version == Version80 {
+		panic("any length references shouldn't be used for version 0x80")
+	}
+
+	switch mr.curMsgKind {
+	case typeMessage:
+		length, err = mr.typeMsg.refAnyLens.ReferencedAnyLen(index)
+	case valueMessage:
+		length, err = mr.valueMsg.refAnyLens.ReferencedAnyLen(index)
+	default:
+		panic("unknown message kind")
+	}
+	return
+}
+
 // AllReferencedTypes returns a list of all types referenced in this message.
 func (mr *messageReader) AllReferencedTypes() []typeId {
 	switch mr.curMsgKind {
@@ -499,12 +444,26 @@ func (mr *messageReader) AllReferencedTypes() []typeId {
 	}
 }
 
+// AllReferencedAnyLens returns a list of all types referenced in this message.
+func (mr *messageReader) AllReferencedAnyLens() []uint64 {
+	switch mr.curMsgKind {
+	case typeMessage:
+		return mr.typeMsg.refAnyLens.lens
+	case valueMessage:
+		return mr.valueMsg.refAnyLens.lens
+	default:
+		panic("unknown message kind")
+	}
+}
+
 type referencedTypes struct {
-	tids []typeId
+	tids   []typeId
+	marker int
 }
 
 func (refTypes *referencedTypes) Reset() (err error) {
 	refTypes.tids = refTypes.tids[:0]
+	refTypes.marker = 0
 	return
 }
 
@@ -517,4 +476,33 @@ func (refTypes *referencedTypes) ReferencedTypeId(index uint64) (typeId, error) 
 		return 0, verror.New(errInvalidTypeIdIndex, nil)
 	}
 	return refTypes.tids[index], nil
+}
+
+func (refTypes *referencedTypes) Mark() {
+	refTypes.marker = len(refTypes.tids)
+}
+
+type referencedAnyLens struct {
+	lens   []uint64
+	marker int
+}
+
+func (refAnys *referencedAnyLens) Reset() (err error) {
+	refAnys.lens = refAnys.lens[:0]
+	return
+}
+
+func (refAnys *referencedAnyLens) AddAnyLen(length uint64) {
+	refAnys.lens = append(refAnys.lens, length)
+}
+
+func (refAnys *referencedAnyLens) ReferencedAnyLen(index uint64) (uint64, error) {
+	if index >= uint64(len(refAnys.lens)) {
+		return 0, verror.New(errInvalidAnyIndex, nil)
+	}
+	return refAnys.lens[index], nil
+}
+
+func (refAnys *referencedAnyLens) Mark() {
+	refAnys.marker = len(refAnys.lens)
 }

@@ -15,7 +15,7 @@ import (
 
 var (
 	errDecodeNil                = verror.Register(pkgPath+".errDecodeNil", verror.NoRetry, "{1:}{2:} vom: invalid decode into nil interface{}{:_}")
-	errDecodeNilRawBytes = verror.Register(pkgPath+".errDecodeNilRawBytes", verror.NoRetry, "{1:}{2:} vom: invalid decode into nil *RawBytes{:_}")
+	errDecodeNilRawBytes        = verror.Register(pkgPath+".errDecodeNilRawBytes", verror.NoRetry, "{1:}{2:} vom: invalid decode into nil *RawBytes{:_}")
 	errDecodeZeroTypeID         = verror.Register(pkgPath+".errDecodeZeroTypeID", verror.NoRetry, "{1:}{2:} vom: zero type id{:_}")
 	errIndexOutOfRange          = verror.Register(pkgPath+".errIndexOutOfRange", verror.NoRetry, "{1:}{2:} vom: index out of range{:_}")
 	errLeftOverBytes            = verror.Register(pkgPath+".errLeftOverBytes", verror.NoRetry, "{1:}{2:} vom: {3} leftover bytes{:_}")
@@ -81,15 +81,17 @@ func NewDecoderWithTypeDecoder(r io.Reader, typeDec *TypeDecoder) *Decoder {
 //
 // Decode(nil) always returns an error.  Use Ignore() to ignore the next value.
 func (d *Decoder) Decode(v interface{}) error {
-	switch tv := v.(type) {
-	case nil:
+	if v == nil {
 		return verror.New(errDecodeNil, nil)
-	case *RawBytes:
-		if tv == nil {
-			return verror.New(errDecodeNilRawBytes, nil)
-		}
-		return d.decodeRaw(tv)
 	}
+	target, err := vdl.ReflectTarget(reflect.ValueOf(v))
+	if err != nil {
+		return err
+	}
+	return d.decodeToTarget(target)
+}
+
+func (d *Decoder) decodeToTarget(target vdl.Target) error {
 	tid, err := d.mr.StartValueMessage()
 	if err != nil {
 		return err
@@ -98,7 +100,21 @@ func (d *Decoder) Decode(v interface{}) error {
 	if err != nil {
 		return err
 	}
-	if err := d.decodeValueMsg(valType, v); err != nil {
+	if hax, ok := target.(hasRvHack); ok {
+		rv := hax.HackGetRv()
+		valLen, err := d.decodeValueByteLen(valType)
+		if err != nil {
+			return err
+		}
+		if rv.IsValid() && rv.Type() == rtRawBytes {
+			rb := rv.Addr().Interface().(*RawBytes)
+			if err := d.decodeRaw(valType, uint64(valLen), rb); err != nil {
+				return err
+			}
+			return d.mr.EndMessage()
+		}
+	}
+	if err := d.decodeValue(valType, target); err != nil {
 		return err
 	}
 	return d.mr.EndMessage()
@@ -125,31 +141,6 @@ func (d *Decoder) Ignore() error {
 	return d.mr.EndMessage()
 }
 
-func (d *Decoder) decodeRaw(raw *RawBytes) error {
-	tid, err := d.mr.StartValueMessage()
-	if err != nil {
-		return err
-	}
-	if raw.Type, err = d.typeDec.lookupType(tid); err != nil {
-		return err
-	}
-	if raw.Data, err = d.mr.ReadAllValueBytes(); err != nil {
-		return err
-	}
-	refTypeLen := len(d.mr.AllReferencedTypes())
-	if cap(raw.RefTypes) >= refTypeLen {
-		raw.RefTypes = raw.RefTypes[:refTypeLen]
-	} else {
-		raw.RefTypes = make([]*vdl.Type, refTypeLen)
-	}
-	for i, tid := range d.mr.AllReferencedTypes() {
-		if raw.RefTypes[i], err = d.typeDec.lookupType(tid); err != nil {
-			return err
-		}
-	}
-	return d.mr.EndMessage()
-}
-
 // decodeWireType decodes the next type definition message and returns its
 // type id.
 func (d *Decoder) decodeWireType(wt *wireType) (typeId, error) {
@@ -158,7 +149,11 @@ func (d *Decoder) decodeWireType(wt *wireType) (typeId, error) {
 		return 0, err
 	}
 	// Decode the wire type like a regular value.
-	if err := d.decodeValueMsg(wireTypeType, wt); err != nil {
+	target, err := vdl.ReflectTarget(reflect.ValueOf(wt))
+	if err != nil {
+		return 0, err
+	}
+	if err := d.decodeValue(wireTypeType, target); err != nil {
 		return 0, err
 	}
 	return tid, d.mr.EndMessage()
@@ -168,17 +163,16 @@ func (d *Decoder) decodeWireType(wt *wireType) (typeId, error) {
 func (d *Decoder) decodeValueByteLen(tt *vdl.Type) (int, error) {
 	if hasChunkLen(tt) {
 		// Use the explicit message length.
-		if d.mr.version == Version82 {
-			// TODO(bprosnitz) Implement this for version 82
-			panic("not yet implemented for version 82")
-		}
 		return d.mr.buf.lim, nil
 	}
 	// No explicit message length, but the length can be computed.
 	switch {
 	case tt.Kind() == vdl.Byte:
-		// Single byte is always encoded as 1 byte.
-		return 1, nil
+		if d.mr.version == Version80 {
+			return 1, nil
+		} else {
+			return binaryPeekUintByteLen(d.mr)
+		}
 	case tt.Kind() == vdl.Array && tt.IsBytes():
 		// Byte arrays are exactly their length and encoded with 1-byte header.
 		return tt.Len() + 1, nil
@@ -198,13 +192,31 @@ func (d *Decoder) decodeValueByteLen(tt *vdl.Type) (int, error) {
 	}
 }
 
-// decodeValueMsg decodes the rest of the message assuming type tt
-func (d *Decoder) decodeValueMsg(tt *vdl.Type, v interface{}) error {
-	target, err := vdl.ReflectTarget(reflect.ValueOf(v))
-	if err != nil {
+func (d *Decoder) decodeRaw(tt *vdl.Type, valLength uint64, raw *RawBytes) error {
+	raw.Version = d.mr.version
+	raw.Type = tt
+	raw.Data = make([]byte, valLength)
+	if err := d.mr.ReadIntoBuf(raw.Data); err != nil {
 		return err
 	}
-	return d.decodeValue(tt, target)
+	refTypeLen := len(d.mr.AllReferencedTypes())
+	if cap(raw.RefTypes) >= refTypeLen {
+		raw.RefTypes = raw.RefTypes[:refTypeLen]
+	} else {
+		raw.RefTypes = make([]*vdl.Type, refTypeLen)
+	}
+	for i, tid := range d.mr.AllReferencedTypes() {
+		var err error
+		if raw.RefTypes[i], err = d.typeDec.lookupType(tid); err != nil {
+			return err
+		}
+	}
+	raw.AnyLengths = d.mr.AllReferencedAnyLens()
+	return nil
+}
+
+type hasRvHack interface {
+	HackGetRv() reflect.Value
 }
 
 // decodeValue decodes the rest of the message assuming type tt.
@@ -475,27 +487,64 @@ func (d *Decoder) decodeValue(tt *vdl.Type, target vdl.Target) error {
 		}
 		return target.FinishFields(fieldsTarget)
 	case vdl.Any:
-		var elemType *vdl.Type
-		switch x, ctrl, err := binaryDecodeUintWithControl(d.mr); {
-		case err != nil:
+		elemType, valLen, err := d.readAnyHeader(tt, target)
+		if err != nil {
 			return err
-		case ctrl == WireCtrlNil:
+		}
+		if elemType == nil {
 			return target.FromNil(tt)
-		case ctrl != 0:
-			return verror.New(errUnexpectedControlByte, nil, ctrl)
-		case d.mr.version == Version80:
-			if elemType, err = d.typeDec.lookupType(typeId(x)); err != nil {
-				return err
-			}
-		default:
-			if elemType, err = d.mr.ReferencedType(x); err != nil {
-				return err
+		}
+		if hax, ok := target.(hasRvHack); ok {
+			rv := hax.HackGetRv()
+			if rv.IsValid() && rv.Type() == rtPtrToRawBytes {
+				rb := rv.Interface().(*RawBytes)
+				if rb == nil {
+					rb = new(RawBytes)
+					rv.Set(reflect.ValueOf(rb))
+				}
+				return d.decodeRaw(elemType, valLen, rb)
 			}
 		}
 		return d.decodeValue(elemType, target)
 	default:
 		panic(verror.New(errDecodeValueUnhandledType, nil, tt))
 	}
+}
+
+func (d *Decoder) readAnyHeader(tt *vdl.Type, target vdl.Target) (*vdl.Type, uint64, error) {
+	var elemType *vdl.Type
+	var valLen uint64
+	switch x, ctrl, err := binaryDecodeUintWithControl(d.mr); {
+	case err != nil:
+		return nil, 0, err
+	case ctrl == WireCtrlNil:
+		return nil, 0, nil
+	case ctrl != 0:
+		return nil, 0, verror.New(errUnexpectedControlByte, nil, ctrl)
+	case d.mr.version == Version80:
+		if elemType, err = d.typeDec.lookupType(typeId(x)); err != nil {
+			return nil, 0, err
+		}
+	default:
+		if elemType, err = d.mr.ReferencedType(x); err != nil {
+			return nil, 0, err
+		}
+	}
+	if d.mr.version != Version80 {
+		switch x, ctrl, err := binaryDecodeUintWithControl(d.mr); {
+		case err != nil:
+			return nil, 0, err
+		case ctrl != 0:
+			return nil, 0, verror.New(errUnexpectedControlByte, nil, ctrl)
+		default:
+			// Reference the any len even if it isn't used so that we can
+			// report the case where references are missing.
+			if valLen, err = d.mr.ReferencedAnyLen(x); err != nil {
+				return nil, 0, err
+			}
+		}
+	}
+	return elemType, valLen, nil
 }
 
 // ignoreValue ignores the rest of the value of type t. This is used to ignore

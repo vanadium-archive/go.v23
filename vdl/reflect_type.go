@@ -121,10 +121,19 @@ func normalizeType(rt reflect.Type) reflect.Type {
 	return rt
 }
 
+type rawBytesTargetConvertible interface {
+	ToTarget(Target) error
+}
+
+var rtTargetConvertible = reflect.TypeOf([]rawBytesTargetConvertible{}).Elem()
+
 // basicType returns the *Type corresponding to rt for basic types that cannot
 // be named by the user, and have a well-known conversion.
 func basicType(rt reflect.Type) *Type {
 	for rt.Kind() == reflect.Ptr {
+		if rt.Implements(rtTargetConvertible) {
+			return AnyType
+		}
 		rt = rt.Elem()
 	}
 	switch rt {

@@ -33,6 +33,8 @@ type DumpKind enum {
 	TypeMsg       // [uint] Type message, describes the type identified by -MsgId.
 	ValueMsg      // [uint] Value message, describes a value of type +MsgId.
 	MsgLen        // [uint] Message length in bytes.
+	AnyMsgLen     // [uint] Length of inner any message in bytes.
+	AnyLensLen    // [uint] Length of list containing any messages.
 	TypeIdsLen    // [uint] Length of referenced type id list.
 	TypeId        // [uint] Type Id.
 	PrimValue     // [*]    Primitive value.

@@ -70,7 +70,8 @@ either a type or a value.  All values are typed.  Here's the protocol grammar:
     +typeID primitive // non-typeobject primitive
   | +typeID len(RefTypes) typeID* refTypesIndex // typeobject primitive
   | +typeID len(ValueMsg) CompositeV
-  | +typeID len(RefTypes) typeID* len(ValueMsg) CompositeV
+  | +typeID len(RefTypes) typeID* len(ValueMsg) CompositeV // message with typeobject but no any
+  | +typeID len(RefTypes) typeID* len(AnyMsgLens) len(anyMsg)* len(ValueMsg) CompositeV // message with any
   Value:
     primitive |  CompositeV
   CompositeV:

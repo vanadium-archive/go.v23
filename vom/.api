@@ -1,6 +1,10 @@
 pkg vom, const ControlKindEnd ControlKind
 pkg vom, const ControlKindIncompleteType ControlKind
 pkg vom, const ControlKindNil ControlKind
+pkg vom, const DefaultVersion Version
+pkg vom, const DefaultVersionWithRawBytesSupport Version
+pkg vom, const DumpKindAnyLensLen DumpKind
+pkg vom, const DumpKindAnyMsgLen DumpKind
 pkg vom, const DumpKindByteLen DumpKind
 pkg vom, const DumpKindControl DumpKind
 pkg vom, const DumpKindIndex DumpKind
@@ -16,7 +20,6 @@ pkg vom, const DumpKindVersion DumpKind
 pkg vom, const DumpKindWireTypeIndex DumpKind
 pkg vom, const Version80 Version
 pkg vom, const Version81 Version
-pkg vom, const Version82 Version
 pkg vom, const WireCtrlEnd byte
 pkg vom, const WireCtrlNil byte
 pkg vom, const WireCtrlTypeChunk byte
@@ -62,6 +65,7 @@ pkg vom, func NewVersionedEncoder(Version, io.Writer) *Encoder
 pkg vom, func NewVersionedEncoderWithTypeEncoder(Version, io.Writer, *TypeEncoder) *Encoder
 pkg vom, func NewVersionedTypeEncoder(Version, io.Writer) *TypeEncoder
 pkg vom, func RawBytesFromValue(interface{}) (*RawBytes, error)
+pkg vom, func RawBytesOf(interface{}) *RawBytes
 pkg vom, func VersionedEncode(Version, interface{}) ([]byte, error)
 pkg vom, method (*ControlKind) Set(string) error
 pkg vom, method (*Decoder) Decode(interface{}) error
@@ -72,6 +76,7 @@ pkg vom, method (*Dumper) Flush() error
 pkg vom, method (*Dumper) Status()
 pkg vom, method (*Dumper) Write([]byte) (int, error)
 pkg vom, method (*Encoder) Encode(interface{}) error
+pkg vom, method (*RawBytes) ToTarget(vdl.Target) error
 pkg vom, method (*RawBytes) ToValue(interface{}) error
 pkg vom, method (*TypeDecoder) Start()
 pkg vom, method (*TypeDecoder) Stop()
@@ -116,6 +121,7 @@ pkg vom, type DumpStatus struct, Err error
 pkg vom, type DumpStatus struct, MsgId int64
 pkg vom, type DumpStatus struct, MsgLen int
 pkg vom, type DumpStatus struct, MsgN int
+pkg vom, type DumpStatus struct, RefAnyLens []uint64
 pkg vom, type DumpStatus struct, RefTypes []*vdl.Type
 pkg vom, type DumpStatus struct, Value *vdl.Value
 pkg vom, type DumpWriter interface { WriteAtom, WriteStatus }
@@ -142,9 +148,11 @@ pkg vom, type PrimitivePString struct, Value string
 pkg vom, type PrimitivePUint struct
 pkg vom, type PrimitivePUint struct, Value uint64
 pkg vom, type RawBytes struct
+pkg vom, type RawBytes struct, AnyLengths []uint64
 pkg vom, type RawBytes struct, Data []byte
 pkg vom, type RawBytes struct, RefTypes []*vdl.Type
 pkg vom, type RawBytes struct, Type *vdl.Type
+pkg vom, type RawBytes struct, Version Version
 pkg vom, type TypeDecoder struct
 pkg vom, type TypeEncoder struct
 pkg vom, type Version byte

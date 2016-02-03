@@ -280,14 +280,15 @@ func (d *dumpWorker) lastFlushDone(err error) {
 // DumpWriter at the end of decoding each value, and may also be triggered
 // explicitly via Dumper.Status calls to get information for partial dumps.
 type DumpStatus struct {
-	MsgId    int64
-	MsgLen   int
-	MsgN     int
-	Buf      []byte
-	Debug    string
-	RefTypes []*vdl.Type
-	Value    *vdl.Value
-	Err      error
+	MsgId      int64
+	MsgLen     int
+	MsgN       int
+	Buf        []byte
+	Debug      string
+	RefTypes   []*vdl.Type
+	RefAnyLens []uint64
+	Value      *vdl.Value
+	Err        error
 }
 
 func (s DumpStatus) String() string {
@@ -482,7 +483,7 @@ func (d *dumpWorker) decodeValueType() (*vdl.Type, error) {
 // decodeValueMsg decodes the rest of the message assuming type t, handling the
 // optional message length.
 func (d *dumpWorker) decodeValueMsg(tt *vdl.Type, target vdl.Target) error {
-	if d.version >= Version81 && containsAnyOrTypeObject(tt) {
+	if d.version >= Version81 && (containsAny(tt) || containsTypeObject(tt)) {
 		d.prepareAtom("waiting for reference type ids")
 		tidsLen, err := decbufBinaryDecodeLen(d.buf)
 		if err != nil {
@@ -498,6 +499,24 @@ func (d *dumpWorker) decodeValueMsg(tt *vdl.Type, target vdl.Target) error {
 			}
 			d.status.RefTypes[i], err = d.typeDec.lookupType(typeId(tid))
 			d.writeAtom(DumpKindTypeId, PrimitivePUint{tid}, "")
+		}
+		if containsAny(tt) {
+			d.prepareAtom("waiting for any length list length")
+			anyLensLen, err := decbufBinaryDecodeLen(d.buf)
+			if err != nil {
+				return err
+			}
+			d.writeAtom(DumpKindAnyLensLen, PrimitivePUint{uint64(anyLensLen)}, "")
+			d.status.RefAnyLens = make([]uint64, anyLensLen)
+			for i := 0; i < anyLensLen; i++ {
+				d.prepareAtom("waiting for any len")
+				anyMsgLen, err := decbufBinaryDecodeUint(d.buf)
+				if err != nil {
+					return err
+				}
+				d.status.RefAnyLens[i] = anyMsgLen
+				d.writeAtom(DumpKindAnyMsgLen, PrimitivePUint{anyMsgLen}, "")
+			}
 		}
 	}
 	if hasChunkLen(tt) {
@@ -848,6 +867,21 @@ func (d *dumpWorker) decodeValue(tt *vdl.Type, target vdl.Target) error {
 			if err != nil {
 				d.writeAtom(DumpKindTypeId, PrimitivePUint{id}, "%v", err)
 				return err
+			}
+			if d.version >= Version81 {
+				d.prepareAtom("waiting for any message length index")
+				switch index, ctrl, err := decbufBinaryDecodeUintWithControl(d.buf); {
+				case err != nil:
+					return err
+				case ctrl != 0:
+					return verror.New(errUnexpectedControlByte, nil, ctrl)
+				default:
+					if index >= uint64(len(d.status.RefAnyLens)) {
+						return fmt.Errorf("any len index %d out of bounds", index)
+					}
+					d.writeAtom(DumpKindAnyMsgLen, PrimitivePUint{index}, "len %v", d.status.RefAnyLens[index])
+					return d.decodeValue(elemType, target)
+				}
 			}
 			d.writeAtom(DumpKindTypeId, PrimitivePUint{id}, "%v", elemType)
 			return d.decodeValue(elemType, target)

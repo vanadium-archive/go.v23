@@ -19,7 +19,9 @@ type Version byte
 const (
 	Version80 = Version(0x80)
 	Version81 = Version(0x81)
-	Version82 = Version(0x82)
+
+	DefaultVersion                    = Version80
+	DefaultVersionWithRawBytesSupport = Version81 // TODO(bprosnitz) Remove once switch to 81 being default
 )
 
 func (v Version) String() string {
@@ -37,7 +39,9 @@ var (
 )
 
 var (
-	rtPtrToValue = reflect.TypeOf((*vdl.Value)(nil))
+	rtPtrToValue    = reflect.TypeOf((*vdl.Value)(nil))
+	rtRawBytes      = reflect.TypeOf(RawBytes{})
+	rtPtrToRawBytes = reflect.TypeOf((*RawBytes)(nil))
 )
 
 var (
@@ -61,7 +65,7 @@ type encoder struct {
 	writer io.Writer
 	// We use buf to buffer up the encoded value. The buffering is necessary so
 	// that we can compute the total message length.
-	buf *switchedEncbuf
+	buf *messageWriter
 	// We maintain a typeStack, where typeStack[0] holds the type of the top-level
 	// value being encoded, and subsequent layers of the stack holds type information
 	// for composites and subtypes. Each entry also holds the start position of the
@@ -74,8 +78,9 @@ type encoder struct {
 }
 
 type typeStackEntry struct {
-	tt         *vdl.Type
-	fieldIndex int // -1 for if it is not in a struct
+	tt          *vdl.Type
+	fieldIndex  int          // -1 for if it is not in a struct
+	anyStartRef *anyStartRef // only non-nil for any
 }
 
 // NewEncoder returns a new Encoder that writes to the given writer in the
@@ -92,7 +97,7 @@ func NewVersionedEncoder(version Version, w io.Writer) *Encoder {
 	}
 	return &Encoder{encoder{
 		writer:          w,
-		buf:             newSwitchedEncbuf(w, version),
+		buf:             newMessageWriter(w, version),
 		typeStack:       make([]typeStackEntry, 0, 10),
 		typeEnc:         newTypeEncoderWithoutVersionByte(version, w),
 		sentVersionByte: false,
@@ -116,7 +121,7 @@ func NewVersionedEncoderWithTypeEncoder(version Version, w io.Writer, typeEnc *T
 	}
 	return &Encoder{encoder{
 		writer:          w,
-		buf:             newSwitchedEncbuf(w, version),
+		buf:             newMessageWriter(w, version),
 		typeStack:       make([]typeStackEntry, 0, 10),
 		typeEnc:         typeEnc,
 		sentVersionByte: false,
@@ -130,7 +135,7 @@ func newEncoderWithoutVersionByte(version Version, w io.Writer, typeEnc *TypeEnc
 	}
 	return &encoder{
 		writer:          w,
-		buf:             newSwitchedEncbuf(w, version),
+		buf:             newMessageWriter(w, version),
 		typeStack:       make([]typeStackEntry, 0, 10),
 		typeEnc:         typeEnc,
 		sentVersionByte: true,
@@ -158,47 +163,24 @@ func (e *Encoder) Encode(v interface{}) error {
 		}
 		e.enc.sentVersionByte = true
 	}
-	if raw, ok := v.(*RawBytes); ok && raw != nil {
-		return e.encodeRaw(raw)
+	if rb, ok := v.(*RawBytes); ok {
+		// This case exists to skip finishEncode when there is a top-level RawBytes and
+		// cover a common special case.
+		// TODO(bprosnitz) This doesn't handle cases with more indirection of RawBytes.
+		return e.enc.encodeRaw(rb)
 	}
 	vdlType := extractType(v)
 	tid, err := e.enc.typeEnc.encode(vdlType)
 	if err != nil {
 		return err
 	}
-	if err := e.enc.startEncode(containsAnyOrTypeObject(vdlType), hasChunkLen(vdlType), false, int64(tid)); err != nil {
+	if err := e.enc.startEncode(containsAny(vdlType), containsTypeObject(vdlType), hasChunkLen(vdlType), false, int64(tid)); err != nil {
 		return err
 	}
 	if err := vdl.FromReflect(&e.enc, reflect.ValueOf(v)); err != nil {
 		return err
 	}
 	return e.enc.finishEncode()
-}
-
-func (e *Encoder) encodeRaw(raw *RawBytes) error {
-	if e.enc.version == Version80 {
-		return verror.New(errUnsupportedInVOMVersion, nil, e.enc.version, "RawBytes")
-	}
-	tid, err := e.enc.typeEnc.encode(raw.Type)
-	if err != nil {
-		return err
-	}
-	if err := e.enc.buf.StartMessage(containsAnyOrTypeObject(raw.Type), hasChunkLen(raw.Type), false, int64(tid)); err != nil {
-		return err
-	}
-	for i, refType := range raw.RefTypes {
-		mid, err := e.enc.typeEnc.encode(refType)
-		if err != nil {
-			return err
-		}
-		if index := e.enc.buf.ReferenceTypeID(mid); index != uint64(i) {
-			return verror.New(verror.ErrInternal, nil, "index unexpectedly out of order")
-		}
-	}
-	if err := e.enc.buf.Write(raw.Data); err != nil {
-		return err
-	}
-	return e.enc.buf.FinishMessage()
 }
 
 // TODO(bprosnitz) Remove -- this is copied from vdl
@@ -208,13 +190,67 @@ func extractType(v interface{}) *vdl.Type {
 		if rv.Type().ConvertibleTo(rtPtrToValue) {
 			return rv.Convert(rtPtrToValue).Interface().(*vdl.Value).Type()
 		}
+		if rv.Type().ConvertibleTo(rtPtrToRawBytes) {
+			return rv.Convert(rtPtrToRawBytes).Interface().(*RawBytes).Type
+		}
 		rv = rv.Elem()
 	}
 	return vdl.TypeOf(v)
 }
 
+func (e *encoder) encodeRaw(raw *RawBytes) error {
+	if e.version == Version80 {
+		return verror.New(errUnsupportedInVOMVersion, nil, "RawBytes", e.version)
+	}
+	if !e.sentVersionByte {
+		if _, err := e.writer.Write([]byte{byte(e.version)}); err != nil {
+			return err
+		}
+	}
+	var fromNil bool
+	if raw == nil {
+		raw = RawBytesOf(vdl.ZeroValue(vdl.AnyType))
+		// TODO(bprosnitz) fromNil should be set based on whether the inner raw bytes value is nil
+		fromNil = true
+	}
+	if err := e.prepareTypeHelper(raw.Type, fromNil); err != nil {
+		return err
+	}
+	tid, err := e.typeEnc.encode(raw.Type)
+	if err != nil {
+		return err
+	}
+	if err := e.buf.StartMessage(containsAny(raw.Type), containsTypeObject(raw.Type), hasChunkLen(raw.Type), false, int64(tid)); err != nil {
+		return err
+	}
+	for i, refType := range raw.RefTypes {
+		mid, err := e.typeEnc.encode(refType)
+		if err != nil {
+			return err
+		}
+		if index := e.buf.ReferenceTypeID(mid); index != uint64(i) {
+			return verror.New(verror.ErrInternal, nil, "index unexpectedly out of order")
+		}
+	}
+	if raw.AnyLengths != nil {
+		e.buf.anyLens.lens = raw.AnyLengths
+	}
+	if err := e.buf.Write(raw.Data); err != nil {
+		return err
+	}
+	if err := e.buf.FinishMessage(); err != nil {
+		return err
+	}
+	if err := e.popType(); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+
 func (e *encoder) encodeWireType(tid typeId, wt wireType, typeIncomplete bool) error {
-	if err := e.startEncode(false, true, typeIncomplete, int64(-tid)); err != nil {
+	if err := e.startEncode(false, false, true, typeIncomplete, int64(-tid)); err != nil {
 		return err
 	}
 	if err := vdl.FromReflect(e, reflect.ValueOf(wt)); err != nil {
@@ -224,8 +260,8 @@ func (e *encoder) encodeWireType(tid typeId, wt wireType, typeIncomplete bool) e
 	return e.finishEncode()
 }
 
-func (e *encoder) startEncode(hasAny, hasLen, typeIncomplete bool, mid int64) error {
-	if err := e.buf.StartMessage(hasAny, hasLen, typeIncomplete, int64(mid)); err != nil {
+func (e *encoder) startEncode(hasAny, hasTypeObject, hasLen, typeIncomplete bool, mid int64) error {
+	if err := e.buf.StartMessage(hasAny, hasTypeObject, hasLen, typeIncomplete, int64(mid)); err != nil {
 		return err
 	}
 	e.typeStack = e.typeStack[:0]
@@ -285,22 +321,29 @@ func (e *encoder) prepareTypeHelper(tt *vdl.Type, fromNil bool) error {
 			binaryEncodeUint(e.buf, uint64(tid))
 		} else {
 			binaryEncodeUint(e.buf, e.buf.ReferenceTypeID(tid))
+			anyStartRef := e.buf.StartAny()
+			e.typeStack[len(e.typeStack)-1].anyStartRef = anyStartRef
+			binaryEncodeUint(e.buf, anyStartRef.index)
 		}
 	}
 	return nil
 }
 
 func (e *encoder) pushType(tt *vdl.Type) {
-	e.typeStack = append(e.typeStack, typeStackEntry{tt, -1})
+	e.typeStack = append(e.typeStack, typeStackEntry{tt, -1, nil})
 }
 
 func (e *encoder) pushFieldType(tt *vdl.Type, index int) {
-	e.typeStack = append(e.typeStack, typeStackEntry{tt, index})
+	e.typeStack = append(e.typeStack, typeStackEntry{tt, index, nil})
 }
 
 func (e *encoder) popType() error {
 	if len(e.typeStack) == 0 {
 		return verror.New(errEncodeBadTypeStack, nil)
+	}
+	topEntry := e.typeStack[len(e.typeStack)-1]
+	if topEntry.anyStartRef != nil {
+		e.buf.FinishAny(topEntry.anyStartRef)
 	}
 	e.typeStack = e.typeStack[:len(e.typeStack)-1]
 	return nil
