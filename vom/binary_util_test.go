@@ -90,9 +90,9 @@ func TestBinaryEncodeDecode(t *testing.T) {
 	for _, test := range tests {
 		// Test encode
 		var byteBuf bytes.Buffer
-		sb := newSwitchedEncbuf(&byteBuf, Version82)
+		sb := newMessageWriter(&byteBuf, Version81)
 		msgID := int64(0x12)
-		sb.StartMessage(false, false, false, msgID)
+		sb.StartMessage(false, false, false, false, msgID)
 		switch val := test.v.(type) {
 		case byte:
 			binaryEncodeControl(sb, val)
@@ -107,12 +107,14 @@ func TestBinaryEncodeDecode(t *testing.T) {
 		case string:
 			binaryEncodeString(sb, val)
 		}
-		if err := sb.chunked.finishChunk(true); err != nil {
-			t.Fatalf("Error finishing chunk\n")
+		if err := sb.FinishMessage(); err != nil {
+			t.Errorf("error in finish message: %v", err)
+			continue
 		}
 		expectedHex := fmt.Sprintf("%x", msgID*2) + test.hex // message id is prepended to hex
 		if got, want := fmt.Sprintf("%x", byteBuf.Bytes()), expectedHex; got != want {
 			t.Errorf("binary encode %T(%v): GOT 0x%v WANT 0x%v", test.v, test.v, got, want)
+			continue
 		}
 		// Test decode
 		var bin string

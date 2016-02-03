@@ -117,6 +117,8 @@ const (
 	DumpKindTypeMsg
 	DumpKindValueMsg
 	DumpKindMsgLen
+	DumpKindAnyMsgLen
+	DumpKindAnyLensLen
 	DumpKindTypeIdsLen
 	DumpKindTypeId
 	DumpKindPrimValue
@@ -127,7 +129,7 @@ const (
 )
 
 // DumpKindAll holds all labels for DumpKind.
-var DumpKindAll = [...]DumpKind{DumpKindVersion, DumpKindControl, DumpKindMsgId, DumpKindTypeMsg, DumpKindValueMsg, DumpKindMsgLen, DumpKindTypeIdsLen, DumpKindTypeId, DumpKindPrimValue, DumpKindByteLen, DumpKindValueLen, DumpKindIndex, DumpKindWireTypeIndex}
+var DumpKindAll = [...]DumpKind{DumpKindVersion, DumpKindControl, DumpKindMsgId, DumpKindTypeMsg, DumpKindValueMsg, DumpKindMsgLen, DumpKindAnyMsgLen, DumpKindAnyLensLen, DumpKindTypeIdsLen, DumpKindTypeId, DumpKindPrimValue, DumpKindByteLen, DumpKindValueLen, DumpKindIndex, DumpKindWireTypeIndex}
 
 // DumpKindFromString creates a DumpKind from a string label.
 func DumpKindFromString(label string) (x DumpKind, err error) {
@@ -155,6 +157,12 @@ func (x *DumpKind) Set(label string) error {
 		return nil
 	case "MsgLen", "msglen":
 		*x = DumpKindMsgLen
+		return nil
+	case "AnyMsgLen", "anymsglen":
+		*x = DumpKindAnyMsgLen
+		return nil
+	case "AnyLensLen", "anylenslen":
+		*x = DumpKindAnyLensLen
 		return nil
 	case "TypeIdsLen", "typeidslen":
 		*x = DumpKindTypeIdsLen
@@ -197,6 +205,10 @@ func (x DumpKind) String() string {
 		return "ValueMsg"
 	case DumpKindMsgLen:
 		return "MsgLen"
+	case DumpKindAnyMsgLen:
+		return "AnyMsgLen"
+	case DumpKindAnyLensLen:
+		return "AnyLensLen"
 	case DumpKindTypeIdsLen:
 		return "TypeIdsLen"
 	case DumpKindTypeId:
@@ -217,7 +229,7 @@ func (x DumpKind) String() string {
 
 func (DumpKind) __VDLReflect(struct {
 	Name string `vdl:"v.io/v23/vom.DumpKind"`
-	Enum struct{ Version, Control, MsgId, TypeMsg, ValueMsg, MsgLen, TypeIdsLen, TypeId, PrimValue, ByteLen, ValueLen, Index, WireTypeIndex string }
+	Enum struct{ Version, Control, MsgId, TypeMsg, ValueMsg, MsgLen, AnyMsgLen, AnyLensLen, TypeIdsLen, TypeId, PrimValue, ByteLen, ValueLen, Index, WireTypeIndex string }
 }) {
 }
 

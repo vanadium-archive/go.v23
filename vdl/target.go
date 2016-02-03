@@ -168,6 +168,7 @@ func FromReflect(target Target, rv reflect.Value) error {
 	if !rv.IsValid() {
 		return target.FromNil(AnyType)
 	}
+
 	// Flatten pointers and interfaces in rv, and handle special-cases.  We track
 	// whether the final flattened value had any pointers via hasPtr, in order to
 	// track optional types correctly.
@@ -210,6 +211,8 @@ func FromReflect(target Target, rv reflect.Value) error {
 		case rt.ConvertibleTo(rtPtrToValue):
 			// If rv is convertible to *Value, fill from it directly.
 			return FromValue(target, rv.Convert(rtPtrToValue).Interface().(*Value))
+		case rt.Implements(rtTargetConvertible):
+			return rv.Interface().(rawBytesTargetConvertible).ToTarget(target)
 		}
 		rv = rv.Elem()
 	}

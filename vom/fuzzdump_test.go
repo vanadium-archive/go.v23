@@ -15,7 +15,6 @@ import (
 
 	"v.io/v23/vom/testdata/data80"
 	"v.io/v23/vom/testdata/data81"
-	"v.io/v23/vom/testdata/data82"
 )
 
 func TestFuzzDump(t *testing.T) {
@@ -26,7 +25,6 @@ func TestFuzzDump(t *testing.T) {
 	seen := make(map[[sha1.Size]byte]bool)
 
 	tests := append(data80.Tests, data81.Tests...)
-	tests = append(tests, data82.Tests...)
 
 	for _, test := range tests {
 		binversion, err := binFromHexPat(test.HexVersion)

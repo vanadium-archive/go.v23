@@ -39,6 +39,11 @@ type convTarget struct {
 	rv reflect.Value
 }
 
+// TODO(bprosnitz) Remove this -- it exists to get the reflect value for VOM and avoid package dependency cycles.
+func (c convTarget) HackGetRv() reflect.Value {
+	return c.rv
+}
+
 // ReflectTarget returns a conversion Target based on the given reflect.Value.
 // Some rules depending on the type of rv:
 //   o If rv is a valid *Value, it is filled in directly.
@@ -53,13 +58,13 @@ func ReflectTarget(rv reflect.Value) (Target, error) {
 	if vv := extractValue(rv); vv.IsValid() {
 		return valueConv(vv), nil
 	}
-	if !rv.CanSet() && rv.Kind() == reflect.Ptr && !rv.IsNil() {
-		// Dereference the pointer a single time to make rv settable.
-		rv = rv.Elem()
-	}
 	tt, err := TypeFromReflect(rv.Type())
 	if err != nil {
 		return nil, err
+	}
+	if !rv.CanSet() && rv.Kind() == reflect.Ptr && !rv.IsNil() {
+		// Dereference the pointer a single time to make rv settable.
+		rv = rv.Elem()
 	}
 	target, err := reflectConv(rv, tt)
 	if err != nil {
@@ -1048,6 +1053,11 @@ func (c convTarget) FinishFields(x FieldsTarget) error {
 // compConvTarget represents the state and logic for composite value conversion.
 type compConvTarget struct {
 	fin, fill convTarget // fields returned by startConvert.
+}
+
+// TODO(bprosnitz) Remove this -- it exists to get the reflect value for VOM and avoid package dependency cycles.
+func (c compConvTarget) HackGetRv() reflect.Value {
+	return c.fin.rv
 }
 
 // StartElem implements the ListTarget interface method.
