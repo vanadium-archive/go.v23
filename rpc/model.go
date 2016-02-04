@@ -28,7 +28,7 @@ type Client interface {
 	// Call object manages streaming args and results, and finishes the call.
 	//
 	// StartCall accepts at least the following options:
-	// v23.CallTimeout.
+	// v.io/v23/options.ChannelTimeout, v.io/v23/options.NoRetry.
 	StartCall(ctx *context.T, name, method string, args []interface{}, opts ...CallOpt) (ClientCall, error)
 
 	// Call makes a synchronous call that will retry application level
