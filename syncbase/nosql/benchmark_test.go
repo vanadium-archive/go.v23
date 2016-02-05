@@ -213,6 +213,34 @@ func runWatchPutsBenchmark(b *testing.B, value interface{}) {
 	}
 }
 
+// Measures how long it takes to put and get notified about a single value.
+func runWatchOnePutBenchmark(b *testing.B, value interface{}) {
+	ctx, d, tb, cleanup := prepare(b)
+	defer cleanup()
+	w, err := d.Watch(ctx, "tb", "", watch.ResumeMarker("now"))
+	row := make(chan struct{})
+	if err != nil {
+		b.Fatalf("watch error: %v", err)
+	}
+	go func() {
+		seen := 0
+		for seen < b.N && w.Advance() {
+			seen++
+			w.Change()
+			row <- struct{}{}
+		}
+		if w.Err() != nil {
+			b.Fatalf("stream error: %v", w.Err())
+		}
+	}()
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		writeRowsCustom(b, ctx, tb, value, 1)
+		<-row
+	}
+	w.Cancel()
+}
+
 func BenchmarkTinyPut(b *testing.B) {
 	runPutBenchmark(b, makeTestStruct())
 }
@@ -237,6 +265,10 @@ func BenchmarkTinyWatchPuts(b *testing.B) {
 	runWatchPutsBenchmark(b, makeTestStruct())
 }
 
+func BenchmarkTinyWatchOnePut(b *testing.B) {
+	runWatchOnePutBenchmark(b, makeTestStruct())
+}
+
 func BenchmarkHugePut(b *testing.B) {
 	runPutBenchmark(b, makeTestStruct100K())
 }
@@ -259,4 +291,8 @@ func BenchmarkHugeExec(b *testing.B) {
 
 func BenchmarkHugeWatchPuts(b *testing.B) {
 	runWatchPutsBenchmark(b, makeTestStruct100K())
+}
+
+func BenchmarkHugeWatchOnePut(b *testing.B) {
+	runWatchOnePutBenchmark(b, makeTestStruct100K())
 }
