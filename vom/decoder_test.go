@@ -521,3 +521,27 @@ func TestFuzzTypeDecodeHang(t *testing.T) {
 		t.Fatal("unexpected success")
 	}
 }
+
+// Test that truncated input is handled gracefully.
+func TestDecodeTruncatedInput(t *testing.T) {
+	type bar struct {
+		I []int64
+	}
+	type foo struct {
+		S string
+		I int32
+		F float64
+		X []byte
+		B bar
+	}
+	encoded, err := Encode(foo{"hello", 42, 3.14159265359, []byte{1, 2, 3, 4, 5, 6}, bar{[]int64{0}}})
+	if err != nil {
+		t.Fatalf("Encode failed: %v", err)
+	}
+	for x := 0; x < len(encoded)-1; x++ {
+		var f interface{}
+		if err := Decode(encoded[:x], &f); err == nil {
+			t.Errorf("Encode did not fail with x=%d", x)
+		}
+	}
+}

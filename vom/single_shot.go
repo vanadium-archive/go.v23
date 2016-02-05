@@ -127,6 +127,9 @@ func computeTypeDecoderCacheKey(message []byte) (string, error) {
 	readPos++
 	// Walk through bytes until we get to a value message.
 	for {
+		if len(message) < readPos {
+			return "", verror.New(errIndexOutOfRange, nil)
+		}
 		switch id, cr, byteLen, err := byteSliceBinaryPeekIntWithControl(message[readPos:]); {
 		case err != nil:
 			return "", err
