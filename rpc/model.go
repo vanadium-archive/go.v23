@@ -12,6 +12,7 @@ import (
 	"time"
 
 	"v.io/v23/context"
+	"v.io/v23/flow"
 	"v.io/v23/glob"
 	"v.io/v23/naming"
 	"v.io/v23/security"
@@ -34,6 +35,11 @@ type Client interface {
 	// Call makes a synchronous call that will retry application level
 	// verrors that have verror.ActionCode RetryBackoff.
 	Call(ctx *context.T, name, method string, inArgs, outArgs []interface{}, opts ...CallOpt) error
+
+	// Connection returns a ManagedConn to the remote end if it is successful
+	// connecting to it within the context’s timeout, or if the connection is
+	// already in the cache.
+	Connection(ctx *context.T, name string, opts ...CallOpt) (flow.ManagedConn, error)
 
 	// Close discards all state associated with this Client.  In-flight calls may
 	// be terminated with an error.
