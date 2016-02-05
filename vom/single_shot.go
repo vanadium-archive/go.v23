@@ -131,13 +131,13 @@ func computeTypeDecoderCacheKey(message []byte) (string, error) {
 		switch id, cr, byteLen, err := byteSliceBinaryPeekIntWithControl(message[readPos:]); {
 		case err != nil:
 			return "", err
-		case id > 0 || cr == WireCtrlValueFirstChunk:
+		case id > 0:
 			// This is a value message.  The bytes read so far include the version
 			// byte and all type messages; use all of these bytes as the cache key.
 			//
 			// TODO(toddw): Take a fingerprint of these bytes to reduce memory usage.
 			return string(message[:readPos]), nil
-		case id < 0 || cr == WireCtrlTypeFirstChunk || cr == WireCtrlTypeChunk || cr == WireCtrlTypeLastChunk:
+		case id < 0:
 
 			// This is a type message.  Skip the bytes for the id or control code, and
 			// decode the message length (which always exists for wireType), and skip

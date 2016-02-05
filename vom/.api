@@ -22,13 +22,7 @@ pkg vom, const Version80 Version
 pkg vom, const Version81 Version
 pkg vom, const WireCtrlEnd byte
 pkg vom, const WireCtrlNil byte
-pkg vom, const WireCtrlTypeChunk byte
-pkg vom, const WireCtrlTypeFirstChunk byte
 pkg vom, const WireCtrlTypeIncomplete byte
-pkg vom, const WireCtrlTypeLastChunk byte
-pkg vom, const WireCtrlValueChunk byte
-pkg vom, const WireCtrlValueFirstChunk byte
-pkg vom, const WireCtrlValueLastChunk byte
 pkg vom, const WireIdAny typeId
 pkg vom, const WireIdBool typeId
 pkg vom, const WireIdByte typeId

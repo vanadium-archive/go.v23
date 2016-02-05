@@ -75,7 +75,7 @@ func uintToInt(uval uint64) int64 {
 	return int64(uval >> 1)
 }
 
-func binaryEncodeControl(buf *messageWriter, v byte) {
+func binaryEncodeControl(buf *encbuf, v byte) {
 	if v < 0x80 || v > 0xef {
 		panic(verror.New(errBadControlCode, nil, v))
 	}
@@ -107,7 +107,7 @@ func decbufBinaryPeekControl(db *decbuf) (byte, error) {
 }
 
 // Bools are encoded as a byte where 0 = false and anything else is true.
-func binaryEncodeBool(buf *messageWriter, v bool) {
+func binaryEncodeBool(buf *encbuf, v bool) {
 	if v {
 		buf.WriteOneByte(1)
 	} else {
@@ -141,81 +141,7 @@ func decbufBinaryDecodeBool(db *decbuf) (bool, error) {
 // two-state encoding.  If the number is less than 128 (0 through 0x7f), its
 // value is written directly.  Otherwise the value is written in big-endian byte
 // order preceded by the negated byte length.
-func binaryEncodeUint(buf *messageWriter, v uint64) (err error) {
-	var b []byte
-	switch {
-	case v <= 0x7f:
-		b, err = buf.Grow(1)
-		b[0] = byte(v)
-	case v <= 0xff:
-		b, err = buf.Grow(2)
-		b[0] = 0xff
-		b[1] = byte(v)
-	case v <= 0xffff:
-		b, err = buf.Grow(3)
-		b[0] = 0xfe
-		b[1] = byte(v >> 8)
-		b[2] = byte(v)
-	case v <= 0xffffff:
-		b, err = buf.Grow(4)
-		b[0] = 0xfd
-		b[1] = byte(v >> 16)
-		b[2] = byte(v >> 8)
-		b[3] = byte(v)
-	case v <= 0xffffffff:
-		b, err = buf.Grow(5)
-		b[0] = 0xfc
-		b[1] = byte(v >> 24)
-		b[2] = byte(v >> 16)
-		b[3] = byte(v >> 8)
-		b[4] = byte(v)
-	case v <= 0xffffffffff:
-		b, err = buf.Grow(6)
-		b[0] = 0xfb
-		b[1] = byte(v >> 32)
-		b[2] = byte(v >> 24)
-		b[3] = byte(v >> 16)
-		b[4] = byte(v >> 8)
-		b[5] = byte(v)
-	case v <= 0xffffffffffff:
-		b, err = buf.Grow(7)
-		b[0] = 0xfa
-		b[1] = byte(v >> 40)
-		b[2] = byte(v >> 32)
-		b[3] = byte(v >> 24)
-		b[4] = byte(v >> 16)
-		b[5] = byte(v >> 8)
-		b[6] = byte(v)
-	case v <= 0xffffffffffffff:
-		b, err = buf.Grow(8)
-		b[0] = 0xf9
-		b[1] = byte(v >> 48)
-		b[2] = byte(v >> 40)
-		b[3] = byte(v >> 32)
-		b[4] = byte(v >> 24)
-		b[5] = byte(v >> 16)
-		b[6] = byte(v >> 8)
-		b[7] = byte(v)
-	default:
-		b, err = buf.Grow(9)
-		b[0] = 0xf8
-		b[1] = byte(v >> 56)
-		b[2] = byte(v >> 48)
-		b[3] = byte(v >> 40)
-		b[4] = byte(v >> 32)
-		b[5] = byte(v >> 24)
-		b[6] = byte(v >> 16)
-		b[7] = byte(v >> 8)
-		b[8] = byte(v)
-	}
-	return
-}
-
-// Unsigned integers are the basis for all other primitive values.  This is a
-// two-state encoding.  If the number is less than 128 (0 through 0x7f), its
-// value is written directly.  Otherwise the value is written in big-endian byte
-// order preceded by the negated byte length.
-func binaryEncodeUintEncBuf(buf *encbuf, v uint64) {
+func binaryEncodeUint(buf *encbuf, v uint64) {
 	switch {
 	case v <= 0x7f:
 		buf.Grow(1)[0] = byte(v)
@@ -592,19 +518,7 @@ func decbufBinaryDecodeLenOrArrayLen(db *decbuf, t *vdl.Type) (int, error) {
 
 // Signed integers are encoded as unsigned integers, where the low bit says
 // whether to complement the other bits to recover the int.
-func binaryEncodeIntEncBuf(buf *encbuf, v int64) {
-	var uval uint64
-	if v < 0 {
-		uval = uint64(^v<<1) | 1
-	} else {
-		uval = uint64(v << 1)
-	}
-	binaryEncodeUintEncBuf(buf, uval)
-}
-
-// Signed integers are encoded as unsigned integers, where the low bit says
-// whether to complement the other bits to recover the int.
-func binaryEncodeInt(buf *messageWriter, v int64) {
+func binaryEncodeInt(buf *encbuf, v int64) {
 	var uval uint64
 	if v < 0 {
 		uval = uint64(^v<<1) | 1
@@ -633,7 +547,7 @@ func binaryPeekInt(mr *messageReader) (int64, int, error) {
 }
 
 // Floating point numbers are encoded as byte-reversed ieee754.
-func binaryEncodeFloat(buf *messageWriter, v float64) {
+func binaryEncodeFloat(buf *encbuf, v float64) {
 	ieee := math.Float64bits(v)
 	// Manually-unrolled byte-reversing.
 	uval := (ieee&0xff)<<56 |
@@ -682,9 +596,9 @@ func decbufBinaryDecodeFloat(db *decbuf) (float64, error) {
 }
 
 // Strings are encoded as the byte count followed by uninterpreted bytes.
-func binaryEncodeString(buf *messageWriter, s string) {
+func binaryEncodeString(buf *encbuf, s string) {
 	binaryEncodeUint(buf, uint64(len(s)))
-	buf.WriteString(s)
+	buf.Write([]byte(s))
 }
 
 func binaryDecodeString(buf *messageReader) (string, error) {

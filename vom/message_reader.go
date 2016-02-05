@@ -42,34 +42,29 @@ func (mk messageKind) String() string {
 	}
 }
 
-type messageData struct {
-	tid        typeId
-	refTypes   referencedTypes
-	refAnyLens referencedAnyLens
+func (mr *messageReader) Reset() error {
+	mr.tid = 0
+	return mr.refTypes.Reset()
 }
 
-func (m *messageData) Reset() error {
-	m.tid = 0
-	return m.refTypes.Reset()
-}
-
-func (m *messageData) HasMessage() bool {
-	return m.tid != 0
+func (mr *messageReader) HasMessage() bool {
+	return mr.tid != 0
 }
 
 // messageReader assists in reading messages across multiple chunks.
 type messageReader struct {
 	// Stream data:
-	buf     *decbuf
-	version Version
+	buf            *decbuf
+	version        Version
 
 	// Message data:
 	curMsgKind     messageKind
 	typeIncomplete bool // Type message was flagged as having dependencies on unsent types.
-	typeMsg        messageData
-	valueMsg       messageData
+	tid        typeId
+	refTypes   referencedTypes
+	refAnyLens referencedAnyLens
 
-	finalChunk bool // current chunk is flagged as the final chunk of the message
+	finalChunk     bool // current chunk is flagged as the final chunk of the message
 
 	lookupType     func(tid typeId) (*vdl.Type, error)
 	readSingleType func() error
@@ -121,68 +116,25 @@ func (mr *messageReader) startChunk() (msgConsumed bool, err error) {
 		mr.typeIncomplete = false
 	}
 
-	var activeMsg *messageData
-	switch cr {
-	case 0, WireCtrlTypeFirstChunk, WireCtrlValueFirstChunk:
-		origCr := cr
-		if cr != 0 {
-			// This is the start of a continuation - read the type id that follows.
-			mr.finalChunk = false
-			mid, cr, err = decbufBinaryDecodeIntWithControl(mr.buf)
-			if err != nil {
-				return false, err
-			}
-			if cr != 0 {
-				return false, verror.New(errInvalid, nil)
-			}
-		} else {
-			mr.finalChunk = true
-		}
-
-		var tid typeId
-		if mid < 0 {
-			mr.curMsgKind = typeMessage
-			activeMsg = &mr.typeMsg
-			tid = typeId(-mid)
-			if origCr == WireCtrlValueFirstChunk {
-				return false, verror.New(errInvalid, nil)
-			}
-		} else if mid > 0 {
-			mr.curMsgKind = valueMessage
-			activeMsg = &mr.valueMsg
-			tid = typeId(mid)
-			if origCr == WireCtrlTypeFirstChunk {
-				return false, verror.New(errInvalid, nil)
-			}
-		} else {
-			return false, verror.New(errDecodeZeroTypeID, nil)
-		}
-		if activeMsg.HasMessage() {
-			// Message continuation before previous ended.
-			return false, verror.New(errInvalid, nil)
-		}
-		activeMsg.tid = tid
-	case WireCtrlTypeChunk, WireCtrlTypeLastChunk:
-		mr.curMsgKind = typeMessage
-		activeMsg = &mr.typeMsg
-		if !activeMsg.HasMessage() {
-			return false, verror.New(errContChunkBeforeNew, nil)
-		}
-		if cr == WireCtrlTypeLastChunk {
-			mr.finalChunk = true
-		}
-	case WireCtrlValueChunk, WireCtrlValueLastChunk:
-		mr.curMsgKind = valueMessage
-		activeMsg = &mr.valueMsg
-		if !activeMsg.HasMessage() {
-			return false, verror.New(errContChunkBeforeNew, nil)
-		}
-		if cr == WireCtrlValueLastChunk {
-			mr.finalChunk = true
-		}
-	default:
+	if cr != 0 {
 		return false, verror.New(errBadControlCode, nil)
 	}
+
+	var tid typeId
+	if mid < 0 {
+		mr.curMsgKind = typeMessage
+		tid = typeId(-mid)
+	} else if mid > 0 {
+		mr.curMsgKind = valueMessage
+		tid = typeId(mid)
+	} else {
+		return false, verror.New(errDecodeZeroTypeID, nil)
+	}
+	if mr.HasMessage() {
+		// Message continuation before previous ended.
+		return false, verror.New(errInvalid, nil)
+	}
+	mr.tid = tid
 
 	var hasAny, hasTypeObject bool
 	var hasLength bool
@@ -192,7 +144,7 @@ func (mr *messageReader) startChunk() (msgConsumed bool, err error) {
 		hasAny = false
 		hasTypeObject = false
 	case valueMessage:
-		t, err := mr.lookupType(activeMsg.tid)
+		t, err := mr.lookupType(mr.tid)
 		if err != nil {
 			return false, err
 		}
@@ -211,7 +163,7 @@ func (mr *messageReader) startChunk() (msgConsumed bool, err error) {
 			if err != nil {
 				return false, err
 			}
-			activeMsg.refTypes.AddTypeID(typeId(refId))
+			mr.refTypes.AddTypeID(typeId(refId))
 		}
 	}
 	if hasAny && mr.version != Version80 {
@@ -224,7 +176,7 @@ func (mr *messageReader) startChunk() (msgConsumed bool, err error) {
 			if err != nil {
 				return false, err
 			}
-			activeMsg.refAnyLens.AddAnyLen(refAnyLen)
+			mr.refAnyLens.AddAnyLen(refAnyLen)
 		}
 	}
 
@@ -282,7 +234,7 @@ func (mr *messageReader) StartTypeMessage() (typeId, error) {
 	if mr.curMsgKind == valueMessage {
 		return 0, verror.New(errGotValueWantType, nil)
 	}
-	return mr.typeMsg.tid, nil
+	return mr.tid, nil
 }
 
 func (mr *messageReader) StartValueMessage() (typeId, error) {
@@ -293,7 +245,7 @@ func (mr *messageReader) StartValueMessage() (typeId, error) {
 	if mr.curMsgKind == typeMessage {
 		return 0, verror.New(errGotTypeWantValue, nil)
 	}
-	return mr.valueMsg.tid, nil
+	return mr.tid, nil
 }
 
 func (mr *messageReader) EndMessage() error {
@@ -303,9 +255,9 @@ func (mr *messageReader) EndMessage() error {
 	switch mr.curMsgKind {
 	case typeMessage:
 		mr.curMsgKind = valueMessage // Set kind to value message to return to reading value if we temporarily left to decode a type.
-		return mr.typeMsg.Reset()
+		return mr.Reset()
 	case valueMessage:
-		return mr.valueMsg.Reset()
+		return mr.Reset()
 	default:
 		panic("unknown msg kind")
 	}
@@ -403,9 +355,9 @@ func (mr *messageReader) ReferencedType(index uint64) (t *vdl.Type, err error) {
 	var tid typeId
 	switch mr.curMsgKind {
 	case typeMessage:
-		tid, err = mr.typeMsg.refTypes.ReferencedTypeId(index)
+		tid, err = mr.refTypes.ReferencedTypeId(index)
 	case valueMessage:
-		tid, err = mr.valueMsg.refTypes.ReferencedTypeId(index)
+		tid, err = mr.refTypes.ReferencedTypeId(index)
 	default:
 		panic("unknown message kind")
 	}
@@ -423,9 +375,9 @@ func (mr *messageReader) ReferencedAnyLen(index uint64) (length uint64, err erro
 
 	switch mr.curMsgKind {
 	case typeMessage:
-		length, err = mr.typeMsg.refAnyLens.ReferencedAnyLen(index)
+		length, err = mr.refAnyLens.ReferencedAnyLen(index)
 	case valueMessage:
-		length, err = mr.valueMsg.refAnyLens.ReferencedAnyLen(index)
+		length, err = mr.refAnyLens.ReferencedAnyLen(index)
 	default:
 		panic("unknown message kind")
 	}
@@ -436,9 +388,9 @@ func (mr *messageReader) ReferencedAnyLen(index uint64) (length uint64, err erro
 func (mr *messageReader) AllReferencedTypes() []typeId {
 	switch mr.curMsgKind {
 	case typeMessage:
-		return mr.typeMsg.refTypes.tids
+		return mr.refTypes.tids
 	case valueMessage:
-		return mr.valueMsg.refTypes.tids
+		return mr.refTypes.tids
 	default:
 		panic("unknown message kind")
 	}
@@ -448,9 +400,9 @@ func (mr *messageReader) AllReferencedTypes() []typeId {
 func (mr *messageReader) AllReferencedAnyLens() []uint64 {
 	switch mr.curMsgKind {
 	case typeMessage:
-		return mr.typeMsg.refAnyLens.lens
+		return mr.refAnyLens.lens
 	case valueMessage:
-		return mr.valueMsg.refAnyLens.lens
+		return mr.refAnyLens.lens
 	default:
 		panic("unknown message kind")
 	}

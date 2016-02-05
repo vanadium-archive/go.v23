@@ -293,20 +293,4 @@ const WireCtrlNil = byte(224) // Nil in optional or any
 
 const WireCtrlEnd = byte(225) // End of struct or union
 
-// Control codes for chunked messages.
-// Chunks in multi-chunk messages begin with one of these values.
-// Single-chunk messages do not use these control codes and instead begin with a
-// type id.
-const WireCtrlValueFirstChunk = byte(226) // First chunk in a multi-chunk value message
-
-const WireCtrlValueChunk = byte(227) // Continuation of a multi-chunk value message
-
-const WireCtrlValueLastChunk = byte(228) // Final chunk in a multi-chunk value message
-
-const WireCtrlTypeFirstChunk = byte(229) // First chunk in a multi-chunk type message
-
-const WireCtrlTypeChunk = byte(230) // Continuation of a multi-chunk type message
-
-const WireCtrlTypeLastChunk = byte(231) // Final chunk in a multi-chunk type message
-
-const WireCtrlTypeIncomplete = byte(232) // Marks that the type message is incomplete until future messages are received
+const WireCtrlTypeIncomplete = byte(226) // Marks that the type message is incomplete until future messages are received

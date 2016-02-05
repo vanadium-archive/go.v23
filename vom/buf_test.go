@@ -22,17 +22,17 @@ func expectEncbufBytes(t *testing.T, b *encbuf, expect string) {
 }
 
 func TestEncbuf(t *testing.T) {
-	b := newEncbuf(2 << 14)
+	b := newEncbuf()
 	expectEncbufBytes(t, b, "")
 	copy(b.Grow(5), "abcde*****")
 	expectEncbufBytes(t, b, "abcde")
 	b.WriteOneByte('1')
 	expectEncbufBytes(t, b, "abcde1")
-	b.WriteMaximumPossible([]byte("def"))
+	b.Write([]byte("def"))
 	expectEncbufBytes(t, b, "abcde1def")
 	b.Reset()
 	expectEncbufBytes(t, b, "")
-	b.WriteMaximumPossible([]byte("123"))
+	b.Write([]byte("123"))
 	expectEncbufBytes(t, b, "123")
 }
 
@@ -40,18 +40,18 @@ func testEncbufReserve(t *testing.T, base int) {
 	for _, size := range []int{base - 1, base, base + 1} {
 		str := strings.Repeat("x", size)
 		// Test starting empty and writing size.
-		b := newEncbuf(2 << 14)
-		b.WriteMaximumPossible([]byte(str))
+		b := newEncbuf()
+		b.Write([]byte(str))
 		expectEncbufBytes(t, b, str)
-		b.WriteMaximumPossible([]byte(str))
+		b.Write([]byte(str))
 		expectEncbufBytes(t, b, str+str)
 		// Test starting with one byte and writing size.
-		b = newEncbuf(2 << 14)
+		b = newEncbuf()
 		b.WriteOneByte('A')
 		expectEncbufBytes(t, b, "A")
-		b.WriteMaximumPossible([]byte(str))
+		b.Write([]byte(str))
 		expectEncbufBytes(t, b, "A"+str)
-		b.WriteMaximumPossible([]byte(str))
+		b.Write([]byte(str))
 		expectEncbufBytes(t, b, "A"+str+str)
 	}
 }
@@ -61,19 +61,6 @@ func TestEncbufReserve(t *testing.T) {
 	testEncbufReserve(t, minBufFree*2)
 	testEncbufReserve(t, minBufFree*3)
 	testEncbufReserve(t, minBufFree*4)
-}
-
-func TestEncbufHitMaximum(t *testing.T) {
-	maxSize := 2 << 10
-	b := newEncbuf(maxSize)
-	b.WriteOneByte('A')
-	b.WriteOneByte('B')
-	str := strings.Repeat("x", maxSize)
-	amtWritten := b.WriteMaximumPossible([]byte(str))
-	if got, want := amtWritten, maxSize-2; got != want {
-		t.Errorf("expected %d bytes to be written, but %d were", want, got)
-	}
-	expectEncbufBytes(t, b, "AB"+str[:len(str)-2])
 }
 
 func expectReadSmall(t *testing.T, mode string, b *decbuf, n int, expect string, expectErr error) {

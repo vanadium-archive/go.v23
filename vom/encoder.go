@@ -7,7 +7,6 @@ package vom
 import (
 	"io"
 	"reflect"
-
 	"fmt"
 
 	"v.io/v23/vdl"
@@ -36,7 +35,18 @@ var (
 	errLabelNotInType          = verror.Register(pkgPath+".errLabelNotInType", verror.NoRetry, "{1:}{2:} enum label {3} doesn't exist in type {4}{:_}")
 	errFieldNotInTopType       = verror.Register(pkgPath+".errFieldNotInTopType", verror.NoRetry, "{1:}{2:} field name {3} doesn't exist in top type {4}{:_}")
 	errUnsupportedInVOMVersion = verror.Register(pkgPath+".errUnsupportedInVOMVersion", verror.NoRetry, "{1:}{2:} {3} unsupported in vom version {4}{:_}")
+	errUnusedTypeIds = verror.Register(pkgPath+".errUnusedTypeIds", verror.NoRetry, "{1:}{2:} vom: some type ids unused during encode {:_}")
+	errUnusedAnys    = verror.Register(pkgPath+".errUnusedAnys", verror.NoRetry, "{1:}{2:} vom: some anys unused during encode {:_}")
 )
+
+
+const (
+	typeIDListInitialSize = 16
+	anyLenListInitialSize = 16
+)
+
+// paddingLen must be large enough to hold the header in writeMsg.
+const paddingLen = maxEncodedUintBytes * 2
 
 var (
 	rtPtrToValue    = reflect.TypeOf((*vdl.Value)(nil))
@@ -65,7 +75,7 @@ type encoder struct {
 	writer io.Writer
 	// We use buf to buffer up the encoded value. The buffering is necessary so
 	// that we can compute the total message length.
-	buf *messageWriter
+	buf *encbuf
 	// We maintain a typeStack, where typeStack[0] holds the type of the top-level
 	// value being encoded, and subsequent layers of the stack holds type information
 	// for composites and subtypes. Each entry also holds the start position of the
@@ -75,6 +85,14 @@ type encoder struct {
 	typeEnc         *TypeEncoder
 	sentVersionByte bool
 	version         Version
+
+	tids    *typeIDList
+	anyLens *anyLenList
+
+	hasLen, hasAny, hasTypeObject bool
+	typeIncomplete                bool
+	mid                           int64 // message id
+	w                             io.Writer
 }
 
 type typeStackEntry struct {
@@ -97,7 +115,7 @@ func NewVersionedEncoder(version Version, w io.Writer) *Encoder {
 	}
 	return &Encoder{encoder{
 		writer:          w,
-		buf:             newMessageWriter(w, version),
+		buf:             newEncbuf(),
 		typeStack:       make([]typeStackEntry, 0, 10),
 		typeEnc:         newTypeEncoderWithoutVersionByte(version, w),
 		sentVersionByte: false,
@@ -121,7 +139,7 @@ func NewVersionedEncoderWithTypeEncoder(version Version, w io.Writer, typeEnc *T
 	}
 	return &Encoder{encoder{
 		writer:          w,
-		buf:             newMessageWriter(w, version),
+		buf:             newEncbuf(),
 		typeStack:       make([]typeStackEntry, 0, 10),
 		typeEnc:         typeEnc,
 		sentVersionByte: false,
@@ -135,7 +153,7 @@ func newEncoderWithoutVersionByte(version Version, w io.Writer, typeEnc *TypeEnc
 	}
 	return &encoder{
 		writer:          w,
-		buf:             newMessageWriter(w, version),
+		buf:             newEncbuf(),
 		typeStack:       make([]typeStackEntry, 0, 10),
 		typeEnc:         typeEnc,
 		sentVersionByte: true,
@@ -220,7 +238,7 @@ func (e *encoder) encodeRaw(raw *RawBytes) error {
 	if err != nil {
 		return err
 	}
-	if err := e.buf.StartMessage(containsAny(raw.Type), containsTypeObject(raw.Type), hasChunkLen(raw.Type), false, int64(tid)); err != nil {
+	if err := e.startMessage(containsAny(raw.Type), containsTypeObject(raw.Type), hasChunkLen(raw.Type), false, int64(tid)); err != nil {
 		return err
 	}
 	for i, refType := range raw.RefTypes {
@@ -228,17 +246,15 @@ func (e *encoder) encodeRaw(raw *RawBytes) error {
 		if err != nil {
 			return err
 		}
-		if index := e.buf.ReferenceTypeID(mid); index != uint64(i) {
+		if index := e.tids.ReferenceTypeID(mid); index != uint64(i) {
 			return verror.New(verror.ErrInternal, nil, "index unexpectedly out of order")
 		}
 	}
 	if raw.AnyLengths != nil {
-		e.buf.anyLens.lens = raw.AnyLengths
+		e.anyLens.lens = raw.AnyLengths
 	}
-	if err := e.buf.Write(raw.Data); err != nil {
-		return err
-	}
-	if err := e.buf.FinishMessage(); err != nil {
+	e.buf.Write(raw.Data)
+	if err := e.finishMessage(); err != nil {
 		return err
 	}
 	if err := e.popType(); err != nil {
@@ -261,7 +277,7 @@ func (e *encoder) encodeWireType(tid typeId, wt wireType, typeIncomplete bool) e
 }
 
 func (e *encoder) startEncode(hasAny, hasTypeObject, hasLen, typeIncomplete bool, mid int64) error {
-	if err := e.buf.StartMessage(hasAny, hasTypeObject, hasLen, typeIncomplete, int64(mid)); err != nil {
+	if err := e.startMessage(hasAny, hasTypeObject, hasLen, typeIncomplete, int64(mid)); err != nil {
 		return err
 	}
 	e.typeStack = e.typeStack[:0]
@@ -275,7 +291,7 @@ func (e *encoder) finishEncode() error {
 	case len(e.typeStack) == 0:
 		return verror.New(errEncodeNilType, nil)
 	}
-	return e.buf.FinishMessage()
+	return e.finishMessage()
 }
 
 func errTypeMismatch(t *vdl.Type, kinds ...vdl.Kind) error {
@@ -320,8 +336,8 @@ func (e *encoder) prepareTypeHelper(tt *vdl.Type, fromNil bool) error {
 		if e.version == Version80 {
 			binaryEncodeUint(e.buf, uint64(tid))
 		} else {
-			binaryEncodeUint(e.buf, e.buf.ReferenceTypeID(tid))
-			anyStartRef := e.buf.StartAny()
+			binaryEncodeUint(e.buf, e.tids.ReferenceTypeID(tid))
+			anyStartRef := e.anyLens.StartAny(uint64(e.buf.Len()))
 			e.typeStack[len(e.typeStack)-1].anyStartRef = anyStartRef
 			binaryEncodeUint(e.buf, anyStartRef.index)
 		}
@@ -343,7 +359,7 @@ func (e *encoder) popType() error {
 	}
 	topEntry := e.typeStack[len(e.typeStack)-1]
 	if topEntry.anyStartRef != nil {
-		e.buf.FinishAny(topEntry.anyStartRef)
+		e.anyLens.FinishAny(topEntry.anyStartRef, uint64(e.buf.Len()))
 	}
 	e.typeStack = e.typeStack[:len(e.typeStack)-1]
 	return nil
@@ -567,7 +583,7 @@ func (e *encoder) FromTypeObject(src *vdl.Type) error {
 	case Version80:
 		binaryEncodeUint(e.buf, uint64(tid))
 	default:
-		binaryEncodeUint(e.buf, e.buf.ReferenceTypeID(tid))
+		binaryEncodeUint(e.buf, e.tids.ReferenceTypeID(tid))
 	}
 	return nil
 }
@@ -755,4 +771,161 @@ func (e *encoder) StartField(name string) (_, _ vdl.Target, _ error) {
 
 func (e *encoder) FinishField(key, field vdl.Target) error {
 	return e.popType()
+}
+
+func (e *encoder) startMessage(hasAny, hasTypeObject, hasLen, typeIncomplete bool, mid int64) error {
+	e.buf.Reset()
+	e.buf.Grow(paddingLen)
+	e.hasLen = hasLen
+	e.hasAny = hasAny
+	e.hasTypeObject = hasTypeObject
+	e.typeIncomplete = typeIncomplete
+	e.mid = mid
+	if e.version >= Version81 && (e.hasAny || e.hasTypeObject) {
+		e.tids = newTypeIDList()
+	} else {
+		e.tids = nil
+	}
+	if e.version >= Version81 && e.hasAny {
+		e.anyLens = newAnyLenList()
+	} else {
+		e.anyLens = nil
+	}
+	return nil
+}
+
+func (e *encoder) finishMessage() error {
+	if e.version >= Version81 {
+		if e.typeIncomplete {
+			if _, err := e.writer.Write([]byte{WireCtrlTypeIncomplete}); err != nil {
+				return err
+			}
+		}
+		if e.hasAny || e.hasTypeObject {
+			ids := e.tids.NewIDs()
+			var anys []uint64
+			if e.hasAny {
+				anys = e.anyLens.NewAnyLens()
+			}
+			headerBuf := newEncbuf()
+			binaryEncodeInt(headerBuf, e.mid)
+			binaryEncodeUint(headerBuf, uint64(len(ids)))
+			for _, id := range ids {
+				binaryEncodeUint(headerBuf, uint64(id))
+			}
+			if e.hasAny {
+				binaryEncodeUint(headerBuf, uint64(len(anys)))
+				for _, anyLen := range anys {
+					binaryEncodeUint(headerBuf, uint64(anyLen))
+				}
+			}
+			msg := e.buf.Bytes()
+			if e.hasLen {
+				binaryEncodeUint(headerBuf, uint64(len(msg)-paddingLen))
+			}
+			if _, err := e.writer.Write(headerBuf.Bytes()); err != nil {
+				return err
+			}
+			_, err := e.writer.Write(msg[paddingLen:])
+			return err
+		}
+	}
+	msg := e.buf.Bytes()
+	header := msg[:paddingLen]
+	if e.hasLen {
+		start := binaryEncodeUintEnd(header, uint64(len(msg)-paddingLen))
+		header = header[:start]
+	}
+	start := binaryEncodeIntEnd(header, e.mid)
+	_, err := e.writer.Write(msg[start:])
+	return err
+}
+
+
+func newTypeIDList() *typeIDList {
+	return &typeIDList{
+		tids: make([]typeId, 0, typeIDListInitialSize),
+	}
+}
+
+type typeIDList struct {
+	tids      []typeId
+	totalSent int
+}
+
+func (l *typeIDList) ReferenceTypeID(tid typeId) uint64 {
+	for index, existingTid := range l.tids {
+		if existingTid == tid {
+			return uint64(index)
+		}
+	}
+
+	l.tids = append(l.tids, tid)
+	return uint64(len(l.tids) - 1)
+}
+
+func (l *typeIDList) Reset() error {
+	if l.totalSent != len(l.tids) {
+		return verror.New(errUnusedTypeIds, nil)
+	}
+	l.tids = l.tids[:0]
+	l.totalSent = 0
+	return nil
+}
+
+func (l *typeIDList) NewIDs() []typeId {
+	var newIDs []typeId
+	if l.totalSent < len(l.tids) {
+		newIDs = l.tids[l.totalSent:]
+	}
+	l.totalSent = len(l.tids)
+	return newIDs
+}
+
+func newAnyLenList() *anyLenList {
+	return &anyLenList{
+		lens: make([]uint64, 0, anyLenListInitialSize),
+	}
+}
+
+type anyStartRef struct {
+	index  uint64 // index into the anyLen list
+	marker uint64 // position marker for the start of the any
+}
+
+type anyLenList struct {
+	lens      []uint64
+	totalSent int
+}
+
+func (l *anyLenList) StartAny(startMarker uint64) *anyStartRef {
+	l.lens = append(l.lens, 0)
+	return &anyStartRef{
+		index:  uint64(len(l.lens) - 1),
+		marker: startMarker,
+	}
+}
+
+func (l *anyLenList) FinishAny(start *anyStartRef, endMarker uint64) {
+	lenIncLenBytes := endMarker - start.marker
+	len := lenIncLenBytes - lenUint(lenIncLenBytes)
+	l.lens[start.index] = len
+}
+
+func (l *anyLenList) Reset() error {
+	if l.totalSent != len(l.lens) {
+		return verror.New(errUnusedAnys, nil)
+	}
+	l.lens = l.lens[:0]
+	l.totalSent = 0
+	return nil
+}
+
+func (l *anyLenList) NewAnyLens() []uint64 {
+	var newAnyLens []uint64
+	if l.totalSent < len(l.lens) {
+		newAnyLens = l.lens[l.totalSent:]
+	}
+	l.totalSent = len(l.lens)
+	return newAnyLens
 }

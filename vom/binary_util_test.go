@@ -1,11 +1,8 @@
 // Copyright 2015 The Vanadium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
-
 package vom
-
 import (
-	"bytes"
 	"fmt"
 	"io"
 	"math"
@@ -29,14 +26,12 @@ func TestBinaryEncodeDecode(t *testing.T) {
 	}{
 		{false, "00"},
 		{true, "01"},
-
 		{byte(0x80), "80"},
 		{byte(0xbf), "bf"},
 		{byte(0xc0), "c0"},
 		{byte(0xdf), "df"},
 		{byte(0xe0), "e0"},
 		{byte(0xef), "ef"},
-
 		{uint64(0), "00"},
 		{uint64(1), "01"},
 		{uint64(2), "02"},
@@ -52,7 +47,6 @@ func TestBinaryEncodeDecode(t *testing.T) {
 		{uint64(0xffffffffffff), "faffffffffffff"},
 		{uint64(0xffffffffffffff), "f9ffffffffffffff"},
 		{uint64(0xffffffffffffffff), "f8ffffffffffffffff"},
-
 		{int64(0), "00"},
 		{int64(1), "02"},
 		{int64(2), "04"},
@@ -65,7 +59,6 @@ func TestBinaryEncodeDecode(t *testing.T) {
 		{int64(math.MaxInt16), "fefffe"},
 		{int64(math.MaxInt32), "fcfffffffe"},
 		{int64(math.MaxInt64), "f8fffffffffffffffe"},
-
 		{int64(-1), "01"},
 		{int64(-2), "03"},
 		{int64(-64), "7f"},
@@ -77,44 +70,43 @@ func TestBinaryEncodeDecode(t *testing.T) {
 		{int64(math.MinInt16), "feffff"},
 		{int64(math.MinInt32), "fcffffffff"},
 		{int64(math.MinInt64), "f8ffffffffffffffff"},
-
 		{float64(0), "00"},
 		{float64(1), "fef03f"},
 		{float64(17), "fe3140"},
 		{float64(18), "fe3240"},
-
 		{"", "00"},
 		{"abc", "03616263"},
 		{"defghi", "06646566676869"},
 	}
 	for _, test := range tests {
 		// Test encode
-		var byteBuf bytes.Buffer
-		sb := newMessageWriter(&byteBuf, Version81)
-		msgID := int64(0x12)
-		sb.StartMessage(false, false, false, false, msgID)
+		encbuf := newEncbuf()
+		var buf []byte
 		switch val := test.v.(type) {
 		case byte:
-			binaryEncodeControl(sb, val)
+			binaryEncodeControl(encbuf, val)
 		case bool:
-			binaryEncodeBool(sb, val)
+			binaryEncodeBool(encbuf, val)
 		case uint64:
-			binaryEncodeUint(sb, val)
+			binaryEncodeUint(encbuf, val)
+			buf = make([]byte, maxEncodedUintBytes)
+			buf = buf[binaryEncodeUintEnd(buf, val):]
 		case int64:
-			binaryEncodeInt(sb, val)
+			binaryEncodeInt(encbuf, val)
+			buf = make([]byte, maxEncodedUintBytes)
+			buf = buf[binaryEncodeIntEnd(buf, val):]
 		case float64:
-			binaryEncodeFloat(sb, val)
+			binaryEncodeFloat(encbuf, val)
 		case string:
-			binaryEncodeString(sb, val)
+			binaryEncodeString(encbuf, val)
 		}
-		if err := sb.FinishMessage(); err != nil {
-			t.Errorf("error in finish message: %v", err)
-			continue
-		}
-		expectedHex := fmt.Sprintf("%x", msgID*2) + test.hex // message id is prepended to hex
-		if got, want := fmt.Sprintf("%x", byteBuf.Bytes()), expectedHex; got != want {
+		if got, want := fmt.Sprintf("%x", encbuf.Bytes()), test.hex; got != want {
 			t.Errorf("binary encode %T(%v): GOT 0x%v WANT 0x%v", test.v, test.v, got, want)
-			continue
+		}
+		if buf != nil {
+			if got, want := fmt.Sprintf("%x", buf), test.hex; got != want {
+				t.Errorf("binary encode end %T(%v): GOT 0x%v WANT 0x%v", test.v, test.v, got, want)
+			}
 		}
 		// Test decode
 		var bin string
@@ -122,7 +114,6 @@ func TestBinaryEncodeDecode(t *testing.T) {
 			t.Errorf("couldn't scan 0x%v as hex: %v", test.hex, err)
 			continue
 		}
-
 		mr := newBinaryUtilTestMessageReader(strings.NewReader(bin))
 		mr2 := newBinaryUtilTestMessageReader(strings.NewReader(bin))
 		mr3 := newBinaryUtilTestMessageReader(strings.NewReader(bin))

@@ -5,7 +5,6 @@
 package vom
 
 import (
-	"fmt"
 	"io"
 )
 
@@ -17,16 +16,11 @@ const minBufFree = 1024 // buffers always have at least 1K free after growth
 type encbuf struct {
 	buf []byte
 	end int // [0, end) is data that's already written
-
-	// It's faster to hold end than to use both the len and cap properties of buf,
-	// since end is cheaper to update than buf.
-	maxSize int
 }
 
-func newEncbuf(maxSize int) *encbuf {
+func newEncbuf() *encbuf {
 	return &encbuf{
 		buf:     make([]byte, minBufFree),
-		maxSize: maxSize,
 	}
 }
 
@@ -39,31 +33,12 @@ func (b *encbuf) Len() int { return b.end }
 // Reset the length to 0 to start a new round of writes.
 func (b *encbuf) Reset() { b.end = 0 }
 
-// SpaceAvailable returns the amount of space available on the buffer for writing.
-func (b *encbuf) SpaceAvailable() int {
-	return b.maxSize - b.end
-}
-
-// assertEnoughSpace if there is not enough space to write the value.
-// TODO(bprosnitz) Consider removing this after things stabilize
-func (b *encbuf) assertEnoughSpace(size int) {
-	if size > b.SpaceAvailable() {
-		panic(fmt.Sprintf("insufficient space to write %d bytes", size))
-	}
-}
-
 // reserve at least min free bytes in the buffer.
 func (b *encbuf) tryReserve(min int) {
-	if len(b.buf) == b.maxSize {
-		return // can't expand further
-	}
 	if len(b.buf)-b.end < min {
 		newlen := len(b.buf) * 2
 		if newlen-b.end < min {
 			newlen = b.end + min + minBufFree
-		}
-		if newlen > b.maxSize {
-			newlen = b.maxSize
 		}
 		newbuf := make([]byte, newlen)
 		copy(newbuf, b.buf[:b.end])
@@ -77,7 +52,6 @@ func (b *encbuf) tryReserve(min int) {
 // this makes expandingEncbuf slightly easier to misuse, it helps to improve performance
 // by avoiding unnecessary copying.
 func (b *encbuf) Grow(n int) []byte {
-	b.assertEnoughSpace(n)
 	b.tryReserve(n)
 	oldend := b.end
 	b.end += n
@@ -86,19 +60,15 @@ func (b *encbuf) Grow(n int) []byte {
 
 // WriteOneByte writes byte c into the buffer.
 func (b *encbuf) WriteOneByte(c byte) {
-	b.assertEnoughSpace(1)
 	b.tryReserve(1)
 	b.buf[b.end] = c
 	b.end++
 }
 
-// WriteMaximumPossible writes the maximum possible length of slice p, given
-// limit constraints, into the buffer.
-func (b *encbuf) WriteMaximumPossible(p []byte) (amtWritten int) {
+// Write writes a byte slice to the buffer.
+func (b *encbuf) Write(p []byte) {
 	b.tryReserve(len(p))
-	amtWritten = copy(b.buf[b.end:], p)
-	b.end += amtWritten
-	return
+	b.end += copy(b.buf[b.end:], p)
 }
 
 // decbuf manages the read buffer for decoders.  The approach is similar to
