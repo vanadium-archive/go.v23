@@ -18,7 +18,7 @@ import (
 // This is a "single-shot" encoding; full type information is always included in
 // the returned encoding, as if a new encoder were used for each call.
 func Encode(v interface{}) ([]byte, error) {
-	return VersionedEncode(Version80, v)
+	return VersionedEncode(DefaultVersion, v)
 }
 
 // VersionedEncode performs single-shot encoding to a specific version of VOM
