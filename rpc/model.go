@@ -50,8 +50,8 @@ type ClientCall interface {
 	Stream
 
 	// CloseSend indicates to the server that no more items will be sent; server
-	// Recv calls will receive io.EOF after all sent items.  Subsequent calls to
-	// Send on the client will fail.  This is an optional call - it's used by
+	// Recv calls will receive io.EOF after all items are sent.  Subsequent calls to
+	// Send on the client will fail.  This is an optional call - it is used by
 	// streaming clients that need the server to receive the io.EOF terminator.
 	CloseSend() error
 
@@ -85,17 +85,17 @@ type Stream interface {
 }
 
 // ListenAddrs is the set of protocol, address pairs to listen on.
-// An anonymous struct is used to to more easily initialize a ListenSpec
+// An anonymous struct is used to more easily initialize a ListenSpec
 // from a different package.
 //
 // For TCP, the address must be in <ip>:<port> format. The <ip> may be
-// omitted, but the <port> can not (choose a port of 0 to have the system
-// allocate one).
+// omitted, but the <port> cannot. Use port 0 to have the system
+// allocate one for you.
 type ListenAddrs []struct {
 	Protocol, Address string
 }
 
-// AddressChooser determines the preferred addresses to publish with the mount
+// AddressChooser determines the preferred addresses to publish into the mount
 // table when one is not otherwise specified.
 type AddressChooser interface {
 	ChooseAddresses(protocol string, candidates []net.Addr) ([]net.Addr, error)
@@ -240,7 +240,7 @@ type ServerStatus struct {
 
 	// Mounts returns the status of the last mount or unmount
 	// operation for every combination of name and server address being
-	// published by this Server
+	// published by this Server.
 	Mounts MountState
 
 	// Endpoints contains the set of endpoints currently registered with the
@@ -278,13 +278,13 @@ func (st MountState) dedup(str func(MountStatus) string) []string {
 	return r
 }
 
-// Names returns the current set of names being published by the publisher,
-// these names not rooted at the mounttable.
+// Names returns the current set of names being published by the publisher.
+// These names are not rooted at the mounttable.
 func (st MountState) Names() []string {
 	return st.dedup(func(v MountStatus) string { return v.Name })
 }
 
-// Servers retyuns the current set of server addresses being published by
+// Servers returns the current set of server addresses being published by
 // the publisher.
 func (st MountState) Servers() []string {
 	return st.dedup(func(v MountStatus) string { return v.Server })
@@ -348,13 +348,13 @@ type Invoker interface {
 	// are typically configured in the VDL specification of the method.
 	Prepare(ctx *context.T, method string, numArgs int) (argptrs []interface{}, tags []*vdl.Value, _ error)
 
-	// Invoke is the second stage of method invocation.  It is passed the the
+	// Invoke is the second stage of method invocation.  It is passed the
 	// in-flight context and call, the method name, and the argptrs returned by
 	// Prepare, filled in with decoded arguments.  It returns the results from the
 	// invocation, and any errors in invoking the method.
 	//
 	// Note that argptrs is a slice of pointers to the argument objects; each
-	// pointer must be dereferenced to obtain the actual arg value.
+	// pointer must be dereferenced to obtain the actual argument value.
 	Invoke(ctx *context.T, call StreamServerCall, method string, argptrs []interface{}) (results []interface{}, _ error)
 
 	// Signature corresponds to the reserved __Signature method; it returns the
@@ -452,7 +452,7 @@ type ServerCall interface {
 	RemoteEndpoint() naming.Endpoint
 	// GrantedBlessings are blessings granted by the client to the server
 	// (bound to the server).  Typically provided by a client to delegate
-	// to the server, allowed the server to use the client's authority to
+	// to the server, allowing the server to use the client's authority to
 	// pursue some task.
 	//
 	// Can be nil, indicating that the client did not delegate any
