@@ -76,12 +76,10 @@ func expectReadSmall(t *testing.T, mode string, b *decbuf, n int, expect string,
 	}
 }
 
-func expectSkip(t *testing.T, mode string, b *decbuf, n, expectN int, expectErr error) {
-	nGot, err := b.Skip(n)
+func expectSkip(t *testing.T, mode string, b *decbuf, n int, expectErr error) {
+	err := b.Skip(n)
 	if got, want := err, expectErr; got != want {
 		t.Errorf("%s Skip err got %v, want %v", mode, got, want)
-	} else if got, want := nGot, expectN; got != want {
-		t.Errorf("%s Skip %d bytes only skipped %d", mode, want, got)
 	}
 }
 
@@ -118,13 +116,11 @@ func expectPeekByte(t *testing.T, mode string, b *decbuf, expect byte, expectErr
 	}
 }
 
-func expectReadIntoBuf(t *testing.T, mode string, b *decbuf, n, expectN int, expect string, expectErr error) {
+func expectReadIntoBuf(t *testing.T, mode string, b *decbuf, n int, expect string, expectErr error) {
 	buf := make([]byte, n)
-	nGot, err := b.ReadIntoBuf(buf)
+	err := b.ReadIntoBuf(buf)
 	if got, want := err, expectErr; got != want {
 		t.Errorf("%s ReadIntoBuf err got %v, want %v", mode, got, want)
-	} else if got, want := nGot, expectN; got != want {
-		t.Errorf("%s ReadIntoBuf read %d but expected %d", mode, got, want)
 	}
 	if err == nil {
 		if got, want := string(buf), expect; got != want {
@@ -150,13 +146,13 @@ func TestDecbufReadSmall(t *testing.T) {
 
 func TestDecbufSkip(t *testing.T) {
 	fn := func(mode string, b *decbuf) {
-		expectSkip(t, mode, b, 1, 1, nil)
+		expectSkip(t, mode, b, 1, nil)
 		expectReadSmall(t, mode, b, 2, "bc", nil)
-		expectSkip(t, mode, b, 3, 3, nil)
+		expectSkip(t, mode, b, 3, nil)
 		expectReadSmall(t, mode, b, 2, "gh", nil)
-		expectSkip(t, mode, b, 2, 2, nil)
-		expectSkip(t, mode, b, 1, 0, io.EOF)
-		expectSkip(t, mode, b, 1, 0, io.EOF)
+		expectSkip(t, mode, b, 2, nil)
+		expectSkip(t, mode, b, 1, io.EOF)
+		expectSkip(t, mode, b, 1, io.EOF)
 		expectReadSmall(t, mode, b, 1, "", io.EOF)
 		expectReadSmall(t, mode, b, 1, "", io.EOF)
 	}
@@ -271,18 +267,18 @@ func TestDecbufPeekByte(t *testing.T) {
 func TestDecbufReadIntBuf(t *testing.T) {
 	fn1 := func(mode string, b *decbuf) {
 		// Start ReadFull from beginning.
-		expectReadIntoBuf(t, mode, b, 3, 3, "abc", nil)
-		expectReadIntoBuf(t, mode, b, 3, 3, "def", nil)
-		expectReadIntoBuf(t, mode, b, 1, 0, "", io.EOF)
-		expectReadIntoBuf(t, mode, b, 1, 0, "", io.EOF)
+		expectReadIntoBuf(t, mode, b, 3, "abc", nil)
+		expectReadIntoBuf(t, mode, b, 3, "def", nil)
+		expectReadIntoBuf(t, mode, b, 1, "", io.EOF)
+		expectReadIntoBuf(t, mode, b, 1, "", io.EOF)
 	}
 	fn2 := func(mode string, b *decbuf) {
 		// Start ReadFull after reading 1 byte, which fills the buffer.
 		expectReadSmall(t, mode, b, 1, "a", nil)
-		expectReadIntoBuf(t, mode, b, 2, 2, "bc", nil)
-		expectReadIntoBuf(t, mode, b, 3, 3, "def", nil)
-		expectReadIntoBuf(t, mode, b, 1, 0, "", io.EOF)
-		expectReadIntoBuf(t, mode, b, 1, 0, "", io.EOF)
+		expectReadIntoBuf(t, mode, b, 2, "bc", nil)
+		expectReadIntoBuf(t, mode, b, 3, "def", nil)
+		expectReadIntoBuf(t, mode, b, 1, "", io.EOF)
+		expectReadIntoBuf(t, mode, b, 1, "", io.EOF)
 	}
 	for _, mode := range allReadModes {
 		fn1(mode.String(), newDecbuf(mode.testReader(abcReader(6))))

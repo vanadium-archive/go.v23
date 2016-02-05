@@ -45,26 +45,25 @@ func Decode(data []byte, v interface{}) error {
 	if err != nil {
 		return err
 	}
-	var mr *messageReader
+	var buf *decbuf
 	typeDec := singleShotTypeDecoderCache.lookup(key)
 	cacheMiss := false
 	if typeDec == nil {
 		// Cache miss; start decoding at the beginning of all type messages with a
 		// new TypeDecoder.
 		cacheMiss = true
-		mr = newMessageReader(newDecbufFromBytes(data))
-		typeDec = newTypeDecoderInternal(mr)
+		buf = newDecbufFromBytes(data)
+		typeDec = newTypeDecoderInternal(buf)
 	} else {
 		version := Version(data[0])
 		data = data[len(key):] // skip the already-read types
-		mr = newMessageReader(newDecbufFromBytes(data))
-		mr.version = version // skip the version byte
-		typeDec = newDerivedTypeDecoderInternal(mr, typeDec)
+		buf = newDecbufFromBytes(data)
+		buf.version = version
+		typeDec = newDerivedTypeDecoderInternal(buf, typeDec)
 	}
-	mr.SetCallbacks(typeDec.lookupType, typeDec.readSingleType)
 	// Decode the value message.
 	decoder := &Decoder{
-		mr:      mr,
+		buf:     buf,
 		typeDec: typeDec,
 	}
 	if err := decoder.Decode(v); err != nil {

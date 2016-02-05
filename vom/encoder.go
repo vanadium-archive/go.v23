@@ -5,9 +5,9 @@
 package vom
 
 import (
+	"fmt"
 	"io"
 	"reflect"
-	"fmt"
 
 	"v.io/v23/vdl"
 	"v.io/v23/verror"
@@ -35,10 +35,9 @@ var (
 	errLabelNotInType          = verror.Register(pkgPath+".errLabelNotInType", verror.NoRetry, "{1:}{2:} enum label {3} doesn't exist in type {4}{:_}")
 	errFieldNotInTopType       = verror.Register(pkgPath+".errFieldNotInTopType", verror.NoRetry, "{1:}{2:} field name {3} doesn't exist in top type {4}{:_}")
 	errUnsupportedInVOMVersion = verror.Register(pkgPath+".errUnsupportedInVOMVersion", verror.NoRetry, "{1:}{2:} {3} unsupported in vom version {4}{:_}")
-	errUnusedTypeIds = verror.Register(pkgPath+".errUnusedTypeIds", verror.NoRetry, "{1:}{2:} vom: some type ids unused during encode {:_}")
-	errUnusedAnys    = verror.Register(pkgPath+".errUnusedAnys", verror.NoRetry, "{1:}{2:} vom: some anys unused during encode {:_}")
+	errUnusedTypeIds           = verror.Register(pkgPath+".errUnusedTypeIds", verror.NoRetry, "{1:}{2:} vom: some type ids unused during encode {:_}")
+	errUnusedAnys              = verror.Register(pkgPath+".errUnusedAnys", verror.NoRetry, "{1:}{2:} vom: some anys unused during encode {:_}")
 )
-
 
 const (
 	typeIDListInitialSize = 16
@@ -263,7 +262,6 @@ func (e *encoder) encodeRaw(raw *RawBytes) error {
 
 	return nil
 }
-
 
 func (e *encoder) encodeWireType(tid typeId, wt wireType, typeIncomplete bool) error {
 	if err := e.startEncode(false, false, true, typeIncomplete, int64(-tid)); err != nil {
@@ -840,7 +838,6 @@ func (e *encoder) finishMessage() error {
 	_, err := e.writer.Write(msg[start:])
 	return err
 }
-
 
 func newTypeIDList() *typeIDList {
 	return &typeIDList{

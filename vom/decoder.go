@@ -15,20 +15,30 @@ import (
 
 var (
 	errDecodeNil                = verror.Register(pkgPath+".errDecodeNil", verror.NoRetry, "{1:}{2:} vom: invalid decode into nil interface{}{:_}")
-	errDecodeNilRawBytes        = verror.Register(pkgPath+".errDecodeNilRawBytes", verror.NoRetry, "{1:}{2:} vom: invalid decode into nil *RawBytes{:_}")
 	errDecodeZeroTypeID         = verror.Register(pkgPath+".errDecodeZeroTypeID", verror.NoRetry, "{1:}{2:} vom: zero type id{:_}")
 	errIndexOutOfRange          = verror.Register(pkgPath+".errIndexOutOfRange", verror.NoRetry, "{1:}{2:} vom: index out of range{:_}")
 	errLeftOverBytes            = verror.Register(pkgPath+".errLeftOverBytes", verror.NoRetry, "{1:}{2:} vom: {3} leftover bytes{:_}")
 	errUnexpectedControlByte    = verror.Register(pkgPath+".errUnexpectedControlByte", verror.NoRetry, "{1:}{2:} vom: unexpected control byte {3}{:_}")
 	errDecodeValueUnhandledType = verror.Register(pkgPath+".errDecodeValueUnhandledType", verror.NoRetry, "{1:}{2:} vom: decodeValue unhandled type {3}{:_}")
 	errIgnoreValueUnhandledType = verror.Register(pkgPath+".errIgnoreValueUnhandledType", verror.NoRetry, "{1:}{2:} vom: ignoreValue unhandled type {3}{:_}")
+	errInvalidTypeIdIndex       = verror.Register(pkgPath+".errInvalidTypeIdIndex", verror.NoRetry, "{1:}{2:} vom: value referenced invalid index into type id table {:_}")
+	errInvalidAnyIndex          = verror.Register(pkgPath+".errInvalidAnyIndex", verror.NoRetry, "{1:}{2:} vom: value referenced invalid index into anyLen table {:_}")
 )
 
 // Decoder manages the receipt and unmarshalling of typed values from the other
 // side of a connection.
 type Decoder struct {
-	mr      *messageReader
 	typeDec *TypeDecoder
+
+	hasSeparateTypeDec bool // TODO(bprosnitz) This should probably be removed.
+
+	// Stream data:
+	buf *decbuf
+
+	// Message data:
+	typeIncomplete bool // Type message was flagged as having dependencies on unsent types.
+	refTypes       referencedTypes
+	refAnyLens     referencedAnyLens
 }
 
 // This is only used for debugging; add this as the first line of NewDecoder to
@@ -45,23 +55,22 @@ func NewDecoder(r io.Reader) *Decoder {
 	// Decoder.decodeValueType() and feed them to the TypeDecoder. That is,
 	// the TypeDecoder will never read messages from the buffer. So we pass
 	// a nil buffer to newTypeDecoder.
-	mr := newMessageReader(newDecbuf(r))
-	typeDec := newTypeDecoderInternal(mr)
-	mr.SetCallbacks(typeDec.lookupType, typeDec.readSingleType)
+	buf := newDecbuf(r)
+	typeDec := newTypeDecoderInternal(buf)
 	return &Decoder{
-		mr:      mr,
-		typeDec: typeDec,
+		buf:                buf,
+		typeDec:            typeDec,
+		hasSeparateTypeDec: false,
 	}
 }
 
 // NewDecoderWithTypeDecoder returns a new Decoder that reads from the given
 // reader. Types will be decoded separately through the given typeDec.
 func NewDecoderWithTypeDecoder(r io.Reader, typeDec *TypeDecoder) *Decoder {
-	mr := newMessageReader(newDecbuf(r))
-	mr.SetCallbacks(typeDec.lookupType, nil)
 	return &Decoder{
-		mr:      mr,
-		typeDec: typeDec,
+		buf:                newDecbuf(r),
+		typeDec:            typeDec,
+		hasSeparateTypeDec: true,
 	}
 }
 
@@ -91,8 +100,29 @@ func (d *Decoder) Decode(v interface{}) error {
 	return d.decodeToTarget(target)
 }
 
+func (d *Decoder) decodeTypeDefs() error {
+	if !d.hasSeparateTypeDec {
+		for {
+			typeNext, err := d.typeIsNext()
+			if err != nil {
+				return err
+			}
+			if !typeNext {
+				break
+			}
+			if err := d.typeDec.readSingleType(); err != nil {
+				return err
+			}
+		}
+	}
+	return nil
+}
+
 func (d *Decoder) decodeToTarget(target vdl.Target) error {
-	tid, err := d.mr.StartValueMessage()
+	if err := d.decodeTypeDefs(); err != nil {
+		return err
+	}
+	tid, err := d.nextMessage()
 	if err != nil {
 		return err
 	}
@@ -111,18 +141,21 @@ func (d *Decoder) decodeToTarget(target vdl.Target) error {
 			if err := d.decodeRaw(valType, uint64(valLen), rb); err != nil {
 				return err
 			}
-			return d.mr.EndMessage()
+			return d.endMessage()
 		}
 	}
 	if err := d.decodeValue(valType, target); err != nil {
 		return err
 	}
-	return d.mr.EndMessage()
+	return d.endMessage()
 }
 
 // Ignore ignores the next value from the reader.
 func (d *Decoder) Ignore() error {
-	tid, err := d.mr.StartValueMessage()
+	if err := d.decodeTypeDefs(); err != nil {
+		return err
+	}
+	tid, err := d.nextMessage()
 	if err != nil {
 		return err
 	}
@@ -135,16 +168,16 @@ func (d *Decoder) Ignore() error {
 		return err
 	}
 
-	if err := d.mr.Skip(valLen); err != nil {
+	if err := d.buf.Skip(valLen); err != nil {
 		return err
 	}
-	return d.mr.EndMessage()
+	return d.endMessage()
 }
 
 // decodeWireType decodes the next type definition message and returns its
 // type id.
 func (d *Decoder) decodeWireType(wt *wireType) (typeId, error) {
-	tid, err := d.mr.StartTypeMessage()
+	tid, err := d.nextMessage()
 	if err != nil {
 		return 0, err
 	}
@@ -156,29 +189,29 @@ func (d *Decoder) decodeWireType(wt *wireType) (typeId, error) {
 	if err := d.decodeValue(wireTypeType, target); err != nil {
 		return 0, err
 	}
-	return tid, d.mr.EndMessage()
+	return tid, d.endMessage()
 }
 
 // decodeValueByteLen returns the byte length of the next value.
 func (d *Decoder) decodeValueByteLen(tt *vdl.Type) (int, error) {
 	if hasChunkLen(tt) {
 		// Use the explicit message length.
-		return d.mr.buf.lim, nil
+		return d.buf.lim, nil
 	}
 	// No explicit message length, but the length can be computed.
 	switch {
 	case tt.Kind() == vdl.Byte:
-		if d.mr.version == Version80 {
+		if d.buf.version == Version80 {
 			return 1, nil
 		} else {
-			return binaryPeekUintByteLen(d.mr)
+			return binaryPeekUintByteLen(d.buf)
 		}
 	case tt.Kind() == vdl.Array && tt.IsBytes():
 		// Byte arrays are exactly their length and encoded with 1-byte header.
 		return tt.Len() + 1, nil
 	case tt.Kind() == vdl.String || tt.IsBytes():
 		// Strings and byte lists are encoded with a length header.
-		strlen, bytelen, err := binaryPeekUint(d.mr)
+		strlen, bytelen, err := binaryPeekUint(d.buf)
 		switch {
 		case err != nil:
 			return 0, err
@@ -188,30 +221,30 @@ func (d *Decoder) decodeValueByteLen(tt *vdl.Type) (int, error) {
 		return int(strlen) + bytelen, nil
 	default:
 		// Must be a primitive, which is encoded as an underlying uint.
-		return binaryPeekUintByteLen(d.mr)
+		return binaryPeekUintByteLen(d.buf)
 	}
 }
 
 func (d *Decoder) decodeRaw(tt *vdl.Type, valLength uint64, raw *RawBytes) error {
-	raw.Version = d.mr.version
+	raw.Version = d.buf.version
 	raw.Type = tt
 	raw.Data = make([]byte, valLength)
-	if err := d.mr.ReadIntoBuf(raw.Data); err != nil {
+	if err := d.buf.ReadIntoBuf(raw.Data); err != nil {
 		return err
 	}
-	refTypeLen := len(d.mr.AllReferencedTypes())
+	refTypeLen := len(d.refTypes.tids)
 	if cap(raw.RefTypes) >= refTypeLen {
 		raw.RefTypes = raw.RefTypes[:refTypeLen]
 	} else {
 		raw.RefTypes = make([]*vdl.Type, refTypeLen)
 	}
-	for i, tid := range d.mr.AllReferencedTypes() {
+	for i, tid := range d.refTypes.tids {
 		var err error
 		if raw.RefTypes[i], err = d.typeDec.lookupType(tid); err != nil {
 			return err
 		}
 	}
-	raw.AnyLengths = d.mr.AllReferencedAnyLens()
+	raw.AnyLengths = d.refAnyLens.lens
 	return nil
 }
 
@@ -225,83 +258,83 @@ func (d *Decoder) decodeValue(tt *vdl.Type, target vdl.Target) error {
 	if tt.Kind() == vdl.Optional {
 		// If the type is optional, we expect to see either WireCtrlNil or the actual
 		// value, but not both.  And thus, we can just peek for the WireCtrlNil here.
-		switch ctrl, err := binaryPeekControl(d.mr); {
+		switch ctrl, err := binaryPeekControl(d.buf); {
 		case err != nil:
 			return err
 		case ctrl == WireCtrlNil:
-			d.mr.Skip(1)
+			d.buf.Skip(1)
 			return target.FromNil(ttFrom)
 		}
 		tt = tt.Elem()
 	}
 	if tt.IsBytes() {
-		len, err := binaryDecodeLenOrArrayLen(d.mr, tt)
+		len, err := binaryDecodeLenOrArrayLen(d.buf, tt)
 		if err != nil {
 			return err
 		}
 		// TODO(toddw): remove allocation
 		buf := make([]byte, len)
-		if err := d.mr.ReadIntoBuf(buf); err != nil {
+		if err := d.buf.ReadIntoBuf(buf); err != nil {
 			return err
 		}
 		return target.FromBytes(buf, ttFrom)
 	}
 	switch kind := tt.Kind(); kind {
 	case vdl.Bool:
-		v, err := binaryDecodeBool(d.mr)
+		v, err := binaryDecodeBool(d.buf)
 		if err != nil {
 			return err
 		}
 		return target.FromBool(v, ttFrom)
 	case vdl.Byte, vdl.Uint16, vdl.Uint32, vdl.Uint64:
 		var v uint64
-		if tt.Kind() == vdl.Byte && d.mr.version == Version80 {
-			b, err := d.mr.ReadByte()
+		if tt.Kind() == vdl.Byte && d.buf.version == Version80 {
+			b, err := d.buf.ReadByte()
 			if err != nil {
 				return err
 			}
 			v = uint64(b)
 		} else {
 			var err error
-			v, err = binaryDecodeUint(d.mr)
+			v, err = binaryDecodeUint(d.buf)
 			if err != nil {
 				return err
 			}
 		}
 		return target.FromUint(v, ttFrom)
 	case vdl.Int8, vdl.Int16, vdl.Int32, vdl.Int64:
-		if d.mr.version == Version80 && tt.Kind() == vdl.Int8 {
-			return verror.New(errUnsupportedInVOMVersion, nil, "int8", d.mr.version)
+		if d.buf.version == Version80 && tt.Kind() == vdl.Int8 {
+			return verror.New(errUnsupportedInVOMVersion, nil, "int8", d.buf.version)
 		}
-		v, err := binaryDecodeInt(d.mr)
+		v, err := binaryDecodeInt(d.buf)
 		if err != nil {
 			return err
 		}
 		return target.FromInt(v, ttFrom)
 	case vdl.Float32, vdl.Float64:
-		v, err := binaryDecodeFloat(d.mr)
+		v, err := binaryDecodeFloat(d.buf)
 		if err != nil {
 			return err
 		}
 		return target.FromFloat(v, ttFrom)
 	case vdl.Complex64, vdl.Complex128:
-		re, err := binaryDecodeFloat(d.mr)
+		re, err := binaryDecodeFloat(d.buf)
 		if err != nil {
 			return err
 		}
-		im, err := binaryDecodeFloat(d.mr)
+		im, err := binaryDecodeFloat(d.buf)
 		if err != nil {
 			return err
 		}
 		return target.FromComplex(complex(re, im), ttFrom)
 	case vdl.String:
-		v, err := binaryDecodeString(d.mr)
+		v, err := binaryDecodeString(d.buf)
 		if err != nil {
 			return err
 		}
 		return target.FromString(v, ttFrom)
 	case vdl.Enum:
-		index, err := binaryDecodeUint(d.mr)
+		index, err := binaryDecodeUint(d.buf)
 		switch {
 		case err != nil:
 			return err
@@ -310,22 +343,26 @@ func (d *Decoder) decodeValue(tt *vdl.Type, target vdl.Target) error {
 		}
 		return target.FromEnumLabel(tt.EnumLabel(int(index)), ttFrom)
 	case vdl.TypeObject:
-		x, err := binaryDecodeUint(d.mr)
+		x, err := binaryDecodeUint(d.buf)
 		if err != nil {
 			return err
 		}
-		var typeobject *vdl.Type
-		if d.mr.version == Version80 {
-			typeobject, err = d.typeDec.lookupType(typeId(x))
+		var tid typeId
+		if d.buf.version == Version80 {
+			tid = typeId(x)
 		} else {
-			typeobject, err = d.mr.ReferencedType(x)
+			tid, err = d.refTypes.ReferencedTypeId(x)
+			if err != nil {
+				return err
+			}
 		}
+		typeobject, err := d.typeDec.lookupType(tid)
 		if err != nil {
 			return err
 		}
 		return target.FromTypeObject(typeobject)
 	case vdl.Array, vdl.List:
-		len, err := binaryDecodeLenOrArrayLen(d.mr, tt)
+		len, err := binaryDecodeLenOrArrayLen(d.buf, tt)
 		if err != nil {
 			return err
 		}
@@ -347,7 +384,7 @@ func (d *Decoder) decodeValue(tt *vdl.Type, target vdl.Target) error {
 		}
 		return target.FinishList(listTarget)
 	case vdl.Set:
-		len, err := binaryDecodeLen(d.mr)
+		len, err := binaryDecodeLen(d.buf)
 		if err != nil {
 			return err
 		}
@@ -372,7 +409,7 @@ func (d *Decoder) decodeValue(tt *vdl.Type, target vdl.Target) error {
 		}
 		return target.FinishSet(setTarget)
 	case vdl.Map:
-		len, err := binaryDecodeLen(d.mr)
+		len, err := binaryDecodeLen(d.buf)
 		if err != nil {
 			return err
 		}
@@ -413,7 +450,7 @@ func (d *Decoder) decodeValue(tt *vdl.Type, target vdl.Target) error {
 		// Loop through decoding the 0-based field index and corresponding field.
 		decodedFields := make([]bool, tt.NumField())
 		for {
-			index, ctrl, err := binaryDecodeUintWithControl(d.mr)
+			index, ctrl, err := binaryDecodeUintWithControl(d.buf)
 			switch {
 			case err != nil:
 				return err
@@ -467,7 +504,7 @@ func (d *Decoder) decodeValue(tt *vdl.Type, target vdl.Target) error {
 		if err != nil {
 			return err
 		}
-		index, err := binaryDecodeUint(d.mr)
+		index, err := binaryDecodeUint(d.buf)
 		switch {
 		case err != nil:
 			return err
@@ -512,26 +549,28 @@ func (d *Decoder) decodeValue(tt *vdl.Type, target vdl.Target) error {
 }
 
 func (d *Decoder) readAnyHeader(tt *vdl.Type, target vdl.Target) (*vdl.Type, uint64, error) {
-	var elemType *vdl.Type
+	var elemTid typeId
 	var valLen uint64
-	switch x, ctrl, err := binaryDecodeUintWithControl(d.mr); {
+	switch x, ctrl, err := binaryDecodeUintWithControl(d.buf); {
 	case err != nil:
 		return nil, 0, err
 	case ctrl == WireCtrlNil:
 		return nil, 0, nil
 	case ctrl != 0:
 		return nil, 0, verror.New(errUnexpectedControlByte, nil, ctrl)
-	case d.mr.version == Version80:
-		if elemType, err = d.typeDec.lookupType(typeId(x)); err != nil {
-			return nil, 0, err
-		}
+	case d.buf.version == Version80:
+		elemTid = typeId(x)
 	default:
-		if elemType, err = d.mr.ReferencedType(x); err != nil {
+		if elemTid, err = d.refTypes.ReferencedTypeId(x); err != nil {
 			return nil, 0, err
 		}
 	}
-	if d.mr.version != Version80 {
-		switch x, ctrl, err := binaryDecodeUintWithControl(d.mr); {
+	elemType, err := d.typeDec.lookupType(elemTid)
+	if err != nil {
+		return nil, 0, err
+	}
+	if d.buf.version != Version80 {
+		switch x, ctrl, err := binaryDecodeUintWithControl(d.buf); {
 		case err != nil:
 			return nil, 0, err
 		case ctrl != 0:
@@ -539,7 +578,7 @@ func (d *Decoder) readAnyHeader(tt *vdl.Type, target vdl.Target) (*vdl.Type, uin
 		default:
 			// Reference the any len even if it isn't used so that we can
 			// report the case where references are missing.
-			if valLen, err = d.mr.ReferencedAnyLen(x); err != nil {
+			if valLen, err = d.refAnyLens.ReferencedAnyLen(x); err != nil {
 				return nil, 0, err
 			}
 		}
@@ -551,37 +590,37 @@ func (d *Decoder) readAnyHeader(tt *vdl.Type, target vdl.Target) (*vdl.Type, uin
 // unknown struct fields.
 func (d *Decoder) ignoreValue(tt *vdl.Type) error {
 	if tt.IsBytes() {
-		len, err := binaryDecodeLenOrArrayLen(d.mr, tt)
+		len, err := binaryDecodeLenOrArrayLen(d.buf, tt)
 		if err != nil {
 			return err
 		}
-		return d.mr.Skip(len)
+		return d.buf.Skip(len)
 	}
 	switch kind := tt.Kind(); kind {
 	case vdl.Bool:
-		return d.mr.Skip(1)
+		return d.buf.Skip(1)
 	case vdl.Byte:
-		if d.mr.version == Version80 {
-			return d.mr.Skip(1)
+		if d.buf.version == Version80 {
+			return d.buf.Skip(1)
 		} else {
-			return binaryIgnoreUint(d.mr)
+			return binaryIgnoreUint(d.buf)
 		}
 	case vdl.Uint16, vdl.Uint32, vdl.Uint64, vdl.Int8, vdl.Int16, vdl.Int32, vdl.Int64, vdl.Float32, vdl.Float64, vdl.Enum, vdl.TypeObject:
-		if d.mr.version == Version80 && tt.Kind() == vdl.Int8 {
-			return verror.New(errUnsupportedInVOMVersion, nil, "int8", d.mr.version)
+		if d.buf.version == Version80 && tt.Kind() == vdl.Int8 {
+			return verror.New(errUnsupportedInVOMVersion, nil, "int8", d.buf.version)
 		}
 		// The underlying encoding of all these types is based on uint.
-		return binaryIgnoreUint(d.mr)
+		return binaryIgnoreUint(d.buf)
 	case vdl.Complex64, vdl.Complex128:
 		// Complex is encoded as two floats, so we can simply ignore two uints.
-		if err := binaryIgnoreUint(d.mr); err != nil {
+		if err := binaryIgnoreUint(d.buf); err != nil {
 			return err
 		}
-		return binaryIgnoreUint(d.mr)
+		return binaryIgnoreUint(d.buf)
 	case vdl.String:
-		return binaryIgnoreString(d.mr)
+		return binaryIgnoreString(d.buf)
 	case vdl.Array, vdl.List, vdl.Set, vdl.Map:
-		len, err := binaryDecodeLenOrArrayLen(d.mr, tt)
+		len, err := binaryDecodeLenOrArrayLen(d.buf, tt)
 		if err != nil {
 			return err
 		}
@@ -601,7 +640,7 @@ func (d *Decoder) ignoreValue(tt *vdl.Type) error {
 	case vdl.Struct:
 		// Loop through decoding the 0-based field index and corresponding field.
 		for {
-			switch index, ctrl, err := binaryDecodeUintWithControl(d.mr); {
+			switch index, ctrl, err := binaryDecodeUintWithControl(d.buf); {
 			case err != nil:
 				return err
 			case ctrl == WireCtrlEnd:
@@ -618,7 +657,7 @@ func (d *Decoder) ignoreValue(tt *vdl.Type) error {
 			}
 		}
 	case vdl.Union:
-		switch index, err := binaryDecodeUint(d.mr); {
+		switch index, err := binaryDecodeUint(d.buf); {
 		case err != nil:
 			return err
 		case index >= uint64(tt.NumField()):
@@ -628,25 +667,214 @@ func (d *Decoder) ignoreValue(tt *vdl.Type) error {
 			return d.ignoreValue(ttfield.Type)
 		}
 	case vdl.Any:
-		var elemType *vdl.Type
-		switch x, ctrl, err := binaryDecodeUintWithControl(d.mr); {
+		var elemTid typeId
+		switch x, ctrl, err := binaryDecodeUintWithControl(d.buf); {
 		case err != nil:
 			return err
 		case ctrl == WireCtrlNil:
 			return nil
 		case ctrl != 0:
 			return verror.New(errUnexpectedControlByte, nil, ctrl)
-		case d.mr.version == Version80:
-			if elemType, err = d.typeDec.lookupType(typeId(x)); err != nil {
-				return err
-			}
+		case d.buf.version == Version80:
+			elemTid = typeId(x)
 		default:
-			if elemType, err = d.mr.ReferencedType(x); err != nil {
+			if elemTid, err = d.refTypes.ReferencedTypeId(x); err != nil {
 				return err
 			}
+		}
+		elemType, err := d.typeDec.lookupType(elemTid)
+		if err != nil {
+			return err
 		}
 		return d.ignoreValue(elemType)
 	default:
 		panic(verror.New(errIgnoreValueUnhandledType, nil, tt))
 	}
+}
+
+func (d *Decoder) nextMessage() (typeId, error) {
+	if leftover := d.buf.RemoveLimit(); leftover > 0 {
+		return 0, verror.New(errLeftOverBytes, nil, leftover)
+	}
+
+	if d.buf.version == 0 {
+		version, err := d.buf.ReadByte()
+		if err != nil {
+			return 0, verror.New(errEndedBeforeVersionByte, nil, err)
+		}
+		d.buf.version = Version(version)
+		if !isAllowedVersion(d.buf.version) {
+			return 0, verror.New(errBadVersionByte, nil, d.buf.version)
+		}
+	}
+
+	mid, cr, err := binaryDecodeIntWithControl(d.buf)
+	if err != nil {
+		return 0, err
+	}
+
+	if cr == WireCtrlTypeIncomplete {
+		mid, cr, err = binaryDecodeIntWithControl(d.buf)
+		if err != nil {
+			return 0, err
+		}
+
+		if cr != 0 || mid >= 0 {
+			// only can have incomplete types on new type messages
+			return 0, verror.New(errInvalid, nil)
+		}
+
+		d.typeIncomplete = true
+	} else if mid < 0 {
+		d.typeIncomplete = false
+	}
+
+	if cr != 0 {
+		return 0, verror.New(errBadControlCode, nil)
+	}
+
+	var tid typeId
+	var hasAny, hasTypeObject bool
+	var hasLength bool
+	switch {
+	case mid < 0:
+		tid = typeId(-mid)
+		hasLength = true
+		hasAny = false
+		hasTypeObject = false
+	case mid > 0:
+		tid = typeId(mid)
+		t, err := d.typeDec.lookupType(tid)
+		if err != nil {
+			return 0, err
+		}
+		hasLength = hasChunkLen(t)
+		hasAny = containsAny(t)
+		hasTypeObject = containsTypeObject(t)
+	default:
+		return 0, verror.New(errDecodeZeroTypeID, nil)
+	}
+
+	if (hasAny || hasTypeObject) && d.buf.version != Version80 {
+		l, err := binaryDecodeUint(d.buf)
+		if err != nil {
+			return 0, err
+		}
+		for i := 0; i < int(l); i++ {
+			refId, err := binaryDecodeUint(d.buf)
+			if err != nil {
+				return 0, err
+			}
+			d.refTypes.AddTypeID(typeId(refId))
+		}
+	}
+	if hasAny && d.buf.version != Version80 {
+		l, err := binaryDecodeUint(d.buf)
+		if err != nil {
+			return 0, err
+		}
+		for i := 0; i < int(l); i++ {
+			refAnyLen, err := binaryDecodeUint(d.buf)
+			if err != nil {
+				return 0, err
+			}
+			d.refAnyLens.AddAnyLen(refAnyLen)
+		}
+	}
+
+	if hasLength {
+		chunkLen, err := binaryDecodeUint(d.buf)
+		if err != nil {
+			return 0, err
+		}
+		d.buf.SetLimit(int(chunkLen))
+	}
+
+	return tid, nil
+}
+
+func (d *Decoder) typeIsNext() (bool, error) {
+	if d.buf.version == 0 {
+		version, err := d.buf.ReadByte()
+		if err != nil {
+			return false, verror.New(errEndedBeforeVersionByte, nil, err)
+		}
+		d.buf.version = Version(version)
+		if !isAllowedVersion(d.buf.version) {
+			return false, verror.New(errBadVersionByte, nil, d.buf.version)
+		}
+	}
+	mid, cr, _, err := binaryPeekIntWithControl(d.buf)
+	if err != nil {
+		return false, err
+	}
+	return mid < 0 || cr == WireCtrlTypeIncomplete, nil
+}
+
+func (d *Decoder) endMessage() error {
+	if leftover := d.buf.RemoveLimit(); leftover > 0 {
+		return verror.New(errLeftOverBytes, nil, leftover)
+	}
+	if err := d.refTypes.Reset(); err != nil {
+		return err
+	}
+	if err := d.refAnyLens.Reset(); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (d *Decoder) reset() error {
+	return nil
+}
+
+type referencedTypes struct {
+	tids   []typeId
+	marker int
+}
+
+func (refTypes *referencedTypes) Reset() (err error) {
+	refTypes.tids = refTypes.tids[:0]
+	refTypes.marker = 0
+	return
+}
+
+func (refTypes *referencedTypes) AddTypeID(tid typeId) {
+	refTypes.tids = append(refTypes.tids, tid)
+}
+
+func (refTypes *referencedTypes) ReferencedTypeId(index uint64) (typeId, error) {
+	if index >= uint64(len(refTypes.tids)) {
+		return 0, verror.New(errInvalidTypeIdIndex, nil)
+	}
+	return refTypes.tids[index], nil
+}
+
+func (refTypes *referencedTypes) Mark() {
+	refTypes.marker = len(refTypes.tids)
+}
+
+type referencedAnyLens struct {
+	lens   []uint64
+	marker int
+}
+
+func (refAnys *referencedAnyLens) Reset() (err error) {
+	refAnys.lens = refAnys.lens[:0]
+	return
+}
+
+func (refAnys *referencedAnyLens) AddAnyLen(length uint64) {
+	refAnys.lens = append(refAnys.lens, length)
+}
+
+func (refAnys *referencedAnyLens) ReferencedAnyLen(index uint64) (uint64, error) {
+	if index >= uint64(len(refAnys.lens)) {
+		return 0, verror.New(errInvalidAnyIndex, nil)
+	}
+	return refAnys.lens[index], nil
+}
+
+func (refAnys *referencedAnyLens) Mark() {
+	refAnys.marker = len(refAnys.lens)
 }

@@ -83,20 +83,8 @@ func binaryEncodeControl(buf *encbuf, v byte) {
 }
 
 // If the byte is not a control, this will return 0.
-func binaryPeekControl(mr *messageReader) (byte, error) {
-	v, err := mr.PeekByte()
-	if err != nil {
-		return 0, err
-	}
-	if v < 0x80 || v > 0xef {
-		return 0, nil
-	}
-	return v, nil
-}
-
-// If the byte is not a control, this will return 0.
-func decbufBinaryPeekControl(db *decbuf) (byte, error) {
-	v, err := db.PeekByte()
+func binaryPeekControl(buf *decbuf) (byte, error) {
+	v, err := buf.PeekByte()
 	if err != nil {
 		return 0, err
 	}
@@ -115,19 +103,8 @@ func binaryEncodeBool(buf *encbuf, v bool) {
 	}
 }
 
-func binaryDecodeBool(mr *messageReader) (bool, error) {
-	v, err := mr.ReadByte()
-	if err != nil {
-		return false, err
-	}
-	if v > 0x7f {
-		return false, verror.New(errInvalid, nil)
-	}
-	return v != 0, nil
-}
-
-func decbufBinaryDecodeBool(db *decbuf) (bool, error) {
-	v, err := db.ReadByte()
+func binaryDecodeBool(buf *decbuf) (bool, error) {
+	v, err := buf.ReadByte()
 	if err != nil {
 		return false, err
 	}
@@ -219,24 +196,12 @@ func byteSliceBinaryPeekUint(p []byte) (val uint64, byteLen int, err error) {
 	return v, bytelen, nil
 }
 
-func decbufBinaryDecodeUint(buf *decbuf) (uint64, error) {
-	v, bytelen, err := decbufBinaryPeekUint(buf)
+func binaryDecodeUint(buf *decbuf) (uint64, error) {
+	v, bytelen, err := binaryPeekUint(buf)
 	if err != nil {
 		return 0, err
 	}
-	n, err := buf.Skip(bytelen)
-	if n != bytelen {
-		panic("unexpected partial read when skipping peeked bytes")
-	}
-	return v, err
-}
-
-func binaryDecodeUint(mr *messageReader) (uint64, error) {
-	v, bytelen, err := binaryPeekUint(mr)
-	if err != nil {
-		return 0, err
-	}
-	return v, mr.Skip(bytelen)
+	return v, buf.Skip(bytelen)
 }
 
 func byteSliceBinaryPeekUintWithControl(b []byte) (val uint64, cr byte, lenRead int, err error) {
@@ -274,7 +239,7 @@ func byteSliceBinaryPeekIntWithControl(b []byte) (val int64, cr byte, lenRead in
 	return
 }
 
-func decbufBinaryPeekUint(buf *decbuf) (uint64, int, error) {
+func binaryPeekUint(buf *decbuf) (uint64, int, error) {
 	firstByte, err := buf.PeekByte()
 	if err != nil {
 		return 0, 0, err
@@ -304,69 +269,23 @@ func decbufBinaryPeekUint(buf *decbuf) (uint64, int, error) {
 	return v, byteLen, nil
 }
 
-func binaryPeekUint(mr *messageReader) (uint64, int, error) {
-	firstByte, err := mr.PeekByte()
+func binaryDecodeUintWithControl(buf *decbuf) (uint64, byte, error) {
+	v, c, bytelen, err := binaryPeekUintWithControl(buf)
 	if err != nil {
 		return 0, 0, err
 	}
-	// Handle single-byte encoding.
-	if firstByte <= 0x7f {
-		return uint64(firstByte), 1, nil
-	}
-	// Verify not a control code.
-	if firstByte <= 0xef {
-		return 0, 0, verror.New(errInvalid, nil)
-	}
-	// Handle multi-byte encoding.
-	byteLen := int(-int8(firstByte))
-	if byteLen < 1 || byteLen > uint64Size {
-		return 0, 0, verror.New(errUintOverflow, nil)
-	}
-	byteLen++ // account for initial len byte
-	bytes, err := mr.PeekSmall(byteLen)
-	if err != nil {
-		return 0, 0, err
-	}
-	var v uint64
-	for _, b := range bytes[1:byteLen] {
-		v = v<<8 | uint64(b)
-	}
-	return v, byteLen, nil
+	return v, c, buf.Skip(bytelen)
 }
 
-func binaryDecodeUintWithControl(mr *messageReader) (uint64, byte, error) {
-	v, c, bytelen, err := binaryPeekUintWithControl(mr)
+func binaryDecodeIntWithControl(buf *decbuf) (int64, byte, error) {
+	v, c, bytelen, err := binaryPeekUintWithControl(buf)
 	if err != nil {
 		return 0, 0, err
 	}
-	return v, c, mr.Skip(bytelen)
+	return uintToInt(v), c, buf.Skip(bytelen)
 }
 
-func decbufBinaryDecodeUintWithControl(buf *decbuf) (uint64, byte, error) {
-	v, c, bytelen, err := decbufBinaryPeekUintWithControl(buf)
-	if err != nil {
-		return 0, 0, err
-	}
-	n, err := buf.Skip(bytelen)
-	if n != bytelen {
-		panic("unexpected partial read when skipping peeked bytes")
-	}
-	return v, c, err
-}
-
-func decbufBinaryDecodeIntWithControl(buf *decbuf) (int64, byte, error) {
-	v, c, bytelen, err := decbufBinaryPeekUintWithControl(buf)
-	if err != nil {
-		return 0, 0, err
-	}
-	n, err := buf.Skip(bytelen)
-	if n != bytelen {
-		panic("unexpected partial read when skipping peeked bytes")
-	}
-	return uintToInt(v), c, err
-}
-
-func decbufBinaryPeekUintWithControl(buf *decbuf) (uint64, byte, int, error) {
+func binaryPeekUintWithControl(buf *decbuf) (uint64, byte, int, error) {
 	firstByte, err := buf.PeekByte()
 	if err != nil {
 		return 0, 0, 0, err
@@ -396,45 +315,13 @@ func decbufBinaryPeekUintWithControl(buf *decbuf) (uint64, byte, int, error) {
 	return v, 0, byteLen, nil
 }
 
-func decbufBinaryPeekIntWithControl(buf *decbuf) (val int64, cr byte, lenRead int, err error) {
-	var uval uint64
-	uval, cr, lenRead, err = decbufBinaryPeekUintWithControl(buf)
-	val = uintToInt(uval)
-	return
+func binaryPeekIntWithControl(buf *decbuf) (int64, byte, int, error) {
+	v, cr, l, err := binaryPeekUintWithControl(buf)
+	return uintToInt(v), cr, l, err
 }
 
-func binaryPeekUintWithControl(mr *messageReader) (uint64, byte, int, error) {
-	firstByte, err := mr.PeekByte()
-	if err != nil {
-		return 0, 0, 0, err
-	}
-	// Handle single-byte encoding.
-	if firstByte <= 0x7f {
-		return uint64(firstByte), 0, 1, nil
-	}
-	// Handle control code.
-	if firstByte <= 0xef {
-		return 0, byte(firstByte), 1, nil
-	}
-	// Handle multi-byte encoding.
-	byteLen := int(-int8(firstByte))
-	if byteLen < 1 || byteLen > uint64Size {
-		return 0, 0, 0, verror.New(errUintOverflow, nil)
-	}
-	byteLen++ // account for initial len byte
-	bytes, err := mr.PeekSmall(byteLen)
-	if err != nil {
-		return 0, 0, 0, err
-	}
-	var v uint64
-	for _, b := range bytes[1:byteLen] {
-		v = v<<8 | uint64(b)
-	}
-	return v, 0, byteLen, nil
-}
-
-func binaryPeekUintByteLen(mr *messageReader) (int, error) {
-	firstByte, err := mr.PeekByte()
+func binaryPeekUintByteLen(buf *decbuf) (int, error) {
+	firstByte, err := buf.PeekByte()
 	if err != nil {
 		return 0, err
 	}
@@ -448,12 +335,12 @@ func binaryPeekUintByteLen(mr *messageReader) (int, error) {
 	return 1 + byteLen, nil
 }
 
-func binaryIgnoreUint(mr *messageReader) error {
-	byteLen, err := binaryPeekUintByteLen(mr)
+func binaryIgnoreUint(buf *decbuf) error {
+	byteLen, err := binaryPeekUintByteLen(buf)
 	if err != nil {
 		return err
 	}
-	return mr.Skip(byteLen)
+	return buf.Skip(byteLen)
 }
 
 func byteSliceBinaryPeekLen(b []byte) (len, byteLen int, err error) {
@@ -467,18 +354,8 @@ func byteSliceBinaryPeekLen(b []byte) (len, byteLen int, err error) {
 	return int(ulen), byteLen, nil
 }
 
-func binaryDecodeLen(mr *messageReader) (int, error) {
-	ulen, err := binaryDecodeUint(mr)
-	switch {
-	case err != nil:
-		return 0, err
-	case ulen > maxBinaryMsgLen:
-		return 0, verror.New(errMsgLen, nil, maxBinaryMsgLen)
-	}
-	return int(ulen), nil
-}
-func decbufBinaryDecodeLen(db *decbuf) (int, error) {
-	ulen, err := decbufBinaryDecodeUint(db)
+func binaryDecodeLen(buf *decbuf) (int, error) {
+	ulen, err := binaryDecodeUint(buf)
 	switch {
 	case err != nil:
 		return 0, err
@@ -488,22 +365,8 @@ func decbufBinaryDecodeLen(db *decbuf) (int, error) {
 	return int(ulen), nil
 }
 
-func binaryDecodeLenOrArrayLen(mr *messageReader, t *vdl.Type) (int, error) {
-	len, err := binaryDecodeLen(mr)
-	if err != nil {
-		return 0, err
-	}
-	if t.Kind() == vdl.Array {
-		if len != 0 {
-			return 0, verror.New(errInvalid, nil)
-		}
-		return t.Len(), nil
-	}
-	return len, nil
-}
-
-func decbufBinaryDecodeLenOrArrayLen(db *decbuf, t *vdl.Type) (int, error) {
-	len, err := decbufBinaryDecodeLen(db)
+func binaryDecodeLenOrArrayLen(buf *decbuf, t *vdl.Type) (int, error) {
+	len, err := binaryDecodeLen(buf)
 	if err != nil {
 		return 0, err
 	}
@@ -528,18 +391,13 @@ func binaryEncodeInt(buf *encbuf, v int64) {
 	binaryEncodeUint(buf, uval)
 }
 
-func decbufBinaryDecodeInt(buf *decbuf) (int64, error) {
-	uval, err := decbufBinaryDecodeUint(buf)
+func binaryDecodeInt(buf *decbuf) (int64, error) {
+	uval, err := binaryDecodeUint(buf)
 	return uintToInt(uval), err
 }
 
-func binaryDecodeInt(mr *messageReader) (int64, error) {
-	uval, err := binaryDecodeUint(mr)
-	return uintToInt(uval), err
-}
-
-func binaryPeekInt(mr *messageReader) (int64, int, error) {
-	uval, bytelen, err := binaryPeekUint(mr)
+func binaryPeekInt(buf *decbuf) (int64, int, error) {
+	uval, bytelen, err := binaryPeekUint(buf)
 	if err != nil {
 		return 0, 0, err
 	}
@@ -561,25 +419,8 @@ func binaryEncodeFloat(buf *encbuf, v float64) {
 	binaryEncodeUint(buf, uval)
 }
 
-func binaryDecodeFloat(mr *messageReader) (float64, error) {
-	uval, err := binaryDecodeUint(mr)
-	if err != nil {
-		return 0, err
-	}
-	// Manually-unrolled byte-reversing.
-	ieee := (uval&0xff)<<56 |
-		(uval&0xff00)<<40 |
-		(uval&0xff0000)<<24 |
-		(uval&0xff000000)<<8 |
-		(uval&0xff00000000)>>8 |
-		(uval&0xff0000000000)>>24 |
-		(uval&0xff000000000000)>>40 |
-		(uval&0xff00000000000000)>>56
-	return math.Float64frombits(ieee), nil
-}
-
-func decbufBinaryDecodeFloat(db *decbuf) (float64, error) {
-	uval, err := decbufBinaryDecodeUint(db)
+func binaryDecodeFloat(buf *decbuf) (float64, error) {
+	uval, err := binaryDecodeUint(buf)
 	if err != nil {
 		return 0, err
 	}
@@ -601,7 +442,7 @@ func binaryEncodeString(buf *encbuf, s string) {
 	buf.Write([]byte(s))
 }
 
-func binaryDecodeString(buf *messageReader) (string, error) {
+func binaryDecodeString(buf *decbuf) (string, error) {
 	len, err := binaryDecodeLen(buf)
 	if err != nil {
 		return "", err
@@ -613,12 +454,12 @@ func binaryDecodeString(buf *messageReader) (string, error) {
 	return string(p), nil
 }
 
-func binaryIgnoreString(mr *messageReader) error {
-	len, err := binaryDecodeLen(mr)
+func binaryIgnoreString(buf *decbuf) error {
+	len, err := binaryDecodeLen(buf)
 	if err != nil {
 		return err
 	}
-	return mr.Skip(len)
+	return buf.Skip(len)
 }
 
 // binaryEncodeUintEnd writes into the trailing part of buf and returns the start

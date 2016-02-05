@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 package vom
+
 import (
 	"fmt"
 	"io"
@@ -114,51 +115,51 @@ func TestBinaryEncodeDecode(t *testing.T) {
 			t.Errorf("couldn't scan 0x%v as hex: %v", test.hex, err)
 			continue
 		}
-		mr := newBinaryUtilTestMessageReader(strings.NewReader(bin))
-		mr2 := newBinaryUtilTestMessageReader(strings.NewReader(bin))
-		mr3 := newBinaryUtilTestMessageReader(strings.NewReader(bin))
 		decbuf := newDecbuf(strings.NewReader(bin))
 		decbuf2 := newDecbuf(strings.NewReader(bin))
+		decbuf3 := newDecbuf(strings.NewReader(bin))
+		decbuf4 := newDecbuf(strings.NewReader(bin))
+		decbuf5 := newDecbuf(strings.NewReader(bin))
 		var v, v2 interface{}
 		var err, err2, err3 error
 		var vmr, vmr2 interface{}
 		var errmr, errmr2, errmr3 error
 		switch test.v.(type) {
 		case byte:
-			_, v, err = decbufBinaryDecodeUintWithControl(decbuf)
+			_, v, err = binaryDecodeUintWithControl(decbuf)
 			decbuf2.Skip(1)
-			vmr, err = binaryPeekControl(mr)
-			mr.Skip(1)
-			_, vmr2, errmr2 = binaryDecodeUintWithControl(mr2)
-			errmr3 = binaryIgnoreUint(mr3)
+			vmr, err = binaryPeekControl(decbuf3)
+			decbuf3.Skip(1)
+			_, vmr2, errmr2 = binaryDecodeUintWithControl(decbuf4)
+			errmr3 = binaryIgnoreUint(decbuf5)
 		case bool:
 			decbuf.Skip(1)
 			decbuf2.Skip(1)
-			vmr, errmr = binaryDecodeBool(mr)
-			errmr2 = binaryIgnoreUint(mr2)
+			vmr, errmr = binaryDecodeBool(decbuf3)
+			errmr2 = binaryIgnoreUint(decbuf4)
 		case uint64:
-			v, err = decbufBinaryDecodeUint(decbuf)
-			v2, _, err2 = decbufBinaryDecodeUintWithControl(decbuf2)
-			vmr, errmr = binaryDecodeUint(mr)
-			vmr2, _, errmr2 = binaryDecodeUintWithControl(mr2)
-			errmr3 = binaryIgnoreUint(mr3)
+			v, err = binaryDecodeUint(decbuf)
+			v2, _, err2 = binaryDecodeUintWithControl(decbuf2)
+			vmr, errmr = binaryDecodeUint(decbuf3)
+			vmr2, _, errmr2 = binaryDecodeUintWithControl(decbuf4)
+			errmr3 = binaryIgnoreUint(decbuf5)
 		case int64:
-			v, err = decbufBinaryDecodeInt(decbuf)
-			v2, err2 = decbufBinaryDecodeInt(decbuf2)
-			vmr, errmr = binaryDecodeInt(mr)
-			errmr2 = binaryIgnoreUint(mr2)
+			v, err = binaryDecodeInt(decbuf)
+			v2, err2 = binaryDecodeInt(decbuf2)
+			vmr, errmr = binaryDecodeInt(decbuf3)
+			errmr2 = binaryIgnoreUint(decbuf4)
 		case float64:
-			decbufBinaryDecodeUint(decbuf)  // skip
-			decbufBinaryDecodeUint(decbuf2) // skip
-			vmr, errmr = binaryDecodeFloat(mr)
-			errmr2 = binaryIgnoreUint(mr2)
+			binaryDecodeUint(decbuf)  // skip
+			binaryDecodeUint(decbuf2) // skip
+			vmr, errmr = binaryDecodeFloat(decbuf3)
+			errmr2 = binaryIgnoreUint(decbuf4)
 		case string:
-			l, _ := decbufBinaryDecodeUint(decbuf)
+			l, _ := binaryDecodeUint(decbuf)
 			decbuf.Skip(int(l))
-			l, _ = decbufBinaryDecodeUint(decbuf2)
+			l, _ = binaryDecodeUint(decbuf2)
 			decbuf2.Skip(int(l))
-			vmr, errmr = binaryDecodeString(mr)
-			errmr2 = binaryIgnoreString(mr2)
+			vmr, errmr = binaryDecodeString(decbuf3)
+			errmr2 = binaryIgnoreString(decbuf4)
 		}
 		if v2 != nil && v != v2 {
 			t.Errorf("binary decode %T(0x%v) differently: %v %v", test.v, test.hex, v, v2)
@@ -195,10 +196,4 @@ func TestBinaryEncodeDecode(t *testing.T) {
 			}
 		}
 	}
-}
-
-func newBinaryUtilTestMessageReader(r io.Reader) *messageReader {
-	buf := newDecbuf(r)
-	buf.SetLimit(1000)
-	return newMessageReader(buf)
 }

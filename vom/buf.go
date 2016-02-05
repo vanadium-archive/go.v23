@@ -20,7 +20,7 @@ type encbuf struct {
 
 func newEncbuf() *encbuf {
 	return &encbuf{
-		buf:     make([]byte, minBufFree),
+		buf: make([]byte, minBufFree),
 	}
 }
 
@@ -81,6 +81,7 @@ type decbuf struct {
 
 	// It's faster to hold end than to use the len and cap properties of buf,
 	// since end is cheaper to update than buf.
+	version Version
 }
 
 // newDecbuf returns a new decbuf that fills its internal buffer by reading r.
@@ -228,12 +229,11 @@ func (b *decbuf) PeekSmall(min int) ([]byte, error) {
 // fewer than n bytes are available.
 //
 // REQUIRES: n >= 0
-func (b *decbuf) Skip(n int) (int, error) {
-	readAmt := n
+func (b *decbuf) Skip(n int) error {
 	if b.lim > -1 {
 		if b.lim < n {
 			n = b.lim
-			readAmt = n
+			return io.EOF
 		}
 		b.lim -= n
 	}
@@ -241,7 +241,7 @@ func (b *decbuf) Skip(n int) (int, error) {
 	avail := b.end - b.beg
 	if avail >= n {
 		b.beg += n
-		return readAmt, nil
+		return nil
 	}
 	n -= avail
 	// Keep reading into buf until we've read enough bytes.
@@ -251,11 +251,11 @@ func (b *decbuf) Skip(n int) (int, error) {
 			if nread >= n {
 				b.beg = n
 				b.end = nread
-				return readAmt, nil
+				return nil
 			}
 			n -= nread
 		case err != nil:
-			return 0, err
+			return err
 		}
 	}
 }
@@ -289,14 +289,13 @@ func (b *decbuf) PeekByte() (byte, error) {
 
 // ReadIntoBuf reads the next len(p) bytes into p, and increments the read position
 // past those bytes.  Returns an error if fewer than len(p) bytes are available.
-func (b *decbuf) ReadIntoBuf(p []byte) (int, error) {
+func (b *decbuf) ReadIntoBuf(p []byte) error {
 	if b.lim > -1 {
 		if b.lim < len(p) {
-			p = p[:b.lim]
+			return io.EOF
 		}
 		b.lim -= len(p)
 	}
-	amtRead := len(p)
 	// Copy bytes from the buffer.
 	ncopy := copy(p, b.buf[b.beg:b.end])
 	b.beg += ncopy
@@ -307,8 +306,8 @@ func (b *decbuf) ReadIntoBuf(p []byte) (int, error) {
 		case nread > 0:
 			p = p[nread:]
 		case err != nil:
-			return 0, err
+			return err
 		}
 	}
-	return amtRead, nil
+	return nil
 }
