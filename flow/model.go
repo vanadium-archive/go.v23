@@ -74,6 +74,17 @@ type Manager interface {
 	// closed.
 	Dial(ctx *context.T, remote naming.Endpoint, auth PeerAuthorizer, channelTimeout time.Duration) (Flow, error)
 
+	// DialCached creates a Flow to the provided remote endpoint using only cached
+	// connections from previous Listen or Dial calls.
+	// If no cached connection exists, an error will be returned.
+	//
+	// 'auth' is used to determine the blessings that will be sent to the remote end.
+	//
+	// channelTimeout specifies the duration we are willing to wait before determining
+	// that connections managed by this Manager are unhealthy and should be
+	// closed.
+	DialCached(ctx *context.T, remote naming.Endpoint, auth PeerAuthorizer, channelTimeout time.Duration) (Flow, error)
+
 	// RoutingID returns the naming.Routing of the flow.Manager.
 	// If the RoutingID of the manager is naming.NullRoutingID, the manager can
 	// only be used to Dial outgoing calls.
