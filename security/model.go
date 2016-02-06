@@ -4,7 +4,7 @@
 
 // Package security defines types and utilities associated with security.
 //
-//   Concept: https://github.com/vanadium/docs/blob/master/concepts/security.md
+//   Concept: https://vanadium.github.io/concepts/security.html
 //   Tutorial: (forthcoming)
 //
 // The primitives and APIs defined in this package enable bi-directional,
@@ -119,7 +119,7 @@ import (
 //
 // Multiple goroutines may invoke methods on a Principal simultaneously.
 //
-// See also: https://github.com/vanadium/docs/blob/master/glossary.md#principal
+// See also: https://vanadium.github.io/glossary.html#principal
 type Principal interface {
 	// Bless binds extensions of blessings held by this principal to
 	// another principal (represented by its public key).
@@ -252,7 +252,7 @@ type BlessingStore interface {
 // BlessingRoots hosts the set of authoritative public keys for roots
 // of blessings.
 //
-// See also: https://github.com/vanadium/docs/blob/master/glossary.md#blessing-root
+// See also: https://vanadium.github.io/glossary.html#blessing-root
 type BlessingRoots interface {
 	// Add marks 'root' (a DER-encoded public key) as an authoritative key
 	// for blessings that match 'pattern'.
@@ -301,7 +301,7 @@ type Signer interface {
 //
 // Multiple goroutines may invoke methods on a ThirdPartyCaveat simultaneously.
 //
-// See also: https://github.com/vanadium/docs/blob/master/glossary.md#third-party-caveat
+// See also: https://vanadium.github.io/glossary.html#third-party-caveat
 type ThirdPartyCaveat interface {
 	// ID returns a cryptographically unique identifier for the ThirdPartCaveat.
 	ID() string

@@ -116,7 +116,7 @@ import (
 
 // AccessList represents a set of blessings that should be granted access.
 //
-// See also: https://github.com/vanadium/docs/blob/master/glossary.md#access-list
+// See also: https://vanadium.github.io/glossary.html#access-list
 type AccessList struct {
 	// In denotes the set of blessings (represented as BlessingPatterns) that
 	// should be granted access, unless blacklisted by an entry in NotIn.

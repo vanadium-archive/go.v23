@@ -4,7 +4,7 @@
 
 // Package naming defines types and utilities associated with naming.
 //
-//   Concept: https://github.com/vanadium/docs/blob/master/concepts/naming.md
+//   Concept: https://vanadium.github.io/concepts/naming.html
 //   Tutorial: (forthcoming)
 //
 // Object names are 'resolved' using a MountTable to obtain a MountedServer that

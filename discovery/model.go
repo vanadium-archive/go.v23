@@ -45,6 +45,6 @@ type T interface {
 	//    v.Attrs["a"] = "v1" OR v.Attrs["a"] = "v2"
 	//
 	// SyncQL tutorial at:
-	//    https://github.com/vanadium/docs/blob/master/tutorials/syncql-tutorial.md
+	//    https://vanadium.github.io/tutorials/syncbase/syncql-tutorial.html
 	Scan(ctx *context.T, query string) (<-chan Update, error)
 }
