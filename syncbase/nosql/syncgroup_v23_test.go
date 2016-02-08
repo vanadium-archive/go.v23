@@ -10,6 +10,7 @@ import (
 	"os"
 	"reflect"
 	"runtime/debug"
+	"sort"
 	"strings"
 	"testing"
 	"time"
@@ -18,9 +19,11 @@ import (
 	"v.io/v23/context"
 	"v.io/v23/naming"
 	wire "v.io/v23/services/syncbase/nosql"
+	"v.io/v23/services/watch"
 	"v.io/v23/syncbase"
 	"v.io/v23/syncbase/nosql"
 	"v.io/v23/verror"
+	"v.io/v23/vom"
 	_ "v.io/x/ref/runtime/factories/generic"
 	constants "v.io/x/ref/services/syncbase/server/util"
 	"v.io/x/ref/test/v23test"
@@ -83,8 +86,10 @@ func TestV23SyncbasedGetDeltas(t *testing.T) {
 
 	server1Creds := sh.ForkCredentials("s1")
 	client1Ctx := sh.ForkContext("c1")
+	// TODO(aghassemi): Resolve permission is currently needed for Watch.
+	// See https://github.com/vanadium/issues/issues/1110
 	sh.StartSyncbase(server1Creds, "sync1", "",
-		`{"Read": {"In":["root:c1"]}, "Write": {"In":["root:c1"]}}`)
+		`{"Resolve": {"In":["root:c1"]}, "Read": {"In":["root:c1"]}, "Write": {"In":["root:c1"]}}`)
 
 	sgName := naming.Join("sync0", constants.SyncbaseSuffix, "SG1")
 
@@ -94,8 +99,11 @@ func TestV23SyncbasedGetDeltas(t *testing.T) {
 	ok(t, runPopulateNonVomData(client0Ctx, "sync0", "bar", 0))
 
 	ok(t, runSetupAppA(client1Ctx, "sync1"))
+	beforeSyncMarker, err := getResumeMarker(client1Ctx, "sync1")
+	ok(t, err)
 	ok(t, runJoinSyncgroup(client1Ctx, "sync1", sgName))
 	ok(t, runVerifySyncgroupData(client1Ctx, "sync1", "foo", 0, 10, false))
+	ok(t, runVerifySyncgroupDataWithWatch(client1Ctx, "sync1", "foo", 10, false, beforeSyncMarker))
 	ok(t, runVerifySyncgroupNonVomData(client1Ctx, "sync1", "bar", 0, 10))
 }
 
@@ -120,8 +128,10 @@ func TestV23SyncbasedGetDeltasWithDel(t *testing.T) {
 
 	server1Creds := sh.ForkCredentials("s1")
 	client1Ctx := sh.ForkContext("c1")
+	// TODO(aghassemi): Resolve permission is currently needed for Watch.
+	// See https://github.com/vanadium/issues/issues/1110
 	sh.StartSyncbase(server1Creds, "sync1", "",
-		`{"Read": {"In":["root:c1"]}, "Write": {"In":["root:c1"]}}`)
+		`{"Resolve": {"In":["root:c1"]}, "Read": {"In":["root:c1"]}, "Write": {"In":["root:c1"]}}`)
 
 	sgName := naming.Join("sync0", constants.SyncbaseSuffix, "SG1")
 
@@ -130,12 +140,18 @@ func TestV23SyncbasedGetDeltasWithDel(t *testing.T) {
 	ok(t, runPopulateData(client0Ctx, "sync0", "foo", 0))
 
 	ok(t, runSetupAppA(client1Ctx, "sync1"))
+	beforeSyncMarker, err := getResumeMarker(client1Ctx, "sync1")
+	ok(t, err)
 	ok(t, runJoinSyncgroup(client1Ctx, "sync1", sgName))
 	ok(t, runVerifySyncgroupData(client1Ctx, "sync1", "foo", 0, 10, false))
+	ok(t, runVerifySyncgroupDataWithWatch(client1Ctx, "sync1", "foo", 10, false, beforeSyncMarker))
 
+	beforeDeleteMarker, err := getResumeMarker(client1Ctx, "sync1")
+	ok(t, err)
 	ok(t, runDeleteData(client0Ctx, "sync0", 0))
 	ok(t, runVerifyDeletedData(client0Ctx, "sync0", "foo"))
 	ok(t, runVerifyDeletedData(client1Ctx, "sync1", "foo"))
+	ok(t, runVerifySyncgroupDataWithWatch(client1Ctx, "sync1", "foo", 5, true, beforeDeleteMarker))
 
 	ok(t, runPopulateData(client0Ctx, "sync0", "bar", 0))
 	ok(t, runVerifySyncgroupData(client1Ctx, "sync1", "bar", 0, 10, false))
@@ -607,7 +623,6 @@ func runCreateSyncgroup(ctx *context.T, serviceName, sgName, sgPrefixes, mtName 
 func runJoinSyncgroup(ctx *context.T, serviceName, sgName string) error {
 	a := syncbase.NewService(serviceName).App("a")
 	d := a.NoSQLDatabase("d", nil)
-
 	sg := d.Syncgroup(sgName)
 	info := wire.SyncgroupMemberInfo{SyncPriority: 10}
 	if _, err := sg.Join(ctx, info); err != nil {
@@ -826,6 +841,64 @@ func runVerifySyncgroupData(ctx *context.T, serviceName, keyPrefix string, start
 
 		if err := stream.Err(); err != nil {
 			return fmt.Errorf("scan stream error: %v\n", err)
+		}
+	}
+	return nil
+}
+
+func runVerifySyncgroupDataWithWatch(ctx *context.T, serviceName, keyPrefix string, count int, expectDelete bool, beforeSyncMarker watch.ResumeMarker) error {
+	if count == 0 {
+		return fmt.Errorf("count cannot be 0: got %d", count)
+	}
+	a := syncbase.NewService(serviceName).App("a")
+	d := a.NoSQLDatabase("d", nil)
+	ctxWithTimeout, cancel := context.WithTimeout(ctx, 10*time.Second)
+	defer cancel()
+
+	stream, err := d.Watch(ctxWithTimeout, testTable, keyPrefix, beforeSyncMarker)
+	if err != nil {
+		return fmt.Errorf("watch error: %v\n", err)
+	}
+
+	var changes []nosql.WatchChange
+	for i := 0; stream.Advance() && i < count; i++ {
+		if err := stream.Err(); err != nil {
+			return fmt.Errorf("watch stream error: %v\n", err)
+		}
+		changes = append(changes, stream.Change())
+	}
+
+	sort.Sort(ByRow(changes))
+
+	if got, want := len(changes), count; got != want {
+		return fmt.Errorf("unexpected number of changes: got %d, want %d", got, want)
+	}
+
+	for i, change := range changes {
+		if got, want := change.Table, "tb"; got != want {
+			return fmt.Errorf("unexpected watch table: got %q, want %q", got, want)
+		}
+		if got, want := change.Row, fmt.Sprintf("%s%d", keyPrefix, i); got != want {
+			return fmt.Errorf("unexpected watch row: got %q, want %q", got, want)
+		}
+		if got, want := change.FromSync, true; got != want {
+			return fmt.Errorf("unexpected FromSync value: got %t, want %t", got, want)
+		}
+		if expectDelete {
+			if got, want := change.ChangeType, nosql.DeleteChange; got != want {
+				return fmt.Errorf("unexpected watch change type: got %q, want %q", got, want)
+			}
+			return nil
+		}
+		var result string
+		if got, want := change.ChangeType, nosql.PutChange; got != want {
+			return fmt.Errorf("unexpected watch change type: got %q, want %q", got, want)
+		}
+		if err := vom.Decode(change.ValueBytes, &result); err != nil {
+			return fmt.Errorf("couldn't decode watch value: %v", err)
+		}
+		if got, want := result, fmt.Sprintf("testkey%s%d", keyPrefix, i); got != want {
+			return fmt.Errorf("unexpected watch value: got %q, want %q", got, want)
 		}
 	}
 	return nil
@@ -1232,6 +1305,12 @@ func runVerifySyncgroupDataMulti(ctx *context.T, serviceName string, numApps, nu
 	return nil
 }
 
+func getResumeMarker(ctx *context.T, serviceName string) (watch.ResumeMarker, error) {
+	a := syncbase.NewService(serviceName).App("a")
+	d := a.NoSQLDatabase("d", nil)
+	return d.GetResumeMarker(ctx)
+}
+
 func ok(t *testing.T, err error) {
 	if err != nil {
 		debug.PrintStack()
@@ -1242,3 +1321,10 @@ func ok(t *testing.T, err error) {
 func TestMain(m *testing.M) {
 	v23test.TestMain(m)
 }
+
+// ByRow implements sort.Interface for []nosql.WatchChange based on the Row field.
+type ByRow []nosql.WatchChange
+
+func (c ByRow) Len() int           { return len(c) }
+func (c ByRow) Swap(i, j int)      { c[i], c[j] = c[j], c[i] }
+func (c ByRow) Less(i, j int) bool { return c[i].Row < c[j].Row }

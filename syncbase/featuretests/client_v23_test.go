@@ -6,8 +6,12 @@ package featuretests_test
 
 import (
 	"testing"
+	"time"
 
+	"v.io/v23/context"
 	"v.io/v23/syncbase"
+	"v.io/v23/syncbase/nosql"
+	"v.io/v23/vom"
 	"v.io/x/ref/test/v23test"
 )
 
@@ -19,7 +23,9 @@ func TestV23SyncbasedPutGet(t *testing.T) {
 
 	// Start syncbased.
 	serverCreds := sh.ForkCredentials("server")
-	sh.StartSyncbase(serverCreds, testSbName, "", `{"Read": {"In":["root:server", "root:client"]}, "Write": {"In":["root:server", "root:client"]}}`)
+	// TODO(aghassemi): Resolve permission is currently needed for Watch.
+	// See https://github.com/vanadium/issues/issues/1110
+	sh.StartSyncbase(serverCreds, testSbName, "", `{"Resolve": {"In":["root:server", "root:client"]}, "Read": {"In":["root:server", "root:client"]}, "Write": {"In":["root:server", "root:client"]}}`)
 
 	// Create app, database and table.
 	// TODO(ivanpi): Use setupAppA.
@@ -36,17 +42,52 @@ func TestV23SyncbasedPutGet(t *testing.T) {
 	if err := tb.Create(ctx, nil); err != nil {
 		t.Fatalf("unable to create a table: %v", err)
 	}
+	marker, err := d.GetResumeMarker(ctx)
+	if err != nil {
+		t.Fatalf("unable to get the resume marker: %v", err)
+	}
 
 	// Do a Put followed by a Get.
-	r := tb.Row("r")
-	if err := r.Put(ctx, "testkey"); err != nil {
+	r := tb.Row("testkey")
+	if err := r.Put(ctx, "testvalue"); err != nil {
 		t.Fatalf("r.Put() failed: %v", err)
 	}
 	var result string
 	if err := r.Get(ctx, &result); err != nil {
 		t.Fatalf("r.Get() failed: %v", err)
 	}
-	if got, want := result, "testkey"; got != want {
+	if got, want := result, "testvalue"; got != want {
 		t.Fatalf("unexpected value: got %q, want %q", got, want)
 	}
+
+	// Do a watch from the resume marker before the put operation.
+	ctxWithTimeout, cancel := context.WithTimeout(ctx, 10*time.Second)
+	defer cancel()
+	stream, err := d.Watch(ctxWithTimeout, "tb", "", marker)
+	if err != nil {
+		t.Fatalf("unable to start a watch %v", err)
+	}
+	if !stream.Advance() {
+		t.Fatalf("watch stream unexpectedly reached the end: %v", stream.Err())
+	}
+	change := stream.Change()
+	if got, want := change.Table, "tb"; got != want {
+		t.Fatalf("unexpected watch table: got %q, want %q", got, want)
+	}
+	if got, want := change.Row, "testkey"; got != want {
+		t.Fatalf("unexpected watch row: got %q, want %q", got, want)
+	}
+	if got, want := change.ChangeType, nosql.PutChange; got != want {
+		t.Fatalf("unexpected watch change type: got %q, want %q", got, want)
+	}
+	if got, want := change.FromSync, false; got != want {
+		t.Fatalf("unexpected FromSync value: got %t, want %t", got, want)
+	}
+	if err := vom.Decode(change.ValueBytes, &result); err != nil {
+		t.Fatalf("couldn't decode watch value: %v", err)
+	}
+	if got, want := result, "testvalue"; got != want {
+		t.Fatalf("unexpected watch value: got %q, want %q", got, want)
+	}
+
 }
