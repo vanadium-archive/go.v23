@@ -11,15 +11,15 @@ package vom
 // $ jiri go get github.com/dvyukov/go-fuzz/go-fuzz{,-build}
 // $ cd $JIRI_ROOT/release/go/src/v.io/v23/vom
 // $ jiri go test -tags fuzzdump
-// $ jiri run go-fuzz-build v.io/v23/vom
-// $ jiri run go-fuzz -bin vom-fuzz.zip -workdir workdir
+// $ jiri run go-fuzz-build -o fuzz-vom.zip v.io/v23/vom
+// $ jiri run go-fuzz -bin fuzz-vom.zip -workdir fuzz-workdir
 //
 // Inputs resulting in crashes will be in workdir/crashers.
 //
 // go-fuzz will explore the space of possible input faster if
-// you put bigger inputs into workdir/corpus to help it. To do so,
+// you put bigger inputs into fuzz-workdir/corpus to help it. To do so,
 // run "jiri go test -tags fuzzdump" once. This will copy all inputs
-// used by the tests into workdir/corpus (see fuzzdump_test.go).
+// used by the tests into fuzz-workdir/corpus (see fuzzdump_test.go).
 
 import "bytes"
 
