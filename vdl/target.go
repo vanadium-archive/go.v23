@@ -216,6 +216,13 @@ func FromReflect(target Target, rv reflect.Value) error {
 		}
 		rv = rv.Elem()
 	}
+
+	if reflect.PtrTo(rv.Type()).Implements(rtTargetConvertible) {
+		rvPtr := reflect.New(rv.Type())
+		rvPtr.Elem().Set(rv)
+		return rvPtr.Interface().(rawBytesTargetConvertible).ToTarget(target)
+	}
+
 	// Handle special-case for errors.
 	if rv.Type().ConvertibleTo(rtError) {
 		return fromError(target, rv)

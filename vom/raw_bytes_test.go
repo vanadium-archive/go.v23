@@ -15,12 +15,6 @@ import (
 	"v.io/v23/vom/testdata/types"
 )
 
-func TestVdlTypeOfRawBytes(t *testing.T) {
-	if got, want := vdl.TypeOf(&RawBytes{}), vdl.AnyType; got != want {
-		t.Errorf("got %v, want %v", got, want)
-	}
-}
-
 type testUint64 uint64
 
 type structTypeObject struct {
@@ -370,6 +364,22 @@ func TestRawBytesToFromValue(t *testing.T) {
 				t.Errorf("%v %s: error in converting to and from raw value. got %v, but want %v", testVersion.Version,
 					test.Name, got, want)
 			}
+		}
+	}
+}
+
+func TestVdlTypeOfRawBytes(t *testing.T) {
+	if got, want := vdl.TypeOf(&RawBytes{}), vdl.AnyType; got != want {
+		t.Errorf("got %v, want %v", got, want)
+	}
+}
+
+func TestVdlValueOfRawBytes(t *testing.T) {
+	for _, test := range rawBytesTestCases {
+		want := vdl.ValueOf(test.goValue)
+		got := vdl.ValueOf(test.rawBytes)
+		if !vdl.EqualValue(got, want) {
+			t.Errorf("vdl.ValueOf(RawBytes) %s: got %v, want %v", test.name, got, want)
 		}
 	}
 }
