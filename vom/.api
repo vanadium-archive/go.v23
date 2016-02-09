@@ -2,7 +2,6 @@ pkg vom, const ControlKindEnd ControlKind
 pkg vom, const ControlKindIncompleteType ControlKind
 pkg vom, const ControlKindNil ControlKind
 pkg vom, const DefaultVersion Version
-pkg vom, const DefaultVersionWithRawBytesSupport Version
 pkg vom, const DumpKindAnyLensLen DumpKind
 pkg vom, const DumpKindAnyMsgLen DumpKind
 pkg vom, const DumpKindByteLen DumpKind

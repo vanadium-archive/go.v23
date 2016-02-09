@@ -153,7 +153,7 @@ func BenchmarkVomEncoder1000Customer(b *testing.B) {
 // vom.Encoder.Encode RawBytes benchmarking
 func vomEncoderEncodeRawBytes(t testing.TB, n int, rv *vom.RawBytes) {
 	var buf bytes.Buffer
-	encoder := vom.NewVersionedEncoder(vom.DefaultVersionWithRawBytesSupport, &buf)
+	encoder := vom.NewEncoder(&buf)
 	for j := 0; j != n; j++ {
 		err := encoder.Encode(rv)
 		if err != nil {
@@ -163,7 +163,7 @@ func vomEncoderEncodeRawBytes(t testing.TB, n int, rv *vom.RawBytes) {
 }
 
 func makeCustomerRawBytes(tb testing.TB) *vom.RawBytes {
-	bytes, err := vom.VersionedEncode(vom.DefaultVersionWithRawBytesSupport, customer)
+	bytes, err := vom.Encode(customer)
 	if err != nil {
 		tb.Fatalf("vom.Encode failed: %v", err)
 	}
@@ -208,7 +208,7 @@ func TestVomDecoder(t *testing.T) {
 	data := buf.Bytes()
 	// TODO(bprosnitz) remove the encoder below when we switch to version 81
 	var buf81 bytes.Buffer
-	encoder81 := vom.NewVersionedEncoder(vom.DefaultVersionWithRawBytesSupport, &buf81)
+	encoder81 := vom.NewEncoder(&buf81)
 	for j := 0; j != 1000; j++ {
 		err := encoder81.Encode(customer)
 		if err != nil {
@@ -268,7 +268,7 @@ func vomDecoderDecodeRawBytes(t testing.TB, n int, buf []byte) {
 
 func BenchmarkVomDecoder1000RawBytes(b *testing.B) {
 	var buf bytes.Buffer
-	encoder := vom.NewVersionedEncoder(vom.DefaultVersionWithRawBytesSupport, &buf)
+	encoder := vom.NewEncoder(&buf)
 	for j := 0; j != 1000; j++ {
 		err := encoder.Encode(customer)
 		if err != nil {

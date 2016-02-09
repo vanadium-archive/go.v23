@@ -29,7 +29,7 @@ func RawBytesOf(value interface{}) *RawBytes {
 
 func RawBytesFromValue(value interface{}) (*RawBytes, error) {
 	// TODO(bprosnitz) This implementation is temporary - we should make it faster
-	dat, err := VersionedEncode(DefaultVersionWithRawBytesSupport, value)
+	dat, err := Encode(value)
 	if err != nil {
 		return nil, err
 	}
@@ -40,7 +40,7 @@ func RawBytesFromValue(value interface{}) (*RawBytes, error) {
 
 func (rb *RawBytes) ToValue(value interface{}) error {
 	// TODO(bprosnitz) This implementation is temporary - we should make it faster
-	dat, err := VersionedEncode(DefaultVersionWithRawBytesSupport, rb)
+	dat, err := Encode(rb)
 	if err != nil {
 		return err
 	}

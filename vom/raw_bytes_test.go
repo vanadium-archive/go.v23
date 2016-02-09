@@ -42,7 +42,7 @@ var rawBytesTestCases = []struct {
 		name:    "testUint64(99)",
 		goValue: testUint64(99),
 		rawBytes: RawBytes{
-			Version: DefaultVersionWithRawBytesSupport,
+			Version: DefaultVersion,
 			Type:    vdl.TypeOf(testUint64(0)),
 			Data:    []byte{0x63},
 		},
@@ -51,7 +51,7 @@ var rawBytesTestCases = []struct {
 		name:    "typeobject(int32)",
 		goValue: vdl.Int32Type,
 		rawBytes: RawBytes{
-			Version:  DefaultVersionWithRawBytesSupport,
+			Version:  DefaultVersion,
 			Type:     vdl.TypeOf(vdl.Int32Type),
 			RefTypes: []*vdl.Type{vdl.Int32Type},
 			Data:     []byte{0x00},
@@ -61,7 +61,7 @@ var rawBytesTestCases = []struct {
 		name:    "structTypeObject{typeobject(int32)}",
 		goValue: structTypeObject{vdl.Int32Type},
 		rawBytes: RawBytes{
-			Version:  DefaultVersionWithRawBytesSupport,
+			Version:  DefaultVersion,
 			Type:     vdl.TypeOf(structTypeObject{}),
 			RefTypes: []*vdl.Type{vdl.Int32Type},
 			Data:     []byte{0x00, 0x00, WireCtrlEnd},
@@ -72,19 +72,19 @@ var rawBytesTestCases = []struct {
 		goValue: structAnyAndTypes{
 			vdl.Int32Type,
 			&RawBytes{
-				Version: DefaultVersionWithRawBytesSupport,
+				Version: DefaultVersion,
 				Type:    vdl.BoolType,
 				Data:    []byte{0x01},
 			},
 			vdl.BoolType,
 			&RawBytes{
-				Version: DefaultVersionWithRawBytesSupport,
+				Version: DefaultVersion,
 				Type:    vdl.TypeOf(""),
 				Data:    []byte{0x03, 0x61, 0x62, 0x63},
 			},
 		},
 		rawBytes: RawBytes{
-			Version:    DefaultVersionWithRawBytesSupport,
+			Version:    DefaultVersion,
 			Type:       vdl.TypeOf(structAnyAndTypes{}),
 			RefTypes:   []*vdl.Type{vdl.Int32Type, vdl.BoolType, vdl.StringType},
 			AnyLengths: []uint64{1, 4},
@@ -100,12 +100,12 @@ var rawBytesTestCases = []struct {
 	{
 		name: "any(nil)",
 		goValue: &RawBytes{
-			Version: DefaultVersionWithRawBytesSupport,
+			Version: DefaultVersion,
 			Type:    vdl.AnyType,
 			Data:    []byte{WireCtrlNil},
 		},
 		rawBytes: RawBytes{
-			Version: DefaultVersionWithRawBytesSupport,
+			Version: DefaultVersion,
 			Type:    vdl.AnyType,
 			Data:    []byte{WireCtrlNil},
 		},
@@ -114,7 +114,7 @@ var rawBytesTestCases = []struct {
 
 func TestDecodeToRawBytes(t *testing.T) {
 	for _, test := range rawBytesTestCases {
-		bytes, err := VersionedEncode(DefaultVersionWithRawBytesSupport, test.goValue)
+		bytes, err := Encode(test.goValue)
 		if err != nil {
 			t.Fatalf("%s: error in encode %v", test.name, err)
 		}
@@ -130,11 +130,11 @@ func TestDecodeToRawBytes(t *testing.T) {
 
 func TestEncodeFromRawBytes(t *testing.T) {
 	for _, test := range rawBytesTestCases {
-		fullBytes, err := VersionedEncode(DefaultVersionWithRawBytesSupport, test.goValue)
+		fullBytes, err := Encode(test.goValue)
 		if err != nil {
 			t.Fatalf("%s: error in encode %v", test.name, err)
 		}
-		fullBytesFromRaw, err := VersionedEncode(DefaultVersionWithRawBytesSupport, &test.rawBytes)
+		fullBytesFromRaw, err := Encode(&test.rawBytes)
 		if err != nil {
 			t.Fatalf("%s: error in encode %v", test.name, err)
 		}
@@ -154,7 +154,7 @@ var rawBytesWrappedTestCases = []struct {
 		name:    "testUint64(99)",
 		goValue: testUint64(99),
 		rawBytes: RawBytes{
-			Version:    DefaultVersionWithRawBytesSupport,
+			Version:    DefaultVersion,
 			Type:       vdl.TypeOf(testUint64(0)),
 			RefTypes:   []*vdl.Type{vdl.TypeOf(testUint64(0))},
 			AnyLengths: []uint64{1},
@@ -165,7 +165,7 @@ var rawBytesWrappedTestCases = []struct {
 		name:    "typeobject(int32)",
 		goValue: vdl.Int32Type,
 		rawBytes: RawBytes{
-			Version:    DefaultVersionWithRawBytesSupport,
+			Version:    DefaultVersion,
 			Type:       vdl.TypeOf(vdl.Int32Type),
 			RefTypes:   []*vdl.Type{vdl.TypeObjectType, vdl.Int32Type},
 			AnyLengths: []uint64{1},
@@ -176,7 +176,7 @@ var rawBytesWrappedTestCases = []struct {
 		name:    "structTypeObject{typeobject(int32)}",
 		goValue: structTypeObject{vdl.Int32Type},
 		rawBytes: RawBytes{
-			Version:    DefaultVersionWithRawBytesSupport,
+			Version:    DefaultVersion,
 			Type:       vdl.TypeOf(structTypeObject{}),
 			RefTypes:   []*vdl.Type{vdl.TypeOf(structTypeObject{}), vdl.Int32Type},
 			AnyLengths: []uint64{3},
@@ -188,19 +188,19 @@ var rawBytesWrappedTestCases = []struct {
 		goValue: structAnyAndTypes{
 			vdl.Int32Type,
 			&RawBytes{
-				Version: DefaultVersionWithRawBytesSupport,
+				Version: DefaultVersion,
 				Type:    vdl.BoolType,
 				Data:    []byte{0x01},
 			},
 			vdl.BoolType,
 			&RawBytes{
-				Version: DefaultVersionWithRawBytesSupport,
+				Version: DefaultVersion,
 				Type:    vdl.TypeOf(""),
 				Data:    []byte{0x03, 0x61, 0x62, 0x63},
 			},
 		},
 		rawBytes: RawBytes{
-			Version:    DefaultVersionWithRawBytesSupport,
+			Version:    DefaultVersion,
 			Type:       vdl.TypeOf(structAnyAndTypes{}),
 			RefTypes:   []*vdl.Type{vdl.TypeOf(structAnyAndTypes{}), vdl.Int32Type, vdl.BoolType, vdl.StringType},
 			AnyLengths: []uint64{16, 1, 4},
@@ -219,7 +219,7 @@ func TestWrappedRawBytes(t *testing.T) {
 	for i, test := range rawBytesWrappedTestCases {
 		unwrapped := rawBytesTestCases[i]
 
-		wrappedBytes, err := VersionedEncode(DefaultVersionWithRawBytesSupport, structAny{&unwrapped.rawBytes})
+		wrappedBytes, err := Encode(structAny{&unwrapped.rawBytes})
 		if err != nil {
 			t.Fatalf("%s: error in encode %v", test.name, err)
 		}
@@ -238,11 +238,11 @@ func TestWrappedRawBytes(t *testing.T) {
 
 func TestEncodeNilRawBytes(t *testing.T) {
 	// Top-level
-	expectedBytes, err := VersionedEncode(DefaultVersionWithRawBytesSupport, vdl.ZeroValue(vdl.AnyType))
+	expectedBytes, err := Encode(vdl.ZeroValue(vdl.AnyType))
 	if err != nil {
 		t.Fatal(err)
 	}
-	encodedBytes, err := VersionedEncode(DefaultVersionWithRawBytesSupport, (*RawBytes)(nil))
+	encodedBytes, err := Encode((*RawBytes)(nil))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -251,11 +251,11 @@ func TestEncodeNilRawBytes(t *testing.T) {
 	}
 
 	// Within an object.
-	expectedBytes, err = VersionedEncode(DefaultVersionWithRawBytesSupport, []*vdl.Value{vdl.ZeroValue(vdl.AnyType)})
+	expectedBytes, err = Encode([]*vdl.Value{vdl.ZeroValue(vdl.AnyType)})
 	if err != nil {
 		t.Fatal(err)
 	}
-	encodedBytes, err = VersionedEncode(DefaultVersionWithRawBytesSupport, []*RawBytes{nil})
+	encodedBytes, err = Encode([]*RawBytes{nil})
 	if err != nil {
 		t.Fatal(err)
 	}

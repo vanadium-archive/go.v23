@@ -33,7 +33,7 @@ type TypeEncoder struct {
 // NewTypeEncoder returns a new TypeEncoder that writes types to the given
 // writer in the binary format.
 func NewTypeEncoder(w io.Writer) *TypeEncoder {
-	return NewVersionedTypeEncoder(Version80, w)
+	return NewVersionedTypeEncoder(DefaultVersion, w)
 }
 
 // NewTypeEncoderVersion returns a new TypeEncoder that writes types to the given

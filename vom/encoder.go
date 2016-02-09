@@ -19,8 +19,7 @@ const (
 	Version80 = Version(0x80)
 	Version81 = Version(0x81)
 
-	DefaultVersion                    = Version80
-	DefaultVersionWithRawBytesSupport = Version81 // TODO(bprosnitz) Remove once switch to 81 being default
+	DefaultVersion = Version81
 )
 
 func (v Version) String() string {
@@ -103,7 +102,7 @@ type typeStackEntry struct {
 // NewEncoder returns a new Encoder that writes to the given writer in the
 // binary format. The binary format is compact and fast.
 func NewEncoder(w io.Writer) *Encoder {
-	return NewVersionedEncoder(Version80, w)
+	return NewVersionedEncoder(DefaultVersion, w)
 }
 
 // NewVersionedEncoder returns a new Encoder that writes to the given writer with
@@ -126,7 +125,7 @@ func NewVersionedEncoder(version Version, w io.Writer) *Encoder {
 // writer in the binary format. Types will be encoded separately through the
 // given typeEncoder.
 func NewEncoderWithTypeEncoder(w io.Writer, typeEnc *TypeEncoder) *Encoder {
-	return NewVersionedEncoderWithTypeEncoder(Version80, w, typeEnc)
+	return NewVersionedEncoderWithTypeEncoder(DefaultVersion, w, typeEnc)
 }
 
 // NewVersionedEncoderWithTypeEncoder returns a new Encoder that writes to the given
