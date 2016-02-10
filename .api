@@ -14,6 +14,7 @@ pkg v23, func NewDiscovery(*context.T) (discovery.T, error)
 pkg v23, func NewEndpoint(string) (naming.Endpoint, error)
 pkg v23, func NewFlowManager(*context.T, time.Duration) (flow.Manager, error)
 pkg v23, func RegisterRuntimeFactory(RuntimeFactory)
+pkg v23, func TryInit() (*context.T, Shutdown, error)
 pkg v23, func WithBackgroundContext(*context.T) *context.T
 pkg v23, func WithListenSpec(*context.T, rpc.ListenSpec) *context.T
 pkg v23, func WithNewClient(*context.T, ...rpc.ClientOpt) (*context.T, rpc.Client, error)

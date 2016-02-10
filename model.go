@@ -444,12 +444,12 @@ func getStack(skip int) string {
 	return buf.String()
 }
 
-func internalInit() (*context.T, Shutdown) {
+func internalInit() (*context.T, Shutdown, error) {
 	initState.mu.Lock()
 	runtimeFactory := initState.runtimeFactory
 	if initState.runtimeFactory == nil {
 		initState.mu.Unlock()
-		panic("No RuntimeFactory has been registered nor specified. This is most" +
+		return nil, nil, fmt.Errorf("No RuntimeFactory has been registered nor specified. This is most" +
 			" likely because your main package has not imported a RuntimeFactory")
 	}
 
@@ -463,7 +463,7 @@ The previous initialization was from:
 This registration is from:
 %s
 `
-		panic(fmt.Sprintf(format, initState.runtimeStack, stack))
+		return nil, nil, fmt.Errorf(format, initState.runtimeStack, stack)
 	}
 	initState.runtimeStack = stack
 	initState.mu.Unlock()
@@ -480,7 +480,7 @@ This registration is from:
 	if err != nil {
 		cancel()
 		rootcancel()
-		panic(err)
+		return nil, nil, err
 	}
 
 	initState.mu.Lock()
@@ -503,8 +503,8 @@ This registration is from:
 
 	if err := rt.Init(ctx); err != nil {
 		vshutdown()
-		panic(err)
+		return nil, nil, err
 	}
 
-	return ctx, vshutdown
+	return ctx, vshutdown, nil
 }

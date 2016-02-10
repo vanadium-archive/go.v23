@@ -28,6 +28,14 @@ func init() {
 // multiple times, but only as long as you call the Shutdown returned
 // previously before calling Init the second time.
 func Init(mctx application.Context) (*context.T, Shutdown) {
+	ctx, shutdown, err := TryInit(mctx)
+	if err != nil {
+		panic(err)
+	}
+	return ctx, shutdown
+}
+
+func TryInit(mctx application.Context) (*context.T, Shutdown, error) {
 	// mctx.Args() is a slice that contains the url of this mojo service
 	// followed by all arguments passed to the mojo service via the
 	// "--args-for" flag. Since the v23 runtime factories parse arguments
