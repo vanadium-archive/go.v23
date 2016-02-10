@@ -14,8 +14,7 @@ import (
 )
 
 // Signature invokes the reserved signature RPC on the given name, and returns
-// the results.  The client will be used to invoke the RPC - if it is nil, the
-// default client from the runtime is used.
+// the results.
 func Signature(ctx *context.T, name string, opts ...rpc.CallOpt) ([]signature.Interface, error) {
 	var sig []signature.Interface
 	res := []interface{}{&sig}
@@ -26,8 +25,7 @@ func Signature(ctx *context.T, name string, opts ...rpc.CallOpt) ([]signature.In
 }
 
 // MethodSignature invokes the reserved method signature RPC on the given name,
-// and returns the results.  The client will be used to invoke the RPC - if it
-// is nil, the default client from the runtime is used.
+// and returns the results.
 func MethodSignature(ctx *context.T, name, method string, opts ...rpc.CallOpt) (signature.Method, error) {
 	args := []interface{}{method}
 	var sig signature.Method
