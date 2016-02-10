@@ -97,12 +97,6 @@ type NameResolutionAuthorizer struct{ security.Authorizer }
 func (NameResolutionAuthorizer) RPCCallOpt() {}
 func (NameResolutionAuthorizer) NSOpt()      {}
 
-// RetryTimeout is the duration during which we will retry starting
-// an RPC call.  Zero means don't retry.
-type RetryTimeout time.Duration
-
-func (RetryTimeout) RPCCallOpt() {}
-
 // Preresolved specifies that the RPC call should not further Resolve the name.
 // If a MountEntry is provided, use it.  Otherwise use the name passed in the
 // RPC call.  If the name is relative, it will be made global using
@@ -144,3 +138,10 @@ type ChannelTimeout time.Duration
 
 func (ChannelTimeout) RPCCallOpt()   {}
 func (ChannelTimeout) RPCServerOpt() {}
+
+// ConnectionTimeout is the amount of time we will try establishing a connection
+// to the remote end during an RPC. Zero means only use cached connections and
+// do not attempt to retry if no connection exists in the cache.
+type ConnectionTimeout time.Duration
+
+func (ConnectionTimeout) RPCCallOpt() {}
