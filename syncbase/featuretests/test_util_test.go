@@ -15,6 +15,7 @@ import (
 	"v.io/v23"
 	"v.io/v23/context"
 	"v.io/v23/security/access"
+	wire_syncbase "v.io/v23/services/syncbase"
 	wire "v.io/v23/services/syncbase/nosql"
 	"v.io/v23/syncbase"
 	"v.io/v23/syncbase/nosql"
@@ -52,7 +53,7 @@ type testSyncbase struct {
 }
 
 // Spawns "num" Syncbase instances and returns handles to them.
-func setupSyncbases(t *testing.T, sh *v23test.Shell, num int, args ...string) []*testSyncbase {
+func setupSyncbases(t testing.TB, sh *v23test.Shell, num int, args ...string) []*testSyncbase {
 	sbs := make([]*testSyncbase, num)
 	for i, _ := range sbs {
 		sbName, clientId := fmt.Sprintf("s%d", i), fmt.Sprintf("c%d", i)
@@ -62,8 +63,8 @@ func setupSyncbases(t *testing.T, sh *v23test.Shell, num int, args ...string) []
 			clientId:  clientId,
 			clientCtx: sh.ForkContext(clientId),
 		}
-		// Give RWA permissions to this Syncbase's client.
-		acl := fmt.Sprintf(`{"Read":{"In":["root:%s"]},"Write":{"In":["root:%s"]},"Admin":{"In":["root:%s"]}}`, clientId, clientId, clientId)
+		// Give XRWA permissions to this Syncbase's client.
+		acl := fmt.Sprintf(`{"Resolve":{"In":["root:%s"]},"Read":{"In":["root:%s"]},"Write":{"In":["root:%s"]},"Admin":{"In":["root:%s"]}}`, clientId, clientId, clientId, clientId)
 		sh.StartSyncbase(sbs[i].sbCreds, sbs[i].sbName, "", acl, args...)
 	}
 	// Call setupHierarchy on each Syncbase.
@@ -327,27 +328,35 @@ func parseSgPrefixes(csv string) []wire.TableRow {
 }
 
 ////////////////////////////////////////////////////////////
+// Helpers to interact with the Syncbase service directly.
+
+// Obtain the Syncbase client stub.
+func sc(name string) wire_syncbase.ServiceClientStub {
+	return wire_syncbase.ServiceClient(name)
+}
+
+////////////////////////////////////////////////////////////
 // Generic testing helpers
 
-func ok(t *testing.T, err error) {
+func ok(t testing.TB, err error) {
 	if err != nil {
 		tu.Fatal(t, err)
 	}
 }
 
-func nok(t *testing.T, err error) {
+func nok(t testing.TB, err error) {
 	if err == nil {
 		tu.Fatal(t, "nil err")
 	}
 }
 
-func eq(t *testing.T, got, want interface{}) {
+func eq(t testing.TB, got, want interface{}) {
 	if !reflect.DeepEqual(got, want) {
 		tu.Fatalf(t, "got %v, want %v", got, want)
 	}
 }
 
-func neq(t *testing.T, got, notWant interface{}) {
+func neq(t testing.TB, got, notWant interface{}) {
 	if reflect.DeepEqual(got, notWant) {
 		tu.Fatalf(t, "got %v", got)
 	}

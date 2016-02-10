@@ -388,10 +388,6 @@ func TestV23VClockSyncWithReboots(t *testing.T) {
 ////////////////////////////////////////////////////////////////////////////////
 // Helper functions
 
-func sc(name string) wire.ServiceClientStub {
-	return wire.ServiceClient(name)
-}
-
 // Creates a "chain" of syncgroups, where each adjacent pair of Syncbases {A,B}
 // share a syncgroup with key prefix "AB".
 func setupChain(t *testing.T, sbs []*testSyncbase) {
