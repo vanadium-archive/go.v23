@@ -187,6 +187,7 @@ func runExecBenchmark(b *testing.B, value interface{}) {
 
 // Measures how long it takes to put and get notified about 'numRows' rows.
 func runWatchPutsBenchmark(b *testing.B, value interface{}) {
+	b.Skip("Hangs on occasion, for unknown reasons - v.io/i/1134")
 	ctx, d, tb, cleanup := prepare(b)
 	defer cleanup()
 	b.ResetTimer()
@@ -215,6 +216,7 @@ func runWatchPutsBenchmark(b *testing.B, value interface{}) {
 
 // Measures how long it takes to put and get notified about a single value.
 func runWatchOnePutBenchmark(b *testing.B, value interface{}) {
+	b.Skip("Hangs on occasion, for unknown reasons - v.io/i/1134")
 	ctx, d, tb, cleanup := prepare(b)
 	defer cleanup()
 	w, err := d.Watch(ctx, "tb", "", watch.ResumeMarker("now"))
