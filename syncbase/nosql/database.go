@@ -211,7 +211,7 @@ func (d *database) CreateBlob(ctx *context.T) (Blob, error) {
 func (d *database) EnforceSchema(ctx *context.T) error {
 	var schema *Schema = d.schema
 	if schema == nil {
-		return verror.New(verror.ErrBadState, ctx, "Schema or SchemaMetadata cannot be nil. A valid Schema needs to be used when creating DB handle.")
+		return verror.New(verror.ErrBadState, ctx, "EnforceSchema cannot be used since a nil *Schema was provided at Database handle creation time.")
 	}
 
 	if schema.Metadata.Version < 0 {
@@ -222,7 +222,7 @@ func (d *database) EnforceSchema(ctx *context.T) error {
 		return verror.New(verror.ErrBadState, ctx, "ResolverTypeAppResolves cannot be used in CrRule without providing a ConflictResolver in Schema.")
 	}
 
-	if _, err := d.upgradeIfOutdated(ctx); err != nil {
+	if _, err := d.updateSchemaMetadata(ctx); err != nil {
 		return err
 	}
 
@@ -243,7 +243,10 @@ func (d *database) Close() {
 	d.crState.disconnect()
 }
 
-func (d *database) upgradeIfOutdated(ctx *context.T) (bool, error) {
+// updateSchemaMetadata reads the current SchemaMetadata from db and checks
+// if the SchemaMetadata provided by the app is newer. If so, it updates the
+// db with the new SchemaMetadata.
+func (d *database) updateSchemaMetadata(ctx *context.T) (bool, error) {
 	var schema *Schema = d.schema
 	schemaMgr := d.getSchemaManager()
 	currMeta, err := schemaMgr.getSchemaMetadata(ctx)
@@ -267,21 +270,9 @@ func (d *database) upgradeIfOutdated(ctx *context.T) (bool, error) {
 	if currMeta.Version >= schema.Metadata.Version {
 		return false, nil
 	}
-	// Call the Upgrader provided by the app to upgrade the schema.
-	//
-	// TODO(jlodhia): disable sync before running Upgrader and reenable
-	// once Upgrader is finished.
-	//
-	// TODO(jlodhia): prevent other processes (local/remote) from accessing
-	// the database while upgrade is in progress.
-	upgradeErr := schema.Upgrader.Run(d, currMeta.Version, schema.Metadata.Version)
-	if upgradeErr != nil {
-		vlog.Error(upgradeErr)
-		return false, upgradeErr
-	}
+
 	// Update the schema metadata in db to the latest version.
-	metadataErr := schemaMgr.setSchemaMetadata(ctx, schema.Metadata)
-	if metadataErr != nil {
+	if metadataErr := schemaMgr.setSchemaMetadata(ctx, schema.Metadata); metadataErr != nil {
 		vlog.Error(metadataErr)
 		return false, metadataErr
 	}

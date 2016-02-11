@@ -127,7 +127,6 @@ func TestCrConnectionReestablish(t *testing.T) {
 func getSchema(cr ConflictResolver) *Schema {
 	return &Schema{
 		Metadata: wire.SchemaMetadata{},
-		Upgrader: nil,
 		Resolver: cr,
 	}
 }

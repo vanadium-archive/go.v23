@@ -9,14 +9,6 @@ import (
 	wire "v.io/v23/services/syncbase/nosql"
 )
 
-// NewSchema creates a new Schema object.
-func NewSchema(metadata wire.SchemaMetadata, upgrader SchemaUpgrader) *Schema {
-	return &Schema{
-		Metadata: metadata,
-		Upgrader: upgrader,
-	}
-}
-
 //////////////////////////////////////////
 // Implementation of SchemaManager (Not part of public client API)
 

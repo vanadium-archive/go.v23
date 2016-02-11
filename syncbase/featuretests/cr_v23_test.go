@@ -570,7 +570,6 @@ func makeSchema(keyPrefix string, resolver *CRImpl) *nosql.Schema {
 	}
 	return &nosql.Schema{
 		Metadata: metadata,
-		Upgrader: nil,
 		Resolver: resolver,
 	}
 }

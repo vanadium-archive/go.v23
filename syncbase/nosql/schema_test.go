@@ -19,28 +19,19 @@ import (
 // This test as following steps:
 // 1) Call NoSQLDatabase() for a non existent db.
 // 2) Create the database, and verify if Schema got stored properly.
-// 3) Call EnforceSchema() to make sure that the method is no-op and is
-//    able to read the schema from db.
-// 4) Call NoSQLDatabase() on the same db to create a new handle with an
-//    upgraded schema, call EnforceSchema() and check if SchemaUpgrader
-//    is called and if the new schema is stored appropriately.
+// 3) Call NoSQLDatabase() on the same db to create a new handle with new
+//    schema metadata, call EnforceSchema() and check if the new metadata was
+//    stored appropriately.
 func TestSchemaCheck(t *testing.T) {
 	ctx, sName, cleanup := tu.SetupOrDie(nil)
 	defer cleanup()
 	a := tu.CreateApp(t, ctx, syncbase.NewService(sName), "a")
 	schema := tu.DefaultSchema(0)
-	mockUpgrader := schema.Upgrader.(*tu.MockSchemaUpgrader)
 
 	db1 := a.NoSQLDatabase("db1", schema)
 
-	// Verify that calling Upgrade on a non existing database does not throw
-	// errors.
-	err := db1.EnforceSchema(ctx)
-	if err != nil {
+	if err := db1.EnforceSchema(ctx); err != nil {
 		t.Fatalf("db1.EnforceSchema() failed: %v", err)
-	}
-	if mockUpgrader.CallCount > 0 {
-		t.Fatal("Call to upgrader was not expected.")
 	}
 
 	// Create db1, this step also stores the schema provided above
@@ -50,14 +41,6 @@ func TestSchemaCheck(t *testing.T) {
 	// verify if schema was stored as part of create
 	if _, err := getSchemaMetadata(ctx, db1.FullName()); err != nil {
 		t.Fatalf("Failed to lookup schema after create: %v", err)
-	}
-
-	// Make redundant call to Upgrade to verify that it is a no-op
-	if err := db1.EnforceSchema(ctx); err != nil {
-		t.Fatalf("db1.EnforceSchema() failed: %v", err)
-	}
-	if mockUpgrader.CallCount > 0 {
-		t.Fatal("Call to upgrader was not expected.")
 	}
 
 	// try to make a new database object for the same database but this time
@@ -72,14 +55,11 @@ func TestSchemaCheck(t *testing.T) {
 	if err := otherdb1.EnforceSchema(ctx); err != nil {
 		t.Fatalf("otherdb1.EnforceSchema() failed: %v", err)
 	}
-	if mockUpgrader.CallCount != 1 {
-		t.Fatalf("Unexpected number of calls to upgrader. Expected: %d, Actual: %d.", 1, mockUpgrader.CallCount)
-	}
 
 	// check if the contents of SchemaMetadata are correctly stored in the db.
-	metadata, err3 := getSchemaMetadata(ctx, otherdb1.FullName())
-	if err3 != nil {
-		t.Fatalf("GetSchemaMetadata failed: %v", err3)
+	metadata, err := getSchemaMetadata(ctx, otherdb1.FullName())
+	if err != nil {
+		t.Fatalf("GetSchemaMetadata failed: %v", err)
 	}
 	if metadata.Version != 1 {
 		t.Fatalf("Unexpected version number: %d", metadata.Version)

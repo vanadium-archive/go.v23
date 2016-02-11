@@ -1,7 +1,6 @@
 pkg nosql, const DeleteChange ChangeType
 pkg nosql, const PutChange ChangeType
 pkg nosql, func NewDatabase(string, string, *Schema) *database
-pkg nosql, func NewSchema(wire.SchemaMetadata, SchemaUpgrader) *Schema
 pkg nosql, func NewValue(*context.T, interface{}) (*Value, error)
 pkg nosql, func Prefix(string) PrefixRange
 pkg nosql, func Range(string, string) RowRange
@@ -135,9 +134,6 @@ pkg nosql, type ScanStream interface, Value(interface{}) error
 pkg nosql, type Schema struct
 pkg nosql, type Schema struct, Metadata wire.SchemaMetadata
 pkg nosql, type Schema struct, Resolver ConflictResolver
-pkg nosql, type Schema struct, Upgrader SchemaUpgrader
-pkg nosql, type SchemaUpgrader interface { Run }
-pkg nosql, type SchemaUpgrader interface, Run(Database, int32, int32) error
 pkg nosql, type Stream interface { Advance, Cancel, Err }
 pkg nosql, type Stream interface, Advance() bool
 pkg nosql, type Stream interface, Cancel()
