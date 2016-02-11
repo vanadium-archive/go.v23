@@ -70,7 +70,8 @@ func TestPanicOnInitWithNoRuntimeFactory(t *testing.T) {
 		if r == nil {
 			t.Fatalf("recover returned nil")
 		}
-		str := r.(string)
+		err := r.(error)
+		str := err.Error()
 		if !strings.Contains(str, "No RuntimeFactory has been registered") {
 			t.Fatalf("unexpected error: %s", str)
 		}
@@ -114,7 +115,8 @@ func TestPanicOnSecondInit(t *testing.T) {
 		if r == nil {
 			t.Fatalf("recover returned nil")
 		}
-		str := r.(string)
+		err := r.(error)
+		str := err.Error()
 		if !strings.Contains(str, "A runtime has already been initialized") {
 			t.Fatalf("unexpected error: %s", str)
 		}
