@@ -868,6 +868,7 @@ func (d *dumpWorker) decodeValue(tt *vdl.Type, target vdl.Target) error {
 				d.writeAtom(DumpKindTypeId, PrimitivePUint{id}, "%v", err)
 				return err
 			}
+			d.writeAtom(DumpKindTypeId, PrimitivePUint{id}, "%v", elemType)
 			if d.version >= Version81 {
 				d.prepareAtom("waiting for any message length index")
 				switch index, ctrl, err := binaryDecodeUintWithControl(d.buf); {
@@ -883,7 +884,6 @@ func (d *dumpWorker) decodeValue(tt *vdl.Type, target vdl.Target) error {
 					return d.decodeValue(elemType, target)
 				}
 			}
-			d.writeAtom(DumpKindTypeId, PrimitivePUint{id}, "%v", elemType)
 			return d.decodeValue(elemType, target)
 		}
 	default:

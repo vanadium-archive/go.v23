@@ -98,6 +98,15 @@ var rawBytesTestCases = []struct {
 		},
 	},
 	{
+		name:    "large message", // to test that multibyte length is encoded properly
+		goValue: makeLargeBytes(1000),
+		rawBytes: RawBytes{
+			Version: DefaultVersion,
+			Type:    vdl.ListType(vdl.ByteType),
+			Data:    append([]byte{0xfe, 0x03, 0xe8}, makeLargeBytes(1000)...),
+		},
+	},
+	{
 		name: "any(nil)",
 		goValue: &RawBytes{
 			Version: DefaultVersion,
@@ -110,6 +119,14 @@ var rawBytesTestCases = []struct {
 			Data:    []byte{WireCtrlNil},
 		},
 	},
+}
+
+func makeLargeBytes(size int) []byte {
+	b := make([]byte, size)
+	for i := range b {
+		b[i] = byte(i % 10)
+	}
+	return b
 }
 
 func TestDecodeToRawBytes(t *testing.T) {
@@ -213,12 +230,22 @@ var rawBytesWrappedTestCases = []struct {
 			},
 		},
 	},
+	{
+		name:    "large message", // to test that multibyte length is encoded properly
+		goValue: makeLargeBytes(1000),
+		rawBytes: RawBytes{
+			Version:    DefaultVersion,
+			Type:       vdl.ListType(vdl.ByteType),
+			RefTypes:   []*vdl.Type{vdl.ListType(vdl.ByteType)},
+			AnyLengths: []uint64{0x3eb},
+			Data:       append([]byte{0xfe, 0x03, 0xe8}, makeLargeBytes(1000)...),
+		},
+	},
 }
 
 func TestWrappedRawBytes(t *testing.T) {
 	for i, test := range rawBytesWrappedTestCases {
 		unwrapped := rawBytesTestCases[i]
-
 		wrappedBytes, err := Encode(structAny{&unwrapped.rawBytes})
 		if err != nil {
 			t.Fatalf("%s: error in encode %v", test.name, err)

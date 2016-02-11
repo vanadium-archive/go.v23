@@ -896,16 +896,15 @@ type anyLenList struct {
 
 func (l *anyLenList) StartAny(startMarker uint64) *anyStartRef {
 	l.lens = append(l.lens, 0)
+	index := uint64(len(l.lens) - 1)
 	return &anyStartRef{
-		index:  uint64(len(l.lens) - 1),
-		marker: startMarker,
+		index:  index,
+		marker: startMarker + lenUint(index),
 	}
 }
 
 func (l *anyLenList) FinishAny(start *anyStartRef, endMarker uint64) {
-	lenIncLenBytes := endMarker - start.marker
-	len := lenIncLenBytes - lenUint(lenIncLenBytes)
-	l.lens[start.index] = len
+	l.lens[start.index] = endMarker - start.marker
 }
 
 func (l *anyLenList) Reset() error {
