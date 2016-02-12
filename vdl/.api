@@ -243,6 +243,7 @@ pkg vdl, var Int16Type *Type
 pkg vdl, var Int32Type *Type
 pkg vdl, var Int64Type *Type
 pkg vdl, var Int8Type *Type
+pkg vdl, var RawBytesTargetFunc func(rv reflect.Value) Target
 pkg vdl, var StringType *Type
 pkg vdl, var TypeObjectType *Type
 pkg vdl, var Uint16Type *Type

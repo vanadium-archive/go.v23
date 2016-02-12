@@ -447,3 +447,32 @@ func TestVdlValueOfRawBytes(t *testing.T) {
 		}
 	}
 }
+
+func TestConvertRawBytes(t *testing.T) {
+	for _, test := range rawBytesTestCases {
+		var rb *RawBytes
+		if err := vdl.Convert(&rb, test.goValue); err != nil {
+			t.Errorf("vdl.Convert %#v to RawBytes: %v", test.goValue, err)
+		}
+		if !reflect.DeepEqual(rb, &test.rawBytes) {
+			t.Errorf("vdl.Convert to RawBytes %s: got %v, want %v", test.name, rb, test.rawBytes)
+		}
+	}
+}
+
+type structAnyInterface struct {
+	X interface{}
+}
+
+func TestConvertRawBytesWrapped(t *testing.T) {
+	for _, test := range rawBytesTestCases {
+		var any structAny
+		if err := vdl.Convert(&any, structAnyInterface{test.goValue}); err != nil {
+			t.Errorf("vdl.Convert %#v to RawBytes: %v", structAnyInterface{test.goValue}, err)
+		}
+		got, want := any, structAny{&test.rawBytes}
+		if !reflect.DeepEqual(got, want) {
+			t.Errorf("vdl.Convert to RawBytes %s: got %v, want %v", test.name, got, want)
+		}
+	}
+}

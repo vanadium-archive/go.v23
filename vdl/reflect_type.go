@@ -127,6 +127,10 @@ type rawBytesTargetConvertible interface {
 
 var rtTargetConvertible = reflect.TypeOf([]rawBytesTargetConvertible{}).Elem()
 
+// Hook for function that returns a Target that writes to a vom.RawBytes.
+// See vom.rbTarget.
+var RawBytesTargetFunc func(rv reflect.Value) Target
+
 // basicType returns the *Type corresponding to rt for basic types that cannot
 // be named by the user, and have a well-known conversion.
 func basicType(rt reflect.Type) *Type {

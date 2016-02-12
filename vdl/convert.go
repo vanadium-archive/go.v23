@@ -533,6 +533,11 @@ func removeOptional(tt *Type) *Type {
 
 // FromNil implements the Target interface method.
 func (c convTarget) FromNil(tt *Type) error {
+	if RawBytesTargetFunc != nil && c.vv == nil {
+		if target := RawBytesTargetFunc(c.rv); target != nil {
+			return target.FromNil(tt)
+		}
+	}
 	if !compatible(c.tt, tt) {
 		return fmt.Errorf("types %q and %q aren't compatible", c.tt, tt)
 	}
@@ -581,6 +586,11 @@ func (c convTarget) FromNil(tt *Type) error {
 
 // FromBool implements the Target interface method.
 func (c convTarget) FromBool(src bool, tt *Type) error {
+	if RawBytesTargetFunc != nil && c.vv == nil {
+		if target := RawBytesTargetFunc(c.rv); target != nil {
+			return target.FromBool(src, tt)
+		}
+	}
 	fin, fill, err := startConvert(c, tt)
 	if err != nil {
 		return err
@@ -593,6 +603,11 @@ func (c convTarget) FromBool(src bool, tt *Type) error {
 
 // FromUint implements the Target interface method.
 func (c convTarget) FromUint(src uint64, tt *Type) error {
+	if RawBytesTargetFunc != nil && c.vv == nil {
+		if target := RawBytesTargetFunc(c.rv); target != nil {
+			return target.FromUint(src, tt)
+		}
+	}
 	fin, fill, err := startConvert(c, tt)
 	if err != nil {
 		return err
@@ -605,6 +620,11 @@ func (c convTarget) FromUint(src uint64, tt *Type) error {
 
 // FromInt implements the Target interface method.
 func (c convTarget) FromInt(src int64, tt *Type) error {
+	if RawBytesTargetFunc != nil && c.vv == nil {
+		if target := RawBytesTargetFunc(c.rv); target != nil {
+			return target.FromInt(src, tt)
+		}
+	}
 	fin, fill, err := startConvert(c, tt)
 	if err != nil {
 		return err
@@ -617,6 +637,11 @@ func (c convTarget) FromInt(src int64, tt *Type) error {
 
 // FromFloat implements the Target interface method.
 func (c convTarget) FromFloat(src float64, tt *Type) error {
+	if RawBytesTargetFunc != nil && c.vv == nil {
+		if target := RawBytesTargetFunc(c.rv); target != nil {
+			return target.FromFloat(src, tt)
+		}
+	}
 	fin, fill, err := startConvert(c, tt)
 	if err != nil {
 		return err
@@ -629,6 +654,11 @@ func (c convTarget) FromFloat(src float64, tt *Type) error {
 
 // FromComplex implements the Target interface method.
 func (c convTarget) FromComplex(src complex128, tt *Type) error {
+	if RawBytesTargetFunc != nil && c.vv == nil {
+		if target := RawBytesTargetFunc(c.rv); target != nil {
+			return target.FromComplex(src, tt)
+		}
+	}
 	fin, fill, err := startConvert(c, tt)
 	if err != nil {
 		return err
@@ -641,6 +671,11 @@ func (c convTarget) FromComplex(src complex128, tt *Type) error {
 
 // FromBytes implements the Target interface method.
 func (c convTarget) FromBytes(src []byte, tt *Type) error {
+	if RawBytesTargetFunc != nil && c.vv == nil {
+		if target := RawBytesTargetFunc(c.rv); target != nil {
+			return target.FromBytes(src, tt)
+		}
+	}
 	fin, fill, err := startConvert(c, tt)
 	if err != nil {
 		return err
@@ -653,6 +688,11 @@ func (c convTarget) FromBytes(src []byte, tt *Type) error {
 
 // FromString implements the Target interface method.
 func (c convTarget) FromString(src string, tt *Type) error {
+	if RawBytesTargetFunc != nil && c.vv == nil {
+		if target := RawBytesTargetFunc(c.rv); target != nil {
+			return target.FromString(src, tt)
+		}
+	}
 	fin, fill, err := startConvert(c, tt)
 	if err != nil {
 		return err
@@ -665,11 +705,21 @@ func (c convTarget) FromString(src string, tt *Type) error {
 
 // FromEnumLabel implements the Target interface method.
 func (c convTarget) FromEnumLabel(src string, tt *Type) error {
+	if RawBytesTargetFunc != nil && c.vv == nil {
+		if target := RawBytesTargetFunc(c.rv); target != nil {
+			return target.FromEnumLabel(src, tt)
+		}
+	}
 	return c.FromString(src, tt)
 }
 
 // FromTypeObject implements the Target interface method.
 func (c convTarget) FromTypeObject(src *Type) error {
+	if RawBytesTargetFunc != nil && c.vv == nil {
+		if target := RawBytesTargetFunc(c.rv); target != nil {
+			return target.FromTypeObject(src)
+		}
+	}
 	fin, fill, err := startConvert(c, TypeObjectType)
 	if err != nil {
 		return err
@@ -1001,8 +1051,20 @@ func (c convTarget) fromTypeObject(src *Type) error {
 	return fmt.Errorf("invalid conversion from typeobject to %v", c.tt)
 }
 
+// An interface used to identify that a given target is a raw bytes target.
+// This is used to special case conversion to RawBytes without having the
+// vdl package have a dependency on vom.
+type rbTarget interface {
+	RawBytesTargetHack()
+}
+
 // StartList implements the Target interface method.
 func (c convTarget) StartList(tt *Type, len int) (ListTarget, error) {
+	if RawBytesTargetFunc != nil && c.vv == nil {
+		if target := RawBytesTargetFunc(c.rv); target != nil {
+			return target.StartList(tt, len)
+		}
+	}
 	// TODO(bprosnitz) Re-think allocation strategy and possibly use len (currently unused).
 	fin, fill, err := startConvert(c, tt)
 	return compConvTarget{fin, fill}, err
@@ -1010,42 +1072,69 @@ func (c convTarget) StartList(tt *Type, len int) (ListTarget, error) {
 
 // FinishList implements the Target interface method.
 func (c convTarget) FinishList(x ListTarget) error {
+	if rbTarg, ok := x.(rbTarget); ok {
+		return rbTarg.(Target).FinishList(x)
+	}
 	cc := x.(compConvTarget)
 	return finishConvert(cc.fin, cc.fill)
 }
 
 // StartSet implements the Target interface method.
 func (c convTarget) StartSet(tt *Type, len int) (SetTarget, error) {
+	if RawBytesTargetFunc != nil && c.vv == nil {
+		if target := RawBytesTargetFunc(c.rv); target != nil {
+			return target.StartSet(tt, len)
+		}
+	}
 	fin, fill, err := startConvert(c, tt)
 	return compConvTarget{fin, fill}, err
 }
 
 // FinishSet implements the Target interface method.
 func (c convTarget) FinishSet(x SetTarget) error {
+	if rbTarg, ok := x.(rbTarget); ok {
+		return rbTarg.(Target).FinishSet(x)
+	}
 	cc := x.(compConvTarget)
 	return finishConvert(cc.fin, cc.fill)
 }
 
 // StartMap implements the Target interface method.
 func (c convTarget) StartMap(tt *Type, len int) (MapTarget, error) {
+	if RawBytesTargetFunc != nil && c.vv == nil {
+		if target := RawBytesTargetFunc(c.rv); target != nil {
+			return target.StartMap(tt, len)
+		}
+	}
 	fin, fill, err := startConvert(c, tt)
 	return compConvTarget{fin, fill}, err
 }
 
 // FinishMap implements the Target interface method.
 func (c convTarget) FinishMap(x MapTarget) error {
+	if rbTarg, ok := x.(rbTarget); ok {
+		return rbTarg.(Target).FinishMap(x)
+	}
 	cc := x.(compConvTarget)
 	return finishConvert(cc.fin, cc.fill)
 }
 
 // StartFields implements the Target interface method.
 func (c convTarget) StartFields(tt *Type) (FieldsTarget, error) {
+	if RawBytesTargetFunc != nil && c.vv == nil {
+		if target := RawBytesTargetFunc(c.rv); target != nil {
+			return target.StartFields(tt)
+		}
+	}
 	fin, fill, err := startConvert(c, tt)
 	return compConvTarget{fin, fill}, err
 }
 
 // FinishFields implements the Target interface method.
 func (c convTarget) FinishFields(x FieldsTarget) error {
+	if rbTarg, ok := x.(rbTarget); ok {
+		return rbTarg.(Target).FinishFields(x)
+	}
 	cc := x.(compConvTarget)
 	return finishConvert(cc.fin, cc.fill)
 }
