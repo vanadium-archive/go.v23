@@ -250,6 +250,8 @@ func testRoundtrip(t *testing.T, withTypeEncoderDecoder bool, concurrency int) {
 		{types.YzStruct{}, types.YzStruct{}},
 		{types.MBool(false), types.MBool(false)},
 		{types.NString(""), types.NString("")},
+		{vdl.ValueOf(uint16(5)), vdl.ValueOf(uint16(5))},
+		{vdl.ValueOf([]interface{}{uint16(5)}).Index(0), vdl.ValueOf(uint16(5))},
 	}
 
 	var (

@@ -204,7 +204,11 @@ func extractType(v interface{}) *vdl.Type {
 	rv := reflect.ValueOf(v)
 	for rv.Kind() == reflect.Ptr && !rv.IsNil() {
 		if rv.Type().ConvertibleTo(rtPtrToValue) {
-			return rv.Convert(rtPtrToValue).Interface().(*vdl.Value).Type()
+			vv := rv.Convert(rtPtrToValue).Interface().(*vdl.Value)
+			if vv.Kind() == vdl.Any && vv.Elem().IsValid() {
+				vv = vv.Elem()
+			}
+			return vv.Type()
 		}
 		if rv.Type().ConvertibleTo(rtPtrToRawBytes) {
 			return rv.Convert(rtPtrToRawBytes).Interface().(*RawBytes).Type

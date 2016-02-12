@@ -107,6 +107,24 @@ var rawBytesTestCases = []struct {
 		},
 	},
 	{
+		name:    "*vdl.Value",
+		goValue: vdl.ValueOf(uint16(5)),
+		rawBytes: RawBytes{
+			Version: DefaultVersion,
+			Type:    vdl.Uint16Type,
+			Data:    []byte{0x05},
+		},
+	},
+	{
+		name:    "*vdl.Value - top level any",
+		goValue: vdl.ValueOf([]interface{}{uint16(5)}).Index(0),
+		rawBytes: RawBytes{
+			Version: DefaultVersion,
+			Type:    vdl.Uint16Type,
+			Data:    []byte{0x05},
+		},
+	},
+	{
 		name: "any(nil)",
 		goValue: &RawBytes{
 			Version: DefaultVersion,
@@ -241,6 +259,28 @@ var rawBytesWrappedTestCases = []struct {
 			Data:       append([]byte{0xfe, 0x03, 0xe8}, makeLargeBytes(1000)...),
 		},
 	},
+	{
+		name:    "*vdl.Value",
+		goValue: vdl.ValueOf(uint16(5)),
+		rawBytes: RawBytes{
+			Version:    DefaultVersion,
+			Type:       vdl.Uint16Type,
+			RefTypes:   []*vdl.Type{vdl.Uint16Type},
+			AnyLengths: []uint64{1},
+			Data:       []byte{0x05},
+		},
+	},
+	{
+		name:    "*vdl.Value - top level any",
+		goValue: vdl.ValueOf([]interface{}{uint16(5)}).Index(0),
+		rawBytes: RawBytes{
+			Version:    DefaultVersion,
+			Type:       vdl.Uint16Type,
+			RefTypes:   []*vdl.Type{vdl.Uint16Type},
+			AnyLengths: []uint64{1},
+			Data:       []byte{0x05},
+		},
+	},
 }
 
 func TestWrappedRawBytes(t *testing.T) {
@@ -253,9 +293,6 @@ func TestWrappedRawBytes(t *testing.T) {
 		var any structAny
 		if err := Decode(wrappedBytes, &any); err != nil {
 			t.Fatalf("%s: error in decode %v", test.name, err)
-		}
-		if any.X.RefTypes[0] != vdl.TypeOf(test.goValue) {
-			t.Errorf("expected type %v to be first in ref list, but was %v", test.goValue, any.X.RefTypes[0])
 		}
 		if !reflect.DeepEqual(any.X, &test.rawBytes) {
 			t.Errorf("%s: got %#v, want %#v", test.name, any.X, &test.rawBytes)
