@@ -314,7 +314,7 @@ func TestCreatePrincipalWithNilStoreAndRoots(t *testing.T) {
 	if got := s.ForPeer(); !got.IsZero() {
 		t.Errorf("BlessingStore.ForPeer: got %v want empty", got)
 	}
-	if got := s.Default(); !got.IsZero() {
+	if got, _ := s.Default(); !got.IsZero() {
 		t.Errorf("BlessingStore.Default: got %v want empty", got)
 	}
 	if got, want := s.PublicKey(), p.PublicKey(); !reflect.DeepEqual(got, want) {

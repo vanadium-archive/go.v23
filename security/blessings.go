@@ -356,7 +356,8 @@ func (i RejectedBlessing) String() string {
 // DefaultBlessingPatterns returns the BlessingsPatterns of the Default Blessings
 // of the provided Principal.
 func DefaultBlessingPatterns(p Principal) (patterns []BlessingPattern) {
-	for _, b := range BlessingNames(p, p.BlessingStore().Default()) {
+	blessings, _ := p.BlessingStore().Default()
+	for _, b := range BlessingNames(p, blessings) {
 		patterns = append(patterns, BlessingPattern(b))
 	}
 	return

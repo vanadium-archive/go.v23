@@ -69,7 +69,7 @@ func (errStore) Set(Blessings, BlessingPattern) (Blessings, error) {
 }
 func (errStore) ForPeer(peerBlessings ...string) Blessings                     { return Blessings{} }
 func (errStore) SetDefault(blessings Blessings) error                          { return verror.New(errNilStore, nil) }
-func (errStore) Default() Blessings                                            { return Blessings{} }
+func (errStore) Default() (Blessings, <-chan struct{})                         { return Blessings{}, nil }
 func (errStore) PeerBlessings() map[BlessingPattern]Blessings                  { return nil }
 func (errStore) CacheDischarge(Discharge, Caveat, DischargeImpetus)            { return }
 func (errStore) ClearDischarges(...Discharge)                                  { return }

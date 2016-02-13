@@ -208,18 +208,19 @@ type BlessingStore interface {
 	// hosts blessings.
 	SetDefault(blessings Blessings) error
 
-	// Default returns the blessings to be shared with peers for which
-	// no other information is available in order to select blessings
-	// from the store.
+	// Default returns the blessings to be shared with peers for which no
+	// other information is available in order to select blessings from the
+	// store.
 	//
 	// For example, Default can be used by servers to identify themselves
 	// to clients before the client has identified itself.
 	//
 	// Default returns the blessings provided to the last call to
-	// SetDefault.
+	// SetDefault and a channel which will be closed when the
+	// Default changes (i.e., SetDefault is called again).
 	//
 	// Returns the zero value if there is no usable blessings.
-	Default() Blessings
+	Default() (Blessings, <-chan struct{})
 
 	// PublicKey returns the public key of the Principal for which
 	// this store hosts blessings.

@@ -88,7 +88,7 @@ pkg security, type BlessingStore interface { CacheDischarge, ClearDischarges, De
 pkg security, type BlessingStore interface, CacheDischarge(Discharge, Caveat, DischargeImpetus)
 pkg security, type BlessingStore interface, ClearDischarges(...Discharge)
 pkg security, type BlessingStore interface, DebugString() string
-pkg security, type BlessingStore interface, Default() Blessings
+pkg security, type BlessingStore interface, Default() (Blessings, <-chan struct{})
 pkg security, type BlessingStore interface, Discharge(Caveat, DischargeImpetus) (Discharge, time.Time)
 pkg security, type BlessingStore interface, ForPeer(...string) Blessings
 pkg security, type BlessingStore interface, PeerBlessings() map[BlessingPattern]Blessings
