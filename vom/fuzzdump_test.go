@@ -17,8 +17,11 @@ import (
 	"v.io/v23/vom/testdata/data81"
 )
 
+// Add the vom tests as binary examples for the fuzzer.
+// This is more of a script than a test, but is written as a test
+// to access binFromHexPat.
 func TestFuzzDump(t *testing.T) {
-	if err := os.MkdirAll("workdir/corpus", 0755); err != nil {
+	if err := os.MkdirAll("fuzz-workdir/corpus", 0755); err != nil {
 		t.Fatal(err)
 	}
 
@@ -50,7 +53,7 @@ func TestFuzzDump(t *testing.T) {
 		}
 		seen[hash] = true
 
-		fn := fmt.Sprintf("workdir/corpus/%x", hash)
+		fn := fmt.Sprintf("fuzz-workdir/corpus/%x", hash)
 		if err := ioutil.WriteFile(fn, data, 0644); err != nil {
 			t.Fatal(err)
 		}
