@@ -68,7 +68,7 @@ pkg nosql, type ConflictRowSet struct, ByBatch map[uint64][]ConflictRow
 pkg nosql, type ConflictRowSet struct, ByKey map[string]ConflictRow
 pkg nosql, type ConflictScanSet struct
 pkg nosql, type ConflictScanSet struct, ByBatch map[uint64][]nosql.ScanOp
-pkg nosql, type Database interface { BeginBatch, Blob, Close, Create, CreateBlob, Destroy, EnforceSchema, Exec, Exists, FullName, GetPermissions, GetResumeMarker, GetSyncgroupNames, ListTables, Name, SetPermissions, Syncgroup, Table, Watch }
+pkg nosql, type Database interface { BeginBatch, Blob, Close, Create, CreateBlob, Destroy, EnforceSchema, Exec, Exists, FullName, GetPermissions, GetResumeMarker, GetSyncgroupNames, ListTables, Name, PauseSync, ResumeSync, SetPermissions, Syncgroup, Table, Watch }
 pkg nosql, type Database interface, BeginBatch(*context.T, wire.BatchOptions) (BatchDatabase, error)
 pkg nosql, type Database interface, Blob(wire.BlobRef) Blob
 pkg nosql, type Database interface, Close()
@@ -84,6 +84,8 @@ pkg nosql, type Database interface, GetResumeMarker(*context.T) (watch.ResumeMar
 pkg nosql, type Database interface, GetSyncgroupNames(*context.T) ([]string, error)
 pkg nosql, type Database interface, ListTables(*context.T) ([]string, error)
 pkg nosql, type Database interface, Name() string
+pkg nosql, type Database interface, PauseSync(*context.T) error
+pkg nosql, type Database interface, ResumeSync(*context.T) error
 pkg nosql, type Database interface, SetPermissions(*context.T, access.Permissions, string) error
 pkg nosql, type Database interface, Syncgroup(string) Syncgroup
 pkg nosql, type Database interface, Table(string) Table

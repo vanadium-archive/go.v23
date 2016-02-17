@@ -177,9 +177,9 @@ func verifySyncgroupData(ctx *context.T, syncbaseName, keyPrefix string, start, 
 	d := a.NoSQLDatabase(testDb, nil)
 	tb := d.Table(testTable)
 
-	// Wait a bit (up to 8 seconds) for the last key to appear.
+	// Wait a bit (up to 10 seconds) for the last key to appear.
 	lastKey := fmt.Sprintf("%s%d", keyPrefix, start+count-1)
-	for i := 0; i < 16; i++ {
+	for i := 0; i < 20; i++ {
 		time.Sleep(500 * time.Millisecond)
 		var value string
 		if err := tb.Get(ctx, lastKey, &value); err == nil {
@@ -294,19 +294,12 @@ func verifySyncgroupMembers(ctx *context.T, syncbaseName, sgName string, wantMem
 	return nil
 }
 
-// blessingPatterns is a ";"-separated list of blessing patterns.
-func toggleSync(ctx *context.T, syncbaseName, sgName, blessingPatterns string) error {
-	a := syncbase.NewService(syncbaseName).App(testApp)
-	d := a.NoSQLDatabase(testDb, nil)
+func pauseSync(ctx *context.T, syncbaseName string) error {
+	return syncbase.NewService(syncbaseName).App(testApp).NoSQLDatabase(testDb, nil).PauseSync(ctx)
+}
 
-	sg := d.Syncgroup(sgName)
-	spec, version, err := sg.GetSpec(ctx)
-	if err != nil {
-		return err
-	}
-	spec.Perms = tu.DefaultPerms(strings.Split(blessingPatterns, ";")...)
-
-	return sg.SetSpec(ctx, spec, version)
+func resumeSync(ctx *context.T, syncbaseName string) error {
+	return syncbase.NewService(syncbaseName).App(testApp).NoSQLDatabase(testDb, nil).ResumeSync(ctx)
 }
 
 ////////////////////////////////////////////////////////////

@@ -207,6 +207,16 @@ func (d *database) CreateBlob(ctx *context.T) (Blob, error) {
 	return createBlob(ctx, d.fullName)
 }
 
+// PauseSync implements Database.PauseSync.
+func (d *database) PauseSync(ctx *context.T) error {
+	return d.c.PauseSync(ctx)
+}
+
+// ResumeSync implements Database.ResumeSync.
+func (d *database) ResumeSync(ctx *context.T) error {
+	return d.c.ResumeSync(ctx)
+}
+
 // EnforceSchema implements Database.EnforceSchema.
 func (d *database) EnforceSchema(ctx *context.T) error {
 	var schema *Schema = d.schema

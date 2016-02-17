@@ -146,6 +146,14 @@ type Database interface {
 	// conflicts. Note: schema can be nil, in which case this method should not
 	// be called and the caller is responsible for maintaining schema sanity.
 	EnforceSchema(ctx *context.T) error
+
+	// PauseSync pauses sync for this database. Incoming sync, as well as
+	// outgoing sync of subsequent writes, will be disabled until ResumeSync
+	// is called. PauseSync is idempotent.
+	PauseSync(ctx *context.T) error
+
+	// ResumeSync resumes sync for this database. ResumeSync is idempotent.
+	ResumeSync(ctx *context.T) error
 }
 
 // BatchDatabase is a handle to a set of reads and writes to the database that

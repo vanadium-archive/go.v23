@@ -248,13 +248,13 @@ func findRowsByType(conflict *Conflict, typePrefix string) []ConflictRow {
 // Tests
 
 func TestConflictResolutionSingleObject(t *testing.T) {
-	mockConflit, expResult := simpleConflictStream(t)
-	RunTest(t, mockConflit, expResult, false)
+	mockConflict, expResult := simpleConflictStream(t)
+	RunTest(t, mockConflict, expResult, false)
 }
 
 func TestConflictResolutionAddDelete(t *testing.T) {
-	mockConflit, expResult := addDeleteConflictStream(t)
-	RunTest(t, mockConflit, expResult, true)
+	mockConflict, expResult := addDeleteConflictStream(t)
+	RunTest(t, mockConflict, expResult, true)
 }
 
 func TestConflictResolutionIntersectingConflicts(t *testing.T) {
@@ -263,20 +263,22 @@ func TestConflictResolutionIntersectingConflicts(t *testing.T) {
 }
 
 func TestConflictResolutionListDelete(t *testing.T) {
-	mockConflit, expResult := listDeleteConflictsWithTaskAdd(t)
-	RunTest(t, mockConflit, expResult, true)
+	mockConflict, expResult := listDeleteConflictsWithTaskAdd(t)
+	RunTest(t, mockConflict, expResult, true)
 }
 
-func RunTest(t *testing.T, mockConflit []wire.ConflictInfo, expResult map[string]wire.ResolutionInfo, singleBatch bool) {
+func RunTest(t *testing.T, mockConflict []wire.ConflictInfo, expResult map[string]wire.ResolutionInfo, singleBatch bool) {
 	db := NewDatabase("parentName", "db1", getSchema(&ConflictResolverImpl{}))
 	advance := func(st *crtestutil.State) bool {
-		if st.ValIndex >= len(mockConflit) {
+		if st.ValIndex >= len(mockConflict) {
 			st.SetIsBlocked(true)
+			// Wait for test to process all conflicts.
 			st.Mu.Lock()
 			defer st.Mu.Unlock()
+			return false
 		}
 		st.SetIsBlocked(false)
-		st.Val = mockConflit[st.ValIndex]
+		st.Val = mockConflict[st.ValIndex]
 		st.ValIndex++
 		return true
 	}
@@ -289,9 +291,12 @@ func RunTest(t *testing.T, mockConflit []wire.ConflictInfo, expResult map[string
 	db.c = crtestutil.MockDbClient(db.c, crStream)
 	db.crState.reconnectWaitTime = 10 * time.Millisecond
 
-	ctx, _ := context.RootContext()
 	st.Mu.Lock() // causes Advance() to block
+	defer st.Mu.Unlock()
+
+	ctx, _ := context.RootContext()
 	db.EnforceSchema(ctx)
+	defer db.Close()
 	for i := 0; i < 100 && (len(st.GetResult()) != len(expResult)); i++ {
 		time.Sleep(time.Millisecond) // wait till Advance() call is blocked
 	}
