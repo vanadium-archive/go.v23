@@ -73,6 +73,14 @@ type Database interface {
 	// ErrNotBoundToBatch.
 	Abort(schemaVersion int32) error {access.Read}
 
+	// PauseSync pauses sync for this database. Incoming sync, as well as
+	// outgoing sync of subsequent writes, will be disabled until ResumeSync
+	// is called. PauseSync is idempotent.
+	PauseSync() error {access.Write}
+
+	// ResumeSync resumes sync for this database. ResumeSync is idempotent.
+	ResumeSync() error {access.Write}
+
 	// SetPermissions and GetPermissions are included from the Object interface.
 	permissions.Object
 

@@ -1951,6 +1951,12 @@ type DatabaseClientMethods interface {
 	// If this Database is not bound to a batch, Abort() will fail with
 	// ErrNotBoundToBatch.
 	Abort(_ *context.T, schemaVersion int32, _ ...rpc.CallOpt) error
+	// PauseSync pauses sync for this database. Incoming sync, as well as
+	// outgoing sync of subsequent writes, will be disabled until ResumeSync
+	// is called. PauseSync is idempotent.
+	PauseSync(*context.T, ...rpc.CallOpt) error
+	// ResumeSync resumes sync for this database. ResumeSync is idempotent.
+	ResumeSync(*context.T, ...rpc.CallOpt) error
 }
 
 // DatabaseClientStub adds universal methods to DatabaseClientMethods.
@@ -2016,6 +2022,16 @@ func (c implDatabaseClientStub) Commit(ctx *context.T, i0 int32, opts ...rpc.Cal
 
 func (c implDatabaseClientStub) Abort(ctx *context.T, i0 int32, opts ...rpc.CallOpt) (err error) {
 	err = v23.GetClient(ctx).Call(ctx, c.name, "Abort", []interface{}{i0}, nil, opts...)
+	return
+}
+
+func (c implDatabaseClientStub) PauseSync(ctx *context.T, opts ...rpc.CallOpt) (err error) {
+	err = v23.GetClient(ctx).Call(ctx, c.name, "PauseSync", nil, nil, opts...)
+	return
+}
+
+func (c implDatabaseClientStub) ResumeSync(ctx *context.T, opts ...rpc.CallOpt) (err error) {
+	err = v23.GetClient(ctx).Call(ctx, c.name, "ResumeSync", nil, nil, opts...)
 	return
 }
 
@@ -2232,6 +2248,12 @@ type DatabaseServerMethods interface {
 	// If this Database is not bound to a batch, Abort() will fail with
 	// ErrNotBoundToBatch.
 	Abort(_ *context.T, _ rpc.ServerCall, schemaVersion int32) error
+	// PauseSync pauses sync for this database. Incoming sync, as well as
+	// outgoing sync of subsequent writes, will be disabled until ResumeSync
+	// is called. PauseSync is idempotent.
+	PauseSync(*context.T, rpc.ServerCall) error
+	// ResumeSync resumes sync for this database. ResumeSync is idempotent.
+	ResumeSync(*context.T, rpc.ServerCall) error
 }
 
 // DatabaseServerStubMethods is the server interface containing
@@ -2375,6 +2397,12 @@ type DatabaseServerStubMethods interface {
 	// If this Database is not bound to a batch, Abort() will fail with
 	// ErrNotBoundToBatch.
 	Abort(_ *context.T, _ rpc.ServerCall, schemaVersion int32) error
+	// PauseSync pauses sync for this database. Incoming sync, as well as
+	// outgoing sync of subsequent writes, will be disabled until ResumeSync
+	// is called. PauseSync is idempotent.
+	PauseSync(*context.T, rpc.ServerCall) error
+	// ResumeSync resumes sync for this database. ResumeSync is idempotent.
+	ResumeSync(*context.T, rpc.ServerCall) error
 }
 
 // DatabaseServerStub adds universal methods to DatabaseServerStubMethods.
@@ -2448,6 +2476,14 @@ func (s implDatabaseServerStub) Commit(ctx *context.T, call rpc.ServerCall, i0 i
 
 func (s implDatabaseServerStub) Abort(ctx *context.T, call rpc.ServerCall, i0 int32) error {
 	return s.impl.Abort(ctx, call, i0)
+}
+
+func (s implDatabaseServerStub) PauseSync(ctx *context.T, call rpc.ServerCall) error {
+	return s.impl.PauseSync(ctx, call)
+}
+
+func (s implDatabaseServerStub) ResumeSync(ctx *context.T, call rpc.ServerCall) error {
+	return s.impl.ResumeSync(ctx, call)
 }
 
 func (s implDatabaseServerStub) Globber() *rpc.GlobState {
@@ -2547,6 +2583,16 @@ var descDatabase = rpc.InterfaceDesc{
 				{"schemaVersion", ``}, // int32
 			},
 			Tags: []*vdl.Value{vdl.ValueOf(access.Tag("Read"))},
+		},
+		{
+			Name: "PauseSync",
+			Doc:  "// PauseSync pauses sync for this database. Incoming sync, as well as\n// outgoing sync of subsequent writes, will be disabled until ResumeSync\n// is called. PauseSync is idempotent.",
+			Tags: []*vdl.Value{vdl.ValueOf(access.Tag("Write"))},
+		},
+		{
+			Name: "ResumeSync",
+			Doc:  "// ResumeSync resumes sync for this database. ResumeSync is idempotent.",
+			Tags: []*vdl.Value{vdl.ValueOf(access.Tag("Write"))},
 		},
 	},
 }
