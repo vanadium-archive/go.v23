@@ -103,11 +103,11 @@ func BenchmarkPingPongPair(b *testing.B) {
 			sbs[i].cleanup(os.Interrupt)
 		}
 
-		// Print out intermediate information.
-		fmt.Printf("Iteration %d of %d\n", iter, b.N)
-		fmt.Printf("Avg Time from 0 to 1: %d ns\n", t0to1/int64(pingPongPairIterations))
-		fmt.Printf("Avg Time from 1 to 0: %d ns\n", t1to0/int64(pingPongPairIterations))
-		fmt.Printf("Avg Time per iteration: %d ns\n", (t1to0+t0to1)/int64(pingPongPairIterations))
+		// Log intermediate information
+		b.Logf("Iteration %d of %d\n", iter, b.N)
+		b.Logf("Avg Time from 0 to 1: %d ns\n", t0to1/int64(pingPongPairIterations))
+		b.Logf("Avg Time from 1 to 0: %d ns\n", t1to0/int64(pingPongPairIterations))
+		b.Logf("Avg Time per iteration: %d ns\n", (t1to0+t0to1)/int64(pingPongPairIterations))
 	}
 }
 
