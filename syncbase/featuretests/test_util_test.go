@@ -7,6 +7,7 @@ package featuretests_test
 import (
 	"errors"
 	"fmt"
+	"os"
 	"reflect"
 	"strings"
 	"testing"
@@ -50,6 +51,7 @@ type testSyncbase struct {
 	sbCreds   *v23test.Credentials
 	clientId  string
 	clientCtx *context.T
+	cleanup   func(sig os.Signal)
 }
 
 // Spawns "num" Syncbase instances and returns handles to them.
@@ -65,7 +67,7 @@ func setupSyncbases(t testing.TB, sh *v23test.Shell, num int, args ...string) []
 		}
 		// Give XRWA permissions to this Syncbase's client.
 		acl := fmt.Sprintf(`{"Resolve":{"In":["root:%s"]},"Read":{"In":["root:%s"]},"Write":{"In":["root:%s"]},"Admin":{"In":["root:%s"]}}`, clientId, clientId, clientId, clientId)
-		sh.StartSyncbase(sbs[i].sbCreds, sbs[i].sbName, "", acl, args...)
+		sbs[i].cleanup = sh.StartSyncbase(sbs[i].sbCreds, sbs[i].sbName, "", acl, args...)
 	}
 	// Call setupHierarchy on each Syncbase.
 	for _, sb := range sbs {
