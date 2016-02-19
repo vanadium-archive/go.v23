@@ -69,6 +69,7 @@ pkg vom, method (*Dumper) Flush() error
 pkg vom, method (*Dumper) Status()
 pkg vom, method (*Dumper) Write([]byte) (int, error)
 pkg vom, method (*Encoder) Encode(interface{}) error
+pkg vom, method (*RawBytes) String() string
 pkg vom, method (*RawBytes) ToTarget(vdl.Target) error
 pkg vom, method (*RawBytes) ToValue(interface{}) error
 pkg vom, method (*TypeDecoder) Start()

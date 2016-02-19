@@ -6,7 +6,9 @@ package vom
 
 import (
 	"bytes"
+	"fmt"
 	"reflect"
+	"strconv"
 
 	"v.io/v23/vdl"
 )
@@ -36,6 +38,39 @@ func RawBytesFromValue(value interface{}) (*RawBytes, error) {
 	var rb RawBytes
 	err = Decode(dat, &rb)
 	return &rb, err
+}
+
+// String outputs a string representation of RawBytes of the form
+// RawBytes{Version81, int8, RefTypes{bool, string}, AnyLengths{4}, fa0e9dcc}
+func (rb *RawBytes) String() string {
+	var buf bytes.Buffer
+	buf.WriteString("RawBytes{")
+	buf.WriteString(rb.Version.String())
+	buf.WriteString(", ")
+	buf.WriteString(rb.Type.String())
+	buf.WriteString(", ")
+	if len(rb.RefTypes) > 0 {
+		buf.WriteString("RefTypes{")
+		for i, t := range rb.RefTypes {
+			if i > 0 {
+				buf.WriteString(", ")
+			}
+			buf.WriteString(t.String())
+		}
+		buf.WriteString("}, ")
+	}
+	if len(rb.AnyLengths) > 0 {
+		buf.WriteString("AnyLengths{")
+		for i, l := range rb.AnyLengths {
+			if i > 0 {
+				buf.WriteString(", ")
+			}
+			buf.WriteString(strconv.FormatUint(l, 10))
+		}
+		buf.WriteString("}, ")
+	}
+	buf.WriteString(fmt.Sprintf("%x}", rb.Data))
+	return buf.String()
 }
 
 func (rb *RawBytes) ToValue(value interface{}) error {
