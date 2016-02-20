@@ -114,13 +114,9 @@ type Database interface {
 	// re-ordering. See watch.GlobWatcher for a detailed explanation of the
 	// behavior.
 	//
-	// This method is designed to be used in the following way:
-	// 1) begin a read-only batch
-	// 2) read all data your app needs
-	// 3) read the ResumeMarker
-	// 4) abort the batch
-	// 5) start watching for changes to the data using the ResumeMarker
-	// In this configuration the client will not miss any changes to the data.
+	// If a nil ResumeMarker is provided, the WatchStream will begin with a Change
+	// batch containing the initial state. Otherwise, the WatchStream will contain
+	// only changes since the provided ResumeMarker.
 	//
 	// TODO(sadovsky): Watch should return just a WatchStream, similar to how Scan
 	// returns just a ScanStream.

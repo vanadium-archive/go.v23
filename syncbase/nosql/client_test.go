@@ -1111,6 +1111,125 @@ func TestWatchWithBatchAndPerms(t *testing.T) {
 	tu.CheckWatch(t, wstream, allChanges[1:])
 }
 
+// TestWatchWithInitialState test that the client watch correctly handles
+// fetching initial state on empty resume marker, including batches and
+// prefix perms.
+func TestWatchWithInitialState(t *testing.T) {
+	ctx, adminCtx, sName, rootp, cleanup := tu.SetupOrDieCustom("admin", "server", nil)
+	defer cleanup()
+	clientCtx := tu.NewCtx(ctx, rootp, "client")
+	a := tu.CreateApp(t, adminCtx, syncbase.NewService(sName), "a")
+	d := tu.CreateNoSQLDatabase(t, adminCtx, a, "d")
+	tb := tu.CreateTable(t, adminCtx, d, "tb")
+
+	// Set permissions. Lock client out of "b".
+	openAcl := tu.DefaultPerms("root:admin", "root:client")
+	adminAcl := tu.DefaultPerms("root:admin")
+	if err := tb.SetPermissions(adminCtx, openAcl); err != nil {
+		t.Fatalf("tb.SetPermissions() failed: %v", err)
+	}
+	if err := tb.SetPrefixPermissions(adminCtx, nosql.Prefix(""), openAcl); err != nil {
+		t.Fatalf("tb.SetPrefixPermissions() failed: %v", err)
+	}
+	if err := tb.SetPrefixPermissions(adminCtx, nosql.Prefix("b"), adminAcl); err != nil {
+		t.Fatalf("tb.SetPrefixPermissions() failed: %v", err)
+	}
+
+	// Put "a/1" and "b/1" in a batch.
+	if err := nosql.RunInBatch(adminCtx, d, wire.BatchOptions{}, func(b nosql.BatchDatabase) error {
+		tb := b.Table("tb")
+		if err := tb.Put(adminCtx, "a/1", "value"); err != nil {
+			return err
+		}
+		return tb.Put(adminCtx, "b/1", "value")
+	}); err != nil {
+		t.Fatalf("RunInBatch failed: %v", err)
+	}
+	// Put "c/1".
+	if err := tb.Put(adminCtx, "c/1", "value"); err != nil {
+		t.Fatalf("tb.Put() failed: %v", err)
+	}
+
+	ctxWithTimeout, cancel := context.WithTimeout(clientCtx, 10*time.Second)
+	defer cancel()
+	// Start watches with empty resume marker.
+	wstreamAll, _ := d.Watch(ctxWithTimeout, "tb", "", nil)
+	wstreamD, _ := d.Watch(ctxWithTimeout, "tb", "d", nil)
+
+	resumeMarkerInitial, err := d.GetResumeMarker(clientCtx)
+	if err != nil {
+		t.Fatalf("d.GetResumeMarker() failed: %v", err)
+	}
+	vomValue, _ := vom.Encode("value")
+	initialChanges := []nosql.WatchChange{
+		nosql.WatchChange{
+			Table:        "tb",
+			Row:          "a/1",
+			ChangeType:   nosql.PutChange,
+			ValueBytes:   vomValue,
+			ResumeMarker: nil,
+			Continued:    true,
+		},
+		nosql.WatchChange{
+			Table:        "tb",
+			Row:          "c/1",
+			ChangeType:   nosql.PutChange,
+			ValueBytes:   vomValue,
+			ResumeMarker: resumeMarkerInitial,
+		},
+	}
+	// Watch with empty prefix should have seen the initial state as one batch,
+	// omitting the inaccessible row.
+	tu.CheckWatch(t, wstreamAll, initialChanges)
+
+	// More writes.
+	// Put "a/2" and "b/2" in a batch.
+	if err := nosql.RunInBatch(adminCtx, d, wire.BatchOptions{}, func(b nosql.BatchDatabase) error {
+		tb := b.Table("tb")
+		if err := tb.Put(adminCtx, "a/2", "value"); err != nil {
+			return err
+		}
+		return tb.Put(adminCtx, "b/2", "value")
+	}); err != nil {
+		t.Fatalf("RunInBatch failed: %v", err)
+	}
+	resumeMarkerAfterA2B2, err := d.GetResumeMarker(clientCtx)
+	if err != nil {
+		t.Fatalf("d.GetResumeMarker() failed: %v", err)
+	}
+	// Put "d/1".
+	if err := tb.Put(adminCtx, "d/1", "value"); err != nil {
+		t.Fatalf("tb.Put() failed: %v", err)
+	}
+	resumeMarkerAfterD1, err := d.GetResumeMarker(clientCtx)
+	if err != nil {
+		t.Fatalf("d.GetResumeMarker() failed: %v", err)
+	}
+
+	continuedChanges := []nosql.WatchChange{
+		nosql.WatchChange{
+			Table:        "tb",
+			Row:          "a/2",
+			ChangeType:   nosql.PutChange,
+			ValueBytes:   vomValue,
+			ResumeMarker: resumeMarkerAfterA2B2,
+		},
+		nosql.WatchChange{
+			Table:        "tb",
+			Row:          "d/1",
+			ChangeType:   nosql.PutChange,
+			ValueBytes:   vomValue,
+			ResumeMarker: resumeMarkerAfterD1,
+		},
+	}
+	// Watch with empty prefix should have seen the continued changes as separate
+	// batches, omitting inaccessible rows.
+	tu.CheckWatch(t, wstreamAll, continuedChanges)
+	// Watch with prefix "d" should have seen only the last change; its initial
+	// state was empty.
+	tu.CheckWatch(t, wstreamD, continuedChanges[1:])
+}
+
 // TestBlockingWatch tests that the server side of the client watch correctly
 // blocks until new updates to the database arrive.
 func TestBlockingWatch(t *testing.T) {

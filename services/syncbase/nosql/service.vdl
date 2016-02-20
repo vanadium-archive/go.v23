@@ -361,21 +361,22 @@ type BlobManager interface {
 // TODO(rogulenko): Currently the only supported watch patterns are
 // "<tableName>/<rowPrefix>*". Consider changing that.
 //
-// The watching is done by starting a streaming RPC. The argument to the RPC
-// contains the ResumeMarker that points to a particular place in the database
-// event log. The result stream consists of a never-ending sequence of Change
-// messages (until the call fails or is canceled). Each Change contains the Name
-// field in the form "<tableName>/<rowKey>" and the Value field of the
-// StoreChange type. If the client has no access to a row specified in a change,
-// that change is excluded from the result stream.
+// Watching is done by starting a streaming RPC. The RPC takes a ResumeMarker
+// argument that points to a particular place in the database event log. If an
+// empty ResumeMarker is provided, the WatchStream will begin with a Change
+// batch containing the initial state. Otherwise, the WatchStream will contain
+// only changes since the provided ResumeMarker.
 //
-// DatabaseWatcher is designed to be used in the following way:
-// 1) begin a read-only batch
-// 2) read all data your app needs
-// 3) read the ResumeMarker
-// 4) abort the batch
-// 5) start watching for changes to the data using the ResumeMarker
-// In this configuration the client will not miss any changes to the data.
+// The result stream consists of a never-ending sequence of Change messages
+// (until the call fails or is canceled). Each Change contains the Name field
+// in the form "<tableName>/<rowKey>" and the Value field of the StoreChange
+// type. If the client has no access to a row specified in a change, that change
+// is excluded from the result stream.
+//
+// Note: A single Watch Change batch may contain changes from more than one
+// batch as originally committed on a remote Syncbase or obtained from conflict
+// resolution. However, changes from a single original batch will always appear
+// in the same Change batch.
 type DatabaseWatcher interface {
 	watch.GlobWatcher
 

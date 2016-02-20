@@ -709,6 +709,7 @@ type StoreChange struct {
 	Value []byte
 	// FromSync indicates whether the change came from sync. If FromSync is
 	// false, then the change originated from the local device.
+	// Note: FromSync is always false for initial state Changes.
 	FromSync bool
 }
 

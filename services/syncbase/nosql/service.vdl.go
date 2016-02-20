@@ -89,21 +89,22 @@ func NewErrSyncgroupJoinFailed(ctx *context.T) error {
 // TODO(rogulenko): Currently the only supported watch patterns are
 // "<tableName>/<rowPrefix>*". Consider changing that.
 //
-// The watching is done by starting a streaming RPC. The argument to the RPC
-// contains the ResumeMarker that points to a particular place in the database
-// event log. The result stream consists of a never-ending sequence of Change
-// messages (until the call fails or is canceled). Each Change contains the Name
-// field in the form "<tableName>/<rowKey>" and the Value field of the
-// StoreChange type. If the client has no access to a row specified in a change,
-// that change is excluded from the result stream.
+// Watching is done by starting a streaming RPC. The RPC takes a ResumeMarker
+// argument that points to a particular place in the database event log. If an
+// empty ResumeMarker is provided, the WatchStream will begin with a Change
+// batch containing the initial state. Otherwise, the WatchStream will contain
+// only changes since the provided ResumeMarker.
 //
-// DatabaseWatcher is designed to be used in the following way:
-// 1) begin a read-only batch
-// 2) read all data your app needs
-// 3) read the ResumeMarker
-// 4) abort the batch
-// 5) start watching for changes to the data using the ResumeMarker
-// In this configuration the client will not miss any changes to the data.
+// The result stream consists of a never-ending sequence of Change messages
+// (until the call fails or is canceled). Each Change contains the Name field
+// in the form "<tableName>/<rowKey>" and the Value field of the StoreChange
+// type. If the client has no access to a row specified in a change, that change
+// is excluded from the result stream.
+//
+// Note: A single Watch Change batch may contain changes from more than one
+// batch as originally committed on a remote Syncbase or obtained from conflict
+// resolution. However, changes from a single original batch will always appear
+// in the same Change batch.
 type DatabaseWatcherClientMethods interface {
 	// GlobWatcher allows a client to receive updates for changes to objects
 	// that match a pattern.  See the package comments for details.
@@ -145,21 +146,22 @@ func (c implDatabaseWatcherClientStub) GetResumeMarker(ctx *context.T, opts ...r
 // TODO(rogulenko): Currently the only supported watch patterns are
 // "<tableName>/<rowPrefix>*". Consider changing that.
 //
-// The watching is done by starting a streaming RPC. The argument to the RPC
-// contains the ResumeMarker that points to a particular place in the database
-// event log. The result stream consists of a never-ending sequence of Change
-// messages (until the call fails or is canceled). Each Change contains the Name
-// field in the form "<tableName>/<rowKey>" and the Value field of the
-// StoreChange type. If the client has no access to a row specified in a change,
-// that change is excluded from the result stream.
+// Watching is done by starting a streaming RPC. The RPC takes a ResumeMarker
+// argument that points to a particular place in the database event log. If an
+// empty ResumeMarker is provided, the WatchStream will begin with a Change
+// batch containing the initial state. Otherwise, the WatchStream will contain
+// only changes since the provided ResumeMarker.
 //
-// DatabaseWatcher is designed to be used in the following way:
-// 1) begin a read-only batch
-// 2) read all data your app needs
-// 3) read the ResumeMarker
-// 4) abort the batch
-// 5) start watching for changes to the data using the ResumeMarker
-// In this configuration the client will not miss any changes to the data.
+// The result stream consists of a never-ending sequence of Change messages
+// (until the call fails or is canceled). Each Change contains the Name field
+// in the form "<tableName>/<rowKey>" and the Value field of the StoreChange
+// type. If the client has no access to a row specified in a change, that change
+// is excluded from the result stream.
+//
+// Note: A single Watch Change batch may contain changes from more than one
+// batch as originally committed on a remote Syncbase or obtained from conflict
+// resolution. However, changes from a single original batch will always appear
+// in the same Change batch.
 type DatabaseWatcherServerMethods interface {
 	// GlobWatcher allows a client to receive updates for changes to objects
 	// that match a pattern.  See the package comments for details.
@@ -232,7 +234,7 @@ var DatabaseWatcherDesc rpc.InterfaceDesc = descDatabaseWatcher
 var descDatabaseWatcher = rpc.InterfaceDesc{
 	Name:    "DatabaseWatcher",
 	PkgPath: "v.io/v23/services/syncbase/nosql",
-	Doc:     "// DatabaseWatcher allows a client to watch for updates to the database. For\n// each watch request, the client will receive a reliable stream of watch events\n// without re-ordering. See watch.GlobWatcher for a detailed explanation of the\n// behavior.\n// TODO(rogulenko): Currently the only supported watch patterns are\n// \"<tableName>/<rowPrefix>*\". Consider changing that.\n//\n// The watching is done by starting a streaming RPC. The argument to the RPC\n// contains the ResumeMarker that points to a particular place in the database\n// event log. The result stream consists of a never-ending sequence of Change\n// messages (until the call fails or is canceled). Each Change contains the Name\n// field in the form \"<tableName>/<rowKey>\" and the Value field of the\n// StoreChange type. If the client has no access to a row specified in a change,\n// that change is excluded from the result stream.\n//\n// DatabaseWatcher is designed to be used in the following way:\n// 1) begin a read-only batch\n// 2) read all data your app needs\n// 3) read the ResumeMarker\n// 4) abort the batch\n// 5) start watching for changes to the data using the ResumeMarker\n// In this configuration the client will not miss any changes to the data.",
+	Doc:     "// DatabaseWatcher allows a client to watch for updates to the database. For\n// each watch request, the client will receive a reliable stream of watch events\n// without re-ordering. See watch.GlobWatcher for a detailed explanation of the\n// behavior.\n// TODO(rogulenko): Currently the only supported watch patterns are\n// \"<tableName>/<rowPrefix>*\". Consider changing that.\n//\n// Watching is done by starting a streaming RPC. The RPC takes a ResumeMarker\n// argument that points to a particular place in the database event log. If an\n// empty ResumeMarker is provided, the WatchStream will begin with a Change\n// batch containing the initial state. Otherwise, the WatchStream will contain\n// only changes since the provided ResumeMarker.\n//\n// The result stream consists of a never-ending sequence of Change messages\n// (until the call fails or is canceled). Each Change contains the Name field\n// in the form \"<tableName>/<rowKey>\" and the Value field of the StoreChange\n// type. If the client has no access to a row specified in a change, that change\n// is excluded from the result stream.\n//\n// Note: A single Watch Change batch may contain changes from more than one\n// batch as originally committed on a remote Syncbase or obtained from conflict\n// resolution. However, changes from a single original batch will always appear\n// in the same Change batch.",
 	Embeds: []rpc.EmbedDesc{
 		{"GlobWatcher", "v.io/v23/services/watch", "// GlobWatcher allows a client to receive updates for changes to objects\n// that match a pattern.  See the package comments for details."},
 	},
@@ -1867,21 +1869,22 @@ type DatabaseClientMethods interface {
 	// TODO(rogulenko): Currently the only supported watch patterns are
 	// "<tableName>/<rowPrefix>*". Consider changing that.
 	//
-	// The watching is done by starting a streaming RPC. The argument to the RPC
-	// contains the ResumeMarker that points to a particular place in the database
-	// event log. The result stream consists of a never-ending sequence of Change
-	// messages (until the call fails or is canceled). Each Change contains the Name
-	// field in the form "<tableName>/<rowKey>" and the Value field of the
-	// StoreChange type. If the client has no access to a row specified in a change,
-	// that change is excluded from the result stream.
+	// Watching is done by starting a streaming RPC. The RPC takes a ResumeMarker
+	// argument that points to a particular place in the database event log. If an
+	// empty ResumeMarker is provided, the WatchStream will begin with a Change
+	// batch containing the initial state. Otherwise, the WatchStream will contain
+	// only changes since the provided ResumeMarker.
 	//
-	// DatabaseWatcher is designed to be used in the following way:
-	// 1) begin a read-only batch
-	// 2) read all data your app needs
-	// 3) read the ResumeMarker
-	// 4) abort the batch
-	// 5) start watching for changes to the data using the ResumeMarker
-	// In this configuration the client will not miss any changes to the data.
+	// The result stream consists of a never-ending sequence of Change messages
+	// (until the call fails or is canceled). Each Change contains the Name field
+	// in the form "<tableName>/<rowKey>" and the Value field of the StoreChange
+	// type. If the client has no access to a row specified in a change, that change
+	// is excluded from the result stream.
+	//
+	// Note: A single Watch Change batch may contain changes from more than one
+	// batch as originally committed on a remote Syncbase or obtained from conflict
+	// resolution. However, changes from a single original batch will always appear
+	// in the same Change batch.
 	DatabaseWatcherClientMethods
 	// SyncgroupManager is the interface for syncgroup operations.
 	// TODO(hpucha): Add blessings to create/join and add a refresh method.
@@ -2164,21 +2167,22 @@ type DatabaseServerMethods interface {
 	// TODO(rogulenko): Currently the only supported watch patterns are
 	// "<tableName>/<rowPrefix>*". Consider changing that.
 	//
-	// The watching is done by starting a streaming RPC. The argument to the RPC
-	// contains the ResumeMarker that points to a particular place in the database
-	// event log. The result stream consists of a never-ending sequence of Change
-	// messages (until the call fails or is canceled). Each Change contains the Name
-	// field in the form "<tableName>/<rowKey>" and the Value field of the
-	// StoreChange type. If the client has no access to a row specified in a change,
-	// that change is excluded from the result stream.
+	// Watching is done by starting a streaming RPC. The RPC takes a ResumeMarker
+	// argument that points to a particular place in the database event log. If an
+	// empty ResumeMarker is provided, the WatchStream will begin with a Change
+	// batch containing the initial state. Otherwise, the WatchStream will contain
+	// only changes since the provided ResumeMarker.
 	//
-	// DatabaseWatcher is designed to be used in the following way:
-	// 1) begin a read-only batch
-	// 2) read all data your app needs
-	// 3) read the ResumeMarker
-	// 4) abort the batch
-	// 5) start watching for changes to the data using the ResumeMarker
-	// In this configuration the client will not miss any changes to the data.
+	// The result stream consists of a never-ending sequence of Change messages
+	// (until the call fails or is canceled). Each Change contains the Name field
+	// in the form "<tableName>/<rowKey>" and the Value field of the StoreChange
+	// type. If the client has no access to a row specified in a change, that change
+	// is excluded from the result stream.
+	//
+	// Note: A single Watch Change batch may contain changes from more than one
+	// batch as originally committed on a remote Syncbase or obtained from conflict
+	// resolution. However, changes from a single original batch will always appear
+	// in the same Change batch.
 	DatabaseWatcherServerMethods
 	// SyncgroupManager is the interface for syncgroup operations.
 	// TODO(hpucha): Add blessings to create/join and add a refresh method.
@@ -2313,21 +2317,22 @@ type DatabaseServerStubMethods interface {
 	// TODO(rogulenko): Currently the only supported watch patterns are
 	// "<tableName>/<rowPrefix>*". Consider changing that.
 	//
-	// The watching is done by starting a streaming RPC. The argument to the RPC
-	// contains the ResumeMarker that points to a particular place in the database
-	// event log. The result stream consists of a never-ending sequence of Change
-	// messages (until the call fails or is canceled). Each Change contains the Name
-	// field in the form "<tableName>/<rowKey>" and the Value field of the
-	// StoreChange type. If the client has no access to a row specified in a change,
-	// that change is excluded from the result stream.
+	// Watching is done by starting a streaming RPC. The RPC takes a ResumeMarker
+	// argument that points to a particular place in the database event log. If an
+	// empty ResumeMarker is provided, the WatchStream will begin with a Change
+	// batch containing the initial state. Otherwise, the WatchStream will contain
+	// only changes since the provided ResumeMarker.
 	//
-	// DatabaseWatcher is designed to be used in the following way:
-	// 1) begin a read-only batch
-	// 2) read all data your app needs
-	// 3) read the ResumeMarker
-	// 4) abort the batch
-	// 5) start watching for changes to the data using the ResumeMarker
-	// In this configuration the client will not miss any changes to the data.
+	// The result stream consists of a never-ending sequence of Change messages
+	// (until the call fails or is canceled). Each Change contains the Name field
+	// in the form "<tableName>/<rowKey>" and the Value field of the StoreChange
+	// type. If the client has no access to a row specified in a change, that change
+	// is excluded from the result stream.
+	//
+	// Note: A single Watch Change batch may contain changes from more than one
+	// batch as originally committed on a remote Syncbase or obtained from conflict
+	// resolution. However, changes from a single original batch will always appear
+	// in the same Change batch.
 	DatabaseWatcherServerStubMethods
 	// SyncgroupManager is the interface for syncgroup operations.
 	// TODO(hpucha): Add blessings to create/join and add a refresh method.
@@ -2504,7 +2509,7 @@ var descDatabase = rpc.InterfaceDesc{
 	Doc:     "// Database represents a collection of Tables. Batches, queries, sync, watch,\n// etc. all operate at the Database level.\n// Database.Glob operates over Table names.\n// Param schemaVersion is the version number that the client expects the\n// database to be at. To disable schema version checking, pass -1.",
 	Embeds: []rpc.EmbedDesc{
 		{"Object", "v.io/v23/services/permissions", "// Object provides access control for Vanadium objects.\n//\n// Vanadium services implementing dynamic access control would typically embed\n// this interface and tag additional methods defined by the service with one of\n// Admin, Read, Write, Resolve etc. For example, the VDL definition of the\n// object would be:\n//\n//   package mypackage\n//\n//   import \"v.io/v23/security/access\"\n//   import \"v.io/v23/services/permissions\"\n//\n//   type MyObject interface {\n//     permissions.Object\n//     MyRead() (string, error) {access.Read}\n//     MyWrite(string) error    {access.Write}\n//   }\n//\n// If the set of pre-defined tags is insufficient, services may define their\n// own tag type and annotate all methods with this new type.\n//\n// Instead of embedding this Object interface, define SetPermissions and\n// GetPermissions in their own interface. Authorization policies will typically\n// respect annotations of a single type. For example, the VDL definition of an\n// object would be:\n//\n//  package mypackage\n//\n//  import \"v.io/v23/security/access\"\n//\n//  type MyTag string\n//\n//  const (\n//    Blue = MyTag(\"Blue\")\n//    Red  = MyTag(\"Red\")\n//  )\n//\n//  type MyObject interface {\n//    MyMethod() (string, error) {Blue}\n//\n//    // Allow clients to change access via the access.Object interface:\n//    SetPermissions(perms access.Permissions, version string) error         {Red}\n//    GetPermissions() (perms access.Permissions, version string, err error) {Blue}\n//  }"},
-		{"DatabaseWatcher", "v.io/v23/services/syncbase/nosql", "// DatabaseWatcher allows a client to watch for updates to the database. For\n// each watch request, the client will receive a reliable stream of watch events\n// without re-ordering. See watch.GlobWatcher for a detailed explanation of the\n// behavior.\n// TODO(rogulenko): Currently the only supported watch patterns are\n// \"<tableName>/<rowPrefix>*\". Consider changing that.\n//\n// The watching is done by starting a streaming RPC. The argument to the RPC\n// contains the ResumeMarker that points to a particular place in the database\n// event log. The result stream consists of a never-ending sequence of Change\n// messages (until the call fails or is canceled). Each Change contains the Name\n// field in the form \"<tableName>/<rowKey>\" and the Value field of the\n// StoreChange type. If the client has no access to a row specified in a change,\n// that change is excluded from the result stream.\n//\n// DatabaseWatcher is designed to be used in the following way:\n// 1) begin a read-only batch\n// 2) read all data your app needs\n// 3) read the ResumeMarker\n// 4) abort the batch\n// 5) start watching for changes to the data using the ResumeMarker\n// In this configuration the client will not miss any changes to the data."},
+		{"DatabaseWatcher", "v.io/v23/services/syncbase/nosql", "// DatabaseWatcher allows a client to watch for updates to the database. For\n// each watch request, the client will receive a reliable stream of watch events\n// without re-ordering. See watch.GlobWatcher for a detailed explanation of the\n// behavior.\n// TODO(rogulenko): Currently the only supported watch patterns are\n// \"<tableName>/<rowPrefix>*\". Consider changing that.\n//\n// Watching is done by starting a streaming RPC. The RPC takes a ResumeMarker\n// argument that points to a particular place in the database event log. If an\n// empty ResumeMarker is provided, the WatchStream will begin with a Change\n// batch containing the initial state. Otherwise, the WatchStream will contain\n// only changes since the provided ResumeMarker.\n//\n// The result stream consists of a never-ending sequence of Change messages\n// (until the call fails or is canceled). Each Change contains the Name field\n// in the form \"<tableName>/<rowKey>\" and the Value field of the StoreChange\n// type. If the client has no access to a row specified in a change, that change\n// is excluded from the result stream.\n//\n// Note: A single Watch Change batch may contain changes from more than one\n// batch as originally committed on a remote Syncbase or obtained from conflict\n// resolution. However, changes from a single original batch will always appear\n// in the same Change batch."},
 		{"SyncgroupManager", "v.io/v23/services/syncbase/nosql", "// SyncgroupManager is the interface for syncgroup operations.\n// TODO(hpucha): Add blessings to create/join and add a refresh method."},
 		{"BlobManager", "v.io/v23/services/syncbase/nosql", "// BlobManager is the interface for blob operations.\n//\n// Description of API for resumable blob creation (append-only):\n// - Up until commit, a BlobRef may be used with PutBlob, GetBlobSize,\n//   DeleteBlob, and CommitBlob. Blob creation may be resumed by obtaining the\n//   current blob size via GetBlobSize and appending to the blob via PutBlob.\n// - After commit, a blob is immutable, at which point PutBlob and CommitBlob\n//   may no longer be used.\n// - All other methods (GetBlob, FetchBlob, PinBlob, etc.) may only be used\n//   after commit."},
 		{"SchemaManager", "v.io/v23/services/syncbase/nosql", "// SchemaManager implements the API for managing schema metadata attached\n// to a Database."},
