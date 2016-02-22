@@ -59,6 +59,7 @@ pkg vom, func NewVersionedEncoderWithTypeEncoder(Version, io.Writer, *TypeEncode
 pkg vom, func NewVersionedTypeEncoder(Version, io.Writer) *TypeEncoder
 pkg vom, func RawBytesFromValue(interface{}) (*RawBytes, error)
 pkg vom, func RawBytesOf(interface{}) *RawBytes
+pkg vom, func RawBytesTarget(*RawBytes) vdl.Target
 pkg vom, func VersionedEncode(Version, interface{}) ([]byte, error)
 pkg vom, method (*ControlKind) Set(string) error
 pkg vom, method (*Decoder) Decode(interface{}) error
