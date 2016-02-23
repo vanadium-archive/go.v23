@@ -63,12 +63,16 @@ type rvHackInterface interface {
 
 var rbType reflect.Type = reflect.TypeOf((*RawBytes)(nil))
 
+func RawBytesTarget(rb *RawBytes) vdl.Target {
+	return &rbTarget{rb: rb}
+}
+
 // If rv is a raw bytes pointer, return a vdl target that
 // modifies it. Otherwise return nil.
 func makeRawBytesTarget(rv reflect.Value) vdl.Target {
 	if rv.Type() == rbType {
 		rv.Set(reflect.ValueOf(&RawBytes{}))
-		return &rbTarget{rb: rv.Interface().(*RawBytes)}
+		return RawBytesTarget(rv.Interface().(*RawBytes))
 	}
 	return nil
 }
