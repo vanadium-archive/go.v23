@@ -476,3 +476,43 @@ func TestConvertRawBytesWrapped(t *testing.T) {
 		}
 	}
 }
+
+func TestRawBytesString(t *testing.T) {
+	tests := []struct {
+		input    *RawBytes
+		expected string
+	}{
+		{
+			input: &RawBytes{
+				Version81,
+				vdl.Int8Type,
+				[]*vdl.Type{vdl.BoolType, vdl.StringType},
+				[]uint64{4},
+				[]byte{0xfa, 0x0e, 0x9d, 0xcc}},
+			expected: "RawBytes{Version81, int8, RefTypes{bool, string}, AnyLengths{4}, fa0e9dcc}",
+		},
+		{
+			input: &RawBytes{
+				Version81,
+				vdl.Int8Type,
+				[]*vdl.Type{vdl.BoolType},
+				[]uint64{},
+				[]byte{0xfa, 0x0e, 0x9d, 0xcc}},
+			expected: "RawBytes{Version81, int8, RefTypes{bool}, fa0e9dcc}",
+		},
+		{
+			input: &RawBytes{
+				Version81,
+				vdl.Int8Type,
+				nil,
+				nil,
+				[]byte{0xfa, 0x0e, 0x9d, 0xcc}},
+			expected: "RawBytes{Version81, int8, fa0e9dcc}",
+		},
+	}
+	for _, test := range tests {
+		if got, want := test.input.String(), test.expected; got != want {
+			t.Errorf("got %v, want %v", got, want)
+		}
+	}
+}
