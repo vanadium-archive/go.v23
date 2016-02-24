@@ -6,7 +6,7 @@
 package syncql
 
 import (
-	"v.io/v23/vdl"
+	"v.io/v23/vom"
 )
 
 // ResultStream is an interface for iterating through results (i.e., rows)
@@ -22,7 +22,7 @@ type ResultStream interface {
 	// Result returns the row (i.e., array of vdl.Values) that was staged by
 	// Advance. Result may panic if Advance returned false or was not called at
 	// all. Result does not block.
-	Result() []*vdl.Value
+	Result() []*vom.RawBytes
 
 	// Err returns a non-nil error iff the stream encountered any errors. Err does
 	// not block.

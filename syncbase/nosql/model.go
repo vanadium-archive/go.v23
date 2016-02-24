@@ -13,7 +13,6 @@ import (
 	wire "v.io/v23/services/syncbase/nosql"
 	"v.io/v23/services/watch"
 	"v.io/v23/syncbase/util"
-	"v.io/v23/vdl"
 	"v.io/v23/verror"
 	"v.io/v23/vom"
 )
@@ -338,7 +337,7 @@ type ResultStream interface {
 	// Result returns the result that was staged by Advance.
 	// Result may panic if Advance returned false or was not called at all.
 	// Result does not block.
-	Result() []*vdl.Value
+	Result() []*vom.RawBytes
 }
 
 // WatchStream is an interface for receiving database updates.

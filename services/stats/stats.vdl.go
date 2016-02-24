@@ -17,6 +17,7 @@ import (
 	"v.io/v23/rpc"
 	"v.io/v23/vdl"
 	"v.io/v23/verror"
+	"v.io/v23/vom"
 
 	// VDL user imports
 	"v.io/v23/security/access"
@@ -54,7 +55,7 @@ type StatsClientMethods interface {
 	// of the value is implementation specific.
 	// Some objects may not have a value, in which case, Value() returns
 	// a NoValue error.
-	Value(*context.T, ...rpc.CallOpt) (*vdl.Value, error)
+	Value(*context.T, ...rpc.CallOpt) (*vom.RawBytes, error)
 }
 
 // StatsClientStub adds universal methods to StatsClientMethods.
@@ -74,7 +75,7 @@ type implStatsClientStub struct {
 	watch.GlobWatcherClientStub
 }
 
-func (c implStatsClientStub) Value(ctx *context.T, opts ...rpc.CallOpt) (o0 *vdl.Value, err error) {
+func (c implStatsClientStub) Value(ctx *context.T, opts ...rpc.CallOpt) (o0 *vom.RawBytes, err error) {
 	err = v23.GetClient(ctx).Call(ctx, c.name, "Value", nil, []interface{}{&o0}, opts...)
 	return
 }
@@ -97,7 +98,7 @@ type StatsServerMethods interface {
 	// of the value is implementation specific.
 	// Some objects may not have a value, in which case, Value() returns
 	// a NoValue error.
-	Value(*context.T, rpc.ServerCall) (*vdl.Value, error)
+	Value(*context.T, rpc.ServerCall) (*vom.RawBytes, error)
 }
 
 // StatsServerStubMethods is the server interface containing
@@ -112,7 +113,7 @@ type StatsServerStubMethods interface {
 	// of the value is implementation specific.
 	// Some objects may not have a value, in which case, Value() returns
 	// a NoValue error.
-	Value(*context.T, rpc.ServerCall) (*vdl.Value, error)
+	Value(*context.T, rpc.ServerCall) (*vom.RawBytes, error)
 }
 
 // StatsServerStub adds universal methods to StatsServerStubMethods.
@@ -146,7 +147,7 @@ type implStatsServerStub struct {
 	gs *rpc.GlobState
 }
 
-func (s implStatsServerStub) Value(ctx *context.T, call rpc.ServerCall) (*vdl.Value, error) {
+func (s implStatsServerStub) Value(ctx *context.T, call rpc.ServerCall) (*vom.RawBytes, error) {
 	return s.impl.Value(ctx, call)
 }
 
@@ -174,7 +175,7 @@ var descStats = rpc.InterfaceDesc{
 			Name: "Value",
 			Doc:  "// Value returns the current value of an object, or an error. The type\n// of the value is implementation specific.\n// Some objects may not have a value, in which case, Value() returns\n// a NoValue error.",
 			OutArgs: []rpc.ArgDesc{
-				{"", ``}, // *vdl.Value
+				{"", ``}, // *vom.RawBytes
 			},
 			Tags: []*vdl.Value{vdl.ValueOf(access.Tag("Debug"))},
 		},

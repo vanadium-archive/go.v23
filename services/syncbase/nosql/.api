@@ -55,7 +55,7 @@ pkg nosql, method (*ConflictManagerStartConflictResolverServerCallStub) Init(rpc
 pkg nosql, method (*ConflictManagerStartConflictResolverServerCallStub) RecvStream() interface {  Advance() bool; Value() ResolutionInfo; Err() error;}
 pkg nosql, method (*ConflictManagerStartConflictResolverServerCallStub) SendStream() interface {  Send(item ConflictInfo) error;}
 pkg nosql, method (*DatabaseExecServerCallStub) Init(rpc.StreamServerCall)
-pkg nosql, method (*DatabaseExecServerCallStub) SendStream() interface {  Send(item []*vdl.Value) error;}
+pkg nosql, method (*DatabaseExecServerCallStub) SendStream() interface {  Send(item []*vom.RawBytes) error;}
 pkg nosql, method (*ResolverType) Set(string) error
 pkg nosql, method (*TableScanServerCallStub) Init(rpc.StreamServerCall)
 pkg nosql, method (*TableScanServerCallStub) SendStream() interface {  Send(item KeyValue) error;}
@@ -328,21 +328,21 @@ pkg nosql, type DatabaseClientStub interface, UnpinBlob(*context.T, BlobRef, ...
 pkg nosql, type DatabaseClientStub interface, WatchGlob(*context.T, GlobRequest, ...rpc.CallOpt) (GlobWatcherWatchGlobClientCall, error)
 pkg nosql, type DatabaseExecClientCall interface { Finish, RecvStream }
 pkg nosql, type DatabaseExecClientCall interface, Finish() error
-pkg nosql, type DatabaseExecClientCall interface, RecvStream() interface {  Advance() bool;; Value() []*vdl.Value;; Err() error;}
+pkg nosql, type DatabaseExecClientCall interface, RecvStream() interface {  Advance() bool;; Value() []*vom.RawBytes;; Err() error;}
 pkg nosql, type DatabaseExecClientStream interface { RecvStream }
-pkg nosql, type DatabaseExecClientStream interface, RecvStream() interface {  Advance() bool;; Value() []*vdl.Value;; Err() error;}
+pkg nosql, type DatabaseExecClientStream interface, RecvStream() interface {  Advance() bool;; Value() []*vom.RawBytes;; Err() error;}
 pkg nosql, type DatabaseExecServerCall interface { GrantedBlessings, LocalEndpoint, RemoteEndpoint, Security, SendStream, Server, Suffix }
 pkg nosql, type DatabaseExecServerCall interface, GrantedBlessings() security.Blessings
 pkg nosql, type DatabaseExecServerCall interface, LocalEndpoint() naming.Endpoint
 pkg nosql, type DatabaseExecServerCall interface, RemoteEndpoint() naming.Endpoint
 pkg nosql, type DatabaseExecServerCall interface, Security() security.Call
-pkg nosql, type DatabaseExecServerCall interface, SendStream() interface {  Send(item []*vdl.Value) error;}
+pkg nosql, type DatabaseExecServerCall interface, SendStream() interface {  Send(item []*vom.RawBytes) error;}
 pkg nosql, type DatabaseExecServerCall interface, Server() Server
 pkg nosql, type DatabaseExecServerCall interface, Suffix() string
 pkg nosql, type DatabaseExecServerCallStub struct
 pkg nosql, type DatabaseExecServerCallStub struct, embedded rpc.StreamServerCall
 pkg nosql, type DatabaseExecServerStream interface { SendStream }
-pkg nosql, type DatabaseExecServerStream interface, SendStream() interface {  Send(item []*vdl.Value) error;}
+pkg nosql, type DatabaseExecServerStream interface, SendStream() interface {  Send(item []*vom.RawBytes) error;}
 pkg nosql, type DatabaseServerMethods interface { Abort, BeginBatch, Commit, CommitBlob, Create, CreateBlob, CreateSyncgroup, DeleteBlob, Destroy, DestroySyncgroup, EjectFromSyncgroup, Exec, Exists, FetchBlob, GetBlob, GetBlobSize, GetPermissions, GetResumeMarker, GetSchemaMetadata, GetSyncgroupMembers, GetSyncgroupNames, GetSyncgroupSpec, JoinSyncgroup, KeepBlob, LeaveSyncgroup, ListTables, PauseSync, PinBlob, PutBlob, ResumeSync, SetPermissions, SetSchemaMetadata, SetSyncgroupSpec, StartConflictResolver, UnpinBlob, WatchGlob }
 pkg nosql, type DatabaseServerMethods interface, Abort(*context.T, rpc.ServerCall, int32) error
 pkg nosql, type DatabaseServerMethods interface, BeginBatch(*context.T, rpc.ServerCall, int32, BatchOptions) (string, error)

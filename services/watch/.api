@@ -11,7 +11,7 @@ pkg watch, type Change struct, Continued bool
 pkg watch, type Change struct, Name string
 pkg watch, type Change struct, ResumeMarker ResumeMarker
 pkg watch, type Change struct, State int32
-pkg watch, type Change struct, Value *vdl.Value
+pkg watch, type Change struct, Value *vom.RawBytes
 pkg watch, type GlobRequest struct
 pkg watch, type GlobRequest struct, Pattern string
 pkg watch, type GlobRequest struct, ResumeMarker ResumeMarker

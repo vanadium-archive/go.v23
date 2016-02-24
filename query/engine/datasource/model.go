@@ -19,6 +19,7 @@ import (
 	"fmt"
 	"v.io/v23/context"
 	"v.io/v23/vdl"
+	"v.io/v23/vom"
 )
 
 type Database interface {
@@ -81,7 +82,7 @@ type KeyValueStream interface {
 	// KeyValue returns the element that was staged by Advance.
 	// KeyValue may panic if Advance returned false or was not
 	// called at all.  KeyValue does not block.
-	KeyValue() (string, *vdl.Value)
+	KeyValue() (string, *vom.RawBytes)
 
 	// Err returns a non-nil error iff the stream encountered
 	// any errors.  Err does not block.

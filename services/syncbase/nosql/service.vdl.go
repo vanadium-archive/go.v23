@@ -17,6 +17,7 @@ import (
 	"v.io/v23/rpc"
 	"v.io/v23/vdl"
 	"v.io/v23/verror"
+	"v.io/v23/vom"
 
 	// VDL user imports
 	"v.io/v23/security/access"
@@ -2048,7 +2049,7 @@ type DatabaseExecClientStream interface {
 		Advance() bool
 		// Value returns the item that was staged by Advance.  May panic if Advance
 		// returned false or was not called.  Never blocks.
-		Value() []*vdl.Value
+		Value() []*vom.RawBytes
 		// Err returns any error encountered by Advance.  Never blocks.
 		Err() error
 	}
@@ -2072,13 +2073,13 @@ type DatabaseExecClientCall interface {
 
 type implDatabaseExecClientCall struct {
 	rpc.ClientCall
-	valRecv []*vdl.Value
+	valRecv []*vom.RawBytes
 	errRecv error
 }
 
 func (c *implDatabaseExecClientCall) RecvStream() interface {
 	Advance() bool
-	Value() []*vdl.Value
+	Value() []*vom.RawBytes
 	Err() error
 } {
 	return implDatabaseExecClientCallRecv{c}
@@ -2092,7 +2093,7 @@ func (c implDatabaseExecClientCallRecv) Advance() bool {
 	c.c.errRecv = c.c.Recv(&c.c.valRecv)
 	return c.c.errRecv == nil
 }
-func (c implDatabaseExecClientCallRecv) Value() []*vdl.Value {
+func (c implDatabaseExecClientCallRecv) Value() []*vom.RawBytes {
 	return c.c.valRecv
 }
 func (c implDatabaseExecClientCallRecv) Err() error {
@@ -2609,7 +2610,7 @@ type DatabaseExecServerStream interface {
 		// Send places the item onto the output stream.  Returns errors encountered
 		// while sending.  Blocks if there is no buffer space; will unblock when
 		// buffer space is available.
-		Send(item []*vdl.Value) error
+		Send(item []*vom.RawBytes) error
 	}
 }
 
@@ -2632,7 +2633,7 @@ func (s *DatabaseExecServerCallStub) Init(call rpc.StreamServerCall) {
 
 // SendStream returns the send side of the Database.Exec server stream.
 func (s *DatabaseExecServerCallStub) SendStream() interface {
-	Send(item []*vdl.Value) error
+	Send(item []*vom.RawBytes) error
 } {
 	return implDatabaseExecServerCallSend{s}
 }
@@ -2641,7 +2642,7 @@ type implDatabaseExecServerCallSend struct {
 	s *DatabaseExecServerCallStub
 }
 
-func (s implDatabaseExecServerCallSend) Send(item []*vdl.Value) error {
+func (s implDatabaseExecServerCallSend) Send(item []*vom.RawBytes) error {
 	return s.s.Send(item)
 }
 

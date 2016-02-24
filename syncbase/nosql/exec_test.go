@@ -19,6 +19,7 @@ import (
 	"v.io/v23/syncbase/nosql/testdata"
 	"v.io/v23/vdl"
 	"v.io/v23/verror"
+	"v.io/v23/vom"
 	_ "v.io/x/ref/runtime/factories/generic"
 	tu "v.io/x/ref/services/syncbase/testutil"
 )
@@ -1121,12 +1122,12 @@ func TestExecSelect(t *testing.T) {
 			t.Errorf("query: %s; got %v, want nil", test.query, err)
 		} else {
 			// Collect results.
-			r := [][]*vdl.Value{}
+			rbs := [][]*vom.RawBytes{}
 			for rs.Advance() {
-				r = append(r, rs.Result())
+				rbs = append(rbs, rs.Result())
 			}
-			if !reflect.DeepEqual(test.r, r) {
-				t.Errorf("query: %s; got %v, want %v", test.query, r, test.r)
+			if got, want := vdl.ValueOf(rbs), vdl.ValueOf(test.r); !vdl.EqualValue(got, want) {
+				t.Errorf("query: %s; got %v, want %v", test.query, got, want)
 			}
 			if !reflect.DeepEqual(test.headers, headers) {
 				t.Errorf("query: %s; got %v, want %v", test.query, headers, test.headers)
@@ -1550,12 +1551,12 @@ func TestExecDelete(t *testing.T) {
 			t.Errorf("delQuery: %s; got %v, want nil", test.delQuery, err)
 		} else {
 			// Collect results.
-			r := [][]*vdl.Value{}
+			rbs := [][]*vom.RawBytes{}
 			for rs.Advance() {
-				r = append(r, rs.Result())
+				rbs = append(rbs, rs.Result())
 			}
-			if !reflect.DeepEqual(test.delResults, r) {
-				t.Errorf("delQuery: %s; got %v, want %v", test.delQuery, r, test.delResults)
+			if got, want := vdl.ValueOf(rbs), vdl.ValueOf(test.delResults); !vdl.EqualValue(got, want) {
+				t.Errorf("delQuery: %s; got %v, want %v", test.delQuery, got, want)
 			}
 			if !reflect.DeepEqual(test.delHeaders, headers) {
 				t.Errorf("delQuery: %s; got %v, want %v", test.delQuery, headers, test.delHeaders)
@@ -1566,12 +1567,12 @@ func TestExecDelete(t *testing.T) {
 			t.Errorf("delQuery: %s; got %v, want nil", test.delQuery, err)
 		} else {
 			// Collect results.
-			r := [][]*vdl.Value{}
+			rbs := [][]*vom.RawBytes{}
 			for rs.Advance() {
-				r = append(r, rs.Result())
+				rbs = append(rbs, rs.Result())
 			}
-			if !reflect.DeepEqual(test.selResults, r) {
-				t.Errorf("delQuery: %s; got %v, want %v", test.delQuery, r, test.selResults)
+			if got, want := vdl.ValueOf(rbs), vdl.ValueOf(test.selResults); !vdl.EqualValue(got, want) {
+				t.Errorf("delQuery: %s; got %v, want %v", test.delQuery, got, want)
 			}
 			if !reflect.DeepEqual(test.selHeaders, headers) {
 				t.Errorf("delQuery: %s; got %v, want %v", test.delQuery, headers, test.selHeaders)
@@ -1753,12 +1754,12 @@ func TestQuerySelectClause(t *testing.T) {
 			t.Errorf("query: %s; got %v, want nil", test.query, err)
 		} else {
 			// Collect results.
-			r := [][]*vdl.Value{}
+			rbs := [][]*vom.RawBytes{}
 			for rs.Advance() {
-				r = append(r, rs.Result())
+				rbs = append(rbs, rs.Result())
 			}
-			if !reflect.DeepEqual(test.r, r) {
-				t.Errorf("query: %s; got %v, want %v", test.query, r, test.r)
+			if got, want := vdl.ValueOf(rbs), vdl.ValueOf(test.r); !vdl.EqualValue(got, want) {
+				t.Errorf("query: %s; got %v, want %v", test.query, got, want)
 			}
 			if !reflect.DeepEqual(test.headers, headers) {
 				t.Errorf("query: %s; got %v, want %v", test.query, headers, test.headers)
@@ -2085,12 +2086,12 @@ func TestQueryWhereClause(t *testing.T) {
 			t.Errorf("query: %s; got %v, want nil", test.query, err)
 		} else {
 			// Collect results.
-			r := [][]*vdl.Value{}
+			rbs := [][]*vom.RawBytes{}
 			for rs.Advance() {
-				r = append(r, rs.Result())
+				rbs = append(rbs, rs.Result())
 			}
-			if !reflect.DeepEqual(test.r, r) {
-				t.Errorf("query: %s; got %v, want %v", test.query, r, test.r)
+			if got, want := vdl.ValueOf(rbs), vdl.ValueOf(test.r); !vdl.EqualValue(got, want) {
+				t.Errorf("query: %s; got %v, want %v", test.query, got, want)
 			}
 			if !reflect.DeepEqual(test.headers, headers) {
 				t.Errorf("query: %s; got %v, want %v", test.query, headers, test.headers)
@@ -2176,12 +2177,12 @@ func TestQueryEscapeClause(t *testing.T) {
 			t.Errorf("query: %s; got %v, want nil", test.query, err)
 		} else {
 			// Collect results.
-			r := [][]*vdl.Value{}
+			rbs := [][]*vom.RawBytes{}
 			for rs.Advance() {
-				r = append(r, rs.Result())
+				rbs = append(rbs, rs.Result())
 			}
-			if !reflect.DeepEqual(test.r, r) {
-				t.Errorf("query: %s; got %v, want %v", test.query, r, test.r)
+			if got, want := vdl.ValueOf(rbs), vdl.ValueOf(test.r); !vdl.EqualValue(got, want) {
+				t.Errorf("query: %s; got %v, want %v", test.query, got, want)
 			}
 			if !reflect.DeepEqual(test.headers, headers) {
 				t.Errorf("query: %s; got %v, want %v", test.query, headers, test.headers)
@@ -2232,12 +2233,12 @@ func TestQueryLimitAndOffsetClauses(t *testing.T) {
 			t.Errorf("query: %s; got %v, want nil", test.query, err)
 		} else {
 			// Collect results.
-			r := [][]*vdl.Value{}
+			rbs := [][]*vom.RawBytes{}
 			for rs.Advance() {
-				r = append(r, rs.Result())
+				rbs = append(rbs, rs.Result())
 			}
-			if !reflect.DeepEqual(test.r, r) {
-				t.Errorf("query: %s; got %v, want %v", test.query, r, test.r)
+			if got, want := vdl.ValueOf(rbs), vdl.ValueOf(test.r); !vdl.EqualValue(got, want) {
+				t.Errorf("query: %s; got %v, want %v", test.query, got, want)
 			}
 			if !reflect.DeepEqual(test.headers, headers) {
 				t.Errorf("query: %s; got %v, want %v", test.query, headers, test.headers)
@@ -2273,7 +2274,7 @@ func TestPreExecFunctions(t *testing.T) {
 		} else {
 			// Check that all results are identical.
 			// Collect results.
-			var last []*vdl.Value
+			var last []*vom.RawBytes
 			for rs.Advance() {
 				result := rs.Result()
 				if last != nil && !reflect.DeepEqual(last, result) {

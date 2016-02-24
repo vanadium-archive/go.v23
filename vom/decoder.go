@@ -143,6 +143,17 @@ func (d *Decoder) decodeToTarget(target vdl.Target) error {
 			}
 			return d.endMessage()
 		}
+		if rv.IsValid() && rv.Type() == rtPtrToRawBytes {
+			rb := rv.Interface().(*RawBytes)
+			if rb == nil {
+				rb = new(RawBytes)
+				rv.Set(reflect.ValueOf(rb))
+			}
+			if err := d.decodeRaw(valType, uint64(valLen), rb); err != nil {
+				return err
+			}
+			return d.endMessage()
+		}
 	}
 	if err := d.decodeValue(valType, target); err != nil {
 		return err

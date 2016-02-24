@@ -9,7 +9,7 @@ package public
 
 import (
 	"v.io/v23/query/syncql"
-	"v.io/v23/vdl"
+	"v.io/v23/vom"
 )
 
 type QueryEngine interface {
@@ -35,7 +35,7 @@ type PreparedStatement interface {
 	// The number of paramValues supplied must match the number of formal parameters
 	// specified in the query (else NotEnoughParamValuesSpecified or
 	// TooManyParamValuesSpecified errors are returned).
-	Exec(paramValues ...*vdl.Value) ([]string, syncql.ResultStream, error)
+	Exec(paramValues ...*vom.RawBytes) ([]string, syncql.ResultStream, error)
 
 	// Handle returns an int64 handle that can be passed to QueryEngine.GetPreparedStatement
 	// function.  This is useful for modules implementing query support as they need

@@ -133,7 +133,7 @@ pkg security, type Certificate struct, PublicKey []byte
 pkg security, type Certificate struct, Signature Signature
 pkg security, type Discharge struct
 pkg security, type DischargeImpetus struct
-pkg security, type DischargeImpetus struct, Arguments []*vdl.Value
+pkg security, type DischargeImpetus struct, Arguments []*vom.RawBytes
 pkg security, type DischargeImpetus struct, Method string
 pkg security, type DischargeImpetus struct, Server []BlessingPattern
 pkg security, type Hash string

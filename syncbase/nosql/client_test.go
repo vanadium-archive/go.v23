@@ -19,7 +19,6 @@ import (
 	"v.io/v23/services/watch"
 	"v.io/v23/syncbase"
 	"v.io/v23/syncbase/nosql"
-	"v.io/v23/vdl"
 	"v.io/v23/verror"
 	"v.io/v23/vom"
 	_ "v.io/x/ref/runtime/factories/generic"
@@ -108,62 +107,62 @@ func TestExec(t *testing.T) {
 
 	tu.CheckExec(t, ctx, d, "select k, v.Name from tb where Type(v) like \"%.Baz\"",
 		[]string{"k", "v.Name"},
-		[][]*vdl.Value{
-			[]*vdl.Value{vdl.ValueOf("baz"), vdl.ValueOf(baz.Name)},
+		[][]*vom.RawBytes{
+			{vom.RawBytesOf("baz"), vom.RawBytesOf(baz.Name)},
 		})
 
 	tu.CheckExec(t, ctx, d, "select k, v from tb",
 		[]string{"k", "v"},
-		[][]*vdl.Value{
-			[]*vdl.Value{vdl.ValueOf("bar"), vdl.ValueOf(bar)},
-			[]*vdl.Value{vdl.ValueOf("baz"), vdl.ValueOf(baz)},
-			[]*vdl.Value{vdl.ValueOf("foo"), vdl.ValueOf(foo)},
+		[][]*vom.RawBytes{
+			{vom.RawBytesOf("bar"), vom.RawBytesOf(bar)},
+			{vom.RawBytesOf("baz"), vom.RawBytesOf(baz)},
+			{vom.RawBytesOf("foo"), vom.RawBytesOf(foo)},
 		})
 
 	tu.CheckExec(t, ctx, d, "select k, v from tb where k like \"ba%\"",
 		[]string{"k", "v"},
-		[][]*vdl.Value{
-			[]*vdl.Value{vdl.ValueOf("bar"), vdl.ValueOf(bar)},
-			[]*vdl.Value{vdl.ValueOf("baz"), vdl.ValueOf(baz)},
+		[][]*vom.RawBytes{
+			{vom.RawBytesOf("bar"), vom.RawBytesOf(bar)},
+			{vom.RawBytesOf("baz"), vom.RawBytesOf(baz)},
 		})
 
 	tu.CheckExec(t, ctx, d, "select k, v from tb where v.Active = true",
 		[]string{"k", "v"},
-		[][]*vdl.Value{
-			[]*vdl.Value{vdl.ValueOf("baz"), vdl.ValueOf(baz)},
+		[][]*vom.RawBytes{
+			{vom.RawBytesOf("baz"), vom.RawBytesOf(baz)},
 		})
 
 	tu.CheckExec(t, ctx, d, "select k, v from tb where Type(v) like \"%.Bar\"",
 		[]string{"k", "v"},
-		[][]*vdl.Value{
-			[]*vdl.Value{vdl.ValueOf("bar"), vdl.ValueOf(bar)},
+		[][]*vom.RawBytes{
+			{vom.RawBytesOf("bar"), vom.RawBytesOf(bar)},
 		})
 
 	tu.CheckExec(t, ctx, d, "select k, v from tb where v.F = 0.5",
 		[]string{"k", "v"},
-		[][]*vdl.Value{
-			[]*vdl.Value{vdl.ValueOf("bar"), vdl.ValueOf(bar)},
+		[][]*vom.RawBytes{
+			{vom.RawBytesOf("bar"), vom.RawBytesOf(bar)},
 		})
 
 	tu.CheckExec(t, ctx, d, "select k, v from tb where Type(v) like \"%.Baz\"",
 		[]string{"k", "v"},
-		[][]*vdl.Value{
-			[]*vdl.Value{vdl.ValueOf("baz"), vdl.ValueOf(baz)},
+		[][]*vom.RawBytes{
+			{vom.RawBytesOf("baz"), vom.RawBytesOf(baz)},
 		})
 
 	// Delete baz
 	tu.CheckExec(t, ctx, d, "delete from tb where Type(v) like \"%.Baz\"",
 		[]string{"Count"},
-		[][]*vdl.Value{
-			[]*vdl.Value{vdl.ValueOf(1)},
+		[][]*vom.RawBytes{
+			{vom.RawBytesOf(1)},
 		})
 
 	// Check that bas is no longer in the table.
 	tu.CheckExec(t, ctx, d, "select k, v from tb",
 		[]string{"k", "v"},
-		[][]*vdl.Value{
-			[]*vdl.Value{vdl.ValueOf("bar"), vdl.ValueOf(bar)},
-			[]*vdl.Value{vdl.ValueOf("foo"), vdl.ValueOf(foo)},
+		[][]*vom.RawBytes{
+			{vom.RawBytesOf("bar"), vom.RawBytesOf(bar)},
+			{vom.RawBytesOf("foo"), vom.RawBytesOf(foo)},
 		})
 
 	tu.CheckExecError(t, ctx, d, "select k, v from foo", syncql.ErrTableCantAccess.ID)

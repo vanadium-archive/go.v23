@@ -243,16 +243,17 @@ func (e *encoder) encodeRaw(raw *RawBytes) error {
 	if err := e.startMessage(containsAny(raw.Type), containsTypeObject(raw.Type), hasChunkLen(raw.Type), false, int64(tid)); err != nil {
 		return err
 	}
-	for i, refType := range raw.RefTypes {
-		mid, err := e.typeEnc.encode(refType)
-		if err != nil {
-			return err
-		}
-		if index := e.tids.ReferenceTypeID(mid); index != uint64(i) {
-			return verror.New(verror.ErrInternal, nil, "index unexpectedly out of order")
+	// The RawBytes object may have RefTypes and AnyLengths even if
+	if containsTypeObject(raw.Type) || containsAny(raw.Type) {
+		for _, refType := range raw.RefTypes {
+			mid, err := e.typeEnc.encode(refType)
+			if err != nil {
+				return err
+			}
+			e.tids.tids = append(e.tids.tids, mid)
 		}
 	}
-	if raw.AnyLengths != nil {
+	if containsAny(raw.Type) {
 		e.anyLens.lens = raw.AnyLengths
 	}
 	e.buf.Write(raw.Data)

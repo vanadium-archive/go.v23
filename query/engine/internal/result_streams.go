@@ -9,6 +9,7 @@ import (
 	"v.io/v23/query/engine/internal/query_parser"
 	"v.io/v23/query/syncql"
 	"v.io/v23/vdl"
+	"v.io/v23/vom"
 )
 
 // Select result stream
@@ -19,7 +20,7 @@ type selectResultStreamImpl struct {
 	skippedCount    int64 // skipped so far (needed for offset clause)
 	keyValueStream  ds.KeyValueStream
 	k               string
-	v               *vdl.Value
+	v               *vom.RawBytes
 	err             error
 }
 
@@ -41,7 +42,7 @@ func (rs *selectResultStreamImpl) Advance() bool {
 		case EXCLUDE:
 			match = false
 		case FETCH_VALUE:
-			match = Eval(rs.db, k, v, rs.selectStatement.Where.Expr)
+			match = Eval(rs.db, k, vdl.ValueOf(v), rs.selectStatement.Where.Expr)
 		}
 		if match {
 			if rs.selectStatement.ResultsOffset == nil || rs.selectStatement.ResultsOffset.ResultsOffset.Value <= rs.skippedCount {
@@ -60,8 +61,8 @@ func (rs *selectResultStreamImpl) Advance() bool {
 	return false
 }
 
-func (rs *selectResultStreamImpl) Result() []*vdl.Value {
-	return ComposeProjection(rs.db, rs.k, rs.v, rs.selectStatement.Select)
+func (rs *selectResultStreamImpl) Result() []*vom.RawBytes {
+	return ComposeProjection(rs.db, rs.k, vdl.ValueOf(rs.v), rs.selectStatement.Select)
 }
 
 func (rs *selectResultStreamImpl) Err() error {
@@ -89,8 +90,8 @@ func (rs *deleteResultStreamImpl) Advance() bool {
 	return false
 }
 
-func (rs *deleteResultStreamImpl) Result() []*vdl.Value {
-	return []*vdl.Value{vdl.ValueOf(rs.deleteCount)}
+func (rs *deleteResultStreamImpl) Result() []*vom.RawBytes {
+	return []*vom.RawBytes{vom.RawBytesOf(rs.deleteCount)}
 }
 
 func (rs *deleteResultStreamImpl) Err() error {

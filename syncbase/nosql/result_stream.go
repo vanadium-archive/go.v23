@@ -9,8 +9,8 @@ import (
 
 	"v.io/v23/context"
 	wire "v.io/v23/services/syncbase/nosql"
-	"v.io/v23/vdl"
 	"v.io/v23/verror"
+	"v.io/v23/vom"
 )
 
 type resultStream struct {
@@ -20,7 +20,7 @@ type resultStream struct {
 	// call is the RPC resultStream object.
 	call wire.DatabaseExecClientCall
 	// curr is the currently staged result, or nil if nothing is staged.
-	curr []*vdl.Value
+	curr []*vom.RawBytes
 	// err is the first error encountered during streaming. It may also be
 	// populated by a call to Cancel.
 	err error
@@ -58,7 +58,7 @@ func (rs *resultStream) Advance() bool {
 	return true
 }
 
-func (rs *resultStream) Result() []*vdl.Value {
+func (rs *resultStream) Result() []*vom.RawBytes {
 	rs.mu.Lock()
 	defer rs.mu.Unlock()
 	if rs.curr == nil {

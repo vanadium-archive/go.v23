@@ -59,7 +59,7 @@ pkg syncql, type ResultStream interface { Advance, Cancel, Err, Result }
 pkg syncql, type ResultStream interface, Advance() bool
 pkg syncql, type ResultStream interface, Cancel()
 pkg syncql, type ResultStream interface, Err() error
-pkg syncql, type ResultStream interface, Result() []*vdl.Value
+pkg syncql, type ResultStream interface, Result() []*vom.RawBytes
 pkg syncql, var ErrArgMustBeField verror.IDAction
 pkg syncql, var ErrBadFieldInWhere verror.IDAction
 pkg syncql, var ErrBigIntConversionError verror.IDAction

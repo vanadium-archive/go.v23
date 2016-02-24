@@ -142,7 +142,11 @@ func (d *database) Exec(ctx *context.T, query string) ([]string, ResultStream, e
 		}
 	}
 	for _, header := range resultStream.Result() {
-		headers = append(headers, header.RawString())
+		var str string
+		if err := header.ToValue(&str); err != nil {
+			return nil, nil, err
+		}
+		headers = append(headers, str)
 	}
 	return headers, resultStream, nil
 }

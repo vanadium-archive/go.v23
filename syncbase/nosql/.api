@@ -116,7 +116,7 @@ pkg nosql, type ResultStream interface { Advance, Cancel, Err, Result }
 pkg nosql, type ResultStream interface, Advance() bool
 pkg nosql, type ResultStream interface, Cancel()
 pkg nosql, type ResultStream interface, Err() error
-pkg nosql, type ResultStream interface, Result() []*vdl.Value
+pkg nosql, type ResultStream interface, Result() []*vom.RawBytes
 pkg nosql, type Row interface { Delete, Exists, FullName, Get, Key, Put }
 pkg nosql, type Row interface, Delete(*context.T) error
 pkg nosql, type Row interface, Exists(*context.T) (bool, error)

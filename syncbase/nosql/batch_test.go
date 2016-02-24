@@ -17,8 +17,8 @@ import (
 	wire "v.io/v23/services/syncbase/nosql"
 	"v.io/v23/syncbase"
 	"v.io/v23/syncbase/nosql"
-	"v.io/v23/vdl"
 	"v.io/v23/verror"
+	"v.io/v23/vom"
 	_ "v.io/x/ref/runtime/factories/generic"
 	tu "v.io/x/ref/services/syncbase/testutil"
 )
@@ -111,7 +111,11 @@ func TestBatchBasics(t *testing.T) {
 	}
 	// make sure Exec's Advance doesn't return a "zzzKey"
 	for execIt.Advance() {
-		if string(execIt.Result()[0].String()) == "zzzKey" {
+		var str string
+		if err := execIt.Result()[0].ToValue(&str); err != nil {
+			t.Fatal(err)
+		}
+		if str == "zzzKey" {
 			t.Fatal("execIt.Advance() found zzzKey")
 		}
 	}
@@ -257,10 +261,10 @@ func TestBatchExecIsolation(t *testing.T) {
 	// fetch all rows
 	tu.CheckExec(t, ctx, roBatch, "select k, v from tb",
 		[]string{"k", "v"},
-		[][]*vdl.Value{
-			[]*vdl.Value{vdl.ValueOf("bar"), vdl.ValueOf(bar)},
-			[]*vdl.Value{vdl.ValueOf("baz"), vdl.ValueOf(baz)},
-			[]*vdl.Value{vdl.ValueOf("foo"), vdl.ValueOf(foo)},
+		[][]*vom.RawBytes{
+			{vom.RawBytesOf("bar"), vom.RawBytesOf(bar)},
+			{vom.RawBytesOf("baz"), vom.RawBytesOf(baz)},
+			{vom.RawBytesOf("foo"), vom.RawBytesOf(foo)},
 		})
 
 	// Add a row outside this batch
@@ -272,10 +276,10 @@ func TestBatchExecIsolation(t *testing.T) {
 	// confirm fetching all rows doesn't get the new row
 	tu.CheckExec(t, ctx, roBatch, "select k, v from tb",
 		[]string{"k", "v"},
-		[][]*vdl.Value{
-			[]*vdl.Value{vdl.ValueOf("bar"), vdl.ValueOf(bar)},
-			[]*vdl.Value{vdl.ValueOf("baz"), vdl.ValueOf(baz)},
-			[]*vdl.Value{vdl.ValueOf("foo"), vdl.ValueOf(foo)},
+		[][]*vom.RawBytes{
+			{vom.RawBytesOf("bar"), vom.RawBytesOf(bar)},
+			{vom.RawBytesOf("baz"), vom.RawBytesOf(baz)},
+			{vom.RawBytesOf("foo"), vom.RawBytesOf(foo)},
 		})
 
 	// start a new batch
@@ -289,11 +293,11 @@ func TestBatchExecIsolation(t *testing.T) {
 	// confirm fetching all rows NOW gets the new row
 	tu.CheckExec(t, ctx, roBatch, "select k, v from tb",
 		[]string{"k", "v"},
-		[][]*vdl.Value{
-			[]*vdl.Value{vdl.ValueOf("bar"), vdl.ValueOf(bar)},
-			[]*vdl.Value{vdl.ValueOf("baz"), vdl.ValueOf(baz)},
-			[]*vdl.Value{vdl.ValueOf("foo"), vdl.ValueOf(foo)},
-			[]*vdl.Value{vdl.ValueOf("newRow"), vdl.ValueOf(newRow)},
+		[][]*vom.RawBytes{
+			{vom.RawBytesOf("bar"), vom.RawBytesOf(bar)},
+			{vom.RawBytesOf("baz"), vom.RawBytesOf(baz)},
+			{vom.RawBytesOf("foo"), vom.RawBytesOf(foo)},
+			{vom.RawBytesOf("newRow"), vom.RawBytesOf(newRow)},
 		})
 
 	// test error condition on batch
@@ -375,10 +379,10 @@ func TestBatchExec(t *testing.T) {
 	// fetch all rows
 	tu.CheckExec(t, ctx, rwBatch, "select k, v from tb",
 		[]string{"k", "v"},
-		[][]*vdl.Value{
-			[]*vdl.Value{vdl.ValueOf("bar"), vdl.ValueOf(bar)},
-			[]*vdl.Value{vdl.ValueOf("baz"), vdl.ValueOf(baz)},
-			[]*vdl.Value{vdl.ValueOf("foo"), vdl.ValueOf(foo)},
+		[][]*vom.RawBytes{
+			{vom.RawBytesOf("bar"), vom.RawBytesOf(bar)},
+			{vom.RawBytesOf("baz"), vom.RawBytesOf(baz)},
+			{vom.RawBytesOf("foo"), vom.RawBytesOf(foo)},
 		})
 
 	rwBatchTb := rwBatch.Table("tb")
@@ -392,11 +396,11 @@ func TestBatchExec(t *testing.T) {
 	// confirm fetching all rows DOES get the new row
 	tu.CheckExec(t, ctx, rwBatch, "select k, v from tb",
 		[]string{"k", "v"},
-		[][]*vdl.Value{
-			[]*vdl.Value{vdl.ValueOf("bar"), vdl.ValueOf(bar)},
-			[]*vdl.Value{vdl.ValueOf("baz"), vdl.ValueOf(baz)},
-			[]*vdl.Value{vdl.ValueOf("foo"), vdl.ValueOf(foo)},
-			[]*vdl.Value{vdl.ValueOf("newRow"), vdl.ValueOf(newRow)},
+		[][]*vom.RawBytes{
+			{vom.RawBytesOf("bar"), vom.RawBytesOf(bar)},
+			{vom.RawBytesOf("baz"), vom.RawBytesOf(baz)},
+			{vom.RawBytesOf("foo"), vom.RawBytesOf(foo)},
+			{vom.RawBytesOf("newRow"), vom.RawBytesOf(newRow)},
 		})
 
 	// Delete the first row (bar) and the last row (newRow).
@@ -404,8 +408,8 @@ func TestBatchExec(t *testing.T) {
 	// the change to baz is seen.
 	tu.CheckExec(t, ctx, rwBatch, "delete from tb where k = \"bar\" or k = \"newRow\"",
 		[]string{"Count"},
-		[][]*vdl.Value{
-			[]*vdl.Value{vdl.ValueOf(2)},
+		[][]*vom.RawBytes{
+			{vom.RawBytesOf(2)},
 		})
 	baz2 := Baz{Name: "Batman", Active: false}
 	if err := rwBatchTb.Put(ctx, "baz", baz2); err != nil {
@@ -413,9 +417,9 @@ func TestBatchExec(t *testing.T) {
 	}
 	tu.CheckExec(t, ctx, rwBatch, "select k, v from tb",
 		[]string{"k", "v"},
-		[][]*vdl.Value{
-			[]*vdl.Value{vdl.ValueOf("baz"), vdl.ValueOf(baz2)},
-			[]*vdl.Value{vdl.ValueOf("foo"), vdl.ValueOf(foo)},
+		[][]*vom.RawBytes{
+			{vom.RawBytesOf("baz"), vom.RawBytesOf(baz2)},
+			{vom.RawBytesOf("foo"), vom.RawBytesOf(foo)},
 		})
 
 	// Add the 2 rows (we just deleted) back again.
@@ -432,14 +436,14 @@ func TestBatchExec(t *testing.T) {
 	}
 	tu.CheckExec(t, ctx, rwBatch, "delete from tb where k = \"baz\" or k = \"foo\"",
 		[]string{"Count"},
-		[][]*vdl.Value{
-			[]*vdl.Value{vdl.ValueOf(2)},
+		[][]*vom.RawBytes{
+			{vom.RawBytesOf(2)},
 		})
 	tu.CheckExec(t, ctx, rwBatch, "select k, v from tb",
 		[]string{"k", "v"},
-		[][]*vdl.Value{
-			[]*vdl.Value{vdl.ValueOf("bar"), vdl.ValueOf(bar2)},
-			[]*vdl.Value{vdl.ValueOf("newRow"), vdl.ValueOf(newRow2)},
+		[][]*vom.RawBytes{
+			{vom.RawBytesOf("bar"), vom.RawBytesOf(bar2)},
+			{vom.RawBytesOf("newRow"), vom.RawBytesOf(newRow2)},
 		})
 
 	// commit rw batch
@@ -455,9 +459,9 @@ func TestBatchExec(t *testing.T) {
 	// confirm fetching all rows gets the rows committed above
 	tu.CheckExec(t, ctx, roBatch, "select k, v from tb",
 		[]string{"k", "v"},
-		[][]*vdl.Value{
-			[]*vdl.Value{vdl.ValueOf("bar"), vdl.ValueOf(bar2)},
-			[]*vdl.Value{vdl.ValueOf("newRow"), vdl.ValueOf(newRow2)},
+		[][]*vom.RawBytes{
+			{vom.RawBytesOf("bar"), vom.RawBytesOf(bar2)},
+			{vom.RawBytesOf("newRow"), vom.RawBytesOf(newRow2)},
 		})
 }
 

@@ -17,6 +17,7 @@ import (
 	"v.io/v23/query/engine/public"
 	"v.io/v23/query/syncql"
 	"v.io/v23/vdl"
+	"v.io/v23/vom"
 )
 
 type queryEngineImpl struct {
@@ -71,15 +72,22 @@ func (qe *queryEngineImpl) PrepareStatement(q string) (public.PreparedStatement,
 	return &preparedStatementImpl{qe, id}, nil
 }
 
-func (p *preparedStatementImpl) Exec(paramValues ...*vdl.Value) ([]string, syncql.ResultStream, error) {
+func (p *preparedStatementImpl) Exec(paramValues ...*vom.RawBytes) ([]string, syncql.ResultStream, error) {
 	// Find the AST
 	p.qe.mutexPreparedStatements.Lock()
 	s := p.qe.preparedStatements[p.id]
 	p.qe.mutexPreparedStatements.Unlock()
 
+	vvs := make([]*vdl.Value, len(paramValues))
+	for i := range paramValues {
+		if err := paramValues[i].ToValue(&vvs[i]); err != nil {
+			return nil, nil, err
+		}
+	}
+
 	// Copy the AST and substitute any parameters with actual values.
 	// Note: Not all of the AST is copied as most parts are immutable.
-	sCopy, err := (*s).CopyAndSubstitute(p.qe.db, paramValues)
+	sCopy, err := (*s).CopyAndSubstitute(p.qe.db, vvs)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -120,17 +128,17 @@ func checkAndExec(db ds.Database, s *query_parser.Statement) ([]string, syncql.R
 
 // Given a key, a value and a SelectClause, return the projection.
 // This function is only called if Eval returned true on the WhereClause expression.
-func ComposeProjection(db ds.Database, k string, v *vdl.Value, s *query_parser.SelectClause) []*vdl.Value {
-	var projection []*vdl.Value
+func ComposeProjection(db ds.Database, k string, v *vdl.Value, s *query_parser.SelectClause) []*vom.RawBytes {
+	var projection []*vom.RawBytes
 	for _, selector := range s.Selectors {
 		switch selector.Type {
 		case query_parser.TypSelField:
 			// If field not found, nil is returned (as per specification).
 			f := ResolveField(db, k, v, selector.Field)
-			projection = append(projection, f)
+			projection = append(projection, vom.RawBytesOf(f))
 		case query_parser.TypSelFunc:
 			if selector.Function.Computed {
-				projection = append(projection, query_functions.ConvertFunctionRetValueToVdlValue(selector.Function.RetValue))
+				projection = append(projection, query_functions.ConvertFunctionRetValueToRawBytes(selector.Function.RetValue))
 			} else {
 				// need to exec function
 				// If error executing function, return nil (as per specification).
@@ -138,7 +146,7 @@ func ComposeProjection(db ds.Database, k string, v *vdl.Value, s *query_parser.S
 				if err != nil {
 					retValue = nil
 				}
-				projection = append(projection, query_functions.ConvertFunctionRetValueToVdlValue(retValue))
+				projection = append(projection, query_functions.ConvertFunctionRetValueToRawBytes(retValue))
 			}
 		}
 	}
@@ -149,9 +157,9 @@ func ComposeProjection(db ds.Database, k string, v *vdl.Value, s *query_parser.S
 // return nil if row not selected, else return the projection (type []*vdl.Value).
 // Note: limit and offset clauses are ignored for this function as they make no sense
 // for a single row.
-func ExecSelectSingleRow(db ds.Database, k string, v *vdl.Value, s *query_parser.SelectStatement) []*vdl.Value {
+func ExecSelectSingleRow(db ds.Database, k string, v *vdl.Value, s *query_parser.SelectStatement) []*vom.RawBytes {
 	if !Eval(db, k, v, s.Where.Expr) {
-		rs := []*vdl.Value{}
+		rs := []*vom.RawBytes{}
 		return rs
 	}
 	return ComposeProjection(db, k, v, s.Select)
@@ -304,7 +312,7 @@ func execStatement(db ds.Database, s *query_parser.Statement) ([]string, syncql.
 			case EXCLUDE:
 				match = false
 			case FETCH_VALUE:
-				match = Eval(db, k, v, st.Where.Expr)
+				match = Eval(db, k, vdl.ValueOf(v), st.Where.Expr)
 			}
 			if match {
 				b, err := st.From.Table.DBTable.Delete(k)

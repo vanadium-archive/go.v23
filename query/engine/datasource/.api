@@ -17,7 +17,7 @@ pkg datasource, type KeyValueStream interface { Advance, Cancel, Err, KeyValue }
 pkg datasource, type KeyValueStream interface, Advance() bool
 pkg datasource, type KeyValueStream interface, Cancel()
 pkg datasource, type KeyValueStream interface, Err() error
-pkg datasource, type KeyValueStream interface, KeyValue() (string, *vdl.Value)
+pkg datasource, type KeyValueStream interface, KeyValue() (string, *vom.RawBytes)
 pkg datasource, type StringFieldRange struct
 pkg datasource, type StringFieldRange struct, Limit string
 pkg datasource, type StringFieldRange struct, Start string

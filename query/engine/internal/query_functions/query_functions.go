@@ -11,7 +11,7 @@ import (
 	"v.io/v23/query/engine/internal/conversions"
 	"v.io/v23/query/engine/internal/query_parser"
 	"v.io/v23/query/syncql"
-	"v.io/v23/vdl"
+	"v.io/v23/vom"
 )
 
 type queryFunc func(ds.Database, int64, []*query_parser.Operand) (*query_parser.Operand, error)
@@ -191,32 +191,32 @@ func ExecFunction(db ds.Database, f *query_parser.Function, args []*query_parser
 	}
 }
 
-func ConvertFunctionRetValueToVdlValue(o *query_parser.Operand) *vdl.Value {
+func ConvertFunctionRetValueToRawBytes(o *query_parser.Operand) *vom.RawBytes {
 	if o == nil {
-		return vdl.ValueOf(nil)
+		return vom.RawBytesOf(nil)
 	}
 	switch o.Type {
 	case query_parser.TypBool:
-		return vdl.ValueOf(o.Bool)
+		return vom.RawBytesOf(o.Bool)
 	case query_parser.TypComplex:
-		return vdl.ValueOf(o.Complex)
+		return vom.RawBytesOf(o.Complex)
 	case query_parser.TypFloat:
-		return vdl.ValueOf(o.Float)
+		return vom.RawBytesOf(o.Float)
 	case query_parser.TypInt:
-		return vdl.ValueOf(o.Int)
+		return vom.RawBytesOf(o.Int)
 	case query_parser.TypStr:
-		return vdl.ValueOf(o.Str)
+		return vom.RawBytesOf(o.Str)
 	case query_parser.TypTime:
-		return vdl.ValueOf(o.Time)
+		return vom.RawBytesOf(o.Time)
 	case query_parser.TypObject:
-		return vdl.ValueOf(o.Object)
+		return vom.RawBytesOf(o.Object)
 	case query_parser.TypUint:
-		return vdl.ValueOf(o.Uint)
+		return vom.RawBytesOf(o.Uint)
 	default:
 		// Other types can't be converted and *shouldn't* be returned
 		// from a function.  This case will result in a nil for this
 		// column in the row.
-		return vdl.ValueOf(nil)
+		return vom.RawBytesOf(nil)
 	}
 }
 

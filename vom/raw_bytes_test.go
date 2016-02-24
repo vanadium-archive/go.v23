@@ -477,6 +477,43 @@ func TestConvertRawBytesWrapped(t *testing.T) {
 	}
 }
 
+// Ensure that the type id lists aren't corrupted when there
+// are more ids in the encoder/decoder.
+func TestReusedDecoderEncoderRawBytes(t *testing.T) {
+	var buf bytes.Buffer
+	enc := NewEncoder(&buf)
+	if err := enc.Encode(structAnyInterface{int64(4)}); err != nil {
+		t.Fatalf("error on encode: %v", err)
+	}
+	if err := enc.Encode(structAnyInterface{"a"}); err != nil {
+		t.Fatalf("error on encode: %v", err)
+	}
+
+	dec := NewDecoder(bytes.NewReader(buf.Bytes()))
+	var x structAny
+	if err := dec.Decode(&x); err != nil {
+		t.Fatalf("error on decode: %v", err)
+	}
+	var i int64
+	if err := x.X.ToValue(&i); err != nil {
+		t.Fatalf("error on value convert: %v", err)
+	}
+	if got, want := i, int64(4); got != want {
+		t.Errorf("got %d, want %d", got, want)
+	}
+	var y structAny
+	if err := dec.Decode(&y); err != nil {
+		t.Fatalf("error on decode: %v", err)
+	}
+	var str string
+	if err := y.X.ToValue(&str); err != nil {
+		t.Fatalf("error on value convert: %v", err)
+	}
+	if got, want := str, "a"; got != want {
+		t.Errorf("got %d, want %d", got, want)
+	}
+}
+
 func TestRawBytesString(t *testing.T) {
 	tests := []struct {
 		input    *RawBytes
