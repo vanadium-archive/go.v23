@@ -19,7 +19,7 @@ pkg nosql, type BatchDatabase interface { Abort, Close, Commit, Exec, FullName, 
 pkg nosql, type BatchDatabase interface, Abort(*context.T) error
 pkg nosql, type BatchDatabase interface, Close()
 pkg nosql, type BatchDatabase interface, Commit(*context.T) error
-pkg nosql, type BatchDatabase interface, Exec(*context.T, string) ([]string, ResultStream, error)
+pkg nosql, type BatchDatabase interface, Exec(*context.T, string, ...interface{}) ([]string, ResultStream, error)
 pkg nosql, type BatchDatabase interface, FullName() string
 pkg nosql, type BatchDatabase interface, GetResumeMarker(*context.T) (watch.ResumeMarker, error)
 pkg nosql, type BatchDatabase interface, ListTables(*context.T) ([]string, error)
@@ -76,7 +76,7 @@ pkg nosql, type Database interface, Create(*context.T, access.Permissions) error
 pkg nosql, type Database interface, CreateBlob(*context.T) (Blob, error)
 pkg nosql, type Database interface, Destroy(*context.T) error
 pkg nosql, type Database interface, EnforceSchema(*context.T) error
-pkg nosql, type Database interface, Exec(*context.T, string) ([]string, ResultStream, error)
+pkg nosql, type Database interface, Exec(*context.T, string, ...interface{}) ([]string, ResultStream, error)
 pkg nosql, type Database interface, Exists(*context.T) (bool, error)
 pkg nosql, type Database interface, FullName() string
 pkg nosql, type Database interface, GetPermissions(*context.T) (access.Permissions, string, error)
@@ -92,7 +92,7 @@ pkg nosql, type Database interface, Table(string) Table
 pkg nosql, type Database interface, Watch(*context.T, string, string, watch.ResumeMarker) (WatchStream, error)
 pkg nosql, type DatabaseHandle interface { Close, Exec, FullName, GetResumeMarker, ListTables, Name, Table }
 pkg nosql, type DatabaseHandle interface, Close()
-pkg nosql, type DatabaseHandle interface, Exec(*context.T, string) ([]string, ResultStream, error)
+pkg nosql, type DatabaseHandle interface, Exec(*context.T, string, ...interface{}) ([]string, ResultStream, error)
 pkg nosql, type DatabaseHandle interface, FullName() string
 pkg nosql, type DatabaseHandle interface, GetResumeMarker(*context.T) (watch.ResumeMarker, error)
 pkg nosql, type DatabaseHandle interface, ListTables(*context.T) ([]string, error)

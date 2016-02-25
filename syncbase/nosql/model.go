@@ -38,6 +38,9 @@ type DatabaseHandle interface {
 	ListTables(ctx *context.T) ([]string, error)
 
 	// Exec executes a syncQL query.
+	// A value must be provided for every positional parameter ('?' placeholder)
+	// in the query.
+	//
 	// For select statements:
 	// If no error is returned, Exec returns an array of headers (i.e., column
 	// names) and a result stream which contains an array of values for each row
@@ -54,7 +57,7 @@ type DatabaseHandle interface {
 	// Exec. The returned stream reads from a consistent snapshot taken at the
 	// time of the RPC, and will not reflect subsequent writes to keys not yet
 	// reached by the stream.
-	Exec(ctx *context.T, query string) ([]string, ResultStream, error)
+	Exec(ctx *context.T, query string, params ...interface{}) ([]string, ResultStream, error)
 
 	// GetResumeMarker returns the ResumeMarker that points to the current end
 	// of the event log.

@@ -98,6 +98,7 @@ func initTables(t *testing.T) {
 	if err := customerTable.Put(ctx, k, c); err != nil {
 		t.Fatalf("customerTable.Put() failed: %v", err)
 	}
+
 	k = "001001"
 	i := testdata.Invoice{1, 1000, t20150122131101, 42, testdata.AddressInfo{"1 Main St.", "Palo Alto", "CA", "94303"}}
 	customerEntries = append(customerEntries, kv{k, vdl.ValueOf(i)})
@@ -155,7 +156,7 @@ func initTables(t *testing.T) {
 	}
 
 	k = "003"
-	c = testdata.Customer{"John Steed", 3, true, testdata.AddressInfo{"100 Queen St.", "New London", "CT", "06320"}, testdata.CreditReport{Agency: testdata.CreditAgencyExperian, Report: testdata.AgencyReportExperianReport{testdata.ExperianCreditReport{testdata.ExperianRatingGood}}}}
+	c = testdata.Customer{"John \"JOS\" O'Steed", 3, true, testdata.AddressInfo{"100 Queen St.", "New London", "CT", "06320"}, testdata.CreditReport{Agency: testdata.CreditAgencyExperian, Report: testdata.AgencyReportExperianReport{testdata.ExperianCreditReport{testdata.ExperianRatingGood}}}}
 	customerEntries = append(customerEntries, kv{k, vdl.ValueOf(c)})
 	if err := customerTable.Put(ctx, k, c); err != nil {
 		t.Fatalf("customerTable.Put() failed: %v", err)
@@ -240,6 +241,29 @@ type preExecFunctionTest struct {
 type execSelectErrorTest struct {
 	query string
 	err   error
+}
+
+type execSelectParamTest struct {
+	query   string
+	params  []interface{}
+	headers []string
+	r       [][]*vdl.Value
+}
+
+type execDeleteParamTest struct {
+	delQuery   string
+	delParams  []interface{}
+	delHeaders []string
+	delResults [][]*vdl.Value
+	selQuery   string
+	selHeaders []string
+	selResults [][]*vdl.Value
+}
+
+type execSelectParamErrorTest struct {
+	query  string
+	params []interface{}
+	err    error
 }
 
 func TestExecSelect(t *testing.T) {
@@ -364,7 +388,7 @@ func TestExecSelect(t *testing.T) {
 			[][]*vdl.Value{
 				[]*vdl.Value{vdl.ValueOf(customerEntries[0].key), vdl.ValueOf("John Smith")},
 				[]*vdl.Value{vdl.ValueOf(customerEntries[4].key), vdl.ValueOf("Bat Masterson")},
-				[]*vdl.Value{vdl.ValueOf(customerEntries[9].key), vdl.ValueOf("John Steed")},
+				[]*vdl.Value{vdl.ValueOf(customerEntries[9].key), vdl.ValueOf("John \"JOS\" O'Steed")},
 			},
 		},
 		{
@@ -845,7 +869,7 @@ func TestExecSelect(t *testing.T) {
 			[][]*vdl.Value{
 				[]*vdl.Value{vdl.ValueOf("john smith")},
 				[]*vdl.Value{vdl.ValueOf("bat masterson")},
-				[]*vdl.Value{vdl.ValueOf("john steed")},
+				[]*vdl.Value{vdl.ValueOf("john \"jos\" o'steed")},
 			},
 		},
 		// Uppercase function
@@ -855,7 +879,7 @@ func TestExecSelect(t *testing.T) {
 			[][]*vdl.Value{
 				[]*vdl.Value{vdl.ValueOf("JOHN SMITH")},
 				[]*vdl.Value{vdl.ValueOf("BAT MASTERSON")},
-				[]*vdl.Value{vdl.ValueOf("JOHN STEED")},
+				[]*vdl.Value{vdl.ValueOf("JOHN \"JOS\" O'STEED")},
 			},
 		},
 		// Second function
@@ -2577,5 +2601,435 @@ func TestQueryStatementSizeExceeded(t *testing.T) {
 	wantSuffix := expectedErr.Error()[len(wantPrefix)+1:]
 	if verror.ErrorID(err) != verror.ErrorID(expectedErr) || !strings.HasPrefix(err.Error(), wantPrefix) || !strings.HasSuffix(err.Error(), wantSuffix) {
 		t.Errorf("query: %s; got %v, want %v", q, err, expectedErr)
+	}
+}
+
+func TestExecParamSelect(t *testing.T) {
+	setup(t)
+	defer cleanup()
+	initTables(t)
+	t20120317, _ := time.Parse("2006-01-02 MST", "2012-03-17 PDT")
+	basic := []execSelectParamTest{
+		{
+			// Select records where v.Address.City is "Collins" or type is Invoice.
+			"select v from Customer where v.Address.City = ? or Type(v) like ?",
+			[]interface{}{
+				"Collins",
+				"%.Invoice",
+			},
+			[]string{"v"},
+			[][]*vdl.Value{
+				[]*vdl.Value{customerEntries[1].value},
+				[]*vdl.Value{customerEntries[2].value},
+				[]*vdl.Value{customerEntries[3].value},
+				[]*vdl.Value{customerEntries[4].value},
+				[]*vdl.Value{customerEntries[5].value},
+				[]*vdl.Value{customerEntries[6].value},
+				[]*vdl.Value{customerEntries[7].value},
+				[]*vdl.Value{customerEntries[8].value},
+			},
+		},
+		{
+			// Select records where v.Address.City is "Collins" and v.InvoiceNum is nil.
+			"select v from Customer where v.Address.City = \"Collins\" and v.InvoiceNum is nil",
+			[]interface{}{},
+			[]string{"v"},
+			[][]*vdl.Value{
+				[]*vdl.Value{customerEntries[4].value},
+			},
+		},
+		{
+			// Select customer name for customer Id (i.e., key) "001".
+			"select v.Name as Name from Customer where Type(v) like \"%.Customer\" and k = ?",
+			[]interface{}{
+				"001",
+			},
+			[]string{"Name"},
+			[][]*vdl.Value{
+				[]*vdl.Value{vdl.ValueOf("John Smith")},
+			},
+		},
+		{
+			// Select v where v.AgencyRating = "Bad"
+			"select v from Customer where v.Credit.Report.EquifaxReport.Rating < ? or v.Credit.Report.ExperianReport.Rating = ? or v.Credit.Report.TransUnionReport.Rating < ?",
+			[]interface{}{
+				'A',
+				"Bad",
+				90,
+			},
+			[]string{"v"},
+			[][]*vdl.Value{
+				[]*vdl.Value{customerEntries[4].value},
+			},
+		},
+		{
+			// Select records where v.Bar.Baz.TitleOrValue.Value = 42
+			"select v from Foo where v.Bar.Baz.TitleOrValue.Value = ?",
+			[]interface{}{
+				42,
+			},
+			[]string{"v"},
+			[][]*vdl.Value{
+				[]*vdl.Value{fooEntries[1].value},
+			},
+		},
+		{
+			// Select records where v.Bar.Baz.TitleOrValue.Value = "42"
+			"select v from Foo where v.Bar.Baz.TitleOrValue.Value = ?",
+			[]interface{}{
+				"42",
+			},
+			[]string{"v"},
+			[][]*vdl.Value{},
+		},
+		{
+			// Now will always be > 2012, so all customer records will be returned.
+			"select v from Customer where Now() > ?",
+			[]interface{}{
+				t20120317,
+			},
+			[]string{"v"},
+			[][]*vdl.Value{
+				[]*vdl.Value{customerEntries[0].value},
+				[]*vdl.Value{customerEntries[1].value},
+				[]*vdl.Value{customerEntries[2].value},
+				[]*vdl.Value{customerEntries[3].value},
+				[]*vdl.Value{customerEntries[4].value},
+				[]*vdl.Value{customerEntries[5].value},
+				[]*vdl.Value{customerEntries[6].value},
+				[]*vdl.Value{customerEntries[7].value},
+				[]*vdl.Value{customerEntries[8].value},
+				[]*vdl.Value{customerEntries[9].value},
+			},
+		},
+		// Test functions.
+		{
+			// Now will always be > 2012, so all customer records will be returned.
+			"select v from Customer where Now() > Time(\"2006-01-02 MST\", ?)",
+			[]interface{}{
+				"2012-03-17 PDT",
+			},
+			[]string{"v"},
+			[][]*vdl.Value{
+				[]*vdl.Value{customerEntries[0].value},
+				[]*vdl.Value{customerEntries[1].value},
+				[]*vdl.Value{customerEntries[2].value},
+				[]*vdl.Value{customerEntries[3].value},
+				[]*vdl.Value{customerEntries[4].value},
+				[]*vdl.Value{customerEntries[5].value},
+				[]*vdl.Value{customerEntries[6].value},
+				[]*vdl.Value{customerEntries[7].value},
+				[]*vdl.Value{customerEntries[8].value},
+				[]*vdl.Value{customerEntries[9].value},
+			},
+		},
+		{
+			// Select invoices shipped to Any street -- using Uppercase.
+			"select k from Customer where Type(v) like StrCat(\"%.\", ?) and Uppercase(v.ShipTo.Street) like ?",
+			[]interface{}{
+				"Invoice",
+				"%ANY%",
+			},
+			[]string{"k"},
+			[][]*vdl.Value{
+				[]*vdl.Value{vdl.ValueOf(customerEntries[5].key)},
+				[]*vdl.Value{vdl.ValueOf(customerEntries[6].key)},
+				[]*vdl.Value{vdl.ValueOf(customerEntries[7].key)},
+				[]*vdl.Value{vdl.ValueOf(customerEntries[8].key)},
+			},
+		},
+		// TODO(ivanpi): Parameters are currently supported only in where clause.
+		/*{
+			"select v.A[?], v.L[6], v.M[?], v.S[?], ? from KeyIndexData",
+			[]interface{}{
+				2,
+				1.1 + 2.2i,
+				"I’ll grind his bones to mix my bread",
+				42,
+			},
+			[]string{"v.A[2]", "v.L[6]", "v.M[Complex]", "v.S[I’ll grind his bones to mix my bread]"},
+			[][]*vdl.Value{
+				[]*vdl.Value{
+					vdl.ValueOf("Fo"),
+					vdl.ValueOf("Englishman"),
+					vdl.ValueOf("Be he living, or be he dead"),
+					vdl.ValueOf(true),
+					vdl.ValueOf(42),
+				},
+			},
+		},
+		{
+			"select v.?[6], v.M[?] as ? from KeyIndexData",
+			[]interface{}{
+				"L",
+				1.1 + 2.2i,
+				"Leet",
+			},
+			[]string{"v.L[6]", "Leet"},
+			[][]*vdl.Value{
+				[]*vdl.Value{
+					vdl.ValueOf("Englishman"),
+					vdl.ValueOf("Be he living, or be he dead"),
+				},
+			},
+		},*/
+		{
+			"select k, v.Key from BigTable where k like StrCat(?, \"_\") or k like StrCat(?, \"_\")",
+			[]interface{}{
+				"10",
+				"20",
+			},
+			[]string{"k", "v.Key"},
+			[][]*vdl.Value{
+				svPair("100"),
+				svPair("101"),
+				svPair("102"),
+				svPair("103"),
+				svPair("104"),
+				svPair("105"),
+				svPair("106"),
+				svPair("107"),
+				svPair("108"),
+				svPair("109"),
+				svPair("200"),
+				svPair("201"),
+				svPair("202"),
+				svPair("203"),
+				svPair("204"),
+				svPair("205"),
+				svPair("206"),
+				svPair("207"),
+				svPair("208"),
+				svPair("209"),
+			},
+		},
+		{
+			"select k, v.Key from BigTable where k <= ? or k = ? or k >= ? or (k <> ? and k not like ? and k >= ?)",
+			[]interface{}{
+				"100",
+				"101",
+				"300",
+				"299",
+				"300",
+				"298",
+			},
+			[]string{"k", "v.Key"},
+			[][]*vdl.Value{
+				svPair("100"),
+				svPair("101"),
+				svPair("298"),
+				svPair("300"),
+			},
+		},
+		// Successful syncQL injection. All values are returned.
+		{
+			"select v from Customer where k = \"" + "BobbyTables\" or \"1\" = \"1" + "\"",
+			[]interface{}{},
+			[]string{"v"},
+			[][]*vdl.Value{
+				[]*vdl.Value{customerEntries[0].value},
+				[]*vdl.Value{customerEntries[1].value},
+				[]*vdl.Value{customerEntries[2].value},
+				[]*vdl.Value{customerEntries[3].value},
+				[]*vdl.Value{customerEntries[4].value},
+				[]*vdl.Value{customerEntries[5].value},
+				[]*vdl.Value{customerEntries[6].value},
+				[]*vdl.Value{customerEntries[7].value},
+				[]*vdl.Value{customerEntries[8].value},
+				[]*vdl.Value{customerEntries[9].value},
+			},
+		},
+		// syncQL injection thwarted by parameterized query.
+		{
+			"select v from Customer where k = ?",
+			[]interface{}{
+				"BobbyTables\" or \"1\" = \"1",
+			},
+			[]string{"v"},
+			[][]*vdl.Value{},
+		},
+	}
+
+	for _, test := range basic {
+		headers, rs, err := db.Exec(ctx, test.query, test.params...)
+		if err != nil {
+			t.Errorf("query: %s, params: %v; got %v, want nil", test.query, test.params, err)
+		} else {
+			// Collect results.
+			rbs := [][]*vom.RawBytes{}
+			for rs.Advance() {
+				rbs = append(rbs, rs.Result())
+			}
+			if got, want := vdl.ValueOf(rbs), vdl.ValueOf(test.r); !vdl.EqualValue(got, want) {
+				t.Errorf("query: %s, params: %v; got %v, want %v", test.query, test.params, got, want)
+			}
+			if !reflect.DeepEqual(test.headers, headers) {
+				t.Errorf("query: %s, params: %v; got %v, want %v", test.query, test.params, headers, test.headers)
+			}
+		}
+	}
+}
+
+func TestExecParamDelete(t *testing.T) {
+	basic := []execDeleteParamTest{
+		{
+			// Delete all $88 invoices.
+			"delete from Customer where Type(v) like \"%.Invoice\" and v.Amount = ?",
+			[]interface{}{
+				88,
+			},
+			[]string{"Count"},
+			[][]*vdl.Value{
+				[]*vdl.Value{vdl.ValueOf(2)},
+			},
+			"select k from Customer",
+			[]string{"k"},
+			[][]*vdl.Value{
+				[]*vdl.Value{vdl.ValueOf("001")},
+				[]*vdl.Value{vdl.ValueOf("001001")},
+				[]*vdl.Value{vdl.ValueOf("001002")},
+				[]*vdl.Value{vdl.ValueOf("002")},
+				[]*vdl.Value{vdl.ValueOf("002001")},
+				[]*vdl.Value{vdl.ValueOf("002002")},
+				[]*vdl.Value{vdl.ValueOf("002003")},
+				[]*vdl.Value{vdl.ValueOf("003")},
+			},
+		},
+		{
+			// delete all with a key prefix of "001" or a key prefix of "002".
+			"delete from Customer where k like ? or k like ?",
+			[]interface{}{
+				"001%",
+				"002%",
+			},
+			[]string{"Count"},
+			[][]*vdl.Value{
+				[]*vdl.Value{vdl.ValueOf(9)},
+			},
+			"select k from Customer",
+			[]string{"k"},
+			[][]*vdl.Value{
+				[]*vdl.Value{vdl.ValueOf("003")},
+			},
+		},
+		{
+			// delete where v.Address.City is "Collins" or type is Invoice.
+			"delete from Customer where v.Address.City = ? or Type(v) like StrCat(\"%.\", ?)",
+			[]interface{}{
+				"Collins",
+				"Invoice",
+			},
+			[]string{"Count"},
+			[][]*vdl.Value{
+				[]*vdl.Value{vdl.ValueOf(8)},
+			},
+			"select k from Customer",
+			[]string{"k"},
+			[][]*vdl.Value{
+				[]*vdl.Value{vdl.ValueOf("001")},
+				[]*vdl.Value{vdl.ValueOf("003")},
+			},
+		},
+		{
+			// delete where v.Name is "John \"JOS\" O'Steed" or type is Invoice.
+			"delete from Customer where v.Name = ? or Type(v) like ?",
+			[]interface{}{
+				"John \"JOS\" O'Steed",
+				"%.Invoice",
+			},
+			[]string{"Count"},
+			[][]*vdl.Value{
+				[]*vdl.Value{vdl.ValueOf(8)},
+			},
+			"select k from Customer",
+			[]string{"k"},
+			[][]*vdl.Value{
+				[]*vdl.Value{vdl.ValueOf("001")},
+				[]*vdl.Value{vdl.ValueOf("002")},
+			},
+		},
+	}
+
+	setup(t)
+	defer cleanup()
+	for _, test := range basic {
+		initTables(t)
+		headers, rs, err := db.Exec(ctx, test.delQuery, test.delParams...)
+		if err != nil {
+			t.Errorf("delQuery: %s, delParams: %v; got %v, want nil", test.delQuery, test.delParams, err)
+		} else {
+			// Collect results.
+			rbs := [][]*vom.RawBytes{}
+			for rs.Advance() {
+				rbs = append(rbs, rs.Result())
+			}
+			if got, want := vdl.ValueOf(rbs), vdl.ValueOf(test.delResults); !vdl.EqualValue(got, want) {
+				t.Errorf("delQuery: %s, delParams: %v; got %v, want %v", test.delQuery, test.delParams, got, want)
+			}
+			if !reflect.DeepEqual(test.delHeaders, headers) {
+				t.Errorf("delQuery: %s, delParams: %v; got %v, want %v", test.delQuery, test.delParams, headers, test.delHeaders)
+			}
+		}
+		headers, rs, err = db.Exec(ctx, test.selQuery)
+		if err != nil {
+			t.Errorf("delQuery: %s, delParams: %v; got %v, want nil", test.delQuery, test.delParams, err)
+		} else {
+			// Collect results.
+			rbs := [][]*vom.RawBytes{}
+			for rs.Advance() {
+				rbs = append(rbs, rs.Result())
+			}
+			if got, want := vdl.ValueOf(rbs), vdl.ValueOf(test.selResults); !vdl.EqualValue(got, want) {
+				t.Errorf("delQuery: %s, delParams: %v; got %v, want %v", test.delQuery, test.delParams, got, want)
+			}
+			if !reflect.DeepEqual(test.selHeaders, headers) {
+				t.Errorf("delQuery: %s, delParams: %v; got %v, want %v", test.delQuery, test.delParams, headers, test.selHeaders)
+			}
+		}
+	}
+}
+
+func TestExecParamErrors(t *testing.T) {
+	setup(t)
+	defer cleanup()
+	initTables(t)
+	basic := []execSelectParamErrorTest{
+		// Produce parameter related errors.
+		{
+			"select k from Customer where v.Name = ? or v.Address.City = ?",
+			[]interface{}{
+				"John",
+			},
+			syncql.NewErrNotEnoughParamValuesSpecified(ctx, 60),
+		},
+		{
+			"select k from Customer where v.Name = ? or v.Address.City = ?",
+			[]interface{}{
+				"John",
+				"Collins",
+				42,
+			},
+			syncql.NewErrTooManyParamValuesSpecified(ctx, 23),
+		},
+		{
+			"delete from Customer where v.Name = ?",
+			[]interface{}{},
+			syncql.NewErrNotEnoughParamValuesSpecified(ctx, 36),
+		},
+	}
+
+	for _, test := range basic {
+		_, rs, err := db.Exec(ctx, test.query, test.params...)
+		if err == nil {
+			err = rs.Err()
+		}
+		// Test both that the IDs compare and the text compares (since the offset needs to match).
+		// Note: This is a little tricky because the actual error message will contain the calling
+		//       module.
+		wantPrefix := test.err.Error()[:strings.Index(test.err.Error(), ":")]
+		wantSuffix := test.err.Error()[len(wantPrefix)+1:]
+		if verror.ErrorID(err) != verror.ErrorID(test.err) || !strings.HasPrefix(err.Error(), wantPrefix) || !strings.HasSuffix(err.Error(), wantSuffix) {
+			t.Errorf("query: %s, params: %v; got %v, want %v", test.query, test.params, err, test.err)
+		}
 	}
 }

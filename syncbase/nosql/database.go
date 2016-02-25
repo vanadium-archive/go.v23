@@ -16,6 +16,7 @@ import (
 	"v.io/v23/services/watch"
 	"v.io/v23/syncbase/util"
 	"v.io/v23/verror"
+	"v.io/v23/vom"
 	"v.io/x/lib/vlog"
 )
 
@@ -124,9 +125,18 @@ func (d *database) Destroy(ctx *context.T) error {
 }
 
 // Exec implements Database.Exec.
-func (d *database) Exec(ctx *context.T, query string) ([]string, ResultStream, error) {
+// TODO(ivanpi): Parameterized Exec currently allows struct comparisons, which
+// we wish to prevent. However, cases like Javascript JSValue benefit from this.
+func (d *database) Exec(ctx *context.T, query string, params ...interface{}) ([]string, ResultStream, error) {
+	paramsVom := make([]*vom.RawBytes, len(params))
+	for i, p := range params {
+		var err error
+		if paramsVom[i], err = vom.RawBytesFromValue(p); err != nil {
+			return nil, nil, err
+		}
+	}
 	ctx, cancel := context.WithCancel(ctx)
-	call, err := d.c.Exec(ctx, d.schemaVersion(), query)
+	call, err := d.c.Exec(ctx, d.schemaVersion(), query, paramsVom)
 	if err != nil {
 		return nil, nil, err
 	}
