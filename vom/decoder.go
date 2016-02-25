@@ -136,22 +136,9 @@ func (d *Decoder) decodeToTarget(target vdl.Target) error {
 		if err != nil {
 			return err
 		}
-		if rv.IsValid() && rv.Type() == rtRawBytes {
-			rb := rv.Addr().Interface().(*RawBytes)
-			if err := d.decodeRaw(valType, uint64(valLen), rb); err != nil {
-				return err
-			}
-			return d.endMessage()
-		}
-		if rv.IsValid() && rv.Type() == rtPtrToRawBytes {
-			rb := rv.Interface().(*RawBytes)
-			if rb == nil {
-				rb = new(RawBytes)
-				rv.Set(reflect.ValueOf(rb))
-			}
-			if err := d.decodeRaw(valType, uint64(valLen), rb); err != nil {
-				return err
-			}
+		if isRawBytes, err := d.tryDecodeRaw(valType, uint64(valLen), rv); err != nil {
+			return err
+		} else if isRawBytes {
 			return d.endMessage()
 		}
 	}
@@ -261,6 +248,29 @@ func (d *Decoder) decodeRaw(tt *vdl.Type, valLength uint64, raw *RawBytes) error
 
 type hasRvHack interface {
 	HackGetRv() reflect.Value
+}
+
+func (d *Decoder) tryDecodeRaw(tt *vdl.Type, valLen uint64, rv reflect.Value) (isRawBytes bool, _ error) {
+	// Dereference pointers down to at most one remaining *.
+	for rv.IsValid() && rv.Kind() == reflect.Ptr && rv.Elem().IsValid() && rv.Elem().Kind() == reflect.Ptr {
+		rv = rv.Elem()
+	}
+	if rv.IsValid() && rv.Type() == rtPtrToRawBytes {
+		rb := rv.Interface().(*RawBytes)
+		if rb == nil {
+			rb = new(RawBytes)
+			rv.Set(reflect.ValueOf(rb))
+		}
+		return true, d.decodeRaw(tt, valLen, rb)
+	}
+	if rv.IsValid() && rv.Type() == rtRawBytes {
+		rb := rv.Addr().Interface().(*RawBytes)
+		if err := d.decodeRaw(tt, uint64(valLen), rb); err != nil {
+			return true, err
+		}
+		return true, nil
+	}
+	return false, nil
 }
 
 // decodeValue decodes the rest of the message assuming type tt.
@@ -544,13 +554,8 @@ func (d *Decoder) decodeValue(tt *vdl.Type, target vdl.Target) error {
 		}
 		if hax, ok := target.(hasRvHack); ok {
 			rv := hax.HackGetRv()
-			if rv.IsValid() && rv.Type() == rtPtrToRawBytes {
-				rb := rv.Interface().(*RawBytes)
-				if rb == nil {
-					rb = new(RawBytes)
-					rv.Set(reflect.ValueOf(rb))
-				}
-				return d.decodeRaw(elemType, valLen, rb)
+			if isRawBytes, err := d.tryDecodeRaw(elemType, valLen, rv); isRawBytes {
+				return err
 			}
 		}
 		return d.decodeValue(elemType, target)

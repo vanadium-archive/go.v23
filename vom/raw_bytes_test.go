@@ -553,3 +553,50 @@ func TestRawBytesString(t *testing.T) {
 		}
 	}
 }
+
+type simpleStruct struct {
+	X int16
+}
+
+// Ensure that RawBytes does not interpret the value portion of the vom message
+// by ensuring that Decoding/Encoding to/from RawBytes doesn't fail when the
+// value portion of the message is invalid vom.
+func TestRawBytesNonVomPayload(t *testing.T) {
+	// Compute expected type message bytes. A struct without any/typeobject is
+	// used for this because it has a message length but is neither something that
+	// could be special cased like a list of bytes nor has the complication
+	// of dealing with the format for describing types with any in the
+	// value message header.
+	var typeBuf, buf bytes.Buffer
+	typeEnc := NewTypeEncoder(&typeBuf)
+	if err := NewEncoderWithTypeEncoder(&buf, typeEnc).Encode(simpleStruct{5}); err != nil {
+		t.Fatalf("failure when preparing type message bytes: %v", t)
+	}
+	var inputMessage []byte = typeBuf.Bytes()
+	inputMessage = append(inputMessage, byte(WireIdFirstUserType*2)) // New value message tid
+	inputMessage = append(inputMessage, 8)                           // Message length
+	// non-vom bytes (invalid because there is no struct field at index 10)
+	dataPortion := []byte{10, 20, 30, 40, 50, 60, 70, 80}
+	inputMessage = append(inputMessage, dataPortion...)
+
+	// Now ensure decoding into a RawBytes works correctly.
+	var rb *RawBytes
+	if err := Decode(inputMessage, &rb); err != nil {
+		t.Fatalf("error decoding %x into a RawBytes: %v", inputMessage, err)
+	}
+	if got, want := rb.Type, vdl.TypeOf(simpleStruct{}); got != want {
+		t.Errorf("Type: got %v, want %v", got, want)
+	}
+	if got, want := rb.Data, dataPortion; !bytes.Equal(got, want) {
+		t.Errorf("Data: got %x, want %x", got, want)
+	}
+
+	// Now re-encode and ensure that we get the original bytes.
+	encoded, err := Encode(rb)
+	if err != nil {
+		t.Fatalf("error encoding RawBytes %v: %v", rb, err)
+	}
+	if got, want := encoded, inputMessage; !bytes.Equal(got, want) {
+		t.Errorf("encoded RawBytes. got %v, want %v", got, want)
+	}
+}
