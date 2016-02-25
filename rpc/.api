@@ -28,11 +28,11 @@ pkg rpc, type CallOpt interface { RPCCallOpt }
 pkg rpc, type CallOpt interface, RPCCallOpt()
 pkg rpc, type ChildrenGlobber interface { GlobChildren__ }
 pkg rpc, type ChildrenGlobber interface, GlobChildren__(*context.T, GlobChildrenServerCall, *glob.Element) error
-pkg rpc, type Client interface { Call, Close, Closed, Connection, StartCall }
+pkg rpc, type Client interface { Call, Close, Closed, PinConnection, StartCall }
 pkg rpc, type Client interface, Call(*context.T, string, string, []interface{}, []interface{}, ...CallOpt) error
 pkg rpc, type Client interface, Close()
 pkg rpc, type Client interface, Closed() <-chan struct{}
-pkg rpc, type Client interface, Connection(*context.T, string, ...CallOpt) (flow.ManagedConn, error)
+pkg rpc, type Client interface, PinConnection(*context.T, string, ...CallOpt) (flow.PinnedConn, error)
 pkg rpc, type Client interface, StartCall(*context.T, string, string, []interface{}, ...CallOpt) (ClientCall, error)
 pkg rpc, type ClientCall interface { CloseSend, Finish, Recv, RemoteBlessings, Security, Send }
 pkg rpc, type ClientCall interface, CloseSend() error

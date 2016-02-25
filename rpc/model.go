@@ -36,10 +36,12 @@ type Client interface {
 	// verrors that have verror.ActionCode RetryBackoff.
 	Call(ctx *context.T, name, method string, inArgs, outArgs []interface{}, opts ...CallOpt) error
 
-	// Connection returns a ManagedConn to the remote end if it is successful
+	// PinConnection returns a flow.PinnedConn to the remote end if it is successful
 	// connecting to it within the context’s timeout, or if the connection is
 	// already in the cache.
-	Connection(ctx *context.T, name string, opts ...CallOpt) (flow.ManagedConn, error)
+	// Connection related opts passed to PinConnection are valid until the
+	// PinnedConn.Unpin() is called.
+	PinConnection(ctx *context.T, name string, opts ...CallOpt) (flow.PinnedConn, error)
 
 	// Close discards all state associated with this Client.  In-flight calls may
 	// be terminated with an error.

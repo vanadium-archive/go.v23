@@ -174,6 +174,21 @@ type ManagedConn interface {
 	Closed() <-chan struct{}
 }
 
+// PinnedConn represents a connection that is pinned to the managers cache.
+// PinnedConn's will attempt to be automatically reconnected when the underlying
+// connection is closed.
+type PinnedConn interface {
+	// Conn returns an underlying ManagedConn for the PinnedConn. The returned
+	// ManagedConn may change due to reconnections. The returned value will always
+	// be non-nil.
+	Conn() ManagedConn
+	// Unpin unpins the conn from the Manager's cache, making it more susceptible
+	// for cache eviction. Any connection related opts passed to PinConnection
+	// (e.g ChannelTimeout) will become invalid when Unpin is called.
+	// It is idempotent.
+	Unpin()
+}
+
 // MsgWriter defines and interface for writing messages.
 type MsgWriter interface {
 	// WriteMsg is like Write, but allows writing more than one buffer at a time.
