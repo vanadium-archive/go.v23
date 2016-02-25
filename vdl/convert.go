@@ -531,12 +531,31 @@ func removeOptional(tt *Type) *Type {
 	return tt
 }
 
+// makeDirectTarget returns the target representing the underlying value, if the
+// underlying value supports direct target access.
+func (c convTarget) makeDirectTarget() Target {
+	if c.vv == nil {
+		rv := c.rv
+		if rv.Type().Implements(rtTargeter) {
+			if rv.Kind() == reflect.Ptr && rv.IsNil() {
+				rv.Set(reflect.New(rv.Type().Elem()))
+			}
+			return rv.Interface().(Targeter).MakeVDLTarget()
+		}
+		if rv.CanAddr() {
+			rv = rv.Addr()
+			if rv.Type().Implements(rtTargeter) {
+				return rv.Interface().(Targeter).MakeVDLTarget()
+			}
+		}
+	}
+	return nil
+}
+
 // FromNil implements the Target interface method.
 func (c convTarget) FromNil(tt *Type) error {
-	if RawBytesTargetFunc != nil && c.vv == nil {
-		if target := RawBytesTargetFunc(c.rv); target != nil {
-			return target.FromNil(tt)
-		}
+	if target := c.makeDirectTarget(); target != nil {
+		return target.FromNil(tt)
 	}
 	if !compatible(c.tt, tt) {
 		return fmt.Errorf("types %q and %q aren't compatible", c.tt, tt)
@@ -586,10 +605,8 @@ func (c convTarget) FromNil(tt *Type) error {
 
 // FromBool implements the Target interface method.
 func (c convTarget) FromBool(src bool, tt *Type) error {
-	if RawBytesTargetFunc != nil && c.vv == nil {
-		if target := RawBytesTargetFunc(c.rv); target != nil {
-			return target.FromBool(src, tt)
-		}
+	if target := c.makeDirectTarget(); target != nil {
+		return target.FromBool(src, tt)
 	}
 	fin, fill, err := startConvert(c, tt)
 	if err != nil {
@@ -603,10 +620,8 @@ func (c convTarget) FromBool(src bool, tt *Type) error {
 
 // FromUint implements the Target interface method.
 func (c convTarget) FromUint(src uint64, tt *Type) error {
-	if RawBytesTargetFunc != nil && c.vv == nil {
-		if target := RawBytesTargetFunc(c.rv); target != nil {
-			return target.FromUint(src, tt)
-		}
+	if target := c.makeDirectTarget(); target != nil {
+		return target.FromUint(src, tt)
 	}
 	fin, fill, err := startConvert(c, tt)
 	if err != nil {
@@ -620,10 +635,8 @@ func (c convTarget) FromUint(src uint64, tt *Type) error {
 
 // FromInt implements the Target interface method.
 func (c convTarget) FromInt(src int64, tt *Type) error {
-	if RawBytesTargetFunc != nil && c.vv == nil {
-		if target := RawBytesTargetFunc(c.rv); target != nil {
-			return target.FromInt(src, tt)
-		}
+	if target := c.makeDirectTarget(); target != nil {
+		return target.FromInt(src, tt)
 	}
 	fin, fill, err := startConvert(c, tt)
 	if err != nil {
@@ -637,10 +650,8 @@ func (c convTarget) FromInt(src int64, tt *Type) error {
 
 // FromFloat implements the Target interface method.
 func (c convTarget) FromFloat(src float64, tt *Type) error {
-	if RawBytesTargetFunc != nil && c.vv == nil {
-		if target := RawBytesTargetFunc(c.rv); target != nil {
-			return target.FromFloat(src, tt)
-		}
+	if target := c.makeDirectTarget(); target != nil {
+		return target.FromFloat(src, tt)
 	}
 	fin, fill, err := startConvert(c, tt)
 	if err != nil {
@@ -654,10 +665,8 @@ func (c convTarget) FromFloat(src float64, tt *Type) error {
 
 // FromComplex implements the Target interface method.
 func (c convTarget) FromComplex(src complex128, tt *Type) error {
-	if RawBytesTargetFunc != nil && c.vv == nil {
-		if target := RawBytesTargetFunc(c.rv); target != nil {
-			return target.FromComplex(src, tt)
-		}
+	if target := c.makeDirectTarget(); target != nil {
+		return target.FromComplex(src, tt)
 	}
 	fin, fill, err := startConvert(c, tt)
 	if err != nil {
@@ -671,10 +680,8 @@ func (c convTarget) FromComplex(src complex128, tt *Type) error {
 
 // FromBytes implements the Target interface method.
 func (c convTarget) FromBytes(src []byte, tt *Type) error {
-	if RawBytesTargetFunc != nil && c.vv == nil {
-		if target := RawBytesTargetFunc(c.rv); target != nil {
-			return target.FromBytes(src, tt)
-		}
+	if target := c.makeDirectTarget(); target != nil {
+		return target.FromBytes(src, tt)
 	}
 	fin, fill, err := startConvert(c, tt)
 	if err != nil {
@@ -688,10 +695,8 @@ func (c convTarget) FromBytes(src []byte, tt *Type) error {
 
 // FromString implements the Target interface method.
 func (c convTarget) FromString(src string, tt *Type) error {
-	if RawBytesTargetFunc != nil && c.vv == nil {
-		if target := RawBytesTargetFunc(c.rv); target != nil {
-			return target.FromString(src, tt)
-		}
+	if target := c.makeDirectTarget(); target != nil {
+		return target.FromString(src, tt)
 	}
 	fin, fill, err := startConvert(c, tt)
 	if err != nil {
@@ -705,20 +710,16 @@ func (c convTarget) FromString(src string, tt *Type) error {
 
 // FromEnumLabel implements the Target interface method.
 func (c convTarget) FromEnumLabel(src string, tt *Type) error {
-	if RawBytesTargetFunc != nil && c.vv == nil {
-		if target := RawBytesTargetFunc(c.rv); target != nil {
-			return target.FromEnumLabel(src, tt)
-		}
+	if target := c.makeDirectTarget(); target != nil {
+		return target.FromEnumLabel(src, tt)
 	}
 	return c.FromString(src, tt)
 }
 
 // FromTypeObject implements the Target interface method.
 func (c convTarget) FromTypeObject(src *Type) error {
-	if RawBytesTargetFunc != nil && c.vv == nil {
-		if target := RawBytesTargetFunc(c.rv); target != nil {
-			return target.FromTypeObject(src)
-		}
+	if target := c.makeDirectTarget(); target != nil {
+		return target.FromTypeObject(src)
 	}
 	fin, fill, err := startConvert(c, TypeObjectType)
 	if err != nil {
@@ -1051,19 +1052,20 @@ func (c convTarget) fromTypeObject(src *Type) error {
 	return fmt.Errorf("invalid conversion from typeobject to %v", c.tt)
 }
 
-// An interface used to identify that a given target is a raw bytes target.
-// This is used to special case conversion to RawBytes without having the
-// vdl package have a dependency on vom.
-type rbTarget interface {
-	RawBytesTargetHack()
+// wrappedListTarget is used to implement FinishList for direct targets.
+type wrappedListTarget struct {
+	ListTarget
+	Target Target
 }
 
 // StartList implements the Target interface method.
 func (c convTarget) StartList(tt *Type, len int) (ListTarget, error) {
-	if RawBytesTargetFunc != nil && c.vv == nil {
-		if target := RawBytesTargetFunc(c.rv); target != nil {
-			return target.StartList(tt, len)
+	if target := c.makeDirectTarget(); target != nil {
+		listTarget, err := target.StartList(tt, len)
+		if err != nil {
+			return nil, err
 		}
+		return wrappedListTarget{listTarget, target}, nil
 	}
 	// TODO(bprosnitz) Re-think allocation strategy and possibly use len (currently unused).
 	fin, fill, err := startConvert(c, tt)
@@ -1072,19 +1074,27 @@ func (c convTarget) StartList(tt *Type, len int) (ListTarget, error) {
 
 // FinishList implements the Target interface method.
 func (c convTarget) FinishList(x ListTarget) error {
-	if rbTarg, ok := x.(rbTarget); ok {
-		return rbTarg.(Target).FinishList(x)
+	if wrapped, ok := x.(wrappedListTarget); ok {
+		return wrapped.Target.FinishList(wrapped.ListTarget)
 	}
 	cc := x.(compConvTarget)
 	return finishConvert(cc.fin, cc.fill)
 }
 
+// wrappedSetTarget is used to implement FinishSet for direct targets.
+type wrappedSetTarget struct {
+	SetTarget
+	Target Target
+}
+
 // StartSet implements the Target interface method.
 func (c convTarget) StartSet(tt *Type, len int) (SetTarget, error) {
-	if RawBytesTargetFunc != nil && c.vv == nil {
-		if target := RawBytesTargetFunc(c.rv); target != nil {
-			return target.StartSet(tt, len)
+	if target := c.makeDirectTarget(); target != nil {
+		setTarget, err := target.StartSet(tt, len)
+		if err != nil {
+			return nil, err
 		}
+		return wrappedSetTarget{setTarget, target}, nil
 	}
 	fin, fill, err := startConvert(c, tt)
 	return compConvTarget{fin, fill}, err
@@ -1092,19 +1102,27 @@ func (c convTarget) StartSet(tt *Type, len int) (SetTarget, error) {
 
 // FinishSet implements the Target interface method.
 func (c convTarget) FinishSet(x SetTarget) error {
-	if rbTarg, ok := x.(rbTarget); ok {
-		return rbTarg.(Target).FinishSet(x)
+	if wrapped, ok := x.(wrappedSetTarget); ok {
+		return wrapped.Target.FinishSet(wrapped.SetTarget)
 	}
 	cc := x.(compConvTarget)
 	return finishConvert(cc.fin, cc.fill)
 }
 
+// wrappedMapTarget is used to implement FinishMap for direct targets.
+type wrappedMapTarget struct {
+	MapTarget
+	Target Target
+}
+
 // StartMap implements the Target interface method.
 func (c convTarget) StartMap(tt *Type, len int) (MapTarget, error) {
-	if RawBytesTargetFunc != nil && c.vv == nil {
-		if target := RawBytesTargetFunc(c.rv); target != nil {
-			return target.StartMap(tt, len)
+	if target := c.makeDirectTarget(); target != nil {
+		mapTarget, err := target.StartMap(tt, len)
+		if err != nil {
+			return nil, err
 		}
+		return wrappedMapTarget{mapTarget, target}, nil
 	}
 	fin, fill, err := startConvert(c, tt)
 	return compConvTarget{fin, fill}, err
@@ -1112,19 +1130,27 @@ func (c convTarget) StartMap(tt *Type, len int) (MapTarget, error) {
 
 // FinishMap implements the Target interface method.
 func (c convTarget) FinishMap(x MapTarget) error {
-	if rbTarg, ok := x.(rbTarget); ok {
-		return rbTarg.(Target).FinishMap(x)
+	if wrapped, ok := x.(wrappedMapTarget); ok {
+		return wrapped.Target.FinishMap(wrapped.MapTarget)
 	}
 	cc := x.(compConvTarget)
 	return finishConvert(cc.fin, cc.fill)
 }
 
+// wrappedFieldsTarget is used to implement FinishFields for direct targets.
+type wrappedFieldsTarget struct {
+	FieldsTarget
+	Target Target
+}
+
 // StartFields implements the Target interface method.
 func (c convTarget) StartFields(tt *Type) (FieldsTarget, error) {
-	if RawBytesTargetFunc != nil && c.vv == nil {
-		if target := RawBytesTargetFunc(c.rv); target != nil {
-			return target.StartFields(tt)
+	if target := c.makeDirectTarget(); target != nil {
+		fieldsTarget, err := target.StartFields(tt)
+		if err != nil {
+			return nil, err
 		}
+		return wrappedFieldsTarget{fieldsTarget, target}, nil
 	}
 	fin, fill, err := startConvert(c, tt)
 	return compConvTarget{fin, fill}, err
@@ -1132,8 +1158,8 @@ func (c convTarget) StartFields(tt *Type) (FieldsTarget, error) {
 
 // FinishFields implements the Target interface method.
 func (c convTarget) FinishFields(x FieldsTarget) error {
-	if rbTarg, ok := x.(rbTarget); ok {
-		return rbTarg.(Target).FinishFields(x)
+	if wrapped, ok := x.(wrappedFieldsTarget); ok {
+		return wrapped.Target.FinishFields(wrapped.FieldsTarget)
 	}
 	cc := x.(compConvTarget)
 	return finishConvert(cc.fin, cc.fill)

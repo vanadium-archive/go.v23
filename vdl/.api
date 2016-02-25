@@ -219,6 +219,9 @@ pkg vdl, type Target interface, StartFields(*Type) (FieldsTarget, error)
 pkg vdl, type Target interface, StartList(*Type, int) (ListTarget, error)
 pkg vdl, type Target interface, StartMap(*Type, int) (MapTarget, error)
 pkg vdl, type Target interface, StartSet(*Type, int) (SetTarget, error)
+pkg vdl, type Targeter interface { FillVDLTarget, MakeVDLTarget }
+pkg vdl, type Targeter interface, FillVDLTarget(Target) error
+pkg vdl, type Targeter interface, MakeVDLTarget() Target
 pkg vdl, type Type struct
 pkg vdl, type TypeBuilder struct
 pkg vdl, type TypeOrPending interface, unexported methods
@@ -243,7 +246,6 @@ pkg vdl, var Int16Type *Type
 pkg vdl, var Int32Type *Type
 pkg vdl, var Int64Type *Type
 pkg vdl, var Int8Type *Type
-pkg vdl, var RawBytesTargetFunc func(rv reflect.Value) Target
 pkg vdl, var StringType *Type
 pkg vdl, var TypeObjectType *Type
 pkg vdl, var Uint16Type *Type

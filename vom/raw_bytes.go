@@ -7,7 +7,6 @@ package vom
 import (
 	"bytes"
 	"fmt"
-	"reflect"
 	"strconv"
 
 	"v.io/v23/vdl"
@@ -82,7 +81,11 @@ func (rb *RawBytes) ToValue(value interface{}) error {
 	return Decode(dat, value)
 }
 
-func (rb *RawBytes) ToTarget(target vdl.Target) error {
+func (rb *RawBytes) MakeVDLTarget() vdl.Target {
+	return &rbTarget{rb: rb}
+}
+
+func (rb *RawBytes) FillVDLTarget(target vdl.Target) error {
 	var buf bytes.Buffer
 	enc := NewVersionedEncoder(rb.Version, &buf)
 	if err := enc.enc.encodeRaw(rb); err != nil {
@@ -92,33 +95,13 @@ func (rb *RawBytes) ToTarget(target vdl.Target) error {
 	return dec.decodeToTarget(target)
 }
 
-type rvHackInterface interface {
-	HackGetRv() reflect.Value
+func (RawBytes) __VDLReflect(struct {
+	Type interface{} // ensure vdl.TypeOf(RawBytes{}) returns vdl.AnyType
+}) {
 }
 
-var rbType reflect.Type = reflect.TypeOf((*RawBytes)(nil))
-
-func RawBytesTarget(rb *RawBytes) vdl.Target {
-	return &rbTarget{rb: rb}
-}
-
-// If rv is a raw bytes pointer, return a vdl target that
-// modifies it. Otherwise return nil.
-func makeRawBytesTarget(rv reflect.Value) vdl.Target {
-	if rv.Type() == rbType {
-		rv.Set(reflect.ValueOf(&RawBytes{}))
-		return RawBytesTarget(rv.Interface().(*RawBytes))
-	}
-	return nil
-}
-
-func init() {
-	vdl.RawBytesTargetFunc = makeRawBytesTarget
-}
-
-// vdl.Target that writes to a vom.RawBytes.
-// This structure is intended to be one-time-use and
-// created from makeRawBytesTarget.
+// vdl.Target that writes to a vom.RawBytes.  This structure is intended to be
+// one-time-use and created via RawBytes.MakeVDLTarget.
 type rbTarget struct {
 	rb         *RawBytes     // RawBytes to write to
 	enc        *encoder      // encoder to act as the underlying target
@@ -369,5 +352,3 @@ func (r *rbTarget) StartField(key string) (vdl.Target, vdl.Target, error) {
 func (r *rbTarget) FinishField(_, _ vdl.Target) error {
 	return r.enc.FinishField(nil, nil)
 }
-
-func (r *rbTarget) RawBytesTargetHack() {}

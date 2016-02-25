@@ -71,6 +71,18 @@ type Target interface {
 	FinishFields(x FieldsTarget) error
 }
 
+// Targeter represents an underlying data object that provides its own target
+// making and filling operations.  During conversions, types that implement
+// Targeter skip the reflection-based codepath and instead make and fill the
+// target directly.  This is used during vdl code generation to provide
+// high-performance encoders and decoders.
+type Targeter interface {
+	// MakeVDLTarget returns the target corresponding to the underlying data.
+	MakeVDLTarget() Target
+	// FillVDLTarget fills target with the contents of the underlying data.
+	FillVDLTarget(target Target) error
+}
+
 // ListTarget represents conversion from a list or array.
 type ListTarget interface {
 	// StartElem prepares conversion of the next list elem.  The given index must
@@ -211,16 +223,15 @@ func FromReflect(target Target, rv reflect.Value) error {
 		case rt.ConvertibleTo(rtPtrToValue):
 			// If rv is convertible to *Value, fill from it directly.
 			return FromValue(target, rv.Convert(rtPtrToValue).Interface().(*Value))
-		case rt.Implements(rtTargetConvertible):
-			return rv.Interface().(rawBytesTargetConvertible).ToTarget(target)
+		case rt.Implements(rtTargeter):
+			return rv.Interface().(Targeter).FillVDLTarget(target)
 		}
 		rv = rv.Elem()
 	}
-
-	if reflect.PtrTo(rv.Type()).Implements(rtTargetConvertible) {
+	if reflect.PtrTo(rv.Type()).Implements(rtTargeter) {
 		rvPtr := reflect.New(rv.Type())
 		rvPtr.Elem().Set(rv)
-		return rvPtr.Interface().(rawBytesTargetConvertible).ToTarget(target)
+		return rvPtr.Interface().(Targeter).FillVDLTarget(target)
 	}
 
 	// Handle special-case for errors.

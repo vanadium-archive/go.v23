@@ -554,6 +554,15 @@ func TestRawBytesString(t *testing.T) {
 	}
 }
 
+func TestRawBytesVDLType(t *testing.T) {
+	if got, want := vdl.TypeOf(RawBytes{}), vdl.AnyType; got != want {
+		t.Errorf("vom.RawBytes{} got %v, want %v", got, want)
+	}
+	if got, want := vdl.TypeOf((*RawBytes)(nil)), vdl.AnyType; got != want {
+		t.Errorf("vom.RawBytes{} got %v, want %v", got, want)
+	}
+}
+
 type simpleStruct struct {
 	X int16
 }

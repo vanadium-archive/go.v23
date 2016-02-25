@@ -104,9 +104,14 @@ func normalizeType(rt reflect.Type) reflect.Type {
 	}
 	// Handle special cases.  Union may be either an interface or a struct, and
 	// should be handled first.
-	ri, _, _ := deriveReflectInfo(rt)
-	if ri != nil && len(ri.UnionFields) > 0 {
-		return rt
+	if ri, _, _ := deriveReflectInfo(rt); ri != nil {
+		if len(ri.UnionFields) > 0 {
+			return rt
+		}
+		// Use the type defined in the reflect info.  Typically this is the same as
+		// the original rt, but in some cases we use __VDLReflect to override the
+		// vdl type.  E.g. vom.RawBytes claims that it is AnyType.
+		rt = ri.Type
 	}
 	switch {
 	case rt.ConvertibleTo(rtError) || rtAtMostOnePtr.ConvertibleTo(rtError):
@@ -121,23 +126,10 @@ func normalizeType(rt reflect.Type) reflect.Type {
 	return rt
 }
 
-type rawBytesTargetConvertible interface {
-	ToTarget(Target) error
-}
-
-var rtTargetConvertible = reflect.TypeOf([]rawBytesTargetConvertible{}).Elem()
-
-// Hook for function that returns a Target that writes to a vom.RawBytes.
-// See vom.rbTarget.
-var RawBytesTargetFunc func(rv reflect.Value) Target
-
 // basicType returns the *Type corresponding to rt for basic types that cannot
 // be named by the user, and have a well-known conversion.
 func basicType(rt reflect.Type) *Type {
 	for rt.Kind() == reflect.Ptr {
-		if rt.Implements(rtTargetConvertible) {
-			return AnyType
-		}
 		rt = rt.Elem()
 	}
 	switch rt {
@@ -435,6 +427,7 @@ var (
 	rtPtrToType          = reflect.TypeOf((*Type)(nil))
 	rtPtrToValue         = reflect.TypeOf((*Value)(nil))
 	rtReflectValue       = reflect.TypeOf(reflect.Value{})
+	rtTargeter           = reflect.TypeOf((*Targeter)(nil)).Elem()
 	rtUnnamedEmptyStruct = reflect.TypeOf(struct{}{})
 
 	typeFromRTKind = [...]*Type{

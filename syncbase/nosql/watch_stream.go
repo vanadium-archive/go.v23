@@ -108,7 +108,7 @@ func ToWatchChange(c watch.Change) WatchChange {
 	if err != nil {
 		panic(err)
 	}
-	if err := c.Value.ToTarget(rtarget); err != nil {
+	if err := c.Value.FillVDLTarget(rtarget); err != nil {
 		panic(err)
 	}
 	// Parse the state.
