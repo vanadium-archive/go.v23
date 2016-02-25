@@ -46,9 +46,10 @@ type Database interface {
 	// TODO(sadovsky): Maybe switch to streaming RPC.
 	ListTables() ([]string | error) {access.Read}
 
-	// Exec executes a syncQL query and returns all results as specified by in the
-	// query's select/delete statement. Concurrency semantics are documented in model.go.
-	Exec(schemaVersion int32, query string) stream<_, []any> error {access.Read}
+	// Exec executes a syncQL query with positional parameters and returns all
+	// results as specified by the query's select/delete statement.
+	// Concurrency semantics are documented in model.go.
+	Exec(schemaVersion int32, query string, params []any) stream<_, []any> error {access.Read}
 
 	// BeginBatch creates a new batch. It returns a "batch suffix" string to
 	// append to the object name of this Database, yielding an object name for the

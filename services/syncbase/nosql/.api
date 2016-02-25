@@ -264,7 +264,7 @@ pkg nosql, type DatabaseClientMethods interface, DeleteBlob(*context.T, BlobRef,
 pkg nosql, type DatabaseClientMethods interface, Destroy(*context.T, int32, ...rpc.CallOpt) error
 pkg nosql, type DatabaseClientMethods interface, DestroySyncgroup(*context.T, string, ...rpc.CallOpt) error
 pkg nosql, type DatabaseClientMethods interface, EjectFromSyncgroup(*context.T, string, string, ...rpc.CallOpt) error
-pkg nosql, type DatabaseClientMethods interface, Exec(*context.T, int32, string, ...rpc.CallOpt) (DatabaseExecClientCall, error)
+pkg nosql, type DatabaseClientMethods interface, Exec(*context.T, int32, string, []*vom.RawBytes, ...rpc.CallOpt) (DatabaseExecClientCall, error)
 pkg nosql, type DatabaseClientMethods interface, Exists(*context.T, int32, ...rpc.CallOpt) (bool, error)
 pkg nosql, type DatabaseClientMethods interface, FetchBlob(*context.T, BlobRef, uint64, ...rpc.CallOpt) (BlobManagerFetchBlobClientCall, error)
 pkg nosql, type DatabaseClientMethods interface, GetBlob(*context.T, BlobRef, int64, ...rpc.CallOpt) (BlobManagerGetBlobClientCall, error)
@@ -301,7 +301,7 @@ pkg nosql, type DatabaseClientStub interface, DeleteBlob(*context.T, BlobRef, ..
 pkg nosql, type DatabaseClientStub interface, Destroy(*context.T, int32, ...rpc.CallOpt) error
 pkg nosql, type DatabaseClientStub interface, DestroySyncgroup(*context.T, string, ...rpc.CallOpt) error
 pkg nosql, type DatabaseClientStub interface, EjectFromSyncgroup(*context.T, string, string, ...rpc.CallOpt) error
-pkg nosql, type DatabaseClientStub interface, Exec(*context.T, int32, string, ...rpc.CallOpt) (DatabaseExecClientCall, error)
+pkg nosql, type DatabaseClientStub interface, Exec(*context.T, int32, string, []*vom.RawBytes, ...rpc.CallOpt) (DatabaseExecClientCall, error)
 pkg nosql, type DatabaseClientStub interface, Exists(*context.T, int32, ...rpc.CallOpt) (bool, error)
 pkg nosql, type DatabaseClientStub interface, FetchBlob(*context.T, BlobRef, uint64, ...rpc.CallOpt) (BlobManagerFetchBlobClientCall, error)
 pkg nosql, type DatabaseClientStub interface, GetBlob(*context.T, BlobRef, int64, ...rpc.CallOpt) (BlobManagerGetBlobClientCall, error)
@@ -355,7 +355,7 @@ pkg nosql, type DatabaseServerMethods interface, DeleteBlob(*context.T, rpc.Serv
 pkg nosql, type DatabaseServerMethods interface, Destroy(*context.T, rpc.ServerCall, int32) error
 pkg nosql, type DatabaseServerMethods interface, DestroySyncgroup(*context.T, rpc.ServerCall, string) error
 pkg nosql, type DatabaseServerMethods interface, EjectFromSyncgroup(*context.T, rpc.ServerCall, string, string) error
-pkg nosql, type DatabaseServerMethods interface, Exec(*context.T, DatabaseExecServerCall, int32, string) error
+pkg nosql, type DatabaseServerMethods interface, Exec(*context.T, DatabaseExecServerCall, int32, string, []*vom.RawBytes) error
 pkg nosql, type DatabaseServerMethods interface, Exists(*context.T, rpc.ServerCall, int32) (bool, error)
 pkg nosql, type DatabaseServerMethods interface, FetchBlob(*context.T, BlobManagerFetchBlobServerCall, BlobRef, uint64) error
 pkg nosql, type DatabaseServerMethods interface, GetBlob(*context.T, BlobManagerGetBlobServerCall, BlobRef, int64) error
@@ -389,7 +389,7 @@ pkg nosql, type DatabaseServerStub interface, CreateBlob(*context.T, rpc.ServerC
 pkg nosql, type DatabaseServerStub interface, DeleteBlob(*context.T, rpc.ServerCall, BlobRef) error
 pkg nosql, type DatabaseServerStub interface, Describe__() []rpc.InterfaceDesc
 pkg nosql, type DatabaseServerStub interface, Destroy(*context.T, rpc.ServerCall, int32) error
-pkg nosql, type DatabaseServerStub interface, Exec(*context.T, *DatabaseExecServerCallStub, int32, string) error
+pkg nosql, type DatabaseServerStub interface, Exec(*context.T, *DatabaseExecServerCallStub, int32, string, []*vom.RawBytes) error
 pkg nosql, type DatabaseServerStub interface, Exists(*context.T, rpc.ServerCall, int32) (bool, error)
 pkg nosql, type DatabaseServerStub interface, FetchBlob(*context.T, *BlobManagerFetchBlobServerCallStub, BlobRef, uint64) error
 pkg nosql, type DatabaseServerStub interface, GetBlob(*context.T, *BlobManagerGetBlobServerCallStub, BlobRef, int64) error
@@ -413,7 +413,7 @@ pkg nosql, type DatabaseServerStubMethods interface, Create(*context.T, rpc.Serv
 pkg nosql, type DatabaseServerStubMethods interface, CreateBlob(*context.T, rpc.ServerCall) (BlobRef, error)
 pkg nosql, type DatabaseServerStubMethods interface, DeleteBlob(*context.T, rpc.ServerCall, BlobRef) error
 pkg nosql, type DatabaseServerStubMethods interface, Destroy(*context.T, rpc.ServerCall, int32) error
-pkg nosql, type DatabaseServerStubMethods interface, Exec(*context.T, *DatabaseExecServerCallStub, int32, string) error
+pkg nosql, type DatabaseServerStubMethods interface, Exec(*context.T, *DatabaseExecServerCallStub, int32, string, []*vom.RawBytes) error
 pkg nosql, type DatabaseServerStubMethods interface, Exists(*context.T, rpc.ServerCall, int32) (bool, error)
 pkg nosql, type DatabaseServerStubMethods interface, FetchBlob(*context.T, *BlobManagerFetchBlobServerCallStub, BlobRef, uint64) error
 pkg nosql, type DatabaseServerStubMethods interface, GetBlob(*context.T, *BlobManagerGetBlobServerCallStub, BlobRef, int64) error

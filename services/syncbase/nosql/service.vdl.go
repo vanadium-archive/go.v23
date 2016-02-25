@@ -1932,9 +1932,10 @@ type DatabaseClientMethods interface {
 	//    Glob("app/*") does not return batch database names like "a/d##bId".
 	// TODO(sadovsky): Maybe switch to streaming RPC.
 	ListTables(*context.T, ...rpc.CallOpt) ([]string, error)
-	// Exec executes a syncQL query and returns all results as specified by in the
-	// query's select/delete statement. Concurrency semantics are documented in model.go.
-	Exec(_ *context.T, schemaVersion int32, query string, _ ...rpc.CallOpt) (DatabaseExecClientCall, error)
+	// Exec executes a syncQL query with positional parameters and returns all
+	// results as specified by the query's select/delete statement.
+	// Concurrency semantics are documented in model.go.
+	Exec(_ *context.T, schemaVersion int32, query string, params []*vom.RawBytes, _ ...rpc.CallOpt) (DatabaseExecClientCall, error)
 	// BeginBatch creates a new batch. It returns a "batch suffix" string to
 	// append to the object name of this Database, yielding an object name for the
 	// Database bound to the created batch. (For example, if this Database is
@@ -2005,9 +2006,9 @@ func (c implDatabaseClientStub) ListTables(ctx *context.T, opts ...rpc.CallOpt) 
 	return
 }
 
-func (c implDatabaseClientStub) Exec(ctx *context.T, i0 int32, i1 string, opts ...rpc.CallOpt) (ocall DatabaseExecClientCall, err error) {
+func (c implDatabaseClientStub) Exec(ctx *context.T, i0 int32, i1 string, i2 []*vom.RawBytes, opts ...rpc.CallOpt) (ocall DatabaseExecClientCall, err error) {
 	var call rpc.ClientCall
-	if call, err = v23.GetClient(ctx).StartCall(ctx, c.name, "Exec", []interface{}{i0, i1}, opts...); err != nil {
+	if call, err = v23.GetClient(ctx).StartCall(ctx, c.name, "Exec", []interface{}{i0, i1, i2}, opts...); err != nil {
 		return
 	}
 	ocall = &implDatabaseExecClientCall{ClientCall: call}
@@ -2230,9 +2231,10 @@ type DatabaseServerMethods interface {
 	//    Glob("app/*") does not return batch database names like "a/d##bId".
 	// TODO(sadovsky): Maybe switch to streaming RPC.
 	ListTables(*context.T, rpc.ServerCall) ([]string, error)
-	// Exec executes a syncQL query and returns all results as specified by in the
-	// query's select/delete statement. Concurrency semantics are documented in model.go.
-	Exec(_ *context.T, _ DatabaseExecServerCall, schemaVersion int32, query string) error
+	// Exec executes a syncQL query with positional parameters and returns all
+	// results as specified by the query's select/delete statement.
+	// Concurrency semantics are documented in model.go.
+	Exec(_ *context.T, _ DatabaseExecServerCall, schemaVersion int32, query string, params []*vom.RawBytes) error
 	// BeginBatch creates a new batch. It returns a "batch suffix" string to
 	// append to the object name of this Database, yielding an object name for the
 	// Database bound to the created batch. (For example, if this Database is
@@ -2380,9 +2382,10 @@ type DatabaseServerStubMethods interface {
 	//    Glob("app/*") does not return batch database names like "a/d##bId".
 	// TODO(sadovsky): Maybe switch to streaming RPC.
 	ListTables(*context.T, rpc.ServerCall) ([]string, error)
-	// Exec executes a syncQL query and returns all results as specified by in the
-	// query's select/delete statement. Concurrency semantics are documented in model.go.
-	Exec(_ *context.T, _ *DatabaseExecServerCallStub, schemaVersion int32, query string) error
+	// Exec executes a syncQL query with positional parameters and returns all
+	// results as specified by the query's select/delete statement.
+	// Concurrency semantics are documented in model.go.
+	Exec(_ *context.T, _ *DatabaseExecServerCallStub, schemaVersion int32, query string, params []*vom.RawBytes) error
 	// BeginBatch creates a new batch. It returns a "batch suffix" string to
 	// append to the object name of this Database, yielding an object name for the
 	// Database bound to the created batch. (For example, if this Database is
@@ -2468,8 +2471,8 @@ func (s implDatabaseServerStub) ListTables(ctx *context.T, call rpc.ServerCall) 
 	return s.impl.ListTables(ctx, call)
 }
 
-func (s implDatabaseServerStub) Exec(ctx *context.T, call *DatabaseExecServerCallStub, i0 int32, i1 string) error {
-	return s.impl.Exec(ctx, call, i0, i1)
+func (s implDatabaseServerStub) Exec(ctx *context.T, call *DatabaseExecServerCallStub, i0 int32, i1 string, i2 []*vom.RawBytes) error {
+	return s.impl.Exec(ctx, call, i0, i1, i2)
 }
 
 func (s implDatabaseServerStub) BeginBatch(ctx *context.T, call rpc.ServerCall, i0 int32, i1 BatchOptions) (string, error) {
@@ -2555,10 +2558,11 @@ var descDatabase = rpc.InterfaceDesc{
 		},
 		{
 			Name: "Exec",
-			Doc:  "// Exec executes a syncQL query and returns all results as specified by in the\n// query's select/delete statement. Concurrency semantics are documented in model.go.",
+			Doc:  "// Exec executes a syncQL query with positional parameters and returns all\n// results as specified by the query's select/delete statement.\n// Concurrency semantics are documented in model.go.",
 			InArgs: []rpc.ArgDesc{
 				{"schemaVersion", ``}, // int32
 				{"query", ``},         // string
+				{"params", ``},        // []*vom.RawBytes
 			},
 			Tags: []*vdl.Value{vdl.ValueOf(access.Tag("Read"))},
 		},
