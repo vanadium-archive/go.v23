@@ -407,7 +407,7 @@ func setupChain(t *testing.T, sbs []*testSyncbase) {
 func startFakeNtpServer(t *testing.T, sh *v23test.Shell, now time.Time) string {
 	nowBuf, err := now.MarshalText()
 	ok(t, err)
-	ntpd := sh.BuildGoPkg("v.io/x/ref/services/syncbase/testutil/fake_ntp_server")
+	ntpd := v23test.BuildGoPkg(sh, "v.io/x/ref/services/syncbase/testutil/fake_ntp_server")
 	c := sh.Cmd(ntpd, "--now="+string(nowBuf))
 	c.Start()
 	host := c.S.ExpectVar("HOST")

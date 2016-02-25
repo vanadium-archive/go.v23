@@ -428,7 +428,7 @@ func TestV23RestartabilityServiceDBCorruption(t *testing.T) {
 
 	// TODO(ivanpi): Repeated below, refactor into method.
 	// Expect syncbase to fail to start.
-	syncbasedPath := sh.BuildGoPkg("v.io/x/ref/services/syncbase/syncbased")
+	syncbasedPath := v23test.BuildGoPkg(sh, "v.io/x/ref/services/syncbase/syncbased")
 	syncbased := sh.Cmd(syncbasedPath,
 		"--alsologtostderr=true",
 		"--v23.tcp.address=127.0.0.1:0",
@@ -464,7 +464,7 @@ func TestV23RestartabilityAppDBCorruption(t *testing.T) {
 	corruptFile(t, rootDir, `apps/[^/]*/dbs/[^/]*/leveldb/.*\.log`)
 
 	// Expect syncbase to fail to start.
-	syncbasedPath := sh.BuildGoPkg("v.io/x/ref/services/syncbase/syncbased")
+	syncbasedPath := v23test.BuildGoPkg(sh, "v.io/x/ref/services/syncbase/syncbased")
 	syncbased := sh.Cmd(syncbasedPath,
 		"--alsologtostderr=true",
 		"--v23.tcp.address=127.0.0.1:0",
