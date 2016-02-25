@@ -74,6 +74,10 @@ type Manager interface {
 	// closed.
 	Dial(ctx *context.T, remote naming.Endpoint, auth PeerAuthorizer, channelTimeout time.Duration) (Flow, error)
 
+	// DialSideChannel behaves the same as Dial, except that the returned flow is
+	// not factored in when deciding the underlying connection's idleness, etc.
+	DialSideChannel(ctx *context.T, remote naming.Endpoint, auth PeerAuthorizer, channelTimeout time.Duration) (Flow, error)
+
 	// DialCached creates a Flow to the provided remote endpoint using only cached
 	// connections from previous Listen or Dial calls.
 	// If no cached connection exists, an error will be returned.

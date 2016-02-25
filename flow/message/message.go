@@ -118,6 +118,10 @@ const (
 	// caller will typically attach it by examining the next message on
 	// the Conn.
 	DisableEncryptionFlag
+	// SideChannelFlag, when set on a OpenFlow message, marks the Flow
+	// as a side channel. This means that the flow will not be counted
+	// towards the "idleness" of the underlying connection.
+	SideChannelFlag
 )
 
 // random consts.

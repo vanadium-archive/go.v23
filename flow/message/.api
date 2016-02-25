@@ -1,5 +1,6 @@
 pkg message, const CloseFlag ideal-int
 pkg message, const DisableEncryptionFlag ideal-int
+pkg message, const SideChannelFlag ideal-int
 pkg message, func Append(*context.T, Message, []byte) ([]byte, error)
 pkg message, func NewErrInvalidMsg(*context.T, byte, uint64, uint64, error) error
 pkg message, func NewErrInvalidSetupOption(*context.T, uint64, uint64) error
