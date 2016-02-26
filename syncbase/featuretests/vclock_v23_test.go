@@ -33,7 +33,7 @@ var (
 // Tests that the virtual clock moves forward.
 func TestV23VClockMovesForward(t *testing.T) {
 	v23test.SkipUnlessRunningIntegrationTests(t)
-	sh := v23test.NewShell(t, v23test.Opts{})
+	sh := v23test.NewShell(t, nil)
 	defer sh.Cleanup()
 	sh.StartRootMountTable()
 
@@ -54,7 +54,7 @@ func TestV23VClockMovesForward(t *testing.T) {
 // Tests that system clock updates affect the virtual clock.
 func TestV23VClockSystemClockUpdate(t *testing.T) {
 	v23test.SkipUnlessRunningIntegrationTests(t)
-	sh := v23test.NewShell(t, v23test.Opts{})
+	sh := v23test.NewShell(t, nil)
 	defer sh.Cleanup()
 	sh.StartRootMountTable()
 
@@ -113,7 +113,7 @@ func TestV23VClockSystemClockUpdate(t *testing.T) {
 // expected frequency (loosely speaking).
 func TestV23VClockSystemClockFrequency(t *testing.T) {
 	v23test.SkipUnlessRunningIntegrationTests(t)
-	sh := v23test.NewShell(t, v23test.Opts{})
+	sh := v23test.NewShell(t, nil)
 	defer sh.Cleanup()
 	sh.StartRootMountTable()
 
@@ -145,7 +145,7 @@ func TestV23VClockSystemClockFrequency(t *testing.T) {
 // backward).
 func TestV23VClockNtpUpdate(t *testing.T) {
 	v23test.SkipUnlessRunningIntegrationTests(t)
-	sh := v23test.NewShell(t, v23test.Opts{})
+	sh := v23test.NewShell(t, nil)
 	defer sh.Cleanup()
 	sh.StartRootMountTable()
 
@@ -173,7 +173,7 @@ func TestV23VClockNtpUpdate(t *testing.T) {
 // Tests that NTP skew persists across reboots.
 func TestV23VClockNtpSkewAfterReboot(t *testing.T) {
 	v23test.SkipUnlessRunningIntegrationTests(t)
-	sh := v23test.NewShell(t, v23test.Opts{})
+	sh := v23test.NewShell(t, nil)
 	defer sh.Cleanup()
 	sh.StartRootMountTable()
 
@@ -212,7 +212,7 @@ func TestV23VClockNtpSkewAfterReboot(t *testing.T) {
 // frequency (loosely speaking).
 func TestV23VClockNtpFrequency(t *testing.T) {
 	v23test.SkipUnlessRunningIntegrationTests(t)
-	sh := v23test.NewShell(t, v23test.Opts{})
+	sh := v23test.NewShell(t, nil)
 	defer sh.Cleanup()
 	sh.StartRootMountTable()
 
@@ -253,7 +253,7 @@ func TestV23VClockNtpFrequency(t *testing.T) {
 // away from an NTP-synced device.
 func TestV23VClockSyncBasic(t *testing.T) {
 	v23test.SkipUnlessRunningIntegrationTests(t)
-	sh := v23test.NewShell(t, v23test.Opts{})
+	sh := v23test.NewShell(t, nil)
 	defer sh.Cleanup()
 	sh.StartRootMountTable()
 
@@ -284,7 +284,7 @@ func TestV23VClockSyncBasic(t *testing.T) {
 // Tests p2p clock sync where multiple devices are NTP-synced.
 func TestV23VClockSyncWithLocalNtp(t *testing.T) {
 	v23test.SkipUnlessRunningIntegrationTests(t)
-	sh := v23test.NewShell(t, v23test.Opts{})
+	sh := v23test.NewShell(t, nil)
 	defer sh.Cleanup()
 	sh.StartRootMountTable()
 
@@ -338,7 +338,7 @@ func TestV23VClockSyncWithLocalNtp(t *testing.T) {
 // NTP-synced device with >0 reboots.
 func TestV23VClockSyncWithReboots(t *testing.T) {
 	v23test.SkipUnlessRunningIntegrationTests(t)
-	sh := v23test.NewShell(t, v23test.Opts{})
+	sh := v23test.NewShell(t, nil)
 	defer sh.Cleanup()
 	sh.StartRootMountTable()
 

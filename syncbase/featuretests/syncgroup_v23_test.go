@@ -26,7 +26,7 @@ import (
 // the syncgroup name with all the joiners.
 func TestV23SyncgroupRendezvousOnline(t *testing.T) {
 	v23test.SkipUnlessRunningIntegrationTests(t)
-	sh := v23test.NewShell(t, v23test.Opts{})
+	sh := v23test.NewShell(t, nil)
 	defer sh.Cleanup()
 	sh.StartRootMountTable()
 
@@ -68,7 +68,7 @@ func TestV23SyncgroupRendezvousOnlineCloud(t *testing.T) {
 	t.Skip()
 
 	v23test.SkipUnlessRunningIntegrationTests(t)
-	sh := v23test.NewShell(t, v23test.Opts{})
+	sh := v23test.NewShell(t, nil)
 	defer sh.Cleanup()
 	sh.StartRootMountTable()
 
@@ -109,7 +109,7 @@ func TestV23SyncgroupRendezvousOnlineCloud(t *testing.T) {
 // that doesn't exist.
 func TestV23SyncgroupNeighborhoodOnly(t *testing.T) {
 	v23test.SkipUnlessRunningIntegrationTests(t)
-	sh := v23test.NewShell(t, v23test.Opts{})
+	sh := v23test.NewShell(t, nil)
 	defer sh.Cleanup()
 	sh.StartRootMountTable()
 
@@ -164,7 +164,7 @@ func TestV23SyncgroupNeighborhoodOnly(t *testing.T) {
 // creates the syncgroup.
 func TestV23SyncgroupPreknownStaggered(t *testing.T) {
 	v23test.SkipUnlessRunningIntegrationTests(t)
-	sh := v23test.NewShell(t, v23test.Opts{})
+	sh := v23test.NewShell(t, nil)
 	defer sh.Cleanup()
 	sh.StartRootMountTable()
 
