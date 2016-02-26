@@ -12,38 +12,53 @@ import (
 	"v.io/v23/vdl"
 )
 
-// Service represents service information for service discovery.
-type Service struct {
-	// The universal unique identifier of a service instance.
+// Advertisement represents a feed into advertiser to broadcast its contents
+// to scanners.
+//
+// A large advertisement may require additional RPC calls causing delay in
+// discovery. We limit the maximum size of an advertisement to 512 bytes
+// excluding id and attachments.
+type Advertisement struct {
+	// Universal unique identifier of the advertisement.
 	// If this is not specified, a random unique identifier will be assigned.
-	InstanceId string
-	// Optional name of the service instance.
-	InstanceName string
-	// The interface that the service implements.
+	Id AdId
+	// Interface name that the advertised service implements.
 	// E.g., 'v.io/v23/services/vtrace.Store'.
 	InterfaceName string
-	// The service attributes.
-	// E.g., {'resolution': '1024x768'}.
-	Attrs Attributes
-	// The addresses (vanadium object names) that the service is served on.
+	// Addresses (vanadium object names) that the advertised service is served on.
 	// E.g., '/host:port/a/b/c', '/ns.dev.v.io:8101/blah/blah'.
-	Addrs []string
-	// The service attachments.
+	Addresses []string
+	// Attributes as a key/value pair.
+	// E.g., {'resolution': '1024x768'}.
+	//
+	// The key must be US-ASCII printable characters, excluding the '=' character
+	// and should not start with '_' character.
+	Attributes Attributes
+	// Attachments as a key/value pair.
 	// E.g., {'thumbnail': binary_data }.
 	//
-	// WARNING: THIS FIELD IS NOT SUPPORTED YET.
+	// Unlike attributes, attachments are for binary data and they are not queryable.
+	// We limit the maximum size of a single attachment to 4K bytes.
+	//
+	// The key must be US-ASCII printable characters, excluding the '=' character
+	// and should not start with '_' character.
 	Attachments Attachments
 }
 
-func (Service) __VDLReflect(struct {
-	Name string `vdl:"v.io/v23/discovery.Service"`
+func (Advertisement) __VDLReflect(struct {
+	Name string `vdl:"v.io/v23/discovery.Advertisement"`
+}) {
+}
+
+// An AdId is a globally unique identifier of an advertisement.
+type AdId [16]byte
+
+func (AdId) __VDLReflect(struct {
+	Name string `vdl:"v.io/v23/discovery.AdId"`
 }) {
 }
 
 // Attributes represents service attributes as a key/value pair.
-//
-// The key must be US-ASCII printable characters, excluding the '=' character
-// and should not start with '_' character.
 type Attributes map[string]string
 
 func (Attributes) __VDLReflect(struct {
@@ -51,13 +66,7 @@ func (Attributes) __VDLReflect(struct {
 }) {
 }
 
-// Attachments represents service attachments as a key/value pair. Unlike
-// attributes, attachments are mostly for larger binary data and they are
-// not queryable. It is recommended to put as small attachments as possible
-// since it may require additional RPC calls causing delay in discovery.
-//
-// The key must be US-ASCII printable characters, excluding the '=' character
-// and should not start with '_' character.
+// Attachments represents service attachments as a key/value pair.
 type Attachments map[string][]byte
 
 func (Attachments) __VDLReflect(struct {
@@ -65,70 +74,9 @@ func (Attachments) __VDLReflect(struct {
 }) {
 }
 
-// Found represents a service that is discovered by scan.
-type Found struct {
-	Service Service
-}
-
-func (Found) __VDLReflect(struct {
-	Name string `vdl:"v.io/v23/discovery.Found"`
-}) {
-}
-
-// Lost represents a service that is lost during scan.
-type Lost struct {
-	Service Service
-}
-
-func (Lost) __VDLReflect(struct {
-	Name string `vdl:"v.io/v23/discovery.Lost"`
-}) {
-}
-
-type (
-	// Update represents any single field of the Update union type.
-	//
-	// Update represents a discovery update.
-	Update interface {
-		// Index returns the field index.
-		Index() int
-		// Interface returns the field value as an interface.
-		Interface() interface{}
-		// Name returns the field name.
-		Name() string
-		// __VDLReflect describes the Update union type.
-		__VDLReflect(__UpdateReflect)
-	}
-	// UpdateFound represents field Found of the Update union type.
-	UpdateFound struct{ Value Found }
-	// UpdateLost represents field Lost of the Update union type.
-	UpdateLost struct{ Value Lost }
-	// __UpdateReflect describes the Update union type.
-	__UpdateReflect struct {
-		Name  string `vdl:"v.io/v23/discovery.Update"`
-		Type  Update
-		Union struct {
-			Found UpdateFound
-			Lost  UpdateLost
-		}
-	}
-)
-
-func (x UpdateFound) Index() int                   { return 0 }
-func (x UpdateFound) Interface() interface{}       { return x.Value }
-func (x UpdateFound) Name() string                 { return "Found" }
-func (x UpdateFound) __VDLReflect(__UpdateReflect) {}
-
-func (x UpdateLost) Index() int                   { return 1 }
-func (x UpdateLost) Interface() interface{}       { return x.Value }
-func (x UpdateLost) Name() string                 { return "Lost" }
-func (x UpdateLost) __VDLReflect(__UpdateReflect) {}
-
 func init() {
-	vdl.Register((*Service)(nil))
+	vdl.Register((*Advertisement)(nil))
+	vdl.Register((*AdId)(nil))
 	vdl.Register((*Attributes)(nil))
 	vdl.Register((*Attachments)(nil))
-	vdl.Register((*Found)(nil))
-	vdl.Register((*Lost)(nil))
-	vdl.Register((*Update)(nil))
 }

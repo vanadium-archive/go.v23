@@ -1,30 +1,27 @@
-pkg discovery, method (UpdateFound) Index() int
-pkg discovery, method (UpdateFound) Interface() interface{}
-pkg discovery, method (UpdateFound) Name() string
-pkg discovery, method (UpdateLost) Index() int
-pkg discovery, method (UpdateLost) Interface() interface{}
-pkg discovery, method (UpdateLost) Name() string
+pkg discovery, func NewAdId() (AdId, error)
+pkg discovery, func ParseAdId(string) (AdId, error)
+pkg discovery, method (AdId) IsValid() bool
+pkg discovery, method (AdId) String() string
+pkg discovery, type AdId [16]byte
+pkg discovery, type Advertisement struct
+pkg discovery, type Advertisement struct, Addresses []string
+pkg discovery, type Advertisement struct, Attachments Attachments
+pkg discovery, type Advertisement struct, Attributes Attributes
+pkg discovery, type Advertisement struct, Id AdId
+pkg discovery, type Advertisement struct, InterfaceName string
 pkg discovery, type Attachments map[string][]byte
 pkg discovery, type Attributes map[string]string
-pkg discovery, type Found struct
-pkg discovery, type Found struct, Service Service
-pkg discovery, type Lost struct
-pkg discovery, type Lost struct, Service Service
-pkg discovery, type Service struct
-pkg discovery, type Service struct, Addrs []string
-pkg discovery, type Service struct, Attachments Attachments
-pkg discovery, type Service struct, Attrs Attributes
-pkg discovery, type Service struct, InstanceId string
-pkg discovery, type Service struct, InstanceName string
-pkg discovery, type Service struct, InterfaceName string
+pkg discovery, type DataOrError struct
+pkg discovery, type DataOrError struct, Data []byte
+pkg discovery, type DataOrError struct, Error error
 pkg discovery, type T interface { Advertise, Scan }
-pkg discovery, type T interface, Advertise(*context.T, *Service, []security.BlessingPattern) (<-chan struct{}, error)
+pkg discovery, type T interface, Advertise(*context.T, *Advertisement, []security.BlessingPattern) (<-chan struct{}, error)
 pkg discovery, type T interface, Scan(*context.T, string) (<-chan Update, error)
-pkg discovery, type Update interface, Index() int
-pkg discovery, type Update interface, Interface() interface{}
-pkg discovery, type Update interface, Name() string
-pkg discovery, type Update interface, unexported methods
-pkg discovery, type UpdateFound struct
-pkg discovery, type UpdateFound struct, Value Found
-pkg discovery, type UpdateLost struct
-pkg discovery, type UpdateLost struct, Value Lost
+pkg discovery, type Update interface { Addresses, Advertisement, Attachment, Attribute, Id, InterfaceName, IsLost }
+pkg discovery, type Update interface, Addresses() []string
+pkg discovery, type Update interface, Advertisement() Advertisement
+pkg discovery, type Update interface, Attachment(*context.T, string) <-chan DataOrError
+pkg discovery, type Update interface, Attribute(string) string
+pkg discovery, type Update interface, Id() AdId
+pkg discovery, type Update interface, InterfaceName() string
+pkg discovery, type Update interface, IsLost() bool

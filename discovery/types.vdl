@@ -4,57 +4,48 @@
 
 package discovery
 
-// Service represents service information for service discovery.
-type Service struct {
-	// The universal unique identifier of a service instance.
+// Advertisement represents a feed into advertiser to broadcast its contents
+// to scanners.
+//
+// A large advertisement may require additional RPC calls causing delay in
+// discovery. We limit the maximum size of an advertisement to 512 bytes
+// excluding id and attachments.
+type Advertisement struct {
+	// Universal unique identifier of the advertisement.
 	// If this is not specified, a random unique identifier will be assigned.
-	InstanceId string
-	// Optional name of the service instance.
-	InstanceName string
-	// The interface that the service implements.
+	Id AdId
+
+	// Interface name that the advertised service implements.
 	// E.g., 'v.io/v23/services/vtrace.Store'.
 	InterfaceName string
-	// The service attributes.
-	// E.g., {'resolution': '1024x768'}.
-	Attrs Attributes
-	// The addresses (vanadium object names) that the service is served on.
+
+	// Addresses (vanadium object names) that the advertised service is served on.
 	// E.g., '/host:port/a/b/c', '/ns.dev.v.io:8101/blah/blah'.
-	Addrs []string
-	// The service attachments.
+	Addresses []string
+
+	// Attributes as a key/value pair.
+	// E.g., {'resolution': '1024x768'}.
+	//
+	// The key must be US-ASCII printable characters, excluding the '=' character
+	// and should not start with '_' character.
+	Attributes Attributes
+
+	// Attachments as a key/value pair.
 	// E.g., {'thumbnail': binary_data }.
 	//
-	// WARNING: THIS FIELD IS NOT SUPPORTED YET.
+	// Unlike attributes, attachments are for binary data and they are not queryable.
+	// We limit the maximum size of a single attachment to 4K bytes.
+	//
+	// The key must be US-ASCII printable characters, excluding the '=' character
+	// and should not start with '_' character.
 	Attachments Attachments
 }
 
+// An AdId is a globally unique identifier of an advertisement.
+type AdId [16]byte
+
 // Attributes represents service attributes as a key/value pair.
-//
-// The key must be US-ASCII printable characters, excluding the '=' character
-// and should not start with '_' character.
 type Attributes map[string]string
 
-// Attachments represents service attachments as a key/value pair. Unlike
-// attributes, attachments are mostly for larger binary data and they are
-// not queryable. It is recommended to put as small attachments as possible
-// since it may require additional RPC calls causing delay in discovery.
-//
-// The key must be US-ASCII printable characters, excluding the '=' character
-// and should not start with '_' character.
+// Attachments represents service attachments as a key/value pair.
 type Attachments map[string][]byte
-
-// Found represents a service that is discovered by scan.
-type Found struct {
-	Service Service
-	// TODO(jhahn): Add proximity.
-}
-
-// Lost represents a service that is lost during scan.
-type Lost struct {
-	Service Service
-}
-
-// Update represents a discovery update.
-type Update union {
-	Found Found
-	Lost  Lost
-}
