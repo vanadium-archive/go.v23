@@ -34,7 +34,7 @@ const pingPongPairIterations = 500
 // After the benchmark completes, the "ns/op" value refers to the average time
 // for |pingPongPairIterations| of Ping Pong roundtrips completed.
 func BenchmarkPingPongPair(b *testing.B) {
-	sh := v23test.NewShell(b, v23test.Opts{})
+	sh := v23test.NewShell(b, nil)
 	defer sh.Cleanup()
 	sh.StartRootMountTable()
 

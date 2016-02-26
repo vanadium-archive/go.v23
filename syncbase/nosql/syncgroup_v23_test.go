@@ -45,7 +45,7 @@ const (
 // syncgroup.
 func TestV23SyncbasedJoinSyncgroup(t *testing.T) {
 	v23test.SkipUnlessRunningIntegrationTests(t)
-	sh := v23test.NewShell(t, v23test.Opts{})
+	sh := v23test.NewShell(t, nil)
 	defer sh.Cleanup()
 	sh.StartRootMountTable()
 
@@ -75,7 +75,7 @@ func TestV23SyncbasedJoinSyncgroup(t *testing.T) {
 // along the path: client0--Syncbase0--Syncbase1--client1.
 func TestV23SyncbasedGetDeltas(t *testing.T) {
 	v23test.SkipUnlessRunningIntegrationTests(t)
-	sh := v23test.NewShell(t, v23test.Opts{})
+	sh := v23test.NewShell(t, nil)
 	defer sh.Cleanup()
 	sh.StartRootMountTable()
 
@@ -117,7 +117,7 @@ func TestV23SyncbasedGetDeltas(t *testing.T) {
 // deletes.
 func TestV23SyncbasedGetDeltasWithDel(t *testing.T) {
 	v23test.SkipUnlessRunningIntegrationTests(t)
-	sh := v23test.NewShell(t, v23test.Opts{})
+	sh := v23test.NewShell(t, nil)
 	defer sh.Cleanup()
 	sh.StartRootMountTable()
 
@@ -170,7 +170,7 @@ func TestV23SyncbasedGetDeltasWithDel(t *testing.T) {
 // synced once again.
 func TestV23SyncbasedCompEval(t *testing.T) {
 	v23test.SkipUnlessRunningIntegrationTests(t)
-	sh := v23test.NewShell(t, v23test.Opts{})
+	sh := v23test.NewShell(t, nil)
 	defer sh.Cleanup()
 	sh.StartRootMountTable()
 
@@ -250,7 +250,7 @@ func TestV23SyncbasedCompEval(t *testing.T) {
 // to both clients. The 1st client should regain access.
 func TestV23SyncbasedExchangeDeltasWithAcls(t *testing.T) {
 	v23test.SkipUnlessRunningIntegrationTests(t)
-	sh := v23test.NewShell(t, v23test.Opts{})
+	sh := v23test.NewShell(t, nil)
 	defer sh.Cleanup()
 	sh.StartRootMountTable()
 
@@ -319,7 +319,7 @@ func TestV23SyncbasedExchangeDeltasWithConflicts(t *testing.T) {
 }
 
 func testSyncbasedExchangeDeltasWithConflicts(t *testing.T) {
-	sh := v23test.NewShell(t, v23test.Opts{})
+	sh := v23test.NewShell(t, nil)
 	defer sh.Cleanup()
 	sh.StartRootMountTable()
 
@@ -363,7 +363,7 @@ func testSyncbasedExchangeDeltasWithConflicts(t *testing.T) {
 // "f" keys.
 func TestV23NestedSyncgroups(t *testing.T) {
 	v23test.SkipUnlessRunningIntegrationTests(t)
-	sh := v23test.NewShell(t, v23test.Opts{})
+	sh := v23test.NewShell(t, nil)
 	defer sh.Cleanup()
 	sh.StartRootMountTable()
 
@@ -404,7 +404,7 @@ func TestV23NestedSyncgroups(t *testing.T) {
 // and "foo" keys created by client 1.
 func TestV23NestedAndPeerSyncgroups(t *testing.T) {
 	v23test.SkipUnlessRunningIntegrationTests(t)
-	sh := v23test.NewShell(t, v23test.Opts{})
+	sh := v23test.NewShell(t, nil)
 	defer sh.Cleanup()
 	sh.StartRootMountTable()
 
@@ -453,7 +453,7 @@ func TestV23NestedAndPeerSyncgroups(t *testing.T) {
 // database entries.
 func TestV23SyncbasedGetDeltasPrePopulate(t *testing.T) {
 	v23test.SkipUnlessRunningIntegrationTests(t)
-	sh := v23test.NewShell(t, v23test.Opts{})
+	sh := v23test.NewShell(t, nil)
 	defer sh.Cleanup()
 	sh.StartRootMountTable()
 
@@ -489,7 +489,7 @@ func TestV23SyncbasedGetDeltasPrePopulate(t *testing.T) {
 // data.  The 2nd client joins these syncgroups and reads all the data.
 func TestV23SyncbasedGetDeltasMultiApp(t *testing.T) {
 	v23test.SkipUnlessRunningIntegrationTests(t)
-	sh := v23test.NewShell(t, v23test.Opts{})
+	sh := v23test.NewShell(t, nil)
 	defer sh.Cleanup()
 	sh.StartRootMountTable()
 
@@ -520,7 +520,7 @@ func TestV23SyncbasedGetDeltasMultiApp(t *testing.T) {
 // syncgroup metadata syncing to learn of client 3 .
 func TestV23SyncgroupSync(t *testing.T) {
 	v23test.SkipUnlessRunningIntegrationTests(t)
-	sh := v23test.NewShell(t, v23test.Opts{})
+	sh := v23test.NewShell(t, nil)
 	defer sh.Cleanup()
 	sh.StartRootMountTable()
 

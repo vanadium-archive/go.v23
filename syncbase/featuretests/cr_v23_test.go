@@ -36,7 +36,7 @@ import (
 // prefix and value type once its implemented.
 func TestV23CRRuleConfig(t *testing.T) {
 	v23test.SkipUnlessRunningIntegrationTests(t)
-	sh := v23test.NewShell(t, v23test.Opts{})
+	sh := v23test.NewShell(t, nil)
 	defer sh.Cleanup()
 	client0Ctx, client1Ctx, _ := setupCRTest(t, sh, 10)
 
@@ -72,7 +72,7 @@ func TestV23CRRuleConfig(t *testing.T) {
 // The value for foo0 after sync settles on what S1 wrote for both syncbases.
 func TestV23CRDefault(t *testing.T) {
 	v23test.SkipUnlessRunningIntegrationTests(t)
-	sh := v23test.NewShell(t, v23test.Opts{})
+	sh := v23test.NewShell(t, nil)
 	defer sh.Cleanup()
 	client0Ctx, client1Ctx, _ := setupCRTest(t, sh, 1)
 
@@ -104,7 +104,7 @@ func TestV23CRDefault(t *testing.T) {
 
 func TestV23CRGenVectorWinsOverVClock(t *testing.T) {
 	v23test.SkipUnlessRunningIntegrationTests(t)
-	sh := v23test.NewShell(t, v23test.Opts{})
+	sh := v23test.NewShell(t, nil)
 	defer sh.Cleanup()
 
 	// Creates S0 and S1 and populates S0 with foo0, foo1 and verifies that it
@@ -165,7 +165,7 @@ func TestV23CRGenVectorWinsOverVClock(t *testing.T) {
 // come from either S0 or S1 but not a mixture of the two.
 func TestV23CRWithAtomicBatch(t *testing.T) {
 	v23test.SkipUnlessRunningIntegrationTests(t)
-	sh := v23test.NewShell(t, v23test.Opts{})
+	sh := v23test.NewShell(t, nil)
 	defer sh.Cleanup()
 	client0Ctx, client1Ctx, _ := setupCRTest(t, sh, 100)
 
@@ -200,7 +200,7 @@ func TestV23CRWithAtomicBatch(t *testing.T) {
 //    single conflict for the batch.
 func TestV23CRAppResolved(t *testing.T) {
 	v23test.SkipUnlessRunningIntegrationTests(t)
-	sh := v23test.NewShell(t, v23test.Opts{})
+	sh := v23test.NewShell(t, nil)
 	defer sh.Cleanup()
 	client0Ctx, client1Ctx, _ := setupCRTest(t, sh, 10)
 
@@ -247,7 +247,7 @@ func TestV23CRAppResolved(t *testing.T) {
 // All rows are resolved via AppResolves.
 func TestV23CRAppBasedResolutionOverridesOthers(t *testing.T) {
 	v23test.SkipUnlessRunningIntegrationTests(t)
-	sh := v23test.NewShell(t, v23test.Opts{})
+	sh := v23test.NewShell(t, nil)
 	defer sh.Cleanup()
 	client0Ctx, client1Ctx, _ := setupCRTest(t, sh, 20)
 
@@ -288,7 +288,7 @@ func TestV23CRAppBasedResolutionOverridesOthers(t *testing.T) {
 // All rows are resolved via AppResolves as a single conflict call.
 func TestV23CRMultipleBatchesAsSingleConflict(t *testing.T) {
 	v23test.SkipUnlessRunningIntegrationTests(t)
-	sh := v23test.NewShell(t, v23test.Opts{})
+	sh := v23test.NewShell(t, nil)
 	defer sh.Cleanup()
 	client0Ctx, client1Ctx, _ := setupCRTest(t, sh, 10)
 

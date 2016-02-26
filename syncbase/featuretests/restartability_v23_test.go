@@ -56,7 +56,7 @@ func createAppDatabaseTable(t *testing.T, clientCtx *context.T) nosql.Database {
 
 func TestV23RestartabilityHierarchy(t *testing.T) {
 	v23test.SkipUnlessRunningIntegrationTests(t)
-	sh := v23test.NewShell(t, v23test.Opts{})
+	sh := v23test.NewShell(t, nil)
 	defer sh.Cleanup()
 	rootDir, clientCtx, serverCreds := restartabilityInit(sh)
 	cleanup := sh.StartSyncbase(serverCreds, testSbName, rootDir, acl)
@@ -73,7 +73,7 @@ func TestV23RestartabilityHierarchy(t *testing.T) {
 // with SIGKILL instead of SIGINT.
 func TestV23RestartabilityCrash(t *testing.T) {
 	v23test.SkipUnlessRunningIntegrationTests(t)
-	sh := v23test.NewShell(t, v23test.Opts{})
+	sh := v23test.NewShell(t, nil)
 	defer sh.Cleanup()
 	rootDir, clientCtx, serverCreds := restartabilityInit(sh)
 	cleanup := sh.StartSyncbase(serverCreds, testSbName, rootDir, acl)
@@ -153,7 +153,7 @@ func checkHierarchy(t *testing.T, ctx *context.T) {
 
 func TestV23RestartabilityQuiescent(t *testing.T) {
 	v23test.SkipUnlessRunningIntegrationTests(t)
-	sh := v23test.NewShell(t, v23test.Opts{})
+	sh := v23test.NewShell(t, nil)
 	defer sh.Cleanup()
 	rootDir, clientCtx, serverCreds := restartabilityInit(sh)
 	cleanup := sh.StartSyncbase(serverCreds, testSbName, rootDir, acl)
@@ -189,7 +189,7 @@ func TestV23RestartabilityQuiescent(t *testing.T) {
 // A read-only batch should fail if the server crashes in the middle.
 func TestV23RestartabilityReadOnlyBatch(t *testing.T) {
 	v23test.SkipUnlessRunningIntegrationTests(t)
-	sh := v23test.NewShell(t, v23test.Opts{})
+	sh := v23test.NewShell(t, nil)
 	defer sh.Cleanup()
 	rootDir, clientCtx, serverCreds := restartabilityInit(sh)
 	cleanup := sh.StartSyncbase(serverCreds, testSbName, rootDir, acl)
@@ -242,7 +242,7 @@ func TestV23RestartabilityReadOnlyBatch(t *testing.T) {
 // A read/write batch should fail if the server crashes in the middle.
 func TestV23RestartabilityReadWriteBatch(t *testing.T) {
 	v23test.SkipUnlessRunningIntegrationTests(t)
-	sh := v23test.NewShell(t, v23test.Opts{})
+	sh := v23test.NewShell(t, nil)
 	defer sh.Cleanup()
 	rootDir, clientCtx, serverCreds := restartabilityInit(sh)
 	cleanup := sh.StartSyncbase(serverCreds, testSbName, rootDir, acl)
@@ -301,7 +301,7 @@ func decodeString(t *testing.T, val []byte) string {
 
 func TestV23RestartabilityWatch(t *testing.T) {
 	v23test.SkipUnlessRunningIntegrationTests(t)
-	sh := v23test.NewShell(t, v23test.Opts{})
+	sh := v23test.NewShell(t, nil)
 	defer sh.Cleanup()
 	rootDir, clientCtx, serverCreds := restartabilityInit(sh)
 	cleanup := sh.StartSyncbase(serverCreds, testSbName, rootDir, acl)
@@ -415,7 +415,7 @@ func corruptFile(t *testing.T, rootDir, pathRegex string) {
 
 func TestV23RestartabilityServiceDBCorruption(t *testing.T) {
 	v23test.SkipUnlessRunningIntegrationTests(t)
-	sh := v23test.NewShell(t, v23test.Opts{})
+	sh := v23test.NewShell(t, nil)
 	defer sh.Cleanup()
 	rootDir, clientCtx, serverCreds := restartabilityInit(sh)
 	cleanup := sh.StartSyncbase(serverCreds, testSbName, rootDir, acl)
@@ -452,7 +452,7 @@ func TestV23RestartabilityServiceDBCorruption(t *testing.T) {
 
 func TestV23RestartabilityAppDBCorruption(t *testing.T) {
 	v23test.SkipUnlessRunningIntegrationTests(t)
-	sh := v23test.NewShell(t, v23test.Opts{})
+	sh := v23test.NewShell(t, nil)
 	defer sh.Cleanup()
 	rootDir, clientCtx, serverCreds := restartabilityInit(sh)
 	cleanup := sh.StartSyncbase(serverCreds, testSbName, rootDir, acl)
@@ -506,7 +506,7 @@ func TestV23RestartabilityStoreGarbageCollect(t *testing.T) {
 	// injection or mocking out the store.
 	// NOTE: Test assumes that leveldb destroy is implemented as 'rm -r'.
 	v23test.SkipUnlessRunningIntegrationTests(t)
-	sh := v23test.NewShell(t, v23test.Opts{})
+	sh := v23test.NewShell(t, nil)
 	defer sh.Cleanup()
 	rootDir, clientCtx, serverCreds := restartabilityInit(sh)
 	cleanup := sh.StartSyncbase(serverCreds, testSbName, rootDir, acl)
