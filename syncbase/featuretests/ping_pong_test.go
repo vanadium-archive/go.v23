@@ -5,6 +5,7 @@
 package featuretests_test
 
 import (
+	"flag"
 	"fmt"
 	"os"
 	"testing"
@@ -20,6 +21,9 @@ import (
 
 const pingPongPairIterations = 500
 
+var numSync *int = flag.Int("numSync", 2, "run test with 2 or more syncbases")
+var numGroup *int = flag.Int("numGroup", 1, "run test with 1 or more syncgroups")
+
 // BenchmarkPingPongPair measures the round trip sync latency between a pair of
 // Syncbase instances that Ping Pong data to each other over a syncgroup.
 //
@@ -34,6 +38,13 @@ const pingPongPairIterations = 500
 // After the benchmark completes, the "ns/op" value refers to the average time
 // for |pingPongPairIterations| of Ping Pong roundtrips completed.
 func BenchmarkPingPongPair(b *testing.B) {
+	flag.Parse()
+	if *numSync < 2 {
+		b.Fatalf("numSync should be at least 2, received %d\n", *numSync)
+	}
+	if *numGroup < 1 {
+		b.Fatalf("numGroup should be at least 1, received %d\n", *numGroup)
+	}
 	sh := v23test.NewShell(b, nil)
 	defer sh.Cleanup()
 	sh.StartRootMountTable()
@@ -42,26 +53,37 @@ func BenchmarkPingPongPair(b *testing.B) {
 	b.StopTimer()
 
 	for iter := 0; iter < b.N; iter++ {
-		// Setup 2 Syncbases.
-		sbs := setupSyncbases(b, sh, 2)
+		// Setup *numSync Syncbases.
+		sbs := setupSyncbases(b, sh, *numSync)
 
-		// Syncbase s0 is the creator.
-		sgName := naming.Join(sbs[0].sbName, constants.SyncbaseSuffix, "SG1")
+		// Setup *numGroup Syncgroups
+		for g := 0; g < *numGroup; g++ {
+			// Syncbase s0 is the creator.
+			sgSuffix := fmt.Sprintf("SG%d", g+1)
+			sgName := naming.Join(sbs[0].sbName, constants.SyncbaseSuffix, sgSuffix)
 
-		// TODO(alexfandrianto): Was unable to use the empty prefix ("tb:").
-		// Observation: w0's watch isn't working with the empty prefix.
-		// Possible Explanation: The empty prefix ACL receives an initial value from
-		// the Table ACL. If this value is synced over from the opposing peer,
-		// conflict resolution can mean that s0 loses the ability to watch.
-		syncString := fmt.Sprintf("%s:p", testTable)
-		ok(b, createSyncgroup(sbs[0].clientCtx, sbs[0].sbName, sgName, syncString, "", sbBlessings(sbs), nil))
+			// TODO(alexfandrianto): Was unable to use the empty prefix ("tb:").
+			// Observation: w0's watch isn't working with the empty prefix.
+			// Possible Explanation: The empty prefix ACL receives an initial value from
+			// the Table ACL. If this value is synced over from the opposing peer,
+			// conflict resolution can mean that s0 loses the ability to watch.
+			syncString := fmt.Sprintf("%s:p", testTable)
+			ok(b, createSyncgroup(sbs[0].clientCtx, sbs[0].sbName, sgName, syncString, "", sbBlessings(sbs), nil))
 
-		// Syncbase s1 will attempt to join the syncgroup.
-		ok(b, joinSyncgroup(sbs[1].clientCtx, sbs[1].sbName, sgName))
+			// The other syncbases will attempt to join the syncgroup.
+			for i := 1; i < *numSync; i++ {
+				ok(b, joinSyncgroup(sbs[i].clientCtx, sbs[i].sbName, sgName))
+			}
+		}
 
 		// Obtain the handles to the databases.
 		db0, _ := getDbAndTable(sbs[0].sbName)
 		db1, _ := getDbAndTable(sbs[1].sbName)
+
+		// Setup the remaining syncbases
+		for i := 2; i < *numSync; i++ {
+			getDbAndTable(sbs[i].sbName)
+		}
 
 		// Set up the watch streams (watching the other syncbase's prefix).
 		prefix0, prefix1 := "prefix0", "prefix1"
