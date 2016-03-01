@@ -1283,15 +1283,16 @@ func TestBlockedWatchCancel(t *testing.T) {
 	if err != nil {
 		t.Fatalf("d.GetResumeMarker() failed: %v", err)
 	}
-	ctxWithTimeout, cancel := context.WithTimeout(ctx, 100*time.Millisecond)
-	defer cancel()
-	wstream, _ := d.Watch(ctxWithTimeout, "tb", "a", resumeMarker)
-	if wstream.Advance() {
-		t.Fatalf("wstream advanced")
+	ctxCancel, cancel := context.WithCancel(ctx)
+	wstream, err := d.Watch(ctxCancel, "tb", "a", resumeMarker)
+	if err != nil {
+		t.Fatalf("d.Watch() failed: %v", err)
 	}
-	// TODO(rogulenko): enable this again when the RPC system always returns
-	// a correct verror ID. See: https://github.com/vanadium/issues/issues/775.
-	// if got, want := verror.ErrorID(wstream.Err()), verror.ErrTimeout.ID; got != want {
-	// 	t.Fatalf("unexpected wstream error ID: got %v, want %v", got, want)
-	// }
+	time.AfterFunc(500*time.Millisecond, cancel)
+	if wstream.Advance() {
+		t.Fatal("wstream should not have advanced")
+	}
+	if got, want := verror.ErrorID(wstream.Err()), verror.ErrCanceled.ID; got != want {
+		t.Errorf("unexpected wstream error ID: got %v, want %v", got, want)
+	}
 }
