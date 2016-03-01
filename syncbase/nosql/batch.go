@@ -27,22 +27,39 @@ func (b *batch) Abort(ctx *context.T) error {
 }
 
 // RunInBatch runs the given fn in a batch, managing retries and commit/abort.
+// Writable batches are committed, retrying if commit fails. Readonly batches
+// are aborted.
 func RunInBatch(ctx *context.T, d Database, opts wire.BatchOptions, fn func(b BatchDatabase) error) error {
-	// TODO(sadovsky): Make the number of attempts configurable.
-	var err error
-	for i := 0; i < 3; i++ {
+	attemptInBatch := func() error {
 		b, err := d.BeginBatch(ctx, opts)
 		if err != nil {
 			return err
 		}
+		// Use defer for Abort to make sure it gets called in case fn panics.
+		commitCalled := false
+		defer func() {
+			if !commitCalled {
+				b.Abort(ctx)
+			}
+		}()
 		if err = fn(b); err != nil {
-			b.Abort(ctx)
 			return err
 		}
+		// A readonly batch should be Aborted; Commit would fail.
+		if opts.ReadOnly {
+			return nil
+		}
+		// Commit is about to be called, do not call Abort.
+		commitCalled = true
+		return b.Commit(ctx)
+	}
+	var err error
+	// TODO(sadovsky): Make the number of attempts configurable.
+	for i := 0; i < 3; i++ {
 		// TODO(sadovsky): Commit() can fail for a number of reasons, e.g. RPC
 		// failure or ErrConcurrentTransaction. Depending on the cause of failure,
 		// it may be desirable to retry the Commit() and/or to call Abort().
-		if err = b.Commit(ctx); verror.ErrorID(err) != wire.ErrConcurrentBatch.ID {
+		if err = attemptInBatch(); verror.ErrorID(err) != wire.ErrConcurrentBatch.ID {
 			return err
 		}
 	}

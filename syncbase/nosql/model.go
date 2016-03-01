@@ -163,6 +163,8 @@ type BatchDatabase interface {
 	DatabaseHandle
 
 	// Commit persists the pending changes to the database.
+	// If the batch is readonly, Commit() will fail with ErrReadOnlyBatch; Abort()
+	// should be used instead.
 	Commit(ctx *context.T) error
 
 	// Abort notifies the server that any pending changes can be discarded.

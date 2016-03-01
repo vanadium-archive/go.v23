@@ -9,9 +9,11 @@
 package nosql_test
 
 import (
+	"fmt"
 	"reflect"
 	"testing"
 
+	"v.io/v23/context"
 	"v.io/v23/naming"
 	"v.io/v23/query/syncql"
 	wire "v.io/v23/services/syncbase/nosql"
@@ -645,4 +647,135 @@ func TestBeginBatchWithNonexistentDatabase(t *testing.T) {
 	if _, err := d.BeginBatch(ctx, wire.BatchOptions{}); verror.ErrorID(err) != verror.ErrNoExist.ID {
 		t.Fatalf("d.BeginBatch() should have failed: %v", err)
 	}
+}
+
+// tryWithConcurrentWrites is a RunInBatch() test helper that causes the first
+// failTimes attempts to fail with a concurrent write before succeeding.
+func tryWithConcurrentWrites(t *testing.T, ctx *context.T, d nosql.Database, failTimes int, returnErr error) error {
+	var value string
+	retries := 0
+	return nosql.RunInBatch(ctx, d, wire.BatchOptions{}, func(b nosql.BatchDatabase) error {
+		retries++
+		// Read foo.
+		if err := b.Table("tb").Get(ctx, fmt.Sprintf("foo-%d", retries), &value); verror.ErrorID(err) != verror.ErrNoExist.ID {
+			t.Errorf("b.Get() should have failed with ErrNoExist, got: %v", err)
+		}
+		// If we need to fail, write to foo in a separate concurrent batch. This
+		// is always written on every attempt.
+		if retries < failTimes {
+			if err := d.Table("tb").Put(ctx, fmt.Sprintf("foo-%d", retries), "foo"); err != nil {
+				t.Errorf("d.Put() failed: %v", err)
+			}
+		}
+		// Write to bar. This is only committed on a successful attempt.
+		if err := b.Table("tb").Put(ctx, fmt.Sprintf("bar-%d", retries), "bar"); err != nil {
+			t.Errorf("b.Put() failed: %v", err)
+		}
+		// Return user defined error.
+		return returnErr
+	})
+}
+
+// Tests that RunInBatch() properly retries on Commit failure.
+func TestRunInBatchRetry(t *testing.T) {
+	ctx, sName, cleanup := tu.SetupOrDie(nil)
+	defer cleanup()
+	a := tu.CreateApp(t, ctx, syncbase.NewService(sName), "a")
+	d := tu.CreateNoSQLDatabase(t, ctx, a, "d")
+	tb := tu.CreateTable(t, ctx, d, "tb")
+
+	// Succeed (no conflict) on second try.
+	if err := tryWithConcurrentWrites(t, ctx, d, 2, nil); err != nil {
+		t.Errorf("RunInBatch() failed: %v", err)
+	}
+	// First try failed, second succeeded.
+	tu.CheckScan(t, ctx, tb, nosql.Prefix(""),
+		[]string{"bar-2", "foo-1"},
+		[]interface{}{"bar", "foo"})
+}
+
+// Tests that RunInBatch() gives up after too many Commit failures.
+func TestRunInBatchMaxRetries(t *testing.T) {
+	ctx, sName, cleanup := tu.SetupOrDie(nil)
+	defer cleanup()
+	a := tu.CreateApp(t, ctx, syncbase.NewService(sName), "a")
+	d := tu.CreateNoSQLDatabase(t, ctx, a, "d")
+	tb := tu.CreateTable(t, ctx, d, "tb")
+
+	// Succeed (no conflict) on 10th try. RunInBatch will retry 3 times and give
+	// up with ErrConcurrentBatch.
+	if err := tryWithConcurrentWrites(t, ctx, d, 10, nil); verror.ErrorID(err) != wire.ErrConcurrentBatch.ID {
+		t.Errorf("RunInBatch() should have failed with ErrConcurrentBatch, got: %v", err)
+	}
+	// Three failed tries.
+	tu.CheckScan(t, ctx, tb, nosql.Prefix(""),
+		[]string{"foo-1", "foo-2", "foo-3"},
+		[]interface{}{"foo", "foo", "foo"})
+}
+
+// Tests that RunInBatch() passes through errors without retrying.
+func TestRunInBatchError(t *testing.T) {
+	ctx, sName, cleanup := tu.SetupOrDie(nil)
+	defer cleanup()
+	a := tu.CreateApp(t, ctx, syncbase.NewService(sName), "a")
+	d := tu.CreateNoSQLDatabase(t, ctx, a, "d")
+	tb := tu.CreateTable(t, ctx, d, "tb")
+
+	// Return error from fn. Errors other than ErrConcurrentTransaction are not
+	// retried.
+	dummyError := fmt.Errorf("dummyError")
+	if err := tryWithConcurrentWrites(t, ctx, d, 10, dummyError); err != dummyError {
+		t.Errorf("RunInBatch() should have failed with %v, got: %v", dummyError, err)
+	}
+	// Single failed try.
+	tu.CheckScan(t, ctx, tb, nosql.Prefix(""),
+		[]string{"foo-1"},
+		[]interface{}{"foo"})
+}
+
+// Tests that RunInBatch() works with readonly batches without trying to Commit.
+func TestRunInBatchReadOnly(t *testing.T) {
+	ctx, sName, cleanup := tu.SetupOrDie(nil)
+	defer cleanup()
+	a := tu.CreateApp(t, ctx, syncbase.NewService(sName), "a")
+	d := tu.CreateNoSQLDatabase(t, ctx, a, "d")
+	tb := tu.CreateTable(t, ctx, d, "tb")
+
+	// Test readonly batch.
+	if err := tb.Put(ctx, "foo", 1); err != nil {
+		t.Fatalf("tb.Put() failed: %v", err)
+	}
+	if err := nosql.RunInBatch(ctx, d, wire.BatchOptions{ReadOnly: true}, func(b nosql.BatchDatabase) error {
+		var value int32
+		// Read foo.
+		if err := b.Table("tb").Get(ctx, "foo", &value); err != nil {
+			t.Fatalf("b.Get() failed: %v", err)
+		}
+		newValue := value + 1
+		// Write to foo in a separate concurrent batch. This is always written on
+		// every iteration. It should not cause a retry since readonly batches are
+		// not committed.
+		if err := d.Table("tb").Put(ctx, "foo", newValue); err != nil {
+			t.Errorf("d.Put() failed: %v", err)
+		}
+		// Read foo again. Batch should not see the incremented value.
+		var rereadValue int32
+		if err := b.Table("tb").Get(ctx, "foo", &rereadValue); err != nil {
+			t.Fatalf("b.Get() failed: %v", err)
+		}
+		if value != rereadValue {
+			t.Fatal("batch should not see value change outside batch")
+		}
+		// Try writing to bar. This should fail since the batch is readonly.
+		if err := b.Table("tb").Put(ctx, "bar", value); verror.ErrorID(err) != wire.ErrReadOnlyBatch.ID {
+			t.Errorf("b.Put() should have failed with ErrReadOnlyBatch, got: %v", err)
+		}
+		return nil
+	}); err != nil {
+		t.Errorf("RunInBatch() failed: %v", err)
+	}
+	// Single uncommitted iteration.
+	tu.CheckScan(t, ctx, tb, nosql.Prefix(""),
+		[]string{"foo"},
+		[]interface{}{int32(2)})
 }
