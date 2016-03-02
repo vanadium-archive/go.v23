@@ -36,13 +36,6 @@ type T interface {
 	// directly responsible for the name.
 	ResolveToMountTable(ctx *context.T, name string, opts ...naming.NamespaceOpt) (entry *naming.MountEntry, err error)
 
-	// ShallowResolve resolves the object name into its mounted servers.  It is the same
-	// as Resolve except when mounttables are stacked below the same mount point.  For example,
-	// if service D is mounted onto /MTA/a/b and /MTA/a/b is mounted onto /MTB/x/y then
-	// Resolve(/MTB/x/y) will return a pointer to D while ShallowResolve(/MTB/x/y) will
-	// return a pointer to /MTA/a/b.
-	ShallowResolve(ctx *context.T, name string, opts ...naming.NamespaceOpt) (entry *naming.MountEntry, err error)
-
 	// FlushCacheEntry flushes resolution information cached for the name.  If
 	// anything was flushed it returns true.
 	FlushCacheEntry(ctx *context.T, name string) bool
