@@ -1,4 +1,4 @@
-pkg namespace, type T interface { CacheCtl, Delete, FlushCacheEntry, GetPermissions, Glob, Mount, Resolve, ResolveToMountTable, Roots, SetPermissions, SetRoots, ShallowResolve, Unmount }
+pkg namespace, type T interface { CacheCtl, Delete, FlushCacheEntry, GetPermissions, Glob, Mount, Resolve, ResolveToMountTable, Roots, SetPermissions, SetRoots, Unmount }
 pkg namespace, type T interface, CacheCtl(...naming.CacheCtl) []naming.CacheCtl
 pkg namespace, type T interface, Delete(*context.T, string, bool, ...naming.NamespaceOpt) error
 pkg namespace, type T interface, FlushCacheEntry(*context.T, string) bool
@@ -10,5 +10,4 @@ pkg namespace, type T interface, ResolveToMountTable(*context.T, string, ...nami
 pkg namespace, type T interface, Roots() []string
 pkg namespace, type T interface, SetPermissions(*context.T, string, access.Permissions, string, ...naming.NamespaceOpt) error
 pkg namespace, type T interface, SetRoots(...string) error
-pkg namespace, type T interface, ShallowResolve(*context.T, string, ...naming.NamespaceOpt) (*naming.MountEntry, error)
 pkg namespace, type T interface, Unmount(*context.T, string, string, ...naming.NamespaceOpt) error
