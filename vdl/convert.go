@@ -1343,6 +1343,9 @@ func (c convTarget) finishKeyStartField(key convTarget) (convTarget, error) {
 				ttField, _ := tt.FieldByName(name)
 				return reflectConv(c.rv.FieldByName("Value"), ttField.Type)
 			}
+			// TODO(toddw): How should we handle anonymous (aka embedded) fields?
+			// Note that unexported embedded fields may themselves have exported
+			// fields.  See https://github.com/golang/go/issues/12367
 			rvField := c.rv.FieldByName(key.rv.String())
 			ttField, index := tt.FieldByName(key.rv.String())
 			if !rvField.IsValid() || index < 0 {
