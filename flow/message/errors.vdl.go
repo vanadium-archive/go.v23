@@ -14,6 +14,9 @@ import (
 	"v.io/v23/verror"
 )
 
+func __VDLEnsureNativeBuilt_errors() {
+}
+
 var (
 	ErrInvalidMsg         = verror.Register("v.io/v23/flow/message.InvalidMsg", verror.NoRetry, "{1:}{2:} message of type {3} and size {4} failed decoding at field {5}{:6}.")
 	ErrInvalidSetupOption = verror.Register("v.io/v23/flow/message.InvalidSetupOption", verror.NoRetry, "{1:}{2:} setup option{:3} failed decoding at field{:4}.")

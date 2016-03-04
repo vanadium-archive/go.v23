@@ -14,6 +14,9 @@ import (
 	"v.io/v23/verror"
 )
 
+func __VDLEnsureNativeBuilt_types() {
+}
+
 var (
 	// GlobMaxRecursionReached indicates that the Glob request exceeded the
 	// max recursion level.

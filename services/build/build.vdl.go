@@ -75,6 +75,23 @@ func (Architecture) __VDLReflect(struct {
 }) {
 }
 
+func (m Architecture) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
+	if err := t.FromEnumLabel(m.String(), __VDLType_build_v_io_v23_services_build_Architecture); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (m Architecture) MakeVDLTarget() vdl.Target {
+	return nil
+}
+
+func (m Architecture) IsZero() bool {
+
+	var1 := (m == ArchitectureAmd64)
+	return var1
+}
+
 // Format specifies the file format of a host.
 type Format int
 
@@ -127,6 +144,23 @@ func (Format) __VDLReflect(struct {
 	Name string `vdl:"v.io/v23/services/build.Format"`
 	Enum struct{ Elf, Mach, Pe string }
 }) {
+}
+
+func (m Format) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
+	if err := t.FromEnumLabel(m.String(), __VDLType_build_v_io_v23_services_build_Format); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (m Format) MakeVDLTarget() vdl.Target {
+	return nil
+}
+
+func (m Format) IsZero() bool {
+
+	var1 := (m == FormatElf)
+	return var1
 }
 
 // OperatingSystem specifies the operating system of a host.
@@ -189,6 +223,23 @@ func (OperatingSystem) __VDLReflect(struct {
 }) {
 }
 
+func (m OperatingSystem) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
+	if err := t.FromEnumLabel(m.String(), __VDLType_build_v_io_v23_services_build_OperatingSystem); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (m OperatingSystem) MakeVDLTarget() vdl.Target {
+	return nil
+}
+
+func (m OperatingSystem) IsZero() bool {
+
+	var1 := (m == OperatingSystemDarwin)
+	return var1
+}
+
 // File records the name and contents of a file.
 type File struct {
 	Name     string
@@ -200,11 +251,88 @@ func (File) __VDLReflect(struct {
 }) {
 }
 
+func (m *File) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
+
+	if __VDLType_build_v_io_v23_services_build_File == nil || __VDLTypebuild0 == nil {
+		panic("Initialization order error: types generated for FillVDLTarget not initialized. Consider moving caller to an init() block.")
+	}
+	fieldsTarget1, err := t.StartFields(tt)
+	if err != nil {
+		return err
+	}
+
+	var2 := (m.Name == "")
+	if !var2 {
+		keyTarget3, fieldTarget4, err := fieldsTarget1.StartField("Name")
+		if err != vdl.ErrFieldNoExist && err != nil {
+			return err
+		}
+		if err != vdl.ErrFieldNoExist {
+			if err := fieldTarget4.FromString(string(m.Name), vdl.StringType); err != nil {
+				return err
+			}
+			if err := fieldsTarget1.FinishField(keyTarget3, fieldTarget4); err != nil {
+				return err
+			}
+		}
+	}
+	var var5 bool
+	if len(m.Contents) == 0 {
+		var5 = true
+	}
+	if !var5 {
+		keyTarget6, fieldTarget7, err := fieldsTarget1.StartField("Contents")
+		if err != vdl.ErrFieldNoExist && err != nil {
+			return err
+		}
+		if err != vdl.ErrFieldNoExist {
+
+			if err := fieldTarget7.FromBytes([]byte(m.Contents), __VDLTypebuild1); err != nil {
+				return err
+			}
+			if err := fieldsTarget1.FinishField(keyTarget6, fieldTarget7); err != nil {
+				return err
+			}
+		}
+	}
+	if err := t.FinishFields(fieldsTarget1); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (m *File) MakeVDLTarget() vdl.Target {
+	return nil
+}
+
+func (m *File) IsZero() bool {
+
+	var1 := true
+	var2 := (m.Name == "")
+	var1 = var1 && var2
+	var var3 bool
+	if len(m.Contents) == 0 {
+		var3 = true
+	}
+	var1 = var1 && var3
+	return var1
+}
+
 func init() {
 	vdl.Register((*Architecture)(nil))
 	vdl.Register((*Format)(nil))
 	vdl.Register((*OperatingSystem)(nil))
 	vdl.Register((*File)(nil))
+}
+
+var __VDLTypebuild0 *vdl.Type = vdl.TypeOf((*File)(nil))
+var __VDLTypebuild1 *vdl.Type = vdl.TypeOf([]byte(nil))
+var __VDLType_build_v_io_v23_services_build_Architecture *vdl.Type = vdl.TypeOf(ArchitectureAmd64)
+var __VDLType_build_v_io_v23_services_build_File *vdl.Type = vdl.TypeOf(File{})
+var __VDLType_build_v_io_v23_services_build_Format *vdl.Type = vdl.TypeOf(FormatElf)
+var __VDLType_build_v_io_v23_services_build_OperatingSystem *vdl.Type = vdl.TypeOf(OperatingSystemDarwin)
+
+func __VDLEnsureNativeBuilt_build() {
 }
 
 // BuilderClientMethods is the client interface

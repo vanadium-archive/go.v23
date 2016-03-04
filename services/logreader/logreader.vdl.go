@@ -33,8 +33,70 @@ func (LogEntry) __VDLReflect(struct {
 }) {
 }
 
+func (m *LogEntry) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
+
+	if __VDLType_logreader_v_io_v23_services_logreader_LogEntry == nil || __VDLTypelogreader0 == nil {
+		panic("Initialization order error: types generated for FillVDLTarget not initialized. Consider moving caller to an init() block.")
+	}
+	fieldsTarget1, err := t.StartFields(tt)
+	if err != nil {
+		return err
+	}
+
+	var2 := (m.Position == int64(0))
+	if !var2 {
+		keyTarget3, fieldTarget4, err := fieldsTarget1.StartField("Position")
+		if err != vdl.ErrFieldNoExist && err != nil {
+			return err
+		}
+		if err != vdl.ErrFieldNoExist {
+			if err := fieldTarget4.FromInt(int64(m.Position), vdl.Int64Type); err != nil {
+				return err
+			}
+			if err := fieldsTarget1.FinishField(keyTarget3, fieldTarget4); err != nil {
+				return err
+			}
+		}
+	}
+	var5 := (m.Line == "")
+	if !var5 {
+		keyTarget6, fieldTarget7, err := fieldsTarget1.StartField("Line")
+		if err != vdl.ErrFieldNoExist && err != nil {
+			return err
+		}
+		if err != vdl.ErrFieldNoExist {
+			if err := fieldTarget7.FromString(string(m.Line), vdl.StringType); err != nil {
+				return err
+			}
+			if err := fieldsTarget1.FinishField(keyTarget6, fieldTarget7); err != nil {
+				return err
+			}
+		}
+	}
+	if err := t.FinishFields(fieldsTarget1); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (m *LogEntry) MakeVDLTarget() vdl.Target {
+	return nil
+}
+
+func (m *LogEntry) IsZero() bool {
+
+	var1 := (*m == LogEntry{})
+	return var1
+}
+
 func init() {
 	vdl.Register((*LogEntry)(nil))
+}
+
+var __VDLTypelogreader0 *vdl.Type = vdl.TypeOf((*LogEntry)(nil))
+var __VDLType_logreader_v_io_v23_services_logreader_LogEntry *vdl.Type = vdl.TypeOf(LogEntry{})
+
+func __VDLEnsureNativeBuilt_logreader() {
 }
 
 // A special NumEntries value that indicates that all entries should be

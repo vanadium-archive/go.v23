@@ -36,8 +36,70 @@ func (MediaInfo) __VDLReflect(struct {
 }) {
 }
 
+func (m *MediaInfo) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
+
+	if __VDLType_repository_v_io_v23_services_repository_MediaInfo == nil || __VDLTyperepository0 == nil {
+		panic("Initialization order error: types generated for FillVDLTarget not initialized. Consider moving caller to an init() block.")
+	}
+	fieldsTarget1, err := t.StartFields(tt)
+	if err != nil {
+		return err
+	}
+
+	var2 := (m.Type == "")
+	if !var2 {
+		keyTarget3, fieldTarget4, err := fieldsTarget1.StartField("Type")
+		if err != vdl.ErrFieldNoExist && err != nil {
+			return err
+		}
+		if err != vdl.ErrFieldNoExist {
+			if err := fieldTarget4.FromString(string(m.Type), vdl.StringType); err != nil {
+				return err
+			}
+			if err := fieldsTarget1.FinishField(keyTarget3, fieldTarget4); err != nil {
+				return err
+			}
+		}
+	}
+	var5 := (m.Encoding == "")
+	if !var5 {
+		keyTarget6, fieldTarget7, err := fieldsTarget1.StartField("Encoding")
+		if err != vdl.ErrFieldNoExist && err != nil {
+			return err
+		}
+		if err != vdl.ErrFieldNoExist {
+			if err := fieldTarget7.FromString(string(m.Encoding), vdl.StringType); err != nil {
+				return err
+			}
+			if err := fieldsTarget1.FinishField(keyTarget6, fieldTarget7); err != nil {
+				return err
+			}
+		}
+	}
+	if err := t.FinishFields(fieldsTarget1); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (m *MediaInfo) MakeVDLTarget() vdl.Target {
+	return nil
+}
+
+func (m *MediaInfo) IsZero() bool {
+
+	var1 := (*m == MediaInfo{})
+	return var1
+}
+
 func init() {
 	vdl.Register((*MediaInfo)(nil))
+}
+
+var __VDLTyperepository0 *vdl.Type = vdl.TypeOf((*MediaInfo)(nil))
+var __VDLType_repository_v_io_v23_services_repository_MediaInfo *vdl.Type = vdl.TypeOf(MediaInfo{})
+
+func __VDLEnsureNativeBuilt_repository() {
 }
 
 // ApplicationClientMethods is the client interface

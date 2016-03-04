@@ -23,6 +23,9 @@ import (
 	"v.io/v23/vtrace"
 )
 
+func __VDLEnsureNativeBuilt_vtrace() {
+}
+
 // StoreClientMethods is the client interface
 // containing Store methods.
 type StoreClientMethods interface {

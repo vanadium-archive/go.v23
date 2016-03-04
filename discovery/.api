@@ -1,7 +1,19 @@
 pkg discovery, func NewAdId() (AdId, error)
 pkg discovery, func ParseAdId(string) (AdId, error)
+pkg discovery, method (*Advertisement) FillVDLTarget(vdl.Target, *vdl.Type) error
+pkg discovery, method (*Advertisement) IsZero() bool
+pkg discovery, method (*Advertisement) MakeVDLTarget() vdl.Target
+pkg discovery, method (AdId) FillVDLTarget(vdl.Target, *vdl.Type) error
 pkg discovery, method (AdId) IsValid() bool
+pkg discovery, method (AdId) IsZero() bool
+pkg discovery, method (AdId) MakeVDLTarget() vdl.Target
 pkg discovery, method (AdId) String() string
+pkg discovery, method (Attachments) FillVDLTarget(vdl.Target, *vdl.Type) error
+pkg discovery, method (Attachments) IsZero() bool
+pkg discovery, method (Attachments) MakeVDLTarget() vdl.Target
+pkg discovery, method (Attributes) FillVDLTarget(vdl.Target, *vdl.Type) error
+pkg discovery, method (Attributes) IsZero() bool
+pkg discovery, method (Attributes) MakeVDLTarget() vdl.Target
 pkg discovery, type AdId [16]byte
 pkg discovery, type Advertisement struct
 pkg discovery, type Advertisement struct, Addresses []string

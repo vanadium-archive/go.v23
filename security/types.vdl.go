@@ -39,12 +39,46 @@ func (BlessingPattern) __VDLReflect(struct {
 }) {
 }
 
+func (m BlessingPattern) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
+	if err := t.FromString(string(m), __VDLType_types_v_io_v23_security_BlessingPattern); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (m BlessingPattern) MakeVDLTarget() vdl.Target {
+	return nil
+}
+
+func (m BlessingPattern) IsZero() bool {
+
+	var1 := (m == BlessingPattern(""))
+	return var1
+}
+
 // Hash identifies a cryptographic hash function approved for use in signature algorithms.
 type Hash string
 
 func (Hash) __VDLReflect(struct {
 	Name string `vdl:"v.io/v23/security.Hash"`
 }) {
+}
+
+func (m Hash) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
+	if err := t.FromString(string(m), __VDLType_types_v_io_v23_security_Hash); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (m Hash) MakeVDLTarget() vdl.Target {
+	return nil
+}
+
+func (m Hash) IsZero() bool {
+
+	var1 := (m == Hash(""))
+	return var1
 }
 
 // Signature represents a digital signature.
@@ -65,6 +99,122 @@ func (Signature) __VDLReflect(struct {
 }) {
 }
 
+func (m *Signature) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
+
+	if __VDLType_types_v_io_v23_security_Signature == nil || __VDLTypetypes0 == nil {
+		panic("Initialization order error: types generated for FillVDLTarget not initialized. Consider moving caller to an init() block.")
+	}
+	fieldsTarget1, err := t.StartFields(tt)
+	if err != nil {
+		return err
+	}
+
+	var var2 bool
+	if len(m.Purpose) == 0 {
+		var2 = true
+	}
+	if !var2 {
+		keyTarget3, fieldTarget4, err := fieldsTarget1.StartField("Purpose")
+		if err != vdl.ErrFieldNoExist && err != nil {
+			return err
+		}
+		if err != vdl.ErrFieldNoExist {
+
+			if err := fieldTarget4.FromBytes([]byte(m.Purpose), __VDLTypetypes1); err != nil {
+				return err
+			}
+			if err := fieldsTarget1.FinishField(keyTarget3, fieldTarget4); err != nil {
+				return err
+			}
+		}
+	}
+	var5 := m.Hash.IsZero()
+	if !var5 {
+		keyTarget6, fieldTarget7, err := fieldsTarget1.StartField("Hash")
+		if err != vdl.ErrFieldNoExist && err != nil {
+			return err
+		}
+		if err != vdl.ErrFieldNoExist {
+
+			if err := m.Hash.FillVDLTarget(fieldTarget7, __VDLType_types_v_io_v23_security_Hash); err != nil {
+				return err
+			}
+			if err := fieldsTarget1.FinishField(keyTarget6, fieldTarget7); err != nil {
+				return err
+			}
+		}
+	}
+	var var8 bool
+	if len(m.R) == 0 {
+		var8 = true
+	}
+	if !var8 {
+		keyTarget9, fieldTarget10, err := fieldsTarget1.StartField("R")
+		if err != vdl.ErrFieldNoExist && err != nil {
+			return err
+		}
+		if err != vdl.ErrFieldNoExist {
+
+			if err := fieldTarget10.FromBytes([]byte(m.R), __VDLTypetypes1); err != nil {
+				return err
+			}
+			if err := fieldsTarget1.FinishField(keyTarget9, fieldTarget10); err != nil {
+				return err
+			}
+		}
+	}
+	var var11 bool
+	if len(m.S) == 0 {
+		var11 = true
+	}
+	if !var11 {
+		keyTarget12, fieldTarget13, err := fieldsTarget1.StartField("S")
+		if err != vdl.ErrFieldNoExist && err != nil {
+			return err
+		}
+		if err != vdl.ErrFieldNoExist {
+
+			if err := fieldTarget13.FromBytes([]byte(m.S), __VDLTypetypes1); err != nil {
+				return err
+			}
+			if err := fieldsTarget1.FinishField(keyTarget12, fieldTarget13); err != nil {
+				return err
+			}
+		}
+	}
+	if err := t.FinishFields(fieldsTarget1); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (m *Signature) MakeVDLTarget() vdl.Target {
+	return nil
+}
+
+func (m *Signature) IsZero() bool {
+
+	var1 := true
+	var var2 bool
+	if len(m.Purpose) == 0 {
+		var2 = true
+	}
+	var1 = var1 && var2
+	var3 := m.Hash.IsZero()
+	var1 = var1 && var3
+	var var4 bool
+	if len(m.R) == 0 {
+		var4 = true
+	}
+	var1 = var1 && var4
+	var var5 bool
+	if len(m.S) == 0 {
+		var5 = true
+	}
+	var1 = var1 && var5
+	return var1
+}
+
 // ThirdPartyRequirements specifies the information required by the third-party
 // that will issue discharges for third-party caveats.
 //
@@ -79,6 +229,77 @@ type ThirdPartyRequirements struct {
 func (ThirdPartyRequirements) __VDLReflect(struct {
 	Name string `vdl:"v.io/v23/security.ThirdPartyRequirements"`
 }) {
+}
+
+func (m *ThirdPartyRequirements) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
+
+	if __VDLType_types_v_io_v23_security_ThirdPartyRequirements == nil || __VDLTypetypes2 == nil {
+		panic("Initialization order error: types generated for FillVDLTarget not initialized. Consider moving caller to an init() block.")
+	}
+	fieldsTarget1, err := t.StartFields(tt)
+	if err != nil {
+		return err
+	}
+
+	var2 := (m.ReportServer == false)
+	if !var2 {
+		keyTarget3, fieldTarget4, err := fieldsTarget1.StartField("ReportServer")
+		if err != vdl.ErrFieldNoExist && err != nil {
+			return err
+		}
+		if err != vdl.ErrFieldNoExist {
+			if err := fieldTarget4.FromBool(bool(m.ReportServer), vdl.BoolType); err != nil {
+				return err
+			}
+			if err := fieldsTarget1.FinishField(keyTarget3, fieldTarget4); err != nil {
+				return err
+			}
+		}
+	}
+	var5 := (m.ReportMethod == false)
+	if !var5 {
+		keyTarget6, fieldTarget7, err := fieldsTarget1.StartField("ReportMethod")
+		if err != vdl.ErrFieldNoExist && err != nil {
+			return err
+		}
+		if err != vdl.ErrFieldNoExist {
+			if err := fieldTarget7.FromBool(bool(m.ReportMethod), vdl.BoolType); err != nil {
+				return err
+			}
+			if err := fieldsTarget1.FinishField(keyTarget6, fieldTarget7); err != nil {
+				return err
+			}
+		}
+	}
+	var8 := (m.ReportArguments == false)
+	if !var8 {
+		keyTarget9, fieldTarget10, err := fieldsTarget1.StartField("ReportArguments")
+		if err != vdl.ErrFieldNoExist && err != nil {
+			return err
+		}
+		if err != vdl.ErrFieldNoExist {
+			if err := fieldTarget10.FromBool(bool(m.ReportArguments), vdl.BoolType); err != nil {
+				return err
+			}
+			if err := fieldsTarget1.FinishField(keyTarget9, fieldTarget10); err != nil {
+				return err
+			}
+		}
+	}
+	if err := t.FinishFields(fieldsTarget1); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (m *ThirdPartyRequirements) MakeVDLTarget() vdl.Target {
+	return nil
+}
+
+func (m *ThirdPartyRequirements) IsZero() bool {
+
+	var1 := (*m == ThirdPartyRequirements{})
+	return var1
 }
 
 // DischargeImpetus encapsulates the motivation for a discharge being sought.
@@ -102,6 +323,137 @@ func (DischargeImpetus) __VDLReflect(struct {
 }) {
 }
 
+func (m *DischargeImpetus) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
+
+	if __VDLType_types_v_io_v23_security_DischargeImpetus == nil || __VDLTypetypes3 == nil {
+		panic("Initialization order error: types generated for FillVDLTarget not initialized. Consider moving caller to an init() block.")
+	}
+	fieldsTarget1, err := t.StartFields(tt)
+	if err != nil {
+		return err
+	}
+
+	var var2 bool
+	if len(m.Server) == 0 {
+		var2 = true
+	}
+	if !var2 {
+		keyTarget3, fieldTarget4, err := fieldsTarget1.StartField("Server")
+		if err != vdl.ErrFieldNoExist && err != nil {
+			return err
+		}
+		if err != vdl.ErrFieldNoExist {
+
+			listTarget5, err := fieldTarget4.StartList(__VDLTypetypes4, len(m.Server))
+			if err != nil {
+				return err
+			}
+			for i, elem7 := range m.Server {
+				elemTarget6, err := listTarget5.StartElem(i)
+				if err != nil {
+					return err
+				}
+
+				if err := elem7.FillVDLTarget(elemTarget6, __VDLType_types_v_io_v23_security_BlessingPattern); err != nil {
+					return err
+				}
+				if err := listTarget5.FinishElem(elemTarget6); err != nil {
+					return err
+				}
+			}
+			if err := fieldTarget4.FinishList(listTarget5); err != nil {
+				return err
+			}
+			if err := fieldsTarget1.FinishField(keyTarget3, fieldTarget4); err != nil {
+				return err
+			}
+		}
+	}
+	var8 := (m.Method == "")
+	if !var8 {
+		keyTarget9, fieldTarget10, err := fieldsTarget1.StartField("Method")
+		if err != vdl.ErrFieldNoExist && err != nil {
+			return err
+		}
+		if err != vdl.ErrFieldNoExist {
+			if err := fieldTarget10.FromString(string(m.Method), vdl.StringType); err != nil {
+				return err
+			}
+			if err := fieldsTarget1.FinishField(keyTarget9, fieldTarget10); err != nil {
+				return err
+			}
+		}
+	}
+	var var11 bool
+	if len(m.Arguments) == 0 {
+		var11 = true
+	}
+	if !var11 {
+		keyTarget12, fieldTarget13, err := fieldsTarget1.StartField("Arguments")
+		if err != vdl.ErrFieldNoExist && err != nil {
+			return err
+		}
+		if err != vdl.ErrFieldNoExist {
+
+			listTarget14, err := fieldTarget13.StartList(__VDLTypetypes5, len(m.Arguments))
+			if err != nil {
+				return err
+			}
+			for i, elem16 := range m.Arguments {
+				elemTarget15, err := listTarget14.StartElem(i)
+				if err != nil {
+					return err
+				}
+
+				if elem16 == nil {
+					if err := elemTarget15.FromNil(vdl.AnyType); err != nil {
+						return err
+					}
+				} else {
+					if err := elem16.FillVDLTarget(elemTarget15, vdl.AnyType); err != nil {
+						return err
+					}
+				}
+				if err := listTarget14.FinishElem(elemTarget15); err != nil {
+					return err
+				}
+			}
+			if err := fieldTarget13.FinishList(listTarget14); err != nil {
+				return err
+			}
+			if err := fieldsTarget1.FinishField(keyTarget12, fieldTarget13); err != nil {
+				return err
+			}
+		}
+	}
+	if err := t.FinishFields(fieldsTarget1); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (m *DischargeImpetus) MakeVDLTarget() vdl.Target {
+	return nil
+}
+
+func (m *DischargeImpetus) IsZero() bool {
+
+	var1 := true
+	var var2 bool
+	if len(m.Server) == 0 {
+		var2 = true
+	}
+	var1 = var1 && var2
+	var3 := (m.Method == "")
+	var1 = var1 && var3
+	var var4 bool
+	if len(m.Arguments) == 0 {
+		var4 = true
+	}
+	var1 = var1 && var4
+	return var1
+}
+
 // Certificate represents the cryptographic proof of the binding of
 // extensions of a blessing held by one principal to another (represented by
 // a public key) under specific caveats.
@@ -121,6 +473,132 @@ func (Certificate) __VDLReflect(struct {
 }) {
 }
 
+func (m *Certificate) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
+
+	if __VDLType_types_v_io_v23_security_Certificate == nil || __VDLTypetypes6 == nil {
+		panic("Initialization order error: types generated for FillVDLTarget not initialized. Consider moving caller to an init() block.")
+	}
+	fieldsTarget1, err := t.StartFields(tt)
+	if err != nil {
+		return err
+	}
+
+	var2 := (m.Extension == "")
+	if !var2 {
+		keyTarget3, fieldTarget4, err := fieldsTarget1.StartField("Extension")
+		if err != vdl.ErrFieldNoExist && err != nil {
+			return err
+		}
+		if err != vdl.ErrFieldNoExist {
+			if err := fieldTarget4.FromString(string(m.Extension), vdl.StringType); err != nil {
+				return err
+			}
+			if err := fieldsTarget1.FinishField(keyTarget3, fieldTarget4); err != nil {
+				return err
+			}
+		}
+	}
+	var var5 bool
+	if len(m.PublicKey) == 0 {
+		var5 = true
+	}
+	if !var5 {
+		keyTarget6, fieldTarget7, err := fieldsTarget1.StartField("PublicKey")
+		if err != vdl.ErrFieldNoExist && err != nil {
+			return err
+		}
+		if err != vdl.ErrFieldNoExist {
+
+			if err := fieldTarget7.FromBytes([]byte(m.PublicKey), __VDLTypetypes1); err != nil {
+				return err
+			}
+			if err := fieldsTarget1.FinishField(keyTarget6, fieldTarget7); err != nil {
+				return err
+			}
+		}
+	}
+	var var8 bool
+	if len(m.Caveats) == 0 {
+		var8 = true
+	}
+	if !var8 {
+		keyTarget9, fieldTarget10, err := fieldsTarget1.StartField("Caveats")
+		if err != vdl.ErrFieldNoExist && err != nil {
+			return err
+		}
+		if err != vdl.ErrFieldNoExist {
+
+			listTarget11, err := fieldTarget10.StartList(__VDLTypetypes7, len(m.Caveats))
+			if err != nil {
+				return err
+			}
+			for i, elem13 := range m.Caveats {
+				elemTarget12, err := listTarget11.StartElem(i)
+				if err != nil {
+					return err
+				}
+
+				if err := elem13.FillVDLTarget(elemTarget12, __VDLType_types_v_io_v23_security_Caveat); err != nil {
+					return err
+				}
+				if err := listTarget11.FinishElem(elemTarget12); err != nil {
+					return err
+				}
+			}
+			if err := fieldTarget10.FinishList(listTarget11); err != nil {
+				return err
+			}
+			if err := fieldsTarget1.FinishField(keyTarget9, fieldTarget10); err != nil {
+				return err
+			}
+		}
+	}
+	var14 := m.Signature.IsZero()
+	if !var14 {
+		keyTarget15, fieldTarget16, err := fieldsTarget1.StartField("Signature")
+		if err != vdl.ErrFieldNoExist && err != nil {
+			return err
+		}
+		if err != vdl.ErrFieldNoExist {
+
+			if err := m.Signature.FillVDLTarget(fieldTarget16, __VDLType_types_v_io_v23_security_Signature); err != nil {
+				return err
+			}
+			if err := fieldsTarget1.FinishField(keyTarget15, fieldTarget16); err != nil {
+				return err
+			}
+		}
+	}
+	if err := t.FinishFields(fieldsTarget1); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (m *Certificate) MakeVDLTarget() vdl.Target {
+	return nil
+}
+
+func (m *Certificate) IsZero() bool {
+
+	var1 := true
+	var2 := (m.Extension == "")
+	var1 = var1 && var2
+	var var3 bool
+	if len(m.PublicKey) == 0 {
+		var3 = true
+	}
+	var1 = var1 && var3
+	var var4 bool
+	if len(m.Caveats) == 0 {
+		var4 = true
+	}
+	var1 = var1 && var4
+	var5 := m.Signature.IsZero()
+	var1 = var1 && var5
+	return var1
+}
+
 // CaveatDescriptor defines an association between a caveat validation function
 // (addressed by globally unique identifier) and the data needed by the
 // validation function.
@@ -135,6 +613,69 @@ type CaveatDescriptor struct {
 func (CaveatDescriptor) __VDLReflect(struct {
 	Name string `vdl:"v.io/v23/security.CaveatDescriptor"`
 }) {
+}
+
+func (m *CaveatDescriptor) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
+
+	if __VDLType_types_v_io_v23_security_CaveatDescriptor == nil || __VDLTypetypes8 == nil {
+		panic("Initialization order error: types generated for FillVDLTarget not initialized. Consider moving caller to an init() block.")
+	}
+	fieldsTarget1, err := t.StartFields(tt)
+	if err != nil {
+		return err
+	}
+
+	var2 := m.Id.IsZero()
+	if !var2 {
+		keyTarget3, fieldTarget4, err := fieldsTarget1.StartField("Id")
+		if err != vdl.ErrFieldNoExist && err != nil {
+			return err
+		}
+		if err != vdl.ErrFieldNoExist {
+
+			if err := m.Id.FillVDLTarget(fieldTarget4, __VDLType_types_v_io_v23_uniqueid_Id); err != nil {
+				return err
+			}
+			if err := fieldsTarget1.FinishField(keyTarget3, fieldTarget4); err != nil {
+				return err
+			}
+		}
+	}
+	var5 := (m.ParamType == vdl.AnyType)
+	if !var5 {
+		keyTarget6, fieldTarget7, err := fieldsTarget1.StartField("ParamType")
+		if err != vdl.ErrFieldNoExist && err != nil {
+			return err
+		}
+		if err != vdl.ErrFieldNoExist {
+			typeObjectVal8 := m.ParamType
+			if typeObjectVal8 == nil {
+				typeObjectVal8 = vdl.AnyType
+			}
+			if err := fieldTarget7.FromTypeObject(typeObjectVal8); err != nil {
+				return err
+			}
+			if err := fieldsTarget1.FinishField(keyTarget6, fieldTarget7); err != nil {
+				return err
+			}
+		}
+	}
+	if err := t.FinishFields(fieldsTarget1); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (m *CaveatDescriptor) MakeVDLTarget() vdl.Target {
+	return nil
+}
+
+func (m *CaveatDescriptor) IsZero() bool {
+
+	var1 := (*m == CaveatDescriptor{
+		ParamType: vdl.AnyType,
+	})
+	return var1
 }
 
 // Caveat is a condition on the validity of a blessing/discharge.
@@ -153,6 +694,74 @@ type Caveat struct {
 func (Caveat) __VDLReflect(struct {
 	Name string `vdl:"v.io/v23/security.Caveat"`
 }) {
+}
+
+func (m *Caveat) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
+
+	if __VDLType_types_v_io_v23_security_Caveat == nil || __VDLTypetypes9 == nil {
+		panic("Initialization order error: types generated for FillVDLTarget not initialized. Consider moving caller to an init() block.")
+	}
+	fieldsTarget1, err := t.StartFields(tt)
+	if err != nil {
+		return err
+	}
+
+	var2 := m.Id.IsZero()
+	if !var2 {
+		keyTarget3, fieldTarget4, err := fieldsTarget1.StartField("Id")
+		if err != vdl.ErrFieldNoExist && err != nil {
+			return err
+		}
+		if err != vdl.ErrFieldNoExist {
+
+			if err := m.Id.FillVDLTarget(fieldTarget4, __VDLType_types_v_io_v23_uniqueid_Id); err != nil {
+				return err
+			}
+			if err := fieldsTarget1.FinishField(keyTarget3, fieldTarget4); err != nil {
+				return err
+			}
+		}
+	}
+	var var5 bool
+	if len(m.ParamVom) == 0 {
+		var5 = true
+	}
+	if !var5 {
+		keyTarget6, fieldTarget7, err := fieldsTarget1.StartField("ParamVom")
+		if err != vdl.ErrFieldNoExist && err != nil {
+			return err
+		}
+		if err != vdl.ErrFieldNoExist {
+
+			if err := fieldTarget7.FromBytes([]byte(m.ParamVom), __VDLTypetypes1); err != nil {
+				return err
+			}
+			if err := fieldsTarget1.FinishField(keyTarget6, fieldTarget7); err != nil {
+				return err
+			}
+		}
+	}
+	if err := t.FinishFields(fieldsTarget1); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (m *Caveat) MakeVDLTarget() vdl.Target {
+	return nil
+}
+
+func (m *Caveat) IsZero() bool {
+
+	var1 := true
+	var2 := m.Id.IsZero()
+	var1 = var1 && var2
+	var var3 bool
+	if len(m.ParamVom) == 0 {
+		var3 = true
+	}
+	var1 = var1 && var3
+	return var1
 }
 
 // WireBlessings encapsulates wire format of a set of blessings and the
@@ -174,6 +783,83 @@ func (WireBlessings) __VDLReflect(struct {
 }) {
 }
 
+func (m *WireBlessings) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
+
+	__VDLEnsureNativeBuilt_types()
+	fieldsTarget1, err := t.StartFields(tt)
+	if err != nil {
+		return err
+	}
+
+	var var2 bool
+	if len(m.CertificateChains) == 0 {
+		var2 = true
+	}
+	if !var2 {
+		keyTarget3, fieldTarget4, err := fieldsTarget1.StartField("CertificateChains")
+		if err != vdl.ErrFieldNoExist && err != nil {
+			return err
+		}
+		if err != vdl.ErrFieldNoExist {
+
+			listTarget5, err := fieldTarget4.StartList(__VDLTypetypes11, len(m.CertificateChains))
+			if err != nil {
+				return err
+			}
+			for i, elem7 := range m.CertificateChains {
+				elemTarget6, err := listTarget5.StartElem(i)
+				if err != nil {
+					return err
+				}
+
+				listTarget8, err := elemTarget6.StartList(__VDLTypetypes12, len(elem7))
+				if err != nil {
+					return err
+				}
+				for i, elem10 := range elem7 {
+					elemTarget9, err := listTarget8.StartElem(i)
+					if err != nil {
+						return err
+					}
+
+					if err := elem10.FillVDLTarget(elemTarget9, __VDLType_types_v_io_v23_security_Certificate); err != nil {
+						return err
+					}
+					if err := listTarget8.FinishElem(elemTarget9); err != nil {
+						return err
+					}
+				}
+				if err := elemTarget6.FinishList(listTarget8); err != nil {
+					return err
+				}
+				if err := listTarget5.FinishElem(elemTarget6); err != nil {
+					return err
+				}
+			}
+			if err := fieldTarget4.FinishList(listTarget5); err != nil {
+				return err
+			}
+			if err := fieldsTarget1.FinishField(keyTarget3, fieldTarget4); err != nil {
+				return err
+			}
+		}
+	}
+	if err := t.FinishFields(fieldsTarget1); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (m *WireBlessings) MakeVDLTarget() vdl.Target {
+	return nil
+}
+
+func (m *WireBlessings) IsZero() bool {
+
+	var1 := vdl.ValueOf(m).IsZero()
+	return var1
+}
+
 type (
 	// WireDischarge represents any single field of the WireDischarge union type.
 	//
@@ -188,6 +874,8 @@ type (
 		Name() string
 		// __VDLReflect describes the WireDischarge union type.
 		__VDLReflect(__WireDischargeReflect)
+		FillVDLTarget(vdl.Target, *vdl.Type) error
+		IsZero() bool
 	}
 	// WireDischargePublicKey represents field PublicKey of the WireDischarge union type.
 	WireDischargePublicKey struct{ Value publicKeyDischarge } // Discharge for PublicKeyThirdPartyCaveat
@@ -206,6 +894,40 @@ func (x WireDischargePublicKey) Interface() interface{}              { return x.
 func (x WireDischargePublicKey) Name() string                        { return "PublicKey" }
 func (x WireDischargePublicKey) __VDLReflect(__WireDischargeReflect) {}
 
+func (m WireDischargePublicKey) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
+
+	fieldsTarget1, err := t.StartFields(__VDLType_types_v_io_v23_security_WireDischarge)
+	if err != nil {
+		return err
+	}
+	keyTarget2, fieldTarget3, err := fieldsTarget1.StartField("PublicKey")
+	if err != nil {
+		return err
+	}
+
+	if err := m.Value.FillVDLTarget(fieldTarget3, __VDLType_types_v_io_v23_security_publicKeyDischarge); err != nil {
+		return err
+	}
+	if err := fieldsTarget1.FinishField(keyTarget2, fieldTarget3); err != nil {
+		return err
+	}
+	if err := t.FinishFields(fieldsTarget1); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (m WireDischargePublicKey) MakeVDLTarget() vdl.Target {
+	return nil
+}
+
+func (m WireDischargePublicKey) IsZero() bool {
+
+	var1 := vdl.ValueOf(m).IsZero()
+	return var1
+}
+
 // RejectedBlessing describes why a blessing failed validation.
 type RejectedBlessing struct {
 	Blessing string
@@ -217,9 +939,81 @@ func (RejectedBlessing) __VDLReflect(struct {
 }) {
 }
 
+func (m *RejectedBlessing) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
+
+	if __VDLType_types_v_io_v23_security_RejectedBlessing == nil || __VDLTypetypes13 == nil {
+		panic("Initialization order error: types generated for FillVDLTarget not initialized. Consider moving caller to an init() block.")
+	}
+	fieldsTarget1, err := t.StartFields(tt)
+	if err != nil {
+		return err
+	}
+
+	var2 := (m.Blessing == "")
+	if !var2 {
+		keyTarget3, fieldTarget4, err := fieldsTarget1.StartField("Blessing")
+		if err != vdl.ErrFieldNoExist && err != nil {
+			return err
+		}
+		if err != vdl.ErrFieldNoExist {
+			if err := fieldTarget4.FromString(string(m.Blessing), vdl.StringType); err != nil {
+				return err
+			}
+			if err := fieldsTarget1.FinishField(keyTarget3, fieldTarget4); err != nil {
+				return err
+			}
+		}
+	}
+	var5 := (m.Err == (error)(nil))
+	if !var5 {
+		keyTarget6, fieldTarget7, err := fieldsTarget1.StartField("Err")
+		if err != vdl.ErrFieldNoExist && err != nil {
+			return err
+		}
+		if err != vdl.ErrFieldNoExist {
+
+			if m.Err == nil {
+				if err := fieldTarget7.FromNil(vdl.ErrorType); err != nil {
+					return err
+				}
+			} else {
+				var wireError8 vdl.WireError
+				if err := verror.WireFromNative(&wireError8, m.Err); err != nil {
+					return err
+				}
+				if err := wireError8.FillVDLTarget(fieldTarget7, vdl.ErrorType); err != nil {
+					return err
+				}
+
+			}
+			if err := fieldsTarget1.FinishField(keyTarget6, fieldTarget7); err != nil {
+				return err
+			}
+		}
+	}
+	if err := t.FinishFields(fieldsTarget1); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (m *RejectedBlessing) MakeVDLTarget() vdl.Target {
+	return nil
+}
+
+func (m *RejectedBlessing) IsZero() bool {
+
+	var1 := true
+	var2 := (m.Blessing == "")
+	var1 = var1 && var2
+	var3 := (m.Err == (error)(nil))
+	var1 = var1 && var3
+	return var1
+}
+
 func init() {
-	vdl.RegisterNative(wireBlessingsToNative, wireBlessingsFromNative)
-	vdl.RegisterNative(wireDischargeToNative, wireDischargeFromNative)
+	vdl.RegisterNative(WireBlessingsToNative, WireBlessingsFromNative)
+	vdl.RegisterNative(WireDischargeToNative, WireDischargeFromNative)
 	vdl.Register((*BlessingPattern)(nil))
 	vdl.Register((*Hash)(nil))
 	vdl.Register((*Signature)(nil))
@@ -234,12 +1028,201 @@ func init() {
 }
 
 // Type-check WireBlessings conversion functions.
-var _ func(WireBlessings, *Blessings) error = wireBlessingsToNative
-var _ func(*WireBlessings, Blessings) error = wireBlessingsFromNative
+var _ func(WireBlessings, *Blessings) error = WireBlessingsToNative
+var _ func(*WireBlessings, Blessings) error = WireBlessingsFromNative
 
 // Type-check WireDischarge conversion functions.
-var _ func(WireDischarge, *Discharge) error = wireDischargeToNative
-var _ func(*WireDischarge, Discharge) error = wireDischargeFromNative
+var _ func(WireDischarge, *Discharge) error = WireDischargeToNative
+var _ func(*WireDischarge, Discharge) error = WireDischargeFromNative
+
+var __VDLTypetypes9 *vdl.Type = vdl.TypeOf((*Caveat)(nil))
+var __VDLTypetypes8 *vdl.Type = vdl.TypeOf((*CaveatDescriptor)(nil))
+var __VDLTypetypes6 *vdl.Type = vdl.TypeOf((*Certificate)(nil))
+var __VDLTypetypes3 *vdl.Type = vdl.TypeOf((*DischargeImpetus)(nil))
+var __VDLTypetypes13 *vdl.Type = vdl.TypeOf((*RejectedBlessing)(nil))
+var __VDLTypetypes0 *vdl.Type = vdl.TypeOf((*Signature)(nil))
+var __VDLTypetypes2 *vdl.Type = vdl.TypeOf((*ThirdPartyRequirements)(nil))
+var __VDLTypetypes10 *vdl.Type
+
+func __VDLTypetypes10_gen() *vdl.Type {
+	__VDLTypetypes10Builder := vdl.TypeBuilder{}
+
+	__VDLTypetypes101 := __VDLTypetypes10Builder.Optional()
+	__VDLTypetypes102 := __VDLTypetypes10Builder.Struct()
+	__VDLTypetypes103 := __VDLTypetypes10Builder.Named("v.io/v23/security.WireBlessings").AssignBase(__VDLTypetypes102)
+	__VDLTypetypes104 := __VDLTypetypes10Builder.List()
+	__VDLTypetypes105 := __VDLTypetypes10Builder.List()
+	__VDLTypetypes106 := __VDLTypetypes10Builder.Struct()
+	__VDLTypetypes107 := __VDLTypetypes10Builder.Named("v.io/v23/security.Certificate").AssignBase(__VDLTypetypes106)
+	__VDLTypetypes108 := vdl.StringType
+	__VDLTypetypes106.AppendField("Extension", __VDLTypetypes108)
+	__VDLTypetypes109 := __VDLTypetypes10Builder.List()
+	__VDLTypetypes1010 := vdl.ByteType
+	__VDLTypetypes109.AssignElem(__VDLTypetypes1010)
+	__VDLTypetypes106.AppendField("PublicKey", __VDLTypetypes109)
+	__VDLTypetypes1011 := __VDLTypetypes10Builder.List()
+	__VDLTypetypes1012 := __VDLTypetypes10Builder.Struct()
+	__VDLTypetypes1013 := __VDLTypetypes10Builder.Named("v.io/v23/security.Caveat").AssignBase(__VDLTypetypes1012)
+	__VDLTypetypes1014 := __VDLTypetypes10Builder.Array()
+	__VDLTypetypes1015 := __VDLTypetypes10Builder.Named("v.io/v23/uniqueid.Id").AssignBase(__VDLTypetypes1014)
+	__VDLTypetypes1014.AssignElem(__VDLTypetypes1010)
+	__VDLTypetypes1014.AssignLen(16)
+	__VDLTypetypes1012.AppendField("Id", __VDLTypetypes1015)
+	__VDLTypetypes1012.AppendField("ParamVom", __VDLTypetypes109)
+	__VDLTypetypes1011.AssignElem(__VDLTypetypes1013)
+	__VDLTypetypes106.AppendField("Caveats", __VDLTypetypes1011)
+	__VDLTypetypes1016 := __VDLTypetypes10Builder.Struct()
+	__VDLTypetypes1017 := __VDLTypetypes10Builder.Named("v.io/v23/security.Signature").AssignBase(__VDLTypetypes1016)
+	__VDLTypetypes1016.AppendField("Purpose", __VDLTypetypes109)
+	__VDLTypetypes1018 := vdl.StringType
+	__VDLTypetypes1019 := __VDLTypetypes10Builder.Named("v.io/v23/security.Hash").AssignBase(__VDLTypetypes1018)
+	__VDLTypetypes1016.AppendField("Hash", __VDLTypetypes1019)
+	__VDLTypetypes1016.AppendField("R", __VDLTypetypes109)
+	__VDLTypetypes1016.AppendField("S", __VDLTypetypes109)
+	__VDLTypetypes106.AppendField("Signature", __VDLTypetypes1017)
+	__VDLTypetypes105.AssignElem(__VDLTypetypes107)
+	__VDLTypetypes104.AssignElem(__VDLTypetypes105)
+	__VDLTypetypes102.AppendField("CertificateChains", __VDLTypetypes104)
+	__VDLTypetypes101.AssignElem(__VDLTypetypes103)
+	__VDLTypetypes10Builder.Build()
+	__VDLTypetypes10v, err := __VDLTypetypes101.Built()
+	if err != nil {
+		panic(err)
+	}
+	return __VDLTypetypes10v
+}
+func init() {
+	__VDLTypetypes10 = __VDLTypetypes10_gen()
+}
+
+var __VDLTypetypes11 *vdl.Type = vdl.TypeOf([][]Certificate(nil))
+var __VDLTypetypes5 *vdl.Type = vdl.TypeOf([]*vom.RawBytes(nil))
+var __VDLTypetypes1 *vdl.Type = vdl.TypeOf([]byte(nil))
+var __VDLTypetypes4 *vdl.Type = vdl.TypeOf([]BlessingPattern(nil))
+var __VDLTypetypes7 *vdl.Type = vdl.TypeOf([]Caveat(nil))
+var __VDLTypetypes12 *vdl.Type = vdl.TypeOf([]Certificate(nil))
+var __VDLType_types_v_io_v23_security_BlessingPattern *vdl.Type = vdl.TypeOf(BlessingPattern(""))
+var __VDLType_types_v_io_v23_security_Caveat *vdl.Type = vdl.TypeOf(Caveat{})
+var __VDLType_types_v_io_v23_security_CaveatDescriptor *vdl.Type = vdl.TypeOf(CaveatDescriptor{
+	ParamType: vdl.AnyType,
+})
+var __VDLType_types_v_io_v23_security_Certificate *vdl.Type = vdl.TypeOf(Certificate{})
+var __VDLType_types_v_io_v23_security_DischargeImpetus *vdl.Type = vdl.TypeOf(DischargeImpetus{})
+var __VDLType_types_v_io_v23_security_Hash *vdl.Type = vdl.TypeOf(Hash(""))
+var __VDLType_types_v_io_v23_security_RejectedBlessing *vdl.Type = vdl.TypeOf(RejectedBlessing{})
+var __VDLType_types_v_io_v23_security_Signature *vdl.Type = vdl.TypeOf(Signature{})
+var __VDLType_types_v_io_v23_security_ThirdPartyRequirements *vdl.Type = vdl.TypeOf(ThirdPartyRequirements{})
+var __VDLType_types_v_io_v23_security_WireBlessings *vdl.Type
+
+func __VDLType_types_v_io_v23_security_WireBlessings_gen() *vdl.Type {
+	__VDLType_types_v_io_v23_security_WireBlessingsBuilder := vdl.TypeBuilder{}
+
+	__VDLType_types_v_io_v23_security_WireBlessings1 := __VDLType_types_v_io_v23_security_WireBlessingsBuilder.Struct()
+	__VDLType_types_v_io_v23_security_WireBlessings2 := __VDLType_types_v_io_v23_security_WireBlessingsBuilder.Named("v.io/v23/security.WireBlessings").AssignBase(__VDLType_types_v_io_v23_security_WireBlessings1)
+	__VDLType_types_v_io_v23_security_WireBlessings3 := __VDLType_types_v_io_v23_security_WireBlessingsBuilder.List()
+	__VDLType_types_v_io_v23_security_WireBlessings4 := __VDLType_types_v_io_v23_security_WireBlessingsBuilder.List()
+	__VDLType_types_v_io_v23_security_WireBlessings5 := __VDLType_types_v_io_v23_security_WireBlessingsBuilder.Struct()
+	__VDLType_types_v_io_v23_security_WireBlessings6 := __VDLType_types_v_io_v23_security_WireBlessingsBuilder.Named("v.io/v23/security.Certificate").AssignBase(__VDLType_types_v_io_v23_security_WireBlessings5)
+	__VDLType_types_v_io_v23_security_WireBlessings7 := vdl.StringType
+	__VDLType_types_v_io_v23_security_WireBlessings5.AppendField("Extension", __VDLType_types_v_io_v23_security_WireBlessings7)
+	__VDLType_types_v_io_v23_security_WireBlessings8 := __VDLType_types_v_io_v23_security_WireBlessingsBuilder.List()
+	__VDLType_types_v_io_v23_security_WireBlessings9 := vdl.ByteType
+	__VDLType_types_v_io_v23_security_WireBlessings8.AssignElem(__VDLType_types_v_io_v23_security_WireBlessings9)
+	__VDLType_types_v_io_v23_security_WireBlessings5.AppendField("PublicKey", __VDLType_types_v_io_v23_security_WireBlessings8)
+	__VDLType_types_v_io_v23_security_WireBlessings10 := __VDLType_types_v_io_v23_security_WireBlessingsBuilder.List()
+	__VDLType_types_v_io_v23_security_WireBlessings11 := __VDLType_types_v_io_v23_security_WireBlessingsBuilder.Struct()
+	__VDLType_types_v_io_v23_security_WireBlessings12 := __VDLType_types_v_io_v23_security_WireBlessingsBuilder.Named("v.io/v23/security.Caveat").AssignBase(__VDLType_types_v_io_v23_security_WireBlessings11)
+	__VDLType_types_v_io_v23_security_WireBlessings13 := __VDLType_types_v_io_v23_security_WireBlessingsBuilder.Array()
+	__VDLType_types_v_io_v23_security_WireBlessings14 := __VDLType_types_v_io_v23_security_WireBlessingsBuilder.Named("v.io/v23/uniqueid.Id").AssignBase(__VDLType_types_v_io_v23_security_WireBlessings13)
+	__VDLType_types_v_io_v23_security_WireBlessings13.AssignElem(__VDLType_types_v_io_v23_security_WireBlessings9)
+	__VDLType_types_v_io_v23_security_WireBlessings13.AssignLen(16)
+	__VDLType_types_v_io_v23_security_WireBlessings11.AppendField("Id", __VDLType_types_v_io_v23_security_WireBlessings14)
+	__VDLType_types_v_io_v23_security_WireBlessings11.AppendField("ParamVom", __VDLType_types_v_io_v23_security_WireBlessings8)
+	__VDLType_types_v_io_v23_security_WireBlessings10.AssignElem(__VDLType_types_v_io_v23_security_WireBlessings12)
+	__VDLType_types_v_io_v23_security_WireBlessings5.AppendField("Caveats", __VDLType_types_v_io_v23_security_WireBlessings10)
+	__VDLType_types_v_io_v23_security_WireBlessings15 := __VDLType_types_v_io_v23_security_WireBlessingsBuilder.Struct()
+	__VDLType_types_v_io_v23_security_WireBlessings16 := __VDLType_types_v_io_v23_security_WireBlessingsBuilder.Named("v.io/v23/security.Signature").AssignBase(__VDLType_types_v_io_v23_security_WireBlessings15)
+	__VDLType_types_v_io_v23_security_WireBlessings15.AppendField("Purpose", __VDLType_types_v_io_v23_security_WireBlessings8)
+	__VDLType_types_v_io_v23_security_WireBlessings17 := vdl.StringType
+	__VDLType_types_v_io_v23_security_WireBlessings18 := __VDLType_types_v_io_v23_security_WireBlessingsBuilder.Named("v.io/v23/security.Hash").AssignBase(__VDLType_types_v_io_v23_security_WireBlessings17)
+	__VDLType_types_v_io_v23_security_WireBlessings15.AppendField("Hash", __VDLType_types_v_io_v23_security_WireBlessings18)
+	__VDLType_types_v_io_v23_security_WireBlessings15.AppendField("R", __VDLType_types_v_io_v23_security_WireBlessings8)
+	__VDLType_types_v_io_v23_security_WireBlessings15.AppendField("S", __VDLType_types_v_io_v23_security_WireBlessings8)
+	__VDLType_types_v_io_v23_security_WireBlessings5.AppendField("Signature", __VDLType_types_v_io_v23_security_WireBlessings16)
+	__VDLType_types_v_io_v23_security_WireBlessings4.AssignElem(__VDLType_types_v_io_v23_security_WireBlessings6)
+	__VDLType_types_v_io_v23_security_WireBlessings3.AssignElem(__VDLType_types_v_io_v23_security_WireBlessings4)
+	__VDLType_types_v_io_v23_security_WireBlessings1.AppendField("CertificateChains", __VDLType_types_v_io_v23_security_WireBlessings3)
+	__VDLType_types_v_io_v23_security_WireBlessingsBuilder.Build()
+	__VDLType_types_v_io_v23_security_WireBlessingsv, err := __VDLType_types_v_io_v23_security_WireBlessings2.Built()
+	if err != nil {
+		panic(err)
+	}
+	return __VDLType_types_v_io_v23_security_WireBlessingsv
+}
+func init() {
+	__VDLType_types_v_io_v23_security_WireBlessings = __VDLType_types_v_io_v23_security_WireBlessings_gen()
+}
+
+var __VDLType_types_v_io_v23_security_WireDischarge *vdl.Type
+
+func __VDLType_types_v_io_v23_security_WireDischarge_gen() *vdl.Type {
+	__VDLType_types_v_io_v23_security_WireDischargeBuilder := vdl.TypeBuilder{}
+
+	__VDLType_types_v_io_v23_security_WireDischarge1 := __VDLType_types_v_io_v23_security_WireDischargeBuilder.Union()
+	__VDLType_types_v_io_v23_security_WireDischarge2 := __VDLType_types_v_io_v23_security_WireDischargeBuilder.Named("v.io/v23/security.WireDischarge").AssignBase(__VDLType_types_v_io_v23_security_WireDischarge1)
+	__VDLType_types_v_io_v23_security_WireDischarge3 := __VDLType_types_v_io_v23_security_WireDischargeBuilder.Struct()
+	__VDLType_types_v_io_v23_security_WireDischarge4 := __VDLType_types_v_io_v23_security_WireDischargeBuilder.Named("v.io/v23/security.publicKeyDischarge").AssignBase(__VDLType_types_v_io_v23_security_WireDischarge3)
+	__VDLType_types_v_io_v23_security_WireDischarge5 := vdl.StringType
+	__VDLType_types_v_io_v23_security_WireDischarge3.AppendField("ThirdPartyCaveatId", __VDLType_types_v_io_v23_security_WireDischarge5)
+	__VDLType_types_v_io_v23_security_WireDischarge6 := __VDLType_types_v_io_v23_security_WireDischargeBuilder.List()
+	__VDLType_types_v_io_v23_security_WireDischarge7 := __VDLType_types_v_io_v23_security_WireDischargeBuilder.Struct()
+	__VDLType_types_v_io_v23_security_WireDischarge8 := __VDLType_types_v_io_v23_security_WireDischargeBuilder.Named("v.io/v23/security.Caveat").AssignBase(__VDLType_types_v_io_v23_security_WireDischarge7)
+	__VDLType_types_v_io_v23_security_WireDischarge9 := __VDLType_types_v_io_v23_security_WireDischargeBuilder.Array()
+	__VDLType_types_v_io_v23_security_WireDischarge10 := __VDLType_types_v_io_v23_security_WireDischargeBuilder.Named("v.io/v23/uniqueid.Id").AssignBase(__VDLType_types_v_io_v23_security_WireDischarge9)
+	__VDLType_types_v_io_v23_security_WireDischarge11 := vdl.ByteType
+	__VDLType_types_v_io_v23_security_WireDischarge9.AssignElem(__VDLType_types_v_io_v23_security_WireDischarge11)
+	__VDLType_types_v_io_v23_security_WireDischarge9.AssignLen(16)
+	__VDLType_types_v_io_v23_security_WireDischarge7.AppendField("Id", __VDLType_types_v_io_v23_security_WireDischarge10)
+	__VDLType_types_v_io_v23_security_WireDischarge12 := __VDLType_types_v_io_v23_security_WireDischargeBuilder.List()
+	__VDLType_types_v_io_v23_security_WireDischarge12.AssignElem(__VDLType_types_v_io_v23_security_WireDischarge11)
+	__VDLType_types_v_io_v23_security_WireDischarge7.AppendField("ParamVom", __VDLType_types_v_io_v23_security_WireDischarge12)
+	__VDLType_types_v_io_v23_security_WireDischarge6.AssignElem(__VDLType_types_v_io_v23_security_WireDischarge8)
+	__VDLType_types_v_io_v23_security_WireDischarge3.AppendField("Caveats", __VDLType_types_v_io_v23_security_WireDischarge6)
+	__VDLType_types_v_io_v23_security_WireDischarge13 := __VDLType_types_v_io_v23_security_WireDischargeBuilder.Struct()
+	__VDLType_types_v_io_v23_security_WireDischarge14 := __VDLType_types_v_io_v23_security_WireDischargeBuilder.Named("v.io/v23/security.Signature").AssignBase(__VDLType_types_v_io_v23_security_WireDischarge13)
+	__VDLType_types_v_io_v23_security_WireDischarge13.AppendField("Purpose", __VDLType_types_v_io_v23_security_WireDischarge12)
+	__VDLType_types_v_io_v23_security_WireDischarge15 := vdl.StringType
+	__VDLType_types_v_io_v23_security_WireDischarge16 := __VDLType_types_v_io_v23_security_WireDischargeBuilder.Named("v.io/v23/security.Hash").AssignBase(__VDLType_types_v_io_v23_security_WireDischarge15)
+	__VDLType_types_v_io_v23_security_WireDischarge13.AppendField("Hash", __VDLType_types_v_io_v23_security_WireDischarge16)
+	__VDLType_types_v_io_v23_security_WireDischarge13.AppendField("R", __VDLType_types_v_io_v23_security_WireDischarge12)
+	__VDLType_types_v_io_v23_security_WireDischarge13.AppendField("S", __VDLType_types_v_io_v23_security_WireDischarge12)
+	__VDLType_types_v_io_v23_security_WireDischarge3.AppendField("Signature", __VDLType_types_v_io_v23_security_WireDischarge14)
+	__VDLType_types_v_io_v23_security_WireDischarge1.AppendField("PublicKey", __VDLType_types_v_io_v23_security_WireDischarge4)
+	__VDLType_types_v_io_v23_security_WireDischargeBuilder.Build()
+	__VDLType_types_v_io_v23_security_WireDischargev, err := __VDLType_types_v_io_v23_security_WireDischarge2.Built()
+	if err != nil {
+		panic(err)
+	}
+	return __VDLType_types_v_io_v23_security_WireDischargev
+}
+func init() {
+	__VDLType_types_v_io_v23_security_WireDischarge = __VDLType_types_v_io_v23_security_WireDischarge_gen()
+}
+
+var __VDLType_types_v_io_v23_security_publicKeyDischarge *vdl.Type = vdl.TypeOf(publicKeyDischarge{})
+var __VDLType_types_v_io_v23_uniqueid_Id *vdl.Type = vdl.TypeOf(uniqueid.Id{})
+
+func __VDLEnsureNativeBuilt_types() {
+	if __VDLTypetypes10 == nil {
+		__VDLTypetypes10 = __VDLTypetypes10_gen()
+	}
+	if __VDLType_types_v_io_v23_security_WireBlessings == nil {
+		__VDLType_types_v_io_v23_security_WireBlessings = __VDLType_types_v_io_v23_security_WireBlessings_gen()
+	}
+	if __VDLType_types_v_io_v23_security_WireDischarge == nil {
+		__VDLType_types_v_io_v23_security_WireDischarge = __VDLType_types_v_io_v23_security_WireDischarge_gen()
+	}
+}
 
 // NoExtension is an optional terminator for a blessing pattern indicating that the pattern
 // cannot match any extensions of the blessing from that point onwards.

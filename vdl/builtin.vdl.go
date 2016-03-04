@@ -28,6 +28,131 @@ func (WireError) __VDLReflect(struct {
 }) {
 }
 
+func (m *WireError) FillVDLTarget(t Target, tt *Type) error {
+
+	if __VDLType_builtin_v_io_v23_vdl_WireError == nil || __VDLTypebuiltin0 == nil {
+		panic("Initialization order error: types generated for FillVDLTarget not initialized. Consider moving caller to an init() block.")
+	}
+	fieldsTarget1, err := t.StartFields(tt)
+	if err != nil {
+		return err
+	}
+
+	var2 := (m.Id == "")
+	if !var2 {
+		keyTarget3, fieldTarget4, err := fieldsTarget1.StartField("Id")
+		if err != ErrFieldNoExist && err != nil {
+			return err
+		}
+		if err != ErrFieldNoExist {
+			if err := fieldTarget4.FromString(string(m.Id), StringType); err != nil {
+				return err
+			}
+			if err := fieldsTarget1.FinishField(keyTarget3, fieldTarget4); err != nil {
+				return err
+			}
+		}
+	}
+	var5 := m.RetryCode.IsZero()
+	if !var5 {
+		keyTarget6, fieldTarget7, err := fieldsTarget1.StartField("RetryCode")
+		if err != ErrFieldNoExist && err != nil {
+			return err
+		}
+		if err != ErrFieldNoExist {
+
+			if err := m.RetryCode.FillVDLTarget(fieldTarget7, __VDLType_builtin_v_io_v23_vdl_WireRetryCode); err != nil {
+				return err
+			}
+			if err := fieldsTarget1.FinishField(keyTarget6, fieldTarget7); err != nil {
+				return err
+			}
+		}
+	}
+	var8 := (m.Msg == "")
+	if !var8 {
+		keyTarget9, fieldTarget10, err := fieldsTarget1.StartField("Msg")
+		if err != ErrFieldNoExist && err != nil {
+			return err
+		}
+		if err != ErrFieldNoExist {
+			if err := fieldTarget10.FromString(string(m.Msg), StringType); err != nil {
+				return err
+			}
+			if err := fieldsTarget1.FinishField(keyTarget9, fieldTarget10); err != nil {
+				return err
+			}
+		}
+	}
+	var var11 bool
+	if len(m.ParamList) == 0 {
+		var11 = true
+	}
+	if !var11 {
+		keyTarget12, fieldTarget13, err := fieldsTarget1.StartField("ParamList")
+		if err != ErrFieldNoExist && err != nil {
+			return err
+		}
+		if err != ErrFieldNoExist {
+
+			listTarget14, err := fieldTarget13.StartList(__VDLTypebuiltin1, len(m.ParamList))
+			if err != nil {
+				return err
+			}
+			for i, elem16 := range m.ParamList {
+				elemTarget15, err := listTarget14.StartElem(i)
+				if err != nil {
+					return err
+				}
+
+				if elem16 == nil {
+					if err := elemTarget15.FromNil(AnyType); err != nil {
+						return err
+					}
+				} else {
+					if err := FromValue(elemTarget15, elem16); err != nil {
+						return err
+					}
+				}
+				if err := listTarget14.FinishElem(elemTarget15); err != nil {
+					return err
+				}
+			}
+			if err := fieldTarget13.FinishList(listTarget14); err != nil {
+				return err
+			}
+			if err := fieldsTarget1.FinishField(keyTarget12, fieldTarget13); err != nil {
+				return err
+			}
+		}
+	}
+	if err := t.FinishFields(fieldsTarget1); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (m *WireError) MakeVDLTarget() Target {
+	return nil
+}
+
+func (m *WireError) IsZero() bool {
+
+	var1 := true
+	var2 := (m.Id == "")
+	var1 = var1 && var2
+	var3 := m.RetryCode.IsZero()
+	var1 = var1 && var3
+	var4 := (m.Msg == "")
+	var1 = var1 && var4
+	var var5 bool
+	if len(m.ParamList) == 0 {
+		var5 = true
+	}
+	var1 = var1 && var5
+	return var1
+}
+
 // WireRetryCode is the suggested retry behavior for the receiver of an error.
 // If the receiver doesn't know how to handle the specific error, it should
 // attempt the suggested retry behavior.
@@ -90,7 +215,32 @@ func (WireRetryCode) __VDLReflect(struct {
 }) {
 }
 
+func (m WireRetryCode) FillVDLTarget(t Target, tt *Type) error {
+	if err := t.FromEnumLabel(m.String(), __VDLType_builtin_v_io_v23_vdl_WireRetryCode); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (m WireRetryCode) MakeVDLTarget() Target {
+	return nil
+}
+
+func (m WireRetryCode) IsZero() bool {
+
+	var1 := (m == WireRetryCodeNoRetry)
+	return var1
+}
+
 func init() {
 	Register((*WireError)(nil))
 	Register((*WireRetryCode)(nil))
+}
+
+var __VDLTypebuiltin0 *Type = TypeOf((*WireError)(nil))
+var __VDLTypebuiltin1 *Type = TypeOf([]*Value(nil))
+var __VDLType_builtin_v_io_v23_vdl_WireError *Type = TypeOf(WireError{})
+var __VDLType_builtin_v_io_v23_vdl_WireRetryCode *Type = TypeOf(WireRetryCodeNoRetry)
+
+func __VDLEnsureNativeBuilt_builtin() {
 }

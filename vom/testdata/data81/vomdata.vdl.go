@@ -15,6 +15,9 @@ import (
 	"v.io/v23/vom/testdata/types"
 )
 
+func __VDLEnsureNativeBuilt_vomdata() {
+}
+
 // Tests contains the testcases to use to test vom encoding and decoding.
 var Tests = []types.TestCase{
 	{

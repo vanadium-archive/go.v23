@@ -25,6 +25,117 @@ func (ConvertGroup) __VDLReflect(struct {
 }) {
 }
 
+func (m *ConvertGroup) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
+
+	if __VDLType_vomtype_v_io_v23_vom_testdata_types_ConvertGroup == nil || __VDLTypevomtype0 == nil {
+		panic("Initialization order error: types generated for FillVDLTarget not initialized. Consider moving caller to an init() block.")
+	}
+	fieldsTarget1, err := t.StartFields(tt)
+	if err != nil {
+		return err
+	}
+
+	var2 := (m.Name == "")
+	if !var2 {
+		keyTarget3, fieldTarget4, err := fieldsTarget1.StartField("Name")
+		if err != vdl.ErrFieldNoExist && err != nil {
+			return err
+		}
+		if err != vdl.ErrFieldNoExist {
+			if err := fieldTarget4.FromString(string(m.Name), vdl.StringType); err != nil {
+				return err
+			}
+			if err := fieldsTarget1.FinishField(keyTarget3, fieldTarget4); err != nil {
+				return err
+			}
+		}
+	}
+	var5 := (m.PrimaryType == vdl.AnyType)
+	if !var5 {
+		keyTarget6, fieldTarget7, err := fieldsTarget1.StartField("PrimaryType")
+		if err != vdl.ErrFieldNoExist && err != nil {
+			return err
+		}
+		if err != vdl.ErrFieldNoExist {
+			typeObjectVal8 := m.PrimaryType
+			if typeObjectVal8 == nil {
+				typeObjectVal8 = vdl.AnyType
+			}
+			if err := fieldTarget7.FromTypeObject(typeObjectVal8); err != nil {
+				return err
+			}
+			if err := fieldsTarget1.FinishField(keyTarget6, fieldTarget7); err != nil {
+				return err
+			}
+		}
+	}
+	var var9 bool
+	if len(m.Values) == 0 {
+		var9 = true
+	}
+	if !var9 {
+		keyTarget10, fieldTarget11, err := fieldsTarget1.StartField("Values")
+		if err != vdl.ErrFieldNoExist && err != nil {
+			return err
+		}
+		if err != vdl.ErrFieldNoExist {
+
+			listTarget12, err := fieldTarget11.StartList(__VDLTypevomtype1, len(m.Values))
+			if err != nil {
+				return err
+			}
+			for i, elem14 := range m.Values {
+				elemTarget13, err := listTarget12.StartElem(i)
+				if err != nil {
+					return err
+				}
+
+				if elem14 == nil {
+					if err := elemTarget13.FromNil(vdl.AnyType); err != nil {
+						return err
+					}
+				} else {
+					if err := vdl.FromValue(elemTarget13, elem14); err != nil {
+						return err
+					}
+				}
+				if err := listTarget12.FinishElem(elemTarget13); err != nil {
+					return err
+				}
+			}
+			if err := fieldTarget11.FinishList(listTarget12); err != nil {
+				return err
+			}
+			if err := fieldsTarget1.FinishField(keyTarget10, fieldTarget11); err != nil {
+				return err
+			}
+		}
+	}
+	if err := t.FinishFields(fieldsTarget1); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (m *ConvertGroup) MakeVDLTarget() vdl.Target {
+	return nil
+}
+
+func (m *ConvertGroup) IsZero() bool {
+
+	var1 := true
+	var2 := (m.Name == "")
+	var1 = var1 && var2
+	var3 := (m.PrimaryType == vdl.AnyType)
+	var1 = var1 && var3
+	var var4 bool
+	if len(m.Values) == 0 {
+		var4 = true
+	}
+	var1 = var1 && var4
+	return var1
+}
+
 type VomdataStruct struct {
 	EncodeDecodeData map[byte][]*vdl.Value // map from min required VOM version to test values
 	CompatData       map[string][]*vdl.Type
@@ -36,12 +147,259 @@ func (VomdataStruct) __VDLReflect(struct {
 }) {
 }
 
+func (m *VomdataStruct) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
+
+	if __VDLType_vomtype_v_io_v23_vom_testdata_types_VomdataStruct == nil || __VDLTypevomtype2 == nil {
+		panic("Initialization order error: types generated for FillVDLTarget not initialized. Consider moving caller to an init() block.")
+	}
+	fieldsTarget1, err := t.StartFields(tt)
+	if err != nil {
+		return err
+	}
+
+	var var2 bool
+	if len(m.EncodeDecodeData) == 0 {
+		var2 = true
+	}
+	if !var2 {
+		keyTarget3, fieldTarget4, err := fieldsTarget1.StartField("EncodeDecodeData")
+		if err != vdl.ErrFieldNoExist && err != nil {
+			return err
+		}
+		if err != vdl.ErrFieldNoExist {
+
+			mapTarget5, err := fieldTarget4.StartMap(__VDLTypevomtype3, len(m.EncodeDecodeData))
+			if err != nil {
+				return err
+			}
+			for key7, value9 := range m.EncodeDecodeData {
+				keyTarget6, err := mapTarget5.StartKey()
+				if err != nil {
+					return err
+				}
+				if err := keyTarget6.FromUint(uint64(key7), vdl.ByteType); err != nil {
+					return err
+				}
+				valueTarget8, err := mapTarget5.FinishKeyStartField(keyTarget6)
+				if err != nil {
+					return err
+				}
+
+				listTarget10, err := valueTarget8.StartList(__VDLTypevomtype1, len(value9))
+				if err != nil {
+					return err
+				}
+				for i, elem12 := range value9 {
+					elemTarget11, err := listTarget10.StartElem(i)
+					if err != nil {
+						return err
+					}
+
+					if elem12 == nil {
+						if err := elemTarget11.FromNil(vdl.AnyType); err != nil {
+							return err
+						}
+					} else {
+						if err := vdl.FromValue(elemTarget11, elem12); err != nil {
+							return err
+						}
+					}
+					if err := listTarget10.FinishElem(elemTarget11); err != nil {
+						return err
+					}
+				}
+				if err := valueTarget8.FinishList(listTarget10); err != nil {
+					return err
+				}
+				if err := mapTarget5.FinishField(keyTarget6, valueTarget8); err != nil {
+					return err
+				}
+			}
+			if err := fieldTarget4.FinishMap(mapTarget5); err != nil {
+				return err
+			}
+			if err := fieldsTarget1.FinishField(keyTarget3, fieldTarget4); err != nil {
+				return err
+			}
+		}
+	}
+	var var13 bool
+	if len(m.CompatData) == 0 {
+		var13 = true
+	}
+	if !var13 {
+		keyTarget14, fieldTarget15, err := fieldsTarget1.StartField("CompatData")
+		if err != vdl.ErrFieldNoExist && err != nil {
+			return err
+		}
+		if err != vdl.ErrFieldNoExist {
+
+			mapTarget16, err := fieldTarget15.StartMap(__VDLTypevomtype4, len(m.CompatData))
+			if err != nil {
+				return err
+			}
+			for key18, value20 := range m.CompatData {
+				keyTarget17, err := mapTarget16.StartKey()
+				if err != nil {
+					return err
+				}
+				if err := keyTarget17.FromString(string(key18), vdl.StringType); err != nil {
+					return err
+				}
+				valueTarget19, err := mapTarget16.FinishKeyStartField(keyTarget17)
+				if err != nil {
+					return err
+				}
+
+				listTarget21, err := valueTarget19.StartList(__VDLTypevomtype5, len(value20))
+				if err != nil {
+					return err
+				}
+				for i, elem23 := range value20 {
+					elemTarget22, err := listTarget21.StartElem(i)
+					if err != nil {
+						return err
+					}
+					typeObjectVal24 := elem23
+					if typeObjectVal24 == nil {
+						typeObjectVal24 = vdl.AnyType
+					}
+					if err := elemTarget22.FromTypeObject(typeObjectVal24); err != nil {
+						return err
+					}
+					if err := listTarget21.FinishElem(elemTarget22); err != nil {
+						return err
+					}
+				}
+				if err := valueTarget19.FinishList(listTarget21); err != nil {
+					return err
+				}
+				if err := mapTarget16.FinishField(keyTarget17, valueTarget19); err != nil {
+					return err
+				}
+			}
+			if err := fieldTarget15.FinishMap(mapTarget16); err != nil {
+				return err
+			}
+			if err := fieldsTarget1.FinishField(keyTarget14, fieldTarget15); err != nil {
+				return err
+			}
+		}
+	}
+	var var25 bool
+	if len(m.ConvertData) == 0 {
+		var25 = true
+	}
+	if !var25 {
+		keyTarget26, fieldTarget27, err := fieldsTarget1.StartField("ConvertData")
+		if err != vdl.ErrFieldNoExist && err != nil {
+			return err
+		}
+		if err != vdl.ErrFieldNoExist {
+
+			mapTarget28, err := fieldTarget27.StartMap(__VDLTypevomtype6, len(m.ConvertData))
+			if err != nil {
+				return err
+			}
+			for key30, value32 := range m.ConvertData {
+				keyTarget29, err := mapTarget28.StartKey()
+				if err != nil {
+					return err
+				}
+				if err := keyTarget29.FromString(string(key30), vdl.StringType); err != nil {
+					return err
+				}
+				valueTarget31, err := mapTarget28.FinishKeyStartField(keyTarget29)
+				if err != nil {
+					return err
+				}
+
+				listTarget33, err := valueTarget31.StartList(__VDLTypevomtype7, len(value32))
+				if err != nil {
+					return err
+				}
+				for i, elem35 := range value32 {
+					elemTarget34, err := listTarget33.StartElem(i)
+					if err != nil {
+						return err
+					}
+
+					if err := elem35.FillVDLTarget(elemTarget34, __VDLType_vomtype_v_io_v23_vom_testdata_types_ConvertGroup); err != nil {
+						return err
+					}
+					if err := listTarget33.FinishElem(elemTarget34); err != nil {
+						return err
+					}
+				}
+				if err := valueTarget31.FinishList(listTarget33); err != nil {
+					return err
+				}
+				if err := mapTarget28.FinishField(keyTarget29, valueTarget31); err != nil {
+					return err
+				}
+			}
+			if err := fieldTarget27.FinishMap(mapTarget28); err != nil {
+				return err
+			}
+			if err := fieldsTarget1.FinishField(keyTarget26, fieldTarget27); err != nil {
+				return err
+			}
+		}
+	}
+	if err := t.FinishFields(fieldsTarget1); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (m *VomdataStruct) MakeVDLTarget() vdl.Target {
+	return nil
+}
+
+func (m *VomdataStruct) IsZero() bool {
+
+	var1 := true
+	var var2 bool
+	if len(m.EncodeDecodeData) == 0 {
+		var2 = true
+	}
+	var1 = var1 && var2
+	var var3 bool
+	if len(m.CompatData) == 0 {
+		var3 = true
+	}
+	var1 = var1 && var3
+	var var4 bool
+	if len(m.ConvertData) == 0 {
+		var4 = true
+	}
+	var1 = var1 && var4
+	return var1
+}
+
 // Named Types
 type NBool bool
 
 func (NBool) __VDLReflect(struct {
 	Name string `vdl:"v.io/v23/vom/testdata/types.NBool"`
 }) {
+}
+
+func (m NBool) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
+	if err := t.FromBool(bool(m), __VDLType_vomtype_v_io_v23_vom_testdata_types_NBool); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (m NBool) MakeVDLTarget() vdl.Target {
+	return nil
+}
+
+func (m NBool) IsZero() bool {
+
+	var1 := (m == NBool(false))
+	return var1
 }
 
 type NString string
@@ -51,11 +409,49 @@ func (NString) __VDLReflect(struct {
 }) {
 }
 
+func (m NString) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
+	if err := t.FromString(string(m), __VDLType_vomtype_v_io_v23_vom_testdata_types_NString); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (m NString) MakeVDLTarget() vdl.Target {
+	return nil
+}
+
+func (m NString) IsZero() bool {
+
+	var1 := (m == NString(""))
+	return var1
+}
+
 type NByteSlice []byte
 
 func (NByteSlice) __VDLReflect(struct {
 	Name string `vdl:"v.io/v23/vom/testdata/types.NByteSlice"`
 }) {
+}
+
+func (m NByteSlice) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
+
+	if err := t.FromBytes([]byte(m), __VDLType_vomtype_v_io_v23_vom_testdata_types_NByteSlice); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (m NByteSlice) MakeVDLTarget() vdl.Target {
+	return nil
+}
+
+func (m NByteSlice) IsZero() bool {
+
+	var var1 bool
+	if len(m) == 0 {
+		var1 = true
+	}
+	return var1
 }
 
 type NByteArray [4]byte
@@ -65,11 +461,46 @@ func (NByteArray) __VDLReflect(struct {
 }) {
 }
 
+func (m NByteArray) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
+
+	if err := t.FromBytes([]byte(m[:]), __VDLType_vomtype_v_io_v23_vom_testdata_types_NByteArray); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (m NByteArray) MakeVDLTarget() vdl.Target {
+	return nil
+}
+
+func (m NByteArray) IsZero() bool {
+
+	var1 := (m == NByteArray{})
+	return var1
+}
+
 type NByte byte
 
 func (NByte) __VDLReflect(struct {
 	Name string `vdl:"v.io/v23/vom/testdata/types.NByte"`
 }) {
+}
+
+func (m NByte) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
+	if err := t.FromUint(uint64(m), __VDLType_vomtype_v_io_v23_vom_testdata_types_NByte); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (m NByte) MakeVDLTarget() vdl.Target {
+	return nil
+}
+
+func (m NByte) IsZero() bool {
+
+	var1 := (m == NByte(0))
+	return var1
 }
 
 type NUint16 uint16
@@ -79,11 +510,45 @@ func (NUint16) __VDLReflect(struct {
 }) {
 }
 
+func (m NUint16) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
+	if err := t.FromUint(uint64(m), __VDLType_vomtype_v_io_v23_vom_testdata_types_NUint16); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (m NUint16) MakeVDLTarget() vdl.Target {
+	return nil
+}
+
+func (m NUint16) IsZero() bool {
+
+	var1 := (m == NUint16(0))
+	return var1
+}
+
 type NUint32 uint32
 
 func (NUint32) __VDLReflect(struct {
 	Name string `vdl:"v.io/v23/vom/testdata/types.NUint32"`
 }) {
+}
+
+func (m NUint32) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
+	if err := t.FromUint(uint64(m), __VDLType_vomtype_v_io_v23_vom_testdata_types_NUint32); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (m NUint32) MakeVDLTarget() vdl.Target {
+	return nil
+}
+
+func (m NUint32) IsZero() bool {
+
+	var1 := (m == NUint32(0))
+	return var1
 }
 
 type NUint64 uint64
@@ -93,11 +558,45 @@ func (NUint64) __VDLReflect(struct {
 }) {
 }
 
+func (m NUint64) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
+	if err := t.FromUint(uint64(m), __VDLType_vomtype_v_io_v23_vom_testdata_types_NUint64); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (m NUint64) MakeVDLTarget() vdl.Target {
+	return nil
+}
+
+func (m NUint64) IsZero() bool {
+
+	var1 := (m == NUint64(0))
+	return var1
+}
+
 type NInt8 int8
 
 func (NInt8) __VDLReflect(struct {
 	Name string `vdl:"v.io/v23/vom/testdata/types.NInt8"`
 }) {
+}
+
+func (m NInt8) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
+	if err := t.FromInt(int64(m), __VDLType_vomtype_v_io_v23_vom_testdata_types_NInt8); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (m NInt8) MakeVDLTarget() vdl.Target {
+	return nil
+}
+
+func (m NInt8) IsZero() bool {
+
+	var1 := (m == NInt8(0))
+	return var1
 }
 
 type NInt16 int16
@@ -107,11 +606,45 @@ func (NInt16) __VDLReflect(struct {
 }) {
 }
 
+func (m NInt16) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
+	if err := t.FromInt(int64(m), __VDLType_vomtype_v_io_v23_vom_testdata_types_NInt16); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (m NInt16) MakeVDLTarget() vdl.Target {
+	return nil
+}
+
+func (m NInt16) IsZero() bool {
+
+	var1 := (m == NInt16(0))
+	return var1
+}
+
 type NInt32 int32
 
 func (NInt32) __VDLReflect(struct {
 	Name string `vdl:"v.io/v23/vom/testdata/types.NInt32"`
 }) {
+}
+
+func (m NInt32) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
+	if err := t.FromInt(int64(m), __VDLType_vomtype_v_io_v23_vom_testdata_types_NInt32); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (m NInt32) MakeVDLTarget() vdl.Target {
+	return nil
+}
+
+func (m NInt32) IsZero() bool {
+
+	var1 := (m == NInt32(0))
+	return var1
 }
 
 type NInt64 int64
@@ -121,11 +654,45 @@ func (NInt64) __VDLReflect(struct {
 }) {
 }
 
+func (m NInt64) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
+	if err := t.FromInt(int64(m), __VDLType_vomtype_v_io_v23_vom_testdata_types_NInt64); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (m NInt64) MakeVDLTarget() vdl.Target {
+	return nil
+}
+
+func (m NInt64) IsZero() bool {
+
+	var1 := (m == NInt64(0))
+	return var1
+}
+
 type NFloat32 float32
 
 func (NFloat32) __VDLReflect(struct {
 	Name string `vdl:"v.io/v23/vom/testdata/types.NFloat32"`
 }) {
+}
+
+func (m NFloat32) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
+	if err := t.FromFloat(float64(m), __VDLType_vomtype_v_io_v23_vom_testdata_types_NFloat32); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (m NFloat32) MakeVDLTarget() vdl.Target {
+	return nil
+}
+
+func (m NFloat32) IsZero() bool {
+
+	var1 := (m == NFloat32(0))
+	return var1
 }
 
 type NFloat64 float64
@@ -135,11 +702,45 @@ func (NFloat64) __VDLReflect(struct {
 }) {
 }
 
+func (m NFloat64) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
+	if err := t.FromFloat(float64(m), __VDLType_vomtype_v_io_v23_vom_testdata_types_NFloat64); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (m NFloat64) MakeVDLTarget() vdl.Target {
+	return nil
+}
+
+func (m NFloat64) IsZero() bool {
+
+	var1 := (m == NFloat64(0))
+	return var1
+}
+
 type NComplex64 complex64
 
 func (NComplex64) __VDLReflect(struct {
 	Name string `vdl:"v.io/v23/vom/testdata/types.NComplex64"`
 }) {
+}
+
+func (m NComplex64) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
+	if err := t.FromComplex(complex128(m), __VDLType_vomtype_v_io_v23_vom_testdata_types_NComplex64); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (m NComplex64) MakeVDLTarget() vdl.Target {
+	return nil
+}
+
+func (m NComplex64) IsZero() bool {
+
+	var1 := (m == NComplex64(0))
+	return var1
 }
 
 type NComplex128 complex128
@@ -149,11 +750,62 @@ func (NComplex128) __VDLReflect(struct {
 }) {
 }
 
+func (m NComplex128) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
+	if err := t.FromComplex(complex128(m), __VDLType_vomtype_v_io_v23_vom_testdata_types_NComplex128); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (m NComplex128) MakeVDLTarget() vdl.Target {
+	return nil
+}
+
+func (m NComplex128) IsZero() bool {
+
+	var1 := (m == NComplex128(0))
+	return var1
+}
+
 type NArray2Uint64 [2]uint64
 
 func (NArray2Uint64) __VDLReflect(struct {
 	Name string `vdl:"v.io/v23/vom/testdata/types.NArray2Uint64"`
 }) {
+}
+
+func (m NArray2Uint64) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
+
+	listTarget1, err := t.StartList(__VDLType_vomtype_v_io_v23_vom_testdata_types_NArray2Uint64, 2)
+	if err != nil {
+		return err
+	}
+	for i, elem3 := range m {
+		elemTarget2, err := listTarget1.StartElem(i)
+		if err != nil {
+			return err
+		}
+		if err := elemTarget2.FromUint(uint64(elem3), vdl.Uint64Type); err != nil {
+			return err
+		}
+		if err := listTarget1.FinishElem(elemTarget2); err != nil {
+			return err
+		}
+	}
+	if err := t.FinishList(listTarget1); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (m NArray2Uint64) MakeVDLTarget() vdl.Target {
+	return nil
+}
+
+func (m NArray2Uint64) IsZero() bool {
+
+	var1 := (m == NArray2Uint64{})
+	return var1
 }
 
 type NListUint64 []uint64
@@ -163,6 +815,43 @@ func (NListUint64) __VDLReflect(struct {
 }) {
 }
 
+func (m NListUint64) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
+
+	listTarget1, err := t.StartList(__VDLType_vomtype_v_io_v23_vom_testdata_types_NListUint64, len(m))
+	if err != nil {
+		return err
+	}
+	for i, elem3 := range m {
+		elemTarget2, err := listTarget1.StartElem(i)
+		if err != nil {
+			return err
+		}
+		if err := elemTarget2.FromUint(uint64(elem3), vdl.Uint64Type); err != nil {
+			return err
+		}
+		if err := listTarget1.FinishElem(elemTarget2); err != nil {
+			return err
+		}
+	}
+	if err := t.FinishList(listTarget1); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (m NListUint64) MakeVDLTarget() vdl.Target {
+	return nil
+}
+
+func (m NListUint64) IsZero() bool {
+
+	var var1 bool
+	if len(m) == 0 {
+		var1 = true
+	}
+	return var1
+}
+
 type NSetUint64 map[uint64]struct{}
 
 func (NSetUint64) __VDLReflect(struct {
@@ -170,11 +859,92 @@ func (NSetUint64) __VDLReflect(struct {
 }) {
 }
 
+func (m NSetUint64) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
+
+	setTarget1, err := t.StartSet(__VDLType_vomtype_v_io_v23_vom_testdata_types_NSetUint64, len(m))
+	if err != nil {
+		return err
+	}
+	for key3 := range m {
+		keyTarget2, err := setTarget1.StartKey()
+		if err != nil {
+			return err
+		}
+		if err := keyTarget2.FromUint(uint64(key3), vdl.Uint64Type); err != nil {
+			return err
+		}
+		if err := setTarget1.FinishKey(keyTarget2); err != nil {
+			return err
+		}
+	}
+	if err := t.FinishSet(setTarget1); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (m NSetUint64) MakeVDLTarget() vdl.Target {
+	return nil
+}
+
+func (m NSetUint64) IsZero() bool {
+
+	var var1 bool
+	if len(m) == 0 {
+		var1 = true
+	}
+	return var1
+}
+
 type NMapUint64String map[uint64]string
 
 func (NMapUint64String) __VDLReflect(struct {
 	Name string `vdl:"v.io/v23/vom/testdata/types.NMapUint64String"`
 }) {
+}
+
+func (m NMapUint64String) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
+
+	mapTarget1, err := t.StartMap(__VDLType_vomtype_v_io_v23_vom_testdata_types_NMapUint64String, len(m))
+	if err != nil {
+		return err
+	}
+	for key3, value5 := range m {
+		keyTarget2, err := mapTarget1.StartKey()
+		if err != nil {
+			return err
+		}
+		if err := keyTarget2.FromUint(uint64(key3), vdl.Uint64Type); err != nil {
+			return err
+		}
+		valueTarget4, err := mapTarget1.FinishKeyStartField(keyTarget2)
+		if err != nil {
+			return err
+		}
+		if err := valueTarget4.FromString(string(value5), vdl.StringType); err != nil {
+			return err
+		}
+		if err := mapTarget1.FinishField(keyTarget2, valueTarget4); err != nil {
+			return err
+		}
+	}
+	if err := t.FinishMap(mapTarget1); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (m NMapUint64String) MakeVDLTarget() vdl.Target {
+	return nil
+}
+
+func (m NMapUint64String) IsZero() bool {
+
+	var var1 bool
+	if len(m) == 0 {
+		var1 = true
+	}
+	return var1
 }
 
 type NStruct struct {
@@ -186,6 +956,77 @@ type NStruct struct {
 func (NStruct) __VDLReflect(struct {
 	Name string `vdl:"v.io/v23/vom/testdata/types.NStruct"`
 }) {
+}
+
+func (m *NStruct) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
+
+	if __VDLType_vomtype_v_io_v23_vom_testdata_types_NStruct == nil || __VDLTypevomtype8 == nil {
+		panic("Initialization order error: types generated for FillVDLTarget not initialized. Consider moving caller to an init() block.")
+	}
+	fieldsTarget1, err := t.StartFields(tt)
+	if err != nil {
+		return err
+	}
+
+	var2 := (m.A == false)
+	if !var2 {
+		keyTarget3, fieldTarget4, err := fieldsTarget1.StartField("A")
+		if err != vdl.ErrFieldNoExist && err != nil {
+			return err
+		}
+		if err != vdl.ErrFieldNoExist {
+			if err := fieldTarget4.FromBool(bool(m.A), vdl.BoolType); err != nil {
+				return err
+			}
+			if err := fieldsTarget1.FinishField(keyTarget3, fieldTarget4); err != nil {
+				return err
+			}
+		}
+	}
+	var5 := (m.B == "")
+	if !var5 {
+		keyTarget6, fieldTarget7, err := fieldsTarget1.StartField("B")
+		if err != vdl.ErrFieldNoExist && err != nil {
+			return err
+		}
+		if err != vdl.ErrFieldNoExist {
+			if err := fieldTarget7.FromString(string(m.B), vdl.StringType); err != nil {
+				return err
+			}
+			if err := fieldsTarget1.FinishField(keyTarget6, fieldTarget7); err != nil {
+				return err
+			}
+		}
+	}
+	var8 := (m.C == int64(0))
+	if !var8 {
+		keyTarget9, fieldTarget10, err := fieldsTarget1.StartField("C")
+		if err != vdl.ErrFieldNoExist && err != nil {
+			return err
+		}
+		if err != vdl.ErrFieldNoExist {
+			if err := fieldTarget10.FromInt(int64(m.C), vdl.Int64Type); err != nil {
+				return err
+			}
+			if err := fieldsTarget1.FinishField(keyTarget9, fieldTarget10); err != nil {
+				return err
+			}
+		}
+	}
+	if err := t.FinishFields(fieldsTarget1); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (m *NStruct) MakeVDLTarget() vdl.Target {
+	return nil
+}
+
+func (m *NStruct) IsZero() bool {
+
+	var1 := (*m == NStruct{})
+	return var1
 }
 
 type NEnum int
@@ -241,6 +1082,23 @@ func (NEnum) __VDLReflect(struct {
 }) {
 }
 
+func (m NEnum) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
+	if err := t.FromEnumLabel(m.String(), __VDLType_vomtype_v_io_v23_vom_testdata_types_NEnum); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (m NEnum) MakeVDLTarget() vdl.Target {
+	return nil
+}
+
+func (m NEnum) IsZero() bool {
+
+	var1 := (m == NEnumA)
+	return var1
+}
+
 type (
 	// NUnion represents any single field of the NUnion union type.
 	NUnion interface {
@@ -252,6 +1110,8 @@ type (
 		Name() string
 		// __VDLReflect describes the NUnion union type.
 		__VDLReflect(__NUnionReflect)
+		FillVDLTarget(vdl.Target, *vdl.Type) error
+		IsZero() bool
 	}
 	// NUnionA represents field A of the NUnion union type.
 	NUnionA struct{ Value bool }
@@ -276,15 +1136,114 @@ func (x NUnionA) Interface() interface{}       { return x.Value }
 func (x NUnionA) Name() string                 { return "A" }
 func (x NUnionA) __VDLReflect(__NUnionReflect) {}
 
+func (m NUnionA) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
+
+	fieldsTarget1, err := t.StartFields(__VDLType_vomtype_v_io_v23_vom_testdata_types_NUnion)
+	if err != nil {
+		return err
+	}
+	keyTarget2, fieldTarget3, err := fieldsTarget1.StartField("A")
+	if err != nil {
+		return err
+	}
+	if err := fieldTarget3.FromBool(bool(m.Value), vdl.BoolType); err != nil {
+		return err
+	}
+	if err := fieldsTarget1.FinishField(keyTarget2, fieldTarget3); err != nil {
+		return err
+	}
+	if err := t.FinishFields(fieldsTarget1); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (m NUnionA) MakeVDLTarget() vdl.Target {
+	return nil
+}
+
+func (m NUnionA) IsZero() bool {
+
+	var2 := (m.Value == false)
+	return var2
+}
+
 func (x NUnionB) Index() int                   { return 1 }
 func (x NUnionB) Interface() interface{}       { return x.Value }
 func (x NUnionB) Name() string                 { return "B" }
 func (x NUnionB) __VDLReflect(__NUnionReflect) {}
 
+func (m NUnionB) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
+
+	fieldsTarget1, err := t.StartFields(__VDLType_vomtype_v_io_v23_vom_testdata_types_NUnion)
+	if err != nil {
+		return err
+	}
+	keyTarget2, fieldTarget3, err := fieldsTarget1.StartField("B")
+	if err != nil {
+		return err
+	}
+	if err := fieldTarget3.FromString(string(m.Value), vdl.StringType); err != nil {
+		return err
+	}
+	if err := fieldsTarget1.FinishField(keyTarget2, fieldTarget3); err != nil {
+		return err
+	}
+	if err := t.FinishFields(fieldsTarget1); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (m NUnionB) MakeVDLTarget() vdl.Target {
+	return nil
+}
+
+func (m NUnionB) IsZero() bool {
+
+	unionField2 := false
+	return unionField2
+}
+
 func (x NUnionC) Index() int                   { return 2 }
 func (x NUnionC) Interface() interface{}       { return x.Value }
 func (x NUnionC) Name() string                 { return "C" }
 func (x NUnionC) __VDLReflect(__NUnionReflect) {}
+
+func (m NUnionC) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
+
+	fieldsTarget1, err := t.StartFields(__VDLType_vomtype_v_io_v23_vom_testdata_types_NUnion)
+	if err != nil {
+		return err
+	}
+	keyTarget2, fieldTarget3, err := fieldsTarget1.StartField("C")
+	if err != nil {
+		return err
+	}
+	if err := fieldTarget3.FromInt(int64(m.Value), vdl.Int64Type); err != nil {
+		return err
+	}
+	if err := fieldsTarget1.FinishField(keyTarget2, fieldTarget3); err != nil {
+		return err
+	}
+	if err := t.FinishFields(fieldsTarget1); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (m NUnionC) MakeVDLTarget() vdl.Target {
+	return nil
+}
+
+func (m NUnionC) IsZero() bool {
+
+	unionField2 := false
+	return unionField2
+}
 
 // Nested Custom Types
 type MBool NBool
@@ -292,6 +1251,23 @@ type MBool NBool
 func (MBool) __VDLReflect(struct {
 	Name string `vdl:"v.io/v23/vom/testdata/types.MBool"`
 }) {
+}
+
+func (m MBool) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
+	if err := t.FromBool(bool(m), __VDLType_vomtype_v_io_v23_vom_testdata_types_MBool); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (m MBool) MakeVDLTarget() vdl.Target {
+	return nil
+}
+
+func (m MBool) IsZero() bool {
+
+	var1 := (m == MBool(false))
+	return var1
 }
 
 type MStruct struct {
@@ -308,11 +1284,187 @@ func (MStruct) __VDLReflect(struct {
 }) {
 }
 
+func (m *MStruct) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
+
+	if __VDLType_vomtype_v_io_v23_vom_testdata_types_MStruct == nil || __VDLTypevomtype9 == nil {
+		panic("Initialization order error: types generated for FillVDLTarget not initialized. Consider moving caller to an init() block.")
+	}
+	fieldsTarget1, err := t.StartFields(tt)
+	if err != nil {
+		return err
+	}
+
+	var2 := (m.A == false)
+	if !var2 {
+		keyTarget3, fieldTarget4, err := fieldsTarget1.StartField("A")
+		if err != vdl.ErrFieldNoExist && err != nil {
+			return err
+		}
+		if err != vdl.ErrFieldNoExist {
+			if err := fieldTarget4.FromBool(bool(m.A), vdl.BoolType); err != nil {
+				return err
+			}
+			if err := fieldsTarget1.FinishField(keyTarget3, fieldTarget4); err != nil {
+				return err
+			}
+		}
+	}
+	var5 := m.B.IsZero()
+	if !var5 {
+		keyTarget6, fieldTarget7, err := fieldsTarget1.StartField("B")
+		if err != vdl.ErrFieldNoExist && err != nil {
+			return err
+		}
+		if err != vdl.ErrFieldNoExist {
+
+			if err := m.B.FillVDLTarget(fieldTarget7, __VDLType_vomtype_v_io_v23_vom_testdata_types_NBool); err != nil {
+				return err
+			}
+			if err := fieldsTarget1.FinishField(keyTarget6, fieldTarget7); err != nil {
+				return err
+			}
+		}
+	}
+	var8 := m.C.IsZero()
+	if !var8 {
+		keyTarget9, fieldTarget10, err := fieldsTarget1.StartField("C")
+		if err != vdl.ErrFieldNoExist && err != nil {
+			return err
+		}
+		if err != vdl.ErrFieldNoExist {
+
+			if err := m.C.FillVDLTarget(fieldTarget10, __VDLType_vomtype_v_io_v23_vom_testdata_types_MBool); err != nil {
+				return err
+			}
+			if err := fieldsTarget1.FinishField(keyTarget9, fieldTarget10); err != nil {
+				return err
+			}
+		}
+	}
+	var11 := (m.D == (*NStruct)(nil))
+	if !var11 {
+		keyTarget12, fieldTarget13, err := fieldsTarget1.StartField("D")
+		if err != vdl.ErrFieldNoExist && err != nil {
+			return err
+		}
+		if err != vdl.ErrFieldNoExist {
+
+			if m.D == nil {
+				if err := fieldTarget13.FromNil(__VDLTypevomtype8); err != nil {
+					return err
+				}
+			} else {
+				if err := m.D.FillVDLTarget(fieldTarget13, __VDLType_vomtype_v_io_v23_vom_testdata_types_NStruct); err != nil {
+					return err
+				}
+			}
+			if err := fieldsTarget1.FinishField(keyTarget12, fieldTarget13); err != nil {
+				return err
+			}
+		}
+	}
+	var14 := (m.E == vdl.AnyType)
+	if !var14 {
+		keyTarget15, fieldTarget16, err := fieldsTarget1.StartField("E")
+		if err != vdl.ErrFieldNoExist && err != nil {
+			return err
+		}
+		if err != vdl.ErrFieldNoExist {
+			typeObjectVal17 := m.E
+			if typeObjectVal17 == nil {
+				typeObjectVal17 = vdl.AnyType
+			}
+			if err := fieldTarget16.FromTypeObject(typeObjectVal17); err != nil {
+				return err
+			}
+			if err := fieldsTarget1.FinishField(keyTarget15, fieldTarget16); err != nil {
+				return err
+			}
+		}
+	}
+	var18 := (m.F == (*vdl.Value)(nil))
+	if !var18 {
+		keyTarget19, fieldTarget20, err := fieldsTarget1.StartField("F")
+		if err != vdl.ErrFieldNoExist && err != nil {
+			return err
+		}
+		if err != vdl.ErrFieldNoExist {
+
+			if m.F == nil {
+				if err := fieldTarget20.FromNil(vdl.AnyType); err != nil {
+					return err
+				}
+			} else {
+				if err := vdl.FromValue(fieldTarget20, m.F); err != nil {
+					return err
+				}
+			}
+			if err := fieldsTarget1.FinishField(keyTarget19, fieldTarget20); err != nil {
+				return err
+			}
+		}
+	}
+	if err := t.FinishFields(fieldsTarget1); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (m *MStruct) MakeVDLTarget() vdl.Target {
+	return nil
+}
+
+func (m *MStruct) IsZero() bool {
+
+	var1 := (*m == MStruct{
+		E: vdl.AnyType,
+	})
+	return var1
+}
+
 type MList []NListUint64
 
 func (MList) __VDLReflect(struct {
 	Name string `vdl:"v.io/v23/vom/testdata/types.MList"`
 }) {
+}
+
+func (m MList) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
+
+	listTarget1, err := t.StartList(__VDLType_vomtype_v_io_v23_vom_testdata_types_MList, len(m))
+	if err != nil {
+		return err
+	}
+	for i, elem3 := range m {
+		elemTarget2, err := listTarget1.StartElem(i)
+		if err != nil {
+			return err
+		}
+
+		if err := elem3.FillVDLTarget(elemTarget2, __VDLType_vomtype_v_io_v23_vom_testdata_types_NListUint64); err != nil {
+			return err
+		}
+		if err := listTarget1.FinishElem(elemTarget2); err != nil {
+			return err
+		}
+	}
+	if err := t.FinishList(listTarget1); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (m MList) MakeVDLTarget() vdl.Target {
+	return nil
+}
+
+func (m MList) IsZero() bool {
+
+	var var1 bool
+	if len(m) == 0 {
+		var1 = true
+	}
+	return var1
 }
 
 type MMap map[NFloat32]NListUint64
@@ -322,6 +1474,52 @@ func (MMap) __VDLReflect(struct {
 }) {
 }
 
+func (m MMap) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
+
+	mapTarget1, err := t.StartMap(__VDLType_vomtype_v_io_v23_vom_testdata_types_MMap, len(m))
+	if err != nil {
+		return err
+	}
+	for key3, value5 := range m {
+		keyTarget2, err := mapTarget1.StartKey()
+		if err != nil {
+			return err
+		}
+
+		if err := key3.FillVDLTarget(keyTarget2, __VDLType_vomtype_v_io_v23_vom_testdata_types_NFloat32); err != nil {
+			return err
+		}
+		valueTarget4, err := mapTarget1.FinishKeyStartField(keyTarget2)
+		if err != nil {
+			return err
+		}
+
+		if err := value5.FillVDLTarget(valueTarget4, __VDLType_vomtype_v_io_v23_vom_testdata_types_NListUint64); err != nil {
+			return err
+		}
+		if err := mapTarget1.FinishField(keyTarget2, valueTarget4); err != nil {
+			return err
+		}
+	}
+	if err := t.FinishMap(mapTarget1); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (m MMap) MakeVDLTarget() vdl.Target {
+	return nil
+}
+
+func (m MMap) IsZero() bool {
+
+	var var1 bool
+	if len(m) == 0 {
+		var1 = true
+	}
+	return var1
+}
+
 type MByteSlice []byte
 
 func (MByteSlice) __VDLReflect(struct {
@@ -329,11 +1527,69 @@ func (MByteSlice) __VDLReflect(struct {
 }) {
 }
 
+func (m MByteSlice) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
+
+	if err := t.FromBytes([]byte(m), __VDLType_vomtype_v_io_v23_vom_testdata_types_MByteSlice); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (m MByteSlice) MakeVDLTarget() vdl.Target {
+	return nil
+}
+
+func (m MByteSlice) IsZero() bool {
+
+	var var1 bool
+	if len(m) == 0 {
+		var1 = true
+	}
+	return var1
+}
+
 type MInt8Slice []int8
 
 func (MInt8Slice) __VDLReflect(struct {
 	Name string `vdl:"v.io/v23/vom/testdata/types.MInt8Slice"`
 }) {
+}
+
+func (m MInt8Slice) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
+
+	listTarget1, err := t.StartList(__VDLType_vomtype_v_io_v23_vom_testdata_types_MInt8Slice, len(m))
+	if err != nil {
+		return err
+	}
+	for i, elem3 := range m {
+		elemTarget2, err := listTarget1.StartElem(i)
+		if err != nil {
+			return err
+		}
+		if err := elemTarget2.FromInt(int64(elem3), vdl.Int8Type); err != nil {
+			return err
+		}
+		if err := listTarget1.FinishElem(elemTarget2); err != nil {
+			return err
+		}
+	}
+	if err := t.FinishList(listTarget1); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (m MInt8Slice) MakeVDLTarget() vdl.Target {
+	return nil
+}
+
+func (m MInt8Slice) IsZero() bool {
+
+	var var1 bool
+	if len(m) == 0 {
+		var1 = true
+	}
+	return var1
 }
 
 // Recursive Type Definitions
@@ -344,11 +1600,87 @@ func (RecA) __VDLReflect(struct {
 }) {
 }
 
+func (m RecA) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
+
+	listTarget1, err := t.StartList(__VDLType_vomtype_v_io_v23_vom_testdata_types_RecA, len(m))
+	if err != nil {
+		return err
+	}
+	for i, elem3 := range m {
+		elemTarget2, err := listTarget1.StartElem(i)
+		if err != nil {
+			return err
+		}
+
+		if err := elem3.FillVDLTarget(elemTarget2, __VDLType_vomtype_v_io_v23_vom_testdata_types_RecA); err != nil {
+			return err
+		}
+		if err := listTarget1.FinishElem(elemTarget2); err != nil {
+			return err
+		}
+	}
+	if err := t.FinishList(listTarget1); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (m RecA) MakeVDLTarget() vdl.Target {
+	return nil
+}
+
+func (m RecA) IsZero() bool {
+
+	var var1 bool
+	if len(m) == 0 {
+		var1 = true
+	}
+	return var1
+}
+
 type RecX []RecY
 
 func (RecX) __VDLReflect(struct {
 	Name string `vdl:"v.io/v23/vom/testdata/types.RecX"`
 }) {
+}
+
+func (m RecX) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
+
+	listTarget1, err := t.StartList(__VDLType_vomtype_v_io_v23_vom_testdata_types_RecX, len(m))
+	if err != nil {
+		return err
+	}
+	for i, elem3 := range m {
+		elemTarget2, err := listTarget1.StartElem(i)
+		if err != nil {
+			return err
+		}
+
+		if err := elem3.FillVDLTarget(elemTarget2, __VDLType_vomtype_v_io_v23_vom_testdata_types_RecY); err != nil {
+			return err
+		}
+		if err := listTarget1.FinishElem(elemTarget2); err != nil {
+			return err
+		}
+	}
+	if err := t.FinishList(listTarget1); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (m RecX) MakeVDLTarget() vdl.Target {
+	return nil
+}
+
+func (m RecX) IsZero() bool {
+
+	var var1 bool
+	if len(m) == 0 {
+		var1 = true
+	}
+	return var1
 }
 
 type RecY []RecX
@@ -358,11 +1690,87 @@ func (RecY) __VDLReflect(struct {
 }) {
 }
 
+func (m RecY) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
+
+	listTarget1, err := t.StartList(__VDLType_vomtype_v_io_v23_vom_testdata_types_RecY, len(m))
+	if err != nil {
+		return err
+	}
+	for i, elem3 := range m {
+		elemTarget2, err := listTarget1.StartElem(i)
+		if err != nil {
+			return err
+		}
+
+		if err := elem3.FillVDLTarget(elemTarget2, __VDLType_vomtype_v_io_v23_vom_testdata_types_RecX); err != nil {
+			return err
+		}
+		if err := listTarget1.FinishElem(elemTarget2); err != nil {
+			return err
+		}
+	}
+	if err := t.FinishList(listTarget1); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (m RecY) MakeVDLTarget() vdl.Target {
+	return nil
+}
+
+func (m RecY) IsZero() bool {
+
+	var var1 bool
+	if len(m) == 0 {
+		var1 = true
+	}
+	return var1
+}
+
 type Rec1 []Rec2
 
 func (Rec1) __VDLReflect(struct {
 	Name string `vdl:"v.io/v23/vom/testdata/types.Rec1"`
 }) {
+}
+
+func (m Rec1) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
+
+	listTarget1, err := t.StartList(__VDLType_vomtype_v_io_v23_vom_testdata_types_Rec1, len(m))
+	if err != nil {
+		return err
+	}
+	for i, elem3 := range m {
+		elemTarget2, err := listTarget1.StartElem(i)
+		if err != nil {
+			return err
+		}
+
+		if err := elem3.FillVDLTarget(elemTarget2, __VDLType_vomtype_v_io_v23_vom_testdata_types_Rec2); err != nil {
+			return err
+		}
+		if err := listTarget1.FinishElem(elemTarget2); err != nil {
+			return err
+		}
+	}
+	if err := t.FinishList(listTarget1); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (m Rec1) MakeVDLTarget() vdl.Target {
+	return nil
+}
+
+func (m Rec1) IsZero() bool {
+
+	var var1 bool
+	if len(m) == 0 {
+		var1 = true
+	}
+	return var1
 }
 
 type Rec2 []Rec3
@@ -372,11 +1780,87 @@ func (Rec2) __VDLReflect(struct {
 }) {
 }
 
+func (m Rec2) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
+
+	listTarget1, err := t.StartList(__VDLType_vomtype_v_io_v23_vom_testdata_types_Rec2, len(m))
+	if err != nil {
+		return err
+	}
+	for i, elem3 := range m {
+		elemTarget2, err := listTarget1.StartElem(i)
+		if err != nil {
+			return err
+		}
+
+		if err := elem3.FillVDLTarget(elemTarget2, __VDLType_vomtype_v_io_v23_vom_testdata_types_Rec3); err != nil {
+			return err
+		}
+		if err := listTarget1.FinishElem(elemTarget2); err != nil {
+			return err
+		}
+	}
+	if err := t.FinishList(listTarget1); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (m Rec2) MakeVDLTarget() vdl.Target {
+	return nil
+}
+
+func (m Rec2) IsZero() bool {
+
+	var var1 bool
+	if len(m) == 0 {
+		var1 = true
+	}
+	return var1
+}
+
 type Rec3 []Rec4
 
 func (Rec3) __VDLReflect(struct {
 	Name string `vdl:"v.io/v23/vom/testdata/types.Rec3"`
 }) {
+}
+
+func (m Rec3) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
+
+	listTarget1, err := t.StartList(__VDLType_vomtype_v_io_v23_vom_testdata_types_Rec3, len(m))
+	if err != nil {
+		return err
+	}
+	for i, elem3 := range m {
+		elemTarget2, err := listTarget1.StartElem(i)
+		if err != nil {
+			return err
+		}
+
+		if err := elem3.FillVDLTarget(elemTarget2, __VDLType_vomtype_v_io_v23_vom_testdata_types_Rec4); err != nil {
+			return err
+		}
+		if err := listTarget1.FinishElem(elemTarget2); err != nil {
+			return err
+		}
+	}
+	if err := t.FinishList(listTarget1); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (m Rec3) MakeVDLTarget() vdl.Target {
+	return nil
+}
+
+func (m Rec3) IsZero() bool {
+
+	var var1 bool
+	if len(m) == 0 {
+		var1 = true
+	}
+	return var1
 }
 
 type Rec4 []Rec1
@@ -386,6 +1870,44 @@ func (Rec4) __VDLReflect(struct {
 }) {
 }
 
+func (m Rec4) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
+
+	listTarget1, err := t.StartList(__VDLType_vomtype_v_io_v23_vom_testdata_types_Rec4, len(m))
+	if err != nil {
+		return err
+	}
+	for i, elem3 := range m {
+		elemTarget2, err := listTarget1.StartElem(i)
+		if err != nil {
+			return err
+		}
+
+		if err := elem3.FillVDLTarget(elemTarget2, __VDLType_vomtype_v_io_v23_vom_testdata_types_Rec1); err != nil {
+			return err
+		}
+		if err := listTarget1.FinishElem(elemTarget2); err != nil {
+			return err
+		}
+	}
+	if err := t.FinishList(listTarget1); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (m Rec4) MakeVDLTarget() vdl.Target {
+	return nil
+}
+
+func (m Rec4) IsZero() bool {
+
+	var var1 bool
+	if len(m) == 0 {
+		var1 = true
+	}
+	return var1
+}
+
 type RecStruct struct {
 	A *RecStruct
 }
@@ -393,6 +1915,54 @@ type RecStruct struct {
 func (RecStruct) __VDLReflect(struct {
 	Name string `vdl:"v.io/v23/vom/testdata/types.RecStruct"`
 }) {
+}
+
+func (m *RecStruct) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
+
+	if __VDLType_vomtype_v_io_v23_vom_testdata_types_RecStruct == nil || __VDLTypevomtype10 == nil {
+		panic("Initialization order error: types generated for FillVDLTarget not initialized. Consider moving caller to an init() block.")
+	}
+	fieldsTarget1, err := t.StartFields(tt)
+	if err != nil {
+		return err
+	}
+
+	var2 := (m.A == (*RecStruct)(nil))
+	if !var2 {
+		keyTarget3, fieldTarget4, err := fieldsTarget1.StartField("A")
+		if err != vdl.ErrFieldNoExist && err != nil {
+			return err
+		}
+		if err != vdl.ErrFieldNoExist {
+
+			if m.A == nil {
+				if err := fieldTarget4.FromNil(__VDLTypevomtype10); err != nil {
+					return err
+				}
+			} else {
+				if err := m.A.FillVDLTarget(fieldTarget4, __VDLType_vomtype_v_io_v23_vom_testdata_types_RecStruct); err != nil {
+					return err
+				}
+			}
+			if err := fieldsTarget1.FinishField(keyTarget3, fieldTarget4); err != nil {
+				return err
+			}
+		}
+	}
+	if err := t.FinishFields(fieldsTarget1); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (m *RecStruct) MakeVDLTarget() vdl.Target {
+	return nil
+}
+
+func (m *RecStruct) IsZero() bool {
+
+	var1 := (*m == RecStruct{})
+	return var1
 }
 
 type Rec1234 struct {
@@ -407,6 +1977,128 @@ func (Rec1234) __VDLReflect(struct {
 }) {
 }
 
+func (m *Rec1234) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
+
+	if __VDLType_vomtype_v_io_v23_vom_testdata_types_Rec1234 == nil || __VDLTypevomtype11 == nil {
+		panic("Initialization order error: types generated for FillVDLTarget not initialized. Consider moving caller to an init() block.")
+	}
+	fieldsTarget1, err := t.StartFields(tt)
+	if err != nil {
+		return err
+	}
+
+	var var2 bool
+	if len(m.R1) == 0 {
+		var2 = true
+	}
+	if !var2 {
+		keyTarget3, fieldTarget4, err := fieldsTarget1.StartField("R1")
+		if err != vdl.ErrFieldNoExist && err != nil {
+			return err
+		}
+		if err != vdl.ErrFieldNoExist {
+
+			if err := m.R1.FillVDLTarget(fieldTarget4, __VDLType_vomtype_v_io_v23_vom_testdata_types_Rec1); err != nil {
+				return err
+			}
+			if err := fieldsTarget1.FinishField(keyTarget3, fieldTarget4); err != nil {
+				return err
+			}
+		}
+	}
+	var var5 bool
+	if len(m.R2) == 0 {
+		var5 = true
+	}
+	if !var5 {
+		keyTarget6, fieldTarget7, err := fieldsTarget1.StartField("R2")
+		if err != vdl.ErrFieldNoExist && err != nil {
+			return err
+		}
+		if err != vdl.ErrFieldNoExist {
+
+			if err := m.R2.FillVDLTarget(fieldTarget7, __VDLType_vomtype_v_io_v23_vom_testdata_types_Rec2); err != nil {
+				return err
+			}
+			if err := fieldsTarget1.FinishField(keyTarget6, fieldTarget7); err != nil {
+				return err
+			}
+		}
+	}
+	var var8 bool
+	if len(m.R3) == 0 {
+		var8 = true
+	}
+	if !var8 {
+		keyTarget9, fieldTarget10, err := fieldsTarget1.StartField("R3")
+		if err != vdl.ErrFieldNoExist && err != nil {
+			return err
+		}
+		if err != vdl.ErrFieldNoExist {
+
+			if err := m.R3.FillVDLTarget(fieldTarget10, __VDLType_vomtype_v_io_v23_vom_testdata_types_Rec3); err != nil {
+				return err
+			}
+			if err := fieldsTarget1.FinishField(keyTarget9, fieldTarget10); err != nil {
+				return err
+			}
+		}
+	}
+	var var11 bool
+	if len(m.R4) == 0 {
+		var11 = true
+	}
+	if !var11 {
+		keyTarget12, fieldTarget13, err := fieldsTarget1.StartField("R4")
+		if err != vdl.ErrFieldNoExist && err != nil {
+			return err
+		}
+		if err != vdl.ErrFieldNoExist {
+
+			if err := m.R4.FillVDLTarget(fieldTarget13, __VDLType_vomtype_v_io_v23_vom_testdata_types_Rec4); err != nil {
+				return err
+			}
+			if err := fieldsTarget1.FinishField(keyTarget12, fieldTarget13); err != nil {
+				return err
+			}
+		}
+	}
+	if err := t.FinishFields(fieldsTarget1); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (m *Rec1234) MakeVDLTarget() vdl.Target {
+	return nil
+}
+
+func (m *Rec1234) IsZero() bool {
+
+	var1 := true
+	var var2 bool
+	if len(m.R1) == 0 {
+		var2 = true
+	}
+	var1 = var1 && var2
+	var var3 bool
+	if len(m.R2) == 0 {
+		var3 = true
+	}
+	var1 = var1 && var3
+	var var4 bool
+	if len(m.R3) == 0 {
+		var4 = true
+	}
+	var1 = var1 && var4
+	var var5 bool
+	if len(m.R4) == 0 {
+		var5 = true
+	}
+	var1 = var1 && var5
+	return var1
+}
+
 type Rec1234A struct {
 	A       []Rec1234A
 	Rec1234 []Rec1234
@@ -415,6 +2107,114 @@ type Rec1234A struct {
 func (Rec1234A) __VDLReflect(struct {
 	Name string `vdl:"v.io/v23/vom/testdata/types.Rec1234A"`
 }) {
+}
+
+func (m *Rec1234A) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
+
+	if __VDLType_vomtype_v_io_v23_vom_testdata_types_Rec1234A == nil || __VDLTypevomtype12 == nil {
+		panic("Initialization order error: types generated for FillVDLTarget not initialized. Consider moving caller to an init() block.")
+	}
+	fieldsTarget1, err := t.StartFields(tt)
+	if err != nil {
+		return err
+	}
+
+	var var2 bool
+	if len(m.A) == 0 {
+		var2 = true
+	}
+	if !var2 {
+		keyTarget3, fieldTarget4, err := fieldsTarget1.StartField("A")
+		if err != vdl.ErrFieldNoExist && err != nil {
+			return err
+		}
+		if err != vdl.ErrFieldNoExist {
+
+			listTarget5, err := fieldTarget4.StartList(__VDLTypevomtype13, len(m.A))
+			if err != nil {
+				return err
+			}
+			for i, elem7 := range m.A {
+				elemTarget6, err := listTarget5.StartElem(i)
+				if err != nil {
+					return err
+				}
+
+				if err := elem7.FillVDLTarget(elemTarget6, __VDLType_vomtype_v_io_v23_vom_testdata_types_Rec1234A); err != nil {
+					return err
+				}
+				if err := listTarget5.FinishElem(elemTarget6); err != nil {
+					return err
+				}
+			}
+			if err := fieldTarget4.FinishList(listTarget5); err != nil {
+				return err
+			}
+			if err := fieldsTarget1.FinishField(keyTarget3, fieldTarget4); err != nil {
+				return err
+			}
+		}
+	}
+	var var8 bool
+	if len(m.Rec1234) == 0 {
+		var8 = true
+	}
+	if !var8 {
+		keyTarget9, fieldTarget10, err := fieldsTarget1.StartField("Rec1234")
+		if err != vdl.ErrFieldNoExist && err != nil {
+			return err
+		}
+		if err != vdl.ErrFieldNoExist {
+
+			listTarget11, err := fieldTarget10.StartList(__VDLTypevomtype14, len(m.Rec1234))
+			if err != nil {
+				return err
+			}
+			for i, elem13 := range m.Rec1234 {
+				elemTarget12, err := listTarget11.StartElem(i)
+				if err != nil {
+					return err
+				}
+
+				if err := elem13.FillVDLTarget(elemTarget12, __VDLType_vomtype_v_io_v23_vom_testdata_types_Rec1234); err != nil {
+					return err
+				}
+				if err := listTarget11.FinishElem(elemTarget12); err != nil {
+					return err
+				}
+			}
+			if err := fieldTarget10.FinishList(listTarget11); err != nil {
+				return err
+			}
+			if err := fieldsTarget1.FinishField(keyTarget9, fieldTarget10); err != nil {
+				return err
+			}
+		}
+	}
+	if err := t.FinishFields(fieldsTarget1); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (m *Rec1234A) MakeVDLTarget() vdl.Target {
+	return nil
+}
+
+func (m *Rec1234A) IsZero() bool {
+
+	var1 := true
+	var var2 bool
+	if len(m.A) == 0 {
+		var2 = true
+	}
+	var1 = var1 && var2
+	var var3 bool
+	if len(m.Rec1234) == 0 {
+		var3 = true
+	}
+	var1 = var1 && var3
+	return var1
 }
 
 type Rec1234B struct {
@@ -427,6 +2227,114 @@ func (Rec1234B) __VDLReflect(struct {
 }) {
 }
 
+func (m *Rec1234B) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
+
+	if __VDLType_vomtype_v_io_v23_vom_testdata_types_Rec1234B == nil || __VDLTypevomtype15 == nil {
+		panic("Initialization order error: types generated for FillVDLTarget not initialized. Consider moving caller to an init() block.")
+	}
+	fieldsTarget1, err := t.StartFields(tt)
+	if err != nil {
+		return err
+	}
+
+	var var2 bool
+	if len(m.B) == 0 {
+		var2 = true
+	}
+	if !var2 {
+		keyTarget3, fieldTarget4, err := fieldsTarget1.StartField("B")
+		if err != vdl.ErrFieldNoExist && err != nil {
+			return err
+		}
+		if err != vdl.ErrFieldNoExist {
+
+			listTarget5, err := fieldTarget4.StartList(__VDLTypevomtype16, len(m.B))
+			if err != nil {
+				return err
+			}
+			for i, elem7 := range m.B {
+				elemTarget6, err := listTarget5.StartElem(i)
+				if err != nil {
+					return err
+				}
+
+				if err := elem7.FillVDLTarget(elemTarget6, __VDLType_vomtype_v_io_v23_vom_testdata_types_Rec1234B); err != nil {
+					return err
+				}
+				if err := listTarget5.FinishElem(elemTarget6); err != nil {
+					return err
+				}
+			}
+			if err := fieldTarget4.FinishList(listTarget5); err != nil {
+				return err
+			}
+			if err := fieldsTarget1.FinishField(keyTarget3, fieldTarget4); err != nil {
+				return err
+			}
+		}
+	}
+	var var8 bool
+	if len(m.Rec1234) == 0 {
+		var8 = true
+	}
+	if !var8 {
+		keyTarget9, fieldTarget10, err := fieldsTarget1.StartField("Rec1234")
+		if err != vdl.ErrFieldNoExist && err != nil {
+			return err
+		}
+		if err != vdl.ErrFieldNoExist {
+
+			listTarget11, err := fieldTarget10.StartList(__VDLTypevomtype14, len(m.Rec1234))
+			if err != nil {
+				return err
+			}
+			for i, elem13 := range m.Rec1234 {
+				elemTarget12, err := listTarget11.StartElem(i)
+				if err != nil {
+					return err
+				}
+
+				if err := elem13.FillVDLTarget(elemTarget12, __VDLType_vomtype_v_io_v23_vom_testdata_types_Rec1234); err != nil {
+					return err
+				}
+				if err := listTarget11.FinishElem(elemTarget12); err != nil {
+					return err
+				}
+			}
+			if err := fieldTarget10.FinishList(listTarget11); err != nil {
+				return err
+			}
+			if err := fieldsTarget1.FinishField(keyTarget9, fieldTarget10); err != nil {
+				return err
+			}
+		}
+	}
+	if err := t.FinishFields(fieldsTarget1); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (m *Rec1234B) MakeVDLTarget() vdl.Target {
+	return nil
+}
+
+func (m *Rec1234B) IsZero() bool {
+
+	var1 := true
+	var var2 bool
+	if len(m.B) == 0 {
+		var2 = true
+	}
+	var1 = var1 && var2
+	var var3 bool
+	if len(m.Rec1234) == 0 {
+		var3 = true
+	}
+	var1 = var1 && var3
+	return var1
+}
+
 type Rec1234All struct {
 	A Rec1234A
 	B Rec1234B
@@ -437,12 +2345,111 @@ func (Rec1234All) __VDLReflect(struct {
 }) {
 }
 
+func (m *Rec1234All) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
+
+	if __VDLType_vomtype_v_io_v23_vom_testdata_types_Rec1234All == nil || __VDLTypevomtype17 == nil {
+		panic("Initialization order error: types generated for FillVDLTarget not initialized. Consider moving caller to an init() block.")
+	}
+	fieldsTarget1, err := t.StartFields(tt)
+	if err != nil {
+		return err
+	}
+
+	var2 := m.A.IsZero()
+	if !var2 {
+		keyTarget3, fieldTarget4, err := fieldsTarget1.StartField("A")
+		if err != vdl.ErrFieldNoExist && err != nil {
+			return err
+		}
+		if err != vdl.ErrFieldNoExist {
+
+			if err := m.A.FillVDLTarget(fieldTarget4, __VDLType_vomtype_v_io_v23_vom_testdata_types_Rec1234A); err != nil {
+				return err
+			}
+			if err := fieldsTarget1.FinishField(keyTarget3, fieldTarget4); err != nil {
+				return err
+			}
+		}
+	}
+	var5 := m.B.IsZero()
+	if !var5 {
+		keyTarget6, fieldTarget7, err := fieldsTarget1.StartField("B")
+		if err != vdl.ErrFieldNoExist && err != nil {
+			return err
+		}
+		if err != vdl.ErrFieldNoExist {
+
+			if err := m.B.FillVDLTarget(fieldTarget7, __VDLType_vomtype_v_io_v23_vom_testdata_types_Rec1234B); err != nil {
+				return err
+			}
+			if err := fieldsTarget1.FinishField(keyTarget6, fieldTarget7); err != nil {
+				return err
+			}
+		}
+	}
+	if err := t.FinishFields(fieldsTarget1); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (m *Rec1234All) MakeVDLTarget() vdl.Target {
+	return nil
+}
+
+func (m *Rec1234All) IsZero() bool {
+
+	var1 := true
+	var2 := m.A.IsZero()
+	var1 = var1 && var2
+	var3 := m.B.IsZero()
+	var1 = var1 && var3
+	return var1
+}
+
 // Additional types for compatibility and conversion checks
 type ListString []string
 
 func (ListString) __VDLReflect(struct {
 	Name string `vdl:"v.io/v23/vom/testdata/types.ListString"`
 }) {
+}
+
+func (m ListString) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
+
+	listTarget1, err := t.StartList(__VDLType_vomtype_v_io_v23_vom_testdata_types_ListString, len(m))
+	if err != nil {
+		return err
+	}
+	for i, elem3 := range m {
+		elemTarget2, err := listTarget1.StartElem(i)
+		if err != nil {
+			return err
+		}
+		if err := elemTarget2.FromString(string(elem3), vdl.StringType); err != nil {
+			return err
+		}
+		if err := listTarget1.FinishElem(elemTarget2); err != nil {
+			return err
+		}
+	}
+	if err := t.FinishList(listTarget1); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (m ListString) MakeVDLTarget() vdl.Target {
+	return nil
+}
+
+func (m ListString) IsZero() bool {
+
+	var var1 bool
+	if len(m) == 0 {
+		var1 = true
+	}
+	return var1
 }
 
 type Array3String [3]string
@@ -452,11 +2459,79 @@ func (Array3String) __VDLReflect(struct {
 }) {
 }
 
+func (m Array3String) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
+
+	listTarget1, err := t.StartList(__VDLType_vomtype_v_io_v23_vom_testdata_types_Array3String, 3)
+	if err != nil {
+		return err
+	}
+	for i, elem3 := range m {
+		elemTarget2, err := listTarget1.StartElem(i)
+		if err != nil {
+			return err
+		}
+		if err := elemTarget2.FromString(string(elem3), vdl.StringType); err != nil {
+			return err
+		}
+		if err := listTarget1.FinishElem(elemTarget2); err != nil {
+			return err
+		}
+	}
+	if err := t.FinishList(listTarget1); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (m Array3String) MakeVDLTarget() vdl.Target {
+	return nil
+}
+
+func (m Array3String) IsZero() bool {
+
+	var1 := (m == Array3String{})
+	return var1
+}
+
 type Array4String [4]string
 
 func (Array4String) __VDLReflect(struct {
 	Name string `vdl:"v.io/v23/vom/testdata/types.Array4String"`
 }) {
+}
+
+func (m Array4String) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
+
+	listTarget1, err := t.StartList(__VDLType_vomtype_v_io_v23_vom_testdata_types_Array4String, 4)
+	if err != nil {
+		return err
+	}
+	for i, elem3 := range m {
+		elemTarget2, err := listTarget1.StartElem(i)
+		if err != nil {
+			return err
+		}
+		if err := elemTarget2.FromString(string(elem3), vdl.StringType); err != nil {
+			return err
+		}
+		if err := listTarget1.FinishElem(elemTarget2); err != nil {
+			return err
+		}
+	}
+	if err := t.FinishList(listTarget1); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (m Array4String) MakeVDLTarget() vdl.Target {
+	return nil
+}
+
+func (m Array4String) IsZero() bool {
+
+	var1 := (m == Array4String{})
+	return var1
 }
 
 type AbcStruct struct {
@@ -470,6 +2545,77 @@ func (AbcStruct) __VDLReflect(struct {
 }) {
 }
 
+func (m *AbcStruct) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
+
+	if __VDLType_vomtype_v_io_v23_vom_testdata_types_AbcStruct == nil || __VDLTypevomtype18 == nil {
+		panic("Initialization order error: types generated for FillVDLTarget not initialized. Consider moving caller to an init() block.")
+	}
+	fieldsTarget1, err := t.StartFields(tt)
+	if err != nil {
+		return err
+	}
+
+	var2 := (m.A == false)
+	if !var2 {
+		keyTarget3, fieldTarget4, err := fieldsTarget1.StartField("A")
+		if err != vdl.ErrFieldNoExist && err != nil {
+			return err
+		}
+		if err != vdl.ErrFieldNoExist {
+			if err := fieldTarget4.FromBool(bool(m.A), vdl.BoolType); err != nil {
+				return err
+			}
+			if err := fieldsTarget1.FinishField(keyTarget3, fieldTarget4); err != nil {
+				return err
+			}
+		}
+	}
+	var5 := (m.B == "")
+	if !var5 {
+		keyTarget6, fieldTarget7, err := fieldsTarget1.StartField("B")
+		if err != vdl.ErrFieldNoExist && err != nil {
+			return err
+		}
+		if err != vdl.ErrFieldNoExist {
+			if err := fieldTarget7.FromString(string(m.B), vdl.StringType); err != nil {
+				return err
+			}
+			if err := fieldsTarget1.FinishField(keyTarget6, fieldTarget7); err != nil {
+				return err
+			}
+		}
+	}
+	var8 := (m.C == int64(0))
+	if !var8 {
+		keyTarget9, fieldTarget10, err := fieldsTarget1.StartField("C")
+		if err != vdl.ErrFieldNoExist && err != nil {
+			return err
+		}
+		if err != vdl.ErrFieldNoExist {
+			if err := fieldTarget10.FromInt(int64(m.C), vdl.Int64Type); err != nil {
+				return err
+			}
+			if err := fieldsTarget1.FinishField(keyTarget9, fieldTarget10); err != nil {
+				return err
+			}
+		}
+	}
+	if err := t.FinishFields(fieldsTarget1); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (m *AbcStruct) MakeVDLTarget() vdl.Target {
+	return nil
+}
+
+func (m *AbcStruct) IsZero() bool {
+
+	var1 := (*m == AbcStruct{})
+	return var1
+}
+
 type AdeStruct struct {
 	A bool
 	D *vdl.Value
@@ -479,6 +2625,90 @@ type AdeStruct struct {
 func (AdeStruct) __VDLReflect(struct {
 	Name string `vdl:"v.io/v23/vom/testdata/types.AdeStruct"`
 }) {
+}
+
+func (m *AdeStruct) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
+
+	if __VDLType_vomtype_v_io_v23_vom_testdata_types_AdeStruct == nil || __VDLTypevomtype19 == nil {
+		panic("Initialization order error: types generated for FillVDLTarget not initialized. Consider moving caller to an init() block.")
+	}
+	fieldsTarget1, err := t.StartFields(tt)
+	if err != nil {
+		return err
+	}
+
+	var2 := (m.A == false)
+	if !var2 {
+		keyTarget3, fieldTarget4, err := fieldsTarget1.StartField("A")
+		if err != vdl.ErrFieldNoExist && err != nil {
+			return err
+		}
+		if err != vdl.ErrFieldNoExist {
+			if err := fieldTarget4.FromBool(bool(m.A), vdl.BoolType); err != nil {
+				return err
+			}
+			if err := fieldsTarget1.FinishField(keyTarget3, fieldTarget4); err != nil {
+				return err
+			}
+		}
+	}
+	var5 := (m.D == (*vdl.Value)(nil))
+	if !var5 {
+		keyTarget6, fieldTarget7, err := fieldsTarget1.StartField("D")
+		if err != vdl.ErrFieldNoExist && err != nil {
+			return err
+		}
+		if err != vdl.ErrFieldNoExist {
+
+			if m.D == nil {
+				if err := fieldTarget7.FromNil(vdl.AnyType); err != nil {
+					return err
+				}
+			} else {
+				if err := vdl.FromValue(fieldTarget7, m.D); err != nil {
+					return err
+				}
+			}
+			if err := fieldsTarget1.FinishField(keyTarget6, fieldTarget7); err != nil {
+				return err
+			}
+		}
+	}
+	var8 := (m.E == vdl.AnyType)
+	if !var8 {
+		keyTarget9, fieldTarget10, err := fieldsTarget1.StartField("E")
+		if err != vdl.ErrFieldNoExist && err != nil {
+			return err
+		}
+		if err != vdl.ErrFieldNoExist {
+			typeObjectVal11 := m.E
+			if typeObjectVal11 == nil {
+				typeObjectVal11 = vdl.AnyType
+			}
+			if err := fieldTarget10.FromTypeObject(typeObjectVal11); err != nil {
+				return err
+			}
+			if err := fieldsTarget1.FinishField(keyTarget9, fieldTarget10); err != nil {
+				return err
+			}
+		}
+	}
+	if err := t.FinishFields(fieldsTarget1); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (m *AdeStruct) MakeVDLTarget() vdl.Target {
+	return nil
+}
+
+func (m *AdeStruct) IsZero() bool {
+
+	var1 := (*m == AdeStruct{
+		E: vdl.AnyType,
+	})
+	return var1
 }
 
 type XyzStruct struct {
@@ -492,6 +2722,78 @@ func (XyzStruct) __VDLReflect(struct {
 }) {
 }
 
+func (m *XyzStruct) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
+
+	if __VDLType_vomtype_v_io_v23_vom_testdata_types_XyzStruct == nil || __VDLTypevomtype20 == nil {
+		panic("Initialization order error: types generated for FillVDLTarget not initialized. Consider moving caller to an init() block.")
+	}
+	fieldsTarget1, err := t.StartFields(tt)
+	if err != nil {
+		return err
+	}
+
+	var2 := (m.X == false)
+	if !var2 {
+		keyTarget3, fieldTarget4, err := fieldsTarget1.StartField("X")
+		if err != vdl.ErrFieldNoExist && err != nil {
+			return err
+		}
+		if err != vdl.ErrFieldNoExist {
+			if err := fieldTarget4.FromBool(bool(m.X), vdl.BoolType); err != nil {
+				return err
+			}
+			if err := fieldsTarget1.FinishField(keyTarget3, fieldTarget4); err != nil {
+				return err
+			}
+		}
+	}
+	var5 := m.Y.IsZero()
+	if !var5 {
+		keyTarget6, fieldTarget7, err := fieldsTarget1.StartField("Y")
+		if err != vdl.ErrFieldNoExist && err != nil {
+			return err
+		}
+		if err != vdl.ErrFieldNoExist {
+
+			if err := m.Y.FillVDLTarget(fieldTarget7, __VDLType_vomtype_v_io_v23_vom_testdata_types_MBool); err != nil {
+				return err
+			}
+			if err := fieldsTarget1.FinishField(keyTarget6, fieldTarget7); err != nil {
+				return err
+			}
+		}
+	}
+	var8 := (m.Z == "")
+	if !var8 {
+		keyTarget9, fieldTarget10, err := fieldsTarget1.StartField("Z")
+		if err != vdl.ErrFieldNoExist && err != nil {
+			return err
+		}
+		if err != vdl.ErrFieldNoExist {
+			if err := fieldTarget10.FromString(string(m.Z), vdl.StringType); err != nil {
+				return err
+			}
+			if err := fieldsTarget1.FinishField(keyTarget9, fieldTarget10); err != nil {
+				return err
+			}
+		}
+	}
+	if err := t.FinishFields(fieldsTarget1); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (m *XyzStruct) MakeVDLTarget() vdl.Target {
+	return nil
+}
+
+func (m *XyzStruct) IsZero() bool {
+
+	var1 := (*m == XyzStruct{})
+	return var1
+}
+
 type YzStruct struct {
 	Y NBool
 	Z NString
@@ -502,6 +2804,64 @@ func (YzStruct) __VDLReflect(struct {
 }) {
 }
 
+func (m *YzStruct) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
+
+	if __VDLType_vomtype_v_io_v23_vom_testdata_types_YzStruct == nil || __VDLTypevomtype21 == nil {
+		panic("Initialization order error: types generated for FillVDLTarget not initialized. Consider moving caller to an init() block.")
+	}
+	fieldsTarget1, err := t.StartFields(tt)
+	if err != nil {
+		return err
+	}
+
+	var2 := m.Y.IsZero()
+	if !var2 {
+		keyTarget3, fieldTarget4, err := fieldsTarget1.StartField("Y")
+		if err != vdl.ErrFieldNoExist && err != nil {
+			return err
+		}
+		if err != vdl.ErrFieldNoExist {
+
+			if err := m.Y.FillVDLTarget(fieldTarget4, __VDLType_vomtype_v_io_v23_vom_testdata_types_NBool); err != nil {
+				return err
+			}
+			if err := fieldsTarget1.FinishField(keyTarget3, fieldTarget4); err != nil {
+				return err
+			}
+		}
+	}
+	var5 := m.Z.IsZero()
+	if !var5 {
+		keyTarget6, fieldTarget7, err := fieldsTarget1.StartField("Z")
+		if err != vdl.ErrFieldNoExist && err != nil {
+			return err
+		}
+		if err != vdl.ErrFieldNoExist {
+
+			if err := m.Z.FillVDLTarget(fieldTarget7, __VDLType_vomtype_v_io_v23_vom_testdata_types_NString); err != nil {
+				return err
+			}
+			if err := fieldsTarget1.FinishField(keyTarget6, fieldTarget7); err != nil {
+				return err
+			}
+		}
+	}
+	if err := t.FinishFields(fieldsTarget1); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (m *YzStruct) MakeVDLTarget() vdl.Target {
+	return nil
+}
+
+func (m *YzStruct) IsZero() bool {
+
+	var1 := (*m == YzStruct{})
+	return var1
+}
+
 type ZStruct struct {
 	Z string
 }
@@ -509,6 +2869,47 @@ type ZStruct struct {
 func (ZStruct) __VDLReflect(struct {
 	Name string `vdl:"v.io/v23/vom/testdata/types.ZStruct"`
 }) {
+}
+
+func (m *ZStruct) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
+
+	if __VDLType_vomtype_v_io_v23_vom_testdata_types_ZStruct == nil || __VDLTypevomtype22 == nil {
+		panic("Initialization order error: types generated for FillVDLTarget not initialized. Consider moving caller to an init() block.")
+	}
+	fieldsTarget1, err := t.StartFields(tt)
+	if err != nil {
+		return err
+	}
+
+	var2 := (m.Z == "")
+	if !var2 {
+		keyTarget3, fieldTarget4, err := fieldsTarget1.StartField("Z")
+		if err != vdl.ErrFieldNoExist && err != nil {
+			return err
+		}
+		if err != vdl.ErrFieldNoExist {
+			if err := fieldTarget4.FromString(string(m.Z), vdl.StringType); err != nil {
+				return err
+			}
+			if err := fieldsTarget1.FinishField(keyTarget3, fieldTarget4); err != nil {
+				return err
+			}
+		}
+	}
+	if err := t.FinishFields(fieldsTarget1); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (m *ZStruct) MakeVDLTarget() vdl.Target {
+	return nil
+}
+
+func (m *ZStruct) IsZero() bool {
+
+	var1 := (*m == ZStruct{})
+	return var1
 }
 
 type MapOnlyStruct struct {
@@ -522,11 +2923,126 @@ func (MapOnlyStruct) __VDLReflect(struct {
 }) {
 }
 
+func (m *MapOnlyStruct) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
+
+	if __VDLType_vomtype_v_io_v23_vom_testdata_types_MapOnlyStruct == nil || __VDLTypevomtype23 == nil {
+		panic("Initialization order error: types generated for FillVDLTarget not initialized. Consider moving caller to an init() block.")
+	}
+	fieldsTarget1, err := t.StartFields(tt)
+	if err != nil {
+		return err
+	}
+
+	var2 := (m.Key1 == int64(0))
+	if !var2 {
+		keyTarget3, fieldTarget4, err := fieldsTarget1.StartField("Key1")
+		if err != vdl.ErrFieldNoExist && err != nil {
+			return err
+		}
+		if err != vdl.ErrFieldNoExist {
+			if err := fieldTarget4.FromInt(int64(m.Key1), vdl.Int64Type); err != nil {
+				return err
+			}
+			if err := fieldsTarget1.FinishField(keyTarget3, fieldTarget4); err != nil {
+				return err
+			}
+		}
+	}
+	var5 := (m.Key2 == uint32(0))
+	if !var5 {
+		keyTarget6, fieldTarget7, err := fieldsTarget1.StartField("Key2")
+		if err != vdl.ErrFieldNoExist && err != nil {
+			return err
+		}
+		if err != vdl.ErrFieldNoExist {
+			if err := fieldTarget7.FromUint(uint64(m.Key2), vdl.Uint32Type); err != nil {
+				return err
+			}
+			if err := fieldsTarget1.FinishField(keyTarget6, fieldTarget7); err != nil {
+				return err
+			}
+		}
+	}
+	var8 := (m.Key3 == complex128(0))
+	if !var8 {
+		keyTarget9, fieldTarget10, err := fieldsTarget1.StartField("Key3")
+		if err != vdl.ErrFieldNoExist && err != nil {
+			return err
+		}
+		if err != vdl.ErrFieldNoExist {
+			if err := fieldTarget10.FromComplex(complex128(m.Key3), vdl.Complex128Type); err != nil {
+				return err
+			}
+			if err := fieldsTarget1.FinishField(keyTarget9, fieldTarget10); err != nil {
+				return err
+			}
+		}
+	}
+	if err := t.FinishFields(fieldsTarget1); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (m *MapOnlyStruct) MakeVDLTarget() vdl.Target {
+	return nil
+}
+
+func (m *MapOnlyStruct) IsZero() bool {
+
+	var1 := (*m == MapOnlyStruct{})
+	return var1
+}
+
 type StructOnlyMap map[string]uint64
 
 func (StructOnlyMap) __VDLReflect(struct {
 	Name string `vdl:"v.io/v23/vom/testdata/types.StructOnlyMap"`
 }) {
+}
+
+func (m StructOnlyMap) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
+
+	mapTarget1, err := t.StartMap(__VDLType_vomtype_v_io_v23_vom_testdata_types_StructOnlyMap, len(m))
+	if err != nil {
+		return err
+	}
+	for key3, value5 := range m {
+		keyTarget2, err := mapTarget1.StartKey()
+		if err != nil {
+			return err
+		}
+		if err := keyTarget2.FromString(string(key3), vdl.StringType); err != nil {
+			return err
+		}
+		valueTarget4, err := mapTarget1.FinishKeyStartField(keyTarget2)
+		if err != nil {
+			return err
+		}
+		if err := valueTarget4.FromUint(uint64(value5), vdl.Uint64Type); err != nil {
+			return err
+		}
+		if err := mapTarget1.FinishField(keyTarget2, valueTarget4); err != nil {
+			return err
+		}
+	}
+	if err := t.FinishMap(mapTarget1); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (m StructOnlyMap) MakeVDLTarget() vdl.Target {
+	return nil
+}
+
+func (m StructOnlyMap) IsZero() bool {
+
+	var var1 bool
+	if len(m) == 0 {
+		var1 = true
+	}
+	return var1
 }
 
 type MapSetStruct struct {
@@ -540,11 +3056,126 @@ func (MapSetStruct) __VDLReflect(struct {
 }) {
 }
 
+func (m *MapSetStruct) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
+
+	if __VDLType_vomtype_v_io_v23_vom_testdata_types_MapSetStruct == nil || __VDLTypevomtype24 == nil {
+		panic("Initialization order error: types generated for FillVDLTarget not initialized. Consider moving caller to an init() block.")
+	}
+	fieldsTarget1, err := t.StartFields(tt)
+	if err != nil {
+		return err
+	}
+
+	var2 := (m.Feat == false)
+	if !var2 {
+		keyTarget3, fieldTarget4, err := fieldsTarget1.StartField("Feat")
+		if err != vdl.ErrFieldNoExist && err != nil {
+			return err
+		}
+		if err != vdl.ErrFieldNoExist {
+			if err := fieldTarget4.FromBool(bool(m.Feat), vdl.BoolType); err != nil {
+				return err
+			}
+			if err := fieldsTarget1.FinishField(keyTarget3, fieldTarget4); err != nil {
+				return err
+			}
+		}
+	}
+	var5 := (m.Tire == false)
+	if !var5 {
+		keyTarget6, fieldTarget7, err := fieldsTarget1.StartField("Tire")
+		if err != vdl.ErrFieldNoExist && err != nil {
+			return err
+		}
+		if err != vdl.ErrFieldNoExist {
+			if err := fieldTarget7.FromBool(bool(m.Tire), vdl.BoolType); err != nil {
+				return err
+			}
+			if err := fieldsTarget1.FinishField(keyTarget6, fieldTarget7); err != nil {
+				return err
+			}
+		}
+	}
+	var8 := (m.Eel == false)
+	if !var8 {
+		keyTarget9, fieldTarget10, err := fieldsTarget1.StartField("Eel")
+		if err != vdl.ErrFieldNoExist && err != nil {
+			return err
+		}
+		if err != vdl.ErrFieldNoExist {
+			if err := fieldTarget10.FromBool(bool(m.Eel), vdl.BoolType); err != nil {
+				return err
+			}
+			if err := fieldsTarget1.FinishField(keyTarget9, fieldTarget10); err != nil {
+				return err
+			}
+		}
+	}
+	if err := t.FinishFields(fieldsTarget1); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (m *MapSetStruct) MakeVDLTarget() vdl.Target {
+	return nil
+}
+
+func (m *MapSetStruct) IsZero() bool {
+
+	var1 := (*m == MapSetStruct{})
+	return var1
+}
+
 type SetStructMap map[string]bool
 
 func (SetStructMap) __VDLReflect(struct {
 	Name string `vdl:"v.io/v23/vom/testdata/types.SetStructMap"`
 }) {
+}
+
+func (m SetStructMap) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
+
+	mapTarget1, err := t.StartMap(__VDLType_vomtype_v_io_v23_vom_testdata_types_SetStructMap, len(m))
+	if err != nil {
+		return err
+	}
+	for key3, value5 := range m {
+		keyTarget2, err := mapTarget1.StartKey()
+		if err != nil {
+			return err
+		}
+		if err := keyTarget2.FromString(string(key3), vdl.StringType); err != nil {
+			return err
+		}
+		valueTarget4, err := mapTarget1.FinishKeyStartField(keyTarget2)
+		if err != nil {
+			return err
+		}
+		if err := valueTarget4.FromBool(bool(value5), vdl.BoolType); err != nil {
+			return err
+		}
+		if err := mapTarget1.FinishField(keyTarget2, valueTarget4); err != nil {
+			return err
+		}
+	}
+	if err := t.FinishMap(mapTarget1); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (m SetStructMap) MakeVDLTarget() vdl.Target {
+	return nil
+}
+
+func (m SetStructMap) IsZero() bool {
+
+	var var1 bool
+	if len(m) == 0 {
+		var1 = true
+	}
+	return var1
 }
 
 type MapStructSet map[string]struct{}
@@ -554,11 +3185,92 @@ func (MapStructSet) __VDLReflect(struct {
 }) {
 }
 
+func (m MapStructSet) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
+
+	setTarget1, err := t.StartSet(__VDLType_vomtype_v_io_v23_vom_testdata_types_MapStructSet, len(m))
+	if err != nil {
+		return err
+	}
+	for key3 := range m {
+		keyTarget2, err := setTarget1.StartKey()
+		if err != nil {
+			return err
+		}
+		if err := keyTarget2.FromString(string(key3), vdl.StringType); err != nil {
+			return err
+		}
+		if err := setTarget1.FinishKey(keyTarget2); err != nil {
+			return err
+		}
+	}
+	if err := t.FinishSet(setTarget1); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (m MapStructSet) MakeVDLTarget() vdl.Target {
+	return nil
+}
+
+func (m MapStructSet) IsZero() bool {
+
+	var var1 bool
+	if len(m) == 0 {
+		var1 = true
+	}
+	return var1
+}
+
 type SetOnlyMap map[float64]bool
 
 func (SetOnlyMap) __VDLReflect(struct {
 	Name string `vdl:"v.io/v23/vom/testdata/types.SetOnlyMap"`
 }) {
+}
+
+func (m SetOnlyMap) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
+
+	mapTarget1, err := t.StartMap(__VDLType_vomtype_v_io_v23_vom_testdata_types_SetOnlyMap, len(m))
+	if err != nil {
+		return err
+	}
+	for key3, value5 := range m {
+		keyTarget2, err := mapTarget1.StartKey()
+		if err != nil {
+			return err
+		}
+		if err := keyTarget2.FromFloat(float64(key3), vdl.Float64Type); err != nil {
+			return err
+		}
+		valueTarget4, err := mapTarget1.FinishKeyStartField(keyTarget2)
+		if err != nil {
+			return err
+		}
+		if err := valueTarget4.FromBool(bool(value5), vdl.BoolType); err != nil {
+			return err
+		}
+		if err := mapTarget1.FinishField(keyTarget2, valueTarget4); err != nil {
+			return err
+		}
+	}
+	if err := t.FinishMap(mapTarget1); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (m SetOnlyMap) MakeVDLTarget() vdl.Target {
+	return nil
+}
+
+func (m SetOnlyMap) IsZero() bool {
+
+	var var1 bool
+	if len(m) == 0 {
+		var1 = true
+	}
+	return var1
 }
 
 type SometimesSetMap map[float64]*vdl.Value
@@ -568,11 +3280,99 @@ func (SometimesSetMap) __VDLReflect(struct {
 }) {
 }
 
+func (m SometimesSetMap) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
+
+	mapTarget1, err := t.StartMap(__VDLType_vomtype_v_io_v23_vom_testdata_types_SometimesSetMap, len(m))
+	if err != nil {
+		return err
+	}
+	for key3, value5 := range m {
+		keyTarget2, err := mapTarget1.StartKey()
+		if err != nil {
+			return err
+		}
+		if err := keyTarget2.FromFloat(float64(key3), vdl.Float64Type); err != nil {
+			return err
+		}
+		valueTarget4, err := mapTarget1.FinishKeyStartField(keyTarget2)
+		if err != nil {
+			return err
+		}
+
+		if value5 == nil {
+			if err := valueTarget4.FromNil(vdl.AnyType); err != nil {
+				return err
+			}
+		} else {
+			if err := vdl.FromValue(valueTarget4, value5); err != nil {
+				return err
+			}
+		}
+		if err := mapTarget1.FinishField(keyTarget2, valueTarget4); err != nil {
+			return err
+		}
+	}
+	if err := t.FinishMap(mapTarget1); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (m SometimesSetMap) MakeVDLTarget() vdl.Target {
+	return nil
+}
+
+func (m SometimesSetMap) IsZero() bool {
+
+	var var1 bool
+	if len(m) == 0 {
+		var1 = true
+	}
+	return var1
+}
+
 type MapOnlySet map[float64]struct{}
 
 func (MapOnlySet) __VDLReflect(struct {
 	Name string `vdl:"v.io/v23/vom/testdata/types.MapOnlySet"`
 }) {
+}
+
+func (m MapOnlySet) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
+
+	setTarget1, err := t.StartSet(__VDLType_vomtype_v_io_v23_vom_testdata_types_MapOnlySet, len(m))
+	if err != nil {
+		return err
+	}
+	for key3 := range m {
+		keyTarget2, err := setTarget1.StartKey()
+		if err != nil {
+			return err
+		}
+		if err := keyTarget2.FromFloat(float64(key3), vdl.Float64Type); err != nil {
+			return err
+		}
+		if err := setTarget1.FinishKey(keyTarget2); err != nil {
+			return err
+		}
+	}
+	if err := t.FinishSet(setTarget1); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (m MapOnlySet) MakeVDLTarget() vdl.Target {
+	return nil
+}
+
+func (m MapOnlySet) IsZero() bool {
+
+	var var1 bool
+	if len(m) == 0 {
+		var1 = true
+	}
+	return var1
 }
 
 type SetOnlyA map[bool]struct{}
@@ -582,11 +3382,86 @@ func (SetOnlyA) __VDLReflect(struct {
 }) {
 }
 
+func (m SetOnlyA) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
+
+	setTarget1, err := t.StartSet(__VDLType_vomtype_v_io_v23_vom_testdata_types_SetOnlyA, len(m))
+	if err != nil {
+		return err
+	}
+	for key3 := range m {
+		keyTarget2, err := setTarget1.StartKey()
+		if err != nil {
+			return err
+		}
+		if err := keyTarget2.FromBool(bool(key3), vdl.BoolType); err != nil {
+			return err
+		}
+		if err := setTarget1.FinishKey(keyTarget2); err != nil {
+			return err
+		}
+	}
+	if err := t.FinishSet(setTarget1); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (m SetOnlyA) MakeVDLTarget() vdl.Target {
+	return nil
+}
+
+func (m SetOnlyA) IsZero() bool {
+
+	var var1 bool
+	if len(m) == 0 {
+		var1 = true
+	}
+	return var1
+}
+
 type SetOnlyA2 map[NBool]struct{}
 
 func (SetOnlyA2) __VDLReflect(struct {
 	Name string `vdl:"v.io/v23/vom/testdata/types.SetOnlyA2"`
 }) {
+}
+
+func (m SetOnlyA2) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
+
+	setTarget1, err := t.StartSet(__VDLType_vomtype_v_io_v23_vom_testdata_types_SetOnlyA2, len(m))
+	if err != nil {
+		return err
+	}
+	for key3 := range m {
+		keyTarget2, err := setTarget1.StartKey()
+		if err != nil {
+			return err
+		}
+
+		if err := key3.FillVDLTarget(keyTarget2, __VDLType_vomtype_v_io_v23_vom_testdata_types_NBool); err != nil {
+			return err
+		}
+		if err := setTarget1.FinishKey(keyTarget2); err != nil {
+			return err
+		}
+	}
+	if err := t.FinishSet(setTarget1); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (m SetOnlyA2) MakeVDLTarget() vdl.Target {
+	return nil
+}
+
+func (m SetOnlyA2) IsZero() bool {
+
+	var var1 bool
+	if len(m) == 0 {
+		var1 = true
+	}
+	return var1
 }
 
 type SetOnlyB map[int16]struct{}
@@ -596,11 +3471,86 @@ func (SetOnlyB) __VDLReflect(struct {
 }) {
 }
 
+func (m SetOnlyB) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
+
+	setTarget1, err := t.StartSet(__VDLType_vomtype_v_io_v23_vom_testdata_types_SetOnlyB, len(m))
+	if err != nil {
+		return err
+	}
+	for key3 := range m {
+		keyTarget2, err := setTarget1.StartKey()
+		if err != nil {
+			return err
+		}
+		if err := keyTarget2.FromInt(int64(key3), vdl.Int16Type); err != nil {
+			return err
+		}
+		if err := setTarget1.FinishKey(keyTarget2); err != nil {
+			return err
+		}
+	}
+	if err := t.FinishSet(setTarget1); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (m SetOnlyB) MakeVDLTarget() vdl.Target {
+	return nil
+}
+
+func (m SetOnlyB) IsZero() bool {
+
+	var var1 bool
+	if len(m) == 0 {
+		var1 = true
+	}
+	return var1
+}
+
 type SetOnlyB2 map[NInt16]struct{}
 
 func (SetOnlyB2) __VDLReflect(struct {
 	Name string `vdl:"v.io/v23/vom/testdata/types.SetOnlyB2"`
 }) {
+}
+
+func (m SetOnlyB2) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
+
+	setTarget1, err := t.StartSet(__VDLType_vomtype_v_io_v23_vom_testdata_types_SetOnlyB2, len(m))
+	if err != nil {
+		return err
+	}
+	for key3 := range m {
+		keyTarget2, err := setTarget1.StartKey()
+		if err != nil {
+			return err
+		}
+
+		if err := key3.FillVDLTarget(keyTarget2, __VDLType_vomtype_v_io_v23_vom_testdata_types_NInt16); err != nil {
+			return err
+		}
+		if err := setTarget1.FinishKey(keyTarget2); err != nil {
+			return err
+		}
+	}
+	if err := t.FinishSet(setTarget1); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (m SetOnlyB2) MakeVDLTarget() vdl.Target {
+	return nil
+}
+
+func (m SetOnlyB2) IsZero() bool {
+
+	var var1 bool
+	if len(m) == 0 {
+		var1 = true
+	}
+	return var1
 }
 
 type MapOnlyA map[uint32]uint32
@@ -610,11 +3560,99 @@ func (MapOnlyA) __VDLReflect(struct {
 }) {
 }
 
+func (m MapOnlyA) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
+
+	mapTarget1, err := t.StartMap(__VDLType_vomtype_v_io_v23_vom_testdata_types_MapOnlyA, len(m))
+	if err != nil {
+		return err
+	}
+	for key3, value5 := range m {
+		keyTarget2, err := mapTarget1.StartKey()
+		if err != nil {
+			return err
+		}
+		if err := keyTarget2.FromUint(uint64(key3), vdl.Uint32Type); err != nil {
+			return err
+		}
+		valueTarget4, err := mapTarget1.FinishKeyStartField(keyTarget2)
+		if err != nil {
+			return err
+		}
+		if err := valueTarget4.FromUint(uint64(value5), vdl.Uint32Type); err != nil {
+			return err
+		}
+		if err := mapTarget1.FinishField(keyTarget2, valueTarget4); err != nil {
+			return err
+		}
+	}
+	if err := t.FinishMap(mapTarget1); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (m MapOnlyA) MakeVDLTarget() vdl.Target {
+	return nil
+}
+
+func (m MapOnlyA) IsZero() bool {
+
+	var var1 bool
+	if len(m) == 0 {
+		var1 = true
+	}
+	return var1
+}
+
 type MapOnlyA2 map[int64]float64
 
 func (MapOnlyA2) __VDLReflect(struct {
 	Name string `vdl:"v.io/v23/vom/testdata/types.MapOnlyA2"`
 }) {
+}
+
+func (m MapOnlyA2) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
+
+	mapTarget1, err := t.StartMap(__VDLType_vomtype_v_io_v23_vom_testdata_types_MapOnlyA2, len(m))
+	if err != nil {
+		return err
+	}
+	for key3, value5 := range m {
+		keyTarget2, err := mapTarget1.StartKey()
+		if err != nil {
+			return err
+		}
+		if err := keyTarget2.FromInt(int64(key3), vdl.Int64Type); err != nil {
+			return err
+		}
+		valueTarget4, err := mapTarget1.FinishKeyStartField(keyTarget2)
+		if err != nil {
+			return err
+		}
+		if err := valueTarget4.FromFloat(float64(value5), vdl.Float64Type); err != nil {
+			return err
+		}
+		if err := mapTarget1.FinishField(keyTarget2, valueTarget4); err != nil {
+			return err
+		}
+	}
+	if err := t.FinishMap(mapTarget1); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (m MapOnlyA2) MakeVDLTarget() vdl.Target {
+	return nil
+}
+
+func (m MapOnlyA2) IsZero() bool {
+
+	var var1 bool
+	if len(m) == 0 {
+		var1 = true
+	}
+	return var1
 }
 
 type MapOnlyB map[bool]string
@@ -624,11 +3662,101 @@ func (MapOnlyB) __VDLReflect(struct {
 }) {
 }
 
+func (m MapOnlyB) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
+
+	mapTarget1, err := t.StartMap(__VDLType_vomtype_v_io_v23_vom_testdata_types_MapOnlyB, len(m))
+	if err != nil {
+		return err
+	}
+	for key3, value5 := range m {
+		keyTarget2, err := mapTarget1.StartKey()
+		if err != nil {
+			return err
+		}
+		if err := keyTarget2.FromBool(bool(key3), vdl.BoolType); err != nil {
+			return err
+		}
+		valueTarget4, err := mapTarget1.FinishKeyStartField(keyTarget2)
+		if err != nil {
+			return err
+		}
+		if err := valueTarget4.FromString(string(value5), vdl.StringType); err != nil {
+			return err
+		}
+		if err := mapTarget1.FinishField(keyTarget2, valueTarget4); err != nil {
+			return err
+		}
+	}
+	if err := t.FinishMap(mapTarget1); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (m MapOnlyB) MakeVDLTarget() vdl.Target {
+	return nil
+}
+
+func (m MapOnlyB) IsZero() bool {
+
+	var var1 bool
+	if len(m) == 0 {
+		var1 = true
+	}
+	return var1
+}
+
 type MapOnlyB2 map[NBool]NString
 
 func (MapOnlyB2) __VDLReflect(struct {
 	Name string `vdl:"v.io/v23/vom/testdata/types.MapOnlyB2"`
 }) {
+}
+
+func (m MapOnlyB2) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
+
+	mapTarget1, err := t.StartMap(__VDLType_vomtype_v_io_v23_vom_testdata_types_MapOnlyB2, len(m))
+	if err != nil {
+		return err
+	}
+	for key3, value5 := range m {
+		keyTarget2, err := mapTarget1.StartKey()
+		if err != nil {
+			return err
+		}
+
+		if err := key3.FillVDLTarget(keyTarget2, __VDLType_vomtype_v_io_v23_vom_testdata_types_NBool); err != nil {
+			return err
+		}
+		valueTarget4, err := mapTarget1.FinishKeyStartField(keyTarget2)
+		if err != nil {
+			return err
+		}
+
+		if err := value5.FillVDLTarget(valueTarget4, __VDLType_vomtype_v_io_v23_vom_testdata_types_NString); err != nil {
+			return err
+		}
+		if err := mapTarget1.FinishField(keyTarget2, valueTarget4); err != nil {
+			return err
+		}
+	}
+	if err := t.FinishMap(mapTarget1); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (m MapOnlyB2) MakeVDLTarget() vdl.Target {
+	return nil
+}
+
+func (m MapOnlyB2) IsZero() bool {
+
+	var var1 bool
+	if len(m) == 0 {
+		var1 = true
+	}
+	return var1
 }
 
 type (
@@ -642,6 +3770,8 @@ type (
 		Name() string
 		// __VDLReflect describes the BdeUnion union type.
 		__VDLReflect(__BdeUnionReflect)
+		FillVDLTarget(vdl.Target, *vdl.Type) error
+		IsZero() bool
 	}
 	// BdeUnionB represents field B of the BdeUnion union type.
 	BdeUnionB struct{ Value string }
@@ -666,15 +3796,125 @@ func (x BdeUnionB) Interface() interface{}         { return x.Value }
 func (x BdeUnionB) Name() string                   { return "B" }
 func (x BdeUnionB) __VDLReflect(__BdeUnionReflect) {}
 
+func (m BdeUnionB) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
+
+	fieldsTarget1, err := t.StartFields(__VDLType_vomtype_v_io_v23_vom_testdata_types_BdeUnion)
+	if err != nil {
+		return err
+	}
+	keyTarget2, fieldTarget3, err := fieldsTarget1.StartField("B")
+	if err != nil {
+		return err
+	}
+	if err := fieldTarget3.FromString(string(m.Value), vdl.StringType); err != nil {
+		return err
+	}
+	if err := fieldsTarget1.FinishField(keyTarget2, fieldTarget3); err != nil {
+		return err
+	}
+	if err := t.FinishFields(fieldsTarget1); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (m BdeUnionB) MakeVDLTarget() vdl.Target {
+	return nil
+}
+
+func (m BdeUnionB) IsZero() bool {
+
+	var2 := (m.Value == "")
+	return var2
+}
+
 func (x BdeUnionD) Index() int                     { return 1 }
 func (x BdeUnionD) Interface() interface{}         { return x.Value }
 func (x BdeUnionD) Name() string                   { return "D" }
 func (x BdeUnionD) __VDLReflect(__BdeUnionReflect) {}
 
+func (m BdeUnionD) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
+
+	fieldsTarget1, err := t.StartFields(__VDLType_vomtype_v_io_v23_vom_testdata_types_BdeUnion)
+	if err != nil {
+		return err
+	}
+	keyTarget2, fieldTarget3, err := fieldsTarget1.StartField("D")
+	if err != nil {
+		return err
+	}
+
+	if m.Value == nil {
+		if err := fieldTarget3.FromNil(vdl.AnyType); err != nil {
+			return err
+		}
+	} else {
+		if err := vdl.FromValue(fieldTarget3, m.Value); err != nil {
+			return err
+		}
+	}
+	if err := fieldsTarget1.FinishField(keyTarget2, fieldTarget3); err != nil {
+		return err
+	}
+	if err := t.FinishFields(fieldsTarget1); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (m BdeUnionD) MakeVDLTarget() vdl.Target {
+	return nil
+}
+
+func (m BdeUnionD) IsZero() bool {
+
+	unionField2 := false
+	return unionField2
+}
+
 func (x BdeUnionE) Index() int                     { return 2 }
 func (x BdeUnionE) Interface() interface{}         { return x.Value }
 func (x BdeUnionE) Name() string                   { return "E" }
 func (x BdeUnionE) __VDLReflect(__BdeUnionReflect) {}
+
+func (m BdeUnionE) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
+
+	fieldsTarget1, err := t.StartFields(__VDLType_vomtype_v_io_v23_vom_testdata_types_BdeUnion)
+	if err != nil {
+		return err
+	}
+	keyTarget2, fieldTarget3, err := fieldsTarget1.StartField("E")
+	if err != nil {
+		return err
+	}
+	typeObjectVal4 := m.Value
+	if typeObjectVal4 == nil {
+		typeObjectVal4 = vdl.AnyType
+	}
+	if err := fieldTarget3.FromTypeObject(typeObjectVal4); err != nil {
+		return err
+	}
+	if err := fieldsTarget1.FinishField(keyTarget2, fieldTarget3); err != nil {
+		return err
+	}
+	if err := t.FinishFields(fieldsTarget1); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (m BdeUnionE) MakeVDLTarget() vdl.Target {
+	return nil
+}
+
+func (m BdeUnionE) IsZero() bool {
+
+	unionField2 := false
+	return unionField2
+}
 
 type BrieEnum int
 
@@ -729,6 +3969,23 @@ func (BrieEnum) __VDLReflect(struct {
 }) {
 }
 
+func (m BrieEnum) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
+	if err := t.FromEnumLabel(m.String(), __VDLType_vomtype_v_io_v23_vom_testdata_types_BrieEnum); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (m BrieEnum) MakeVDLTarget() vdl.Target {
+	return nil
+}
+
+func (m BrieEnum) IsZero() bool {
+
+	var1 := (m == BrieEnumGlee)
+	return var1
+}
+
 type BeanEnum int
 
 const (
@@ -768,6 +4025,23 @@ func (BeanEnum) __VDLReflect(struct {
 	Name string `vdl:"v.io/v23/vom/testdata/types.BeanEnum"`
 	Enum struct{ Bean string }
 }) {
+}
+
+func (m BeanEnum) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
+	if err := t.FromEnumLabel(m.String(), __VDLType_vomtype_v_io_v23_vom_testdata_types_BeanEnum); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (m BeanEnum) MakeVDLTarget() vdl.Target {
+	return nil
+}
+
+func (m BeanEnum) IsZero() bool {
+
+	var1 := (m == BeanEnumBean)
+	return var1
 }
 
 type FoodEnum int
@@ -823,6 +4097,23 @@ func (FoodEnum) __VDLReflect(struct {
 }) {
 }
 
+func (m FoodEnum) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
+	if err := t.FromEnumLabel(m.String(), __VDLType_vomtype_v_io_v23_vom_testdata_types_FoodEnum); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (m FoodEnum) MakeVDLTarget() vdl.Target {
+	return nil
+}
+
+func (m FoodEnum) IsZero() bool {
+
+	var1 := (m == FoodEnumBean)
+	return var1
+}
+
 type StructAny struct {
 	Any *vdl.Value
 }
@@ -832,6 +4123,54 @@ func (StructAny) __VDLReflect(struct {
 }) {
 }
 
+func (m *StructAny) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
+
+	if __VDLType_vomtype_v_io_v23_vom_testdata_types_StructAny == nil || __VDLTypevomtype25 == nil {
+		panic("Initialization order error: types generated for FillVDLTarget not initialized. Consider moving caller to an init() block.")
+	}
+	fieldsTarget1, err := t.StartFields(tt)
+	if err != nil {
+		return err
+	}
+
+	var2 := (m.Any == (*vdl.Value)(nil))
+	if !var2 {
+		keyTarget3, fieldTarget4, err := fieldsTarget1.StartField("Any")
+		if err != vdl.ErrFieldNoExist && err != nil {
+			return err
+		}
+		if err != vdl.ErrFieldNoExist {
+
+			if m.Any == nil {
+				if err := fieldTarget4.FromNil(vdl.AnyType); err != nil {
+					return err
+				}
+			} else {
+				if err := vdl.FromValue(fieldTarget4, m.Any); err != nil {
+					return err
+				}
+			}
+			if err := fieldsTarget1.FinishField(keyTarget3, fieldTarget4); err != nil {
+				return err
+			}
+		}
+	}
+	if err := t.FinishFields(fieldsTarget1); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (m *StructAny) MakeVDLTarget() vdl.Target {
+	return nil
+}
+
+func (m *StructAny) IsZero() bool {
+
+	var1 := (*m == StructAny{})
+	return var1
+}
+
 type StructMap struct {
 	Map map[int64]int64
 }
@@ -839,6 +4178,79 @@ type StructMap struct {
 func (StructMap) __VDLReflect(struct {
 	Name string `vdl:"v.io/v23/vom/testdata/types.StructMap"`
 }) {
+}
+
+func (m *StructMap) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
+
+	if __VDLType_vomtype_v_io_v23_vom_testdata_types_StructMap == nil || __VDLTypevomtype26 == nil {
+		panic("Initialization order error: types generated for FillVDLTarget not initialized. Consider moving caller to an init() block.")
+	}
+	fieldsTarget1, err := t.StartFields(tt)
+	if err != nil {
+		return err
+	}
+
+	var var2 bool
+	if len(m.Map) == 0 {
+		var2 = true
+	}
+	if !var2 {
+		keyTarget3, fieldTarget4, err := fieldsTarget1.StartField("Map")
+		if err != vdl.ErrFieldNoExist && err != nil {
+			return err
+		}
+		if err != vdl.ErrFieldNoExist {
+
+			mapTarget5, err := fieldTarget4.StartMap(__VDLTypevomtype27, len(m.Map))
+			if err != nil {
+				return err
+			}
+			for key7, value9 := range m.Map {
+				keyTarget6, err := mapTarget5.StartKey()
+				if err != nil {
+					return err
+				}
+				if err := keyTarget6.FromInt(int64(key7), vdl.Int64Type); err != nil {
+					return err
+				}
+				valueTarget8, err := mapTarget5.FinishKeyStartField(keyTarget6)
+				if err != nil {
+					return err
+				}
+				if err := valueTarget8.FromInt(int64(value9), vdl.Int64Type); err != nil {
+					return err
+				}
+				if err := mapTarget5.FinishField(keyTarget6, valueTarget8); err != nil {
+					return err
+				}
+			}
+			if err := fieldTarget4.FinishMap(mapTarget5); err != nil {
+				return err
+			}
+			if err := fieldsTarget1.FinishField(keyTarget3, fieldTarget4); err != nil {
+				return err
+			}
+		}
+	}
+	if err := t.FinishFields(fieldsTarget1); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (m *StructMap) MakeVDLTarget() vdl.Target {
+	return nil
+}
+
+func (m *StructMap) IsZero() bool {
+
+	var1 := true
+	var var2 bool
+	if len(m.Map) == 0 {
+		var2 = true
+	}
+	var1 = var1 && var2
+	return var1
 }
 
 // Since the encoding changes if struct fields are zero values,
@@ -875,11 +4287,531 @@ func (StructManyTypes) __VDLReflect(struct {
 }) {
 }
 
+func (m *StructManyTypes) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
+
+	if __VDLType_vomtype_v_io_v23_vom_testdata_types_StructManyTypes == nil || __VDLTypevomtype28 == nil {
+		panic("Initialization order error: types generated for FillVDLTarget not initialized. Consider moving caller to an init() block.")
+	}
+	fieldsTarget1, err := t.StartFields(tt)
+	if err != nil {
+		return err
+	}
+
+	var2 := (m.Bool == false)
+	if !var2 {
+		keyTarget3, fieldTarget4, err := fieldsTarget1.StartField("Bool")
+		if err != vdl.ErrFieldNoExist && err != nil {
+			return err
+		}
+		if err != vdl.ErrFieldNoExist {
+			if err := fieldTarget4.FromBool(bool(m.Bool), vdl.BoolType); err != nil {
+				return err
+			}
+			if err := fieldsTarget1.FinishField(keyTarget3, fieldTarget4); err != nil {
+				return err
+			}
+		}
+	}
+	var5 := (m.AByte == byte(0))
+	if !var5 {
+		keyTarget6, fieldTarget7, err := fieldsTarget1.StartField("AByte")
+		if err != vdl.ErrFieldNoExist && err != nil {
+			return err
+		}
+		if err != vdl.ErrFieldNoExist {
+			if err := fieldTarget7.FromUint(uint64(m.AByte), vdl.ByteType); err != nil {
+				return err
+			}
+			if err := fieldsTarget1.FinishField(keyTarget6, fieldTarget7); err != nil {
+				return err
+			}
+		}
+	}
+	var8 := (m.Int16 == int16(0))
+	if !var8 {
+		keyTarget9, fieldTarget10, err := fieldsTarget1.StartField("Int16")
+		if err != vdl.ErrFieldNoExist && err != nil {
+			return err
+		}
+		if err != vdl.ErrFieldNoExist {
+			if err := fieldTarget10.FromInt(int64(m.Int16), vdl.Int16Type); err != nil {
+				return err
+			}
+			if err := fieldsTarget1.FinishField(keyTarget9, fieldTarget10); err != nil {
+				return err
+			}
+		}
+	}
+	var11 := (m.Int32 == int32(0))
+	if !var11 {
+		keyTarget12, fieldTarget13, err := fieldsTarget1.StartField("Int32")
+		if err != vdl.ErrFieldNoExist && err != nil {
+			return err
+		}
+		if err != vdl.ErrFieldNoExist {
+			if err := fieldTarget13.FromInt(int64(m.Int32), vdl.Int32Type); err != nil {
+				return err
+			}
+			if err := fieldsTarget1.FinishField(keyTarget12, fieldTarget13); err != nil {
+				return err
+			}
+		}
+	}
+	var14 := (m.Int64 == int64(0))
+	if !var14 {
+		keyTarget15, fieldTarget16, err := fieldsTarget1.StartField("Int64")
+		if err != vdl.ErrFieldNoExist && err != nil {
+			return err
+		}
+		if err != vdl.ErrFieldNoExist {
+			if err := fieldTarget16.FromInt(int64(m.Int64), vdl.Int64Type); err != nil {
+				return err
+			}
+			if err := fieldsTarget1.FinishField(keyTarget15, fieldTarget16); err != nil {
+				return err
+			}
+		}
+	}
+	var17 := (m.Uint16 == uint16(0))
+	if !var17 {
+		keyTarget18, fieldTarget19, err := fieldsTarget1.StartField("Uint16")
+		if err != vdl.ErrFieldNoExist && err != nil {
+			return err
+		}
+		if err != vdl.ErrFieldNoExist {
+			if err := fieldTarget19.FromUint(uint64(m.Uint16), vdl.Uint16Type); err != nil {
+				return err
+			}
+			if err := fieldsTarget1.FinishField(keyTarget18, fieldTarget19); err != nil {
+				return err
+			}
+		}
+	}
+	var20 := (m.Uint32 == uint32(0))
+	if !var20 {
+		keyTarget21, fieldTarget22, err := fieldsTarget1.StartField("Uint32")
+		if err != vdl.ErrFieldNoExist && err != nil {
+			return err
+		}
+		if err != vdl.ErrFieldNoExist {
+			if err := fieldTarget22.FromUint(uint64(m.Uint32), vdl.Uint32Type); err != nil {
+				return err
+			}
+			if err := fieldsTarget1.FinishField(keyTarget21, fieldTarget22); err != nil {
+				return err
+			}
+		}
+	}
+	var23 := (m.Uint64 == uint64(0))
+	if !var23 {
+		keyTarget24, fieldTarget25, err := fieldsTarget1.StartField("Uint64")
+		if err != vdl.ErrFieldNoExist && err != nil {
+			return err
+		}
+		if err != vdl.ErrFieldNoExist {
+			if err := fieldTarget25.FromUint(uint64(m.Uint64), vdl.Uint64Type); err != nil {
+				return err
+			}
+			if err := fieldsTarget1.FinishField(keyTarget24, fieldTarget25); err != nil {
+				return err
+			}
+		}
+	}
+	var26 := (m.String == "")
+	if !var26 {
+		keyTarget27, fieldTarget28, err := fieldsTarget1.StartField("String")
+		if err != vdl.ErrFieldNoExist && err != nil {
+			return err
+		}
+		if err != vdl.ErrFieldNoExist {
+			if err := fieldTarget28.FromString(string(m.String), vdl.StringType); err != nil {
+				return err
+			}
+			if err := fieldsTarget1.FinishField(keyTarget27, fieldTarget28); err != nil {
+				return err
+			}
+		}
+	}
+	var var29 bool
+	if len(m.Bytes) == 0 {
+		var29 = true
+	}
+	if !var29 {
+		keyTarget30, fieldTarget31, err := fieldsTarget1.StartField("Bytes")
+		if err != vdl.ErrFieldNoExist && err != nil {
+			return err
+		}
+		if err != vdl.ErrFieldNoExist {
+
+			if err := fieldTarget31.FromBytes([]byte(m.Bytes), __VDLTypevomtype29); err != nil {
+				return err
+			}
+			if err := fieldsTarget1.FinishField(keyTarget30, fieldTarget31); err != nil {
+				return err
+			}
+		}
+	}
+	var32 := (m.Float32 == float32(0))
+	if !var32 {
+		keyTarget33, fieldTarget34, err := fieldsTarget1.StartField("Float32")
+		if err != vdl.ErrFieldNoExist && err != nil {
+			return err
+		}
+		if err != vdl.ErrFieldNoExist {
+			if err := fieldTarget34.FromFloat(float64(m.Float32), vdl.Float32Type); err != nil {
+				return err
+			}
+			if err := fieldsTarget1.FinishField(keyTarget33, fieldTarget34); err != nil {
+				return err
+			}
+		}
+	}
+	var35 := (m.Float64 == float64(0))
+	if !var35 {
+		keyTarget36, fieldTarget37, err := fieldsTarget1.StartField("Float64")
+		if err != vdl.ErrFieldNoExist && err != nil {
+			return err
+		}
+		if err != vdl.ErrFieldNoExist {
+			if err := fieldTarget37.FromFloat(float64(m.Float64), vdl.Float64Type); err != nil {
+				return err
+			}
+			if err := fieldsTarget1.FinishField(keyTarget36, fieldTarget37); err != nil {
+				return err
+			}
+		}
+	}
+	var38 := (m.Complex64 == complex64(0))
+	if !var38 {
+		keyTarget39, fieldTarget40, err := fieldsTarget1.StartField("Complex64")
+		if err != vdl.ErrFieldNoExist && err != nil {
+			return err
+		}
+		if err != vdl.ErrFieldNoExist {
+			if err := fieldTarget40.FromComplex(complex128(m.Complex64), vdl.Complex64Type); err != nil {
+				return err
+			}
+			if err := fieldsTarget1.FinishField(keyTarget39, fieldTarget40); err != nil {
+				return err
+			}
+		}
+	}
+	var41 := (m.Complex128 == complex128(0))
+	if !var41 {
+		keyTarget42, fieldTarget43, err := fieldsTarget1.StartField("Complex128")
+		if err != vdl.ErrFieldNoExist && err != nil {
+			return err
+		}
+		if err != vdl.ErrFieldNoExist {
+			if err := fieldTarget43.FromComplex(complex128(m.Complex128), vdl.Complex128Type); err != nil {
+				return err
+			}
+			if err := fieldsTarget1.FinishField(keyTarget42, fieldTarget43); err != nil {
+				return err
+			}
+		}
+	}
+	var44 := m.FoodEnum.IsZero()
+	if !var44 {
+		keyTarget45, fieldTarget46, err := fieldsTarget1.StartField("FoodEnum")
+		if err != vdl.ErrFieldNoExist && err != nil {
+			return err
+		}
+		if err != vdl.ErrFieldNoExist {
+
+			if err := m.FoodEnum.FillVDLTarget(fieldTarget46, __VDLType_vomtype_v_io_v23_vom_testdata_types_FoodEnum); err != nil {
+				return err
+			}
+			if err := fieldsTarget1.FinishField(keyTarget45, fieldTarget46); err != nil {
+				return err
+			}
+		}
+	}
+	var47 := m.NEnum.IsZero()
+	if !var47 {
+		keyTarget48, fieldTarget49, err := fieldsTarget1.StartField("NEnum")
+		if err != vdl.ErrFieldNoExist && err != nil {
+			return err
+		}
+		if err != vdl.ErrFieldNoExist {
+
+			if err := m.NEnum.FillVDLTarget(fieldTarget49, __VDLType_vomtype_v_io_v23_vom_testdata_types_NEnum); err != nil {
+				return err
+			}
+			if err := fieldsTarget1.FinishField(keyTarget48, fieldTarget49); err != nil {
+				return err
+			}
+		}
+	}
+	var var50 bool
+	if len(m.NListUint64) == 0 {
+		var50 = true
+	}
+	if !var50 {
+		keyTarget51, fieldTarget52, err := fieldsTarget1.StartField("NListUint64")
+		if err != vdl.ErrFieldNoExist && err != nil {
+			return err
+		}
+		if err != vdl.ErrFieldNoExist {
+
+			if err := m.NListUint64.FillVDLTarget(fieldTarget52, __VDLType_vomtype_v_io_v23_vom_testdata_types_NListUint64); err != nil {
+				return err
+			}
+			if err := fieldsTarget1.FinishField(keyTarget51, fieldTarget52); err != nil {
+				return err
+			}
+		}
+	}
+	var53 := m.NByteArray.IsZero()
+	if !var53 {
+		keyTarget54, fieldTarget55, err := fieldsTarget1.StartField("NByteArray")
+		if err != vdl.ErrFieldNoExist && err != nil {
+			return err
+		}
+		if err != vdl.ErrFieldNoExist {
+
+			if err := m.NByteArray.FillVDLTarget(fieldTarget55, __VDLType_vomtype_v_io_v23_vom_testdata_types_NByteArray); err != nil {
+				return err
+			}
+			if err := fieldsTarget1.FinishField(keyTarget54, fieldTarget55); err != nil {
+				return err
+			}
+		}
+	}
+	var56 := m.NArray2Uint64.IsZero()
+	if !var56 {
+		keyTarget57, fieldTarget58, err := fieldsTarget1.StartField("NArray2Uint64")
+		if err != vdl.ErrFieldNoExist && err != nil {
+			return err
+		}
+		if err != vdl.ErrFieldNoExist {
+
+			if err := m.NArray2Uint64.FillVDLTarget(fieldTarget58, __VDLType_vomtype_v_io_v23_vom_testdata_types_NArray2Uint64); err != nil {
+				return err
+			}
+			if err := fieldsTarget1.FinishField(keyTarget57, fieldTarget58); err != nil {
+				return err
+			}
+		}
+	}
+	var var59 bool
+	if len(m.NSetUint64) == 0 {
+		var59 = true
+	}
+	if !var59 {
+		keyTarget60, fieldTarget61, err := fieldsTarget1.StartField("NSetUint64")
+		if err != vdl.ErrFieldNoExist && err != nil {
+			return err
+		}
+		if err != vdl.ErrFieldNoExist {
+
+			if err := m.NSetUint64.FillVDLTarget(fieldTarget61, __VDLType_vomtype_v_io_v23_vom_testdata_types_NSetUint64); err != nil {
+				return err
+			}
+			if err := fieldsTarget1.FinishField(keyTarget60, fieldTarget61); err != nil {
+				return err
+			}
+		}
+	}
+	var var62 bool
+	if len(m.NMapUint64String) == 0 {
+		var62 = true
+	}
+	if !var62 {
+		keyTarget63, fieldTarget64, err := fieldsTarget1.StartField("NMapUint64String")
+		if err != vdl.ErrFieldNoExist && err != nil {
+			return err
+		}
+		if err != vdl.ErrFieldNoExist {
+
+			if err := m.NMapUint64String.FillVDLTarget(fieldTarget64, __VDLType_vomtype_v_io_v23_vom_testdata_types_NMapUint64String); err != nil {
+				return err
+			}
+			if err := fieldsTarget1.FinishField(keyTarget63, fieldTarget64); err != nil {
+				return err
+			}
+		}
+	}
+	var65 := m.NStruct.IsZero()
+	if !var65 {
+		keyTarget66, fieldTarget67, err := fieldsTarget1.StartField("NStruct")
+		if err != vdl.ErrFieldNoExist && err != nil {
+			return err
+		}
+		if err != vdl.ErrFieldNoExist {
+
+			if err := m.NStruct.FillVDLTarget(fieldTarget67, __VDLType_vomtype_v_io_v23_vom_testdata_types_NStruct); err != nil {
+				return err
+			}
+			if err := fieldsTarget1.FinishField(keyTarget66, fieldTarget67); err != nil {
+				return err
+			}
+		}
+	}
+	var68 := m.NUnion.IsZero()
+	if !var68 {
+		keyTarget69, fieldTarget70, err := fieldsTarget1.StartField("NUnion")
+		if err != vdl.ErrFieldNoExist && err != nil {
+			return err
+		}
+		if err != vdl.ErrFieldNoExist {
+
+			unionValue71 := m.NUnion
+			if unionValue71 == nil {
+				unionValue71 = NUnionA{}
+			}
+			if err := unionValue71.FillVDLTarget(fieldTarget70, __VDLType_vomtype_v_io_v23_vom_testdata_types_NUnion); err != nil {
+				return err
+			}
+			if err := fieldsTarget1.FinishField(keyTarget69, fieldTarget70); err != nil {
+				return err
+			}
+		}
+	}
+	var72 := (m.TypeObject == vdl.AnyType)
+	if !var72 {
+		keyTarget73, fieldTarget74, err := fieldsTarget1.StartField("TypeObject")
+		if err != vdl.ErrFieldNoExist && err != nil {
+			return err
+		}
+		if err != vdl.ErrFieldNoExist {
+			typeObjectVal75 := m.TypeObject
+			if typeObjectVal75 == nil {
+				typeObjectVal75 = vdl.AnyType
+			}
+			if err := fieldTarget74.FromTypeObject(typeObjectVal75); err != nil {
+				return err
+			}
+			if err := fieldsTarget1.FinishField(keyTarget73, fieldTarget74); err != nil {
+				return err
+			}
+		}
+	}
+	if err := t.FinishFields(fieldsTarget1); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (m *StructManyTypes) MakeVDLTarget() vdl.Target {
+	return nil
+}
+
+func (m *StructManyTypes) IsZero() bool {
+
+	var1 := true
+	var2 := (m.Bool == false)
+	var1 = var1 && var2
+	var3 := (m.AByte == byte(0))
+	var1 = var1 && var3
+	var4 := (m.Int16 == int16(0))
+	var1 = var1 && var4
+	var5 := (m.Int32 == int32(0))
+	var1 = var1 && var5
+	var6 := (m.Int64 == int64(0))
+	var1 = var1 && var6
+	var7 := (m.Uint16 == uint16(0))
+	var1 = var1 && var7
+	var8 := (m.Uint32 == uint32(0))
+	var1 = var1 && var8
+	var9 := (m.Uint64 == uint64(0))
+	var1 = var1 && var9
+	var10 := (m.String == "")
+	var1 = var1 && var10
+	var var11 bool
+	if len(m.Bytes) == 0 {
+		var11 = true
+	}
+	var1 = var1 && var11
+	var12 := (m.Float32 == float32(0))
+	var1 = var1 && var12
+	var13 := (m.Float64 == float64(0))
+	var1 = var1 && var13
+	var14 := (m.Complex64 == complex64(0))
+	var1 = var1 && var14
+	var15 := (m.Complex128 == complex128(0))
+	var1 = var1 && var15
+	var16 := m.FoodEnum.IsZero()
+	var1 = var1 && var16
+	var17 := m.NEnum.IsZero()
+	var1 = var1 && var17
+	var var18 bool
+	if len(m.NListUint64) == 0 {
+		var18 = true
+	}
+	var1 = var1 && var18
+	var19 := m.NByteArray.IsZero()
+	var1 = var1 && var19
+	var20 := m.NArray2Uint64.IsZero()
+	var1 = var1 && var20
+	var var21 bool
+	if len(m.NSetUint64) == 0 {
+		var21 = true
+	}
+	var1 = var1 && var21
+	var var22 bool
+	if len(m.NMapUint64String) == 0 {
+		var22 = true
+	}
+	var1 = var1 && var22
+	var23 := m.NStruct.IsZero()
+	var1 = var1 && var23
+	var24 := m.NUnion.IsZero()
+	var1 = var1 && var24
+	var25 := (m.TypeObject == vdl.AnyType)
+	var1 = var1 && var25
+	return var1
+}
+
 type AnySlice []*vdl.Value
 
 func (AnySlice) __VDLReflect(struct {
 	Name string `vdl:"v.io/v23/vom/testdata/types.AnySlice"`
 }) {
+}
+
+func (m AnySlice) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
+
+	listTarget1, err := t.StartList(__VDLType_vomtype_v_io_v23_vom_testdata_types_AnySlice, len(m))
+	if err != nil {
+		return err
+	}
+	for i, elem3 := range m {
+		elemTarget2, err := listTarget1.StartElem(i)
+		if err != nil {
+			return err
+		}
+
+		if elem3 == nil {
+			if err := elemTarget2.FromNil(vdl.AnyType); err != nil {
+				return err
+			}
+		} else {
+			if err := vdl.FromValue(elemTarget2, elem3); err != nil {
+				return err
+			}
+		}
+		if err := listTarget1.FinishElem(elemTarget2); err != nil {
+			return err
+		}
+	}
+	if err := t.FinishList(listTarget1); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (m AnySlice) MakeVDLTarget() vdl.Target {
+	return nil
+}
+
+func (m AnySlice) IsZero() bool {
+
+	var var1 bool
+	if len(m) == 0 {
+		var1 = true
+	}
+	return var1
 }
 
 type LargeMessageType struct {
@@ -892,6 +4824,80 @@ func (LargeMessageType) __VDLReflect(struct {
 }) {
 }
 
+func (m *LargeMessageType) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
+
+	if __VDLType_vomtype_v_io_v23_vom_testdata_types_LargeMessageType == nil || __VDLTypevomtype30 == nil {
+		panic("Initialization order error: types generated for FillVDLTarget not initialized. Consider moving caller to an init() block.")
+	}
+	fieldsTarget1, err := t.StartFields(tt)
+	if err != nil {
+		return err
+	}
+
+	var var2 bool
+	if len(m.Payload) == 0 {
+		var2 = true
+	}
+	if !var2 {
+		keyTarget3, fieldTarget4, err := fieldsTarget1.StartField("Payload")
+		if err != vdl.ErrFieldNoExist && err != nil {
+			return err
+		}
+		if err != vdl.ErrFieldNoExist {
+
+			if err := fieldTarget4.FromBytes([]byte(m.Payload), __VDLTypevomtype29); err != nil {
+				return err
+			}
+			if err := fieldsTarget1.FinishField(keyTarget3, fieldTarget4); err != nil {
+				return err
+			}
+		}
+	}
+	var5 := (m.Next == (*LargeMessageType)(nil))
+	if !var5 {
+		keyTarget6, fieldTarget7, err := fieldsTarget1.StartField("Next")
+		if err != vdl.ErrFieldNoExist && err != nil {
+			return err
+		}
+		if err != vdl.ErrFieldNoExist {
+
+			if m.Next == nil {
+				if err := fieldTarget7.FromNil(__VDLTypevomtype30); err != nil {
+					return err
+				}
+			} else {
+				if err := m.Next.FillVDLTarget(fieldTarget7, __VDLType_vomtype_v_io_v23_vom_testdata_types_LargeMessageType); err != nil {
+					return err
+				}
+			}
+			if err := fieldsTarget1.FinishField(keyTarget6, fieldTarget7); err != nil {
+				return err
+			}
+		}
+	}
+	if err := t.FinishFields(fieldsTarget1); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (m *LargeMessageType) MakeVDLTarget() vdl.Target {
+	return nil
+}
+
+func (m *LargeMessageType) IsZero() bool {
+
+	var1 := true
+	var var2 bool
+	if len(m.Payload) == 0 {
+		var2 = true
+	}
+	var1 = var1 && var2
+	var3 := (m.Next == (*LargeMessageType)(nil))
+	var1 = var1 && var3
+	return var1
+}
+
 type LargeAnyMessageType struct {
 	Payload *vdl.Value
 	Next    *LargeAnyMessageType
@@ -900,6 +4906,76 @@ type LargeAnyMessageType struct {
 func (LargeAnyMessageType) __VDLReflect(struct {
 	Name string `vdl:"v.io/v23/vom/testdata/types.LargeAnyMessageType"`
 }) {
+}
+
+func (m *LargeAnyMessageType) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
+
+	if __VDLType_vomtype_v_io_v23_vom_testdata_types_LargeAnyMessageType == nil || __VDLTypevomtype31 == nil {
+		panic("Initialization order error: types generated for FillVDLTarget not initialized. Consider moving caller to an init() block.")
+	}
+	fieldsTarget1, err := t.StartFields(tt)
+	if err != nil {
+		return err
+	}
+
+	var2 := (m.Payload == (*vdl.Value)(nil))
+	if !var2 {
+		keyTarget3, fieldTarget4, err := fieldsTarget1.StartField("Payload")
+		if err != vdl.ErrFieldNoExist && err != nil {
+			return err
+		}
+		if err != vdl.ErrFieldNoExist {
+
+			if m.Payload == nil {
+				if err := fieldTarget4.FromNil(vdl.AnyType); err != nil {
+					return err
+				}
+			} else {
+				if err := vdl.FromValue(fieldTarget4, m.Payload); err != nil {
+					return err
+				}
+			}
+			if err := fieldsTarget1.FinishField(keyTarget3, fieldTarget4); err != nil {
+				return err
+			}
+		}
+	}
+	var5 := (m.Next == (*LargeAnyMessageType)(nil))
+	if !var5 {
+		keyTarget6, fieldTarget7, err := fieldsTarget1.StartField("Next")
+		if err != vdl.ErrFieldNoExist && err != nil {
+			return err
+		}
+		if err != vdl.ErrFieldNoExist {
+
+			if m.Next == nil {
+				if err := fieldTarget7.FromNil(__VDLTypevomtype31); err != nil {
+					return err
+				}
+			} else {
+				if err := m.Next.FillVDLTarget(fieldTarget7, __VDLType_vomtype_v_io_v23_vom_testdata_types_LargeAnyMessageType); err != nil {
+					return err
+				}
+			}
+			if err := fieldsTarget1.FinishField(keyTarget6, fieldTarget7); err != nil {
+				return err
+			}
+		}
+	}
+	if err := t.FinishFields(fieldsTarget1); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (m *LargeAnyMessageType) MakeVDLTarget() vdl.Target {
+	return nil
+}
+
+func (m *LargeAnyMessageType) IsZero() bool {
+
+	var1 := (*m == LargeAnyMessageType{})
+	return var1
 }
 
 func init() {
@@ -980,4 +5056,126 @@ func init() {
 	vdl.Register((*AnySlice)(nil))
 	vdl.Register((*LargeMessageType)(nil))
 	vdl.Register((*LargeAnyMessageType)(nil))
+}
+
+var __VDLTypevomtype18 *vdl.Type = vdl.TypeOf((*AbcStruct)(nil))
+var __VDLTypevomtype19 *vdl.Type = vdl.TypeOf((*AdeStruct)(nil))
+var __VDLTypevomtype0 *vdl.Type = vdl.TypeOf((*ConvertGroup)(nil))
+var __VDLTypevomtype31 *vdl.Type = vdl.TypeOf((*LargeAnyMessageType)(nil))
+var __VDLTypevomtype30 *vdl.Type = vdl.TypeOf((*LargeMessageType)(nil))
+var __VDLTypevomtype9 *vdl.Type = vdl.TypeOf((*MStruct)(nil))
+var __VDLTypevomtype23 *vdl.Type = vdl.TypeOf((*MapOnlyStruct)(nil))
+var __VDLTypevomtype24 *vdl.Type = vdl.TypeOf((*MapSetStruct)(nil))
+var __VDLTypevomtype8 *vdl.Type = vdl.TypeOf((*NStruct)(nil))
+var __VDLTypevomtype11 *vdl.Type = vdl.TypeOf((*Rec1234)(nil))
+var __VDLTypevomtype12 *vdl.Type = vdl.TypeOf((*Rec1234A)(nil))
+var __VDLTypevomtype17 *vdl.Type = vdl.TypeOf((*Rec1234All)(nil))
+var __VDLTypevomtype15 *vdl.Type = vdl.TypeOf((*Rec1234B)(nil))
+var __VDLTypevomtype10 *vdl.Type = vdl.TypeOf((*RecStruct)(nil))
+var __VDLTypevomtype25 *vdl.Type = vdl.TypeOf((*StructAny)(nil))
+var __VDLTypevomtype28 *vdl.Type = vdl.TypeOf((*StructManyTypes)(nil))
+var __VDLTypevomtype26 *vdl.Type = vdl.TypeOf((*StructMap)(nil))
+var __VDLTypevomtype2 *vdl.Type = vdl.TypeOf((*VomdataStruct)(nil))
+var __VDLTypevomtype20 *vdl.Type = vdl.TypeOf((*XyzStruct)(nil))
+var __VDLTypevomtype21 *vdl.Type = vdl.TypeOf((*YzStruct)(nil))
+var __VDLTypevomtype22 *vdl.Type = vdl.TypeOf((*ZStruct)(nil))
+var __VDLTypevomtype1 *vdl.Type = vdl.TypeOf([]*vdl.Value(nil))
+var __VDLTypevomtype29 *vdl.Type = vdl.TypeOf([]byte(nil))
+var __VDLTypevomtype5 *vdl.Type = vdl.TypeOf([]*vdl.Type(nil))
+var __VDLTypevomtype7 *vdl.Type = vdl.TypeOf([]ConvertGroup(nil))
+var __VDLTypevomtype14 *vdl.Type = vdl.TypeOf([]Rec1234(nil))
+var __VDLTypevomtype13 *vdl.Type = vdl.TypeOf([]Rec1234A(nil))
+var __VDLTypevomtype16 *vdl.Type = vdl.TypeOf([]Rec1234B(nil))
+var __VDLTypevomtype3 *vdl.Type = vdl.TypeOf(map[byte][]*vdl.Value(nil))
+var __VDLTypevomtype27 *vdl.Type = vdl.TypeOf(map[int64]int64(nil))
+var __VDLTypevomtype4 *vdl.Type = vdl.TypeOf(map[string][]*vdl.Type(nil))
+var __VDLTypevomtype6 *vdl.Type = vdl.TypeOf(map[string][]ConvertGroup(nil))
+var __VDLType_vomtype_v_io_v23_vom_testdata_types_AbcStruct *vdl.Type = vdl.TypeOf(AbcStruct{})
+var __VDLType_vomtype_v_io_v23_vom_testdata_types_AdeStruct *vdl.Type = vdl.TypeOf(AdeStruct{
+	E: vdl.AnyType,
+})
+var __VDLType_vomtype_v_io_v23_vom_testdata_types_AnySlice *vdl.Type = vdl.TypeOf(AnySlice(nil))
+var __VDLType_vomtype_v_io_v23_vom_testdata_types_Array3String *vdl.Type = vdl.TypeOf(Array3String{})
+var __VDLType_vomtype_v_io_v23_vom_testdata_types_Array4String *vdl.Type = vdl.TypeOf(Array4String{})
+var __VDLType_vomtype_v_io_v23_vom_testdata_types_BdeUnion *vdl.Type = vdl.TypeOf(BdeUnion(BdeUnionB{""}))
+var __VDLType_vomtype_v_io_v23_vom_testdata_types_BeanEnum *vdl.Type = vdl.TypeOf(BeanEnumBean)
+var __VDLType_vomtype_v_io_v23_vom_testdata_types_BrieEnum *vdl.Type = vdl.TypeOf(BrieEnumGlee)
+var __VDLType_vomtype_v_io_v23_vom_testdata_types_ConvertGroup *vdl.Type = vdl.TypeOf(ConvertGroup{
+	PrimaryType: vdl.AnyType,
+})
+var __VDLType_vomtype_v_io_v23_vom_testdata_types_FoodEnum *vdl.Type = vdl.TypeOf(FoodEnumBean)
+var __VDLType_vomtype_v_io_v23_vom_testdata_types_LargeAnyMessageType *vdl.Type = vdl.TypeOf(LargeAnyMessageType{})
+var __VDLType_vomtype_v_io_v23_vom_testdata_types_LargeMessageType *vdl.Type = vdl.TypeOf(LargeMessageType{})
+var __VDLType_vomtype_v_io_v23_vom_testdata_types_ListString *vdl.Type = vdl.TypeOf(ListString(nil))
+var __VDLType_vomtype_v_io_v23_vom_testdata_types_MBool *vdl.Type = vdl.TypeOf(MBool(false))
+var __VDLType_vomtype_v_io_v23_vom_testdata_types_MByteSlice *vdl.Type = vdl.TypeOf(MByteSlice(nil))
+var __VDLType_vomtype_v_io_v23_vom_testdata_types_MInt8Slice *vdl.Type = vdl.TypeOf(MInt8Slice(nil))
+var __VDLType_vomtype_v_io_v23_vom_testdata_types_MList *vdl.Type = vdl.TypeOf(MList(nil))
+var __VDLType_vomtype_v_io_v23_vom_testdata_types_MMap *vdl.Type = vdl.TypeOf(MMap(nil))
+var __VDLType_vomtype_v_io_v23_vom_testdata_types_MStruct *vdl.Type = vdl.TypeOf(MStruct{
+	E: vdl.AnyType,
+})
+var __VDLType_vomtype_v_io_v23_vom_testdata_types_MapOnlyA *vdl.Type = vdl.TypeOf(MapOnlyA(nil))
+var __VDLType_vomtype_v_io_v23_vom_testdata_types_MapOnlyA2 *vdl.Type = vdl.TypeOf(MapOnlyA2(nil))
+var __VDLType_vomtype_v_io_v23_vom_testdata_types_MapOnlyB *vdl.Type = vdl.TypeOf(MapOnlyB(nil))
+var __VDLType_vomtype_v_io_v23_vom_testdata_types_MapOnlyB2 *vdl.Type = vdl.TypeOf(MapOnlyB2(nil))
+var __VDLType_vomtype_v_io_v23_vom_testdata_types_MapOnlySet *vdl.Type = vdl.TypeOf(MapOnlySet(nil))
+var __VDLType_vomtype_v_io_v23_vom_testdata_types_MapOnlyStruct *vdl.Type = vdl.TypeOf(MapOnlyStruct{})
+var __VDLType_vomtype_v_io_v23_vom_testdata_types_MapSetStruct *vdl.Type = vdl.TypeOf(MapSetStruct{})
+var __VDLType_vomtype_v_io_v23_vom_testdata_types_MapStructSet *vdl.Type = vdl.TypeOf(MapStructSet(nil))
+var __VDLType_vomtype_v_io_v23_vom_testdata_types_NArray2Uint64 *vdl.Type = vdl.TypeOf(NArray2Uint64{})
+var __VDLType_vomtype_v_io_v23_vom_testdata_types_NBool *vdl.Type = vdl.TypeOf(NBool(false))
+var __VDLType_vomtype_v_io_v23_vom_testdata_types_NByte *vdl.Type = vdl.TypeOf(NByte(0))
+var __VDLType_vomtype_v_io_v23_vom_testdata_types_NByteArray *vdl.Type = vdl.TypeOf(NByteArray{})
+var __VDLType_vomtype_v_io_v23_vom_testdata_types_NByteSlice *vdl.Type = vdl.TypeOf(NByteSlice(nil))
+var __VDLType_vomtype_v_io_v23_vom_testdata_types_NComplex128 *vdl.Type = vdl.TypeOf(NComplex128(0))
+var __VDLType_vomtype_v_io_v23_vom_testdata_types_NComplex64 *vdl.Type = vdl.TypeOf(NComplex64(0))
+var __VDLType_vomtype_v_io_v23_vom_testdata_types_NEnum *vdl.Type = vdl.TypeOf(NEnumA)
+var __VDLType_vomtype_v_io_v23_vom_testdata_types_NFloat32 *vdl.Type = vdl.TypeOf(NFloat32(0))
+var __VDLType_vomtype_v_io_v23_vom_testdata_types_NFloat64 *vdl.Type = vdl.TypeOf(NFloat64(0))
+var __VDLType_vomtype_v_io_v23_vom_testdata_types_NInt16 *vdl.Type = vdl.TypeOf(NInt16(0))
+var __VDLType_vomtype_v_io_v23_vom_testdata_types_NInt32 *vdl.Type = vdl.TypeOf(NInt32(0))
+var __VDLType_vomtype_v_io_v23_vom_testdata_types_NInt64 *vdl.Type = vdl.TypeOf(NInt64(0))
+var __VDLType_vomtype_v_io_v23_vom_testdata_types_NInt8 *vdl.Type = vdl.TypeOf(NInt8(0))
+var __VDLType_vomtype_v_io_v23_vom_testdata_types_NListUint64 *vdl.Type = vdl.TypeOf(NListUint64(nil))
+var __VDLType_vomtype_v_io_v23_vom_testdata_types_NMapUint64String *vdl.Type = vdl.TypeOf(NMapUint64String(nil))
+var __VDLType_vomtype_v_io_v23_vom_testdata_types_NSetUint64 *vdl.Type = vdl.TypeOf(NSetUint64(nil))
+var __VDLType_vomtype_v_io_v23_vom_testdata_types_NString *vdl.Type = vdl.TypeOf(NString(""))
+var __VDLType_vomtype_v_io_v23_vom_testdata_types_NStruct *vdl.Type = vdl.TypeOf(NStruct{})
+var __VDLType_vomtype_v_io_v23_vom_testdata_types_NUint16 *vdl.Type = vdl.TypeOf(NUint16(0))
+var __VDLType_vomtype_v_io_v23_vom_testdata_types_NUint32 *vdl.Type = vdl.TypeOf(NUint32(0))
+var __VDLType_vomtype_v_io_v23_vom_testdata_types_NUint64 *vdl.Type = vdl.TypeOf(NUint64(0))
+var __VDLType_vomtype_v_io_v23_vom_testdata_types_NUnion *vdl.Type = vdl.TypeOf(NUnion(NUnionA{false}))
+var __VDLType_vomtype_v_io_v23_vom_testdata_types_Rec1 *vdl.Type = vdl.TypeOf(Rec1(nil))
+var __VDLType_vomtype_v_io_v23_vom_testdata_types_Rec1234 *vdl.Type = vdl.TypeOf(Rec1234{})
+var __VDLType_vomtype_v_io_v23_vom_testdata_types_Rec1234A *vdl.Type = vdl.TypeOf(Rec1234A{})
+var __VDLType_vomtype_v_io_v23_vom_testdata_types_Rec1234All *vdl.Type = vdl.TypeOf(Rec1234All{})
+var __VDLType_vomtype_v_io_v23_vom_testdata_types_Rec1234B *vdl.Type = vdl.TypeOf(Rec1234B{})
+var __VDLType_vomtype_v_io_v23_vom_testdata_types_Rec2 *vdl.Type = vdl.TypeOf(Rec2(nil))
+var __VDLType_vomtype_v_io_v23_vom_testdata_types_Rec3 *vdl.Type = vdl.TypeOf(Rec3(nil))
+var __VDLType_vomtype_v_io_v23_vom_testdata_types_Rec4 *vdl.Type = vdl.TypeOf(Rec4(nil))
+var __VDLType_vomtype_v_io_v23_vom_testdata_types_RecA *vdl.Type = vdl.TypeOf(RecA(nil))
+var __VDLType_vomtype_v_io_v23_vom_testdata_types_RecStruct *vdl.Type = vdl.TypeOf(RecStruct{})
+var __VDLType_vomtype_v_io_v23_vom_testdata_types_RecX *vdl.Type = vdl.TypeOf(RecX(nil))
+var __VDLType_vomtype_v_io_v23_vom_testdata_types_RecY *vdl.Type = vdl.TypeOf(RecY(nil))
+var __VDLType_vomtype_v_io_v23_vom_testdata_types_SetOnlyA *vdl.Type = vdl.TypeOf(SetOnlyA(nil))
+var __VDLType_vomtype_v_io_v23_vom_testdata_types_SetOnlyA2 *vdl.Type = vdl.TypeOf(SetOnlyA2(nil))
+var __VDLType_vomtype_v_io_v23_vom_testdata_types_SetOnlyB *vdl.Type = vdl.TypeOf(SetOnlyB(nil))
+var __VDLType_vomtype_v_io_v23_vom_testdata_types_SetOnlyB2 *vdl.Type = vdl.TypeOf(SetOnlyB2(nil))
+var __VDLType_vomtype_v_io_v23_vom_testdata_types_SetOnlyMap *vdl.Type = vdl.TypeOf(SetOnlyMap(nil))
+var __VDLType_vomtype_v_io_v23_vom_testdata_types_SetStructMap *vdl.Type = vdl.TypeOf(SetStructMap(nil))
+var __VDLType_vomtype_v_io_v23_vom_testdata_types_SometimesSetMap *vdl.Type = vdl.TypeOf(SometimesSetMap(nil))
+var __VDLType_vomtype_v_io_v23_vom_testdata_types_StructAny *vdl.Type = vdl.TypeOf(StructAny{})
+var __VDLType_vomtype_v_io_v23_vom_testdata_types_StructManyTypes *vdl.Type = vdl.TypeOf(StructManyTypes{
+	NUnion:     NUnionA{false},
+	TypeObject: vdl.AnyType,
+})
+var __VDLType_vomtype_v_io_v23_vom_testdata_types_StructMap *vdl.Type = vdl.TypeOf(StructMap{})
+var __VDLType_vomtype_v_io_v23_vom_testdata_types_StructOnlyMap *vdl.Type = vdl.TypeOf(StructOnlyMap(nil))
+var __VDLType_vomtype_v_io_v23_vom_testdata_types_VomdataStruct *vdl.Type = vdl.TypeOf(VomdataStruct{})
+var __VDLType_vomtype_v_io_v23_vom_testdata_types_XyzStruct *vdl.Type = vdl.TypeOf(XyzStruct{})
+var __VDLType_vomtype_v_io_v23_vom_testdata_types_YzStruct *vdl.Type = vdl.TypeOf(YzStruct{})
+var __VDLType_vomtype_v_io_v23_vom_testdata_types_ZStruct *vdl.Type = vdl.TypeOf(ZStruct{})
+
+func __VDLEnsureNativeBuilt_vomtype() {
 }

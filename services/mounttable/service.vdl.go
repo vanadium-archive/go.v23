@@ -37,8 +37,30 @@ func (Tag) __VDLReflect(struct {
 }) {
 }
 
+func (m Tag) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
+	if err := t.FromString(string(m), __VDLType_service_v_io_v23_services_mounttable_Tag); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (m Tag) MakeVDLTarget() vdl.Target {
+	return nil
+}
+
+func (m Tag) IsZero() bool {
+
+	var1 := (m == Tag(""))
+	return var1
+}
+
 func init() {
 	vdl.Register((*Tag)(nil))
+}
+
+var __VDLType_service_v_io_v23_services_mounttable_Tag *vdl.Type = vdl.TypeOf(Tag(""))
+
+func __VDLEnsureNativeBuilt_service() {
 }
 
 // Admin allow the client to SetPermissions or Delete the receiver.  It also subsumes

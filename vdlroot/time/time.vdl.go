@@ -46,6 +46,60 @@ func (Time) __VDLReflect(struct {
 }) {
 }
 
+func (m *Time) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
+
+	__VDLEnsureNativeBuilt_time()
+	fieldsTarget1, err := t.StartFields(tt)
+	if err != nil {
+		return err
+	}
+
+	var2 := (m.Seconds == int64(0))
+	if !var2 {
+		keyTarget3, fieldTarget4, err := fieldsTarget1.StartField("Seconds")
+		if err != vdl.ErrFieldNoExist && err != nil {
+			return err
+		}
+		if err != vdl.ErrFieldNoExist {
+			if err := fieldTarget4.FromInt(int64(m.Seconds), vdl.Int64Type); err != nil {
+				return err
+			}
+			if err := fieldsTarget1.FinishField(keyTarget3, fieldTarget4); err != nil {
+				return err
+			}
+		}
+	}
+	var5 := (m.Nanos == int32(0))
+	if !var5 {
+		keyTarget6, fieldTarget7, err := fieldsTarget1.StartField("Nanos")
+		if err != vdl.ErrFieldNoExist && err != nil {
+			return err
+		}
+		if err != vdl.ErrFieldNoExist {
+			if err := fieldTarget7.FromInt(int64(m.Nanos), vdl.Int32Type); err != nil {
+				return err
+			}
+			if err := fieldsTarget1.FinishField(keyTarget6, fieldTarget7); err != nil {
+				return err
+			}
+		}
+	}
+	if err := t.FinishFields(fieldsTarget1); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (m *Time) MakeVDLTarget() vdl.Target {
+	return nil
+}
+
+func (m *Time) IsZero() bool {
+
+	var1 := vdl.ValueOf(m).IsZero()
+	return var1
+}
+
 // Duration represents the elapsed duration between two points in time, with
 // up to nanosecond precision.
 type Duration struct {
@@ -64,6 +118,60 @@ type Duration struct {
 func (Duration) __VDLReflect(struct {
 	Name string `vdl:"time.Duration"`
 }) {
+}
+
+func (m *Duration) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
+
+	__VDLEnsureNativeBuilt_time()
+	fieldsTarget1, err := t.StartFields(tt)
+	if err != nil {
+		return err
+	}
+
+	var2 := (m.Seconds == int64(0))
+	if !var2 {
+		keyTarget3, fieldTarget4, err := fieldsTarget1.StartField("Seconds")
+		if err != vdl.ErrFieldNoExist && err != nil {
+			return err
+		}
+		if err != vdl.ErrFieldNoExist {
+			if err := fieldTarget4.FromInt(int64(m.Seconds), vdl.Int64Type); err != nil {
+				return err
+			}
+			if err := fieldsTarget1.FinishField(keyTarget3, fieldTarget4); err != nil {
+				return err
+			}
+		}
+	}
+	var5 := (m.Nanos == int32(0))
+	if !var5 {
+		keyTarget6, fieldTarget7, err := fieldsTarget1.StartField("Nanos")
+		if err != vdl.ErrFieldNoExist && err != nil {
+			return err
+		}
+		if err != vdl.ErrFieldNoExist {
+			if err := fieldTarget7.FromInt(int64(m.Nanos), vdl.Int32Type); err != nil {
+				return err
+			}
+			if err := fieldsTarget1.FinishField(keyTarget6, fieldTarget7); err != nil {
+				return err
+			}
+		}
+	}
+	if err := t.FinishFields(fieldsTarget1); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (m *Duration) MakeVDLTarget() vdl.Target {
+	return nil
+}
+
+func (m *Duration) IsZero() bool {
+
+	var1 := vdl.ValueOf(m).IsZero()
+	return var1
 }
 
 // WireDeadline represents the deadline for an operation, where the operation is
@@ -101,23 +209,251 @@ func (WireDeadline) __VDLReflect(struct {
 }) {
 }
 
+func (m *WireDeadline) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
+
+	__VDLEnsureNativeBuilt_time()
+	fieldsTarget1, err := t.StartFields(tt)
+	if err != nil {
+		return err
+	}
+
+	var wireValue2 Duration
+	if err := DurationFromNative(&wireValue2, m.FromNow); err != nil {
+		return err
+	}
+
+	var3 := wireValue2.IsZero()
+	if !var3 {
+		keyTarget4, fieldTarget5, err := fieldsTarget1.StartField("FromNow")
+		if err != vdl.ErrFieldNoExist && err != nil {
+			return err
+		}
+		if err != vdl.ErrFieldNoExist {
+
+			if err := wireValue2.FillVDLTarget(fieldTarget5, __VDLType_time_time_Duration); err != nil {
+				return err
+			}
+			if err := fieldsTarget1.FinishField(keyTarget4, fieldTarget5); err != nil {
+				return err
+			}
+		}
+	}
+	var6 := (m.NoDeadline == false)
+	if !var6 {
+		keyTarget7, fieldTarget8, err := fieldsTarget1.StartField("NoDeadline")
+		if err != vdl.ErrFieldNoExist && err != nil {
+			return err
+		}
+		if err != vdl.ErrFieldNoExist {
+			if err := fieldTarget8.FromBool(bool(m.NoDeadline), vdl.BoolType); err != nil {
+				return err
+			}
+			if err := fieldsTarget1.FinishField(keyTarget7, fieldTarget8); err != nil {
+				return err
+			}
+		}
+	}
+	if err := t.FinishFields(fieldsTarget1); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (m *WireDeadline) MakeVDLTarget() vdl.Target {
+	return nil
+}
+
+func (m *WireDeadline) IsZero() bool {
+
+	var1 := vdl.ValueOf(m).IsZero()
+	return var1
+}
+
 func init() {
-	vdl.RegisterNative(durationToNative, durationFromNative)
-	vdl.RegisterNative(timeToNative, timeFromNative)
-	vdl.RegisterNative(wireDeadlineToNative, wireDeadlineFromNative)
+	vdl.RegisterNative(DurationToNative, DurationFromNative)
+	vdl.RegisterNative(TimeToNative, TimeFromNative)
+	vdl.RegisterNative(WireDeadlineToNative, WireDeadlineFromNative)
 	vdl.Register((*Time)(nil))
 	vdl.Register((*Duration)(nil))
 	vdl.Register((*WireDeadline)(nil))
 }
 
 // Type-check Duration conversion functions.
-var _ func(Duration, *time.Duration) error = durationToNative
-var _ func(*Duration, time.Duration) error = durationFromNative
+var _ func(Duration, *time.Duration) error = DurationToNative
+var _ func(*Duration, time.Duration) error = DurationFromNative
 
 // Type-check Time conversion functions.
-var _ func(Time, *time.Time) error = timeToNative
-var _ func(*Time, time.Time) error = timeFromNative
+var _ func(Time, *time.Time) error = TimeToNative
+var _ func(*Time, time.Time) error = TimeFromNative
 
 // Type-check WireDeadline conversion functions.
-var _ func(WireDeadline, *Deadline) error = wireDeadlineToNative
-var _ func(*WireDeadline, Deadline) error = wireDeadlineFromNative
+var _ func(WireDeadline, *Deadline) error = WireDeadlineToNative
+var _ func(*WireDeadline, Deadline) error = WireDeadlineFromNative
+
+var __VDLTypetime1 *vdl.Type
+
+func __VDLTypetime1_gen() *vdl.Type {
+	__VDLTypetime1Builder := vdl.TypeBuilder{}
+
+	__VDLTypetime11 := __VDLTypetime1Builder.Optional()
+	__VDLTypetime12 := __VDLTypetime1Builder.Struct()
+	__VDLTypetime13 := __VDLTypetime1Builder.Named("time.Duration").AssignBase(__VDLTypetime12)
+	__VDLTypetime14 := vdl.Int64Type
+	__VDLTypetime12.AppendField("Seconds", __VDLTypetime14)
+	__VDLTypetime15 := vdl.Int32Type
+	__VDLTypetime12.AppendField("Nanos", __VDLTypetime15)
+	__VDLTypetime11.AssignElem(__VDLTypetime13)
+	__VDLTypetime1Builder.Build()
+	__VDLTypetime1v, err := __VDLTypetime11.Built()
+	if err != nil {
+		panic(err)
+	}
+	return __VDLTypetime1v
+}
+func init() {
+	__VDLTypetime1 = __VDLTypetime1_gen()
+}
+
+var __VDLTypetime0 *vdl.Type
+
+func __VDLTypetime0_gen() *vdl.Type {
+	__VDLTypetime0Builder := vdl.TypeBuilder{}
+
+	__VDLTypetime01 := __VDLTypetime0Builder.Optional()
+	__VDLTypetime02 := __VDLTypetime0Builder.Struct()
+	__VDLTypetime03 := __VDLTypetime0Builder.Named("time.Time").AssignBase(__VDLTypetime02)
+	__VDLTypetime04 := vdl.Int64Type
+	__VDLTypetime02.AppendField("Seconds", __VDLTypetime04)
+	__VDLTypetime05 := vdl.Int32Type
+	__VDLTypetime02.AppendField("Nanos", __VDLTypetime05)
+	__VDLTypetime01.AssignElem(__VDLTypetime03)
+	__VDLTypetime0Builder.Build()
+	__VDLTypetime0v, err := __VDLTypetime01.Built()
+	if err != nil {
+		panic(err)
+	}
+	return __VDLTypetime0v
+}
+func init() {
+	__VDLTypetime0 = __VDLTypetime0_gen()
+}
+
+var __VDLTypetime2 *vdl.Type
+
+func __VDLTypetime2_gen() *vdl.Type {
+	__VDLTypetime2Builder := vdl.TypeBuilder{}
+
+	__VDLTypetime21 := __VDLTypetime2Builder.Optional()
+	__VDLTypetime22 := __VDLTypetime2Builder.Struct()
+	__VDLTypetime23 := __VDLTypetime2Builder.Named("time.WireDeadline").AssignBase(__VDLTypetime22)
+	__VDLTypetime24 := __VDLTypetime2Builder.Struct()
+	__VDLTypetime25 := __VDLTypetime2Builder.Named("time.Duration").AssignBase(__VDLTypetime24)
+	__VDLTypetime26 := vdl.Int64Type
+	__VDLTypetime24.AppendField("Seconds", __VDLTypetime26)
+	__VDLTypetime27 := vdl.Int32Type
+	__VDLTypetime24.AppendField("Nanos", __VDLTypetime27)
+	__VDLTypetime22.AppendField("FromNow", __VDLTypetime25)
+	__VDLTypetime28 := vdl.BoolType
+	__VDLTypetime22.AppendField("NoDeadline", __VDLTypetime28)
+	__VDLTypetime21.AssignElem(__VDLTypetime23)
+	__VDLTypetime2Builder.Build()
+	__VDLTypetime2v, err := __VDLTypetime21.Built()
+	if err != nil {
+		panic(err)
+	}
+	return __VDLTypetime2v
+}
+func init() {
+	__VDLTypetime2 = __VDLTypetime2_gen()
+}
+
+var __VDLType_time_time_Duration *vdl.Type
+
+func __VDLType_time_time_Duration_gen() *vdl.Type {
+	__VDLType_time_time_DurationBuilder := vdl.TypeBuilder{}
+
+	__VDLType_time_time_Duration1 := __VDLType_time_time_DurationBuilder.Struct()
+	__VDLType_time_time_Duration2 := __VDLType_time_time_DurationBuilder.Named("time.Duration").AssignBase(__VDLType_time_time_Duration1)
+	__VDLType_time_time_Duration3 := vdl.Int64Type
+	__VDLType_time_time_Duration1.AppendField("Seconds", __VDLType_time_time_Duration3)
+	__VDLType_time_time_Duration4 := vdl.Int32Type
+	__VDLType_time_time_Duration1.AppendField("Nanos", __VDLType_time_time_Duration4)
+	__VDLType_time_time_DurationBuilder.Build()
+	__VDLType_time_time_Durationv, err := __VDLType_time_time_Duration2.Built()
+	if err != nil {
+		panic(err)
+	}
+	return __VDLType_time_time_Durationv
+}
+func init() {
+	__VDLType_time_time_Duration = __VDLType_time_time_Duration_gen()
+}
+
+var __VDLType_time_time_Time *vdl.Type
+
+func __VDLType_time_time_Time_gen() *vdl.Type {
+	__VDLType_time_time_TimeBuilder := vdl.TypeBuilder{}
+
+	__VDLType_time_time_Time1 := __VDLType_time_time_TimeBuilder.Struct()
+	__VDLType_time_time_Time2 := __VDLType_time_time_TimeBuilder.Named("time.Time").AssignBase(__VDLType_time_time_Time1)
+	__VDLType_time_time_Time3 := vdl.Int64Type
+	__VDLType_time_time_Time1.AppendField("Seconds", __VDLType_time_time_Time3)
+	__VDLType_time_time_Time4 := vdl.Int32Type
+	__VDLType_time_time_Time1.AppendField("Nanos", __VDLType_time_time_Time4)
+	__VDLType_time_time_TimeBuilder.Build()
+	__VDLType_time_time_Timev, err := __VDLType_time_time_Time2.Built()
+	if err != nil {
+		panic(err)
+	}
+	return __VDLType_time_time_Timev
+}
+func init() {
+	__VDLType_time_time_Time = __VDLType_time_time_Time_gen()
+}
+
+var __VDLType_time_time_WireDeadline *vdl.Type
+
+func __VDLType_time_time_WireDeadline_gen() *vdl.Type {
+	__VDLType_time_time_WireDeadlineBuilder := vdl.TypeBuilder{}
+
+	__VDLType_time_time_WireDeadline1 := __VDLType_time_time_WireDeadlineBuilder.Struct()
+	__VDLType_time_time_WireDeadline2 := __VDLType_time_time_WireDeadlineBuilder.Named("time.WireDeadline").AssignBase(__VDLType_time_time_WireDeadline1)
+	__VDLType_time_time_WireDeadline3 := __VDLType_time_time_WireDeadlineBuilder.Struct()
+	__VDLType_time_time_WireDeadline4 := __VDLType_time_time_WireDeadlineBuilder.Named("time.Duration").AssignBase(__VDLType_time_time_WireDeadline3)
+	__VDLType_time_time_WireDeadline5 := vdl.Int64Type
+	__VDLType_time_time_WireDeadline3.AppendField("Seconds", __VDLType_time_time_WireDeadline5)
+	__VDLType_time_time_WireDeadline6 := vdl.Int32Type
+	__VDLType_time_time_WireDeadline3.AppendField("Nanos", __VDLType_time_time_WireDeadline6)
+	__VDLType_time_time_WireDeadline1.AppendField("FromNow", __VDLType_time_time_WireDeadline4)
+	__VDLType_time_time_WireDeadline7 := vdl.BoolType
+	__VDLType_time_time_WireDeadline1.AppendField("NoDeadline", __VDLType_time_time_WireDeadline7)
+	__VDLType_time_time_WireDeadlineBuilder.Build()
+	__VDLType_time_time_WireDeadlinev, err := __VDLType_time_time_WireDeadline2.Built()
+	if err != nil {
+		panic(err)
+	}
+	return __VDLType_time_time_WireDeadlinev
+}
+func init() {
+	__VDLType_time_time_WireDeadline = __VDLType_time_time_WireDeadline_gen()
+}
+func __VDLEnsureNativeBuilt_time() {
+	if __VDLTypetime1 == nil {
+		__VDLTypetime1 = __VDLTypetime1_gen()
+	}
+	if __VDLTypetime0 == nil {
+		__VDLTypetime0 = __VDLTypetime0_gen()
+	}
+	if __VDLTypetime2 == nil {
+		__VDLTypetime2 = __VDLTypetime2_gen()
+	}
+	if __VDLType_time_time_Duration == nil {
+		__VDLType_time_time_Duration = __VDLType_time_time_Duration_gen()
+	}
+	if __VDLType_time_time_Time == nil {
+		__VDLType_time_time_Time = __VDLType_time_time_Time_gen()
+	}
+	if __VDLType_time_time_WireDeadline == nil {
+		__VDLType_time_time_WireDeadline = __VDLType_time_time_WireDeadline_gen()
+	}
+}

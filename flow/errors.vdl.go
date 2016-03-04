@@ -14,6 +14,9 @@ import (
 	"v.io/v23/verror"
 )
 
+func __VDLEnsureNativeBuilt_errors() {
+}
+
 var (
 	ErrAuth          = verror.Register("v.io/v23/flow.Auth", verror.NoRetry, "{1:}{2:} {:3}")
 	ErrNotTrusted    = verror.Register("v.io/v23/flow.NotTrusted", verror.NoRetry, "{1:}{2:} {:3}")

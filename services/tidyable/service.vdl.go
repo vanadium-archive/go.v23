@@ -20,6 +20,9 @@ import (
 	"v.io/v23/security/access"
 )
 
+func __VDLEnsureNativeBuilt_service() {
+}
+
 // TidyableClientMethods is the client interface
 // containing Tidyable methods.
 //

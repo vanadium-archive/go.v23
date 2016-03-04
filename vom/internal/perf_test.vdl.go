@@ -25,6 +25,92 @@ func (AddressInfo) __VDLReflect(struct {
 }) {
 }
 
+func (m *AddressInfo) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
+
+	if __VDLType_perf_test_v_io_v23_vom_internal_AddressInfo == nil || __VDLTypeperf_test0 == nil {
+		panic("Initialization order error: types generated for FillVDLTarget not initialized. Consider moving caller to an init() block.")
+	}
+	fieldsTarget1, err := t.StartFields(tt)
+	if err != nil {
+		return err
+	}
+
+	var2 := (m.Street == "")
+	if !var2 {
+		keyTarget3, fieldTarget4, err := fieldsTarget1.StartField("Street")
+		if err != vdl.ErrFieldNoExist && err != nil {
+			return err
+		}
+		if err != vdl.ErrFieldNoExist {
+			if err := fieldTarget4.FromString(string(m.Street), vdl.StringType); err != nil {
+				return err
+			}
+			if err := fieldsTarget1.FinishField(keyTarget3, fieldTarget4); err != nil {
+				return err
+			}
+		}
+	}
+	var5 := (m.City == "")
+	if !var5 {
+		keyTarget6, fieldTarget7, err := fieldsTarget1.StartField("City")
+		if err != vdl.ErrFieldNoExist && err != nil {
+			return err
+		}
+		if err != vdl.ErrFieldNoExist {
+			if err := fieldTarget7.FromString(string(m.City), vdl.StringType); err != nil {
+				return err
+			}
+			if err := fieldsTarget1.FinishField(keyTarget6, fieldTarget7); err != nil {
+				return err
+			}
+		}
+	}
+	var8 := (m.State == "")
+	if !var8 {
+		keyTarget9, fieldTarget10, err := fieldsTarget1.StartField("State")
+		if err != vdl.ErrFieldNoExist && err != nil {
+			return err
+		}
+		if err != vdl.ErrFieldNoExist {
+			if err := fieldTarget10.FromString(string(m.State), vdl.StringType); err != nil {
+				return err
+			}
+			if err := fieldsTarget1.FinishField(keyTarget9, fieldTarget10); err != nil {
+				return err
+			}
+		}
+	}
+	var11 := (m.Zip == "")
+	if !var11 {
+		keyTarget12, fieldTarget13, err := fieldsTarget1.StartField("Zip")
+		if err != vdl.ErrFieldNoExist && err != nil {
+			return err
+		}
+		if err != vdl.ErrFieldNoExist {
+			if err := fieldTarget13.FromString(string(m.Zip), vdl.StringType); err != nil {
+				return err
+			}
+			if err := fieldsTarget1.FinishField(keyTarget12, fieldTarget13); err != nil {
+				return err
+			}
+		}
+	}
+	if err := t.FinishFields(fieldsTarget1); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (m *AddressInfo) MakeVDLTarget() vdl.Target {
+	return nil
+}
+
+func (m *AddressInfo) IsZero() bool {
+
+	var1 := (*m == AddressInfo{})
+	return var1
+}
+
 type CreditAgency int
 
 const (
@@ -78,6 +164,23 @@ func (CreditAgency) __VDLReflect(struct {
 }) {
 }
 
+func (m CreditAgency) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
+	if err := t.FromEnumLabel(m.String(), __VDLType_perf_test_v_io_v23_vom_internal_CreditAgency); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (m CreditAgency) MakeVDLTarget() vdl.Target {
+	return nil
+}
+
+func (m CreditAgency) IsZero() bool {
+
+	var1 := (m == CreditAgencyEquifax)
+	return var1
+}
+
 type ExperianRating int
 
 const (
@@ -125,6 +228,23 @@ func (ExperianRating) __VDLReflect(struct {
 }) {
 }
 
+func (m ExperianRating) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
+	if err := t.FromEnumLabel(m.String(), __VDLType_perf_test_v_io_v23_vom_internal_ExperianRating); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (m ExperianRating) MakeVDLTarget() vdl.Target {
+	return nil
+}
+
+func (m ExperianRating) IsZero() bool {
+
+	var1 := (m == ExperianRatingGood)
+	return var1
+}
+
 type EquifaxCreditReport struct {
 	Rating byte
 }
@@ -132,6 +252,47 @@ type EquifaxCreditReport struct {
 func (EquifaxCreditReport) __VDLReflect(struct {
 	Name string `vdl:"v.io/v23/vom/internal.EquifaxCreditReport"`
 }) {
+}
+
+func (m *EquifaxCreditReport) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
+
+	if __VDLType_perf_test_v_io_v23_vom_internal_EquifaxCreditReport == nil || __VDLTypeperf_test1 == nil {
+		panic("Initialization order error: types generated for FillVDLTarget not initialized. Consider moving caller to an init() block.")
+	}
+	fieldsTarget1, err := t.StartFields(tt)
+	if err != nil {
+		return err
+	}
+
+	var2 := (m.Rating == byte(0))
+	if !var2 {
+		keyTarget3, fieldTarget4, err := fieldsTarget1.StartField("Rating")
+		if err != vdl.ErrFieldNoExist && err != nil {
+			return err
+		}
+		if err != vdl.ErrFieldNoExist {
+			if err := fieldTarget4.FromUint(uint64(m.Rating), vdl.ByteType); err != nil {
+				return err
+			}
+			if err := fieldsTarget1.FinishField(keyTarget3, fieldTarget4); err != nil {
+				return err
+			}
+		}
+	}
+	if err := t.FinishFields(fieldsTarget1); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (m *EquifaxCreditReport) MakeVDLTarget() vdl.Target {
+	return nil
+}
+
+func (m *EquifaxCreditReport) IsZero() bool {
+
+	var1 := (*m == EquifaxCreditReport{})
+	return var1
 }
 
 type ExperianCreditReport struct {
@@ -143,6 +304,48 @@ func (ExperianCreditReport) __VDLReflect(struct {
 }) {
 }
 
+func (m *ExperianCreditReport) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
+
+	if __VDLType_perf_test_v_io_v23_vom_internal_ExperianCreditReport == nil || __VDLTypeperf_test2 == nil {
+		panic("Initialization order error: types generated for FillVDLTarget not initialized. Consider moving caller to an init() block.")
+	}
+	fieldsTarget1, err := t.StartFields(tt)
+	if err != nil {
+		return err
+	}
+
+	var2 := m.Rating.IsZero()
+	if !var2 {
+		keyTarget3, fieldTarget4, err := fieldsTarget1.StartField("Rating")
+		if err != vdl.ErrFieldNoExist && err != nil {
+			return err
+		}
+		if err != vdl.ErrFieldNoExist {
+
+			if err := m.Rating.FillVDLTarget(fieldTarget4, __VDLType_perf_test_v_io_v23_vom_internal_ExperianRating); err != nil {
+				return err
+			}
+			if err := fieldsTarget1.FinishField(keyTarget3, fieldTarget4); err != nil {
+				return err
+			}
+		}
+	}
+	if err := t.FinishFields(fieldsTarget1); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (m *ExperianCreditReport) MakeVDLTarget() vdl.Target {
+	return nil
+}
+
+func (m *ExperianCreditReport) IsZero() bool {
+
+	var1 := (*m == ExperianCreditReport{})
+	return var1
+}
+
 type TransUnionCreditReport struct {
 	Rating int16
 }
@@ -150,6 +353,47 @@ type TransUnionCreditReport struct {
 func (TransUnionCreditReport) __VDLReflect(struct {
 	Name string `vdl:"v.io/v23/vom/internal.TransUnionCreditReport"`
 }) {
+}
+
+func (m *TransUnionCreditReport) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
+
+	if __VDLType_perf_test_v_io_v23_vom_internal_TransUnionCreditReport == nil || __VDLTypeperf_test3 == nil {
+		panic("Initialization order error: types generated for FillVDLTarget not initialized. Consider moving caller to an init() block.")
+	}
+	fieldsTarget1, err := t.StartFields(tt)
+	if err != nil {
+		return err
+	}
+
+	var2 := (m.Rating == int16(0))
+	if !var2 {
+		keyTarget3, fieldTarget4, err := fieldsTarget1.StartField("Rating")
+		if err != vdl.ErrFieldNoExist && err != nil {
+			return err
+		}
+		if err != vdl.ErrFieldNoExist {
+			if err := fieldTarget4.FromInt(int64(m.Rating), vdl.Int16Type); err != nil {
+				return err
+			}
+			if err := fieldsTarget1.FinishField(keyTarget3, fieldTarget4); err != nil {
+				return err
+			}
+		}
+	}
+	if err := t.FinishFields(fieldsTarget1); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (m *TransUnionCreditReport) MakeVDLTarget() vdl.Target {
+	return nil
+}
+
+func (m *TransUnionCreditReport) IsZero() bool {
+
+	var1 := (*m == TransUnionCreditReport{})
+	return var1
 }
 
 type (
@@ -163,6 +407,8 @@ type (
 		Name() string
 		// __VDLReflect describes the AgencyReport union type.
 		__VDLReflect(__AgencyReportReflect)
+		FillVDLTarget(vdl.Target, *vdl.Type) error
+		IsZero() bool
 	}
 	// AgencyReportEquifaxReport represents field EquifaxReport of the AgencyReport union type.
 	AgencyReportEquifaxReport struct{ Value EquifaxCreditReport }
@@ -187,15 +433,117 @@ func (x AgencyReportEquifaxReport) Interface() interface{}             { return 
 func (x AgencyReportEquifaxReport) Name() string                       { return "EquifaxReport" }
 func (x AgencyReportEquifaxReport) __VDLReflect(__AgencyReportReflect) {}
 
+func (m AgencyReportEquifaxReport) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
+
+	fieldsTarget1, err := t.StartFields(__VDLType_perf_test_v_io_v23_vom_internal_AgencyReport)
+	if err != nil {
+		return err
+	}
+	keyTarget2, fieldTarget3, err := fieldsTarget1.StartField("EquifaxReport")
+	if err != nil {
+		return err
+	}
+
+	if err := m.Value.FillVDLTarget(fieldTarget3, __VDLType_perf_test_v_io_v23_vom_internal_EquifaxCreditReport); err != nil {
+		return err
+	}
+	if err := fieldsTarget1.FinishField(keyTarget2, fieldTarget3); err != nil {
+		return err
+	}
+	if err := t.FinishFields(fieldsTarget1); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (m AgencyReportEquifaxReport) MakeVDLTarget() vdl.Target {
+	return nil
+}
+
+func (m AgencyReportEquifaxReport) IsZero() bool {
+
+	var2 := m.Value.IsZero()
+	return var2
+}
+
 func (x AgencyReportExperianReport) Index() int                         { return 1 }
 func (x AgencyReportExperianReport) Interface() interface{}             { return x.Value }
 func (x AgencyReportExperianReport) Name() string                       { return "ExperianReport" }
 func (x AgencyReportExperianReport) __VDLReflect(__AgencyReportReflect) {}
 
+func (m AgencyReportExperianReport) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
+
+	fieldsTarget1, err := t.StartFields(__VDLType_perf_test_v_io_v23_vom_internal_AgencyReport)
+	if err != nil {
+		return err
+	}
+	keyTarget2, fieldTarget3, err := fieldsTarget1.StartField("ExperianReport")
+	if err != nil {
+		return err
+	}
+
+	if err := m.Value.FillVDLTarget(fieldTarget3, __VDLType_perf_test_v_io_v23_vom_internal_ExperianCreditReport); err != nil {
+		return err
+	}
+	if err := fieldsTarget1.FinishField(keyTarget2, fieldTarget3); err != nil {
+		return err
+	}
+	if err := t.FinishFields(fieldsTarget1); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (m AgencyReportExperianReport) MakeVDLTarget() vdl.Target {
+	return nil
+}
+
+func (m AgencyReportExperianReport) IsZero() bool {
+
+	unionField2 := false
+	return unionField2
+}
+
 func (x AgencyReportTransUnionReport) Index() int                         { return 2 }
 func (x AgencyReportTransUnionReport) Interface() interface{}             { return x.Value }
 func (x AgencyReportTransUnionReport) Name() string                       { return "TransUnionReport" }
 func (x AgencyReportTransUnionReport) __VDLReflect(__AgencyReportReflect) {}
+
+func (m AgencyReportTransUnionReport) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
+
+	fieldsTarget1, err := t.StartFields(__VDLType_perf_test_v_io_v23_vom_internal_AgencyReport)
+	if err != nil {
+		return err
+	}
+	keyTarget2, fieldTarget3, err := fieldsTarget1.StartField("TransUnionReport")
+	if err != nil {
+		return err
+	}
+
+	if err := m.Value.FillVDLTarget(fieldTarget3, __VDLType_perf_test_v_io_v23_vom_internal_TransUnionCreditReport); err != nil {
+		return err
+	}
+	if err := fieldsTarget1.FinishField(keyTarget2, fieldTarget3); err != nil {
+		return err
+	}
+	if err := t.FinishFields(fieldsTarget1); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (m AgencyReportTransUnionReport) MakeVDLTarget() vdl.Target {
+	return nil
+}
+
+func (m AgencyReportTransUnionReport) IsZero() bool {
+
+	unionField2 := false
+	return unionField2
+}
 
 type CreditReport struct {
 	Agency CreditAgency
@@ -205,6 +553,70 @@ type CreditReport struct {
 func (CreditReport) __VDLReflect(struct {
 	Name string `vdl:"v.io/v23/vom/internal.CreditReport"`
 }) {
+}
+
+func (m *CreditReport) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
+
+	if __VDLType_perf_test_v_io_v23_vom_internal_CreditReport == nil || __VDLTypeperf_test4 == nil {
+		panic("Initialization order error: types generated for FillVDLTarget not initialized. Consider moving caller to an init() block.")
+	}
+	fieldsTarget1, err := t.StartFields(tt)
+	if err != nil {
+		return err
+	}
+
+	var2 := m.Agency.IsZero()
+	if !var2 {
+		keyTarget3, fieldTarget4, err := fieldsTarget1.StartField("Agency")
+		if err != vdl.ErrFieldNoExist && err != nil {
+			return err
+		}
+		if err != vdl.ErrFieldNoExist {
+
+			if err := m.Agency.FillVDLTarget(fieldTarget4, __VDLType_perf_test_v_io_v23_vom_internal_CreditAgency); err != nil {
+				return err
+			}
+			if err := fieldsTarget1.FinishField(keyTarget3, fieldTarget4); err != nil {
+				return err
+			}
+		}
+	}
+	var5 := m.Report.IsZero()
+	if !var5 {
+		keyTarget6, fieldTarget7, err := fieldsTarget1.StartField("Report")
+		if err != vdl.ErrFieldNoExist && err != nil {
+			return err
+		}
+		if err != vdl.ErrFieldNoExist {
+
+			unionValue8 := m.Report
+			if unionValue8 == nil {
+				unionValue8 = AgencyReportEquifaxReport{}
+			}
+			if err := unionValue8.FillVDLTarget(fieldTarget7, __VDLType_perf_test_v_io_v23_vom_internal_AgencyReport); err != nil {
+				return err
+			}
+			if err := fieldsTarget1.FinishField(keyTarget6, fieldTarget7); err != nil {
+				return err
+			}
+		}
+	}
+	if err := t.FinishFields(fieldsTarget1); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (m *CreditReport) MakeVDLTarget() vdl.Target {
+	return nil
+}
+
+func (m *CreditReport) IsZero() bool {
+
+	var1 := (*m == CreditReport{
+		Report: AgencyReportEquifaxReport{EquifaxCreditReport{}},
+	})
+	return var1
 }
 
 type Customer struct {
@@ -220,6 +632,113 @@ func (Customer) __VDLReflect(struct {
 }) {
 }
 
+func (m *Customer) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
+
+	if __VDLType_perf_test_v_io_v23_vom_internal_Customer == nil || __VDLTypeperf_test5 == nil {
+		panic("Initialization order error: types generated for FillVDLTarget not initialized. Consider moving caller to an init() block.")
+	}
+	fieldsTarget1, err := t.StartFields(tt)
+	if err != nil {
+		return err
+	}
+
+	var2 := (m.Name == "")
+	if !var2 {
+		keyTarget3, fieldTarget4, err := fieldsTarget1.StartField("Name")
+		if err != vdl.ErrFieldNoExist && err != nil {
+			return err
+		}
+		if err != vdl.ErrFieldNoExist {
+			if err := fieldTarget4.FromString(string(m.Name), vdl.StringType); err != nil {
+				return err
+			}
+			if err := fieldsTarget1.FinishField(keyTarget3, fieldTarget4); err != nil {
+				return err
+			}
+		}
+	}
+	var5 := (m.Id == int64(0))
+	if !var5 {
+		keyTarget6, fieldTarget7, err := fieldsTarget1.StartField("Id")
+		if err != vdl.ErrFieldNoExist && err != nil {
+			return err
+		}
+		if err != vdl.ErrFieldNoExist {
+			if err := fieldTarget7.FromInt(int64(m.Id), vdl.Int64Type); err != nil {
+				return err
+			}
+			if err := fieldsTarget1.FinishField(keyTarget6, fieldTarget7); err != nil {
+				return err
+			}
+		}
+	}
+	var8 := (m.Active == false)
+	if !var8 {
+		keyTarget9, fieldTarget10, err := fieldsTarget1.StartField("Active")
+		if err != vdl.ErrFieldNoExist && err != nil {
+			return err
+		}
+		if err != vdl.ErrFieldNoExist {
+			if err := fieldTarget10.FromBool(bool(m.Active), vdl.BoolType); err != nil {
+				return err
+			}
+			if err := fieldsTarget1.FinishField(keyTarget9, fieldTarget10); err != nil {
+				return err
+			}
+		}
+	}
+	var11 := m.Address.IsZero()
+	if !var11 {
+		keyTarget12, fieldTarget13, err := fieldsTarget1.StartField("Address")
+		if err != vdl.ErrFieldNoExist && err != nil {
+			return err
+		}
+		if err != vdl.ErrFieldNoExist {
+
+			if err := m.Address.FillVDLTarget(fieldTarget13, __VDLType_perf_test_v_io_v23_vom_internal_AddressInfo); err != nil {
+				return err
+			}
+			if err := fieldsTarget1.FinishField(keyTarget12, fieldTarget13); err != nil {
+				return err
+			}
+		}
+	}
+	var14 := m.Credit.IsZero()
+	if !var14 {
+		keyTarget15, fieldTarget16, err := fieldsTarget1.StartField("Credit")
+		if err != vdl.ErrFieldNoExist && err != nil {
+			return err
+		}
+		if err != vdl.ErrFieldNoExist {
+
+			if err := m.Credit.FillVDLTarget(fieldTarget16, __VDLType_perf_test_v_io_v23_vom_internal_CreditReport); err != nil {
+				return err
+			}
+			if err := fieldsTarget1.FinishField(keyTarget15, fieldTarget16); err != nil {
+				return err
+			}
+		}
+	}
+	if err := t.FinishFields(fieldsTarget1); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (m *Customer) MakeVDLTarget() vdl.Target {
+	return nil
+}
+
+func (m *Customer) IsZero() bool {
+
+	var1 := (*m == Customer{
+		Credit: CreditReport{
+			Report: AgencyReportEquifaxReport{EquifaxCreditReport{}},
+		},
+	})
+	return var1
+}
+
 func init() {
 	vdl.Register((*AddressInfo)(nil))
 	vdl.Register((*CreditAgency)(nil))
@@ -230,4 +749,29 @@ func init() {
 	vdl.Register((*AgencyReport)(nil))
 	vdl.Register((*CreditReport)(nil))
 	vdl.Register((*Customer)(nil))
+}
+
+var __VDLTypeperf_test0 *vdl.Type = vdl.TypeOf((*AddressInfo)(nil))
+var __VDLTypeperf_test4 *vdl.Type = vdl.TypeOf((*CreditReport)(nil))
+var __VDLTypeperf_test5 *vdl.Type = vdl.TypeOf((*Customer)(nil))
+var __VDLTypeperf_test1 *vdl.Type = vdl.TypeOf((*EquifaxCreditReport)(nil))
+var __VDLTypeperf_test2 *vdl.Type = vdl.TypeOf((*ExperianCreditReport)(nil))
+var __VDLTypeperf_test3 *vdl.Type = vdl.TypeOf((*TransUnionCreditReport)(nil))
+var __VDLType_perf_test_v_io_v23_vom_internal_AddressInfo *vdl.Type = vdl.TypeOf(AddressInfo{})
+var __VDLType_perf_test_v_io_v23_vom_internal_AgencyReport *vdl.Type = vdl.TypeOf(AgencyReport(AgencyReportEquifaxReport{EquifaxCreditReport{}}))
+var __VDLType_perf_test_v_io_v23_vom_internal_CreditAgency *vdl.Type = vdl.TypeOf(CreditAgencyEquifax)
+var __VDLType_perf_test_v_io_v23_vom_internal_CreditReport *vdl.Type = vdl.TypeOf(CreditReport{
+	Report: AgencyReportEquifaxReport{EquifaxCreditReport{}},
+})
+var __VDLType_perf_test_v_io_v23_vom_internal_Customer *vdl.Type = vdl.TypeOf(Customer{
+	Credit: CreditReport{
+		Report: AgencyReportEquifaxReport{EquifaxCreditReport{}},
+	},
+})
+var __VDLType_perf_test_v_io_v23_vom_internal_EquifaxCreditReport *vdl.Type = vdl.TypeOf(EquifaxCreditReport{})
+var __VDLType_perf_test_v_io_v23_vom_internal_ExperianCreditReport *vdl.Type = vdl.TypeOf(ExperianCreditReport{})
+var __VDLType_perf_test_v_io_v23_vom_internal_ExperianRating *vdl.Type = vdl.TypeOf(ExperianRatingGood)
+var __VDLType_perf_test_v_io_v23_vom_internal_TransUnionCreditReport *vdl.Type = vdl.TypeOf(TransUnionCreditReport{})
+
+func __VDLEnsureNativeBuilt_perf_test() {
 }

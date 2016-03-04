@@ -7,7 +7,19 @@ pkg signature, func CopyMethod(Method) Method
 pkg signature, func CopyMethods([]Method) []Method
 pkg signature, func FirstMethod([]Interface, string) (Method, bool)
 pkg signature, func MethodNames([]Interface) []string
+pkg signature, method (*Arg) FillVDLTarget(vdl.Target, *vdl.Type) error
+pkg signature, method (*Arg) IsZero() bool
+pkg signature, method (*Arg) MakeVDLTarget() vdl.Target
+pkg signature, method (*Embed) FillVDLTarget(vdl.Target, *vdl.Type) error
+pkg signature, method (*Embed) IsZero() bool
+pkg signature, method (*Embed) MakeVDLTarget() vdl.Target
+pkg signature, method (*Interface) FillVDLTarget(vdl.Target, *vdl.Type) error
 pkg signature, method (*Interface) FindMethod(string) (Method, bool)
+pkg signature, method (*Interface) IsZero() bool
+pkg signature, method (*Interface) MakeVDLTarget() vdl.Target
+pkg signature, method (*Method) FillVDLTarget(vdl.Target, *vdl.Type) error
+pkg signature, method (*Method) IsZero() bool
+pkg signature, method (*Method) MakeVDLTarget() vdl.Target
 pkg signature, method (SortableMethods) Len() int
 pkg signature, method (SortableMethods) Less(int, int) bool
 pkg signature, method (SortableMethods) Swap(int, int)

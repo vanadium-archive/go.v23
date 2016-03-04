@@ -71,12 +71,12 @@ func (d Discharge) Equivalent(discharge Discharge) bool {
 	return reflect.DeepEqual(d, discharge)
 }
 
-func wireDischargeToNative(wire WireDischarge, native *Discharge) error {
+func WireDischargeToNative(wire WireDischarge, native *Discharge) error {
 	native.wire = wire
 	return nil
 }
 
-func wireDischargeFromNative(wire *WireDischarge, native Discharge) error {
+func WireDischargeFromNative(wire *WireDischarge, native Discharge) error {
 	*wire = native.wire
 	return nil
 }

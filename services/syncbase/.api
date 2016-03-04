@@ -6,6 +6,9 @@ pkg syncbase, func NewErrNotInDevMode(*context.T) error
 pkg syncbase, func NewErrUnknownBatch(*context.T) error
 pkg syncbase, func ServiceClient(string) ServiceClientStub
 pkg syncbase, func ServiceServer(ServiceServerMethods) ServiceServerStub
+pkg syncbase, method (*DevModeUpdateVClockOpts) FillVDLTarget(vdl.Target, *vdl.Type) error
+pkg syncbase, method (*DevModeUpdateVClockOpts) IsZero() bool
+pkg syncbase, method (*DevModeUpdateVClockOpts) MakeVDLTarget() vdl.Target
 pkg syncbase, type AppClientMethods interface { Create, Destroy, Exists, GetPermissions, SetPermissions }
 pkg syncbase, type AppClientMethods interface, Create(*context.T, access.Permissions, ...rpc.CallOpt) error
 pkg syncbase, type AppClientMethods interface, Destroy(*context.T, ...rpc.CallOpt) error

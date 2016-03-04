@@ -36,6 +36,8 @@ pkg verror, func Register(ID, ActionCode, string) IDAction
 pkg verror, func SetDefaultContext(*context.T)
 pkg verror, func Stack(error) PCs
 pkg verror, func StackToText(io.Writer, []uintptr) error
+pkg verror, func WireFromNative(*vdl.WireError, error) error
+pkg verror, func WireToNative(vdl.WireError, *E) error
 pkg verror, func WithComponentName(*context.T, string) *context.T
 pkg verror, method (ActionCode) RetryAction() ActionCode
 pkg verror, method (E) Error() string

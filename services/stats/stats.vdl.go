@@ -24,6 +24,9 @@ import (
 	"v.io/v23/services/watch"
 )
 
+func __VDLEnsureNativeBuilt_stats() {
+}
+
 var (
 	ErrNoValue = verror.Register("v.io/v23/services/stats.NoValue", verror.NoRetry, "{1:}{2:} object has no value, suffix: {3}")
 )

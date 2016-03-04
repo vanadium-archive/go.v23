@@ -80,7 +80,7 @@ type Targeter interface {
 	// MakeVDLTarget returns the target corresponding to the underlying data.
 	MakeVDLTarget() Target
 	// FillVDLTarget fills target with the contents of the underlying data.
-	FillVDLTarget(target Target) error
+	FillVDLTarget(target Target, expectedType *Type) error
 }
 
 // ListTarget represents conversion from a list or array.
@@ -224,14 +224,22 @@ func FromReflect(target Target, rv reflect.Value) error {
 			// If rv is convertible to *Value, fill from it directly.
 			return FromValue(target, rv.Convert(rtPtrToValue).Interface().(*Value))
 		case rt.Implements(rtTargeter):
-			return rv.Interface().(Targeter).FillVDLTarget(target)
+			tt, err := TypeFromReflect(rt)
+			if err != nil {
+				return err
+			}
+			return rv.Interface().(Targeter).FillVDLTarget(target, tt)
 		}
 		rv = rv.Elem()
 	}
 	if reflect.PtrTo(rv.Type()).Implements(rtTargeter) {
 		rvPtr := reflect.New(rv.Type())
 		rvPtr.Elem().Set(rv)
-		return rvPtr.Interface().(Targeter).FillVDLTarget(target)
+		tt, err := TypeFromReflect(rv.Type())
+		if err != nil {
+			return err
+		}
+		return rvPtr.Interface().(Targeter).FillVDLTarget(target, tt)
 	}
 
 	// Handle special-case for errors.

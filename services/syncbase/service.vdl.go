@@ -28,6 +28,9 @@ import (
 	_ "v.io/v23/vdlroot/time"
 )
 
+func __VDLEnsureNativeBuilt_service() {
+}
+
 var (
 	ErrNotInDevMode    = verror.Register("v.io/v23/services/syncbase.NotInDevMode", verror.NoRetry, "{1:}{2:} not running with --dev=true")
 	ErrInvalidName     = verror.Register("v.io/v23/services/syncbase.InvalidName", verror.NoRetry, "{1:}{2:} invalid name: {3}")

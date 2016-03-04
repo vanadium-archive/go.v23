@@ -36,12 +36,55 @@ func (BlessingPatternChunk) __VDLReflect(struct {
 }) {
 }
 
+func (m BlessingPatternChunk) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
+	if err := t.FromString(string(m), __VDLType_groups_v_io_v23_services_groups_BlessingPatternChunk); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (m BlessingPatternChunk) MakeVDLTarget() vdl.Target {
+	return nil
+}
+
+func (m BlessingPatternChunk) IsZero() bool {
+
+	var1 := (m == BlessingPatternChunk(""))
+	return var1
+}
+
 type GetRequest struct {
 }
 
 func (GetRequest) __VDLReflect(struct {
 	Name string `vdl:"v.io/v23/services/groups.GetRequest"`
 }) {
+}
+
+func (m *GetRequest) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
+
+	if __VDLType_groups_v_io_v23_services_groups_GetRequest == nil || __VDLTypegroups0 == nil {
+		panic("Initialization order error: types generated for FillVDLTarget not initialized. Consider moving caller to an init() block.")
+	}
+	fieldsTarget1, err := t.StartFields(tt)
+	if err != nil {
+		return err
+	}
+
+	if err := t.FinishFields(fieldsTarget1); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (m *GetRequest) MakeVDLTarget() vdl.Target {
+	return nil
+}
+
+func (m *GetRequest) IsZero() bool {
+
+	var1 := (*m == GetRequest{})
+	return var1
 }
 
 type GetResponse struct {
@@ -51,6 +94,73 @@ type GetResponse struct {
 func (GetResponse) __VDLReflect(struct {
 	Name string `vdl:"v.io/v23/services/groups.GetResponse"`
 }) {
+}
+
+func (m *GetResponse) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
+
+	if __VDLType_groups_v_io_v23_services_groups_GetResponse == nil || __VDLTypegroups1 == nil {
+		panic("Initialization order error: types generated for FillVDLTarget not initialized. Consider moving caller to an init() block.")
+	}
+	fieldsTarget1, err := t.StartFields(tt)
+	if err != nil {
+		return err
+	}
+
+	var var2 bool
+	if len(m.Entries) == 0 {
+		var2 = true
+	}
+	if !var2 {
+		keyTarget3, fieldTarget4, err := fieldsTarget1.StartField("Entries")
+		if err != vdl.ErrFieldNoExist && err != nil {
+			return err
+		}
+		if err != vdl.ErrFieldNoExist {
+
+			setTarget5, err := fieldTarget4.StartSet(__VDLTypegroups2, len(m.Entries))
+			if err != nil {
+				return err
+			}
+			for key7 := range m.Entries {
+				keyTarget6, err := setTarget5.StartKey()
+				if err != nil {
+					return err
+				}
+
+				if err := key7.FillVDLTarget(keyTarget6, __VDLType_groups_v_io_v23_services_groups_BlessingPatternChunk); err != nil {
+					return err
+				}
+				if err := setTarget5.FinishKey(keyTarget6); err != nil {
+					return err
+				}
+			}
+			if err := fieldTarget4.FinishSet(setTarget5); err != nil {
+				return err
+			}
+			if err := fieldsTarget1.FinishField(keyTarget3, fieldTarget4); err != nil {
+				return err
+			}
+		}
+	}
+	if err := t.FinishFields(fieldsTarget1); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (m *GetResponse) MakeVDLTarget() vdl.Target {
+	return nil
+}
+
+func (m *GetResponse) IsZero() bool {
+
+	var1 := true
+	var var2 bool
+	if len(m.Entries) == 0 {
+		var2 = true
+	}
+	var1 = var1 && var2
+	return var1
 }
 
 // ApproximationType defines the type of approximation desired when a Relate
@@ -105,6 +215,23 @@ func (ApproximationType) __VDLReflect(struct {
 }) {
 }
 
+func (m ApproximationType) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
+	if err := t.FromEnumLabel(m.String(), __VDLType_groups_v_io_v23_services_groups_ApproximationType); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (m ApproximationType) MakeVDLTarget() vdl.Target {
+	return nil
+}
+
+func (m ApproximationType) IsZero() bool {
+
+	var1 := (m == ApproximationTypeUnder)
+	return var1
+}
+
 // Approximation contains information about membership approximations made
 // during a Relate call.
 type Approximation struct {
@@ -117,12 +244,81 @@ func (Approximation) __VDLReflect(struct {
 }) {
 }
 
+func (m *Approximation) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
+
+	if __VDLType_groups_v_io_v23_services_groups_Approximation == nil || __VDLTypegroups3 == nil {
+		panic("Initialization order error: types generated for FillVDLTarget not initialized. Consider moving caller to an init() block.")
+	}
+	fieldsTarget1, err := t.StartFields(tt)
+	if err != nil {
+		return err
+	}
+
+	var2 := (m.Reason == "")
+	if !var2 {
+		keyTarget3, fieldTarget4, err := fieldsTarget1.StartField("Reason")
+		if err != vdl.ErrFieldNoExist && err != nil {
+			return err
+		}
+		if err != vdl.ErrFieldNoExist {
+			if err := fieldTarget4.FromString(string(m.Reason), vdl.StringType); err != nil {
+				return err
+			}
+			if err := fieldsTarget1.FinishField(keyTarget3, fieldTarget4); err != nil {
+				return err
+			}
+		}
+	}
+	var5 := (m.Details == "")
+	if !var5 {
+		keyTarget6, fieldTarget7, err := fieldsTarget1.StartField("Details")
+		if err != vdl.ErrFieldNoExist && err != nil {
+			return err
+		}
+		if err != vdl.ErrFieldNoExist {
+			if err := fieldTarget7.FromString(string(m.Details), vdl.StringType); err != nil {
+				return err
+			}
+			if err := fieldsTarget1.FinishField(keyTarget6, fieldTarget7); err != nil {
+				return err
+			}
+		}
+	}
+	if err := t.FinishFields(fieldsTarget1); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (m *Approximation) MakeVDLTarget() vdl.Target {
+	return nil
+}
+
+func (m *Approximation) IsZero() bool {
+
+	var1 := (*m == Approximation{})
+	return var1
+}
+
 func init() {
 	vdl.Register((*BlessingPatternChunk)(nil))
 	vdl.Register((*GetRequest)(nil))
 	vdl.Register((*GetResponse)(nil))
 	vdl.Register((*ApproximationType)(nil))
 	vdl.Register((*Approximation)(nil))
+}
+
+var __VDLTypegroups3 *vdl.Type = vdl.TypeOf((*Approximation)(nil))
+var __VDLTypegroups0 *vdl.Type = vdl.TypeOf((*GetRequest)(nil))
+var __VDLTypegroups1 *vdl.Type = vdl.TypeOf((*GetResponse)(nil))
+var __VDLTypegroups2 *vdl.Type = vdl.TypeOf(map[BlessingPatternChunk]struct{}(nil))
+var __VDLType_groups_v_io_v23_services_groups_Approximation *vdl.Type = vdl.TypeOf(Approximation{})
+var __VDLType_groups_v_io_v23_services_groups_ApproximationType *vdl.Type = vdl.TypeOf(ApproximationTypeUnder)
+var __VDLType_groups_v_io_v23_services_groups_BlessingPatternChunk *vdl.Type = vdl.TypeOf(BlessingPatternChunk(""))
+var __VDLType_groups_v_io_v23_services_groups_GetRequest *vdl.Type = vdl.TypeOf(GetRequest{})
+var __VDLType_groups_v_io_v23_services_groups_GetResponse *vdl.Type = vdl.TypeOf(GetResponse{})
+
+func __VDLEnsureNativeBuilt_groups() {
 }
 
 var (

@@ -25,14 +25,14 @@ const (
 	maxGoDurationSec = maxInt64 / nanosPerSecond
 )
 
-// timeToNative is called by VDL for conversions from wire to native times.
-func timeToNative(wire Time, native *time.Time) error {
+// TimeToNative is called by VDL for conversions from wire to native times.
+func TimeToNative(wire Time, native *time.Time) error {
 	*native = time.Unix(wire.Seconds-unixEpoch, int64(wire.Nanos)).UTC()
 	return nil
 }
 
-// timeFromNative is called by VDL for conversions from native to wire times.
-func timeFromNative(wire *Time, native time.Time) error {
+// TimeFromNative is called by VDL for conversions from native to wire times.
+func TimeFromNative(wire *Time, native time.Time) error {
 	wire.Seconds = native.Unix() + unixEpoch
 	wire.Nanos = int32(native.Nanosecond())
 	*wire = wire.Normalize()
@@ -50,13 +50,13 @@ func (x Time) Normalize() Time {
 // Now returns the current time.
 func Now() Time {
 	var t Time
-	timeFromNative(&t, time.Now())
+	TimeFromNative(&t, time.Now())
 	return t
 }
 
-// durationToNative is called by VDL for conversions from wire to native
+// DurationToNative is called by VDL for conversions from wire to native
 // durations.
-func durationToNative(wire Duration, native *time.Duration) error {
+func DurationToNative(wire Duration, native *time.Duration) error {
 	*native = 0
 	// Go represents duration as int64 nanoseconds, which has a much smaller range
 	// than VDL duration, so we catch these cases and return an error.
@@ -71,9 +71,9 @@ func durationToNative(wire Duration, native *time.Duration) error {
 	return nil
 }
 
-// durationFromNative is called by VDL for conversions from native to wire
+// DurationFromNative is called by VDL for conversions from native to wire
 // durations.
-func durationFromNative(wire *Duration, native time.Duration) error {
+func DurationFromNative(wire *Duration, native time.Duration) error {
 	wire.Seconds = int64(native / nanosPerSecond)
 	wire.Nanos = int32(native % nanosPerSecond)
 	return nil
@@ -110,9 +110,9 @@ type Deadline struct {
 	time.Time
 }
 
-// wireDeadlineToNative is called by VDL for conversions from wire to native
+// WireDeadlineToNative is called by VDL for conversions from wire to native
 // deadlines.
-func wireDeadlineToNative(wire WireDeadline, native *Deadline) error {
+func WireDeadlineToNative(wire WireDeadline, native *Deadline) error {
 	if wire.NoDeadline {
 		native.Time = time.Time{}
 	} else {
@@ -121,9 +121,9 @@ func wireDeadlineToNative(wire WireDeadline, native *Deadline) error {
 	return nil
 }
 
-// wireDeadlineFromNative is called by VDL for conversions from native to wire
+// WireDeadlineFromNative is called by VDL for conversions from native to wire
 // deadlines.
-func wireDeadlineFromNative(wire *WireDeadline, native Deadline) error {
+func WireDeadlineFromNative(wire *WireDeadline, native Deadline) error {
 	if native.IsZero() {
 		*wire = WireDeadline{NoDeadline: true}
 	} else {

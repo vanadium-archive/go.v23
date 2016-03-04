@@ -216,7 +216,7 @@ func MarshalBlessings(b Blessings) WireBlessings {
 	return WireBlessings{b.chains}
 }
 
-func wireBlessingsToNative(wire WireBlessings, native *Blessings) error {
+func WireBlessingsToNative(wire WireBlessings, native *Blessings) error {
 	if len(wire.CertificateChains) == 0 {
 		return nil
 	}
@@ -269,7 +269,7 @@ func wireBlessingsToNative(wire WireBlessings, native *Blessings) error {
 	return nil
 }
 
-func wireBlessingsFromNative(wire *WireBlessings, native Blessings) error {
+func WireBlessingsFromNative(wire *WireBlessings, native Blessings) error {
 	wire.CertificateChains = native.chains
 	return nil
 }

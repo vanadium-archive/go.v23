@@ -43,43 +43,130 @@ pkg nosql, func TableClient(string) TableClientStub
 pkg nosql, func TableServer(TableServerMethods) TableServerStub
 pkg nosql, func ValueSelectionFromString(string) (ValueSelection, error)
 pkg nosql, func ValueStateFromString(string) (ValueState, error)
+pkg nosql, method (*BatchInfo) FillVDLTarget(vdl.Target, *vdl.Type) error
+pkg nosql, method (*BatchInfo) IsZero() bool
+pkg nosql, method (*BatchInfo) MakeVDLTarget() vdl.Target
+pkg nosql, method (*BatchOptions) FillVDLTarget(vdl.Target, *vdl.Type) error
+pkg nosql, method (*BatchOptions) IsZero() bool
+pkg nosql, method (*BatchOptions) MakeVDLTarget() vdl.Target
 pkg nosql, method (*BatchSource) Set(string) error
 pkg nosql, method (*BlobFetchState) Set(string) error
+pkg nosql, method (*BlobFetchStatus) FillVDLTarget(vdl.Target, *vdl.Type) error
+pkg nosql, method (*BlobFetchStatus) IsZero() bool
+pkg nosql, method (*BlobFetchStatus) MakeVDLTarget() vdl.Target
 pkg nosql, method (*BlobManagerFetchBlobServerCallStub) Init(rpc.StreamServerCall)
 pkg nosql, method (*BlobManagerFetchBlobServerCallStub) SendStream() interface {  Send(item BlobFetchStatus) error;}
 pkg nosql, method (*BlobManagerGetBlobServerCallStub) Init(rpc.StreamServerCall)
 pkg nosql, method (*BlobManagerGetBlobServerCallStub) SendStream() interface {  Send(item []byte) error;}
 pkg nosql, method (*BlobManagerPutBlobServerCallStub) Init(rpc.StreamServerCall)
 pkg nosql, method (*BlobManagerPutBlobServerCallStub) RecvStream() interface {  Advance() bool; Value() []byte; Err() error;}
+pkg nosql, method (*ConflictInfo) FillVDLTarget(vdl.Target, *vdl.Type) error
+pkg nosql, method (*ConflictInfo) IsZero() bool
+pkg nosql, method (*ConflictInfo) MakeVDLTarget() vdl.Target
 pkg nosql, method (*ConflictManagerStartConflictResolverServerCallStub) Init(rpc.StreamServerCall)
 pkg nosql, method (*ConflictManagerStartConflictResolverServerCallStub) RecvStream() interface {  Advance() bool; Value() ResolutionInfo; Err() error;}
 pkg nosql, method (*ConflictManagerStartConflictResolverServerCallStub) SendStream() interface {  Send(item ConflictInfo) error;}
+pkg nosql, method (*CrPolicy) FillVDLTarget(vdl.Target, *vdl.Type) error
+pkg nosql, method (*CrPolicy) IsZero() bool
+pkg nosql, method (*CrPolicy) MakeVDLTarget() vdl.Target
+pkg nosql, method (*CrRule) FillVDLTarget(vdl.Target, *vdl.Type) error
+pkg nosql, method (*CrRule) IsZero() bool
+pkg nosql, method (*CrRule) MakeVDLTarget() vdl.Target
 pkg nosql, method (*DatabaseExecServerCallStub) Init(rpc.StreamServerCall)
 pkg nosql, method (*DatabaseExecServerCallStub) SendStream() interface {  Send(item []*vom.RawBytes) error;}
+pkg nosql, method (*KeyValue) FillVDLTarget(vdl.Target, *vdl.Type) error
+pkg nosql, method (*KeyValue) IsZero() bool
+pkg nosql, method (*KeyValue) MakeVDLTarget() vdl.Target
+pkg nosql, method (*PrefixPermissions) FillVDLTarget(vdl.Target, *vdl.Type) error
+pkg nosql, method (*PrefixPermissions) IsZero() bool
+pkg nosql, method (*PrefixPermissions) MakeVDLTarget() vdl.Target
+pkg nosql, method (*ResolutionInfo) FillVDLTarget(vdl.Target, *vdl.Type) error
+pkg nosql, method (*ResolutionInfo) IsZero() bool
+pkg nosql, method (*ResolutionInfo) MakeVDLTarget() vdl.Target
 pkg nosql, method (*ResolverType) Set(string) error
+pkg nosql, method (*RowInfo) FillVDLTarget(vdl.Target, *vdl.Type) error
+pkg nosql, method (*RowInfo) IsZero() bool
+pkg nosql, method (*RowInfo) MakeVDLTarget() vdl.Target
+pkg nosql, method (*RowOp) FillVDLTarget(vdl.Target, *vdl.Type) error
+pkg nosql, method (*RowOp) IsZero() bool
+pkg nosql, method (*RowOp) MakeVDLTarget() vdl.Target
+pkg nosql, method (*ScanOp) FillVDLTarget(vdl.Target, *vdl.Type) error
+pkg nosql, method (*ScanOp) IsZero() bool
+pkg nosql, method (*ScanOp) MakeVDLTarget() vdl.Target
+pkg nosql, method (*SchemaMetadata) FillVDLTarget(vdl.Target, *vdl.Type) error
+pkg nosql, method (*SchemaMetadata) IsZero() bool
+pkg nosql, method (*SchemaMetadata) MakeVDLTarget() vdl.Target
+pkg nosql, method (*StoreChange) FillVDLTarget(vdl.Target, *vdl.Type) error
+pkg nosql, method (*StoreChange) IsZero() bool
+pkg nosql, method (*StoreChange) MakeVDLTarget() vdl.Target
+pkg nosql, method (*SyncgroupMemberInfo) FillVDLTarget(vdl.Target, *vdl.Type) error
+pkg nosql, method (*SyncgroupMemberInfo) IsZero() bool
+pkg nosql, method (*SyncgroupMemberInfo) MakeVDLTarget() vdl.Target
+pkg nosql, method (*SyncgroupSpec) FillVDLTarget(vdl.Target, *vdl.Type) error
+pkg nosql, method (*SyncgroupSpec) IsZero() bool
+pkg nosql, method (*SyncgroupSpec) MakeVDLTarget() vdl.Target
+pkg nosql, method (*TableRow) FillVDLTarget(vdl.Target, *vdl.Type) error
+pkg nosql, method (*TableRow) IsZero() bool
+pkg nosql, method (*TableRow) MakeVDLTarget() vdl.Target
 pkg nosql, method (*TableScanServerCallStub) Init(rpc.StreamServerCall)
 pkg nosql, method (*TableScanServerCallStub) SendStream() interface {  Send(item KeyValue) error;}
+pkg nosql, method (*Value) FillVDLTarget(vdl.Target, *vdl.Type) error
+pkg nosql, method (*Value) IsZero() bool
+pkg nosql, method (*Value) MakeVDLTarget() vdl.Target
 pkg nosql, method (*ValueSelection) Set(string) error
 pkg nosql, method (*ValueState) Set(string) error
+pkg nosql, method (BatchSource) FillVDLTarget(vdl.Target, *vdl.Type) error
+pkg nosql, method (BatchSource) IsZero() bool
+pkg nosql, method (BatchSource) MakeVDLTarget() vdl.Target
 pkg nosql, method (BatchSource) String() string
+pkg nosql, method (BlobFetchState) FillVDLTarget(vdl.Target, *vdl.Type) error
+pkg nosql, method (BlobFetchState) IsZero() bool
+pkg nosql, method (BlobFetchState) MakeVDLTarget() vdl.Target
 pkg nosql, method (BlobFetchState) String() string
+pkg nosql, method (BlobRef) FillVDLTarget(vdl.Target, *vdl.Type) error
+pkg nosql, method (BlobRef) IsZero() bool
+pkg nosql, method (BlobRef) MakeVDLTarget() vdl.Target
+pkg nosql, method (ConflictDataBatch) FillVDLTarget(vdl.Target, *vdl.Type) error
 pkg nosql, method (ConflictDataBatch) Index() int
 pkg nosql, method (ConflictDataBatch) Interface() interface{}
+pkg nosql, method (ConflictDataBatch) IsZero() bool
+pkg nosql, method (ConflictDataBatch) MakeVDLTarget() vdl.Target
 pkg nosql, method (ConflictDataBatch) Name() string
+pkg nosql, method (ConflictDataRow) FillVDLTarget(vdl.Target, *vdl.Type) error
 pkg nosql, method (ConflictDataRow) Index() int
 pkg nosql, method (ConflictDataRow) Interface() interface{}
+pkg nosql, method (ConflictDataRow) IsZero() bool
+pkg nosql, method (ConflictDataRow) MakeVDLTarget() vdl.Target
 pkg nosql, method (ConflictDataRow) Name() string
+pkg nosql, method (OperationRead) FillVDLTarget(vdl.Target, *vdl.Type) error
 pkg nosql, method (OperationRead) Index() int
 pkg nosql, method (OperationRead) Interface() interface{}
+pkg nosql, method (OperationRead) IsZero() bool
+pkg nosql, method (OperationRead) MakeVDLTarget() vdl.Target
 pkg nosql, method (OperationRead) Name() string
+pkg nosql, method (OperationScan) FillVDLTarget(vdl.Target, *vdl.Type) error
 pkg nosql, method (OperationScan) Index() int
 pkg nosql, method (OperationScan) Interface() interface{}
+pkg nosql, method (OperationScan) IsZero() bool
+pkg nosql, method (OperationScan) MakeVDLTarget() vdl.Target
 pkg nosql, method (OperationScan) Name() string
+pkg nosql, method (OperationWrite) FillVDLTarget(vdl.Target, *vdl.Type) error
 pkg nosql, method (OperationWrite) Index() int
 pkg nosql, method (OperationWrite) Interface() interface{}
+pkg nosql, method (OperationWrite) IsZero() bool
+pkg nosql, method (OperationWrite) MakeVDLTarget() vdl.Target
 pkg nosql, method (OperationWrite) Name() string
+pkg nosql, method (ResolverType) FillVDLTarget(vdl.Target, *vdl.Type) error
+pkg nosql, method (ResolverType) IsZero() bool
+pkg nosql, method (ResolverType) MakeVDLTarget() vdl.Target
 pkg nosql, method (ResolverType) String() string
+pkg nosql, method (ValueSelection) FillVDLTarget(vdl.Target, *vdl.Type) error
+pkg nosql, method (ValueSelection) IsZero() bool
+pkg nosql, method (ValueSelection) MakeVDLTarget() vdl.Target
 pkg nosql, method (ValueSelection) String() string
+pkg nosql, method (ValueState) FillVDLTarget(vdl.Target, *vdl.Type) error
+pkg nosql, method (ValueState) IsZero() bool
+pkg nosql, method (ValueState) MakeVDLTarget() vdl.Target
 pkg nosql, method (ValueState) String() string
 pkg nosql, type BatchInfo struct
 pkg nosql, type BatchInfo struct, Hint string
@@ -202,8 +289,10 @@ pkg nosql, type BlobManagerServerStubMethods interface, PinBlob(*context.T, rpc.
 pkg nosql, type BlobManagerServerStubMethods interface, PutBlob(*context.T, *BlobManagerPutBlobServerCallStub, BlobRef) error
 pkg nosql, type BlobManagerServerStubMethods interface, UnpinBlob(*context.T, rpc.ServerCall, BlobRef) error
 pkg nosql, type BlobRef string
+pkg nosql, type ConflictData interface, FillVDLTarget(vdl.Target, *vdl.Type) error
 pkg nosql, type ConflictData interface, Index() int
 pkg nosql, type ConflictData interface, Interface() interface{}
+pkg nosql, type ConflictData interface, IsZero() bool
 pkg nosql, type ConflictData interface, Name() string
 pkg nosql, type ConflictData interface, unexported methods
 pkg nosql, type ConflictDataBatch struct
@@ -448,8 +537,10 @@ pkg nosql, type DatabaseWatcherServerStubMethods interface, WatchGlob(*context.T
 pkg nosql, type KeyValue struct
 pkg nosql, type KeyValue struct, Key string
 pkg nosql, type KeyValue struct, Value []byte
+pkg nosql, type Operation interface, FillVDLTarget(vdl.Target, *vdl.Type) error
 pkg nosql, type Operation interface, Index() int
 pkg nosql, type Operation interface, Interface() interface{}
+pkg nosql, type Operation interface, IsZero() bool
 pkg nosql, type Operation interface, Name() string
 pkg nosql, type Operation interface, unexported methods
 pkg nosql, type OperationRead struct

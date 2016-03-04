@@ -13,6 +13,9 @@ import (
 	"v.io/v23/i18n"
 )
 
+func __VDLEnsureNativeBuilt_common() {
+}
+
 var (
 	// Unknown means the error has no known Id.  A more specific error should
 	// always be used, if possible.  Unknown is typically only used when

@@ -147,8 +147,14 @@ pkg vdl, method (*Value) Type() *Type
 pkg vdl, method (*Value) TypeObject() *Type
 pkg vdl, method (*Value) Uint() uint64
 pkg vdl, method (*Value) UnionField() (int, *Value)
+pkg vdl, method (*WireError) FillVDLTarget(Target, *Type) error
+pkg vdl, method (*WireError) IsZero() bool
+pkg vdl, method (*WireError) MakeVDLTarget() Target
 pkg vdl, method (*WireRetryCode) Set(string) error
 pkg vdl, method (Kind) String() string
+pkg vdl, method (WireRetryCode) FillVDLTarget(Target, *Type) error
+pkg vdl, method (WireRetryCode) IsZero() bool
+pkg vdl, method (WireRetryCode) MakeVDLTarget() Target
 pkg vdl, method (WireRetryCode) String() string
 pkg vdl, type Field struct
 pkg vdl, type Field struct, Name string
@@ -220,7 +226,7 @@ pkg vdl, type Target interface, StartList(*Type, int) (ListTarget, error)
 pkg vdl, type Target interface, StartMap(*Type, int) (MapTarget, error)
 pkg vdl, type Target interface, StartSet(*Type, int) (SetTarget, error)
 pkg vdl, type Targeter interface { FillVDLTarget, MakeVDLTarget }
-pkg vdl, type Targeter interface, FillVDLTarget(Target) error
+pkg vdl, type Targeter interface, FillVDLTarget(Target, *Type) error
 pkg vdl, type Targeter interface, MakeVDLTarget() Target
 pkg vdl, type Type struct
 pkg vdl, type TypeBuilder struct

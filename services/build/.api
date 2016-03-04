@@ -18,12 +18,24 @@ pkg build, method (*Architecture) SetFromGoArch(string) error
 pkg build, method (*BuilderBuildServerCallStub) Init(rpc.StreamServerCall)
 pkg build, method (*BuilderBuildServerCallStub) RecvStream() interface {  Advance() bool; Value() File; Err() error;}
 pkg build, method (*BuilderBuildServerCallStub) SendStream() interface {  Send(item File) error;}
+pkg build, method (*File) FillVDLTarget(vdl.Target, *vdl.Type) error
+pkg build, method (*File) IsZero() bool
+pkg build, method (*File) MakeVDLTarget() vdl.Target
 pkg build, method (*Format) Set(string) error
 pkg build, method (*OperatingSystem) Set(string) error
 pkg build, method (*OperatingSystem) SetFromGoOS(string) error
+pkg build, method (Architecture) FillVDLTarget(vdl.Target, *vdl.Type) error
+pkg build, method (Architecture) IsZero() bool
+pkg build, method (Architecture) MakeVDLTarget() vdl.Target
 pkg build, method (Architecture) String() string
 pkg build, method (Architecture) ToGoArch() string
+pkg build, method (Format) FillVDLTarget(vdl.Target, *vdl.Type) error
+pkg build, method (Format) IsZero() bool
+pkg build, method (Format) MakeVDLTarget() vdl.Target
 pkg build, method (Format) String() string
+pkg build, method (OperatingSystem) FillVDLTarget(vdl.Target, *vdl.Type) error
+pkg build, method (OperatingSystem) IsZero() bool
+pkg build, method (OperatingSystem) MakeVDLTarget() vdl.Target
 pkg build, method (OperatingSystem) String() string
 pkg build, method (OperatingSystem) ToGoOS() string
 pkg build, type Architecture int

@@ -22,6 +22,9 @@ import (
 	"v.io/v23/security/access"
 )
 
+func __VDLEnsureNativeBuilt_pprof() {
+}
+
 // PProfClientMethods is the client interface
 // containing PProf methods.
 type PProfClientMethods interface {

@@ -40,6 +40,96 @@ func (Description) __VDLReflect(struct {
 }) {
 }
 
+func (m *Description) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
+
+	if __VDLType_binary_v_io_v23_services_binary_Description == nil || __VDLTypebinary0 == nil {
+		panic("Initialization order error: types generated for FillVDLTarget not initialized. Consider moving caller to an init() block.")
+	}
+	fieldsTarget1, err := t.StartFields(tt)
+	if err != nil {
+		return err
+	}
+
+	var2 := (m.Name == "")
+	if !var2 {
+		keyTarget3, fieldTarget4, err := fieldsTarget1.StartField("Name")
+		if err != vdl.ErrFieldNoExist && err != nil {
+			return err
+		}
+		if err != vdl.ErrFieldNoExist {
+			if err := fieldTarget4.FromString(string(m.Name), vdl.StringType); err != nil {
+				return err
+			}
+			if err := fieldsTarget1.FinishField(keyTarget3, fieldTarget4); err != nil {
+				return err
+			}
+		}
+	}
+	var var5 bool
+	if len(m.Profiles) == 0 {
+		var5 = true
+	}
+	if !var5 {
+		keyTarget6, fieldTarget7, err := fieldsTarget1.StartField("Profiles")
+		if err != vdl.ErrFieldNoExist && err != nil {
+			return err
+		}
+		if err != vdl.ErrFieldNoExist {
+
+			mapTarget8, err := fieldTarget7.StartMap(__VDLTypebinary1, len(m.Profiles))
+			if err != nil {
+				return err
+			}
+			for key10, value12 := range m.Profiles {
+				keyTarget9, err := mapTarget8.StartKey()
+				if err != nil {
+					return err
+				}
+				if err := keyTarget9.FromString(string(key10), vdl.StringType); err != nil {
+					return err
+				}
+				valueTarget11, err := mapTarget8.FinishKeyStartField(keyTarget9)
+				if err != nil {
+					return err
+				}
+				if err := valueTarget11.FromBool(bool(value12), vdl.BoolType); err != nil {
+					return err
+				}
+				if err := mapTarget8.FinishField(keyTarget9, valueTarget11); err != nil {
+					return err
+				}
+			}
+			if err := fieldTarget7.FinishMap(mapTarget8); err != nil {
+				return err
+			}
+			if err := fieldsTarget1.FinishField(keyTarget6, fieldTarget7); err != nil {
+				return err
+			}
+		}
+	}
+	if err := t.FinishFields(fieldsTarget1); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (m *Description) MakeVDLTarget() vdl.Target {
+	return nil
+}
+
+func (m *Description) IsZero() bool {
+
+	var1 := true
+	var2 := (m.Name == "")
+	var1 = var1 && var2
+	var var3 bool
+	if len(m.Profiles) == 0 {
+		var3 = true
+	}
+	var1 = var1 && var3
+	return var1
+}
+
 // PartInfo holds information describing a binary part.
 type PartInfo struct {
 	// Checksum holds the hex-encoded MD5 checksum of the binary part.
@@ -53,9 +143,74 @@ func (PartInfo) __VDLReflect(struct {
 }) {
 }
 
+func (m *PartInfo) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
+
+	if __VDLType_binary_v_io_v23_services_binary_PartInfo == nil || __VDLTypebinary2 == nil {
+		panic("Initialization order error: types generated for FillVDLTarget not initialized. Consider moving caller to an init() block.")
+	}
+	fieldsTarget1, err := t.StartFields(tt)
+	if err != nil {
+		return err
+	}
+
+	var2 := (m.Checksum == "")
+	if !var2 {
+		keyTarget3, fieldTarget4, err := fieldsTarget1.StartField("Checksum")
+		if err != vdl.ErrFieldNoExist && err != nil {
+			return err
+		}
+		if err != vdl.ErrFieldNoExist {
+			if err := fieldTarget4.FromString(string(m.Checksum), vdl.StringType); err != nil {
+				return err
+			}
+			if err := fieldsTarget1.FinishField(keyTarget3, fieldTarget4); err != nil {
+				return err
+			}
+		}
+	}
+	var5 := (m.Size == int64(0))
+	if !var5 {
+		keyTarget6, fieldTarget7, err := fieldsTarget1.StartField("Size")
+		if err != vdl.ErrFieldNoExist && err != nil {
+			return err
+		}
+		if err != vdl.ErrFieldNoExist {
+			if err := fieldTarget7.FromInt(int64(m.Size), vdl.Int64Type); err != nil {
+				return err
+			}
+			if err := fieldsTarget1.FinishField(keyTarget6, fieldTarget7); err != nil {
+				return err
+			}
+		}
+	}
+	if err := t.FinishFields(fieldsTarget1); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (m *PartInfo) MakeVDLTarget() vdl.Target {
+	return nil
+}
+
+func (m *PartInfo) IsZero() bool {
+
+	var1 := (*m == PartInfo{})
+	return var1
+}
+
 func init() {
 	vdl.Register((*Description)(nil))
 	vdl.Register((*PartInfo)(nil))
+}
+
+var __VDLTypebinary0 *vdl.Type = vdl.TypeOf((*Description)(nil))
+var __VDLTypebinary2 *vdl.Type = vdl.TypeOf((*PartInfo)(nil))
+var __VDLTypebinary1 *vdl.Type = vdl.TypeOf(map[string]bool(nil))
+var __VDLType_binary_v_io_v23_services_binary_Description *vdl.Type = vdl.TypeOf(Description{})
+var __VDLType_binary_v_io_v23_services_binary_PartInfo *vdl.Type = vdl.TypeOf(PartInfo{})
+
+func __VDLEnsureNativeBuilt_binary() {
 }
 
 const MissingChecksum = ""

@@ -15,7 +15,7 @@ import (
 	// VDL user imports
 	"time"
 	"v.io/v23/security/access"
-	_ "v.io/v23/vdlroot/time"
+	time_2 "v.io/v23/vdlroot/time"
 )
 
 // BatchOptions configures a batch.
@@ -42,6 +42,62 @@ func (BatchOptions) __VDLReflect(struct {
 }) {
 }
 
+func (m *BatchOptions) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
+
+	if __VDLType_types_v_io_v23_services_syncbase_nosql_BatchOptions == nil || __VDLTypetypes0 == nil {
+		panic("Initialization order error: types generated for FillVDLTarget not initialized. Consider moving caller to an init() block.")
+	}
+	fieldsTarget1, err := t.StartFields(tt)
+	if err != nil {
+		return err
+	}
+
+	var2 := (m.Hint == "")
+	if !var2 {
+		keyTarget3, fieldTarget4, err := fieldsTarget1.StartField("Hint")
+		if err != vdl.ErrFieldNoExist && err != nil {
+			return err
+		}
+		if err != vdl.ErrFieldNoExist {
+			if err := fieldTarget4.FromString(string(m.Hint), vdl.StringType); err != nil {
+				return err
+			}
+			if err := fieldsTarget1.FinishField(keyTarget3, fieldTarget4); err != nil {
+				return err
+			}
+		}
+	}
+	var5 := (m.ReadOnly == false)
+	if !var5 {
+		keyTarget6, fieldTarget7, err := fieldsTarget1.StartField("ReadOnly")
+		if err != vdl.ErrFieldNoExist && err != nil {
+			return err
+		}
+		if err != vdl.ErrFieldNoExist {
+			if err := fieldTarget7.FromBool(bool(m.ReadOnly), vdl.BoolType); err != nil {
+				return err
+			}
+			if err := fieldsTarget1.FinishField(keyTarget6, fieldTarget7); err != nil {
+				return err
+			}
+		}
+	}
+	if err := t.FinishFields(fieldsTarget1); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (m *BatchOptions) MakeVDLTarget() vdl.Target {
+	return nil
+}
+
+func (m *BatchOptions) IsZero() bool {
+
+	var1 := (*m == BatchOptions{})
+	return var1
+}
+
 // PrefixPermissions represents a pair of (prefix, perms).
 type PrefixPermissions struct {
 	Prefix string
@@ -51,6 +107,73 @@ type PrefixPermissions struct {
 func (PrefixPermissions) __VDLReflect(struct {
 	Name string `vdl:"v.io/v23/services/syncbase/nosql.PrefixPermissions"`
 }) {
+}
+
+func (m *PrefixPermissions) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
+
+	if __VDLType_types_v_io_v23_services_syncbase_nosql_PrefixPermissions == nil || __VDLTypetypes1 == nil {
+		panic("Initialization order error: types generated for FillVDLTarget not initialized. Consider moving caller to an init() block.")
+	}
+	fieldsTarget1, err := t.StartFields(tt)
+	if err != nil {
+		return err
+	}
+
+	var2 := (m.Prefix == "")
+	if !var2 {
+		keyTarget3, fieldTarget4, err := fieldsTarget1.StartField("Prefix")
+		if err != vdl.ErrFieldNoExist && err != nil {
+			return err
+		}
+		if err != vdl.ErrFieldNoExist {
+			if err := fieldTarget4.FromString(string(m.Prefix), vdl.StringType); err != nil {
+				return err
+			}
+			if err := fieldsTarget1.FinishField(keyTarget3, fieldTarget4); err != nil {
+				return err
+			}
+		}
+	}
+	var var5 bool
+	if len(m.Perms) == 0 {
+		var5 = true
+	}
+	if !var5 {
+		keyTarget6, fieldTarget7, err := fieldsTarget1.StartField("Perms")
+		if err != vdl.ErrFieldNoExist && err != nil {
+			return err
+		}
+		if err != vdl.ErrFieldNoExist {
+
+			if err := m.Perms.FillVDLTarget(fieldTarget7, __VDLType_types_v_io_v23_security_access_Permissions); err != nil {
+				return err
+			}
+			if err := fieldsTarget1.FinishField(keyTarget6, fieldTarget7); err != nil {
+				return err
+			}
+		}
+	}
+	if err := t.FinishFields(fieldsTarget1); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (m *PrefixPermissions) MakeVDLTarget() vdl.Target {
+	return nil
+}
+
+func (m *PrefixPermissions) IsZero() bool {
+
+	var1 := true
+	var2 := (m.Prefix == "")
+	var1 = var1 && var2
+	var var3 bool
+	if len(m.Perms) == 0 {
+		var3 = true
+	}
+	var1 = var1 && var3
+	return var1
 }
 
 // KeyValue is a key-value pair.
@@ -64,6 +187,73 @@ func (KeyValue) __VDLReflect(struct {
 }) {
 }
 
+func (m *KeyValue) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
+
+	if __VDLType_types_v_io_v23_services_syncbase_nosql_KeyValue == nil || __VDLTypetypes2 == nil {
+		panic("Initialization order error: types generated for FillVDLTarget not initialized. Consider moving caller to an init() block.")
+	}
+	fieldsTarget1, err := t.StartFields(tt)
+	if err != nil {
+		return err
+	}
+
+	var2 := (m.Key == "")
+	if !var2 {
+		keyTarget3, fieldTarget4, err := fieldsTarget1.StartField("Key")
+		if err != vdl.ErrFieldNoExist && err != nil {
+			return err
+		}
+		if err != vdl.ErrFieldNoExist {
+			if err := fieldTarget4.FromString(string(m.Key), vdl.StringType); err != nil {
+				return err
+			}
+			if err := fieldsTarget1.FinishField(keyTarget3, fieldTarget4); err != nil {
+				return err
+			}
+		}
+	}
+	var var5 bool
+	if len(m.Value) == 0 {
+		var5 = true
+	}
+	if !var5 {
+		keyTarget6, fieldTarget7, err := fieldsTarget1.StartField("Value")
+		if err != vdl.ErrFieldNoExist && err != nil {
+			return err
+		}
+		if err != vdl.ErrFieldNoExist {
+
+			if err := fieldTarget7.FromBytes([]byte(m.Value), __VDLTypetypes3); err != nil {
+				return err
+			}
+			if err := fieldsTarget1.FinishField(keyTarget6, fieldTarget7); err != nil {
+				return err
+			}
+		}
+	}
+	if err := t.FinishFields(fieldsTarget1); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (m *KeyValue) MakeVDLTarget() vdl.Target {
+	return nil
+}
+
+func (m *KeyValue) IsZero() bool {
+
+	var1 := true
+	var2 := (m.Key == "")
+	var1 = var1 && var2
+	var var3 bool
+	if len(m.Value) == 0 {
+		var3 = true
+	}
+	var1 = var1 && var3
+	return var1
+}
+
 // TableRow encapsulates the table name and row key or row prefix.
 type TableRow struct {
 	TableName string
@@ -73,6 +263,62 @@ type TableRow struct {
 func (TableRow) __VDLReflect(struct {
 	Name string `vdl:"v.io/v23/services/syncbase/nosql.TableRow"`
 }) {
+}
+
+func (m *TableRow) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
+
+	if __VDLType_types_v_io_v23_services_syncbase_nosql_TableRow == nil || __VDLTypetypes4 == nil {
+		panic("Initialization order error: types generated for FillVDLTarget not initialized. Consider moving caller to an init() block.")
+	}
+	fieldsTarget1, err := t.StartFields(tt)
+	if err != nil {
+		return err
+	}
+
+	var2 := (m.TableName == "")
+	if !var2 {
+		keyTarget3, fieldTarget4, err := fieldsTarget1.StartField("TableName")
+		if err != vdl.ErrFieldNoExist && err != nil {
+			return err
+		}
+		if err != vdl.ErrFieldNoExist {
+			if err := fieldTarget4.FromString(string(m.TableName), vdl.StringType); err != nil {
+				return err
+			}
+			if err := fieldsTarget1.FinishField(keyTarget3, fieldTarget4); err != nil {
+				return err
+			}
+		}
+	}
+	var5 := (m.Row == "")
+	if !var5 {
+		keyTarget6, fieldTarget7, err := fieldsTarget1.StartField("Row")
+		if err != vdl.ErrFieldNoExist && err != nil {
+			return err
+		}
+		if err != vdl.ErrFieldNoExist {
+			if err := fieldTarget7.FromString(string(m.Row), vdl.StringType); err != nil {
+				return err
+			}
+			if err := fieldsTarget1.FinishField(keyTarget6, fieldTarget7); err != nil {
+				return err
+			}
+		}
+	}
+	if err := t.FinishFields(fieldsTarget1); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (m *TableRow) MakeVDLTarget() vdl.Target {
+	return nil
+}
+
+func (m *TableRow) IsZero() bool {
+
+	var1 := (*m == TableRow{})
+	return var1
 }
 
 // SyncgroupSpec contains the specification for a syncgroup.
@@ -103,6 +349,171 @@ func (SyncgroupSpec) __VDLReflect(struct {
 }) {
 }
 
+func (m *SyncgroupSpec) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
+
+	if __VDLType_types_v_io_v23_services_syncbase_nosql_SyncgroupSpec == nil || __VDLTypetypes5 == nil {
+		panic("Initialization order error: types generated for FillVDLTarget not initialized. Consider moving caller to an init() block.")
+	}
+	fieldsTarget1, err := t.StartFields(tt)
+	if err != nil {
+		return err
+	}
+
+	var2 := (m.Description == "")
+	if !var2 {
+		keyTarget3, fieldTarget4, err := fieldsTarget1.StartField("Description")
+		if err != vdl.ErrFieldNoExist && err != nil {
+			return err
+		}
+		if err != vdl.ErrFieldNoExist {
+			if err := fieldTarget4.FromString(string(m.Description), vdl.StringType); err != nil {
+				return err
+			}
+			if err := fieldsTarget1.FinishField(keyTarget3, fieldTarget4); err != nil {
+				return err
+			}
+		}
+	}
+	var var5 bool
+	if len(m.Perms) == 0 {
+		var5 = true
+	}
+	if !var5 {
+		keyTarget6, fieldTarget7, err := fieldsTarget1.StartField("Perms")
+		if err != vdl.ErrFieldNoExist && err != nil {
+			return err
+		}
+		if err != vdl.ErrFieldNoExist {
+
+			if err := m.Perms.FillVDLTarget(fieldTarget7, __VDLType_types_v_io_v23_security_access_Permissions); err != nil {
+				return err
+			}
+			if err := fieldsTarget1.FinishField(keyTarget6, fieldTarget7); err != nil {
+				return err
+			}
+		}
+	}
+	var var8 bool
+	if len(m.Prefixes) == 0 {
+		var8 = true
+	}
+	if !var8 {
+		keyTarget9, fieldTarget10, err := fieldsTarget1.StartField("Prefixes")
+		if err != vdl.ErrFieldNoExist && err != nil {
+			return err
+		}
+		if err != vdl.ErrFieldNoExist {
+
+			listTarget11, err := fieldTarget10.StartList(__VDLTypetypes6, len(m.Prefixes))
+			if err != nil {
+				return err
+			}
+			for i, elem13 := range m.Prefixes {
+				elemTarget12, err := listTarget11.StartElem(i)
+				if err != nil {
+					return err
+				}
+
+				if err := elem13.FillVDLTarget(elemTarget12, __VDLType_types_v_io_v23_services_syncbase_nosql_TableRow); err != nil {
+					return err
+				}
+				if err := listTarget11.FinishElem(elemTarget12); err != nil {
+					return err
+				}
+			}
+			if err := fieldTarget10.FinishList(listTarget11); err != nil {
+				return err
+			}
+			if err := fieldsTarget1.FinishField(keyTarget9, fieldTarget10); err != nil {
+				return err
+			}
+		}
+	}
+	var var14 bool
+	if len(m.MountTables) == 0 {
+		var14 = true
+	}
+	if !var14 {
+		keyTarget15, fieldTarget16, err := fieldsTarget1.StartField("MountTables")
+		if err != vdl.ErrFieldNoExist && err != nil {
+			return err
+		}
+		if err != vdl.ErrFieldNoExist {
+
+			listTarget17, err := fieldTarget16.StartList(__VDLTypetypes7, len(m.MountTables))
+			if err != nil {
+				return err
+			}
+			for i, elem19 := range m.MountTables {
+				elemTarget18, err := listTarget17.StartElem(i)
+				if err != nil {
+					return err
+				}
+				if err := elemTarget18.FromString(string(elem19), vdl.StringType); err != nil {
+					return err
+				}
+				if err := listTarget17.FinishElem(elemTarget18); err != nil {
+					return err
+				}
+			}
+			if err := fieldTarget16.FinishList(listTarget17); err != nil {
+				return err
+			}
+			if err := fieldsTarget1.FinishField(keyTarget15, fieldTarget16); err != nil {
+				return err
+			}
+		}
+	}
+	var20 := (m.IsPrivate == false)
+	if !var20 {
+		keyTarget21, fieldTarget22, err := fieldsTarget1.StartField("IsPrivate")
+		if err != vdl.ErrFieldNoExist && err != nil {
+			return err
+		}
+		if err != vdl.ErrFieldNoExist {
+			if err := fieldTarget22.FromBool(bool(m.IsPrivate), vdl.BoolType); err != nil {
+				return err
+			}
+			if err := fieldsTarget1.FinishField(keyTarget21, fieldTarget22); err != nil {
+				return err
+			}
+		}
+	}
+	if err := t.FinishFields(fieldsTarget1); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (m *SyncgroupSpec) MakeVDLTarget() vdl.Target {
+	return nil
+}
+
+func (m *SyncgroupSpec) IsZero() bool {
+
+	var1 := true
+	var2 := (m.Description == "")
+	var1 = var1 && var2
+	var var3 bool
+	if len(m.Perms) == 0 {
+		var3 = true
+	}
+	var1 = var1 && var3
+	var var4 bool
+	if len(m.Prefixes) == 0 {
+		var4 = true
+	}
+	var1 = var1 && var4
+	var var5 bool
+	if len(m.MountTables) == 0 {
+		var5 = true
+	}
+	var1 = var1 && var5
+	var6 := (m.IsPrivate == false)
+	var1 = var1 && var6
+	return var1
+}
+
 // SyncgroupMemberInfo contains per-member metadata.
 type SyncgroupMemberInfo struct {
 	SyncPriority byte
@@ -112,6 +523,62 @@ type SyncgroupMemberInfo struct {
 func (SyncgroupMemberInfo) __VDLReflect(struct {
 	Name string `vdl:"v.io/v23/services/syncbase/nosql.SyncgroupMemberInfo"`
 }) {
+}
+
+func (m *SyncgroupMemberInfo) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
+
+	if __VDLType_types_v_io_v23_services_syncbase_nosql_SyncgroupMemberInfo == nil || __VDLTypetypes8 == nil {
+		panic("Initialization order error: types generated for FillVDLTarget not initialized. Consider moving caller to an init() block.")
+	}
+	fieldsTarget1, err := t.StartFields(tt)
+	if err != nil {
+		return err
+	}
+
+	var2 := (m.SyncPriority == byte(0))
+	if !var2 {
+		keyTarget3, fieldTarget4, err := fieldsTarget1.StartField("SyncPriority")
+		if err != vdl.ErrFieldNoExist && err != nil {
+			return err
+		}
+		if err != vdl.ErrFieldNoExist {
+			if err := fieldTarget4.FromUint(uint64(m.SyncPriority), vdl.ByteType); err != nil {
+				return err
+			}
+			if err := fieldsTarget1.FinishField(keyTarget3, fieldTarget4); err != nil {
+				return err
+			}
+		}
+	}
+	var5 := (m.IsServer == false)
+	if !var5 {
+		keyTarget6, fieldTarget7, err := fieldsTarget1.StartField("IsServer")
+		if err != vdl.ErrFieldNoExist && err != nil {
+			return err
+		}
+		if err != vdl.ErrFieldNoExist {
+			if err := fieldTarget7.FromBool(bool(m.IsServer), vdl.BoolType); err != nil {
+				return err
+			}
+			if err := fieldsTarget1.FinishField(keyTarget6, fieldTarget7); err != nil {
+				return err
+			}
+		}
+	}
+	if err := t.FinishFields(fieldsTarget1); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (m *SyncgroupMemberInfo) MakeVDLTarget() vdl.Target {
+	return nil
+}
+
+func (m *SyncgroupMemberInfo) IsZero() bool {
+
+	var1 := (*m == SyncgroupMemberInfo{})
+	return var1
 }
 
 // ResolverType defines the possible conflict resolution policies.
@@ -178,6 +645,23 @@ func (ResolverType) __VDLReflect(struct {
 }) {
 }
 
+func (m ResolverType) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
+	if err := t.FromEnumLabel(m.String(), __VDLType_types_v_io_v23_services_syncbase_nosql_ResolverType); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (m ResolverType) MakeVDLTarget() vdl.Target {
+	return nil
+}
+
+func (m ResolverType) IsZero() bool {
+
+	var1 := (m == ResolverTypeLastWins)
+	return var1
+}
+
 // ConflictInfo contains information to fully specify a conflict
 // for a key, providing the (local, remote, ancestor) tuple.
 // A key under conflict can be a part of a batch in local, remote or both
@@ -198,6 +682,69 @@ func (ConflictInfo) __VDLReflect(struct {
 }) {
 }
 
+func (m *ConflictInfo) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
+
+	__VDLEnsureNativeBuilt_types()
+	fieldsTarget1, err := t.StartFields(tt)
+	if err != nil {
+		return err
+	}
+
+	var2 := m.Data.IsZero()
+	if !var2 {
+		keyTarget3, fieldTarget4, err := fieldsTarget1.StartField("Data")
+		if err != vdl.ErrFieldNoExist && err != nil {
+			return err
+		}
+		if err != vdl.ErrFieldNoExist {
+
+			unionValue5 := m.Data
+			if unionValue5 == nil {
+				unionValue5 = ConflictDataBatch{}
+			}
+			if err := unionValue5.FillVDLTarget(fieldTarget4, __VDLType_types_v_io_v23_services_syncbase_nosql_ConflictData); err != nil {
+				return err
+			}
+			if err := fieldsTarget1.FinishField(keyTarget3, fieldTarget4); err != nil {
+				return err
+			}
+		}
+	}
+	var6 := (m.Continued == false)
+	if !var6 {
+		keyTarget7, fieldTarget8, err := fieldsTarget1.StartField("Continued")
+		if err != vdl.ErrFieldNoExist && err != nil {
+			return err
+		}
+		if err != vdl.ErrFieldNoExist {
+			if err := fieldTarget8.FromBool(bool(m.Continued), vdl.BoolType); err != nil {
+				return err
+			}
+			if err := fieldsTarget1.FinishField(keyTarget7, fieldTarget8); err != nil {
+				return err
+			}
+		}
+	}
+	if err := t.FinishFields(fieldsTarget1); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (m *ConflictInfo) MakeVDLTarget() vdl.Target {
+	return nil
+}
+
+func (m *ConflictInfo) IsZero() bool {
+
+	var1 := true
+	var2 := m.Data.IsZero()
+	var1 = var1 && var2
+	var3 := (m.Continued == false)
+	var1 = var1 && var3
+	return var1
+}
+
 type (
 	// ConflictData represents any single field of the ConflictData union type.
 	//
@@ -213,6 +760,8 @@ type (
 		Name() string
 		// __VDLReflect describes the ConflictData union type.
 		__VDLReflect(__ConflictDataReflect)
+		FillVDLTarget(vdl.Target, *vdl.Type) error
+		IsZero() bool
 	}
 	// ConflictDataBatch represents field Batch of the ConflictData union type.
 	ConflictDataBatch struct{ Value BatchInfo }
@@ -234,10 +783,78 @@ func (x ConflictDataBatch) Interface() interface{}             { return x.Value 
 func (x ConflictDataBatch) Name() string                       { return "Batch" }
 func (x ConflictDataBatch) __VDLReflect(__ConflictDataReflect) {}
 
+func (m ConflictDataBatch) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
+
+	fieldsTarget1, err := t.StartFields(__VDLType_types_v_io_v23_services_syncbase_nosql_ConflictData)
+	if err != nil {
+		return err
+	}
+	keyTarget2, fieldTarget3, err := fieldsTarget1.StartField("Batch")
+	if err != nil {
+		return err
+	}
+
+	if err := m.Value.FillVDLTarget(fieldTarget3, __VDLType_types_v_io_v23_services_syncbase_nosql_BatchInfo); err != nil {
+		return err
+	}
+	if err := fieldsTarget1.FinishField(keyTarget2, fieldTarget3); err != nil {
+		return err
+	}
+	if err := t.FinishFields(fieldsTarget1); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (m ConflictDataBatch) MakeVDLTarget() vdl.Target {
+	return nil
+}
+
+func (m ConflictDataBatch) IsZero() bool {
+
+	var2 := m.Value.IsZero()
+	return var2
+}
+
 func (x ConflictDataRow) Index() int                         { return 1 }
 func (x ConflictDataRow) Interface() interface{}             { return x.Value }
 func (x ConflictDataRow) Name() string                       { return "Row" }
 func (x ConflictDataRow) __VDLReflect(__ConflictDataReflect) {}
+
+func (m ConflictDataRow) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
+
+	fieldsTarget1, err := t.StartFields(__VDLType_types_v_io_v23_services_syncbase_nosql_ConflictData)
+	if err != nil {
+		return err
+	}
+	keyTarget2, fieldTarget3, err := fieldsTarget1.StartField("Row")
+	if err != nil {
+		return err
+	}
+
+	if err := m.Value.FillVDLTarget(fieldTarget3, __VDLType_types_v_io_v23_services_syncbase_nosql_RowInfo); err != nil {
+		return err
+	}
+	if err := fieldsTarget1.FinishField(keyTarget2, fieldTarget3); err != nil {
+		return err
+	}
+	if err := t.FinishFields(fieldsTarget1); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (m ConflictDataRow) MakeVDLTarget() vdl.Target {
+	return nil
+}
+
+func (m ConflictDataRow) IsZero() bool {
+
+	unionField2 := false
+	return unionField2
+}
 
 type BatchInfo struct {
 	// Id is an identifier for a batch contained in a conflict. It is
@@ -254,6 +871,78 @@ type BatchInfo struct {
 func (BatchInfo) __VDLReflect(struct {
 	Name string `vdl:"v.io/v23/services/syncbase/nosql.BatchInfo"`
 }) {
+}
+
+func (m *BatchInfo) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
+
+	if __VDLType_types_v_io_v23_services_syncbase_nosql_BatchInfo == nil || __VDLTypetypes10 == nil {
+		panic("Initialization order error: types generated for FillVDLTarget not initialized. Consider moving caller to an init() block.")
+	}
+	fieldsTarget1, err := t.StartFields(tt)
+	if err != nil {
+		return err
+	}
+
+	var2 := (m.Id == uint64(0))
+	if !var2 {
+		keyTarget3, fieldTarget4, err := fieldsTarget1.StartField("Id")
+		if err != vdl.ErrFieldNoExist && err != nil {
+			return err
+		}
+		if err != vdl.ErrFieldNoExist {
+			if err := fieldTarget4.FromUint(uint64(m.Id), vdl.Uint64Type); err != nil {
+				return err
+			}
+			if err := fieldsTarget1.FinishField(keyTarget3, fieldTarget4); err != nil {
+				return err
+			}
+		}
+	}
+	var5 := (m.Hint == "")
+	if !var5 {
+		keyTarget6, fieldTarget7, err := fieldsTarget1.StartField("Hint")
+		if err != vdl.ErrFieldNoExist && err != nil {
+			return err
+		}
+		if err != vdl.ErrFieldNoExist {
+			if err := fieldTarget7.FromString(string(m.Hint), vdl.StringType); err != nil {
+				return err
+			}
+			if err := fieldsTarget1.FinishField(keyTarget6, fieldTarget7); err != nil {
+				return err
+			}
+		}
+	}
+	var8 := m.Source.IsZero()
+	if !var8 {
+		keyTarget9, fieldTarget10, err := fieldsTarget1.StartField("Source")
+		if err != vdl.ErrFieldNoExist && err != nil {
+			return err
+		}
+		if err != vdl.ErrFieldNoExist {
+
+			if err := m.Source.FillVDLTarget(fieldTarget10, __VDLType_types_v_io_v23_services_syncbase_nosql_BatchSource); err != nil {
+				return err
+			}
+			if err := fieldsTarget1.FinishField(keyTarget9, fieldTarget10); err != nil {
+				return err
+			}
+		}
+	}
+	if err := t.FinishFields(fieldsTarget1); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (m *BatchInfo) MakeVDLTarget() vdl.Target {
+	return nil
+}
+
+func (m *BatchInfo) IsZero() bool {
+
+	var1 := (*m == BatchInfo{})
+	return var1
 }
 
 // BatchSource represents where the batch was committed.
@@ -304,6 +993,23 @@ func (BatchSource) __VDLReflect(struct {
 }) {
 }
 
+func (m BatchSource) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
+	if err := t.FromEnumLabel(m.String(), __VDLType_types_v_io_v23_services_syncbase_nosql_BatchSource); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (m BatchSource) MakeVDLTarget() vdl.Target {
+	return nil
+}
+
+func (m BatchSource) IsZero() bool {
+
+	var1 := (m == BatchSourceLocal)
+	return var1
+}
+
 // RowInfo contains a single operation performed on a row (in case of read or
 // write) or a range or rows (in case of scan) along with a mapping to each
 // of the batches that this operation belongs to.
@@ -324,6 +1030,92 @@ func (RowInfo) __VDLReflect(struct {
 }) {
 }
 
+func (m *RowInfo) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
+
+	__VDLEnsureNativeBuilt_types()
+	fieldsTarget1, err := t.StartFields(tt)
+	if err != nil {
+		return err
+	}
+
+	var2 := m.Op.IsZero()
+	if !var2 {
+		keyTarget3, fieldTarget4, err := fieldsTarget1.StartField("Op")
+		if err != vdl.ErrFieldNoExist && err != nil {
+			return err
+		}
+		if err != vdl.ErrFieldNoExist {
+
+			unionValue5 := m.Op
+			if unionValue5 == nil {
+				unionValue5 = OperationRead{}
+			}
+			if err := unionValue5.FillVDLTarget(fieldTarget4, __VDLType_types_v_io_v23_services_syncbase_nosql_Operation); err != nil {
+				return err
+			}
+			if err := fieldsTarget1.FinishField(keyTarget3, fieldTarget4); err != nil {
+				return err
+			}
+		}
+	}
+	var var6 bool
+	if len(m.BatchIds) == 0 {
+		var6 = true
+	}
+	if !var6 {
+		keyTarget7, fieldTarget8, err := fieldsTarget1.StartField("BatchIds")
+		if err != vdl.ErrFieldNoExist && err != nil {
+			return err
+		}
+		if err != vdl.ErrFieldNoExist {
+
+			listTarget9, err := fieldTarget8.StartList(__VDLTypetypes12, len(m.BatchIds))
+			if err != nil {
+				return err
+			}
+			for i, elem11 := range m.BatchIds {
+				elemTarget10, err := listTarget9.StartElem(i)
+				if err != nil {
+					return err
+				}
+				if err := elemTarget10.FromUint(uint64(elem11), vdl.Uint64Type); err != nil {
+					return err
+				}
+				if err := listTarget9.FinishElem(elemTarget10); err != nil {
+					return err
+				}
+			}
+			if err := fieldTarget8.FinishList(listTarget9); err != nil {
+				return err
+			}
+			if err := fieldsTarget1.FinishField(keyTarget7, fieldTarget8); err != nil {
+				return err
+			}
+		}
+	}
+	if err := t.FinishFields(fieldsTarget1); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (m *RowInfo) MakeVDLTarget() vdl.Target {
+	return nil
+}
+
+func (m *RowInfo) IsZero() bool {
+
+	var1 := true
+	var2 := m.Op.IsZero()
+	var1 = var1 && var2
+	var var3 bool
+	if len(m.BatchIds) == 0 {
+		var3 = true
+	}
+	var1 = var1 && var3
+	return var1
+}
+
 type (
 	// Operation represents any single field of the Operation union type.
 	//
@@ -338,6 +1130,8 @@ type (
 		Name() string
 		// __VDLReflect describes the Operation union type.
 		__VDLReflect(__OperationReflect)
+		FillVDLTarget(vdl.Target, *vdl.Type) error
+		IsZero() bool
 	}
 	// OperationRead represents field Read of the Operation union type.
 	//
@@ -372,15 +1166,117 @@ func (x OperationRead) Interface() interface{}          { return x.Value }
 func (x OperationRead) Name() string                    { return "Read" }
 func (x OperationRead) __VDLReflect(__OperationReflect) {}
 
+func (m OperationRead) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
+
+	fieldsTarget1, err := t.StartFields(__VDLType_types_v_io_v23_services_syncbase_nosql_Operation)
+	if err != nil {
+		return err
+	}
+	keyTarget2, fieldTarget3, err := fieldsTarget1.StartField("Read")
+	if err != nil {
+		return err
+	}
+
+	if err := m.Value.FillVDLTarget(fieldTarget3, __VDLType_types_v_io_v23_services_syncbase_nosql_RowOp); err != nil {
+		return err
+	}
+	if err := fieldsTarget1.FinishField(keyTarget2, fieldTarget3); err != nil {
+		return err
+	}
+	if err := t.FinishFields(fieldsTarget1); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (m OperationRead) MakeVDLTarget() vdl.Target {
+	return nil
+}
+
+func (m OperationRead) IsZero() bool {
+
+	var2 := m.Value.IsZero()
+	return var2
+}
+
 func (x OperationWrite) Index() int                      { return 1 }
 func (x OperationWrite) Interface() interface{}          { return x.Value }
 func (x OperationWrite) Name() string                    { return "Write" }
 func (x OperationWrite) __VDLReflect(__OperationReflect) {}
 
+func (m OperationWrite) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
+
+	fieldsTarget1, err := t.StartFields(__VDLType_types_v_io_v23_services_syncbase_nosql_Operation)
+	if err != nil {
+		return err
+	}
+	keyTarget2, fieldTarget3, err := fieldsTarget1.StartField("Write")
+	if err != nil {
+		return err
+	}
+
+	if err := m.Value.FillVDLTarget(fieldTarget3, __VDLType_types_v_io_v23_services_syncbase_nosql_RowOp); err != nil {
+		return err
+	}
+	if err := fieldsTarget1.FinishField(keyTarget2, fieldTarget3); err != nil {
+		return err
+	}
+	if err := t.FinishFields(fieldsTarget1); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (m OperationWrite) MakeVDLTarget() vdl.Target {
+	return nil
+}
+
+func (m OperationWrite) IsZero() bool {
+
+	unionField2 := false
+	return unionField2
+}
+
 func (x OperationScan) Index() int                      { return 2 }
 func (x OperationScan) Interface() interface{}          { return x.Value }
 func (x OperationScan) Name() string                    { return "Scan" }
 func (x OperationScan) __VDLReflect(__OperationReflect) {}
+
+func (m OperationScan) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
+
+	fieldsTarget1, err := t.StartFields(__VDLType_types_v_io_v23_services_syncbase_nosql_Operation)
+	if err != nil {
+		return err
+	}
+	keyTarget2, fieldTarget3, err := fieldsTarget1.StartField("Scan")
+	if err != nil {
+		return err
+	}
+
+	if err := m.Value.FillVDLTarget(fieldTarget3, __VDLType_types_v_io_v23_services_syncbase_nosql_ScanOp); err != nil {
+		return err
+	}
+	if err := fieldsTarget1.FinishField(keyTarget2, fieldTarget3); err != nil {
+		return err
+	}
+	if err := t.FinishFields(fieldsTarget1); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (m OperationScan) MakeVDLTarget() vdl.Target {
+	return nil
+}
+
+func (m OperationScan) IsZero() bool {
+
+	unionField2 := false
+	return unionField2
+}
 
 // RowOp represents a read or write operation on a row corresponding to the
 // given key.
@@ -402,6 +1298,119 @@ func (RowOp) __VDLReflect(struct {
 }) {
 }
 
+func (m *RowOp) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
+
+	__VDLEnsureNativeBuilt_types()
+	fieldsTarget1, err := t.StartFields(tt)
+	if err != nil {
+		return err
+	}
+
+	var2 := (m.Key == "")
+	if !var2 {
+		keyTarget3, fieldTarget4, err := fieldsTarget1.StartField("Key")
+		if err != vdl.ErrFieldNoExist && err != nil {
+			return err
+		}
+		if err != vdl.ErrFieldNoExist {
+			if err := fieldTarget4.FromString(string(m.Key), vdl.StringType); err != nil {
+				return err
+			}
+			if err := fieldsTarget1.FinishField(keyTarget3, fieldTarget4); err != nil {
+				return err
+			}
+		}
+	}
+	var5 := (m.LocalValue == (*Value)(nil))
+	if !var5 {
+		keyTarget6, fieldTarget7, err := fieldsTarget1.StartField("LocalValue")
+		if err != vdl.ErrFieldNoExist && err != nil {
+			return err
+		}
+		if err != vdl.ErrFieldNoExist {
+
+			if m.LocalValue == nil {
+				if err := fieldTarget7.FromNil(__VDLTypetypes14); err != nil {
+					return err
+				}
+			} else {
+				if err := m.LocalValue.FillVDLTarget(fieldTarget7, __VDLType_types_v_io_v23_services_syncbase_nosql_Value); err != nil {
+					return err
+				}
+			}
+			if err := fieldsTarget1.FinishField(keyTarget6, fieldTarget7); err != nil {
+				return err
+			}
+		}
+	}
+	var8 := (m.RemoteValue == (*Value)(nil))
+	if !var8 {
+		keyTarget9, fieldTarget10, err := fieldsTarget1.StartField("RemoteValue")
+		if err != vdl.ErrFieldNoExist && err != nil {
+			return err
+		}
+		if err != vdl.ErrFieldNoExist {
+
+			if m.RemoteValue == nil {
+				if err := fieldTarget10.FromNil(__VDLTypetypes14); err != nil {
+					return err
+				}
+			} else {
+				if err := m.RemoteValue.FillVDLTarget(fieldTarget10, __VDLType_types_v_io_v23_services_syncbase_nosql_Value); err != nil {
+					return err
+				}
+			}
+			if err := fieldsTarget1.FinishField(keyTarget9, fieldTarget10); err != nil {
+				return err
+			}
+		}
+	}
+	var11 := (m.AncestorValue == (*Value)(nil))
+	if !var11 {
+		keyTarget12, fieldTarget13, err := fieldsTarget1.StartField("AncestorValue")
+		if err != vdl.ErrFieldNoExist && err != nil {
+			return err
+		}
+		if err != vdl.ErrFieldNoExist {
+
+			if m.AncestorValue == nil {
+				if err := fieldTarget13.FromNil(__VDLTypetypes14); err != nil {
+					return err
+				}
+			} else {
+				if err := m.AncestorValue.FillVDLTarget(fieldTarget13, __VDLType_types_v_io_v23_services_syncbase_nosql_Value); err != nil {
+					return err
+				}
+			}
+			if err := fieldsTarget1.FinishField(keyTarget12, fieldTarget13); err != nil {
+				return err
+			}
+		}
+	}
+	if err := t.FinishFields(fieldsTarget1); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (m *RowOp) MakeVDLTarget() vdl.Target {
+	return nil
+}
+
+func (m *RowOp) IsZero() bool {
+
+	var1 := true
+	var2 := (m.Key == "")
+	var1 = var1 && var2
+	var3 := (m.LocalValue == (*Value)(nil))
+	var1 = var1 && var3
+	var4 := (m.RemoteValue == (*Value)(nil))
+	var1 = var1 && var4
+	var5 := (m.AncestorValue == (*Value)(nil))
+	var1 = var1 && var5
+	return var1
+}
+
 // ScanOp provides details of a scan operation.
 type ScanOp struct {
 	// Start contains the starting key for a range scan.
@@ -413,6 +1422,62 @@ type ScanOp struct {
 func (ScanOp) __VDLReflect(struct {
 	Name string `vdl:"v.io/v23/services/syncbase/nosql.ScanOp"`
 }) {
+}
+
+func (m *ScanOp) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
+
+	if __VDLType_types_v_io_v23_services_syncbase_nosql_ScanOp == nil || __VDLTypetypes15 == nil {
+		panic("Initialization order error: types generated for FillVDLTarget not initialized. Consider moving caller to an init() block.")
+	}
+	fieldsTarget1, err := t.StartFields(tt)
+	if err != nil {
+		return err
+	}
+
+	var2 := (m.Start == "")
+	if !var2 {
+		keyTarget3, fieldTarget4, err := fieldsTarget1.StartField("Start")
+		if err != vdl.ErrFieldNoExist && err != nil {
+			return err
+		}
+		if err != vdl.ErrFieldNoExist {
+			if err := fieldTarget4.FromString(string(m.Start), vdl.StringType); err != nil {
+				return err
+			}
+			if err := fieldsTarget1.FinishField(keyTarget3, fieldTarget4); err != nil {
+				return err
+			}
+		}
+	}
+	var5 := (m.Limit == "")
+	if !var5 {
+		keyTarget6, fieldTarget7, err := fieldsTarget1.StartField("Limit")
+		if err != vdl.ErrFieldNoExist && err != nil {
+			return err
+		}
+		if err != vdl.ErrFieldNoExist {
+			if err := fieldTarget7.FromString(string(m.Limit), vdl.StringType); err != nil {
+				return err
+			}
+			if err := fieldsTarget1.FinishField(keyTarget6, fieldTarget7); err != nil {
+				return err
+			}
+		}
+	}
+	if err := t.FinishFields(fieldsTarget1); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (m *ScanOp) MakeVDLTarget() vdl.Target {
+	return nil
+}
+
+func (m *ScanOp) IsZero() bool {
+
+	var1 := (*m == ScanOp{})
+	return var1
 }
 
 // Value contains the encoded bytes for a row's value stored in syncbase.
@@ -429,6 +1494,100 @@ type Value struct {
 func (Value) __VDLReflect(struct {
 	Name string `vdl:"v.io/v23/services/syncbase/nosql.Value"`
 }) {
+}
+
+func (m *Value) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
+
+	__VDLEnsureNativeBuilt_types()
+	fieldsTarget1, err := t.StartFields(tt)
+	if err != nil {
+		return err
+	}
+
+	var2 := m.State.IsZero()
+	if !var2 {
+		keyTarget3, fieldTarget4, err := fieldsTarget1.StartField("State")
+		if err != vdl.ErrFieldNoExist && err != nil {
+			return err
+		}
+		if err != vdl.ErrFieldNoExist {
+
+			if err := m.State.FillVDLTarget(fieldTarget4, __VDLType_types_v_io_v23_services_syncbase_nosql_ValueState); err != nil {
+				return err
+			}
+			if err := fieldsTarget1.FinishField(keyTarget3, fieldTarget4); err != nil {
+				return err
+			}
+		}
+	}
+	var var5 bool
+	if len(m.Bytes) == 0 {
+		var5 = true
+	}
+	if !var5 {
+		keyTarget6, fieldTarget7, err := fieldsTarget1.StartField("Bytes")
+		if err != vdl.ErrFieldNoExist && err != nil {
+			return err
+		}
+		if err != vdl.ErrFieldNoExist {
+
+			if err := fieldTarget7.FromBytes([]byte(m.Bytes), __VDLTypetypes3); err != nil {
+				return err
+			}
+			if err := fieldsTarget1.FinishField(keyTarget6, fieldTarget7); err != nil {
+				return err
+			}
+		}
+	}
+	var wireValue8 time_2.Time
+	if err := time_2.TimeFromNative(&wireValue8, m.WriteTs); err != nil {
+		return err
+	}
+
+	var9 := wireValue8.IsZero()
+	if !var9 {
+		keyTarget10, fieldTarget11, err := fieldsTarget1.StartField("WriteTs")
+		if err != vdl.ErrFieldNoExist && err != nil {
+			return err
+		}
+		if err != vdl.ErrFieldNoExist {
+
+			if err := wireValue8.FillVDLTarget(fieldTarget11, __VDLType_types_time_Time); err != nil {
+				return err
+			}
+			if err := fieldsTarget1.FinishField(keyTarget10, fieldTarget11); err != nil {
+				return err
+			}
+		}
+	}
+	if err := t.FinishFields(fieldsTarget1); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (m *Value) MakeVDLTarget() vdl.Target {
+	return nil
+}
+
+func (m *Value) IsZero() bool {
+
+	var1 := true
+	var2 := m.State.IsZero()
+	var1 = var1 && var2
+	var var3 bool
+	if len(m.Bytes) == 0 {
+		var3 = true
+	}
+	var1 = var1 && var3
+	var wireValue4 time_2.Time
+	if err := time_2.TimeFromNative(&wireValue4, m.WriteTs); err != nil {
+		return false // error will be caught on encode
+	}
+
+	var5 := wireValue4.IsZero()
+	var1 = var1 && var5
+	return var1
 }
 
 // ValueState represents the state for Value object providing information about
@@ -492,6 +1651,23 @@ func (ValueState) __VDLReflect(struct {
 }) {
 }
 
+func (m ValueState) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
+	if err := t.FromEnumLabel(m.String(), __VDLType_types_v_io_v23_services_syncbase_nosql_ValueState); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (m ValueState) MakeVDLTarget() vdl.Target {
+	return nil
+}
+
+func (m ValueState) IsZero() bool {
+
+	var1 := (m == ValueStateExists)
+	return var1
+}
+
 // ValueSelection represents the value that was selected as the final resolution
 // for a conflict.
 type ValueSelection int
@@ -547,6 +1723,23 @@ func (ValueSelection) __VDLReflect(struct {
 }) {
 }
 
+func (m ValueSelection) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
+	if err := t.FromEnumLabel(m.String(), __VDLType_types_v_io_v23_services_syncbase_nosql_ValueSelection); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (m ValueSelection) MakeVDLTarget() vdl.Target {
+	return nil
+}
+
+func (m ValueSelection) IsZero() bool {
+
+	var1 := (m == ValueSelectionLocal)
+	return var1
+}
+
 // ResolutionInfo contains the application’s reply to a conflict for a key,
 // providing the resolution value. The resolution may be over a group of keys
 // in which case the application must send a stream of ResolutionInfos with
@@ -571,6 +1764,106 @@ func (ResolutionInfo) __VDLReflect(struct {
 }) {
 }
 
+func (m *ResolutionInfo) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
+
+	__VDLEnsureNativeBuilt_types()
+	fieldsTarget1, err := t.StartFields(tt)
+	if err != nil {
+		return err
+	}
+
+	var2 := (m.Key == "")
+	if !var2 {
+		keyTarget3, fieldTarget4, err := fieldsTarget1.StartField("Key")
+		if err != vdl.ErrFieldNoExist && err != nil {
+			return err
+		}
+		if err != vdl.ErrFieldNoExist {
+			if err := fieldTarget4.FromString(string(m.Key), vdl.StringType); err != nil {
+				return err
+			}
+			if err := fieldsTarget1.FinishField(keyTarget3, fieldTarget4); err != nil {
+				return err
+			}
+		}
+	}
+	var5 := m.Selection.IsZero()
+	if !var5 {
+		keyTarget6, fieldTarget7, err := fieldsTarget1.StartField("Selection")
+		if err != vdl.ErrFieldNoExist && err != nil {
+			return err
+		}
+		if err != vdl.ErrFieldNoExist {
+
+			if err := m.Selection.FillVDLTarget(fieldTarget7, __VDLType_types_v_io_v23_services_syncbase_nosql_ValueSelection); err != nil {
+				return err
+			}
+			if err := fieldsTarget1.FinishField(keyTarget6, fieldTarget7); err != nil {
+				return err
+			}
+		}
+	}
+	var8 := (m.Result == (*Value)(nil))
+	if !var8 {
+		keyTarget9, fieldTarget10, err := fieldsTarget1.StartField("Result")
+		if err != vdl.ErrFieldNoExist && err != nil {
+			return err
+		}
+		if err != vdl.ErrFieldNoExist {
+
+			if m.Result == nil {
+				if err := fieldTarget10.FromNil(__VDLTypetypes14); err != nil {
+					return err
+				}
+			} else {
+				if err := m.Result.FillVDLTarget(fieldTarget10, __VDLType_types_v_io_v23_services_syncbase_nosql_Value); err != nil {
+					return err
+				}
+			}
+			if err := fieldsTarget1.FinishField(keyTarget9, fieldTarget10); err != nil {
+				return err
+			}
+		}
+	}
+	var11 := (m.Continued == false)
+	if !var11 {
+		keyTarget12, fieldTarget13, err := fieldsTarget1.StartField("Continued")
+		if err != vdl.ErrFieldNoExist && err != nil {
+			return err
+		}
+		if err != vdl.ErrFieldNoExist {
+			if err := fieldTarget13.FromBool(bool(m.Continued), vdl.BoolType); err != nil {
+				return err
+			}
+			if err := fieldsTarget1.FinishField(keyTarget12, fieldTarget13); err != nil {
+				return err
+			}
+		}
+	}
+	if err := t.FinishFields(fieldsTarget1); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (m *ResolutionInfo) MakeVDLTarget() vdl.Target {
+	return nil
+}
+
+func (m *ResolutionInfo) IsZero() bool {
+
+	var1 := true
+	var2 := (m.Key == "")
+	var1 = var1 && var2
+	var3 := m.Selection.IsZero()
+	var1 = var1 && var3
+	var4 := (m.Result == (*Value)(nil))
+	var1 = var1 && var4
+	var5 := (m.Continued == false)
+	var1 = var1 && var5
+	return var1
+}
+
 // SchemaMetadata maintains metadata related to the schema of a given database.
 // There is one SchemaMetadata per database.
 type SchemaMetadata struct {
@@ -586,6 +1879,67 @@ func (SchemaMetadata) __VDLReflect(struct {
 }) {
 }
 
+func (m *SchemaMetadata) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
+
+	if __VDLType_types_v_io_v23_services_syncbase_nosql_SchemaMetadata == nil || __VDLTypetypes17 == nil {
+		panic("Initialization order error: types generated for FillVDLTarget not initialized. Consider moving caller to an init() block.")
+	}
+	fieldsTarget1, err := t.StartFields(tt)
+	if err != nil {
+		return err
+	}
+
+	var2 := (m.Version == int32(0))
+	if !var2 {
+		keyTarget3, fieldTarget4, err := fieldsTarget1.StartField("Version")
+		if err != vdl.ErrFieldNoExist && err != nil {
+			return err
+		}
+		if err != vdl.ErrFieldNoExist {
+			if err := fieldTarget4.FromInt(int64(m.Version), vdl.Int32Type); err != nil {
+				return err
+			}
+			if err := fieldsTarget1.FinishField(keyTarget3, fieldTarget4); err != nil {
+				return err
+			}
+		}
+	}
+	var5 := m.Policy.IsZero()
+	if !var5 {
+		keyTarget6, fieldTarget7, err := fieldsTarget1.StartField("Policy")
+		if err != vdl.ErrFieldNoExist && err != nil {
+			return err
+		}
+		if err != vdl.ErrFieldNoExist {
+
+			if err := m.Policy.FillVDLTarget(fieldTarget7, __VDLType_types_v_io_v23_services_syncbase_nosql_CrPolicy); err != nil {
+				return err
+			}
+			if err := fieldsTarget1.FinishField(keyTarget6, fieldTarget7); err != nil {
+				return err
+			}
+		}
+	}
+	if err := t.FinishFields(fieldsTarget1); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (m *SchemaMetadata) MakeVDLTarget() vdl.Target {
+	return nil
+}
+
+func (m *SchemaMetadata) IsZero() bool {
+
+	var1 := true
+	var2 := (m.Version == int32(0))
+	var1 = var1 && var2
+	var3 := m.Policy.IsZero()
+	var1 = var1 && var3
+	return var1
+}
+
 // For a given row with a conflict, all rules are matched against the row.
 // If no rules match the row, we default to "LastWins". If multiple
 // rules match the row, ties are broken as follows:
@@ -599,6 +1953,73 @@ type CrPolicy struct {
 func (CrPolicy) __VDLReflect(struct {
 	Name string `vdl:"v.io/v23/services/syncbase/nosql.CrPolicy"`
 }) {
+}
+
+func (m *CrPolicy) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
+
+	if __VDLType_types_v_io_v23_services_syncbase_nosql_CrPolicy == nil || __VDLTypetypes18 == nil {
+		panic("Initialization order error: types generated for FillVDLTarget not initialized. Consider moving caller to an init() block.")
+	}
+	fieldsTarget1, err := t.StartFields(tt)
+	if err != nil {
+		return err
+	}
+
+	var var2 bool
+	if len(m.Rules) == 0 {
+		var2 = true
+	}
+	if !var2 {
+		keyTarget3, fieldTarget4, err := fieldsTarget1.StartField("Rules")
+		if err != vdl.ErrFieldNoExist && err != nil {
+			return err
+		}
+		if err != vdl.ErrFieldNoExist {
+
+			listTarget5, err := fieldTarget4.StartList(__VDLTypetypes19, len(m.Rules))
+			if err != nil {
+				return err
+			}
+			for i, elem7 := range m.Rules {
+				elemTarget6, err := listTarget5.StartElem(i)
+				if err != nil {
+					return err
+				}
+
+				if err := elem7.FillVDLTarget(elemTarget6, __VDLType_types_v_io_v23_services_syncbase_nosql_CrRule); err != nil {
+					return err
+				}
+				if err := listTarget5.FinishElem(elemTarget6); err != nil {
+					return err
+				}
+			}
+			if err := fieldTarget4.FinishList(listTarget5); err != nil {
+				return err
+			}
+			if err := fieldsTarget1.FinishField(keyTarget3, fieldTarget4); err != nil {
+				return err
+			}
+		}
+	}
+	if err := t.FinishFields(fieldsTarget1); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (m *CrPolicy) MakeVDLTarget() vdl.Target {
+	return nil
+}
+
+func (m *CrPolicy) IsZero() bool {
+
+	var1 := true
+	var var2 bool
+	if len(m.Rules) == 0 {
+		var2 = true
+	}
+	var1 = var1 && var2
+	return var1
 }
 
 // CrRule provides a filter and the type of resolution to perform for a row
@@ -621,12 +2042,116 @@ func (CrRule) __VDLReflect(struct {
 }) {
 }
 
+func (m *CrRule) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
+
+	if __VDLType_types_v_io_v23_services_syncbase_nosql_CrRule == nil || __VDLTypetypes20 == nil {
+		panic("Initialization order error: types generated for FillVDLTarget not initialized. Consider moving caller to an init() block.")
+	}
+	fieldsTarget1, err := t.StartFields(tt)
+	if err != nil {
+		return err
+	}
+
+	var2 := (m.TableName == "")
+	if !var2 {
+		keyTarget3, fieldTarget4, err := fieldsTarget1.StartField("TableName")
+		if err != vdl.ErrFieldNoExist && err != nil {
+			return err
+		}
+		if err != vdl.ErrFieldNoExist {
+			if err := fieldTarget4.FromString(string(m.TableName), vdl.StringType); err != nil {
+				return err
+			}
+			if err := fieldsTarget1.FinishField(keyTarget3, fieldTarget4); err != nil {
+				return err
+			}
+		}
+	}
+	var5 := (m.KeyPrefix == "")
+	if !var5 {
+		keyTarget6, fieldTarget7, err := fieldsTarget1.StartField("KeyPrefix")
+		if err != vdl.ErrFieldNoExist && err != nil {
+			return err
+		}
+		if err != vdl.ErrFieldNoExist {
+			if err := fieldTarget7.FromString(string(m.KeyPrefix), vdl.StringType); err != nil {
+				return err
+			}
+			if err := fieldsTarget1.FinishField(keyTarget6, fieldTarget7); err != nil {
+				return err
+			}
+		}
+	}
+	var8 := (m.Type == "")
+	if !var8 {
+		keyTarget9, fieldTarget10, err := fieldsTarget1.StartField("Type")
+		if err != vdl.ErrFieldNoExist && err != nil {
+			return err
+		}
+		if err != vdl.ErrFieldNoExist {
+			if err := fieldTarget10.FromString(string(m.Type), vdl.StringType); err != nil {
+				return err
+			}
+			if err := fieldsTarget1.FinishField(keyTarget9, fieldTarget10); err != nil {
+				return err
+			}
+		}
+	}
+	var11 := m.Resolver.IsZero()
+	if !var11 {
+		keyTarget12, fieldTarget13, err := fieldsTarget1.StartField("Resolver")
+		if err != vdl.ErrFieldNoExist && err != nil {
+			return err
+		}
+		if err != vdl.ErrFieldNoExist {
+
+			if err := m.Resolver.FillVDLTarget(fieldTarget13, __VDLType_types_v_io_v23_services_syncbase_nosql_ResolverType); err != nil {
+				return err
+			}
+			if err := fieldsTarget1.FinishField(keyTarget12, fieldTarget13); err != nil {
+				return err
+			}
+		}
+	}
+	if err := t.FinishFields(fieldsTarget1); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (m *CrRule) MakeVDLTarget() vdl.Target {
+	return nil
+}
+
+func (m *CrRule) IsZero() bool {
+
+	var1 := (*m == CrRule{})
+	return var1
+}
+
 // BlobRef is a reference to a blob.
 type BlobRef string
 
 func (BlobRef) __VDLReflect(struct {
 	Name string `vdl:"v.io/v23/services/syncbase/nosql.BlobRef"`
 }) {
+}
+
+func (m BlobRef) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
+	if err := t.FromString(string(m), __VDLType_types_v_io_v23_services_syncbase_nosql_BlobRef); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (m BlobRef) MakeVDLTarget() vdl.Target {
+	return nil
+}
+
+func (m BlobRef) IsZero() bool {
+
+	var1 := (m == BlobRef(""))
+	return var1
 }
 
 // BlobFetchState represents the state transitions of a blob fetch.
@@ -689,6 +2214,23 @@ func (BlobFetchState) __VDLReflect(struct {
 }) {
 }
 
+func (m BlobFetchState) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
+	if err := t.FromEnumLabel(m.String(), __VDLType_types_v_io_v23_services_syncbase_nosql_BlobFetchState); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (m BlobFetchState) MakeVDLTarget() vdl.Target {
+	return nil
+}
+
+func (m BlobFetchState) IsZero() bool {
+
+	var1 := (m == BlobFetchStatePending)
+	return var1
+}
+
 // BlobFetchStatus describes the progress of an asynchronous blob fetch.
 type BlobFetchStatus struct {
 	State    BlobFetchState // State of the blob fetch request.
@@ -699,6 +2241,78 @@ type BlobFetchStatus struct {
 func (BlobFetchStatus) __VDLReflect(struct {
 	Name string `vdl:"v.io/v23/services/syncbase/nosql.BlobFetchStatus"`
 }) {
+}
+
+func (m *BlobFetchStatus) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
+
+	if __VDLType_types_v_io_v23_services_syncbase_nosql_BlobFetchStatus == nil || __VDLTypetypes21 == nil {
+		panic("Initialization order error: types generated for FillVDLTarget not initialized. Consider moving caller to an init() block.")
+	}
+	fieldsTarget1, err := t.StartFields(tt)
+	if err != nil {
+		return err
+	}
+
+	var2 := m.State.IsZero()
+	if !var2 {
+		keyTarget3, fieldTarget4, err := fieldsTarget1.StartField("State")
+		if err != vdl.ErrFieldNoExist && err != nil {
+			return err
+		}
+		if err != vdl.ErrFieldNoExist {
+
+			if err := m.State.FillVDLTarget(fieldTarget4, __VDLType_types_v_io_v23_services_syncbase_nosql_BlobFetchState); err != nil {
+				return err
+			}
+			if err := fieldsTarget1.FinishField(keyTarget3, fieldTarget4); err != nil {
+				return err
+			}
+		}
+	}
+	var5 := (m.Received == int64(0))
+	if !var5 {
+		keyTarget6, fieldTarget7, err := fieldsTarget1.StartField("Received")
+		if err != vdl.ErrFieldNoExist && err != nil {
+			return err
+		}
+		if err != vdl.ErrFieldNoExist {
+			if err := fieldTarget7.FromInt(int64(m.Received), vdl.Int64Type); err != nil {
+				return err
+			}
+			if err := fieldsTarget1.FinishField(keyTarget6, fieldTarget7); err != nil {
+				return err
+			}
+		}
+	}
+	var8 := (m.Total == int64(0))
+	if !var8 {
+		keyTarget9, fieldTarget10, err := fieldsTarget1.StartField("Total")
+		if err != vdl.ErrFieldNoExist && err != nil {
+			return err
+		}
+		if err != vdl.ErrFieldNoExist {
+			if err := fieldTarget10.FromInt(int64(m.Total), vdl.Int64Type); err != nil {
+				return err
+			}
+			if err := fieldsTarget1.FinishField(keyTarget9, fieldTarget10); err != nil {
+				return err
+			}
+		}
+	}
+	if err := t.FinishFields(fieldsTarget1); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (m *BlobFetchStatus) MakeVDLTarget() vdl.Target {
+	return nil
+}
+
+func (m *BlobFetchStatus) IsZero() bool {
+
+	var1 := (*m == BlobFetchStatus{})
+	return var1
 }
 
 // StoreChange is the new value for a watched entity.
@@ -716,6 +2330,73 @@ type StoreChange struct {
 func (StoreChange) __VDLReflect(struct {
 	Name string `vdl:"v.io/v23/services/syncbase/nosql.StoreChange"`
 }) {
+}
+
+func (m *StoreChange) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
+
+	if __VDLType_types_v_io_v23_services_syncbase_nosql_StoreChange == nil || __VDLTypetypes22 == nil {
+		panic("Initialization order error: types generated for FillVDLTarget not initialized. Consider moving caller to an init() block.")
+	}
+	fieldsTarget1, err := t.StartFields(tt)
+	if err != nil {
+		return err
+	}
+
+	var var2 bool
+	if len(m.Value) == 0 {
+		var2 = true
+	}
+	if !var2 {
+		keyTarget3, fieldTarget4, err := fieldsTarget1.StartField("Value")
+		if err != vdl.ErrFieldNoExist && err != nil {
+			return err
+		}
+		if err != vdl.ErrFieldNoExist {
+
+			if err := fieldTarget4.FromBytes([]byte(m.Value), __VDLTypetypes3); err != nil {
+				return err
+			}
+			if err := fieldsTarget1.FinishField(keyTarget3, fieldTarget4); err != nil {
+				return err
+			}
+		}
+	}
+	var5 := (m.FromSync == false)
+	if !var5 {
+		keyTarget6, fieldTarget7, err := fieldsTarget1.StartField("FromSync")
+		if err != vdl.ErrFieldNoExist && err != nil {
+			return err
+		}
+		if err != vdl.ErrFieldNoExist {
+			if err := fieldTarget7.FromBool(bool(m.FromSync), vdl.BoolType); err != nil {
+				return err
+			}
+			if err := fieldsTarget1.FinishField(keyTarget6, fieldTarget7); err != nil {
+				return err
+			}
+		}
+	}
+	if err := t.FinishFields(fieldsTarget1); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (m *StoreChange) MakeVDLTarget() vdl.Target {
+	return nil
+}
+
+func (m *StoreChange) IsZero() bool {
+
+	var1 := true
+	var var2 bool
+	if len(m.Value) == 0 {
+		var2 = true
+	}
+	var1 = var1 && var2
+	var3 := (m.FromSync == false)
+	var1 = var1 && var3
+	return var1
 }
 
 func init() {
@@ -745,6 +2426,791 @@ func init() {
 	vdl.Register((*BlobFetchState)(nil))
 	vdl.Register((*BlobFetchStatus)(nil))
 	vdl.Register((*StoreChange)(nil))
+}
+
+var __VDLTypetypes10 *vdl.Type = vdl.TypeOf((*BatchInfo)(nil))
+var __VDLTypetypes0 *vdl.Type = vdl.TypeOf((*BatchOptions)(nil))
+var __VDLTypetypes21 *vdl.Type = vdl.TypeOf((*BlobFetchStatus)(nil))
+var __VDLTypetypes9 *vdl.Type
+
+func __VDLTypetypes9_gen() *vdl.Type {
+	__VDLTypetypes9Builder := vdl.TypeBuilder{}
+
+	__VDLTypetypes91 := __VDLTypetypes9Builder.Optional()
+	__VDLTypetypes92 := __VDLTypetypes9Builder.Struct()
+	__VDLTypetypes93 := __VDLTypetypes9Builder.Named("v.io/v23/services/syncbase/nosql.ConflictInfo").AssignBase(__VDLTypetypes92)
+	__VDLTypetypes94 := __VDLTypetypes9Builder.Union()
+	__VDLTypetypes95 := __VDLTypetypes9Builder.Named("v.io/v23/services/syncbase/nosql.ConflictData").AssignBase(__VDLTypetypes94)
+	__VDLTypetypes96 := __VDLTypetypes9Builder.Struct()
+	__VDLTypetypes97 := __VDLTypetypes9Builder.Named("v.io/v23/services/syncbase/nosql.BatchInfo").AssignBase(__VDLTypetypes96)
+	__VDLTypetypes98 := vdl.Uint64Type
+	__VDLTypetypes96.AppendField("Id", __VDLTypetypes98)
+	__VDLTypetypes99 := vdl.StringType
+	__VDLTypetypes96.AppendField("Hint", __VDLTypetypes99)
+	__VDLTypetypes910 := __VDLTypetypes9Builder.Enum()
+	__VDLTypetypes911 := __VDLTypetypes9Builder.Named("v.io/v23/services/syncbase/nosql.BatchSource").AssignBase(__VDLTypetypes910)
+	__VDLTypetypes910.AppendLabel("Local")
+	__VDLTypetypes910.AppendLabel("Remote")
+	__VDLTypetypes96.AppendField("Source", __VDLTypetypes911)
+	__VDLTypetypes94.AppendField("Batch", __VDLTypetypes97)
+	__VDLTypetypes912 := __VDLTypetypes9Builder.Struct()
+	__VDLTypetypes913 := __VDLTypetypes9Builder.Named("v.io/v23/services/syncbase/nosql.RowInfo").AssignBase(__VDLTypetypes912)
+	__VDLTypetypes914 := __VDLTypetypes9Builder.Union()
+	__VDLTypetypes915 := __VDLTypetypes9Builder.Named("v.io/v23/services/syncbase/nosql.Operation").AssignBase(__VDLTypetypes914)
+	__VDLTypetypes916 := __VDLTypetypes9Builder.Struct()
+	__VDLTypetypes917 := __VDLTypetypes9Builder.Named("v.io/v23/services/syncbase/nosql.RowOp").AssignBase(__VDLTypetypes916)
+	__VDLTypetypes916.AppendField("Key", __VDLTypetypes99)
+	__VDLTypetypes918 := __VDLTypetypes9Builder.Optional()
+	__VDLTypetypes919 := __VDLTypetypes9Builder.Struct()
+	__VDLTypetypes920 := __VDLTypetypes9Builder.Named("v.io/v23/services/syncbase/nosql.Value").AssignBase(__VDLTypetypes919)
+	__VDLTypetypes921 := __VDLTypetypes9Builder.Enum()
+	__VDLTypetypes922 := __VDLTypetypes9Builder.Named("v.io/v23/services/syncbase/nosql.ValueState").AssignBase(__VDLTypetypes921)
+	__VDLTypetypes921.AppendLabel("Exists")
+	__VDLTypetypes921.AppendLabel("NoExists")
+	__VDLTypetypes921.AppendLabel("Deleted")
+	__VDLTypetypes921.AppendLabel("Unknown")
+	__VDLTypetypes919.AppendField("State", __VDLTypetypes922)
+	__VDLTypetypes923 := __VDLTypetypes9Builder.List()
+	__VDLTypetypes924 := vdl.ByteType
+	__VDLTypetypes923.AssignElem(__VDLTypetypes924)
+	__VDLTypetypes919.AppendField("Bytes", __VDLTypetypes923)
+	__VDLTypetypes925 := __VDLTypetypes9Builder.Struct()
+	__VDLTypetypes926 := __VDLTypetypes9Builder.Named("time.Time").AssignBase(__VDLTypetypes925)
+	__VDLTypetypes927 := vdl.Int64Type
+	__VDLTypetypes925.AppendField("Seconds", __VDLTypetypes927)
+	__VDLTypetypes928 := vdl.Int32Type
+	__VDLTypetypes925.AppendField("Nanos", __VDLTypetypes928)
+	__VDLTypetypes919.AppendField("WriteTs", __VDLTypetypes926)
+	__VDLTypetypes918.AssignElem(__VDLTypetypes920)
+	__VDLTypetypes916.AppendField("LocalValue", __VDLTypetypes918)
+	__VDLTypetypes916.AppendField("RemoteValue", __VDLTypetypes918)
+	__VDLTypetypes916.AppendField("AncestorValue", __VDLTypetypes918)
+	__VDLTypetypes914.AppendField("Read", __VDLTypetypes917)
+	__VDLTypetypes914.AppendField("Write", __VDLTypetypes917)
+	__VDLTypetypes929 := __VDLTypetypes9Builder.Struct()
+	__VDLTypetypes930 := __VDLTypetypes9Builder.Named("v.io/v23/services/syncbase/nosql.ScanOp").AssignBase(__VDLTypetypes929)
+	__VDLTypetypes929.AppendField("Start", __VDLTypetypes99)
+	__VDLTypetypes929.AppendField("Limit", __VDLTypetypes99)
+	__VDLTypetypes914.AppendField("Scan", __VDLTypetypes930)
+	__VDLTypetypes912.AppendField("Op", __VDLTypetypes915)
+	__VDLTypetypes931 := __VDLTypetypes9Builder.List()
+	__VDLTypetypes931.AssignElem(__VDLTypetypes98)
+	__VDLTypetypes912.AppendField("BatchIds", __VDLTypetypes931)
+	__VDLTypetypes94.AppendField("Row", __VDLTypetypes913)
+	__VDLTypetypes92.AppendField("Data", __VDLTypetypes95)
+	__VDLTypetypes932 := vdl.BoolType
+	__VDLTypetypes92.AppendField("Continued", __VDLTypetypes932)
+	__VDLTypetypes91.AssignElem(__VDLTypetypes93)
+	__VDLTypetypes9Builder.Build()
+	__VDLTypetypes9v, err := __VDLTypetypes91.Built()
+	if err != nil {
+		panic(err)
+	}
+	return __VDLTypetypes9v
+}
+func init() {
+	__VDLTypetypes9 = __VDLTypetypes9_gen()
+}
+
+var __VDLTypetypes18 *vdl.Type = vdl.TypeOf((*CrPolicy)(nil))
+var __VDLTypetypes20 *vdl.Type = vdl.TypeOf((*CrRule)(nil))
+var __VDLTypetypes2 *vdl.Type = vdl.TypeOf((*KeyValue)(nil))
+var __VDLTypetypes1 *vdl.Type = vdl.TypeOf((*PrefixPermissions)(nil))
+var __VDLTypetypes16 *vdl.Type
+
+func __VDLTypetypes16_gen() *vdl.Type {
+	__VDLTypetypes16Builder := vdl.TypeBuilder{}
+
+	__VDLTypetypes161 := __VDLTypetypes16Builder.Optional()
+	__VDLTypetypes162 := __VDLTypetypes16Builder.Struct()
+	__VDLTypetypes163 := __VDLTypetypes16Builder.Named("v.io/v23/services/syncbase/nosql.ResolutionInfo").AssignBase(__VDLTypetypes162)
+	__VDLTypetypes164 := vdl.StringType
+	__VDLTypetypes162.AppendField("Key", __VDLTypetypes164)
+	__VDLTypetypes165 := __VDLTypetypes16Builder.Enum()
+	__VDLTypetypes166 := __VDLTypetypes16Builder.Named("v.io/v23/services/syncbase/nosql.ValueSelection").AssignBase(__VDLTypetypes165)
+	__VDLTypetypes165.AppendLabel("Local")
+	__VDLTypetypes165.AppendLabel("Remote")
+	__VDLTypetypes165.AppendLabel("Other")
+	__VDLTypetypes162.AppendField("Selection", __VDLTypetypes166)
+	__VDLTypetypes167 := __VDLTypetypes16Builder.Optional()
+	__VDLTypetypes168 := __VDLTypetypes16Builder.Struct()
+	__VDLTypetypes169 := __VDLTypetypes16Builder.Named("v.io/v23/services/syncbase/nosql.Value").AssignBase(__VDLTypetypes168)
+	__VDLTypetypes1610 := __VDLTypetypes16Builder.Enum()
+	__VDLTypetypes1611 := __VDLTypetypes16Builder.Named("v.io/v23/services/syncbase/nosql.ValueState").AssignBase(__VDLTypetypes1610)
+	__VDLTypetypes1610.AppendLabel("Exists")
+	__VDLTypetypes1610.AppendLabel("NoExists")
+	__VDLTypetypes1610.AppendLabel("Deleted")
+	__VDLTypetypes1610.AppendLabel("Unknown")
+	__VDLTypetypes168.AppendField("State", __VDLTypetypes1611)
+	__VDLTypetypes1612 := __VDLTypetypes16Builder.List()
+	__VDLTypetypes1613 := vdl.ByteType
+	__VDLTypetypes1612.AssignElem(__VDLTypetypes1613)
+	__VDLTypetypes168.AppendField("Bytes", __VDLTypetypes1612)
+	__VDLTypetypes1614 := __VDLTypetypes16Builder.Struct()
+	__VDLTypetypes1615 := __VDLTypetypes16Builder.Named("time.Time").AssignBase(__VDLTypetypes1614)
+	__VDLTypetypes1616 := vdl.Int64Type
+	__VDLTypetypes1614.AppendField("Seconds", __VDLTypetypes1616)
+	__VDLTypetypes1617 := vdl.Int32Type
+	__VDLTypetypes1614.AppendField("Nanos", __VDLTypetypes1617)
+	__VDLTypetypes168.AppendField("WriteTs", __VDLTypetypes1615)
+	__VDLTypetypes167.AssignElem(__VDLTypetypes169)
+	__VDLTypetypes162.AppendField("Result", __VDLTypetypes167)
+	__VDLTypetypes1618 := vdl.BoolType
+	__VDLTypetypes162.AppendField("Continued", __VDLTypetypes1618)
+	__VDLTypetypes161.AssignElem(__VDLTypetypes163)
+	__VDLTypetypes16Builder.Build()
+	__VDLTypetypes16v, err := __VDLTypetypes161.Built()
+	if err != nil {
+		panic(err)
+	}
+	return __VDLTypetypes16v
+}
+func init() {
+	__VDLTypetypes16 = __VDLTypetypes16_gen()
+}
+
+var __VDLTypetypes11 *vdl.Type
+
+func __VDLTypetypes11_gen() *vdl.Type {
+	__VDLTypetypes11Builder := vdl.TypeBuilder{}
+
+	__VDLTypetypes111 := __VDLTypetypes11Builder.Optional()
+	__VDLTypetypes112 := __VDLTypetypes11Builder.Struct()
+	__VDLTypetypes113 := __VDLTypetypes11Builder.Named("v.io/v23/services/syncbase/nosql.RowInfo").AssignBase(__VDLTypetypes112)
+	__VDLTypetypes114 := __VDLTypetypes11Builder.Union()
+	__VDLTypetypes115 := __VDLTypetypes11Builder.Named("v.io/v23/services/syncbase/nosql.Operation").AssignBase(__VDLTypetypes114)
+	__VDLTypetypes116 := __VDLTypetypes11Builder.Struct()
+	__VDLTypetypes117 := __VDLTypetypes11Builder.Named("v.io/v23/services/syncbase/nosql.RowOp").AssignBase(__VDLTypetypes116)
+	__VDLTypetypes118 := vdl.StringType
+	__VDLTypetypes116.AppendField("Key", __VDLTypetypes118)
+	__VDLTypetypes119 := __VDLTypetypes11Builder.Optional()
+	__VDLTypetypes1110 := __VDLTypetypes11Builder.Struct()
+	__VDLTypetypes1111 := __VDLTypetypes11Builder.Named("v.io/v23/services/syncbase/nosql.Value").AssignBase(__VDLTypetypes1110)
+	__VDLTypetypes1112 := __VDLTypetypes11Builder.Enum()
+	__VDLTypetypes1113 := __VDLTypetypes11Builder.Named("v.io/v23/services/syncbase/nosql.ValueState").AssignBase(__VDLTypetypes1112)
+	__VDLTypetypes1112.AppendLabel("Exists")
+	__VDLTypetypes1112.AppendLabel("NoExists")
+	__VDLTypetypes1112.AppendLabel("Deleted")
+	__VDLTypetypes1112.AppendLabel("Unknown")
+	__VDLTypetypes1110.AppendField("State", __VDLTypetypes1113)
+	__VDLTypetypes1114 := __VDLTypetypes11Builder.List()
+	__VDLTypetypes1115 := vdl.ByteType
+	__VDLTypetypes1114.AssignElem(__VDLTypetypes1115)
+	__VDLTypetypes1110.AppendField("Bytes", __VDLTypetypes1114)
+	__VDLTypetypes1116 := __VDLTypetypes11Builder.Struct()
+	__VDLTypetypes1117 := __VDLTypetypes11Builder.Named("time.Time").AssignBase(__VDLTypetypes1116)
+	__VDLTypetypes1118 := vdl.Int64Type
+	__VDLTypetypes1116.AppendField("Seconds", __VDLTypetypes1118)
+	__VDLTypetypes1119 := vdl.Int32Type
+	__VDLTypetypes1116.AppendField("Nanos", __VDLTypetypes1119)
+	__VDLTypetypes1110.AppendField("WriteTs", __VDLTypetypes1117)
+	__VDLTypetypes119.AssignElem(__VDLTypetypes1111)
+	__VDLTypetypes116.AppendField("LocalValue", __VDLTypetypes119)
+	__VDLTypetypes116.AppendField("RemoteValue", __VDLTypetypes119)
+	__VDLTypetypes116.AppendField("AncestorValue", __VDLTypetypes119)
+	__VDLTypetypes114.AppendField("Read", __VDLTypetypes117)
+	__VDLTypetypes114.AppendField("Write", __VDLTypetypes117)
+	__VDLTypetypes1120 := __VDLTypetypes11Builder.Struct()
+	__VDLTypetypes1121 := __VDLTypetypes11Builder.Named("v.io/v23/services/syncbase/nosql.ScanOp").AssignBase(__VDLTypetypes1120)
+	__VDLTypetypes1120.AppendField("Start", __VDLTypetypes118)
+	__VDLTypetypes1120.AppendField("Limit", __VDLTypetypes118)
+	__VDLTypetypes114.AppendField("Scan", __VDLTypetypes1121)
+	__VDLTypetypes112.AppendField("Op", __VDLTypetypes115)
+	__VDLTypetypes1122 := __VDLTypetypes11Builder.List()
+	__VDLTypetypes1123 := vdl.Uint64Type
+	__VDLTypetypes1122.AssignElem(__VDLTypetypes1123)
+	__VDLTypetypes112.AppendField("BatchIds", __VDLTypetypes1122)
+	__VDLTypetypes111.AssignElem(__VDLTypetypes113)
+	__VDLTypetypes11Builder.Build()
+	__VDLTypetypes11v, err := __VDLTypetypes111.Built()
+	if err != nil {
+		panic(err)
+	}
+	return __VDLTypetypes11v
+}
+func init() {
+	__VDLTypetypes11 = __VDLTypetypes11_gen()
+}
+
+var __VDLTypetypes13 *vdl.Type
+
+func __VDLTypetypes13_gen() *vdl.Type {
+	__VDLTypetypes13Builder := vdl.TypeBuilder{}
+
+	__VDLTypetypes131 := __VDLTypetypes13Builder.Optional()
+	__VDLTypetypes132 := __VDLTypetypes13Builder.Struct()
+	__VDLTypetypes133 := __VDLTypetypes13Builder.Named("v.io/v23/services/syncbase/nosql.RowOp").AssignBase(__VDLTypetypes132)
+	__VDLTypetypes134 := vdl.StringType
+	__VDLTypetypes132.AppendField("Key", __VDLTypetypes134)
+	__VDLTypetypes135 := __VDLTypetypes13Builder.Optional()
+	__VDLTypetypes136 := __VDLTypetypes13Builder.Struct()
+	__VDLTypetypes137 := __VDLTypetypes13Builder.Named("v.io/v23/services/syncbase/nosql.Value").AssignBase(__VDLTypetypes136)
+	__VDLTypetypes138 := __VDLTypetypes13Builder.Enum()
+	__VDLTypetypes139 := __VDLTypetypes13Builder.Named("v.io/v23/services/syncbase/nosql.ValueState").AssignBase(__VDLTypetypes138)
+	__VDLTypetypes138.AppendLabel("Exists")
+	__VDLTypetypes138.AppendLabel("NoExists")
+	__VDLTypetypes138.AppendLabel("Deleted")
+	__VDLTypetypes138.AppendLabel("Unknown")
+	__VDLTypetypes136.AppendField("State", __VDLTypetypes139)
+	__VDLTypetypes1310 := __VDLTypetypes13Builder.List()
+	__VDLTypetypes1311 := vdl.ByteType
+	__VDLTypetypes1310.AssignElem(__VDLTypetypes1311)
+	__VDLTypetypes136.AppendField("Bytes", __VDLTypetypes1310)
+	__VDLTypetypes1312 := __VDLTypetypes13Builder.Struct()
+	__VDLTypetypes1313 := __VDLTypetypes13Builder.Named("time.Time").AssignBase(__VDLTypetypes1312)
+	__VDLTypetypes1314 := vdl.Int64Type
+	__VDLTypetypes1312.AppendField("Seconds", __VDLTypetypes1314)
+	__VDLTypetypes1315 := vdl.Int32Type
+	__VDLTypetypes1312.AppendField("Nanos", __VDLTypetypes1315)
+	__VDLTypetypes136.AppendField("WriteTs", __VDLTypetypes1313)
+	__VDLTypetypes135.AssignElem(__VDLTypetypes137)
+	__VDLTypetypes132.AppendField("LocalValue", __VDLTypetypes135)
+	__VDLTypetypes132.AppendField("RemoteValue", __VDLTypetypes135)
+	__VDLTypetypes132.AppendField("AncestorValue", __VDLTypetypes135)
+	__VDLTypetypes131.AssignElem(__VDLTypetypes133)
+	__VDLTypetypes13Builder.Build()
+	__VDLTypetypes13v, err := __VDLTypetypes131.Built()
+	if err != nil {
+		panic(err)
+	}
+	return __VDLTypetypes13v
+}
+func init() {
+	__VDLTypetypes13 = __VDLTypetypes13_gen()
+}
+
+var __VDLTypetypes15 *vdl.Type = vdl.TypeOf((*ScanOp)(nil))
+var __VDLTypetypes17 *vdl.Type = vdl.TypeOf((*SchemaMetadata)(nil))
+var __VDLTypetypes22 *vdl.Type = vdl.TypeOf((*StoreChange)(nil))
+var __VDLTypetypes8 *vdl.Type = vdl.TypeOf((*SyncgroupMemberInfo)(nil))
+var __VDLTypetypes5 *vdl.Type = vdl.TypeOf((*SyncgroupSpec)(nil))
+var __VDLTypetypes4 *vdl.Type = vdl.TypeOf((*TableRow)(nil))
+var __VDLTypetypes14 *vdl.Type
+
+func __VDLTypetypes14_gen() *vdl.Type {
+	__VDLTypetypes14Builder := vdl.TypeBuilder{}
+
+	__VDLTypetypes141 := __VDLTypetypes14Builder.Optional()
+	__VDLTypetypes142 := __VDLTypetypes14Builder.Struct()
+	__VDLTypetypes143 := __VDLTypetypes14Builder.Named("v.io/v23/services/syncbase/nosql.Value").AssignBase(__VDLTypetypes142)
+	__VDLTypetypes144 := __VDLTypetypes14Builder.Enum()
+	__VDLTypetypes145 := __VDLTypetypes14Builder.Named("v.io/v23/services/syncbase/nosql.ValueState").AssignBase(__VDLTypetypes144)
+	__VDLTypetypes144.AppendLabel("Exists")
+	__VDLTypetypes144.AppendLabel("NoExists")
+	__VDLTypetypes144.AppendLabel("Deleted")
+	__VDLTypetypes144.AppendLabel("Unknown")
+	__VDLTypetypes142.AppendField("State", __VDLTypetypes145)
+	__VDLTypetypes146 := __VDLTypetypes14Builder.List()
+	__VDLTypetypes147 := vdl.ByteType
+	__VDLTypetypes146.AssignElem(__VDLTypetypes147)
+	__VDLTypetypes142.AppendField("Bytes", __VDLTypetypes146)
+	__VDLTypetypes148 := __VDLTypetypes14Builder.Struct()
+	__VDLTypetypes149 := __VDLTypetypes14Builder.Named("time.Time").AssignBase(__VDLTypetypes148)
+	__VDLTypetypes1410 := vdl.Int64Type
+	__VDLTypetypes148.AppendField("Seconds", __VDLTypetypes1410)
+	__VDLTypetypes1411 := vdl.Int32Type
+	__VDLTypetypes148.AppendField("Nanos", __VDLTypetypes1411)
+	__VDLTypetypes142.AppendField("WriteTs", __VDLTypetypes149)
+	__VDLTypetypes141.AssignElem(__VDLTypetypes143)
+	__VDLTypetypes14Builder.Build()
+	__VDLTypetypes14v, err := __VDLTypetypes141.Built()
+	if err != nil {
+		panic(err)
+	}
+	return __VDLTypetypes14v
+}
+func init() {
+	__VDLTypetypes14 = __VDLTypetypes14_gen()
+}
+
+var __VDLTypetypes3 *vdl.Type = vdl.TypeOf([]byte(nil))
+var __VDLTypetypes7 *vdl.Type = vdl.TypeOf([]string(nil))
+var __VDLTypetypes12 *vdl.Type = vdl.TypeOf([]uint64(nil))
+var __VDLTypetypes19 *vdl.Type = vdl.TypeOf([]CrRule(nil))
+var __VDLTypetypes6 *vdl.Type = vdl.TypeOf([]TableRow(nil))
+var __VDLType_types_time_Time *vdl.Type
+
+func __VDLType_types_time_Time_gen() *vdl.Type {
+	__VDLType_types_time_TimeBuilder := vdl.TypeBuilder{}
+
+	__VDLType_types_time_Time1 := __VDLType_types_time_TimeBuilder.Struct()
+	__VDLType_types_time_Time2 := __VDLType_types_time_TimeBuilder.Named("time.Time").AssignBase(__VDLType_types_time_Time1)
+	__VDLType_types_time_Time3 := vdl.Int64Type
+	__VDLType_types_time_Time1.AppendField("Seconds", __VDLType_types_time_Time3)
+	__VDLType_types_time_Time4 := vdl.Int32Type
+	__VDLType_types_time_Time1.AppendField("Nanos", __VDLType_types_time_Time4)
+	__VDLType_types_time_TimeBuilder.Build()
+	__VDLType_types_time_Timev, err := __VDLType_types_time_Time2.Built()
+	if err != nil {
+		panic(err)
+	}
+	return __VDLType_types_time_Timev
+}
+func init() {
+	__VDLType_types_time_Time = __VDLType_types_time_Time_gen()
+}
+
+var __VDLType_types_v_io_v23_security_access_Permissions *vdl.Type = vdl.TypeOf(access.Permissions(nil))
+var __VDLType_types_v_io_v23_services_syncbase_nosql_BatchInfo *vdl.Type = vdl.TypeOf(BatchInfo{})
+var __VDLType_types_v_io_v23_services_syncbase_nosql_BatchOptions *vdl.Type = vdl.TypeOf(BatchOptions{})
+var __VDLType_types_v_io_v23_services_syncbase_nosql_BatchSource *vdl.Type = vdl.TypeOf(BatchSourceLocal)
+var __VDLType_types_v_io_v23_services_syncbase_nosql_BlobFetchState *vdl.Type = vdl.TypeOf(BlobFetchStatePending)
+var __VDLType_types_v_io_v23_services_syncbase_nosql_BlobFetchStatus *vdl.Type = vdl.TypeOf(BlobFetchStatus{})
+var __VDLType_types_v_io_v23_services_syncbase_nosql_BlobRef *vdl.Type = vdl.TypeOf(BlobRef(""))
+var __VDLType_types_v_io_v23_services_syncbase_nosql_ConflictData *vdl.Type
+
+func __VDLType_types_v_io_v23_services_syncbase_nosql_ConflictData_gen() *vdl.Type {
+	__VDLType_types_v_io_v23_services_syncbase_nosql_ConflictDataBuilder := vdl.TypeBuilder{}
+
+	__VDLType_types_v_io_v23_services_syncbase_nosql_ConflictData1 := __VDLType_types_v_io_v23_services_syncbase_nosql_ConflictDataBuilder.Union()
+	__VDLType_types_v_io_v23_services_syncbase_nosql_ConflictData2 := __VDLType_types_v_io_v23_services_syncbase_nosql_ConflictDataBuilder.Named("v.io/v23/services/syncbase/nosql.ConflictData").AssignBase(__VDLType_types_v_io_v23_services_syncbase_nosql_ConflictData1)
+	__VDLType_types_v_io_v23_services_syncbase_nosql_ConflictData3 := __VDLType_types_v_io_v23_services_syncbase_nosql_ConflictDataBuilder.Struct()
+	__VDLType_types_v_io_v23_services_syncbase_nosql_ConflictData4 := __VDLType_types_v_io_v23_services_syncbase_nosql_ConflictDataBuilder.Named("v.io/v23/services/syncbase/nosql.BatchInfo").AssignBase(__VDLType_types_v_io_v23_services_syncbase_nosql_ConflictData3)
+	__VDLType_types_v_io_v23_services_syncbase_nosql_ConflictData5 := vdl.Uint64Type
+	__VDLType_types_v_io_v23_services_syncbase_nosql_ConflictData3.AppendField("Id", __VDLType_types_v_io_v23_services_syncbase_nosql_ConflictData5)
+	__VDLType_types_v_io_v23_services_syncbase_nosql_ConflictData6 := vdl.StringType
+	__VDLType_types_v_io_v23_services_syncbase_nosql_ConflictData3.AppendField("Hint", __VDLType_types_v_io_v23_services_syncbase_nosql_ConflictData6)
+	__VDLType_types_v_io_v23_services_syncbase_nosql_ConflictData7 := __VDLType_types_v_io_v23_services_syncbase_nosql_ConflictDataBuilder.Enum()
+	__VDLType_types_v_io_v23_services_syncbase_nosql_ConflictData8 := __VDLType_types_v_io_v23_services_syncbase_nosql_ConflictDataBuilder.Named("v.io/v23/services/syncbase/nosql.BatchSource").AssignBase(__VDLType_types_v_io_v23_services_syncbase_nosql_ConflictData7)
+	__VDLType_types_v_io_v23_services_syncbase_nosql_ConflictData7.AppendLabel("Local")
+	__VDLType_types_v_io_v23_services_syncbase_nosql_ConflictData7.AppendLabel("Remote")
+	__VDLType_types_v_io_v23_services_syncbase_nosql_ConflictData3.AppendField("Source", __VDLType_types_v_io_v23_services_syncbase_nosql_ConflictData8)
+	__VDLType_types_v_io_v23_services_syncbase_nosql_ConflictData1.AppendField("Batch", __VDLType_types_v_io_v23_services_syncbase_nosql_ConflictData4)
+	__VDLType_types_v_io_v23_services_syncbase_nosql_ConflictData9 := __VDLType_types_v_io_v23_services_syncbase_nosql_ConflictDataBuilder.Struct()
+	__VDLType_types_v_io_v23_services_syncbase_nosql_ConflictData10 := __VDLType_types_v_io_v23_services_syncbase_nosql_ConflictDataBuilder.Named("v.io/v23/services/syncbase/nosql.RowInfo").AssignBase(__VDLType_types_v_io_v23_services_syncbase_nosql_ConflictData9)
+	__VDLType_types_v_io_v23_services_syncbase_nosql_ConflictData11 := __VDLType_types_v_io_v23_services_syncbase_nosql_ConflictDataBuilder.Union()
+	__VDLType_types_v_io_v23_services_syncbase_nosql_ConflictData12 := __VDLType_types_v_io_v23_services_syncbase_nosql_ConflictDataBuilder.Named("v.io/v23/services/syncbase/nosql.Operation").AssignBase(__VDLType_types_v_io_v23_services_syncbase_nosql_ConflictData11)
+	__VDLType_types_v_io_v23_services_syncbase_nosql_ConflictData13 := __VDLType_types_v_io_v23_services_syncbase_nosql_ConflictDataBuilder.Struct()
+	__VDLType_types_v_io_v23_services_syncbase_nosql_ConflictData14 := __VDLType_types_v_io_v23_services_syncbase_nosql_ConflictDataBuilder.Named("v.io/v23/services/syncbase/nosql.RowOp").AssignBase(__VDLType_types_v_io_v23_services_syncbase_nosql_ConflictData13)
+	__VDLType_types_v_io_v23_services_syncbase_nosql_ConflictData13.AppendField("Key", __VDLType_types_v_io_v23_services_syncbase_nosql_ConflictData6)
+	__VDLType_types_v_io_v23_services_syncbase_nosql_ConflictData15 := __VDLType_types_v_io_v23_services_syncbase_nosql_ConflictDataBuilder.Optional()
+	__VDLType_types_v_io_v23_services_syncbase_nosql_ConflictData16 := __VDLType_types_v_io_v23_services_syncbase_nosql_ConflictDataBuilder.Struct()
+	__VDLType_types_v_io_v23_services_syncbase_nosql_ConflictData17 := __VDLType_types_v_io_v23_services_syncbase_nosql_ConflictDataBuilder.Named("v.io/v23/services/syncbase/nosql.Value").AssignBase(__VDLType_types_v_io_v23_services_syncbase_nosql_ConflictData16)
+	__VDLType_types_v_io_v23_services_syncbase_nosql_ConflictData18 := __VDLType_types_v_io_v23_services_syncbase_nosql_ConflictDataBuilder.Enum()
+	__VDLType_types_v_io_v23_services_syncbase_nosql_ConflictData19 := __VDLType_types_v_io_v23_services_syncbase_nosql_ConflictDataBuilder.Named("v.io/v23/services/syncbase/nosql.ValueState").AssignBase(__VDLType_types_v_io_v23_services_syncbase_nosql_ConflictData18)
+	__VDLType_types_v_io_v23_services_syncbase_nosql_ConflictData18.AppendLabel("Exists")
+	__VDLType_types_v_io_v23_services_syncbase_nosql_ConflictData18.AppendLabel("NoExists")
+	__VDLType_types_v_io_v23_services_syncbase_nosql_ConflictData18.AppendLabel("Deleted")
+	__VDLType_types_v_io_v23_services_syncbase_nosql_ConflictData18.AppendLabel("Unknown")
+	__VDLType_types_v_io_v23_services_syncbase_nosql_ConflictData16.AppendField("State", __VDLType_types_v_io_v23_services_syncbase_nosql_ConflictData19)
+	__VDLType_types_v_io_v23_services_syncbase_nosql_ConflictData20 := __VDLType_types_v_io_v23_services_syncbase_nosql_ConflictDataBuilder.List()
+	__VDLType_types_v_io_v23_services_syncbase_nosql_ConflictData21 := vdl.ByteType
+	__VDLType_types_v_io_v23_services_syncbase_nosql_ConflictData20.AssignElem(__VDLType_types_v_io_v23_services_syncbase_nosql_ConflictData21)
+	__VDLType_types_v_io_v23_services_syncbase_nosql_ConflictData16.AppendField("Bytes", __VDLType_types_v_io_v23_services_syncbase_nosql_ConflictData20)
+	__VDLType_types_v_io_v23_services_syncbase_nosql_ConflictData22 := __VDLType_types_v_io_v23_services_syncbase_nosql_ConflictDataBuilder.Struct()
+	__VDLType_types_v_io_v23_services_syncbase_nosql_ConflictData23 := __VDLType_types_v_io_v23_services_syncbase_nosql_ConflictDataBuilder.Named("time.Time").AssignBase(__VDLType_types_v_io_v23_services_syncbase_nosql_ConflictData22)
+	__VDLType_types_v_io_v23_services_syncbase_nosql_ConflictData24 := vdl.Int64Type
+	__VDLType_types_v_io_v23_services_syncbase_nosql_ConflictData22.AppendField("Seconds", __VDLType_types_v_io_v23_services_syncbase_nosql_ConflictData24)
+	__VDLType_types_v_io_v23_services_syncbase_nosql_ConflictData25 := vdl.Int32Type
+	__VDLType_types_v_io_v23_services_syncbase_nosql_ConflictData22.AppendField("Nanos", __VDLType_types_v_io_v23_services_syncbase_nosql_ConflictData25)
+	__VDLType_types_v_io_v23_services_syncbase_nosql_ConflictData16.AppendField("WriteTs", __VDLType_types_v_io_v23_services_syncbase_nosql_ConflictData23)
+	__VDLType_types_v_io_v23_services_syncbase_nosql_ConflictData15.AssignElem(__VDLType_types_v_io_v23_services_syncbase_nosql_ConflictData17)
+	__VDLType_types_v_io_v23_services_syncbase_nosql_ConflictData13.AppendField("LocalValue", __VDLType_types_v_io_v23_services_syncbase_nosql_ConflictData15)
+	__VDLType_types_v_io_v23_services_syncbase_nosql_ConflictData13.AppendField("RemoteValue", __VDLType_types_v_io_v23_services_syncbase_nosql_ConflictData15)
+	__VDLType_types_v_io_v23_services_syncbase_nosql_ConflictData13.AppendField("AncestorValue", __VDLType_types_v_io_v23_services_syncbase_nosql_ConflictData15)
+	__VDLType_types_v_io_v23_services_syncbase_nosql_ConflictData11.AppendField("Read", __VDLType_types_v_io_v23_services_syncbase_nosql_ConflictData14)
+	__VDLType_types_v_io_v23_services_syncbase_nosql_ConflictData11.AppendField("Write", __VDLType_types_v_io_v23_services_syncbase_nosql_ConflictData14)
+	__VDLType_types_v_io_v23_services_syncbase_nosql_ConflictData26 := __VDLType_types_v_io_v23_services_syncbase_nosql_ConflictDataBuilder.Struct()
+	__VDLType_types_v_io_v23_services_syncbase_nosql_ConflictData27 := __VDLType_types_v_io_v23_services_syncbase_nosql_ConflictDataBuilder.Named("v.io/v23/services/syncbase/nosql.ScanOp").AssignBase(__VDLType_types_v_io_v23_services_syncbase_nosql_ConflictData26)
+	__VDLType_types_v_io_v23_services_syncbase_nosql_ConflictData26.AppendField("Start", __VDLType_types_v_io_v23_services_syncbase_nosql_ConflictData6)
+	__VDLType_types_v_io_v23_services_syncbase_nosql_ConflictData26.AppendField("Limit", __VDLType_types_v_io_v23_services_syncbase_nosql_ConflictData6)
+	__VDLType_types_v_io_v23_services_syncbase_nosql_ConflictData11.AppendField("Scan", __VDLType_types_v_io_v23_services_syncbase_nosql_ConflictData27)
+	__VDLType_types_v_io_v23_services_syncbase_nosql_ConflictData9.AppendField("Op", __VDLType_types_v_io_v23_services_syncbase_nosql_ConflictData12)
+	__VDLType_types_v_io_v23_services_syncbase_nosql_ConflictData28 := __VDLType_types_v_io_v23_services_syncbase_nosql_ConflictDataBuilder.List()
+	__VDLType_types_v_io_v23_services_syncbase_nosql_ConflictData28.AssignElem(__VDLType_types_v_io_v23_services_syncbase_nosql_ConflictData5)
+	__VDLType_types_v_io_v23_services_syncbase_nosql_ConflictData9.AppendField("BatchIds", __VDLType_types_v_io_v23_services_syncbase_nosql_ConflictData28)
+	__VDLType_types_v_io_v23_services_syncbase_nosql_ConflictData1.AppendField("Row", __VDLType_types_v_io_v23_services_syncbase_nosql_ConflictData10)
+	__VDLType_types_v_io_v23_services_syncbase_nosql_ConflictDataBuilder.Build()
+	__VDLType_types_v_io_v23_services_syncbase_nosql_ConflictDatav, err := __VDLType_types_v_io_v23_services_syncbase_nosql_ConflictData2.Built()
+	if err != nil {
+		panic(err)
+	}
+	return __VDLType_types_v_io_v23_services_syncbase_nosql_ConflictDatav
+}
+func init() {
+	__VDLType_types_v_io_v23_services_syncbase_nosql_ConflictData = __VDLType_types_v_io_v23_services_syncbase_nosql_ConflictData_gen()
+}
+
+var __VDLType_types_v_io_v23_services_syncbase_nosql_ConflictInfo *vdl.Type
+
+func __VDLType_types_v_io_v23_services_syncbase_nosql_ConflictInfo_gen() *vdl.Type {
+	__VDLType_types_v_io_v23_services_syncbase_nosql_ConflictInfoBuilder := vdl.TypeBuilder{}
+
+	__VDLType_types_v_io_v23_services_syncbase_nosql_ConflictInfo1 := __VDLType_types_v_io_v23_services_syncbase_nosql_ConflictInfoBuilder.Struct()
+	__VDLType_types_v_io_v23_services_syncbase_nosql_ConflictInfo2 := __VDLType_types_v_io_v23_services_syncbase_nosql_ConflictInfoBuilder.Named("v.io/v23/services/syncbase/nosql.ConflictInfo").AssignBase(__VDLType_types_v_io_v23_services_syncbase_nosql_ConflictInfo1)
+	__VDLType_types_v_io_v23_services_syncbase_nosql_ConflictInfo3 := __VDLType_types_v_io_v23_services_syncbase_nosql_ConflictInfoBuilder.Union()
+	__VDLType_types_v_io_v23_services_syncbase_nosql_ConflictInfo4 := __VDLType_types_v_io_v23_services_syncbase_nosql_ConflictInfoBuilder.Named("v.io/v23/services/syncbase/nosql.ConflictData").AssignBase(__VDLType_types_v_io_v23_services_syncbase_nosql_ConflictInfo3)
+	__VDLType_types_v_io_v23_services_syncbase_nosql_ConflictInfo5 := __VDLType_types_v_io_v23_services_syncbase_nosql_ConflictInfoBuilder.Struct()
+	__VDLType_types_v_io_v23_services_syncbase_nosql_ConflictInfo6 := __VDLType_types_v_io_v23_services_syncbase_nosql_ConflictInfoBuilder.Named("v.io/v23/services/syncbase/nosql.BatchInfo").AssignBase(__VDLType_types_v_io_v23_services_syncbase_nosql_ConflictInfo5)
+	__VDLType_types_v_io_v23_services_syncbase_nosql_ConflictInfo7 := vdl.Uint64Type
+	__VDLType_types_v_io_v23_services_syncbase_nosql_ConflictInfo5.AppendField("Id", __VDLType_types_v_io_v23_services_syncbase_nosql_ConflictInfo7)
+	__VDLType_types_v_io_v23_services_syncbase_nosql_ConflictInfo8 := vdl.StringType
+	__VDLType_types_v_io_v23_services_syncbase_nosql_ConflictInfo5.AppendField("Hint", __VDLType_types_v_io_v23_services_syncbase_nosql_ConflictInfo8)
+	__VDLType_types_v_io_v23_services_syncbase_nosql_ConflictInfo9 := __VDLType_types_v_io_v23_services_syncbase_nosql_ConflictInfoBuilder.Enum()
+	__VDLType_types_v_io_v23_services_syncbase_nosql_ConflictInfo10 := __VDLType_types_v_io_v23_services_syncbase_nosql_ConflictInfoBuilder.Named("v.io/v23/services/syncbase/nosql.BatchSource").AssignBase(__VDLType_types_v_io_v23_services_syncbase_nosql_ConflictInfo9)
+	__VDLType_types_v_io_v23_services_syncbase_nosql_ConflictInfo9.AppendLabel("Local")
+	__VDLType_types_v_io_v23_services_syncbase_nosql_ConflictInfo9.AppendLabel("Remote")
+	__VDLType_types_v_io_v23_services_syncbase_nosql_ConflictInfo5.AppendField("Source", __VDLType_types_v_io_v23_services_syncbase_nosql_ConflictInfo10)
+	__VDLType_types_v_io_v23_services_syncbase_nosql_ConflictInfo3.AppendField("Batch", __VDLType_types_v_io_v23_services_syncbase_nosql_ConflictInfo6)
+	__VDLType_types_v_io_v23_services_syncbase_nosql_ConflictInfo11 := __VDLType_types_v_io_v23_services_syncbase_nosql_ConflictInfoBuilder.Struct()
+	__VDLType_types_v_io_v23_services_syncbase_nosql_ConflictInfo12 := __VDLType_types_v_io_v23_services_syncbase_nosql_ConflictInfoBuilder.Named("v.io/v23/services/syncbase/nosql.RowInfo").AssignBase(__VDLType_types_v_io_v23_services_syncbase_nosql_ConflictInfo11)
+	__VDLType_types_v_io_v23_services_syncbase_nosql_ConflictInfo13 := __VDLType_types_v_io_v23_services_syncbase_nosql_ConflictInfoBuilder.Union()
+	__VDLType_types_v_io_v23_services_syncbase_nosql_ConflictInfo14 := __VDLType_types_v_io_v23_services_syncbase_nosql_ConflictInfoBuilder.Named("v.io/v23/services/syncbase/nosql.Operation").AssignBase(__VDLType_types_v_io_v23_services_syncbase_nosql_ConflictInfo13)
+	__VDLType_types_v_io_v23_services_syncbase_nosql_ConflictInfo15 := __VDLType_types_v_io_v23_services_syncbase_nosql_ConflictInfoBuilder.Struct()
+	__VDLType_types_v_io_v23_services_syncbase_nosql_ConflictInfo16 := __VDLType_types_v_io_v23_services_syncbase_nosql_ConflictInfoBuilder.Named("v.io/v23/services/syncbase/nosql.RowOp").AssignBase(__VDLType_types_v_io_v23_services_syncbase_nosql_ConflictInfo15)
+	__VDLType_types_v_io_v23_services_syncbase_nosql_ConflictInfo15.AppendField("Key", __VDLType_types_v_io_v23_services_syncbase_nosql_ConflictInfo8)
+	__VDLType_types_v_io_v23_services_syncbase_nosql_ConflictInfo17 := __VDLType_types_v_io_v23_services_syncbase_nosql_ConflictInfoBuilder.Optional()
+	__VDLType_types_v_io_v23_services_syncbase_nosql_ConflictInfo18 := __VDLType_types_v_io_v23_services_syncbase_nosql_ConflictInfoBuilder.Struct()
+	__VDLType_types_v_io_v23_services_syncbase_nosql_ConflictInfo19 := __VDLType_types_v_io_v23_services_syncbase_nosql_ConflictInfoBuilder.Named("v.io/v23/services/syncbase/nosql.Value").AssignBase(__VDLType_types_v_io_v23_services_syncbase_nosql_ConflictInfo18)
+	__VDLType_types_v_io_v23_services_syncbase_nosql_ConflictInfo20 := __VDLType_types_v_io_v23_services_syncbase_nosql_ConflictInfoBuilder.Enum()
+	__VDLType_types_v_io_v23_services_syncbase_nosql_ConflictInfo21 := __VDLType_types_v_io_v23_services_syncbase_nosql_ConflictInfoBuilder.Named("v.io/v23/services/syncbase/nosql.ValueState").AssignBase(__VDLType_types_v_io_v23_services_syncbase_nosql_ConflictInfo20)
+	__VDLType_types_v_io_v23_services_syncbase_nosql_ConflictInfo20.AppendLabel("Exists")
+	__VDLType_types_v_io_v23_services_syncbase_nosql_ConflictInfo20.AppendLabel("NoExists")
+	__VDLType_types_v_io_v23_services_syncbase_nosql_ConflictInfo20.AppendLabel("Deleted")
+	__VDLType_types_v_io_v23_services_syncbase_nosql_ConflictInfo20.AppendLabel("Unknown")
+	__VDLType_types_v_io_v23_services_syncbase_nosql_ConflictInfo18.AppendField("State", __VDLType_types_v_io_v23_services_syncbase_nosql_ConflictInfo21)
+	__VDLType_types_v_io_v23_services_syncbase_nosql_ConflictInfo22 := __VDLType_types_v_io_v23_services_syncbase_nosql_ConflictInfoBuilder.List()
+	__VDLType_types_v_io_v23_services_syncbase_nosql_ConflictInfo23 := vdl.ByteType
+	__VDLType_types_v_io_v23_services_syncbase_nosql_ConflictInfo22.AssignElem(__VDLType_types_v_io_v23_services_syncbase_nosql_ConflictInfo23)
+	__VDLType_types_v_io_v23_services_syncbase_nosql_ConflictInfo18.AppendField("Bytes", __VDLType_types_v_io_v23_services_syncbase_nosql_ConflictInfo22)
+	__VDLType_types_v_io_v23_services_syncbase_nosql_ConflictInfo24 := __VDLType_types_v_io_v23_services_syncbase_nosql_ConflictInfoBuilder.Struct()
+	__VDLType_types_v_io_v23_services_syncbase_nosql_ConflictInfo25 := __VDLType_types_v_io_v23_services_syncbase_nosql_ConflictInfoBuilder.Named("time.Time").AssignBase(__VDLType_types_v_io_v23_services_syncbase_nosql_ConflictInfo24)
+	__VDLType_types_v_io_v23_services_syncbase_nosql_ConflictInfo26 := vdl.Int64Type
+	__VDLType_types_v_io_v23_services_syncbase_nosql_ConflictInfo24.AppendField("Seconds", __VDLType_types_v_io_v23_services_syncbase_nosql_ConflictInfo26)
+	__VDLType_types_v_io_v23_services_syncbase_nosql_ConflictInfo27 := vdl.Int32Type
+	__VDLType_types_v_io_v23_services_syncbase_nosql_ConflictInfo24.AppendField("Nanos", __VDLType_types_v_io_v23_services_syncbase_nosql_ConflictInfo27)
+	__VDLType_types_v_io_v23_services_syncbase_nosql_ConflictInfo18.AppendField("WriteTs", __VDLType_types_v_io_v23_services_syncbase_nosql_ConflictInfo25)
+	__VDLType_types_v_io_v23_services_syncbase_nosql_ConflictInfo17.AssignElem(__VDLType_types_v_io_v23_services_syncbase_nosql_ConflictInfo19)
+	__VDLType_types_v_io_v23_services_syncbase_nosql_ConflictInfo15.AppendField("LocalValue", __VDLType_types_v_io_v23_services_syncbase_nosql_ConflictInfo17)
+	__VDLType_types_v_io_v23_services_syncbase_nosql_ConflictInfo15.AppendField("RemoteValue", __VDLType_types_v_io_v23_services_syncbase_nosql_ConflictInfo17)
+	__VDLType_types_v_io_v23_services_syncbase_nosql_ConflictInfo15.AppendField("AncestorValue", __VDLType_types_v_io_v23_services_syncbase_nosql_ConflictInfo17)
+	__VDLType_types_v_io_v23_services_syncbase_nosql_ConflictInfo13.AppendField("Read", __VDLType_types_v_io_v23_services_syncbase_nosql_ConflictInfo16)
+	__VDLType_types_v_io_v23_services_syncbase_nosql_ConflictInfo13.AppendField("Write", __VDLType_types_v_io_v23_services_syncbase_nosql_ConflictInfo16)
+	__VDLType_types_v_io_v23_services_syncbase_nosql_ConflictInfo28 := __VDLType_types_v_io_v23_services_syncbase_nosql_ConflictInfoBuilder.Struct()
+	__VDLType_types_v_io_v23_services_syncbase_nosql_ConflictInfo29 := __VDLType_types_v_io_v23_services_syncbase_nosql_ConflictInfoBuilder.Named("v.io/v23/services/syncbase/nosql.ScanOp").AssignBase(__VDLType_types_v_io_v23_services_syncbase_nosql_ConflictInfo28)
+	__VDLType_types_v_io_v23_services_syncbase_nosql_ConflictInfo28.AppendField("Start", __VDLType_types_v_io_v23_services_syncbase_nosql_ConflictInfo8)
+	__VDLType_types_v_io_v23_services_syncbase_nosql_ConflictInfo28.AppendField("Limit", __VDLType_types_v_io_v23_services_syncbase_nosql_ConflictInfo8)
+	__VDLType_types_v_io_v23_services_syncbase_nosql_ConflictInfo13.AppendField("Scan", __VDLType_types_v_io_v23_services_syncbase_nosql_ConflictInfo29)
+	__VDLType_types_v_io_v23_services_syncbase_nosql_ConflictInfo11.AppendField("Op", __VDLType_types_v_io_v23_services_syncbase_nosql_ConflictInfo14)
+	__VDLType_types_v_io_v23_services_syncbase_nosql_ConflictInfo30 := __VDLType_types_v_io_v23_services_syncbase_nosql_ConflictInfoBuilder.List()
+	__VDLType_types_v_io_v23_services_syncbase_nosql_ConflictInfo30.AssignElem(__VDLType_types_v_io_v23_services_syncbase_nosql_ConflictInfo7)
+	__VDLType_types_v_io_v23_services_syncbase_nosql_ConflictInfo11.AppendField("BatchIds", __VDLType_types_v_io_v23_services_syncbase_nosql_ConflictInfo30)
+	__VDLType_types_v_io_v23_services_syncbase_nosql_ConflictInfo3.AppendField("Row", __VDLType_types_v_io_v23_services_syncbase_nosql_ConflictInfo12)
+	__VDLType_types_v_io_v23_services_syncbase_nosql_ConflictInfo1.AppendField("Data", __VDLType_types_v_io_v23_services_syncbase_nosql_ConflictInfo4)
+	__VDLType_types_v_io_v23_services_syncbase_nosql_ConflictInfo31 := vdl.BoolType
+	__VDLType_types_v_io_v23_services_syncbase_nosql_ConflictInfo1.AppendField("Continued", __VDLType_types_v_io_v23_services_syncbase_nosql_ConflictInfo31)
+	__VDLType_types_v_io_v23_services_syncbase_nosql_ConflictInfoBuilder.Build()
+	__VDLType_types_v_io_v23_services_syncbase_nosql_ConflictInfov, err := __VDLType_types_v_io_v23_services_syncbase_nosql_ConflictInfo2.Built()
+	if err != nil {
+		panic(err)
+	}
+	return __VDLType_types_v_io_v23_services_syncbase_nosql_ConflictInfov
+}
+func init() {
+	__VDLType_types_v_io_v23_services_syncbase_nosql_ConflictInfo = __VDLType_types_v_io_v23_services_syncbase_nosql_ConflictInfo_gen()
+}
+
+var __VDLType_types_v_io_v23_services_syncbase_nosql_CrPolicy *vdl.Type = vdl.TypeOf(CrPolicy{})
+var __VDLType_types_v_io_v23_services_syncbase_nosql_CrRule *vdl.Type = vdl.TypeOf(CrRule{})
+var __VDLType_types_v_io_v23_services_syncbase_nosql_KeyValue *vdl.Type = vdl.TypeOf(KeyValue{})
+var __VDLType_types_v_io_v23_services_syncbase_nosql_Operation *vdl.Type
+
+func __VDLType_types_v_io_v23_services_syncbase_nosql_Operation_gen() *vdl.Type {
+	__VDLType_types_v_io_v23_services_syncbase_nosql_OperationBuilder := vdl.TypeBuilder{}
+
+	__VDLType_types_v_io_v23_services_syncbase_nosql_Operation1 := __VDLType_types_v_io_v23_services_syncbase_nosql_OperationBuilder.Union()
+	__VDLType_types_v_io_v23_services_syncbase_nosql_Operation2 := __VDLType_types_v_io_v23_services_syncbase_nosql_OperationBuilder.Named("v.io/v23/services/syncbase/nosql.Operation").AssignBase(__VDLType_types_v_io_v23_services_syncbase_nosql_Operation1)
+	__VDLType_types_v_io_v23_services_syncbase_nosql_Operation3 := __VDLType_types_v_io_v23_services_syncbase_nosql_OperationBuilder.Struct()
+	__VDLType_types_v_io_v23_services_syncbase_nosql_Operation4 := __VDLType_types_v_io_v23_services_syncbase_nosql_OperationBuilder.Named("v.io/v23/services/syncbase/nosql.RowOp").AssignBase(__VDLType_types_v_io_v23_services_syncbase_nosql_Operation3)
+	__VDLType_types_v_io_v23_services_syncbase_nosql_Operation5 := vdl.StringType
+	__VDLType_types_v_io_v23_services_syncbase_nosql_Operation3.AppendField("Key", __VDLType_types_v_io_v23_services_syncbase_nosql_Operation5)
+	__VDLType_types_v_io_v23_services_syncbase_nosql_Operation6 := __VDLType_types_v_io_v23_services_syncbase_nosql_OperationBuilder.Optional()
+	__VDLType_types_v_io_v23_services_syncbase_nosql_Operation7 := __VDLType_types_v_io_v23_services_syncbase_nosql_OperationBuilder.Struct()
+	__VDLType_types_v_io_v23_services_syncbase_nosql_Operation8 := __VDLType_types_v_io_v23_services_syncbase_nosql_OperationBuilder.Named("v.io/v23/services/syncbase/nosql.Value").AssignBase(__VDLType_types_v_io_v23_services_syncbase_nosql_Operation7)
+	__VDLType_types_v_io_v23_services_syncbase_nosql_Operation9 := __VDLType_types_v_io_v23_services_syncbase_nosql_OperationBuilder.Enum()
+	__VDLType_types_v_io_v23_services_syncbase_nosql_Operation10 := __VDLType_types_v_io_v23_services_syncbase_nosql_OperationBuilder.Named("v.io/v23/services/syncbase/nosql.ValueState").AssignBase(__VDLType_types_v_io_v23_services_syncbase_nosql_Operation9)
+	__VDLType_types_v_io_v23_services_syncbase_nosql_Operation9.AppendLabel("Exists")
+	__VDLType_types_v_io_v23_services_syncbase_nosql_Operation9.AppendLabel("NoExists")
+	__VDLType_types_v_io_v23_services_syncbase_nosql_Operation9.AppendLabel("Deleted")
+	__VDLType_types_v_io_v23_services_syncbase_nosql_Operation9.AppendLabel("Unknown")
+	__VDLType_types_v_io_v23_services_syncbase_nosql_Operation7.AppendField("State", __VDLType_types_v_io_v23_services_syncbase_nosql_Operation10)
+	__VDLType_types_v_io_v23_services_syncbase_nosql_Operation11 := __VDLType_types_v_io_v23_services_syncbase_nosql_OperationBuilder.List()
+	__VDLType_types_v_io_v23_services_syncbase_nosql_Operation12 := vdl.ByteType
+	__VDLType_types_v_io_v23_services_syncbase_nosql_Operation11.AssignElem(__VDLType_types_v_io_v23_services_syncbase_nosql_Operation12)
+	__VDLType_types_v_io_v23_services_syncbase_nosql_Operation7.AppendField("Bytes", __VDLType_types_v_io_v23_services_syncbase_nosql_Operation11)
+	__VDLType_types_v_io_v23_services_syncbase_nosql_Operation13 := __VDLType_types_v_io_v23_services_syncbase_nosql_OperationBuilder.Struct()
+	__VDLType_types_v_io_v23_services_syncbase_nosql_Operation14 := __VDLType_types_v_io_v23_services_syncbase_nosql_OperationBuilder.Named("time.Time").AssignBase(__VDLType_types_v_io_v23_services_syncbase_nosql_Operation13)
+	__VDLType_types_v_io_v23_services_syncbase_nosql_Operation15 := vdl.Int64Type
+	__VDLType_types_v_io_v23_services_syncbase_nosql_Operation13.AppendField("Seconds", __VDLType_types_v_io_v23_services_syncbase_nosql_Operation15)
+	__VDLType_types_v_io_v23_services_syncbase_nosql_Operation16 := vdl.Int32Type
+	__VDLType_types_v_io_v23_services_syncbase_nosql_Operation13.AppendField("Nanos", __VDLType_types_v_io_v23_services_syncbase_nosql_Operation16)
+	__VDLType_types_v_io_v23_services_syncbase_nosql_Operation7.AppendField("WriteTs", __VDLType_types_v_io_v23_services_syncbase_nosql_Operation14)
+	__VDLType_types_v_io_v23_services_syncbase_nosql_Operation6.AssignElem(__VDLType_types_v_io_v23_services_syncbase_nosql_Operation8)
+	__VDLType_types_v_io_v23_services_syncbase_nosql_Operation3.AppendField("LocalValue", __VDLType_types_v_io_v23_services_syncbase_nosql_Operation6)
+	__VDLType_types_v_io_v23_services_syncbase_nosql_Operation3.AppendField("RemoteValue", __VDLType_types_v_io_v23_services_syncbase_nosql_Operation6)
+	__VDLType_types_v_io_v23_services_syncbase_nosql_Operation3.AppendField("AncestorValue", __VDLType_types_v_io_v23_services_syncbase_nosql_Operation6)
+	__VDLType_types_v_io_v23_services_syncbase_nosql_Operation1.AppendField("Read", __VDLType_types_v_io_v23_services_syncbase_nosql_Operation4)
+	__VDLType_types_v_io_v23_services_syncbase_nosql_Operation1.AppendField("Write", __VDLType_types_v_io_v23_services_syncbase_nosql_Operation4)
+	__VDLType_types_v_io_v23_services_syncbase_nosql_Operation17 := __VDLType_types_v_io_v23_services_syncbase_nosql_OperationBuilder.Struct()
+	__VDLType_types_v_io_v23_services_syncbase_nosql_Operation18 := __VDLType_types_v_io_v23_services_syncbase_nosql_OperationBuilder.Named("v.io/v23/services/syncbase/nosql.ScanOp").AssignBase(__VDLType_types_v_io_v23_services_syncbase_nosql_Operation17)
+	__VDLType_types_v_io_v23_services_syncbase_nosql_Operation17.AppendField("Start", __VDLType_types_v_io_v23_services_syncbase_nosql_Operation5)
+	__VDLType_types_v_io_v23_services_syncbase_nosql_Operation17.AppendField("Limit", __VDLType_types_v_io_v23_services_syncbase_nosql_Operation5)
+	__VDLType_types_v_io_v23_services_syncbase_nosql_Operation1.AppendField("Scan", __VDLType_types_v_io_v23_services_syncbase_nosql_Operation18)
+	__VDLType_types_v_io_v23_services_syncbase_nosql_OperationBuilder.Build()
+	__VDLType_types_v_io_v23_services_syncbase_nosql_Operationv, err := __VDLType_types_v_io_v23_services_syncbase_nosql_Operation2.Built()
+	if err != nil {
+		panic(err)
+	}
+	return __VDLType_types_v_io_v23_services_syncbase_nosql_Operationv
+}
+func init() {
+	__VDLType_types_v_io_v23_services_syncbase_nosql_Operation = __VDLType_types_v_io_v23_services_syncbase_nosql_Operation_gen()
+}
+
+var __VDLType_types_v_io_v23_services_syncbase_nosql_PrefixPermissions *vdl.Type = vdl.TypeOf(PrefixPermissions{})
+var __VDLType_types_v_io_v23_services_syncbase_nosql_ResolutionInfo *vdl.Type
+
+func __VDLType_types_v_io_v23_services_syncbase_nosql_ResolutionInfo_gen() *vdl.Type {
+	__VDLType_types_v_io_v23_services_syncbase_nosql_ResolutionInfoBuilder := vdl.TypeBuilder{}
+
+	__VDLType_types_v_io_v23_services_syncbase_nosql_ResolutionInfo1 := __VDLType_types_v_io_v23_services_syncbase_nosql_ResolutionInfoBuilder.Struct()
+	__VDLType_types_v_io_v23_services_syncbase_nosql_ResolutionInfo2 := __VDLType_types_v_io_v23_services_syncbase_nosql_ResolutionInfoBuilder.Named("v.io/v23/services/syncbase/nosql.ResolutionInfo").AssignBase(__VDLType_types_v_io_v23_services_syncbase_nosql_ResolutionInfo1)
+	__VDLType_types_v_io_v23_services_syncbase_nosql_ResolutionInfo3 := vdl.StringType
+	__VDLType_types_v_io_v23_services_syncbase_nosql_ResolutionInfo1.AppendField("Key", __VDLType_types_v_io_v23_services_syncbase_nosql_ResolutionInfo3)
+	__VDLType_types_v_io_v23_services_syncbase_nosql_ResolutionInfo4 := __VDLType_types_v_io_v23_services_syncbase_nosql_ResolutionInfoBuilder.Enum()
+	__VDLType_types_v_io_v23_services_syncbase_nosql_ResolutionInfo5 := __VDLType_types_v_io_v23_services_syncbase_nosql_ResolutionInfoBuilder.Named("v.io/v23/services/syncbase/nosql.ValueSelection").AssignBase(__VDLType_types_v_io_v23_services_syncbase_nosql_ResolutionInfo4)
+	__VDLType_types_v_io_v23_services_syncbase_nosql_ResolutionInfo4.AppendLabel("Local")
+	__VDLType_types_v_io_v23_services_syncbase_nosql_ResolutionInfo4.AppendLabel("Remote")
+	__VDLType_types_v_io_v23_services_syncbase_nosql_ResolutionInfo4.AppendLabel("Other")
+	__VDLType_types_v_io_v23_services_syncbase_nosql_ResolutionInfo1.AppendField("Selection", __VDLType_types_v_io_v23_services_syncbase_nosql_ResolutionInfo5)
+	__VDLType_types_v_io_v23_services_syncbase_nosql_ResolutionInfo6 := __VDLType_types_v_io_v23_services_syncbase_nosql_ResolutionInfoBuilder.Optional()
+	__VDLType_types_v_io_v23_services_syncbase_nosql_ResolutionInfo7 := __VDLType_types_v_io_v23_services_syncbase_nosql_ResolutionInfoBuilder.Struct()
+	__VDLType_types_v_io_v23_services_syncbase_nosql_ResolutionInfo8 := __VDLType_types_v_io_v23_services_syncbase_nosql_ResolutionInfoBuilder.Named("v.io/v23/services/syncbase/nosql.Value").AssignBase(__VDLType_types_v_io_v23_services_syncbase_nosql_ResolutionInfo7)
+	__VDLType_types_v_io_v23_services_syncbase_nosql_ResolutionInfo9 := __VDLType_types_v_io_v23_services_syncbase_nosql_ResolutionInfoBuilder.Enum()
+	__VDLType_types_v_io_v23_services_syncbase_nosql_ResolutionInfo10 := __VDLType_types_v_io_v23_services_syncbase_nosql_ResolutionInfoBuilder.Named("v.io/v23/services/syncbase/nosql.ValueState").AssignBase(__VDLType_types_v_io_v23_services_syncbase_nosql_ResolutionInfo9)
+	__VDLType_types_v_io_v23_services_syncbase_nosql_ResolutionInfo9.AppendLabel("Exists")
+	__VDLType_types_v_io_v23_services_syncbase_nosql_ResolutionInfo9.AppendLabel("NoExists")
+	__VDLType_types_v_io_v23_services_syncbase_nosql_ResolutionInfo9.AppendLabel("Deleted")
+	__VDLType_types_v_io_v23_services_syncbase_nosql_ResolutionInfo9.AppendLabel("Unknown")
+	__VDLType_types_v_io_v23_services_syncbase_nosql_ResolutionInfo7.AppendField("State", __VDLType_types_v_io_v23_services_syncbase_nosql_ResolutionInfo10)
+	__VDLType_types_v_io_v23_services_syncbase_nosql_ResolutionInfo11 := __VDLType_types_v_io_v23_services_syncbase_nosql_ResolutionInfoBuilder.List()
+	__VDLType_types_v_io_v23_services_syncbase_nosql_ResolutionInfo12 := vdl.ByteType
+	__VDLType_types_v_io_v23_services_syncbase_nosql_ResolutionInfo11.AssignElem(__VDLType_types_v_io_v23_services_syncbase_nosql_ResolutionInfo12)
+	__VDLType_types_v_io_v23_services_syncbase_nosql_ResolutionInfo7.AppendField("Bytes", __VDLType_types_v_io_v23_services_syncbase_nosql_ResolutionInfo11)
+	__VDLType_types_v_io_v23_services_syncbase_nosql_ResolutionInfo13 := __VDLType_types_v_io_v23_services_syncbase_nosql_ResolutionInfoBuilder.Struct()
+	__VDLType_types_v_io_v23_services_syncbase_nosql_ResolutionInfo14 := __VDLType_types_v_io_v23_services_syncbase_nosql_ResolutionInfoBuilder.Named("time.Time").AssignBase(__VDLType_types_v_io_v23_services_syncbase_nosql_ResolutionInfo13)
+	__VDLType_types_v_io_v23_services_syncbase_nosql_ResolutionInfo15 := vdl.Int64Type
+	__VDLType_types_v_io_v23_services_syncbase_nosql_ResolutionInfo13.AppendField("Seconds", __VDLType_types_v_io_v23_services_syncbase_nosql_ResolutionInfo15)
+	__VDLType_types_v_io_v23_services_syncbase_nosql_ResolutionInfo16 := vdl.Int32Type
+	__VDLType_types_v_io_v23_services_syncbase_nosql_ResolutionInfo13.AppendField("Nanos", __VDLType_types_v_io_v23_services_syncbase_nosql_ResolutionInfo16)
+	__VDLType_types_v_io_v23_services_syncbase_nosql_ResolutionInfo7.AppendField("WriteTs", __VDLType_types_v_io_v23_services_syncbase_nosql_ResolutionInfo14)
+	__VDLType_types_v_io_v23_services_syncbase_nosql_ResolutionInfo6.AssignElem(__VDLType_types_v_io_v23_services_syncbase_nosql_ResolutionInfo8)
+	__VDLType_types_v_io_v23_services_syncbase_nosql_ResolutionInfo1.AppendField("Result", __VDLType_types_v_io_v23_services_syncbase_nosql_ResolutionInfo6)
+	__VDLType_types_v_io_v23_services_syncbase_nosql_ResolutionInfo17 := vdl.BoolType
+	__VDLType_types_v_io_v23_services_syncbase_nosql_ResolutionInfo1.AppendField("Continued", __VDLType_types_v_io_v23_services_syncbase_nosql_ResolutionInfo17)
+	__VDLType_types_v_io_v23_services_syncbase_nosql_ResolutionInfoBuilder.Build()
+	__VDLType_types_v_io_v23_services_syncbase_nosql_ResolutionInfov, err := __VDLType_types_v_io_v23_services_syncbase_nosql_ResolutionInfo2.Built()
+	if err != nil {
+		panic(err)
+	}
+	return __VDLType_types_v_io_v23_services_syncbase_nosql_ResolutionInfov
+}
+func init() {
+	__VDLType_types_v_io_v23_services_syncbase_nosql_ResolutionInfo = __VDLType_types_v_io_v23_services_syncbase_nosql_ResolutionInfo_gen()
+}
+
+var __VDLType_types_v_io_v23_services_syncbase_nosql_ResolverType *vdl.Type = vdl.TypeOf(ResolverTypeLastWins)
+var __VDLType_types_v_io_v23_services_syncbase_nosql_RowInfo *vdl.Type
+
+func __VDLType_types_v_io_v23_services_syncbase_nosql_RowInfo_gen() *vdl.Type {
+	__VDLType_types_v_io_v23_services_syncbase_nosql_RowInfoBuilder := vdl.TypeBuilder{}
+
+	__VDLType_types_v_io_v23_services_syncbase_nosql_RowInfo1 := __VDLType_types_v_io_v23_services_syncbase_nosql_RowInfoBuilder.Struct()
+	__VDLType_types_v_io_v23_services_syncbase_nosql_RowInfo2 := __VDLType_types_v_io_v23_services_syncbase_nosql_RowInfoBuilder.Named("v.io/v23/services/syncbase/nosql.RowInfo").AssignBase(__VDLType_types_v_io_v23_services_syncbase_nosql_RowInfo1)
+	__VDLType_types_v_io_v23_services_syncbase_nosql_RowInfo3 := __VDLType_types_v_io_v23_services_syncbase_nosql_RowInfoBuilder.Union()
+	__VDLType_types_v_io_v23_services_syncbase_nosql_RowInfo4 := __VDLType_types_v_io_v23_services_syncbase_nosql_RowInfoBuilder.Named("v.io/v23/services/syncbase/nosql.Operation").AssignBase(__VDLType_types_v_io_v23_services_syncbase_nosql_RowInfo3)
+	__VDLType_types_v_io_v23_services_syncbase_nosql_RowInfo5 := __VDLType_types_v_io_v23_services_syncbase_nosql_RowInfoBuilder.Struct()
+	__VDLType_types_v_io_v23_services_syncbase_nosql_RowInfo6 := __VDLType_types_v_io_v23_services_syncbase_nosql_RowInfoBuilder.Named("v.io/v23/services/syncbase/nosql.RowOp").AssignBase(__VDLType_types_v_io_v23_services_syncbase_nosql_RowInfo5)
+	__VDLType_types_v_io_v23_services_syncbase_nosql_RowInfo7 := vdl.StringType
+	__VDLType_types_v_io_v23_services_syncbase_nosql_RowInfo5.AppendField("Key", __VDLType_types_v_io_v23_services_syncbase_nosql_RowInfo7)
+	__VDLType_types_v_io_v23_services_syncbase_nosql_RowInfo8 := __VDLType_types_v_io_v23_services_syncbase_nosql_RowInfoBuilder.Optional()
+	__VDLType_types_v_io_v23_services_syncbase_nosql_RowInfo9 := __VDLType_types_v_io_v23_services_syncbase_nosql_RowInfoBuilder.Struct()
+	__VDLType_types_v_io_v23_services_syncbase_nosql_RowInfo10 := __VDLType_types_v_io_v23_services_syncbase_nosql_RowInfoBuilder.Named("v.io/v23/services/syncbase/nosql.Value").AssignBase(__VDLType_types_v_io_v23_services_syncbase_nosql_RowInfo9)
+	__VDLType_types_v_io_v23_services_syncbase_nosql_RowInfo11 := __VDLType_types_v_io_v23_services_syncbase_nosql_RowInfoBuilder.Enum()
+	__VDLType_types_v_io_v23_services_syncbase_nosql_RowInfo12 := __VDLType_types_v_io_v23_services_syncbase_nosql_RowInfoBuilder.Named("v.io/v23/services/syncbase/nosql.ValueState").AssignBase(__VDLType_types_v_io_v23_services_syncbase_nosql_RowInfo11)
+	__VDLType_types_v_io_v23_services_syncbase_nosql_RowInfo11.AppendLabel("Exists")
+	__VDLType_types_v_io_v23_services_syncbase_nosql_RowInfo11.AppendLabel("NoExists")
+	__VDLType_types_v_io_v23_services_syncbase_nosql_RowInfo11.AppendLabel("Deleted")
+	__VDLType_types_v_io_v23_services_syncbase_nosql_RowInfo11.AppendLabel("Unknown")
+	__VDLType_types_v_io_v23_services_syncbase_nosql_RowInfo9.AppendField("State", __VDLType_types_v_io_v23_services_syncbase_nosql_RowInfo12)
+	__VDLType_types_v_io_v23_services_syncbase_nosql_RowInfo13 := __VDLType_types_v_io_v23_services_syncbase_nosql_RowInfoBuilder.List()
+	__VDLType_types_v_io_v23_services_syncbase_nosql_RowInfo14 := vdl.ByteType
+	__VDLType_types_v_io_v23_services_syncbase_nosql_RowInfo13.AssignElem(__VDLType_types_v_io_v23_services_syncbase_nosql_RowInfo14)
+	__VDLType_types_v_io_v23_services_syncbase_nosql_RowInfo9.AppendField("Bytes", __VDLType_types_v_io_v23_services_syncbase_nosql_RowInfo13)
+	__VDLType_types_v_io_v23_services_syncbase_nosql_RowInfo15 := __VDLType_types_v_io_v23_services_syncbase_nosql_RowInfoBuilder.Struct()
+	__VDLType_types_v_io_v23_services_syncbase_nosql_RowInfo16 := __VDLType_types_v_io_v23_services_syncbase_nosql_RowInfoBuilder.Named("time.Time").AssignBase(__VDLType_types_v_io_v23_services_syncbase_nosql_RowInfo15)
+	__VDLType_types_v_io_v23_services_syncbase_nosql_RowInfo17 := vdl.Int64Type
+	__VDLType_types_v_io_v23_services_syncbase_nosql_RowInfo15.AppendField("Seconds", __VDLType_types_v_io_v23_services_syncbase_nosql_RowInfo17)
+	__VDLType_types_v_io_v23_services_syncbase_nosql_RowInfo18 := vdl.Int32Type
+	__VDLType_types_v_io_v23_services_syncbase_nosql_RowInfo15.AppendField("Nanos", __VDLType_types_v_io_v23_services_syncbase_nosql_RowInfo18)
+	__VDLType_types_v_io_v23_services_syncbase_nosql_RowInfo9.AppendField("WriteTs", __VDLType_types_v_io_v23_services_syncbase_nosql_RowInfo16)
+	__VDLType_types_v_io_v23_services_syncbase_nosql_RowInfo8.AssignElem(__VDLType_types_v_io_v23_services_syncbase_nosql_RowInfo10)
+	__VDLType_types_v_io_v23_services_syncbase_nosql_RowInfo5.AppendField("LocalValue", __VDLType_types_v_io_v23_services_syncbase_nosql_RowInfo8)
+	__VDLType_types_v_io_v23_services_syncbase_nosql_RowInfo5.AppendField("RemoteValue", __VDLType_types_v_io_v23_services_syncbase_nosql_RowInfo8)
+	__VDLType_types_v_io_v23_services_syncbase_nosql_RowInfo5.AppendField("AncestorValue", __VDLType_types_v_io_v23_services_syncbase_nosql_RowInfo8)
+	__VDLType_types_v_io_v23_services_syncbase_nosql_RowInfo3.AppendField("Read", __VDLType_types_v_io_v23_services_syncbase_nosql_RowInfo6)
+	__VDLType_types_v_io_v23_services_syncbase_nosql_RowInfo3.AppendField("Write", __VDLType_types_v_io_v23_services_syncbase_nosql_RowInfo6)
+	__VDLType_types_v_io_v23_services_syncbase_nosql_RowInfo19 := __VDLType_types_v_io_v23_services_syncbase_nosql_RowInfoBuilder.Struct()
+	__VDLType_types_v_io_v23_services_syncbase_nosql_RowInfo20 := __VDLType_types_v_io_v23_services_syncbase_nosql_RowInfoBuilder.Named("v.io/v23/services/syncbase/nosql.ScanOp").AssignBase(__VDLType_types_v_io_v23_services_syncbase_nosql_RowInfo19)
+	__VDLType_types_v_io_v23_services_syncbase_nosql_RowInfo19.AppendField("Start", __VDLType_types_v_io_v23_services_syncbase_nosql_RowInfo7)
+	__VDLType_types_v_io_v23_services_syncbase_nosql_RowInfo19.AppendField("Limit", __VDLType_types_v_io_v23_services_syncbase_nosql_RowInfo7)
+	__VDLType_types_v_io_v23_services_syncbase_nosql_RowInfo3.AppendField("Scan", __VDLType_types_v_io_v23_services_syncbase_nosql_RowInfo20)
+	__VDLType_types_v_io_v23_services_syncbase_nosql_RowInfo1.AppendField("Op", __VDLType_types_v_io_v23_services_syncbase_nosql_RowInfo4)
+	__VDLType_types_v_io_v23_services_syncbase_nosql_RowInfo21 := __VDLType_types_v_io_v23_services_syncbase_nosql_RowInfoBuilder.List()
+	__VDLType_types_v_io_v23_services_syncbase_nosql_RowInfo22 := vdl.Uint64Type
+	__VDLType_types_v_io_v23_services_syncbase_nosql_RowInfo21.AssignElem(__VDLType_types_v_io_v23_services_syncbase_nosql_RowInfo22)
+	__VDLType_types_v_io_v23_services_syncbase_nosql_RowInfo1.AppendField("BatchIds", __VDLType_types_v_io_v23_services_syncbase_nosql_RowInfo21)
+	__VDLType_types_v_io_v23_services_syncbase_nosql_RowInfoBuilder.Build()
+	__VDLType_types_v_io_v23_services_syncbase_nosql_RowInfov, err := __VDLType_types_v_io_v23_services_syncbase_nosql_RowInfo2.Built()
+	if err != nil {
+		panic(err)
+	}
+	return __VDLType_types_v_io_v23_services_syncbase_nosql_RowInfov
+}
+func init() {
+	__VDLType_types_v_io_v23_services_syncbase_nosql_RowInfo = __VDLType_types_v_io_v23_services_syncbase_nosql_RowInfo_gen()
+}
+
+var __VDLType_types_v_io_v23_services_syncbase_nosql_RowOp *vdl.Type
+
+func __VDLType_types_v_io_v23_services_syncbase_nosql_RowOp_gen() *vdl.Type {
+	__VDLType_types_v_io_v23_services_syncbase_nosql_RowOpBuilder := vdl.TypeBuilder{}
+
+	__VDLType_types_v_io_v23_services_syncbase_nosql_RowOp1 := __VDLType_types_v_io_v23_services_syncbase_nosql_RowOpBuilder.Struct()
+	__VDLType_types_v_io_v23_services_syncbase_nosql_RowOp2 := __VDLType_types_v_io_v23_services_syncbase_nosql_RowOpBuilder.Named("v.io/v23/services/syncbase/nosql.RowOp").AssignBase(__VDLType_types_v_io_v23_services_syncbase_nosql_RowOp1)
+	__VDLType_types_v_io_v23_services_syncbase_nosql_RowOp3 := vdl.StringType
+	__VDLType_types_v_io_v23_services_syncbase_nosql_RowOp1.AppendField("Key", __VDLType_types_v_io_v23_services_syncbase_nosql_RowOp3)
+	__VDLType_types_v_io_v23_services_syncbase_nosql_RowOp4 := __VDLType_types_v_io_v23_services_syncbase_nosql_RowOpBuilder.Optional()
+	__VDLType_types_v_io_v23_services_syncbase_nosql_RowOp5 := __VDLType_types_v_io_v23_services_syncbase_nosql_RowOpBuilder.Struct()
+	__VDLType_types_v_io_v23_services_syncbase_nosql_RowOp6 := __VDLType_types_v_io_v23_services_syncbase_nosql_RowOpBuilder.Named("v.io/v23/services/syncbase/nosql.Value").AssignBase(__VDLType_types_v_io_v23_services_syncbase_nosql_RowOp5)
+	__VDLType_types_v_io_v23_services_syncbase_nosql_RowOp7 := __VDLType_types_v_io_v23_services_syncbase_nosql_RowOpBuilder.Enum()
+	__VDLType_types_v_io_v23_services_syncbase_nosql_RowOp8 := __VDLType_types_v_io_v23_services_syncbase_nosql_RowOpBuilder.Named("v.io/v23/services/syncbase/nosql.ValueState").AssignBase(__VDLType_types_v_io_v23_services_syncbase_nosql_RowOp7)
+	__VDLType_types_v_io_v23_services_syncbase_nosql_RowOp7.AppendLabel("Exists")
+	__VDLType_types_v_io_v23_services_syncbase_nosql_RowOp7.AppendLabel("NoExists")
+	__VDLType_types_v_io_v23_services_syncbase_nosql_RowOp7.AppendLabel("Deleted")
+	__VDLType_types_v_io_v23_services_syncbase_nosql_RowOp7.AppendLabel("Unknown")
+	__VDLType_types_v_io_v23_services_syncbase_nosql_RowOp5.AppendField("State", __VDLType_types_v_io_v23_services_syncbase_nosql_RowOp8)
+	__VDLType_types_v_io_v23_services_syncbase_nosql_RowOp9 := __VDLType_types_v_io_v23_services_syncbase_nosql_RowOpBuilder.List()
+	__VDLType_types_v_io_v23_services_syncbase_nosql_RowOp10 := vdl.ByteType
+	__VDLType_types_v_io_v23_services_syncbase_nosql_RowOp9.AssignElem(__VDLType_types_v_io_v23_services_syncbase_nosql_RowOp10)
+	__VDLType_types_v_io_v23_services_syncbase_nosql_RowOp5.AppendField("Bytes", __VDLType_types_v_io_v23_services_syncbase_nosql_RowOp9)
+	__VDLType_types_v_io_v23_services_syncbase_nosql_RowOp11 := __VDLType_types_v_io_v23_services_syncbase_nosql_RowOpBuilder.Struct()
+	__VDLType_types_v_io_v23_services_syncbase_nosql_RowOp12 := __VDLType_types_v_io_v23_services_syncbase_nosql_RowOpBuilder.Named("time.Time").AssignBase(__VDLType_types_v_io_v23_services_syncbase_nosql_RowOp11)
+	__VDLType_types_v_io_v23_services_syncbase_nosql_RowOp13 := vdl.Int64Type
+	__VDLType_types_v_io_v23_services_syncbase_nosql_RowOp11.AppendField("Seconds", __VDLType_types_v_io_v23_services_syncbase_nosql_RowOp13)
+	__VDLType_types_v_io_v23_services_syncbase_nosql_RowOp14 := vdl.Int32Type
+	__VDLType_types_v_io_v23_services_syncbase_nosql_RowOp11.AppendField("Nanos", __VDLType_types_v_io_v23_services_syncbase_nosql_RowOp14)
+	__VDLType_types_v_io_v23_services_syncbase_nosql_RowOp5.AppendField("WriteTs", __VDLType_types_v_io_v23_services_syncbase_nosql_RowOp12)
+	__VDLType_types_v_io_v23_services_syncbase_nosql_RowOp4.AssignElem(__VDLType_types_v_io_v23_services_syncbase_nosql_RowOp6)
+	__VDLType_types_v_io_v23_services_syncbase_nosql_RowOp1.AppendField("LocalValue", __VDLType_types_v_io_v23_services_syncbase_nosql_RowOp4)
+	__VDLType_types_v_io_v23_services_syncbase_nosql_RowOp1.AppendField("RemoteValue", __VDLType_types_v_io_v23_services_syncbase_nosql_RowOp4)
+	__VDLType_types_v_io_v23_services_syncbase_nosql_RowOp1.AppendField("AncestorValue", __VDLType_types_v_io_v23_services_syncbase_nosql_RowOp4)
+	__VDLType_types_v_io_v23_services_syncbase_nosql_RowOpBuilder.Build()
+	__VDLType_types_v_io_v23_services_syncbase_nosql_RowOpv, err := __VDLType_types_v_io_v23_services_syncbase_nosql_RowOp2.Built()
+	if err != nil {
+		panic(err)
+	}
+	return __VDLType_types_v_io_v23_services_syncbase_nosql_RowOpv
+}
+func init() {
+	__VDLType_types_v_io_v23_services_syncbase_nosql_RowOp = __VDLType_types_v_io_v23_services_syncbase_nosql_RowOp_gen()
+}
+
+var __VDLType_types_v_io_v23_services_syncbase_nosql_ScanOp *vdl.Type = vdl.TypeOf(ScanOp{})
+var __VDLType_types_v_io_v23_services_syncbase_nosql_SchemaMetadata *vdl.Type = vdl.TypeOf(SchemaMetadata{})
+var __VDLType_types_v_io_v23_services_syncbase_nosql_StoreChange *vdl.Type = vdl.TypeOf(StoreChange{})
+var __VDLType_types_v_io_v23_services_syncbase_nosql_SyncgroupMemberInfo *vdl.Type = vdl.TypeOf(SyncgroupMemberInfo{})
+var __VDLType_types_v_io_v23_services_syncbase_nosql_SyncgroupSpec *vdl.Type = vdl.TypeOf(SyncgroupSpec{})
+var __VDLType_types_v_io_v23_services_syncbase_nosql_TableRow *vdl.Type = vdl.TypeOf(TableRow{})
+var __VDLType_types_v_io_v23_services_syncbase_nosql_Value *vdl.Type
+
+func __VDLType_types_v_io_v23_services_syncbase_nosql_Value_gen() *vdl.Type {
+	__VDLType_types_v_io_v23_services_syncbase_nosql_ValueBuilder := vdl.TypeBuilder{}
+
+	__VDLType_types_v_io_v23_services_syncbase_nosql_Value1 := __VDLType_types_v_io_v23_services_syncbase_nosql_ValueBuilder.Struct()
+	__VDLType_types_v_io_v23_services_syncbase_nosql_Value2 := __VDLType_types_v_io_v23_services_syncbase_nosql_ValueBuilder.Named("v.io/v23/services/syncbase/nosql.Value").AssignBase(__VDLType_types_v_io_v23_services_syncbase_nosql_Value1)
+	__VDLType_types_v_io_v23_services_syncbase_nosql_Value3 := __VDLType_types_v_io_v23_services_syncbase_nosql_ValueBuilder.Enum()
+	__VDLType_types_v_io_v23_services_syncbase_nosql_Value4 := __VDLType_types_v_io_v23_services_syncbase_nosql_ValueBuilder.Named("v.io/v23/services/syncbase/nosql.ValueState").AssignBase(__VDLType_types_v_io_v23_services_syncbase_nosql_Value3)
+	__VDLType_types_v_io_v23_services_syncbase_nosql_Value3.AppendLabel("Exists")
+	__VDLType_types_v_io_v23_services_syncbase_nosql_Value3.AppendLabel("NoExists")
+	__VDLType_types_v_io_v23_services_syncbase_nosql_Value3.AppendLabel("Deleted")
+	__VDLType_types_v_io_v23_services_syncbase_nosql_Value3.AppendLabel("Unknown")
+	__VDLType_types_v_io_v23_services_syncbase_nosql_Value1.AppendField("State", __VDLType_types_v_io_v23_services_syncbase_nosql_Value4)
+	__VDLType_types_v_io_v23_services_syncbase_nosql_Value5 := __VDLType_types_v_io_v23_services_syncbase_nosql_ValueBuilder.List()
+	__VDLType_types_v_io_v23_services_syncbase_nosql_Value6 := vdl.ByteType
+	__VDLType_types_v_io_v23_services_syncbase_nosql_Value5.AssignElem(__VDLType_types_v_io_v23_services_syncbase_nosql_Value6)
+	__VDLType_types_v_io_v23_services_syncbase_nosql_Value1.AppendField("Bytes", __VDLType_types_v_io_v23_services_syncbase_nosql_Value5)
+	__VDLType_types_v_io_v23_services_syncbase_nosql_Value7 := __VDLType_types_v_io_v23_services_syncbase_nosql_ValueBuilder.Struct()
+	__VDLType_types_v_io_v23_services_syncbase_nosql_Value8 := __VDLType_types_v_io_v23_services_syncbase_nosql_ValueBuilder.Named("time.Time").AssignBase(__VDLType_types_v_io_v23_services_syncbase_nosql_Value7)
+	__VDLType_types_v_io_v23_services_syncbase_nosql_Value9 := vdl.Int64Type
+	__VDLType_types_v_io_v23_services_syncbase_nosql_Value7.AppendField("Seconds", __VDLType_types_v_io_v23_services_syncbase_nosql_Value9)
+	__VDLType_types_v_io_v23_services_syncbase_nosql_Value10 := vdl.Int32Type
+	__VDLType_types_v_io_v23_services_syncbase_nosql_Value7.AppendField("Nanos", __VDLType_types_v_io_v23_services_syncbase_nosql_Value10)
+	__VDLType_types_v_io_v23_services_syncbase_nosql_Value1.AppendField("WriteTs", __VDLType_types_v_io_v23_services_syncbase_nosql_Value8)
+	__VDLType_types_v_io_v23_services_syncbase_nosql_ValueBuilder.Build()
+	__VDLType_types_v_io_v23_services_syncbase_nosql_Valuev, err := __VDLType_types_v_io_v23_services_syncbase_nosql_Value2.Built()
+	if err != nil {
+		panic(err)
+	}
+	return __VDLType_types_v_io_v23_services_syncbase_nosql_Valuev
+}
+func init() {
+	__VDLType_types_v_io_v23_services_syncbase_nosql_Value = __VDLType_types_v_io_v23_services_syncbase_nosql_Value_gen()
+}
+
+var __VDLType_types_v_io_v23_services_syncbase_nosql_ValueSelection *vdl.Type = vdl.TypeOf(ValueSelectionLocal)
+var __VDLType_types_v_io_v23_services_syncbase_nosql_ValueState *vdl.Type = vdl.TypeOf(ValueStateExists)
+
+func __VDLEnsureNativeBuilt_types() {
+	if __VDLTypetypes9 == nil {
+		__VDLTypetypes9 = __VDLTypetypes9_gen()
+	}
+	if __VDLTypetypes16 == nil {
+		__VDLTypetypes16 = __VDLTypetypes16_gen()
+	}
+	if __VDLTypetypes11 == nil {
+		__VDLTypetypes11 = __VDLTypetypes11_gen()
+	}
+	if __VDLTypetypes13 == nil {
+		__VDLTypetypes13 = __VDLTypetypes13_gen()
+	}
+	if __VDLTypetypes14 == nil {
+		__VDLTypetypes14 = __VDLTypetypes14_gen()
+	}
+	if __VDLType_types_time_Time == nil {
+		__VDLType_types_time_Time = __VDLType_types_time_Time_gen()
+	}
+	if __VDLType_types_v_io_v23_services_syncbase_nosql_ConflictData == nil {
+		__VDLType_types_v_io_v23_services_syncbase_nosql_ConflictData = __VDLType_types_v_io_v23_services_syncbase_nosql_ConflictData_gen()
+	}
+	if __VDLType_types_v_io_v23_services_syncbase_nosql_ConflictInfo == nil {
+		__VDLType_types_v_io_v23_services_syncbase_nosql_ConflictInfo = __VDLType_types_v_io_v23_services_syncbase_nosql_ConflictInfo_gen()
+	}
+	if __VDLType_types_v_io_v23_services_syncbase_nosql_Operation == nil {
+		__VDLType_types_v_io_v23_services_syncbase_nosql_Operation = __VDLType_types_v_io_v23_services_syncbase_nosql_Operation_gen()
+	}
+	if __VDLType_types_v_io_v23_services_syncbase_nosql_ResolutionInfo == nil {
+		__VDLType_types_v_io_v23_services_syncbase_nosql_ResolutionInfo = __VDLType_types_v_io_v23_services_syncbase_nosql_ResolutionInfo_gen()
+	}
+	if __VDLType_types_v_io_v23_services_syncbase_nosql_RowInfo == nil {
+		__VDLType_types_v_io_v23_services_syncbase_nosql_RowInfo = __VDLType_types_v_io_v23_services_syncbase_nosql_RowInfo_gen()
+	}
+	if __VDLType_types_v_io_v23_services_syncbase_nosql_RowOp == nil {
+		__VDLType_types_v_io_v23_services_syncbase_nosql_RowOp = __VDLType_types_v_io_v23_services_syncbase_nosql_RowOp_gen()
+	}
+	if __VDLType_types_v_io_v23_services_syncbase_nosql_Value == nil {
+		__VDLType_types_v_io_v23_services_syncbase_nosql_Value = __VDLType_types_v_io_v23_services_syncbase_nosql_Value_gen()
+	}
 }
 
 const NullBlobRef = BlobRef("")

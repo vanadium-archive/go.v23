@@ -14,6 +14,9 @@ import (
 	"v.io/v23/verror"
 )
 
+func __VDLEnsureNativeBuilt_errors() {
+}
+
 var (
 	ErrNoCompatibleVersion = verror.Register("v.io/v23/rpc/version.NoCompatibleVersion", verror.NoRetry, "{1:}{2:} There were no compatible versions between ({3},{4}) and ({5},{6}).")
 )

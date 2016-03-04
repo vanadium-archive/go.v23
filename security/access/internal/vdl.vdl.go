@@ -26,8 +26,30 @@ func (MyTag) __VDLReflect(struct {
 }) {
 }
 
+func (m MyTag) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
+	if err := t.FromString(string(m), __VDLType_vdl_v_io_v23_security_access_internal_MyTag); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (m MyTag) MakeVDLTarget() vdl.Target {
+	return nil
+}
+
+func (m MyTag) IsZero() bool {
+
+	var1 := (m == MyTag(""))
+	return var1
+}
+
 func init() {
 	vdl.Register((*MyTag)(nil))
+}
+
+var __VDLType_vdl_v_io_v23_security_access_internal_MyTag *vdl.Type = vdl.TypeOf(MyTag(""))
+
+func __VDLEnsureNativeBuilt_vdl() {
 }
 
 // For this example/unittest, there are three possible values of MyTag, each

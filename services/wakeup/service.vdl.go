@@ -16,6 +16,9 @@ import (
 	"v.io/v23/rpc"
 )
 
+func __VDLEnsureNativeBuilt_service() {
+}
+
 // WakeUpClientMethods is the client interface
 // containing WakeUp methods.
 //

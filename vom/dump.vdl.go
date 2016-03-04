@@ -27,6 +27,8 @@ type (
 		Name() string
 		// __VDLReflect describes the Primitive union type.
 		__VDLReflect(__PrimitiveReflect)
+		FillVDLTarget(vdl.Target, *vdl.Type) error
+		IsZero() bool
 	}
 	// PrimitivePBool represents field PBool of the Primitive union type.
 	PrimitivePBool struct{ Value bool }
@@ -63,35 +65,267 @@ func (x PrimitivePBool) Interface() interface{}          { return x.Value }
 func (x PrimitivePBool) Name() string                    { return "PBool" }
 func (x PrimitivePBool) __VDLReflect(__PrimitiveReflect) {}
 
+func (m PrimitivePBool) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
+
+	fieldsTarget1, err := t.StartFields(__VDLType_dump_v_io_v23_vom_Primitive)
+	if err != nil {
+		return err
+	}
+	keyTarget2, fieldTarget3, err := fieldsTarget1.StartField("PBool")
+	if err != nil {
+		return err
+	}
+	if err := fieldTarget3.FromBool(bool(m.Value), vdl.BoolType); err != nil {
+		return err
+	}
+	if err := fieldsTarget1.FinishField(keyTarget2, fieldTarget3); err != nil {
+		return err
+	}
+	if err := t.FinishFields(fieldsTarget1); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (m PrimitivePBool) MakeVDLTarget() vdl.Target {
+	return nil
+}
+
+func (m PrimitivePBool) IsZero() bool {
+
+	var2 := (m.Value == false)
+	return var2
+}
+
 func (x PrimitivePByte) Index() int                      { return 1 }
 func (x PrimitivePByte) Interface() interface{}          { return x.Value }
 func (x PrimitivePByte) Name() string                    { return "PByte" }
 func (x PrimitivePByte) __VDLReflect(__PrimitiveReflect) {}
+
+func (m PrimitivePByte) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
+
+	fieldsTarget1, err := t.StartFields(__VDLType_dump_v_io_v23_vom_Primitive)
+	if err != nil {
+		return err
+	}
+	keyTarget2, fieldTarget3, err := fieldsTarget1.StartField("PByte")
+	if err != nil {
+		return err
+	}
+	if err := fieldTarget3.FromUint(uint64(m.Value), vdl.ByteType); err != nil {
+		return err
+	}
+	if err := fieldsTarget1.FinishField(keyTarget2, fieldTarget3); err != nil {
+		return err
+	}
+	if err := t.FinishFields(fieldsTarget1); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (m PrimitivePByte) MakeVDLTarget() vdl.Target {
+	return nil
+}
+
+func (m PrimitivePByte) IsZero() bool {
+
+	unionField2 := false
+	return unionField2
+}
 
 func (x PrimitivePUint) Index() int                      { return 2 }
 func (x PrimitivePUint) Interface() interface{}          { return x.Value }
 func (x PrimitivePUint) Name() string                    { return "PUint" }
 func (x PrimitivePUint) __VDLReflect(__PrimitiveReflect) {}
 
+func (m PrimitivePUint) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
+
+	fieldsTarget1, err := t.StartFields(__VDLType_dump_v_io_v23_vom_Primitive)
+	if err != nil {
+		return err
+	}
+	keyTarget2, fieldTarget3, err := fieldsTarget1.StartField("PUint")
+	if err != nil {
+		return err
+	}
+	if err := fieldTarget3.FromUint(uint64(m.Value), vdl.Uint64Type); err != nil {
+		return err
+	}
+	if err := fieldsTarget1.FinishField(keyTarget2, fieldTarget3); err != nil {
+		return err
+	}
+	if err := t.FinishFields(fieldsTarget1); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (m PrimitivePUint) MakeVDLTarget() vdl.Target {
+	return nil
+}
+
+func (m PrimitivePUint) IsZero() bool {
+
+	unionField2 := false
+	return unionField2
+}
+
 func (x PrimitivePInt) Index() int                      { return 3 }
 func (x PrimitivePInt) Interface() interface{}          { return x.Value }
 func (x PrimitivePInt) Name() string                    { return "PInt" }
 func (x PrimitivePInt) __VDLReflect(__PrimitiveReflect) {}
+
+func (m PrimitivePInt) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
+
+	fieldsTarget1, err := t.StartFields(__VDLType_dump_v_io_v23_vom_Primitive)
+	if err != nil {
+		return err
+	}
+	keyTarget2, fieldTarget3, err := fieldsTarget1.StartField("PInt")
+	if err != nil {
+		return err
+	}
+	if err := fieldTarget3.FromInt(int64(m.Value), vdl.Int64Type); err != nil {
+		return err
+	}
+	if err := fieldsTarget1.FinishField(keyTarget2, fieldTarget3); err != nil {
+		return err
+	}
+	if err := t.FinishFields(fieldsTarget1); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (m PrimitivePInt) MakeVDLTarget() vdl.Target {
+	return nil
+}
+
+func (m PrimitivePInt) IsZero() bool {
+
+	unionField2 := false
+	return unionField2
+}
 
 func (x PrimitivePFloat) Index() int                      { return 4 }
 func (x PrimitivePFloat) Interface() interface{}          { return x.Value }
 func (x PrimitivePFloat) Name() string                    { return "PFloat" }
 func (x PrimitivePFloat) __VDLReflect(__PrimitiveReflect) {}
 
+func (m PrimitivePFloat) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
+
+	fieldsTarget1, err := t.StartFields(__VDLType_dump_v_io_v23_vom_Primitive)
+	if err != nil {
+		return err
+	}
+	keyTarget2, fieldTarget3, err := fieldsTarget1.StartField("PFloat")
+	if err != nil {
+		return err
+	}
+	if err := fieldTarget3.FromFloat(float64(m.Value), vdl.Float64Type); err != nil {
+		return err
+	}
+	if err := fieldsTarget1.FinishField(keyTarget2, fieldTarget3); err != nil {
+		return err
+	}
+	if err := t.FinishFields(fieldsTarget1); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (m PrimitivePFloat) MakeVDLTarget() vdl.Target {
+	return nil
+}
+
+func (m PrimitivePFloat) IsZero() bool {
+
+	unionField2 := false
+	return unionField2
+}
+
 func (x PrimitivePString) Index() int                      { return 5 }
 func (x PrimitivePString) Interface() interface{}          { return x.Value }
 func (x PrimitivePString) Name() string                    { return "PString" }
 func (x PrimitivePString) __VDLReflect(__PrimitiveReflect) {}
 
+func (m PrimitivePString) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
+
+	fieldsTarget1, err := t.StartFields(__VDLType_dump_v_io_v23_vom_Primitive)
+	if err != nil {
+		return err
+	}
+	keyTarget2, fieldTarget3, err := fieldsTarget1.StartField("PString")
+	if err != nil {
+		return err
+	}
+	if err := fieldTarget3.FromString(string(m.Value), vdl.StringType); err != nil {
+		return err
+	}
+	if err := fieldsTarget1.FinishField(keyTarget2, fieldTarget3); err != nil {
+		return err
+	}
+	if err := t.FinishFields(fieldsTarget1); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (m PrimitivePString) MakeVDLTarget() vdl.Target {
+	return nil
+}
+
+func (m PrimitivePString) IsZero() bool {
+
+	unionField2 := false
+	return unionField2
+}
+
 func (x PrimitivePControl) Index() int                      { return 6 }
 func (x PrimitivePControl) Interface() interface{}          { return x.Value }
 func (x PrimitivePControl) Name() string                    { return "PControl" }
 func (x PrimitivePControl) __VDLReflect(__PrimitiveReflect) {}
+
+func (m PrimitivePControl) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
+
+	fieldsTarget1, err := t.StartFields(__VDLType_dump_v_io_v23_vom_Primitive)
+	if err != nil {
+		return err
+	}
+	keyTarget2, fieldTarget3, err := fieldsTarget1.StartField("PControl")
+	if err != nil {
+		return err
+	}
+
+	if err := m.Value.FillVDLTarget(fieldTarget3, __VDLType_dump_v_io_v23_vom_ControlKind); err != nil {
+		return err
+	}
+	if err := fieldsTarget1.FinishField(keyTarget2, fieldTarget3); err != nil {
+		return err
+	}
+	if err := t.FinishFields(fieldsTarget1); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (m PrimitivePControl) MakeVDLTarget() vdl.Target {
+	return nil
+}
+
+func (m PrimitivePControl) IsZero() bool {
+
+	unionField2 := false
+	return unionField2
+}
 
 // DumpAtom describes a single indivisible piece of the vom encoding.  The vom
 // encoding is composed of a stream of these atoms.
@@ -105,6 +339,113 @@ type DumpAtom struct {
 func (DumpAtom) __VDLReflect(struct {
 	Name string `vdl:"v.io/v23/vom.DumpAtom"`
 }) {
+}
+
+func (m *DumpAtom) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
+
+	if __VDLType_dump_v_io_v23_vom_DumpAtom == nil || __VDLTypedump0 == nil {
+		panic("Initialization order error: types generated for FillVDLTarget not initialized. Consider moving caller to an init() block.")
+	}
+	fieldsTarget1, err := t.StartFields(tt)
+	if err != nil {
+		return err
+	}
+
+	var2 := m.Kind.IsZero()
+	if !var2 {
+		keyTarget3, fieldTarget4, err := fieldsTarget1.StartField("Kind")
+		if err != vdl.ErrFieldNoExist && err != nil {
+			return err
+		}
+		if err != vdl.ErrFieldNoExist {
+
+			if err := m.Kind.FillVDLTarget(fieldTarget4, __VDLType_dump_v_io_v23_vom_DumpKind); err != nil {
+				return err
+			}
+			if err := fieldsTarget1.FinishField(keyTarget3, fieldTarget4); err != nil {
+				return err
+			}
+		}
+	}
+	var var5 bool
+	if len(m.Bytes) == 0 {
+		var5 = true
+	}
+	if !var5 {
+		keyTarget6, fieldTarget7, err := fieldsTarget1.StartField("Bytes")
+		if err != vdl.ErrFieldNoExist && err != nil {
+			return err
+		}
+		if err != vdl.ErrFieldNoExist {
+
+			if err := fieldTarget7.FromBytes([]byte(m.Bytes), __VDLTypedump1); err != nil {
+				return err
+			}
+			if err := fieldsTarget1.FinishField(keyTarget6, fieldTarget7); err != nil {
+				return err
+			}
+		}
+	}
+	var8 := m.Data.IsZero()
+	if !var8 {
+		keyTarget9, fieldTarget10, err := fieldsTarget1.StartField("Data")
+		if err != vdl.ErrFieldNoExist && err != nil {
+			return err
+		}
+		if err != vdl.ErrFieldNoExist {
+
+			unionValue11 := m.Data
+			if unionValue11 == nil {
+				unionValue11 = PrimitivePBool{}
+			}
+			if err := unionValue11.FillVDLTarget(fieldTarget10, __VDLType_dump_v_io_v23_vom_Primitive); err != nil {
+				return err
+			}
+			if err := fieldsTarget1.FinishField(keyTarget9, fieldTarget10); err != nil {
+				return err
+			}
+		}
+	}
+	var12 := (m.Debug == "")
+	if !var12 {
+		keyTarget13, fieldTarget14, err := fieldsTarget1.StartField("Debug")
+		if err != vdl.ErrFieldNoExist && err != nil {
+			return err
+		}
+		if err != vdl.ErrFieldNoExist {
+			if err := fieldTarget14.FromString(string(m.Debug), vdl.StringType); err != nil {
+				return err
+			}
+			if err := fieldsTarget1.FinishField(keyTarget13, fieldTarget14); err != nil {
+				return err
+			}
+		}
+	}
+	if err := t.FinishFields(fieldsTarget1); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (m *DumpAtom) MakeVDLTarget() vdl.Target {
+	return nil
+}
+
+func (m *DumpAtom) IsZero() bool {
+
+	var1 := true
+	var2 := m.Kind.IsZero()
+	var1 = var1 && var2
+	var var3 bool
+	if len(m.Bytes) == 0 {
+		var3 = true
+	}
+	var1 = var1 && var3
+	var4 := m.Data.IsZero()
+	var1 = var1 && var4
+	var5 := (m.Debug == "")
+	var1 = var1 && var5
+	return var1
 }
 
 // DumpKind enumerates the different kinds of dump atoms.
@@ -233,6 +574,23 @@ func (DumpKind) __VDLReflect(struct {
 }) {
 }
 
+func (m DumpKind) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
+	if err := t.FromEnumLabel(m.String(), __VDLType_dump_v_io_v23_vom_DumpKind); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (m DumpKind) MakeVDLTarget() vdl.Target {
+	return nil
+}
+
+func (m DumpKind) IsZero() bool {
+
+	var1 := (m == DumpKindVersion)
+	return var1
+}
+
 // ControlKind enumerates the different kinds of control bytes.
 type ControlKind int
 
@@ -287,9 +645,38 @@ func (ControlKind) __VDLReflect(struct {
 }) {
 }
 
+func (m ControlKind) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
+	if err := t.FromEnumLabel(m.String(), __VDLType_dump_v_io_v23_vom_ControlKind); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (m ControlKind) MakeVDLTarget() vdl.Target {
+	return nil
+}
+
+func (m ControlKind) IsZero() bool {
+
+	var1 := (m == ControlKindNil)
+	return var1
+}
+
 func init() {
 	vdl.Register((*Primitive)(nil))
 	vdl.Register((*DumpAtom)(nil))
 	vdl.Register((*DumpKind)(nil))
 	vdl.Register((*ControlKind)(nil))
+}
+
+var __VDLTypedump0 *vdl.Type = vdl.TypeOf((*DumpAtom)(nil))
+var __VDLTypedump1 *vdl.Type = vdl.TypeOf([]byte(nil))
+var __VDLType_dump_v_io_v23_vom_ControlKind *vdl.Type = vdl.TypeOf(ControlKindNil)
+var __VDLType_dump_v_io_v23_vom_DumpAtom *vdl.Type = vdl.TypeOf(DumpAtom{
+	Data: PrimitivePBool{false},
+})
+var __VDLType_dump_v_io_v23_vom_DumpKind *vdl.Type = vdl.TypeOf(DumpKindVersion)
+var __VDLType_dump_v_io_v23_vom_Primitive *vdl.Type = vdl.TypeOf(Primitive(PrimitivePBool{false}))
+
+func __VDLEnsureNativeBuilt_dump() {
 }

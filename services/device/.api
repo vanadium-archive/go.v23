@@ -17,24 +17,63 @@ pkg device, func InstanceStateFromString(string) (InstanceState, error)
 pkg device, method (*ApplicationInstantiateServerCallStub) Init(rpc.StreamServerCall)
 pkg device, method (*ApplicationInstantiateServerCallStub) RecvStream() interface {  Advance() bool; Value() BlessClientMessage; Err() error;}
 pkg device, method (*ApplicationInstantiateServerCallStub) SendStream() interface {  Send(item BlessServerMessage) error;}
+pkg device, method (*Association) FillVDLTarget(vdl.Target, *vdl.Type) error
+pkg device, method (*Association) IsZero() bool
+pkg device, method (*Association) MakeVDLTarget() vdl.Target
+pkg device, method (*Description) FillVDLTarget(vdl.Target, *vdl.Type) error
+pkg device, method (*Description) IsZero() bool
+pkg device, method (*Description) MakeVDLTarget() vdl.Target
+pkg device, method (*DeviceStatus) FillVDLTarget(vdl.Target, *vdl.Type) error
+pkg device, method (*DeviceStatus) IsZero() bool
+pkg device, method (*DeviceStatus) MakeVDLTarget() vdl.Target
 pkg device, method (*InstallationState) Set(string) error
+pkg device, method (*InstallationStatus) FillVDLTarget(vdl.Target, *vdl.Type) error
+pkg device, method (*InstallationStatus) IsZero() bool
+pkg device, method (*InstallationStatus) MakeVDLTarget() vdl.Target
 pkg device, method (*InstanceState) Set(string) error
+pkg device, method (*InstanceStatus) FillVDLTarget(vdl.Target, *vdl.Type) error
+pkg device, method (*InstanceStatus) IsZero() bool
+pkg device, method (*InstanceStatus) MakeVDLTarget() vdl.Target
+pkg device, method (BlessClientMessageAppBlessings) FillVDLTarget(vdl.Target, *vdl.Type) error
 pkg device, method (BlessClientMessageAppBlessings) Index() int
 pkg device, method (BlessClientMessageAppBlessings) Interface() interface{}
+pkg device, method (BlessClientMessageAppBlessings) IsZero() bool
+pkg device, method (BlessClientMessageAppBlessings) MakeVDLTarget() vdl.Target
 pkg device, method (BlessClientMessageAppBlessings) Name() string
+pkg device, method (BlessServerMessageInstancePublicKey) FillVDLTarget(vdl.Target, *vdl.Type) error
 pkg device, method (BlessServerMessageInstancePublicKey) Index() int
 pkg device, method (BlessServerMessageInstancePublicKey) Interface() interface{}
+pkg device, method (BlessServerMessageInstancePublicKey) IsZero() bool
+pkg device, method (BlessServerMessageInstancePublicKey) MakeVDLTarget() vdl.Target
 pkg device, method (BlessServerMessageInstancePublicKey) Name() string
+pkg device, method (Config) FillVDLTarget(vdl.Target, *vdl.Type) error
+pkg device, method (Config) IsZero() bool
+pkg device, method (Config) MakeVDLTarget() vdl.Target
+pkg device, method (InstallationState) FillVDLTarget(vdl.Target, *vdl.Type) error
+pkg device, method (InstallationState) IsZero() bool
+pkg device, method (InstallationState) MakeVDLTarget() vdl.Target
 pkg device, method (InstallationState) String() string
+pkg device, method (InstanceState) FillVDLTarget(vdl.Target, *vdl.Type) error
+pkg device, method (InstanceState) IsZero() bool
+pkg device, method (InstanceState) MakeVDLTarget() vdl.Target
 pkg device, method (InstanceState) String() string
+pkg device, method (StatusDevice) FillVDLTarget(vdl.Target, *vdl.Type) error
 pkg device, method (StatusDevice) Index() int
 pkg device, method (StatusDevice) Interface() interface{}
+pkg device, method (StatusDevice) IsZero() bool
+pkg device, method (StatusDevice) MakeVDLTarget() vdl.Target
 pkg device, method (StatusDevice) Name() string
+pkg device, method (StatusInstallation) FillVDLTarget(vdl.Target, *vdl.Type) error
 pkg device, method (StatusInstallation) Index() int
 pkg device, method (StatusInstallation) Interface() interface{}
+pkg device, method (StatusInstallation) IsZero() bool
+pkg device, method (StatusInstallation) MakeVDLTarget() vdl.Target
 pkg device, method (StatusInstallation) Name() string
+pkg device, method (StatusInstance) FillVDLTarget(vdl.Target, *vdl.Type) error
 pkg device, method (StatusInstance) Index() int
 pkg device, method (StatusInstance) Interface() interface{}
+pkg device, method (StatusInstance) IsZero() bool
+pkg device, method (StatusInstance) MakeVDLTarget() vdl.Target
 pkg device, method (StatusInstance) Name() string
 pkg device, type ApplicationClientMethods interface { Debug, Delete, GetPermissions, Install, Instantiate, Kill, Revert, Run, SetPermissions, Status, Uninstall, Update, UpdateTo }
 pkg device, type ApplicationClientMethods interface, Debug(*context.T, ...rpc.CallOpt) (string, error)
@@ -127,14 +166,18 @@ pkg device, type ApplicationServerStubMethods interface, unexported methods
 pkg device, type Association struct
 pkg device, type Association struct, AccountName string
 pkg device, type Association struct, IdentityName string
+pkg device, type BlessClientMessage interface, FillVDLTarget(vdl.Target, *vdl.Type) error
 pkg device, type BlessClientMessage interface, Index() int
 pkg device, type BlessClientMessage interface, Interface() interface{}
+pkg device, type BlessClientMessage interface, IsZero() bool
 pkg device, type BlessClientMessage interface, Name() string
 pkg device, type BlessClientMessage interface, unexported methods
 pkg device, type BlessClientMessageAppBlessings struct
 pkg device, type BlessClientMessageAppBlessings struct, Value security.Blessings
+pkg device, type BlessServerMessage interface, FillVDLTarget(vdl.Target, *vdl.Type) error
 pkg device, type BlessServerMessage interface, Index() int
 pkg device, type BlessServerMessage interface, Interface() interface{}
+pkg device, type BlessServerMessage interface, IsZero() bool
 pkg device, type BlessServerMessage interface, Name() string
 pkg device, type BlessServerMessage interface, unexported methods
 pkg device, type BlessServerMessageInstancePublicKey struct
@@ -257,8 +300,10 @@ pkg device, type InstanceState int
 pkg device, type InstanceStatus struct
 pkg device, type InstanceStatus struct, State InstanceState
 pkg device, type InstanceStatus struct, Version string
+pkg device, type Status interface, FillVDLTarget(vdl.Target, *vdl.Type) error
 pkg device, type Status interface, Index() int
 pkg device, type Status interface, Interface() interface{}
+pkg device, type Status interface, IsZero() bool
 pkg device, type Status interface, Name() string
 pkg device, type Status interface, unexported methods
 pkg device, type StatusDevice struct

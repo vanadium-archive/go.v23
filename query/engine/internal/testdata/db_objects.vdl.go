@@ -14,7 +14,7 @@ import (
 
 	// VDL user imports
 	"time"
-	_ "v.io/v23/vdlroot/time"
+	time_2 "v.io/v23/vdlroot/time"
 )
 
 type AddressInfo struct {
@@ -27,6 +27,92 @@ type AddressInfo struct {
 func (AddressInfo) __VDLReflect(struct {
 	Name string `vdl:"v.io/v23/query/engine/internal/testdata.AddressInfo"`
 }) {
+}
+
+func (m *AddressInfo) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
+
+	if __VDLType_db_objects_v_io_v23_query_engine_internal_testdata_AddressInfo == nil || __VDLTypedb_objects0 == nil {
+		panic("Initialization order error: types generated for FillVDLTarget not initialized. Consider moving caller to an init() block.")
+	}
+	fieldsTarget1, err := t.StartFields(tt)
+	if err != nil {
+		return err
+	}
+
+	var2 := (m.Street == "")
+	if !var2 {
+		keyTarget3, fieldTarget4, err := fieldsTarget1.StartField("Street")
+		if err != vdl.ErrFieldNoExist && err != nil {
+			return err
+		}
+		if err != vdl.ErrFieldNoExist {
+			if err := fieldTarget4.FromString(string(m.Street), vdl.StringType); err != nil {
+				return err
+			}
+			if err := fieldsTarget1.FinishField(keyTarget3, fieldTarget4); err != nil {
+				return err
+			}
+		}
+	}
+	var5 := (m.City == "")
+	if !var5 {
+		keyTarget6, fieldTarget7, err := fieldsTarget1.StartField("City")
+		if err != vdl.ErrFieldNoExist && err != nil {
+			return err
+		}
+		if err != vdl.ErrFieldNoExist {
+			if err := fieldTarget7.FromString(string(m.City), vdl.StringType); err != nil {
+				return err
+			}
+			if err := fieldsTarget1.FinishField(keyTarget6, fieldTarget7); err != nil {
+				return err
+			}
+		}
+	}
+	var8 := (m.State == "")
+	if !var8 {
+		keyTarget9, fieldTarget10, err := fieldsTarget1.StartField("State")
+		if err != vdl.ErrFieldNoExist && err != nil {
+			return err
+		}
+		if err != vdl.ErrFieldNoExist {
+			if err := fieldTarget10.FromString(string(m.State), vdl.StringType); err != nil {
+				return err
+			}
+			if err := fieldsTarget1.FinishField(keyTarget9, fieldTarget10); err != nil {
+				return err
+			}
+		}
+	}
+	var11 := (m.Zip == "")
+	if !var11 {
+		keyTarget12, fieldTarget13, err := fieldsTarget1.StartField("Zip")
+		if err != vdl.ErrFieldNoExist && err != nil {
+			return err
+		}
+		if err != vdl.ErrFieldNoExist {
+			if err := fieldTarget13.FromString(string(m.Zip), vdl.StringType); err != nil {
+				return err
+			}
+			if err := fieldsTarget1.FinishField(keyTarget12, fieldTarget13); err != nil {
+				return err
+			}
+		}
+	}
+	if err := t.FinishFields(fieldsTarget1); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (m *AddressInfo) MakeVDLTarget() vdl.Target {
+	return nil
+}
+
+func (m *AddressInfo) IsZero() bool {
+
+	var1 := (*m == AddressInfo{})
+	return var1
 }
 
 type CreditAgency int
@@ -82,6 +168,23 @@ func (CreditAgency) __VDLReflect(struct {
 }) {
 }
 
+func (m CreditAgency) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
+	if err := t.FromEnumLabel(m.String(), __VDLType_db_objects_v_io_v23_query_engine_internal_testdata_CreditAgency); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (m CreditAgency) MakeVDLTarget() vdl.Target {
+	return nil
+}
+
+func (m CreditAgency) IsZero() bool {
+
+	var1 := (m == CreditAgencyEquifax)
+	return var1
+}
+
 type ExperianRating int
 
 const (
@@ -129,11 +232,62 @@ func (ExperianRating) __VDLReflect(struct {
 }) {
 }
 
+func (m ExperianRating) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
+	if err := t.FromEnumLabel(m.String(), __VDLType_db_objects_v_io_v23_query_engine_internal_testdata_ExperianRating); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (m ExperianRating) MakeVDLTarget() vdl.Target {
+	return nil
+}
+
+func (m ExperianRating) IsZero() bool {
+
+	var1 := (m == ExperianRatingGood)
+	return var1
+}
+
 type RatingsArray [4]int16
 
 func (RatingsArray) __VDLReflect(struct {
 	Name string `vdl:"v.io/v23/query/engine/internal/testdata.RatingsArray"`
 }) {
+}
+
+func (m RatingsArray) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
+
+	listTarget1, err := t.StartList(__VDLType_db_objects_v_io_v23_query_engine_internal_testdata_RatingsArray, 4)
+	if err != nil {
+		return err
+	}
+	for i, elem3 := range m {
+		elemTarget2, err := listTarget1.StartElem(i)
+		if err != nil {
+			return err
+		}
+		if err := elemTarget2.FromInt(int64(elem3), vdl.Int16Type); err != nil {
+			return err
+		}
+		if err := listTarget1.FinishElem(elemTarget2); err != nil {
+			return err
+		}
+	}
+	if err := t.FinishList(listTarget1); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (m RatingsArray) MakeVDLTarget() vdl.Target {
+	return nil
+}
+
+func (m RatingsArray) IsZero() bool {
+
+	var1 := (m == RatingsArray{})
+	return var1
 }
 
 type EquifaxCreditReport struct {
@@ -144,6 +298,63 @@ type EquifaxCreditReport struct {
 func (EquifaxCreditReport) __VDLReflect(struct {
 	Name string `vdl:"v.io/v23/query/engine/internal/testdata.EquifaxCreditReport"`
 }) {
+}
+
+func (m *EquifaxCreditReport) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
+
+	if __VDLType_db_objects_v_io_v23_query_engine_internal_testdata_EquifaxCreditReport == nil || __VDLTypedb_objects1 == nil {
+		panic("Initialization order error: types generated for FillVDLTarget not initialized. Consider moving caller to an init() block.")
+	}
+	fieldsTarget1, err := t.StartFields(tt)
+	if err != nil {
+		return err
+	}
+
+	var2 := (m.Rating == byte(0))
+	if !var2 {
+		keyTarget3, fieldTarget4, err := fieldsTarget1.StartField("Rating")
+		if err != vdl.ErrFieldNoExist && err != nil {
+			return err
+		}
+		if err != vdl.ErrFieldNoExist {
+			if err := fieldTarget4.FromUint(uint64(m.Rating), vdl.ByteType); err != nil {
+				return err
+			}
+			if err := fieldsTarget1.FinishField(keyTarget3, fieldTarget4); err != nil {
+				return err
+			}
+		}
+	}
+	var5 := m.FourScoreRatings.IsZero()
+	if !var5 {
+		keyTarget6, fieldTarget7, err := fieldsTarget1.StartField("FourScoreRatings")
+		if err != vdl.ErrFieldNoExist && err != nil {
+			return err
+		}
+		if err != vdl.ErrFieldNoExist {
+
+			if err := m.FourScoreRatings.FillVDLTarget(fieldTarget7, __VDLType_db_objects_v_io_v23_query_engine_internal_testdata_RatingsArray); err != nil {
+				return err
+			}
+			if err := fieldsTarget1.FinishField(keyTarget6, fieldTarget7); err != nil {
+				return err
+			}
+		}
+	}
+	if err := t.FinishFields(fieldsTarget1); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (m *EquifaxCreditReport) MakeVDLTarget() vdl.Target {
+	return nil
+}
+
+func (m *EquifaxCreditReport) IsZero() bool {
+
+	var1 := (*m == EquifaxCreditReport{})
+	return var1
 }
 
 type Tdh int
@@ -199,6 +410,23 @@ func (Tdh) __VDLReflect(struct {
 }) {
 }
 
+func (m Tdh) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
+	if err := t.FromEnumLabel(m.String(), __VDLType_db_objects_v_io_v23_query_engine_internal_testdata_Tdh); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (m Tdh) MakeVDLTarget() vdl.Target {
+	return nil
+}
+
+func (m Tdh) IsZero() bool {
+
+	var1 := (m == TdhTom)
+	return var1
+}
+
 type ExperianCreditReport struct {
 	Rating       ExperianRating
 	TdhApprovals map[Tdh]struct{}
@@ -210,6 +438,109 @@ func (ExperianCreditReport) __VDLReflect(struct {
 }) {
 }
 
+func (m *ExperianCreditReport) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
+
+	if __VDLType_db_objects_v_io_v23_query_engine_internal_testdata_ExperianCreditReport == nil || __VDLTypedb_objects2 == nil {
+		panic("Initialization order error: types generated for FillVDLTarget not initialized. Consider moving caller to an init() block.")
+	}
+	fieldsTarget1, err := t.StartFields(tt)
+	if err != nil {
+		return err
+	}
+
+	var2 := m.Rating.IsZero()
+	if !var2 {
+		keyTarget3, fieldTarget4, err := fieldsTarget1.StartField("Rating")
+		if err != vdl.ErrFieldNoExist && err != nil {
+			return err
+		}
+		if err != vdl.ErrFieldNoExist {
+
+			if err := m.Rating.FillVDLTarget(fieldTarget4, __VDLType_db_objects_v_io_v23_query_engine_internal_testdata_ExperianRating); err != nil {
+				return err
+			}
+			if err := fieldsTarget1.FinishField(keyTarget3, fieldTarget4); err != nil {
+				return err
+			}
+		}
+	}
+	var var5 bool
+	if len(m.TdhApprovals) == 0 {
+		var5 = true
+	}
+	if !var5 {
+		keyTarget6, fieldTarget7, err := fieldsTarget1.StartField("TdhApprovals")
+		if err != vdl.ErrFieldNoExist && err != nil {
+			return err
+		}
+		if err != vdl.ErrFieldNoExist {
+
+			setTarget8, err := fieldTarget7.StartSet(__VDLTypedb_objects3, len(m.TdhApprovals))
+			if err != nil {
+				return err
+			}
+			for key10 := range m.TdhApprovals {
+				keyTarget9, err := setTarget8.StartKey()
+				if err != nil {
+					return err
+				}
+
+				if err := key10.FillVDLTarget(keyTarget9, __VDLType_db_objects_v_io_v23_query_engine_internal_testdata_Tdh); err != nil {
+					return err
+				}
+				if err := setTarget8.FinishKey(keyTarget9); err != nil {
+					return err
+				}
+			}
+			if err := fieldTarget7.FinishSet(setTarget8); err != nil {
+				return err
+			}
+			if err := fieldsTarget1.FinishField(keyTarget6, fieldTarget7); err != nil {
+				return err
+			}
+		}
+	}
+	var11 := m.Auditor.IsZero()
+	if !var11 {
+		keyTarget12, fieldTarget13, err := fieldsTarget1.StartField("Auditor")
+		if err != vdl.ErrFieldNoExist && err != nil {
+			return err
+		}
+		if err != vdl.ErrFieldNoExist {
+
+			if err := m.Auditor.FillVDLTarget(fieldTarget13, __VDLType_db_objects_v_io_v23_query_engine_internal_testdata_Tdh); err != nil {
+				return err
+			}
+			if err := fieldsTarget1.FinishField(keyTarget12, fieldTarget13); err != nil {
+				return err
+			}
+		}
+	}
+	if err := t.FinishFields(fieldsTarget1); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (m *ExperianCreditReport) MakeVDLTarget() vdl.Target {
+	return nil
+}
+
+func (m *ExperianCreditReport) IsZero() bool {
+
+	var1 := true
+	var2 := m.Rating.IsZero()
+	var1 = var1 && var2
+	var var3 bool
+	if len(m.TdhApprovals) == 0 {
+		var3 = true
+	}
+	var1 = var1 && var3
+	var4 := m.Auditor.IsZero()
+	var1 = var1 && var4
+	return var1
+}
+
 type TransUnionCreditReport struct {
 	Rating          int16
 	PreviousRatings map[string]int16
@@ -218,6 +549,96 @@ type TransUnionCreditReport struct {
 func (TransUnionCreditReport) __VDLReflect(struct {
 	Name string `vdl:"v.io/v23/query/engine/internal/testdata.TransUnionCreditReport"`
 }) {
+}
+
+func (m *TransUnionCreditReport) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
+
+	if __VDLType_db_objects_v_io_v23_query_engine_internal_testdata_TransUnionCreditReport == nil || __VDLTypedb_objects4 == nil {
+		panic("Initialization order error: types generated for FillVDLTarget not initialized. Consider moving caller to an init() block.")
+	}
+	fieldsTarget1, err := t.StartFields(tt)
+	if err != nil {
+		return err
+	}
+
+	var2 := (m.Rating == int16(0))
+	if !var2 {
+		keyTarget3, fieldTarget4, err := fieldsTarget1.StartField("Rating")
+		if err != vdl.ErrFieldNoExist && err != nil {
+			return err
+		}
+		if err != vdl.ErrFieldNoExist {
+			if err := fieldTarget4.FromInt(int64(m.Rating), vdl.Int16Type); err != nil {
+				return err
+			}
+			if err := fieldsTarget1.FinishField(keyTarget3, fieldTarget4); err != nil {
+				return err
+			}
+		}
+	}
+	var var5 bool
+	if len(m.PreviousRatings) == 0 {
+		var5 = true
+	}
+	if !var5 {
+		keyTarget6, fieldTarget7, err := fieldsTarget1.StartField("PreviousRatings")
+		if err != vdl.ErrFieldNoExist && err != nil {
+			return err
+		}
+		if err != vdl.ErrFieldNoExist {
+
+			mapTarget8, err := fieldTarget7.StartMap(__VDLTypedb_objects5, len(m.PreviousRatings))
+			if err != nil {
+				return err
+			}
+			for key10, value12 := range m.PreviousRatings {
+				keyTarget9, err := mapTarget8.StartKey()
+				if err != nil {
+					return err
+				}
+				if err := keyTarget9.FromString(string(key10), vdl.StringType); err != nil {
+					return err
+				}
+				valueTarget11, err := mapTarget8.FinishKeyStartField(keyTarget9)
+				if err != nil {
+					return err
+				}
+				if err := valueTarget11.FromInt(int64(value12), vdl.Int16Type); err != nil {
+					return err
+				}
+				if err := mapTarget8.FinishField(keyTarget9, valueTarget11); err != nil {
+					return err
+				}
+			}
+			if err := fieldTarget7.FinishMap(mapTarget8); err != nil {
+				return err
+			}
+			if err := fieldsTarget1.FinishField(keyTarget6, fieldTarget7); err != nil {
+				return err
+			}
+		}
+	}
+	if err := t.FinishFields(fieldsTarget1); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (m *TransUnionCreditReport) MakeVDLTarget() vdl.Target {
+	return nil
+}
+
+func (m *TransUnionCreditReport) IsZero() bool {
+
+	var1 := true
+	var2 := (m.Rating == int16(0))
+	var1 = var1 && var2
+	var var3 bool
+	if len(m.PreviousRatings) == 0 {
+		var3 = true
+	}
+	var1 = var1 && var3
+	return var1
 }
 
 type (
@@ -231,6 +652,8 @@ type (
 		Name() string
 		// __VDLReflect describes the AgencyReport union type.
 		__VDLReflect(__AgencyReportReflect)
+		FillVDLTarget(vdl.Target, *vdl.Type) error
+		IsZero() bool
 	}
 	// AgencyReportEquifaxReport represents field EquifaxReport of the AgencyReport union type.
 	AgencyReportEquifaxReport struct{ Value EquifaxCreditReport }
@@ -255,15 +678,117 @@ func (x AgencyReportEquifaxReport) Interface() interface{}             { return 
 func (x AgencyReportEquifaxReport) Name() string                       { return "EquifaxReport" }
 func (x AgencyReportEquifaxReport) __VDLReflect(__AgencyReportReflect) {}
 
+func (m AgencyReportEquifaxReport) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
+
+	fieldsTarget1, err := t.StartFields(__VDLType_db_objects_v_io_v23_query_engine_internal_testdata_AgencyReport)
+	if err != nil {
+		return err
+	}
+	keyTarget2, fieldTarget3, err := fieldsTarget1.StartField("EquifaxReport")
+	if err != nil {
+		return err
+	}
+
+	if err := m.Value.FillVDLTarget(fieldTarget3, __VDLType_db_objects_v_io_v23_query_engine_internal_testdata_EquifaxCreditReport); err != nil {
+		return err
+	}
+	if err := fieldsTarget1.FinishField(keyTarget2, fieldTarget3); err != nil {
+		return err
+	}
+	if err := t.FinishFields(fieldsTarget1); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (m AgencyReportEquifaxReport) MakeVDLTarget() vdl.Target {
+	return nil
+}
+
+func (m AgencyReportEquifaxReport) IsZero() bool {
+
+	var2 := m.Value.IsZero()
+	return var2
+}
+
 func (x AgencyReportExperianReport) Index() int                         { return 1 }
 func (x AgencyReportExperianReport) Interface() interface{}             { return x.Value }
 func (x AgencyReportExperianReport) Name() string                       { return "ExperianReport" }
 func (x AgencyReportExperianReport) __VDLReflect(__AgencyReportReflect) {}
 
+func (m AgencyReportExperianReport) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
+
+	fieldsTarget1, err := t.StartFields(__VDLType_db_objects_v_io_v23_query_engine_internal_testdata_AgencyReport)
+	if err != nil {
+		return err
+	}
+	keyTarget2, fieldTarget3, err := fieldsTarget1.StartField("ExperianReport")
+	if err != nil {
+		return err
+	}
+
+	if err := m.Value.FillVDLTarget(fieldTarget3, __VDLType_db_objects_v_io_v23_query_engine_internal_testdata_ExperianCreditReport); err != nil {
+		return err
+	}
+	if err := fieldsTarget1.FinishField(keyTarget2, fieldTarget3); err != nil {
+		return err
+	}
+	if err := t.FinishFields(fieldsTarget1); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (m AgencyReportExperianReport) MakeVDLTarget() vdl.Target {
+	return nil
+}
+
+func (m AgencyReportExperianReport) IsZero() bool {
+
+	unionField2 := false
+	return unionField2
+}
+
 func (x AgencyReportTransUnionReport) Index() int                         { return 2 }
 func (x AgencyReportTransUnionReport) Interface() interface{}             { return x.Value }
 func (x AgencyReportTransUnionReport) Name() string                       { return "TransUnionReport" }
 func (x AgencyReportTransUnionReport) __VDLReflect(__AgencyReportReflect) {}
+
+func (m AgencyReportTransUnionReport) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
+
+	fieldsTarget1, err := t.StartFields(__VDLType_db_objects_v_io_v23_query_engine_internal_testdata_AgencyReport)
+	if err != nil {
+		return err
+	}
+	keyTarget2, fieldTarget3, err := fieldsTarget1.StartField("TransUnionReport")
+	if err != nil {
+		return err
+	}
+
+	if err := m.Value.FillVDLTarget(fieldTarget3, __VDLType_db_objects_v_io_v23_query_engine_internal_testdata_TransUnionCreditReport); err != nil {
+		return err
+	}
+	if err := fieldsTarget1.FinishField(keyTarget2, fieldTarget3); err != nil {
+		return err
+	}
+	if err := t.FinishFields(fieldsTarget1); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (m AgencyReportTransUnionReport) MakeVDLTarget() vdl.Target {
+	return nil
+}
+
+func (m AgencyReportTransUnionReport) IsZero() bool {
+
+	unionField2 := false
+	return unionField2
+}
 
 type CreditReport struct {
 	Agency CreditAgency
@@ -273,6 +798,72 @@ type CreditReport struct {
 func (CreditReport) __VDLReflect(struct {
 	Name string `vdl:"v.io/v23/query/engine/internal/testdata.CreditReport"`
 }) {
+}
+
+func (m *CreditReport) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
+
+	if __VDLType_db_objects_v_io_v23_query_engine_internal_testdata_CreditReport == nil || __VDLTypedb_objects6 == nil {
+		panic("Initialization order error: types generated for FillVDLTarget not initialized. Consider moving caller to an init() block.")
+	}
+	fieldsTarget1, err := t.StartFields(tt)
+	if err != nil {
+		return err
+	}
+
+	var2 := m.Agency.IsZero()
+	if !var2 {
+		keyTarget3, fieldTarget4, err := fieldsTarget1.StartField("Agency")
+		if err != vdl.ErrFieldNoExist && err != nil {
+			return err
+		}
+		if err != vdl.ErrFieldNoExist {
+
+			if err := m.Agency.FillVDLTarget(fieldTarget4, __VDLType_db_objects_v_io_v23_query_engine_internal_testdata_CreditAgency); err != nil {
+				return err
+			}
+			if err := fieldsTarget1.FinishField(keyTarget3, fieldTarget4); err != nil {
+				return err
+			}
+		}
+	}
+	var5 := m.Report.IsZero()
+	if !var5 {
+		keyTarget6, fieldTarget7, err := fieldsTarget1.StartField("Report")
+		if err != vdl.ErrFieldNoExist && err != nil {
+			return err
+		}
+		if err != vdl.ErrFieldNoExist {
+
+			unionValue8 := m.Report
+			if unionValue8 == nil {
+				unionValue8 = AgencyReportEquifaxReport{}
+			}
+			if err := unionValue8.FillVDLTarget(fieldTarget7, __VDLType_db_objects_v_io_v23_query_engine_internal_testdata_AgencyReport); err != nil {
+				return err
+			}
+			if err := fieldsTarget1.FinishField(keyTarget6, fieldTarget7); err != nil {
+				return err
+			}
+		}
+	}
+	if err := t.FinishFields(fieldsTarget1); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (m *CreditReport) MakeVDLTarget() vdl.Target {
+	return nil
+}
+
+func (m *CreditReport) IsZero() bool {
+
+	var1 := true
+	var2 := m.Agency.IsZero()
+	var1 = var1 && var2
+	var3 := m.Report.IsZero()
+	var1 = var1 && var3
+	return var1
 }
 
 type Customer struct {
@@ -289,6 +880,160 @@ func (Customer) __VDLReflect(struct {
 }) {
 }
 
+func (m *Customer) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
+
+	if __VDLType_db_objects_v_io_v23_query_engine_internal_testdata_Customer == nil || __VDLTypedb_objects7 == nil {
+		panic("Initialization order error: types generated for FillVDLTarget not initialized. Consider moving caller to an init() block.")
+	}
+	fieldsTarget1, err := t.StartFields(tt)
+	if err != nil {
+		return err
+	}
+
+	var2 := (m.Name == "")
+	if !var2 {
+		keyTarget3, fieldTarget4, err := fieldsTarget1.StartField("Name")
+		if err != vdl.ErrFieldNoExist && err != nil {
+			return err
+		}
+		if err != vdl.ErrFieldNoExist {
+			if err := fieldTarget4.FromString(string(m.Name), vdl.StringType); err != nil {
+				return err
+			}
+			if err := fieldsTarget1.FinishField(keyTarget3, fieldTarget4); err != nil {
+				return err
+			}
+		}
+	}
+	var5 := (m.Id == int64(0))
+	if !var5 {
+		keyTarget6, fieldTarget7, err := fieldsTarget1.StartField("Id")
+		if err != vdl.ErrFieldNoExist && err != nil {
+			return err
+		}
+		if err != vdl.ErrFieldNoExist {
+			if err := fieldTarget7.FromInt(int64(m.Id), vdl.Int64Type); err != nil {
+				return err
+			}
+			if err := fieldsTarget1.FinishField(keyTarget6, fieldTarget7); err != nil {
+				return err
+			}
+		}
+	}
+	var8 := (m.Active == false)
+	if !var8 {
+		keyTarget9, fieldTarget10, err := fieldsTarget1.StartField("Active")
+		if err != vdl.ErrFieldNoExist && err != nil {
+			return err
+		}
+		if err != vdl.ErrFieldNoExist {
+			if err := fieldTarget10.FromBool(bool(m.Active), vdl.BoolType); err != nil {
+				return err
+			}
+			if err := fieldsTarget1.FinishField(keyTarget9, fieldTarget10); err != nil {
+				return err
+			}
+		}
+	}
+	var11 := m.Address.IsZero()
+	if !var11 {
+		keyTarget12, fieldTarget13, err := fieldsTarget1.StartField("Address")
+		if err != vdl.ErrFieldNoExist && err != nil {
+			return err
+		}
+		if err != vdl.ErrFieldNoExist {
+
+			if err := m.Address.FillVDLTarget(fieldTarget13, __VDLType_db_objects_v_io_v23_query_engine_internal_testdata_AddressInfo); err != nil {
+				return err
+			}
+			if err := fieldsTarget1.FinishField(keyTarget12, fieldTarget13); err != nil {
+				return err
+			}
+		}
+	}
+	var var14 bool
+	if len(m.PreviousAddresses) == 0 {
+		var14 = true
+	}
+	if !var14 {
+		keyTarget15, fieldTarget16, err := fieldsTarget1.StartField("PreviousAddresses")
+		if err != vdl.ErrFieldNoExist && err != nil {
+			return err
+		}
+		if err != vdl.ErrFieldNoExist {
+
+			listTarget17, err := fieldTarget16.StartList(__VDLTypedb_objects8, len(m.PreviousAddresses))
+			if err != nil {
+				return err
+			}
+			for i, elem19 := range m.PreviousAddresses {
+				elemTarget18, err := listTarget17.StartElem(i)
+				if err != nil {
+					return err
+				}
+
+				if err := elem19.FillVDLTarget(elemTarget18, __VDLType_db_objects_v_io_v23_query_engine_internal_testdata_AddressInfo); err != nil {
+					return err
+				}
+				if err := listTarget17.FinishElem(elemTarget18); err != nil {
+					return err
+				}
+			}
+			if err := fieldTarget16.FinishList(listTarget17); err != nil {
+				return err
+			}
+			if err := fieldsTarget1.FinishField(keyTarget15, fieldTarget16); err != nil {
+				return err
+			}
+		}
+	}
+	var20 := m.Credit.IsZero()
+	if !var20 {
+		keyTarget21, fieldTarget22, err := fieldsTarget1.StartField("Credit")
+		if err != vdl.ErrFieldNoExist && err != nil {
+			return err
+		}
+		if err != vdl.ErrFieldNoExist {
+
+			if err := m.Credit.FillVDLTarget(fieldTarget22, __VDLType_db_objects_v_io_v23_query_engine_internal_testdata_CreditReport); err != nil {
+				return err
+			}
+			if err := fieldsTarget1.FinishField(keyTarget21, fieldTarget22); err != nil {
+				return err
+			}
+		}
+	}
+	if err := t.FinishFields(fieldsTarget1); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (m *Customer) MakeVDLTarget() vdl.Target {
+	return nil
+}
+
+func (m *Customer) IsZero() bool {
+
+	var1 := true
+	var2 := (m.Name == "")
+	var1 = var1 && var2
+	var3 := (m.Id == int64(0))
+	var1 = var1 && var3
+	var4 := (m.Active == false)
+	var1 = var1 && var4
+	var5 := m.Address.IsZero()
+	var1 = var1 && var5
+	var var6 bool
+	if len(m.PreviousAddresses) == 0 {
+		var6 = true
+	}
+	var1 = var1 && var6
+	var7 := m.Credit.IsZero()
+	var1 = var1 && var7
+	return var1
+}
+
 type Invoice struct {
 	CustId      int64
 	InvoiceNum  int64
@@ -300,6 +1045,112 @@ type Invoice struct {
 func (Invoice) __VDLReflect(struct {
 	Name string `vdl:"v.io/v23/query/engine/internal/testdata.Invoice"`
 }) {
+}
+
+func (m *Invoice) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
+
+	__VDLEnsureNativeBuilt_db_objects()
+	fieldsTarget1, err := t.StartFields(tt)
+	if err != nil {
+		return err
+	}
+
+	var2 := (m.CustId == int64(0))
+	if !var2 {
+		keyTarget3, fieldTarget4, err := fieldsTarget1.StartField("CustId")
+		if err != vdl.ErrFieldNoExist && err != nil {
+			return err
+		}
+		if err != vdl.ErrFieldNoExist {
+			if err := fieldTarget4.FromInt(int64(m.CustId), vdl.Int64Type); err != nil {
+				return err
+			}
+			if err := fieldsTarget1.FinishField(keyTarget3, fieldTarget4); err != nil {
+				return err
+			}
+		}
+	}
+	var5 := (m.InvoiceNum == int64(0))
+	if !var5 {
+		keyTarget6, fieldTarget7, err := fieldsTarget1.StartField("InvoiceNum")
+		if err != vdl.ErrFieldNoExist && err != nil {
+			return err
+		}
+		if err != vdl.ErrFieldNoExist {
+			if err := fieldTarget7.FromInt(int64(m.InvoiceNum), vdl.Int64Type); err != nil {
+				return err
+			}
+			if err := fieldsTarget1.FinishField(keyTarget6, fieldTarget7); err != nil {
+				return err
+			}
+		}
+	}
+	var wireValue8 time_2.Time
+	if err := time_2.TimeFromNative(&wireValue8, m.InvoiceDate); err != nil {
+		return err
+	}
+
+	var9 := wireValue8.IsZero()
+	if !var9 {
+		keyTarget10, fieldTarget11, err := fieldsTarget1.StartField("InvoiceDate")
+		if err != vdl.ErrFieldNoExist && err != nil {
+			return err
+		}
+		if err != vdl.ErrFieldNoExist {
+
+			if err := wireValue8.FillVDLTarget(fieldTarget11, __VDLType_db_objects_time_Time); err != nil {
+				return err
+			}
+			if err := fieldsTarget1.FinishField(keyTarget10, fieldTarget11); err != nil {
+				return err
+			}
+		}
+	}
+	var12 := (m.Amount == int64(0))
+	if !var12 {
+		keyTarget13, fieldTarget14, err := fieldsTarget1.StartField("Amount")
+		if err != vdl.ErrFieldNoExist && err != nil {
+			return err
+		}
+		if err != vdl.ErrFieldNoExist {
+			if err := fieldTarget14.FromInt(int64(m.Amount), vdl.Int64Type); err != nil {
+				return err
+			}
+			if err := fieldsTarget1.FinishField(keyTarget13, fieldTarget14); err != nil {
+				return err
+			}
+		}
+	}
+	var15 := m.ShipTo.IsZero()
+	if !var15 {
+		keyTarget16, fieldTarget17, err := fieldsTarget1.StartField("ShipTo")
+		if err != vdl.ErrFieldNoExist && err != nil {
+			return err
+		}
+		if err != vdl.ErrFieldNoExist {
+
+			if err := m.ShipTo.FillVDLTarget(fieldTarget17, __VDLType_db_objects_v_io_v23_query_engine_internal_testdata_AddressInfo); err != nil {
+				return err
+			}
+			if err := fieldsTarget1.FinishField(keyTarget16, fieldTarget17); err != nil {
+				return err
+			}
+		}
+	}
+	if err := t.FinishFields(fieldsTarget1); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (m *Invoice) MakeVDLTarget() vdl.Target {
+	return nil
+}
+
+func (m *Invoice) IsZero() bool {
+
+	var1 := (*m == Invoice{})
+	return var1
 }
 
 type Numbers struct {
@@ -321,6 +1172,197 @@ func (Numbers) __VDLReflect(struct {
 }) {
 }
 
+func (m *Numbers) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
+
+	if __VDLType_db_objects_v_io_v23_query_engine_internal_testdata_Numbers == nil || __VDLTypedb_objects10 == nil {
+		panic("Initialization order error: types generated for FillVDLTarget not initialized. Consider moving caller to an init() block.")
+	}
+	fieldsTarget1, err := t.StartFields(tt)
+	if err != nil {
+		return err
+	}
+
+	var2 := (m.B == byte(0))
+	if !var2 {
+		keyTarget3, fieldTarget4, err := fieldsTarget1.StartField("B")
+		if err != vdl.ErrFieldNoExist && err != nil {
+			return err
+		}
+		if err != vdl.ErrFieldNoExist {
+			if err := fieldTarget4.FromUint(uint64(m.B), vdl.ByteType); err != nil {
+				return err
+			}
+			if err := fieldsTarget1.FinishField(keyTarget3, fieldTarget4); err != nil {
+				return err
+			}
+		}
+	}
+	var5 := (m.Ui16 == uint16(0))
+	if !var5 {
+		keyTarget6, fieldTarget7, err := fieldsTarget1.StartField("Ui16")
+		if err != vdl.ErrFieldNoExist && err != nil {
+			return err
+		}
+		if err != vdl.ErrFieldNoExist {
+			if err := fieldTarget7.FromUint(uint64(m.Ui16), vdl.Uint16Type); err != nil {
+				return err
+			}
+			if err := fieldsTarget1.FinishField(keyTarget6, fieldTarget7); err != nil {
+				return err
+			}
+		}
+	}
+	var8 := (m.Ui32 == uint32(0))
+	if !var8 {
+		keyTarget9, fieldTarget10, err := fieldsTarget1.StartField("Ui32")
+		if err != vdl.ErrFieldNoExist && err != nil {
+			return err
+		}
+		if err != vdl.ErrFieldNoExist {
+			if err := fieldTarget10.FromUint(uint64(m.Ui32), vdl.Uint32Type); err != nil {
+				return err
+			}
+			if err := fieldsTarget1.FinishField(keyTarget9, fieldTarget10); err != nil {
+				return err
+			}
+		}
+	}
+	var11 := (m.Ui64 == uint64(0))
+	if !var11 {
+		keyTarget12, fieldTarget13, err := fieldsTarget1.StartField("Ui64")
+		if err != vdl.ErrFieldNoExist && err != nil {
+			return err
+		}
+		if err != vdl.ErrFieldNoExist {
+			if err := fieldTarget13.FromUint(uint64(m.Ui64), vdl.Uint64Type); err != nil {
+				return err
+			}
+			if err := fieldsTarget1.FinishField(keyTarget12, fieldTarget13); err != nil {
+				return err
+			}
+		}
+	}
+	var14 := (m.I16 == int16(0))
+	if !var14 {
+		keyTarget15, fieldTarget16, err := fieldsTarget1.StartField("I16")
+		if err != vdl.ErrFieldNoExist && err != nil {
+			return err
+		}
+		if err != vdl.ErrFieldNoExist {
+			if err := fieldTarget16.FromInt(int64(m.I16), vdl.Int16Type); err != nil {
+				return err
+			}
+			if err := fieldsTarget1.FinishField(keyTarget15, fieldTarget16); err != nil {
+				return err
+			}
+		}
+	}
+	var17 := (m.I32 == int32(0))
+	if !var17 {
+		keyTarget18, fieldTarget19, err := fieldsTarget1.StartField("I32")
+		if err != vdl.ErrFieldNoExist && err != nil {
+			return err
+		}
+		if err != vdl.ErrFieldNoExist {
+			if err := fieldTarget19.FromInt(int64(m.I32), vdl.Int32Type); err != nil {
+				return err
+			}
+			if err := fieldsTarget1.FinishField(keyTarget18, fieldTarget19); err != nil {
+				return err
+			}
+		}
+	}
+	var20 := (m.I64 == int64(0))
+	if !var20 {
+		keyTarget21, fieldTarget22, err := fieldsTarget1.StartField("I64")
+		if err != vdl.ErrFieldNoExist && err != nil {
+			return err
+		}
+		if err != vdl.ErrFieldNoExist {
+			if err := fieldTarget22.FromInt(int64(m.I64), vdl.Int64Type); err != nil {
+				return err
+			}
+			if err := fieldsTarget1.FinishField(keyTarget21, fieldTarget22); err != nil {
+				return err
+			}
+		}
+	}
+	var23 := (m.F32 == float32(0))
+	if !var23 {
+		keyTarget24, fieldTarget25, err := fieldsTarget1.StartField("F32")
+		if err != vdl.ErrFieldNoExist && err != nil {
+			return err
+		}
+		if err != vdl.ErrFieldNoExist {
+			if err := fieldTarget25.FromFloat(float64(m.F32), vdl.Float32Type); err != nil {
+				return err
+			}
+			if err := fieldsTarget1.FinishField(keyTarget24, fieldTarget25); err != nil {
+				return err
+			}
+		}
+	}
+	var26 := (m.F64 == float64(0))
+	if !var26 {
+		keyTarget27, fieldTarget28, err := fieldsTarget1.StartField("F64")
+		if err != vdl.ErrFieldNoExist && err != nil {
+			return err
+		}
+		if err != vdl.ErrFieldNoExist {
+			if err := fieldTarget28.FromFloat(float64(m.F64), vdl.Float64Type); err != nil {
+				return err
+			}
+			if err := fieldsTarget1.FinishField(keyTarget27, fieldTarget28); err != nil {
+				return err
+			}
+		}
+	}
+	var29 := (m.C64 == complex64(0))
+	if !var29 {
+		keyTarget30, fieldTarget31, err := fieldsTarget1.StartField("C64")
+		if err != vdl.ErrFieldNoExist && err != nil {
+			return err
+		}
+		if err != vdl.ErrFieldNoExist {
+			if err := fieldTarget31.FromComplex(complex128(m.C64), vdl.Complex64Type); err != nil {
+				return err
+			}
+			if err := fieldsTarget1.FinishField(keyTarget30, fieldTarget31); err != nil {
+				return err
+			}
+		}
+	}
+	var32 := (m.C128 == complex128(0))
+	if !var32 {
+		keyTarget33, fieldTarget34, err := fieldsTarget1.StartField("C128")
+		if err != vdl.ErrFieldNoExist && err != nil {
+			return err
+		}
+		if err != vdl.ErrFieldNoExist {
+			if err := fieldTarget34.FromComplex(complex128(m.C128), vdl.Complex128Type); err != nil {
+				return err
+			}
+			if err := fieldsTarget1.FinishField(keyTarget33, fieldTarget34); err != nil {
+				return err
+			}
+		}
+	}
+	if err := t.FinishFields(fieldsTarget1); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (m *Numbers) MakeVDLTarget() vdl.Target {
+	return nil
+}
+
+func (m *Numbers) IsZero() bool {
+
+	var1 := (*m == Numbers{})
+	return var1
+}
+
 type FooType struct {
 	Bar BarType
 }
@@ -330,6 +1372,54 @@ func (FooType) __VDLReflect(struct {
 }) {
 }
 
+func (m *FooType) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
+
+	if __VDLType_db_objects_v_io_v23_query_engine_internal_testdata_FooType == nil || __VDLTypedb_objects11 == nil {
+		panic("Initialization order error: types generated for FillVDLTarget not initialized. Consider moving caller to an init() block.")
+	}
+	fieldsTarget1, err := t.StartFields(tt)
+	if err != nil {
+		return err
+	}
+
+	var2 := m.Bar.IsZero()
+	if !var2 {
+		keyTarget3, fieldTarget4, err := fieldsTarget1.StartField("Bar")
+		if err != vdl.ErrFieldNoExist && err != nil {
+			return err
+		}
+		if err != vdl.ErrFieldNoExist {
+
+			if err := m.Bar.FillVDLTarget(fieldTarget4, __VDLType_db_objects_v_io_v23_query_engine_internal_testdata_BarType); err != nil {
+				return err
+			}
+			if err := fieldsTarget1.FinishField(keyTarget3, fieldTarget4); err != nil {
+				return err
+			}
+		}
+	}
+	if err := t.FinishFields(fieldsTarget1); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (m *FooType) MakeVDLTarget() vdl.Target {
+	return nil
+}
+
+func (m *FooType) IsZero() bool {
+
+	var1 := (*m == FooType{
+		Bar: BarType{
+			Baz: BazType{
+				TitleOrValue: TitleOrValueTypeTitle{""},
+			},
+		},
+	})
+	return var1
+}
+
 type BarType struct {
 	Baz BazType
 }
@@ -337,6 +1427,52 @@ type BarType struct {
 func (BarType) __VDLReflect(struct {
 	Name string `vdl:"v.io/v23/query/engine/internal/testdata.BarType"`
 }) {
+}
+
+func (m *BarType) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
+
+	if __VDLType_db_objects_v_io_v23_query_engine_internal_testdata_BarType == nil || __VDLTypedb_objects12 == nil {
+		panic("Initialization order error: types generated for FillVDLTarget not initialized. Consider moving caller to an init() block.")
+	}
+	fieldsTarget1, err := t.StartFields(tt)
+	if err != nil {
+		return err
+	}
+
+	var2 := m.Baz.IsZero()
+	if !var2 {
+		keyTarget3, fieldTarget4, err := fieldsTarget1.StartField("Baz")
+		if err != vdl.ErrFieldNoExist && err != nil {
+			return err
+		}
+		if err != vdl.ErrFieldNoExist {
+
+			if err := m.Baz.FillVDLTarget(fieldTarget4, __VDLType_db_objects_v_io_v23_query_engine_internal_testdata_BazType); err != nil {
+				return err
+			}
+			if err := fieldsTarget1.FinishField(keyTarget3, fieldTarget4); err != nil {
+				return err
+			}
+		}
+	}
+	if err := t.FinishFields(fieldsTarget1); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (m *BarType) MakeVDLTarget() vdl.Target {
+	return nil
+}
+
+func (m *BarType) IsZero() bool {
+
+	var1 := (*m == BarType{
+		Baz: BazType{
+			TitleOrValue: TitleOrValueTypeTitle{""},
+		},
+	})
+	return var1
 }
 
 type (
@@ -350,6 +1486,8 @@ type (
 		Name() string
 		// __VDLReflect describes the TitleOrValueType union type.
 		__VDLReflect(__TitleOrValueTypeReflect)
+		FillVDLTarget(vdl.Target, *vdl.Type) error
+		IsZero() bool
 	}
 	// TitleOrValueTypeTitle represents field Title of the TitleOrValueType union type.
 	TitleOrValueTypeTitle struct{ Value string }
@@ -371,10 +1509,76 @@ func (x TitleOrValueTypeTitle) Interface() interface{}                 { return 
 func (x TitleOrValueTypeTitle) Name() string                           { return "Title" }
 func (x TitleOrValueTypeTitle) __VDLReflect(__TitleOrValueTypeReflect) {}
 
+func (m TitleOrValueTypeTitle) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
+
+	fieldsTarget1, err := t.StartFields(__VDLType_db_objects_v_io_v23_query_engine_internal_testdata_TitleOrValueType)
+	if err != nil {
+		return err
+	}
+	keyTarget2, fieldTarget3, err := fieldsTarget1.StartField("Title")
+	if err != nil {
+		return err
+	}
+	if err := fieldTarget3.FromString(string(m.Value), vdl.StringType); err != nil {
+		return err
+	}
+	if err := fieldsTarget1.FinishField(keyTarget2, fieldTarget3); err != nil {
+		return err
+	}
+	if err := t.FinishFields(fieldsTarget1); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (m TitleOrValueTypeTitle) MakeVDLTarget() vdl.Target {
+	return nil
+}
+
+func (m TitleOrValueTypeTitle) IsZero() bool {
+
+	var2 := (m.Value == "")
+	return var2
+}
+
 func (x TitleOrValueTypeValue) Index() int                             { return 1 }
 func (x TitleOrValueTypeValue) Interface() interface{}                 { return x.Value }
 func (x TitleOrValueTypeValue) Name() string                           { return "Value" }
 func (x TitleOrValueTypeValue) __VDLReflect(__TitleOrValueTypeReflect) {}
+
+func (m TitleOrValueTypeValue) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
+
+	fieldsTarget1, err := t.StartFields(__VDLType_db_objects_v_io_v23_query_engine_internal_testdata_TitleOrValueType)
+	if err != nil {
+		return err
+	}
+	keyTarget2, fieldTarget3, err := fieldsTarget1.StartField("Value")
+	if err != nil {
+		return err
+	}
+	if err := fieldTarget3.FromInt(int64(m.Value), vdl.Int64Type); err != nil {
+		return err
+	}
+	if err := fieldsTarget1.FinishField(keyTarget2, fieldTarget3); err != nil {
+		return err
+	}
+	if err := t.FinishFields(fieldsTarget1); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (m TitleOrValueTypeValue) MakeVDLTarget() vdl.Target {
+	return nil
+}
+
+func (m TitleOrValueTypeValue) IsZero() bool {
+
+	unionField2 := false
+	return unionField2
+}
 
 type BazType struct {
 	Name         string
@@ -384,6 +1588,69 @@ type BazType struct {
 func (BazType) __VDLReflect(struct {
 	Name string `vdl:"v.io/v23/query/engine/internal/testdata.BazType"`
 }) {
+}
+
+func (m *BazType) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
+
+	if __VDLType_db_objects_v_io_v23_query_engine_internal_testdata_BazType == nil || __VDLTypedb_objects13 == nil {
+		panic("Initialization order error: types generated for FillVDLTarget not initialized. Consider moving caller to an init() block.")
+	}
+	fieldsTarget1, err := t.StartFields(tt)
+	if err != nil {
+		return err
+	}
+
+	var2 := (m.Name == "")
+	if !var2 {
+		keyTarget3, fieldTarget4, err := fieldsTarget1.StartField("Name")
+		if err != vdl.ErrFieldNoExist && err != nil {
+			return err
+		}
+		if err != vdl.ErrFieldNoExist {
+			if err := fieldTarget4.FromString(string(m.Name), vdl.StringType); err != nil {
+				return err
+			}
+			if err := fieldsTarget1.FinishField(keyTarget3, fieldTarget4); err != nil {
+				return err
+			}
+		}
+	}
+	var5 := m.TitleOrValue.IsZero()
+	if !var5 {
+		keyTarget6, fieldTarget7, err := fieldsTarget1.StartField("TitleOrValue")
+		if err != vdl.ErrFieldNoExist && err != nil {
+			return err
+		}
+		if err != vdl.ErrFieldNoExist {
+
+			unionValue8 := m.TitleOrValue
+			if unionValue8 == nil {
+				unionValue8 = TitleOrValueTypeTitle{}
+			}
+			if err := unionValue8.FillVDLTarget(fieldTarget7, __VDLType_db_objects_v_io_v23_query_engine_internal_testdata_TitleOrValueType); err != nil {
+				return err
+			}
+			if err := fieldsTarget1.FinishField(keyTarget6, fieldTarget7); err != nil {
+				return err
+			}
+		}
+	}
+	if err := t.FinishFields(fieldsTarget1); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (m *BazType) MakeVDLTarget() vdl.Target {
+	return nil
+}
+
+func (m *BazType) IsZero() bool {
+
+	var1 := (*m == BazType{
+		TitleOrValue: TitleOrValueTypeTitle{""},
+	})
+	return var1
 }
 
 type K struct {
@@ -396,6 +1663,62 @@ func (K) __VDLReflect(struct {
 }) {
 }
 
+func (m *K) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
+
+	if __VDLType_db_objects_v_io_v23_query_engine_internal_testdata_K == nil || __VDLTypedb_objects14 == nil {
+		panic("Initialization order error: types generated for FillVDLTarget not initialized. Consider moving caller to an init() block.")
+	}
+	fieldsTarget1, err := t.StartFields(tt)
+	if err != nil {
+		return err
+	}
+
+	var2 := (m.A == byte(0))
+	if !var2 {
+		keyTarget3, fieldTarget4, err := fieldsTarget1.StartField("A")
+		if err != vdl.ErrFieldNoExist && err != nil {
+			return err
+		}
+		if err != vdl.ErrFieldNoExist {
+			if err := fieldTarget4.FromUint(uint64(m.A), vdl.ByteType); err != nil {
+				return err
+			}
+			if err := fieldsTarget1.FinishField(keyTarget3, fieldTarget4); err != nil {
+				return err
+			}
+		}
+	}
+	var5 := (m.B == "")
+	if !var5 {
+		keyTarget6, fieldTarget7, err := fieldsTarget1.StartField("B")
+		if err != vdl.ErrFieldNoExist && err != nil {
+			return err
+		}
+		if err != vdl.ErrFieldNoExist {
+			if err := fieldTarget7.FromString(string(m.B), vdl.StringType); err != nil {
+				return err
+			}
+			if err := fieldsTarget1.FinishField(keyTarget6, fieldTarget7); err != nil {
+				return err
+			}
+		}
+	}
+	if err := t.FinishFields(fieldsTarget1); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (m *K) MakeVDLTarget() vdl.Target {
+	return nil
+}
+
+func (m *K) IsZero() bool {
+
+	var1 := (*m == K{})
+	return var1
+}
+
 type V struct {
 	A string
 	B float32
@@ -404,6 +1727,62 @@ type V struct {
 func (V) __VDLReflect(struct {
 	Name string `vdl:"v.io/v23/query/engine/internal/testdata.V"`
 }) {
+}
+
+func (m *V) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
+
+	if __VDLType_db_objects_v_io_v23_query_engine_internal_testdata_V == nil || __VDLTypedb_objects15 == nil {
+		panic("Initialization order error: types generated for FillVDLTarget not initialized. Consider moving caller to an init() block.")
+	}
+	fieldsTarget1, err := t.StartFields(tt)
+	if err != nil {
+		return err
+	}
+
+	var2 := (m.A == "")
+	if !var2 {
+		keyTarget3, fieldTarget4, err := fieldsTarget1.StartField("A")
+		if err != vdl.ErrFieldNoExist && err != nil {
+			return err
+		}
+		if err != vdl.ErrFieldNoExist {
+			if err := fieldTarget4.FromString(string(m.A), vdl.StringType); err != nil {
+				return err
+			}
+			if err := fieldsTarget1.FinishField(keyTarget3, fieldTarget4); err != nil {
+				return err
+			}
+		}
+	}
+	var5 := (m.B == float32(0))
+	if !var5 {
+		keyTarget6, fieldTarget7, err := fieldsTarget1.StartField("B")
+		if err != vdl.ErrFieldNoExist && err != nil {
+			return err
+		}
+		if err != vdl.ErrFieldNoExist {
+			if err := fieldTarget7.FromFloat(float64(m.B), vdl.Float32Type); err != nil {
+				return err
+			}
+			if err := fieldsTarget1.FinishField(keyTarget6, fieldTarget7); err != nil {
+				return err
+			}
+		}
+	}
+	if err := t.FinishFields(fieldsTarget1); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (m *V) MakeVDLTarget() vdl.Target {
+	return nil
+}
+
+func (m *V) IsZero() bool {
+
+	var1 := (*m == V{})
+	return var1
 }
 
 type FunWithMaps struct {
@@ -417,6 +1796,180 @@ func (FunWithMaps) __VDLReflect(struct {
 }) {
 }
 
+func (m *FunWithMaps) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
+
+	if __VDLType_db_objects_v_io_v23_query_engine_internal_testdata_FunWithMaps == nil || __VDLTypedb_objects16 == nil {
+		panic("Initialization order error: types generated for FillVDLTarget not initialized. Consider moving caller to an init() block.")
+	}
+	fieldsTarget1, err := t.StartFields(tt)
+	if err != nil {
+		return err
+	}
+
+	var2 := m.Key.IsZero()
+	if !var2 {
+		keyTarget3, fieldTarget4, err := fieldsTarget1.StartField("Key")
+		if err != vdl.ErrFieldNoExist && err != nil {
+			return err
+		}
+		if err != vdl.ErrFieldNoExist {
+
+			if err := m.Key.FillVDLTarget(fieldTarget4, __VDLType_db_objects_v_io_v23_query_engine_internal_testdata_K); err != nil {
+				return err
+			}
+			if err := fieldsTarget1.FinishField(keyTarget3, fieldTarget4); err != nil {
+				return err
+			}
+		}
+	}
+	var var5 bool
+	if len(m.Map) == 0 {
+		var5 = true
+	}
+	if !var5 {
+		keyTarget6, fieldTarget7, err := fieldsTarget1.StartField("Map")
+		if err != vdl.ErrFieldNoExist && err != nil {
+			return err
+		}
+		if err != vdl.ErrFieldNoExist {
+
+			mapTarget8, err := fieldTarget7.StartMap(__VDLTypedb_objects17, len(m.Map))
+			if err != nil {
+				return err
+			}
+			for key10, value12 := range m.Map {
+				keyTarget9, err := mapTarget8.StartKey()
+				if err != nil {
+					return err
+				}
+
+				if err := key10.FillVDLTarget(keyTarget9, __VDLType_db_objects_v_io_v23_query_engine_internal_testdata_K); err != nil {
+					return err
+				}
+				valueTarget11, err := mapTarget8.FinishKeyStartField(keyTarget9)
+				if err != nil {
+					return err
+				}
+
+				if err := value12.FillVDLTarget(valueTarget11, __VDLType_db_objects_v_io_v23_query_engine_internal_testdata_V); err != nil {
+					return err
+				}
+				if err := mapTarget8.FinishField(keyTarget9, valueTarget11); err != nil {
+					return err
+				}
+			}
+			if err := fieldTarget7.FinishMap(mapTarget8); err != nil {
+				return err
+			}
+			if err := fieldsTarget1.FinishField(keyTarget6, fieldTarget7); err != nil {
+				return err
+			}
+		}
+	}
+	var var13 bool
+	if len(m.Confusing) == 0 {
+		var13 = true
+	}
+	if !var13 {
+		keyTarget14, fieldTarget15, err := fieldsTarget1.StartField("Confusing")
+		if err != vdl.ErrFieldNoExist && err != nil {
+			return err
+		}
+		if err != vdl.ErrFieldNoExist {
+
+			mapTarget16, err := fieldTarget15.StartMap(__VDLTypedb_objects18, len(m.Confusing))
+			if err != nil {
+				return err
+			}
+			for key18, value20 := range m.Confusing {
+				keyTarget17, err := mapTarget16.StartKey()
+				if err != nil {
+					return err
+				}
+				if err := keyTarget17.FromInt(int64(key18), vdl.Int16Type); err != nil {
+					return err
+				}
+				valueTarget19, err := mapTarget16.FinishKeyStartField(keyTarget17)
+				if err != nil {
+					return err
+				}
+
+				listTarget21, err := valueTarget19.StartList(__VDLTypedb_objects19, len(value20))
+				if err != nil {
+					return err
+				}
+				for i, elem23 := range value20 {
+					elemTarget22, err := listTarget21.StartElem(i)
+					if err != nil {
+						return err
+					}
+
+					setTarget24, err := elemTarget22.StartSet(__VDLTypedb_objects20, len(elem23))
+					if err != nil {
+						return err
+					}
+					for key26 := range elem23 {
+						keyTarget25, err := setTarget24.StartKey()
+						if err != nil {
+							return err
+						}
+						if err := keyTarget25.FromString(string(key26), vdl.StringType); err != nil {
+							return err
+						}
+						if err := setTarget24.FinishKey(keyTarget25); err != nil {
+							return err
+						}
+					}
+					if err := elemTarget22.FinishSet(setTarget24); err != nil {
+						return err
+					}
+					if err := listTarget21.FinishElem(elemTarget22); err != nil {
+						return err
+					}
+				}
+				if err := valueTarget19.FinishList(listTarget21); err != nil {
+					return err
+				}
+				if err := mapTarget16.FinishField(keyTarget17, valueTarget19); err != nil {
+					return err
+				}
+			}
+			if err := fieldTarget15.FinishMap(mapTarget16); err != nil {
+				return err
+			}
+			if err := fieldsTarget1.FinishField(keyTarget14, fieldTarget15); err != nil {
+				return err
+			}
+		}
+	}
+	if err := t.FinishFields(fieldsTarget1); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (m *FunWithMaps) MakeVDLTarget() vdl.Target {
+	return nil
+}
+
+func (m *FunWithMaps) IsZero() bool {
+
+	var1 := true
+	var2 := m.Key.IsZero()
+	var1 = var1 && var2
+	var var3 bool
+	if len(m.Map) == 0 {
+		var3 = true
+	}
+	var1 = var1 && var3
+	var var4 bool
+	if len(m.Confusing) == 0 {
+		var4 = true
+	}
+	var1 = var1 && var4
+	return var1
+}
+
 type FunWithTypes struct {
 	T1 *vdl.Type
 	T2 *vdl.Type
@@ -425,6 +1978,73 @@ type FunWithTypes struct {
 func (FunWithTypes) __VDLReflect(struct {
 	Name string `vdl:"v.io/v23/query/engine/internal/testdata.FunWithTypes"`
 }) {
+}
+
+func (m *FunWithTypes) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
+
+	if __VDLType_db_objects_v_io_v23_query_engine_internal_testdata_FunWithTypes == nil || __VDLTypedb_objects21 == nil {
+		panic("Initialization order error: types generated for FillVDLTarget not initialized. Consider moving caller to an init() block.")
+	}
+	fieldsTarget1, err := t.StartFields(tt)
+	if err != nil {
+		return err
+	}
+
+	var2 := (m.T1 == vdl.AnyType)
+	if !var2 {
+		keyTarget3, fieldTarget4, err := fieldsTarget1.StartField("T1")
+		if err != vdl.ErrFieldNoExist && err != nil {
+			return err
+		}
+		if err != vdl.ErrFieldNoExist {
+			typeObjectVal5 := m.T1
+			if typeObjectVal5 == nil {
+				typeObjectVal5 = vdl.AnyType
+			}
+			if err := fieldTarget4.FromTypeObject(typeObjectVal5); err != nil {
+				return err
+			}
+			if err := fieldsTarget1.FinishField(keyTarget3, fieldTarget4); err != nil {
+				return err
+			}
+		}
+	}
+	var6 := (m.T2 == vdl.AnyType)
+	if !var6 {
+		keyTarget7, fieldTarget8, err := fieldsTarget1.StartField("T2")
+		if err != vdl.ErrFieldNoExist && err != nil {
+			return err
+		}
+		if err != vdl.ErrFieldNoExist {
+			typeObjectVal9 := m.T2
+			if typeObjectVal9 == nil {
+				typeObjectVal9 = vdl.AnyType
+			}
+			if err := fieldTarget8.FromTypeObject(typeObjectVal9); err != nil {
+				return err
+			}
+			if err := fieldsTarget1.FinishField(keyTarget7, fieldTarget8); err != nil {
+				return err
+			}
+		}
+	}
+	if err := t.FinishFields(fieldsTarget1); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (m *FunWithTypes) MakeVDLTarget() vdl.Target {
+	return nil
+}
+
+func (m *FunWithTypes) IsZero() bool {
+
+	var1 := (*m == FunWithTypes{
+		T1: vdl.AnyType,
+		T2: vdl.AnyType,
+	})
+	return var1
 }
 
 type ManyMaps struct {
@@ -450,6 +2070,765 @@ func (ManyMaps) __VDLReflect(struct {
 }) {
 }
 
+func (m *ManyMaps) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
+
+	__VDLEnsureNativeBuilt_db_objects()
+	fieldsTarget1, err := t.StartFields(tt)
+	if err != nil {
+		return err
+	}
+
+	var var2 bool
+	if len(m.B) == 0 {
+		var2 = true
+	}
+	if !var2 {
+		keyTarget3, fieldTarget4, err := fieldsTarget1.StartField("B")
+		if err != vdl.ErrFieldNoExist && err != nil {
+			return err
+		}
+		if err != vdl.ErrFieldNoExist {
+
+			mapTarget5, err := fieldTarget4.StartMap(__VDLTypedb_objects23, len(m.B))
+			if err != nil {
+				return err
+			}
+			for key7, value9 := range m.B {
+				keyTarget6, err := mapTarget5.StartKey()
+				if err != nil {
+					return err
+				}
+				if err := keyTarget6.FromBool(bool(key7), vdl.BoolType); err != nil {
+					return err
+				}
+				valueTarget8, err := mapTarget5.FinishKeyStartField(keyTarget6)
+				if err != nil {
+					return err
+				}
+				if err := valueTarget8.FromString(string(value9), vdl.StringType); err != nil {
+					return err
+				}
+				if err := mapTarget5.FinishField(keyTarget6, valueTarget8); err != nil {
+					return err
+				}
+			}
+			if err := fieldTarget4.FinishMap(mapTarget5); err != nil {
+				return err
+			}
+			if err := fieldsTarget1.FinishField(keyTarget3, fieldTarget4); err != nil {
+				return err
+			}
+		}
+	}
+	var var10 bool
+	if len(m.By) == 0 {
+		var10 = true
+	}
+	if !var10 {
+		keyTarget11, fieldTarget12, err := fieldsTarget1.StartField("By")
+		if err != vdl.ErrFieldNoExist && err != nil {
+			return err
+		}
+		if err != vdl.ErrFieldNoExist {
+
+			mapTarget13, err := fieldTarget12.StartMap(__VDLTypedb_objects24, len(m.By))
+			if err != nil {
+				return err
+			}
+			for key15, value17 := range m.By {
+				keyTarget14, err := mapTarget13.StartKey()
+				if err != nil {
+					return err
+				}
+				if err := keyTarget14.FromUint(uint64(key15), vdl.ByteType); err != nil {
+					return err
+				}
+				valueTarget16, err := mapTarget13.FinishKeyStartField(keyTarget14)
+				if err != nil {
+					return err
+				}
+				if err := valueTarget16.FromString(string(value17), vdl.StringType); err != nil {
+					return err
+				}
+				if err := mapTarget13.FinishField(keyTarget14, valueTarget16); err != nil {
+					return err
+				}
+			}
+			if err := fieldTarget12.FinishMap(mapTarget13); err != nil {
+				return err
+			}
+			if err := fieldsTarget1.FinishField(keyTarget11, fieldTarget12); err != nil {
+				return err
+			}
+		}
+	}
+	var var18 bool
+	if len(m.U16) == 0 {
+		var18 = true
+	}
+	if !var18 {
+		keyTarget19, fieldTarget20, err := fieldsTarget1.StartField("U16")
+		if err != vdl.ErrFieldNoExist && err != nil {
+			return err
+		}
+		if err != vdl.ErrFieldNoExist {
+
+			mapTarget21, err := fieldTarget20.StartMap(__VDLTypedb_objects25, len(m.U16))
+			if err != nil {
+				return err
+			}
+			for key23, value25 := range m.U16 {
+				keyTarget22, err := mapTarget21.StartKey()
+				if err != nil {
+					return err
+				}
+				if err := keyTarget22.FromUint(uint64(key23), vdl.Uint16Type); err != nil {
+					return err
+				}
+				valueTarget24, err := mapTarget21.FinishKeyStartField(keyTarget22)
+				if err != nil {
+					return err
+				}
+				if err := valueTarget24.FromString(string(value25), vdl.StringType); err != nil {
+					return err
+				}
+				if err := mapTarget21.FinishField(keyTarget22, valueTarget24); err != nil {
+					return err
+				}
+			}
+			if err := fieldTarget20.FinishMap(mapTarget21); err != nil {
+				return err
+			}
+			if err := fieldsTarget1.FinishField(keyTarget19, fieldTarget20); err != nil {
+				return err
+			}
+		}
+	}
+	var var26 bool
+	if len(m.U32) == 0 {
+		var26 = true
+	}
+	if !var26 {
+		keyTarget27, fieldTarget28, err := fieldsTarget1.StartField("U32")
+		if err != vdl.ErrFieldNoExist && err != nil {
+			return err
+		}
+		if err != vdl.ErrFieldNoExist {
+
+			mapTarget29, err := fieldTarget28.StartMap(__VDLTypedb_objects26, len(m.U32))
+			if err != nil {
+				return err
+			}
+			for key31, value33 := range m.U32 {
+				keyTarget30, err := mapTarget29.StartKey()
+				if err != nil {
+					return err
+				}
+				if err := keyTarget30.FromUint(uint64(key31), vdl.Uint32Type); err != nil {
+					return err
+				}
+				valueTarget32, err := mapTarget29.FinishKeyStartField(keyTarget30)
+				if err != nil {
+					return err
+				}
+				if err := valueTarget32.FromString(string(value33), vdl.StringType); err != nil {
+					return err
+				}
+				if err := mapTarget29.FinishField(keyTarget30, valueTarget32); err != nil {
+					return err
+				}
+			}
+			if err := fieldTarget28.FinishMap(mapTarget29); err != nil {
+				return err
+			}
+			if err := fieldsTarget1.FinishField(keyTarget27, fieldTarget28); err != nil {
+				return err
+			}
+		}
+	}
+	var var34 bool
+	if len(m.U64) == 0 {
+		var34 = true
+	}
+	if !var34 {
+		keyTarget35, fieldTarget36, err := fieldsTarget1.StartField("U64")
+		if err != vdl.ErrFieldNoExist && err != nil {
+			return err
+		}
+		if err != vdl.ErrFieldNoExist {
+
+			mapTarget37, err := fieldTarget36.StartMap(__VDLTypedb_objects27, len(m.U64))
+			if err != nil {
+				return err
+			}
+			for key39, value41 := range m.U64 {
+				keyTarget38, err := mapTarget37.StartKey()
+				if err != nil {
+					return err
+				}
+				if err := keyTarget38.FromUint(uint64(key39), vdl.Uint64Type); err != nil {
+					return err
+				}
+				valueTarget40, err := mapTarget37.FinishKeyStartField(keyTarget38)
+				if err != nil {
+					return err
+				}
+				if err := valueTarget40.FromString(string(value41), vdl.StringType); err != nil {
+					return err
+				}
+				if err := mapTarget37.FinishField(keyTarget38, valueTarget40); err != nil {
+					return err
+				}
+			}
+			if err := fieldTarget36.FinishMap(mapTarget37); err != nil {
+				return err
+			}
+			if err := fieldsTarget1.FinishField(keyTarget35, fieldTarget36); err != nil {
+				return err
+			}
+		}
+	}
+	var var42 bool
+	if len(m.I16) == 0 {
+		var42 = true
+	}
+	if !var42 {
+		keyTarget43, fieldTarget44, err := fieldsTarget1.StartField("I16")
+		if err != vdl.ErrFieldNoExist && err != nil {
+			return err
+		}
+		if err != vdl.ErrFieldNoExist {
+
+			mapTarget45, err := fieldTarget44.StartMap(__VDLTypedb_objects28, len(m.I16))
+			if err != nil {
+				return err
+			}
+			for key47, value49 := range m.I16 {
+				keyTarget46, err := mapTarget45.StartKey()
+				if err != nil {
+					return err
+				}
+				if err := keyTarget46.FromInt(int64(key47), vdl.Int16Type); err != nil {
+					return err
+				}
+				valueTarget48, err := mapTarget45.FinishKeyStartField(keyTarget46)
+				if err != nil {
+					return err
+				}
+				if err := valueTarget48.FromString(string(value49), vdl.StringType); err != nil {
+					return err
+				}
+				if err := mapTarget45.FinishField(keyTarget46, valueTarget48); err != nil {
+					return err
+				}
+			}
+			if err := fieldTarget44.FinishMap(mapTarget45); err != nil {
+				return err
+			}
+			if err := fieldsTarget1.FinishField(keyTarget43, fieldTarget44); err != nil {
+				return err
+			}
+		}
+	}
+	var var50 bool
+	if len(m.I32) == 0 {
+		var50 = true
+	}
+	if !var50 {
+		keyTarget51, fieldTarget52, err := fieldsTarget1.StartField("I32")
+		if err != vdl.ErrFieldNoExist && err != nil {
+			return err
+		}
+		if err != vdl.ErrFieldNoExist {
+
+			mapTarget53, err := fieldTarget52.StartMap(__VDLTypedb_objects29, len(m.I32))
+			if err != nil {
+				return err
+			}
+			for key55, value57 := range m.I32 {
+				keyTarget54, err := mapTarget53.StartKey()
+				if err != nil {
+					return err
+				}
+				if err := keyTarget54.FromInt(int64(key55), vdl.Int32Type); err != nil {
+					return err
+				}
+				valueTarget56, err := mapTarget53.FinishKeyStartField(keyTarget54)
+				if err != nil {
+					return err
+				}
+				if err := valueTarget56.FromString(string(value57), vdl.StringType); err != nil {
+					return err
+				}
+				if err := mapTarget53.FinishField(keyTarget54, valueTarget56); err != nil {
+					return err
+				}
+			}
+			if err := fieldTarget52.FinishMap(mapTarget53); err != nil {
+				return err
+			}
+			if err := fieldsTarget1.FinishField(keyTarget51, fieldTarget52); err != nil {
+				return err
+			}
+		}
+	}
+	var var58 bool
+	if len(m.I64) == 0 {
+		var58 = true
+	}
+	if !var58 {
+		keyTarget59, fieldTarget60, err := fieldsTarget1.StartField("I64")
+		if err != vdl.ErrFieldNoExist && err != nil {
+			return err
+		}
+		if err != vdl.ErrFieldNoExist {
+
+			mapTarget61, err := fieldTarget60.StartMap(__VDLTypedb_objects30, len(m.I64))
+			if err != nil {
+				return err
+			}
+			for key63, value65 := range m.I64 {
+				keyTarget62, err := mapTarget61.StartKey()
+				if err != nil {
+					return err
+				}
+				if err := keyTarget62.FromInt(int64(key63), vdl.Int64Type); err != nil {
+					return err
+				}
+				valueTarget64, err := mapTarget61.FinishKeyStartField(keyTarget62)
+				if err != nil {
+					return err
+				}
+				if err := valueTarget64.FromString(string(value65), vdl.StringType); err != nil {
+					return err
+				}
+				if err := mapTarget61.FinishField(keyTarget62, valueTarget64); err != nil {
+					return err
+				}
+			}
+			if err := fieldTarget60.FinishMap(mapTarget61); err != nil {
+				return err
+			}
+			if err := fieldsTarget1.FinishField(keyTarget59, fieldTarget60); err != nil {
+				return err
+			}
+		}
+	}
+	var var66 bool
+	if len(m.F32) == 0 {
+		var66 = true
+	}
+	if !var66 {
+		keyTarget67, fieldTarget68, err := fieldsTarget1.StartField("F32")
+		if err != vdl.ErrFieldNoExist && err != nil {
+			return err
+		}
+		if err != vdl.ErrFieldNoExist {
+
+			mapTarget69, err := fieldTarget68.StartMap(__VDLTypedb_objects31, len(m.F32))
+			if err != nil {
+				return err
+			}
+			for key71, value73 := range m.F32 {
+				keyTarget70, err := mapTarget69.StartKey()
+				if err != nil {
+					return err
+				}
+				if err := keyTarget70.FromFloat(float64(key71), vdl.Float32Type); err != nil {
+					return err
+				}
+				valueTarget72, err := mapTarget69.FinishKeyStartField(keyTarget70)
+				if err != nil {
+					return err
+				}
+				if err := valueTarget72.FromString(string(value73), vdl.StringType); err != nil {
+					return err
+				}
+				if err := mapTarget69.FinishField(keyTarget70, valueTarget72); err != nil {
+					return err
+				}
+			}
+			if err := fieldTarget68.FinishMap(mapTarget69); err != nil {
+				return err
+			}
+			if err := fieldsTarget1.FinishField(keyTarget67, fieldTarget68); err != nil {
+				return err
+			}
+		}
+	}
+	var var74 bool
+	if len(m.F64) == 0 {
+		var74 = true
+	}
+	if !var74 {
+		keyTarget75, fieldTarget76, err := fieldsTarget1.StartField("F64")
+		if err != vdl.ErrFieldNoExist && err != nil {
+			return err
+		}
+		if err != vdl.ErrFieldNoExist {
+
+			mapTarget77, err := fieldTarget76.StartMap(__VDLTypedb_objects32, len(m.F64))
+			if err != nil {
+				return err
+			}
+			for key79, value81 := range m.F64 {
+				keyTarget78, err := mapTarget77.StartKey()
+				if err != nil {
+					return err
+				}
+				if err := keyTarget78.FromFloat(float64(key79), vdl.Float64Type); err != nil {
+					return err
+				}
+				valueTarget80, err := mapTarget77.FinishKeyStartField(keyTarget78)
+				if err != nil {
+					return err
+				}
+				if err := valueTarget80.FromString(string(value81), vdl.StringType); err != nil {
+					return err
+				}
+				if err := mapTarget77.FinishField(keyTarget78, valueTarget80); err != nil {
+					return err
+				}
+			}
+			if err := fieldTarget76.FinishMap(mapTarget77); err != nil {
+				return err
+			}
+			if err := fieldsTarget1.FinishField(keyTarget75, fieldTarget76); err != nil {
+				return err
+			}
+		}
+	}
+	var var82 bool
+	if len(m.C64) == 0 {
+		var82 = true
+	}
+	if !var82 {
+		keyTarget83, fieldTarget84, err := fieldsTarget1.StartField("C64")
+		if err != vdl.ErrFieldNoExist && err != nil {
+			return err
+		}
+		if err != vdl.ErrFieldNoExist {
+
+			mapTarget85, err := fieldTarget84.StartMap(__VDLTypedb_objects33, len(m.C64))
+			if err != nil {
+				return err
+			}
+			for key87, value89 := range m.C64 {
+				keyTarget86, err := mapTarget85.StartKey()
+				if err != nil {
+					return err
+				}
+				if err := keyTarget86.FromComplex(complex128(key87), vdl.Complex64Type); err != nil {
+					return err
+				}
+				valueTarget88, err := mapTarget85.FinishKeyStartField(keyTarget86)
+				if err != nil {
+					return err
+				}
+				if err := valueTarget88.FromString(string(value89), vdl.StringType); err != nil {
+					return err
+				}
+				if err := mapTarget85.FinishField(keyTarget86, valueTarget88); err != nil {
+					return err
+				}
+			}
+			if err := fieldTarget84.FinishMap(mapTarget85); err != nil {
+				return err
+			}
+			if err := fieldsTarget1.FinishField(keyTarget83, fieldTarget84); err != nil {
+				return err
+			}
+		}
+	}
+	var var90 bool
+	if len(m.C128) == 0 {
+		var90 = true
+	}
+	if !var90 {
+		keyTarget91, fieldTarget92, err := fieldsTarget1.StartField("C128")
+		if err != vdl.ErrFieldNoExist && err != nil {
+			return err
+		}
+		if err != vdl.ErrFieldNoExist {
+
+			mapTarget93, err := fieldTarget92.StartMap(__VDLTypedb_objects34, len(m.C128))
+			if err != nil {
+				return err
+			}
+			for key95, value97 := range m.C128 {
+				keyTarget94, err := mapTarget93.StartKey()
+				if err != nil {
+					return err
+				}
+				if err := keyTarget94.FromComplex(complex128(key95), vdl.Complex128Type); err != nil {
+					return err
+				}
+				valueTarget96, err := mapTarget93.FinishKeyStartField(keyTarget94)
+				if err != nil {
+					return err
+				}
+				if err := valueTarget96.FromString(string(value97), vdl.StringType); err != nil {
+					return err
+				}
+				if err := mapTarget93.FinishField(keyTarget94, valueTarget96); err != nil {
+					return err
+				}
+			}
+			if err := fieldTarget92.FinishMap(mapTarget93); err != nil {
+				return err
+			}
+			if err := fieldsTarget1.FinishField(keyTarget91, fieldTarget92); err != nil {
+				return err
+			}
+		}
+	}
+	var var98 bool
+	if len(m.S) == 0 {
+		var98 = true
+	}
+	if !var98 {
+		keyTarget99, fieldTarget100, err := fieldsTarget1.StartField("S")
+		if err != vdl.ErrFieldNoExist && err != nil {
+			return err
+		}
+		if err != vdl.ErrFieldNoExist {
+
+			mapTarget101, err := fieldTarget100.StartMap(__VDLTypedb_objects35, len(m.S))
+			if err != nil {
+				return err
+			}
+			for key103, value105 := range m.S {
+				keyTarget102, err := mapTarget101.StartKey()
+				if err != nil {
+					return err
+				}
+				if err := keyTarget102.FromString(string(key103), vdl.StringType); err != nil {
+					return err
+				}
+				valueTarget104, err := mapTarget101.FinishKeyStartField(keyTarget102)
+				if err != nil {
+					return err
+				}
+				if err := valueTarget104.FromString(string(value105), vdl.StringType); err != nil {
+					return err
+				}
+				if err := mapTarget101.FinishField(keyTarget102, valueTarget104); err != nil {
+					return err
+				}
+			}
+			if err := fieldTarget100.FinishMap(mapTarget101); err != nil {
+				return err
+			}
+			if err := fieldsTarget1.FinishField(keyTarget99, fieldTarget100); err != nil {
+				return err
+			}
+		}
+	}
+	var var106 bool
+	if len(m.Ms) == 0 {
+		var106 = true
+	}
+	if !var106 {
+		keyTarget107, fieldTarget108, err := fieldsTarget1.StartField("Ms")
+		if err != vdl.ErrFieldNoExist && err != nil {
+			return err
+		}
+		if err != vdl.ErrFieldNoExist {
+
+			mapTarget109, err := fieldTarget108.StartMap(__VDLTypedb_objects36, len(m.Ms))
+			if err != nil {
+				return err
+			}
+			for key111, value113 := range m.Ms {
+				keyTarget110, err := mapTarget109.StartKey()
+				if err != nil {
+					return err
+				}
+				if err := keyTarget110.FromString(string(key111), vdl.StringType); err != nil {
+					return err
+				}
+				valueTarget112, err := mapTarget109.FinishKeyStartField(keyTarget110)
+				if err != nil {
+					return err
+				}
+
+				mapTarget114, err := valueTarget112.StartMap(__VDLTypedb_objects35, len(value113))
+				if err != nil {
+					return err
+				}
+				for key116, value118 := range value113 {
+					keyTarget115, err := mapTarget114.StartKey()
+					if err != nil {
+						return err
+					}
+					if err := keyTarget115.FromString(string(key116), vdl.StringType); err != nil {
+						return err
+					}
+					valueTarget117, err := mapTarget114.FinishKeyStartField(keyTarget115)
+					if err != nil {
+						return err
+					}
+					if err := valueTarget117.FromString(string(value118), vdl.StringType); err != nil {
+						return err
+					}
+					if err := mapTarget114.FinishField(keyTarget115, valueTarget117); err != nil {
+						return err
+					}
+				}
+				if err := valueTarget112.FinishMap(mapTarget114); err != nil {
+					return err
+				}
+				if err := mapTarget109.FinishField(keyTarget110, valueTarget112); err != nil {
+					return err
+				}
+			}
+			if err := fieldTarget108.FinishMap(mapTarget109); err != nil {
+				return err
+			}
+			if err := fieldsTarget1.FinishField(keyTarget107, fieldTarget108); err != nil {
+				return err
+			}
+		}
+	}
+	var var119 bool
+	if len(m.T) == 0 {
+		var119 = true
+	}
+	if !var119 {
+		keyTarget120, fieldTarget121, err := fieldsTarget1.StartField("T")
+		if err != vdl.ErrFieldNoExist && err != nil {
+			return err
+		}
+		if err != vdl.ErrFieldNoExist {
+
+			mapTarget122, err := fieldTarget121.StartMap(__VDLTypedb_objects37, len(m.T))
+			if err != nil {
+				return err
+			}
+			for key124, value126 := range m.T {
+				keyTarget123, err := mapTarget122.StartKey()
+				if err != nil {
+					return err
+				}
+
+				var wireValue127 time_2.Time
+				if err := time_2.TimeFromNative(&wireValue127, key124); err != nil {
+					return err
+				}
+
+				if err := wireValue127.FillVDLTarget(keyTarget123, __VDLType_db_objects_time_Time); err != nil {
+					return err
+				}
+				valueTarget125, err := mapTarget122.FinishKeyStartField(keyTarget123)
+				if err != nil {
+					return err
+				}
+				if err := valueTarget125.FromString(string(value126), vdl.StringType); err != nil {
+					return err
+				}
+				if err := mapTarget122.FinishField(keyTarget123, valueTarget125); err != nil {
+					return err
+				}
+			}
+			if err := fieldTarget121.FinishMap(mapTarget122); err != nil {
+				return err
+			}
+			if err := fieldsTarget1.FinishField(keyTarget120, fieldTarget121); err != nil {
+				return err
+			}
+		}
+	}
+	if err := t.FinishFields(fieldsTarget1); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (m *ManyMaps) MakeVDLTarget() vdl.Target {
+	return nil
+}
+
+func (m *ManyMaps) IsZero() bool {
+
+	var1 := true
+	var var2 bool
+	if len(m.B) == 0 {
+		var2 = true
+	}
+	var1 = var1 && var2
+	var var3 bool
+	if len(m.By) == 0 {
+		var3 = true
+	}
+	var1 = var1 && var3
+	var var4 bool
+	if len(m.U16) == 0 {
+		var4 = true
+	}
+	var1 = var1 && var4
+	var var5 bool
+	if len(m.U32) == 0 {
+		var5 = true
+	}
+	var1 = var1 && var5
+	var var6 bool
+	if len(m.U64) == 0 {
+		var6 = true
+	}
+	var1 = var1 && var6
+	var var7 bool
+	if len(m.I16) == 0 {
+		var7 = true
+	}
+	var1 = var1 && var7
+	var var8 bool
+	if len(m.I32) == 0 {
+		var8 = true
+	}
+	var1 = var1 && var8
+	var var9 bool
+	if len(m.I64) == 0 {
+		var9 = true
+	}
+	var1 = var1 && var9
+	var var10 bool
+	if len(m.F32) == 0 {
+		var10 = true
+	}
+	var1 = var1 && var10
+	var var11 bool
+	if len(m.F64) == 0 {
+		var11 = true
+	}
+	var1 = var1 && var11
+	var var12 bool
+	if len(m.C64) == 0 {
+		var12 = true
+	}
+	var1 = var1 && var12
+	var var13 bool
+	if len(m.C128) == 0 {
+		var13 = true
+	}
+	var1 = var1 && var13
+	var var14 bool
+	if len(m.S) == 0 {
+		var14 = true
+	}
+	var1 = var1 && var14
+	var var15 bool
+	if len(m.Ms) == 0 {
+		var15 = true
+	}
+	var1 = var1 && var15
+	var var16 bool
+	if len(m.T) == 0 {
+		var16 = true
+	}
+	var1 = var1 && var16
+	return var1
+}
+
 type ManySets struct {
 	B    map[bool]struct{}
 	By   map[byte]struct{}
@@ -472,6 +2851,596 @@ func (ManySets) __VDLReflect(struct {
 }) {
 }
 
+func (m *ManySets) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
+
+	__VDLEnsureNativeBuilt_db_objects()
+	fieldsTarget1, err := t.StartFields(tt)
+	if err != nil {
+		return err
+	}
+
+	var var2 bool
+	if len(m.B) == 0 {
+		var2 = true
+	}
+	if !var2 {
+		keyTarget3, fieldTarget4, err := fieldsTarget1.StartField("B")
+		if err != vdl.ErrFieldNoExist && err != nil {
+			return err
+		}
+		if err != vdl.ErrFieldNoExist {
+
+			setTarget5, err := fieldTarget4.StartSet(__VDLTypedb_objects39, len(m.B))
+			if err != nil {
+				return err
+			}
+			for key7 := range m.B {
+				keyTarget6, err := setTarget5.StartKey()
+				if err != nil {
+					return err
+				}
+				if err := keyTarget6.FromBool(bool(key7), vdl.BoolType); err != nil {
+					return err
+				}
+				if err := setTarget5.FinishKey(keyTarget6); err != nil {
+					return err
+				}
+			}
+			if err := fieldTarget4.FinishSet(setTarget5); err != nil {
+				return err
+			}
+			if err := fieldsTarget1.FinishField(keyTarget3, fieldTarget4); err != nil {
+				return err
+			}
+		}
+	}
+	var var8 bool
+	if len(m.By) == 0 {
+		var8 = true
+	}
+	if !var8 {
+		keyTarget9, fieldTarget10, err := fieldsTarget1.StartField("By")
+		if err != vdl.ErrFieldNoExist && err != nil {
+			return err
+		}
+		if err != vdl.ErrFieldNoExist {
+
+			setTarget11, err := fieldTarget10.StartSet(__VDLTypedb_objects40, len(m.By))
+			if err != nil {
+				return err
+			}
+			for key13 := range m.By {
+				keyTarget12, err := setTarget11.StartKey()
+				if err != nil {
+					return err
+				}
+				if err := keyTarget12.FromUint(uint64(key13), vdl.ByteType); err != nil {
+					return err
+				}
+				if err := setTarget11.FinishKey(keyTarget12); err != nil {
+					return err
+				}
+			}
+			if err := fieldTarget10.FinishSet(setTarget11); err != nil {
+				return err
+			}
+			if err := fieldsTarget1.FinishField(keyTarget9, fieldTarget10); err != nil {
+				return err
+			}
+		}
+	}
+	var var14 bool
+	if len(m.U16) == 0 {
+		var14 = true
+	}
+	if !var14 {
+		keyTarget15, fieldTarget16, err := fieldsTarget1.StartField("U16")
+		if err != vdl.ErrFieldNoExist && err != nil {
+			return err
+		}
+		if err != vdl.ErrFieldNoExist {
+
+			setTarget17, err := fieldTarget16.StartSet(__VDLTypedb_objects41, len(m.U16))
+			if err != nil {
+				return err
+			}
+			for key19 := range m.U16 {
+				keyTarget18, err := setTarget17.StartKey()
+				if err != nil {
+					return err
+				}
+				if err := keyTarget18.FromUint(uint64(key19), vdl.Uint16Type); err != nil {
+					return err
+				}
+				if err := setTarget17.FinishKey(keyTarget18); err != nil {
+					return err
+				}
+			}
+			if err := fieldTarget16.FinishSet(setTarget17); err != nil {
+				return err
+			}
+			if err := fieldsTarget1.FinishField(keyTarget15, fieldTarget16); err != nil {
+				return err
+			}
+		}
+	}
+	var var20 bool
+	if len(m.U32) == 0 {
+		var20 = true
+	}
+	if !var20 {
+		keyTarget21, fieldTarget22, err := fieldsTarget1.StartField("U32")
+		if err != vdl.ErrFieldNoExist && err != nil {
+			return err
+		}
+		if err != vdl.ErrFieldNoExist {
+
+			setTarget23, err := fieldTarget22.StartSet(__VDLTypedb_objects42, len(m.U32))
+			if err != nil {
+				return err
+			}
+			for key25 := range m.U32 {
+				keyTarget24, err := setTarget23.StartKey()
+				if err != nil {
+					return err
+				}
+				if err := keyTarget24.FromUint(uint64(key25), vdl.Uint32Type); err != nil {
+					return err
+				}
+				if err := setTarget23.FinishKey(keyTarget24); err != nil {
+					return err
+				}
+			}
+			if err := fieldTarget22.FinishSet(setTarget23); err != nil {
+				return err
+			}
+			if err := fieldsTarget1.FinishField(keyTarget21, fieldTarget22); err != nil {
+				return err
+			}
+		}
+	}
+	var var26 bool
+	if len(m.U64) == 0 {
+		var26 = true
+	}
+	if !var26 {
+		keyTarget27, fieldTarget28, err := fieldsTarget1.StartField("U64")
+		if err != vdl.ErrFieldNoExist && err != nil {
+			return err
+		}
+		if err != vdl.ErrFieldNoExist {
+
+			setTarget29, err := fieldTarget28.StartSet(__VDLTypedb_objects43, len(m.U64))
+			if err != nil {
+				return err
+			}
+			for key31 := range m.U64 {
+				keyTarget30, err := setTarget29.StartKey()
+				if err != nil {
+					return err
+				}
+				if err := keyTarget30.FromUint(uint64(key31), vdl.Uint64Type); err != nil {
+					return err
+				}
+				if err := setTarget29.FinishKey(keyTarget30); err != nil {
+					return err
+				}
+			}
+			if err := fieldTarget28.FinishSet(setTarget29); err != nil {
+				return err
+			}
+			if err := fieldsTarget1.FinishField(keyTarget27, fieldTarget28); err != nil {
+				return err
+			}
+		}
+	}
+	var var32 bool
+	if len(m.I16) == 0 {
+		var32 = true
+	}
+	if !var32 {
+		keyTarget33, fieldTarget34, err := fieldsTarget1.StartField("I16")
+		if err != vdl.ErrFieldNoExist && err != nil {
+			return err
+		}
+		if err != vdl.ErrFieldNoExist {
+
+			setTarget35, err := fieldTarget34.StartSet(__VDLTypedb_objects44, len(m.I16))
+			if err != nil {
+				return err
+			}
+			for key37 := range m.I16 {
+				keyTarget36, err := setTarget35.StartKey()
+				if err != nil {
+					return err
+				}
+				if err := keyTarget36.FromInt(int64(key37), vdl.Int16Type); err != nil {
+					return err
+				}
+				if err := setTarget35.FinishKey(keyTarget36); err != nil {
+					return err
+				}
+			}
+			if err := fieldTarget34.FinishSet(setTarget35); err != nil {
+				return err
+			}
+			if err := fieldsTarget1.FinishField(keyTarget33, fieldTarget34); err != nil {
+				return err
+			}
+		}
+	}
+	var var38 bool
+	if len(m.I32) == 0 {
+		var38 = true
+	}
+	if !var38 {
+		keyTarget39, fieldTarget40, err := fieldsTarget1.StartField("I32")
+		if err != vdl.ErrFieldNoExist && err != nil {
+			return err
+		}
+		if err != vdl.ErrFieldNoExist {
+
+			setTarget41, err := fieldTarget40.StartSet(__VDLTypedb_objects45, len(m.I32))
+			if err != nil {
+				return err
+			}
+			for key43 := range m.I32 {
+				keyTarget42, err := setTarget41.StartKey()
+				if err != nil {
+					return err
+				}
+				if err := keyTarget42.FromInt(int64(key43), vdl.Int32Type); err != nil {
+					return err
+				}
+				if err := setTarget41.FinishKey(keyTarget42); err != nil {
+					return err
+				}
+			}
+			if err := fieldTarget40.FinishSet(setTarget41); err != nil {
+				return err
+			}
+			if err := fieldsTarget1.FinishField(keyTarget39, fieldTarget40); err != nil {
+				return err
+			}
+		}
+	}
+	var var44 bool
+	if len(m.I64) == 0 {
+		var44 = true
+	}
+	if !var44 {
+		keyTarget45, fieldTarget46, err := fieldsTarget1.StartField("I64")
+		if err != vdl.ErrFieldNoExist && err != nil {
+			return err
+		}
+		if err != vdl.ErrFieldNoExist {
+
+			setTarget47, err := fieldTarget46.StartSet(__VDLTypedb_objects46, len(m.I64))
+			if err != nil {
+				return err
+			}
+			for key49 := range m.I64 {
+				keyTarget48, err := setTarget47.StartKey()
+				if err != nil {
+					return err
+				}
+				if err := keyTarget48.FromInt(int64(key49), vdl.Int64Type); err != nil {
+					return err
+				}
+				if err := setTarget47.FinishKey(keyTarget48); err != nil {
+					return err
+				}
+			}
+			if err := fieldTarget46.FinishSet(setTarget47); err != nil {
+				return err
+			}
+			if err := fieldsTarget1.FinishField(keyTarget45, fieldTarget46); err != nil {
+				return err
+			}
+		}
+	}
+	var var50 bool
+	if len(m.F32) == 0 {
+		var50 = true
+	}
+	if !var50 {
+		keyTarget51, fieldTarget52, err := fieldsTarget1.StartField("F32")
+		if err != vdl.ErrFieldNoExist && err != nil {
+			return err
+		}
+		if err != vdl.ErrFieldNoExist {
+
+			setTarget53, err := fieldTarget52.StartSet(__VDLTypedb_objects47, len(m.F32))
+			if err != nil {
+				return err
+			}
+			for key55 := range m.F32 {
+				keyTarget54, err := setTarget53.StartKey()
+				if err != nil {
+					return err
+				}
+				if err := keyTarget54.FromFloat(float64(key55), vdl.Float32Type); err != nil {
+					return err
+				}
+				if err := setTarget53.FinishKey(keyTarget54); err != nil {
+					return err
+				}
+			}
+			if err := fieldTarget52.FinishSet(setTarget53); err != nil {
+				return err
+			}
+			if err := fieldsTarget1.FinishField(keyTarget51, fieldTarget52); err != nil {
+				return err
+			}
+		}
+	}
+	var var56 bool
+	if len(m.F64) == 0 {
+		var56 = true
+	}
+	if !var56 {
+		keyTarget57, fieldTarget58, err := fieldsTarget1.StartField("F64")
+		if err != vdl.ErrFieldNoExist && err != nil {
+			return err
+		}
+		if err != vdl.ErrFieldNoExist {
+
+			setTarget59, err := fieldTarget58.StartSet(__VDLTypedb_objects48, len(m.F64))
+			if err != nil {
+				return err
+			}
+			for key61 := range m.F64 {
+				keyTarget60, err := setTarget59.StartKey()
+				if err != nil {
+					return err
+				}
+				if err := keyTarget60.FromFloat(float64(key61), vdl.Float64Type); err != nil {
+					return err
+				}
+				if err := setTarget59.FinishKey(keyTarget60); err != nil {
+					return err
+				}
+			}
+			if err := fieldTarget58.FinishSet(setTarget59); err != nil {
+				return err
+			}
+			if err := fieldsTarget1.FinishField(keyTarget57, fieldTarget58); err != nil {
+				return err
+			}
+		}
+	}
+	var var62 bool
+	if len(m.C64) == 0 {
+		var62 = true
+	}
+	if !var62 {
+		keyTarget63, fieldTarget64, err := fieldsTarget1.StartField("C64")
+		if err != vdl.ErrFieldNoExist && err != nil {
+			return err
+		}
+		if err != vdl.ErrFieldNoExist {
+
+			setTarget65, err := fieldTarget64.StartSet(__VDLTypedb_objects49, len(m.C64))
+			if err != nil {
+				return err
+			}
+			for key67 := range m.C64 {
+				keyTarget66, err := setTarget65.StartKey()
+				if err != nil {
+					return err
+				}
+				if err := keyTarget66.FromComplex(complex128(key67), vdl.Complex64Type); err != nil {
+					return err
+				}
+				if err := setTarget65.FinishKey(keyTarget66); err != nil {
+					return err
+				}
+			}
+			if err := fieldTarget64.FinishSet(setTarget65); err != nil {
+				return err
+			}
+			if err := fieldsTarget1.FinishField(keyTarget63, fieldTarget64); err != nil {
+				return err
+			}
+		}
+	}
+	var var68 bool
+	if len(m.C128) == 0 {
+		var68 = true
+	}
+	if !var68 {
+		keyTarget69, fieldTarget70, err := fieldsTarget1.StartField("C128")
+		if err != vdl.ErrFieldNoExist && err != nil {
+			return err
+		}
+		if err != vdl.ErrFieldNoExist {
+
+			setTarget71, err := fieldTarget70.StartSet(__VDLTypedb_objects50, len(m.C128))
+			if err != nil {
+				return err
+			}
+			for key73 := range m.C128 {
+				keyTarget72, err := setTarget71.StartKey()
+				if err != nil {
+					return err
+				}
+				if err := keyTarget72.FromComplex(complex128(key73), vdl.Complex128Type); err != nil {
+					return err
+				}
+				if err := setTarget71.FinishKey(keyTarget72); err != nil {
+					return err
+				}
+			}
+			if err := fieldTarget70.FinishSet(setTarget71); err != nil {
+				return err
+			}
+			if err := fieldsTarget1.FinishField(keyTarget69, fieldTarget70); err != nil {
+				return err
+			}
+		}
+	}
+	var var74 bool
+	if len(m.S) == 0 {
+		var74 = true
+	}
+	if !var74 {
+		keyTarget75, fieldTarget76, err := fieldsTarget1.StartField("S")
+		if err != vdl.ErrFieldNoExist && err != nil {
+			return err
+		}
+		if err != vdl.ErrFieldNoExist {
+
+			setTarget77, err := fieldTarget76.StartSet(__VDLTypedb_objects20, len(m.S))
+			if err != nil {
+				return err
+			}
+			for key79 := range m.S {
+				keyTarget78, err := setTarget77.StartKey()
+				if err != nil {
+					return err
+				}
+				if err := keyTarget78.FromString(string(key79), vdl.StringType); err != nil {
+					return err
+				}
+				if err := setTarget77.FinishKey(keyTarget78); err != nil {
+					return err
+				}
+			}
+			if err := fieldTarget76.FinishSet(setTarget77); err != nil {
+				return err
+			}
+			if err := fieldsTarget1.FinishField(keyTarget75, fieldTarget76); err != nil {
+				return err
+			}
+		}
+	}
+	var var80 bool
+	if len(m.T) == 0 {
+		var80 = true
+	}
+	if !var80 {
+		keyTarget81, fieldTarget82, err := fieldsTarget1.StartField("T")
+		if err != vdl.ErrFieldNoExist && err != nil {
+			return err
+		}
+		if err != vdl.ErrFieldNoExist {
+
+			setTarget83, err := fieldTarget82.StartSet(__VDLTypedb_objects51, len(m.T))
+			if err != nil {
+				return err
+			}
+			for key85 := range m.T {
+				keyTarget84, err := setTarget83.StartKey()
+				if err != nil {
+					return err
+				}
+
+				var wireValue86 time_2.Time
+				if err := time_2.TimeFromNative(&wireValue86, key85); err != nil {
+					return err
+				}
+
+				if err := wireValue86.FillVDLTarget(keyTarget84, __VDLType_db_objects_time_Time); err != nil {
+					return err
+				}
+				if err := setTarget83.FinishKey(keyTarget84); err != nil {
+					return err
+				}
+			}
+			if err := fieldTarget82.FinishSet(setTarget83); err != nil {
+				return err
+			}
+			if err := fieldsTarget1.FinishField(keyTarget81, fieldTarget82); err != nil {
+				return err
+			}
+		}
+	}
+	if err := t.FinishFields(fieldsTarget1); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (m *ManySets) MakeVDLTarget() vdl.Target {
+	return nil
+}
+
+func (m *ManySets) IsZero() bool {
+
+	var1 := true
+	var var2 bool
+	if len(m.B) == 0 {
+		var2 = true
+	}
+	var1 = var1 && var2
+	var var3 bool
+	if len(m.By) == 0 {
+		var3 = true
+	}
+	var1 = var1 && var3
+	var var4 bool
+	if len(m.U16) == 0 {
+		var4 = true
+	}
+	var1 = var1 && var4
+	var var5 bool
+	if len(m.U32) == 0 {
+		var5 = true
+	}
+	var1 = var1 && var5
+	var var6 bool
+	if len(m.U64) == 0 {
+		var6 = true
+	}
+	var1 = var1 && var6
+	var var7 bool
+	if len(m.I16) == 0 {
+		var7 = true
+	}
+	var1 = var1 && var7
+	var var8 bool
+	if len(m.I32) == 0 {
+		var8 = true
+	}
+	var1 = var1 && var8
+	var var9 bool
+	if len(m.I64) == 0 {
+		var9 = true
+	}
+	var1 = var1 && var9
+	var var10 bool
+	if len(m.F32) == 0 {
+		var10 = true
+	}
+	var1 = var1 && var10
+	var var11 bool
+	if len(m.F64) == 0 {
+		var11 = true
+	}
+	var1 = var1 && var11
+	var var12 bool
+	if len(m.C64) == 0 {
+		var12 = true
+	}
+	var1 = var1 && var12
+	var var13 bool
+	if len(m.C128) == 0 {
+		var13 = true
+	}
+	var1 = var1 && var13
+	var var14 bool
+	if len(m.S) == 0 {
+		var14 = true
+	}
+	var1 = var1 && var14
+	var var15 bool
+	if len(m.T) == 0 {
+		var15 = true
+	}
+	var1 = var1 && var15
+	return var1
+}
+
 type BigData struct {
 	Key string // A dup of the key stored in the value.
 }
@@ -479,6 +3448,47 @@ type BigData struct {
 func (BigData) __VDLReflect(struct {
 	Name string `vdl:"v.io/v23/query/engine/internal/testdata.BigData"`
 }) {
+}
+
+func (m *BigData) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
+
+	if __VDLType_db_objects_v_io_v23_query_engine_internal_testdata_BigData == nil || __VDLTypedb_objects52 == nil {
+		panic("Initialization order error: types generated for FillVDLTarget not initialized. Consider moving caller to an init() block.")
+	}
+	fieldsTarget1, err := t.StartFields(tt)
+	if err != nil {
+		return err
+	}
+
+	var2 := (m.Key == "")
+	if !var2 {
+		keyTarget3, fieldTarget4, err := fieldsTarget1.StartField("Key")
+		if err != vdl.ErrFieldNoExist && err != nil {
+			return err
+		}
+		if err != vdl.ErrFieldNoExist {
+			if err := fieldTarget4.FromString(string(m.Key), vdl.StringType); err != nil {
+				return err
+			}
+			if err := fieldsTarget1.FinishField(keyTarget3, fieldTarget4); err != nil {
+				return err
+			}
+		}
+	}
+	if err := t.FinishFields(fieldsTarget1); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (m *BigData) MakeVDLTarget() vdl.Target {
+	return nil
+}
+
+func (m *BigData) IsZero() bool {
+
+	var1 := (*m == BigData{})
+	return var1
 }
 
 func init() {
@@ -506,4 +3516,619 @@ func init() {
 	vdl.Register((*ManyMaps)(nil))
 	vdl.Register((*ManySets)(nil))
 	vdl.Register((*BigData)(nil))
+}
+
+var __VDLTypedb_objects0 *vdl.Type = vdl.TypeOf((*AddressInfo)(nil))
+var __VDLTypedb_objects12 *vdl.Type = vdl.TypeOf((*BarType)(nil))
+var __VDLTypedb_objects13 *vdl.Type = vdl.TypeOf((*BazType)(nil))
+var __VDLTypedb_objects52 *vdl.Type = vdl.TypeOf((*BigData)(nil))
+var __VDLTypedb_objects6 *vdl.Type = vdl.TypeOf((*CreditReport)(nil))
+var __VDLTypedb_objects7 *vdl.Type = vdl.TypeOf((*Customer)(nil))
+var __VDLTypedb_objects1 *vdl.Type = vdl.TypeOf((*EquifaxCreditReport)(nil))
+var __VDLTypedb_objects2 *vdl.Type = vdl.TypeOf((*ExperianCreditReport)(nil))
+var __VDLTypedb_objects11 *vdl.Type = vdl.TypeOf((*FooType)(nil))
+var __VDLTypedb_objects16 *vdl.Type = vdl.TypeOf((*FunWithMaps)(nil))
+var __VDLTypedb_objects21 *vdl.Type = vdl.TypeOf((*FunWithTypes)(nil))
+var __VDLTypedb_objects9 *vdl.Type
+
+func __VDLTypedb_objects9_gen() *vdl.Type {
+	__VDLTypedb_objects9Builder := vdl.TypeBuilder{}
+
+	__VDLTypedb_objects91 := __VDLTypedb_objects9Builder.Optional()
+	__VDLTypedb_objects92 := __VDLTypedb_objects9Builder.Struct()
+	__VDLTypedb_objects93 := __VDLTypedb_objects9Builder.Named("v.io/v23/query/engine/internal/testdata.Invoice").AssignBase(__VDLTypedb_objects92)
+	__VDLTypedb_objects94 := vdl.Int64Type
+	__VDLTypedb_objects92.AppendField("CustId", __VDLTypedb_objects94)
+	__VDLTypedb_objects92.AppendField("InvoiceNum", __VDLTypedb_objects94)
+	__VDLTypedb_objects95 := __VDLTypedb_objects9Builder.Struct()
+	__VDLTypedb_objects96 := __VDLTypedb_objects9Builder.Named("time.Time").AssignBase(__VDLTypedb_objects95)
+	__VDLTypedb_objects95.AppendField("Seconds", __VDLTypedb_objects94)
+	__VDLTypedb_objects97 := vdl.Int32Type
+	__VDLTypedb_objects95.AppendField("Nanos", __VDLTypedb_objects97)
+	__VDLTypedb_objects92.AppendField("InvoiceDate", __VDLTypedb_objects96)
+	__VDLTypedb_objects92.AppendField("Amount", __VDLTypedb_objects94)
+	__VDLTypedb_objects98 := __VDLTypedb_objects9Builder.Struct()
+	__VDLTypedb_objects99 := __VDLTypedb_objects9Builder.Named("v.io/v23/query/engine/internal/testdata.AddressInfo").AssignBase(__VDLTypedb_objects98)
+	__VDLTypedb_objects910 := vdl.StringType
+	__VDLTypedb_objects98.AppendField("Street", __VDLTypedb_objects910)
+	__VDLTypedb_objects98.AppendField("City", __VDLTypedb_objects910)
+	__VDLTypedb_objects98.AppendField("State", __VDLTypedb_objects910)
+	__VDLTypedb_objects98.AppendField("Zip", __VDLTypedb_objects910)
+	__VDLTypedb_objects92.AppendField("ShipTo", __VDLTypedb_objects99)
+	__VDLTypedb_objects91.AssignElem(__VDLTypedb_objects93)
+	__VDLTypedb_objects9Builder.Build()
+	__VDLTypedb_objects9v, err := __VDLTypedb_objects91.Built()
+	if err != nil {
+		panic(err)
+	}
+	return __VDLTypedb_objects9v
+}
+func init() {
+	__VDLTypedb_objects9 = __VDLTypedb_objects9_gen()
+}
+
+var __VDLTypedb_objects14 *vdl.Type = vdl.TypeOf((*K)(nil))
+var __VDLTypedb_objects22 *vdl.Type
+
+func __VDLTypedb_objects22_gen() *vdl.Type {
+	__VDLTypedb_objects22Builder := vdl.TypeBuilder{}
+
+	__VDLTypedb_objects221 := __VDLTypedb_objects22Builder.Optional()
+	__VDLTypedb_objects222 := __VDLTypedb_objects22Builder.Struct()
+	__VDLTypedb_objects223 := __VDLTypedb_objects22Builder.Named("v.io/v23/query/engine/internal/testdata.ManyMaps").AssignBase(__VDLTypedb_objects222)
+	__VDLTypedb_objects224 := __VDLTypedb_objects22Builder.Map()
+	__VDLTypedb_objects225 := vdl.BoolType
+	__VDLTypedb_objects224.AssignKey(__VDLTypedb_objects225)
+	__VDLTypedb_objects226 := vdl.StringType
+	__VDLTypedb_objects224.AssignElem(__VDLTypedb_objects226)
+	__VDLTypedb_objects222.AppendField("B", __VDLTypedb_objects224)
+	__VDLTypedb_objects227 := __VDLTypedb_objects22Builder.Map()
+	__VDLTypedb_objects228 := vdl.ByteType
+	__VDLTypedb_objects227.AssignKey(__VDLTypedb_objects228)
+	__VDLTypedb_objects227.AssignElem(__VDLTypedb_objects226)
+	__VDLTypedb_objects222.AppendField("By", __VDLTypedb_objects227)
+	__VDLTypedb_objects229 := __VDLTypedb_objects22Builder.Map()
+	__VDLTypedb_objects2210 := vdl.Uint16Type
+	__VDLTypedb_objects229.AssignKey(__VDLTypedb_objects2210)
+	__VDLTypedb_objects229.AssignElem(__VDLTypedb_objects226)
+	__VDLTypedb_objects222.AppendField("U16", __VDLTypedb_objects229)
+	__VDLTypedb_objects2211 := __VDLTypedb_objects22Builder.Map()
+	__VDLTypedb_objects2212 := vdl.Uint32Type
+	__VDLTypedb_objects2211.AssignKey(__VDLTypedb_objects2212)
+	__VDLTypedb_objects2211.AssignElem(__VDLTypedb_objects226)
+	__VDLTypedb_objects222.AppendField("U32", __VDLTypedb_objects2211)
+	__VDLTypedb_objects2213 := __VDLTypedb_objects22Builder.Map()
+	__VDLTypedb_objects2214 := vdl.Uint64Type
+	__VDLTypedb_objects2213.AssignKey(__VDLTypedb_objects2214)
+	__VDLTypedb_objects2213.AssignElem(__VDLTypedb_objects226)
+	__VDLTypedb_objects222.AppendField("U64", __VDLTypedb_objects2213)
+	__VDLTypedb_objects2215 := __VDLTypedb_objects22Builder.Map()
+	__VDLTypedb_objects2216 := vdl.Int16Type
+	__VDLTypedb_objects2215.AssignKey(__VDLTypedb_objects2216)
+	__VDLTypedb_objects2215.AssignElem(__VDLTypedb_objects226)
+	__VDLTypedb_objects222.AppendField("I16", __VDLTypedb_objects2215)
+	__VDLTypedb_objects2217 := __VDLTypedb_objects22Builder.Map()
+	__VDLTypedb_objects2218 := vdl.Int32Type
+	__VDLTypedb_objects2217.AssignKey(__VDLTypedb_objects2218)
+	__VDLTypedb_objects2217.AssignElem(__VDLTypedb_objects226)
+	__VDLTypedb_objects222.AppendField("I32", __VDLTypedb_objects2217)
+	__VDLTypedb_objects2219 := __VDLTypedb_objects22Builder.Map()
+	__VDLTypedb_objects2220 := vdl.Int64Type
+	__VDLTypedb_objects2219.AssignKey(__VDLTypedb_objects2220)
+	__VDLTypedb_objects2219.AssignElem(__VDLTypedb_objects226)
+	__VDLTypedb_objects222.AppendField("I64", __VDLTypedb_objects2219)
+	__VDLTypedb_objects2221 := __VDLTypedb_objects22Builder.Map()
+	__VDLTypedb_objects2222 := vdl.Float32Type
+	__VDLTypedb_objects2221.AssignKey(__VDLTypedb_objects2222)
+	__VDLTypedb_objects2221.AssignElem(__VDLTypedb_objects226)
+	__VDLTypedb_objects222.AppendField("F32", __VDLTypedb_objects2221)
+	__VDLTypedb_objects2223 := __VDLTypedb_objects22Builder.Map()
+	__VDLTypedb_objects2224 := vdl.Float64Type
+	__VDLTypedb_objects2223.AssignKey(__VDLTypedb_objects2224)
+	__VDLTypedb_objects2223.AssignElem(__VDLTypedb_objects226)
+	__VDLTypedb_objects222.AppendField("F64", __VDLTypedb_objects2223)
+	__VDLTypedb_objects2225 := __VDLTypedb_objects22Builder.Map()
+	__VDLTypedb_objects2226 := vdl.Complex64Type
+	__VDLTypedb_objects2225.AssignKey(__VDLTypedb_objects2226)
+	__VDLTypedb_objects2225.AssignElem(__VDLTypedb_objects226)
+	__VDLTypedb_objects222.AppendField("C64", __VDLTypedb_objects2225)
+	__VDLTypedb_objects2227 := __VDLTypedb_objects22Builder.Map()
+	__VDLTypedb_objects2228 := vdl.Complex128Type
+	__VDLTypedb_objects2227.AssignKey(__VDLTypedb_objects2228)
+	__VDLTypedb_objects2227.AssignElem(__VDLTypedb_objects226)
+	__VDLTypedb_objects222.AppendField("C128", __VDLTypedb_objects2227)
+	__VDLTypedb_objects2229 := __VDLTypedb_objects22Builder.Map()
+	__VDLTypedb_objects2229.AssignKey(__VDLTypedb_objects226)
+	__VDLTypedb_objects2229.AssignElem(__VDLTypedb_objects226)
+	__VDLTypedb_objects222.AppendField("S", __VDLTypedb_objects2229)
+	__VDLTypedb_objects2230 := __VDLTypedb_objects22Builder.Map()
+	__VDLTypedb_objects2230.AssignKey(__VDLTypedb_objects226)
+	__VDLTypedb_objects2230.AssignElem(__VDLTypedb_objects2229)
+	__VDLTypedb_objects222.AppendField("Ms", __VDLTypedb_objects2230)
+	__VDLTypedb_objects2231 := __VDLTypedb_objects22Builder.Map()
+	__VDLTypedb_objects2232 := __VDLTypedb_objects22Builder.Struct()
+	__VDLTypedb_objects2233 := __VDLTypedb_objects22Builder.Named("time.Time").AssignBase(__VDLTypedb_objects2232)
+	__VDLTypedb_objects2232.AppendField("Seconds", __VDLTypedb_objects2220)
+	__VDLTypedb_objects2232.AppendField("Nanos", __VDLTypedb_objects2218)
+	__VDLTypedb_objects2231.AssignKey(__VDLTypedb_objects2233)
+	__VDLTypedb_objects2231.AssignElem(__VDLTypedb_objects226)
+	__VDLTypedb_objects222.AppendField("T", __VDLTypedb_objects2231)
+	__VDLTypedb_objects221.AssignElem(__VDLTypedb_objects223)
+	__VDLTypedb_objects22Builder.Build()
+	__VDLTypedb_objects22v, err := __VDLTypedb_objects221.Built()
+	if err != nil {
+		panic(err)
+	}
+	return __VDLTypedb_objects22v
+}
+func init() {
+	__VDLTypedb_objects22 = __VDLTypedb_objects22_gen()
+}
+
+var __VDLTypedb_objects38 *vdl.Type
+
+func __VDLTypedb_objects38_gen() *vdl.Type {
+	__VDLTypedb_objects38Builder := vdl.TypeBuilder{}
+
+	__VDLTypedb_objects381 := __VDLTypedb_objects38Builder.Optional()
+	__VDLTypedb_objects382 := __VDLTypedb_objects38Builder.Struct()
+	__VDLTypedb_objects383 := __VDLTypedb_objects38Builder.Named("v.io/v23/query/engine/internal/testdata.ManySets").AssignBase(__VDLTypedb_objects382)
+	__VDLTypedb_objects384 := __VDLTypedb_objects38Builder.Set()
+	__VDLTypedb_objects385 := vdl.BoolType
+	__VDLTypedb_objects384.AssignKey(__VDLTypedb_objects385)
+	__VDLTypedb_objects382.AppendField("B", __VDLTypedb_objects384)
+	__VDLTypedb_objects386 := __VDLTypedb_objects38Builder.Set()
+	__VDLTypedb_objects387 := vdl.ByteType
+	__VDLTypedb_objects386.AssignKey(__VDLTypedb_objects387)
+	__VDLTypedb_objects382.AppendField("By", __VDLTypedb_objects386)
+	__VDLTypedb_objects388 := __VDLTypedb_objects38Builder.Set()
+	__VDLTypedb_objects389 := vdl.Uint16Type
+	__VDLTypedb_objects388.AssignKey(__VDLTypedb_objects389)
+	__VDLTypedb_objects382.AppendField("U16", __VDLTypedb_objects388)
+	__VDLTypedb_objects3810 := __VDLTypedb_objects38Builder.Set()
+	__VDLTypedb_objects3811 := vdl.Uint32Type
+	__VDLTypedb_objects3810.AssignKey(__VDLTypedb_objects3811)
+	__VDLTypedb_objects382.AppendField("U32", __VDLTypedb_objects3810)
+	__VDLTypedb_objects3812 := __VDLTypedb_objects38Builder.Set()
+	__VDLTypedb_objects3813 := vdl.Uint64Type
+	__VDLTypedb_objects3812.AssignKey(__VDLTypedb_objects3813)
+	__VDLTypedb_objects382.AppendField("U64", __VDLTypedb_objects3812)
+	__VDLTypedb_objects3814 := __VDLTypedb_objects38Builder.Set()
+	__VDLTypedb_objects3815 := vdl.Int16Type
+	__VDLTypedb_objects3814.AssignKey(__VDLTypedb_objects3815)
+	__VDLTypedb_objects382.AppendField("I16", __VDLTypedb_objects3814)
+	__VDLTypedb_objects3816 := __VDLTypedb_objects38Builder.Set()
+	__VDLTypedb_objects3817 := vdl.Int32Type
+	__VDLTypedb_objects3816.AssignKey(__VDLTypedb_objects3817)
+	__VDLTypedb_objects382.AppendField("I32", __VDLTypedb_objects3816)
+	__VDLTypedb_objects3818 := __VDLTypedb_objects38Builder.Set()
+	__VDLTypedb_objects3819 := vdl.Int64Type
+	__VDLTypedb_objects3818.AssignKey(__VDLTypedb_objects3819)
+	__VDLTypedb_objects382.AppendField("I64", __VDLTypedb_objects3818)
+	__VDLTypedb_objects3820 := __VDLTypedb_objects38Builder.Set()
+	__VDLTypedb_objects3821 := vdl.Float32Type
+	__VDLTypedb_objects3820.AssignKey(__VDLTypedb_objects3821)
+	__VDLTypedb_objects382.AppendField("F32", __VDLTypedb_objects3820)
+	__VDLTypedb_objects3822 := __VDLTypedb_objects38Builder.Set()
+	__VDLTypedb_objects3823 := vdl.Float64Type
+	__VDLTypedb_objects3822.AssignKey(__VDLTypedb_objects3823)
+	__VDLTypedb_objects382.AppendField("F64", __VDLTypedb_objects3822)
+	__VDLTypedb_objects3824 := __VDLTypedb_objects38Builder.Set()
+	__VDLTypedb_objects3825 := vdl.Complex64Type
+	__VDLTypedb_objects3824.AssignKey(__VDLTypedb_objects3825)
+	__VDLTypedb_objects382.AppendField("C64", __VDLTypedb_objects3824)
+	__VDLTypedb_objects3826 := __VDLTypedb_objects38Builder.Set()
+	__VDLTypedb_objects3827 := vdl.Complex128Type
+	__VDLTypedb_objects3826.AssignKey(__VDLTypedb_objects3827)
+	__VDLTypedb_objects382.AppendField("C128", __VDLTypedb_objects3826)
+	__VDLTypedb_objects3828 := __VDLTypedb_objects38Builder.Set()
+	__VDLTypedb_objects3829 := vdl.StringType
+	__VDLTypedb_objects3828.AssignKey(__VDLTypedb_objects3829)
+	__VDLTypedb_objects382.AppendField("S", __VDLTypedb_objects3828)
+	__VDLTypedb_objects3830 := __VDLTypedb_objects38Builder.Set()
+	__VDLTypedb_objects3831 := __VDLTypedb_objects38Builder.Struct()
+	__VDLTypedb_objects3832 := __VDLTypedb_objects38Builder.Named("time.Time").AssignBase(__VDLTypedb_objects3831)
+	__VDLTypedb_objects3831.AppendField("Seconds", __VDLTypedb_objects3819)
+	__VDLTypedb_objects3831.AppendField("Nanos", __VDLTypedb_objects3817)
+	__VDLTypedb_objects3830.AssignKey(__VDLTypedb_objects3832)
+	__VDLTypedb_objects382.AppendField("T", __VDLTypedb_objects3830)
+	__VDLTypedb_objects381.AssignElem(__VDLTypedb_objects383)
+	__VDLTypedb_objects38Builder.Build()
+	__VDLTypedb_objects38v, err := __VDLTypedb_objects381.Built()
+	if err != nil {
+		panic(err)
+	}
+	return __VDLTypedb_objects38v
+}
+func init() {
+	__VDLTypedb_objects38 = __VDLTypedb_objects38_gen()
+}
+
+var __VDLTypedb_objects10 *vdl.Type = vdl.TypeOf((*Numbers)(nil))
+var __VDLTypedb_objects4 *vdl.Type = vdl.TypeOf((*TransUnionCreditReport)(nil))
+var __VDLTypedb_objects15 *vdl.Type = vdl.TypeOf((*V)(nil))
+var __VDLTypedb_objects19 *vdl.Type = vdl.TypeOf([]map[string]struct{}(nil))
+var __VDLTypedb_objects8 *vdl.Type = vdl.TypeOf([]AddressInfo(nil))
+var __VDLTypedb_objects23 *vdl.Type = vdl.TypeOf(map[bool]string(nil))
+var __VDLTypedb_objects24 *vdl.Type = vdl.TypeOf(map[byte]string(nil))
+var __VDLTypedb_objects34 *vdl.Type = vdl.TypeOf(map[complex128]string(nil))
+var __VDLTypedb_objects33 *vdl.Type = vdl.TypeOf(map[complex64]string(nil))
+var __VDLTypedb_objects31 *vdl.Type = vdl.TypeOf(map[float32]string(nil))
+var __VDLTypedb_objects32 *vdl.Type = vdl.TypeOf(map[float64]string(nil))
+var __VDLTypedb_objects18 *vdl.Type = vdl.TypeOf(map[int16][]map[string]struct{}(nil))
+var __VDLTypedb_objects28 *vdl.Type = vdl.TypeOf(map[int16]string(nil))
+var __VDLTypedb_objects29 *vdl.Type = vdl.TypeOf(map[int32]string(nil))
+var __VDLTypedb_objects30 *vdl.Type = vdl.TypeOf(map[int64]string(nil))
+var __VDLTypedb_objects5 *vdl.Type = vdl.TypeOf(map[string]int16(nil))
+var __VDLTypedb_objects36 *vdl.Type = vdl.TypeOf(map[string]map[string]string(nil))
+var __VDLTypedb_objects35 *vdl.Type = vdl.TypeOf(map[string]string(nil))
+var __VDLTypedb_objects37 *vdl.Type
+
+func __VDLTypedb_objects37_gen() *vdl.Type {
+	__VDLTypedb_objects37Builder := vdl.TypeBuilder{}
+
+	__VDLTypedb_objects371 := __VDLTypedb_objects37Builder.Map()
+	__VDLTypedb_objects372 := __VDLTypedb_objects37Builder.Struct()
+	__VDLTypedb_objects373 := __VDLTypedb_objects37Builder.Named("time.Time").AssignBase(__VDLTypedb_objects372)
+	__VDLTypedb_objects374 := vdl.Int64Type
+	__VDLTypedb_objects372.AppendField("Seconds", __VDLTypedb_objects374)
+	__VDLTypedb_objects375 := vdl.Int32Type
+	__VDLTypedb_objects372.AppendField("Nanos", __VDLTypedb_objects375)
+	__VDLTypedb_objects371.AssignKey(__VDLTypedb_objects373)
+	__VDLTypedb_objects376 := vdl.StringType
+	__VDLTypedb_objects371.AssignElem(__VDLTypedb_objects376)
+	__VDLTypedb_objects37Builder.Build()
+	__VDLTypedb_objects37v, err := __VDLTypedb_objects371.Built()
+	if err != nil {
+		panic(err)
+	}
+	return __VDLTypedb_objects37v
+}
+func init() {
+	__VDLTypedb_objects37 = __VDLTypedb_objects37_gen()
+}
+
+var __VDLTypedb_objects25 *vdl.Type = vdl.TypeOf(map[uint16]string(nil))
+var __VDLTypedb_objects26 *vdl.Type = vdl.TypeOf(map[uint32]string(nil))
+var __VDLTypedb_objects27 *vdl.Type = vdl.TypeOf(map[uint64]string(nil))
+var __VDLTypedb_objects17 *vdl.Type = vdl.TypeOf(map[K]V(nil))
+var __VDLTypedb_objects39 *vdl.Type = vdl.TypeOf(map[bool]struct{}(nil))
+var __VDLTypedb_objects40 *vdl.Type = vdl.TypeOf(map[byte]struct{}(nil))
+var __VDLTypedb_objects50 *vdl.Type = vdl.TypeOf(map[complex128]struct{}(nil))
+var __VDLTypedb_objects49 *vdl.Type = vdl.TypeOf(map[complex64]struct{}(nil))
+var __VDLTypedb_objects47 *vdl.Type = vdl.TypeOf(map[float32]struct{}(nil))
+var __VDLTypedb_objects48 *vdl.Type = vdl.TypeOf(map[float64]struct{}(nil))
+var __VDLTypedb_objects44 *vdl.Type = vdl.TypeOf(map[int16]struct{}(nil))
+var __VDLTypedb_objects45 *vdl.Type = vdl.TypeOf(map[int32]struct{}(nil))
+var __VDLTypedb_objects46 *vdl.Type = vdl.TypeOf(map[int64]struct{}(nil))
+var __VDLTypedb_objects20 *vdl.Type = vdl.TypeOf(map[string]struct{}(nil))
+var __VDLTypedb_objects51 *vdl.Type
+
+func __VDLTypedb_objects51_gen() *vdl.Type {
+	__VDLTypedb_objects51Builder := vdl.TypeBuilder{}
+
+	__VDLTypedb_objects511 := __VDLTypedb_objects51Builder.Set()
+	__VDLTypedb_objects512 := __VDLTypedb_objects51Builder.Struct()
+	__VDLTypedb_objects513 := __VDLTypedb_objects51Builder.Named("time.Time").AssignBase(__VDLTypedb_objects512)
+	__VDLTypedb_objects514 := vdl.Int64Type
+	__VDLTypedb_objects512.AppendField("Seconds", __VDLTypedb_objects514)
+	__VDLTypedb_objects515 := vdl.Int32Type
+	__VDLTypedb_objects512.AppendField("Nanos", __VDLTypedb_objects515)
+	__VDLTypedb_objects511.AssignKey(__VDLTypedb_objects513)
+	__VDLTypedb_objects51Builder.Build()
+	__VDLTypedb_objects51v, err := __VDLTypedb_objects511.Built()
+	if err != nil {
+		panic(err)
+	}
+	return __VDLTypedb_objects51v
+}
+func init() {
+	__VDLTypedb_objects51 = __VDLTypedb_objects51_gen()
+}
+
+var __VDLTypedb_objects41 *vdl.Type = vdl.TypeOf(map[uint16]struct{}(nil))
+var __VDLTypedb_objects42 *vdl.Type = vdl.TypeOf(map[uint32]struct{}(nil))
+var __VDLTypedb_objects43 *vdl.Type = vdl.TypeOf(map[uint64]struct{}(nil))
+var __VDLTypedb_objects3 *vdl.Type = vdl.TypeOf(map[Tdh]struct{}(nil))
+var __VDLType_db_objects_time_Time *vdl.Type
+
+func __VDLType_db_objects_time_Time_gen() *vdl.Type {
+	__VDLType_db_objects_time_TimeBuilder := vdl.TypeBuilder{}
+
+	__VDLType_db_objects_time_Time1 := __VDLType_db_objects_time_TimeBuilder.Struct()
+	__VDLType_db_objects_time_Time2 := __VDLType_db_objects_time_TimeBuilder.Named("time.Time").AssignBase(__VDLType_db_objects_time_Time1)
+	__VDLType_db_objects_time_Time3 := vdl.Int64Type
+	__VDLType_db_objects_time_Time1.AppendField("Seconds", __VDLType_db_objects_time_Time3)
+	__VDLType_db_objects_time_Time4 := vdl.Int32Type
+	__VDLType_db_objects_time_Time1.AppendField("Nanos", __VDLType_db_objects_time_Time4)
+	__VDLType_db_objects_time_TimeBuilder.Build()
+	__VDLType_db_objects_time_Timev, err := __VDLType_db_objects_time_Time2.Built()
+	if err != nil {
+		panic(err)
+	}
+	return __VDLType_db_objects_time_Timev
+}
+func init() {
+	__VDLType_db_objects_time_Time = __VDLType_db_objects_time_Time_gen()
+}
+
+var __VDLType_db_objects_v_io_v23_query_engine_internal_testdata_AddressInfo *vdl.Type = vdl.TypeOf(AddressInfo{})
+var __VDLType_db_objects_v_io_v23_query_engine_internal_testdata_AgencyReport *vdl.Type = vdl.TypeOf(AgencyReport(AgencyReportEquifaxReport{EquifaxCreditReport{}}))
+var __VDLType_db_objects_v_io_v23_query_engine_internal_testdata_BarType *vdl.Type = vdl.TypeOf(BarType{
+	Baz: BazType{
+		TitleOrValue: TitleOrValueTypeTitle{""},
+	},
+})
+var __VDLType_db_objects_v_io_v23_query_engine_internal_testdata_BazType *vdl.Type = vdl.TypeOf(BazType{
+	TitleOrValue: TitleOrValueTypeTitle{""},
+})
+var __VDLType_db_objects_v_io_v23_query_engine_internal_testdata_BigData *vdl.Type = vdl.TypeOf(BigData{})
+var __VDLType_db_objects_v_io_v23_query_engine_internal_testdata_CreditAgency *vdl.Type = vdl.TypeOf(CreditAgencyEquifax)
+var __VDLType_db_objects_v_io_v23_query_engine_internal_testdata_CreditReport *vdl.Type = vdl.TypeOf(CreditReport{
+	Report: AgencyReportEquifaxReport{EquifaxCreditReport{}},
+})
+var __VDLType_db_objects_v_io_v23_query_engine_internal_testdata_Customer *vdl.Type = vdl.TypeOf(Customer{
+	Credit: CreditReport{
+		Report: AgencyReportEquifaxReport{EquifaxCreditReport{}},
+	},
+})
+var __VDLType_db_objects_v_io_v23_query_engine_internal_testdata_EquifaxCreditReport *vdl.Type = vdl.TypeOf(EquifaxCreditReport{})
+var __VDLType_db_objects_v_io_v23_query_engine_internal_testdata_ExperianCreditReport *vdl.Type = vdl.TypeOf(ExperianCreditReport{})
+var __VDLType_db_objects_v_io_v23_query_engine_internal_testdata_ExperianRating *vdl.Type = vdl.TypeOf(ExperianRatingGood)
+var __VDLType_db_objects_v_io_v23_query_engine_internal_testdata_FooType *vdl.Type = vdl.TypeOf(FooType{
+	Bar: BarType{
+		Baz: BazType{
+			TitleOrValue: TitleOrValueTypeTitle{""},
+		},
+	},
+})
+var __VDLType_db_objects_v_io_v23_query_engine_internal_testdata_FunWithMaps *vdl.Type = vdl.TypeOf(FunWithMaps{})
+var __VDLType_db_objects_v_io_v23_query_engine_internal_testdata_FunWithTypes *vdl.Type = vdl.TypeOf(FunWithTypes{
+	T1: vdl.AnyType,
+	T2: vdl.AnyType,
+})
+var __VDLType_db_objects_v_io_v23_query_engine_internal_testdata_Invoice *vdl.Type
+
+func __VDLType_db_objects_v_io_v23_query_engine_internal_testdata_Invoice_gen() *vdl.Type {
+	__VDLType_db_objects_v_io_v23_query_engine_internal_testdata_InvoiceBuilder := vdl.TypeBuilder{}
+
+	__VDLType_db_objects_v_io_v23_query_engine_internal_testdata_Invoice1 := __VDLType_db_objects_v_io_v23_query_engine_internal_testdata_InvoiceBuilder.Struct()
+	__VDLType_db_objects_v_io_v23_query_engine_internal_testdata_Invoice2 := __VDLType_db_objects_v_io_v23_query_engine_internal_testdata_InvoiceBuilder.Named("v.io/v23/query/engine/internal/testdata.Invoice").AssignBase(__VDLType_db_objects_v_io_v23_query_engine_internal_testdata_Invoice1)
+	__VDLType_db_objects_v_io_v23_query_engine_internal_testdata_Invoice3 := vdl.Int64Type
+	__VDLType_db_objects_v_io_v23_query_engine_internal_testdata_Invoice1.AppendField("CustId", __VDLType_db_objects_v_io_v23_query_engine_internal_testdata_Invoice3)
+	__VDLType_db_objects_v_io_v23_query_engine_internal_testdata_Invoice1.AppendField("InvoiceNum", __VDLType_db_objects_v_io_v23_query_engine_internal_testdata_Invoice3)
+	__VDLType_db_objects_v_io_v23_query_engine_internal_testdata_Invoice4 := __VDLType_db_objects_v_io_v23_query_engine_internal_testdata_InvoiceBuilder.Struct()
+	__VDLType_db_objects_v_io_v23_query_engine_internal_testdata_Invoice5 := __VDLType_db_objects_v_io_v23_query_engine_internal_testdata_InvoiceBuilder.Named("time.Time").AssignBase(__VDLType_db_objects_v_io_v23_query_engine_internal_testdata_Invoice4)
+	__VDLType_db_objects_v_io_v23_query_engine_internal_testdata_Invoice4.AppendField("Seconds", __VDLType_db_objects_v_io_v23_query_engine_internal_testdata_Invoice3)
+	__VDLType_db_objects_v_io_v23_query_engine_internal_testdata_Invoice6 := vdl.Int32Type
+	__VDLType_db_objects_v_io_v23_query_engine_internal_testdata_Invoice4.AppendField("Nanos", __VDLType_db_objects_v_io_v23_query_engine_internal_testdata_Invoice6)
+	__VDLType_db_objects_v_io_v23_query_engine_internal_testdata_Invoice1.AppendField("InvoiceDate", __VDLType_db_objects_v_io_v23_query_engine_internal_testdata_Invoice5)
+	__VDLType_db_objects_v_io_v23_query_engine_internal_testdata_Invoice1.AppendField("Amount", __VDLType_db_objects_v_io_v23_query_engine_internal_testdata_Invoice3)
+	__VDLType_db_objects_v_io_v23_query_engine_internal_testdata_Invoice7 := __VDLType_db_objects_v_io_v23_query_engine_internal_testdata_InvoiceBuilder.Struct()
+	__VDLType_db_objects_v_io_v23_query_engine_internal_testdata_Invoice8 := __VDLType_db_objects_v_io_v23_query_engine_internal_testdata_InvoiceBuilder.Named("v.io/v23/query/engine/internal/testdata.AddressInfo").AssignBase(__VDLType_db_objects_v_io_v23_query_engine_internal_testdata_Invoice7)
+	__VDLType_db_objects_v_io_v23_query_engine_internal_testdata_Invoice9 := vdl.StringType
+	__VDLType_db_objects_v_io_v23_query_engine_internal_testdata_Invoice7.AppendField("Street", __VDLType_db_objects_v_io_v23_query_engine_internal_testdata_Invoice9)
+	__VDLType_db_objects_v_io_v23_query_engine_internal_testdata_Invoice7.AppendField("City", __VDLType_db_objects_v_io_v23_query_engine_internal_testdata_Invoice9)
+	__VDLType_db_objects_v_io_v23_query_engine_internal_testdata_Invoice7.AppendField("State", __VDLType_db_objects_v_io_v23_query_engine_internal_testdata_Invoice9)
+	__VDLType_db_objects_v_io_v23_query_engine_internal_testdata_Invoice7.AppendField("Zip", __VDLType_db_objects_v_io_v23_query_engine_internal_testdata_Invoice9)
+	__VDLType_db_objects_v_io_v23_query_engine_internal_testdata_Invoice1.AppendField("ShipTo", __VDLType_db_objects_v_io_v23_query_engine_internal_testdata_Invoice8)
+	__VDLType_db_objects_v_io_v23_query_engine_internal_testdata_InvoiceBuilder.Build()
+	__VDLType_db_objects_v_io_v23_query_engine_internal_testdata_Invoicev, err := __VDLType_db_objects_v_io_v23_query_engine_internal_testdata_Invoice2.Built()
+	if err != nil {
+		panic(err)
+	}
+	return __VDLType_db_objects_v_io_v23_query_engine_internal_testdata_Invoicev
+}
+func init() {
+	__VDLType_db_objects_v_io_v23_query_engine_internal_testdata_Invoice = __VDLType_db_objects_v_io_v23_query_engine_internal_testdata_Invoice_gen()
+}
+
+var __VDLType_db_objects_v_io_v23_query_engine_internal_testdata_K *vdl.Type = vdl.TypeOf(K{})
+var __VDLType_db_objects_v_io_v23_query_engine_internal_testdata_ManyMaps *vdl.Type
+
+func __VDLType_db_objects_v_io_v23_query_engine_internal_testdata_ManyMaps_gen() *vdl.Type {
+	__VDLType_db_objects_v_io_v23_query_engine_internal_testdata_ManyMapsBuilder := vdl.TypeBuilder{}
+
+	__VDLType_db_objects_v_io_v23_query_engine_internal_testdata_ManyMaps1 := __VDLType_db_objects_v_io_v23_query_engine_internal_testdata_ManyMapsBuilder.Struct()
+	__VDLType_db_objects_v_io_v23_query_engine_internal_testdata_ManyMaps2 := __VDLType_db_objects_v_io_v23_query_engine_internal_testdata_ManyMapsBuilder.Named("v.io/v23/query/engine/internal/testdata.ManyMaps").AssignBase(__VDLType_db_objects_v_io_v23_query_engine_internal_testdata_ManyMaps1)
+	__VDLType_db_objects_v_io_v23_query_engine_internal_testdata_ManyMaps3 := __VDLType_db_objects_v_io_v23_query_engine_internal_testdata_ManyMapsBuilder.Map()
+	__VDLType_db_objects_v_io_v23_query_engine_internal_testdata_ManyMaps4 := vdl.BoolType
+	__VDLType_db_objects_v_io_v23_query_engine_internal_testdata_ManyMaps3.AssignKey(__VDLType_db_objects_v_io_v23_query_engine_internal_testdata_ManyMaps4)
+	__VDLType_db_objects_v_io_v23_query_engine_internal_testdata_ManyMaps5 := vdl.StringType
+	__VDLType_db_objects_v_io_v23_query_engine_internal_testdata_ManyMaps3.AssignElem(__VDLType_db_objects_v_io_v23_query_engine_internal_testdata_ManyMaps5)
+	__VDLType_db_objects_v_io_v23_query_engine_internal_testdata_ManyMaps1.AppendField("B", __VDLType_db_objects_v_io_v23_query_engine_internal_testdata_ManyMaps3)
+	__VDLType_db_objects_v_io_v23_query_engine_internal_testdata_ManyMaps6 := __VDLType_db_objects_v_io_v23_query_engine_internal_testdata_ManyMapsBuilder.Map()
+	__VDLType_db_objects_v_io_v23_query_engine_internal_testdata_ManyMaps7 := vdl.ByteType
+	__VDLType_db_objects_v_io_v23_query_engine_internal_testdata_ManyMaps6.AssignKey(__VDLType_db_objects_v_io_v23_query_engine_internal_testdata_ManyMaps7)
+	__VDLType_db_objects_v_io_v23_query_engine_internal_testdata_ManyMaps6.AssignElem(__VDLType_db_objects_v_io_v23_query_engine_internal_testdata_ManyMaps5)
+	__VDLType_db_objects_v_io_v23_query_engine_internal_testdata_ManyMaps1.AppendField("By", __VDLType_db_objects_v_io_v23_query_engine_internal_testdata_ManyMaps6)
+	__VDLType_db_objects_v_io_v23_query_engine_internal_testdata_ManyMaps8 := __VDLType_db_objects_v_io_v23_query_engine_internal_testdata_ManyMapsBuilder.Map()
+	__VDLType_db_objects_v_io_v23_query_engine_internal_testdata_ManyMaps9 := vdl.Uint16Type
+	__VDLType_db_objects_v_io_v23_query_engine_internal_testdata_ManyMaps8.AssignKey(__VDLType_db_objects_v_io_v23_query_engine_internal_testdata_ManyMaps9)
+	__VDLType_db_objects_v_io_v23_query_engine_internal_testdata_ManyMaps8.AssignElem(__VDLType_db_objects_v_io_v23_query_engine_internal_testdata_ManyMaps5)
+	__VDLType_db_objects_v_io_v23_query_engine_internal_testdata_ManyMaps1.AppendField("U16", __VDLType_db_objects_v_io_v23_query_engine_internal_testdata_ManyMaps8)
+	__VDLType_db_objects_v_io_v23_query_engine_internal_testdata_ManyMaps10 := __VDLType_db_objects_v_io_v23_query_engine_internal_testdata_ManyMapsBuilder.Map()
+	__VDLType_db_objects_v_io_v23_query_engine_internal_testdata_ManyMaps11 := vdl.Uint32Type
+	__VDLType_db_objects_v_io_v23_query_engine_internal_testdata_ManyMaps10.AssignKey(__VDLType_db_objects_v_io_v23_query_engine_internal_testdata_ManyMaps11)
+	__VDLType_db_objects_v_io_v23_query_engine_internal_testdata_ManyMaps10.AssignElem(__VDLType_db_objects_v_io_v23_query_engine_internal_testdata_ManyMaps5)
+	__VDLType_db_objects_v_io_v23_query_engine_internal_testdata_ManyMaps1.AppendField("U32", __VDLType_db_objects_v_io_v23_query_engine_internal_testdata_ManyMaps10)
+	__VDLType_db_objects_v_io_v23_query_engine_internal_testdata_ManyMaps12 := __VDLType_db_objects_v_io_v23_query_engine_internal_testdata_ManyMapsBuilder.Map()
+	__VDLType_db_objects_v_io_v23_query_engine_internal_testdata_ManyMaps13 := vdl.Uint64Type
+	__VDLType_db_objects_v_io_v23_query_engine_internal_testdata_ManyMaps12.AssignKey(__VDLType_db_objects_v_io_v23_query_engine_internal_testdata_ManyMaps13)
+	__VDLType_db_objects_v_io_v23_query_engine_internal_testdata_ManyMaps12.AssignElem(__VDLType_db_objects_v_io_v23_query_engine_internal_testdata_ManyMaps5)
+	__VDLType_db_objects_v_io_v23_query_engine_internal_testdata_ManyMaps1.AppendField("U64", __VDLType_db_objects_v_io_v23_query_engine_internal_testdata_ManyMaps12)
+	__VDLType_db_objects_v_io_v23_query_engine_internal_testdata_ManyMaps14 := __VDLType_db_objects_v_io_v23_query_engine_internal_testdata_ManyMapsBuilder.Map()
+	__VDLType_db_objects_v_io_v23_query_engine_internal_testdata_ManyMaps15 := vdl.Int16Type
+	__VDLType_db_objects_v_io_v23_query_engine_internal_testdata_ManyMaps14.AssignKey(__VDLType_db_objects_v_io_v23_query_engine_internal_testdata_ManyMaps15)
+	__VDLType_db_objects_v_io_v23_query_engine_internal_testdata_ManyMaps14.AssignElem(__VDLType_db_objects_v_io_v23_query_engine_internal_testdata_ManyMaps5)
+	__VDLType_db_objects_v_io_v23_query_engine_internal_testdata_ManyMaps1.AppendField("I16", __VDLType_db_objects_v_io_v23_query_engine_internal_testdata_ManyMaps14)
+	__VDLType_db_objects_v_io_v23_query_engine_internal_testdata_ManyMaps16 := __VDLType_db_objects_v_io_v23_query_engine_internal_testdata_ManyMapsBuilder.Map()
+	__VDLType_db_objects_v_io_v23_query_engine_internal_testdata_ManyMaps17 := vdl.Int32Type
+	__VDLType_db_objects_v_io_v23_query_engine_internal_testdata_ManyMaps16.AssignKey(__VDLType_db_objects_v_io_v23_query_engine_internal_testdata_ManyMaps17)
+	__VDLType_db_objects_v_io_v23_query_engine_internal_testdata_ManyMaps16.AssignElem(__VDLType_db_objects_v_io_v23_query_engine_internal_testdata_ManyMaps5)
+	__VDLType_db_objects_v_io_v23_query_engine_internal_testdata_ManyMaps1.AppendField("I32", __VDLType_db_objects_v_io_v23_query_engine_internal_testdata_ManyMaps16)
+	__VDLType_db_objects_v_io_v23_query_engine_internal_testdata_ManyMaps18 := __VDLType_db_objects_v_io_v23_query_engine_internal_testdata_ManyMapsBuilder.Map()
+	__VDLType_db_objects_v_io_v23_query_engine_internal_testdata_ManyMaps19 := vdl.Int64Type
+	__VDLType_db_objects_v_io_v23_query_engine_internal_testdata_ManyMaps18.AssignKey(__VDLType_db_objects_v_io_v23_query_engine_internal_testdata_ManyMaps19)
+	__VDLType_db_objects_v_io_v23_query_engine_internal_testdata_ManyMaps18.AssignElem(__VDLType_db_objects_v_io_v23_query_engine_internal_testdata_ManyMaps5)
+	__VDLType_db_objects_v_io_v23_query_engine_internal_testdata_ManyMaps1.AppendField("I64", __VDLType_db_objects_v_io_v23_query_engine_internal_testdata_ManyMaps18)
+	__VDLType_db_objects_v_io_v23_query_engine_internal_testdata_ManyMaps20 := __VDLType_db_objects_v_io_v23_query_engine_internal_testdata_ManyMapsBuilder.Map()
+	__VDLType_db_objects_v_io_v23_query_engine_internal_testdata_ManyMaps21 := vdl.Float32Type
+	__VDLType_db_objects_v_io_v23_query_engine_internal_testdata_ManyMaps20.AssignKey(__VDLType_db_objects_v_io_v23_query_engine_internal_testdata_ManyMaps21)
+	__VDLType_db_objects_v_io_v23_query_engine_internal_testdata_ManyMaps20.AssignElem(__VDLType_db_objects_v_io_v23_query_engine_internal_testdata_ManyMaps5)
+	__VDLType_db_objects_v_io_v23_query_engine_internal_testdata_ManyMaps1.AppendField("F32", __VDLType_db_objects_v_io_v23_query_engine_internal_testdata_ManyMaps20)
+	__VDLType_db_objects_v_io_v23_query_engine_internal_testdata_ManyMaps22 := __VDLType_db_objects_v_io_v23_query_engine_internal_testdata_ManyMapsBuilder.Map()
+	__VDLType_db_objects_v_io_v23_query_engine_internal_testdata_ManyMaps23 := vdl.Float64Type
+	__VDLType_db_objects_v_io_v23_query_engine_internal_testdata_ManyMaps22.AssignKey(__VDLType_db_objects_v_io_v23_query_engine_internal_testdata_ManyMaps23)
+	__VDLType_db_objects_v_io_v23_query_engine_internal_testdata_ManyMaps22.AssignElem(__VDLType_db_objects_v_io_v23_query_engine_internal_testdata_ManyMaps5)
+	__VDLType_db_objects_v_io_v23_query_engine_internal_testdata_ManyMaps1.AppendField("F64", __VDLType_db_objects_v_io_v23_query_engine_internal_testdata_ManyMaps22)
+	__VDLType_db_objects_v_io_v23_query_engine_internal_testdata_ManyMaps24 := __VDLType_db_objects_v_io_v23_query_engine_internal_testdata_ManyMapsBuilder.Map()
+	__VDLType_db_objects_v_io_v23_query_engine_internal_testdata_ManyMaps25 := vdl.Complex64Type
+	__VDLType_db_objects_v_io_v23_query_engine_internal_testdata_ManyMaps24.AssignKey(__VDLType_db_objects_v_io_v23_query_engine_internal_testdata_ManyMaps25)
+	__VDLType_db_objects_v_io_v23_query_engine_internal_testdata_ManyMaps24.AssignElem(__VDLType_db_objects_v_io_v23_query_engine_internal_testdata_ManyMaps5)
+	__VDLType_db_objects_v_io_v23_query_engine_internal_testdata_ManyMaps1.AppendField("C64", __VDLType_db_objects_v_io_v23_query_engine_internal_testdata_ManyMaps24)
+	__VDLType_db_objects_v_io_v23_query_engine_internal_testdata_ManyMaps26 := __VDLType_db_objects_v_io_v23_query_engine_internal_testdata_ManyMapsBuilder.Map()
+	__VDLType_db_objects_v_io_v23_query_engine_internal_testdata_ManyMaps27 := vdl.Complex128Type
+	__VDLType_db_objects_v_io_v23_query_engine_internal_testdata_ManyMaps26.AssignKey(__VDLType_db_objects_v_io_v23_query_engine_internal_testdata_ManyMaps27)
+	__VDLType_db_objects_v_io_v23_query_engine_internal_testdata_ManyMaps26.AssignElem(__VDLType_db_objects_v_io_v23_query_engine_internal_testdata_ManyMaps5)
+	__VDLType_db_objects_v_io_v23_query_engine_internal_testdata_ManyMaps1.AppendField("C128", __VDLType_db_objects_v_io_v23_query_engine_internal_testdata_ManyMaps26)
+	__VDLType_db_objects_v_io_v23_query_engine_internal_testdata_ManyMaps28 := __VDLType_db_objects_v_io_v23_query_engine_internal_testdata_ManyMapsBuilder.Map()
+	__VDLType_db_objects_v_io_v23_query_engine_internal_testdata_ManyMaps28.AssignKey(__VDLType_db_objects_v_io_v23_query_engine_internal_testdata_ManyMaps5)
+	__VDLType_db_objects_v_io_v23_query_engine_internal_testdata_ManyMaps28.AssignElem(__VDLType_db_objects_v_io_v23_query_engine_internal_testdata_ManyMaps5)
+	__VDLType_db_objects_v_io_v23_query_engine_internal_testdata_ManyMaps1.AppendField("S", __VDLType_db_objects_v_io_v23_query_engine_internal_testdata_ManyMaps28)
+	__VDLType_db_objects_v_io_v23_query_engine_internal_testdata_ManyMaps29 := __VDLType_db_objects_v_io_v23_query_engine_internal_testdata_ManyMapsBuilder.Map()
+	__VDLType_db_objects_v_io_v23_query_engine_internal_testdata_ManyMaps29.AssignKey(__VDLType_db_objects_v_io_v23_query_engine_internal_testdata_ManyMaps5)
+	__VDLType_db_objects_v_io_v23_query_engine_internal_testdata_ManyMaps29.AssignElem(__VDLType_db_objects_v_io_v23_query_engine_internal_testdata_ManyMaps28)
+	__VDLType_db_objects_v_io_v23_query_engine_internal_testdata_ManyMaps1.AppendField("Ms", __VDLType_db_objects_v_io_v23_query_engine_internal_testdata_ManyMaps29)
+	__VDLType_db_objects_v_io_v23_query_engine_internal_testdata_ManyMaps30 := __VDLType_db_objects_v_io_v23_query_engine_internal_testdata_ManyMapsBuilder.Map()
+	__VDLType_db_objects_v_io_v23_query_engine_internal_testdata_ManyMaps31 := __VDLType_db_objects_v_io_v23_query_engine_internal_testdata_ManyMapsBuilder.Struct()
+	__VDLType_db_objects_v_io_v23_query_engine_internal_testdata_ManyMaps32 := __VDLType_db_objects_v_io_v23_query_engine_internal_testdata_ManyMapsBuilder.Named("time.Time").AssignBase(__VDLType_db_objects_v_io_v23_query_engine_internal_testdata_ManyMaps31)
+	__VDLType_db_objects_v_io_v23_query_engine_internal_testdata_ManyMaps31.AppendField("Seconds", __VDLType_db_objects_v_io_v23_query_engine_internal_testdata_ManyMaps19)
+	__VDLType_db_objects_v_io_v23_query_engine_internal_testdata_ManyMaps31.AppendField("Nanos", __VDLType_db_objects_v_io_v23_query_engine_internal_testdata_ManyMaps17)
+	__VDLType_db_objects_v_io_v23_query_engine_internal_testdata_ManyMaps30.AssignKey(__VDLType_db_objects_v_io_v23_query_engine_internal_testdata_ManyMaps32)
+	__VDLType_db_objects_v_io_v23_query_engine_internal_testdata_ManyMaps30.AssignElem(__VDLType_db_objects_v_io_v23_query_engine_internal_testdata_ManyMaps5)
+	__VDLType_db_objects_v_io_v23_query_engine_internal_testdata_ManyMaps1.AppendField("T", __VDLType_db_objects_v_io_v23_query_engine_internal_testdata_ManyMaps30)
+	__VDLType_db_objects_v_io_v23_query_engine_internal_testdata_ManyMapsBuilder.Build()
+	__VDLType_db_objects_v_io_v23_query_engine_internal_testdata_ManyMapsv, err := __VDLType_db_objects_v_io_v23_query_engine_internal_testdata_ManyMaps2.Built()
+	if err != nil {
+		panic(err)
+	}
+	return __VDLType_db_objects_v_io_v23_query_engine_internal_testdata_ManyMapsv
+}
+func init() {
+	__VDLType_db_objects_v_io_v23_query_engine_internal_testdata_ManyMaps = __VDLType_db_objects_v_io_v23_query_engine_internal_testdata_ManyMaps_gen()
+}
+
+var __VDLType_db_objects_v_io_v23_query_engine_internal_testdata_ManySets *vdl.Type
+
+func __VDLType_db_objects_v_io_v23_query_engine_internal_testdata_ManySets_gen() *vdl.Type {
+	__VDLType_db_objects_v_io_v23_query_engine_internal_testdata_ManySetsBuilder := vdl.TypeBuilder{}
+
+	__VDLType_db_objects_v_io_v23_query_engine_internal_testdata_ManySets1 := __VDLType_db_objects_v_io_v23_query_engine_internal_testdata_ManySetsBuilder.Struct()
+	__VDLType_db_objects_v_io_v23_query_engine_internal_testdata_ManySets2 := __VDLType_db_objects_v_io_v23_query_engine_internal_testdata_ManySetsBuilder.Named("v.io/v23/query/engine/internal/testdata.ManySets").AssignBase(__VDLType_db_objects_v_io_v23_query_engine_internal_testdata_ManySets1)
+	__VDLType_db_objects_v_io_v23_query_engine_internal_testdata_ManySets3 := __VDLType_db_objects_v_io_v23_query_engine_internal_testdata_ManySetsBuilder.Set()
+	__VDLType_db_objects_v_io_v23_query_engine_internal_testdata_ManySets4 := vdl.BoolType
+	__VDLType_db_objects_v_io_v23_query_engine_internal_testdata_ManySets3.AssignKey(__VDLType_db_objects_v_io_v23_query_engine_internal_testdata_ManySets4)
+	__VDLType_db_objects_v_io_v23_query_engine_internal_testdata_ManySets1.AppendField("B", __VDLType_db_objects_v_io_v23_query_engine_internal_testdata_ManySets3)
+	__VDLType_db_objects_v_io_v23_query_engine_internal_testdata_ManySets5 := __VDLType_db_objects_v_io_v23_query_engine_internal_testdata_ManySetsBuilder.Set()
+	__VDLType_db_objects_v_io_v23_query_engine_internal_testdata_ManySets6 := vdl.ByteType
+	__VDLType_db_objects_v_io_v23_query_engine_internal_testdata_ManySets5.AssignKey(__VDLType_db_objects_v_io_v23_query_engine_internal_testdata_ManySets6)
+	__VDLType_db_objects_v_io_v23_query_engine_internal_testdata_ManySets1.AppendField("By", __VDLType_db_objects_v_io_v23_query_engine_internal_testdata_ManySets5)
+	__VDLType_db_objects_v_io_v23_query_engine_internal_testdata_ManySets7 := __VDLType_db_objects_v_io_v23_query_engine_internal_testdata_ManySetsBuilder.Set()
+	__VDLType_db_objects_v_io_v23_query_engine_internal_testdata_ManySets8 := vdl.Uint16Type
+	__VDLType_db_objects_v_io_v23_query_engine_internal_testdata_ManySets7.AssignKey(__VDLType_db_objects_v_io_v23_query_engine_internal_testdata_ManySets8)
+	__VDLType_db_objects_v_io_v23_query_engine_internal_testdata_ManySets1.AppendField("U16", __VDLType_db_objects_v_io_v23_query_engine_internal_testdata_ManySets7)
+	__VDLType_db_objects_v_io_v23_query_engine_internal_testdata_ManySets9 := __VDLType_db_objects_v_io_v23_query_engine_internal_testdata_ManySetsBuilder.Set()
+	__VDLType_db_objects_v_io_v23_query_engine_internal_testdata_ManySets10 := vdl.Uint32Type
+	__VDLType_db_objects_v_io_v23_query_engine_internal_testdata_ManySets9.AssignKey(__VDLType_db_objects_v_io_v23_query_engine_internal_testdata_ManySets10)
+	__VDLType_db_objects_v_io_v23_query_engine_internal_testdata_ManySets1.AppendField("U32", __VDLType_db_objects_v_io_v23_query_engine_internal_testdata_ManySets9)
+	__VDLType_db_objects_v_io_v23_query_engine_internal_testdata_ManySets11 := __VDLType_db_objects_v_io_v23_query_engine_internal_testdata_ManySetsBuilder.Set()
+	__VDLType_db_objects_v_io_v23_query_engine_internal_testdata_ManySets12 := vdl.Uint64Type
+	__VDLType_db_objects_v_io_v23_query_engine_internal_testdata_ManySets11.AssignKey(__VDLType_db_objects_v_io_v23_query_engine_internal_testdata_ManySets12)
+	__VDLType_db_objects_v_io_v23_query_engine_internal_testdata_ManySets1.AppendField("U64", __VDLType_db_objects_v_io_v23_query_engine_internal_testdata_ManySets11)
+	__VDLType_db_objects_v_io_v23_query_engine_internal_testdata_ManySets13 := __VDLType_db_objects_v_io_v23_query_engine_internal_testdata_ManySetsBuilder.Set()
+	__VDLType_db_objects_v_io_v23_query_engine_internal_testdata_ManySets14 := vdl.Int16Type
+	__VDLType_db_objects_v_io_v23_query_engine_internal_testdata_ManySets13.AssignKey(__VDLType_db_objects_v_io_v23_query_engine_internal_testdata_ManySets14)
+	__VDLType_db_objects_v_io_v23_query_engine_internal_testdata_ManySets1.AppendField("I16", __VDLType_db_objects_v_io_v23_query_engine_internal_testdata_ManySets13)
+	__VDLType_db_objects_v_io_v23_query_engine_internal_testdata_ManySets15 := __VDLType_db_objects_v_io_v23_query_engine_internal_testdata_ManySetsBuilder.Set()
+	__VDLType_db_objects_v_io_v23_query_engine_internal_testdata_ManySets16 := vdl.Int32Type
+	__VDLType_db_objects_v_io_v23_query_engine_internal_testdata_ManySets15.AssignKey(__VDLType_db_objects_v_io_v23_query_engine_internal_testdata_ManySets16)
+	__VDLType_db_objects_v_io_v23_query_engine_internal_testdata_ManySets1.AppendField("I32", __VDLType_db_objects_v_io_v23_query_engine_internal_testdata_ManySets15)
+	__VDLType_db_objects_v_io_v23_query_engine_internal_testdata_ManySets17 := __VDLType_db_objects_v_io_v23_query_engine_internal_testdata_ManySetsBuilder.Set()
+	__VDLType_db_objects_v_io_v23_query_engine_internal_testdata_ManySets18 := vdl.Int64Type
+	__VDLType_db_objects_v_io_v23_query_engine_internal_testdata_ManySets17.AssignKey(__VDLType_db_objects_v_io_v23_query_engine_internal_testdata_ManySets18)
+	__VDLType_db_objects_v_io_v23_query_engine_internal_testdata_ManySets1.AppendField("I64", __VDLType_db_objects_v_io_v23_query_engine_internal_testdata_ManySets17)
+	__VDLType_db_objects_v_io_v23_query_engine_internal_testdata_ManySets19 := __VDLType_db_objects_v_io_v23_query_engine_internal_testdata_ManySetsBuilder.Set()
+	__VDLType_db_objects_v_io_v23_query_engine_internal_testdata_ManySets20 := vdl.Float32Type
+	__VDLType_db_objects_v_io_v23_query_engine_internal_testdata_ManySets19.AssignKey(__VDLType_db_objects_v_io_v23_query_engine_internal_testdata_ManySets20)
+	__VDLType_db_objects_v_io_v23_query_engine_internal_testdata_ManySets1.AppendField("F32", __VDLType_db_objects_v_io_v23_query_engine_internal_testdata_ManySets19)
+	__VDLType_db_objects_v_io_v23_query_engine_internal_testdata_ManySets21 := __VDLType_db_objects_v_io_v23_query_engine_internal_testdata_ManySetsBuilder.Set()
+	__VDLType_db_objects_v_io_v23_query_engine_internal_testdata_ManySets22 := vdl.Float64Type
+	__VDLType_db_objects_v_io_v23_query_engine_internal_testdata_ManySets21.AssignKey(__VDLType_db_objects_v_io_v23_query_engine_internal_testdata_ManySets22)
+	__VDLType_db_objects_v_io_v23_query_engine_internal_testdata_ManySets1.AppendField("F64", __VDLType_db_objects_v_io_v23_query_engine_internal_testdata_ManySets21)
+	__VDLType_db_objects_v_io_v23_query_engine_internal_testdata_ManySets23 := __VDLType_db_objects_v_io_v23_query_engine_internal_testdata_ManySetsBuilder.Set()
+	__VDLType_db_objects_v_io_v23_query_engine_internal_testdata_ManySets24 := vdl.Complex64Type
+	__VDLType_db_objects_v_io_v23_query_engine_internal_testdata_ManySets23.AssignKey(__VDLType_db_objects_v_io_v23_query_engine_internal_testdata_ManySets24)
+	__VDLType_db_objects_v_io_v23_query_engine_internal_testdata_ManySets1.AppendField("C64", __VDLType_db_objects_v_io_v23_query_engine_internal_testdata_ManySets23)
+	__VDLType_db_objects_v_io_v23_query_engine_internal_testdata_ManySets25 := __VDLType_db_objects_v_io_v23_query_engine_internal_testdata_ManySetsBuilder.Set()
+	__VDLType_db_objects_v_io_v23_query_engine_internal_testdata_ManySets26 := vdl.Complex128Type
+	__VDLType_db_objects_v_io_v23_query_engine_internal_testdata_ManySets25.AssignKey(__VDLType_db_objects_v_io_v23_query_engine_internal_testdata_ManySets26)
+	__VDLType_db_objects_v_io_v23_query_engine_internal_testdata_ManySets1.AppendField("C128", __VDLType_db_objects_v_io_v23_query_engine_internal_testdata_ManySets25)
+	__VDLType_db_objects_v_io_v23_query_engine_internal_testdata_ManySets27 := __VDLType_db_objects_v_io_v23_query_engine_internal_testdata_ManySetsBuilder.Set()
+	__VDLType_db_objects_v_io_v23_query_engine_internal_testdata_ManySets28 := vdl.StringType
+	__VDLType_db_objects_v_io_v23_query_engine_internal_testdata_ManySets27.AssignKey(__VDLType_db_objects_v_io_v23_query_engine_internal_testdata_ManySets28)
+	__VDLType_db_objects_v_io_v23_query_engine_internal_testdata_ManySets1.AppendField("S", __VDLType_db_objects_v_io_v23_query_engine_internal_testdata_ManySets27)
+	__VDLType_db_objects_v_io_v23_query_engine_internal_testdata_ManySets29 := __VDLType_db_objects_v_io_v23_query_engine_internal_testdata_ManySetsBuilder.Set()
+	__VDLType_db_objects_v_io_v23_query_engine_internal_testdata_ManySets30 := __VDLType_db_objects_v_io_v23_query_engine_internal_testdata_ManySetsBuilder.Struct()
+	__VDLType_db_objects_v_io_v23_query_engine_internal_testdata_ManySets31 := __VDLType_db_objects_v_io_v23_query_engine_internal_testdata_ManySetsBuilder.Named("time.Time").AssignBase(__VDLType_db_objects_v_io_v23_query_engine_internal_testdata_ManySets30)
+	__VDLType_db_objects_v_io_v23_query_engine_internal_testdata_ManySets30.AppendField("Seconds", __VDLType_db_objects_v_io_v23_query_engine_internal_testdata_ManySets18)
+	__VDLType_db_objects_v_io_v23_query_engine_internal_testdata_ManySets30.AppendField("Nanos", __VDLType_db_objects_v_io_v23_query_engine_internal_testdata_ManySets16)
+	__VDLType_db_objects_v_io_v23_query_engine_internal_testdata_ManySets29.AssignKey(__VDLType_db_objects_v_io_v23_query_engine_internal_testdata_ManySets31)
+	__VDLType_db_objects_v_io_v23_query_engine_internal_testdata_ManySets1.AppendField("T", __VDLType_db_objects_v_io_v23_query_engine_internal_testdata_ManySets29)
+	__VDLType_db_objects_v_io_v23_query_engine_internal_testdata_ManySetsBuilder.Build()
+	__VDLType_db_objects_v_io_v23_query_engine_internal_testdata_ManySetsv, err := __VDLType_db_objects_v_io_v23_query_engine_internal_testdata_ManySets2.Built()
+	if err != nil {
+		panic(err)
+	}
+	return __VDLType_db_objects_v_io_v23_query_engine_internal_testdata_ManySetsv
+}
+func init() {
+	__VDLType_db_objects_v_io_v23_query_engine_internal_testdata_ManySets = __VDLType_db_objects_v_io_v23_query_engine_internal_testdata_ManySets_gen()
+}
+
+var __VDLType_db_objects_v_io_v23_query_engine_internal_testdata_Numbers *vdl.Type = vdl.TypeOf(Numbers{})
+var __VDLType_db_objects_v_io_v23_query_engine_internal_testdata_RatingsArray *vdl.Type = vdl.TypeOf(RatingsArray{})
+var __VDLType_db_objects_v_io_v23_query_engine_internal_testdata_Tdh *vdl.Type = vdl.TypeOf(TdhTom)
+var __VDLType_db_objects_v_io_v23_query_engine_internal_testdata_TitleOrValueType *vdl.Type = vdl.TypeOf(TitleOrValueType(TitleOrValueTypeTitle{""}))
+var __VDLType_db_objects_v_io_v23_query_engine_internal_testdata_TransUnionCreditReport *vdl.Type = vdl.TypeOf(TransUnionCreditReport{})
+var __VDLType_db_objects_v_io_v23_query_engine_internal_testdata_V *vdl.Type = vdl.TypeOf(V{})
+
+func __VDLEnsureNativeBuilt_db_objects() {
+	if __VDLTypedb_objects9 == nil {
+		__VDLTypedb_objects9 = __VDLTypedb_objects9_gen()
+	}
+	if __VDLTypedb_objects22 == nil {
+		__VDLTypedb_objects22 = __VDLTypedb_objects22_gen()
+	}
+	if __VDLTypedb_objects38 == nil {
+		__VDLTypedb_objects38 = __VDLTypedb_objects38_gen()
+	}
+	if __VDLTypedb_objects37 == nil {
+		__VDLTypedb_objects37 = __VDLTypedb_objects37_gen()
+	}
+	if __VDLTypedb_objects51 == nil {
+		__VDLTypedb_objects51 = __VDLTypedb_objects51_gen()
+	}
+	if __VDLType_db_objects_time_Time == nil {
+		__VDLType_db_objects_time_Time = __VDLType_db_objects_time_Time_gen()
+	}
+	if __VDLType_db_objects_v_io_v23_query_engine_internal_testdata_Invoice == nil {
+		__VDLType_db_objects_v_io_v23_query_engine_internal_testdata_Invoice = __VDLType_db_objects_v_io_v23_query_engine_internal_testdata_Invoice_gen()
+	}
+	if __VDLType_db_objects_v_io_v23_query_engine_internal_testdata_ManyMaps == nil {
+		__VDLType_db_objects_v_io_v23_query_engine_internal_testdata_ManyMaps = __VDLType_db_objects_v_io_v23_query_engine_internal_testdata_ManyMaps_gen()
+	}
+	if __VDLType_db_objects_v_io_v23_query_engine_internal_testdata_ManySets == nil {
+		__VDLType_db_objects_v_io_v23_query_engine_internal_testdata_ManySets = __VDLType_db_objects_v_io_v23_query_engine_internal_testdata_ManySets_gen()
+	}
 }

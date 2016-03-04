@@ -37,6 +37,50 @@ func (Config) __VDLReflect(struct {
 }) {
 }
 
+func (m Config) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
+
+	mapTarget1, err := t.StartMap(__VDLType_device_v_io_v23_services_device_Config, len(m))
+	if err != nil {
+		return err
+	}
+	for key3, value5 := range m {
+		keyTarget2, err := mapTarget1.StartKey()
+		if err != nil {
+			return err
+		}
+		if err := keyTarget2.FromString(string(key3), vdl.StringType); err != nil {
+			return err
+		}
+		valueTarget4, err := mapTarget1.FinishKeyStartField(keyTarget2)
+		if err != nil {
+			return err
+		}
+		if err := valueTarget4.FromString(string(value5), vdl.StringType); err != nil {
+			return err
+		}
+		if err := mapTarget1.FinishField(keyTarget2, valueTarget4); err != nil {
+			return err
+		}
+	}
+	if err := t.FinishMap(mapTarget1); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (m Config) MakeVDLTarget() vdl.Target {
+	return nil
+}
+
+func (m Config) IsZero() bool {
+
+	var var1 bool
+	if len(m) == 0 {
+		var1 = true
+	}
+	return var1
+}
+
 // InstallationState describes the states that an installation can be in at any
 // time.
 type InstallationState int
@@ -84,6 +128,23 @@ func (InstallationState) __VDLReflect(struct {
 	Name string `vdl:"v.io/v23/services/device.InstallationState"`
 	Enum struct{ Active, Uninstalled string }
 }) {
+}
+
+func (m InstallationState) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
+	if err := t.FromEnumLabel(m.String(), __VDLType_device_v_io_v23_services_device_InstallationState); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (m InstallationState) MakeVDLTarget() vdl.Target {
+	return nil
+}
+
+func (m InstallationState) IsZero() bool {
+
+	var1 := (m == InstallationStateActive)
+	return var1
 }
 
 // InstanceState describes the states that an instance can be in at any
@@ -159,6 +220,23 @@ func (InstanceState) __VDLReflect(struct {
 }) {
 }
 
+func (m InstanceState) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
+	if err := t.FromEnumLabel(m.String(), __VDLType_device_v_io_v23_services_device_InstanceState); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (m InstanceState) MakeVDLTarget() vdl.Target {
+	return nil
+}
+
+func (m InstanceState) IsZero() bool {
+
+	var1 := (m == InstanceStateLaunching)
+	return var1
+}
+
 type (
 	// Status represents any single field of the Status union type.
 	//
@@ -172,6 +250,8 @@ type (
 		Name() string
 		// __VDLReflect describes the Status union type.
 		__VDLReflect(__StatusReflect)
+		FillVDLTarget(vdl.Target, *vdl.Type) error
+		IsZero() bool
 	}
 	// StatusInstance represents field Instance of the Status union type.
 	StatusInstance struct{ Value InstanceStatus }
@@ -196,15 +276,117 @@ func (x StatusInstance) Interface() interface{}       { return x.Value }
 func (x StatusInstance) Name() string                 { return "Instance" }
 func (x StatusInstance) __VDLReflect(__StatusReflect) {}
 
+func (m StatusInstance) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
+
+	fieldsTarget1, err := t.StartFields(__VDLType_device_v_io_v23_services_device_Status)
+	if err != nil {
+		return err
+	}
+	keyTarget2, fieldTarget3, err := fieldsTarget1.StartField("Instance")
+	if err != nil {
+		return err
+	}
+
+	if err := m.Value.FillVDLTarget(fieldTarget3, __VDLType_device_v_io_v23_services_device_InstanceStatus); err != nil {
+		return err
+	}
+	if err := fieldsTarget1.FinishField(keyTarget2, fieldTarget3); err != nil {
+		return err
+	}
+	if err := t.FinishFields(fieldsTarget1); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (m StatusInstance) MakeVDLTarget() vdl.Target {
+	return nil
+}
+
+func (m StatusInstance) IsZero() bool {
+
+	var2 := m.Value.IsZero()
+	return var2
+}
+
 func (x StatusInstallation) Index() int                   { return 1 }
 func (x StatusInstallation) Interface() interface{}       { return x.Value }
 func (x StatusInstallation) Name() string                 { return "Installation" }
 func (x StatusInstallation) __VDLReflect(__StatusReflect) {}
 
+func (m StatusInstallation) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
+
+	fieldsTarget1, err := t.StartFields(__VDLType_device_v_io_v23_services_device_Status)
+	if err != nil {
+		return err
+	}
+	keyTarget2, fieldTarget3, err := fieldsTarget1.StartField("Installation")
+	if err != nil {
+		return err
+	}
+
+	if err := m.Value.FillVDLTarget(fieldTarget3, __VDLType_device_v_io_v23_services_device_InstallationStatus); err != nil {
+		return err
+	}
+	if err := fieldsTarget1.FinishField(keyTarget2, fieldTarget3); err != nil {
+		return err
+	}
+	if err := t.FinishFields(fieldsTarget1); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (m StatusInstallation) MakeVDLTarget() vdl.Target {
+	return nil
+}
+
+func (m StatusInstallation) IsZero() bool {
+
+	unionField2 := false
+	return unionField2
+}
+
 func (x StatusDevice) Index() int                   { return 2 }
 func (x StatusDevice) Interface() interface{}       { return x.Value }
 func (x StatusDevice) Name() string                 { return "Device" }
 func (x StatusDevice) __VDLReflect(__StatusReflect) {}
+
+func (m StatusDevice) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
+
+	fieldsTarget1, err := t.StartFields(__VDLType_device_v_io_v23_services_device_Status)
+	if err != nil {
+		return err
+	}
+	keyTarget2, fieldTarget3, err := fieldsTarget1.StartField("Device")
+	if err != nil {
+		return err
+	}
+
+	if err := m.Value.FillVDLTarget(fieldTarget3, __VDLType_device_v_io_v23_services_device_DeviceStatus); err != nil {
+		return err
+	}
+	if err := fieldsTarget1.FinishField(keyTarget2, fieldTarget3); err != nil {
+		return err
+	}
+	if err := t.FinishFields(fieldsTarget1); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (m StatusDevice) MakeVDLTarget() vdl.Target {
+	return nil
+}
+
+func (m StatusDevice) IsZero() bool {
+
+	unionField2 := false
+	return unionField2
+}
 
 // InstallationStatus specifies the Status returned by the Application Status
 // method for installation objects.
@@ -216,6 +398,63 @@ type InstallationStatus struct {
 func (InstallationStatus) __VDLReflect(struct {
 	Name string `vdl:"v.io/v23/services/device.InstallationStatus"`
 }) {
+}
+
+func (m *InstallationStatus) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
+
+	if __VDLType_device_v_io_v23_services_device_InstallationStatus == nil || __VDLTypedevice0 == nil {
+		panic("Initialization order error: types generated for FillVDLTarget not initialized. Consider moving caller to an init() block.")
+	}
+	fieldsTarget1, err := t.StartFields(tt)
+	if err != nil {
+		return err
+	}
+
+	var2 := m.State.IsZero()
+	if !var2 {
+		keyTarget3, fieldTarget4, err := fieldsTarget1.StartField("State")
+		if err != vdl.ErrFieldNoExist && err != nil {
+			return err
+		}
+		if err != vdl.ErrFieldNoExist {
+
+			if err := m.State.FillVDLTarget(fieldTarget4, __VDLType_device_v_io_v23_services_device_InstallationState); err != nil {
+				return err
+			}
+			if err := fieldsTarget1.FinishField(keyTarget3, fieldTarget4); err != nil {
+				return err
+			}
+		}
+	}
+	var5 := (m.Version == "")
+	if !var5 {
+		keyTarget6, fieldTarget7, err := fieldsTarget1.StartField("Version")
+		if err != vdl.ErrFieldNoExist && err != nil {
+			return err
+		}
+		if err != vdl.ErrFieldNoExist {
+			if err := fieldTarget7.FromString(string(m.Version), vdl.StringType); err != nil {
+				return err
+			}
+			if err := fieldsTarget1.FinishField(keyTarget6, fieldTarget7); err != nil {
+				return err
+			}
+		}
+	}
+	if err := t.FinishFields(fieldsTarget1); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (m *InstallationStatus) MakeVDLTarget() vdl.Target {
+	return nil
+}
+
+func (m *InstallationStatus) IsZero() bool {
+
+	var1 := (*m == InstallationStatus{})
+	return var1
 }
 
 // InstanceStatus specifies the Status returned by the Application Status method
@@ -230,6 +469,63 @@ func (InstanceStatus) __VDLReflect(struct {
 }) {
 }
 
+func (m *InstanceStatus) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
+
+	if __VDLType_device_v_io_v23_services_device_InstanceStatus == nil || __VDLTypedevice1 == nil {
+		panic("Initialization order error: types generated for FillVDLTarget not initialized. Consider moving caller to an init() block.")
+	}
+	fieldsTarget1, err := t.StartFields(tt)
+	if err != nil {
+		return err
+	}
+
+	var2 := m.State.IsZero()
+	if !var2 {
+		keyTarget3, fieldTarget4, err := fieldsTarget1.StartField("State")
+		if err != vdl.ErrFieldNoExist && err != nil {
+			return err
+		}
+		if err != vdl.ErrFieldNoExist {
+
+			if err := m.State.FillVDLTarget(fieldTarget4, __VDLType_device_v_io_v23_services_device_InstanceState); err != nil {
+				return err
+			}
+			if err := fieldsTarget1.FinishField(keyTarget3, fieldTarget4); err != nil {
+				return err
+			}
+		}
+	}
+	var5 := (m.Version == "")
+	if !var5 {
+		keyTarget6, fieldTarget7, err := fieldsTarget1.StartField("Version")
+		if err != vdl.ErrFieldNoExist && err != nil {
+			return err
+		}
+		if err != vdl.ErrFieldNoExist {
+			if err := fieldTarget7.FromString(string(m.Version), vdl.StringType); err != nil {
+				return err
+			}
+			if err := fieldsTarget1.FinishField(keyTarget6, fieldTarget7); err != nil {
+				return err
+			}
+		}
+	}
+	if err := t.FinishFields(fieldsTarget1); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (m *InstanceStatus) MakeVDLTarget() vdl.Target {
+	return nil
+}
+
+func (m *InstanceStatus) IsZero() bool {
+
+	var1 := (*m == InstanceStatus{})
+	return var1
+}
+
 // DeviceStatus specifies the Status returned by the Application Status method
 // for the device service object.
 type DeviceStatus struct {
@@ -240,6 +536,63 @@ type DeviceStatus struct {
 func (DeviceStatus) __VDLReflect(struct {
 	Name string `vdl:"v.io/v23/services/device.DeviceStatus"`
 }) {
+}
+
+func (m *DeviceStatus) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
+
+	if __VDLType_device_v_io_v23_services_device_DeviceStatus == nil || __VDLTypedevice2 == nil {
+		panic("Initialization order error: types generated for FillVDLTarget not initialized. Consider moving caller to an init() block.")
+	}
+	fieldsTarget1, err := t.StartFields(tt)
+	if err != nil {
+		return err
+	}
+
+	var2 := m.State.IsZero()
+	if !var2 {
+		keyTarget3, fieldTarget4, err := fieldsTarget1.StartField("State")
+		if err != vdl.ErrFieldNoExist && err != nil {
+			return err
+		}
+		if err != vdl.ErrFieldNoExist {
+
+			if err := m.State.FillVDLTarget(fieldTarget4, __VDLType_device_v_io_v23_services_device_InstanceState); err != nil {
+				return err
+			}
+			if err := fieldsTarget1.FinishField(keyTarget3, fieldTarget4); err != nil {
+				return err
+			}
+		}
+	}
+	var5 := (m.Version == "")
+	if !var5 {
+		keyTarget6, fieldTarget7, err := fieldsTarget1.StartField("Version")
+		if err != vdl.ErrFieldNoExist && err != nil {
+			return err
+		}
+		if err != vdl.ErrFieldNoExist {
+			if err := fieldTarget7.FromString(string(m.Version), vdl.StringType); err != nil {
+				return err
+			}
+			if err := fieldsTarget1.FinishField(keyTarget6, fieldTarget7); err != nil {
+				return err
+			}
+		}
+	}
+	if err := t.FinishFields(fieldsTarget1); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (m *DeviceStatus) MakeVDLTarget() vdl.Target {
+	return nil
+}
+
+func (m *DeviceStatus) IsZero() bool {
+
+	var1 := (*m == DeviceStatus{})
+	return var1
 }
 
 type (
@@ -257,6 +610,8 @@ type (
 		Name() string
 		// __VDLReflect describes the BlessServerMessage union type.
 		__VDLReflect(__BlessServerMessageReflect)
+		FillVDLTarget(vdl.Target, *vdl.Type) error
+		IsZero() bool
 	}
 	// BlessServerMessageInstancePublicKey represents field InstancePublicKey of the BlessServerMessage union type.
 	//
@@ -278,6 +633,43 @@ func (x BlessServerMessageInstancePublicKey) Interface() interface{}            
 func (x BlessServerMessageInstancePublicKey) Name() string                             { return "InstancePublicKey" }
 func (x BlessServerMessageInstancePublicKey) __VDLReflect(__BlessServerMessageReflect) {}
 
+func (m BlessServerMessageInstancePublicKey) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
+
+	fieldsTarget1, err := t.StartFields(__VDLType_device_v_io_v23_services_device_BlessServerMessage)
+	if err != nil {
+		return err
+	}
+	keyTarget2, fieldTarget3, err := fieldsTarget1.StartField("InstancePublicKey")
+	if err != nil {
+		return err
+	}
+
+	if err := fieldTarget3.FromBytes([]byte(m.Value), __VDLTypedevice3); err != nil {
+		return err
+	}
+	if err := fieldsTarget1.FinishField(keyTarget2, fieldTarget3); err != nil {
+		return err
+	}
+	if err := t.FinishFields(fieldsTarget1); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (m BlessServerMessageInstancePublicKey) MakeVDLTarget() vdl.Target {
+	return nil
+}
+
+func (m BlessServerMessageInstancePublicKey) IsZero() bool {
+
+	var var2 bool
+	if len(m.Value) == 0 {
+		var2 = true
+	}
+	return var2
+}
+
 type (
 	// BlessClientMessage represents any single field of the BlessClientMessage union type.
 	//
@@ -293,6 +685,8 @@ type (
 		Name() string
 		// __VDLReflect describes the BlessClientMessage union type.
 		__VDLReflect(__BlessClientMessageReflect)
+		FillVDLTarget(vdl.Target, *vdl.Type) error
+		IsZero() bool
 	}
 	// BlessClientMessageAppBlessings represents field AppBlessings of the BlessClientMessage union type.
 	//
@@ -313,6 +707,50 @@ func (x BlessClientMessageAppBlessings) Interface() interface{}                 
 func (x BlessClientMessageAppBlessings) Name() string                             { return "AppBlessings" }
 func (x BlessClientMessageAppBlessings) __VDLReflect(__BlessClientMessageReflect) {}
 
+func (m BlessClientMessageAppBlessings) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
+
+	fieldsTarget1, err := t.StartFields(__VDLType_device_v_io_v23_services_device_BlessClientMessage)
+	if err != nil {
+		return err
+	}
+	keyTarget2, fieldTarget3, err := fieldsTarget1.StartField("AppBlessings")
+	if err != nil {
+		return err
+	}
+
+	var wireValue4 security.WireBlessings
+	if err := security.WireBlessingsFromNative(&wireValue4, m.Value); err != nil {
+		return err
+	}
+
+	if err := wireValue4.FillVDLTarget(fieldTarget3, __VDLType_device_v_io_v23_security_WireBlessings); err != nil {
+		return err
+	}
+	if err := fieldsTarget1.FinishField(keyTarget2, fieldTarget3); err != nil {
+		return err
+	}
+	if err := t.FinishFields(fieldsTarget1); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (m BlessClientMessageAppBlessings) MakeVDLTarget() vdl.Target {
+	return nil
+}
+
+func (m BlessClientMessageAppBlessings) IsZero() bool {
+
+	var wireValue2 security.WireBlessings
+	if err := security.WireBlessingsFromNative(&wireValue2, m.Value); err != nil {
+		return false // error will be caught on encode
+	}
+
+	var3 := wireValue2.IsZero()
+	return var3
+}
+
 // Description enumerates the profiles that a Device supports.
 type Description struct {
 	// Profiles is a set of names of supported profiles.	Each name can
@@ -331,6 +769,72 @@ func (Description) __VDLReflect(struct {
 }) {
 }
 
+func (m *Description) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
+
+	if __VDLType_device_v_io_v23_services_device_Description == nil || __VDLTypedevice4 == nil {
+		panic("Initialization order error: types generated for FillVDLTarget not initialized. Consider moving caller to an init() block.")
+	}
+	fieldsTarget1, err := t.StartFields(tt)
+	if err != nil {
+		return err
+	}
+
+	var var2 bool
+	if len(m.Profiles) == 0 {
+		var2 = true
+	}
+	if !var2 {
+		keyTarget3, fieldTarget4, err := fieldsTarget1.StartField("Profiles")
+		if err != vdl.ErrFieldNoExist && err != nil {
+			return err
+		}
+		if err != vdl.ErrFieldNoExist {
+
+			setTarget5, err := fieldTarget4.StartSet(__VDLTypedevice5, len(m.Profiles))
+			if err != nil {
+				return err
+			}
+			for key7 := range m.Profiles {
+				keyTarget6, err := setTarget5.StartKey()
+				if err != nil {
+					return err
+				}
+				if err := keyTarget6.FromString(string(key7), vdl.StringType); err != nil {
+					return err
+				}
+				if err := setTarget5.FinishKey(keyTarget6); err != nil {
+					return err
+				}
+			}
+			if err := fieldTarget4.FinishSet(setTarget5); err != nil {
+				return err
+			}
+			if err := fieldsTarget1.FinishField(keyTarget3, fieldTarget4); err != nil {
+				return err
+			}
+		}
+	}
+	if err := t.FinishFields(fieldsTarget1); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (m *Description) MakeVDLTarget() vdl.Target {
+	return nil
+}
+
+func (m *Description) IsZero() bool {
+
+	var1 := true
+	var var2 bool
+	if len(m.Profiles) == 0 {
+		var2 = true
+	}
+	var1 = var1 && var2
+	return var1
+}
+
 // Association is a tuple containing an association between a Vanadium
 // identity and a system account name.
 type Association struct {
@@ -341,6 +845,62 @@ type Association struct {
 func (Association) __VDLReflect(struct {
 	Name string `vdl:"v.io/v23/services/device.Association"`
 }) {
+}
+
+func (m *Association) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
+
+	if __VDLType_device_v_io_v23_services_device_Association == nil || __VDLTypedevice6 == nil {
+		panic("Initialization order error: types generated for FillVDLTarget not initialized. Consider moving caller to an init() block.")
+	}
+	fieldsTarget1, err := t.StartFields(tt)
+	if err != nil {
+		return err
+	}
+
+	var2 := (m.IdentityName == "")
+	if !var2 {
+		keyTarget3, fieldTarget4, err := fieldsTarget1.StartField("IdentityName")
+		if err != vdl.ErrFieldNoExist && err != nil {
+			return err
+		}
+		if err != vdl.ErrFieldNoExist {
+			if err := fieldTarget4.FromString(string(m.IdentityName), vdl.StringType); err != nil {
+				return err
+			}
+			if err := fieldsTarget1.FinishField(keyTarget3, fieldTarget4); err != nil {
+				return err
+			}
+		}
+	}
+	var5 := (m.AccountName == "")
+	if !var5 {
+		keyTarget6, fieldTarget7, err := fieldsTarget1.StartField("AccountName")
+		if err != vdl.ErrFieldNoExist && err != nil {
+			return err
+		}
+		if err != vdl.ErrFieldNoExist {
+			if err := fieldTarget7.FromString(string(m.AccountName), vdl.StringType); err != nil {
+				return err
+			}
+			if err := fieldsTarget1.FinishField(keyTarget6, fieldTarget7); err != nil {
+				return err
+			}
+		}
+	}
+	if err := t.FinishFields(fieldsTarget1); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (m *Association) MakeVDLTarget() vdl.Target {
+	return nil
+}
+
+func (m *Association) IsZero() bool {
+
+	var1 := (*m == Association{})
+	return var1
 }
 
 func init() {
@@ -355,6 +915,138 @@ func init() {
 	vdl.Register((*BlessClientMessage)(nil))
 	vdl.Register((*Description)(nil))
 	vdl.Register((*Association)(nil))
+}
+
+var __VDLTypedevice6 *vdl.Type = vdl.TypeOf((*Association)(nil))
+var __VDLTypedevice4 *vdl.Type = vdl.TypeOf((*Description)(nil))
+var __VDLTypedevice2 *vdl.Type = vdl.TypeOf((*DeviceStatus)(nil))
+var __VDLTypedevice0 *vdl.Type = vdl.TypeOf((*InstallationStatus)(nil))
+var __VDLTypedevice1 *vdl.Type = vdl.TypeOf((*InstanceStatus)(nil))
+var __VDLTypedevice3 *vdl.Type = vdl.TypeOf([]byte(nil))
+var __VDLTypedevice5 *vdl.Type = vdl.TypeOf(map[string]struct{}(nil))
+var __VDLType_device_v_io_v23_security_WireBlessings *vdl.Type
+
+func __VDLType_device_v_io_v23_security_WireBlessings_gen() *vdl.Type {
+	__VDLType_device_v_io_v23_security_WireBlessingsBuilder := vdl.TypeBuilder{}
+
+	__VDLType_device_v_io_v23_security_WireBlessings1 := __VDLType_device_v_io_v23_security_WireBlessingsBuilder.Struct()
+	__VDLType_device_v_io_v23_security_WireBlessings2 := __VDLType_device_v_io_v23_security_WireBlessingsBuilder.Named("v.io/v23/security.WireBlessings").AssignBase(__VDLType_device_v_io_v23_security_WireBlessings1)
+	__VDLType_device_v_io_v23_security_WireBlessings3 := __VDLType_device_v_io_v23_security_WireBlessingsBuilder.List()
+	__VDLType_device_v_io_v23_security_WireBlessings4 := __VDLType_device_v_io_v23_security_WireBlessingsBuilder.List()
+	__VDLType_device_v_io_v23_security_WireBlessings5 := __VDLType_device_v_io_v23_security_WireBlessingsBuilder.Struct()
+	__VDLType_device_v_io_v23_security_WireBlessings6 := __VDLType_device_v_io_v23_security_WireBlessingsBuilder.Named("v.io/v23/security.Certificate").AssignBase(__VDLType_device_v_io_v23_security_WireBlessings5)
+	__VDLType_device_v_io_v23_security_WireBlessings7 := vdl.StringType
+	__VDLType_device_v_io_v23_security_WireBlessings5.AppendField("Extension", __VDLType_device_v_io_v23_security_WireBlessings7)
+	__VDLType_device_v_io_v23_security_WireBlessings8 := __VDLType_device_v_io_v23_security_WireBlessingsBuilder.List()
+	__VDLType_device_v_io_v23_security_WireBlessings9 := vdl.ByteType
+	__VDLType_device_v_io_v23_security_WireBlessings8.AssignElem(__VDLType_device_v_io_v23_security_WireBlessings9)
+	__VDLType_device_v_io_v23_security_WireBlessings5.AppendField("PublicKey", __VDLType_device_v_io_v23_security_WireBlessings8)
+	__VDLType_device_v_io_v23_security_WireBlessings10 := __VDLType_device_v_io_v23_security_WireBlessingsBuilder.List()
+	__VDLType_device_v_io_v23_security_WireBlessings11 := __VDLType_device_v_io_v23_security_WireBlessingsBuilder.Struct()
+	__VDLType_device_v_io_v23_security_WireBlessings12 := __VDLType_device_v_io_v23_security_WireBlessingsBuilder.Named("v.io/v23/security.Caveat").AssignBase(__VDLType_device_v_io_v23_security_WireBlessings11)
+	__VDLType_device_v_io_v23_security_WireBlessings13 := __VDLType_device_v_io_v23_security_WireBlessingsBuilder.Array()
+	__VDLType_device_v_io_v23_security_WireBlessings14 := __VDLType_device_v_io_v23_security_WireBlessingsBuilder.Named("v.io/v23/uniqueid.Id").AssignBase(__VDLType_device_v_io_v23_security_WireBlessings13)
+	__VDLType_device_v_io_v23_security_WireBlessings13.AssignElem(__VDLType_device_v_io_v23_security_WireBlessings9)
+	__VDLType_device_v_io_v23_security_WireBlessings13.AssignLen(16)
+	__VDLType_device_v_io_v23_security_WireBlessings11.AppendField("Id", __VDLType_device_v_io_v23_security_WireBlessings14)
+	__VDLType_device_v_io_v23_security_WireBlessings11.AppendField("ParamVom", __VDLType_device_v_io_v23_security_WireBlessings8)
+	__VDLType_device_v_io_v23_security_WireBlessings10.AssignElem(__VDLType_device_v_io_v23_security_WireBlessings12)
+	__VDLType_device_v_io_v23_security_WireBlessings5.AppendField("Caveats", __VDLType_device_v_io_v23_security_WireBlessings10)
+	__VDLType_device_v_io_v23_security_WireBlessings15 := __VDLType_device_v_io_v23_security_WireBlessingsBuilder.Struct()
+	__VDLType_device_v_io_v23_security_WireBlessings16 := __VDLType_device_v_io_v23_security_WireBlessingsBuilder.Named("v.io/v23/security.Signature").AssignBase(__VDLType_device_v_io_v23_security_WireBlessings15)
+	__VDLType_device_v_io_v23_security_WireBlessings15.AppendField("Purpose", __VDLType_device_v_io_v23_security_WireBlessings8)
+	__VDLType_device_v_io_v23_security_WireBlessings17 := vdl.StringType
+	__VDLType_device_v_io_v23_security_WireBlessings18 := __VDLType_device_v_io_v23_security_WireBlessingsBuilder.Named("v.io/v23/security.Hash").AssignBase(__VDLType_device_v_io_v23_security_WireBlessings17)
+	__VDLType_device_v_io_v23_security_WireBlessings15.AppendField("Hash", __VDLType_device_v_io_v23_security_WireBlessings18)
+	__VDLType_device_v_io_v23_security_WireBlessings15.AppendField("R", __VDLType_device_v_io_v23_security_WireBlessings8)
+	__VDLType_device_v_io_v23_security_WireBlessings15.AppendField("S", __VDLType_device_v_io_v23_security_WireBlessings8)
+	__VDLType_device_v_io_v23_security_WireBlessings5.AppendField("Signature", __VDLType_device_v_io_v23_security_WireBlessings16)
+	__VDLType_device_v_io_v23_security_WireBlessings4.AssignElem(__VDLType_device_v_io_v23_security_WireBlessings6)
+	__VDLType_device_v_io_v23_security_WireBlessings3.AssignElem(__VDLType_device_v_io_v23_security_WireBlessings4)
+	__VDLType_device_v_io_v23_security_WireBlessings1.AppendField("CertificateChains", __VDLType_device_v_io_v23_security_WireBlessings3)
+	__VDLType_device_v_io_v23_security_WireBlessingsBuilder.Build()
+	__VDLType_device_v_io_v23_security_WireBlessingsv, err := __VDLType_device_v_io_v23_security_WireBlessings2.Built()
+	if err != nil {
+		panic(err)
+	}
+	return __VDLType_device_v_io_v23_security_WireBlessingsv
+}
+func init() {
+	__VDLType_device_v_io_v23_security_WireBlessings = __VDLType_device_v_io_v23_security_WireBlessings_gen()
+}
+
+var __VDLType_device_v_io_v23_services_device_Association *vdl.Type = vdl.TypeOf(Association{})
+var __VDLType_device_v_io_v23_services_device_BlessClientMessage *vdl.Type
+
+func __VDLType_device_v_io_v23_services_device_BlessClientMessage_gen() *vdl.Type {
+	__VDLType_device_v_io_v23_services_device_BlessClientMessageBuilder := vdl.TypeBuilder{}
+
+	__VDLType_device_v_io_v23_services_device_BlessClientMessage1 := __VDLType_device_v_io_v23_services_device_BlessClientMessageBuilder.Union()
+	__VDLType_device_v_io_v23_services_device_BlessClientMessage2 := __VDLType_device_v_io_v23_services_device_BlessClientMessageBuilder.Named("v.io/v23/services/device.BlessClientMessage").AssignBase(__VDLType_device_v_io_v23_services_device_BlessClientMessage1)
+	__VDLType_device_v_io_v23_services_device_BlessClientMessage3 := __VDLType_device_v_io_v23_services_device_BlessClientMessageBuilder.Struct()
+	__VDLType_device_v_io_v23_services_device_BlessClientMessage4 := __VDLType_device_v_io_v23_services_device_BlessClientMessageBuilder.Named("v.io/v23/security.WireBlessings").AssignBase(__VDLType_device_v_io_v23_services_device_BlessClientMessage3)
+	__VDLType_device_v_io_v23_services_device_BlessClientMessage5 := __VDLType_device_v_io_v23_services_device_BlessClientMessageBuilder.List()
+	__VDLType_device_v_io_v23_services_device_BlessClientMessage6 := __VDLType_device_v_io_v23_services_device_BlessClientMessageBuilder.List()
+	__VDLType_device_v_io_v23_services_device_BlessClientMessage7 := __VDLType_device_v_io_v23_services_device_BlessClientMessageBuilder.Struct()
+	__VDLType_device_v_io_v23_services_device_BlessClientMessage8 := __VDLType_device_v_io_v23_services_device_BlessClientMessageBuilder.Named("v.io/v23/security.Certificate").AssignBase(__VDLType_device_v_io_v23_services_device_BlessClientMessage7)
+	__VDLType_device_v_io_v23_services_device_BlessClientMessage9 := vdl.StringType
+	__VDLType_device_v_io_v23_services_device_BlessClientMessage7.AppendField("Extension", __VDLType_device_v_io_v23_services_device_BlessClientMessage9)
+	__VDLType_device_v_io_v23_services_device_BlessClientMessage10 := __VDLType_device_v_io_v23_services_device_BlessClientMessageBuilder.List()
+	__VDLType_device_v_io_v23_services_device_BlessClientMessage11 := vdl.ByteType
+	__VDLType_device_v_io_v23_services_device_BlessClientMessage10.AssignElem(__VDLType_device_v_io_v23_services_device_BlessClientMessage11)
+	__VDLType_device_v_io_v23_services_device_BlessClientMessage7.AppendField("PublicKey", __VDLType_device_v_io_v23_services_device_BlessClientMessage10)
+	__VDLType_device_v_io_v23_services_device_BlessClientMessage12 := __VDLType_device_v_io_v23_services_device_BlessClientMessageBuilder.List()
+	__VDLType_device_v_io_v23_services_device_BlessClientMessage13 := __VDLType_device_v_io_v23_services_device_BlessClientMessageBuilder.Struct()
+	__VDLType_device_v_io_v23_services_device_BlessClientMessage14 := __VDLType_device_v_io_v23_services_device_BlessClientMessageBuilder.Named("v.io/v23/security.Caveat").AssignBase(__VDLType_device_v_io_v23_services_device_BlessClientMessage13)
+	__VDLType_device_v_io_v23_services_device_BlessClientMessage15 := __VDLType_device_v_io_v23_services_device_BlessClientMessageBuilder.Array()
+	__VDLType_device_v_io_v23_services_device_BlessClientMessage16 := __VDLType_device_v_io_v23_services_device_BlessClientMessageBuilder.Named("v.io/v23/uniqueid.Id").AssignBase(__VDLType_device_v_io_v23_services_device_BlessClientMessage15)
+	__VDLType_device_v_io_v23_services_device_BlessClientMessage15.AssignElem(__VDLType_device_v_io_v23_services_device_BlessClientMessage11)
+	__VDLType_device_v_io_v23_services_device_BlessClientMessage15.AssignLen(16)
+	__VDLType_device_v_io_v23_services_device_BlessClientMessage13.AppendField("Id", __VDLType_device_v_io_v23_services_device_BlessClientMessage16)
+	__VDLType_device_v_io_v23_services_device_BlessClientMessage13.AppendField("ParamVom", __VDLType_device_v_io_v23_services_device_BlessClientMessage10)
+	__VDLType_device_v_io_v23_services_device_BlessClientMessage12.AssignElem(__VDLType_device_v_io_v23_services_device_BlessClientMessage14)
+	__VDLType_device_v_io_v23_services_device_BlessClientMessage7.AppendField("Caveats", __VDLType_device_v_io_v23_services_device_BlessClientMessage12)
+	__VDLType_device_v_io_v23_services_device_BlessClientMessage17 := __VDLType_device_v_io_v23_services_device_BlessClientMessageBuilder.Struct()
+	__VDLType_device_v_io_v23_services_device_BlessClientMessage18 := __VDLType_device_v_io_v23_services_device_BlessClientMessageBuilder.Named("v.io/v23/security.Signature").AssignBase(__VDLType_device_v_io_v23_services_device_BlessClientMessage17)
+	__VDLType_device_v_io_v23_services_device_BlessClientMessage17.AppendField("Purpose", __VDLType_device_v_io_v23_services_device_BlessClientMessage10)
+	__VDLType_device_v_io_v23_services_device_BlessClientMessage19 := vdl.StringType
+	__VDLType_device_v_io_v23_services_device_BlessClientMessage20 := __VDLType_device_v_io_v23_services_device_BlessClientMessageBuilder.Named("v.io/v23/security.Hash").AssignBase(__VDLType_device_v_io_v23_services_device_BlessClientMessage19)
+	__VDLType_device_v_io_v23_services_device_BlessClientMessage17.AppendField("Hash", __VDLType_device_v_io_v23_services_device_BlessClientMessage20)
+	__VDLType_device_v_io_v23_services_device_BlessClientMessage17.AppendField("R", __VDLType_device_v_io_v23_services_device_BlessClientMessage10)
+	__VDLType_device_v_io_v23_services_device_BlessClientMessage17.AppendField("S", __VDLType_device_v_io_v23_services_device_BlessClientMessage10)
+	__VDLType_device_v_io_v23_services_device_BlessClientMessage7.AppendField("Signature", __VDLType_device_v_io_v23_services_device_BlessClientMessage18)
+	__VDLType_device_v_io_v23_services_device_BlessClientMessage6.AssignElem(__VDLType_device_v_io_v23_services_device_BlessClientMessage8)
+	__VDLType_device_v_io_v23_services_device_BlessClientMessage5.AssignElem(__VDLType_device_v_io_v23_services_device_BlessClientMessage6)
+	__VDLType_device_v_io_v23_services_device_BlessClientMessage3.AppendField("CertificateChains", __VDLType_device_v_io_v23_services_device_BlessClientMessage5)
+	__VDLType_device_v_io_v23_services_device_BlessClientMessage1.AppendField("AppBlessings", __VDLType_device_v_io_v23_services_device_BlessClientMessage4)
+	__VDLType_device_v_io_v23_services_device_BlessClientMessageBuilder.Build()
+	__VDLType_device_v_io_v23_services_device_BlessClientMessagev, err := __VDLType_device_v_io_v23_services_device_BlessClientMessage2.Built()
+	if err != nil {
+		panic(err)
+	}
+	return __VDLType_device_v_io_v23_services_device_BlessClientMessagev
+}
+func init() {
+	__VDLType_device_v_io_v23_services_device_BlessClientMessage = __VDLType_device_v_io_v23_services_device_BlessClientMessage_gen()
+}
+
+var __VDLType_device_v_io_v23_services_device_BlessServerMessage *vdl.Type = vdl.TypeOf(BlessServerMessage(BlessServerMessageInstancePublicKey{[]byte(nil)}))
+var __VDLType_device_v_io_v23_services_device_Config *vdl.Type = vdl.TypeOf(Config(nil))
+var __VDLType_device_v_io_v23_services_device_Description *vdl.Type = vdl.TypeOf(Description{})
+var __VDLType_device_v_io_v23_services_device_DeviceStatus *vdl.Type = vdl.TypeOf(DeviceStatus{})
+var __VDLType_device_v_io_v23_services_device_InstallationState *vdl.Type = vdl.TypeOf(InstallationStateActive)
+var __VDLType_device_v_io_v23_services_device_InstallationStatus *vdl.Type = vdl.TypeOf(InstallationStatus{})
+var __VDLType_device_v_io_v23_services_device_InstanceState *vdl.Type = vdl.TypeOf(InstanceStateLaunching)
+var __VDLType_device_v_io_v23_services_device_InstanceStatus *vdl.Type = vdl.TypeOf(InstanceStatus{})
+var __VDLType_device_v_io_v23_services_device_Status *vdl.Type = vdl.TypeOf(Status(StatusInstance{InstanceStatus{}}))
+
+func __VDLEnsureNativeBuilt_device() {
+	if __VDLType_device_v_io_v23_security_WireBlessings == nil {
+		__VDLType_device_v_io_v23_security_WireBlessings = __VDLType_device_v_io_v23_security_WireBlessings_gen()
+	}
+	if __VDLType_device_v_io_v23_services_device_BlessClientMessage == nil {
+		__VDLType_device_v_io_v23_services_device_BlessClientMessage = __VDLType_device_v_io_v23_services_device_BlessClientMessage_gen()
+	}
 }
 
 // ApplicationClientMethods is the client interface

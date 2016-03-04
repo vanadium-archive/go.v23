@@ -28,6 +28,150 @@ func (TestCase) __VDLReflect(struct {
 }) {
 }
 
+func (m *TestCase) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
+
+	if __VDLType_testcase_v_io_v23_vom_testdata_types_TestCase == nil || __VDLTypetestcase0 == nil {
+		panic("Initialization order error: types generated for FillVDLTarget not initialized. Consider moving caller to an init() block.")
+	}
+	fieldsTarget1, err := t.StartFields(tt)
+	if err != nil {
+		return err
+	}
+
+	var2 := (m.Name == "")
+	if !var2 {
+		keyTarget3, fieldTarget4, err := fieldsTarget1.StartField("Name")
+		if err != vdl.ErrFieldNoExist && err != nil {
+			return err
+		}
+		if err != vdl.ErrFieldNoExist {
+			if err := fieldTarget4.FromString(string(m.Name), vdl.StringType); err != nil {
+				return err
+			}
+			if err := fieldsTarget1.FinishField(keyTarget3, fieldTarget4); err != nil {
+				return err
+			}
+		}
+	}
+	var5 := (m.Value == (*vdl.Value)(nil))
+	if !var5 {
+		keyTarget6, fieldTarget7, err := fieldsTarget1.StartField("Value")
+		if err != vdl.ErrFieldNoExist && err != nil {
+			return err
+		}
+		if err != vdl.ErrFieldNoExist {
+
+			if m.Value == nil {
+				if err := fieldTarget7.FromNil(vdl.AnyType); err != nil {
+					return err
+				}
+			} else {
+				if err := vdl.FromValue(fieldTarget7, m.Value); err != nil {
+					return err
+				}
+			}
+			if err := fieldsTarget1.FinishField(keyTarget6, fieldTarget7); err != nil {
+				return err
+			}
+		}
+	}
+	var8 := (m.TypeString == "")
+	if !var8 {
+		keyTarget9, fieldTarget10, err := fieldsTarget1.StartField("TypeString")
+		if err != vdl.ErrFieldNoExist && err != nil {
+			return err
+		}
+		if err != vdl.ErrFieldNoExist {
+			if err := fieldTarget10.FromString(string(m.TypeString), vdl.StringType); err != nil {
+				return err
+			}
+			if err := fieldsTarget1.FinishField(keyTarget9, fieldTarget10); err != nil {
+				return err
+			}
+		}
+	}
+	var11 := (m.Hex == "")
+	if !var11 {
+		keyTarget12, fieldTarget13, err := fieldsTarget1.StartField("Hex")
+		if err != vdl.ErrFieldNoExist && err != nil {
+			return err
+		}
+		if err != vdl.ErrFieldNoExist {
+			if err := fieldTarget13.FromString(string(m.Hex), vdl.StringType); err != nil {
+				return err
+			}
+			if err := fieldsTarget1.FinishField(keyTarget12, fieldTarget13); err != nil {
+				return err
+			}
+		}
+	}
+	var14 := (m.HexVersion == "")
+	if !var14 {
+		keyTarget15, fieldTarget16, err := fieldsTarget1.StartField("HexVersion")
+		if err != vdl.ErrFieldNoExist && err != nil {
+			return err
+		}
+		if err != vdl.ErrFieldNoExist {
+			if err := fieldTarget16.FromString(string(m.HexVersion), vdl.StringType); err != nil {
+				return err
+			}
+			if err := fieldsTarget1.FinishField(keyTarget15, fieldTarget16); err != nil {
+				return err
+			}
+		}
+	}
+	var17 := (m.HexType == "")
+	if !var17 {
+		keyTarget18, fieldTarget19, err := fieldsTarget1.StartField("HexType")
+		if err != vdl.ErrFieldNoExist && err != nil {
+			return err
+		}
+		if err != vdl.ErrFieldNoExist {
+			if err := fieldTarget19.FromString(string(m.HexType), vdl.StringType); err != nil {
+				return err
+			}
+			if err := fieldsTarget1.FinishField(keyTarget18, fieldTarget19); err != nil {
+				return err
+			}
+		}
+	}
+	var20 := (m.HexValue == "")
+	if !var20 {
+		keyTarget21, fieldTarget22, err := fieldsTarget1.StartField("HexValue")
+		if err != vdl.ErrFieldNoExist && err != nil {
+			return err
+		}
+		if err != vdl.ErrFieldNoExist {
+			if err := fieldTarget22.FromString(string(m.HexValue), vdl.StringType); err != nil {
+				return err
+			}
+			if err := fieldsTarget1.FinishField(keyTarget21, fieldTarget22); err != nil {
+				return err
+			}
+		}
+	}
+	if err := t.FinishFields(fieldsTarget1); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (m *TestCase) MakeVDLTarget() vdl.Target {
+	return nil
+}
+
+func (m *TestCase) IsZero() bool {
+
+	var1 := (*m == TestCase{})
+	return var1
+}
+
 func init() {
 	vdl.Register((*TestCase)(nil))
+}
+
+var __VDLTypetestcase0 *vdl.Type = vdl.TypeOf((*TestCase)(nil))
+var __VDLType_testcase_v_io_v23_vom_testdata_types_TestCase *vdl.Type = vdl.TypeOf(TestCase{})
+
+func __VDLEnsureNativeBuilt_testcase() {
 }

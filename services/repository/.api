@@ -8,6 +8,9 @@ pkg repository, method (*BinaryDownloadServerCallStub) Init(rpc.StreamServerCall
 pkg repository, method (*BinaryDownloadServerCallStub) SendStream() interface {  Send(item []byte) error;}
 pkg repository, method (*BinaryUploadServerCallStub) Init(rpc.StreamServerCall)
 pkg repository, method (*BinaryUploadServerCallStub) RecvStream() interface {  Advance() bool; Value() []byte; Err() error;}
+pkg repository, method (*MediaInfo) FillVDLTarget(vdl.Target, *vdl.Type) error
+pkg repository, method (*MediaInfo) IsZero() bool
+pkg repository, method (*MediaInfo) MakeVDLTarget() vdl.Target
 pkg repository, type ApplicationClientMethods interface { GetPermissions, Match, SetPermissions, TidyNow }
 pkg repository, type ApplicationClientMethods interface, GetPermissions(*context.T, ...rpc.CallOpt) (access.Permissions, string, error)
 pkg repository, type ApplicationClientMethods interface, Match(*context.T, []string, ...rpc.CallOpt) (application.Envelope, error)

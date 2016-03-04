@@ -10,6 +10,7 @@ package rpc
 import (
 	// VDL system imports
 	"v.io/v23/vdl"
+	"v.io/v23/verror"
 
 	// VDL user imports
 	"v.io/v23/security"
@@ -60,6 +61,189 @@ func (Request) __VDLReflect(struct {
 }) {
 }
 
+func (m *Request) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
+
+	__VDLEnsureNativeBuilt_protocol()
+	fieldsTarget1, err := t.StartFields(tt)
+	if err != nil {
+		return err
+	}
+
+	var2 := (m.Suffix == "")
+	if !var2 {
+		keyTarget3, fieldTarget4, err := fieldsTarget1.StartField("Suffix")
+		if err != vdl.ErrFieldNoExist && err != nil {
+			return err
+		}
+		if err != vdl.ErrFieldNoExist {
+			if err := fieldTarget4.FromString(string(m.Suffix), vdl.StringType); err != nil {
+				return err
+			}
+			if err := fieldsTarget1.FinishField(keyTarget3, fieldTarget4); err != nil {
+				return err
+			}
+		}
+	}
+	var5 := (m.Method == "")
+	if !var5 {
+		keyTarget6, fieldTarget7, err := fieldsTarget1.StartField("Method")
+		if err != vdl.ErrFieldNoExist && err != nil {
+			return err
+		}
+		if err != vdl.ErrFieldNoExist {
+			if err := fieldTarget7.FromString(string(m.Method), vdl.StringType); err != nil {
+				return err
+			}
+			if err := fieldsTarget1.FinishField(keyTarget6, fieldTarget7); err != nil {
+				return err
+			}
+		}
+	}
+	var8 := (m.NumPosArgs == uint64(0))
+	if !var8 {
+		keyTarget9, fieldTarget10, err := fieldsTarget1.StartField("NumPosArgs")
+		if err != vdl.ErrFieldNoExist && err != nil {
+			return err
+		}
+		if err != vdl.ErrFieldNoExist {
+			if err := fieldTarget10.FromUint(uint64(m.NumPosArgs), vdl.Uint64Type); err != nil {
+				return err
+			}
+			if err := fieldsTarget1.FinishField(keyTarget9, fieldTarget10); err != nil {
+				return err
+			}
+		}
+	}
+	var11 := (m.EndStreamArgs == false)
+	if !var11 {
+		keyTarget12, fieldTarget13, err := fieldsTarget1.StartField("EndStreamArgs")
+		if err != vdl.ErrFieldNoExist && err != nil {
+			return err
+		}
+		if err != vdl.ErrFieldNoExist {
+			if err := fieldTarget13.FromBool(bool(m.EndStreamArgs), vdl.BoolType); err != nil {
+				return err
+			}
+			if err := fieldsTarget1.FinishField(keyTarget12, fieldTarget13); err != nil {
+				return err
+			}
+		}
+	}
+	var wireValue14 time.WireDeadline
+	if err := time.WireDeadlineFromNative(&wireValue14, m.Deadline); err != nil {
+		return err
+	}
+
+	var15 := wireValue14.IsZero()
+	if !var15 {
+		keyTarget16, fieldTarget17, err := fieldsTarget1.StartField("Deadline")
+		if err != vdl.ErrFieldNoExist && err != nil {
+			return err
+		}
+		if err != vdl.ErrFieldNoExist {
+
+			if err := wireValue14.FillVDLTarget(fieldTarget17, __VDLType_protocol_time_WireDeadline); err != nil {
+				return err
+			}
+			if err := fieldsTarget1.FinishField(keyTarget16, fieldTarget17); err != nil {
+				return err
+			}
+		}
+	}
+	var wireValue18 security.WireBlessings
+	if err := security.WireBlessingsFromNative(&wireValue18, m.GrantedBlessings); err != nil {
+		return err
+	}
+
+	var19 := wireValue18.IsZero()
+	if !var19 {
+		keyTarget20, fieldTarget21, err := fieldsTarget1.StartField("GrantedBlessings")
+		if err != vdl.ErrFieldNoExist && err != nil {
+			return err
+		}
+		if err != vdl.ErrFieldNoExist {
+
+			if err := wireValue18.FillVDLTarget(fieldTarget21, __VDLType_protocol_v_io_v23_security_WireBlessings); err != nil {
+				return err
+			}
+			if err := fieldsTarget1.FinishField(keyTarget20, fieldTarget21); err != nil {
+				return err
+			}
+		}
+	}
+	var22 := m.TraceRequest.IsZero()
+	if !var22 {
+		keyTarget23, fieldTarget24, err := fieldsTarget1.StartField("TraceRequest")
+		if err != vdl.ErrFieldNoExist && err != nil {
+			return err
+		}
+		if err != vdl.ErrFieldNoExist {
+
+			if err := m.TraceRequest.FillVDLTarget(fieldTarget24, __VDLType_protocol_v_io_v23_vtrace_Request); err != nil {
+				return err
+			}
+			if err := fieldsTarget1.FinishField(keyTarget23, fieldTarget24); err != nil {
+				return err
+			}
+		}
+	}
+	var25 := (m.Language == "")
+	if !var25 {
+		keyTarget26, fieldTarget27, err := fieldsTarget1.StartField("Language")
+		if err != vdl.ErrFieldNoExist && err != nil {
+			return err
+		}
+		if err != vdl.ErrFieldNoExist {
+			if err := fieldTarget27.FromString(string(m.Language), vdl.StringType); err != nil {
+				return err
+			}
+			if err := fieldsTarget1.FinishField(keyTarget26, fieldTarget27); err != nil {
+				return err
+			}
+		}
+	}
+	if err := t.FinishFields(fieldsTarget1); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (m *Request) MakeVDLTarget() vdl.Target {
+	return nil
+}
+
+func (m *Request) IsZero() bool {
+
+	var1 := true
+	var2 := (m.Suffix == "")
+	var1 = var1 && var2
+	var3 := (m.Method == "")
+	var1 = var1 && var3
+	var4 := (m.NumPosArgs == uint64(0))
+	var1 = var1 && var4
+	var5 := (m.EndStreamArgs == false)
+	var1 = var1 && var5
+	var wireValue6 time.WireDeadline
+	if err := time.WireDeadlineFromNative(&wireValue6, m.Deadline); err != nil {
+		return false // error will be caught on encode
+	}
+
+	var7 := wireValue6.IsZero()
+	var1 = var1 && var7
+	var wireValue8 security.WireBlessings
+	if err := security.WireBlessingsFromNative(&wireValue8, m.GrantedBlessings); err != nil {
+		return false // error will be caught on encode
+	}
+
+	var9 := wireValue8.IsZero()
+	var1 = var1 && var9
+	var10 := m.TraceRequest.IsZero()
+	var1 = var1 && var10
+	var11 := (m.Language == "")
+	var1 = var1 && var11
+	return var1
+}
+
 // Response describes the response header sent by the server to the client.  A
 // zero response header is sent before each streaming arg.  Thereafter a
 // non-zero response header is sent at the end of the RPC call, right before
@@ -87,9 +271,611 @@ func (Response) __VDLReflect(struct {
 }) {
 }
 
+func (m *Response) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
+
+	__VDLEnsureNativeBuilt_protocol()
+	fieldsTarget1, err := t.StartFields(tt)
+	if err != nil {
+		return err
+	}
+
+	var2 := (m.Error == (error)(nil))
+	if !var2 {
+		keyTarget3, fieldTarget4, err := fieldsTarget1.StartField("Error")
+		if err != vdl.ErrFieldNoExist && err != nil {
+			return err
+		}
+		if err != vdl.ErrFieldNoExist {
+
+			if m.Error == nil {
+				if err := fieldTarget4.FromNil(vdl.ErrorType); err != nil {
+					return err
+				}
+			} else {
+				var wireError5 vdl.WireError
+				if err := verror.WireFromNative(&wireError5, m.Error); err != nil {
+					return err
+				}
+				if err := wireError5.FillVDLTarget(fieldTarget4, vdl.ErrorType); err != nil {
+					return err
+				}
+
+			}
+			if err := fieldsTarget1.FinishField(keyTarget3, fieldTarget4); err != nil {
+				return err
+			}
+		}
+	}
+	var6 := (m.EndStreamResults == false)
+	if !var6 {
+		keyTarget7, fieldTarget8, err := fieldsTarget1.StartField("EndStreamResults")
+		if err != vdl.ErrFieldNoExist && err != nil {
+			return err
+		}
+		if err != vdl.ErrFieldNoExist {
+			if err := fieldTarget8.FromBool(bool(m.EndStreamResults), vdl.BoolType); err != nil {
+				return err
+			}
+			if err := fieldsTarget1.FinishField(keyTarget7, fieldTarget8); err != nil {
+				return err
+			}
+		}
+	}
+	var9 := (m.NumPosResults == uint64(0))
+	if !var9 {
+		keyTarget10, fieldTarget11, err := fieldsTarget1.StartField("NumPosResults")
+		if err != vdl.ErrFieldNoExist && err != nil {
+			return err
+		}
+		if err != vdl.ErrFieldNoExist {
+			if err := fieldTarget11.FromUint(uint64(m.NumPosResults), vdl.Uint64Type); err != nil {
+				return err
+			}
+			if err := fieldsTarget1.FinishField(keyTarget10, fieldTarget11); err != nil {
+				return err
+			}
+		}
+	}
+	var12 := m.TraceResponse.IsZero()
+	if !var12 {
+		keyTarget13, fieldTarget14, err := fieldsTarget1.StartField("TraceResponse")
+		if err != vdl.ErrFieldNoExist && err != nil {
+			return err
+		}
+		if err != vdl.ErrFieldNoExist {
+
+			if err := m.TraceResponse.FillVDLTarget(fieldTarget14, __VDLType_protocol_v_io_v23_vtrace_Response); err != nil {
+				return err
+			}
+			if err := fieldsTarget1.FinishField(keyTarget13, fieldTarget14); err != nil {
+				return err
+			}
+		}
+	}
+	var15 := (m.AckBlessings == false)
+	if !var15 {
+		keyTarget16, fieldTarget17, err := fieldsTarget1.StartField("AckBlessings")
+		if err != vdl.ErrFieldNoExist && err != nil {
+			return err
+		}
+		if err != vdl.ErrFieldNoExist {
+			if err := fieldTarget17.FromBool(bool(m.AckBlessings), vdl.BoolType); err != nil {
+				return err
+			}
+			if err := fieldsTarget1.FinishField(keyTarget16, fieldTarget17); err != nil {
+				return err
+			}
+		}
+	}
+	if err := t.FinishFields(fieldsTarget1); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (m *Response) MakeVDLTarget() vdl.Target {
+	return nil
+}
+
+func (m *Response) IsZero() bool {
+
+	var1 := true
+	var2 := (m.Error == (error)(nil))
+	var1 = var1 && var2
+	var3 := (m.EndStreamResults == false)
+	var1 = var1 && var3
+	var4 := (m.NumPosResults == uint64(0))
+	var1 = var1 && var4
+	var5 := m.TraceResponse.IsZero()
+	var1 = var1 && var5
+	var6 := (m.AckBlessings == false)
+	var1 = var1 && var6
+	return var1
+}
+
 func init() {
 	vdl.Register((*Request)(nil))
 	vdl.Register((*Response)(nil))
+}
+
+var __VDLTypeprotocol0 *vdl.Type
+
+func __VDLTypeprotocol0_gen() *vdl.Type {
+	__VDLTypeprotocol0Builder := vdl.TypeBuilder{}
+
+	__VDLTypeprotocol01 := __VDLTypeprotocol0Builder.Optional()
+	__VDLTypeprotocol02 := __VDLTypeprotocol0Builder.Struct()
+	__VDLTypeprotocol03 := __VDLTypeprotocol0Builder.Named("v.io/v23/rpc.Request").AssignBase(__VDLTypeprotocol02)
+	__VDLTypeprotocol04 := vdl.StringType
+	__VDLTypeprotocol02.AppendField("Suffix", __VDLTypeprotocol04)
+	__VDLTypeprotocol02.AppendField("Method", __VDLTypeprotocol04)
+	__VDLTypeprotocol05 := vdl.Uint64Type
+	__VDLTypeprotocol02.AppendField("NumPosArgs", __VDLTypeprotocol05)
+	__VDLTypeprotocol06 := vdl.BoolType
+	__VDLTypeprotocol02.AppendField("EndStreamArgs", __VDLTypeprotocol06)
+	__VDLTypeprotocol07 := __VDLTypeprotocol0Builder.Struct()
+	__VDLTypeprotocol08 := __VDLTypeprotocol0Builder.Named("time.WireDeadline").AssignBase(__VDLTypeprotocol07)
+	__VDLTypeprotocol09 := __VDLTypeprotocol0Builder.Struct()
+	__VDLTypeprotocol010 := __VDLTypeprotocol0Builder.Named("time.Duration").AssignBase(__VDLTypeprotocol09)
+	__VDLTypeprotocol011 := vdl.Int64Type
+	__VDLTypeprotocol09.AppendField("Seconds", __VDLTypeprotocol011)
+	__VDLTypeprotocol012 := vdl.Int32Type
+	__VDLTypeprotocol09.AppendField("Nanos", __VDLTypeprotocol012)
+	__VDLTypeprotocol07.AppendField("FromNow", __VDLTypeprotocol010)
+	__VDLTypeprotocol07.AppendField("NoDeadline", __VDLTypeprotocol06)
+	__VDLTypeprotocol02.AppendField("Deadline", __VDLTypeprotocol08)
+	__VDLTypeprotocol013 := __VDLTypeprotocol0Builder.Struct()
+	__VDLTypeprotocol014 := __VDLTypeprotocol0Builder.Named("v.io/v23/security.WireBlessings").AssignBase(__VDLTypeprotocol013)
+	__VDLTypeprotocol015 := __VDLTypeprotocol0Builder.List()
+	__VDLTypeprotocol016 := __VDLTypeprotocol0Builder.List()
+	__VDLTypeprotocol017 := __VDLTypeprotocol0Builder.Struct()
+	__VDLTypeprotocol018 := __VDLTypeprotocol0Builder.Named("v.io/v23/security.Certificate").AssignBase(__VDLTypeprotocol017)
+	__VDLTypeprotocol017.AppendField("Extension", __VDLTypeprotocol04)
+	__VDLTypeprotocol019 := __VDLTypeprotocol0Builder.List()
+	__VDLTypeprotocol020 := vdl.ByteType
+	__VDLTypeprotocol019.AssignElem(__VDLTypeprotocol020)
+	__VDLTypeprotocol017.AppendField("PublicKey", __VDLTypeprotocol019)
+	__VDLTypeprotocol021 := __VDLTypeprotocol0Builder.List()
+	__VDLTypeprotocol022 := __VDLTypeprotocol0Builder.Struct()
+	__VDLTypeprotocol023 := __VDLTypeprotocol0Builder.Named("v.io/v23/security.Caveat").AssignBase(__VDLTypeprotocol022)
+	__VDLTypeprotocol024 := __VDLTypeprotocol0Builder.Array()
+	__VDLTypeprotocol025 := __VDLTypeprotocol0Builder.Named("v.io/v23/uniqueid.Id").AssignBase(__VDLTypeprotocol024)
+	__VDLTypeprotocol024.AssignElem(__VDLTypeprotocol020)
+	__VDLTypeprotocol024.AssignLen(16)
+	__VDLTypeprotocol022.AppendField("Id", __VDLTypeprotocol025)
+	__VDLTypeprotocol022.AppendField("ParamVom", __VDLTypeprotocol019)
+	__VDLTypeprotocol021.AssignElem(__VDLTypeprotocol023)
+	__VDLTypeprotocol017.AppendField("Caveats", __VDLTypeprotocol021)
+	__VDLTypeprotocol026 := __VDLTypeprotocol0Builder.Struct()
+	__VDLTypeprotocol027 := __VDLTypeprotocol0Builder.Named("v.io/v23/security.Signature").AssignBase(__VDLTypeprotocol026)
+	__VDLTypeprotocol026.AppendField("Purpose", __VDLTypeprotocol019)
+	__VDLTypeprotocol028 := vdl.StringType
+	__VDLTypeprotocol029 := __VDLTypeprotocol0Builder.Named("v.io/v23/security.Hash").AssignBase(__VDLTypeprotocol028)
+	__VDLTypeprotocol026.AppendField("Hash", __VDLTypeprotocol029)
+	__VDLTypeprotocol026.AppendField("R", __VDLTypeprotocol019)
+	__VDLTypeprotocol026.AppendField("S", __VDLTypeprotocol019)
+	__VDLTypeprotocol017.AppendField("Signature", __VDLTypeprotocol027)
+	__VDLTypeprotocol016.AssignElem(__VDLTypeprotocol018)
+	__VDLTypeprotocol015.AssignElem(__VDLTypeprotocol016)
+	__VDLTypeprotocol013.AppendField("CertificateChains", __VDLTypeprotocol015)
+	__VDLTypeprotocol02.AppendField("GrantedBlessings", __VDLTypeprotocol014)
+	__VDLTypeprotocol030 := __VDLTypeprotocol0Builder.Struct()
+	__VDLTypeprotocol031 := __VDLTypeprotocol0Builder.Named("v.io/v23/vtrace.Request").AssignBase(__VDLTypeprotocol030)
+	__VDLTypeprotocol030.AppendField("SpanId", __VDLTypeprotocol025)
+	__VDLTypeprotocol030.AppendField("TraceId", __VDLTypeprotocol025)
+	__VDLTypeprotocol032 := vdl.Int32Type
+	__VDLTypeprotocol033 := __VDLTypeprotocol0Builder.Named("v.io/v23/vtrace.TraceFlags").AssignBase(__VDLTypeprotocol032)
+	__VDLTypeprotocol030.AppendField("Flags", __VDLTypeprotocol033)
+	__VDLTypeprotocol030.AppendField("LogLevel", __VDLTypeprotocol012)
+	__VDLTypeprotocol02.AppendField("TraceRequest", __VDLTypeprotocol031)
+	__VDLTypeprotocol02.AppendField("Language", __VDLTypeprotocol04)
+	__VDLTypeprotocol01.AssignElem(__VDLTypeprotocol03)
+	__VDLTypeprotocol0Builder.Build()
+	__VDLTypeprotocol0v, err := __VDLTypeprotocol01.Built()
+	if err != nil {
+		panic(err)
+	}
+	return __VDLTypeprotocol0v
+}
+func init() {
+	__VDLTypeprotocol0 = __VDLTypeprotocol0_gen()
+}
+
+var __VDLTypeprotocol1 *vdl.Type
+
+func __VDLTypeprotocol1_gen() *vdl.Type {
+	__VDLTypeprotocol1Builder := vdl.TypeBuilder{}
+
+	__VDLTypeprotocol11 := __VDLTypeprotocol1Builder.Optional()
+	__VDLTypeprotocol12 := __VDLTypeprotocol1Builder.Struct()
+	__VDLTypeprotocol13 := __VDLTypeprotocol1Builder.Named("v.io/v23/rpc.Response").AssignBase(__VDLTypeprotocol12)
+	__VDLTypeprotocol14 := __VDLTypeprotocol1Builder.Optional()
+	__VDLTypeprotocol15 := __VDLTypeprotocol1Builder.Struct()
+	__VDLTypeprotocol16 := __VDLTypeprotocol1Builder.Named("error").AssignBase(__VDLTypeprotocol15)
+	__VDLTypeprotocol17 := vdl.StringType
+	__VDLTypeprotocol15.AppendField("Id", __VDLTypeprotocol17)
+	__VDLTypeprotocol18 := __VDLTypeprotocol1Builder.Enum()
+	__VDLTypeprotocol18.AppendLabel("NoRetry")
+	__VDLTypeprotocol18.AppendLabel("RetryConnection")
+	__VDLTypeprotocol18.AppendLabel("RetryRefetch")
+	__VDLTypeprotocol18.AppendLabel("RetryBackoff")
+	__VDLTypeprotocol15.AppendField("RetryCode", __VDLTypeprotocol18)
+	__VDLTypeprotocol15.AppendField("Msg", __VDLTypeprotocol17)
+	__VDLTypeprotocol19 := __VDLTypeprotocol1Builder.List()
+	__VDLTypeprotocol110 := vdl.AnyType
+	__VDLTypeprotocol19.AssignElem(__VDLTypeprotocol110)
+	__VDLTypeprotocol15.AppendField("ParamList", __VDLTypeprotocol19)
+	__VDLTypeprotocol14.AssignElem(__VDLTypeprotocol16)
+	__VDLTypeprotocol12.AppendField("Error", __VDLTypeprotocol14)
+	__VDLTypeprotocol111 := vdl.BoolType
+	__VDLTypeprotocol12.AppendField("EndStreamResults", __VDLTypeprotocol111)
+	__VDLTypeprotocol112 := vdl.Uint64Type
+	__VDLTypeprotocol12.AppendField("NumPosResults", __VDLTypeprotocol112)
+	__VDLTypeprotocol113 := __VDLTypeprotocol1Builder.Struct()
+	__VDLTypeprotocol114 := __VDLTypeprotocol1Builder.Named("v.io/v23/vtrace.Response").AssignBase(__VDLTypeprotocol113)
+	__VDLTypeprotocol115 := vdl.Int32Type
+	__VDLTypeprotocol116 := __VDLTypeprotocol1Builder.Named("v.io/v23/vtrace.TraceFlags").AssignBase(__VDLTypeprotocol115)
+	__VDLTypeprotocol113.AppendField("Flags", __VDLTypeprotocol116)
+	__VDLTypeprotocol117 := __VDLTypeprotocol1Builder.Struct()
+	__VDLTypeprotocol118 := __VDLTypeprotocol1Builder.Named("v.io/v23/vtrace.TraceRecord").AssignBase(__VDLTypeprotocol117)
+	__VDLTypeprotocol119 := __VDLTypeprotocol1Builder.Array()
+	__VDLTypeprotocol120 := __VDLTypeprotocol1Builder.Named("v.io/v23/uniqueid.Id").AssignBase(__VDLTypeprotocol119)
+	__VDLTypeprotocol121 := vdl.ByteType
+	__VDLTypeprotocol119.AssignElem(__VDLTypeprotocol121)
+	__VDLTypeprotocol119.AssignLen(16)
+	__VDLTypeprotocol117.AppendField("Id", __VDLTypeprotocol120)
+	__VDLTypeprotocol122 := __VDLTypeprotocol1Builder.List()
+	__VDLTypeprotocol123 := __VDLTypeprotocol1Builder.Struct()
+	__VDLTypeprotocol124 := __VDLTypeprotocol1Builder.Named("v.io/v23/vtrace.SpanRecord").AssignBase(__VDLTypeprotocol123)
+	__VDLTypeprotocol123.AppendField("Id", __VDLTypeprotocol120)
+	__VDLTypeprotocol123.AppendField("Parent", __VDLTypeprotocol120)
+	__VDLTypeprotocol123.AppendField("Name", __VDLTypeprotocol17)
+	__VDLTypeprotocol125 := __VDLTypeprotocol1Builder.Struct()
+	__VDLTypeprotocol126 := __VDLTypeprotocol1Builder.Named("time.Time").AssignBase(__VDLTypeprotocol125)
+	__VDLTypeprotocol127 := vdl.Int64Type
+	__VDLTypeprotocol125.AppendField("Seconds", __VDLTypeprotocol127)
+	__VDLTypeprotocol128 := vdl.Int32Type
+	__VDLTypeprotocol125.AppendField("Nanos", __VDLTypeprotocol128)
+	__VDLTypeprotocol123.AppendField("Start", __VDLTypeprotocol126)
+	__VDLTypeprotocol123.AppendField("End", __VDLTypeprotocol126)
+	__VDLTypeprotocol129 := __VDLTypeprotocol1Builder.List()
+	__VDLTypeprotocol130 := __VDLTypeprotocol1Builder.Struct()
+	__VDLTypeprotocol131 := __VDLTypeprotocol1Builder.Named("v.io/v23/vtrace.Annotation").AssignBase(__VDLTypeprotocol130)
+	__VDLTypeprotocol130.AppendField("When", __VDLTypeprotocol126)
+	__VDLTypeprotocol130.AppendField("Message", __VDLTypeprotocol17)
+	__VDLTypeprotocol129.AssignElem(__VDLTypeprotocol131)
+	__VDLTypeprotocol123.AppendField("Annotations", __VDLTypeprotocol129)
+	__VDLTypeprotocol122.AssignElem(__VDLTypeprotocol124)
+	__VDLTypeprotocol117.AppendField("Spans", __VDLTypeprotocol122)
+	__VDLTypeprotocol113.AppendField("Trace", __VDLTypeprotocol118)
+	__VDLTypeprotocol12.AppendField("TraceResponse", __VDLTypeprotocol114)
+	__VDLTypeprotocol12.AppendField("AckBlessings", __VDLTypeprotocol111)
+	__VDLTypeprotocol11.AssignElem(__VDLTypeprotocol13)
+	__VDLTypeprotocol1Builder.Build()
+	__VDLTypeprotocol1v, err := __VDLTypeprotocol11.Built()
+	if err != nil {
+		panic(err)
+	}
+	return __VDLTypeprotocol1v
+}
+func init() {
+	__VDLTypeprotocol1 = __VDLTypeprotocol1_gen()
+}
+
+var __VDLType_protocol_time_WireDeadline *vdl.Type
+
+func __VDLType_protocol_time_WireDeadline_gen() *vdl.Type {
+	__VDLType_protocol_time_WireDeadlineBuilder := vdl.TypeBuilder{}
+
+	__VDLType_protocol_time_WireDeadline1 := __VDLType_protocol_time_WireDeadlineBuilder.Struct()
+	__VDLType_protocol_time_WireDeadline2 := __VDLType_protocol_time_WireDeadlineBuilder.Named("time.WireDeadline").AssignBase(__VDLType_protocol_time_WireDeadline1)
+	__VDLType_protocol_time_WireDeadline3 := __VDLType_protocol_time_WireDeadlineBuilder.Struct()
+	__VDLType_protocol_time_WireDeadline4 := __VDLType_protocol_time_WireDeadlineBuilder.Named("time.Duration").AssignBase(__VDLType_protocol_time_WireDeadline3)
+	__VDLType_protocol_time_WireDeadline5 := vdl.Int64Type
+	__VDLType_protocol_time_WireDeadline3.AppendField("Seconds", __VDLType_protocol_time_WireDeadline5)
+	__VDLType_protocol_time_WireDeadline6 := vdl.Int32Type
+	__VDLType_protocol_time_WireDeadline3.AppendField("Nanos", __VDLType_protocol_time_WireDeadline6)
+	__VDLType_protocol_time_WireDeadline1.AppendField("FromNow", __VDLType_protocol_time_WireDeadline4)
+	__VDLType_protocol_time_WireDeadline7 := vdl.BoolType
+	__VDLType_protocol_time_WireDeadline1.AppendField("NoDeadline", __VDLType_protocol_time_WireDeadline7)
+	__VDLType_protocol_time_WireDeadlineBuilder.Build()
+	__VDLType_protocol_time_WireDeadlinev, err := __VDLType_protocol_time_WireDeadline2.Built()
+	if err != nil {
+		panic(err)
+	}
+	return __VDLType_protocol_time_WireDeadlinev
+}
+func init() {
+	__VDLType_protocol_time_WireDeadline = __VDLType_protocol_time_WireDeadline_gen()
+}
+
+var __VDLType_protocol_v_io_v23_rpc_Request *vdl.Type
+
+func __VDLType_protocol_v_io_v23_rpc_Request_gen() *vdl.Type {
+	__VDLType_protocol_v_io_v23_rpc_RequestBuilder := vdl.TypeBuilder{}
+
+	__VDLType_protocol_v_io_v23_rpc_Request1 := __VDLType_protocol_v_io_v23_rpc_RequestBuilder.Struct()
+	__VDLType_protocol_v_io_v23_rpc_Request2 := __VDLType_protocol_v_io_v23_rpc_RequestBuilder.Named("v.io/v23/rpc.Request").AssignBase(__VDLType_protocol_v_io_v23_rpc_Request1)
+	__VDLType_protocol_v_io_v23_rpc_Request3 := vdl.StringType
+	__VDLType_protocol_v_io_v23_rpc_Request1.AppendField("Suffix", __VDLType_protocol_v_io_v23_rpc_Request3)
+	__VDLType_protocol_v_io_v23_rpc_Request1.AppendField("Method", __VDLType_protocol_v_io_v23_rpc_Request3)
+	__VDLType_protocol_v_io_v23_rpc_Request4 := vdl.Uint64Type
+	__VDLType_protocol_v_io_v23_rpc_Request1.AppendField("NumPosArgs", __VDLType_protocol_v_io_v23_rpc_Request4)
+	__VDLType_protocol_v_io_v23_rpc_Request5 := vdl.BoolType
+	__VDLType_protocol_v_io_v23_rpc_Request1.AppendField("EndStreamArgs", __VDLType_protocol_v_io_v23_rpc_Request5)
+	__VDLType_protocol_v_io_v23_rpc_Request6 := __VDLType_protocol_v_io_v23_rpc_RequestBuilder.Struct()
+	__VDLType_protocol_v_io_v23_rpc_Request7 := __VDLType_protocol_v_io_v23_rpc_RequestBuilder.Named("time.WireDeadline").AssignBase(__VDLType_protocol_v_io_v23_rpc_Request6)
+	__VDLType_protocol_v_io_v23_rpc_Request8 := __VDLType_protocol_v_io_v23_rpc_RequestBuilder.Struct()
+	__VDLType_protocol_v_io_v23_rpc_Request9 := __VDLType_protocol_v_io_v23_rpc_RequestBuilder.Named("time.Duration").AssignBase(__VDLType_protocol_v_io_v23_rpc_Request8)
+	__VDLType_protocol_v_io_v23_rpc_Request10 := vdl.Int64Type
+	__VDLType_protocol_v_io_v23_rpc_Request8.AppendField("Seconds", __VDLType_protocol_v_io_v23_rpc_Request10)
+	__VDLType_protocol_v_io_v23_rpc_Request11 := vdl.Int32Type
+	__VDLType_protocol_v_io_v23_rpc_Request8.AppendField("Nanos", __VDLType_protocol_v_io_v23_rpc_Request11)
+	__VDLType_protocol_v_io_v23_rpc_Request6.AppendField("FromNow", __VDLType_protocol_v_io_v23_rpc_Request9)
+	__VDLType_protocol_v_io_v23_rpc_Request6.AppendField("NoDeadline", __VDLType_protocol_v_io_v23_rpc_Request5)
+	__VDLType_protocol_v_io_v23_rpc_Request1.AppendField("Deadline", __VDLType_protocol_v_io_v23_rpc_Request7)
+	__VDLType_protocol_v_io_v23_rpc_Request12 := __VDLType_protocol_v_io_v23_rpc_RequestBuilder.Struct()
+	__VDLType_protocol_v_io_v23_rpc_Request13 := __VDLType_protocol_v_io_v23_rpc_RequestBuilder.Named("v.io/v23/security.WireBlessings").AssignBase(__VDLType_protocol_v_io_v23_rpc_Request12)
+	__VDLType_protocol_v_io_v23_rpc_Request14 := __VDLType_protocol_v_io_v23_rpc_RequestBuilder.List()
+	__VDLType_protocol_v_io_v23_rpc_Request15 := __VDLType_protocol_v_io_v23_rpc_RequestBuilder.List()
+	__VDLType_protocol_v_io_v23_rpc_Request16 := __VDLType_protocol_v_io_v23_rpc_RequestBuilder.Struct()
+	__VDLType_protocol_v_io_v23_rpc_Request17 := __VDLType_protocol_v_io_v23_rpc_RequestBuilder.Named("v.io/v23/security.Certificate").AssignBase(__VDLType_protocol_v_io_v23_rpc_Request16)
+	__VDLType_protocol_v_io_v23_rpc_Request16.AppendField("Extension", __VDLType_protocol_v_io_v23_rpc_Request3)
+	__VDLType_protocol_v_io_v23_rpc_Request18 := __VDLType_protocol_v_io_v23_rpc_RequestBuilder.List()
+	__VDLType_protocol_v_io_v23_rpc_Request19 := vdl.ByteType
+	__VDLType_protocol_v_io_v23_rpc_Request18.AssignElem(__VDLType_protocol_v_io_v23_rpc_Request19)
+	__VDLType_protocol_v_io_v23_rpc_Request16.AppendField("PublicKey", __VDLType_protocol_v_io_v23_rpc_Request18)
+	__VDLType_protocol_v_io_v23_rpc_Request20 := __VDLType_protocol_v_io_v23_rpc_RequestBuilder.List()
+	__VDLType_protocol_v_io_v23_rpc_Request21 := __VDLType_protocol_v_io_v23_rpc_RequestBuilder.Struct()
+	__VDLType_protocol_v_io_v23_rpc_Request22 := __VDLType_protocol_v_io_v23_rpc_RequestBuilder.Named("v.io/v23/security.Caveat").AssignBase(__VDLType_protocol_v_io_v23_rpc_Request21)
+	__VDLType_protocol_v_io_v23_rpc_Request23 := __VDLType_protocol_v_io_v23_rpc_RequestBuilder.Array()
+	__VDLType_protocol_v_io_v23_rpc_Request24 := __VDLType_protocol_v_io_v23_rpc_RequestBuilder.Named("v.io/v23/uniqueid.Id").AssignBase(__VDLType_protocol_v_io_v23_rpc_Request23)
+	__VDLType_protocol_v_io_v23_rpc_Request23.AssignElem(__VDLType_protocol_v_io_v23_rpc_Request19)
+	__VDLType_protocol_v_io_v23_rpc_Request23.AssignLen(16)
+	__VDLType_protocol_v_io_v23_rpc_Request21.AppendField("Id", __VDLType_protocol_v_io_v23_rpc_Request24)
+	__VDLType_protocol_v_io_v23_rpc_Request21.AppendField("ParamVom", __VDLType_protocol_v_io_v23_rpc_Request18)
+	__VDLType_protocol_v_io_v23_rpc_Request20.AssignElem(__VDLType_protocol_v_io_v23_rpc_Request22)
+	__VDLType_protocol_v_io_v23_rpc_Request16.AppendField("Caveats", __VDLType_protocol_v_io_v23_rpc_Request20)
+	__VDLType_protocol_v_io_v23_rpc_Request25 := __VDLType_protocol_v_io_v23_rpc_RequestBuilder.Struct()
+	__VDLType_protocol_v_io_v23_rpc_Request26 := __VDLType_protocol_v_io_v23_rpc_RequestBuilder.Named("v.io/v23/security.Signature").AssignBase(__VDLType_protocol_v_io_v23_rpc_Request25)
+	__VDLType_protocol_v_io_v23_rpc_Request25.AppendField("Purpose", __VDLType_protocol_v_io_v23_rpc_Request18)
+	__VDLType_protocol_v_io_v23_rpc_Request27 := vdl.StringType
+	__VDLType_protocol_v_io_v23_rpc_Request28 := __VDLType_protocol_v_io_v23_rpc_RequestBuilder.Named("v.io/v23/security.Hash").AssignBase(__VDLType_protocol_v_io_v23_rpc_Request27)
+	__VDLType_protocol_v_io_v23_rpc_Request25.AppendField("Hash", __VDLType_protocol_v_io_v23_rpc_Request28)
+	__VDLType_protocol_v_io_v23_rpc_Request25.AppendField("R", __VDLType_protocol_v_io_v23_rpc_Request18)
+	__VDLType_protocol_v_io_v23_rpc_Request25.AppendField("S", __VDLType_protocol_v_io_v23_rpc_Request18)
+	__VDLType_protocol_v_io_v23_rpc_Request16.AppendField("Signature", __VDLType_protocol_v_io_v23_rpc_Request26)
+	__VDLType_protocol_v_io_v23_rpc_Request15.AssignElem(__VDLType_protocol_v_io_v23_rpc_Request17)
+	__VDLType_protocol_v_io_v23_rpc_Request14.AssignElem(__VDLType_protocol_v_io_v23_rpc_Request15)
+	__VDLType_protocol_v_io_v23_rpc_Request12.AppendField("CertificateChains", __VDLType_protocol_v_io_v23_rpc_Request14)
+	__VDLType_protocol_v_io_v23_rpc_Request1.AppendField("GrantedBlessings", __VDLType_protocol_v_io_v23_rpc_Request13)
+	__VDLType_protocol_v_io_v23_rpc_Request29 := __VDLType_protocol_v_io_v23_rpc_RequestBuilder.Struct()
+	__VDLType_protocol_v_io_v23_rpc_Request30 := __VDLType_protocol_v_io_v23_rpc_RequestBuilder.Named("v.io/v23/vtrace.Request").AssignBase(__VDLType_protocol_v_io_v23_rpc_Request29)
+	__VDLType_protocol_v_io_v23_rpc_Request29.AppendField("SpanId", __VDLType_protocol_v_io_v23_rpc_Request24)
+	__VDLType_protocol_v_io_v23_rpc_Request29.AppendField("TraceId", __VDLType_protocol_v_io_v23_rpc_Request24)
+	__VDLType_protocol_v_io_v23_rpc_Request31 := vdl.Int32Type
+	__VDLType_protocol_v_io_v23_rpc_Request32 := __VDLType_protocol_v_io_v23_rpc_RequestBuilder.Named("v.io/v23/vtrace.TraceFlags").AssignBase(__VDLType_protocol_v_io_v23_rpc_Request31)
+	__VDLType_protocol_v_io_v23_rpc_Request29.AppendField("Flags", __VDLType_protocol_v_io_v23_rpc_Request32)
+	__VDLType_protocol_v_io_v23_rpc_Request29.AppendField("LogLevel", __VDLType_protocol_v_io_v23_rpc_Request11)
+	__VDLType_protocol_v_io_v23_rpc_Request1.AppendField("TraceRequest", __VDLType_protocol_v_io_v23_rpc_Request30)
+	__VDLType_protocol_v_io_v23_rpc_Request1.AppendField("Language", __VDLType_protocol_v_io_v23_rpc_Request3)
+	__VDLType_protocol_v_io_v23_rpc_RequestBuilder.Build()
+	__VDLType_protocol_v_io_v23_rpc_Requestv, err := __VDLType_protocol_v_io_v23_rpc_Request2.Built()
+	if err != nil {
+		panic(err)
+	}
+	return __VDLType_protocol_v_io_v23_rpc_Requestv
+}
+func init() {
+	__VDLType_protocol_v_io_v23_rpc_Request = __VDLType_protocol_v_io_v23_rpc_Request_gen()
+}
+
+var __VDLType_protocol_v_io_v23_rpc_Response *vdl.Type
+
+func __VDLType_protocol_v_io_v23_rpc_Response_gen() *vdl.Type {
+	__VDLType_protocol_v_io_v23_rpc_ResponseBuilder := vdl.TypeBuilder{}
+
+	__VDLType_protocol_v_io_v23_rpc_Response1 := __VDLType_protocol_v_io_v23_rpc_ResponseBuilder.Struct()
+	__VDLType_protocol_v_io_v23_rpc_Response2 := __VDLType_protocol_v_io_v23_rpc_ResponseBuilder.Named("v.io/v23/rpc.Response").AssignBase(__VDLType_protocol_v_io_v23_rpc_Response1)
+	__VDLType_protocol_v_io_v23_rpc_Response3 := __VDLType_protocol_v_io_v23_rpc_ResponseBuilder.Optional()
+	__VDLType_protocol_v_io_v23_rpc_Response4 := __VDLType_protocol_v_io_v23_rpc_ResponseBuilder.Struct()
+	__VDLType_protocol_v_io_v23_rpc_Response5 := __VDLType_protocol_v_io_v23_rpc_ResponseBuilder.Named("error").AssignBase(__VDLType_protocol_v_io_v23_rpc_Response4)
+	__VDLType_protocol_v_io_v23_rpc_Response6 := vdl.StringType
+	__VDLType_protocol_v_io_v23_rpc_Response4.AppendField("Id", __VDLType_protocol_v_io_v23_rpc_Response6)
+	__VDLType_protocol_v_io_v23_rpc_Response7 := __VDLType_protocol_v_io_v23_rpc_ResponseBuilder.Enum()
+	__VDLType_protocol_v_io_v23_rpc_Response7.AppendLabel("NoRetry")
+	__VDLType_protocol_v_io_v23_rpc_Response7.AppendLabel("RetryConnection")
+	__VDLType_protocol_v_io_v23_rpc_Response7.AppendLabel("RetryRefetch")
+	__VDLType_protocol_v_io_v23_rpc_Response7.AppendLabel("RetryBackoff")
+	__VDLType_protocol_v_io_v23_rpc_Response4.AppendField("RetryCode", __VDLType_protocol_v_io_v23_rpc_Response7)
+	__VDLType_protocol_v_io_v23_rpc_Response4.AppendField("Msg", __VDLType_protocol_v_io_v23_rpc_Response6)
+	__VDLType_protocol_v_io_v23_rpc_Response8 := __VDLType_protocol_v_io_v23_rpc_ResponseBuilder.List()
+	__VDLType_protocol_v_io_v23_rpc_Response9 := vdl.AnyType
+	__VDLType_protocol_v_io_v23_rpc_Response8.AssignElem(__VDLType_protocol_v_io_v23_rpc_Response9)
+	__VDLType_protocol_v_io_v23_rpc_Response4.AppendField("ParamList", __VDLType_protocol_v_io_v23_rpc_Response8)
+	__VDLType_protocol_v_io_v23_rpc_Response3.AssignElem(__VDLType_protocol_v_io_v23_rpc_Response5)
+	__VDLType_protocol_v_io_v23_rpc_Response1.AppendField("Error", __VDLType_protocol_v_io_v23_rpc_Response3)
+	__VDLType_protocol_v_io_v23_rpc_Response10 := vdl.BoolType
+	__VDLType_protocol_v_io_v23_rpc_Response1.AppendField("EndStreamResults", __VDLType_protocol_v_io_v23_rpc_Response10)
+	__VDLType_protocol_v_io_v23_rpc_Response11 := vdl.Uint64Type
+	__VDLType_protocol_v_io_v23_rpc_Response1.AppendField("NumPosResults", __VDLType_protocol_v_io_v23_rpc_Response11)
+	__VDLType_protocol_v_io_v23_rpc_Response12 := __VDLType_protocol_v_io_v23_rpc_ResponseBuilder.Struct()
+	__VDLType_protocol_v_io_v23_rpc_Response13 := __VDLType_protocol_v_io_v23_rpc_ResponseBuilder.Named("v.io/v23/vtrace.Response").AssignBase(__VDLType_protocol_v_io_v23_rpc_Response12)
+	__VDLType_protocol_v_io_v23_rpc_Response14 := vdl.Int32Type
+	__VDLType_protocol_v_io_v23_rpc_Response15 := __VDLType_protocol_v_io_v23_rpc_ResponseBuilder.Named("v.io/v23/vtrace.TraceFlags").AssignBase(__VDLType_protocol_v_io_v23_rpc_Response14)
+	__VDLType_protocol_v_io_v23_rpc_Response12.AppendField("Flags", __VDLType_protocol_v_io_v23_rpc_Response15)
+	__VDLType_protocol_v_io_v23_rpc_Response16 := __VDLType_protocol_v_io_v23_rpc_ResponseBuilder.Struct()
+	__VDLType_protocol_v_io_v23_rpc_Response17 := __VDLType_protocol_v_io_v23_rpc_ResponseBuilder.Named("v.io/v23/vtrace.TraceRecord").AssignBase(__VDLType_protocol_v_io_v23_rpc_Response16)
+	__VDLType_protocol_v_io_v23_rpc_Response18 := __VDLType_protocol_v_io_v23_rpc_ResponseBuilder.Array()
+	__VDLType_protocol_v_io_v23_rpc_Response19 := __VDLType_protocol_v_io_v23_rpc_ResponseBuilder.Named("v.io/v23/uniqueid.Id").AssignBase(__VDLType_protocol_v_io_v23_rpc_Response18)
+	__VDLType_protocol_v_io_v23_rpc_Response20 := vdl.ByteType
+	__VDLType_protocol_v_io_v23_rpc_Response18.AssignElem(__VDLType_protocol_v_io_v23_rpc_Response20)
+	__VDLType_protocol_v_io_v23_rpc_Response18.AssignLen(16)
+	__VDLType_protocol_v_io_v23_rpc_Response16.AppendField("Id", __VDLType_protocol_v_io_v23_rpc_Response19)
+	__VDLType_protocol_v_io_v23_rpc_Response21 := __VDLType_protocol_v_io_v23_rpc_ResponseBuilder.List()
+	__VDLType_protocol_v_io_v23_rpc_Response22 := __VDLType_protocol_v_io_v23_rpc_ResponseBuilder.Struct()
+	__VDLType_protocol_v_io_v23_rpc_Response23 := __VDLType_protocol_v_io_v23_rpc_ResponseBuilder.Named("v.io/v23/vtrace.SpanRecord").AssignBase(__VDLType_protocol_v_io_v23_rpc_Response22)
+	__VDLType_protocol_v_io_v23_rpc_Response22.AppendField("Id", __VDLType_protocol_v_io_v23_rpc_Response19)
+	__VDLType_protocol_v_io_v23_rpc_Response22.AppendField("Parent", __VDLType_protocol_v_io_v23_rpc_Response19)
+	__VDLType_protocol_v_io_v23_rpc_Response22.AppendField("Name", __VDLType_protocol_v_io_v23_rpc_Response6)
+	__VDLType_protocol_v_io_v23_rpc_Response24 := __VDLType_protocol_v_io_v23_rpc_ResponseBuilder.Struct()
+	__VDLType_protocol_v_io_v23_rpc_Response25 := __VDLType_protocol_v_io_v23_rpc_ResponseBuilder.Named("time.Time").AssignBase(__VDLType_protocol_v_io_v23_rpc_Response24)
+	__VDLType_protocol_v_io_v23_rpc_Response26 := vdl.Int64Type
+	__VDLType_protocol_v_io_v23_rpc_Response24.AppendField("Seconds", __VDLType_protocol_v_io_v23_rpc_Response26)
+	__VDLType_protocol_v_io_v23_rpc_Response27 := vdl.Int32Type
+	__VDLType_protocol_v_io_v23_rpc_Response24.AppendField("Nanos", __VDLType_protocol_v_io_v23_rpc_Response27)
+	__VDLType_protocol_v_io_v23_rpc_Response22.AppendField("Start", __VDLType_protocol_v_io_v23_rpc_Response25)
+	__VDLType_protocol_v_io_v23_rpc_Response22.AppendField("End", __VDLType_protocol_v_io_v23_rpc_Response25)
+	__VDLType_protocol_v_io_v23_rpc_Response28 := __VDLType_protocol_v_io_v23_rpc_ResponseBuilder.List()
+	__VDLType_protocol_v_io_v23_rpc_Response29 := __VDLType_protocol_v_io_v23_rpc_ResponseBuilder.Struct()
+	__VDLType_protocol_v_io_v23_rpc_Response30 := __VDLType_protocol_v_io_v23_rpc_ResponseBuilder.Named("v.io/v23/vtrace.Annotation").AssignBase(__VDLType_protocol_v_io_v23_rpc_Response29)
+	__VDLType_protocol_v_io_v23_rpc_Response29.AppendField("When", __VDLType_protocol_v_io_v23_rpc_Response25)
+	__VDLType_protocol_v_io_v23_rpc_Response29.AppendField("Message", __VDLType_protocol_v_io_v23_rpc_Response6)
+	__VDLType_protocol_v_io_v23_rpc_Response28.AssignElem(__VDLType_protocol_v_io_v23_rpc_Response30)
+	__VDLType_protocol_v_io_v23_rpc_Response22.AppendField("Annotations", __VDLType_protocol_v_io_v23_rpc_Response28)
+	__VDLType_protocol_v_io_v23_rpc_Response21.AssignElem(__VDLType_protocol_v_io_v23_rpc_Response23)
+	__VDLType_protocol_v_io_v23_rpc_Response16.AppendField("Spans", __VDLType_protocol_v_io_v23_rpc_Response21)
+	__VDLType_protocol_v_io_v23_rpc_Response12.AppendField("Trace", __VDLType_protocol_v_io_v23_rpc_Response17)
+	__VDLType_protocol_v_io_v23_rpc_Response1.AppendField("TraceResponse", __VDLType_protocol_v_io_v23_rpc_Response13)
+	__VDLType_protocol_v_io_v23_rpc_Response1.AppendField("AckBlessings", __VDLType_protocol_v_io_v23_rpc_Response10)
+	__VDLType_protocol_v_io_v23_rpc_ResponseBuilder.Build()
+	__VDLType_protocol_v_io_v23_rpc_Responsev, err := __VDLType_protocol_v_io_v23_rpc_Response2.Built()
+	if err != nil {
+		panic(err)
+	}
+	return __VDLType_protocol_v_io_v23_rpc_Responsev
+}
+func init() {
+	__VDLType_protocol_v_io_v23_rpc_Response = __VDLType_protocol_v_io_v23_rpc_Response_gen()
+}
+
+var __VDLType_protocol_v_io_v23_security_WireBlessings *vdl.Type
+
+func __VDLType_protocol_v_io_v23_security_WireBlessings_gen() *vdl.Type {
+	__VDLType_protocol_v_io_v23_security_WireBlessingsBuilder := vdl.TypeBuilder{}
+
+	__VDLType_protocol_v_io_v23_security_WireBlessings1 := __VDLType_protocol_v_io_v23_security_WireBlessingsBuilder.Struct()
+	__VDLType_protocol_v_io_v23_security_WireBlessings2 := __VDLType_protocol_v_io_v23_security_WireBlessingsBuilder.Named("v.io/v23/security.WireBlessings").AssignBase(__VDLType_protocol_v_io_v23_security_WireBlessings1)
+	__VDLType_protocol_v_io_v23_security_WireBlessings3 := __VDLType_protocol_v_io_v23_security_WireBlessingsBuilder.List()
+	__VDLType_protocol_v_io_v23_security_WireBlessings4 := __VDLType_protocol_v_io_v23_security_WireBlessingsBuilder.List()
+	__VDLType_protocol_v_io_v23_security_WireBlessings5 := __VDLType_protocol_v_io_v23_security_WireBlessingsBuilder.Struct()
+	__VDLType_protocol_v_io_v23_security_WireBlessings6 := __VDLType_protocol_v_io_v23_security_WireBlessingsBuilder.Named("v.io/v23/security.Certificate").AssignBase(__VDLType_protocol_v_io_v23_security_WireBlessings5)
+	__VDLType_protocol_v_io_v23_security_WireBlessings7 := vdl.StringType
+	__VDLType_protocol_v_io_v23_security_WireBlessings5.AppendField("Extension", __VDLType_protocol_v_io_v23_security_WireBlessings7)
+	__VDLType_protocol_v_io_v23_security_WireBlessings8 := __VDLType_protocol_v_io_v23_security_WireBlessingsBuilder.List()
+	__VDLType_protocol_v_io_v23_security_WireBlessings9 := vdl.ByteType
+	__VDLType_protocol_v_io_v23_security_WireBlessings8.AssignElem(__VDLType_protocol_v_io_v23_security_WireBlessings9)
+	__VDLType_protocol_v_io_v23_security_WireBlessings5.AppendField("PublicKey", __VDLType_protocol_v_io_v23_security_WireBlessings8)
+	__VDLType_protocol_v_io_v23_security_WireBlessings10 := __VDLType_protocol_v_io_v23_security_WireBlessingsBuilder.List()
+	__VDLType_protocol_v_io_v23_security_WireBlessings11 := __VDLType_protocol_v_io_v23_security_WireBlessingsBuilder.Struct()
+	__VDLType_protocol_v_io_v23_security_WireBlessings12 := __VDLType_protocol_v_io_v23_security_WireBlessingsBuilder.Named("v.io/v23/security.Caveat").AssignBase(__VDLType_protocol_v_io_v23_security_WireBlessings11)
+	__VDLType_protocol_v_io_v23_security_WireBlessings13 := __VDLType_protocol_v_io_v23_security_WireBlessingsBuilder.Array()
+	__VDLType_protocol_v_io_v23_security_WireBlessings14 := __VDLType_protocol_v_io_v23_security_WireBlessingsBuilder.Named("v.io/v23/uniqueid.Id").AssignBase(__VDLType_protocol_v_io_v23_security_WireBlessings13)
+	__VDLType_protocol_v_io_v23_security_WireBlessings13.AssignElem(__VDLType_protocol_v_io_v23_security_WireBlessings9)
+	__VDLType_protocol_v_io_v23_security_WireBlessings13.AssignLen(16)
+	__VDLType_protocol_v_io_v23_security_WireBlessings11.AppendField("Id", __VDLType_protocol_v_io_v23_security_WireBlessings14)
+	__VDLType_protocol_v_io_v23_security_WireBlessings11.AppendField("ParamVom", __VDLType_protocol_v_io_v23_security_WireBlessings8)
+	__VDLType_protocol_v_io_v23_security_WireBlessings10.AssignElem(__VDLType_protocol_v_io_v23_security_WireBlessings12)
+	__VDLType_protocol_v_io_v23_security_WireBlessings5.AppendField("Caveats", __VDLType_protocol_v_io_v23_security_WireBlessings10)
+	__VDLType_protocol_v_io_v23_security_WireBlessings15 := __VDLType_protocol_v_io_v23_security_WireBlessingsBuilder.Struct()
+	__VDLType_protocol_v_io_v23_security_WireBlessings16 := __VDLType_protocol_v_io_v23_security_WireBlessingsBuilder.Named("v.io/v23/security.Signature").AssignBase(__VDLType_protocol_v_io_v23_security_WireBlessings15)
+	__VDLType_protocol_v_io_v23_security_WireBlessings15.AppendField("Purpose", __VDLType_protocol_v_io_v23_security_WireBlessings8)
+	__VDLType_protocol_v_io_v23_security_WireBlessings17 := vdl.StringType
+	__VDLType_protocol_v_io_v23_security_WireBlessings18 := __VDLType_protocol_v_io_v23_security_WireBlessingsBuilder.Named("v.io/v23/security.Hash").AssignBase(__VDLType_protocol_v_io_v23_security_WireBlessings17)
+	__VDLType_protocol_v_io_v23_security_WireBlessings15.AppendField("Hash", __VDLType_protocol_v_io_v23_security_WireBlessings18)
+	__VDLType_protocol_v_io_v23_security_WireBlessings15.AppendField("R", __VDLType_protocol_v_io_v23_security_WireBlessings8)
+	__VDLType_protocol_v_io_v23_security_WireBlessings15.AppendField("S", __VDLType_protocol_v_io_v23_security_WireBlessings8)
+	__VDLType_protocol_v_io_v23_security_WireBlessings5.AppendField("Signature", __VDLType_protocol_v_io_v23_security_WireBlessings16)
+	__VDLType_protocol_v_io_v23_security_WireBlessings4.AssignElem(__VDLType_protocol_v_io_v23_security_WireBlessings6)
+	__VDLType_protocol_v_io_v23_security_WireBlessings3.AssignElem(__VDLType_protocol_v_io_v23_security_WireBlessings4)
+	__VDLType_protocol_v_io_v23_security_WireBlessings1.AppendField("CertificateChains", __VDLType_protocol_v_io_v23_security_WireBlessings3)
+	__VDLType_protocol_v_io_v23_security_WireBlessingsBuilder.Build()
+	__VDLType_protocol_v_io_v23_security_WireBlessingsv, err := __VDLType_protocol_v_io_v23_security_WireBlessings2.Built()
+	if err != nil {
+		panic(err)
+	}
+	return __VDLType_protocol_v_io_v23_security_WireBlessingsv
+}
+func init() {
+	__VDLType_protocol_v_io_v23_security_WireBlessings = __VDLType_protocol_v_io_v23_security_WireBlessings_gen()
+}
+
+var __VDLType_protocol_v_io_v23_vtrace_Request *vdl.Type = vdl.TypeOf(vtrace.Request{})
+var __VDLType_protocol_v_io_v23_vtrace_Response *vdl.Type
+
+func __VDLType_protocol_v_io_v23_vtrace_Response_gen() *vdl.Type {
+	__VDLType_protocol_v_io_v23_vtrace_ResponseBuilder := vdl.TypeBuilder{}
+
+	__VDLType_protocol_v_io_v23_vtrace_Response1 := __VDLType_protocol_v_io_v23_vtrace_ResponseBuilder.Struct()
+	__VDLType_protocol_v_io_v23_vtrace_Response2 := __VDLType_protocol_v_io_v23_vtrace_ResponseBuilder.Named("v.io/v23/vtrace.Response").AssignBase(__VDLType_protocol_v_io_v23_vtrace_Response1)
+	__VDLType_protocol_v_io_v23_vtrace_Response3 := vdl.Int32Type
+	__VDLType_protocol_v_io_v23_vtrace_Response4 := __VDLType_protocol_v_io_v23_vtrace_ResponseBuilder.Named("v.io/v23/vtrace.TraceFlags").AssignBase(__VDLType_protocol_v_io_v23_vtrace_Response3)
+	__VDLType_protocol_v_io_v23_vtrace_Response1.AppendField("Flags", __VDLType_protocol_v_io_v23_vtrace_Response4)
+	__VDLType_protocol_v_io_v23_vtrace_Response5 := __VDLType_protocol_v_io_v23_vtrace_ResponseBuilder.Struct()
+	__VDLType_protocol_v_io_v23_vtrace_Response6 := __VDLType_protocol_v_io_v23_vtrace_ResponseBuilder.Named("v.io/v23/vtrace.TraceRecord").AssignBase(__VDLType_protocol_v_io_v23_vtrace_Response5)
+	__VDLType_protocol_v_io_v23_vtrace_Response7 := __VDLType_protocol_v_io_v23_vtrace_ResponseBuilder.Array()
+	__VDLType_protocol_v_io_v23_vtrace_Response8 := __VDLType_protocol_v_io_v23_vtrace_ResponseBuilder.Named("v.io/v23/uniqueid.Id").AssignBase(__VDLType_protocol_v_io_v23_vtrace_Response7)
+	__VDLType_protocol_v_io_v23_vtrace_Response9 := vdl.ByteType
+	__VDLType_protocol_v_io_v23_vtrace_Response7.AssignElem(__VDLType_protocol_v_io_v23_vtrace_Response9)
+	__VDLType_protocol_v_io_v23_vtrace_Response7.AssignLen(16)
+	__VDLType_protocol_v_io_v23_vtrace_Response5.AppendField("Id", __VDLType_protocol_v_io_v23_vtrace_Response8)
+	__VDLType_protocol_v_io_v23_vtrace_Response10 := __VDLType_protocol_v_io_v23_vtrace_ResponseBuilder.List()
+	__VDLType_protocol_v_io_v23_vtrace_Response11 := __VDLType_protocol_v_io_v23_vtrace_ResponseBuilder.Struct()
+	__VDLType_protocol_v_io_v23_vtrace_Response12 := __VDLType_protocol_v_io_v23_vtrace_ResponseBuilder.Named("v.io/v23/vtrace.SpanRecord").AssignBase(__VDLType_protocol_v_io_v23_vtrace_Response11)
+	__VDLType_protocol_v_io_v23_vtrace_Response11.AppendField("Id", __VDLType_protocol_v_io_v23_vtrace_Response8)
+	__VDLType_protocol_v_io_v23_vtrace_Response11.AppendField("Parent", __VDLType_protocol_v_io_v23_vtrace_Response8)
+	__VDLType_protocol_v_io_v23_vtrace_Response13 := vdl.StringType
+	__VDLType_protocol_v_io_v23_vtrace_Response11.AppendField("Name", __VDLType_protocol_v_io_v23_vtrace_Response13)
+	__VDLType_protocol_v_io_v23_vtrace_Response14 := __VDLType_protocol_v_io_v23_vtrace_ResponseBuilder.Struct()
+	__VDLType_protocol_v_io_v23_vtrace_Response15 := __VDLType_protocol_v_io_v23_vtrace_ResponseBuilder.Named("time.Time").AssignBase(__VDLType_protocol_v_io_v23_vtrace_Response14)
+	__VDLType_protocol_v_io_v23_vtrace_Response16 := vdl.Int64Type
+	__VDLType_protocol_v_io_v23_vtrace_Response14.AppendField("Seconds", __VDLType_protocol_v_io_v23_vtrace_Response16)
+	__VDLType_protocol_v_io_v23_vtrace_Response17 := vdl.Int32Type
+	__VDLType_protocol_v_io_v23_vtrace_Response14.AppendField("Nanos", __VDLType_protocol_v_io_v23_vtrace_Response17)
+	__VDLType_protocol_v_io_v23_vtrace_Response11.AppendField("Start", __VDLType_protocol_v_io_v23_vtrace_Response15)
+	__VDLType_protocol_v_io_v23_vtrace_Response11.AppendField("End", __VDLType_protocol_v_io_v23_vtrace_Response15)
+	__VDLType_protocol_v_io_v23_vtrace_Response18 := __VDLType_protocol_v_io_v23_vtrace_ResponseBuilder.List()
+	__VDLType_protocol_v_io_v23_vtrace_Response19 := __VDLType_protocol_v_io_v23_vtrace_ResponseBuilder.Struct()
+	__VDLType_protocol_v_io_v23_vtrace_Response20 := __VDLType_protocol_v_io_v23_vtrace_ResponseBuilder.Named("v.io/v23/vtrace.Annotation").AssignBase(__VDLType_protocol_v_io_v23_vtrace_Response19)
+	__VDLType_protocol_v_io_v23_vtrace_Response19.AppendField("When", __VDLType_protocol_v_io_v23_vtrace_Response15)
+	__VDLType_protocol_v_io_v23_vtrace_Response19.AppendField("Message", __VDLType_protocol_v_io_v23_vtrace_Response13)
+	__VDLType_protocol_v_io_v23_vtrace_Response18.AssignElem(__VDLType_protocol_v_io_v23_vtrace_Response20)
+	__VDLType_protocol_v_io_v23_vtrace_Response11.AppendField("Annotations", __VDLType_protocol_v_io_v23_vtrace_Response18)
+	__VDLType_protocol_v_io_v23_vtrace_Response10.AssignElem(__VDLType_protocol_v_io_v23_vtrace_Response12)
+	__VDLType_protocol_v_io_v23_vtrace_Response5.AppendField("Spans", __VDLType_protocol_v_io_v23_vtrace_Response10)
+	__VDLType_protocol_v_io_v23_vtrace_Response1.AppendField("Trace", __VDLType_protocol_v_io_v23_vtrace_Response6)
+	__VDLType_protocol_v_io_v23_vtrace_ResponseBuilder.Build()
+	__VDLType_protocol_v_io_v23_vtrace_Responsev, err := __VDLType_protocol_v_io_v23_vtrace_Response2.Built()
+	if err != nil {
+		panic(err)
+	}
+	return __VDLType_protocol_v_io_v23_vtrace_Responsev
+}
+func init() {
+	__VDLType_protocol_v_io_v23_vtrace_Response = __VDLType_protocol_v_io_v23_vtrace_Response_gen()
+}
+func __VDLEnsureNativeBuilt_protocol() {
+	if __VDLTypeprotocol0 == nil {
+		__VDLTypeprotocol0 = __VDLTypeprotocol0_gen()
+	}
+	if __VDLTypeprotocol1 == nil {
+		__VDLTypeprotocol1 = __VDLTypeprotocol1_gen()
+	}
+	if __VDLType_protocol_time_WireDeadline == nil {
+		__VDLType_protocol_time_WireDeadline = __VDLType_protocol_time_WireDeadline_gen()
+	}
+	if __VDLType_protocol_v_io_v23_rpc_Request == nil {
+		__VDLType_protocol_v_io_v23_rpc_Request = __VDLType_protocol_v_io_v23_rpc_Request_gen()
+	}
+	if __VDLType_protocol_v_io_v23_rpc_Response == nil {
+		__VDLType_protocol_v_io_v23_rpc_Response = __VDLType_protocol_v_io_v23_rpc_Response_gen()
+	}
+	if __VDLType_protocol_v_io_v23_security_WireBlessings == nil {
+		__VDLType_protocol_v_io_v23_security_WireBlessings = __VDLType_protocol_v_io_v23_security_WireBlessings_gen()
+	}
+	if __VDLType_protocol_v_io_v23_vtrace_Response == nil {
+		__VDLType_protocol_v_io_v23_vtrace_Response = __VDLType_protocol_v_io_v23_vtrace_Response_gen()
+	}
 }
 
 // TODO(toddw): Rename GlobMethod to ReservedGlob.

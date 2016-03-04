@@ -405,12 +405,12 @@ func BenchmarkBless(b *testing.B) {
 func BenchmarkVerifyCertificateIntegrity(b *testing.B) {
 	native := makeBlessings(b, 1)
 	var wire WireBlessings
-	if err := wireBlessingsFromNative(&wire, native); err != nil {
+	if err := WireBlessingsFromNative(&wire, native); err != nil {
 		b.Fatal(err)
 	}
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		if err := wireBlessingsToNative(wire, &native); err != nil {
+		if err := WireBlessingsToNative(wire, &native); err != nil {
 			b.Fatal(err)
 		}
 	}

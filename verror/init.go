@@ -10,12 +10,12 @@ func init() {
 	// We must register the error conversion functions between vdl.WireError and
 	// the standard error interface with the vdl package.  This allows the vdl
 	// package to have minimal dependencies.
-	vdl.RegisterNative(wireErrorToNative, wireErrorFromNative)
+	vdl.RegisterNative(WireToNative, WireFromNative)
 }
 
-// wireErrorToNative converts from vdl.WireError to verror.E, which
+// WireToNative converts from vdl.WireError to verror.E, which
 // implements the standard go error interface.
-func wireErrorToNative(wire vdl.WireError, native *E) error {
+func WireToNative(wire vdl.WireError, native *E) error {
 	*native = E{
 		ID:     ID(wire.Id),
 		Action: retryToAction(wire.RetryCode),
@@ -40,9 +40,9 @@ func wireErrorToNative(wire vdl.WireError, native *E) error {
 	return nil
 }
 
-// wireErrorFromNative converts from the standard go error interface to
+// WireFromNative converts from the standard go error interface to
 // verror.E, and then to vdl.WireError.
-func wireErrorFromNative(wire *vdl.WireError, native error) error {
+func WireFromNative(wire *vdl.WireError, native error) error {
 	e := ExplicitConvert(ErrUnknown, "", "", "", native)
 	*wire = vdl.WireError{
 		Id:        string(ErrorID(e)),

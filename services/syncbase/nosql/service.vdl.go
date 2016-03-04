@@ -25,6 +25,9 @@ import (
 	"v.io/v23/services/watch"
 )
 
+func __VDLEnsureNativeBuilt_service() {
+}
+
 var (
 	ErrBoundToBatch          = verror.Register("v.io/v23/services/syncbase/nosql.BoundToBatch", verror.NoRetry, "{1:}{2:} bound to batch")
 	ErrNotBoundToBatch       = verror.Register("v.io/v23/services/syncbase/nosql.NotBoundToBatch", verror.NoRetry, "{1:}{2:} not bound to batch")

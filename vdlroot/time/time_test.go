@@ -47,14 +47,14 @@ func TestTimeToFromNative(t *testing.T) {
 	}
 	for _, test := range tests {
 		native := gotime.Now() // Start with an arbitrary value.
-		if err := timeToNative(test.Wire, &native); err != nil {
+		if err := TimeToNative(test.Wire, &native); err != nil {
 			t.Errorf("%v timeToNative failed: %v", test.Wire, err)
 		}
 		if got, want := native, test.Native; got != want {
 			t.Errorf("%v timeFromNative got %v, want %v", test.Wire, got, want)
 		}
 		wire := Now() // Start with an arbitrary value.
-		if err := timeFromNative(&wire, test.Native); err != nil {
+		if err := TimeFromNative(&wire, test.Native); err != nil {
 			t.Errorf("%v timeFromNative failed: %v", test.Wire, err)
 		}
 		if got, want := wire, test.Wire.Normalize(); got != want {
@@ -95,18 +95,18 @@ func TestDurationToFromNative(t *testing.T) {
 	}
 	for _, test := range tests {
 		native := randGoDuration() // Start with an arbitrary value.
-		if err := durationToNative(test.Wire, &native); err != nil {
-			t.Errorf("%v durationToNative failed: %v", test.Wire, err)
+		if err := DurationToNative(test.Wire, &native); err != nil {
+			t.Errorf("%v DurationToNative failed: %v", test.Wire, err)
 		}
 		if got, want := native, test.Native; got != want {
-			t.Errorf("%v durationToNative got %v, want %v", test.Wire, got, want)
+			t.Errorf("%v DurationToNative got %v, want %v", test.Wire, got, want)
 		}
 		wire := randomDuration() // Start with an arbitrary value.
-		if err := durationFromNative(&wire, test.Native); err != nil {
-			t.Errorf("%v durationFromNative failed: %v", test.Wire, err)
+		if err := DurationFromNative(&wire, test.Native); err != nil {
+			t.Errorf("%v DurationFromNative failed: %v", test.Wire, err)
 		}
 		if got, want := wire, test.Wire.Normalize(); got != want {
-			t.Errorf("%v durationFromNative got %v, want %v", test.Wire, got, want)
+			t.Errorf("%v DurationFromNative got %v, want %v", test.Wire, got, want)
 		}
 	}
 }
@@ -131,12 +131,12 @@ func TestDurationToNativeError(t *testing.T) {
 	}
 	for _, test := range tests {
 		native := randGoDuration() // Start with an arbitrary value.
-		err := durationToNative(test.Wire, &native)
+		err := DurationToNative(test.Wire, &native)
 		if got, want := fmt.Sprint(err), test.Err; !strings.Contains(got, want) {
-			t.Errorf("%v durationToNative got error %q, want substr %q", test.Wire, got, want)
+			t.Errorf("%v DurationToNative got error %q, want substr %q", test.Wire, got, want)
 		}
 		if got, want := native, gotime.Duration(0); got != want {
-			t.Errorf("%v durationToNative got %v, want %v", test.Wire, got, want)
+			t.Errorf("%v DurationToNative got %v, want %v", test.Wire, got, want)
 		}
 	}
 }
@@ -201,7 +201,7 @@ func TestDeadline(t *testing.T) {
 		loT, hiT := now.Add(loD), now.Add(hiD)
 		// Test conversion from wire to native.
 		var native Deadline
-		if err := wireDeadlineToNative(WireDeadline{FromNow: test}, &native); err != nil {
+		if err := WireDeadlineToNative(WireDeadline{FromNow: test}, &native); err != nil {
 			t.Errorf("%v wireDeadlineToNative failed: %v", test, err)
 		}
 		if got := native; got.Before(loT) || got.After(hiT) {
@@ -209,7 +209,7 @@ func TestDeadline(t *testing.T) {
 		}
 		// Test conversion from native to wire.
 		var wire WireDeadline
-		if err := wireDeadlineFromNative(&wire, Deadline{now.Add(test)}); err != nil {
+		if err := WireDeadlineFromNative(&wire, Deadline{now.Add(test)}); err != nil {
 			t.Errorf("%v wireDeadlineFromNative failed: %v", test, err)
 		}
 		if got := wire.FromNow; got < loD || got > hiD {
@@ -248,7 +248,7 @@ func TestNoDeadline(t *testing.T) {
 
 	// Test conversion from wire to native.
 	var native Deadline
-	if err := wireDeadlineToNative(WireDeadline{NoDeadline: true}, &native); err != nil {
+	if err := WireDeadlineToNative(WireDeadline{NoDeadline: true}, &native); err != nil {
 		t.Errorf("wireDeadlineToNative failed: %v", err)
 	}
 	if got := native; !got.IsZero() {
@@ -256,7 +256,7 @@ func TestNoDeadline(t *testing.T) {
 	}
 	// Test conversion from native to wire.
 	var wire WireDeadline
-	if err := wireDeadlineFromNative(&wire, Deadline{}); err != nil {
+	if err := WireDeadlineFromNative(&wire, Deadline{}); err != nil {
 		t.Errorf("wireDeadlineFromNative failed: %v", err)
 	}
 	if !wire.NoDeadline {

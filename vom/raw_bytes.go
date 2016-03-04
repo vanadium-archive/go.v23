@@ -85,7 +85,7 @@ func (rb *RawBytes) MakeVDLTarget() vdl.Target {
 	return &rbTarget{rb: rb}
 }
 
-func (rb *RawBytes) FillVDLTarget(target vdl.Target) error {
+func (rb *RawBytes) FillVDLTarget(target vdl.Target, _ *vdl.Type) error {
 	var buf bytes.Buffer
 	enc := NewVersionedEncoder(rb.Version, &buf)
 	if err := enc.enc.encodeRaw(rb); err != nil {

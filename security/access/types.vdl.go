@@ -143,6 +143,113 @@ func (AccessList) __VDLReflect(struct {
 }) {
 }
 
+func (m *AccessList) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
+
+	if __VDLType_types_v_io_v23_security_access_AccessList == nil || __VDLTypetypes0 == nil {
+		panic("Initialization order error: types generated for FillVDLTarget not initialized. Consider moving caller to an init() block.")
+	}
+	fieldsTarget1, err := t.StartFields(tt)
+	if err != nil {
+		return err
+	}
+
+	var var2 bool
+	if len(m.In) == 0 {
+		var2 = true
+	}
+	if !var2 {
+		keyTarget3, fieldTarget4, err := fieldsTarget1.StartField("In")
+		if err != vdl.ErrFieldNoExist && err != nil {
+			return err
+		}
+		if err != vdl.ErrFieldNoExist {
+
+			listTarget5, err := fieldTarget4.StartList(__VDLTypetypes1, len(m.In))
+			if err != nil {
+				return err
+			}
+			for i, elem7 := range m.In {
+				elemTarget6, err := listTarget5.StartElem(i)
+				if err != nil {
+					return err
+				}
+
+				if err := elem7.FillVDLTarget(elemTarget6, __VDLType_types_v_io_v23_security_BlessingPattern); err != nil {
+					return err
+				}
+				if err := listTarget5.FinishElem(elemTarget6); err != nil {
+					return err
+				}
+			}
+			if err := fieldTarget4.FinishList(listTarget5); err != nil {
+				return err
+			}
+			if err := fieldsTarget1.FinishField(keyTarget3, fieldTarget4); err != nil {
+				return err
+			}
+		}
+	}
+	var var8 bool
+	if len(m.NotIn) == 0 {
+		var8 = true
+	}
+	if !var8 {
+		keyTarget9, fieldTarget10, err := fieldsTarget1.StartField("NotIn")
+		if err != vdl.ErrFieldNoExist && err != nil {
+			return err
+		}
+		if err != vdl.ErrFieldNoExist {
+
+			listTarget11, err := fieldTarget10.StartList(__VDLTypetypes2, len(m.NotIn))
+			if err != nil {
+				return err
+			}
+			for i, elem13 := range m.NotIn {
+				elemTarget12, err := listTarget11.StartElem(i)
+				if err != nil {
+					return err
+				}
+				if err := elemTarget12.FromString(string(elem13), vdl.StringType); err != nil {
+					return err
+				}
+				if err := listTarget11.FinishElem(elemTarget12); err != nil {
+					return err
+				}
+			}
+			if err := fieldTarget10.FinishList(listTarget11); err != nil {
+				return err
+			}
+			if err := fieldsTarget1.FinishField(keyTarget9, fieldTarget10); err != nil {
+				return err
+			}
+		}
+	}
+	if err := t.FinishFields(fieldsTarget1); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (m *AccessList) MakeVDLTarget() vdl.Target {
+	return nil
+}
+
+func (m *AccessList) IsZero() bool {
+
+	var1 := true
+	var var2 bool
+	if len(m.In) == 0 {
+		var2 = true
+	}
+	var1 = var1 && var2
+	var var3 bool
+	if len(m.NotIn) == 0 {
+		var3 = true
+	}
+	var1 = var1 && var3
+	return var1
+}
+
 // Permissions maps string tags to access lists specifying the blessings
 // required to invoke methods with that tag.
 //
@@ -157,6 +264,51 @@ func (Permissions) __VDLReflect(struct {
 }) {
 }
 
+func (m Permissions) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
+
+	mapTarget1, err := t.StartMap(__VDLType_types_v_io_v23_security_access_Permissions, len(m))
+	if err != nil {
+		return err
+	}
+	for key3, value5 := range m {
+		keyTarget2, err := mapTarget1.StartKey()
+		if err != nil {
+			return err
+		}
+		if err := keyTarget2.FromString(string(key3), vdl.StringType); err != nil {
+			return err
+		}
+		valueTarget4, err := mapTarget1.FinishKeyStartField(keyTarget2)
+		if err != nil {
+			return err
+		}
+
+		if err := value5.FillVDLTarget(valueTarget4, __VDLType_types_v_io_v23_security_access_AccessList); err != nil {
+			return err
+		}
+		if err := mapTarget1.FinishField(keyTarget2, valueTarget4); err != nil {
+			return err
+		}
+	}
+	if err := t.FinishMap(mapTarget1); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (m Permissions) MakeVDLTarget() vdl.Target {
+	return nil
+}
+
+func (m Permissions) IsZero() bool {
+
+	var var1 bool
+	if len(m) == 0 {
+		var1 = true
+	}
+	return var1
+}
+
 // Tag is used to associate methods with an AccessList in a Permissions.
 //
 // While services can define their own tag type and values, many
@@ -169,10 +321,38 @@ func (Tag) __VDLReflect(struct {
 }) {
 }
 
+func (m Tag) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
+	if err := t.FromString(string(m), __VDLType_types_v_io_v23_security_access_Tag); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (m Tag) MakeVDLTarget() vdl.Target {
+	return nil
+}
+
+func (m Tag) IsZero() bool {
+
+	var1 := (m == Tag(""))
+	return var1
+}
+
 func init() {
 	vdl.Register((*AccessList)(nil))
 	vdl.Register((*Permissions)(nil))
 	vdl.Register((*Tag)(nil))
+}
+
+var __VDLTypetypes0 *vdl.Type = vdl.TypeOf((*AccessList)(nil))
+var __VDLTypetypes2 *vdl.Type = vdl.TypeOf([]string(nil))
+var __VDLTypetypes1 *vdl.Type = vdl.TypeOf([]security.BlessingPattern(nil))
+var __VDLType_types_v_io_v23_security_BlessingPattern *vdl.Type = vdl.TypeOf(security.BlessingPattern(""))
+var __VDLType_types_v_io_v23_security_access_AccessList *vdl.Type = vdl.TypeOf(AccessList{})
+var __VDLType_types_v_io_v23_security_access_Permissions *vdl.Type = vdl.TypeOf(Permissions(nil))
+var __VDLType_types_v_io_v23_security_access_Tag *vdl.Type = vdl.TypeOf(Tag(""))
+
+func __VDLEnsureNativeBuilt_types() {
 }
 
 const Admin = Tag("Admin") // Operations that require privileged access for object administration.

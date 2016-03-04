@@ -1,6 +1,9 @@
 pkg logreader, const AllEntries int32
 pkg logreader, func LogFileClient(string) LogFileClientStub
 pkg logreader, func LogFileServer(LogFileServerMethods) LogFileServerStub
+pkg logreader, method (*LogEntry) FillVDLTarget(vdl.Target, *vdl.Type) error
+pkg logreader, method (*LogEntry) IsZero() bool
+pkg logreader, method (*LogEntry) MakeVDLTarget() vdl.Target
 pkg logreader, method (*LogFileReadLogServerCallStub) Init(rpc.StreamServerCall)
 pkg logreader, method (*LogFileReadLogServerCallStub) SendStream() interface {  Send(item LogEntry) error;}
 pkg logreader, type LogEntry struct

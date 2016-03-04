@@ -37,8 +37,70 @@ func (Task) __VDLReflect(struct {
 }) {
 }
 
+func (m *Task) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
+
+	if __VDLType_appcycle_v_io_v23_services_appcycle_Task == nil || __VDLTypeappcycle0 == nil {
+		panic("Initialization order error: types generated for FillVDLTarget not initialized. Consider moving caller to an init() block.")
+	}
+	fieldsTarget1, err := t.StartFields(tt)
+	if err != nil {
+		return err
+	}
+
+	var2 := (m.Progress == int32(0))
+	if !var2 {
+		keyTarget3, fieldTarget4, err := fieldsTarget1.StartField("Progress")
+		if err != vdl.ErrFieldNoExist && err != nil {
+			return err
+		}
+		if err != vdl.ErrFieldNoExist {
+			if err := fieldTarget4.FromInt(int64(m.Progress), vdl.Int32Type); err != nil {
+				return err
+			}
+			if err := fieldsTarget1.FinishField(keyTarget3, fieldTarget4); err != nil {
+				return err
+			}
+		}
+	}
+	var5 := (m.Goal == int32(0))
+	if !var5 {
+		keyTarget6, fieldTarget7, err := fieldsTarget1.StartField("Goal")
+		if err != vdl.ErrFieldNoExist && err != nil {
+			return err
+		}
+		if err != vdl.ErrFieldNoExist {
+			if err := fieldTarget7.FromInt(int64(m.Goal), vdl.Int32Type); err != nil {
+				return err
+			}
+			if err := fieldsTarget1.FinishField(keyTarget6, fieldTarget7); err != nil {
+				return err
+			}
+		}
+	}
+	if err := t.FinishFields(fieldsTarget1); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (m *Task) MakeVDLTarget() vdl.Target {
+	return nil
+}
+
+func (m *Task) IsZero() bool {
+
+	var1 := (*m == Task{})
+	return var1
+}
+
 func init() {
 	vdl.Register((*Task)(nil))
+}
+
+var __VDLTypeappcycle0 *vdl.Type = vdl.TypeOf((*Task)(nil))
+var __VDLType_appcycle_v_io_v23_services_appcycle_Task *vdl.Type = vdl.TypeOf(Task{})
+
+func __VDLEnsureNativeBuilt_appcycle() {
 }
 
 // AppCycleClientMethods is the client interface

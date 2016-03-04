@@ -27,6 +27,165 @@ func (Interface) __VDLReflect(struct {
 }) {
 }
 
+func (m *Interface) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
+
+	if __VDLType_signature_signature_Interface == nil || __VDLTypesignature0 == nil {
+		panic("Initialization order error: types generated for FillVDLTarget not initialized. Consider moving caller to an init() block.")
+	}
+	fieldsTarget1, err := t.StartFields(tt)
+	if err != nil {
+		return err
+	}
+
+	var2 := (m.Name == "")
+	if !var2 {
+		keyTarget3, fieldTarget4, err := fieldsTarget1.StartField("Name")
+		if err != vdl.ErrFieldNoExist && err != nil {
+			return err
+		}
+		if err != vdl.ErrFieldNoExist {
+			if err := fieldTarget4.FromString(string(m.Name), vdl.StringType); err != nil {
+				return err
+			}
+			if err := fieldsTarget1.FinishField(keyTarget3, fieldTarget4); err != nil {
+				return err
+			}
+		}
+	}
+	var5 := (m.PkgPath == "")
+	if !var5 {
+		keyTarget6, fieldTarget7, err := fieldsTarget1.StartField("PkgPath")
+		if err != vdl.ErrFieldNoExist && err != nil {
+			return err
+		}
+		if err != vdl.ErrFieldNoExist {
+			if err := fieldTarget7.FromString(string(m.PkgPath), vdl.StringType); err != nil {
+				return err
+			}
+			if err := fieldsTarget1.FinishField(keyTarget6, fieldTarget7); err != nil {
+				return err
+			}
+		}
+	}
+	var8 := (m.Doc == "")
+	if !var8 {
+		keyTarget9, fieldTarget10, err := fieldsTarget1.StartField("Doc")
+		if err != vdl.ErrFieldNoExist && err != nil {
+			return err
+		}
+		if err != vdl.ErrFieldNoExist {
+			if err := fieldTarget10.FromString(string(m.Doc), vdl.StringType); err != nil {
+				return err
+			}
+			if err := fieldsTarget1.FinishField(keyTarget9, fieldTarget10); err != nil {
+				return err
+			}
+		}
+	}
+	var var11 bool
+	if len(m.Embeds) == 0 {
+		var11 = true
+	}
+	if !var11 {
+		keyTarget12, fieldTarget13, err := fieldsTarget1.StartField("Embeds")
+		if err != vdl.ErrFieldNoExist && err != nil {
+			return err
+		}
+		if err != vdl.ErrFieldNoExist {
+
+			listTarget14, err := fieldTarget13.StartList(__VDLTypesignature1, len(m.Embeds))
+			if err != nil {
+				return err
+			}
+			for i, elem16 := range m.Embeds {
+				elemTarget15, err := listTarget14.StartElem(i)
+				if err != nil {
+					return err
+				}
+
+				if err := elem16.FillVDLTarget(elemTarget15, __VDLType_signature_signature_Embed); err != nil {
+					return err
+				}
+				if err := listTarget14.FinishElem(elemTarget15); err != nil {
+					return err
+				}
+			}
+			if err := fieldTarget13.FinishList(listTarget14); err != nil {
+				return err
+			}
+			if err := fieldsTarget1.FinishField(keyTarget12, fieldTarget13); err != nil {
+				return err
+			}
+		}
+	}
+	var var17 bool
+	if len(m.Methods) == 0 {
+		var17 = true
+	}
+	if !var17 {
+		keyTarget18, fieldTarget19, err := fieldsTarget1.StartField("Methods")
+		if err != vdl.ErrFieldNoExist && err != nil {
+			return err
+		}
+		if err != vdl.ErrFieldNoExist {
+
+			listTarget20, err := fieldTarget19.StartList(__VDLTypesignature2, len(m.Methods))
+			if err != nil {
+				return err
+			}
+			for i, elem22 := range m.Methods {
+				elemTarget21, err := listTarget20.StartElem(i)
+				if err != nil {
+					return err
+				}
+
+				if err := elem22.FillVDLTarget(elemTarget21, __VDLType_signature_signature_Method); err != nil {
+					return err
+				}
+				if err := listTarget20.FinishElem(elemTarget21); err != nil {
+					return err
+				}
+			}
+			if err := fieldTarget19.FinishList(listTarget20); err != nil {
+				return err
+			}
+			if err := fieldsTarget1.FinishField(keyTarget18, fieldTarget19); err != nil {
+				return err
+			}
+		}
+	}
+	if err := t.FinishFields(fieldsTarget1); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (m *Interface) MakeVDLTarget() vdl.Target {
+	return nil
+}
+
+func (m *Interface) IsZero() bool {
+
+	var1 := true
+	var2 := (m.Name == "")
+	var1 = var1 && var2
+	var3 := (m.PkgPath == "")
+	var1 = var1 && var3
+	var4 := (m.Doc == "")
+	var1 = var1 && var4
+	var var5 bool
+	if len(m.Embeds) == 0 {
+		var5 = true
+	}
+	var1 = var1 && var5
+	var var6 bool
+	if len(m.Methods) == 0 {
+		var6 = true
+	}
+	var1 = var1 && var6
+	return var1
+}
+
 // Embed describes the signature of an embedded interface.
 type Embed struct {
 	Name    string
@@ -37,6 +196,77 @@ type Embed struct {
 func (Embed) __VDLReflect(struct {
 	Name string `vdl:"signature.Embed"`
 }) {
+}
+
+func (m *Embed) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
+
+	if __VDLType_signature_signature_Embed == nil || __VDLTypesignature3 == nil {
+		panic("Initialization order error: types generated for FillVDLTarget not initialized. Consider moving caller to an init() block.")
+	}
+	fieldsTarget1, err := t.StartFields(tt)
+	if err != nil {
+		return err
+	}
+
+	var2 := (m.Name == "")
+	if !var2 {
+		keyTarget3, fieldTarget4, err := fieldsTarget1.StartField("Name")
+		if err != vdl.ErrFieldNoExist && err != nil {
+			return err
+		}
+		if err != vdl.ErrFieldNoExist {
+			if err := fieldTarget4.FromString(string(m.Name), vdl.StringType); err != nil {
+				return err
+			}
+			if err := fieldsTarget1.FinishField(keyTarget3, fieldTarget4); err != nil {
+				return err
+			}
+		}
+	}
+	var5 := (m.PkgPath == "")
+	if !var5 {
+		keyTarget6, fieldTarget7, err := fieldsTarget1.StartField("PkgPath")
+		if err != vdl.ErrFieldNoExist && err != nil {
+			return err
+		}
+		if err != vdl.ErrFieldNoExist {
+			if err := fieldTarget7.FromString(string(m.PkgPath), vdl.StringType); err != nil {
+				return err
+			}
+			if err := fieldsTarget1.FinishField(keyTarget6, fieldTarget7); err != nil {
+				return err
+			}
+		}
+	}
+	var8 := (m.Doc == "")
+	if !var8 {
+		keyTarget9, fieldTarget10, err := fieldsTarget1.StartField("Doc")
+		if err != vdl.ErrFieldNoExist && err != nil {
+			return err
+		}
+		if err != vdl.ErrFieldNoExist {
+			if err := fieldTarget10.FromString(string(m.Doc), vdl.StringType); err != nil {
+				return err
+			}
+			if err := fieldsTarget1.FinishField(keyTarget9, fieldTarget10); err != nil {
+				return err
+			}
+		}
+	}
+	if err := t.FinishFields(fieldsTarget1); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (m *Embed) MakeVDLTarget() vdl.Target {
+	return nil
+}
+
+func (m *Embed) IsZero() bool {
+
+	var1 := (*m == Embed{})
+	return var1
 }
 
 // Method describes the signature of an interface method.
@@ -55,6 +285,243 @@ func (Method) __VDLReflect(struct {
 }) {
 }
 
+func (m *Method) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
+
+	if __VDLType_signature_signature_Method == nil || __VDLTypesignature4 == nil {
+		panic("Initialization order error: types generated for FillVDLTarget not initialized. Consider moving caller to an init() block.")
+	}
+	fieldsTarget1, err := t.StartFields(tt)
+	if err != nil {
+		return err
+	}
+
+	var2 := (m.Name == "")
+	if !var2 {
+		keyTarget3, fieldTarget4, err := fieldsTarget1.StartField("Name")
+		if err != vdl.ErrFieldNoExist && err != nil {
+			return err
+		}
+		if err != vdl.ErrFieldNoExist {
+			if err := fieldTarget4.FromString(string(m.Name), vdl.StringType); err != nil {
+				return err
+			}
+			if err := fieldsTarget1.FinishField(keyTarget3, fieldTarget4); err != nil {
+				return err
+			}
+		}
+	}
+	var5 := (m.Doc == "")
+	if !var5 {
+		keyTarget6, fieldTarget7, err := fieldsTarget1.StartField("Doc")
+		if err != vdl.ErrFieldNoExist && err != nil {
+			return err
+		}
+		if err != vdl.ErrFieldNoExist {
+			if err := fieldTarget7.FromString(string(m.Doc), vdl.StringType); err != nil {
+				return err
+			}
+			if err := fieldsTarget1.FinishField(keyTarget6, fieldTarget7); err != nil {
+				return err
+			}
+		}
+	}
+	var var8 bool
+	if len(m.InArgs) == 0 {
+		var8 = true
+	}
+	if !var8 {
+		keyTarget9, fieldTarget10, err := fieldsTarget1.StartField("InArgs")
+		if err != vdl.ErrFieldNoExist && err != nil {
+			return err
+		}
+		if err != vdl.ErrFieldNoExist {
+
+			listTarget11, err := fieldTarget10.StartList(__VDLTypesignature5, len(m.InArgs))
+			if err != nil {
+				return err
+			}
+			for i, elem13 := range m.InArgs {
+				elemTarget12, err := listTarget11.StartElem(i)
+				if err != nil {
+					return err
+				}
+
+				if err := elem13.FillVDLTarget(elemTarget12, __VDLType_signature_signature_Arg); err != nil {
+					return err
+				}
+				if err := listTarget11.FinishElem(elemTarget12); err != nil {
+					return err
+				}
+			}
+			if err := fieldTarget10.FinishList(listTarget11); err != nil {
+				return err
+			}
+			if err := fieldsTarget1.FinishField(keyTarget9, fieldTarget10); err != nil {
+				return err
+			}
+		}
+	}
+	var var14 bool
+	if len(m.OutArgs) == 0 {
+		var14 = true
+	}
+	if !var14 {
+		keyTarget15, fieldTarget16, err := fieldsTarget1.StartField("OutArgs")
+		if err != vdl.ErrFieldNoExist && err != nil {
+			return err
+		}
+		if err != vdl.ErrFieldNoExist {
+
+			listTarget17, err := fieldTarget16.StartList(__VDLTypesignature5, len(m.OutArgs))
+			if err != nil {
+				return err
+			}
+			for i, elem19 := range m.OutArgs {
+				elemTarget18, err := listTarget17.StartElem(i)
+				if err != nil {
+					return err
+				}
+
+				if err := elem19.FillVDLTarget(elemTarget18, __VDLType_signature_signature_Arg); err != nil {
+					return err
+				}
+				if err := listTarget17.FinishElem(elemTarget18); err != nil {
+					return err
+				}
+			}
+			if err := fieldTarget16.FinishList(listTarget17); err != nil {
+				return err
+			}
+			if err := fieldsTarget1.FinishField(keyTarget15, fieldTarget16); err != nil {
+				return err
+			}
+		}
+	}
+	var20 := (m.InStream == (*Arg)(nil))
+	if !var20 {
+		keyTarget21, fieldTarget22, err := fieldsTarget1.StartField("InStream")
+		if err != vdl.ErrFieldNoExist && err != nil {
+			return err
+		}
+		if err != vdl.ErrFieldNoExist {
+
+			if m.InStream == nil {
+				if err := fieldTarget22.FromNil(__VDLTypesignature6); err != nil {
+					return err
+				}
+			} else {
+				if err := m.InStream.FillVDLTarget(fieldTarget22, __VDLType_signature_signature_Arg); err != nil {
+					return err
+				}
+			}
+			if err := fieldsTarget1.FinishField(keyTarget21, fieldTarget22); err != nil {
+				return err
+			}
+		}
+	}
+	var23 := (m.OutStream == (*Arg)(nil))
+	if !var23 {
+		keyTarget24, fieldTarget25, err := fieldsTarget1.StartField("OutStream")
+		if err != vdl.ErrFieldNoExist && err != nil {
+			return err
+		}
+		if err != vdl.ErrFieldNoExist {
+
+			if m.OutStream == nil {
+				if err := fieldTarget25.FromNil(__VDLTypesignature6); err != nil {
+					return err
+				}
+			} else {
+				if err := m.OutStream.FillVDLTarget(fieldTarget25, __VDLType_signature_signature_Arg); err != nil {
+					return err
+				}
+			}
+			if err := fieldsTarget1.FinishField(keyTarget24, fieldTarget25); err != nil {
+				return err
+			}
+		}
+	}
+	var var26 bool
+	if len(m.Tags) == 0 {
+		var26 = true
+	}
+	if !var26 {
+		keyTarget27, fieldTarget28, err := fieldsTarget1.StartField("Tags")
+		if err != vdl.ErrFieldNoExist && err != nil {
+			return err
+		}
+		if err != vdl.ErrFieldNoExist {
+
+			listTarget29, err := fieldTarget28.StartList(__VDLTypesignature7, len(m.Tags))
+			if err != nil {
+				return err
+			}
+			for i, elem31 := range m.Tags {
+				elemTarget30, err := listTarget29.StartElem(i)
+				if err != nil {
+					return err
+				}
+
+				if elem31 == nil {
+					if err := elemTarget30.FromNil(vdl.AnyType); err != nil {
+						return err
+					}
+				} else {
+					if err := vdl.FromValue(elemTarget30, elem31); err != nil {
+						return err
+					}
+				}
+				if err := listTarget29.FinishElem(elemTarget30); err != nil {
+					return err
+				}
+			}
+			if err := fieldTarget28.FinishList(listTarget29); err != nil {
+				return err
+			}
+			if err := fieldsTarget1.FinishField(keyTarget27, fieldTarget28); err != nil {
+				return err
+			}
+		}
+	}
+	if err := t.FinishFields(fieldsTarget1); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (m *Method) MakeVDLTarget() vdl.Target {
+	return nil
+}
+
+func (m *Method) IsZero() bool {
+
+	var1 := true
+	var2 := (m.Name == "")
+	var1 = var1 && var2
+	var3 := (m.Doc == "")
+	var1 = var1 && var3
+	var var4 bool
+	if len(m.InArgs) == 0 {
+		var4 = true
+	}
+	var1 = var1 && var4
+	var var5 bool
+	if len(m.OutArgs) == 0 {
+		var5 = true
+	}
+	var1 = var1 && var5
+	var6 := (m.InStream == (*Arg)(nil))
+	var1 = var1 && var6
+	var7 := (m.OutStream == (*Arg)(nil))
+	var1 = var1 && var7
+	var var8 bool
+	if len(m.Tags) == 0 {
+		var8 = true
+	}
+	var1 = var1 && var8
+	return var1
+}
+
 // Arg describes the signature of a single argument.
 type Arg struct {
 	Name string
@@ -67,9 +534,104 @@ func (Arg) __VDLReflect(struct {
 }) {
 }
 
+func (m *Arg) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
+
+	if __VDLType_signature_signature_Arg == nil || __VDLTypesignature6 == nil {
+		panic("Initialization order error: types generated for FillVDLTarget not initialized. Consider moving caller to an init() block.")
+	}
+	fieldsTarget1, err := t.StartFields(tt)
+	if err != nil {
+		return err
+	}
+
+	var2 := (m.Name == "")
+	if !var2 {
+		keyTarget3, fieldTarget4, err := fieldsTarget1.StartField("Name")
+		if err != vdl.ErrFieldNoExist && err != nil {
+			return err
+		}
+		if err != vdl.ErrFieldNoExist {
+			if err := fieldTarget4.FromString(string(m.Name), vdl.StringType); err != nil {
+				return err
+			}
+			if err := fieldsTarget1.FinishField(keyTarget3, fieldTarget4); err != nil {
+				return err
+			}
+		}
+	}
+	var5 := (m.Doc == "")
+	if !var5 {
+		keyTarget6, fieldTarget7, err := fieldsTarget1.StartField("Doc")
+		if err != vdl.ErrFieldNoExist && err != nil {
+			return err
+		}
+		if err != vdl.ErrFieldNoExist {
+			if err := fieldTarget7.FromString(string(m.Doc), vdl.StringType); err != nil {
+				return err
+			}
+			if err := fieldsTarget1.FinishField(keyTarget6, fieldTarget7); err != nil {
+				return err
+			}
+		}
+	}
+	var8 := (m.Type == vdl.AnyType)
+	if !var8 {
+		keyTarget9, fieldTarget10, err := fieldsTarget1.StartField("Type")
+		if err != vdl.ErrFieldNoExist && err != nil {
+			return err
+		}
+		if err != vdl.ErrFieldNoExist {
+			typeObjectVal11 := m.Type
+			if typeObjectVal11 == nil {
+				typeObjectVal11 = vdl.AnyType
+			}
+			if err := fieldTarget10.FromTypeObject(typeObjectVal11); err != nil {
+				return err
+			}
+			if err := fieldsTarget1.FinishField(keyTarget9, fieldTarget10); err != nil {
+				return err
+			}
+		}
+	}
+	if err := t.FinishFields(fieldsTarget1); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (m *Arg) MakeVDLTarget() vdl.Target {
+	return nil
+}
+
+func (m *Arg) IsZero() bool {
+
+	var1 := (*m == Arg{
+		Type: vdl.AnyType,
+	})
+	return var1
+}
+
 func init() {
 	vdl.Register((*Interface)(nil))
 	vdl.Register((*Embed)(nil))
 	vdl.Register((*Method)(nil))
 	vdl.Register((*Arg)(nil))
+}
+
+var __VDLTypesignature6 *vdl.Type = vdl.TypeOf((*Arg)(nil))
+var __VDLTypesignature3 *vdl.Type = vdl.TypeOf((*Embed)(nil))
+var __VDLTypesignature0 *vdl.Type = vdl.TypeOf((*Interface)(nil))
+var __VDLTypesignature4 *vdl.Type = vdl.TypeOf((*Method)(nil))
+var __VDLTypesignature7 *vdl.Type = vdl.TypeOf([]*vdl.Value(nil))
+var __VDLTypesignature5 *vdl.Type = vdl.TypeOf([]Arg(nil))
+var __VDLTypesignature1 *vdl.Type = vdl.TypeOf([]Embed(nil))
+var __VDLTypesignature2 *vdl.Type = vdl.TypeOf([]Method(nil))
+var __VDLType_signature_signature_Arg *vdl.Type = vdl.TypeOf(Arg{
+	Type: vdl.AnyType,
+})
+var __VDLType_signature_signature_Embed *vdl.Type = vdl.TypeOf(Embed{})
+var __VDLType_signature_signature_Interface *vdl.Type = vdl.TypeOf(Interface{})
+var __VDLType_signature_signature_Method *vdl.Type = vdl.TypeOf(Method{})
+
+func __VDLEnsureNativeBuilt_signature() {
 }

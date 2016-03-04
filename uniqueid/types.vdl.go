@@ -20,6 +20,29 @@ func (Id) __VDLReflect(struct {
 }) {
 }
 
+func (m Id) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
+
+	if err := t.FromBytes([]byte(m[:]), __VDLType_types_v_io_v23_uniqueid_Id); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (m Id) MakeVDLTarget() vdl.Target {
+	return nil
+}
+
+func (m Id) IsZero() bool {
+
+	var1 := (m == Id{})
+	return var1
+}
+
 func init() {
 	vdl.Register((*Id)(nil))
+}
+
+var __VDLType_types_v_io_v23_uniqueid_Id *vdl.Type = vdl.TypeOf(Id{})
+
+func __VDLEnsureNativeBuilt_types() {
 }

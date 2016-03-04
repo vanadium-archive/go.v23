@@ -27,6 +27,24 @@ func (nonce) __VDLReflect(struct {
 }) {
 }
 
+func (m nonce) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
+
+	if err := t.FromBytes([]byte(m[:]), __VDLType_caveat_v_io_v23_security_nonce); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (m nonce) MakeVDLTarget() vdl.Target {
+	return nil
+}
+
+func (m nonce) IsZero() bool {
+
+	var1 := (m == nonce{})
+	return var1
+}
+
 // publicKeyThirdPartyCaveatParam represents a third-party caveat that requires
 // discharges to be issued by a principal identified by a public key.
 //
@@ -62,6 +80,150 @@ func (publicKeyThirdPartyCaveatParam) __VDLReflect(struct {
 }) {
 }
 
+func (m *publicKeyThirdPartyCaveatParam) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
+
+	if __VDLType_caveat_v_io_v23_security_publicKeyThirdPartyCaveatParam == nil || __VDLTypecaveat0 == nil {
+		panic("Initialization order error: types generated for FillVDLTarget not initialized. Consider moving caller to an init() block.")
+	}
+	fieldsTarget1, err := t.StartFields(tt)
+	if err != nil {
+		return err
+	}
+
+	var2 := m.Nonce.IsZero()
+	if !var2 {
+		keyTarget3, fieldTarget4, err := fieldsTarget1.StartField("Nonce")
+		if err != vdl.ErrFieldNoExist && err != nil {
+			return err
+		}
+		if err != vdl.ErrFieldNoExist {
+
+			if err := m.Nonce.FillVDLTarget(fieldTarget4, __VDLType_caveat_v_io_v23_security_nonce); err != nil {
+				return err
+			}
+			if err := fieldsTarget1.FinishField(keyTarget3, fieldTarget4); err != nil {
+				return err
+			}
+		}
+	}
+	var var5 bool
+	if len(m.Caveats) == 0 {
+		var5 = true
+	}
+	if !var5 {
+		keyTarget6, fieldTarget7, err := fieldsTarget1.StartField("Caveats")
+		if err != vdl.ErrFieldNoExist && err != nil {
+			return err
+		}
+		if err != vdl.ErrFieldNoExist {
+
+			listTarget8, err := fieldTarget7.StartList(__VDLTypecaveat1, len(m.Caveats))
+			if err != nil {
+				return err
+			}
+			for i, elem10 := range m.Caveats {
+				elemTarget9, err := listTarget8.StartElem(i)
+				if err != nil {
+					return err
+				}
+
+				if err := elem10.FillVDLTarget(elemTarget9, __VDLType_caveat_v_io_v23_security_Caveat); err != nil {
+					return err
+				}
+				if err := listTarget8.FinishElem(elemTarget9); err != nil {
+					return err
+				}
+			}
+			if err := fieldTarget7.FinishList(listTarget8); err != nil {
+				return err
+			}
+			if err := fieldsTarget1.FinishField(keyTarget6, fieldTarget7); err != nil {
+				return err
+			}
+		}
+	}
+	var var11 bool
+	if len(m.DischargerKey) == 0 {
+		var11 = true
+	}
+	if !var11 {
+		keyTarget12, fieldTarget13, err := fieldsTarget1.StartField("DischargerKey")
+		if err != vdl.ErrFieldNoExist && err != nil {
+			return err
+		}
+		if err != vdl.ErrFieldNoExist {
+
+			if err := fieldTarget13.FromBytes([]byte(m.DischargerKey), __VDLTypecaveat2); err != nil {
+				return err
+			}
+			if err := fieldsTarget1.FinishField(keyTarget12, fieldTarget13); err != nil {
+				return err
+			}
+		}
+	}
+	var14 := (m.DischargerLocation == "")
+	if !var14 {
+		keyTarget15, fieldTarget16, err := fieldsTarget1.StartField("DischargerLocation")
+		if err != vdl.ErrFieldNoExist && err != nil {
+			return err
+		}
+		if err != vdl.ErrFieldNoExist {
+			if err := fieldTarget16.FromString(string(m.DischargerLocation), vdl.StringType); err != nil {
+				return err
+			}
+			if err := fieldsTarget1.FinishField(keyTarget15, fieldTarget16); err != nil {
+				return err
+			}
+		}
+	}
+	var17 := m.DischargerRequirements.IsZero()
+	if !var17 {
+		keyTarget18, fieldTarget19, err := fieldsTarget1.StartField("DischargerRequirements")
+		if err != vdl.ErrFieldNoExist && err != nil {
+			return err
+		}
+		if err != vdl.ErrFieldNoExist {
+
+			if err := m.DischargerRequirements.FillVDLTarget(fieldTarget19, __VDLType_caveat_v_io_v23_security_ThirdPartyRequirements); err != nil {
+				return err
+			}
+			if err := fieldsTarget1.FinishField(keyTarget18, fieldTarget19); err != nil {
+				return err
+			}
+		}
+	}
+	if err := t.FinishFields(fieldsTarget1); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (m *publicKeyThirdPartyCaveatParam) MakeVDLTarget() vdl.Target {
+	return nil
+}
+
+func (m *publicKeyThirdPartyCaveatParam) IsZero() bool {
+
+	var1 := true
+	var2 := m.Nonce.IsZero()
+	var1 = var1 && var2
+	var var3 bool
+	if len(m.Caveats) == 0 {
+		var3 = true
+	}
+	var1 = var1 && var3
+	var var4 bool
+	if len(m.DischargerKey) == 0 {
+		var4 = true
+	}
+	var1 = var1 && var4
+	var5 := (m.DischargerLocation == "")
+	var1 = var1 && var5
+	var6 := m.DischargerRequirements.IsZero()
+	var1 = var1 && var6
+	return var1
+}
+
 // publicKeyDischarge represents the discharge issued for publicKeyThirdPartyCaveatParams.
 //
 // The message digest of this structure is computed as follows:
@@ -79,10 +241,126 @@ func (publicKeyDischarge) __VDLReflect(struct {
 }) {
 }
 
+func (m *publicKeyDischarge) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
+
+	if __VDLType_caveat_v_io_v23_security_publicKeyDischarge == nil || __VDLTypecaveat3 == nil {
+		panic("Initialization order error: types generated for FillVDLTarget not initialized. Consider moving caller to an init() block.")
+	}
+	fieldsTarget1, err := t.StartFields(tt)
+	if err != nil {
+		return err
+	}
+
+	var2 := (m.ThirdPartyCaveatId == "")
+	if !var2 {
+		keyTarget3, fieldTarget4, err := fieldsTarget1.StartField("ThirdPartyCaveatId")
+		if err != vdl.ErrFieldNoExist && err != nil {
+			return err
+		}
+		if err != vdl.ErrFieldNoExist {
+			if err := fieldTarget4.FromString(string(m.ThirdPartyCaveatId), vdl.StringType); err != nil {
+				return err
+			}
+			if err := fieldsTarget1.FinishField(keyTarget3, fieldTarget4); err != nil {
+				return err
+			}
+		}
+	}
+	var var5 bool
+	if len(m.Caveats) == 0 {
+		var5 = true
+	}
+	if !var5 {
+		keyTarget6, fieldTarget7, err := fieldsTarget1.StartField("Caveats")
+		if err != vdl.ErrFieldNoExist && err != nil {
+			return err
+		}
+		if err != vdl.ErrFieldNoExist {
+
+			listTarget8, err := fieldTarget7.StartList(__VDLTypecaveat1, len(m.Caveats))
+			if err != nil {
+				return err
+			}
+			for i, elem10 := range m.Caveats {
+				elemTarget9, err := listTarget8.StartElem(i)
+				if err != nil {
+					return err
+				}
+
+				if err := elem10.FillVDLTarget(elemTarget9, __VDLType_caveat_v_io_v23_security_Caveat); err != nil {
+					return err
+				}
+				if err := listTarget8.FinishElem(elemTarget9); err != nil {
+					return err
+				}
+			}
+			if err := fieldTarget7.FinishList(listTarget8); err != nil {
+				return err
+			}
+			if err := fieldsTarget1.FinishField(keyTarget6, fieldTarget7); err != nil {
+				return err
+			}
+		}
+	}
+	var11 := m.Signature.IsZero()
+	if !var11 {
+		keyTarget12, fieldTarget13, err := fieldsTarget1.StartField("Signature")
+		if err != vdl.ErrFieldNoExist && err != nil {
+			return err
+		}
+		if err != vdl.ErrFieldNoExist {
+
+			if err := m.Signature.FillVDLTarget(fieldTarget13, __VDLType_caveat_v_io_v23_security_Signature); err != nil {
+				return err
+			}
+			if err := fieldsTarget1.FinishField(keyTarget12, fieldTarget13); err != nil {
+				return err
+			}
+		}
+	}
+	if err := t.FinishFields(fieldsTarget1); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (m *publicKeyDischarge) MakeVDLTarget() vdl.Target {
+	return nil
+}
+
+func (m *publicKeyDischarge) IsZero() bool {
+
+	var1 := true
+	var2 := (m.ThirdPartyCaveatId == "")
+	var1 = var1 && var2
+	var var3 bool
+	if len(m.Caveats) == 0 {
+		var3 = true
+	}
+	var1 = var1 && var3
+	var4 := m.Signature.IsZero()
+	var1 = var1 && var4
+	return var1
+}
+
 func init() {
 	vdl.Register((*nonce)(nil))
 	vdl.Register((*publicKeyThirdPartyCaveatParam)(nil))
 	vdl.Register((*publicKeyDischarge)(nil))
+}
+
+var __VDLTypecaveat3 *vdl.Type = vdl.TypeOf((*publicKeyDischarge)(nil))
+var __VDLTypecaveat0 *vdl.Type = vdl.TypeOf((*publicKeyThirdPartyCaveatParam)(nil))
+var __VDLTypecaveat2 *vdl.Type = vdl.TypeOf([]byte(nil))
+var __VDLTypecaveat1 *vdl.Type = vdl.TypeOf([]Caveat(nil))
+var __VDLType_caveat_v_io_v23_security_Caveat *vdl.Type = vdl.TypeOf(Caveat{})
+var __VDLType_caveat_v_io_v23_security_Signature *vdl.Type = vdl.TypeOf(Signature{})
+var __VDLType_caveat_v_io_v23_security_ThirdPartyRequirements *vdl.Type = vdl.TypeOf(ThirdPartyRequirements{})
+var __VDLType_caveat_v_io_v23_security_nonce *vdl.Type = vdl.TypeOf(nonce{})
+var __VDLType_caveat_v_io_v23_security_publicKeyDischarge *vdl.Type = vdl.TypeOf(publicKeyDischarge{})
+var __VDLType_caveat_v_io_v23_security_publicKeyThirdPartyCaveatParam *vdl.Type = vdl.TypeOf(publicKeyThirdPartyCaveatParam{})
+
+func __VDLEnsureNativeBuilt_caveat() {
 }
 
 // ConstCaveat represents a caveat that either always validates or never validates.
