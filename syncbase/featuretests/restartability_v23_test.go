@@ -116,8 +116,11 @@ func checkHierarchy(t *testing.T, ctx *context.T) {
 	s := syncbase.NewService(testSbName)
 	var got, want []string
 	var err error
-	if got, err = s.ListApps(ctx); err != nil {
-		t.Fatalf("s.ListApps() failed: %v", err)
+	for len(got) != 2 {
+		if got, err = s.ListApps(ctx); err != nil {
+			t.Fatalf("s.ListApps() failed: %v", err)
+		}
+		time.Sleep(10 * time.Millisecond)
 	}
 	want = []string{"a1", "a2"}
 	if !reflect.DeepEqual(got, want) {

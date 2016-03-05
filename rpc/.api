@@ -1,4 +1,8 @@
 pkg rpc, const GlobMethod ideal-string
+pkg rpc, const PublisherMounted PublisherState
+pkg rpc, const PublisherMounting PublisherState
+pkg rpc, const PublisherUnmounted PublisherState
+pkg rpc, const PublisherUnmounting PublisherState
 pkg rpc, const ReservedMethodSignature ideal-string
 pkg rpc, const ReservedSignature ideal-string
 pkg rpc, const ServerActive ServerState
@@ -6,6 +10,8 @@ pkg rpc, const ServerStopped ServerState
 pkg rpc, const ServerStopping ServerState
 pkg rpc, func ChildrenGlobberInvoker(...string) Invoker
 pkg rpc, func NewGlobState(interface{}) *GlobState
+pkg rpc, func PublisherNames([]PublisherEntry) []string
+pkg rpc, func PublisherServers([]PublisherEntry) []string
 pkg rpc, func ReflectInvoker(interface{}) (Invoker, error)
 pkg rpc, func ReflectInvokerOrDie(interface{}) Invoker
 pkg rpc, func TypeCheckMethods(interface{}) map[string]error
@@ -18,9 +24,8 @@ pkg rpc, method (*Response) MakeVDLTarget() vdl.Target
 pkg rpc, method (AddressChooserFunc) ChooseAddresses(string, []net.Addr) ([]net.Addr, error)
 pkg rpc, method (ListenSpec) Copy() ListenSpec
 pkg rpc, method (ListenSpec) String() string
-pkg rpc, method (MountState) Names() []string
-pkg rpc, method (MountState) Servers() []string
-pkg rpc, method (MountStatus) String() string
+pkg rpc, method (PublisherEntry) String() string
+pkg rpc, method (PublisherState) String() string
 pkg rpc, method (ServerState) String() string
 pkg rpc, type AddressChooser interface { ChooseAddresses }
 pkg rpc, type AddressChooser interface, ChooseAddresses(string, []net.Addr) ([]net.Addr, error)
@@ -106,15 +111,17 @@ pkg rpc, type MethodDesc struct, Name string
 pkg rpc, type MethodDesc struct, OutArgs []ArgDesc
 pkg rpc, type MethodDesc struct, OutStream ArgDesc
 pkg rpc, type MethodDesc struct, Tags []*vdl.Value
-pkg rpc, type MountState []MountStatus
-pkg rpc, type MountStatus struct
-pkg rpc, type MountStatus struct, LastMount time.Time
-pkg rpc, type MountStatus struct, LastMountErr error
-pkg rpc, type MountStatus struct, LastUnmount time.Time
-pkg rpc, type MountStatus struct, LastUnmountErr error
-pkg rpc, type MountStatus struct, Name string
-pkg rpc, type MountStatus struct, Server string
-pkg rpc, type MountStatus struct, TTL time.Duration
+pkg rpc, type PublisherEntry struct
+pkg rpc, type PublisherEntry struct, DesiredState PublisherState
+pkg rpc, type PublisherEntry struct, LastMount time.Time
+pkg rpc, type PublisherEntry struct, LastMountErr error
+pkg rpc, type PublisherEntry struct, LastState PublisherState
+pkg rpc, type PublisherEntry struct, LastUnmount time.Time
+pkg rpc, type PublisherEntry struct, LastUnmountErr error
+pkg rpc, type PublisherEntry struct, Name string
+pkg rpc, type PublisherEntry struct, Server string
+pkg rpc, type PublisherEntry struct, TTL time.Duration
+pkg rpc, type PublisherState int
 pkg rpc, type Request struct
 pkg rpc, type Request struct, Deadline time.Deadline
 pkg rpc, type Request struct, EndStreamArgs bool
@@ -149,8 +156,8 @@ pkg rpc, type ServerState int
 pkg rpc, type ServerStatus struct
 pkg rpc, type ServerStatus struct, Endpoints []naming.Endpoint
 pkg rpc, type ServerStatus struct, ListenErrors map[struct{ Protocol, Address string }]error
-pkg rpc, type ServerStatus struct, Mounts MountState
 pkg rpc, type ServerStatus struct, ProxyErrors map[string]error
+pkg rpc, type ServerStatus struct, PublisherStatus []PublisherEntry
 pkg rpc, type ServerStatus struct, ServesMountTable bool
 pkg rpc, type ServerStatus struct, State ServerState
 pkg rpc, type ServerStatus struct, Valid <-chan struct{}

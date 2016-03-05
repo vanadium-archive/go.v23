@@ -204,8 +204,68 @@ func (i ServerState) String() string {
 	}
 }
 
-// MountStatus contains the status of a given mount operation.
-type MountStatus struct {
+// PublisherNames returns the current set of names being published by the publisher.
+// These names are not rooted at the mounttable.
+func PublisherNames(e []PublisherEntry) []string {
+	m := map[string]bool{}
+	var r []string
+	for _, v := range e {
+		if s := v.Name; !m[s] {
+			m[s] = true
+			r = append(r, s)
+		}
+	}
+	sort.Strings(r)
+	return r
+}
+
+// PublisherServers returns the current set of server addresses being published
+// by the publisher.
+func PublisherServers(e []PublisherEntry) []string {
+	m := map[string]bool{}
+	var r []string
+	for _, v := range e {
+		if s := v.Server; !m[s] {
+			m[s] = true
+			r = append(r, s)
+		}
+	}
+	sort.Strings(r)
+	return r
+}
+
+// PublisherState indicates the state of a PublisherEntry.
+type PublisherState int
+
+const (
+	// PublisherUnmounted indicates that the PublisherEntry is not mounted.
+	PublisherUnmounted PublisherState = iota
+	// PublisherMounting indicates that the PublisherEntry is in the process of mounting.
+	PublisherMounting
+	// PublisherMounted indicates that the PublisherEntry is mounted.
+	PublisherMounted
+	// PublisherUnmounting indicates that the PublisherEntry is in the process of unmounting.
+	PublisherUnmounting
+)
+
+// String returns a string representation of the PublisherState.
+func (s PublisherState) String() string {
+	switch s {
+	case PublisherUnmounted:
+		return "Unmounted"
+	case PublisherMounting:
+		return "Mounting"
+	case PublisherMounted:
+		return "Mounted"
+	case PublisherUnmounting:
+		return "Unmounting"
+	default:
+		return "Unknown"
+	}
+}
+
+// PublisherEntry contains the status of a given mount operation.
+type PublisherEntry struct {
 	// The Name and Server 'address' of this mount table request.
 	Name, Server string
 	// LastMount records the time of the last attempted mount request.
@@ -214,30 +274,33 @@ type MountStatus struct {
 	LastMountErr error
 	// TTL is the TTL supplied for the last mount request.
 	TTL time.Duration
-	// LastUnount records the time of the last attempted unmount request.
+	// LastUnmount records the time of the last attempted unmount request.
 	LastUnmount time.Time
 	// LastUnmountErr records any error reported by the last attempted unmount.
 	LastUnmountErr error
+	// LastState is the last known publisher state of the entry.
+	LastState PublisherState
+	// DesiredState is the current desired state of the entry.
+	// This will be either PublisherMounted or PublisherUnmounted.
+	DesiredState PublisherState
 }
 
-func (ms MountStatus) String() string {
+func (e PublisherEntry) String() string {
 	r := ""
-	if !ms.LastMount.IsZero() {
-		r += "Mounted @ " + ms.LastMount.String() + " TTL " + ms.TTL.String()
-		if ms.LastMountErr != nil {
-			r += " " + ms.LastMountErr.Error()
+	if !e.LastMount.IsZero() {
+		r += "Mounted @ " + e.LastMount.String() + " TTL " + e.TTL.String()
+		if e.LastMountErr != nil {
+			r += " " + e.LastMountErr.Error()
 		}
 	}
-	if !ms.LastUnmount.IsZero() {
-		r += "Unmounted @ " + ms.LastUnmount.String()
-		if ms.LastUnmountErr != nil {
-			r += " " + ms.LastUnmountErr.Error()
+	if !e.LastUnmount.IsZero() {
+		r += "Unmounted @ " + e.LastUnmount.String()
+		if e.LastUnmountErr != nil {
+			r += " " + e.LastUnmountErr.Error()
 		}
 	}
 	return r
 }
-
-type MountState []MountStatus
 
 type ServerStatus struct {
 	// The current state of the server.
@@ -246,10 +309,10 @@ type ServerStatus struct {
 	// ServesMountTable is true if this server serves a mount table.
 	ServesMountTable bool
 
-	// Mounts returns the status of the last mount or unmount
+	// PublisherStatus returns the status of the last mount or unmount
 	// operation for every combination of name and server address being
 	// published by this Server.
-	Mounts MountState
+	PublisherStatus []PublisherEntry
 
 	// Endpoints contains the set of endpoints currently registered with the
 	// mount table for the names published using this server including all
@@ -268,34 +331,7 @@ type ServerStatus struct {
 
 	// Valid will be closed if a status change occurs. Callers should
 	// requery server.Status() to get the fresh server status.
-	// Currently, Valid is closed only when Endpoints change.
-	// TODO(suharshs): Make this close when Mounts change as well.
 	Valid <-chan struct{}
-}
-
-func (st MountState) dedup(str func(MountStatus) string) []string {
-	m := map[string]bool{}
-	var r []string
-	for _, v := range st {
-		if s := str(v); !m[s] {
-			m[s] = true
-			r = append(r, s)
-		}
-	}
-	sort.Strings(r)
-	return r
-}
-
-// Names returns the current set of names being published by the publisher.
-// These names are not rooted at the mounttable.
-func (st MountState) Names() []string {
-	return st.dedup(func(v MountStatus) string { return v.Name })
-}
-
-// Servers returns the current set of server addresses being published by
-// the publisher.
-func (st MountState) Servers() []string {
-	return st.dedup(func(v MountStatus) string { return v.Server })
 }
 
 // Dispatcher defines the interface that a server must implement to handle
