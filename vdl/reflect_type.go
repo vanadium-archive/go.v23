@@ -380,6 +380,9 @@ func makeUnnamedFromReflectLocked(ri *reflectInfo, builder *TypeBuilder, pending
 	case reflect.Struct:
 		st := builder.Struct()
 		for fx := 0; fx < rt.NumField(); fx++ {
+			// TODO(toddw): How should we handle anonymous (aka embedded) fields?
+			// Note that unexported embedded fields may themselves have exported
+			// fields.  See https://github.com/golang/go/issues/12367
 			rtField := rt.Field(fx)
 			if rtField.PkgPath != "" {
 				continue // field isn't exported
