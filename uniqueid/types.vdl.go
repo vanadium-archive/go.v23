@@ -32,12 +32,6 @@ func (m Id) MakeVDLTarget() vdl.Target {
 	return nil
 }
 
-func (m Id) IsZero() bool {
-
-	var1 := (m == Id{})
-	return var1
-}
-
 func init() {
 	vdl.Register((*Id)(nil))
 }

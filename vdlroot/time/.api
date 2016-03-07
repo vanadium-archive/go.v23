@@ -6,13 +6,10 @@ pkg time, func TimeToNative(Time, *time.Time) error
 pkg time, func WireDeadlineFromNative(*WireDeadline, Deadline) error
 pkg time, func WireDeadlineToNative(WireDeadline, *Deadline) error
 pkg time, method (*Duration) FillVDLTarget(vdl.Target, *vdl.Type) error
-pkg time, method (*Duration) IsZero() bool
 pkg time, method (*Duration) MakeVDLTarget() vdl.Target
 pkg time, method (*Time) FillVDLTarget(vdl.Target, *vdl.Type) error
-pkg time, method (*Time) IsZero() bool
 pkg time, method (*Time) MakeVDLTarget() vdl.Target
 pkg time, method (*WireDeadline) FillVDLTarget(vdl.Target, *vdl.Type) error
-pkg time, method (*WireDeadline) IsZero() bool
 pkg time, method (*WireDeadline) MakeVDLTarget() vdl.Target
 pkg time, method (Duration) Normalize() Duration
 pkg time, method (Time) Normalize() Time

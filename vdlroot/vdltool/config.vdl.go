@@ -44,88 +44,73 @@ func (m *Config) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 		return err
 	}
 
-	var var2 bool
-	if len(m.GenLanguages) == 0 {
-		var2 = true
+	keyTarget2, fieldTarget3, err := fieldsTarget1.StartField("GenLanguages")
+	if err != vdl.ErrFieldNoExist && err != nil {
+		return err
 	}
-	if !var2 {
-		keyTarget3, fieldTarget4, err := fieldsTarget1.StartField("GenLanguages")
-		if err != vdl.ErrFieldNoExist && err != nil {
+	if err != vdl.ErrFieldNoExist {
+
+		setTarget4, err := fieldTarget3.StartSet(__VDLTypeconfig1, len(m.GenLanguages))
+		if err != nil {
 			return err
 		}
-		if err != vdl.ErrFieldNoExist {
-
-			setTarget5, err := fieldTarget4.StartSet(__VDLTypeconfig1, len(m.GenLanguages))
+		for key6 := range m.GenLanguages {
+			keyTarget5, err := setTarget4.StartKey()
 			if err != nil {
 				return err
 			}
-			for key7 := range m.GenLanguages {
-				keyTarget6, err := setTarget5.StartKey()
-				if err != nil {
-					return err
-				}
 
-				if err := key7.FillVDLTarget(keyTarget6, __VDLType_config_vdltool_GenLanguage); err != nil {
-					return err
-				}
-				if err := setTarget5.FinishKey(keyTarget6); err != nil {
-					return err
-				}
-			}
-			if err := fieldTarget4.FinishSet(setTarget5); err != nil {
+			if err := key6.FillVDLTarget(keyTarget5, __VDLType_config_vdltool_GenLanguage); err != nil {
 				return err
 			}
-			if err := fieldsTarget1.FinishField(keyTarget3, fieldTarget4); err != nil {
+			if err := setTarget4.FinishKey(keyTarget5); err != nil {
 				return err
 			}
 		}
-	}
-	var8 := m.Go.IsZero()
-	if !var8 {
-		keyTarget9, fieldTarget10, err := fieldsTarget1.StartField("Go")
-		if err != vdl.ErrFieldNoExist && err != nil {
+		if err := fieldTarget3.FinishSet(setTarget4); err != nil {
 			return err
 		}
-		if err != vdl.ErrFieldNoExist {
-
-			if err := m.Go.FillVDLTarget(fieldTarget10, __VDLType_config_vdltool_GoConfig); err != nil {
-				return err
-			}
-			if err := fieldsTarget1.FinishField(keyTarget9, fieldTarget10); err != nil {
-				return err
-			}
-		}
-	}
-	var11 := m.Java.IsZero()
-	if !var11 {
-		keyTarget12, fieldTarget13, err := fieldsTarget1.StartField("Java")
-		if err != vdl.ErrFieldNoExist && err != nil {
+		if err := fieldsTarget1.FinishField(keyTarget2, fieldTarget3); err != nil {
 			return err
 		}
-		if err != vdl.ErrFieldNoExist {
-
-			if err := m.Java.FillVDLTarget(fieldTarget13, __VDLType_config_vdltool_JavaConfig); err != nil {
-				return err
-			}
-			if err := fieldsTarget1.FinishField(keyTarget12, fieldTarget13); err != nil {
-				return err
-			}
-		}
 	}
-	var14 := m.Javascript.IsZero()
-	if !var14 {
-		keyTarget15, fieldTarget16, err := fieldsTarget1.StartField("Javascript")
-		if err != vdl.ErrFieldNoExist && err != nil {
+	keyTarget7, fieldTarget8, err := fieldsTarget1.StartField("Go")
+	if err != vdl.ErrFieldNoExist && err != nil {
+		return err
+	}
+	if err != vdl.ErrFieldNoExist {
+
+		if err := m.Go.FillVDLTarget(fieldTarget8, __VDLType_config_vdltool_GoConfig); err != nil {
 			return err
 		}
-		if err != vdl.ErrFieldNoExist {
+		if err := fieldsTarget1.FinishField(keyTarget7, fieldTarget8); err != nil {
+			return err
+		}
+	}
+	keyTarget9, fieldTarget10, err := fieldsTarget1.StartField("Java")
+	if err != vdl.ErrFieldNoExist && err != nil {
+		return err
+	}
+	if err != vdl.ErrFieldNoExist {
 
-			if err := m.Javascript.FillVDLTarget(fieldTarget16, __VDLType_config_vdltool_JavascriptConfig); err != nil {
-				return err
-			}
-			if err := fieldsTarget1.FinishField(keyTarget15, fieldTarget16); err != nil {
-				return err
-			}
+		if err := m.Java.FillVDLTarget(fieldTarget10, __VDLType_config_vdltool_JavaConfig); err != nil {
+			return err
+		}
+		if err := fieldsTarget1.FinishField(keyTarget9, fieldTarget10); err != nil {
+			return err
+		}
+	}
+	keyTarget11, fieldTarget12, err := fieldsTarget1.StartField("Javascript")
+	if err != vdl.ErrFieldNoExist && err != nil {
+		return err
+	}
+	if err != vdl.ErrFieldNoExist {
+
+		if err := m.Javascript.FillVDLTarget(fieldTarget12, __VDLType_config_vdltool_JavascriptConfig); err != nil {
+			return err
+		}
+		if err := fieldsTarget1.FinishField(keyTarget11, fieldTarget12); err != nil {
+			return err
 		}
 	}
 	if err := t.FinishFields(fieldsTarget1); err != nil {
@@ -136,23 +121,6 @@ func (m *Config) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 
 func (m *Config) MakeVDLTarget() vdl.Target {
 	return nil
-}
-
-func (m *Config) IsZero() bool {
-
-	var1 := true
-	var var2 bool
-	if len(m.GenLanguages) == 0 {
-		var2 = true
-	}
-	var1 = var1 && var2
-	var3 := m.Go.IsZero()
-	var1 = var1 && var3
-	var4 := m.Java.IsZero()
-	var1 = var1 && var4
-	var5 := m.Javascript.IsZero()
-	var1 = var1 && var5
-	return var1
 }
 
 // GenLanguage enumerates the known code generation languages.
@@ -220,12 +188,6 @@ func (m GenLanguage) MakeVDLTarget() vdl.Target {
 	return nil
 }
 
-func (m GenLanguage) IsZero() bool {
-
-	var1 := (m == GenLanguageGo)
-	return var1
-}
-
 // GoConfig specifies go specific configuration.
 type GoConfig struct {
 	// WireToNativeTypes specifies the mapping from a VDL wire type to its Go
@@ -267,47 +229,41 @@ func (m *GoConfig) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 		return err
 	}
 
-	var var2 bool
-	if len(m.WireToNativeTypes) == 0 {
-		var2 = true
+	keyTarget2, fieldTarget3, err := fieldsTarget1.StartField("WireToNativeTypes")
+	if err != vdl.ErrFieldNoExist && err != nil {
+		return err
 	}
-	if !var2 {
-		keyTarget3, fieldTarget4, err := fieldsTarget1.StartField("WireToNativeTypes")
-		if err != vdl.ErrFieldNoExist && err != nil {
+	if err != vdl.ErrFieldNoExist {
+
+		mapTarget4, err := fieldTarget3.StartMap(__VDLTypeconfig3, len(m.WireToNativeTypes))
+		if err != nil {
 			return err
 		}
-		if err != vdl.ErrFieldNoExist {
-
-			mapTarget5, err := fieldTarget4.StartMap(__VDLTypeconfig3, len(m.WireToNativeTypes))
+		for key6, value8 := range m.WireToNativeTypes {
+			keyTarget5, err := mapTarget4.StartKey()
 			if err != nil {
 				return err
 			}
-			for key7, value9 := range m.WireToNativeTypes {
-				keyTarget6, err := mapTarget5.StartKey()
-				if err != nil {
-					return err
-				}
-				if err := keyTarget6.FromString(string(key7), vdl.StringType); err != nil {
-					return err
-				}
-				valueTarget8, err := mapTarget5.FinishKeyStartField(keyTarget6)
-				if err != nil {
-					return err
-				}
+			if err := keyTarget5.FromString(string(key6), vdl.StringType); err != nil {
+				return err
+			}
+			valueTarget7, err := mapTarget4.FinishKeyStartField(keyTarget5)
+			if err != nil {
+				return err
+			}
 
-				if err := value9.FillVDLTarget(valueTarget8, __VDLType_config_vdltool_GoType); err != nil {
-					return err
-				}
-				if err := mapTarget5.FinishField(keyTarget6, valueTarget8); err != nil {
-					return err
-				}
-			}
-			if err := fieldTarget4.FinishMap(mapTarget5); err != nil {
+			if err := value8.FillVDLTarget(valueTarget7, __VDLType_config_vdltool_GoType); err != nil {
 				return err
 			}
-			if err := fieldsTarget1.FinishField(keyTarget3, fieldTarget4); err != nil {
+			if err := mapTarget4.FinishField(keyTarget5, valueTarget7); err != nil {
 				return err
 			}
+		}
+		if err := fieldTarget3.FinishMap(mapTarget4); err != nil {
+			return err
+		}
+		if err := fieldsTarget1.FinishField(keyTarget2, fieldTarget3); err != nil {
+			return err
 		}
 	}
 	if err := t.FinishFields(fieldsTarget1); err != nil {
@@ -318,17 +274,6 @@ func (m *GoConfig) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 
 func (m *GoConfig) MakeVDLTarget() vdl.Target {
 	return nil
-}
-
-func (m *GoConfig) IsZero() bool {
-
-	var1 := true
-	var var2 bool
-	if len(m.WireToNativeTypes) == 0 {
-		var2 = true
-	}
-	var1 = var1 && var2
-	return var1
 }
 
 // GoType describes the Go type information associated with a VDL type.
@@ -358,55 +303,46 @@ func (m *GoType) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 		return err
 	}
 
-	var2 := (m.Type == "")
-	if !var2 {
-		keyTarget3, fieldTarget4, err := fieldsTarget1.StartField("Type")
-		if err != vdl.ErrFieldNoExist && err != nil {
+	keyTarget2, fieldTarget3, err := fieldsTarget1.StartField("Type")
+	if err != vdl.ErrFieldNoExist && err != nil {
+		return err
+	}
+	if err != vdl.ErrFieldNoExist {
+		if err := fieldTarget3.FromString(string(m.Type), vdl.StringType); err != nil {
 			return err
 		}
-		if err != vdl.ErrFieldNoExist {
-			if err := fieldTarget4.FromString(string(m.Type), vdl.StringType); err != nil {
-				return err
-			}
-			if err := fieldsTarget1.FinishField(keyTarget3, fieldTarget4); err != nil {
-				return err
-			}
-		}
-	}
-	var var5 bool
-	if len(m.Imports) == 0 {
-		var5 = true
-	}
-	if !var5 {
-		keyTarget6, fieldTarget7, err := fieldsTarget1.StartField("Imports")
-		if err != vdl.ErrFieldNoExist && err != nil {
+		if err := fieldsTarget1.FinishField(keyTarget2, fieldTarget3); err != nil {
 			return err
 		}
-		if err != vdl.ErrFieldNoExist {
+	}
+	keyTarget4, fieldTarget5, err := fieldsTarget1.StartField("Imports")
+	if err != vdl.ErrFieldNoExist && err != nil {
+		return err
+	}
+	if err != vdl.ErrFieldNoExist {
 
-			listTarget8, err := fieldTarget7.StartList(__VDLTypeconfig5, len(m.Imports))
+		listTarget6, err := fieldTarget5.StartList(__VDLTypeconfig5, len(m.Imports))
+		if err != nil {
+			return err
+		}
+		for i, elem8 := range m.Imports {
+			elemTarget7, err := listTarget6.StartElem(i)
 			if err != nil {
 				return err
 			}
-			for i, elem10 := range m.Imports {
-				elemTarget9, err := listTarget8.StartElem(i)
-				if err != nil {
-					return err
-				}
 
-				if err := elem10.FillVDLTarget(elemTarget9, __VDLType_config_vdltool_GoImport); err != nil {
-					return err
-				}
-				if err := listTarget8.FinishElem(elemTarget9); err != nil {
-					return err
-				}
-			}
-			if err := fieldTarget7.FinishList(listTarget8); err != nil {
+			if err := elem8.FillVDLTarget(elemTarget7, __VDLType_config_vdltool_GoImport); err != nil {
 				return err
 			}
-			if err := fieldsTarget1.FinishField(keyTarget6, fieldTarget7); err != nil {
+			if err := listTarget6.FinishElem(elemTarget7); err != nil {
 				return err
 			}
+		}
+		if err := fieldTarget5.FinishList(listTarget6); err != nil {
+			return err
+		}
+		if err := fieldsTarget1.FinishField(keyTarget4, fieldTarget5); err != nil {
+			return err
 		}
 	}
 	if err := t.FinishFields(fieldsTarget1); err != nil {
@@ -417,19 +353,6 @@ func (m *GoType) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 
 func (m *GoType) MakeVDLTarget() vdl.Target {
 	return nil
-}
-
-func (m *GoType) IsZero() bool {
-
-	var1 := true
-	var2 := (m.Type == "")
-	var1 = var1 && var2
-	var var3 bool
-	if len(m.Imports) == 0 {
-		var3 = true
-	}
-	var1 = var1 && var3
-	return var1
 }
 
 // GoImport describes Go import information.
@@ -457,34 +380,28 @@ func (m *GoImport) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 		return err
 	}
 
-	var2 := (m.Path == "")
-	if !var2 {
-		keyTarget3, fieldTarget4, err := fieldsTarget1.StartField("Path")
-		if err != vdl.ErrFieldNoExist && err != nil {
+	keyTarget2, fieldTarget3, err := fieldsTarget1.StartField("Path")
+	if err != vdl.ErrFieldNoExist && err != nil {
+		return err
+	}
+	if err != vdl.ErrFieldNoExist {
+		if err := fieldTarget3.FromString(string(m.Path), vdl.StringType); err != nil {
 			return err
 		}
-		if err != vdl.ErrFieldNoExist {
-			if err := fieldTarget4.FromString(string(m.Path), vdl.StringType); err != nil {
-				return err
-			}
-			if err := fieldsTarget1.FinishField(keyTarget3, fieldTarget4); err != nil {
-				return err
-			}
+		if err := fieldsTarget1.FinishField(keyTarget2, fieldTarget3); err != nil {
+			return err
 		}
 	}
-	var5 := (m.Name == "")
-	if !var5 {
-		keyTarget6, fieldTarget7, err := fieldsTarget1.StartField("Name")
-		if err != vdl.ErrFieldNoExist && err != nil {
+	keyTarget4, fieldTarget5, err := fieldsTarget1.StartField("Name")
+	if err != vdl.ErrFieldNoExist && err != nil {
+		return err
+	}
+	if err != vdl.ErrFieldNoExist {
+		if err := fieldTarget5.FromString(string(m.Name), vdl.StringType); err != nil {
 			return err
 		}
-		if err != vdl.ErrFieldNoExist {
-			if err := fieldTarget7.FromString(string(m.Name), vdl.StringType); err != nil {
-				return err
-			}
-			if err := fieldsTarget1.FinishField(keyTarget6, fieldTarget7); err != nil {
-				return err
-			}
+		if err := fieldsTarget1.FinishField(keyTarget4, fieldTarget5); err != nil {
+			return err
 		}
 	}
 	if err := t.FinishFields(fieldsTarget1); err != nil {
@@ -495,12 +412,6 @@ func (m *GoImport) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 
 func (m *GoImport) MakeVDLTarget() vdl.Target {
 	return nil
-}
-
-func (m *GoImport) IsZero() bool {
-
-	var1 := (*m == GoImport{})
-	return var1
 }
 
 // JavaConfig specifies java specific configuration.
@@ -554,88 +465,76 @@ func (m *JavaConfig) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 		return err
 	}
 
-	var var2 bool
-	if len(m.WireToNativeTypes) == 0 {
-		var2 = true
+	keyTarget2, fieldTarget3, err := fieldsTarget1.StartField("WireToNativeTypes")
+	if err != vdl.ErrFieldNoExist && err != nil {
+		return err
 	}
-	if !var2 {
-		keyTarget3, fieldTarget4, err := fieldsTarget1.StartField("WireToNativeTypes")
-		if err != vdl.ErrFieldNoExist && err != nil {
+	if err != vdl.ErrFieldNoExist {
+
+		mapTarget4, err := fieldTarget3.StartMap(__VDLTypeconfig8, len(m.WireToNativeTypes))
+		if err != nil {
 			return err
 		}
-		if err != vdl.ErrFieldNoExist {
-
-			mapTarget5, err := fieldTarget4.StartMap(__VDLTypeconfig8, len(m.WireToNativeTypes))
+		for key6, value8 := range m.WireToNativeTypes {
+			keyTarget5, err := mapTarget4.StartKey()
 			if err != nil {
 				return err
 			}
-			for key7, value9 := range m.WireToNativeTypes {
-				keyTarget6, err := mapTarget5.StartKey()
-				if err != nil {
-					return err
-				}
-				if err := keyTarget6.FromString(string(key7), vdl.StringType); err != nil {
-					return err
-				}
-				valueTarget8, err := mapTarget5.FinishKeyStartField(keyTarget6)
-				if err != nil {
-					return err
-				}
-				if err := valueTarget8.FromString(string(value9), vdl.StringType); err != nil {
-					return err
-				}
-				if err := mapTarget5.FinishField(keyTarget6, valueTarget8); err != nil {
-					return err
-				}
-			}
-			if err := fieldTarget4.FinishMap(mapTarget5); err != nil {
+			if err := keyTarget5.FromString(string(key6), vdl.StringType); err != nil {
 				return err
 			}
-			if err := fieldsTarget1.FinishField(keyTarget3, fieldTarget4); err != nil {
-				return err
-			}
-		}
-	}
-	var var10 bool
-	if len(m.WireTypeRenames) == 0 {
-		var10 = true
-	}
-	if !var10 {
-		keyTarget11, fieldTarget12, err := fieldsTarget1.StartField("WireTypeRenames")
-		if err != vdl.ErrFieldNoExist && err != nil {
-			return err
-		}
-		if err != vdl.ErrFieldNoExist {
-
-			mapTarget13, err := fieldTarget12.StartMap(__VDLTypeconfig8, len(m.WireTypeRenames))
+			valueTarget7, err := mapTarget4.FinishKeyStartField(keyTarget5)
 			if err != nil {
 				return err
 			}
-			for key15, value17 := range m.WireTypeRenames {
-				keyTarget14, err := mapTarget13.StartKey()
-				if err != nil {
-					return err
-				}
-				if err := keyTarget14.FromString(string(key15), vdl.StringType); err != nil {
-					return err
-				}
-				valueTarget16, err := mapTarget13.FinishKeyStartField(keyTarget14)
-				if err != nil {
-					return err
-				}
-				if err := valueTarget16.FromString(string(value17), vdl.StringType); err != nil {
-					return err
-				}
-				if err := mapTarget13.FinishField(keyTarget14, valueTarget16); err != nil {
-					return err
-				}
-			}
-			if err := fieldTarget12.FinishMap(mapTarget13); err != nil {
+			if err := valueTarget7.FromString(string(value8), vdl.StringType); err != nil {
 				return err
 			}
-			if err := fieldsTarget1.FinishField(keyTarget11, fieldTarget12); err != nil {
+			if err := mapTarget4.FinishField(keyTarget5, valueTarget7); err != nil {
 				return err
 			}
+		}
+		if err := fieldTarget3.FinishMap(mapTarget4); err != nil {
+			return err
+		}
+		if err := fieldsTarget1.FinishField(keyTarget2, fieldTarget3); err != nil {
+			return err
+		}
+	}
+	keyTarget9, fieldTarget10, err := fieldsTarget1.StartField("WireTypeRenames")
+	if err != vdl.ErrFieldNoExist && err != nil {
+		return err
+	}
+	if err != vdl.ErrFieldNoExist {
+
+		mapTarget11, err := fieldTarget10.StartMap(__VDLTypeconfig8, len(m.WireTypeRenames))
+		if err != nil {
+			return err
+		}
+		for key13, value15 := range m.WireTypeRenames {
+			keyTarget12, err := mapTarget11.StartKey()
+			if err != nil {
+				return err
+			}
+			if err := keyTarget12.FromString(string(key13), vdl.StringType); err != nil {
+				return err
+			}
+			valueTarget14, err := mapTarget11.FinishKeyStartField(keyTarget12)
+			if err != nil {
+				return err
+			}
+			if err := valueTarget14.FromString(string(value15), vdl.StringType); err != nil {
+				return err
+			}
+			if err := mapTarget11.FinishField(keyTarget12, valueTarget14); err != nil {
+				return err
+			}
+		}
+		if err := fieldTarget10.FinishMap(mapTarget11); err != nil {
+			return err
+		}
+		if err := fieldsTarget1.FinishField(keyTarget9, fieldTarget10); err != nil {
+			return err
 		}
 	}
 	if err := t.FinishFields(fieldsTarget1); err != nil {
@@ -646,22 +545,6 @@ func (m *JavaConfig) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 
 func (m *JavaConfig) MakeVDLTarget() vdl.Target {
 	return nil
-}
-
-func (m *JavaConfig) IsZero() bool {
-
-	var1 := true
-	var var2 bool
-	if len(m.WireToNativeTypes) == 0 {
-		var2 = true
-	}
-	var1 = var1 && var2
-	var var3 bool
-	if len(m.WireTypeRenames) == 0 {
-		var3 = true
-	}
-	var1 = var1 && var3
-	return var1
 }
 
 // JavascriptConfig specifies javascript specific configuration.
@@ -691,12 +574,6 @@ func (m *JavascriptConfig) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 
 func (m *JavascriptConfig) MakeVDLTarget() vdl.Target {
 	return nil
-}
-
-func (m *JavascriptConfig) IsZero() bool {
-
-	var1 := (*m == JavascriptConfig{})
-	return var1
 }
 
 func init() {

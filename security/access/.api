@@ -19,7 +19,6 @@ pkg access, func TypicalTagType() *vdl.Type
 pkg access, func TypicalTagTypePermissionsAuthorizer(Permissions) security.Authorizer
 pkg access, func WritePermissions(io.Writer, Permissions) error
 pkg access, method (*AccessList) FillVDLTarget(vdl.Target, *vdl.Type) error
-pkg access, method (*AccessList) IsZero() bool
 pkg access, method (*AccessList) MakeVDLTarget() vdl.Target
 pkg access, method (AccessList) Authorize(*context.T, security.Call) error
 pkg access, method (AccessList) Enforceable(*context.T, security.Principal) error
@@ -29,11 +28,9 @@ pkg access, method (Permissions) Blacklist(string, ...string) Permissions
 pkg access, method (Permissions) Clear(string, ...string) Permissions
 pkg access, method (Permissions) Copy() Permissions
 pkg access, method (Permissions) FillVDLTarget(vdl.Target, *vdl.Type) error
-pkg access, method (Permissions) IsZero() bool
 pkg access, method (Permissions) MakeVDLTarget() vdl.Target
 pkg access, method (Permissions) Normalize() Permissions
 pkg access, method (Tag) FillVDLTarget(vdl.Target, *vdl.Type) error
-pkg access, method (Tag) IsZero() bool
 pkg access, method (Tag) MakeVDLTarget() vdl.Target
 pkg access, type AccessList struct
 pkg access, type AccessList struct, In []security.BlessingPattern

@@ -153,75 +153,63 @@ func (m *AccessList) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 		return err
 	}
 
-	var var2 bool
-	if len(m.In) == 0 {
-		var2 = true
+	keyTarget2, fieldTarget3, err := fieldsTarget1.StartField("In")
+	if err != vdl.ErrFieldNoExist && err != nil {
+		return err
 	}
-	if !var2 {
-		keyTarget3, fieldTarget4, err := fieldsTarget1.StartField("In")
-		if err != vdl.ErrFieldNoExist && err != nil {
+	if err != vdl.ErrFieldNoExist {
+
+		listTarget4, err := fieldTarget3.StartList(__VDLTypetypes1, len(m.In))
+		if err != nil {
 			return err
 		}
-		if err != vdl.ErrFieldNoExist {
-
-			listTarget5, err := fieldTarget4.StartList(__VDLTypetypes1, len(m.In))
+		for i, elem6 := range m.In {
+			elemTarget5, err := listTarget4.StartElem(i)
 			if err != nil {
 				return err
 			}
-			for i, elem7 := range m.In {
-				elemTarget6, err := listTarget5.StartElem(i)
-				if err != nil {
-					return err
-				}
 
-				if err := elem7.FillVDLTarget(elemTarget6, __VDLType_types_v_io_v23_security_BlessingPattern); err != nil {
-					return err
-				}
-				if err := listTarget5.FinishElem(elemTarget6); err != nil {
-					return err
-				}
-			}
-			if err := fieldTarget4.FinishList(listTarget5); err != nil {
+			if err := elem6.FillVDLTarget(elemTarget5, __VDLType_types_v_io_v23_security_BlessingPattern); err != nil {
 				return err
 			}
-			if err := fieldsTarget1.FinishField(keyTarget3, fieldTarget4); err != nil {
+			if err := listTarget4.FinishElem(elemTarget5); err != nil {
 				return err
 			}
 		}
-	}
-	var var8 bool
-	if len(m.NotIn) == 0 {
-		var8 = true
-	}
-	if !var8 {
-		keyTarget9, fieldTarget10, err := fieldsTarget1.StartField("NotIn")
-		if err != vdl.ErrFieldNoExist && err != nil {
+		if err := fieldTarget3.FinishList(listTarget4); err != nil {
 			return err
 		}
-		if err != vdl.ErrFieldNoExist {
+		if err := fieldsTarget1.FinishField(keyTarget2, fieldTarget3); err != nil {
+			return err
+		}
+	}
+	keyTarget7, fieldTarget8, err := fieldsTarget1.StartField("NotIn")
+	if err != vdl.ErrFieldNoExist && err != nil {
+		return err
+	}
+	if err != vdl.ErrFieldNoExist {
 
-			listTarget11, err := fieldTarget10.StartList(__VDLTypetypes2, len(m.NotIn))
+		listTarget9, err := fieldTarget8.StartList(__VDLTypetypes2, len(m.NotIn))
+		if err != nil {
+			return err
+		}
+		for i, elem11 := range m.NotIn {
+			elemTarget10, err := listTarget9.StartElem(i)
 			if err != nil {
 				return err
 			}
-			for i, elem13 := range m.NotIn {
-				elemTarget12, err := listTarget11.StartElem(i)
-				if err != nil {
-					return err
-				}
-				if err := elemTarget12.FromString(string(elem13), vdl.StringType); err != nil {
-					return err
-				}
-				if err := listTarget11.FinishElem(elemTarget12); err != nil {
-					return err
-				}
-			}
-			if err := fieldTarget10.FinishList(listTarget11); err != nil {
+			if err := elemTarget10.FromString(string(elem11), vdl.StringType); err != nil {
 				return err
 			}
-			if err := fieldsTarget1.FinishField(keyTarget9, fieldTarget10); err != nil {
+			if err := listTarget9.FinishElem(elemTarget10); err != nil {
 				return err
 			}
+		}
+		if err := fieldTarget8.FinishList(listTarget9); err != nil {
+			return err
+		}
+		if err := fieldsTarget1.FinishField(keyTarget7, fieldTarget8); err != nil {
+			return err
 		}
 	}
 	if err := t.FinishFields(fieldsTarget1); err != nil {
@@ -232,22 +220,6 @@ func (m *AccessList) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 
 func (m *AccessList) MakeVDLTarget() vdl.Target {
 	return nil
-}
-
-func (m *AccessList) IsZero() bool {
-
-	var1 := true
-	var var2 bool
-	if len(m.In) == 0 {
-		var2 = true
-	}
-	var1 = var1 && var2
-	var var3 bool
-	if len(m.NotIn) == 0 {
-		var3 = true
-	}
-	var1 = var1 && var3
-	return var1
 }
 
 // Permissions maps string tags to access lists specifying the blessings
@@ -300,15 +272,6 @@ func (m Permissions) MakeVDLTarget() vdl.Target {
 	return nil
 }
 
-func (m Permissions) IsZero() bool {
-
-	var var1 bool
-	if len(m) == 0 {
-		var1 = true
-	}
-	return var1
-}
-
 // Tag is used to associate methods with an AccessList in a Permissions.
 //
 // While services can define their own tag type and values, many
@@ -330,12 +293,6 @@ func (m Tag) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 
 func (m Tag) MakeVDLTarget() vdl.Target {
 	return nil
-}
-
-func (m Tag) IsZero() bool {
-
-	var1 := (m == Tag(""))
-	return var1
 }
 
 func init() {

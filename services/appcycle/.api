@@ -3,7 +3,6 @@ pkg appcycle, func AppCycleServer(AppCycleServerMethods) AppCycleServerStub
 pkg appcycle, method (*AppCycleStopServerCallStub) Init(rpc.StreamServerCall)
 pkg appcycle, method (*AppCycleStopServerCallStub) SendStream() interface {  Send(item Task) error;}
 pkg appcycle, method (*Task) FillVDLTarget(vdl.Target, *vdl.Type) error
-pkg appcycle, method (*Task) IsZero() bool
 pkg appcycle, method (*Task) MakeVDLTarget() vdl.Target
 pkg appcycle, type AppCycleClientMethods interface { ForceStop, Stop }
 pkg appcycle, type AppCycleClientMethods interface, ForceStop(*context.T, ...rpc.CallOpt) error

@@ -1,14 +1,11 @@
 pkg application, const DeviceManagerTitle ideal-string
 pkg application, method (*Envelope) FillVDLTarget(vdl.Target, *vdl.Type) error
-pkg application, method (*Envelope) IsZero() bool
 pkg application, method (*Envelope) MakeVDLTarget() vdl.Target
 pkg application, method (*Envelope) UnmarshalJSON([]byte) error
 pkg application, method (*SignedFile) FillVDLTarget(vdl.Target, *vdl.Type) error
-pkg application, method (*SignedFile) IsZero() bool
 pkg application, method (*SignedFile) MakeVDLTarget() vdl.Target
 pkg application, method (Envelope) MarshalJSON() ([]byte, error)
 pkg application, method (Packages) FillVDLTarget(vdl.Target, *vdl.Type) error
-pkg application, method (Packages) IsZero() bool
 pkg application, method (Packages) MakeVDLTarget() vdl.Target
 pkg application, type Envelope struct
 pkg application, type Envelope struct, Args []string

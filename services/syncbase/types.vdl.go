@@ -47,91 +47,76 @@ func (m *DevModeUpdateVClockOpts) FillVDLTarget(t vdl.Target, tt *vdl.Type) erro
 		return err
 	}
 
-	var2 := (m.NtpHost == "")
-	if !var2 {
-		keyTarget3, fieldTarget4, err := fieldsTarget1.StartField("NtpHost")
-		if err != vdl.ErrFieldNoExist && err != nil {
+	keyTarget2, fieldTarget3, err := fieldsTarget1.StartField("NtpHost")
+	if err != vdl.ErrFieldNoExist && err != nil {
+		return err
+	}
+	if err != vdl.ErrFieldNoExist {
+		if err := fieldTarget3.FromString(string(m.NtpHost), vdl.StringType); err != nil {
 			return err
 		}
-		if err != vdl.ErrFieldNoExist {
-			if err := fieldTarget4.FromString(string(m.NtpHost), vdl.StringType); err != nil {
-				return err
-			}
-			if err := fieldsTarget1.FinishField(keyTarget3, fieldTarget4); err != nil {
-				return err
-			}
+		if err := fieldsTarget1.FinishField(keyTarget2, fieldTarget3); err != nil {
+			return err
 		}
 	}
-	var wireValue5 time_2.Time
-	if err := time_2.TimeFromNative(&wireValue5, m.Now); err != nil {
+	var wireValue4 time_2.Time
+	if err := time_2.TimeFromNative(&wireValue4, m.Now); err != nil {
 		return err
 	}
 
-	var6 := wireValue5.IsZero()
-	if !var6 {
-		keyTarget7, fieldTarget8, err := fieldsTarget1.StartField("Now")
-		if err != vdl.ErrFieldNoExist && err != nil {
+	keyTarget5, fieldTarget6, err := fieldsTarget1.StartField("Now")
+	if err != vdl.ErrFieldNoExist && err != nil {
+		return err
+	}
+	if err != vdl.ErrFieldNoExist {
+
+		if err := wireValue4.FillVDLTarget(fieldTarget6, __VDLType_types_time_Time); err != nil {
 			return err
 		}
-		if err != vdl.ErrFieldNoExist {
-
-			if err := wireValue5.FillVDLTarget(fieldTarget8, __VDLType_types_time_Time); err != nil {
-				return err
-			}
-			if err := fieldsTarget1.FinishField(keyTarget7, fieldTarget8); err != nil {
-				return err
-			}
+		if err := fieldsTarget1.FinishField(keyTarget5, fieldTarget6); err != nil {
+			return err
 		}
 	}
-	var wireValue9 time_2.Duration
-	if err := time_2.DurationFromNative(&wireValue9, m.ElapsedTime); err != nil {
+	var wireValue7 time_2.Duration
+	if err := time_2.DurationFromNative(&wireValue7, m.ElapsedTime); err != nil {
 		return err
 	}
 
-	var10 := wireValue9.IsZero()
-	if !var10 {
-		keyTarget11, fieldTarget12, err := fieldsTarget1.StartField("ElapsedTime")
-		if err != vdl.ErrFieldNoExist && err != nil {
-			return err
-		}
-		if err != vdl.ErrFieldNoExist {
+	keyTarget8, fieldTarget9, err := fieldsTarget1.StartField("ElapsedTime")
+	if err != vdl.ErrFieldNoExist && err != nil {
+		return err
+	}
+	if err != vdl.ErrFieldNoExist {
 
-			if err := wireValue9.FillVDLTarget(fieldTarget12, __VDLType_types_time_Duration); err != nil {
-				return err
-			}
-			if err := fieldsTarget1.FinishField(keyTarget11, fieldTarget12); err != nil {
-				return err
-			}
-		}
-	}
-	var13 := (m.DoNtpUpdate == false)
-	if !var13 {
-		keyTarget14, fieldTarget15, err := fieldsTarget1.StartField("DoNtpUpdate")
-		if err != vdl.ErrFieldNoExist && err != nil {
+		if err := wireValue7.FillVDLTarget(fieldTarget9, __VDLType_types_time_Duration); err != nil {
 			return err
 		}
-		if err != vdl.ErrFieldNoExist {
-			if err := fieldTarget15.FromBool(bool(m.DoNtpUpdate), vdl.BoolType); err != nil {
-				return err
-			}
-			if err := fieldsTarget1.FinishField(keyTarget14, fieldTarget15); err != nil {
-				return err
-			}
-		}
-	}
-	var16 := (m.DoLocalUpdate == false)
-	if !var16 {
-		keyTarget17, fieldTarget18, err := fieldsTarget1.StartField("DoLocalUpdate")
-		if err != vdl.ErrFieldNoExist && err != nil {
+		if err := fieldsTarget1.FinishField(keyTarget8, fieldTarget9); err != nil {
 			return err
 		}
-		if err != vdl.ErrFieldNoExist {
-			if err := fieldTarget18.FromBool(bool(m.DoLocalUpdate), vdl.BoolType); err != nil {
-				return err
-			}
-			if err := fieldsTarget1.FinishField(keyTarget17, fieldTarget18); err != nil {
-				return err
-			}
+	}
+	keyTarget10, fieldTarget11, err := fieldsTarget1.StartField("DoNtpUpdate")
+	if err != vdl.ErrFieldNoExist && err != nil {
+		return err
+	}
+	if err != vdl.ErrFieldNoExist {
+		if err := fieldTarget11.FromBool(bool(m.DoNtpUpdate), vdl.BoolType); err != nil {
+			return err
+		}
+		if err := fieldsTarget1.FinishField(keyTarget10, fieldTarget11); err != nil {
+			return err
+		}
+	}
+	keyTarget12, fieldTarget13, err := fieldsTarget1.StartField("DoLocalUpdate")
+	if err != vdl.ErrFieldNoExist && err != nil {
+		return err
+	}
+	if err != vdl.ErrFieldNoExist {
+		if err := fieldTarget13.FromBool(bool(m.DoLocalUpdate), vdl.BoolType); err != nil {
+			return err
+		}
+		if err := fieldsTarget1.FinishField(keyTarget12, fieldTarget13); err != nil {
+			return err
 		}
 	}
 	if err := t.FinishFields(fieldsTarget1); err != nil {
@@ -142,12 +127,6 @@ func (m *DevModeUpdateVClockOpts) FillVDLTarget(t vdl.Target, tt *vdl.Type) erro
 
 func (m *DevModeUpdateVClockOpts) MakeVDLTarget() vdl.Target {
 	return nil
-}
-
-func (m *DevModeUpdateVClockOpts) IsZero() bool {
-
-	var1 := (*m == DevModeUpdateVClockOpts{})
-	return var1
 }
 
 func init() {

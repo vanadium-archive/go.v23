@@ -1,10 +1,8 @@
 pkg binary, const MissingChecksum ideal-string
 pkg binary, const MissingSize int64
 pkg binary, method (*Description) FillVDLTarget(vdl.Target, *vdl.Type) error
-pkg binary, method (*Description) IsZero() bool
 pkg binary, method (*Description) MakeVDLTarget() vdl.Target
 pkg binary, method (*PartInfo) FillVDLTarget(vdl.Target, *vdl.Type) error
-pkg binary, method (*PartInfo) IsZero() bool
 pkg binary, method (*PartInfo) MakeVDLTarget() vdl.Target
 pkg binary, type Description struct
 pkg binary, type Description struct, Name string

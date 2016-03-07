@@ -86,12 +86,6 @@ func (m Architecture) MakeVDLTarget() vdl.Target {
 	return nil
 }
 
-func (m Architecture) IsZero() bool {
-
-	var1 := (m == ArchitectureAmd64)
-	return var1
-}
-
 // Format specifies the file format of a host.
 type Format int
 
@@ -155,12 +149,6 @@ func (m Format) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 
 func (m Format) MakeVDLTarget() vdl.Target {
 	return nil
-}
-
-func (m Format) IsZero() bool {
-
-	var1 := (m == FormatElf)
-	return var1
 }
 
 // OperatingSystem specifies the operating system of a host.
@@ -234,12 +222,6 @@ func (m OperatingSystem) MakeVDLTarget() vdl.Target {
 	return nil
 }
 
-func (m OperatingSystem) IsZero() bool {
-
-	var1 := (m == OperatingSystemDarwin)
-	return var1
-}
-
 // File records the name and contents of a file.
 type File struct {
 	Name     string
@@ -261,38 +243,29 @@ func (m *File) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 		return err
 	}
 
-	var2 := (m.Name == "")
-	if !var2 {
-		keyTarget3, fieldTarget4, err := fieldsTarget1.StartField("Name")
-		if err != vdl.ErrFieldNoExist && err != nil {
+	keyTarget2, fieldTarget3, err := fieldsTarget1.StartField("Name")
+	if err != vdl.ErrFieldNoExist && err != nil {
+		return err
+	}
+	if err != vdl.ErrFieldNoExist {
+		if err := fieldTarget3.FromString(string(m.Name), vdl.StringType); err != nil {
 			return err
 		}
-		if err != vdl.ErrFieldNoExist {
-			if err := fieldTarget4.FromString(string(m.Name), vdl.StringType); err != nil {
-				return err
-			}
-			if err := fieldsTarget1.FinishField(keyTarget3, fieldTarget4); err != nil {
-				return err
-			}
-		}
-	}
-	var var5 bool
-	if len(m.Contents) == 0 {
-		var5 = true
-	}
-	if !var5 {
-		keyTarget6, fieldTarget7, err := fieldsTarget1.StartField("Contents")
-		if err != vdl.ErrFieldNoExist && err != nil {
+		if err := fieldsTarget1.FinishField(keyTarget2, fieldTarget3); err != nil {
 			return err
 		}
-		if err != vdl.ErrFieldNoExist {
+	}
+	keyTarget4, fieldTarget5, err := fieldsTarget1.StartField("Contents")
+	if err != vdl.ErrFieldNoExist && err != nil {
+		return err
+	}
+	if err != vdl.ErrFieldNoExist {
 
-			if err := fieldTarget7.FromBytes([]byte(m.Contents), __VDLTypebuild1); err != nil {
-				return err
-			}
-			if err := fieldsTarget1.FinishField(keyTarget6, fieldTarget7); err != nil {
-				return err
-			}
+		if err := fieldTarget5.FromBytes([]byte(m.Contents), __VDLTypebuild1); err != nil {
+			return err
+		}
+		if err := fieldsTarget1.FinishField(keyTarget4, fieldTarget5); err != nil {
+			return err
 		}
 	}
 	if err := t.FinishFields(fieldsTarget1); err != nil {
@@ -303,19 +276,6 @@ func (m *File) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 
 func (m *File) MakeVDLTarget() vdl.Target {
 	return nil
-}
-
-func (m *File) IsZero() bool {
-
-	var1 := true
-	var2 := (m.Name == "")
-	var1 = var1 && var2
-	var var3 bool
-	if len(m.Contents) == 0 {
-		var3 = true
-	}
-	var1 = var1 && var3
-	return var1
 }
 
 func init() {

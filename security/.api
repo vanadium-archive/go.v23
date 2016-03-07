@@ -57,35 +57,26 @@ pkg security, func WireDischargeFromNative(*WireDischarge, Discharge) error
 pkg security, func WireDischargeToNative(WireDischarge, *Discharge) error
 pkg security, method (*CallParams) Copy(Call)
 pkg security, method (*Caveat) FillVDLTarget(vdl.Target, *vdl.Type) error
-pkg security, method (*Caveat) IsZero() bool
 pkg security, method (*Caveat) MakeVDLTarget() vdl.Target
 pkg security, method (*Caveat) ThirdPartyDetails() ThirdPartyCaveat
 pkg security, method (*Caveat) Validate(*context.T, Call) error
 pkg security, method (*CaveatDescriptor) FillVDLTarget(vdl.Target, *vdl.Type) error
-pkg security, method (*CaveatDescriptor) IsZero() bool
 pkg security, method (*CaveatDescriptor) MakeVDLTarget() vdl.Target
 pkg security, method (*Certificate) FillVDLTarget(vdl.Target, *vdl.Type) error
-pkg security, method (*Certificate) IsZero() bool
 pkg security, method (*Certificate) MakeVDLTarget() vdl.Target
 pkg security, method (*DischargeImpetus) FillVDLTarget(vdl.Target, *vdl.Type) error
-pkg security, method (*DischargeImpetus) IsZero() bool
 pkg security, method (*DischargeImpetus) MakeVDLTarget() vdl.Target
 pkg security, method (*RejectedBlessing) FillVDLTarget(vdl.Target, *vdl.Type) error
-pkg security, method (*RejectedBlessing) IsZero() bool
 pkg security, method (*RejectedBlessing) MakeVDLTarget() vdl.Target
 pkg security, method (*Signature) FillVDLTarget(vdl.Target, *vdl.Type) error
-pkg security, method (*Signature) IsZero() bool
 pkg security, method (*Signature) MakeVDLTarget() vdl.Target
 pkg security, method (*Signature) Verify(PublicKey, []byte) bool
 pkg security, method (*ThirdPartyRequirements) FillVDLTarget(vdl.Target, *vdl.Type) error
-pkg security, method (*ThirdPartyRequirements) IsZero() bool
 pkg security, method (*ThirdPartyRequirements) MakeVDLTarget() vdl.Target
 pkg security, method (*WireBlessings) FillVDLTarget(vdl.Target, *vdl.Type) error
-pkg security, method (*WireBlessings) IsZero() bool
 pkg security, method (*WireBlessings) MakeVDLTarget() vdl.Target
 pkg security, method (BlessingPattern) FillVDLTarget(vdl.Target, *vdl.Type) error
 pkg security, method (BlessingPattern) IsValid() bool
-pkg security, method (BlessingPattern) IsZero() bool
 pkg security, method (BlessingPattern) MakeNonExtendable() BlessingPattern
 pkg security, method (BlessingPattern) MakeVDLTarget() vdl.Target
 pkg security, method (BlessingPattern) MatchedBy(...string) bool
@@ -104,13 +95,11 @@ pkg security, method (Discharge) Expiry() time.Time
 pkg security, method (Discharge) ID() string
 pkg security, method (Discharge) ThirdPartyCaveats() []ThirdPartyCaveat
 pkg security, method (Hash) FillVDLTarget(vdl.Target, *vdl.Type) error
-pkg security, method (Hash) IsZero() bool
 pkg security, method (Hash) MakeVDLTarget() vdl.Target
 pkg security, method (RejectedBlessing) String() string
 pkg security, method (WireDischargePublicKey) FillVDLTarget(vdl.Target, *vdl.Type) error
 pkg security, method (WireDischargePublicKey) Index() int
 pkg security, method (WireDischargePublicKey) Interface() interface{}
-pkg security, method (WireDischargePublicKey) IsZero() bool
 pkg security, method (WireDischargePublicKey) MakeVDLTarget() vdl.Target
 pkg security, method (WireDischargePublicKey) Name() string
 pkg security, type Authorizer interface { Authorize }
@@ -210,7 +199,6 @@ pkg security, type WireBlessings struct, CertificateChains [][]Certificate
 pkg security, type WireDischarge interface, FillVDLTarget(vdl.Target, *vdl.Type) error
 pkg security, type WireDischarge interface, Index() int
 pkg security, type WireDischarge interface, Interface() interface{}
-pkg security, type WireDischarge interface, IsZero() bool
 pkg security, type WireDischarge interface, Name() string
 pkg security, type WireDischarge interface, unexported methods
 pkg security, type WireDischargePublicKey struct

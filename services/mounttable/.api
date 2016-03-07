@@ -6,7 +6,6 @@ pkg mounttable, const Resolve Tag
 pkg mounttable, func MountTableClient(string) MountTableClientStub
 pkg mounttable, func MountTableServer(MountTableServerMethods) MountTableServerStub
 pkg mounttable, method (Tag) FillVDLTarget(vdl.Target, *vdl.Type) error
-pkg mounttable, method (Tag) IsZero() bool
 pkg mounttable, method (Tag) MakeVDLTarget() vdl.Target
 pkg mounttable, type MountTableClientMethods interface { Delete, GetPermissions, Mount, ResolveStep, SetPermissions, Unmount }
 pkg mounttable, type MountTableClientMethods interface, Delete(*context.T, bool, ...rpc.CallOpt) error

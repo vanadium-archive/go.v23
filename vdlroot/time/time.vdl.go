@@ -54,34 +54,28 @@ func (m *Time) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 		return err
 	}
 
-	var2 := (m.Seconds == int64(0))
-	if !var2 {
-		keyTarget3, fieldTarget4, err := fieldsTarget1.StartField("Seconds")
-		if err != vdl.ErrFieldNoExist && err != nil {
+	keyTarget2, fieldTarget3, err := fieldsTarget1.StartField("Seconds")
+	if err != vdl.ErrFieldNoExist && err != nil {
+		return err
+	}
+	if err != vdl.ErrFieldNoExist {
+		if err := fieldTarget3.FromInt(int64(m.Seconds), vdl.Int64Type); err != nil {
 			return err
 		}
-		if err != vdl.ErrFieldNoExist {
-			if err := fieldTarget4.FromInt(int64(m.Seconds), vdl.Int64Type); err != nil {
-				return err
-			}
-			if err := fieldsTarget1.FinishField(keyTarget3, fieldTarget4); err != nil {
-				return err
-			}
+		if err := fieldsTarget1.FinishField(keyTarget2, fieldTarget3); err != nil {
+			return err
 		}
 	}
-	var5 := (m.Nanos == int32(0))
-	if !var5 {
-		keyTarget6, fieldTarget7, err := fieldsTarget1.StartField("Nanos")
-		if err != vdl.ErrFieldNoExist && err != nil {
+	keyTarget4, fieldTarget5, err := fieldsTarget1.StartField("Nanos")
+	if err != vdl.ErrFieldNoExist && err != nil {
+		return err
+	}
+	if err != vdl.ErrFieldNoExist {
+		if err := fieldTarget5.FromInt(int64(m.Nanos), vdl.Int32Type); err != nil {
 			return err
 		}
-		if err != vdl.ErrFieldNoExist {
-			if err := fieldTarget7.FromInt(int64(m.Nanos), vdl.Int32Type); err != nil {
-				return err
-			}
-			if err := fieldsTarget1.FinishField(keyTarget6, fieldTarget7); err != nil {
-				return err
-			}
+		if err := fieldsTarget1.FinishField(keyTarget4, fieldTarget5); err != nil {
+			return err
 		}
 	}
 	if err := t.FinishFields(fieldsTarget1); err != nil {
@@ -92,12 +86,6 @@ func (m *Time) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 
 func (m *Time) MakeVDLTarget() vdl.Target {
 	return nil
-}
-
-func (m *Time) IsZero() bool {
-
-	var1 := vdl.ValueOf(m).IsZero()
-	return var1
 }
 
 // Duration represents the elapsed duration between two points in time, with
@@ -128,34 +116,28 @@ func (m *Duration) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 		return err
 	}
 
-	var2 := (m.Seconds == int64(0))
-	if !var2 {
-		keyTarget3, fieldTarget4, err := fieldsTarget1.StartField("Seconds")
-		if err != vdl.ErrFieldNoExist && err != nil {
+	keyTarget2, fieldTarget3, err := fieldsTarget1.StartField("Seconds")
+	if err != vdl.ErrFieldNoExist && err != nil {
+		return err
+	}
+	if err != vdl.ErrFieldNoExist {
+		if err := fieldTarget3.FromInt(int64(m.Seconds), vdl.Int64Type); err != nil {
 			return err
 		}
-		if err != vdl.ErrFieldNoExist {
-			if err := fieldTarget4.FromInt(int64(m.Seconds), vdl.Int64Type); err != nil {
-				return err
-			}
-			if err := fieldsTarget1.FinishField(keyTarget3, fieldTarget4); err != nil {
-				return err
-			}
+		if err := fieldsTarget1.FinishField(keyTarget2, fieldTarget3); err != nil {
+			return err
 		}
 	}
-	var5 := (m.Nanos == int32(0))
-	if !var5 {
-		keyTarget6, fieldTarget7, err := fieldsTarget1.StartField("Nanos")
-		if err != vdl.ErrFieldNoExist && err != nil {
+	keyTarget4, fieldTarget5, err := fieldsTarget1.StartField("Nanos")
+	if err != vdl.ErrFieldNoExist && err != nil {
+		return err
+	}
+	if err != vdl.ErrFieldNoExist {
+		if err := fieldTarget5.FromInt(int64(m.Nanos), vdl.Int32Type); err != nil {
 			return err
 		}
-		if err != vdl.ErrFieldNoExist {
-			if err := fieldTarget7.FromInt(int64(m.Nanos), vdl.Int32Type); err != nil {
-				return err
-			}
-			if err := fieldsTarget1.FinishField(keyTarget6, fieldTarget7); err != nil {
-				return err
-			}
+		if err := fieldsTarget1.FinishField(keyTarget4, fieldTarget5); err != nil {
+			return err
 		}
 	}
 	if err := t.FinishFields(fieldsTarget1); err != nil {
@@ -166,12 +148,6 @@ func (m *Duration) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 
 func (m *Duration) MakeVDLTarget() vdl.Target {
 	return nil
-}
-
-func (m *Duration) IsZero() bool {
-
-	var1 := vdl.ValueOf(m).IsZero()
-	return var1
 }
 
 // WireDeadline represents the deadline for an operation, where the operation is
@@ -222,35 +198,29 @@ func (m *WireDeadline) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 		return err
 	}
 
-	var3 := wireValue2.IsZero()
-	if !var3 {
-		keyTarget4, fieldTarget5, err := fieldsTarget1.StartField("FromNow")
-		if err != vdl.ErrFieldNoExist && err != nil {
+	keyTarget3, fieldTarget4, err := fieldsTarget1.StartField("FromNow")
+	if err != vdl.ErrFieldNoExist && err != nil {
+		return err
+	}
+	if err != vdl.ErrFieldNoExist {
+
+		if err := wireValue2.FillVDLTarget(fieldTarget4, __VDLType_time_time_Duration); err != nil {
 			return err
 		}
-		if err != vdl.ErrFieldNoExist {
-
-			if err := wireValue2.FillVDLTarget(fieldTarget5, __VDLType_time_time_Duration); err != nil {
-				return err
-			}
-			if err := fieldsTarget1.FinishField(keyTarget4, fieldTarget5); err != nil {
-				return err
-			}
+		if err := fieldsTarget1.FinishField(keyTarget3, fieldTarget4); err != nil {
+			return err
 		}
 	}
-	var6 := (m.NoDeadline == false)
-	if !var6 {
-		keyTarget7, fieldTarget8, err := fieldsTarget1.StartField("NoDeadline")
-		if err != vdl.ErrFieldNoExist && err != nil {
+	keyTarget5, fieldTarget6, err := fieldsTarget1.StartField("NoDeadline")
+	if err != vdl.ErrFieldNoExist && err != nil {
+		return err
+	}
+	if err != vdl.ErrFieldNoExist {
+		if err := fieldTarget6.FromBool(bool(m.NoDeadline), vdl.BoolType); err != nil {
 			return err
 		}
-		if err != vdl.ErrFieldNoExist {
-			if err := fieldTarget8.FromBool(bool(m.NoDeadline), vdl.BoolType); err != nil {
-				return err
-			}
-			if err := fieldsTarget1.FinishField(keyTarget7, fieldTarget8); err != nil {
-				return err
-			}
+		if err := fieldsTarget1.FinishField(keyTarget5, fieldTarget6); err != nil {
+			return err
 		}
 	}
 	if err := t.FinishFields(fieldsTarget1); err != nil {
@@ -261,12 +231,6 @@ func (m *WireDeadline) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 
 func (m *WireDeadline) MakeVDLTarget() vdl.Target {
 	return nil
-}
-
-func (m *WireDeadline) IsZero() bool {
-
-	var1 := vdl.ValueOf(m).IsZero()
-	return var1
 }
 
 func init() {

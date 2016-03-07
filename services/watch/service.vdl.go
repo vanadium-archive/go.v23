@@ -148,38 +148,29 @@ func (m *GlobRequest) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 		return err
 	}
 
-	var2 := (m.Pattern == "")
-	if !var2 {
-		keyTarget3, fieldTarget4, err := fieldsTarget1.StartField("Pattern")
-		if err != vdl.ErrFieldNoExist && err != nil {
+	keyTarget2, fieldTarget3, err := fieldsTarget1.StartField("Pattern")
+	if err != vdl.ErrFieldNoExist && err != nil {
+		return err
+	}
+	if err != vdl.ErrFieldNoExist {
+		if err := fieldTarget3.FromString(string(m.Pattern), vdl.StringType); err != nil {
 			return err
 		}
-		if err != vdl.ErrFieldNoExist {
-			if err := fieldTarget4.FromString(string(m.Pattern), vdl.StringType); err != nil {
-				return err
-			}
-			if err := fieldsTarget1.FinishField(keyTarget3, fieldTarget4); err != nil {
-				return err
-			}
-		}
-	}
-	var var5 bool
-	if len(m.ResumeMarker) == 0 {
-		var5 = true
-	}
-	if !var5 {
-		keyTarget6, fieldTarget7, err := fieldsTarget1.StartField("ResumeMarker")
-		if err != vdl.ErrFieldNoExist && err != nil {
+		if err := fieldsTarget1.FinishField(keyTarget2, fieldTarget3); err != nil {
 			return err
 		}
-		if err != vdl.ErrFieldNoExist {
+	}
+	keyTarget4, fieldTarget5, err := fieldsTarget1.StartField("ResumeMarker")
+	if err != vdl.ErrFieldNoExist && err != nil {
+		return err
+	}
+	if err != vdl.ErrFieldNoExist {
 
-			if err := m.ResumeMarker.FillVDLTarget(fieldTarget7, __VDLType_service_v_io_v23_services_watch_ResumeMarker); err != nil {
-				return err
-			}
-			if err := fieldsTarget1.FinishField(keyTarget6, fieldTarget7); err != nil {
-				return err
-			}
+		if err := m.ResumeMarker.FillVDLTarget(fieldTarget5, __VDLType_service_v_io_v23_services_watch_ResumeMarker); err != nil {
+			return err
+		}
+		if err := fieldsTarget1.FinishField(keyTarget4, fieldTarget5); err != nil {
+			return err
 		}
 	}
 	if err := t.FinishFields(fieldsTarget1); err != nil {
@@ -190,19 +181,6 @@ func (m *GlobRequest) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 
 func (m *GlobRequest) MakeVDLTarget() vdl.Target {
 	return nil
-}
-
-func (m *GlobRequest) IsZero() bool {
-
-	var1 := true
-	var2 := (m.Pattern == "")
-	var1 = var1 && var2
-	var var3 bool
-	if len(m.ResumeMarker) == 0 {
-		var3 = true
-	}
-	var1 = var1 && var3
-	return var1
 }
 
 // ResumeMarker specifies how much of the existing underlying state
@@ -255,15 +233,6 @@ func (m ResumeMarker) MakeVDLTarget() vdl.Target {
 	return nil
 }
 
-func (m ResumeMarker) IsZero() bool {
-
-	var var1 bool
-	if len(m) == 0 {
-		var1 = true
-	}
-	return var1
-}
-
 // Change is the new value for a watched entity.
 type Change struct {
 	// Name is the Object name of the entity that changed.  This name is relative
@@ -300,90 +269,72 @@ func (m *Change) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 		return err
 	}
 
-	var2 := (m.Name == "")
-	if !var2 {
-		keyTarget3, fieldTarget4, err := fieldsTarget1.StartField("Name")
-		if err != vdl.ErrFieldNoExist && err != nil {
+	keyTarget2, fieldTarget3, err := fieldsTarget1.StartField("Name")
+	if err != vdl.ErrFieldNoExist && err != nil {
+		return err
+	}
+	if err != vdl.ErrFieldNoExist {
+		if err := fieldTarget3.FromString(string(m.Name), vdl.StringType); err != nil {
 			return err
 		}
-		if err != vdl.ErrFieldNoExist {
-			if err := fieldTarget4.FromString(string(m.Name), vdl.StringType); err != nil {
-				return err
-			}
-			if err := fieldsTarget1.FinishField(keyTarget3, fieldTarget4); err != nil {
-				return err
-			}
+		if err := fieldsTarget1.FinishField(keyTarget2, fieldTarget3); err != nil {
+			return err
 		}
 	}
-	var5 := (m.State == int32(0))
-	if !var5 {
-		keyTarget6, fieldTarget7, err := fieldsTarget1.StartField("State")
-		if err != vdl.ErrFieldNoExist && err != nil {
+	keyTarget4, fieldTarget5, err := fieldsTarget1.StartField("State")
+	if err != vdl.ErrFieldNoExist && err != nil {
+		return err
+	}
+	if err != vdl.ErrFieldNoExist {
+		if err := fieldTarget5.FromInt(int64(m.State), vdl.Int32Type); err != nil {
 			return err
 		}
-		if err != vdl.ErrFieldNoExist {
-			if err := fieldTarget7.FromInt(int64(m.State), vdl.Int32Type); err != nil {
-				return err
-			}
-			if err := fieldsTarget1.FinishField(keyTarget6, fieldTarget7); err != nil {
-				return err
-			}
+		if err := fieldsTarget1.FinishField(keyTarget4, fieldTarget5); err != nil {
+			return err
 		}
 	}
-	var8 := (m.Value == (*vom.RawBytes)(nil))
-	if !var8 {
-		keyTarget9, fieldTarget10, err := fieldsTarget1.StartField("Value")
-		if err != vdl.ErrFieldNoExist && err != nil {
-			return err
-		}
-		if err != vdl.ErrFieldNoExist {
+	keyTarget6, fieldTarget7, err := fieldsTarget1.StartField("Value")
+	if err != vdl.ErrFieldNoExist && err != nil {
+		return err
+	}
+	if err != vdl.ErrFieldNoExist {
 
-			if m.Value == nil {
-				if err := fieldTarget10.FromNil(vdl.AnyType); err != nil {
-					return err
-				}
-			} else {
-				if err := m.Value.FillVDLTarget(fieldTarget10, vdl.AnyType); err != nil {
-					return err
-				}
+		if m.Value == nil {
+			if err := fieldTarget7.FromNil(vdl.AnyType); err != nil {
+				return err
 			}
-			if err := fieldsTarget1.FinishField(keyTarget9, fieldTarget10); err != nil {
+		} else {
+			if err := m.Value.FillVDLTarget(fieldTarget7, vdl.AnyType); err != nil {
 				return err
 			}
 		}
-	}
-	var var11 bool
-	if len(m.ResumeMarker) == 0 {
-		var11 = true
-	}
-	if !var11 {
-		keyTarget12, fieldTarget13, err := fieldsTarget1.StartField("ResumeMarker")
-		if err != vdl.ErrFieldNoExist && err != nil {
+		if err := fieldsTarget1.FinishField(keyTarget6, fieldTarget7); err != nil {
 			return err
 		}
-		if err != vdl.ErrFieldNoExist {
+	}
+	keyTarget8, fieldTarget9, err := fieldsTarget1.StartField("ResumeMarker")
+	if err != vdl.ErrFieldNoExist && err != nil {
+		return err
+	}
+	if err != vdl.ErrFieldNoExist {
 
-			if err := m.ResumeMarker.FillVDLTarget(fieldTarget13, __VDLType_service_v_io_v23_services_watch_ResumeMarker); err != nil {
-				return err
-			}
-			if err := fieldsTarget1.FinishField(keyTarget12, fieldTarget13); err != nil {
-				return err
-			}
-		}
-	}
-	var14 := (m.Continued == false)
-	if !var14 {
-		keyTarget15, fieldTarget16, err := fieldsTarget1.StartField("Continued")
-		if err != vdl.ErrFieldNoExist && err != nil {
+		if err := m.ResumeMarker.FillVDLTarget(fieldTarget9, __VDLType_service_v_io_v23_services_watch_ResumeMarker); err != nil {
 			return err
 		}
-		if err != vdl.ErrFieldNoExist {
-			if err := fieldTarget16.FromBool(bool(m.Continued), vdl.BoolType); err != nil {
-				return err
-			}
-			if err := fieldsTarget1.FinishField(keyTarget15, fieldTarget16); err != nil {
-				return err
-			}
+		if err := fieldsTarget1.FinishField(keyTarget8, fieldTarget9); err != nil {
+			return err
+		}
+	}
+	keyTarget10, fieldTarget11, err := fieldsTarget1.StartField("Continued")
+	if err != vdl.ErrFieldNoExist && err != nil {
+		return err
+	}
+	if err != vdl.ErrFieldNoExist {
+		if err := fieldTarget11.FromBool(bool(m.Continued), vdl.BoolType); err != nil {
+			return err
+		}
+		if err := fieldsTarget1.FinishField(keyTarget10, fieldTarget11); err != nil {
+			return err
 		}
 	}
 	if err := t.FinishFields(fieldsTarget1); err != nil {
@@ -394,25 +345,6 @@ func (m *Change) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 
 func (m *Change) MakeVDLTarget() vdl.Target {
 	return nil
-}
-
-func (m *Change) IsZero() bool {
-
-	var1 := true
-	var2 := (m.Name == "")
-	var1 = var1 && var2
-	var3 := (m.State == int32(0))
-	var1 = var1 && var3
-	var4 := (m.Value == (*vom.RawBytes)(nil))
-	var1 = var1 && var4
-	var var5 bool
-	if len(m.ResumeMarker) == 0 {
-		var5 = true
-	}
-	var1 = var1 && var5
-	var6 := (m.Continued == false)
-	var1 = var1 && var6
-	return var1
 }
 
 func init() {

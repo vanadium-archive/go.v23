@@ -38,92 +38,77 @@ func (m *WireError) FillVDLTarget(t Target, tt *Type) error {
 		return err
 	}
 
-	var2 := (m.Id == "")
-	if !var2 {
-		keyTarget3, fieldTarget4, err := fieldsTarget1.StartField("Id")
-		if err != ErrFieldNoExist && err != nil {
+	keyTarget2, fieldTarget3, err := fieldsTarget1.StartField("Id")
+	if err != ErrFieldNoExist && err != nil {
+		return err
+	}
+	if err != ErrFieldNoExist {
+		if err := fieldTarget3.FromString(string(m.Id), StringType); err != nil {
 			return err
 		}
-		if err != ErrFieldNoExist {
-			if err := fieldTarget4.FromString(string(m.Id), StringType); err != nil {
-				return err
-			}
-			if err := fieldsTarget1.FinishField(keyTarget3, fieldTarget4); err != nil {
-				return err
-			}
+		if err := fieldsTarget1.FinishField(keyTarget2, fieldTarget3); err != nil {
+			return err
 		}
 	}
-	var5 := m.RetryCode.IsZero()
-	if !var5 {
-		keyTarget6, fieldTarget7, err := fieldsTarget1.StartField("RetryCode")
-		if err != ErrFieldNoExist && err != nil {
-			return err
-		}
-		if err != ErrFieldNoExist {
+	keyTarget4, fieldTarget5, err := fieldsTarget1.StartField("RetryCode")
+	if err != ErrFieldNoExist && err != nil {
+		return err
+	}
+	if err != ErrFieldNoExist {
 
-			if err := m.RetryCode.FillVDLTarget(fieldTarget7, __VDLType_builtin_v_io_v23_vdl_WireRetryCode); err != nil {
-				return err
-			}
-			if err := fieldsTarget1.FinishField(keyTarget6, fieldTarget7); err != nil {
-				return err
-			}
-		}
-	}
-	var8 := (m.Msg == "")
-	if !var8 {
-		keyTarget9, fieldTarget10, err := fieldsTarget1.StartField("Msg")
-		if err != ErrFieldNoExist && err != nil {
+		if err := m.RetryCode.FillVDLTarget(fieldTarget5, __VDLType_builtin_v_io_v23_vdl_WireRetryCode); err != nil {
 			return err
 		}
-		if err != ErrFieldNoExist {
-			if err := fieldTarget10.FromString(string(m.Msg), StringType); err != nil {
-				return err
-			}
-			if err := fieldsTarget1.FinishField(keyTarget9, fieldTarget10); err != nil {
-				return err
-			}
-		}
-	}
-	var var11 bool
-	if len(m.ParamList) == 0 {
-		var11 = true
-	}
-	if !var11 {
-		keyTarget12, fieldTarget13, err := fieldsTarget1.StartField("ParamList")
-		if err != ErrFieldNoExist && err != nil {
+		if err := fieldsTarget1.FinishField(keyTarget4, fieldTarget5); err != nil {
 			return err
 		}
-		if err != ErrFieldNoExist {
+	}
+	keyTarget6, fieldTarget7, err := fieldsTarget1.StartField("Msg")
+	if err != ErrFieldNoExist && err != nil {
+		return err
+	}
+	if err != ErrFieldNoExist {
+		if err := fieldTarget7.FromString(string(m.Msg), StringType); err != nil {
+			return err
+		}
+		if err := fieldsTarget1.FinishField(keyTarget6, fieldTarget7); err != nil {
+			return err
+		}
+	}
+	keyTarget8, fieldTarget9, err := fieldsTarget1.StartField("ParamList")
+	if err != ErrFieldNoExist && err != nil {
+		return err
+	}
+	if err != ErrFieldNoExist {
 
-			listTarget14, err := fieldTarget13.StartList(__VDLTypebuiltin1, len(m.ParamList))
+		listTarget10, err := fieldTarget9.StartList(__VDLTypebuiltin1, len(m.ParamList))
+		if err != nil {
+			return err
+		}
+		for i, elem12 := range m.ParamList {
+			elemTarget11, err := listTarget10.StartElem(i)
 			if err != nil {
 				return err
 			}
-			for i, elem16 := range m.ParamList {
-				elemTarget15, err := listTarget14.StartElem(i)
-				if err != nil {
-					return err
-				}
 
-				if elem16 == nil {
-					if err := elemTarget15.FromNil(AnyType); err != nil {
-						return err
-					}
-				} else {
-					if err := FromValue(elemTarget15, elem16); err != nil {
-						return err
-					}
+			if elem12 == nil {
+				if err := elemTarget11.FromNil(AnyType); err != nil {
+					return err
 				}
-				if err := listTarget14.FinishElem(elemTarget15); err != nil {
+			} else {
+				if err := FromValue(elemTarget11, elem12); err != nil {
 					return err
 				}
 			}
-			if err := fieldTarget13.FinishList(listTarget14); err != nil {
+			if err := listTarget10.FinishElem(elemTarget11); err != nil {
 				return err
 			}
-			if err := fieldsTarget1.FinishField(keyTarget12, fieldTarget13); err != nil {
-				return err
-			}
+		}
+		if err := fieldTarget9.FinishList(listTarget10); err != nil {
+			return err
+		}
+		if err := fieldsTarget1.FinishField(keyTarget8, fieldTarget9); err != nil {
+			return err
 		}
 	}
 	if err := t.FinishFields(fieldsTarget1); err != nil {
@@ -134,23 +119,6 @@ func (m *WireError) FillVDLTarget(t Target, tt *Type) error {
 
 func (m *WireError) MakeVDLTarget() Target {
 	return nil
-}
-
-func (m *WireError) IsZero() bool {
-
-	var1 := true
-	var2 := (m.Id == "")
-	var1 = var1 && var2
-	var3 := m.RetryCode.IsZero()
-	var1 = var1 && var3
-	var4 := (m.Msg == "")
-	var1 = var1 && var4
-	var var5 bool
-	if len(m.ParamList) == 0 {
-		var5 = true
-	}
-	var1 = var1 && var5
-	return var1
 }
 
 // WireRetryCode is the suggested retry behavior for the receiver of an error.
@@ -224,12 +192,6 @@ func (m WireRetryCode) FillVDLTarget(t Target, tt *Type) error {
 
 func (m WireRetryCode) MakeVDLTarget() Target {
 	return nil
-}
-
-func (m WireRetryCode) IsZero() bool {
-
-	var1 := (m == WireRetryCodeNoRetry)
-	return var1
 }
 
 func init() {

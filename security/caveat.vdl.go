@@ -39,12 +39,6 @@ func (m nonce) MakeVDLTarget() vdl.Target {
 	return nil
 }
 
-func (m nonce) IsZero() bool {
-
-	var1 := (m == nonce{})
-	return var1
-}
-
 // publicKeyThirdPartyCaveatParam represents a third-party caveat that requires
 // discharges to be issued by a principal identified by a public key.
 //
@@ -90,106 +84,85 @@ func (m *publicKeyThirdPartyCaveatParam) FillVDLTarget(t vdl.Target, tt *vdl.Typ
 		return err
 	}
 
-	var2 := m.Nonce.IsZero()
-	if !var2 {
-		keyTarget3, fieldTarget4, err := fieldsTarget1.StartField("Nonce")
-		if err != vdl.ErrFieldNoExist && err != nil {
+	keyTarget2, fieldTarget3, err := fieldsTarget1.StartField("Nonce")
+	if err != vdl.ErrFieldNoExist && err != nil {
+		return err
+	}
+	if err != vdl.ErrFieldNoExist {
+
+		if err := m.Nonce.FillVDLTarget(fieldTarget3, __VDLType_caveat_v_io_v23_security_nonce); err != nil {
 			return err
 		}
-		if err != vdl.ErrFieldNoExist {
-
-			if err := m.Nonce.FillVDLTarget(fieldTarget4, __VDLType_caveat_v_io_v23_security_nonce); err != nil {
-				return err
-			}
-			if err := fieldsTarget1.FinishField(keyTarget3, fieldTarget4); err != nil {
-				return err
-			}
-		}
-	}
-	var var5 bool
-	if len(m.Caveats) == 0 {
-		var5 = true
-	}
-	if !var5 {
-		keyTarget6, fieldTarget7, err := fieldsTarget1.StartField("Caveats")
-		if err != vdl.ErrFieldNoExist && err != nil {
+		if err := fieldsTarget1.FinishField(keyTarget2, fieldTarget3); err != nil {
 			return err
 		}
-		if err != vdl.ErrFieldNoExist {
+	}
+	keyTarget4, fieldTarget5, err := fieldsTarget1.StartField("Caveats")
+	if err != vdl.ErrFieldNoExist && err != nil {
+		return err
+	}
+	if err != vdl.ErrFieldNoExist {
 
-			listTarget8, err := fieldTarget7.StartList(__VDLTypecaveat1, len(m.Caveats))
+		listTarget6, err := fieldTarget5.StartList(__VDLTypecaveat1, len(m.Caveats))
+		if err != nil {
+			return err
+		}
+		for i, elem8 := range m.Caveats {
+			elemTarget7, err := listTarget6.StartElem(i)
 			if err != nil {
 				return err
 			}
-			for i, elem10 := range m.Caveats {
-				elemTarget9, err := listTarget8.StartElem(i)
-				if err != nil {
-					return err
-				}
 
-				if err := elem10.FillVDLTarget(elemTarget9, __VDLType_caveat_v_io_v23_security_Caveat); err != nil {
-					return err
-				}
-				if err := listTarget8.FinishElem(elemTarget9); err != nil {
-					return err
-				}
-			}
-			if err := fieldTarget7.FinishList(listTarget8); err != nil {
+			if err := elem8.FillVDLTarget(elemTarget7, __VDLType_caveat_v_io_v23_security_Caveat); err != nil {
 				return err
 			}
-			if err := fieldsTarget1.FinishField(keyTarget6, fieldTarget7); err != nil {
+			if err := listTarget6.FinishElem(elemTarget7); err != nil {
 				return err
 			}
 		}
-	}
-	var var11 bool
-	if len(m.DischargerKey) == 0 {
-		var11 = true
-	}
-	if !var11 {
-		keyTarget12, fieldTarget13, err := fieldsTarget1.StartField("DischargerKey")
-		if err != vdl.ErrFieldNoExist && err != nil {
+		if err := fieldTarget5.FinishList(listTarget6); err != nil {
 			return err
 		}
-		if err != vdl.ErrFieldNoExist {
-
-			if err := fieldTarget13.FromBytes([]byte(m.DischargerKey), __VDLTypecaveat2); err != nil {
-				return err
-			}
-			if err := fieldsTarget1.FinishField(keyTarget12, fieldTarget13); err != nil {
-				return err
-			}
-		}
-	}
-	var14 := (m.DischargerLocation == "")
-	if !var14 {
-		keyTarget15, fieldTarget16, err := fieldsTarget1.StartField("DischargerLocation")
-		if err != vdl.ErrFieldNoExist && err != nil {
+		if err := fieldsTarget1.FinishField(keyTarget4, fieldTarget5); err != nil {
 			return err
 		}
-		if err != vdl.ErrFieldNoExist {
-			if err := fieldTarget16.FromString(string(m.DischargerLocation), vdl.StringType); err != nil {
-				return err
-			}
-			if err := fieldsTarget1.FinishField(keyTarget15, fieldTarget16); err != nil {
-				return err
-			}
-		}
 	}
-	var17 := m.DischargerRequirements.IsZero()
-	if !var17 {
-		keyTarget18, fieldTarget19, err := fieldsTarget1.StartField("DischargerRequirements")
-		if err != vdl.ErrFieldNoExist && err != nil {
+	keyTarget9, fieldTarget10, err := fieldsTarget1.StartField("DischargerKey")
+	if err != vdl.ErrFieldNoExist && err != nil {
+		return err
+	}
+	if err != vdl.ErrFieldNoExist {
+
+		if err := fieldTarget10.FromBytes([]byte(m.DischargerKey), __VDLTypecaveat2); err != nil {
 			return err
 		}
-		if err != vdl.ErrFieldNoExist {
+		if err := fieldsTarget1.FinishField(keyTarget9, fieldTarget10); err != nil {
+			return err
+		}
+	}
+	keyTarget11, fieldTarget12, err := fieldsTarget1.StartField("DischargerLocation")
+	if err != vdl.ErrFieldNoExist && err != nil {
+		return err
+	}
+	if err != vdl.ErrFieldNoExist {
+		if err := fieldTarget12.FromString(string(m.DischargerLocation), vdl.StringType); err != nil {
+			return err
+		}
+		if err := fieldsTarget1.FinishField(keyTarget11, fieldTarget12); err != nil {
+			return err
+		}
+	}
+	keyTarget13, fieldTarget14, err := fieldsTarget1.StartField("DischargerRequirements")
+	if err != vdl.ErrFieldNoExist && err != nil {
+		return err
+	}
+	if err != vdl.ErrFieldNoExist {
 
-			if err := m.DischargerRequirements.FillVDLTarget(fieldTarget19, __VDLType_caveat_v_io_v23_security_ThirdPartyRequirements); err != nil {
-				return err
-			}
-			if err := fieldsTarget1.FinishField(keyTarget18, fieldTarget19); err != nil {
-				return err
-			}
+		if err := m.DischargerRequirements.FillVDLTarget(fieldTarget14, __VDLType_caveat_v_io_v23_security_ThirdPartyRequirements); err != nil {
+			return err
+		}
+		if err := fieldsTarget1.FinishField(keyTarget13, fieldTarget14); err != nil {
+			return err
 		}
 	}
 	if err := t.FinishFields(fieldsTarget1); err != nil {
@@ -200,28 +173,6 @@ func (m *publicKeyThirdPartyCaveatParam) FillVDLTarget(t vdl.Target, tt *vdl.Typ
 
 func (m *publicKeyThirdPartyCaveatParam) MakeVDLTarget() vdl.Target {
 	return nil
-}
-
-func (m *publicKeyThirdPartyCaveatParam) IsZero() bool {
-
-	var1 := true
-	var2 := m.Nonce.IsZero()
-	var1 = var1 && var2
-	var var3 bool
-	if len(m.Caveats) == 0 {
-		var3 = true
-	}
-	var1 = var1 && var3
-	var var4 bool
-	if len(m.DischargerKey) == 0 {
-		var4 = true
-	}
-	var1 = var1 && var4
-	var5 := (m.DischargerLocation == "")
-	var1 = var1 && var5
-	var6 := m.DischargerRequirements.IsZero()
-	var1 = var1 && var6
-	return var1
 }
 
 // publicKeyDischarge represents the discharge issued for publicKeyThirdPartyCaveatParams.
@@ -251,71 +202,59 @@ func (m *publicKeyDischarge) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 		return err
 	}
 
-	var2 := (m.ThirdPartyCaveatId == "")
-	if !var2 {
-		keyTarget3, fieldTarget4, err := fieldsTarget1.StartField("ThirdPartyCaveatId")
-		if err != vdl.ErrFieldNoExist && err != nil {
+	keyTarget2, fieldTarget3, err := fieldsTarget1.StartField("ThirdPartyCaveatId")
+	if err != vdl.ErrFieldNoExist && err != nil {
+		return err
+	}
+	if err != vdl.ErrFieldNoExist {
+		if err := fieldTarget3.FromString(string(m.ThirdPartyCaveatId), vdl.StringType); err != nil {
 			return err
 		}
-		if err != vdl.ErrFieldNoExist {
-			if err := fieldTarget4.FromString(string(m.ThirdPartyCaveatId), vdl.StringType); err != nil {
-				return err
-			}
-			if err := fieldsTarget1.FinishField(keyTarget3, fieldTarget4); err != nil {
-				return err
-			}
-		}
-	}
-	var var5 bool
-	if len(m.Caveats) == 0 {
-		var5 = true
-	}
-	if !var5 {
-		keyTarget6, fieldTarget7, err := fieldsTarget1.StartField("Caveats")
-		if err != vdl.ErrFieldNoExist && err != nil {
+		if err := fieldsTarget1.FinishField(keyTarget2, fieldTarget3); err != nil {
 			return err
 		}
-		if err != vdl.ErrFieldNoExist {
+	}
+	keyTarget4, fieldTarget5, err := fieldsTarget1.StartField("Caveats")
+	if err != vdl.ErrFieldNoExist && err != nil {
+		return err
+	}
+	if err != vdl.ErrFieldNoExist {
 
-			listTarget8, err := fieldTarget7.StartList(__VDLTypecaveat1, len(m.Caveats))
+		listTarget6, err := fieldTarget5.StartList(__VDLTypecaveat1, len(m.Caveats))
+		if err != nil {
+			return err
+		}
+		for i, elem8 := range m.Caveats {
+			elemTarget7, err := listTarget6.StartElem(i)
 			if err != nil {
 				return err
 			}
-			for i, elem10 := range m.Caveats {
-				elemTarget9, err := listTarget8.StartElem(i)
-				if err != nil {
-					return err
-				}
 
-				if err := elem10.FillVDLTarget(elemTarget9, __VDLType_caveat_v_io_v23_security_Caveat); err != nil {
-					return err
-				}
-				if err := listTarget8.FinishElem(elemTarget9); err != nil {
-					return err
-				}
-			}
-			if err := fieldTarget7.FinishList(listTarget8); err != nil {
+			if err := elem8.FillVDLTarget(elemTarget7, __VDLType_caveat_v_io_v23_security_Caveat); err != nil {
 				return err
 			}
-			if err := fieldsTarget1.FinishField(keyTarget6, fieldTarget7); err != nil {
+			if err := listTarget6.FinishElem(elemTarget7); err != nil {
 				return err
 			}
 		}
-	}
-	var11 := m.Signature.IsZero()
-	if !var11 {
-		keyTarget12, fieldTarget13, err := fieldsTarget1.StartField("Signature")
-		if err != vdl.ErrFieldNoExist && err != nil {
+		if err := fieldTarget5.FinishList(listTarget6); err != nil {
 			return err
 		}
-		if err != vdl.ErrFieldNoExist {
+		if err := fieldsTarget1.FinishField(keyTarget4, fieldTarget5); err != nil {
+			return err
+		}
+	}
+	keyTarget9, fieldTarget10, err := fieldsTarget1.StartField("Signature")
+	if err != vdl.ErrFieldNoExist && err != nil {
+		return err
+	}
+	if err != vdl.ErrFieldNoExist {
 
-			if err := m.Signature.FillVDLTarget(fieldTarget13, __VDLType_caveat_v_io_v23_security_Signature); err != nil {
-				return err
-			}
-			if err := fieldsTarget1.FinishField(keyTarget12, fieldTarget13); err != nil {
-				return err
-			}
+		if err := m.Signature.FillVDLTarget(fieldTarget10, __VDLType_caveat_v_io_v23_security_Signature); err != nil {
+			return err
+		}
+		if err := fieldsTarget1.FinishField(keyTarget9, fieldTarget10); err != nil {
+			return err
 		}
 	}
 	if err := t.FinishFields(fieldsTarget1); err != nil {
@@ -326,21 +265,6 @@ func (m *publicKeyDischarge) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 
 func (m *publicKeyDischarge) MakeVDLTarget() vdl.Target {
 	return nil
-}
-
-func (m *publicKeyDischarge) IsZero() bool {
-
-	var1 := true
-	var2 := (m.ThirdPartyCaveatId == "")
-	var1 = var1 && var2
-	var var3 bool
-	if len(m.Caveats) == 0 {
-		var3 = true
-	}
-	var1 = var1 && var3
-	var4 := m.Signature.IsZero()
-	var1 = var1 && var4
-	return var1
 }
 
 func init() {

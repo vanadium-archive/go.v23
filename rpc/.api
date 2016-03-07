@@ -16,10 +16,8 @@ pkg rpc, func ReflectInvoker(interface{}) (Invoker, error)
 pkg rpc, func ReflectInvokerOrDie(interface{}) Invoker
 pkg rpc, func TypeCheckMethods(interface{}) map[string]error
 pkg rpc, method (*Request) FillVDLTarget(vdl.Target, *vdl.Type) error
-pkg rpc, method (*Request) IsZero() bool
 pkg rpc, method (*Request) MakeVDLTarget() vdl.Target
 pkg rpc, method (*Response) FillVDLTarget(vdl.Target, *vdl.Type) error
-pkg rpc, method (*Response) IsZero() bool
 pkg rpc, method (*Response) MakeVDLTarget() vdl.Target
 pkg rpc, method (AddressChooserFunc) ChooseAddresses(string, []net.Addr) ([]net.Addr, error)
 pkg rpc, method (ListenSpec) Copy() ListenSpec

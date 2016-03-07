@@ -13,22 +13,16 @@ pkg vtrace, func WithManager(*context.T, Manager) *context.T
 pkg vtrace, func WithNewSpan(*context.T, string) (*context.T, Span)
 pkg vtrace, func WithNewTrace(*context.T) (*context.T, Span)
 pkg vtrace, method (*Annotation) FillVDLTarget(vdl.Target, *vdl.Type) error
-pkg vtrace, method (*Annotation) IsZero() bool
 pkg vtrace, method (*Annotation) MakeVDLTarget() vdl.Target
 pkg vtrace, method (*Request) FillVDLTarget(vdl.Target, *vdl.Type) error
-pkg vtrace, method (*Request) IsZero() bool
 pkg vtrace, method (*Request) MakeVDLTarget() vdl.Target
 pkg vtrace, method (*Response) FillVDLTarget(vdl.Target, *vdl.Type) error
-pkg vtrace, method (*Response) IsZero() bool
 pkg vtrace, method (*Response) MakeVDLTarget() vdl.Target
 pkg vtrace, method (*SpanRecord) FillVDLTarget(vdl.Target, *vdl.Type) error
-pkg vtrace, method (*SpanRecord) IsZero() bool
 pkg vtrace, method (*SpanRecord) MakeVDLTarget() vdl.Target
 pkg vtrace, method (*TraceRecord) FillVDLTarget(vdl.Target, *vdl.Type) error
-pkg vtrace, method (*TraceRecord) IsZero() bool
 pkg vtrace, method (*TraceRecord) MakeVDLTarget() vdl.Target
 pkg vtrace, method (TraceFlags) FillVDLTarget(vdl.Target, *vdl.Type) error
-pkg vtrace, method (TraceFlags) IsZero() bool
 pkg vtrace, method (TraceFlags) MakeVDLTarget() vdl.Target
 pkg vtrace, type Annotation struct
 pkg vtrace, type Annotation struct, Message string

@@ -3,26 +3,19 @@ pkg vdltool, const GenLanguageJava GenLanguage
 pkg vdltool, const GenLanguageJavascript GenLanguage
 pkg vdltool, func GenLanguageFromString(string) (GenLanguage, error)
 pkg vdltool, method (*Config) FillVDLTarget(vdl.Target, *vdl.Type) error
-pkg vdltool, method (*Config) IsZero() bool
 pkg vdltool, method (*Config) MakeVDLTarget() vdl.Target
 pkg vdltool, method (*GenLanguage) Set(string) error
 pkg vdltool, method (*GoConfig) FillVDLTarget(vdl.Target, *vdl.Type) error
-pkg vdltool, method (*GoConfig) IsZero() bool
 pkg vdltool, method (*GoConfig) MakeVDLTarget() vdl.Target
 pkg vdltool, method (*GoImport) FillVDLTarget(vdl.Target, *vdl.Type) error
-pkg vdltool, method (*GoImport) IsZero() bool
 pkg vdltool, method (*GoImport) MakeVDLTarget() vdl.Target
 pkg vdltool, method (*GoType) FillVDLTarget(vdl.Target, *vdl.Type) error
-pkg vdltool, method (*GoType) IsZero() bool
 pkg vdltool, method (*GoType) MakeVDLTarget() vdl.Target
 pkg vdltool, method (*JavaConfig) FillVDLTarget(vdl.Target, *vdl.Type) error
-pkg vdltool, method (*JavaConfig) IsZero() bool
 pkg vdltool, method (*JavaConfig) MakeVDLTarget() vdl.Target
 pkg vdltool, method (*JavascriptConfig) FillVDLTarget(vdl.Target, *vdl.Type) error
-pkg vdltool, method (*JavascriptConfig) IsZero() bool
 pkg vdltool, method (*JavascriptConfig) MakeVDLTarget() vdl.Target
 pkg vdltool, method (GenLanguage) FillVDLTarget(vdl.Target, *vdl.Type) error
-pkg vdltool, method (GenLanguage) IsZero() bool
 pkg vdltool, method (GenLanguage) MakeVDLTarget() vdl.Target
 pkg vdltool, method (GenLanguage) String() string
 pkg vdltool, type Config struct

@@ -9,16 +9,12 @@ pkg nosql, func SingleRow(string) RowRange
 pkg nosql, func ToWatchChange(watch.Change) WatchChange
 pkg nosql, func UUID() string
 pkg nosql, method (*Conflict) FillVDLTarget(vdl.Target, *vdl.Type) error
-pkg nosql, method (*Conflict) IsZero() bool
 pkg nosql, method (*Conflict) MakeVDLTarget() vdl.Target
 pkg nosql, method (*ConflictRow) FillVDLTarget(vdl.Target, *vdl.Type) error
-pkg nosql, method (*ConflictRow) IsZero() bool
 pkg nosql, method (*ConflictRow) MakeVDLTarget() vdl.Target
 pkg nosql, method (*ConflictRowSet) FillVDLTarget(vdl.Target, *vdl.Type) error
-pkg nosql, method (*ConflictRowSet) IsZero() bool
 pkg nosql, method (*ConflictRowSet) MakeVDLTarget() vdl.Target
 pkg nosql, method (*ConflictScanSet) FillVDLTarget(vdl.Target, *vdl.Type) error
-pkg nosql, method (*ConflictScanSet) IsZero() bool
 pkg nosql, method (*ConflictScanSet) MakeVDLTarget() vdl.Target
 pkg nosql, method (*InvalidScanStream) Advance() bool
 pkg nosql, method (*InvalidScanStream) Cancel()
@@ -26,14 +22,11 @@ pkg nosql, method (*InvalidScanStream) Err() error
 pkg nosql, method (*InvalidScanStream) Key() string
 pkg nosql, method (*InvalidScanStream) Value(interface{}) error
 pkg nosql, method (*Resolution) FillVDLTarget(vdl.Target, *vdl.Type) error
-pkg nosql, method (*Resolution) IsZero() bool
 pkg nosql, method (*Resolution) MakeVDLTarget() vdl.Target
 pkg nosql, method (*ResolvedRow) FillVDLTarget(vdl.Target, *vdl.Type) error
-pkg nosql, method (*ResolvedRow) IsZero() bool
 pkg nosql, method (*ResolvedRow) MakeVDLTarget() vdl.Target
 pkg nosql, method (*Value) FillVDLTarget(vdl.Target, *vdl.Type) error
 pkg nosql, method (*Value) Get(interface{}) error
-pkg nosql, method (*Value) IsZero() bool
 pkg nosql, method (*Value) MakeVDLTarget() vdl.Target
 pkg nosql, method (*WatchChange) Value(interface{}) error
 pkg nosql, type BatchDatabase interface { Abort, Close, Commit, Exec, FullName, GetResumeMarker, ListTables, Name, Table }

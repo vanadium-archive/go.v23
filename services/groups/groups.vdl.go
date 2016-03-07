@@ -47,12 +47,6 @@ func (m BlessingPatternChunk) MakeVDLTarget() vdl.Target {
 	return nil
 }
 
-func (m BlessingPatternChunk) IsZero() bool {
-
-	var1 := (m == BlessingPatternChunk(""))
-	return var1
-}
-
 type GetRequest struct {
 }
 
@@ -81,12 +75,6 @@ func (m *GetRequest) MakeVDLTarget() vdl.Target {
 	return nil
 }
 
-func (m *GetRequest) IsZero() bool {
-
-	var1 := (*m == GetRequest{})
-	return var1
-}
-
 type GetResponse struct {
 	Entries map[BlessingPatternChunk]struct{}
 }
@@ -106,40 +94,34 @@ func (m *GetResponse) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 		return err
 	}
 
-	var var2 bool
-	if len(m.Entries) == 0 {
-		var2 = true
+	keyTarget2, fieldTarget3, err := fieldsTarget1.StartField("Entries")
+	if err != vdl.ErrFieldNoExist && err != nil {
+		return err
 	}
-	if !var2 {
-		keyTarget3, fieldTarget4, err := fieldsTarget1.StartField("Entries")
-		if err != vdl.ErrFieldNoExist && err != nil {
+	if err != vdl.ErrFieldNoExist {
+
+		setTarget4, err := fieldTarget3.StartSet(__VDLTypegroups2, len(m.Entries))
+		if err != nil {
 			return err
 		}
-		if err != vdl.ErrFieldNoExist {
-
-			setTarget5, err := fieldTarget4.StartSet(__VDLTypegroups2, len(m.Entries))
+		for key6 := range m.Entries {
+			keyTarget5, err := setTarget4.StartKey()
 			if err != nil {
 				return err
 			}
-			for key7 := range m.Entries {
-				keyTarget6, err := setTarget5.StartKey()
-				if err != nil {
-					return err
-				}
 
-				if err := key7.FillVDLTarget(keyTarget6, __VDLType_groups_v_io_v23_services_groups_BlessingPatternChunk); err != nil {
-					return err
-				}
-				if err := setTarget5.FinishKey(keyTarget6); err != nil {
-					return err
-				}
-			}
-			if err := fieldTarget4.FinishSet(setTarget5); err != nil {
+			if err := key6.FillVDLTarget(keyTarget5, __VDLType_groups_v_io_v23_services_groups_BlessingPatternChunk); err != nil {
 				return err
 			}
-			if err := fieldsTarget1.FinishField(keyTarget3, fieldTarget4); err != nil {
+			if err := setTarget4.FinishKey(keyTarget5); err != nil {
 				return err
 			}
+		}
+		if err := fieldTarget3.FinishSet(setTarget4); err != nil {
+			return err
+		}
+		if err := fieldsTarget1.FinishField(keyTarget2, fieldTarget3); err != nil {
+			return err
 		}
 	}
 	if err := t.FinishFields(fieldsTarget1); err != nil {
@@ -150,17 +132,6 @@ func (m *GetResponse) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 
 func (m *GetResponse) MakeVDLTarget() vdl.Target {
 	return nil
-}
-
-func (m *GetResponse) IsZero() bool {
-
-	var1 := true
-	var var2 bool
-	if len(m.Entries) == 0 {
-		var2 = true
-	}
-	var1 = var1 && var2
-	return var1
 }
 
 // ApproximationType defines the type of approximation desired when a Relate
@@ -226,12 +197,6 @@ func (m ApproximationType) MakeVDLTarget() vdl.Target {
 	return nil
 }
 
-func (m ApproximationType) IsZero() bool {
-
-	var1 := (m == ApproximationTypeUnder)
-	return var1
-}
-
 // Approximation contains information about membership approximations made
 // during a Relate call.
 type Approximation struct {
@@ -254,34 +219,28 @@ func (m *Approximation) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 		return err
 	}
 
-	var2 := (m.Reason == "")
-	if !var2 {
-		keyTarget3, fieldTarget4, err := fieldsTarget1.StartField("Reason")
-		if err != vdl.ErrFieldNoExist && err != nil {
+	keyTarget2, fieldTarget3, err := fieldsTarget1.StartField("Reason")
+	if err != vdl.ErrFieldNoExist && err != nil {
+		return err
+	}
+	if err != vdl.ErrFieldNoExist {
+		if err := fieldTarget3.FromString(string(m.Reason), vdl.StringType); err != nil {
 			return err
 		}
-		if err != vdl.ErrFieldNoExist {
-			if err := fieldTarget4.FromString(string(m.Reason), vdl.StringType); err != nil {
-				return err
-			}
-			if err := fieldsTarget1.FinishField(keyTarget3, fieldTarget4); err != nil {
-				return err
-			}
+		if err := fieldsTarget1.FinishField(keyTarget2, fieldTarget3); err != nil {
+			return err
 		}
 	}
-	var5 := (m.Details == "")
-	if !var5 {
-		keyTarget6, fieldTarget7, err := fieldsTarget1.StartField("Details")
-		if err != vdl.ErrFieldNoExist && err != nil {
+	keyTarget4, fieldTarget5, err := fieldsTarget1.StartField("Details")
+	if err != vdl.ErrFieldNoExist && err != nil {
+		return err
+	}
+	if err != vdl.ErrFieldNoExist {
+		if err := fieldTarget5.FromString(string(m.Details), vdl.StringType); err != nil {
 			return err
 		}
-		if err != vdl.ErrFieldNoExist {
-			if err := fieldTarget7.FromString(string(m.Details), vdl.StringType); err != nil {
-				return err
-			}
-			if err := fieldsTarget1.FinishField(keyTarget6, fieldTarget7); err != nil {
-				return err
-			}
+		if err := fieldsTarget1.FinishField(keyTarget4, fieldTarget5); err != nil {
+			return err
 		}
 	}
 	if err := t.FinishFields(fieldsTarget1); err != nil {
@@ -292,12 +251,6 @@ func (m *Approximation) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 
 func (m *Approximation) MakeVDLTarget() vdl.Target {
 	return nil
-}
-
-func (m *Approximation) IsZero() bool {
-
-	var1 := (*m == Approximation{})
-	return var1
 }
 
 func init() {

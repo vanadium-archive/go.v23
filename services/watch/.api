@@ -5,15 +5,12 @@ pkg watch, func GlobWatcherClient(string) GlobWatcherClientStub
 pkg watch, func GlobWatcherServer(GlobWatcherServerMethods) GlobWatcherServerStub
 pkg watch, func NewErrUnknownResumeMarker(*context.T) error
 pkg watch, method (*Change) FillVDLTarget(vdl.Target, *vdl.Type) error
-pkg watch, method (*Change) IsZero() bool
 pkg watch, method (*Change) MakeVDLTarget() vdl.Target
 pkg watch, method (*GlobRequest) FillVDLTarget(vdl.Target, *vdl.Type) error
-pkg watch, method (*GlobRequest) IsZero() bool
 pkg watch, method (*GlobRequest) MakeVDLTarget() vdl.Target
 pkg watch, method (*GlobWatcherWatchGlobServerCallStub) Init(rpc.StreamServerCall)
 pkg watch, method (*GlobWatcherWatchGlobServerCallStub) SendStream() interface {  Send(item Change) error;}
 pkg watch, method (ResumeMarker) FillVDLTarget(vdl.Target, *vdl.Type) error
-pkg watch, method (ResumeMarker) IsZero() bool
 pkg watch, method (ResumeMarker) MakeVDLTarget() vdl.Target
 pkg watch, type Change struct
 pkg watch, type Change struct, Continued bool

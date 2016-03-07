@@ -37,12 +37,6 @@ func (m MyTag) MakeVDLTarget() vdl.Target {
 	return nil
 }
 
-func (m MyTag) IsZero() bool {
-
-	var1 := (m == MyTag(""))
-	return var1
-}
-
 func init() {
 	vdl.Register((*MyTag)(nil))
 }
