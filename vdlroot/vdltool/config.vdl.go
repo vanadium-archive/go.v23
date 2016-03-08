@@ -10,7 +10,6 @@
 package vdltool
 
 import (
-	// VDL system imports
 	"fmt"
 	"v.io/v23/vdl"
 )

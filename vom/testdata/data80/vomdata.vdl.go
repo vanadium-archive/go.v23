@@ -8,10 +8,7 @@
 package data80
 
 import (
-	// VDL system imports
 	"v.io/v23/vdl"
-
-	// VDL user imports
 	"v.io/v23/vom/testdata/types"
 )
 

@@ -8,7 +8,6 @@
 package vdl
 
 import (
-	// VDL system imports
 	"fmt"
 )
 

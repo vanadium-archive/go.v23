@@ -19,15 +19,12 @@
 package mounttable
 
 import (
-	// VDL system imports
 	"v.io/v23"
 	"v.io/v23/context"
-	"v.io/v23/rpc"
-	"v.io/v23/vdl"
-
-	// VDL user imports
 	"v.io/v23/naming"
+	"v.io/v23/rpc"
 	"v.io/v23/services/permissions"
+	"v.io/v23/vdl"
 )
 
 type Tag string

@@ -8,15 +8,12 @@
 package security
 
 import (
-	// VDL system imports
 	"v.io/v23/context"
 	"v.io/v23/i18n"
+	"v.io/v23/uniqueid"
 	"v.io/v23/vdl"
 	"v.io/v23/verror"
 	"v.io/v23/vom"
-
-	// VDL user imports
-	"v.io/v23/uniqueid"
 )
 
 // BlessingPattern is a pattern that is matched by specific blessings.

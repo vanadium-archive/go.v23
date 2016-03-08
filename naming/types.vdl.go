@@ -8,12 +8,9 @@
 package naming
 
 import (
-	// VDL system imports
 	"v.io/v23/vdl"
-	"v.io/v23/verror"
-
-	// VDL user imports
 	"v.io/v23/vdlroot/time"
+	"v.io/v23/verror"
 )
 
 // MountFlag is a bit mask of options to the mount call.

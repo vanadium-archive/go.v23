@@ -14,11 +14,8 @@
 package time
 
 import (
-	// VDL system imports
-	"v.io/v23/vdl"
-
-	// VDL user imports
 	"time"
+	"v.io/v23/vdl"
 )
 
 // Time represents an absolute point in time with up to nanosecond precision.

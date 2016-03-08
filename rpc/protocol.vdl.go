@@ -8,13 +8,10 @@
 package rpc
 
 import (
-	// VDL system imports
-	"v.io/v23/vdl"
-	"v.io/v23/verror"
-
-	// VDL user imports
 	"v.io/v23/security"
+	"v.io/v23/vdl"
 	"v.io/v23/vdlroot/time"
+	"v.io/v23/verror"
 	"v.io/v23/vtrace"
 )
 

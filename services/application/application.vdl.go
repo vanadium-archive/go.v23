@@ -9,12 +9,9 @@
 package application
 
 import (
-	// VDL system imports
-	"v.io/v23/vdl"
-
-	// VDL user imports
 	"time"
 	"v.io/v23/security"
+	"v.io/v23/vdl"
 	time_2 "v.io/v23/vdlroot/time"
 )
 

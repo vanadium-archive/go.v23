@@ -10,22 +10,19 @@
 package device
 
 import (
-	// VDL system imports
 	"fmt"
 	"io"
+	"time"
 	"v.io/v23"
 	"v.io/v23/context"
 	"v.io/v23/rpc"
-	"v.io/v23/vdl"
-
-	// VDL user imports
-	"time"
 	"v.io/v23/security"
 	"v.io/v23/security/access"
 	"v.io/v23/services/application"
 	"v.io/v23/services/binary"
 	"v.io/v23/services/permissions"
 	"v.io/v23/services/tidyable"
+	"v.io/v23/vdl"
 	_ "v.io/v23/vdlroot/time"
 )
 

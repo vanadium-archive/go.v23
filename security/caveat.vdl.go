@@ -8,16 +8,13 @@
 package security
 
 import (
-	// VDL system imports
+	"time"
 	"v.io/v23/context"
 	"v.io/v23/i18n"
-	"v.io/v23/vdl"
-	"v.io/v23/verror"
-
-	// VDL user imports
-	"time"
 	"v.io/v23/uniqueid"
+	"v.io/v23/vdl"
 	_ "v.io/v23/vdlroot/time"
+	"v.io/v23/verror"
 )
 
 type nonce [16]byte

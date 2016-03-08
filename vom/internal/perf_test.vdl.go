@@ -8,7 +8,6 @@
 package internal
 
 import (
-	// VDL system imports
 	"fmt"
 	"v.io/v23/vdl"
 )

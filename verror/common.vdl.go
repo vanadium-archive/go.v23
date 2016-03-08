@@ -8,7 +8,6 @@
 package verror
 
 import (
-	// VDL system imports
 	"v.io/v23/context"
 	"v.io/v23/i18n"
 )

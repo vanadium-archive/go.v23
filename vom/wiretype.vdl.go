@@ -8,7 +8,6 @@
 package vom
 
 import (
-	// VDL system imports
 	"v.io/v23/vdl"
 )
 

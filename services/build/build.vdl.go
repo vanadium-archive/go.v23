@@ -9,16 +9,13 @@
 package build
 
 import (
-	// VDL system imports
 	"fmt"
 	"io"
 	"v.io/v23"
 	"v.io/v23/context"
 	"v.io/v23/rpc"
-	"v.io/v23/vdl"
-
-	// VDL user imports
 	"v.io/v23/services/binary"
+	"v.io/v23/vdl"
 )
 
 // Architecture specifies the hardware architecture of a host.
