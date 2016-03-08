@@ -114,10 +114,10 @@ type ListenStatus struct {
 	// entry exists and is nil, the ProxyListen was successful.
 	ProxyErrors map[string]error
 
-	// Valid will be closed if a status change occurs. Callers should
+	// Dirty will be closed if a status change occurs. Callers should
 	// requery manager.Status() to get the fresh server status.
-	// Valid will be nil once the manager is Closed.
-	Valid <-chan struct{}
+	// Dirty will be nil once the manager is Closed.
+	Dirty <-chan struct{}
 }
 
 // PeerAuthorizer is the interface used in performing security authorization.

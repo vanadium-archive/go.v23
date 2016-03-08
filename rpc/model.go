@@ -329,9 +329,9 @@ type ServerStatus struct {
 	// ListenSpec.
 	ProxyErrors map[string]error
 
-	// Valid will be closed if a status change occurs. Callers should
+	// Dirty will be closed if a status change occurs. Callers should
 	// requery server.Status() to get the fresh server status.
-	Valid <-chan struct{}
+	Dirty <-chan struct{}
 }
 
 // Dispatcher defines the interface that a server must implement to handle

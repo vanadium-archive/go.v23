@@ -33,9 +33,9 @@ pkg flow, type Flow interface, Write([]byte) (int, error)
 pkg flow, type Flow interface, WriteMsg(...[]byte) (int, error)
 pkg flow, type Flow interface, WriteMsgAndClose(...[]byte) (int, error)
 pkg flow, type ListenStatus struct
+pkg flow, type ListenStatus struct, Dirty <-chan struct{}
 pkg flow, type ListenStatus struct, Endpoints []naming.Endpoint
 pkg flow, type ListenStatus struct, ProxyErrors map[string]error
-pkg flow, type ListenStatus struct, Valid <-chan struct{}
 pkg flow, type Listener interface { Accept, Addr, Close }
 pkg flow, type Listener interface, Accept(*context.T) (Conn, error)
 pkg flow, type Listener interface, Addr() net.Addr
