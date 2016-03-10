@@ -15,7 +15,7 @@ import (
 	"v.io/v23/services/watch"
 	"v.io/v23/syncbase"
 	"v.io/v23/syncbase/nosql"
-	constants "v.io/x/ref/services/syncbase/server/util"
+	"v.io/x/ref/services/syncbase/common"
 	"v.io/x/ref/test/v23test"
 )
 
@@ -60,7 +60,7 @@ func BenchmarkPingPongPair(b *testing.B) {
 		for g := 0; g < *numGroup; g++ {
 			// Syncbase s0 is the creator.
 			sgSuffix := fmt.Sprintf("SG%d", g+1)
-			sgName := naming.Join(sbs[0].sbName, constants.SyncbaseSuffix, sgSuffix)
+			sgName := naming.Join(sbs[0].sbName, common.SyncbaseSuffix, sgSuffix)
 
 			// TODO(alexfandrianto): Was unable to use the empty prefix ("tb:").
 			// Observation: w0's watch isn't working with the empty prefix.

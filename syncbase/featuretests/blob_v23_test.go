@@ -16,7 +16,7 @@ import (
 	"v.io/v23/naming"
 	wire "v.io/v23/services/syncbase/nosql"
 	"v.io/v23/syncbase"
-	"v.io/x/ref/services/syncbase/server/util"
+	"v.io/x/ref/services/syncbase/common"
 	"v.io/x/ref/test/v23test"
 )
 
@@ -28,7 +28,7 @@ func TestV23BlobWholeTransfer(t *testing.T) {
 
 	sbs := setupSyncbases(t, sh, 2, false)
 
-	sgName := naming.Join("s0", util.SyncbaseSuffix, "SG1")
+	sgName := naming.Join("s0", common.SyncbaseSuffix, "SG1")
 
 	ok(t, populateData(sbs[0].clientCtx, "s0", "foo", 0, 10))
 	ok(t, createSyncgroup(sbs[0].clientCtx, "s0", sgName, "tb:foo", "", sbBlessings(sbs), nil))

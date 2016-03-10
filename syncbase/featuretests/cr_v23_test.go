@@ -17,7 +17,7 @@ import (
 	"v.io/v23/syncbase"
 	"v.io/v23/syncbase/nosql"
 	"v.io/v23/verror"
-	"v.io/x/ref/services/syncbase/server/util"
+	"v.io/x/ref/services/syncbase/common"
 	"v.io/x/ref/test/testutil"
 	"v.io/x/ref/test/v23test"
 )
@@ -325,7 +325,7 @@ func setupCRTest(t *testing.T, sh *v23test.Shell, numInitRows int, devMode bool)
 	sh.StartRootMountTable()
 	sbs := setupSyncbases(t, sh, 2, devMode)
 
-	sgName = naming.Join("s0", util.SyncbaseSuffix, "SG1")
+	sgName = naming.Join("s0", common.SyncbaseSuffix, "SG1")
 
 	// Create syncgroup and populate data on s0.
 	ok(t, createSyncgroup(sbs[0].clientCtx, "s0", sgName, "tb:foo", "", sbBlessings(sbs), nil))
@@ -596,5 +596,5 @@ func (ri *CRImpl) OnConflict(ctx *context.T, conflict *nosql.Conflict) nosql.Res
 }
 
 func keyPart(rowKey string) string {
-	return util.SplitKeyParts(rowKey)[1]
+	return common.SplitKeyParts(rowKey)[1]
 }

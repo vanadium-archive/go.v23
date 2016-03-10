@@ -16,7 +16,7 @@ import (
 	"v.io/v23/syncbase"
 	"v.io/v23/syncbase/nosql"
 	"v.io/v23/verror"
-	"v.io/x/ref/services/syncbase/server/util"
+	"v.io/x/ref/services/syncbase/common"
 	tu "v.io/x/ref/services/syncbase/testutil"
 )
 
@@ -29,7 +29,7 @@ func TestCreateSyncgroup(t *testing.T) {
 
 	// Check if create fails with empty spec.
 	spec := wire.SyncgroupSpec{}
-	sg1 := naming.Join(sName, util.SyncbaseSuffix, "sg1")
+	sg1 := naming.Join(sName, common.SyncbaseSuffix, "sg1")
 
 	createSyncgroup(t, ctx, d, sg1, spec, verror.ErrBadArg.ID)
 
@@ -65,7 +65,7 @@ func TestCreateSyncgroup(t *testing.T) {
 
 	// Create a peer syncgroup.
 	spec.Description = "test syncgroup sg2"
-	sg2 := naming.Join(sName, util.SyncbaseSuffix, "sg2")
+	sg2 := naming.Join(sName, common.SyncbaseSuffix, "sg2")
 	createSyncgroup(t, ctx, d, sg2, spec, verror.ID(""))
 
 	wantNames = []string{sg1, sg2}
@@ -75,7 +75,7 @@ func TestCreateSyncgroup(t *testing.T) {
 	// Create a nested syncgroup.
 	spec.Description = "test syncgroup sg3"
 	spec.Prefixes = []wire.TableRow{{TableName: "t1", Row: "foobar"}}
-	sg3 := naming.Join(sName, util.SyncbaseSuffix, "sg3")
+	sg3 := naming.Join(sName, common.SyncbaseSuffix, "sg3")
 	createSyncgroup(t, ctx, d, sg3, spec, verror.ID(""))
 
 	wantNames = []string{sg1, sg2, sg3}
@@ -89,7 +89,7 @@ func TestCreateSyncgroup(t *testing.T) {
 		t.Fatalf("d.SetPermissions() failed: %v", err)
 	}
 	spec.Description = "test syncgroup sg4"
-	sg4 := naming.Join(sName, util.SyncbaseSuffix, "sg4")
+	sg4 := naming.Join(sName, common.SyncbaseSuffix, "sg4")
 	createSyncgroup(t, ctx, d, sg4, spec, verror.ErrNoAccess.ID)
 	verifySyncgroupNames(t, ctx, d, nil, verror.ErrNoAccess.ID)
 }
@@ -109,7 +109,7 @@ func TestJoinSyncgroup(t *testing.T) {
 		Perms:       perms("root:client1"),
 		Prefixes:    []wire.TableRow{{TableName: "t1", Row: "foo"}},
 	}
-	sgNameA := naming.Join(sName, util.SyncbaseSuffix, "sgA")
+	sgNameA := naming.Join(sName, common.SyncbaseSuffix, "sgA")
 	createSyncgroup(t, ctx1, d1, sgNameA, specA, verror.ID(""))
 
 	// Check that creator can call join successfully.
@@ -144,7 +144,7 @@ func TestJoinSyncgroup(t *testing.T) {
 		Perms:       perms("root:client1", "root:client2"),
 		Prefixes:    []wire.TableRow{{TableName: "t1", Row: "foo"}},
 	}
-	sgNameB := naming.Join(sName, util.SyncbaseSuffix, "sgB")
+	sgNameB := naming.Join(sName, common.SyncbaseSuffix, "sgB")
 	createSyncgroup(t, ctx1, d1, sgNameB, specB, verror.ID(""))
 
 	// Check that client2's join now succeeds.
@@ -167,7 +167,7 @@ func TestSetSpecSyncgroup(t *testing.T) {
 	d := tu.CreateNoSQLDatabase(t, ctx, a, "d")
 
 	// Create successfully.
-	sgName := naming.Join(sName, util.SyncbaseSuffix, "sg1")
+	sgName := naming.Join(sName, common.SyncbaseSuffix, "sg1")
 	spec := wire.SyncgroupSpec{
 		Description: "test syncgroup sg1",
 		Perms:       perms("root:client"),

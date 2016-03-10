@@ -25,7 +25,7 @@ import (
 	"v.io/v23/verror"
 	"v.io/v23/vom"
 	_ "v.io/x/ref/runtime/factories/generic"
-	constants "v.io/x/ref/services/syncbase/server/util"
+	"v.io/x/ref/services/syncbase/common"
 	"v.io/x/ref/services/syncbase/syncbaselib"
 	"v.io/x/ref/test/v23test"
 )
@@ -58,7 +58,7 @@ func TestV23SyncbasedJoinSyncgroup(t *testing.T) {
 	client1Ctx := sh.ForkContext("c1")
 	sh.StartSyncbase(server1Creds, syncbaselib.Opts{Name: "sync1"}, `{"Read": {"In":["root:c1"]}, "Write": {"In":["root:c1"]}}`)
 
-	sgName := naming.Join("sync0", constants.SyncbaseSuffix, "SG1")
+	sgName := naming.Join("sync0", common.SyncbaseSuffix, "SG1")
 
 	ok(t, runSetupAppA(client0Ctx, "sync0"))
 	ok(t, runCreateSyncgroup(client0Ctx, "sync0", sgName, "tb:foo", "", "root:s0", "root:s1"))
@@ -88,7 +88,7 @@ func TestV23SyncbasedGetDeltas(t *testing.T) {
 	// See https://github.com/vanadium/issues/issues/1110
 	sh.StartSyncbase(server1Creds, syncbaselib.Opts{Name: "sync1"}, `{"Resolve": {"In":["root:c1"]}, "Read": {"In":["root:c1"]}, "Write": {"In":["root:c1"]}}`)
 
-	sgName := naming.Join("sync0", constants.SyncbaseSuffix, "SG1")
+	sgName := naming.Join("sync0", common.SyncbaseSuffix, "SG1")
 
 	ok(t, runSetupAppA(client0Ctx, "sync0"))
 	ok(t, runCreateSyncgroup(client0Ctx, "sync0", sgName, "tb:foo,tb:bar", "", "root:s0", "root:s1"))
@@ -128,7 +128,7 @@ func TestV23SyncbasedGetDeltasWithDel(t *testing.T) {
 	// See https://github.com/vanadium/issues/issues/1110
 	sh.StartSyncbase(server1Creds, syncbaselib.Opts{Name: "sync1"}, `{"Resolve": {"In":["root:c1"]}, "Read": {"In":["root:c1"]}, "Write": {"In":["root:c1"]}}`)
 
-	sgName := naming.Join("sync0", constants.SyncbaseSuffix, "SG1")
+	sgName := naming.Join("sync0", common.SyncbaseSuffix, "SG1")
 
 	ok(t, runSetupAppA(client0Ctx, "sync0"))
 	ok(t, runCreateSyncgroup(client0Ctx, "sync0", sgName, "tb:foo,tb:bar", "", "root:s0", "root:s1"))
@@ -179,7 +179,7 @@ func TestV23SyncbasedCompEval(t *testing.T) {
 	server1RDir := sh.MakeTempDir()
 	cleanSync1 := sh.StartSyncbase(server1Creds, syncbaselib.Opts{Name: "sync1", RootDir: server1RDir}, `{"Read": {"In":["root:c1"]}, "Write": {"In":["root:c1"]}}`)
 
-	sgName := naming.Join("sync0", constants.SyncbaseSuffix, "SG1")
+	sgName := naming.Join("sync0", common.SyncbaseSuffix, "SG1")
 
 	ok(t, runSetupAppA(client0Ctx, "sync0"))
 	ok(t, runCreateSyncgroup(client0Ctx, "sync0", sgName, "tb:foo", "", "root:s0", "root:s1"))
@@ -191,7 +191,7 @@ func TestV23SyncbasedCompEval(t *testing.T) {
 	// on the first syncgroup do not get any data belonging to this
 	// syncgroup. This triggers the handling of filtered log records in the
 	// restartability code.
-	sgName1 := naming.Join("sync0", constants.SyncbaseSuffix, "SG2")
+	sgName1 := naming.Join("sync0", common.SyncbaseSuffix, "SG2")
 	ok(t, runCreateSyncgroup(client0Ctx, "sync0", sgName1, "tb:bar", "", "root:s0", "root:s1"))
 	ok(t, runPopulateData(client0Ctx, "sync0", "bar", 0))
 
@@ -251,7 +251,7 @@ func TestV23SyncbasedExchangeDeltasWithAcls(t *testing.T) {
 	client1Ctx := sh.ForkContext("c1")
 	sh.StartSyncbase(server1Creds, syncbaselib.Opts{Name: "sync1"}, `{"Read": {"In":["root:c1"]}, "Write": {"In":["root:c1"]}, "Admin": {"In":["root:c1"]}}`)
 
-	sgName := naming.Join("sync0", constants.SyncbaseSuffix, "SG1")
+	sgName := naming.Join("sync0", common.SyncbaseSuffix, "SG1")
 
 	ok(t, runSetupAppA(client0Ctx, "sync0"))
 	ok(t, runCreateSyncgroup(client0Ctx, "sync0", sgName, "tb:foo", "", "root:s0", "root:s1"))
@@ -318,7 +318,7 @@ func testSyncbasedExchangeDeltasWithConflicts(t *testing.T) {
 	client1Ctx := sh.ForkContext("c1")
 	sh.StartSyncbase(server1Creds, syncbaselib.Opts{Name: "sync1"}, `{"Read": {"In":["root:c1"]}, "Write": {"In":["root:c1"]}}`)
 
-	sgName := naming.Join("sync0", constants.SyncbaseSuffix, "SG1")
+	sgName := naming.Join("sync0", common.SyncbaseSuffix, "SG1")
 
 	ok(t, runSetupAppA(client0Ctx, "sync0"))
 	ok(t, runCreateSyncgroup(client0Ctx, "sync0", sgName, "tb:foo", "", "root:s0", "root:s1"))
@@ -360,8 +360,8 @@ func TestV23NestedSyncgroups(t *testing.T) {
 	client1Ctx := sh.ForkContext("c1")
 	sh.StartSyncbase(server1Creds, syncbaselib.Opts{Name: "sync1"}, `{"Read": {"In":["root:c1"]}, "Write": {"In":["root:c1"]}}`)
 
-	sg1Name := naming.Join("sync0", constants.SyncbaseSuffix, "SG1")
-	sg2Name := naming.Join("sync0", constants.SyncbaseSuffix, "SG2")
+	sg1Name := naming.Join("sync0", common.SyncbaseSuffix, "SG1")
+	sg2Name := naming.Join("sync0", common.SyncbaseSuffix, "SG2")
 
 	ok(t, runSetupAppA(client0Ctx, "sync0"))
 	ok(t, runCreateSyncgroup(client0Ctx, "sync0", sg1Name, "tb:foo", "", "root:s0", "root:s1"))
@@ -403,9 +403,9 @@ func TestV23NestedAndPeerSyncgroups(t *testing.T) {
 	client2Ctx := sh.ForkContext("c2")
 	sh.StartSyncbase(server2Creds, syncbaselib.Opts{Name: "sync2"}, `{"Read": {"In":["root:c2"]}, "Write": {"In":["root:c2"]}}`)
 
-	sg1Name := naming.Join("sync0", constants.SyncbaseSuffix, "SG1")
-	sg2Name := naming.Join("sync0", constants.SyncbaseSuffix, "SG2")
-	sg3Name := naming.Join("sync1", constants.SyncbaseSuffix, "SG3")
+	sg1Name := naming.Join("sync0", common.SyncbaseSuffix, "SG1")
+	sg2Name := naming.Join("sync0", common.SyncbaseSuffix, "SG2")
+	sg3Name := naming.Join("sync1", common.SyncbaseSuffix, "SG3")
 
 	ok(t, runSetupAppA(client0Ctx, "sync0"))
 	ok(t, runCreateSyncgroup(client0Ctx, "sync0", sg1Name, "tb:foo", "", "root:s0", "root:s1", "root:s2"))
@@ -445,7 +445,7 @@ func TestV23SyncbasedGetDeltasPrePopulate(t *testing.T) {
 	client1Ctx := sh.ForkContext("c1")
 	sh.StartSyncbase(server1Creds, syncbaselib.Opts{Name: "sync1"}, `{"Read": {"In":["root:c1"]}, "Write": {"In":["root:c1"]}}`)
 
-	sgName := naming.Join("sync0", constants.SyncbaseSuffix, "SG1")
+	sgName := naming.Join("sync0", common.SyncbaseSuffix, "SG1")
 
 	// Populate table data before creating the syncgroup.  Also populate
 	// with data that is not part of the syncgroup to verify filtering.
@@ -479,7 +479,7 @@ func TestV23SyncbasedGetDeltasMultiApp(t *testing.T) {
 	client1Ctx := sh.ForkContext("c1")
 	sh.StartSyncbase(server1Creds, syncbaselib.Opts{Name: "sync1"}, `{"Read": {"In":["root:c1"]}, "Write": {"In":["root:c1"]}}`)
 
-	sgNamePrefix := naming.Join("sync0", constants.SyncbaseSuffix)
+	sgNamePrefix := naming.Join("sync0", common.SyncbaseSuffix)
 	na, nd, nt := 2, 2, 2 // number of apps, dbs, tables
 
 	ok(t, runSetupAppMulti(client0Ctx, "sync0", na, nd, nt))
@@ -512,7 +512,7 @@ func TestV23SyncgroupSync(t *testing.T) {
 	client2Ctx := sh.ForkContext("c2")
 	sh.StartSyncbase(server2Creds, syncbaselib.Opts{Name: "sync2"}, `{"Read": {"In":["root:c2"]}, "Write": {"In":["root:c2"]}}`)
 
-	sgName := naming.Join("sync0", constants.SyncbaseSuffix, "SG1")
+	sgName := naming.Join("sync0", common.SyncbaseSuffix, "SG1")
 
 	ok(t, runSetupAppA(client0Ctx, "sync0"))
 	ok(t, runCreateSyncgroup(client0Ctx, "sync0", sgName, "tb:foo", "", "root:s0", "root:s1", "root:s2"))

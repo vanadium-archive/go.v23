@@ -11,7 +11,7 @@ import (
 	"v.io/v23/context"
 	"v.io/v23/naming"
 	wire "v.io/v23/services/syncbase"
-	"v.io/x/ref/services/syncbase/server/util"
+	"v.io/x/ref/services/syncbase/common"
 	"v.io/x/ref/services/syncbase/syncbaselib"
 	tu "v.io/x/ref/services/syncbase/testutil"
 	"v.io/x/ref/test/v23test"
@@ -397,7 +397,7 @@ func setupChain(t *testing.T, sbs []*testSyncbase) {
 			break
 		}
 		a, b := sbs[i], sbs[i+1]
-		sgName := naming.Join(a.sbName, util.SyncbaseSuffix, "syncgroup")
+		sgName := naming.Join(a.sbName, common.SyncbaseSuffix, "syncgroup")
 		ok(t, createSyncgroup(a.clientCtx, a.sbName, sgName, testTable+":"+a.sbName+b.sbName, "", "root", nil))
 		ok(t, joinSyncgroup(b.clientCtx, b.sbName, sgName))
 		// Wait for a to see b.

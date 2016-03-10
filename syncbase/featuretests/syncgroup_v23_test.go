@@ -17,7 +17,7 @@ import (
 	"v.io/v23/naming"
 	"v.io/v23/security"
 	"v.io/v23/security/access"
-	constants "v.io/x/ref/services/syncbase/server/util"
+	"v.io/x/ref/services/syncbase/common"
 	"v.io/x/ref/test/v23test"
 )
 
@@ -35,7 +35,7 @@ func TestV23SyncgroupRendezvousOnline(t *testing.T) {
 	sbs := setupSyncbases(t, sh, N, false)
 
 	// Syncbase s0 is the creator.
-	sgName := naming.Join(sbs[0].sbName, constants.SyncbaseSuffix, "SG1")
+	sgName := naming.Join(sbs[0].sbName, common.SyncbaseSuffix, "SG1")
 
 	ok(t, createSyncgroup(sbs[0].clientCtx, sbs[0].sbName, sgName, "tb:foo", "", sbBlessings(sbs), nil))
 
@@ -77,7 +77,7 @@ func TestV23SyncgroupRendezvousOnlineCloud(t *testing.T) {
 	sbs := setupSyncbases(t, sh, N+1, false)
 
 	// Syncbase s0 is the creator, and sN is the cloud.
-	sgName := naming.Join(sbs[N].sbName, constants.SyncbaseSuffix, "SG1")
+	sgName := naming.Join(sbs[N].sbName, common.SyncbaseSuffix, "SG1")
 
 	ok(t, createSyncgroup(sbs[0].clientCtx, sbs[0].sbName, sgName, "tb:foo", "", sbBlessings(sbs), nil))
 
@@ -120,7 +120,7 @@ func TestV23SyncgroupNeighborhoodOnly(t *testing.T) {
 
 	// Syncbase s0 is the creator, but the syncgroup refers to non-existent
 	// Syncbase "s6".
-	sgName := naming.Join("s6", constants.SyncbaseSuffix, "SG1")
+	sgName := naming.Join("s6", common.SyncbaseSuffix, "SG1")
 
 	// For now, we set the permissions to have a single admin. Once we have
 	// syncgroup conflict resolution in place, we should be able to have
@@ -174,7 +174,7 @@ func TestV23SyncgroupPreknownStaggered(t *testing.T) {
 
 	// Syncbase s0 is the first to join or create. Run s0 separately to
 	// stagger the process.
-	sgName := naming.Join(sbs[0].sbName, constants.SyncbaseSuffix, "SG1")
+	sgName := naming.Join(sbs[0].sbName, common.SyncbaseSuffix, "SG1")
 	ok(t, joinOrCreateSyncgroup(sbs[0].clientCtx, sbs[0].sbName, sgName, "tb:foo", "", sbBlessings(sbs)))
 
 	// Remaining syncbases run the specified workload concurrently.
