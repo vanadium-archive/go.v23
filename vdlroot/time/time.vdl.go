@@ -14,6 +14,7 @@
 package time
 
 import (
+	"fmt"
 	"time"
 	"v.io/v23/vdl"
 )
@@ -84,6 +85,42 @@ func (m *Time) MakeVDLTarget() vdl.Target {
 	return nil
 }
 
+type TimeTarget struct {
+	Value     *time.Time
+	wireValue Time
+	vdl.TargetBase
+	vdl.FieldsTargetBase
+}
+
+func (t *TimeTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
+	if !vdl.Compatible(tt, __VDLType_time_time_Time) {
+		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType_time_time_Time)
+	}
+	return t, nil
+}
+func (t *TimeTarget) StartField(name string) (key, field vdl.Target, _ error) {
+	switch name {
+	case "Seconds":
+		val, err := &vdl.Int64Target{Value: &t.wireValue.Seconds}, error(nil)
+		return nil, val, err
+	case "Nanos":
+		val, err := &vdl.Int32Target{Value: &t.wireValue.Nanos}, error(nil)
+		return nil, val, err
+	default:
+		return nil, nil, fmt.Errorf("field %s not in struct %v", name, __VDLType_time_time_Time)
+	}
+}
+func (t *TimeTarget) FinishField(_, _ vdl.Target) error {
+	return nil
+}
+func (t *TimeTarget) FinishFields(_ vdl.FieldsTarget) error {
+
+	if err := TimeToNative(t.wireValue, t.Value); err != nil {
+		return err
+	}
+	return nil
+}
+
 // Duration represents the elapsed duration between two points in time, with
 // up to nanosecond precision.
 type Duration struct {
@@ -142,6 +179,42 @@ func (m *Duration) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 }
 
 func (m *Duration) MakeVDLTarget() vdl.Target {
+	return nil
+}
+
+type DurationTarget struct {
+	Value     *time.Duration
+	wireValue Duration
+	vdl.TargetBase
+	vdl.FieldsTargetBase
+}
+
+func (t *DurationTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
+	if !vdl.Compatible(tt, __VDLType_time_time_Duration) {
+		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType_time_time_Duration)
+	}
+	return t, nil
+}
+func (t *DurationTarget) StartField(name string) (key, field vdl.Target, _ error) {
+	switch name {
+	case "Seconds":
+		val, err := &vdl.Int64Target{Value: &t.wireValue.Seconds}, error(nil)
+		return nil, val, err
+	case "Nanos":
+		val, err := &vdl.Int32Target{Value: &t.wireValue.Nanos}, error(nil)
+		return nil, val, err
+	default:
+		return nil, nil, fmt.Errorf("field %s not in struct %v", name, __VDLType_time_time_Duration)
+	}
+}
+func (t *DurationTarget) FinishField(_, _ vdl.Target) error {
+	return nil
+}
+func (t *DurationTarget) FinishFields(_ vdl.FieldsTarget) error {
+
+	if err := DurationToNative(t.wireValue, t.Value); err != nil {
+		return err
+	}
 	return nil
 }
 
@@ -224,6 +297,42 @@ func (m *WireDeadline) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 }
 
 func (m *WireDeadline) MakeVDLTarget() vdl.Target {
+	return nil
+}
+
+type WireDeadlineTarget struct {
+	Value     *Deadline
+	wireValue WireDeadline
+	vdl.TargetBase
+	vdl.FieldsTargetBase
+}
+
+func (t *WireDeadlineTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
+	if !vdl.Compatible(tt, __VDLType_time_time_WireDeadline) {
+		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType_time_time_WireDeadline)
+	}
+	return t, nil
+}
+func (t *WireDeadlineTarget) StartField(name string) (key, field vdl.Target, _ error) {
+	switch name {
+	case "FromNow":
+		val, err := &DurationTarget{Value: &t.wireValue.FromNow}, error(nil)
+		return nil, val, err
+	case "NoDeadline":
+		val, err := &vdl.BoolTarget{Value: &t.wireValue.NoDeadline}, error(nil)
+		return nil, val, err
+	default:
+		return nil, nil, fmt.Errorf("field %s not in struct %v", name, __VDLType_time_time_WireDeadline)
+	}
+}
+func (t *WireDeadlineTarget) FinishField(_, _ vdl.Target) error {
+	return nil
+}
+func (t *WireDeadlineTarget) FinishFields(_ vdl.FieldsTarget) error {
+
+	if err := WireDeadlineToNative(t.wireValue, t.Value); err != nil {
+		return err
+	}
 	return nil
 }
 

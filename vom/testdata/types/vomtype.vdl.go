@@ -140,6 +140,7 @@ func (t *ConvertGroupTarget) FinishField(_, _ vdl.Target) error {
 	return nil
 }
 func (t *ConvertGroupTarget) FinishFields(_ vdl.FieldsTarget) error {
+
 	return nil
 }
 
@@ -167,6 +168,7 @@ func (t *vomtype5b5d616e79Target) FinishElem(elem vdl.Target) error {
 	return nil
 }
 func (t *vomtype5b5d616e79Target) FinishList(elem vdl.ListTarget) error {
+
 	return nil
 }
 
@@ -402,6 +404,7 @@ func (t *VomdataStructTarget) FinishField(_, _ vdl.Target) error {
 	return nil
 }
 func (t *VomdataStructTarget) FinishFields(_ vdl.FieldsTarget) error {
+
 	return nil
 }
 
@@ -436,6 +439,7 @@ func (t *vomtype6d61705b627974655d5b5d616e79Target) FinishMap(elem vdl.MapTarget
 	if len(*t.Value) == 0 {
 		*t.Value = nil
 	}
+
 	return nil
 }
 
@@ -470,6 +474,7 @@ func (t *vomtype6d61705b737472696e675d5b5d747970656f626a656374Target) FinishMap(
 	if len(*t.Value) == 0 {
 		*t.Value = nil
 	}
+
 	return nil
 }
 
@@ -497,6 +502,7 @@ func (t *vomtype5b5d747970656f626a656374Target) FinishElem(elem vdl.Target) erro
 	return nil
 }
 func (t *vomtype5b5d747970656f626a656374Target) FinishList(elem vdl.ListTarget) error {
+
 	return nil
 }
 
@@ -531,6 +537,7 @@ func (t *vomtype6d61705b737472696e675d5b5d762e696f2f7632332f766f6d2f746573746461
 	if len(*t.Value) == 0 {
 		*t.Value = nil
 	}
+
 	return nil
 }
 
@@ -558,6 +565,7 @@ func (t *vomtype5b5d762e696f2f7632332f766f6d2f74657374646174612f74797065732e436f
 	return nil
 }
 func (t *vomtype5b5d762e696f2f7632332f766f6d2f74657374646174612f74797065732e436f6e7665727447726f7570207374727563747b4e616d6520737472696e673b5072696d6172795479706520747970656f626a6563743b56616c756573205b5d616e797dTarget) FinishList(elem vdl.ListTarget) error {
+
 	return nil
 }
 
@@ -590,6 +598,7 @@ func (t *NBoolTarget) FromBool(src bool, tt *vdl.Type) error {
 		return fmt.Errorf("type %v incompatible with %v", tt, __VDLType_vomtype_v_io_v23_vom_testdata_types_NBool)
 	}
 	*t.Value = NBool(src)
+
 	return nil
 }
 
@@ -621,6 +630,7 @@ func (t *NStringTarget) FromString(src string, tt *vdl.Type) error {
 		return fmt.Errorf("type %v incompatible with %v", tt, __VDLType_vomtype_v_io_v23_vom_testdata_types_NString)
 	}
 	*t.Value = NString(src)
+
 	return nil
 }
 
@@ -657,6 +667,7 @@ func (t *NByteSliceTarget) FromBytes(src []byte, tt *vdl.Type) error {
 		*t.Value = make([]byte, len(src))
 		copy(*t.Value, src)
 	}
+
 	return nil
 }
 
@@ -688,6 +699,7 @@ func (t *NByteArrayTarget) FromBytes(src []byte, tt *vdl.Type) error {
 		return fmt.Errorf("type %v incompatible with %v", tt, __VDLType_vomtype_v_io_v23_vom_testdata_types_NByteArray)
 	}
 	copy((*t.Value)[:], src)
+
 	return nil
 }
 
@@ -720,6 +732,7 @@ func (t *NByteTarget) FromUint(src uint64, tt *vdl.Type) error {
 		return err
 	}
 	*t.Value = NByte(val)
+
 	return nil
 }
 func (t *NByteTarget) FromInt(src int64, tt *vdl.Type) error {
@@ -728,6 +741,7 @@ func (t *NByteTarget) FromInt(src int64, tt *vdl.Type) error {
 		return err
 	}
 	*t.Value = NByte(val)
+
 	return nil
 }
 func (t *NByteTarget) FromFloat(src float64, tt *vdl.Type) error {
@@ -736,6 +750,7 @@ func (t *NByteTarget) FromFloat(src float64, tt *vdl.Type) error {
 		return err
 	}
 	*t.Value = NByte(val)
+
 	return nil
 }
 func (t *NByteTarget) FromComplex(src complex128, tt *vdl.Type) error {
@@ -744,6 +759,7 @@ func (t *NByteTarget) FromComplex(src complex128, tt *vdl.Type) error {
 		return err
 	}
 	*t.Value = NByte(val)
+
 	return nil
 }
 
@@ -776,6 +792,7 @@ func (t *NUint16Target) FromUint(src uint64, tt *vdl.Type) error {
 		return err
 	}
 	*t.Value = NUint16(val)
+
 	return nil
 }
 func (t *NUint16Target) FromInt(src int64, tt *vdl.Type) error {
@@ -784,6 +801,7 @@ func (t *NUint16Target) FromInt(src int64, tt *vdl.Type) error {
 		return err
 	}
 	*t.Value = NUint16(val)
+
 	return nil
 }
 func (t *NUint16Target) FromFloat(src float64, tt *vdl.Type) error {
@@ -792,6 +810,7 @@ func (t *NUint16Target) FromFloat(src float64, tt *vdl.Type) error {
 		return err
 	}
 	*t.Value = NUint16(val)
+
 	return nil
 }
 func (t *NUint16Target) FromComplex(src complex128, tt *vdl.Type) error {
@@ -800,6 +819,7 @@ func (t *NUint16Target) FromComplex(src complex128, tt *vdl.Type) error {
 		return err
 	}
 	*t.Value = NUint16(val)
+
 	return nil
 }
 
@@ -832,6 +852,7 @@ func (t *NUint32Target) FromUint(src uint64, tt *vdl.Type) error {
 		return err
 	}
 	*t.Value = NUint32(val)
+
 	return nil
 }
 func (t *NUint32Target) FromInt(src int64, tt *vdl.Type) error {
@@ -840,6 +861,7 @@ func (t *NUint32Target) FromInt(src int64, tt *vdl.Type) error {
 		return err
 	}
 	*t.Value = NUint32(val)
+
 	return nil
 }
 func (t *NUint32Target) FromFloat(src float64, tt *vdl.Type) error {
@@ -848,6 +870,7 @@ func (t *NUint32Target) FromFloat(src float64, tt *vdl.Type) error {
 		return err
 	}
 	*t.Value = NUint32(val)
+
 	return nil
 }
 func (t *NUint32Target) FromComplex(src complex128, tt *vdl.Type) error {
@@ -856,6 +879,7 @@ func (t *NUint32Target) FromComplex(src complex128, tt *vdl.Type) error {
 		return err
 	}
 	*t.Value = NUint32(val)
+
 	return nil
 }
 
@@ -884,6 +908,7 @@ type NUint64Target struct {
 
 func (t *NUint64Target) FromUint(src uint64, tt *vdl.Type) error {
 	*t.Value = NUint64(src)
+
 	return nil
 }
 func (t *NUint64Target) FromInt(src int64, tt *vdl.Type) error {
@@ -892,6 +917,7 @@ func (t *NUint64Target) FromInt(src int64, tt *vdl.Type) error {
 		return err
 	}
 	*t.Value = NUint64(val)
+
 	return nil
 }
 func (t *NUint64Target) FromFloat(src float64, tt *vdl.Type) error {
@@ -900,6 +926,7 @@ func (t *NUint64Target) FromFloat(src float64, tt *vdl.Type) error {
 		return err
 	}
 	*t.Value = NUint64(val)
+
 	return nil
 }
 func (t *NUint64Target) FromComplex(src complex128, tt *vdl.Type) error {
@@ -908,6 +935,7 @@ func (t *NUint64Target) FromComplex(src complex128, tt *vdl.Type) error {
 		return err
 	}
 	*t.Value = NUint64(val)
+
 	return nil
 }
 
@@ -940,6 +968,7 @@ func (t *NInt8Target) FromUint(src uint64, tt *vdl.Type) error {
 		return err
 	}
 	*t.Value = NInt8(val)
+
 	return nil
 }
 func (t *NInt8Target) FromInt(src int64, tt *vdl.Type) error {
@@ -948,6 +977,7 @@ func (t *NInt8Target) FromInt(src int64, tt *vdl.Type) error {
 		return err
 	}
 	*t.Value = NInt8(val)
+
 	return nil
 }
 func (t *NInt8Target) FromFloat(src float64, tt *vdl.Type) error {
@@ -956,6 +986,7 @@ func (t *NInt8Target) FromFloat(src float64, tt *vdl.Type) error {
 		return err
 	}
 	*t.Value = NInt8(val)
+
 	return nil
 }
 func (t *NInt8Target) FromComplex(src complex128, tt *vdl.Type) error {
@@ -964,6 +995,7 @@ func (t *NInt8Target) FromComplex(src complex128, tt *vdl.Type) error {
 		return err
 	}
 	*t.Value = NInt8(val)
+
 	return nil
 }
 
@@ -996,6 +1028,7 @@ func (t *NInt16Target) FromUint(src uint64, tt *vdl.Type) error {
 		return err
 	}
 	*t.Value = NInt16(val)
+
 	return nil
 }
 func (t *NInt16Target) FromInt(src int64, tt *vdl.Type) error {
@@ -1004,6 +1037,7 @@ func (t *NInt16Target) FromInt(src int64, tt *vdl.Type) error {
 		return err
 	}
 	*t.Value = NInt16(val)
+
 	return nil
 }
 func (t *NInt16Target) FromFloat(src float64, tt *vdl.Type) error {
@@ -1012,6 +1046,7 @@ func (t *NInt16Target) FromFloat(src float64, tt *vdl.Type) error {
 		return err
 	}
 	*t.Value = NInt16(val)
+
 	return nil
 }
 func (t *NInt16Target) FromComplex(src complex128, tt *vdl.Type) error {
@@ -1020,6 +1055,7 @@ func (t *NInt16Target) FromComplex(src complex128, tt *vdl.Type) error {
 		return err
 	}
 	*t.Value = NInt16(val)
+
 	return nil
 }
 
@@ -1052,6 +1088,7 @@ func (t *NInt32Target) FromUint(src uint64, tt *vdl.Type) error {
 		return err
 	}
 	*t.Value = NInt32(val)
+
 	return nil
 }
 func (t *NInt32Target) FromInt(src int64, tt *vdl.Type) error {
@@ -1060,6 +1097,7 @@ func (t *NInt32Target) FromInt(src int64, tt *vdl.Type) error {
 		return err
 	}
 	*t.Value = NInt32(val)
+
 	return nil
 }
 func (t *NInt32Target) FromFloat(src float64, tt *vdl.Type) error {
@@ -1068,6 +1106,7 @@ func (t *NInt32Target) FromFloat(src float64, tt *vdl.Type) error {
 		return err
 	}
 	*t.Value = NInt32(val)
+
 	return nil
 }
 func (t *NInt32Target) FromComplex(src complex128, tt *vdl.Type) error {
@@ -1076,6 +1115,7 @@ func (t *NInt32Target) FromComplex(src complex128, tt *vdl.Type) error {
 		return err
 	}
 	*t.Value = NInt32(val)
+
 	return nil
 }
 
@@ -1108,10 +1148,12 @@ func (t *NInt64Target) FromUint(src uint64, tt *vdl.Type) error {
 		return err
 	}
 	*t.Value = NInt64(val)
+
 	return nil
 }
 func (t *NInt64Target) FromInt(src int64, tt *vdl.Type) error {
 	*t.Value = NInt64(src)
+
 	return nil
 }
 func (t *NInt64Target) FromFloat(src float64, tt *vdl.Type) error {
@@ -1120,6 +1162,7 @@ func (t *NInt64Target) FromFloat(src float64, tt *vdl.Type) error {
 		return err
 	}
 	*t.Value = NInt64(val)
+
 	return nil
 }
 func (t *NInt64Target) FromComplex(src complex128, tt *vdl.Type) error {
@@ -1128,6 +1171,7 @@ func (t *NInt64Target) FromComplex(src complex128, tt *vdl.Type) error {
 		return err
 	}
 	*t.Value = NInt64(val)
+
 	return nil
 }
 
@@ -1160,6 +1204,7 @@ func (t *NFloat32Target) FromUint(src uint64, tt *vdl.Type) error {
 		return err
 	}
 	*t.Value = NFloat32(val)
+
 	return nil
 }
 func (t *NFloat32Target) FromInt(src int64, tt *vdl.Type) error {
@@ -1168,6 +1213,7 @@ func (t *NFloat32Target) FromInt(src int64, tt *vdl.Type) error {
 		return err
 	}
 	*t.Value = NFloat32(val)
+
 	return nil
 }
 func (t *NFloat32Target) FromFloat(src float64, tt *vdl.Type) error {
@@ -1176,6 +1222,7 @@ func (t *NFloat32Target) FromFloat(src float64, tt *vdl.Type) error {
 		return err
 	}
 	*t.Value = NFloat32(val)
+
 	return nil
 }
 func (t *NFloat32Target) FromComplex(src complex128, tt *vdl.Type) error {
@@ -1184,6 +1231,7 @@ func (t *NFloat32Target) FromComplex(src complex128, tt *vdl.Type) error {
 		return err
 	}
 	*t.Value = NFloat32(val)
+
 	return nil
 }
 
@@ -1216,6 +1264,7 @@ func (t *NFloat64Target) FromUint(src uint64, tt *vdl.Type) error {
 		return err
 	}
 	*t.Value = NFloat64(val)
+
 	return nil
 }
 func (t *NFloat64Target) FromInt(src int64, tt *vdl.Type) error {
@@ -1224,10 +1273,12 @@ func (t *NFloat64Target) FromInt(src int64, tt *vdl.Type) error {
 		return err
 	}
 	*t.Value = NFloat64(val)
+
 	return nil
 }
 func (t *NFloat64Target) FromFloat(src float64, tt *vdl.Type) error {
 	*t.Value = NFloat64(src)
+
 	return nil
 }
 func (t *NFloat64Target) FromComplex(src complex128, tt *vdl.Type) error {
@@ -1236,6 +1287,7 @@ func (t *NFloat64Target) FromComplex(src complex128, tt *vdl.Type) error {
 		return err
 	}
 	*t.Value = NFloat64(val)
+
 	return nil
 }
 
@@ -1268,6 +1320,7 @@ func (t *NComplex64Target) FromUint(src uint64, tt *vdl.Type) error {
 		return err
 	}
 	*t.Value = NComplex64(val)
+
 	return nil
 }
 func (t *NComplex64Target) FromInt(src int64, tt *vdl.Type) error {
@@ -1276,6 +1329,7 @@ func (t *NComplex64Target) FromInt(src int64, tt *vdl.Type) error {
 		return err
 	}
 	*t.Value = NComplex64(val)
+
 	return nil
 }
 func (t *NComplex64Target) FromFloat(src float64, tt *vdl.Type) error {
@@ -1284,6 +1338,7 @@ func (t *NComplex64Target) FromFloat(src float64, tt *vdl.Type) error {
 		return err
 	}
 	*t.Value = NComplex64(val)
+
 	return nil
 }
 func (t *NComplex64Target) FromComplex(src complex128, tt *vdl.Type) error {
@@ -1292,6 +1347,7 @@ func (t *NComplex64Target) FromComplex(src complex128, tt *vdl.Type) error {
 		return err
 	}
 	*t.Value = NComplex64(val)
+
 	return nil
 }
 
@@ -1324,6 +1380,7 @@ func (t *NComplex128Target) FromUint(src uint64, tt *vdl.Type) error {
 		return err
 	}
 	*t.Value = NComplex128(val)
+
 	return nil
 }
 func (t *NComplex128Target) FromInt(src int64, tt *vdl.Type) error {
@@ -1332,6 +1389,7 @@ func (t *NComplex128Target) FromInt(src int64, tt *vdl.Type) error {
 		return err
 	}
 	*t.Value = NComplex128(val)
+
 	return nil
 }
 func (t *NComplex128Target) FromFloat(src float64, tt *vdl.Type) error {
@@ -1340,10 +1398,12 @@ func (t *NComplex128Target) FromFloat(src float64, tt *vdl.Type) error {
 		return err
 	}
 	*t.Value = NComplex128(val)
+
 	return nil
 }
 func (t *NComplex128Target) FromComplex(src complex128, tt *vdl.Type) error {
 	*t.Value = NComplex128(src)
+
 	return nil
 }
 
@@ -1400,6 +1460,7 @@ func (t *NArray2Uint64Target) FinishElem(elem vdl.Target) error {
 	return nil
 }
 func (t *NArray2Uint64Target) FinishList(elem vdl.ListTarget) error {
+
 	return nil
 }
 
@@ -1461,6 +1522,7 @@ func (t *NListUint64Target) FinishElem(elem vdl.Target) error {
 	return nil
 }
 func (t *NListUint64Target) FinishList(elem vdl.ListTarget) error {
+
 	return nil
 }
 
@@ -1524,6 +1586,7 @@ func (t *NSetUint64Target) FinishSet(list vdl.SetTarget) error {
 	if len(*t.Value) == 0 {
 		*t.Value = nil
 	}
+
 	return nil
 }
 
@@ -1599,6 +1662,7 @@ func (t *NMapUint64StringTarget) FinishMap(elem vdl.MapTarget) error {
 	if len(*t.Value) == 0 {
 		*t.Value = nil
 	}
+
 	return nil
 }
 
@@ -1699,6 +1763,7 @@ func (t *NStructTarget) FinishField(_, _ vdl.Target) error {
 	return nil
 }
 func (t *NStructTarget) FinishFields(_ vdl.FieldsTarget) error {
+
 	return nil
 }
 
@@ -1785,6 +1850,7 @@ func (t *NEnumTarget) FromEnumLabel(src string, tt *vdl.Type) error {
 	default:
 		return fmt.Errorf("label %s not in enum %v", src, __VDLType_vomtype_v_io_v23_vom_testdata_types_NEnum)
 	}
+
 	return nil
 }
 
@@ -1941,6 +2007,7 @@ func (t *MBoolTarget) FromBool(src bool, tt *vdl.Type) error {
 		return fmt.Errorf("type %v incompatible with %v", tt, __VDLType_vomtype_v_io_v23_vom_testdata_types_MBool)
 	}
 	*t.Value = MBool(src)
+
 	return nil
 }
 
@@ -2109,6 +2176,7 @@ func (t *MStructTarget) FinishField(_, _ vdl.Target) error {
 	return nil
 }
 func (t *MStructTarget) FinishFields(_ vdl.FieldsTarget) error {
+
 	return nil
 }
 
@@ -2129,10 +2197,12 @@ func (t *vomtype3f762e696f2f7632332f766f6d2f74657374646174612f74797065732e4e5374
 	return target.StartFields(tt)
 }
 func (t *vomtype3f762e696f2f7632332f766f6d2f74657374646174612f74797065732e4e537472756374207374727563747b4120626f6f6c3b4220737472696e673b4320696e7436347dTarget) FinishFields(_ vdl.FieldsTarget) error {
+
 	return nil
 }
 func (t *vomtype3f762e696f2f7632332f766f6d2f74657374646174612f74797065732e4e537472756374207374727563747b4120626f6f6c3b4220737472696e673b4320696e7436347dTarget) FromNil(tt *vdl.Type) error {
 	*t.Value = nil
+
 	return nil
 }
 
@@ -2195,6 +2265,7 @@ func (t *MListTarget) FinishElem(elem vdl.Target) error {
 	return nil
 }
 func (t *MListTarget) FinishList(elem vdl.ListTarget) error {
+
 	return nil
 }
 
@@ -2272,6 +2343,7 @@ func (t *MMapTarget) FinishMap(elem vdl.MapTarget) error {
 	if len(*t.Value) == 0 {
 		*t.Value = nil
 	}
+
 	return nil
 }
 
@@ -2308,6 +2380,7 @@ func (t *MByteSliceTarget) FromBytes(src []byte, tt *vdl.Type) error {
 		*t.Value = make([]byte, len(src))
 		copy(*t.Value, src)
 	}
+
 	return nil
 }
 
@@ -2369,6 +2442,7 @@ func (t *MInt8SliceTarget) FinishElem(elem vdl.Target) error {
 	return nil
 }
 func (t *MInt8SliceTarget) FinishList(elem vdl.ListTarget) error {
+
 	return nil
 }
 
@@ -2432,6 +2506,7 @@ func (t *RecATarget) FinishElem(elem vdl.Target) error {
 	return nil
 }
 func (t *RecATarget) FinishList(elem vdl.ListTarget) error {
+
 	return nil
 }
 
@@ -2494,6 +2569,7 @@ func (t *RecXTarget) FinishElem(elem vdl.Target) error {
 	return nil
 }
 func (t *RecXTarget) FinishList(elem vdl.ListTarget) error {
+
 	return nil
 }
 
@@ -2521,6 +2597,7 @@ func (t *RecYTarget) FinishElem(elem vdl.Target) error {
 	return nil
 }
 func (t *RecYTarget) FinishList(elem vdl.ListTarget) error {
+
 	return nil
 }
 
@@ -2618,6 +2695,7 @@ func (t *Rec1Target) FinishElem(elem vdl.Target) error {
 	return nil
 }
 func (t *Rec1Target) FinishList(elem vdl.ListTarget) error {
+
 	return nil
 }
 
@@ -2645,6 +2723,7 @@ func (t *Rec2Target) FinishElem(elem vdl.Target) error {
 	return nil
 }
 func (t *Rec2Target) FinishList(elem vdl.ListTarget) error {
+
 	return nil
 }
 
@@ -2672,6 +2751,7 @@ func (t *Rec3Target) FinishElem(elem vdl.Target) error {
 	return nil
 }
 func (t *Rec3Target) FinishList(elem vdl.ListTarget) error {
+
 	return nil
 }
 
@@ -2699,6 +2779,7 @@ func (t *Rec4Target) FinishElem(elem vdl.Target) error {
 	return nil
 }
 func (t *Rec4Target) FinishList(elem vdl.ListTarget) error {
+
 	return nil
 }
 
@@ -2879,6 +2960,7 @@ func (t *RecStructTarget) FinishField(_, _ vdl.Target) error {
 	return nil
 }
 func (t *RecStructTarget) FinishFields(_ vdl.FieldsTarget) error {
+
 	return nil
 }
 
@@ -2899,10 +2981,12 @@ func (t *vomtype3f762e696f2f7632332f766f6d2f74657374646174612f74797065732e526563
 	return target.StartFields(tt)
 }
 func (t *vomtype3f762e696f2f7632332f766f6d2f74657374646174612f74797065732e526563537472756374207374727563747b41203f762e696f2f7632332f766f6d2f74657374646174612f74797065732e5265635374727563747dTarget) FinishFields(_ vdl.FieldsTarget) error {
+
 	return nil
 }
 func (t *vomtype3f762e696f2f7632332f766f6d2f74657374646174612f74797065732e526563537472756374207374727563747b41203f762e696f2f7632332f766f6d2f74657374646174612f74797065732e5265635374727563747dTarget) FromNil(tt *vdl.Type) error {
 	*t.Value = nil
+
 	return nil
 }
 
@@ -3023,6 +3107,7 @@ func (t *Rec1234Target) FinishField(_, _ vdl.Target) error {
 	return nil
 }
 func (t *Rec1234Target) FinishFields(_ vdl.FieldsTarget) error {
+
 	return nil
 }
 
@@ -3143,6 +3228,7 @@ func (t *Rec1234ATarget) FinishField(_, _ vdl.Target) error {
 	return nil
 }
 func (t *Rec1234ATarget) FinishFields(_ vdl.FieldsTarget) error {
+
 	return nil
 }
 
@@ -3170,6 +3256,7 @@ func (t *vomtype5b5d762e696f2f7632332f766f6d2f74657374646174612f74797065732e5265
 	return nil
 }
 func (t *vomtype5b5d762e696f2f7632332f766f6d2f74657374646174612f74797065732e5265633132333441207374727563747b41205b5d762e696f2f7632332f766f6d2f74657374646174612f74797065732e52656331323334413b52656331323334205b5d762e696f2f7632332f766f6d2f74657374646174612f74797065732e52656331323334207374727563747b523120762e696f2f7632332f766f6d2f74657374646174612f74797065732e52656331205b5d762e696f2f7632332f766f6d2f74657374646174612f74797065732e52656332205b5d762e696f2f7632332f766f6d2f74657374646174612f74797065732e52656333205b5d762e696f2f7632332f766f6d2f74657374646174612f74797065732e52656334205b5d762e696f2f7632332f766f6d2f74657374646174612f74797065732e526563313b523220762e696f2f7632332f766f6d2f74657374646174612f74797065732e526563323b523320762e696f2f7632332f766f6d2f74657374646174612f74797065732e526563333b523420762e696f2f7632332f766f6d2f74657374646174612f74797065732e526563347d7dTarget) FinishList(elem vdl.ListTarget) error {
+
 	return nil
 }
 
@@ -3197,6 +3284,7 @@ func (t *vomtype5b5d762e696f2f7632332f766f6d2f74657374646174612f74797065732e5265
 	return nil
 }
 func (t *vomtype5b5d762e696f2f7632332f766f6d2f74657374646174612f74797065732e52656331323334207374727563747b523120762e696f2f7632332f766f6d2f74657374646174612f74797065732e52656331205b5d762e696f2f7632332f766f6d2f74657374646174612f74797065732e52656332205b5d762e696f2f7632332f766f6d2f74657374646174612f74797065732e52656333205b5d762e696f2f7632332f766f6d2f74657374646174612f74797065732e52656334205b5d762e696f2f7632332f766f6d2f74657374646174612f74797065732e526563313b523220762e696f2f7632332f766f6d2f74657374646174612f74797065732e526563323b523320762e696f2f7632332f766f6d2f74657374646174612f74797065732e526563333b523420762e696f2f7632332f766f6d2f74657374646174612f74797065732e526563347dTarget) FinishList(elem vdl.ListTarget) error {
+
 	return nil
 }
 
@@ -3317,6 +3405,7 @@ func (t *Rec1234BTarget) FinishField(_, _ vdl.Target) error {
 	return nil
 }
 func (t *Rec1234BTarget) FinishFields(_ vdl.FieldsTarget) error {
+
 	return nil
 }
 
@@ -3344,6 +3433,7 @@ func (t *vomtype5b5d762e696f2f7632332f766f6d2f74657374646174612f74797065732e5265
 	return nil
 }
 func (t *vomtype5b5d762e696f2f7632332f766f6d2f74657374646174612f74797065732e5265633132333442207374727563747b42205b5d762e696f2f7632332f766f6d2f74657374646174612f74797065732e52656331323334423b52656331323334205b5d762e696f2f7632332f766f6d2f74657374646174612f74797065732e52656331323334207374727563747b523120762e696f2f7632332f766f6d2f74657374646174612f74797065732e52656331205b5d762e696f2f7632332f766f6d2f74657374646174612f74797065732e52656332205b5d762e696f2f7632332f766f6d2f74657374646174612f74797065732e52656333205b5d762e696f2f7632332f766f6d2f74657374646174612f74797065732e52656334205b5d762e696f2f7632332f766f6d2f74657374646174612f74797065732e526563313b523220762e696f2f7632332f766f6d2f74657374646174612f74797065732e526563323b523320762e696f2f7632332f766f6d2f74657374646174612f74797065732e526563333b523420762e696f2f7632332f766f6d2f74657374646174612f74797065732e526563347d7dTarget) FinishList(elem vdl.ListTarget) error {
+
 	return nil
 }
 
@@ -3430,6 +3520,7 @@ func (t *Rec1234AllTarget) FinishField(_, _ vdl.Target) error {
 	return nil
 }
 func (t *Rec1234AllTarget) FinishFields(_ vdl.FieldsTarget) error {
+
 	return nil
 }
 
@@ -3492,6 +3583,7 @@ func (t *ListStringTarget) FinishElem(elem vdl.Target) error {
 	return nil
 }
 func (t *ListStringTarget) FinishList(elem vdl.ListTarget) error {
+
 	return nil
 }
 
@@ -3548,6 +3640,7 @@ func (t *Array3StringTarget) FinishElem(elem vdl.Target) error {
 	return nil
 }
 func (t *Array3StringTarget) FinishList(elem vdl.ListTarget) error {
+
 	return nil
 }
 
@@ -3604,6 +3697,7 @@ func (t *Array4StringTarget) FinishElem(elem vdl.Target) error {
 	return nil
 }
 func (t *Array4StringTarget) FinishList(elem vdl.ListTarget) error {
+
 	return nil
 }
 
@@ -3704,6 +3798,7 @@ func (t *AbcStructTarget) FinishField(_, _ vdl.Target) error {
 	return nil
 }
 func (t *AbcStructTarget) FinishFields(_ vdl.FieldsTarget) error {
+
 	return nil
 }
 
@@ -3815,6 +3910,7 @@ func (t *AdeStructTarget) FinishField(_, _ vdl.Target) error {
 	return nil
 }
 func (t *AdeStructTarget) FinishFields(_ vdl.FieldsTarget) error {
+
 	return nil
 }
 
@@ -3916,6 +4012,7 @@ func (t *XyzStructTarget) FinishField(_, _ vdl.Target) error {
 	return nil
 }
 func (t *XyzStructTarget) FinishFields(_ vdl.FieldsTarget) error {
+
 	return nil
 }
 
@@ -4002,6 +4099,7 @@ func (t *YzStructTarget) FinishField(_, _ vdl.Target) error {
 	return nil
 }
 func (t *YzStructTarget) FinishFields(_ vdl.FieldsTarget) error {
+
 	return nil
 }
 
@@ -4070,6 +4168,7 @@ func (t *ZStructTarget) FinishField(_, _ vdl.Target) error {
 	return nil
 }
 func (t *ZStructTarget) FinishFields(_ vdl.FieldsTarget) error {
+
 	return nil
 }
 
@@ -4170,6 +4269,7 @@ func (t *MapOnlyStructTarget) FinishField(_, _ vdl.Target) error {
 	return nil
 }
 func (t *MapOnlyStructTarget) FinishFields(_ vdl.FieldsTarget) error {
+
 	return nil
 }
 
@@ -4245,6 +4345,7 @@ func (t *StructOnlyMapTarget) FinishMap(elem vdl.MapTarget) error {
 	if len(*t.Value) == 0 {
 		*t.Value = nil
 	}
+
 	return nil
 }
 
@@ -4345,6 +4446,7 @@ func (t *MapSetStructTarget) FinishField(_, _ vdl.Target) error {
 	return nil
 }
 func (t *MapSetStructTarget) FinishFields(_ vdl.FieldsTarget) error {
+
 	return nil
 }
 
@@ -4420,6 +4522,7 @@ func (t *SetStructMapTarget) FinishMap(elem vdl.MapTarget) error {
 	if len(*t.Value) == 0 {
 		*t.Value = nil
 	}
+
 	return nil
 }
 
@@ -4483,6 +4586,7 @@ func (t *MapStructSetTarget) FinishSet(list vdl.SetTarget) error {
 	if len(*t.Value) == 0 {
 		*t.Value = nil
 	}
+
 	return nil
 }
 
@@ -4558,6 +4662,7 @@ func (t *SetOnlyMapTarget) FinishMap(elem vdl.MapTarget) error {
 	if len(*t.Value) == 0 {
 		*t.Value = nil
 	}
+
 	return nil
 }
 
@@ -4640,6 +4745,7 @@ func (t *SometimesSetMapTarget) FinishMap(elem vdl.MapTarget) error {
 	if len(*t.Value) == 0 {
 		*t.Value = nil
 	}
+
 	return nil
 }
 
@@ -4703,6 +4809,7 @@ func (t *MapOnlySetTarget) FinishSet(list vdl.SetTarget) error {
 	if len(*t.Value) == 0 {
 		*t.Value = nil
 	}
+
 	return nil
 }
 
@@ -4766,6 +4873,7 @@ func (t *SetOnlyATarget) FinishSet(list vdl.SetTarget) error {
 	if len(*t.Value) == 0 {
 		*t.Value = nil
 	}
+
 	return nil
 }
 
@@ -4830,6 +4938,7 @@ func (t *SetOnlyA2Target) FinishSet(list vdl.SetTarget) error {
 	if len(*t.Value) == 0 {
 		*t.Value = nil
 	}
+
 	return nil
 }
 
@@ -4893,6 +5002,7 @@ func (t *SetOnlyBTarget) FinishSet(list vdl.SetTarget) error {
 	if len(*t.Value) == 0 {
 		*t.Value = nil
 	}
+
 	return nil
 }
 
@@ -4957,6 +5067,7 @@ func (t *SetOnlyB2Target) FinishSet(list vdl.SetTarget) error {
 	if len(*t.Value) == 0 {
 		*t.Value = nil
 	}
+
 	return nil
 }
 
@@ -5032,6 +5143,7 @@ func (t *MapOnlyATarget) FinishMap(elem vdl.MapTarget) error {
 	if len(*t.Value) == 0 {
 		*t.Value = nil
 	}
+
 	return nil
 }
 
@@ -5107,6 +5219,7 @@ func (t *MapOnlyA2Target) FinishMap(elem vdl.MapTarget) error {
 	if len(*t.Value) == 0 {
 		*t.Value = nil
 	}
+
 	return nil
 }
 
@@ -5182,6 +5295,7 @@ func (t *MapOnlyBTarget) FinishMap(elem vdl.MapTarget) error {
 	if len(*t.Value) == 0 {
 		*t.Value = nil
 	}
+
 	return nil
 }
 
@@ -5259,6 +5373,7 @@ func (t *MapOnlyB2Target) FinishMap(elem vdl.MapTarget) error {
 	if len(*t.Value) == 0 {
 		*t.Value = nil
 	}
+
 	return nil
 }
 
@@ -5480,6 +5595,7 @@ func (t *BrieEnumTarget) FromEnumLabel(src string, tt *vdl.Type) error {
 	default:
 		return fmt.Errorf("label %s not in enum %v", src, __VDLType_vomtype_v_io_v23_vom_testdata_types_BrieEnum)
 	}
+
 	return nil
 }
 
@@ -5550,6 +5666,7 @@ func (t *BeanEnumTarget) FromEnumLabel(src string, tt *vdl.Type) error {
 	default:
 		return fmt.Errorf("label %s not in enum %v", src, __VDLType_vomtype_v_io_v23_vom_testdata_types_BeanEnum)
 	}
+
 	return nil
 }
 
@@ -5636,6 +5753,7 @@ func (t *FoodEnumTarget) FromEnumLabel(src string, tt *vdl.Type) error {
 	default:
 		return fmt.Errorf("label %s not in enum %v", src, __VDLType_vomtype_v_io_v23_vom_testdata_types_FoodEnum)
 	}
+
 	return nil
 }
 
@@ -5711,6 +5829,7 @@ func (t *StructAnyTarget) FinishField(_, _ vdl.Target) error {
 	return nil
 }
 func (t *StructAnyTarget) FinishFields(_ vdl.FieldsTarget) error {
+
 	return nil
 }
 
@@ -5803,6 +5922,7 @@ func (t *StructMapTarget) FinishField(_, _ vdl.Target) error {
 	return nil
 }
 func (t *StructMapTarget) FinishFields(_ vdl.FieldsTarget) error {
+
 	return nil
 }
 
@@ -5837,6 +5957,7 @@ func (t *vomtype6d61705b696e7436345d696e743634Target) FinishMap(elem vdl.MapTarg
 	if len(*t.Value) == 0 {
 		*t.Value = nil
 	}
+
 	return nil
 }
 
@@ -6293,6 +6414,7 @@ func (t *StructManyTypesTarget) FinishField(_, _ vdl.Target) error {
 	return nil
 }
 func (t *StructManyTypesTarget) FinishFields(_ vdl.FieldsTarget) error {
+
 	return nil
 }
 
@@ -6361,6 +6483,7 @@ func (t *AnySliceTarget) FinishElem(elem vdl.Target) error {
 	return nil
 }
 func (t *AnySliceTarget) FinishList(elem vdl.ListTarget) error {
+
 	return nil
 }
 
@@ -6453,6 +6576,7 @@ func (t *LargeMessageTypeTarget) FinishField(_, _ vdl.Target) error {
 	return nil
 }
 func (t *LargeMessageTypeTarget) FinishFields(_ vdl.FieldsTarget) error {
+
 	return nil
 }
 
@@ -6473,10 +6597,12 @@ func (t *vomtype3f762e696f2f7632332f766f6d2f74657374646174612f74797065732e4c6172
 	return target.StartFields(tt)
 }
 func (t *vomtype3f762e696f2f7632332f766f6d2f74657374646174612f74797065732e4c617267654d65737361676554797065207374727563747b5061796c6f6164205b5d627974653b4e657874203f762e696f2f7632332f766f6d2f74657374646174612f74797065732e4c617267654d657373616765547970657dTarget) FinishFields(_ vdl.FieldsTarget) error {
+
 	return nil
 }
 func (t *vomtype3f762e696f2f7632332f766f6d2f74657374646174612f74797065732e4c617267654d65737361676554797065207374727563747b5061796c6f6164205b5d627974653b4e657874203f762e696f2f7632332f766f6d2f74657374646174612f74797065732e4c617267654d657373616765547970657dTarget) FromNil(tt *vdl.Type) error {
 	*t.Value = nil
+
 	return nil
 }
 
@@ -6575,6 +6701,7 @@ func (t *LargeAnyMessageTypeTarget) FinishField(_, _ vdl.Target) error {
 	return nil
 }
 func (t *LargeAnyMessageTypeTarget) FinishFields(_ vdl.FieldsTarget) error {
+
 	return nil
 }
 
@@ -6595,10 +6722,12 @@ func (t *vomtype3f762e696f2f7632332f766f6d2f74657374646174612f74797065732e4c6172
 	return target.StartFields(tt)
 }
 func (t *vomtype3f762e696f2f7632332f766f6d2f74657374646174612f74797065732e4c61726765416e794d65737361676554797065207374727563747b5061796c6f616420616e793b4e657874203f762e696f2f7632332f766f6d2f74657374646174612f74797065732e4c61726765416e794d657373616765547970657dTarget) FinishFields(_ vdl.FieldsTarget) error {
+
 	return nil
 }
 func (t *vomtype3f762e696f2f7632332f766f6d2f74657374646174612f74797065732e4c61726765416e794d65737361676554797065207374727563747b5061796c6f616420616e793b4e657874203f762e696f2f7632332f766f6d2f74657374646174612f74797065732e4c61726765416e794d657373616765547970657dTarget) FromNil(tt *vdl.Type) error {
 	*t.Value = nil
+
 	return nil
 }
 

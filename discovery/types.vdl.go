@@ -186,6 +186,7 @@ func (t *AdvertisementTarget) FinishField(_, _ vdl.Target) error {
 	return nil
 }
 func (t *AdvertisementTarget) FinishFields(_ vdl.FieldsTarget) error {
+
 	return nil
 }
 
@@ -199,6 +200,7 @@ func (t *AdIdTarget) FromBytes(src []byte, tt *vdl.Type) error {
 		return fmt.Errorf("type %v incompatible with %v", tt, __VDLType_types_v_io_v23_discovery_AdId)
 	}
 	copy((*t.Value)[:], src)
+
 	return nil
 }
 
@@ -233,6 +235,7 @@ func (t *AttributesTarget) FinishMap(elem vdl.MapTarget) error {
 	if len(*t.Value) == 0 {
 		*t.Value = nil
 	}
+
 	return nil
 }
 
@@ -267,6 +270,7 @@ func (t *AttachmentsTarget) FinishMap(elem vdl.MapTarget) error {
 	if len(*t.Value) == 0 {
 		*t.Value = nil
 	}
+
 	return nil
 }
 

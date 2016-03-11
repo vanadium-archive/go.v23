@@ -105,6 +105,7 @@ func (t *MediaInfoTarget) FinishField(_, _ vdl.Target) error {
 	return nil
 }
 func (t *MediaInfoTarget) FinishFields(_ vdl.FieldsTarget) error {
+
 	return nil
 }
 

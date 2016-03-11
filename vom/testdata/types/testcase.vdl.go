@@ -182,6 +182,7 @@ func (t *TestCaseTarget) FinishField(_, _ vdl.Target) error {
 	return nil
 }
 func (t *TestCaseTarget) FinishFields(_ vdl.FieldsTarget) error {
+
 	return nil
 }
 

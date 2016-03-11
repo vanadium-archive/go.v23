@@ -47,6 +47,7 @@ func (t *MyTagTarget) FromString(src string, tt *vdl.Type) error {
 		return fmt.Errorf("type %v incompatible with %v", tt, __VDLType_vdl_v_io_v23_security_access_internal_MyTag)
 	}
 	*t.Value = MyTag(src)
+
 	return nil
 }
 

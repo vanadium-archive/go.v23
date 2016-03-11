@@ -209,6 +209,7 @@ func (t *GlobRequestTarget) FinishField(_, _ vdl.Target) error {
 	return nil
 }
 func (t *GlobRequestTarget) FinishFields(_ vdl.FieldsTarget) error {
+
 	return nil
 }
 
@@ -227,6 +228,7 @@ func (t *ResumeMarkerTarget) FromBytes(src []byte, tt *vdl.Type) error {
 		*t.Value = make([]byte, len(src))
 		copy(*t.Value, src)
 	}
+
 	return nil
 }
 
@@ -429,6 +431,7 @@ func (t *ChangeTarget) FinishField(_, _ vdl.Target) error {
 	return nil
 }
 func (t *ChangeTarget) FinishFields(_ vdl.FieldsTarget) error {
+
 	return nil
 }
 

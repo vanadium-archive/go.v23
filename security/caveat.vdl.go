@@ -46,6 +46,7 @@ func (t *nonceTarget) FromBytes(src []byte, tt *vdl.Type) error {
 		return fmt.Errorf("type %v incompatible with %v", tt, __VDLType_caveat_v_io_v23_security_nonce)
 	}
 	copy((*t.Value)[:], src)
+
 	return nil
 }
 
@@ -221,6 +222,7 @@ func (t *publicKeyThirdPartyCaveatParamTarget) FinishField(_, _ vdl.Target) erro
 	return nil
 }
 func (t *publicKeyThirdPartyCaveatParamTarget) FinishFields(_ vdl.FieldsTarget) error {
+
 	return nil
 }
 
@@ -248,6 +250,7 @@ func (t *caveat5b5d762e696f2f7632332f73656375726974792e4361766561742073747275637
 	return nil
 }
 func (t *caveat5b5d762e696f2f7632332f73656375726974792e436176656174207374727563747b496420762e696f2f7632332f756e6971756569642e4964205b31365d627974653b506172616d566f6d205b5d627974657dTarget) FinishList(elem vdl.ListTarget) error {
+
 	return nil
 }
 
@@ -373,6 +376,7 @@ func (t *publicKeyDischargeTarget) FinishField(_, _ vdl.Target) error {
 	return nil
 }
 func (t *publicKeyDischargeTarget) FinishFields(_ vdl.FieldsTarget) error {
+
 	return nil
 }
 

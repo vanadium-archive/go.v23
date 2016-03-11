@@ -9,7 +9,6 @@ package syncbase
 
 import (
 	"fmt"
-	"reflect"
 	"time"
 	"v.io/v23/vdl"
 	time_2 "v.io/v23/vdlroot/time"
@@ -145,10 +144,10 @@ func (t *DevModeUpdateVClockOptsTarget) StartField(name string) (key, field vdl.
 		val, err := &vdl.StringTarget{Value: &t.Value.NtpHost}, error(nil)
 		return nil, val, err
 	case "Now":
-		val, err := vdl.ReflectTarget(reflect.ValueOf(&t.Value.Now))
+		val, err := &time_2.TimeTarget{Value: &t.Value.Now}, error(nil)
 		return nil, val, err
 	case "ElapsedTime":
-		val, err := vdl.ReflectTarget(reflect.ValueOf(&t.Value.ElapsedTime))
+		val, err := &time_2.DurationTarget{Value: &t.Value.ElapsedTime}, error(nil)
 		return nil, val, err
 	case "DoNtpUpdate":
 		val, err := &vdl.BoolTarget{Value: &t.Value.DoNtpUpdate}, error(nil)
@@ -164,6 +163,7 @@ func (t *DevModeUpdateVClockOptsTarget) FinishField(_, _ vdl.Target) error {
 	return nil
 }
 func (t *DevModeUpdateVClockOptsTarget) FinishFields(_ vdl.FieldsTarget) error {
+
 	return nil
 }
 

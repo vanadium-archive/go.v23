@@ -155,6 +155,7 @@ func (t *ConfigTarget) FinishField(_, _ vdl.Target) error {
 	return nil
 }
 func (t *ConfigTarget) FinishFields(_ vdl.FieldsTarget) error {
+
 	return nil
 }
 
@@ -184,6 +185,7 @@ func (t *config7365745b76646c746f6f6c2e47656e4c616e677561676520656e756d7b476f3b4
 	if len(*t.Value) == 0 {
 		*t.Value = nil
 	}
+
 	return nil
 }
 
@@ -206,6 +208,7 @@ func (t *GenLanguageTarget) FromEnumLabel(src string, tt *vdl.Type) error {
 	default:
 		return fmt.Errorf("label %s not in enum %v", src, __VDLType_config_vdltool_GenLanguage)
 	}
+
 	return nil
 }
 
@@ -234,6 +237,7 @@ func (t *GoConfigTarget) FinishField(_, _ vdl.Target) error {
 	return nil
 }
 func (t *GoConfigTarget) FinishFields(_ vdl.FieldsTarget) error {
+
 	return nil
 }
 
@@ -268,6 +272,7 @@ func (t *config6d61705b737472696e675d76646c746f6f6c2e476f54797065207374727563747
 	if len(*t.Value) == 0 {
 		*t.Value = nil
 	}
+
 	return nil
 }
 
@@ -299,6 +304,7 @@ func (t *GoTypeTarget) FinishField(_, _ vdl.Target) error {
 	return nil
 }
 func (t *GoTypeTarget) FinishFields(_ vdl.FieldsTarget) error {
+
 	return nil
 }
 
@@ -326,6 +332,7 @@ func (t *config5b5d76646c746f6f6c2e476f496d706f7274207374727563747b5061746820737
 	return nil
 }
 func (t *config5b5d76646c746f6f6c2e476f496d706f7274207374727563747b5061746820737472696e673b4e616d6520737472696e677dTarget) FinishList(elem vdl.ListTarget) error {
+
 	return nil
 }
 
@@ -357,6 +364,7 @@ func (t *GoImportTarget) FinishField(_, _ vdl.Target) error {
 	return nil
 }
 func (t *GoImportTarget) FinishFields(_ vdl.FieldsTarget) error {
+
 	return nil
 }
 
@@ -388,6 +396,7 @@ func (t *JavaConfigTarget) FinishField(_, _ vdl.Target) error {
 	return nil
 }
 func (t *JavaConfigTarget) FinishFields(_ vdl.FieldsTarget) error {
+
 	return nil
 }
 
@@ -422,6 +431,7 @@ func (t *config6d61705b737472696e675d737472696e67Target) FinishMap(elem vdl.MapT
 	if len(*t.Value) == 0 {
 		*t.Value = nil
 	}
+
 	return nil
 }
 
@@ -447,6 +457,7 @@ func (t *JavascriptConfigTarget) FinishField(_, _ vdl.Target) error {
 	return nil
 }
 func (t *JavascriptConfigTarget) FinishFields(_ vdl.FieldsTarget) error {
+
 	return nil
 }
 

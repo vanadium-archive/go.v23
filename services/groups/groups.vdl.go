@@ -54,6 +54,7 @@ func (t *BlessingPatternChunkTarget) FromString(src string, tt *vdl.Type) error 
 		return fmt.Errorf("type %v incompatible with %v", tt, __VDLType_groups_v_io_v23_services_groups_BlessingPatternChunk)
 	}
 	*t.Value = BlessingPatternChunk(src)
+
 	return nil
 }
 
@@ -106,6 +107,7 @@ func (t *GetRequestTarget) FinishField(_, _ vdl.Target) error {
 	return nil
 }
 func (t *GetRequestTarget) FinishFields(_ vdl.FieldsTarget) error {
+
 	return nil
 }
 
@@ -192,6 +194,7 @@ func (t *GetResponseTarget) FinishField(_, _ vdl.Target) error {
 	return nil
 }
 func (t *GetResponseTarget) FinishFields(_ vdl.FieldsTarget) error {
+
 	return nil
 }
 
@@ -221,6 +224,7 @@ func (t *groups7365745b762e696f2f7632332f73657276696365732f67726f7570732e426c657
 	if len(*t.Value) == 0 {
 		*t.Value = nil
 	}
+
 	return nil
 }
 
@@ -304,6 +308,7 @@ func (t *ApproximationTypeTarget) FromEnumLabel(src string, tt *vdl.Type) error 
 	default:
 		return fmt.Errorf("label %s not in enum %v", src, __VDLType_groups_v_io_v23_services_groups_ApproximationType)
 	}
+
 	return nil
 }
 
@@ -390,6 +395,7 @@ func (t *ApproximationTarget) FinishField(_, _ vdl.Target) error {
 	return nil
 }
 func (t *ApproximationTarget) FinishFields(_ vdl.FieldsTarget) error {
+
 	return nil
 }
 

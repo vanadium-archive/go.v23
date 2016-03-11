@@ -126,6 +126,7 @@ func (t *AddressInfoTarget) FinishField(_, _ vdl.Target) error {
 	return nil
 }
 func (t *AddressInfoTarget) FinishFields(_ vdl.FieldsTarget) error {
+
 	return nil
 }
 
@@ -212,6 +213,7 @@ func (t *CreditAgencyTarget) FromEnumLabel(src string, tt *vdl.Type) error {
 	default:
 		return fmt.Errorf("label %s not in enum %v", src, __VDLType_perf_test_v_io_v23_vom_internal_CreditAgency)
 	}
+
 	return nil
 }
 
@@ -290,6 +292,7 @@ func (t *ExperianRatingTarget) FromEnumLabel(src string, tt *vdl.Type) error {
 	default:
 		return fmt.Errorf("label %s not in enum %v", src, __VDLType_perf_test_v_io_v23_vom_internal_ExperianRating)
 	}
+
 	return nil
 }
 
@@ -358,6 +361,7 @@ func (t *EquifaxCreditReportTarget) FinishField(_, _ vdl.Target) error {
 	return nil
 }
 func (t *EquifaxCreditReportTarget) FinishFields(_ vdl.FieldsTarget) error {
+
 	return nil
 }
 
@@ -427,6 +431,7 @@ func (t *ExperianCreditReportTarget) FinishField(_, _ vdl.Target) error {
 	return nil
 }
 func (t *ExperianCreditReportTarget) FinishFields(_ vdl.FieldsTarget) error {
+
 	return nil
 }
 
@@ -495,6 +500,7 @@ func (t *TransUnionCreditReportTarget) FinishField(_, _ vdl.Target) error {
 	return nil
 }
 func (t *TransUnionCreditReportTarget) FinishFields(_ vdl.FieldsTarget) error {
+
 	return nil
 }
 
@@ -712,6 +718,7 @@ func (t *CreditReportTarget) FinishField(_, _ vdl.Target) error {
 	return nil
 }
 func (t *CreditReportTarget) FinishFields(_ vdl.FieldsTarget) error {
+
 	return nil
 }
 
@@ -846,6 +853,7 @@ func (t *CustomerTarget) FinishField(_, _ vdl.Target) error {
 	return nil
 }
 func (t *CustomerTarget) FinishFields(_ vdl.FieldsTarget) error {
+
 	return nil
 }
 

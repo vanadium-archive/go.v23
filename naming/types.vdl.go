@@ -9,7 +9,6 @@ package naming
 
 import (
 	"fmt"
-	"reflect"
 	"v.io/v23/vdl"
 	"v.io/v23/vdl/vdlconv"
 	"v.io/v23/vdlroot/time"
@@ -46,6 +45,7 @@ func (t *MountFlagTarget) FromUint(src uint64, tt *vdl.Type) error {
 		return err
 	}
 	*t.Value = MountFlag(val)
+
 	return nil
 }
 func (t *MountFlagTarget) FromInt(src int64, tt *vdl.Type) error {
@@ -54,6 +54,7 @@ func (t *MountFlagTarget) FromInt(src int64, tt *vdl.Type) error {
 		return err
 	}
 	*t.Value = MountFlag(val)
+
 	return nil
 }
 func (t *MountFlagTarget) FromFloat(src float64, tt *vdl.Type) error {
@@ -62,6 +63,7 @@ func (t *MountFlagTarget) FromFloat(src float64, tt *vdl.Type) error {
 		return err
 	}
 	*t.Value = MountFlag(val)
+
 	return nil
 }
 func (t *MountFlagTarget) FromComplex(src complex128, tt *vdl.Type) error {
@@ -70,6 +72,7 @@ func (t *MountFlagTarget) FromComplex(src complex128, tt *vdl.Type) error {
 		return err
 	}
 	*t.Value = MountFlag(val)
+
 	return nil
 }
 
@@ -151,7 +154,7 @@ func (t *MountedServerTarget) StartField(name string) (key, field vdl.Target, _ 
 		val, err := &vdl.StringTarget{Value: &t.Value.Server}, error(nil)
 		return nil, val, err
 	case "Deadline":
-		val, err := vdl.ReflectTarget(reflect.ValueOf(&t.Value.Deadline))
+		val, err := &time.WireDeadlineTarget{Value: &t.Value.Deadline}, error(nil)
 		return nil, val, err
 	default:
 		return nil, nil, fmt.Errorf("field %s not in struct %v", name, __VDLType_types_v_io_v23_naming_MountedServer)
@@ -161,6 +164,7 @@ func (t *MountedServerTarget) FinishField(_, _ vdl.Target) error {
 	return nil
 }
 func (t *MountedServerTarget) FinishFields(_ vdl.FieldsTarget) error {
+
 	return nil
 }
 
@@ -298,6 +302,7 @@ func (t *MountEntryTarget) FinishField(_, _ vdl.Target) error {
 	return nil
 }
 func (t *MountEntryTarget) FinishFields(_ vdl.FieldsTarget) error {
+
 	return nil
 }
 
@@ -325,6 +330,7 @@ func (t *types5b5d762e696f2f7632332f6e616d696e672e4d6f756e7465645365727665722073
 	return nil
 }
 func (t *types5b5d762e696f2f7632332f6e616d696e672e4d6f756e746564536572766572207374727563747b53657276657220737472696e673b446561646c696e652074696d652e57697265446561646c696e65207374727563747b46726f6d4e6f772074696d652e4475726174696f6e207374727563747b5365636f6e647320696e7436343b4e616e6f7320696e7433327d3b4e6f446561646c696e6520626f6f6c7d7dTarget) FinishList(elem vdl.ListTarget) error {
+
 	return nil
 }
 
@@ -425,6 +431,7 @@ func (t *GlobErrorTarget) FinishField(_, _ vdl.Target) error {
 	return nil
 }
 func (t *GlobErrorTarget) FinishFields(_ vdl.FieldsTarget) error {
+
 	return nil
 }
 

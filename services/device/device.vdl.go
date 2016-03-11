@@ -99,6 +99,7 @@ func (t *ConfigTarget) FinishMap(elem vdl.MapTarget) error {
 	if len(*t.Value) == 0 {
 		*t.Value = nil
 	}
+
 	return nil
 }
 
@@ -179,6 +180,7 @@ func (t *InstallationStateTarget) FromEnumLabel(src string, tt *vdl.Type) error 
 	default:
 		return fmt.Errorf("label %s not in enum %v", src, __VDLType_device_v_io_v23_services_device_InstallationState)
 	}
+
 	return nil
 }
 
@@ -291,6 +293,7 @@ func (t *InstanceStateTarget) FromEnumLabel(src string, tt *vdl.Type) error {
 	default:
 		return fmt.Errorf("label %s not in enum %v", src, __VDLType_device_v_io_v23_services_device_InstanceState)
 	}
+
 	return nil
 }
 
@@ -507,6 +510,7 @@ func (t *InstallationStatusTarget) FinishField(_, _ vdl.Target) error {
 	return nil
 }
 func (t *InstallationStatusTarget) FinishFields(_ vdl.FieldsTarget) error {
+
 	return nil
 }
 
@@ -594,6 +598,7 @@ func (t *InstanceStatusTarget) FinishField(_, _ vdl.Target) error {
 	return nil
 }
 func (t *InstanceStatusTarget) FinishFields(_ vdl.FieldsTarget) error {
+
 	return nil
 }
 
@@ -681,6 +686,7 @@ func (t *DeviceStatusTarget) FinishField(_, _ vdl.Target) error {
 	return nil
 }
 func (t *DeviceStatusTarget) FinishFields(_ vdl.FieldsTarget) error {
+
 	return nil
 }
 
@@ -907,6 +913,7 @@ func (t *DescriptionTarget) FinishField(_, _ vdl.Target) error {
 	return nil
 }
 func (t *DescriptionTarget) FinishFields(_ vdl.FieldsTarget) error {
+
 	return nil
 }
 
@@ -936,6 +943,7 @@ func (t *device7365745b737472696e675dTarget) FinishSet(list vdl.SetTarget) error
 	if len(*t.Value) == 0 {
 		*t.Value = nil
 	}
+
 	return nil
 }
 
@@ -1022,6 +1030,7 @@ func (t *AssociationTarget) FinishField(_, _ vdl.Target) error {
 	return nil
 }
 func (t *AssociationTarget) FinishFields(_ vdl.FieldsTarget) error {
+
 	return nil
 }
 

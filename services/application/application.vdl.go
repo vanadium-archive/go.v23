@@ -10,7 +10,6 @@ package application
 
 import (
 	"fmt"
-	"reflect"
 	"time"
 	"v.io/v23/security"
 	"v.io/v23/vdl"
@@ -246,7 +245,7 @@ func (t *EnvelopeTarget) StartField(name string) (key, field vdl.Target, _ error
 		val, err := &SignedFileTarget{Value: &t.Value.Binary}, error(nil)
 		return nil, val, err
 	case "Publisher":
-		val, err := vdl.ReflectTarget(reflect.ValueOf(&t.Value.Publisher))
+		val, err := &security.WireBlessingsTarget{Value: &t.Value.Publisher}, error(nil)
 		return nil, val, err
 	case "Env":
 		val, err := &vdl.StringSliceTarget{Value: &t.Value.Env}, error(nil)
@@ -258,7 +257,7 @@ func (t *EnvelopeTarget) StartField(name string) (key, field vdl.Target, _ error
 		val, err := &vdl.Int32Target{Value: &t.Value.Restarts}, error(nil)
 		return nil, val, err
 	case "RestartTimeWindow":
-		val, err := vdl.ReflectTarget(reflect.ValueOf(&t.Value.RestartTimeWindow))
+		val, err := &time_2.DurationTarget{Value: &t.Value.RestartTimeWindow}, error(nil)
 		return nil, val, err
 	default:
 		return nil, nil, fmt.Errorf("field %s not in struct %v", name, __VDLType_application_v_io_v23_services_application_Envelope)
@@ -268,6 +267,7 @@ func (t *EnvelopeTarget) FinishField(_, _ vdl.Target) error {
 	return nil
 }
 func (t *EnvelopeTarget) FinishFields(_ vdl.FieldsTarget) error {
+
 	return nil
 }
 
@@ -299,6 +299,7 @@ func (t *SignedFileTarget) FinishField(_, _ vdl.Target) error {
 	return nil
 }
 func (t *SignedFileTarget) FinishFields(_ vdl.FieldsTarget) error {
+
 	return nil
 }
 
@@ -333,6 +334,7 @@ func (t *PackagesTarget) FinishMap(elem vdl.MapTarget) error {
 	if len(*t.Value) == 0 {
 		*t.Value = nil
 	}
+
 	return nil
 }
 

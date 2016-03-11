@@ -7,10 +7,22 @@ pkg time, func WireDeadlineFromNative(*WireDeadline, Deadline) error
 pkg time, func WireDeadlineToNative(WireDeadline, *Deadline) error
 pkg time, method (*Duration) FillVDLTarget(vdl.Target, *vdl.Type) error
 pkg time, method (*Duration) MakeVDLTarget() vdl.Target
+pkg time, method (*DurationTarget) FinishField(vdl.Target, vdl.Target) error
+pkg time, method (*DurationTarget) FinishFields(vdl.FieldsTarget) error
+pkg time, method (*DurationTarget) StartField(string) (vdl.Target, vdl.Target, error)
+pkg time, method (*DurationTarget) StartFields(*vdl.Type) (vdl.FieldsTarget, error)
 pkg time, method (*Time) FillVDLTarget(vdl.Target, *vdl.Type) error
 pkg time, method (*Time) MakeVDLTarget() vdl.Target
+pkg time, method (*TimeTarget) FinishField(vdl.Target, vdl.Target) error
+pkg time, method (*TimeTarget) FinishFields(vdl.FieldsTarget) error
+pkg time, method (*TimeTarget) StartField(string) (vdl.Target, vdl.Target, error)
+pkg time, method (*TimeTarget) StartFields(*vdl.Type) (vdl.FieldsTarget, error)
 pkg time, method (*WireDeadline) FillVDLTarget(vdl.Target, *vdl.Type) error
 pkg time, method (*WireDeadline) MakeVDLTarget() vdl.Target
+pkg time, method (*WireDeadlineTarget) FinishField(vdl.Target, vdl.Target) error
+pkg time, method (*WireDeadlineTarget) FinishFields(vdl.FieldsTarget) error
+pkg time, method (*WireDeadlineTarget) StartField(string) (vdl.Target, vdl.Target, error)
+pkg time, method (*WireDeadlineTarget) StartFields(*vdl.Type) (vdl.FieldsTarget, error)
 pkg time, method (Duration) Normalize() Duration
 pkg time, method (Time) Normalize() Time
 pkg time, type Deadline struct
@@ -18,9 +30,21 @@ pkg time, type Deadline struct, embedded time.Time
 pkg time, type Duration struct
 pkg time, type Duration struct, Nanos int32
 pkg time, type Duration struct, Seconds int64
+pkg time, type DurationTarget struct
+pkg time, type DurationTarget struct, Value *time.Duration
+pkg time, type DurationTarget struct, embedded vdl.FieldsTargetBase
+pkg time, type DurationTarget struct, embedded vdl.TargetBase
 pkg time, type Time struct
 pkg time, type Time struct, Nanos int32
 pkg time, type Time struct, Seconds int64
+pkg time, type TimeTarget struct
+pkg time, type TimeTarget struct, Value *time.Time
+pkg time, type TimeTarget struct, embedded vdl.FieldsTargetBase
+pkg time, type TimeTarget struct, embedded vdl.TargetBase
 pkg time, type WireDeadline struct
 pkg time, type WireDeadline struct, FromNow time.Duration
 pkg time, type WireDeadline struct, NoDeadline bool
+pkg time, type WireDeadlineTarget struct
+pkg time, type WireDeadlineTarget struct, Value *Deadline
+pkg time, type WireDeadlineTarget struct, embedded vdl.FieldsTargetBase
+pkg time, type WireDeadlineTarget struct, embedded vdl.TargetBase

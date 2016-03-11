@@ -108,6 +108,7 @@ func (t *TaskTarget) FinishField(_, _ vdl.Target) error {
 	return nil
 }
 func (t *TaskTarget) FinishFields(_ vdl.FieldsTarget) error {
+
 	return nil
 }
 

@@ -247,6 +247,7 @@ func (t *AccessListTarget) FinishField(_, _ vdl.Target) error {
 	return nil
 }
 func (t *AccessListTarget) FinishFields(_ vdl.FieldsTarget) error {
+
 	return nil
 }
 
@@ -274,6 +275,7 @@ func (t *types5b5d762e696f2f7632332f73656375726974792e426c657373696e675061747465
 	return nil
 }
 func (t *types5b5d762e696f2f7632332f73656375726974792e426c657373696e675061747465726e20737472696e67Target) FinishList(elem vdl.ListTarget) error {
+
 	return nil
 }
 
@@ -357,6 +359,7 @@ func (t *PermissionsTarget) FinishMap(elem vdl.MapTarget) error {
 	if len(*t.Value) == 0 {
 		*t.Value = nil
 	}
+
 	return nil
 }
 
@@ -393,6 +396,7 @@ func (t *TagTarget) FromString(src string, tt *vdl.Type) error {
 		return fmt.Errorf("type %v incompatible with %v", tt, __VDLType_types_v_io_v23_security_access_Tag)
 	}
 	*t.Value = Tag(src)
+
 	return nil
 }
 

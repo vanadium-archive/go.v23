@@ -399,6 +399,7 @@ func (t *DumpAtomTarget) FinishField(_, _ vdl.Target) error {
 	return nil
 }
 func (t *DumpAtomTarget) FinishFields(_ vdl.FieldsTarget) error {
+
 	return nil
 }
 
@@ -445,6 +446,7 @@ func (t *DumpKindTarget) FromEnumLabel(src string, tt *vdl.Type) error {
 	default:
 		return fmt.Errorf("label %s not in enum %v", src, __VDLType_dump_v_io_v23_vom_DumpKind)
 	}
+
 	return nil
 }
 
@@ -669,6 +671,7 @@ func (t *ControlKindTarget) FromEnumLabel(src string, tt *vdl.Type) error {
 	default:
 		return fmt.Errorf("label %s not in enum %v", src, __VDLType_dump_v_io_v23_vom_ControlKind)
 	}
+
 	return nil
 }
 

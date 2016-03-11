@@ -9,7 +9,6 @@ package vtrace
 
 import (
 	"fmt"
-	"reflect"
 	"time"
 	"v.io/v23/uniqueid"
 	"v.io/v23/vdl"
@@ -115,6 +114,7 @@ func (t *TraceRecordTarget) FinishField(_, _ vdl.Target) error {
 	return nil
 }
 func (t *TraceRecordTarget) FinishFields(_ vdl.FieldsTarget) error {
+
 	return nil
 }
 
@@ -142,6 +142,7 @@ func (t *types5b5d762e696f2f7632332f7674726163652e5370616e5265636f72642073747275
 	return nil
 }
 func (t *types5b5d762e696f2f7632332f7674726163652e5370616e5265636f7264207374727563747b496420762e696f2f7632332f756e6971756569642e4964205b31365d627974653b506172656e7420762e696f2f7632332f756e6971756569642e49643b4e616d6520737472696e673b53746172742074696d652e54696d65207374727563747b5365636f6e647320696e7436343b4e616e6f7320696e7433327d3b456e642074696d652e54696d653b416e6e6f746174696f6e73205b5d762e696f2f7632332f7674726163652e416e6e6f746174696f6e207374727563747b5768656e2074696d652e54696d653b4d65737361676520737472696e677d7dTarget) FinishList(elem vdl.ListTarget) error {
+
 	return nil
 }
 
@@ -169,10 +170,10 @@ func (t *SpanRecordTarget) StartField(name string) (key, field vdl.Target, _ err
 		val, err := &vdl.StringTarget{Value: &t.Value.Name}, error(nil)
 		return nil, val, err
 	case "Start":
-		val, err := vdl.ReflectTarget(reflect.ValueOf(&t.Value.Start))
+		val, err := &time_2.TimeTarget{Value: &t.Value.Start}, error(nil)
 		return nil, val, err
 	case "End":
-		val, err := vdl.ReflectTarget(reflect.ValueOf(&t.Value.End))
+		val, err := &time_2.TimeTarget{Value: &t.Value.End}, error(nil)
 		return nil, val, err
 	case "Annotations":
 		val, err := &types5b5d762e696f2f7632332f7674726163652e416e6e6f746174696f6e207374727563747b5768656e2074696d652e54696d65207374727563747b5365636f6e647320696e7436343b4e616e6f7320696e7433327d3b4d65737361676520737472696e677dTarget{Value: &t.Value.Annotations}, error(nil)
@@ -185,6 +186,7 @@ func (t *SpanRecordTarget) FinishField(_, _ vdl.Target) error {
 	return nil
 }
 func (t *SpanRecordTarget) FinishFields(_ vdl.FieldsTarget) error {
+
 	return nil
 }
 
@@ -212,6 +214,7 @@ func (t *types5b5d762e696f2f7632332f7674726163652e416e6e6f746174696f6e2073747275
 	return nil
 }
 func (t *types5b5d762e696f2f7632332f7674726163652e416e6e6f746174696f6e207374727563747b5768656e2074696d652e54696d65207374727563747b5365636f6e647320696e7436343b4e616e6f7320696e7433327d3b4d65737361676520737472696e677dTarget) FinishList(elem vdl.ListTarget) error {
+
 	return nil
 }
 
@@ -230,7 +233,7 @@ func (t *AnnotationTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
 func (t *AnnotationTarget) StartField(name string) (key, field vdl.Target, _ error) {
 	switch name {
 	case "When":
-		val, err := vdl.ReflectTarget(reflect.ValueOf(&t.Value.When))
+		val, err := &time_2.TimeTarget{Value: &t.Value.When}, error(nil)
 		return nil, val, err
 	case "Message":
 		val, err := &vdl.StringTarget{Value: &t.Value.Message}, error(nil)
@@ -243,6 +246,7 @@ func (t *AnnotationTarget) FinishField(_, _ vdl.Target) error {
 	return nil
 }
 func (t *AnnotationTarget) FinishFields(_ vdl.FieldsTarget) error {
+
 	return nil
 }
 
@@ -474,6 +478,7 @@ func (t *TraceFlagsTarget) FromUint(src uint64, tt *vdl.Type) error {
 		return err
 	}
 	*t.Value = TraceFlags(val)
+
 	return nil
 }
 func (t *TraceFlagsTarget) FromInt(src int64, tt *vdl.Type) error {
@@ -482,6 +487,7 @@ func (t *TraceFlagsTarget) FromInt(src int64, tt *vdl.Type) error {
 		return err
 	}
 	*t.Value = TraceFlags(val)
+
 	return nil
 }
 func (t *TraceFlagsTarget) FromFloat(src float64, tt *vdl.Type) error {
@@ -490,6 +496,7 @@ func (t *TraceFlagsTarget) FromFloat(src float64, tt *vdl.Type) error {
 		return err
 	}
 	*t.Value = TraceFlags(val)
+
 	return nil
 }
 func (t *TraceFlagsTarget) FromComplex(src complex128, tt *vdl.Type) error {
@@ -498,6 +505,7 @@ func (t *TraceFlagsTarget) FromComplex(src complex128, tt *vdl.Type) error {
 		return err
 	}
 	*t.Value = TraceFlags(val)
+
 	return nil
 }
 
@@ -618,6 +626,7 @@ func (t *RequestTarget) FinishField(_, _ vdl.Target) error {
 	return nil
 }
 func (t *RequestTarget) FinishFields(_ vdl.FieldsTarget) error {
+
 	return nil
 }
 
@@ -706,6 +715,7 @@ func (t *ResponseTarget) FinishField(_, _ vdl.Target) error {
 	return nil
 }
 func (t *ResponseTarget) FinishFields(_ vdl.FieldsTarget) error {
+
 	return nil
 }
 

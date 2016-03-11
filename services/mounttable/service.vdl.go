@@ -56,6 +56,7 @@ func (t *TagTarget) FromString(src string, tt *vdl.Type) error {
 		return fmt.Errorf("type %v incompatible with %v", tt, __VDLType_service_v_io_v23_services_mounttable_Tag)
 	}
 	*t.Value = Tag(src)
+
 	return nil
 }
 

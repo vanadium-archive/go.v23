@@ -102,6 +102,7 @@ func (t *LogEntryTarget) FinishField(_, _ vdl.Target) error {
 	return nil
 }
 func (t *LogEntryTarget) FinishFields(_ vdl.FieldsTarget) error {
+
 	return nil
 }
 

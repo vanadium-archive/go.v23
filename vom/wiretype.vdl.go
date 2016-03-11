@@ -39,6 +39,7 @@ type typeIdTarget struct {
 
 func (t *typeIdTarget) FromUint(src uint64, tt *vdl.Type) error {
 	*t.Value = typeId(src)
+
 	return nil
 }
 func (t *typeIdTarget) FromInt(src int64, tt *vdl.Type) error {
@@ -47,6 +48,7 @@ func (t *typeIdTarget) FromInt(src int64, tt *vdl.Type) error {
 		return err
 	}
 	*t.Value = typeId(val)
+
 	return nil
 }
 func (t *typeIdTarget) FromFloat(src float64, tt *vdl.Type) error {
@@ -55,6 +57,7 @@ func (t *typeIdTarget) FromFloat(src float64, tt *vdl.Type) error {
 		return err
 	}
 	*t.Value = typeId(val)
+
 	return nil
 }
 func (t *typeIdTarget) FromComplex(src complex128, tt *vdl.Type) error {
@@ -63,6 +66,7 @@ func (t *typeIdTarget) FromComplex(src complex128, tt *vdl.Type) error {
 		return err
 	}
 	*t.Value = typeId(val)
+
 	return nil
 }
 
@@ -494,6 +498,7 @@ func (t *wireNamedTarget) FinishField(_, _ vdl.Target) error {
 	return nil
 }
 func (t *wireNamedTarget) FinishFields(_ vdl.FieldsTarget) error {
+
 	return nil
 }
 
@@ -596,6 +601,7 @@ func (t *wireEnumTarget) FinishField(_, _ vdl.Target) error {
 	return nil
 }
 func (t *wireEnumTarget) FinishFields(_ vdl.FieldsTarget) error {
+
 	return nil
 }
 
@@ -698,6 +704,7 @@ func (t *wireArrayTarget) FinishField(_, _ vdl.Target) error {
 	return nil
 }
 func (t *wireArrayTarget) FinishFields(_ vdl.FieldsTarget) error {
+
 	return nil
 }
 
@@ -784,6 +791,7 @@ func (t *wireListTarget) FinishField(_, _ vdl.Target) error {
 	return nil
 }
 func (t *wireListTarget) FinishFields(_ vdl.FieldsTarget) error {
+
 	return nil
 }
 
@@ -870,6 +878,7 @@ func (t *wireSetTarget) FinishField(_, _ vdl.Target) error {
 	return nil
 }
 func (t *wireSetTarget) FinishFields(_ vdl.FieldsTarget) error {
+
 	return nil
 }
 
@@ -973,6 +982,7 @@ func (t *wireMapTarget) FinishField(_, _ vdl.Target) error {
 	return nil
 }
 func (t *wireMapTarget) FinishFields(_ vdl.FieldsTarget) error {
+
 	return nil
 }
 
@@ -1059,6 +1069,7 @@ func (t *wireFieldTarget) FinishField(_, _ vdl.Target) error {
 	return nil
 }
 func (t *wireFieldTarget) FinishFields(_ vdl.FieldsTarget) error {
+
 	return nil
 }
 
@@ -1162,6 +1173,7 @@ func (t *wireStructTarget) FinishField(_, _ vdl.Target) error {
 	return nil
 }
 func (t *wireStructTarget) FinishFields(_ vdl.FieldsTarget) error {
+
 	return nil
 }
 
@@ -1189,6 +1201,7 @@ func (t *wiretype5b5d762e696f2f7632332f766f6d2e776972654669656c64207374727563747
 	return nil
 }
 func (t *wiretype5b5d762e696f2f7632332f766f6d2e776972654669656c64207374727563747b4e616d6520737472696e673b5479706520762e696f2f7632332f766f6d2e7479706549642075696e7436347dTarget) FinishList(elem vdl.ListTarget) error {
+
 	return nil
 }
 
@@ -1292,6 +1305,7 @@ func (t *wireUnionTarget) FinishField(_, _ vdl.Target) error {
 	return nil
 }
 func (t *wireUnionTarget) FinishFields(_ vdl.FieldsTarget) error {
+
 	return nil
 }
 
@@ -1378,6 +1392,7 @@ func (t *wireOptionalTarget) FinishField(_, _ vdl.Target) error {
 	return nil
 }
 func (t *wireOptionalTarget) FinishFields(_ vdl.FieldsTarget) error {
+
 	return nil
 }
 

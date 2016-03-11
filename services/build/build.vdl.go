@@ -102,6 +102,7 @@ func (t *ArchitectureTarget) FromEnumLabel(src string, tt *vdl.Type) error {
 	default:
 		return fmt.Errorf("label %s not in enum %v", src, __VDLType_build_v_io_v23_services_build_Architecture)
 	}
+
 	return nil
 }
 
@@ -189,6 +190,7 @@ func (t *FormatTarget) FromEnumLabel(src string, tt *vdl.Type) error {
 	default:
 		return fmt.Errorf("label %s not in enum %v", src, __VDLType_build_v_io_v23_services_build_Format)
 	}
+
 	return nil
 }
 
@@ -284,6 +286,7 @@ func (t *OperatingSystemTarget) FromEnumLabel(src string, tt *vdl.Type) error {
 	default:
 		return fmt.Errorf("label %s not in enum %v", src, __VDLType_build_v_io_v23_services_build_OperatingSystem)
 	}
+
 	return nil
 }
 
@@ -370,6 +373,7 @@ func (t *FileTarget) FinishField(_, _ vdl.Target) error {
 	return nil
 }
 func (t *FileTarget) FinishFields(_ vdl.FieldsTarget) error {
+
 	return nil
 }
 

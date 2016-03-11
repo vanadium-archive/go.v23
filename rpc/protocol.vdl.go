@@ -9,7 +9,6 @@ package rpc
 
 import (
 	"fmt"
-	"reflect"
 	"v.io/v23/security"
 	"v.io/v23/vdl"
 	"v.io/v23/vdlroot/time"
@@ -213,10 +212,10 @@ func (t *RequestTarget) StartField(name string) (key, field vdl.Target, _ error)
 		val, err := &vdl.BoolTarget{Value: &t.Value.EndStreamArgs}, error(nil)
 		return nil, val, err
 	case "Deadline":
-		val, err := vdl.ReflectTarget(reflect.ValueOf(&t.Value.Deadline))
+		val, err := &time.WireDeadlineTarget{Value: &t.Value.Deadline}, error(nil)
 		return nil, val, err
 	case "GrantedBlessings":
-		val, err := vdl.ReflectTarget(reflect.ValueOf(&t.Value.GrantedBlessings))
+		val, err := &security.WireBlessingsTarget{Value: &t.Value.GrantedBlessings}, error(nil)
 		return nil, val, err
 	case "TraceRequest":
 		val, err := &vtrace.RequestTarget{Value: &t.Value.TraceRequest}, error(nil)
@@ -232,6 +231,7 @@ func (t *RequestTarget) FinishField(_, _ vdl.Target) error {
 	return nil
 }
 func (t *RequestTarget) FinishFields(_ vdl.FieldsTarget) error {
+
 	return nil
 }
 
@@ -389,6 +389,7 @@ func (t *ResponseTarget) FinishField(_, _ vdl.Target) error {
 	return nil
 }
 func (t *ResponseTarget) FinishFields(_ vdl.FieldsTarget) error {
+
 	return nil
 }
 

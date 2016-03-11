@@ -41,6 +41,7 @@ func (t *IdTarget) FromBytes(src []byte, tt *vdl.Type) error {
 		return fmt.Errorf("type %v incompatible with %v", tt, __VDLType_types_v_io_v23_uniqueid_Id)
 	}
 	copy((*t.Value)[:], src)
+
 	return nil
 }
 

@@ -135,6 +135,7 @@ func (t *DescriptionTarget) FinishField(_, _ vdl.Target) error {
 	return nil
 }
 func (t *DescriptionTarget) FinishFields(_ vdl.FieldsTarget) error {
+
 	return nil
 }
 
@@ -169,6 +170,7 @@ func (t *binary6d61705b737472696e675d626f6f6cTarget) FinishMap(elem vdl.MapTarge
 	if len(*t.Value) == 0 {
 		*t.Value = nil
 	}
+
 	return nil
 }
 
@@ -256,6 +258,7 @@ func (t *PartInfoTarget) FinishField(_, _ vdl.Target) error {
 	return nil
 }
 func (t *PartInfoTarget) FinishFields(_ vdl.FieldsTarget) error {
+
 	return nil
 }
 

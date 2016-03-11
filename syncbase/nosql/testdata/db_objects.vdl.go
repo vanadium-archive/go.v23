@@ -128,6 +128,7 @@ func (t *AddressInfoTarget) FinishField(_, _ vdl.Target) error {
 	return nil
 }
 func (t *AddressInfoTarget) FinishFields(_ vdl.FieldsTarget) error {
+
 	return nil
 }
 
@@ -214,6 +215,7 @@ func (t *CreditAgencyTarget) FromEnumLabel(src string, tt *vdl.Type) error {
 	default:
 		return fmt.Errorf("label %s not in enum %v", src, __VDLType_db_objects_v_io_v23_syncbase_nosql_testdata_CreditAgency)
 	}
+
 	return nil
 }
 
@@ -292,6 +294,7 @@ func (t *ExperianRatingTarget) FromEnumLabel(src string, tt *vdl.Type) error {
 	default:
 		return fmt.Errorf("label %s not in enum %v", src, __VDLType_db_objects_v_io_v23_syncbase_nosql_testdata_ExperianRating)
 	}
+
 	return nil
 }
 
@@ -360,6 +363,7 @@ func (t *EquifaxCreditReportTarget) FinishField(_, _ vdl.Target) error {
 	return nil
 }
 func (t *EquifaxCreditReportTarget) FinishFields(_ vdl.FieldsTarget) error {
+
 	return nil
 }
 
@@ -429,6 +433,7 @@ func (t *ExperianCreditReportTarget) FinishField(_, _ vdl.Target) error {
 	return nil
 }
 func (t *ExperianCreditReportTarget) FinishFields(_ vdl.FieldsTarget) error {
+
 	return nil
 }
 
@@ -497,6 +502,7 @@ func (t *TransUnionCreditReportTarget) FinishField(_, _ vdl.Target) error {
 	return nil
 }
 func (t *TransUnionCreditReportTarget) FinishFields(_ vdl.FieldsTarget) error {
+
 	return nil
 }
 
@@ -714,6 +720,7 @@ func (t *CreditReportTarget) FinishField(_, _ vdl.Target) error {
 	return nil
 }
 func (t *CreditReportTarget) FinishFields(_ vdl.FieldsTarget) error {
+
 	return nil
 }
 
@@ -848,6 +855,7 @@ func (t *CustomerTarget) FinishField(_, _ vdl.Target) error {
 	return nil
 }
 func (t *CustomerTarget) FinishFields(_ vdl.FieldsTarget) error {
+
 	return nil
 }
 
@@ -969,7 +977,7 @@ func (t *InvoiceTarget) StartField(name string) (key, field vdl.Target, _ error)
 		val, err := &vdl.Int64Target{Value: &t.Value.InvoiceNum}, error(nil)
 		return nil, val, err
 	case "InvoiceDate":
-		val, err := vdl.ReflectTarget(reflect.ValueOf(&t.Value.InvoiceDate))
+		val, err := &time_2.TimeTarget{Value: &t.Value.InvoiceDate}, error(nil)
 		return nil, val, err
 	case "Amount":
 		val, err := &vdl.Int64Target{Value: &t.Value.Amount}, error(nil)
@@ -985,6 +993,7 @@ func (t *InvoiceTarget) FinishField(_, _ vdl.Target) error {
 	return nil
 }
 func (t *InvoiceTarget) FinishFields(_ vdl.FieldsTarget) error {
+
 	return nil
 }
 
@@ -1213,6 +1222,7 @@ func (t *NumbersTarget) FinishField(_, _ vdl.Target) error {
 	return nil
 }
 func (t *NumbersTarget) FinishFields(_ vdl.FieldsTarget) error {
+
 	return nil
 }
 
@@ -1282,6 +1292,7 @@ func (t *FooTypeTarget) FinishField(_, _ vdl.Target) error {
 	return nil
 }
 func (t *FooTypeTarget) FinishFields(_ vdl.FieldsTarget) error {
+
 	return nil
 }
 
@@ -1310,6 +1321,7 @@ func (t *BarTypeTarget) FinishField(_, _ vdl.Target) error {
 	return nil
 }
 func (t *BarTypeTarget) FinishFields(_ vdl.FieldsTarget) error {
+
 	return nil
 }
 
@@ -1341,6 +1353,7 @@ func (t *BazTypeTarget) FinishField(_, _ vdl.Target) error {
 	return nil
 }
 func (t *BazTypeTarget) FinishFields(_ vdl.FieldsTarget) error {
+
 	return nil
 }
 
@@ -1586,6 +1599,7 @@ func (t *ArrayOfFourTarget) FinishElem(elem vdl.Target) error {
 	return nil
 }
 func (t *ArrayOfFourTarget) FinishList(elem vdl.ListTarget) error {
+
 	return nil
 }
 
@@ -1761,6 +1775,7 @@ func (t *KeyIndexDataTarget) FinishField(_, _ vdl.Target) error {
 	return nil
 }
 func (t *KeyIndexDataTarget) FinishFields(_ vdl.FieldsTarget) error {
+
 	return nil
 }
 
@@ -1795,6 +1810,7 @@ func (t *db_objects6d61705b636f6d706c65783132385d737472696e67Target) FinishMap(e
 	if len(*t.Value) == 0 {
 		*t.Value = nil
 	}
+
 	return nil
 }
 
@@ -1824,6 +1840,7 @@ func (t *db_objects7365745b737472696e675dTarget) FinishSet(list vdl.SetTarget) e
 	if len(*t.Value) == 0 {
 		*t.Value = nil
 	}
+
 	return nil
 }
 
@@ -1892,6 +1909,7 @@ func (t *BigDataTarget) FinishField(_, _ vdl.Target) error {
 	return nil
 }
 func (t *BigDataTarget) FinishFields(_ vdl.FieldsTarget) error {
+
 	return nil
 }
 

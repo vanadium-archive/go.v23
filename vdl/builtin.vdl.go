@@ -154,6 +154,7 @@ func (t *WireErrorTarget) FinishField(_, _ Target) error {
 	return nil
 }
 func (t *WireErrorTarget) FinishFields(_ FieldsTarget) error {
+
 	return nil
 }
 
@@ -178,6 +179,7 @@ func (t *WireRetryCodeTarget) FromEnumLabel(src string, tt *Type) error {
 	default:
 		return fmt.Errorf("label %s not in enum %v", src, __VDLType_builtin_v_io_v23_vdl_WireRetryCode)
 	}
+
 	return nil
 }
 
@@ -205,6 +207,7 @@ func (t *builtin5b5d616e79Target) FinishElem(elem Target) error {
 	return nil
 }
 func (t *builtin5b5d616e79Target) FinishList(elem ListTarget) error {
+
 	return nil
 }
 

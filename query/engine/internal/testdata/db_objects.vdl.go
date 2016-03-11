@@ -128,6 +128,7 @@ func (t *AddressInfoTarget) FinishField(_, _ vdl.Target) error {
 	return nil
 }
 func (t *AddressInfoTarget) FinishFields(_ vdl.FieldsTarget) error {
+
 	return nil
 }
 
@@ -214,6 +215,7 @@ func (t *CreditAgencyTarget) FromEnumLabel(src string, tt *vdl.Type) error {
 	default:
 		return fmt.Errorf("label %s not in enum %v", src, __VDLType_db_objects_v_io_v23_query_engine_internal_testdata_CreditAgency)
 	}
+
 	return nil
 }
 
@@ -292,6 +294,7 @@ func (t *ExperianRatingTarget) FromEnumLabel(src string, tt *vdl.Type) error {
 	default:
 		return fmt.Errorf("label %s not in enum %v", src, __VDLType_db_objects_v_io_v23_query_engine_internal_testdata_ExperianRating)
 	}
+
 	return nil
 }
 
@@ -348,6 +351,7 @@ func (t *RatingsArrayTarget) FinishElem(elem vdl.Target) error {
 	return nil
 }
 func (t *RatingsArrayTarget) FinishList(elem vdl.ListTarget) error {
+
 	return nil
 }
 
@@ -433,6 +437,7 @@ func (t *EquifaxCreditReportTarget) FinishField(_, _ vdl.Target) error {
 	return nil
 }
 func (t *EquifaxCreditReportTarget) FinishFields(_ vdl.FieldsTarget) error {
+
 	return nil
 }
 
@@ -519,6 +524,7 @@ func (t *TdhTarget) FromEnumLabel(src string, tt *vdl.Type) error {
 	default:
 		return fmt.Errorf("label %s not in enum %v", src, __VDLType_db_objects_v_io_v23_query_engine_internal_testdata_Tdh)
 	}
+
 	return nil
 }
 
@@ -639,6 +645,7 @@ func (t *ExperianCreditReportTarget) FinishField(_, _ vdl.Target) error {
 	return nil
 }
 func (t *ExperianCreditReportTarget) FinishFields(_ vdl.FieldsTarget) error {
+
 	return nil
 }
 
@@ -668,6 +675,7 @@ func (t *db_objects7365745b762e696f2f7632332f71756572792f656e67696e652f696e74657
 	if len(*t.Value) == 0 {
 		*t.Value = nil
 	}
+
 	return nil
 }
 
@@ -776,6 +784,7 @@ func (t *TransUnionCreditReportTarget) FinishField(_, _ vdl.Target) error {
 	return nil
 }
 func (t *TransUnionCreditReportTarget) FinishFields(_ vdl.FieldsTarget) error {
+
 	return nil
 }
 
@@ -810,6 +819,7 @@ func (t *db_objects6d61705b737472696e675d696e743136Target) FinishMap(elem vdl.Ma
 	if len(*t.Value) == 0 {
 		*t.Value = nil
 	}
+
 	return nil
 }
 
@@ -1027,6 +1037,7 @@ func (t *CreditReportTarget) FinishField(_, _ vdl.Target) error {
 	return nil
 }
 func (t *CreditReportTarget) FinishFields(_ vdl.FieldsTarget) error {
+
 	return nil
 }
 
@@ -1195,6 +1206,7 @@ func (t *CustomerTarget) FinishField(_, _ vdl.Target) error {
 	return nil
 }
 func (t *CustomerTarget) FinishFields(_ vdl.FieldsTarget) error {
+
 	return nil
 }
 
@@ -1222,6 +1234,7 @@ func (t *db_objects5b5d762e696f2f7632332f71756572792f656e67696e652f696e7465726e6
 	return nil
 }
 func (t *db_objects5b5d762e696f2f7632332f71756572792f656e67696e652f696e7465726e616c2f74657374646174612e41646472657373496e666f207374727563747b53747265657420737472696e673b4369747920737472696e673b537461746520737472696e673b5a697020737472696e677dTarget) FinishList(elem vdl.ListTarget) error {
+
 	return nil
 }
 
@@ -1343,7 +1356,7 @@ func (t *InvoiceTarget) StartField(name string) (key, field vdl.Target, _ error)
 		val, err := &vdl.Int64Target{Value: &t.Value.InvoiceNum}, error(nil)
 		return nil, val, err
 	case "InvoiceDate":
-		val, err := vdl.ReflectTarget(reflect.ValueOf(&t.Value.InvoiceDate))
+		val, err := &time_2.TimeTarget{Value: &t.Value.InvoiceDate}, error(nil)
 		return nil, val, err
 	case "Amount":
 		val, err := &vdl.Int64Target{Value: &t.Value.Amount}, error(nil)
@@ -1359,6 +1372,7 @@ func (t *InvoiceTarget) FinishField(_, _ vdl.Target) error {
 	return nil
 }
 func (t *InvoiceTarget) FinishFields(_ vdl.FieldsTarget) error {
+
 	return nil
 }
 
@@ -1587,6 +1601,7 @@ func (t *NumbersTarget) FinishField(_, _ vdl.Target) error {
 	return nil
 }
 func (t *NumbersTarget) FinishFields(_ vdl.FieldsTarget) error {
+
 	return nil
 }
 
@@ -1656,6 +1671,7 @@ func (t *FooTypeTarget) FinishField(_, _ vdl.Target) error {
 	return nil
 }
 func (t *FooTypeTarget) FinishFields(_ vdl.FieldsTarget) error {
+
 	return nil
 }
 
@@ -1684,6 +1700,7 @@ func (t *BarTypeTarget) FinishField(_, _ vdl.Target) error {
 	return nil
 }
 func (t *BarTypeTarget) FinishFields(_ vdl.FieldsTarget) error {
+
 	return nil
 }
 
@@ -1715,6 +1732,7 @@ func (t *BazTypeTarget) FinishField(_, _ vdl.Target) error {
 	return nil
 }
 func (t *BazTypeTarget) FinishFields(_ vdl.FieldsTarget) error {
+
 	return nil
 }
 
@@ -1988,6 +2006,7 @@ func (t *KTarget) FinishField(_, _ vdl.Target) error {
 	return nil
 }
 func (t *KTarget) FinishFields(_ vdl.FieldsTarget) error {
+
 	return nil
 }
 
@@ -2072,6 +2091,7 @@ func (t *VTarget) FinishField(_, _ vdl.Target) error {
 	return nil
 }
 func (t *VTarget) FinishFields(_ vdl.FieldsTarget) error {
+
 	return nil
 }
 
@@ -2257,6 +2277,7 @@ func (t *FunWithMapsTarget) FinishField(_, _ vdl.Target) error {
 	return nil
 }
 func (t *FunWithMapsTarget) FinishFields(_ vdl.FieldsTarget) error {
+
 	return nil
 }
 
@@ -2291,6 +2312,7 @@ func (t *db_objects6d61705b762e696f2f7632332f71756572792f656e67696e652f696e74657
 	if len(*t.Value) == 0 {
 		*t.Value = nil
 	}
+
 	return nil
 }
 
@@ -2325,6 +2347,7 @@ func (t *db_objects6d61705b696e7431365d5b5d7365745b737472696e675dTarget) FinishM
 	if len(*t.Value) == 0 {
 		*t.Value = nil
 	}
+
 	return nil
 }
 
@@ -2352,6 +2375,7 @@ func (t *db_objects5b5d7365745b737472696e675dTarget) FinishElem(elem vdl.Target)
 	return nil
 }
 func (t *db_objects5b5d7365745b737472696e675dTarget) FinishList(elem vdl.ListTarget) error {
+
 	return nil
 }
 
@@ -2381,6 +2405,7 @@ func (t *db_objects7365745b737472696e675dTarget) FinishSet(list vdl.SetTarget) e
 	if len(*t.Value) == 0 {
 		*t.Value = nil
 	}
+
 	return nil
 }
 
@@ -2473,6 +2498,7 @@ func (t *FunWithTypesTarget) FinishField(_, _ vdl.Target) error {
 	return nil
 }
 func (t *FunWithTypesTarget) FinishFields(_ vdl.FieldsTarget) error {
+
 	return nil
 }
 
@@ -3153,6 +3179,7 @@ func (t *ManyMapsTarget) FinishField(_, _ vdl.Target) error {
 	return nil
 }
 func (t *ManyMapsTarget) FinishFields(_ vdl.FieldsTarget) error {
+
 	return nil
 }
 
@@ -3187,6 +3214,7 @@ func (t *db_objects6d61705b626f6f6c5d737472696e67Target) FinishMap(elem vdl.MapT
 	if len(*t.Value) == 0 {
 		*t.Value = nil
 	}
+
 	return nil
 }
 
@@ -3221,6 +3249,7 @@ func (t *db_objects6d61705b627974655d737472696e67Target) FinishMap(elem vdl.MapT
 	if len(*t.Value) == 0 {
 		*t.Value = nil
 	}
+
 	return nil
 }
 
@@ -3255,6 +3284,7 @@ func (t *db_objects6d61705b75696e7431365d737472696e67Target) FinishMap(elem vdl.
 	if len(*t.Value) == 0 {
 		*t.Value = nil
 	}
+
 	return nil
 }
 
@@ -3289,6 +3319,7 @@ func (t *db_objects6d61705b75696e7433325d737472696e67Target) FinishMap(elem vdl.
 	if len(*t.Value) == 0 {
 		*t.Value = nil
 	}
+
 	return nil
 }
 
@@ -3323,6 +3354,7 @@ func (t *db_objects6d61705b75696e7436345d737472696e67Target) FinishMap(elem vdl.
 	if len(*t.Value) == 0 {
 		*t.Value = nil
 	}
+
 	return nil
 }
 
@@ -3357,6 +3389,7 @@ func (t *db_objects6d61705b696e7431365d737472696e67Target) FinishMap(elem vdl.Ma
 	if len(*t.Value) == 0 {
 		*t.Value = nil
 	}
+
 	return nil
 }
 
@@ -3391,6 +3424,7 @@ func (t *db_objects6d61705b696e7433325d737472696e67Target) FinishMap(elem vdl.Ma
 	if len(*t.Value) == 0 {
 		*t.Value = nil
 	}
+
 	return nil
 }
 
@@ -3425,6 +3459,7 @@ func (t *db_objects6d61705b696e7436345d737472696e67Target) FinishMap(elem vdl.Ma
 	if len(*t.Value) == 0 {
 		*t.Value = nil
 	}
+
 	return nil
 }
 
@@ -3459,6 +3494,7 @@ func (t *db_objects6d61705b666c6f617433325d737472696e67Target) FinishMap(elem vd
 	if len(*t.Value) == 0 {
 		*t.Value = nil
 	}
+
 	return nil
 }
 
@@ -3493,6 +3529,7 @@ func (t *db_objects6d61705b666c6f617436345d737472696e67Target) FinishMap(elem vd
 	if len(*t.Value) == 0 {
 		*t.Value = nil
 	}
+
 	return nil
 }
 
@@ -3527,6 +3564,7 @@ func (t *db_objects6d61705b636f6d706c657836345d737472696e67Target) FinishMap(ele
 	if len(*t.Value) == 0 {
 		*t.Value = nil
 	}
+
 	return nil
 }
 
@@ -3561,6 +3599,7 @@ func (t *db_objects6d61705b636f6d706c65783132385d737472696e67Target) FinishMap(e
 	if len(*t.Value) == 0 {
 		*t.Value = nil
 	}
+
 	return nil
 }
 
@@ -3595,6 +3634,7 @@ func (t *db_objects6d61705b737472696e675d737472696e67Target) FinishMap(elem vdl.
 	if len(*t.Value) == 0 {
 		*t.Value = nil
 	}
+
 	return nil
 }
 
@@ -3629,6 +3669,7 @@ func (t *db_objects6d61705b737472696e675d6d61705b737472696e675d737472696e67Targe
 	if len(*t.Value) == 0 {
 		*t.Value = nil
 	}
+
 	return nil
 }
 
@@ -3649,7 +3690,7 @@ func (t *db_objects6d61705b74696d652e54696d65207374727563747b5365636f6e647320696
 }
 func (t *db_objects6d61705b74696d652e54696d65207374727563747b5365636f6e647320696e7436343b4e616e6f7320696e7433327d5d737472696e67Target) StartKey() (key vdl.Target, _ error) {
 	t.currKey = reflect.Zero(reflect.TypeOf(t.currKey)).Interface().(time.Time)
-	return vdl.ReflectTarget(reflect.ValueOf(&t.currKey))
+	return &time_2.TimeTarget{Value: &t.currKey}, error(nil)
 }
 func (t *db_objects6d61705b74696d652e54696d65207374727563747b5365636f6e647320696e7436343b4e616e6f7320696e7433327d5d737472696e67Target) FinishKeyStartField(key vdl.Target) (field vdl.Target, _ error) {
 	t.currElem = ""
@@ -3663,6 +3704,7 @@ func (t *db_objects6d61705b74696d652e54696d65207374727563747b5365636f6e647320696
 	if len(*t.Value) == 0 {
 		*t.Value = nil
 	}
+
 	return nil
 }
 
@@ -4181,6 +4223,7 @@ func (t *ManySetsTarget) FinishField(_, _ vdl.Target) error {
 	return nil
 }
 func (t *ManySetsTarget) FinishFields(_ vdl.FieldsTarget) error {
+
 	return nil
 }
 
@@ -4210,6 +4253,7 @@ func (t *db_objects7365745b626f6f6c5dTarget) FinishSet(list vdl.SetTarget) error
 	if len(*t.Value) == 0 {
 		*t.Value = nil
 	}
+
 	return nil
 }
 
@@ -4239,6 +4283,7 @@ func (t *db_objects7365745b627974655dTarget) FinishSet(list vdl.SetTarget) error
 	if len(*t.Value) == 0 {
 		*t.Value = nil
 	}
+
 	return nil
 }
 
@@ -4268,6 +4313,7 @@ func (t *db_objects7365745b75696e7431365dTarget) FinishSet(list vdl.SetTarget) e
 	if len(*t.Value) == 0 {
 		*t.Value = nil
 	}
+
 	return nil
 }
 
@@ -4297,6 +4343,7 @@ func (t *db_objects7365745b75696e7433325dTarget) FinishSet(list vdl.SetTarget) e
 	if len(*t.Value) == 0 {
 		*t.Value = nil
 	}
+
 	return nil
 }
 
@@ -4326,6 +4373,7 @@ func (t *db_objects7365745b75696e7436345dTarget) FinishSet(list vdl.SetTarget) e
 	if len(*t.Value) == 0 {
 		*t.Value = nil
 	}
+
 	return nil
 }
 
@@ -4355,6 +4403,7 @@ func (t *db_objects7365745b696e7431365dTarget) FinishSet(list vdl.SetTarget) err
 	if len(*t.Value) == 0 {
 		*t.Value = nil
 	}
+
 	return nil
 }
 
@@ -4384,6 +4433,7 @@ func (t *db_objects7365745b696e7433325dTarget) FinishSet(list vdl.SetTarget) err
 	if len(*t.Value) == 0 {
 		*t.Value = nil
 	}
+
 	return nil
 }
 
@@ -4413,6 +4463,7 @@ func (t *db_objects7365745b696e7436345dTarget) FinishSet(list vdl.SetTarget) err
 	if len(*t.Value) == 0 {
 		*t.Value = nil
 	}
+
 	return nil
 }
 
@@ -4442,6 +4493,7 @@ func (t *db_objects7365745b666c6f617433325dTarget) FinishSet(list vdl.SetTarget)
 	if len(*t.Value) == 0 {
 		*t.Value = nil
 	}
+
 	return nil
 }
 
@@ -4471,6 +4523,7 @@ func (t *db_objects7365745b666c6f617436345dTarget) FinishSet(list vdl.SetTarget)
 	if len(*t.Value) == 0 {
 		*t.Value = nil
 	}
+
 	return nil
 }
 
@@ -4500,6 +4553,7 @@ func (t *db_objects7365745b636f6d706c657836345dTarget) FinishSet(list vdl.SetTar
 	if len(*t.Value) == 0 {
 		*t.Value = nil
 	}
+
 	return nil
 }
 
@@ -4529,6 +4583,7 @@ func (t *db_objects7365745b636f6d706c65783132385dTarget) FinishSet(list vdl.SetT
 	if len(*t.Value) == 0 {
 		*t.Value = nil
 	}
+
 	return nil
 }
 
@@ -4548,7 +4603,7 @@ func (t *db_objects7365745b74696d652e54696d65207374727563747b5365636f6e647320696
 }
 func (t *db_objects7365745b74696d652e54696d65207374727563747b5365636f6e647320696e7436343b4e616e6f7320696e7433327d5dTarget) StartKey() (key vdl.Target, _ error) {
 	t.currKey = reflect.Zero(reflect.TypeOf(t.currKey)).Interface().(time.Time)
-	return vdl.ReflectTarget(reflect.ValueOf(&t.currKey))
+	return &time_2.TimeTarget{Value: &t.currKey}, error(nil)
 }
 func (t *db_objects7365745b74696d652e54696d65207374727563747b5365636f6e647320696e7436343b4e616e6f7320696e7433327d5dTarget) FinishKey(key vdl.Target) error {
 	(*t.Value)[t.currKey] = struct{}{}
@@ -4558,6 +4613,7 @@ func (t *db_objects7365745b74696d652e54696d65207374727563747b5365636f6e647320696
 	if len(*t.Value) == 0 {
 		*t.Value = nil
 	}
+
 	return nil
 }
 
@@ -4626,6 +4682,7 @@ func (t *BigDataTarget) FinishField(_, _ vdl.Target) error {
 	return nil
 }
 func (t *BigDataTarget) FinishFields(_ vdl.FieldsTarget) error {
+
 	return nil
 }
 

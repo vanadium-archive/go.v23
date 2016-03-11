@@ -180,6 +180,7 @@ func (t *InterfaceTarget) FinishField(_, _ vdl.Target) error {
 	return nil
 }
 func (t *InterfaceTarget) FinishFields(_ vdl.FieldsTarget) error {
+
 	return nil
 }
 
@@ -207,6 +208,7 @@ func (t *signature5b5d7369676e61747572652e456d626564207374727563747b4e616d652073
 	return nil
 }
 func (t *signature5b5d7369676e61747572652e456d626564207374727563747b4e616d6520737472696e673b506b675061746820737472696e673b446f6320737472696e677dTarget) FinishList(elem vdl.ListTarget) error {
+
 	return nil
 }
 
@@ -241,6 +243,7 @@ func (t *EmbedTarget) FinishField(_, _ vdl.Target) error {
 	return nil
 }
 func (t *EmbedTarget) FinishFields(_ vdl.FieldsTarget) error {
+
 	return nil
 }
 
@@ -268,6 +271,7 @@ func (t *signature5b5d7369676e61747572652e4d6574686f64207374727563747b4e616d6520
 	return nil
 }
 func (t *signature5b5d7369676e61747572652e4d6574686f64207374727563747b4e616d6520737472696e673b446f6320737472696e673b496e41726773205b5d7369676e61747572652e417267207374727563747b4e616d6520737472696e673b446f6320737472696e673b5479706520747970656f626a6563747d3b4f757441726773205b5d7369676e61747572652e4172673b496e53747265616d203f7369676e61747572652e4172673b4f757453747265616d203f7369676e61747572652e4172673b54616773205b5d616e797dTarget) FinishList(elem vdl.ListTarget) error {
+
 	return nil
 }
 
@@ -314,6 +318,7 @@ func (t *MethodTarget) FinishField(_, _ vdl.Target) error {
 	return nil
 }
 func (t *MethodTarget) FinishFields(_ vdl.FieldsTarget) error {
+
 	return nil
 }
 
@@ -341,6 +346,7 @@ func (t *signature5b5d7369676e61747572652e417267207374727563747b4e616d6520737472
 	return nil
 }
 func (t *signature5b5d7369676e61747572652e417267207374727563747b4e616d6520737472696e673b446f6320737472696e673b5479706520747970656f626a6563747dTarget) FinishList(elem vdl.ListTarget) error {
+
 	return nil
 }
 
@@ -375,6 +381,7 @@ func (t *ArgTarget) FinishField(_, _ vdl.Target) error {
 	return nil
 }
 func (t *ArgTarget) FinishFields(_ vdl.FieldsTarget) error {
+
 	return nil
 }
 
@@ -397,10 +404,12 @@ func (t *signature3f7369676e61747572652e417267207374727563747b4e616d652073747269
 	return target.StartFields(tt)
 }
 func (t *signature3f7369676e61747572652e417267207374727563747b4e616d6520737472696e673b446f6320737472696e673b5479706520747970656f626a6563747dTarget) FinishFields(_ vdl.FieldsTarget) error {
+
 	return nil
 }
 func (t *signature3f7369676e61747572652e417267207374727563747b4e616d6520737472696e673b446f6320737472696e673b5479706520747970656f626a6563747dTarget) FromNil(tt *vdl.Type) error {
 	*t.Value = nil
+
 	return nil
 }
 
@@ -428,6 +437,7 @@ func (t *signature5b5d616e79Target) FinishElem(elem vdl.Target) error {
 	return nil
 }
 func (t *signature5b5d616e79Target) FinishList(elem vdl.ListTarget) error {
+
 	return nil
 }
 
