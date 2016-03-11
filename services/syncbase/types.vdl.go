@@ -8,6 +8,8 @@
 package syncbase
 
 import (
+	"fmt"
+	"reflect"
 	"time"
 	"v.io/v23/vdl"
 	time_2 "v.io/v23/vdlroot/time"
@@ -37,7 +39,6 @@ func (DevModeUpdateVClockOpts) __VDLReflect(struct {
 }
 
 func (m *DevModeUpdateVClockOpts) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
-
 	__VDLEnsureNativeBuilt_types()
 	fieldsTarget1, err := t.StartFields(tt)
 	if err != nil {
@@ -123,6 +124,46 @@ func (m *DevModeUpdateVClockOpts) FillVDLTarget(t vdl.Target, tt *vdl.Type) erro
 }
 
 func (m *DevModeUpdateVClockOpts) MakeVDLTarget() vdl.Target {
+	return &DevModeUpdateVClockOptsTarget{Value: m}
+}
+
+type DevModeUpdateVClockOptsTarget struct {
+	Value *DevModeUpdateVClockOpts
+	vdl.TargetBase
+	vdl.FieldsTargetBase
+}
+
+func (t *DevModeUpdateVClockOptsTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
+	if !vdl.Compatible(tt, __VDLType_types_v_io_v23_services_syncbase_DevModeUpdateVClockOpts) {
+		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType_types_v_io_v23_services_syncbase_DevModeUpdateVClockOpts)
+	}
+	return t, nil
+}
+func (t *DevModeUpdateVClockOptsTarget) StartField(name string) (key, field vdl.Target, _ error) {
+	switch name {
+	case "NtpHost":
+		val, err := &vdl.StringTarget{Value: &t.Value.NtpHost}, error(nil)
+		return nil, val, err
+	case "Now":
+		val, err := vdl.ReflectTarget(reflect.ValueOf(&t.Value.Now))
+		return nil, val, err
+	case "ElapsedTime":
+		val, err := vdl.ReflectTarget(reflect.ValueOf(&t.Value.ElapsedTime))
+		return nil, val, err
+	case "DoNtpUpdate":
+		val, err := &vdl.BoolTarget{Value: &t.Value.DoNtpUpdate}, error(nil)
+		return nil, val, err
+	case "DoLocalUpdate":
+		val, err := &vdl.BoolTarget{Value: &t.Value.DoLocalUpdate}, error(nil)
+		return nil, val, err
+	default:
+		return nil, nil, fmt.Errorf("field %s not in struct %v", name, __VDLType_types_v_io_v23_services_syncbase_DevModeUpdateVClockOpts)
+	}
+}
+func (t *DevModeUpdateVClockOptsTarget) FinishField(_, _ vdl.Target) error {
+	return nil
+}
+func (t *DevModeUpdateVClockOptsTarget) FinishFields(_ vdl.FieldsTarget) error {
 	return nil
 }
 

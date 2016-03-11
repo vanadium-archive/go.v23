@@ -9,6 +9,7 @@ package testdata
 
 import (
 	"fmt"
+	"reflect"
 	"time"
 	"v.io/v23/vdl"
 	time_2 "v.io/v23/vdlroot/time"
@@ -27,7 +28,6 @@ func (AddressInfo) __VDLReflect(struct {
 }
 
 func (m *AddressInfo) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
-
 	if __VDLType_db_objects_v_io_v23_query_engine_internal_testdata_AddressInfo == nil || __VDLTypedb_objects0 == nil {
 		panic("Initialization order error: types generated for FillVDLTarget not initialized. Consider moving caller to an init() block.")
 	}
@@ -91,6 +91,43 @@ func (m *AddressInfo) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 }
 
 func (m *AddressInfo) MakeVDLTarget() vdl.Target {
+	return &AddressInfoTarget{Value: m}
+}
+
+type AddressInfoTarget struct {
+	Value *AddressInfo
+	vdl.TargetBase
+	vdl.FieldsTargetBase
+}
+
+func (t *AddressInfoTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
+	if !vdl.Compatible(tt, __VDLType_db_objects_v_io_v23_query_engine_internal_testdata_AddressInfo) {
+		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType_db_objects_v_io_v23_query_engine_internal_testdata_AddressInfo)
+	}
+	return t, nil
+}
+func (t *AddressInfoTarget) StartField(name string) (key, field vdl.Target, _ error) {
+	switch name {
+	case "Street":
+		val, err := &vdl.StringTarget{Value: &t.Value.Street}, error(nil)
+		return nil, val, err
+	case "City":
+		val, err := &vdl.StringTarget{Value: &t.Value.City}, error(nil)
+		return nil, val, err
+	case "State":
+		val, err := &vdl.StringTarget{Value: &t.Value.State}, error(nil)
+		return nil, val, err
+	case "Zip":
+		val, err := &vdl.StringTarget{Value: &t.Value.Zip}, error(nil)
+		return nil, val, err
+	default:
+		return nil, nil, fmt.Errorf("field %s not in struct %v", name, __VDLType_db_objects_v_io_v23_query_engine_internal_testdata_AddressInfo)
+	}
+}
+func (t *AddressInfoTarget) FinishField(_, _ vdl.Target) error {
+	return nil
+}
+func (t *AddressInfoTarget) FinishFields(_ vdl.FieldsTarget) error {
 	return nil
 }
 
@@ -147,14 +184,36 @@ func (CreditAgency) __VDLReflect(struct {
 }) {
 }
 
-func (m CreditAgency) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
-	if err := t.FromEnumLabel(m.String(), __VDLType_db_objects_v_io_v23_query_engine_internal_testdata_CreditAgency); err != nil {
+func (m *CreditAgency) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
+	if err := t.FromEnumLabel((*m).String(), __VDLType_db_objects_v_io_v23_query_engine_internal_testdata_CreditAgency); err != nil {
 		return err
 	}
 	return nil
 }
 
-func (m CreditAgency) MakeVDLTarget() vdl.Target {
+func (m *CreditAgency) MakeVDLTarget() vdl.Target {
+	return &CreditAgencyTarget{Value: m}
+}
+
+type CreditAgencyTarget struct {
+	Value *CreditAgency
+	vdl.TargetBase
+}
+
+func (t *CreditAgencyTarget) FromEnumLabel(src string, tt *vdl.Type) error {
+	if !vdl.Compatible(tt, __VDLType_db_objects_v_io_v23_query_engine_internal_testdata_CreditAgency) {
+		return fmt.Errorf("type %v incompatible with %v", tt, __VDLType_db_objects_v_io_v23_query_engine_internal_testdata_CreditAgency)
+	}
+	switch src {
+	case "Equifax":
+		*t.Value = 0
+	case "Experian":
+		*t.Value = 1
+	case "TransUnion":
+		*t.Value = 2
+	default:
+		return fmt.Errorf("label %s not in enum %v", src, __VDLType_db_objects_v_io_v23_query_engine_internal_testdata_CreditAgency)
+	}
 	return nil
 }
 
@@ -205,14 +264,34 @@ func (ExperianRating) __VDLReflect(struct {
 }) {
 }
 
-func (m ExperianRating) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
-	if err := t.FromEnumLabel(m.String(), __VDLType_db_objects_v_io_v23_query_engine_internal_testdata_ExperianRating); err != nil {
+func (m *ExperianRating) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
+	if err := t.FromEnumLabel((*m).String(), __VDLType_db_objects_v_io_v23_query_engine_internal_testdata_ExperianRating); err != nil {
 		return err
 	}
 	return nil
 }
 
-func (m ExperianRating) MakeVDLTarget() vdl.Target {
+func (m *ExperianRating) MakeVDLTarget() vdl.Target {
+	return &ExperianRatingTarget{Value: m}
+}
+
+type ExperianRatingTarget struct {
+	Value *ExperianRating
+	vdl.TargetBase
+}
+
+func (t *ExperianRatingTarget) FromEnumLabel(src string, tt *vdl.Type) error {
+	if !vdl.Compatible(tt, __VDLType_db_objects_v_io_v23_query_engine_internal_testdata_ExperianRating) {
+		return fmt.Errorf("type %v incompatible with %v", tt, __VDLType_db_objects_v_io_v23_query_engine_internal_testdata_ExperianRating)
+	}
+	switch src {
+	case "Good":
+		*t.Value = 0
+	case "Bad":
+		*t.Value = 1
+	default:
+		return fmt.Errorf("label %s not in enum %v", src, __VDLType_db_objects_v_io_v23_query_engine_internal_testdata_ExperianRating)
+	}
 	return nil
 }
 
@@ -223,13 +302,12 @@ func (RatingsArray) __VDLReflect(struct {
 }) {
 }
 
-func (m RatingsArray) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
-
+func (m *RatingsArray) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 	listTarget1, err := t.StartList(__VDLType_db_objects_v_io_v23_query_engine_internal_testdata_RatingsArray, 4)
 	if err != nil {
 		return err
 	}
-	for i, elem3 := range m {
+	for i, elem3 := range *m {
 		elemTarget2, err := listTarget1.StartElem(i)
 		if err != nil {
 			return err
@@ -247,7 +325,29 @@ func (m RatingsArray) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 	return nil
 }
 
-func (m RatingsArray) MakeVDLTarget() vdl.Target {
+func (m *RatingsArray) MakeVDLTarget() vdl.Target {
+	return &RatingsArrayTarget{Value: m}
+}
+
+type RatingsArrayTarget struct {
+	Value *RatingsArray
+	vdl.TargetBase
+	vdl.ListTargetBase
+}
+
+func (t *RatingsArrayTarget) StartList(tt *vdl.Type, len int) (vdl.ListTarget, error) {
+	if !vdl.Compatible(tt, __VDLType_db_objects_v_io_v23_query_engine_internal_testdata_RatingsArray) {
+		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType_db_objects_v_io_v23_query_engine_internal_testdata_RatingsArray)
+	}
+	return t, nil
+}
+func (t *RatingsArrayTarget) StartElem(index int) (elem vdl.Target, _ error) {
+	return &vdl.Int16Target{Value: &(*t.Value)[index]}, error(nil)
+}
+func (t *RatingsArrayTarget) FinishElem(elem vdl.Target) error {
+	return nil
+}
+func (t *RatingsArrayTarget) FinishList(elem vdl.ListTarget) error {
 	return nil
 }
 
@@ -262,7 +362,6 @@ func (EquifaxCreditReport) __VDLReflect(struct {
 }
 
 func (m *EquifaxCreditReport) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
-
 	if __VDLType_db_objects_v_io_v23_query_engine_internal_testdata_EquifaxCreditReport == nil || __VDLTypedb_objects1 == nil {
 		panic("Initialization order error: types generated for FillVDLTarget not initialized. Consider moving caller to an init() block.")
 	}
@@ -303,6 +402,37 @@ func (m *EquifaxCreditReport) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 }
 
 func (m *EquifaxCreditReport) MakeVDLTarget() vdl.Target {
+	return &EquifaxCreditReportTarget{Value: m}
+}
+
+type EquifaxCreditReportTarget struct {
+	Value *EquifaxCreditReport
+	vdl.TargetBase
+	vdl.FieldsTargetBase
+}
+
+func (t *EquifaxCreditReportTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
+	if !vdl.Compatible(tt, __VDLType_db_objects_v_io_v23_query_engine_internal_testdata_EquifaxCreditReport) {
+		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType_db_objects_v_io_v23_query_engine_internal_testdata_EquifaxCreditReport)
+	}
+	return t, nil
+}
+func (t *EquifaxCreditReportTarget) StartField(name string) (key, field vdl.Target, _ error) {
+	switch name {
+	case "Rating":
+		val, err := &vdl.ByteTarget{Value: &t.Value.Rating}, error(nil)
+		return nil, val, err
+	case "FourScoreRatings":
+		val, err := &RatingsArrayTarget{Value: &t.Value.FourScoreRatings}, error(nil)
+		return nil, val, err
+	default:
+		return nil, nil, fmt.Errorf("field %s not in struct %v", name, __VDLType_db_objects_v_io_v23_query_engine_internal_testdata_EquifaxCreditReport)
+	}
+}
+func (t *EquifaxCreditReportTarget) FinishField(_, _ vdl.Target) error {
+	return nil
+}
+func (t *EquifaxCreditReportTarget) FinishFields(_ vdl.FieldsTarget) error {
 	return nil
 }
 
@@ -359,14 +489,36 @@ func (Tdh) __VDLReflect(struct {
 }) {
 }
 
-func (m Tdh) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
-	if err := t.FromEnumLabel(m.String(), __VDLType_db_objects_v_io_v23_query_engine_internal_testdata_Tdh); err != nil {
+func (m *Tdh) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
+	if err := t.FromEnumLabel((*m).String(), __VDLType_db_objects_v_io_v23_query_engine_internal_testdata_Tdh); err != nil {
 		return err
 	}
 	return nil
 }
 
-func (m Tdh) MakeVDLTarget() vdl.Target {
+func (m *Tdh) MakeVDLTarget() vdl.Target {
+	return &TdhTarget{Value: m}
+}
+
+type TdhTarget struct {
+	Value *Tdh
+	vdl.TargetBase
+}
+
+func (t *TdhTarget) FromEnumLabel(src string, tt *vdl.Type) error {
+	if !vdl.Compatible(tt, __VDLType_db_objects_v_io_v23_query_engine_internal_testdata_Tdh) {
+		return fmt.Errorf("type %v incompatible with %v", tt, __VDLType_db_objects_v_io_v23_query_engine_internal_testdata_Tdh)
+	}
+	switch src {
+	case "Tom":
+		*t.Value = 0
+	case "Dick":
+		*t.Value = 1
+	case "Harry":
+		*t.Value = 2
+	default:
+		return fmt.Errorf("label %s not in enum %v", src, __VDLType_db_objects_v_io_v23_query_engine_internal_testdata_Tdh)
+	}
 	return nil
 }
 
@@ -382,7 +534,6 @@ func (ExperianCreditReport) __VDLReflect(struct {
 }
 
 func (m *ExperianCreditReport) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
-
 	if __VDLType_db_objects_v_io_v23_query_engine_internal_testdata_ExperianCreditReport == nil || __VDLTypedb_objects2 == nil {
 		panic("Initialization order error: types generated for FillVDLTarget not initialized. Consider moving caller to an init() block.")
 	}
@@ -454,6 +605,69 @@ func (m *ExperianCreditReport) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 }
 
 func (m *ExperianCreditReport) MakeVDLTarget() vdl.Target {
+	return &ExperianCreditReportTarget{Value: m}
+}
+
+type ExperianCreditReportTarget struct {
+	Value *ExperianCreditReport
+	vdl.TargetBase
+	vdl.FieldsTargetBase
+}
+
+func (t *ExperianCreditReportTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
+	if !vdl.Compatible(tt, __VDLType_db_objects_v_io_v23_query_engine_internal_testdata_ExperianCreditReport) {
+		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType_db_objects_v_io_v23_query_engine_internal_testdata_ExperianCreditReport)
+	}
+	return t, nil
+}
+func (t *ExperianCreditReportTarget) StartField(name string) (key, field vdl.Target, _ error) {
+	switch name {
+	case "Rating":
+		val, err := &ExperianRatingTarget{Value: &t.Value.Rating}, error(nil)
+		return nil, val, err
+	case "TdhApprovals":
+		val, err := &db_objects7365745b762e696f2f7632332f71756572792f656e67696e652f696e7465726e616c2f74657374646174612e54646820656e756d7b546f6d3b4469636b3b48617272797d5dTarget{Value: &t.Value.TdhApprovals}, error(nil)
+		return nil, val, err
+	case "Auditor":
+		val, err := &TdhTarget{Value: &t.Value.Auditor}, error(nil)
+		return nil, val, err
+	default:
+		return nil, nil, fmt.Errorf("field %s not in struct %v", name, __VDLType_db_objects_v_io_v23_query_engine_internal_testdata_ExperianCreditReport)
+	}
+}
+func (t *ExperianCreditReportTarget) FinishField(_, _ vdl.Target) error {
+	return nil
+}
+func (t *ExperianCreditReportTarget) FinishFields(_ vdl.FieldsTarget) error {
+	return nil
+}
+
+type db_objects7365745b762e696f2f7632332f71756572792f656e67696e652f696e7465726e616c2f74657374646174612e54646820656e756d7b546f6d3b4469636b3b48617272797d5dTarget struct {
+	Value   *map[Tdh]struct{}
+	currKey Tdh
+	vdl.TargetBase
+	vdl.SetTargetBase
+}
+
+func (t *db_objects7365745b762e696f2f7632332f71756572792f656e67696e652f696e7465726e616c2f74657374646174612e54646820656e756d7b546f6d3b4469636b3b48617272797d5dTarget) StartSet(tt *vdl.Type, len int) (vdl.SetTarget, error) {
+	if !vdl.Compatible(tt, __VDLTypedb_objects3) {
+		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLTypedb_objects3)
+	}
+	*t.Value = make(map[Tdh]struct{})
+	return t, nil
+}
+func (t *db_objects7365745b762e696f2f7632332f71756572792f656e67696e652f696e7465726e616c2f74657374646174612e54646820656e756d7b546f6d3b4469636b3b48617272797d5dTarget) StartKey() (key vdl.Target, _ error) {
+	t.currKey = TdhTom
+	return &TdhTarget{Value: &t.currKey}, error(nil)
+}
+func (t *db_objects7365745b762e696f2f7632332f71756572792f656e67696e652f696e7465726e616c2f74657374646174612e54646820656e756d7b546f6d3b4469636b3b48617272797d5dTarget) FinishKey(key vdl.Target) error {
+	(*t.Value)[t.currKey] = struct{}{}
+	return nil
+}
+func (t *db_objects7365745b762e696f2f7632332f71756572792f656e67696e652f696e7465726e616c2f74657374646174612e54646820656e756d7b546f6d3b4469636b3b48617272797d5dTarget) FinishSet(list vdl.SetTarget) error {
+	if len(*t.Value) == 0 {
+		*t.Value = nil
+	}
 	return nil
 }
 
@@ -468,7 +682,6 @@ func (TransUnionCreditReport) __VDLReflect(struct {
 }
 
 func (m *TransUnionCreditReport) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
-
 	if __VDLType_db_objects_v_io_v23_query_engine_internal_testdata_TransUnionCreditReport == nil || __VDLTypedb_objects4 == nil {
 		panic("Initialization order error: types generated for FillVDLTarget not initialized. Consider moving caller to an init() block.")
 	}
@@ -532,6 +745,71 @@ func (m *TransUnionCreditReport) FillVDLTarget(t vdl.Target, tt *vdl.Type) error
 }
 
 func (m *TransUnionCreditReport) MakeVDLTarget() vdl.Target {
+	return &TransUnionCreditReportTarget{Value: m}
+}
+
+type TransUnionCreditReportTarget struct {
+	Value *TransUnionCreditReport
+	vdl.TargetBase
+	vdl.FieldsTargetBase
+}
+
+func (t *TransUnionCreditReportTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
+	if !vdl.Compatible(tt, __VDLType_db_objects_v_io_v23_query_engine_internal_testdata_TransUnionCreditReport) {
+		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType_db_objects_v_io_v23_query_engine_internal_testdata_TransUnionCreditReport)
+	}
+	return t, nil
+}
+func (t *TransUnionCreditReportTarget) StartField(name string) (key, field vdl.Target, _ error) {
+	switch name {
+	case "Rating":
+		val, err := &vdl.Int16Target{Value: &t.Value.Rating}, error(nil)
+		return nil, val, err
+	case "PreviousRatings":
+		val, err := &db_objects6d61705b737472696e675d696e743136Target{Value: &t.Value.PreviousRatings}, error(nil)
+		return nil, val, err
+	default:
+		return nil, nil, fmt.Errorf("field %s not in struct %v", name, __VDLType_db_objects_v_io_v23_query_engine_internal_testdata_TransUnionCreditReport)
+	}
+}
+func (t *TransUnionCreditReportTarget) FinishField(_, _ vdl.Target) error {
+	return nil
+}
+func (t *TransUnionCreditReportTarget) FinishFields(_ vdl.FieldsTarget) error {
+	return nil
+}
+
+type db_objects6d61705b737472696e675d696e743136Target struct {
+	Value    *map[string]int16
+	currKey  string
+	currElem int16
+	vdl.TargetBase
+	vdl.MapTargetBase
+}
+
+func (t *db_objects6d61705b737472696e675d696e743136Target) StartMap(tt *vdl.Type, len int) (vdl.MapTarget, error) {
+	if !vdl.Compatible(tt, __VDLTypedb_objects5) {
+		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLTypedb_objects5)
+	}
+	*t.Value = make(map[string]int16)
+	return t, nil
+}
+func (t *db_objects6d61705b737472696e675d696e743136Target) StartKey() (key vdl.Target, _ error) {
+	t.currKey = ""
+	return &vdl.StringTarget{Value: &t.currKey}, error(nil)
+}
+func (t *db_objects6d61705b737472696e675d696e743136Target) FinishKeyStartField(key vdl.Target) (field vdl.Target, _ error) {
+	t.currElem = int16(0)
+	return &vdl.Int16Target{Value: &t.currElem}, error(nil)
+}
+func (t *db_objects6d61705b737472696e675d696e743136Target) FinishField(key, field vdl.Target) error {
+	(*t.Value)[t.currKey] = t.currElem
+	return nil
+}
+func (t *db_objects6d61705b737472696e675d696e743136Target) FinishMap(elem vdl.MapTarget) error {
+	if len(*t.Value) == 0 {
+		*t.Value = nil
+	}
 	return nil
 }
 
@@ -572,7 +850,6 @@ func (x AgencyReportEquifaxReport) Name() string                       { return 
 func (x AgencyReportEquifaxReport) __VDLReflect(__AgencyReportReflect) {}
 
 func (m AgencyReportEquifaxReport) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
-
 	fieldsTarget1, err := t.StartFields(__VDLType_db_objects_v_io_v23_query_engine_internal_testdata_AgencyReport)
 	if err != nil {
 		return err
@@ -605,7 +882,6 @@ func (x AgencyReportExperianReport) Name() string                       { return
 func (x AgencyReportExperianReport) __VDLReflect(__AgencyReportReflect) {}
 
 func (m AgencyReportExperianReport) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
-
 	fieldsTarget1, err := t.StartFields(__VDLType_db_objects_v_io_v23_query_engine_internal_testdata_AgencyReport)
 	if err != nil {
 		return err
@@ -638,7 +914,6 @@ func (x AgencyReportTransUnionReport) Name() string                       { retu
 func (x AgencyReportTransUnionReport) __VDLReflect(__AgencyReportReflect) {}
 
 func (m AgencyReportTransUnionReport) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
-
 	fieldsTarget1, err := t.StartFields(__VDLType_db_objects_v_io_v23_query_engine_internal_testdata_AgencyReport)
 	if err != nil {
 		return err
@@ -676,7 +951,6 @@ func (CreditReport) __VDLReflect(struct {
 }
 
 func (m *CreditReport) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
-
 	if __VDLType_db_objects_v_io_v23_query_engine_internal_testdata_CreditReport == nil || __VDLTypedb_objects6 == nil {
 		panic("Initialization order error: types generated for FillVDLTarget not initialized. Consider moving caller to an init() block.")
 	}
@@ -722,6 +996,37 @@ func (m *CreditReport) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 }
 
 func (m *CreditReport) MakeVDLTarget() vdl.Target {
+	return &CreditReportTarget{Value: m}
+}
+
+type CreditReportTarget struct {
+	Value *CreditReport
+	vdl.TargetBase
+	vdl.FieldsTargetBase
+}
+
+func (t *CreditReportTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
+	if !vdl.Compatible(tt, __VDLType_db_objects_v_io_v23_query_engine_internal_testdata_CreditReport) {
+		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType_db_objects_v_io_v23_query_engine_internal_testdata_CreditReport)
+	}
+	return t, nil
+}
+func (t *CreditReportTarget) StartField(name string) (key, field vdl.Target, _ error) {
+	switch name {
+	case "Agency":
+		val, err := &CreditAgencyTarget{Value: &t.Value.Agency}, error(nil)
+		return nil, val, err
+	case "Report":
+		val, err := vdl.ReflectTarget(reflect.ValueOf(&t.Value.Report))
+		return nil, val, err
+	default:
+		return nil, nil, fmt.Errorf("field %s not in struct %v", name, __VDLType_db_objects_v_io_v23_query_engine_internal_testdata_CreditReport)
+	}
+}
+func (t *CreditReportTarget) FinishField(_, _ vdl.Target) error {
+	return nil
+}
+func (t *CreditReportTarget) FinishFields(_ vdl.FieldsTarget) error {
 	return nil
 }
 
@@ -740,7 +1045,6 @@ func (Customer) __VDLReflect(struct {
 }
 
 func (m *Customer) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
-
 	if __VDLType_db_objects_v_io_v23_query_engine_internal_testdata_Customer == nil || __VDLTypedb_objects7 == nil {
 		panic("Initialization order error: types generated for FillVDLTarget not initialized. Consider moving caller to an init() block.")
 	}
@@ -848,6 +1152,76 @@ func (m *Customer) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 }
 
 func (m *Customer) MakeVDLTarget() vdl.Target {
+	return &CustomerTarget{Value: m}
+}
+
+type CustomerTarget struct {
+	Value *Customer
+	vdl.TargetBase
+	vdl.FieldsTargetBase
+}
+
+func (t *CustomerTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
+	if !vdl.Compatible(tt, __VDLType_db_objects_v_io_v23_query_engine_internal_testdata_Customer) {
+		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType_db_objects_v_io_v23_query_engine_internal_testdata_Customer)
+	}
+	return t, nil
+}
+func (t *CustomerTarget) StartField(name string) (key, field vdl.Target, _ error) {
+	switch name {
+	case "Name":
+		val, err := &vdl.StringTarget{Value: &t.Value.Name}, error(nil)
+		return nil, val, err
+	case "Id":
+		val, err := &vdl.Int64Target{Value: &t.Value.Id}, error(nil)
+		return nil, val, err
+	case "Active":
+		val, err := &vdl.BoolTarget{Value: &t.Value.Active}, error(nil)
+		return nil, val, err
+	case "Address":
+		val, err := &AddressInfoTarget{Value: &t.Value.Address}, error(nil)
+		return nil, val, err
+	case "PreviousAddresses":
+		val, err := &db_objects5b5d762e696f2f7632332f71756572792f656e67696e652f696e7465726e616c2f74657374646174612e41646472657373496e666f207374727563747b53747265657420737472696e673b4369747920737472696e673b537461746520737472696e673b5a697020737472696e677dTarget{Value: &t.Value.PreviousAddresses}, error(nil)
+		return nil, val, err
+	case "Credit":
+		val, err := &CreditReportTarget{Value: &t.Value.Credit}, error(nil)
+		return nil, val, err
+	default:
+		return nil, nil, fmt.Errorf("field %s not in struct %v", name, __VDLType_db_objects_v_io_v23_query_engine_internal_testdata_Customer)
+	}
+}
+func (t *CustomerTarget) FinishField(_, _ vdl.Target) error {
+	return nil
+}
+func (t *CustomerTarget) FinishFields(_ vdl.FieldsTarget) error {
+	return nil
+}
+
+type db_objects5b5d762e696f2f7632332f71756572792f656e67696e652f696e7465726e616c2f74657374646174612e41646472657373496e666f207374727563747b53747265657420737472696e673b4369747920737472696e673b537461746520737472696e673b5a697020737472696e677dTarget struct {
+	Value *[]AddressInfo
+	vdl.TargetBase
+	vdl.ListTargetBase
+}
+
+func (t *db_objects5b5d762e696f2f7632332f71756572792f656e67696e652f696e7465726e616c2f74657374646174612e41646472657373496e666f207374727563747b53747265657420737472696e673b4369747920737472696e673b537461746520737472696e673b5a697020737472696e677dTarget) StartList(tt *vdl.Type, len int) (vdl.ListTarget, error) {
+	if !vdl.Compatible(tt, __VDLTypedb_objects8) {
+		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLTypedb_objects8)
+	}
+	if cap(*t.Value) < len {
+		*t.Value = make([]AddressInfo, len)
+	} else {
+		*t.Value = (*t.Value)[:len]
+	}
+	return t, nil
+}
+func (t *db_objects5b5d762e696f2f7632332f71756572792f656e67696e652f696e7465726e616c2f74657374646174612e41646472657373496e666f207374727563747b53747265657420737472696e673b4369747920737472696e673b537461746520737472696e673b5a697020737472696e677dTarget) StartElem(index int) (elem vdl.Target, _ error) {
+	return &AddressInfoTarget{Value: &(*t.Value)[index]}, error(nil)
+}
+func (t *db_objects5b5d762e696f2f7632332f71756572792f656e67696e652f696e7465726e616c2f74657374646174612e41646472657373496e666f207374727563747b53747265657420737472696e673b4369747920737472696e673b537461746520737472696e673b5a697020737472696e677dTarget) FinishElem(elem vdl.Target) error {
+	return nil
+}
+func (t *db_objects5b5d762e696f2f7632332f71756572792f656e67696e652f696e7465726e616c2f74657374646174612e41646472657373496e666f207374727563747b53747265657420737472696e673b4369747920737472696e673b537461746520737472696e673b5a697020737472696e677dTarget) FinishList(elem vdl.ListTarget) error {
 	return nil
 }
 
@@ -865,7 +1239,6 @@ func (Invoice) __VDLReflect(struct {
 }
 
 func (m *Invoice) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
-
 	__VDLEnsureNativeBuilt_db_objects()
 	fieldsTarget1, err := t.StartFields(tt)
 	if err != nil {
@@ -946,6 +1319,46 @@ func (m *Invoice) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 }
 
 func (m *Invoice) MakeVDLTarget() vdl.Target {
+	return &InvoiceTarget{Value: m}
+}
+
+type InvoiceTarget struct {
+	Value *Invoice
+	vdl.TargetBase
+	vdl.FieldsTargetBase
+}
+
+func (t *InvoiceTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
+	if !vdl.Compatible(tt, __VDLType_db_objects_v_io_v23_query_engine_internal_testdata_Invoice) {
+		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType_db_objects_v_io_v23_query_engine_internal_testdata_Invoice)
+	}
+	return t, nil
+}
+func (t *InvoiceTarget) StartField(name string) (key, field vdl.Target, _ error) {
+	switch name {
+	case "CustId":
+		val, err := &vdl.Int64Target{Value: &t.Value.CustId}, error(nil)
+		return nil, val, err
+	case "InvoiceNum":
+		val, err := &vdl.Int64Target{Value: &t.Value.InvoiceNum}, error(nil)
+		return nil, val, err
+	case "InvoiceDate":
+		val, err := vdl.ReflectTarget(reflect.ValueOf(&t.Value.InvoiceDate))
+		return nil, val, err
+	case "Amount":
+		val, err := &vdl.Int64Target{Value: &t.Value.Amount}, error(nil)
+		return nil, val, err
+	case "ShipTo":
+		val, err := &AddressInfoTarget{Value: &t.Value.ShipTo}, error(nil)
+		return nil, val, err
+	default:
+		return nil, nil, fmt.Errorf("field %s not in struct %v", name, __VDLType_db_objects_v_io_v23_query_engine_internal_testdata_Invoice)
+	}
+}
+func (t *InvoiceTarget) FinishField(_, _ vdl.Target) error {
+	return nil
+}
+func (t *InvoiceTarget) FinishFields(_ vdl.FieldsTarget) error {
 	return nil
 }
 
@@ -969,7 +1382,6 @@ func (Numbers) __VDLReflect(struct {
 }
 
 func (m *Numbers) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
-
 	if __VDLType_db_objects_v_io_v23_query_engine_internal_testdata_Numbers == nil || __VDLTypedb_objects10 == nil {
 		panic("Initialization order error: types generated for FillVDLTarget not initialized. Consider moving caller to an init() block.")
 	}
@@ -1117,6 +1529,64 @@ func (m *Numbers) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 }
 
 func (m *Numbers) MakeVDLTarget() vdl.Target {
+	return &NumbersTarget{Value: m}
+}
+
+type NumbersTarget struct {
+	Value *Numbers
+	vdl.TargetBase
+	vdl.FieldsTargetBase
+}
+
+func (t *NumbersTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
+	if !vdl.Compatible(tt, __VDLType_db_objects_v_io_v23_query_engine_internal_testdata_Numbers) {
+		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType_db_objects_v_io_v23_query_engine_internal_testdata_Numbers)
+	}
+	return t, nil
+}
+func (t *NumbersTarget) StartField(name string) (key, field vdl.Target, _ error) {
+	switch name {
+	case "B":
+		val, err := &vdl.ByteTarget{Value: &t.Value.B}, error(nil)
+		return nil, val, err
+	case "Ui16":
+		val, err := &vdl.Uint16Target{Value: &t.Value.Ui16}, error(nil)
+		return nil, val, err
+	case "Ui32":
+		val, err := &vdl.Uint32Target{Value: &t.Value.Ui32}, error(nil)
+		return nil, val, err
+	case "Ui64":
+		val, err := &vdl.Uint64Target{Value: &t.Value.Ui64}, error(nil)
+		return nil, val, err
+	case "I16":
+		val, err := &vdl.Int16Target{Value: &t.Value.I16}, error(nil)
+		return nil, val, err
+	case "I32":
+		val, err := &vdl.Int32Target{Value: &t.Value.I32}, error(nil)
+		return nil, val, err
+	case "I64":
+		val, err := &vdl.Int64Target{Value: &t.Value.I64}, error(nil)
+		return nil, val, err
+	case "F32":
+		val, err := &vdl.Float32Target{Value: &t.Value.F32}, error(nil)
+		return nil, val, err
+	case "F64":
+		val, err := &vdl.Float64Target{Value: &t.Value.F64}, error(nil)
+		return nil, val, err
+	case "C64":
+		val, err := &vdl.Complex64Target{Value: &t.Value.C64}, error(nil)
+		return nil, val, err
+	case "C128":
+		val, err := &vdl.Complex128Target{Value: &t.Value.C128}, error(nil)
+		return nil, val, err
+	default:
+		return nil, nil, fmt.Errorf("field %s not in struct %v", name, __VDLType_db_objects_v_io_v23_query_engine_internal_testdata_Numbers)
+	}
+}
+func (t *NumbersTarget) FinishField(_, _ vdl.Target) error {
+	return nil
+}
+func (t *NumbersTarget) FinishFields(_ vdl.FieldsTarget) error {
 	return nil
 }
 
@@ -1130,7 +1600,6 @@ func (FooType) __VDLReflect(struct {
 }
 
 func (m *FooType) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
-
 	if __VDLType_db_objects_v_io_v23_query_engine_internal_testdata_FooType == nil || __VDLTypedb_objects11 == nil {
 		panic("Initialization order error: types generated for FillVDLTarget not initialized. Consider moving caller to an init() block.")
 	}
@@ -1159,6 +1628,93 @@ func (m *FooType) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 }
 
 func (m *FooType) MakeVDLTarget() vdl.Target {
+	return &FooTypeTarget{Value: m}
+}
+
+type FooTypeTarget struct {
+	Value *FooType
+	vdl.TargetBase
+	vdl.FieldsTargetBase
+}
+
+func (t *FooTypeTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
+	if !vdl.Compatible(tt, __VDLType_db_objects_v_io_v23_query_engine_internal_testdata_FooType) {
+		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType_db_objects_v_io_v23_query_engine_internal_testdata_FooType)
+	}
+	return t, nil
+}
+func (t *FooTypeTarget) StartField(name string) (key, field vdl.Target, _ error) {
+	switch name {
+	case "Bar":
+		val, err := &BarTypeTarget{Value: &t.Value.Bar}, error(nil)
+		return nil, val, err
+	default:
+		return nil, nil, fmt.Errorf("field %s not in struct %v", name, __VDLType_db_objects_v_io_v23_query_engine_internal_testdata_FooType)
+	}
+}
+func (t *FooTypeTarget) FinishField(_, _ vdl.Target) error {
+	return nil
+}
+func (t *FooTypeTarget) FinishFields(_ vdl.FieldsTarget) error {
+	return nil
+}
+
+type BarTypeTarget struct {
+	Value *BarType
+	vdl.TargetBase
+	vdl.FieldsTargetBase
+}
+
+func (t *BarTypeTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
+	if !vdl.Compatible(tt, __VDLType_db_objects_v_io_v23_query_engine_internal_testdata_BarType) {
+		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType_db_objects_v_io_v23_query_engine_internal_testdata_BarType)
+	}
+	return t, nil
+}
+func (t *BarTypeTarget) StartField(name string) (key, field vdl.Target, _ error) {
+	switch name {
+	case "Baz":
+		val, err := &BazTypeTarget{Value: &t.Value.Baz}, error(nil)
+		return nil, val, err
+	default:
+		return nil, nil, fmt.Errorf("field %s not in struct %v", name, __VDLType_db_objects_v_io_v23_query_engine_internal_testdata_BarType)
+	}
+}
+func (t *BarTypeTarget) FinishField(_, _ vdl.Target) error {
+	return nil
+}
+func (t *BarTypeTarget) FinishFields(_ vdl.FieldsTarget) error {
+	return nil
+}
+
+type BazTypeTarget struct {
+	Value *BazType
+	vdl.TargetBase
+	vdl.FieldsTargetBase
+}
+
+func (t *BazTypeTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
+	if !vdl.Compatible(tt, __VDLType_db_objects_v_io_v23_query_engine_internal_testdata_BazType) {
+		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType_db_objects_v_io_v23_query_engine_internal_testdata_BazType)
+	}
+	return t, nil
+}
+func (t *BazTypeTarget) StartField(name string) (key, field vdl.Target, _ error) {
+	switch name {
+	case "Name":
+		val, err := &vdl.StringTarget{Value: &t.Value.Name}, error(nil)
+		return nil, val, err
+	case "TitleOrValue":
+		val, err := vdl.ReflectTarget(reflect.ValueOf(&t.Value.TitleOrValue))
+		return nil, val, err
+	default:
+		return nil, nil, fmt.Errorf("field %s not in struct %v", name, __VDLType_db_objects_v_io_v23_query_engine_internal_testdata_BazType)
+	}
+}
+func (t *BazTypeTarget) FinishField(_, _ vdl.Target) error {
+	return nil
+}
+func (t *BazTypeTarget) FinishFields(_ vdl.FieldsTarget) error {
 	return nil
 }
 
@@ -1172,7 +1728,6 @@ func (BarType) __VDLReflect(struct {
 }
 
 func (m *BarType) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
-
 	if __VDLType_db_objects_v_io_v23_query_engine_internal_testdata_BarType == nil || __VDLTypedb_objects12 == nil {
 		panic("Initialization order error: types generated for FillVDLTarget not initialized. Consider moving caller to an init() block.")
 	}
@@ -1201,7 +1756,7 @@ func (m *BarType) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 }
 
 func (m *BarType) MakeVDLTarget() vdl.Target {
-	return nil
+	return &BarTypeTarget{Value: m}
 }
 
 type (
@@ -1238,7 +1793,6 @@ func (x TitleOrValueTypeTitle) Name() string                           { return 
 func (x TitleOrValueTypeTitle) __VDLReflect(__TitleOrValueTypeReflect) {}
 
 func (m TitleOrValueTypeTitle) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
-
 	fieldsTarget1, err := t.StartFields(__VDLType_db_objects_v_io_v23_query_engine_internal_testdata_TitleOrValueType)
 	if err != nil {
 		return err
@@ -1270,7 +1824,6 @@ func (x TitleOrValueTypeValue) Name() string                           { return 
 func (x TitleOrValueTypeValue) __VDLReflect(__TitleOrValueTypeReflect) {}
 
 func (m TitleOrValueTypeValue) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
-
 	fieldsTarget1, err := t.StartFields(__VDLType_db_objects_v_io_v23_query_engine_internal_testdata_TitleOrValueType)
 	if err != nil {
 		return err
@@ -1307,7 +1860,6 @@ func (BazType) __VDLReflect(struct {
 }
 
 func (m *BazType) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
-
 	if __VDLType_db_objects_v_io_v23_query_engine_internal_testdata_BazType == nil || __VDLTypedb_objects13 == nil {
 		panic("Initialization order error: types generated for FillVDLTarget not initialized. Consider moving caller to an init() block.")
 	}
@@ -1352,7 +1904,7 @@ func (m *BazType) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 }
 
 func (m *BazType) MakeVDLTarget() vdl.Target {
-	return nil
+	return &BazTypeTarget{Value: m}
 }
 
 type K struct {
@@ -1366,7 +1918,6 @@ func (K) __VDLReflect(struct {
 }
 
 func (m *K) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
-
 	if __VDLType_db_objects_v_io_v23_query_engine_internal_testdata_K == nil || __VDLTypedb_objects14 == nil {
 		panic("Initialization order error: types generated for FillVDLTarget not initialized. Consider moving caller to an init() block.")
 	}
@@ -1406,6 +1957,37 @@ func (m *K) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 }
 
 func (m *K) MakeVDLTarget() vdl.Target {
+	return &KTarget{Value: m}
+}
+
+type KTarget struct {
+	Value *K
+	vdl.TargetBase
+	vdl.FieldsTargetBase
+}
+
+func (t *KTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
+	if !vdl.Compatible(tt, __VDLType_db_objects_v_io_v23_query_engine_internal_testdata_K) {
+		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType_db_objects_v_io_v23_query_engine_internal_testdata_K)
+	}
+	return t, nil
+}
+func (t *KTarget) StartField(name string) (key, field vdl.Target, _ error) {
+	switch name {
+	case "A":
+		val, err := &vdl.ByteTarget{Value: &t.Value.A}, error(nil)
+		return nil, val, err
+	case "B":
+		val, err := &vdl.StringTarget{Value: &t.Value.B}, error(nil)
+		return nil, val, err
+	default:
+		return nil, nil, fmt.Errorf("field %s not in struct %v", name, __VDLType_db_objects_v_io_v23_query_engine_internal_testdata_K)
+	}
+}
+func (t *KTarget) FinishField(_, _ vdl.Target) error {
+	return nil
+}
+func (t *KTarget) FinishFields(_ vdl.FieldsTarget) error {
 	return nil
 }
 
@@ -1420,7 +2002,6 @@ func (V) __VDLReflect(struct {
 }
 
 func (m *V) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
-
 	if __VDLType_db_objects_v_io_v23_query_engine_internal_testdata_V == nil || __VDLTypedb_objects15 == nil {
 		panic("Initialization order error: types generated for FillVDLTarget not initialized. Consider moving caller to an init() block.")
 	}
@@ -1460,6 +2041,37 @@ func (m *V) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 }
 
 func (m *V) MakeVDLTarget() vdl.Target {
+	return &VTarget{Value: m}
+}
+
+type VTarget struct {
+	Value *V
+	vdl.TargetBase
+	vdl.FieldsTargetBase
+}
+
+func (t *VTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
+	if !vdl.Compatible(tt, __VDLType_db_objects_v_io_v23_query_engine_internal_testdata_V) {
+		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType_db_objects_v_io_v23_query_engine_internal_testdata_V)
+	}
+	return t, nil
+}
+func (t *VTarget) StartField(name string) (key, field vdl.Target, _ error) {
+	switch name {
+	case "A":
+		val, err := &vdl.StringTarget{Value: &t.Value.A}, error(nil)
+		return nil, val, err
+	case "B":
+		val, err := &vdl.Float32Target{Value: &t.Value.B}, error(nil)
+		return nil, val, err
+	default:
+		return nil, nil, fmt.Errorf("field %s not in struct %v", name, __VDLType_db_objects_v_io_v23_query_engine_internal_testdata_V)
+	}
+}
+func (t *VTarget) FinishField(_, _ vdl.Target) error {
+	return nil
+}
+func (t *VTarget) FinishFields(_ vdl.FieldsTarget) error {
 	return nil
 }
 
@@ -1475,7 +2087,6 @@ func (FunWithMaps) __VDLReflect(struct {
 }
 
 func (m *FunWithMaps) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
-
 	if __VDLType_db_objects_v_io_v23_query_engine_internal_testdata_FunWithMaps == nil || __VDLTypedb_objects16 == nil {
 		panic("Initialization order error: types generated for FillVDLTarget not initialized. Consider moving caller to an init() block.")
 	}
@@ -1612,6 +2223,164 @@ func (m *FunWithMaps) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 }
 
 func (m *FunWithMaps) MakeVDLTarget() vdl.Target {
+	return &FunWithMapsTarget{Value: m}
+}
+
+type FunWithMapsTarget struct {
+	Value *FunWithMaps
+	vdl.TargetBase
+	vdl.FieldsTargetBase
+}
+
+func (t *FunWithMapsTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
+	if !vdl.Compatible(tt, __VDLType_db_objects_v_io_v23_query_engine_internal_testdata_FunWithMaps) {
+		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType_db_objects_v_io_v23_query_engine_internal_testdata_FunWithMaps)
+	}
+	return t, nil
+}
+func (t *FunWithMapsTarget) StartField(name string) (key, field vdl.Target, _ error) {
+	switch name {
+	case "Key":
+		val, err := &KTarget{Value: &t.Value.Key}, error(nil)
+		return nil, val, err
+	case "Map":
+		val, err := &db_objects6d61705b762e696f2f7632332f71756572792f656e67696e652f696e7465726e616c2f74657374646174612e4b207374727563747b4120627974653b4220737472696e677d5d762e696f2f7632332f71756572792f656e67696e652f696e7465726e616c2f74657374646174612e56207374727563747b4120737472696e673b4220666c6f617433327dTarget{Value: &t.Value.Map}, error(nil)
+		return nil, val, err
+	case "Confusing":
+		val, err := &db_objects6d61705b696e7431365d5b5d7365745b737472696e675dTarget{Value: &t.Value.Confusing}, error(nil)
+		return nil, val, err
+	default:
+		return nil, nil, fmt.Errorf("field %s not in struct %v", name, __VDLType_db_objects_v_io_v23_query_engine_internal_testdata_FunWithMaps)
+	}
+}
+func (t *FunWithMapsTarget) FinishField(_, _ vdl.Target) error {
+	return nil
+}
+func (t *FunWithMapsTarget) FinishFields(_ vdl.FieldsTarget) error {
+	return nil
+}
+
+type db_objects6d61705b762e696f2f7632332f71756572792f656e67696e652f696e7465726e616c2f74657374646174612e4b207374727563747b4120627974653b4220737472696e677d5d762e696f2f7632332f71756572792f656e67696e652f696e7465726e616c2f74657374646174612e56207374727563747b4120737472696e673b4220666c6f617433327dTarget struct {
+	Value    *map[K]V
+	currKey  K
+	currElem V
+	vdl.TargetBase
+	vdl.MapTargetBase
+}
+
+func (t *db_objects6d61705b762e696f2f7632332f71756572792f656e67696e652f696e7465726e616c2f74657374646174612e4b207374727563747b4120627974653b4220737472696e677d5d762e696f2f7632332f71756572792f656e67696e652f696e7465726e616c2f74657374646174612e56207374727563747b4120737472696e673b4220666c6f617433327dTarget) StartMap(tt *vdl.Type, len int) (vdl.MapTarget, error) {
+	if !vdl.Compatible(tt, __VDLTypedb_objects17) {
+		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLTypedb_objects17)
+	}
+	*t.Value = make(map[K]V)
+	return t, nil
+}
+func (t *db_objects6d61705b762e696f2f7632332f71756572792f656e67696e652f696e7465726e616c2f74657374646174612e4b207374727563747b4120627974653b4220737472696e677d5d762e696f2f7632332f71756572792f656e67696e652f696e7465726e616c2f74657374646174612e56207374727563747b4120737472696e673b4220666c6f617433327dTarget) StartKey() (key vdl.Target, _ error) {
+	t.currKey = K{}
+	return &KTarget{Value: &t.currKey}, error(nil)
+}
+func (t *db_objects6d61705b762e696f2f7632332f71756572792f656e67696e652f696e7465726e616c2f74657374646174612e4b207374727563747b4120627974653b4220737472696e677d5d762e696f2f7632332f71756572792f656e67696e652f696e7465726e616c2f74657374646174612e56207374727563747b4120737472696e673b4220666c6f617433327dTarget) FinishKeyStartField(key vdl.Target) (field vdl.Target, _ error) {
+	t.currElem = V{}
+	return &VTarget{Value: &t.currElem}, error(nil)
+}
+func (t *db_objects6d61705b762e696f2f7632332f71756572792f656e67696e652f696e7465726e616c2f74657374646174612e4b207374727563747b4120627974653b4220737472696e677d5d762e696f2f7632332f71756572792f656e67696e652f696e7465726e616c2f74657374646174612e56207374727563747b4120737472696e673b4220666c6f617433327dTarget) FinishField(key, field vdl.Target) error {
+	(*t.Value)[t.currKey] = t.currElem
+	return nil
+}
+func (t *db_objects6d61705b762e696f2f7632332f71756572792f656e67696e652f696e7465726e616c2f74657374646174612e4b207374727563747b4120627974653b4220737472696e677d5d762e696f2f7632332f71756572792f656e67696e652f696e7465726e616c2f74657374646174612e56207374727563747b4120737472696e673b4220666c6f617433327dTarget) FinishMap(elem vdl.MapTarget) error {
+	if len(*t.Value) == 0 {
+		*t.Value = nil
+	}
+	return nil
+}
+
+type db_objects6d61705b696e7431365d5b5d7365745b737472696e675dTarget struct {
+	Value    *map[int16][]map[string]struct{}
+	currKey  int16
+	currElem []map[string]struct{}
+	vdl.TargetBase
+	vdl.MapTargetBase
+}
+
+func (t *db_objects6d61705b696e7431365d5b5d7365745b737472696e675dTarget) StartMap(tt *vdl.Type, len int) (vdl.MapTarget, error) {
+	if !vdl.Compatible(tt, __VDLTypedb_objects18) {
+		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLTypedb_objects18)
+	}
+	*t.Value = make(map[int16][]map[string]struct{})
+	return t, nil
+}
+func (t *db_objects6d61705b696e7431365d5b5d7365745b737472696e675dTarget) StartKey() (key vdl.Target, _ error) {
+	t.currKey = int16(0)
+	return &vdl.Int16Target{Value: &t.currKey}, error(nil)
+}
+func (t *db_objects6d61705b696e7431365d5b5d7365745b737472696e675dTarget) FinishKeyStartField(key vdl.Target) (field vdl.Target, _ error) {
+	t.currElem = []map[string]struct{}(nil)
+	return &db_objects5b5d7365745b737472696e675dTarget{Value: &t.currElem}, error(nil)
+}
+func (t *db_objects6d61705b696e7431365d5b5d7365745b737472696e675dTarget) FinishField(key, field vdl.Target) error {
+	(*t.Value)[t.currKey] = t.currElem
+	return nil
+}
+func (t *db_objects6d61705b696e7431365d5b5d7365745b737472696e675dTarget) FinishMap(elem vdl.MapTarget) error {
+	if len(*t.Value) == 0 {
+		*t.Value = nil
+	}
+	return nil
+}
+
+type db_objects5b5d7365745b737472696e675dTarget struct {
+	Value *[]map[string]struct{}
+	vdl.TargetBase
+	vdl.ListTargetBase
+}
+
+func (t *db_objects5b5d7365745b737472696e675dTarget) StartList(tt *vdl.Type, len int) (vdl.ListTarget, error) {
+	if !vdl.Compatible(tt, __VDLTypedb_objects19) {
+		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLTypedb_objects19)
+	}
+	if cap(*t.Value) < len {
+		*t.Value = make([]map[string]struct{}, len)
+	} else {
+		*t.Value = (*t.Value)[:len]
+	}
+	return t, nil
+}
+func (t *db_objects5b5d7365745b737472696e675dTarget) StartElem(index int) (elem vdl.Target, _ error) {
+	return &db_objects7365745b737472696e675dTarget{Value: &(*t.Value)[index]}, error(nil)
+}
+func (t *db_objects5b5d7365745b737472696e675dTarget) FinishElem(elem vdl.Target) error {
+	return nil
+}
+func (t *db_objects5b5d7365745b737472696e675dTarget) FinishList(elem vdl.ListTarget) error {
+	return nil
+}
+
+type db_objects7365745b737472696e675dTarget struct {
+	Value   *map[string]struct{}
+	currKey string
+	vdl.TargetBase
+	vdl.SetTargetBase
+}
+
+func (t *db_objects7365745b737472696e675dTarget) StartSet(tt *vdl.Type, len int) (vdl.SetTarget, error) {
+	if !vdl.Compatible(tt, __VDLTypedb_objects20) {
+		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLTypedb_objects20)
+	}
+	*t.Value = make(map[string]struct{})
+	return t, nil
+}
+func (t *db_objects7365745b737472696e675dTarget) StartKey() (key vdl.Target, _ error) {
+	t.currKey = ""
+	return &vdl.StringTarget{Value: &t.currKey}, error(nil)
+}
+func (t *db_objects7365745b737472696e675dTarget) FinishKey(key vdl.Target) error {
+	(*t.Value)[t.currKey] = struct{}{}
+	return nil
+}
+func (t *db_objects7365745b737472696e675dTarget) FinishSet(list vdl.SetTarget) error {
+	if len(*t.Value) == 0 {
+		*t.Value = nil
+	}
 	return nil
 }
 
@@ -1626,7 +2395,6 @@ func (FunWithTypes) __VDLReflect(struct {
 }
 
 func (m *FunWithTypes) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
-
 	if __VDLType_db_objects_v_io_v23_query_engine_internal_testdata_FunWithTypes == nil || __VDLTypedb_objects21 == nil {
 		panic("Initialization order error: types generated for FillVDLTarget not initialized. Consider moving caller to an init() block.")
 	}
@@ -1674,6 +2442,37 @@ func (m *FunWithTypes) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 }
 
 func (m *FunWithTypes) MakeVDLTarget() vdl.Target {
+	return &FunWithTypesTarget{Value: m}
+}
+
+type FunWithTypesTarget struct {
+	Value *FunWithTypes
+	vdl.TargetBase
+	vdl.FieldsTargetBase
+}
+
+func (t *FunWithTypesTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
+	if !vdl.Compatible(tt, __VDLType_db_objects_v_io_v23_query_engine_internal_testdata_FunWithTypes) {
+		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType_db_objects_v_io_v23_query_engine_internal_testdata_FunWithTypes)
+	}
+	return t, nil
+}
+func (t *FunWithTypesTarget) StartField(name string) (key, field vdl.Target, _ error) {
+	switch name {
+	case "T1":
+		val, err := &vdl.TypeObjectTarget{Value: &t.Value.T1}, error(nil)
+		return nil, val, err
+	case "T2":
+		val, err := &vdl.TypeObjectTarget{Value: &t.Value.T2}, error(nil)
+		return nil, val, err
+	default:
+		return nil, nil, fmt.Errorf("field %s not in struct %v", name, __VDLType_db_objects_v_io_v23_query_engine_internal_testdata_FunWithTypes)
+	}
+}
+func (t *FunWithTypesTarget) FinishField(_, _ vdl.Target) error {
+	return nil
+}
+func (t *FunWithTypesTarget) FinishFields(_ vdl.FieldsTarget) error {
 	return nil
 }
 
@@ -1701,7 +2500,6 @@ func (ManyMaps) __VDLReflect(struct {
 }
 
 func (m *ManyMaps) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
-
 	__VDLEnsureNativeBuilt_db_objects()
 	fieldsTarget1, err := t.StartFields(tt)
 	if err != nil {
@@ -2285,6 +3083,586 @@ func (m *ManyMaps) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 }
 
 func (m *ManyMaps) MakeVDLTarget() vdl.Target {
+	return &ManyMapsTarget{Value: m}
+}
+
+type ManyMapsTarget struct {
+	Value *ManyMaps
+	vdl.TargetBase
+	vdl.FieldsTargetBase
+}
+
+func (t *ManyMapsTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
+	if !vdl.Compatible(tt, __VDLType_db_objects_v_io_v23_query_engine_internal_testdata_ManyMaps) {
+		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType_db_objects_v_io_v23_query_engine_internal_testdata_ManyMaps)
+	}
+	return t, nil
+}
+func (t *ManyMapsTarget) StartField(name string) (key, field vdl.Target, _ error) {
+	switch name {
+	case "B":
+		val, err := &db_objects6d61705b626f6f6c5d737472696e67Target{Value: &t.Value.B}, error(nil)
+		return nil, val, err
+	case "By":
+		val, err := &db_objects6d61705b627974655d737472696e67Target{Value: &t.Value.By}, error(nil)
+		return nil, val, err
+	case "U16":
+		val, err := &db_objects6d61705b75696e7431365d737472696e67Target{Value: &t.Value.U16}, error(nil)
+		return nil, val, err
+	case "U32":
+		val, err := &db_objects6d61705b75696e7433325d737472696e67Target{Value: &t.Value.U32}, error(nil)
+		return nil, val, err
+	case "U64":
+		val, err := &db_objects6d61705b75696e7436345d737472696e67Target{Value: &t.Value.U64}, error(nil)
+		return nil, val, err
+	case "I16":
+		val, err := &db_objects6d61705b696e7431365d737472696e67Target{Value: &t.Value.I16}, error(nil)
+		return nil, val, err
+	case "I32":
+		val, err := &db_objects6d61705b696e7433325d737472696e67Target{Value: &t.Value.I32}, error(nil)
+		return nil, val, err
+	case "I64":
+		val, err := &db_objects6d61705b696e7436345d737472696e67Target{Value: &t.Value.I64}, error(nil)
+		return nil, val, err
+	case "F32":
+		val, err := &db_objects6d61705b666c6f617433325d737472696e67Target{Value: &t.Value.F32}, error(nil)
+		return nil, val, err
+	case "F64":
+		val, err := &db_objects6d61705b666c6f617436345d737472696e67Target{Value: &t.Value.F64}, error(nil)
+		return nil, val, err
+	case "C64":
+		val, err := &db_objects6d61705b636f6d706c657836345d737472696e67Target{Value: &t.Value.C64}, error(nil)
+		return nil, val, err
+	case "C128":
+		val, err := &db_objects6d61705b636f6d706c65783132385d737472696e67Target{Value: &t.Value.C128}, error(nil)
+		return nil, val, err
+	case "S":
+		val, err := &db_objects6d61705b737472696e675d737472696e67Target{Value: &t.Value.S}, error(nil)
+		return nil, val, err
+	case "Ms":
+		val, err := &db_objects6d61705b737472696e675d6d61705b737472696e675d737472696e67Target{Value: &t.Value.Ms}, error(nil)
+		return nil, val, err
+	case "T":
+		val, err := &db_objects6d61705b74696d652e54696d65207374727563747b5365636f6e647320696e7436343b4e616e6f7320696e7433327d5d737472696e67Target{Value: &t.Value.T}, error(nil)
+		return nil, val, err
+	default:
+		return nil, nil, fmt.Errorf("field %s not in struct %v", name, __VDLType_db_objects_v_io_v23_query_engine_internal_testdata_ManyMaps)
+	}
+}
+func (t *ManyMapsTarget) FinishField(_, _ vdl.Target) error {
+	return nil
+}
+func (t *ManyMapsTarget) FinishFields(_ vdl.FieldsTarget) error {
+	return nil
+}
+
+type db_objects6d61705b626f6f6c5d737472696e67Target struct {
+	Value    *map[bool]string
+	currKey  bool
+	currElem string
+	vdl.TargetBase
+	vdl.MapTargetBase
+}
+
+func (t *db_objects6d61705b626f6f6c5d737472696e67Target) StartMap(tt *vdl.Type, len int) (vdl.MapTarget, error) {
+	if !vdl.Compatible(tt, __VDLTypedb_objects23) {
+		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLTypedb_objects23)
+	}
+	*t.Value = make(map[bool]string)
+	return t, nil
+}
+func (t *db_objects6d61705b626f6f6c5d737472696e67Target) StartKey() (key vdl.Target, _ error) {
+	t.currKey = false
+	return &vdl.BoolTarget{Value: &t.currKey}, error(nil)
+}
+func (t *db_objects6d61705b626f6f6c5d737472696e67Target) FinishKeyStartField(key vdl.Target) (field vdl.Target, _ error) {
+	t.currElem = ""
+	return &vdl.StringTarget{Value: &t.currElem}, error(nil)
+}
+func (t *db_objects6d61705b626f6f6c5d737472696e67Target) FinishField(key, field vdl.Target) error {
+	(*t.Value)[t.currKey] = t.currElem
+	return nil
+}
+func (t *db_objects6d61705b626f6f6c5d737472696e67Target) FinishMap(elem vdl.MapTarget) error {
+	if len(*t.Value) == 0 {
+		*t.Value = nil
+	}
+	return nil
+}
+
+type db_objects6d61705b627974655d737472696e67Target struct {
+	Value    *map[byte]string
+	currKey  byte
+	currElem string
+	vdl.TargetBase
+	vdl.MapTargetBase
+}
+
+func (t *db_objects6d61705b627974655d737472696e67Target) StartMap(tt *vdl.Type, len int) (vdl.MapTarget, error) {
+	if !vdl.Compatible(tt, __VDLTypedb_objects24) {
+		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLTypedb_objects24)
+	}
+	*t.Value = make(map[byte]string)
+	return t, nil
+}
+func (t *db_objects6d61705b627974655d737472696e67Target) StartKey() (key vdl.Target, _ error) {
+	t.currKey = byte(0)
+	return &vdl.ByteTarget{Value: &t.currKey}, error(nil)
+}
+func (t *db_objects6d61705b627974655d737472696e67Target) FinishKeyStartField(key vdl.Target) (field vdl.Target, _ error) {
+	t.currElem = ""
+	return &vdl.StringTarget{Value: &t.currElem}, error(nil)
+}
+func (t *db_objects6d61705b627974655d737472696e67Target) FinishField(key, field vdl.Target) error {
+	(*t.Value)[t.currKey] = t.currElem
+	return nil
+}
+func (t *db_objects6d61705b627974655d737472696e67Target) FinishMap(elem vdl.MapTarget) error {
+	if len(*t.Value) == 0 {
+		*t.Value = nil
+	}
+	return nil
+}
+
+type db_objects6d61705b75696e7431365d737472696e67Target struct {
+	Value    *map[uint16]string
+	currKey  uint16
+	currElem string
+	vdl.TargetBase
+	vdl.MapTargetBase
+}
+
+func (t *db_objects6d61705b75696e7431365d737472696e67Target) StartMap(tt *vdl.Type, len int) (vdl.MapTarget, error) {
+	if !vdl.Compatible(tt, __VDLTypedb_objects25) {
+		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLTypedb_objects25)
+	}
+	*t.Value = make(map[uint16]string)
+	return t, nil
+}
+func (t *db_objects6d61705b75696e7431365d737472696e67Target) StartKey() (key vdl.Target, _ error) {
+	t.currKey = uint16(0)
+	return &vdl.Uint16Target{Value: &t.currKey}, error(nil)
+}
+func (t *db_objects6d61705b75696e7431365d737472696e67Target) FinishKeyStartField(key vdl.Target) (field vdl.Target, _ error) {
+	t.currElem = ""
+	return &vdl.StringTarget{Value: &t.currElem}, error(nil)
+}
+func (t *db_objects6d61705b75696e7431365d737472696e67Target) FinishField(key, field vdl.Target) error {
+	(*t.Value)[t.currKey] = t.currElem
+	return nil
+}
+func (t *db_objects6d61705b75696e7431365d737472696e67Target) FinishMap(elem vdl.MapTarget) error {
+	if len(*t.Value) == 0 {
+		*t.Value = nil
+	}
+	return nil
+}
+
+type db_objects6d61705b75696e7433325d737472696e67Target struct {
+	Value    *map[uint32]string
+	currKey  uint32
+	currElem string
+	vdl.TargetBase
+	vdl.MapTargetBase
+}
+
+func (t *db_objects6d61705b75696e7433325d737472696e67Target) StartMap(tt *vdl.Type, len int) (vdl.MapTarget, error) {
+	if !vdl.Compatible(tt, __VDLTypedb_objects26) {
+		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLTypedb_objects26)
+	}
+	*t.Value = make(map[uint32]string)
+	return t, nil
+}
+func (t *db_objects6d61705b75696e7433325d737472696e67Target) StartKey() (key vdl.Target, _ error) {
+	t.currKey = uint32(0)
+	return &vdl.Uint32Target{Value: &t.currKey}, error(nil)
+}
+func (t *db_objects6d61705b75696e7433325d737472696e67Target) FinishKeyStartField(key vdl.Target) (field vdl.Target, _ error) {
+	t.currElem = ""
+	return &vdl.StringTarget{Value: &t.currElem}, error(nil)
+}
+func (t *db_objects6d61705b75696e7433325d737472696e67Target) FinishField(key, field vdl.Target) error {
+	(*t.Value)[t.currKey] = t.currElem
+	return nil
+}
+func (t *db_objects6d61705b75696e7433325d737472696e67Target) FinishMap(elem vdl.MapTarget) error {
+	if len(*t.Value) == 0 {
+		*t.Value = nil
+	}
+	return nil
+}
+
+type db_objects6d61705b75696e7436345d737472696e67Target struct {
+	Value    *map[uint64]string
+	currKey  uint64
+	currElem string
+	vdl.TargetBase
+	vdl.MapTargetBase
+}
+
+func (t *db_objects6d61705b75696e7436345d737472696e67Target) StartMap(tt *vdl.Type, len int) (vdl.MapTarget, error) {
+	if !vdl.Compatible(tt, __VDLTypedb_objects27) {
+		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLTypedb_objects27)
+	}
+	*t.Value = make(map[uint64]string)
+	return t, nil
+}
+func (t *db_objects6d61705b75696e7436345d737472696e67Target) StartKey() (key vdl.Target, _ error) {
+	t.currKey = uint64(0)
+	return &vdl.Uint64Target{Value: &t.currKey}, error(nil)
+}
+func (t *db_objects6d61705b75696e7436345d737472696e67Target) FinishKeyStartField(key vdl.Target) (field vdl.Target, _ error) {
+	t.currElem = ""
+	return &vdl.StringTarget{Value: &t.currElem}, error(nil)
+}
+func (t *db_objects6d61705b75696e7436345d737472696e67Target) FinishField(key, field vdl.Target) error {
+	(*t.Value)[t.currKey] = t.currElem
+	return nil
+}
+func (t *db_objects6d61705b75696e7436345d737472696e67Target) FinishMap(elem vdl.MapTarget) error {
+	if len(*t.Value) == 0 {
+		*t.Value = nil
+	}
+	return nil
+}
+
+type db_objects6d61705b696e7431365d737472696e67Target struct {
+	Value    *map[int16]string
+	currKey  int16
+	currElem string
+	vdl.TargetBase
+	vdl.MapTargetBase
+}
+
+func (t *db_objects6d61705b696e7431365d737472696e67Target) StartMap(tt *vdl.Type, len int) (vdl.MapTarget, error) {
+	if !vdl.Compatible(tt, __VDLTypedb_objects28) {
+		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLTypedb_objects28)
+	}
+	*t.Value = make(map[int16]string)
+	return t, nil
+}
+func (t *db_objects6d61705b696e7431365d737472696e67Target) StartKey() (key vdl.Target, _ error) {
+	t.currKey = int16(0)
+	return &vdl.Int16Target{Value: &t.currKey}, error(nil)
+}
+func (t *db_objects6d61705b696e7431365d737472696e67Target) FinishKeyStartField(key vdl.Target) (field vdl.Target, _ error) {
+	t.currElem = ""
+	return &vdl.StringTarget{Value: &t.currElem}, error(nil)
+}
+func (t *db_objects6d61705b696e7431365d737472696e67Target) FinishField(key, field vdl.Target) error {
+	(*t.Value)[t.currKey] = t.currElem
+	return nil
+}
+func (t *db_objects6d61705b696e7431365d737472696e67Target) FinishMap(elem vdl.MapTarget) error {
+	if len(*t.Value) == 0 {
+		*t.Value = nil
+	}
+	return nil
+}
+
+type db_objects6d61705b696e7433325d737472696e67Target struct {
+	Value    *map[int32]string
+	currKey  int32
+	currElem string
+	vdl.TargetBase
+	vdl.MapTargetBase
+}
+
+func (t *db_objects6d61705b696e7433325d737472696e67Target) StartMap(tt *vdl.Type, len int) (vdl.MapTarget, error) {
+	if !vdl.Compatible(tt, __VDLTypedb_objects29) {
+		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLTypedb_objects29)
+	}
+	*t.Value = make(map[int32]string)
+	return t, nil
+}
+func (t *db_objects6d61705b696e7433325d737472696e67Target) StartKey() (key vdl.Target, _ error) {
+	t.currKey = int32(0)
+	return &vdl.Int32Target{Value: &t.currKey}, error(nil)
+}
+func (t *db_objects6d61705b696e7433325d737472696e67Target) FinishKeyStartField(key vdl.Target) (field vdl.Target, _ error) {
+	t.currElem = ""
+	return &vdl.StringTarget{Value: &t.currElem}, error(nil)
+}
+func (t *db_objects6d61705b696e7433325d737472696e67Target) FinishField(key, field vdl.Target) error {
+	(*t.Value)[t.currKey] = t.currElem
+	return nil
+}
+func (t *db_objects6d61705b696e7433325d737472696e67Target) FinishMap(elem vdl.MapTarget) error {
+	if len(*t.Value) == 0 {
+		*t.Value = nil
+	}
+	return nil
+}
+
+type db_objects6d61705b696e7436345d737472696e67Target struct {
+	Value    *map[int64]string
+	currKey  int64
+	currElem string
+	vdl.TargetBase
+	vdl.MapTargetBase
+}
+
+func (t *db_objects6d61705b696e7436345d737472696e67Target) StartMap(tt *vdl.Type, len int) (vdl.MapTarget, error) {
+	if !vdl.Compatible(tt, __VDLTypedb_objects30) {
+		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLTypedb_objects30)
+	}
+	*t.Value = make(map[int64]string)
+	return t, nil
+}
+func (t *db_objects6d61705b696e7436345d737472696e67Target) StartKey() (key vdl.Target, _ error) {
+	t.currKey = int64(0)
+	return &vdl.Int64Target{Value: &t.currKey}, error(nil)
+}
+func (t *db_objects6d61705b696e7436345d737472696e67Target) FinishKeyStartField(key vdl.Target) (field vdl.Target, _ error) {
+	t.currElem = ""
+	return &vdl.StringTarget{Value: &t.currElem}, error(nil)
+}
+func (t *db_objects6d61705b696e7436345d737472696e67Target) FinishField(key, field vdl.Target) error {
+	(*t.Value)[t.currKey] = t.currElem
+	return nil
+}
+func (t *db_objects6d61705b696e7436345d737472696e67Target) FinishMap(elem vdl.MapTarget) error {
+	if len(*t.Value) == 0 {
+		*t.Value = nil
+	}
+	return nil
+}
+
+type db_objects6d61705b666c6f617433325d737472696e67Target struct {
+	Value    *map[float32]string
+	currKey  float32
+	currElem string
+	vdl.TargetBase
+	vdl.MapTargetBase
+}
+
+func (t *db_objects6d61705b666c6f617433325d737472696e67Target) StartMap(tt *vdl.Type, len int) (vdl.MapTarget, error) {
+	if !vdl.Compatible(tt, __VDLTypedb_objects31) {
+		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLTypedb_objects31)
+	}
+	*t.Value = make(map[float32]string)
+	return t, nil
+}
+func (t *db_objects6d61705b666c6f617433325d737472696e67Target) StartKey() (key vdl.Target, _ error) {
+	t.currKey = float32(0)
+	return &vdl.Float32Target{Value: &t.currKey}, error(nil)
+}
+func (t *db_objects6d61705b666c6f617433325d737472696e67Target) FinishKeyStartField(key vdl.Target) (field vdl.Target, _ error) {
+	t.currElem = ""
+	return &vdl.StringTarget{Value: &t.currElem}, error(nil)
+}
+func (t *db_objects6d61705b666c6f617433325d737472696e67Target) FinishField(key, field vdl.Target) error {
+	(*t.Value)[t.currKey] = t.currElem
+	return nil
+}
+func (t *db_objects6d61705b666c6f617433325d737472696e67Target) FinishMap(elem vdl.MapTarget) error {
+	if len(*t.Value) == 0 {
+		*t.Value = nil
+	}
+	return nil
+}
+
+type db_objects6d61705b666c6f617436345d737472696e67Target struct {
+	Value    *map[float64]string
+	currKey  float64
+	currElem string
+	vdl.TargetBase
+	vdl.MapTargetBase
+}
+
+func (t *db_objects6d61705b666c6f617436345d737472696e67Target) StartMap(tt *vdl.Type, len int) (vdl.MapTarget, error) {
+	if !vdl.Compatible(tt, __VDLTypedb_objects32) {
+		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLTypedb_objects32)
+	}
+	*t.Value = make(map[float64]string)
+	return t, nil
+}
+func (t *db_objects6d61705b666c6f617436345d737472696e67Target) StartKey() (key vdl.Target, _ error) {
+	t.currKey = float64(0)
+	return &vdl.Float64Target{Value: &t.currKey}, error(nil)
+}
+func (t *db_objects6d61705b666c6f617436345d737472696e67Target) FinishKeyStartField(key vdl.Target) (field vdl.Target, _ error) {
+	t.currElem = ""
+	return &vdl.StringTarget{Value: &t.currElem}, error(nil)
+}
+func (t *db_objects6d61705b666c6f617436345d737472696e67Target) FinishField(key, field vdl.Target) error {
+	(*t.Value)[t.currKey] = t.currElem
+	return nil
+}
+func (t *db_objects6d61705b666c6f617436345d737472696e67Target) FinishMap(elem vdl.MapTarget) error {
+	if len(*t.Value) == 0 {
+		*t.Value = nil
+	}
+	return nil
+}
+
+type db_objects6d61705b636f6d706c657836345d737472696e67Target struct {
+	Value    *map[complex64]string
+	currKey  complex64
+	currElem string
+	vdl.TargetBase
+	vdl.MapTargetBase
+}
+
+func (t *db_objects6d61705b636f6d706c657836345d737472696e67Target) StartMap(tt *vdl.Type, len int) (vdl.MapTarget, error) {
+	if !vdl.Compatible(tt, __VDLTypedb_objects33) {
+		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLTypedb_objects33)
+	}
+	*t.Value = make(map[complex64]string)
+	return t, nil
+}
+func (t *db_objects6d61705b636f6d706c657836345d737472696e67Target) StartKey() (key vdl.Target, _ error) {
+	t.currKey = complex64(0)
+	return &vdl.Complex64Target{Value: &t.currKey}, error(nil)
+}
+func (t *db_objects6d61705b636f6d706c657836345d737472696e67Target) FinishKeyStartField(key vdl.Target) (field vdl.Target, _ error) {
+	t.currElem = ""
+	return &vdl.StringTarget{Value: &t.currElem}, error(nil)
+}
+func (t *db_objects6d61705b636f6d706c657836345d737472696e67Target) FinishField(key, field vdl.Target) error {
+	(*t.Value)[t.currKey] = t.currElem
+	return nil
+}
+func (t *db_objects6d61705b636f6d706c657836345d737472696e67Target) FinishMap(elem vdl.MapTarget) error {
+	if len(*t.Value) == 0 {
+		*t.Value = nil
+	}
+	return nil
+}
+
+type db_objects6d61705b636f6d706c65783132385d737472696e67Target struct {
+	Value    *map[complex128]string
+	currKey  complex128
+	currElem string
+	vdl.TargetBase
+	vdl.MapTargetBase
+}
+
+func (t *db_objects6d61705b636f6d706c65783132385d737472696e67Target) StartMap(tt *vdl.Type, len int) (vdl.MapTarget, error) {
+	if !vdl.Compatible(tt, __VDLTypedb_objects34) {
+		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLTypedb_objects34)
+	}
+	*t.Value = make(map[complex128]string)
+	return t, nil
+}
+func (t *db_objects6d61705b636f6d706c65783132385d737472696e67Target) StartKey() (key vdl.Target, _ error) {
+	t.currKey = complex128(0)
+	return &vdl.Complex128Target{Value: &t.currKey}, error(nil)
+}
+func (t *db_objects6d61705b636f6d706c65783132385d737472696e67Target) FinishKeyStartField(key vdl.Target) (field vdl.Target, _ error) {
+	t.currElem = ""
+	return &vdl.StringTarget{Value: &t.currElem}, error(nil)
+}
+func (t *db_objects6d61705b636f6d706c65783132385d737472696e67Target) FinishField(key, field vdl.Target) error {
+	(*t.Value)[t.currKey] = t.currElem
+	return nil
+}
+func (t *db_objects6d61705b636f6d706c65783132385d737472696e67Target) FinishMap(elem vdl.MapTarget) error {
+	if len(*t.Value) == 0 {
+		*t.Value = nil
+	}
+	return nil
+}
+
+type db_objects6d61705b737472696e675d737472696e67Target struct {
+	Value    *map[string]string
+	currKey  string
+	currElem string
+	vdl.TargetBase
+	vdl.MapTargetBase
+}
+
+func (t *db_objects6d61705b737472696e675d737472696e67Target) StartMap(tt *vdl.Type, len int) (vdl.MapTarget, error) {
+	if !vdl.Compatible(tt, __VDLTypedb_objects35) {
+		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLTypedb_objects35)
+	}
+	*t.Value = make(map[string]string)
+	return t, nil
+}
+func (t *db_objects6d61705b737472696e675d737472696e67Target) StartKey() (key vdl.Target, _ error) {
+	t.currKey = ""
+	return &vdl.StringTarget{Value: &t.currKey}, error(nil)
+}
+func (t *db_objects6d61705b737472696e675d737472696e67Target) FinishKeyStartField(key vdl.Target) (field vdl.Target, _ error) {
+	t.currElem = ""
+	return &vdl.StringTarget{Value: &t.currElem}, error(nil)
+}
+func (t *db_objects6d61705b737472696e675d737472696e67Target) FinishField(key, field vdl.Target) error {
+	(*t.Value)[t.currKey] = t.currElem
+	return nil
+}
+func (t *db_objects6d61705b737472696e675d737472696e67Target) FinishMap(elem vdl.MapTarget) error {
+	if len(*t.Value) == 0 {
+		*t.Value = nil
+	}
+	return nil
+}
+
+type db_objects6d61705b737472696e675d6d61705b737472696e675d737472696e67Target struct {
+	Value    *map[string]map[string]string
+	currKey  string
+	currElem map[string]string
+	vdl.TargetBase
+	vdl.MapTargetBase
+}
+
+func (t *db_objects6d61705b737472696e675d6d61705b737472696e675d737472696e67Target) StartMap(tt *vdl.Type, len int) (vdl.MapTarget, error) {
+	if !vdl.Compatible(tt, __VDLTypedb_objects36) {
+		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLTypedb_objects36)
+	}
+	*t.Value = make(map[string]map[string]string)
+	return t, nil
+}
+func (t *db_objects6d61705b737472696e675d6d61705b737472696e675d737472696e67Target) StartKey() (key vdl.Target, _ error) {
+	t.currKey = ""
+	return &vdl.StringTarget{Value: &t.currKey}, error(nil)
+}
+func (t *db_objects6d61705b737472696e675d6d61705b737472696e675d737472696e67Target) FinishKeyStartField(key vdl.Target) (field vdl.Target, _ error) {
+	t.currElem = map[string]string(nil)
+	return &db_objects6d61705b737472696e675d737472696e67Target{Value: &t.currElem}, error(nil)
+}
+func (t *db_objects6d61705b737472696e675d6d61705b737472696e675d737472696e67Target) FinishField(key, field vdl.Target) error {
+	(*t.Value)[t.currKey] = t.currElem
+	return nil
+}
+func (t *db_objects6d61705b737472696e675d6d61705b737472696e675d737472696e67Target) FinishMap(elem vdl.MapTarget) error {
+	if len(*t.Value) == 0 {
+		*t.Value = nil
+	}
+	return nil
+}
+
+type db_objects6d61705b74696d652e54696d65207374727563747b5365636f6e647320696e7436343b4e616e6f7320696e7433327d5d737472696e67Target struct {
+	Value    *map[time.Time]string
+	currKey  time.Time
+	currElem string
+	vdl.TargetBase
+	vdl.MapTargetBase
+}
+
+func (t *db_objects6d61705b74696d652e54696d65207374727563747b5365636f6e647320696e7436343b4e616e6f7320696e7433327d5d737472696e67Target) StartMap(tt *vdl.Type, len int) (vdl.MapTarget, error) {
+	if !vdl.Compatible(tt, __VDLTypedb_objects37) {
+		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLTypedb_objects37)
+	}
+	*t.Value = make(map[time.Time]string)
+	return t, nil
+}
+func (t *db_objects6d61705b74696d652e54696d65207374727563747b5365636f6e647320696e7436343b4e616e6f7320696e7433327d5d737472696e67Target) StartKey() (key vdl.Target, _ error) {
+	t.currKey = reflect.Zero(reflect.TypeOf(t.currKey)).Interface().(time.Time)
+	return vdl.ReflectTarget(reflect.ValueOf(&t.currKey))
+}
+func (t *db_objects6d61705b74696d652e54696d65207374727563747b5365636f6e647320696e7436343b4e616e6f7320696e7433327d5d737472696e67Target) FinishKeyStartField(key vdl.Target) (field vdl.Target, _ error) {
+	t.currElem = ""
+	return &vdl.StringTarget{Value: &t.currElem}, error(nil)
+}
+func (t *db_objects6d61705b74696d652e54696d65207374727563747b5365636f6e647320696e7436343b4e616e6f7320696e7433327d5d737472696e67Target) FinishField(key, field vdl.Target) error {
+	(*t.Value)[t.currKey] = t.currElem
+	return nil
+}
+func (t *db_objects6d61705b74696d652e54696d65207374727563747b5365636f6e647320696e7436343b4e616e6f7320696e7433327d5d737472696e67Target) FinishMap(elem vdl.MapTarget) error {
+	if len(*t.Value) == 0 {
+		*t.Value = nil
+	}
 	return nil
 }
 
@@ -2311,7 +3689,6 @@ func (ManySets) __VDLReflect(struct {
 }
 
 func (m *ManySets) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
-
 	__VDLEnsureNativeBuilt_db_objects()
 	fieldsTarget1, err := t.StartFields(tt)
 	if err != nil {
@@ -2737,6 +4114,450 @@ func (m *ManySets) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 }
 
 func (m *ManySets) MakeVDLTarget() vdl.Target {
+	return &ManySetsTarget{Value: m}
+}
+
+type ManySetsTarget struct {
+	Value *ManySets
+	vdl.TargetBase
+	vdl.FieldsTargetBase
+}
+
+func (t *ManySetsTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
+	if !vdl.Compatible(tt, __VDLType_db_objects_v_io_v23_query_engine_internal_testdata_ManySets) {
+		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType_db_objects_v_io_v23_query_engine_internal_testdata_ManySets)
+	}
+	return t, nil
+}
+func (t *ManySetsTarget) StartField(name string) (key, field vdl.Target, _ error) {
+	switch name {
+	case "B":
+		val, err := &db_objects7365745b626f6f6c5dTarget{Value: &t.Value.B}, error(nil)
+		return nil, val, err
+	case "By":
+		val, err := &db_objects7365745b627974655dTarget{Value: &t.Value.By}, error(nil)
+		return nil, val, err
+	case "U16":
+		val, err := &db_objects7365745b75696e7431365dTarget{Value: &t.Value.U16}, error(nil)
+		return nil, val, err
+	case "U32":
+		val, err := &db_objects7365745b75696e7433325dTarget{Value: &t.Value.U32}, error(nil)
+		return nil, val, err
+	case "U64":
+		val, err := &db_objects7365745b75696e7436345dTarget{Value: &t.Value.U64}, error(nil)
+		return nil, val, err
+	case "I16":
+		val, err := &db_objects7365745b696e7431365dTarget{Value: &t.Value.I16}, error(nil)
+		return nil, val, err
+	case "I32":
+		val, err := &db_objects7365745b696e7433325dTarget{Value: &t.Value.I32}, error(nil)
+		return nil, val, err
+	case "I64":
+		val, err := &db_objects7365745b696e7436345dTarget{Value: &t.Value.I64}, error(nil)
+		return nil, val, err
+	case "F32":
+		val, err := &db_objects7365745b666c6f617433325dTarget{Value: &t.Value.F32}, error(nil)
+		return nil, val, err
+	case "F64":
+		val, err := &db_objects7365745b666c6f617436345dTarget{Value: &t.Value.F64}, error(nil)
+		return nil, val, err
+	case "C64":
+		val, err := &db_objects7365745b636f6d706c657836345dTarget{Value: &t.Value.C64}, error(nil)
+		return nil, val, err
+	case "C128":
+		val, err := &db_objects7365745b636f6d706c65783132385dTarget{Value: &t.Value.C128}, error(nil)
+		return nil, val, err
+	case "S":
+		val, err := &db_objects7365745b737472696e675dTarget{Value: &t.Value.S}, error(nil)
+		return nil, val, err
+	case "T":
+		val, err := &db_objects7365745b74696d652e54696d65207374727563747b5365636f6e647320696e7436343b4e616e6f7320696e7433327d5dTarget{Value: &t.Value.T}, error(nil)
+		return nil, val, err
+	default:
+		return nil, nil, fmt.Errorf("field %s not in struct %v", name, __VDLType_db_objects_v_io_v23_query_engine_internal_testdata_ManySets)
+	}
+}
+func (t *ManySetsTarget) FinishField(_, _ vdl.Target) error {
+	return nil
+}
+func (t *ManySetsTarget) FinishFields(_ vdl.FieldsTarget) error {
+	return nil
+}
+
+type db_objects7365745b626f6f6c5dTarget struct {
+	Value   *map[bool]struct{}
+	currKey bool
+	vdl.TargetBase
+	vdl.SetTargetBase
+}
+
+func (t *db_objects7365745b626f6f6c5dTarget) StartSet(tt *vdl.Type, len int) (vdl.SetTarget, error) {
+	if !vdl.Compatible(tt, __VDLTypedb_objects39) {
+		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLTypedb_objects39)
+	}
+	*t.Value = make(map[bool]struct{})
+	return t, nil
+}
+func (t *db_objects7365745b626f6f6c5dTarget) StartKey() (key vdl.Target, _ error) {
+	t.currKey = false
+	return &vdl.BoolTarget{Value: &t.currKey}, error(nil)
+}
+func (t *db_objects7365745b626f6f6c5dTarget) FinishKey(key vdl.Target) error {
+	(*t.Value)[t.currKey] = struct{}{}
+	return nil
+}
+func (t *db_objects7365745b626f6f6c5dTarget) FinishSet(list vdl.SetTarget) error {
+	if len(*t.Value) == 0 {
+		*t.Value = nil
+	}
+	return nil
+}
+
+type db_objects7365745b627974655dTarget struct {
+	Value   *map[byte]struct{}
+	currKey byte
+	vdl.TargetBase
+	vdl.SetTargetBase
+}
+
+func (t *db_objects7365745b627974655dTarget) StartSet(tt *vdl.Type, len int) (vdl.SetTarget, error) {
+	if !vdl.Compatible(tt, __VDLTypedb_objects40) {
+		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLTypedb_objects40)
+	}
+	*t.Value = make(map[byte]struct{})
+	return t, nil
+}
+func (t *db_objects7365745b627974655dTarget) StartKey() (key vdl.Target, _ error) {
+	t.currKey = byte(0)
+	return &vdl.ByteTarget{Value: &t.currKey}, error(nil)
+}
+func (t *db_objects7365745b627974655dTarget) FinishKey(key vdl.Target) error {
+	(*t.Value)[t.currKey] = struct{}{}
+	return nil
+}
+func (t *db_objects7365745b627974655dTarget) FinishSet(list vdl.SetTarget) error {
+	if len(*t.Value) == 0 {
+		*t.Value = nil
+	}
+	return nil
+}
+
+type db_objects7365745b75696e7431365dTarget struct {
+	Value   *map[uint16]struct{}
+	currKey uint16
+	vdl.TargetBase
+	vdl.SetTargetBase
+}
+
+func (t *db_objects7365745b75696e7431365dTarget) StartSet(tt *vdl.Type, len int) (vdl.SetTarget, error) {
+	if !vdl.Compatible(tt, __VDLTypedb_objects41) {
+		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLTypedb_objects41)
+	}
+	*t.Value = make(map[uint16]struct{})
+	return t, nil
+}
+func (t *db_objects7365745b75696e7431365dTarget) StartKey() (key vdl.Target, _ error) {
+	t.currKey = uint16(0)
+	return &vdl.Uint16Target{Value: &t.currKey}, error(nil)
+}
+func (t *db_objects7365745b75696e7431365dTarget) FinishKey(key vdl.Target) error {
+	(*t.Value)[t.currKey] = struct{}{}
+	return nil
+}
+func (t *db_objects7365745b75696e7431365dTarget) FinishSet(list vdl.SetTarget) error {
+	if len(*t.Value) == 0 {
+		*t.Value = nil
+	}
+	return nil
+}
+
+type db_objects7365745b75696e7433325dTarget struct {
+	Value   *map[uint32]struct{}
+	currKey uint32
+	vdl.TargetBase
+	vdl.SetTargetBase
+}
+
+func (t *db_objects7365745b75696e7433325dTarget) StartSet(tt *vdl.Type, len int) (vdl.SetTarget, error) {
+	if !vdl.Compatible(tt, __VDLTypedb_objects42) {
+		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLTypedb_objects42)
+	}
+	*t.Value = make(map[uint32]struct{})
+	return t, nil
+}
+func (t *db_objects7365745b75696e7433325dTarget) StartKey() (key vdl.Target, _ error) {
+	t.currKey = uint32(0)
+	return &vdl.Uint32Target{Value: &t.currKey}, error(nil)
+}
+func (t *db_objects7365745b75696e7433325dTarget) FinishKey(key vdl.Target) error {
+	(*t.Value)[t.currKey] = struct{}{}
+	return nil
+}
+func (t *db_objects7365745b75696e7433325dTarget) FinishSet(list vdl.SetTarget) error {
+	if len(*t.Value) == 0 {
+		*t.Value = nil
+	}
+	return nil
+}
+
+type db_objects7365745b75696e7436345dTarget struct {
+	Value   *map[uint64]struct{}
+	currKey uint64
+	vdl.TargetBase
+	vdl.SetTargetBase
+}
+
+func (t *db_objects7365745b75696e7436345dTarget) StartSet(tt *vdl.Type, len int) (vdl.SetTarget, error) {
+	if !vdl.Compatible(tt, __VDLTypedb_objects43) {
+		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLTypedb_objects43)
+	}
+	*t.Value = make(map[uint64]struct{})
+	return t, nil
+}
+func (t *db_objects7365745b75696e7436345dTarget) StartKey() (key vdl.Target, _ error) {
+	t.currKey = uint64(0)
+	return &vdl.Uint64Target{Value: &t.currKey}, error(nil)
+}
+func (t *db_objects7365745b75696e7436345dTarget) FinishKey(key vdl.Target) error {
+	(*t.Value)[t.currKey] = struct{}{}
+	return nil
+}
+func (t *db_objects7365745b75696e7436345dTarget) FinishSet(list vdl.SetTarget) error {
+	if len(*t.Value) == 0 {
+		*t.Value = nil
+	}
+	return nil
+}
+
+type db_objects7365745b696e7431365dTarget struct {
+	Value   *map[int16]struct{}
+	currKey int16
+	vdl.TargetBase
+	vdl.SetTargetBase
+}
+
+func (t *db_objects7365745b696e7431365dTarget) StartSet(tt *vdl.Type, len int) (vdl.SetTarget, error) {
+	if !vdl.Compatible(tt, __VDLTypedb_objects44) {
+		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLTypedb_objects44)
+	}
+	*t.Value = make(map[int16]struct{})
+	return t, nil
+}
+func (t *db_objects7365745b696e7431365dTarget) StartKey() (key vdl.Target, _ error) {
+	t.currKey = int16(0)
+	return &vdl.Int16Target{Value: &t.currKey}, error(nil)
+}
+func (t *db_objects7365745b696e7431365dTarget) FinishKey(key vdl.Target) error {
+	(*t.Value)[t.currKey] = struct{}{}
+	return nil
+}
+func (t *db_objects7365745b696e7431365dTarget) FinishSet(list vdl.SetTarget) error {
+	if len(*t.Value) == 0 {
+		*t.Value = nil
+	}
+	return nil
+}
+
+type db_objects7365745b696e7433325dTarget struct {
+	Value   *map[int32]struct{}
+	currKey int32
+	vdl.TargetBase
+	vdl.SetTargetBase
+}
+
+func (t *db_objects7365745b696e7433325dTarget) StartSet(tt *vdl.Type, len int) (vdl.SetTarget, error) {
+	if !vdl.Compatible(tt, __VDLTypedb_objects45) {
+		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLTypedb_objects45)
+	}
+	*t.Value = make(map[int32]struct{})
+	return t, nil
+}
+func (t *db_objects7365745b696e7433325dTarget) StartKey() (key vdl.Target, _ error) {
+	t.currKey = int32(0)
+	return &vdl.Int32Target{Value: &t.currKey}, error(nil)
+}
+func (t *db_objects7365745b696e7433325dTarget) FinishKey(key vdl.Target) error {
+	(*t.Value)[t.currKey] = struct{}{}
+	return nil
+}
+func (t *db_objects7365745b696e7433325dTarget) FinishSet(list vdl.SetTarget) error {
+	if len(*t.Value) == 0 {
+		*t.Value = nil
+	}
+	return nil
+}
+
+type db_objects7365745b696e7436345dTarget struct {
+	Value   *map[int64]struct{}
+	currKey int64
+	vdl.TargetBase
+	vdl.SetTargetBase
+}
+
+func (t *db_objects7365745b696e7436345dTarget) StartSet(tt *vdl.Type, len int) (vdl.SetTarget, error) {
+	if !vdl.Compatible(tt, __VDLTypedb_objects46) {
+		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLTypedb_objects46)
+	}
+	*t.Value = make(map[int64]struct{})
+	return t, nil
+}
+func (t *db_objects7365745b696e7436345dTarget) StartKey() (key vdl.Target, _ error) {
+	t.currKey = int64(0)
+	return &vdl.Int64Target{Value: &t.currKey}, error(nil)
+}
+func (t *db_objects7365745b696e7436345dTarget) FinishKey(key vdl.Target) error {
+	(*t.Value)[t.currKey] = struct{}{}
+	return nil
+}
+func (t *db_objects7365745b696e7436345dTarget) FinishSet(list vdl.SetTarget) error {
+	if len(*t.Value) == 0 {
+		*t.Value = nil
+	}
+	return nil
+}
+
+type db_objects7365745b666c6f617433325dTarget struct {
+	Value   *map[float32]struct{}
+	currKey float32
+	vdl.TargetBase
+	vdl.SetTargetBase
+}
+
+func (t *db_objects7365745b666c6f617433325dTarget) StartSet(tt *vdl.Type, len int) (vdl.SetTarget, error) {
+	if !vdl.Compatible(tt, __VDLTypedb_objects47) {
+		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLTypedb_objects47)
+	}
+	*t.Value = make(map[float32]struct{})
+	return t, nil
+}
+func (t *db_objects7365745b666c6f617433325dTarget) StartKey() (key vdl.Target, _ error) {
+	t.currKey = float32(0)
+	return &vdl.Float32Target{Value: &t.currKey}, error(nil)
+}
+func (t *db_objects7365745b666c6f617433325dTarget) FinishKey(key vdl.Target) error {
+	(*t.Value)[t.currKey] = struct{}{}
+	return nil
+}
+func (t *db_objects7365745b666c6f617433325dTarget) FinishSet(list vdl.SetTarget) error {
+	if len(*t.Value) == 0 {
+		*t.Value = nil
+	}
+	return nil
+}
+
+type db_objects7365745b666c6f617436345dTarget struct {
+	Value   *map[float64]struct{}
+	currKey float64
+	vdl.TargetBase
+	vdl.SetTargetBase
+}
+
+func (t *db_objects7365745b666c6f617436345dTarget) StartSet(tt *vdl.Type, len int) (vdl.SetTarget, error) {
+	if !vdl.Compatible(tt, __VDLTypedb_objects48) {
+		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLTypedb_objects48)
+	}
+	*t.Value = make(map[float64]struct{})
+	return t, nil
+}
+func (t *db_objects7365745b666c6f617436345dTarget) StartKey() (key vdl.Target, _ error) {
+	t.currKey = float64(0)
+	return &vdl.Float64Target{Value: &t.currKey}, error(nil)
+}
+func (t *db_objects7365745b666c6f617436345dTarget) FinishKey(key vdl.Target) error {
+	(*t.Value)[t.currKey] = struct{}{}
+	return nil
+}
+func (t *db_objects7365745b666c6f617436345dTarget) FinishSet(list vdl.SetTarget) error {
+	if len(*t.Value) == 0 {
+		*t.Value = nil
+	}
+	return nil
+}
+
+type db_objects7365745b636f6d706c657836345dTarget struct {
+	Value   *map[complex64]struct{}
+	currKey complex64
+	vdl.TargetBase
+	vdl.SetTargetBase
+}
+
+func (t *db_objects7365745b636f6d706c657836345dTarget) StartSet(tt *vdl.Type, len int) (vdl.SetTarget, error) {
+	if !vdl.Compatible(tt, __VDLTypedb_objects49) {
+		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLTypedb_objects49)
+	}
+	*t.Value = make(map[complex64]struct{})
+	return t, nil
+}
+func (t *db_objects7365745b636f6d706c657836345dTarget) StartKey() (key vdl.Target, _ error) {
+	t.currKey = complex64(0)
+	return &vdl.Complex64Target{Value: &t.currKey}, error(nil)
+}
+func (t *db_objects7365745b636f6d706c657836345dTarget) FinishKey(key vdl.Target) error {
+	(*t.Value)[t.currKey] = struct{}{}
+	return nil
+}
+func (t *db_objects7365745b636f6d706c657836345dTarget) FinishSet(list vdl.SetTarget) error {
+	if len(*t.Value) == 0 {
+		*t.Value = nil
+	}
+	return nil
+}
+
+type db_objects7365745b636f6d706c65783132385dTarget struct {
+	Value   *map[complex128]struct{}
+	currKey complex128
+	vdl.TargetBase
+	vdl.SetTargetBase
+}
+
+func (t *db_objects7365745b636f6d706c65783132385dTarget) StartSet(tt *vdl.Type, len int) (vdl.SetTarget, error) {
+	if !vdl.Compatible(tt, __VDLTypedb_objects50) {
+		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLTypedb_objects50)
+	}
+	*t.Value = make(map[complex128]struct{})
+	return t, nil
+}
+func (t *db_objects7365745b636f6d706c65783132385dTarget) StartKey() (key vdl.Target, _ error) {
+	t.currKey = complex128(0)
+	return &vdl.Complex128Target{Value: &t.currKey}, error(nil)
+}
+func (t *db_objects7365745b636f6d706c65783132385dTarget) FinishKey(key vdl.Target) error {
+	(*t.Value)[t.currKey] = struct{}{}
+	return nil
+}
+func (t *db_objects7365745b636f6d706c65783132385dTarget) FinishSet(list vdl.SetTarget) error {
+	if len(*t.Value) == 0 {
+		*t.Value = nil
+	}
+	return nil
+}
+
+type db_objects7365745b74696d652e54696d65207374727563747b5365636f6e647320696e7436343b4e616e6f7320696e7433327d5dTarget struct {
+	Value   *map[time.Time]struct{}
+	currKey time.Time
+	vdl.TargetBase
+	vdl.SetTargetBase
+}
+
+func (t *db_objects7365745b74696d652e54696d65207374727563747b5365636f6e647320696e7436343b4e616e6f7320696e7433327d5dTarget) StartSet(tt *vdl.Type, len int) (vdl.SetTarget, error) {
+	if !vdl.Compatible(tt, __VDLTypedb_objects51) {
+		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLTypedb_objects51)
+	}
+	*t.Value = make(map[time.Time]struct{})
+	return t, nil
+}
+func (t *db_objects7365745b74696d652e54696d65207374727563747b5365636f6e647320696e7436343b4e616e6f7320696e7433327d5dTarget) StartKey() (key vdl.Target, _ error) {
+	t.currKey = reflect.Zero(reflect.TypeOf(t.currKey)).Interface().(time.Time)
+	return vdl.ReflectTarget(reflect.ValueOf(&t.currKey))
+}
+func (t *db_objects7365745b74696d652e54696d65207374727563747b5365636f6e647320696e7436343b4e616e6f7320696e7433327d5dTarget) FinishKey(key vdl.Target) error {
+	(*t.Value)[t.currKey] = struct{}{}
+	return nil
+}
+func (t *db_objects7365745b74696d652e54696d65207374727563747b5365636f6e647320696e7436343b4e616e6f7320696e7433327d5dTarget) FinishSet(list vdl.SetTarget) error {
+	if len(*t.Value) == 0 {
+		*t.Value = nil
+	}
 	return nil
 }
 
@@ -2750,7 +4571,6 @@ func (BigData) __VDLReflect(struct {
 }
 
 func (m *BigData) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
-
 	if __VDLType_db_objects_v_io_v23_query_engine_internal_testdata_BigData == nil || __VDLTypedb_objects52 == nil {
 		panic("Initialization order error: types generated for FillVDLTarget not initialized. Consider moving caller to an init() block.")
 	}
@@ -2778,6 +4598,34 @@ func (m *BigData) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 }
 
 func (m *BigData) MakeVDLTarget() vdl.Target {
+	return &BigDataTarget{Value: m}
+}
+
+type BigDataTarget struct {
+	Value *BigData
+	vdl.TargetBase
+	vdl.FieldsTargetBase
+}
+
+func (t *BigDataTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
+	if !vdl.Compatible(tt, __VDLType_db_objects_v_io_v23_query_engine_internal_testdata_BigData) {
+		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType_db_objects_v_io_v23_query_engine_internal_testdata_BigData)
+	}
+	return t, nil
+}
+func (t *BigDataTarget) StartField(name string) (key, field vdl.Target, _ error) {
+	switch name {
+	case "Key":
+		val, err := &vdl.StringTarget{Value: &t.Value.Key}, error(nil)
+		return nil, val, err
+	default:
+		return nil, nil, fmt.Errorf("field %s not in struct %v", name, __VDLType_db_objects_v_io_v23_query_engine_internal_testdata_BigData)
+	}
+}
+func (t *BigDataTarget) FinishField(_, _ vdl.Target) error {
+	return nil
+}
+func (t *BigDataTarget) FinishFields(_ vdl.FieldsTarget) error {
 	return nil
 }
 

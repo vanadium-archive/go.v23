@@ -9,6 +9,7 @@ package vom
 
 import (
 	"fmt"
+	"reflect"
 	"v.io/v23/vdl"
 )
 
@@ -64,7 +65,6 @@ func (x PrimitivePBool) Name() string                    { return "PBool" }
 func (x PrimitivePBool) __VDLReflect(__PrimitiveReflect) {}
 
 func (m PrimitivePBool) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
-
 	fieldsTarget1, err := t.StartFields(__VDLType_dump_v_io_v23_vom_Primitive)
 	if err != nil {
 		return err
@@ -96,7 +96,6 @@ func (x PrimitivePByte) Name() string                    { return "PByte" }
 func (x PrimitivePByte) __VDLReflect(__PrimitiveReflect) {}
 
 func (m PrimitivePByte) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
-
 	fieldsTarget1, err := t.StartFields(__VDLType_dump_v_io_v23_vom_Primitive)
 	if err != nil {
 		return err
@@ -128,7 +127,6 @@ func (x PrimitivePUint) Name() string                    { return "PUint" }
 func (x PrimitivePUint) __VDLReflect(__PrimitiveReflect) {}
 
 func (m PrimitivePUint) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
-
 	fieldsTarget1, err := t.StartFields(__VDLType_dump_v_io_v23_vom_Primitive)
 	if err != nil {
 		return err
@@ -160,7 +158,6 @@ func (x PrimitivePInt) Name() string                    { return "PInt" }
 func (x PrimitivePInt) __VDLReflect(__PrimitiveReflect) {}
 
 func (m PrimitivePInt) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
-
 	fieldsTarget1, err := t.StartFields(__VDLType_dump_v_io_v23_vom_Primitive)
 	if err != nil {
 		return err
@@ -192,7 +189,6 @@ func (x PrimitivePFloat) Name() string                    { return "PFloat" }
 func (x PrimitivePFloat) __VDLReflect(__PrimitiveReflect) {}
 
 func (m PrimitivePFloat) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
-
 	fieldsTarget1, err := t.StartFields(__VDLType_dump_v_io_v23_vom_Primitive)
 	if err != nil {
 		return err
@@ -224,7 +220,6 @@ func (x PrimitivePString) Name() string                    { return "PString" }
 func (x PrimitivePString) __VDLReflect(__PrimitiveReflect) {}
 
 func (m PrimitivePString) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
-
 	fieldsTarget1, err := t.StartFields(__VDLType_dump_v_io_v23_vom_Primitive)
 	if err != nil {
 		return err
@@ -256,7 +251,6 @@ func (x PrimitivePControl) Name() string                    { return "PControl" 
 func (x PrimitivePControl) __VDLReflect(__PrimitiveReflect) {}
 
 func (m PrimitivePControl) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
-
 	fieldsTarget1, err := t.StartFields(__VDLType_dump_v_io_v23_vom_Primitive)
 	if err != nil {
 		return err
@@ -298,7 +292,6 @@ func (DumpAtom) __VDLReflect(struct {
 }
 
 func (m *DumpAtom) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
-
 	if __VDLType_dump_v_io_v23_vom_DumpAtom == nil || __VDLTypedump0 == nil {
 		panic("Initialization order error: types generated for FillVDLTarget not initialized. Consider moving caller to an init() block.")
 	}
@@ -369,6 +362,89 @@ func (m *DumpAtom) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 }
 
 func (m *DumpAtom) MakeVDLTarget() vdl.Target {
+	return &DumpAtomTarget{Value: m}
+}
+
+type DumpAtomTarget struct {
+	Value *DumpAtom
+	vdl.TargetBase
+	vdl.FieldsTargetBase
+}
+
+func (t *DumpAtomTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
+	if !vdl.Compatible(tt, __VDLType_dump_v_io_v23_vom_DumpAtom) {
+		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType_dump_v_io_v23_vom_DumpAtom)
+	}
+	return t, nil
+}
+func (t *DumpAtomTarget) StartField(name string) (key, field vdl.Target, _ error) {
+	switch name {
+	case "Kind":
+		val, err := &DumpKindTarget{Value: &t.Value.Kind}, error(nil)
+		return nil, val, err
+	case "Bytes":
+		val, err := &vdl.BytesTarget{Value: &t.Value.Bytes}, error(nil)
+		return nil, val, err
+	case "Data":
+		val, err := vdl.ReflectTarget(reflect.ValueOf(&t.Value.Data))
+		return nil, val, err
+	case "Debug":
+		val, err := &vdl.StringTarget{Value: &t.Value.Debug}, error(nil)
+		return nil, val, err
+	default:
+		return nil, nil, fmt.Errorf("field %s not in struct %v", name, __VDLType_dump_v_io_v23_vom_DumpAtom)
+	}
+}
+func (t *DumpAtomTarget) FinishField(_, _ vdl.Target) error {
+	return nil
+}
+func (t *DumpAtomTarget) FinishFields(_ vdl.FieldsTarget) error {
+	return nil
+}
+
+type DumpKindTarget struct {
+	Value *DumpKind
+	vdl.TargetBase
+}
+
+func (t *DumpKindTarget) FromEnumLabel(src string, tt *vdl.Type) error {
+	if !vdl.Compatible(tt, __VDLType_dump_v_io_v23_vom_DumpKind) {
+		return fmt.Errorf("type %v incompatible with %v", tt, __VDLType_dump_v_io_v23_vom_DumpKind)
+	}
+	switch src {
+	case "Version":
+		*t.Value = 0
+	case "Control":
+		*t.Value = 1
+	case "MsgId":
+		*t.Value = 2
+	case "TypeMsg":
+		*t.Value = 3
+	case "ValueMsg":
+		*t.Value = 4
+	case "MsgLen":
+		*t.Value = 5
+	case "AnyMsgLen":
+		*t.Value = 6
+	case "AnyLensLen":
+		*t.Value = 7
+	case "TypeIdsLen":
+		*t.Value = 8
+	case "TypeId":
+		*t.Value = 9
+	case "PrimValue":
+		*t.Value = 10
+	case "ByteLen":
+		*t.Value = 11
+	case "ValueLen":
+		*t.Value = 12
+	case "Index":
+		*t.Value = 13
+	case "WireTypeIndex":
+		*t.Value = 14
+	default:
+		return fmt.Errorf("label %s not in enum %v", src, __VDLType_dump_v_io_v23_vom_DumpKind)
+	}
 	return nil
 }
 
@@ -498,15 +574,15 @@ func (DumpKind) __VDLReflect(struct {
 }) {
 }
 
-func (m DumpKind) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
-	if err := t.FromEnumLabel(m.String(), __VDLType_dump_v_io_v23_vom_DumpKind); err != nil {
+func (m *DumpKind) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
+	if err := t.FromEnumLabel((*m).String(), __VDLType_dump_v_io_v23_vom_DumpKind); err != nil {
 		return err
 	}
 	return nil
 }
 
-func (m DumpKind) MakeVDLTarget() vdl.Target {
-	return nil
+func (m *DumpKind) MakeVDLTarget() vdl.Target {
+	return &DumpKindTarget{Value: m}
 }
 
 // ControlKind enumerates the different kinds of control bytes.
@@ -563,14 +639,36 @@ func (ControlKind) __VDLReflect(struct {
 }) {
 }
 
-func (m ControlKind) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
-	if err := t.FromEnumLabel(m.String(), __VDLType_dump_v_io_v23_vom_ControlKind); err != nil {
+func (m *ControlKind) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
+	if err := t.FromEnumLabel((*m).String(), __VDLType_dump_v_io_v23_vom_ControlKind); err != nil {
 		return err
 	}
 	return nil
 }
 
-func (m ControlKind) MakeVDLTarget() vdl.Target {
+func (m *ControlKind) MakeVDLTarget() vdl.Target {
+	return &ControlKindTarget{Value: m}
+}
+
+type ControlKindTarget struct {
+	Value *ControlKind
+	vdl.TargetBase
+}
+
+func (t *ControlKindTarget) FromEnumLabel(src string, tt *vdl.Type) error {
+	if !vdl.Compatible(tt, __VDLType_dump_v_io_v23_vom_ControlKind) {
+		return fmt.Errorf("type %v incompatible with %v", tt, __VDLType_dump_v_io_v23_vom_ControlKind)
+	}
+	switch src {
+	case "Nil":
+		*t.Value = 0
+	case "End":
+		*t.Value = 1
+	case "IncompleteType":
+		*t.Value = 2
+	default:
+		return fmt.Errorf("label %s not in enum %v", src, __VDLType_dump_v_io_v23_vom_ControlKind)
+	}
 	return nil
 }
 

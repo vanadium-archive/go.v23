@@ -9,6 +9,7 @@ package internal
 
 import (
 	"fmt"
+	"reflect"
 	"v.io/v23/vdl"
 )
 
@@ -25,7 +26,6 @@ func (AddressInfo) __VDLReflect(struct {
 }
 
 func (m *AddressInfo) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
-
 	if __VDLType_perf_test_v_io_v23_vom_internal_AddressInfo == nil || __VDLTypeperf_test0 == nil {
 		panic("Initialization order error: types generated for FillVDLTarget not initialized. Consider moving caller to an init() block.")
 	}
@@ -89,6 +89,43 @@ func (m *AddressInfo) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 }
 
 func (m *AddressInfo) MakeVDLTarget() vdl.Target {
+	return &AddressInfoTarget{Value: m}
+}
+
+type AddressInfoTarget struct {
+	Value *AddressInfo
+	vdl.TargetBase
+	vdl.FieldsTargetBase
+}
+
+func (t *AddressInfoTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
+	if !vdl.Compatible(tt, __VDLType_perf_test_v_io_v23_vom_internal_AddressInfo) {
+		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType_perf_test_v_io_v23_vom_internal_AddressInfo)
+	}
+	return t, nil
+}
+func (t *AddressInfoTarget) StartField(name string) (key, field vdl.Target, _ error) {
+	switch name {
+	case "Street":
+		val, err := &vdl.StringTarget{Value: &t.Value.Street}, error(nil)
+		return nil, val, err
+	case "City":
+		val, err := &vdl.StringTarget{Value: &t.Value.City}, error(nil)
+		return nil, val, err
+	case "State":
+		val, err := &vdl.StringTarget{Value: &t.Value.State}, error(nil)
+		return nil, val, err
+	case "Zip":
+		val, err := &vdl.StringTarget{Value: &t.Value.Zip}, error(nil)
+		return nil, val, err
+	default:
+		return nil, nil, fmt.Errorf("field %s not in struct %v", name, __VDLType_perf_test_v_io_v23_vom_internal_AddressInfo)
+	}
+}
+func (t *AddressInfoTarget) FinishField(_, _ vdl.Target) error {
+	return nil
+}
+func (t *AddressInfoTarget) FinishFields(_ vdl.FieldsTarget) error {
 	return nil
 }
 
@@ -145,14 +182,36 @@ func (CreditAgency) __VDLReflect(struct {
 }) {
 }
 
-func (m CreditAgency) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
-	if err := t.FromEnumLabel(m.String(), __VDLType_perf_test_v_io_v23_vom_internal_CreditAgency); err != nil {
+func (m *CreditAgency) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
+	if err := t.FromEnumLabel((*m).String(), __VDLType_perf_test_v_io_v23_vom_internal_CreditAgency); err != nil {
 		return err
 	}
 	return nil
 }
 
-func (m CreditAgency) MakeVDLTarget() vdl.Target {
+func (m *CreditAgency) MakeVDLTarget() vdl.Target {
+	return &CreditAgencyTarget{Value: m}
+}
+
+type CreditAgencyTarget struct {
+	Value *CreditAgency
+	vdl.TargetBase
+}
+
+func (t *CreditAgencyTarget) FromEnumLabel(src string, tt *vdl.Type) error {
+	if !vdl.Compatible(tt, __VDLType_perf_test_v_io_v23_vom_internal_CreditAgency) {
+		return fmt.Errorf("type %v incompatible with %v", tt, __VDLType_perf_test_v_io_v23_vom_internal_CreditAgency)
+	}
+	switch src {
+	case "Equifax":
+		*t.Value = 0
+	case "Experian":
+		*t.Value = 1
+	case "TransUnion":
+		*t.Value = 2
+	default:
+		return fmt.Errorf("label %s not in enum %v", src, __VDLType_perf_test_v_io_v23_vom_internal_CreditAgency)
+	}
 	return nil
 }
 
@@ -203,14 +262,34 @@ func (ExperianRating) __VDLReflect(struct {
 }) {
 }
 
-func (m ExperianRating) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
-	if err := t.FromEnumLabel(m.String(), __VDLType_perf_test_v_io_v23_vom_internal_ExperianRating); err != nil {
+func (m *ExperianRating) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
+	if err := t.FromEnumLabel((*m).String(), __VDLType_perf_test_v_io_v23_vom_internal_ExperianRating); err != nil {
 		return err
 	}
 	return nil
 }
 
-func (m ExperianRating) MakeVDLTarget() vdl.Target {
+func (m *ExperianRating) MakeVDLTarget() vdl.Target {
+	return &ExperianRatingTarget{Value: m}
+}
+
+type ExperianRatingTarget struct {
+	Value *ExperianRating
+	vdl.TargetBase
+}
+
+func (t *ExperianRatingTarget) FromEnumLabel(src string, tt *vdl.Type) error {
+	if !vdl.Compatible(tt, __VDLType_perf_test_v_io_v23_vom_internal_ExperianRating) {
+		return fmt.Errorf("type %v incompatible with %v", tt, __VDLType_perf_test_v_io_v23_vom_internal_ExperianRating)
+	}
+	switch src {
+	case "Good":
+		*t.Value = 0
+	case "Bad":
+		*t.Value = 1
+	default:
+		return fmt.Errorf("label %s not in enum %v", src, __VDLType_perf_test_v_io_v23_vom_internal_ExperianRating)
+	}
 	return nil
 }
 
@@ -224,7 +303,6 @@ func (EquifaxCreditReport) __VDLReflect(struct {
 }
 
 func (m *EquifaxCreditReport) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
-
 	if __VDLType_perf_test_v_io_v23_vom_internal_EquifaxCreditReport == nil || __VDLTypeperf_test1 == nil {
 		panic("Initialization order error: types generated for FillVDLTarget not initialized. Consider moving caller to an init() block.")
 	}
@@ -252,6 +330,34 @@ func (m *EquifaxCreditReport) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 }
 
 func (m *EquifaxCreditReport) MakeVDLTarget() vdl.Target {
+	return &EquifaxCreditReportTarget{Value: m}
+}
+
+type EquifaxCreditReportTarget struct {
+	Value *EquifaxCreditReport
+	vdl.TargetBase
+	vdl.FieldsTargetBase
+}
+
+func (t *EquifaxCreditReportTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
+	if !vdl.Compatible(tt, __VDLType_perf_test_v_io_v23_vom_internal_EquifaxCreditReport) {
+		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType_perf_test_v_io_v23_vom_internal_EquifaxCreditReport)
+	}
+	return t, nil
+}
+func (t *EquifaxCreditReportTarget) StartField(name string) (key, field vdl.Target, _ error) {
+	switch name {
+	case "Rating":
+		val, err := &vdl.ByteTarget{Value: &t.Value.Rating}, error(nil)
+		return nil, val, err
+	default:
+		return nil, nil, fmt.Errorf("field %s not in struct %v", name, __VDLType_perf_test_v_io_v23_vom_internal_EquifaxCreditReport)
+	}
+}
+func (t *EquifaxCreditReportTarget) FinishField(_, _ vdl.Target) error {
+	return nil
+}
+func (t *EquifaxCreditReportTarget) FinishFields(_ vdl.FieldsTarget) error {
 	return nil
 }
 
@@ -265,7 +371,6 @@ func (ExperianCreditReport) __VDLReflect(struct {
 }
 
 func (m *ExperianCreditReport) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
-
 	if __VDLType_perf_test_v_io_v23_vom_internal_ExperianCreditReport == nil || __VDLTypeperf_test2 == nil {
 		panic("Initialization order error: types generated for FillVDLTarget not initialized. Consider moving caller to an init() block.")
 	}
@@ -294,6 +399,34 @@ func (m *ExperianCreditReport) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 }
 
 func (m *ExperianCreditReport) MakeVDLTarget() vdl.Target {
+	return &ExperianCreditReportTarget{Value: m}
+}
+
+type ExperianCreditReportTarget struct {
+	Value *ExperianCreditReport
+	vdl.TargetBase
+	vdl.FieldsTargetBase
+}
+
+func (t *ExperianCreditReportTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
+	if !vdl.Compatible(tt, __VDLType_perf_test_v_io_v23_vom_internal_ExperianCreditReport) {
+		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType_perf_test_v_io_v23_vom_internal_ExperianCreditReport)
+	}
+	return t, nil
+}
+func (t *ExperianCreditReportTarget) StartField(name string) (key, field vdl.Target, _ error) {
+	switch name {
+	case "Rating":
+		val, err := &ExperianRatingTarget{Value: &t.Value.Rating}, error(nil)
+		return nil, val, err
+	default:
+		return nil, nil, fmt.Errorf("field %s not in struct %v", name, __VDLType_perf_test_v_io_v23_vom_internal_ExperianCreditReport)
+	}
+}
+func (t *ExperianCreditReportTarget) FinishField(_, _ vdl.Target) error {
+	return nil
+}
+func (t *ExperianCreditReportTarget) FinishFields(_ vdl.FieldsTarget) error {
 	return nil
 }
 
@@ -307,7 +440,6 @@ func (TransUnionCreditReport) __VDLReflect(struct {
 }
 
 func (m *TransUnionCreditReport) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
-
 	if __VDLType_perf_test_v_io_v23_vom_internal_TransUnionCreditReport == nil || __VDLTypeperf_test3 == nil {
 		panic("Initialization order error: types generated for FillVDLTarget not initialized. Consider moving caller to an init() block.")
 	}
@@ -335,6 +467,34 @@ func (m *TransUnionCreditReport) FillVDLTarget(t vdl.Target, tt *vdl.Type) error
 }
 
 func (m *TransUnionCreditReport) MakeVDLTarget() vdl.Target {
+	return &TransUnionCreditReportTarget{Value: m}
+}
+
+type TransUnionCreditReportTarget struct {
+	Value *TransUnionCreditReport
+	vdl.TargetBase
+	vdl.FieldsTargetBase
+}
+
+func (t *TransUnionCreditReportTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
+	if !vdl.Compatible(tt, __VDLType_perf_test_v_io_v23_vom_internal_TransUnionCreditReport) {
+		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType_perf_test_v_io_v23_vom_internal_TransUnionCreditReport)
+	}
+	return t, nil
+}
+func (t *TransUnionCreditReportTarget) StartField(name string) (key, field vdl.Target, _ error) {
+	switch name {
+	case "Rating":
+		val, err := &vdl.Int16Target{Value: &t.Value.Rating}, error(nil)
+		return nil, val, err
+	default:
+		return nil, nil, fmt.Errorf("field %s not in struct %v", name, __VDLType_perf_test_v_io_v23_vom_internal_TransUnionCreditReport)
+	}
+}
+func (t *TransUnionCreditReportTarget) FinishField(_, _ vdl.Target) error {
+	return nil
+}
+func (t *TransUnionCreditReportTarget) FinishFields(_ vdl.FieldsTarget) error {
 	return nil
 }
 
@@ -375,7 +535,6 @@ func (x AgencyReportEquifaxReport) Name() string                       { return 
 func (x AgencyReportEquifaxReport) __VDLReflect(__AgencyReportReflect) {}
 
 func (m AgencyReportEquifaxReport) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
-
 	fieldsTarget1, err := t.StartFields(__VDLType_perf_test_v_io_v23_vom_internal_AgencyReport)
 	if err != nil {
 		return err
@@ -408,7 +567,6 @@ func (x AgencyReportExperianReport) Name() string                       { return
 func (x AgencyReportExperianReport) __VDLReflect(__AgencyReportReflect) {}
 
 func (m AgencyReportExperianReport) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
-
 	fieldsTarget1, err := t.StartFields(__VDLType_perf_test_v_io_v23_vom_internal_AgencyReport)
 	if err != nil {
 		return err
@@ -441,7 +599,6 @@ func (x AgencyReportTransUnionReport) Name() string                       { retu
 func (x AgencyReportTransUnionReport) __VDLReflect(__AgencyReportReflect) {}
 
 func (m AgencyReportTransUnionReport) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
-
 	fieldsTarget1, err := t.StartFields(__VDLType_perf_test_v_io_v23_vom_internal_AgencyReport)
 	if err != nil {
 		return err
@@ -479,7 +636,6 @@ func (CreditReport) __VDLReflect(struct {
 }
 
 func (m *CreditReport) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
-
 	if __VDLType_perf_test_v_io_v23_vom_internal_CreditReport == nil || __VDLTypeperf_test4 == nil {
 		panic("Initialization order error: types generated for FillVDLTarget not initialized. Consider moving caller to an init() block.")
 	}
@@ -525,6 +681,37 @@ func (m *CreditReport) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 }
 
 func (m *CreditReport) MakeVDLTarget() vdl.Target {
+	return &CreditReportTarget{Value: m}
+}
+
+type CreditReportTarget struct {
+	Value *CreditReport
+	vdl.TargetBase
+	vdl.FieldsTargetBase
+}
+
+func (t *CreditReportTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
+	if !vdl.Compatible(tt, __VDLType_perf_test_v_io_v23_vom_internal_CreditReport) {
+		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType_perf_test_v_io_v23_vom_internal_CreditReport)
+	}
+	return t, nil
+}
+func (t *CreditReportTarget) StartField(name string) (key, field vdl.Target, _ error) {
+	switch name {
+	case "Agency":
+		val, err := &CreditAgencyTarget{Value: &t.Value.Agency}, error(nil)
+		return nil, val, err
+	case "Report":
+		val, err := vdl.ReflectTarget(reflect.ValueOf(&t.Value.Report))
+		return nil, val, err
+	default:
+		return nil, nil, fmt.Errorf("field %s not in struct %v", name, __VDLType_perf_test_v_io_v23_vom_internal_CreditReport)
+	}
+}
+func (t *CreditReportTarget) FinishField(_, _ vdl.Target) error {
+	return nil
+}
+func (t *CreditReportTarget) FinishFields(_ vdl.FieldsTarget) error {
 	return nil
 }
 
@@ -542,7 +729,6 @@ func (Customer) __VDLReflect(struct {
 }
 
 func (m *Customer) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
-
 	if __VDLType_perf_test_v_io_v23_vom_internal_Customer == nil || __VDLTypeperf_test5 == nil {
 		panic("Initialization order error: types generated for FillVDLTarget not initialized. Consider moving caller to an init() block.")
 	}
@@ -620,6 +806,46 @@ func (m *Customer) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 }
 
 func (m *Customer) MakeVDLTarget() vdl.Target {
+	return &CustomerTarget{Value: m}
+}
+
+type CustomerTarget struct {
+	Value *Customer
+	vdl.TargetBase
+	vdl.FieldsTargetBase
+}
+
+func (t *CustomerTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
+	if !vdl.Compatible(tt, __VDLType_perf_test_v_io_v23_vom_internal_Customer) {
+		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType_perf_test_v_io_v23_vom_internal_Customer)
+	}
+	return t, nil
+}
+func (t *CustomerTarget) StartField(name string) (key, field vdl.Target, _ error) {
+	switch name {
+	case "Name":
+		val, err := &vdl.StringTarget{Value: &t.Value.Name}, error(nil)
+		return nil, val, err
+	case "Id":
+		val, err := &vdl.Int64Target{Value: &t.Value.Id}, error(nil)
+		return nil, val, err
+	case "Active":
+		val, err := &vdl.BoolTarget{Value: &t.Value.Active}, error(nil)
+		return nil, val, err
+	case "Address":
+		val, err := &AddressInfoTarget{Value: &t.Value.Address}, error(nil)
+		return nil, val, err
+	case "Credit":
+		val, err := &CreditReportTarget{Value: &t.Value.Credit}, error(nil)
+		return nil, val, err
+	default:
+		return nil, nil, fmt.Errorf("field %s not in struct %v", name, __VDLType_perf_test_v_io_v23_vom_internal_Customer)
+	}
+}
+func (t *CustomerTarget) FinishField(_, _ vdl.Target) error {
+	return nil
+}
+func (t *CustomerTarget) FinishFields(_ vdl.FieldsTarget) error {
 	return nil
 }
 

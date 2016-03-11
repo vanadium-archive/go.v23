@@ -108,7 +108,9 @@
 package watch
 
 import (
+	"fmt"
 	"io"
+	"reflect"
 	"v.io/v23"
 	"v.io/v23/context"
 	"v.io/v23/i18n"
@@ -136,7 +138,6 @@ func (GlobRequest) __VDLReflect(struct {
 }
 
 func (m *GlobRequest) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
-
 	if __VDLType_service_v_io_v23_services_watch_GlobRequest == nil || __VDLTypeservice0 == nil {
 		panic("Initialization order error: types generated for FillVDLTarget not initialized. Consider moving caller to an init() block.")
 	}
@@ -177,6 +178,55 @@ func (m *GlobRequest) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 }
 
 func (m *GlobRequest) MakeVDLTarget() vdl.Target {
+	return &GlobRequestTarget{Value: m}
+}
+
+type GlobRequestTarget struct {
+	Value *GlobRequest
+	vdl.TargetBase
+	vdl.FieldsTargetBase
+}
+
+func (t *GlobRequestTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
+	if !vdl.Compatible(tt, __VDLType_service_v_io_v23_services_watch_GlobRequest) {
+		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType_service_v_io_v23_services_watch_GlobRequest)
+	}
+	return t, nil
+}
+func (t *GlobRequestTarget) StartField(name string) (key, field vdl.Target, _ error) {
+	switch name {
+	case "Pattern":
+		val, err := &vdl.StringTarget{Value: &t.Value.Pattern}, error(nil)
+		return nil, val, err
+	case "ResumeMarker":
+		val, err := &ResumeMarkerTarget{Value: &t.Value.ResumeMarker}, error(nil)
+		return nil, val, err
+	default:
+		return nil, nil, fmt.Errorf("field %s not in struct %v", name, __VDLType_service_v_io_v23_services_watch_GlobRequest)
+	}
+}
+func (t *GlobRequestTarget) FinishField(_, _ vdl.Target) error {
+	return nil
+}
+func (t *GlobRequestTarget) FinishFields(_ vdl.FieldsTarget) error {
+	return nil
+}
+
+type ResumeMarkerTarget struct {
+	Value *ResumeMarker
+	vdl.TargetBase
+}
+
+func (t *ResumeMarkerTarget) FromBytes(src []byte, tt *vdl.Type) error {
+	if !vdl.Compatible(tt, __VDLType_service_v_io_v23_services_watch_ResumeMarker) {
+		return fmt.Errorf("type %v incompatible with %v", tt, __VDLType_service_v_io_v23_services_watch_ResumeMarker)
+	}
+	if len(src) == 0 {
+		*t.Value = nil
+	} else {
+		*t.Value = make([]byte, len(src))
+		copy(*t.Value, src)
+	}
 	return nil
 }
 
@@ -218,16 +268,15 @@ func (ResumeMarker) __VDLReflect(struct {
 }) {
 }
 
-func (m ResumeMarker) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
-
-	if err := t.FromBytes([]byte(m), __VDLType_service_v_io_v23_services_watch_ResumeMarker); err != nil {
+func (m *ResumeMarker) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
+	if err := t.FromBytes([]byte((*m)), __VDLType_service_v_io_v23_services_watch_ResumeMarker); err != nil {
 		return err
 	}
 	return nil
 }
 
-func (m ResumeMarker) MakeVDLTarget() vdl.Target {
-	return nil
+func (m *ResumeMarker) MakeVDLTarget() vdl.Target {
+	return &ResumeMarkerTarget{Value: m}
 }
 
 // Change is the new value for a watched entity.
@@ -257,7 +306,6 @@ func (Change) __VDLReflect(struct {
 }
 
 func (m *Change) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
-
 	if __VDLType_service_v_io_v23_services_watch_Change == nil || __VDLTypeservice1 == nil {
 		panic("Initialization order error: types generated for FillVDLTarget not initialized. Consider moving caller to an init() block.")
 	}
@@ -341,6 +389,46 @@ func (m *Change) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 }
 
 func (m *Change) MakeVDLTarget() vdl.Target {
+	return &ChangeTarget{Value: m}
+}
+
+type ChangeTarget struct {
+	Value *Change
+	vdl.TargetBase
+	vdl.FieldsTargetBase
+}
+
+func (t *ChangeTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
+	if !vdl.Compatible(tt, __VDLType_service_v_io_v23_services_watch_Change) {
+		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType_service_v_io_v23_services_watch_Change)
+	}
+	return t, nil
+}
+func (t *ChangeTarget) StartField(name string) (key, field vdl.Target, _ error) {
+	switch name {
+	case "Name":
+		val, err := &vdl.StringTarget{Value: &t.Value.Name}, error(nil)
+		return nil, val, err
+	case "State":
+		val, err := &vdl.Int32Target{Value: &t.Value.State}, error(nil)
+		return nil, val, err
+	case "Value":
+		val, err := vdl.ReflectTarget(reflect.ValueOf(&t.Value.Value))
+		return nil, val, err
+	case "ResumeMarker":
+		val, err := &ResumeMarkerTarget{Value: &t.Value.ResumeMarker}, error(nil)
+		return nil, val, err
+	case "Continued":
+		val, err := &vdl.BoolTarget{Value: &t.Value.Continued}, error(nil)
+		return nil, val, err
+	default:
+		return nil, nil, fmt.Errorf("field %s not in struct %v", name, __VDLType_service_v_io_v23_services_watch_Change)
+	}
+}
+func (t *ChangeTarget) FinishField(_, _ vdl.Target) error {
+	return nil
+}
+func (t *ChangeTarget) FinishFields(_ vdl.FieldsTarget) error {
 	return nil
 }
 

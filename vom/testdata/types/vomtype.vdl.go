@@ -9,7 +9,9 @@ package types
 
 import (
 	"fmt"
+	"reflect"
 	"v.io/v23/vdl"
+	"v.io/v23/vdl/vdlconv"
 )
 
 // vomdata config types
@@ -25,7 +27,6 @@ func (ConvertGroup) __VDLReflect(struct {
 }
 
 func (m *ConvertGroup) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
-
 	if __VDLType_vomtype_v_io_v23_vom_testdata_types_ConvertGroup == nil || __VDLTypevomtype0 == nil {
 		panic("Initialization order error: types generated for FillVDLTarget not initialized. Consider moving caller to an init() block.")
 	}
@@ -105,6 +106,67 @@ func (m *ConvertGroup) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 }
 
 func (m *ConvertGroup) MakeVDLTarget() vdl.Target {
+	return &ConvertGroupTarget{Value: m}
+}
+
+type ConvertGroupTarget struct {
+	Value *ConvertGroup
+	vdl.TargetBase
+	vdl.FieldsTargetBase
+}
+
+func (t *ConvertGroupTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
+	if !vdl.Compatible(tt, __VDLType_vomtype_v_io_v23_vom_testdata_types_ConvertGroup) {
+		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType_vomtype_v_io_v23_vom_testdata_types_ConvertGroup)
+	}
+	return t, nil
+}
+func (t *ConvertGroupTarget) StartField(name string) (key, field vdl.Target, _ error) {
+	switch name {
+	case "Name":
+		val, err := &vdl.StringTarget{Value: &t.Value.Name}, error(nil)
+		return nil, val, err
+	case "PrimaryType":
+		val, err := &vdl.TypeObjectTarget{Value: &t.Value.PrimaryType}, error(nil)
+		return nil, val, err
+	case "Values":
+		val, err := &vomtype5b5d616e79Target{Value: &t.Value.Values}, error(nil)
+		return nil, val, err
+	default:
+		return nil, nil, fmt.Errorf("field %s not in struct %v", name, __VDLType_vomtype_v_io_v23_vom_testdata_types_ConvertGroup)
+	}
+}
+func (t *ConvertGroupTarget) FinishField(_, _ vdl.Target) error {
+	return nil
+}
+func (t *ConvertGroupTarget) FinishFields(_ vdl.FieldsTarget) error {
+	return nil
+}
+
+type vomtype5b5d616e79Target struct {
+	Value *[]*vdl.Value
+	vdl.TargetBase
+	vdl.ListTargetBase
+}
+
+func (t *vomtype5b5d616e79Target) StartList(tt *vdl.Type, len int) (vdl.ListTarget, error) {
+	if !vdl.Compatible(tt, __VDLTypevomtype1) {
+		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLTypevomtype1)
+	}
+	if cap(*t.Value) < len {
+		*t.Value = make([]*vdl.Value, len)
+	} else {
+		*t.Value = (*t.Value)[:len]
+	}
+	return t, nil
+}
+func (t *vomtype5b5d616e79Target) StartElem(index int) (elem vdl.Target, _ error) {
+	return vdl.ReflectTarget(reflect.ValueOf(&(*t.Value)[index]))
+}
+func (t *vomtype5b5d616e79Target) FinishElem(elem vdl.Target) error {
+	return nil
+}
+func (t *vomtype5b5d616e79Target) FinishList(elem vdl.ListTarget) error {
 	return nil
 }
 
@@ -120,7 +182,6 @@ func (VomdataStruct) __VDLReflect(struct {
 }
 
 func (m *VomdataStruct) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
-
 	if __VDLType_vomtype_v_io_v23_vom_testdata_types_VomdataStruct == nil || __VDLTypevomtype2 == nil {
 		panic("Initialization order error: types generated for FillVDLTarget not initialized. Consider moving caller to an init() block.")
 	}
@@ -307,6 +368,196 @@ func (m *VomdataStruct) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 }
 
 func (m *VomdataStruct) MakeVDLTarget() vdl.Target {
+	return &VomdataStructTarget{Value: m}
+}
+
+type VomdataStructTarget struct {
+	Value *VomdataStruct
+	vdl.TargetBase
+	vdl.FieldsTargetBase
+}
+
+func (t *VomdataStructTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
+	if !vdl.Compatible(tt, __VDLType_vomtype_v_io_v23_vom_testdata_types_VomdataStruct) {
+		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType_vomtype_v_io_v23_vom_testdata_types_VomdataStruct)
+	}
+	return t, nil
+}
+func (t *VomdataStructTarget) StartField(name string) (key, field vdl.Target, _ error) {
+	switch name {
+	case "EncodeDecodeData":
+		val, err := &vomtype6d61705b627974655d5b5d616e79Target{Value: &t.Value.EncodeDecodeData}, error(nil)
+		return nil, val, err
+	case "CompatData":
+		val, err := &vomtype6d61705b737472696e675d5b5d747970656f626a656374Target{Value: &t.Value.CompatData}, error(nil)
+		return nil, val, err
+	case "ConvertData":
+		val, err := &vomtype6d61705b737472696e675d5b5d762e696f2f7632332f766f6d2f74657374646174612f74797065732e436f6e7665727447726f7570207374727563747b4e616d6520737472696e673b5072696d6172795479706520747970656f626a6563743b56616c756573205b5d616e797dTarget{Value: &t.Value.ConvertData}, error(nil)
+		return nil, val, err
+	default:
+		return nil, nil, fmt.Errorf("field %s not in struct %v", name, __VDLType_vomtype_v_io_v23_vom_testdata_types_VomdataStruct)
+	}
+}
+func (t *VomdataStructTarget) FinishField(_, _ vdl.Target) error {
+	return nil
+}
+func (t *VomdataStructTarget) FinishFields(_ vdl.FieldsTarget) error {
+	return nil
+}
+
+type vomtype6d61705b627974655d5b5d616e79Target struct {
+	Value    *map[byte][]*vdl.Value
+	currKey  byte
+	currElem []*vdl.Value
+	vdl.TargetBase
+	vdl.MapTargetBase
+}
+
+func (t *vomtype6d61705b627974655d5b5d616e79Target) StartMap(tt *vdl.Type, len int) (vdl.MapTarget, error) {
+	if !vdl.Compatible(tt, __VDLTypevomtype3) {
+		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLTypevomtype3)
+	}
+	*t.Value = make(map[byte][]*vdl.Value)
+	return t, nil
+}
+func (t *vomtype6d61705b627974655d5b5d616e79Target) StartKey() (key vdl.Target, _ error) {
+	t.currKey = byte(0)
+	return &vdl.ByteTarget{Value: &t.currKey}, error(nil)
+}
+func (t *vomtype6d61705b627974655d5b5d616e79Target) FinishKeyStartField(key vdl.Target) (field vdl.Target, _ error) {
+	t.currElem = []*vdl.Value(nil)
+	return &vomtype5b5d616e79Target{Value: &t.currElem}, error(nil)
+}
+func (t *vomtype6d61705b627974655d5b5d616e79Target) FinishField(key, field vdl.Target) error {
+	(*t.Value)[t.currKey] = t.currElem
+	return nil
+}
+func (t *vomtype6d61705b627974655d5b5d616e79Target) FinishMap(elem vdl.MapTarget) error {
+	if len(*t.Value) == 0 {
+		*t.Value = nil
+	}
+	return nil
+}
+
+type vomtype6d61705b737472696e675d5b5d747970656f626a656374Target struct {
+	Value    *map[string][]*vdl.Type
+	currKey  string
+	currElem []*vdl.Type
+	vdl.TargetBase
+	vdl.MapTargetBase
+}
+
+func (t *vomtype6d61705b737472696e675d5b5d747970656f626a656374Target) StartMap(tt *vdl.Type, len int) (vdl.MapTarget, error) {
+	if !vdl.Compatible(tt, __VDLTypevomtype4) {
+		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLTypevomtype4)
+	}
+	*t.Value = make(map[string][]*vdl.Type)
+	return t, nil
+}
+func (t *vomtype6d61705b737472696e675d5b5d747970656f626a656374Target) StartKey() (key vdl.Target, _ error) {
+	t.currKey = ""
+	return &vdl.StringTarget{Value: &t.currKey}, error(nil)
+}
+func (t *vomtype6d61705b737472696e675d5b5d747970656f626a656374Target) FinishKeyStartField(key vdl.Target) (field vdl.Target, _ error) {
+	t.currElem = []*vdl.Type(nil)
+	return &vomtype5b5d747970656f626a656374Target{Value: &t.currElem}, error(nil)
+}
+func (t *vomtype6d61705b737472696e675d5b5d747970656f626a656374Target) FinishField(key, field vdl.Target) error {
+	(*t.Value)[t.currKey] = t.currElem
+	return nil
+}
+func (t *vomtype6d61705b737472696e675d5b5d747970656f626a656374Target) FinishMap(elem vdl.MapTarget) error {
+	if len(*t.Value) == 0 {
+		*t.Value = nil
+	}
+	return nil
+}
+
+type vomtype5b5d747970656f626a656374Target struct {
+	Value *[]*vdl.Type
+	vdl.TargetBase
+	vdl.ListTargetBase
+}
+
+func (t *vomtype5b5d747970656f626a656374Target) StartList(tt *vdl.Type, len int) (vdl.ListTarget, error) {
+	if !vdl.Compatible(tt, __VDLTypevomtype5) {
+		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLTypevomtype5)
+	}
+	if cap(*t.Value) < len {
+		*t.Value = make([]*vdl.Type, len)
+	} else {
+		*t.Value = (*t.Value)[:len]
+	}
+	return t, nil
+}
+func (t *vomtype5b5d747970656f626a656374Target) StartElem(index int) (elem vdl.Target, _ error) {
+	return &vdl.TypeObjectTarget{Value: &(*t.Value)[index]}, error(nil)
+}
+func (t *vomtype5b5d747970656f626a656374Target) FinishElem(elem vdl.Target) error {
+	return nil
+}
+func (t *vomtype5b5d747970656f626a656374Target) FinishList(elem vdl.ListTarget) error {
+	return nil
+}
+
+type vomtype6d61705b737472696e675d5b5d762e696f2f7632332f766f6d2f74657374646174612f74797065732e436f6e7665727447726f7570207374727563747b4e616d6520737472696e673b5072696d6172795479706520747970656f626a6563743b56616c756573205b5d616e797dTarget struct {
+	Value    *map[string][]ConvertGroup
+	currKey  string
+	currElem []ConvertGroup
+	vdl.TargetBase
+	vdl.MapTargetBase
+}
+
+func (t *vomtype6d61705b737472696e675d5b5d762e696f2f7632332f766f6d2f74657374646174612f74797065732e436f6e7665727447726f7570207374727563747b4e616d6520737472696e673b5072696d6172795479706520747970656f626a6563743b56616c756573205b5d616e797dTarget) StartMap(tt *vdl.Type, len int) (vdl.MapTarget, error) {
+	if !vdl.Compatible(tt, __VDLTypevomtype6) {
+		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLTypevomtype6)
+	}
+	*t.Value = make(map[string][]ConvertGroup)
+	return t, nil
+}
+func (t *vomtype6d61705b737472696e675d5b5d762e696f2f7632332f766f6d2f74657374646174612f74797065732e436f6e7665727447726f7570207374727563747b4e616d6520737472696e673b5072696d6172795479706520747970656f626a6563743b56616c756573205b5d616e797dTarget) StartKey() (key vdl.Target, _ error) {
+	t.currKey = ""
+	return &vdl.StringTarget{Value: &t.currKey}, error(nil)
+}
+func (t *vomtype6d61705b737472696e675d5b5d762e696f2f7632332f766f6d2f74657374646174612f74797065732e436f6e7665727447726f7570207374727563747b4e616d6520737472696e673b5072696d6172795479706520747970656f626a6563743b56616c756573205b5d616e797dTarget) FinishKeyStartField(key vdl.Target) (field vdl.Target, _ error) {
+	t.currElem = []ConvertGroup(nil)
+	return &vomtype5b5d762e696f2f7632332f766f6d2f74657374646174612f74797065732e436f6e7665727447726f7570207374727563747b4e616d6520737472696e673b5072696d6172795479706520747970656f626a6563743b56616c756573205b5d616e797dTarget{Value: &t.currElem}, error(nil)
+}
+func (t *vomtype6d61705b737472696e675d5b5d762e696f2f7632332f766f6d2f74657374646174612f74797065732e436f6e7665727447726f7570207374727563747b4e616d6520737472696e673b5072696d6172795479706520747970656f626a6563743b56616c756573205b5d616e797dTarget) FinishField(key, field vdl.Target) error {
+	(*t.Value)[t.currKey] = t.currElem
+	return nil
+}
+func (t *vomtype6d61705b737472696e675d5b5d762e696f2f7632332f766f6d2f74657374646174612f74797065732e436f6e7665727447726f7570207374727563747b4e616d6520737472696e673b5072696d6172795479706520747970656f626a6563743b56616c756573205b5d616e797dTarget) FinishMap(elem vdl.MapTarget) error {
+	if len(*t.Value) == 0 {
+		*t.Value = nil
+	}
+	return nil
+}
+
+type vomtype5b5d762e696f2f7632332f766f6d2f74657374646174612f74797065732e436f6e7665727447726f7570207374727563747b4e616d6520737472696e673b5072696d6172795479706520747970656f626a6563743b56616c756573205b5d616e797dTarget struct {
+	Value *[]ConvertGroup
+	vdl.TargetBase
+	vdl.ListTargetBase
+}
+
+func (t *vomtype5b5d762e696f2f7632332f766f6d2f74657374646174612f74797065732e436f6e7665727447726f7570207374727563747b4e616d6520737472696e673b5072696d6172795479706520747970656f626a6563743b56616c756573205b5d616e797dTarget) StartList(tt *vdl.Type, len int) (vdl.ListTarget, error) {
+	if !vdl.Compatible(tt, __VDLTypevomtype7) {
+		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLTypevomtype7)
+	}
+	if cap(*t.Value) < len {
+		*t.Value = make([]ConvertGroup, len)
+	} else {
+		*t.Value = (*t.Value)[:len]
+	}
+	return t, nil
+}
+func (t *vomtype5b5d762e696f2f7632332f766f6d2f74657374646174612f74797065732e436f6e7665727447726f7570207374727563747b4e616d6520737472696e673b5072696d6172795479706520747970656f626a6563743b56616c756573205b5d616e797dTarget) StartElem(index int) (elem vdl.Target, _ error) {
+	return &ConvertGroupTarget{Value: &(*t.Value)[index]}, error(nil)
+}
+func (t *vomtype5b5d762e696f2f7632332f766f6d2f74657374646174612f74797065732e436f6e7665727447726f7570207374727563747b4e616d6520737472696e673b5072696d6172795479706520747970656f626a6563743b56616c756573205b5d616e797dTarget) FinishElem(elem vdl.Target) error {
+	return nil
+}
+func (t *vomtype5b5d762e696f2f7632332f766f6d2f74657374646174612f74797065732e436f6e7665727447726f7570207374727563747b4e616d6520737472696e673b5072696d6172795479706520747970656f626a6563743b56616c756573205b5d616e797dTarget) FinishList(elem vdl.ListTarget) error {
 	return nil
 }
 
@@ -318,14 +569,27 @@ func (NBool) __VDLReflect(struct {
 }) {
 }
 
-func (m NBool) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
-	if err := t.FromBool(bool(m), __VDLType_vomtype_v_io_v23_vom_testdata_types_NBool); err != nil {
+func (m *NBool) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
+	if err := t.FromBool(bool((*m)), __VDLType_vomtype_v_io_v23_vom_testdata_types_NBool); err != nil {
 		return err
 	}
 	return nil
 }
 
-func (m NBool) MakeVDLTarget() vdl.Target {
+func (m *NBool) MakeVDLTarget() vdl.Target {
+	return &NBoolTarget{Value: m}
+}
+
+type NBoolTarget struct {
+	Value *NBool
+	vdl.TargetBase
+}
+
+func (t *NBoolTarget) FromBool(src bool, tt *vdl.Type) error {
+	if !vdl.Compatible(tt, __VDLType_vomtype_v_io_v23_vom_testdata_types_NBool) {
+		return fmt.Errorf("type %v incompatible with %v", tt, __VDLType_vomtype_v_io_v23_vom_testdata_types_NBool)
+	}
+	*t.Value = NBool(src)
 	return nil
 }
 
@@ -336,14 +600,27 @@ func (NString) __VDLReflect(struct {
 }) {
 }
 
-func (m NString) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
-	if err := t.FromString(string(m), __VDLType_vomtype_v_io_v23_vom_testdata_types_NString); err != nil {
+func (m *NString) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
+	if err := t.FromString(string((*m)), __VDLType_vomtype_v_io_v23_vom_testdata_types_NString); err != nil {
 		return err
 	}
 	return nil
 }
 
-func (m NString) MakeVDLTarget() vdl.Target {
+func (m *NString) MakeVDLTarget() vdl.Target {
+	return &NStringTarget{Value: m}
+}
+
+type NStringTarget struct {
+	Value *NString
+	vdl.TargetBase
+}
+
+func (t *NStringTarget) FromString(src string, tt *vdl.Type) error {
+	if !vdl.Compatible(tt, __VDLType_vomtype_v_io_v23_vom_testdata_types_NString) {
+		return fmt.Errorf("type %v incompatible with %v", tt, __VDLType_vomtype_v_io_v23_vom_testdata_types_NString)
+	}
+	*t.Value = NString(src)
 	return nil
 }
 
@@ -354,15 +631,32 @@ func (NByteSlice) __VDLReflect(struct {
 }) {
 }
 
-func (m NByteSlice) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
-
-	if err := t.FromBytes([]byte(m), __VDLType_vomtype_v_io_v23_vom_testdata_types_NByteSlice); err != nil {
+func (m *NByteSlice) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
+	if err := t.FromBytes([]byte((*m)), __VDLType_vomtype_v_io_v23_vom_testdata_types_NByteSlice); err != nil {
 		return err
 	}
 	return nil
 }
 
-func (m NByteSlice) MakeVDLTarget() vdl.Target {
+func (m *NByteSlice) MakeVDLTarget() vdl.Target {
+	return &NByteSliceTarget{Value: m}
+}
+
+type NByteSliceTarget struct {
+	Value *NByteSlice
+	vdl.TargetBase
+}
+
+func (t *NByteSliceTarget) FromBytes(src []byte, tt *vdl.Type) error {
+	if !vdl.Compatible(tt, __VDLType_vomtype_v_io_v23_vom_testdata_types_NByteSlice) {
+		return fmt.Errorf("type %v incompatible with %v", tt, __VDLType_vomtype_v_io_v23_vom_testdata_types_NByteSlice)
+	}
+	if len(src) == 0 {
+		*t.Value = nil
+	} else {
+		*t.Value = make([]byte, len(src))
+		copy(*t.Value, src)
+	}
 	return nil
 }
 
@@ -373,15 +667,27 @@ func (NByteArray) __VDLReflect(struct {
 }) {
 }
 
-func (m NByteArray) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
-
-	if err := t.FromBytes([]byte(m[:]), __VDLType_vomtype_v_io_v23_vom_testdata_types_NByteArray); err != nil {
+func (m *NByteArray) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
+	if err := t.FromBytes([]byte((*m)[:]), __VDLType_vomtype_v_io_v23_vom_testdata_types_NByteArray); err != nil {
 		return err
 	}
 	return nil
 }
 
-func (m NByteArray) MakeVDLTarget() vdl.Target {
+func (m *NByteArray) MakeVDLTarget() vdl.Target {
+	return &NByteArrayTarget{Value: m}
+}
+
+type NByteArrayTarget struct {
+	Value *NByteArray
+	vdl.TargetBase
+}
+
+func (t *NByteArrayTarget) FromBytes(src []byte, tt *vdl.Type) error {
+	if !vdl.Compatible(tt, __VDLType_vomtype_v_io_v23_vom_testdata_types_NByteArray) {
+		return fmt.Errorf("type %v incompatible with %v", tt, __VDLType_vomtype_v_io_v23_vom_testdata_types_NByteArray)
+	}
+	copy((*t.Value)[:], src)
 	return nil
 }
 
@@ -392,14 +698,52 @@ func (NByte) __VDLReflect(struct {
 }) {
 }
 
-func (m NByte) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
-	if err := t.FromUint(uint64(m), __VDLType_vomtype_v_io_v23_vom_testdata_types_NByte); err != nil {
+func (m *NByte) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
+	if err := t.FromUint(uint64((*m)), __VDLType_vomtype_v_io_v23_vom_testdata_types_NByte); err != nil {
 		return err
 	}
 	return nil
 }
 
-func (m NByte) MakeVDLTarget() vdl.Target {
+func (m *NByte) MakeVDLTarget() vdl.Target {
+	return &NByteTarget{Value: m}
+}
+
+type NByteTarget struct {
+	Value *NByte
+	vdl.TargetBase
+}
+
+func (t *NByteTarget) FromUint(src uint64, tt *vdl.Type) error {
+	val, err := vdlconv.Uint64ToUint8(src)
+	if err != nil {
+		return err
+	}
+	*t.Value = NByte(val)
+	return nil
+}
+func (t *NByteTarget) FromInt(src int64, tt *vdl.Type) error {
+	val, err := vdlconv.Int64ToUint8(src)
+	if err != nil {
+		return err
+	}
+	*t.Value = NByte(val)
+	return nil
+}
+func (t *NByteTarget) FromFloat(src float64, tt *vdl.Type) error {
+	val, err := vdlconv.Float64ToUint8(src)
+	if err != nil {
+		return err
+	}
+	*t.Value = NByte(val)
+	return nil
+}
+func (t *NByteTarget) FromComplex(src complex128, tt *vdl.Type) error {
+	val, err := vdlconv.Complex128ToUint8(src)
+	if err != nil {
+		return err
+	}
+	*t.Value = NByte(val)
 	return nil
 }
 
@@ -410,14 +754,52 @@ func (NUint16) __VDLReflect(struct {
 }) {
 }
 
-func (m NUint16) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
-	if err := t.FromUint(uint64(m), __VDLType_vomtype_v_io_v23_vom_testdata_types_NUint16); err != nil {
+func (m *NUint16) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
+	if err := t.FromUint(uint64((*m)), __VDLType_vomtype_v_io_v23_vom_testdata_types_NUint16); err != nil {
 		return err
 	}
 	return nil
 }
 
-func (m NUint16) MakeVDLTarget() vdl.Target {
+func (m *NUint16) MakeVDLTarget() vdl.Target {
+	return &NUint16Target{Value: m}
+}
+
+type NUint16Target struct {
+	Value *NUint16
+	vdl.TargetBase
+}
+
+func (t *NUint16Target) FromUint(src uint64, tt *vdl.Type) error {
+	val, err := vdlconv.Uint64ToUint16(src)
+	if err != nil {
+		return err
+	}
+	*t.Value = NUint16(val)
+	return nil
+}
+func (t *NUint16Target) FromInt(src int64, tt *vdl.Type) error {
+	val, err := vdlconv.Int64ToUint16(src)
+	if err != nil {
+		return err
+	}
+	*t.Value = NUint16(val)
+	return nil
+}
+func (t *NUint16Target) FromFloat(src float64, tt *vdl.Type) error {
+	val, err := vdlconv.Float64ToUint16(src)
+	if err != nil {
+		return err
+	}
+	*t.Value = NUint16(val)
+	return nil
+}
+func (t *NUint16Target) FromComplex(src complex128, tt *vdl.Type) error {
+	val, err := vdlconv.Complex128ToUint16(src)
+	if err != nil {
+		return err
+	}
+	*t.Value = NUint16(val)
 	return nil
 }
 
@@ -428,14 +810,52 @@ func (NUint32) __VDLReflect(struct {
 }) {
 }
 
-func (m NUint32) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
-	if err := t.FromUint(uint64(m), __VDLType_vomtype_v_io_v23_vom_testdata_types_NUint32); err != nil {
+func (m *NUint32) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
+	if err := t.FromUint(uint64((*m)), __VDLType_vomtype_v_io_v23_vom_testdata_types_NUint32); err != nil {
 		return err
 	}
 	return nil
 }
 
-func (m NUint32) MakeVDLTarget() vdl.Target {
+func (m *NUint32) MakeVDLTarget() vdl.Target {
+	return &NUint32Target{Value: m}
+}
+
+type NUint32Target struct {
+	Value *NUint32
+	vdl.TargetBase
+}
+
+func (t *NUint32Target) FromUint(src uint64, tt *vdl.Type) error {
+	val, err := vdlconv.Uint64ToUint32(src)
+	if err != nil {
+		return err
+	}
+	*t.Value = NUint32(val)
+	return nil
+}
+func (t *NUint32Target) FromInt(src int64, tt *vdl.Type) error {
+	val, err := vdlconv.Int64ToUint32(src)
+	if err != nil {
+		return err
+	}
+	*t.Value = NUint32(val)
+	return nil
+}
+func (t *NUint32Target) FromFloat(src float64, tt *vdl.Type) error {
+	val, err := vdlconv.Float64ToUint32(src)
+	if err != nil {
+		return err
+	}
+	*t.Value = NUint32(val)
+	return nil
+}
+func (t *NUint32Target) FromComplex(src complex128, tt *vdl.Type) error {
+	val, err := vdlconv.Complex128ToUint32(src)
+	if err != nil {
+		return err
+	}
+	*t.Value = NUint32(val)
 	return nil
 }
 
@@ -446,14 +866,48 @@ func (NUint64) __VDLReflect(struct {
 }) {
 }
 
-func (m NUint64) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
-	if err := t.FromUint(uint64(m), __VDLType_vomtype_v_io_v23_vom_testdata_types_NUint64); err != nil {
+func (m *NUint64) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
+	if err := t.FromUint(uint64((*m)), __VDLType_vomtype_v_io_v23_vom_testdata_types_NUint64); err != nil {
 		return err
 	}
 	return nil
 }
 
-func (m NUint64) MakeVDLTarget() vdl.Target {
+func (m *NUint64) MakeVDLTarget() vdl.Target {
+	return &NUint64Target{Value: m}
+}
+
+type NUint64Target struct {
+	Value *NUint64
+	vdl.TargetBase
+}
+
+func (t *NUint64Target) FromUint(src uint64, tt *vdl.Type) error {
+	*t.Value = NUint64(src)
+	return nil
+}
+func (t *NUint64Target) FromInt(src int64, tt *vdl.Type) error {
+	val, err := vdlconv.Int64ToUint64(src)
+	if err != nil {
+		return err
+	}
+	*t.Value = NUint64(val)
+	return nil
+}
+func (t *NUint64Target) FromFloat(src float64, tt *vdl.Type) error {
+	val, err := vdlconv.Float64ToUint64(src)
+	if err != nil {
+		return err
+	}
+	*t.Value = NUint64(val)
+	return nil
+}
+func (t *NUint64Target) FromComplex(src complex128, tt *vdl.Type) error {
+	val, err := vdlconv.Complex128ToUint64(src)
+	if err != nil {
+		return err
+	}
+	*t.Value = NUint64(val)
 	return nil
 }
 
@@ -464,14 +918,52 @@ func (NInt8) __VDLReflect(struct {
 }) {
 }
 
-func (m NInt8) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
-	if err := t.FromInt(int64(m), __VDLType_vomtype_v_io_v23_vom_testdata_types_NInt8); err != nil {
+func (m *NInt8) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
+	if err := t.FromInt(int64((*m)), __VDLType_vomtype_v_io_v23_vom_testdata_types_NInt8); err != nil {
 		return err
 	}
 	return nil
 }
 
-func (m NInt8) MakeVDLTarget() vdl.Target {
+func (m *NInt8) MakeVDLTarget() vdl.Target {
+	return &NInt8Target{Value: m}
+}
+
+type NInt8Target struct {
+	Value *NInt8
+	vdl.TargetBase
+}
+
+func (t *NInt8Target) FromUint(src uint64, tt *vdl.Type) error {
+	val, err := vdlconv.Uint64ToInt8(src)
+	if err != nil {
+		return err
+	}
+	*t.Value = NInt8(val)
+	return nil
+}
+func (t *NInt8Target) FromInt(src int64, tt *vdl.Type) error {
+	val, err := vdlconv.Int64ToInt8(src)
+	if err != nil {
+		return err
+	}
+	*t.Value = NInt8(val)
+	return nil
+}
+func (t *NInt8Target) FromFloat(src float64, tt *vdl.Type) error {
+	val, err := vdlconv.Float64ToInt8(src)
+	if err != nil {
+		return err
+	}
+	*t.Value = NInt8(val)
+	return nil
+}
+func (t *NInt8Target) FromComplex(src complex128, tt *vdl.Type) error {
+	val, err := vdlconv.Complex128ToInt8(src)
+	if err != nil {
+		return err
+	}
+	*t.Value = NInt8(val)
 	return nil
 }
 
@@ -482,14 +974,52 @@ func (NInt16) __VDLReflect(struct {
 }) {
 }
 
-func (m NInt16) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
-	if err := t.FromInt(int64(m), __VDLType_vomtype_v_io_v23_vom_testdata_types_NInt16); err != nil {
+func (m *NInt16) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
+	if err := t.FromInt(int64((*m)), __VDLType_vomtype_v_io_v23_vom_testdata_types_NInt16); err != nil {
 		return err
 	}
 	return nil
 }
 
-func (m NInt16) MakeVDLTarget() vdl.Target {
+func (m *NInt16) MakeVDLTarget() vdl.Target {
+	return &NInt16Target{Value: m}
+}
+
+type NInt16Target struct {
+	Value *NInt16
+	vdl.TargetBase
+}
+
+func (t *NInt16Target) FromUint(src uint64, tt *vdl.Type) error {
+	val, err := vdlconv.Uint64ToInt16(src)
+	if err != nil {
+		return err
+	}
+	*t.Value = NInt16(val)
+	return nil
+}
+func (t *NInt16Target) FromInt(src int64, tt *vdl.Type) error {
+	val, err := vdlconv.Int64ToInt16(src)
+	if err != nil {
+		return err
+	}
+	*t.Value = NInt16(val)
+	return nil
+}
+func (t *NInt16Target) FromFloat(src float64, tt *vdl.Type) error {
+	val, err := vdlconv.Float64ToInt16(src)
+	if err != nil {
+		return err
+	}
+	*t.Value = NInt16(val)
+	return nil
+}
+func (t *NInt16Target) FromComplex(src complex128, tt *vdl.Type) error {
+	val, err := vdlconv.Complex128ToInt16(src)
+	if err != nil {
+		return err
+	}
+	*t.Value = NInt16(val)
 	return nil
 }
 
@@ -500,14 +1030,52 @@ func (NInt32) __VDLReflect(struct {
 }) {
 }
 
-func (m NInt32) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
-	if err := t.FromInt(int64(m), __VDLType_vomtype_v_io_v23_vom_testdata_types_NInt32); err != nil {
+func (m *NInt32) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
+	if err := t.FromInt(int64((*m)), __VDLType_vomtype_v_io_v23_vom_testdata_types_NInt32); err != nil {
 		return err
 	}
 	return nil
 }
 
-func (m NInt32) MakeVDLTarget() vdl.Target {
+func (m *NInt32) MakeVDLTarget() vdl.Target {
+	return &NInt32Target{Value: m}
+}
+
+type NInt32Target struct {
+	Value *NInt32
+	vdl.TargetBase
+}
+
+func (t *NInt32Target) FromUint(src uint64, tt *vdl.Type) error {
+	val, err := vdlconv.Uint64ToInt32(src)
+	if err != nil {
+		return err
+	}
+	*t.Value = NInt32(val)
+	return nil
+}
+func (t *NInt32Target) FromInt(src int64, tt *vdl.Type) error {
+	val, err := vdlconv.Int64ToInt32(src)
+	if err != nil {
+		return err
+	}
+	*t.Value = NInt32(val)
+	return nil
+}
+func (t *NInt32Target) FromFloat(src float64, tt *vdl.Type) error {
+	val, err := vdlconv.Float64ToInt32(src)
+	if err != nil {
+		return err
+	}
+	*t.Value = NInt32(val)
+	return nil
+}
+func (t *NInt32Target) FromComplex(src complex128, tt *vdl.Type) error {
+	val, err := vdlconv.Complex128ToInt32(src)
+	if err != nil {
+		return err
+	}
+	*t.Value = NInt32(val)
 	return nil
 }
 
@@ -518,14 +1086,48 @@ func (NInt64) __VDLReflect(struct {
 }) {
 }
 
-func (m NInt64) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
-	if err := t.FromInt(int64(m), __VDLType_vomtype_v_io_v23_vom_testdata_types_NInt64); err != nil {
+func (m *NInt64) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
+	if err := t.FromInt(int64((*m)), __VDLType_vomtype_v_io_v23_vom_testdata_types_NInt64); err != nil {
 		return err
 	}
 	return nil
 }
 
-func (m NInt64) MakeVDLTarget() vdl.Target {
+func (m *NInt64) MakeVDLTarget() vdl.Target {
+	return &NInt64Target{Value: m}
+}
+
+type NInt64Target struct {
+	Value *NInt64
+	vdl.TargetBase
+}
+
+func (t *NInt64Target) FromUint(src uint64, tt *vdl.Type) error {
+	val, err := vdlconv.Uint64ToInt64(src)
+	if err != nil {
+		return err
+	}
+	*t.Value = NInt64(val)
+	return nil
+}
+func (t *NInt64Target) FromInt(src int64, tt *vdl.Type) error {
+	*t.Value = NInt64(src)
+	return nil
+}
+func (t *NInt64Target) FromFloat(src float64, tt *vdl.Type) error {
+	val, err := vdlconv.Float64ToInt64(src)
+	if err != nil {
+		return err
+	}
+	*t.Value = NInt64(val)
+	return nil
+}
+func (t *NInt64Target) FromComplex(src complex128, tt *vdl.Type) error {
+	val, err := vdlconv.Complex128ToInt64(src)
+	if err != nil {
+		return err
+	}
+	*t.Value = NInt64(val)
 	return nil
 }
 
@@ -536,14 +1138,52 @@ func (NFloat32) __VDLReflect(struct {
 }) {
 }
 
-func (m NFloat32) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
-	if err := t.FromFloat(float64(m), __VDLType_vomtype_v_io_v23_vom_testdata_types_NFloat32); err != nil {
+func (m *NFloat32) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
+	if err := t.FromFloat(float64((*m)), __VDLType_vomtype_v_io_v23_vom_testdata_types_NFloat32); err != nil {
 		return err
 	}
 	return nil
 }
 
-func (m NFloat32) MakeVDLTarget() vdl.Target {
+func (m *NFloat32) MakeVDLTarget() vdl.Target {
+	return &NFloat32Target{Value: m}
+}
+
+type NFloat32Target struct {
+	Value *NFloat32
+	vdl.TargetBase
+}
+
+func (t *NFloat32Target) FromUint(src uint64, tt *vdl.Type) error {
+	val, err := vdlconv.Uint64ToFloat32(src)
+	if err != nil {
+		return err
+	}
+	*t.Value = NFloat32(val)
+	return nil
+}
+func (t *NFloat32Target) FromInt(src int64, tt *vdl.Type) error {
+	val, err := vdlconv.Int64ToFloat32(src)
+	if err != nil {
+		return err
+	}
+	*t.Value = NFloat32(val)
+	return nil
+}
+func (t *NFloat32Target) FromFloat(src float64, tt *vdl.Type) error {
+	val, err := vdlconv.Float64ToFloat32(src)
+	if err != nil {
+		return err
+	}
+	*t.Value = NFloat32(val)
+	return nil
+}
+func (t *NFloat32Target) FromComplex(src complex128, tt *vdl.Type) error {
+	val, err := vdlconv.Complex128ToFloat32(src)
+	if err != nil {
+		return err
+	}
+	*t.Value = NFloat32(val)
 	return nil
 }
 
@@ -554,14 +1194,48 @@ func (NFloat64) __VDLReflect(struct {
 }) {
 }
 
-func (m NFloat64) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
-	if err := t.FromFloat(float64(m), __VDLType_vomtype_v_io_v23_vom_testdata_types_NFloat64); err != nil {
+func (m *NFloat64) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
+	if err := t.FromFloat(float64((*m)), __VDLType_vomtype_v_io_v23_vom_testdata_types_NFloat64); err != nil {
 		return err
 	}
 	return nil
 }
 
-func (m NFloat64) MakeVDLTarget() vdl.Target {
+func (m *NFloat64) MakeVDLTarget() vdl.Target {
+	return &NFloat64Target{Value: m}
+}
+
+type NFloat64Target struct {
+	Value *NFloat64
+	vdl.TargetBase
+}
+
+func (t *NFloat64Target) FromUint(src uint64, tt *vdl.Type) error {
+	val, err := vdlconv.Uint64ToFloat64(src)
+	if err != nil {
+		return err
+	}
+	*t.Value = NFloat64(val)
+	return nil
+}
+func (t *NFloat64Target) FromInt(src int64, tt *vdl.Type) error {
+	val, err := vdlconv.Int64ToFloat64(src)
+	if err != nil {
+		return err
+	}
+	*t.Value = NFloat64(val)
+	return nil
+}
+func (t *NFloat64Target) FromFloat(src float64, tt *vdl.Type) error {
+	*t.Value = NFloat64(src)
+	return nil
+}
+func (t *NFloat64Target) FromComplex(src complex128, tt *vdl.Type) error {
+	val, err := vdlconv.Complex128ToFloat64(src)
+	if err != nil {
+		return err
+	}
+	*t.Value = NFloat64(val)
 	return nil
 }
 
@@ -572,14 +1246,52 @@ func (NComplex64) __VDLReflect(struct {
 }) {
 }
 
-func (m NComplex64) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
-	if err := t.FromComplex(complex128(m), __VDLType_vomtype_v_io_v23_vom_testdata_types_NComplex64); err != nil {
+func (m *NComplex64) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
+	if err := t.FromComplex(complex128((*m)), __VDLType_vomtype_v_io_v23_vom_testdata_types_NComplex64); err != nil {
 		return err
 	}
 	return nil
 }
 
-func (m NComplex64) MakeVDLTarget() vdl.Target {
+func (m *NComplex64) MakeVDLTarget() vdl.Target {
+	return &NComplex64Target{Value: m}
+}
+
+type NComplex64Target struct {
+	Value *NComplex64
+	vdl.TargetBase
+}
+
+func (t *NComplex64Target) FromUint(src uint64, tt *vdl.Type) error {
+	val, err := vdlconv.Uint64ToComplex64(src)
+	if err != nil {
+		return err
+	}
+	*t.Value = NComplex64(val)
+	return nil
+}
+func (t *NComplex64Target) FromInt(src int64, tt *vdl.Type) error {
+	val, err := vdlconv.Int64ToComplex64(src)
+	if err != nil {
+		return err
+	}
+	*t.Value = NComplex64(val)
+	return nil
+}
+func (t *NComplex64Target) FromFloat(src float64, tt *vdl.Type) error {
+	val, err := vdlconv.Float64ToComplex64(src)
+	if err != nil {
+		return err
+	}
+	*t.Value = NComplex64(val)
+	return nil
+}
+func (t *NComplex64Target) FromComplex(src complex128, tt *vdl.Type) error {
+	val, err := vdlconv.Complex128ToComplex64(src)
+	if err != nil {
+		return err
+	}
+	*t.Value = NComplex64(val)
 	return nil
 }
 
@@ -590,14 +1302,48 @@ func (NComplex128) __VDLReflect(struct {
 }) {
 }
 
-func (m NComplex128) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
-	if err := t.FromComplex(complex128(m), __VDLType_vomtype_v_io_v23_vom_testdata_types_NComplex128); err != nil {
+func (m *NComplex128) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
+	if err := t.FromComplex(complex128((*m)), __VDLType_vomtype_v_io_v23_vom_testdata_types_NComplex128); err != nil {
 		return err
 	}
 	return nil
 }
 
-func (m NComplex128) MakeVDLTarget() vdl.Target {
+func (m *NComplex128) MakeVDLTarget() vdl.Target {
+	return &NComplex128Target{Value: m}
+}
+
+type NComplex128Target struct {
+	Value *NComplex128
+	vdl.TargetBase
+}
+
+func (t *NComplex128Target) FromUint(src uint64, tt *vdl.Type) error {
+	val, err := vdlconv.Uint64ToComplex128(src)
+	if err != nil {
+		return err
+	}
+	*t.Value = NComplex128(val)
+	return nil
+}
+func (t *NComplex128Target) FromInt(src int64, tt *vdl.Type) error {
+	val, err := vdlconv.Int64ToComplex128(src)
+	if err != nil {
+		return err
+	}
+	*t.Value = NComplex128(val)
+	return nil
+}
+func (t *NComplex128Target) FromFloat(src float64, tt *vdl.Type) error {
+	val, err := vdlconv.Float64ToComplex128(src)
+	if err != nil {
+		return err
+	}
+	*t.Value = NComplex128(val)
+	return nil
+}
+func (t *NComplex128Target) FromComplex(src complex128, tt *vdl.Type) error {
+	*t.Value = NComplex128(src)
 	return nil
 }
 
@@ -608,13 +1354,12 @@ func (NArray2Uint64) __VDLReflect(struct {
 }) {
 }
 
-func (m NArray2Uint64) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
-
+func (m *NArray2Uint64) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 	listTarget1, err := t.StartList(__VDLType_vomtype_v_io_v23_vom_testdata_types_NArray2Uint64, 2)
 	if err != nil {
 		return err
 	}
-	for i, elem3 := range m {
+	for i, elem3 := range *m {
 		elemTarget2, err := listTarget1.StartElem(i)
 		if err != nil {
 			return err
@@ -632,7 +1377,29 @@ func (m NArray2Uint64) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 	return nil
 }
 
-func (m NArray2Uint64) MakeVDLTarget() vdl.Target {
+func (m *NArray2Uint64) MakeVDLTarget() vdl.Target {
+	return &NArray2Uint64Target{Value: m}
+}
+
+type NArray2Uint64Target struct {
+	Value *NArray2Uint64
+	vdl.TargetBase
+	vdl.ListTargetBase
+}
+
+func (t *NArray2Uint64Target) StartList(tt *vdl.Type, len int) (vdl.ListTarget, error) {
+	if !vdl.Compatible(tt, __VDLType_vomtype_v_io_v23_vom_testdata_types_NArray2Uint64) {
+		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType_vomtype_v_io_v23_vom_testdata_types_NArray2Uint64)
+	}
+	return t, nil
+}
+func (t *NArray2Uint64Target) StartElem(index int) (elem vdl.Target, _ error) {
+	return &vdl.Uint64Target{Value: &(*t.Value)[index]}, error(nil)
+}
+func (t *NArray2Uint64Target) FinishElem(elem vdl.Target) error {
+	return nil
+}
+func (t *NArray2Uint64Target) FinishList(elem vdl.ListTarget) error {
 	return nil
 }
 
@@ -643,13 +1410,12 @@ func (NListUint64) __VDLReflect(struct {
 }) {
 }
 
-func (m NListUint64) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
-
-	listTarget1, err := t.StartList(__VDLType_vomtype_v_io_v23_vom_testdata_types_NListUint64, len(m))
+func (m *NListUint64) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
+	listTarget1, err := t.StartList(__VDLType_vomtype_v_io_v23_vom_testdata_types_NListUint64, len((*m)))
 	if err != nil {
 		return err
 	}
-	for i, elem3 := range m {
+	for i, elem3 := range *m {
 		elemTarget2, err := listTarget1.StartElem(i)
 		if err != nil {
 			return err
@@ -667,7 +1433,34 @@ func (m NListUint64) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 	return nil
 }
 
-func (m NListUint64) MakeVDLTarget() vdl.Target {
+func (m *NListUint64) MakeVDLTarget() vdl.Target {
+	return &NListUint64Target{Value: m}
+}
+
+type NListUint64Target struct {
+	Value *NListUint64
+	vdl.TargetBase
+	vdl.ListTargetBase
+}
+
+func (t *NListUint64Target) StartList(tt *vdl.Type, len int) (vdl.ListTarget, error) {
+	if !vdl.Compatible(tt, __VDLType_vomtype_v_io_v23_vom_testdata_types_NListUint64) {
+		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType_vomtype_v_io_v23_vom_testdata_types_NListUint64)
+	}
+	if cap(*t.Value) < len {
+		*t.Value = make(NListUint64, len)
+	} else {
+		*t.Value = (*t.Value)[:len]
+	}
+	return t, nil
+}
+func (t *NListUint64Target) StartElem(index int) (elem vdl.Target, _ error) {
+	return &vdl.Uint64Target{Value: &(*t.Value)[index]}, error(nil)
+}
+func (t *NListUint64Target) FinishElem(elem vdl.Target) error {
+	return nil
+}
+func (t *NListUint64Target) FinishList(elem vdl.ListTarget) error {
 	return nil
 }
 
@@ -678,13 +1471,12 @@ func (NSetUint64) __VDLReflect(struct {
 }) {
 }
 
-func (m NSetUint64) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
-
-	setTarget1, err := t.StartSet(__VDLType_vomtype_v_io_v23_vom_testdata_types_NSetUint64, len(m))
+func (m *NSetUint64) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
+	setTarget1, err := t.StartSet(__VDLType_vomtype_v_io_v23_vom_testdata_types_NSetUint64, len((*m)))
 	if err != nil {
 		return err
 	}
-	for key3 := range m {
+	for key3 := range *m {
 		keyTarget2, err := setTarget1.StartKey()
 		if err != nil {
 			return err
@@ -702,7 +1494,36 @@ func (m NSetUint64) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 	return nil
 }
 
-func (m NSetUint64) MakeVDLTarget() vdl.Target {
+func (m *NSetUint64) MakeVDLTarget() vdl.Target {
+	return &NSetUint64Target{Value: m}
+}
+
+type NSetUint64Target struct {
+	Value   *NSetUint64
+	currKey uint64
+	vdl.TargetBase
+	vdl.SetTargetBase
+}
+
+func (t *NSetUint64Target) StartSet(tt *vdl.Type, len int) (vdl.SetTarget, error) {
+	if !vdl.Compatible(tt, __VDLType_vomtype_v_io_v23_vom_testdata_types_NSetUint64) {
+		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType_vomtype_v_io_v23_vom_testdata_types_NSetUint64)
+	}
+	*t.Value = make(NSetUint64)
+	return t, nil
+}
+func (t *NSetUint64Target) StartKey() (key vdl.Target, _ error) {
+	t.currKey = uint64(0)
+	return &vdl.Uint64Target{Value: &t.currKey}, error(nil)
+}
+func (t *NSetUint64Target) FinishKey(key vdl.Target) error {
+	(*t.Value)[t.currKey] = struct{}{}
+	return nil
+}
+func (t *NSetUint64Target) FinishSet(list vdl.SetTarget) error {
+	if len(*t.Value) == 0 {
+		*t.Value = nil
+	}
 	return nil
 }
 
@@ -713,13 +1534,12 @@ func (NMapUint64String) __VDLReflect(struct {
 }) {
 }
 
-func (m NMapUint64String) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
-
-	mapTarget1, err := t.StartMap(__VDLType_vomtype_v_io_v23_vom_testdata_types_NMapUint64String, len(m))
+func (m *NMapUint64String) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
+	mapTarget1, err := t.StartMap(__VDLType_vomtype_v_io_v23_vom_testdata_types_NMapUint64String, len((*m)))
 	if err != nil {
 		return err
 	}
-	for key3, value5 := range m {
+	for key3, value5 := range *m {
 		keyTarget2, err := mapTarget1.StartKey()
 		if err != nil {
 			return err
@@ -744,7 +1564,41 @@ func (m NMapUint64String) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 	return nil
 }
 
-func (m NMapUint64String) MakeVDLTarget() vdl.Target {
+func (m *NMapUint64String) MakeVDLTarget() vdl.Target {
+	return &NMapUint64StringTarget{Value: m}
+}
+
+type NMapUint64StringTarget struct {
+	Value    *NMapUint64String
+	currKey  uint64
+	currElem string
+	vdl.TargetBase
+	vdl.MapTargetBase
+}
+
+func (t *NMapUint64StringTarget) StartMap(tt *vdl.Type, len int) (vdl.MapTarget, error) {
+	if !vdl.Compatible(tt, __VDLType_vomtype_v_io_v23_vom_testdata_types_NMapUint64String) {
+		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType_vomtype_v_io_v23_vom_testdata_types_NMapUint64String)
+	}
+	*t.Value = make(NMapUint64String)
+	return t, nil
+}
+func (t *NMapUint64StringTarget) StartKey() (key vdl.Target, _ error) {
+	t.currKey = uint64(0)
+	return &vdl.Uint64Target{Value: &t.currKey}, error(nil)
+}
+func (t *NMapUint64StringTarget) FinishKeyStartField(key vdl.Target) (field vdl.Target, _ error) {
+	t.currElem = ""
+	return &vdl.StringTarget{Value: &t.currElem}, error(nil)
+}
+func (t *NMapUint64StringTarget) FinishField(key, field vdl.Target) error {
+	(*t.Value)[t.currKey] = t.currElem
+	return nil
+}
+func (t *NMapUint64StringTarget) FinishMap(elem vdl.MapTarget) error {
+	if len(*t.Value) == 0 {
+		*t.Value = nil
+	}
 	return nil
 }
 
@@ -760,7 +1614,6 @@ func (NStruct) __VDLReflect(struct {
 }
 
 func (m *NStruct) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
-
 	if __VDLType_vomtype_v_io_v23_vom_testdata_types_NStruct == nil || __VDLTypevomtype8 == nil {
 		panic("Initialization order error: types generated for FillVDLTarget not initialized. Consider moving caller to an init() block.")
 	}
@@ -812,6 +1665,40 @@ func (m *NStruct) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 }
 
 func (m *NStruct) MakeVDLTarget() vdl.Target {
+	return &NStructTarget{Value: m}
+}
+
+type NStructTarget struct {
+	Value *NStruct
+	vdl.TargetBase
+	vdl.FieldsTargetBase
+}
+
+func (t *NStructTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
+	if !vdl.Compatible(tt, __VDLType_vomtype_v_io_v23_vom_testdata_types_NStruct) {
+		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType_vomtype_v_io_v23_vom_testdata_types_NStruct)
+	}
+	return t, nil
+}
+func (t *NStructTarget) StartField(name string) (key, field vdl.Target, _ error) {
+	switch name {
+	case "A":
+		val, err := &vdl.BoolTarget{Value: &t.Value.A}, error(nil)
+		return nil, val, err
+	case "B":
+		val, err := &vdl.StringTarget{Value: &t.Value.B}, error(nil)
+		return nil, val, err
+	case "C":
+		val, err := &vdl.Int64Target{Value: &t.Value.C}, error(nil)
+		return nil, val, err
+	default:
+		return nil, nil, fmt.Errorf("field %s not in struct %v", name, __VDLType_vomtype_v_io_v23_vom_testdata_types_NStruct)
+	}
+}
+func (t *NStructTarget) FinishField(_, _ vdl.Target) error {
+	return nil
+}
+func (t *NStructTarget) FinishFields(_ vdl.FieldsTarget) error {
 	return nil
 }
 
@@ -868,14 +1755,36 @@ func (NEnum) __VDLReflect(struct {
 }) {
 }
 
-func (m NEnum) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
-	if err := t.FromEnumLabel(m.String(), __VDLType_vomtype_v_io_v23_vom_testdata_types_NEnum); err != nil {
+func (m *NEnum) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
+	if err := t.FromEnumLabel((*m).String(), __VDLType_vomtype_v_io_v23_vom_testdata_types_NEnum); err != nil {
 		return err
 	}
 	return nil
 }
 
-func (m NEnum) MakeVDLTarget() vdl.Target {
+func (m *NEnum) MakeVDLTarget() vdl.Target {
+	return &NEnumTarget{Value: m}
+}
+
+type NEnumTarget struct {
+	Value *NEnum
+	vdl.TargetBase
+}
+
+func (t *NEnumTarget) FromEnumLabel(src string, tt *vdl.Type) error {
+	if !vdl.Compatible(tt, __VDLType_vomtype_v_io_v23_vom_testdata_types_NEnum) {
+		return fmt.Errorf("type %v incompatible with %v", tt, __VDLType_vomtype_v_io_v23_vom_testdata_types_NEnum)
+	}
+	switch src {
+	case "A":
+		*t.Value = 0
+	case "B":
+		*t.Value = 1
+	case "C":
+		*t.Value = 2
+	default:
+		return fmt.Errorf("label %s not in enum %v", src, __VDLType_vomtype_v_io_v23_vom_testdata_types_NEnum)
+	}
 	return nil
 }
 
@@ -916,7 +1825,6 @@ func (x NUnionA) Name() string                 { return "A" }
 func (x NUnionA) __VDLReflect(__NUnionReflect) {}
 
 func (m NUnionA) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
-
 	fieldsTarget1, err := t.StartFields(__VDLType_vomtype_v_io_v23_vom_testdata_types_NUnion)
 	if err != nil {
 		return err
@@ -948,7 +1856,6 @@ func (x NUnionB) Name() string                 { return "B" }
 func (x NUnionB) __VDLReflect(__NUnionReflect) {}
 
 func (m NUnionB) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
-
 	fieldsTarget1, err := t.StartFields(__VDLType_vomtype_v_io_v23_vom_testdata_types_NUnion)
 	if err != nil {
 		return err
@@ -980,7 +1887,6 @@ func (x NUnionC) Name() string                 { return "C" }
 func (x NUnionC) __VDLReflect(__NUnionReflect) {}
 
 func (m NUnionC) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
-
 	fieldsTarget1, err := t.StartFields(__VDLType_vomtype_v_io_v23_vom_testdata_types_NUnion)
 	if err != nil {
 		return err
@@ -1014,14 +1920,27 @@ func (MBool) __VDLReflect(struct {
 }) {
 }
 
-func (m MBool) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
-	if err := t.FromBool(bool(m), __VDLType_vomtype_v_io_v23_vom_testdata_types_MBool); err != nil {
+func (m *MBool) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
+	if err := t.FromBool(bool((*m)), __VDLType_vomtype_v_io_v23_vom_testdata_types_MBool); err != nil {
 		return err
 	}
 	return nil
 }
 
-func (m MBool) MakeVDLTarget() vdl.Target {
+func (m *MBool) MakeVDLTarget() vdl.Target {
+	return &MBoolTarget{Value: m}
+}
+
+type MBoolTarget struct {
+	Value *MBool
+	vdl.TargetBase
+}
+
+func (t *MBoolTarget) FromBool(src bool, tt *vdl.Type) error {
+	if !vdl.Compatible(tt, __VDLType_vomtype_v_io_v23_vom_testdata_types_MBool) {
+		return fmt.Errorf("type %v incompatible with %v", tt, __VDLType_vomtype_v_io_v23_vom_testdata_types_MBool)
+	}
+	*t.Value = MBool(src)
 	return nil
 }
 
@@ -1040,7 +1959,6 @@ func (MStruct) __VDLReflect(struct {
 }
 
 func (m *MStruct) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
-
 	if __VDLType_vomtype_v_io_v23_vom_testdata_types_MStruct == nil || __VDLTypevomtype9 == nil {
 		panic("Initialization order error: types generated for FillVDLTarget not initialized. Consider moving caller to an init() block.")
 	}
@@ -1148,6 +2066,73 @@ func (m *MStruct) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 }
 
 func (m *MStruct) MakeVDLTarget() vdl.Target {
+	return &MStructTarget{Value: m}
+}
+
+type MStructTarget struct {
+	Value *MStruct
+	vdl.TargetBase
+	vdl.FieldsTargetBase
+}
+
+func (t *MStructTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
+	if !vdl.Compatible(tt, __VDLType_vomtype_v_io_v23_vom_testdata_types_MStruct) {
+		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType_vomtype_v_io_v23_vom_testdata_types_MStruct)
+	}
+	return t, nil
+}
+func (t *MStructTarget) StartField(name string) (key, field vdl.Target, _ error) {
+	switch name {
+	case "A":
+		val, err := &vdl.BoolTarget{Value: &t.Value.A}, error(nil)
+		return nil, val, err
+	case "B":
+		val, err := &NBoolTarget{Value: &t.Value.B}, error(nil)
+		return nil, val, err
+	case "C":
+		val, err := &MBoolTarget{Value: &t.Value.C}, error(nil)
+		return nil, val, err
+	case "D":
+		val, err := &vomtype3f762e696f2f7632332f766f6d2f74657374646174612f74797065732e4e537472756374207374727563747b4120626f6f6c3b4220737472696e673b4320696e7436347dTarget{Value: &t.Value.D}, error(nil)
+		return nil, val, err
+	case "E":
+		val, err := &vdl.TypeObjectTarget{Value: &t.Value.E}, error(nil)
+		return nil, val, err
+	case "F":
+		val, err := vdl.ReflectTarget(reflect.ValueOf(&t.Value.F))
+		return nil, val, err
+	default:
+		return nil, nil, fmt.Errorf("field %s not in struct %v", name, __VDLType_vomtype_v_io_v23_vom_testdata_types_MStruct)
+	}
+}
+func (t *MStructTarget) FinishField(_, _ vdl.Target) error {
+	return nil
+}
+func (t *MStructTarget) FinishFields(_ vdl.FieldsTarget) error {
+	return nil
+}
+
+type vomtype3f762e696f2f7632332f766f6d2f74657374646174612f74797065732e4e537472756374207374727563747b4120626f6f6c3b4220737472696e673b4320696e7436347dTarget struct {
+	Value **NStruct
+	vdl.TargetBase
+	vdl.FieldsTargetBase
+}
+
+func (t *vomtype3f762e696f2f7632332f766f6d2f74657374646174612f74797065732e4e537472756374207374727563747b4120626f6f6c3b4220737472696e673b4320696e7436347dTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
+	if *t.Value == nil {
+		*t.Value = &NStruct{}
+	}
+	target, err := &NStructTarget{Value: *t.Value}, error(nil)
+	if err != nil {
+		return nil, err
+	}
+	return target.StartFields(tt)
+}
+func (t *vomtype3f762e696f2f7632332f766f6d2f74657374646174612f74797065732e4e537472756374207374727563747b4120626f6f6c3b4220737472696e673b4320696e7436347dTarget) FinishFields(_ vdl.FieldsTarget) error {
+	return nil
+}
+func (t *vomtype3f762e696f2f7632332f766f6d2f74657374646174612f74797065732e4e537472756374207374727563747b4120626f6f6c3b4220737472696e673b4320696e7436347dTarget) FromNil(tt *vdl.Type) error {
+	*t.Value = nil
 	return nil
 }
 
@@ -1158,13 +2143,12 @@ func (MList) __VDLReflect(struct {
 }) {
 }
 
-func (m MList) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
-
-	listTarget1, err := t.StartList(__VDLType_vomtype_v_io_v23_vom_testdata_types_MList, len(m))
+func (m *MList) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
+	listTarget1, err := t.StartList(__VDLType_vomtype_v_io_v23_vom_testdata_types_MList, len((*m)))
 	if err != nil {
 		return err
 	}
-	for i, elem3 := range m {
+	for i, elem3 := range *m {
 		elemTarget2, err := listTarget1.StartElem(i)
 		if err != nil {
 			return err
@@ -1183,7 +2167,34 @@ func (m MList) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 	return nil
 }
 
-func (m MList) MakeVDLTarget() vdl.Target {
+func (m *MList) MakeVDLTarget() vdl.Target {
+	return &MListTarget{Value: m}
+}
+
+type MListTarget struct {
+	Value *MList
+	vdl.TargetBase
+	vdl.ListTargetBase
+}
+
+func (t *MListTarget) StartList(tt *vdl.Type, len int) (vdl.ListTarget, error) {
+	if !vdl.Compatible(tt, __VDLType_vomtype_v_io_v23_vom_testdata_types_MList) {
+		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType_vomtype_v_io_v23_vom_testdata_types_MList)
+	}
+	if cap(*t.Value) < len {
+		*t.Value = make(MList, len)
+	} else {
+		*t.Value = (*t.Value)[:len]
+	}
+	return t, nil
+}
+func (t *MListTarget) StartElem(index int) (elem vdl.Target, _ error) {
+	return &NListUint64Target{Value: &(*t.Value)[index]}, error(nil)
+}
+func (t *MListTarget) FinishElem(elem vdl.Target) error {
+	return nil
+}
+func (t *MListTarget) FinishList(elem vdl.ListTarget) error {
 	return nil
 }
 
@@ -1194,13 +2205,12 @@ func (MMap) __VDLReflect(struct {
 }) {
 }
 
-func (m MMap) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
-
-	mapTarget1, err := t.StartMap(__VDLType_vomtype_v_io_v23_vom_testdata_types_MMap, len(m))
+func (m *MMap) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
+	mapTarget1, err := t.StartMap(__VDLType_vomtype_v_io_v23_vom_testdata_types_MMap, len((*m)))
 	if err != nil {
 		return err
 	}
-	for key3, value5 := range m {
+	for key3, value5 := range *m {
 		keyTarget2, err := mapTarget1.StartKey()
 		if err != nil {
 			return err
@@ -1227,7 +2237,41 @@ func (m MMap) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 	return nil
 }
 
-func (m MMap) MakeVDLTarget() vdl.Target {
+func (m *MMap) MakeVDLTarget() vdl.Target {
+	return &MMapTarget{Value: m}
+}
+
+type MMapTarget struct {
+	Value    *MMap
+	currKey  NFloat32
+	currElem NListUint64
+	vdl.TargetBase
+	vdl.MapTargetBase
+}
+
+func (t *MMapTarget) StartMap(tt *vdl.Type, len int) (vdl.MapTarget, error) {
+	if !vdl.Compatible(tt, __VDLType_vomtype_v_io_v23_vom_testdata_types_MMap) {
+		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType_vomtype_v_io_v23_vom_testdata_types_MMap)
+	}
+	*t.Value = make(MMap)
+	return t, nil
+}
+func (t *MMapTarget) StartKey() (key vdl.Target, _ error) {
+	t.currKey = NFloat32(0)
+	return &NFloat32Target{Value: &t.currKey}, error(nil)
+}
+func (t *MMapTarget) FinishKeyStartField(key vdl.Target) (field vdl.Target, _ error) {
+	t.currElem = NListUint64(nil)
+	return &NListUint64Target{Value: &t.currElem}, error(nil)
+}
+func (t *MMapTarget) FinishField(key, field vdl.Target) error {
+	(*t.Value)[t.currKey] = t.currElem
+	return nil
+}
+func (t *MMapTarget) FinishMap(elem vdl.MapTarget) error {
+	if len(*t.Value) == 0 {
+		*t.Value = nil
+	}
 	return nil
 }
 
@@ -1238,15 +2282,32 @@ func (MByteSlice) __VDLReflect(struct {
 }) {
 }
 
-func (m MByteSlice) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
-
-	if err := t.FromBytes([]byte(m), __VDLType_vomtype_v_io_v23_vom_testdata_types_MByteSlice); err != nil {
+func (m *MByteSlice) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
+	if err := t.FromBytes([]byte((*m)), __VDLType_vomtype_v_io_v23_vom_testdata_types_MByteSlice); err != nil {
 		return err
 	}
 	return nil
 }
 
-func (m MByteSlice) MakeVDLTarget() vdl.Target {
+func (m *MByteSlice) MakeVDLTarget() vdl.Target {
+	return &MByteSliceTarget{Value: m}
+}
+
+type MByteSliceTarget struct {
+	Value *MByteSlice
+	vdl.TargetBase
+}
+
+func (t *MByteSliceTarget) FromBytes(src []byte, tt *vdl.Type) error {
+	if !vdl.Compatible(tt, __VDLType_vomtype_v_io_v23_vom_testdata_types_MByteSlice) {
+		return fmt.Errorf("type %v incompatible with %v", tt, __VDLType_vomtype_v_io_v23_vom_testdata_types_MByteSlice)
+	}
+	if len(src) == 0 {
+		*t.Value = nil
+	} else {
+		*t.Value = make([]byte, len(src))
+		copy(*t.Value, src)
+	}
 	return nil
 }
 
@@ -1257,13 +2318,12 @@ func (MInt8Slice) __VDLReflect(struct {
 }) {
 }
 
-func (m MInt8Slice) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
-
-	listTarget1, err := t.StartList(__VDLType_vomtype_v_io_v23_vom_testdata_types_MInt8Slice, len(m))
+func (m *MInt8Slice) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
+	listTarget1, err := t.StartList(__VDLType_vomtype_v_io_v23_vom_testdata_types_MInt8Slice, len((*m)))
 	if err != nil {
 		return err
 	}
-	for i, elem3 := range m {
+	for i, elem3 := range *m {
 		elemTarget2, err := listTarget1.StartElem(i)
 		if err != nil {
 			return err
@@ -1281,7 +2341,34 @@ func (m MInt8Slice) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 	return nil
 }
 
-func (m MInt8Slice) MakeVDLTarget() vdl.Target {
+func (m *MInt8Slice) MakeVDLTarget() vdl.Target {
+	return &MInt8SliceTarget{Value: m}
+}
+
+type MInt8SliceTarget struct {
+	Value *MInt8Slice
+	vdl.TargetBase
+	vdl.ListTargetBase
+}
+
+func (t *MInt8SliceTarget) StartList(tt *vdl.Type, len int) (vdl.ListTarget, error) {
+	if !vdl.Compatible(tt, __VDLType_vomtype_v_io_v23_vom_testdata_types_MInt8Slice) {
+		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType_vomtype_v_io_v23_vom_testdata_types_MInt8Slice)
+	}
+	if cap(*t.Value) < len {
+		*t.Value = make(MInt8Slice, len)
+	} else {
+		*t.Value = (*t.Value)[:len]
+	}
+	return t, nil
+}
+func (t *MInt8SliceTarget) StartElem(index int) (elem vdl.Target, _ error) {
+	return &vdl.Int8Target{Value: &(*t.Value)[index]}, error(nil)
+}
+func (t *MInt8SliceTarget) FinishElem(elem vdl.Target) error {
+	return nil
+}
+func (t *MInt8SliceTarget) FinishList(elem vdl.ListTarget) error {
 	return nil
 }
 
@@ -1293,13 +2380,12 @@ func (RecA) __VDLReflect(struct {
 }) {
 }
 
-func (m RecA) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
-
-	listTarget1, err := t.StartList(__VDLType_vomtype_v_io_v23_vom_testdata_types_RecA, len(m))
+func (m *RecA) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
+	listTarget1, err := t.StartList(__VDLType_vomtype_v_io_v23_vom_testdata_types_RecA, len((*m)))
 	if err != nil {
 		return err
 	}
-	for i, elem3 := range m {
+	for i, elem3 := range *m {
 		elemTarget2, err := listTarget1.StartElem(i)
 		if err != nil {
 			return err
@@ -1318,7 +2404,34 @@ func (m RecA) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 	return nil
 }
 
-func (m RecA) MakeVDLTarget() vdl.Target {
+func (m *RecA) MakeVDLTarget() vdl.Target {
+	return &RecATarget{Value: m}
+}
+
+type RecATarget struct {
+	Value *RecA
+	vdl.TargetBase
+	vdl.ListTargetBase
+}
+
+func (t *RecATarget) StartList(tt *vdl.Type, len int) (vdl.ListTarget, error) {
+	if !vdl.Compatible(tt, __VDLType_vomtype_v_io_v23_vom_testdata_types_RecA) {
+		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType_vomtype_v_io_v23_vom_testdata_types_RecA)
+	}
+	if cap(*t.Value) < len {
+		*t.Value = make(RecA, len)
+	} else {
+		*t.Value = (*t.Value)[:len]
+	}
+	return t, nil
+}
+func (t *RecATarget) StartElem(index int) (elem vdl.Target, _ error) {
+	return &RecATarget{Value: &(*t.Value)[index]}, error(nil)
+}
+func (t *RecATarget) FinishElem(elem vdl.Target) error {
+	return nil
+}
+func (t *RecATarget) FinishList(elem vdl.ListTarget) error {
 	return nil
 }
 
@@ -1329,13 +2442,12 @@ func (RecX) __VDLReflect(struct {
 }) {
 }
 
-func (m RecX) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
-
-	listTarget1, err := t.StartList(__VDLType_vomtype_v_io_v23_vom_testdata_types_RecX, len(m))
+func (m *RecX) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
+	listTarget1, err := t.StartList(__VDLType_vomtype_v_io_v23_vom_testdata_types_RecX, len((*m)))
 	if err != nil {
 		return err
 	}
-	for i, elem3 := range m {
+	for i, elem3 := range *m {
 		elemTarget2, err := listTarget1.StartElem(i)
 		if err != nil {
 			return err
@@ -1354,7 +2466,61 @@ func (m RecX) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 	return nil
 }
 
-func (m RecX) MakeVDLTarget() vdl.Target {
+func (m *RecX) MakeVDLTarget() vdl.Target {
+	return &RecXTarget{Value: m}
+}
+
+type RecXTarget struct {
+	Value *RecX
+	vdl.TargetBase
+	vdl.ListTargetBase
+}
+
+func (t *RecXTarget) StartList(tt *vdl.Type, len int) (vdl.ListTarget, error) {
+	if !vdl.Compatible(tt, __VDLType_vomtype_v_io_v23_vom_testdata_types_RecX) {
+		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType_vomtype_v_io_v23_vom_testdata_types_RecX)
+	}
+	if cap(*t.Value) < len {
+		*t.Value = make(RecX, len)
+	} else {
+		*t.Value = (*t.Value)[:len]
+	}
+	return t, nil
+}
+func (t *RecXTarget) StartElem(index int) (elem vdl.Target, _ error) {
+	return &RecYTarget{Value: &(*t.Value)[index]}, error(nil)
+}
+func (t *RecXTarget) FinishElem(elem vdl.Target) error {
+	return nil
+}
+func (t *RecXTarget) FinishList(elem vdl.ListTarget) error {
+	return nil
+}
+
+type RecYTarget struct {
+	Value *RecY
+	vdl.TargetBase
+	vdl.ListTargetBase
+}
+
+func (t *RecYTarget) StartList(tt *vdl.Type, len int) (vdl.ListTarget, error) {
+	if !vdl.Compatible(tt, __VDLType_vomtype_v_io_v23_vom_testdata_types_RecY) {
+		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType_vomtype_v_io_v23_vom_testdata_types_RecY)
+	}
+	if cap(*t.Value) < len {
+		*t.Value = make(RecY, len)
+	} else {
+		*t.Value = (*t.Value)[:len]
+	}
+	return t, nil
+}
+func (t *RecYTarget) StartElem(index int) (elem vdl.Target, _ error) {
+	return &RecXTarget{Value: &(*t.Value)[index]}, error(nil)
+}
+func (t *RecYTarget) FinishElem(elem vdl.Target) error {
+	return nil
+}
+func (t *RecYTarget) FinishList(elem vdl.ListTarget) error {
 	return nil
 }
 
@@ -1365,13 +2531,12 @@ func (RecY) __VDLReflect(struct {
 }) {
 }
 
-func (m RecY) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
-
-	listTarget1, err := t.StartList(__VDLType_vomtype_v_io_v23_vom_testdata_types_RecY, len(m))
+func (m *RecY) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
+	listTarget1, err := t.StartList(__VDLType_vomtype_v_io_v23_vom_testdata_types_RecY, len((*m)))
 	if err != nil {
 		return err
 	}
-	for i, elem3 := range m {
+	for i, elem3 := range *m {
 		elemTarget2, err := listTarget1.StartElem(i)
 		if err != nil {
 			return err
@@ -1390,8 +2555,8 @@ func (m RecY) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 	return nil
 }
 
-func (m RecY) MakeVDLTarget() vdl.Target {
-	return nil
+func (m *RecY) MakeVDLTarget() vdl.Target {
+	return &RecYTarget{Value: m}
 }
 
 type Rec1 []Rec2
@@ -1401,13 +2566,12 @@ func (Rec1) __VDLReflect(struct {
 }) {
 }
 
-func (m Rec1) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
-
-	listTarget1, err := t.StartList(__VDLType_vomtype_v_io_v23_vom_testdata_types_Rec1, len(m))
+func (m *Rec1) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
+	listTarget1, err := t.StartList(__VDLType_vomtype_v_io_v23_vom_testdata_types_Rec1, len((*m)))
 	if err != nil {
 		return err
 	}
-	for i, elem3 := range m {
+	for i, elem3 := range *m {
 		elemTarget2, err := listTarget1.StartElem(i)
 		if err != nil {
 			return err
@@ -1426,7 +2590,115 @@ func (m Rec1) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 	return nil
 }
 
-func (m Rec1) MakeVDLTarget() vdl.Target {
+func (m *Rec1) MakeVDLTarget() vdl.Target {
+	return &Rec1Target{Value: m}
+}
+
+type Rec1Target struct {
+	Value *Rec1
+	vdl.TargetBase
+	vdl.ListTargetBase
+}
+
+func (t *Rec1Target) StartList(tt *vdl.Type, len int) (vdl.ListTarget, error) {
+	if !vdl.Compatible(tt, __VDLType_vomtype_v_io_v23_vom_testdata_types_Rec1) {
+		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType_vomtype_v_io_v23_vom_testdata_types_Rec1)
+	}
+	if cap(*t.Value) < len {
+		*t.Value = make(Rec1, len)
+	} else {
+		*t.Value = (*t.Value)[:len]
+	}
+	return t, nil
+}
+func (t *Rec1Target) StartElem(index int) (elem vdl.Target, _ error) {
+	return &Rec2Target{Value: &(*t.Value)[index]}, error(nil)
+}
+func (t *Rec1Target) FinishElem(elem vdl.Target) error {
+	return nil
+}
+func (t *Rec1Target) FinishList(elem vdl.ListTarget) error {
+	return nil
+}
+
+type Rec2Target struct {
+	Value *Rec2
+	vdl.TargetBase
+	vdl.ListTargetBase
+}
+
+func (t *Rec2Target) StartList(tt *vdl.Type, len int) (vdl.ListTarget, error) {
+	if !vdl.Compatible(tt, __VDLType_vomtype_v_io_v23_vom_testdata_types_Rec2) {
+		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType_vomtype_v_io_v23_vom_testdata_types_Rec2)
+	}
+	if cap(*t.Value) < len {
+		*t.Value = make(Rec2, len)
+	} else {
+		*t.Value = (*t.Value)[:len]
+	}
+	return t, nil
+}
+func (t *Rec2Target) StartElem(index int) (elem vdl.Target, _ error) {
+	return &Rec3Target{Value: &(*t.Value)[index]}, error(nil)
+}
+func (t *Rec2Target) FinishElem(elem vdl.Target) error {
+	return nil
+}
+func (t *Rec2Target) FinishList(elem vdl.ListTarget) error {
+	return nil
+}
+
+type Rec3Target struct {
+	Value *Rec3
+	vdl.TargetBase
+	vdl.ListTargetBase
+}
+
+func (t *Rec3Target) StartList(tt *vdl.Type, len int) (vdl.ListTarget, error) {
+	if !vdl.Compatible(tt, __VDLType_vomtype_v_io_v23_vom_testdata_types_Rec3) {
+		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType_vomtype_v_io_v23_vom_testdata_types_Rec3)
+	}
+	if cap(*t.Value) < len {
+		*t.Value = make(Rec3, len)
+	} else {
+		*t.Value = (*t.Value)[:len]
+	}
+	return t, nil
+}
+func (t *Rec3Target) StartElem(index int) (elem vdl.Target, _ error) {
+	return &Rec4Target{Value: &(*t.Value)[index]}, error(nil)
+}
+func (t *Rec3Target) FinishElem(elem vdl.Target) error {
+	return nil
+}
+func (t *Rec3Target) FinishList(elem vdl.ListTarget) error {
+	return nil
+}
+
+type Rec4Target struct {
+	Value *Rec4
+	vdl.TargetBase
+	vdl.ListTargetBase
+}
+
+func (t *Rec4Target) StartList(tt *vdl.Type, len int) (vdl.ListTarget, error) {
+	if !vdl.Compatible(tt, __VDLType_vomtype_v_io_v23_vom_testdata_types_Rec4) {
+		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType_vomtype_v_io_v23_vom_testdata_types_Rec4)
+	}
+	if cap(*t.Value) < len {
+		*t.Value = make(Rec4, len)
+	} else {
+		*t.Value = (*t.Value)[:len]
+	}
+	return t, nil
+}
+func (t *Rec4Target) StartElem(index int) (elem vdl.Target, _ error) {
+	return &Rec1Target{Value: &(*t.Value)[index]}, error(nil)
+}
+func (t *Rec4Target) FinishElem(elem vdl.Target) error {
+	return nil
+}
+func (t *Rec4Target) FinishList(elem vdl.ListTarget) error {
 	return nil
 }
 
@@ -1437,13 +2709,12 @@ func (Rec2) __VDLReflect(struct {
 }) {
 }
 
-func (m Rec2) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
-
-	listTarget1, err := t.StartList(__VDLType_vomtype_v_io_v23_vom_testdata_types_Rec2, len(m))
+func (m *Rec2) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
+	listTarget1, err := t.StartList(__VDLType_vomtype_v_io_v23_vom_testdata_types_Rec2, len((*m)))
 	if err != nil {
 		return err
 	}
-	for i, elem3 := range m {
+	for i, elem3 := range *m {
 		elemTarget2, err := listTarget1.StartElem(i)
 		if err != nil {
 			return err
@@ -1462,8 +2733,8 @@ func (m Rec2) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 	return nil
 }
 
-func (m Rec2) MakeVDLTarget() vdl.Target {
-	return nil
+func (m *Rec2) MakeVDLTarget() vdl.Target {
+	return &Rec2Target{Value: m}
 }
 
 type Rec3 []Rec4
@@ -1473,13 +2744,12 @@ func (Rec3) __VDLReflect(struct {
 }) {
 }
 
-func (m Rec3) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
-
-	listTarget1, err := t.StartList(__VDLType_vomtype_v_io_v23_vom_testdata_types_Rec3, len(m))
+func (m *Rec3) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
+	listTarget1, err := t.StartList(__VDLType_vomtype_v_io_v23_vom_testdata_types_Rec3, len((*m)))
 	if err != nil {
 		return err
 	}
-	for i, elem3 := range m {
+	for i, elem3 := range *m {
 		elemTarget2, err := listTarget1.StartElem(i)
 		if err != nil {
 			return err
@@ -1498,8 +2768,8 @@ func (m Rec3) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 	return nil
 }
 
-func (m Rec3) MakeVDLTarget() vdl.Target {
-	return nil
+func (m *Rec3) MakeVDLTarget() vdl.Target {
+	return &Rec3Target{Value: m}
 }
 
 type Rec4 []Rec1
@@ -1509,13 +2779,12 @@ func (Rec4) __VDLReflect(struct {
 }) {
 }
 
-func (m Rec4) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
-
-	listTarget1, err := t.StartList(__VDLType_vomtype_v_io_v23_vom_testdata_types_Rec4, len(m))
+func (m *Rec4) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
+	listTarget1, err := t.StartList(__VDLType_vomtype_v_io_v23_vom_testdata_types_Rec4, len((*m)))
 	if err != nil {
 		return err
 	}
-	for i, elem3 := range m {
+	for i, elem3 := range *m {
 		elemTarget2, err := listTarget1.StartElem(i)
 		if err != nil {
 			return err
@@ -1534,8 +2803,8 @@ func (m Rec4) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 	return nil
 }
 
-func (m Rec4) MakeVDLTarget() vdl.Target {
-	return nil
+func (m *Rec4) MakeVDLTarget() vdl.Target {
+	return &Rec4Target{Value: m}
 }
 
 type RecStruct struct {
@@ -1548,7 +2817,6 @@ func (RecStruct) __VDLReflect(struct {
 }
 
 func (m *RecStruct) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
-
 	if __VDLType_vomtype_v_io_v23_vom_testdata_types_RecStruct == nil || __VDLTypevomtype10 == nil {
 		panic("Initialization order error: types generated for FillVDLTarget not initialized. Consider moving caller to an init() block.")
 	}
@@ -1583,6 +2851,58 @@ func (m *RecStruct) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 }
 
 func (m *RecStruct) MakeVDLTarget() vdl.Target {
+	return &RecStructTarget{Value: m}
+}
+
+type RecStructTarget struct {
+	Value *RecStruct
+	vdl.TargetBase
+	vdl.FieldsTargetBase
+}
+
+func (t *RecStructTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
+	if !vdl.Compatible(tt, __VDLType_vomtype_v_io_v23_vom_testdata_types_RecStruct) {
+		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType_vomtype_v_io_v23_vom_testdata_types_RecStruct)
+	}
+	return t, nil
+}
+func (t *RecStructTarget) StartField(name string) (key, field vdl.Target, _ error) {
+	switch name {
+	case "A":
+		val, err := &vomtype3f762e696f2f7632332f766f6d2f74657374646174612f74797065732e526563537472756374207374727563747b41203f762e696f2f7632332f766f6d2f74657374646174612f74797065732e5265635374727563747dTarget{Value: &t.Value.A}, error(nil)
+		return nil, val, err
+	default:
+		return nil, nil, fmt.Errorf("field %s not in struct %v", name, __VDLType_vomtype_v_io_v23_vom_testdata_types_RecStruct)
+	}
+}
+func (t *RecStructTarget) FinishField(_, _ vdl.Target) error {
+	return nil
+}
+func (t *RecStructTarget) FinishFields(_ vdl.FieldsTarget) error {
+	return nil
+}
+
+type vomtype3f762e696f2f7632332f766f6d2f74657374646174612f74797065732e526563537472756374207374727563747b41203f762e696f2f7632332f766f6d2f74657374646174612f74797065732e5265635374727563747dTarget struct {
+	Value **RecStruct
+	vdl.TargetBase
+	vdl.FieldsTargetBase
+}
+
+func (t *vomtype3f762e696f2f7632332f766f6d2f74657374646174612f74797065732e526563537472756374207374727563747b41203f762e696f2f7632332f766f6d2f74657374646174612f74797065732e5265635374727563747dTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
+	if *t.Value == nil {
+		*t.Value = &RecStruct{}
+	}
+	target, err := &RecStructTarget{Value: *t.Value}, error(nil)
+	if err != nil {
+		return nil, err
+	}
+	return target.StartFields(tt)
+}
+func (t *vomtype3f762e696f2f7632332f766f6d2f74657374646174612f74797065732e526563537472756374207374727563747b41203f762e696f2f7632332f766f6d2f74657374646174612f74797065732e5265635374727563747dTarget) FinishFields(_ vdl.FieldsTarget) error {
+	return nil
+}
+func (t *vomtype3f762e696f2f7632332f766f6d2f74657374646174612f74797065732e526563537472756374207374727563747b41203f762e696f2f7632332f766f6d2f74657374646174612f74797065732e5265635374727563747dTarget) FromNil(tt *vdl.Type) error {
+	*t.Value = nil
 	return nil
 }
 
@@ -1599,7 +2919,6 @@ func (Rec1234) __VDLReflect(struct {
 }
 
 func (m *Rec1234) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
-
 	if __VDLType_vomtype_v_io_v23_vom_testdata_types_Rec1234 == nil || __VDLTypevomtype11 == nil {
 		panic("Initialization order error: types generated for FillVDLTarget not initialized. Consider moving caller to an init() block.")
 	}
@@ -1667,6 +2986,43 @@ func (m *Rec1234) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 }
 
 func (m *Rec1234) MakeVDLTarget() vdl.Target {
+	return &Rec1234Target{Value: m}
+}
+
+type Rec1234Target struct {
+	Value *Rec1234
+	vdl.TargetBase
+	vdl.FieldsTargetBase
+}
+
+func (t *Rec1234Target) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
+	if !vdl.Compatible(tt, __VDLType_vomtype_v_io_v23_vom_testdata_types_Rec1234) {
+		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType_vomtype_v_io_v23_vom_testdata_types_Rec1234)
+	}
+	return t, nil
+}
+func (t *Rec1234Target) StartField(name string) (key, field vdl.Target, _ error) {
+	switch name {
+	case "R1":
+		val, err := &Rec1Target{Value: &t.Value.R1}, error(nil)
+		return nil, val, err
+	case "R2":
+		val, err := &Rec2Target{Value: &t.Value.R2}, error(nil)
+		return nil, val, err
+	case "R3":
+		val, err := &Rec3Target{Value: &t.Value.R3}, error(nil)
+		return nil, val, err
+	case "R4":
+		val, err := &Rec4Target{Value: &t.Value.R4}, error(nil)
+		return nil, val, err
+	default:
+		return nil, nil, fmt.Errorf("field %s not in struct %v", name, __VDLType_vomtype_v_io_v23_vom_testdata_types_Rec1234)
+	}
+}
+func (t *Rec1234Target) FinishField(_, _ vdl.Target) error {
+	return nil
+}
+func (t *Rec1234Target) FinishFields(_ vdl.FieldsTarget) error {
 	return nil
 }
 
@@ -1681,7 +3037,6 @@ func (Rec1234A) __VDLReflect(struct {
 }
 
 func (m *Rec1234A) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
-
 	if __VDLType_vomtype_v_io_v23_vom_testdata_types_Rec1234A == nil || __VDLTypevomtype12 == nil {
 		panic("Initialization order error: types generated for FillVDLTarget not initialized. Consider moving caller to an init() block.")
 	}
@@ -1757,6 +3112,91 @@ func (m *Rec1234A) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 }
 
 func (m *Rec1234A) MakeVDLTarget() vdl.Target {
+	return &Rec1234ATarget{Value: m}
+}
+
+type Rec1234ATarget struct {
+	Value *Rec1234A
+	vdl.TargetBase
+	vdl.FieldsTargetBase
+}
+
+func (t *Rec1234ATarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
+	if !vdl.Compatible(tt, __VDLType_vomtype_v_io_v23_vom_testdata_types_Rec1234A) {
+		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType_vomtype_v_io_v23_vom_testdata_types_Rec1234A)
+	}
+	return t, nil
+}
+func (t *Rec1234ATarget) StartField(name string) (key, field vdl.Target, _ error) {
+	switch name {
+	case "A":
+		val, err := &vomtype5b5d762e696f2f7632332f766f6d2f74657374646174612f74797065732e5265633132333441207374727563747b41205b5d762e696f2f7632332f766f6d2f74657374646174612f74797065732e52656331323334413b52656331323334205b5d762e696f2f7632332f766f6d2f74657374646174612f74797065732e52656331323334207374727563747b523120762e696f2f7632332f766f6d2f74657374646174612f74797065732e52656331205b5d762e696f2f7632332f766f6d2f74657374646174612f74797065732e52656332205b5d762e696f2f7632332f766f6d2f74657374646174612f74797065732e52656333205b5d762e696f2f7632332f766f6d2f74657374646174612f74797065732e52656334205b5d762e696f2f7632332f766f6d2f74657374646174612f74797065732e526563313b523220762e696f2f7632332f766f6d2f74657374646174612f74797065732e526563323b523320762e696f2f7632332f766f6d2f74657374646174612f74797065732e526563333b523420762e696f2f7632332f766f6d2f74657374646174612f74797065732e526563347d7dTarget{Value: &t.Value.A}, error(nil)
+		return nil, val, err
+	case "Rec1234":
+		val, err := &vomtype5b5d762e696f2f7632332f766f6d2f74657374646174612f74797065732e52656331323334207374727563747b523120762e696f2f7632332f766f6d2f74657374646174612f74797065732e52656331205b5d762e696f2f7632332f766f6d2f74657374646174612f74797065732e52656332205b5d762e696f2f7632332f766f6d2f74657374646174612f74797065732e52656333205b5d762e696f2f7632332f766f6d2f74657374646174612f74797065732e52656334205b5d762e696f2f7632332f766f6d2f74657374646174612f74797065732e526563313b523220762e696f2f7632332f766f6d2f74657374646174612f74797065732e526563323b523320762e696f2f7632332f766f6d2f74657374646174612f74797065732e526563333b523420762e696f2f7632332f766f6d2f74657374646174612f74797065732e526563347dTarget{Value: &t.Value.Rec1234}, error(nil)
+		return nil, val, err
+	default:
+		return nil, nil, fmt.Errorf("field %s not in struct %v", name, __VDLType_vomtype_v_io_v23_vom_testdata_types_Rec1234A)
+	}
+}
+func (t *Rec1234ATarget) FinishField(_, _ vdl.Target) error {
+	return nil
+}
+func (t *Rec1234ATarget) FinishFields(_ vdl.FieldsTarget) error {
+	return nil
+}
+
+type vomtype5b5d762e696f2f7632332f766f6d2f74657374646174612f74797065732e5265633132333441207374727563747b41205b5d762e696f2f7632332f766f6d2f74657374646174612f74797065732e52656331323334413b52656331323334205b5d762e696f2f7632332f766f6d2f74657374646174612f74797065732e52656331323334207374727563747b523120762e696f2f7632332f766f6d2f74657374646174612f74797065732e52656331205b5d762e696f2f7632332f766f6d2f74657374646174612f74797065732e52656332205b5d762e696f2f7632332f766f6d2f74657374646174612f74797065732e52656333205b5d762e696f2f7632332f766f6d2f74657374646174612f74797065732e52656334205b5d762e696f2f7632332f766f6d2f74657374646174612f74797065732e526563313b523220762e696f2f7632332f766f6d2f74657374646174612f74797065732e526563323b523320762e696f2f7632332f766f6d2f74657374646174612f74797065732e526563333b523420762e696f2f7632332f766f6d2f74657374646174612f74797065732e526563347d7dTarget struct {
+	Value *[]Rec1234A
+	vdl.TargetBase
+	vdl.ListTargetBase
+}
+
+func (t *vomtype5b5d762e696f2f7632332f766f6d2f74657374646174612f74797065732e5265633132333441207374727563747b41205b5d762e696f2f7632332f766f6d2f74657374646174612f74797065732e52656331323334413b52656331323334205b5d762e696f2f7632332f766f6d2f74657374646174612f74797065732e52656331323334207374727563747b523120762e696f2f7632332f766f6d2f74657374646174612f74797065732e52656331205b5d762e696f2f7632332f766f6d2f74657374646174612f74797065732e52656332205b5d762e696f2f7632332f766f6d2f74657374646174612f74797065732e52656333205b5d762e696f2f7632332f766f6d2f74657374646174612f74797065732e52656334205b5d762e696f2f7632332f766f6d2f74657374646174612f74797065732e526563313b523220762e696f2f7632332f766f6d2f74657374646174612f74797065732e526563323b523320762e696f2f7632332f766f6d2f74657374646174612f74797065732e526563333b523420762e696f2f7632332f766f6d2f74657374646174612f74797065732e526563347d7dTarget) StartList(tt *vdl.Type, len int) (vdl.ListTarget, error) {
+	if !vdl.Compatible(tt, __VDLTypevomtype13) {
+		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLTypevomtype13)
+	}
+	if cap(*t.Value) < len {
+		*t.Value = make([]Rec1234A, len)
+	} else {
+		*t.Value = (*t.Value)[:len]
+	}
+	return t, nil
+}
+func (t *vomtype5b5d762e696f2f7632332f766f6d2f74657374646174612f74797065732e5265633132333441207374727563747b41205b5d762e696f2f7632332f766f6d2f74657374646174612f74797065732e52656331323334413b52656331323334205b5d762e696f2f7632332f766f6d2f74657374646174612f74797065732e52656331323334207374727563747b523120762e696f2f7632332f766f6d2f74657374646174612f74797065732e52656331205b5d762e696f2f7632332f766f6d2f74657374646174612f74797065732e52656332205b5d762e696f2f7632332f766f6d2f74657374646174612f74797065732e52656333205b5d762e696f2f7632332f766f6d2f74657374646174612f74797065732e52656334205b5d762e696f2f7632332f766f6d2f74657374646174612f74797065732e526563313b523220762e696f2f7632332f766f6d2f74657374646174612f74797065732e526563323b523320762e696f2f7632332f766f6d2f74657374646174612f74797065732e526563333b523420762e696f2f7632332f766f6d2f74657374646174612f74797065732e526563347d7dTarget) StartElem(index int) (elem vdl.Target, _ error) {
+	return &Rec1234ATarget{Value: &(*t.Value)[index]}, error(nil)
+}
+func (t *vomtype5b5d762e696f2f7632332f766f6d2f74657374646174612f74797065732e5265633132333441207374727563747b41205b5d762e696f2f7632332f766f6d2f74657374646174612f74797065732e52656331323334413b52656331323334205b5d762e696f2f7632332f766f6d2f74657374646174612f74797065732e52656331323334207374727563747b523120762e696f2f7632332f766f6d2f74657374646174612f74797065732e52656331205b5d762e696f2f7632332f766f6d2f74657374646174612f74797065732e52656332205b5d762e696f2f7632332f766f6d2f74657374646174612f74797065732e52656333205b5d762e696f2f7632332f766f6d2f74657374646174612f74797065732e52656334205b5d762e696f2f7632332f766f6d2f74657374646174612f74797065732e526563313b523220762e696f2f7632332f766f6d2f74657374646174612f74797065732e526563323b523320762e696f2f7632332f766f6d2f74657374646174612f74797065732e526563333b523420762e696f2f7632332f766f6d2f74657374646174612f74797065732e526563347d7dTarget) FinishElem(elem vdl.Target) error {
+	return nil
+}
+func (t *vomtype5b5d762e696f2f7632332f766f6d2f74657374646174612f74797065732e5265633132333441207374727563747b41205b5d762e696f2f7632332f766f6d2f74657374646174612f74797065732e52656331323334413b52656331323334205b5d762e696f2f7632332f766f6d2f74657374646174612f74797065732e52656331323334207374727563747b523120762e696f2f7632332f766f6d2f74657374646174612f74797065732e52656331205b5d762e696f2f7632332f766f6d2f74657374646174612f74797065732e52656332205b5d762e696f2f7632332f766f6d2f74657374646174612f74797065732e52656333205b5d762e696f2f7632332f766f6d2f74657374646174612f74797065732e52656334205b5d762e696f2f7632332f766f6d2f74657374646174612f74797065732e526563313b523220762e696f2f7632332f766f6d2f74657374646174612f74797065732e526563323b523320762e696f2f7632332f766f6d2f74657374646174612f74797065732e526563333b523420762e696f2f7632332f766f6d2f74657374646174612f74797065732e526563347d7dTarget) FinishList(elem vdl.ListTarget) error {
+	return nil
+}
+
+type vomtype5b5d762e696f2f7632332f766f6d2f74657374646174612f74797065732e52656331323334207374727563747b523120762e696f2f7632332f766f6d2f74657374646174612f74797065732e52656331205b5d762e696f2f7632332f766f6d2f74657374646174612f74797065732e52656332205b5d762e696f2f7632332f766f6d2f74657374646174612f74797065732e52656333205b5d762e696f2f7632332f766f6d2f74657374646174612f74797065732e52656334205b5d762e696f2f7632332f766f6d2f74657374646174612f74797065732e526563313b523220762e696f2f7632332f766f6d2f74657374646174612f74797065732e526563323b523320762e696f2f7632332f766f6d2f74657374646174612f74797065732e526563333b523420762e696f2f7632332f766f6d2f74657374646174612f74797065732e526563347dTarget struct {
+	Value *[]Rec1234
+	vdl.TargetBase
+	vdl.ListTargetBase
+}
+
+func (t *vomtype5b5d762e696f2f7632332f766f6d2f74657374646174612f74797065732e52656331323334207374727563747b523120762e696f2f7632332f766f6d2f74657374646174612f74797065732e52656331205b5d762e696f2f7632332f766f6d2f74657374646174612f74797065732e52656332205b5d762e696f2f7632332f766f6d2f74657374646174612f74797065732e52656333205b5d762e696f2f7632332f766f6d2f74657374646174612f74797065732e52656334205b5d762e696f2f7632332f766f6d2f74657374646174612f74797065732e526563313b523220762e696f2f7632332f766f6d2f74657374646174612f74797065732e526563323b523320762e696f2f7632332f766f6d2f74657374646174612f74797065732e526563333b523420762e696f2f7632332f766f6d2f74657374646174612f74797065732e526563347dTarget) StartList(tt *vdl.Type, len int) (vdl.ListTarget, error) {
+	if !vdl.Compatible(tt, __VDLTypevomtype14) {
+		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLTypevomtype14)
+	}
+	if cap(*t.Value) < len {
+		*t.Value = make([]Rec1234, len)
+	} else {
+		*t.Value = (*t.Value)[:len]
+	}
+	return t, nil
+}
+func (t *vomtype5b5d762e696f2f7632332f766f6d2f74657374646174612f74797065732e52656331323334207374727563747b523120762e696f2f7632332f766f6d2f74657374646174612f74797065732e52656331205b5d762e696f2f7632332f766f6d2f74657374646174612f74797065732e52656332205b5d762e696f2f7632332f766f6d2f74657374646174612f74797065732e52656333205b5d762e696f2f7632332f766f6d2f74657374646174612f74797065732e52656334205b5d762e696f2f7632332f766f6d2f74657374646174612f74797065732e526563313b523220762e696f2f7632332f766f6d2f74657374646174612f74797065732e526563323b523320762e696f2f7632332f766f6d2f74657374646174612f74797065732e526563333b523420762e696f2f7632332f766f6d2f74657374646174612f74797065732e526563347dTarget) StartElem(index int) (elem vdl.Target, _ error) {
+	return &Rec1234Target{Value: &(*t.Value)[index]}, error(nil)
+}
+func (t *vomtype5b5d762e696f2f7632332f766f6d2f74657374646174612f74797065732e52656331323334207374727563747b523120762e696f2f7632332f766f6d2f74657374646174612f74797065732e52656331205b5d762e696f2f7632332f766f6d2f74657374646174612f74797065732e52656332205b5d762e696f2f7632332f766f6d2f74657374646174612f74797065732e52656333205b5d762e696f2f7632332f766f6d2f74657374646174612f74797065732e52656334205b5d762e696f2f7632332f766f6d2f74657374646174612f74797065732e526563313b523220762e696f2f7632332f766f6d2f74657374646174612f74797065732e526563323b523320762e696f2f7632332f766f6d2f74657374646174612f74797065732e526563333b523420762e696f2f7632332f766f6d2f74657374646174612f74797065732e526563347dTarget) FinishElem(elem vdl.Target) error {
+	return nil
+}
+func (t *vomtype5b5d762e696f2f7632332f766f6d2f74657374646174612f74797065732e52656331323334207374727563747b523120762e696f2f7632332f766f6d2f74657374646174612f74797065732e52656331205b5d762e696f2f7632332f766f6d2f74657374646174612f74797065732e52656332205b5d762e696f2f7632332f766f6d2f74657374646174612f74797065732e52656333205b5d762e696f2f7632332f766f6d2f74657374646174612f74797065732e52656334205b5d762e696f2f7632332f766f6d2f74657374646174612f74797065732e526563313b523220762e696f2f7632332f766f6d2f74657374646174612f74797065732e526563323b523320762e696f2f7632332f766f6d2f74657374646174612f74797065732e526563333b523420762e696f2f7632332f766f6d2f74657374646174612f74797065732e526563347dTarget) FinishList(elem vdl.ListTarget) error {
 	return nil
 }
 
@@ -1771,7 +3211,6 @@ func (Rec1234B) __VDLReflect(struct {
 }
 
 func (m *Rec1234B) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
-
 	if __VDLType_vomtype_v_io_v23_vom_testdata_types_Rec1234B == nil || __VDLTypevomtype15 == nil {
 		panic("Initialization order error: types generated for FillVDLTarget not initialized. Consider moving caller to an init() block.")
 	}
@@ -1847,6 +3286,64 @@ func (m *Rec1234B) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 }
 
 func (m *Rec1234B) MakeVDLTarget() vdl.Target {
+	return &Rec1234BTarget{Value: m}
+}
+
+type Rec1234BTarget struct {
+	Value *Rec1234B
+	vdl.TargetBase
+	vdl.FieldsTargetBase
+}
+
+func (t *Rec1234BTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
+	if !vdl.Compatible(tt, __VDLType_vomtype_v_io_v23_vom_testdata_types_Rec1234B) {
+		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType_vomtype_v_io_v23_vom_testdata_types_Rec1234B)
+	}
+	return t, nil
+}
+func (t *Rec1234BTarget) StartField(name string) (key, field vdl.Target, _ error) {
+	switch name {
+	case "B":
+		val, err := &vomtype5b5d762e696f2f7632332f766f6d2f74657374646174612f74797065732e5265633132333442207374727563747b42205b5d762e696f2f7632332f766f6d2f74657374646174612f74797065732e52656331323334423b52656331323334205b5d762e696f2f7632332f766f6d2f74657374646174612f74797065732e52656331323334207374727563747b523120762e696f2f7632332f766f6d2f74657374646174612f74797065732e52656331205b5d762e696f2f7632332f766f6d2f74657374646174612f74797065732e52656332205b5d762e696f2f7632332f766f6d2f74657374646174612f74797065732e52656333205b5d762e696f2f7632332f766f6d2f74657374646174612f74797065732e52656334205b5d762e696f2f7632332f766f6d2f74657374646174612f74797065732e526563313b523220762e696f2f7632332f766f6d2f74657374646174612f74797065732e526563323b523320762e696f2f7632332f766f6d2f74657374646174612f74797065732e526563333b523420762e696f2f7632332f766f6d2f74657374646174612f74797065732e526563347d7dTarget{Value: &t.Value.B}, error(nil)
+		return nil, val, err
+	case "Rec1234":
+		val, err := &vomtype5b5d762e696f2f7632332f766f6d2f74657374646174612f74797065732e52656331323334207374727563747b523120762e696f2f7632332f766f6d2f74657374646174612f74797065732e52656331205b5d762e696f2f7632332f766f6d2f74657374646174612f74797065732e52656332205b5d762e696f2f7632332f766f6d2f74657374646174612f74797065732e52656333205b5d762e696f2f7632332f766f6d2f74657374646174612f74797065732e52656334205b5d762e696f2f7632332f766f6d2f74657374646174612f74797065732e526563313b523220762e696f2f7632332f766f6d2f74657374646174612f74797065732e526563323b523320762e696f2f7632332f766f6d2f74657374646174612f74797065732e526563333b523420762e696f2f7632332f766f6d2f74657374646174612f74797065732e526563347dTarget{Value: &t.Value.Rec1234}, error(nil)
+		return nil, val, err
+	default:
+		return nil, nil, fmt.Errorf("field %s not in struct %v", name, __VDLType_vomtype_v_io_v23_vom_testdata_types_Rec1234B)
+	}
+}
+func (t *Rec1234BTarget) FinishField(_, _ vdl.Target) error {
+	return nil
+}
+func (t *Rec1234BTarget) FinishFields(_ vdl.FieldsTarget) error {
+	return nil
+}
+
+type vomtype5b5d762e696f2f7632332f766f6d2f74657374646174612f74797065732e5265633132333442207374727563747b42205b5d762e696f2f7632332f766f6d2f74657374646174612f74797065732e52656331323334423b52656331323334205b5d762e696f2f7632332f766f6d2f74657374646174612f74797065732e52656331323334207374727563747b523120762e696f2f7632332f766f6d2f74657374646174612f74797065732e52656331205b5d762e696f2f7632332f766f6d2f74657374646174612f74797065732e52656332205b5d762e696f2f7632332f766f6d2f74657374646174612f74797065732e52656333205b5d762e696f2f7632332f766f6d2f74657374646174612f74797065732e52656334205b5d762e696f2f7632332f766f6d2f74657374646174612f74797065732e526563313b523220762e696f2f7632332f766f6d2f74657374646174612f74797065732e526563323b523320762e696f2f7632332f766f6d2f74657374646174612f74797065732e526563333b523420762e696f2f7632332f766f6d2f74657374646174612f74797065732e526563347d7dTarget struct {
+	Value *[]Rec1234B
+	vdl.TargetBase
+	vdl.ListTargetBase
+}
+
+func (t *vomtype5b5d762e696f2f7632332f766f6d2f74657374646174612f74797065732e5265633132333442207374727563747b42205b5d762e696f2f7632332f766f6d2f74657374646174612f74797065732e52656331323334423b52656331323334205b5d762e696f2f7632332f766f6d2f74657374646174612f74797065732e52656331323334207374727563747b523120762e696f2f7632332f766f6d2f74657374646174612f74797065732e52656331205b5d762e696f2f7632332f766f6d2f74657374646174612f74797065732e52656332205b5d762e696f2f7632332f766f6d2f74657374646174612f74797065732e52656333205b5d762e696f2f7632332f766f6d2f74657374646174612f74797065732e52656334205b5d762e696f2f7632332f766f6d2f74657374646174612f74797065732e526563313b523220762e696f2f7632332f766f6d2f74657374646174612f74797065732e526563323b523320762e696f2f7632332f766f6d2f74657374646174612f74797065732e526563333b523420762e696f2f7632332f766f6d2f74657374646174612f74797065732e526563347d7dTarget) StartList(tt *vdl.Type, len int) (vdl.ListTarget, error) {
+	if !vdl.Compatible(tt, __VDLTypevomtype16) {
+		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLTypevomtype16)
+	}
+	if cap(*t.Value) < len {
+		*t.Value = make([]Rec1234B, len)
+	} else {
+		*t.Value = (*t.Value)[:len]
+	}
+	return t, nil
+}
+func (t *vomtype5b5d762e696f2f7632332f766f6d2f74657374646174612f74797065732e5265633132333442207374727563747b42205b5d762e696f2f7632332f766f6d2f74657374646174612f74797065732e52656331323334423b52656331323334205b5d762e696f2f7632332f766f6d2f74657374646174612f74797065732e52656331323334207374727563747b523120762e696f2f7632332f766f6d2f74657374646174612f74797065732e52656331205b5d762e696f2f7632332f766f6d2f74657374646174612f74797065732e52656332205b5d762e696f2f7632332f766f6d2f74657374646174612f74797065732e52656333205b5d762e696f2f7632332f766f6d2f74657374646174612f74797065732e52656334205b5d762e696f2f7632332f766f6d2f74657374646174612f74797065732e526563313b523220762e696f2f7632332f766f6d2f74657374646174612f74797065732e526563323b523320762e696f2f7632332f766f6d2f74657374646174612f74797065732e526563333b523420762e696f2f7632332f766f6d2f74657374646174612f74797065732e526563347d7dTarget) StartElem(index int) (elem vdl.Target, _ error) {
+	return &Rec1234BTarget{Value: &(*t.Value)[index]}, error(nil)
+}
+func (t *vomtype5b5d762e696f2f7632332f766f6d2f74657374646174612f74797065732e5265633132333442207374727563747b42205b5d762e696f2f7632332f766f6d2f74657374646174612f74797065732e52656331323334423b52656331323334205b5d762e696f2f7632332f766f6d2f74657374646174612f74797065732e52656331323334207374727563747b523120762e696f2f7632332f766f6d2f74657374646174612f74797065732e52656331205b5d762e696f2f7632332f766f6d2f74657374646174612f74797065732e52656332205b5d762e696f2f7632332f766f6d2f74657374646174612f74797065732e52656333205b5d762e696f2f7632332f766f6d2f74657374646174612f74797065732e52656334205b5d762e696f2f7632332f766f6d2f74657374646174612f74797065732e526563313b523220762e696f2f7632332f766f6d2f74657374646174612f74797065732e526563323b523320762e696f2f7632332f766f6d2f74657374646174612f74797065732e526563333b523420762e696f2f7632332f766f6d2f74657374646174612f74797065732e526563347d7dTarget) FinishElem(elem vdl.Target) error {
+	return nil
+}
+func (t *vomtype5b5d762e696f2f7632332f766f6d2f74657374646174612f74797065732e5265633132333442207374727563747b42205b5d762e696f2f7632332f766f6d2f74657374646174612f74797065732e52656331323334423b52656331323334205b5d762e696f2f7632332f766f6d2f74657374646174612f74797065732e52656331323334207374727563747b523120762e696f2f7632332f766f6d2f74657374646174612f74797065732e52656331205b5d762e696f2f7632332f766f6d2f74657374646174612f74797065732e52656332205b5d762e696f2f7632332f766f6d2f74657374646174612f74797065732e52656333205b5d762e696f2f7632332f766f6d2f74657374646174612f74797065732e52656334205b5d762e696f2f7632332f766f6d2f74657374646174612f74797065732e526563313b523220762e696f2f7632332f766f6d2f74657374646174612f74797065732e526563323b523320762e696f2f7632332f766f6d2f74657374646174612f74797065732e526563333b523420762e696f2f7632332f766f6d2f74657374646174612f74797065732e526563347d7dTarget) FinishList(elem vdl.ListTarget) error {
 	return nil
 }
 
@@ -1861,7 +3358,6 @@ func (Rec1234All) __VDLReflect(struct {
 }
 
 func (m *Rec1234All) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
-
 	if __VDLType_vomtype_v_io_v23_vom_testdata_types_Rec1234All == nil || __VDLTypevomtype17 == nil {
 		panic("Initialization order error: types generated for FillVDLTarget not initialized. Consider moving caller to an init() block.")
 	}
@@ -1903,6 +3399,37 @@ func (m *Rec1234All) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 }
 
 func (m *Rec1234All) MakeVDLTarget() vdl.Target {
+	return &Rec1234AllTarget{Value: m}
+}
+
+type Rec1234AllTarget struct {
+	Value *Rec1234All
+	vdl.TargetBase
+	vdl.FieldsTargetBase
+}
+
+func (t *Rec1234AllTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
+	if !vdl.Compatible(tt, __VDLType_vomtype_v_io_v23_vom_testdata_types_Rec1234All) {
+		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType_vomtype_v_io_v23_vom_testdata_types_Rec1234All)
+	}
+	return t, nil
+}
+func (t *Rec1234AllTarget) StartField(name string) (key, field vdl.Target, _ error) {
+	switch name {
+	case "A":
+		val, err := &Rec1234ATarget{Value: &t.Value.A}, error(nil)
+		return nil, val, err
+	case "B":
+		val, err := &Rec1234BTarget{Value: &t.Value.B}, error(nil)
+		return nil, val, err
+	default:
+		return nil, nil, fmt.Errorf("field %s not in struct %v", name, __VDLType_vomtype_v_io_v23_vom_testdata_types_Rec1234All)
+	}
+}
+func (t *Rec1234AllTarget) FinishField(_, _ vdl.Target) error {
+	return nil
+}
+func (t *Rec1234AllTarget) FinishFields(_ vdl.FieldsTarget) error {
 	return nil
 }
 
@@ -1914,13 +3441,12 @@ func (ListString) __VDLReflect(struct {
 }) {
 }
 
-func (m ListString) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
-
-	listTarget1, err := t.StartList(__VDLType_vomtype_v_io_v23_vom_testdata_types_ListString, len(m))
+func (m *ListString) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
+	listTarget1, err := t.StartList(__VDLType_vomtype_v_io_v23_vom_testdata_types_ListString, len((*m)))
 	if err != nil {
 		return err
 	}
-	for i, elem3 := range m {
+	for i, elem3 := range *m {
 		elemTarget2, err := listTarget1.StartElem(i)
 		if err != nil {
 			return err
@@ -1938,7 +3464,34 @@ func (m ListString) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 	return nil
 }
 
-func (m ListString) MakeVDLTarget() vdl.Target {
+func (m *ListString) MakeVDLTarget() vdl.Target {
+	return &ListStringTarget{Value: m}
+}
+
+type ListStringTarget struct {
+	Value *ListString
+	vdl.TargetBase
+	vdl.ListTargetBase
+}
+
+func (t *ListStringTarget) StartList(tt *vdl.Type, len int) (vdl.ListTarget, error) {
+	if !vdl.Compatible(tt, __VDLType_vomtype_v_io_v23_vom_testdata_types_ListString) {
+		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType_vomtype_v_io_v23_vom_testdata_types_ListString)
+	}
+	if cap(*t.Value) < len {
+		*t.Value = make(ListString, len)
+	} else {
+		*t.Value = (*t.Value)[:len]
+	}
+	return t, nil
+}
+func (t *ListStringTarget) StartElem(index int) (elem vdl.Target, _ error) {
+	return &vdl.StringTarget{Value: &(*t.Value)[index]}, error(nil)
+}
+func (t *ListStringTarget) FinishElem(elem vdl.Target) error {
+	return nil
+}
+func (t *ListStringTarget) FinishList(elem vdl.ListTarget) error {
 	return nil
 }
 
@@ -1949,13 +3502,12 @@ func (Array3String) __VDLReflect(struct {
 }) {
 }
 
-func (m Array3String) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
-
+func (m *Array3String) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 	listTarget1, err := t.StartList(__VDLType_vomtype_v_io_v23_vom_testdata_types_Array3String, 3)
 	if err != nil {
 		return err
 	}
-	for i, elem3 := range m {
+	for i, elem3 := range *m {
 		elemTarget2, err := listTarget1.StartElem(i)
 		if err != nil {
 			return err
@@ -1973,7 +3525,29 @@ func (m Array3String) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 	return nil
 }
 
-func (m Array3String) MakeVDLTarget() vdl.Target {
+func (m *Array3String) MakeVDLTarget() vdl.Target {
+	return &Array3StringTarget{Value: m}
+}
+
+type Array3StringTarget struct {
+	Value *Array3String
+	vdl.TargetBase
+	vdl.ListTargetBase
+}
+
+func (t *Array3StringTarget) StartList(tt *vdl.Type, len int) (vdl.ListTarget, error) {
+	if !vdl.Compatible(tt, __VDLType_vomtype_v_io_v23_vom_testdata_types_Array3String) {
+		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType_vomtype_v_io_v23_vom_testdata_types_Array3String)
+	}
+	return t, nil
+}
+func (t *Array3StringTarget) StartElem(index int) (elem vdl.Target, _ error) {
+	return &vdl.StringTarget{Value: &(*t.Value)[index]}, error(nil)
+}
+func (t *Array3StringTarget) FinishElem(elem vdl.Target) error {
+	return nil
+}
+func (t *Array3StringTarget) FinishList(elem vdl.ListTarget) error {
 	return nil
 }
 
@@ -1984,13 +3558,12 @@ func (Array4String) __VDLReflect(struct {
 }) {
 }
 
-func (m Array4String) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
-
+func (m *Array4String) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 	listTarget1, err := t.StartList(__VDLType_vomtype_v_io_v23_vom_testdata_types_Array4String, 4)
 	if err != nil {
 		return err
 	}
-	for i, elem3 := range m {
+	for i, elem3 := range *m {
 		elemTarget2, err := listTarget1.StartElem(i)
 		if err != nil {
 			return err
@@ -2008,7 +3581,29 @@ func (m Array4String) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 	return nil
 }
 
-func (m Array4String) MakeVDLTarget() vdl.Target {
+func (m *Array4String) MakeVDLTarget() vdl.Target {
+	return &Array4StringTarget{Value: m}
+}
+
+type Array4StringTarget struct {
+	Value *Array4String
+	vdl.TargetBase
+	vdl.ListTargetBase
+}
+
+func (t *Array4StringTarget) StartList(tt *vdl.Type, len int) (vdl.ListTarget, error) {
+	if !vdl.Compatible(tt, __VDLType_vomtype_v_io_v23_vom_testdata_types_Array4String) {
+		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType_vomtype_v_io_v23_vom_testdata_types_Array4String)
+	}
+	return t, nil
+}
+func (t *Array4StringTarget) StartElem(index int) (elem vdl.Target, _ error) {
+	return &vdl.StringTarget{Value: &(*t.Value)[index]}, error(nil)
+}
+func (t *Array4StringTarget) FinishElem(elem vdl.Target) error {
+	return nil
+}
+func (t *Array4StringTarget) FinishList(elem vdl.ListTarget) error {
 	return nil
 }
 
@@ -2024,7 +3619,6 @@ func (AbcStruct) __VDLReflect(struct {
 }
 
 func (m *AbcStruct) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
-
 	if __VDLType_vomtype_v_io_v23_vom_testdata_types_AbcStruct == nil || __VDLTypevomtype18 == nil {
 		panic("Initialization order error: types generated for FillVDLTarget not initialized. Consider moving caller to an init() block.")
 	}
@@ -2076,6 +3670,40 @@ func (m *AbcStruct) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 }
 
 func (m *AbcStruct) MakeVDLTarget() vdl.Target {
+	return &AbcStructTarget{Value: m}
+}
+
+type AbcStructTarget struct {
+	Value *AbcStruct
+	vdl.TargetBase
+	vdl.FieldsTargetBase
+}
+
+func (t *AbcStructTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
+	if !vdl.Compatible(tt, __VDLType_vomtype_v_io_v23_vom_testdata_types_AbcStruct) {
+		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType_vomtype_v_io_v23_vom_testdata_types_AbcStruct)
+	}
+	return t, nil
+}
+func (t *AbcStructTarget) StartField(name string) (key, field vdl.Target, _ error) {
+	switch name {
+	case "A":
+		val, err := &vdl.BoolTarget{Value: &t.Value.A}, error(nil)
+		return nil, val, err
+	case "B":
+		val, err := &vdl.StringTarget{Value: &t.Value.B}, error(nil)
+		return nil, val, err
+	case "C":
+		val, err := &vdl.Int64Target{Value: &t.Value.C}, error(nil)
+		return nil, val, err
+	default:
+		return nil, nil, fmt.Errorf("field %s not in struct %v", name, __VDLType_vomtype_v_io_v23_vom_testdata_types_AbcStruct)
+	}
+}
+func (t *AbcStructTarget) FinishField(_, _ vdl.Target) error {
+	return nil
+}
+func (t *AbcStructTarget) FinishFields(_ vdl.FieldsTarget) error {
 	return nil
 }
 
@@ -2091,7 +3719,6 @@ func (AdeStruct) __VDLReflect(struct {
 }
 
 func (m *AdeStruct) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
-
 	if __VDLType_vomtype_v_io_v23_vom_testdata_types_AdeStruct == nil || __VDLTypevomtype19 == nil {
 		panic("Initialization order error: types generated for FillVDLTarget not initialized. Consider moving caller to an init() block.")
 	}
@@ -2154,6 +3781,40 @@ func (m *AdeStruct) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 }
 
 func (m *AdeStruct) MakeVDLTarget() vdl.Target {
+	return &AdeStructTarget{Value: m}
+}
+
+type AdeStructTarget struct {
+	Value *AdeStruct
+	vdl.TargetBase
+	vdl.FieldsTargetBase
+}
+
+func (t *AdeStructTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
+	if !vdl.Compatible(tt, __VDLType_vomtype_v_io_v23_vom_testdata_types_AdeStruct) {
+		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType_vomtype_v_io_v23_vom_testdata_types_AdeStruct)
+	}
+	return t, nil
+}
+func (t *AdeStructTarget) StartField(name string) (key, field vdl.Target, _ error) {
+	switch name {
+	case "A":
+		val, err := &vdl.BoolTarget{Value: &t.Value.A}, error(nil)
+		return nil, val, err
+	case "D":
+		val, err := vdl.ReflectTarget(reflect.ValueOf(&t.Value.D))
+		return nil, val, err
+	case "E":
+		val, err := &vdl.TypeObjectTarget{Value: &t.Value.E}, error(nil)
+		return nil, val, err
+	default:
+		return nil, nil, fmt.Errorf("field %s not in struct %v", name, __VDLType_vomtype_v_io_v23_vom_testdata_types_AdeStruct)
+	}
+}
+func (t *AdeStructTarget) FinishField(_, _ vdl.Target) error {
+	return nil
+}
+func (t *AdeStructTarget) FinishFields(_ vdl.FieldsTarget) error {
 	return nil
 }
 
@@ -2169,7 +3830,6 @@ func (XyzStruct) __VDLReflect(struct {
 }
 
 func (m *XyzStruct) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
-
 	if __VDLType_vomtype_v_io_v23_vom_testdata_types_XyzStruct == nil || __VDLTypevomtype20 == nil {
 		panic("Initialization order error: types generated for FillVDLTarget not initialized. Consider moving caller to an init() block.")
 	}
@@ -2222,6 +3882,40 @@ func (m *XyzStruct) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 }
 
 func (m *XyzStruct) MakeVDLTarget() vdl.Target {
+	return &XyzStructTarget{Value: m}
+}
+
+type XyzStructTarget struct {
+	Value *XyzStruct
+	vdl.TargetBase
+	vdl.FieldsTargetBase
+}
+
+func (t *XyzStructTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
+	if !vdl.Compatible(tt, __VDLType_vomtype_v_io_v23_vom_testdata_types_XyzStruct) {
+		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType_vomtype_v_io_v23_vom_testdata_types_XyzStruct)
+	}
+	return t, nil
+}
+func (t *XyzStructTarget) StartField(name string) (key, field vdl.Target, _ error) {
+	switch name {
+	case "X":
+		val, err := &vdl.BoolTarget{Value: &t.Value.X}, error(nil)
+		return nil, val, err
+	case "Y":
+		val, err := &MBoolTarget{Value: &t.Value.Y}, error(nil)
+		return nil, val, err
+	case "Z":
+		val, err := &vdl.StringTarget{Value: &t.Value.Z}, error(nil)
+		return nil, val, err
+	default:
+		return nil, nil, fmt.Errorf("field %s not in struct %v", name, __VDLType_vomtype_v_io_v23_vom_testdata_types_XyzStruct)
+	}
+}
+func (t *XyzStructTarget) FinishField(_, _ vdl.Target) error {
+	return nil
+}
+func (t *XyzStructTarget) FinishFields(_ vdl.FieldsTarget) error {
 	return nil
 }
 
@@ -2236,7 +3930,6 @@ func (YzStruct) __VDLReflect(struct {
 }
 
 func (m *YzStruct) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
-
 	if __VDLType_vomtype_v_io_v23_vom_testdata_types_YzStruct == nil || __VDLTypevomtype21 == nil {
 		panic("Initialization order error: types generated for FillVDLTarget not initialized. Consider moving caller to an init() block.")
 	}
@@ -2278,6 +3971,37 @@ func (m *YzStruct) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 }
 
 func (m *YzStruct) MakeVDLTarget() vdl.Target {
+	return &YzStructTarget{Value: m}
+}
+
+type YzStructTarget struct {
+	Value *YzStruct
+	vdl.TargetBase
+	vdl.FieldsTargetBase
+}
+
+func (t *YzStructTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
+	if !vdl.Compatible(tt, __VDLType_vomtype_v_io_v23_vom_testdata_types_YzStruct) {
+		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType_vomtype_v_io_v23_vom_testdata_types_YzStruct)
+	}
+	return t, nil
+}
+func (t *YzStructTarget) StartField(name string) (key, field vdl.Target, _ error) {
+	switch name {
+	case "Y":
+		val, err := &NBoolTarget{Value: &t.Value.Y}, error(nil)
+		return nil, val, err
+	case "Z":
+		val, err := &NStringTarget{Value: &t.Value.Z}, error(nil)
+		return nil, val, err
+	default:
+		return nil, nil, fmt.Errorf("field %s not in struct %v", name, __VDLType_vomtype_v_io_v23_vom_testdata_types_YzStruct)
+	}
+}
+func (t *YzStructTarget) FinishField(_, _ vdl.Target) error {
+	return nil
+}
+func (t *YzStructTarget) FinishFields(_ vdl.FieldsTarget) error {
 	return nil
 }
 
@@ -2291,7 +4015,6 @@ func (ZStruct) __VDLReflect(struct {
 }
 
 func (m *ZStruct) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
-
 	if __VDLType_vomtype_v_io_v23_vom_testdata_types_ZStruct == nil || __VDLTypevomtype22 == nil {
 		panic("Initialization order error: types generated for FillVDLTarget not initialized. Consider moving caller to an init() block.")
 	}
@@ -2319,6 +4042,34 @@ func (m *ZStruct) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 }
 
 func (m *ZStruct) MakeVDLTarget() vdl.Target {
+	return &ZStructTarget{Value: m}
+}
+
+type ZStructTarget struct {
+	Value *ZStruct
+	vdl.TargetBase
+	vdl.FieldsTargetBase
+}
+
+func (t *ZStructTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
+	if !vdl.Compatible(tt, __VDLType_vomtype_v_io_v23_vom_testdata_types_ZStruct) {
+		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType_vomtype_v_io_v23_vom_testdata_types_ZStruct)
+	}
+	return t, nil
+}
+func (t *ZStructTarget) StartField(name string) (key, field vdl.Target, _ error) {
+	switch name {
+	case "Z":
+		val, err := &vdl.StringTarget{Value: &t.Value.Z}, error(nil)
+		return nil, val, err
+	default:
+		return nil, nil, fmt.Errorf("field %s not in struct %v", name, __VDLType_vomtype_v_io_v23_vom_testdata_types_ZStruct)
+	}
+}
+func (t *ZStructTarget) FinishField(_, _ vdl.Target) error {
+	return nil
+}
+func (t *ZStructTarget) FinishFields(_ vdl.FieldsTarget) error {
 	return nil
 }
 
@@ -2334,7 +4085,6 @@ func (MapOnlyStruct) __VDLReflect(struct {
 }
 
 func (m *MapOnlyStruct) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
-
 	if __VDLType_vomtype_v_io_v23_vom_testdata_types_MapOnlyStruct == nil || __VDLTypevomtype23 == nil {
 		panic("Initialization order error: types generated for FillVDLTarget not initialized. Consider moving caller to an init() block.")
 	}
@@ -2386,6 +4136,40 @@ func (m *MapOnlyStruct) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 }
 
 func (m *MapOnlyStruct) MakeVDLTarget() vdl.Target {
+	return &MapOnlyStructTarget{Value: m}
+}
+
+type MapOnlyStructTarget struct {
+	Value *MapOnlyStruct
+	vdl.TargetBase
+	vdl.FieldsTargetBase
+}
+
+func (t *MapOnlyStructTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
+	if !vdl.Compatible(tt, __VDLType_vomtype_v_io_v23_vom_testdata_types_MapOnlyStruct) {
+		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType_vomtype_v_io_v23_vom_testdata_types_MapOnlyStruct)
+	}
+	return t, nil
+}
+func (t *MapOnlyStructTarget) StartField(name string) (key, field vdl.Target, _ error) {
+	switch name {
+	case "Key1":
+		val, err := &vdl.Int64Target{Value: &t.Value.Key1}, error(nil)
+		return nil, val, err
+	case "Key2":
+		val, err := &vdl.Uint32Target{Value: &t.Value.Key2}, error(nil)
+		return nil, val, err
+	case "Key3":
+		val, err := &vdl.Complex128Target{Value: &t.Value.Key3}, error(nil)
+		return nil, val, err
+	default:
+		return nil, nil, fmt.Errorf("field %s not in struct %v", name, __VDLType_vomtype_v_io_v23_vom_testdata_types_MapOnlyStruct)
+	}
+}
+func (t *MapOnlyStructTarget) FinishField(_, _ vdl.Target) error {
+	return nil
+}
+func (t *MapOnlyStructTarget) FinishFields(_ vdl.FieldsTarget) error {
 	return nil
 }
 
@@ -2396,13 +4180,12 @@ func (StructOnlyMap) __VDLReflect(struct {
 }) {
 }
 
-func (m StructOnlyMap) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
-
-	mapTarget1, err := t.StartMap(__VDLType_vomtype_v_io_v23_vom_testdata_types_StructOnlyMap, len(m))
+func (m *StructOnlyMap) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
+	mapTarget1, err := t.StartMap(__VDLType_vomtype_v_io_v23_vom_testdata_types_StructOnlyMap, len((*m)))
 	if err != nil {
 		return err
 	}
-	for key3, value5 := range m {
+	for key3, value5 := range *m {
 		keyTarget2, err := mapTarget1.StartKey()
 		if err != nil {
 			return err
@@ -2427,7 +4210,41 @@ func (m StructOnlyMap) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 	return nil
 }
 
-func (m StructOnlyMap) MakeVDLTarget() vdl.Target {
+func (m *StructOnlyMap) MakeVDLTarget() vdl.Target {
+	return &StructOnlyMapTarget{Value: m}
+}
+
+type StructOnlyMapTarget struct {
+	Value    *StructOnlyMap
+	currKey  string
+	currElem uint64
+	vdl.TargetBase
+	vdl.MapTargetBase
+}
+
+func (t *StructOnlyMapTarget) StartMap(tt *vdl.Type, len int) (vdl.MapTarget, error) {
+	if !vdl.Compatible(tt, __VDLType_vomtype_v_io_v23_vom_testdata_types_StructOnlyMap) {
+		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType_vomtype_v_io_v23_vom_testdata_types_StructOnlyMap)
+	}
+	*t.Value = make(StructOnlyMap)
+	return t, nil
+}
+func (t *StructOnlyMapTarget) StartKey() (key vdl.Target, _ error) {
+	t.currKey = ""
+	return &vdl.StringTarget{Value: &t.currKey}, error(nil)
+}
+func (t *StructOnlyMapTarget) FinishKeyStartField(key vdl.Target) (field vdl.Target, _ error) {
+	t.currElem = uint64(0)
+	return &vdl.Uint64Target{Value: &t.currElem}, error(nil)
+}
+func (t *StructOnlyMapTarget) FinishField(key, field vdl.Target) error {
+	(*t.Value)[t.currKey] = t.currElem
+	return nil
+}
+func (t *StructOnlyMapTarget) FinishMap(elem vdl.MapTarget) error {
+	if len(*t.Value) == 0 {
+		*t.Value = nil
+	}
 	return nil
 }
 
@@ -2443,7 +4260,6 @@ func (MapSetStruct) __VDLReflect(struct {
 }
 
 func (m *MapSetStruct) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
-
 	if __VDLType_vomtype_v_io_v23_vom_testdata_types_MapSetStruct == nil || __VDLTypevomtype24 == nil {
 		panic("Initialization order error: types generated for FillVDLTarget not initialized. Consider moving caller to an init() block.")
 	}
@@ -2495,6 +4311,40 @@ func (m *MapSetStruct) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 }
 
 func (m *MapSetStruct) MakeVDLTarget() vdl.Target {
+	return &MapSetStructTarget{Value: m}
+}
+
+type MapSetStructTarget struct {
+	Value *MapSetStruct
+	vdl.TargetBase
+	vdl.FieldsTargetBase
+}
+
+func (t *MapSetStructTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
+	if !vdl.Compatible(tt, __VDLType_vomtype_v_io_v23_vom_testdata_types_MapSetStruct) {
+		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType_vomtype_v_io_v23_vom_testdata_types_MapSetStruct)
+	}
+	return t, nil
+}
+func (t *MapSetStructTarget) StartField(name string) (key, field vdl.Target, _ error) {
+	switch name {
+	case "Feat":
+		val, err := &vdl.BoolTarget{Value: &t.Value.Feat}, error(nil)
+		return nil, val, err
+	case "Tire":
+		val, err := &vdl.BoolTarget{Value: &t.Value.Tire}, error(nil)
+		return nil, val, err
+	case "Eel":
+		val, err := &vdl.BoolTarget{Value: &t.Value.Eel}, error(nil)
+		return nil, val, err
+	default:
+		return nil, nil, fmt.Errorf("field %s not in struct %v", name, __VDLType_vomtype_v_io_v23_vom_testdata_types_MapSetStruct)
+	}
+}
+func (t *MapSetStructTarget) FinishField(_, _ vdl.Target) error {
+	return nil
+}
+func (t *MapSetStructTarget) FinishFields(_ vdl.FieldsTarget) error {
 	return nil
 }
 
@@ -2505,13 +4355,12 @@ func (SetStructMap) __VDLReflect(struct {
 }) {
 }
 
-func (m SetStructMap) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
-
-	mapTarget1, err := t.StartMap(__VDLType_vomtype_v_io_v23_vom_testdata_types_SetStructMap, len(m))
+func (m *SetStructMap) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
+	mapTarget1, err := t.StartMap(__VDLType_vomtype_v_io_v23_vom_testdata_types_SetStructMap, len((*m)))
 	if err != nil {
 		return err
 	}
-	for key3, value5 := range m {
+	for key3, value5 := range *m {
 		keyTarget2, err := mapTarget1.StartKey()
 		if err != nil {
 			return err
@@ -2536,7 +4385,41 @@ func (m SetStructMap) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 	return nil
 }
 
-func (m SetStructMap) MakeVDLTarget() vdl.Target {
+func (m *SetStructMap) MakeVDLTarget() vdl.Target {
+	return &SetStructMapTarget{Value: m}
+}
+
+type SetStructMapTarget struct {
+	Value    *SetStructMap
+	currKey  string
+	currElem bool
+	vdl.TargetBase
+	vdl.MapTargetBase
+}
+
+func (t *SetStructMapTarget) StartMap(tt *vdl.Type, len int) (vdl.MapTarget, error) {
+	if !vdl.Compatible(tt, __VDLType_vomtype_v_io_v23_vom_testdata_types_SetStructMap) {
+		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType_vomtype_v_io_v23_vom_testdata_types_SetStructMap)
+	}
+	*t.Value = make(SetStructMap)
+	return t, nil
+}
+func (t *SetStructMapTarget) StartKey() (key vdl.Target, _ error) {
+	t.currKey = ""
+	return &vdl.StringTarget{Value: &t.currKey}, error(nil)
+}
+func (t *SetStructMapTarget) FinishKeyStartField(key vdl.Target) (field vdl.Target, _ error) {
+	t.currElem = false
+	return &vdl.BoolTarget{Value: &t.currElem}, error(nil)
+}
+func (t *SetStructMapTarget) FinishField(key, field vdl.Target) error {
+	(*t.Value)[t.currKey] = t.currElem
+	return nil
+}
+func (t *SetStructMapTarget) FinishMap(elem vdl.MapTarget) error {
+	if len(*t.Value) == 0 {
+		*t.Value = nil
+	}
 	return nil
 }
 
@@ -2547,13 +4430,12 @@ func (MapStructSet) __VDLReflect(struct {
 }) {
 }
 
-func (m MapStructSet) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
-
-	setTarget1, err := t.StartSet(__VDLType_vomtype_v_io_v23_vom_testdata_types_MapStructSet, len(m))
+func (m *MapStructSet) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
+	setTarget1, err := t.StartSet(__VDLType_vomtype_v_io_v23_vom_testdata_types_MapStructSet, len((*m)))
 	if err != nil {
 		return err
 	}
-	for key3 := range m {
+	for key3 := range *m {
 		keyTarget2, err := setTarget1.StartKey()
 		if err != nil {
 			return err
@@ -2571,7 +4453,36 @@ func (m MapStructSet) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 	return nil
 }
 
-func (m MapStructSet) MakeVDLTarget() vdl.Target {
+func (m *MapStructSet) MakeVDLTarget() vdl.Target {
+	return &MapStructSetTarget{Value: m}
+}
+
+type MapStructSetTarget struct {
+	Value   *MapStructSet
+	currKey string
+	vdl.TargetBase
+	vdl.SetTargetBase
+}
+
+func (t *MapStructSetTarget) StartSet(tt *vdl.Type, len int) (vdl.SetTarget, error) {
+	if !vdl.Compatible(tt, __VDLType_vomtype_v_io_v23_vom_testdata_types_MapStructSet) {
+		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType_vomtype_v_io_v23_vom_testdata_types_MapStructSet)
+	}
+	*t.Value = make(MapStructSet)
+	return t, nil
+}
+func (t *MapStructSetTarget) StartKey() (key vdl.Target, _ error) {
+	t.currKey = ""
+	return &vdl.StringTarget{Value: &t.currKey}, error(nil)
+}
+func (t *MapStructSetTarget) FinishKey(key vdl.Target) error {
+	(*t.Value)[t.currKey] = struct{}{}
+	return nil
+}
+func (t *MapStructSetTarget) FinishSet(list vdl.SetTarget) error {
+	if len(*t.Value) == 0 {
+		*t.Value = nil
+	}
 	return nil
 }
 
@@ -2582,13 +4493,12 @@ func (SetOnlyMap) __VDLReflect(struct {
 }) {
 }
 
-func (m SetOnlyMap) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
-
-	mapTarget1, err := t.StartMap(__VDLType_vomtype_v_io_v23_vom_testdata_types_SetOnlyMap, len(m))
+func (m *SetOnlyMap) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
+	mapTarget1, err := t.StartMap(__VDLType_vomtype_v_io_v23_vom_testdata_types_SetOnlyMap, len((*m)))
 	if err != nil {
 		return err
 	}
-	for key3, value5 := range m {
+	for key3, value5 := range *m {
 		keyTarget2, err := mapTarget1.StartKey()
 		if err != nil {
 			return err
@@ -2613,7 +4523,41 @@ func (m SetOnlyMap) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 	return nil
 }
 
-func (m SetOnlyMap) MakeVDLTarget() vdl.Target {
+func (m *SetOnlyMap) MakeVDLTarget() vdl.Target {
+	return &SetOnlyMapTarget{Value: m}
+}
+
+type SetOnlyMapTarget struct {
+	Value    *SetOnlyMap
+	currKey  float64
+	currElem bool
+	vdl.TargetBase
+	vdl.MapTargetBase
+}
+
+func (t *SetOnlyMapTarget) StartMap(tt *vdl.Type, len int) (vdl.MapTarget, error) {
+	if !vdl.Compatible(tt, __VDLType_vomtype_v_io_v23_vom_testdata_types_SetOnlyMap) {
+		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType_vomtype_v_io_v23_vom_testdata_types_SetOnlyMap)
+	}
+	*t.Value = make(SetOnlyMap)
+	return t, nil
+}
+func (t *SetOnlyMapTarget) StartKey() (key vdl.Target, _ error) {
+	t.currKey = float64(0)
+	return &vdl.Float64Target{Value: &t.currKey}, error(nil)
+}
+func (t *SetOnlyMapTarget) FinishKeyStartField(key vdl.Target) (field vdl.Target, _ error) {
+	t.currElem = false
+	return &vdl.BoolTarget{Value: &t.currElem}, error(nil)
+}
+func (t *SetOnlyMapTarget) FinishField(key, field vdl.Target) error {
+	(*t.Value)[t.currKey] = t.currElem
+	return nil
+}
+func (t *SetOnlyMapTarget) FinishMap(elem vdl.MapTarget) error {
+	if len(*t.Value) == 0 {
+		*t.Value = nil
+	}
 	return nil
 }
 
@@ -2624,13 +4568,12 @@ func (SometimesSetMap) __VDLReflect(struct {
 }) {
 }
 
-func (m SometimesSetMap) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
-
-	mapTarget1, err := t.StartMap(__VDLType_vomtype_v_io_v23_vom_testdata_types_SometimesSetMap, len(m))
+func (m *SometimesSetMap) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
+	mapTarget1, err := t.StartMap(__VDLType_vomtype_v_io_v23_vom_testdata_types_SometimesSetMap, len((*m)))
 	if err != nil {
 		return err
 	}
-	for key3, value5 := range m {
+	for key3, value5 := range *m {
 		keyTarget2, err := mapTarget1.StartKey()
 		if err != nil {
 			return err
@@ -2662,7 +4605,41 @@ func (m SometimesSetMap) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 	return nil
 }
 
-func (m SometimesSetMap) MakeVDLTarget() vdl.Target {
+func (m *SometimesSetMap) MakeVDLTarget() vdl.Target {
+	return &SometimesSetMapTarget{Value: m}
+}
+
+type SometimesSetMapTarget struct {
+	Value    *SometimesSetMap
+	currKey  float64
+	currElem *vdl.Value
+	vdl.TargetBase
+	vdl.MapTargetBase
+}
+
+func (t *SometimesSetMapTarget) StartMap(tt *vdl.Type, len int) (vdl.MapTarget, error) {
+	if !vdl.Compatible(tt, __VDLType_vomtype_v_io_v23_vom_testdata_types_SometimesSetMap) {
+		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType_vomtype_v_io_v23_vom_testdata_types_SometimesSetMap)
+	}
+	*t.Value = make(SometimesSetMap)
+	return t, nil
+}
+func (t *SometimesSetMapTarget) StartKey() (key vdl.Target, _ error) {
+	t.currKey = float64(0)
+	return &vdl.Float64Target{Value: &t.currKey}, error(nil)
+}
+func (t *SometimesSetMapTarget) FinishKeyStartField(key vdl.Target) (field vdl.Target, _ error) {
+	t.currElem = (*vdl.Value)(nil)
+	return vdl.ReflectTarget(reflect.ValueOf(&t.currElem))
+}
+func (t *SometimesSetMapTarget) FinishField(key, field vdl.Target) error {
+	(*t.Value)[t.currKey] = t.currElem
+	return nil
+}
+func (t *SometimesSetMapTarget) FinishMap(elem vdl.MapTarget) error {
+	if len(*t.Value) == 0 {
+		*t.Value = nil
+	}
 	return nil
 }
 
@@ -2673,13 +4650,12 @@ func (MapOnlySet) __VDLReflect(struct {
 }) {
 }
 
-func (m MapOnlySet) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
-
-	setTarget1, err := t.StartSet(__VDLType_vomtype_v_io_v23_vom_testdata_types_MapOnlySet, len(m))
+func (m *MapOnlySet) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
+	setTarget1, err := t.StartSet(__VDLType_vomtype_v_io_v23_vom_testdata_types_MapOnlySet, len((*m)))
 	if err != nil {
 		return err
 	}
-	for key3 := range m {
+	for key3 := range *m {
 		keyTarget2, err := setTarget1.StartKey()
 		if err != nil {
 			return err
@@ -2697,7 +4673,36 @@ func (m MapOnlySet) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 	return nil
 }
 
-func (m MapOnlySet) MakeVDLTarget() vdl.Target {
+func (m *MapOnlySet) MakeVDLTarget() vdl.Target {
+	return &MapOnlySetTarget{Value: m}
+}
+
+type MapOnlySetTarget struct {
+	Value   *MapOnlySet
+	currKey float64
+	vdl.TargetBase
+	vdl.SetTargetBase
+}
+
+func (t *MapOnlySetTarget) StartSet(tt *vdl.Type, len int) (vdl.SetTarget, error) {
+	if !vdl.Compatible(tt, __VDLType_vomtype_v_io_v23_vom_testdata_types_MapOnlySet) {
+		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType_vomtype_v_io_v23_vom_testdata_types_MapOnlySet)
+	}
+	*t.Value = make(MapOnlySet)
+	return t, nil
+}
+func (t *MapOnlySetTarget) StartKey() (key vdl.Target, _ error) {
+	t.currKey = float64(0)
+	return &vdl.Float64Target{Value: &t.currKey}, error(nil)
+}
+func (t *MapOnlySetTarget) FinishKey(key vdl.Target) error {
+	(*t.Value)[t.currKey] = struct{}{}
+	return nil
+}
+func (t *MapOnlySetTarget) FinishSet(list vdl.SetTarget) error {
+	if len(*t.Value) == 0 {
+		*t.Value = nil
+	}
 	return nil
 }
 
@@ -2708,13 +4713,12 @@ func (SetOnlyA) __VDLReflect(struct {
 }) {
 }
 
-func (m SetOnlyA) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
-
-	setTarget1, err := t.StartSet(__VDLType_vomtype_v_io_v23_vom_testdata_types_SetOnlyA, len(m))
+func (m *SetOnlyA) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
+	setTarget1, err := t.StartSet(__VDLType_vomtype_v_io_v23_vom_testdata_types_SetOnlyA, len((*m)))
 	if err != nil {
 		return err
 	}
-	for key3 := range m {
+	for key3 := range *m {
 		keyTarget2, err := setTarget1.StartKey()
 		if err != nil {
 			return err
@@ -2732,7 +4736,36 @@ func (m SetOnlyA) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 	return nil
 }
 
-func (m SetOnlyA) MakeVDLTarget() vdl.Target {
+func (m *SetOnlyA) MakeVDLTarget() vdl.Target {
+	return &SetOnlyATarget{Value: m}
+}
+
+type SetOnlyATarget struct {
+	Value   *SetOnlyA
+	currKey bool
+	vdl.TargetBase
+	vdl.SetTargetBase
+}
+
+func (t *SetOnlyATarget) StartSet(tt *vdl.Type, len int) (vdl.SetTarget, error) {
+	if !vdl.Compatible(tt, __VDLType_vomtype_v_io_v23_vom_testdata_types_SetOnlyA) {
+		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType_vomtype_v_io_v23_vom_testdata_types_SetOnlyA)
+	}
+	*t.Value = make(SetOnlyA)
+	return t, nil
+}
+func (t *SetOnlyATarget) StartKey() (key vdl.Target, _ error) {
+	t.currKey = false
+	return &vdl.BoolTarget{Value: &t.currKey}, error(nil)
+}
+func (t *SetOnlyATarget) FinishKey(key vdl.Target) error {
+	(*t.Value)[t.currKey] = struct{}{}
+	return nil
+}
+func (t *SetOnlyATarget) FinishSet(list vdl.SetTarget) error {
+	if len(*t.Value) == 0 {
+		*t.Value = nil
+	}
 	return nil
 }
 
@@ -2743,13 +4776,12 @@ func (SetOnlyA2) __VDLReflect(struct {
 }) {
 }
 
-func (m SetOnlyA2) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
-
-	setTarget1, err := t.StartSet(__VDLType_vomtype_v_io_v23_vom_testdata_types_SetOnlyA2, len(m))
+func (m *SetOnlyA2) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
+	setTarget1, err := t.StartSet(__VDLType_vomtype_v_io_v23_vom_testdata_types_SetOnlyA2, len((*m)))
 	if err != nil {
 		return err
 	}
-	for key3 := range m {
+	for key3 := range *m {
 		keyTarget2, err := setTarget1.StartKey()
 		if err != nil {
 			return err
@@ -2768,7 +4800,36 @@ func (m SetOnlyA2) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 	return nil
 }
 
-func (m SetOnlyA2) MakeVDLTarget() vdl.Target {
+func (m *SetOnlyA2) MakeVDLTarget() vdl.Target {
+	return &SetOnlyA2Target{Value: m}
+}
+
+type SetOnlyA2Target struct {
+	Value   *SetOnlyA2
+	currKey NBool
+	vdl.TargetBase
+	vdl.SetTargetBase
+}
+
+func (t *SetOnlyA2Target) StartSet(tt *vdl.Type, len int) (vdl.SetTarget, error) {
+	if !vdl.Compatible(tt, __VDLType_vomtype_v_io_v23_vom_testdata_types_SetOnlyA2) {
+		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType_vomtype_v_io_v23_vom_testdata_types_SetOnlyA2)
+	}
+	*t.Value = make(SetOnlyA2)
+	return t, nil
+}
+func (t *SetOnlyA2Target) StartKey() (key vdl.Target, _ error) {
+	t.currKey = NBool(false)
+	return &NBoolTarget{Value: &t.currKey}, error(nil)
+}
+func (t *SetOnlyA2Target) FinishKey(key vdl.Target) error {
+	(*t.Value)[t.currKey] = struct{}{}
+	return nil
+}
+func (t *SetOnlyA2Target) FinishSet(list vdl.SetTarget) error {
+	if len(*t.Value) == 0 {
+		*t.Value = nil
+	}
 	return nil
 }
 
@@ -2779,13 +4840,12 @@ func (SetOnlyB) __VDLReflect(struct {
 }) {
 }
 
-func (m SetOnlyB) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
-
-	setTarget1, err := t.StartSet(__VDLType_vomtype_v_io_v23_vom_testdata_types_SetOnlyB, len(m))
+func (m *SetOnlyB) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
+	setTarget1, err := t.StartSet(__VDLType_vomtype_v_io_v23_vom_testdata_types_SetOnlyB, len((*m)))
 	if err != nil {
 		return err
 	}
-	for key3 := range m {
+	for key3 := range *m {
 		keyTarget2, err := setTarget1.StartKey()
 		if err != nil {
 			return err
@@ -2803,7 +4863,36 @@ func (m SetOnlyB) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 	return nil
 }
 
-func (m SetOnlyB) MakeVDLTarget() vdl.Target {
+func (m *SetOnlyB) MakeVDLTarget() vdl.Target {
+	return &SetOnlyBTarget{Value: m}
+}
+
+type SetOnlyBTarget struct {
+	Value   *SetOnlyB
+	currKey int16
+	vdl.TargetBase
+	vdl.SetTargetBase
+}
+
+func (t *SetOnlyBTarget) StartSet(tt *vdl.Type, len int) (vdl.SetTarget, error) {
+	if !vdl.Compatible(tt, __VDLType_vomtype_v_io_v23_vom_testdata_types_SetOnlyB) {
+		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType_vomtype_v_io_v23_vom_testdata_types_SetOnlyB)
+	}
+	*t.Value = make(SetOnlyB)
+	return t, nil
+}
+func (t *SetOnlyBTarget) StartKey() (key vdl.Target, _ error) {
+	t.currKey = int16(0)
+	return &vdl.Int16Target{Value: &t.currKey}, error(nil)
+}
+func (t *SetOnlyBTarget) FinishKey(key vdl.Target) error {
+	(*t.Value)[t.currKey] = struct{}{}
+	return nil
+}
+func (t *SetOnlyBTarget) FinishSet(list vdl.SetTarget) error {
+	if len(*t.Value) == 0 {
+		*t.Value = nil
+	}
 	return nil
 }
 
@@ -2814,13 +4903,12 @@ func (SetOnlyB2) __VDLReflect(struct {
 }) {
 }
 
-func (m SetOnlyB2) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
-
-	setTarget1, err := t.StartSet(__VDLType_vomtype_v_io_v23_vom_testdata_types_SetOnlyB2, len(m))
+func (m *SetOnlyB2) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
+	setTarget1, err := t.StartSet(__VDLType_vomtype_v_io_v23_vom_testdata_types_SetOnlyB2, len((*m)))
 	if err != nil {
 		return err
 	}
-	for key3 := range m {
+	for key3 := range *m {
 		keyTarget2, err := setTarget1.StartKey()
 		if err != nil {
 			return err
@@ -2839,7 +4927,36 @@ func (m SetOnlyB2) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 	return nil
 }
 
-func (m SetOnlyB2) MakeVDLTarget() vdl.Target {
+func (m *SetOnlyB2) MakeVDLTarget() vdl.Target {
+	return &SetOnlyB2Target{Value: m}
+}
+
+type SetOnlyB2Target struct {
+	Value   *SetOnlyB2
+	currKey NInt16
+	vdl.TargetBase
+	vdl.SetTargetBase
+}
+
+func (t *SetOnlyB2Target) StartSet(tt *vdl.Type, len int) (vdl.SetTarget, error) {
+	if !vdl.Compatible(tt, __VDLType_vomtype_v_io_v23_vom_testdata_types_SetOnlyB2) {
+		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType_vomtype_v_io_v23_vom_testdata_types_SetOnlyB2)
+	}
+	*t.Value = make(SetOnlyB2)
+	return t, nil
+}
+func (t *SetOnlyB2Target) StartKey() (key vdl.Target, _ error) {
+	t.currKey = NInt16(0)
+	return &NInt16Target{Value: &t.currKey}, error(nil)
+}
+func (t *SetOnlyB2Target) FinishKey(key vdl.Target) error {
+	(*t.Value)[t.currKey] = struct{}{}
+	return nil
+}
+func (t *SetOnlyB2Target) FinishSet(list vdl.SetTarget) error {
+	if len(*t.Value) == 0 {
+		*t.Value = nil
+	}
 	return nil
 }
 
@@ -2850,13 +4967,12 @@ func (MapOnlyA) __VDLReflect(struct {
 }) {
 }
 
-func (m MapOnlyA) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
-
-	mapTarget1, err := t.StartMap(__VDLType_vomtype_v_io_v23_vom_testdata_types_MapOnlyA, len(m))
+func (m *MapOnlyA) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
+	mapTarget1, err := t.StartMap(__VDLType_vomtype_v_io_v23_vom_testdata_types_MapOnlyA, len((*m)))
 	if err != nil {
 		return err
 	}
-	for key3, value5 := range m {
+	for key3, value5 := range *m {
 		keyTarget2, err := mapTarget1.StartKey()
 		if err != nil {
 			return err
@@ -2881,7 +4997,41 @@ func (m MapOnlyA) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 	return nil
 }
 
-func (m MapOnlyA) MakeVDLTarget() vdl.Target {
+func (m *MapOnlyA) MakeVDLTarget() vdl.Target {
+	return &MapOnlyATarget{Value: m}
+}
+
+type MapOnlyATarget struct {
+	Value    *MapOnlyA
+	currKey  uint32
+	currElem uint32
+	vdl.TargetBase
+	vdl.MapTargetBase
+}
+
+func (t *MapOnlyATarget) StartMap(tt *vdl.Type, len int) (vdl.MapTarget, error) {
+	if !vdl.Compatible(tt, __VDLType_vomtype_v_io_v23_vom_testdata_types_MapOnlyA) {
+		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType_vomtype_v_io_v23_vom_testdata_types_MapOnlyA)
+	}
+	*t.Value = make(MapOnlyA)
+	return t, nil
+}
+func (t *MapOnlyATarget) StartKey() (key vdl.Target, _ error) {
+	t.currKey = uint32(0)
+	return &vdl.Uint32Target{Value: &t.currKey}, error(nil)
+}
+func (t *MapOnlyATarget) FinishKeyStartField(key vdl.Target) (field vdl.Target, _ error) {
+	t.currElem = uint32(0)
+	return &vdl.Uint32Target{Value: &t.currElem}, error(nil)
+}
+func (t *MapOnlyATarget) FinishField(key, field vdl.Target) error {
+	(*t.Value)[t.currKey] = t.currElem
+	return nil
+}
+func (t *MapOnlyATarget) FinishMap(elem vdl.MapTarget) error {
+	if len(*t.Value) == 0 {
+		*t.Value = nil
+	}
 	return nil
 }
 
@@ -2892,13 +5042,12 @@ func (MapOnlyA2) __VDLReflect(struct {
 }) {
 }
 
-func (m MapOnlyA2) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
-
-	mapTarget1, err := t.StartMap(__VDLType_vomtype_v_io_v23_vom_testdata_types_MapOnlyA2, len(m))
+func (m *MapOnlyA2) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
+	mapTarget1, err := t.StartMap(__VDLType_vomtype_v_io_v23_vom_testdata_types_MapOnlyA2, len((*m)))
 	if err != nil {
 		return err
 	}
-	for key3, value5 := range m {
+	for key3, value5 := range *m {
 		keyTarget2, err := mapTarget1.StartKey()
 		if err != nil {
 			return err
@@ -2923,7 +5072,41 @@ func (m MapOnlyA2) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 	return nil
 }
 
-func (m MapOnlyA2) MakeVDLTarget() vdl.Target {
+func (m *MapOnlyA2) MakeVDLTarget() vdl.Target {
+	return &MapOnlyA2Target{Value: m}
+}
+
+type MapOnlyA2Target struct {
+	Value    *MapOnlyA2
+	currKey  int64
+	currElem float64
+	vdl.TargetBase
+	vdl.MapTargetBase
+}
+
+func (t *MapOnlyA2Target) StartMap(tt *vdl.Type, len int) (vdl.MapTarget, error) {
+	if !vdl.Compatible(tt, __VDLType_vomtype_v_io_v23_vom_testdata_types_MapOnlyA2) {
+		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType_vomtype_v_io_v23_vom_testdata_types_MapOnlyA2)
+	}
+	*t.Value = make(MapOnlyA2)
+	return t, nil
+}
+func (t *MapOnlyA2Target) StartKey() (key vdl.Target, _ error) {
+	t.currKey = int64(0)
+	return &vdl.Int64Target{Value: &t.currKey}, error(nil)
+}
+func (t *MapOnlyA2Target) FinishKeyStartField(key vdl.Target) (field vdl.Target, _ error) {
+	t.currElem = float64(0)
+	return &vdl.Float64Target{Value: &t.currElem}, error(nil)
+}
+func (t *MapOnlyA2Target) FinishField(key, field vdl.Target) error {
+	(*t.Value)[t.currKey] = t.currElem
+	return nil
+}
+func (t *MapOnlyA2Target) FinishMap(elem vdl.MapTarget) error {
+	if len(*t.Value) == 0 {
+		*t.Value = nil
+	}
 	return nil
 }
 
@@ -2934,13 +5117,12 @@ func (MapOnlyB) __VDLReflect(struct {
 }) {
 }
 
-func (m MapOnlyB) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
-
-	mapTarget1, err := t.StartMap(__VDLType_vomtype_v_io_v23_vom_testdata_types_MapOnlyB, len(m))
+func (m *MapOnlyB) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
+	mapTarget1, err := t.StartMap(__VDLType_vomtype_v_io_v23_vom_testdata_types_MapOnlyB, len((*m)))
 	if err != nil {
 		return err
 	}
-	for key3, value5 := range m {
+	for key3, value5 := range *m {
 		keyTarget2, err := mapTarget1.StartKey()
 		if err != nil {
 			return err
@@ -2965,7 +5147,41 @@ func (m MapOnlyB) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 	return nil
 }
 
-func (m MapOnlyB) MakeVDLTarget() vdl.Target {
+func (m *MapOnlyB) MakeVDLTarget() vdl.Target {
+	return &MapOnlyBTarget{Value: m}
+}
+
+type MapOnlyBTarget struct {
+	Value    *MapOnlyB
+	currKey  bool
+	currElem string
+	vdl.TargetBase
+	vdl.MapTargetBase
+}
+
+func (t *MapOnlyBTarget) StartMap(tt *vdl.Type, len int) (vdl.MapTarget, error) {
+	if !vdl.Compatible(tt, __VDLType_vomtype_v_io_v23_vom_testdata_types_MapOnlyB) {
+		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType_vomtype_v_io_v23_vom_testdata_types_MapOnlyB)
+	}
+	*t.Value = make(MapOnlyB)
+	return t, nil
+}
+func (t *MapOnlyBTarget) StartKey() (key vdl.Target, _ error) {
+	t.currKey = false
+	return &vdl.BoolTarget{Value: &t.currKey}, error(nil)
+}
+func (t *MapOnlyBTarget) FinishKeyStartField(key vdl.Target) (field vdl.Target, _ error) {
+	t.currElem = ""
+	return &vdl.StringTarget{Value: &t.currElem}, error(nil)
+}
+func (t *MapOnlyBTarget) FinishField(key, field vdl.Target) error {
+	(*t.Value)[t.currKey] = t.currElem
+	return nil
+}
+func (t *MapOnlyBTarget) FinishMap(elem vdl.MapTarget) error {
+	if len(*t.Value) == 0 {
+		*t.Value = nil
+	}
 	return nil
 }
 
@@ -2976,13 +5192,12 @@ func (MapOnlyB2) __VDLReflect(struct {
 }) {
 }
 
-func (m MapOnlyB2) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
-
-	mapTarget1, err := t.StartMap(__VDLType_vomtype_v_io_v23_vom_testdata_types_MapOnlyB2, len(m))
+func (m *MapOnlyB2) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
+	mapTarget1, err := t.StartMap(__VDLType_vomtype_v_io_v23_vom_testdata_types_MapOnlyB2, len((*m)))
 	if err != nil {
 		return err
 	}
-	for key3, value5 := range m {
+	for key3, value5 := range *m {
 		keyTarget2, err := mapTarget1.StartKey()
 		if err != nil {
 			return err
@@ -3009,7 +5224,41 @@ func (m MapOnlyB2) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 	return nil
 }
 
-func (m MapOnlyB2) MakeVDLTarget() vdl.Target {
+func (m *MapOnlyB2) MakeVDLTarget() vdl.Target {
+	return &MapOnlyB2Target{Value: m}
+}
+
+type MapOnlyB2Target struct {
+	Value    *MapOnlyB2
+	currKey  NBool
+	currElem NString
+	vdl.TargetBase
+	vdl.MapTargetBase
+}
+
+func (t *MapOnlyB2Target) StartMap(tt *vdl.Type, len int) (vdl.MapTarget, error) {
+	if !vdl.Compatible(tt, __VDLType_vomtype_v_io_v23_vom_testdata_types_MapOnlyB2) {
+		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType_vomtype_v_io_v23_vom_testdata_types_MapOnlyB2)
+	}
+	*t.Value = make(MapOnlyB2)
+	return t, nil
+}
+func (t *MapOnlyB2Target) StartKey() (key vdl.Target, _ error) {
+	t.currKey = NBool(false)
+	return &NBoolTarget{Value: &t.currKey}, error(nil)
+}
+func (t *MapOnlyB2Target) FinishKeyStartField(key vdl.Target) (field vdl.Target, _ error) {
+	t.currElem = NString("")
+	return &NStringTarget{Value: &t.currElem}, error(nil)
+}
+func (t *MapOnlyB2Target) FinishField(key, field vdl.Target) error {
+	(*t.Value)[t.currKey] = t.currElem
+	return nil
+}
+func (t *MapOnlyB2Target) FinishMap(elem vdl.MapTarget) error {
+	if len(*t.Value) == 0 {
+		*t.Value = nil
+	}
 	return nil
 }
 
@@ -3050,7 +5299,6 @@ func (x BdeUnionB) Name() string                   { return "B" }
 func (x BdeUnionB) __VDLReflect(__BdeUnionReflect) {}
 
 func (m BdeUnionB) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
-
 	fieldsTarget1, err := t.StartFields(__VDLType_vomtype_v_io_v23_vom_testdata_types_BdeUnion)
 	if err != nil {
 		return err
@@ -3082,7 +5330,6 @@ func (x BdeUnionD) Name() string                   { return "D" }
 func (x BdeUnionD) __VDLReflect(__BdeUnionReflect) {}
 
 func (m BdeUnionD) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
-
 	fieldsTarget1, err := t.StartFields(__VDLType_vomtype_v_io_v23_vom_testdata_types_BdeUnion)
 	if err != nil {
 		return err
@@ -3121,7 +5368,6 @@ func (x BdeUnionE) Name() string                   { return "E" }
 func (x BdeUnionE) __VDLReflect(__BdeUnionReflect) {}
 
 func (m BdeUnionE) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
-
 	fieldsTarget1, err := t.StartFields(__VDLType_vomtype_v_io_v23_vom_testdata_types_BdeUnion)
 	if err != nil {
 		return err
@@ -3204,14 +5450,36 @@ func (BrieEnum) __VDLReflect(struct {
 }) {
 }
 
-func (m BrieEnum) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
-	if err := t.FromEnumLabel(m.String(), __VDLType_vomtype_v_io_v23_vom_testdata_types_BrieEnum); err != nil {
+func (m *BrieEnum) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
+	if err := t.FromEnumLabel((*m).String(), __VDLType_vomtype_v_io_v23_vom_testdata_types_BrieEnum); err != nil {
 		return err
 	}
 	return nil
 }
 
-func (m BrieEnum) MakeVDLTarget() vdl.Target {
+func (m *BrieEnum) MakeVDLTarget() vdl.Target {
+	return &BrieEnumTarget{Value: m}
+}
+
+type BrieEnumTarget struct {
+	Value *BrieEnum
+	vdl.TargetBase
+}
+
+func (t *BrieEnumTarget) FromEnumLabel(src string, tt *vdl.Type) error {
+	if !vdl.Compatible(tt, __VDLType_vomtype_v_io_v23_vom_testdata_types_BrieEnum) {
+		return fmt.Errorf("type %v incompatible with %v", tt, __VDLType_vomtype_v_io_v23_vom_testdata_types_BrieEnum)
+	}
+	switch src {
+	case "Glee":
+		*t.Value = 0
+	case "Brie":
+		*t.Value = 1
+	case "Three":
+		*t.Value = 2
+	default:
+		return fmt.Errorf("label %s not in enum %v", src, __VDLType_vomtype_v_io_v23_vom_testdata_types_BrieEnum)
+	}
 	return nil
 }
 
@@ -3256,14 +5524,32 @@ func (BeanEnum) __VDLReflect(struct {
 }) {
 }
 
-func (m BeanEnum) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
-	if err := t.FromEnumLabel(m.String(), __VDLType_vomtype_v_io_v23_vom_testdata_types_BeanEnum); err != nil {
+func (m *BeanEnum) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
+	if err := t.FromEnumLabel((*m).String(), __VDLType_vomtype_v_io_v23_vom_testdata_types_BeanEnum); err != nil {
 		return err
 	}
 	return nil
 }
 
-func (m BeanEnum) MakeVDLTarget() vdl.Target {
+func (m *BeanEnum) MakeVDLTarget() vdl.Target {
+	return &BeanEnumTarget{Value: m}
+}
+
+type BeanEnumTarget struct {
+	Value *BeanEnum
+	vdl.TargetBase
+}
+
+func (t *BeanEnumTarget) FromEnumLabel(src string, tt *vdl.Type) error {
+	if !vdl.Compatible(tt, __VDLType_vomtype_v_io_v23_vom_testdata_types_BeanEnum) {
+		return fmt.Errorf("type %v incompatible with %v", tt, __VDLType_vomtype_v_io_v23_vom_testdata_types_BeanEnum)
+	}
+	switch src {
+	case "Bean":
+		*t.Value = 0
+	default:
+		return fmt.Errorf("label %s not in enum %v", src, __VDLType_vomtype_v_io_v23_vom_testdata_types_BeanEnum)
+	}
 	return nil
 }
 
@@ -3320,14 +5606,36 @@ func (FoodEnum) __VDLReflect(struct {
 }) {
 }
 
-func (m FoodEnum) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
-	if err := t.FromEnumLabel(m.String(), __VDLType_vomtype_v_io_v23_vom_testdata_types_FoodEnum); err != nil {
+func (m *FoodEnum) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
+	if err := t.FromEnumLabel((*m).String(), __VDLType_vomtype_v_io_v23_vom_testdata_types_FoodEnum); err != nil {
 		return err
 	}
 	return nil
 }
 
-func (m FoodEnum) MakeVDLTarget() vdl.Target {
+func (m *FoodEnum) MakeVDLTarget() vdl.Target {
+	return &FoodEnumTarget{Value: m}
+}
+
+type FoodEnumTarget struct {
+	Value *FoodEnum
+	vdl.TargetBase
+}
+
+func (t *FoodEnumTarget) FromEnumLabel(src string, tt *vdl.Type) error {
+	if !vdl.Compatible(tt, __VDLType_vomtype_v_io_v23_vom_testdata_types_FoodEnum) {
+		return fmt.Errorf("type %v incompatible with %v", tt, __VDLType_vomtype_v_io_v23_vom_testdata_types_FoodEnum)
+	}
+	switch src {
+	case "Bean":
+		*t.Value = 0
+	case "Brie":
+		*t.Value = 1
+	case "Cherry":
+		*t.Value = 2
+	default:
+		return fmt.Errorf("label %s not in enum %v", src, __VDLType_vomtype_v_io_v23_vom_testdata_types_FoodEnum)
+	}
 	return nil
 }
 
@@ -3341,7 +5649,6 @@ func (StructAny) __VDLReflect(struct {
 }
 
 func (m *StructAny) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
-
 	if __VDLType_vomtype_v_io_v23_vom_testdata_types_StructAny == nil || __VDLTypevomtype25 == nil {
 		panic("Initialization order error: types generated for FillVDLTarget not initialized. Consider moving caller to an init() block.")
 	}
@@ -3376,6 +5683,34 @@ func (m *StructAny) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 }
 
 func (m *StructAny) MakeVDLTarget() vdl.Target {
+	return &StructAnyTarget{Value: m}
+}
+
+type StructAnyTarget struct {
+	Value *StructAny
+	vdl.TargetBase
+	vdl.FieldsTargetBase
+}
+
+func (t *StructAnyTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
+	if !vdl.Compatible(tt, __VDLType_vomtype_v_io_v23_vom_testdata_types_StructAny) {
+		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType_vomtype_v_io_v23_vom_testdata_types_StructAny)
+	}
+	return t, nil
+}
+func (t *StructAnyTarget) StartField(name string) (key, field vdl.Target, _ error) {
+	switch name {
+	case "Any":
+		val, err := vdl.ReflectTarget(reflect.ValueOf(&t.Value.Any))
+		return nil, val, err
+	default:
+		return nil, nil, fmt.Errorf("field %s not in struct %v", name, __VDLType_vomtype_v_io_v23_vom_testdata_types_StructAny)
+	}
+}
+func (t *StructAnyTarget) FinishField(_, _ vdl.Target) error {
+	return nil
+}
+func (t *StructAnyTarget) FinishFields(_ vdl.FieldsTarget) error {
 	return nil
 }
 
@@ -3389,7 +5724,6 @@ func (StructMap) __VDLReflect(struct {
 }
 
 func (m *StructMap) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
-
 	if __VDLType_vomtype_v_io_v23_vom_testdata_types_StructMap == nil || __VDLTypevomtype26 == nil {
 		panic("Initialization order error: types generated for FillVDLTarget not initialized. Consider moving caller to an init() block.")
 	}
@@ -3441,6 +5775,68 @@ func (m *StructMap) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 }
 
 func (m *StructMap) MakeVDLTarget() vdl.Target {
+	return &StructMapTarget{Value: m}
+}
+
+type StructMapTarget struct {
+	Value *StructMap
+	vdl.TargetBase
+	vdl.FieldsTargetBase
+}
+
+func (t *StructMapTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
+	if !vdl.Compatible(tt, __VDLType_vomtype_v_io_v23_vom_testdata_types_StructMap) {
+		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType_vomtype_v_io_v23_vom_testdata_types_StructMap)
+	}
+	return t, nil
+}
+func (t *StructMapTarget) StartField(name string) (key, field vdl.Target, _ error) {
+	switch name {
+	case "Map":
+		val, err := &vomtype6d61705b696e7436345d696e743634Target{Value: &t.Value.Map}, error(nil)
+		return nil, val, err
+	default:
+		return nil, nil, fmt.Errorf("field %s not in struct %v", name, __VDLType_vomtype_v_io_v23_vom_testdata_types_StructMap)
+	}
+}
+func (t *StructMapTarget) FinishField(_, _ vdl.Target) error {
+	return nil
+}
+func (t *StructMapTarget) FinishFields(_ vdl.FieldsTarget) error {
+	return nil
+}
+
+type vomtype6d61705b696e7436345d696e743634Target struct {
+	Value    *map[int64]int64
+	currKey  int64
+	currElem int64
+	vdl.TargetBase
+	vdl.MapTargetBase
+}
+
+func (t *vomtype6d61705b696e7436345d696e743634Target) StartMap(tt *vdl.Type, len int) (vdl.MapTarget, error) {
+	if !vdl.Compatible(tt, __VDLTypevomtype27) {
+		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLTypevomtype27)
+	}
+	*t.Value = make(map[int64]int64)
+	return t, nil
+}
+func (t *vomtype6d61705b696e7436345d696e743634Target) StartKey() (key vdl.Target, _ error) {
+	t.currKey = int64(0)
+	return &vdl.Int64Target{Value: &t.currKey}, error(nil)
+}
+func (t *vomtype6d61705b696e7436345d696e743634Target) FinishKeyStartField(key vdl.Target) (field vdl.Target, _ error) {
+	t.currElem = int64(0)
+	return &vdl.Int64Target{Value: &t.currElem}, error(nil)
+}
+func (t *vomtype6d61705b696e7436345d696e743634Target) FinishField(key, field vdl.Target) error {
+	(*t.Value)[t.currKey] = t.currElem
+	return nil
+}
+func (t *vomtype6d61705b696e7436345d696e743634Target) FinishMap(elem vdl.MapTarget) error {
+	if len(*t.Value) == 0 {
+		*t.Value = nil
+	}
 	return nil
 }
 
@@ -3479,7 +5875,6 @@ func (StructManyTypes) __VDLReflect(struct {
 }
 
 func (m *StructManyTypes) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
-
 	if __VDLType_vomtype_v_io_v23_vom_testdata_types_StructManyTypes == nil || __VDLTypevomtype28 == nil {
 		panic("Initialization order error: types generated for FillVDLTarget not initialized. Consider moving caller to an init() block.")
 	}
@@ -3801,6 +6196,103 @@ func (m *StructManyTypes) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 }
 
 func (m *StructManyTypes) MakeVDLTarget() vdl.Target {
+	return &StructManyTypesTarget{Value: m}
+}
+
+type StructManyTypesTarget struct {
+	Value *StructManyTypes
+	vdl.TargetBase
+	vdl.FieldsTargetBase
+}
+
+func (t *StructManyTypesTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
+	if !vdl.Compatible(tt, __VDLType_vomtype_v_io_v23_vom_testdata_types_StructManyTypes) {
+		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType_vomtype_v_io_v23_vom_testdata_types_StructManyTypes)
+	}
+	return t, nil
+}
+func (t *StructManyTypesTarget) StartField(name string) (key, field vdl.Target, _ error) {
+	switch name {
+	case "Bool":
+		val, err := &vdl.BoolTarget{Value: &t.Value.Bool}, error(nil)
+		return nil, val, err
+	case "AByte":
+		val, err := &vdl.ByteTarget{Value: &t.Value.AByte}, error(nil)
+		return nil, val, err
+	case "Int16":
+		val, err := &vdl.Int16Target{Value: &t.Value.Int16}, error(nil)
+		return nil, val, err
+	case "Int32":
+		val, err := &vdl.Int32Target{Value: &t.Value.Int32}, error(nil)
+		return nil, val, err
+	case "Int64":
+		val, err := &vdl.Int64Target{Value: &t.Value.Int64}, error(nil)
+		return nil, val, err
+	case "Uint16":
+		val, err := &vdl.Uint16Target{Value: &t.Value.Uint16}, error(nil)
+		return nil, val, err
+	case "Uint32":
+		val, err := &vdl.Uint32Target{Value: &t.Value.Uint32}, error(nil)
+		return nil, val, err
+	case "Uint64":
+		val, err := &vdl.Uint64Target{Value: &t.Value.Uint64}, error(nil)
+		return nil, val, err
+	case "String":
+		val, err := &vdl.StringTarget{Value: &t.Value.String}, error(nil)
+		return nil, val, err
+	case "Bytes":
+		val, err := &vdl.BytesTarget{Value: &t.Value.Bytes}, error(nil)
+		return nil, val, err
+	case "Float32":
+		val, err := &vdl.Float32Target{Value: &t.Value.Float32}, error(nil)
+		return nil, val, err
+	case "Float64":
+		val, err := &vdl.Float64Target{Value: &t.Value.Float64}, error(nil)
+		return nil, val, err
+	case "Complex64":
+		val, err := &vdl.Complex64Target{Value: &t.Value.Complex64}, error(nil)
+		return nil, val, err
+	case "Complex128":
+		val, err := &vdl.Complex128Target{Value: &t.Value.Complex128}, error(nil)
+		return nil, val, err
+	case "FoodEnum":
+		val, err := &FoodEnumTarget{Value: &t.Value.FoodEnum}, error(nil)
+		return nil, val, err
+	case "NEnum":
+		val, err := &NEnumTarget{Value: &t.Value.NEnum}, error(nil)
+		return nil, val, err
+	case "NListUint64":
+		val, err := &NListUint64Target{Value: &t.Value.NListUint64}, error(nil)
+		return nil, val, err
+	case "NByteArray":
+		val, err := &NByteArrayTarget{Value: &t.Value.NByteArray}, error(nil)
+		return nil, val, err
+	case "NArray2Uint64":
+		val, err := &NArray2Uint64Target{Value: &t.Value.NArray2Uint64}, error(nil)
+		return nil, val, err
+	case "NSetUint64":
+		val, err := &NSetUint64Target{Value: &t.Value.NSetUint64}, error(nil)
+		return nil, val, err
+	case "NMapUint64String":
+		val, err := &NMapUint64StringTarget{Value: &t.Value.NMapUint64String}, error(nil)
+		return nil, val, err
+	case "NStruct":
+		val, err := &NStructTarget{Value: &t.Value.NStruct}, error(nil)
+		return nil, val, err
+	case "NUnion":
+		val, err := vdl.ReflectTarget(reflect.ValueOf(&t.Value.NUnion))
+		return nil, val, err
+	case "TypeObject":
+		val, err := &vdl.TypeObjectTarget{Value: &t.Value.TypeObject}, error(nil)
+		return nil, val, err
+	default:
+		return nil, nil, fmt.Errorf("field %s not in struct %v", name, __VDLType_vomtype_v_io_v23_vom_testdata_types_StructManyTypes)
+	}
+}
+func (t *StructManyTypesTarget) FinishField(_, _ vdl.Target) error {
+	return nil
+}
+func (t *StructManyTypesTarget) FinishFields(_ vdl.FieldsTarget) error {
 	return nil
 }
 
@@ -3811,13 +6303,12 @@ func (AnySlice) __VDLReflect(struct {
 }) {
 }
 
-func (m AnySlice) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
-
-	listTarget1, err := t.StartList(__VDLType_vomtype_v_io_v23_vom_testdata_types_AnySlice, len(m))
+func (m *AnySlice) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
+	listTarget1, err := t.StartList(__VDLType_vomtype_v_io_v23_vom_testdata_types_AnySlice, len((*m)))
 	if err != nil {
 		return err
 	}
-	for i, elem3 := range m {
+	for i, elem3 := range *m {
 		elemTarget2, err := listTarget1.StartElem(i)
 		if err != nil {
 			return err
@@ -3842,7 +6333,34 @@ func (m AnySlice) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 	return nil
 }
 
-func (m AnySlice) MakeVDLTarget() vdl.Target {
+func (m *AnySlice) MakeVDLTarget() vdl.Target {
+	return &AnySliceTarget{Value: m}
+}
+
+type AnySliceTarget struct {
+	Value *AnySlice
+	vdl.TargetBase
+	vdl.ListTargetBase
+}
+
+func (t *AnySliceTarget) StartList(tt *vdl.Type, len int) (vdl.ListTarget, error) {
+	if !vdl.Compatible(tt, __VDLType_vomtype_v_io_v23_vom_testdata_types_AnySlice) {
+		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType_vomtype_v_io_v23_vom_testdata_types_AnySlice)
+	}
+	if cap(*t.Value) < len {
+		*t.Value = make(AnySlice, len)
+	} else {
+		*t.Value = (*t.Value)[:len]
+	}
+	return t, nil
+}
+func (t *AnySliceTarget) StartElem(index int) (elem vdl.Target, _ error) {
+	return vdl.ReflectTarget(reflect.ValueOf(&(*t.Value)[index]))
+}
+func (t *AnySliceTarget) FinishElem(elem vdl.Target) error {
+	return nil
+}
+func (t *AnySliceTarget) FinishList(elem vdl.ListTarget) error {
 	return nil
 }
 
@@ -3857,7 +6375,6 @@ func (LargeMessageType) __VDLReflect(struct {
 }
 
 func (m *LargeMessageType) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
-
 	if __VDLType_vomtype_v_io_v23_vom_testdata_types_LargeMessageType == nil || __VDLTypevomtype30 == nil {
 		panic("Initialization order error: types generated for FillVDLTarget not initialized. Consider moving caller to an init() block.")
 	}
@@ -3905,6 +6422,61 @@ func (m *LargeMessageType) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 }
 
 func (m *LargeMessageType) MakeVDLTarget() vdl.Target {
+	return &LargeMessageTypeTarget{Value: m}
+}
+
+type LargeMessageTypeTarget struct {
+	Value *LargeMessageType
+	vdl.TargetBase
+	vdl.FieldsTargetBase
+}
+
+func (t *LargeMessageTypeTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
+	if !vdl.Compatible(tt, __VDLType_vomtype_v_io_v23_vom_testdata_types_LargeMessageType) {
+		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType_vomtype_v_io_v23_vom_testdata_types_LargeMessageType)
+	}
+	return t, nil
+}
+func (t *LargeMessageTypeTarget) StartField(name string) (key, field vdl.Target, _ error) {
+	switch name {
+	case "Payload":
+		val, err := &vdl.BytesTarget{Value: &t.Value.Payload}, error(nil)
+		return nil, val, err
+	case "Next":
+		val, err := &vomtype3f762e696f2f7632332f766f6d2f74657374646174612f74797065732e4c617267654d65737361676554797065207374727563747b5061796c6f6164205b5d627974653b4e657874203f762e696f2f7632332f766f6d2f74657374646174612f74797065732e4c617267654d657373616765547970657dTarget{Value: &t.Value.Next}, error(nil)
+		return nil, val, err
+	default:
+		return nil, nil, fmt.Errorf("field %s not in struct %v", name, __VDLType_vomtype_v_io_v23_vom_testdata_types_LargeMessageType)
+	}
+}
+func (t *LargeMessageTypeTarget) FinishField(_, _ vdl.Target) error {
+	return nil
+}
+func (t *LargeMessageTypeTarget) FinishFields(_ vdl.FieldsTarget) error {
+	return nil
+}
+
+type vomtype3f762e696f2f7632332f766f6d2f74657374646174612f74797065732e4c617267654d65737361676554797065207374727563747b5061796c6f6164205b5d627974653b4e657874203f762e696f2f7632332f766f6d2f74657374646174612f74797065732e4c617267654d657373616765547970657dTarget struct {
+	Value **LargeMessageType
+	vdl.TargetBase
+	vdl.FieldsTargetBase
+}
+
+func (t *vomtype3f762e696f2f7632332f766f6d2f74657374646174612f74797065732e4c617267654d65737361676554797065207374727563747b5061796c6f6164205b5d627974653b4e657874203f762e696f2f7632332f766f6d2f74657374646174612f74797065732e4c617267654d657373616765547970657dTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
+	if *t.Value == nil {
+		*t.Value = &LargeMessageType{}
+	}
+	target, err := &LargeMessageTypeTarget{Value: *t.Value}, error(nil)
+	if err != nil {
+		return nil, err
+	}
+	return target.StartFields(tt)
+}
+func (t *vomtype3f762e696f2f7632332f766f6d2f74657374646174612f74797065732e4c617267654d65737361676554797065207374727563747b5061796c6f6164205b5d627974653b4e657874203f762e696f2f7632332f766f6d2f74657374646174612f74797065732e4c617267654d657373616765547970657dTarget) FinishFields(_ vdl.FieldsTarget) error {
+	return nil
+}
+func (t *vomtype3f762e696f2f7632332f766f6d2f74657374646174612f74797065732e4c617267654d65737361676554797065207374727563747b5061796c6f6164205b5d627974653b4e657874203f762e696f2f7632332f766f6d2f74657374646174612f74797065732e4c617267654d657373616765547970657dTarget) FromNil(tt *vdl.Type) error {
+	*t.Value = nil
 	return nil
 }
 
@@ -3919,7 +6491,6 @@ func (LargeAnyMessageType) __VDLReflect(struct {
 }
 
 func (m *LargeAnyMessageType) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
-
 	if __VDLType_vomtype_v_io_v23_vom_testdata_types_LargeAnyMessageType == nil || __VDLTypevomtype31 == nil {
 		panic("Initialization order error: types generated for FillVDLTarget not initialized. Consider moving caller to an init() block.")
 	}
@@ -3973,6 +6544,61 @@ func (m *LargeAnyMessageType) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 }
 
 func (m *LargeAnyMessageType) MakeVDLTarget() vdl.Target {
+	return &LargeAnyMessageTypeTarget{Value: m}
+}
+
+type LargeAnyMessageTypeTarget struct {
+	Value *LargeAnyMessageType
+	vdl.TargetBase
+	vdl.FieldsTargetBase
+}
+
+func (t *LargeAnyMessageTypeTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
+	if !vdl.Compatible(tt, __VDLType_vomtype_v_io_v23_vom_testdata_types_LargeAnyMessageType) {
+		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType_vomtype_v_io_v23_vom_testdata_types_LargeAnyMessageType)
+	}
+	return t, nil
+}
+func (t *LargeAnyMessageTypeTarget) StartField(name string) (key, field vdl.Target, _ error) {
+	switch name {
+	case "Payload":
+		val, err := vdl.ReflectTarget(reflect.ValueOf(&t.Value.Payload))
+		return nil, val, err
+	case "Next":
+		val, err := &vomtype3f762e696f2f7632332f766f6d2f74657374646174612f74797065732e4c61726765416e794d65737361676554797065207374727563747b5061796c6f616420616e793b4e657874203f762e696f2f7632332f766f6d2f74657374646174612f74797065732e4c61726765416e794d657373616765547970657dTarget{Value: &t.Value.Next}, error(nil)
+		return nil, val, err
+	default:
+		return nil, nil, fmt.Errorf("field %s not in struct %v", name, __VDLType_vomtype_v_io_v23_vom_testdata_types_LargeAnyMessageType)
+	}
+}
+func (t *LargeAnyMessageTypeTarget) FinishField(_, _ vdl.Target) error {
+	return nil
+}
+func (t *LargeAnyMessageTypeTarget) FinishFields(_ vdl.FieldsTarget) error {
+	return nil
+}
+
+type vomtype3f762e696f2f7632332f766f6d2f74657374646174612f74797065732e4c61726765416e794d65737361676554797065207374727563747b5061796c6f616420616e793b4e657874203f762e696f2f7632332f766f6d2f74657374646174612f74797065732e4c61726765416e794d657373616765547970657dTarget struct {
+	Value **LargeAnyMessageType
+	vdl.TargetBase
+	vdl.FieldsTargetBase
+}
+
+func (t *vomtype3f762e696f2f7632332f766f6d2f74657374646174612f74797065732e4c61726765416e794d65737361676554797065207374727563747b5061796c6f616420616e793b4e657874203f762e696f2f7632332f766f6d2f74657374646174612f74797065732e4c61726765416e794d657373616765547970657dTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
+	if *t.Value == nil {
+		*t.Value = &LargeAnyMessageType{}
+	}
+	target, err := &LargeAnyMessageTypeTarget{Value: *t.Value}, error(nil)
+	if err != nil {
+		return nil, err
+	}
+	return target.StartFields(tt)
+}
+func (t *vomtype3f762e696f2f7632332f766f6d2f74657374646174612f74797065732e4c61726765416e794d65737361676554797065207374727563747b5061796c6f616420616e793b4e657874203f762e696f2f7632332f766f6d2f74657374646174612f74797065732e4c61726765416e794d657373616765547970657dTarget) FinishFields(_ vdl.FieldsTarget) error {
+	return nil
+}
+func (t *vomtype3f762e696f2f7632332f766f6d2f74657374646174612f74797065732e4c61726765416e794d65737361676554797065207374727563747b5061796c6f616420616e793b4e657874203f762e696f2f7632332f766f6d2f74657374646174612f74797065732e4c61726765416e794d657373616765547970657dTarget) FromNil(tt *vdl.Type) error {
+	*t.Value = nil
 	return nil
 }
 

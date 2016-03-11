@@ -34,7 +34,6 @@ func (Config) __VDLReflect(struct {
 }
 
 func (m *Config) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
-
 	if __VDLType_config_vdltool_Config == nil || __VDLTypeconfig0 == nil {
 		panic("Initialization order error: types generated for FillVDLTarget not initialized. Consider moving caller to an init() block.")
 	}
@@ -119,6 +118,335 @@ func (m *Config) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 }
 
 func (m *Config) MakeVDLTarget() vdl.Target {
+	return &ConfigTarget{Value: m}
+}
+
+type ConfigTarget struct {
+	Value *Config
+	vdl.TargetBase
+	vdl.FieldsTargetBase
+}
+
+func (t *ConfigTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
+	if !vdl.Compatible(tt, __VDLType_config_vdltool_Config) {
+		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType_config_vdltool_Config)
+	}
+	return t, nil
+}
+func (t *ConfigTarget) StartField(name string) (key, field vdl.Target, _ error) {
+	switch name {
+	case "GenLanguages":
+		val, err := &config7365745b76646c746f6f6c2e47656e4c616e677561676520656e756d7b476f3b4a6176613b4a6176617363726970747d5dTarget{Value: &t.Value.GenLanguages}, error(nil)
+		return nil, val, err
+	case "Go":
+		val, err := &GoConfigTarget{Value: &t.Value.Go}, error(nil)
+		return nil, val, err
+	case "Java":
+		val, err := &JavaConfigTarget{Value: &t.Value.Java}, error(nil)
+		return nil, val, err
+	case "Javascript":
+		val, err := &JavascriptConfigTarget{Value: &t.Value.Javascript}, error(nil)
+		return nil, val, err
+	default:
+		return nil, nil, fmt.Errorf("field %s not in struct %v", name, __VDLType_config_vdltool_Config)
+	}
+}
+func (t *ConfigTarget) FinishField(_, _ vdl.Target) error {
+	return nil
+}
+func (t *ConfigTarget) FinishFields(_ vdl.FieldsTarget) error {
+	return nil
+}
+
+type config7365745b76646c746f6f6c2e47656e4c616e677561676520656e756d7b476f3b4a6176613b4a6176617363726970747d5dTarget struct {
+	Value   *map[GenLanguage]struct{}
+	currKey GenLanguage
+	vdl.TargetBase
+	vdl.SetTargetBase
+}
+
+func (t *config7365745b76646c746f6f6c2e47656e4c616e677561676520656e756d7b476f3b4a6176613b4a6176617363726970747d5dTarget) StartSet(tt *vdl.Type, len int) (vdl.SetTarget, error) {
+	if !vdl.Compatible(tt, __VDLTypeconfig1) {
+		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLTypeconfig1)
+	}
+	*t.Value = make(map[GenLanguage]struct{})
+	return t, nil
+}
+func (t *config7365745b76646c746f6f6c2e47656e4c616e677561676520656e756d7b476f3b4a6176613b4a6176617363726970747d5dTarget) StartKey() (key vdl.Target, _ error) {
+	t.currKey = GenLanguageGo
+	return &GenLanguageTarget{Value: &t.currKey}, error(nil)
+}
+func (t *config7365745b76646c746f6f6c2e47656e4c616e677561676520656e756d7b476f3b4a6176613b4a6176617363726970747d5dTarget) FinishKey(key vdl.Target) error {
+	(*t.Value)[t.currKey] = struct{}{}
+	return nil
+}
+func (t *config7365745b76646c746f6f6c2e47656e4c616e677561676520656e756d7b476f3b4a6176613b4a6176617363726970747d5dTarget) FinishSet(list vdl.SetTarget) error {
+	if len(*t.Value) == 0 {
+		*t.Value = nil
+	}
+	return nil
+}
+
+type GenLanguageTarget struct {
+	Value *GenLanguage
+	vdl.TargetBase
+}
+
+func (t *GenLanguageTarget) FromEnumLabel(src string, tt *vdl.Type) error {
+	if !vdl.Compatible(tt, __VDLType_config_vdltool_GenLanguage) {
+		return fmt.Errorf("type %v incompatible with %v", tt, __VDLType_config_vdltool_GenLanguage)
+	}
+	switch src {
+	case "Go":
+		*t.Value = 0
+	case "Java":
+		*t.Value = 1
+	case "Javascript":
+		*t.Value = 2
+	default:
+		return fmt.Errorf("label %s not in enum %v", src, __VDLType_config_vdltool_GenLanguage)
+	}
+	return nil
+}
+
+type GoConfigTarget struct {
+	Value *GoConfig
+	vdl.TargetBase
+	vdl.FieldsTargetBase
+}
+
+func (t *GoConfigTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
+	if !vdl.Compatible(tt, __VDLType_config_vdltool_GoConfig) {
+		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType_config_vdltool_GoConfig)
+	}
+	return t, nil
+}
+func (t *GoConfigTarget) StartField(name string) (key, field vdl.Target, _ error) {
+	switch name {
+	case "WireToNativeTypes":
+		val, err := &config6d61705b737472696e675d76646c746f6f6c2e476f54797065207374727563747b5479706520737472696e673b496d706f727473205b5d76646c746f6f6c2e476f496d706f7274207374727563747b5061746820737472696e673b4e616d6520737472696e677d7dTarget{Value: &t.Value.WireToNativeTypes}, error(nil)
+		return nil, val, err
+	default:
+		return nil, nil, fmt.Errorf("field %s not in struct %v", name, __VDLType_config_vdltool_GoConfig)
+	}
+}
+func (t *GoConfigTarget) FinishField(_, _ vdl.Target) error {
+	return nil
+}
+func (t *GoConfigTarget) FinishFields(_ vdl.FieldsTarget) error {
+	return nil
+}
+
+type config6d61705b737472696e675d76646c746f6f6c2e476f54797065207374727563747b5479706520737472696e673b496d706f727473205b5d76646c746f6f6c2e476f496d706f7274207374727563747b5061746820737472696e673b4e616d6520737472696e677d7dTarget struct {
+	Value    *map[string]GoType
+	currKey  string
+	currElem GoType
+	vdl.TargetBase
+	vdl.MapTargetBase
+}
+
+func (t *config6d61705b737472696e675d76646c746f6f6c2e476f54797065207374727563747b5479706520737472696e673b496d706f727473205b5d76646c746f6f6c2e476f496d706f7274207374727563747b5061746820737472696e673b4e616d6520737472696e677d7dTarget) StartMap(tt *vdl.Type, len int) (vdl.MapTarget, error) {
+	if !vdl.Compatible(tt, __VDLTypeconfig3) {
+		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLTypeconfig3)
+	}
+	*t.Value = make(map[string]GoType)
+	return t, nil
+}
+func (t *config6d61705b737472696e675d76646c746f6f6c2e476f54797065207374727563747b5479706520737472696e673b496d706f727473205b5d76646c746f6f6c2e476f496d706f7274207374727563747b5061746820737472696e673b4e616d6520737472696e677d7dTarget) StartKey() (key vdl.Target, _ error) {
+	t.currKey = ""
+	return &vdl.StringTarget{Value: &t.currKey}, error(nil)
+}
+func (t *config6d61705b737472696e675d76646c746f6f6c2e476f54797065207374727563747b5479706520737472696e673b496d706f727473205b5d76646c746f6f6c2e476f496d706f7274207374727563747b5061746820737472696e673b4e616d6520737472696e677d7dTarget) FinishKeyStartField(key vdl.Target) (field vdl.Target, _ error) {
+	t.currElem = GoType{}
+	return &GoTypeTarget{Value: &t.currElem}, error(nil)
+}
+func (t *config6d61705b737472696e675d76646c746f6f6c2e476f54797065207374727563747b5479706520737472696e673b496d706f727473205b5d76646c746f6f6c2e476f496d706f7274207374727563747b5061746820737472696e673b4e616d6520737472696e677d7dTarget) FinishField(key, field vdl.Target) error {
+	(*t.Value)[t.currKey] = t.currElem
+	return nil
+}
+func (t *config6d61705b737472696e675d76646c746f6f6c2e476f54797065207374727563747b5479706520737472696e673b496d706f727473205b5d76646c746f6f6c2e476f496d706f7274207374727563747b5061746820737472696e673b4e616d6520737472696e677d7dTarget) FinishMap(elem vdl.MapTarget) error {
+	if len(*t.Value) == 0 {
+		*t.Value = nil
+	}
+	return nil
+}
+
+type GoTypeTarget struct {
+	Value *GoType
+	vdl.TargetBase
+	vdl.FieldsTargetBase
+}
+
+func (t *GoTypeTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
+	if !vdl.Compatible(tt, __VDLType_config_vdltool_GoType) {
+		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType_config_vdltool_GoType)
+	}
+	return t, nil
+}
+func (t *GoTypeTarget) StartField(name string) (key, field vdl.Target, _ error) {
+	switch name {
+	case "Type":
+		val, err := &vdl.StringTarget{Value: &t.Value.Type}, error(nil)
+		return nil, val, err
+	case "Imports":
+		val, err := &config5b5d76646c746f6f6c2e476f496d706f7274207374727563747b5061746820737472696e673b4e616d6520737472696e677dTarget{Value: &t.Value.Imports}, error(nil)
+		return nil, val, err
+	default:
+		return nil, nil, fmt.Errorf("field %s not in struct %v", name, __VDLType_config_vdltool_GoType)
+	}
+}
+func (t *GoTypeTarget) FinishField(_, _ vdl.Target) error {
+	return nil
+}
+func (t *GoTypeTarget) FinishFields(_ vdl.FieldsTarget) error {
+	return nil
+}
+
+type config5b5d76646c746f6f6c2e476f496d706f7274207374727563747b5061746820737472696e673b4e616d6520737472696e677dTarget struct {
+	Value *[]GoImport
+	vdl.TargetBase
+	vdl.ListTargetBase
+}
+
+func (t *config5b5d76646c746f6f6c2e476f496d706f7274207374727563747b5061746820737472696e673b4e616d6520737472696e677dTarget) StartList(tt *vdl.Type, len int) (vdl.ListTarget, error) {
+	if !vdl.Compatible(tt, __VDLTypeconfig2) {
+		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLTypeconfig2)
+	}
+	if cap(*t.Value) < len {
+		*t.Value = make([]GoImport, len)
+	} else {
+		*t.Value = (*t.Value)[:len]
+	}
+	return t, nil
+}
+func (t *config5b5d76646c746f6f6c2e476f496d706f7274207374727563747b5061746820737472696e673b4e616d6520737472696e677dTarget) StartElem(index int) (elem vdl.Target, _ error) {
+	return &GoImportTarget{Value: &(*t.Value)[index]}, error(nil)
+}
+func (t *config5b5d76646c746f6f6c2e476f496d706f7274207374727563747b5061746820737472696e673b4e616d6520737472696e677dTarget) FinishElem(elem vdl.Target) error {
+	return nil
+}
+func (t *config5b5d76646c746f6f6c2e476f496d706f7274207374727563747b5061746820737472696e673b4e616d6520737472696e677dTarget) FinishList(elem vdl.ListTarget) error {
+	return nil
+}
+
+type GoImportTarget struct {
+	Value *GoImport
+	vdl.TargetBase
+	vdl.FieldsTargetBase
+}
+
+func (t *GoImportTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
+	if !vdl.Compatible(tt, __VDLType_config_vdltool_GoImport) {
+		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType_config_vdltool_GoImport)
+	}
+	return t, nil
+}
+func (t *GoImportTarget) StartField(name string) (key, field vdl.Target, _ error) {
+	switch name {
+	case "Path":
+		val, err := &vdl.StringTarget{Value: &t.Value.Path}, error(nil)
+		return nil, val, err
+	case "Name":
+		val, err := &vdl.StringTarget{Value: &t.Value.Name}, error(nil)
+		return nil, val, err
+	default:
+		return nil, nil, fmt.Errorf("field %s not in struct %v", name, __VDLType_config_vdltool_GoImport)
+	}
+}
+func (t *GoImportTarget) FinishField(_, _ vdl.Target) error {
+	return nil
+}
+func (t *GoImportTarget) FinishFields(_ vdl.FieldsTarget) error {
+	return nil
+}
+
+type JavaConfigTarget struct {
+	Value *JavaConfig
+	vdl.TargetBase
+	vdl.FieldsTargetBase
+}
+
+func (t *JavaConfigTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
+	if !vdl.Compatible(tt, __VDLType_config_vdltool_JavaConfig) {
+		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType_config_vdltool_JavaConfig)
+	}
+	return t, nil
+}
+func (t *JavaConfigTarget) StartField(name string) (key, field vdl.Target, _ error) {
+	switch name {
+	case "WireToNativeTypes":
+		val, err := &config6d61705b737472696e675d737472696e67Target{Value: &t.Value.WireToNativeTypes}, error(nil)
+		return nil, val, err
+	case "WireTypeRenames":
+		val, err := &config6d61705b737472696e675d737472696e67Target{Value: &t.Value.WireTypeRenames}, error(nil)
+		return nil, val, err
+	default:
+		return nil, nil, fmt.Errorf("field %s not in struct %v", name, __VDLType_config_vdltool_JavaConfig)
+	}
+}
+func (t *JavaConfigTarget) FinishField(_, _ vdl.Target) error {
+	return nil
+}
+func (t *JavaConfigTarget) FinishFields(_ vdl.FieldsTarget) error {
+	return nil
+}
+
+type config6d61705b737472696e675d737472696e67Target struct {
+	Value    *map[string]string
+	currKey  string
+	currElem string
+	vdl.TargetBase
+	vdl.MapTargetBase
+}
+
+func (t *config6d61705b737472696e675d737472696e67Target) StartMap(tt *vdl.Type, len int) (vdl.MapTarget, error) {
+	if !vdl.Compatible(tt, __VDLTypeconfig4) {
+		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLTypeconfig4)
+	}
+	*t.Value = make(map[string]string)
+	return t, nil
+}
+func (t *config6d61705b737472696e675d737472696e67Target) StartKey() (key vdl.Target, _ error) {
+	t.currKey = ""
+	return &vdl.StringTarget{Value: &t.currKey}, error(nil)
+}
+func (t *config6d61705b737472696e675d737472696e67Target) FinishKeyStartField(key vdl.Target) (field vdl.Target, _ error) {
+	t.currElem = ""
+	return &vdl.StringTarget{Value: &t.currElem}, error(nil)
+}
+func (t *config6d61705b737472696e675d737472696e67Target) FinishField(key, field vdl.Target) error {
+	(*t.Value)[t.currKey] = t.currElem
+	return nil
+}
+func (t *config6d61705b737472696e675d737472696e67Target) FinishMap(elem vdl.MapTarget) error {
+	if len(*t.Value) == 0 {
+		*t.Value = nil
+	}
+	return nil
+}
+
+type JavascriptConfigTarget struct {
+	Value *JavascriptConfig
+	vdl.TargetBase
+	vdl.FieldsTargetBase
+}
+
+func (t *JavascriptConfigTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
+	if !vdl.Compatible(tt, __VDLType_config_vdltool_JavascriptConfig) {
+		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType_config_vdltool_JavascriptConfig)
+	}
+	return t, nil
+}
+func (t *JavascriptConfigTarget) StartField(name string) (key, field vdl.Target, _ error) {
+	switch name {
+	default:
+		return nil, nil, fmt.Errorf("field %s not in struct %v", name, __VDLType_config_vdltool_JavascriptConfig)
+	}
+}
+func (t *JavascriptConfigTarget) FinishField(_, _ vdl.Target) error {
+	return nil
+}
+func (t *JavascriptConfigTarget) FinishFields(_ vdl.FieldsTarget) error {
 	return nil
 }
 
@@ -176,15 +504,15 @@ func (GenLanguage) __VDLReflect(struct {
 }) {
 }
 
-func (m GenLanguage) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
-	if err := t.FromEnumLabel(m.String(), __VDLType_config_vdltool_GenLanguage); err != nil {
+func (m *GenLanguage) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
+	if err := t.FromEnumLabel((*m).String(), __VDLType_config_vdltool_GenLanguage); err != nil {
 		return err
 	}
 	return nil
 }
 
-func (m GenLanguage) MakeVDLTarget() vdl.Target {
-	return nil
+func (m *GenLanguage) MakeVDLTarget() vdl.Target {
+	return &GenLanguageTarget{Value: m}
 }
 
 // GoConfig specifies go specific configuration.
@@ -219,8 +547,7 @@ func (GoConfig) __VDLReflect(struct {
 }
 
 func (m *GoConfig) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
-
-	if __VDLType_config_vdltool_GoConfig == nil || __VDLTypeconfig2 == nil {
+	if __VDLType_config_vdltool_GoConfig == nil || __VDLTypeconfig5 == nil {
 		panic("Initialization order error: types generated for FillVDLTarget not initialized. Consider moving caller to an init() block.")
 	}
 	fieldsTarget1, err := t.StartFields(tt)
@@ -272,7 +599,7 @@ func (m *GoConfig) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 }
 
 func (m *GoConfig) MakeVDLTarget() vdl.Target {
-	return nil
+	return &GoConfigTarget{Value: m}
 }
 
 // GoType describes the Go type information associated with a VDL type.
@@ -293,8 +620,7 @@ func (GoType) __VDLReflect(struct {
 }
 
 func (m *GoType) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
-
-	if __VDLType_config_vdltool_GoType == nil || __VDLTypeconfig4 == nil {
+	if __VDLType_config_vdltool_GoType == nil || __VDLTypeconfig6 == nil {
 		panic("Initialization order error: types generated for FillVDLTarget not initialized. Consider moving caller to an init() block.")
 	}
 	fieldsTarget1, err := t.StartFields(tt)
@@ -320,7 +646,7 @@ func (m *GoType) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 	}
 	if err != vdl.ErrFieldNoExist {
 
-		listTarget6, err := fieldTarget5.StartList(__VDLTypeconfig5, len(m.Imports))
+		listTarget6, err := fieldTarget5.StartList(__VDLTypeconfig2, len(m.Imports))
 		if err != nil {
 			return err
 		}
@@ -351,7 +677,7 @@ func (m *GoType) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 }
 
 func (m *GoType) MakeVDLTarget() vdl.Target {
-	return nil
+	return &GoTypeTarget{Value: m}
 }
 
 // GoImport describes Go import information.
@@ -370,8 +696,7 @@ func (GoImport) __VDLReflect(struct {
 }
 
 func (m *GoImport) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
-
-	if __VDLType_config_vdltool_GoImport == nil || __VDLTypeconfig6 == nil {
+	if __VDLType_config_vdltool_GoImport == nil || __VDLTypeconfig7 == nil {
 		panic("Initialization order error: types generated for FillVDLTarget not initialized. Consider moving caller to an init() block.")
 	}
 	fieldsTarget1, err := t.StartFields(tt)
@@ -410,7 +735,7 @@ func (m *GoImport) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 }
 
 func (m *GoImport) MakeVDLTarget() vdl.Target {
-	return nil
+	return &GoImportTarget{Value: m}
 }
 
 // JavaConfig specifies java specific configuration.
@@ -455,8 +780,7 @@ func (JavaConfig) __VDLReflect(struct {
 }
 
 func (m *JavaConfig) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
-
-	if __VDLType_config_vdltool_JavaConfig == nil || __VDLTypeconfig7 == nil {
+	if __VDLType_config_vdltool_JavaConfig == nil || __VDLTypeconfig8 == nil {
 		panic("Initialization order error: types generated for FillVDLTarget not initialized. Consider moving caller to an init() block.")
 	}
 	fieldsTarget1, err := t.StartFields(tt)
@@ -470,7 +794,7 @@ func (m *JavaConfig) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 	}
 	if err != vdl.ErrFieldNoExist {
 
-		mapTarget4, err := fieldTarget3.StartMap(__VDLTypeconfig8, len(m.WireToNativeTypes))
+		mapTarget4, err := fieldTarget3.StartMap(__VDLTypeconfig4, len(m.WireToNativeTypes))
 		if err != nil {
 			return err
 		}
@@ -506,7 +830,7 @@ func (m *JavaConfig) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 	}
 	if err != vdl.ErrFieldNoExist {
 
-		mapTarget11, err := fieldTarget10.StartMap(__VDLTypeconfig8, len(m.WireTypeRenames))
+		mapTarget11, err := fieldTarget10.StartMap(__VDLTypeconfig4, len(m.WireTypeRenames))
 		if err != nil {
 			return err
 		}
@@ -543,7 +867,7 @@ func (m *JavaConfig) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 }
 
 func (m *JavaConfig) MakeVDLTarget() vdl.Target {
-	return nil
+	return &JavaConfigTarget{Value: m}
 }
 
 // JavascriptConfig specifies javascript specific configuration.
@@ -556,7 +880,6 @@ func (JavascriptConfig) __VDLReflect(struct {
 }
 
 func (m *JavascriptConfig) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
-
 	if __VDLType_config_vdltool_JavascriptConfig == nil || __VDLTypeconfig9 == nil {
 		panic("Initialization order error: types generated for FillVDLTarget not initialized. Consider moving caller to an init() block.")
 	}
@@ -572,7 +895,7 @@ func (m *JavascriptConfig) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 }
 
 func (m *JavascriptConfig) MakeVDLTarget() vdl.Target {
-	return nil
+	return &JavascriptConfigTarget{Value: m}
 }
 
 func init() {
@@ -586,13 +909,13 @@ func init() {
 }
 
 var __VDLTypeconfig0 *vdl.Type = vdl.TypeOf((*Config)(nil))
-var __VDLTypeconfig2 *vdl.Type = vdl.TypeOf((*GoConfig)(nil))
-var __VDLTypeconfig6 *vdl.Type = vdl.TypeOf((*GoImport)(nil))
-var __VDLTypeconfig4 *vdl.Type = vdl.TypeOf((*GoType)(nil))
-var __VDLTypeconfig7 *vdl.Type = vdl.TypeOf((*JavaConfig)(nil))
+var __VDLTypeconfig5 *vdl.Type = vdl.TypeOf((*GoConfig)(nil))
+var __VDLTypeconfig7 *vdl.Type = vdl.TypeOf((*GoImport)(nil))
+var __VDLTypeconfig6 *vdl.Type = vdl.TypeOf((*GoType)(nil))
+var __VDLTypeconfig8 *vdl.Type = vdl.TypeOf((*JavaConfig)(nil))
 var __VDLTypeconfig9 *vdl.Type = vdl.TypeOf((*JavascriptConfig)(nil))
-var __VDLTypeconfig5 *vdl.Type = vdl.TypeOf([]GoImport(nil))
-var __VDLTypeconfig8 *vdl.Type = vdl.TypeOf(map[string]string(nil))
+var __VDLTypeconfig2 *vdl.Type = vdl.TypeOf([]GoImport(nil))
+var __VDLTypeconfig4 *vdl.Type = vdl.TypeOf(map[string]string(nil))
 var __VDLTypeconfig3 *vdl.Type = vdl.TypeOf(map[string]GoType(nil))
 var __VDLTypeconfig1 *vdl.Type = vdl.TypeOf(map[GenLanguage]struct{}(nil))
 var __VDLType_config_vdltool_Config *vdl.Type = vdl.TypeOf(Config{})

@@ -2,11 +2,24 @@ pkg application, const DeviceManagerTitle ideal-string
 pkg application, method (*Envelope) FillVDLTarget(vdl.Target, *vdl.Type) error
 pkg application, method (*Envelope) MakeVDLTarget() vdl.Target
 pkg application, method (*Envelope) UnmarshalJSON([]byte) error
+pkg application, method (*EnvelopeTarget) FinishField(vdl.Target, vdl.Target) error
+pkg application, method (*EnvelopeTarget) FinishFields(vdl.FieldsTarget) error
+pkg application, method (*EnvelopeTarget) StartField(string) (vdl.Target, vdl.Target, error)
+pkg application, method (*EnvelopeTarget) StartFields(*vdl.Type) (vdl.FieldsTarget, error)
+pkg application, method (*Packages) FillVDLTarget(vdl.Target, *vdl.Type) error
+pkg application, method (*Packages) MakeVDLTarget() vdl.Target
+pkg application, method (*PackagesTarget) FinishField(vdl.Target, vdl.Target) error
+pkg application, method (*PackagesTarget) FinishKeyStartField(vdl.Target) (vdl.Target, error)
+pkg application, method (*PackagesTarget) FinishMap(vdl.MapTarget) error
+pkg application, method (*PackagesTarget) StartKey() (vdl.Target, error)
+pkg application, method (*PackagesTarget) StartMap(*vdl.Type, int) (vdl.MapTarget, error)
 pkg application, method (*SignedFile) FillVDLTarget(vdl.Target, *vdl.Type) error
 pkg application, method (*SignedFile) MakeVDLTarget() vdl.Target
+pkg application, method (*SignedFileTarget) FinishField(vdl.Target, vdl.Target) error
+pkg application, method (*SignedFileTarget) FinishFields(vdl.FieldsTarget) error
+pkg application, method (*SignedFileTarget) StartField(string) (vdl.Target, vdl.Target, error)
+pkg application, method (*SignedFileTarget) StartFields(*vdl.Type) (vdl.FieldsTarget, error)
 pkg application, method (Envelope) MarshalJSON() ([]byte, error)
-pkg application, method (Packages) FillVDLTarget(vdl.Target, *vdl.Type) error
-pkg application, method (Packages) MakeVDLTarget() vdl.Target
 pkg application, type Envelope struct
 pkg application, type Envelope struct, Args []string
 pkg application, type Envelope struct, Binary SignedFile
@@ -16,7 +29,19 @@ pkg application, type Envelope struct, Publisher security.Blessings
 pkg application, type Envelope struct, RestartTimeWindow time.Duration
 pkg application, type Envelope struct, Restarts int32
 pkg application, type Envelope struct, Title string
+pkg application, type EnvelopeTarget struct
+pkg application, type EnvelopeTarget struct, Value *Envelope
+pkg application, type EnvelopeTarget struct, embedded vdl.FieldsTargetBase
+pkg application, type EnvelopeTarget struct, embedded vdl.TargetBase
 pkg application, type Packages map[string]SignedFile
+pkg application, type PackagesTarget struct
+pkg application, type PackagesTarget struct, Value *Packages
+pkg application, type PackagesTarget struct, embedded vdl.MapTargetBase
+pkg application, type PackagesTarget struct, embedded vdl.TargetBase
 pkg application, type SignedFile struct
 pkg application, type SignedFile struct, File string
 pkg application, type SignedFile struct, Signature security.Signature
+pkg application, type SignedFileTarget struct
+pkg application, type SignedFileTarget struct, Value *SignedFile
+pkg application, type SignedFileTarget struct, embedded vdl.FieldsTargetBase
+pkg application, type SignedFileTarget struct, embedded vdl.TargetBase

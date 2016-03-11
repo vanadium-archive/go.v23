@@ -3,11 +3,19 @@ pkg logreader, func LogFileClient(string) LogFileClientStub
 pkg logreader, func LogFileServer(LogFileServerMethods) LogFileServerStub
 pkg logreader, method (*LogEntry) FillVDLTarget(vdl.Target, *vdl.Type) error
 pkg logreader, method (*LogEntry) MakeVDLTarget() vdl.Target
+pkg logreader, method (*LogEntryTarget) FinishField(vdl.Target, vdl.Target) error
+pkg logreader, method (*LogEntryTarget) FinishFields(vdl.FieldsTarget) error
+pkg logreader, method (*LogEntryTarget) StartField(string) (vdl.Target, vdl.Target, error)
+pkg logreader, method (*LogEntryTarget) StartFields(*vdl.Type) (vdl.FieldsTarget, error)
 pkg logreader, method (*LogFileReadLogServerCallStub) Init(rpc.StreamServerCall)
 pkg logreader, method (*LogFileReadLogServerCallStub) SendStream() interface {  Send(item LogEntry) error;}
 pkg logreader, type LogEntry struct
 pkg logreader, type LogEntry struct, Line string
 pkg logreader, type LogEntry struct, Position int64
+pkg logreader, type LogEntryTarget struct
+pkg logreader, type LogEntryTarget struct, Value *LogEntry
+pkg logreader, type LogEntryTarget struct, embedded vdl.FieldsTargetBase
+pkg logreader, type LogEntryTarget struct, embedded vdl.TargetBase
 pkg logreader, type LogFileClientMethods interface { ReadLog, Size }
 pkg logreader, type LogFileClientMethods interface, ReadLog(*context.T, int64, int32, bool, ...rpc.CallOpt) (LogFileReadLogClientCall, error)
 pkg logreader, type LogFileClientMethods interface, Size(*context.T, ...rpc.CallOpt) (int64, error)

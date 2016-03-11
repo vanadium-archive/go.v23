@@ -10,6 +10,7 @@
 package repository
 
 import (
+	"fmt"
 	"io"
 	"v.io/v23"
 	"v.io/v23/context"
@@ -34,7 +35,6 @@ func (MediaInfo) __VDLReflect(struct {
 }
 
 func (m *MediaInfo) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
-
 	if __VDLType_repository_v_io_v23_services_repository_MediaInfo == nil || __VDLTyperepository0 == nil {
 		panic("Initialization order error: types generated for FillVDLTarget not initialized. Consider moving caller to an init() block.")
 	}
@@ -74,6 +74,37 @@ func (m *MediaInfo) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 }
 
 func (m *MediaInfo) MakeVDLTarget() vdl.Target {
+	return &MediaInfoTarget{Value: m}
+}
+
+type MediaInfoTarget struct {
+	Value *MediaInfo
+	vdl.TargetBase
+	vdl.FieldsTargetBase
+}
+
+func (t *MediaInfoTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
+	if !vdl.Compatible(tt, __VDLType_repository_v_io_v23_services_repository_MediaInfo) {
+		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType_repository_v_io_v23_services_repository_MediaInfo)
+	}
+	return t, nil
+}
+func (t *MediaInfoTarget) StartField(name string) (key, field vdl.Target, _ error) {
+	switch name {
+	case "Type":
+		val, err := &vdl.StringTarget{Value: &t.Value.Type}, error(nil)
+		return nil, val, err
+	case "Encoding":
+		val, err := &vdl.StringTarget{Value: &t.Value.Encoding}, error(nil)
+		return nil, val, err
+	default:
+		return nil, nil, fmt.Errorf("field %s not in struct %v", name, __VDLType_repository_v_io_v23_services_repository_MediaInfo)
+	}
+}
+func (t *MediaInfoTarget) FinishField(_, _ vdl.Target) error {
+	return nil
+}
+func (t *MediaInfoTarget) FinishFields(_ vdl.FieldsTarget) error {
 	return nil
 }
 

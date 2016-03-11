@@ -8,6 +8,8 @@
 package types
 
 import (
+	"fmt"
+	"reflect"
 	"v.io/v23/vdl"
 )
 
@@ -28,7 +30,6 @@ func (TestCase) __VDLReflect(struct {
 }
 
 func (m *TestCase) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
-
 	if __VDLType_testcase_v_io_v23_vom_testdata_types_TestCase == nil || __VDLTypetestcase0 == nil {
 		panic("Initialization order error: types generated for FillVDLTarget not initialized. Consider moving caller to an init() block.")
 	}
@@ -135,6 +136,52 @@ func (m *TestCase) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 }
 
 func (m *TestCase) MakeVDLTarget() vdl.Target {
+	return &TestCaseTarget{Value: m}
+}
+
+type TestCaseTarget struct {
+	Value *TestCase
+	vdl.TargetBase
+	vdl.FieldsTargetBase
+}
+
+func (t *TestCaseTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
+	if !vdl.Compatible(tt, __VDLType_testcase_v_io_v23_vom_testdata_types_TestCase) {
+		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType_testcase_v_io_v23_vom_testdata_types_TestCase)
+	}
+	return t, nil
+}
+func (t *TestCaseTarget) StartField(name string) (key, field vdl.Target, _ error) {
+	switch name {
+	case "Name":
+		val, err := &vdl.StringTarget{Value: &t.Value.Name}, error(nil)
+		return nil, val, err
+	case "Value":
+		val, err := vdl.ReflectTarget(reflect.ValueOf(&t.Value.Value))
+		return nil, val, err
+	case "TypeString":
+		val, err := &vdl.StringTarget{Value: &t.Value.TypeString}, error(nil)
+		return nil, val, err
+	case "Hex":
+		val, err := &vdl.StringTarget{Value: &t.Value.Hex}, error(nil)
+		return nil, val, err
+	case "HexVersion":
+		val, err := &vdl.StringTarget{Value: &t.Value.HexVersion}, error(nil)
+		return nil, val, err
+	case "HexType":
+		val, err := &vdl.StringTarget{Value: &t.Value.HexType}, error(nil)
+		return nil, val, err
+	case "HexValue":
+		val, err := &vdl.StringTarget{Value: &t.Value.HexValue}, error(nil)
+		return nil, val, err
+	default:
+		return nil, nil, fmt.Errorf("field %s not in struct %v", name, __VDLType_testcase_v_io_v23_vom_testdata_types_TestCase)
+	}
+}
+func (t *TestCaseTarget) FinishField(_, _ vdl.Target) error {
+	return nil
+}
+func (t *TestCaseTarget) FinishFields(_ vdl.FieldsTarget) error {
 	return nil
 }
 

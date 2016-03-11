@@ -8,7 +8,9 @@
 package vom
 
 import (
+	"fmt"
 	"v.io/v23/vdl"
+	"v.io/v23/vdl/vdlconv"
 )
 
 // typeId uniquely identifies a type definition within a vom stream.
@@ -19,14 +21,48 @@ func (typeId) __VDLReflect(struct {
 }) {
 }
 
-func (m typeId) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
-	if err := t.FromUint(uint64(m), __VDLType_wiretype_v_io_v23_vom_typeId); err != nil {
+func (m *typeId) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
+	if err := t.FromUint(uint64((*m)), __VDLType_wiretype_v_io_v23_vom_typeId); err != nil {
 		return err
 	}
 	return nil
 }
 
-func (m typeId) MakeVDLTarget() vdl.Target {
+func (m *typeId) MakeVDLTarget() vdl.Target {
+	return &typeIdTarget{Value: m}
+}
+
+type typeIdTarget struct {
+	Value *typeId
+	vdl.TargetBase
+}
+
+func (t *typeIdTarget) FromUint(src uint64, tt *vdl.Type) error {
+	*t.Value = typeId(src)
+	return nil
+}
+func (t *typeIdTarget) FromInt(src int64, tt *vdl.Type) error {
+	val, err := vdlconv.Int64ToUint64(src)
+	if err != nil {
+		return err
+	}
+	*t.Value = typeId(val)
+	return nil
+}
+func (t *typeIdTarget) FromFloat(src float64, tt *vdl.Type) error {
+	val, err := vdlconv.Float64ToUint64(src)
+	if err != nil {
+		return err
+	}
+	*t.Value = typeId(val)
+	return nil
+}
+func (t *typeIdTarget) FromComplex(src complex128, tt *vdl.Type) error {
+	val, err := vdlconv.Complex128ToUint64(src)
+	if err != nil {
+		return err
+	}
+	*t.Value = typeId(val)
 	return nil
 }
 
@@ -93,7 +129,6 @@ func (x wireTypeNamedT) Name() string                   { return "NamedT" }
 func (x wireTypeNamedT) __VDLReflect(__wireTypeReflect) {}
 
 func (m wireTypeNamedT) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
-
 	fieldsTarget1, err := t.StartFields(__VDLType_wiretype_v_io_v23_vom_wireType)
 	if err != nil {
 		return err
@@ -126,7 +161,6 @@ func (x wireTypeEnumT) Name() string                   { return "EnumT" }
 func (x wireTypeEnumT) __VDLReflect(__wireTypeReflect) {}
 
 func (m wireTypeEnumT) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
-
 	fieldsTarget1, err := t.StartFields(__VDLType_wiretype_v_io_v23_vom_wireType)
 	if err != nil {
 		return err
@@ -159,7 +193,6 @@ func (x wireTypeArrayT) Name() string                   { return "ArrayT" }
 func (x wireTypeArrayT) __VDLReflect(__wireTypeReflect) {}
 
 func (m wireTypeArrayT) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
-
 	fieldsTarget1, err := t.StartFields(__VDLType_wiretype_v_io_v23_vom_wireType)
 	if err != nil {
 		return err
@@ -192,7 +225,6 @@ func (x wireTypeListT) Name() string                   { return "ListT" }
 func (x wireTypeListT) __VDLReflect(__wireTypeReflect) {}
 
 func (m wireTypeListT) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
-
 	fieldsTarget1, err := t.StartFields(__VDLType_wiretype_v_io_v23_vom_wireType)
 	if err != nil {
 		return err
@@ -225,7 +257,6 @@ func (x wireTypeSetT) Name() string                   { return "SetT" }
 func (x wireTypeSetT) __VDLReflect(__wireTypeReflect) {}
 
 func (m wireTypeSetT) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
-
 	fieldsTarget1, err := t.StartFields(__VDLType_wiretype_v_io_v23_vom_wireType)
 	if err != nil {
 		return err
@@ -258,7 +289,6 @@ func (x wireTypeMapT) Name() string                   { return "MapT" }
 func (x wireTypeMapT) __VDLReflect(__wireTypeReflect) {}
 
 func (m wireTypeMapT) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
-
 	fieldsTarget1, err := t.StartFields(__VDLType_wiretype_v_io_v23_vom_wireType)
 	if err != nil {
 		return err
@@ -291,7 +321,6 @@ func (x wireTypeStructT) Name() string                   { return "StructT" }
 func (x wireTypeStructT) __VDLReflect(__wireTypeReflect) {}
 
 func (m wireTypeStructT) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
-
 	fieldsTarget1, err := t.StartFields(__VDLType_wiretype_v_io_v23_vom_wireType)
 	if err != nil {
 		return err
@@ -324,7 +353,6 @@ func (x wireTypeUnionT) Name() string                   { return "UnionT" }
 func (x wireTypeUnionT) __VDLReflect(__wireTypeReflect) {}
 
 func (m wireTypeUnionT) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
-
 	fieldsTarget1, err := t.StartFields(__VDLType_wiretype_v_io_v23_vom_wireType)
 	if err != nil {
 		return err
@@ -357,7 +385,6 @@ func (x wireTypeOptionalT) Name() string                   { return "OptionalT" 
 func (x wireTypeOptionalT) __VDLReflect(__wireTypeReflect) {}
 
 func (m wireTypeOptionalT) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
-
 	fieldsTarget1, err := t.StartFields(__VDLType_wiretype_v_io_v23_vom_wireType)
 	if err != nil {
 		return err
@@ -396,7 +423,6 @@ func (wireNamed) __VDLReflect(struct {
 }
 
 func (m *wireNamed) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
-
 	if __VDLType_wiretype_v_io_v23_vom_wireNamed == nil || __VDLTypewiretype0 == nil {
 		panic("Initialization order error: types generated for FillVDLTarget not initialized. Consider moving caller to an init() block.")
 	}
@@ -437,6 +463,37 @@ func (m *wireNamed) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 }
 
 func (m *wireNamed) MakeVDLTarget() vdl.Target {
+	return &wireNamedTarget{Value: m}
+}
+
+type wireNamedTarget struct {
+	Value *wireNamed
+	vdl.TargetBase
+	vdl.FieldsTargetBase
+}
+
+func (t *wireNamedTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
+	if !vdl.Compatible(tt, __VDLType_wiretype_v_io_v23_vom_wireNamed) {
+		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType_wiretype_v_io_v23_vom_wireNamed)
+	}
+	return t, nil
+}
+func (t *wireNamedTarget) StartField(name string) (key, field vdl.Target, _ error) {
+	switch name {
+	case "Name":
+		val, err := &vdl.StringTarget{Value: &t.Value.Name}, error(nil)
+		return nil, val, err
+	case "Base":
+		val, err := &typeIdTarget{Value: &t.Value.Base}, error(nil)
+		return nil, val, err
+	default:
+		return nil, nil, fmt.Errorf("field %s not in struct %v", name, __VDLType_wiretype_v_io_v23_vom_wireNamed)
+	}
+}
+func (t *wireNamedTarget) FinishField(_, _ vdl.Target) error {
+	return nil
+}
+func (t *wireNamedTarget) FinishFields(_ vdl.FieldsTarget) error {
 	return nil
 }
 
@@ -452,7 +509,6 @@ func (wireEnum) __VDLReflect(struct {
 }
 
 func (m *wireEnum) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
-
 	if __VDLType_wiretype_v_io_v23_vom_wireEnum == nil || __VDLTypewiretype1 == nil {
 		panic("Initialization order error: types generated for FillVDLTarget not initialized. Consider moving caller to an init() block.")
 	}
@@ -509,6 +565,37 @@ func (m *wireEnum) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 }
 
 func (m *wireEnum) MakeVDLTarget() vdl.Target {
+	return &wireEnumTarget{Value: m}
+}
+
+type wireEnumTarget struct {
+	Value *wireEnum
+	vdl.TargetBase
+	vdl.FieldsTargetBase
+}
+
+func (t *wireEnumTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
+	if !vdl.Compatible(tt, __VDLType_wiretype_v_io_v23_vom_wireEnum) {
+		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType_wiretype_v_io_v23_vom_wireEnum)
+	}
+	return t, nil
+}
+func (t *wireEnumTarget) StartField(name string) (key, field vdl.Target, _ error) {
+	switch name {
+	case "Name":
+		val, err := &vdl.StringTarget{Value: &t.Value.Name}, error(nil)
+		return nil, val, err
+	case "Labels":
+		val, err := &vdl.StringSliceTarget{Value: &t.Value.Labels}, error(nil)
+		return nil, val, err
+	default:
+		return nil, nil, fmt.Errorf("field %s not in struct %v", name, __VDLType_wiretype_v_io_v23_vom_wireEnum)
+	}
+}
+func (t *wireEnumTarget) FinishField(_, _ vdl.Target) error {
+	return nil
+}
+func (t *wireEnumTarget) FinishFields(_ vdl.FieldsTarget) error {
 	return nil
 }
 
@@ -525,7 +612,6 @@ func (wireArray) __VDLReflect(struct {
 }
 
 func (m *wireArray) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
-
 	if __VDLType_wiretype_v_io_v23_vom_wireArray == nil || __VDLTypewiretype3 == nil {
 		panic("Initialization order error: types generated for FillVDLTarget not initialized. Consider moving caller to an init() block.")
 	}
@@ -578,6 +664,40 @@ func (m *wireArray) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 }
 
 func (m *wireArray) MakeVDLTarget() vdl.Target {
+	return &wireArrayTarget{Value: m}
+}
+
+type wireArrayTarget struct {
+	Value *wireArray
+	vdl.TargetBase
+	vdl.FieldsTargetBase
+}
+
+func (t *wireArrayTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
+	if !vdl.Compatible(tt, __VDLType_wiretype_v_io_v23_vom_wireArray) {
+		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType_wiretype_v_io_v23_vom_wireArray)
+	}
+	return t, nil
+}
+func (t *wireArrayTarget) StartField(name string) (key, field vdl.Target, _ error) {
+	switch name {
+	case "Name":
+		val, err := &vdl.StringTarget{Value: &t.Value.Name}, error(nil)
+		return nil, val, err
+	case "Elem":
+		val, err := &typeIdTarget{Value: &t.Value.Elem}, error(nil)
+		return nil, val, err
+	case "Len":
+		val, err := &vdl.Uint64Target{Value: &t.Value.Len}, error(nil)
+		return nil, val, err
+	default:
+		return nil, nil, fmt.Errorf("field %s not in struct %v", name, __VDLType_wiretype_v_io_v23_vom_wireArray)
+	}
+}
+func (t *wireArrayTarget) FinishField(_, _ vdl.Target) error {
+	return nil
+}
+func (t *wireArrayTarget) FinishFields(_ vdl.FieldsTarget) error {
 	return nil
 }
 
@@ -593,7 +713,6 @@ func (wireList) __VDLReflect(struct {
 }
 
 func (m *wireList) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
-
 	if __VDLType_wiretype_v_io_v23_vom_wireList == nil || __VDLTypewiretype4 == nil {
 		panic("Initialization order error: types generated for FillVDLTarget not initialized. Consider moving caller to an init() block.")
 	}
@@ -634,6 +753,37 @@ func (m *wireList) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 }
 
 func (m *wireList) MakeVDLTarget() vdl.Target {
+	return &wireListTarget{Value: m}
+}
+
+type wireListTarget struct {
+	Value *wireList
+	vdl.TargetBase
+	vdl.FieldsTargetBase
+}
+
+func (t *wireListTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
+	if !vdl.Compatible(tt, __VDLType_wiretype_v_io_v23_vom_wireList) {
+		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType_wiretype_v_io_v23_vom_wireList)
+	}
+	return t, nil
+}
+func (t *wireListTarget) StartField(name string) (key, field vdl.Target, _ error) {
+	switch name {
+	case "Name":
+		val, err := &vdl.StringTarget{Value: &t.Value.Name}, error(nil)
+		return nil, val, err
+	case "Elem":
+		val, err := &typeIdTarget{Value: &t.Value.Elem}, error(nil)
+		return nil, val, err
+	default:
+		return nil, nil, fmt.Errorf("field %s not in struct %v", name, __VDLType_wiretype_v_io_v23_vom_wireList)
+	}
+}
+func (t *wireListTarget) FinishField(_, _ vdl.Target) error {
+	return nil
+}
+func (t *wireListTarget) FinishFields(_ vdl.FieldsTarget) error {
 	return nil
 }
 
@@ -649,7 +799,6 @@ func (wireSet) __VDLReflect(struct {
 }
 
 func (m *wireSet) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
-
 	if __VDLType_wiretype_v_io_v23_vom_wireSet == nil || __VDLTypewiretype5 == nil {
 		panic("Initialization order error: types generated for FillVDLTarget not initialized. Consider moving caller to an init() block.")
 	}
@@ -690,6 +839,37 @@ func (m *wireSet) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 }
 
 func (m *wireSet) MakeVDLTarget() vdl.Target {
+	return &wireSetTarget{Value: m}
+}
+
+type wireSetTarget struct {
+	Value *wireSet
+	vdl.TargetBase
+	vdl.FieldsTargetBase
+}
+
+func (t *wireSetTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
+	if !vdl.Compatible(tt, __VDLType_wiretype_v_io_v23_vom_wireSet) {
+		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType_wiretype_v_io_v23_vom_wireSet)
+	}
+	return t, nil
+}
+func (t *wireSetTarget) StartField(name string) (key, field vdl.Target, _ error) {
+	switch name {
+	case "Name":
+		val, err := &vdl.StringTarget{Value: &t.Value.Name}, error(nil)
+		return nil, val, err
+	case "Key":
+		val, err := &typeIdTarget{Value: &t.Value.Key}, error(nil)
+		return nil, val, err
+	default:
+		return nil, nil, fmt.Errorf("field %s not in struct %v", name, __VDLType_wiretype_v_io_v23_vom_wireSet)
+	}
+}
+func (t *wireSetTarget) FinishField(_, _ vdl.Target) error {
+	return nil
+}
+func (t *wireSetTarget) FinishFields(_ vdl.FieldsTarget) error {
 	return nil
 }
 
@@ -706,7 +886,6 @@ func (wireMap) __VDLReflect(struct {
 }
 
 func (m *wireMap) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
-
 	if __VDLType_wiretype_v_io_v23_vom_wireMap == nil || __VDLTypewiretype6 == nil {
 		panic("Initialization order error: types generated for FillVDLTarget not initialized. Consider moving caller to an init() block.")
 	}
@@ -760,6 +939,40 @@ func (m *wireMap) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 }
 
 func (m *wireMap) MakeVDLTarget() vdl.Target {
+	return &wireMapTarget{Value: m}
+}
+
+type wireMapTarget struct {
+	Value *wireMap
+	vdl.TargetBase
+	vdl.FieldsTargetBase
+}
+
+func (t *wireMapTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
+	if !vdl.Compatible(tt, __VDLType_wiretype_v_io_v23_vom_wireMap) {
+		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType_wiretype_v_io_v23_vom_wireMap)
+	}
+	return t, nil
+}
+func (t *wireMapTarget) StartField(name string) (key, field vdl.Target, _ error) {
+	switch name {
+	case "Name":
+		val, err := &vdl.StringTarget{Value: &t.Value.Name}, error(nil)
+		return nil, val, err
+	case "Key":
+		val, err := &typeIdTarget{Value: &t.Value.Key}, error(nil)
+		return nil, val, err
+	case "Elem":
+		val, err := &typeIdTarget{Value: &t.Value.Elem}, error(nil)
+		return nil, val, err
+	default:
+		return nil, nil, fmt.Errorf("field %s not in struct %v", name, __VDLType_wiretype_v_io_v23_vom_wireMap)
+	}
+}
+func (t *wireMapTarget) FinishField(_, _ vdl.Target) error {
+	return nil
+}
+func (t *wireMapTarget) FinishFields(_ vdl.FieldsTarget) error {
 	return nil
 }
 
@@ -775,7 +988,6 @@ func (wireField) __VDLReflect(struct {
 }
 
 func (m *wireField) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
-
 	if __VDLType_wiretype_v_io_v23_vom_wireField == nil || __VDLTypewiretype7 == nil {
 		panic("Initialization order error: types generated for FillVDLTarget not initialized. Consider moving caller to an init() block.")
 	}
@@ -816,6 +1028,37 @@ func (m *wireField) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 }
 
 func (m *wireField) MakeVDLTarget() vdl.Target {
+	return &wireFieldTarget{Value: m}
+}
+
+type wireFieldTarget struct {
+	Value *wireField
+	vdl.TargetBase
+	vdl.FieldsTargetBase
+}
+
+func (t *wireFieldTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
+	if !vdl.Compatible(tt, __VDLType_wiretype_v_io_v23_vom_wireField) {
+		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType_wiretype_v_io_v23_vom_wireField)
+	}
+	return t, nil
+}
+func (t *wireFieldTarget) StartField(name string) (key, field vdl.Target, _ error) {
+	switch name {
+	case "Name":
+		val, err := &vdl.StringTarget{Value: &t.Value.Name}, error(nil)
+		return nil, val, err
+	case "Type":
+		val, err := &typeIdTarget{Value: &t.Value.Type}, error(nil)
+		return nil, val, err
+	default:
+		return nil, nil, fmt.Errorf("field %s not in struct %v", name, __VDLType_wiretype_v_io_v23_vom_wireField)
+	}
+}
+func (t *wireFieldTarget) FinishField(_, _ vdl.Target) error {
+	return nil
+}
+func (t *wireFieldTarget) FinishFields(_ vdl.FieldsTarget) error {
 	return nil
 }
 
@@ -831,7 +1074,6 @@ func (wireStruct) __VDLReflect(struct {
 }
 
 func (m *wireStruct) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
-
 	if __VDLType_wiretype_v_io_v23_vom_wireStruct == nil || __VDLTypewiretype8 == nil {
 		panic("Initialization order error: types generated for FillVDLTarget not initialized. Consider moving caller to an init() block.")
 	}
@@ -889,6 +1131,64 @@ func (m *wireStruct) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 }
 
 func (m *wireStruct) MakeVDLTarget() vdl.Target {
+	return &wireStructTarget{Value: m}
+}
+
+type wireStructTarget struct {
+	Value *wireStruct
+	vdl.TargetBase
+	vdl.FieldsTargetBase
+}
+
+func (t *wireStructTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
+	if !vdl.Compatible(tt, __VDLType_wiretype_v_io_v23_vom_wireStruct) {
+		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType_wiretype_v_io_v23_vom_wireStruct)
+	}
+	return t, nil
+}
+func (t *wireStructTarget) StartField(name string) (key, field vdl.Target, _ error) {
+	switch name {
+	case "Name":
+		val, err := &vdl.StringTarget{Value: &t.Value.Name}, error(nil)
+		return nil, val, err
+	case "Fields":
+		val, err := &wiretype5b5d762e696f2f7632332f766f6d2e776972654669656c64207374727563747b4e616d6520737472696e673b5479706520762e696f2f7632332f766f6d2e7479706549642075696e7436347dTarget{Value: &t.Value.Fields}, error(nil)
+		return nil, val, err
+	default:
+		return nil, nil, fmt.Errorf("field %s not in struct %v", name, __VDLType_wiretype_v_io_v23_vom_wireStruct)
+	}
+}
+func (t *wireStructTarget) FinishField(_, _ vdl.Target) error {
+	return nil
+}
+func (t *wireStructTarget) FinishFields(_ vdl.FieldsTarget) error {
+	return nil
+}
+
+type wiretype5b5d762e696f2f7632332f766f6d2e776972654669656c64207374727563747b4e616d6520737472696e673b5479706520762e696f2f7632332f766f6d2e7479706549642075696e7436347dTarget struct {
+	Value *[]wireField
+	vdl.TargetBase
+	vdl.ListTargetBase
+}
+
+func (t *wiretype5b5d762e696f2f7632332f766f6d2e776972654669656c64207374727563747b4e616d6520737472696e673b5479706520762e696f2f7632332f766f6d2e7479706549642075696e7436347dTarget) StartList(tt *vdl.Type, len int) (vdl.ListTarget, error) {
+	if !vdl.Compatible(tt, __VDLTypewiretype9) {
+		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLTypewiretype9)
+	}
+	if cap(*t.Value) < len {
+		*t.Value = make([]wireField, len)
+	} else {
+		*t.Value = (*t.Value)[:len]
+	}
+	return t, nil
+}
+func (t *wiretype5b5d762e696f2f7632332f766f6d2e776972654669656c64207374727563747b4e616d6520737472696e673b5479706520762e696f2f7632332f766f6d2e7479706549642075696e7436347dTarget) StartElem(index int) (elem vdl.Target, _ error) {
+	return &wireFieldTarget{Value: &(*t.Value)[index]}, error(nil)
+}
+func (t *wiretype5b5d762e696f2f7632332f766f6d2e776972654669656c64207374727563747b4e616d6520737472696e673b5479706520762e696f2f7632332f766f6d2e7479706549642075696e7436347dTarget) FinishElem(elem vdl.Target) error {
+	return nil
+}
+func (t *wiretype5b5d762e696f2f7632332f766f6d2e776972654669656c64207374727563747b4e616d6520737472696e673b5479706520762e696f2f7632332f766f6d2e7479706549642075696e7436347dTarget) FinishList(elem vdl.ListTarget) error {
 	return nil
 }
 
@@ -904,7 +1204,6 @@ func (wireUnion) __VDLReflect(struct {
 }
 
 func (m *wireUnion) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
-
 	if __VDLType_wiretype_v_io_v23_vom_wireUnion == nil || __VDLTypewiretype10 == nil {
 		panic("Initialization order error: types generated for FillVDLTarget not initialized. Consider moving caller to an init() block.")
 	}
@@ -962,6 +1261,37 @@ func (m *wireUnion) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 }
 
 func (m *wireUnion) MakeVDLTarget() vdl.Target {
+	return &wireUnionTarget{Value: m}
+}
+
+type wireUnionTarget struct {
+	Value *wireUnion
+	vdl.TargetBase
+	vdl.FieldsTargetBase
+}
+
+func (t *wireUnionTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
+	if !vdl.Compatible(tt, __VDLType_wiretype_v_io_v23_vom_wireUnion) {
+		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType_wiretype_v_io_v23_vom_wireUnion)
+	}
+	return t, nil
+}
+func (t *wireUnionTarget) StartField(name string) (key, field vdl.Target, _ error) {
+	switch name {
+	case "Name":
+		val, err := &vdl.StringTarget{Value: &t.Value.Name}, error(nil)
+		return nil, val, err
+	case "Fields":
+		val, err := &wiretype5b5d762e696f2f7632332f766f6d2e776972654669656c64207374727563747b4e616d6520737472696e673b5479706520762e696f2f7632332f766f6d2e7479706549642075696e7436347dTarget{Value: &t.Value.Fields}, error(nil)
+		return nil, val, err
+	default:
+		return nil, nil, fmt.Errorf("field %s not in struct %v", name, __VDLType_wiretype_v_io_v23_vom_wireUnion)
+	}
+}
+func (t *wireUnionTarget) FinishField(_, _ vdl.Target) error {
+	return nil
+}
+func (t *wireUnionTarget) FinishFields(_ vdl.FieldsTarget) error {
 	return nil
 }
 
@@ -977,7 +1307,6 @@ func (wireOptional) __VDLReflect(struct {
 }
 
 func (m *wireOptional) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
-
 	if __VDLType_wiretype_v_io_v23_vom_wireOptional == nil || __VDLTypewiretype11 == nil {
 		panic("Initialization order error: types generated for FillVDLTarget not initialized. Consider moving caller to an init() block.")
 	}
@@ -1018,6 +1347,37 @@ func (m *wireOptional) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 }
 
 func (m *wireOptional) MakeVDLTarget() vdl.Target {
+	return &wireOptionalTarget{Value: m}
+}
+
+type wireOptionalTarget struct {
+	Value *wireOptional
+	vdl.TargetBase
+	vdl.FieldsTargetBase
+}
+
+func (t *wireOptionalTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
+	if !vdl.Compatible(tt, __VDLType_wiretype_v_io_v23_vom_wireOptional) {
+		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType_wiretype_v_io_v23_vom_wireOptional)
+	}
+	return t, nil
+}
+func (t *wireOptionalTarget) StartField(name string) (key, field vdl.Target, _ error) {
+	switch name {
+	case "Name":
+		val, err := &vdl.StringTarget{Value: &t.Value.Name}, error(nil)
+		return nil, val, err
+	case "Elem":
+		val, err := &typeIdTarget{Value: &t.Value.Elem}, error(nil)
+		return nil, val, err
+	default:
+		return nil, nil, fmt.Errorf("field %s not in struct %v", name, __VDLType_wiretype_v_io_v23_vom_wireOptional)
+	}
+}
+func (t *wireOptionalTarget) FinishField(_, _ vdl.Target) error {
+	return nil
+}
+func (t *wireOptionalTarget) FinishFields(_ vdl.FieldsTarget) error {
 	return nil
 }
 

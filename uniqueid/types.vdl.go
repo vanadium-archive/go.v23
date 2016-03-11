@@ -8,6 +8,7 @@
 package uniqueid
 
 import (
+	"fmt"
 	"v.io/v23/vdl"
 )
 
@@ -19,15 +20,27 @@ func (Id) __VDLReflect(struct {
 }) {
 }
 
-func (m Id) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
-
-	if err := t.FromBytes([]byte(m[:]), __VDLType_types_v_io_v23_uniqueid_Id); err != nil {
+func (m *Id) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
+	if err := t.FromBytes([]byte((*m)[:]), __VDLType_types_v_io_v23_uniqueid_Id); err != nil {
 		return err
 	}
 	return nil
 }
 
-func (m Id) MakeVDLTarget() vdl.Target {
+func (m *Id) MakeVDLTarget() vdl.Target {
+	return &IdTarget{Value: m}
+}
+
+type IdTarget struct {
+	Value *Id
+	vdl.TargetBase
+}
+
+func (t *IdTarget) FromBytes(src []byte, tt *vdl.Type) error {
+	if !vdl.Compatible(tt, __VDLType_types_v_io_v23_uniqueid_Id) {
+		return fmt.Errorf("type %v incompatible with %v", tt, __VDLType_types_v_io_v23_uniqueid_Id)
+	}
+	copy((*t.Value)[:], src)
 	return nil
 }
 

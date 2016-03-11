@@ -9,6 +9,7 @@ package vdl
 
 import (
 	"fmt"
+	"reflect"
 )
 
 // WireError is the wire representation for the built-in error type.  Errors and
@@ -28,7 +29,6 @@ func (WireError) __VDLReflect(struct {
 }
 
 func (m *WireError) FillVDLTarget(t Target, tt *Type) error {
-
 	if __VDLType_builtin_v_io_v23_vdl_WireError == nil || __VDLTypebuiltin0 == nil {
 		panic("Initialization order error: types generated for FillVDLTarget not initialized. Consider moving caller to an init() block.")
 	}
@@ -117,6 +117,94 @@ func (m *WireError) FillVDLTarget(t Target, tt *Type) error {
 }
 
 func (m *WireError) MakeVDLTarget() Target {
+	return &WireErrorTarget{Value: m}
+}
+
+type WireErrorTarget struct {
+	Value *WireError
+	TargetBase
+	FieldsTargetBase
+}
+
+func (t *WireErrorTarget) StartFields(tt *Type) (FieldsTarget, error) {
+	if !Compatible(tt, __VDLType_builtin_v_io_v23_vdl_WireError) {
+		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType_builtin_v_io_v23_vdl_WireError)
+	}
+	return t, nil
+}
+func (t *WireErrorTarget) StartField(name string) (key, field Target, _ error) {
+	switch name {
+	case "Id":
+		val, err := &StringTarget{Value: &t.Value.Id}, error(nil)
+		return nil, val, err
+	case "RetryCode":
+		val, err := &WireRetryCodeTarget{Value: &t.Value.RetryCode}, error(nil)
+		return nil, val, err
+	case "Msg":
+		val, err := &StringTarget{Value: &t.Value.Msg}, error(nil)
+		return nil, val, err
+	case "ParamList":
+		val, err := &builtin5b5d616e79Target{Value: &t.Value.ParamList}, error(nil)
+		return nil, val, err
+	default:
+		return nil, nil, fmt.Errorf("field %s not in struct %v", name, __VDLType_builtin_v_io_v23_vdl_WireError)
+	}
+}
+func (t *WireErrorTarget) FinishField(_, _ Target) error {
+	return nil
+}
+func (t *WireErrorTarget) FinishFields(_ FieldsTarget) error {
+	return nil
+}
+
+type WireRetryCodeTarget struct {
+	Value *WireRetryCode
+	TargetBase
+}
+
+func (t *WireRetryCodeTarget) FromEnumLabel(src string, tt *Type) error {
+	if !Compatible(tt, __VDLType_builtin_v_io_v23_vdl_WireRetryCode) {
+		return fmt.Errorf("type %v incompatible with %v", tt, __VDLType_builtin_v_io_v23_vdl_WireRetryCode)
+	}
+	switch src {
+	case "NoRetry":
+		*t.Value = 0
+	case "RetryConnection":
+		*t.Value = 1
+	case "RetryRefetch":
+		*t.Value = 2
+	case "RetryBackoff":
+		*t.Value = 3
+	default:
+		return fmt.Errorf("label %s not in enum %v", src, __VDLType_builtin_v_io_v23_vdl_WireRetryCode)
+	}
+	return nil
+}
+
+type builtin5b5d616e79Target struct {
+	Value *[]*Value
+	TargetBase
+	ListTargetBase
+}
+
+func (t *builtin5b5d616e79Target) StartList(tt *Type, len int) (ListTarget, error) {
+	if !Compatible(tt, __VDLTypebuiltin1) {
+		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLTypebuiltin1)
+	}
+	if cap(*t.Value) < len {
+		*t.Value = make([]*Value, len)
+	} else {
+		*t.Value = (*t.Value)[:len]
+	}
+	return t, nil
+}
+func (t *builtin5b5d616e79Target) StartElem(index int) (elem Target, _ error) {
+	return ReflectTarget(reflect.ValueOf(&(*t.Value)[index]))
+}
+func (t *builtin5b5d616e79Target) FinishElem(elem Target) error {
+	return nil
+}
+func (t *builtin5b5d616e79Target) FinishList(elem ListTarget) error {
 	return nil
 }
 
@@ -182,15 +270,15 @@ func (WireRetryCode) __VDLReflect(struct {
 }) {
 }
 
-func (m WireRetryCode) FillVDLTarget(t Target, tt *Type) error {
-	if err := t.FromEnumLabel(m.String(), __VDLType_builtin_v_io_v23_vdl_WireRetryCode); err != nil {
+func (m *WireRetryCode) FillVDLTarget(t Target, tt *Type) error {
+	if err := t.FromEnumLabel((*m).String(), __VDLType_builtin_v_io_v23_vdl_WireRetryCode); err != nil {
 		return err
 	}
 	return nil
 }
 
-func (m WireRetryCode) MakeVDLTarget() Target {
-	return nil
+func (m *WireRetryCode) MakeVDLTarget() Target {
+	return &WireRetryCodeTarget{Value: m}
 }
 
 func init() {

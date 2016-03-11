@@ -9,7 +9,7 @@ import (
 	"sync"
 )
 
-// compatible returns true if types a and b are compatible with each other.
+// Compatible returns true if types a and b are compatible with each other.
 //
 // Compatibility is checked before every value conversion; it is the first-pass
 // filter that disallows certain conversions.  Values of incompatible types are
@@ -63,7 +63,7 @@ import (
 // otherwise we'd end up with nonsensical conversions:
 //
 //   union{A string} <-> string <-> union{B string}
-func compatible(a, b *Type) bool {
+func Compatible(a, b *Type) bool {
 	if a.Kind() == Optional {
 		a = a.Elem()
 	}

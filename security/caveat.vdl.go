@@ -8,6 +8,7 @@
 package security
 
 import (
+	"fmt"
 	"time"
 	"v.io/v23/context"
 	"v.io/v23/i18n"
@@ -24,15 +25,27 @@ func (nonce) __VDLReflect(struct {
 }) {
 }
 
-func (m nonce) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
-
-	if err := t.FromBytes([]byte(m[:]), __VDLType_caveat_v_io_v23_security_nonce); err != nil {
+func (m *nonce) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
+	if err := t.FromBytes([]byte((*m)[:]), __VDLType_caveat_v_io_v23_security_nonce); err != nil {
 		return err
 	}
 	return nil
 }
 
-func (m nonce) MakeVDLTarget() vdl.Target {
+func (m *nonce) MakeVDLTarget() vdl.Target {
+	return &nonceTarget{Value: m}
+}
+
+type nonceTarget struct {
+	Value *nonce
+	vdl.TargetBase
+}
+
+func (t *nonceTarget) FromBytes(src []byte, tt *vdl.Type) error {
+	if !vdl.Compatible(tt, __VDLType_caveat_v_io_v23_security_nonce) {
+		return fmt.Errorf("type %v incompatible with %v", tt, __VDLType_caveat_v_io_v23_security_nonce)
+	}
+	copy((*t.Value)[:], src)
 	return nil
 }
 
@@ -72,7 +85,6 @@ func (publicKeyThirdPartyCaveatParam) __VDLReflect(struct {
 }
 
 func (m *publicKeyThirdPartyCaveatParam) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
-
 	if __VDLType_caveat_v_io_v23_security_publicKeyThirdPartyCaveatParam == nil || __VDLTypecaveat0 == nil {
 		panic("Initialization order error: types generated for FillVDLTarget not initialized. Consider moving caller to an init() block.")
 	}
@@ -169,6 +181,73 @@ func (m *publicKeyThirdPartyCaveatParam) FillVDLTarget(t vdl.Target, tt *vdl.Typ
 }
 
 func (m *publicKeyThirdPartyCaveatParam) MakeVDLTarget() vdl.Target {
+	return &publicKeyThirdPartyCaveatParamTarget{Value: m}
+}
+
+type publicKeyThirdPartyCaveatParamTarget struct {
+	Value *publicKeyThirdPartyCaveatParam
+	vdl.TargetBase
+	vdl.FieldsTargetBase
+}
+
+func (t *publicKeyThirdPartyCaveatParamTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
+	if !vdl.Compatible(tt, __VDLType_caveat_v_io_v23_security_publicKeyThirdPartyCaveatParam) {
+		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType_caveat_v_io_v23_security_publicKeyThirdPartyCaveatParam)
+	}
+	return t, nil
+}
+func (t *publicKeyThirdPartyCaveatParamTarget) StartField(name string) (key, field vdl.Target, _ error) {
+	switch name {
+	case "Nonce":
+		val, err := &nonceTarget{Value: &t.Value.Nonce}, error(nil)
+		return nil, val, err
+	case "Caveats":
+		val, err := &caveat5b5d762e696f2f7632332f73656375726974792e436176656174207374727563747b496420762e696f2f7632332f756e6971756569642e4964205b31365d627974653b506172616d566f6d205b5d627974657dTarget{Value: &t.Value.Caveats}, error(nil)
+		return nil, val, err
+	case "DischargerKey":
+		val, err := &vdl.BytesTarget{Value: &t.Value.DischargerKey}, error(nil)
+		return nil, val, err
+	case "DischargerLocation":
+		val, err := &vdl.StringTarget{Value: &t.Value.DischargerLocation}, error(nil)
+		return nil, val, err
+	case "DischargerRequirements":
+		val, err := &ThirdPartyRequirementsTarget{Value: &t.Value.DischargerRequirements}, error(nil)
+		return nil, val, err
+	default:
+		return nil, nil, fmt.Errorf("field %s not in struct %v", name, __VDLType_caveat_v_io_v23_security_publicKeyThirdPartyCaveatParam)
+	}
+}
+func (t *publicKeyThirdPartyCaveatParamTarget) FinishField(_, _ vdl.Target) error {
+	return nil
+}
+func (t *publicKeyThirdPartyCaveatParamTarget) FinishFields(_ vdl.FieldsTarget) error {
+	return nil
+}
+
+type caveat5b5d762e696f2f7632332f73656375726974792e436176656174207374727563747b496420762e696f2f7632332f756e6971756569642e4964205b31365d627974653b506172616d566f6d205b5d627974657dTarget struct {
+	Value *[]Caveat
+	vdl.TargetBase
+	vdl.ListTargetBase
+}
+
+func (t *caveat5b5d762e696f2f7632332f73656375726974792e436176656174207374727563747b496420762e696f2f7632332f756e6971756569642e4964205b31365d627974653b506172616d566f6d205b5d627974657dTarget) StartList(tt *vdl.Type, len int) (vdl.ListTarget, error) {
+	if !vdl.Compatible(tt, __VDLTypecaveat1) {
+		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLTypecaveat1)
+	}
+	if cap(*t.Value) < len {
+		*t.Value = make([]Caveat, len)
+	} else {
+		*t.Value = (*t.Value)[:len]
+	}
+	return t, nil
+}
+func (t *caveat5b5d762e696f2f7632332f73656375726974792e436176656174207374727563747b496420762e696f2f7632332f756e6971756569642e4964205b31365d627974653b506172616d566f6d205b5d627974657dTarget) StartElem(index int) (elem vdl.Target, _ error) {
+	return &CaveatTarget{Value: &(*t.Value)[index]}, error(nil)
+}
+func (t *caveat5b5d762e696f2f7632332f73656375726974792e436176656174207374727563747b496420762e696f2f7632332f756e6971756569642e4964205b31365d627974653b506172616d566f6d205b5d627974657dTarget) FinishElem(elem vdl.Target) error {
+	return nil
+}
+func (t *caveat5b5d762e696f2f7632332f73656375726974792e436176656174207374727563747b496420762e696f2f7632332f756e6971756569642e4964205b31365d627974653b506172616d566f6d205b5d627974657dTarget) FinishList(elem vdl.ListTarget) error {
 	return nil
 }
 
@@ -190,7 +269,6 @@ func (publicKeyDischarge) __VDLReflect(struct {
 }
 
 func (m *publicKeyDischarge) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
-
 	if __VDLType_caveat_v_io_v23_security_publicKeyDischarge == nil || __VDLTypecaveat3 == nil {
 		panic("Initialization order error: types generated for FillVDLTarget not initialized. Consider moving caller to an init() block.")
 	}
@@ -261,6 +339,40 @@ func (m *publicKeyDischarge) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 }
 
 func (m *publicKeyDischarge) MakeVDLTarget() vdl.Target {
+	return &publicKeyDischargeTarget{Value: m}
+}
+
+type publicKeyDischargeTarget struct {
+	Value *publicKeyDischarge
+	vdl.TargetBase
+	vdl.FieldsTargetBase
+}
+
+func (t *publicKeyDischargeTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
+	if !vdl.Compatible(tt, __VDLType_caveat_v_io_v23_security_publicKeyDischarge) {
+		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType_caveat_v_io_v23_security_publicKeyDischarge)
+	}
+	return t, nil
+}
+func (t *publicKeyDischargeTarget) StartField(name string) (key, field vdl.Target, _ error) {
+	switch name {
+	case "ThirdPartyCaveatId":
+		val, err := &vdl.StringTarget{Value: &t.Value.ThirdPartyCaveatId}, error(nil)
+		return nil, val, err
+	case "Caveats":
+		val, err := &caveat5b5d762e696f2f7632332f73656375726974792e436176656174207374727563747b496420762e696f2f7632332f756e6971756569642e4964205b31365d627974653b506172616d566f6d205b5d627974657dTarget{Value: &t.Value.Caveats}, error(nil)
+		return nil, val, err
+	case "Signature":
+		val, err := &SignatureTarget{Value: &t.Value.Signature}, error(nil)
+		return nil, val, err
+	default:
+		return nil, nil, fmt.Errorf("field %s not in struct %v", name, __VDLType_caveat_v_io_v23_security_publicKeyDischarge)
+	}
+}
+func (t *publicKeyDischargeTarget) FinishField(_, _ vdl.Target) error {
+	return nil
+}
+func (t *publicKeyDischargeTarget) FinishFields(_ vdl.FieldsTarget) error {
 	return nil
 }
 

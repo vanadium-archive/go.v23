@@ -44,7 +44,6 @@ func (Time) __VDLReflect(struct {
 }
 
 func (m *Time) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
-
 	__VDLEnsureNativeBuilt_time()
 	fieldsTarget1, err := t.StartFields(tt)
 	if err != nil {
@@ -106,7 +105,6 @@ func (Duration) __VDLReflect(struct {
 }
 
 func (m *Duration) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
-
 	__VDLEnsureNativeBuilt_time()
 	fieldsTarget1, err := t.StartFields(tt)
 	if err != nil {
@@ -183,7 +181,6 @@ func (WireDeadline) __VDLReflect(struct {
 }
 
 func (m *WireDeadline) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
-
 	__VDLEnsureNativeBuilt_time()
 	fieldsTarget1, err := t.StartFields(tt)
 	if err != nil {

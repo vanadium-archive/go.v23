@@ -6,21 +6,38 @@ pkg watch, func GlobWatcherServer(GlobWatcherServerMethods) GlobWatcherServerStu
 pkg watch, func NewErrUnknownResumeMarker(*context.T) error
 pkg watch, method (*Change) FillVDLTarget(vdl.Target, *vdl.Type) error
 pkg watch, method (*Change) MakeVDLTarget() vdl.Target
+pkg watch, method (*ChangeTarget) FinishField(vdl.Target, vdl.Target) error
+pkg watch, method (*ChangeTarget) FinishFields(vdl.FieldsTarget) error
+pkg watch, method (*ChangeTarget) StartField(string) (vdl.Target, vdl.Target, error)
+pkg watch, method (*ChangeTarget) StartFields(*vdl.Type) (vdl.FieldsTarget, error)
 pkg watch, method (*GlobRequest) FillVDLTarget(vdl.Target, *vdl.Type) error
 pkg watch, method (*GlobRequest) MakeVDLTarget() vdl.Target
+pkg watch, method (*GlobRequestTarget) FinishField(vdl.Target, vdl.Target) error
+pkg watch, method (*GlobRequestTarget) FinishFields(vdl.FieldsTarget) error
+pkg watch, method (*GlobRequestTarget) StartField(string) (vdl.Target, vdl.Target, error)
+pkg watch, method (*GlobRequestTarget) StartFields(*vdl.Type) (vdl.FieldsTarget, error)
 pkg watch, method (*GlobWatcherWatchGlobServerCallStub) Init(rpc.StreamServerCall)
 pkg watch, method (*GlobWatcherWatchGlobServerCallStub) SendStream() interface {  Send(item Change) error;}
-pkg watch, method (ResumeMarker) FillVDLTarget(vdl.Target, *vdl.Type) error
-pkg watch, method (ResumeMarker) MakeVDLTarget() vdl.Target
+pkg watch, method (*ResumeMarker) FillVDLTarget(vdl.Target, *vdl.Type) error
+pkg watch, method (*ResumeMarker) MakeVDLTarget() vdl.Target
+pkg watch, method (*ResumeMarkerTarget) FromBytes([]byte, *vdl.Type) error
 pkg watch, type Change struct
 pkg watch, type Change struct, Continued bool
 pkg watch, type Change struct, Name string
 pkg watch, type Change struct, ResumeMarker ResumeMarker
 pkg watch, type Change struct, State int32
 pkg watch, type Change struct, Value *vom.RawBytes
+pkg watch, type ChangeTarget struct
+pkg watch, type ChangeTarget struct, Value *Change
+pkg watch, type ChangeTarget struct, embedded vdl.FieldsTargetBase
+pkg watch, type ChangeTarget struct, embedded vdl.TargetBase
 pkg watch, type GlobRequest struct
 pkg watch, type GlobRequest struct, Pattern string
 pkg watch, type GlobRequest struct, ResumeMarker ResumeMarker
+pkg watch, type GlobRequestTarget struct
+pkg watch, type GlobRequestTarget struct, Value *GlobRequest
+pkg watch, type GlobRequestTarget struct, embedded vdl.FieldsTargetBase
+pkg watch, type GlobRequestTarget struct, embedded vdl.TargetBase
 pkg watch, type GlobWatcherClientMethods interface { WatchGlob }
 pkg watch, type GlobWatcherClientMethods interface, WatchGlob(*context.T, GlobRequest, ...rpc.CallOpt) (GlobWatcherWatchGlobClientCall, error)
 pkg watch, type GlobWatcherClientStub interface { WatchGlob }
@@ -50,5 +67,8 @@ pkg watch, type GlobWatcherWatchGlobServerCallStub struct, embedded rpc.StreamSe
 pkg watch, type GlobWatcherWatchGlobServerStream interface { SendStream }
 pkg watch, type GlobWatcherWatchGlobServerStream interface, SendStream() interface {  Send(item Change) error;}
 pkg watch, type ResumeMarker []byte
+pkg watch, type ResumeMarkerTarget struct
+pkg watch, type ResumeMarkerTarget struct, Value *ResumeMarker
+pkg watch, type ResumeMarkerTarget struct, embedded vdl.TargetBase
 pkg watch, var ErrUnknownResumeMarker verror.IDAction
 pkg watch, var GlobWatcherDesc rpc.InterfaceDesc

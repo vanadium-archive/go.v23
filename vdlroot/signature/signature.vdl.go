@@ -9,6 +9,8 @@
 package signature
 
 import (
+	"fmt"
+	"reflect"
 	"v.io/v23/vdl"
 )
 
@@ -27,7 +29,6 @@ func (Interface) __VDLReflect(struct {
 }
 
 func (m *Interface) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
-
 	if __VDLType_signature_signature_Interface == nil || __VDLTypesignature0 == nil {
 		panic("Initialization order error: types generated for FillVDLTarget not initialized. Consider moving caller to an init() block.")
 	}
@@ -139,6 +140,294 @@ func (m *Interface) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 }
 
 func (m *Interface) MakeVDLTarget() vdl.Target {
+	return &InterfaceTarget{Value: m}
+}
+
+type InterfaceTarget struct {
+	Value *Interface
+	vdl.TargetBase
+	vdl.FieldsTargetBase
+}
+
+func (t *InterfaceTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
+	if !vdl.Compatible(tt, __VDLType_signature_signature_Interface) {
+		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType_signature_signature_Interface)
+	}
+	return t, nil
+}
+func (t *InterfaceTarget) StartField(name string) (key, field vdl.Target, _ error) {
+	switch name {
+	case "Name":
+		val, err := &vdl.StringTarget{Value: &t.Value.Name}, error(nil)
+		return nil, val, err
+	case "PkgPath":
+		val, err := &vdl.StringTarget{Value: &t.Value.PkgPath}, error(nil)
+		return nil, val, err
+	case "Doc":
+		val, err := &vdl.StringTarget{Value: &t.Value.Doc}, error(nil)
+		return nil, val, err
+	case "Embeds":
+		val, err := &signature5b5d7369676e61747572652e456d626564207374727563747b4e616d6520737472696e673b506b675061746820737472696e673b446f6320737472696e677dTarget{Value: &t.Value.Embeds}, error(nil)
+		return nil, val, err
+	case "Methods":
+		val, err := &signature5b5d7369676e61747572652e4d6574686f64207374727563747b4e616d6520737472696e673b446f6320737472696e673b496e41726773205b5d7369676e61747572652e417267207374727563747b4e616d6520737472696e673b446f6320737472696e673b5479706520747970656f626a6563747d3b4f757441726773205b5d7369676e61747572652e4172673b496e53747265616d203f7369676e61747572652e4172673b4f757453747265616d203f7369676e61747572652e4172673b54616773205b5d616e797dTarget{Value: &t.Value.Methods}, error(nil)
+		return nil, val, err
+	default:
+		return nil, nil, fmt.Errorf("field %s not in struct %v", name, __VDLType_signature_signature_Interface)
+	}
+}
+func (t *InterfaceTarget) FinishField(_, _ vdl.Target) error {
+	return nil
+}
+func (t *InterfaceTarget) FinishFields(_ vdl.FieldsTarget) error {
+	return nil
+}
+
+type signature5b5d7369676e61747572652e456d626564207374727563747b4e616d6520737472696e673b506b675061746820737472696e673b446f6320737472696e677dTarget struct {
+	Value *[]Embed
+	vdl.TargetBase
+	vdl.ListTargetBase
+}
+
+func (t *signature5b5d7369676e61747572652e456d626564207374727563747b4e616d6520737472696e673b506b675061746820737472696e673b446f6320737472696e677dTarget) StartList(tt *vdl.Type, len int) (vdl.ListTarget, error) {
+	if !vdl.Compatible(tt, __VDLTypesignature1) {
+		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLTypesignature1)
+	}
+	if cap(*t.Value) < len {
+		*t.Value = make([]Embed, len)
+	} else {
+		*t.Value = (*t.Value)[:len]
+	}
+	return t, nil
+}
+func (t *signature5b5d7369676e61747572652e456d626564207374727563747b4e616d6520737472696e673b506b675061746820737472696e673b446f6320737472696e677dTarget) StartElem(index int) (elem vdl.Target, _ error) {
+	return &EmbedTarget{Value: &(*t.Value)[index]}, error(nil)
+}
+func (t *signature5b5d7369676e61747572652e456d626564207374727563747b4e616d6520737472696e673b506b675061746820737472696e673b446f6320737472696e677dTarget) FinishElem(elem vdl.Target) error {
+	return nil
+}
+func (t *signature5b5d7369676e61747572652e456d626564207374727563747b4e616d6520737472696e673b506b675061746820737472696e673b446f6320737472696e677dTarget) FinishList(elem vdl.ListTarget) error {
+	return nil
+}
+
+type EmbedTarget struct {
+	Value *Embed
+	vdl.TargetBase
+	vdl.FieldsTargetBase
+}
+
+func (t *EmbedTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
+	if !vdl.Compatible(tt, __VDLType_signature_signature_Embed) {
+		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType_signature_signature_Embed)
+	}
+	return t, nil
+}
+func (t *EmbedTarget) StartField(name string) (key, field vdl.Target, _ error) {
+	switch name {
+	case "Name":
+		val, err := &vdl.StringTarget{Value: &t.Value.Name}, error(nil)
+		return nil, val, err
+	case "PkgPath":
+		val, err := &vdl.StringTarget{Value: &t.Value.PkgPath}, error(nil)
+		return nil, val, err
+	case "Doc":
+		val, err := &vdl.StringTarget{Value: &t.Value.Doc}, error(nil)
+		return nil, val, err
+	default:
+		return nil, nil, fmt.Errorf("field %s not in struct %v", name, __VDLType_signature_signature_Embed)
+	}
+}
+func (t *EmbedTarget) FinishField(_, _ vdl.Target) error {
+	return nil
+}
+func (t *EmbedTarget) FinishFields(_ vdl.FieldsTarget) error {
+	return nil
+}
+
+type signature5b5d7369676e61747572652e4d6574686f64207374727563747b4e616d6520737472696e673b446f6320737472696e673b496e41726773205b5d7369676e61747572652e417267207374727563747b4e616d6520737472696e673b446f6320737472696e673b5479706520747970656f626a6563747d3b4f757441726773205b5d7369676e61747572652e4172673b496e53747265616d203f7369676e61747572652e4172673b4f757453747265616d203f7369676e61747572652e4172673b54616773205b5d616e797dTarget struct {
+	Value *[]Method
+	vdl.TargetBase
+	vdl.ListTargetBase
+}
+
+func (t *signature5b5d7369676e61747572652e4d6574686f64207374727563747b4e616d6520737472696e673b446f6320737472696e673b496e41726773205b5d7369676e61747572652e417267207374727563747b4e616d6520737472696e673b446f6320737472696e673b5479706520747970656f626a6563747d3b4f757441726773205b5d7369676e61747572652e4172673b496e53747265616d203f7369676e61747572652e4172673b4f757453747265616d203f7369676e61747572652e4172673b54616773205b5d616e797dTarget) StartList(tt *vdl.Type, len int) (vdl.ListTarget, error) {
+	if !vdl.Compatible(tt, __VDLTypesignature2) {
+		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLTypesignature2)
+	}
+	if cap(*t.Value) < len {
+		*t.Value = make([]Method, len)
+	} else {
+		*t.Value = (*t.Value)[:len]
+	}
+	return t, nil
+}
+func (t *signature5b5d7369676e61747572652e4d6574686f64207374727563747b4e616d6520737472696e673b446f6320737472696e673b496e41726773205b5d7369676e61747572652e417267207374727563747b4e616d6520737472696e673b446f6320737472696e673b5479706520747970656f626a6563747d3b4f757441726773205b5d7369676e61747572652e4172673b496e53747265616d203f7369676e61747572652e4172673b4f757453747265616d203f7369676e61747572652e4172673b54616773205b5d616e797dTarget) StartElem(index int) (elem vdl.Target, _ error) {
+	return &MethodTarget{Value: &(*t.Value)[index]}, error(nil)
+}
+func (t *signature5b5d7369676e61747572652e4d6574686f64207374727563747b4e616d6520737472696e673b446f6320737472696e673b496e41726773205b5d7369676e61747572652e417267207374727563747b4e616d6520737472696e673b446f6320737472696e673b5479706520747970656f626a6563747d3b4f757441726773205b5d7369676e61747572652e4172673b496e53747265616d203f7369676e61747572652e4172673b4f757453747265616d203f7369676e61747572652e4172673b54616773205b5d616e797dTarget) FinishElem(elem vdl.Target) error {
+	return nil
+}
+func (t *signature5b5d7369676e61747572652e4d6574686f64207374727563747b4e616d6520737472696e673b446f6320737472696e673b496e41726773205b5d7369676e61747572652e417267207374727563747b4e616d6520737472696e673b446f6320737472696e673b5479706520747970656f626a6563747d3b4f757441726773205b5d7369676e61747572652e4172673b496e53747265616d203f7369676e61747572652e4172673b4f757453747265616d203f7369676e61747572652e4172673b54616773205b5d616e797dTarget) FinishList(elem vdl.ListTarget) error {
+	return nil
+}
+
+type MethodTarget struct {
+	Value *Method
+	vdl.TargetBase
+	vdl.FieldsTargetBase
+}
+
+func (t *MethodTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
+	if !vdl.Compatible(tt, __VDLType_signature_signature_Method) {
+		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType_signature_signature_Method)
+	}
+	return t, nil
+}
+func (t *MethodTarget) StartField(name string) (key, field vdl.Target, _ error) {
+	switch name {
+	case "Name":
+		val, err := &vdl.StringTarget{Value: &t.Value.Name}, error(nil)
+		return nil, val, err
+	case "Doc":
+		val, err := &vdl.StringTarget{Value: &t.Value.Doc}, error(nil)
+		return nil, val, err
+	case "InArgs":
+		val, err := &signature5b5d7369676e61747572652e417267207374727563747b4e616d6520737472696e673b446f6320737472696e673b5479706520747970656f626a6563747dTarget{Value: &t.Value.InArgs}, error(nil)
+		return nil, val, err
+	case "OutArgs":
+		val, err := &signature5b5d7369676e61747572652e417267207374727563747b4e616d6520737472696e673b446f6320737472696e673b5479706520747970656f626a6563747dTarget{Value: &t.Value.OutArgs}, error(nil)
+		return nil, val, err
+	case "InStream":
+		val, err := &signature3f7369676e61747572652e417267207374727563747b4e616d6520737472696e673b446f6320737472696e673b5479706520747970656f626a6563747dTarget{Value: &t.Value.InStream}, error(nil)
+		return nil, val, err
+	case "OutStream":
+		val, err := &signature3f7369676e61747572652e417267207374727563747b4e616d6520737472696e673b446f6320737472696e673b5479706520747970656f626a6563747dTarget{Value: &t.Value.OutStream}, error(nil)
+		return nil, val, err
+	case "Tags":
+		val, err := &signature5b5d616e79Target{Value: &t.Value.Tags}, error(nil)
+		return nil, val, err
+	default:
+		return nil, nil, fmt.Errorf("field %s not in struct %v", name, __VDLType_signature_signature_Method)
+	}
+}
+func (t *MethodTarget) FinishField(_, _ vdl.Target) error {
+	return nil
+}
+func (t *MethodTarget) FinishFields(_ vdl.FieldsTarget) error {
+	return nil
+}
+
+type signature5b5d7369676e61747572652e417267207374727563747b4e616d6520737472696e673b446f6320737472696e673b5479706520747970656f626a6563747dTarget struct {
+	Value *[]Arg
+	vdl.TargetBase
+	vdl.ListTargetBase
+}
+
+func (t *signature5b5d7369676e61747572652e417267207374727563747b4e616d6520737472696e673b446f6320737472696e673b5479706520747970656f626a6563747dTarget) StartList(tt *vdl.Type, len int) (vdl.ListTarget, error) {
+	if !vdl.Compatible(tt, __VDLTypesignature3) {
+		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLTypesignature3)
+	}
+	if cap(*t.Value) < len {
+		*t.Value = make([]Arg, len)
+	} else {
+		*t.Value = (*t.Value)[:len]
+	}
+	return t, nil
+}
+func (t *signature5b5d7369676e61747572652e417267207374727563747b4e616d6520737472696e673b446f6320737472696e673b5479706520747970656f626a6563747dTarget) StartElem(index int) (elem vdl.Target, _ error) {
+	return &ArgTarget{Value: &(*t.Value)[index]}, error(nil)
+}
+func (t *signature5b5d7369676e61747572652e417267207374727563747b4e616d6520737472696e673b446f6320737472696e673b5479706520747970656f626a6563747dTarget) FinishElem(elem vdl.Target) error {
+	return nil
+}
+func (t *signature5b5d7369676e61747572652e417267207374727563747b4e616d6520737472696e673b446f6320737472696e673b5479706520747970656f626a6563747dTarget) FinishList(elem vdl.ListTarget) error {
+	return nil
+}
+
+type ArgTarget struct {
+	Value *Arg
+	vdl.TargetBase
+	vdl.FieldsTargetBase
+}
+
+func (t *ArgTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
+	if !vdl.Compatible(tt, __VDLType_signature_signature_Arg) {
+		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType_signature_signature_Arg)
+	}
+	return t, nil
+}
+func (t *ArgTarget) StartField(name string) (key, field vdl.Target, _ error) {
+	switch name {
+	case "Name":
+		val, err := &vdl.StringTarget{Value: &t.Value.Name}, error(nil)
+		return nil, val, err
+	case "Doc":
+		val, err := &vdl.StringTarget{Value: &t.Value.Doc}, error(nil)
+		return nil, val, err
+	case "Type":
+		val, err := &vdl.TypeObjectTarget{Value: &t.Value.Type}, error(nil)
+		return nil, val, err
+	default:
+		return nil, nil, fmt.Errorf("field %s not in struct %v", name, __VDLType_signature_signature_Arg)
+	}
+}
+func (t *ArgTarget) FinishField(_, _ vdl.Target) error {
+	return nil
+}
+func (t *ArgTarget) FinishFields(_ vdl.FieldsTarget) error {
+	return nil
+}
+
+type signature3f7369676e61747572652e417267207374727563747b4e616d6520737472696e673b446f6320737472696e673b5479706520747970656f626a6563747dTarget struct {
+	Value **Arg
+	vdl.TargetBase
+	vdl.FieldsTargetBase
+}
+
+func (t *signature3f7369676e61747572652e417267207374727563747b4e616d6520737472696e673b446f6320737472696e673b5479706520747970656f626a6563747dTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
+	if *t.Value == nil {
+		*t.Value = &Arg{
+			Type: vdl.AnyType,
+		}
+	}
+	target, err := &ArgTarget{Value: *t.Value}, error(nil)
+	if err != nil {
+		return nil, err
+	}
+	return target.StartFields(tt)
+}
+func (t *signature3f7369676e61747572652e417267207374727563747b4e616d6520737472696e673b446f6320737472696e673b5479706520747970656f626a6563747dTarget) FinishFields(_ vdl.FieldsTarget) error {
+	return nil
+}
+func (t *signature3f7369676e61747572652e417267207374727563747b4e616d6520737472696e673b446f6320737472696e673b5479706520747970656f626a6563747dTarget) FromNil(tt *vdl.Type) error {
+	*t.Value = nil
+	return nil
+}
+
+type signature5b5d616e79Target struct {
+	Value *[]*vdl.Value
+	vdl.TargetBase
+	vdl.ListTargetBase
+}
+
+func (t *signature5b5d616e79Target) StartList(tt *vdl.Type, len int) (vdl.ListTarget, error) {
+	if !vdl.Compatible(tt, __VDLTypesignature4) {
+		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLTypesignature4)
+	}
+	if cap(*t.Value) < len {
+		*t.Value = make([]*vdl.Value, len)
+	} else {
+		*t.Value = (*t.Value)[:len]
+	}
+	return t, nil
+}
+func (t *signature5b5d616e79Target) StartElem(index int) (elem vdl.Target, _ error) {
+	return vdl.ReflectTarget(reflect.ValueOf(&(*t.Value)[index]))
+}
+func (t *signature5b5d616e79Target) FinishElem(elem vdl.Target) error {
+	return nil
+}
+func (t *signature5b5d616e79Target) FinishList(elem vdl.ListTarget) error {
 	return nil
 }
 
@@ -155,8 +444,7 @@ func (Embed) __VDLReflect(struct {
 }
 
 func (m *Embed) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
-
-	if __VDLType_signature_signature_Embed == nil || __VDLTypesignature3 == nil {
+	if __VDLType_signature_signature_Embed == nil || __VDLTypesignature5 == nil {
 		panic("Initialization order error: types generated for FillVDLTarget not initialized. Consider moving caller to an init() block.")
 	}
 	fieldsTarget1, err := t.StartFields(tt)
@@ -207,7 +495,7 @@ func (m *Embed) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 }
 
 func (m *Embed) MakeVDLTarget() vdl.Target {
-	return nil
+	return &EmbedTarget{Value: m}
 }
 
 // Method describes the signature of an interface method.
@@ -227,8 +515,7 @@ func (Method) __VDLReflect(struct {
 }
 
 func (m *Method) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
-
-	if __VDLType_signature_signature_Method == nil || __VDLTypesignature4 == nil {
+	if __VDLType_signature_signature_Method == nil || __VDLTypesignature6 == nil {
 		panic("Initialization order error: types generated for FillVDLTarget not initialized. Consider moving caller to an init() block.")
 	}
 	fieldsTarget1, err := t.StartFields(tt)
@@ -266,7 +553,7 @@ func (m *Method) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 	}
 	if err != vdl.ErrFieldNoExist {
 
-		listTarget8, err := fieldTarget7.StartList(__VDLTypesignature5, len(m.InArgs))
+		listTarget8, err := fieldTarget7.StartList(__VDLTypesignature3, len(m.InArgs))
 		if err != nil {
 			return err
 		}
@@ -296,7 +583,7 @@ func (m *Method) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 	}
 	if err != vdl.ErrFieldNoExist {
 
-		listTarget13, err := fieldTarget12.StartList(__VDLTypesignature5, len(m.OutArgs))
+		listTarget13, err := fieldTarget12.StartList(__VDLTypesignature3, len(m.OutArgs))
 		if err != nil {
 			return err
 		}
@@ -327,7 +614,7 @@ func (m *Method) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 	if err != vdl.ErrFieldNoExist {
 
 		if m.InStream == nil {
-			if err := fieldTarget17.FromNil(__VDLTypesignature6); err != nil {
+			if err := fieldTarget17.FromNil(__VDLTypesignature7); err != nil {
 				return err
 			}
 		} else {
@@ -346,7 +633,7 @@ func (m *Method) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 	if err != vdl.ErrFieldNoExist {
 
 		if m.OutStream == nil {
-			if err := fieldTarget19.FromNil(__VDLTypesignature6); err != nil {
+			if err := fieldTarget19.FromNil(__VDLTypesignature7); err != nil {
 				return err
 			}
 		} else {
@@ -364,7 +651,7 @@ func (m *Method) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 	}
 	if err != vdl.ErrFieldNoExist {
 
-		listTarget22, err := fieldTarget21.StartList(__VDLTypesignature7, len(m.Tags))
+		listTarget22, err := fieldTarget21.StartList(__VDLTypesignature4, len(m.Tags))
 		if err != nil {
 			return err
 		}
@@ -401,7 +688,7 @@ func (m *Method) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 }
 
 func (m *Method) MakeVDLTarget() vdl.Target {
-	return nil
+	return &MethodTarget{Value: m}
 }
 
 // Arg describes the signature of a single argument.
@@ -417,8 +704,7 @@ func (Arg) __VDLReflect(struct {
 }
 
 func (m *Arg) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
-
-	if __VDLType_signature_signature_Arg == nil || __VDLTypesignature6 == nil {
+	if __VDLType_signature_signature_Arg == nil || __VDLTypesignature7 == nil {
 		panic("Initialization order error: types generated for FillVDLTarget not initialized. Consider moving caller to an init() block.")
 	}
 	fieldsTarget1, err := t.StartFields(tt)
@@ -473,7 +759,7 @@ func (m *Arg) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 }
 
 func (m *Arg) MakeVDLTarget() vdl.Target {
-	return nil
+	return &ArgTarget{Value: m}
 }
 
 func init() {
@@ -483,12 +769,12 @@ func init() {
 	vdl.Register((*Arg)(nil))
 }
 
-var __VDLTypesignature6 *vdl.Type = vdl.TypeOf((*Arg)(nil))
-var __VDLTypesignature3 *vdl.Type = vdl.TypeOf((*Embed)(nil))
+var __VDLTypesignature7 *vdl.Type = vdl.TypeOf((*Arg)(nil))
+var __VDLTypesignature5 *vdl.Type = vdl.TypeOf((*Embed)(nil))
 var __VDLTypesignature0 *vdl.Type = vdl.TypeOf((*Interface)(nil))
-var __VDLTypesignature4 *vdl.Type = vdl.TypeOf((*Method)(nil))
-var __VDLTypesignature7 *vdl.Type = vdl.TypeOf([]*vdl.Value(nil))
-var __VDLTypesignature5 *vdl.Type = vdl.TypeOf([]Arg(nil))
+var __VDLTypesignature6 *vdl.Type = vdl.TypeOf((*Method)(nil))
+var __VDLTypesignature4 *vdl.Type = vdl.TypeOf([]*vdl.Value(nil))
+var __VDLTypesignature3 *vdl.Type = vdl.TypeOf([]Arg(nil))
 var __VDLTypesignature1 *vdl.Type = vdl.TypeOf([]Embed(nil))
 var __VDLTypesignature2 *vdl.Type = vdl.TypeOf([]Method(nil))
 var __VDLType_signature_signature_Arg *vdl.Type = vdl.TypeOf(Arg{

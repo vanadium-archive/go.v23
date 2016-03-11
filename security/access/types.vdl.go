@@ -103,6 +103,7 @@
 package access
 
 import (
+	"fmt"
 	"v.io/v23/context"
 	"v.io/v23/i18n"
 	"v.io/v23/security"
@@ -141,7 +142,6 @@ func (AccessList) __VDLReflect(struct {
 }
 
 func (m *AccessList) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
-
 	if __VDLType_types_v_io_v23_security_access_AccessList == nil || __VDLTypetypes0 == nil {
 		panic("Initialization order error: types generated for FillVDLTarget not initialized. Consider moving caller to an init() block.")
 	}
@@ -216,6 +216,64 @@ func (m *AccessList) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 }
 
 func (m *AccessList) MakeVDLTarget() vdl.Target {
+	return &AccessListTarget{Value: m}
+}
+
+type AccessListTarget struct {
+	Value *AccessList
+	vdl.TargetBase
+	vdl.FieldsTargetBase
+}
+
+func (t *AccessListTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
+	if !vdl.Compatible(tt, __VDLType_types_v_io_v23_security_access_AccessList) {
+		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType_types_v_io_v23_security_access_AccessList)
+	}
+	return t, nil
+}
+func (t *AccessListTarget) StartField(name string) (key, field vdl.Target, _ error) {
+	switch name {
+	case "In":
+		val, err := &types5b5d762e696f2f7632332f73656375726974792e426c657373696e675061747465726e20737472696e67Target{Value: &t.Value.In}, error(nil)
+		return nil, val, err
+	case "NotIn":
+		val, err := &vdl.StringSliceTarget{Value: &t.Value.NotIn}, error(nil)
+		return nil, val, err
+	default:
+		return nil, nil, fmt.Errorf("field %s not in struct %v", name, __VDLType_types_v_io_v23_security_access_AccessList)
+	}
+}
+func (t *AccessListTarget) FinishField(_, _ vdl.Target) error {
+	return nil
+}
+func (t *AccessListTarget) FinishFields(_ vdl.FieldsTarget) error {
+	return nil
+}
+
+type types5b5d762e696f2f7632332f73656375726974792e426c657373696e675061747465726e20737472696e67Target struct {
+	Value *[]security.BlessingPattern
+	vdl.TargetBase
+	vdl.ListTargetBase
+}
+
+func (t *types5b5d762e696f2f7632332f73656375726974792e426c657373696e675061747465726e20737472696e67Target) StartList(tt *vdl.Type, len int) (vdl.ListTarget, error) {
+	if !vdl.Compatible(tt, __VDLTypetypes1) {
+		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLTypetypes1)
+	}
+	if cap(*t.Value) < len {
+		*t.Value = make([]security.BlessingPattern, len)
+	} else {
+		*t.Value = (*t.Value)[:len]
+	}
+	return t, nil
+}
+func (t *types5b5d762e696f2f7632332f73656375726974792e426c657373696e675061747465726e20737472696e67Target) StartElem(index int) (elem vdl.Target, _ error) {
+	return &security.BlessingPatternTarget{Value: &(*t.Value)[index]}, error(nil)
+}
+func (t *types5b5d762e696f2f7632332f73656375726974792e426c657373696e675061747465726e20737472696e67Target) FinishElem(elem vdl.Target) error {
+	return nil
+}
+func (t *types5b5d762e696f2f7632332f73656375726974792e426c657373696e675061747465726e20737472696e67Target) FinishList(elem vdl.ListTarget) error {
 	return nil
 }
 
@@ -233,13 +291,12 @@ func (Permissions) __VDLReflect(struct {
 }) {
 }
 
-func (m Permissions) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
-
-	mapTarget1, err := t.StartMap(__VDLType_types_v_io_v23_security_access_Permissions, len(m))
+func (m *Permissions) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
+	mapTarget1, err := t.StartMap(__VDLType_types_v_io_v23_security_access_Permissions, len((*m)))
 	if err != nil {
 		return err
 	}
-	for key3, value5 := range m {
+	for key3, value5 := range *m {
 		keyTarget2, err := mapTarget1.StartKey()
 		if err != nil {
 			return err
@@ -265,7 +322,41 @@ func (m Permissions) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 	return nil
 }
 
-func (m Permissions) MakeVDLTarget() vdl.Target {
+func (m *Permissions) MakeVDLTarget() vdl.Target {
+	return &PermissionsTarget{Value: m}
+}
+
+type PermissionsTarget struct {
+	Value    *Permissions
+	currKey  string
+	currElem AccessList
+	vdl.TargetBase
+	vdl.MapTargetBase
+}
+
+func (t *PermissionsTarget) StartMap(tt *vdl.Type, len int) (vdl.MapTarget, error) {
+	if !vdl.Compatible(tt, __VDLType_types_v_io_v23_security_access_Permissions) {
+		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType_types_v_io_v23_security_access_Permissions)
+	}
+	*t.Value = make(Permissions)
+	return t, nil
+}
+func (t *PermissionsTarget) StartKey() (key vdl.Target, _ error) {
+	t.currKey = ""
+	return &vdl.StringTarget{Value: &t.currKey}, error(nil)
+}
+func (t *PermissionsTarget) FinishKeyStartField(key vdl.Target) (field vdl.Target, _ error) {
+	t.currElem = AccessList{}
+	return &AccessListTarget{Value: &t.currElem}, error(nil)
+}
+func (t *PermissionsTarget) FinishField(key, field vdl.Target) error {
+	(*t.Value)[t.currKey] = t.currElem
+	return nil
+}
+func (t *PermissionsTarget) FinishMap(elem vdl.MapTarget) error {
+	if len(*t.Value) == 0 {
+		*t.Value = nil
+	}
 	return nil
 }
 
@@ -281,14 +372,27 @@ func (Tag) __VDLReflect(struct {
 }) {
 }
 
-func (m Tag) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
-	if err := t.FromString(string(m), __VDLType_types_v_io_v23_security_access_Tag); err != nil {
+func (m *Tag) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
+	if err := t.FromString(string((*m)), __VDLType_types_v_io_v23_security_access_Tag); err != nil {
 		return err
 	}
 	return nil
 }
 
-func (m Tag) MakeVDLTarget() vdl.Target {
+func (m *Tag) MakeVDLTarget() vdl.Target {
+	return &TagTarget{Value: m}
+}
+
+type TagTarget struct {
+	Value *Tag
+	vdl.TargetBase
+}
+
+func (t *TagTarget) FromString(src string, tt *vdl.Type) error {
+	if !vdl.Compatible(tt, __VDLType_types_v_io_v23_security_access_Tag) {
+		return fmt.Errorf("type %v incompatible with %v", tt, __VDLType_types_v_io_v23_security_access_Tag)
+	}
+	*t.Value = Tag(src)
 	return nil
 }
 

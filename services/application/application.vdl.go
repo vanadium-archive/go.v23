@@ -9,6 +9,8 @@
 package application
 
 import (
+	"fmt"
+	"reflect"
 	"time"
 	"v.io/v23/security"
 	"v.io/v23/vdl"
@@ -60,7 +62,6 @@ func (Envelope) __VDLReflect(struct {
 }
 
 func (m *Envelope) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
-
 	__VDLEnsureNativeBuilt_application()
 	fieldsTarget1, err := t.StartFields(tt)
 	if err != nil {
@@ -218,6 +219,120 @@ func (m *Envelope) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 }
 
 func (m *Envelope) MakeVDLTarget() vdl.Target {
+	return &EnvelopeTarget{Value: m}
+}
+
+type EnvelopeTarget struct {
+	Value *Envelope
+	vdl.TargetBase
+	vdl.FieldsTargetBase
+}
+
+func (t *EnvelopeTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
+	if !vdl.Compatible(tt, __VDLType_application_v_io_v23_services_application_Envelope) {
+		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType_application_v_io_v23_services_application_Envelope)
+	}
+	return t, nil
+}
+func (t *EnvelopeTarget) StartField(name string) (key, field vdl.Target, _ error) {
+	switch name {
+	case "Title":
+		val, err := &vdl.StringTarget{Value: &t.Value.Title}, error(nil)
+		return nil, val, err
+	case "Args":
+		val, err := &vdl.StringSliceTarget{Value: &t.Value.Args}, error(nil)
+		return nil, val, err
+	case "Binary":
+		val, err := &SignedFileTarget{Value: &t.Value.Binary}, error(nil)
+		return nil, val, err
+	case "Publisher":
+		val, err := vdl.ReflectTarget(reflect.ValueOf(&t.Value.Publisher))
+		return nil, val, err
+	case "Env":
+		val, err := &vdl.StringSliceTarget{Value: &t.Value.Env}, error(nil)
+		return nil, val, err
+	case "Packages":
+		val, err := &PackagesTarget{Value: &t.Value.Packages}, error(nil)
+		return nil, val, err
+	case "Restarts":
+		val, err := &vdl.Int32Target{Value: &t.Value.Restarts}, error(nil)
+		return nil, val, err
+	case "RestartTimeWindow":
+		val, err := vdl.ReflectTarget(reflect.ValueOf(&t.Value.RestartTimeWindow))
+		return nil, val, err
+	default:
+		return nil, nil, fmt.Errorf("field %s not in struct %v", name, __VDLType_application_v_io_v23_services_application_Envelope)
+	}
+}
+func (t *EnvelopeTarget) FinishField(_, _ vdl.Target) error {
+	return nil
+}
+func (t *EnvelopeTarget) FinishFields(_ vdl.FieldsTarget) error {
+	return nil
+}
+
+type SignedFileTarget struct {
+	Value *SignedFile
+	vdl.TargetBase
+	vdl.FieldsTargetBase
+}
+
+func (t *SignedFileTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
+	if !vdl.Compatible(tt, __VDLType_application_v_io_v23_services_application_SignedFile) {
+		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType_application_v_io_v23_services_application_SignedFile)
+	}
+	return t, nil
+}
+func (t *SignedFileTarget) StartField(name string) (key, field vdl.Target, _ error) {
+	switch name {
+	case "File":
+		val, err := &vdl.StringTarget{Value: &t.Value.File}, error(nil)
+		return nil, val, err
+	case "Signature":
+		val, err := &security.SignatureTarget{Value: &t.Value.Signature}, error(nil)
+		return nil, val, err
+	default:
+		return nil, nil, fmt.Errorf("field %s not in struct %v", name, __VDLType_application_v_io_v23_services_application_SignedFile)
+	}
+}
+func (t *SignedFileTarget) FinishField(_, _ vdl.Target) error {
+	return nil
+}
+func (t *SignedFileTarget) FinishFields(_ vdl.FieldsTarget) error {
+	return nil
+}
+
+type PackagesTarget struct {
+	Value    *Packages
+	currKey  string
+	currElem SignedFile
+	vdl.TargetBase
+	vdl.MapTargetBase
+}
+
+func (t *PackagesTarget) StartMap(tt *vdl.Type, len int) (vdl.MapTarget, error) {
+	if !vdl.Compatible(tt, __VDLType_application_v_io_v23_services_application_Packages) {
+		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType_application_v_io_v23_services_application_Packages)
+	}
+	*t.Value = make(Packages)
+	return t, nil
+}
+func (t *PackagesTarget) StartKey() (key vdl.Target, _ error) {
+	t.currKey = ""
+	return &vdl.StringTarget{Value: &t.currKey}, error(nil)
+}
+func (t *PackagesTarget) FinishKeyStartField(key vdl.Target) (field vdl.Target, _ error) {
+	t.currElem = SignedFile{}
+	return &SignedFileTarget{Value: &t.currElem}, error(nil)
+}
+func (t *PackagesTarget) FinishField(key, field vdl.Target) error {
+	(*t.Value)[t.currKey] = t.currElem
+	return nil
+}
+func (t *PackagesTarget) FinishMap(elem vdl.MapTarget) error {
+	if len(*t.Value) == 0 {
+		*t.Value = nil
+	}
 	return nil
 }
 
@@ -245,13 +360,12 @@ func (Packages) __VDLReflect(struct {
 }) {
 }
 
-func (m Packages) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
-
-	mapTarget1, err := t.StartMap(__VDLType_application_v_io_v23_services_application_Packages, len(m))
+func (m *Packages) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
+	mapTarget1, err := t.StartMap(__VDLType_application_v_io_v23_services_application_Packages, len((*m)))
 	if err != nil {
 		return err
 	}
-	for key3, value5 := range m {
+	for key3, value5 := range *m {
 		keyTarget2, err := mapTarget1.StartKey()
 		if err != nil {
 			return err
@@ -277,8 +391,8 @@ func (m Packages) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 	return nil
 }
 
-func (m Packages) MakeVDLTarget() vdl.Target {
-	return nil
+func (m *Packages) MakeVDLTarget() vdl.Target {
+	return &PackagesTarget{Value: m}
 }
 
 // SignedFile represents a file accompanied by a signature of its contents.
@@ -296,7 +410,6 @@ func (SignedFile) __VDLReflect(struct {
 }
 
 func (m *SignedFile) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
-
 	if __VDLType_application_v_io_v23_services_application_SignedFile == nil || __VDLTypeapplication2 == nil {
 		panic("Initialization order error: types generated for FillVDLTarget not initialized. Consider moving caller to an init() block.")
 	}
@@ -337,7 +450,7 @@ func (m *SignedFile) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 }
 
 func (m *SignedFile) MakeVDLTarget() vdl.Target {
-	return nil
+	return &SignedFileTarget{Value: m}
 }
 
 func init() {

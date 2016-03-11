@@ -55,6 +55,9 @@ pkg security, func WireBlessingsFromNative(*WireBlessings, Blessings) error
 pkg security, func WireBlessingsToNative(WireBlessings, *Blessings) error
 pkg security, func WireDischargeFromNative(*WireDischarge, Discharge) error
 pkg security, func WireDischargeToNative(WireDischarge, *Discharge) error
+pkg security, method (*BlessingPattern) FillVDLTarget(vdl.Target, *vdl.Type) error
+pkg security, method (*BlessingPattern) MakeVDLTarget() vdl.Target
+pkg security, method (*BlessingPatternTarget) FromString(string, *vdl.Type) error
 pkg security, method (*CallParams) Copy(Call)
 pkg security, method (*Caveat) FillVDLTarget(vdl.Target, *vdl.Type) error
 pkg security, method (*Caveat) MakeVDLTarget() vdl.Target
@@ -62,23 +65,52 @@ pkg security, method (*Caveat) ThirdPartyDetails() ThirdPartyCaveat
 pkg security, method (*Caveat) Validate(*context.T, Call) error
 pkg security, method (*CaveatDescriptor) FillVDLTarget(vdl.Target, *vdl.Type) error
 pkg security, method (*CaveatDescriptor) MakeVDLTarget() vdl.Target
+pkg security, method (*CaveatDescriptorTarget) FinishField(vdl.Target, vdl.Target) error
+pkg security, method (*CaveatDescriptorTarget) FinishFields(vdl.FieldsTarget) error
+pkg security, method (*CaveatDescriptorTarget) StartField(string) (vdl.Target, vdl.Target, error)
+pkg security, method (*CaveatDescriptorTarget) StartFields(*vdl.Type) (vdl.FieldsTarget, error)
+pkg security, method (*CaveatTarget) FinishField(vdl.Target, vdl.Target) error
+pkg security, method (*CaveatTarget) FinishFields(vdl.FieldsTarget) error
+pkg security, method (*CaveatTarget) StartField(string) (vdl.Target, vdl.Target, error)
+pkg security, method (*CaveatTarget) StartFields(*vdl.Type) (vdl.FieldsTarget, error)
 pkg security, method (*Certificate) FillVDLTarget(vdl.Target, *vdl.Type) error
 pkg security, method (*Certificate) MakeVDLTarget() vdl.Target
+pkg security, method (*CertificateTarget) FinishField(vdl.Target, vdl.Target) error
+pkg security, method (*CertificateTarget) FinishFields(vdl.FieldsTarget) error
+pkg security, method (*CertificateTarget) StartField(string) (vdl.Target, vdl.Target, error)
+pkg security, method (*CertificateTarget) StartFields(*vdl.Type) (vdl.FieldsTarget, error)
 pkg security, method (*DischargeImpetus) FillVDLTarget(vdl.Target, *vdl.Type) error
 pkg security, method (*DischargeImpetus) MakeVDLTarget() vdl.Target
+pkg security, method (*DischargeImpetusTarget) FinishField(vdl.Target, vdl.Target) error
+pkg security, method (*DischargeImpetusTarget) FinishFields(vdl.FieldsTarget) error
+pkg security, method (*DischargeImpetusTarget) StartField(string) (vdl.Target, vdl.Target, error)
+pkg security, method (*DischargeImpetusTarget) StartFields(*vdl.Type) (vdl.FieldsTarget, error)
+pkg security, method (*Hash) FillVDLTarget(vdl.Target, *vdl.Type) error
+pkg security, method (*Hash) MakeVDLTarget() vdl.Target
+pkg security, method (*HashTarget) FromString(string, *vdl.Type) error
 pkg security, method (*RejectedBlessing) FillVDLTarget(vdl.Target, *vdl.Type) error
 pkg security, method (*RejectedBlessing) MakeVDLTarget() vdl.Target
+pkg security, method (*RejectedBlessingTarget) FinishField(vdl.Target, vdl.Target) error
+pkg security, method (*RejectedBlessingTarget) FinishFields(vdl.FieldsTarget) error
+pkg security, method (*RejectedBlessingTarget) StartField(string) (vdl.Target, vdl.Target, error)
+pkg security, method (*RejectedBlessingTarget) StartFields(*vdl.Type) (vdl.FieldsTarget, error)
 pkg security, method (*Signature) FillVDLTarget(vdl.Target, *vdl.Type) error
 pkg security, method (*Signature) MakeVDLTarget() vdl.Target
 pkg security, method (*Signature) Verify(PublicKey, []byte) bool
+pkg security, method (*SignatureTarget) FinishField(vdl.Target, vdl.Target) error
+pkg security, method (*SignatureTarget) FinishFields(vdl.FieldsTarget) error
+pkg security, method (*SignatureTarget) StartField(string) (vdl.Target, vdl.Target, error)
+pkg security, method (*SignatureTarget) StartFields(*vdl.Type) (vdl.FieldsTarget, error)
 pkg security, method (*ThirdPartyRequirements) FillVDLTarget(vdl.Target, *vdl.Type) error
 pkg security, method (*ThirdPartyRequirements) MakeVDLTarget() vdl.Target
+pkg security, method (*ThirdPartyRequirementsTarget) FinishField(vdl.Target, vdl.Target) error
+pkg security, method (*ThirdPartyRequirementsTarget) FinishFields(vdl.FieldsTarget) error
+pkg security, method (*ThirdPartyRequirementsTarget) StartField(string) (vdl.Target, vdl.Target, error)
+pkg security, method (*ThirdPartyRequirementsTarget) StartFields(*vdl.Type) (vdl.FieldsTarget, error)
 pkg security, method (*WireBlessings) FillVDLTarget(vdl.Target, *vdl.Type) error
 pkg security, method (*WireBlessings) MakeVDLTarget() vdl.Target
-pkg security, method (BlessingPattern) FillVDLTarget(vdl.Target, *vdl.Type) error
 pkg security, method (BlessingPattern) IsValid() bool
 pkg security, method (BlessingPattern) MakeNonExtendable() BlessingPattern
-pkg security, method (BlessingPattern) MakeVDLTarget() vdl.Target
 pkg security, method (BlessingPattern) MatchedBy(...string) bool
 pkg security, method (BlessingPattern) PrefixPatterns() []BlessingPattern
 pkg security, method (Blessings) CouldHaveNames([]string) bool
@@ -94,8 +126,6 @@ pkg security, method (Discharge) Equivalent(Discharge) bool
 pkg security, method (Discharge) Expiry() time.Time
 pkg security, method (Discharge) ID() string
 pkg security, method (Discharge) ThirdPartyCaveats() []ThirdPartyCaveat
-pkg security, method (Hash) FillVDLTarget(vdl.Target, *vdl.Type) error
-pkg security, method (Hash) MakeVDLTarget() vdl.Target
 pkg security, method (RejectedBlessing) String() string
 pkg security, method (WireDischargePublicKey) FillVDLTarget(vdl.Target, *vdl.Type) error
 pkg security, method (WireDischargePublicKey) Index() int
@@ -105,6 +135,9 @@ pkg security, method (WireDischargePublicKey) Name() string
 pkg security, type Authorizer interface { Authorize }
 pkg security, type Authorizer interface, Authorize(*context.T, Call) error
 pkg security, type BlessingPattern string
+pkg security, type BlessingPatternTarget struct
+pkg security, type BlessingPatternTarget struct, Value *BlessingPattern
+pkg security, type BlessingPatternTarget struct, embedded vdl.TargetBase
 pkg security, type BlessingRoots interface { Add, DebugString, Dump, Recognized }
 pkg security, type BlessingRoots interface, Add([]byte, BlessingPattern) error
 pkg security, type BlessingRoots interface, DebugString() string
@@ -152,17 +185,36 @@ pkg security, type Caveat struct, ParamVom []byte
 pkg security, type CaveatDescriptor struct
 pkg security, type CaveatDescriptor struct, Id uniqueid.Id
 pkg security, type CaveatDescriptor struct, ParamType *vdl.Type
+pkg security, type CaveatDescriptorTarget struct
+pkg security, type CaveatDescriptorTarget struct, Value *CaveatDescriptor
+pkg security, type CaveatDescriptorTarget struct, embedded vdl.FieldsTargetBase
+pkg security, type CaveatDescriptorTarget struct, embedded vdl.TargetBase
+pkg security, type CaveatTarget struct
+pkg security, type CaveatTarget struct, Value *Caveat
+pkg security, type CaveatTarget struct, embedded vdl.FieldsTargetBase
+pkg security, type CaveatTarget struct, embedded vdl.TargetBase
 pkg security, type Certificate struct
 pkg security, type Certificate struct, Caveats []Caveat
 pkg security, type Certificate struct, Extension string
 pkg security, type Certificate struct, PublicKey []byte
 pkg security, type Certificate struct, Signature Signature
+pkg security, type CertificateTarget struct
+pkg security, type CertificateTarget struct, Value *Certificate
+pkg security, type CertificateTarget struct, embedded vdl.FieldsTargetBase
+pkg security, type CertificateTarget struct, embedded vdl.TargetBase
 pkg security, type Discharge struct
 pkg security, type DischargeImpetus struct
 pkg security, type DischargeImpetus struct, Arguments []*vom.RawBytes
 pkg security, type DischargeImpetus struct, Method string
 pkg security, type DischargeImpetus struct, Server []BlessingPattern
+pkg security, type DischargeImpetusTarget struct
+pkg security, type DischargeImpetusTarget struct, Value *DischargeImpetus
+pkg security, type DischargeImpetusTarget struct, embedded vdl.FieldsTargetBase
+pkg security, type DischargeImpetusTarget struct, embedded vdl.TargetBase
 pkg security, type Hash string
+pkg security, type HashTarget struct
+pkg security, type HashTarget struct, Value *Hash
+pkg security, type HashTarget struct, embedded vdl.TargetBase
 pkg security, type Principal interface { Bless, BlessSelf, BlessingStore, MintDischarge, PublicKey, Roots, Sign }
 pkg security, type Principal interface, Bless(PublicKey, Blessings, string, Caveat, ...Caveat) (Blessings, error)
 pkg security, type Principal interface, BlessSelf(string, ...Caveat) (Blessings, error)
@@ -177,11 +229,19 @@ pkg security, type PublicKey interface, unexported methods
 pkg security, type RejectedBlessing struct
 pkg security, type RejectedBlessing struct, Blessing string
 pkg security, type RejectedBlessing struct, Err error
+pkg security, type RejectedBlessingTarget struct
+pkg security, type RejectedBlessingTarget struct, Value *RejectedBlessing
+pkg security, type RejectedBlessingTarget struct, embedded vdl.FieldsTargetBase
+pkg security, type RejectedBlessingTarget struct, embedded vdl.TargetBase
 pkg security, type Signature struct
 pkg security, type Signature struct, Hash Hash
 pkg security, type Signature struct, Purpose []byte
 pkg security, type Signature struct, R []byte
 pkg security, type Signature struct, S []byte
+pkg security, type SignatureTarget struct
+pkg security, type SignatureTarget struct, Value *Signature
+pkg security, type SignatureTarget struct, embedded vdl.FieldsTargetBase
+pkg security, type SignatureTarget struct, embedded vdl.TargetBase
 pkg security, type Signer interface { PublicKey, Sign }
 pkg security, type Signer interface, PublicKey() PublicKey
 pkg security, type Signer interface, Sign([]byte, []byte) (Signature, error)
@@ -194,6 +254,10 @@ pkg security, type ThirdPartyRequirements struct
 pkg security, type ThirdPartyRequirements struct, ReportArguments bool
 pkg security, type ThirdPartyRequirements struct, ReportMethod bool
 pkg security, type ThirdPartyRequirements struct, ReportServer bool
+pkg security, type ThirdPartyRequirementsTarget struct
+pkg security, type ThirdPartyRequirementsTarget struct, Value *ThirdPartyRequirements
+pkg security, type ThirdPartyRequirementsTarget struct, embedded vdl.FieldsTargetBase
+pkg security, type ThirdPartyRequirementsTarget struct, embedded vdl.TargetBase
 pkg security, type WireBlessings struct
 pkg security, type WireBlessings struct, CertificateChains [][]Certificate
 pkg security, type WireDischarge interface, FillVDLTarget(vdl.Target, *vdl.Type) error

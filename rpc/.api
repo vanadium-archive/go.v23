@@ -17,8 +17,16 @@ pkg rpc, func ReflectInvokerOrDie(interface{}) Invoker
 pkg rpc, func TypeCheckMethods(interface{}) map[string]error
 pkg rpc, method (*Request) FillVDLTarget(vdl.Target, *vdl.Type) error
 pkg rpc, method (*Request) MakeVDLTarget() vdl.Target
+pkg rpc, method (*RequestTarget) FinishField(vdl.Target, vdl.Target) error
+pkg rpc, method (*RequestTarget) FinishFields(vdl.FieldsTarget) error
+pkg rpc, method (*RequestTarget) StartField(string) (vdl.Target, vdl.Target, error)
+pkg rpc, method (*RequestTarget) StartFields(*vdl.Type) (vdl.FieldsTarget, error)
 pkg rpc, method (*Response) FillVDLTarget(vdl.Target, *vdl.Type) error
 pkg rpc, method (*Response) MakeVDLTarget() vdl.Target
+pkg rpc, method (*ResponseTarget) FinishField(vdl.Target, vdl.Target) error
+pkg rpc, method (*ResponseTarget) FinishFields(vdl.FieldsTarget) error
+pkg rpc, method (*ResponseTarget) StartField(string) (vdl.Target, vdl.Target, error)
+pkg rpc, method (*ResponseTarget) StartFields(*vdl.Type) (vdl.FieldsTarget, error)
 pkg rpc, method (AddressChooserFunc) ChooseAddresses(string, []net.Addr) ([]net.Addr, error)
 pkg rpc, method (ListenSpec) Copy() ListenSpec
 pkg rpc, method (ListenSpec) String() string
@@ -129,12 +137,20 @@ pkg rpc, type Request struct, Method string
 pkg rpc, type Request struct, NumPosArgs uint64
 pkg rpc, type Request struct, Suffix string
 pkg rpc, type Request struct, TraceRequest vtrace.Request
+pkg rpc, type RequestTarget struct
+pkg rpc, type RequestTarget struct, Value *Request
+pkg rpc, type RequestTarget struct, embedded vdl.FieldsTargetBase
+pkg rpc, type RequestTarget struct, embedded vdl.TargetBase
 pkg rpc, type Response struct
 pkg rpc, type Response struct, AckBlessings bool
 pkg rpc, type Response struct, EndStreamResults bool
 pkg rpc, type Response struct, Error error
 pkg rpc, type Response struct, NumPosResults uint64
 pkg rpc, type Response struct, TraceResponse vtrace.Response
+pkg rpc, type ResponseTarget struct
+pkg rpc, type ResponseTarget struct, Value *Response
+pkg rpc, type ResponseTarget struct, embedded vdl.FieldsTargetBase
+pkg rpc, type ResponseTarget struct, embedded vdl.TargetBase
 pkg rpc, type Server interface { AddName, Closed, RemoveName, Status, Stop }
 pkg rpc, type Server interface, AddName(string) error
 pkg rpc, type Server interface, Closed() <-chan struct{}

@@ -34,13 +34,12 @@ func (Config) __VDLReflect(struct {
 }) {
 }
 
-func (m Config) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
-
-	mapTarget1, err := t.StartMap(__VDLType_device_v_io_v23_services_device_Config, len(m))
+func (m *Config) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
+	mapTarget1, err := t.StartMap(__VDLType_device_v_io_v23_services_device_Config, len((*m)))
 	if err != nil {
 		return err
 	}
-	for key3, value5 := range m {
+	for key3, value5 := range *m {
 		keyTarget2, err := mapTarget1.StartKey()
 		if err != nil {
 			return err
@@ -65,7 +64,41 @@ func (m Config) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 	return nil
 }
 
-func (m Config) MakeVDLTarget() vdl.Target {
+func (m *Config) MakeVDLTarget() vdl.Target {
+	return &ConfigTarget{Value: m}
+}
+
+type ConfigTarget struct {
+	Value    *Config
+	currKey  string
+	currElem string
+	vdl.TargetBase
+	vdl.MapTargetBase
+}
+
+func (t *ConfigTarget) StartMap(tt *vdl.Type, len int) (vdl.MapTarget, error) {
+	if !vdl.Compatible(tt, __VDLType_device_v_io_v23_services_device_Config) {
+		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType_device_v_io_v23_services_device_Config)
+	}
+	*t.Value = make(Config)
+	return t, nil
+}
+func (t *ConfigTarget) StartKey() (key vdl.Target, _ error) {
+	t.currKey = ""
+	return &vdl.StringTarget{Value: &t.currKey}, error(nil)
+}
+func (t *ConfigTarget) FinishKeyStartField(key vdl.Target) (field vdl.Target, _ error) {
+	t.currElem = ""
+	return &vdl.StringTarget{Value: &t.currElem}, error(nil)
+}
+func (t *ConfigTarget) FinishField(key, field vdl.Target) error {
+	(*t.Value)[t.currKey] = t.currElem
+	return nil
+}
+func (t *ConfigTarget) FinishMap(elem vdl.MapTarget) error {
+	if len(*t.Value) == 0 {
+		*t.Value = nil
+	}
 	return nil
 }
 
@@ -118,14 +151,34 @@ func (InstallationState) __VDLReflect(struct {
 }) {
 }
 
-func (m InstallationState) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
-	if err := t.FromEnumLabel(m.String(), __VDLType_device_v_io_v23_services_device_InstallationState); err != nil {
+func (m *InstallationState) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
+	if err := t.FromEnumLabel((*m).String(), __VDLType_device_v_io_v23_services_device_InstallationState); err != nil {
 		return err
 	}
 	return nil
 }
 
-func (m InstallationState) MakeVDLTarget() vdl.Target {
+func (m *InstallationState) MakeVDLTarget() vdl.Target {
+	return &InstallationStateTarget{Value: m}
+}
+
+type InstallationStateTarget struct {
+	Value *InstallationState
+	vdl.TargetBase
+}
+
+func (t *InstallationStateTarget) FromEnumLabel(src string, tt *vdl.Type) error {
+	if !vdl.Compatible(tt, __VDLType_device_v_io_v23_services_device_InstallationState) {
+		return fmt.Errorf("type %v incompatible with %v", tt, __VDLType_device_v_io_v23_services_device_InstallationState)
+	}
+	switch src {
+	case "Active":
+		*t.Value = 0
+	case "Uninstalled":
+		*t.Value = 1
+	default:
+		return fmt.Errorf("label %s not in enum %v", src, __VDLType_device_v_io_v23_services_device_InstallationState)
+	}
 	return nil
 }
 
@@ -202,14 +255,42 @@ func (InstanceState) __VDLReflect(struct {
 }) {
 }
 
-func (m InstanceState) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
-	if err := t.FromEnumLabel(m.String(), __VDLType_device_v_io_v23_services_device_InstanceState); err != nil {
+func (m *InstanceState) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
+	if err := t.FromEnumLabel((*m).String(), __VDLType_device_v_io_v23_services_device_InstanceState); err != nil {
 		return err
 	}
 	return nil
 }
 
-func (m InstanceState) MakeVDLTarget() vdl.Target {
+func (m *InstanceState) MakeVDLTarget() vdl.Target {
+	return &InstanceStateTarget{Value: m}
+}
+
+type InstanceStateTarget struct {
+	Value *InstanceState
+	vdl.TargetBase
+}
+
+func (t *InstanceStateTarget) FromEnumLabel(src string, tt *vdl.Type) error {
+	if !vdl.Compatible(tt, __VDLType_device_v_io_v23_services_device_InstanceState) {
+		return fmt.Errorf("type %v incompatible with %v", tt, __VDLType_device_v_io_v23_services_device_InstanceState)
+	}
+	switch src {
+	case "Launching":
+		*t.Value = 0
+	case "Running":
+		*t.Value = 1
+	case "Dying":
+		*t.Value = 2
+	case "NotRunning":
+		*t.Value = 3
+	case "Updating":
+		*t.Value = 4
+	case "Deleted":
+		*t.Value = 5
+	default:
+		return fmt.Errorf("label %s not in enum %v", src, __VDLType_device_v_io_v23_services_device_InstanceState)
+	}
 	return nil
 }
 
@@ -252,7 +333,6 @@ func (x StatusInstance) Name() string                 { return "Instance" }
 func (x StatusInstance) __VDLReflect(__StatusReflect) {}
 
 func (m StatusInstance) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
-
 	fieldsTarget1, err := t.StartFields(__VDLType_device_v_io_v23_services_device_Status)
 	if err != nil {
 		return err
@@ -285,7 +365,6 @@ func (x StatusInstallation) Name() string                 { return "Installation
 func (x StatusInstallation) __VDLReflect(__StatusReflect) {}
 
 func (m StatusInstallation) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
-
 	fieldsTarget1, err := t.StartFields(__VDLType_device_v_io_v23_services_device_Status)
 	if err != nil {
 		return err
@@ -318,7 +397,6 @@ func (x StatusDevice) Name() string                 { return "Device" }
 func (x StatusDevice) __VDLReflect(__StatusReflect) {}
 
 func (m StatusDevice) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
-
 	fieldsTarget1, err := t.StartFields(__VDLType_device_v_io_v23_services_device_Status)
 	if err != nil {
 		return err
@@ -358,7 +436,6 @@ func (InstallationStatus) __VDLReflect(struct {
 }
 
 func (m *InstallationStatus) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
-
 	if __VDLType_device_v_io_v23_services_device_InstallationStatus == nil || __VDLTypedevice0 == nil {
 		panic("Initialization order error: types generated for FillVDLTarget not initialized. Consider moving caller to an init() block.")
 	}
@@ -399,6 +476,37 @@ func (m *InstallationStatus) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 }
 
 func (m *InstallationStatus) MakeVDLTarget() vdl.Target {
+	return &InstallationStatusTarget{Value: m}
+}
+
+type InstallationStatusTarget struct {
+	Value *InstallationStatus
+	vdl.TargetBase
+	vdl.FieldsTargetBase
+}
+
+func (t *InstallationStatusTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
+	if !vdl.Compatible(tt, __VDLType_device_v_io_v23_services_device_InstallationStatus) {
+		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType_device_v_io_v23_services_device_InstallationStatus)
+	}
+	return t, nil
+}
+func (t *InstallationStatusTarget) StartField(name string) (key, field vdl.Target, _ error) {
+	switch name {
+	case "State":
+		val, err := &InstallationStateTarget{Value: &t.Value.State}, error(nil)
+		return nil, val, err
+	case "Version":
+		val, err := &vdl.StringTarget{Value: &t.Value.Version}, error(nil)
+		return nil, val, err
+	default:
+		return nil, nil, fmt.Errorf("field %s not in struct %v", name, __VDLType_device_v_io_v23_services_device_InstallationStatus)
+	}
+}
+func (t *InstallationStatusTarget) FinishField(_, _ vdl.Target) error {
+	return nil
+}
+func (t *InstallationStatusTarget) FinishFields(_ vdl.FieldsTarget) error {
 	return nil
 }
 
@@ -415,7 +523,6 @@ func (InstanceStatus) __VDLReflect(struct {
 }
 
 func (m *InstanceStatus) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
-
 	if __VDLType_device_v_io_v23_services_device_InstanceStatus == nil || __VDLTypedevice1 == nil {
 		panic("Initialization order error: types generated for FillVDLTarget not initialized. Consider moving caller to an init() block.")
 	}
@@ -456,6 +563,37 @@ func (m *InstanceStatus) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 }
 
 func (m *InstanceStatus) MakeVDLTarget() vdl.Target {
+	return &InstanceStatusTarget{Value: m}
+}
+
+type InstanceStatusTarget struct {
+	Value *InstanceStatus
+	vdl.TargetBase
+	vdl.FieldsTargetBase
+}
+
+func (t *InstanceStatusTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
+	if !vdl.Compatible(tt, __VDLType_device_v_io_v23_services_device_InstanceStatus) {
+		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType_device_v_io_v23_services_device_InstanceStatus)
+	}
+	return t, nil
+}
+func (t *InstanceStatusTarget) StartField(name string) (key, field vdl.Target, _ error) {
+	switch name {
+	case "State":
+		val, err := &InstanceStateTarget{Value: &t.Value.State}, error(nil)
+		return nil, val, err
+	case "Version":
+		val, err := &vdl.StringTarget{Value: &t.Value.Version}, error(nil)
+		return nil, val, err
+	default:
+		return nil, nil, fmt.Errorf("field %s not in struct %v", name, __VDLType_device_v_io_v23_services_device_InstanceStatus)
+	}
+}
+func (t *InstanceStatusTarget) FinishField(_, _ vdl.Target) error {
+	return nil
+}
+func (t *InstanceStatusTarget) FinishFields(_ vdl.FieldsTarget) error {
 	return nil
 }
 
@@ -472,7 +610,6 @@ func (DeviceStatus) __VDLReflect(struct {
 }
 
 func (m *DeviceStatus) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
-
 	if __VDLType_device_v_io_v23_services_device_DeviceStatus == nil || __VDLTypedevice2 == nil {
 		panic("Initialization order error: types generated for FillVDLTarget not initialized. Consider moving caller to an init() block.")
 	}
@@ -513,6 +650,37 @@ func (m *DeviceStatus) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 }
 
 func (m *DeviceStatus) MakeVDLTarget() vdl.Target {
+	return &DeviceStatusTarget{Value: m}
+}
+
+type DeviceStatusTarget struct {
+	Value *DeviceStatus
+	vdl.TargetBase
+	vdl.FieldsTargetBase
+}
+
+func (t *DeviceStatusTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
+	if !vdl.Compatible(tt, __VDLType_device_v_io_v23_services_device_DeviceStatus) {
+		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType_device_v_io_v23_services_device_DeviceStatus)
+	}
+	return t, nil
+}
+func (t *DeviceStatusTarget) StartField(name string) (key, field vdl.Target, _ error) {
+	switch name {
+	case "State":
+		val, err := &InstanceStateTarget{Value: &t.Value.State}, error(nil)
+		return nil, val, err
+	case "Version":
+		val, err := &vdl.StringTarget{Value: &t.Value.Version}, error(nil)
+		return nil, val, err
+	default:
+		return nil, nil, fmt.Errorf("field %s not in struct %v", name, __VDLType_device_v_io_v23_services_device_DeviceStatus)
+	}
+}
+func (t *DeviceStatusTarget) FinishField(_, _ vdl.Target) error {
+	return nil
+}
+func (t *DeviceStatusTarget) FinishFields(_ vdl.FieldsTarget) error {
 	return nil
 }
 
@@ -554,7 +722,6 @@ func (x BlessServerMessageInstancePublicKey) Name() string                      
 func (x BlessServerMessageInstancePublicKey) __VDLReflect(__BlessServerMessageReflect) {}
 
 func (m BlessServerMessageInstancePublicKey) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
-
 	fieldsTarget1, err := t.StartFields(__VDLType_device_v_io_v23_services_device_BlessServerMessage)
 	if err != nil {
 		return err
@@ -618,7 +785,6 @@ func (x BlessClientMessageAppBlessings) Name() string                           
 func (x BlessClientMessageAppBlessings) __VDLReflect(__BlessClientMessageReflect) {}
 
 func (m BlessClientMessageAppBlessings) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
-
 	fieldsTarget1, err := t.StartFields(__VDLType_device_v_io_v23_services_device_BlessClientMessage)
 	if err != nil {
 		return err
@@ -669,7 +835,6 @@ func (Description) __VDLReflect(struct {
 }
 
 func (m *Description) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
-
 	if __VDLType_device_v_io_v23_services_device_Description == nil || __VDLTypedevice4 == nil {
 		panic("Initialization order error: types generated for FillVDLTarget not initialized. Consider moving caller to an init() block.")
 	}
@@ -714,6 +879,63 @@ func (m *Description) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 }
 
 func (m *Description) MakeVDLTarget() vdl.Target {
+	return &DescriptionTarget{Value: m}
+}
+
+type DescriptionTarget struct {
+	Value *Description
+	vdl.TargetBase
+	vdl.FieldsTargetBase
+}
+
+func (t *DescriptionTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
+	if !vdl.Compatible(tt, __VDLType_device_v_io_v23_services_device_Description) {
+		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType_device_v_io_v23_services_device_Description)
+	}
+	return t, nil
+}
+func (t *DescriptionTarget) StartField(name string) (key, field vdl.Target, _ error) {
+	switch name {
+	case "Profiles":
+		val, err := &device7365745b737472696e675dTarget{Value: &t.Value.Profiles}, error(nil)
+		return nil, val, err
+	default:
+		return nil, nil, fmt.Errorf("field %s not in struct %v", name, __VDLType_device_v_io_v23_services_device_Description)
+	}
+}
+func (t *DescriptionTarget) FinishField(_, _ vdl.Target) error {
+	return nil
+}
+func (t *DescriptionTarget) FinishFields(_ vdl.FieldsTarget) error {
+	return nil
+}
+
+type device7365745b737472696e675dTarget struct {
+	Value   *map[string]struct{}
+	currKey string
+	vdl.TargetBase
+	vdl.SetTargetBase
+}
+
+func (t *device7365745b737472696e675dTarget) StartSet(tt *vdl.Type, len int) (vdl.SetTarget, error) {
+	if !vdl.Compatible(tt, __VDLTypedevice5) {
+		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLTypedevice5)
+	}
+	*t.Value = make(map[string]struct{})
+	return t, nil
+}
+func (t *device7365745b737472696e675dTarget) StartKey() (key vdl.Target, _ error) {
+	t.currKey = ""
+	return &vdl.StringTarget{Value: &t.currKey}, error(nil)
+}
+func (t *device7365745b737472696e675dTarget) FinishKey(key vdl.Target) error {
+	(*t.Value)[t.currKey] = struct{}{}
+	return nil
+}
+func (t *device7365745b737472696e675dTarget) FinishSet(list vdl.SetTarget) error {
+	if len(*t.Value) == 0 {
+		*t.Value = nil
+	}
 	return nil
 }
 
@@ -730,7 +952,6 @@ func (Association) __VDLReflect(struct {
 }
 
 func (m *Association) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
-
 	if __VDLType_device_v_io_v23_services_device_Association == nil || __VDLTypedevice6 == nil {
 		panic("Initialization order error: types generated for FillVDLTarget not initialized. Consider moving caller to an init() block.")
 	}
@@ -770,6 +991,37 @@ func (m *Association) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 }
 
 func (m *Association) MakeVDLTarget() vdl.Target {
+	return &AssociationTarget{Value: m}
+}
+
+type AssociationTarget struct {
+	Value *Association
+	vdl.TargetBase
+	vdl.FieldsTargetBase
+}
+
+func (t *AssociationTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
+	if !vdl.Compatible(tt, __VDLType_device_v_io_v23_services_device_Association) {
+		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType_device_v_io_v23_services_device_Association)
+	}
+	return t, nil
+}
+func (t *AssociationTarget) StartField(name string) (key, field vdl.Target, _ error) {
+	switch name {
+	case "IdentityName":
+		val, err := &vdl.StringTarget{Value: &t.Value.IdentityName}, error(nil)
+		return nil, val, err
+	case "AccountName":
+		val, err := &vdl.StringTarget{Value: &t.Value.AccountName}, error(nil)
+		return nil, val, err
+	default:
+		return nil, nil, fmt.Errorf("field %s not in struct %v", name, __VDLType_device_v_io_v23_services_device_Association)
+	}
+}
+func (t *AssociationTarget) FinishField(_, _ vdl.Target) error {
+	return nil
+}
+func (t *AssociationTarget) FinishFields(_ vdl.FieldsTarget) error {
 	return nil
 }
 

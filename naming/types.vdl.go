@@ -8,7 +8,10 @@
 package naming
 
 import (
+	"fmt"
+	"reflect"
 	"v.io/v23/vdl"
+	"v.io/v23/vdl/vdlconv"
 	"v.io/v23/vdlroot/time"
 	"v.io/v23/verror"
 )
@@ -21,14 +24,52 @@ func (MountFlag) __VDLReflect(struct {
 }) {
 }
 
-func (m MountFlag) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
-	if err := t.FromUint(uint64(m), __VDLType_types_v_io_v23_naming_MountFlag); err != nil {
+func (m *MountFlag) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
+	if err := t.FromUint(uint64((*m)), __VDLType_types_v_io_v23_naming_MountFlag); err != nil {
 		return err
 	}
 	return nil
 }
 
-func (m MountFlag) MakeVDLTarget() vdl.Target {
+func (m *MountFlag) MakeVDLTarget() vdl.Target {
+	return &MountFlagTarget{Value: m}
+}
+
+type MountFlagTarget struct {
+	Value *MountFlag
+	vdl.TargetBase
+}
+
+func (t *MountFlagTarget) FromUint(src uint64, tt *vdl.Type) error {
+	val, err := vdlconv.Uint64ToUint32(src)
+	if err != nil {
+		return err
+	}
+	*t.Value = MountFlag(val)
+	return nil
+}
+func (t *MountFlagTarget) FromInt(src int64, tt *vdl.Type) error {
+	val, err := vdlconv.Int64ToUint32(src)
+	if err != nil {
+		return err
+	}
+	*t.Value = MountFlag(val)
+	return nil
+}
+func (t *MountFlagTarget) FromFloat(src float64, tt *vdl.Type) error {
+	val, err := vdlconv.Float64ToUint32(src)
+	if err != nil {
+		return err
+	}
+	*t.Value = MountFlag(val)
+	return nil
+}
+func (t *MountFlagTarget) FromComplex(src complex128, tt *vdl.Type) error {
+	val, err := vdlconv.Complex128ToUint32(src)
+	if err != nil {
+		return err
+	}
+	*t.Value = MountFlag(val)
 	return nil
 }
 
@@ -46,7 +87,6 @@ func (MountedServer) __VDLReflect(struct {
 }
 
 func (m *MountedServer) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
-
 	__VDLEnsureNativeBuilt_types()
 	fieldsTarget1, err := t.StartFields(tt)
 	if err != nil {
@@ -90,6 +130,37 @@ func (m *MountedServer) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 }
 
 func (m *MountedServer) MakeVDLTarget() vdl.Target {
+	return &MountedServerTarget{Value: m}
+}
+
+type MountedServerTarget struct {
+	Value *MountedServer
+	vdl.TargetBase
+	vdl.FieldsTargetBase
+}
+
+func (t *MountedServerTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
+	if !vdl.Compatible(tt, __VDLType_types_v_io_v23_naming_MountedServer) {
+		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType_types_v_io_v23_naming_MountedServer)
+	}
+	return t, nil
+}
+func (t *MountedServerTarget) StartField(name string) (key, field vdl.Target, _ error) {
+	switch name {
+	case "Server":
+		val, err := &vdl.StringTarget{Value: &t.Value.Server}, error(nil)
+		return nil, val, err
+	case "Deadline":
+		val, err := vdl.ReflectTarget(reflect.ValueOf(&t.Value.Deadline))
+		return nil, val, err
+	default:
+		return nil, nil, fmt.Errorf("field %s not in struct %v", name, __VDLType_types_v_io_v23_naming_MountedServer)
+	}
+}
+func (t *MountedServerTarget) FinishField(_, _ vdl.Target) error {
+	return nil
+}
+func (t *MountedServerTarget) FinishFields(_ vdl.FieldsTarget) error {
 	return nil
 }
 
@@ -111,7 +182,6 @@ func (MountEntry) __VDLReflect(struct {
 }
 
 func (m *MountEntry) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
-
 	__VDLEnsureNativeBuilt_types()
 	fieldsTarget1, err := t.StartFields(tt)
 	if err != nil {
@@ -191,6 +261,70 @@ func (m *MountEntry) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 }
 
 func (m *MountEntry) MakeVDLTarget() vdl.Target {
+	return &MountEntryTarget{Value: m}
+}
+
+type MountEntryTarget struct {
+	Value *MountEntry
+	vdl.TargetBase
+	vdl.FieldsTargetBase
+}
+
+func (t *MountEntryTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
+	if !vdl.Compatible(tt, __VDLType_types_v_io_v23_naming_MountEntry) {
+		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType_types_v_io_v23_naming_MountEntry)
+	}
+	return t, nil
+}
+func (t *MountEntryTarget) StartField(name string) (key, field vdl.Target, _ error) {
+	switch name {
+	case "Name":
+		val, err := &vdl.StringTarget{Value: &t.Value.Name}, error(nil)
+		return nil, val, err
+	case "Servers":
+		val, err := &types5b5d762e696f2f7632332f6e616d696e672e4d6f756e746564536572766572207374727563747b53657276657220737472696e673b446561646c696e652074696d652e57697265446561646c696e65207374727563747b46726f6d4e6f772074696d652e4475726174696f6e207374727563747b5365636f6e647320696e7436343b4e616e6f7320696e7433327d3b4e6f446561646c696e6520626f6f6c7d7dTarget{Value: &t.Value.Servers}, error(nil)
+		return nil, val, err
+	case "ServesMountTable":
+		val, err := &vdl.BoolTarget{Value: &t.Value.ServesMountTable}, error(nil)
+		return nil, val, err
+	case "IsLeaf":
+		val, err := &vdl.BoolTarget{Value: &t.Value.IsLeaf}, error(nil)
+		return nil, val, err
+	default:
+		return nil, nil, fmt.Errorf("field %s not in struct %v", name, __VDLType_types_v_io_v23_naming_MountEntry)
+	}
+}
+func (t *MountEntryTarget) FinishField(_, _ vdl.Target) error {
+	return nil
+}
+func (t *MountEntryTarget) FinishFields(_ vdl.FieldsTarget) error {
+	return nil
+}
+
+type types5b5d762e696f2f7632332f6e616d696e672e4d6f756e746564536572766572207374727563747b53657276657220737472696e673b446561646c696e652074696d652e57697265446561646c696e65207374727563747b46726f6d4e6f772074696d652e4475726174696f6e207374727563747b5365636f6e647320696e7436343b4e616e6f7320696e7433327d3b4e6f446561646c696e6520626f6f6c7d7dTarget struct {
+	Value *[]MountedServer
+	vdl.TargetBase
+	vdl.ListTargetBase
+}
+
+func (t *types5b5d762e696f2f7632332f6e616d696e672e4d6f756e746564536572766572207374727563747b53657276657220737472696e673b446561646c696e652074696d652e57697265446561646c696e65207374727563747b46726f6d4e6f772074696d652e4475726174696f6e207374727563747b5365636f6e647320696e7436343b4e616e6f7320696e7433327d3b4e6f446561646c696e6520626f6f6c7d7dTarget) StartList(tt *vdl.Type, len int) (vdl.ListTarget, error) {
+	if !vdl.Compatible(tt, __VDLTypetypes2) {
+		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLTypetypes2)
+	}
+	if cap(*t.Value) < len {
+		*t.Value = make([]MountedServer, len)
+	} else {
+		*t.Value = (*t.Value)[:len]
+	}
+	return t, nil
+}
+func (t *types5b5d762e696f2f7632332f6e616d696e672e4d6f756e746564536572766572207374727563747b53657276657220737472696e673b446561646c696e652074696d652e57697265446561646c696e65207374727563747b46726f6d4e6f772074696d652e4475726174696f6e207374727563747b5365636f6e647320696e7436343b4e616e6f7320696e7433327d3b4e6f446561646c696e6520626f6f6c7d7dTarget) StartElem(index int) (elem vdl.Target, _ error) {
+	return &MountedServerTarget{Value: &(*t.Value)[index]}, error(nil)
+}
+func (t *types5b5d762e696f2f7632332f6e616d696e672e4d6f756e746564536572766572207374727563747b53657276657220737472696e673b446561646c696e652074696d652e57697265446561646c696e65207374727563747b46726f6d4e6f772074696d652e4475726174696f6e207374727563747b5365636f6e647320696e7436343b4e616e6f7320696e7433327d3b4e6f446561646c696e6520626f6f6c7d7dTarget) FinishElem(elem vdl.Target) error {
+	return nil
+}
+func (t *types5b5d762e696f2f7632332f6e616d696e672e4d6f756e746564536572766572207374727563747b53657276657220737472696e673b446561646c696e652074696d652e57697265446561646c696e65207374727563747b46726f6d4e6f772074696d652e4475726174696f6e207374727563747b5365636f6e647320696e7436343b4e616e6f7320696e7433327d3b4e6f446561646c696e6520626f6f6c7d7dTarget) FinishList(elem vdl.ListTarget) error {
 	return nil
 }
 
@@ -209,7 +343,6 @@ func (GlobError) __VDLReflect(struct {
 }
 
 func (m *GlobError) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
-
 	if __VDLType_types_v_io_v23_naming_GlobError == nil || __VDLTypetypes3 == nil {
 		panic("Initialization order error: types generated for FillVDLTarget not initialized. Consider moving caller to an init() block.")
 	}
@@ -261,6 +394,37 @@ func (m *GlobError) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 }
 
 func (m *GlobError) MakeVDLTarget() vdl.Target {
+	return &GlobErrorTarget{Value: m}
+}
+
+type GlobErrorTarget struct {
+	Value *GlobError
+	vdl.TargetBase
+	vdl.FieldsTargetBase
+}
+
+func (t *GlobErrorTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
+	if !vdl.Compatible(tt, __VDLType_types_v_io_v23_naming_GlobError) {
+		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType_types_v_io_v23_naming_GlobError)
+	}
+	return t, nil
+}
+func (t *GlobErrorTarget) StartField(name string) (key, field vdl.Target, _ error) {
+	switch name {
+	case "Name":
+		val, err := &vdl.StringTarget{Value: &t.Value.Name}, error(nil)
+		return nil, val, err
+	case "Error":
+		val, err := &verror.ErrorTarget{Value: &t.Value.Error}, error(nil)
+		return nil, val, err
+	default:
+		return nil, nil, fmt.Errorf("field %s not in struct %v", name, __VDLType_types_v_io_v23_naming_GlobError)
+	}
+}
+func (t *GlobErrorTarget) FinishField(_, _ vdl.Target) error {
+	return nil
+}
+func (t *GlobErrorTarget) FinishFields(_ vdl.FieldsTarget) error {
 	return nil
 }
 
@@ -300,7 +464,6 @@ func (x GlobReplyEntry) Name() string                    { return "Entry" }
 func (x GlobReplyEntry) __VDLReflect(__GlobReplyReflect) {}
 
 func (m GlobReplyEntry) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
-
 	fieldsTarget1, err := t.StartFields(__VDLType_types_v_io_v23_naming_GlobReply)
 	if err != nil {
 		return err
@@ -333,7 +496,6 @@ func (x GlobReplyError) Name() string                    { return "Error" }
 func (x GlobReplyError) __VDLReflect(__GlobReplyReflect) {}
 
 func (m GlobReplyError) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
-
 	fieldsTarget1, err := t.StartFields(__VDLType_types_v_io_v23_naming_GlobReply)
 	if err != nil {
 		return err
@@ -396,7 +558,6 @@ func (x GlobChildrenReplyName) Name() string                            { return
 func (x GlobChildrenReplyName) __VDLReflect(__GlobChildrenReplyReflect) {}
 
 func (m GlobChildrenReplyName) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
-
 	fieldsTarget1, err := t.StartFields(__VDLType_types_v_io_v23_naming_GlobChildrenReply)
 	if err != nil {
 		return err
@@ -428,7 +589,6 @@ func (x GlobChildrenReplyError) Name() string                            { retur
 func (x GlobChildrenReplyError) __VDLReflect(__GlobChildrenReplyReflect) {}
 
 func (m GlobChildrenReplyError) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
-
 	fieldsTarget1, err := t.StartFields(__VDLType_types_v_io_v23_naming_GlobChildrenReply)
 	if err != nil {
 		return err

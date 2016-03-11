@@ -9,6 +9,7 @@ package testdata
 
 import (
 	"fmt"
+	"reflect"
 	"time"
 	"v.io/v23/vdl"
 	time_2 "v.io/v23/vdlroot/time"
@@ -27,7 +28,6 @@ func (AddressInfo) __VDLReflect(struct {
 }
 
 func (m *AddressInfo) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
-
 	if __VDLType_db_objects_v_io_v23_syncbase_nosql_testdata_AddressInfo == nil || __VDLTypedb_objects0 == nil {
 		panic("Initialization order error: types generated for FillVDLTarget not initialized. Consider moving caller to an init() block.")
 	}
@@ -91,6 +91,43 @@ func (m *AddressInfo) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 }
 
 func (m *AddressInfo) MakeVDLTarget() vdl.Target {
+	return &AddressInfoTarget{Value: m}
+}
+
+type AddressInfoTarget struct {
+	Value *AddressInfo
+	vdl.TargetBase
+	vdl.FieldsTargetBase
+}
+
+func (t *AddressInfoTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
+	if !vdl.Compatible(tt, __VDLType_db_objects_v_io_v23_syncbase_nosql_testdata_AddressInfo) {
+		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType_db_objects_v_io_v23_syncbase_nosql_testdata_AddressInfo)
+	}
+	return t, nil
+}
+func (t *AddressInfoTarget) StartField(name string) (key, field vdl.Target, _ error) {
+	switch name {
+	case "Street":
+		val, err := &vdl.StringTarget{Value: &t.Value.Street}, error(nil)
+		return nil, val, err
+	case "City":
+		val, err := &vdl.StringTarget{Value: &t.Value.City}, error(nil)
+		return nil, val, err
+	case "State":
+		val, err := &vdl.StringTarget{Value: &t.Value.State}, error(nil)
+		return nil, val, err
+	case "Zip":
+		val, err := &vdl.StringTarget{Value: &t.Value.Zip}, error(nil)
+		return nil, val, err
+	default:
+		return nil, nil, fmt.Errorf("field %s not in struct %v", name, __VDLType_db_objects_v_io_v23_syncbase_nosql_testdata_AddressInfo)
+	}
+}
+func (t *AddressInfoTarget) FinishField(_, _ vdl.Target) error {
+	return nil
+}
+func (t *AddressInfoTarget) FinishFields(_ vdl.FieldsTarget) error {
 	return nil
 }
 
@@ -147,14 +184,36 @@ func (CreditAgency) __VDLReflect(struct {
 }) {
 }
 
-func (m CreditAgency) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
-	if err := t.FromEnumLabel(m.String(), __VDLType_db_objects_v_io_v23_syncbase_nosql_testdata_CreditAgency); err != nil {
+func (m *CreditAgency) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
+	if err := t.FromEnumLabel((*m).String(), __VDLType_db_objects_v_io_v23_syncbase_nosql_testdata_CreditAgency); err != nil {
 		return err
 	}
 	return nil
 }
 
-func (m CreditAgency) MakeVDLTarget() vdl.Target {
+func (m *CreditAgency) MakeVDLTarget() vdl.Target {
+	return &CreditAgencyTarget{Value: m}
+}
+
+type CreditAgencyTarget struct {
+	Value *CreditAgency
+	vdl.TargetBase
+}
+
+func (t *CreditAgencyTarget) FromEnumLabel(src string, tt *vdl.Type) error {
+	if !vdl.Compatible(tt, __VDLType_db_objects_v_io_v23_syncbase_nosql_testdata_CreditAgency) {
+		return fmt.Errorf("type %v incompatible with %v", tt, __VDLType_db_objects_v_io_v23_syncbase_nosql_testdata_CreditAgency)
+	}
+	switch src {
+	case "Equifax":
+		*t.Value = 0
+	case "Experian":
+		*t.Value = 1
+	case "TransUnion":
+		*t.Value = 2
+	default:
+		return fmt.Errorf("label %s not in enum %v", src, __VDLType_db_objects_v_io_v23_syncbase_nosql_testdata_CreditAgency)
+	}
 	return nil
 }
 
@@ -205,14 +264,34 @@ func (ExperianRating) __VDLReflect(struct {
 }) {
 }
 
-func (m ExperianRating) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
-	if err := t.FromEnumLabel(m.String(), __VDLType_db_objects_v_io_v23_syncbase_nosql_testdata_ExperianRating); err != nil {
+func (m *ExperianRating) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
+	if err := t.FromEnumLabel((*m).String(), __VDLType_db_objects_v_io_v23_syncbase_nosql_testdata_ExperianRating); err != nil {
 		return err
 	}
 	return nil
 }
 
-func (m ExperianRating) MakeVDLTarget() vdl.Target {
+func (m *ExperianRating) MakeVDLTarget() vdl.Target {
+	return &ExperianRatingTarget{Value: m}
+}
+
+type ExperianRatingTarget struct {
+	Value *ExperianRating
+	vdl.TargetBase
+}
+
+func (t *ExperianRatingTarget) FromEnumLabel(src string, tt *vdl.Type) error {
+	if !vdl.Compatible(tt, __VDLType_db_objects_v_io_v23_syncbase_nosql_testdata_ExperianRating) {
+		return fmt.Errorf("type %v incompatible with %v", tt, __VDLType_db_objects_v_io_v23_syncbase_nosql_testdata_ExperianRating)
+	}
+	switch src {
+	case "Good":
+		*t.Value = 0
+	case "Bad":
+		*t.Value = 1
+	default:
+		return fmt.Errorf("label %s not in enum %v", src, __VDLType_db_objects_v_io_v23_syncbase_nosql_testdata_ExperianRating)
+	}
 	return nil
 }
 
@@ -226,7 +305,6 @@ func (EquifaxCreditReport) __VDLReflect(struct {
 }
 
 func (m *EquifaxCreditReport) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
-
 	if __VDLType_db_objects_v_io_v23_syncbase_nosql_testdata_EquifaxCreditReport == nil || __VDLTypedb_objects1 == nil {
 		panic("Initialization order error: types generated for FillVDLTarget not initialized. Consider moving caller to an init() block.")
 	}
@@ -254,6 +332,34 @@ func (m *EquifaxCreditReport) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 }
 
 func (m *EquifaxCreditReport) MakeVDLTarget() vdl.Target {
+	return &EquifaxCreditReportTarget{Value: m}
+}
+
+type EquifaxCreditReportTarget struct {
+	Value *EquifaxCreditReport
+	vdl.TargetBase
+	vdl.FieldsTargetBase
+}
+
+func (t *EquifaxCreditReportTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
+	if !vdl.Compatible(tt, __VDLType_db_objects_v_io_v23_syncbase_nosql_testdata_EquifaxCreditReport) {
+		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType_db_objects_v_io_v23_syncbase_nosql_testdata_EquifaxCreditReport)
+	}
+	return t, nil
+}
+func (t *EquifaxCreditReportTarget) StartField(name string) (key, field vdl.Target, _ error) {
+	switch name {
+	case "Rating":
+		val, err := &vdl.ByteTarget{Value: &t.Value.Rating}, error(nil)
+		return nil, val, err
+	default:
+		return nil, nil, fmt.Errorf("field %s not in struct %v", name, __VDLType_db_objects_v_io_v23_syncbase_nosql_testdata_EquifaxCreditReport)
+	}
+}
+func (t *EquifaxCreditReportTarget) FinishField(_, _ vdl.Target) error {
+	return nil
+}
+func (t *EquifaxCreditReportTarget) FinishFields(_ vdl.FieldsTarget) error {
 	return nil
 }
 
@@ -267,7 +373,6 @@ func (ExperianCreditReport) __VDLReflect(struct {
 }
 
 func (m *ExperianCreditReport) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
-
 	if __VDLType_db_objects_v_io_v23_syncbase_nosql_testdata_ExperianCreditReport == nil || __VDLTypedb_objects2 == nil {
 		panic("Initialization order error: types generated for FillVDLTarget not initialized. Consider moving caller to an init() block.")
 	}
@@ -296,6 +401,34 @@ func (m *ExperianCreditReport) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 }
 
 func (m *ExperianCreditReport) MakeVDLTarget() vdl.Target {
+	return &ExperianCreditReportTarget{Value: m}
+}
+
+type ExperianCreditReportTarget struct {
+	Value *ExperianCreditReport
+	vdl.TargetBase
+	vdl.FieldsTargetBase
+}
+
+func (t *ExperianCreditReportTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
+	if !vdl.Compatible(tt, __VDLType_db_objects_v_io_v23_syncbase_nosql_testdata_ExperianCreditReport) {
+		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType_db_objects_v_io_v23_syncbase_nosql_testdata_ExperianCreditReport)
+	}
+	return t, nil
+}
+func (t *ExperianCreditReportTarget) StartField(name string) (key, field vdl.Target, _ error) {
+	switch name {
+	case "Rating":
+		val, err := &ExperianRatingTarget{Value: &t.Value.Rating}, error(nil)
+		return nil, val, err
+	default:
+		return nil, nil, fmt.Errorf("field %s not in struct %v", name, __VDLType_db_objects_v_io_v23_syncbase_nosql_testdata_ExperianCreditReport)
+	}
+}
+func (t *ExperianCreditReportTarget) FinishField(_, _ vdl.Target) error {
+	return nil
+}
+func (t *ExperianCreditReportTarget) FinishFields(_ vdl.FieldsTarget) error {
 	return nil
 }
 
@@ -309,7 +442,6 @@ func (TransUnionCreditReport) __VDLReflect(struct {
 }
 
 func (m *TransUnionCreditReport) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
-
 	if __VDLType_db_objects_v_io_v23_syncbase_nosql_testdata_TransUnionCreditReport == nil || __VDLTypedb_objects3 == nil {
 		panic("Initialization order error: types generated for FillVDLTarget not initialized. Consider moving caller to an init() block.")
 	}
@@ -337,6 +469,34 @@ func (m *TransUnionCreditReport) FillVDLTarget(t vdl.Target, tt *vdl.Type) error
 }
 
 func (m *TransUnionCreditReport) MakeVDLTarget() vdl.Target {
+	return &TransUnionCreditReportTarget{Value: m}
+}
+
+type TransUnionCreditReportTarget struct {
+	Value *TransUnionCreditReport
+	vdl.TargetBase
+	vdl.FieldsTargetBase
+}
+
+func (t *TransUnionCreditReportTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
+	if !vdl.Compatible(tt, __VDLType_db_objects_v_io_v23_syncbase_nosql_testdata_TransUnionCreditReport) {
+		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType_db_objects_v_io_v23_syncbase_nosql_testdata_TransUnionCreditReport)
+	}
+	return t, nil
+}
+func (t *TransUnionCreditReportTarget) StartField(name string) (key, field vdl.Target, _ error) {
+	switch name {
+	case "Rating":
+		val, err := &vdl.Int16Target{Value: &t.Value.Rating}, error(nil)
+		return nil, val, err
+	default:
+		return nil, nil, fmt.Errorf("field %s not in struct %v", name, __VDLType_db_objects_v_io_v23_syncbase_nosql_testdata_TransUnionCreditReport)
+	}
+}
+func (t *TransUnionCreditReportTarget) FinishField(_, _ vdl.Target) error {
+	return nil
+}
+func (t *TransUnionCreditReportTarget) FinishFields(_ vdl.FieldsTarget) error {
 	return nil
 }
 
@@ -377,7 +537,6 @@ func (x AgencyReportEquifaxReport) Name() string                       { return 
 func (x AgencyReportEquifaxReport) __VDLReflect(__AgencyReportReflect) {}
 
 func (m AgencyReportEquifaxReport) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
-
 	fieldsTarget1, err := t.StartFields(__VDLType_db_objects_v_io_v23_syncbase_nosql_testdata_AgencyReport)
 	if err != nil {
 		return err
@@ -410,7 +569,6 @@ func (x AgencyReportExperianReport) Name() string                       { return
 func (x AgencyReportExperianReport) __VDLReflect(__AgencyReportReflect) {}
 
 func (m AgencyReportExperianReport) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
-
 	fieldsTarget1, err := t.StartFields(__VDLType_db_objects_v_io_v23_syncbase_nosql_testdata_AgencyReport)
 	if err != nil {
 		return err
@@ -443,7 +601,6 @@ func (x AgencyReportTransUnionReport) Name() string                       { retu
 func (x AgencyReportTransUnionReport) __VDLReflect(__AgencyReportReflect) {}
 
 func (m AgencyReportTransUnionReport) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
-
 	fieldsTarget1, err := t.StartFields(__VDLType_db_objects_v_io_v23_syncbase_nosql_testdata_AgencyReport)
 	if err != nil {
 		return err
@@ -481,7 +638,6 @@ func (CreditReport) __VDLReflect(struct {
 }
 
 func (m *CreditReport) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
-
 	if __VDLType_db_objects_v_io_v23_syncbase_nosql_testdata_CreditReport == nil || __VDLTypedb_objects4 == nil {
 		panic("Initialization order error: types generated for FillVDLTarget not initialized. Consider moving caller to an init() block.")
 	}
@@ -527,6 +683,37 @@ func (m *CreditReport) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 }
 
 func (m *CreditReport) MakeVDLTarget() vdl.Target {
+	return &CreditReportTarget{Value: m}
+}
+
+type CreditReportTarget struct {
+	Value *CreditReport
+	vdl.TargetBase
+	vdl.FieldsTargetBase
+}
+
+func (t *CreditReportTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
+	if !vdl.Compatible(tt, __VDLType_db_objects_v_io_v23_syncbase_nosql_testdata_CreditReport) {
+		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType_db_objects_v_io_v23_syncbase_nosql_testdata_CreditReport)
+	}
+	return t, nil
+}
+func (t *CreditReportTarget) StartField(name string) (key, field vdl.Target, _ error) {
+	switch name {
+	case "Agency":
+		val, err := &CreditAgencyTarget{Value: &t.Value.Agency}, error(nil)
+		return nil, val, err
+	case "Report":
+		val, err := vdl.ReflectTarget(reflect.ValueOf(&t.Value.Report))
+		return nil, val, err
+	default:
+		return nil, nil, fmt.Errorf("field %s not in struct %v", name, __VDLType_db_objects_v_io_v23_syncbase_nosql_testdata_CreditReport)
+	}
+}
+func (t *CreditReportTarget) FinishField(_, _ vdl.Target) error {
+	return nil
+}
+func (t *CreditReportTarget) FinishFields(_ vdl.FieldsTarget) error {
 	return nil
 }
 
@@ -544,7 +731,6 @@ func (Customer) __VDLReflect(struct {
 }
 
 func (m *Customer) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
-
 	if __VDLType_db_objects_v_io_v23_syncbase_nosql_testdata_Customer == nil || __VDLTypedb_objects5 == nil {
 		panic("Initialization order error: types generated for FillVDLTarget not initialized. Consider moving caller to an init() block.")
 	}
@@ -622,6 +808,46 @@ func (m *Customer) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 }
 
 func (m *Customer) MakeVDLTarget() vdl.Target {
+	return &CustomerTarget{Value: m}
+}
+
+type CustomerTarget struct {
+	Value *Customer
+	vdl.TargetBase
+	vdl.FieldsTargetBase
+}
+
+func (t *CustomerTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
+	if !vdl.Compatible(tt, __VDLType_db_objects_v_io_v23_syncbase_nosql_testdata_Customer) {
+		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType_db_objects_v_io_v23_syncbase_nosql_testdata_Customer)
+	}
+	return t, nil
+}
+func (t *CustomerTarget) StartField(name string) (key, field vdl.Target, _ error) {
+	switch name {
+	case "Name":
+		val, err := &vdl.StringTarget{Value: &t.Value.Name}, error(nil)
+		return nil, val, err
+	case "Id":
+		val, err := &vdl.Int64Target{Value: &t.Value.Id}, error(nil)
+		return nil, val, err
+	case "Active":
+		val, err := &vdl.BoolTarget{Value: &t.Value.Active}, error(nil)
+		return nil, val, err
+	case "Address":
+		val, err := &AddressInfoTarget{Value: &t.Value.Address}, error(nil)
+		return nil, val, err
+	case "Credit":
+		val, err := &CreditReportTarget{Value: &t.Value.Credit}, error(nil)
+		return nil, val, err
+	default:
+		return nil, nil, fmt.Errorf("field %s not in struct %v", name, __VDLType_db_objects_v_io_v23_syncbase_nosql_testdata_Customer)
+	}
+}
+func (t *CustomerTarget) FinishField(_, _ vdl.Target) error {
+	return nil
+}
+func (t *CustomerTarget) FinishFields(_ vdl.FieldsTarget) error {
 	return nil
 }
 
@@ -639,7 +865,6 @@ func (Invoice) __VDLReflect(struct {
 }
 
 func (m *Invoice) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
-
 	__VDLEnsureNativeBuilt_db_objects()
 	fieldsTarget1, err := t.StartFields(tt)
 	if err != nil {
@@ -720,6 +945,46 @@ func (m *Invoice) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 }
 
 func (m *Invoice) MakeVDLTarget() vdl.Target {
+	return &InvoiceTarget{Value: m}
+}
+
+type InvoiceTarget struct {
+	Value *Invoice
+	vdl.TargetBase
+	vdl.FieldsTargetBase
+}
+
+func (t *InvoiceTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
+	if !vdl.Compatible(tt, __VDLType_db_objects_v_io_v23_syncbase_nosql_testdata_Invoice) {
+		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType_db_objects_v_io_v23_syncbase_nosql_testdata_Invoice)
+	}
+	return t, nil
+}
+func (t *InvoiceTarget) StartField(name string) (key, field vdl.Target, _ error) {
+	switch name {
+	case "CustId":
+		val, err := &vdl.Int64Target{Value: &t.Value.CustId}, error(nil)
+		return nil, val, err
+	case "InvoiceNum":
+		val, err := &vdl.Int64Target{Value: &t.Value.InvoiceNum}, error(nil)
+		return nil, val, err
+	case "InvoiceDate":
+		val, err := vdl.ReflectTarget(reflect.ValueOf(&t.Value.InvoiceDate))
+		return nil, val, err
+	case "Amount":
+		val, err := &vdl.Int64Target{Value: &t.Value.Amount}, error(nil)
+		return nil, val, err
+	case "ShipTo":
+		val, err := &AddressInfoTarget{Value: &t.Value.ShipTo}, error(nil)
+		return nil, val, err
+	default:
+		return nil, nil, fmt.Errorf("field %s not in struct %v", name, __VDLType_db_objects_v_io_v23_syncbase_nosql_testdata_Invoice)
+	}
+}
+func (t *InvoiceTarget) FinishField(_, _ vdl.Target) error {
+	return nil
+}
+func (t *InvoiceTarget) FinishFields(_ vdl.FieldsTarget) error {
 	return nil
 }
 
@@ -743,7 +1008,6 @@ func (Numbers) __VDLReflect(struct {
 }
 
 func (m *Numbers) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
-
 	if __VDLType_db_objects_v_io_v23_syncbase_nosql_testdata_Numbers == nil || __VDLTypedb_objects7 == nil {
 		panic("Initialization order error: types generated for FillVDLTarget not initialized. Consider moving caller to an init() block.")
 	}
@@ -891,6 +1155,64 @@ func (m *Numbers) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 }
 
 func (m *Numbers) MakeVDLTarget() vdl.Target {
+	return &NumbersTarget{Value: m}
+}
+
+type NumbersTarget struct {
+	Value *Numbers
+	vdl.TargetBase
+	vdl.FieldsTargetBase
+}
+
+func (t *NumbersTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
+	if !vdl.Compatible(tt, __VDLType_db_objects_v_io_v23_syncbase_nosql_testdata_Numbers) {
+		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType_db_objects_v_io_v23_syncbase_nosql_testdata_Numbers)
+	}
+	return t, nil
+}
+func (t *NumbersTarget) StartField(name string) (key, field vdl.Target, _ error) {
+	switch name {
+	case "B":
+		val, err := &vdl.ByteTarget{Value: &t.Value.B}, error(nil)
+		return nil, val, err
+	case "Ui16":
+		val, err := &vdl.Uint16Target{Value: &t.Value.Ui16}, error(nil)
+		return nil, val, err
+	case "Ui32":
+		val, err := &vdl.Uint32Target{Value: &t.Value.Ui32}, error(nil)
+		return nil, val, err
+	case "Ui64":
+		val, err := &vdl.Uint64Target{Value: &t.Value.Ui64}, error(nil)
+		return nil, val, err
+	case "I16":
+		val, err := &vdl.Int16Target{Value: &t.Value.I16}, error(nil)
+		return nil, val, err
+	case "I32":
+		val, err := &vdl.Int32Target{Value: &t.Value.I32}, error(nil)
+		return nil, val, err
+	case "I64":
+		val, err := &vdl.Int64Target{Value: &t.Value.I64}, error(nil)
+		return nil, val, err
+	case "F32":
+		val, err := &vdl.Float32Target{Value: &t.Value.F32}, error(nil)
+		return nil, val, err
+	case "F64":
+		val, err := &vdl.Float64Target{Value: &t.Value.F64}, error(nil)
+		return nil, val, err
+	case "C64":
+		val, err := &vdl.Complex64Target{Value: &t.Value.C64}, error(nil)
+		return nil, val, err
+	case "C128":
+		val, err := &vdl.Complex128Target{Value: &t.Value.C128}, error(nil)
+		return nil, val, err
+	default:
+		return nil, nil, fmt.Errorf("field %s not in struct %v", name, __VDLType_db_objects_v_io_v23_syncbase_nosql_testdata_Numbers)
+	}
+}
+func (t *NumbersTarget) FinishField(_, _ vdl.Target) error {
+	return nil
+}
+func (t *NumbersTarget) FinishFields(_ vdl.FieldsTarget) error {
 	return nil
 }
 
@@ -904,7 +1226,6 @@ func (FooType) __VDLReflect(struct {
 }
 
 func (m *FooType) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
-
 	if __VDLType_db_objects_v_io_v23_syncbase_nosql_testdata_FooType == nil || __VDLTypedb_objects8 == nil {
 		panic("Initialization order error: types generated for FillVDLTarget not initialized. Consider moving caller to an init() block.")
 	}
@@ -933,6 +1254,93 @@ func (m *FooType) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 }
 
 func (m *FooType) MakeVDLTarget() vdl.Target {
+	return &FooTypeTarget{Value: m}
+}
+
+type FooTypeTarget struct {
+	Value *FooType
+	vdl.TargetBase
+	vdl.FieldsTargetBase
+}
+
+func (t *FooTypeTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
+	if !vdl.Compatible(tt, __VDLType_db_objects_v_io_v23_syncbase_nosql_testdata_FooType) {
+		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType_db_objects_v_io_v23_syncbase_nosql_testdata_FooType)
+	}
+	return t, nil
+}
+func (t *FooTypeTarget) StartField(name string) (key, field vdl.Target, _ error) {
+	switch name {
+	case "Bar":
+		val, err := &BarTypeTarget{Value: &t.Value.Bar}, error(nil)
+		return nil, val, err
+	default:
+		return nil, nil, fmt.Errorf("field %s not in struct %v", name, __VDLType_db_objects_v_io_v23_syncbase_nosql_testdata_FooType)
+	}
+}
+func (t *FooTypeTarget) FinishField(_, _ vdl.Target) error {
+	return nil
+}
+func (t *FooTypeTarget) FinishFields(_ vdl.FieldsTarget) error {
+	return nil
+}
+
+type BarTypeTarget struct {
+	Value *BarType
+	vdl.TargetBase
+	vdl.FieldsTargetBase
+}
+
+func (t *BarTypeTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
+	if !vdl.Compatible(tt, __VDLType_db_objects_v_io_v23_syncbase_nosql_testdata_BarType) {
+		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType_db_objects_v_io_v23_syncbase_nosql_testdata_BarType)
+	}
+	return t, nil
+}
+func (t *BarTypeTarget) StartField(name string) (key, field vdl.Target, _ error) {
+	switch name {
+	case "Baz":
+		val, err := &BazTypeTarget{Value: &t.Value.Baz}, error(nil)
+		return nil, val, err
+	default:
+		return nil, nil, fmt.Errorf("field %s not in struct %v", name, __VDLType_db_objects_v_io_v23_syncbase_nosql_testdata_BarType)
+	}
+}
+func (t *BarTypeTarget) FinishField(_, _ vdl.Target) error {
+	return nil
+}
+func (t *BarTypeTarget) FinishFields(_ vdl.FieldsTarget) error {
+	return nil
+}
+
+type BazTypeTarget struct {
+	Value *BazType
+	vdl.TargetBase
+	vdl.FieldsTargetBase
+}
+
+func (t *BazTypeTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
+	if !vdl.Compatible(tt, __VDLType_db_objects_v_io_v23_syncbase_nosql_testdata_BazType) {
+		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType_db_objects_v_io_v23_syncbase_nosql_testdata_BazType)
+	}
+	return t, nil
+}
+func (t *BazTypeTarget) StartField(name string) (key, field vdl.Target, _ error) {
+	switch name {
+	case "Name":
+		val, err := &vdl.StringTarget{Value: &t.Value.Name}, error(nil)
+		return nil, val, err
+	case "TitleOrValue":
+		val, err := vdl.ReflectTarget(reflect.ValueOf(&t.Value.TitleOrValue))
+		return nil, val, err
+	default:
+		return nil, nil, fmt.Errorf("field %s not in struct %v", name, __VDLType_db_objects_v_io_v23_syncbase_nosql_testdata_BazType)
+	}
+}
+func (t *BazTypeTarget) FinishField(_, _ vdl.Target) error {
+	return nil
+}
+func (t *BazTypeTarget) FinishFields(_ vdl.FieldsTarget) error {
 	return nil
 }
 
@@ -946,7 +1354,6 @@ func (BarType) __VDLReflect(struct {
 }
 
 func (m *BarType) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
-
 	if __VDLType_db_objects_v_io_v23_syncbase_nosql_testdata_BarType == nil || __VDLTypedb_objects9 == nil {
 		panic("Initialization order error: types generated for FillVDLTarget not initialized. Consider moving caller to an init() block.")
 	}
@@ -975,7 +1382,7 @@ func (m *BarType) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 }
 
 func (m *BarType) MakeVDLTarget() vdl.Target {
-	return nil
+	return &BarTypeTarget{Value: m}
 }
 
 type (
@@ -1012,7 +1419,6 @@ func (x TitleOrValueTypeTitle) Name() string                           { return 
 func (x TitleOrValueTypeTitle) __VDLReflect(__TitleOrValueTypeReflect) {}
 
 func (m TitleOrValueTypeTitle) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
-
 	fieldsTarget1, err := t.StartFields(__VDLType_db_objects_v_io_v23_syncbase_nosql_testdata_TitleOrValueType)
 	if err != nil {
 		return err
@@ -1044,7 +1450,6 @@ func (x TitleOrValueTypeValue) Name() string                           { return 
 func (x TitleOrValueTypeValue) __VDLReflect(__TitleOrValueTypeReflect) {}
 
 func (m TitleOrValueTypeValue) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
-
 	fieldsTarget1, err := t.StartFields(__VDLType_db_objects_v_io_v23_syncbase_nosql_testdata_TitleOrValueType)
 	if err != nil {
 		return err
@@ -1081,7 +1486,6 @@ func (BazType) __VDLReflect(struct {
 }
 
 func (m *BazType) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
-
 	if __VDLType_db_objects_v_io_v23_syncbase_nosql_testdata_BazType == nil || __VDLTypedb_objects10 == nil {
 		panic("Initialization order error: types generated for FillVDLTarget not initialized. Consider moving caller to an init() block.")
 	}
@@ -1126,7 +1530,7 @@ func (m *BazType) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 }
 
 func (m *BazType) MakeVDLTarget() vdl.Target {
-	return nil
+	return &BazTypeTarget{Value: m}
 }
 
 type ArrayOfFour [4]string
@@ -1136,13 +1540,12 @@ func (ArrayOfFour) __VDLReflect(struct {
 }) {
 }
 
-func (m ArrayOfFour) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
-
+func (m *ArrayOfFour) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 	listTarget1, err := t.StartList(__VDLType_db_objects_v_io_v23_syncbase_nosql_testdata_ArrayOfFour, 4)
 	if err != nil {
 		return err
 	}
-	for i, elem3 := range m {
+	for i, elem3 := range *m {
 		elemTarget2, err := listTarget1.StartElem(i)
 		if err != nil {
 			return err
@@ -1160,7 +1563,29 @@ func (m ArrayOfFour) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 	return nil
 }
 
-func (m ArrayOfFour) MakeVDLTarget() vdl.Target {
+func (m *ArrayOfFour) MakeVDLTarget() vdl.Target {
+	return &ArrayOfFourTarget{Value: m}
+}
+
+type ArrayOfFourTarget struct {
+	Value *ArrayOfFour
+	vdl.TargetBase
+	vdl.ListTargetBase
+}
+
+func (t *ArrayOfFourTarget) StartList(tt *vdl.Type, len int) (vdl.ListTarget, error) {
+	if !vdl.Compatible(tt, __VDLType_db_objects_v_io_v23_syncbase_nosql_testdata_ArrayOfFour) {
+		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType_db_objects_v_io_v23_syncbase_nosql_testdata_ArrayOfFour)
+	}
+	return t, nil
+}
+func (t *ArrayOfFourTarget) StartElem(index int) (elem vdl.Target, _ error) {
+	return &vdl.StringTarget{Value: &(*t.Value)[index]}, error(nil)
+}
+func (t *ArrayOfFourTarget) FinishElem(elem vdl.Target) error {
+	return nil
+}
+func (t *ArrayOfFourTarget) FinishList(elem vdl.ListTarget) error {
 	return nil
 }
 
@@ -1177,7 +1602,6 @@ func (KeyIndexData) __VDLReflect(struct {
 }
 
 func (m *KeyIndexData) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
-
 	if __VDLType_db_objects_v_io_v23_syncbase_nosql_testdata_KeyIndexData == nil || __VDLTypedb_objects11 == nil {
 		panic("Initialization order error: types generated for FillVDLTarget not initialized. Consider moving caller to an init() block.")
 	}
@@ -1300,6 +1724,106 @@ func (m *KeyIndexData) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 }
 
 func (m *KeyIndexData) MakeVDLTarget() vdl.Target {
+	return &KeyIndexDataTarget{Value: m}
+}
+
+type KeyIndexDataTarget struct {
+	Value *KeyIndexData
+	vdl.TargetBase
+	vdl.FieldsTargetBase
+}
+
+func (t *KeyIndexDataTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
+	if !vdl.Compatible(tt, __VDLType_db_objects_v_io_v23_syncbase_nosql_testdata_KeyIndexData) {
+		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType_db_objects_v_io_v23_syncbase_nosql_testdata_KeyIndexData)
+	}
+	return t, nil
+}
+func (t *KeyIndexDataTarget) StartField(name string) (key, field vdl.Target, _ error) {
+	switch name {
+	case "A":
+		val, err := &ArrayOfFourTarget{Value: &t.Value.A}, error(nil)
+		return nil, val, err
+	case "L":
+		val, err := &vdl.StringSliceTarget{Value: &t.Value.L}, error(nil)
+		return nil, val, err
+	case "M":
+		val, err := &db_objects6d61705b636f6d706c65783132385d737472696e67Target{Value: &t.Value.M}, error(nil)
+		return nil, val, err
+	case "S":
+		val, err := &db_objects7365745b737472696e675dTarget{Value: &t.Value.S}, error(nil)
+		return nil, val, err
+	default:
+		return nil, nil, fmt.Errorf("field %s not in struct %v", name, __VDLType_db_objects_v_io_v23_syncbase_nosql_testdata_KeyIndexData)
+	}
+}
+func (t *KeyIndexDataTarget) FinishField(_, _ vdl.Target) error {
+	return nil
+}
+func (t *KeyIndexDataTarget) FinishFields(_ vdl.FieldsTarget) error {
+	return nil
+}
+
+type db_objects6d61705b636f6d706c65783132385d737472696e67Target struct {
+	Value    *map[complex128]string
+	currKey  complex128
+	currElem string
+	vdl.TargetBase
+	vdl.MapTargetBase
+}
+
+func (t *db_objects6d61705b636f6d706c65783132385d737472696e67Target) StartMap(tt *vdl.Type, len int) (vdl.MapTarget, error) {
+	if !vdl.Compatible(tt, __VDLTypedb_objects13) {
+		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLTypedb_objects13)
+	}
+	*t.Value = make(map[complex128]string)
+	return t, nil
+}
+func (t *db_objects6d61705b636f6d706c65783132385d737472696e67Target) StartKey() (key vdl.Target, _ error) {
+	t.currKey = complex128(0)
+	return &vdl.Complex128Target{Value: &t.currKey}, error(nil)
+}
+func (t *db_objects6d61705b636f6d706c65783132385d737472696e67Target) FinishKeyStartField(key vdl.Target) (field vdl.Target, _ error) {
+	t.currElem = ""
+	return &vdl.StringTarget{Value: &t.currElem}, error(nil)
+}
+func (t *db_objects6d61705b636f6d706c65783132385d737472696e67Target) FinishField(key, field vdl.Target) error {
+	(*t.Value)[t.currKey] = t.currElem
+	return nil
+}
+func (t *db_objects6d61705b636f6d706c65783132385d737472696e67Target) FinishMap(elem vdl.MapTarget) error {
+	if len(*t.Value) == 0 {
+		*t.Value = nil
+	}
+	return nil
+}
+
+type db_objects7365745b737472696e675dTarget struct {
+	Value   *map[string]struct{}
+	currKey string
+	vdl.TargetBase
+	vdl.SetTargetBase
+}
+
+func (t *db_objects7365745b737472696e675dTarget) StartSet(tt *vdl.Type, len int) (vdl.SetTarget, error) {
+	if !vdl.Compatible(tt, __VDLTypedb_objects14) {
+		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLTypedb_objects14)
+	}
+	*t.Value = make(map[string]struct{})
+	return t, nil
+}
+func (t *db_objects7365745b737472696e675dTarget) StartKey() (key vdl.Target, _ error) {
+	t.currKey = ""
+	return &vdl.StringTarget{Value: &t.currKey}, error(nil)
+}
+func (t *db_objects7365745b737472696e675dTarget) FinishKey(key vdl.Target) error {
+	(*t.Value)[t.currKey] = struct{}{}
+	return nil
+}
+func (t *db_objects7365745b737472696e675dTarget) FinishSet(list vdl.SetTarget) error {
+	if len(*t.Value) == 0 {
+		*t.Value = nil
+	}
 	return nil
 }
 
@@ -1313,7 +1837,6 @@ func (BigData) __VDLReflect(struct {
 }
 
 func (m *BigData) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
-
 	if __VDLType_db_objects_v_io_v23_syncbase_nosql_testdata_BigData == nil || __VDLTypedb_objects15 == nil {
 		panic("Initialization order error: types generated for FillVDLTarget not initialized. Consider moving caller to an init() block.")
 	}
@@ -1341,6 +1864,34 @@ func (m *BigData) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 }
 
 func (m *BigData) MakeVDLTarget() vdl.Target {
+	return &BigDataTarget{Value: m}
+}
+
+type BigDataTarget struct {
+	Value *BigData
+	vdl.TargetBase
+	vdl.FieldsTargetBase
+}
+
+func (t *BigDataTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
+	if !vdl.Compatible(tt, __VDLType_db_objects_v_io_v23_syncbase_nosql_testdata_BigData) {
+		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType_db_objects_v_io_v23_syncbase_nosql_testdata_BigData)
+	}
+	return t, nil
+}
+func (t *BigDataTarget) StartField(name string) (key, field vdl.Target, _ error) {
+	switch name {
+	case "Key":
+		val, err := &vdl.StringTarget{Value: &t.Value.Key}, error(nil)
+		return nil, val, err
+	default:
+		return nil, nil, fmt.Errorf("field %s not in struct %v", name, __VDLType_db_objects_v_io_v23_syncbase_nosql_testdata_BigData)
+	}
+}
+func (t *BigDataTarget) FinishField(_, _ vdl.Target) error {
+	return nil
+}
+func (t *BigDataTarget) FinishFields(_ vdl.FieldsTarget) error {
 	return nil
 }
 

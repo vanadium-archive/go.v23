@@ -45,66 +45,150 @@ pkg nosql, func ValueSelectionFromString(string) (ValueSelection, error)
 pkg nosql, func ValueStateFromString(string) (ValueState, error)
 pkg nosql, method (*BatchInfo) FillVDLTarget(vdl.Target, *vdl.Type) error
 pkg nosql, method (*BatchInfo) MakeVDLTarget() vdl.Target
+pkg nosql, method (*BatchInfoTarget) FinishField(vdl.Target, vdl.Target) error
+pkg nosql, method (*BatchInfoTarget) FinishFields(vdl.FieldsTarget) error
+pkg nosql, method (*BatchInfoTarget) StartField(string) (vdl.Target, vdl.Target, error)
+pkg nosql, method (*BatchInfoTarget) StartFields(*vdl.Type) (vdl.FieldsTarget, error)
 pkg nosql, method (*BatchOptions) FillVDLTarget(vdl.Target, *vdl.Type) error
 pkg nosql, method (*BatchOptions) MakeVDLTarget() vdl.Target
+pkg nosql, method (*BatchOptionsTarget) FinishField(vdl.Target, vdl.Target) error
+pkg nosql, method (*BatchOptionsTarget) FinishFields(vdl.FieldsTarget) error
+pkg nosql, method (*BatchOptionsTarget) StartField(string) (vdl.Target, vdl.Target, error)
+pkg nosql, method (*BatchOptionsTarget) StartFields(*vdl.Type) (vdl.FieldsTarget, error)
+pkg nosql, method (*BatchSource) FillVDLTarget(vdl.Target, *vdl.Type) error
+pkg nosql, method (*BatchSource) MakeVDLTarget() vdl.Target
 pkg nosql, method (*BatchSource) Set(string) error
+pkg nosql, method (*BatchSourceTarget) FromEnumLabel(string, *vdl.Type) error
+pkg nosql, method (*BlobFetchState) FillVDLTarget(vdl.Target, *vdl.Type) error
+pkg nosql, method (*BlobFetchState) MakeVDLTarget() vdl.Target
 pkg nosql, method (*BlobFetchState) Set(string) error
+pkg nosql, method (*BlobFetchStateTarget) FromEnumLabel(string, *vdl.Type) error
 pkg nosql, method (*BlobFetchStatus) FillVDLTarget(vdl.Target, *vdl.Type) error
 pkg nosql, method (*BlobFetchStatus) MakeVDLTarget() vdl.Target
+pkg nosql, method (*BlobFetchStatusTarget) FinishField(vdl.Target, vdl.Target) error
+pkg nosql, method (*BlobFetchStatusTarget) FinishFields(vdl.FieldsTarget) error
+pkg nosql, method (*BlobFetchStatusTarget) StartField(string) (vdl.Target, vdl.Target, error)
+pkg nosql, method (*BlobFetchStatusTarget) StartFields(*vdl.Type) (vdl.FieldsTarget, error)
 pkg nosql, method (*BlobManagerFetchBlobServerCallStub) Init(rpc.StreamServerCall)
 pkg nosql, method (*BlobManagerFetchBlobServerCallStub) SendStream() interface {  Send(item BlobFetchStatus) error;}
 pkg nosql, method (*BlobManagerGetBlobServerCallStub) Init(rpc.StreamServerCall)
 pkg nosql, method (*BlobManagerGetBlobServerCallStub) SendStream() interface {  Send(item []byte) error;}
 pkg nosql, method (*BlobManagerPutBlobServerCallStub) Init(rpc.StreamServerCall)
 pkg nosql, method (*BlobManagerPutBlobServerCallStub) RecvStream() interface {  Advance() bool; Value() []byte; Err() error;}
+pkg nosql, method (*BlobRef) FillVDLTarget(vdl.Target, *vdl.Type) error
+pkg nosql, method (*BlobRef) MakeVDLTarget() vdl.Target
+pkg nosql, method (*BlobRefTarget) FromString(string, *vdl.Type) error
 pkg nosql, method (*ConflictInfo) FillVDLTarget(vdl.Target, *vdl.Type) error
 pkg nosql, method (*ConflictInfo) MakeVDLTarget() vdl.Target
+pkg nosql, method (*ConflictInfoTarget) FinishField(vdl.Target, vdl.Target) error
+pkg nosql, method (*ConflictInfoTarget) FinishFields(vdl.FieldsTarget) error
+pkg nosql, method (*ConflictInfoTarget) StartField(string) (vdl.Target, vdl.Target, error)
+pkg nosql, method (*ConflictInfoTarget) StartFields(*vdl.Type) (vdl.FieldsTarget, error)
 pkg nosql, method (*ConflictManagerStartConflictResolverServerCallStub) Init(rpc.StreamServerCall)
 pkg nosql, method (*ConflictManagerStartConflictResolverServerCallStub) RecvStream() interface {  Advance() bool; Value() ResolutionInfo; Err() error;}
 pkg nosql, method (*ConflictManagerStartConflictResolverServerCallStub) SendStream() interface {  Send(item ConflictInfo) error;}
 pkg nosql, method (*CrPolicy) FillVDLTarget(vdl.Target, *vdl.Type) error
 pkg nosql, method (*CrPolicy) MakeVDLTarget() vdl.Target
+pkg nosql, method (*CrPolicyTarget) FinishField(vdl.Target, vdl.Target) error
+pkg nosql, method (*CrPolicyTarget) FinishFields(vdl.FieldsTarget) error
+pkg nosql, method (*CrPolicyTarget) StartField(string) (vdl.Target, vdl.Target, error)
+pkg nosql, method (*CrPolicyTarget) StartFields(*vdl.Type) (vdl.FieldsTarget, error)
 pkg nosql, method (*CrRule) FillVDLTarget(vdl.Target, *vdl.Type) error
 pkg nosql, method (*CrRule) MakeVDLTarget() vdl.Target
+pkg nosql, method (*CrRuleTarget) FinishField(vdl.Target, vdl.Target) error
+pkg nosql, method (*CrRuleTarget) FinishFields(vdl.FieldsTarget) error
+pkg nosql, method (*CrRuleTarget) StartField(string) (vdl.Target, vdl.Target, error)
+pkg nosql, method (*CrRuleTarget) StartFields(*vdl.Type) (vdl.FieldsTarget, error)
 pkg nosql, method (*DatabaseExecServerCallStub) Init(rpc.StreamServerCall)
 pkg nosql, method (*DatabaseExecServerCallStub) SendStream() interface {  Send(item []*vom.RawBytes) error;}
 pkg nosql, method (*KeyValue) FillVDLTarget(vdl.Target, *vdl.Type) error
 pkg nosql, method (*KeyValue) MakeVDLTarget() vdl.Target
+pkg nosql, method (*KeyValueTarget) FinishField(vdl.Target, vdl.Target) error
+pkg nosql, method (*KeyValueTarget) FinishFields(vdl.FieldsTarget) error
+pkg nosql, method (*KeyValueTarget) StartField(string) (vdl.Target, vdl.Target, error)
+pkg nosql, method (*KeyValueTarget) StartFields(*vdl.Type) (vdl.FieldsTarget, error)
 pkg nosql, method (*PrefixPermissions) FillVDLTarget(vdl.Target, *vdl.Type) error
 pkg nosql, method (*PrefixPermissions) MakeVDLTarget() vdl.Target
+pkg nosql, method (*PrefixPermissionsTarget) FinishField(vdl.Target, vdl.Target) error
+pkg nosql, method (*PrefixPermissionsTarget) FinishFields(vdl.FieldsTarget) error
+pkg nosql, method (*PrefixPermissionsTarget) StartField(string) (vdl.Target, vdl.Target, error)
+pkg nosql, method (*PrefixPermissionsTarget) StartFields(*vdl.Type) (vdl.FieldsTarget, error)
 pkg nosql, method (*ResolutionInfo) FillVDLTarget(vdl.Target, *vdl.Type) error
 pkg nosql, method (*ResolutionInfo) MakeVDLTarget() vdl.Target
+pkg nosql, method (*ResolutionInfoTarget) FinishField(vdl.Target, vdl.Target) error
+pkg nosql, method (*ResolutionInfoTarget) FinishFields(vdl.FieldsTarget) error
+pkg nosql, method (*ResolutionInfoTarget) StartField(string) (vdl.Target, vdl.Target, error)
+pkg nosql, method (*ResolutionInfoTarget) StartFields(*vdl.Type) (vdl.FieldsTarget, error)
+pkg nosql, method (*ResolverType) FillVDLTarget(vdl.Target, *vdl.Type) error
+pkg nosql, method (*ResolverType) MakeVDLTarget() vdl.Target
 pkg nosql, method (*ResolverType) Set(string) error
+pkg nosql, method (*ResolverTypeTarget) FromEnumLabel(string, *vdl.Type) error
 pkg nosql, method (*RowInfo) FillVDLTarget(vdl.Target, *vdl.Type) error
 pkg nosql, method (*RowInfo) MakeVDLTarget() vdl.Target
+pkg nosql, method (*RowInfoTarget) FinishField(vdl.Target, vdl.Target) error
+pkg nosql, method (*RowInfoTarget) FinishFields(vdl.FieldsTarget) error
+pkg nosql, method (*RowInfoTarget) StartField(string) (vdl.Target, vdl.Target, error)
+pkg nosql, method (*RowInfoTarget) StartFields(*vdl.Type) (vdl.FieldsTarget, error)
 pkg nosql, method (*RowOp) FillVDLTarget(vdl.Target, *vdl.Type) error
 pkg nosql, method (*RowOp) MakeVDLTarget() vdl.Target
+pkg nosql, method (*RowOpTarget) FinishField(vdl.Target, vdl.Target) error
+pkg nosql, method (*RowOpTarget) FinishFields(vdl.FieldsTarget) error
+pkg nosql, method (*RowOpTarget) StartField(string) (vdl.Target, vdl.Target, error)
+pkg nosql, method (*RowOpTarget) StartFields(*vdl.Type) (vdl.FieldsTarget, error)
 pkg nosql, method (*ScanOp) FillVDLTarget(vdl.Target, *vdl.Type) error
 pkg nosql, method (*ScanOp) MakeVDLTarget() vdl.Target
+pkg nosql, method (*ScanOpTarget) FinishField(vdl.Target, vdl.Target) error
+pkg nosql, method (*ScanOpTarget) FinishFields(vdl.FieldsTarget) error
+pkg nosql, method (*ScanOpTarget) StartField(string) (vdl.Target, vdl.Target, error)
+pkg nosql, method (*ScanOpTarget) StartFields(*vdl.Type) (vdl.FieldsTarget, error)
 pkg nosql, method (*SchemaMetadata) FillVDLTarget(vdl.Target, *vdl.Type) error
 pkg nosql, method (*SchemaMetadata) MakeVDLTarget() vdl.Target
+pkg nosql, method (*SchemaMetadataTarget) FinishField(vdl.Target, vdl.Target) error
+pkg nosql, method (*SchemaMetadataTarget) FinishFields(vdl.FieldsTarget) error
+pkg nosql, method (*SchemaMetadataTarget) StartField(string) (vdl.Target, vdl.Target, error)
+pkg nosql, method (*SchemaMetadataTarget) StartFields(*vdl.Type) (vdl.FieldsTarget, error)
 pkg nosql, method (*StoreChange) FillVDLTarget(vdl.Target, *vdl.Type) error
 pkg nosql, method (*StoreChange) MakeVDLTarget() vdl.Target
+pkg nosql, method (*StoreChangeTarget) FinishField(vdl.Target, vdl.Target) error
+pkg nosql, method (*StoreChangeTarget) FinishFields(vdl.FieldsTarget) error
+pkg nosql, method (*StoreChangeTarget) StartField(string) (vdl.Target, vdl.Target, error)
+pkg nosql, method (*StoreChangeTarget) StartFields(*vdl.Type) (vdl.FieldsTarget, error)
 pkg nosql, method (*SyncgroupMemberInfo) FillVDLTarget(vdl.Target, *vdl.Type) error
 pkg nosql, method (*SyncgroupMemberInfo) MakeVDLTarget() vdl.Target
+pkg nosql, method (*SyncgroupMemberInfoTarget) FinishField(vdl.Target, vdl.Target) error
+pkg nosql, method (*SyncgroupMemberInfoTarget) FinishFields(vdl.FieldsTarget) error
+pkg nosql, method (*SyncgroupMemberInfoTarget) StartField(string) (vdl.Target, vdl.Target, error)
+pkg nosql, method (*SyncgroupMemberInfoTarget) StartFields(*vdl.Type) (vdl.FieldsTarget, error)
 pkg nosql, method (*SyncgroupSpec) FillVDLTarget(vdl.Target, *vdl.Type) error
 pkg nosql, method (*SyncgroupSpec) MakeVDLTarget() vdl.Target
+pkg nosql, method (*SyncgroupSpecTarget) FinishField(vdl.Target, vdl.Target) error
+pkg nosql, method (*SyncgroupSpecTarget) FinishFields(vdl.FieldsTarget) error
+pkg nosql, method (*SyncgroupSpecTarget) StartField(string) (vdl.Target, vdl.Target, error)
+pkg nosql, method (*SyncgroupSpecTarget) StartFields(*vdl.Type) (vdl.FieldsTarget, error)
 pkg nosql, method (*TableRow) FillVDLTarget(vdl.Target, *vdl.Type) error
 pkg nosql, method (*TableRow) MakeVDLTarget() vdl.Target
+pkg nosql, method (*TableRowTarget) FinishField(vdl.Target, vdl.Target) error
+pkg nosql, method (*TableRowTarget) FinishFields(vdl.FieldsTarget) error
+pkg nosql, method (*TableRowTarget) StartField(string) (vdl.Target, vdl.Target, error)
+pkg nosql, method (*TableRowTarget) StartFields(*vdl.Type) (vdl.FieldsTarget, error)
 pkg nosql, method (*TableScanServerCallStub) Init(rpc.StreamServerCall)
 pkg nosql, method (*TableScanServerCallStub) SendStream() interface {  Send(item KeyValue) error;}
 pkg nosql, method (*Value) FillVDLTarget(vdl.Target, *vdl.Type) error
 pkg nosql, method (*Value) MakeVDLTarget() vdl.Target
+pkg nosql, method (*ValueSelection) FillVDLTarget(vdl.Target, *vdl.Type) error
+pkg nosql, method (*ValueSelection) MakeVDLTarget() vdl.Target
 pkg nosql, method (*ValueSelection) Set(string) error
+pkg nosql, method (*ValueSelectionTarget) FromEnumLabel(string, *vdl.Type) error
+pkg nosql, method (*ValueState) FillVDLTarget(vdl.Target, *vdl.Type) error
+pkg nosql, method (*ValueState) MakeVDLTarget() vdl.Target
 pkg nosql, method (*ValueState) Set(string) error
-pkg nosql, method (BatchSource) FillVDLTarget(vdl.Target, *vdl.Type) error
-pkg nosql, method (BatchSource) MakeVDLTarget() vdl.Target
+pkg nosql, method (*ValueStateTarget) FromEnumLabel(string, *vdl.Type) error
+pkg nosql, method (*ValueTarget) FinishField(vdl.Target, vdl.Target) error
+pkg nosql, method (*ValueTarget) FinishFields(vdl.FieldsTarget) error
+pkg nosql, method (*ValueTarget) StartField(string) (vdl.Target, vdl.Target, error)
+pkg nosql, method (*ValueTarget) StartFields(*vdl.Type) (vdl.FieldsTarget, error)
 pkg nosql, method (BatchSource) String() string
-pkg nosql, method (BlobFetchState) FillVDLTarget(vdl.Target, *vdl.Type) error
-pkg nosql, method (BlobFetchState) MakeVDLTarget() vdl.Target
 pkg nosql, method (BlobFetchState) String() string
-pkg nosql, method (BlobRef) FillVDLTarget(vdl.Target, *vdl.Type) error
-pkg nosql, method (BlobRef) MakeVDLTarget() vdl.Target
 pkg nosql, method (ConflictDataBatch) FillVDLTarget(vdl.Target, *vdl.Type) error
 pkg nosql, method (ConflictDataBatch) Index() int
 pkg nosql, method (ConflictDataBatch) Interface() interface{}
@@ -130,28 +214,40 @@ pkg nosql, method (OperationWrite) Index() int
 pkg nosql, method (OperationWrite) Interface() interface{}
 pkg nosql, method (OperationWrite) MakeVDLTarget() vdl.Target
 pkg nosql, method (OperationWrite) Name() string
-pkg nosql, method (ResolverType) FillVDLTarget(vdl.Target, *vdl.Type) error
-pkg nosql, method (ResolverType) MakeVDLTarget() vdl.Target
 pkg nosql, method (ResolverType) String() string
-pkg nosql, method (ValueSelection) FillVDLTarget(vdl.Target, *vdl.Type) error
-pkg nosql, method (ValueSelection) MakeVDLTarget() vdl.Target
 pkg nosql, method (ValueSelection) String() string
-pkg nosql, method (ValueState) FillVDLTarget(vdl.Target, *vdl.Type) error
-pkg nosql, method (ValueState) MakeVDLTarget() vdl.Target
 pkg nosql, method (ValueState) String() string
 pkg nosql, type BatchInfo struct
 pkg nosql, type BatchInfo struct, Hint string
 pkg nosql, type BatchInfo struct, Id uint64
 pkg nosql, type BatchInfo struct, Source BatchSource
+pkg nosql, type BatchInfoTarget struct
+pkg nosql, type BatchInfoTarget struct, Value *BatchInfo
+pkg nosql, type BatchInfoTarget struct, embedded vdl.FieldsTargetBase
+pkg nosql, type BatchInfoTarget struct, embedded vdl.TargetBase
 pkg nosql, type BatchOptions struct
 pkg nosql, type BatchOptions struct, Hint string
 pkg nosql, type BatchOptions struct, ReadOnly bool
+pkg nosql, type BatchOptionsTarget struct
+pkg nosql, type BatchOptionsTarget struct, Value *BatchOptions
+pkg nosql, type BatchOptionsTarget struct, embedded vdl.FieldsTargetBase
+pkg nosql, type BatchOptionsTarget struct, embedded vdl.TargetBase
 pkg nosql, type BatchSource int
+pkg nosql, type BatchSourceTarget struct
+pkg nosql, type BatchSourceTarget struct, Value *BatchSource
+pkg nosql, type BatchSourceTarget struct, embedded vdl.TargetBase
 pkg nosql, type BlobFetchState int
+pkg nosql, type BlobFetchStateTarget struct
+pkg nosql, type BlobFetchStateTarget struct, Value *BlobFetchState
+pkg nosql, type BlobFetchStateTarget struct, embedded vdl.TargetBase
 pkg nosql, type BlobFetchStatus struct
 pkg nosql, type BlobFetchStatus struct, Received int64
 pkg nosql, type BlobFetchStatus struct, State BlobFetchState
 pkg nosql, type BlobFetchStatus struct, Total int64
+pkg nosql, type BlobFetchStatusTarget struct
+pkg nosql, type BlobFetchStatusTarget struct, Value *BlobFetchStatus
+pkg nosql, type BlobFetchStatusTarget struct, embedded vdl.FieldsTargetBase
+pkg nosql, type BlobFetchStatusTarget struct, embedded vdl.TargetBase
 pkg nosql, type BlobManagerClientMethods interface { CommitBlob, CreateBlob, DeleteBlob, FetchBlob, GetBlob, GetBlobSize, KeepBlob, PinBlob, PutBlob, UnpinBlob }
 pkg nosql, type BlobManagerClientMethods interface, CommitBlob(*context.T, BlobRef, ...rpc.CallOpt) error
 pkg nosql, type BlobManagerClientMethods interface, CreateBlob(*context.T, ...rpc.CallOpt) (BlobRef, error)
@@ -260,6 +356,9 @@ pkg nosql, type BlobManagerServerStubMethods interface, PinBlob(*context.T, rpc.
 pkg nosql, type BlobManagerServerStubMethods interface, PutBlob(*context.T, *BlobManagerPutBlobServerCallStub, BlobRef) error
 pkg nosql, type BlobManagerServerStubMethods interface, UnpinBlob(*context.T, rpc.ServerCall, BlobRef) error
 pkg nosql, type BlobRef string
+pkg nosql, type BlobRefTarget struct
+pkg nosql, type BlobRefTarget struct, Value *BlobRef
+pkg nosql, type BlobRefTarget struct, embedded vdl.TargetBase
 pkg nosql, type ConflictData interface, FillVDLTarget(vdl.Target, *vdl.Type) error
 pkg nosql, type ConflictData interface, Index() int
 pkg nosql, type ConflictData interface, Interface() interface{}
@@ -272,6 +371,10 @@ pkg nosql, type ConflictDataRow struct, Value RowInfo
 pkg nosql, type ConflictInfo struct
 pkg nosql, type ConflictInfo struct, Continued bool
 pkg nosql, type ConflictInfo struct, Data ConflictData
+pkg nosql, type ConflictInfoTarget struct
+pkg nosql, type ConflictInfoTarget struct, Value *ConflictInfo
+pkg nosql, type ConflictInfoTarget struct, embedded vdl.FieldsTargetBase
+pkg nosql, type ConflictInfoTarget struct, embedded vdl.TargetBase
 pkg nosql, type ConflictManagerClientMethods interface { StartConflictResolver }
 pkg nosql, type ConflictManagerClientMethods interface, StartConflictResolver(*context.T, ...rpc.CallOpt) (ConflictManagerStartConflictResolverClientCall, error)
 pkg nosql, type ConflictManagerClientStub interface { StartConflictResolver }
@@ -306,11 +409,19 @@ pkg nosql, type ConflictManagerStartConflictResolverServerStream interface, Recv
 pkg nosql, type ConflictManagerStartConflictResolverServerStream interface, SendStream() interface {  Send(item ConflictInfo) error;}
 pkg nosql, type CrPolicy struct
 pkg nosql, type CrPolicy struct, Rules []CrRule
+pkg nosql, type CrPolicyTarget struct
+pkg nosql, type CrPolicyTarget struct, Value *CrPolicy
+pkg nosql, type CrPolicyTarget struct, embedded vdl.FieldsTargetBase
+pkg nosql, type CrPolicyTarget struct, embedded vdl.TargetBase
 pkg nosql, type CrRule struct
 pkg nosql, type CrRule struct, KeyPrefix string
 pkg nosql, type CrRule struct, Resolver ResolverType
 pkg nosql, type CrRule struct, TableName string
 pkg nosql, type CrRule struct, Type string
+pkg nosql, type CrRuleTarget struct
+pkg nosql, type CrRuleTarget struct, Value *CrRule
+pkg nosql, type CrRuleTarget struct, embedded vdl.FieldsTargetBase
+pkg nosql, type CrRuleTarget struct, embedded vdl.TargetBase
 pkg nosql, type DatabaseClientMethods interface { Abort, BeginBatch, Commit, CommitBlob, Create, CreateBlob, CreateSyncgroup, DeleteBlob, Destroy, DestroySyncgroup, EjectFromSyncgroup, Exec, Exists, FetchBlob, GetBlob, GetBlobSize, GetPermissions, GetResumeMarker, GetSchemaMetadata, GetSyncgroupMembers, GetSyncgroupNames, GetSyncgroupSpec, JoinSyncgroup, KeepBlob, LeaveSyncgroup, ListTables, PauseSync, PinBlob, PutBlob, ResumeSync, SetPermissions, SetSchemaMetadata, SetSyncgroupSpec, StartConflictResolver, UnpinBlob, WatchGlob }
 pkg nosql, type DatabaseClientMethods interface, Abort(*context.T, int32, ...rpc.CallOpt) error
 pkg nosql, type DatabaseClientMethods interface, BeginBatch(*context.T, int32, BatchOptions, ...rpc.CallOpt) (string, error)
@@ -507,6 +618,10 @@ pkg nosql, type DatabaseWatcherServerStubMethods interface, WatchGlob(*context.T
 pkg nosql, type KeyValue struct
 pkg nosql, type KeyValue struct, Key string
 pkg nosql, type KeyValue struct, Value []byte
+pkg nosql, type KeyValueTarget struct
+pkg nosql, type KeyValueTarget struct, Value *KeyValue
+pkg nosql, type KeyValueTarget struct, embedded vdl.FieldsTargetBase
+pkg nosql, type KeyValueTarget struct, embedded vdl.TargetBase
 pkg nosql, type Operation interface, FillVDLTarget(vdl.Target, *vdl.Type) error
 pkg nosql, type Operation interface, Index() int
 pkg nosql, type Operation interface, Interface() interface{}
@@ -521,12 +636,23 @@ pkg nosql, type OperationWrite struct, Value RowOp
 pkg nosql, type PrefixPermissions struct
 pkg nosql, type PrefixPermissions struct, Perms access.Permissions
 pkg nosql, type PrefixPermissions struct, Prefix string
+pkg nosql, type PrefixPermissionsTarget struct
+pkg nosql, type PrefixPermissionsTarget struct, Value *PrefixPermissions
+pkg nosql, type PrefixPermissionsTarget struct, embedded vdl.FieldsTargetBase
+pkg nosql, type PrefixPermissionsTarget struct, embedded vdl.TargetBase
 pkg nosql, type ResolutionInfo struct
 pkg nosql, type ResolutionInfo struct, Continued bool
 pkg nosql, type ResolutionInfo struct, Key string
 pkg nosql, type ResolutionInfo struct, Result *Value
 pkg nosql, type ResolutionInfo struct, Selection ValueSelection
+pkg nosql, type ResolutionInfoTarget struct
+pkg nosql, type ResolutionInfoTarget struct, Value *ResolutionInfo
+pkg nosql, type ResolutionInfoTarget struct, embedded vdl.FieldsTargetBase
+pkg nosql, type ResolutionInfoTarget struct, embedded vdl.TargetBase
 pkg nosql, type ResolverType int
+pkg nosql, type ResolverTypeTarget struct
+pkg nosql, type ResolverTypeTarget struct, Value *ResolverType
+pkg nosql, type ResolverTypeTarget struct, embedded vdl.TargetBase
 pkg nosql, type RowClientMethods interface { Delete, Exists, Get, Put }
 pkg nosql, type RowClientMethods interface, Delete(*context.T, int32, ...rpc.CallOpt) error
 pkg nosql, type RowClientMethods interface, Exists(*context.T, int32, ...rpc.CallOpt) (bool, error)
@@ -540,11 +666,19 @@ pkg nosql, type RowClientStub interface, Put(*context.T, int32, []byte, ...rpc.C
 pkg nosql, type RowInfo struct
 pkg nosql, type RowInfo struct, BatchIds []uint64
 pkg nosql, type RowInfo struct, Op Operation
+pkg nosql, type RowInfoTarget struct
+pkg nosql, type RowInfoTarget struct, Value *RowInfo
+pkg nosql, type RowInfoTarget struct, embedded vdl.FieldsTargetBase
+pkg nosql, type RowInfoTarget struct, embedded vdl.TargetBase
 pkg nosql, type RowOp struct
 pkg nosql, type RowOp struct, AncestorValue *Value
 pkg nosql, type RowOp struct, Key string
 pkg nosql, type RowOp struct, LocalValue *Value
 pkg nosql, type RowOp struct, RemoteValue *Value
+pkg nosql, type RowOpTarget struct
+pkg nosql, type RowOpTarget struct, Value *RowOp
+pkg nosql, type RowOpTarget struct, embedded vdl.FieldsTargetBase
+pkg nosql, type RowOpTarget struct, embedded vdl.TargetBase
 pkg nosql, type RowServerMethods interface { Delete, Exists, Get, Put }
 pkg nosql, type RowServerMethods interface, Delete(*context.T, rpc.ServerCall, int32) error
 pkg nosql, type RowServerMethods interface, Exists(*context.T, rpc.ServerCall, int32) (bool, error)
@@ -556,6 +690,10 @@ pkg nosql, type RowServerStubMethods RowServerMethods
 pkg nosql, type ScanOp struct
 pkg nosql, type ScanOp struct, Limit string
 pkg nosql, type ScanOp struct, Start string
+pkg nosql, type ScanOpTarget struct
+pkg nosql, type ScanOpTarget struct, Value *ScanOp
+pkg nosql, type ScanOpTarget struct, embedded vdl.FieldsTargetBase
+pkg nosql, type ScanOpTarget struct, embedded vdl.TargetBase
 pkg nosql, type SchemaManagerClientMethods interface { GetSchemaMetadata, SetSchemaMetadata }
 pkg nosql, type SchemaManagerClientMethods interface, GetSchemaMetadata(*context.T, ...rpc.CallOpt) (SchemaMetadata, error)
 pkg nosql, type SchemaManagerClientMethods interface, SetSchemaMetadata(*context.T, SchemaMetadata, ...rpc.CallOpt) error
@@ -571,9 +709,17 @@ pkg nosql, type SchemaManagerServerStubMethods SchemaManagerServerMethods
 pkg nosql, type SchemaMetadata struct
 pkg nosql, type SchemaMetadata struct, Policy CrPolicy
 pkg nosql, type SchemaMetadata struct, Version int32
+pkg nosql, type SchemaMetadataTarget struct
+pkg nosql, type SchemaMetadataTarget struct, Value *SchemaMetadata
+pkg nosql, type SchemaMetadataTarget struct, embedded vdl.FieldsTargetBase
+pkg nosql, type SchemaMetadataTarget struct, embedded vdl.TargetBase
 pkg nosql, type StoreChange struct
 pkg nosql, type StoreChange struct, FromSync bool
 pkg nosql, type StoreChange struct, Value []byte
+pkg nosql, type StoreChangeTarget struct
+pkg nosql, type StoreChangeTarget struct, Value *StoreChange
+pkg nosql, type StoreChangeTarget struct, embedded vdl.FieldsTargetBase
+pkg nosql, type StoreChangeTarget struct, embedded vdl.TargetBase
 pkg nosql, type SyncgroupManagerClientMethods interface { CreateSyncgroup, DestroySyncgroup, EjectFromSyncgroup, GetSyncgroupMembers, GetSyncgroupNames, GetSyncgroupSpec, JoinSyncgroup, LeaveSyncgroup, SetSyncgroupSpec }
 pkg nosql, type SyncgroupManagerClientMethods interface, CreateSyncgroup(*context.T, string, SyncgroupSpec, SyncgroupMemberInfo, ...rpc.CallOpt) error
 pkg nosql, type SyncgroupManagerClientMethods interface, DestroySyncgroup(*context.T, string, ...rpc.CallOpt) error
@@ -610,12 +756,20 @@ pkg nosql, type SyncgroupManagerServerStubMethods SyncgroupManagerServerMethods
 pkg nosql, type SyncgroupMemberInfo struct
 pkg nosql, type SyncgroupMemberInfo struct, IsServer bool
 pkg nosql, type SyncgroupMemberInfo struct, SyncPriority byte
+pkg nosql, type SyncgroupMemberInfoTarget struct
+pkg nosql, type SyncgroupMemberInfoTarget struct, Value *SyncgroupMemberInfo
+pkg nosql, type SyncgroupMemberInfoTarget struct, embedded vdl.FieldsTargetBase
+pkg nosql, type SyncgroupMemberInfoTarget struct, embedded vdl.TargetBase
 pkg nosql, type SyncgroupSpec struct
 pkg nosql, type SyncgroupSpec struct, Description string
 pkg nosql, type SyncgroupSpec struct, IsPrivate bool
 pkg nosql, type SyncgroupSpec struct, MountTables []string
 pkg nosql, type SyncgroupSpec struct, Perms access.Permissions
 pkg nosql, type SyncgroupSpec struct, Prefixes []TableRow
+pkg nosql, type SyncgroupSpecTarget struct
+pkg nosql, type SyncgroupSpecTarget struct, Value *SyncgroupSpec
+pkg nosql, type SyncgroupSpecTarget struct, embedded vdl.FieldsTargetBase
+pkg nosql, type SyncgroupSpecTarget struct, embedded vdl.TargetBase
 pkg nosql, type TableClientMethods interface { Create, DeletePrefixPermissions, DeleteRange, Destroy, Exists, GetPermissions, GetPrefixPermissions, Scan, SetPermissions, SetPrefixPermissions }
 pkg nosql, type TableClientMethods interface, Create(*context.T, int32, access.Permissions, ...rpc.CallOpt) error
 pkg nosql, type TableClientMethods interface, DeletePrefixPermissions(*context.T, int32, string, ...rpc.CallOpt) error
@@ -641,6 +795,10 @@ pkg nosql, type TableClientStub interface, SetPrefixPermissions(*context.T, int3
 pkg nosql, type TableRow struct
 pkg nosql, type TableRow struct, Row string
 pkg nosql, type TableRow struct, TableName string
+pkg nosql, type TableRowTarget struct
+pkg nosql, type TableRowTarget struct, Value *TableRow
+pkg nosql, type TableRowTarget struct, embedded vdl.FieldsTargetBase
+pkg nosql, type TableRowTarget struct, embedded vdl.TargetBase
 pkg nosql, type TableScanClientCall interface { Finish, RecvStream }
 pkg nosql, type TableScanClientCall interface, Finish() error
 pkg nosql, type TableScanClientCall interface, RecvStream() interface {  Advance() bool;; Value() KeyValue;; Err() error;}
@@ -697,7 +855,17 @@ pkg nosql, type Value struct, Bytes []byte
 pkg nosql, type Value struct, State ValueState
 pkg nosql, type Value struct, WriteTs time.Time
 pkg nosql, type ValueSelection int
+pkg nosql, type ValueSelectionTarget struct
+pkg nosql, type ValueSelectionTarget struct, Value *ValueSelection
+pkg nosql, type ValueSelectionTarget struct, embedded vdl.TargetBase
 pkg nosql, type ValueState int
+pkg nosql, type ValueStateTarget struct
+pkg nosql, type ValueStateTarget struct, Value *ValueState
+pkg nosql, type ValueStateTarget struct, embedded vdl.TargetBase
+pkg nosql, type ValueTarget struct
+pkg nosql, type ValueTarget struct, Value *Value
+pkg nosql, type ValueTarget struct, embedded vdl.FieldsTargetBase
+pkg nosql, type ValueTarget struct, embedded vdl.TargetBase
 pkg nosql, var BatchSourceAll [...]BatchSource
 pkg nosql, var BlobFetchStateAll [...]BlobFetchState
 pkg nosql, var BlobManagerDesc rpc.InterfaceDesc

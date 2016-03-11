@@ -117,7 +117,7 @@ func startConvert(c convTarget, ttFrom *Type) (fin, fill convTarget, err error) 
 	if ttFrom.Kind() == Any {
 		return convTarget{}, convTarget{}, fmt.Errorf("can't convert from type %q - either call target.FromNil or target.From* for the element value", ttFrom)
 	}
-	if !compatible(c.tt, ttFrom) {
+	if !Compatible(c.tt, ttFrom) {
 		return convTarget{}, convTarget{}, fmt.Errorf("types %q and %q aren't compatible", c.tt, ttFrom)
 	}
 	fin = createFinTarget(c, ttFrom)
@@ -534,7 +534,11 @@ func removeOptional(tt *Type) *Type {
 // makeDirectTarget returns the target representing the underlying value, if the
 // underlying value supports direct target access.
 func (c convTarget) makeDirectTarget() Target {
-	if c.vv == nil {
+	if c.vv == nil && c.tt.Kind() != Optional {
+		// Top-level optional is not directly Targetable because
+		// MakeVdlTarget() for *StructType is the struct target, not the
+		// optional struct target.
+		// TODO(bprosnitz) Fix this.
 		rv := c.rv
 		if rv.Type().Implements(rtTargeter) {
 			if rv.Kind() == reflect.Ptr && rv.IsNil() {
@@ -557,7 +561,7 @@ func (c convTarget) FromNil(tt *Type) error {
 	if target := c.makeDirectTarget(); target != nil {
 		return target.FromNil(tt)
 	}
-	if !compatible(c.tt, tt) {
+	if !Compatible(c.tt, tt) {
 		return fmt.Errorf("types %q and %q aren't compatible", c.tt, tt)
 	}
 	if !tt.CanBeNil() || !c.tt.CanBeNil() {

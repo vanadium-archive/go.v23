@@ -9,6 +9,7 @@
 package appcycle
 
 import (
+	"fmt"
 	"io"
 	"v.io/v23"
 	"v.io/v23/context"
@@ -37,7 +38,6 @@ func (Task) __VDLReflect(struct {
 }
 
 func (m *Task) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
-
 	if __VDLType_appcycle_v_io_v23_services_appcycle_Task == nil || __VDLTypeappcycle0 == nil {
 		panic("Initialization order error: types generated for FillVDLTarget not initialized. Consider moving caller to an init() block.")
 	}
@@ -77,6 +77,37 @@ func (m *Task) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 }
 
 func (m *Task) MakeVDLTarget() vdl.Target {
+	return &TaskTarget{Value: m}
+}
+
+type TaskTarget struct {
+	Value *Task
+	vdl.TargetBase
+	vdl.FieldsTargetBase
+}
+
+func (t *TaskTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
+	if !vdl.Compatible(tt, __VDLType_appcycle_v_io_v23_services_appcycle_Task) {
+		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType_appcycle_v_io_v23_services_appcycle_Task)
+	}
+	return t, nil
+}
+func (t *TaskTarget) StartField(name string) (key, field vdl.Target, _ error) {
+	switch name {
+	case "Progress":
+		val, err := &vdl.Int32Target{Value: &t.Value.Progress}, error(nil)
+		return nil, val, err
+	case "Goal":
+		val, err := &vdl.Int32Target{Value: &t.Value.Goal}, error(nil)
+		return nil, val, err
+	default:
+		return nil, nil, fmt.Errorf("field %s not in struct %v", name, __VDLType_appcycle_v_io_v23_services_appcycle_Task)
+	}
+}
+func (t *TaskTarget) FinishField(_, _ vdl.Target) error {
+	return nil
+}
+func (t *TaskTarget) FinishFields(_ vdl.FieldsTarget) error {
 	return nil
 }
 

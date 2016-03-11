@@ -9,6 +9,7 @@
 package binary
 
 import (
+	"fmt"
 	"v.io/v23/vdl"
 )
 
@@ -40,7 +41,6 @@ func (Description) __VDLReflect(struct {
 }
 
 func (m *Description) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
-
 	if __VDLType_binary_v_io_v23_services_binary_Description == nil || __VDLTypebinary0 == nil {
 		panic("Initialization order error: types generated for FillVDLTarget not initialized. Consider moving caller to an init() block.")
 	}
@@ -104,6 +104,71 @@ func (m *Description) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 }
 
 func (m *Description) MakeVDLTarget() vdl.Target {
+	return &DescriptionTarget{Value: m}
+}
+
+type DescriptionTarget struct {
+	Value *Description
+	vdl.TargetBase
+	vdl.FieldsTargetBase
+}
+
+func (t *DescriptionTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
+	if !vdl.Compatible(tt, __VDLType_binary_v_io_v23_services_binary_Description) {
+		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType_binary_v_io_v23_services_binary_Description)
+	}
+	return t, nil
+}
+func (t *DescriptionTarget) StartField(name string) (key, field vdl.Target, _ error) {
+	switch name {
+	case "Name":
+		val, err := &vdl.StringTarget{Value: &t.Value.Name}, error(nil)
+		return nil, val, err
+	case "Profiles":
+		val, err := &binary6d61705b737472696e675d626f6f6cTarget{Value: &t.Value.Profiles}, error(nil)
+		return nil, val, err
+	default:
+		return nil, nil, fmt.Errorf("field %s not in struct %v", name, __VDLType_binary_v_io_v23_services_binary_Description)
+	}
+}
+func (t *DescriptionTarget) FinishField(_, _ vdl.Target) error {
+	return nil
+}
+func (t *DescriptionTarget) FinishFields(_ vdl.FieldsTarget) error {
+	return nil
+}
+
+type binary6d61705b737472696e675d626f6f6cTarget struct {
+	Value    *map[string]bool
+	currKey  string
+	currElem bool
+	vdl.TargetBase
+	vdl.MapTargetBase
+}
+
+func (t *binary6d61705b737472696e675d626f6f6cTarget) StartMap(tt *vdl.Type, len int) (vdl.MapTarget, error) {
+	if !vdl.Compatible(tt, __VDLTypebinary1) {
+		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLTypebinary1)
+	}
+	*t.Value = make(map[string]bool)
+	return t, nil
+}
+func (t *binary6d61705b737472696e675d626f6f6cTarget) StartKey() (key vdl.Target, _ error) {
+	t.currKey = ""
+	return &vdl.StringTarget{Value: &t.currKey}, error(nil)
+}
+func (t *binary6d61705b737472696e675d626f6f6cTarget) FinishKeyStartField(key vdl.Target) (field vdl.Target, _ error) {
+	t.currElem = false
+	return &vdl.BoolTarget{Value: &t.currElem}, error(nil)
+}
+func (t *binary6d61705b737472696e675d626f6f6cTarget) FinishField(key, field vdl.Target) error {
+	(*t.Value)[t.currKey] = t.currElem
+	return nil
+}
+func (t *binary6d61705b737472696e675d626f6f6cTarget) FinishMap(elem vdl.MapTarget) error {
+	if len(*t.Value) == 0 {
+		*t.Value = nil
+	}
 	return nil
 }
 
@@ -121,7 +186,6 @@ func (PartInfo) __VDLReflect(struct {
 }
 
 func (m *PartInfo) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
-
 	if __VDLType_binary_v_io_v23_services_binary_PartInfo == nil || __VDLTypebinary2 == nil {
 		panic("Initialization order error: types generated for FillVDLTarget not initialized. Consider moving caller to an init() block.")
 	}
@@ -161,6 +225,37 @@ func (m *PartInfo) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 }
 
 func (m *PartInfo) MakeVDLTarget() vdl.Target {
+	return &PartInfoTarget{Value: m}
+}
+
+type PartInfoTarget struct {
+	Value *PartInfo
+	vdl.TargetBase
+	vdl.FieldsTargetBase
+}
+
+func (t *PartInfoTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
+	if !vdl.Compatible(tt, __VDLType_binary_v_io_v23_services_binary_PartInfo) {
+		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType_binary_v_io_v23_services_binary_PartInfo)
+	}
+	return t, nil
+}
+func (t *PartInfoTarget) StartField(name string) (key, field vdl.Target, _ error) {
+	switch name {
+	case "Checksum":
+		val, err := &vdl.StringTarget{Value: &t.Value.Checksum}, error(nil)
+		return nil, val, err
+	case "Size":
+		val, err := &vdl.Int64Target{Value: &t.Value.Size}, error(nil)
+		return nil, val, err
+	default:
+		return nil, nil, fmt.Errorf("field %s not in struct %v", name, __VDLType_binary_v_io_v23_services_binary_PartInfo)
+	}
+}
+func (t *PartInfoTarget) FinishField(_, _ vdl.Target) error {
+	return nil
+}
+func (t *PartInfoTarget) FinishFields(_ vdl.FieldsTarget) error {
 	return nil
 }
 

@@ -8,9 +8,12 @@
 package vtrace
 
 import (
+	"fmt"
+	"reflect"
 	"time"
 	"v.io/v23/uniqueid"
 	"v.io/v23/vdl"
+	"v.io/v23/vdl/vdlconv"
 	time_2 "v.io/v23/vdlroot/time"
 )
 
@@ -25,7 +28,6 @@ func (TraceRecord) __VDLReflect(struct {
 }
 
 func (m *TraceRecord) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
-
 	__VDLEnsureNativeBuilt_types()
 	fieldsTarget1, err := t.StartFields(tt)
 	if err != nil {
@@ -82,6 +84,165 @@ func (m *TraceRecord) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 }
 
 func (m *TraceRecord) MakeVDLTarget() vdl.Target {
+	return &TraceRecordTarget{Value: m}
+}
+
+type TraceRecordTarget struct {
+	Value *TraceRecord
+	vdl.TargetBase
+	vdl.FieldsTargetBase
+}
+
+func (t *TraceRecordTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
+	if !vdl.Compatible(tt, __VDLType_types_v_io_v23_vtrace_TraceRecord) {
+		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType_types_v_io_v23_vtrace_TraceRecord)
+	}
+	return t, nil
+}
+func (t *TraceRecordTarget) StartField(name string) (key, field vdl.Target, _ error) {
+	switch name {
+	case "Id":
+		val, err := &uniqueid.IdTarget{Value: &t.Value.Id}, error(nil)
+		return nil, val, err
+	case "Spans":
+		val, err := &types5b5d762e696f2f7632332f7674726163652e5370616e5265636f7264207374727563747b496420762e696f2f7632332f756e6971756569642e4964205b31365d627974653b506172656e7420762e696f2f7632332f756e6971756569642e49643b4e616d6520737472696e673b53746172742074696d652e54696d65207374727563747b5365636f6e647320696e7436343b4e616e6f7320696e7433327d3b456e642074696d652e54696d653b416e6e6f746174696f6e73205b5d762e696f2f7632332f7674726163652e416e6e6f746174696f6e207374727563747b5768656e2074696d652e54696d653b4d65737361676520737472696e677d7dTarget{Value: &t.Value.Spans}, error(nil)
+		return nil, val, err
+	default:
+		return nil, nil, fmt.Errorf("field %s not in struct %v", name, __VDLType_types_v_io_v23_vtrace_TraceRecord)
+	}
+}
+func (t *TraceRecordTarget) FinishField(_, _ vdl.Target) error {
+	return nil
+}
+func (t *TraceRecordTarget) FinishFields(_ vdl.FieldsTarget) error {
+	return nil
+}
+
+type types5b5d762e696f2f7632332f7674726163652e5370616e5265636f7264207374727563747b496420762e696f2f7632332f756e6971756569642e4964205b31365d627974653b506172656e7420762e696f2f7632332f756e6971756569642e49643b4e616d6520737472696e673b53746172742074696d652e54696d65207374727563747b5365636f6e647320696e7436343b4e616e6f7320696e7433327d3b456e642074696d652e54696d653b416e6e6f746174696f6e73205b5d762e696f2f7632332f7674726163652e416e6e6f746174696f6e207374727563747b5768656e2074696d652e54696d653b4d65737361676520737472696e677d7dTarget struct {
+	Value *[]SpanRecord
+	vdl.TargetBase
+	vdl.ListTargetBase
+}
+
+func (t *types5b5d762e696f2f7632332f7674726163652e5370616e5265636f7264207374727563747b496420762e696f2f7632332f756e6971756569642e4964205b31365d627974653b506172656e7420762e696f2f7632332f756e6971756569642e49643b4e616d6520737472696e673b53746172742074696d652e54696d65207374727563747b5365636f6e647320696e7436343b4e616e6f7320696e7433327d3b456e642074696d652e54696d653b416e6e6f746174696f6e73205b5d762e696f2f7632332f7674726163652e416e6e6f746174696f6e207374727563747b5768656e2074696d652e54696d653b4d65737361676520737472696e677d7dTarget) StartList(tt *vdl.Type, len int) (vdl.ListTarget, error) {
+	if !vdl.Compatible(tt, __VDLTypetypes1) {
+		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLTypetypes1)
+	}
+	if cap(*t.Value) < len {
+		*t.Value = make([]SpanRecord, len)
+	} else {
+		*t.Value = (*t.Value)[:len]
+	}
+	return t, nil
+}
+func (t *types5b5d762e696f2f7632332f7674726163652e5370616e5265636f7264207374727563747b496420762e696f2f7632332f756e6971756569642e4964205b31365d627974653b506172656e7420762e696f2f7632332f756e6971756569642e49643b4e616d6520737472696e673b53746172742074696d652e54696d65207374727563747b5365636f6e647320696e7436343b4e616e6f7320696e7433327d3b456e642074696d652e54696d653b416e6e6f746174696f6e73205b5d762e696f2f7632332f7674726163652e416e6e6f746174696f6e207374727563747b5768656e2074696d652e54696d653b4d65737361676520737472696e677d7dTarget) StartElem(index int) (elem vdl.Target, _ error) {
+	return &SpanRecordTarget{Value: &(*t.Value)[index]}, error(nil)
+}
+func (t *types5b5d762e696f2f7632332f7674726163652e5370616e5265636f7264207374727563747b496420762e696f2f7632332f756e6971756569642e4964205b31365d627974653b506172656e7420762e696f2f7632332f756e6971756569642e49643b4e616d6520737472696e673b53746172742074696d652e54696d65207374727563747b5365636f6e647320696e7436343b4e616e6f7320696e7433327d3b456e642074696d652e54696d653b416e6e6f746174696f6e73205b5d762e696f2f7632332f7674726163652e416e6e6f746174696f6e207374727563747b5768656e2074696d652e54696d653b4d65737361676520737472696e677d7dTarget) FinishElem(elem vdl.Target) error {
+	return nil
+}
+func (t *types5b5d762e696f2f7632332f7674726163652e5370616e5265636f7264207374727563747b496420762e696f2f7632332f756e6971756569642e4964205b31365d627974653b506172656e7420762e696f2f7632332f756e6971756569642e49643b4e616d6520737472696e673b53746172742074696d652e54696d65207374727563747b5365636f6e647320696e7436343b4e616e6f7320696e7433327d3b456e642074696d652e54696d653b416e6e6f746174696f6e73205b5d762e696f2f7632332f7674726163652e416e6e6f746174696f6e207374727563747b5768656e2074696d652e54696d653b4d65737361676520737472696e677d7dTarget) FinishList(elem vdl.ListTarget) error {
+	return nil
+}
+
+type SpanRecordTarget struct {
+	Value *SpanRecord
+	vdl.TargetBase
+	vdl.FieldsTargetBase
+}
+
+func (t *SpanRecordTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
+	if !vdl.Compatible(tt, __VDLType_types_v_io_v23_vtrace_SpanRecord) {
+		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType_types_v_io_v23_vtrace_SpanRecord)
+	}
+	return t, nil
+}
+func (t *SpanRecordTarget) StartField(name string) (key, field vdl.Target, _ error) {
+	switch name {
+	case "Id":
+		val, err := &uniqueid.IdTarget{Value: &t.Value.Id}, error(nil)
+		return nil, val, err
+	case "Parent":
+		val, err := &uniqueid.IdTarget{Value: &t.Value.Parent}, error(nil)
+		return nil, val, err
+	case "Name":
+		val, err := &vdl.StringTarget{Value: &t.Value.Name}, error(nil)
+		return nil, val, err
+	case "Start":
+		val, err := vdl.ReflectTarget(reflect.ValueOf(&t.Value.Start))
+		return nil, val, err
+	case "End":
+		val, err := vdl.ReflectTarget(reflect.ValueOf(&t.Value.End))
+		return nil, val, err
+	case "Annotations":
+		val, err := &types5b5d762e696f2f7632332f7674726163652e416e6e6f746174696f6e207374727563747b5768656e2074696d652e54696d65207374727563747b5365636f6e647320696e7436343b4e616e6f7320696e7433327d3b4d65737361676520737472696e677dTarget{Value: &t.Value.Annotations}, error(nil)
+		return nil, val, err
+	default:
+		return nil, nil, fmt.Errorf("field %s not in struct %v", name, __VDLType_types_v_io_v23_vtrace_SpanRecord)
+	}
+}
+func (t *SpanRecordTarget) FinishField(_, _ vdl.Target) error {
+	return nil
+}
+func (t *SpanRecordTarget) FinishFields(_ vdl.FieldsTarget) error {
+	return nil
+}
+
+type types5b5d762e696f2f7632332f7674726163652e416e6e6f746174696f6e207374727563747b5768656e2074696d652e54696d65207374727563747b5365636f6e647320696e7436343b4e616e6f7320696e7433327d3b4d65737361676520737472696e677dTarget struct {
+	Value *[]Annotation
+	vdl.TargetBase
+	vdl.ListTargetBase
+}
+
+func (t *types5b5d762e696f2f7632332f7674726163652e416e6e6f746174696f6e207374727563747b5768656e2074696d652e54696d65207374727563747b5365636f6e647320696e7436343b4e616e6f7320696e7433327d3b4d65737361676520737472696e677dTarget) StartList(tt *vdl.Type, len int) (vdl.ListTarget, error) {
+	if !vdl.Compatible(tt, __VDLTypetypes2) {
+		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLTypetypes2)
+	}
+	if cap(*t.Value) < len {
+		*t.Value = make([]Annotation, len)
+	} else {
+		*t.Value = (*t.Value)[:len]
+	}
+	return t, nil
+}
+func (t *types5b5d762e696f2f7632332f7674726163652e416e6e6f746174696f6e207374727563747b5768656e2074696d652e54696d65207374727563747b5365636f6e647320696e7436343b4e616e6f7320696e7433327d3b4d65737361676520737472696e677dTarget) StartElem(index int) (elem vdl.Target, _ error) {
+	return &AnnotationTarget{Value: &(*t.Value)[index]}, error(nil)
+}
+func (t *types5b5d762e696f2f7632332f7674726163652e416e6e6f746174696f6e207374727563747b5768656e2074696d652e54696d65207374727563747b5365636f6e647320696e7436343b4e616e6f7320696e7433327d3b4d65737361676520737472696e677dTarget) FinishElem(elem vdl.Target) error {
+	return nil
+}
+func (t *types5b5d762e696f2f7632332f7674726163652e416e6e6f746174696f6e207374727563747b5768656e2074696d652e54696d65207374727563747b5365636f6e647320696e7436343b4e616e6f7320696e7433327d3b4d65737361676520737472696e677dTarget) FinishList(elem vdl.ListTarget) error {
+	return nil
+}
+
+type AnnotationTarget struct {
+	Value *Annotation
+	vdl.TargetBase
+	vdl.FieldsTargetBase
+}
+
+func (t *AnnotationTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
+	if !vdl.Compatible(tt, __VDLType_types_v_io_v23_vtrace_Annotation) {
+		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType_types_v_io_v23_vtrace_Annotation)
+	}
+	return t, nil
+}
+func (t *AnnotationTarget) StartField(name string) (key, field vdl.Target, _ error) {
+	switch name {
+	case "When":
+		val, err := vdl.ReflectTarget(reflect.ValueOf(&t.Value.When))
+		return nil, val, err
+	case "Message":
+		val, err := &vdl.StringTarget{Value: &t.Value.Message}, error(nil)
+		return nil, val, err
+	default:
+		return nil, nil, fmt.Errorf("field %s not in struct %v", name, __VDLType_types_v_io_v23_vtrace_Annotation)
+	}
+}
+func (t *AnnotationTarget) FinishField(_, _ vdl.Target) error {
+	return nil
+}
+func (t *AnnotationTarget) FinishFields(_ vdl.FieldsTarget) error {
 	return nil
 }
 
@@ -101,7 +262,6 @@ func (Annotation) __VDLReflect(struct {
 }
 
 func (m *Annotation) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
-
 	__VDLEnsureNativeBuilt_types()
 	fieldsTarget1, err := t.StartFields(tt)
 	if err != nil {
@@ -145,7 +305,7 @@ func (m *Annotation) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 }
 
 func (m *Annotation) MakeVDLTarget() vdl.Target {
-	return nil
+	return &AnnotationTarget{Value: m}
 }
 
 // A SpanRecord is the wire format for a Span.
@@ -165,7 +325,6 @@ func (SpanRecord) __VDLReflect(struct {
 }
 
 func (m *SpanRecord) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
-
 	__VDLEnsureNativeBuilt_types()
 	fieldsTarget1, err := t.StartFields(tt)
 	if err != nil {
@@ -252,7 +411,7 @@ func (m *SpanRecord) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 	}
 	if err != vdl.ErrFieldNoExist {
 
-		listTarget16, err := fieldTarget15.StartList(__VDLTypetypes4, len(m.Annotations))
+		listTarget16, err := fieldTarget15.StartList(__VDLTypetypes2, len(m.Annotations))
 		if err != nil {
 			return err
 		}
@@ -283,7 +442,7 @@ func (m *SpanRecord) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 }
 
 func (m *SpanRecord) MakeVDLTarget() vdl.Target {
-	return nil
+	return &SpanRecordTarget{Value: m}
 }
 
 type TraceFlags int32
@@ -293,14 +452,52 @@ func (TraceFlags) __VDLReflect(struct {
 }) {
 }
 
-func (m TraceFlags) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
-	if err := t.FromInt(int64(m), __VDLType_types_v_io_v23_vtrace_TraceFlags); err != nil {
+func (m *TraceFlags) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
+	if err := t.FromInt(int64((*m)), __VDLType_types_v_io_v23_vtrace_TraceFlags); err != nil {
 		return err
 	}
 	return nil
 }
 
-func (m TraceFlags) MakeVDLTarget() vdl.Target {
+func (m *TraceFlags) MakeVDLTarget() vdl.Target {
+	return &TraceFlagsTarget{Value: m}
+}
+
+type TraceFlagsTarget struct {
+	Value *TraceFlags
+	vdl.TargetBase
+}
+
+func (t *TraceFlagsTarget) FromUint(src uint64, tt *vdl.Type) error {
+	val, err := vdlconv.Uint64ToInt32(src)
+	if err != nil {
+		return err
+	}
+	*t.Value = TraceFlags(val)
+	return nil
+}
+func (t *TraceFlagsTarget) FromInt(src int64, tt *vdl.Type) error {
+	val, err := vdlconv.Int64ToInt32(src)
+	if err != nil {
+		return err
+	}
+	*t.Value = TraceFlags(val)
+	return nil
+}
+func (t *TraceFlagsTarget) FromFloat(src float64, tt *vdl.Type) error {
+	val, err := vdlconv.Float64ToInt32(src)
+	if err != nil {
+		return err
+	}
+	*t.Value = TraceFlags(val)
+	return nil
+}
+func (t *TraceFlagsTarget) FromComplex(src complex128, tt *vdl.Type) error {
+	val, err := vdlconv.Complex128ToInt32(src)
+	if err != nil {
+		return err
+	}
+	*t.Value = TraceFlags(val)
 	return nil
 }
 
@@ -318,7 +515,6 @@ func (Request) __VDLReflect(struct {
 }
 
 func (m *Request) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
-
 	if __VDLType_types_v_io_v23_vtrace_Request == nil || __VDLTypetypes5 == nil {
 		panic("Initialization order error: types generated for FillVDLTarget not initialized. Consider moving caller to an init() block.")
 	}
@@ -385,6 +581,43 @@ func (m *Request) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 }
 
 func (m *Request) MakeVDLTarget() vdl.Target {
+	return &RequestTarget{Value: m}
+}
+
+type RequestTarget struct {
+	Value *Request
+	vdl.TargetBase
+	vdl.FieldsTargetBase
+}
+
+func (t *RequestTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
+	if !vdl.Compatible(tt, __VDLType_types_v_io_v23_vtrace_Request) {
+		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType_types_v_io_v23_vtrace_Request)
+	}
+	return t, nil
+}
+func (t *RequestTarget) StartField(name string) (key, field vdl.Target, _ error) {
+	switch name {
+	case "SpanId":
+		val, err := &uniqueid.IdTarget{Value: &t.Value.SpanId}, error(nil)
+		return nil, val, err
+	case "TraceId":
+		val, err := &uniqueid.IdTarget{Value: &t.Value.TraceId}, error(nil)
+		return nil, val, err
+	case "Flags":
+		val, err := &TraceFlagsTarget{Value: &t.Value.Flags}, error(nil)
+		return nil, val, err
+	case "LogLevel":
+		val, err := &vdl.Int32Target{Value: &t.Value.LogLevel}, error(nil)
+		return nil, val, err
+	default:
+		return nil, nil, fmt.Errorf("field %s not in struct %v", name, __VDLType_types_v_io_v23_vtrace_Request)
+	}
+}
+func (t *RequestTarget) FinishField(_, _ vdl.Target) error {
+	return nil
+}
+func (t *RequestTarget) FinishFields(_ vdl.FieldsTarget) error {
 	return nil
 }
 
@@ -403,7 +636,6 @@ func (Response) __VDLReflect(struct {
 }
 
 func (m *Response) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
-
 	__VDLEnsureNativeBuilt_types()
 	fieldsTarget1, err := t.StartFields(tt)
 	if err != nil {
@@ -443,6 +675,37 @@ func (m *Response) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 }
 
 func (m *Response) MakeVDLTarget() vdl.Target {
+	return &ResponseTarget{Value: m}
+}
+
+type ResponseTarget struct {
+	Value *Response
+	vdl.TargetBase
+	vdl.FieldsTargetBase
+}
+
+func (t *ResponseTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
+	if !vdl.Compatible(tt, __VDLType_types_v_io_v23_vtrace_Response) {
+		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType_types_v_io_v23_vtrace_Response)
+	}
+	return t, nil
+}
+func (t *ResponseTarget) StartField(name string) (key, field vdl.Target, _ error) {
+	switch name {
+	case "Flags":
+		val, err := &TraceFlagsTarget{Value: &t.Value.Flags}, error(nil)
+		return nil, val, err
+	case "Trace":
+		val, err := &TraceRecordTarget{Value: &t.Value.Trace}, error(nil)
+		return nil, val, err
+	default:
+		return nil, nil, fmt.Errorf("field %s not in struct %v", name, __VDLType_types_v_io_v23_vtrace_Response)
+	}
+}
+func (t *ResponseTarget) FinishField(_, _ vdl.Target) error {
+	return nil
+}
+func (t *ResponseTarget) FinishFields(_ vdl.FieldsTarget) error {
 	return nil
 }
 
@@ -455,33 +718,33 @@ func init() {
 	vdl.Register((*Response)(nil))
 }
 
-var __VDLTypetypes2 *vdl.Type
+var __VDLTypetypes3 *vdl.Type
 
-func __VDLTypetypes2_gen() *vdl.Type {
-	__VDLTypetypes2Builder := vdl.TypeBuilder{}
+func __VDLTypetypes3_gen() *vdl.Type {
+	__VDLTypetypes3Builder := vdl.TypeBuilder{}
 
-	__VDLTypetypes21 := __VDLTypetypes2Builder.Optional()
-	__VDLTypetypes22 := __VDLTypetypes2Builder.Struct()
-	__VDLTypetypes23 := __VDLTypetypes2Builder.Named("v.io/v23/vtrace.Annotation").AssignBase(__VDLTypetypes22)
-	__VDLTypetypes24 := __VDLTypetypes2Builder.Struct()
-	__VDLTypetypes25 := __VDLTypetypes2Builder.Named("time.Time").AssignBase(__VDLTypetypes24)
-	__VDLTypetypes26 := vdl.Int64Type
-	__VDLTypetypes24.AppendField("Seconds", __VDLTypetypes26)
-	__VDLTypetypes27 := vdl.Int32Type
-	__VDLTypetypes24.AppendField("Nanos", __VDLTypetypes27)
-	__VDLTypetypes22.AppendField("When", __VDLTypetypes25)
-	__VDLTypetypes28 := vdl.StringType
-	__VDLTypetypes22.AppendField("Message", __VDLTypetypes28)
-	__VDLTypetypes21.AssignElem(__VDLTypetypes23)
-	__VDLTypetypes2Builder.Build()
-	__VDLTypetypes2v, err := __VDLTypetypes21.Built()
+	__VDLTypetypes31 := __VDLTypetypes3Builder.Optional()
+	__VDLTypetypes32 := __VDLTypetypes3Builder.Struct()
+	__VDLTypetypes33 := __VDLTypetypes3Builder.Named("v.io/v23/vtrace.Annotation").AssignBase(__VDLTypetypes32)
+	__VDLTypetypes34 := __VDLTypetypes3Builder.Struct()
+	__VDLTypetypes35 := __VDLTypetypes3Builder.Named("time.Time").AssignBase(__VDLTypetypes34)
+	__VDLTypetypes36 := vdl.Int64Type
+	__VDLTypetypes34.AppendField("Seconds", __VDLTypetypes36)
+	__VDLTypetypes37 := vdl.Int32Type
+	__VDLTypetypes34.AppendField("Nanos", __VDLTypetypes37)
+	__VDLTypetypes32.AppendField("When", __VDLTypetypes35)
+	__VDLTypetypes38 := vdl.StringType
+	__VDLTypetypes32.AppendField("Message", __VDLTypetypes38)
+	__VDLTypetypes31.AssignElem(__VDLTypetypes33)
+	__VDLTypetypes3Builder.Build()
+	__VDLTypetypes3v, err := __VDLTypetypes31.Built()
 	if err != nil {
 		panic(err)
 	}
-	return __VDLTypetypes2v
+	return __VDLTypetypes3v
 }
 func init() {
-	__VDLTypetypes2 = __VDLTypetypes2_gen()
+	__VDLTypetypes3 = __VDLTypetypes3_gen()
 }
 
 var __VDLTypetypes5 *vdl.Type = vdl.TypeOf((*Request)(nil))
@@ -541,48 +804,48 @@ func init() {
 	__VDLTypetypes6 = __VDLTypetypes6_gen()
 }
 
-var __VDLTypetypes3 *vdl.Type
+var __VDLTypetypes4 *vdl.Type
 
-func __VDLTypetypes3_gen() *vdl.Type {
-	__VDLTypetypes3Builder := vdl.TypeBuilder{}
+func __VDLTypetypes4_gen() *vdl.Type {
+	__VDLTypetypes4Builder := vdl.TypeBuilder{}
 
-	__VDLTypetypes31 := __VDLTypetypes3Builder.Optional()
-	__VDLTypetypes32 := __VDLTypetypes3Builder.Struct()
-	__VDLTypetypes33 := __VDLTypetypes3Builder.Named("v.io/v23/vtrace.SpanRecord").AssignBase(__VDLTypetypes32)
-	__VDLTypetypes34 := __VDLTypetypes3Builder.Array()
-	__VDLTypetypes35 := __VDLTypetypes3Builder.Named("v.io/v23/uniqueid.Id").AssignBase(__VDLTypetypes34)
-	__VDLTypetypes36 := vdl.ByteType
-	__VDLTypetypes34.AssignElem(__VDLTypetypes36)
-	__VDLTypetypes34.AssignLen(16)
-	__VDLTypetypes32.AppendField("Id", __VDLTypetypes35)
-	__VDLTypetypes32.AppendField("Parent", __VDLTypetypes35)
-	__VDLTypetypes37 := vdl.StringType
-	__VDLTypetypes32.AppendField("Name", __VDLTypetypes37)
-	__VDLTypetypes38 := __VDLTypetypes3Builder.Struct()
-	__VDLTypetypes39 := __VDLTypetypes3Builder.Named("time.Time").AssignBase(__VDLTypetypes38)
-	__VDLTypetypes310 := vdl.Int64Type
-	__VDLTypetypes38.AppendField("Seconds", __VDLTypetypes310)
-	__VDLTypetypes311 := vdl.Int32Type
-	__VDLTypetypes38.AppendField("Nanos", __VDLTypetypes311)
-	__VDLTypetypes32.AppendField("Start", __VDLTypetypes39)
-	__VDLTypetypes32.AppendField("End", __VDLTypetypes39)
-	__VDLTypetypes312 := __VDLTypetypes3Builder.List()
-	__VDLTypetypes313 := __VDLTypetypes3Builder.Struct()
-	__VDLTypetypes314 := __VDLTypetypes3Builder.Named("v.io/v23/vtrace.Annotation").AssignBase(__VDLTypetypes313)
-	__VDLTypetypes313.AppendField("When", __VDLTypetypes39)
-	__VDLTypetypes313.AppendField("Message", __VDLTypetypes37)
-	__VDLTypetypes312.AssignElem(__VDLTypetypes314)
-	__VDLTypetypes32.AppendField("Annotations", __VDLTypetypes312)
-	__VDLTypetypes31.AssignElem(__VDLTypetypes33)
-	__VDLTypetypes3Builder.Build()
-	__VDLTypetypes3v, err := __VDLTypetypes31.Built()
+	__VDLTypetypes41 := __VDLTypetypes4Builder.Optional()
+	__VDLTypetypes42 := __VDLTypetypes4Builder.Struct()
+	__VDLTypetypes43 := __VDLTypetypes4Builder.Named("v.io/v23/vtrace.SpanRecord").AssignBase(__VDLTypetypes42)
+	__VDLTypetypes44 := __VDLTypetypes4Builder.Array()
+	__VDLTypetypes45 := __VDLTypetypes4Builder.Named("v.io/v23/uniqueid.Id").AssignBase(__VDLTypetypes44)
+	__VDLTypetypes46 := vdl.ByteType
+	__VDLTypetypes44.AssignElem(__VDLTypetypes46)
+	__VDLTypetypes44.AssignLen(16)
+	__VDLTypetypes42.AppendField("Id", __VDLTypetypes45)
+	__VDLTypetypes42.AppendField("Parent", __VDLTypetypes45)
+	__VDLTypetypes47 := vdl.StringType
+	__VDLTypetypes42.AppendField("Name", __VDLTypetypes47)
+	__VDLTypetypes48 := __VDLTypetypes4Builder.Struct()
+	__VDLTypetypes49 := __VDLTypetypes4Builder.Named("time.Time").AssignBase(__VDLTypetypes48)
+	__VDLTypetypes410 := vdl.Int64Type
+	__VDLTypetypes48.AppendField("Seconds", __VDLTypetypes410)
+	__VDLTypetypes411 := vdl.Int32Type
+	__VDLTypetypes48.AppendField("Nanos", __VDLTypetypes411)
+	__VDLTypetypes42.AppendField("Start", __VDLTypetypes49)
+	__VDLTypetypes42.AppendField("End", __VDLTypetypes49)
+	__VDLTypetypes412 := __VDLTypetypes4Builder.List()
+	__VDLTypetypes413 := __VDLTypetypes4Builder.Struct()
+	__VDLTypetypes414 := __VDLTypetypes4Builder.Named("v.io/v23/vtrace.Annotation").AssignBase(__VDLTypetypes413)
+	__VDLTypetypes413.AppendField("When", __VDLTypetypes49)
+	__VDLTypetypes413.AppendField("Message", __VDLTypetypes47)
+	__VDLTypetypes412.AssignElem(__VDLTypetypes414)
+	__VDLTypetypes42.AppendField("Annotations", __VDLTypetypes412)
+	__VDLTypetypes41.AssignElem(__VDLTypetypes43)
+	__VDLTypetypes4Builder.Build()
+	__VDLTypetypes4v, err := __VDLTypetypes41.Built()
 	if err != nil {
 		panic(err)
 	}
-	return __VDLTypetypes3v
+	return __VDLTypetypes4v
 }
 func init() {
-	__VDLTypetypes3 = __VDLTypetypes3_gen()
+	__VDLTypetypes4 = __VDLTypetypes4_gen()
 }
 
 var __VDLTypetypes0 *vdl.Type
@@ -635,33 +898,33 @@ func init() {
 	__VDLTypetypes0 = __VDLTypetypes0_gen()
 }
 
-var __VDLTypetypes4 *vdl.Type
+var __VDLTypetypes2 *vdl.Type
 
-func __VDLTypetypes4_gen() *vdl.Type {
-	__VDLTypetypes4Builder := vdl.TypeBuilder{}
+func __VDLTypetypes2_gen() *vdl.Type {
+	__VDLTypetypes2Builder := vdl.TypeBuilder{}
 
-	__VDLTypetypes41 := __VDLTypetypes4Builder.List()
-	__VDLTypetypes42 := __VDLTypetypes4Builder.Struct()
-	__VDLTypetypes43 := __VDLTypetypes4Builder.Named("v.io/v23/vtrace.Annotation").AssignBase(__VDLTypetypes42)
-	__VDLTypetypes44 := __VDLTypetypes4Builder.Struct()
-	__VDLTypetypes45 := __VDLTypetypes4Builder.Named("time.Time").AssignBase(__VDLTypetypes44)
-	__VDLTypetypes46 := vdl.Int64Type
-	__VDLTypetypes44.AppendField("Seconds", __VDLTypetypes46)
-	__VDLTypetypes47 := vdl.Int32Type
-	__VDLTypetypes44.AppendField("Nanos", __VDLTypetypes47)
-	__VDLTypetypes42.AppendField("When", __VDLTypetypes45)
-	__VDLTypetypes48 := vdl.StringType
-	__VDLTypetypes42.AppendField("Message", __VDLTypetypes48)
-	__VDLTypetypes41.AssignElem(__VDLTypetypes43)
-	__VDLTypetypes4Builder.Build()
-	__VDLTypetypes4v, err := __VDLTypetypes41.Built()
+	__VDLTypetypes21 := __VDLTypetypes2Builder.List()
+	__VDLTypetypes22 := __VDLTypetypes2Builder.Struct()
+	__VDLTypetypes23 := __VDLTypetypes2Builder.Named("v.io/v23/vtrace.Annotation").AssignBase(__VDLTypetypes22)
+	__VDLTypetypes24 := __VDLTypetypes2Builder.Struct()
+	__VDLTypetypes25 := __VDLTypetypes2Builder.Named("time.Time").AssignBase(__VDLTypetypes24)
+	__VDLTypetypes26 := vdl.Int64Type
+	__VDLTypetypes24.AppendField("Seconds", __VDLTypetypes26)
+	__VDLTypetypes27 := vdl.Int32Type
+	__VDLTypetypes24.AppendField("Nanos", __VDLTypetypes27)
+	__VDLTypetypes22.AppendField("When", __VDLTypetypes25)
+	__VDLTypetypes28 := vdl.StringType
+	__VDLTypetypes22.AppendField("Message", __VDLTypetypes28)
+	__VDLTypetypes21.AssignElem(__VDLTypetypes23)
+	__VDLTypetypes2Builder.Build()
+	__VDLTypetypes2v, err := __VDLTypetypes21.Built()
 	if err != nil {
 		panic(err)
 	}
-	return __VDLTypetypes4v
+	return __VDLTypetypes2v
 }
 func init() {
-	__VDLTypetypes4 = __VDLTypetypes4_gen()
+	__VDLTypetypes2 = __VDLTypetypes2_gen()
 }
 
 var __VDLTypetypes1 *vdl.Type
@@ -904,20 +1167,20 @@ func init() {
 	__VDLType_types_v_io_v23_vtrace_TraceRecord = __VDLType_types_v_io_v23_vtrace_TraceRecord_gen()
 }
 func __VDLEnsureNativeBuilt_types() {
-	if __VDLTypetypes2 == nil {
-		__VDLTypetypes2 = __VDLTypetypes2_gen()
+	if __VDLTypetypes3 == nil {
+		__VDLTypetypes3 = __VDLTypetypes3_gen()
 	}
 	if __VDLTypetypes6 == nil {
 		__VDLTypetypes6 = __VDLTypetypes6_gen()
 	}
-	if __VDLTypetypes3 == nil {
-		__VDLTypetypes3 = __VDLTypetypes3_gen()
+	if __VDLTypetypes4 == nil {
+		__VDLTypetypes4 = __VDLTypetypes4_gen()
 	}
 	if __VDLTypetypes0 == nil {
 		__VDLTypetypes0 = __VDLTypetypes0_gen()
 	}
-	if __VDLTypetypes4 == nil {
-		__VDLTypetypes4 = __VDLTypetypes4_gen()
+	if __VDLTypetypes2 == nil {
+		__VDLTypetypes2 = __VDLTypetypes2_gen()
 	}
 	if __VDLTypetypes1 == nil {
 		__VDLTypetypes1 = __VDLTypetypes1_gen()

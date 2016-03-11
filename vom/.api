@@ -60,12 +60,22 @@ pkg vom, func NewVersionedTypeEncoder(Version, io.Writer) *TypeEncoder
 pkg vom, func RawBytesFromValue(interface{}) (*RawBytes, error)
 pkg vom, func RawBytesOf(interface{}) *RawBytes
 pkg vom, func VersionedEncode(Version, interface{}) ([]byte, error)
+pkg vom, method (*ControlKind) FillVDLTarget(vdl.Target, *vdl.Type) error
+pkg vom, method (*ControlKind) MakeVDLTarget() vdl.Target
 pkg vom, method (*ControlKind) Set(string) error
+pkg vom, method (*ControlKindTarget) FromEnumLabel(string, *vdl.Type) error
 pkg vom, method (*Decoder) Decode(interface{}) error
 pkg vom, method (*Decoder) Ignore() error
 pkg vom, method (*DumpAtom) FillVDLTarget(vdl.Target, *vdl.Type) error
 pkg vom, method (*DumpAtom) MakeVDLTarget() vdl.Target
+pkg vom, method (*DumpAtomTarget) FinishField(vdl.Target, vdl.Target) error
+pkg vom, method (*DumpAtomTarget) FinishFields(vdl.FieldsTarget) error
+pkg vom, method (*DumpAtomTarget) StartField(string) (vdl.Target, vdl.Target, error)
+pkg vom, method (*DumpAtomTarget) StartFields(*vdl.Type) (vdl.FieldsTarget, error)
+pkg vom, method (*DumpKind) FillVDLTarget(vdl.Target, *vdl.Type) error
+pkg vom, method (*DumpKind) MakeVDLTarget() vdl.Target
 pkg vom, method (*DumpKind) Set(string) error
+pkg vom, method (*DumpKindTarget) FromEnumLabel(string, *vdl.Type) error
 pkg vom, method (*Dumper) Close() error
 pkg vom, method (*Dumper) Flush() error
 pkg vom, method (*Dumper) Status()
@@ -77,12 +87,8 @@ pkg vom, method (*RawBytes) String() string
 pkg vom, method (*RawBytes) ToValue(interface{}) error
 pkg vom, method (*TypeDecoder) Start()
 pkg vom, method (*TypeDecoder) Stop()
-pkg vom, method (ControlKind) FillVDLTarget(vdl.Target, *vdl.Type) error
-pkg vom, method (ControlKind) MakeVDLTarget() vdl.Target
 pkg vom, method (ControlKind) String() string
 pkg vom, method (DumpAtom) String() string
-pkg vom, method (DumpKind) FillVDLTarget(vdl.Target, *vdl.Type) error
-pkg vom, method (DumpKind) MakeVDLTarget() vdl.Target
 pkg vom, method (DumpKind) String() string
 pkg vom, method (DumpStatus) String() string
 pkg vom, method (PrimitivePBool) FillVDLTarget(vdl.Target, *vdl.Type) error
@@ -122,13 +128,23 @@ pkg vom, method (PrimitivePUint) MakeVDLTarget() vdl.Target
 pkg vom, method (PrimitivePUint) Name() string
 pkg vom, method (Version) String() string
 pkg vom, type ControlKind int
+pkg vom, type ControlKindTarget struct
+pkg vom, type ControlKindTarget struct, Value *ControlKind
+pkg vom, type ControlKindTarget struct, embedded vdl.TargetBase
 pkg vom, type Decoder struct
 pkg vom, type DumpAtom struct
 pkg vom, type DumpAtom struct, Bytes []byte
 pkg vom, type DumpAtom struct, Data Primitive
 pkg vom, type DumpAtom struct, Debug string
 pkg vom, type DumpAtom struct, Kind DumpKind
+pkg vom, type DumpAtomTarget struct
+pkg vom, type DumpAtomTarget struct, Value *DumpAtom
+pkg vom, type DumpAtomTarget struct, embedded vdl.FieldsTargetBase
+pkg vom, type DumpAtomTarget struct, embedded vdl.TargetBase
 pkg vom, type DumpKind int
+pkg vom, type DumpKindTarget struct
+pkg vom, type DumpKindTarget struct, Value *DumpKind
+pkg vom, type DumpKindTarget struct, embedded vdl.TargetBase
 pkg vom, type DumpStatus struct
 pkg vom, type DumpStatus struct, Buf []byte
 pkg vom, type DumpStatus struct, Debug string

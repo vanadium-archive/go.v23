@@ -4,36 +4,88 @@ pkg vdltool, const GenLanguageJavascript GenLanguage
 pkg vdltool, func GenLanguageFromString(string) (GenLanguage, error)
 pkg vdltool, method (*Config) FillVDLTarget(vdl.Target, *vdl.Type) error
 pkg vdltool, method (*Config) MakeVDLTarget() vdl.Target
+pkg vdltool, method (*ConfigTarget) FinishField(vdl.Target, vdl.Target) error
+pkg vdltool, method (*ConfigTarget) FinishFields(vdl.FieldsTarget) error
+pkg vdltool, method (*ConfigTarget) StartField(string) (vdl.Target, vdl.Target, error)
+pkg vdltool, method (*ConfigTarget) StartFields(*vdl.Type) (vdl.FieldsTarget, error)
+pkg vdltool, method (*GenLanguage) FillVDLTarget(vdl.Target, *vdl.Type) error
+pkg vdltool, method (*GenLanguage) MakeVDLTarget() vdl.Target
 pkg vdltool, method (*GenLanguage) Set(string) error
+pkg vdltool, method (*GenLanguageTarget) FromEnumLabel(string, *vdl.Type) error
 pkg vdltool, method (*GoConfig) FillVDLTarget(vdl.Target, *vdl.Type) error
 pkg vdltool, method (*GoConfig) MakeVDLTarget() vdl.Target
+pkg vdltool, method (*GoConfigTarget) FinishField(vdl.Target, vdl.Target) error
+pkg vdltool, method (*GoConfigTarget) FinishFields(vdl.FieldsTarget) error
+pkg vdltool, method (*GoConfigTarget) StartField(string) (vdl.Target, vdl.Target, error)
+pkg vdltool, method (*GoConfigTarget) StartFields(*vdl.Type) (vdl.FieldsTarget, error)
 pkg vdltool, method (*GoImport) FillVDLTarget(vdl.Target, *vdl.Type) error
 pkg vdltool, method (*GoImport) MakeVDLTarget() vdl.Target
+pkg vdltool, method (*GoImportTarget) FinishField(vdl.Target, vdl.Target) error
+pkg vdltool, method (*GoImportTarget) FinishFields(vdl.FieldsTarget) error
+pkg vdltool, method (*GoImportTarget) StartField(string) (vdl.Target, vdl.Target, error)
+pkg vdltool, method (*GoImportTarget) StartFields(*vdl.Type) (vdl.FieldsTarget, error)
 pkg vdltool, method (*GoType) FillVDLTarget(vdl.Target, *vdl.Type) error
 pkg vdltool, method (*GoType) MakeVDLTarget() vdl.Target
+pkg vdltool, method (*GoTypeTarget) FinishField(vdl.Target, vdl.Target) error
+pkg vdltool, method (*GoTypeTarget) FinishFields(vdl.FieldsTarget) error
+pkg vdltool, method (*GoTypeTarget) StartField(string) (vdl.Target, vdl.Target, error)
+pkg vdltool, method (*GoTypeTarget) StartFields(*vdl.Type) (vdl.FieldsTarget, error)
 pkg vdltool, method (*JavaConfig) FillVDLTarget(vdl.Target, *vdl.Type) error
 pkg vdltool, method (*JavaConfig) MakeVDLTarget() vdl.Target
+pkg vdltool, method (*JavaConfigTarget) FinishField(vdl.Target, vdl.Target) error
+pkg vdltool, method (*JavaConfigTarget) FinishFields(vdl.FieldsTarget) error
+pkg vdltool, method (*JavaConfigTarget) StartField(string) (vdl.Target, vdl.Target, error)
+pkg vdltool, method (*JavaConfigTarget) StartFields(*vdl.Type) (vdl.FieldsTarget, error)
 pkg vdltool, method (*JavascriptConfig) FillVDLTarget(vdl.Target, *vdl.Type) error
 pkg vdltool, method (*JavascriptConfig) MakeVDLTarget() vdl.Target
-pkg vdltool, method (GenLanguage) FillVDLTarget(vdl.Target, *vdl.Type) error
-pkg vdltool, method (GenLanguage) MakeVDLTarget() vdl.Target
+pkg vdltool, method (*JavascriptConfigTarget) FinishField(vdl.Target, vdl.Target) error
+pkg vdltool, method (*JavascriptConfigTarget) FinishFields(vdl.FieldsTarget) error
+pkg vdltool, method (*JavascriptConfigTarget) StartField(string) (vdl.Target, vdl.Target, error)
+pkg vdltool, method (*JavascriptConfigTarget) StartFields(*vdl.Type) (vdl.FieldsTarget, error)
 pkg vdltool, method (GenLanguage) String() string
 pkg vdltool, type Config struct
 pkg vdltool, type Config struct, GenLanguages map[GenLanguage]struct{}
 pkg vdltool, type Config struct, Go GoConfig
 pkg vdltool, type Config struct, Java JavaConfig
 pkg vdltool, type Config struct, Javascript JavascriptConfig
+pkg vdltool, type ConfigTarget struct
+pkg vdltool, type ConfigTarget struct, Value *Config
+pkg vdltool, type ConfigTarget struct, embedded vdl.FieldsTargetBase
+pkg vdltool, type ConfigTarget struct, embedded vdl.TargetBase
 pkg vdltool, type GenLanguage int
+pkg vdltool, type GenLanguageTarget struct
+pkg vdltool, type GenLanguageTarget struct, Value *GenLanguage
+pkg vdltool, type GenLanguageTarget struct, embedded vdl.TargetBase
 pkg vdltool, type GoConfig struct
 pkg vdltool, type GoConfig struct, WireToNativeTypes map[string]GoType
+pkg vdltool, type GoConfigTarget struct
+pkg vdltool, type GoConfigTarget struct, Value *GoConfig
+pkg vdltool, type GoConfigTarget struct, embedded vdl.FieldsTargetBase
+pkg vdltool, type GoConfigTarget struct, embedded vdl.TargetBase
 pkg vdltool, type GoImport struct
 pkg vdltool, type GoImport struct, Name string
 pkg vdltool, type GoImport struct, Path string
+pkg vdltool, type GoImportTarget struct
+pkg vdltool, type GoImportTarget struct, Value *GoImport
+pkg vdltool, type GoImportTarget struct, embedded vdl.FieldsTargetBase
+pkg vdltool, type GoImportTarget struct, embedded vdl.TargetBase
 pkg vdltool, type GoType struct
 pkg vdltool, type GoType struct, Imports []GoImport
 pkg vdltool, type GoType struct, Type string
+pkg vdltool, type GoTypeTarget struct
+pkg vdltool, type GoTypeTarget struct, Value *GoType
+pkg vdltool, type GoTypeTarget struct, embedded vdl.FieldsTargetBase
+pkg vdltool, type GoTypeTarget struct, embedded vdl.TargetBase
 pkg vdltool, type JavaConfig struct
 pkg vdltool, type JavaConfig struct, WireToNativeTypes map[string]string
 pkg vdltool, type JavaConfig struct, WireTypeRenames map[string]string
+pkg vdltool, type JavaConfigTarget struct
+pkg vdltool, type JavaConfigTarget struct, Value *JavaConfig
+pkg vdltool, type JavaConfigTarget struct, embedded vdl.FieldsTargetBase
+pkg vdltool, type JavaConfigTarget struct, embedded vdl.TargetBase
 pkg vdltool, type JavascriptConfig struct
+pkg vdltool, type JavascriptConfigTarget struct
+pkg vdltool, type JavascriptConfigTarget struct, Value *JavascriptConfig
+pkg vdltool, type JavascriptConfigTarget struct, embedded vdl.FieldsTargetBase
+pkg vdltool, type JavascriptConfigTarget struct, embedded vdl.TargetBase
 pkg vdltool, var GenLanguageAll [...]GenLanguage

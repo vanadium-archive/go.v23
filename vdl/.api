@@ -33,6 +33,7 @@ pkg vdl, func ArrayType(int, *Type) *Type
 pkg vdl, func BoolValue(bool) *Value
 pkg vdl, func ByteValue(byte) *Value
 pkg vdl, func BytesValue([]byte) *Value
+pkg vdl, func Compatible(*Type, *Type) bool
 pkg vdl, func Complex128Value(complex128) *Value
 pkg vdl, func Complex64Value(complex64) *Value
 pkg vdl, func Convert(interface{}, interface{}) error
@@ -74,6 +75,269 @@ pkg vdl, func ValueOf(interface{}) *Value
 pkg vdl, func ValueTarget(*Value) (Target, error)
 pkg vdl, func WireRetryCodeFromString(string) (WireRetryCode, error)
 pkg vdl, func ZeroValue(*Type) *Value
+pkg vdl, method (*BoolTarget) FinishFields(FieldsTarget) error
+pkg vdl, method (*BoolTarget) FinishList(ListTarget) error
+pkg vdl, method (*BoolTarget) FinishMap(MapTarget) error
+pkg vdl, method (*BoolTarget) FinishSet(SetTarget) error
+pkg vdl, method (*BoolTarget) FromBool(bool, *Type) error
+pkg vdl, method (*BoolTarget) FromBytes([]byte, *Type) error
+pkg vdl, method (*BoolTarget) FromComplex(complex128, *Type) error
+pkg vdl, method (*BoolTarget) FromEnumLabel(string, *Type) error
+pkg vdl, method (*BoolTarget) FromFloat(float64, *Type) error
+pkg vdl, method (*BoolTarget) FromInt(int64, *Type) error
+pkg vdl, method (*BoolTarget) FromNil(*Type) error
+pkg vdl, method (*BoolTarget) FromString(string, *Type) error
+pkg vdl, method (*BoolTarget) FromTypeObject(*Type) error
+pkg vdl, method (*BoolTarget) FromUint(uint64, *Type) error
+pkg vdl, method (*BoolTarget) StartFields(*Type) (FieldsTarget, error)
+pkg vdl, method (*BoolTarget) StartList(*Type, int) (ListTarget, error)
+pkg vdl, method (*BoolTarget) StartMap(*Type, int) (MapTarget, error)
+pkg vdl, method (*BoolTarget) StartSet(*Type, int) (SetTarget, error)
+pkg vdl, method (*ByteTarget) FinishFields(FieldsTarget) error
+pkg vdl, method (*ByteTarget) FinishList(ListTarget) error
+pkg vdl, method (*ByteTarget) FinishMap(MapTarget) error
+pkg vdl, method (*ByteTarget) FinishSet(SetTarget) error
+pkg vdl, method (*ByteTarget) FromBool(bool, *Type) error
+pkg vdl, method (*ByteTarget) FromBytes([]byte, *Type) error
+pkg vdl, method (*ByteTarget) FromComplex(complex128, *Type) error
+pkg vdl, method (*ByteTarget) FromEnumLabel(string, *Type) error
+pkg vdl, method (*ByteTarget) FromFloat(float64, *Type) error
+pkg vdl, method (*ByteTarget) FromInt(int64, *Type) error
+pkg vdl, method (*ByteTarget) FromNil(*Type) error
+pkg vdl, method (*ByteTarget) FromString(string, *Type) error
+pkg vdl, method (*ByteTarget) FromTypeObject(*Type) error
+pkg vdl, method (*ByteTarget) FromUint(uint64, *Type) error
+pkg vdl, method (*ByteTarget) StartFields(*Type) (FieldsTarget, error)
+pkg vdl, method (*ByteTarget) StartList(*Type, int) (ListTarget, error)
+pkg vdl, method (*ByteTarget) StartMap(*Type, int) (MapTarget, error)
+pkg vdl, method (*ByteTarget) StartSet(*Type, int) (SetTarget, error)
+pkg vdl, method (*BytesTarget) FinishFields(FieldsTarget) error
+pkg vdl, method (*BytesTarget) FinishList(ListTarget) error
+pkg vdl, method (*BytesTarget) FinishMap(MapTarget) error
+pkg vdl, method (*BytesTarget) FinishSet(SetTarget) error
+pkg vdl, method (*BytesTarget) FromBool(bool, *Type) error
+pkg vdl, method (*BytesTarget) FromBytes([]byte, *Type) error
+pkg vdl, method (*BytesTarget) FromComplex(complex128, *Type) error
+pkg vdl, method (*BytesTarget) FromEnumLabel(string, *Type) error
+pkg vdl, method (*BytesTarget) FromFloat(float64, *Type) error
+pkg vdl, method (*BytesTarget) FromInt(int64, *Type) error
+pkg vdl, method (*BytesTarget) FromNil(*Type) error
+pkg vdl, method (*BytesTarget) FromString(string, *Type) error
+pkg vdl, method (*BytesTarget) FromTypeObject(*Type) error
+pkg vdl, method (*BytesTarget) FromUint(uint64, *Type) error
+pkg vdl, method (*BytesTarget) StartFields(*Type) (FieldsTarget, error)
+pkg vdl, method (*BytesTarget) StartList(*Type, int) (ListTarget, error)
+pkg vdl, method (*BytesTarget) StartMap(*Type, int) (MapTarget, error)
+pkg vdl, method (*BytesTarget) StartSet(*Type, int) (SetTarget, error)
+pkg vdl, method (*Complex128Target) FinishFields(FieldsTarget) error
+pkg vdl, method (*Complex128Target) FinishList(ListTarget) error
+pkg vdl, method (*Complex128Target) FinishMap(MapTarget) error
+pkg vdl, method (*Complex128Target) FinishSet(SetTarget) error
+pkg vdl, method (*Complex128Target) FromBool(bool, *Type) error
+pkg vdl, method (*Complex128Target) FromBytes([]byte, *Type) error
+pkg vdl, method (*Complex128Target) FromComplex(complex128, *Type) error
+pkg vdl, method (*Complex128Target) FromEnumLabel(string, *Type) error
+pkg vdl, method (*Complex128Target) FromFloat(float64, *Type) error
+pkg vdl, method (*Complex128Target) FromInt(int64, *Type) error
+pkg vdl, method (*Complex128Target) FromNil(*Type) error
+pkg vdl, method (*Complex128Target) FromString(string, *Type) error
+pkg vdl, method (*Complex128Target) FromTypeObject(*Type) error
+pkg vdl, method (*Complex128Target) FromUint(uint64, *Type) error
+pkg vdl, method (*Complex128Target) StartFields(*Type) (FieldsTarget, error)
+pkg vdl, method (*Complex128Target) StartList(*Type, int) (ListTarget, error)
+pkg vdl, method (*Complex128Target) StartMap(*Type, int) (MapTarget, error)
+pkg vdl, method (*Complex128Target) StartSet(*Type, int) (SetTarget, error)
+pkg vdl, method (*Complex64Target) FinishFields(FieldsTarget) error
+pkg vdl, method (*Complex64Target) FinishList(ListTarget) error
+pkg vdl, method (*Complex64Target) FinishMap(MapTarget) error
+pkg vdl, method (*Complex64Target) FinishSet(SetTarget) error
+pkg vdl, method (*Complex64Target) FromBool(bool, *Type) error
+pkg vdl, method (*Complex64Target) FromBytes([]byte, *Type) error
+pkg vdl, method (*Complex64Target) FromComplex(complex128, *Type) error
+pkg vdl, method (*Complex64Target) FromEnumLabel(string, *Type) error
+pkg vdl, method (*Complex64Target) FromFloat(float64, *Type) error
+pkg vdl, method (*Complex64Target) FromInt(int64, *Type) error
+pkg vdl, method (*Complex64Target) FromNil(*Type) error
+pkg vdl, method (*Complex64Target) FromString(string, *Type) error
+pkg vdl, method (*Complex64Target) FromTypeObject(*Type) error
+pkg vdl, method (*Complex64Target) FromUint(uint64, *Type) error
+pkg vdl, method (*Complex64Target) StartFields(*Type) (FieldsTarget, error)
+pkg vdl, method (*Complex64Target) StartList(*Type, int) (ListTarget, error)
+pkg vdl, method (*Complex64Target) StartMap(*Type, int) (MapTarget, error)
+pkg vdl, method (*Complex64Target) StartSet(*Type, int) (SetTarget, error)
+pkg vdl, method (*FieldsTargetBase) FinishField(Target, Target) error
+pkg vdl, method (*FieldsTargetBase) StartField(string) (Target, Target, error)
+pkg vdl, method (*Float32Target) FinishFields(FieldsTarget) error
+pkg vdl, method (*Float32Target) FinishList(ListTarget) error
+pkg vdl, method (*Float32Target) FinishMap(MapTarget) error
+pkg vdl, method (*Float32Target) FinishSet(SetTarget) error
+pkg vdl, method (*Float32Target) FromBool(bool, *Type) error
+pkg vdl, method (*Float32Target) FromBytes([]byte, *Type) error
+pkg vdl, method (*Float32Target) FromComplex(complex128, *Type) error
+pkg vdl, method (*Float32Target) FromEnumLabel(string, *Type) error
+pkg vdl, method (*Float32Target) FromFloat(float64, *Type) error
+pkg vdl, method (*Float32Target) FromInt(int64, *Type) error
+pkg vdl, method (*Float32Target) FromNil(*Type) error
+pkg vdl, method (*Float32Target) FromString(string, *Type) error
+pkg vdl, method (*Float32Target) FromTypeObject(*Type) error
+pkg vdl, method (*Float32Target) FromUint(uint64, *Type) error
+pkg vdl, method (*Float32Target) StartFields(*Type) (FieldsTarget, error)
+pkg vdl, method (*Float32Target) StartList(*Type, int) (ListTarget, error)
+pkg vdl, method (*Float32Target) StartMap(*Type, int) (MapTarget, error)
+pkg vdl, method (*Float32Target) StartSet(*Type, int) (SetTarget, error)
+pkg vdl, method (*Float64Target) FinishFields(FieldsTarget) error
+pkg vdl, method (*Float64Target) FinishList(ListTarget) error
+pkg vdl, method (*Float64Target) FinishMap(MapTarget) error
+pkg vdl, method (*Float64Target) FinishSet(SetTarget) error
+pkg vdl, method (*Float64Target) FromBool(bool, *Type) error
+pkg vdl, method (*Float64Target) FromBytes([]byte, *Type) error
+pkg vdl, method (*Float64Target) FromComplex(complex128, *Type) error
+pkg vdl, method (*Float64Target) FromEnumLabel(string, *Type) error
+pkg vdl, method (*Float64Target) FromFloat(float64, *Type) error
+pkg vdl, method (*Float64Target) FromInt(int64, *Type) error
+pkg vdl, method (*Float64Target) FromNil(*Type) error
+pkg vdl, method (*Float64Target) FromString(string, *Type) error
+pkg vdl, method (*Float64Target) FromTypeObject(*Type) error
+pkg vdl, method (*Float64Target) FromUint(uint64, *Type) error
+pkg vdl, method (*Float64Target) StartFields(*Type) (FieldsTarget, error)
+pkg vdl, method (*Float64Target) StartList(*Type, int) (ListTarget, error)
+pkg vdl, method (*Float64Target) StartMap(*Type, int) (MapTarget, error)
+pkg vdl, method (*Float64Target) StartSet(*Type, int) (SetTarget, error)
+pkg vdl, method (*Int16Target) FinishFields(FieldsTarget) error
+pkg vdl, method (*Int16Target) FinishList(ListTarget) error
+pkg vdl, method (*Int16Target) FinishMap(MapTarget) error
+pkg vdl, method (*Int16Target) FinishSet(SetTarget) error
+pkg vdl, method (*Int16Target) FromBool(bool, *Type) error
+pkg vdl, method (*Int16Target) FromBytes([]byte, *Type) error
+pkg vdl, method (*Int16Target) FromComplex(complex128, *Type) error
+pkg vdl, method (*Int16Target) FromEnumLabel(string, *Type) error
+pkg vdl, method (*Int16Target) FromFloat(float64, *Type) error
+pkg vdl, method (*Int16Target) FromInt(int64, *Type) error
+pkg vdl, method (*Int16Target) FromNil(*Type) error
+pkg vdl, method (*Int16Target) FromString(string, *Type) error
+pkg vdl, method (*Int16Target) FromTypeObject(*Type) error
+pkg vdl, method (*Int16Target) FromUint(uint64, *Type) error
+pkg vdl, method (*Int16Target) StartFields(*Type) (FieldsTarget, error)
+pkg vdl, method (*Int16Target) StartList(*Type, int) (ListTarget, error)
+pkg vdl, method (*Int16Target) StartMap(*Type, int) (MapTarget, error)
+pkg vdl, method (*Int16Target) StartSet(*Type, int) (SetTarget, error)
+pkg vdl, method (*Int32Target) FinishFields(FieldsTarget) error
+pkg vdl, method (*Int32Target) FinishList(ListTarget) error
+pkg vdl, method (*Int32Target) FinishMap(MapTarget) error
+pkg vdl, method (*Int32Target) FinishSet(SetTarget) error
+pkg vdl, method (*Int32Target) FromBool(bool, *Type) error
+pkg vdl, method (*Int32Target) FromBytes([]byte, *Type) error
+pkg vdl, method (*Int32Target) FromComplex(complex128, *Type) error
+pkg vdl, method (*Int32Target) FromEnumLabel(string, *Type) error
+pkg vdl, method (*Int32Target) FromFloat(float64, *Type) error
+pkg vdl, method (*Int32Target) FromInt(int64, *Type) error
+pkg vdl, method (*Int32Target) FromNil(*Type) error
+pkg vdl, method (*Int32Target) FromString(string, *Type) error
+pkg vdl, method (*Int32Target) FromTypeObject(*Type) error
+pkg vdl, method (*Int32Target) FromUint(uint64, *Type) error
+pkg vdl, method (*Int32Target) StartFields(*Type) (FieldsTarget, error)
+pkg vdl, method (*Int32Target) StartList(*Type, int) (ListTarget, error)
+pkg vdl, method (*Int32Target) StartMap(*Type, int) (MapTarget, error)
+pkg vdl, method (*Int32Target) StartSet(*Type, int) (SetTarget, error)
+pkg vdl, method (*Int64Target) FinishFields(FieldsTarget) error
+pkg vdl, method (*Int64Target) FinishList(ListTarget) error
+pkg vdl, method (*Int64Target) FinishMap(MapTarget) error
+pkg vdl, method (*Int64Target) FinishSet(SetTarget) error
+pkg vdl, method (*Int64Target) FromBool(bool, *Type) error
+pkg vdl, method (*Int64Target) FromBytes([]byte, *Type) error
+pkg vdl, method (*Int64Target) FromComplex(complex128, *Type) error
+pkg vdl, method (*Int64Target) FromEnumLabel(string, *Type) error
+pkg vdl, method (*Int64Target) FromFloat(float64, *Type) error
+pkg vdl, method (*Int64Target) FromInt(int64, *Type) error
+pkg vdl, method (*Int64Target) FromNil(*Type) error
+pkg vdl, method (*Int64Target) FromString(string, *Type) error
+pkg vdl, method (*Int64Target) FromTypeObject(*Type) error
+pkg vdl, method (*Int64Target) FromUint(uint64, *Type) error
+pkg vdl, method (*Int64Target) StartFields(*Type) (FieldsTarget, error)
+pkg vdl, method (*Int64Target) StartList(*Type, int) (ListTarget, error)
+pkg vdl, method (*Int64Target) StartMap(*Type, int) (MapTarget, error)
+pkg vdl, method (*Int64Target) StartSet(*Type, int) (SetTarget, error)
+pkg vdl, method (*Int8Target) FinishFields(FieldsTarget) error
+pkg vdl, method (*Int8Target) FinishList(ListTarget) error
+pkg vdl, method (*Int8Target) FinishMap(MapTarget) error
+pkg vdl, method (*Int8Target) FinishSet(SetTarget) error
+pkg vdl, method (*Int8Target) FromBool(bool, *Type) error
+pkg vdl, method (*Int8Target) FromBytes([]byte, *Type) error
+pkg vdl, method (*Int8Target) FromComplex(complex128, *Type) error
+pkg vdl, method (*Int8Target) FromEnumLabel(string, *Type) error
+pkg vdl, method (*Int8Target) FromFloat(float64, *Type) error
+pkg vdl, method (*Int8Target) FromInt(int64, *Type) error
+pkg vdl, method (*Int8Target) FromNil(*Type) error
+pkg vdl, method (*Int8Target) FromString(string, *Type) error
+pkg vdl, method (*Int8Target) FromTypeObject(*Type) error
+pkg vdl, method (*Int8Target) FromUint(uint64, *Type) error
+pkg vdl, method (*Int8Target) StartFields(*Type) (FieldsTarget, error)
+pkg vdl, method (*Int8Target) StartList(*Type, int) (ListTarget, error)
+pkg vdl, method (*Int8Target) StartMap(*Type, int) (MapTarget, error)
+pkg vdl, method (*Int8Target) StartSet(*Type, int) (SetTarget, error)
+pkg vdl, method (*ListTargetBase) FinishElem(Target) error
+pkg vdl, method (*ListTargetBase) StartElem(int) (Target, error)
+pkg vdl, method (*MapTargetBase) FinishField(Target, Target) error
+pkg vdl, method (*MapTargetBase) FinishKeyStartField(Target) (Target, error)
+pkg vdl, method (*MapTargetBase) StartKey() (Target, error)
+pkg vdl, method (*SetTargetBase) FinishKey(Target) error
+pkg vdl, method (*SetTargetBase) StartKey() (Target, error)
+pkg vdl, method (*StringSliceTarget) FinishElem(Target) error
+pkg vdl, method (*StringSliceTarget) FinishFields(FieldsTarget) error
+pkg vdl, method (*StringSliceTarget) FinishList(ListTarget) error
+pkg vdl, method (*StringSliceTarget) FinishMap(MapTarget) error
+pkg vdl, method (*StringSliceTarget) FinishSet(SetTarget) error
+pkg vdl, method (*StringSliceTarget) FromBool(bool, *Type) error
+pkg vdl, method (*StringSliceTarget) FromBytes([]byte, *Type) error
+pkg vdl, method (*StringSliceTarget) FromComplex(complex128, *Type) error
+pkg vdl, method (*StringSliceTarget) FromEnumLabel(string, *Type) error
+pkg vdl, method (*StringSliceTarget) FromFloat(float64, *Type) error
+pkg vdl, method (*StringSliceTarget) FromInt(int64, *Type) error
+pkg vdl, method (*StringSliceTarget) FromNil(*Type) error
+pkg vdl, method (*StringSliceTarget) FromString(string, *Type) error
+pkg vdl, method (*StringSliceTarget) FromTypeObject(*Type) error
+pkg vdl, method (*StringSliceTarget) FromUint(uint64, *Type) error
+pkg vdl, method (*StringSliceTarget) StartElem(int) (Target, error)
+pkg vdl, method (*StringSliceTarget) StartFields(*Type) (FieldsTarget, error)
+pkg vdl, method (*StringSliceTarget) StartList(*Type, int) (ListTarget, error)
+pkg vdl, method (*StringSliceTarget) StartMap(*Type, int) (MapTarget, error)
+pkg vdl, method (*StringSliceTarget) StartSet(*Type, int) (SetTarget, error)
+pkg vdl, method (*StringTarget) FinishFields(FieldsTarget) error
+pkg vdl, method (*StringTarget) FinishList(ListTarget) error
+pkg vdl, method (*StringTarget) FinishMap(MapTarget) error
+pkg vdl, method (*StringTarget) FinishSet(SetTarget) error
+pkg vdl, method (*StringTarget) FromBool(bool, *Type) error
+pkg vdl, method (*StringTarget) FromBytes([]byte, *Type) error
+pkg vdl, method (*StringTarget) FromComplex(complex128, *Type) error
+pkg vdl, method (*StringTarget) FromEnumLabel(string, *Type) error
+pkg vdl, method (*StringTarget) FromFloat(float64, *Type) error
+pkg vdl, method (*StringTarget) FromInt(int64, *Type) error
+pkg vdl, method (*StringTarget) FromNil(*Type) error
+pkg vdl, method (*StringTarget) FromString(string, *Type) error
+pkg vdl, method (*StringTarget) FromTypeObject(*Type) error
+pkg vdl, method (*StringTarget) FromUint(uint64, *Type) error
+pkg vdl, method (*StringTarget) StartFields(*Type) (FieldsTarget, error)
+pkg vdl, method (*StringTarget) StartList(*Type, int) (ListTarget, error)
+pkg vdl, method (*StringTarget) StartMap(*Type, int) (MapTarget, error)
+pkg vdl, method (*StringTarget) StartSet(*Type, int) (SetTarget, error)
+pkg vdl, method (*TargetBase) FinishFields(FieldsTarget) error
+pkg vdl, method (*TargetBase) FinishList(ListTarget) error
+pkg vdl, method (*TargetBase) FinishMap(MapTarget) error
+pkg vdl, method (*TargetBase) FinishSet(SetTarget) error
+pkg vdl, method (*TargetBase) FromBool(bool, *Type) error
+pkg vdl, method (*TargetBase) FromBytes([]byte, *Type) error
+pkg vdl, method (*TargetBase) FromComplex(complex128, *Type) error
+pkg vdl, method (*TargetBase) FromEnumLabel(string, *Type) error
+pkg vdl, method (*TargetBase) FromFloat(float64, *Type) error
+pkg vdl, method (*TargetBase) FromInt(int64, *Type) error
+pkg vdl, method (*TargetBase) FromNil(*Type) error
+pkg vdl, method (*TargetBase) FromString(string, *Type) error
+pkg vdl, method (*TargetBase) FromTypeObject(*Type) error
+pkg vdl, method (*TargetBase) FromUint(uint64, *Type) error
+pkg vdl, method (*TargetBase) StartFields(*Type) (FieldsTarget, error)
+pkg vdl, method (*TargetBase) StartList(*Type, int) (ListTarget, error)
+pkg vdl, method (*TargetBase) StartMap(*Type, int) (MapTarget, error)
+pkg vdl, method (*TargetBase) StartSet(*Type, int) (SetTarget, error)
 pkg vdl, method (*Type) AssignableFrom(*Value) bool
 pkg vdl, method (*Type) CanBeKey() bool
 pkg vdl, method (*Type) CanBeNamed() bool
@@ -105,6 +369,78 @@ pkg vdl, method (*TypeBuilder) Optional() PendingOptional
 pkg vdl, method (*TypeBuilder) Set() PendingSet
 pkg vdl, method (*TypeBuilder) Struct() PendingStruct
 pkg vdl, method (*TypeBuilder) Union() PendingUnion
+pkg vdl, method (*TypeObjectTarget) FinishFields(FieldsTarget) error
+pkg vdl, method (*TypeObjectTarget) FinishList(ListTarget) error
+pkg vdl, method (*TypeObjectTarget) FinishMap(MapTarget) error
+pkg vdl, method (*TypeObjectTarget) FinishSet(SetTarget) error
+pkg vdl, method (*TypeObjectTarget) FromBool(bool, *Type) error
+pkg vdl, method (*TypeObjectTarget) FromBytes([]byte, *Type) error
+pkg vdl, method (*TypeObjectTarget) FromComplex(complex128, *Type) error
+pkg vdl, method (*TypeObjectTarget) FromEnumLabel(string, *Type) error
+pkg vdl, method (*TypeObjectTarget) FromFloat(float64, *Type) error
+pkg vdl, method (*TypeObjectTarget) FromInt(int64, *Type) error
+pkg vdl, method (*TypeObjectTarget) FromNil(*Type) error
+pkg vdl, method (*TypeObjectTarget) FromString(string, *Type) error
+pkg vdl, method (*TypeObjectTarget) FromTypeObject(*Type) error
+pkg vdl, method (*TypeObjectTarget) FromUint(uint64, *Type) error
+pkg vdl, method (*TypeObjectTarget) StartFields(*Type) (FieldsTarget, error)
+pkg vdl, method (*TypeObjectTarget) StartList(*Type, int) (ListTarget, error)
+pkg vdl, method (*TypeObjectTarget) StartMap(*Type, int) (MapTarget, error)
+pkg vdl, method (*TypeObjectTarget) StartSet(*Type, int) (SetTarget, error)
+pkg vdl, method (*Uint16Target) FinishFields(FieldsTarget) error
+pkg vdl, method (*Uint16Target) FinishList(ListTarget) error
+pkg vdl, method (*Uint16Target) FinishMap(MapTarget) error
+pkg vdl, method (*Uint16Target) FinishSet(SetTarget) error
+pkg vdl, method (*Uint16Target) FromBool(bool, *Type) error
+pkg vdl, method (*Uint16Target) FromBytes([]byte, *Type) error
+pkg vdl, method (*Uint16Target) FromComplex(complex128, *Type) error
+pkg vdl, method (*Uint16Target) FromEnumLabel(string, *Type) error
+pkg vdl, method (*Uint16Target) FromFloat(float64, *Type) error
+pkg vdl, method (*Uint16Target) FromInt(int64, *Type) error
+pkg vdl, method (*Uint16Target) FromNil(*Type) error
+pkg vdl, method (*Uint16Target) FromString(string, *Type) error
+pkg vdl, method (*Uint16Target) FromTypeObject(*Type) error
+pkg vdl, method (*Uint16Target) FromUint(uint64, *Type) error
+pkg vdl, method (*Uint16Target) StartFields(*Type) (FieldsTarget, error)
+pkg vdl, method (*Uint16Target) StartList(*Type, int) (ListTarget, error)
+pkg vdl, method (*Uint16Target) StartMap(*Type, int) (MapTarget, error)
+pkg vdl, method (*Uint16Target) StartSet(*Type, int) (SetTarget, error)
+pkg vdl, method (*Uint32Target) FinishFields(FieldsTarget) error
+pkg vdl, method (*Uint32Target) FinishList(ListTarget) error
+pkg vdl, method (*Uint32Target) FinishMap(MapTarget) error
+pkg vdl, method (*Uint32Target) FinishSet(SetTarget) error
+pkg vdl, method (*Uint32Target) FromBool(bool, *Type) error
+pkg vdl, method (*Uint32Target) FromBytes([]byte, *Type) error
+pkg vdl, method (*Uint32Target) FromComplex(complex128, *Type) error
+pkg vdl, method (*Uint32Target) FromEnumLabel(string, *Type) error
+pkg vdl, method (*Uint32Target) FromFloat(float64, *Type) error
+pkg vdl, method (*Uint32Target) FromInt(int64, *Type) error
+pkg vdl, method (*Uint32Target) FromNil(*Type) error
+pkg vdl, method (*Uint32Target) FromString(string, *Type) error
+pkg vdl, method (*Uint32Target) FromTypeObject(*Type) error
+pkg vdl, method (*Uint32Target) FromUint(uint64, *Type) error
+pkg vdl, method (*Uint32Target) StartFields(*Type) (FieldsTarget, error)
+pkg vdl, method (*Uint32Target) StartList(*Type, int) (ListTarget, error)
+pkg vdl, method (*Uint32Target) StartMap(*Type, int) (MapTarget, error)
+pkg vdl, method (*Uint32Target) StartSet(*Type, int) (SetTarget, error)
+pkg vdl, method (*Uint64Target) FinishFields(FieldsTarget) error
+pkg vdl, method (*Uint64Target) FinishList(ListTarget) error
+pkg vdl, method (*Uint64Target) FinishMap(MapTarget) error
+pkg vdl, method (*Uint64Target) FinishSet(SetTarget) error
+pkg vdl, method (*Uint64Target) FromBool(bool, *Type) error
+pkg vdl, method (*Uint64Target) FromBytes([]byte, *Type) error
+pkg vdl, method (*Uint64Target) FromComplex(complex128, *Type) error
+pkg vdl, method (*Uint64Target) FromEnumLabel(string, *Type) error
+pkg vdl, method (*Uint64Target) FromFloat(float64, *Type) error
+pkg vdl, method (*Uint64Target) FromInt(int64, *Type) error
+pkg vdl, method (*Uint64Target) FromNil(*Type) error
+pkg vdl, method (*Uint64Target) FromString(string, *Type) error
+pkg vdl, method (*Uint64Target) FromTypeObject(*Type) error
+pkg vdl, method (*Uint64Target) FromUint(uint64, *Type) error
+pkg vdl, method (*Uint64Target) StartFields(*Type) (FieldsTarget, error)
+pkg vdl, method (*Uint64Target) StartList(*Type, int) (ListTarget, error)
+pkg vdl, method (*Uint64Target) StartMap(*Type, int) (MapTarget, error)
+pkg vdl, method (*Uint64Target) StartSet(*Type, int) (SetTarget, error)
 pkg vdl, method (*Value) Assign(*Value) *Value
 pkg vdl, method (*Value) AssignBool(bool) *Value
 pkg vdl, method (*Value) AssignBytes([]byte) *Value
@@ -149,25 +485,99 @@ pkg vdl, method (*Value) Uint() uint64
 pkg vdl, method (*Value) UnionField() (int, *Value)
 pkg vdl, method (*WireError) FillVDLTarget(Target, *Type) error
 pkg vdl, method (*WireError) MakeVDLTarget() Target
+pkg vdl, method (*WireErrorTarget) FinishField(Target, Target) error
+pkg vdl, method (*WireErrorTarget) FinishFields(FieldsTarget) error
+pkg vdl, method (*WireErrorTarget) FinishList(ListTarget) error
+pkg vdl, method (*WireErrorTarget) FinishMap(MapTarget) error
+pkg vdl, method (*WireErrorTarget) FinishSet(SetTarget) error
+pkg vdl, method (*WireErrorTarget) FromBool(bool, *Type) error
+pkg vdl, method (*WireErrorTarget) FromBytes([]byte, *Type) error
+pkg vdl, method (*WireErrorTarget) FromComplex(complex128, *Type) error
+pkg vdl, method (*WireErrorTarget) FromEnumLabel(string, *Type) error
+pkg vdl, method (*WireErrorTarget) FromFloat(float64, *Type) error
+pkg vdl, method (*WireErrorTarget) FromInt(int64, *Type) error
+pkg vdl, method (*WireErrorTarget) FromNil(*Type) error
+pkg vdl, method (*WireErrorTarget) FromString(string, *Type) error
+pkg vdl, method (*WireErrorTarget) FromTypeObject(*Type) error
+pkg vdl, method (*WireErrorTarget) FromUint(uint64, *Type) error
+pkg vdl, method (*WireErrorTarget) StartField(string) (Target, Target, error)
+pkg vdl, method (*WireErrorTarget) StartFields(*Type) (FieldsTarget, error)
+pkg vdl, method (*WireErrorTarget) StartList(*Type, int) (ListTarget, error)
+pkg vdl, method (*WireErrorTarget) StartMap(*Type, int) (MapTarget, error)
+pkg vdl, method (*WireErrorTarget) StartSet(*Type, int) (SetTarget, error)
+pkg vdl, method (*WireRetryCode) FillVDLTarget(Target, *Type) error
+pkg vdl, method (*WireRetryCode) MakeVDLTarget() Target
 pkg vdl, method (*WireRetryCode) Set(string) error
+pkg vdl, method (*WireRetryCodeTarget) FinishFields(FieldsTarget) error
+pkg vdl, method (*WireRetryCodeTarget) FinishList(ListTarget) error
+pkg vdl, method (*WireRetryCodeTarget) FinishMap(MapTarget) error
+pkg vdl, method (*WireRetryCodeTarget) FinishSet(SetTarget) error
+pkg vdl, method (*WireRetryCodeTarget) FromBool(bool, *Type) error
+pkg vdl, method (*WireRetryCodeTarget) FromBytes([]byte, *Type) error
+pkg vdl, method (*WireRetryCodeTarget) FromComplex(complex128, *Type) error
+pkg vdl, method (*WireRetryCodeTarget) FromEnumLabel(string, *Type) error
+pkg vdl, method (*WireRetryCodeTarget) FromFloat(float64, *Type) error
+pkg vdl, method (*WireRetryCodeTarget) FromInt(int64, *Type) error
+pkg vdl, method (*WireRetryCodeTarget) FromNil(*Type) error
+pkg vdl, method (*WireRetryCodeTarget) FromString(string, *Type) error
+pkg vdl, method (*WireRetryCodeTarget) FromTypeObject(*Type) error
+pkg vdl, method (*WireRetryCodeTarget) FromUint(uint64, *Type) error
+pkg vdl, method (*WireRetryCodeTarget) StartFields(*Type) (FieldsTarget, error)
+pkg vdl, method (*WireRetryCodeTarget) StartList(*Type, int) (ListTarget, error)
+pkg vdl, method (*WireRetryCodeTarget) StartMap(*Type, int) (MapTarget, error)
+pkg vdl, method (*WireRetryCodeTarget) StartSet(*Type, int) (SetTarget, error)
 pkg vdl, method (Kind) String() string
-pkg vdl, method (WireRetryCode) FillVDLTarget(Target, *Type) error
-pkg vdl, method (WireRetryCode) MakeVDLTarget() Target
 pkg vdl, method (WireRetryCode) String() string
+pkg vdl, type BoolTarget struct
+pkg vdl, type BoolTarget struct, Value *bool
+pkg vdl, type BoolTarget struct, embedded TargetBase
+pkg vdl, type ByteTarget struct
+pkg vdl, type ByteTarget struct, Value *byte
+pkg vdl, type ByteTarget struct, embedded TargetBase
+pkg vdl, type BytesTarget struct
+pkg vdl, type BytesTarget struct, Value *[]byte
+pkg vdl, type BytesTarget struct, embedded TargetBase
+pkg vdl, type Complex128Target struct
+pkg vdl, type Complex128Target struct, Value *complex128
+pkg vdl, type Complex128Target struct, embedded TargetBase
+pkg vdl, type Complex64Target struct
+pkg vdl, type Complex64Target struct, Value *complex64
+pkg vdl, type Complex64Target struct, embedded TargetBase
 pkg vdl, type Field struct
 pkg vdl, type Field struct, Name string
 pkg vdl, type Field struct, Type *Type
 pkg vdl, type FieldsTarget interface { FinishField, StartField }
 pkg vdl, type FieldsTarget interface, FinishField(Target, Target) error
 pkg vdl, type FieldsTarget interface, StartField(string) (Target, Target, error)
+pkg vdl, type FieldsTargetBase struct
+pkg vdl, type Float32Target struct
+pkg vdl, type Float32Target struct, Value *float32
+pkg vdl, type Float32Target struct, embedded TargetBase
+pkg vdl, type Float64Target struct
+pkg vdl, type Float64Target struct, Value *float64
+pkg vdl, type Float64Target struct, embedded TargetBase
+pkg vdl, type Int16Target struct
+pkg vdl, type Int16Target struct, Value *int16
+pkg vdl, type Int16Target struct, embedded TargetBase
+pkg vdl, type Int32Target struct
+pkg vdl, type Int32Target struct, Value *int32
+pkg vdl, type Int32Target struct, embedded TargetBase
+pkg vdl, type Int64Target struct
+pkg vdl, type Int64Target struct, Value *int64
+pkg vdl, type Int64Target struct, embedded TargetBase
+pkg vdl, type Int8Target struct
+pkg vdl, type Int8Target struct, Value *int8
+pkg vdl, type Int8Target struct, embedded TargetBase
 pkg vdl, type Kind uint
 pkg vdl, type ListTarget interface { FinishElem, StartElem }
 pkg vdl, type ListTarget interface, FinishElem(Target) error
 pkg vdl, type ListTarget interface, StartElem(int) (Target, error)
+pkg vdl, type ListTargetBase struct
 pkg vdl, type MapTarget interface { FinishField, FinishKeyStartField, StartKey }
 pkg vdl, type MapTarget interface, FinishField(Target, Target) error
 pkg vdl, type MapTarget interface, FinishKeyStartField(Target) (Target, error)
 pkg vdl, type MapTarget interface, StartKey() (Target, error)
+pkg vdl, type MapTargetBase struct
 pkg vdl, type PendingArray interface, AssignElem(TypeOrPending) PendingArray
 pkg vdl, type PendingArray interface, AssignLen(int) PendingArray
 pkg vdl, type PendingArray interface, Built() (*Type, error)
@@ -204,6 +614,14 @@ pkg vdl, type PendingUnion interface, unexported methods
 pkg vdl, type SetTarget interface { FinishKey, StartKey }
 pkg vdl, type SetTarget interface, FinishKey(Target) error
 pkg vdl, type SetTarget interface, StartKey() (Target, error)
+pkg vdl, type SetTargetBase struct
+pkg vdl, type StringSliceTarget struct
+pkg vdl, type StringSliceTarget struct, Value *[]string
+pkg vdl, type StringSliceTarget struct, embedded ListTargetBase
+pkg vdl, type StringSliceTarget struct, embedded TargetBase
+pkg vdl, type StringTarget struct
+pkg vdl, type StringTarget struct, Value *string
+pkg vdl, type StringTarget struct, embedded TargetBase
 pkg vdl, type Target interface { FinishFields, FinishList, FinishMap, FinishSet, FromBool, FromBytes, FromComplex, FromEnumLabel, FromFloat, FromInt, FromNil, FromString, FromTypeObject, FromUint, StartFields, StartList, StartMap, StartSet }
 pkg vdl, type Target interface, FinishFields(FieldsTarget) error
 pkg vdl, type Target interface, FinishList(ListTarget) error
@@ -223,12 +641,25 @@ pkg vdl, type Target interface, StartFields(*Type) (FieldsTarget, error)
 pkg vdl, type Target interface, StartList(*Type, int) (ListTarget, error)
 pkg vdl, type Target interface, StartMap(*Type, int) (MapTarget, error)
 pkg vdl, type Target interface, StartSet(*Type, int) (SetTarget, error)
+pkg vdl, type TargetBase struct
 pkg vdl, type Targeter interface { FillVDLTarget, MakeVDLTarget }
 pkg vdl, type Targeter interface, FillVDLTarget(Target, *Type) error
 pkg vdl, type Targeter interface, MakeVDLTarget() Target
 pkg vdl, type Type struct
 pkg vdl, type TypeBuilder struct
+pkg vdl, type TypeObjectTarget struct
+pkg vdl, type TypeObjectTarget struct, Value **Type
+pkg vdl, type TypeObjectTarget struct, embedded TargetBase
 pkg vdl, type TypeOrPending interface, unexported methods
+pkg vdl, type Uint16Target struct
+pkg vdl, type Uint16Target struct, Value *uint16
+pkg vdl, type Uint16Target struct, embedded TargetBase
+pkg vdl, type Uint32Target struct
+pkg vdl, type Uint32Target struct, Value *uint32
+pkg vdl, type Uint32Target struct, embedded TargetBase
+pkg vdl, type Uint64Target struct
+pkg vdl, type Uint64Target struct, Value *uint64
+pkg vdl, type Uint64Target struct, embedded TargetBase
 pkg vdl, type Value struct
 pkg vdl, type WalkMode int
 pkg vdl, type WireError struct
@@ -236,7 +667,14 @@ pkg vdl, type WireError struct, Id string
 pkg vdl, type WireError struct, Msg string
 pkg vdl, type WireError struct, ParamList []*Value
 pkg vdl, type WireError struct, RetryCode WireRetryCode
+pkg vdl, type WireErrorTarget struct
+pkg vdl, type WireErrorTarget struct, Value *WireError
+pkg vdl, type WireErrorTarget struct, embedded FieldsTargetBase
+pkg vdl, type WireErrorTarget struct, embedded TargetBase
 pkg vdl, type WireRetryCode int
+pkg vdl, type WireRetryCodeTarget struct
+pkg vdl, type WireRetryCodeTarget struct, Value *WireRetryCode
+pkg vdl, type WireRetryCodeTarget struct, embedded TargetBase
 pkg vdl, var AnyType *Type
 pkg vdl, var BoolType *Type
 pkg vdl, var ByteType *Type

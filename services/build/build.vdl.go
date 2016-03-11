@@ -72,14 +72,36 @@ func (Architecture) __VDLReflect(struct {
 }) {
 }
 
-func (m Architecture) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
-	if err := t.FromEnumLabel(m.String(), __VDLType_build_v_io_v23_services_build_Architecture); err != nil {
+func (m *Architecture) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
+	if err := t.FromEnumLabel((*m).String(), __VDLType_build_v_io_v23_services_build_Architecture); err != nil {
 		return err
 	}
 	return nil
 }
 
-func (m Architecture) MakeVDLTarget() vdl.Target {
+func (m *Architecture) MakeVDLTarget() vdl.Target {
+	return &ArchitectureTarget{Value: m}
+}
+
+type ArchitectureTarget struct {
+	Value *Architecture
+	vdl.TargetBase
+}
+
+func (t *ArchitectureTarget) FromEnumLabel(src string, tt *vdl.Type) error {
+	if !vdl.Compatible(tt, __VDLType_build_v_io_v23_services_build_Architecture) {
+		return fmt.Errorf("type %v incompatible with %v", tt, __VDLType_build_v_io_v23_services_build_Architecture)
+	}
+	switch src {
+	case "Amd64":
+		*t.Value = 0
+	case "Arm":
+		*t.Value = 1
+	case "X86":
+		*t.Value = 2
+	default:
+		return fmt.Errorf("label %s not in enum %v", src, __VDLType_build_v_io_v23_services_build_Architecture)
+	}
 	return nil
 }
 
@@ -137,14 +159,36 @@ func (Format) __VDLReflect(struct {
 }) {
 }
 
-func (m Format) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
-	if err := t.FromEnumLabel(m.String(), __VDLType_build_v_io_v23_services_build_Format); err != nil {
+func (m *Format) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
+	if err := t.FromEnumLabel((*m).String(), __VDLType_build_v_io_v23_services_build_Format); err != nil {
 		return err
 	}
 	return nil
 }
 
-func (m Format) MakeVDLTarget() vdl.Target {
+func (m *Format) MakeVDLTarget() vdl.Target {
+	return &FormatTarget{Value: m}
+}
+
+type FormatTarget struct {
+	Value *Format
+	vdl.TargetBase
+}
+
+func (t *FormatTarget) FromEnumLabel(src string, tt *vdl.Type) error {
+	if !vdl.Compatible(tt, __VDLType_build_v_io_v23_services_build_Format) {
+		return fmt.Errorf("type %v incompatible with %v", tt, __VDLType_build_v_io_v23_services_build_Format)
+	}
+	switch src {
+	case "Elf":
+		*t.Value = 0
+	case "Mach":
+		*t.Value = 1
+	case "Pe":
+		*t.Value = 2
+	default:
+		return fmt.Errorf("label %s not in enum %v", src, __VDLType_build_v_io_v23_services_build_Format)
+	}
 	return nil
 }
 
@@ -208,14 +252,38 @@ func (OperatingSystem) __VDLReflect(struct {
 }) {
 }
 
-func (m OperatingSystem) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
-	if err := t.FromEnumLabel(m.String(), __VDLType_build_v_io_v23_services_build_OperatingSystem); err != nil {
+func (m *OperatingSystem) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
+	if err := t.FromEnumLabel((*m).String(), __VDLType_build_v_io_v23_services_build_OperatingSystem); err != nil {
 		return err
 	}
 	return nil
 }
 
-func (m OperatingSystem) MakeVDLTarget() vdl.Target {
+func (m *OperatingSystem) MakeVDLTarget() vdl.Target {
+	return &OperatingSystemTarget{Value: m}
+}
+
+type OperatingSystemTarget struct {
+	Value *OperatingSystem
+	vdl.TargetBase
+}
+
+func (t *OperatingSystemTarget) FromEnumLabel(src string, tt *vdl.Type) error {
+	if !vdl.Compatible(tt, __VDLType_build_v_io_v23_services_build_OperatingSystem) {
+		return fmt.Errorf("type %v incompatible with %v", tt, __VDLType_build_v_io_v23_services_build_OperatingSystem)
+	}
+	switch src {
+	case "Darwin":
+		*t.Value = 0
+	case "Linux":
+		*t.Value = 1
+	case "Windows":
+		*t.Value = 2
+	case "Android":
+		*t.Value = 3
+	default:
+		return fmt.Errorf("label %s not in enum %v", src, __VDLType_build_v_io_v23_services_build_OperatingSystem)
+	}
 	return nil
 }
 
@@ -231,7 +299,6 @@ func (File) __VDLReflect(struct {
 }
 
 func (m *File) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
-
 	if __VDLType_build_v_io_v23_services_build_File == nil || __VDLTypebuild0 == nil {
 		panic("Initialization order error: types generated for FillVDLTarget not initialized. Consider moving caller to an init() block.")
 	}
@@ -272,6 +339,37 @@ func (m *File) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 }
 
 func (m *File) MakeVDLTarget() vdl.Target {
+	return &FileTarget{Value: m}
+}
+
+type FileTarget struct {
+	Value *File
+	vdl.TargetBase
+	vdl.FieldsTargetBase
+}
+
+func (t *FileTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
+	if !vdl.Compatible(tt, __VDLType_build_v_io_v23_services_build_File) {
+		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType_build_v_io_v23_services_build_File)
+	}
+	return t, nil
+}
+func (t *FileTarget) StartField(name string) (key, field vdl.Target, _ error) {
+	switch name {
+	case "Name":
+		val, err := &vdl.StringTarget{Value: &t.Value.Name}, error(nil)
+		return nil, val, err
+	case "Contents":
+		val, err := &vdl.BytesTarget{Value: &t.Value.Contents}, error(nil)
+		return nil, val, err
+	default:
+		return nil, nil, fmt.Errorf("field %s not in struct %v", name, __VDLType_build_v_io_v23_services_build_File)
+	}
+}
+func (t *FileTarget) FinishField(_, _ vdl.Target) error {
+	return nil
+}
+func (t *FileTarget) FinishFields(_ vdl.FieldsTarget) error {
 	return nil
 }
 

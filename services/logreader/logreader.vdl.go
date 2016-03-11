@@ -9,6 +9,7 @@
 package logreader
 
 import (
+	"fmt"
 	"io"
 	"v.io/v23"
 	"v.io/v23/context"
@@ -31,7 +32,6 @@ func (LogEntry) __VDLReflect(struct {
 }
 
 func (m *LogEntry) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
-
 	if __VDLType_logreader_v_io_v23_services_logreader_LogEntry == nil || __VDLTypelogreader0 == nil {
 		panic("Initialization order error: types generated for FillVDLTarget not initialized. Consider moving caller to an init() block.")
 	}
@@ -71,6 +71,37 @@ func (m *LogEntry) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 }
 
 func (m *LogEntry) MakeVDLTarget() vdl.Target {
+	return &LogEntryTarget{Value: m}
+}
+
+type LogEntryTarget struct {
+	Value *LogEntry
+	vdl.TargetBase
+	vdl.FieldsTargetBase
+}
+
+func (t *LogEntryTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
+	if !vdl.Compatible(tt, __VDLType_logreader_v_io_v23_services_logreader_LogEntry) {
+		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType_logreader_v_io_v23_services_logreader_LogEntry)
+	}
+	return t, nil
+}
+func (t *LogEntryTarget) StartField(name string) (key, field vdl.Target, _ error) {
+	switch name {
+	case "Position":
+		val, err := &vdl.Int64Target{Value: &t.Value.Position}, error(nil)
+		return nil, val, err
+	case "Line":
+		val, err := &vdl.StringTarget{Value: &t.Value.Line}, error(nil)
+		return nil, val, err
+	default:
+		return nil, nil, fmt.Errorf("field %s not in struct %v", name, __VDLType_logreader_v_io_v23_services_logreader_LogEntry)
+	}
+}
+func (t *LogEntryTarget) FinishField(_, _ vdl.Target) error {
+	return nil
+}
+func (t *LogEntryTarget) FinishFields(_ vdl.FieldsTarget) error {
 	return nil
 }
 

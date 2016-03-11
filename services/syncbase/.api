@@ -8,6 +8,10 @@ pkg syncbase, func ServiceClient(string) ServiceClientStub
 pkg syncbase, func ServiceServer(ServiceServerMethods) ServiceServerStub
 pkg syncbase, method (*DevModeUpdateVClockOpts) FillVDLTarget(vdl.Target, *vdl.Type) error
 pkg syncbase, method (*DevModeUpdateVClockOpts) MakeVDLTarget() vdl.Target
+pkg syncbase, method (*DevModeUpdateVClockOptsTarget) FinishField(vdl.Target, vdl.Target) error
+pkg syncbase, method (*DevModeUpdateVClockOptsTarget) FinishFields(vdl.FieldsTarget) error
+pkg syncbase, method (*DevModeUpdateVClockOptsTarget) StartField(string) (vdl.Target, vdl.Target, error)
+pkg syncbase, method (*DevModeUpdateVClockOptsTarget) StartFields(*vdl.Type) (vdl.FieldsTarget, error)
 pkg syncbase, type AppClientMethods interface { Create, Destroy, Exists, GetPermissions, SetPermissions }
 pkg syncbase, type AppClientMethods interface, Create(*context.T, access.Permissions, ...rpc.CallOpt) error
 pkg syncbase, type AppClientMethods interface, Destroy(*context.T, ...rpc.CallOpt) error
@@ -35,6 +39,10 @@ pkg syncbase, type DevModeUpdateVClockOpts struct, DoNtpUpdate bool
 pkg syncbase, type DevModeUpdateVClockOpts struct, ElapsedTime time.Duration
 pkg syncbase, type DevModeUpdateVClockOpts struct, Now time.Time
 pkg syncbase, type DevModeUpdateVClockOpts struct, NtpHost string
+pkg syncbase, type DevModeUpdateVClockOptsTarget struct
+pkg syncbase, type DevModeUpdateVClockOptsTarget struct, Value *DevModeUpdateVClockOpts
+pkg syncbase, type DevModeUpdateVClockOptsTarget struct, embedded vdl.FieldsTargetBase
+pkg syncbase, type DevModeUpdateVClockOptsTarget struct, embedded vdl.TargetBase
 pkg syncbase, type ServiceClientMethods interface { DevModeGetTime, DevModeUpdateVClock, GetPermissions, SetPermissions }
 pkg syncbase, type ServiceClientMethods interface, DevModeGetTime(*context.T, ...rpc.CallOpt) (time.Time, error)
 pkg syncbase, type ServiceClientMethods interface, DevModeUpdateVClock(*context.T, DevModeUpdateVClockOpts, ...rpc.CallOpt) error

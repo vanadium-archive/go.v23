@@ -33,14 +33,27 @@ func (BlessingPatternChunk) __VDLReflect(struct {
 }) {
 }
 
-func (m BlessingPatternChunk) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
-	if err := t.FromString(string(m), __VDLType_groups_v_io_v23_services_groups_BlessingPatternChunk); err != nil {
+func (m *BlessingPatternChunk) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
+	if err := t.FromString(string((*m)), __VDLType_groups_v_io_v23_services_groups_BlessingPatternChunk); err != nil {
 		return err
 	}
 	return nil
 }
 
-func (m BlessingPatternChunk) MakeVDLTarget() vdl.Target {
+func (m *BlessingPatternChunk) MakeVDLTarget() vdl.Target {
+	return &BlessingPatternChunkTarget{Value: m}
+}
+
+type BlessingPatternChunkTarget struct {
+	Value *BlessingPatternChunk
+	vdl.TargetBase
+}
+
+func (t *BlessingPatternChunkTarget) FromString(src string, tt *vdl.Type) error {
+	if !vdl.Compatible(tt, __VDLType_groups_v_io_v23_services_groups_BlessingPatternChunk) {
+		return fmt.Errorf("type %v incompatible with %v", tt, __VDLType_groups_v_io_v23_services_groups_BlessingPatternChunk)
+	}
+	*t.Value = BlessingPatternChunk(src)
 	return nil
 }
 
@@ -53,7 +66,6 @@ func (GetRequest) __VDLReflect(struct {
 }
 
 func (m *GetRequest) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
-
 	if __VDLType_groups_v_io_v23_services_groups_GetRequest == nil || __VDLTypegroups0 == nil {
 		panic("Initialization order error: types generated for FillVDLTarget not initialized. Consider moving caller to an init() block.")
 	}
@@ -69,6 +81,31 @@ func (m *GetRequest) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 }
 
 func (m *GetRequest) MakeVDLTarget() vdl.Target {
+	return &GetRequestTarget{Value: m}
+}
+
+type GetRequestTarget struct {
+	Value *GetRequest
+	vdl.TargetBase
+	vdl.FieldsTargetBase
+}
+
+func (t *GetRequestTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
+	if !vdl.Compatible(tt, __VDLType_groups_v_io_v23_services_groups_GetRequest) {
+		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType_groups_v_io_v23_services_groups_GetRequest)
+	}
+	return t, nil
+}
+func (t *GetRequestTarget) StartField(name string) (key, field vdl.Target, _ error) {
+	switch name {
+	default:
+		return nil, nil, fmt.Errorf("field %s not in struct %v", name, __VDLType_groups_v_io_v23_services_groups_GetRequest)
+	}
+}
+func (t *GetRequestTarget) FinishField(_, _ vdl.Target) error {
+	return nil
+}
+func (t *GetRequestTarget) FinishFields(_ vdl.FieldsTarget) error {
 	return nil
 }
 
@@ -82,7 +119,6 @@ func (GetResponse) __VDLReflect(struct {
 }
 
 func (m *GetResponse) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
-
 	if __VDLType_groups_v_io_v23_services_groups_GetResponse == nil || __VDLTypegroups1 == nil {
 		panic("Initialization order error: types generated for FillVDLTarget not initialized. Consider moving caller to an init() block.")
 	}
@@ -128,6 +164,63 @@ func (m *GetResponse) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 }
 
 func (m *GetResponse) MakeVDLTarget() vdl.Target {
+	return &GetResponseTarget{Value: m}
+}
+
+type GetResponseTarget struct {
+	Value *GetResponse
+	vdl.TargetBase
+	vdl.FieldsTargetBase
+}
+
+func (t *GetResponseTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
+	if !vdl.Compatible(tt, __VDLType_groups_v_io_v23_services_groups_GetResponse) {
+		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType_groups_v_io_v23_services_groups_GetResponse)
+	}
+	return t, nil
+}
+func (t *GetResponseTarget) StartField(name string) (key, field vdl.Target, _ error) {
+	switch name {
+	case "Entries":
+		val, err := &groups7365745b762e696f2f7632332f73657276696365732f67726f7570732e426c657373696e675061747465726e4368756e6b20737472696e675dTarget{Value: &t.Value.Entries}, error(nil)
+		return nil, val, err
+	default:
+		return nil, nil, fmt.Errorf("field %s not in struct %v", name, __VDLType_groups_v_io_v23_services_groups_GetResponse)
+	}
+}
+func (t *GetResponseTarget) FinishField(_, _ vdl.Target) error {
+	return nil
+}
+func (t *GetResponseTarget) FinishFields(_ vdl.FieldsTarget) error {
+	return nil
+}
+
+type groups7365745b762e696f2f7632332f73657276696365732f67726f7570732e426c657373696e675061747465726e4368756e6b20737472696e675dTarget struct {
+	Value   *map[BlessingPatternChunk]struct{}
+	currKey BlessingPatternChunk
+	vdl.TargetBase
+	vdl.SetTargetBase
+}
+
+func (t *groups7365745b762e696f2f7632332f73657276696365732f67726f7570732e426c657373696e675061747465726e4368756e6b20737472696e675dTarget) StartSet(tt *vdl.Type, len int) (vdl.SetTarget, error) {
+	if !vdl.Compatible(tt, __VDLTypegroups2) {
+		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLTypegroups2)
+	}
+	*t.Value = make(map[BlessingPatternChunk]struct{})
+	return t, nil
+}
+func (t *groups7365745b762e696f2f7632332f73657276696365732f67726f7570732e426c657373696e675061747465726e4368756e6b20737472696e675dTarget) StartKey() (key vdl.Target, _ error) {
+	t.currKey = BlessingPatternChunk("")
+	return &BlessingPatternChunkTarget{Value: &t.currKey}, error(nil)
+}
+func (t *groups7365745b762e696f2f7632332f73657276696365732f67726f7570732e426c657373696e675061747465726e4368756e6b20737472696e675dTarget) FinishKey(key vdl.Target) error {
+	(*t.Value)[t.currKey] = struct{}{}
+	return nil
+}
+func (t *groups7365745b762e696f2f7632332f73657276696365732f67726f7570732e426c657373696e675061747465726e4368756e6b20737472696e675dTarget) FinishSet(list vdl.SetTarget) error {
+	if len(*t.Value) == 0 {
+		*t.Value = nil
+	}
 	return nil
 }
 
@@ -183,14 +276,34 @@ func (ApproximationType) __VDLReflect(struct {
 }) {
 }
 
-func (m ApproximationType) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
-	if err := t.FromEnumLabel(m.String(), __VDLType_groups_v_io_v23_services_groups_ApproximationType); err != nil {
+func (m *ApproximationType) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
+	if err := t.FromEnumLabel((*m).String(), __VDLType_groups_v_io_v23_services_groups_ApproximationType); err != nil {
 		return err
 	}
 	return nil
 }
 
-func (m ApproximationType) MakeVDLTarget() vdl.Target {
+func (m *ApproximationType) MakeVDLTarget() vdl.Target {
+	return &ApproximationTypeTarget{Value: m}
+}
+
+type ApproximationTypeTarget struct {
+	Value *ApproximationType
+	vdl.TargetBase
+}
+
+func (t *ApproximationTypeTarget) FromEnumLabel(src string, tt *vdl.Type) error {
+	if !vdl.Compatible(tt, __VDLType_groups_v_io_v23_services_groups_ApproximationType) {
+		return fmt.Errorf("type %v incompatible with %v", tt, __VDLType_groups_v_io_v23_services_groups_ApproximationType)
+	}
+	switch src {
+	case "Under":
+		*t.Value = 0
+	case "Over":
+		*t.Value = 1
+	default:
+		return fmt.Errorf("label %s not in enum %v", src, __VDLType_groups_v_io_v23_services_groups_ApproximationType)
+	}
 	return nil
 }
 
@@ -207,7 +320,6 @@ func (Approximation) __VDLReflect(struct {
 }
 
 func (m *Approximation) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
-
 	if __VDLType_groups_v_io_v23_services_groups_Approximation == nil || __VDLTypegroups3 == nil {
 		panic("Initialization order error: types generated for FillVDLTarget not initialized. Consider moving caller to an init() block.")
 	}
@@ -247,6 +359,37 @@ func (m *Approximation) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 }
 
 func (m *Approximation) MakeVDLTarget() vdl.Target {
+	return &ApproximationTarget{Value: m}
+}
+
+type ApproximationTarget struct {
+	Value *Approximation
+	vdl.TargetBase
+	vdl.FieldsTargetBase
+}
+
+func (t *ApproximationTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
+	if !vdl.Compatible(tt, __VDLType_groups_v_io_v23_services_groups_Approximation) {
+		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType_groups_v_io_v23_services_groups_Approximation)
+	}
+	return t, nil
+}
+func (t *ApproximationTarget) StartField(name string) (key, field vdl.Target, _ error) {
+	switch name {
+	case "Reason":
+		val, err := &vdl.StringTarget{Value: &t.Value.Reason}, error(nil)
+		return nil, val, err
+	case "Details":
+		val, err := &vdl.StringTarget{Value: &t.Value.Details}, error(nil)
+		return nil, val, err
+	default:
+		return nil, nil, fmt.Errorf("field %s not in struct %v", name, __VDLType_groups_v_io_v23_services_groups_Approximation)
+	}
+}
+func (t *ApproximationTarget) FinishField(_, _ vdl.Target) error {
+	return nil
+}
+func (t *ApproximationTarget) FinishFields(_ vdl.FieldsTarget) error {
 	return nil
 }
 

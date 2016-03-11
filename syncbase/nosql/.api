@@ -14,8 +14,24 @@ pkg nosql, method (*ConflictRow) FillVDLTarget(vdl.Target, *vdl.Type) error
 pkg nosql, method (*ConflictRow) MakeVDLTarget() vdl.Target
 pkg nosql, method (*ConflictRowSet) FillVDLTarget(vdl.Target, *vdl.Type) error
 pkg nosql, method (*ConflictRowSet) MakeVDLTarget() vdl.Target
+pkg nosql, method (*ConflictRowSetTarget) FinishField(vdl.Target, vdl.Target) error
+pkg nosql, method (*ConflictRowSetTarget) FinishFields(vdl.FieldsTarget) error
+pkg nosql, method (*ConflictRowSetTarget) StartField(string) (vdl.Target, vdl.Target, error)
+pkg nosql, method (*ConflictRowSetTarget) StartFields(*vdl.Type) (vdl.FieldsTarget, error)
+pkg nosql, method (*ConflictRowTarget) FinishField(vdl.Target, vdl.Target) error
+pkg nosql, method (*ConflictRowTarget) FinishFields(vdl.FieldsTarget) error
+pkg nosql, method (*ConflictRowTarget) StartField(string) (vdl.Target, vdl.Target, error)
+pkg nosql, method (*ConflictRowTarget) StartFields(*vdl.Type) (vdl.FieldsTarget, error)
 pkg nosql, method (*ConflictScanSet) FillVDLTarget(vdl.Target, *vdl.Type) error
 pkg nosql, method (*ConflictScanSet) MakeVDLTarget() vdl.Target
+pkg nosql, method (*ConflictScanSetTarget) FinishField(vdl.Target, vdl.Target) error
+pkg nosql, method (*ConflictScanSetTarget) FinishFields(vdl.FieldsTarget) error
+pkg nosql, method (*ConflictScanSetTarget) StartField(string) (vdl.Target, vdl.Target, error)
+pkg nosql, method (*ConflictScanSetTarget) StartFields(*vdl.Type) (vdl.FieldsTarget, error)
+pkg nosql, method (*ConflictTarget) FinishField(vdl.Target, vdl.Target) error
+pkg nosql, method (*ConflictTarget) FinishFields(vdl.FieldsTarget) error
+pkg nosql, method (*ConflictTarget) StartField(string) (vdl.Target, vdl.Target, error)
+pkg nosql, method (*ConflictTarget) StartFields(*vdl.Type) (vdl.FieldsTarget, error)
 pkg nosql, method (*InvalidScanStream) Advance() bool
 pkg nosql, method (*InvalidScanStream) Cancel()
 pkg nosql, method (*InvalidScanStream) Err() error
@@ -23,11 +39,23 @@ pkg nosql, method (*InvalidScanStream) Key() string
 pkg nosql, method (*InvalidScanStream) Value(interface{}) error
 pkg nosql, method (*Resolution) FillVDLTarget(vdl.Target, *vdl.Type) error
 pkg nosql, method (*Resolution) MakeVDLTarget() vdl.Target
+pkg nosql, method (*ResolutionTarget) FinishField(vdl.Target, vdl.Target) error
+pkg nosql, method (*ResolutionTarget) FinishFields(vdl.FieldsTarget) error
+pkg nosql, method (*ResolutionTarget) StartField(string) (vdl.Target, vdl.Target, error)
+pkg nosql, method (*ResolutionTarget) StartFields(*vdl.Type) (vdl.FieldsTarget, error)
 pkg nosql, method (*ResolvedRow) FillVDLTarget(vdl.Target, *vdl.Type) error
 pkg nosql, method (*ResolvedRow) MakeVDLTarget() vdl.Target
+pkg nosql, method (*ResolvedRowTarget) FinishField(vdl.Target, vdl.Target) error
+pkg nosql, method (*ResolvedRowTarget) FinishFields(vdl.FieldsTarget) error
+pkg nosql, method (*ResolvedRowTarget) StartField(string) (vdl.Target, vdl.Target, error)
+pkg nosql, method (*ResolvedRowTarget) StartFields(*vdl.Type) (vdl.FieldsTarget, error)
 pkg nosql, method (*Value) FillVDLTarget(vdl.Target, *vdl.Type) error
 pkg nosql, method (*Value) Get(interface{}) error
 pkg nosql, method (*Value) MakeVDLTarget() vdl.Target
+pkg nosql, method (*ValueTarget) FinishField(vdl.Target, vdl.Target) error
+pkg nosql, method (*ValueTarget) FinishFields(vdl.FieldsTarget) error
+pkg nosql, method (*ValueTarget) StartField(string) (vdl.Target, vdl.Target, error)
+pkg nosql, method (*ValueTarget) StartFields(*vdl.Type) (vdl.FieldsTarget, error)
 pkg nosql, method (*WatchChange) Value(interface{}) error
 pkg nosql, type BatchDatabase interface { Abort, Close, Commit, Exec, FullName, GetResumeMarker, ListTables, Name, Table }
 pkg nosql, type BatchDatabase interface, Abort(*context.T) error
@@ -80,8 +108,24 @@ pkg nosql, type ConflictRow struct, RemoteValue Value
 pkg nosql, type ConflictRowSet struct
 pkg nosql, type ConflictRowSet struct, ByBatch map[uint64][]ConflictRow
 pkg nosql, type ConflictRowSet struct, ByKey map[string]ConflictRow
+pkg nosql, type ConflictRowSetTarget struct
+pkg nosql, type ConflictRowSetTarget struct, Value *ConflictRowSet
+pkg nosql, type ConflictRowSetTarget struct, embedded vdl.FieldsTargetBase
+pkg nosql, type ConflictRowSetTarget struct, embedded vdl.TargetBase
+pkg nosql, type ConflictRowTarget struct
+pkg nosql, type ConflictRowTarget struct, Value *ConflictRow
+pkg nosql, type ConflictRowTarget struct, embedded vdl.FieldsTargetBase
+pkg nosql, type ConflictRowTarget struct, embedded vdl.TargetBase
 pkg nosql, type ConflictScanSet struct
 pkg nosql, type ConflictScanSet struct, ByBatch map[uint64][]nosql.ScanOp
+pkg nosql, type ConflictScanSetTarget struct
+pkg nosql, type ConflictScanSetTarget struct, Value *ConflictScanSet
+pkg nosql, type ConflictScanSetTarget struct, embedded vdl.FieldsTargetBase
+pkg nosql, type ConflictScanSetTarget struct, embedded vdl.TargetBase
+pkg nosql, type ConflictTarget struct
+pkg nosql, type ConflictTarget struct, Value *Conflict
+pkg nosql, type ConflictTarget struct, embedded vdl.FieldsTargetBase
+pkg nosql, type ConflictTarget struct, embedded vdl.TargetBase
 pkg nosql, type Database interface { BeginBatch, Blob, Close, Create, CreateBlob, Destroy, EnforceSchema, Exec, Exists, FullName, GetPermissions, GetResumeMarker, GetSyncgroupNames, ListTables, Name, PauseSync, ResumeSync, SetPermissions, Syncgroup, Table, Watch }
 pkg nosql, type Database interface, BeginBatch(*context.T, wire.BatchOptions) (BatchDatabase, error)
 pkg nosql, type Database interface, Blob(wire.BlobRef) Blob
@@ -123,9 +167,17 @@ pkg nosql, type PrefixRange interface, Prefix() string
 pkg nosql, type PrefixRange interface, Start() string
 pkg nosql, type Resolution struct
 pkg nosql, type Resolution struct, ResultSet map[string]ResolvedRow
+pkg nosql, type ResolutionTarget struct
+pkg nosql, type ResolutionTarget struct, Value *Resolution
+pkg nosql, type ResolutionTarget struct, embedded vdl.FieldsTargetBase
+pkg nosql, type ResolutionTarget struct, embedded vdl.TargetBase
 pkg nosql, type ResolvedRow struct
 pkg nosql, type ResolvedRow struct, Key string
 pkg nosql, type ResolvedRow struct, Result *Value
+pkg nosql, type ResolvedRowTarget struct
+pkg nosql, type ResolvedRowTarget struct, Value *ResolvedRow
+pkg nosql, type ResolvedRowTarget struct, embedded vdl.FieldsTargetBase
+pkg nosql, type ResolvedRowTarget struct, embedded vdl.TargetBase
 pkg nosql, type ResultStream interface { Advance, Cancel, Err, Result }
 pkg nosql, type ResultStream interface, Advance() bool
 pkg nosql, type ResultStream interface, Cancel()
@@ -185,6 +237,10 @@ pkg nosql, type Value struct, Selection nosql.ValueSelection
 pkg nosql, type Value struct, State nosql.ValueState
 pkg nosql, type Value struct, Val []byte
 pkg nosql, type Value struct, WriteTs time.Time
+pkg nosql, type ValueTarget struct
+pkg nosql, type ValueTarget struct, Value *Value
+pkg nosql, type ValueTarget struct, embedded vdl.FieldsTargetBase
+pkg nosql, type ValueTarget struct, embedded vdl.TargetBase
 pkg nosql, type WatchChange struct
 pkg nosql, type WatchChange struct, ChangeType ChangeType
 pkg nosql, type WatchChange struct, Continued bool

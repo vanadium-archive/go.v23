@@ -8,6 +8,8 @@
 package rpc
 
 import (
+	"fmt"
+	"reflect"
 	"v.io/v23/security"
 	"v.io/v23/vdl"
 	"v.io/v23/vdlroot/time"
@@ -59,7 +61,6 @@ func (Request) __VDLReflect(struct {
 }
 
 func (m *Request) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
-
 	__VDLEnsureNativeBuilt_protocol()
 	fieldsTarget1, err := t.StartFields(tt)
 	if err != nil {
@@ -182,6 +183,55 @@ func (m *Request) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 }
 
 func (m *Request) MakeVDLTarget() vdl.Target {
+	return &RequestTarget{Value: m}
+}
+
+type RequestTarget struct {
+	Value *Request
+	vdl.TargetBase
+	vdl.FieldsTargetBase
+}
+
+func (t *RequestTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
+	if !vdl.Compatible(tt, __VDLType_protocol_v_io_v23_rpc_Request) {
+		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType_protocol_v_io_v23_rpc_Request)
+	}
+	return t, nil
+}
+func (t *RequestTarget) StartField(name string) (key, field vdl.Target, _ error) {
+	switch name {
+	case "Suffix":
+		val, err := &vdl.StringTarget{Value: &t.Value.Suffix}, error(nil)
+		return nil, val, err
+	case "Method":
+		val, err := &vdl.StringTarget{Value: &t.Value.Method}, error(nil)
+		return nil, val, err
+	case "NumPosArgs":
+		val, err := &vdl.Uint64Target{Value: &t.Value.NumPosArgs}, error(nil)
+		return nil, val, err
+	case "EndStreamArgs":
+		val, err := &vdl.BoolTarget{Value: &t.Value.EndStreamArgs}, error(nil)
+		return nil, val, err
+	case "Deadline":
+		val, err := vdl.ReflectTarget(reflect.ValueOf(&t.Value.Deadline))
+		return nil, val, err
+	case "GrantedBlessings":
+		val, err := vdl.ReflectTarget(reflect.ValueOf(&t.Value.GrantedBlessings))
+		return nil, val, err
+	case "TraceRequest":
+		val, err := &vtrace.RequestTarget{Value: &t.Value.TraceRequest}, error(nil)
+		return nil, val, err
+	case "Language":
+		val, err := &vdl.StringTarget{Value: &t.Value.Language}, error(nil)
+		return nil, val, err
+	default:
+		return nil, nil, fmt.Errorf("field %s not in struct %v", name, __VDLType_protocol_v_io_v23_rpc_Request)
+	}
+}
+func (t *RequestTarget) FinishField(_, _ vdl.Target) error {
+	return nil
+}
+func (t *RequestTarget) FinishFields(_ vdl.FieldsTarget) error {
 	return nil
 }
 
@@ -213,7 +263,6 @@ func (Response) __VDLReflect(struct {
 }
 
 func (m *Response) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
-
 	__VDLEnsureNativeBuilt_protocol()
 	fieldsTarget1, err := t.StartFields(tt)
 	if err != nil {
@@ -300,6 +349,46 @@ func (m *Response) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 }
 
 func (m *Response) MakeVDLTarget() vdl.Target {
+	return &ResponseTarget{Value: m}
+}
+
+type ResponseTarget struct {
+	Value *Response
+	vdl.TargetBase
+	vdl.FieldsTargetBase
+}
+
+func (t *ResponseTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
+	if !vdl.Compatible(tt, __VDLType_protocol_v_io_v23_rpc_Response) {
+		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType_protocol_v_io_v23_rpc_Response)
+	}
+	return t, nil
+}
+func (t *ResponseTarget) StartField(name string) (key, field vdl.Target, _ error) {
+	switch name {
+	case "Error":
+		val, err := &verror.ErrorTarget{Value: &t.Value.Error}, error(nil)
+		return nil, val, err
+	case "EndStreamResults":
+		val, err := &vdl.BoolTarget{Value: &t.Value.EndStreamResults}, error(nil)
+		return nil, val, err
+	case "NumPosResults":
+		val, err := &vdl.Uint64Target{Value: &t.Value.NumPosResults}, error(nil)
+		return nil, val, err
+	case "TraceResponse":
+		val, err := &vtrace.ResponseTarget{Value: &t.Value.TraceResponse}, error(nil)
+		return nil, val, err
+	case "AckBlessings":
+		val, err := &vdl.BoolTarget{Value: &t.Value.AckBlessings}, error(nil)
+		return nil, val, err
+	default:
+		return nil, nil, fmt.Errorf("field %s not in struct %v", name, __VDLType_protocol_v_io_v23_rpc_Response)
+	}
+}
+func (t *ResponseTarget) FinishField(_, _ vdl.Target) error {
+	return nil
+}
+func (t *ResponseTarget) FinishFields(_ vdl.FieldsTarget) error {
 	return nil
 }
 
