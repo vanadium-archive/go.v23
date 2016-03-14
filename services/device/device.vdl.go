@@ -69,9 +69,11 @@ func (m *Config) MakeVDLTarget() vdl.Target {
 }
 
 type ConfigTarget struct {
-	Value    *Config
-	currKey  string
-	currElem string
+	Value      *Config
+	currKey    string
+	currElem   string
+	keyTarget  vdl.StringTarget
+	elemTarget vdl.StringTarget
 	vdl.TargetBase
 	vdl.MapTargetBase
 }
@@ -85,11 +87,15 @@ func (t *ConfigTarget) StartMap(tt *vdl.Type, len int) (vdl.MapTarget, error) {
 }
 func (t *ConfigTarget) StartKey() (key vdl.Target, _ error) {
 	t.currKey = ""
-	return &vdl.StringTarget{Value: &t.currKey}, error(nil)
+	t.keyTarget.Value = &t.currKey
+	target, err := &t.keyTarget, error(nil)
+	return target, err
 }
 func (t *ConfigTarget) FinishKeyStartField(key vdl.Target) (field vdl.Target, _ error) {
 	t.currElem = ""
-	return &vdl.StringTarget{Value: &t.currElem}, error(nil)
+	t.elemTarget.Value = &t.currElem
+	target, err := &t.elemTarget, error(nil)
+	return target, err
 }
 func (t *ConfigTarget) FinishField(key, field vdl.Target) error {
 	(*t.Value)[t.currKey] = t.currElem
@@ -483,7 +489,9 @@ func (m *InstallationStatus) MakeVDLTarget() vdl.Target {
 }
 
 type InstallationStatusTarget struct {
-	Value *InstallationStatus
+	Value         *InstallationStatus
+	stateTarget   InstallationStateTarget
+	versionTarget vdl.StringTarget
 	vdl.TargetBase
 	vdl.FieldsTargetBase
 }
@@ -497,11 +505,13 @@ func (t *InstallationStatusTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, 
 func (t *InstallationStatusTarget) StartField(name string) (key, field vdl.Target, _ error) {
 	switch name {
 	case "State":
-		val, err := &InstallationStateTarget{Value: &t.Value.State}, error(nil)
-		return nil, val, err
+		t.stateTarget.Value = &t.Value.State
+		target, err := &t.stateTarget, error(nil)
+		return nil, target, err
 	case "Version":
-		val, err := &vdl.StringTarget{Value: &t.Value.Version}, error(nil)
-		return nil, val, err
+		t.versionTarget.Value = &t.Value.Version
+		target, err := &t.versionTarget, error(nil)
+		return nil, target, err
 	default:
 		return nil, nil, fmt.Errorf("field %s not in struct %v", name, __VDLType_v_io_v23_services_device_InstallationStatus)
 	}
@@ -571,7 +581,9 @@ func (m *InstanceStatus) MakeVDLTarget() vdl.Target {
 }
 
 type InstanceStatusTarget struct {
-	Value *InstanceStatus
+	Value         *InstanceStatus
+	stateTarget   InstanceStateTarget
+	versionTarget vdl.StringTarget
 	vdl.TargetBase
 	vdl.FieldsTargetBase
 }
@@ -585,11 +597,13 @@ func (t *InstanceStatusTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, erro
 func (t *InstanceStatusTarget) StartField(name string) (key, field vdl.Target, _ error) {
 	switch name {
 	case "State":
-		val, err := &InstanceStateTarget{Value: &t.Value.State}, error(nil)
-		return nil, val, err
+		t.stateTarget.Value = &t.Value.State
+		target, err := &t.stateTarget, error(nil)
+		return nil, target, err
 	case "Version":
-		val, err := &vdl.StringTarget{Value: &t.Value.Version}, error(nil)
-		return nil, val, err
+		t.versionTarget.Value = &t.Value.Version
+		target, err := &t.versionTarget, error(nil)
+		return nil, target, err
 	default:
 		return nil, nil, fmt.Errorf("field %s not in struct %v", name, __VDLType_v_io_v23_services_device_InstanceStatus)
 	}
@@ -659,7 +673,9 @@ func (m *DeviceStatus) MakeVDLTarget() vdl.Target {
 }
 
 type DeviceStatusTarget struct {
-	Value *DeviceStatus
+	Value         *DeviceStatus
+	stateTarget   InstanceStateTarget
+	versionTarget vdl.StringTarget
 	vdl.TargetBase
 	vdl.FieldsTargetBase
 }
@@ -673,11 +689,13 @@ func (t *DeviceStatusTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error)
 func (t *DeviceStatusTarget) StartField(name string) (key, field vdl.Target, _ error) {
 	switch name {
 	case "State":
-		val, err := &InstanceStateTarget{Value: &t.Value.State}, error(nil)
-		return nil, val, err
+		t.stateTarget.Value = &t.Value.State
+		target, err := &t.stateTarget, error(nil)
+		return nil, target, err
 	case "Version":
-		val, err := &vdl.StringTarget{Value: &t.Value.Version}, error(nil)
-		return nil, val, err
+		t.versionTarget.Value = &t.Value.Version
+		target, err := &t.versionTarget, error(nil)
+		return nil, target, err
 	default:
 		return nil, nil, fmt.Errorf("field %s not in struct %v", name, __VDLType_v_io_v23_services_device_DeviceStatus)
 	}
@@ -889,7 +907,8 @@ func (m *Description) MakeVDLTarget() vdl.Target {
 }
 
 type DescriptionTarget struct {
-	Value *Description
+	Value          *Description
+	profilesTarget unnamed_7365745b737472696e675dTarget
 	vdl.TargetBase
 	vdl.FieldsTargetBase
 }
@@ -903,8 +922,9 @@ func (t *DescriptionTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) 
 func (t *DescriptionTarget) StartField(name string) (key, field vdl.Target, _ error) {
 	switch name {
 	case "Profiles":
-		val, err := &unnamed_7365745b737472696e675d_Target{Value: &t.Value.Profiles}, error(nil)
-		return nil, val, err
+		t.profilesTarget.Value = &t.Value.Profiles
+		target, err := &t.profilesTarget, error(nil)
+		return nil, target, err
 	default:
 		return nil, nil, fmt.Errorf("field %s not in struct %v", name, __VDLType_v_io_v23_services_device_Description)
 	}
@@ -917,29 +937,33 @@ func (t *DescriptionTarget) FinishFields(_ vdl.FieldsTarget) error {
 	return nil
 }
 
-type unnamed_7365745b737472696e675d_Target struct {
-	Value   *map[string]struct{}
-	currKey string
+// map[string]struct{}
+type unnamed_7365745b737472696e675dTarget struct {
+	Value     *map[string]struct{}
+	currKey   string
+	keyTarget vdl.StringTarget
 	vdl.TargetBase
 	vdl.SetTargetBase
 }
 
-func (t *unnamed_7365745b737472696e675d_Target) StartSet(tt *vdl.Type, len int) (vdl.SetTarget, error) {
+func (t *unnamed_7365745b737472696e675dTarget) StartSet(tt *vdl.Type, len int) (vdl.SetTarget, error) {
 	if !vdl.Compatible(tt, __VDLType5) {
 		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType5)
 	}
 	*t.Value = make(map[string]struct{})
 	return t, nil
 }
-func (t *unnamed_7365745b737472696e675d_Target) StartKey() (key vdl.Target, _ error) {
+func (t *unnamed_7365745b737472696e675dTarget) StartKey() (key vdl.Target, _ error) {
 	t.currKey = ""
-	return &vdl.StringTarget{Value: &t.currKey}, error(nil)
+	t.keyTarget.Value = &t.currKey
+	target, err := &t.keyTarget, error(nil)
+	return target, err
 }
-func (t *unnamed_7365745b737472696e675d_Target) FinishKey(key vdl.Target) error {
+func (t *unnamed_7365745b737472696e675dTarget) FinishKey(key vdl.Target) error {
 	(*t.Value)[t.currKey] = struct{}{}
 	return nil
 }
-func (t *unnamed_7365745b737472696e675d_Target) FinishSet(list vdl.SetTarget) error {
+func (t *unnamed_7365745b737472696e675dTarget) FinishSet(list vdl.SetTarget) error {
 	if len(*t.Value) == 0 {
 		*t.Value = nil
 	}
@@ -1003,7 +1027,9 @@ func (m *Association) MakeVDLTarget() vdl.Target {
 }
 
 type AssociationTarget struct {
-	Value *Association
+	Value              *Association
+	identityNameTarget vdl.StringTarget
+	accountNameTarget  vdl.StringTarget
 	vdl.TargetBase
 	vdl.FieldsTargetBase
 }
@@ -1017,11 +1043,13 @@ func (t *AssociationTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) 
 func (t *AssociationTarget) StartField(name string) (key, field vdl.Target, _ error) {
 	switch name {
 	case "IdentityName":
-		val, err := &vdl.StringTarget{Value: &t.Value.IdentityName}, error(nil)
-		return nil, val, err
+		t.identityNameTarget.Value = &t.Value.IdentityName
+		target, err := &t.identityNameTarget, error(nil)
+		return nil, target, err
 	case "AccountName":
-		val, err := &vdl.StringTarget{Value: &t.Value.AccountName}, error(nil)
-		return nil, val, err
+		t.accountNameTarget.Value = &t.Value.AccountName
+		target, err := &t.accountNameTarget, error(nil)
+		return nil, target, err
 	default:
 		return nil, nil, fmt.Errorf("field %s not in struct %v", name, __VDLType_v_io_v23_services_device_Association)
 	}

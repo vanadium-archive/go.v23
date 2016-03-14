@@ -170,7 +170,8 @@ func (m *GetResponse) MakeVDLTarget() vdl.Target {
 }
 
 type GetResponseTarget struct {
-	Value *GetResponse
+	Value         *GetResponse
+	entriesTarget unnamed_7365745b762e696f2f7632332f73657276696365732f67726f7570732e426c657373696e675061747465726e4368756e6b20737472696e675dTarget
 	vdl.TargetBase
 	vdl.FieldsTargetBase
 }
@@ -184,8 +185,9 @@ func (t *GetResponseTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) 
 func (t *GetResponseTarget) StartField(name string) (key, field vdl.Target, _ error) {
 	switch name {
 	case "Entries":
-		val, err := &unnamed_7365745b762e696f2f7632332f73657276696365732f67726f7570732e426c657373696e675061747465726e4368756e6b20737472696e675d_Target{Value: &t.Value.Entries}, error(nil)
-		return nil, val, err
+		t.entriesTarget.Value = &t.Value.Entries
+		target, err := &t.entriesTarget, error(nil)
+		return nil, target, err
 	default:
 		return nil, nil, fmt.Errorf("field %s not in struct %v", name, __VDLType_v_io_v23_services_groups_GetResponse)
 	}
@@ -198,29 +200,33 @@ func (t *GetResponseTarget) FinishFields(_ vdl.FieldsTarget) error {
 	return nil
 }
 
-type unnamed_7365745b762e696f2f7632332f73657276696365732f67726f7570732e426c657373696e675061747465726e4368756e6b20737472696e675d_Target struct {
-	Value   *map[BlessingPatternChunk]struct{}
-	currKey BlessingPatternChunk
+// map[BlessingPatternChunk]struct{}
+type unnamed_7365745b762e696f2f7632332f73657276696365732f67726f7570732e426c657373696e675061747465726e4368756e6b20737472696e675dTarget struct {
+	Value     *map[BlessingPatternChunk]struct{}
+	currKey   BlessingPatternChunk
+	keyTarget BlessingPatternChunkTarget
 	vdl.TargetBase
 	vdl.SetTargetBase
 }
 
-func (t *unnamed_7365745b762e696f2f7632332f73657276696365732f67726f7570732e426c657373696e675061747465726e4368756e6b20737472696e675d_Target) StartSet(tt *vdl.Type, len int) (vdl.SetTarget, error) {
+func (t *unnamed_7365745b762e696f2f7632332f73657276696365732f67726f7570732e426c657373696e675061747465726e4368756e6b20737472696e675dTarget) StartSet(tt *vdl.Type, len int) (vdl.SetTarget, error) {
 	if !vdl.Compatible(tt, __VDLType2) {
 		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType2)
 	}
 	*t.Value = make(map[BlessingPatternChunk]struct{})
 	return t, nil
 }
-func (t *unnamed_7365745b762e696f2f7632332f73657276696365732f67726f7570732e426c657373696e675061747465726e4368756e6b20737472696e675d_Target) StartKey() (key vdl.Target, _ error) {
+func (t *unnamed_7365745b762e696f2f7632332f73657276696365732f67726f7570732e426c657373696e675061747465726e4368756e6b20737472696e675dTarget) StartKey() (key vdl.Target, _ error) {
 	t.currKey = BlessingPatternChunk("")
-	return &BlessingPatternChunkTarget{Value: &t.currKey}, error(nil)
+	t.keyTarget.Value = &t.currKey
+	target, err := &t.keyTarget, error(nil)
+	return target, err
 }
-func (t *unnamed_7365745b762e696f2f7632332f73657276696365732f67726f7570732e426c657373696e675061747465726e4368756e6b20737472696e675d_Target) FinishKey(key vdl.Target) error {
+func (t *unnamed_7365745b762e696f2f7632332f73657276696365732f67726f7570732e426c657373696e675061747465726e4368756e6b20737472696e675dTarget) FinishKey(key vdl.Target) error {
 	(*t.Value)[t.currKey] = struct{}{}
 	return nil
 }
-func (t *unnamed_7365745b762e696f2f7632332f73657276696365732f67726f7570732e426c657373696e675061747465726e4368756e6b20737472696e675d_Target) FinishSet(list vdl.SetTarget) error {
+func (t *unnamed_7365745b762e696f2f7632332f73657276696365732f67726f7570732e426c657373696e675061747465726e4368756e6b20737472696e675dTarget) FinishSet(list vdl.SetTarget) error {
 	if len(*t.Value) == 0 {
 		*t.Value = nil
 	}
@@ -368,7 +374,9 @@ func (m *Approximation) MakeVDLTarget() vdl.Target {
 }
 
 type ApproximationTarget struct {
-	Value *Approximation
+	Value         *Approximation
+	reasonTarget  vdl.StringTarget
+	detailsTarget vdl.StringTarget
 	vdl.TargetBase
 	vdl.FieldsTargetBase
 }
@@ -382,11 +390,13 @@ func (t *ApproximationTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error
 func (t *ApproximationTarget) StartField(name string) (key, field vdl.Target, _ error) {
 	switch name {
 	case "Reason":
-		val, err := &vdl.StringTarget{Value: &t.Value.Reason}, error(nil)
-		return nil, val, err
+		t.reasonTarget.Value = &t.Value.Reason
+		target, err := &t.reasonTarget, error(nil)
+		return nil, target, err
 	case "Details":
-		val, err := &vdl.StringTarget{Value: &t.Value.Details}, error(nil)
-		return nil, val, err
+		t.detailsTarget.Value = &t.Value.Details
+		target, err := &t.detailsTarget, error(nil)
+		return nil, target, err
 	default:
 		return nil, nil, fmt.Errorf("field %s not in struct %v", name, __VDLType_v_io_v23_services_groups_Approximation)
 	}

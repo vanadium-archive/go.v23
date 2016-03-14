@@ -186,7 +186,15 @@ func (m *Request) MakeVDLTarget() vdl.Target {
 }
 
 type RequestTarget struct {
-	Value *Request
+	Value                  *Request
+	suffixTarget           vdl.StringTarget
+	methodTarget           vdl.StringTarget
+	numPosArgsTarget       vdl.Uint64Target
+	endStreamArgsTarget    vdl.BoolTarget
+	deadlineTarget         time.WireDeadlineTarget
+	grantedBlessingsTarget security.WireBlessingsTarget
+	traceRequestTarget     vtrace.RequestTarget
+	languageTarget         vdl.StringTarget
 	vdl.TargetBase
 	vdl.FieldsTargetBase
 }
@@ -200,29 +208,37 @@ func (t *RequestTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
 func (t *RequestTarget) StartField(name string) (key, field vdl.Target, _ error) {
 	switch name {
 	case "Suffix":
-		val, err := &vdl.StringTarget{Value: &t.Value.Suffix}, error(nil)
-		return nil, val, err
+		t.suffixTarget.Value = &t.Value.Suffix
+		target, err := &t.suffixTarget, error(nil)
+		return nil, target, err
 	case "Method":
-		val, err := &vdl.StringTarget{Value: &t.Value.Method}, error(nil)
-		return nil, val, err
+		t.methodTarget.Value = &t.Value.Method
+		target, err := &t.methodTarget, error(nil)
+		return nil, target, err
 	case "NumPosArgs":
-		val, err := &vdl.Uint64Target{Value: &t.Value.NumPosArgs}, error(nil)
-		return nil, val, err
+		t.numPosArgsTarget.Value = &t.Value.NumPosArgs
+		target, err := &t.numPosArgsTarget, error(nil)
+		return nil, target, err
 	case "EndStreamArgs":
-		val, err := &vdl.BoolTarget{Value: &t.Value.EndStreamArgs}, error(nil)
-		return nil, val, err
+		t.endStreamArgsTarget.Value = &t.Value.EndStreamArgs
+		target, err := &t.endStreamArgsTarget, error(nil)
+		return nil, target, err
 	case "Deadline":
-		val, err := &time.WireDeadlineTarget{Value: &t.Value.Deadline}, error(nil)
-		return nil, val, err
+		t.deadlineTarget.Value = &t.Value.Deadline
+		target, err := &t.deadlineTarget, error(nil)
+		return nil, target, err
 	case "GrantedBlessings":
-		val, err := &security.WireBlessingsTarget{Value: &t.Value.GrantedBlessings}, error(nil)
-		return nil, val, err
+		t.grantedBlessingsTarget.Value = &t.Value.GrantedBlessings
+		target, err := &t.grantedBlessingsTarget, error(nil)
+		return nil, target, err
 	case "TraceRequest":
-		val, err := &vtrace.RequestTarget{Value: &t.Value.TraceRequest}, error(nil)
-		return nil, val, err
+		t.traceRequestTarget.Value = &t.Value.TraceRequest
+		target, err := &t.traceRequestTarget, error(nil)
+		return nil, target, err
 	case "Language":
-		val, err := &vdl.StringTarget{Value: &t.Value.Language}, error(nil)
-		return nil, val, err
+		t.languageTarget.Value = &t.Value.Language
+		target, err := &t.languageTarget, error(nil)
+		return nil, target, err
 	default:
 		return nil, nil, fmt.Errorf("field %s not in struct %v", name, __VDLType_v_io_v23_rpc_Request)
 	}
@@ -353,7 +369,12 @@ func (m *Response) MakeVDLTarget() vdl.Target {
 }
 
 type ResponseTarget struct {
-	Value *Response
+	Value                  *Response
+	errorTarget            verror.ErrorTarget
+	endStreamResultsTarget vdl.BoolTarget
+	numPosResultsTarget    vdl.Uint64Target
+	traceResponseTarget    vtrace.ResponseTarget
+	ackBlessingsTarget     vdl.BoolTarget
 	vdl.TargetBase
 	vdl.FieldsTargetBase
 }
@@ -367,20 +388,25 @@ func (t *ResponseTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
 func (t *ResponseTarget) StartField(name string) (key, field vdl.Target, _ error) {
 	switch name {
 	case "Error":
-		val, err := &verror.ErrorTarget{Value: &t.Value.Error}, error(nil)
-		return nil, val, err
+		t.errorTarget.Value = &t.Value.Error
+		target, err := &t.errorTarget, error(nil)
+		return nil, target, err
 	case "EndStreamResults":
-		val, err := &vdl.BoolTarget{Value: &t.Value.EndStreamResults}, error(nil)
-		return nil, val, err
+		t.endStreamResultsTarget.Value = &t.Value.EndStreamResults
+		target, err := &t.endStreamResultsTarget, error(nil)
+		return nil, target, err
 	case "NumPosResults":
-		val, err := &vdl.Uint64Target{Value: &t.Value.NumPosResults}, error(nil)
-		return nil, val, err
+		t.numPosResultsTarget.Value = &t.Value.NumPosResults
+		target, err := &t.numPosResultsTarget, error(nil)
+		return nil, target, err
 	case "TraceResponse":
-		val, err := &vtrace.ResponseTarget{Value: &t.Value.TraceResponse}, error(nil)
-		return nil, val, err
+		t.traceResponseTarget.Value = &t.Value.TraceResponse
+		target, err := &t.traceResponseTarget, error(nil)
+		return nil, target, err
 	case "AckBlessings":
-		val, err := &vdl.BoolTarget{Value: &t.Value.AckBlessings}, error(nil)
-		return nil, val, err
+		t.ackBlessingsTarget.Value = &t.Value.AckBlessings
+		target, err := &t.ackBlessingsTarget, error(nil)
+		return nil, target, err
 	default:
 		return nil, nil, fmt.Errorf("field %s not in struct %v", name, __VDLType_v_io_v23_rpc_Response)
 	}

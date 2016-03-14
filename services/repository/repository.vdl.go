@@ -78,7 +78,9 @@ func (m *MediaInfo) MakeVDLTarget() vdl.Target {
 }
 
 type MediaInfoTarget struct {
-	Value *MediaInfo
+	Value          *MediaInfo
+	typeTarget     vdl.StringTarget
+	encodingTarget vdl.StringTarget
 	vdl.TargetBase
 	vdl.FieldsTargetBase
 }
@@ -92,11 +94,13 @@ func (t *MediaInfoTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
 func (t *MediaInfoTarget) StartField(name string) (key, field vdl.Target, _ error) {
 	switch name {
 	case "Type":
-		val, err := &vdl.StringTarget{Value: &t.Value.Type}, error(nil)
-		return nil, val, err
+		t.typeTarget.Value = &t.Value.Type
+		target, err := &t.typeTarget, error(nil)
+		return nil, target, err
 	case "Encoding":
-		val, err := &vdl.StringTarget{Value: &t.Value.Encoding}, error(nil)
-		return nil, val, err
+		t.encodingTarget.Value = &t.Value.Encoding
+		target, err := &t.encodingTarget, error(nil)
+		return nil, target, err
 	default:
 		return nil, nil, fmt.Errorf("field %s not in struct %v", name, __VDLType_v_io_v23_services_repository_MediaInfo)
 	}

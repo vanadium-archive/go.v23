@@ -86,8 +86,10 @@ func (m *Time) MakeVDLTarget() vdl.Target {
 }
 
 type TimeTarget struct {
-	Value     *time.Time
-	wireValue Time
+	Value         *time.Time
+	wireValue     Time
+	secondsTarget vdl.Int64Target
+	nanosTarget   vdl.Int32Target
 	vdl.TargetBase
 	vdl.FieldsTargetBase
 }
@@ -101,11 +103,13 @@ func (t *TimeTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
 func (t *TimeTarget) StartField(name string) (key, field vdl.Target, _ error) {
 	switch name {
 	case "Seconds":
-		val, err := &vdl.Int64Target{Value: &t.wireValue.Seconds}, error(nil)
-		return nil, val, err
+		t.secondsTarget.Value = &t.wireValue.Seconds
+		target, err := &t.secondsTarget, error(nil)
+		return nil, target, err
 	case "Nanos":
-		val, err := &vdl.Int32Target{Value: &t.wireValue.Nanos}, error(nil)
-		return nil, val, err
+		t.nanosTarget.Value = &t.wireValue.Nanos
+		target, err := &t.nanosTarget, error(nil)
+		return nil, target, err
 	default:
 		return nil, nil, fmt.Errorf("field %s not in struct %v", name, __VDLType_time_Time)
 	}
@@ -183,8 +187,10 @@ func (m *Duration) MakeVDLTarget() vdl.Target {
 }
 
 type DurationTarget struct {
-	Value     *time.Duration
-	wireValue Duration
+	Value         *time.Duration
+	wireValue     Duration
+	secondsTarget vdl.Int64Target
+	nanosTarget   vdl.Int32Target
 	vdl.TargetBase
 	vdl.FieldsTargetBase
 }
@@ -198,11 +204,13 @@ func (t *DurationTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
 func (t *DurationTarget) StartField(name string) (key, field vdl.Target, _ error) {
 	switch name {
 	case "Seconds":
-		val, err := &vdl.Int64Target{Value: &t.wireValue.Seconds}, error(nil)
-		return nil, val, err
+		t.secondsTarget.Value = &t.wireValue.Seconds
+		target, err := &t.secondsTarget, error(nil)
+		return nil, target, err
 	case "Nanos":
-		val, err := &vdl.Int32Target{Value: &t.wireValue.Nanos}, error(nil)
-		return nil, val, err
+		t.nanosTarget.Value = &t.wireValue.Nanos
+		target, err := &t.nanosTarget, error(nil)
+		return nil, target, err
 	default:
 		return nil, nil, fmt.Errorf("field %s not in struct %v", name, __VDLType_time_Duration)
 	}
@@ -301,8 +309,10 @@ func (m *WireDeadline) MakeVDLTarget() vdl.Target {
 }
 
 type WireDeadlineTarget struct {
-	Value     *Deadline
-	wireValue WireDeadline
+	Value            *Deadline
+	wireValue        WireDeadline
+	fromNowTarget    DurationTarget
+	noDeadlineTarget vdl.BoolTarget
 	vdl.TargetBase
 	vdl.FieldsTargetBase
 }
@@ -316,11 +326,13 @@ func (t *WireDeadlineTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error)
 func (t *WireDeadlineTarget) StartField(name string) (key, field vdl.Target, _ error) {
 	switch name {
 	case "FromNow":
-		val, err := &DurationTarget{Value: &t.wireValue.FromNow}, error(nil)
-		return nil, val, err
+		t.fromNowTarget.Value = &t.wireValue.FromNow
+		target, err := &t.fromNowTarget, error(nil)
+		return nil, target, err
 	case "NoDeadline":
-		val, err := &vdl.BoolTarget{Value: &t.wireValue.NoDeadline}, error(nil)
-		return nil, val, err
+		t.noDeadlineTarget.Value = &t.wireValue.NoDeadline
+		target, err := &t.noDeadlineTarget, error(nil)
+		return nil, target, err
 	default:
 		return nil, nil, fmt.Errorf("field %s not in struct %v", name, __VDLType_time_WireDeadline)
 	}

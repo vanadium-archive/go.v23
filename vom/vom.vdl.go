@@ -367,7 +367,11 @@ func (m *DumpAtom) MakeVDLTarget() vdl.Target {
 }
 
 type DumpAtomTarget struct {
-	Value *DumpAtom
+	Value       *DumpAtom
+	kindTarget  DumpKindTarget
+	bytesTarget vdl.BytesTarget
+
+	debugTarget vdl.StringTarget
 	vdl.TargetBase
 	vdl.FieldsTargetBase
 }
@@ -381,17 +385,20 @@ func (t *DumpAtomTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
 func (t *DumpAtomTarget) StartField(name string) (key, field vdl.Target, _ error) {
 	switch name {
 	case "Kind":
-		val, err := &DumpKindTarget{Value: &t.Value.Kind}, error(nil)
-		return nil, val, err
+		t.kindTarget.Value = &t.Value.Kind
+		target, err := &t.kindTarget, error(nil)
+		return nil, target, err
 	case "Bytes":
-		val, err := &vdl.BytesTarget{Value: &t.Value.Bytes}, error(nil)
-		return nil, val, err
+		t.bytesTarget.Value = &t.Value.Bytes
+		target, err := &t.bytesTarget, error(nil)
+		return nil, target, err
 	case "Data":
-		val, err := vdl.ReflectTarget(reflect.ValueOf(&t.Value.Data))
-		return nil, val, err
+		target, err := vdl.ReflectTarget(reflect.ValueOf(&t.Value.Data))
+		return nil, target, err
 	case "Debug":
-		val, err := &vdl.StringTarget{Value: &t.Value.Debug}, error(nil)
-		return nil, val, err
+		t.debugTarget.Value = &t.Value.Debug
+		target, err := &t.debugTarget, error(nil)
+		return nil, target, err
 	default:
 		return nil, nil, fmt.Errorf("field %s not in struct %v", name, __VDLType_v_io_v23_vom_DumpAtom)
 	}
@@ -1134,7 +1141,9 @@ func (m *wireNamed) MakeVDLTarget() vdl.Target {
 }
 
 type wireNamedTarget struct {
-	Value *wireNamed
+	Value      *wireNamed
+	nameTarget vdl.StringTarget
+	baseTarget typeIdTarget
 	vdl.TargetBase
 	vdl.FieldsTargetBase
 }
@@ -1148,11 +1157,13 @@ func (t *wireNamedTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
 func (t *wireNamedTarget) StartField(name string) (key, field vdl.Target, _ error) {
 	switch name {
 	case "Name":
-		val, err := &vdl.StringTarget{Value: &t.Value.Name}, error(nil)
-		return nil, val, err
+		t.nameTarget.Value = &t.Value.Name
+		target, err := &t.nameTarget, error(nil)
+		return nil, target, err
 	case "Base":
-		val, err := &typeIdTarget{Value: &t.Value.Base}, error(nil)
-		return nil, val, err
+		t.baseTarget.Value = &t.Value.Base
+		target, err := &t.baseTarget, error(nil)
+		return nil, target, err
 	default:
 		return nil, nil, fmt.Errorf("field %s not in struct %v", name, __VDLType_v_io_v23_vom_wireNamed)
 	}
@@ -1237,7 +1248,9 @@ func (m *wireEnum) MakeVDLTarget() vdl.Target {
 }
 
 type wireEnumTarget struct {
-	Value *wireEnum
+	Value        *wireEnum
+	nameTarget   vdl.StringTarget
+	labelsTarget vdl.StringSliceTarget
 	vdl.TargetBase
 	vdl.FieldsTargetBase
 }
@@ -1251,11 +1264,13 @@ func (t *wireEnumTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
 func (t *wireEnumTarget) StartField(name string) (key, field vdl.Target, _ error) {
 	switch name {
 	case "Name":
-		val, err := &vdl.StringTarget{Value: &t.Value.Name}, error(nil)
-		return nil, val, err
+		t.nameTarget.Value = &t.Value.Name
+		target, err := &t.nameTarget, error(nil)
+		return nil, target, err
 	case "Labels":
-		val, err := &vdl.StringSliceTarget{Value: &t.Value.Labels}, error(nil)
-		return nil, val, err
+		t.labelsTarget.Value = &t.Value.Labels
+		target, err := &t.labelsTarget, error(nil)
+		return nil, target, err
 	default:
 		return nil, nil, fmt.Errorf("field %s not in struct %v", name, __VDLType_v_io_v23_vom_wireEnum)
 	}
@@ -1337,7 +1352,10 @@ func (m *wireArray) MakeVDLTarget() vdl.Target {
 }
 
 type wireArrayTarget struct {
-	Value *wireArray
+	Value      *wireArray
+	nameTarget vdl.StringTarget
+	elemTarget typeIdTarget
+	lenTarget  vdl.Uint64Target
 	vdl.TargetBase
 	vdl.FieldsTargetBase
 }
@@ -1351,14 +1369,17 @@ func (t *wireArrayTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
 func (t *wireArrayTarget) StartField(name string) (key, field vdl.Target, _ error) {
 	switch name {
 	case "Name":
-		val, err := &vdl.StringTarget{Value: &t.Value.Name}, error(nil)
-		return nil, val, err
+		t.nameTarget.Value = &t.Value.Name
+		target, err := &t.nameTarget, error(nil)
+		return nil, target, err
 	case "Elem":
-		val, err := &typeIdTarget{Value: &t.Value.Elem}, error(nil)
-		return nil, val, err
+		t.elemTarget.Value = &t.Value.Elem
+		target, err := &t.elemTarget, error(nil)
+		return nil, target, err
 	case "Len":
-		val, err := &vdl.Uint64Target{Value: &t.Value.Len}, error(nil)
-		return nil, val, err
+		t.lenTarget.Value = &t.Value.Len
+		target, err := &t.lenTarget, error(nil)
+		return nil, target, err
 	default:
 		return nil, nil, fmt.Errorf("field %s not in struct %v", name, __VDLType_v_io_v23_vom_wireArray)
 	}
@@ -1427,7 +1448,9 @@ func (m *wireList) MakeVDLTarget() vdl.Target {
 }
 
 type wireListTarget struct {
-	Value *wireList
+	Value      *wireList
+	nameTarget vdl.StringTarget
+	elemTarget typeIdTarget
 	vdl.TargetBase
 	vdl.FieldsTargetBase
 }
@@ -1441,11 +1464,13 @@ func (t *wireListTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
 func (t *wireListTarget) StartField(name string) (key, field vdl.Target, _ error) {
 	switch name {
 	case "Name":
-		val, err := &vdl.StringTarget{Value: &t.Value.Name}, error(nil)
-		return nil, val, err
+		t.nameTarget.Value = &t.Value.Name
+		target, err := &t.nameTarget, error(nil)
+		return nil, target, err
 	case "Elem":
-		val, err := &typeIdTarget{Value: &t.Value.Elem}, error(nil)
-		return nil, val, err
+		t.elemTarget.Value = &t.Value.Elem
+		target, err := &t.elemTarget, error(nil)
+		return nil, target, err
 	default:
 		return nil, nil, fmt.Errorf("field %s not in struct %v", name, __VDLType_v_io_v23_vom_wireList)
 	}
@@ -1514,7 +1539,9 @@ func (m *wireSet) MakeVDLTarget() vdl.Target {
 }
 
 type wireSetTarget struct {
-	Value *wireSet
+	Value      *wireSet
+	nameTarget vdl.StringTarget
+	keyTarget  typeIdTarget
 	vdl.TargetBase
 	vdl.FieldsTargetBase
 }
@@ -1528,11 +1555,13 @@ func (t *wireSetTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
 func (t *wireSetTarget) StartField(name string) (key, field vdl.Target, _ error) {
 	switch name {
 	case "Name":
-		val, err := &vdl.StringTarget{Value: &t.Value.Name}, error(nil)
-		return nil, val, err
+		t.nameTarget.Value = &t.Value.Name
+		target, err := &t.nameTarget, error(nil)
+		return nil, target, err
 	case "Key":
-		val, err := &typeIdTarget{Value: &t.Value.Key}, error(nil)
-		return nil, val, err
+		t.keyTarget.Value = &t.Value.Key
+		target, err := &t.keyTarget, error(nil)
+		return nil, target, err
 	default:
 		return nil, nil, fmt.Errorf("field %s not in struct %v", name, __VDLType_v_io_v23_vom_wireSet)
 	}
@@ -1615,7 +1644,10 @@ func (m *wireMap) MakeVDLTarget() vdl.Target {
 }
 
 type wireMapTarget struct {
-	Value *wireMap
+	Value      *wireMap
+	nameTarget vdl.StringTarget
+	keyTarget  typeIdTarget
+	elemTarget typeIdTarget
 	vdl.TargetBase
 	vdl.FieldsTargetBase
 }
@@ -1629,14 +1661,17 @@ func (t *wireMapTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
 func (t *wireMapTarget) StartField(name string) (key, field vdl.Target, _ error) {
 	switch name {
 	case "Name":
-		val, err := &vdl.StringTarget{Value: &t.Value.Name}, error(nil)
-		return nil, val, err
+		t.nameTarget.Value = &t.Value.Name
+		target, err := &t.nameTarget, error(nil)
+		return nil, target, err
 	case "Key":
-		val, err := &typeIdTarget{Value: &t.Value.Key}, error(nil)
-		return nil, val, err
+		t.keyTarget.Value = &t.Value.Key
+		target, err := &t.keyTarget, error(nil)
+		return nil, target, err
 	case "Elem":
-		val, err := &typeIdTarget{Value: &t.Value.Elem}, error(nil)
-		return nil, val, err
+		t.elemTarget.Value = &t.Value.Elem
+		target, err := &t.elemTarget, error(nil)
+		return nil, target, err
 	default:
 		return nil, nil, fmt.Errorf("field %s not in struct %v", name, __VDLType_v_io_v23_vom_wireMap)
 	}
@@ -1705,7 +1740,9 @@ func (m *wireField) MakeVDLTarget() vdl.Target {
 }
 
 type wireFieldTarget struct {
-	Value *wireField
+	Value      *wireField
+	nameTarget vdl.StringTarget
+	typeTarget typeIdTarget
 	vdl.TargetBase
 	vdl.FieldsTargetBase
 }
@@ -1719,11 +1756,13 @@ func (t *wireFieldTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
 func (t *wireFieldTarget) StartField(name string) (key, field vdl.Target, _ error) {
 	switch name {
 	case "Name":
-		val, err := &vdl.StringTarget{Value: &t.Value.Name}, error(nil)
-		return nil, val, err
+		t.nameTarget.Value = &t.Value.Name
+		target, err := &t.nameTarget, error(nil)
+		return nil, target, err
 	case "Type":
-		val, err := &typeIdTarget{Value: &t.Value.Type}, error(nil)
-		return nil, val, err
+		t.typeTarget.Value = &t.Value.Type
+		target, err := &t.typeTarget, error(nil)
+		return nil, target, err
 	default:
 		return nil, nil, fmt.Errorf("field %s not in struct %v", name, __VDLType_v_io_v23_vom_wireField)
 	}
@@ -1809,7 +1848,9 @@ func (m *wireStruct) MakeVDLTarget() vdl.Target {
 }
 
 type wireStructTarget struct {
-	Value *wireStruct
+	Value        *wireStruct
+	nameTarget   vdl.StringTarget
+	fieldsTarget unnamed_5b5d762e696f2f7632332f766f6d2e776972654669656c64207374727563747b4e616d6520737472696e673b5479706520762e696f2f7632332f766f6d2e7479706549642075696e7436347dTarget
 	vdl.TargetBase
 	vdl.FieldsTargetBase
 }
@@ -1823,11 +1864,13 @@ func (t *wireStructTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
 func (t *wireStructTarget) StartField(name string) (key, field vdl.Target, _ error) {
 	switch name {
 	case "Name":
-		val, err := &vdl.StringTarget{Value: &t.Value.Name}, error(nil)
-		return nil, val, err
+		t.nameTarget.Value = &t.Value.Name
+		target, err := &t.nameTarget, error(nil)
+		return nil, target, err
 	case "Fields":
-		val, err := &unnamed_5b5d762e696f2f7632332f766f6d2e776972654669656c64207374727563747b4e616d6520737472696e673b5479706520762e696f2f7632332f766f6d2e7479706549642075696e7436347d_Target{Value: &t.Value.Fields}, error(nil)
-		return nil, val, err
+		t.fieldsTarget.Value = &t.Value.Fields
+		target, err := &t.fieldsTarget, error(nil)
+		return nil, target, err
 	default:
 		return nil, nil, fmt.Errorf("field %s not in struct %v", name, __VDLType_v_io_v23_vom_wireStruct)
 	}
@@ -1840,13 +1883,15 @@ func (t *wireStructTarget) FinishFields(_ vdl.FieldsTarget) error {
 	return nil
 }
 
-type unnamed_5b5d762e696f2f7632332f766f6d2e776972654669656c64207374727563747b4e616d6520737472696e673b5479706520762e696f2f7632332f766f6d2e7479706549642075696e7436347d_Target struct {
-	Value *[]wireField
+// []wireField
+type unnamed_5b5d762e696f2f7632332f766f6d2e776972654669656c64207374727563747b4e616d6520737472696e673b5479706520762e696f2f7632332f766f6d2e7479706549642075696e7436347dTarget struct {
+	Value      *[]wireField
+	elemTarget wireFieldTarget
 	vdl.TargetBase
 	vdl.ListTargetBase
 }
 
-func (t *unnamed_5b5d762e696f2f7632332f766f6d2e776972654669656c64207374727563747b4e616d6520737472696e673b5479706520762e696f2f7632332f766f6d2e7479706549642075696e7436347d_Target) StartList(tt *vdl.Type, len int) (vdl.ListTarget, error) {
+func (t *unnamed_5b5d762e696f2f7632332f766f6d2e776972654669656c64207374727563747b4e616d6520737472696e673b5479706520762e696f2f7632332f766f6d2e7479706549642075696e7436347dTarget) StartList(tt *vdl.Type, len int) (vdl.ListTarget, error) {
 	if !vdl.Compatible(tt, __VDLType11) {
 		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType11)
 	}
@@ -1857,13 +1902,15 @@ func (t *unnamed_5b5d762e696f2f7632332f766f6d2e776972654669656c64207374727563747
 	}
 	return t, nil
 }
-func (t *unnamed_5b5d762e696f2f7632332f766f6d2e776972654669656c64207374727563747b4e616d6520737472696e673b5479706520762e696f2f7632332f766f6d2e7479706549642075696e7436347d_Target) StartElem(index int) (elem vdl.Target, _ error) {
-	return &wireFieldTarget{Value: &(*t.Value)[index]}, error(nil)
+func (t *unnamed_5b5d762e696f2f7632332f766f6d2e776972654669656c64207374727563747b4e616d6520737472696e673b5479706520762e696f2f7632332f766f6d2e7479706549642075696e7436347dTarget) StartElem(index int) (elem vdl.Target, _ error) {
+	t.elemTarget.Value = &(*t.Value)[index]
+	target, err := &t.elemTarget, error(nil)
+	return target, err
 }
-func (t *unnamed_5b5d762e696f2f7632332f766f6d2e776972654669656c64207374727563747b4e616d6520737472696e673b5479706520762e696f2f7632332f766f6d2e7479706549642075696e7436347d_Target) FinishElem(elem vdl.Target) error {
+func (t *unnamed_5b5d762e696f2f7632332f766f6d2e776972654669656c64207374727563747b4e616d6520737472696e673b5479706520762e696f2f7632332f766f6d2e7479706549642075696e7436347dTarget) FinishElem(elem vdl.Target) error {
 	return nil
 }
-func (t *unnamed_5b5d762e696f2f7632332f766f6d2e776972654669656c64207374727563747b4e616d6520737472696e673b5479706520762e696f2f7632332f766f6d2e7479706549642075696e7436347d_Target) FinishList(elem vdl.ListTarget) error {
+func (t *unnamed_5b5d762e696f2f7632332f766f6d2e776972654669656c64207374727563747b4e616d6520737472696e673b5479706520762e696f2f7632332f766f6d2e7479706549642075696e7436347dTarget) FinishList(elem vdl.ListTarget) error {
 
 	return nil
 }
@@ -1941,7 +1988,9 @@ func (m *wireUnion) MakeVDLTarget() vdl.Target {
 }
 
 type wireUnionTarget struct {
-	Value *wireUnion
+	Value        *wireUnion
+	nameTarget   vdl.StringTarget
+	fieldsTarget unnamed_5b5d762e696f2f7632332f766f6d2e776972654669656c64207374727563747b4e616d6520737472696e673b5479706520762e696f2f7632332f766f6d2e7479706549642075696e7436347dTarget
 	vdl.TargetBase
 	vdl.FieldsTargetBase
 }
@@ -1955,11 +2004,13 @@ func (t *wireUnionTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
 func (t *wireUnionTarget) StartField(name string) (key, field vdl.Target, _ error) {
 	switch name {
 	case "Name":
-		val, err := &vdl.StringTarget{Value: &t.Value.Name}, error(nil)
-		return nil, val, err
+		t.nameTarget.Value = &t.Value.Name
+		target, err := &t.nameTarget, error(nil)
+		return nil, target, err
 	case "Fields":
-		val, err := &unnamed_5b5d762e696f2f7632332f766f6d2e776972654669656c64207374727563747b4e616d6520737472696e673b5479706520762e696f2f7632332f766f6d2e7479706549642075696e7436347d_Target{Value: &t.Value.Fields}, error(nil)
-		return nil, val, err
+		t.fieldsTarget.Value = &t.Value.Fields
+		target, err := &t.fieldsTarget, error(nil)
+		return nil, target, err
 	default:
 		return nil, nil, fmt.Errorf("field %s not in struct %v", name, __VDLType_v_io_v23_vom_wireUnion)
 	}
@@ -2028,7 +2079,9 @@ func (m *wireOptional) MakeVDLTarget() vdl.Target {
 }
 
 type wireOptionalTarget struct {
-	Value *wireOptional
+	Value      *wireOptional
+	nameTarget vdl.StringTarget
+	elemTarget typeIdTarget
 	vdl.TargetBase
 	vdl.FieldsTargetBase
 }
@@ -2042,11 +2095,13 @@ func (t *wireOptionalTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error)
 func (t *wireOptionalTarget) StartField(name string) (key, field vdl.Target, _ error) {
 	switch name {
 	case "Name":
-		val, err := &vdl.StringTarget{Value: &t.Value.Name}, error(nil)
-		return nil, val, err
+		t.nameTarget.Value = &t.Value.Name
+		target, err := &t.nameTarget, error(nil)
+		return nil, target, err
 	case "Elem":
-		val, err := &typeIdTarget{Value: &t.Value.Elem}, error(nil)
-		return nil, val, err
+		t.elemTarget.Value = &t.Value.Elem
+		target, err := &t.elemTarget, error(nil)
+		return nil, target, err
 	default:
 		return nil, nil, fmt.Errorf("field %s not in struct %v", name, __VDLType_v_io_v23_vom_wireOptional)
 	}

@@ -220,7 +220,9 @@ func (m *AccessList) MakeVDLTarget() vdl.Target {
 }
 
 type AccessListTarget struct {
-	Value *AccessList
+	Value       *AccessList
+	inTarget    unnamed_5b5d762e696f2f7632332f73656375726974792e426c657373696e675061747465726e20737472696e67Target
+	notInTarget vdl.StringSliceTarget
 	vdl.TargetBase
 	vdl.FieldsTargetBase
 }
@@ -234,11 +236,13 @@ func (t *AccessListTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
 func (t *AccessListTarget) StartField(name string) (key, field vdl.Target, _ error) {
 	switch name {
 	case "In":
-		val, err := &unnamed_5b5d762e696f2f7632332f73656375726974792e426c657373696e675061747465726e20737472696e67_Target{Value: &t.Value.In}, error(nil)
-		return nil, val, err
+		t.inTarget.Value = &t.Value.In
+		target, err := &t.inTarget, error(nil)
+		return nil, target, err
 	case "NotIn":
-		val, err := &vdl.StringSliceTarget{Value: &t.Value.NotIn}, error(nil)
-		return nil, val, err
+		t.notInTarget.Value = &t.Value.NotIn
+		target, err := &t.notInTarget, error(nil)
+		return nil, target, err
 	default:
 		return nil, nil, fmt.Errorf("field %s not in struct %v", name, __VDLType_v_io_v23_security_access_AccessList)
 	}
@@ -251,13 +255,15 @@ func (t *AccessListTarget) FinishFields(_ vdl.FieldsTarget) error {
 	return nil
 }
 
-type unnamed_5b5d762e696f2f7632332f73656375726974792e426c657373696e675061747465726e20737472696e67_Target struct {
-	Value *[]security.BlessingPattern
+// []security.BlessingPattern
+type unnamed_5b5d762e696f2f7632332f73656375726974792e426c657373696e675061747465726e20737472696e67Target struct {
+	Value      *[]security.BlessingPattern
+	elemTarget security.BlessingPatternTarget
 	vdl.TargetBase
 	vdl.ListTargetBase
 }
 
-func (t *unnamed_5b5d762e696f2f7632332f73656375726974792e426c657373696e675061747465726e20737472696e67_Target) StartList(tt *vdl.Type, len int) (vdl.ListTarget, error) {
+func (t *unnamed_5b5d762e696f2f7632332f73656375726974792e426c657373696e675061747465726e20737472696e67Target) StartList(tt *vdl.Type, len int) (vdl.ListTarget, error) {
 	if !vdl.Compatible(tt, __VDLType1) {
 		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType1)
 	}
@@ -268,13 +274,15 @@ func (t *unnamed_5b5d762e696f2f7632332f73656375726974792e426c657373696e675061747
 	}
 	return t, nil
 }
-func (t *unnamed_5b5d762e696f2f7632332f73656375726974792e426c657373696e675061747465726e20737472696e67_Target) StartElem(index int) (elem vdl.Target, _ error) {
-	return &security.BlessingPatternTarget{Value: &(*t.Value)[index]}, error(nil)
+func (t *unnamed_5b5d762e696f2f7632332f73656375726974792e426c657373696e675061747465726e20737472696e67Target) StartElem(index int) (elem vdl.Target, _ error) {
+	t.elemTarget.Value = &(*t.Value)[index]
+	target, err := &t.elemTarget, error(nil)
+	return target, err
 }
-func (t *unnamed_5b5d762e696f2f7632332f73656375726974792e426c657373696e675061747465726e20737472696e67_Target) FinishElem(elem vdl.Target) error {
+func (t *unnamed_5b5d762e696f2f7632332f73656375726974792e426c657373696e675061747465726e20737472696e67Target) FinishElem(elem vdl.Target) error {
 	return nil
 }
-func (t *unnamed_5b5d762e696f2f7632332f73656375726974792e426c657373696e675061747465726e20737472696e67_Target) FinishList(elem vdl.ListTarget) error {
+func (t *unnamed_5b5d762e696f2f7632332f73656375726974792e426c657373696e675061747465726e20737472696e67Target) FinishList(elem vdl.ListTarget) error {
 
 	return nil
 }
@@ -329,9 +337,11 @@ func (m *Permissions) MakeVDLTarget() vdl.Target {
 }
 
 type PermissionsTarget struct {
-	Value    *Permissions
-	currKey  string
-	currElem AccessList
+	Value      *Permissions
+	currKey    string
+	currElem   AccessList
+	keyTarget  vdl.StringTarget
+	elemTarget AccessListTarget
 	vdl.TargetBase
 	vdl.MapTargetBase
 }
@@ -345,11 +355,15 @@ func (t *PermissionsTarget) StartMap(tt *vdl.Type, len int) (vdl.MapTarget, erro
 }
 func (t *PermissionsTarget) StartKey() (key vdl.Target, _ error) {
 	t.currKey = ""
-	return &vdl.StringTarget{Value: &t.currKey}, error(nil)
+	t.keyTarget.Value = &t.currKey
+	target, err := &t.keyTarget, error(nil)
+	return target, err
 }
 func (t *PermissionsTarget) FinishKeyStartField(key vdl.Target) (field vdl.Target, _ error) {
 	t.currElem = AccessList{}
-	return &AccessListTarget{Value: &t.currElem}, error(nil)
+	t.elemTarget.Value = &t.currElem
+	target, err := &t.elemTarget, error(nil)
+	return target, err
 }
 func (t *PermissionsTarget) FinishField(key, field vdl.Target) error {
 	(*t.Value)[t.currKey] = t.currElem

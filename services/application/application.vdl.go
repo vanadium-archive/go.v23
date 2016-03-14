@@ -222,7 +222,15 @@ func (m *Envelope) MakeVDLTarget() vdl.Target {
 }
 
 type EnvelopeTarget struct {
-	Value *Envelope
+	Value                   *Envelope
+	titleTarget             vdl.StringTarget
+	argsTarget              vdl.StringSliceTarget
+	binaryTarget            SignedFileTarget
+	publisherTarget         security.WireBlessingsTarget
+	envTarget               vdl.StringSliceTarget
+	packagesTarget          PackagesTarget
+	restartsTarget          vdl.Int32Target
+	restartTimeWindowTarget time_2.DurationTarget
 	vdl.TargetBase
 	vdl.FieldsTargetBase
 }
@@ -236,29 +244,37 @@ func (t *EnvelopeTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
 func (t *EnvelopeTarget) StartField(name string) (key, field vdl.Target, _ error) {
 	switch name {
 	case "Title":
-		val, err := &vdl.StringTarget{Value: &t.Value.Title}, error(nil)
-		return nil, val, err
+		t.titleTarget.Value = &t.Value.Title
+		target, err := &t.titleTarget, error(nil)
+		return nil, target, err
 	case "Args":
-		val, err := &vdl.StringSliceTarget{Value: &t.Value.Args}, error(nil)
-		return nil, val, err
+		t.argsTarget.Value = &t.Value.Args
+		target, err := &t.argsTarget, error(nil)
+		return nil, target, err
 	case "Binary":
-		val, err := &SignedFileTarget{Value: &t.Value.Binary}, error(nil)
-		return nil, val, err
+		t.binaryTarget.Value = &t.Value.Binary
+		target, err := &t.binaryTarget, error(nil)
+		return nil, target, err
 	case "Publisher":
-		val, err := &security.WireBlessingsTarget{Value: &t.Value.Publisher}, error(nil)
-		return nil, val, err
+		t.publisherTarget.Value = &t.Value.Publisher
+		target, err := &t.publisherTarget, error(nil)
+		return nil, target, err
 	case "Env":
-		val, err := &vdl.StringSliceTarget{Value: &t.Value.Env}, error(nil)
-		return nil, val, err
+		t.envTarget.Value = &t.Value.Env
+		target, err := &t.envTarget, error(nil)
+		return nil, target, err
 	case "Packages":
-		val, err := &PackagesTarget{Value: &t.Value.Packages}, error(nil)
-		return nil, val, err
+		t.packagesTarget.Value = &t.Value.Packages
+		target, err := &t.packagesTarget, error(nil)
+		return nil, target, err
 	case "Restarts":
-		val, err := &vdl.Int32Target{Value: &t.Value.Restarts}, error(nil)
-		return nil, val, err
+		t.restartsTarget.Value = &t.Value.Restarts
+		target, err := &t.restartsTarget, error(nil)
+		return nil, target, err
 	case "RestartTimeWindow":
-		val, err := &time_2.DurationTarget{Value: &t.Value.RestartTimeWindow}, error(nil)
-		return nil, val, err
+		t.restartTimeWindowTarget.Value = &t.Value.RestartTimeWindow
+		target, err := &t.restartTimeWindowTarget, error(nil)
+		return nil, target, err
 	default:
 		return nil, nil, fmt.Errorf("field %s not in struct %v", name, __VDLType_v_io_v23_services_application_Envelope)
 	}
@@ -272,7 +288,9 @@ func (t *EnvelopeTarget) FinishFields(_ vdl.FieldsTarget) error {
 }
 
 type SignedFileTarget struct {
-	Value *SignedFile
+	Value           *SignedFile
+	fileTarget      vdl.StringTarget
+	signatureTarget security.SignatureTarget
 	vdl.TargetBase
 	vdl.FieldsTargetBase
 }
@@ -286,11 +304,13 @@ func (t *SignedFileTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
 func (t *SignedFileTarget) StartField(name string) (key, field vdl.Target, _ error) {
 	switch name {
 	case "File":
-		val, err := &vdl.StringTarget{Value: &t.Value.File}, error(nil)
-		return nil, val, err
+		t.fileTarget.Value = &t.Value.File
+		target, err := &t.fileTarget, error(nil)
+		return nil, target, err
 	case "Signature":
-		val, err := &security.SignatureTarget{Value: &t.Value.Signature}, error(nil)
-		return nil, val, err
+		t.signatureTarget.Value = &t.Value.Signature
+		target, err := &t.signatureTarget, error(nil)
+		return nil, target, err
 	default:
 		return nil, nil, fmt.Errorf("field %s not in struct %v", name, __VDLType_v_io_v23_services_application_SignedFile)
 	}
@@ -304,9 +324,11 @@ func (t *SignedFileTarget) FinishFields(_ vdl.FieldsTarget) error {
 }
 
 type PackagesTarget struct {
-	Value    *Packages
-	currKey  string
-	currElem SignedFile
+	Value      *Packages
+	currKey    string
+	currElem   SignedFile
+	keyTarget  vdl.StringTarget
+	elemTarget SignedFileTarget
 	vdl.TargetBase
 	vdl.MapTargetBase
 }
@@ -320,11 +342,15 @@ func (t *PackagesTarget) StartMap(tt *vdl.Type, len int) (vdl.MapTarget, error) 
 }
 func (t *PackagesTarget) StartKey() (key vdl.Target, _ error) {
 	t.currKey = ""
-	return &vdl.StringTarget{Value: &t.currKey}, error(nil)
+	t.keyTarget.Value = &t.currKey
+	target, err := &t.keyTarget, error(nil)
+	return target, err
 }
 func (t *PackagesTarget) FinishKeyStartField(key vdl.Target) (field vdl.Target, _ error) {
 	t.currElem = SignedFile{}
-	return &SignedFileTarget{Value: &t.currElem}, error(nil)
+	t.elemTarget.Value = &t.currElem
+	target, err := &t.elemTarget, error(nil)
+	return target, err
 }
 func (t *PackagesTarget) FinishField(key, field vdl.Target) error {
 	(*t.Value)[t.currKey] = t.currElem

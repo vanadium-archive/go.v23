@@ -81,7 +81,9 @@ func (m *Task) MakeVDLTarget() vdl.Target {
 }
 
 type TaskTarget struct {
-	Value *Task
+	Value          *Task
+	progressTarget vdl.Int32Target
+	goalTarget     vdl.Int32Target
 	vdl.TargetBase
 	vdl.FieldsTargetBase
 }
@@ -95,11 +97,13 @@ func (t *TaskTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
 func (t *TaskTarget) StartField(name string) (key, field vdl.Target, _ error) {
 	switch name {
 	case "Progress":
-		val, err := &vdl.Int32Target{Value: &t.Value.Progress}, error(nil)
-		return nil, val, err
+		t.progressTarget.Value = &t.Value.Progress
+		target, err := &t.progressTarget, error(nil)
+		return nil, target, err
 	case "Goal":
-		val, err := &vdl.Int32Target{Value: &t.Value.Goal}, error(nil)
-		return nil, val, err
+		t.goalTarget.Value = &t.Value.Goal
+		target, err := &t.goalTarget, error(nil)
+		return nil, target, err
 	default:
 		return nil, nil, fmt.Errorf("field %s not in struct %v", name, __VDLType_v_io_v23_services_appcycle_Task)
 	}

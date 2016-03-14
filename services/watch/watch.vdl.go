@@ -182,7 +182,9 @@ func (m *GlobRequest) MakeVDLTarget() vdl.Target {
 }
 
 type GlobRequestTarget struct {
-	Value *GlobRequest
+	Value              *GlobRequest
+	patternTarget      vdl.StringTarget
+	resumeMarkerTarget ResumeMarkerTarget
 	vdl.TargetBase
 	vdl.FieldsTargetBase
 }
@@ -196,11 +198,13 @@ func (t *GlobRequestTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) 
 func (t *GlobRequestTarget) StartField(name string) (key, field vdl.Target, _ error) {
 	switch name {
 	case "Pattern":
-		val, err := &vdl.StringTarget{Value: &t.Value.Pattern}, error(nil)
-		return nil, val, err
+		t.patternTarget.Value = &t.Value.Pattern
+		target, err := &t.patternTarget, error(nil)
+		return nil, target, err
 	case "ResumeMarker":
-		val, err := &ResumeMarkerTarget{Value: &t.Value.ResumeMarker}, error(nil)
-		return nil, val, err
+		t.resumeMarkerTarget.Value = &t.Value.ResumeMarker
+		target, err := &t.resumeMarkerTarget, error(nil)
+		return nil, target, err
 	default:
 		return nil, nil, fmt.Errorf("field %s not in struct %v", name, __VDLType_v_io_v23_services_watch_GlobRequest)
 	}
@@ -395,7 +399,12 @@ func (m *Change) MakeVDLTarget() vdl.Target {
 }
 
 type ChangeTarget struct {
-	Value *Change
+	Value       *Change
+	nameTarget  vdl.StringTarget
+	stateTarget vdl.Int32Target
+
+	resumeMarkerTarget ResumeMarkerTarget
+	continuedTarget    vdl.BoolTarget
 	vdl.TargetBase
 	vdl.FieldsTargetBase
 }
@@ -409,20 +418,24 @@ func (t *ChangeTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
 func (t *ChangeTarget) StartField(name string) (key, field vdl.Target, _ error) {
 	switch name {
 	case "Name":
-		val, err := &vdl.StringTarget{Value: &t.Value.Name}, error(nil)
-		return nil, val, err
+		t.nameTarget.Value = &t.Value.Name
+		target, err := &t.nameTarget, error(nil)
+		return nil, target, err
 	case "State":
-		val, err := &vdl.Int32Target{Value: &t.Value.State}, error(nil)
-		return nil, val, err
+		t.stateTarget.Value = &t.Value.State
+		target, err := &t.stateTarget, error(nil)
+		return nil, target, err
 	case "Value":
-		val, err := vdl.ReflectTarget(reflect.ValueOf(&t.Value.Value))
-		return nil, val, err
+		target, err := vdl.ReflectTarget(reflect.ValueOf(&t.Value.Value))
+		return nil, target, err
 	case "ResumeMarker":
-		val, err := &ResumeMarkerTarget{Value: &t.Value.ResumeMarker}, error(nil)
-		return nil, val, err
+		t.resumeMarkerTarget.Value = &t.Value.ResumeMarker
+		target, err := &t.resumeMarkerTarget, error(nil)
+		return nil, target, err
 	case "Continued":
-		val, err := &vdl.BoolTarget{Value: &t.Value.Continued}, error(nil)
-		return nil, val, err
+		t.continuedTarget.Value = &t.Value.Continued
+		target, err := &t.continuedTarget, error(nil)
+		return nil, target, err
 	default:
 		return nil, nil, fmt.Errorf("field %s not in struct %v", name, __VDLType_v_io_v23_services_watch_Change)
 	}
