@@ -534,11 +534,7 @@ func removeOptional(tt *Type) *Type {
 // makeDirectTarget returns the target representing the underlying value, if the
 // underlying value supports direct target access.
 func (c convTarget) makeDirectTarget() Target {
-	if c.vv == nil && c.tt.Kind() != Optional {
-		// Top-level optional is not directly Targetable because
-		// MakeVdlTarget() for *StructType is the struct target, not the
-		// optional struct target.
-		// TODO(bprosnitz) Fix this.
+	if c.vv == nil {
 		rv := c.rv
 		if rv.Type().Implements(rtTargeter) {
 			if rv.Kind() == reflect.Ptr && rv.IsNil() {
@@ -558,8 +554,14 @@ func (c convTarget) makeDirectTarget() Target {
 
 // FromNil implements the Target interface method.
 func (c convTarget) FromNil(tt *Type) error {
-	if target := c.makeDirectTarget(); target != nil {
-		return target.FromNil(tt)
+	if c.tt == AnyType {
+		// Optional is not currently supported for FromNil() direct targets
+		// because there is no way to get a generated optional struct target
+		// for an arbitrary struct. (the struct target itself doesn't support
+		// the FromNil method).
+		if target := c.makeDirectTarget(); target != nil {
+			return target.FromNil(tt)
+		}
 	}
 	if !Compatible(c.tt, tt) {
 		return fmt.Errorf("types %q and %q aren't compatible", c.tt, tt)
