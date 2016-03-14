@@ -151,12 +151,11 @@ pkg rpc, type ResponseTarget struct
 pkg rpc, type ResponseTarget struct, Value *Response
 pkg rpc, type ResponseTarget struct, embedded vdl.FieldsTargetBase
 pkg rpc, type ResponseTarget struct, embedded vdl.TargetBase
-pkg rpc, type Server interface { AddName, Closed, RemoveName, Status, Stop }
+pkg rpc, type Server interface { AddName, Closed, RemoveName, Status }
 pkg rpc, type Server interface, AddName(string) error
 pkg rpc, type Server interface, Closed() <-chan struct{}
 pkg rpc, type Server interface, RemoveName(string)
 pkg rpc, type Server interface, Status() ServerStatus
-pkg rpc, type Server interface, Stop() error
 pkg rpc, type ServerCall interface { GrantedBlessings, LocalEndpoint, RemoteEndpoint, Security, Server, Suffix }
 pkg rpc, type ServerCall interface, GrantedBlessings() security.Blessings
 pkg rpc, type ServerCall interface, LocalEndpoint() naming.Endpoint

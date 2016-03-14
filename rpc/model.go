@@ -164,13 +164,6 @@ type Server interface {
 	// details.
 	Status() ServerStatus
 
-	// Stop gracefully stops all services on this Server.  New calls are rejected,
-	// but any in-flight calls are allowed to complete.  All published mountpoints
-	// are unmounted.  This call waits for this process to complete, and returns
-	// once the server has been shut down.
-	// TODO(mattr): This method is deprecated in the new RPC system.
-	Stop() error
-
 	// Closed returns a channel that will be closed after the server is shut down.
 	Closed() <-chan struct{}
 }
