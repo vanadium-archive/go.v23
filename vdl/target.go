@@ -128,14 +128,14 @@ type FieldsTarget interface {
 	FinishField(key, field Target) error
 }
 
-// Convert converts from src to target - it is a helper for calling
-// ReflectTarget(reflect.ValueOf(target)).FromReflect(reflect.ValueOf(src)).
-func Convert(target, src interface{}) error {
-	rtarget, err := ReflectTarget(reflect.ValueOf(target))
+// Convert converts from src to dst - it is a helper for calling
+// ReflectTarget(reflect.ValueOf(dst)).FromReflect(reflect.ValueOf(src)).
+func Convert(dst, src interface{}) error {
+	target, err := ReflectTarget(reflect.ValueOf(dst))
 	if err != nil {
 		return err
 	}
-	return FromReflect(rtarget, reflect.ValueOf(src))
+	return FromReflect(target, reflect.ValueOf(src))
 }
 
 // ValueOf returns the value corresponding to v.  It's a helper for calling

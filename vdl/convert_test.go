@@ -1353,3 +1353,24 @@ func TestConverterError(t *testing.T) {
 		}
 	}
 }
+
+// Note: There are no other tests which cover these cases outside of a test in
+// v.io/v23/security.
+// These tests also can't be moved to TestConverter because it involves
+// conversion to an interface which will resolve in a non-wiretype output.
+func TestConverterToWiretype(t *testing.T) {
+	var nWire vdl.NWire
+	if err := vdl.Convert(&nWire, vdl.NWire{"100"}); err != nil {
+		t.Fatalf("unexpected error converting to wire type")
+	}
+	if got, want := nWire, (vdl.NWire{"100"}); got != want {
+		t.Errorf("got %#v, want %#v", got, want)
+	}
+	var nUnionWire vdl.NUnionWire
+	if err := vdl.Convert(&nUnionWire, vdl.NUnionNative("A=false")); err != nil {
+		t.Fatalf("unexpected error converting to wire type")
+	}
+	if got, want := nUnionWire, (vdl.NUnionWireA{false}); got != want {
+		t.Errorf("got %#v, want %#v", got, want)
+	}
+}
