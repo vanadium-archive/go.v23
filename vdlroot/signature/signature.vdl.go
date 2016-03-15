@@ -144,7 +144,12 @@ func (m *Interface) MakeVDLTarget() vdl.Target {
 }
 
 type InterfaceTarget struct {
-	Value *Interface
+	Value         *Interface
+	nameTarget    vdl.StringTarget
+	pkgPathTarget vdl.StringTarget
+	docTarget     vdl.StringTarget
+	embedsTarget  unnamed_5b5d7369676e61747572652e456d626564207374727563747b4e616d6520737472696e673b506b675061746820737472696e673b446f6320737472696e677dTarget
+	methodsTarget unnamed_5b5d7369676e61747572652e4d6574686f64207374727563747b4e616d6520737472696e673b446f6320737472696e673b496e41726773205b5d7369676e61747572652e417267207374727563747b4e616d6520737472696e673b446f6320737472696e673b5479706520747970656f626a6563747d3b4f757441726773205b5d7369676e61747572652e4172673b496e53747265616d203f7369676e61747572652e4172673b4f757453747265616d203f7369676e61747572652e4172673b54616773205b5d616e797dTarget
 	vdl.TargetBase
 	vdl.FieldsTargetBase
 }
@@ -158,20 +163,25 @@ func (t *InterfaceTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
 func (t *InterfaceTarget) StartField(name string) (key, field vdl.Target, _ error) {
 	switch name {
 	case "Name":
-		val, err := &vdl.StringTarget{Value: &t.Value.Name}, error(nil)
-		return nil, val, err
+		t.nameTarget.Value = &t.Value.Name
+		target, err := &t.nameTarget, error(nil)
+		return nil, target, err
 	case "PkgPath":
-		val, err := &vdl.StringTarget{Value: &t.Value.PkgPath}, error(nil)
-		return nil, val, err
+		t.pkgPathTarget.Value = &t.Value.PkgPath
+		target, err := &t.pkgPathTarget, error(nil)
+		return nil, target, err
 	case "Doc":
-		val, err := &vdl.StringTarget{Value: &t.Value.Doc}, error(nil)
-		return nil, val, err
+		t.docTarget.Value = &t.Value.Doc
+		target, err := &t.docTarget, error(nil)
+		return nil, target, err
 	case "Embeds":
-		val, err := &unnamed_5b5d7369676e61747572652e456d626564207374727563747b4e616d6520737472696e673b506b675061746820737472696e673b446f6320737472696e677d_Target{Value: &t.Value.Embeds}, error(nil)
-		return nil, val, err
+		t.embedsTarget.Value = &t.Value.Embeds
+		target, err := &t.embedsTarget, error(nil)
+		return nil, target, err
 	case "Methods":
-		val, err := &unnamed_5b5d7369676e61747572652e4d6574686f64207374727563747b4e616d6520737472696e673b446f6320737472696e673b496e41726773205b5d7369676e61747572652e417267207374727563747b4e616d6520737472696e673b446f6320737472696e673b5479706520747970656f626a6563747d3b4f757441726773205b5d7369676e61747572652e4172673b496e53747265616d203f7369676e61747572652e4172673b4f757453747265616d203f7369676e61747572652e4172673b54616773205b5d616e797d_Target{Value: &t.Value.Methods}, error(nil)
-		return nil, val, err
+		t.methodsTarget.Value = &t.Value.Methods
+		target, err := &t.methodsTarget, error(nil)
+		return nil, target, err
 	default:
 		return nil, nil, fmt.Errorf("field %s not in struct %v", name, __VDLType_signature_Interface)
 	}
@@ -184,13 +194,15 @@ func (t *InterfaceTarget) FinishFields(_ vdl.FieldsTarget) error {
 	return nil
 }
 
-type unnamed_5b5d7369676e61747572652e456d626564207374727563747b4e616d6520737472696e673b506b675061746820737472696e673b446f6320737472696e677d_Target struct {
-	Value *[]Embed
+// []Embed
+type unnamed_5b5d7369676e61747572652e456d626564207374727563747b4e616d6520737472696e673b506b675061746820737472696e673b446f6320737472696e677dTarget struct {
+	Value      *[]Embed
+	elemTarget EmbedTarget
 	vdl.TargetBase
 	vdl.ListTargetBase
 }
 
-func (t *unnamed_5b5d7369676e61747572652e456d626564207374727563747b4e616d6520737472696e673b506b675061746820737472696e673b446f6320737472696e677d_Target) StartList(tt *vdl.Type, len int) (vdl.ListTarget, error) {
+func (t *unnamed_5b5d7369676e61747572652e456d626564207374727563747b4e616d6520737472696e673b506b675061746820737472696e673b446f6320737472696e677dTarget) StartList(tt *vdl.Type, len int) (vdl.ListTarget, error) {
 	if !vdl.Compatible(tt, __VDLType1) {
 		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType1)
 	}
@@ -201,19 +213,24 @@ func (t *unnamed_5b5d7369676e61747572652e456d626564207374727563747b4e616d6520737
 	}
 	return t, nil
 }
-func (t *unnamed_5b5d7369676e61747572652e456d626564207374727563747b4e616d6520737472696e673b506b675061746820737472696e673b446f6320737472696e677d_Target) StartElem(index int) (elem vdl.Target, _ error) {
-	return &EmbedTarget{Value: &(*t.Value)[index]}, error(nil)
+func (t *unnamed_5b5d7369676e61747572652e456d626564207374727563747b4e616d6520737472696e673b506b675061746820737472696e673b446f6320737472696e677dTarget) StartElem(index int) (elem vdl.Target, _ error) {
+	t.elemTarget.Value = &(*t.Value)[index]
+	target, err := &t.elemTarget, error(nil)
+	return target, err
 }
-func (t *unnamed_5b5d7369676e61747572652e456d626564207374727563747b4e616d6520737472696e673b506b675061746820737472696e673b446f6320737472696e677d_Target) FinishElem(elem vdl.Target) error {
+func (t *unnamed_5b5d7369676e61747572652e456d626564207374727563747b4e616d6520737472696e673b506b675061746820737472696e673b446f6320737472696e677dTarget) FinishElem(elem vdl.Target) error {
 	return nil
 }
-func (t *unnamed_5b5d7369676e61747572652e456d626564207374727563747b4e616d6520737472696e673b506b675061746820737472696e673b446f6320737472696e677d_Target) FinishList(elem vdl.ListTarget) error {
+func (t *unnamed_5b5d7369676e61747572652e456d626564207374727563747b4e616d6520737472696e673b506b675061746820737472696e673b446f6320737472696e677dTarget) FinishList(elem vdl.ListTarget) error {
 
 	return nil
 }
 
 type EmbedTarget struct {
-	Value *Embed
+	Value         *Embed
+	nameTarget    vdl.StringTarget
+	pkgPathTarget vdl.StringTarget
+	docTarget     vdl.StringTarget
 	vdl.TargetBase
 	vdl.FieldsTargetBase
 }
@@ -227,14 +244,17 @@ func (t *EmbedTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
 func (t *EmbedTarget) StartField(name string) (key, field vdl.Target, _ error) {
 	switch name {
 	case "Name":
-		val, err := &vdl.StringTarget{Value: &t.Value.Name}, error(nil)
-		return nil, val, err
+		t.nameTarget.Value = &t.Value.Name
+		target, err := &t.nameTarget, error(nil)
+		return nil, target, err
 	case "PkgPath":
-		val, err := &vdl.StringTarget{Value: &t.Value.PkgPath}, error(nil)
-		return nil, val, err
+		t.pkgPathTarget.Value = &t.Value.PkgPath
+		target, err := &t.pkgPathTarget, error(nil)
+		return nil, target, err
 	case "Doc":
-		val, err := &vdl.StringTarget{Value: &t.Value.Doc}, error(nil)
-		return nil, val, err
+		t.docTarget.Value = &t.Value.Doc
+		target, err := &t.docTarget, error(nil)
+		return nil, target, err
 	default:
 		return nil, nil, fmt.Errorf("field %s not in struct %v", name, __VDLType_signature_Embed)
 	}
@@ -247,13 +267,15 @@ func (t *EmbedTarget) FinishFields(_ vdl.FieldsTarget) error {
 	return nil
 }
 
-type unnamed_5b5d7369676e61747572652e4d6574686f64207374727563747b4e616d6520737472696e673b446f6320737472696e673b496e41726773205b5d7369676e61747572652e417267207374727563747b4e616d6520737472696e673b446f6320737472696e673b5479706520747970656f626a6563747d3b4f757441726773205b5d7369676e61747572652e4172673b496e53747265616d203f7369676e61747572652e4172673b4f757453747265616d203f7369676e61747572652e4172673b54616773205b5d616e797d_Target struct {
-	Value *[]Method
+// []Method
+type unnamed_5b5d7369676e61747572652e4d6574686f64207374727563747b4e616d6520737472696e673b446f6320737472696e673b496e41726773205b5d7369676e61747572652e417267207374727563747b4e616d6520737472696e673b446f6320737472696e673b5479706520747970656f626a6563747d3b4f757441726773205b5d7369676e61747572652e4172673b496e53747265616d203f7369676e61747572652e4172673b4f757453747265616d203f7369676e61747572652e4172673b54616773205b5d616e797dTarget struct {
+	Value      *[]Method
+	elemTarget MethodTarget
 	vdl.TargetBase
 	vdl.ListTargetBase
 }
 
-func (t *unnamed_5b5d7369676e61747572652e4d6574686f64207374727563747b4e616d6520737472696e673b446f6320737472696e673b496e41726773205b5d7369676e61747572652e417267207374727563747b4e616d6520737472696e673b446f6320737472696e673b5479706520747970656f626a6563747d3b4f757441726773205b5d7369676e61747572652e4172673b496e53747265616d203f7369676e61747572652e4172673b4f757453747265616d203f7369676e61747572652e4172673b54616773205b5d616e797d_Target) StartList(tt *vdl.Type, len int) (vdl.ListTarget, error) {
+func (t *unnamed_5b5d7369676e61747572652e4d6574686f64207374727563747b4e616d6520737472696e673b446f6320737472696e673b496e41726773205b5d7369676e61747572652e417267207374727563747b4e616d6520737472696e673b446f6320737472696e673b5479706520747970656f626a6563747d3b4f757441726773205b5d7369676e61747572652e4172673b496e53747265616d203f7369676e61747572652e4172673b4f757453747265616d203f7369676e61747572652e4172673b54616773205b5d616e797dTarget) StartList(tt *vdl.Type, len int) (vdl.ListTarget, error) {
 	if !vdl.Compatible(tt, __VDLType2) {
 		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType2)
 	}
@@ -264,19 +286,28 @@ func (t *unnamed_5b5d7369676e61747572652e4d6574686f64207374727563747b4e616d65207
 	}
 	return t, nil
 }
-func (t *unnamed_5b5d7369676e61747572652e4d6574686f64207374727563747b4e616d6520737472696e673b446f6320737472696e673b496e41726773205b5d7369676e61747572652e417267207374727563747b4e616d6520737472696e673b446f6320737472696e673b5479706520747970656f626a6563747d3b4f757441726773205b5d7369676e61747572652e4172673b496e53747265616d203f7369676e61747572652e4172673b4f757453747265616d203f7369676e61747572652e4172673b54616773205b5d616e797d_Target) StartElem(index int) (elem vdl.Target, _ error) {
-	return &MethodTarget{Value: &(*t.Value)[index]}, error(nil)
+func (t *unnamed_5b5d7369676e61747572652e4d6574686f64207374727563747b4e616d6520737472696e673b446f6320737472696e673b496e41726773205b5d7369676e61747572652e417267207374727563747b4e616d6520737472696e673b446f6320737472696e673b5479706520747970656f626a6563747d3b4f757441726773205b5d7369676e61747572652e4172673b496e53747265616d203f7369676e61747572652e4172673b4f757453747265616d203f7369676e61747572652e4172673b54616773205b5d616e797dTarget) StartElem(index int) (elem vdl.Target, _ error) {
+	t.elemTarget.Value = &(*t.Value)[index]
+	target, err := &t.elemTarget, error(nil)
+	return target, err
 }
-func (t *unnamed_5b5d7369676e61747572652e4d6574686f64207374727563747b4e616d6520737472696e673b446f6320737472696e673b496e41726773205b5d7369676e61747572652e417267207374727563747b4e616d6520737472696e673b446f6320737472696e673b5479706520747970656f626a6563747d3b4f757441726773205b5d7369676e61747572652e4172673b496e53747265616d203f7369676e61747572652e4172673b4f757453747265616d203f7369676e61747572652e4172673b54616773205b5d616e797d_Target) FinishElem(elem vdl.Target) error {
+func (t *unnamed_5b5d7369676e61747572652e4d6574686f64207374727563747b4e616d6520737472696e673b446f6320737472696e673b496e41726773205b5d7369676e61747572652e417267207374727563747b4e616d6520737472696e673b446f6320737472696e673b5479706520747970656f626a6563747d3b4f757441726773205b5d7369676e61747572652e4172673b496e53747265616d203f7369676e61747572652e4172673b4f757453747265616d203f7369676e61747572652e4172673b54616773205b5d616e797dTarget) FinishElem(elem vdl.Target) error {
 	return nil
 }
-func (t *unnamed_5b5d7369676e61747572652e4d6574686f64207374727563747b4e616d6520737472696e673b446f6320737472696e673b496e41726773205b5d7369676e61747572652e417267207374727563747b4e616d6520737472696e673b446f6320737472696e673b5479706520747970656f626a6563747d3b4f757441726773205b5d7369676e61747572652e4172673b496e53747265616d203f7369676e61747572652e4172673b4f757453747265616d203f7369676e61747572652e4172673b54616773205b5d616e797d_Target) FinishList(elem vdl.ListTarget) error {
+func (t *unnamed_5b5d7369676e61747572652e4d6574686f64207374727563747b4e616d6520737472696e673b446f6320737472696e673b496e41726773205b5d7369676e61747572652e417267207374727563747b4e616d6520737472696e673b446f6320737472696e673b5479706520747970656f626a6563747d3b4f757441726773205b5d7369676e61747572652e4172673b496e53747265616d203f7369676e61747572652e4172673b4f757453747265616d203f7369676e61747572652e4172673b54616773205b5d616e797dTarget) FinishList(elem vdl.ListTarget) error {
 
 	return nil
 }
 
 type MethodTarget struct {
-	Value *Method
+	Value           *Method
+	nameTarget      vdl.StringTarget
+	docTarget       vdl.StringTarget
+	inArgsTarget    unnamed_5b5d7369676e61747572652e417267207374727563747b4e616d6520737472696e673b446f6320737472696e673b5479706520747970656f626a6563747dTarget
+	outArgsTarget   unnamed_5b5d7369676e61747572652e417267207374727563747b4e616d6520737472696e673b446f6320737472696e673b5479706520747970656f626a6563747dTarget
+	inStreamTarget  unnamed_3f7369676e61747572652e417267207374727563747b4e616d6520737472696e673b446f6320737472696e673b5479706520747970656f626a6563747dTarget
+	outStreamTarget unnamed_3f7369676e61747572652e417267207374727563747b4e616d6520737472696e673b446f6320737472696e673b5479706520747970656f626a6563747dTarget
+	tagsTarget      unnamed_5b5d616e79Target
 	vdl.TargetBase
 	vdl.FieldsTargetBase
 }
@@ -290,26 +321,33 @@ func (t *MethodTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
 func (t *MethodTarget) StartField(name string) (key, field vdl.Target, _ error) {
 	switch name {
 	case "Name":
-		val, err := &vdl.StringTarget{Value: &t.Value.Name}, error(nil)
-		return nil, val, err
+		t.nameTarget.Value = &t.Value.Name
+		target, err := &t.nameTarget, error(nil)
+		return nil, target, err
 	case "Doc":
-		val, err := &vdl.StringTarget{Value: &t.Value.Doc}, error(nil)
-		return nil, val, err
+		t.docTarget.Value = &t.Value.Doc
+		target, err := &t.docTarget, error(nil)
+		return nil, target, err
 	case "InArgs":
-		val, err := &unnamed_5b5d7369676e61747572652e417267207374727563747b4e616d6520737472696e673b446f6320737472696e673b5479706520747970656f626a6563747d_Target{Value: &t.Value.InArgs}, error(nil)
-		return nil, val, err
+		t.inArgsTarget.Value = &t.Value.InArgs
+		target, err := &t.inArgsTarget, error(nil)
+		return nil, target, err
 	case "OutArgs":
-		val, err := &unnamed_5b5d7369676e61747572652e417267207374727563747b4e616d6520737472696e673b446f6320737472696e673b5479706520747970656f626a6563747d_Target{Value: &t.Value.OutArgs}, error(nil)
-		return nil, val, err
+		t.outArgsTarget.Value = &t.Value.OutArgs
+		target, err := &t.outArgsTarget, error(nil)
+		return nil, target, err
 	case "InStream":
-		val, err := &unnamed_3f7369676e61747572652e417267207374727563747b4e616d6520737472696e673b446f6320737472696e673b5479706520747970656f626a6563747d_Target{Value: &t.Value.InStream}, error(nil)
-		return nil, val, err
+		t.inStreamTarget.Value = &t.Value.InStream
+		target, err := &t.inStreamTarget, error(nil)
+		return nil, target, err
 	case "OutStream":
-		val, err := &unnamed_3f7369676e61747572652e417267207374727563747b4e616d6520737472696e673b446f6320737472696e673b5479706520747970656f626a6563747d_Target{Value: &t.Value.OutStream}, error(nil)
-		return nil, val, err
+		t.outStreamTarget.Value = &t.Value.OutStream
+		target, err := &t.outStreamTarget, error(nil)
+		return nil, target, err
 	case "Tags":
-		val, err := &unnamed_5b5d616e79_Target{Value: &t.Value.Tags}, error(nil)
-		return nil, val, err
+		t.tagsTarget.Value = &t.Value.Tags
+		target, err := &t.tagsTarget, error(nil)
+		return nil, target, err
 	default:
 		return nil, nil, fmt.Errorf("field %s not in struct %v", name, __VDLType_signature_Method)
 	}
@@ -322,13 +360,15 @@ func (t *MethodTarget) FinishFields(_ vdl.FieldsTarget) error {
 	return nil
 }
 
-type unnamed_5b5d7369676e61747572652e417267207374727563747b4e616d6520737472696e673b446f6320737472696e673b5479706520747970656f626a6563747d_Target struct {
-	Value *[]Arg
+// []Arg
+type unnamed_5b5d7369676e61747572652e417267207374727563747b4e616d6520737472696e673b446f6320737472696e673b5479706520747970656f626a6563747dTarget struct {
+	Value      *[]Arg
+	elemTarget ArgTarget
 	vdl.TargetBase
 	vdl.ListTargetBase
 }
 
-func (t *unnamed_5b5d7369676e61747572652e417267207374727563747b4e616d6520737472696e673b446f6320737472696e673b5479706520747970656f626a6563747d_Target) StartList(tt *vdl.Type, len int) (vdl.ListTarget, error) {
+func (t *unnamed_5b5d7369676e61747572652e417267207374727563747b4e616d6520737472696e673b446f6320737472696e673b5479706520747970656f626a6563747dTarget) StartList(tt *vdl.Type, len int) (vdl.ListTarget, error) {
 	if !vdl.Compatible(tt, __VDLType3) {
 		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType3)
 	}
@@ -339,19 +379,24 @@ func (t *unnamed_5b5d7369676e61747572652e417267207374727563747b4e616d65207374726
 	}
 	return t, nil
 }
-func (t *unnamed_5b5d7369676e61747572652e417267207374727563747b4e616d6520737472696e673b446f6320737472696e673b5479706520747970656f626a6563747d_Target) StartElem(index int) (elem vdl.Target, _ error) {
-	return &ArgTarget{Value: &(*t.Value)[index]}, error(nil)
+func (t *unnamed_5b5d7369676e61747572652e417267207374727563747b4e616d6520737472696e673b446f6320737472696e673b5479706520747970656f626a6563747dTarget) StartElem(index int) (elem vdl.Target, _ error) {
+	t.elemTarget.Value = &(*t.Value)[index]
+	target, err := &t.elemTarget, error(nil)
+	return target, err
 }
-func (t *unnamed_5b5d7369676e61747572652e417267207374727563747b4e616d6520737472696e673b446f6320737472696e673b5479706520747970656f626a6563747d_Target) FinishElem(elem vdl.Target) error {
+func (t *unnamed_5b5d7369676e61747572652e417267207374727563747b4e616d6520737472696e673b446f6320737472696e673b5479706520747970656f626a6563747dTarget) FinishElem(elem vdl.Target) error {
 	return nil
 }
-func (t *unnamed_5b5d7369676e61747572652e417267207374727563747b4e616d6520737472696e673b446f6320737472696e673b5479706520747970656f626a6563747d_Target) FinishList(elem vdl.ListTarget) error {
+func (t *unnamed_5b5d7369676e61747572652e417267207374727563747b4e616d6520737472696e673b446f6320737472696e673b5479706520747970656f626a6563747dTarget) FinishList(elem vdl.ListTarget) error {
 
 	return nil
 }
 
 type ArgTarget struct {
-	Value *Arg
+	Value      *Arg
+	nameTarget vdl.StringTarget
+	docTarget  vdl.StringTarget
+	typeTarget vdl.TypeObjectTarget
 	vdl.TargetBase
 	vdl.FieldsTargetBase
 }
@@ -365,14 +410,17 @@ func (t *ArgTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
 func (t *ArgTarget) StartField(name string) (key, field vdl.Target, _ error) {
 	switch name {
 	case "Name":
-		val, err := &vdl.StringTarget{Value: &t.Value.Name}, error(nil)
-		return nil, val, err
+		t.nameTarget.Value = &t.Value.Name
+		target, err := &t.nameTarget, error(nil)
+		return nil, target, err
 	case "Doc":
-		val, err := &vdl.StringTarget{Value: &t.Value.Doc}, error(nil)
-		return nil, val, err
+		t.docTarget.Value = &t.Value.Doc
+		target, err := &t.docTarget, error(nil)
+		return nil, target, err
 	case "Type":
-		val, err := &vdl.TypeObjectTarget{Value: &t.Value.Type}, error(nil)
-		return nil, val, err
+		t.typeTarget.Value = &t.Value.Type
+		target, err := &t.typeTarget, error(nil)
+		return nil, target, err
 	default:
 		return nil, nil, fmt.Errorf("field %s not in struct %v", name, __VDLType_signature_Arg)
 	}
@@ -385,41 +433,46 @@ func (t *ArgTarget) FinishFields(_ vdl.FieldsTarget) error {
 	return nil
 }
 
-type unnamed_3f7369676e61747572652e417267207374727563747b4e616d6520737472696e673b446f6320737472696e673b5479706520747970656f626a6563747d_Target struct {
-	Value **Arg
+// Optional Arg
+type unnamed_3f7369676e61747572652e417267207374727563747b4e616d6520737472696e673b446f6320737472696e673b5479706520747970656f626a6563747dTarget struct {
+	Value      **Arg
+	elemTarget ArgTarget
 	vdl.TargetBase
 	vdl.FieldsTargetBase
 }
 
-func (t *unnamed_3f7369676e61747572652e417267207374727563747b4e616d6520737472696e673b446f6320737472696e673b5479706520747970656f626a6563747d_Target) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
+func (t *unnamed_3f7369676e61747572652e417267207374727563747b4e616d6520737472696e673b446f6320737472696e673b5479706520747970656f626a6563747dTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
 	if *t.Value == nil {
 		*t.Value = &Arg{
 			Type: vdl.AnyType,
 		}
 	}
-	target, err := &ArgTarget{Value: *t.Value}, error(nil)
+	t.elemTarget.Value = *t.Value
+	target, err := &t.elemTarget, error(nil)
 	if err != nil {
 		return nil, err
 	}
 	return target.StartFields(tt)
 }
-func (t *unnamed_3f7369676e61747572652e417267207374727563747b4e616d6520737472696e673b446f6320737472696e673b5479706520747970656f626a6563747d_Target) FinishFields(_ vdl.FieldsTarget) error {
+func (t *unnamed_3f7369676e61747572652e417267207374727563747b4e616d6520737472696e673b446f6320737472696e673b5479706520747970656f626a6563747dTarget) FinishFields(_ vdl.FieldsTarget) error {
 
 	return nil
 }
-func (t *unnamed_3f7369676e61747572652e417267207374727563747b4e616d6520737472696e673b446f6320737472696e673b5479706520747970656f626a6563747d_Target) FromNil(tt *vdl.Type) error {
+func (t *unnamed_3f7369676e61747572652e417267207374727563747b4e616d6520737472696e673b446f6320737472696e673b5479706520747970656f626a6563747dTarget) FromNil(tt *vdl.Type) error {
 	*t.Value = nil
 
 	return nil
 }
 
-type unnamed_5b5d616e79_Target struct {
+// []*vdl.Value
+type unnamed_5b5d616e79Target struct {
 	Value *[]*vdl.Value
+
 	vdl.TargetBase
 	vdl.ListTargetBase
 }
 
-func (t *unnamed_5b5d616e79_Target) StartList(tt *vdl.Type, len int) (vdl.ListTarget, error) {
+func (t *unnamed_5b5d616e79Target) StartList(tt *vdl.Type, len int) (vdl.ListTarget, error) {
 	if !vdl.Compatible(tt, __VDLType4) {
 		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType4)
 	}
@@ -430,13 +483,14 @@ func (t *unnamed_5b5d616e79_Target) StartList(tt *vdl.Type, len int) (vdl.ListTa
 	}
 	return t, nil
 }
-func (t *unnamed_5b5d616e79_Target) StartElem(index int) (elem vdl.Target, _ error) {
-	return vdl.ReflectTarget(reflect.ValueOf(&(*t.Value)[index]))
+func (t *unnamed_5b5d616e79Target) StartElem(index int) (elem vdl.Target, _ error) {
+	target, err := vdl.ReflectTarget(reflect.ValueOf(&(*t.Value)[index]))
+	return target, err
 }
-func (t *unnamed_5b5d616e79_Target) FinishElem(elem vdl.Target) error {
+func (t *unnamed_5b5d616e79Target) FinishElem(elem vdl.Target) error {
 	return nil
 }
-func (t *unnamed_5b5d616e79_Target) FinishList(elem vdl.ListTarget) error {
+func (t *unnamed_5b5d616e79Target) FinishList(elem vdl.ListTarget) error {
 
 	return nil
 }

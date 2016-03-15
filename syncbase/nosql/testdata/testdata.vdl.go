@@ -95,7 +95,11 @@ func (m *AddressInfo) MakeVDLTarget() vdl.Target {
 }
 
 type AddressInfoTarget struct {
-	Value *AddressInfo
+	Value        *AddressInfo
+	streetTarget vdl.StringTarget
+	cityTarget   vdl.StringTarget
+	stateTarget  vdl.StringTarget
+	zipTarget    vdl.StringTarget
 	vdl.TargetBase
 	vdl.FieldsTargetBase
 }
@@ -109,17 +113,21 @@ func (t *AddressInfoTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) 
 func (t *AddressInfoTarget) StartField(name string) (key, field vdl.Target, _ error) {
 	switch name {
 	case "Street":
-		val, err := &vdl.StringTarget{Value: &t.Value.Street}, error(nil)
-		return nil, val, err
+		t.streetTarget.Value = &t.Value.Street
+		target, err := &t.streetTarget, error(nil)
+		return nil, target, err
 	case "City":
-		val, err := &vdl.StringTarget{Value: &t.Value.City}, error(nil)
-		return nil, val, err
+		t.cityTarget.Value = &t.Value.City
+		target, err := &t.cityTarget, error(nil)
+		return nil, target, err
 	case "State":
-		val, err := &vdl.StringTarget{Value: &t.Value.State}, error(nil)
-		return nil, val, err
+		t.stateTarget.Value = &t.Value.State
+		target, err := &t.stateTarget, error(nil)
+		return nil, target, err
 	case "Zip":
-		val, err := &vdl.StringTarget{Value: &t.Value.Zip}, error(nil)
-		return nil, val, err
+		t.zipTarget.Value = &t.Value.Zip
+		target, err := &t.zipTarget, error(nil)
+		return nil, target, err
 	default:
 		return nil, nil, fmt.Errorf("field %s not in struct %v", name, __VDLType_v_io_v23_syncbase_nosql_testdata_AddressInfo)
 	}
@@ -339,7 +347,8 @@ func (m *EquifaxCreditReport) MakeVDLTarget() vdl.Target {
 }
 
 type EquifaxCreditReportTarget struct {
-	Value *EquifaxCreditReport
+	Value        *EquifaxCreditReport
+	ratingTarget vdl.ByteTarget
 	vdl.TargetBase
 	vdl.FieldsTargetBase
 }
@@ -353,8 +362,9 @@ func (t *EquifaxCreditReportTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget,
 func (t *EquifaxCreditReportTarget) StartField(name string) (key, field vdl.Target, _ error) {
 	switch name {
 	case "Rating":
-		val, err := &vdl.ByteTarget{Value: &t.Value.Rating}, error(nil)
-		return nil, val, err
+		t.ratingTarget.Value = &t.Value.Rating
+		target, err := &t.ratingTarget, error(nil)
+		return nil, target, err
 	default:
 		return nil, nil, fmt.Errorf("field %s not in struct %v", name, __VDLType_v_io_v23_syncbase_nosql_testdata_EquifaxCreditReport)
 	}
@@ -409,7 +419,8 @@ func (m *ExperianCreditReport) MakeVDLTarget() vdl.Target {
 }
 
 type ExperianCreditReportTarget struct {
-	Value *ExperianCreditReport
+	Value        *ExperianCreditReport
+	ratingTarget ExperianRatingTarget
 	vdl.TargetBase
 	vdl.FieldsTargetBase
 }
@@ -423,8 +434,9 @@ func (t *ExperianCreditReportTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget
 func (t *ExperianCreditReportTarget) StartField(name string) (key, field vdl.Target, _ error) {
 	switch name {
 	case "Rating":
-		val, err := &ExperianRatingTarget{Value: &t.Value.Rating}, error(nil)
-		return nil, val, err
+		t.ratingTarget.Value = &t.Value.Rating
+		target, err := &t.ratingTarget, error(nil)
+		return nil, target, err
 	default:
 		return nil, nil, fmt.Errorf("field %s not in struct %v", name, __VDLType_v_io_v23_syncbase_nosql_testdata_ExperianCreditReport)
 	}
@@ -478,7 +490,8 @@ func (m *TransUnionCreditReport) MakeVDLTarget() vdl.Target {
 }
 
 type TransUnionCreditReportTarget struct {
-	Value *TransUnionCreditReport
+	Value        *TransUnionCreditReport
+	ratingTarget vdl.Int16Target
 	vdl.TargetBase
 	vdl.FieldsTargetBase
 }
@@ -492,8 +505,9 @@ func (t *TransUnionCreditReportTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarg
 func (t *TransUnionCreditReportTarget) StartField(name string) (key, field vdl.Target, _ error) {
 	switch name {
 	case "Rating":
-		val, err := &vdl.Int16Target{Value: &t.Value.Rating}, error(nil)
-		return nil, val, err
+		t.ratingTarget.Value = &t.Value.Rating
+		target, err := &t.ratingTarget, error(nil)
+		return nil, target, err
 	default:
 		return nil, nil, fmt.Errorf("field %s not in struct %v", name, __VDLType_v_io_v23_syncbase_nosql_testdata_TransUnionCreditReport)
 	}
@@ -693,7 +707,9 @@ func (m *CreditReport) MakeVDLTarget() vdl.Target {
 }
 
 type CreditReportTarget struct {
-	Value *CreditReport
+	Value        *CreditReport
+	agencyTarget CreditAgencyTarget
+
 	vdl.TargetBase
 	vdl.FieldsTargetBase
 }
@@ -707,11 +723,12 @@ func (t *CreditReportTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error)
 func (t *CreditReportTarget) StartField(name string) (key, field vdl.Target, _ error) {
 	switch name {
 	case "Agency":
-		val, err := &CreditAgencyTarget{Value: &t.Value.Agency}, error(nil)
-		return nil, val, err
+		t.agencyTarget.Value = &t.Value.Agency
+		target, err := &t.agencyTarget, error(nil)
+		return nil, target, err
 	case "Report":
-		val, err := vdl.ReflectTarget(reflect.ValueOf(&t.Value.Report))
-		return nil, val, err
+		target, err := vdl.ReflectTarget(reflect.ValueOf(&t.Value.Report))
+		return nil, target, err
 	default:
 		return nil, nil, fmt.Errorf("field %s not in struct %v", name, __VDLType_v_io_v23_syncbase_nosql_testdata_CreditReport)
 	}
@@ -819,7 +836,12 @@ func (m *Customer) MakeVDLTarget() vdl.Target {
 }
 
 type CustomerTarget struct {
-	Value *Customer
+	Value         *Customer
+	nameTarget    vdl.StringTarget
+	idTarget      vdl.Int64Target
+	activeTarget  vdl.BoolTarget
+	addressTarget AddressInfoTarget
+	creditTarget  CreditReportTarget
 	vdl.TargetBase
 	vdl.FieldsTargetBase
 }
@@ -833,20 +855,25 @@ func (t *CustomerTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
 func (t *CustomerTarget) StartField(name string) (key, field vdl.Target, _ error) {
 	switch name {
 	case "Name":
-		val, err := &vdl.StringTarget{Value: &t.Value.Name}, error(nil)
-		return nil, val, err
+		t.nameTarget.Value = &t.Value.Name
+		target, err := &t.nameTarget, error(nil)
+		return nil, target, err
 	case "Id":
-		val, err := &vdl.Int64Target{Value: &t.Value.Id}, error(nil)
-		return nil, val, err
+		t.idTarget.Value = &t.Value.Id
+		target, err := &t.idTarget, error(nil)
+		return nil, target, err
 	case "Active":
-		val, err := &vdl.BoolTarget{Value: &t.Value.Active}, error(nil)
-		return nil, val, err
+		t.activeTarget.Value = &t.Value.Active
+		target, err := &t.activeTarget, error(nil)
+		return nil, target, err
 	case "Address":
-		val, err := &AddressInfoTarget{Value: &t.Value.Address}, error(nil)
-		return nil, val, err
+		t.addressTarget.Value = &t.Value.Address
+		target, err := &t.addressTarget, error(nil)
+		return nil, target, err
 	case "Credit":
-		val, err := &CreditReportTarget{Value: &t.Value.Credit}, error(nil)
-		return nil, val, err
+		t.creditTarget.Value = &t.Value.Credit
+		target, err := &t.creditTarget, error(nil)
+		return nil, target, err
 	default:
 		return nil, nil, fmt.Errorf("field %s not in struct %v", name, __VDLType_v_io_v23_syncbase_nosql_testdata_Customer)
 	}
@@ -957,7 +984,12 @@ func (m *Invoice) MakeVDLTarget() vdl.Target {
 }
 
 type InvoiceTarget struct {
-	Value *Invoice
+	Value             *Invoice
+	custIdTarget      vdl.Int64Target
+	invoiceNumTarget  vdl.Int64Target
+	invoiceDateTarget time_2.TimeTarget
+	amountTarget      vdl.Int64Target
+	shipToTarget      AddressInfoTarget
 	vdl.TargetBase
 	vdl.FieldsTargetBase
 }
@@ -971,20 +1003,25 @@ func (t *InvoiceTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
 func (t *InvoiceTarget) StartField(name string) (key, field vdl.Target, _ error) {
 	switch name {
 	case "CustId":
-		val, err := &vdl.Int64Target{Value: &t.Value.CustId}, error(nil)
-		return nil, val, err
+		t.custIdTarget.Value = &t.Value.CustId
+		target, err := &t.custIdTarget, error(nil)
+		return nil, target, err
 	case "InvoiceNum":
-		val, err := &vdl.Int64Target{Value: &t.Value.InvoiceNum}, error(nil)
-		return nil, val, err
+		t.invoiceNumTarget.Value = &t.Value.InvoiceNum
+		target, err := &t.invoiceNumTarget, error(nil)
+		return nil, target, err
 	case "InvoiceDate":
-		val, err := &time_2.TimeTarget{Value: &t.Value.InvoiceDate}, error(nil)
-		return nil, val, err
+		t.invoiceDateTarget.Value = &t.Value.InvoiceDate
+		target, err := &t.invoiceDateTarget, error(nil)
+		return nil, target, err
 	case "Amount":
-		val, err := &vdl.Int64Target{Value: &t.Value.Amount}, error(nil)
-		return nil, val, err
+		t.amountTarget.Value = &t.Value.Amount
+		target, err := &t.amountTarget, error(nil)
+		return nil, target, err
 	case "ShipTo":
-		val, err := &AddressInfoTarget{Value: &t.Value.ShipTo}, error(nil)
-		return nil, val, err
+		t.shipToTarget.Value = &t.Value.ShipTo
+		target, err := &t.shipToTarget, error(nil)
+		return nil, target, err
 	default:
 		return nil, nil, fmt.Errorf("field %s not in struct %v", name, __VDLType_v_io_v23_syncbase_nosql_testdata_Invoice)
 	}
@@ -1168,7 +1205,18 @@ func (m *Numbers) MakeVDLTarget() vdl.Target {
 }
 
 type NumbersTarget struct {
-	Value *Numbers
+	Value      *Numbers
+	bTarget    vdl.ByteTarget
+	ui16Target vdl.Uint16Target
+	ui32Target vdl.Uint32Target
+	ui64Target vdl.Uint64Target
+	i16Target  vdl.Int16Target
+	i32Target  vdl.Int32Target
+	i64Target  vdl.Int64Target
+	f32Target  vdl.Float32Target
+	f64Target  vdl.Float64Target
+	c64Target  vdl.Complex64Target
+	c128Target vdl.Complex128Target
 	vdl.TargetBase
 	vdl.FieldsTargetBase
 }
@@ -1182,38 +1230,49 @@ func (t *NumbersTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
 func (t *NumbersTarget) StartField(name string) (key, field vdl.Target, _ error) {
 	switch name {
 	case "B":
-		val, err := &vdl.ByteTarget{Value: &t.Value.B}, error(nil)
-		return nil, val, err
+		t.bTarget.Value = &t.Value.B
+		target, err := &t.bTarget, error(nil)
+		return nil, target, err
 	case "Ui16":
-		val, err := &vdl.Uint16Target{Value: &t.Value.Ui16}, error(nil)
-		return nil, val, err
+		t.ui16Target.Value = &t.Value.Ui16
+		target, err := &t.ui16Target, error(nil)
+		return nil, target, err
 	case "Ui32":
-		val, err := &vdl.Uint32Target{Value: &t.Value.Ui32}, error(nil)
-		return nil, val, err
+		t.ui32Target.Value = &t.Value.Ui32
+		target, err := &t.ui32Target, error(nil)
+		return nil, target, err
 	case "Ui64":
-		val, err := &vdl.Uint64Target{Value: &t.Value.Ui64}, error(nil)
-		return nil, val, err
+		t.ui64Target.Value = &t.Value.Ui64
+		target, err := &t.ui64Target, error(nil)
+		return nil, target, err
 	case "I16":
-		val, err := &vdl.Int16Target{Value: &t.Value.I16}, error(nil)
-		return nil, val, err
+		t.i16Target.Value = &t.Value.I16
+		target, err := &t.i16Target, error(nil)
+		return nil, target, err
 	case "I32":
-		val, err := &vdl.Int32Target{Value: &t.Value.I32}, error(nil)
-		return nil, val, err
+		t.i32Target.Value = &t.Value.I32
+		target, err := &t.i32Target, error(nil)
+		return nil, target, err
 	case "I64":
-		val, err := &vdl.Int64Target{Value: &t.Value.I64}, error(nil)
-		return nil, val, err
+		t.i64Target.Value = &t.Value.I64
+		target, err := &t.i64Target, error(nil)
+		return nil, target, err
 	case "F32":
-		val, err := &vdl.Float32Target{Value: &t.Value.F32}, error(nil)
-		return nil, val, err
+		t.f32Target.Value = &t.Value.F32
+		target, err := &t.f32Target, error(nil)
+		return nil, target, err
 	case "F64":
-		val, err := &vdl.Float64Target{Value: &t.Value.F64}, error(nil)
-		return nil, val, err
+		t.f64Target.Value = &t.Value.F64
+		target, err := &t.f64Target, error(nil)
+		return nil, target, err
 	case "C64":
-		val, err := &vdl.Complex64Target{Value: &t.Value.C64}, error(nil)
-		return nil, val, err
+		t.c64Target.Value = &t.Value.C64
+		target, err := &t.c64Target, error(nil)
+		return nil, target, err
 	case "C128":
-		val, err := &vdl.Complex128Target{Value: &t.Value.C128}, error(nil)
-		return nil, val, err
+		t.c128Target.Value = &t.Value.C128
+		target, err := &t.c128Target, error(nil)
+		return nil, target, err
 	default:
 		return nil, nil, fmt.Errorf("field %s not in struct %v", name, __VDLType_v_io_v23_syncbase_nosql_testdata_Numbers)
 	}
@@ -1268,7 +1327,8 @@ func (m *FooType) MakeVDLTarget() vdl.Target {
 }
 
 type FooTypeTarget struct {
-	Value *FooType
+	Value     *FooType
+	barTarget BarTypeTarget
 	vdl.TargetBase
 	vdl.FieldsTargetBase
 }
@@ -1282,8 +1342,9 @@ func (t *FooTypeTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
 func (t *FooTypeTarget) StartField(name string) (key, field vdl.Target, _ error) {
 	switch name {
 	case "Bar":
-		val, err := &BarTypeTarget{Value: &t.Value.Bar}, error(nil)
-		return nil, val, err
+		t.barTarget.Value = &t.Value.Bar
+		target, err := &t.barTarget, error(nil)
+		return nil, target, err
 	default:
 		return nil, nil, fmt.Errorf("field %s not in struct %v", name, __VDLType_v_io_v23_syncbase_nosql_testdata_FooType)
 	}
@@ -1297,7 +1358,8 @@ func (t *FooTypeTarget) FinishFields(_ vdl.FieldsTarget) error {
 }
 
 type BarTypeTarget struct {
-	Value *BarType
+	Value     *BarType
+	bazTarget BazTypeTarget
 	vdl.TargetBase
 	vdl.FieldsTargetBase
 }
@@ -1311,8 +1373,9 @@ func (t *BarTypeTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
 func (t *BarTypeTarget) StartField(name string) (key, field vdl.Target, _ error) {
 	switch name {
 	case "Baz":
-		val, err := &BazTypeTarget{Value: &t.Value.Baz}, error(nil)
-		return nil, val, err
+		t.bazTarget.Value = &t.Value.Baz
+		target, err := &t.bazTarget, error(nil)
+		return nil, target, err
 	default:
 		return nil, nil, fmt.Errorf("field %s not in struct %v", name, __VDLType_v_io_v23_syncbase_nosql_testdata_BarType)
 	}
@@ -1326,7 +1389,9 @@ func (t *BarTypeTarget) FinishFields(_ vdl.FieldsTarget) error {
 }
 
 type BazTypeTarget struct {
-	Value *BazType
+	Value      *BazType
+	nameTarget vdl.StringTarget
+
 	vdl.TargetBase
 	vdl.FieldsTargetBase
 }
@@ -1340,11 +1405,12 @@ func (t *BazTypeTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
 func (t *BazTypeTarget) StartField(name string) (key, field vdl.Target, _ error) {
 	switch name {
 	case "Name":
-		val, err := &vdl.StringTarget{Value: &t.Value.Name}, error(nil)
-		return nil, val, err
+		t.nameTarget.Value = &t.Value.Name
+		target, err := &t.nameTarget, error(nil)
+		return nil, target, err
 	case "TitleOrValue":
-		val, err := vdl.ReflectTarget(reflect.ValueOf(&t.Value.TitleOrValue))
-		return nil, val, err
+		target, err := vdl.ReflectTarget(reflect.ValueOf(&t.Value.TitleOrValue))
+		return nil, target, err
 	default:
 		return nil, nil, fmt.Errorf("field %s not in struct %v", name, __VDLType_v_io_v23_syncbase_nosql_testdata_BazType)
 	}
@@ -1580,8 +1646,10 @@ func (m *ArrayOfFour) MakeVDLTarget() vdl.Target {
 	return &ArrayOfFourTarget{Value: m}
 }
 
+// ArrayOfFour
 type ArrayOfFourTarget struct {
-	Value *ArrayOfFour
+	Value      *ArrayOfFour
+	elemTarget vdl.StringTarget
 	vdl.TargetBase
 	vdl.ListTargetBase
 }
@@ -1593,7 +1661,9 @@ func (t *ArrayOfFourTarget) StartList(tt *vdl.Type, len int) (vdl.ListTarget, er
 	return t, nil
 }
 func (t *ArrayOfFourTarget) StartElem(index int) (elem vdl.Target, _ error) {
-	return &vdl.StringTarget{Value: &(*t.Value)[index]}, error(nil)
+	t.elemTarget.Value = &(*t.Value)[index]
+	target, err := &t.elemTarget, error(nil)
+	return target, err
 }
 func (t *ArrayOfFourTarget) FinishElem(elem vdl.Target) error {
 	return nil
@@ -1742,7 +1812,11 @@ func (m *KeyIndexData) MakeVDLTarget() vdl.Target {
 }
 
 type KeyIndexDataTarget struct {
-	Value *KeyIndexData
+	Value   *KeyIndexData
+	aTarget ArrayOfFourTarget
+	lTarget vdl.StringSliceTarget
+	mTarget unnamed_6d61705b636f6d706c65783132385d737472696e67Target
+	sTarget unnamed_7365745b737472696e675dTarget
 	vdl.TargetBase
 	vdl.FieldsTargetBase
 }
@@ -1756,17 +1830,21 @@ func (t *KeyIndexDataTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error)
 func (t *KeyIndexDataTarget) StartField(name string) (key, field vdl.Target, _ error) {
 	switch name {
 	case "A":
-		val, err := &ArrayOfFourTarget{Value: &t.Value.A}, error(nil)
-		return nil, val, err
+		t.aTarget.Value = &t.Value.A
+		target, err := &t.aTarget, error(nil)
+		return nil, target, err
 	case "L":
-		val, err := &vdl.StringSliceTarget{Value: &t.Value.L}, error(nil)
-		return nil, val, err
+		t.lTarget.Value = &t.Value.L
+		target, err := &t.lTarget, error(nil)
+		return nil, target, err
 	case "M":
-		val, err := &unnamed_6d61705b636f6d706c65783132385d737472696e67_Target{Value: &t.Value.M}, error(nil)
-		return nil, val, err
+		t.mTarget.Value = &t.Value.M
+		target, err := &t.mTarget, error(nil)
+		return nil, target, err
 	case "S":
-		val, err := &unnamed_7365745b737472696e675d_Target{Value: &t.Value.S}, error(nil)
-		return nil, val, err
+		t.sTarget.Value = &t.Value.S
+		target, err := &t.sTarget, error(nil)
+		return nil, target, err
 	default:
 		return nil, nil, fmt.Errorf("field %s not in struct %v", name, __VDLType_v_io_v23_syncbase_nosql_testdata_KeyIndexData)
 	}
@@ -1779,34 +1857,41 @@ func (t *KeyIndexDataTarget) FinishFields(_ vdl.FieldsTarget) error {
 	return nil
 }
 
-type unnamed_6d61705b636f6d706c65783132385d737472696e67_Target struct {
-	Value    *map[complex128]string
-	currKey  complex128
-	currElem string
+// map[complex128]string
+type unnamed_6d61705b636f6d706c65783132385d737472696e67Target struct {
+	Value      *map[complex128]string
+	currKey    complex128
+	currElem   string
+	keyTarget  vdl.Complex128Target
+	elemTarget vdl.StringTarget
 	vdl.TargetBase
 	vdl.MapTargetBase
 }
 
-func (t *unnamed_6d61705b636f6d706c65783132385d737472696e67_Target) StartMap(tt *vdl.Type, len int) (vdl.MapTarget, error) {
+func (t *unnamed_6d61705b636f6d706c65783132385d737472696e67Target) StartMap(tt *vdl.Type, len int) (vdl.MapTarget, error) {
 	if !vdl.Compatible(tt, __VDLType13) {
 		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType13)
 	}
 	*t.Value = make(map[complex128]string)
 	return t, nil
 }
-func (t *unnamed_6d61705b636f6d706c65783132385d737472696e67_Target) StartKey() (key vdl.Target, _ error) {
+func (t *unnamed_6d61705b636f6d706c65783132385d737472696e67Target) StartKey() (key vdl.Target, _ error) {
 	t.currKey = complex128(0)
-	return &vdl.Complex128Target{Value: &t.currKey}, error(nil)
+	t.keyTarget.Value = &t.currKey
+	target, err := &t.keyTarget, error(nil)
+	return target, err
 }
-func (t *unnamed_6d61705b636f6d706c65783132385d737472696e67_Target) FinishKeyStartField(key vdl.Target) (field vdl.Target, _ error) {
+func (t *unnamed_6d61705b636f6d706c65783132385d737472696e67Target) FinishKeyStartField(key vdl.Target) (field vdl.Target, _ error) {
 	t.currElem = ""
-	return &vdl.StringTarget{Value: &t.currElem}, error(nil)
+	t.elemTarget.Value = &t.currElem
+	target, err := &t.elemTarget, error(nil)
+	return target, err
 }
-func (t *unnamed_6d61705b636f6d706c65783132385d737472696e67_Target) FinishField(key, field vdl.Target) error {
+func (t *unnamed_6d61705b636f6d706c65783132385d737472696e67Target) FinishField(key, field vdl.Target) error {
 	(*t.Value)[t.currKey] = t.currElem
 	return nil
 }
-func (t *unnamed_6d61705b636f6d706c65783132385d737472696e67_Target) FinishMap(elem vdl.MapTarget) error {
+func (t *unnamed_6d61705b636f6d706c65783132385d737472696e67Target) FinishMap(elem vdl.MapTarget) error {
 	if len(*t.Value) == 0 {
 		*t.Value = nil
 	}
@@ -1814,29 +1899,33 @@ func (t *unnamed_6d61705b636f6d706c65783132385d737472696e67_Target) FinishMap(el
 	return nil
 }
 
-type unnamed_7365745b737472696e675d_Target struct {
-	Value   *map[string]struct{}
-	currKey string
+// map[string]struct{}
+type unnamed_7365745b737472696e675dTarget struct {
+	Value     *map[string]struct{}
+	currKey   string
+	keyTarget vdl.StringTarget
 	vdl.TargetBase
 	vdl.SetTargetBase
 }
 
-func (t *unnamed_7365745b737472696e675d_Target) StartSet(tt *vdl.Type, len int) (vdl.SetTarget, error) {
+func (t *unnamed_7365745b737472696e675dTarget) StartSet(tt *vdl.Type, len int) (vdl.SetTarget, error) {
 	if !vdl.Compatible(tt, __VDLType14) {
 		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType14)
 	}
 	*t.Value = make(map[string]struct{})
 	return t, nil
 }
-func (t *unnamed_7365745b737472696e675d_Target) StartKey() (key vdl.Target, _ error) {
+func (t *unnamed_7365745b737472696e675dTarget) StartKey() (key vdl.Target, _ error) {
 	t.currKey = ""
-	return &vdl.StringTarget{Value: &t.currKey}, error(nil)
+	t.keyTarget.Value = &t.currKey
+	target, err := &t.keyTarget, error(nil)
+	return target, err
 }
-func (t *unnamed_7365745b737472696e675d_Target) FinishKey(key vdl.Target) error {
+func (t *unnamed_7365745b737472696e675dTarget) FinishKey(key vdl.Target) error {
 	(*t.Value)[t.currKey] = struct{}{}
 	return nil
 }
-func (t *unnamed_7365745b737472696e675d_Target) FinishSet(list vdl.SetTarget) error {
+func (t *unnamed_7365745b737472696e675dTarget) FinishSet(list vdl.SetTarget) error {
 	if len(*t.Value) == 0 {
 		*t.Value = nil
 	}
@@ -1885,7 +1974,8 @@ func (m *BigData) MakeVDLTarget() vdl.Target {
 }
 
 type BigDataTarget struct {
-	Value *BigData
+	Value     *BigData
+	keyTarget vdl.StringTarget
 	vdl.TargetBase
 	vdl.FieldsTargetBase
 }
@@ -1899,8 +1989,9 @@ func (t *BigDataTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
 func (t *BigDataTarget) StartField(name string) (key, field vdl.Target, _ error) {
 	switch name {
 	case "Key":
-		val, err := &vdl.StringTarget{Value: &t.Value.Key}, error(nil)
-		return nil, val, err
+		t.keyTarget.Value = &t.Value.Key
+		target, err := &t.keyTarget, error(nil)
+		return nil, target, err
 	default:
 		return nil, nil, fmt.Errorf("field %s not in struct %v", name, __VDLType_v_io_v23_syncbase_nosql_testdata_BigData)
 	}

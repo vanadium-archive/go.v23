@@ -108,7 +108,9 @@ func (m *Description) MakeVDLTarget() vdl.Target {
 }
 
 type DescriptionTarget struct {
-	Value *Description
+	Value          *Description
+	nameTarget     vdl.StringTarget
+	profilesTarget unnamed_6d61705b737472696e675d626f6f6cTarget
 	vdl.TargetBase
 	vdl.FieldsTargetBase
 }
@@ -122,11 +124,13 @@ func (t *DescriptionTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) 
 func (t *DescriptionTarget) StartField(name string) (key, field vdl.Target, _ error) {
 	switch name {
 	case "Name":
-		val, err := &vdl.StringTarget{Value: &t.Value.Name}, error(nil)
-		return nil, val, err
+		t.nameTarget.Value = &t.Value.Name
+		target, err := &t.nameTarget, error(nil)
+		return nil, target, err
 	case "Profiles":
-		val, err := &unnamed_6d61705b737472696e675d626f6f6c_Target{Value: &t.Value.Profiles}, error(nil)
-		return nil, val, err
+		t.profilesTarget.Value = &t.Value.Profiles
+		target, err := &t.profilesTarget, error(nil)
+		return nil, target, err
 	default:
 		return nil, nil, fmt.Errorf("field %s not in struct %v", name, __VDLType_v_io_v23_services_binary_Description)
 	}
@@ -139,34 +143,41 @@ func (t *DescriptionTarget) FinishFields(_ vdl.FieldsTarget) error {
 	return nil
 }
 
-type unnamed_6d61705b737472696e675d626f6f6c_Target struct {
-	Value    *map[string]bool
-	currKey  string
-	currElem bool
+// map[string]bool
+type unnamed_6d61705b737472696e675d626f6f6cTarget struct {
+	Value      *map[string]bool
+	currKey    string
+	currElem   bool
+	keyTarget  vdl.StringTarget
+	elemTarget vdl.BoolTarget
 	vdl.TargetBase
 	vdl.MapTargetBase
 }
 
-func (t *unnamed_6d61705b737472696e675d626f6f6c_Target) StartMap(tt *vdl.Type, len int) (vdl.MapTarget, error) {
+func (t *unnamed_6d61705b737472696e675d626f6f6cTarget) StartMap(tt *vdl.Type, len int) (vdl.MapTarget, error) {
 	if !vdl.Compatible(tt, __VDLType1) {
 		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType1)
 	}
 	*t.Value = make(map[string]bool)
 	return t, nil
 }
-func (t *unnamed_6d61705b737472696e675d626f6f6c_Target) StartKey() (key vdl.Target, _ error) {
+func (t *unnamed_6d61705b737472696e675d626f6f6cTarget) StartKey() (key vdl.Target, _ error) {
 	t.currKey = ""
-	return &vdl.StringTarget{Value: &t.currKey}, error(nil)
+	t.keyTarget.Value = &t.currKey
+	target, err := &t.keyTarget, error(nil)
+	return target, err
 }
-func (t *unnamed_6d61705b737472696e675d626f6f6c_Target) FinishKeyStartField(key vdl.Target) (field vdl.Target, _ error) {
+func (t *unnamed_6d61705b737472696e675d626f6f6cTarget) FinishKeyStartField(key vdl.Target) (field vdl.Target, _ error) {
 	t.currElem = false
-	return &vdl.BoolTarget{Value: &t.currElem}, error(nil)
+	t.elemTarget.Value = &t.currElem
+	target, err := &t.elemTarget, error(nil)
+	return target, err
 }
-func (t *unnamed_6d61705b737472696e675d626f6f6c_Target) FinishField(key, field vdl.Target) error {
+func (t *unnamed_6d61705b737472696e675d626f6f6cTarget) FinishField(key, field vdl.Target) error {
 	(*t.Value)[t.currKey] = t.currElem
 	return nil
 }
-func (t *unnamed_6d61705b737472696e675d626f6f6c_Target) FinishMap(elem vdl.MapTarget) error {
+func (t *unnamed_6d61705b737472696e675d626f6f6cTarget) FinishMap(elem vdl.MapTarget) error {
 	if len(*t.Value) == 0 {
 		*t.Value = nil
 	}
@@ -231,7 +242,9 @@ func (m *PartInfo) MakeVDLTarget() vdl.Target {
 }
 
 type PartInfoTarget struct {
-	Value *PartInfo
+	Value          *PartInfo
+	checksumTarget vdl.StringTarget
+	sizeTarget     vdl.Int64Target
 	vdl.TargetBase
 	vdl.FieldsTargetBase
 }
@@ -245,11 +258,13 @@ func (t *PartInfoTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
 func (t *PartInfoTarget) StartField(name string) (key, field vdl.Target, _ error) {
 	switch name {
 	case "Checksum":
-		val, err := &vdl.StringTarget{Value: &t.Value.Checksum}, error(nil)
-		return nil, val, err
+		t.checksumTarget.Value = &t.Value.Checksum
+		target, err := &t.checksumTarget, error(nil)
+		return nil, target, err
 	case "Size":
-		val, err := &vdl.Int64Target{Value: &t.Value.Size}, error(nil)
-		return nil, val, err
+		t.sizeTarget.Value = &t.Value.Size
+		target, err := &t.sizeTarget, error(nil)
+		return nil, target, err
 	default:
 		return nil, nil, fmt.Errorf("field %s not in struct %v", name, __VDLType_v_io_v23_services_binary_PartInfo)
 	}

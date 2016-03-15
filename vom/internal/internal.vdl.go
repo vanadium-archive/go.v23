@@ -93,7 +93,11 @@ func (m *AddressInfo) MakeVDLTarget() vdl.Target {
 }
 
 type AddressInfoTarget struct {
-	Value *AddressInfo
+	Value        *AddressInfo
+	streetTarget vdl.StringTarget
+	cityTarget   vdl.StringTarget
+	stateTarget  vdl.StringTarget
+	zipTarget    vdl.StringTarget
 	vdl.TargetBase
 	vdl.FieldsTargetBase
 }
@@ -107,17 +111,21 @@ func (t *AddressInfoTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) 
 func (t *AddressInfoTarget) StartField(name string) (key, field vdl.Target, _ error) {
 	switch name {
 	case "Street":
-		val, err := &vdl.StringTarget{Value: &t.Value.Street}, error(nil)
-		return nil, val, err
+		t.streetTarget.Value = &t.Value.Street
+		target, err := &t.streetTarget, error(nil)
+		return nil, target, err
 	case "City":
-		val, err := &vdl.StringTarget{Value: &t.Value.City}, error(nil)
-		return nil, val, err
+		t.cityTarget.Value = &t.Value.City
+		target, err := &t.cityTarget, error(nil)
+		return nil, target, err
 	case "State":
-		val, err := &vdl.StringTarget{Value: &t.Value.State}, error(nil)
-		return nil, val, err
+		t.stateTarget.Value = &t.Value.State
+		target, err := &t.stateTarget, error(nil)
+		return nil, target, err
 	case "Zip":
-		val, err := &vdl.StringTarget{Value: &t.Value.Zip}, error(nil)
-		return nil, val, err
+		t.zipTarget.Value = &t.Value.Zip
+		target, err := &t.zipTarget, error(nil)
+		return nil, target, err
 	default:
 		return nil, nil, fmt.Errorf("field %s not in struct %v", name, __VDLType_v_io_v23_vom_internal_AddressInfo)
 	}
@@ -337,7 +345,8 @@ func (m *EquifaxCreditReport) MakeVDLTarget() vdl.Target {
 }
 
 type EquifaxCreditReportTarget struct {
-	Value *EquifaxCreditReport
+	Value        *EquifaxCreditReport
+	ratingTarget vdl.ByteTarget
 	vdl.TargetBase
 	vdl.FieldsTargetBase
 }
@@ -351,8 +360,9 @@ func (t *EquifaxCreditReportTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget,
 func (t *EquifaxCreditReportTarget) StartField(name string) (key, field vdl.Target, _ error) {
 	switch name {
 	case "Rating":
-		val, err := &vdl.ByteTarget{Value: &t.Value.Rating}, error(nil)
-		return nil, val, err
+		t.ratingTarget.Value = &t.Value.Rating
+		target, err := &t.ratingTarget, error(nil)
+		return nil, target, err
 	default:
 		return nil, nil, fmt.Errorf("field %s not in struct %v", name, __VDLType_v_io_v23_vom_internal_EquifaxCreditReport)
 	}
@@ -407,7 +417,8 @@ func (m *ExperianCreditReport) MakeVDLTarget() vdl.Target {
 }
 
 type ExperianCreditReportTarget struct {
-	Value *ExperianCreditReport
+	Value        *ExperianCreditReport
+	ratingTarget ExperianRatingTarget
 	vdl.TargetBase
 	vdl.FieldsTargetBase
 }
@@ -421,8 +432,9 @@ func (t *ExperianCreditReportTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget
 func (t *ExperianCreditReportTarget) StartField(name string) (key, field vdl.Target, _ error) {
 	switch name {
 	case "Rating":
-		val, err := &ExperianRatingTarget{Value: &t.Value.Rating}, error(nil)
-		return nil, val, err
+		t.ratingTarget.Value = &t.Value.Rating
+		target, err := &t.ratingTarget, error(nil)
+		return nil, target, err
 	default:
 		return nil, nil, fmt.Errorf("field %s not in struct %v", name, __VDLType_v_io_v23_vom_internal_ExperianCreditReport)
 	}
@@ -476,7 +488,8 @@ func (m *TransUnionCreditReport) MakeVDLTarget() vdl.Target {
 }
 
 type TransUnionCreditReportTarget struct {
-	Value *TransUnionCreditReport
+	Value        *TransUnionCreditReport
+	ratingTarget vdl.Int16Target
 	vdl.TargetBase
 	vdl.FieldsTargetBase
 }
@@ -490,8 +503,9 @@ func (t *TransUnionCreditReportTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarg
 func (t *TransUnionCreditReportTarget) StartField(name string) (key, field vdl.Target, _ error) {
 	switch name {
 	case "Rating":
-		val, err := &vdl.Int16Target{Value: &t.Value.Rating}, error(nil)
-		return nil, val, err
+		t.ratingTarget.Value = &t.Value.Rating
+		target, err := &t.ratingTarget, error(nil)
+		return nil, target, err
 	default:
 		return nil, nil, fmt.Errorf("field %s not in struct %v", name, __VDLType_v_io_v23_vom_internal_TransUnionCreditReport)
 	}
@@ -691,7 +705,9 @@ func (m *CreditReport) MakeVDLTarget() vdl.Target {
 }
 
 type CreditReportTarget struct {
-	Value *CreditReport
+	Value        *CreditReport
+	agencyTarget CreditAgencyTarget
+
 	vdl.TargetBase
 	vdl.FieldsTargetBase
 }
@@ -705,11 +721,12 @@ func (t *CreditReportTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error)
 func (t *CreditReportTarget) StartField(name string) (key, field vdl.Target, _ error) {
 	switch name {
 	case "Agency":
-		val, err := &CreditAgencyTarget{Value: &t.Value.Agency}, error(nil)
-		return nil, val, err
+		t.agencyTarget.Value = &t.Value.Agency
+		target, err := &t.agencyTarget, error(nil)
+		return nil, target, err
 	case "Report":
-		val, err := vdl.ReflectTarget(reflect.ValueOf(&t.Value.Report))
-		return nil, val, err
+		target, err := vdl.ReflectTarget(reflect.ValueOf(&t.Value.Report))
+		return nil, target, err
 	default:
 		return nil, nil, fmt.Errorf("field %s not in struct %v", name, __VDLType_v_io_v23_vom_internal_CreditReport)
 	}
@@ -817,7 +834,12 @@ func (m *Customer) MakeVDLTarget() vdl.Target {
 }
 
 type CustomerTarget struct {
-	Value *Customer
+	Value         *Customer
+	nameTarget    vdl.StringTarget
+	idTarget      vdl.Int64Target
+	activeTarget  vdl.BoolTarget
+	addressTarget AddressInfoTarget
+	creditTarget  CreditReportTarget
 	vdl.TargetBase
 	vdl.FieldsTargetBase
 }
@@ -831,20 +853,25 @@ func (t *CustomerTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
 func (t *CustomerTarget) StartField(name string) (key, field vdl.Target, _ error) {
 	switch name {
 	case "Name":
-		val, err := &vdl.StringTarget{Value: &t.Value.Name}, error(nil)
-		return nil, val, err
+		t.nameTarget.Value = &t.Value.Name
+		target, err := &t.nameTarget, error(nil)
+		return nil, target, err
 	case "Id":
-		val, err := &vdl.Int64Target{Value: &t.Value.Id}, error(nil)
-		return nil, val, err
+		t.idTarget.Value = &t.Value.Id
+		target, err := &t.idTarget, error(nil)
+		return nil, target, err
 	case "Active":
-		val, err := &vdl.BoolTarget{Value: &t.Value.Active}, error(nil)
-		return nil, val, err
+		t.activeTarget.Value = &t.Value.Active
+		target, err := &t.activeTarget, error(nil)
+		return nil, target, err
 	case "Address":
-		val, err := &AddressInfoTarget{Value: &t.Value.Address}, error(nil)
-		return nil, val, err
+		t.addressTarget.Value = &t.Value.Address
+		target, err := &t.addressTarget, error(nil)
+		return nil, target, err
 	case "Credit":
-		val, err := &CreditReportTarget{Value: &t.Value.Credit}, error(nil)
-		return nil, val, err
+		t.creditTarget.Value = &t.Value.Credit
+		target, err := &t.creditTarget, error(nil)
+		return nil, target, err
 	default:
 		return nil, nil, fmt.Errorf("field %s not in struct %v", name, __VDLType_v_io_v23_vom_internal_Customer)
 	}

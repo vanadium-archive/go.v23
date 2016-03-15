@@ -75,7 +75,9 @@ func (m *LogEntry) MakeVDLTarget() vdl.Target {
 }
 
 type LogEntryTarget struct {
-	Value *LogEntry
+	Value          *LogEntry
+	positionTarget vdl.Int64Target
+	lineTarget     vdl.StringTarget
 	vdl.TargetBase
 	vdl.FieldsTargetBase
 }
@@ -89,11 +91,13 @@ func (t *LogEntryTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
 func (t *LogEntryTarget) StartField(name string) (key, field vdl.Target, _ error) {
 	switch name {
 	case "Position":
-		val, err := &vdl.Int64Target{Value: &t.Value.Position}, error(nil)
-		return nil, val, err
+		t.positionTarget.Value = &t.Value.Position
+		target, err := &t.positionTarget, error(nil)
+		return nil, target, err
 	case "Line":
-		val, err := &vdl.StringTarget{Value: &t.Value.Line}, error(nil)
-		return nil, val, err
+		t.lineTarget.Value = &t.Value.Line
+		target, err := &t.lineTarget, error(nil)
+		return nil, target, err
 	default:
 		return nil, nil, fmt.Errorf("field %s not in struct %v", name, __VDLType_v_io_v23_services_logreader_LogEntry)
 	}

@@ -121,7 +121,11 @@ func (m *WireError) MakeVDLTarget() Target {
 }
 
 type WireErrorTarget struct {
-	Value *WireError
+	Value           *WireError
+	idTarget        StringTarget
+	retryCodeTarget WireRetryCodeTarget
+	msgTarget       StringTarget
+	paramListTarget unnamed_5b5d616e79Target
 	TargetBase
 	FieldsTargetBase
 }
@@ -135,17 +139,21 @@ func (t *WireErrorTarget) StartFields(tt *Type) (FieldsTarget, error) {
 func (t *WireErrorTarget) StartField(name string) (key, field Target, _ error) {
 	switch name {
 	case "Id":
-		val, err := &StringTarget{Value: &t.Value.Id}, error(nil)
-		return nil, val, err
+		t.idTarget.Value = &t.Value.Id
+		target, err := &t.idTarget, error(nil)
+		return nil, target, err
 	case "RetryCode":
-		val, err := &WireRetryCodeTarget{Value: &t.Value.RetryCode}, error(nil)
-		return nil, val, err
+		t.retryCodeTarget.Value = &t.Value.RetryCode
+		target, err := &t.retryCodeTarget, error(nil)
+		return nil, target, err
 	case "Msg":
-		val, err := &StringTarget{Value: &t.Value.Msg}, error(nil)
-		return nil, val, err
+		t.msgTarget.Value = &t.Value.Msg
+		target, err := &t.msgTarget, error(nil)
+		return nil, target, err
 	case "ParamList":
-		val, err := &unnamed_5b5d616e79_Target{Value: &t.Value.ParamList}, error(nil)
-		return nil, val, err
+		t.paramListTarget.Value = &t.Value.ParamList
+		target, err := &t.paramListTarget, error(nil)
+		return nil, target, err
 	default:
 		return nil, nil, fmt.Errorf("field %s not in struct %v", name, __VDLType_v_io_v23_vdl_WireError)
 	}
@@ -183,13 +191,15 @@ func (t *WireRetryCodeTarget) FromEnumLabel(src string, tt *Type) error {
 	return nil
 }
 
-type unnamed_5b5d616e79_Target struct {
+// []*Value
+type unnamed_5b5d616e79Target struct {
 	Value *[]*Value
+
 	TargetBase
 	ListTargetBase
 }
 
-func (t *unnamed_5b5d616e79_Target) StartList(tt *Type, len int) (ListTarget, error) {
+func (t *unnamed_5b5d616e79Target) StartList(tt *Type, len int) (ListTarget, error) {
 	if !Compatible(tt, __VDLType1) {
 		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType1)
 	}
@@ -200,13 +210,14 @@ func (t *unnamed_5b5d616e79_Target) StartList(tt *Type, len int) (ListTarget, er
 	}
 	return t, nil
 }
-func (t *unnamed_5b5d616e79_Target) StartElem(index int) (elem Target, _ error) {
-	return ReflectTarget(reflect.ValueOf(&(*t.Value)[index]))
+func (t *unnamed_5b5d616e79Target) StartElem(index int) (elem Target, _ error) {
+	target, err := ReflectTarget(reflect.ValueOf(&(*t.Value)[index]))
+	return target, err
 }
-func (t *unnamed_5b5d616e79_Target) FinishElem(elem Target) error {
+func (t *unnamed_5b5d616e79Target) FinishElem(elem Target) error {
 	return nil
 }
-func (t *unnamed_5b5d616e79_Target) FinishList(elem ListTarget) error {
+func (t *unnamed_5b5d616e79Target) FinishList(elem ListTarget) error {
 
 	return nil
 }

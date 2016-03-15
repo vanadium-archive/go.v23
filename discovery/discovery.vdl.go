@@ -150,7 +150,12 @@ func (m *Advertisement) MakeVDLTarget() vdl.Target {
 }
 
 type AdvertisementTarget struct {
-	Value *Advertisement
+	Value               *Advertisement
+	idTarget            AdIdTarget
+	interfaceNameTarget vdl.StringTarget
+	addressesTarget     vdl.StringSliceTarget
+	attributesTarget    AttributesTarget
+	attachmentsTarget   AttachmentsTarget
 	vdl.TargetBase
 	vdl.FieldsTargetBase
 }
@@ -164,20 +169,25 @@ func (t *AdvertisementTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error
 func (t *AdvertisementTarget) StartField(name string) (key, field vdl.Target, _ error) {
 	switch name {
 	case "Id":
-		val, err := &AdIdTarget{Value: &t.Value.Id}, error(nil)
-		return nil, val, err
+		t.idTarget.Value = &t.Value.Id
+		target, err := &t.idTarget, error(nil)
+		return nil, target, err
 	case "InterfaceName":
-		val, err := &vdl.StringTarget{Value: &t.Value.InterfaceName}, error(nil)
-		return nil, val, err
+		t.interfaceNameTarget.Value = &t.Value.InterfaceName
+		target, err := &t.interfaceNameTarget, error(nil)
+		return nil, target, err
 	case "Addresses":
-		val, err := &vdl.StringSliceTarget{Value: &t.Value.Addresses}, error(nil)
-		return nil, val, err
+		t.addressesTarget.Value = &t.Value.Addresses
+		target, err := &t.addressesTarget, error(nil)
+		return nil, target, err
 	case "Attributes":
-		val, err := &AttributesTarget{Value: &t.Value.Attributes}, error(nil)
-		return nil, val, err
+		t.attributesTarget.Value = &t.Value.Attributes
+		target, err := &t.attributesTarget, error(nil)
+		return nil, target, err
 	case "Attachments":
-		val, err := &AttachmentsTarget{Value: &t.Value.Attachments}, error(nil)
-		return nil, val, err
+		t.attachmentsTarget.Value = &t.Value.Attachments
+		target, err := &t.attachmentsTarget, error(nil)
+		return nil, target, err
 	default:
 		return nil, nil, fmt.Errorf("field %s not in struct %v", name, __VDLType_v_io_v23_discovery_Advertisement)
 	}
@@ -205,9 +215,11 @@ func (t *AdIdTarget) FromBytes(src []byte, tt *vdl.Type) error {
 }
 
 type AttributesTarget struct {
-	Value    *Attributes
-	currKey  string
-	currElem string
+	Value      *Attributes
+	currKey    string
+	currElem   string
+	keyTarget  vdl.StringTarget
+	elemTarget vdl.StringTarget
 	vdl.TargetBase
 	vdl.MapTargetBase
 }
@@ -221,11 +233,15 @@ func (t *AttributesTarget) StartMap(tt *vdl.Type, len int) (vdl.MapTarget, error
 }
 func (t *AttributesTarget) StartKey() (key vdl.Target, _ error) {
 	t.currKey = ""
-	return &vdl.StringTarget{Value: &t.currKey}, error(nil)
+	t.keyTarget.Value = &t.currKey
+	target, err := &t.keyTarget, error(nil)
+	return target, err
 }
 func (t *AttributesTarget) FinishKeyStartField(key vdl.Target) (field vdl.Target, _ error) {
 	t.currElem = ""
-	return &vdl.StringTarget{Value: &t.currElem}, error(nil)
+	t.elemTarget.Value = &t.currElem
+	target, err := &t.elemTarget, error(nil)
+	return target, err
 }
 func (t *AttributesTarget) FinishField(key, field vdl.Target) error {
 	(*t.Value)[t.currKey] = t.currElem
@@ -240,9 +256,11 @@ func (t *AttributesTarget) FinishMap(elem vdl.MapTarget) error {
 }
 
 type AttachmentsTarget struct {
-	Value    *Attachments
-	currKey  string
-	currElem []byte
+	Value      *Attachments
+	currKey    string
+	currElem   []byte
+	keyTarget  vdl.StringTarget
+	elemTarget vdl.BytesTarget
 	vdl.TargetBase
 	vdl.MapTargetBase
 }
@@ -256,11 +274,15 @@ func (t *AttachmentsTarget) StartMap(tt *vdl.Type, len int) (vdl.MapTarget, erro
 }
 func (t *AttachmentsTarget) StartKey() (key vdl.Target, _ error) {
 	t.currKey = ""
-	return &vdl.StringTarget{Value: &t.currKey}, error(nil)
+	t.keyTarget.Value = &t.currKey
+	target, err := &t.keyTarget, error(nil)
+	return target, err
 }
 func (t *AttachmentsTarget) FinishKeyStartField(key vdl.Target) (field vdl.Target, _ error) {
 	t.currElem = []byte(nil)
-	return &vdl.BytesTarget{Value: &t.currElem}, error(nil)
+	t.elemTarget.Value = &t.currElem
+	target, err := &t.elemTarget, error(nil)
+	return target, err
 }
 func (t *AttachmentsTarget) FinishField(key, field vdl.Target) error {
 	(*t.Value)[t.currKey] = t.currElem

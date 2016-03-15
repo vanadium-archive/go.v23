@@ -346,7 +346,9 @@ func (m *File) MakeVDLTarget() vdl.Target {
 }
 
 type FileTarget struct {
-	Value *File
+	Value          *File
+	nameTarget     vdl.StringTarget
+	contentsTarget vdl.BytesTarget
 	vdl.TargetBase
 	vdl.FieldsTargetBase
 }
@@ -360,11 +362,13 @@ func (t *FileTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
 func (t *FileTarget) StartField(name string) (key, field vdl.Target, _ error) {
 	switch name {
 	case "Name":
-		val, err := &vdl.StringTarget{Value: &t.Value.Name}, error(nil)
-		return nil, val, err
+		t.nameTarget.Value = &t.Value.Name
+		target, err := &t.nameTarget, error(nil)
+		return nil, target, err
 	case "Contents":
-		val, err := &vdl.BytesTarget{Value: &t.Value.Contents}, error(nil)
-		return nil, val, err
+		t.contentsTarget.Value = &t.Value.Contents
+		target, err := &t.contentsTarget, error(nil)
+		return nil, target, err
 	default:
 		return nil, nil, fmt.Errorf("field %s not in struct %v", name, __VDLType_v_io_v23_services_build_File)
 	}

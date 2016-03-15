@@ -139,7 +139,12 @@ func (m *DevModeUpdateVClockOpts) MakeVDLTarget() vdl.Target {
 }
 
 type DevModeUpdateVClockOptsTarget struct {
-	Value *DevModeUpdateVClockOpts
+	Value               *DevModeUpdateVClockOpts
+	ntpHostTarget       vdl.StringTarget
+	nowTarget           time_2.TimeTarget
+	elapsedTimeTarget   time_2.DurationTarget
+	doNtpUpdateTarget   vdl.BoolTarget
+	doLocalUpdateTarget vdl.BoolTarget
 	vdl.TargetBase
 	vdl.FieldsTargetBase
 }
@@ -153,20 +158,25 @@ func (t *DevModeUpdateVClockOptsTarget) StartFields(tt *vdl.Type) (vdl.FieldsTar
 func (t *DevModeUpdateVClockOptsTarget) StartField(name string) (key, field vdl.Target, _ error) {
 	switch name {
 	case "NtpHost":
-		val, err := &vdl.StringTarget{Value: &t.Value.NtpHost}, error(nil)
-		return nil, val, err
+		t.ntpHostTarget.Value = &t.Value.NtpHost
+		target, err := &t.ntpHostTarget, error(nil)
+		return nil, target, err
 	case "Now":
-		val, err := &time_2.TimeTarget{Value: &t.Value.Now}, error(nil)
-		return nil, val, err
+		t.nowTarget.Value = &t.Value.Now
+		target, err := &t.nowTarget, error(nil)
+		return nil, target, err
 	case "ElapsedTime":
-		val, err := &time_2.DurationTarget{Value: &t.Value.ElapsedTime}, error(nil)
-		return nil, val, err
+		t.elapsedTimeTarget.Value = &t.Value.ElapsedTime
+		target, err := &t.elapsedTimeTarget, error(nil)
+		return nil, target, err
 	case "DoNtpUpdate":
-		val, err := &vdl.BoolTarget{Value: &t.Value.DoNtpUpdate}, error(nil)
-		return nil, val, err
+		t.doNtpUpdateTarget.Value = &t.Value.DoNtpUpdate
+		target, err := &t.doNtpUpdateTarget, error(nil)
+		return nil, target, err
 	case "DoLocalUpdate":
-		val, err := &vdl.BoolTarget{Value: &t.Value.DoLocalUpdate}, error(nil)
-		return nil, val, err
+		t.doLocalUpdateTarget.Value = &t.Value.DoLocalUpdate
+		target, err := &t.doLocalUpdateTarget, error(nil)
+		return nil, target, err
 	default:
 		return nil, nil, fmt.Errorf("field %s not in struct %v", name, __VDLType_v_io_v23_services_syncbase_DevModeUpdateVClockOpts)
 	}

@@ -94,7 +94,9 @@ func (m *BatchOptions) MakeVDLTarget() vdl.Target {
 }
 
 type BatchOptionsTarget struct {
-	Value *BatchOptions
+	Value          *BatchOptions
+	hintTarget     vdl.StringTarget
+	readOnlyTarget vdl.BoolTarget
 	vdl.TargetBase
 	vdl.FieldsTargetBase
 }
@@ -108,11 +110,13 @@ func (t *BatchOptionsTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error)
 func (t *BatchOptionsTarget) StartField(name string) (key, field vdl.Target, _ error) {
 	switch name {
 	case "Hint":
-		val, err := &vdl.StringTarget{Value: &t.Value.Hint}, error(nil)
-		return nil, val, err
+		t.hintTarget.Value = &t.Value.Hint
+		target, err := &t.hintTarget, error(nil)
+		return nil, target, err
 	case "ReadOnly":
-		val, err := &vdl.BoolTarget{Value: &t.Value.ReadOnly}, error(nil)
-		return nil, val, err
+		t.readOnlyTarget.Value = &t.Value.ReadOnly
+		target, err := &t.readOnlyTarget, error(nil)
+		return nil, target, err
 	default:
 		return nil, nil, fmt.Errorf("field %s not in struct %v", name, __VDLType_v_io_v23_services_syncbase_nosql_BatchOptions)
 	}
@@ -181,7 +185,9 @@ func (m *PrefixPermissions) MakeVDLTarget() vdl.Target {
 }
 
 type PrefixPermissionsTarget struct {
-	Value *PrefixPermissions
+	Value        *PrefixPermissions
+	prefixTarget vdl.StringTarget
+	permsTarget  access.PermissionsTarget
 	vdl.TargetBase
 	vdl.FieldsTargetBase
 }
@@ -195,11 +201,13 @@ func (t *PrefixPermissionsTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, e
 func (t *PrefixPermissionsTarget) StartField(name string) (key, field vdl.Target, _ error) {
 	switch name {
 	case "Prefix":
-		val, err := &vdl.StringTarget{Value: &t.Value.Prefix}, error(nil)
-		return nil, val, err
+		t.prefixTarget.Value = &t.Value.Prefix
+		target, err := &t.prefixTarget, error(nil)
+		return nil, target, err
 	case "Perms":
-		val, err := &access.PermissionsTarget{Value: &t.Value.Perms}, error(nil)
-		return nil, val, err
+		t.permsTarget.Value = &t.Value.Perms
+		target, err := &t.permsTarget, error(nil)
+		return nil, target, err
 	default:
 		return nil, nil, fmt.Errorf("field %s not in struct %v", name, __VDLType_v_io_v23_services_syncbase_nosql_PrefixPermissions)
 	}
@@ -268,7 +276,9 @@ func (m *KeyValue) MakeVDLTarget() vdl.Target {
 }
 
 type KeyValueTarget struct {
-	Value *KeyValue
+	Value       *KeyValue
+	keyTarget   vdl.StringTarget
+	valueTarget vdl.BytesTarget
 	vdl.TargetBase
 	vdl.FieldsTargetBase
 }
@@ -282,11 +292,13 @@ func (t *KeyValueTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
 func (t *KeyValueTarget) StartField(name string) (key, field vdl.Target, _ error) {
 	switch name {
 	case "Key":
-		val, err := &vdl.StringTarget{Value: &t.Value.Key}, error(nil)
-		return nil, val, err
+		t.keyTarget.Value = &t.Value.Key
+		target, err := &t.keyTarget, error(nil)
+		return nil, target, err
 	case "Value":
-		val, err := &vdl.BytesTarget{Value: &t.Value.Value}, error(nil)
-		return nil, val, err
+		t.valueTarget.Value = &t.Value.Value
+		target, err := &t.valueTarget, error(nil)
+		return nil, target, err
 	default:
 		return nil, nil, fmt.Errorf("field %s not in struct %v", name, __VDLType_v_io_v23_services_syncbase_nosql_KeyValue)
 	}
@@ -354,7 +366,9 @@ func (m *TableRow) MakeVDLTarget() vdl.Target {
 }
 
 type TableRowTarget struct {
-	Value *TableRow
+	Value           *TableRow
+	tableNameTarget vdl.StringTarget
+	rowTarget       vdl.StringTarget
 	vdl.TargetBase
 	vdl.FieldsTargetBase
 }
@@ -368,11 +382,13 @@ func (t *TableRowTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
 func (t *TableRowTarget) StartField(name string) (key, field vdl.Target, _ error) {
 	switch name {
 	case "TableName":
-		val, err := &vdl.StringTarget{Value: &t.Value.TableName}, error(nil)
-		return nil, val, err
+		t.tableNameTarget.Value = &t.Value.TableName
+		target, err := &t.tableNameTarget, error(nil)
+		return nil, target, err
 	case "Row":
-		val, err := &vdl.StringTarget{Value: &t.Value.Row}, error(nil)
-		return nil, val, err
+		t.rowTarget.Value = &t.Value.Row
+		target, err := &t.rowTarget, error(nil)
+		return nil, target, err
 	default:
 		return nil, nil, fmt.Errorf("field %s not in struct %v", name, __VDLType_v_io_v23_services_syncbase_nosql_TableRow)
 	}
@@ -529,7 +545,12 @@ func (m *SyncgroupSpec) MakeVDLTarget() vdl.Target {
 }
 
 type SyncgroupSpecTarget struct {
-	Value *SyncgroupSpec
+	Value             *SyncgroupSpec
+	descriptionTarget vdl.StringTarget
+	permsTarget       access.PermissionsTarget
+	prefixesTarget    unnamed_5b5d762e696f2f7632332f73657276696365732f73796e63626173652f6e6f73716c2e5461626c65526f77207374727563747b5461626c654e616d6520737472696e673b526f7720737472696e677dTarget
+	mountTablesTarget vdl.StringSliceTarget
+	isPrivateTarget   vdl.BoolTarget
 	vdl.TargetBase
 	vdl.FieldsTargetBase
 }
@@ -543,20 +564,25 @@ func (t *SyncgroupSpecTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error
 func (t *SyncgroupSpecTarget) StartField(name string) (key, field vdl.Target, _ error) {
 	switch name {
 	case "Description":
-		val, err := &vdl.StringTarget{Value: &t.Value.Description}, error(nil)
-		return nil, val, err
+		t.descriptionTarget.Value = &t.Value.Description
+		target, err := &t.descriptionTarget, error(nil)
+		return nil, target, err
 	case "Perms":
-		val, err := &access.PermissionsTarget{Value: &t.Value.Perms}, error(nil)
-		return nil, val, err
+		t.permsTarget.Value = &t.Value.Perms
+		target, err := &t.permsTarget, error(nil)
+		return nil, target, err
 	case "Prefixes":
-		val, err := &unnamed_5b5d762e696f2f7632332f73657276696365732f73796e63626173652f6e6f73716c2e5461626c65526f77207374727563747b5461626c654e616d6520737472696e673b526f7720737472696e677d_Target{Value: &t.Value.Prefixes}, error(nil)
-		return nil, val, err
+		t.prefixesTarget.Value = &t.Value.Prefixes
+		target, err := &t.prefixesTarget, error(nil)
+		return nil, target, err
 	case "MountTables":
-		val, err := &vdl.StringSliceTarget{Value: &t.Value.MountTables}, error(nil)
-		return nil, val, err
+		t.mountTablesTarget.Value = &t.Value.MountTables
+		target, err := &t.mountTablesTarget, error(nil)
+		return nil, target, err
 	case "IsPrivate":
-		val, err := &vdl.BoolTarget{Value: &t.Value.IsPrivate}, error(nil)
-		return nil, val, err
+		t.isPrivateTarget.Value = &t.Value.IsPrivate
+		target, err := &t.isPrivateTarget, error(nil)
+		return nil, target, err
 	default:
 		return nil, nil, fmt.Errorf("field %s not in struct %v", name, __VDLType_v_io_v23_services_syncbase_nosql_SyncgroupSpec)
 	}
@@ -569,13 +595,15 @@ func (t *SyncgroupSpecTarget) FinishFields(_ vdl.FieldsTarget) error {
 	return nil
 }
 
-type unnamed_5b5d762e696f2f7632332f73657276696365732f73796e63626173652f6e6f73716c2e5461626c65526f77207374727563747b5461626c654e616d6520737472696e673b526f7720737472696e677d_Target struct {
-	Value *[]TableRow
+// []TableRow
+type unnamed_5b5d762e696f2f7632332f73657276696365732f73796e63626173652f6e6f73716c2e5461626c65526f77207374727563747b5461626c654e616d6520737472696e673b526f7720737472696e677dTarget struct {
+	Value      *[]TableRow
+	elemTarget TableRowTarget
 	vdl.TargetBase
 	vdl.ListTargetBase
 }
 
-func (t *unnamed_5b5d762e696f2f7632332f73657276696365732f73796e63626173652f6e6f73716c2e5461626c65526f77207374727563747b5461626c654e616d6520737472696e673b526f7720737472696e677d_Target) StartList(tt *vdl.Type, len int) (vdl.ListTarget, error) {
+func (t *unnamed_5b5d762e696f2f7632332f73657276696365732f73796e63626173652f6e6f73716c2e5461626c65526f77207374727563747b5461626c654e616d6520737472696e673b526f7720737472696e677dTarget) StartList(tt *vdl.Type, len int) (vdl.ListTarget, error) {
 	if !vdl.Compatible(tt, __VDLType6) {
 		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType6)
 	}
@@ -586,13 +614,15 @@ func (t *unnamed_5b5d762e696f2f7632332f73657276696365732f73796e63626173652f6e6f7
 	}
 	return t, nil
 }
-func (t *unnamed_5b5d762e696f2f7632332f73657276696365732f73796e63626173652f6e6f73716c2e5461626c65526f77207374727563747b5461626c654e616d6520737472696e673b526f7720737472696e677d_Target) StartElem(index int) (elem vdl.Target, _ error) {
-	return &TableRowTarget{Value: &(*t.Value)[index]}, error(nil)
+func (t *unnamed_5b5d762e696f2f7632332f73657276696365732f73796e63626173652f6e6f73716c2e5461626c65526f77207374727563747b5461626c654e616d6520737472696e673b526f7720737472696e677dTarget) StartElem(index int) (elem vdl.Target, _ error) {
+	t.elemTarget.Value = &(*t.Value)[index]
+	target, err := &t.elemTarget, error(nil)
+	return target, err
 }
-func (t *unnamed_5b5d762e696f2f7632332f73657276696365732f73796e63626173652f6e6f73716c2e5461626c65526f77207374727563747b5461626c654e616d6520737472696e673b526f7720737472696e677d_Target) FinishElem(elem vdl.Target) error {
+func (t *unnamed_5b5d762e696f2f7632332f73657276696365732f73796e63626173652f6e6f73716c2e5461626c65526f77207374727563747b5461626c654e616d6520737472696e673b526f7720737472696e677dTarget) FinishElem(elem vdl.Target) error {
 	return nil
 }
-func (t *unnamed_5b5d762e696f2f7632332f73657276696365732f73796e63626173652f6e6f73716c2e5461626c65526f77207374727563747b5461626c654e616d6520737472696e673b526f7720737472696e677d_Target) FinishList(elem vdl.ListTarget) error {
+func (t *unnamed_5b5d762e696f2f7632332f73657276696365732f73796e63626173652f6e6f73716c2e5461626c65526f77207374727563747b5461626c654e616d6520737472696e673b526f7720737472696e677dTarget) FinishList(elem vdl.ListTarget) error {
 
 	return nil
 }
@@ -652,7 +682,9 @@ func (m *SyncgroupMemberInfo) MakeVDLTarget() vdl.Target {
 }
 
 type SyncgroupMemberInfoTarget struct {
-	Value *SyncgroupMemberInfo
+	Value              *SyncgroupMemberInfo
+	syncPriorityTarget vdl.ByteTarget
+	isServerTarget     vdl.BoolTarget
 	vdl.TargetBase
 	vdl.FieldsTargetBase
 }
@@ -666,11 +698,13 @@ func (t *SyncgroupMemberInfoTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget,
 func (t *SyncgroupMemberInfoTarget) StartField(name string) (key, field vdl.Target, _ error) {
 	switch name {
 	case "SyncPriority":
-		val, err := &vdl.ByteTarget{Value: &t.Value.SyncPriority}, error(nil)
-		return nil, val, err
+		t.syncPriorityTarget.Value = &t.Value.SyncPriority
+		target, err := &t.syncPriorityTarget, error(nil)
+		return nil, target, err
 	case "IsServer":
-		val, err := &vdl.BoolTarget{Value: &t.Value.IsServer}, error(nil)
-		return nil, val, err
+		t.isServerTarget.Value = &t.Value.IsServer
+		target, err := &t.isServerTarget, error(nil)
+		return nil, target, err
 	default:
 		return nil, nil, fmt.Errorf("field %s not in struct %v", name, __VDLType_v_io_v23_services_syncbase_nosql_SyncgroupMemberInfo)
 	}
@@ -849,6 +883,8 @@ func (m *ConflictInfo) MakeVDLTarget() vdl.Target {
 
 type ConflictInfoTarget struct {
 	Value *ConflictInfo
+
+	continuedTarget vdl.BoolTarget
 	vdl.TargetBase
 	vdl.FieldsTargetBase
 }
@@ -862,11 +898,12 @@ func (t *ConflictInfoTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error)
 func (t *ConflictInfoTarget) StartField(name string) (key, field vdl.Target, _ error) {
 	switch name {
 	case "Data":
-		val, err := vdl.ReflectTarget(reflect.ValueOf(&t.Value.Data))
-		return nil, val, err
+		target, err := vdl.ReflectTarget(reflect.ValueOf(&t.Value.Data))
+		return nil, target, err
 	case "Continued":
-		val, err := &vdl.BoolTarget{Value: &t.Value.Continued}, error(nil)
-		return nil, val, err
+		t.continuedTarget.Value = &t.Value.Continued
+		target, err := &t.continuedTarget, error(nil)
+		return nil, target, err
 	default:
 		return nil, nil, fmt.Errorf("field %s not in struct %v", name, __VDLType_v_io_v23_services_syncbase_nosql_ConflictInfo)
 	}
@@ -1049,7 +1086,10 @@ func (m *BatchInfo) MakeVDLTarget() vdl.Target {
 }
 
 type BatchInfoTarget struct {
-	Value *BatchInfo
+	Value        *BatchInfo
+	idTarget     vdl.Uint64Target
+	hintTarget   vdl.StringTarget
+	sourceTarget BatchSourceTarget
 	vdl.TargetBase
 	vdl.FieldsTargetBase
 }
@@ -1063,14 +1103,17 @@ func (t *BatchInfoTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
 func (t *BatchInfoTarget) StartField(name string) (key, field vdl.Target, _ error) {
 	switch name {
 	case "Id":
-		val, err := &vdl.Uint64Target{Value: &t.Value.Id}, error(nil)
-		return nil, val, err
+		t.idTarget.Value = &t.Value.Id
+		target, err := &t.idTarget, error(nil)
+		return nil, target, err
 	case "Hint":
-		val, err := &vdl.StringTarget{Value: &t.Value.Hint}, error(nil)
-		return nil, val, err
+		t.hintTarget.Value = &t.Value.Hint
+		target, err := &t.hintTarget, error(nil)
+		return nil, target, err
 	case "Source":
-		val, err := &BatchSourceTarget{Value: &t.Value.Source}, error(nil)
-		return nil, val, err
+		t.sourceTarget.Value = &t.Value.Source
+		target, err := &t.sourceTarget, error(nil)
+		return nil, target, err
 	default:
 		return nil, nil, fmt.Errorf("field %s not in struct %v", name, __VDLType_v_io_v23_services_syncbase_nosql_BatchInfo)
 	}
@@ -1248,6 +1291,8 @@ func (m *RowInfo) MakeVDLTarget() vdl.Target {
 
 type RowInfoTarget struct {
 	Value *RowInfo
+
+	batchIdsTarget unnamed_5b5d75696e743634Target
 	vdl.TargetBase
 	vdl.FieldsTargetBase
 }
@@ -1261,11 +1306,12 @@ func (t *RowInfoTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
 func (t *RowInfoTarget) StartField(name string) (key, field vdl.Target, _ error) {
 	switch name {
 	case "Op":
-		val, err := vdl.ReflectTarget(reflect.ValueOf(&t.Value.Op))
-		return nil, val, err
+		target, err := vdl.ReflectTarget(reflect.ValueOf(&t.Value.Op))
+		return nil, target, err
 	case "BatchIds":
-		val, err := &unnamed_5b5d75696e743634_Target{Value: &t.Value.BatchIds}, error(nil)
-		return nil, val, err
+		t.batchIdsTarget.Value = &t.Value.BatchIds
+		target, err := &t.batchIdsTarget, error(nil)
+		return nil, target, err
 	default:
 		return nil, nil, fmt.Errorf("field %s not in struct %v", name, __VDLType_v_io_v23_services_syncbase_nosql_RowInfo)
 	}
@@ -1278,13 +1324,15 @@ func (t *RowInfoTarget) FinishFields(_ vdl.FieldsTarget) error {
 	return nil
 }
 
-type unnamed_5b5d75696e743634_Target struct {
-	Value *[]uint64
+// []uint64
+type unnamed_5b5d75696e743634Target struct {
+	Value      *[]uint64
+	elemTarget vdl.Uint64Target
 	vdl.TargetBase
 	vdl.ListTargetBase
 }
 
-func (t *unnamed_5b5d75696e743634_Target) StartList(tt *vdl.Type, len int) (vdl.ListTarget, error) {
+func (t *unnamed_5b5d75696e743634Target) StartList(tt *vdl.Type, len int) (vdl.ListTarget, error) {
 	if !vdl.Compatible(tt, __VDLType12) {
 		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType12)
 	}
@@ -1295,13 +1343,15 @@ func (t *unnamed_5b5d75696e743634_Target) StartList(tt *vdl.Type, len int) (vdl.
 	}
 	return t, nil
 }
-func (t *unnamed_5b5d75696e743634_Target) StartElem(index int) (elem vdl.Target, _ error) {
-	return &vdl.Uint64Target{Value: &(*t.Value)[index]}, error(nil)
+func (t *unnamed_5b5d75696e743634Target) StartElem(index int) (elem vdl.Target, _ error) {
+	t.elemTarget.Value = &(*t.Value)[index]
+	target, err := &t.elemTarget, error(nil)
+	return target, err
 }
-func (t *unnamed_5b5d75696e743634_Target) FinishElem(elem vdl.Target) error {
+func (t *unnamed_5b5d75696e743634Target) FinishElem(elem vdl.Target) error {
 	return nil
 }
-func (t *unnamed_5b5d75696e743634_Target) FinishList(elem vdl.ListTarget) error {
+func (t *unnamed_5b5d75696e743634Target) FinishList(elem vdl.ListTarget) error {
 
 	return nil
 }
@@ -1553,7 +1603,11 @@ func (m *RowOp) MakeVDLTarget() vdl.Target {
 }
 
 type RowOpTarget struct {
-	Value *RowOp
+	Value               *RowOp
+	keyTarget           vdl.StringTarget
+	localValueTarget    unnamed_3f762e696f2f7632332f73657276696365732f73796e63626173652f6e6f73716c2e56616c7565207374727563747b537461746520762e696f2f7632332f73657276696365732f73796e63626173652f6e6f73716c2e56616c7565537461746520656e756d7b4578697374733b4e6f4578697374733b44656c657465643b556e6b6e6f776e7d3b4279746573205b5d627974653b577269746554732074696d652e54696d65207374727563747b5365636f6e647320696e7436343b4e616e6f7320696e7433327d7dTarget
+	remoteValueTarget   unnamed_3f762e696f2f7632332f73657276696365732f73796e63626173652f6e6f73716c2e56616c7565207374727563747b537461746520762e696f2f7632332f73657276696365732f73796e63626173652f6e6f73716c2e56616c7565537461746520656e756d7b4578697374733b4e6f4578697374733b44656c657465643b556e6b6e6f776e7d3b4279746573205b5d627974653b577269746554732074696d652e54696d65207374727563747b5365636f6e647320696e7436343b4e616e6f7320696e7433327d7dTarget
+	ancestorValueTarget unnamed_3f762e696f2f7632332f73657276696365732f73796e63626173652f6e6f73716c2e56616c7565207374727563747b537461746520762e696f2f7632332f73657276696365732f73796e63626173652f6e6f73716c2e56616c7565537461746520656e756d7b4578697374733b4e6f4578697374733b44656c657465643b556e6b6e6f776e7d3b4279746573205b5d627974653b577269746554732074696d652e54696d65207374727563747b5365636f6e647320696e7436343b4e616e6f7320696e7433327d7dTarget
 	vdl.TargetBase
 	vdl.FieldsTargetBase
 }
@@ -1567,17 +1621,21 @@ func (t *RowOpTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
 func (t *RowOpTarget) StartField(name string) (key, field vdl.Target, _ error) {
 	switch name {
 	case "Key":
-		val, err := &vdl.StringTarget{Value: &t.Value.Key}, error(nil)
-		return nil, val, err
+		t.keyTarget.Value = &t.Value.Key
+		target, err := &t.keyTarget, error(nil)
+		return nil, target, err
 	case "LocalValue":
-		val, err := &unnamed_3f762e696f2f7632332f73657276696365732f73796e63626173652f6e6f73716c2e56616c7565207374727563747b537461746520762e696f2f7632332f73657276696365732f73796e63626173652f6e6f73716c2e56616c7565537461746520656e756d7b4578697374733b4e6f4578697374733b44656c657465643b556e6b6e6f776e7d3b4279746573205b5d627974653b577269746554732074696d652e54696d65207374727563747b5365636f6e647320696e7436343b4e616e6f7320696e7433327d7d_Target{Value: &t.Value.LocalValue}, error(nil)
-		return nil, val, err
+		t.localValueTarget.Value = &t.Value.LocalValue
+		target, err := &t.localValueTarget, error(nil)
+		return nil, target, err
 	case "RemoteValue":
-		val, err := &unnamed_3f762e696f2f7632332f73657276696365732f73796e63626173652f6e6f73716c2e56616c7565207374727563747b537461746520762e696f2f7632332f73657276696365732f73796e63626173652f6e6f73716c2e56616c7565537461746520656e756d7b4578697374733b4e6f4578697374733b44656c657465643b556e6b6e6f776e7d3b4279746573205b5d627974653b577269746554732074696d652e54696d65207374727563747b5365636f6e647320696e7436343b4e616e6f7320696e7433327d7d_Target{Value: &t.Value.RemoteValue}, error(nil)
-		return nil, val, err
+		t.remoteValueTarget.Value = &t.Value.RemoteValue
+		target, err := &t.remoteValueTarget, error(nil)
+		return nil, target, err
 	case "AncestorValue":
-		val, err := &unnamed_3f762e696f2f7632332f73657276696365732f73796e63626173652f6e6f73716c2e56616c7565207374727563747b537461746520762e696f2f7632332f73657276696365732f73796e63626173652f6e6f73716c2e56616c7565537461746520656e756d7b4578697374733b4e6f4578697374733b44656c657465643b556e6b6e6f776e7d3b4279746573205b5d627974653b577269746554732074696d652e54696d65207374727563747b5365636f6e647320696e7436343b4e616e6f7320696e7433327d7d_Target{Value: &t.Value.AncestorValue}, error(nil)
-		return nil, val, err
+		t.ancestorValueTarget.Value = &t.Value.AncestorValue
+		target, err := &t.ancestorValueTarget, error(nil)
+		return nil, target, err
 	default:
 		return nil, nil, fmt.Errorf("field %s not in struct %v", name, __VDLType_v_io_v23_services_syncbase_nosql_RowOp)
 	}
@@ -1590,34 +1648,40 @@ func (t *RowOpTarget) FinishFields(_ vdl.FieldsTarget) error {
 	return nil
 }
 
-type unnamed_3f762e696f2f7632332f73657276696365732f73796e63626173652f6e6f73716c2e56616c7565207374727563747b537461746520762e696f2f7632332f73657276696365732f73796e63626173652f6e6f73716c2e56616c7565537461746520656e756d7b4578697374733b4e6f4578697374733b44656c657465643b556e6b6e6f776e7d3b4279746573205b5d627974653b577269746554732074696d652e54696d65207374727563747b5365636f6e647320696e7436343b4e616e6f7320696e7433327d7d_Target struct {
-	Value **Value
+// Optional Value
+type unnamed_3f762e696f2f7632332f73657276696365732f73796e63626173652f6e6f73716c2e56616c7565207374727563747b537461746520762e696f2f7632332f73657276696365732f73796e63626173652f6e6f73716c2e56616c7565537461746520656e756d7b4578697374733b4e6f4578697374733b44656c657465643b556e6b6e6f776e7d3b4279746573205b5d627974653b577269746554732074696d652e54696d65207374727563747b5365636f6e647320696e7436343b4e616e6f7320696e7433327d7dTarget struct {
+	Value      **Value
+	elemTarget ValueTarget
 	vdl.TargetBase
 	vdl.FieldsTargetBase
 }
 
-func (t *unnamed_3f762e696f2f7632332f73657276696365732f73796e63626173652f6e6f73716c2e56616c7565207374727563747b537461746520762e696f2f7632332f73657276696365732f73796e63626173652f6e6f73716c2e56616c7565537461746520656e756d7b4578697374733b4e6f4578697374733b44656c657465643b556e6b6e6f776e7d3b4279746573205b5d627974653b577269746554732074696d652e54696d65207374727563747b5365636f6e647320696e7436343b4e616e6f7320696e7433327d7d_Target) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
+func (t *unnamed_3f762e696f2f7632332f73657276696365732f73796e63626173652f6e6f73716c2e56616c7565207374727563747b537461746520762e696f2f7632332f73657276696365732f73796e63626173652f6e6f73716c2e56616c7565537461746520656e756d7b4578697374733b4e6f4578697374733b44656c657465643b556e6b6e6f776e7d3b4279746573205b5d627974653b577269746554732074696d652e54696d65207374727563747b5365636f6e647320696e7436343b4e616e6f7320696e7433327d7dTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
 	if *t.Value == nil {
 		*t.Value = &Value{}
 	}
-	target, err := &ValueTarget{Value: *t.Value}, error(nil)
+	t.elemTarget.Value = *t.Value
+	target, err := &t.elemTarget, error(nil)
 	if err != nil {
 		return nil, err
 	}
 	return target.StartFields(tt)
 }
-func (t *unnamed_3f762e696f2f7632332f73657276696365732f73796e63626173652f6e6f73716c2e56616c7565207374727563747b537461746520762e696f2f7632332f73657276696365732f73796e63626173652f6e6f73716c2e56616c7565537461746520656e756d7b4578697374733b4e6f4578697374733b44656c657465643b556e6b6e6f776e7d3b4279746573205b5d627974653b577269746554732074696d652e54696d65207374727563747b5365636f6e647320696e7436343b4e616e6f7320696e7433327d7d_Target) FinishFields(_ vdl.FieldsTarget) error {
+func (t *unnamed_3f762e696f2f7632332f73657276696365732f73796e63626173652f6e6f73716c2e56616c7565207374727563747b537461746520762e696f2f7632332f73657276696365732f73796e63626173652f6e6f73716c2e56616c7565537461746520656e756d7b4578697374733b4e6f4578697374733b44656c657465643b556e6b6e6f776e7d3b4279746573205b5d627974653b577269746554732074696d652e54696d65207374727563747b5365636f6e647320696e7436343b4e616e6f7320696e7433327d7dTarget) FinishFields(_ vdl.FieldsTarget) error {
 
 	return nil
 }
-func (t *unnamed_3f762e696f2f7632332f73657276696365732f73796e63626173652f6e6f73716c2e56616c7565207374727563747b537461746520762e696f2f7632332f73657276696365732f73796e63626173652f6e6f73716c2e56616c7565537461746520656e756d7b4578697374733b4e6f4578697374733b44656c657465643b556e6b6e6f776e7d3b4279746573205b5d627974653b577269746554732074696d652e54696d65207374727563747b5365636f6e647320696e7436343b4e616e6f7320696e7433327d7d_Target) FromNil(tt *vdl.Type) error {
+func (t *unnamed_3f762e696f2f7632332f73657276696365732f73796e63626173652f6e6f73716c2e56616c7565207374727563747b537461746520762e696f2f7632332f73657276696365732f73796e63626173652f6e6f73716c2e56616c7565537461746520656e756d7b4578697374733b4e6f4578697374733b44656c657465643b556e6b6e6f776e7d3b4279746573205b5d627974653b577269746554732074696d652e54696d65207374727563747b5365636f6e647320696e7436343b4e616e6f7320696e7433327d7dTarget) FromNil(tt *vdl.Type) error {
 	*t.Value = nil
 
 	return nil
 }
 
 type ValueTarget struct {
-	Value *Value
+	Value         *Value
+	stateTarget   ValueStateTarget
+	bytesTarget   vdl.BytesTarget
+	writeTsTarget time_2.TimeTarget
 	vdl.TargetBase
 	vdl.FieldsTargetBase
 }
@@ -1631,14 +1695,17 @@ func (t *ValueTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
 func (t *ValueTarget) StartField(name string) (key, field vdl.Target, _ error) {
 	switch name {
 	case "State":
-		val, err := &ValueStateTarget{Value: &t.Value.State}, error(nil)
-		return nil, val, err
+		t.stateTarget.Value = &t.Value.State
+		target, err := &t.stateTarget, error(nil)
+		return nil, target, err
 	case "Bytes":
-		val, err := &vdl.BytesTarget{Value: &t.Value.Bytes}, error(nil)
-		return nil, val, err
+		t.bytesTarget.Value = &t.Value.Bytes
+		target, err := &t.bytesTarget, error(nil)
+		return nil, target, err
 	case "WriteTs":
-		val, err := &time_2.TimeTarget{Value: &t.Value.WriteTs}, error(nil)
-		return nil, val, err
+		t.writeTsTarget.Value = &t.Value.WriteTs
+		target, err := &t.writeTsTarget, error(nil)
+		return nil, target, err
 	default:
 		return nil, nil, fmt.Errorf("field %s not in struct %v", name, __VDLType_v_io_v23_services_syncbase_nosql_Value)
 	}
@@ -1733,7 +1800,9 @@ func (m *ScanOp) MakeVDLTarget() vdl.Target {
 }
 
 type ScanOpTarget struct {
-	Value *ScanOp
+	Value       *ScanOp
+	startTarget vdl.StringTarget
+	limitTarget vdl.StringTarget
 	vdl.TargetBase
 	vdl.FieldsTargetBase
 }
@@ -1747,11 +1816,13 @@ func (t *ScanOpTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
 func (t *ScanOpTarget) StartField(name string) (key, field vdl.Target, _ error) {
 	switch name {
 	case "Start":
-		val, err := &vdl.StringTarget{Value: &t.Value.Start}, error(nil)
-		return nil, val, err
+		t.startTarget.Value = &t.Value.Start
+		target, err := &t.startTarget, error(nil)
+		return nil, target, err
 	case "Limit":
-		val, err := &vdl.StringTarget{Value: &t.Value.Limit}, error(nil)
-		return nil, val, err
+		t.limitTarget.Value = &t.Value.Limit
+		target, err := &t.limitTarget, error(nil)
+		return nil, target, err
 	default:
 		return nil, nil, fmt.Errorf("field %s not in struct %v", name, __VDLType_v_io_v23_services_syncbase_nosql_ScanOp)
 	}
@@ -2100,7 +2171,11 @@ func (m *ResolutionInfo) MakeVDLTarget() vdl.Target {
 }
 
 type ResolutionInfoTarget struct {
-	Value *ResolutionInfo
+	Value           *ResolutionInfo
+	keyTarget       vdl.StringTarget
+	selectionTarget ValueSelectionTarget
+	resultTarget    unnamed_3f762e696f2f7632332f73657276696365732f73796e63626173652f6e6f73716c2e56616c7565207374727563747b537461746520762e696f2f7632332f73657276696365732f73796e63626173652f6e6f73716c2e56616c7565537461746520656e756d7b4578697374733b4e6f4578697374733b44656c657465643b556e6b6e6f776e7d3b4279746573205b5d627974653b577269746554732074696d652e54696d65207374727563747b5365636f6e647320696e7436343b4e616e6f7320696e7433327d7dTarget
+	continuedTarget vdl.BoolTarget
 	vdl.TargetBase
 	vdl.FieldsTargetBase
 }
@@ -2114,17 +2189,21 @@ func (t *ResolutionInfoTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, erro
 func (t *ResolutionInfoTarget) StartField(name string) (key, field vdl.Target, _ error) {
 	switch name {
 	case "Key":
-		val, err := &vdl.StringTarget{Value: &t.Value.Key}, error(nil)
-		return nil, val, err
+		t.keyTarget.Value = &t.Value.Key
+		target, err := &t.keyTarget, error(nil)
+		return nil, target, err
 	case "Selection":
-		val, err := &ValueSelectionTarget{Value: &t.Value.Selection}, error(nil)
-		return nil, val, err
+		t.selectionTarget.Value = &t.Value.Selection
+		target, err := &t.selectionTarget, error(nil)
+		return nil, target, err
 	case "Result":
-		val, err := &unnamed_3f762e696f2f7632332f73657276696365732f73796e63626173652f6e6f73716c2e56616c7565207374727563747b537461746520762e696f2f7632332f73657276696365732f73796e63626173652f6e6f73716c2e56616c7565537461746520656e756d7b4578697374733b4e6f4578697374733b44656c657465643b556e6b6e6f776e7d3b4279746573205b5d627974653b577269746554732074696d652e54696d65207374727563747b5365636f6e647320696e7436343b4e616e6f7320696e7433327d7d_Target{Value: &t.Value.Result}, error(nil)
-		return nil, val, err
+		t.resultTarget.Value = &t.Value.Result
+		target, err := &t.resultTarget, error(nil)
+		return nil, target, err
 	case "Continued":
-		val, err := &vdl.BoolTarget{Value: &t.Value.Continued}, error(nil)
-		return nil, val, err
+		t.continuedTarget.Value = &t.Value.Continued
+		target, err := &t.continuedTarget, error(nil)
+		return nil, target, err
 	default:
 		return nil, nil, fmt.Errorf("field %s not in struct %v", name, __VDLType_v_io_v23_services_syncbase_nosql_ResolutionInfo)
 	}
@@ -2197,7 +2276,9 @@ func (m *SchemaMetadata) MakeVDLTarget() vdl.Target {
 }
 
 type SchemaMetadataTarget struct {
-	Value *SchemaMetadata
+	Value         *SchemaMetadata
+	versionTarget vdl.Int32Target
+	policyTarget  CrPolicyTarget
 	vdl.TargetBase
 	vdl.FieldsTargetBase
 }
@@ -2211,11 +2292,13 @@ func (t *SchemaMetadataTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, erro
 func (t *SchemaMetadataTarget) StartField(name string) (key, field vdl.Target, _ error) {
 	switch name {
 	case "Version":
-		val, err := &vdl.Int32Target{Value: &t.Value.Version}, error(nil)
-		return nil, val, err
+		t.versionTarget.Value = &t.Value.Version
+		target, err := &t.versionTarget, error(nil)
+		return nil, target, err
 	case "Policy":
-		val, err := &CrPolicyTarget{Value: &t.Value.Policy}, error(nil)
-		return nil, val, err
+		t.policyTarget.Value = &t.Value.Policy
+		target, err := &t.policyTarget, error(nil)
+		return nil, target, err
 	default:
 		return nil, nil, fmt.Errorf("field %s not in struct %v", name, __VDLType_v_io_v23_services_syncbase_nosql_SchemaMetadata)
 	}
@@ -2229,7 +2312,8 @@ func (t *SchemaMetadataTarget) FinishFields(_ vdl.FieldsTarget) error {
 }
 
 type CrPolicyTarget struct {
-	Value *CrPolicy
+	Value       *CrPolicy
+	rulesTarget unnamed_5b5d762e696f2f7632332f73657276696365732f73796e63626173652f6e6f73716c2e437252756c65207374727563747b5461626c654e616d6520737472696e673b4b657950726566697820737472696e673b5479706520737472696e673b5265736f6c76657220762e696f2f7632332f73657276696365732f73796e63626173652f6e6f73716c2e5265736f6c7665725479706520656e756d7b4c61737457696e733b4170705265736f6c7665733b44656665727d7dTarget
 	vdl.TargetBase
 	vdl.FieldsTargetBase
 }
@@ -2243,8 +2327,9 @@ func (t *CrPolicyTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
 func (t *CrPolicyTarget) StartField(name string) (key, field vdl.Target, _ error) {
 	switch name {
 	case "Rules":
-		val, err := &unnamed_5b5d762e696f2f7632332f73657276696365732f73796e63626173652f6e6f73716c2e437252756c65207374727563747b5461626c654e616d6520737472696e673b4b657950726566697820737472696e673b5479706520737472696e673b5265736f6c76657220762e696f2f7632332f73657276696365732f73796e63626173652f6e6f73716c2e5265736f6c7665725479706520656e756d7b4c61737457696e733b4170705265736f6c7665733b44656665727d7d_Target{Value: &t.Value.Rules}, error(nil)
-		return nil, val, err
+		t.rulesTarget.Value = &t.Value.Rules
+		target, err := &t.rulesTarget, error(nil)
+		return nil, target, err
 	default:
 		return nil, nil, fmt.Errorf("field %s not in struct %v", name, __VDLType_v_io_v23_services_syncbase_nosql_CrPolicy)
 	}
@@ -2257,13 +2342,15 @@ func (t *CrPolicyTarget) FinishFields(_ vdl.FieldsTarget) error {
 	return nil
 }
 
-type unnamed_5b5d762e696f2f7632332f73657276696365732f73796e63626173652f6e6f73716c2e437252756c65207374727563747b5461626c654e616d6520737472696e673b4b657950726566697820737472696e673b5479706520737472696e673b5265736f6c76657220762e696f2f7632332f73657276696365732f73796e63626173652f6e6f73716c2e5265736f6c7665725479706520656e756d7b4c61737457696e733b4170705265736f6c7665733b44656665727d7d_Target struct {
-	Value *[]CrRule
+// []CrRule
+type unnamed_5b5d762e696f2f7632332f73657276696365732f73796e63626173652f6e6f73716c2e437252756c65207374727563747b5461626c654e616d6520737472696e673b4b657950726566697820737472696e673b5479706520737472696e673b5265736f6c76657220762e696f2f7632332f73657276696365732f73796e63626173652f6e6f73716c2e5265736f6c7665725479706520656e756d7b4c61737457696e733b4170705265736f6c7665733b44656665727d7dTarget struct {
+	Value      *[]CrRule
+	elemTarget CrRuleTarget
 	vdl.TargetBase
 	vdl.ListTargetBase
 }
 
-func (t *unnamed_5b5d762e696f2f7632332f73657276696365732f73796e63626173652f6e6f73716c2e437252756c65207374727563747b5461626c654e616d6520737472696e673b4b657950726566697820737472696e673b5479706520737472696e673b5265736f6c76657220762e696f2f7632332f73657276696365732f73796e63626173652f6e6f73716c2e5265736f6c7665725479706520656e756d7b4c61737457696e733b4170705265736f6c7665733b44656665727d7d_Target) StartList(tt *vdl.Type, len int) (vdl.ListTarget, error) {
+func (t *unnamed_5b5d762e696f2f7632332f73657276696365732f73796e63626173652f6e6f73716c2e437252756c65207374727563747b5461626c654e616d6520737472696e673b4b657950726566697820737472696e673b5479706520737472696e673b5265736f6c76657220762e696f2f7632332f73657276696365732f73796e63626173652f6e6f73716c2e5265736f6c7665725479706520656e756d7b4c61737457696e733b4170705265736f6c7665733b44656665727d7dTarget) StartList(tt *vdl.Type, len int) (vdl.ListTarget, error) {
 	if !vdl.Compatible(tt, __VDLType18) {
 		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType18)
 	}
@@ -2274,19 +2361,25 @@ func (t *unnamed_5b5d762e696f2f7632332f73657276696365732f73796e63626173652f6e6f7
 	}
 	return t, nil
 }
-func (t *unnamed_5b5d762e696f2f7632332f73657276696365732f73796e63626173652f6e6f73716c2e437252756c65207374727563747b5461626c654e616d6520737472696e673b4b657950726566697820737472696e673b5479706520737472696e673b5265736f6c76657220762e696f2f7632332f73657276696365732f73796e63626173652f6e6f73716c2e5265736f6c7665725479706520656e756d7b4c61737457696e733b4170705265736f6c7665733b44656665727d7d_Target) StartElem(index int) (elem vdl.Target, _ error) {
-	return &CrRuleTarget{Value: &(*t.Value)[index]}, error(nil)
+func (t *unnamed_5b5d762e696f2f7632332f73657276696365732f73796e63626173652f6e6f73716c2e437252756c65207374727563747b5461626c654e616d6520737472696e673b4b657950726566697820737472696e673b5479706520737472696e673b5265736f6c76657220762e696f2f7632332f73657276696365732f73796e63626173652f6e6f73716c2e5265736f6c7665725479706520656e756d7b4c61737457696e733b4170705265736f6c7665733b44656665727d7dTarget) StartElem(index int) (elem vdl.Target, _ error) {
+	t.elemTarget.Value = &(*t.Value)[index]
+	target, err := &t.elemTarget, error(nil)
+	return target, err
 }
-func (t *unnamed_5b5d762e696f2f7632332f73657276696365732f73796e63626173652f6e6f73716c2e437252756c65207374727563747b5461626c654e616d6520737472696e673b4b657950726566697820737472696e673b5479706520737472696e673b5265736f6c76657220762e696f2f7632332f73657276696365732f73796e63626173652f6e6f73716c2e5265736f6c7665725479706520656e756d7b4c61737457696e733b4170705265736f6c7665733b44656665727d7d_Target) FinishElem(elem vdl.Target) error {
+func (t *unnamed_5b5d762e696f2f7632332f73657276696365732f73796e63626173652f6e6f73716c2e437252756c65207374727563747b5461626c654e616d6520737472696e673b4b657950726566697820737472696e673b5479706520737472696e673b5265736f6c76657220762e696f2f7632332f73657276696365732f73796e63626173652f6e6f73716c2e5265736f6c7665725479706520656e756d7b4c61737457696e733b4170705265736f6c7665733b44656665727d7dTarget) FinishElem(elem vdl.Target) error {
 	return nil
 }
-func (t *unnamed_5b5d762e696f2f7632332f73657276696365732f73796e63626173652f6e6f73716c2e437252756c65207374727563747b5461626c654e616d6520737472696e673b4b657950726566697820737472696e673b5479706520737472696e673b5265736f6c76657220762e696f2f7632332f73657276696365732f73796e63626173652f6e6f73716c2e5265736f6c7665725479706520656e756d7b4c61737457696e733b4170705265736f6c7665733b44656665727d7d_Target) FinishList(elem vdl.ListTarget) error {
+func (t *unnamed_5b5d762e696f2f7632332f73657276696365732f73796e63626173652f6e6f73716c2e437252756c65207374727563747b5461626c654e616d6520737472696e673b4b657950726566697820737472696e673b5479706520737472696e673b5265736f6c76657220762e696f2f7632332f73657276696365732f73796e63626173652f6e6f73716c2e5265736f6c7665725479706520656e756d7b4c61737457696e733b4170705265736f6c7665733b44656665727d7dTarget) FinishList(elem vdl.ListTarget) error {
 
 	return nil
 }
 
 type CrRuleTarget struct {
-	Value *CrRule
+	Value           *CrRule
+	tableNameTarget vdl.StringTarget
+	keyPrefixTarget vdl.StringTarget
+	typeTarget      vdl.StringTarget
+	resolverTarget  ResolverTypeTarget
 	vdl.TargetBase
 	vdl.FieldsTargetBase
 }
@@ -2300,17 +2393,21 @@ func (t *CrRuleTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
 func (t *CrRuleTarget) StartField(name string) (key, field vdl.Target, _ error) {
 	switch name {
 	case "TableName":
-		val, err := &vdl.StringTarget{Value: &t.Value.TableName}, error(nil)
-		return nil, val, err
+		t.tableNameTarget.Value = &t.Value.TableName
+		target, err := &t.tableNameTarget, error(nil)
+		return nil, target, err
 	case "KeyPrefix":
-		val, err := &vdl.StringTarget{Value: &t.Value.KeyPrefix}, error(nil)
-		return nil, val, err
+		t.keyPrefixTarget.Value = &t.Value.KeyPrefix
+		target, err := &t.keyPrefixTarget, error(nil)
+		return nil, target, err
 	case "Type":
-		val, err := &vdl.StringTarget{Value: &t.Value.Type}, error(nil)
-		return nil, val, err
+		t.typeTarget.Value = &t.Value.Type
+		target, err := &t.typeTarget, error(nil)
+		return nil, target, err
 	case "Resolver":
-		val, err := &ResolverTypeTarget{Value: &t.Value.Resolver}, error(nil)
-		return nil, val, err
+		t.resolverTarget.Value = &t.Value.Resolver
+		target, err := &t.resolverTarget, error(nil)
+		return nil, target, err
 	default:
 		return nil, nil, fmt.Errorf("field %s not in struct %v", name, __VDLType_v_io_v23_services_syncbase_nosql_CrRule)
 	}
@@ -2673,7 +2770,10 @@ func (m *BlobFetchStatus) MakeVDLTarget() vdl.Target {
 }
 
 type BlobFetchStatusTarget struct {
-	Value *BlobFetchStatus
+	Value          *BlobFetchStatus
+	stateTarget    BlobFetchStateTarget
+	receivedTarget vdl.Int64Target
+	totalTarget    vdl.Int64Target
 	vdl.TargetBase
 	vdl.FieldsTargetBase
 }
@@ -2687,14 +2787,17 @@ func (t *BlobFetchStatusTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, err
 func (t *BlobFetchStatusTarget) StartField(name string) (key, field vdl.Target, _ error) {
 	switch name {
 	case "State":
-		val, err := &BlobFetchStateTarget{Value: &t.Value.State}, error(nil)
-		return nil, val, err
+		t.stateTarget.Value = &t.Value.State
+		target, err := &t.stateTarget, error(nil)
+		return nil, target, err
 	case "Received":
-		val, err := &vdl.Int64Target{Value: &t.Value.Received}, error(nil)
-		return nil, val, err
+		t.receivedTarget.Value = &t.Value.Received
+		target, err := &t.receivedTarget, error(nil)
+		return nil, target, err
 	case "Total":
-		val, err := &vdl.Int64Target{Value: &t.Value.Total}, error(nil)
-		return nil, val, err
+		t.totalTarget.Value = &t.Value.Total
+		target, err := &t.totalTarget, error(nil)
+		return nil, target, err
 	default:
 		return nil, nil, fmt.Errorf("field %s not in struct %v", name, __VDLType_v_io_v23_services_syncbase_nosql_BlobFetchStatus)
 	}
@@ -2769,7 +2872,9 @@ func (m *StoreChange) MakeVDLTarget() vdl.Target {
 }
 
 type StoreChangeTarget struct {
-	Value *StoreChange
+	Value          *StoreChange
+	valueTarget    vdl.BytesTarget
+	fromSyncTarget vdl.BoolTarget
 	vdl.TargetBase
 	vdl.FieldsTargetBase
 }
@@ -2783,11 +2888,13 @@ func (t *StoreChangeTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) 
 func (t *StoreChangeTarget) StartField(name string) (key, field vdl.Target, _ error) {
 	switch name {
 	case "Value":
-		val, err := &vdl.BytesTarget{Value: &t.Value.Value}, error(nil)
-		return nil, val, err
+		t.valueTarget.Value = &t.Value.Value
+		target, err := &t.valueTarget, error(nil)
+		return nil, target, err
 	case "FromSync":
-		val, err := &vdl.BoolTarget{Value: &t.Value.FromSync}, error(nil)
-		return nil, val, err
+		t.fromSyncTarget.Value = &t.Value.FromSync
+		target, err := &t.fromSyncTarget, error(nil)
+		return nil, target, err
 	default:
 		return nil, nil, fmt.Errorf("field %s not in struct %v", name, __VDLType_v_io_v23_services_syncbase_nosql_StoreChange)
 	}
