@@ -188,21 +188,6 @@ func createFinTarget(c convTarget, ttFrom *Type) convTarget {
 //
 // If fin is already a concrete type it's used directly as the fill target.
 //
-// There is one particularly weird trick that we need to use when the conversion
-// target (i.e. fin) is a reflect union interface.  The problem is that
-// createFillTarget is called before we know which union field is set, so
-// there's no way to create a concrete union struct representing the appropriate
-// field.  So we return a vdl.Value as the fill target, to capture the value.
-// We still want the concrete union struct to be created at the end of the
-// conversion, so we call makeReflectUnion in finishConvert to convert the
-// vdl.Value back into a concrete union struct, which needs to work even if the
-// type hasn't been registered.
-//
-// The comments below refer to this trick as the UNION TRICK.
-//
-// TODO(toddw): The UNION TRICK is probably very slow.  We should benchmark and
-// probably re-design our conversion strategy.
-//
 // TODO(toddw): The conversion logic is way too complicated, with many similar
 // branches; rewrite this entire file..
 func createFillTarget(fin convTarget, ttFrom *Type) (convTarget, error) {
@@ -222,11 +207,6 @@ func createFillTarget(fin convTarget, ttFrom *Type) (convTarget, error) {
 			if err != nil {
 				return convTarget{}, err
 			}
-			if tt.Kind() == Union {
-				// The wire type is a union.  Apply the UNION TRICK (see above), and
-				// fill *Value, since we don't know which field is set.
-				return valueConv(ZeroValue(tt)), nil
-			}
 			return reflectConv(reflect.New(ni.WireType).Elem(), tt)
 		}
 		if fin.rv.Kind() == reflect.Interface {
@@ -240,9 +220,7 @@ func createFillTarget(fin convTarget, ttFrom *Type) (convTarget, error) {
 				// Create the standard WireError struct to fill in, without the pointer.
 				return reflectConv(reflect.New(rtWireError).Elem(), ErrorType.Elem())
 			case fin.tt.Kind() == Union:
-				// The fin target is a union interface.  Apply the UNION TRICK (see
-				// above), and fill *Value, since we don't know which field is set.
-				return valueConv(ZeroValue(fin.tt)), nil
+				return reflectConv(reflect.New(fin.rv.Type()).Elem(), fin.tt)
 			case fin.tt.Kind() != Any:
 				return convTarget{}, fmt.Errorf("internal error - cannot convert to Go type %v vdl type %v from %v", fin.rv.Type(), fin.tt, ttFrom)
 			}
@@ -261,17 +239,7 @@ func createFillTarget(fin convTarget, ttFrom *Type) (convTarget, error) {
 				// fill target, and rely on finishConvert to perform the final step of
 				// converting from the wire type to the native type.
 				if ni := nativeInfoFromNative(rt); ni != nil {
-					if ttFrom.Kind() == Union {
-						// The wire type is a union interface.  Apply the UNION TRICK (see
-						// above), and fill *Value, since we don't know which field is set.
-						return valueConv(ZeroValue(ttFrom)), nil
-					}
 					return reflectConv(reflect.New(ni.WireType).Elem(), ttFrom)
-				}
-				if rt.Kind() == reflect.Interface && ttFrom.Kind() == Union {
-					// The wire type is a union interface.  Apply the UNION TRICK (see
-					// above), and fill *Value, since we don't know which field is set.
-					return valueConv(ZeroValue(ttFrom)), nil
 				}
 				rv := reflect.New(rt).Elem()
 				for rv.Kind() == reflect.Ptr {
@@ -318,18 +286,7 @@ func finishConvert(fin, fill convTarget) error {
 		// Handle mirrored case in createFillTarget where fin.rv is a native type;
 		// fill.rv is the wire type that has been filled in.
 		if ni := nativeInfoFromNative(fin.rv.Type()); ni != nil {
-			tt, err := TypeFromReflect(ni.WireType)
-			if err != nil {
-				return err
-			}
 			rvFill := fill.rv
-			if tt.Kind() == Union {
-				// If the fill target is a union type, finish conversion for the UNION
-				// TRICK (see above), to turn it into a concrete field struct.
-				if rvFill, err = makeReflectUnion(ni.WireType, fill.vv); err != nil {
-					return err
-				}
-			}
 			return ni.ToNative(rvFill, fin.rv.Addr())
 		}
 		if fin.rv.Kind() == reflect.Interface {
@@ -337,7 +294,10 @@ func finishConvert(fin, fill convTarget) error {
 			var rvFill reflect.Value
 			if fill.vv == nil {
 				rvFill = fill.rv
-				if fill.rv.Type() == rtWireError {
+				// Note: this if statement and the one in the else if block do not correctly
+				// support the case of optional wiretypes.
+				// TODO(bprosnitz) Fix this
+				if fill.rv.Type() == rtWireError && fin.rv.Type() != rtWireError {
 					// Handle case where fill.rv has type WireError; if error conversions
 					// have been registered with the vdl package, we need to convert to
 					// the standard error interface.
@@ -348,7 +308,7 @@ func finishConvert(fin, fill convTarget) error {
 						}
 						rvFill = newNative.Elem()
 					}
-				} else if ni := nativeInfoFromWire(fill.rv.Type()); ni != nil {
+				} else if ni := nativeInfoFromWire(fill.rv.Type()); ni != nil && fin.rv.Type() != ni.WireType {
 					// Handle case where fill.rv is a wire type with a native type; set
 					// rvFill to a new native type and call ToNative to fill it in.
 					newNative := reflect.New(ni.NativeType)
@@ -368,36 +328,11 @@ func finishConvert(fin, fill convTarget) error {
 					}
 				}
 			} else {
-				// If the fill target is a union type, finish conversion for the UNION
-				// TRICK (see above), to turn it into a concrete field struct.
-				if fill.tt.Kind() == Union {
-					var err error
-					rvFill, err = makeReflectUnion(fin.rv.Type(), fill.vv)
-					if err != nil {
-						// Handle case where fin.rv is a native type; fill.vv is the union
-						// wire type that has been filled in.
-						if rt := TypeToReflect(fill.tt); rt != nil {
-							if ni := nativeInfoFromNative(rt); ni != nil {
-								rvWireUnion, err := makeReflectUnion(ni.WireType, fill.vv)
-								if err != nil {
-									return err
-								}
-								newNative := reflect.New(ni.NativeType)
-								if err := ni.ToNative(rvWireUnion, newNative); err != nil {
-									return err
-								}
-								rvFill = newNative.Elem()
-							}
-						}
-					}
-				}
-				if !rvFill.IsValid() {
-					switch fill.tt.Kind() {
-					case Optional:
-						rvFill = reflect.ValueOf(OptionalValue(fill.vv))
-					default:
-						rvFill = reflect.ValueOf(fill.vv)
-					}
+				switch fill.tt.Kind() {
+				case Optional:
+					rvFill = reflect.ValueOf(OptionalValue(fill.vv))
+				default:
+					rvFill = reflect.ValueOf(fill.vv)
 				}
 			}
 			if to, from := fin.rv.Type(), rvFill.Type(); !from.AssignableTo(to) {
@@ -483,45 +418,6 @@ func rvSettableZeroValue(rt reflect.Type, tt *Type) reflect.Value {
 		return rv
 	}
 	panic(fmt.Errorf("vdl: rvSettableZeroValue unhandled rt: %v tt: %v", rt, tt))
-}
-
-// makeReflectUnion returns the union concrete struct based on the union
-// interface type rt, corresponding to the field that is set in vv.  The point
-// of this machinery is to ensure union can always be created, without any type
-// registration.
-func makeReflectUnion(rt reflect.Type, vv *Value) (reflect.Value, error) {
-	// TODO(toddw): Cache the field types for faster access.
-	ri, _, err := deriveReflectInfo(rt)
-	if err != nil || len(ri.UnionFields) == 0 {
-		// If rt isn't a union interface type, it still might be registered, so we
-		// can get the reflect type from vv.
-		if rt2 := TypeToReflect(vv.Type()); rt2 != nil {
-			rt = rt2
-			ri, _, err = deriveReflectInfo(rt)
-		}
-	}
-	switch {
-	case err != nil:
-		return reflect.Value{}, err
-	case len(ri.UnionFields) == 0 || vv.Kind() != Union:
-		return reflect.Value{}, fmt.Errorf("vdl: makeReflectUnion(%v, %v) must only be called on Union", rt, vv.Type())
-	}
-	index, vvField := vv.UnionField()
-	if index >= len(ri.UnionFields) {
-		return reflect.Value{}, fmt.Errorf("vdl: makeReflectUnion(%v, %v) field index %d out of range, len=%d", rt, vv.Type(), index, len(ri.UnionFields))
-	}
-	// Run our regular conversion from vvField to rvField.  Keep in mind that
-	// rvField is the concrete union struct, so we convert into Field(0), which
-	// corresponds to the "Value" field.
-	rvField := reflect.New(ri.UnionFields[index].RepType).Elem()
-	target, err := ReflectTarget(rvField.Field(0))
-	if err != nil {
-		return reflect.Value{}, err
-	}
-	if err := FromValue(target, vvField); err != nil {
-		return reflect.Value{}, err
-	}
-	return rvField, nil
 }
 
 func removeOptional(tt *Type) *Type {
@@ -1292,8 +1188,8 @@ func (c convTarget) startKey() (convTarget, error) {
 		switch c.rv.Kind() {
 		case reflect.Map:
 			return reflectConv(rvSettableZeroValue(c.rv.Type().Key(), tt.Key()), tt.Key())
-		case reflect.Struct:
-			// The key for struct is the field name, which is a string.
+		case reflect.Struct, reflect.Interface:
+			// The key for struct and union is the field name, which is a string.
 			return reflectConv(reflect.New(rtString).Elem(), StringType)
 		}
 	} else {
@@ -1362,6 +1258,20 @@ func (c convTarget) finishKeyStartField(key convTarget) (convTarget, error) {
 				rvField.SetBool(true)
 			}
 			return reflectConv(rvField, ttField.Type)
+		case reflect.Interface:
+			if tt.Kind() == Union {
+				ri, _, err := deriveReflectInfo(c.rv.Type())
+				if err != nil {
+					return convTarget{}, err
+				}
+				ttField, index := tt.FieldByName(key.rv.String())
+				fld, found := ri.UnionFields[index].RepType.FieldByName("Value")
+				if !found {
+					return convTarget{}, fmt.Errorf("concrete union type %q missing required Value field", ri.UnionFields[index].RepType)
+				}
+				rvValue := reflect.New(fld.Type).Elem()
+				return reflectConv(rvValue, ttField.Type)
+			}
 		}
 	} else {
 		switch c.vv.Kind() {
@@ -1418,6 +1328,18 @@ func (c convTarget) finishField(key, field convTarget) error {
 			return nil
 		case reflect.Struct:
 			return nil
+		case reflect.Interface:
+			if tt.Kind() == Union {
+				ri, _, err := deriveReflectInfo(c.rv.Type())
+				if err != nil {
+					return err
+				}
+				_, index := c.tt.FieldByName(key.rv.String())
+				rvField := reflect.New(ri.UnionFields[index].RepType).Elem()
+				rvField.FieldByName("Value").Set(field.rv)
+				c.rv.Set(rvField)
+				return nil
+			}
 		}
 	} else {
 		switch c.vv.Kind() {
