@@ -15,6 +15,11 @@ import (
 	time_2 "v.io/v23/vdlroot/time"
 )
 
+var _ = __VDLInit() // Must be first; see __VDLInit comments for details.
+
+//////////////////////////////////////////////////
+// Type definitions
+
 type AddressInfo struct {
 	Street string
 	City   string
@@ -28,9 +33,6 @@ func (AddressInfo) __VDLReflect(struct {
 }
 
 func (m *AddressInfo) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
-	if __VDLType_v_io_v23_query_engine_internal_testdata_AddressInfo == nil || __VDLType0 == nil {
-		panic("Initialization order error: types generated for FillVDLTarget not initialized. Consider moving caller to an init() block.")
-	}
 	fieldsTarget1, err := t.StartFields(tt)
 	if err != nil {
 		return err
@@ -41,7 +43,7 @@ func (m *AddressInfo) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 		return err
 	}
 	if err != vdl.ErrFieldNoExist {
-		if err := fieldTarget3.FromString(string(m.Street), vdl.StringType); err != nil {
+		if err := fieldTarget3.FromString(string(m.Street), tt.NonOptional().Field(0).Type); err != nil {
 			return err
 		}
 		if err := fieldsTarget1.FinishField(keyTarget2, fieldTarget3); err != nil {
@@ -53,7 +55,7 @@ func (m *AddressInfo) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 		return err
 	}
 	if err != vdl.ErrFieldNoExist {
-		if err := fieldTarget5.FromString(string(m.City), vdl.StringType); err != nil {
+		if err := fieldTarget5.FromString(string(m.City), tt.NonOptional().Field(1).Type); err != nil {
 			return err
 		}
 		if err := fieldsTarget1.FinishField(keyTarget4, fieldTarget5); err != nil {
@@ -65,7 +67,7 @@ func (m *AddressInfo) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 		return err
 	}
 	if err != vdl.ErrFieldNoExist {
-		if err := fieldTarget7.FromString(string(m.State), vdl.StringType); err != nil {
+		if err := fieldTarget7.FromString(string(m.State), tt.NonOptional().Field(2).Type); err != nil {
 			return err
 		}
 		if err := fieldsTarget1.FinishField(keyTarget6, fieldTarget7); err != nil {
@@ -77,7 +79,7 @@ func (m *AddressInfo) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 		return err
 	}
 	if err != vdl.ErrFieldNoExist {
-		if err := fieldTarget9.FromString(string(m.Zip), vdl.StringType); err != nil {
+		if err := fieldTarget9.FromString(string(m.Zip), tt.NonOptional().Field(3).Type); err != nil {
 			return err
 		}
 		if err := fieldsTarget1.FinishField(keyTarget8, fieldTarget9); err != nil {
@@ -106,8 +108,8 @@ type AddressInfoTarget struct {
 
 func (t *AddressInfoTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
 
-	if !vdl.Compatible(tt, __VDLType_v_io_v23_query_engine_internal_testdata_AddressInfo) {
-		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType_v_io_v23_query_engine_internal_testdata_AddressInfo)
+	if ttWant := vdl.TypeOf((*AddressInfo)(nil)).Elem(); !vdl.Compatible(tt, ttWant) {
+		return nil, fmt.Errorf("type %v incompatible with %v", tt, ttWant)
 	}
 	return t, nil
 }
@@ -130,7 +132,7 @@ func (t *AddressInfoTarget) StartField(name string) (key, field vdl.Target, _ er
 		target, err := &t.zipTarget, error(nil)
 		return nil, target, err
 	default:
-		return nil, nil, fmt.Errorf("field %s not in struct %v", name, __VDLType_v_io_v23_query_engine_internal_testdata_AddressInfo)
+		return nil, nil, fmt.Errorf("field %s not in struct v.io/v23/query/engine/internal/testdata.AddressInfo", name)
 	}
 }
 func (t *AddressInfoTarget) FinishField(_, _ vdl.Target) error {
@@ -195,7 +197,7 @@ func (CreditAgency) __VDLReflect(struct {
 }
 
 func (m *CreditAgency) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
-	if err := t.FromEnumLabel((*m).String(), __VDLType_v_io_v23_query_engine_internal_testdata_CreditAgency); err != nil {
+	if err := t.FromEnumLabel((*m).String(), tt); err != nil {
 		return err
 	}
 	return nil
@@ -212,8 +214,8 @@ type CreditAgencyTarget struct {
 
 func (t *CreditAgencyTarget) FromEnumLabel(src string, tt *vdl.Type) error {
 
-	if !vdl.Compatible(tt, __VDLType_v_io_v23_query_engine_internal_testdata_CreditAgency) {
-		return fmt.Errorf("type %v incompatible with %v", tt, __VDLType_v_io_v23_query_engine_internal_testdata_CreditAgency)
+	if ttWant := vdl.TypeOf((*CreditAgency)(nil)); !vdl.Compatible(tt, ttWant) {
+		return fmt.Errorf("type %v incompatible with %v", tt, ttWant)
 	}
 	switch src {
 	case "Equifax":
@@ -223,7 +225,7 @@ func (t *CreditAgencyTarget) FromEnumLabel(src string, tt *vdl.Type) error {
 	case "TransUnion":
 		*t.Value = 2
 	default:
-		return fmt.Errorf("label %s not in enum %v", src, __VDLType_v_io_v23_query_engine_internal_testdata_CreditAgency)
+		return fmt.Errorf("label %s not in enum v.io/v23/query/engine/internal/testdata.CreditAgency", src)
 	}
 
 	return nil
@@ -277,7 +279,7 @@ func (ExperianRating) __VDLReflect(struct {
 }
 
 func (m *ExperianRating) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
-	if err := t.FromEnumLabel((*m).String(), __VDLType_v_io_v23_query_engine_internal_testdata_ExperianRating); err != nil {
+	if err := t.FromEnumLabel((*m).String(), tt); err != nil {
 		return err
 	}
 	return nil
@@ -294,8 +296,8 @@ type ExperianRatingTarget struct {
 
 func (t *ExperianRatingTarget) FromEnumLabel(src string, tt *vdl.Type) error {
 
-	if !vdl.Compatible(tt, __VDLType_v_io_v23_query_engine_internal_testdata_ExperianRating) {
-		return fmt.Errorf("type %v incompatible with %v", tt, __VDLType_v_io_v23_query_engine_internal_testdata_ExperianRating)
+	if ttWant := vdl.TypeOf((*ExperianRating)(nil)); !vdl.Compatible(tt, ttWant) {
+		return fmt.Errorf("type %v incompatible with %v", tt, ttWant)
 	}
 	switch src {
 	case "Good":
@@ -303,7 +305,7 @@ func (t *ExperianRatingTarget) FromEnumLabel(src string, tt *vdl.Type) error {
 	case "Bad":
 		*t.Value = 1
 	default:
-		return fmt.Errorf("label %s not in enum %v", src, __VDLType_v_io_v23_query_engine_internal_testdata_ExperianRating)
+		return fmt.Errorf("label %s not in enum v.io/v23/query/engine/internal/testdata.ExperianRating", src)
 	}
 
 	return nil
@@ -317,7 +319,7 @@ func (RatingsArray) __VDLReflect(struct {
 }
 
 func (m *RatingsArray) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
-	listTarget1, err := t.StartList(__VDLType_v_io_v23_query_engine_internal_testdata_RatingsArray, 4)
+	listTarget1, err := t.StartList(tt, 4)
 	if err != nil {
 		return err
 	}
@@ -326,7 +328,7 @@ func (m *RatingsArray) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 		if err != nil {
 			return err
 		}
-		if err := elemTarget2.FromInt(int64(elem3), vdl.Int16Type); err != nil {
+		if err := elemTarget2.FromInt(int64(elem3), tt.NonOptional().Elem()); err != nil {
 			return err
 		}
 		if err := listTarget1.FinishElem(elemTarget2); err != nil {
@@ -353,8 +355,8 @@ type RatingsArrayTarget struct {
 
 func (t *RatingsArrayTarget) StartList(tt *vdl.Type, len int) (vdl.ListTarget, error) {
 
-	if !vdl.Compatible(tt, __VDLType_v_io_v23_query_engine_internal_testdata_RatingsArray) {
-		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType_v_io_v23_query_engine_internal_testdata_RatingsArray)
+	if ttWant := vdl.TypeOf((*RatingsArray)(nil)); !vdl.Compatible(tt, ttWant) {
+		return nil, fmt.Errorf("type %v incompatible with %v", tt, ttWant)
 	}
 	return t, nil
 }
@@ -382,9 +384,6 @@ func (EquifaxCreditReport) __VDLReflect(struct {
 }
 
 func (m *EquifaxCreditReport) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
-	if __VDLType_v_io_v23_query_engine_internal_testdata_EquifaxCreditReport == nil || __VDLType1 == nil {
-		panic("Initialization order error: types generated for FillVDLTarget not initialized. Consider moving caller to an init() block.")
-	}
 	fieldsTarget1, err := t.StartFields(tt)
 	if err != nil {
 		return err
@@ -395,7 +394,7 @@ func (m *EquifaxCreditReport) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 		return err
 	}
 	if err != vdl.ErrFieldNoExist {
-		if err := fieldTarget3.FromUint(uint64(m.Rating), vdl.ByteType); err != nil {
+		if err := fieldTarget3.FromUint(uint64(m.Rating), tt.NonOptional().Field(0).Type); err != nil {
 			return err
 		}
 		if err := fieldsTarget1.FinishField(keyTarget2, fieldTarget3); err != nil {
@@ -408,7 +407,7 @@ func (m *EquifaxCreditReport) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 	}
 	if err != vdl.ErrFieldNoExist {
 
-		if err := m.FourScoreRatings.FillVDLTarget(fieldTarget5, __VDLType_v_io_v23_query_engine_internal_testdata_RatingsArray); err != nil {
+		if err := m.FourScoreRatings.FillVDLTarget(fieldTarget5, tt.NonOptional().Field(1).Type); err != nil {
 			return err
 		}
 		if err := fieldsTarget1.FinishField(keyTarget4, fieldTarget5); err != nil {
@@ -435,8 +434,8 @@ type EquifaxCreditReportTarget struct {
 
 func (t *EquifaxCreditReportTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
 
-	if !vdl.Compatible(tt, __VDLType_v_io_v23_query_engine_internal_testdata_EquifaxCreditReport) {
-		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType_v_io_v23_query_engine_internal_testdata_EquifaxCreditReport)
+	if ttWant := vdl.TypeOf((*EquifaxCreditReport)(nil)).Elem(); !vdl.Compatible(tt, ttWant) {
+		return nil, fmt.Errorf("type %v incompatible with %v", tt, ttWant)
 	}
 	return t, nil
 }
@@ -451,7 +450,7 @@ func (t *EquifaxCreditReportTarget) StartField(name string) (key, field vdl.Targ
 		target, err := &t.fourScoreRatingsTarget, error(nil)
 		return nil, target, err
 	default:
-		return nil, nil, fmt.Errorf("field %s not in struct %v", name, __VDLType_v_io_v23_query_engine_internal_testdata_EquifaxCreditReport)
+		return nil, nil, fmt.Errorf("field %s not in struct v.io/v23/query/engine/internal/testdata.EquifaxCreditReport", name)
 	}
 }
 func (t *EquifaxCreditReportTarget) FinishField(_, _ vdl.Target) error {
@@ -516,7 +515,7 @@ func (Tdh) __VDLReflect(struct {
 }
 
 func (m *Tdh) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
-	if err := t.FromEnumLabel((*m).String(), __VDLType_v_io_v23_query_engine_internal_testdata_Tdh); err != nil {
+	if err := t.FromEnumLabel((*m).String(), tt); err != nil {
 		return err
 	}
 	return nil
@@ -533,8 +532,8 @@ type TdhTarget struct {
 
 func (t *TdhTarget) FromEnumLabel(src string, tt *vdl.Type) error {
 
-	if !vdl.Compatible(tt, __VDLType_v_io_v23_query_engine_internal_testdata_Tdh) {
-		return fmt.Errorf("type %v incompatible with %v", tt, __VDLType_v_io_v23_query_engine_internal_testdata_Tdh)
+	if ttWant := vdl.TypeOf((*Tdh)(nil)); !vdl.Compatible(tt, ttWant) {
+		return fmt.Errorf("type %v incompatible with %v", tt, ttWant)
 	}
 	switch src {
 	case "Tom":
@@ -544,7 +543,7 @@ func (t *TdhTarget) FromEnumLabel(src string, tt *vdl.Type) error {
 	case "Harry":
 		*t.Value = 2
 	default:
-		return fmt.Errorf("label %s not in enum %v", src, __VDLType_v_io_v23_query_engine_internal_testdata_Tdh)
+		return fmt.Errorf("label %s not in enum v.io/v23/query/engine/internal/testdata.Tdh", src)
 	}
 
 	return nil
@@ -562,9 +561,6 @@ func (ExperianCreditReport) __VDLReflect(struct {
 }
 
 func (m *ExperianCreditReport) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
-	if __VDLType_v_io_v23_query_engine_internal_testdata_ExperianCreditReport == nil || __VDLType2 == nil {
-		panic("Initialization order error: types generated for FillVDLTarget not initialized. Consider moving caller to an init() block.")
-	}
 	fieldsTarget1, err := t.StartFields(tt)
 	if err != nil {
 		return err
@@ -576,7 +572,7 @@ func (m *ExperianCreditReport) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 	}
 	if err != vdl.ErrFieldNoExist {
 
-		if err := m.Rating.FillVDLTarget(fieldTarget3, __VDLType_v_io_v23_query_engine_internal_testdata_ExperianRating); err != nil {
+		if err := m.Rating.FillVDLTarget(fieldTarget3, tt.NonOptional().Field(0).Type); err != nil {
 			return err
 		}
 		if err := fieldsTarget1.FinishField(keyTarget2, fieldTarget3); err != nil {
@@ -589,7 +585,7 @@ func (m *ExperianCreditReport) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 	}
 	if err != vdl.ErrFieldNoExist {
 
-		setTarget6, err := fieldTarget5.StartSet(__VDLType3, len(m.TdhApprovals))
+		setTarget6, err := fieldTarget5.StartSet(tt.NonOptional().Field(1).Type, len(m.TdhApprovals))
 		if err != nil {
 			return err
 		}
@@ -599,7 +595,7 @@ func (m *ExperianCreditReport) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 				return err
 			}
 
-			if err := key8.FillVDLTarget(keyTarget7, __VDLType_v_io_v23_query_engine_internal_testdata_Tdh); err != nil {
+			if err := key8.FillVDLTarget(keyTarget7, tt.NonOptional().Field(1).Type.Key()); err != nil {
 				return err
 			}
 			if err := setTarget6.FinishKey(keyTarget7); err != nil {
@@ -619,7 +615,7 @@ func (m *ExperianCreditReport) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 	}
 	if err != vdl.ErrFieldNoExist {
 
-		if err := m.Auditor.FillVDLTarget(fieldTarget10, __VDLType_v_io_v23_query_engine_internal_testdata_Tdh); err != nil {
+		if err := m.Auditor.FillVDLTarget(fieldTarget10, tt.NonOptional().Field(2).Type); err != nil {
 			return err
 		}
 		if err := fieldsTarget1.FinishField(keyTarget9, fieldTarget10); err != nil {
@@ -647,8 +643,8 @@ type ExperianCreditReportTarget struct {
 
 func (t *ExperianCreditReportTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
 
-	if !vdl.Compatible(tt, __VDLType_v_io_v23_query_engine_internal_testdata_ExperianCreditReport) {
-		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType_v_io_v23_query_engine_internal_testdata_ExperianCreditReport)
+	if ttWant := vdl.TypeOf((*ExperianCreditReport)(nil)).Elem(); !vdl.Compatible(tt, ttWant) {
+		return nil, fmt.Errorf("type %v incompatible with %v", tt, ttWant)
 	}
 	return t, nil
 }
@@ -667,7 +663,7 @@ func (t *ExperianCreditReportTarget) StartField(name string) (key, field vdl.Tar
 		target, err := &t.auditorTarget, error(nil)
 		return nil, target, err
 	default:
-		return nil, nil, fmt.Errorf("field %s not in struct %v", name, __VDLType_v_io_v23_query_engine_internal_testdata_ExperianCreditReport)
+		return nil, nil, fmt.Errorf("field %s not in struct v.io/v23/query/engine/internal/testdata.ExperianCreditReport", name)
 	}
 }
 func (t *ExperianCreditReportTarget) FinishField(_, _ vdl.Target) error {
@@ -689,8 +685,8 @@ type unnamed_7365745b762e696f2f7632332f71756572792f656e67696e652f696e7465726e616
 
 func (t *unnamed_7365745b762e696f2f7632332f71756572792f656e67696e652f696e7465726e616c2f74657374646174612e54646820656e756d7b546f6d3b4469636b3b48617272797d5dTarget) StartSet(tt *vdl.Type, len int) (vdl.SetTarget, error) {
 
-	if !vdl.Compatible(tt, __VDLType3) {
-		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType3)
+	if ttWant := vdl.TypeOf((*map[Tdh]struct{})(nil)); !vdl.Compatible(tt, ttWant) {
+		return nil, fmt.Errorf("type %v incompatible with %v", tt, ttWant)
 	}
 	*t.Value = make(map[Tdh]struct{})
 	return t, nil
@@ -724,9 +720,6 @@ func (TransUnionCreditReport) __VDLReflect(struct {
 }
 
 func (m *TransUnionCreditReport) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
-	if __VDLType_v_io_v23_query_engine_internal_testdata_TransUnionCreditReport == nil || __VDLType4 == nil {
-		panic("Initialization order error: types generated for FillVDLTarget not initialized. Consider moving caller to an init() block.")
-	}
 	fieldsTarget1, err := t.StartFields(tt)
 	if err != nil {
 		return err
@@ -737,7 +730,7 @@ func (m *TransUnionCreditReport) FillVDLTarget(t vdl.Target, tt *vdl.Type) error
 		return err
 	}
 	if err != vdl.ErrFieldNoExist {
-		if err := fieldTarget3.FromInt(int64(m.Rating), vdl.Int16Type); err != nil {
+		if err := fieldTarget3.FromInt(int64(m.Rating), tt.NonOptional().Field(0).Type); err != nil {
 			return err
 		}
 		if err := fieldsTarget1.FinishField(keyTarget2, fieldTarget3); err != nil {
@@ -750,7 +743,7 @@ func (m *TransUnionCreditReport) FillVDLTarget(t vdl.Target, tt *vdl.Type) error
 	}
 	if err != vdl.ErrFieldNoExist {
 
-		mapTarget6, err := fieldTarget5.StartMap(__VDLType5, len(m.PreviousRatings))
+		mapTarget6, err := fieldTarget5.StartMap(tt.NonOptional().Field(1).Type, len(m.PreviousRatings))
 		if err != nil {
 			return err
 		}
@@ -759,14 +752,14 @@ func (m *TransUnionCreditReport) FillVDLTarget(t vdl.Target, tt *vdl.Type) error
 			if err != nil {
 				return err
 			}
-			if err := keyTarget7.FromString(string(key8), vdl.StringType); err != nil {
+			if err := keyTarget7.FromString(string(key8), tt.NonOptional().Field(1).Type.Key()); err != nil {
 				return err
 			}
 			valueTarget9, err := mapTarget6.FinishKeyStartField(keyTarget7)
 			if err != nil {
 				return err
 			}
-			if err := valueTarget9.FromInt(int64(value10), vdl.Int16Type); err != nil {
+			if err := valueTarget9.FromInt(int64(value10), tt.NonOptional().Field(1).Type.Elem()); err != nil {
 				return err
 			}
 			if err := mapTarget6.FinishField(keyTarget7, valueTarget9); err != nil {
@@ -800,8 +793,8 @@ type TransUnionCreditReportTarget struct {
 
 func (t *TransUnionCreditReportTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
 
-	if !vdl.Compatible(tt, __VDLType_v_io_v23_query_engine_internal_testdata_TransUnionCreditReport) {
-		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType_v_io_v23_query_engine_internal_testdata_TransUnionCreditReport)
+	if ttWant := vdl.TypeOf((*TransUnionCreditReport)(nil)).Elem(); !vdl.Compatible(tt, ttWant) {
+		return nil, fmt.Errorf("type %v incompatible with %v", tt, ttWant)
 	}
 	return t, nil
 }
@@ -816,7 +809,7 @@ func (t *TransUnionCreditReportTarget) StartField(name string) (key, field vdl.T
 		target, err := &t.previousRatingsTarget, error(nil)
 		return nil, target, err
 	default:
-		return nil, nil, fmt.Errorf("field %s not in struct %v", name, __VDLType_v_io_v23_query_engine_internal_testdata_TransUnionCreditReport)
+		return nil, nil, fmt.Errorf("field %s not in struct v.io/v23/query/engine/internal/testdata.TransUnionCreditReport", name)
 	}
 }
 func (t *TransUnionCreditReportTarget) FinishField(_, _ vdl.Target) error {
@@ -840,8 +833,8 @@ type unnamed_6d61705b737472696e675d696e743136Target struct {
 
 func (t *unnamed_6d61705b737472696e675d696e743136Target) StartMap(tt *vdl.Type, len int) (vdl.MapTarget, error) {
 
-	if !vdl.Compatible(tt, __VDLType5) {
-		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType5)
+	if ttWant := vdl.TypeOf((*map[string]int16)(nil)); !vdl.Compatible(tt, ttWant) {
+		return nil, fmt.Errorf("type %v incompatible with %v", tt, ttWant)
 	}
 	*t.Value = make(map[string]int16)
 	return t, nil
@@ -907,7 +900,7 @@ func (x AgencyReportEquifaxReport) Name() string                       { return 
 func (x AgencyReportEquifaxReport) __VDLReflect(__AgencyReportReflect) {}
 
 func (m AgencyReportEquifaxReport) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
-	fieldsTarget1, err := t.StartFields(__VDLType_v_io_v23_query_engine_internal_testdata_AgencyReport)
+	fieldsTarget1, err := t.StartFields(tt)
 	if err != nil {
 		return err
 	}
@@ -916,7 +909,7 @@ func (m AgencyReportEquifaxReport) FillVDLTarget(t vdl.Target, tt *vdl.Type) err
 		return err
 	}
 
-	if err := m.Value.FillVDLTarget(fieldTarget3, __VDLType_v_io_v23_query_engine_internal_testdata_EquifaxCreditReport); err != nil {
+	if err := m.Value.FillVDLTarget(fieldTarget3, tt.NonOptional().Field(0).Type); err != nil {
 		return err
 	}
 	if err := fieldsTarget1.FinishField(keyTarget2, fieldTarget3); err != nil {
@@ -939,7 +932,7 @@ func (x AgencyReportExperianReport) Name() string                       { return
 func (x AgencyReportExperianReport) __VDLReflect(__AgencyReportReflect) {}
 
 func (m AgencyReportExperianReport) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
-	fieldsTarget1, err := t.StartFields(__VDLType_v_io_v23_query_engine_internal_testdata_AgencyReport)
+	fieldsTarget1, err := t.StartFields(tt)
 	if err != nil {
 		return err
 	}
@@ -948,7 +941,7 @@ func (m AgencyReportExperianReport) FillVDLTarget(t vdl.Target, tt *vdl.Type) er
 		return err
 	}
 
-	if err := m.Value.FillVDLTarget(fieldTarget3, __VDLType_v_io_v23_query_engine_internal_testdata_ExperianCreditReport); err != nil {
+	if err := m.Value.FillVDLTarget(fieldTarget3, tt.NonOptional().Field(1).Type); err != nil {
 		return err
 	}
 	if err := fieldsTarget1.FinishField(keyTarget2, fieldTarget3); err != nil {
@@ -971,7 +964,7 @@ func (x AgencyReportTransUnionReport) Name() string                       { retu
 func (x AgencyReportTransUnionReport) __VDLReflect(__AgencyReportReflect) {}
 
 func (m AgencyReportTransUnionReport) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
-	fieldsTarget1, err := t.StartFields(__VDLType_v_io_v23_query_engine_internal_testdata_AgencyReport)
+	fieldsTarget1, err := t.StartFields(tt)
 	if err != nil {
 		return err
 	}
@@ -980,7 +973,7 @@ func (m AgencyReportTransUnionReport) FillVDLTarget(t vdl.Target, tt *vdl.Type) 
 		return err
 	}
 
-	if err := m.Value.FillVDLTarget(fieldTarget3, __VDLType_v_io_v23_query_engine_internal_testdata_TransUnionCreditReport); err != nil {
+	if err := m.Value.FillVDLTarget(fieldTarget3, tt.NonOptional().Field(2).Type); err != nil {
 		return err
 	}
 	if err := fieldsTarget1.FinishField(keyTarget2, fieldTarget3); err != nil {
@@ -1008,9 +1001,6 @@ func (CreditReport) __VDLReflect(struct {
 }
 
 func (m *CreditReport) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
-	if __VDLType_v_io_v23_query_engine_internal_testdata_CreditReport == nil || __VDLType6 == nil {
-		panic("Initialization order error: types generated for FillVDLTarget not initialized. Consider moving caller to an init() block.")
-	}
 	fieldsTarget1, err := t.StartFields(tt)
 	if err != nil {
 		return err
@@ -1022,7 +1012,7 @@ func (m *CreditReport) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 	}
 	if err != vdl.ErrFieldNoExist {
 
-		if err := m.Agency.FillVDLTarget(fieldTarget3, __VDLType_v_io_v23_query_engine_internal_testdata_CreditAgency); err != nil {
+		if err := m.Agency.FillVDLTarget(fieldTarget3, tt.NonOptional().Field(0).Type); err != nil {
 			return err
 		}
 		if err := fieldsTarget1.FinishField(keyTarget2, fieldTarget3); err != nil {
@@ -1039,7 +1029,7 @@ func (m *CreditReport) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 		if unionValue6 == nil {
 			unionValue6 = AgencyReportEquifaxReport{}
 		}
-		if err := unionValue6.FillVDLTarget(fieldTarget5, __VDLType_v_io_v23_query_engine_internal_testdata_AgencyReport); err != nil {
+		if err := unionValue6.FillVDLTarget(fieldTarget5, tt.NonOptional().Field(1).Type); err != nil {
 			return err
 		}
 		if err := fieldsTarget1.FinishField(keyTarget4, fieldTarget5); err != nil {
@@ -1066,8 +1056,8 @@ type CreditReportTarget struct {
 
 func (t *CreditReportTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
 
-	if !vdl.Compatible(tt, __VDLType_v_io_v23_query_engine_internal_testdata_CreditReport) {
-		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType_v_io_v23_query_engine_internal_testdata_CreditReport)
+	if ttWant := vdl.TypeOf((*CreditReport)(nil)).Elem(); !vdl.Compatible(tt, ttWant) {
+		return nil, fmt.Errorf("type %v incompatible with %v", tt, ttWant)
 	}
 	return t, nil
 }
@@ -1081,7 +1071,7 @@ func (t *CreditReportTarget) StartField(name string) (key, field vdl.Target, _ e
 		target, err := vdl.ReflectTarget(reflect.ValueOf(&t.Value.Report))
 		return nil, target, err
 	default:
-		return nil, nil, fmt.Errorf("field %s not in struct %v", name, __VDLType_v_io_v23_query_engine_internal_testdata_CreditReport)
+		return nil, nil, fmt.Errorf("field %s not in struct v.io/v23/query/engine/internal/testdata.CreditReport", name)
 	}
 }
 func (t *CreditReportTarget) FinishField(_, _ vdl.Target) error {
@@ -1107,9 +1097,6 @@ func (Customer) __VDLReflect(struct {
 }
 
 func (m *Customer) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
-	if __VDLType_v_io_v23_query_engine_internal_testdata_Customer == nil || __VDLType7 == nil {
-		panic("Initialization order error: types generated for FillVDLTarget not initialized. Consider moving caller to an init() block.")
-	}
 	fieldsTarget1, err := t.StartFields(tt)
 	if err != nil {
 		return err
@@ -1120,7 +1107,7 @@ func (m *Customer) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 		return err
 	}
 	if err != vdl.ErrFieldNoExist {
-		if err := fieldTarget3.FromString(string(m.Name), vdl.StringType); err != nil {
+		if err := fieldTarget3.FromString(string(m.Name), tt.NonOptional().Field(0).Type); err != nil {
 			return err
 		}
 		if err := fieldsTarget1.FinishField(keyTarget2, fieldTarget3); err != nil {
@@ -1132,7 +1119,7 @@ func (m *Customer) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 		return err
 	}
 	if err != vdl.ErrFieldNoExist {
-		if err := fieldTarget5.FromInt(int64(m.Id), vdl.Int64Type); err != nil {
+		if err := fieldTarget5.FromInt(int64(m.Id), tt.NonOptional().Field(1).Type); err != nil {
 			return err
 		}
 		if err := fieldsTarget1.FinishField(keyTarget4, fieldTarget5); err != nil {
@@ -1144,7 +1131,7 @@ func (m *Customer) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 		return err
 	}
 	if err != vdl.ErrFieldNoExist {
-		if err := fieldTarget7.FromBool(bool(m.Active), vdl.BoolType); err != nil {
+		if err := fieldTarget7.FromBool(bool(m.Active), tt.NonOptional().Field(2).Type); err != nil {
 			return err
 		}
 		if err := fieldsTarget1.FinishField(keyTarget6, fieldTarget7); err != nil {
@@ -1157,7 +1144,7 @@ func (m *Customer) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 	}
 	if err != vdl.ErrFieldNoExist {
 
-		if err := m.Address.FillVDLTarget(fieldTarget9, __VDLType_v_io_v23_query_engine_internal_testdata_AddressInfo); err != nil {
+		if err := m.Address.FillVDLTarget(fieldTarget9, tt.NonOptional().Field(3).Type); err != nil {
 			return err
 		}
 		if err := fieldsTarget1.FinishField(keyTarget8, fieldTarget9); err != nil {
@@ -1170,7 +1157,7 @@ func (m *Customer) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 	}
 	if err != vdl.ErrFieldNoExist {
 
-		listTarget12, err := fieldTarget11.StartList(__VDLType8, len(m.PreviousAddresses))
+		listTarget12, err := fieldTarget11.StartList(tt.NonOptional().Field(4).Type, len(m.PreviousAddresses))
 		if err != nil {
 			return err
 		}
@@ -1180,7 +1167,7 @@ func (m *Customer) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 				return err
 			}
 
-			if err := elem14.FillVDLTarget(elemTarget13, __VDLType_v_io_v23_query_engine_internal_testdata_AddressInfo); err != nil {
+			if err := elem14.FillVDLTarget(elemTarget13, tt.NonOptional().Field(4).Type.Elem()); err != nil {
 				return err
 			}
 			if err := listTarget12.FinishElem(elemTarget13); err != nil {
@@ -1200,7 +1187,7 @@ func (m *Customer) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 	}
 	if err != vdl.ErrFieldNoExist {
 
-		if err := m.Credit.FillVDLTarget(fieldTarget16, __VDLType_v_io_v23_query_engine_internal_testdata_CreditReport); err != nil {
+		if err := m.Credit.FillVDLTarget(fieldTarget16, tt.NonOptional().Field(5).Type); err != nil {
 			return err
 		}
 		if err := fieldsTarget1.FinishField(keyTarget15, fieldTarget16); err != nil {
@@ -1231,8 +1218,8 @@ type CustomerTarget struct {
 
 func (t *CustomerTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
 
-	if !vdl.Compatible(tt, __VDLType_v_io_v23_query_engine_internal_testdata_Customer) {
-		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType_v_io_v23_query_engine_internal_testdata_Customer)
+	if ttWant := vdl.TypeOf((*Customer)(nil)).Elem(); !vdl.Compatible(tt, ttWant) {
+		return nil, fmt.Errorf("type %v incompatible with %v", tt, ttWant)
 	}
 	return t, nil
 }
@@ -1263,7 +1250,7 @@ func (t *CustomerTarget) StartField(name string) (key, field vdl.Target, _ error
 		target, err := &t.creditTarget, error(nil)
 		return nil, target, err
 	default:
-		return nil, nil, fmt.Errorf("field %s not in struct %v", name, __VDLType_v_io_v23_query_engine_internal_testdata_Customer)
+		return nil, nil, fmt.Errorf("field %s not in struct v.io/v23/query/engine/internal/testdata.Customer", name)
 	}
 }
 func (t *CustomerTarget) FinishField(_, _ vdl.Target) error {
@@ -1284,8 +1271,8 @@ type unnamed_5b5d762e696f2f7632332f71756572792f656e67696e652f696e7465726e616c2f7
 
 func (t *unnamed_5b5d762e696f2f7632332f71756572792f656e67696e652f696e7465726e616c2f74657374646174612e41646472657373496e666f207374727563747b53747265657420737472696e673b4369747920737472696e673b537461746520737472696e673b5a697020737472696e677dTarget) StartList(tt *vdl.Type, len int) (vdl.ListTarget, error) {
 
-	if !vdl.Compatible(tt, __VDLType8) {
-		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType8)
+	if ttWant := vdl.TypeOf((*[]AddressInfo)(nil)); !vdl.Compatible(tt, ttWant) {
+		return nil, fmt.Errorf("type %v incompatible with %v", tt, ttWant)
 	}
 	if cap(*t.Value) < len {
 		*t.Value = make([]AddressInfo, len)
@@ -1321,7 +1308,6 @@ func (Invoice) __VDLReflect(struct {
 }
 
 func (m *Invoice) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
-	__VDLEnsureNativeBuilt()
 	fieldsTarget1, err := t.StartFields(tt)
 	if err != nil {
 		return err
@@ -1332,7 +1318,7 @@ func (m *Invoice) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 		return err
 	}
 	if err != vdl.ErrFieldNoExist {
-		if err := fieldTarget3.FromInt(int64(m.CustId), vdl.Int64Type); err != nil {
+		if err := fieldTarget3.FromInt(int64(m.CustId), tt.NonOptional().Field(0).Type); err != nil {
 			return err
 		}
 		if err := fieldsTarget1.FinishField(keyTarget2, fieldTarget3); err != nil {
@@ -1344,7 +1330,7 @@ func (m *Invoice) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 		return err
 	}
 	if err != vdl.ErrFieldNoExist {
-		if err := fieldTarget5.FromInt(int64(m.InvoiceNum), vdl.Int64Type); err != nil {
+		if err := fieldTarget5.FromInt(int64(m.InvoiceNum), tt.NonOptional().Field(1).Type); err != nil {
 			return err
 		}
 		if err := fieldsTarget1.FinishField(keyTarget4, fieldTarget5); err != nil {
@@ -1362,7 +1348,7 @@ func (m *Invoice) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 	}
 	if err != vdl.ErrFieldNoExist {
 
-		if err := wireValue6.FillVDLTarget(fieldTarget8, __VDLType_time_Time); err != nil {
+		if err := wireValue6.FillVDLTarget(fieldTarget8, tt.NonOptional().Field(2).Type); err != nil {
 			return err
 		}
 		if err := fieldsTarget1.FinishField(keyTarget7, fieldTarget8); err != nil {
@@ -1374,7 +1360,7 @@ func (m *Invoice) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 		return err
 	}
 	if err != vdl.ErrFieldNoExist {
-		if err := fieldTarget10.FromInt(int64(m.Amount), vdl.Int64Type); err != nil {
+		if err := fieldTarget10.FromInt(int64(m.Amount), tt.NonOptional().Field(3).Type); err != nil {
 			return err
 		}
 		if err := fieldsTarget1.FinishField(keyTarget9, fieldTarget10); err != nil {
@@ -1387,7 +1373,7 @@ func (m *Invoice) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 	}
 	if err != vdl.ErrFieldNoExist {
 
-		if err := m.ShipTo.FillVDLTarget(fieldTarget12, __VDLType_v_io_v23_query_engine_internal_testdata_AddressInfo); err != nil {
+		if err := m.ShipTo.FillVDLTarget(fieldTarget12, tt.NonOptional().Field(4).Type); err != nil {
 			return err
 		}
 		if err := fieldsTarget1.FinishField(keyTarget11, fieldTarget12); err != nil {
@@ -1417,8 +1403,8 @@ type InvoiceTarget struct {
 
 func (t *InvoiceTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
 
-	if !vdl.Compatible(tt, __VDLType_v_io_v23_query_engine_internal_testdata_Invoice) {
-		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType_v_io_v23_query_engine_internal_testdata_Invoice)
+	if ttWant := vdl.TypeOf((*Invoice)(nil)).Elem(); !vdl.Compatible(tt, ttWant) {
+		return nil, fmt.Errorf("type %v incompatible with %v", tt, ttWant)
 	}
 	return t, nil
 }
@@ -1445,7 +1431,7 @@ func (t *InvoiceTarget) StartField(name string) (key, field vdl.Target, _ error)
 		target, err := &t.shipToTarget, error(nil)
 		return nil, target, err
 	default:
-		return nil, nil, fmt.Errorf("field %s not in struct %v", name, __VDLType_v_io_v23_query_engine_internal_testdata_Invoice)
+		return nil, nil, fmt.Errorf("field %s not in struct v.io/v23/query/engine/internal/testdata.Invoice", name)
 	}
 }
 func (t *InvoiceTarget) FinishField(_, _ vdl.Target) error {
@@ -1476,9 +1462,6 @@ func (Numbers) __VDLReflect(struct {
 }
 
 func (m *Numbers) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
-	if __VDLType_v_io_v23_query_engine_internal_testdata_Numbers == nil || __VDLType10 == nil {
-		panic("Initialization order error: types generated for FillVDLTarget not initialized. Consider moving caller to an init() block.")
-	}
 	fieldsTarget1, err := t.StartFields(tt)
 	if err != nil {
 		return err
@@ -1489,7 +1472,7 @@ func (m *Numbers) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 		return err
 	}
 	if err != vdl.ErrFieldNoExist {
-		if err := fieldTarget3.FromUint(uint64(m.B), vdl.ByteType); err != nil {
+		if err := fieldTarget3.FromUint(uint64(m.B), tt.NonOptional().Field(0).Type); err != nil {
 			return err
 		}
 		if err := fieldsTarget1.FinishField(keyTarget2, fieldTarget3); err != nil {
@@ -1501,7 +1484,7 @@ func (m *Numbers) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 		return err
 	}
 	if err != vdl.ErrFieldNoExist {
-		if err := fieldTarget5.FromUint(uint64(m.Ui16), vdl.Uint16Type); err != nil {
+		if err := fieldTarget5.FromUint(uint64(m.Ui16), tt.NonOptional().Field(1).Type); err != nil {
 			return err
 		}
 		if err := fieldsTarget1.FinishField(keyTarget4, fieldTarget5); err != nil {
@@ -1513,7 +1496,7 @@ func (m *Numbers) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 		return err
 	}
 	if err != vdl.ErrFieldNoExist {
-		if err := fieldTarget7.FromUint(uint64(m.Ui32), vdl.Uint32Type); err != nil {
+		if err := fieldTarget7.FromUint(uint64(m.Ui32), tt.NonOptional().Field(2).Type); err != nil {
 			return err
 		}
 		if err := fieldsTarget1.FinishField(keyTarget6, fieldTarget7); err != nil {
@@ -1525,7 +1508,7 @@ func (m *Numbers) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 		return err
 	}
 	if err != vdl.ErrFieldNoExist {
-		if err := fieldTarget9.FromUint(uint64(m.Ui64), vdl.Uint64Type); err != nil {
+		if err := fieldTarget9.FromUint(uint64(m.Ui64), tt.NonOptional().Field(3).Type); err != nil {
 			return err
 		}
 		if err := fieldsTarget1.FinishField(keyTarget8, fieldTarget9); err != nil {
@@ -1537,7 +1520,7 @@ func (m *Numbers) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 		return err
 	}
 	if err != vdl.ErrFieldNoExist {
-		if err := fieldTarget11.FromInt(int64(m.I16), vdl.Int16Type); err != nil {
+		if err := fieldTarget11.FromInt(int64(m.I16), tt.NonOptional().Field(4).Type); err != nil {
 			return err
 		}
 		if err := fieldsTarget1.FinishField(keyTarget10, fieldTarget11); err != nil {
@@ -1549,7 +1532,7 @@ func (m *Numbers) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 		return err
 	}
 	if err != vdl.ErrFieldNoExist {
-		if err := fieldTarget13.FromInt(int64(m.I32), vdl.Int32Type); err != nil {
+		if err := fieldTarget13.FromInt(int64(m.I32), tt.NonOptional().Field(5).Type); err != nil {
 			return err
 		}
 		if err := fieldsTarget1.FinishField(keyTarget12, fieldTarget13); err != nil {
@@ -1561,7 +1544,7 @@ func (m *Numbers) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 		return err
 	}
 	if err != vdl.ErrFieldNoExist {
-		if err := fieldTarget15.FromInt(int64(m.I64), vdl.Int64Type); err != nil {
+		if err := fieldTarget15.FromInt(int64(m.I64), tt.NonOptional().Field(6).Type); err != nil {
 			return err
 		}
 		if err := fieldsTarget1.FinishField(keyTarget14, fieldTarget15); err != nil {
@@ -1573,7 +1556,7 @@ func (m *Numbers) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 		return err
 	}
 	if err != vdl.ErrFieldNoExist {
-		if err := fieldTarget17.FromFloat(float64(m.F32), vdl.Float32Type); err != nil {
+		if err := fieldTarget17.FromFloat(float64(m.F32), tt.NonOptional().Field(7).Type); err != nil {
 			return err
 		}
 		if err := fieldsTarget1.FinishField(keyTarget16, fieldTarget17); err != nil {
@@ -1585,7 +1568,7 @@ func (m *Numbers) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 		return err
 	}
 	if err != vdl.ErrFieldNoExist {
-		if err := fieldTarget19.FromFloat(float64(m.F64), vdl.Float64Type); err != nil {
+		if err := fieldTarget19.FromFloat(float64(m.F64), tt.NonOptional().Field(8).Type); err != nil {
 			return err
 		}
 		if err := fieldsTarget1.FinishField(keyTarget18, fieldTarget19); err != nil {
@@ -1597,7 +1580,7 @@ func (m *Numbers) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 		return err
 	}
 	if err != vdl.ErrFieldNoExist {
-		if err := fieldTarget21.FromComplex(complex128(m.C64), vdl.Complex64Type); err != nil {
+		if err := fieldTarget21.FromComplex(complex128(m.C64), tt.NonOptional().Field(9).Type); err != nil {
 			return err
 		}
 		if err := fieldsTarget1.FinishField(keyTarget20, fieldTarget21); err != nil {
@@ -1609,7 +1592,7 @@ func (m *Numbers) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 		return err
 	}
 	if err != vdl.ErrFieldNoExist {
-		if err := fieldTarget23.FromComplex(complex128(m.C128), vdl.Complex128Type); err != nil {
+		if err := fieldTarget23.FromComplex(complex128(m.C128), tt.NonOptional().Field(10).Type); err != nil {
 			return err
 		}
 		if err := fieldsTarget1.FinishField(keyTarget22, fieldTarget23); err != nil {
@@ -1645,8 +1628,8 @@ type NumbersTarget struct {
 
 func (t *NumbersTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
 
-	if !vdl.Compatible(tt, __VDLType_v_io_v23_query_engine_internal_testdata_Numbers) {
-		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType_v_io_v23_query_engine_internal_testdata_Numbers)
+	if ttWant := vdl.TypeOf((*Numbers)(nil)).Elem(); !vdl.Compatible(tt, ttWant) {
+		return nil, fmt.Errorf("type %v incompatible with %v", tt, ttWant)
 	}
 	return t, nil
 }
@@ -1697,7 +1680,7 @@ func (t *NumbersTarget) StartField(name string) (key, field vdl.Target, _ error)
 		target, err := &t.c128Target, error(nil)
 		return nil, target, err
 	default:
-		return nil, nil, fmt.Errorf("field %s not in struct %v", name, __VDLType_v_io_v23_query_engine_internal_testdata_Numbers)
+		return nil, nil, fmt.Errorf("field %s not in struct v.io/v23/query/engine/internal/testdata.Numbers", name)
 	}
 }
 func (t *NumbersTarget) FinishField(_, _ vdl.Target) error {
@@ -1706,188 +1689,6 @@ func (t *NumbersTarget) FinishField(_, _ vdl.Target) error {
 func (t *NumbersTarget) FinishFields(_ vdl.FieldsTarget) error {
 
 	return nil
-}
-
-type FooType struct {
-	Bar BarType
-}
-
-func (FooType) __VDLReflect(struct {
-	Name string `vdl:"v.io/v23/query/engine/internal/testdata.FooType"`
-}) {
-}
-
-func (m *FooType) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
-	if __VDLType_v_io_v23_query_engine_internal_testdata_FooType == nil || __VDLType11 == nil {
-		panic("Initialization order error: types generated for FillVDLTarget not initialized. Consider moving caller to an init() block.")
-	}
-	fieldsTarget1, err := t.StartFields(tt)
-	if err != nil {
-		return err
-	}
-
-	keyTarget2, fieldTarget3, err := fieldsTarget1.StartField("Bar")
-	if err != vdl.ErrFieldNoExist && err != nil {
-		return err
-	}
-	if err != vdl.ErrFieldNoExist {
-
-		if err := m.Bar.FillVDLTarget(fieldTarget3, __VDLType_v_io_v23_query_engine_internal_testdata_BarType); err != nil {
-			return err
-		}
-		if err := fieldsTarget1.FinishField(keyTarget2, fieldTarget3); err != nil {
-			return err
-		}
-	}
-	if err := t.FinishFields(fieldsTarget1); err != nil {
-		return err
-	}
-	return nil
-}
-
-func (m *FooType) MakeVDLTarget() vdl.Target {
-	return &FooTypeTarget{Value: m}
-}
-
-type FooTypeTarget struct {
-	Value     *FooType
-	barTarget BarTypeTarget
-	vdl.TargetBase
-	vdl.FieldsTargetBase
-}
-
-func (t *FooTypeTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
-
-	if !vdl.Compatible(tt, __VDLType_v_io_v23_query_engine_internal_testdata_FooType) {
-		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType_v_io_v23_query_engine_internal_testdata_FooType)
-	}
-	return t, nil
-}
-func (t *FooTypeTarget) StartField(name string) (key, field vdl.Target, _ error) {
-	switch name {
-	case "Bar":
-		t.barTarget.Value = &t.Value.Bar
-		target, err := &t.barTarget, error(nil)
-		return nil, target, err
-	default:
-		return nil, nil, fmt.Errorf("field %s not in struct %v", name, __VDLType_v_io_v23_query_engine_internal_testdata_FooType)
-	}
-}
-func (t *FooTypeTarget) FinishField(_, _ vdl.Target) error {
-	return nil
-}
-func (t *FooTypeTarget) FinishFields(_ vdl.FieldsTarget) error {
-
-	return nil
-}
-
-type BarTypeTarget struct {
-	Value     *BarType
-	bazTarget BazTypeTarget
-	vdl.TargetBase
-	vdl.FieldsTargetBase
-}
-
-func (t *BarTypeTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
-
-	if !vdl.Compatible(tt, __VDLType_v_io_v23_query_engine_internal_testdata_BarType) {
-		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType_v_io_v23_query_engine_internal_testdata_BarType)
-	}
-	return t, nil
-}
-func (t *BarTypeTarget) StartField(name string) (key, field vdl.Target, _ error) {
-	switch name {
-	case "Baz":
-		t.bazTarget.Value = &t.Value.Baz
-		target, err := &t.bazTarget, error(nil)
-		return nil, target, err
-	default:
-		return nil, nil, fmt.Errorf("field %s not in struct %v", name, __VDLType_v_io_v23_query_engine_internal_testdata_BarType)
-	}
-}
-func (t *BarTypeTarget) FinishField(_, _ vdl.Target) error {
-	return nil
-}
-func (t *BarTypeTarget) FinishFields(_ vdl.FieldsTarget) error {
-
-	return nil
-}
-
-type BazTypeTarget struct {
-	Value      *BazType
-	nameTarget vdl.StringTarget
-
-	vdl.TargetBase
-	vdl.FieldsTargetBase
-}
-
-func (t *BazTypeTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
-
-	if !vdl.Compatible(tt, __VDLType_v_io_v23_query_engine_internal_testdata_BazType) {
-		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType_v_io_v23_query_engine_internal_testdata_BazType)
-	}
-	return t, nil
-}
-func (t *BazTypeTarget) StartField(name string) (key, field vdl.Target, _ error) {
-	switch name {
-	case "Name":
-		t.nameTarget.Value = &t.Value.Name
-		target, err := &t.nameTarget, error(nil)
-		return nil, target, err
-	case "TitleOrValue":
-		target, err := vdl.ReflectTarget(reflect.ValueOf(&t.Value.TitleOrValue))
-		return nil, target, err
-	default:
-		return nil, nil, fmt.Errorf("field %s not in struct %v", name, __VDLType_v_io_v23_query_engine_internal_testdata_BazType)
-	}
-}
-func (t *BazTypeTarget) FinishField(_, _ vdl.Target) error {
-	return nil
-}
-func (t *BazTypeTarget) FinishFields(_ vdl.FieldsTarget) error {
-
-	return nil
-}
-
-type BarType struct {
-	Baz BazType
-}
-
-func (BarType) __VDLReflect(struct {
-	Name string `vdl:"v.io/v23/query/engine/internal/testdata.BarType"`
-}) {
-}
-
-func (m *BarType) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
-	if __VDLType_v_io_v23_query_engine_internal_testdata_BarType == nil || __VDLType12 == nil {
-		panic("Initialization order error: types generated for FillVDLTarget not initialized. Consider moving caller to an init() block.")
-	}
-	fieldsTarget1, err := t.StartFields(tt)
-	if err != nil {
-		return err
-	}
-
-	keyTarget2, fieldTarget3, err := fieldsTarget1.StartField("Baz")
-	if err != vdl.ErrFieldNoExist && err != nil {
-		return err
-	}
-	if err != vdl.ErrFieldNoExist {
-
-		if err := m.Baz.FillVDLTarget(fieldTarget3, __VDLType_v_io_v23_query_engine_internal_testdata_BazType); err != nil {
-			return err
-		}
-		if err := fieldsTarget1.FinishField(keyTarget2, fieldTarget3); err != nil {
-			return err
-		}
-	}
-	if err := t.FinishFields(fieldsTarget1); err != nil {
-		return err
-	}
-	return nil
-}
-
-func (m *BarType) MakeVDLTarget() vdl.Target {
-	return &BarTypeTarget{Value: m}
 }
 
 type (
@@ -1924,7 +1725,7 @@ func (x TitleOrValueTypeTitle) Name() string                           { return 
 func (x TitleOrValueTypeTitle) __VDLReflect(__TitleOrValueTypeReflect) {}
 
 func (m TitleOrValueTypeTitle) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
-	fieldsTarget1, err := t.StartFields(__VDLType_v_io_v23_query_engine_internal_testdata_TitleOrValueType)
+	fieldsTarget1, err := t.StartFields(tt)
 	if err != nil {
 		return err
 	}
@@ -1932,7 +1733,7 @@ func (m TitleOrValueTypeTitle) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 	if err != nil {
 		return err
 	}
-	if err := fieldTarget3.FromString(string(m.Value), vdl.StringType); err != nil {
+	if err := fieldTarget3.FromString(string(m.Value), tt.NonOptional().Field(0).Type); err != nil {
 		return err
 	}
 	if err := fieldsTarget1.FinishField(keyTarget2, fieldTarget3); err != nil {
@@ -1955,7 +1756,7 @@ func (x TitleOrValueTypeValue) Name() string                           { return 
 func (x TitleOrValueTypeValue) __VDLReflect(__TitleOrValueTypeReflect) {}
 
 func (m TitleOrValueTypeValue) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
-	fieldsTarget1, err := t.StartFields(__VDLType_v_io_v23_query_engine_internal_testdata_TitleOrValueType)
+	fieldsTarget1, err := t.StartFields(tt)
 	if err != nil {
 		return err
 	}
@@ -1963,7 +1764,7 @@ func (m TitleOrValueTypeValue) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 	if err != nil {
 		return err
 	}
-	if err := fieldTarget3.FromInt(int64(m.Value), vdl.Int64Type); err != nil {
+	if err := fieldTarget3.FromInt(int64(m.Value), tt.NonOptional().Field(1).Type); err != nil {
 		return err
 	}
 	if err := fieldsTarget1.FinishField(keyTarget2, fieldTarget3); err != nil {
@@ -1991,9 +1792,6 @@ func (BazType) __VDLReflect(struct {
 }
 
 func (m *BazType) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
-	if __VDLType_v_io_v23_query_engine_internal_testdata_BazType == nil || __VDLType13 == nil {
-		panic("Initialization order error: types generated for FillVDLTarget not initialized. Consider moving caller to an init() block.")
-	}
 	fieldsTarget1, err := t.StartFields(tt)
 	if err != nil {
 		return err
@@ -2004,7 +1802,7 @@ func (m *BazType) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 		return err
 	}
 	if err != vdl.ErrFieldNoExist {
-		if err := fieldTarget3.FromString(string(m.Name), vdl.StringType); err != nil {
+		if err := fieldTarget3.FromString(string(m.Name), tt.NonOptional().Field(0).Type); err != nil {
 			return err
 		}
 		if err := fieldsTarget1.FinishField(keyTarget2, fieldTarget3); err != nil {
@@ -2021,7 +1819,7 @@ func (m *BazType) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 		if unionValue6 == nil {
 			unionValue6 = TitleOrValueTypeTitle{}
 		}
-		if err := unionValue6.FillVDLTarget(fieldTarget5, __VDLType_v_io_v23_query_engine_internal_testdata_TitleOrValueType); err != nil {
+		if err := unionValue6.FillVDLTarget(fieldTarget5, tt.NonOptional().Field(1).Type); err != nil {
 			return err
 		}
 		if err := fieldsTarget1.FinishField(keyTarget4, fieldTarget5); err != nil {
@@ -2038,6 +1836,182 @@ func (m *BazType) MakeVDLTarget() vdl.Target {
 	return &BazTypeTarget{Value: m}
 }
 
+type BazTypeTarget struct {
+	Value      *BazType
+	nameTarget vdl.StringTarget
+
+	vdl.TargetBase
+	vdl.FieldsTargetBase
+}
+
+func (t *BazTypeTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
+
+	if ttWant := vdl.TypeOf((*BazType)(nil)).Elem(); !vdl.Compatible(tt, ttWant) {
+		return nil, fmt.Errorf("type %v incompatible with %v", tt, ttWant)
+	}
+	return t, nil
+}
+func (t *BazTypeTarget) StartField(name string) (key, field vdl.Target, _ error) {
+	switch name {
+	case "Name":
+		t.nameTarget.Value = &t.Value.Name
+		target, err := &t.nameTarget, error(nil)
+		return nil, target, err
+	case "TitleOrValue":
+		target, err := vdl.ReflectTarget(reflect.ValueOf(&t.Value.TitleOrValue))
+		return nil, target, err
+	default:
+		return nil, nil, fmt.Errorf("field %s not in struct v.io/v23/query/engine/internal/testdata.BazType", name)
+	}
+}
+func (t *BazTypeTarget) FinishField(_, _ vdl.Target) error {
+	return nil
+}
+func (t *BazTypeTarget) FinishFields(_ vdl.FieldsTarget) error {
+
+	return nil
+}
+
+type BarType struct {
+	Baz BazType
+}
+
+func (BarType) __VDLReflect(struct {
+	Name string `vdl:"v.io/v23/query/engine/internal/testdata.BarType"`
+}) {
+}
+
+func (m *BarType) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
+	fieldsTarget1, err := t.StartFields(tt)
+	if err != nil {
+		return err
+	}
+
+	keyTarget2, fieldTarget3, err := fieldsTarget1.StartField("Baz")
+	if err != vdl.ErrFieldNoExist && err != nil {
+		return err
+	}
+	if err != vdl.ErrFieldNoExist {
+
+		if err := m.Baz.FillVDLTarget(fieldTarget3, tt.NonOptional().Field(0).Type); err != nil {
+			return err
+		}
+		if err := fieldsTarget1.FinishField(keyTarget2, fieldTarget3); err != nil {
+			return err
+		}
+	}
+	if err := t.FinishFields(fieldsTarget1); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (m *BarType) MakeVDLTarget() vdl.Target {
+	return &BarTypeTarget{Value: m}
+}
+
+type BarTypeTarget struct {
+	Value     *BarType
+	bazTarget BazTypeTarget
+	vdl.TargetBase
+	vdl.FieldsTargetBase
+}
+
+func (t *BarTypeTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
+
+	if ttWant := vdl.TypeOf((*BarType)(nil)).Elem(); !vdl.Compatible(tt, ttWant) {
+		return nil, fmt.Errorf("type %v incompatible with %v", tt, ttWant)
+	}
+	return t, nil
+}
+func (t *BarTypeTarget) StartField(name string) (key, field vdl.Target, _ error) {
+	switch name {
+	case "Baz":
+		t.bazTarget.Value = &t.Value.Baz
+		target, err := &t.bazTarget, error(nil)
+		return nil, target, err
+	default:
+		return nil, nil, fmt.Errorf("field %s not in struct v.io/v23/query/engine/internal/testdata.BarType", name)
+	}
+}
+func (t *BarTypeTarget) FinishField(_, _ vdl.Target) error {
+	return nil
+}
+func (t *BarTypeTarget) FinishFields(_ vdl.FieldsTarget) error {
+
+	return nil
+}
+
+type FooType struct {
+	Bar BarType
+}
+
+func (FooType) __VDLReflect(struct {
+	Name string `vdl:"v.io/v23/query/engine/internal/testdata.FooType"`
+}) {
+}
+
+func (m *FooType) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
+	fieldsTarget1, err := t.StartFields(tt)
+	if err != nil {
+		return err
+	}
+
+	keyTarget2, fieldTarget3, err := fieldsTarget1.StartField("Bar")
+	if err != vdl.ErrFieldNoExist && err != nil {
+		return err
+	}
+	if err != vdl.ErrFieldNoExist {
+
+		if err := m.Bar.FillVDLTarget(fieldTarget3, tt.NonOptional().Field(0).Type); err != nil {
+			return err
+		}
+		if err := fieldsTarget1.FinishField(keyTarget2, fieldTarget3); err != nil {
+			return err
+		}
+	}
+	if err := t.FinishFields(fieldsTarget1); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (m *FooType) MakeVDLTarget() vdl.Target {
+	return &FooTypeTarget{Value: m}
+}
+
+type FooTypeTarget struct {
+	Value     *FooType
+	barTarget BarTypeTarget
+	vdl.TargetBase
+	vdl.FieldsTargetBase
+}
+
+func (t *FooTypeTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
+
+	if ttWant := vdl.TypeOf((*FooType)(nil)).Elem(); !vdl.Compatible(tt, ttWant) {
+		return nil, fmt.Errorf("type %v incompatible with %v", tt, ttWant)
+	}
+	return t, nil
+}
+func (t *FooTypeTarget) StartField(name string) (key, field vdl.Target, _ error) {
+	switch name {
+	case "Bar":
+		t.barTarget.Value = &t.Value.Bar
+		target, err := &t.barTarget, error(nil)
+		return nil, target, err
+	default:
+		return nil, nil, fmt.Errorf("field %s not in struct v.io/v23/query/engine/internal/testdata.FooType", name)
+	}
+}
+func (t *FooTypeTarget) FinishField(_, _ vdl.Target) error {
+	return nil
+}
+func (t *FooTypeTarget) FinishFields(_ vdl.FieldsTarget) error {
+
+	return nil
+}
+
 type K struct {
 	A byte
 	B string
@@ -2049,9 +2023,6 @@ func (K) __VDLReflect(struct {
 }
 
 func (m *K) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
-	if __VDLType_v_io_v23_query_engine_internal_testdata_K == nil || __VDLType14 == nil {
-		panic("Initialization order error: types generated for FillVDLTarget not initialized. Consider moving caller to an init() block.")
-	}
 	fieldsTarget1, err := t.StartFields(tt)
 	if err != nil {
 		return err
@@ -2062,7 +2033,7 @@ func (m *K) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 		return err
 	}
 	if err != vdl.ErrFieldNoExist {
-		if err := fieldTarget3.FromUint(uint64(m.A), vdl.ByteType); err != nil {
+		if err := fieldTarget3.FromUint(uint64(m.A), tt.NonOptional().Field(0).Type); err != nil {
 			return err
 		}
 		if err := fieldsTarget1.FinishField(keyTarget2, fieldTarget3); err != nil {
@@ -2074,7 +2045,7 @@ func (m *K) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 		return err
 	}
 	if err != vdl.ErrFieldNoExist {
-		if err := fieldTarget5.FromString(string(m.B), vdl.StringType); err != nil {
+		if err := fieldTarget5.FromString(string(m.B), tt.NonOptional().Field(1).Type); err != nil {
 			return err
 		}
 		if err := fieldsTarget1.FinishField(keyTarget4, fieldTarget5); err != nil {
@@ -2101,8 +2072,8 @@ type KTarget struct {
 
 func (t *KTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
 
-	if !vdl.Compatible(tt, __VDLType_v_io_v23_query_engine_internal_testdata_K) {
-		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType_v_io_v23_query_engine_internal_testdata_K)
+	if ttWant := vdl.TypeOf((*K)(nil)).Elem(); !vdl.Compatible(tt, ttWant) {
+		return nil, fmt.Errorf("type %v incompatible with %v", tt, ttWant)
 	}
 	return t, nil
 }
@@ -2117,7 +2088,7 @@ func (t *KTarget) StartField(name string) (key, field vdl.Target, _ error) {
 		target, err := &t.bTarget, error(nil)
 		return nil, target, err
 	default:
-		return nil, nil, fmt.Errorf("field %s not in struct %v", name, __VDLType_v_io_v23_query_engine_internal_testdata_K)
+		return nil, nil, fmt.Errorf("field %s not in struct v.io/v23/query/engine/internal/testdata.K", name)
 	}
 }
 func (t *KTarget) FinishField(_, _ vdl.Target) error {
@@ -2139,9 +2110,6 @@ func (V) __VDLReflect(struct {
 }
 
 func (m *V) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
-	if __VDLType_v_io_v23_query_engine_internal_testdata_V == nil || __VDLType15 == nil {
-		panic("Initialization order error: types generated for FillVDLTarget not initialized. Consider moving caller to an init() block.")
-	}
 	fieldsTarget1, err := t.StartFields(tt)
 	if err != nil {
 		return err
@@ -2152,7 +2120,7 @@ func (m *V) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 		return err
 	}
 	if err != vdl.ErrFieldNoExist {
-		if err := fieldTarget3.FromString(string(m.A), vdl.StringType); err != nil {
+		if err := fieldTarget3.FromString(string(m.A), tt.NonOptional().Field(0).Type); err != nil {
 			return err
 		}
 		if err := fieldsTarget1.FinishField(keyTarget2, fieldTarget3); err != nil {
@@ -2164,7 +2132,7 @@ func (m *V) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 		return err
 	}
 	if err != vdl.ErrFieldNoExist {
-		if err := fieldTarget5.FromFloat(float64(m.B), vdl.Float32Type); err != nil {
+		if err := fieldTarget5.FromFloat(float64(m.B), tt.NonOptional().Field(1).Type); err != nil {
 			return err
 		}
 		if err := fieldsTarget1.FinishField(keyTarget4, fieldTarget5); err != nil {
@@ -2191,8 +2159,8 @@ type VTarget struct {
 
 func (t *VTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
 
-	if !vdl.Compatible(tt, __VDLType_v_io_v23_query_engine_internal_testdata_V) {
-		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType_v_io_v23_query_engine_internal_testdata_V)
+	if ttWant := vdl.TypeOf((*V)(nil)).Elem(); !vdl.Compatible(tt, ttWant) {
+		return nil, fmt.Errorf("type %v incompatible with %v", tt, ttWant)
 	}
 	return t, nil
 }
@@ -2207,7 +2175,7 @@ func (t *VTarget) StartField(name string) (key, field vdl.Target, _ error) {
 		target, err := &t.bTarget, error(nil)
 		return nil, target, err
 	default:
-		return nil, nil, fmt.Errorf("field %s not in struct %v", name, __VDLType_v_io_v23_query_engine_internal_testdata_V)
+		return nil, nil, fmt.Errorf("field %s not in struct v.io/v23/query/engine/internal/testdata.V", name)
 	}
 }
 func (t *VTarget) FinishField(_, _ vdl.Target) error {
@@ -2230,9 +2198,6 @@ func (FunWithMaps) __VDLReflect(struct {
 }
 
 func (m *FunWithMaps) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
-	if __VDLType_v_io_v23_query_engine_internal_testdata_FunWithMaps == nil || __VDLType16 == nil {
-		panic("Initialization order error: types generated for FillVDLTarget not initialized. Consider moving caller to an init() block.")
-	}
 	fieldsTarget1, err := t.StartFields(tt)
 	if err != nil {
 		return err
@@ -2244,7 +2209,7 @@ func (m *FunWithMaps) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 	}
 	if err != vdl.ErrFieldNoExist {
 
-		if err := m.Key.FillVDLTarget(fieldTarget3, __VDLType_v_io_v23_query_engine_internal_testdata_K); err != nil {
+		if err := m.Key.FillVDLTarget(fieldTarget3, tt.NonOptional().Field(0).Type); err != nil {
 			return err
 		}
 		if err := fieldsTarget1.FinishField(keyTarget2, fieldTarget3); err != nil {
@@ -2257,7 +2222,7 @@ func (m *FunWithMaps) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 	}
 	if err != vdl.ErrFieldNoExist {
 
-		mapTarget6, err := fieldTarget5.StartMap(__VDLType17, len(m.Map))
+		mapTarget6, err := fieldTarget5.StartMap(tt.NonOptional().Field(1).Type, len(m.Map))
 		if err != nil {
 			return err
 		}
@@ -2267,7 +2232,7 @@ func (m *FunWithMaps) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 				return err
 			}
 
-			if err := key8.FillVDLTarget(keyTarget7, __VDLType_v_io_v23_query_engine_internal_testdata_K); err != nil {
+			if err := key8.FillVDLTarget(keyTarget7, tt.NonOptional().Field(1).Type.Key()); err != nil {
 				return err
 			}
 			valueTarget9, err := mapTarget6.FinishKeyStartField(keyTarget7)
@@ -2275,7 +2240,7 @@ func (m *FunWithMaps) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 				return err
 			}
 
-			if err := value10.FillVDLTarget(valueTarget9, __VDLType_v_io_v23_query_engine_internal_testdata_V); err != nil {
+			if err := value10.FillVDLTarget(valueTarget9, tt.NonOptional().Field(1).Type.Elem()); err != nil {
 				return err
 			}
 			if err := mapTarget6.FinishField(keyTarget7, valueTarget9); err != nil {
@@ -2295,7 +2260,7 @@ func (m *FunWithMaps) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 	}
 	if err != vdl.ErrFieldNoExist {
 
-		mapTarget13, err := fieldTarget12.StartMap(__VDLType18, len(m.Confusing))
+		mapTarget13, err := fieldTarget12.StartMap(tt.NonOptional().Field(2).Type, len(m.Confusing))
 		if err != nil {
 			return err
 		}
@@ -2304,7 +2269,7 @@ func (m *FunWithMaps) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 			if err != nil {
 				return err
 			}
-			if err := keyTarget14.FromInt(int64(key15), vdl.Int16Type); err != nil {
+			if err := keyTarget14.FromInt(int64(key15), tt.NonOptional().Field(2).Type.Key()); err != nil {
 				return err
 			}
 			valueTarget16, err := mapTarget13.FinishKeyStartField(keyTarget14)
@@ -2312,7 +2277,7 @@ func (m *FunWithMaps) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 				return err
 			}
 
-			listTarget18, err := valueTarget16.StartList(__VDLType19, len(value17))
+			listTarget18, err := valueTarget16.StartList(tt.NonOptional().Field(2).Type.Elem(), len(value17))
 			if err != nil {
 				return err
 			}
@@ -2322,7 +2287,7 @@ func (m *FunWithMaps) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 					return err
 				}
 
-				setTarget21, err := elemTarget19.StartSet(__VDLType20, len(elem20))
+				setTarget21, err := elemTarget19.StartSet(tt.NonOptional().Field(2).Type.Elem().Elem(), len(elem20))
 				if err != nil {
 					return err
 				}
@@ -2331,7 +2296,7 @@ func (m *FunWithMaps) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 					if err != nil {
 						return err
 					}
-					if err := keyTarget22.FromString(string(key23), vdl.StringType); err != nil {
+					if err := keyTarget22.FromString(string(key23), tt.NonOptional().Field(2).Type.Elem().Elem().Key()); err != nil {
 						return err
 					}
 					if err := setTarget21.FinishKey(keyTarget22); err != nil {
@@ -2380,8 +2345,8 @@ type FunWithMapsTarget struct {
 
 func (t *FunWithMapsTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
 
-	if !vdl.Compatible(tt, __VDLType_v_io_v23_query_engine_internal_testdata_FunWithMaps) {
-		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType_v_io_v23_query_engine_internal_testdata_FunWithMaps)
+	if ttWant := vdl.TypeOf((*FunWithMaps)(nil)).Elem(); !vdl.Compatible(tt, ttWant) {
+		return nil, fmt.Errorf("type %v incompatible with %v", tt, ttWant)
 	}
 	return t, nil
 }
@@ -2400,7 +2365,7 @@ func (t *FunWithMapsTarget) StartField(name string) (key, field vdl.Target, _ er
 		target, err := &t.confusingTarget, error(nil)
 		return nil, target, err
 	default:
-		return nil, nil, fmt.Errorf("field %s not in struct %v", name, __VDLType_v_io_v23_query_engine_internal_testdata_FunWithMaps)
+		return nil, nil, fmt.Errorf("field %s not in struct v.io/v23/query/engine/internal/testdata.FunWithMaps", name)
 	}
 }
 func (t *FunWithMapsTarget) FinishField(_, _ vdl.Target) error {
@@ -2424,8 +2389,8 @@ type unnamed_6d61705b762e696f2f7632332f71756572792f656e67696e652f696e7465726e616
 
 func (t *unnamed_6d61705b762e696f2f7632332f71756572792f656e67696e652f696e7465726e616c2f74657374646174612e4b207374727563747b4120627974653b4220737472696e677d5d762e696f2f7632332f71756572792f656e67696e652f696e7465726e616c2f74657374646174612e56207374727563747b4120737472696e673b4220666c6f617433327dTarget) StartMap(tt *vdl.Type, len int) (vdl.MapTarget, error) {
 
-	if !vdl.Compatible(tt, __VDLType17) {
-		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType17)
+	if ttWant := vdl.TypeOf((*map[K]V)(nil)); !vdl.Compatible(tt, ttWant) {
+		return nil, fmt.Errorf("type %v incompatible with %v", tt, ttWant)
 	}
 	*t.Value = make(map[K]V)
 	return t, nil
@@ -2467,8 +2432,8 @@ type unnamed_6d61705b696e7431365d5b5d7365745b737472696e675dTarget struct {
 
 func (t *unnamed_6d61705b696e7431365d5b5d7365745b737472696e675dTarget) StartMap(tt *vdl.Type, len int) (vdl.MapTarget, error) {
 
-	if !vdl.Compatible(tt, __VDLType18) {
-		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType18)
+	if ttWant := vdl.TypeOf((*map[int16][]map[string]struct{})(nil)); !vdl.Compatible(tt, ttWant) {
+		return nil, fmt.Errorf("type %v incompatible with %v", tt, ttWant)
 	}
 	*t.Value = make(map[int16][]map[string]struct{})
 	return t, nil
@@ -2507,8 +2472,8 @@ type unnamed_5b5d7365745b737472696e675dTarget struct {
 
 func (t *unnamed_5b5d7365745b737472696e675dTarget) StartList(tt *vdl.Type, len int) (vdl.ListTarget, error) {
 
-	if !vdl.Compatible(tt, __VDLType19) {
-		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType19)
+	if ttWant := vdl.TypeOf((*[]map[string]struct{})(nil)); !vdl.Compatible(tt, ttWant) {
+		return nil, fmt.Errorf("type %v incompatible with %v", tt, ttWant)
 	}
 	if cap(*t.Value) < len {
 		*t.Value = make([]map[string]struct{}, len)
@@ -2541,8 +2506,8 @@ type unnamed_7365745b737472696e675dTarget struct {
 
 func (t *unnamed_7365745b737472696e675dTarget) StartSet(tt *vdl.Type, len int) (vdl.SetTarget, error) {
 
-	if !vdl.Compatible(tt, __VDLType20) {
-		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType20)
+	if ttWant := vdl.TypeOf((*map[string]struct{})(nil)); !vdl.Compatible(tt, ttWant) {
+		return nil, fmt.Errorf("type %v incompatible with %v", tt, ttWant)
 	}
 	*t.Value = make(map[string]struct{})
 	return t, nil
@@ -2576,9 +2541,6 @@ func (FunWithTypes) __VDLReflect(struct {
 }
 
 func (m *FunWithTypes) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
-	if __VDLType_v_io_v23_query_engine_internal_testdata_FunWithTypes == nil || __VDLType21 == nil {
-		panic("Initialization order error: types generated for FillVDLTarget not initialized. Consider moving caller to an init() block.")
-	}
 	fieldsTarget1, err := t.StartFields(tt)
 	if err != nil {
 		return err
@@ -2636,8 +2598,8 @@ type FunWithTypesTarget struct {
 
 func (t *FunWithTypesTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
 
-	if !vdl.Compatible(tt, __VDLType_v_io_v23_query_engine_internal_testdata_FunWithTypes) {
-		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType_v_io_v23_query_engine_internal_testdata_FunWithTypes)
+	if ttWant := vdl.TypeOf((*FunWithTypes)(nil)).Elem(); !vdl.Compatible(tt, ttWant) {
+		return nil, fmt.Errorf("type %v incompatible with %v", tt, ttWant)
 	}
 	return t, nil
 }
@@ -2652,7 +2614,7 @@ func (t *FunWithTypesTarget) StartField(name string) (key, field vdl.Target, _ e
 		target, err := &t.t2Target, error(nil)
 		return nil, target, err
 	default:
-		return nil, nil, fmt.Errorf("field %s not in struct %v", name, __VDLType_v_io_v23_query_engine_internal_testdata_FunWithTypes)
+		return nil, nil, fmt.Errorf("field %s not in struct v.io/v23/query/engine/internal/testdata.FunWithTypes", name)
 	}
 }
 func (t *FunWithTypesTarget) FinishField(_, _ vdl.Target) error {
@@ -2687,7 +2649,6 @@ func (ManyMaps) __VDLReflect(struct {
 }
 
 func (m *ManyMaps) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
-	__VDLEnsureNativeBuilt()
 	fieldsTarget1, err := t.StartFields(tt)
 	if err != nil {
 		return err
@@ -2699,7 +2660,7 @@ func (m *ManyMaps) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 	}
 	if err != vdl.ErrFieldNoExist {
 
-		mapTarget4, err := fieldTarget3.StartMap(__VDLType23, len(m.B))
+		mapTarget4, err := fieldTarget3.StartMap(tt.NonOptional().Field(0).Type, len(m.B))
 		if err != nil {
 			return err
 		}
@@ -2708,14 +2669,14 @@ func (m *ManyMaps) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 			if err != nil {
 				return err
 			}
-			if err := keyTarget5.FromBool(bool(key6), vdl.BoolType); err != nil {
+			if err := keyTarget5.FromBool(bool(key6), tt.NonOptional().Field(0).Type.Key()); err != nil {
 				return err
 			}
 			valueTarget7, err := mapTarget4.FinishKeyStartField(keyTarget5)
 			if err != nil {
 				return err
 			}
-			if err := valueTarget7.FromString(string(value8), vdl.StringType); err != nil {
+			if err := valueTarget7.FromString(string(value8), tt.NonOptional().Field(0).Type.Elem()); err != nil {
 				return err
 			}
 			if err := mapTarget4.FinishField(keyTarget5, valueTarget7); err != nil {
@@ -2735,7 +2696,7 @@ func (m *ManyMaps) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 	}
 	if err != vdl.ErrFieldNoExist {
 
-		mapTarget11, err := fieldTarget10.StartMap(__VDLType24, len(m.By))
+		mapTarget11, err := fieldTarget10.StartMap(tt.NonOptional().Field(1).Type, len(m.By))
 		if err != nil {
 			return err
 		}
@@ -2744,14 +2705,14 @@ func (m *ManyMaps) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 			if err != nil {
 				return err
 			}
-			if err := keyTarget12.FromUint(uint64(key13), vdl.ByteType); err != nil {
+			if err := keyTarget12.FromUint(uint64(key13), tt.NonOptional().Field(1).Type.Key()); err != nil {
 				return err
 			}
 			valueTarget14, err := mapTarget11.FinishKeyStartField(keyTarget12)
 			if err != nil {
 				return err
 			}
-			if err := valueTarget14.FromString(string(value15), vdl.StringType); err != nil {
+			if err := valueTarget14.FromString(string(value15), tt.NonOptional().Field(1).Type.Elem()); err != nil {
 				return err
 			}
 			if err := mapTarget11.FinishField(keyTarget12, valueTarget14); err != nil {
@@ -2771,7 +2732,7 @@ func (m *ManyMaps) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 	}
 	if err != vdl.ErrFieldNoExist {
 
-		mapTarget18, err := fieldTarget17.StartMap(__VDLType25, len(m.U16))
+		mapTarget18, err := fieldTarget17.StartMap(tt.NonOptional().Field(2).Type, len(m.U16))
 		if err != nil {
 			return err
 		}
@@ -2780,14 +2741,14 @@ func (m *ManyMaps) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 			if err != nil {
 				return err
 			}
-			if err := keyTarget19.FromUint(uint64(key20), vdl.Uint16Type); err != nil {
+			if err := keyTarget19.FromUint(uint64(key20), tt.NonOptional().Field(2).Type.Key()); err != nil {
 				return err
 			}
 			valueTarget21, err := mapTarget18.FinishKeyStartField(keyTarget19)
 			if err != nil {
 				return err
 			}
-			if err := valueTarget21.FromString(string(value22), vdl.StringType); err != nil {
+			if err := valueTarget21.FromString(string(value22), tt.NonOptional().Field(2).Type.Elem()); err != nil {
 				return err
 			}
 			if err := mapTarget18.FinishField(keyTarget19, valueTarget21); err != nil {
@@ -2807,7 +2768,7 @@ func (m *ManyMaps) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 	}
 	if err != vdl.ErrFieldNoExist {
 
-		mapTarget25, err := fieldTarget24.StartMap(__VDLType26, len(m.U32))
+		mapTarget25, err := fieldTarget24.StartMap(tt.NonOptional().Field(3).Type, len(m.U32))
 		if err != nil {
 			return err
 		}
@@ -2816,14 +2777,14 @@ func (m *ManyMaps) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 			if err != nil {
 				return err
 			}
-			if err := keyTarget26.FromUint(uint64(key27), vdl.Uint32Type); err != nil {
+			if err := keyTarget26.FromUint(uint64(key27), tt.NonOptional().Field(3).Type.Key()); err != nil {
 				return err
 			}
 			valueTarget28, err := mapTarget25.FinishKeyStartField(keyTarget26)
 			if err != nil {
 				return err
 			}
-			if err := valueTarget28.FromString(string(value29), vdl.StringType); err != nil {
+			if err := valueTarget28.FromString(string(value29), tt.NonOptional().Field(3).Type.Elem()); err != nil {
 				return err
 			}
 			if err := mapTarget25.FinishField(keyTarget26, valueTarget28); err != nil {
@@ -2843,7 +2804,7 @@ func (m *ManyMaps) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 	}
 	if err != vdl.ErrFieldNoExist {
 
-		mapTarget32, err := fieldTarget31.StartMap(__VDLType27, len(m.U64))
+		mapTarget32, err := fieldTarget31.StartMap(tt.NonOptional().Field(4).Type, len(m.U64))
 		if err != nil {
 			return err
 		}
@@ -2852,14 +2813,14 @@ func (m *ManyMaps) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 			if err != nil {
 				return err
 			}
-			if err := keyTarget33.FromUint(uint64(key34), vdl.Uint64Type); err != nil {
+			if err := keyTarget33.FromUint(uint64(key34), tt.NonOptional().Field(4).Type.Key()); err != nil {
 				return err
 			}
 			valueTarget35, err := mapTarget32.FinishKeyStartField(keyTarget33)
 			if err != nil {
 				return err
 			}
-			if err := valueTarget35.FromString(string(value36), vdl.StringType); err != nil {
+			if err := valueTarget35.FromString(string(value36), tt.NonOptional().Field(4).Type.Elem()); err != nil {
 				return err
 			}
 			if err := mapTarget32.FinishField(keyTarget33, valueTarget35); err != nil {
@@ -2879,7 +2840,7 @@ func (m *ManyMaps) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 	}
 	if err != vdl.ErrFieldNoExist {
 
-		mapTarget39, err := fieldTarget38.StartMap(__VDLType28, len(m.I16))
+		mapTarget39, err := fieldTarget38.StartMap(tt.NonOptional().Field(5).Type, len(m.I16))
 		if err != nil {
 			return err
 		}
@@ -2888,14 +2849,14 @@ func (m *ManyMaps) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 			if err != nil {
 				return err
 			}
-			if err := keyTarget40.FromInt(int64(key41), vdl.Int16Type); err != nil {
+			if err := keyTarget40.FromInt(int64(key41), tt.NonOptional().Field(5).Type.Key()); err != nil {
 				return err
 			}
 			valueTarget42, err := mapTarget39.FinishKeyStartField(keyTarget40)
 			if err != nil {
 				return err
 			}
-			if err := valueTarget42.FromString(string(value43), vdl.StringType); err != nil {
+			if err := valueTarget42.FromString(string(value43), tt.NonOptional().Field(5).Type.Elem()); err != nil {
 				return err
 			}
 			if err := mapTarget39.FinishField(keyTarget40, valueTarget42); err != nil {
@@ -2915,7 +2876,7 @@ func (m *ManyMaps) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 	}
 	if err != vdl.ErrFieldNoExist {
 
-		mapTarget46, err := fieldTarget45.StartMap(__VDLType29, len(m.I32))
+		mapTarget46, err := fieldTarget45.StartMap(tt.NonOptional().Field(6).Type, len(m.I32))
 		if err != nil {
 			return err
 		}
@@ -2924,14 +2885,14 @@ func (m *ManyMaps) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 			if err != nil {
 				return err
 			}
-			if err := keyTarget47.FromInt(int64(key48), vdl.Int32Type); err != nil {
+			if err := keyTarget47.FromInt(int64(key48), tt.NonOptional().Field(6).Type.Key()); err != nil {
 				return err
 			}
 			valueTarget49, err := mapTarget46.FinishKeyStartField(keyTarget47)
 			if err != nil {
 				return err
 			}
-			if err := valueTarget49.FromString(string(value50), vdl.StringType); err != nil {
+			if err := valueTarget49.FromString(string(value50), tt.NonOptional().Field(6).Type.Elem()); err != nil {
 				return err
 			}
 			if err := mapTarget46.FinishField(keyTarget47, valueTarget49); err != nil {
@@ -2951,7 +2912,7 @@ func (m *ManyMaps) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 	}
 	if err != vdl.ErrFieldNoExist {
 
-		mapTarget53, err := fieldTarget52.StartMap(__VDLType30, len(m.I64))
+		mapTarget53, err := fieldTarget52.StartMap(tt.NonOptional().Field(7).Type, len(m.I64))
 		if err != nil {
 			return err
 		}
@@ -2960,14 +2921,14 @@ func (m *ManyMaps) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 			if err != nil {
 				return err
 			}
-			if err := keyTarget54.FromInt(int64(key55), vdl.Int64Type); err != nil {
+			if err := keyTarget54.FromInt(int64(key55), tt.NonOptional().Field(7).Type.Key()); err != nil {
 				return err
 			}
 			valueTarget56, err := mapTarget53.FinishKeyStartField(keyTarget54)
 			if err != nil {
 				return err
 			}
-			if err := valueTarget56.FromString(string(value57), vdl.StringType); err != nil {
+			if err := valueTarget56.FromString(string(value57), tt.NonOptional().Field(7).Type.Elem()); err != nil {
 				return err
 			}
 			if err := mapTarget53.FinishField(keyTarget54, valueTarget56); err != nil {
@@ -2987,7 +2948,7 @@ func (m *ManyMaps) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 	}
 	if err != vdl.ErrFieldNoExist {
 
-		mapTarget60, err := fieldTarget59.StartMap(__VDLType31, len(m.F32))
+		mapTarget60, err := fieldTarget59.StartMap(tt.NonOptional().Field(8).Type, len(m.F32))
 		if err != nil {
 			return err
 		}
@@ -2996,14 +2957,14 @@ func (m *ManyMaps) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 			if err != nil {
 				return err
 			}
-			if err := keyTarget61.FromFloat(float64(key62), vdl.Float32Type); err != nil {
+			if err := keyTarget61.FromFloat(float64(key62), tt.NonOptional().Field(8).Type.Key()); err != nil {
 				return err
 			}
 			valueTarget63, err := mapTarget60.FinishKeyStartField(keyTarget61)
 			if err != nil {
 				return err
 			}
-			if err := valueTarget63.FromString(string(value64), vdl.StringType); err != nil {
+			if err := valueTarget63.FromString(string(value64), tt.NonOptional().Field(8).Type.Elem()); err != nil {
 				return err
 			}
 			if err := mapTarget60.FinishField(keyTarget61, valueTarget63); err != nil {
@@ -3023,7 +2984,7 @@ func (m *ManyMaps) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 	}
 	if err != vdl.ErrFieldNoExist {
 
-		mapTarget67, err := fieldTarget66.StartMap(__VDLType32, len(m.F64))
+		mapTarget67, err := fieldTarget66.StartMap(tt.NonOptional().Field(9).Type, len(m.F64))
 		if err != nil {
 			return err
 		}
@@ -3032,14 +2993,14 @@ func (m *ManyMaps) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 			if err != nil {
 				return err
 			}
-			if err := keyTarget68.FromFloat(float64(key69), vdl.Float64Type); err != nil {
+			if err := keyTarget68.FromFloat(float64(key69), tt.NonOptional().Field(9).Type.Key()); err != nil {
 				return err
 			}
 			valueTarget70, err := mapTarget67.FinishKeyStartField(keyTarget68)
 			if err != nil {
 				return err
 			}
-			if err := valueTarget70.FromString(string(value71), vdl.StringType); err != nil {
+			if err := valueTarget70.FromString(string(value71), tt.NonOptional().Field(9).Type.Elem()); err != nil {
 				return err
 			}
 			if err := mapTarget67.FinishField(keyTarget68, valueTarget70); err != nil {
@@ -3059,7 +3020,7 @@ func (m *ManyMaps) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 	}
 	if err != vdl.ErrFieldNoExist {
 
-		mapTarget74, err := fieldTarget73.StartMap(__VDLType33, len(m.C64))
+		mapTarget74, err := fieldTarget73.StartMap(tt.NonOptional().Field(10).Type, len(m.C64))
 		if err != nil {
 			return err
 		}
@@ -3068,14 +3029,14 @@ func (m *ManyMaps) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 			if err != nil {
 				return err
 			}
-			if err := keyTarget75.FromComplex(complex128(key76), vdl.Complex64Type); err != nil {
+			if err := keyTarget75.FromComplex(complex128(key76), tt.NonOptional().Field(10).Type.Key()); err != nil {
 				return err
 			}
 			valueTarget77, err := mapTarget74.FinishKeyStartField(keyTarget75)
 			if err != nil {
 				return err
 			}
-			if err := valueTarget77.FromString(string(value78), vdl.StringType); err != nil {
+			if err := valueTarget77.FromString(string(value78), tt.NonOptional().Field(10).Type.Elem()); err != nil {
 				return err
 			}
 			if err := mapTarget74.FinishField(keyTarget75, valueTarget77); err != nil {
@@ -3095,7 +3056,7 @@ func (m *ManyMaps) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 	}
 	if err != vdl.ErrFieldNoExist {
 
-		mapTarget81, err := fieldTarget80.StartMap(__VDLType34, len(m.C128))
+		mapTarget81, err := fieldTarget80.StartMap(tt.NonOptional().Field(11).Type, len(m.C128))
 		if err != nil {
 			return err
 		}
@@ -3104,14 +3065,14 @@ func (m *ManyMaps) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 			if err != nil {
 				return err
 			}
-			if err := keyTarget82.FromComplex(complex128(key83), vdl.Complex128Type); err != nil {
+			if err := keyTarget82.FromComplex(complex128(key83), tt.NonOptional().Field(11).Type.Key()); err != nil {
 				return err
 			}
 			valueTarget84, err := mapTarget81.FinishKeyStartField(keyTarget82)
 			if err != nil {
 				return err
 			}
-			if err := valueTarget84.FromString(string(value85), vdl.StringType); err != nil {
+			if err := valueTarget84.FromString(string(value85), tt.NonOptional().Field(11).Type.Elem()); err != nil {
 				return err
 			}
 			if err := mapTarget81.FinishField(keyTarget82, valueTarget84); err != nil {
@@ -3131,7 +3092,7 @@ func (m *ManyMaps) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 	}
 	if err != vdl.ErrFieldNoExist {
 
-		mapTarget88, err := fieldTarget87.StartMap(__VDLType35, len(m.S))
+		mapTarget88, err := fieldTarget87.StartMap(tt.NonOptional().Field(12).Type, len(m.S))
 		if err != nil {
 			return err
 		}
@@ -3140,14 +3101,14 @@ func (m *ManyMaps) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 			if err != nil {
 				return err
 			}
-			if err := keyTarget89.FromString(string(key90), vdl.StringType); err != nil {
+			if err := keyTarget89.FromString(string(key90), tt.NonOptional().Field(12).Type.Key()); err != nil {
 				return err
 			}
 			valueTarget91, err := mapTarget88.FinishKeyStartField(keyTarget89)
 			if err != nil {
 				return err
 			}
-			if err := valueTarget91.FromString(string(value92), vdl.StringType); err != nil {
+			if err := valueTarget91.FromString(string(value92), tt.NonOptional().Field(12).Type.Elem()); err != nil {
 				return err
 			}
 			if err := mapTarget88.FinishField(keyTarget89, valueTarget91); err != nil {
@@ -3167,7 +3128,7 @@ func (m *ManyMaps) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 	}
 	if err != vdl.ErrFieldNoExist {
 
-		mapTarget95, err := fieldTarget94.StartMap(__VDLType36, len(m.Ms))
+		mapTarget95, err := fieldTarget94.StartMap(tt.NonOptional().Field(13).Type, len(m.Ms))
 		if err != nil {
 			return err
 		}
@@ -3176,7 +3137,7 @@ func (m *ManyMaps) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 			if err != nil {
 				return err
 			}
-			if err := keyTarget96.FromString(string(key97), vdl.StringType); err != nil {
+			if err := keyTarget96.FromString(string(key97), tt.NonOptional().Field(13).Type.Key()); err != nil {
 				return err
 			}
 			valueTarget98, err := mapTarget95.FinishKeyStartField(keyTarget96)
@@ -3184,7 +3145,7 @@ func (m *ManyMaps) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 				return err
 			}
 
-			mapTarget100, err := valueTarget98.StartMap(__VDLType35, len(value99))
+			mapTarget100, err := valueTarget98.StartMap(tt.NonOptional().Field(13).Type.Elem(), len(value99))
 			if err != nil {
 				return err
 			}
@@ -3193,14 +3154,14 @@ func (m *ManyMaps) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 				if err != nil {
 					return err
 				}
-				if err := keyTarget101.FromString(string(key102), vdl.StringType); err != nil {
+				if err := keyTarget101.FromString(string(key102), tt.NonOptional().Field(13).Type.Elem().Key()); err != nil {
 					return err
 				}
 				valueTarget103, err := mapTarget100.FinishKeyStartField(keyTarget101)
 				if err != nil {
 					return err
 				}
-				if err := valueTarget103.FromString(string(value104), vdl.StringType); err != nil {
+				if err := valueTarget103.FromString(string(value104), tt.NonOptional().Field(13).Type.Elem().Elem()); err != nil {
 					return err
 				}
 				if err := mapTarget100.FinishField(keyTarget101, valueTarget103); err != nil {
@@ -3227,7 +3188,7 @@ func (m *ManyMaps) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 	}
 	if err != vdl.ErrFieldNoExist {
 
-		mapTarget107, err := fieldTarget106.StartMap(__VDLType37, len(m.T))
+		mapTarget107, err := fieldTarget106.StartMap(tt.NonOptional().Field(14).Type, len(m.T))
 		if err != nil {
 			return err
 		}
@@ -3242,14 +3203,14 @@ func (m *ManyMaps) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 				return err
 			}
 
-			if err := wireValue112.FillVDLTarget(keyTarget108, __VDLType_time_Time); err != nil {
+			if err := wireValue112.FillVDLTarget(keyTarget108, tt.NonOptional().Field(14).Type.Key()); err != nil {
 				return err
 			}
 			valueTarget110, err := mapTarget107.FinishKeyStartField(keyTarget108)
 			if err != nil {
 				return err
 			}
-			if err := valueTarget110.FromString(string(value111), vdl.StringType); err != nil {
+			if err := valueTarget110.FromString(string(value111), tt.NonOptional().Field(14).Type.Elem()); err != nil {
 				return err
 			}
 			if err := mapTarget107.FinishField(keyTarget108, valueTarget110); err != nil {
@@ -3296,8 +3257,8 @@ type ManyMapsTarget struct {
 
 func (t *ManyMapsTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
 
-	if !vdl.Compatible(tt, __VDLType_v_io_v23_query_engine_internal_testdata_ManyMaps) {
-		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType_v_io_v23_query_engine_internal_testdata_ManyMaps)
+	if ttWant := vdl.TypeOf((*ManyMaps)(nil)).Elem(); !vdl.Compatible(tt, ttWant) {
+		return nil, fmt.Errorf("type %v incompatible with %v", tt, ttWant)
 	}
 	return t, nil
 }
@@ -3364,7 +3325,7 @@ func (t *ManyMapsTarget) StartField(name string) (key, field vdl.Target, _ error
 		target, err := &t.tTarget, error(nil)
 		return nil, target, err
 	default:
-		return nil, nil, fmt.Errorf("field %s not in struct %v", name, __VDLType_v_io_v23_query_engine_internal_testdata_ManyMaps)
+		return nil, nil, fmt.Errorf("field %s not in struct v.io/v23/query/engine/internal/testdata.ManyMaps", name)
 	}
 }
 func (t *ManyMapsTarget) FinishField(_, _ vdl.Target) error {
@@ -3388,8 +3349,8 @@ type unnamed_6d61705b626f6f6c5d737472696e67Target struct {
 
 func (t *unnamed_6d61705b626f6f6c5d737472696e67Target) StartMap(tt *vdl.Type, len int) (vdl.MapTarget, error) {
 
-	if !vdl.Compatible(tt, __VDLType23) {
-		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType23)
+	if ttWant := vdl.TypeOf((*map[bool]string)(nil)); !vdl.Compatible(tt, ttWant) {
+		return nil, fmt.Errorf("type %v incompatible with %v", tt, ttWant)
 	}
 	*t.Value = make(map[bool]string)
 	return t, nil
@@ -3431,8 +3392,8 @@ type unnamed_6d61705b627974655d737472696e67Target struct {
 
 func (t *unnamed_6d61705b627974655d737472696e67Target) StartMap(tt *vdl.Type, len int) (vdl.MapTarget, error) {
 
-	if !vdl.Compatible(tt, __VDLType24) {
-		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType24)
+	if ttWant := vdl.TypeOf((*map[byte]string)(nil)); !vdl.Compatible(tt, ttWant) {
+		return nil, fmt.Errorf("type %v incompatible with %v", tt, ttWant)
 	}
 	*t.Value = make(map[byte]string)
 	return t, nil
@@ -3474,8 +3435,8 @@ type unnamed_6d61705b75696e7431365d737472696e67Target struct {
 
 func (t *unnamed_6d61705b75696e7431365d737472696e67Target) StartMap(tt *vdl.Type, len int) (vdl.MapTarget, error) {
 
-	if !vdl.Compatible(tt, __VDLType25) {
-		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType25)
+	if ttWant := vdl.TypeOf((*map[uint16]string)(nil)); !vdl.Compatible(tt, ttWant) {
+		return nil, fmt.Errorf("type %v incompatible with %v", tt, ttWant)
 	}
 	*t.Value = make(map[uint16]string)
 	return t, nil
@@ -3517,8 +3478,8 @@ type unnamed_6d61705b75696e7433325d737472696e67Target struct {
 
 func (t *unnamed_6d61705b75696e7433325d737472696e67Target) StartMap(tt *vdl.Type, len int) (vdl.MapTarget, error) {
 
-	if !vdl.Compatible(tt, __VDLType26) {
-		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType26)
+	if ttWant := vdl.TypeOf((*map[uint32]string)(nil)); !vdl.Compatible(tt, ttWant) {
+		return nil, fmt.Errorf("type %v incompatible with %v", tt, ttWant)
 	}
 	*t.Value = make(map[uint32]string)
 	return t, nil
@@ -3560,8 +3521,8 @@ type unnamed_6d61705b75696e7436345d737472696e67Target struct {
 
 func (t *unnamed_6d61705b75696e7436345d737472696e67Target) StartMap(tt *vdl.Type, len int) (vdl.MapTarget, error) {
 
-	if !vdl.Compatible(tt, __VDLType27) {
-		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType27)
+	if ttWant := vdl.TypeOf((*map[uint64]string)(nil)); !vdl.Compatible(tt, ttWant) {
+		return nil, fmt.Errorf("type %v incompatible with %v", tt, ttWant)
 	}
 	*t.Value = make(map[uint64]string)
 	return t, nil
@@ -3603,8 +3564,8 @@ type unnamed_6d61705b696e7431365d737472696e67Target struct {
 
 func (t *unnamed_6d61705b696e7431365d737472696e67Target) StartMap(tt *vdl.Type, len int) (vdl.MapTarget, error) {
 
-	if !vdl.Compatible(tt, __VDLType28) {
-		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType28)
+	if ttWant := vdl.TypeOf((*map[int16]string)(nil)); !vdl.Compatible(tt, ttWant) {
+		return nil, fmt.Errorf("type %v incompatible with %v", tt, ttWant)
 	}
 	*t.Value = make(map[int16]string)
 	return t, nil
@@ -3646,8 +3607,8 @@ type unnamed_6d61705b696e7433325d737472696e67Target struct {
 
 func (t *unnamed_6d61705b696e7433325d737472696e67Target) StartMap(tt *vdl.Type, len int) (vdl.MapTarget, error) {
 
-	if !vdl.Compatible(tt, __VDLType29) {
-		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType29)
+	if ttWant := vdl.TypeOf((*map[int32]string)(nil)); !vdl.Compatible(tt, ttWant) {
+		return nil, fmt.Errorf("type %v incompatible with %v", tt, ttWant)
 	}
 	*t.Value = make(map[int32]string)
 	return t, nil
@@ -3689,8 +3650,8 @@ type unnamed_6d61705b696e7436345d737472696e67Target struct {
 
 func (t *unnamed_6d61705b696e7436345d737472696e67Target) StartMap(tt *vdl.Type, len int) (vdl.MapTarget, error) {
 
-	if !vdl.Compatible(tt, __VDLType30) {
-		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType30)
+	if ttWant := vdl.TypeOf((*map[int64]string)(nil)); !vdl.Compatible(tt, ttWant) {
+		return nil, fmt.Errorf("type %v incompatible with %v", tt, ttWant)
 	}
 	*t.Value = make(map[int64]string)
 	return t, nil
@@ -3732,8 +3693,8 @@ type unnamed_6d61705b666c6f617433325d737472696e67Target struct {
 
 func (t *unnamed_6d61705b666c6f617433325d737472696e67Target) StartMap(tt *vdl.Type, len int) (vdl.MapTarget, error) {
 
-	if !vdl.Compatible(tt, __VDLType31) {
-		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType31)
+	if ttWant := vdl.TypeOf((*map[float32]string)(nil)); !vdl.Compatible(tt, ttWant) {
+		return nil, fmt.Errorf("type %v incompatible with %v", tt, ttWant)
 	}
 	*t.Value = make(map[float32]string)
 	return t, nil
@@ -3775,8 +3736,8 @@ type unnamed_6d61705b666c6f617436345d737472696e67Target struct {
 
 func (t *unnamed_6d61705b666c6f617436345d737472696e67Target) StartMap(tt *vdl.Type, len int) (vdl.MapTarget, error) {
 
-	if !vdl.Compatible(tt, __VDLType32) {
-		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType32)
+	if ttWant := vdl.TypeOf((*map[float64]string)(nil)); !vdl.Compatible(tt, ttWant) {
+		return nil, fmt.Errorf("type %v incompatible with %v", tt, ttWant)
 	}
 	*t.Value = make(map[float64]string)
 	return t, nil
@@ -3818,8 +3779,8 @@ type unnamed_6d61705b636f6d706c657836345d737472696e67Target struct {
 
 func (t *unnamed_6d61705b636f6d706c657836345d737472696e67Target) StartMap(tt *vdl.Type, len int) (vdl.MapTarget, error) {
 
-	if !vdl.Compatible(tt, __VDLType33) {
-		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType33)
+	if ttWant := vdl.TypeOf((*map[complex64]string)(nil)); !vdl.Compatible(tt, ttWant) {
+		return nil, fmt.Errorf("type %v incompatible with %v", tt, ttWant)
 	}
 	*t.Value = make(map[complex64]string)
 	return t, nil
@@ -3861,8 +3822,8 @@ type unnamed_6d61705b636f6d706c65783132385d737472696e67Target struct {
 
 func (t *unnamed_6d61705b636f6d706c65783132385d737472696e67Target) StartMap(tt *vdl.Type, len int) (vdl.MapTarget, error) {
 
-	if !vdl.Compatible(tt, __VDLType34) {
-		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType34)
+	if ttWant := vdl.TypeOf((*map[complex128]string)(nil)); !vdl.Compatible(tt, ttWant) {
+		return nil, fmt.Errorf("type %v incompatible with %v", tt, ttWant)
 	}
 	*t.Value = make(map[complex128]string)
 	return t, nil
@@ -3904,8 +3865,8 @@ type unnamed_6d61705b737472696e675d737472696e67Target struct {
 
 func (t *unnamed_6d61705b737472696e675d737472696e67Target) StartMap(tt *vdl.Type, len int) (vdl.MapTarget, error) {
 
-	if !vdl.Compatible(tt, __VDLType35) {
-		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType35)
+	if ttWant := vdl.TypeOf((*map[string]string)(nil)); !vdl.Compatible(tt, ttWant) {
+		return nil, fmt.Errorf("type %v incompatible with %v", tt, ttWant)
 	}
 	*t.Value = make(map[string]string)
 	return t, nil
@@ -3947,8 +3908,8 @@ type unnamed_6d61705b737472696e675d6d61705b737472696e675d737472696e67Target stru
 
 func (t *unnamed_6d61705b737472696e675d6d61705b737472696e675d737472696e67Target) StartMap(tt *vdl.Type, len int) (vdl.MapTarget, error) {
 
-	if !vdl.Compatible(tt, __VDLType36) {
-		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType36)
+	if ttWant := vdl.TypeOf((*map[string]map[string]string)(nil)); !vdl.Compatible(tt, ttWant) {
+		return nil, fmt.Errorf("type %v incompatible with %v", tt, ttWant)
 	}
 	*t.Value = make(map[string]map[string]string)
 	return t, nil
@@ -3990,8 +3951,8 @@ type unnamed_6d61705b74696d652e54696d65207374727563747b5365636f6e647320696e74363
 
 func (t *unnamed_6d61705b74696d652e54696d65207374727563747b5365636f6e647320696e7436343b4e616e6f7320696e7433327d5d737472696e67Target) StartMap(tt *vdl.Type, len int) (vdl.MapTarget, error) {
 
-	if !vdl.Compatible(tt, __VDLType37) {
-		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType37)
+	if ttWant := vdl.TypeOf((*map[time_2.Time]string)(nil)); !vdl.Compatible(tt, ttWant) {
+		return nil, fmt.Errorf("type %v incompatible with %v", tt, ttWant)
 	}
 	*t.Value = make(map[time.Time]string)
 	return t, nil
@@ -4043,7 +4004,6 @@ func (ManySets) __VDLReflect(struct {
 }
 
 func (m *ManySets) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
-	__VDLEnsureNativeBuilt()
 	fieldsTarget1, err := t.StartFields(tt)
 	if err != nil {
 		return err
@@ -4055,7 +4015,7 @@ func (m *ManySets) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 	}
 	if err != vdl.ErrFieldNoExist {
 
-		setTarget4, err := fieldTarget3.StartSet(__VDLType39, len(m.B))
+		setTarget4, err := fieldTarget3.StartSet(tt.NonOptional().Field(0).Type, len(m.B))
 		if err != nil {
 			return err
 		}
@@ -4064,7 +4024,7 @@ func (m *ManySets) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 			if err != nil {
 				return err
 			}
-			if err := keyTarget5.FromBool(bool(key6), vdl.BoolType); err != nil {
+			if err := keyTarget5.FromBool(bool(key6), tt.NonOptional().Field(0).Type.Key()); err != nil {
 				return err
 			}
 			if err := setTarget4.FinishKey(keyTarget5); err != nil {
@@ -4084,7 +4044,7 @@ func (m *ManySets) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 	}
 	if err != vdl.ErrFieldNoExist {
 
-		setTarget9, err := fieldTarget8.StartSet(__VDLType40, len(m.By))
+		setTarget9, err := fieldTarget8.StartSet(tt.NonOptional().Field(1).Type, len(m.By))
 		if err != nil {
 			return err
 		}
@@ -4093,7 +4053,7 @@ func (m *ManySets) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 			if err != nil {
 				return err
 			}
-			if err := keyTarget10.FromUint(uint64(key11), vdl.ByteType); err != nil {
+			if err := keyTarget10.FromUint(uint64(key11), tt.NonOptional().Field(1).Type.Key()); err != nil {
 				return err
 			}
 			if err := setTarget9.FinishKey(keyTarget10); err != nil {
@@ -4113,7 +4073,7 @@ func (m *ManySets) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 	}
 	if err != vdl.ErrFieldNoExist {
 
-		setTarget14, err := fieldTarget13.StartSet(__VDLType41, len(m.U16))
+		setTarget14, err := fieldTarget13.StartSet(tt.NonOptional().Field(2).Type, len(m.U16))
 		if err != nil {
 			return err
 		}
@@ -4122,7 +4082,7 @@ func (m *ManySets) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 			if err != nil {
 				return err
 			}
-			if err := keyTarget15.FromUint(uint64(key16), vdl.Uint16Type); err != nil {
+			if err := keyTarget15.FromUint(uint64(key16), tt.NonOptional().Field(2).Type.Key()); err != nil {
 				return err
 			}
 			if err := setTarget14.FinishKey(keyTarget15); err != nil {
@@ -4142,7 +4102,7 @@ func (m *ManySets) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 	}
 	if err != vdl.ErrFieldNoExist {
 
-		setTarget19, err := fieldTarget18.StartSet(__VDLType42, len(m.U32))
+		setTarget19, err := fieldTarget18.StartSet(tt.NonOptional().Field(3).Type, len(m.U32))
 		if err != nil {
 			return err
 		}
@@ -4151,7 +4111,7 @@ func (m *ManySets) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 			if err != nil {
 				return err
 			}
-			if err := keyTarget20.FromUint(uint64(key21), vdl.Uint32Type); err != nil {
+			if err := keyTarget20.FromUint(uint64(key21), tt.NonOptional().Field(3).Type.Key()); err != nil {
 				return err
 			}
 			if err := setTarget19.FinishKey(keyTarget20); err != nil {
@@ -4171,7 +4131,7 @@ func (m *ManySets) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 	}
 	if err != vdl.ErrFieldNoExist {
 
-		setTarget24, err := fieldTarget23.StartSet(__VDLType43, len(m.U64))
+		setTarget24, err := fieldTarget23.StartSet(tt.NonOptional().Field(4).Type, len(m.U64))
 		if err != nil {
 			return err
 		}
@@ -4180,7 +4140,7 @@ func (m *ManySets) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 			if err != nil {
 				return err
 			}
-			if err := keyTarget25.FromUint(uint64(key26), vdl.Uint64Type); err != nil {
+			if err := keyTarget25.FromUint(uint64(key26), tt.NonOptional().Field(4).Type.Key()); err != nil {
 				return err
 			}
 			if err := setTarget24.FinishKey(keyTarget25); err != nil {
@@ -4200,7 +4160,7 @@ func (m *ManySets) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 	}
 	if err != vdl.ErrFieldNoExist {
 
-		setTarget29, err := fieldTarget28.StartSet(__VDLType44, len(m.I16))
+		setTarget29, err := fieldTarget28.StartSet(tt.NonOptional().Field(5).Type, len(m.I16))
 		if err != nil {
 			return err
 		}
@@ -4209,7 +4169,7 @@ func (m *ManySets) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 			if err != nil {
 				return err
 			}
-			if err := keyTarget30.FromInt(int64(key31), vdl.Int16Type); err != nil {
+			if err := keyTarget30.FromInt(int64(key31), tt.NonOptional().Field(5).Type.Key()); err != nil {
 				return err
 			}
 			if err := setTarget29.FinishKey(keyTarget30); err != nil {
@@ -4229,7 +4189,7 @@ func (m *ManySets) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 	}
 	if err != vdl.ErrFieldNoExist {
 
-		setTarget34, err := fieldTarget33.StartSet(__VDLType45, len(m.I32))
+		setTarget34, err := fieldTarget33.StartSet(tt.NonOptional().Field(6).Type, len(m.I32))
 		if err != nil {
 			return err
 		}
@@ -4238,7 +4198,7 @@ func (m *ManySets) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 			if err != nil {
 				return err
 			}
-			if err := keyTarget35.FromInt(int64(key36), vdl.Int32Type); err != nil {
+			if err := keyTarget35.FromInt(int64(key36), tt.NonOptional().Field(6).Type.Key()); err != nil {
 				return err
 			}
 			if err := setTarget34.FinishKey(keyTarget35); err != nil {
@@ -4258,7 +4218,7 @@ func (m *ManySets) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 	}
 	if err != vdl.ErrFieldNoExist {
 
-		setTarget39, err := fieldTarget38.StartSet(__VDLType46, len(m.I64))
+		setTarget39, err := fieldTarget38.StartSet(tt.NonOptional().Field(7).Type, len(m.I64))
 		if err != nil {
 			return err
 		}
@@ -4267,7 +4227,7 @@ func (m *ManySets) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 			if err != nil {
 				return err
 			}
-			if err := keyTarget40.FromInt(int64(key41), vdl.Int64Type); err != nil {
+			if err := keyTarget40.FromInt(int64(key41), tt.NonOptional().Field(7).Type.Key()); err != nil {
 				return err
 			}
 			if err := setTarget39.FinishKey(keyTarget40); err != nil {
@@ -4287,7 +4247,7 @@ func (m *ManySets) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 	}
 	if err != vdl.ErrFieldNoExist {
 
-		setTarget44, err := fieldTarget43.StartSet(__VDLType47, len(m.F32))
+		setTarget44, err := fieldTarget43.StartSet(tt.NonOptional().Field(8).Type, len(m.F32))
 		if err != nil {
 			return err
 		}
@@ -4296,7 +4256,7 @@ func (m *ManySets) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 			if err != nil {
 				return err
 			}
-			if err := keyTarget45.FromFloat(float64(key46), vdl.Float32Type); err != nil {
+			if err := keyTarget45.FromFloat(float64(key46), tt.NonOptional().Field(8).Type.Key()); err != nil {
 				return err
 			}
 			if err := setTarget44.FinishKey(keyTarget45); err != nil {
@@ -4316,7 +4276,7 @@ func (m *ManySets) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 	}
 	if err != vdl.ErrFieldNoExist {
 
-		setTarget49, err := fieldTarget48.StartSet(__VDLType48, len(m.F64))
+		setTarget49, err := fieldTarget48.StartSet(tt.NonOptional().Field(9).Type, len(m.F64))
 		if err != nil {
 			return err
 		}
@@ -4325,7 +4285,7 @@ func (m *ManySets) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 			if err != nil {
 				return err
 			}
-			if err := keyTarget50.FromFloat(float64(key51), vdl.Float64Type); err != nil {
+			if err := keyTarget50.FromFloat(float64(key51), tt.NonOptional().Field(9).Type.Key()); err != nil {
 				return err
 			}
 			if err := setTarget49.FinishKey(keyTarget50); err != nil {
@@ -4345,7 +4305,7 @@ func (m *ManySets) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 	}
 	if err != vdl.ErrFieldNoExist {
 
-		setTarget54, err := fieldTarget53.StartSet(__VDLType49, len(m.C64))
+		setTarget54, err := fieldTarget53.StartSet(tt.NonOptional().Field(10).Type, len(m.C64))
 		if err != nil {
 			return err
 		}
@@ -4354,7 +4314,7 @@ func (m *ManySets) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 			if err != nil {
 				return err
 			}
-			if err := keyTarget55.FromComplex(complex128(key56), vdl.Complex64Type); err != nil {
+			if err := keyTarget55.FromComplex(complex128(key56), tt.NonOptional().Field(10).Type.Key()); err != nil {
 				return err
 			}
 			if err := setTarget54.FinishKey(keyTarget55); err != nil {
@@ -4374,7 +4334,7 @@ func (m *ManySets) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 	}
 	if err != vdl.ErrFieldNoExist {
 
-		setTarget59, err := fieldTarget58.StartSet(__VDLType50, len(m.C128))
+		setTarget59, err := fieldTarget58.StartSet(tt.NonOptional().Field(11).Type, len(m.C128))
 		if err != nil {
 			return err
 		}
@@ -4383,7 +4343,7 @@ func (m *ManySets) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 			if err != nil {
 				return err
 			}
-			if err := keyTarget60.FromComplex(complex128(key61), vdl.Complex128Type); err != nil {
+			if err := keyTarget60.FromComplex(complex128(key61), tt.NonOptional().Field(11).Type.Key()); err != nil {
 				return err
 			}
 			if err := setTarget59.FinishKey(keyTarget60); err != nil {
@@ -4403,7 +4363,7 @@ func (m *ManySets) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 	}
 	if err != vdl.ErrFieldNoExist {
 
-		setTarget64, err := fieldTarget63.StartSet(__VDLType20, len(m.S))
+		setTarget64, err := fieldTarget63.StartSet(tt.NonOptional().Field(12).Type, len(m.S))
 		if err != nil {
 			return err
 		}
@@ -4412,7 +4372,7 @@ func (m *ManySets) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 			if err != nil {
 				return err
 			}
-			if err := keyTarget65.FromString(string(key66), vdl.StringType); err != nil {
+			if err := keyTarget65.FromString(string(key66), tt.NonOptional().Field(12).Type.Key()); err != nil {
 				return err
 			}
 			if err := setTarget64.FinishKey(keyTarget65); err != nil {
@@ -4432,7 +4392,7 @@ func (m *ManySets) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 	}
 	if err != vdl.ErrFieldNoExist {
 
-		setTarget69, err := fieldTarget68.StartSet(__VDLType51, len(m.T))
+		setTarget69, err := fieldTarget68.StartSet(tt.NonOptional().Field(13).Type, len(m.T))
 		if err != nil {
 			return err
 		}
@@ -4447,7 +4407,7 @@ func (m *ManySets) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 				return err
 			}
 
-			if err := wireValue72.FillVDLTarget(keyTarget70, __VDLType_time_Time); err != nil {
+			if err := wireValue72.FillVDLTarget(keyTarget70, tt.NonOptional().Field(13).Type.Key()); err != nil {
 				return err
 			}
 			if err := setTarget69.FinishKey(keyTarget70); err != nil {
@@ -4493,8 +4453,8 @@ type ManySetsTarget struct {
 
 func (t *ManySetsTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
 
-	if !vdl.Compatible(tt, __VDLType_v_io_v23_query_engine_internal_testdata_ManySets) {
-		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType_v_io_v23_query_engine_internal_testdata_ManySets)
+	if ttWant := vdl.TypeOf((*ManySets)(nil)).Elem(); !vdl.Compatible(tt, ttWant) {
+		return nil, fmt.Errorf("type %v incompatible with %v", tt, ttWant)
 	}
 	return t, nil
 }
@@ -4557,7 +4517,7 @@ func (t *ManySetsTarget) StartField(name string) (key, field vdl.Target, _ error
 		target, err := &t.tTarget, error(nil)
 		return nil, target, err
 	default:
-		return nil, nil, fmt.Errorf("field %s not in struct %v", name, __VDLType_v_io_v23_query_engine_internal_testdata_ManySets)
+		return nil, nil, fmt.Errorf("field %s not in struct v.io/v23/query/engine/internal/testdata.ManySets", name)
 	}
 }
 func (t *ManySetsTarget) FinishField(_, _ vdl.Target) error {
@@ -4579,8 +4539,8 @@ type unnamed_7365745b626f6f6c5dTarget struct {
 
 func (t *unnamed_7365745b626f6f6c5dTarget) StartSet(tt *vdl.Type, len int) (vdl.SetTarget, error) {
 
-	if !vdl.Compatible(tt, __VDLType39) {
-		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType39)
+	if ttWant := vdl.TypeOf((*map[bool]struct{})(nil)); !vdl.Compatible(tt, ttWant) {
+		return nil, fmt.Errorf("type %v incompatible with %v", tt, ttWant)
 	}
 	*t.Value = make(map[bool]struct{})
 	return t, nil
@@ -4614,8 +4574,8 @@ type unnamed_7365745b627974655dTarget struct {
 
 func (t *unnamed_7365745b627974655dTarget) StartSet(tt *vdl.Type, len int) (vdl.SetTarget, error) {
 
-	if !vdl.Compatible(tt, __VDLType40) {
-		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType40)
+	if ttWant := vdl.TypeOf((*map[byte]struct{})(nil)); !vdl.Compatible(tt, ttWant) {
+		return nil, fmt.Errorf("type %v incompatible with %v", tt, ttWant)
 	}
 	*t.Value = make(map[byte]struct{})
 	return t, nil
@@ -4649,8 +4609,8 @@ type unnamed_7365745b75696e7431365dTarget struct {
 
 func (t *unnamed_7365745b75696e7431365dTarget) StartSet(tt *vdl.Type, len int) (vdl.SetTarget, error) {
 
-	if !vdl.Compatible(tt, __VDLType41) {
-		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType41)
+	if ttWant := vdl.TypeOf((*map[uint16]struct{})(nil)); !vdl.Compatible(tt, ttWant) {
+		return nil, fmt.Errorf("type %v incompatible with %v", tt, ttWant)
 	}
 	*t.Value = make(map[uint16]struct{})
 	return t, nil
@@ -4684,8 +4644,8 @@ type unnamed_7365745b75696e7433325dTarget struct {
 
 func (t *unnamed_7365745b75696e7433325dTarget) StartSet(tt *vdl.Type, len int) (vdl.SetTarget, error) {
 
-	if !vdl.Compatible(tt, __VDLType42) {
-		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType42)
+	if ttWant := vdl.TypeOf((*map[uint32]struct{})(nil)); !vdl.Compatible(tt, ttWant) {
+		return nil, fmt.Errorf("type %v incompatible with %v", tt, ttWant)
 	}
 	*t.Value = make(map[uint32]struct{})
 	return t, nil
@@ -4719,8 +4679,8 @@ type unnamed_7365745b75696e7436345dTarget struct {
 
 func (t *unnamed_7365745b75696e7436345dTarget) StartSet(tt *vdl.Type, len int) (vdl.SetTarget, error) {
 
-	if !vdl.Compatible(tt, __VDLType43) {
-		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType43)
+	if ttWant := vdl.TypeOf((*map[uint64]struct{})(nil)); !vdl.Compatible(tt, ttWant) {
+		return nil, fmt.Errorf("type %v incompatible with %v", tt, ttWant)
 	}
 	*t.Value = make(map[uint64]struct{})
 	return t, nil
@@ -4754,8 +4714,8 @@ type unnamed_7365745b696e7431365dTarget struct {
 
 func (t *unnamed_7365745b696e7431365dTarget) StartSet(tt *vdl.Type, len int) (vdl.SetTarget, error) {
 
-	if !vdl.Compatible(tt, __VDLType44) {
-		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType44)
+	if ttWant := vdl.TypeOf((*map[int16]struct{})(nil)); !vdl.Compatible(tt, ttWant) {
+		return nil, fmt.Errorf("type %v incompatible with %v", tt, ttWant)
 	}
 	*t.Value = make(map[int16]struct{})
 	return t, nil
@@ -4789,8 +4749,8 @@ type unnamed_7365745b696e7433325dTarget struct {
 
 func (t *unnamed_7365745b696e7433325dTarget) StartSet(tt *vdl.Type, len int) (vdl.SetTarget, error) {
 
-	if !vdl.Compatible(tt, __VDLType45) {
-		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType45)
+	if ttWant := vdl.TypeOf((*map[int32]struct{})(nil)); !vdl.Compatible(tt, ttWant) {
+		return nil, fmt.Errorf("type %v incompatible with %v", tt, ttWant)
 	}
 	*t.Value = make(map[int32]struct{})
 	return t, nil
@@ -4824,8 +4784,8 @@ type unnamed_7365745b696e7436345dTarget struct {
 
 func (t *unnamed_7365745b696e7436345dTarget) StartSet(tt *vdl.Type, len int) (vdl.SetTarget, error) {
 
-	if !vdl.Compatible(tt, __VDLType46) {
-		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType46)
+	if ttWant := vdl.TypeOf((*map[int64]struct{})(nil)); !vdl.Compatible(tt, ttWant) {
+		return nil, fmt.Errorf("type %v incompatible with %v", tt, ttWant)
 	}
 	*t.Value = make(map[int64]struct{})
 	return t, nil
@@ -4859,8 +4819,8 @@ type unnamed_7365745b666c6f617433325dTarget struct {
 
 func (t *unnamed_7365745b666c6f617433325dTarget) StartSet(tt *vdl.Type, len int) (vdl.SetTarget, error) {
 
-	if !vdl.Compatible(tt, __VDLType47) {
-		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType47)
+	if ttWant := vdl.TypeOf((*map[float32]struct{})(nil)); !vdl.Compatible(tt, ttWant) {
+		return nil, fmt.Errorf("type %v incompatible with %v", tt, ttWant)
 	}
 	*t.Value = make(map[float32]struct{})
 	return t, nil
@@ -4894,8 +4854,8 @@ type unnamed_7365745b666c6f617436345dTarget struct {
 
 func (t *unnamed_7365745b666c6f617436345dTarget) StartSet(tt *vdl.Type, len int) (vdl.SetTarget, error) {
 
-	if !vdl.Compatible(tt, __VDLType48) {
-		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType48)
+	if ttWant := vdl.TypeOf((*map[float64]struct{})(nil)); !vdl.Compatible(tt, ttWant) {
+		return nil, fmt.Errorf("type %v incompatible with %v", tt, ttWant)
 	}
 	*t.Value = make(map[float64]struct{})
 	return t, nil
@@ -4929,8 +4889,8 @@ type unnamed_7365745b636f6d706c657836345dTarget struct {
 
 func (t *unnamed_7365745b636f6d706c657836345dTarget) StartSet(tt *vdl.Type, len int) (vdl.SetTarget, error) {
 
-	if !vdl.Compatible(tt, __VDLType49) {
-		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType49)
+	if ttWant := vdl.TypeOf((*map[complex64]struct{})(nil)); !vdl.Compatible(tt, ttWant) {
+		return nil, fmt.Errorf("type %v incompatible with %v", tt, ttWant)
 	}
 	*t.Value = make(map[complex64]struct{})
 	return t, nil
@@ -4964,8 +4924,8 @@ type unnamed_7365745b636f6d706c65783132385dTarget struct {
 
 func (t *unnamed_7365745b636f6d706c65783132385dTarget) StartSet(tt *vdl.Type, len int) (vdl.SetTarget, error) {
 
-	if !vdl.Compatible(tt, __VDLType50) {
-		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType50)
+	if ttWant := vdl.TypeOf((*map[complex128]struct{})(nil)); !vdl.Compatible(tt, ttWant) {
+		return nil, fmt.Errorf("type %v incompatible with %v", tt, ttWant)
 	}
 	*t.Value = make(map[complex128]struct{})
 	return t, nil
@@ -4999,8 +4959,8 @@ type unnamed_7365745b74696d652e54696d65207374727563747b5365636f6e647320696e74363
 
 func (t *unnamed_7365745b74696d652e54696d65207374727563747b5365636f6e647320696e7436343b4e616e6f7320696e7433327d5dTarget) StartSet(tt *vdl.Type, len int) (vdl.SetTarget, error) {
 
-	if !vdl.Compatible(tt, __VDLType51) {
-		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType51)
+	if ttWant := vdl.TypeOf((*map[time_2.Time]struct{})(nil)); !vdl.Compatible(tt, ttWant) {
+		return nil, fmt.Errorf("type %v incompatible with %v", tt, ttWant)
 	}
 	*t.Value = make(map[time.Time]struct{})
 	return t, nil
@@ -5033,9 +4993,6 @@ func (BigData) __VDLReflect(struct {
 }
 
 func (m *BigData) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
-	if __VDLType_v_io_v23_query_engine_internal_testdata_BigData == nil || __VDLType52 == nil {
-		panic("Initialization order error: types generated for FillVDLTarget not initialized. Consider moving caller to an init() block.")
-	}
 	fieldsTarget1, err := t.StartFields(tt)
 	if err != nil {
 		return err
@@ -5046,7 +5003,7 @@ func (m *BigData) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 		return err
 	}
 	if err != vdl.ErrFieldNoExist {
-		if err := fieldTarget3.FromString(string(m.Key), vdl.StringType); err != nil {
+		if err := fieldTarget3.FromString(string(m.Key), tt.NonOptional().Field(0).Type); err != nil {
 			return err
 		}
 		if err := fieldsTarget1.FinishField(keyTarget2, fieldTarget3); err != nil {
@@ -5072,8 +5029,8 @@ type BigDataTarget struct {
 
 func (t *BigDataTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
 
-	if !vdl.Compatible(tt, __VDLType_v_io_v23_query_engine_internal_testdata_BigData) {
-		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType_v_io_v23_query_engine_internal_testdata_BigData)
+	if ttWant := vdl.TypeOf((*BigData)(nil)).Elem(); !vdl.Compatible(tt, ttWant) {
+		return nil, fmt.Errorf("type %v incompatible with %v", tt, ttWant)
 	}
 	return t, nil
 }
@@ -5084,7 +5041,7 @@ func (t *BigDataTarget) StartField(name string) (key, field vdl.Target, _ error)
 		target, err := &t.keyTarget, error(nil)
 		return nil, target, err
 	default:
-		return nil, nil, fmt.Errorf("field %s not in struct %v", name, __VDLType_v_io_v23_query_engine_internal_testdata_BigData)
+		return nil, nil, fmt.Errorf("field %s not in struct v.io/v23/query/engine/internal/testdata.BigData", name)
 	}
 }
 func (t *BigDataTarget) FinishField(_, _ vdl.Target) error {
@@ -5095,7 +5052,27 @@ func (t *BigDataTarget) FinishFields(_ vdl.FieldsTarget) error {
 	return nil
 }
 
-func init() {
+var __VDLInitCalled bool
+
+// __VDLInit performs vdl initialization.  It is safe to call multiple times.
+// If you have an init ordering issue, just insert the following line verbatim
+// into your source files in this package, right after the "package foo" clause:
+//
+//    var _ = __VDLInit()
+//
+// The purpose of this function is to ensure that vdl initialization occurs in
+// the right order, and very early in the init sequence.  In particular, vdl
+// registration and package variable initialization needs to occur before
+// functions like vdl.TypeOf will work properly.
+//
+// This function returns a dummy value, so that it can be used to initialize the
+// first var in the file, to take advantage of Go's defined init order.
+func __VDLInit() struct{} {
+	if __VDLInitCalled {
+		return struct{}{}
+	}
+
+	// Register types.
 	vdl.Register((*AddressInfo)(nil))
 	vdl.Register((*CreditAgency)(nil))
 	vdl.Register((*ExperianRating)(nil))
@@ -5109,10 +5086,10 @@ func init() {
 	vdl.Register((*Customer)(nil))
 	vdl.Register((*Invoice)(nil))
 	vdl.Register((*Numbers)(nil))
-	vdl.Register((*FooType)(nil))
-	vdl.Register((*BarType)(nil))
 	vdl.Register((*TitleOrValueType)(nil))
 	vdl.Register((*BazType)(nil))
+	vdl.Register((*BarType)(nil))
+	vdl.Register((*FooType)(nil))
 	vdl.Register((*K)(nil))
 	vdl.Register((*V)(nil))
 	vdl.Register((*FunWithMaps)(nil))
@@ -5120,619 +5097,6 @@ func init() {
 	vdl.Register((*ManyMaps)(nil))
 	vdl.Register((*ManySets)(nil))
 	vdl.Register((*BigData)(nil))
-}
 
-var __VDLType0 *vdl.Type = vdl.TypeOf((*AddressInfo)(nil))
-var __VDLType12 *vdl.Type = vdl.TypeOf((*BarType)(nil))
-var __VDLType13 *vdl.Type = vdl.TypeOf((*BazType)(nil))
-var __VDLType52 *vdl.Type = vdl.TypeOf((*BigData)(nil))
-var __VDLType6 *vdl.Type = vdl.TypeOf((*CreditReport)(nil))
-var __VDLType7 *vdl.Type = vdl.TypeOf((*Customer)(nil))
-var __VDLType1 *vdl.Type = vdl.TypeOf((*EquifaxCreditReport)(nil))
-var __VDLType2 *vdl.Type = vdl.TypeOf((*ExperianCreditReport)(nil))
-var __VDLType11 *vdl.Type = vdl.TypeOf((*FooType)(nil))
-var __VDLType16 *vdl.Type = vdl.TypeOf((*FunWithMaps)(nil))
-var __VDLType21 *vdl.Type = vdl.TypeOf((*FunWithTypes)(nil))
-var __VDLType9 *vdl.Type
-
-func __VDLType9_gen() *vdl.Type {
-	__VDLType9Builder := vdl.TypeBuilder{}
-
-	__VDLType91 := __VDLType9Builder.Optional()
-	__VDLType92 := __VDLType9Builder.Struct()
-	__VDLType93 := __VDLType9Builder.Named("v.io/v23/query/engine/internal/testdata.Invoice").AssignBase(__VDLType92)
-	__VDLType94 := vdl.Int64Type
-	__VDLType92.AppendField("CustId", __VDLType94)
-	__VDLType92.AppendField("InvoiceNum", __VDLType94)
-	__VDLType95 := __VDLType9Builder.Struct()
-	__VDLType96 := __VDLType9Builder.Named("time.Time").AssignBase(__VDLType95)
-	__VDLType95.AppendField("Seconds", __VDLType94)
-	__VDLType97 := vdl.Int32Type
-	__VDLType95.AppendField("Nanos", __VDLType97)
-	__VDLType92.AppendField("InvoiceDate", __VDLType96)
-	__VDLType92.AppendField("Amount", __VDLType94)
-	__VDLType98 := __VDLType9Builder.Struct()
-	__VDLType99 := __VDLType9Builder.Named("v.io/v23/query/engine/internal/testdata.AddressInfo").AssignBase(__VDLType98)
-	__VDLType910 := vdl.StringType
-	__VDLType98.AppendField("Street", __VDLType910)
-	__VDLType98.AppendField("City", __VDLType910)
-	__VDLType98.AppendField("State", __VDLType910)
-	__VDLType98.AppendField("Zip", __VDLType910)
-	__VDLType92.AppendField("ShipTo", __VDLType99)
-	__VDLType91.AssignElem(__VDLType93)
-	__VDLType9Builder.Build()
-	__VDLType9v, err := __VDLType91.Built()
-	if err != nil {
-		panic(err)
-	}
-	return __VDLType9v
-}
-func init() {
-	__VDLType9 = __VDLType9_gen()
-}
-
-var __VDLType14 *vdl.Type = vdl.TypeOf((*K)(nil))
-var __VDLType22 *vdl.Type
-
-func __VDLType22_gen() *vdl.Type {
-	__VDLType22Builder := vdl.TypeBuilder{}
-
-	__VDLType221 := __VDLType22Builder.Optional()
-	__VDLType222 := __VDLType22Builder.Struct()
-	__VDLType223 := __VDLType22Builder.Named("v.io/v23/query/engine/internal/testdata.ManyMaps").AssignBase(__VDLType222)
-	__VDLType224 := __VDLType22Builder.Map()
-	__VDLType225 := vdl.BoolType
-	__VDLType224.AssignKey(__VDLType225)
-	__VDLType226 := vdl.StringType
-	__VDLType224.AssignElem(__VDLType226)
-	__VDLType222.AppendField("B", __VDLType224)
-	__VDLType227 := __VDLType22Builder.Map()
-	__VDLType228 := vdl.ByteType
-	__VDLType227.AssignKey(__VDLType228)
-	__VDLType227.AssignElem(__VDLType226)
-	__VDLType222.AppendField("By", __VDLType227)
-	__VDLType229 := __VDLType22Builder.Map()
-	__VDLType2210 := vdl.Uint16Type
-	__VDLType229.AssignKey(__VDLType2210)
-	__VDLType229.AssignElem(__VDLType226)
-	__VDLType222.AppendField("U16", __VDLType229)
-	__VDLType2211 := __VDLType22Builder.Map()
-	__VDLType2212 := vdl.Uint32Type
-	__VDLType2211.AssignKey(__VDLType2212)
-	__VDLType2211.AssignElem(__VDLType226)
-	__VDLType222.AppendField("U32", __VDLType2211)
-	__VDLType2213 := __VDLType22Builder.Map()
-	__VDLType2214 := vdl.Uint64Type
-	__VDLType2213.AssignKey(__VDLType2214)
-	__VDLType2213.AssignElem(__VDLType226)
-	__VDLType222.AppendField("U64", __VDLType2213)
-	__VDLType2215 := __VDLType22Builder.Map()
-	__VDLType2216 := vdl.Int16Type
-	__VDLType2215.AssignKey(__VDLType2216)
-	__VDLType2215.AssignElem(__VDLType226)
-	__VDLType222.AppendField("I16", __VDLType2215)
-	__VDLType2217 := __VDLType22Builder.Map()
-	__VDLType2218 := vdl.Int32Type
-	__VDLType2217.AssignKey(__VDLType2218)
-	__VDLType2217.AssignElem(__VDLType226)
-	__VDLType222.AppendField("I32", __VDLType2217)
-	__VDLType2219 := __VDLType22Builder.Map()
-	__VDLType2220 := vdl.Int64Type
-	__VDLType2219.AssignKey(__VDLType2220)
-	__VDLType2219.AssignElem(__VDLType226)
-	__VDLType222.AppendField("I64", __VDLType2219)
-	__VDLType2221 := __VDLType22Builder.Map()
-	__VDLType2222 := vdl.Float32Type
-	__VDLType2221.AssignKey(__VDLType2222)
-	__VDLType2221.AssignElem(__VDLType226)
-	__VDLType222.AppendField("F32", __VDLType2221)
-	__VDLType2223 := __VDLType22Builder.Map()
-	__VDLType2224 := vdl.Float64Type
-	__VDLType2223.AssignKey(__VDLType2224)
-	__VDLType2223.AssignElem(__VDLType226)
-	__VDLType222.AppendField("F64", __VDLType2223)
-	__VDLType2225 := __VDLType22Builder.Map()
-	__VDLType2226 := vdl.Complex64Type
-	__VDLType2225.AssignKey(__VDLType2226)
-	__VDLType2225.AssignElem(__VDLType226)
-	__VDLType222.AppendField("C64", __VDLType2225)
-	__VDLType2227 := __VDLType22Builder.Map()
-	__VDLType2228 := vdl.Complex128Type
-	__VDLType2227.AssignKey(__VDLType2228)
-	__VDLType2227.AssignElem(__VDLType226)
-	__VDLType222.AppendField("C128", __VDLType2227)
-	__VDLType2229 := __VDLType22Builder.Map()
-	__VDLType2229.AssignKey(__VDLType226)
-	__VDLType2229.AssignElem(__VDLType226)
-	__VDLType222.AppendField("S", __VDLType2229)
-	__VDLType2230 := __VDLType22Builder.Map()
-	__VDLType2230.AssignKey(__VDLType226)
-	__VDLType2230.AssignElem(__VDLType2229)
-	__VDLType222.AppendField("Ms", __VDLType2230)
-	__VDLType2231 := __VDLType22Builder.Map()
-	__VDLType2232 := __VDLType22Builder.Struct()
-	__VDLType2233 := __VDLType22Builder.Named("time.Time").AssignBase(__VDLType2232)
-	__VDLType2232.AppendField("Seconds", __VDLType2220)
-	__VDLType2232.AppendField("Nanos", __VDLType2218)
-	__VDLType2231.AssignKey(__VDLType2233)
-	__VDLType2231.AssignElem(__VDLType226)
-	__VDLType222.AppendField("T", __VDLType2231)
-	__VDLType221.AssignElem(__VDLType223)
-	__VDLType22Builder.Build()
-	__VDLType22v, err := __VDLType221.Built()
-	if err != nil {
-		panic(err)
-	}
-	return __VDLType22v
-}
-func init() {
-	__VDLType22 = __VDLType22_gen()
-}
-
-var __VDLType38 *vdl.Type
-
-func __VDLType38_gen() *vdl.Type {
-	__VDLType38Builder := vdl.TypeBuilder{}
-
-	__VDLType381 := __VDLType38Builder.Optional()
-	__VDLType382 := __VDLType38Builder.Struct()
-	__VDLType383 := __VDLType38Builder.Named("v.io/v23/query/engine/internal/testdata.ManySets").AssignBase(__VDLType382)
-	__VDLType384 := __VDLType38Builder.Set()
-	__VDLType385 := vdl.BoolType
-	__VDLType384.AssignKey(__VDLType385)
-	__VDLType382.AppendField("B", __VDLType384)
-	__VDLType386 := __VDLType38Builder.Set()
-	__VDLType387 := vdl.ByteType
-	__VDLType386.AssignKey(__VDLType387)
-	__VDLType382.AppendField("By", __VDLType386)
-	__VDLType388 := __VDLType38Builder.Set()
-	__VDLType389 := vdl.Uint16Type
-	__VDLType388.AssignKey(__VDLType389)
-	__VDLType382.AppendField("U16", __VDLType388)
-	__VDLType3810 := __VDLType38Builder.Set()
-	__VDLType3811 := vdl.Uint32Type
-	__VDLType3810.AssignKey(__VDLType3811)
-	__VDLType382.AppendField("U32", __VDLType3810)
-	__VDLType3812 := __VDLType38Builder.Set()
-	__VDLType3813 := vdl.Uint64Type
-	__VDLType3812.AssignKey(__VDLType3813)
-	__VDLType382.AppendField("U64", __VDLType3812)
-	__VDLType3814 := __VDLType38Builder.Set()
-	__VDLType3815 := vdl.Int16Type
-	__VDLType3814.AssignKey(__VDLType3815)
-	__VDLType382.AppendField("I16", __VDLType3814)
-	__VDLType3816 := __VDLType38Builder.Set()
-	__VDLType3817 := vdl.Int32Type
-	__VDLType3816.AssignKey(__VDLType3817)
-	__VDLType382.AppendField("I32", __VDLType3816)
-	__VDLType3818 := __VDLType38Builder.Set()
-	__VDLType3819 := vdl.Int64Type
-	__VDLType3818.AssignKey(__VDLType3819)
-	__VDLType382.AppendField("I64", __VDLType3818)
-	__VDLType3820 := __VDLType38Builder.Set()
-	__VDLType3821 := vdl.Float32Type
-	__VDLType3820.AssignKey(__VDLType3821)
-	__VDLType382.AppendField("F32", __VDLType3820)
-	__VDLType3822 := __VDLType38Builder.Set()
-	__VDLType3823 := vdl.Float64Type
-	__VDLType3822.AssignKey(__VDLType3823)
-	__VDLType382.AppendField("F64", __VDLType3822)
-	__VDLType3824 := __VDLType38Builder.Set()
-	__VDLType3825 := vdl.Complex64Type
-	__VDLType3824.AssignKey(__VDLType3825)
-	__VDLType382.AppendField("C64", __VDLType3824)
-	__VDLType3826 := __VDLType38Builder.Set()
-	__VDLType3827 := vdl.Complex128Type
-	__VDLType3826.AssignKey(__VDLType3827)
-	__VDLType382.AppendField("C128", __VDLType3826)
-	__VDLType3828 := __VDLType38Builder.Set()
-	__VDLType3829 := vdl.StringType
-	__VDLType3828.AssignKey(__VDLType3829)
-	__VDLType382.AppendField("S", __VDLType3828)
-	__VDLType3830 := __VDLType38Builder.Set()
-	__VDLType3831 := __VDLType38Builder.Struct()
-	__VDLType3832 := __VDLType38Builder.Named("time.Time").AssignBase(__VDLType3831)
-	__VDLType3831.AppendField("Seconds", __VDLType3819)
-	__VDLType3831.AppendField("Nanos", __VDLType3817)
-	__VDLType3830.AssignKey(__VDLType3832)
-	__VDLType382.AppendField("T", __VDLType3830)
-	__VDLType381.AssignElem(__VDLType383)
-	__VDLType38Builder.Build()
-	__VDLType38v, err := __VDLType381.Built()
-	if err != nil {
-		panic(err)
-	}
-	return __VDLType38v
-}
-func init() {
-	__VDLType38 = __VDLType38_gen()
-}
-
-var __VDLType10 *vdl.Type = vdl.TypeOf((*Numbers)(nil))
-var __VDLType4 *vdl.Type = vdl.TypeOf((*TransUnionCreditReport)(nil))
-var __VDLType15 *vdl.Type = vdl.TypeOf((*V)(nil))
-var __VDLType19 *vdl.Type = vdl.TypeOf([]map[string]struct{}(nil))
-var __VDLType8 *vdl.Type = vdl.TypeOf([]AddressInfo(nil))
-var __VDLType23 *vdl.Type = vdl.TypeOf(map[bool]string(nil))
-var __VDLType24 *vdl.Type = vdl.TypeOf(map[byte]string(nil))
-var __VDLType34 *vdl.Type = vdl.TypeOf(map[complex128]string(nil))
-var __VDLType33 *vdl.Type = vdl.TypeOf(map[complex64]string(nil))
-var __VDLType31 *vdl.Type = vdl.TypeOf(map[float32]string(nil))
-var __VDLType32 *vdl.Type = vdl.TypeOf(map[float64]string(nil))
-var __VDLType18 *vdl.Type = vdl.TypeOf(map[int16][]map[string]struct{}(nil))
-var __VDLType28 *vdl.Type = vdl.TypeOf(map[int16]string(nil))
-var __VDLType29 *vdl.Type = vdl.TypeOf(map[int32]string(nil))
-var __VDLType30 *vdl.Type = vdl.TypeOf(map[int64]string(nil))
-var __VDLType5 *vdl.Type = vdl.TypeOf(map[string]int16(nil))
-var __VDLType36 *vdl.Type = vdl.TypeOf(map[string]map[string]string(nil))
-var __VDLType35 *vdl.Type = vdl.TypeOf(map[string]string(nil))
-var __VDLType37 *vdl.Type
-
-func __VDLType37_gen() *vdl.Type {
-	__VDLType37Builder := vdl.TypeBuilder{}
-
-	__VDLType371 := __VDLType37Builder.Map()
-	__VDLType372 := __VDLType37Builder.Struct()
-	__VDLType373 := __VDLType37Builder.Named("time.Time").AssignBase(__VDLType372)
-	__VDLType374 := vdl.Int64Type
-	__VDLType372.AppendField("Seconds", __VDLType374)
-	__VDLType375 := vdl.Int32Type
-	__VDLType372.AppendField("Nanos", __VDLType375)
-	__VDLType371.AssignKey(__VDLType373)
-	__VDLType376 := vdl.StringType
-	__VDLType371.AssignElem(__VDLType376)
-	__VDLType37Builder.Build()
-	__VDLType37v, err := __VDLType371.Built()
-	if err != nil {
-		panic(err)
-	}
-	return __VDLType37v
-}
-func init() {
-	__VDLType37 = __VDLType37_gen()
-}
-
-var __VDLType25 *vdl.Type = vdl.TypeOf(map[uint16]string(nil))
-var __VDLType26 *vdl.Type = vdl.TypeOf(map[uint32]string(nil))
-var __VDLType27 *vdl.Type = vdl.TypeOf(map[uint64]string(nil))
-var __VDLType17 *vdl.Type = vdl.TypeOf(map[K]V(nil))
-var __VDLType39 *vdl.Type = vdl.TypeOf(map[bool]struct{}(nil))
-var __VDLType40 *vdl.Type = vdl.TypeOf(map[byte]struct{}(nil))
-var __VDLType50 *vdl.Type = vdl.TypeOf(map[complex128]struct{}(nil))
-var __VDLType49 *vdl.Type = vdl.TypeOf(map[complex64]struct{}(nil))
-var __VDLType47 *vdl.Type = vdl.TypeOf(map[float32]struct{}(nil))
-var __VDLType48 *vdl.Type = vdl.TypeOf(map[float64]struct{}(nil))
-var __VDLType44 *vdl.Type = vdl.TypeOf(map[int16]struct{}(nil))
-var __VDLType45 *vdl.Type = vdl.TypeOf(map[int32]struct{}(nil))
-var __VDLType46 *vdl.Type = vdl.TypeOf(map[int64]struct{}(nil))
-var __VDLType20 *vdl.Type = vdl.TypeOf(map[string]struct{}(nil))
-var __VDLType51 *vdl.Type
-
-func __VDLType51_gen() *vdl.Type {
-	__VDLType51Builder := vdl.TypeBuilder{}
-
-	__VDLType511 := __VDLType51Builder.Set()
-	__VDLType512 := __VDLType51Builder.Struct()
-	__VDLType513 := __VDLType51Builder.Named("time.Time").AssignBase(__VDLType512)
-	__VDLType514 := vdl.Int64Type
-	__VDLType512.AppendField("Seconds", __VDLType514)
-	__VDLType515 := vdl.Int32Type
-	__VDLType512.AppendField("Nanos", __VDLType515)
-	__VDLType511.AssignKey(__VDLType513)
-	__VDLType51Builder.Build()
-	__VDLType51v, err := __VDLType511.Built()
-	if err != nil {
-		panic(err)
-	}
-	return __VDLType51v
-}
-func init() {
-	__VDLType51 = __VDLType51_gen()
-}
-
-var __VDLType41 *vdl.Type = vdl.TypeOf(map[uint16]struct{}(nil))
-var __VDLType42 *vdl.Type = vdl.TypeOf(map[uint32]struct{}(nil))
-var __VDLType43 *vdl.Type = vdl.TypeOf(map[uint64]struct{}(nil))
-var __VDLType3 *vdl.Type = vdl.TypeOf(map[Tdh]struct{}(nil))
-var __VDLType_time_Time *vdl.Type
-
-func __VDLType_time_Time_gen() *vdl.Type {
-	__VDLType_time_TimeBuilder := vdl.TypeBuilder{}
-
-	__VDLType_time_Time1 := __VDLType_time_TimeBuilder.Struct()
-	__VDLType_time_Time2 := __VDLType_time_TimeBuilder.Named("time.Time").AssignBase(__VDLType_time_Time1)
-	__VDLType_time_Time3 := vdl.Int64Type
-	__VDLType_time_Time1.AppendField("Seconds", __VDLType_time_Time3)
-	__VDLType_time_Time4 := vdl.Int32Type
-	__VDLType_time_Time1.AppendField("Nanos", __VDLType_time_Time4)
-	__VDLType_time_TimeBuilder.Build()
-	__VDLType_time_Timev, err := __VDLType_time_Time2.Built()
-	if err != nil {
-		panic(err)
-	}
-	return __VDLType_time_Timev
-}
-func init() {
-	__VDLType_time_Time = __VDLType_time_Time_gen()
-}
-
-var __VDLType_v_io_v23_query_engine_internal_testdata_AddressInfo *vdl.Type = vdl.TypeOf(AddressInfo{})
-var __VDLType_v_io_v23_query_engine_internal_testdata_AgencyReport *vdl.Type = vdl.TypeOf(AgencyReport(AgencyReportEquifaxReport{EquifaxCreditReport{}}))
-var __VDLType_v_io_v23_query_engine_internal_testdata_BarType *vdl.Type = vdl.TypeOf(BarType{
-	Baz: BazType{
-		TitleOrValue: TitleOrValueTypeTitle{""},
-	},
-})
-var __VDLType_v_io_v23_query_engine_internal_testdata_BazType *vdl.Type = vdl.TypeOf(BazType{
-	TitleOrValue: TitleOrValueTypeTitle{""},
-})
-var __VDLType_v_io_v23_query_engine_internal_testdata_BigData *vdl.Type = vdl.TypeOf(BigData{})
-var __VDLType_v_io_v23_query_engine_internal_testdata_CreditAgency *vdl.Type = vdl.TypeOf(CreditAgencyEquifax)
-var __VDLType_v_io_v23_query_engine_internal_testdata_CreditReport *vdl.Type = vdl.TypeOf(CreditReport{
-	Report: AgencyReportEquifaxReport{EquifaxCreditReport{}},
-})
-var __VDLType_v_io_v23_query_engine_internal_testdata_Customer *vdl.Type = vdl.TypeOf(Customer{
-	Credit: CreditReport{
-		Report: AgencyReportEquifaxReport{EquifaxCreditReport{}},
-	},
-})
-var __VDLType_v_io_v23_query_engine_internal_testdata_EquifaxCreditReport *vdl.Type = vdl.TypeOf(EquifaxCreditReport{})
-var __VDLType_v_io_v23_query_engine_internal_testdata_ExperianCreditReport *vdl.Type = vdl.TypeOf(ExperianCreditReport{})
-var __VDLType_v_io_v23_query_engine_internal_testdata_ExperianRating *vdl.Type = vdl.TypeOf(ExperianRatingGood)
-var __VDLType_v_io_v23_query_engine_internal_testdata_FooType *vdl.Type = vdl.TypeOf(FooType{
-	Bar: BarType{
-		Baz: BazType{
-			TitleOrValue: TitleOrValueTypeTitle{""},
-		},
-	},
-})
-var __VDLType_v_io_v23_query_engine_internal_testdata_FunWithMaps *vdl.Type = vdl.TypeOf(FunWithMaps{})
-var __VDLType_v_io_v23_query_engine_internal_testdata_FunWithTypes *vdl.Type = vdl.TypeOf(FunWithTypes{
-	T1: vdl.AnyType,
-	T2: vdl.AnyType,
-})
-var __VDLType_v_io_v23_query_engine_internal_testdata_Invoice *vdl.Type
-
-func __VDLType_v_io_v23_query_engine_internal_testdata_Invoice_gen() *vdl.Type {
-	__VDLType_v_io_v23_query_engine_internal_testdata_InvoiceBuilder := vdl.TypeBuilder{}
-
-	__VDLType_v_io_v23_query_engine_internal_testdata_Invoice1 := __VDLType_v_io_v23_query_engine_internal_testdata_InvoiceBuilder.Struct()
-	__VDLType_v_io_v23_query_engine_internal_testdata_Invoice2 := __VDLType_v_io_v23_query_engine_internal_testdata_InvoiceBuilder.Named("v.io/v23/query/engine/internal/testdata.Invoice").AssignBase(__VDLType_v_io_v23_query_engine_internal_testdata_Invoice1)
-	__VDLType_v_io_v23_query_engine_internal_testdata_Invoice3 := vdl.Int64Type
-	__VDLType_v_io_v23_query_engine_internal_testdata_Invoice1.AppendField("CustId", __VDLType_v_io_v23_query_engine_internal_testdata_Invoice3)
-	__VDLType_v_io_v23_query_engine_internal_testdata_Invoice1.AppendField("InvoiceNum", __VDLType_v_io_v23_query_engine_internal_testdata_Invoice3)
-	__VDLType_v_io_v23_query_engine_internal_testdata_Invoice4 := __VDLType_v_io_v23_query_engine_internal_testdata_InvoiceBuilder.Struct()
-	__VDLType_v_io_v23_query_engine_internal_testdata_Invoice5 := __VDLType_v_io_v23_query_engine_internal_testdata_InvoiceBuilder.Named("time.Time").AssignBase(__VDLType_v_io_v23_query_engine_internal_testdata_Invoice4)
-	__VDLType_v_io_v23_query_engine_internal_testdata_Invoice4.AppendField("Seconds", __VDLType_v_io_v23_query_engine_internal_testdata_Invoice3)
-	__VDLType_v_io_v23_query_engine_internal_testdata_Invoice6 := vdl.Int32Type
-	__VDLType_v_io_v23_query_engine_internal_testdata_Invoice4.AppendField("Nanos", __VDLType_v_io_v23_query_engine_internal_testdata_Invoice6)
-	__VDLType_v_io_v23_query_engine_internal_testdata_Invoice1.AppendField("InvoiceDate", __VDLType_v_io_v23_query_engine_internal_testdata_Invoice5)
-	__VDLType_v_io_v23_query_engine_internal_testdata_Invoice1.AppendField("Amount", __VDLType_v_io_v23_query_engine_internal_testdata_Invoice3)
-	__VDLType_v_io_v23_query_engine_internal_testdata_Invoice7 := __VDLType_v_io_v23_query_engine_internal_testdata_InvoiceBuilder.Struct()
-	__VDLType_v_io_v23_query_engine_internal_testdata_Invoice8 := __VDLType_v_io_v23_query_engine_internal_testdata_InvoiceBuilder.Named("v.io/v23/query/engine/internal/testdata.AddressInfo").AssignBase(__VDLType_v_io_v23_query_engine_internal_testdata_Invoice7)
-	__VDLType_v_io_v23_query_engine_internal_testdata_Invoice9 := vdl.StringType
-	__VDLType_v_io_v23_query_engine_internal_testdata_Invoice7.AppendField("Street", __VDLType_v_io_v23_query_engine_internal_testdata_Invoice9)
-	__VDLType_v_io_v23_query_engine_internal_testdata_Invoice7.AppendField("City", __VDLType_v_io_v23_query_engine_internal_testdata_Invoice9)
-	__VDLType_v_io_v23_query_engine_internal_testdata_Invoice7.AppendField("State", __VDLType_v_io_v23_query_engine_internal_testdata_Invoice9)
-	__VDLType_v_io_v23_query_engine_internal_testdata_Invoice7.AppendField("Zip", __VDLType_v_io_v23_query_engine_internal_testdata_Invoice9)
-	__VDLType_v_io_v23_query_engine_internal_testdata_Invoice1.AppendField("ShipTo", __VDLType_v_io_v23_query_engine_internal_testdata_Invoice8)
-	__VDLType_v_io_v23_query_engine_internal_testdata_InvoiceBuilder.Build()
-	__VDLType_v_io_v23_query_engine_internal_testdata_Invoicev, err := __VDLType_v_io_v23_query_engine_internal_testdata_Invoice2.Built()
-	if err != nil {
-		panic(err)
-	}
-	return __VDLType_v_io_v23_query_engine_internal_testdata_Invoicev
-}
-func init() {
-	__VDLType_v_io_v23_query_engine_internal_testdata_Invoice = __VDLType_v_io_v23_query_engine_internal_testdata_Invoice_gen()
-}
-
-var __VDLType_v_io_v23_query_engine_internal_testdata_K *vdl.Type = vdl.TypeOf(K{})
-var __VDLType_v_io_v23_query_engine_internal_testdata_ManyMaps *vdl.Type
-
-func __VDLType_v_io_v23_query_engine_internal_testdata_ManyMaps_gen() *vdl.Type {
-	__VDLType_v_io_v23_query_engine_internal_testdata_ManyMapsBuilder := vdl.TypeBuilder{}
-
-	__VDLType_v_io_v23_query_engine_internal_testdata_ManyMaps1 := __VDLType_v_io_v23_query_engine_internal_testdata_ManyMapsBuilder.Struct()
-	__VDLType_v_io_v23_query_engine_internal_testdata_ManyMaps2 := __VDLType_v_io_v23_query_engine_internal_testdata_ManyMapsBuilder.Named("v.io/v23/query/engine/internal/testdata.ManyMaps").AssignBase(__VDLType_v_io_v23_query_engine_internal_testdata_ManyMaps1)
-	__VDLType_v_io_v23_query_engine_internal_testdata_ManyMaps3 := __VDLType_v_io_v23_query_engine_internal_testdata_ManyMapsBuilder.Map()
-	__VDLType_v_io_v23_query_engine_internal_testdata_ManyMaps4 := vdl.BoolType
-	__VDLType_v_io_v23_query_engine_internal_testdata_ManyMaps3.AssignKey(__VDLType_v_io_v23_query_engine_internal_testdata_ManyMaps4)
-	__VDLType_v_io_v23_query_engine_internal_testdata_ManyMaps5 := vdl.StringType
-	__VDLType_v_io_v23_query_engine_internal_testdata_ManyMaps3.AssignElem(__VDLType_v_io_v23_query_engine_internal_testdata_ManyMaps5)
-	__VDLType_v_io_v23_query_engine_internal_testdata_ManyMaps1.AppendField("B", __VDLType_v_io_v23_query_engine_internal_testdata_ManyMaps3)
-	__VDLType_v_io_v23_query_engine_internal_testdata_ManyMaps6 := __VDLType_v_io_v23_query_engine_internal_testdata_ManyMapsBuilder.Map()
-	__VDLType_v_io_v23_query_engine_internal_testdata_ManyMaps7 := vdl.ByteType
-	__VDLType_v_io_v23_query_engine_internal_testdata_ManyMaps6.AssignKey(__VDLType_v_io_v23_query_engine_internal_testdata_ManyMaps7)
-	__VDLType_v_io_v23_query_engine_internal_testdata_ManyMaps6.AssignElem(__VDLType_v_io_v23_query_engine_internal_testdata_ManyMaps5)
-	__VDLType_v_io_v23_query_engine_internal_testdata_ManyMaps1.AppendField("By", __VDLType_v_io_v23_query_engine_internal_testdata_ManyMaps6)
-	__VDLType_v_io_v23_query_engine_internal_testdata_ManyMaps8 := __VDLType_v_io_v23_query_engine_internal_testdata_ManyMapsBuilder.Map()
-	__VDLType_v_io_v23_query_engine_internal_testdata_ManyMaps9 := vdl.Uint16Type
-	__VDLType_v_io_v23_query_engine_internal_testdata_ManyMaps8.AssignKey(__VDLType_v_io_v23_query_engine_internal_testdata_ManyMaps9)
-	__VDLType_v_io_v23_query_engine_internal_testdata_ManyMaps8.AssignElem(__VDLType_v_io_v23_query_engine_internal_testdata_ManyMaps5)
-	__VDLType_v_io_v23_query_engine_internal_testdata_ManyMaps1.AppendField("U16", __VDLType_v_io_v23_query_engine_internal_testdata_ManyMaps8)
-	__VDLType_v_io_v23_query_engine_internal_testdata_ManyMaps10 := __VDLType_v_io_v23_query_engine_internal_testdata_ManyMapsBuilder.Map()
-	__VDLType_v_io_v23_query_engine_internal_testdata_ManyMaps11 := vdl.Uint32Type
-	__VDLType_v_io_v23_query_engine_internal_testdata_ManyMaps10.AssignKey(__VDLType_v_io_v23_query_engine_internal_testdata_ManyMaps11)
-	__VDLType_v_io_v23_query_engine_internal_testdata_ManyMaps10.AssignElem(__VDLType_v_io_v23_query_engine_internal_testdata_ManyMaps5)
-	__VDLType_v_io_v23_query_engine_internal_testdata_ManyMaps1.AppendField("U32", __VDLType_v_io_v23_query_engine_internal_testdata_ManyMaps10)
-	__VDLType_v_io_v23_query_engine_internal_testdata_ManyMaps12 := __VDLType_v_io_v23_query_engine_internal_testdata_ManyMapsBuilder.Map()
-	__VDLType_v_io_v23_query_engine_internal_testdata_ManyMaps13 := vdl.Uint64Type
-	__VDLType_v_io_v23_query_engine_internal_testdata_ManyMaps12.AssignKey(__VDLType_v_io_v23_query_engine_internal_testdata_ManyMaps13)
-	__VDLType_v_io_v23_query_engine_internal_testdata_ManyMaps12.AssignElem(__VDLType_v_io_v23_query_engine_internal_testdata_ManyMaps5)
-	__VDLType_v_io_v23_query_engine_internal_testdata_ManyMaps1.AppendField("U64", __VDLType_v_io_v23_query_engine_internal_testdata_ManyMaps12)
-	__VDLType_v_io_v23_query_engine_internal_testdata_ManyMaps14 := __VDLType_v_io_v23_query_engine_internal_testdata_ManyMapsBuilder.Map()
-	__VDLType_v_io_v23_query_engine_internal_testdata_ManyMaps15 := vdl.Int16Type
-	__VDLType_v_io_v23_query_engine_internal_testdata_ManyMaps14.AssignKey(__VDLType_v_io_v23_query_engine_internal_testdata_ManyMaps15)
-	__VDLType_v_io_v23_query_engine_internal_testdata_ManyMaps14.AssignElem(__VDLType_v_io_v23_query_engine_internal_testdata_ManyMaps5)
-	__VDLType_v_io_v23_query_engine_internal_testdata_ManyMaps1.AppendField("I16", __VDLType_v_io_v23_query_engine_internal_testdata_ManyMaps14)
-	__VDLType_v_io_v23_query_engine_internal_testdata_ManyMaps16 := __VDLType_v_io_v23_query_engine_internal_testdata_ManyMapsBuilder.Map()
-	__VDLType_v_io_v23_query_engine_internal_testdata_ManyMaps17 := vdl.Int32Type
-	__VDLType_v_io_v23_query_engine_internal_testdata_ManyMaps16.AssignKey(__VDLType_v_io_v23_query_engine_internal_testdata_ManyMaps17)
-	__VDLType_v_io_v23_query_engine_internal_testdata_ManyMaps16.AssignElem(__VDLType_v_io_v23_query_engine_internal_testdata_ManyMaps5)
-	__VDLType_v_io_v23_query_engine_internal_testdata_ManyMaps1.AppendField("I32", __VDLType_v_io_v23_query_engine_internal_testdata_ManyMaps16)
-	__VDLType_v_io_v23_query_engine_internal_testdata_ManyMaps18 := __VDLType_v_io_v23_query_engine_internal_testdata_ManyMapsBuilder.Map()
-	__VDLType_v_io_v23_query_engine_internal_testdata_ManyMaps19 := vdl.Int64Type
-	__VDLType_v_io_v23_query_engine_internal_testdata_ManyMaps18.AssignKey(__VDLType_v_io_v23_query_engine_internal_testdata_ManyMaps19)
-	__VDLType_v_io_v23_query_engine_internal_testdata_ManyMaps18.AssignElem(__VDLType_v_io_v23_query_engine_internal_testdata_ManyMaps5)
-	__VDLType_v_io_v23_query_engine_internal_testdata_ManyMaps1.AppendField("I64", __VDLType_v_io_v23_query_engine_internal_testdata_ManyMaps18)
-	__VDLType_v_io_v23_query_engine_internal_testdata_ManyMaps20 := __VDLType_v_io_v23_query_engine_internal_testdata_ManyMapsBuilder.Map()
-	__VDLType_v_io_v23_query_engine_internal_testdata_ManyMaps21 := vdl.Float32Type
-	__VDLType_v_io_v23_query_engine_internal_testdata_ManyMaps20.AssignKey(__VDLType_v_io_v23_query_engine_internal_testdata_ManyMaps21)
-	__VDLType_v_io_v23_query_engine_internal_testdata_ManyMaps20.AssignElem(__VDLType_v_io_v23_query_engine_internal_testdata_ManyMaps5)
-	__VDLType_v_io_v23_query_engine_internal_testdata_ManyMaps1.AppendField("F32", __VDLType_v_io_v23_query_engine_internal_testdata_ManyMaps20)
-	__VDLType_v_io_v23_query_engine_internal_testdata_ManyMaps22 := __VDLType_v_io_v23_query_engine_internal_testdata_ManyMapsBuilder.Map()
-	__VDLType_v_io_v23_query_engine_internal_testdata_ManyMaps23 := vdl.Float64Type
-	__VDLType_v_io_v23_query_engine_internal_testdata_ManyMaps22.AssignKey(__VDLType_v_io_v23_query_engine_internal_testdata_ManyMaps23)
-	__VDLType_v_io_v23_query_engine_internal_testdata_ManyMaps22.AssignElem(__VDLType_v_io_v23_query_engine_internal_testdata_ManyMaps5)
-	__VDLType_v_io_v23_query_engine_internal_testdata_ManyMaps1.AppendField("F64", __VDLType_v_io_v23_query_engine_internal_testdata_ManyMaps22)
-	__VDLType_v_io_v23_query_engine_internal_testdata_ManyMaps24 := __VDLType_v_io_v23_query_engine_internal_testdata_ManyMapsBuilder.Map()
-	__VDLType_v_io_v23_query_engine_internal_testdata_ManyMaps25 := vdl.Complex64Type
-	__VDLType_v_io_v23_query_engine_internal_testdata_ManyMaps24.AssignKey(__VDLType_v_io_v23_query_engine_internal_testdata_ManyMaps25)
-	__VDLType_v_io_v23_query_engine_internal_testdata_ManyMaps24.AssignElem(__VDLType_v_io_v23_query_engine_internal_testdata_ManyMaps5)
-	__VDLType_v_io_v23_query_engine_internal_testdata_ManyMaps1.AppendField("C64", __VDLType_v_io_v23_query_engine_internal_testdata_ManyMaps24)
-	__VDLType_v_io_v23_query_engine_internal_testdata_ManyMaps26 := __VDLType_v_io_v23_query_engine_internal_testdata_ManyMapsBuilder.Map()
-	__VDLType_v_io_v23_query_engine_internal_testdata_ManyMaps27 := vdl.Complex128Type
-	__VDLType_v_io_v23_query_engine_internal_testdata_ManyMaps26.AssignKey(__VDLType_v_io_v23_query_engine_internal_testdata_ManyMaps27)
-	__VDLType_v_io_v23_query_engine_internal_testdata_ManyMaps26.AssignElem(__VDLType_v_io_v23_query_engine_internal_testdata_ManyMaps5)
-	__VDLType_v_io_v23_query_engine_internal_testdata_ManyMaps1.AppendField("C128", __VDLType_v_io_v23_query_engine_internal_testdata_ManyMaps26)
-	__VDLType_v_io_v23_query_engine_internal_testdata_ManyMaps28 := __VDLType_v_io_v23_query_engine_internal_testdata_ManyMapsBuilder.Map()
-	__VDLType_v_io_v23_query_engine_internal_testdata_ManyMaps28.AssignKey(__VDLType_v_io_v23_query_engine_internal_testdata_ManyMaps5)
-	__VDLType_v_io_v23_query_engine_internal_testdata_ManyMaps28.AssignElem(__VDLType_v_io_v23_query_engine_internal_testdata_ManyMaps5)
-	__VDLType_v_io_v23_query_engine_internal_testdata_ManyMaps1.AppendField("S", __VDLType_v_io_v23_query_engine_internal_testdata_ManyMaps28)
-	__VDLType_v_io_v23_query_engine_internal_testdata_ManyMaps29 := __VDLType_v_io_v23_query_engine_internal_testdata_ManyMapsBuilder.Map()
-	__VDLType_v_io_v23_query_engine_internal_testdata_ManyMaps29.AssignKey(__VDLType_v_io_v23_query_engine_internal_testdata_ManyMaps5)
-	__VDLType_v_io_v23_query_engine_internal_testdata_ManyMaps29.AssignElem(__VDLType_v_io_v23_query_engine_internal_testdata_ManyMaps28)
-	__VDLType_v_io_v23_query_engine_internal_testdata_ManyMaps1.AppendField("Ms", __VDLType_v_io_v23_query_engine_internal_testdata_ManyMaps29)
-	__VDLType_v_io_v23_query_engine_internal_testdata_ManyMaps30 := __VDLType_v_io_v23_query_engine_internal_testdata_ManyMapsBuilder.Map()
-	__VDLType_v_io_v23_query_engine_internal_testdata_ManyMaps31 := __VDLType_v_io_v23_query_engine_internal_testdata_ManyMapsBuilder.Struct()
-	__VDLType_v_io_v23_query_engine_internal_testdata_ManyMaps32 := __VDLType_v_io_v23_query_engine_internal_testdata_ManyMapsBuilder.Named("time.Time").AssignBase(__VDLType_v_io_v23_query_engine_internal_testdata_ManyMaps31)
-	__VDLType_v_io_v23_query_engine_internal_testdata_ManyMaps31.AppendField("Seconds", __VDLType_v_io_v23_query_engine_internal_testdata_ManyMaps19)
-	__VDLType_v_io_v23_query_engine_internal_testdata_ManyMaps31.AppendField("Nanos", __VDLType_v_io_v23_query_engine_internal_testdata_ManyMaps17)
-	__VDLType_v_io_v23_query_engine_internal_testdata_ManyMaps30.AssignKey(__VDLType_v_io_v23_query_engine_internal_testdata_ManyMaps32)
-	__VDLType_v_io_v23_query_engine_internal_testdata_ManyMaps30.AssignElem(__VDLType_v_io_v23_query_engine_internal_testdata_ManyMaps5)
-	__VDLType_v_io_v23_query_engine_internal_testdata_ManyMaps1.AppendField("T", __VDLType_v_io_v23_query_engine_internal_testdata_ManyMaps30)
-	__VDLType_v_io_v23_query_engine_internal_testdata_ManyMapsBuilder.Build()
-	__VDLType_v_io_v23_query_engine_internal_testdata_ManyMapsv, err := __VDLType_v_io_v23_query_engine_internal_testdata_ManyMaps2.Built()
-	if err != nil {
-		panic(err)
-	}
-	return __VDLType_v_io_v23_query_engine_internal_testdata_ManyMapsv
-}
-func init() {
-	__VDLType_v_io_v23_query_engine_internal_testdata_ManyMaps = __VDLType_v_io_v23_query_engine_internal_testdata_ManyMaps_gen()
-}
-
-var __VDLType_v_io_v23_query_engine_internal_testdata_ManySets *vdl.Type
-
-func __VDLType_v_io_v23_query_engine_internal_testdata_ManySets_gen() *vdl.Type {
-	__VDLType_v_io_v23_query_engine_internal_testdata_ManySetsBuilder := vdl.TypeBuilder{}
-
-	__VDLType_v_io_v23_query_engine_internal_testdata_ManySets1 := __VDLType_v_io_v23_query_engine_internal_testdata_ManySetsBuilder.Struct()
-	__VDLType_v_io_v23_query_engine_internal_testdata_ManySets2 := __VDLType_v_io_v23_query_engine_internal_testdata_ManySetsBuilder.Named("v.io/v23/query/engine/internal/testdata.ManySets").AssignBase(__VDLType_v_io_v23_query_engine_internal_testdata_ManySets1)
-	__VDLType_v_io_v23_query_engine_internal_testdata_ManySets3 := __VDLType_v_io_v23_query_engine_internal_testdata_ManySetsBuilder.Set()
-	__VDLType_v_io_v23_query_engine_internal_testdata_ManySets4 := vdl.BoolType
-	__VDLType_v_io_v23_query_engine_internal_testdata_ManySets3.AssignKey(__VDLType_v_io_v23_query_engine_internal_testdata_ManySets4)
-	__VDLType_v_io_v23_query_engine_internal_testdata_ManySets1.AppendField("B", __VDLType_v_io_v23_query_engine_internal_testdata_ManySets3)
-	__VDLType_v_io_v23_query_engine_internal_testdata_ManySets5 := __VDLType_v_io_v23_query_engine_internal_testdata_ManySetsBuilder.Set()
-	__VDLType_v_io_v23_query_engine_internal_testdata_ManySets6 := vdl.ByteType
-	__VDLType_v_io_v23_query_engine_internal_testdata_ManySets5.AssignKey(__VDLType_v_io_v23_query_engine_internal_testdata_ManySets6)
-	__VDLType_v_io_v23_query_engine_internal_testdata_ManySets1.AppendField("By", __VDLType_v_io_v23_query_engine_internal_testdata_ManySets5)
-	__VDLType_v_io_v23_query_engine_internal_testdata_ManySets7 := __VDLType_v_io_v23_query_engine_internal_testdata_ManySetsBuilder.Set()
-	__VDLType_v_io_v23_query_engine_internal_testdata_ManySets8 := vdl.Uint16Type
-	__VDLType_v_io_v23_query_engine_internal_testdata_ManySets7.AssignKey(__VDLType_v_io_v23_query_engine_internal_testdata_ManySets8)
-	__VDLType_v_io_v23_query_engine_internal_testdata_ManySets1.AppendField("U16", __VDLType_v_io_v23_query_engine_internal_testdata_ManySets7)
-	__VDLType_v_io_v23_query_engine_internal_testdata_ManySets9 := __VDLType_v_io_v23_query_engine_internal_testdata_ManySetsBuilder.Set()
-	__VDLType_v_io_v23_query_engine_internal_testdata_ManySets10 := vdl.Uint32Type
-	__VDLType_v_io_v23_query_engine_internal_testdata_ManySets9.AssignKey(__VDLType_v_io_v23_query_engine_internal_testdata_ManySets10)
-	__VDLType_v_io_v23_query_engine_internal_testdata_ManySets1.AppendField("U32", __VDLType_v_io_v23_query_engine_internal_testdata_ManySets9)
-	__VDLType_v_io_v23_query_engine_internal_testdata_ManySets11 := __VDLType_v_io_v23_query_engine_internal_testdata_ManySetsBuilder.Set()
-	__VDLType_v_io_v23_query_engine_internal_testdata_ManySets12 := vdl.Uint64Type
-	__VDLType_v_io_v23_query_engine_internal_testdata_ManySets11.AssignKey(__VDLType_v_io_v23_query_engine_internal_testdata_ManySets12)
-	__VDLType_v_io_v23_query_engine_internal_testdata_ManySets1.AppendField("U64", __VDLType_v_io_v23_query_engine_internal_testdata_ManySets11)
-	__VDLType_v_io_v23_query_engine_internal_testdata_ManySets13 := __VDLType_v_io_v23_query_engine_internal_testdata_ManySetsBuilder.Set()
-	__VDLType_v_io_v23_query_engine_internal_testdata_ManySets14 := vdl.Int16Type
-	__VDLType_v_io_v23_query_engine_internal_testdata_ManySets13.AssignKey(__VDLType_v_io_v23_query_engine_internal_testdata_ManySets14)
-	__VDLType_v_io_v23_query_engine_internal_testdata_ManySets1.AppendField("I16", __VDLType_v_io_v23_query_engine_internal_testdata_ManySets13)
-	__VDLType_v_io_v23_query_engine_internal_testdata_ManySets15 := __VDLType_v_io_v23_query_engine_internal_testdata_ManySetsBuilder.Set()
-	__VDLType_v_io_v23_query_engine_internal_testdata_ManySets16 := vdl.Int32Type
-	__VDLType_v_io_v23_query_engine_internal_testdata_ManySets15.AssignKey(__VDLType_v_io_v23_query_engine_internal_testdata_ManySets16)
-	__VDLType_v_io_v23_query_engine_internal_testdata_ManySets1.AppendField("I32", __VDLType_v_io_v23_query_engine_internal_testdata_ManySets15)
-	__VDLType_v_io_v23_query_engine_internal_testdata_ManySets17 := __VDLType_v_io_v23_query_engine_internal_testdata_ManySetsBuilder.Set()
-	__VDLType_v_io_v23_query_engine_internal_testdata_ManySets18 := vdl.Int64Type
-	__VDLType_v_io_v23_query_engine_internal_testdata_ManySets17.AssignKey(__VDLType_v_io_v23_query_engine_internal_testdata_ManySets18)
-	__VDLType_v_io_v23_query_engine_internal_testdata_ManySets1.AppendField("I64", __VDLType_v_io_v23_query_engine_internal_testdata_ManySets17)
-	__VDLType_v_io_v23_query_engine_internal_testdata_ManySets19 := __VDLType_v_io_v23_query_engine_internal_testdata_ManySetsBuilder.Set()
-	__VDLType_v_io_v23_query_engine_internal_testdata_ManySets20 := vdl.Float32Type
-	__VDLType_v_io_v23_query_engine_internal_testdata_ManySets19.AssignKey(__VDLType_v_io_v23_query_engine_internal_testdata_ManySets20)
-	__VDLType_v_io_v23_query_engine_internal_testdata_ManySets1.AppendField("F32", __VDLType_v_io_v23_query_engine_internal_testdata_ManySets19)
-	__VDLType_v_io_v23_query_engine_internal_testdata_ManySets21 := __VDLType_v_io_v23_query_engine_internal_testdata_ManySetsBuilder.Set()
-	__VDLType_v_io_v23_query_engine_internal_testdata_ManySets22 := vdl.Float64Type
-	__VDLType_v_io_v23_query_engine_internal_testdata_ManySets21.AssignKey(__VDLType_v_io_v23_query_engine_internal_testdata_ManySets22)
-	__VDLType_v_io_v23_query_engine_internal_testdata_ManySets1.AppendField("F64", __VDLType_v_io_v23_query_engine_internal_testdata_ManySets21)
-	__VDLType_v_io_v23_query_engine_internal_testdata_ManySets23 := __VDLType_v_io_v23_query_engine_internal_testdata_ManySetsBuilder.Set()
-	__VDLType_v_io_v23_query_engine_internal_testdata_ManySets24 := vdl.Complex64Type
-	__VDLType_v_io_v23_query_engine_internal_testdata_ManySets23.AssignKey(__VDLType_v_io_v23_query_engine_internal_testdata_ManySets24)
-	__VDLType_v_io_v23_query_engine_internal_testdata_ManySets1.AppendField("C64", __VDLType_v_io_v23_query_engine_internal_testdata_ManySets23)
-	__VDLType_v_io_v23_query_engine_internal_testdata_ManySets25 := __VDLType_v_io_v23_query_engine_internal_testdata_ManySetsBuilder.Set()
-	__VDLType_v_io_v23_query_engine_internal_testdata_ManySets26 := vdl.Complex128Type
-	__VDLType_v_io_v23_query_engine_internal_testdata_ManySets25.AssignKey(__VDLType_v_io_v23_query_engine_internal_testdata_ManySets26)
-	__VDLType_v_io_v23_query_engine_internal_testdata_ManySets1.AppendField("C128", __VDLType_v_io_v23_query_engine_internal_testdata_ManySets25)
-	__VDLType_v_io_v23_query_engine_internal_testdata_ManySets27 := __VDLType_v_io_v23_query_engine_internal_testdata_ManySetsBuilder.Set()
-	__VDLType_v_io_v23_query_engine_internal_testdata_ManySets28 := vdl.StringType
-	__VDLType_v_io_v23_query_engine_internal_testdata_ManySets27.AssignKey(__VDLType_v_io_v23_query_engine_internal_testdata_ManySets28)
-	__VDLType_v_io_v23_query_engine_internal_testdata_ManySets1.AppendField("S", __VDLType_v_io_v23_query_engine_internal_testdata_ManySets27)
-	__VDLType_v_io_v23_query_engine_internal_testdata_ManySets29 := __VDLType_v_io_v23_query_engine_internal_testdata_ManySetsBuilder.Set()
-	__VDLType_v_io_v23_query_engine_internal_testdata_ManySets30 := __VDLType_v_io_v23_query_engine_internal_testdata_ManySetsBuilder.Struct()
-	__VDLType_v_io_v23_query_engine_internal_testdata_ManySets31 := __VDLType_v_io_v23_query_engine_internal_testdata_ManySetsBuilder.Named("time.Time").AssignBase(__VDLType_v_io_v23_query_engine_internal_testdata_ManySets30)
-	__VDLType_v_io_v23_query_engine_internal_testdata_ManySets30.AppendField("Seconds", __VDLType_v_io_v23_query_engine_internal_testdata_ManySets18)
-	__VDLType_v_io_v23_query_engine_internal_testdata_ManySets30.AppendField("Nanos", __VDLType_v_io_v23_query_engine_internal_testdata_ManySets16)
-	__VDLType_v_io_v23_query_engine_internal_testdata_ManySets29.AssignKey(__VDLType_v_io_v23_query_engine_internal_testdata_ManySets31)
-	__VDLType_v_io_v23_query_engine_internal_testdata_ManySets1.AppendField("T", __VDLType_v_io_v23_query_engine_internal_testdata_ManySets29)
-	__VDLType_v_io_v23_query_engine_internal_testdata_ManySetsBuilder.Build()
-	__VDLType_v_io_v23_query_engine_internal_testdata_ManySetsv, err := __VDLType_v_io_v23_query_engine_internal_testdata_ManySets2.Built()
-	if err != nil {
-		panic(err)
-	}
-	return __VDLType_v_io_v23_query_engine_internal_testdata_ManySetsv
-}
-func init() {
-	__VDLType_v_io_v23_query_engine_internal_testdata_ManySets = __VDLType_v_io_v23_query_engine_internal_testdata_ManySets_gen()
-}
-
-var __VDLType_v_io_v23_query_engine_internal_testdata_Numbers *vdl.Type = vdl.TypeOf(Numbers{})
-var __VDLType_v_io_v23_query_engine_internal_testdata_RatingsArray *vdl.Type = vdl.TypeOf(RatingsArray{})
-var __VDLType_v_io_v23_query_engine_internal_testdata_Tdh *vdl.Type = vdl.TypeOf(TdhTom)
-var __VDLType_v_io_v23_query_engine_internal_testdata_TitleOrValueType *vdl.Type = vdl.TypeOf(TitleOrValueType(TitleOrValueTypeTitle{""}))
-var __VDLType_v_io_v23_query_engine_internal_testdata_TransUnionCreditReport *vdl.Type = vdl.TypeOf(TransUnionCreditReport{})
-var __VDLType_v_io_v23_query_engine_internal_testdata_V *vdl.Type = vdl.TypeOf(V{})
-
-func __VDLEnsureNativeBuilt() {
-	if __VDLType9 == nil {
-		__VDLType9 = __VDLType9_gen()
-	}
-	if __VDLType22 == nil {
-		__VDLType22 = __VDLType22_gen()
-	}
-	if __VDLType38 == nil {
-		__VDLType38 = __VDLType38_gen()
-	}
-	if __VDLType37 == nil {
-		__VDLType37 = __VDLType37_gen()
-	}
-	if __VDLType51 == nil {
-		__VDLType51 = __VDLType51_gen()
-	}
-	if __VDLType_time_Time == nil {
-		__VDLType_time_Time = __VDLType_time_Time_gen()
-	}
-	if __VDLType_v_io_v23_query_engine_internal_testdata_Invoice == nil {
-		__VDLType_v_io_v23_query_engine_internal_testdata_Invoice = __VDLType_v_io_v23_query_engine_internal_testdata_Invoice_gen()
-	}
-	if __VDLType_v_io_v23_query_engine_internal_testdata_ManyMaps == nil {
-		__VDLType_v_io_v23_query_engine_internal_testdata_ManyMaps = __VDLType_v_io_v23_query_engine_internal_testdata_ManyMaps_gen()
-	}
-	if __VDLType_v_io_v23_query_engine_internal_testdata_ManySets == nil {
-		__VDLType_v_io_v23_query_engine_internal_testdata_ManySets = __VDLType_v_io_v23_query_engine_internal_testdata_ManySets_gen()
-	}
+	return struct{}{}
 }

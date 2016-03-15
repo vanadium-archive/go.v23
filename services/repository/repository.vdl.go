@@ -23,6 +23,11 @@ import (
 	"v.io/v23/vdl"
 )
 
+var _ = __VDLInit() // Must be first; see __VDLInit comments for details.
+
+//////////////////////////////////////////////////
+// Type definitions
+
 // MediaInfo contains the metadata information for a binary.
 type MediaInfo struct {
 	Type     string // The media-type (RFC 2046)
@@ -35,9 +40,6 @@ func (MediaInfo) __VDLReflect(struct {
 }
 
 func (m *MediaInfo) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
-	if __VDLType_v_io_v23_services_repository_MediaInfo == nil || __VDLType0 == nil {
-		panic("Initialization order error: types generated for FillVDLTarget not initialized. Consider moving caller to an init() block.")
-	}
 	fieldsTarget1, err := t.StartFields(tt)
 	if err != nil {
 		return err
@@ -48,7 +50,7 @@ func (m *MediaInfo) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 		return err
 	}
 	if err != vdl.ErrFieldNoExist {
-		if err := fieldTarget3.FromString(string(m.Type), vdl.StringType); err != nil {
+		if err := fieldTarget3.FromString(string(m.Type), tt.NonOptional().Field(0).Type); err != nil {
 			return err
 		}
 		if err := fieldsTarget1.FinishField(keyTarget2, fieldTarget3); err != nil {
@@ -60,7 +62,7 @@ func (m *MediaInfo) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 		return err
 	}
 	if err != vdl.ErrFieldNoExist {
-		if err := fieldTarget5.FromString(string(m.Encoding), vdl.StringType); err != nil {
+		if err := fieldTarget5.FromString(string(m.Encoding), tt.NonOptional().Field(1).Type); err != nil {
 			return err
 		}
 		if err := fieldsTarget1.FinishField(keyTarget4, fieldTarget5); err != nil {
@@ -87,8 +89,8 @@ type MediaInfoTarget struct {
 
 func (t *MediaInfoTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
 
-	if !vdl.Compatible(tt, __VDLType_v_io_v23_services_repository_MediaInfo) {
-		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType_v_io_v23_services_repository_MediaInfo)
+	if ttWant := vdl.TypeOf((*MediaInfo)(nil)).Elem(); !vdl.Compatible(tt, ttWant) {
+		return nil, fmt.Errorf("type %v incompatible with %v", tt, ttWant)
 	}
 	return t, nil
 }
@@ -103,7 +105,7 @@ func (t *MediaInfoTarget) StartField(name string) (key, field vdl.Target, _ erro
 		target, err := &t.encodingTarget, error(nil)
 		return nil, target, err
 	default:
-		return nil, nil, fmt.Errorf("field %s not in struct %v", name, __VDLType_v_io_v23_services_repository_MediaInfo)
+		return nil, nil, fmt.Errorf("field %s not in struct v.io/v23/services/repository.MediaInfo", name)
 	}
 }
 func (t *MediaInfoTarget) FinishField(_, _ vdl.Target) error {
@@ -114,15 +116,8 @@ func (t *MediaInfoTarget) FinishFields(_ vdl.FieldsTarget) error {
 	return nil
 }
 
-func init() {
-	vdl.Register((*MediaInfo)(nil))
-}
-
-var __VDLType0 *vdl.Type = vdl.TypeOf((*MediaInfo)(nil))
-var __VDLType_v_io_v23_services_repository_MediaInfo *vdl.Type = vdl.TypeOf(MediaInfo{})
-
-func __VDLEnsureNativeBuilt() {
-}
+//////////////////////////////////////////////////
+// Interface definitions
 
 // ApplicationClientMethods is the client interface
 // containing Application methods.
@@ -1221,4 +1216,30 @@ var descProfile = rpc.InterfaceDesc{
 			Tags: []*vdl.Value{vdl.ValueOf(access.Tag("Read"))},
 		},
 	},
+}
+
+var __VDLInitCalled bool
+
+// __VDLInit performs vdl initialization.  It is safe to call multiple times.
+// If you have an init ordering issue, just insert the following line verbatim
+// into your source files in this package, right after the "package foo" clause:
+//
+//    var _ = __VDLInit()
+//
+// The purpose of this function is to ensure that vdl initialization occurs in
+// the right order, and very early in the init sequence.  In particular, vdl
+// registration and package variable initialization needs to occur before
+// functions like vdl.TypeOf will work properly.
+//
+// This function returns a dummy value, so that it can be used to initialize the
+// first var in the file, to take advantage of Go's defined init order.
+func __VDLInit() struct{} {
+	if __VDLInitCalled {
+		return struct{}{}
+	}
+
+	// Register types.
+	vdl.Register((*MediaInfo)(nil))
+
+	return struct{}{}
 }

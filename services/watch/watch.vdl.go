@@ -121,122 +121,10 @@ import (
 	"v.io/v23/vom"
 )
 
-// GlobRequest specifies which entities should be watched and, optionally,
-// how to resume from a previous Watch call.
-type GlobRequest struct {
-	// Pattern specifies the subset of the children of the root entity
-	// for which the client wants updates.
-	Pattern string
-	// ResumeMarker specifies how to resume from a previous Watch call.
-	// See the ResumeMarker type for detailed comments.
-	ResumeMarker ResumeMarker
-}
+var _ = __VDLInit() // Must be first; see __VDLInit comments for details.
 
-func (GlobRequest) __VDLReflect(struct {
-	Name string `vdl:"v.io/v23/services/watch.GlobRequest"`
-}) {
-}
-
-func (m *GlobRequest) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
-	if __VDLType_v_io_v23_services_watch_GlobRequest == nil || __VDLType0 == nil {
-		panic("Initialization order error: types generated for FillVDLTarget not initialized. Consider moving caller to an init() block.")
-	}
-	fieldsTarget1, err := t.StartFields(tt)
-	if err != nil {
-		return err
-	}
-
-	keyTarget2, fieldTarget3, err := fieldsTarget1.StartField("Pattern")
-	if err != vdl.ErrFieldNoExist && err != nil {
-		return err
-	}
-	if err != vdl.ErrFieldNoExist {
-		if err := fieldTarget3.FromString(string(m.Pattern), vdl.StringType); err != nil {
-			return err
-		}
-		if err := fieldsTarget1.FinishField(keyTarget2, fieldTarget3); err != nil {
-			return err
-		}
-	}
-	keyTarget4, fieldTarget5, err := fieldsTarget1.StartField("ResumeMarker")
-	if err != vdl.ErrFieldNoExist && err != nil {
-		return err
-	}
-	if err != vdl.ErrFieldNoExist {
-
-		if err := m.ResumeMarker.FillVDLTarget(fieldTarget5, __VDLType_v_io_v23_services_watch_ResumeMarker); err != nil {
-			return err
-		}
-		if err := fieldsTarget1.FinishField(keyTarget4, fieldTarget5); err != nil {
-			return err
-		}
-	}
-	if err := t.FinishFields(fieldsTarget1); err != nil {
-		return err
-	}
-	return nil
-}
-
-func (m *GlobRequest) MakeVDLTarget() vdl.Target {
-	return &GlobRequestTarget{Value: m}
-}
-
-type GlobRequestTarget struct {
-	Value              *GlobRequest
-	patternTarget      vdl.StringTarget
-	resumeMarkerTarget ResumeMarkerTarget
-	vdl.TargetBase
-	vdl.FieldsTargetBase
-}
-
-func (t *GlobRequestTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
-
-	if !vdl.Compatible(tt, __VDLType_v_io_v23_services_watch_GlobRequest) {
-		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType_v_io_v23_services_watch_GlobRequest)
-	}
-	return t, nil
-}
-func (t *GlobRequestTarget) StartField(name string) (key, field vdl.Target, _ error) {
-	switch name {
-	case "Pattern":
-		t.patternTarget.Value = &t.Value.Pattern
-		target, err := &t.patternTarget, error(nil)
-		return nil, target, err
-	case "ResumeMarker":
-		t.resumeMarkerTarget.Value = &t.Value.ResumeMarker
-		target, err := &t.resumeMarkerTarget, error(nil)
-		return nil, target, err
-	default:
-		return nil, nil, fmt.Errorf("field %s not in struct %v", name, __VDLType_v_io_v23_services_watch_GlobRequest)
-	}
-}
-func (t *GlobRequestTarget) FinishField(_, _ vdl.Target) error {
-	return nil
-}
-func (t *GlobRequestTarget) FinishFields(_ vdl.FieldsTarget) error {
-
-	return nil
-}
-
-type ResumeMarkerTarget struct {
-	Value *ResumeMarker
-	vdl.TargetBase
-}
-
-func (t *ResumeMarkerTarget) FromBytes(src []byte, tt *vdl.Type) error {
-
-	if !vdl.Compatible(tt, __VDLType_v_io_v23_services_watch_ResumeMarker) {
-		return fmt.Errorf("type %v incompatible with %v", tt, __VDLType_v_io_v23_services_watch_ResumeMarker)
-	}
-	if len(src) == 0 {
-		*t.Value = nil
-	} else {
-		*t.Value = make([]byte, len(src))
-		copy(*t.Value, src)
-	}
-
-	return nil
-}
+//////////////////////////////////////////////////
+// Type definitions
 
 // ResumeMarker specifies how much of the existing underlying state
 // is delivered to the client when the watch request is received by
@@ -277,7 +165,7 @@ func (ResumeMarker) __VDLReflect(struct {
 }
 
 func (m *ResumeMarker) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
-	if err := t.FromBytes([]byte((*m)), __VDLType_v_io_v23_services_watch_ResumeMarker); err != nil {
+	if err := t.FromBytes([]byte((*m)), tt); err != nil {
 		return err
 	}
 	return nil
@@ -285,6 +173,120 @@ func (m *ResumeMarker) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 
 func (m *ResumeMarker) MakeVDLTarget() vdl.Target {
 	return &ResumeMarkerTarget{Value: m}
+}
+
+type ResumeMarkerTarget struct {
+	Value *ResumeMarker
+	vdl.TargetBase
+}
+
+func (t *ResumeMarkerTarget) FromBytes(src []byte, tt *vdl.Type) error {
+
+	if ttWant := vdl.TypeOf((*ResumeMarker)(nil)); !vdl.Compatible(tt, ttWant) {
+		return fmt.Errorf("type %v incompatible with %v", tt, ttWant)
+	}
+	if len(src) == 0 {
+		*t.Value = nil
+	} else {
+		*t.Value = make([]byte, len(src))
+		copy(*t.Value, src)
+	}
+
+	return nil
+}
+
+// GlobRequest specifies which entities should be watched and, optionally,
+// how to resume from a previous Watch call.
+type GlobRequest struct {
+	// Pattern specifies the subset of the children of the root entity
+	// for which the client wants updates.
+	Pattern string
+	// ResumeMarker specifies how to resume from a previous Watch call.
+	// See the ResumeMarker type for detailed comments.
+	ResumeMarker ResumeMarker
+}
+
+func (GlobRequest) __VDLReflect(struct {
+	Name string `vdl:"v.io/v23/services/watch.GlobRequest"`
+}) {
+}
+
+func (m *GlobRequest) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
+	fieldsTarget1, err := t.StartFields(tt)
+	if err != nil {
+		return err
+	}
+
+	keyTarget2, fieldTarget3, err := fieldsTarget1.StartField("Pattern")
+	if err != vdl.ErrFieldNoExist && err != nil {
+		return err
+	}
+	if err != vdl.ErrFieldNoExist {
+		if err := fieldTarget3.FromString(string(m.Pattern), tt.NonOptional().Field(0).Type); err != nil {
+			return err
+		}
+		if err := fieldsTarget1.FinishField(keyTarget2, fieldTarget3); err != nil {
+			return err
+		}
+	}
+	keyTarget4, fieldTarget5, err := fieldsTarget1.StartField("ResumeMarker")
+	if err != vdl.ErrFieldNoExist && err != nil {
+		return err
+	}
+	if err != vdl.ErrFieldNoExist {
+
+		if err := m.ResumeMarker.FillVDLTarget(fieldTarget5, tt.NonOptional().Field(1).Type); err != nil {
+			return err
+		}
+		if err := fieldsTarget1.FinishField(keyTarget4, fieldTarget5); err != nil {
+			return err
+		}
+	}
+	if err := t.FinishFields(fieldsTarget1); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (m *GlobRequest) MakeVDLTarget() vdl.Target {
+	return &GlobRequestTarget{Value: m}
+}
+
+type GlobRequestTarget struct {
+	Value              *GlobRequest
+	patternTarget      vdl.StringTarget
+	resumeMarkerTarget ResumeMarkerTarget
+	vdl.TargetBase
+	vdl.FieldsTargetBase
+}
+
+func (t *GlobRequestTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
+
+	if ttWant := vdl.TypeOf((*GlobRequest)(nil)).Elem(); !vdl.Compatible(tt, ttWant) {
+		return nil, fmt.Errorf("type %v incompatible with %v", tt, ttWant)
+	}
+	return t, nil
+}
+func (t *GlobRequestTarget) StartField(name string) (key, field vdl.Target, _ error) {
+	switch name {
+	case "Pattern":
+		t.patternTarget.Value = &t.Value.Pattern
+		target, err := &t.patternTarget, error(nil)
+		return nil, target, err
+	case "ResumeMarker":
+		t.resumeMarkerTarget.Value = &t.Value.ResumeMarker
+		target, err := &t.resumeMarkerTarget, error(nil)
+		return nil, target, err
+	default:
+		return nil, nil, fmt.Errorf("field %s not in struct v.io/v23/services/watch.GlobRequest", name)
+	}
+}
+func (t *GlobRequestTarget) FinishField(_, _ vdl.Target) error {
+	return nil
+}
+func (t *GlobRequestTarget) FinishFields(_ vdl.FieldsTarget) error {
+
+	return nil
 }
 
 // Change is the new value for a watched entity.
@@ -314,9 +316,6 @@ func (Change) __VDLReflect(struct {
 }
 
 func (m *Change) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
-	if __VDLType_v_io_v23_services_watch_Change == nil || __VDLType1 == nil {
-		panic("Initialization order error: types generated for FillVDLTarget not initialized. Consider moving caller to an init() block.")
-	}
 	fieldsTarget1, err := t.StartFields(tt)
 	if err != nil {
 		return err
@@ -327,7 +326,7 @@ func (m *Change) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 		return err
 	}
 	if err != vdl.ErrFieldNoExist {
-		if err := fieldTarget3.FromString(string(m.Name), vdl.StringType); err != nil {
+		if err := fieldTarget3.FromString(string(m.Name), tt.NonOptional().Field(0).Type); err != nil {
 			return err
 		}
 		if err := fieldsTarget1.FinishField(keyTarget2, fieldTarget3); err != nil {
@@ -339,7 +338,7 @@ func (m *Change) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 		return err
 	}
 	if err != vdl.ErrFieldNoExist {
-		if err := fieldTarget5.FromInt(int64(m.State), vdl.Int32Type); err != nil {
+		if err := fieldTarget5.FromInt(int64(m.State), tt.NonOptional().Field(1).Type); err != nil {
 			return err
 		}
 		if err := fieldsTarget1.FinishField(keyTarget4, fieldTarget5); err != nil {
@@ -353,11 +352,11 @@ func (m *Change) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 	if err != vdl.ErrFieldNoExist {
 
 		if m.Value == nil {
-			if err := fieldTarget7.FromNil(vdl.AnyType); err != nil {
+			if err := fieldTarget7.FromNil(tt.NonOptional().Field(2).Type); err != nil {
 				return err
 			}
 		} else {
-			if err := m.Value.FillVDLTarget(fieldTarget7, vdl.AnyType); err != nil {
+			if err := m.Value.FillVDLTarget(fieldTarget7, tt.NonOptional().Field(2).Type); err != nil {
 				return err
 			}
 		}
@@ -371,7 +370,7 @@ func (m *Change) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 	}
 	if err != vdl.ErrFieldNoExist {
 
-		if err := m.ResumeMarker.FillVDLTarget(fieldTarget9, __VDLType_v_io_v23_services_watch_ResumeMarker); err != nil {
+		if err := m.ResumeMarker.FillVDLTarget(fieldTarget9, tt.NonOptional().Field(3).Type); err != nil {
 			return err
 		}
 		if err := fieldsTarget1.FinishField(keyTarget8, fieldTarget9); err != nil {
@@ -383,7 +382,7 @@ func (m *Change) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 		return err
 	}
 	if err != vdl.ErrFieldNoExist {
-		if err := fieldTarget11.FromBool(bool(m.Continued), vdl.BoolType); err != nil {
+		if err := fieldTarget11.FromBool(bool(m.Continued), tt.NonOptional().Field(4).Type); err != nil {
 			return err
 		}
 		if err := fieldsTarget1.FinishField(keyTarget10, fieldTarget11); err != nil {
@@ -413,8 +412,8 @@ type ChangeTarget struct {
 
 func (t *ChangeTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
 
-	if !vdl.Compatible(tt, __VDLType_v_io_v23_services_watch_Change) {
-		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType_v_io_v23_services_watch_Change)
+	if ttWant := vdl.TypeOf((*Change)(nil)).Elem(); !vdl.Compatible(tt, ttWant) {
+		return nil, fmt.Errorf("type %v incompatible with %v", tt, ttWant)
 	}
 	return t, nil
 }
@@ -440,7 +439,7 @@ func (t *ChangeTarget) StartField(name string) (key, field vdl.Target, _ error) 
 		target, err := &t.continuedTarget, error(nil)
 		return nil, target, err
 	default:
-		return nil, nil, fmt.Errorf("field %s not in struct %v", name, __VDLType_v_io_v23_services_watch_Change)
+		return nil, nil, fmt.Errorf("field %s not in struct v.io/v23/services/watch.Change", name)
 	}
 }
 func (t *ChangeTarget) FinishField(_, _ vdl.Target) error {
@@ -451,20 +450,8 @@ func (t *ChangeTarget) FinishFields(_ vdl.FieldsTarget) error {
 	return nil
 }
 
-func init() {
-	vdl.Register((*GlobRequest)(nil))
-	vdl.Register((*ResumeMarker)(nil))
-	vdl.Register((*Change)(nil))
-}
-
-var __VDLType1 *vdl.Type = vdl.TypeOf((*Change)(nil))
-var __VDLType0 *vdl.Type = vdl.TypeOf((*GlobRequest)(nil))
-var __VDLType_v_io_v23_services_watch_Change *vdl.Type = vdl.TypeOf(Change{})
-var __VDLType_v_io_v23_services_watch_GlobRequest *vdl.Type = vdl.TypeOf(GlobRequest{})
-var __VDLType_v_io_v23_services_watch_ResumeMarker *vdl.Type = vdl.TypeOf(ResumeMarker(nil))
-
-func __VDLEnsureNativeBuilt() {
-}
+//////////////////////////////////////////////////
+// Const definitions
 
 // The entity exists and its full value is included in Value.
 const Exists = int32(0)
@@ -478,18 +465,19 @@ const DoesNotExist = int32(1)
 // above.
 const InitialStateSkipped = int32(2)
 
+//////////////////////////////////////////////////
+// Error definitions
 var (
 	ErrUnknownResumeMarker = verror.Register("v.io/v23/services/watch.UnknownResumeMarker", verror.NoRetry, "{1:}{2:} unknown resume marker {_}")
 )
-
-func init() {
-	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrUnknownResumeMarker.ID), "{1:}{2:} unknown resume marker {_}")
-}
 
 // NewErrUnknownResumeMarker returns an error with the ErrUnknownResumeMarker ID.
 func NewErrUnknownResumeMarker(ctx *context.T) error {
 	return verror.New(ErrUnknownResumeMarker, ctx)
 }
+
+//////////////////////////////////////////////////
+// Interface definitions
 
 // GlobWatcherClientMethods is the client interface
 // containing GlobWatcher methods.
@@ -715,4 +703,35 @@ type implGlobWatcherWatchGlobServerCallSend struct {
 
 func (s implGlobWatcherWatchGlobServerCallSend) Send(item Change) error {
 	return s.s.Send(item)
+}
+
+var __VDLInitCalled bool
+
+// __VDLInit performs vdl initialization.  It is safe to call multiple times.
+// If you have an init ordering issue, just insert the following line verbatim
+// into your source files in this package, right after the "package foo" clause:
+//
+//    var _ = __VDLInit()
+//
+// The purpose of this function is to ensure that vdl initialization occurs in
+// the right order, and very early in the init sequence.  In particular, vdl
+// registration and package variable initialization needs to occur before
+// functions like vdl.TypeOf will work properly.
+//
+// This function returns a dummy value, so that it can be used to initialize the
+// first var in the file, to take advantage of Go's defined init order.
+func __VDLInit() struct{} {
+	if __VDLInitCalled {
+		return struct{}{}
+	}
+
+	// Register types.
+	vdl.Register((*ResumeMarker)(nil))
+	vdl.Register((*GlobRequest)(nil))
+	vdl.Register((*Change)(nil))
+
+	// Set error format strings.
+	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrUnknownResumeMarker.ID), "{1:}{2:} unknown resume marker {_}")
+
+	return struct{}{}
 }

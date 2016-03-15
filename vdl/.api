@@ -355,6 +355,7 @@ pkg vdl, method (*Type) Key() *Type
 pkg vdl, method (*Type) Kind() Kind
 pkg vdl, method (*Type) Len() int
 pkg vdl, method (*Type) Name() string
+pkg vdl, method (*Type) NonOptional() *Type
 pkg vdl, method (*Type) NumEnumLabel() int
 pkg vdl, method (*Type) NumField() int
 pkg vdl, method (*Type) String() string

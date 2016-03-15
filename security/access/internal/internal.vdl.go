@@ -17,6 +17,11 @@ import (
 	"v.io/v23/vdl"
 )
 
+var _ = __VDLInit() // Must be first; see __VDLInit comments for details.
+
+//////////////////////////////////////////////////
+// Type definitions
+
 // Any package can define tags (of arbitrary types) to be attached to methods.
 // This type can be used to index into a Permissions.
 type MyTag string
@@ -27,7 +32,7 @@ func (MyTag) __VDLReflect(struct {
 }
 
 func (m *MyTag) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
-	if err := t.FromString(string((*m)), __VDLType_v_io_v23_security_access_internal_MyTag); err != nil {
+	if err := t.FromString(string((*m)), tt); err != nil {
 		return err
 	}
 	return nil
@@ -44,30 +49,25 @@ type MyTagTarget struct {
 
 func (t *MyTagTarget) FromString(src string, tt *vdl.Type) error {
 
-	if !vdl.Compatible(tt, __VDLType_v_io_v23_security_access_internal_MyTag) {
-		return fmt.Errorf("type %v incompatible with %v", tt, __VDLType_v_io_v23_security_access_internal_MyTag)
+	if ttWant := vdl.TypeOf((*MyTag)(nil)); !vdl.Compatible(tt, ttWant) {
+		return fmt.Errorf("type %v incompatible with %v", tt, ttWant)
 	}
 	*t.Value = MyTag(src)
 
 	return nil
 }
 
-func init() {
-	vdl.Register((*MyTag)(nil))
-}
-
-var __VDLType_v_io_v23_security_access_internal_MyTag *vdl.Type = vdl.TypeOf(MyTag(""))
-
-func __VDLEnsureNativeBuilt() {
-}
+//////////////////////////////////////////////////
+// Const definitions
 
 // For this example/unittest, there are three possible values of MyTag, each
 // represented by a single-character string.
 const Read = MyTag("R")
-
 const Write = MyTag("W")
-
 const Execute = MyTag("X")
+
+//////////////////////////////////////////////////
+// Interface definitions
 
 // MyObjectClientMethods is the client interface
 // containing MyObject methods.
@@ -210,4 +210,30 @@ var descMyObject = rpc.InterfaceDesc{
 			Name: "NoTags",
 		},
 	},
+}
+
+var __VDLInitCalled bool
+
+// __VDLInit performs vdl initialization.  It is safe to call multiple times.
+// If you have an init ordering issue, just insert the following line verbatim
+// into your source files in this package, right after the "package foo" clause:
+//
+//    var _ = __VDLInit()
+//
+// The purpose of this function is to ensure that vdl initialization occurs in
+// the right order, and very early in the init sequence.  In particular, vdl
+// registration and package variable initialization needs to occur before
+// functions like vdl.TypeOf will work properly.
+//
+// This function returns a dummy value, so that it can be used to initialize the
+// first var in the file, to take advantage of Go's defined init order.
+func __VDLInit() struct{} {
+	if __VDLInitCalled {
+		return struct{}{}
+	}
+
+	// Register types.
+	vdl.Register((*MyTag)(nil))
+
+	return struct{}{}
 }

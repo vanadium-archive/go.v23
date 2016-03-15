@@ -12,17 +12,17 @@ import (
 	"unsafe"
 )
 
-// rtRegistry is a map from reflect.Type to *Type.  The only instance is
-// rtCache, which is a global cache to speed up repeated lookups.
+// rtCacheT is a map from reflect.Type to *Type.  The only instance is rtCache,
+// which is a global cache to speed up repeated lookups.
 //
 // All locking is performed in TypeFromReflect.
-type rtRegistry struct {
+type rtCacheT struct {
 	sync.RWMutex
 	rtmap map[reflect.Type]*Type
 }
 
 var (
-	rtCache = &rtRegistry{
+	rtCache = &rtCacheT{
 		rtmap: map[reflect.Type]*Type{
 			// Ensure TypeOf(WireError{}) returns the built-in VDL error type.
 			reflect.TypeOf(WireError{}): ErrorType.Elem(),
@@ -31,14 +31,14 @@ var (
 	rtCacheEnabled = true
 )
 
-func (reg *rtRegistry) lookup(rt reflect.Type) *Type {
+func (reg *rtCacheT) lookup(rt reflect.Type) *Type {
 	if !rtCacheEnabled {
 		return nil
 	}
 	return reg.rtmap[rt]
 }
 
-func (reg *rtRegistry) update(pending map[reflect.Type]TypeOrPending) {
+func (reg *rtCacheT) update(pending map[reflect.Type]TypeOrPending) {
 	if !rtCacheEnabled {
 		return
 	}

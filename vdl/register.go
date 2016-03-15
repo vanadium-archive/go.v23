@@ -45,12 +45,26 @@ func registerRecursive(rt reflect.Type) error {
 	}
 	if !added {
 		// Break cyles for recursive types.
+		//
+		// TODO(toddw): There is a glaring bug in this logic.  Our first step is to
+		// call normalizeType, which itself calls deriveReflectInfo.  Thus our
+		// subsequent call to deriveReflectInfo will always return added=false, and
+		// we will never run the logic below.  In addition, deriveReflectInfo is
+		// also called outside of registerRecursive, with the same effect.
+		//
+		// The general philosophy for the fix:
+		//   1) Types may be registered explicitly via Register.
+		//   2) Types may be registered implicitly via all calls in vdl that take an
+		//      interface{} argument.
+		//   3) RegisterNative registers both wire and native types.
+		//   4) Subtypes are always registered recursively.
+		//   5) Once a type is registered, decode/convert into an interface{} works
+		//      as expected, returning the concrete Go value.
 		return nil
 	}
-	// 2) Register subtypes, if this is the first time we've seen the type.
-	//
-	// Special-case to recurse on union fields.
+	// 2) Recurse on subtypes contained in composite types.
 	if len(ri.UnionFields) > 0 {
+		// Special-case to recurse on union fields.
 		for _, field := range ri.UnionFields {
 			if err := registerRecursive(field.Type); err != nil {
 				return err
@@ -58,7 +72,6 @@ func registerRecursive(rt reflect.Type) error {
 		}
 		return nil
 	}
-	// Recurse on subtypes contained in regular composite types.
 	switch wt := ri.Type; wt.Kind() {
 	case reflect.Array, reflect.Slice, reflect.Ptr:
 		return registerRecursive(wt.Elem())
@@ -333,7 +346,7 @@ func describeUnion(unionReflect, rt reflect.Type, ri *reflectInfo) error {
 
 // TypeToReflect returns the reflect.Type corresponding to t.  We look up
 // named types in our registry, and build the unnamed types that we can via the
-// Go reflect package.
+// Go reflect package.  Returns nil for types that can't be manufactured.
 func TypeToReflect(t *Type) reflect.Type {
 	if t.Name() != "" {
 		// Named types cannot be manufactured via Go reflect, so we lookup in our

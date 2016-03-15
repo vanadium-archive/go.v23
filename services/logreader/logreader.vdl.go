@@ -18,6 +18,11 @@ import (
 	"v.io/v23/vdl"
 )
 
+var _ = __VDLInit() // Must be first; see __VDLInit comments for details.
+
+//////////////////////////////////////////////////
+// Type definitions
+
 // LogEntry is a log entry from a log file.
 type LogEntry struct {
 	// The offset (in bytes) where this entry starts.
@@ -32,9 +37,6 @@ func (LogEntry) __VDLReflect(struct {
 }
 
 func (m *LogEntry) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
-	if __VDLType_v_io_v23_services_logreader_LogEntry == nil || __VDLType0 == nil {
-		panic("Initialization order error: types generated for FillVDLTarget not initialized. Consider moving caller to an init() block.")
-	}
 	fieldsTarget1, err := t.StartFields(tt)
 	if err != nil {
 		return err
@@ -45,7 +47,7 @@ func (m *LogEntry) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 		return err
 	}
 	if err != vdl.ErrFieldNoExist {
-		if err := fieldTarget3.FromInt(int64(m.Position), vdl.Int64Type); err != nil {
+		if err := fieldTarget3.FromInt(int64(m.Position), tt.NonOptional().Field(0).Type); err != nil {
 			return err
 		}
 		if err := fieldsTarget1.FinishField(keyTarget2, fieldTarget3); err != nil {
@@ -57,7 +59,7 @@ func (m *LogEntry) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 		return err
 	}
 	if err != vdl.ErrFieldNoExist {
-		if err := fieldTarget5.FromString(string(m.Line), vdl.StringType); err != nil {
+		if err := fieldTarget5.FromString(string(m.Line), tt.NonOptional().Field(1).Type); err != nil {
 			return err
 		}
 		if err := fieldsTarget1.FinishField(keyTarget4, fieldTarget5); err != nil {
@@ -84,8 +86,8 @@ type LogEntryTarget struct {
 
 func (t *LogEntryTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
 
-	if !vdl.Compatible(tt, __VDLType_v_io_v23_services_logreader_LogEntry) {
-		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType_v_io_v23_services_logreader_LogEntry)
+	if ttWant := vdl.TypeOf((*LogEntry)(nil)).Elem(); !vdl.Compatible(tt, ttWant) {
+		return nil, fmt.Errorf("type %v incompatible with %v", tt, ttWant)
 	}
 	return t, nil
 }
@@ -100,7 +102,7 @@ func (t *LogEntryTarget) StartField(name string) (key, field vdl.Target, _ error
 		target, err := &t.lineTarget, error(nil)
 		return nil, target, err
 	default:
-		return nil, nil, fmt.Errorf("field %s not in struct %v", name, __VDLType_v_io_v23_services_logreader_LogEntry)
+		return nil, nil, fmt.Errorf("field %s not in struct v.io/v23/services/logreader.LogEntry", name)
 	}
 }
 func (t *LogEntryTarget) FinishField(_, _ vdl.Target) error {
@@ -111,19 +113,15 @@ func (t *LogEntryTarget) FinishFields(_ vdl.FieldsTarget) error {
 	return nil
 }
 
-func init() {
-	vdl.Register((*LogEntry)(nil))
-}
-
-var __VDLType0 *vdl.Type = vdl.TypeOf((*LogEntry)(nil))
-var __VDLType_v_io_v23_services_logreader_LogEntry *vdl.Type = vdl.TypeOf(LogEntry{})
-
-func __VDLEnsureNativeBuilt() {
-}
+//////////////////////////////////////////////////
+// Const definitions
 
 // A special NumEntries value that indicates that all entries should be
 // returned by ReadLog.
 const AllEntries = int32(-1)
+
+//////////////////////////////////////////////////
+// Interface definitions
 
 // LogFileClientMethods is the client interface
 // containing LogFile methods.
@@ -411,4 +409,30 @@ type implLogFileReadLogServerCallSend struct {
 
 func (s implLogFileReadLogServerCallSend) Send(item LogEntry) error {
 	return s.s.Send(item)
+}
+
+var __VDLInitCalled bool
+
+// __VDLInit performs vdl initialization.  It is safe to call multiple times.
+// If you have an init ordering issue, just insert the following line verbatim
+// into your source files in this package, right after the "package foo" clause:
+//
+//    var _ = __VDLInit()
+//
+// The purpose of this function is to ensure that vdl initialization occurs in
+// the right order, and very early in the init sequence.  In particular, vdl
+// registration and package variable initialization needs to occur before
+// functions like vdl.TypeOf will work properly.
+//
+// This function returns a dummy value, so that it can be used to initialize the
+// first var in the file, to take advantage of Go's defined init order.
+func __VDLInit() struct{} {
+	if __VDLInitCalled {
+		return struct{}{}
+	}
+
+	// Register types.
+	vdl.Register((*LogEntry)(nil))
+
+	return struct{}{}
 }

@@ -258,6 +258,14 @@ func (t *Type) Elem() *Type {
 	return t.elem
 }
 
+// NonOptional returns t.Elem() if t is Optional, otherwise returns t.
+func (t *Type) NonOptional() *Type {
+	if t.kind == Optional {
+		return t.elem
+	}
+	return t
+}
+
 var keyAllowed = []Kind{Set, Map}
 
 // Key returns the key type of a Set or Map.

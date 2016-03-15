@@ -13,6 +13,11 @@ import (
 	"v.io/v23/vdl"
 )
 
+var _ = __VDLInit() // Must be first; see __VDLInit comments for details.
+
+//////////////////////////////////////////////////
+// Type definitions
+
 // Description describes a binary. Binaries are named and have been
 // determined to run on some set of profiles. The mechanism for
 // determing profiles is specifically not specified and left to the
@@ -41,9 +46,6 @@ func (Description) __VDLReflect(struct {
 }
 
 func (m *Description) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
-	if __VDLType_v_io_v23_services_binary_Description == nil || __VDLType0 == nil {
-		panic("Initialization order error: types generated for FillVDLTarget not initialized. Consider moving caller to an init() block.")
-	}
 	fieldsTarget1, err := t.StartFields(tt)
 	if err != nil {
 		return err
@@ -54,7 +56,7 @@ func (m *Description) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 		return err
 	}
 	if err != vdl.ErrFieldNoExist {
-		if err := fieldTarget3.FromString(string(m.Name), vdl.StringType); err != nil {
+		if err := fieldTarget3.FromString(string(m.Name), tt.NonOptional().Field(0).Type); err != nil {
 			return err
 		}
 		if err := fieldsTarget1.FinishField(keyTarget2, fieldTarget3); err != nil {
@@ -67,7 +69,7 @@ func (m *Description) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 	}
 	if err != vdl.ErrFieldNoExist {
 
-		mapTarget6, err := fieldTarget5.StartMap(__VDLType1, len(m.Profiles))
+		mapTarget6, err := fieldTarget5.StartMap(tt.NonOptional().Field(1).Type, len(m.Profiles))
 		if err != nil {
 			return err
 		}
@@ -76,14 +78,14 @@ func (m *Description) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 			if err != nil {
 				return err
 			}
-			if err := keyTarget7.FromString(string(key8), vdl.StringType); err != nil {
+			if err := keyTarget7.FromString(string(key8), tt.NonOptional().Field(1).Type.Key()); err != nil {
 				return err
 			}
 			valueTarget9, err := mapTarget6.FinishKeyStartField(keyTarget7)
 			if err != nil {
 				return err
 			}
-			if err := valueTarget9.FromBool(bool(value10), vdl.BoolType); err != nil {
+			if err := valueTarget9.FromBool(bool(value10), tt.NonOptional().Field(1).Type.Elem()); err != nil {
 				return err
 			}
 			if err := mapTarget6.FinishField(keyTarget7, valueTarget9); err != nil {
@@ -117,8 +119,8 @@ type DescriptionTarget struct {
 
 func (t *DescriptionTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
 
-	if !vdl.Compatible(tt, __VDLType_v_io_v23_services_binary_Description) {
-		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType_v_io_v23_services_binary_Description)
+	if ttWant := vdl.TypeOf((*Description)(nil)).Elem(); !vdl.Compatible(tt, ttWant) {
+		return nil, fmt.Errorf("type %v incompatible with %v", tt, ttWant)
 	}
 	return t, nil
 }
@@ -133,7 +135,7 @@ func (t *DescriptionTarget) StartField(name string) (key, field vdl.Target, _ er
 		target, err := &t.profilesTarget, error(nil)
 		return nil, target, err
 	default:
-		return nil, nil, fmt.Errorf("field %s not in struct %v", name, __VDLType_v_io_v23_services_binary_Description)
+		return nil, nil, fmt.Errorf("field %s not in struct v.io/v23/services/binary.Description", name)
 	}
 }
 func (t *DescriptionTarget) FinishField(_, _ vdl.Target) error {
@@ -157,8 +159,8 @@ type unnamed_6d61705b737472696e675d626f6f6cTarget struct {
 
 func (t *unnamed_6d61705b737472696e675d626f6f6cTarget) StartMap(tt *vdl.Type, len int) (vdl.MapTarget, error) {
 
-	if !vdl.Compatible(tt, __VDLType1) {
-		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType1)
+	if ttWant := vdl.TypeOf((*map[string]bool)(nil)); !vdl.Compatible(tt, ttWant) {
+		return nil, fmt.Errorf("type %v incompatible with %v", tt, ttWant)
 	}
 	*t.Value = make(map[string]bool)
 	return t, nil
@@ -201,9 +203,6 @@ func (PartInfo) __VDLReflect(struct {
 }
 
 func (m *PartInfo) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
-	if __VDLType_v_io_v23_services_binary_PartInfo == nil || __VDLType2 == nil {
-		panic("Initialization order error: types generated for FillVDLTarget not initialized. Consider moving caller to an init() block.")
-	}
 	fieldsTarget1, err := t.StartFields(tt)
 	if err != nil {
 		return err
@@ -214,7 +213,7 @@ func (m *PartInfo) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 		return err
 	}
 	if err != vdl.ErrFieldNoExist {
-		if err := fieldTarget3.FromString(string(m.Checksum), vdl.StringType); err != nil {
+		if err := fieldTarget3.FromString(string(m.Checksum), tt.NonOptional().Field(0).Type); err != nil {
 			return err
 		}
 		if err := fieldsTarget1.FinishField(keyTarget2, fieldTarget3); err != nil {
@@ -226,7 +225,7 @@ func (m *PartInfo) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 		return err
 	}
 	if err != vdl.ErrFieldNoExist {
-		if err := fieldTarget5.FromInt(int64(m.Size), vdl.Int64Type); err != nil {
+		if err := fieldTarget5.FromInt(int64(m.Size), tt.NonOptional().Field(1).Type); err != nil {
 			return err
 		}
 		if err := fieldsTarget1.FinishField(keyTarget4, fieldTarget5); err != nil {
@@ -253,8 +252,8 @@ type PartInfoTarget struct {
 
 func (t *PartInfoTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
 
-	if !vdl.Compatible(tt, __VDLType_v_io_v23_services_binary_PartInfo) {
-		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType_v_io_v23_services_binary_PartInfo)
+	if ttWant := vdl.TypeOf((*PartInfo)(nil)).Elem(); !vdl.Compatible(tt, ttWant) {
+		return nil, fmt.Errorf("type %v incompatible with %v", tt, ttWant)
 	}
 	return t, nil
 }
@@ -269,7 +268,7 @@ func (t *PartInfoTarget) StartField(name string) (key, field vdl.Target, _ error
 		target, err := &t.sizeTarget, error(nil)
 		return nil, target, err
 	default:
-		return nil, nil, fmt.Errorf("field %s not in struct %v", name, __VDLType_v_io_v23_services_binary_PartInfo)
+		return nil, nil, fmt.Errorf("field %s not in struct v.io/v23/services/binary.PartInfo", name)
 	}
 }
 func (t *PartInfoTarget) FinishField(_, _ vdl.Target) error {
@@ -280,20 +279,35 @@ func (t *PartInfoTarget) FinishFields(_ vdl.FieldsTarget) error {
 	return nil
 }
 
-func init() {
-	vdl.Register((*Description)(nil))
-	vdl.Register((*PartInfo)(nil))
-}
-
-var __VDLType0 *vdl.Type = vdl.TypeOf((*Description)(nil))
-var __VDLType2 *vdl.Type = vdl.TypeOf((*PartInfo)(nil))
-var __VDLType1 *vdl.Type = vdl.TypeOf(map[string]bool(nil))
-var __VDLType_v_io_v23_services_binary_Description *vdl.Type = vdl.TypeOf(Description{})
-var __VDLType_v_io_v23_services_binary_PartInfo *vdl.Type = vdl.TypeOf(PartInfo{})
-
-func __VDLEnsureNativeBuilt() {
-}
+//////////////////////////////////////////////////
+// Const definitions
 
 const MissingChecksum = ""
-
 const MissingSize = int64(-1)
+
+var __VDLInitCalled bool
+
+// __VDLInit performs vdl initialization.  It is safe to call multiple times.
+// If you have an init ordering issue, just insert the following line verbatim
+// into your source files in this package, right after the "package foo" clause:
+//
+//    var _ = __VDLInit()
+//
+// The purpose of this function is to ensure that vdl initialization occurs in
+// the right order, and very early in the init sequence.  In particular, vdl
+// registration and package variable initialization needs to occur before
+// functions like vdl.TypeOf will work properly.
+//
+// This function returns a dummy value, so that it can be used to initialize the
+// first var in the file, to take advantage of Go's defined init order.
+func __VDLInit() struct{} {
+	if __VDLInitCalled {
+		return struct{}{}
+	}
+
+	// Register types.
+	vdl.Register((*Description)(nil))
+	vdl.Register((*PartInfo)(nil))
+
+	return struct{}{}
+}

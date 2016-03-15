@@ -26,6 +26,11 @@ import (
 	_ "v.io/v23/vdlroot/time"
 )
 
+var _ = __VDLInit() // Must be first; see __VDLInit comments for details.
+
+//////////////////////////////////////////////////
+// Type definitions
+
 // Config specifies app configuration that overrides what's in the envelope.
 type Config map[string]string
 
@@ -35,7 +40,7 @@ func (Config) __VDLReflect(struct {
 }
 
 func (m *Config) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
-	mapTarget1, err := t.StartMap(__VDLType_v_io_v23_services_device_Config, len((*m)))
+	mapTarget1, err := t.StartMap(tt, len((*m)))
 	if err != nil {
 		return err
 	}
@@ -44,14 +49,14 @@ func (m *Config) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 		if err != nil {
 			return err
 		}
-		if err := keyTarget2.FromString(string(key3), vdl.StringType); err != nil {
+		if err := keyTarget2.FromString(string(key3), tt.NonOptional().Key()); err != nil {
 			return err
 		}
 		valueTarget4, err := mapTarget1.FinishKeyStartField(keyTarget2)
 		if err != nil {
 			return err
 		}
-		if err := valueTarget4.FromString(string(value5), vdl.StringType); err != nil {
+		if err := valueTarget4.FromString(string(value5), tt.NonOptional().Elem()); err != nil {
 			return err
 		}
 		if err := mapTarget1.FinishField(keyTarget2, valueTarget4); err != nil {
@@ -80,8 +85,8 @@ type ConfigTarget struct {
 
 func (t *ConfigTarget) StartMap(tt *vdl.Type, len int) (vdl.MapTarget, error) {
 
-	if !vdl.Compatible(tt, __VDLType_v_io_v23_services_device_Config) {
-		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType_v_io_v23_services_device_Config)
+	if ttWant := vdl.TypeOf((*Config)(nil)); !vdl.Compatible(tt, ttWant) {
+		return nil, fmt.Errorf("type %v incompatible with %v", tt, ttWant)
 	}
 	*t.Value = make(Config)
 	return t, nil
@@ -160,7 +165,7 @@ func (InstallationState) __VDLReflect(struct {
 }
 
 func (m *InstallationState) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
-	if err := t.FromEnumLabel((*m).String(), __VDLType_v_io_v23_services_device_InstallationState); err != nil {
+	if err := t.FromEnumLabel((*m).String(), tt); err != nil {
 		return err
 	}
 	return nil
@@ -177,8 +182,8 @@ type InstallationStateTarget struct {
 
 func (t *InstallationStateTarget) FromEnumLabel(src string, tt *vdl.Type) error {
 
-	if !vdl.Compatible(tt, __VDLType_v_io_v23_services_device_InstallationState) {
-		return fmt.Errorf("type %v incompatible with %v", tt, __VDLType_v_io_v23_services_device_InstallationState)
+	if ttWant := vdl.TypeOf((*InstallationState)(nil)); !vdl.Compatible(tt, ttWant) {
+		return fmt.Errorf("type %v incompatible with %v", tt, ttWant)
 	}
 	switch src {
 	case "Active":
@@ -186,7 +191,7 @@ func (t *InstallationStateTarget) FromEnumLabel(src string, tt *vdl.Type) error 
 	case "Uninstalled":
 		*t.Value = 1
 	default:
-		return fmt.Errorf("label %s not in enum %v", src, __VDLType_v_io_v23_services_device_InstallationState)
+		return fmt.Errorf("label %s not in enum v.io/v23/services/device.InstallationState", src)
 	}
 
 	return nil
@@ -266,7 +271,7 @@ func (InstanceState) __VDLReflect(struct {
 }
 
 func (m *InstanceState) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
-	if err := t.FromEnumLabel((*m).String(), __VDLType_v_io_v23_services_device_InstanceState); err != nil {
+	if err := t.FromEnumLabel((*m).String(), tt); err != nil {
 		return err
 	}
 	return nil
@@ -283,8 +288,8 @@ type InstanceStateTarget struct {
 
 func (t *InstanceStateTarget) FromEnumLabel(src string, tt *vdl.Type) error {
 
-	if !vdl.Compatible(tt, __VDLType_v_io_v23_services_device_InstanceState) {
-		return fmt.Errorf("type %v incompatible with %v", tt, __VDLType_v_io_v23_services_device_InstanceState)
+	if ttWant := vdl.TypeOf((*InstanceState)(nil)); !vdl.Compatible(tt, ttWant) {
+		return fmt.Errorf("type %v incompatible with %v", tt, ttWant)
 	}
 	switch src {
 	case "Launching":
@@ -300,8 +305,278 @@ func (t *InstanceStateTarget) FromEnumLabel(src string, tt *vdl.Type) error {
 	case "Deleted":
 		*t.Value = 5
 	default:
-		return fmt.Errorf("label %s not in enum %v", src, __VDLType_v_io_v23_services_device_InstanceState)
+		return fmt.Errorf("label %s not in enum v.io/v23/services/device.InstanceState", src)
 	}
+
+	return nil
+}
+
+// InstanceStatus specifies the Status returned by the Application Status method
+// for instance objects.
+type InstanceStatus struct {
+	State   InstanceState
+	Version string
+}
+
+func (InstanceStatus) __VDLReflect(struct {
+	Name string `vdl:"v.io/v23/services/device.InstanceStatus"`
+}) {
+}
+
+func (m *InstanceStatus) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
+	fieldsTarget1, err := t.StartFields(tt)
+	if err != nil {
+		return err
+	}
+
+	keyTarget2, fieldTarget3, err := fieldsTarget1.StartField("State")
+	if err != vdl.ErrFieldNoExist && err != nil {
+		return err
+	}
+	if err != vdl.ErrFieldNoExist {
+
+		if err := m.State.FillVDLTarget(fieldTarget3, tt.NonOptional().Field(0).Type); err != nil {
+			return err
+		}
+		if err := fieldsTarget1.FinishField(keyTarget2, fieldTarget3); err != nil {
+			return err
+		}
+	}
+	keyTarget4, fieldTarget5, err := fieldsTarget1.StartField("Version")
+	if err != vdl.ErrFieldNoExist && err != nil {
+		return err
+	}
+	if err != vdl.ErrFieldNoExist {
+		if err := fieldTarget5.FromString(string(m.Version), tt.NonOptional().Field(1).Type); err != nil {
+			return err
+		}
+		if err := fieldsTarget1.FinishField(keyTarget4, fieldTarget5); err != nil {
+			return err
+		}
+	}
+	if err := t.FinishFields(fieldsTarget1); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (m *InstanceStatus) MakeVDLTarget() vdl.Target {
+	return &InstanceStatusTarget{Value: m}
+}
+
+type InstanceStatusTarget struct {
+	Value         *InstanceStatus
+	stateTarget   InstanceStateTarget
+	versionTarget vdl.StringTarget
+	vdl.TargetBase
+	vdl.FieldsTargetBase
+}
+
+func (t *InstanceStatusTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
+
+	if ttWant := vdl.TypeOf((*InstanceStatus)(nil)).Elem(); !vdl.Compatible(tt, ttWant) {
+		return nil, fmt.Errorf("type %v incompatible with %v", tt, ttWant)
+	}
+	return t, nil
+}
+func (t *InstanceStatusTarget) StartField(name string) (key, field vdl.Target, _ error) {
+	switch name {
+	case "State":
+		t.stateTarget.Value = &t.Value.State
+		target, err := &t.stateTarget, error(nil)
+		return nil, target, err
+	case "Version":
+		t.versionTarget.Value = &t.Value.Version
+		target, err := &t.versionTarget, error(nil)
+		return nil, target, err
+	default:
+		return nil, nil, fmt.Errorf("field %s not in struct v.io/v23/services/device.InstanceStatus", name)
+	}
+}
+func (t *InstanceStatusTarget) FinishField(_, _ vdl.Target) error {
+	return nil
+}
+func (t *InstanceStatusTarget) FinishFields(_ vdl.FieldsTarget) error {
+
+	return nil
+}
+
+// InstallationStatus specifies the Status returned by the Application Status
+// method for installation objects.
+type InstallationStatus struct {
+	State   InstallationState
+	Version string
+}
+
+func (InstallationStatus) __VDLReflect(struct {
+	Name string `vdl:"v.io/v23/services/device.InstallationStatus"`
+}) {
+}
+
+func (m *InstallationStatus) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
+	fieldsTarget1, err := t.StartFields(tt)
+	if err != nil {
+		return err
+	}
+
+	keyTarget2, fieldTarget3, err := fieldsTarget1.StartField("State")
+	if err != vdl.ErrFieldNoExist && err != nil {
+		return err
+	}
+	if err != vdl.ErrFieldNoExist {
+
+		if err := m.State.FillVDLTarget(fieldTarget3, tt.NonOptional().Field(0).Type); err != nil {
+			return err
+		}
+		if err := fieldsTarget1.FinishField(keyTarget2, fieldTarget3); err != nil {
+			return err
+		}
+	}
+	keyTarget4, fieldTarget5, err := fieldsTarget1.StartField("Version")
+	if err != vdl.ErrFieldNoExist && err != nil {
+		return err
+	}
+	if err != vdl.ErrFieldNoExist {
+		if err := fieldTarget5.FromString(string(m.Version), tt.NonOptional().Field(1).Type); err != nil {
+			return err
+		}
+		if err := fieldsTarget1.FinishField(keyTarget4, fieldTarget5); err != nil {
+			return err
+		}
+	}
+	if err := t.FinishFields(fieldsTarget1); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (m *InstallationStatus) MakeVDLTarget() vdl.Target {
+	return &InstallationStatusTarget{Value: m}
+}
+
+type InstallationStatusTarget struct {
+	Value         *InstallationStatus
+	stateTarget   InstallationStateTarget
+	versionTarget vdl.StringTarget
+	vdl.TargetBase
+	vdl.FieldsTargetBase
+}
+
+func (t *InstallationStatusTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
+
+	if ttWant := vdl.TypeOf((*InstallationStatus)(nil)).Elem(); !vdl.Compatible(tt, ttWant) {
+		return nil, fmt.Errorf("type %v incompatible with %v", tt, ttWant)
+	}
+	return t, nil
+}
+func (t *InstallationStatusTarget) StartField(name string) (key, field vdl.Target, _ error) {
+	switch name {
+	case "State":
+		t.stateTarget.Value = &t.Value.State
+		target, err := &t.stateTarget, error(nil)
+		return nil, target, err
+	case "Version":
+		t.versionTarget.Value = &t.Value.Version
+		target, err := &t.versionTarget, error(nil)
+		return nil, target, err
+	default:
+		return nil, nil, fmt.Errorf("field %s not in struct v.io/v23/services/device.InstallationStatus", name)
+	}
+}
+func (t *InstallationStatusTarget) FinishField(_, _ vdl.Target) error {
+	return nil
+}
+func (t *InstallationStatusTarget) FinishFields(_ vdl.FieldsTarget) error {
+
+	return nil
+}
+
+// DeviceStatus specifies the Status returned by the Application Status method
+// for the device service object.
+type DeviceStatus struct {
+	State   InstanceState
+	Version string
+}
+
+func (DeviceStatus) __VDLReflect(struct {
+	Name string `vdl:"v.io/v23/services/device.DeviceStatus"`
+}) {
+}
+
+func (m *DeviceStatus) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
+	fieldsTarget1, err := t.StartFields(tt)
+	if err != nil {
+		return err
+	}
+
+	keyTarget2, fieldTarget3, err := fieldsTarget1.StartField("State")
+	if err != vdl.ErrFieldNoExist && err != nil {
+		return err
+	}
+	if err != vdl.ErrFieldNoExist {
+
+		if err := m.State.FillVDLTarget(fieldTarget3, tt.NonOptional().Field(0).Type); err != nil {
+			return err
+		}
+		if err := fieldsTarget1.FinishField(keyTarget2, fieldTarget3); err != nil {
+			return err
+		}
+	}
+	keyTarget4, fieldTarget5, err := fieldsTarget1.StartField("Version")
+	if err != vdl.ErrFieldNoExist && err != nil {
+		return err
+	}
+	if err != vdl.ErrFieldNoExist {
+		if err := fieldTarget5.FromString(string(m.Version), tt.NonOptional().Field(1).Type); err != nil {
+			return err
+		}
+		if err := fieldsTarget1.FinishField(keyTarget4, fieldTarget5); err != nil {
+			return err
+		}
+	}
+	if err := t.FinishFields(fieldsTarget1); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (m *DeviceStatus) MakeVDLTarget() vdl.Target {
+	return &DeviceStatusTarget{Value: m}
+}
+
+type DeviceStatusTarget struct {
+	Value         *DeviceStatus
+	stateTarget   InstanceStateTarget
+	versionTarget vdl.StringTarget
+	vdl.TargetBase
+	vdl.FieldsTargetBase
+}
+
+func (t *DeviceStatusTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
+
+	if ttWant := vdl.TypeOf((*DeviceStatus)(nil)).Elem(); !vdl.Compatible(tt, ttWant) {
+		return nil, fmt.Errorf("type %v incompatible with %v", tt, ttWant)
+	}
+	return t, nil
+}
+func (t *DeviceStatusTarget) StartField(name string) (key, field vdl.Target, _ error) {
+	switch name {
+	case "State":
+		t.stateTarget.Value = &t.Value.State
+		target, err := &t.stateTarget, error(nil)
+		return nil, target, err
+	case "Version":
+		t.versionTarget.Value = &t.Value.Version
+		target, err := &t.versionTarget, error(nil)
+		return nil, target, err
+	default:
+		return nil, nil, fmt.Errorf("field %s not in struct v.io/v23/services/device.DeviceStatus", name)
+	}
+}
+func (t *DeviceStatusTarget) FinishField(_, _ vdl.Target) error {
+	return nil
+}
+func (t *DeviceStatusTarget) FinishFields(_ vdl.FieldsTarget) error {
 
 	return nil
 }
@@ -345,7 +620,7 @@ func (x StatusInstance) Name() string                 { return "Instance" }
 func (x StatusInstance) __VDLReflect(__StatusReflect) {}
 
 func (m StatusInstance) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
-	fieldsTarget1, err := t.StartFields(__VDLType_v_io_v23_services_device_Status)
+	fieldsTarget1, err := t.StartFields(tt)
 	if err != nil {
 		return err
 	}
@@ -354,7 +629,7 @@ func (m StatusInstance) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 		return err
 	}
 
-	if err := m.Value.FillVDLTarget(fieldTarget3, __VDLType_v_io_v23_services_device_InstanceStatus); err != nil {
+	if err := m.Value.FillVDLTarget(fieldTarget3, tt.NonOptional().Field(0).Type); err != nil {
 		return err
 	}
 	if err := fieldsTarget1.FinishField(keyTarget2, fieldTarget3); err != nil {
@@ -377,7 +652,7 @@ func (x StatusInstallation) Name() string                 { return "Installation
 func (x StatusInstallation) __VDLReflect(__StatusReflect) {}
 
 func (m StatusInstallation) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
-	fieldsTarget1, err := t.StartFields(__VDLType_v_io_v23_services_device_Status)
+	fieldsTarget1, err := t.StartFields(tt)
 	if err != nil {
 		return err
 	}
@@ -386,7 +661,7 @@ func (m StatusInstallation) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 		return err
 	}
 
-	if err := m.Value.FillVDLTarget(fieldTarget3, __VDLType_v_io_v23_services_device_InstallationStatus); err != nil {
+	if err := m.Value.FillVDLTarget(fieldTarget3, tt.NonOptional().Field(1).Type); err != nil {
 		return err
 	}
 	if err := fieldsTarget1.FinishField(keyTarget2, fieldTarget3); err != nil {
@@ -409,7 +684,7 @@ func (x StatusDevice) Name() string                 { return "Device" }
 func (x StatusDevice) __VDLReflect(__StatusReflect) {}
 
 func (m StatusDevice) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
-	fieldsTarget1, err := t.StartFields(__VDLType_v_io_v23_services_device_Status)
+	fieldsTarget1, err := t.StartFields(tt)
 	if err != nil {
 		return err
 	}
@@ -418,7 +693,7 @@ func (m StatusDevice) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 		return err
 	}
 
-	if err := m.Value.FillVDLTarget(fieldTarget3, __VDLType_v_io_v23_services_device_DeviceStatus); err != nil {
+	if err := m.Value.FillVDLTarget(fieldTarget3, tt.NonOptional().Field(2).Type); err != nil {
 		return err
 	}
 	if err := fieldsTarget1.FinishField(keyTarget2, fieldTarget3); err != nil {
@@ -432,285 +707,6 @@ func (m StatusDevice) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 }
 
 func (m StatusDevice) MakeVDLTarget() vdl.Target {
-	return nil
-}
-
-// InstallationStatus specifies the Status returned by the Application Status
-// method for installation objects.
-type InstallationStatus struct {
-	State   InstallationState
-	Version string
-}
-
-func (InstallationStatus) __VDLReflect(struct {
-	Name string `vdl:"v.io/v23/services/device.InstallationStatus"`
-}) {
-}
-
-func (m *InstallationStatus) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
-	if __VDLType_v_io_v23_services_device_InstallationStatus == nil || __VDLType0 == nil {
-		panic("Initialization order error: types generated for FillVDLTarget not initialized. Consider moving caller to an init() block.")
-	}
-	fieldsTarget1, err := t.StartFields(tt)
-	if err != nil {
-		return err
-	}
-
-	keyTarget2, fieldTarget3, err := fieldsTarget1.StartField("State")
-	if err != vdl.ErrFieldNoExist && err != nil {
-		return err
-	}
-	if err != vdl.ErrFieldNoExist {
-
-		if err := m.State.FillVDLTarget(fieldTarget3, __VDLType_v_io_v23_services_device_InstallationState); err != nil {
-			return err
-		}
-		if err := fieldsTarget1.FinishField(keyTarget2, fieldTarget3); err != nil {
-			return err
-		}
-	}
-	keyTarget4, fieldTarget5, err := fieldsTarget1.StartField("Version")
-	if err != vdl.ErrFieldNoExist && err != nil {
-		return err
-	}
-	if err != vdl.ErrFieldNoExist {
-		if err := fieldTarget5.FromString(string(m.Version), vdl.StringType); err != nil {
-			return err
-		}
-		if err := fieldsTarget1.FinishField(keyTarget4, fieldTarget5); err != nil {
-			return err
-		}
-	}
-	if err := t.FinishFields(fieldsTarget1); err != nil {
-		return err
-	}
-	return nil
-}
-
-func (m *InstallationStatus) MakeVDLTarget() vdl.Target {
-	return &InstallationStatusTarget{Value: m}
-}
-
-type InstallationStatusTarget struct {
-	Value         *InstallationStatus
-	stateTarget   InstallationStateTarget
-	versionTarget vdl.StringTarget
-	vdl.TargetBase
-	vdl.FieldsTargetBase
-}
-
-func (t *InstallationStatusTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
-
-	if !vdl.Compatible(tt, __VDLType_v_io_v23_services_device_InstallationStatus) {
-		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType_v_io_v23_services_device_InstallationStatus)
-	}
-	return t, nil
-}
-func (t *InstallationStatusTarget) StartField(name string) (key, field vdl.Target, _ error) {
-	switch name {
-	case "State":
-		t.stateTarget.Value = &t.Value.State
-		target, err := &t.stateTarget, error(nil)
-		return nil, target, err
-	case "Version":
-		t.versionTarget.Value = &t.Value.Version
-		target, err := &t.versionTarget, error(nil)
-		return nil, target, err
-	default:
-		return nil, nil, fmt.Errorf("field %s not in struct %v", name, __VDLType_v_io_v23_services_device_InstallationStatus)
-	}
-}
-func (t *InstallationStatusTarget) FinishField(_, _ vdl.Target) error {
-	return nil
-}
-func (t *InstallationStatusTarget) FinishFields(_ vdl.FieldsTarget) error {
-
-	return nil
-}
-
-// InstanceStatus specifies the Status returned by the Application Status method
-// for instance objects.
-type InstanceStatus struct {
-	State   InstanceState
-	Version string
-}
-
-func (InstanceStatus) __VDLReflect(struct {
-	Name string `vdl:"v.io/v23/services/device.InstanceStatus"`
-}) {
-}
-
-func (m *InstanceStatus) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
-	if __VDLType_v_io_v23_services_device_InstanceStatus == nil || __VDLType1 == nil {
-		panic("Initialization order error: types generated for FillVDLTarget not initialized. Consider moving caller to an init() block.")
-	}
-	fieldsTarget1, err := t.StartFields(tt)
-	if err != nil {
-		return err
-	}
-
-	keyTarget2, fieldTarget3, err := fieldsTarget1.StartField("State")
-	if err != vdl.ErrFieldNoExist && err != nil {
-		return err
-	}
-	if err != vdl.ErrFieldNoExist {
-
-		if err := m.State.FillVDLTarget(fieldTarget3, __VDLType_v_io_v23_services_device_InstanceState); err != nil {
-			return err
-		}
-		if err := fieldsTarget1.FinishField(keyTarget2, fieldTarget3); err != nil {
-			return err
-		}
-	}
-	keyTarget4, fieldTarget5, err := fieldsTarget1.StartField("Version")
-	if err != vdl.ErrFieldNoExist && err != nil {
-		return err
-	}
-	if err != vdl.ErrFieldNoExist {
-		if err := fieldTarget5.FromString(string(m.Version), vdl.StringType); err != nil {
-			return err
-		}
-		if err := fieldsTarget1.FinishField(keyTarget4, fieldTarget5); err != nil {
-			return err
-		}
-	}
-	if err := t.FinishFields(fieldsTarget1); err != nil {
-		return err
-	}
-	return nil
-}
-
-func (m *InstanceStatus) MakeVDLTarget() vdl.Target {
-	return &InstanceStatusTarget{Value: m}
-}
-
-type InstanceStatusTarget struct {
-	Value         *InstanceStatus
-	stateTarget   InstanceStateTarget
-	versionTarget vdl.StringTarget
-	vdl.TargetBase
-	vdl.FieldsTargetBase
-}
-
-func (t *InstanceStatusTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
-
-	if !vdl.Compatible(tt, __VDLType_v_io_v23_services_device_InstanceStatus) {
-		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType_v_io_v23_services_device_InstanceStatus)
-	}
-	return t, nil
-}
-func (t *InstanceStatusTarget) StartField(name string) (key, field vdl.Target, _ error) {
-	switch name {
-	case "State":
-		t.stateTarget.Value = &t.Value.State
-		target, err := &t.stateTarget, error(nil)
-		return nil, target, err
-	case "Version":
-		t.versionTarget.Value = &t.Value.Version
-		target, err := &t.versionTarget, error(nil)
-		return nil, target, err
-	default:
-		return nil, nil, fmt.Errorf("field %s not in struct %v", name, __VDLType_v_io_v23_services_device_InstanceStatus)
-	}
-}
-func (t *InstanceStatusTarget) FinishField(_, _ vdl.Target) error {
-	return nil
-}
-func (t *InstanceStatusTarget) FinishFields(_ vdl.FieldsTarget) error {
-
-	return nil
-}
-
-// DeviceStatus specifies the Status returned by the Application Status method
-// for the device service object.
-type DeviceStatus struct {
-	State   InstanceState
-	Version string
-}
-
-func (DeviceStatus) __VDLReflect(struct {
-	Name string `vdl:"v.io/v23/services/device.DeviceStatus"`
-}) {
-}
-
-func (m *DeviceStatus) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
-	if __VDLType_v_io_v23_services_device_DeviceStatus == nil || __VDLType2 == nil {
-		panic("Initialization order error: types generated for FillVDLTarget not initialized. Consider moving caller to an init() block.")
-	}
-	fieldsTarget1, err := t.StartFields(tt)
-	if err != nil {
-		return err
-	}
-
-	keyTarget2, fieldTarget3, err := fieldsTarget1.StartField("State")
-	if err != vdl.ErrFieldNoExist && err != nil {
-		return err
-	}
-	if err != vdl.ErrFieldNoExist {
-
-		if err := m.State.FillVDLTarget(fieldTarget3, __VDLType_v_io_v23_services_device_InstanceState); err != nil {
-			return err
-		}
-		if err := fieldsTarget1.FinishField(keyTarget2, fieldTarget3); err != nil {
-			return err
-		}
-	}
-	keyTarget4, fieldTarget5, err := fieldsTarget1.StartField("Version")
-	if err != vdl.ErrFieldNoExist && err != nil {
-		return err
-	}
-	if err != vdl.ErrFieldNoExist {
-		if err := fieldTarget5.FromString(string(m.Version), vdl.StringType); err != nil {
-			return err
-		}
-		if err := fieldsTarget1.FinishField(keyTarget4, fieldTarget5); err != nil {
-			return err
-		}
-	}
-	if err := t.FinishFields(fieldsTarget1); err != nil {
-		return err
-	}
-	return nil
-}
-
-func (m *DeviceStatus) MakeVDLTarget() vdl.Target {
-	return &DeviceStatusTarget{Value: m}
-}
-
-type DeviceStatusTarget struct {
-	Value         *DeviceStatus
-	stateTarget   InstanceStateTarget
-	versionTarget vdl.StringTarget
-	vdl.TargetBase
-	vdl.FieldsTargetBase
-}
-
-func (t *DeviceStatusTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
-
-	if !vdl.Compatible(tt, __VDLType_v_io_v23_services_device_DeviceStatus) {
-		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType_v_io_v23_services_device_DeviceStatus)
-	}
-	return t, nil
-}
-func (t *DeviceStatusTarget) StartField(name string) (key, field vdl.Target, _ error) {
-	switch name {
-	case "State":
-		t.stateTarget.Value = &t.Value.State
-		target, err := &t.stateTarget, error(nil)
-		return nil, target, err
-	case "Version":
-		t.versionTarget.Value = &t.Value.Version
-		target, err := &t.versionTarget, error(nil)
-		return nil, target, err
-	default:
-		return nil, nil, fmt.Errorf("field %s not in struct %v", name, __VDLType_v_io_v23_services_device_DeviceStatus)
-	}
-}
-func (t *DeviceStatusTarget) FinishField(_, _ vdl.Target) error {
-	return nil
-}
-func (t *DeviceStatusTarget) FinishFields(_ vdl.FieldsTarget) error {
-
 	return nil
 }
 
@@ -752,7 +748,7 @@ func (x BlessServerMessageInstancePublicKey) Name() string                      
 func (x BlessServerMessageInstancePublicKey) __VDLReflect(__BlessServerMessageReflect) {}
 
 func (m BlessServerMessageInstancePublicKey) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
-	fieldsTarget1, err := t.StartFields(__VDLType_v_io_v23_services_device_BlessServerMessage)
+	fieldsTarget1, err := t.StartFields(tt)
 	if err != nil {
 		return err
 	}
@@ -761,7 +757,7 @@ func (m BlessServerMessageInstancePublicKey) FillVDLTarget(t vdl.Target, tt *vdl
 		return err
 	}
 
-	if err := fieldTarget3.FromBytes([]byte(m.Value), __VDLType3); err != nil {
+	if err := fieldTarget3.FromBytes([]byte(m.Value), tt.NonOptional().Field(0).Type); err != nil {
 		return err
 	}
 	if err := fieldsTarget1.FinishField(keyTarget2, fieldTarget3); err != nil {
@@ -815,7 +811,7 @@ func (x BlessClientMessageAppBlessings) Name() string                           
 func (x BlessClientMessageAppBlessings) __VDLReflect(__BlessClientMessageReflect) {}
 
 func (m BlessClientMessageAppBlessings) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
-	fieldsTarget1, err := t.StartFields(__VDLType_v_io_v23_services_device_BlessClientMessage)
+	fieldsTarget1, err := t.StartFields(tt)
 	if err != nil {
 		return err
 	}
@@ -829,7 +825,7 @@ func (m BlessClientMessageAppBlessings) FillVDLTarget(t vdl.Target, tt *vdl.Type
 		return err
 	}
 
-	if err := wireValue4.FillVDLTarget(fieldTarget3, __VDLType_v_io_v23_security_WireBlessings); err != nil {
+	if err := wireValue4.FillVDLTarget(fieldTarget3, tt.NonOptional().Field(0).Type); err != nil {
 		return err
 	}
 	if err := fieldsTarget1.FinishField(keyTarget2, fieldTarget3); err != nil {
@@ -865,9 +861,6 @@ func (Description) __VDLReflect(struct {
 }
 
 func (m *Description) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
-	if __VDLType_v_io_v23_services_device_Description == nil || __VDLType4 == nil {
-		panic("Initialization order error: types generated for FillVDLTarget not initialized. Consider moving caller to an init() block.")
-	}
 	fieldsTarget1, err := t.StartFields(tt)
 	if err != nil {
 		return err
@@ -879,7 +872,7 @@ func (m *Description) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 	}
 	if err != vdl.ErrFieldNoExist {
 
-		setTarget4, err := fieldTarget3.StartSet(__VDLType5, len(m.Profiles))
+		setTarget4, err := fieldTarget3.StartSet(tt.NonOptional().Field(0).Type, len(m.Profiles))
 		if err != nil {
 			return err
 		}
@@ -888,7 +881,7 @@ func (m *Description) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 			if err != nil {
 				return err
 			}
-			if err := keyTarget5.FromString(string(key6), vdl.StringType); err != nil {
+			if err := keyTarget5.FromString(string(key6), tt.NonOptional().Field(0).Type.Key()); err != nil {
 				return err
 			}
 			if err := setTarget4.FinishKey(keyTarget5); err != nil {
@@ -921,8 +914,8 @@ type DescriptionTarget struct {
 
 func (t *DescriptionTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
 
-	if !vdl.Compatible(tt, __VDLType_v_io_v23_services_device_Description) {
-		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType_v_io_v23_services_device_Description)
+	if ttWant := vdl.TypeOf((*Description)(nil)).Elem(); !vdl.Compatible(tt, ttWant) {
+		return nil, fmt.Errorf("type %v incompatible with %v", tt, ttWant)
 	}
 	return t, nil
 }
@@ -933,7 +926,7 @@ func (t *DescriptionTarget) StartField(name string) (key, field vdl.Target, _ er
 		target, err := &t.profilesTarget, error(nil)
 		return nil, target, err
 	default:
-		return nil, nil, fmt.Errorf("field %s not in struct %v", name, __VDLType_v_io_v23_services_device_Description)
+		return nil, nil, fmt.Errorf("field %s not in struct v.io/v23/services/device.Description", name)
 	}
 }
 func (t *DescriptionTarget) FinishField(_, _ vdl.Target) error {
@@ -955,8 +948,8 @@ type unnamed_7365745b737472696e675dTarget struct {
 
 func (t *unnamed_7365745b737472696e675dTarget) StartSet(tt *vdl.Type, len int) (vdl.SetTarget, error) {
 
-	if !vdl.Compatible(tt, __VDLType5) {
-		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType5)
+	if ttWant := vdl.TypeOf((*map[string]struct{})(nil)); !vdl.Compatible(tt, ttWant) {
+		return nil, fmt.Errorf("type %v incompatible with %v", tt, ttWant)
 	}
 	*t.Value = make(map[string]struct{})
 	return t, nil
@@ -992,9 +985,6 @@ func (Association) __VDLReflect(struct {
 }
 
 func (m *Association) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
-	if __VDLType_v_io_v23_services_device_Association == nil || __VDLType6 == nil {
-		panic("Initialization order error: types generated for FillVDLTarget not initialized. Consider moving caller to an init() block.")
-	}
 	fieldsTarget1, err := t.StartFields(tt)
 	if err != nil {
 		return err
@@ -1005,7 +995,7 @@ func (m *Association) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 		return err
 	}
 	if err != vdl.ErrFieldNoExist {
-		if err := fieldTarget3.FromString(string(m.IdentityName), vdl.StringType); err != nil {
+		if err := fieldTarget3.FromString(string(m.IdentityName), tt.NonOptional().Field(0).Type); err != nil {
 			return err
 		}
 		if err := fieldsTarget1.FinishField(keyTarget2, fieldTarget3); err != nil {
@@ -1017,7 +1007,7 @@ func (m *Association) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 		return err
 	}
 	if err != vdl.ErrFieldNoExist {
-		if err := fieldTarget5.FromString(string(m.AccountName), vdl.StringType); err != nil {
+		if err := fieldTarget5.FromString(string(m.AccountName), tt.NonOptional().Field(1).Type); err != nil {
 			return err
 		}
 		if err := fieldsTarget1.FinishField(keyTarget4, fieldTarget5); err != nil {
@@ -1044,8 +1034,8 @@ type AssociationTarget struct {
 
 func (t *AssociationTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
 
-	if !vdl.Compatible(tt, __VDLType_v_io_v23_services_device_Association) {
-		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType_v_io_v23_services_device_Association)
+	if ttWant := vdl.TypeOf((*Association)(nil)).Elem(); !vdl.Compatible(tt, ttWant) {
+		return nil, fmt.Errorf("type %v incompatible with %v", tt, ttWant)
 	}
 	return t, nil
 }
@@ -1060,7 +1050,7 @@ func (t *AssociationTarget) StartField(name string) (key, field vdl.Target, _ er
 		target, err := &t.accountNameTarget, error(nil)
 		return nil, target, err
 	default:
-		return nil, nil, fmt.Errorf("field %s not in struct %v", name, __VDLType_v_io_v23_services_device_Association)
+		return nil, nil, fmt.Errorf("field %s not in struct v.io/v23/services/device.Association", name)
 	}
 }
 func (t *AssociationTarget) FinishField(_, _ vdl.Target) error {
@@ -1071,151 +1061,8 @@ func (t *AssociationTarget) FinishFields(_ vdl.FieldsTarget) error {
 	return nil
 }
 
-func init() {
-	vdl.Register((*Config)(nil))
-	vdl.Register((*InstallationState)(nil))
-	vdl.Register((*InstanceState)(nil))
-	vdl.Register((*Status)(nil))
-	vdl.Register((*InstallationStatus)(nil))
-	vdl.Register((*InstanceStatus)(nil))
-	vdl.Register((*DeviceStatus)(nil))
-	vdl.Register((*BlessServerMessage)(nil))
-	vdl.Register((*BlessClientMessage)(nil))
-	vdl.Register((*Description)(nil))
-	vdl.Register((*Association)(nil))
-}
-
-var __VDLType6 *vdl.Type = vdl.TypeOf((*Association)(nil))
-var __VDLType4 *vdl.Type = vdl.TypeOf((*Description)(nil))
-var __VDLType2 *vdl.Type = vdl.TypeOf((*DeviceStatus)(nil))
-var __VDLType0 *vdl.Type = vdl.TypeOf((*InstallationStatus)(nil))
-var __VDLType1 *vdl.Type = vdl.TypeOf((*InstanceStatus)(nil))
-var __VDLType3 *vdl.Type = vdl.TypeOf([]byte(nil))
-var __VDLType5 *vdl.Type = vdl.TypeOf(map[string]struct{}(nil))
-var __VDLType_v_io_v23_security_WireBlessings *vdl.Type
-
-func __VDLType_v_io_v23_security_WireBlessings_gen() *vdl.Type {
-	__VDLType_v_io_v23_security_WireBlessingsBuilder := vdl.TypeBuilder{}
-
-	__VDLType_v_io_v23_security_WireBlessings1 := __VDLType_v_io_v23_security_WireBlessingsBuilder.Struct()
-	__VDLType_v_io_v23_security_WireBlessings2 := __VDLType_v_io_v23_security_WireBlessingsBuilder.Named("v.io/v23/security.WireBlessings").AssignBase(__VDLType_v_io_v23_security_WireBlessings1)
-	__VDLType_v_io_v23_security_WireBlessings3 := __VDLType_v_io_v23_security_WireBlessingsBuilder.List()
-	__VDLType_v_io_v23_security_WireBlessings4 := __VDLType_v_io_v23_security_WireBlessingsBuilder.List()
-	__VDLType_v_io_v23_security_WireBlessings5 := __VDLType_v_io_v23_security_WireBlessingsBuilder.Struct()
-	__VDLType_v_io_v23_security_WireBlessings6 := __VDLType_v_io_v23_security_WireBlessingsBuilder.Named("v.io/v23/security.Certificate").AssignBase(__VDLType_v_io_v23_security_WireBlessings5)
-	__VDLType_v_io_v23_security_WireBlessings7 := vdl.StringType
-	__VDLType_v_io_v23_security_WireBlessings5.AppendField("Extension", __VDLType_v_io_v23_security_WireBlessings7)
-	__VDLType_v_io_v23_security_WireBlessings8 := __VDLType_v_io_v23_security_WireBlessingsBuilder.List()
-	__VDLType_v_io_v23_security_WireBlessings9 := vdl.ByteType
-	__VDLType_v_io_v23_security_WireBlessings8.AssignElem(__VDLType_v_io_v23_security_WireBlessings9)
-	__VDLType_v_io_v23_security_WireBlessings5.AppendField("PublicKey", __VDLType_v_io_v23_security_WireBlessings8)
-	__VDLType_v_io_v23_security_WireBlessings10 := __VDLType_v_io_v23_security_WireBlessingsBuilder.List()
-	__VDLType_v_io_v23_security_WireBlessings11 := __VDLType_v_io_v23_security_WireBlessingsBuilder.Struct()
-	__VDLType_v_io_v23_security_WireBlessings12 := __VDLType_v_io_v23_security_WireBlessingsBuilder.Named("v.io/v23/security.Caveat").AssignBase(__VDLType_v_io_v23_security_WireBlessings11)
-	__VDLType_v_io_v23_security_WireBlessings13 := __VDLType_v_io_v23_security_WireBlessingsBuilder.Array()
-	__VDLType_v_io_v23_security_WireBlessings14 := __VDLType_v_io_v23_security_WireBlessingsBuilder.Named("v.io/v23/uniqueid.Id").AssignBase(__VDLType_v_io_v23_security_WireBlessings13)
-	__VDLType_v_io_v23_security_WireBlessings13.AssignElem(__VDLType_v_io_v23_security_WireBlessings9)
-	__VDLType_v_io_v23_security_WireBlessings13.AssignLen(16)
-	__VDLType_v_io_v23_security_WireBlessings11.AppendField("Id", __VDLType_v_io_v23_security_WireBlessings14)
-	__VDLType_v_io_v23_security_WireBlessings11.AppendField("ParamVom", __VDLType_v_io_v23_security_WireBlessings8)
-	__VDLType_v_io_v23_security_WireBlessings10.AssignElem(__VDLType_v_io_v23_security_WireBlessings12)
-	__VDLType_v_io_v23_security_WireBlessings5.AppendField("Caveats", __VDLType_v_io_v23_security_WireBlessings10)
-	__VDLType_v_io_v23_security_WireBlessings15 := __VDLType_v_io_v23_security_WireBlessingsBuilder.Struct()
-	__VDLType_v_io_v23_security_WireBlessings16 := __VDLType_v_io_v23_security_WireBlessingsBuilder.Named("v.io/v23/security.Signature").AssignBase(__VDLType_v_io_v23_security_WireBlessings15)
-	__VDLType_v_io_v23_security_WireBlessings15.AppendField("Purpose", __VDLType_v_io_v23_security_WireBlessings8)
-	__VDLType_v_io_v23_security_WireBlessings17 := vdl.StringType
-	__VDLType_v_io_v23_security_WireBlessings18 := __VDLType_v_io_v23_security_WireBlessingsBuilder.Named("v.io/v23/security.Hash").AssignBase(__VDLType_v_io_v23_security_WireBlessings17)
-	__VDLType_v_io_v23_security_WireBlessings15.AppendField("Hash", __VDLType_v_io_v23_security_WireBlessings18)
-	__VDLType_v_io_v23_security_WireBlessings15.AppendField("R", __VDLType_v_io_v23_security_WireBlessings8)
-	__VDLType_v_io_v23_security_WireBlessings15.AppendField("S", __VDLType_v_io_v23_security_WireBlessings8)
-	__VDLType_v_io_v23_security_WireBlessings5.AppendField("Signature", __VDLType_v_io_v23_security_WireBlessings16)
-	__VDLType_v_io_v23_security_WireBlessings4.AssignElem(__VDLType_v_io_v23_security_WireBlessings6)
-	__VDLType_v_io_v23_security_WireBlessings3.AssignElem(__VDLType_v_io_v23_security_WireBlessings4)
-	__VDLType_v_io_v23_security_WireBlessings1.AppendField("CertificateChains", __VDLType_v_io_v23_security_WireBlessings3)
-	__VDLType_v_io_v23_security_WireBlessingsBuilder.Build()
-	__VDLType_v_io_v23_security_WireBlessingsv, err := __VDLType_v_io_v23_security_WireBlessings2.Built()
-	if err != nil {
-		panic(err)
-	}
-	return __VDLType_v_io_v23_security_WireBlessingsv
-}
-func init() {
-	__VDLType_v_io_v23_security_WireBlessings = __VDLType_v_io_v23_security_WireBlessings_gen()
-}
-
-var __VDLType_v_io_v23_services_device_Association *vdl.Type = vdl.TypeOf(Association{})
-var __VDLType_v_io_v23_services_device_BlessClientMessage *vdl.Type
-
-func __VDLType_v_io_v23_services_device_BlessClientMessage_gen() *vdl.Type {
-	__VDLType_v_io_v23_services_device_BlessClientMessageBuilder := vdl.TypeBuilder{}
-
-	__VDLType_v_io_v23_services_device_BlessClientMessage1 := __VDLType_v_io_v23_services_device_BlessClientMessageBuilder.Union()
-	__VDLType_v_io_v23_services_device_BlessClientMessage2 := __VDLType_v_io_v23_services_device_BlessClientMessageBuilder.Named("v.io/v23/services/device.BlessClientMessage").AssignBase(__VDLType_v_io_v23_services_device_BlessClientMessage1)
-	__VDLType_v_io_v23_services_device_BlessClientMessage3 := __VDLType_v_io_v23_services_device_BlessClientMessageBuilder.Struct()
-	__VDLType_v_io_v23_services_device_BlessClientMessage4 := __VDLType_v_io_v23_services_device_BlessClientMessageBuilder.Named("v.io/v23/security.WireBlessings").AssignBase(__VDLType_v_io_v23_services_device_BlessClientMessage3)
-	__VDLType_v_io_v23_services_device_BlessClientMessage5 := __VDLType_v_io_v23_services_device_BlessClientMessageBuilder.List()
-	__VDLType_v_io_v23_services_device_BlessClientMessage6 := __VDLType_v_io_v23_services_device_BlessClientMessageBuilder.List()
-	__VDLType_v_io_v23_services_device_BlessClientMessage7 := __VDLType_v_io_v23_services_device_BlessClientMessageBuilder.Struct()
-	__VDLType_v_io_v23_services_device_BlessClientMessage8 := __VDLType_v_io_v23_services_device_BlessClientMessageBuilder.Named("v.io/v23/security.Certificate").AssignBase(__VDLType_v_io_v23_services_device_BlessClientMessage7)
-	__VDLType_v_io_v23_services_device_BlessClientMessage9 := vdl.StringType
-	__VDLType_v_io_v23_services_device_BlessClientMessage7.AppendField("Extension", __VDLType_v_io_v23_services_device_BlessClientMessage9)
-	__VDLType_v_io_v23_services_device_BlessClientMessage10 := __VDLType_v_io_v23_services_device_BlessClientMessageBuilder.List()
-	__VDLType_v_io_v23_services_device_BlessClientMessage11 := vdl.ByteType
-	__VDLType_v_io_v23_services_device_BlessClientMessage10.AssignElem(__VDLType_v_io_v23_services_device_BlessClientMessage11)
-	__VDLType_v_io_v23_services_device_BlessClientMessage7.AppendField("PublicKey", __VDLType_v_io_v23_services_device_BlessClientMessage10)
-	__VDLType_v_io_v23_services_device_BlessClientMessage12 := __VDLType_v_io_v23_services_device_BlessClientMessageBuilder.List()
-	__VDLType_v_io_v23_services_device_BlessClientMessage13 := __VDLType_v_io_v23_services_device_BlessClientMessageBuilder.Struct()
-	__VDLType_v_io_v23_services_device_BlessClientMessage14 := __VDLType_v_io_v23_services_device_BlessClientMessageBuilder.Named("v.io/v23/security.Caveat").AssignBase(__VDLType_v_io_v23_services_device_BlessClientMessage13)
-	__VDLType_v_io_v23_services_device_BlessClientMessage15 := __VDLType_v_io_v23_services_device_BlessClientMessageBuilder.Array()
-	__VDLType_v_io_v23_services_device_BlessClientMessage16 := __VDLType_v_io_v23_services_device_BlessClientMessageBuilder.Named("v.io/v23/uniqueid.Id").AssignBase(__VDLType_v_io_v23_services_device_BlessClientMessage15)
-	__VDLType_v_io_v23_services_device_BlessClientMessage15.AssignElem(__VDLType_v_io_v23_services_device_BlessClientMessage11)
-	__VDLType_v_io_v23_services_device_BlessClientMessage15.AssignLen(16)
-	__VDLType_v_io_v23_services_device_BlessClientMessage13.AppendField("Id", __VDLType_v_io_v23_services_device_BlessClientMessage16)
-	__VDLType_v_io_v23_services_device_BlessClientMessage13.AppendField("ParamVom", __VDLType_v_io_v23_services_device_BlessClientMessage10)
-	__VDLType_v_io_v23_services_device_BlessClientMessage12.AssignElem(__VDLType_v_io_v23_services_device_BlessClientMessage14)
-	__VDLType_v_io_v23_services_device_BlessClientMessage7.AppendField("Caveats", __VDLType_v_io_v23_services_device_BlessClientMessage12)
-	__VDLType_v_io_v23_services_device_BlessClientMessage17 := __VDLType_v_io_v23_services_device_BlessClientMessageBuilder.Struct()
-	__VDLType_v_io_v23_services_device_BlessClientMessage18 := __VDLType_v_io_v23_services_device_BlessClientMessageBuilder.Named("v.io/v23/security.Signature").AssignBase(__VDLType_v_io_v23_services_device_BlessClientMessage17)
-	__VDLType_v_io_v23_services_device_BlessClientMessage17.AppendField("Purpose", __VDLType_v_io_v23_services_device_BlessClientMessage10)
-	__VDLType_v_io_v23_services_device_BlessClientMessage19 := vdl.StringType
-	__VDLType_v_io_v23_services_device_BlessClientMessage20 := __VDLType_v_io_v23_services_device_BlessClientMessageBuilder.Named("v.io/v23/security.Hash").AssignBase(__VDLType_v_io_v23_services_device_BlessClientMessage19)
-	__VDLType_v_io_v23_services_device_BlessClientMessage17.AppendField("Hash", __VDLType_v_io_v23_services_device_BlessClientMessage20)
-	__VDLType_v_io_v23_services_device_BlessClientMessage17.AppendField("R", __VDLType_v_io_v23_services_device_BlessClientMessage10)
-	__VDLType_v_io_v23_services_device_BlessClientMessage17.AppendField("S", __VDLType_v_io_v23_services_device_BlessClientMessage10)
-	__VDLType_v_io_v23_services_device_BlessClientMessage7.AppendField("Signature", __VDLType_v_io_v23_services_device_BlessClientMessage18)
-	__VDLType_v_io_v23_services_device_BlessClientMessage6.AssignElem(__VDLType_v_io_v23_services_device_BlessClientMessage8)
-	__VDLType_v_io_v23_services_device_BlessClientMessage5.AssignElem(__VDLType_v_io_v23_services_device_BlessClientMessage6)
-	__VDLType_v_io_v23_services_device_BlessClientMessage3.AppendField("CertificateChains", __VDLType_v_io_v23_services_device_BlessClientMessage5)
-	__VDLType_v_io_v23_services_device_BlessClientMessage1.AppendField("AppBlessings", __VDLType_v_io_v23_services_device_BlessClientMessage4)
-	__VDLType_v_io_v23_services_device_BlessClientMessageBuilder.Build()
-	__VDLType_v_io_v23_services_device_BlessClientMessagev, err := __VDLType_v_io_v23_services_device_BlessClientMessage2.Built()
-	if err != nil {
-		panic(err)
-	}
-	return __VDLType_v_io_v23_services_device_BlessClientMessagev
-}
-func init() {
-	__VDLType_v_io_v23_services_device_BlessClientMessage = __VDLType_v_io_v23_services_device_BlessClientMessage_gen()
-}
-
-var __VDLType_v_io_v23_services_device_BlessServerMessage *vdl.Type = vdl.TypeOf(BlessServerMessage(BlessServerMessageInstancePublicKey{[]byte(nil)}))
-var __VDLType_v_io_v23_services_device_Config *vdl.Type = vdl.TypeOf(Config(nil))
-var __VDLType_v_io_v23_services_device_Description *vdl.Type = vdl.TypeOf(Description{})
-var __VDLType_v_io_v23_services_device_DeviceStatus *vdl.Type = vdl.TypeOf(DeviceStatus{})
-var __VDLType_v_io_v23_services_device_InstallationState *vdl.Type = vdl.TypeOf(InstallationStateActive)
-var __VDLType_v_io_v23_services_device_InstallationStatus *vdl.Type = vdl.TypeOf(InstallationStatus{})
-var __VDLType_v_io_v23_services_device_InstanceState *vdl.Type = vdl.TypeOf(InstanceStateLaunching)
-var __VDLType_v_io_v23_services_device_InstanceStatus *vdl.Type = vdl.TypeOf(InstanceStatus{})
-var __VDLType_v_io_v23_services_device_Status *vdl.Type = vdl.TypeOf(Status(StatusInstance{InstanceStatus{}}))
-
-func __VDLEnsureNativeBuilt() {
-	if __VDLType_v_io_v23_security_WireBlessings == nil {
-		__VDLType_v_io_v23_security_WireBlessings = __VDLType_v_io_v23_security_WireBlessings_gen()
-	}
-	if __VDLType_v_io_v23_services_device_BlessClientMessage == nil {
-		__VDLType_v_io_v23_services_device_BlessClientMessage = __VDLType_v_io_v23_services_device_BlessClientMessage_gen()
-	}
-}
+//////////////////////////////////////////////////
+// Interface definitions
 
 // ApplicationClientMethods is the client interface
 // containing Application methods.
@@ -2927,4 +2774,40 @@ var descDevice = rpc.InterfaceDesc{
 			Tags: []*vdl.Value{vdl.ValueOf(access.Tag("Admin"))},
 		},
 	},
+}
+
+var __VDLInitCalled bool
+
+// __VDLInit performs vdl initialization.  It is safe to call multiple times.
+// If you have an init ordering issue, just insert the following line verbatim
+// into your source files in this package, right after the "package foo" clause:
+//
+//    var _ = __VDLInit()
+//
+// The purpose of this function is to ensure that vdl initialization occurs in
+// the right order, and very early in the init sequence.  In particular, vdl
+// registration and package variable initialization needs to occur before
+// functions like vdl.TypeOf will work properly.
+//
+// This function returns a dummy value, so that it can be used to initialize the
+// first var in the file, to take advantage of Go's defined init order.
+func __VDLInit() struct{} {
+	if __VDLInitCalled {
+		return struct{}{}
+	}
+
+	// Register types.
+	vdl.Register((*Config)(nil))
+	vdl.Register((*InstallationState)(nil))
+	vdl.Register((*InstanceState)(nil))
+	vdl.Register((*InstanceStatus)(nil))
+	vdl.Register((*InstallationStatus)(nil))
+	vdl.Register((*DeviceStatus)(nil))
+	vdl.Register((*Status)(nil))
+	vdl.Register((*BlessServerMessage)(nil))
+	vdl.Register((*BlessClientMessage)(nil))
+	vdl.Register((*Description)(nil))
+	vdl.Register((*Association)(nil))
+
+	return struct{}{}
 }

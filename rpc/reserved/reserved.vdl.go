@@ -13,10 +13,12 @@ import (
 	"v.io/v23/verror"
 )
 
-func __VDLEnsureNativeBuilt() {
-}
+var _ = __VDLInit() // Must be first; see __VDLInit comments for details.
 
+//////////////////////////////////////////////////
+// Error definitions
 var (
+
 	// GlobMaxRecursionReached indicates that the Glob request exceeded the
 	// max recursion level.
 	ErrGlobMaxRecursionReached = verror.Register("v.io/v23/rpc/reserved.GlobMaxRecursionReached", verror.NoRetry, "{1:}{2:} max recursion level reached{:_}")
@@ -27,12 +29,6 @@ var (
 	// object.
 	ErrGlobNotImplemented = verror.Register("v.io/v23/rpc/reserved.GlobNotImplemented", verror.NoRetry, "{1:}{2:} Glob not implemented")
 )
-
-func init() {
-	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrGlobMaxRecursionReached.ID), "{1:}{2:} max recursion level reached{:_}")
-	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrGlobMatchesOmitted.ID), "{1:}{2:} some matches might have been omitted")
-	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrGlobNotImplemented.ID), "{1:}{2:} Glob not implemented")
-}
 
 // NewErrGlobMaxRecursionReached returns an error with the ErrGlobMaxRecursionReached ID.
 func NewErrGlobMaxRecursionReached(ctx *context.T) error {
@@ -47,4 +43,32 @@ func NewErrGlobMatchesOmitted(ctx *context.T) error {
 // NewErrGlobNotImplemented returns an error with the ErrGlobNotImplemented ID.
 func NewErrGlobNotImplemented(ctx *context.T) error {
 	return verror.New(ErrGlobNotImplemented, ctx)
+}
+
+var __VDLInitCalled bool
+
+// __VDLInit performs vdl initialization.  It is safe to call multiple times.
+// If you have an init ordering issue, just insert the following line verbatim
+// into your source files in this package, right after the "package foo" clause:
+//
+//    var _ = __VDLInit()
+//
+// The purpose of this function is to ensure that vdl initialization occurs in
+// the right order, and very early in the init sequence.  In particular, vdl
+// registration and package variable initialization needs to occur before
+// functions like vdl.TypeOf will work properly.
+//
+// This function returns a dummy value, so that it can be used to initialize the
+// first var in the file, to take advantage of Go's defined init order.
+func __VDLInit() struct{} {
+	if __VDLInitCalled {
+		return struct{}{}
+	}
+
+	// Set error format strings.
+	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrGlobMaxRecursionReached.ID), "{1:}{2:} max recursion level reached{:_}")
+	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrGlobMatchesOmitted.ID), "{1:}{2:} some matches might have been omitted")
+	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrGlobNotImplemented.ID), "{1:}{2:} Glob not implemented")
+
+	return struct{}{}
 }

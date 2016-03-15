@@ -17,6 +17,11 @@ import (
 	"v.io/v23/vdl"
 )
 
+var _ = __VDLInit() // Must be first; see __VDLInit comments for details.
+
+//////////////////////////////////////////////////
+// Type definitions
+
 // Task is streamed by Stop to provide the client with a sense of the progress
 // of the shutdown.
 // The meaning of Progress and Goal are up to the developer (the server provides
@@ -38,9 +43,6 @@ func (Task) __VDLReflect(struct {
 }
 
 func (m *Task) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
-	if __VDLType_v_io_v23_services_appcycle_Task == nil || __VDLType0 == nil {
-		panic("Initialization order error: types generated for FillVDLTarget not initialized. Consider moving caller to an init() block.")
-	}
 	fieldsTarget1, err := t.StartFields(tt)
 	if err != nil {
 		return err
@@ -51,7 +53,7 @@ func (m *Task) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 		return err
 	}
 	if err != vdl.ErrFieldNoExist {
-		if err := fieldTarget3.FromInt(int64(m.Progress), vdl.Int32Type); err != nil {
+		if err := fieldTarget3.FromInt(int64(m.Progress), tt.NonOptional().Field(0).Type); err != nil {
 			return err
 		}
 		if err := fieldsTarget1.FinishField(keyTarget2, fieldTarget3); err != nil {
@@ -63,7 +65,7 @@ func (m *Task) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 		return err
 	}
 	if err != vdl.ErrFieldNoExist {
-		if err := fieldTarget5.FromInt(int64(m.Goal), vdl.Int32Type); err != nil {
+		if err := fieldTarget5.FromInt(int64(m.Goal), tt.NonOptional().Field(1).Type); err != nil {
 			return err
 		}
 		if err := fieldsTarget1.FinishField(keyTarget4, fieldTarget5); err != nil {
@@ -90,8 +92,8 @@ type TaskTarget struct {
 
 func (t *TaskTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
 
-	if !vdl.Compatible(tt, __VDLType_v_io_v23_services_appcycle_Task) {
-		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType_v_io_v23_services_appcycle_Task)
+	if ttWant := vdl.TypeOf((*Task)(nil)).Elem(); !vdl.Compatible(tt, ttWant) {
+		return nil, fmt.Errorf("type %v incompatible with %v", tt, ttWant)
 	}
 	return t, nil
 }
@@ -106,7 +108,7 @@ func (t *TaskTarget) StartField(name string) (key, field vdl.Target, _ error) {
 		target, err := &t.goalTarget, error(nil)
 		return nil, target, err
 	default:
-		return nil, nil, fmt.Errorf("field %s not in struct %v", name, __VDLType_v_io_v23_services_appcycle_Task)
+		return nil, nil, fmt.Errorf("field %s not in struct v.io/v23/services/appcycle.Task", name)
 	}
 }
 func (t *TaskTarget) FinishField(_, _ vdl.Target) error {
@@ -117,15 +119,8 @@ func (t *TaskTarget) FinishFields(_ vdl.FieldsTarget) error {
 	return nil
 }
 
-func init() {
-	vdl.Register((*Task)(nil))
-}
-
-var __VDLType0 *vdl.Type = vdl.TypeOf((*Task)(nil))
-var __VDLType_v_io_v23_services_appcycle_Task *vdl.Type = vdl.TypeOf(Task{})
-
-func __VDLEnsureNativeBuilt() {
-}
+//////////////////////////////////////////////////
+// Interface definitions
 
 // AppCycleClientMethods is the client interface
 // containing AppCycle methods.
@@ -376,4 +371,30 @@ type implAppCycleStopServerCallSend struct {
 
 func (s implAppCycleStopServerCallSend) Send(item Task) error {
 	return s.s.Send(item)
+}
+
+var __VDLInitCalled bool
+
+// __VDLInit performs vdl initialization.  It is safe to call multiple times.
+// If you have an init ordering issue, just insert the following line verbatim
+// into your source files in this package, right after the "package foo" clause:
+//
+//    var _ = __VDLInit()
+//
+// The purpose of this function is to ensure that vdl initialization occurs in
+// the right order, and very early in the init sequence.  In particular, vdl
+// registration and package variable initialization needs to occur before
+// functions like vdl.TypeOf will work properly.
+//
+// This function returns a dummy value, so that it can be used to initialize the
+// first var in the file, to take advantage of Go's defined init order.
+func __VDLInit() struct{} {
+	if __VDLInitCalled {
+		return struct{}{}
+	}
+
+	// Register types.
+	vdl.Register((*Task)(nil))
+
+	return struct{}{}
 }

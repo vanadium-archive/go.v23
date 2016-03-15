@@ -12,6 +12,214 @@ import (
 	"v.io/v23/vdl"
 )
 
+var _ = __VDLInit() // Must be first; see __VDLInit comments for details.
+
+//////////////////////////////////////////////////
+// Type definitions
+
+// An AdId is a globally unique identifier of an advertisement.
+type AdId [16]byte
+
+func (AdId) __VDLReflect(struct {
+	Name string `vdl:"v.io/v23/discovery.AdId"`
+}) {
+}
+
+func (m *AdId) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
+	if err := t.FromBytes([]byte((*m)[:]), tt); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (m *AdId) MakeVDLTarget() vdl.Target {
+	return &AdIdTarget{Value: m}
+}
+
+type AdIdTarget struct {
+	Value *AdId
+	vdl.TargetBase
+}
+
+func (t *AdIdTarget) FromBytes(src []byte, tt *vdl.Type) error {
+
+	if ttWant := vdl.TypeOf((*AdId)(nil)); !vdl.Compatible(tt, ttWant) {
+		return fmt.Errorf("type %v incompatible with %v", tt, ttWant)
+	}
+	copy((*t.Value)[:], src)
+
+	return nil
+}
+
+// Attributes represents service attributes as a key/value pair.
+type Attributes map[string]string
+
+func (Attributes) __VDLReflect(struct {
+	Name string `vdl:"v.io/v23/discovery.Attributes"`
+}) {
+}
+
+func (m *Attributes) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
+	mapTarget1, err := t.StartMap(tt, len((*m)))
+	if err != nil {
+		return err
+	}
+	for key3, value5 := range *m {
+		keyTarget2, err := mapTarget1.StartKey()
+		if err != nil {
+			return err
+		}
+		if err := keyTarget2.FromString(string(key3), tt.NonOptional().Key()); err != nil {
+			return err
+		}
+		valueTarget4, err := mapTarget1.FinishKeyStartField(keyTarget2)
+		if err != nil {
+			return err
+		}
+		if err := valueTarget4.FromString(string(value5), tt.NonOptional().Elem()); err != nil {
+			return err
+		}
+		if err := mapTarget1.FinishField(keyTarget2, valueTarget4); err != nil {
+			return err
+		}
+	}
+	if err := t.FinishMap(mapTarget1); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (m *Attributes) MakeVDLTarget() vdl.Target {
+	return &AttributesTarget{Value: m}
+}
+
+type AttributesTarget struct {
+	Value      *Attributes
+	currKey    string
+	currElem   string
+	keyTarget  vdl.StringTarget
+	elemTarget vdl.StringTarget
+	vdl.TargetBase
+	vdl.MapTargetBase
+}
+
+func (t *AttributesTarget) StartMap(tt *vdl.Type, len int) (vdl.MapTarget, error) {
+
+	if ttWant := vdl.TypeOf((*Attributes)(nil)); !vdl.Compatible(tt, ttWant) {
+		return nil, fmt.Errorf("type %v incompatible with %v", tt, ttWant)
+	}
+	*t.Value = make(Attributes)
+	return t, nil
+}
+func (t *AttributesTarget) StartKey() (key vdl.Target, _ error) {
+	t.currKey = ""
+	t.keyTarget.Value = &t.currKey
+	target, err := &t.keyTarget, error(nil)
+	return target, err
+}
+func (t *AttributesTarget) FinishKeyStartField(key vdl.Target) (field vdl.Target, _ error) {
+	t.currElem = ""
+	t.elemTarget.Value = &t.currElem
+	target, err := &t.elemTarget, error(nil)
+	return target, err
+}
+func (t *AttributesTarget) FinishField(key, field vdl.Target) error {
+	(*t.Value)[t.currKey] = t.currElem
+	return nil
+}
+func (t *AttributesTarget) FinishMap(elem vdl.MapTarget) error {
+	if len(*t.Value) == 0 {
+		*t.Value = nil
+	}
+
+	return nil
+}
+
+// Attachments represents service attachments as a key/value pair.
+type Attachments map[string][]byte
+
+func (Attachments) __VDLReflect(struct {
+	Name string `vdl:"v.io/v23/discovery.Attachments"`
+}) {
+}
+
+func (m *Attachments) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
+	mapTarget1, err := t.StartMap(tt, len((*m)))
+	if err != nil {
+		return err
+	}
+	for key3, value5 := range *m {
+		keyTarget2, err := mapTarget1.StartKey()
+		if err != nil {
+			return err
+		}
+		if err := keyTarget2.FromString(string(key3), tt.NonOptional().Key()); err != nil {
+			return err
+		}
+		valueTarget4, err := mapTarget1.FinishKeyStartField(keyTarget2)
+		if err != nil {
+			return err
+		}
+
+		if err := valueTarget4.FromBytes([]byte(value5), tt.NonOptional().Elem()); err != nil {
+			return err
+		}
+		if err := mapTarget1.FinishField(keyTarget2, valueTarget4); err != nil {
+			return err
+		}
+	}
+	if err := t.FinishMap(mapTarget1); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (m *Attachments) MakeVDLTarget() vdl.Target {
+	return &AttachmentsTarget{Value: m}
+}
+
+type AttachmentsTarget struct {
+	Value      *Attachments
+	currKey    string
+	currElem   []byte
+	keyTarget  vdl.StringTarget
+	elemTarget vdl.BytesTarget
+	vdl.TargetBase
+	vdl.MapTargetBase
+}
+
+func (t *AttachmentsTarget) StartMap(tt *vdl.Type, len int) (vdl.MapTarget, error) {
+
+	if ttWant := vdl.TypeOf((*Attachments)(nil)); !vdl.Compatible(tt, ttWant) {
+		return nil, fmt.Errorf("type %v incompatible with %v", tt, ttWant)
+	}
+	*t.Value = make(Attachments)
+	return t, nil
+}
+func (t *AttachmentsTarget) StartKey() (key vdl.Target, _ error) {
+	t.currKey = ""
+	t.keyTarget.Value = &t.currKey
+	target, err := &t.keyTarget, error(nil)
+	return target, err
+}
+func (t *AttachmentsTarget) FinishKeyStartField(key vdl.Target) (field vdl.Target, _ error) {
+	t.currElem = []byte(nil)
+	t.elemTarget.Value = &t.currElem
+	target, err := &t.elemTarget, error(nil)
+	return target, err
+}
+func (t *AttachmentsTarget) FinishField(key, field vdl.Target) error {
+	(*t.Value)[t.currKey] = t.currElem
+	return nil
+}
+func (t *AttachmentsTarget) FinishMap(elem vdl.MapTarget) error {
+	if len(*t.Value) == 0 {
+		*t.Value = nil
+	}
+
+	return nil
+}
+
 // Advertisement represents a feed into advertiser to broadcast its contents
 // to scanners.
 //
@@ -51,9 +259,6 @@ func (Advertisement) __VDLReflect(struct {
 }
 
 func (m *Advertisement) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
-	if __VDLType_v_io_v23_discovery_Advertisement == nil || __VDLType0 == nil {
-		panic("Initialization order error: types generated for FillVDLTarget not initialized. Consider moving caller to an init() block.")
-	}
 	fieldsTarget1, err := t.StartFields(tt)
 	if err != nil {
 		return err
@@ -65,7 +270,7 @@ func (m *Advertisement) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 	}
 	if err != vdl.ErrFieldNoExist {
 
-		if err := m.Id.FillVDLTarget(fieldTarget3, __VDLType_v_io_v23_discovery_AdId); err != nil {
+		if err := m.Id.FillVDLTarget(fieldTarget3, tt.NonOptional().Field(0).Type); err != nil {
 			return err
 		}
 		if err := fieldsTarget1.FinishField(keyTarget2, fieldTarget3); err != nil {
@@ -77,7 +282,7 @@ func (m *Advertisement) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 		return err
 	}
 	if err != vdl.ErrFieldNoExist {
-		if err := fieldTarget5.FromString(string(m.InterfaceName), vdl.StringType); err != nil {
+		if err := fieldTarget5.FromString(string(m.InterfaceName), tt.NonOptional().Field(1).Type); err != nil {
 			return err
 		}
 		if err := fieldsTarget1.FinishField(keyTarget4, fieldTarget5); err != nil {
@@ -90,7 +295,7 @@ func (m *Advertisement) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 	}
 	if err != vdl.ErrFieldNoExist {
 
-		listTarget8, err := fieldTarget7.StartList(__VDLType1, len(m.Addresses))
+		listTarget8, err := fieldTarget7.StartList(tt.NonOptional().Field(2).Type, len(m.Addresses))
 		if err != nil {
 			return err
 		}
@@ -99,7 +304,7 @@ func (m *Advertisement) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 			if err != nil {
 				return err
 			}
-			if err := elemTarget9.FromString(string(elem10), vdl.StringType); err != nil {
+			if err := elemTarget9.FromString(string(elem10), tt.NonOptional().Field(2).Type.Elem()); err != nil {
 				return err
 			}
 			if err := listTarget8.FinishElem(elemTarget9); err != nil {
@@ -119,7 +324,7 @@ func (m *Advertisement) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 	}
 	if err != vdl.ErrFieldNoExist {
 
-		if err := m.Attributes.FillVDLTarget(fieldTarget12, __VDLType_v_io_v23_discovery_Attributes); err != nil {
+		if err := m.Attributes.FillVDLTarget(fieldTarget12, tt.NonOptional().Field(3).Type); err != nil {
 			return err
 		}
 		if err := fieldsTarget1.FinishField(keyTarget11, fieldTarget12); err != nil {
@@ -132,7 +337,7 @@ func (m *Advertisement) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 	}
 	if err != vdl.ErrFieldNoExist {
 
-		if err := m.Attachments.FillVDLTarget(fieldTarget14, __VDLType_v_io_v23_discovery_Attachments); err != nil {
+		if err := m.Attachments.FillVDLTarget(fieldTarget14, tt.NonOptional().Field(4).Type); err != nil {
 			return err
 		}
 		if err := fieldsTarget1.FinishField(keyTarget13, fieldTarget14); err != nil {
@@ -162,8 +367,8 @@ type AdvertisementTarget struct {
 
 func (t *AdvertisementTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
 
-	if !vdl.Compatible(tt, __VDLType_v_io_v23_discovery_Advertisement) {
-		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType_v_io_v23_discovery_Advertisement)
+	if ttWant := vdl.TypeOf((*Advertisement)(nil)).Elem(); !vdl.Compatible(tt, ttWant) {
+		return nil, fmt.Errorf("type %v incompatible with %v", tt, ttWant)
 	}
 	return t, nil
 }
@@ -190,7 +395,7 @@ func (t *AdvertisementTarget) StartField(name string) (key, field vdl.Target, _ 
 		target, err := &t.attachmentsTarget, error(nil)
 		return nil, target, err
 	default:
-		return nil, nil, fmt.Errorf("field %s not in struct %v", name, __VDLType_v_io_v23_discovery_Advertisement)
+		return nil, nil, fmt.Errorf("field %s not in struct v.io/v23/discovery.Advertisement", name)
 	}
 }
 func (t *AdvertisementTarget) FinishField(_, _ vdl.Target) error {
@@ -201,223 +406,31 @@ func (t *AdvertisementTarget) FinishFields(_ vdl.FieldsTarget) error {
 	return nil
 }
 
-type AdIdTarget struct {
-	Value *AdId
-	vdl.TargetBase
-}
+var __VDLInitCalled bool
 
-func (t *AdIdTarget) FromBytes(src []byte, tt *vdl.Type) error {
-
-	if !vdl.Compatible(tt, __VDLType_v_io_v23_discovery_AdId) {
-		return fmt.Errorf("type %v incompatible with %v", tt, __VDLType_v_io_v23_discovery_AdId)
-	}
-	copy((*t.Value)[:], src)
-
-	return nil
-}
-
-type AttributesTarget struct {
-	Value      *Attributes
-	currKey    string
-	currElem   string
-	keyTarget  vdl.StringTarget
-	elemTarget vdl.StringTarget
-	vdl.TargetBase
-	vdl.MapTargetBase
-}
-
-func (t *AttributesTarget) StartMap(tt *vdl.Type, len int) (vdl.MapTarget, error) {
-
-	if !vdl.Compatible(tt, __VDLType_v_io_v23_discovery_Attributes) {
-		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType_v_io_v23_discovery_Attributes)
-	}
-	*t.Value = make(Attributes)
-	return t, nil
-}
-func (t *AttributesTarget) StartKey() (key vdl.Target, _ error) {
-	t.currKey = ""
-	t.keyTarget.Value = &t.currKey
-	target, err := &t.keyTarget, error(nil)
-	return target, err
-}
-func (t *AttributesTarget) FinishKeyStartField(key vdl.Target) (field vdl.Target, _ error) {
-	t.currElem = ""
-	t.elemTarget.Value = &t.currElem
-	target, err := &t.elemTarget, error(nil)
-	return target, err
-}
-func (t *AttributesTarget) FinishField(key, field vdl.Target) error {
-	(*t.Value)[t.currKey] = t.currElem
-	return nil
-}
-func (t *AttributesTarget) FinishMap(elem vdl.MapTarget) error {
-	if len(*t.Value) == 0 {
-		*t.Value = nil
+// __VDLInit performs vdl initialization.  It is safe to call multiple times.
+// If you have an init ordering issue, just insert the following line verbatim
+// into your source files in this package, right after the "package foo" clause:
+//
+//    var _ = __VDLInit()
+//
+// The purpose of this function is to ensure that vdl initialization occurs in
+// the right order, and very early in the init sequence.  In particular, vdl
+// registration and package variable initialization needs to occur before
+// functions like vdl.TypeOf will work properly.
+//
+// This function returns a dummy value, so that it can be used to initialize the
+// first var in the file, to take advantage of Go's defined init order.
+func __VDLInit() struct{} {
+	if __VDLInitCalled {
+		return struct{}{}
 	}
 
-	return nil
-}
-
-type AttachmentsTarget struct {
-	Value      *Attachments
-	currKey    string
-	currElem   []byte
-	keyTarget  vdl.StringTarget
-	elemTarget vdl.BytesTarget
-	vdl.TargetBase
-	vdl.MapTargetBase
-}
-
-func (t *AttachmentsTarget) StartMap(tt *vdl.Type, len int) (vdl.MapTarget, error) {
-
-	if !vdl.Compatible(tt, __VDLType_v_io_v23_discovery_Attachments) {
-		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType_v_io_v23_discovery_Attachments)
-	}
-	*t.Value = make(Attachments)
-	return t, nil
-}
-func (t *AttachmentsTarget) StartKey() (key vdl.Target, _ error) {
-	t.currKey = ""
-	t.keyTarget.Value = &t.currKey
-	target, err := &t.keyTarget, error(nil)
-	return target, err
-}
-func (t *AttachmentsTarget) FinishKeyStartField(key vdl.Target) (field vdl.Target, _ error) {
-	t.currElem = []byte(nil)
-	t.elemTarget.Value = &t.currElem
-	target, err := &t.elemTarget, error(nil)
-	return target, err
-}
-func (t *AttachmentsTarget) FinishField(key, field vdl.Target) error {
-	(*t.Value)[t.currKey] = t.currElem
-	return nil
-}
-func (t *AttachmentsTarget) FinishMap(elem vdl.MapTarget) error {
-	if len(*t.Value) == 0 {
-		*t.Value = nil
-	}
-
-	return nil
-}
-
-// An AdId is a globally unique identifier of an advertisement.
-type AdId [16]byte
-
-func (AdId) __VDLReflect(struct {
-	Name string `vdl:"v.io/v23/discovery.AdId"`
-}) {
-}
-
-func (m *AdId) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
-	if err := t.FromBytes([]byte((*m)[:]), __VDLType_v_io_v23_discovery_AdId); err != nil {
-		return err
-	}
-	return nil
-}
-
-func (m *AdId) MakeVDLTarget() vdl.Target {
-	return &AdIdTarget{Value: m}
-}
-
-// Attributes represents service attributes as a key/value pair.
-type Attributes map[string]string
-
-func (Attributes) __VDLReflect(struct {
-	Name string `vdl:"v.io/v23/discovery.Attributes"`
-}) {
-}
-
-func (m *Attributes) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
-	mapTarget1, err := t.StartMap(__VDLType_v_io_v23_discovery_Attributes, len((*m)))
-	if err != nil {
-		return err
-	}
-	for key3, value5 := range *m {
-		keyTarget2, err := mapTarget1.StartKey()
-		if err != nil {
-			return err
-		}
-		if err := keyTarget2.FromString(string(key3), vdl.StringType); err != nil {
-			return err
-		}
-		valueTarget4, err := mapTarget1.FinishKeyStartField(keyTarget2)
-		if err != nil {
-			return err
-		}
-		if err := valueTarget4.FromString(string(value5), vdl.StringType); err != nil {
-			return err
-		}
-		if err := mapTarget1.FinishField(keyTarget2, valueTarget4); err != nil {
-			return err
-		}
-	}
-	if err := t.FinishMap(mapTarget1); err != nil {
-		return err
-	}
-	return nil
-}
-
-func (m *Attributes) MakeVDLTarget() vdl.Target {
-	return &AttributesTarget{Value: m}
-}
-
-// Attachments represents service attachments as a key/value pair.
-type Attachments map[string][]byte
-
-func (Attachments) __VDLReflect(struct {
-	Name string `vdl:"v.io/v23/discovery.Attachments"`
-}) {
-}
-
-func (m *Attachments) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
-	mapTarget1, err := t.StartMap(__VDLType_v_io_v23_discovery_Attachments, len((*m)))
-	if err != nil {
-		return err
-	}
-	for key3, value5 := range *m {
-		keyTarget2, err := mapTarget1.StartKey()
-		if err != nil {
-			return err
-		}
-		if err := keyTarget2.FromString(string(key3), vdl.StringType); err != nil {
-			return err
-		}
-		valueTarget4, err := mapTarget1.FinishKeyStartField(keyTarget2)
-		if err != nil {
-			return err
-		}
-
-		if err := valueTarget4.FromBytes([]byte(value5), __VDLType2); err != nil {
-			return err
-		}
-		if err := mapTarget1.FinishField(keyTarget2, valueTarget4); err != nil {
-			return err
-		}
-	}
-	if err := t.FinishMap(mapTarget1); err != nil {
-		return err
-	}
-	return nil
-}
-
-func (m *Attachments) MakeVDLTarget() vdl.Target {
-	return &AttachmentsTarget{Value: m}
-}
-
-func init() {
-	vdl.Register((*Advertisement)(nil))
+	// Register types.
 	vdl.Register((*AdId)(nil))
 	vdl.Register((*Attributes)(nil))
 	vdl.Register((*Attachments)(nil))
-}
+	vdl.Register((*Advertisement)(nil))
 
-var __VDLType0 *vdl.Type = vdl.TypeOf((*Advertisement)(nil))
-var __VDLType2 *vdl.Type = vdl.TypeOf([]byte(nil))
-var __VDLType1 *vdl.Type = vdl.TypeOf([]string(nil))
-var __VDLType_v_io_v23_discovery_AdId *vdl.Type = vdl.TypeOf(AdId{})
-var __VDLType_v_io_v23_discovery_Advertisement *vdl.Type = vdl.TypeOf(Advertisement{})
-var __VDLType_v_io_v23_discovery_Attachments *vdl.Type = vdl.TypeOf(Attachments(nil))
-var __VDLType_v_io_v23_discovery_Attributes *vdl.Type = vdl.TypeOf(Attributes(nil))
-
-func __VDLEnsureNativeBuilt() {
+	return struct{}{}
 }

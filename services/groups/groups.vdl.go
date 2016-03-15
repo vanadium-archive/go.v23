@@ -21,6 +21,11 @@ import (
 	"v.io/v23/verror"
 )
 
+var _ = __VDLInit() // Must be first; see __VDLInit comments for details.
+
+//////////////////////////////////////////////////
+// Type definitions
+
 // BlessingPatternChunk is a substring of a BlessingPattern. As with
 // BlessingPatterns, BlessingPatternChunks may contain references to groups.
 // However, they may be restricted in other ways. For example, in the future
@@ -34,7 +39,7 @@ func (BlessingPatternChunk) __VDLReflect(struct {
 }
 
 func (m *BlessingPatternChunk) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
-	if err := t.FromString(string((*m)), __VDLType_v_io_v23_services_groups_BlessingPatternChunk); err != nil {
+	if err := t.FromString(string((*m)), tt); err != nil {
 		return err
 	}
 	return nil
@@ -51,8 +56,8 @@ type BlessingPatternChunkTarget struct {
 
 func (t *BlessingPatternChunkTarget) FromString(src string, tt *vdl.Type) error {
 
-	if !vdl.Compatible(tt, __VDLType_v_io_v23_services_groups_BlessingPatternChunk) {
-		return fmt.Errorf("type %v incompatible with %v", tt, __VDLType_v_io_v23_services_groups_BlessingPatternChunk)
+	if ttWant := vdl.TypeOf((*BlessingPatternChunk)(nil)); !vdl.Compatible(tt, ttWant) {
+		return fmt.Errorf("type %v incompatible with %v", tt, ttWant)
 	}
 	*t.Value = BlessingPatternChunk(src)
 
@@ -68,9 +73,6 @@ func (GetRequest) __VDLReflect(struct {
 }
 
 func (m *GetRequest) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
-	if __VDLType_v_io_v23_services_groups_GetRequest == nil || __VDLType0 == nil {
-		panic("Initialization order error: types generated for FillVDLTarget not initialized. Consider moving caller to an init() block.")
-	}
 	fieldsTarget1, err := t.StartFields(tt)
 	if err != nil {
 		return err
@@ -94,15 +96,15 @@ type GetRequestTarget struct {
 
 func (t *GetRequestTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
 
-	if !vdl.Compatible(tt, __VDLType_v_io_v23_services_groups_GetRequest) {
-		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType_v_io_v23_services_groups_GetRequest)
+	if ttWant := vdl.TypeOf((*GetRequest)(nil)).Elem(); !vdl.Compatible(tt, ttWant) {
+		return nil, fmt.Errorf("type %v incompatible with %v", tt, ttWant)
 	}
 	return t, nil
 }
 func (t *GetRequestTarget) StartField(name string) (key, field vdl.Target, _ error) {
 	switch name {
 	default:
-		return nil, nil, fmt.Errorf("field %s not in struct %v", name, __VDLType_v_io_v23_services_groups_GetRequest)
+		return nil, nil, fmt.Errorf("field %s not in struct v.io/v23/services/groups.GetRequest", name)
 	}
 }
 func (t *GetRequestTarget) FinishField(_, _ vdl.Target) error {
@@ -123,9 +125,6 @@ func (GetResponse) __VDLReflect(struct {
 }
 
 func (m *GetResponse) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
-	if __VDLType_v_io_v23_services_groups_GetResponse == nil || __VDLType1 == nil {
-		panic("Initialization order error: types generated for FillVDLTarget not initialized. Consider moving caller to an init() block.")
-	}
 	fieldsTarget1, err := t.StartFields(tt)
 	if err != nil {
 		return err
@@ -137,7 +136,7 @@ func (m *GetResponse) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 	}
 	if err != vdl.ErrFieldNoExist {
 
-		setTarget4, err := fieldTarget3.StartSet(__VDLType2, len(m.Entries))
+		setTarget4, err := fieldTarget3.StartSet(tt.NonOptional().Field(0).Type, len(m.Entries))
 		if err != nil {
 			return err
 		}
@@ -147,7 +146,7 @@ func (m *GetResponse) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 				return err
 			}
 
-			if err := key6.FillVDLTarget(keyTarget5, __VDLType_v_io_v23_services_groups_BlessingPatternChunk); err != nil {
+			if err := key6.FillVDLTarget(keyTarget5, tt.NonOptional().Field(0).Type.Key()); err != nil {
 				return err
 			}
 			if err := setTarget4.FinishKey(keyTarget5); err != nil {
@@ -180,8 +179,8 @@ type GetResponseTarget struct {
 
 func (t *GetResponseTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
 
-	if !vdl.Compatible(tt, __VDLType_v_io_v23_services_groups_GetResponse) {
-		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType_v_io_v23_services_groups_GetResponse)
+	if ttWant := vdl.TypeOf((*GetResponse)(nil)).Elem(); !vdl.Compatible(tt, ttWant) {
+		return nil, fmt.Errorf("type %v incompatible with %v", tt, ttWant)
 	}
 	return t, nil
 }
@@ -192,7 +191,7 @@ func (t *GetResponseTarget) StartField(name string) (key, field vdl.Target, _ er
 		target, err := &t.entriesTarget, error(nil)
 		return nil, target, err
 	default:
-		return nil, nil, fmt.Errorf("field %s not in struct %v", name, __VDLType_v_io_v23_services_groups_GetResponse)
+		return nil, nil, fmt.Errorf("field %s not in struct v.io/v23/services/groups.GetResponse", name)
 	}
 }
 func (t *GetResponseTarget) FinishField(_, _ vdl.Target) error {
@@ -214,8 +213,8 @@ type unnamed_7365745b762e696f2f7632332f73657276696365732f67726f7570732e426c65737
 
 func (t *unnamed_7365745b762e696f2f7632332f73657276696365732f67726f7570732e426c657373696e675061747465726e4368756e6b20737472696e675dTarget) StartSet(tt *vdl.Type, len int) (vdl.SetTarget, error) {
 
-	if !vdl.Compatible(tt, __VDLType2) {
-		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType2)
+	if ttWant := vdl.TypeOf((*map[BlessingPatternChunk]struct{})(nil)); !vdl.Compatible(tt, ttWant) {
+		return nil, fmt.Errorf("type %v incompatible with %v", tt, ttWant)
 	}
 	*t.Value = make(map[BlessingPatternChunk]struct{})
 	return t, nil
@@ -291,7 +290,7 @@ func (ApproximationType) __VDLReflect(struct {
 }
 
 func (m *ApproximationType) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
-	if err := t.FromEnumLabel((*m).String(), __VDLType_v_io_v23_services_groups_ApproximationType); err != nil {
+	if err := t.FromEnumLabel((*m).String(), tt); err != nil {
 		return err
 	}
 	return nil
@@ -308,8 +307,8 @@ type ApproximationTypeTarget struct {
 
 func (t *ApproximationTypeTarget) FromEnumLabel(src string, tt *vdl.Type) error {
 
-	if !vdl.Compatible(tt, __VDLType_v_io_v23_services_groups_ApproximationType) {
-		return fmt.Errorf("type %v incompatible with %v", tt, __VDLType_v_io_v23_services_groups_ApproximationType)
+	if ttWant := vdl.TypeOf((*ApproximationType)(nil)); !vdl.Compatible(tt, ttWant) {
+		return fmt.Errorf("type %v incompatible with %v", tt, ttWant)
 	}
 	switch src {
 	case "Under":
@@ -317,7 +316,7 @@ func (t *ApproximationTypeTarget) FromEnumLabel(src string, tt *vdl.Type) error 
 	case "Over":
 		*t.Value = 1
 	default:
-		return fmt.Errorf("label %s not in enum %v", src, __VDLType_v_io_v23_services_groups_ApproximationType)
+		return fmt.Errorf("label %s not in enum v.io/v23/services/groups.ApproximationType", src)
 	}
 
 	return nil
@@ -336,9 +335,6 @@ func (Approximation) __VDLReflect(struct {
 }
 
 func (m *Approximation) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
-	if __VDLType_v_io_v23_services_groups_Approximation == nil || __VDLType3 == nil {
-		panic("Initialization order error: types generated for FillVDLTarget not initialized. Consider moving caller to an init() block.")
-	}
 	fieldsTarget1, err := t.StartFields(tt)
 	if err != nil {
 		return err
@@ -349,7 +345,7 @@ func (m *Approximation) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 		return err
 	}
 	if err != vdl.ErrFieldNoExist {
-		if err := fieldTarget3.FromString(string(m.Reason), vdl.StringType); err != nil {
+		if err := fieldTarget3.FromString(string(m.Reason), tt.NonOptional().Field(0).Type); err != nil {
 			return err
 		}
 		if err := fieldsTarget1.FinishField(keyTarget2, fieldTarget3); err != nil {
@@ -361,7 +357,7 @@ func (m *Approximation) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 		return err
 	}
 	if err != vdl.ErrFieldNoExist {
-		if err := fieldTarget5.FromString(string(m.Details), vdl.StringType); err != nil {
+		if err := fieldTarget5.FromString(string(m.Details), tt.NonOptional().Field(1).Type); err != nil {
 			return err
 		}
 		if err := fieldsTarget1.FinishField(keyTarget4, fieldTarget5); err != nil {
@@ -388,8 +384,8 @@ type ApproximationTarget struct {
 
 func (t *ApproximationTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
 
-	if !vdl.Compatible(tt, __VDLType_v_io_v23_services_groups_Approximation) {
-		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType_v_io_v23_services_groups_Approximation)
+	if ttWant := vdl.TypeOf((*Approximation)(nil)).Elem(); !vdl.Compatible(tt, ttWant) {
+		return nil, fmt.Errorf("type %v incompatible with %v", tt, ttWant)
 	}
 	return t, nil
 }
@@ -404,7 +400,7 @@ func (t *ApproximationTarget) StartField(name string) (key, field vdl.Target, _ 
 		target, err := &t.detailsTarget, error(nil)
 		return nil, target, err
 	default:
-		return nil, nil, fmt.Errorf("field %s not in struct %v", name, __VDLType_v_io_v23_services_groups_Approximation)
+		return nil, nil, fmt.Errorf("field %s not in struct v.io/v23/services/groups.Approximation", name)
 	}
 }
 func (t *ApproximationTarget) FinishField(_, _ vdl.Target) error {
@@ -415,38 +411,13 @@ func (t *ApproximationTarget) FinishFields(_ vdl.FieldsTarget) error {
 	return nil
 }
 
-func init() {
-	vdl.Register((*BlessingPatternChunk)(nil))
-	vdl.Register((*GetRequest)(nil))
-	vdl.Register((*GetResponse)(nil))
-	vdl.Register((*ApproximationType)(nil))
-	vdl.Register((*Approximation)(nil))
-}
-
-var __VDLType3 *vdl.Type = vdl.TypeOf((*Approximation)(nil))
-var __VDLType0 *vdl.Type = vdl.TypeOf((*GetRequest)(nil))
-var __VDLType1 *vdl.Type = vdl.TypeOf((*GetResponse)(nil))
-var __VDLType2 *vdl.Type = vdl.TypeOf(map[BlessingPatternChunk]struct{}(nil))
-var __VDLType_v_io_v23_services_groups_Approximation *vdl.Type = vdl.TypeOf(Approximation{})
-var __VDLType_v_io_v23_services_groups_ApproximationType *vdl.Type = vdl.TypeOf(ApproximationTypeUnder)
-var __VDLType_v_io_v23_services_groups_BlessingPatternChunk *vdl.Type = vdl.TypeOf(BlessingPatternChunk(""))
-var __VDLType_v_io_v23_services_groups_GetRequest *vdl.Type = vdl.TypeOf(GetRequest{})
-var __VDLType_v_io_v23_services_groups_GetResponse *vdl.Type = vdl.TypeOf(GetResponse{})
-
-func __VDLEnsureNativeBuilt() {
-}
-
+//////////////////////////////////////////////////
+// Error definitions
 var (
 	ErrNoBlessings         = verror.Register("v.io/v23/services/groups.NoBlessings", verror.NoRetry, "{1:}{2:} No blessings recognized; cannot create group Permissions")
 	ErrExcessiveContention = verror.Register("v.io/v23/services/groups.ExcessiveContention", verror.RetryBackoff, "{1:}{2:} Gave up after encountering excessive contention; try again later")
 	ErrCycleFound          = verror.Register("v.io/v23/services/groups.CycleFound", verror.NoRetry, "{1:}{2:} Found cycle in group definitions{:_}")
 )
-
-func init() {
-	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrNoBlessings.ID), "{1:}{2:} No blessings recognized; cannot create group Permissions")
-	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrExcessiveContention.ID), "{1:}{2:} Gave up after encountering excessive contention; try again later")
-	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrCycleFound.ID), "{1:}{2:} Found cycle in group definitions{:_}")
-}
 
 // NewErrNoBlessings returns an error with the ErrNoBlessings ID.
 func NewErrNoBlessings(ctx *context.T) error {
@@ -462,6 +433,9 @@ func NewErrExcessiveContention(ctx *context.T) error {
 func NewErrCycleFound(ctx *context.T) error {
 	return verror.New(ErrCycleFound, ctx)
 }
+
+//////////////////////////////////////////////////
+// Interface definitions
 
 // GroupReaderClientMethods is the client interface
 // containing GroupReader methods.
@@ -954,4 +928,39 @@ var descGroup = rpc.InterfaceDesc{
 			Tags: []*vdl.Value{vdl.ValueOf(access.Tag("Write"))},
 		},
 	},
+}
+
+var __VDLInitCalled bool
+
+// __VDLInit performs vdl initialization.  It is safe to call multiple times.
+// If you have an init ordering issue, just insert the following line verbatim
+// into your source files in this package, right after the "package foo" clause:
+//
+//    var _ = __VDLInit()
+//
+// The purpose of this function is to ensure that vdl initialization occurs in
+// the right order, and very early in the init sequence.  In particular, vdl
+// registration and package variable initialization needs to occur before
+// functions like vdl.TypeOf will work properly.
+//
+// This function returns a dummy value, so that it can be used to initialize the
+// first var in the file, to take advantage of Go's defined init order.
+func __VDLInit() struct{} {
+	if __VDLInitCalled {
+		return struct{}{}
+	}
+
+	// Register types.
+	vdl.Register((*BlessingPatternChunk)(nil))
+	vdl.Register((*GetRequest)(nil))
+	vdl.Register((*GetResponse)(nil))
+	vdl.Register((*ApproximationType)(nil))
+	vdl.Register((*Approximation)(nil))
+
+	// Set error format strings.
+	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrNoBlessings.ID), "{1:}{2:} No blessings recognized; cannot create group Permissions")
+	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrExcessiveContention.ID), "{1:}{2:} Gave up after encountering excessive contention; try again later")
+	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrCycleFound.ID), "{1:}{2:} Found cycle in group definitions{:_}")
+
+	return struct{}{}
 }

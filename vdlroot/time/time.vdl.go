@@ -20,112 +20,10 @@ import (
 	"v.io/v23/vdl"
 )
 
-// Time represents an absolute point in time with up to nanosecond precision.
-//
-// Time is represented as the duration before or after a fixed epoch.  The zero
-// Time represents the epoch 0001-01-01T00:00:00.000000000Z.  This uses the
-// proleptic Gregorian calendar; the calendar runs on an exact 400 year cycle.
-// Leap seconds are "smeared", ensuring that no leap second table is necessary
-// for interpretation.
-//
-// This is similar to Go time.Time, but always in the UTC location.
-// http://golang.org/pkg/time/#Time
-//
-// This is similar to conventional "unix time", but with the epoch defined at
-// year 1 rather than year 1970.  This allows the zero Time to be used as a
-// natural sentry, since it isn't a valid time for many practical applications.
-// http://en.wikipedia.org/wiki/Unix_time
-type Time struct {
-	Seconds int64
-	Nanos   int32
-}
+var _ = __VDLInit() // Must be first; see __VDLInit comments for details.
 
-func (Time) __VDLReflect(struct {
-	Name string `vdl:"time.Time"`
-}) {
-}
-
-func (m *Time) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
-	__VDLEnsureNativeBuilt()
-	fieldsTarget1, err := t.StartFields(tt)
-	if err != nil {
-		return err
-	}
-
-	keyTarget2, fieldTarget3, err := fieldsTarget1.StartField("Seconds")
-	if err != vdl.ErrFieldNoExist && err != nil {
-		return err
-	}
-	if err != vdl.ErrFieldNoExist {
-		if err := fieldTarget3.FromInt(int64(m.Seconds), vdl.Int64Type); err != nil {
-			return err
-		}
-		if err := fieldsTarget1.FinishField(keyTarget2, fieldTarget3); err != nil {
-			return err
-		}
-	}
-	keyTarget4, fieldTarget5, err := fieldsTarget1.StartField("Nanos")
-	if err != vdl.ErrFieldNoExist && err != nil {
-		return err
-	}
-	if err != vdl.ErrFieldNoExist {
-		if err := fieldTarget5.FromInt(int64(m.Nanos), vdl.Int32Type); err != nil {
-			return err
-		}
-		if err := fieldsTarget1.FinishField(keyTarget4, fieldTarget5); err != nil {
-			return err
-		}
-	}
-	if err := t.FinishFields(fieldsTarget1); err != nil {
-		return err
-	}
-	return nil
-}
-
-func (m *Time) MakeVDLTarget() vdl.Target {
-	return nil
-}
-
-type TimeTarget struct {
-	Value         *time.Time
-	wireValue     Time
-	secondsTarget vdl.Int64Target
-	nanosTarget   vdl.Int32Target
-	vdl.TargetBase
-	vdl.FieldsTargetBase
-}
-
-func (t *TimeTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
-	t.wireValue = reflect.Zero(reflect.TypeOf(t.wireValue)).Interface().(Time)
-	if !vdl.Compatible(tt, __VDLType_time_Time) {
-		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType_time_Time)
-	}
-	return t, nil
-}
-func (t *TimeTarget) StartField(name string) (key, field vdl.Target, _ error) {
-	switch name {
-	case "Seconds":
-		t.secondsTarget.Value = &t.wireValue.Seconds
-		target, err := &t.secondsTarget, error(nil)
-		return nil, target, err
-	case "Nanos":
-		t.nanosTarget.Value = &t.wireValue.Nanos
-		target, err := &t.nanosTarget, error(nil)
-		return nil, target, err
-	default:
-		return nil, nil, fmt.Errorf("field %s not in struct %v", name, __VDLType_time_Time)
-	}
-}
-func (t *TimeTarget) FinishField(_, _ vdl.Target) error {
-	return nil
-}
-func (t *TimeTarget) FinishFields(_ vdl.FieldsTarget) error {
-
-	if err := TimeToNative(t.wireValue, t.Value); err != nil {
-		return err
-	}
-	return nil
-}
+//////////////////////////////////////////////////
+// Type definitions
 
 // Duration represents the elapsed duration between two points in time, with
 // up to nanosecond precision.
@@ -148,7 +46,6 @@ func (Duration) __VDLReflect(struct {
 }
 
 func (m *Duration) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
-	__VDLEnsureNativeBuilt()
 	fieldsTarget1, err := t.StartFields(tt)
 	if err != nil {
 		return err
@@ -159,7 +56,7 @@ func (m *Duration) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 		return err
 	}
 	if err != vdl.ErrFieldNoExist {
-		if err := fieldTarget3.FromInt(int64(m.Seconds), vdl.Int64Type); err != nil {
+		if err := fieldTarget3.FromInt(int64(m.Seconds), tt.NonOptional().Field(0).Type); err != nil {
 			return err
 		}
 		if err := fieldsTarget1.FinishField(keyTarget2, fieldTarget3); err != nil {
@@ -171,7 +68,7 @@ func (m *Duration) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 		return err
 	}
 	if err != vdl.ErrFieldNoExist {
-		if err := fieldTarget5.FromInt(int64(m.Nanos), vdl.Int32Type); err != nil {
+		if err := fieldTarget5.FromInt(int64(m.Nanos), tt.NonOptional().Field(1).Type); err != nil {
 			return err
 		}
 		if err := fieldsTarget1.FinishField(keyTarget4, fieldTarget5); err != nil {
@@ -199,8 +96,8 @@ type DurationTarget struct {
 
 func (t *DurationTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
 	t.wireValue = reflect.Zero(reflect.TypeOf(t.wireValue)).Interface().(Duration)
-	if !vdl.Compatible(tt, __VDLType_time_Duration) {
-		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType_time_Duration)
+	if ttWant := vdl.TypeOf((*Duration)(nil)).Elem(); !vdl.Compatible(tt, ttWant) {
+		return nil, fmt.Errorf("type %v incompatible with %v", tt, ttWant)
 	}
 	return t, nil
 }
@@ -215,7 +112,7 @@ func (t *DurationTarget) StartField(name string) (key, field vdl.Target, _ error
 		target, err := &t.nanosTarget, error(nil)
 		return nil, target, err
 	default:
-		return nil, nil, fmt.Errorf("field %s not in struct %v", name, __VDLType_time_Duration)
+		return nil, nil, fmt.Errorf("field %s not in struct time.Duration", name)
 	}
 }
 func (t *DurationTarget) FinishField(_, _ vdl.Target) error {
@@ -224,6 +121,112 @@ func (t *DurationTarget) FinishField(_, _ vdl.Target) error {
 func (t *DurationTarget) FinishFields(_ vdl.FieldsTarget) error {
 
 	if err := DurationToNative(t.wireValue, t.Value); err != nil {
+		return err
+	}
+	return nil
+}
+
+// Time represents an absolute point in time with up to nanosecond precision.
+//
+// Time is represented as the duration before or after a fixed epoch.  The zero
+// Time represents the epoch 0001-01-01T00:00:00.000000000Z.  This uses the
+// proleptic Gregorian calendar; the calendar runs on an exact 400 year cycle.
+// Leap seconds are "smeared", ensuring that no leap second table is necessary
+// for interpretation.
+//
+// This is similar to Go time.Time, but always in the UTC location.
+// http://golang.org/pkg/time/#Time
+//
+// This is similar to conventional "unix time", but with the epoch defined at
+// year 1 rather than year 1970.  This allows the zero Time to be used as a
+// natural sentry, since it isn't a valid time for many practical applications.
+// http://en.wikipedia.org/wiki/Unix_time
+type Time struct {
+	Seconds int64
+	Nanos   int32
+}
+
+func (Time) __VDLReflect(struct {
+	Name string `vdl:"time.Time"`
+}) {
+}
+
+func (m *Time) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
+	fieldsTarget1, err := t.StartFields(tt)
+	if err != nil {
+		return err
+	}
+
+	keyTarget2, fieldTarget3, err := fieldsTarget1.StartField("Seconds")
+	if err != vdl.ErrFieldNoExist && err != nil {
+		return err
+	}
+	if err != vdl.ErrFieldNoExist {
+		if err := fieldTarget3.FromInt(int64(m.Seconds), tt.NonOptional().Field(0).Type); err != nil {
+			return err
+		}
+		if err := fieldsTarget1.FinishField(keyTarget2, fieldTarget3); err != nil {
+			return err
+		}
+	}
+	keyTarget4, fieldTarget5, err := fieldsTarget1.StartField("Nanos")
+	if err != vdl.ErrFieldNoExist && err != nil {
+		return err
+	}
+	if err != vdl.ErrFieldNoExist {
+		if err := fieldTarget5.FromInt(int64(m.Nanos), tt.NonOptional().Field(1).Type); err != nil {
+			return err
+		}
+		if err := fieldsTarget1.FinishField(keyTarget4, fieldTarget5); err != nil {
+			return err
+		}
+	}
+	if err := t.FinishFields(fieldsTarget1); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (m *Time) MakeVDLTarget() vdl.Target {
+	return nil
+}
+
+type TimeTarget struct {
+	Value         *time.Time
+	wireValue     Time
+	secondsTarget vdl.Int64Target
+	nanosTarget   vdl.Int32Target
+	vdl.TargetBase
+	vdl.FieldsTargetBase
+}
+
+func (t *TimeTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
+	t.wireValue = reflect.Zero(reflect.TypeOf(t.wireValue)).Interface().(Time)
+	if ttWant := vdl.TypeOf((*Time)(nil)).Elem(); !vdl.Compatible(tt, ttWant) {
+		return nil, fmt.Errorf("type %v incompatible with %v", tt, ttWant)
+	}
+	return t, nil
+}
+func (t *TimeTarget) StartField(name string) (key, field vdl.Target, _ error) {
+	switch name {
+	case "Seconds":
+		t.secondsTarget.Value = &t.wireValue.Seconds
+		target, err := &t.secondsTarget, error(nil)
+		return nil, target, err
+	case "Nanos":
+		t.nanosTarget.Value = &t.wireValue.Nanos
+		target, err := &t.nanosTarget, error(nil)
+		return nil, target, err
+	default:
+		return nil, nil, fmt.Errorf("field %s not in struct time.Time", name)
+	}
+}
+func (t *TimeTarget) FinishField(_, _ vdl.Target) error {
+	return nil
+}
+func (t *TimeTarget) FinishFields(_ vdl.FieldsTarget) error {
+
+	if err := TimeToNative(t.wireValue, t.Value); err != nil {
 		return err
 	}
 	return nil
@@ -265,7 +268,6 @@ func (WireDeadline) __VDLReflect(struct {
 }
 
 func (m *WireDeadline) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
-	__VDLEnsureNativeBuilt()
 	fieldsTarget1, err := t.StartFields(tt)
 	if err != nil {
 		return err
@@ -282,7 +284,7 @@ func (m *WireDeadline) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 	}
 	if err != vdl.ErrFieldNoExist {
 
-		if err := wireValue2.FillVDLTarget(fieldTarget4, __VDLType_time_Duration); err != nil {
+		if err := wireValue2.FillVDLTarget(fieldTarget4, tt.NonOptional().Field(0).Type); err != nil {
 			return err
 		}
 		if err := fieldsTarget1.FinishField(keyTarget3, fieldTarget4); err != nil {
@@ -294,7 +296,7 @@ func (m *WireDeadline) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 		return err
 	}
 	if err != vdl.ErrFieldNoExist {
-		if err := fieldTarget6.FromBool(bool(m.NoDeadline), vdl.BoolType); err != nil {
+		if err := fieldTarget6.FromBool(bool(m.NoDeadline), tt.NonOptional().Field(1).Type); err != nil {
 			return err
 		}
 		if err := fieldsTarget1.FinishField(keyTarget5, fieldTarget6); err != nil {
@@ -322,8 +324,8 @@ type WireDeadlineTarget struct {
 
 func (t *WireDeadlineTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
 	t.wireValue = reflect.Zero(reflect.TypeOf(t.wireValue)).Interface().(WireDeadline)
-	if !vdl.Compatible(tt, __VDLType_time_WireDeadline) {
-		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType_time_WireDeadline)
+	if ttWant := vdl.TypeOf((*WireDeadline)(nil)).Elem(); !vdl.Compatible(tt, ttWant) {
+		return nil, fmt.Errorf("type %v incompatible with %v", tt, ttWant)
 	}
 	return t, nil
 }
@@ -338,7 +340,7 @@ func (t *WireDeadlineTarget) StartField(name string) (key, field vdl.Target, _ e
 		target, err := &t.noDeadlineTarget, error(nil)
 		return nil, target, err
 	default:
-		return nil, nil, fmt.Errorf("field %s not in struct %v", name, __VDLType_time_WireDeadline)
+		return nil, nil, fmt.Errorf("field %s not in struct time.WireDeadline", name)
 	}
 }
 func (t *WireDeadlineTarget) FinishField(_, _ vdl.Target) error {
@@ -350,15 +352,6 @@ func (t *WireDeadlineTarget) FinishFields(_ vdl.FieldsTarget) error {
 		return err
 	}
 	return nil
-}
-
-func init() {
-	vdl.RegisterNative(DurationToNative, DurationFromNative)
-	vdl.RegisterNative(TimeToNative, TimeFromNative)
-	vdl.RegisterNative(WireDeadlineToNative, WireDeadlineFromNative)
-	vdl.Register((*Time)(nil))
-	vdl.Register((*Duration)(nil))
-	vdl.Register((*WireDeadline)(nil))
 }
 
 // Type-check Duration conversion functions.
@@ -373,170 +366,35 @@ var _ func(*Time, time.Time) error = TimeFromNative
 var _ func(WireDeadline, *Deadline) error = WireDeadlineToNative
 var _ func(*WireDeadline, Deadline) error = WireDeadlineFromNative
 
-var __VDLType1 *vdl.Type
+var __VDLInitCalled bool
 
-func __VDLType1_gen() *vdl.Type {
-	__VDLType1Builder := vdl.TypeBuilder{}
-
-	__VDLType11 := __VDLType1Builder.Optional()
-	__VDLType12 := __VDLType1Builder.Struct()
-	__VDLType13 := __VDLType1Builder.Named("time.Duration").AssignBase(__VDLType12)
-	__VDLType14 := vdl.Int64Type
-	__VDLType12.AppendField("Seconds", __VDLType14)
-	__VDLType15 := vdl.Int32Type
-	__VDLType12.AppendField("Nanos", __VDLType15)
-	__VDLType11.AssignElem(__VDLType13)
-	__VDLType1Builder.Build()
-	__VDLType1v, err := __VDLType11.Built()
-	if err != nil {
-		panic(err)
+// __VDLInit performs vdl initialization.  It is safe to call multiple times.
+// If you have an init ordering issue, just insert the following line verbatim
+// into your source files in this package, right after the "package foo" clause:
+//
+//    var _ = __VDLInit()
+//
+// The purpose of this function is to ensure that vdl initialization occurs in
+// the right order, and very early in the init sequence.  In particular, vdl
+// registration and package variable initialization needs to occur before
+// functions like vdl.TypeOf will work properly.
+//
+// This function returns a dummy value, so that it can be used to initialize the
+// first var in the file, to take advantage of Go's defined init order.
+func __VDLInit() struct{} {
+	if __VDLInitCalled {
+		return struct{}{}
 	}
-	return __VDLType1v
-}
-func init() {
-	__VDLType1 = __VDLType1_gen()
-}
 
-var __VDLType0 *vdl.Type
+	// Register native type conversions first, so that vdl.TypeOf works.
+	vdl.RegisterNative(DurationToNative, DurationFromNative)
+	vdl.RegisterNative(TimeToNative, TimeFromNative)
+	vdl.RegisterNative(WireDeadlineToNative, WireDeadlineFromNative)
 
-func __VDLType0_gen() *vdl.Type {
-	__VDLType0Builder := vdl.TypeBuilder{}
+	// Register types.
+	vdl.Register((*Duration)(nil))
+	vdl.Register((*Time)(nil))
+	vdl.Register((*WireDeadline)(nil))
 
-	__VDLType01 := __VDLType0Builder.Optional()
-	__VDLType02 := __VDLType0Builder.Struct()
-	__VDLType03 := __VDLType0Builder.Named("time.Time").AssignBase(__VDLType02)
-	__VDLType04 := vdl.Int64Type
-	__VDLType02.AppendField("Seconds", __VDLType04)
-	__VDLType05 := vdl.Int32Type
-	__VDLType02.AppendField("Nanos", __VDLType05)
-	__VDLType01.AssignElem(__VDLType03)
-	__VDLType0Builder.Build()
-	__VDLType0v, err := __VDLType01.Built()
-	if err != nil {
-		panic(err)
-	}
-	return __VDLType0v
-}
-func init() {
-	__VDLType0 = __VDLType0_gen()
-}
-
-var __VDLType2 *vdl.Type
-
-func __VDLType2_gen() *vdl.Type {
-	__VDLType2Builder := vdl.TypeBuilder{}
-
-	__VDLType21 := __VDLType2Builder.Optional()
-	__VDLType22 := __VDLType2Builder.Struct()
-	__VDLType23 := __VDLType2Builder.Named("time.WireDeadline").AssignBase(__VDLType22)
-	__VDLType24 := __VDLType2Builder.Struct()
-	__VDLType25 := __VDLType2Builder.Named("time.Duration").AssignBase(__VDLType24)
-	__VDLType26 := vdl.Int64Type
-	__VDLType24.AppendField("Seconds", __VDLType26)
-	__VDLType27 := vdl.Int32Type
-	__VDLType24.AppendField("Nanos", __VDLType27)
-	__VDLType22.AppendField("FromNow", __VDLType25)
-	__VDLType28 := vdl.BoolType
-	__VDLType22.AppendField("NoDeadline", __VDLType28)
-	__VDLType21.AssignElem(__VDLType23)
-	__VDLType2Builder.Build()
-	__VDLType2v, err := __VDLType21.Built()
-	if err != nil {
-		panic(err)
-	}
-	return __VDLType2v
-}
-func init() {
-	__VDLType2 = __VDLType2_gen()
-}
-
-var __VDLType_time_Duration *vdl.Type
-
-func __VDLType_time_Duration_gen() *vdl.Type {
-	__VDLType_time_DurationBuilder := vdl.TypeBuilder{}
-
-	__VDLType_time_Duration1 := __VDLType_time_DurationBuilder.Struct()
-	__VDLType_time_Duration2 := __VDLType_time_DurationBuilder.Named("time.Duration").AssignBase(__VDLType_time_Duration1)
-	__VDLType_time_Duration3 := vdl.Int64Type
-	__VDLType_time_Duration1.AppendField("Seconds", __VDLType_time_Duration3)
-	__VDLType_time_Duration4 := vdl.Int32Type
-	__VDLType_time_Duration1.AppendField("Nanos", __VDLType_time_Duration4)
-	__VDLType_time_DurationBuilder.Build()
-	__VDLType_time_Durationv, err := __VDLType_time_Duration2.Built()
-	if err != nil {
-		panic(err)
-	}
-	return __VDLType_time_Durationv
-}
-func init() {
-	__VDLType_time_Duration = __VDLType_time_Duration_gen()
-}
-
-var __VDLType_time_Time *vdl.Type
-
-func __VDLType_time_Time_gen() *vdl.Type {
-	__VDLType_time_TimeBuilder := vdl.TypeBuilder{}
-
-	__VDLType_time_Time1 := __VDLType_time_TimeBuilder.Struct()
-	__VDLType_time_Time2 := __VDLType_time_TimeBuilder.Named("time.Time").AssignBase(__VDLType_time_Time1)
-	__VDLType_time_Time3 := vdl.Int64Type
-	__VDLType_time_Time1.AppendField("Seconds", __VDLType_time_Time3)
-	__VDLType_time_Time4 := vdl.Int32Type
-	__VDLType_time_Time1.AppendField("Nanos", __VDLType_time_Time4)
-	__VDLType_time_TimeBuilder.Build()
-	__VDLType_time_Timev, err := __VDLType_time_Time2.Built()
-	if err != nil {
-		panic(err)
-	}
-	return __VDLType_time_Timev
-}
-func init() {
-	__VDLType_time_Time = __VDLType_time_Time_gen()
-}
-
-var __VDLType_time_WireDeadline *vdl.Type
-
-func __VDLType_time_WireDeadline_gen() *vdl.Type {
-	__VDLType_time_WireDeadlineBuilder := vdl.TypeBuilder{}
-
-	__VDLType_time_WireDeadline1 := __VDLType_time_WireDeadlineBuilder.Struct()
-	__VDLType_time_WireDeadline2 := __VDLType_time_WireDeadlineBuilder.Named("time.WireDeadline").AssignBase(__VDLType_time_WireDeadline1)
-	__VDLType_time_WireDeadline3 := __VDLType_time_WireDeadlineBuilder.Struct()
-	__VDLType_time_WireDeadline4 := __VDLType_time_WireDeadlineBuilder.Named("time.Duration").AssignBase(__VDLType_time_WireDeadline3)
-	__VDLType_time_WireDeadline5 := vdl.Int64Type
-	__VDLType_time_WireDeadline3.AppendField("Seconds", __VDLType_time_WireDeadline5)
-	__VDLType_time_WireDeadline6 := vdl.Int32Type
-	__VDLType_time_WireDeadline3.AppendField("Nanos", __VDLType_time_WireDeadline6)
-	__VDLType_time_WireDeadline1.AppendField("FromNow", __VDLType_time_WireDeadline4)
-	__VDLType_time_WireDeadline7 := vdl.BoolType
-	__VDLType_time_WireDeadline1.AppendField("NoDeadline", __VDLType_time_WireDeadline7)
-	__VDLType_time_WireDeadlineBuilder.Build()
-	__VDLType_time_WireDeadlinev, err := __VDLType_time_WireDeadline2.Built()
-	if err != nil {
-		panic(err)
-	}
-	return __VDLType_time_WireDeadlinev
-}
-func init() {
-	__VDLType_time_WireDeadline = __VDLType_time_WireDeadline_gen()
-}
-func __VDLEnsureNativeBuilt() {
-	if __VDLType1 == nil {
-		__VDLType1 = __VDLType1_gen()
-	}
-	if __VDLType0 == nil {
-		__VDLType0 = __VDLType0_gen()
-	}
-	if __VDLType2 == nil {
-		__VDLType2 = __VDLType2_gen()
-	}
-	if __VDLType_time_Duration == nil {
-		__VDLType_time_Duration = __VDLType_time_Duration_gen()
-	}
-	if __VDLType_time_Time == nil {
-		__VDLType_time_Time = __VDLType_time_Time_gen()
-	}
-	if __VDLType_time_WireDeadline == nil {
-		__VDLType_time_WireDeadline = __VDLType_time_WireDeadline_gen()
-	}
+	return struct{}{}
 }

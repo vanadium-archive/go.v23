@@ -26,6 +26,11 @@ import (
 	"v.io/v23/verror"
 )
 
+var _ = __VDLInit() // Must be first; see __VDLInit comments for details.
+
+//////////////////////////////////////////////////
+// Type definitions
+
 // DevModeUpdateVClockOpts specifies what DevModeUpdateVClock should do, as
 // described below.
 type DevModeUpdateVClockOpts struct {
@@ -50,7 +55,6 @@ func (DevModeUpdateVClockOpts) __VDLReflect(struct {
 }
 
 func (m *DevModeUpdateVClockOpts) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
-	__VDLEnsureNativeBuilt()
 	fieldsTarget1, err := t.StartFields(tt)
 	if err != nil {
 		return err
@@ -61,7 +65,7 @@ func (m *DevModeUpdateVClockOpts) FillVDLTarget(t vdl.Target, tt *vdl.Type) erro
 		return err
 	}
 	if err != vdl.ErrFieldNoExist {
-		if err := fieldTarget3.FromString(string(m.NtpHost), vdl.StringType); err != nil {
+		if err := fieldTarget3.FromString(string(m.NtpHost), tt.NonOptional().Field(0).Type); err != nil {
 			return err
 		}
 		if err := fieldsTarget1.FinishField(keyTarget2, fieldTarget3); err != nil {
@@ -79,7 +83,7 @@ func (m *DevModeUpdateVClockOpts) FillVDLTarget(t vdl.Target, tt *vdl.Type) erro
 	}
 	if err != vdl.ErrFieldNoExist {
 
-		if err := wireValue4.FillVDLTarget(fieldTarget6, __VDLType_time_Time); err != nil {
+		if err := wireValue4.FillVDLTarget(fieldTarget6, tt.NonOptional().Field(1).Type); err != nil {
 			return err
 		}
 		if err := fieldsTarget1.FinishField(keyTarget5, fieldTarget6); err != nil {
@@ -97,7 +101,7 @@ func (m *DevModeUpdateVClockOpts) FillVDLTarget(t vdl.Target, tt *vdl.Type) erro
 	}
 	if err != vdl.ErrFieldNoExist {
 
-		if err := wireValue7.FillVDLTarget(fieldTarget9, __VDLType_time_Duration); err != nil {
+		if err := wireValue7.FillVDLTarget(fieldTarget9, tt.NonOptional().Field(2).Type); err != nil {
 			return err
 		}
 		if err := fieldsTarget1.FinishField(keyTarget8, fieldTarget9); err != nil {
@@ -109,7 +113,7 @@ func (m *DevModeUpdateVClockOpts) FillVDLTarget(t vdl.Target, tt *vdl.Type) erro
 		return err
 	}
 	if err != vdl.ErrFieldNoExist {
-		if err := fieldTarget11.FromBool(bool(m.DoNtpUpdate), vdl.BoolType); err != nil {
+		if err := fieldTarget11.FromBool(bool(m.DoNtpUpdate), tt.NonOptional().Field(3).Type); err != nil {
 			return err
 		}
 		if err := fieldsTarget1.FinishField(keyTarget10, fieldTarget11); err != nil {
@@ -121,7 +125,7 @@ func (m *DevModeUpdateVClockOpts) FillVDLTarget(t vdl.Target, tt *vdl.Type) erro
 		return err
 	}
 	if err != vdl.ErrFieldNoExist {
-		if err := fieldTarget13.FromBool(bool(m.DoLocalUpdate), vdl.BoolType); err != nil {
+		if err := fieldTarget13.FromBool(bool(m.DoLocalUpdate), tt.NonOptional().Field(4).Type); err != nil {
 			return err
 		}
 		if err := fieldsTarget1.FinishField(keyTarget12, fieldTarget13); err != nil {
@@ -151,8 +155,8 @@ type DevModeUpdateVClockOptsTarget struct {
 
 func (t *DevModeUpdateVClockOptsTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
 
-	if !vdl.Compatible(tt, __VDLType_v_io_v23_services_syncbase_DevModeUpdateVClockOpts) {
-		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType_v_io_v23_services_syncbase_DevModeUpdateVClockOpts)
+	if ttWant := vdl.TypeOf((*DevModeUpdateVClockOpts)(nil)).Elem(); !vdl.Compatible(tt, ttWant) {
+		return nil, fmt.Errorf("type %v incompatible with %v", tt, ttWant)
 	}
 	return t, nil
 }
@@ -179,7 +183,7 @@ func (t *DevModeUpdateVClockOptsTarget) StartField(name string) (key, field vdl.
 		target, err := &t.doLocalUpdateTarget, error(nil)
 		return nil, target, err
 	default:
-		return nil, nil, fmt.Errorf("field %s not in struct %v", name, __VDLType_v_io_v23_services_syncbase_DevModeUpdateVClockOpts)
+		return nil, nil, fmt.Errorf("field %s not in struct v.io/v23/services/syncbase.DevModeUpdateVClockOpts", name)
 	}
 }
 func (t *DevModeUpdateVClockOptsTarget) FinishField(_, _ vdl.Target) error {
@@ -190,153 +194,14 @@ func (t *DevModeUpdateVClockOptsTarget) FinishFields(_ vdl.FieldsTarget) error {
 	return nil
 }
 
-func init() {
-	vdl.Register((*DevModeUpdateVClockOpts)(nil))
-}
-
-var __VDLType0 *vdl.Type
-
-func __VDLType0_gen() *vdl.Type {
-	__VDLType0Builder := vdl.TypeBuilder{}
-
-	__VDLType01 := __VDLType0Builder.Optional()
-	__VDLType02 := __VDLType0Builder.Struct()
-	__VDLType03 := __VDLType0Builder.Named("v.io/v23/services/syncbase.DevModeUpdateVClockOpts").AssignBase(__VDLType02)
-	__VDLType04 := vdl.StringType
-	__VDLType02.AppendField("NtpHost", __VDLType04)
-	__VDLType05 := __VDLType0Builder.Struct()
-	__VDLType06 := __VDLType0Builder.Named("time.Time").AssignBase(__VDLType05)
-	__VDLType07 := vdl.Int64Type
-	__VDLType05.AppendField("Seconds", __VDLType07)
-	__VDLType08 := vdl.Int32Type
-	__VDLType05.AppendField("Nanos", __VDLType08)
-	__VDLType02.AppendField("Now", __VDLType06)
-	__VDLType09 := __VDLType0Builder.Struct()
-	__VDLType010 := __VDLType0Builder.Named("time.Duration").AssignBase(__VDLType09)
-	__VDLType09.AppendField("Seconds", __VDLType07)
-	__VDLType09.AppendField("Nanos", __VDLType08)
-	__VDLType02.AppendField("ElapsedTime", __VDLType010)
-	__VDLType011 := vdl.BoolType
-	__VDLType02.AppendField("DoNtpUpdate", __VDLType011)
-	__VDLType02.AppendField("DoLocalUpdate", __VDLType011)
-	__VDLType01.AssignElem(__VDLType03)
-	__VDLType0Builder.Build()
-	__VDLType0v, err := __VDLType01.Built()
-	if err != nil {
-		panic(err)
-	}
-	return __VDLType0v
-}
-func init() {
-	__VDLType0 = __VDLType0_gen()
-}
-
-var __VDLType_time_Duration *vdl.Type
-
-func __VDLType_time_Duration_gen() *vdl.Type {
-	__VDLType_time_DurationBuilder := vdl.TypeBuilder{}
-
-	__VDLType_time_Duration1 := __VDLType_time_DurationBuilder.Struct()
-	__VDLType_time_Duration2 := __VDLType_time_DurationBuilder.Named("time.Duration").AssignBase(__VDLType_time_Duration1)
-	__VDLType_time_Duration3 := vdl.Int64Type
-	__VDLType_time_Duration1.AppendField("Seconds", __VDLType_time_Duration3)
-	__VDLType_time_Duration4 := vdl.Int32Type
-	__VDLType_time_Duration1.AppendField("Nanos", __VDLType_time_Duration4)
-	__VDLType_time_DurationBuilder.Build()
-	__VDLType_time_Durationv, err := __VDLType_time_Duration2.Built()
-	if err != nil {
-		panic(err)
-	}
-	return __VDLType_time_Durationv
-}
-func init() {
-	__VDLType_time_Duration = __VDLType_time_Duration_gen()
-}
-
-var __VDLType_time_Time *vdl.Type
-
-func __VDLType_time_Time_gen() *vdl.Type {
-	__VDLType_time_TimeBuilder := vdl.TypeBuilder{}
-
-	__VDLType_time_Time1 := __VDLType_time_TimeBuilder.Struct()
-	__VDLType_time_Time2 := __VDLType_time_TimeBuilder.Named("time.Time").AssignBase(__VDLType_time_Time1)
-	__VDLType_time_Time3 := vdl.Int64Type
-	__VDLType_time_Time1.AppendField("Seconds", __VDLType_time_Time3)
-	__VDLType_time_Time4 := vdl.Int32Type
-	__VDLType_time_Time1.AppendField("Nanos", __VDLType_time_Time4)
-	__VDLType_time_TimeBuilder.Build()
-	__VDLType_time_Timev, err := __VDLType_time_Time2.Built()
-	if err != nil {
-		panic(err)
-	}
-	return __VDLType_time_Timev
-}
-func init() {
-	__VDLType_time_Time = __VDLType_time_Time_gen()
-}
-
-var __VDLType_v_io_v23_services_syncbase_DevModeUpdateVClockOpts *vdl.Type
-
-func __VDLType_v_io_v23_services_syncbase_DevModeUpdateVClockOpts_gen() *vdl.Type {
-	__VDLType_v_io_v23_services_syncbase_DevModeUpdateVClockOptsBuilder := vdl.TypeBuilder{}
-
-	__VDLType_v_io_v23_services_syncbase_DevModeUpdateVClockOpts1 := __VDLType_v_io_v23_services_syncbase_DevModeUpdateVClockOptsBuilder.Struct()
-	__VDLType_v_io_v23_services_syncbase_DevModeUpdateVClockOpts2 := __VDLType_v_io_v23_services_syncbase_DevModeUpdateVClockOptsBuilder.Named("v.io/v23/services/syncbase.DevModeUpdateVClockOpts").AssignBase(__VDLType_v_io_v23_services_syncbase_DevModeUpdateVClockOpts1)
-	__VDLType_v_io_v23_services_syncbase_DevModeUpdateVClockOpts3 := vdl.StringType
-	__VDLType_v_io_v23_services_syncbase_DevModeUpdateVClockOpts1.AppendField("NtpHost", __VDLType_v_io_v23_services_syncbase_DevModeUpdateVClockOpts3)
-	__VDLType_v_io_v23_services_syncbase_DevModeUpdateVClockOpts4 := __VDLType_v_io_v23_services_syncbase_DevModeUpdateVClockOptsBuilder.Struct()
-	__VDLType_v_io_v23_services_syncbase_DevModeUpdateVClockOpts5 := __VDLType_v_io_v23_services_syncbase_DevModeUpdateVClockOptsBuilder.Named("time.Time").AssignBase(__VDLType_v_io_v23_services_syncbase_DevModeUpdateVClockOpts4)
-	__VDLType_v_io_v23_services_syncbase_DevModeUpdateVClockOpts6 := vdl.Int64Type
-	__VDLType_v_io_v23_services_syncbase_DevModeUpdateVClockOpts4.AppendField("Seconds", __VDLType_v_io_v23_services_syncbase_DevModeUpdateVClockOpts6)
-	__VDLType_v_io_v23_services_syncbase_DevModeUpdateVClockOpts7 := vdl.Int32Type
-	__VDLType_v_io_v23_services_syncbase_DevModeUpdateVClockOpts4.AppendField("Nanos", __VDLType_v_io_v23_services_syncbase_DevModeUpdateVClockOpts7)
-	__VDLType_v_io_v23_services_syncbase_DevModeUpdateVClockOpts1.AppendField("Now", __VDLType_v_io_v23_services_syncbase_DevModeUpdateVClockOpts5)
-	__VDLType_v_io_v23_services_syncbase_DevModeUpdateVClockOpts8 := __VDLType_v_io_v23_services_syncbase_DevModeUpdateVClockOptsBuilder.Struct()
-	__VDLType_v_io_v23_services_syncbase_DevModeUpdateVClockOpts9 := __VDLType_v_io_v23_services_syncbase_DevModeUpdateVClockOptsBuilder.Named("time.Duration").AssignBase(__VDLType_v_io_v23_services_syncbase_DevModeUpdateVClockOpts8)
-	__VDLType_v_io_v23_services_syncbase_DevModeUpdateVClockOpts8.AppendField("Seconds", __VDLType_v_io_v23_services_syncbase_DevModeUpdateVClockOpts6)
-	__VDLType_v_io_v23_services_syncbase_DevModeUpdateVClockOpts8.AppendField("Nanos", __VDLType_v_io_v23_services_syncbase_DevModeUpdateVClockOpts7)
-	__VDLType_v_io_v23_services_syncbase_DevModeUpdateVClockOpts1.AppendField("ElapsedTime", __VDLType_v_io_v23_services_syncbase_DevModeUpdateVClockOpts9)
-	__VDLType_v_io_v23_services_syncbase_DevModeUpdateVClockOpts10 := vdl.BoolType
-	__VDLType_v_io_v23_services_syncbase_DevModeUpdateVClockOpts1.AppendField("DoNtpUpdate", __VDLType_v_io_v23_services_syncbase_DevModeUpdateVClockOpts10)
-	__VDLType_v_io_v23_services_syncbase_DevModeUpdateVClockOpts1.AppendField("DoLocalUpdate", __VDLType_v_io_v23_services_syncbase_DevModeUpdateVClockOpts10)
-	__VDLType_v_io_v23_services_syncbase_DevModeUpdateVClockOptsBuilder.Build()
-	__VDLType_v_io_v23_services_syncbase_DevModeUpdateVClockOptsv, err := __VDLType_v_io_v23_services_syncbase_DevModeUpdateVClockOpts2.Built()
-	if err != nil {
-		panic(err)
-	}
-	return __VDLType_v_io_v23_services_syncbase_DevModeUpdateVClockOptsv
-}
-func init() {
-	__VDLType_v_io_v23_services_syncbase_DevModeUpdateVClockOpts = __VDLType_v_io_v23_services_syncbase_DevModeUpdateVClockOpts_gen()
-}
-func __VDLEnsureNativeBuilt() {
-	if __VDLType0 == nil {
-		__VDLType0 = __VDLType0_gen()
-	}
-	if __VDLType_time_Duration == nil {
-		__VDLType_time_Duration = __VDLType_time_Duration_gen()
-	}
-	if __VDLType_time_Time == nil {
-		__VDLType_time_Time = __VDLType_time_Time_gen()
-	}
-	if __VDLType_v_io_v23_services_syncbase_DevModeUpdateVClockOpts == nil {
-		__VDLType_v_io_v23_services_syncbase_DevModeUpdateVClockOpts = __VDLType_v_io_v23_services_syncbase_DevModeUpdateVClockOpts_gen()
-	}
-}
-
+//////////////////////////////////////////////////
+// Error definitions
 var (
 	ErrNotInDevMode    = verror.Register("v.io/v23/services/syncbase.NotInDevMode", verror.NoRetry, "{1:}{2:} not running with --dev=true")
 	ErrInvalidName     = verror.Register("v.io/v23/services/syncbase.InvalidName", verror.NoRetry, "{1:}{2:} invalid name: {3}")
 	ErrCorruptDatabase = verror.Register("v.io/v23/services/syncbase.CorruptDatabase", verror.NoRetry, "{1:}{2:} database corrupt, moved to {3}; client must create a new database")
 	ErrUnknownBatch    = verror.Register("v.io/v23/services/syncbase.UnknownBatch", verror.NoRetry, "{1:}{2:} unknown batch, perhaps the server restarted")
 )
-
-func init() {
-	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrNotInDevMode.ID), "{1:}{2:} not running with --dev=true")
-	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrInvalidName.ID), "{1:}{2:} invalid name: {3}")
-	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrCorruptDatabase.ID), "{1:}{2:} database corrupt, moved to {3}; client must create a new database")
-	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrUnknownBatch.ID), "{1:}{2:} unknown batch, perhaps the server restarted")
-}
 
 // NewErrNotInDevMode returns an error with the ErrNotInDevMode ID.
 func NewErrNotInDevMode(ctx *context.T) error {
@@ -357,6 +222,9 @@ func NewErrCorruptDatabase(ctx *context.T, path string) error {
 func NewErrUnknownBatch(ctx *context.T) error {
 	return verror.New(ErrUnknownBatch, ctx)
 }
+
+//////////////////////////////////////////////////
+// Interface definitions
 
 // ServiceClientMethods is the client interface
 // containing Service methods.
@@ -838,4 +706,36 @@ var descApp = rpc.InterfaceDesc{
 			Tags: []*vdl.Value{vdl.ValueOf(access.Tag("Resolve"))},
 		},
 	},
+}
+
+var __VDLInitCalled bool
+
+// __VDLInit performs vdl initialization.  It is safe to call multiple times.
+// If you have an init ordering issue, just insert the following line verbatim
+// into your source files in this package, right after the "package foo" clause:
+//
+//    var _ = __VDLInit()
+//
+// The purpose of this function is to ensure that vdl initialization occurs in
+// the right order, and very early in the init sequence.  In particular, vdl
+// registration and package variable initialization needs to occur before
+// functions like vdl.TypeOf will work properly.
+//
+// This function returns a dummy value, so that it can be used to initialize the
+// first var in the file, to take advantage of Go's defined init order.
+func __VDLInit() struct{} {
+	if __VDLInitCalled {
+		return struct{}{}
+	}
+
+	// Register types.
+	vdl.Register((*DevModeUpdateVClockOpts)(nil))
+
+	// Set error format strings.
+	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrNotInDevMode.ID), "{1:}{2:} not running with --dev=true")
+	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrInvalidName.ID), "{1:}{2:} invalid name: {3}")
+	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrCorruptDatabase.ID), "{1:}{2:} database corrupt, moved to {3}; client must create a new database")
+	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrUnknownBatch.ID), "{1:}{2:} unknown batch, perhaps the server restarted")
+
+	return struct{}{}
 }

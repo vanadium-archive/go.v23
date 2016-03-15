@@ -112,6 +112,11 @@ import (
 	"v.io/v23/verror"
 )
 
+var _ = __VDLInit() // Must be first; see __VDLInit comments for details.
+
+//////////////////////////////////////////////////
+// Type definitions
+
 // AccessList represents a set of blessings that should be granted access.
 //
 // See also: https://vanadium.github.io/glossary.html#access-list
@@ -142,9 +147,6 @@ func (AccessList) __VDLReflect(struct {
 }
 
 func (m *AccessList) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
-	if __VDLType_v_io_v23_security_access_AccessList == nil || __VDLType0 == nil {
-		panic("Initialization order error: types generated for FillVDLTarget not initialized. Consider moving caller to an init() block.")
-	}
 	fieldsTarget1, err := t.StartFields(tt)
 	if err != nil {
 		return err
@@ -156,7 +158,7 @@ func (m *AccessList) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 	}
 	if err != vdl.ErrFieldNoExist {
 
-		listTarget4, err := fieldTarget3.StartList(__VDLType1, len(m.In))
+		listTarget4, err := fieldTarget3.StartList(tt.NonOptional().Field(0).Type, len(m.In))
 		if err != nil {
 			return err
 		}
@@ -166,7 +168,7 @@ func (m *AccessList) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 				return err
 			}
 
-			if err := elem6.FillVDLTarget(elemTarget5, __VDLType_v_io_v23_security_BlessingPattern); err != nil {
+			if err := elem6.FillVDLTarget(elemTarget5, tt.NonOptional().Field(0).Type.Elem()); err != nil {
 				return err
 			}
 			if err := listTarget4.FinishElem(elemTarget5); err != nil {
@@ -186,7 +188,7 @@ func (m *AccessList) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 	}
 	if err != vdl.ErrFieldNoExist {
 
-		listTarget9, err := fieldTarget8.StartList(__VDLType2, len(m.NotIn))
+		listTarget9, err := fieldTarget8.StartList(tt.NonOptional().Field(1).Type, len(m.NotIn))
 		if err != nil {
 			return err
 		}
@@ -195,7 +197,7 @@ func (m *AccessList) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 			if err != nil {
 				return err
 			}
-			if err := elemTarget10.FromString(string(elem11), vdl.StringType); err != nil {
+			if err := elemTarget10.FromString(string(elem11), tt.NonOptional().Field(1).Type.Elem()); err != nil {
 				return err
 			}
 			if err := listTarget9.FinishElem(elemTarget10); err != nil {
@@ -229,8 +231,8 @@ type AccessListTarget struct {
 
 func (t *AccessListTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
 
-	if !vdl.Compatible(tt, __VDLType_v_io_v23_security_access_AccessList) {
-		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType_v_io_v23_security_access_AccessList)
+	if ttWant := vdl.TypeOf((*AccessList)(nil)).Elem(); !vdl.Compatible(tt, ttWant) {
+		return nil, fmt.Errorf("type %v incompatible with %v", tt, ttWant)
 	}
 	return t, nil
 }
@@ -245,7 +247,7 @@ func (t *AccessListTarget) StartField(name string) (key, field vdl.Target, _ err
 		target, err := &t.notInTarget, error(nil)
 		return nil, target, err
 	default:
-		return nil, nil, fmt.Errorf("field %s not in struct %v", name, __VDLType_v_io_v23_security_access_AccessList)
+		return nil, nil, fmt.Errorf("field %s not in struct v.io/v23/security/access.AccessList", name)
 	}
 }
 func (t *AccessListTarget) FinishField(_, _ vdl.Target) error {
@@ -266,8 +268,8 @@ type unnamed_5b5d762e696f2f7632332f73656375726974792e426c657373696e6750617474657
 
 func (t *unnamed_5b5d762e696f2f7632332f73656375726974792e426c657373696e675061747465726e20737472696e67Target) StartList(tt *vdl.Type, len int) (vdl.ListTarget, error) {
 
-	if !vdl.Compatible(tt, __VDLType1) {
-		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType1)
+	if ttWant := vdl.TypeOf((*[]security.BlessingPattern)(nil)); !vdl.Compatible(tt, ttWant) {
+		return nil, fmt.Errorf("type %v incompatible with %v", tt, ttWant)
 	}
 	if cap(*t.Value) < len {
 		*t.Value = make([]security.BlessingPattern, len)
@@ -304,7 +306,7 @@ func (Permissions) __VDLReflect(struct {
 }
 
 func (m *Permissions) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
-	mapTarget1, err := t.StartMap(__VDLType_v_io_v23_security_access_Permissions, len((*m)))
+	mapTarget1, err := t.StartMap(tt, len((*m)))
 	if err != nil {
 		return err
 	}
@@ -313,7 +315,7 @@ func (m *Permissions) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 		if err != nil {
 			return err
 		}
-		if err := keyTarget2.FromString(string(key3), vdl.StringType); err != nil {
+		if err := keyTarget2.FromString(string(key3), tt.NonOptional().Key()); err != nil {
 			return err
 		}
 		valueTarget4, err := mapTarget1.FinishKeyStartField(keyTarget2)
@@ -321,7 +323,7 @@ func (m *Permissions) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 			return err
 		}
 
-		if err := value5.FillVDLTarget(valueTarget4, __VDLType_v_io_v23_security_access_AccessList); err != nil {
+		if err := value5.FillVDLTarget(valueTarget4, tt.NonOptional().Elem()); err != nil {
 			return err
 		}
 		if err := mapTarget1.FinishField(keyTarget2, valueTarget4); err != nil {
@@ -350,8 +352,8 @@ type PermissionsTarget struct {
 
 func (t *PermissionsTarget) StartMap(tt *vdl.Type, len int) (vdl.MapTarget, error) {
 
-	if !vdl.Compatible(tt, __VDLType_v_io_v23_security_access_Permissions) {
-		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType_v_io_v23_security_access_Permissions)
+	if ttWant := vdl.TypeOf((*Permissions)(nil)); !vdl.Compatible(tt, ttWant) {
+		return nil, fmt.Errorf("type %v incompatible with %v", tt, ttWant)
 	}
 	*t.Value = make(Permissions)
 	return t, nil
@@ -393,7 +395,7 @@ func (Tag) __VDLReflect(struct {
 }
 
 func (m *Tag) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
-	if err := t.FromString(string((*m)), __VDLType_v_io_v23_security_access_Tag); err != nil {
+	if err := t.FromString(string((*m)), tt); err != nil {
 		return err
 	}
 	return nil
@@ -410,41 +412,22 @@ type TagTarget struct {
 
 func (t *TagTarget) FromString(src string, tt *vdl.Type) error {
 
-	if !vdl.Compatible(tt, __VDLType_v_io_v23_security_access_Tag) {
-		return fmt.Errorf("type %v incompatible with %v", tt, __VDLType_v_io_v23_security_access_Tag)
+	if ttWant := vdl.TypeOf((*Tag)(nil)); !vdl.Compatible(tt, ttWant) {
+		return fmt.Errorf("type %v incompatible with %v", tt, ttWant)
 	}
 	*t.Value = Tag(src)
 
 	return nil
 }
 
-func init() {
-	vdl.Register((*AccessList)(nil))
-	vdl.Register((*Permissions)(nil))
-	vdl.Register((*Tag)(nil))
-}
+//////////////////////////////////////////////////
+// Const definitions
 
-var __VDLType0 *vdl.Type = vdl.TypeOf((*AccessList)(nil))
-var __VDLType2 *vdl.Type = vdl.TypeOf([]string(nil))
-var __VDLType1 *vdl.Type = vdl.TypeOf([]security.BlessingPattern(nil))
-var __VDLType_v_io_v23_security_BlessingPattern *vdl.Type = vdl.TypeOf(security.BlessingPattern(""))
-var __VDLType_v_io_v23_security_access_AccessList *vdl.Type = vdl.TypeOf(AccessList{})
-var __VDLType_v_io_v23_security_access_Permissions *vdl.Type = vdl.TypeOf(Permissions(nil))
-var __VDLType_v_io_v23_security_access_Tag *vdl.Type = vdl.TypeOf(Tag(""))
-
-func __VDLEnsureNativeBuilt() {
-}
-
-const Admin = Tag("Admin") // Operations that require privileged access for object administration.
-
-const Debug = Tag("Debug") // Operations that return debugging information (e.g., logs, statistics etc.) about the object.
-
-const Read = Tag("Read") // Operations that do not mutate the state of the object.
-
-const Write = Tag("Write") // Operations that mutate the state of the object.
-
+const Admin = Tag("Admin")     // Operations that require privileged access for object administration.
+const Debug = Tag("Debug")     // Operations that return debugging information (e.g., logs, statistics etc.) about the object.
+const Read = Tag("Read")       // Operations that do not mutate the state of the object.
+const Write = Tag("Write")     // Operations that mutate the state of the object.
 const Resolve = Tag("Resolve") // Operations involving namespace navigation.
-
 // AccessTagCaveat represents a caveat that validates iff the method being invoked has
 // at least one of the tags listed in the caveat.
 var AccessTagCaveat = security.CaveatDescriptor{
@@ -466,10 +449,13 @@ var AccessTagCaveat = security.CaveatDescriptor{
 		128,
 		0,
 	},
-	ParamType: vdl.TypeOf([]Tag(nil)),
+	ParamType: vdl.TypeOf((*[]Tag)(nil)),
 }
 
+//////////////////////////////////////////////////
+// Error definitions
 var (
+
 	// The AccessList is too big.  Use groups to represent large sets of principals.
 	ErrTooBig                    = verror.Register("v.io/v23/security/access.TooBig", verror.NoRetry, "{1:}{2:} AccessList is too big")
 	ErrNoPermissions             = verror.Register("v.io/v23/security/access.NoPermissions", verror.NoRetry, "{1:}{2:} {3} does not have {5} access (rejected blessings: {4})")
@@ -478,15 +464,6 @@ var (
 	ErrInvalidOpenAccessList     = verror.Register("v.io/v23/security/access.InvalidOpenAccessList", verror.NoRetry, "{1:}{2:} AccessList with the pattern ... in its In list must have no other patterns in the In or NotIn lists")
 	ErrAccessTagCaveatValidation = verror.Register("v.io/v23/security/access.AccessTagCaveatValidation", verror.NoRetry, "{1:}{2:} access tags on method ({3}) do not include any of the ones in the caveat ({4}), or the method is using a different tag type")
 )
-
-func init() {
-	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrTooBig.ID), "{1:}{2:} AccessList is too big")
-	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrNoPermissions.ID), "{1:}{2:} {3} does not have {5} access (rejected blessings: {4})")
-	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrAccessListMatch.ID), "{1:}{2:} {3} does not match the access list (rejected blessings: {4})")
-	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrUnenforceablePatterns.ID), "{1:}{2:} AccessList contains the following invalid or unrecognized patterns in the In list: {3}")
-	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrInvalidOpenAccessList.ID), "{1:}{2:} AccessList with the pattern ... in its In list must have no other patterns in the In or NotIn lists")
-	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrAccessTagCaveatValidation.ID), "{1:}{2:} access tags on method ({3}) do not include any of the ones in the caveat ({4}), or the method is using a different tag type")
-}
 
 // NewErrTooBig returns an error with the ErrTooBig ID.
 func NewErrTooBig(ctx *context.T) error {
@@ -516,4 +493,40 @@ func NewErrInvalidOpenAccessList(ctx *context.T) error {
 // NewErrAccessTagCaveatValidation returns an error with the ErrAccessTagCaveatValidation ID.
 func NewErrAccessTagCaveatValidation(ctx *context.T, methodTags []string, caveatTags []Tag) error {
 	return verror.New(ErrAccessTagCaveatValidation, ctx, methodTags, caveatTags)
+}
+
+var __VDLInitCalled bool
+
+// __VDLInit performs vdl initialization.  It is safe to call multiple times.
+// If you have an init ordering issue, just insert the following line verbatim
+// into your source files in this package, right after the "package foo" clause:
+//
+//    var _ = __VDLInit()
+//
+// The purpose of this function is to ensure that vdl initialization occurs in
+// the right order, and very early in the init sequence.  In particular, vdl
+// registration and package variable initialization needs to occur before
+// functions like vdl.TypeOf will work properly.
+//
+// This function returns a dummy value, so that it can be used to initialize the
+// first var in the file, to take advantage of Go's defined init order.
+func __VDLInit() struct{} {
+	if __VDLInitCalled {
+		return struct{}{}
+	}
+
+	// Register types.
+	vdl.Register((*AccessList)(nil))
+	vdl.Register((*Permissions)(nil))
+	vdl.Register((*Tag)(nil))
+
+	// Set error format strings.
+	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrTooBig.ID), "{1:}{2:} AccessList is too big")
+	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrNoPermissions.ID), "{1:}{2:} {3} does not have {5} access (rejected blessings: {4})")
+	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrAccessListMatch.ID), "{1:}{2:} {3} does not match the access list (rejected blessings: {4})")
+	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrUnenforceablePatterns.ID), "{1:}{2:} AccessList contains the following invalid or unrecognized patterns in the In list: {3}")
+	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrInvalidOpenAccessList.ID), "{1:}{2:} AccessList with the pattern ... in its In list must have no other patterns in the In or NotIn lists")
+	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrAccessTagCaveatValidation.ID), "{1:}{2:} access tags on method ({3}) do not include any of the ones in the caveat ({4}), or the method is using a different tag type")
+
+	return struct{}{}
 }

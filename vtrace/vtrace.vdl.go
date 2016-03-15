@@ -16,18 +16,126 @@ import (
 	time_2 "v.io/v23/vdlroot/time"
 )
 
-type TraceRecord struct {
-	Id    uniqueid.Id
-	Spans []SpanRecord
+var _ = __VDLInit() // Must be first; see __VDLInit comments for details.
+
+//////////////////////////////////////////////////
+// Type definitions
+
+// An Annotation represents data that is relevant at a specific moment.
+// They can be attached to spans to add useful debugging information.
+type Annotation struct {
+	// When the annotation was added.
+	When time.Time
+	// The annotation message.
+	// TODO(mattr): Allow richer annotations.
+	Message string
 }
 
-func (TraceRecord) __VDLReflect(struct {
-	Name string `vdl:"v.io/v23/vtrace.TraceRecord"`
+func (Annotation) __VDLReflect(struct {
+	Name string `vdl:"v.io/v23/vtrace.Annotation"`
 }) {
 }
 
-func (m *TraceRecord) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
-	__VDLEnsureNativeBuilt()
+func (m *Annotation) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
+	fieldsTarget1, err := t.StartFields(tt)
+	if err != nil {
+		return err
+	}
+
+	var wireValue2 time_2.Time
+	if err := time_2.TimeFromNative(&wireValue2, m.When); err != nil {
+		return err
+	}
+
+	keyTarget3, fieldTarget4, err := fieldsTarget1.StartField("When")
+	if err != vdl.ErrFieldNoExist && err != nil {
+		return err
+	}
+	if err != vdl.ErrFieldNoExist {
+
+		if err := wireValue2.FillVDLTarget(fieldTarget4, tt.NonOptional().Field(0).Type); err != nil {
+			return err
+		}
+		if err := fieldsTarget1.FinishField(keyTarget3, fieldTarget4); err != nil {
+			return err
+		}
+	}
+	keyTarget5, fieldTarget6, err := fieldsTarget1.StartField("Message")
+	if err != vdl.ErrFieldNoExist && err != nil {
+		return err
+	}
+	if err != vdl.ErrFieldNoExist {
+		if err := fieldTarget6.FromString(string(m.Message), tt.NonOptional().Field(1).Type); err != nil {
+			return err
+		}
+		if err := fieldsTarget1.FinishField(keyTarget5, fieldTarget6); err != nil {
+			return err
+		}
+	}
+	if err := t.FinishFields(fieldsTarget1); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (m *Annotation) MakeVDLTarget() vdl.Target {
+	return &AnnotationTarget{Value: m}
+}
+
+type AnnotationTarget struct {
+	Value         *Annotation
+	whenTarget    time_2.TimeTarget
+	messageTarget vdl.StringTarget
+	vdl.TargetBase
+	vdl.FieldsTargetBase
+}
+
+func (t *AnnotationTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
+
+	if ttWant := vdl.TypeOf((*Annotation)(nil)).Elem(); !vdl.Compatible(tt, ttWant) {
+		return nil, fmt.Errorf("type %v incompatible with %v", tt, ttWant)
+	}
+	return t, nil
+}
+func (t *AnnotationTarget) StartField(name string) (key, field vdl.Target, _ error) {
+	switch name {
+	case "When":
+		t.whenTarget.Value = &t.Value.When
+		target, err := &t.whenTarget, error(nil)
+		return nil, target, err
+	case "Message":
+		t.messageTarget.Value = &t.Value.Message
+		target, err := &t.messageTarget, error(nil)
+		return nil, target, err
+	default:
+		return nil, nil, fmt.Errorf("field %s not in struct v.io/v23/vtrace.Annotation", name)
+	}
+}
+func (t *AnnotationTarget) FinishField(_, _ vdl.Target) error {
+	return nil
+}
+func (t *AnnotationTarget) FinishFields(_ vdl.FieldsTarget) error {
+
+	return nil
+}
+
+// A SpanRecord is the wire format for a Span.
+type SpanRecord struct {
+	Id     uniqueid.Id // The Id of the Span.
+	Parent uniqueid.Id // The Id of this Span's parent.
+	Name   string      // The Name of this span.
+	Start  time.Time   // The start time of this span.
+	End    time.Time   // The end time of this span.
+	// A series of annotations.
+	Annotations []Annotation
+}
+
+func (SpanRecord) __VDLReflect(struct {
+	Name string `vdl:"v.io/v23/vtrace.SpanRecord"`
+}) {
+}
+
+func (m *SpanRecord) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 	fieldsTarget1, err := t.StartFields(tt)
 	if err != nil {
 		return err
@@ -39,7 +147,227 @@ func (m *TraceRecord) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 	}
 	if err != vdl.ErrFieldNoExist {
 
-		if err := m.Id.FillVDLTarget(fieldTarget3, __VDLType_v_io_v23_uniqueid_Id); err != nil {
+		if err := m.Id.FillVDLTarget(fieldTarget3, tt.NonOptional().Field(0).Type); err != nil {
+			return err
+		}
+		if err := fieldsTarget1.FinishField(keyTarget2, fieldTarget3); err != nil {
+			return err
+		}
+	}
+	keyTarget4, fieldTarget5, err := fieldsTarget1.StartField("Parent")
+	if err != vdl.ErrFieldNoExist && err != nil {
+		return err
+	}
+	if err != vdl.ErrFieldNoExist {
+
+		if err := m.Parent.FillVDLTarget(fieldTarget5, tt.NonOptional().Field(1).Type); err != nil {
+			return err
+		}
+		if err := fieldsTarget1.FinishField(keyTarget4, fieldTarget5); err != nil {
+			return err
+		}
+	}
+	keyTarget6, fieldTarget7, err := fieldsTarget1.StartField("Name")
+	if err != vdl.ErrFieldNoExist && err != nil {
+		return err
+	}
+	if err != vdl.ErrFieldNoExist {
+		if err := fieldTarget7.FromString(string(m.Name), tt.NonOptional().Field(2).Type); err != nil {
+			return err
+		}
+		if err := fieldsTarget1.FinishField(keyTarget6, fieldTarget7); err != nil {
+			return err
+		}
+	}
+	var wireValue8 time_2.Time
+	if err := time_2.TimeFromNative(&wireValue8, m.Start); err != nil {
+		return err
+	}
+
+	keyTarget9, fieldTarget10, err := fieldsTarget1.StartField("Start")
+	if err != vdl.ErrFieldNoExist && err != nil {
+		return err
+	}
+	if err != vdl.ErrFieldNoExist {
+
+		if err := wireValue8.FillVDLTarget(fieldTarget10, tt.NonOptional().Field(3).Type); err != nil {
+			return err
+		}
+		if err := fieldsTarget1.FinishField(keyTarget9, fieldTarget10); err != nil {
+			return err
+		}
+	}
+	var wireValue11 time_2.Time
+	if err := time_2.TimeFromNative(&wireValue11, m.End); err != nil {
+		return err
+	}
+
+	keyTarget12, fieldTarget13, err := fieldsTarget1.StartField("End")
+	if err != vdl.ErrFieldNoExist && err != nil {
+		return err
+	}
+	if err != vdl.ErrFieldNoExist {
+
+		if err := wireValue11.FillVDLTarget(fieldTarget13, tt.NonOptional().Field(4).Type); err != nil {
+			return err
+		}
+		if err := fieldsTarget1.FinishField(keyTarget12, fieldTarget13); err != nil {
+			return err
+		}
+	}
+	keyTarget14, fieldTarget15, err := fieldsTarget1.StartField("Annotations")
+	if err != vdl.ErrFieldNoExist && err != nil {
+		return err
+	}
+	if err != vdl.ErrFieldNoExist {
+
+		listTarget16, err := fieldTarget15.StartList(tt.NonOptional().Field(5).Type, len(m.Annotations))
+		if err != nil {
+			return err
+		}
+		for i, elem18 := range m.Annotations {
+			elemTarget17, err := listTarget16.StartElem(i)
+			if err != nil {
+				return err
+			}
+
+			if err := elem18.FillVDLTarget(elemTarget17, tt.NonOptional().Field(5).Type.Elem()); err != nil {
+				return err
+			}
+			if err := listTarget16.FinishElem(elemTarget17); err != nil {
+				return err
+			}
+		}
+		if err := fieldTarget15.FinishList(listTarget16); err != nil {
+			return err
+		}
+		if err := fieldsTarget1.FinishField(keyTarget14, fieldTarget15); err != nil {
+			return err
+		}
+	}
+	if err := t.FinishFields(fieldsTarget1); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (m *SpanRecord) MakeVDLTarget() vdl.Target {
+	return &SpanRecordTarget{Value: m}
+}
+
+type SpanRecordTarget struct {
+	Value             *SpanRecord
+	idTarget          uniqueid.IdTarget
+	parentTarget      uniqueid.IdTarget
+	nameTarget        vdl.StringTarget
+	startTarget       time_2.TimeTarget
+	endTarget         time_2.TimeTarget
+	annotationsTarget unnamed_5b5d762e696f2f7632332f7674726163652e416e6e6f746174696f6e207374727563747b5768656e2074696d652e54696d65207374727563747b5365636f6e647320696e7436343b4e616e6f7320696e7433327d3b4d65737361676520737472696e677dTarget
+	vdl.TargetBase
+	vdl.FieldsTargetBase
+}
+
+func (t *SpanRecordTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
+
+	if ttWant := vdl.TypeOf((*SpanRecord)(nil)).Elem(); !vdl.Compatible(tt, ttWant) {
+		return nil, fmt.Errorf("type %v incompatible with %v", tt, ttWant)
+	}
+	return t, nil
+}
+func (t *SpanRecordTarget) StartField(name string) (key, field vdl.Target, _ error) {
+	switch name {
+	case "Id":
+		t.idTarget.Value = &t.Value.Id
+		target, err := &t.idTarget, error(nil)
+		return nil, target, err
+	case "Parent":
+		t.parentTarget.Value = &t.Value.Parent
+		target, err := &t.parentTarget, error(nil)
+		return nil, target, err
+	case "Name":
+		t.nameTarget.Value = &t.Value.Name
+		target, err := &t.nameTarget, error(nil)
+		return nil, target, err
+	case "Start":
+		t.startTarget.Value = &t.Value.Start
+		target, err := &t.startTarget, error(nil)
+		return nil, target, err
+	case "End":
+		t.endTarget.Value = &t.Value.End
+		target, err := &t.endTarget, error(nil)
+		return nil, target, err
+	case "Annotations":
+		t.annotationsTarget.Value = &t.Value.Annotations
+		target, err := &t.annotationsTarget, error(nil)
+		return nil, target, err
+	default:
+		return nil, nil, fmt.Errorf("field %s not in struct v.io/v23/vtrace.SpanRecord", name)
+	}
+}
+func (t *SpanRecordTarget) FinishField(_, _ vdl.Target) error {
+	return nil
+}
+func (t *SpanRecordTarget) FinishFields(_ vdl.FieldsTarget) error {
+
+	return nil
+}
+
+// []Annotation
+type unnamed_5b5d762e696f2f7632332f7674726163652e416e6e6f746174696f6e207374727563747b5768656e2074696d652e54696d65207374727563747b5365636f6e647320696e7436343b4e616e6f7320696e7433327d3b4d65737361676520737472696e677dTarget struct {
+	Value      *[]Annotation
+	elemTarget AnnotationTarget
+	vdl.TargetBase
+	vdl.ListTargetBase
+}
+
+func (t *unnamed_5b5d762e696f2f7632332f7674726163652e416e6e6f746174696f6e207374727563747b5768656e2074696d652e54696d65207374727563747b5365636f6e647320696e7436343b4e616e6f7320696e7433327d3b4d65737361676520737472696e677dTarget) StartList(tt *vdl.Type, len int) (vdl.ListTarget, error) {
+
+	if ttWant := vdl.TypeOf((*[]Annotation)(nil)); !vdl.Compatible(tt, ttWant) {
+		return nil, fmt.Errorf("type %v incompatible with %v", tt, ttWant)
+	}
+	if cap(*t.Value) < len {
+		*t.Value = make([]Annotation, len)
+	} else {
+		*t.Value = (*t.Value)[:len]
+	}
+	return t, nil
+}
+func (t *unnamed_5b5d762e696f2f7632332f7674726163652e416e6e6f746174696f6e207374727563747b5768656e2074696d652e54696d65207374727563747b5365636f6e647320696e7436343b4e616e6f7320696e7433327d3b4d65737361676520737472696e677dTarget) StartElem(index int) (elem vdl.Target, _ error) {
+	t.elemTarget.Value = &(*t.Value)[index]
+	target, err := &t.elemTarget, error(nil)
+	return target, err
+}
+func (t *unnamed_5b5d762e696f2f7632332f7674726163652e416e6e6f746174696f6e207374727563747b5768656e2074696d652e54696d65207374727563747b5365636f6e647320696e7436343b4e616e6f7320696e7433327d3b4d65737361676520737472696e677dTarget) FinishElem(elem vdl.Target) error {
+	return nil
+}
+func (t *unnamed_5b5d762e696f2f7632332f7674726163652e416e6e6f746174696f6e207374727563747b5768656e2074696d652e54696d65207374727563747b5365636f6e647320696e7436343b4e616e6f7320696e7433327d3b4d65737361676520737472696e677dTarget) FinishList(elem vdl.ListTarget) error {
+
+	return nil
+}
+
+type TraceRecord struct {
+	Id    uniqueid.Id
+	Spans []SpanRecord
+}
+
+func (TraceRecord) __VDLReflect(struct {
+	Name string `vdl:"v.io/v23/vtrace.TraceRecord"`
+}) {
+}
+
+func (m *TraceRecord) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
+	fieldsTarget1, err := t.StartFields(tt)
+	if err != nil {
+		return err
+	}
+
+	keyTarget2, fieldTarget3, err := fieldsTarget1.StartField("Id")
+	if err != vdl.ErrFieldNoExist && err != nil {
+		return err
+	}
+	if err != vdl.ErrFieldNoExist {
+
+		if err := m.Id.FillVDLTarget(fieldTarget3, tt.NonOptional().Field(0).Type); err != nil {
 			return err
 		}
 		if err := fieldsTarget1.FinishField(keyTarget2, fieldTarget3); err != nil {
@@ -52,7 +380,7 @@ func (m *TraceRecord) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 	}
 	if err != vdl.ErrFieldNoExist {
 
-		listTarget6, err := fieldTarget5.StartList(__VDLType1, len(m.Spans))
+		listTarget6, err := fieldTarget5.StartList(tt.NonOptional().Field(1).Type, len(m.Spans))
 		if err != nil {
 			return err
 		}
@@ -62,7 +390,7 @@ func (m *TraceRecord) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 				return err
 			}
 
-			if err := elem8.FillVDLTarget(elemTarget7, __VDLType_v_io_v23_vtrace_SpanRecord); err != nil {
+			if err := elem8.FillVDLTarget(elemTarget7, tt.NonOptional().Field(1).Type.Elem()); err != nil {
 				return err
 			}
 			if err := listTarget6.FinishElem(elemTarget7); err != nil {
@@ -96,8 +424,8 @@ type TraceRecordTarget struct {
 
 func (t *TraceRecordTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
 
-	if !vdl.Compatible(tt, __VDLType_v_io_v23_vtrace_TraceRecord) {
-		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType_v_io_v23_vtrace_TraceRecord)
+	if ttWant := vdl.TypeOf((*TraceRecord)(nil)).Elem(); !vdl.Compatible(tt, ttWant) {
+		return nil, fmt.Errorf("type %v incompatible with %v", tt, ttWant)
 	}
 	return t, nil
 }
@@ -112,7 +440,7 @@ func (t *TraceRecordTarget) StartField(name string) (key, field vdl.Target, _ er
 		target, err := &t.spansTarget, error(nil)
 		return nil, target, err
 	default:
-		return nil, nil, fmt.Errorf("field %s not in struct %v", name, __VDLType_v_io_v23_vtrace_TraceRecord)
+		return nil, nil, fmt.Errorf("field %s not in struct v.io/v23/vtrace.TraceRecord", name)
 	}
 }
 func (t *TraceRecordTarget) FinishField(_, _ vdl.Target) error {
@@ -133,8 +461,8 @@ type unnamed_5b5d762e696f2f7632332f7674726163652e5370616e5265636f726420737472756
 
 func (t *unnamed_5b5d762e696f2f7632332f7674726163652e5370616e5265636f7264207374727563747b496420762e696f2f7632332f756e6971756569642e4964205b31365d627974653b506172656e7420762e696f2f7632332f756e6971756569642e49643b4e616d6520737472696e673b53746172742074696d652e54696d65207374727563747b5365636f6e647320696e7436343b4e616e6f7320696e7433327d3b456e642074696d652e54696d653b416e6e6f746174696f6e73205b5d762e696f2f7632332f7674726163652e416e6e6f746174696f6e207374727563747b5768656e2074696d652e54696d653b4d65737361676520737472696e677d7dTarget) StartList(tt *vdl.Type, len int) (vdl.ListTarget, error) {
 
-	if !vdl.Compatible(tt, __VDLType1) {
-		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType1)
+	if ttWant := vdl.TypeOf((*[]SpanRecord)(nil)); !vdl.Compatible(tt, ttWant) {
+		return nil, fmt.Errorf("type %v incompatible with %v", tt, ttWant)
 	}
 	if cap(*t.Value) < len {
 		*t.Value = make([]SpanRecord, len)
@@ -156,332 +484,6 @@ func (t *unnamed_5b5d762e696f2f7632332f7674726163652e5370616e5265636f72642073747
 	return nil
 }
 
-type SpanRecordTarget struct {
-	Value             *SpanRecord
-	idTarget          uniqueid.IdTarget
-	parentTarget      uniqueid.IdTarget
-	nameTarget        vdl.StringTarget
-	startTarget       time_2.TimeTarget
-	endTarget         time_2.TimeTarget
-	annotationsTarget unnamed_5b5d762e696f2f7632332f7674726163652e416e6e6f746174696f6e207374727563747b5768656e2074696d652e54696d65207374727563747b5365636f6e647320696e7436343b4e616e6f7320696e7433327d3b4d65737361676520737472696e677dTarget
-	vdl.TargetBase
-	vdl.FieldsTargetBase
-}
-
-func (t *SpanRecordTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
-
-	if !vdl.Compatible(tt, __VDLType_v_io_v23_vtrace_SpanRecord) {
-		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType_v_io_v23_vtrace_SpanRecord)
-	}
-	return t, nil
-}
-func (t *SpanRecordTarget) StartField(name string) (key, field vdl.Target, _ error) {
-	switch name {
-	case "Id":
-		t.idTarget.Value = &t.Value.Id
-		target, err := &t.idTarget, error(nil)
-		return nil, target, err
-	case "Parent":
-		t.parentTarget.Value = &t.Value.Parent
-		target, err := &t.parentTarget, error(nil)
-		return nil, target, err
-	case "Name":
-		t.nameTarget.Value = &t.Value.Name
-		target, err := &t.nameTarget, error(nil)
-		return nil, target, err
-	case "Start":
-		t.startTarget.Value = &t.Value.Start
-		target, err := &t.startTarget, error(nil)
-		return nil, target, err
-	case "End":
-		t.endTarget.Value = &t.Value.End
-		target, err := &t.endTarget, error(nil)
-		return nil, target, err
-	case "Annotations":
-		t.annotationsTarget.Value = &t.Value.Annotations
-		target, err := &t.annotationsTarget, error(nil)
-		return nil, target, err
-	default:
-		return nil, nil, fmt.Errorf("field %s not in struct %v", name, __VDLType_v_io_v23_vtrace_SpanRecord)
-	}
-}
-func (t *SpanRecordTarget) FinishField(_, _ vdl.Target) error {
-	return nil
-}
-func (t *SpanRecordTarget) FinishFields(_ vdl.FieldsTarget) error {
-
-	return nil
-}
-
-// []Annotation
-type unnamed_5b5d762e696f2f7632332f7674726163652e416e6e6f746174696f6e207374727563747b5768656e2074696d652e54696d65207374727563747b5365636f6e647320696e7436343b4e616e6f7320696e7433327d3b4d65737361676520737472696e677dTarget struct {
-	Value      *[]Annotation
-	elemTarget AnnotationTarget
-	vdl.TargetBase
-	vdl.ListTargetBase
-}
-
-func (t *unnamed_5b5d762e696f2f7632332f7674726163652e416e6e6f746174696f6e207374727563747b5768656e2074696d652e54696d65207374727563747b5365636f6e647320696e7436343b4e616e6f7320696e7433327d3b4d65737361676520737472696e677dTarget) StartList(tt *vdl.Type, len int) (vdl.ListTarget, error) {
-
-	if !vdl.Compatible(tt, __VDLType2) {
-		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType2)
-	}
-	if cap(*t.Value) < len {
-		*t.Value = make([]Annotation, len)
-	} else {
-		*t.Value = (*t.Value)[:len]
-	}
-	return t, nil
-}
-func (t *unnamed_5b5d762e696f2f7632332f7674726163652e416e6e6f746174696f6e207374727563747b5768656e2074696d652e54696d65207374727563747b5365636f6e647320696e7436343b4e616e6f7320696e7433327d3b4d65737361676520737472696e677dTarget) StartElem(index int) (elem vdl.Target, _ error) {
-	t.elemTarget.Value = &(*t.Value)[index]
-	target, err := &t.elemTarget, error(nil)
-	return target, err
-}
-func (t *unnamed_5b5d762e696f2f7632332f7674726163652e416e6e6f746174696f6e207374727563747b5768656e2074696d652e54696d65207374727563747b5365636f6e647320696e7436343b4e616e6f7320696e7433327d3b4d65737361676520737472696e677dTarget) FinishElem(elem vdl.Target) error {
-	return nil
-}
-func (t *unnamed_5b5d762e696f2f7632332f7674726163652e416e6e6f746174696f6e207374727563747b5768656e2074696d652e54696d65207374727563747b5365636f6e647320696e7436343b4e616e6f7320696e7433327d3b4d65737361676520737472696e677dTarget) FinishList(elem vdl.ListTarget) error {
-
-	return nil
-}
-
-type AnnotationTarget struct {
-	Value         *Annotation
-	whenTarget    time_2.TimeTarget
-	messageTarget vdl.StringTarget
-	vdl.TargetBase
-	vdl.FieldsTargetBase
-}
-
-func (t *AnnotationTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
-
-	if !vdl.Compatible(tt, __VDLType_v_io_v23_vtrace_Annotation) {
-		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType_v_io_v23_vtrace_Annotation)
-	}
-	return t, nil
-}
-func (t *AnnotationTarget) StartField(name string) (key, field vdl.Target, _ error) {
-	switch name {
-	case "When":
-		t.whenTarget.Value = &t.Value.When
-		target, err := &t.whenTarget, error(nil)
-		return nil, target, err
-	case "Message":
-		t.messageTarget.Value = &t.Value.Message
-		target, err := &t.messageTarget, error(nil)
-		return nil, target, err
-	default:
-		return nil, nil, fmt.Errorf("field %s not in struct %v", name, __VDLType_v_io_v23_vtrace_Annotation)
-	}
-}
-func (t *AnnotationTarget) FinishField(_, _ vdl.Target) error {
-	return nil
-}
-func (t *AnnotationTarget) FinishFields(_ vdl.FieldsTarget) error {
-
-	return nil
-}
-
-// An Annotation represents data that is relevant at a specific moment.
-// They can be attached to spans to add useful debugging information.
-type Annotation struct {
-	// When the annotation was added.
-	When time.Time
-	// The annotation message.
-	// TODO(mattr): Allow richer annotations.
-	Message string
-}
-
-func (Annotation) __VDLReflect(struct {
-	Name string `vdl:"v.io/v23/vtrace.Annotation"`
-}) {
-}
-
-func (m *Annotation) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
-	__VDLEnsureNativeBuilt()
-	fieldsTarget1, err := t.StartFields(tt)
-	if err != nil {
-		return err
-	}
-
-	var wireValue2 time_2.Time
-	if err := time_2.TimeFromNative(&wireValue2, m.When); err != nil {
-		return err
-	}
-
-	keyTarget3, fieldTarget4, err := fieldsTarget1.StartField("When")
-	if err != vdl.ErrFieldNoExist && err != nil {
-		return err
-	}
-	if err != vdl.ErrFieldNoExist {
-
-		if err := wireValue2.FillVDLTarget(fieldTarget4, __VDLType_time_Time); err != nil {
-			return err
-		}
-		if err := fieldsTarget1.FinishField(keyTarget3, fieldTarget4); err != nil {
-			return err
-		}
-	}
-	keyTarget5, fieldTarget6, err := fieldsTarget1.StartField("Message")
-	if err != vdl.ErrFieldNoExist && err != nil {
-		return err
-	}
-	if err != vdl.ErrFieldNoExist {
-		if err := fieldTarget6.FromString(string(m.Message), vdl.StringType); err != nil {
-			return err
-		}
-		if err := fieldsTarget1.FinishField(keyTarget5, fieldTarget6); err != nil {
-			return err
-		}
-	}
-	if err := t.FinishFields(fieldsTarget1); err != nil {
-		return err
-	}
-	return nil
-}
-
-func (m *Annotation) MakeVDLTarget() vdl.Target {
-	return &AnnotationTarget{Value: m}
-}
-
-// A SpanRecord is the wire format for a Span.
-type SpanRecord struct {
-	Id     uniqueid.Id // The Id of the Span.
-	Parent uniqueid.Id // The Id of this Span's parent.
-	Name   string      // The Name of this span.
-	Start  time.Time   // The start time of this span.
-	End    time.Time   // The end time of this span.
-	// A series of annotations.
-	Annotations []Annotation
-}
-
-func (SpanRecord) __VDLReflect(struct {
-	Name string `vdl:"v.io/v23/vtrace.SpanRecord"`
-}) {
-}
-
-func (m *SpanRecord) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
-	__VDLEnsureNativeBuilt()
-	fieldsTarget1, err := t.StartFields(tt)
-	if err != nil {
-		return err
-	}
-
-	keyTarget2, fieldTarget3, err := fieldsTarget1.StartField("Id")
-	if err != vdl.ErrFieldNoExist && err != nil {
-		return err
-	}
-	if err != vdl.ErrFieldNoExist {
-
-		if err := m.Id.FillVDLTarget(fieldTarget3, __VDLType_v_io_v23_uniqueid_Id); err != nil {
-			return err
-		}
-		if err := fieldsTarget1.FinishField(keyTarget2, fieldTarget3); err != nil {
-			return err
-		}
-	}
-	keyTarget4, fieldTarget5, err := fieldsTarget1.StartField("Parent")
-	if err != vdl.ErrFieldNoExist && err != nil {
-		return err
-	}
-	if err != vdl.ErrFieldNoExist {
-
-		if err := m.Parent.FillVDLTarget(fieldTarget5, __VDLType_v_io_v23_uniqueid_Id); err != nil {
-			return err
-		}
-		if err := fieldsTarget1.FinishField(keyTarget4, fieldTarget5); err != nil {
-			return err
-		}
-	}
-	keyTarget6, fieldTarget7, err := fieldsTarget1.StartField("Name")
-	if err != vdl.ErrFieldNoExist && err != nil {
-		return err
-	}
-	if err != vdl.ErrFieldNoExist {
-		if err := fieldTarget7.FromString(string(m.Name), vdl.StringType); err != nil {
-			return err
-		}
-		if err := fieldsTarget1.FinishField(keyTarget6, fieldTarget7); err != nil {
-			return err
-		}
-	}
-	var wireValue8 time_2.Time
-	if err := time_2.TimeFromNative(&wireValue8, m.Start); err != nil {
-		return err
-	}
-
-	keyTarget9, fieldTarget10, err := fieldsTarget1.StartField("Start")
-	if err != vdl.ErrFieldNoExist && err != nil {
-		return err
-	}
-	if err != vdl.ErrFieldNoExist {
-
-		if err := wireValue8.FillVDLTarget(fieldTarget10, __VDLType_time_Time); err != nil {
-			return err
-		}
-		if err := fieldsTarget1.FinishField(keyTarget9, fieldTarget10); err != nil {
-			return err
-		}
-	}
-	var wireValue11 time_2.Time
-	if err := time_2.TimeFromNative(&wireValue11, m.End); err != nil {
-		return err
-	}
-
-	keyTarget12, fieldTarget13, err := fieldsTarget1.StartField("End")
-	if err != vdl.ErrFieldNoExist && err != nil {
-		return err
-	}
-	if err != vdl.ErrFieldNoExist {
-
-		if err := wireValue11.FillVDLTarget(fieldTarget13, __VDLType_time_Time); err != nil {
-			return err
-		}
-		if err := fieldsTarget1.FinishField(keyTarget12, fieldTarget13); err != nil {
-			return err
-		}
-	}
-	keyTarget14, fieldTarget15, err := fieldsTarget1.StartField("Annotations")
-	if err != vdl.ErrFieldNoExist && err != nil {
-		return err
-	}
-	if err != vdl.ErrFieldNoExist {
-
-		listTarget16, err := fieldTarget15.StartList(__VDLType2, len(m.Annotations))
-		if err != nil {
-			return err
-		}
-		for i, elem18 := range m.Annotations {
-			elemTarget17, err := listTarget16.StartElem(i)
-			if err != nil {
-				return err
-			}
-
-			if err := elem18.FillVDLTarget(elemTarget17, __VDLType_v_io_v23_vtrace_Annotation); err != nil {
-				return err
-			}
-			if err := listTarget16.FinishElem(elemTarget17); err != nil {
-				return err
-			}
-		}
-		if err := fieldTarget15.FinishList(listTarget16); err != nil {
-			return err
-		}
-		if err := fieldsTarget1.FinishField(keyTarget14, fieldTarget15); err != nil {
-			return err
-		}
-	}
-	if err := t.FinishFields(fieldsTarget1); err != nil {
-		return err
-	}
-	return nil
-}
-
-func (m *SpanRecord) MakeVDLTarget() vdl.Target {
-	return &SpanRecordTarget{Value: m}
-}
-
 type TraceFlags int32
 
 func (TraceFlags) __VDLReflect(struct {
@@ -490,7 +492,7 @@ func (TraceFlags) __VDLReflect(struct {
 }
 
 func (m *TraceFlags) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
-	if err := t.FromInt(int64((*m)), __VDLType_v_io_v23_vtrace_TraceFlags); err != nil {
+	if err := t.FromInt(int64((*m)), tt); err != nil {
 		return err
 	}
 	return nil
@@ -560,9 +562,6 @@ func (Request) __VDLReflect(struct {
 }
 
 func (m *Request) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
-	if __VDLType_v_io_v23_vtrace_Request == nil || __VDLType5 == nil {
-		panic("Initialization order error: types generated for FillVDLTarget not initialized. Consider moving caller to an init() block.")
-	}
 	fieldsTarget1, err := t.StartFields(tt)
 	if err != nil {
 		return err
@@ -574,7 +573,7 @@ func (m *Request) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 	}
 	if err != vdl.ErrFieldNoExist {
 
-		if err := m.SpanId.FillVDLTarget(fieldTarget3, __VDLType_v_io_v23_uniqueid_Id); err != nil {
+		if err := m.SpanId.FillVDLTarget(fieldTarget3, tt.NonOptional().Field(0).Type); err != nil {
 			return err
 		}
 		if err := fieldsTarget1.FinishField(keyTarget2, fieldTarget3); err != nil {
@@ -587,7 +586,7 @@ func (m *Request) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 	}
 	if err != vdl.ErrFieldNoExist {
 
-		if err := m.TraceId.FillVDLTarget(fieldTarget5, __VDLType_v_io_v23_uniqueid_Id); err != nil {
+		if err := m.TraceId.FillVDLTarget(fieldTarget5, tt.NonOptional().Field(1).Type); err != nil {
 			return err
 		}
 		if err := fieldsTarget1.FinishField(keyTarget4, fieldTarget5); err != nil {
@@ -600,7 +599,7 @@ func (m *Request) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 	}
 	if err != vdl.ErrFieldNoExist {
 
-		if err := m.Flags.FillVDLTarget(fieldTarget7, __VDLType_v_io_v23_vtrace_TraceFlags); err != nil {
+		if err := m.Flags.FillVDLTarget(fieldTarget7, tt.NonOptional().Field(2).Type); err != nil {
 			return err
 		}
 		if err := fieldsTarget1.FinishField(keyTarget6, fieldTarget7); err != nil {
@@ -612,7 +611,7 @@ func (m *Request) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 		return err
 	}
 	if err != vdl.ErrFieldNoExist {
-		if err := fieldTarget9.FromInt(int64(m.LogLevel), vdl.Int32Type); err != nil {
+		if err := fieldTarget9.FromInt(int64(m.LogLevel), tt.NonOptional().Field(3).Type); err != nil {
 			return err
 		}
 		if err := fieldsTarget1.FinishField(keyTarget8, fieldTarget9); err != nil {
@@ -641,8 +640,8 @@ type RequestTarget struct {
 
 func (t *RequestTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
 
-	if !vdl.Compatible(tt, __VDLType_v_io_v23_vtrace_Request) {
-		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType_v_io_v23_vtrace_Request)
+	if ttWant := vdl.TypeOf((*Request)(nil)).Elem(); !vdl.Compatible(tt, ttWant) {
+		return nil, fmt.Errorf("type %v incompatible with %v", tt, ttWant)
 	}
 	return t, nil
 }
@@ -665,7 +664,7 @@ func (t *RequestTarget) StartField(name string) (key, field vdl.Target, _ error)
 		target, err := &t.logLevelTarget, error(nil)
 		return nil, target, err
 	default:
-		return nil, nil, fmt.Errorf("field %s not in struct %v", name, __VDLType_v_io_v23_vtrace_Request)
+		return nil, nil, fmt.Errorf("field %s not in struct v.io/v23/vtrace.Request", name)
 	}
 }
 func (t *RequestTarget) FinishField(_, _ vdl.Target) error {
@@ -691,7 +690,6 @@ func (Response) __VDLReflect(struct {
 }
 
 func (m *Response) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
-	__VDLEnsureNativeBuilt()
 	fieldsTarget1, err := t.StartFields(tt)
 	if err != nil {
 		return err
@@ -703,7 +701,7 @@ func (m *Response) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 	}
 	if err != vdl.ErrFieldNoExist {
 
-		if err := m.Flags.FillVDLTarget(fieldTarget3, __VDLType_v_io_v23_vtrace_TraceFlags); err != nil {
+		if err := m.Flags.FillVDLTarget(fieldTarget3, tt.NonOptional().Field(0).Type); err != nil {
 			return err
 		}
 		if err := fieldsTarget1.FinishField(keyTarget2, fieldTarget3); err != nil {
@@ -716,7 +714,7 @@ func (m *Response) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 	}
 	if err != vdl.ErrFieldNoExist {
 
-		if err := m.Trace.FillVDLTarget(fieldTarget5, __VDLType_v_io_v23_vtrace_TraceRecord); err != nil {
+		if err := m.Trace.FillVDLTarget(fieldTarget5, tt.NonOptional().Field(1).Type); err != nil {
 			return err
 		}
 		if err := fieldsTarget1.FinishField(keyTarget4, fieldTarget5); err != nil {
@@ -743,8 +741,8 @@ type ResponseTarget struct {
 
 func (t *ResponseTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
 
-	if !vdl.Compatible(tt, __VDLType_v_io_v23_vtrace_Response) {
-		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType_v_io_v23_vtrace_Response)
+	if ttWant := vdl.TypeOf((*Response)(nil)).Elem(); !vdl.Compatible(tt, ttWant) {
+		return nil, fmt.Errorf("type %v incompatible with %v", tt, ttWant)
 	}
 	return t, nil
 }
@@ -759,7 +757,7 @@ func (t *ResponseTarget) StartField(name string) (key, field vdl.Target, _ error
 		target, err := &t.traceTarget, error(nil)
 		return nil, target, err
 	default:
-		return nil, nil, fmt.Errorf("field %s not in struct %v", name, __VDLType_v_io_v23_vtrace_Response)
+		return nil, nil, fmt.Errorf("field %s not in struct v.io/v23/vtrace.Response", name)
 	}
 }
 func (t *ResponseTarget) FinishField(_, _ vdl.Target) error {
@@ -770,499 +768,39 @@ func (t *ResponseTarget) FinishFields(_ vdl.FieldsTarget) error {
 	return nil
 }
 
-func init() {
-	vdl.Register((*TraceRecord)(nil))
+//////////////////////////////////////////////////
+// Const definitions
+
+const Empty = TraceFlags(0)
+const CollectInMemory = TraceFlags(1)
+
+var __VDLInitCalled bool
+
+// __VDLInit performs vdl initialization.  It is safe to call multiple times.
+// If you have an init ordering issue, just insert the following line verbatim
+// into your source files in this package, right after the "package foo" clause:
+//
+//    var _ = __VDLInit()
+//
+// The purpose of this function is to ensure that vdl initialization occurs in
+// the right order, and very early in the init sequence.  In particular, vdl
+// registration and package variable initialization needs to occur before
+// functions like vdl.TypeOf will work properly.
+//
+// This function returns a dummy value, so that it can be used to initialize the
+// first var in the file, to take advantage of Go's defined init order.
+func __VDLInit() struct{} {
+	if __VDLInitCalled {
+		return struct{}{}
+	}
+
+	// Register types.
 	vdl.Register((*Annotation)(nil))
 	vdl.Register((*SpanRecord)(nil))
+	vdl.Register((*TraceRecord)(nil))
 	vdl.Register((*TraceFlags)(nil))
 	vdl.Register((*Request)(nil))
 	vdl.Register((*Response)(nil))
+
+	return struct{}{}
 }
-
-var __VDLType3 *vdl.Type
-
-func __VDLType3_gen() *vdl.Type {
-	__VDLType3Builder := vdl.TypeBuilder{}
-
-	__VDLType31 := __VDLType3Builder.Optional()
-	__VDLType32 := __VDLType3Builder.Struct()
-	__VDLType33 := __VDLType3Builder.Named("v.io/v23/vtrace.Annotation").AssignBase(__VDLType32)
-	__VDLType34 := __VDLType3Builder.Struct()
-	__VDLType35 := __VDLType3Builder.Named("time.Time").AssignBase(__VDLType34)
-	__VDLType36 := vdl.Int64Type
-	__VDLType34.AppendField("Seconds", __VDLType36)
-	__VDLType37 := vdl.Int32Type
-	__VDLType34.AppendField("Nanos", __VDLType37)
-	__VDLType32.AppendField("When", __VDLType35)
-	__VDLType38 := vdl.StringType
-	__VDLType32.AppendField("Message", __VDLType38)
-	__VDLType31.AssignElem(__VDLType33)
-	__VDLType3Builder.Build()
-	__VDLType3v, err := __VDLType31.Built()
-	if err != nil {
-		panic(err)
-	}
-	return __VDLType3v
-}
-func init() {
-	__VDLType3 = __VDLType3_gen()
-}
-
-var __VDLType5 *vdl.Type = vdl.TypeOf((*Request)(nil))
-var __VDLType6 *vdl.Type
-
-func __VDLType6_gen() *vdl.Type {
-	__VDLType6Builder := vdl.TypeBuilder{}
-
-	__VDLType61 := __VDLType6Builder.Optional()
-	__VDLType62 := __VDLType6Builder.Struct()
-	__VDLType63 := __VDLType6Builder.Named("v.io/v23/vtrace.Response").AssignBase(__VDLType62)
-	__VDLType64 := vdl.Int32Type
-	__VDLType65 := __VDLType6Builder.Named("v.io/v23/vtrace.TraceFlags").AssignBase(__VDLType64)
-	__VDLType62.AppendField("Flags", __VDLType65)
-	__VDLType66 := __VDLType6Builder.Struct()
-	__VDLType67 := __VDLType6Builder.Named("v.io/v23/vtrace.TraceRecord").AssignBase(__VDLType66)
-	__VDLType68 := __VDLType6Builder.Array()
-	__VDLType69 := __VDLType6Builder.Named("v.io/v23/uniqueid.Id").AssignBase(__VDLType68)
-	__VDLType610 := vdl.ByteType
-	__VDLType68.AssignElem(__VDLType610)
-	__VDLType68.AssignLen(16)
-	__VDLType66.AppendField("Id", __VDLType69)
-	__VDLType611 := __VDLType6Builder.List()
-	__VDLType612 := __VDLType6Builder.Struct()
-	__VDLType613 := __VDLType6Builder.Named("v.io/v23/vtrace.SpanRecord").AssignBase(__VDLType612)
-	__VDLType612.AppendField("Id", __VDLType69)
-	__VDLType612.AppendField("Parent", __VDLType69)
-	__VDLType614 := vdl.StringType
-	__VDLType612.AppendField("Name", __VDLType614)
-	__VDLType615 := __VDLType6Builder.Struct()
-	__VDLType616 := __VDLType6Builder.Named("time.Time").AssignBase(__VDLType615)
-	__VDLType617 := vdl.Int64Type
-	__VDLType615.AppendField("Seconds", __VDLType617)
-	__VDLType618 := vdl.Int32Type
-	__VDLType615.AppendField("Nanos", __VDLType618)
-	__VDLType612.AppendField("Start", __VDLType616)
-	__VDLType612.AppendField("End", __VDLType616)
-	__VDLType619 := __VDLType6Builder.List()
-	__VDLType620 := __VDLType6Builder.Struct()
-	__VDLType621 := __VDLType6Builder.Named("v.io/v23/vtrace.Annotation").AssignBase(__VDLType620)
-	__VDLType620.AppendField("When", __VDLType616)
-	__VDLType620.AppendField("Message", __VDLType614)
-	__VDLType619.AssignElem(__VDLType621)
-	__VDLType612.AppendField("Annotations", __VDLType619)
-	__VDLType611.AssignElem(__VDLType613)
-	__VDLType66.AppendField("Spans", __VDLType611)
-	__VDLType62.AppendField("Trace", __VDLType67)
-	__VDLType61.AssignElem(__VDLType63)
-	__VDLType6Builder.Build()
-	__VDLType6v, err := __VDLType61.Built()
-	if err != nil {
-		panic(err)
-	}
-	return __VDLType6v
-}
-func init() {
-	__VDLType6 = __VDLType6_gen()
-}
-
-var __VDLType4 *vdl.Type
-
-func __VDLType4_gen() *vdl.Type {
-	__VDLType4Builder := vdl.TypeBuilder{}
-
-	__VDLType41 := __VDLType4Builder.Optional()
-	__VDLType42 := __VDLType4Builder.Struct()
-	__VDLType43 := __VDLType4Builder.Named("v.io/v23/vtrace.SpanRecord").AssignBase(__VDLType42)
-	__VDLType44 := __VDLType4Builder.Array()
-	__VDLType45 := __VDLType4Builder.Named("v.io/v23/uniqueid.Id").AssignBase(__VDLType44)
-	__VDLType46 := vdl.ByteType
-	__VDLType44.AssignElem(__VDLType46)
-	__VDLType44.AssignLen(16)
-	__VDLType42.AppendField("Id", __VDLType45)
-	__VDLType42.AppendField("Parent", __VDLType45)
-	__VDLType47 := vdl.StringType
-	__VDLType42.AppendField("Name", __VDLType47)
-	__VDLType48 := __VDLType4Builder.Struct()
-	__VDLType49 := __VDLType4Builder.Named("time.Time").AssignBase(__VDLType48)
-	__VDLType410 := vdl.Int64Type
-	__VDLType48.AppendField("Seconds", __VDLType410)
-	__VDLType411 := vdl.Int32Type
-	__VDLType48.AppendField("Nanos", __VDLType411)
-	__VDLType42.AppendField("Start", __VDLType49)
-	__VDLType42.AppendField("End", __VDLType49)
-	__VDLType412 := __VDLType4Builder.List()
-	__VDLType413 := __VDLType4Builder.Struct()
-	__VDLType414 := __VDLType4Builder.Named("v.io/v23/vtrace.Annotation").AssignBase(__VDLType413)
-	__VDLType413.AppendField("When", __VDLType49)
-	__VDLType413.AppendField("Message", __VDLType47)
-	__VDLType412.AssignElem(__VDLType414)
-	__VDLType42.AppendField("Annotations", __VDLType412)
-	__VDLType41.AssignElem(__VDLType43)
-	__VDLType4Builder.Build()
-	__VDLType4v, err := __VDLType41.Built()
-	if err != nil {
-		panic(err)
-	}
-	return __VDLType4v
-}
-func init() {
-	__VDLType4 = __VDLType4_gen()
-}
-
-var __VDLType0 *vdl.Type
-
-func __VDLType0_gen() *vdl.Type {
-	__VDLType0Builder := vdl.TypeBuilder{}
-
-	__VDLType01 := __VDLType0Builder.Optional()
-	__VDLType02 := __VDLType0Builder.Struct()
-	__VDLType03 := __VDLType0Builder.Named("v.io/v23/vtrace.TraceRecord").AssignBase(__VDLType02)
-	__VDLType04 := __VDLType0Builder.Array()
-	__VDLType05 := __VDLType0Builder.Named("v.io/v23/uniqueid.Id").AssignBase(__VDLType04)
-	__VDLType06 := vdl.ByteType
-	__VDLType04.AssignElem(__VDLType06)
-	__VDLType04.AssignLen(16)
-	__VDLType02.AppendField("Id", __VDLType05)
-	__VDLType07 := __VDLType0Builder.List()
-	__VDLType08 := __VDLType0Builder.Struct()
-	__VDLType09 := __VDLType0Builder.Named("v.io/v23/vtrace.SpanRecord").AssignBase(__VDLType08)
-	__VDLType08.AppendField("Id", __VDLType05)
-	__VDLType08.AppendField("Parent", __VDLType05)
-	__VDLType010 := vdl.StringType
-	__VDLType08.AppendField("Name", __VDLType010)
-	__VDLType011 := __VDLType0Builder.Struct()
-	__VDLType012 := __VDLType0Builder.Named("time.Time").AssignBase(__VDLType011)
-	__VDLType013 := vdl.Int64Type
-	__VDLType011.AppendField("Seconds", __VDLType013)
-	__VDLType014 := vdl.Int32Type
-	__VDLType011.AppendField("Nanos", __VDLType014)
-	__VDLType08.AppendField("Start", __VDLType012)
-	__VDLType08.AppendField("End", __VDLType012)
-	__VDLType015 := __VDLType0Builder.List()
-	__VDLType016 := __VDLType0Builder.Struct()
-	__VDLType017 := __VDLType0Builder.Named("v.io/v23/vtrace.Annotation").AssignBase(__VDLType016)
-	__VDLType016.AppendField("When", __VDLType012)
-	__VDLType016.AppendField("Message", __VDLType010)
-	__VDLType015.AssignElem(__VDLType017)
-	__VDLType08.AppendField("Annotations", __VDLType015)
-	__VDLType07.AssignElem(__VDLType09)
-	__VDLType02.AppendField("Spans", __VDLType07)
-	__VDLType01.AssignElem(__VDLType03)
-	__VDLType0Builder.Build()
-	__VDLType0v, err := __VDLType01.Built()
-	if err != nil {
-		panic(err)
-	}
-	return __VDLType0v
-}
-func init() {
-	__VDLType0 = __VDLType0_gen()
-}
-
-var __VDLType2 *vdl.Type
-
-func __VDLType2_gen() *vdl.Type {
-	__VDLType2Builder := vdl.TypeBuilder{}
-
-	__VDLType21 := __VDLType2Builder.List()
-	__VDLType22 := __VDLType2Builder.Struct()
-	__VDLType23 := __VDLType2Builder.Named("v.io/v23/vtrace.Annotation").AssignBase(__VDLType22)
-	__VDLType24 := __VDLType2Builder.Struct()
-	__VDLType25 := __VDLType2Builder.Named("time.Time").AssignBase(__VDLType24)
-	__VDLType26 := vdl.Int64Type
-	__VDLType24.AppendField("Seconds", __VDLType26)
-	__VDLType27 := vdl.Int32Type
-	__VDLType24.AppendField("Nanos", __VDLType27)
-	__VDLType22.AppendField("When", __VDLType25)
-	__VDLType28 := vdl.StringType
-	__VDLType22.AppendField("Message", __VDLType28)
-	__VDLType21.AssignElem(__VDLType23)
-	__VDLType2Builder.Build()
-	__VDLType2v, err := __VDLType21.Built()
-	if err != nil {
-		panic(err)
-	}
-	return __VDLType2v
-}
-func init() {
-	__VDLType2 = __VDLType2_gen()
-}
-
-var __VDLType1 *vdl.Type
-
-func __VDLType1_gen() *vdl.Type {
-	__VDLType1Builder := vdl.TypeBuilder{}
-
-	__VDLType11 := __VDLType1Builder.List()
-	__VDLType12 := __VDLType1Builder.Struct()
-	__VDLType13 := __VDLType1Builder.Named("v.io/v23/vtrace.SpanRecord").AssignBase(__VDLType12)
-	__VDLType14 := __VDLType1Builder.Array()
-	__VDLType15 := __VDLType1Builder.Named("v.io/v23/uniqueid.Id").AssignBase(__VDLType14)
-	__VDLType16 := vdl.ByteType
-	__VDLType14.AssignElem(__VDLType16)
-	__VDLType14.AssignLen(16)
-	__VDLType12.AppendField("Id", __VDLType15)
-	__VDLType12.AppendField("Parent", __VDLType15)
-	__VDLType17 := vdl.StringType
-	__VDLType12.AppendField("Name", __VDLType17)
-	__VDLType18 := __VDLType1Builder.Struct()
-	__VDLType19 := __VDLType1Builder.Named("time.Time").AssignBase(__VDLType18)
-	__VDLType110 := vdl.Int64Type
-	__VDLType18.AppendField("Seconds", __VDLType110)
-	__VDLType111 := vdl.Int32Type
-	__VDLType18.AppendField("Nanos", __VDLType111)
-	__VDLType12.AppendField("Start", __VDLType19)
-	__VDLType12.AppendField("End", __VDLType19)
-	__VDLType112 := __VDLType1Builder.List()
-	__VDLType113 := __VDLType1Builder.Struct()
-	__VDLType114 := __VDLType1Builder.Named("v.io/v23/vtrace.Annotation").AssignBase(__VDLType113)
-	__VDLType113.AppendField("When", __VDLType19)
-	__VDLType113.AppendField("Message", __VDLType17)
-	__VDLType112.AssignElem(__VDLType114)
-	__VDLType12.AppendField("Annotations", __VDLType112)
-	__VDLType11.AssignElem(__VDLType13)
-	__VDLType1Builder.Build()
-	__VDLType1v, err := __VDLType11.Built()
-	if err != nil {
-		panic(err)
-	}
-	return __VDLType1v
-}
-func init() {
-	__VDLType1 = __VDLType1_gen()
-}
-
-var __VDLType_time_Time *vdl.Type
-
-func __VDLType_time_Time_gen() *vdl.Type {
-	__VDLType_time_TimeBuilder := vdl.TypeBuilder{}
-
-	__VDLType_time_Time1 := __VDLType_time_TimeBuilder.Struct()
-	__VDLType_time_Time2 := __VDLType_time_TimeBuilder.Named("time.Time").AssignBase(__VDLType_time_Time1)
-	__VDLType_time_Time3 := vdl.Int64Type
-	__VDLType_time_Time1.AppendField("Seconds", __VDLType_time_Time3)
-	__VDLType_time_Time4 := vdl.Int32Type
-	__VDLType_time_Time1.AppendField("Nanos", __VDLType_time_Time4)
-	__VDLType_time_TimeBuilder.Build()
-	__VDLType_time_Timev, err := __VDLType_time_Time2.Built()
-	if err != nil {
-		panic(err)
-	}
-	return __VDLType_time_Timev
-}
-func init() {
-	__VDLType_time_Time = __VDLType_time_Time_gen()
-}
-
-var __VDLType_v_io_v23_uniqueid_Id *vdl.Type = vdl.TypeOf(uniqueid.Id{})
-var __VDLType_v_io_v23_vtrace_Annotation *vdl.Type
-
-func __VDLType_v_io_v23_vtrace_Annotation_gen() *vdl.Type {
-	__VDLType_v_io_v23_vtrace_AnnotationBuilder := vdl.TypeBuilder{}
-
-	__VDLType_v_io_v23_vtrace_Annotation1 := __VDLType_v_io_v23_vtrace_AnnotationBuilder.Struct()
-	__VDLType_v_io_v23_vtrace_Annotation2 := __VDLType_v_io_v23_vtrace_AnnotationBuilder.Named("v.io/v23/vtrace.Annotation").AssignBase(__VDLType_v_io_v23_vtrace_Annotation1)
-	__VDLType_v_io_v23_vtrace_Annotation3 := __VDLType_v_io_v23_vtrace_AnnotationBuilder.Struct()
-	__VDLType_v_io_v23_vtrace_Annotation4 := __VDLType_v_io_v23_vtrace_AnnotationBuilder.Named("time.Time").AssignBase(__VDLType_v_io_v23_vtrace_Annotation3)
-	__VDLType_v_io_v23_vtrace_Annotation5 := vdl.Int64Type
-	__VDLType_v_io_v23_vtrace_Annotation3.AppendField("Seconds", __VDLType_v_io_v23_vtrace_Annotation5)
-	__VDLType_v_io_v23_vtrace_Annotation6 := vdl.Int32Type
-	__VDLType_v_io_v23_vtrace_Annotation3.AppendField("Nanos", __VDLType_v_io_v23_vtrace_Annotation6)
-	__VDLType_v_io_v23_vtrace_Annotation1.AppendField("When", __VDLType_v_io_v23_vtrace_Annotation4)
-	__VDLType_v_io_v23_vtrace_Annotation7 := vdl.StringType
-	__VDLType_v_io_v23_vtrace_Annotation1.AppendField("Message", __VDLType_v_io_v23_vtrace_Annotation7)
-	__VDLType_v_io_v23_vtrace_AnnotationBuilder.Build()
-	__VDLType_v_io_v23_vtrace_Annotationv, err := __VDLType_v_io_v23_vtrace_Annotation2.Built()
-	if err != nil {
-		panic(err)
-	}
-	return __VDLType_v_io_v23_vtrace_Annotationv
-}
-func init() {
-	__VDLType_v_io_v23_vtrace_Annotation = __VDLType_v_io_v23_vtrace_Annotation_gen()
-}
-
-var __VDLType_v_io_v23_vtrace_Request *vdl.Type = vdl.TypeOf(Request{})
-var __VDLType_v_io_v23_vtrace_Response *vdl.Type
-
-func __VDLType_v_io_v23_vtrace_Response_gen() *vdl.Type {
-	__VDLType_v_io_v23_vtrace_ResponseBuilder := vdl.TypeBuilder{}
-
-	__VDLType_v_io_v23_vtrace_Response1 := __VDLType_v_io_v23_vtrace_ResponseBuilder.Struct()
-	__VDLType_v_io_v23_vtrace_Response2 := __VDLType_v_io_v23_vtrace_ResponseBuilder.Named("v.io/v23/vtrace.Response").AssignBase(__VDLType_v_io_v23_vtrace_Response1)
-	__VDLType_v_io_v23_vtrace_Response3 := vdl.Int32Type
-	__VDLType_v_io_v23_vtrace_Response4 := __VDLType_v_io_v23_vtrace_ResponseBuilder.Named("v.io/v23/vtrace.TraceFlags").AssignBase(__VDLType_v_io_v23_vtrace_Response3)
-	__VDLType_v_io_v23_vtrace_Response1.AppendField("Flags", __VDLType_v_io_v23_vtrace_Response4)
-	__VDLType_v_io_v23_vtrace_Response5 := __VDLType_v_io_v23_vtrace_ResponseBuilder.Struct()
-	__VDLType_v_io_v23_vtrace_Response6 := __VDLType_v_io_v23_vtrace_ResponseBuilder.Named("v.io/v23/vtrace.TraceRecord").AssignBase(__VDLType_v_io_v23_vtrace_Response5)
-	__VDLType_v_io_v23_vtrace_Response7 := __VDLType_v_io_v23_vtrace_ResponseBuilder.Array()
-	__VDLType_v_io_v23_vtrace_Response8 := __VDLType_v_io_v23_vtrace_ResponseBuilder.Named("v.io/v23/uniqueid.Id").AssignBase(__VDLType_v_io_v23_vtrace_Response7)
-	__VDLType_v_io_v23_vtrace_Response9 := vdl.ByteType
-	__VDLType_v_io_v23_vtrace_Response7.AssignElem(__VDLType_v_io_v23_vtrace_Response9)
-	__VDLType_v_io_v23_vtrace_Response7.AssignLen(16)
-	__VDLType_v_io_v23_vtrace_Response5.AppendField("Id", __VDLType_v_io_v23_vtrace_Response8)
-	__VDLType_v_io_v23_vtrace_Response10 := __VDLType_v_io_v23_vtrace_ResponseBuilder.List()
-	__VDLType_v_io_v23_vtrace_Response11 := __VDLType_v_io_v23_vtrace_ResponseBuilder.Struct()
-	__VDLType_v_io_v23_vtrace_Response12 := __VDLType_v_io_v23_vtrace_ResponseBuilder.Named("v.io/v23/vtrace.SpanRecord").AssignBase(__VDLType_v_io_v23_vtrace_Response11)
-	__VDLType_v_io_v23_vtrace_Response11.AppendField("Id", __VDLType_v_io_v23_vtrace_Response8)
-	__VDLType_v_io_v23_vtrace_Response11.AppendField("Parent", __VDLType_v_io_v23_vtrace_Response8)
-	__VDLType_v_io_v23_vtrace_Response13 := vdl.StringType
-	__VDLType_v_io_v23_vtrace_Response11.AppendField("Name", __VDLType_v_io_v23_vtrace_Response13)
-	__VDLType_v_io_v23_vtrace_Response14 := __VDLType_v_io_v23_vtrace_ResponseBuilder.Struct()
-	__VDLType_v_io_v23_vtrace_Response15 := __VDLType_v_io_v23_vtrace_ResponseBuilder.Named("time.Time").AssignBase(__VDLType_v_io_v23_vtrace_Response14)
-	__VDLType_v_io_v23_vtrace_Response16 := vdl.Int64Type
-	__VDLType_v_io_v23_vtrace_Response14.AppendField("Seconds", __VDLType_v_io_v23_vtrace_Response16)
-	__VDLType_v_io_v23_vtrace_Response17 := vdl.Int32Type
-	__VDLType_v_io_v23_vtrace_Response14.AppendField("Nanos", __VDLType_v_io_v23_vtrace_Response17)
-	__VDLType_v_io_v23_vtrace_Response11.AppendField("Start", __VDLType_v_io_v23_vtrace_Response15)
-	__VDLType_v_io_v23_vtrace_Response11.AppendField("End", __VDLType_v_io_v23_vtrace_Response15)
-	__VDLType_v_io_v23_vtrace_Response18 := __VDLType_v_io_v23_vtrace_ResponseBuilder.List()
-	__VDLType_v_io_v23_vtrace_Response19 := __VDLType_v_io_v23_vtrace_ResponseBuilder.Struct()
-	__VDLType_v_io_v23_vtrace_Response20 := __VDLType_v_io_v23_vtrace_ResponseBuilder.Named("v.io/v23/vtrace.Annotation").AssignBase(__VDLType_v_io_v23_vtrace_Response19)
-	__VDLType_v_io_v23_vtrace_Response19.AppendField("When", __VDLType_v_io_v23_vtrace_Response15)
-	__VDLType_v_io_v23_vtrace_Response19.AppendField("Message", __VDLType_v_io_v23_vtrace_Response13)
-	__VDLType_v_io_v23_vtrace_Response18.AssignElem(__VDLType_v_io_v23_vtrace_Response20)
-	__VDLType_v_io_v23_vtrace_Response11.AppendField("Annotations", __VDLType_v_io_v23_vtrace_Response18)
-	__VDLType_v_io_v23_vtrace_Response10.AssignElem(__VDLType_v_io_v23_vtrace_Response12)
-	__VDLType_v_io_v23_vtrace_Response5.AppendField("Spans", __VDLType_v_io_v23_vtrace_Response10)
-	__VDLType_v_io_v23_vtrace_Response1.AppendField("Trace", __VDLType_v_io_v23_vtrace_Response6)
-	__VDLType_v_io_v23_vtrace_ResponseBuilder.Build()
-	__VDLType_v_io_v23_vtrace_Responsev, err := __VDLType_v_io_v23_vtrace_Response2.Built()
-	if err != nil {
-		panic(err)
-	}
-	return __VDLType_v_io_v23_vtrace_Responsev
-}
-func init() {
-	__VDLType_v_io_v23_vtrace_Response = __VDLType_v_io_v23_vtrace_Response_gen()
-}
-
-var __VDLType_v_io_v23_vtrace_SpanRecord *vdl.Type
-
-func __VDLType_v_io_v23_vtrace_SpanRecord_gen() *vdl.Type {
-	__VDLType_v_io_v23_vtrace_SpanRecordBuilder := vdl.TypeBuilder{}
-
-	__VDLType_v_io_v23_vtrace_SpanRecord1 := __VDLType_v_io_v23_vtrace_SpanRecordBuilder.Struct()
-	__VDLType_v_io_v23_vtrace_SpanRecord2 := __VDLType_v_io_v23_vtrace_SpanRecordBuilder.Named("v.io/v23/vtrace.SpanRecord").AssignBase(__VDLType_v_io_v23_vtrace_SpanRecord1)
-	__VDLType_v_io_v23_vtrace_SpanRecord3 := __VDLType_v_io_v23_vtrace_SpanRecordBuilder.Array()
-	__VDLType_v_io_v23_vtrace_SpanRecord4 := __VDLType_v_io_v23_vtrace_SpanRecordBuilder.Named("v.io/v23/uniqueid.Id").AssignBase(__VDLType_v_io_v23_vtrace_SpanRecord3)
-	__VDLType_v_io_v23_vtrace_SpanRecord5 := vdl.ByteType
-	__VDLType_v_io_v23_vtrace_SpanRecord3.AssignElem(__VDLType_v_io_v23_vtrace_SpanRecord5)
-	__VDLType_v_io_v23_vtrace_SpanRecord3.AssignLen(16)
-	__VDLType_v_io_v23_vtrace_SpanRecord1.AppendField("Id", __VDLType_v_io_v23_vtrace_SpanRecord4)
-	__VDLType_v_io_v23_vtrace_SpanRecord1.AppendField("Parent", __VDLType_v_io_v23_vtrace_SpanRecord4)
-	__VDLType_v_io_v23_vtrace_SpanRecord6 := vdl.StringType
-	__VDLType_v_io_v23_vtrace_SpanRecord1.AppendField("Name", __VDLType_v_io_v23_vtrace_SpanRecord6)
-	__VDLType_v_io_v23_vtrace_SpanRecord7 := __VDLType_v_io_v23_vtrace_SpanRecordBuilder.Struct()
-	__VDLType_v_io_v23_vtrace_SpanRecord8 := __VDLType_v_io_v23_vtrace_SpanRecordBuilder.Named("time.Time").AssignBase(__VDLType_v_io_v23_vtrace_SpanRecord7)
-	__VDLType_v_io_v23_vtrace_SpanRecord9 := vdl.Int64Type
-	__VDLType_v_io_v23_vtrace_SpanRecord7.AppendField("Seconds", __VDLType_v_io_v23_vtrace_SpanRecord9)
-	__VDLType_v_io_v23_vtrace_SpanRecord10 := vdl.Int32Type
-	__VDLType_v_io_v23_vtrace_SpanRecord7.AppendField("Nanos", __VDLType_v_io_v23_vtrace_SpanRecord10)
-	__VDLType_v_io_v23_vtrace_SpanRecord1.AppendField("Start", __VDLType_v_io_v23_vtrace_SpanRecord8)
-	__VDLType_v_io_v23_vtrace_SpanRecord1.AppendField("End", __VDLType_v_io_v23_vtrace_SpanRecord8)
-	__VDLType_v_io_v23_vtrace_SpanRecord11 := __VDLType_v_io_v23_vtrace_SpanRecordBuilder.List()
-	__VDLType_v_io_v23_vtrace_SpanRecord12 := __VDLType_v_io_v23_vtrace_SpanRecordBuilder.Struct()
-	__VDLType_v_io_v23_vtrace_SpanRecord13 := __VDLType_v_io_v23_vtrace_SpanRecordBuilder.Named("v.io/v23/vtrace.Annotation").AssignBase(__VDLType_v_io_v23_vtrace_SpanRecord12)
-	__VDLType_v_io_v23_vtrace_SpanRecord12.AppendField("When", __VDLType_v_io_v23_vtrace_SpanRecord8)
-	__VDLType_v_io_v23_vtrace_SpanRecord12.AppendField("Message", __VDLType_v_io_v23_vtrace_SpanRecord6)
-	__VDLType_v_io_v23_vtrace_SpanRecord11.AssignElem(__VDLType_v_io_v23_vtrace_SpanRecord13)
-	__VDLType_v_io_v23_vtrace_SpanRecord1.AppendField("Annotations", __VDLType_v_io_v23_vtrace_SpanRecord11)
-	__VDLType_v_io_v23_vtrace_SpanRecordBuilder.Build()
-	__VDLType_v_io_v23_vtrace_SpanRecordv, err := __VDLType_v_io_v23_vtrace_SpanRecord2.Built()
-	if err != nil {
-		panic(err)
-	}
-	return __VDLType_v_io_v23_vtrace_SpanRecordv
-}
-func init() {
-	__VDLType_v_io_v23_vtrace_SpanRecord = __VDLType_v_io_v23_vtrace_SpanRecord_gen()
-}
-
-var __VDLType_v_io_v23_vtrace_TraceFlags *vdl.Type = vdl.TypeOf(TraceFlags(0))
-var __VDLType_v_io_v23_vtrace_TraceRecord *vdl.Type
-
-func __VDLType_v_io_v23_vtrace_TraceRecord_gen() *vdl.Type {
-	__VDLType_v_io_v23_vtrace_TraceRecordBuilder := vdl.TypeBuilder{}
-
-	__VDLType_v_io_v23_vtrace_TraceRecord1 := __VDLType_v_io_v23_vtrace_TraceRecordBuilder.Struct()
-	__VDLType_v_io_v23_vtrace_TraceRecord2 := __VDLType_v_io_v23_vtrace_TraceRecordBuilder.Named("v.io/v23/vtrace.TraceRecord").AssignBase(__VDLType_v_io_v23_vtrace_TraceRecord1)
-	__VDLType_v_io_v23_vtrace_TraceRecord3 := __VDLType_v_io_v23_vtrace_TraceRecordBuilder.Array()
-	__VDLType_v_io_v23_vtrace_TraceRecord4 := __VDLType_v_io_v23_vtrace_TraceRecordBuilder.Named("v.io/v23/uniqueid.Id").AssignBase(__VDLType_v_io_v23_vtrace_TraceRecord3)
-	__VDLType_v_io_v23_vtrace_TraceRecord5 := vdl.ByteType
-	__VDLType_v_io_v23_vtrace_TraceRecord3.AssignElem(__VDLType_v_io_v23_vtrace_TraceRecord5)
-	__VDLType_v_io_v23_vtrace_TraceRecord3.AssignLen(16)
-	__VDLType_v_io_v23_vtrace_TraceRecord1.AppendField("Id", __VDLType_v_io_v23_vtrace_TraceRecord4)
-	__VDLType_v_io_v23_vtrace_TraceRecord6 := __VDLType_v_io_v23_vtrace_TraceRecordBuilder.List()
-	__VDLType_v_io_v23_vtrace_TraceRecord7 := __VDLType_v_io_v23_vtrace_TraceRecordBuilder.Struct()
-	__VDLType_v_io_v23_vtrace_TraceRecord8 := __VDLType_v_io_v23_vtrace_TraceRecordBuilder.Named("v.io/v23/vtrace.SpanRecord").AssignBase(__VDLType_v_io_v23_vtrace_TraceRecord7)
-	__VDLType_v_io_v23_vtrace_TraceRecord7.AppendField("Id", __VDLType_v_io_v23_vtrace_TraceRecord4)
-	__VDLType_v_io_v23_vtrace_TraceRecord7.AppendField("Parent", __VDLType_v_io_v23_vtrace_TraceRecord4)
-	__VDLType_v_io_v23_vtrace_TraceRecord9 := vdl.StringType
-	__VDLType_v_io_v23_vtrace_TraceRecord7.AppendField("Name", __VDLType_v_io_v23_vtrace_TraceRecord9)
-	__VDLType_v_io_v23_vtrace_TraceRecord10 := __VDLType_v_io_v23_vtrace_TraceRecordBuilder.Struct()
-	__VDLType_v_io_v23_vtrace_TraceRecord11 := __VDLType_v_io_v23_vtrace_TraceRecordBuilder.Named("time.Time").AssignBase(__VDLType_v_io_v23_vtrace_TraceRecord10)
-	__VDLType_v_io_v23_vtrace_TraceRecord12 := vdl.Int64Type
-	__VDLType_v_io_v23_vtrace_TraceRecord10.AppendField("Seconds", __VDLType_v_io_v23_vtrace_TraceRecord12)
-	__VDLType_v_io_v23_vtrace_TraceRecord13 := vdl.Int32Type
-	__VDLType_v_io_v23_vtrace_TraceRecord10.AppendField("Nanos", __VDLType_v_io_v23_vtrace_TraceRecord13)
-	__VDLType_v_io_v23_vtrace_TraceRecord7.AppendField("Start", __VDLType_v_io_v23_vtrace_TraceRecord11)
-	__VDLType_v_io_v23_vtrace_TraceRecord7.AppendField("End", __VDLType_v_io_v23_vtrace_TraceRecord11)
-	__VDLType_v_io_v23_vtrace_TraceRecord14 := __VDLType_v_io_v23_vtrace_TraceRecordBuilder.List()
-	__VDLType_v_io_v23_vtrace_TraceRecord15 := __VDLType_v_io_v23_vtrace_TraceRecordBuilder.Struct()
-	__VDLType_v_io_v23_vtrace_TraceRecord16 := __VDLType_v_io_v23_vtrace_TraceRecordBuilder.Named("v.io/v23/vtrace.Annotation").AssignBase(__VDLType_v_io_v23_vtrace_TraceRecord15)
-	__VDLType_v_io_v23_vtrace_TraceRecord15.AppendField("When", __VDLType_v_io_v23_vtrace_TraceRecord11)
-	__VDLType_v_io_v23_vtrace_TraceRecord15.AppendField("Message", __VDLType_v_io_v23_vtrace_TraceRecord9)
-	__VDLType_v_io_v23_vtrace_TraceRecord14.AssignElem(__VDLType_v_io_v23_vtrace_TraceRecord16)
-	__VDLType_v_io_v23_vtrace_TraceRecord7.AppendField("Annotations", __VDLType_v_io_v23_vtrace_TraceRecord14)
-	__VDLType_v_io_v23_vtrace_TraceRecord6.AssignElem(__VDLType_v_io_v23_vtrace_TraceRecord8)
-	__VDLType_v_io_v23_vtrace_TraceRecord1.AppendField("Spans", __VDLType_v_io_v23_vtrace_TraceRecord6)
-	__VDLType_v_io_v23_vtrace_TraceRecordBuilder.Build()
-	__VDLType_v_io_v23_vtrace_TraceRecordv, err := __VDLType_v_io_v23_vtrace_TraceRecord2.Built()
-	if err != nil {
-		panic(err)
-	}
-	return __VDLType_v_io_v23_vtrace_TraceRecordv
-}
-func init() {
-	__VDLType_v_io_v23_vtrace_TraceRecord = __VDLType_v_io_v23_vtrace_TraceRecord_gen()
-}
-func __VDLEnsureNativeBuilt() {
-	if __VDLType3 == nil {
-		__VDLType3 = __VDLType3_gen()
-	}
-	if __VDLType6 == nil {
-		__VDLType6 = __VDLType6_gen()
-	}
-	if __VDLType4 == nil {
-		__VDLType4 = __VDLType4_gen()
-	}
-	if __VDLType0 == nil {
-		__VDLType0 = __VDLType0_gen()
-	}
-	if __VDLType2 == nil {
-		__VDLType2 = __VDLType2_gen()
-	}
-	if __VDLType1 == nil {
-		__VDLType1 = __VDLType1_gen()
-	}
-	if __VDLType_time_Time == nil {
-		__VDLType_time_Time = __VDLType_time_Time_gen()
-	}
-	if __VDLType_v_io_v23_vtrace_Annotation == nil {
-		__VDLType_v_io_v23_vtrace_Annotation = __VDLType_v_io_v23_vtrace_Annotation_gen()
-	}
-	if __VDLType_v_io_v23_vtrace_Response == nil {
-		__VDLType_v_io_v23_vtrace_Response = __VDLType_v_io_v23_vtrace_Response_gen()
-	}
-	if __VDLType_v_io_v23_vtrace_SpanRecord == nil {
-		__VDLType_v_io_v23_vtrace_SpanRecord = __VDLType_v_io_v23_vtrace_SpanRecord_gen()
-	}
-	if __VDLType_v_io_v23_vtrace_TraceRecord == nil {
-		__VDLType_v_io_v23_vtrace_TraceRecord = __VDLType_v_io_v23_vtrace_TraceRecord_gen()
-	}
-}
-
-const Empty = TraceFlags(0)
-
-const CollectInMemory = TraceFlags(1)

@@ -13,9 +13,10 @@ import (
 	"v.io/v23/verror"
 )
 
-func __VDLEnsureNativeBuilt() {
-}
+var _ = __VDLInit() // Must be first; see __VDLInit comments for details.
 
+//////////////////////////////////////////////////
+// Error definitions
 var (
 	ErrAuth          = verror.Register("v.io/v23/flow.Auth", verror.NoRetry, "{1:}{2:} {:3}")
 	ErrNotTrusted    = verror.Register("v.io/v23/flow.NotTrusted", verror.NoRetry, "{1:}{2:} {:3}")
@@ -27,18 +28,6 @@ var (
 	ErrBadState      = verror.Register("v.io/v23/flow.BadState", verror.NoRetry, "{1:}{2:} {:3}")
 	ErrAborted       = verror.Register("v.io/v23/flow.Aborted", verror.NoRetry, "{1:}{2:} {:3}")
 )
-
-func init() {
-	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrAuth.ID), "{1:}{2:} {:3}")
-	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrNotTrusted.ID), "{1:}{2:} {:3}")
-	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrNetwork.ID), "{1:}{2:} {:3}")
-	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrDialFailed.ID), "{1:}{2:} {:3}")
-	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrResolveFailed.ID), "{1:}{2:} {:3}")
-	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrProxy.ID), "{1:}{2:} {:3}")
-	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrBadArg.ID), "{1:}{2:} {:3}")
-	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrBadState.ID), "{1:}{2:} {:3}")
-	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrAborted.ID), "{1:}{2:} {:3}")
-}
 
 // NewErrAuth returns an error with the ErrAuth ID.
 func NewErrAuth(ctx *context.T, err error) error {
@@ -83,4 +72,38 @@ func NewErrBadState(ctx *context.T, err error) error {
 // NewErrAborted returns an error with the ErrAborted ID.
 func NewErrAborted(ctx *context.T, err error) error {
 	return verror.New(ErrAborted, ctx, err)
+}
+
+var __VDLInitCalled bool
+
+// __VDLInit performs vdl initialization.  It is safe to call multiple times.
+// If you have an init ordering issue, just insert the following line verbatim
+// into your source files in this package, right after the "package foo" clause:
+//
+//    var _ = __VDLInit()
+//
+// The purpose of this function is to ensure that vdl initialization occurs in
+// the right order, and very early in the init sequence.  In particular, vdl
+// registration and package variable initialization needs to occur before
+// functions like vdl.TypeOf will work properly.
+//
+// This function returns a dummy value, so that it can be used to initialize the
+// first var in the file, to take advantage of Go's defined init order.
+func __VDLInit() struct{} {
+	if __VDLInitCalled {
+		return struct{}{}
+	}
+
+	// Set error format strings.
+	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrAuth.ID), "{1:}{2:} {:3}")
+	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrNotTrusted.ID), "{1:}{2:} {:3}")
+	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrNetwork.ID), "{1:}{2:} {:3}")
+	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrDialFailed.ID), "{1:}{2:} {:3}")
+	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrResolveFailed.ID), "{1:}{2:} {:3}")
+	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrProxy.ID), "{1:}{2:} {:3}")
+	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrBadArg.ID), "{1:}{2:} {:3}")
+	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrBadState.ID), "{1:}{2:} {:3}")
+	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrAborted.ID), "{1:}{2:} {:3}")
+
+	return struct{}{}
 }

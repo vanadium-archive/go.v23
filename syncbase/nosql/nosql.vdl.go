@@ -16,6 +16,820 @@ import (
 	time_2 "v.io/v23/vdlroot/time"
 )
 
+var _ = __VDLInit() // Must be first; see __VDLInit comments for details.
+
+//////////////////////////////////////////////////
+// Type definitions
+
+// Value contains a specific version of data for the row under conflict along
+// with the write timestamp and hints associated with the version.
+// State defines whether the value is empty or not. It can be empty for
+// reasons like Deleted or Unknown.
+// WriteTs is the write timestamp for this value.
+type Value struct {
+	State   nosql.ValueState
+	Val     []byte
+	WriteTs time.Time
+	// TODO(jlodhia): Since field Selection cannot be package private in VDL,
+	// review the ConflictResolution API to see if we should keep this field
+	// or not.
+	Selection nosql.ValueSelection
+}
+
+func (Value) __VDLReflect(struct {
+	Name string `vdl:"v.io/v23/syncbase/nosql.Value"`
+}) {
+}
+
+func (m *Value) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
+	fieldsTarget1, err := t.StartFields(tt)
+	if err != nil {
+		return err
+	}
+
+	keyTarget2, fieldTarget3, err := fieldsTarget1.StartField("State")
+	if err != vdl.ErrFieldNoExist && err != nil {
+		return err
+	}
+	if err != vdl.ErrFieldNoExist {
+
+		if err := m.State.FillVDLTarget(fieldTarget3, tt.NonOptional().Field(0).Type); err != nil {
+			return err
+		}
+		if err := fieldsTarget1.FinishField(keyTarget2, fieldTarget3); err != nil {
+			return err
+		}
+	}
+	keyTarget4, fieldTarget5, err := fieldsTarget1.StartField("Val")
+	if err != vdl.ErrFieldNoExist && err != nil {
+		return err
+	}
+	if err != vdl.ErrFieldNoExist {
+
+		if err := fieldTarget5.FromBytes([]byte(m.Val), tt.NonOptional().Field(1).Type); err != nil {
+			return err
+		}
+		if err := fieldsTarget1.FinishField(keyTarget4, fieldTarget5); err != nil {
+			return err
+		}
+	}
+	var wireValue6 time_2.Time
+	if err := time_2.TimeFromNative(&wireValue6, m.WriteTs); err != nil {
+		return err
+	}
+
+	keyTarget7, fieldTarget8, err := fieldsTarget1.StartField("WriteTs")
+	if err != vdl.ErrFieldNoExist && err != nil {
+		return err
+	}
+	if err != vdl.ErrFieldNoExist {
+
+		if err := wireValue6.FillVDLTarget(fieldTarget8, tt.NonOptional().Field(2).Type); err != nil {
+			return err
+		}
+		if err := fieldsTarget1.FinishField(keyTarget7, fieldTarget8); err != nil {
+			return err
+		}
+	}
+	keyTarget9, fieldTarget10, err := fieldsTarget1.StartField("Selection")
+	if err != vdl.ErrFieldNoExist && err != nil {
+		return err
+	}
+	if err != vdl.ErrFieldNoExist {
+
+		if err := m.Selection.FillVDLTarget(fieldTarget10, tt.NonOptional().Field(3).Type); err != nil {
+			return err
+		}
+		if err := fieldsTarget1.FinishField(keyTarget9, fieldTarget10); err != nil {
+			return err
+		}
+	}
+	if err := t.FinishFields(fieldsTarget1); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (m *Value) MakeVDLTarget() vdl.Target {
+	return &ValueTarget{Value: m}
+}
+
+type ValueTarget struct {
+	Value           *Value
+	stateTarget     nosql.ValueStateTarget
+	valTarget       vdl.BytesTarget
+	writeTsTarget   time_2.TimeTarget
+	selectionTarget nosql.ValueSelectionTarget
+	vdl.TargetBase
+	vdl.FieldsTargetBase
+}
+
+func (t *ValueTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
+
+	if ttWant := vdl.TypeOf((*Value)(nil)).Elem(); !vdl.Compatible(tt, ttWant) {
+		return nil, fmt.Errorf("type %v incompatible with %v", tt, ttWant)
+	}
+	return t, nil
+}
+func (t *ValueTarget) StartField(name string) (key, field vdl.Target, _ error) {
+	switch name {
+	case "State":
+		t.stateTarget.Value = &t.Value.State
+		target, err := &t.stateTarget, error(nil)
+		return nil, target, err
+	case "Val":
+		t.valTarget.Value = &t.Value.Val
+		target, err := &t.valTarget, error(nil)
+		return nil, target, err
+	case "WriteTs":
+		t.writeTsTarget.Value = &t.Value.WriteTs
+		target, err := &t.writeTsTarget, error(nil)
+		return nil, target, err
+	case "Selection":
+		t.selectionTarget.Value = &t.Value.Selection
+		target, err := &t.selectionTarget, error(nil)
+		return nil, target, err
+	default:
+		return nil, nil, fmt.Errorf("field %s not in struct v.io/v23/syncbase/nosql.Value", name)
+	}
+}
+func (t *ValueTarget) FinishField(_, _ vdl.Target) error {
+	return nil
+}
+func (t *ValueTarget) FinishFields(_ vdl.FieldsTarget) error {
+
+	return nil
+}
+
+// ConflictRow represents a row under conflict.
+// Key is the key for the row.
+// LocalValue is the value present in the local db.
+// RemoteValue is the value received via sync.
+// AncestorValue is the value for the key which is the lowest common
+// ancestor of the two values represented by LocalValue and RemoteValue.
+// AncestorValue's state is NoExists if the ConflictRow is a part of the read set.
+// BatchIds is a list of ids of all the batches that this row belongs to.
+type ConflictRow struct {
+	Key           string
+	LocalValue    Value
+	RemoteValue   Value
+	AncestorValue Value
+	BatchIds      []uint64
+}
+
+func (ConflictRow) __VDLReflect(struct {
+	Name string `vdl:"v.io/v23/syncbase/nosql.ConflictRow"`
+}) {
+}
+
+func (m *ConflictRow) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
+	fieldsTarget1, err := t.StartFields(tt)
+	if err != nil {
+		return err
+	}
+
+	keyTarget2, fieldTarget3, err := fieldsTarget1.StartField("Key")
+	if err != vdl.ErrFieldNoExist && err != nil {
+		return err
+	}
+	if err != vdl.ErrFieldNoExist {
+		if err := fieldTarget3.FromString(string(m.Key), tt.NonOptional().Field(0).Type); err != nil {
+			return err
+		}
+		if err := fieldsTarget1.FinishField(keyTarget2, fieldTarget3); err != nil {
+			return err
+		}
+	}
+	keyTarget4, fieldTarget5, err := fieldsTarget1.StartField("LocalValue")
+	if err != vdl.ErrFieldNoExist && err != nil {
+		return err
+	}
+	if err != vdl.ErrFieldNoExist {
+
+		if err := m.LocalValue.FillVDLTarget(fieldTarget5, tt.NonOptional().Field(1).Type); err != nil {
+			return err
+		}
+		if err := fieldsTarget1.FinishField(keyTarget4, fieldTarget5); err != nil {
+			return err
+		}
+	}
+	keyTarget6, fieldTarget7, err := fieldsTarget1.StartField("RemoteValue")
+	if err != vdl.ErrFieldNoExist && err != nil {
+		return err
+	}
+	if err != vdl.ErrFieldNoExist {
+
+		if err := m.RemoteValue.FillVDLTarget(fieldTarget7, tt.NonOptional().Field(2).Type); err != nil {
+			return err
+		}
+		if err := fieldsTarget1.FinishField(keyTarget6, fieldTarget7); err != nil {
+			return err
+		}
+	}
+	keyTarget8, fieldTarget9, err := fieldsTarget1.StartField("AncestorValue")
+	if err != vdl.ErrFieldNoExist && err != nil {
+		return err
+	}
+	if err != vdl.ErrFieldNoExist {
+
+		if err := m.AncestorValue.FillVDLTarget(fieldTarget9, tt.NonOptional().Field(3).Type); err != nil {
+			return err
+		}
+		if err := fieldsTarget1.FinishField(keyTarget8, fieldTarget9); err != nil {
+			return err
+		}
+	}
+	keyTarget10, fieldTarget11, err := fieldsTarget1.StartField("BatchIds")
+	if err != vdl.ErrFieldNoExist && err != nil {
+		return err
+	}
+	if err != vdl.ErrFieldNoExist {
+
+		listTarget12, err := fieldTarget11.StartList(tt.NonOptional().Field(4).Type, len(m.BatchIds))
+		if err != nil {
+			return err
+		}
+		for i, elem14 := range m.BatchIds {
+			elemTarget13, err := listTarget12.StartElem(i)
+			if err != nil {
+				return err
+			}
+			if err := elemTarget13.FromUint(uint64(elem14), tt.NonOptional().Field(4).Type.Elem()); err != nil {
+				return err
+			}
+			if err := listTarget12.FinishElem(elemTarget13); err != nil {
+				return err
+			}
+		}
+		if err := fieldTarget11.FinishList(listTarget12); err != nil {
+			return err
+		}
+		if err := fieldsTarget1.FinishField(keyTarget10, fieldTarget11); err != nil {
+			return err
+		}
+	}
+	if err := t.FinishFields(fieldsTarget1); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (m *ConflictRow) MakeVDLTarget() vdl.Target {
+	return &ConflictRowTarget{Value: m}
+}
+
+type ConflictRowTarget struct {
+	Value               *ConflictRow
+	keyTarget           vdl.StringTarget
+	localValueTarget    ValueTarget
+	remoteValueTarget   ValueTarget
+	ancestorValueTarget ValueTarget
+	batchIdsTarget      unnamed_5b5d75696e743634Target
+	vdl.TargetBase
+	vdl.FieldsTargetBase
+}
+
+func (t *ConflictRowTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
+
+	if ttWant := vdl.TypeOf((*ConflictRow)(nil)).Elem(); !vdl.Compatible(tt, ttWant) {
+		return nil, fmt.Errorf("type %v incompatible with %v", tt, ttWant)
+	}
+	return t, nil
+}
+func (t *ConflictRowTarget) StartField(name string) (key, field vdl.Target, _ error) {
+	switch name {
+	case "Key":
+		t.keyTarget.Value = &t.Value.Key
+		target, err := &t.keyTarget, error(nil)
+		return nil, target, err
+	case "LocalValue":
+		t.localValueTarget.Value = &t.Value.LocalValue
+		target, err := &t.localValueTarget, error(nil)
+		return nil, target, err
+	case "RemoteValue":
+		t.remoteValueTarget.Value = &t.Value.RemoteValue
+		target, err := &t.remoteValueTarget, error(nil)
+		return nil, target, err
+	case "AncestorValue":
+		t.ancestorValueTarget.Value = &t.Value.AncestorValue
+		target, err := &t.ancestorValueTarget, error(nil)
+		return nil, target, err
+	case "BatchIds":
+		t.batchIdsTarget.Value = &t.Value.BatchIds
+		target, err := &t.batchIdsTarget, error(nil)
+		return nil, target, err
+	default:
+		return nil, nil, fmt.Errorf("field %s not in struct v.io/v23/syncbase/nosql.ConflictRow", name)
+	}
+}
+func (t *ConflictRowTarget) FinishField(_, _ vdl.Target) error {
+	return nil
+}
+func (t *ConflictRowTarget) FinishFields(_ vdl.FieldsTarget) error {
+
+	return nil
+}
+
+// []uint64
+type unnamed_5b5d75696e743634Target struct {
+	Value      *[]uint64
+	elemTarget vdl.Uint64Target
+	vdl.TargetBase
+	vdl.ListTargetBase
+}
+
+func (t *unnamed_5b5d75696e743634Target) StartList(tt *vdl.Type, len int) (vdl.ListTarget, error) {
+
+	if ttWant := vdl.TypeOf((*[]uint64)(nil)); !vdl.Compatible(tt, ttWant) {
+		return nil, fmt.Errorf("type %v incompatible with %v", tt, ttWant)
+	}
+	if cap(*t.Value) < len {
+		*t.Value = make([]uint64, len)
+	} else {
+		*t.Value = (*t.Value)[:len]
+	}
+	return t, nil
+}
+func (t *unnamed_5b5d75696e743634Target) StartElem(index int) (elem vdl.Target, _ error) {
+	t.elemTarget.Value = &(*t.Value)[index]
+	target, err := &t.elemTarget, error(nil)
+	return target, err
+}
+func (t *unnamed_5b5d75696e743634Target) FinishElem(elem vdl.Target) error {
+	return nil
+}
+func (t *unnamed_5b5d75696e743634Target) FinishList(elem vdl.ListTarget) error {
+
+	return nil
+}
+
+// ConflictRowSet contains a set of rows under conflict. It provides two different
+// ways to access the same set.
+// ByKey is a map of ConflictRows keyed by the row key.
+// ByBatch is a map of []ConflictRows keyed by batch id. This map lets the client
+// access all ConflictRows within this set that contain a given hint.
+type ConflictRowSet struct {
+	ByKey   map[string]ConflictRow
+	ByBatch map[uint64][]ConflictRow
+}
+
+func (ConflictRowSet) __VDLReflect(struct {
+	Name string `vdl:"v.io/v23/syncbase/nosql.ConflictRowSet"`
+}) {
+}
+
+func (m *ConflictRowSet) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
+	fieldsTarget1, err := t.StartFields(tt)
+	if err != nil {
+		return err
+	}
+
+	keyTarget2, fieldTarget3, err := fieldsTarget1.StartField("ByKey")
+	if err != vdl.ErrFieldNoExist && err != nil {
+		return err
+	}
+	if err != vdl.ErrFieldNoExist {
+
+		mapTarget4, err := fieldTarget3.StartMap(tt.NonOptional().Field(0).Type, len(m.ByKey))
+		if err != nil {
+			return err
+		}
+		for key6, value8 := range m.ByKey {
+			keyTarget5, err := mapTarget4.StartKey()
+			if err != nil {
+				return err
+			}
+			if err := keyTarget5.FromString(string(key6), tt.NonOptional().Field(0).Type.Key()); err != nil {
+				return err
+			}
+			valueTarget7, err := mapTarget4.FinishKeyStartField(keyTarget5)
+			if err != nil {
+				return err
+			}
+
+			if err := value8.FillVDLTarget(valueTarget7, tt.NonOptional().Field(0).Type.Elem()); err != nil {
+				return err
+			}
+			if err := mapTarget4.FinishField(keyTarget5, valueTarget7); err != nil {
+				return err
+			}
+		}
+		if err := fieldTarget3.FinishMap(mapTarget4); err != nil {
+			return err
+		}
+		if err := fieldsTarget1.FinishField(keyTarget2, fieldTarget3); err != nil {
+			return err
+		}
+	}
+	keyTarget9, fieldTarget10, err := fieldsTarget1.StartField("ByBatch")
+	if err != vdl.ErrFieldNoExist && err != nil {
+		return err
+	}
+	if err != vdl.ErrFieldNoExist {
+
+		mapTarget11, err := fieldTarget10.StartMap(tt.NonOptional().Field(1).Type, len(m.ByBatch))
+		if err != nil {
+			return err
+		}
+		for key13, value15 := range m.ByBatch {
+			keyTarget12, err := mapTarget11.StartKey()
+			if err != nil {
+				return err
+			}
+			if err := keyTarget12.FromUint(uint64(key13), tt.NonOptional().Field(1).Type.Key()); err != nil {
+				return err
+			}
+			valueTarget14, err := mapTarget11.FinishKeyStartField(keyTarget12)
+			if err != nil {
+				return err
+			}
+
+			listTarget16, err := valueTarget14.StartList(tt.NonOptional().Field(1).Type.Elem(), len(value15))
+			if err != nil {
+				return err
+			}
+			for i, elem18 := range value15 {
+				elemTarget17, err := listTarget16.StartElem(i)
+				if err != nil {
+					return err
+				}
+
+				if err := elem18.FillVDLTarget(elemTarget17, tt.NonOptional().Field(1).Type.Elem().Elem()); err != nil {
+					return err
+				}
+				if err := listTarget16.FinishElem(elemTarget17); err != nil {
+					return err
+				}
+			}
+			if err := valueTarget14.FinishList(listTarget16); err != nil {
+				return err
+			}
+			if err := mapTarget11.FinishField(keyTarget12, valueTarget14); err != nil {
+				return err
+			}
+		}
+		if err := fieldTarget10.FinishMap(mapTarget11); err != nil {
+			return err
+		}
+		if err := fieldsTarget1.FinishField(keyTarget9, fieldTarget10); err != nil {
+			return err
+		}
+	}
+	if err := t.FinishFields(fieldsTarget1); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (m *ConflictRowSet) MakeVDLTarget() vdl.Target {
+	return &ConflictRowSetTarget{Value: m}
+}
+
+type ConflictRowSetTarget struct {
+	Value         *ConflictRowSet
+	byKeyTarget   unnamed_6d61705b737472696e675d762e696f2f7632332f73796e63626173652f6e6f73716c2e436f6e666c696374526f77207374727563747b4b657920737472696e673b4c6f63616c56616c756520762e696f2f7632332f73796e63626173652f6e6f73716c2e56616c7565207374727563747b537461746520762e696f2f7632332f73657276696365732f73796e63626173652f6e6f73716c2e56616c7565537461746520656e756d7b4578697374733b4e6f4578697374733b44656c657465643b556e6b6e6f776e7d3b56616c205b5d627974653b577269746554732074696d652e54696d65207374727563747b5365636f6e647320696e7436343b4e616e6f7320696e7433327d3b53656c656374696f6e20762e696f2f7632332f73657276696365732f73796e63626173652f6e6f73716c2e56616c756553656c656374696f6e20656e756d7b4c6f63616c3b52656d6f74653b4f746865727d7d3b52656d6f746556616c756520762e696f2f7632332f73796e63626173652f6e6f73716c2e56616c75653b416e636573746f7256616c756520762e696f2f7632332f73796e63626173652f6e6f73716c2e56616c75653b4261746368496473205b5d75696e7436347dTarget
+	byBatchTarget unnamed_6d61705b75696e7436345d5b5d762e696f2f7632332f73796e63626173652f6e6f73716c2e436f6e666c696374526f77207374727563747b4b657920737472696e673b4c6f63616c56616c756520762e696f2f7632332f73796e63626173652f6e6f73716c2e56616c7565207374727563747b537461746520762e696f2f7632332f73657276696365732f73796e63626173652f6e6f73716c2e56616c7565537461746520656e756d7b4578697374733b4e6f4578697374733b44656c657465643b556e6b6e6f776e7d3b56616c205b5d627974653b577269746554732074696d652e54696d65207374727563747b5365636f6e647320696e7436343b4e616e6f7320696e7433327d3b53656c656374696f6e20762e696f2f7632332f73657276696365732f73796e63626173652f6e6f73716c2e56616c756553656c656374696f6e20656e756d7b4c6f63616c3b52656d6f74653b4f746865727d7d3b52656d6f746556616c756520762e696f2f7632332f73796e63626173652f6e6f73716c2e56616c75653b416e636573746f7256616c756520762e696f2f7632332f73796e63626173652f6e6f73716c2e56616c75653b4261746368496473205b5d75696e7436347dTarget
+	vdl.TargetBase
+	vdl.FieldsTargetBase
+}
+
+func (t *ConflictRowSetTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
+
+	if ttWant := vdl.TypeOf((*ConflictRowSet)(nil)).Elem(); !vdl.Compatible(tt, ttWant) {
+		return nil, fmt.Errorf("type %v incompatible with %v", tt, ttWant)
+	}
+	return t, nil
+}
+func (t *ConflictRowSetTarget) StartField(name string) (key, field vdl.Target, _ error) {
+	switch name {
+	case "ByKey":
+		t.byKeyTarget.Value = &t.Value.ByKey
+		target, err := &t.byKeyTarget, error(nil)
+		return nil, target, err
+	case "ByBatch":
+		t.byBatchTarget.Value = &t.Value.ByBatch
+		target, err := &t.byBatchTarget, error(nil)
+		return nil, target, err
+	default:
+		return nil, nil, fmt.Errorf("field %s not in struct v.io/v23/syncbase/nosql.ConflictRowSet", name)
+	}
+}
+func (t *ConflictRowSetTarget) FinishField(_, _ vdl.Target) error {
+	return nil
+}
+func (t *ConflictRowSetTarget) FinishFields(_ vdl.FieldsTarget) error {
+
+	return nil
+}
+
+// map[string]ConflictRow
+type unnamed_6d61705b737472696e675d762e696f2f7632332f73796e63626173652f6e6f73716c2e436f6e666c696374526f77207374727563747b4b657920737472696e673b4c6f63616c56616c756520762e696f2f7632332f73796e63626173652f6e6f73716c2e56616c7565207374727563747b537461746520762e696f2f7632332f73657276696365732f73796e63626173652f6e6f73716c2e56616c7565537461746520656e756d7b4578697374733b4e6f4578697374733b44656c657465643b556e6b6e6f776e7d3b56616c205b5d627974653b577269746554732074696d652e54696d65207374727563747b5365636f6e647320696e7436343b4e616e6f7320696e7433327d3b53656c656374696f6e20762e696f2f7632332f73657276696365732f73796e63626173652f6e6f73716c2e56616c756553656c656374696f6e20656e756d7b4c6f63616c3b52656d6f74653b4f746865727d7d3b52656d6f746556616c756520762e696f2f7632332f73796e63626173652f6e6f73716c2e56616c75653b416e636573746f7256616c756520762e696f2f7632332f73796e63626173652f6e6f73716c2e56616c75653b4261746368496473205b5d75696e7436347dTarget struct {
+	Value      *map[string]ConflictRow
+	currKey    string
+	currElem   ConflictRow
+	keyTarget  vdl.StringTarget
+	elemTarget ConflictRowTarget
+	vdl.TargetBase
+	vdl.MapTargetBase
+}
+
+func (t *unnamed_6d61705b737472696e675d762e696f2f7632332f73796e63626173652f6e6f73716c2e436f6e666c696374526f77207374727563747b4b657920737472696e673b4c6f63616c56616c756520762e696f2f7632332f73796e63626173652f6e6f73716c2e56616c7565207374727563747b537461746520762e696f2f7632332f73657276696365732f73796e63626173652f6e6f73716c2e56616c7565537461746520656e756d7b4578697374733b4e6f4578697374733b44656c657465643b556e6b6e6f776e7d3b56616c205b5d627974653b577269746554732074696d652e54696d65207374727563747b5365636f6e647320696e7436343b4e616e6f7320696e7433327d3b53656c656374696f6e20762e696f2f7632332f73657276696365732f73796e63626173652f6e6f73716c2e56616c756553656c656374696f6e20656e756d7b4c6f63616c3b52656d6f74653b4f746865727d7d3b52656d6f746556616c756520762e696f2f7632332f73796e63626173652f6e6f73716c2e56616c75653b416e636573746f7256616c756520762e696f2f7632332f73796e63626173652f6e6f73716c2e56616c75653b4261746368496473205b5d75696e7436347dTarget) StartMap(tt *vdl.Type, len int) (vdl.MapTarget, error) {
+
+	if ttWant := vdl.TypeOf((*map[string]ConflictRow)(nil)); !vdl.Compatible(tt, ttWant) {
+		return nil, fmt.Errorf("type %v incompatible with %v", tt, ttWant)
+	}
+	*t.Value = make(map[string]ConflictRow)
+	return t, nil
+}
+func (t *unnamed_6d61705b737472696e675d762e696f2f7632332f73796e63626173652f6e6f73716c2e436f6e666c696374526f77207374727563747b4b657920737472696e673b4c6f63616c56616c756520762e696f2f7632332f73796e63626173652f6e6f73716c2e56616c7565207374727563747b537461746520762e696f2f7632332f73657276696365732f73796e63626173652f6e6f73716c2e56616c7565537461746520656e756d7b4578697374733b4e6f4578697374733b44656c657465643b556e6b6e6f776e7d3b56616c205b5d627974653b577269746554732074696d652e54696d65207374727563747b5365636f6e647320696e7436343b4e616e6f7320696e7433327d3b53656c656374696f6e20762e696f2f7632332f73657276696365732f73796e63626173652f6e6f73716c2e56616c756553656c656374696f6e20656e756d7b4c6f63616c3b52656d6f74653b4f746865727d7d3b52656d6f746556616c756520762e696f2f7632332f73796e63626173652f6e6f73716c2e56616c75653b416e636573746f7256616c756520762e696f2f7632332f73796e63626173652f6e6f73716c2e56616c75653b4261746368496473205b5d75696e7436347dTarget) StartKey() (key vdl.Target, _ error) {
+	t.currKey = ""
+	t.keyTarget.Value = &t.currKey
+	target, err := &t.keyTarget, error(nil)
+	return target, err
+}
+func (t *unnamed_6d61705b737472696e675d762e696f2f7632332f73796e63626173652f6e6f73716c2e436f6e666c696374526f77207374727563747b4b657920737472696e673b4c6f63616c56616c756520762e696f2f7632332f73796e63626173652f6e6f73716c2e56616c7565207374727563747b537461746520762e696f2f7632332f73657276696365732f73796e63626173652f6e6f73716c2e56616c7565537461746520656e756d7b4578697374733b4e6f4578697374733b44656c657465643b556e6b6e6f776e7d3b56616c205b5d627974653b577269746554732074696d652e54696d65207374727563747b5365636f6e647320696e7436343b4e616e6f7320696e7433327d3b53656c656374696f6e20762e696f2f7632332f73657276696365732f73796e63626173652f6e6f73716c2e56616c756553656c656374696f6e20656e756d7b4c6f63616c3b52656d6f74653b4f746865727d7d3b52656d6f746556616c756520762e696f2f7632332f73796e63626173652f6e6f73716c2e56616c75653b416e636573746f7256616c756520762e696f2f7632332f73796e63626173652f6e6f73716c2e56616c75653b4261746368496473205b5d75696e7436347dTarget) FinishKeyStartField(key vdl.Target) (field vdl.Target, _ error) {
+	t.currElem = reflect.Zero(reflect.TypeOf(t.currElem)).Interface().(ConflictRow)
+	t.elemTarget.Value = &t.currElem
+	target, err := &t.elemTarget, error(nil)
+	return target, err
+}
+func (t *unnamed_6d61705b737472696e675d762e696f2f7632332f73796e63626173652f6e6f73716c2e436f6e666c696374526f77207374727563747b4b657920737472696e673b4c6f63616c56616c756520762e696f2f7632332f73796e63626173652f6e6f73716c2e56616c7565207374727563747b537461746520762e696f2f7632332f73657276696365732f73796e63626173652f6e6f73716c2e56616c7565537461746520656e756d7b4578697374733b4e6f4578697374733b44656c657465643b556e6b6e6f776e7d3b56616c205b5d627974653b577269746554732074696d652e54696d65207374727563747b5365636f6e647320696e7436343b4e616e6f7320696e7433327d3b53656c656374696f6e20762e696f2f7632332f73657276696365732f73796e63626173652f6e6f73716c2e56616c756553656c656374696f6e20656e756d7b4c6f63616c3b52656d6f74653b4f746865727d7d3b52656d6f746556616c756520762e696f2f7632332f73796e63626173652f6e6f73716c2e56616c75653b416e636573746f7256616c756520762e696f2f7632332f73796e63626173652f6e6f73716c2e56616c75653b4261746368496473205b5d75696e7436347dTarget) FinishField(key, field vdl.Target) error {
+	(*t.Value)[t.currKey] = t.currElem
+	return nil
+}
+func (t *unnamed_6d61705b737472696e675d762e696f2f7632332f73796e63626173652f6e6f73716c2e436f6e666c696374526f77207374727563747b4b657920737472696e673b4c6f63616c56616c756520762e696f2f7632332f73796e63626173652f6e6f73716c2e56616c7565207374727563747b537461746520762e696f2f7632332f73657276696365732f73796e63626173652f6e6f73716c2e56616c7565537461746520656e756d7b4578697374733b4e6f4578697374733b44656c657465643b556e6b6e6f776e7d3b56616c205b5d627974653b577269746554732074696d652e54696d65207374727563747b5365636f6e647320696e7436343b4e616e6f7320696e7433327d3b53656c656374696f6e20762e696f2f7632332f73657276696365732f73796e63626173652f6e6f73716c2e56616c756553656c656374696f6e20656e756d7b4c6f63616c3b52656d6f74653b4f746865727d7d3b52656d6f746556616c756520762e696f2f7632332f73796e63626173652f6e6f73716c2e56616c75653b416e636573746f7256616c756520762e696f2f7632332f73796e63626173652f6e6f73716c2e56616c75653b4261746368496473205b5d75696e7436347dTarget) FinishMap(elem vdl.MapTarget) error {
+	if len(*t.Value) == 0 {
+		*t.Value = nil
+	}
+
+	return nil
+}
+
+// map[uint64][]ConflictRow
+type unnamed_6d61705b75696e7436345d5b5d762e696f2f7632332f73796e63626173652f6e6f73716c2e436f6e666c696374526f77207374727563747b4b657920737472696e673b4c6f63616c56616c756520762e696f2f7632332f73796e63626173652f6e6f73716c2e56616c7565207374727563747b537461746520762e696f2f7632332f73657276696365732f73796e63626173652f6e6f73716c2e56616c7565537461746520656e756d7b4578697374733b4e6f4578697374733b44656c657465643b556e6b6e6f776e7d3b56616c205b5d627974653b577269746554732074696d652e54696d65207374727563747b5365636f6e647320696e7436343b4e616e6f7320696e7433327d3b53656c656374696f6e20762e696f2f7632332f73657276696365732f73796e63626173652f6e6f73716c2e56616c756553656c656374696f6e20656e756d7b4c6f63616c3b52656d6f74653b4f746865727d7d3b52656d6f746556616c756520762e696f2f7632332f73796e63626173652f6e6f73716c2e56616c75653b416e636573746f7256616c756520762e696f2f7632332f73796e63626173652f6e6f73716c2e56616c75653b4261746368496473205b5d75696e7436347dTarget struct {
+	Value      *map[uint64][]ConflictRow
+	currKey    uint64
+	currElem   []ConflictRow
+	keyTarget  vdl.Uint64Target
+	elemTarget unnamed_5b5d762e696f2f7632332f73796e63626173652f6e6f73716c2e436f6e666c696374526f77207374727563747b4b657920737472696e673b4c6f63616c56616c756520762e696f2f7632332f73796e63626173652f6e6f73716c2e56616c7565207374727563747b537461746520762e696f2f7632332f73657276696365732f73796e63626173652f6e6f73716c2e56616c7565537461746520656e756d7b4578697374733b4e6f4578697374733b44656c657465643b556e6b6e6f776e7d3b56616c205b5d627974653b577269746554732074696d652e54696d65207374727563747b5365636f6e647320696e7436343b4e616e6f7320696e7433327d3b53656c656374696f6e20762e696f2f7632332f73657276696365732f73796e63626173652f6e6f73716c2e56616c756553656c656374696f6e20656e756d7b4c6f63616c3b52656d6f74653b4f746865727d7d3b52656d6f746556616c756520762e696f2f7632332f73796e63626173652f6e6f73716c2e56616c75653b416e636573746f7256616c756520762e696f2f7632332f73796e63626173652f6e6f73716c2e56616c75653b4261746368496473205b5d75696e7436347dTarget
+	vdl.TargetBase
+	vdl.MapTargetBase
+}
+
+func (t *unnamed_6d61705b75696e7436345d5b5d762e696f2f7632332f73796e63626173652f6e6f73716c2e436f6e666c696374526f77207374727563747b4b657920737472696e673b4c6f63616c56616c756520762e696f2f7632332f73796e63626173652f6e6f73716c2e56616c7565207374727563747b537461746520762e696f2f7632332f73657276696365732f73796e63626173652f6e6f73716c2e56616c7565537461746520656e756d7b4578697374733b4e6f4578697374733b44656c657465643b556e6b6e6f776e7d3b56616c205b5d627974653b577269746554732074696d652e54696d65207374727563747b5365636f6e647320696e7436343b4e616e6f7320696e7433327d3b53656c656374696f6e20762e696f2f7632332f73657276696365732f73796e63626173652f6e6f73716c2e56616c756553656c656374696f6e20656e756d7b4c6f63616c3b52656d6f74653b4f746865727d7d3b52656d6f746556616c756520762e696f2f7632332f73796e63626173652f6e6f73716c2e56616c75653b416e636573746f7256616c756520762e696f2f7632332f73796e63626173652f6e6f73716c2e56616c75653b4261746368496473205b5d75696e7436347dTarget) StartMap(tt *vdl.Type, len int) (vdl.MapTarget, error) {
+
+	if ttWant := vdl.TypeOf((*map[uint64][]ConflictRow)(nil)); !vdl.Compatible(tt, ttWant) {
+		return nil, fmt.Errorf("type %v incompatible with %v", tt, ttWant)
+	}
+	*t.Value = make(map[uint64][]ConflictRow)
+	return t, nil
+}
+func (t *unnamed_6d61705b75696e7436345d5b5d762e696f2f7632332f73796e63626173652f6e6f73716c2e436f6e666c696374526f77207374727563747b4b657920737472696e673b4c6f63616c56616c756520762e696f2f7632332f73796e63626173652f6e6f73716c2e56616c7565207374727563747b537461746520762e696f2f7632332f73657276696365732f73796e63626173652f6e6f73716c2e56616c7565537461746520656e756d7b4578697374733b4e6f4578697374733b44656c657465643b556e6b6e6f776e7d3b56616c205b5d627974653b577269746554732074696d652e54696d65207374727563747b5365636f6e647320696e7436343b4e616e6f7320696e7433327d3b53656c656374696f6e20762e696f2f7632332f73657276696365732f73796e63626173652f6e6f73716c2e56616c756553656c656374696f6e20656e756d7b4c6f63616c3b52656d6f74653b4f746865727d7d3b52656d6f746556616c756520762e696f2f7632332f73796e63626173652f6e6f73716c2e56616c75653b416e636573746f7256616c756520762e696f2f7632332f73796e63626173652f6e6f73716c2e56616c75653b4261746368496473205b5d75696e7436347dTarget) StartKey() (key vdl.Target, _ error) {
+	t.currKey = uint64(0)
+	t.keyTarget.Value = &t.currKey
+	target, err := &t.keyTarget, error(nil)
+	return target, err
+}
+func (t *unnamed_6d61705b75696e7436345d5b5d762e696f2f7632332f73796e63626173652f6e6f73716c2e436f6e666c696374526f77207374727563747b4b657920737472696e673b4c6f63616c56616c756520762e696f2f7632332f73796e63626173652f6e6f73716c2e56616c7565207374727563747b537461746520762e696f2f7632332f73657276696365732f73796e63626173652f6e6f73716c2e56616c7565537461746520656e756d7b4578697374733b4e6f4578697374733b44656c657465643b556e6b6e6f776e7d3b56616c205b5d627974653b577269746554732074696d652e54696d65207374727563747b5365636f6e647320696e7436343b4e616e6f7320696e7433327d3b53656c656374696f6e20762e696f2f7632332f73657276696365732f73796e63626173652f6e6f73716c2e56616c756553656c656374696f6e20656e756d7b4c6f63616c3b52656d6f74653b4f746865727d7d3b52656d6f746556616c756520762e696f2f7632332f73796e63626173652f6e6f73716c2e56616c75653b416e636573746f7256616c756520762e696f2f7632332f73796e63626173652f6e6f73716c2e56616c75653b4261746368496473205b5d75696e7436347dTarget) FinishKeyStartField(key vdl.Target) (field vdl.Target, _ error) {
+	t.currElem = reflect.Zero(reflect.TypeOf(t.currElem)).Interface().([]ConflictRow)
+	t.elemTarget.Value = &t.currElem
+	target, err := &t.elemTarget, error(nil)
+	return target, err
+}
+func (t *unnamed_6d61705b75696e7436345d5b5d762e696f2f7632332f73796e63626173652f6e6f73716c2e436f6e666c696374526f77207374727563747b4b657920737472696e673b4c6f63616c56616c756520762e696f2f7632332f73796e63626173652f6e6f73716c2e56616c7565207374727563747b537461746520762e696f2f7632332f73657276696365732f73796e63626173652f6e6f73716c2e56616c7565537461746520656e756d7b4578697374733b4e6f4578697374733b44656c657465643b556e6b6e6f776e7d3b56616c205b5d627974653b577269746554732074696d652e54696d65207374727563747b5365636f6e647320696e7436343b4e616e6f7320696e7433327d3b53656c656374696f6e20762e696f2f7632332f73657276696365732f73796e63626173652f6e6f73716c2e56616c756553656c656374696f6e20656e756d7b4c6f63616c3b52656d6f74653b4f746865727d7d3b52656d6f746556616c756520762e696f2f7632332f73796e63626173652f6e6f73716c2e56616c75653b416e636573746f7256616c756520762e696f2f7632332f73796e63626173652f6e6f73716c2e56616c75653b4261746368496473205b5d75696e7436347dTarget) FinishField(key, field vdl.Target) error {
+	(*t.Value)[t.currKey] = t.currElem
+	return nil
+}
+func (t *unnamed_6d61705b75696e7436345d5b5d762e696f2f7632332f73796e63626173652f6e6f73716c2e436f6e666c696374526f77207374727563747b4b657920737472696e673b4c6f63616c56616c756520762e696f2f7632332f73796e63626173652f6e6f73716c2e56616c7565207374727563747b537461746520762e696f2f7632332f73657276696365732f73796e63626173652f6e6f73716c2e56616c7565537461746520656e756d7b4578697374733b4e6f4578697374733b44656c657465643b556e6b6e6f776e7d3b56616c205b5d627974653b577269746554732074696d652e54696d65207374727563747b5365636f6e647320696e7436343b4e616e6f7320696e7433327d3b53656c656374696f6e20762e696f2f7632332f73657276696365732f73796e63626173652f6e6f73716c2e56616c756553656c656374696f6e20656e756d7b4c6f63616c3b52656d6f74653b4f746865727d7d3b52656d6f746556616c756520762e696f2f7632332f73796e63626173652f6e6f73716c2e56616c75653b416e636573746f7256616c756520762e696f2f7632332f73796e63626173652f6e6f73716c2e56616c75653b4261746368496473205b5d75696e7436347dTarget) FinishMap(elem vdl.MapTarget) error {
+	if len(*t.Value) == 0 {
+		*t.Value = nil
+	}
+
+	return nil
+}
+
+// []ConflictRow
+type unnamed_5b5d762e696f2f7632332f73796e63626173652f6e6f73716c2e436f6e666c696374526f77207374727563747b4b657920737472696e673b4c6f63616c56616c756520762e696f2f7632332f73796e63626173652f6e6f73716c2e56616c7565207374727563747b537461746520762e696f2f7632332f73657276696365732f73796e63626173652f6e6f73716c2e56616c7565537461746520656e756d7b4578697374733b4e6f4578697374733b44656c657465643b556e6b6e6f776e7d3b56616c205b5d627974653b577269746554732074696d652e54696d65207374727563747b5365636f6e647320696e7436343b4e616e6f7320696e7433327d3b53656c656374696f6e20762e696f2f7632332f73657276696365732f73796e63626173652f6e6f73716c2e56616c756553656c656374696f6e20656e756d7b4c6f63616c3b52656d6f74653b4f746865727d7d3b52656d6f746556616c756520762e696f2f7632332f73796e63626173652f6e6f73716c2e56616c75653b416e636573746f7256616c756520762e696f2f7632332f73796e63626173652f6e6f73716c2e56616c75653b4261746368496473205b5d75696e7436347dTarget struct {
+	Value      *[]ConflictRow
+	elemTarget ConflictRowTarget
+	vdl.TargetBase
+	vdl.ListTargetBase
+}
+
+func (t *unnamed_5b5d762e696f2f7632332f73796e63626173652f6e6f73716c2e436f6e666c696374526f77207374727563747b4b657920737472696e673b4c6f63616c56616c756520762e696f2f7632332f73796e63626173652f6e6f73716c2e56616c7565207374727563747b537461746520762e696f2f7632332f73657276696365732f73796e63626173652f6e6f73716c2e56616c7565537461746520656e756d7b4578697374733b4e6f4578697374733b44656c657465643b556e6b6e6f776e7d3b56616c205b5d627974653b577269746554732074696d652e54696d65207374727563747b5365636f6e647320696e7436343b4e616e6f7320696e7433327d3b53656c656374696f6e20762e696f2f7632332f73657276696365732f73796e63626173652f6e6f73716c2e56616c756553656c656374696f6e20656e756d7b4c6f63616c3b52656d6f74653b4f746865727d7d3b52656d6f746556616c756520762e696f2f7632332f73796e63626173652f6e6f73716c2e56616c75653b416e636573746f7256616c756520762e696f2f7632332f73796e63626173652f6e6f73716c2e56616c75653b4261746368496473205b5d75696e7436347dTarget) StartList(tt *vdl.Type, len int) (vdl.ListTarget, error) {
+
+	if ttWant := vdl.TypeOf((*[]ConflictRow)(nil)); !vdl.Compatible(tt, ttWant) {
+		return nil, fmt.Errorf("type %v incompatible with %v", tt, ttWant)
+	}
+	if cap(*t.Value) < len {
+		*t.Value = make([]ConflictRow, len)
+	} else {
+		*t.Value = (*t.Value)[:len]
+	}
+	return t, nil
+}
+func (t *unnamed_5b5d762e696f2f7632332f73796e63626173652f6e6f73716c2e436f6e666c696374526f77207374727563747b4b657920737472696e673b4c6f63616c56616c756520762e696f2f7632332f73796e63626173652f6e6f73716c2e56616c7565207374727563747b537461746520762e696f2f7632332f73657276696365732f73796e63626173652f6e6f73716c2e56616c7565537461746520656e756d7b4578697374733b4e6f4578697374733b44656c657465643b556e6b6e6f776e7d3b56616c205b5d627974653b577269746554732074696d652e54696d65207374727563747b5365636f6e647320696e7436343b4e616e6f7320696e7433327d3b53656c656374696f6e20762e696f2f7632332f73657276696365732f73796e63626173652f6e6f73716c2e56616c756553656c656374696f6e20656e756d7b4c6f63616c3b52656d6f74653b4f746865727d7d3b52656d6f746556616c756520762e696f2f7632332f73796e63626173652f6e6f73716c2e56616c75653b416e636573746f7256616c756520762e696f2f7632332f73796e63626173652f6e6f73716c2e56616c75653b4261746368496473205b5d75696e7436347dTarget) StartElem(index int) (elem vdl.Target, _ error) {
+	t.elemTarget.Value = &(*t.Value)[index]
+	target, err := &t.elemTarget, error(nil)
+	return target, err
+}
+func (t *unnamed_5b5d762e696f2f7632332f73796e63626173652f6e6f73716c2e436f6e666c696374526f77207374727563747b4b657920737472696e673b4c6f63616c56616c756520762e696f2f7632332f73796e63626173652f6e6f73716c2e56616c7565207374727563747b537461746520762e696f2f7632332f73657276696365732f73796e63626173652f6e6f73716c2e56616c7565537461746520656e756d7b4578697374733b4e6f4578697374733b44656c657465643b556e6b6e6f776e7d3b56616c205b5d627974653b577269746554732074696d652e54696d65207374727563747b5365636f6e647320696e7436343b4e616e6f7320696e7433327d3b53656c656374696f6e20762e696f2f7632332f73657276696365732f73796e63626173652f6e6f73716c2e56616c756553656c656374696f6e20656e756d7b4c6f63616c3b52656d6f74653b4f746865727d7d3b52656d6f746556616c756520762e696f2f7632332f73796e63626173652f6e6f73716c2e56616c75653b416e636573746f7256616c756520762e696f2f7632332f73796e63626173652f6e6f73716c2e56616c75653b4261746368496473205b5d75696e7436347dTarget) FinishElem(elem vdl.Target) error {
+	return nil
+}
+func (t *unnamed_5b5d762e696f2f7632332f73796e63626173652f6e6f73716c2e436f6e666c696374526f77207374727563747b4b657920737472696e673b4c6f63616c56616c756520762e696f2f7632332f73796e63626173652f6e6f73716c2e56616c7565207374727563747b537461746520762e696f2f7632332f73657276696365732f73796e63626173652f6e6f73716c2e56616c7565537461746520656e756d7b4578697374733b4e6f4578697374733b44656c657465643b556e6b6e6f776e7d3b56616c205b5d627974653b577269746554732074696d652e54696d65207374727563747b5365636f6e647320696e7436343b4e616e6f7320696e7433327d3b53656c656374696f6e20762e696f2f7632332f73657276696365732f73796e63626173652f6e6f73716c2e56616c756553656c656374696f6e20656e756d7b4c6f63616c3b52656d6f74653b4f746865727d7d3b52656d6f746556616c756520762e696f2f7632332f73796e63626173652f6e6f73716c2e56616c75653b416e636573746f7256616c756520762e696f2f7632332f73796e63626173652f6e6f73716c2e56616c75653b4261746368496473205b5d75696e7436347dTarget) FinishList(elem vdl.ListTarget) error {
+
+	return nil
+}
+
+// ConflictScanSet contains a set of scans under conflict.
+// ByBatch is a map of array of ScanOps keyed by batch id.
+type ConflictScanSet struct {
+	ByBatch map[uint64][]nosql.ScanOp
+}
+
+func (ConflictScanSet) __VDLReflect(struct {
+	Name string `vdl:"v.io/v23/syncbase/nosql.ConflictScanSet"`
+}) {
+}
+
+func (m *ConflictScanSet) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
+	fieldsTarget1, err := t.StartFields(tt)
+	if err != nil {
+		return err
+	}
+
+	keyTarget2, fieldTarget3, err := fieldsTarget1.StartField("ByBatch")
+	if err != vdl.ErrFieldNoExist && err != nil {
+		return err
+	}
+	if err != vdl.ErrFieldNoExist {
+
+		mapTarget4, err := fieldTarget3.StartMap(tt.NonOptional().Field(0).Type, len(m.ByBatch))
+		if err != nil {
+			return err
+		}
+		for key6, value8 := range m.ByBatch {
+			keyTarget5, err := mapTarget4.StartKey()
+			if err != nil {
+				return err
+			}
+			if err := keyTarget5.FromUint(uint64(key6), tt.NonOptional().Field(0).Type.Key()); err != nil {
+				return err
+			}
+			valueTarget7, err := mapTarget4.FinishKeyStartField(keyTarget5)
+			if err != nil {
+				return err
+			}
+
+			listTarget9, err := valueTarget7.StartList(tt.NonOptional().Field(0).Type.Elem(), len(value8))
+			if err != nil {
+				return err
+			}
+			for i, elem11 := range value8 {
+				elemTarget10, err := listTarget9.StartElem(i)
+				if err != nil {
+					return err
+				}
+
+				if err := elem11.FillVDLTarget(elemTarget10, tt.NonOptional().Field(0).Type.Elem().Elem()); err != nil {
+					return err
+				}
+				if err := listTarget9.FinishElem(elemTarget10); err != nil {
+					return err
+				}
+			}
+			if err := valueTarget7.FinishList(listTarget9); err != nil {
+				return err
+			}
+			if err := mapTarget4.FinishField(keyTarget5, valueTarget7); err != nil {
+				return err
+			}
+		}
+		if err := fieldTarget3.FinishMap(mapTarget4); err != nil {
+			return err
+		}
+		if err := fieldsTarget1.FinishField(keyTarget2, fieldTarget3); err != nil {
+			return err
+		}
+	}
+	if err := t.FinishFields(fieldsTarget1); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (m *ConflictScanSet) MakeVDLTarget() vdl.Target {
+	return &ConflictScanSetTarget{Value: m}
+}
+
+type ConflictScanSetTarget struct {
+	Value         *ConflictScanSet
+	byBatchTarget unnamed_6d61705b75696e7436345d5b5d762e696f2f7632332f73657276696365732f73796e63626173652f6e6f73716c2e5363616e4f70207374727563747b537461727420737472696e673b4c696d697420737472696e677dTarget
+	vdl.TargetBase
+	vdl.FieldsTargetBase
+}
+
+func (t *ConflictScanSetTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
+
+	if ttWant := vdl.TypeOf((*ConflictScanSet)(nil)).Elem(); !vdl.Compatible(tt, ttWant) {
+		return nil, fmt.Errorf("type %v incompatible with %v", tt, ttWant)
+	}
+	return t, nil
+}
+func (t *ConflictScanSetTarget) StartField(name string) (key, field vdl.Target, _ error) {
+	switch name {
+	case "ByBatch":
+		t.byBatchTarget.Value = &t.Value.ByBatch
+		target, err := &t.byBatchTarget, error(nil)
+		return nil, target, err
+	default:
+		return nil, nil, fmt.Errorf("field %s not in struct v.io/v23/syncbase/nosql.ConflictScanSet", name)
+	}
+}
+func (t *ConflictScanSetTarget) FinishField(_, _ vdl.Target) error {
+	return nil
+}
+func (t *ConflictScanSetTarget) FinishFields(_ vdl.FieldsTarget) error {
+
+	return nil
+}
+
+// map[uint64][]nosql.ScanOp
+type unnamed_6d61705b75696e7436345d5b5d762e696f2f7632332f73657276696365732f73796e63626173652f6e6f73716c2e5363616e4f70207374727563747b537461727420737472696e673b4c696d697420737472696e677dTarget struct {
+	Value      *map[uint64][]nosql.ScanOp
+	currKey    uint64
+	currElem   []nosql.ScanOp
+	keyTarget  vdl.Uint64Target
+	elemTarget unnamed_5b5d762e696f2f7632332f73657276696365732f73796e63626173652f6e6f73716c2e5363616e4f70207374727563747b537461727420737472696e673b4c696d697420737472696e677dTarget
+	vdl.TargetBase
+	vdl.MapTargetBase
+}
+
+func (t *unnamed_6d61705b75696e7436345d5b5d762e696f2f7632332f73657276696365732f73796e63626173652f6e6f73716c2e5363616e4f70207374727563747b537461727420737472696e673b4c696d697420737472696e677dTarget) StartMap(tt *vdl.Type, len int) (vdl.MapTarget, error) {
+
+	if ttWant := vdl.TypeOf((*map[uint64][]nosql.ScanOp)(nil)); !vdl.Compatible(tt, ttWant) {
+		return nil, fmt.Errorf("type %v incompatible with %v", tt, ttWant)
+	}
+	*t.Value = make(map[uint64][]nosql.ScanOp)
+	return t, nil
+}
+func (t *unnamed_6d61705b75696e7436345d5b5d762e696f2f7632332f73657276696365732f73796e63626173652f6e6f73716c2e5363616e4f70207374727563747b537461727420737472696e673b4c696d697420737472696e677dTarget) StartKey() (key vdl.Target, _ error) {
+	t.currKey = uint64(0)
+	t.keyTarget.Value = &t.currKey
+	target, err := &t.keyTarget, error(nil)
+	return target, err
+}
+func (t *unnamed_6d61705b75696e7436345d5b5d762e696f2f7632332f73657276696365732f73796e63626173652f6e6f73716c2e5363616e4f70207374727563747b537461727420737472696e673b4c696d697420737472696e677dTarget) FinishKeyStartField(key vdl.Target) (field vdl.Target, _ error) {
+	t.currElem = []nosql.ScanOp(nil)
+	t.elemTarget.Value = &t.currElem
+	target, err := &t.elemTarget, error(nil)
+	return target, err
+}
+func (t *unnamed_6d61705b75696e7436345d5b5d762e696f2f7632332f73657276696365732f73796e63626173652f6e6f73716c2e5363616e4f70207374727563747b537461727420737472696e673b4c696d697420737472696e677dTarget) FinishField(key, field vdl.Target) error {
+	(*t.Value)[t.currKey] = t.currElem
+	return nil
+}
+func (t *unnamed_6d61705b75696e7436345d5b5d762e696f2f7632332f73657276696365732f73796e63626173652f6e6f73716c2e5363616e4f70207374727563747b537461727420737472696e673b4c696d697420737472696e677dTarget) FinishMap(elem vdl.MapTarget) error {
+	if len(*t.Value) == 0 {
+		*t.Value = nil
+	}
+
+	return nil
+}
+
+// []nosql.ScanOp
+type unnamed_5b5d762e696f2f7632332f73657276696365732f73796e63626173652f6e6f73716c2e5363616e4f70207374727563747b537461727420737472696e673b4c696d697420737472696e677dTarget struct {
+	Value      *[]nosql.ScanOp
+	elemTarget nosql.ScanOpTarget
+	vdl.TargetBase
+	vdl.ListTargetBase
+}
+
+func (t *unnamed_5b5d762e696f2f7632332f73657276696365732f73796e63626173652f6e6f73716c2e5363616e4f70207374727563747b537461727420737472696e673b4c696d697420737472696e677dTarget) StartList(tt *vdl.Type, len int) (vdl.ListTarget, error) {
+
+	if ttWant := vdl.TypeOf((*[]nosql.ScanOp)(nil)); !vdl.Compatible(tt, ttWant) {
+		return nil, fmt.Errorf("type %v incompatible with %v", tt, ttWant)
+	}
+	if cap(*t.Value) < len {
+		*t.Value = make([]nosql.ScanOp, len)
+	} else {
+		*t.Value = (*t.Value)[:len]
+	}
+	return t, nil
+}
+func (t *unnamed_5b5d762e696f2f7632332f73657276696365732f73796e63626173652f6e6f73716c2e5363616e4f70207374727563747b537461727420737472696e673b4c696d697420737472696e677dTarget) StartElem(index int) (elem vdl.Target, _ error) {
+	t.elemTarget.Value = &(*t.Value)[index]
+	target, err := &t.elemTarget, error(nil)
+	return target, err
+}
+func (t *unnamed_5b5d762e696f2f7632332f73657276696365732f73796e63626173652f6e6f73716c2e5363616e4f70207374727563747b537461727420737472696e673b4c696d697420737472696e677dTarget) FinishElem(elem vdl.Target) error {
+	return nil
+}
+func (t *unnamed_5b5d762e696f2f7632332f73657276696365732f73796e63626173652f6e6f73716c2e5363616e4f70207374727563747b537461727420737472696e673b4c696d697420737472696e677dTarget) FinishList(elem vdl.ListTarget) error {
+
+	return nil
+}
+
 // Conflict contains information to fully specify a conflict. Since syncbase
 // supports batches there can be one or more rows within the batch that has a
 // conflict. Each of these rows will be sent together as part of a single
@@ -43,7 +857,6 @@ func (Conflict) __VDLReflect(struct {
 }
 
 func (m *Conflict) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
-	__VDLEnsureNativeBuilt()
 	fieldsTarget1, err := t.StartFields(tt)
 	if err != nil {
 		return err
@@ -56,11 +869,11 @@ func (m *Conflict) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 	if err != vdl.ErrFieldNoExist {
 
 		if m.ReadSet == nil {
-			if err := fieldTarget3.FromNil(__VDLType1); err != nil {
+			if err := fieldTarget3.FromNil(tt.NonOptional().Field(0).Type); err != nil {
 				return err
 			}
 		} else {
-			if err := m.ReadSet.FillVDLTarget(fieldTarget3, __VDLType_v_io_v23_syncbase_nosql_ConflictRowSet); err != nil {
+			if err := m.ReadSet.FillVDLTarget(fieldTarget3, tt.NonOptional().Field(0).Type); err != nil {
 				return err
 			}
 		}
@@ -75,11 +888,11 @@ func (m *Conflict) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 	if err != vdl.ErrFieldNoExist {
 
 		if m.WriteSet == nil {
-			if err := fieldTarget5.FromNil(__VDLType1); err != nil {
+			if err := fieldTarget5.FromNil(tt.NonOptional().Field(1).Type); err != nil {
 				return err
 			}
 		} else {
-			if err := m.WriteSet.FillVDLTarget(fieldTarget5, __VDLType_v_io_v23_syncbase_nosql_ConflictRowSet); err != nil {
+			if err := m.WriteSet.FillVDLTarget(fieldTarget5, tt.NonOptional().Field(1).Type); err != nil {
 				return err
 			}
 		}
@@ -94,11 +907,11 @@ func (m *Conflict) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 	if err != vdl.ErrFieldNoExist {
 
 		if m.ScanSet == nil {
-			if err := fieldTarget7.FromNil(__VDLType2); err != nil {
+			if err := fieldTarget7.FromNil(tt.NonOptional().Field(2).Type); err != nil {
 				return err
 			}
 		} else {
-			if err := m.ScanSet.FillVDLTarget(fieldTarget7, __VDLType_v_io_v23_syncbase_nosql_ConflictScanSet); err != nil {
+			if err := m.ScanSet.FillVDLTarget(fieldTarget7, tt.NonOptional().Field(2).Type); err != nil {
 				return err
 			}
 		}
@@ -112,7 +925,7 @@ func (m *Conflict) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 	}
 	if err != vdl.ErrFieldNoExist {
 
-		mapTarget10, err := fieldTarget9.StartMap(__VDLType3, len(m.Batches))
+		mapTarget10, err := fieldTarget9.StartMap(tt.NonOptional().Field(3).Type, len(m.Batches))
 		if err != nil {
 			return err
 		}
@@ -121,7 +934,7 @@ func (m *Conflict) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 			if err != nil {
 				return err
 			}
-			if err := keyTarget11.FromUint(uint64(key12), vdl.Uint64Type); err != nil {
+			if err := keyTarget11.FromUint(uint64(key12), tt.NonOptional().Field(3).Type.Key()); err != nil {
 				return err
 			}
 			valueTarget13, err := mapTarget10.FinishKeyStartField(keyTarget11)
@@ -129,7 +942,7 @@ func (m *Conflict) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 				return err
 			}
 
-			if err := value14.FillVDLTarget(valueTarget13, __VDLType_v_io_v23_services_syncbase_nosql_BatchInfo); err != nil {
+			if err := value14.FillVDLTarget(valueTarget13, tt.NonOptional().Field(3).Type.Elem()); err != nil {
 				return err
 			}
 			if err := mapTarget10.FinishField(keyTarget11, valueTarget13); err != nil {
@@ -165,8 +978,8 @@ type ConflictTarget struct {
 
 func (t *ConflictTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
 
-	if !vdl.Compatible(tt, __VDLType_v_io_v23_syncbase_nosql_Conflict) {
-		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType_v_io_v23_syncbase_nosql_Conflict)
+	if ttWant := vdl.TypeOf((*Conflict)(nil)).Elem(); !vdl.Compatible(tt, ttWant) {
+		return nil, fmt.Errorf("type %v incompatible with %v", tt, ttWant)
 	}
 	return t, nil
 }
@@ -189,7 +1002,7 @@ func (t *ConflictTarget) StartField(name string) (key, field vdl.Target, _ error
 		target, err := &t.batchesTarget, error(nil)
 		return nil, target, err
 	default:
-		return nil, nil, fmt.Errorf("field %s not in struct %v", name, __VDLType_v_io_v23_syncbase_nosql_Conflict)
+		return nil, nil, fmt.Errorf("field %s not in struct v.io/v23/syncbase/nosql.Conflict", name)
 	}
 }
 func (t *ConflictTarget) FinishField(_, _ vdl.Target) error {
@@ -231,294 +1044,6 @@ func (t *unnamed_3f762e696f2f7632332f73796e63626173652f6e6f73716c2e436f6e666c696
 	return nil
 }
 
-type ConflictRowSetTarget struct {
-	Value         *ConflictRowSet
-	byKeyTarget   unnamed_6d61705b737472696e675d762e696f2f7632332f73796e63626173652f6e6f73716c2e436f6e666c696374526f77207374727563747b4b657920737472696e673b4c6f63616c56616c756520762e696f2f7632332f73796e63626173652f6e6f73716c2e56616c7565207374727563747b537461746520762e696f2f7632332f73657276696365732f73796e63626173652f6e6f73716c2e56616c7565537461746520656e756d7b4578697374733b4e6f4578697374733b44656c657465643b556e6b6e6f776e7d3b56616c205b5d627974653b577269746554732074696d652e54696d65207374727563747b5365636f6e647320696e7436343b4e616e6f7320696e7433327d3b53656c656374696f6e20762e696f2f7632332f73657276696365732f73796e63626173652f6e6f73716c2e56616c756553656c656374696f6e20656e756d7b4c6f63616c3b52656d6f74653b4f746865727d7d3b52656d6f746556616c756520762e696f2f7632332f73796e63626173652f6e6f73716c2e56616c75653b416e636573746f7256616c756520762e696f2f7632332f73796e63626173652f6e6f73716c2e56616c75653b4261746368496473205b5d75696e7436347dTarget
-	byBatchTarget unnamed_6d61705b75696e7436345d5b5d762e696f2f7632332f73796e63626173652f6e6f73716c2e436f6e666c696374526f77207374727563747b4b657920737472696e673b4c6f63616c56616c756520762e696f2f7632332f73796e63626173652f6e6f73716c2e56616c7565207374727563747b537461746520762e696f2f7632332f73657276696365732f73796e63626173652f6e6f73716c2e56616c7565537461746520656e756d7b4578697374733b4e6f4578697374733b44656c657465643b556e6b6e6f776e7d3b56616c205b5d627974653b577269746554732074696d652e54696d65207374727563747b5365636f6e647320696e7436343b4e616e6f7320696e7433327d3b53656c656374696f6e20762e696f2f7632332f73657276696365732f73796e63626173652f6e6f73716c2e56616c756553656c656374696f6e20656e756d7b4c6f63616c3b52656d6f74653b4f746865727d7d3b52656d6f746556616c756520762e696f2f7632332f73796e63626173652f6e6f73716c2e56616c75653b416e636573746f7256616c756520762e696f2f7632332f73796e63626173652f6e6f73716c2e56616c75653b4261746368496473205b5d75696e7436347dTarget
-	vdl.TargetBase
-	vdl.FieldsTargetBase
-}
-
-func (t *ConflictRowSetTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
-
-	if !vdl.Compatible(tt, __VDLType_v_io_v23_syncbase_nosql_ConflictRowSet) {
-		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType_v_io_v23_syncbase_nosql_ConflictRowSet)
-	}
-	return t, nil
-}
-func (t *ConflictRowSetTarget) StartField(name string) (key, field vdl.Target, _ error) {
-	switch name {
-	case "ByKey":
-		t.byKeyTarget.Value = &t.Value.ByKey
-		target, err := &t.byKeyTarget, error(nil)
-		return nil, target, err
-	case "ByBatch":
-		t.byBatchTarget.Value = &t.Value.ByBatch
-		target, err := &t.byBatchTarget, error(nil)
-		return nil, target, err
-	default:
-		return nil, nil, fmt.Errorf("field %s not in struct %v", name, __VDLType_v_io_v23_syncbase_nosql_ConflictRowSet)
-	}
-}
-func (t *ConflictRowSetTarget) FinishField(_, _ vdl.Target) error {
-	return nil
-}
-func (t *ConflictRowSetTarget) FinishFields(_ vdl.FieldsTarget) error {
-
-	return nil
-}
-
-// map[string]ConflictRow
-type unnamed_6d61705b737472696e675d762e696f2f7632332f73796e63626173652f6e6f73716c2e436f6e666c696374526f77207374727563747b4b657920737472696e673b4c6f63616c56616c756520762e696f2f7632332f73796e63626173652f6e6f73716c2e56616c7565207374727563747b537461746520762e696f2f7632332f73657276696365732f73796e63626173652f6e6f73716c2e56616c7565537461746520656e756d7b4578697374733b4e6f4578697374733b44656c657465643b556e6b6e6f776e7d3b56616c205b5d627974653b577269746554732074696d652e54696d65207374727563747b5365636f6e647320696e7436343b4e616e6f7320696e7433327d3b53656c656374696f6e20762e696f2f7632332f73657276696365732f73796e63626173652f6e6f73716c2e56616c756553656c656374696f6e20656e756d7b4c6f63616c3b52656d6f74653b4f746865727d7d3b52656d6f746556616c756520762e696f2f7632332f73796e63626173652f6e6f73716c2e56616c75653b416e636573746f7256616c756520762e696f2f7632332f73796e63626173652f6e6f73716c2e56616c75653b4261746368496473205b5d75696e7436347dTarget struct {
-	Value      *map[string]ConflictRow
-	currKey    string
-	currElem   ConflictRow
-	keyTarget  vdl.StringTarget
-	elemTarget ConflictRowTarget
-	vdl.TargetBase
-	vdl.MapTargetBase
-}
-
-func (t *unnamed_6d61705b737472696e675d762e696f2f7632332f73796e63626173652f6e6f73716c2e436f6e666c696374526f77207374727563747b4b657920737472696e673b4c6f63616c56616c756520762e696f2f7632332f73796e63626173652f6e6f73716c2e56616c7565207374727563747b537461746520762e696f2f7632332f73657276696365732f73796e63626173652f6e6f73716c2e56616c7565537461746520656e756d7b4578697374733b4e6f4578697374733b44656c657465643b556e6b6e6f776e7d3b56616c205b5d627974653b577269746554732074696d652e54696d65207374727563747b5365636f6e647320696e7436343b4e616e6f7320696e7433327d3b53656c656374696f6e20762e696f2f7632332f73657276696365732f73796e63626173652f6e6f73716c2e56616c756553656c656374696f6e20656e756d7b4c6f63616c3b52656d6f74653b4f746865727d7d3b52656d6f746556616c756520762e696f2f7632332f73796e63626173652f6e6f73716c2e56616c75653b416e636573746f7256616c756520762e696f2f7632332f73796e63626173652f6e6f73716c2e56616c75653b4261746368496473205b5d75696e7436347dTarget) StartMap(tt *vdl.Type, len int) (vdl.MapTarget, error) {
-
-	if !vdl.Compatible(tt, __VDLType5) {
-		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType5)
-	}
-	*t.Value = make(map[string]ConflictRow)
-	return t, nil
-}
-func (t *unnamed_6d61705b737472696e675d762e696f2f7632332f73796e63626173652f6e6f73716c2e436f6e666c696374526f77207374727563747b4b657920737472696e673b4c6f63616c56616c756520762e696f2f7632332f73796e63626173652f6e6f73716c2e56616c7565207374727563747b537461746520762e696f2f7632332f73657276696365732f73796e63626173652f6e6f73716c2e56616c7565537461746520656e756d7b4578697374733b4e6f4578697374733b44656c657465643b556e6b6e6f776e7d3b56616c205b5d627974653b577269746554732074696d652e54696d65207374727563747b5365636f6e647320696e7436343b4e616e6f7320696e7433327d3b53656c656374696f6e20762e696f2f7632332f73657276696365732f73796e63626173652f6e6f73716c2e56616c756553656c656374696f6e20656e756d7b4c6f63616c3b52656d6f74653b4f746865727d7d3b52656d6f746556616c756520762e696f2f7632332f73796e63626173652f6e6f73716c2e56616c75653b416e636573746f7256616c756520762e696f2f7632332f73796e63626173652f6e6f73716c2e56616c75653b4261746368496473205b5d75696e7436347dTarget) StartKey() (key vdl.Target, _ error) {
-	t.currKey = ""
-	t.keyTarget.Value = &t.currKey
-	target, err := &t.keyTarget, error(nil)
-	return target, err
-}
-func (t *unnamed_6d61705b737472696e675d762e696f2f7632332f73796e63626173652f6e6f73716c2e436f6e666c696374526f77207374727563747b4b657920737472696e673b4c6f63616c56616c756520762e696f2f7632332f73796e63626173652f6e6f73716c2e56616c7565207374727563747b537461746520762e696f2f7632332f73657276696365732f73796e63626173652f6e6f73716c2e56616c7565537461746520656e756d7b4578697374733b4e6f4578697374733b44656c657465643b556e6b6e6f776e7d3b56616c205b5d627974653b577269746554732074696d652e54696d65207374727563747b5365636f6e647320696e7436343b4e616e6f7320696e7433327d3b53656c656374696f6e20762e696f2f7632332f73657276696365732f73796e63626173652f6e6f73716c2e56616c756553656c656374696f6e20656e756d7b4c6f63616c3b52656d6f74653b4f746865727d7d3b52656d6f746556616c756520762e696f2f7632332f73796e63626173652f6e6f73716c2e56616c75653b416e636573746f7256616c756520762e696f2f7632332f73796e63626173652f6e6f73716c2e56616c75653b4261746368496473205b5d75696e7436347dTarget) FinishKeyStartField(key vdl.Target) (field vdl.Target, _ error) {
-	t.currElem = reflect.Zero(reflect.TypeOf(t.currElem)).Interface().(ConflictRow)
-	t.elemTarget.Value = &t.currElem
-	target, err := &t.elemTarget, error(nil)
-	return target, err
-}
-func (t *unnamed_6d61705b737472696e675d762e696f2f7632332f73796e63626173652f6e6f73716c2e436f6e666c696374526f77207374727563747b4b657920737472696e673b4c6f63616c56616c756520762e696f2f7632332f73796e63626173652f6e6f73716c2e56616c7565207374727563747b537461746520762e696f2f7632332f73657276696365732f73796e63626173652f6e6f73716c2e56616c7565537461746520656e756d7b4578697374733b4e6f4578697374733b44656c657465643b556e6b6e6f776e7d3b56616c205b5d627974653b577269746554732074696d652e54696d65207374727563747b5365636f6e647320696e7436343b4e616e6f7320696e7433327d3b53656c656374696f6e20762e696f2f7632332f73657276696365732f73796e63626173652f6e6f73716c2e56616c756553656c656374696f6e20656e756d7b4c6f63616c3b52656d6f74653b4f746865727d7d3b52656d6f746556616c756520762e696f2f7632332f73796e63626173652f6e6f73716c2e56616c75653b416e636573746f7256616c756520762e696f2f7632332f73796e63626173652f6e6f73716c2e56616c75653b4261746368496473205b5d75696e7436347dTarget) FinishField(key, field vdl.Target) error {
-	(*t.Value)[t.currKey] = t.currElem
-	return nil
-}
-func (t *unnamed_6d61705b737472696e675d762e696f2f7632332f73796e63626173652f6e6f73716c2e436f6e666c696374526f77207374727563747b4b657920737472696e673b4c6f63616c56616c756520762e696f2f7632332f73796e63626173652f6e6f73716c2e56616c7565207374727563747b537461746520762e696f2f7632332f73657276696365732f73796e63626173652f6e6f73716c2e56616c7565537461746520656e756d7b4578697374733b4e6f4578697374733b44656c657465643b556e6b6e6f776e7d3b56616c205b5d627974653b577269746554732074696d652e54696d65207374727563747b5365636f6e647320696e7436343b4e616e6f7320696e7433327d3b53656c656374696f6e20762e696f2f7632332f73657276696365732f73796e63626173652f6e6f73716c2e56616c756553656c656374696f6e20656e756d7b4c6f63616c3b52656d6f74653b4f746865727d7d3b52656d6f746556616c756520762e696f2f7632332f73796e63626173652f6e6f73716c2e56616c75653b416e636573746f7256616c756520762e696f2f7632332f73796e63626173652f6e6f73716c2e56616c75653b4261746368496473205b5d75696e7436347dTarget) FinishMap(elem vdl.MapTarget) error {
-	if len(*t.Value) == 0 {
-		*t.Value = nil
-	}
-
-	return nil
-}
-
-type ConflictRowTarget struct {
-	Value               *ConflictRow
-	keyTarget           vdl.StringTarget
-	localValueTarget    ValueTarget
-	remoteValueTarget   ValueTarget
-	ancestorValueTarget ValueTarget
-	batchIdsTarget      unnamed_5b5d75696e743634Target
-	vdl.TargetBase
-	vdl.FieldsTargetBase
-}
-
-func (t *ConflictRowTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
-
-	if !vdl.Compatible(tt, __VDLType_v_io_v23_syncbase_nosql_ConflictRow) {
-		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType_v_io_v23_syncbase_nosql_ConflictRow)
-	}
-	return t, nil
-}
-func (t *ConflictRowTarget) StartField(name string) (key, field vdl.Target, _ error) {
-	switch name {
-	case "Key":
-		t.keyTarget.Value = &t.Value.Key
-		target, err := &t.keyTarget, error(nil)
-		return nil, target, err
-	case "LocalValue":
-		t.localValueTarget.Value = &t.Value.LocalValue
-		target, err := &t.localValueTarget, error(nil)
-		return nil, target, err
-	case "RemoteValue":
-		t.remoteValueTarget.Value = &t.Value.RemoteValue
-		target, err := &t.remoteValueTarget, error(nil)
-		return nil, target, err
-	case "AncestorValue":
-		t.ancestorValueTarget.Value = &t.Value.AncestorValue
-		target, err := &t.ancestorValueTarget, error(nil)
-		return nil, target, err
-	case "BatchIds":
-		t.batchIdsTarget.Value = &t.Value.BatchIds
-		target, err := &t.batchIdsTarget, error(nil)
-		return nil, target, err
-	default:
-		return nil, nil, fmt.Errorf("field %s not in struct %v", name, __VDLType_v_io_v23_syncbase_nosql_ConflictRow)
-	}
-}
-func (t *ConflictRowTarget) FinishField(_, _ vdl.Target) error {
-	return nil
-}
-func (t *ConflictRowTarget) FinishFields(_ vdl.FieldsTarget) error {
-
-	return nil
-}
-
-type ValueTarget struct {
-	Value           *Value
-	stateTarget     nosql.ValueStateTarget
-	valTarget       vdl.BytesTarget
-	writeTsTarget   time_2.TimeTarget
-	selectionTarget nosql.ValueSelectionTarget
-	vdl.TargetBase
-	vdl.FieldsTargetBase
-}
-
-func (t *ValueTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
-
-	if !vdl.Compatible(tt, __VDLType_v_io_v23_syncbase_nosql_Value) {
-		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType_v_io_v23_syncbase_nosql_Value)
-	}
-	return t, nil
-}
-func (t *ValueTarget) StartField(name string) (key, field vdl.Target, _ error) {
-	switch name {
-	case "State":
-		t.stateTarget.Value = &t.Value.State
-		target, err := &t.stateTarget, error(nil)
-		return nil, target, err
-	case "Val":
-		t.valTarget.Value = &t.Value.Val
-		target, err := &t.valTarget, error(nil)
-		return nil, target, err
-	case "WriteTs":
-		t.writeTsTarget.Value = &t.Value.WriteTs
-		target, err := &t.writeTsTarget, error(nil)
-		return nil, target, err
-	case "Selection":
-		t.selectionTarget.Value = &t.Value.Selection
-		target, err := &t.selectionTarget, error(nil)
-		return nil, target, err
-	default:
-		return nil, nil, fmt.Errorf("field %s not in struct %v", name, __VDLType_v_io_v23_syncbase_nosql_Value)
-	}
-}
-func (t *ValueTarget) FinishField(_, _ vdl.Target) error {
-	return nil
-}
-func (t *ValueTarget) FinishFields(_ vdl.FieldsTarget) error {
-
-	return nil
-}
-
-// []uint64
-type unnamed_5b5d75696e743634Target struct {
-	Value      *[]uint64
-	elemTarget vdl.Uint64Target
-	vdl.TargetBase
-	vdl.ListTargetBase
-}
-
-func (t *unnamed_5b5d75696e743634Target) StartList(tt *vdl.Type, len int) (vdl.ListTarget, error) {
-
-	if !vdl.Compatible(tt, __VDLType4) {
-		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType4)
-	}
-	if cap(*t.Value) < len {
-		*t.Value = make([]uint64, len)
-	} else {
-		*t.Value = (*t.Value)[:len]
-	}
-	return t, nil
-}
-func (t *unnamed_5b5d75696e743634Target) StartElem(index int) (elem vdl.Target, _ error) {
-	t.elemTarget.Value = &(*t.Value)[index]
-	target, err := &t.elemTarget, error(nil)
-	return target, err
-}
-func (t *unnamed_5b5d75696e743634Target) FinishElem(elem vdl.Target) error {
-	return nil
-}
-func (t *unnamed_5b5d75696e743634Target) FinishList(elem vdl.ListTarget) error {
-
-	return nil
-}
-
-// map[uint64][]ConflictRow
-type unnamed_6d61705b75696e7436345d5b5d762e696f2f7632332f73796e63626173652f6e6f73716c2e436f6e666c696374526f77207374727563747b4b657920737472696e673b4c6f63616c56616c756520762e696f2f7632332f73796e63626173652f6e6f73716c2e56616c7565207374727563747b537461746520762e696f2f7632332f73657276696365732f73796e63626173652f6e6f73716c2e56616c7565537461746520656e756d7b4578697374733b4e6f4578697374733b44656c657465643b556e6b6e6f776e7d3b56616c205b5d627974653b577269746554732074696d652e54696d65207374727563747b5365636f6e647320696e7436343b4e616e6f7320696e7433327d3b53656c656374696f6e20762e696f2f7632332f73657276696365732f73796e63626173652f6e6f73716c2e56616c756553656c656374696f6e20656e756d7b4c6f63616c3b52656d6f74653b4f746865727d7d3b52656d6f746556616c756520762e696f2f7632332f73796e63626173652f6e6f73716c2e56616c75653b416e636573746f7256616c756520762e696f2f7632332f73796e63626173652f6e6f73716c2e56616c75653b4261746368496473205b5d75696e7436347dTarget struct {
-	Value      *map[uint64][]ConflictRow
-	currKey    uint64
-	currElem   []ConflictRow
-	keyTarget  vdl.Uint64Target
-	elemTarget unnamed_5b5d762e696f2f7632332f73796e63626173652f6e6f73716c2e436f6e666c696374526f77207374727563747b4b657920737472696e673b4c6f63616c56616c756520762e696f2f7632332f73796e63626173652f6e6f73716c2e56616c7565207374727563747b537461746520762e696f2f7632332f73657276696365732f73796e63626173652f6e6f73716c2e56616c7565537461746520656e756d7b4578697374733b4e6f4578697374733b44656c657465643b556e6b6e6f776e7d3b56616c205b5d627974653b577269746554732074696d652e54696d65207374727563747b5365636f6e647320696e7436343b4e616e6f7320696e7433327d3b53656c656374696f6e20762e696f2f7632332f73657276696365732f73796e63626173652f6e6f73716c2e56616c756553656c656374696f6e20656e756d7b4c6f63616c3b52656d6f74653b4f746865727d7d3b52656d6f746556616c756520762e696f2f7632332f73796e63626173652f6e6f73716c2e56616c75653b416e636573746f7256616c756520762e696f2f7632332f73796e63626173652f6e6f73716c2e56616c75653b4261746368496473205b5d75696e7436347dTarget
-	vdl.TargetBase
-	vdl.MapTargetBase
-}
-
-func (t *unnamed_6d61705b75696e7436345d5b5d762e696f2f7632332f73796e63626173652f6e6f73716c2e436f6e666c696374526f77207374727563747b4b657920737472696e673b4c6f63616c56616c756520762e696f2f7632332f73796e63626173652f6e6f73716c2e56616c7565207374727563747b537461746520762e696f2f7632332f73657276696365732f73796e63626173652f6e6f73716c2e56616c7565537461746520656e756d7b4578697374733b4e6f4578697374733b44656c657465643b556e6b6e6f776e7d3b56616c205b5d627974653b577269746554732074696d652e54696d65207374727563747b5365636f6e647320696e7436343b4e616e6f7320696e7433327d3b53656c656374696f6e20762e696f2f7632332f73657276696365732f73796e63626173652f6e6f73716c2e56616c756553656c656374696f6e20656e756d7b4c6f63616c3b52656d6f74653b4f746865727d7d3b52656d6f746556616c756520762e696f2f7632332f73796e63626173652f6e6f73716c2e56616c75653b416e636573746f7256616c756520762e696f2f7632332f73796e63626173652f6e6f73716c2e56616c75653b4261746368496473205b5d75696e7436347dTarget) StartMap(tt *vdl.Type, len int) (vdl.MapTarget, error) {
-
-	if !vdl.Compatible(tt, __VDLType7) {
-		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType7)
-	}
-	*t.Value = make(map[uint64][]ConflictRow)
-	return t, nil
-}
-func (t *unnamed_6d61705b75696e7436345d5b5d762e696f2f7632332f73796e63626173652f6e6f73716c2e436f6e666c696374526f77207374727563747b4b657920737472696e673b4c6f63616c56616c756520762e696f2f7632332f73796e63626173652f6e6f73716c2e56616c7565207374727563747b537461746520762e696f2f7632332f73657276696365732f73796e63626173652f6e6f73716c2e56616c7565537461746520656e756d7b4578697374733b4e6f4578697374733b44656c657465643b556e6b6e6f776e7d3b56616c205b5d627974653b577269746554732074696d652e54696d65207374727563747b5365636f6e647320696e7436343b4e616e6f7320696e7433327d3b53656c656374696f6e20762e696f2f7632332f73657276696365732f73796e63626173652f6e6f73716c2e56616c756553656c656374696f6e20656e756d7b4c6f63616c3b52656d6f74653b4f746865727d7d3b52656d6f746556616c756520762e696f2f7632332f73796e63626173652f6e6f73716c2e56616c75653b416e636573746f7256616c756520762e696f2f7632332f73796e63626173652f6e6f73716c2e56616c75653b4261746368496473205b5d75696e7436347dTarget) StartKey() (key vdl.Target, _ error) {
-	t.currKey = uint64(0)
-	t.keyTarget.Value = &t.currKey
-	target, err := &t.keyTarget, error(nil)
-	return target, err
-}
-func (t *unnamed_6d61705b75696e7436345d5b5d762e696f2f7632332f73796e63626173652f6e6f73716c2e436f6e666c696374526f77207374727563747b4b657920737472696e673b4c6f63616c56616c756520762e696f2f7632332f73796e63626173652f6e6f73716c2e56616c7565207374727563747b537461746520762e696f2f7632332f73657276696365732f73796e63626173652f6e6f73716c2e56616c7565537461746520656e756d7b4578697374733b4e6f4578697374733b44656c657465643b556e6b6e6f776e7d3b56616c205b5d627974653b577269746554732074696d652e54696d65207374727563747b5365636f6e647320696e7436343b4e616e6f7320696e7433327d3b53656c656374696f6e20762e696f2f7632332f73657276696365732f73796e63626173652f6e6f73716c2e56616c756553656c656374696f6e20656e756d7b4c6f63616c3b52656d6f74653b4f746865727d7d3b52656d6f746556616c756520762e696f2f7632332f73796e63626173652f6e6f73716c2e56616c75653b416e636573746f7256616c756520762e696f2f7632332f73796e63626173652f6e6f73716c2e56616c75653b4261746368496473205b5d75696e7436347dTarget) FinishKeyStartField(key vdl.Target) (field vdl.Target, _ error) {
-	t.currElem = reflect.Zero(reflect.TypeOf(t.currElem)).Interface().([]ConflictRow)
-	t.elemTarget.Value = &t.currElem
-	target, err := &t.elemTarget, error(nil)
-	return target, err
-}
-func (t *unnamed_6d61705b75696e7436345d5b5d762e696f2f7632332f73796e63626173652f6e6f73716c2e436f6e666c696374526f77207374727563747b4b657920737472696e673b4c6f63616c56616c756520762e696f2f7632332f73796e63626173652f6e6f73716c2e56616c7565207374727563747b537461746520762e696f2f7632332f73657276696365732f73796e63626173652f6e6f73716c2e56616c7565537461746520656e756d7b4578697374733b4e6f4578697374733b44656c657465643b556e6b6e6f776e7d3b56616c205b5d627974653b577269746554732074696d652e54696d65207374727563747b5365636f6e647320696e7436343b4e616e6f7320696e7433327d3b53656c656374696f6e20762e696f2f7632332f73657276696365732f73796e63626173652f6e6f73716c2e56616c756553656c656374696f6e20656e756d7b4c6f63616c3b52656d6f74653b4f746865727d7d3b52656d6f746556616c756520762e696f2f7632332f73796e63626173652f6e6f73716c2e56616c75653b416e636573746f7256616c756520762e696f2f7632332f73796e63626173652f6e6f73716c2e56616c75653b4261746368496473205b5d75696e7436347dTarget) FinishField(key, field vdl.Target) error {
-	(*t.Value)[t.currKey] = t.currElem
-	return nil
-}
-func (t *unnamed_6d61705b75696e7436345d5b5d762e696f2f7632332f73796e63626173652f6e6f73716c2e436f6e666c696374526f77207374727563747b4b657920737472696e673b4c6f63616c56616c756520762e696f2f7632332f73796e63626173652f6e6f73716c2e56616c7565207374727563747b537461746520762e696f2f7632332f73657276696365732f73796e63626173652f6e6f73716c2e56616c7565537461746520656e756d7b4578697374733b4e6f4578697374733b44656c657465643b556e6b6e6f776e7d3b56616c205b5d627974653b577269746554732074696d652e54696d65207374727563747b5365636f6e647320696e7436343b4e616e6f7320696e7433327d3b53656c656374696f6e20762e696f2f7632332f73657276696365732f73796e63626173652f6e6f73716c2e56616c756553656c656374696f6e20656e756d7b4c6f63616c3b52656d6f74653b4f746865727d7d3b52656d6f746556616c756520762e696f2f7632332f73796e63626173652f6e6f73716c2e56616c75653b416e636573746f7256616c756520762e696f2f7632332f73796e63626173652f6e6f73716c2e56616c75653b4261746368496473205b5d75696e7436347dTarget) FinishMap(elem vdl.MapTarget) error {
-	if len(*t.Value) == 0 {
-		*t.Value = nil
-	}
-
-	return nil
-}
-
-// []ConflictRow
-type unnamed_5b5d762e696f2f7632332f73796e63626173652f6e6f73716c2e436f6e666c696374526f77207374727563747b4b657920737472696e673b4c6f63616c56616c756520762e696f2f7632332f73796e63626173652f6e6f73716c2e56616c7565207374727563747b537461746520762e696f2f7632332f73657276696365732f73796e63626173652f6e6f73716c2e56616c7565537461746520656e756d7b4578697374733b4e6f4578697374733b44656c657465643b556e6b6e6f776e7d3b56616c205b5d627974653b577269746554732074696d652e54696d65207374727563747b5365636f6e647320696e7436343b4e616e6f7320696e7433327d3b53656c656374696f6e20762e696f2f7632332f73657276696365732f73796e63626173652f6e6f73716c2e56616c756553656c656374696f6e20656e756d7b4c6f63616c3b52656d6f74653b4f746865727d7d3b52656d6f746556616c756520762e696f2f7632332f73796e63626173652f6e6f73716c2e56616c75653b416e636573746f7256616c756520762e696f2f7632332f73796e63626173652f6e6f73716c2e56616c75653b4261746368496473205b5d75696e7436347dTarget struct {
-	Value      *[]ConflictRow
-	elemTarget ConflictRowTarget
-	vdl.TargetBase
-	vdl.ListTargetBase
-}
-
-func (t *unnamed_5b5d762e696f2f7632332f73796e63626173652f6e6f73716c2e436f6e666c696374526f77207374727563747b4b657920737472696e673b4c6f63616c56616c756520762e696f2f7632332f73796e63626173652f6e6f73716c2e56616c7565207374727563747b537461746520762e696f2f7632332f73657276696365732f73796e63626173652f6e6f73716c2e56616c7565537461746520656e756d7b4578697374733b4e6f4578697374733b44656c657465643b556e6b6e6f776e7d3b56616c205b5d627974653b577269746554732074696d652e54696d65207374727563747b5365636f6e647320696e7436343b4e616e6f7320696e7433327d3b53656c656374696f6e20762e696f2f7632332f73657276696365732f73796e63626173652f6e6f73716c2e56616c756553656c656374696f6e20656e756d7b4c6f63616c3b52656d6f74653b4f746865727d7d3b52656d6f746556616c756520762e696f2f7632332f73796e63626173652f6e6f73716c2e56616c75653b416e636573746f7256616c756520762e696f2f7632332f73796e63626173652f6e6f73716c2e56616c75653b4261746368496473205b5d75696e7436347dTarget) StartList(tt *vdl.Type, len int) (vdl.ListTarget, error) {
-
-	if !vdl.Compatible(tt, __VDLType6) {
-		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType6)
-	}
-	if cap(*t.Value) < len {
-		*t.Value = make([]ConflictRow, len)
-	} else {
-		*t.Value = (*t.Value)[:len]
-	}
-	return t, nil
-}
-func (t *unnamed_5b5d762e696f2f7632332f73796e63626173652f6e6f73716c2e436f6e666c696374526f77207374727563747b4b657920737472696e673b4c6f63616c56616c756520762e696f2f7632332f73796e63626173652f6e6f73716c2e56616c7565207374727563747b537461746520762e696f2f7632332f73657276696365732f73796e63626173652f6e6f73716c2e56616c7565537461746520656e756d7b4578697374733b4e6f4578697374733b44656c657465643b556e6b6e6f776e7d3b56616c205b5d627974653b577269746554732074696d652e54696d65207374727563747b5365636f6e647320696e7436343b4e616e6f7320696e7433327d3b53656c656374696f6e20762e696f2f7632332f73657276696365732f73796e63626173652f6e6f73716c2e56616c756553656c656374696f6e20656e756d7b4c6f63616c3b52656d6f74653b4f746865727d7d3b52656d6f746556616c756520762e696f2f7632332f73796e63626173652f6e6f73716c2e56616c75653b416e636573746f7256616c756520762e696f2f7632332f73796e63626173652f6e6f73716c2e56616c75653b4261746368496473205b5d75696e7436347dTarget) StartElem(index int) (elem vdl.Target, _ error) {
-	t.elemTarget.Value = &(*t.Value)[index]
-	target, err := &t.elemTarget, error(nil)
-	return target, err
-}
-func (t *unnamed_5b5d762e696f2f7632332f73796e63626173652f6e6f73716c2e436f6e666c696374526f77207374727563747b4b657920737472696e673b4c6f63616c56616c756520762e696f2f7632332f73796e63626173652f6e6f73716c2e56616c7565207374727563747b537461746520762e696f2f7632332f73657276696365732f73796e63626173652f6e6f73716c2e56616c7565537461746520656e756d7b4578697374733b4e6f4578697374733b44656c657465643b556e6b6e6f776e7d3b56616c205b5d627974653b577269746554732074696d652e54696d65207374727563747b5365636f6e647320696e7436343b4e616e6f7320696e7433327d3b53656c656374696f6e20762e696f2f7632332f73657276696365732f73796e63626173652f6e6f73716c2e56616c756553656c656374696f6e20656e756d7b4c6f63616c3b52656d6f74653b4f746865727d7d3b52656d6f746556616c756520762e696f2f7632332f73796e63626173652f6e6f73716c2e56616c75653b416e636573746f7256616c756520762e696f2f7632332f73796e63626173652f6e6f73716c2e56616c75653b4261746368496473205b5d75696e7436347dTarget) FinishElem(elem vdl.Target) error {
-	return nil
-}
-func (t *unnamed_5b5d762e696f2f7632332f73796e63626173652f6e6f73716c2e436f6e666c696374526f77207374727563747b4b657920737472696e673b4c6f63616c56616c756520762e696f2f7632332f73796e63626173652f6e6f73716c2e56616c7565207374727563747b537461746520762e696f2f7632332f73657276696365732f73796e63626173652f6e6f73716c2e56616c7565537461746520656e756d7b4578697374733b4e6f4578697374733b44656c657465643b556e6b6e6f776e7d3b56616c205b5d627974653b577269746554732074696d652e54696d65207374727563747b5365636f6e647320696e7436343b4e616e6f7320696e7433327d3b53656c656374696f6e20762e696f2f7632332f73657276696365732f73796e63626173652f6e6f73716c2e56616c756553656c656374696f6e20656e756d7b4c6f63616c3b52656d6f74653b4f746865727d7d3b52656d6f746556616c756520762e696f2f7632332f73796e63626173652f6e6f73716c2e56616c75653b416e636573746f7256616c756520762e696f2f7632332f73796e63626173652f6e6f73716c2e56616c75653b4261746368496473205b5d75696e7436347dTarget) FinishList(elem vdl.ListTarget) error {
-
-	return nil
-}
-
 // Optional ConflictScanSet
 type unnamed_3f762e696f2f7632332f73796e63626173652f6e6f73716c2e436f6e666c6963745363616e536574207374727563747b42794261746368206d61705b75696e7436345d5b5d762e696f2f7632332f73657276696365732f73796e63626173652f6e6f73716c2e5363616e4f70207374727563747b537461727420737472696e673b4c696d697420737472696e677d7dTarget struct {
 	Value      **ConflictScanSet
@@ -550,114 +1075,6 @@ func (t *unnamed_3f762e696f2f7632332f73796e63626173652f6e6f73716c2e436f6e666c696
 	return nil
 }
 
-type ConflictScanSetTarget struct {
-	Value         *ConflictScanSet
-	byBatchTarget unnamed_6d61705b75696e7436345d5b5d762e696f2f7632332f73657276696365732f73796e63626173652f6e6f73716c2e5363616e4f70207374727563747b537461727420737472696e673b4c696d697420737472696e677dTarget
-	vdl.TargetBase
-	vdl.FieldsTargetBase
-}
-
-func (t *ConflictScanSetTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
-
-	if !vdl.Compatible(tt, __VDLType_v_io_v23_syncbase_nosql_ConflictScanSet) {
-		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType_v_io_v23_syncbase_nosql_ConflictScanSet)
-	}
-	return t, nil
-}
-func (t *ConflictScanSetTarget) StartField(name string) (key, field vdl.Target, _ error) {
-	switch name {
-	case "ByBatch":
-		t.byBatchTarget.Value = &t.Value.ByBatch
-		target, err := &t.byBatchTarget, error(nil)
-		return nil, target, err
-	default:
-		return nil, nil, fmt.Errorf("field %s not in struct %v", name, __VDLType_v_io_v23_syncbase_nosql_ConflictScanSet)
-	}
-}
-func (t *ConflictScanSetTarget) FinishField(_, _ vdl.Target) error {
-	return nil
-}
-func (t *ConflictScanSetTarget) FinishFields(_ vdl.FieldsTarget) error {
-
-	return nil
-}
-
-// map[uint64][]nosql.ScanOp
-type unnamed_6d61705b75696e7436345d5b5d762e696f2f7632332f73657276696365732f73796e63626173652f6e6f73716c2e5363616e4f70207374727563747b537461727420737472696e673b4c696d697420737472696e677dTarget struct {
-	Value      *map[uint64][]nosql.ScanOp
-	currKey    uint64
-	currElem   []nosql.ScanOp
-	keyTarget  vdl.Uint64Target
-	elemTarget unnamed_5b5d762e696f2f7632332f73657276696365732f73796e63626173652f6e6f73716c2e5363616e4f70207374727563747b537461727420737472696e673b4c696d697420737472696e677dTarget
-	vdl.TargetBase
-	vdl.MapTargetBase
-}
-
-func (t *unnamed_6d61705b75696e7436345d5b5d762e696f2f7632332f73657276696365732f73796e63626173652f6e6f73716c2e5363616e4f70207374727563747b537461727420737472696e673b4c696d697420737472696e677dTarget) StartMap(tt *vdl.Type, len int) (vdl.MapTarget, error) {
-
-	if !vdl.Compatible(tt, __VDLType9) {
-		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType9)
-	}
-	*t.Value = make(map[uint64][]nosql.ScanOp)
-	return t, nil
-}
-func (t *unnamed_6d61705b75696e7436345d5b5d762e696f2f7632332f73657276696365732f73796e63626173652f6e6f73716c2e5363616e4f70207374727563747b537461727420737472696e673b4c696d697420737472696e677dTarget) StartKey() (key vdl.Target, _ error) {
-	t.currKey = uint64(0)
-	t.keyTarget.Value = &t.currKey
-	target, err := &t.keyTarget, error(nil)
-	return target, err
-}
-func (t *unnamed_6d61705b75696e7436345d5b5d762e696f2f7632332f73657276696365732f73796e63626173652f6e6f73716c2e5363616e4f70207374727563747b537461727420737472696e673b4c696d697420737472696e677dTarget) FinishKeyStartField(key vdl.Target) (field vdl.Target, _ error) {
-	t.currElem = []nosql.ScanOp(nil)
-	t.elemTarget.Value = &t.currElem
-	target, err := &t.elemTarget, error(nil)
-	return target, err
-}
-func (t *unnamed_6d61705b75696e7436345d5b5d762e696f2f7632332f73657276696365732f73796e63626173652f6e6f73716c2e5363616e4f70207374727563747b537461727420737472696e673b4c696d697420737472696e677dTarget) FinishField(key, field vdl.Target) error {
-	(*t.Value)[t.currKey] = t.currElem
-	return nil
-}
-func (t *unnamed_6d61705b75696e7436345d5b5d762e696f2f7632332f73657276696365732f73796e63626173652f6e6f73716c2e5363616e4f70207374727563747b537461727420737472696e673b4c696d697420737472696e677dTarget) FinishMap(elem vdl.MapTarget) error {
-	if len(*t.Value) == 0 {
-		*t.Value = nil
-	}
-
-	return nil
-}
-
-// []nosql.ScanOp
-type unnamed_5b5d762e696f2f7632332f73657276696365732f73796e63626173652f6e6f73716c2e5363616e4f70207374727563747b537461727420737472696e673b4c696d697420737472696e677dTarget struct {
-	Value      *[]nosql.ScanOp
-	elemTarget nosql.ScanOpTarget
-	vdl.TargetBase
-	vdl.ListTargetBase
-}
-
-func (t *unnamed_5b5d762e696f2f7632332f73657276696365732f73796e63626173652f6e6f73716c2e5363616e4f70207374727563747b537461727420737472696e673b4c696d697420737472696e677dTarget) StartList(tt *vdl.Type, len int) (vdl.ListTarget, error) {
-
-	if !vdl.Compatible(tt, __VDLType8) {
-		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType8)
-	}
-	if cap(*t.Value) < len {
-		*t.Value = make([]nosql.ScanOp, len)
-	} else {
-		*t.Value = (*t.Value)[:len]
-	}
-	return t, nil
-}
-func (t *unnamed_5b5d762e696f2f7632332f73657276696365732f73796e63626173652f6e6f73716c2e5363616e4f70207374727563747b537461727420737472696e673b4c696d697420737472696e677dTarget) StartElem(index int) (elem vdl.Target, _ error) {
-	t.elemTarget.Value = &(*t.Value)[index]
-	target, err := &t.elemTarget, error(nil)
-	return target, err
-}
-func (t *unnamed_5b5d762e696f2f7632332f73657276696365732f73796e63626173652f6e6f73716c2e5363616e4f70207374727563747b537461727420737472696e673b4c696d697420737472696e677dTarget) FinishElem(elem vdl.Target) error {
-	return nil
-}
-func (t *unnamed_5b5d762e696f2f7632332f73657276696365732f73796e63626173652f6e6f73716c2e5363616e4f70207374727563747b537461727420737472696e673b4c696d697420737472696e677dTarget) FinishList(elem vdl.ListTarget) error {
-
-	return nil
-}
-
 // map[uint64]nosql.BatchInfo
 type unnamed_6d61705b75696e7436345d762e696f2f7632332f73657276696365732f73796e63626173652f6e6f73716c2e4261746368496e666f207374727563747b49642075696e7436343b48696e7420737472696e673b536f7572636520762e696f2f7632332f73657276696365732f73796e63626173652f6e6f73716c2e4261746368536f7572636520656e756d7b4c6f63616c3b52656d6f74657d7dTarget struct {
 	Value      *map[uint64]nosql.BatchInfo
@@ -671,8 +1088,8 @@ type unnamed_6d61705b75696e7436345d762e696f2f7632332f73657276696365732f73796e636
 
 func (t *unnamed_6d61705b75696e7436345d762e696f2f7632332f73657276696365732f73796e63626173652f6e6f73716c2e4261746368496e666f207374727563747b49642075696e7436343b48696e7420737472696e673b536f7572636520762e696f2f7632332f73657276696365732f73796e63626173652f6e6f73716c2e4261746368536f7572636520656e756d7b4c6f63616c3b52656d6f74657d7dTarget) StartMap(tt *vdl.Type, len int) (vdl.MapTarget, error) {
 
-	if !vdl.Compatible(tt, __VDLType3) {
-		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType3)
+	if ttWant := vdl.TypeOf((*map[uint64]nosql.BatchInfo)(nil)); !vdl.Compatible(tt, ttWant) {
+		return nil, fmt.Errorf("type %v incompatible with %v", tt, ttWant)
 	}
 	*t.Value = make(map[uint64]nosql.BatchInfo)
 	return t, nil
@@ -701,236 +1118,21 @@ func (t *unnamed_6d61705b75696e7436345d762e696f2f7632332f73657276696365732f73796
 	return nil
 }
 
-// ConflictRowSet contains a set of rows under conflict. It provides two different
-// ways to access the same set.
-// ByKey is a map of ConflictRows keyed by the row key.
-// ByBatch is a map of []ConflictRows keyed by batch id. This map lets the client
-// access all ConflictRows within this set that contain a given hint.
-type ConflictRowSet struct {
-	ByKey   map[string]ConflictRow
-	ByBatch map[uint64][]ConflictRow
-}
-
-func (ConflictRowSet) __VDLReflect(struct {
-	Name string `vdl:"v.io/v23/syncbase/nosql.ConflictRowSet"`
-}) {
-}
-
-func (m *ConflictRowSet) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
-	__VDLEnsureNativeBuilt()
-	fieldsTarget1, err := t.StartFields(tt)
-	if err != nil {
-		return err
-	}
-
-	keyTarget2, fieldTarget3, err := fieldsTarget1.StartField("ByKey")
-	if err != vdl.ErrFieldNoExist && err != nil {
-		return err
-	}
-	if err != vdl.ErrFieldNoExist {
-
-		mapTarget4, err := fieldTarget3.StartMap(__VDLType5, len(m.ByKey))
-		if err != nil {
-			return err
-		}
-		for key6, value8 := range m.ByKey {
-			keyTarget5, err := mapTarget4.StartKey()
-			if err != nil {
-				return err
-			}
-			if err := keyTarget5.FromString(string(key6), vdl.StringType); err != nil {
-				return err
-			}
-			valueTarget7, err := mapTarget4.FinishKeyStartField(keyTarget5)
-			if err != nil {
-				return err
-			}
-
-			if err := value8.FillVDLTarget(valueTarget7, __VDLType_v_io_v23_syncbase_nosql_ConflictRow); err != nil {
-				return err
-			}
-			if err := mapTarget4.FinishField(keyTarget5, valueTarget7); err != nil {
-				return err
-			}
-		}
-		if err := fieldTarget3.FinishMap(mapTarget4); err != nil {
-			return err
-		}
-		if err := fieldsTarget1.FinishField(keyTarget2, fieldTarget3); err != nil {
-			return err
-		}
-	}
-	keyTarget9, fieldTarget10, err := fieldsTarget1.StartField("ByBatch")
-	if err != vdl.ErrFieldNoExist && err != nil {
-		return err
-	}
-	if err != vdl.ErrFieldNoExist {
-
-		mapTarget11, err := fieldTarget10.StartMap(__VDLType7, len(m.ByBatch))
-		if err != nil {
-			return err
-		}
-		for key13, value15 := range m.ByBatch {
-			keyTarget12, err := mapTarget11.StartKey()
-			if err != nil {
-				return err
-			}
-			if err := keyTarget12.FromUint(uint64(key13), vdl.Uint64Type); err != nil {
-				return err
-			}
-			valueTarget14, err := mapTarget11.FinishKeyStartField(keyTarget12)
-			if err != nil {
-				return err
-			}
-
-			listTarget16, err := valueTarget14.StartList(__VDLType6, len(value15))
-			if err != nil {
-				return err
-			}
-			for i, elem18 := range value15 {
-				elemTarget17, err := listTarget16.StartElem(i)
-				if err != nil {
-					return err
-				}
-
-				if err := elem18.FillVDLTarget(elemTarget17, __VDLType_v_io_v23_syncbase_nosql_ConflictRow); err != nil {
-					return err
-				}
-				if err := listTarget16.FinishElem(elemTarget17); err != nil {
-					return err
-				}
-			}
-			if err := valueTarget14.FinishList(listTarget16); err != nil {
-				return err
-			}
-			if err := mapTarget11.FinishField(keyTarget12, valueTarget14); err != nil {
-				return err
-			}
-		}
-		if err := fieldTarget10.FinishMap(mapTarget11); err != nil {
-			return err
-		}
-		if err := fieldsTarget1.FinishField(keyTarget9, fieldTarget10); err != nil {
-			return err
-		}
-	}
-	if err := t.FinishFields(fieldsTarget1); err != nil {
-		return err
-	}
-	return nil
-}
-
-func (m *ConflictRowSet) MakeVDLTarget() vdl.Target {
-	return &ConflictRowSetTarget{Value: m}
-}
-
-// ConflictScanSet contains a set of scans under conflict.
-// ByBatch is a map of array of ScanOps keyed by batch id.
-type ConflictScanSet struct {
-	ByBatch map[uint64][]nosql.ScanOp
-}
-
-func (ConflictScanSet) __VDLReflect(struct {
-	Name string `vdl:"v.io/v23/syncbase/nosql.ConflictScanSet"`
-}) {
-}
-
-func (m *ConflictScanSet) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
-	if __VDLType_v_io_v23_syncbase_nosql_ConflictScanSet == nil || __VDLType2 == nil {
-		panic("Initialization order error: types generated for FillVDLTarget not initialized. Consider moving caller to an init() block.")
-	}
-	fieldsTarget1, err := t.StartFields(tt)
-	if err != nil {
-		return err
-	}
-
-	keyTarget2, fieldTarget3, err := fieldsTarget1.StartField("ByBatch")
-	if err != vdl.ErrFieldNoExist && err != nil {
-		return err
-	}
-	if err != vdl.ErrFieldNoExist {
-
-		mapTarget4, err := fieldTarget3.StartMap(__VDLType9, len(m.ByBatch))
-		if err != nil {
-			return err
-		}
-		for key6, value8 := range m.ByBatch {
-			keyTarget5, err := mapTarget4.StartKey()
-			if err != nil {
-				return err
-			}
-			if err := keyTarget5.FromUint(uint64(key6), vdl.Uint64Type); err != nil {
-				return err
-			}
-			valueTarget7, err := mapTarget4.FinishKeyStartField(keyTarget5)
-			if err != nil {
-				return err
-			}
-
-			listTarget9, err := valueTarget7.StartList(__VDLType8, len(value8))
-			if err != nil {
-				return err
-			}
-			for i, elem11 := range value8 {
-				elemTarget10, err := listTarget9.StartElem(i)
-				if err != nil {
-					return err
-				}
-
-				if err := elem11.FillVDLTarget(elemTarget10, __VDLType_v_io_v23_services_syncbase_nosql_ScanOp); err != nil {
-					return err
-				}
-				if err := listTarget9.FinishElem(elemTarget10); err != nil {
-					return err
-				}
-			}
-			if err := valueTarget7.FinishList(listTarget9); err != nil {
-				return err
-			}
-			if err := mapTarget4.FinishField(keyTarget5, valueTarget7); err != nil {
-				return err
-			}
-		}
-		if err := fieldTarget3.FinishMap(mapTarget4); err != nil {
-			return err
-		}
-		if err := fieldsTarget1.FinishField(keyTarget2, fieldTarget3); err != nil {
-			return err
-		}
-	}
-	if err := t.FinishFields(fieldsTarget1); err != nil {
-		return err
-	}
-	return nil
-}
-
-func (m *ConflictScanSet) MakeVDLTarget() vdl.Target {
-	return &ConflictScanSetTarget{Value: m}
-}
-
-// ConflictRow represents a row under conflict.
+// ResolvedRow represents a result of resolution of a row under conflict.
 // Key is the key for the row.
-// LocalValue is the value present in the local db.
-// RemoteValue is the value received via sync.
-// AncestorValue is the value for the key which is the lowest common
-// ancestor of the two values represented by LocalValue and RemoteValue.
-// AncestorValue's state is NoExists if the ConflictRow is a part of the read set.
-// BatchIds is a list of ids of all the batches that this row belongs to.
-type ConflictRow struct {
-	Key           string
-	LocalValue    Value
-	RemoteValue   Value
-	AncestorValue Value
-	BatchIds      []uint64
+// Result is the result of the conflict resolution. Delete is represented
+// by nil.
+type ResolvedRow struct {
+	Key    string
+	Result *Value
 }
 
-func (ConflictRow) __VDLReflect(struct {
-	Name string `vdl:"v.io/v23/syncbase/nosql.ConflictRow"`
+func (ResolvedRow) __VDLReflect(struct {
+	Name string `vdl:"v.io/v23/syncbase/nosql.ResolvedRow"`
 }) {
 }
 
-func (m *ConflictRow) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
-	__VDLEnsureNativeBuilt()
+func (m *ResolvedRow) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 	fieldsTarget1, err := t.StartFields(tt)
 	if err != nil {
 		return err
@@ -941,231 +1143,40 @@ func (m *ConflictRow) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 		return err
 	}
 	if err != vdl.ErrFieldNoExist {
-		if err := fieldTarget3.FromString(string(m.Key), vdl.StringType); err != nil {
+		if err := fieldTarget3.FromString(string(m.Key), tt.NonOptional().Field(0).Type); err != nil {
 			return err
 		}
 		if err := fieldsTarget1.FinishField(keyTarget2, fieldTarget3); err != nil {
 			return err
 		}
 	}
-	keyTarget4, fieldTarget5, err := fieldsTarget1.StartField("LocalValue")
+	keyTarget4, fieldTarget5, err := fieldsTarget1.StartField("Result")
 	if err != vdl.ErrFieldNoExist && err != nil {
 		return err
 	}
 	if err != vdl.ErrFieldNoExist {
 
-		if err := m.LocalValue.FillVDLTarget(fieldTarget5, __VDLType_v_io_v23_syncbase_nosql_Value); err != nil {
-			return err
+		if m.Result == nil {
+			if err := fieldTarget5.FromNil(tt.NonOptional().Field(1).Type); err != nil {
+				return err
+			}
+		} else {
+			if err := m.Result.FillVDLTarget(fieldTarget5, tt.NonOptional().Field(1).Type); err != nil {
+				return err
+			}
 		}
 		if err := fieldsTarget1.FinishField(keyTarget4, fieldTarget5); err != nil {
 			return err
 		}
 	}
-	keyTarget6, fieldTarget7, err := fieldsTarget1.StartField("RemoteValue")
-	if err != vdl.ErrFieldNoExist && err != nil {
-		return err
-	}
-	if err != vdl.ErrFieldNoExist {
-
-		if err := m.RemoteValue.FillVDLTarget(fieldTarget7, __VDLType_v_io_v23_syncbase_nosql_Value); err != nil {
-			return err
-		}
-		if err := fieldsTarget1.FinishField(keyTarget6, fieldTarget7); err != nil {
-			return err
-		}
-	}
-	keyTarget8, fieldTarget9, err := fieldsTarget1.StartField("AncestorValue")
-	if err != vdl.ErrFieldNoExist && err != nil {
-		return err
-	}
-	if err != vdl.ErrFieldNoExist {
-
-		if err := m.AncestorValue.FillVDLTarget(fieldTarget9, __VDLType_v_io_v23_syncbase_nosql_Value); err != nil {
-			return err
-		}
-		if err := fieldsTarget1.FinishField(keyTarget8, fieldTarget9); err != nil {
-			return err
-		}
-	}
-	keyTarget10, fieldTarget11, err := fieldsTarget1.StartField("BatchIds")
-	if err != vdl.ErrFieldNoExist && err != nil {
-		return err
-	}
-	if err != vdl.ErrFieldNoExist {
-
-		listTarget12, err := fieldTarget11.StartList(__VDLType4, len(m.BatchIds))
-		if err != nil {
-			return err
-		}
-		for i, elem14 := range m.BatchIds {
-			elemTarget13, err := listTarget12.StartElem(i)
-			if err != nil {
-				return err
-			}
-			if err := elemTarget13.FromUint(uint64(elem14), vdl.Uint64Type); err != nil {
-				return err
-			}
-			if err := listTarget12.FinishElem(elemTarget13); err != nil {
-				return err
-			}
-		}
-		if err := fieldTarget11.FinishList(listTarget12); err != nil {
-			return err
-		}
-		if err := fieldsTarget1.FinishField(keyTarget10, fieldTarget11); err != nil {
-			return err
-		}
-	}
 	if err := t.FinishFields(fieldsTarget1); err != nil {
 		return err
 	}
 	return nil
 }
 
-func (m *ConflictRow) MakeVDLTarget() vdl.Target {
-	return &ConflictRowTarget{Value: m}
-}
-
-// Resolution contains the application’s reply to a conflict. It must contain a
-// resolved value for each conflict row within the WriteSet of the given
-// conflict.
-// ResultSet is a map of row key to ResolvedRow.
-type Resolution struct {
-	ResultSet map[string]ResolvedRow
-}
-
-func (Resolution) __VDLReflect(struct {
-	Name string `vdl:"v.io/v23/syncbase/nosql.Resolution"`
-}) {
-}
-
-func (m *Resolution) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
-	__VDLEnsureNativeBuilt()
-	fieldsTarget1, err := t.StartFields(tt)
-	if err != nil {
-		return err
-	}
-
-	keyTarget2, fieldTarget3, err := fieldsTarget1.StartField("ResultSet")
-	if err != vdl.ErrFieldNoExist && err != nil {
-		return err
-	}
-	if err != vdl.ErrFieldNoExist {
-
-		mapTarget4, err := fieldTarget3.StartMap(__VDLType12, len(m.ResultSet))
-		if err != nil {
-			return err
-		}
-		for key6, value8 := range m.ResultSet {
-			keyTarget5, err := mapTarget4.StartKey()
-			if err != nil {
-				return err
-			}
-			if err := keyTarget5.FromString(string(key6), vdl.StringType); err != nil {
-				return err
-			}
-			valueTarget7, err := mapTarget4.FinishKeyStartField(keyTarget5)
-			if err != nil {
-				return err
-			}
-
-			if err := value8.FillVDLTarget(valueTarget7, __VDLType_v_io_v23_syncbase_nosql_ResolvedRow); err != nil {
-				return err
-			}
-			if err := mapTarget4.FinishField(keyTarget5, valueTarget7); err != nil {
-				return err
-			}
-		}
-		if err := fieldTarget3.FinishMap(mapTarget4); err != nil {
-			return err
-		}
-		if err := fieldsTarget1.FinishField(keyTarget2, fieldTarget3); err != nil {
-			return err
-		}
-	}
-	if err := t.FinishFields(fieldsTarget1); err != nil {
-		return err
-	}
-	return nil
-}
-
-func (m *Resolution) MakeVDLTarget() vdl.Target {
-	return &ResolutionTarget{Value: m}
-}
-
-type ResolutionTarget struct {
-	Value           *Resolution
-	resultSetTarget unnamed_6d61705b737472696e675d762e696f2f7632332f73796e63626173652f6e6f73716c2e5265736f6c766564526f77207374727563747b4b657920737472696e673b526573756c74203f762e696f2f7632332f73796e63626173652f6e6f73716c2e56616c7565207374727563747b537461746520762e696f2f7632332f73657276696365732f73796e63626173652f6e6f73716c2e56616c7565537461746520656e756d7b4578697374733b4e6f4578697374733b44656c657465643b556e6b6e6f776e7d3b56616c205b5d627974653b577269746554732074696d652e54696d65207374727563747b5365636f6e647320696e7436343b4e616e6f7320696e7433327d3b53656c656374696f6e20762e696f2f7632332f73657276696365732f73796e63626173652f6e6f73716c2e56616c756553656c656374696f6e20656e756d7b4c6f63616c3b52656d6f74653b4f746865727d7d7dTarget
-	vdl.TargetBase
-	vdl.FieldsTargetBase
-}
-
-func (t *ResolutionTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
-
-	if !vdl.Compatible(tt, __VDLType_v_io_v23_syncbase_nosql_Resolution) {
-		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType_v_io_v23_syncbase_nosql_Resolution)
-	}
-	return t, nil
-}
-func (t *ResolutionTarget) StartField(name string) (key, field vdl.Target, _ error) {
-	switch name {
-	case "ResultSet":
-		t.resultSetTarget.Value = &t.Value.ResultSet
-		target, err := &t.resultSetTarget, error(nil)
-		return nil, target, err
-	default:
-		return nil, nil, fmt.Errorf("field %s not in struct %v", name, __VDLType_v_io_v23_syncbase_nosql_Resolution)
-	}
-}
-func (t *ResolutionTarget) FinishField(_, _ vdl.Target) error {
-	return nil
-}
-func (t *ResolutionTarget) FinishFields(_ vdl.FieldsTarget) error {
-
-	return nil
-}
-
-// map[string]ResolvedRow
-type unnamed_6d61705b737472696e675d762e696f2f7632332f73796e63626173652f6e6f73716c2e5265736f6c766564526f77207374727563747b4b657920737472696e673b526573756c74203f762e696f2f7632332f73796e63626173652f6e6f73716c2e56616c7565207374727563747b537461746520762e696f2f7632332f73657276696365732f73796e63626173652f6e6f73716c2e56616c7565537461746520656e756d7b4578697374733b4e6f4578697374733b44656c657465643b556e6b6e6f776e7d3b56616c205b5d627974653b577269746554732074696d652e54696d65207374727563747b5365636f6e647320696e7436343b4e616e6f7320696e7433327d3b53656c656374696f6e20762e696f2f7632332f73657276696365732f73796e63626173652f6e6f73716c2e56616c756553656c656374696f6e20656e756d7b4c6f63616c3b52656d6f74653b4f746865727d7d7dTarget struct {
-	Value      *map[string]ResolvedRow
-	currKey    string
-	currElem   ResolvedRow
-	keyTarget  vdl.StringTarget
-	elemTarget ResolvedRowTarget
-	vdl.TargetBase
-	vdl.MapTargetBase
-}
-
-func (t *unnamed_6d61705b737472696e675d762e696f2f7632332f73796e63626173652f6e6f73716c2e5265736f6c766564526f77207374727563747b4b657920737472696e673b526573756c74203f762e696f2f7632332f73796e63626173652f6e6f73716c2e56616c7565207374727563747b537461746520762e696f2f7632332f73657276696365732f73796e63626173652f6e6f73716c2e56616c7565537461746520656e756d7b4578697374733b4e6f4578697374733b44656c657465643b556e6b6e6f776e7d3b56616c205b5d627974653b577269746554732074696d652e54696d65207374727563747b5365636f6e647320696e7436343b4e616e6f7320696e7433327d3b53656c656374696f6e20762e696f2f7632332f73657276696365732f73796e63626173652f6e6f73716c2e56616c756553656c656374696f6e20656e756d7b4c6f63616c3b52656d6f74653b4f746865727d7d7dTarget) StartMap(tt *vdl.Type, len int) (vdl.MapTarget, error) {
-
-	if !vdl.Compatible(tt, __VDLType12) {
-		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType12)
-	}
-	*t.Value = make(map[string]ResolvedRow)
-	return t, nil
-}
-func (t *unnamed_6d61705b737472696e675d762e696f2f7632332f73796e63626173652f6e6f73716c2e5265736f6c766564526f77207374727563747b4b657920737472696e673b526573756c74203f762e696f2f7632332f73796e63626173652f6e6f73716c2e56616c7565207374727563747b537461746520762e696f2f7632332f73657276696365732f73796e63626173652f6e6f73716c2e56616c7565537461746520656e756d7b4578697374733b4e6f4578697374733b44656c657465643b556e6b6e6f776e7d3b56616c205b5d627974653b577269746554732074696d652e54696d65207374727563747b5365636f6e647320696e7436343b4e616e6f7320696e7433327d3b53656c656374696f6e20762e696f2f7632332f73657276696365732f73796e63626173652f6e6f73716c2e56616c756553656c656374696f6e20656e756d7b4c6f63616c3b52656d6f74653b4f746865727d7d7dTarget) StartKey() (key vdl.Target, _ error) {
-	t.currKey = ""
-	t.keyTarget.Value = &t.currKey
-	target, err := &t.keyTarget, error(nil)
-	return target, err
-}
-func (t *unnamed_6d61705b737472696e675d762e696f2f7632332f73796e63626173652f6e6f73716c2e5265736f6c766564526f77207374727563747b4b657920737472696e673b526573756c74203f762e696f2f7632332f73796e63626173652f6e6f73716c2e56616c7565207374727563747b537461746520762e696f2f7632332f73657276696365732f73796e63626173652f6e6f73716c2e56616c7565537461746520656e756d7b4578697374733b4e6f4578697374733b44656c657465643b556e6b6e6f776e7d3b56616c205b5d627974653b577269746554732074696d652e54696d65207374727563747b5365636f6e647320696e7436343b4e616e6f7320696e7433327d3b53656c656374696f6e20762e696f2f7632332f73657276696365732f73796e63626173652f6e6f73716c2e56616c756553656c656374696f6e20656e756d7b4c6f63616c3b52656d6f74653b4f746865727d7d7dTarget) FinishKeyStartField(key vdl.Target) (field vdl.Target, _ error) {
-	t.currElem = reflect.Zero(reflect.TypeOf(t.currElem)).Interface().(ResolvedRow)
-	t.elemTarget.Value = &t.currElem
-	target, err := &t.elemTarget, error(nil)
-	return target, err
-}
-func (t *unnamed_6d61705b737472696e675d762e696f2f7632332f73796e63626173652f6e6f73716c2e5265736f6c766564526f77207374727563747b4b657920737472696e673b526573756c74203f762e696f2f7632332f73796e63626173652f6e6f73716c2e56616c7565207374727563747b537461746520762e696f2f7632332f73657276696365732f73796e63626173652f6e6f73716c2e56616c7565537461746520656e756d7b4578697374733b4e6f4578697374733b44656c657465643b556e6b6e6f776e7d3b56616c205b5d627974653b577269746554732074696d652e54696d65207374727563747b5365636f6e647320696e7436343b4e616e6f7320696e7433327d3b53656c656374696f6e20762e696f2f7632332f73657276696365732f73796e63626173652f6e6f73716c2e56616c756553656c656374696f6e20656e756d7b4c6f63616c3b52656d6f74653b4f746865727d7d7dTarget) FinishField(key, field vdl.Target) error {
-	(*t.Value)[t.currKey] = t.currElem
-	return nil
-}
-func (t *unnamed_6d61705b737472696e675d762e696f2f7632332f73796e63626173652f6e6f73716c2e5265736f6c766564526f77207374727563747b4b657920737472696e673b526573756c74203f762e696f2f7632332f73796e63626173652f6e6f73716c2e56616c7565207374727563747b537461746520762e696f2f7632332f73657276696365732f73796e63626173652f6e6f73716c2e56616c7565537461746520656e756d7b4578697374733b4e6f4578697374733b44656c657465643b556e6b6e6f776e7d3b56616c205b5d627974653b577269746554732074696d652e54696d65207374727563747b5365636f6e647320696e7436343b4e616e6f7320696e7433327d3b53656c656374696f6e20762e696f2f7632332f73657276696365732f73796e63626173652f6e6f73716c2e56616c756553656c656374696f6e20656e756d7b4c6f63616c3b52656d6f74653b4f746865727d7d7dTarget) FinishMap(elem vdl.MapTarget) error {
-	if len(*t.Value) == 0 {
-		*t.Value = nil
-	}
-
-	return nil
+func (m *ResolvedRow) MakeVDLTarget() vdl.Target {
+	return &ResolvedRowTarget{Value: m}
 }
 
 type ResolvedRowTarget struct {
@@ -1178,8 +1189,8 @@ type ResolvedRowTarget struct {
 
 func (t *ResolvedRowTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
 
-	if !vdl.Compatible(tt, __VDLType_v_io_v23_syncbase_nosql_ResolvedRow) {
-		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType_v_io_v23_syncbase_nosql_ResolvedRow)
+	if ttWant := vdl.TypeOf((*ResolvedRow)(nil)).Elem(); !vdl.Compatible(tt, ttWant) {
+		return nil, fmt.Errorf("type %v incompatible with %v", tt, ttWant)
 	}
 	return t, nil
 }
@@ -1194,7 +1205,7 @@ func (t *ResolvedRowTarget) StartField(name string) (key, field vdl.Target, _ er
 		target, err := &t.resultTarget, error(nil)
 		return nil, target, err
 	default:
-		return nil, nil, fmt.Errorf("field %s not in struct %v", name, __VDLType_v_io_v23_syncbase_nosql_ResolvedRow)
+		return nil, nil, fmt.Errorf("field %s not in struct v.io/v23/syncbase/nosql.ResolvedRow", name)
 	}
 }
 func (t *ResolvedRowTarget) FinishField(_, _ vdl.Target) error {
@@ -1236,55 +1247,59 @@ func (t *unnamed_3f762e696f2f7632332f73796e63626173652f6e6f73716c2e56616c7565207
 	return nil
 }
 
-// ResolvedRow represents a result of resolution of a row under conflict.
-// Key is the key for the row.
-// Result is the result of the conflict resolution. Delete is represented
-// by nil.
-type ResolvedRow struct {
-	Key    string
-	Result *Value
+// Resolution contains the application’s reply to a conflict. It must contain a
+// resolved value for each conflict row within the WriteSet of the given
+// conflict.
+// ResultSet is a map of row key to ResolvedRow.
+type Resolution struct {
+	ResultSet map[string]ResolvedRow
 }
 
-func (ResolvedRow) __VDLReflect(struct {
-	Name string `vdl:"v.io/v23/syncbase/nosql.ResolvedRow"`
+func (Resolution) __VDLReflect(struct {
+	Name string `vdl:"v.io/v23/syncbase/nosql.Resolution"`
 }) {
 }
 
-func (m *ResolvedRow) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
-	__VDLEnsureNativeBuilt()
+func (m *Resolution) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 	fieldsTarget1, err := t.StartFields(tt)
 	if err != nil {
 		return err
 	}
 
-	keyTarget2, fieldTarget3, err := fieldsTarget1.StartField("Key")
-	if err != vdl.ErrFieldNoExist && err != nil {
-		return err
-	}
-	if err != vdl.ErrFieldNoExist {
-		if err := fieldTarget3.FromString(string(m.Key), vdl.StringType); err != nil {
-			return err
-		}
-		if err := fieldsTarget1.FinishField(keyTarget2, fieldTarget3); err != nil {
-			return err
-		}
-	}
-	keyTarget4, fieldTarget5, err := fieldsTarget1.StartField("Result")
+	keyTarget2, fieldTarget3, err := fieldsTarget1.StartField("ResultSet")
 	if err != vdl.ErrFieldNoExist && err != nil {
 		return err
 	}
 	if err != vdl.ErrFieldNoExist {
 
-		if m.Result == nil {
-			if err := fieldTarget5.FromNil(__VDLType14); err != nil {
+		mapTarget4, err := fieldTarget3.StartMap(tt.NonOptional().Field(0).Type, len(m.ResultSet))
+		if err != nil {
+			return err
+		}
+		for key6, value8 := range m.ResultSet {
+			keyTarget5, err := mapTarget4.StartKey()
+			if err != nil {
 				return err
 			}
-		} else {
-			if err := m.Result.FillVDLTarget(fieldTarget5, __VDLType_v_io_v23_syncbase_nosql_Value); err != nil {
+			if err := keyTarget5.FromString(string(key6), tt.NonOptional().Field(0).Type.Key()); err != nil {
+				return err
+			}
+			valueTarget7, err := mapTarget4.FinishKeyStartField(keyTarget5)
+			if err != nil {
+				return err
+			}
+
+			if err := value8.FillVDLTarget(valueTarget7, tt.NonOptional().Field(0).Type.Elem()); err != nil {
+				return err
+			}
+			if err := mapTarget4.FinishField(keyTarget5, valueTarget7); err != nil {
 				return err
 			}
 		}
-		if err := fieldsTarget1.FinishField(keyTarget4, fieldTarget5); err != nil {
+		if err := fieldTarget3.FinishMap(mapTarget4); err != nil {
+			return err
+		}
+		if err := fieldsTarget1.FinishField(keyTarget2, fieldTarget3); err != nil {
 			return err
 		}
 	}
@@ -1294,1155 +1309,113 @@ func (m *ResolvedRow) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 	return nil
 }
 
-func (m *ResolvedRow) MakeVDLTarget() vdl.Target {
-	return &ResolvedRowTarget{Value: m}
+func (m *Resolution) MakeVDLTarget() vdl.Target {
+	return &ResolutionTarget{Value: m}
 }
 
-// Value contains a specific version of data for the row under conflict along
-// with the write timestamp and hints associated with the version.
-// State defines whether the value is empty or not. It can be empty for
-// reasons like Deleted or Unknown.
-// WriteTs is the write timestamp for this value.
-type Value struct {
-	State   nosql.ValueState
-	Val     []byte
-	WriteTs time.Time
-	// TODO(jlodhia): Since field Selection cannot be package private in VDL,
-	// review the ConflictResolution API to see if we should keep this field
-	// or not.
-	Selection nosql.ValueSelection
+type ResolutionTarget struct {
+	Value           *Resolution
+	resultSetTarget unnamed_6d61705b737472696e675d762e696f2f7632332f73796e63626173652f6e6f73716c2e5265736f6c766564526f77207374727563747b4b657920737472696e673b526573756c74203f762e696f2f7632332f73796e63626173652f6e6f73716c2e56616c7565207374727563747b537461746520762e696f2f7632332f73657276696365732f73796e63626173652f6e6f73716c2e56616c7565537461746520656e756d7b4578697374733b4e6f4578697374733b44656c657465643b556e6b6e6f776e7d3b56616c205b5d627974653b577269746554732074696d652e54696d65207374727563747b5365636f6e647320696e7436343b4e616e6f7320696e7433327d3b53656c656374696f6e20762e696f2f7632332f73657276696365732f73796e63626173652f6e6f73716c2e56616c756553656c656374696f6e20656e756d7b4c6f63616c3b52656d6f74653b4f746865727d7d7dTarget
+	vdl.TargetBase
+	vdl.FieldsTargetBase
 }
 
-func (Value) __VDLReflect(struct {
-	Name string `vdl:"v.io/v23/syncbase/nosql.Value"`
-}) {
+func (t *ResolutionTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
+
+	if ttWant := vdl.TypeOf((*Resolution)(nil)).Elem(); !vdl.Compatible(tt, ttWant) {
+		return nil, fmt.Errorf("type %v incompatible with %v", tt, ttWant)
+	}
+	return t, nil
 }
+func (t *ResolutionTarget) StartField(name string) (key, field vdl.Target, _ error) {
+	switch name {
+	case "ResultSet":
+		t.resultSetTarget.Value = &t.Value.ResultSet
+		target, err := &t.resultSetTarget, error(nil)
+		return nil, target, err
+	default:
+		return nil, nil, fmt.Errorf("field %s not in struct v.io/v23/syncbase/nosql.Resolution", name)
+	}
+}
+func (t *ResolutionTarget) FinishField(_, _ vdl.Target) error {
+	return nil
+}
+func (t *ResolutionTarget) FinishFields(_ vdl.FieldsTarget) error {
 
-func (m *Value) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
-	__VDLEnsureNativeBuilt()
-	fieldsTarget1, err := t.StartFields(tt)
-	if err != nil {
-		return err
-	}
-
-	keyTarget2, fieldTarget3, err := fieldsTarget1.StartField("State")
-	if err != vdl.ErrFieldNoExist && err != nil {
-		return err
-	}
-	if err != vdl.ErrFieldNoExist {
-
-		if err := m.State.FillVDLTarget(fieldTarget3, __VDLType_v_io_v23_services_syncbase_nosql_ValueState); err != nil {
-			return err
-		}
-		if err := fieldsTarget1.FinishField(keyTarget2, fieldTarget3); err != nil {
-			return err
-		}
-	}
-	keyTarget4, fieldTarget5, err := fieldsTarget1.StartField("Val")
-	if err != vdl.ErrFieldNoExist && err != nil {
-		return err
-	}
-	if err != vdl.ErrFieldNoExist {
-
-		if err := fieldTarget5.FromBytes([]byte(m.Val), __VDLType15); err != nil {
-			return err
-		}
-		if err := fieldsTarget1.FinishField(keyTarget4, fieldTarget5); err != nil {
-			return err
-		}
-	}
-	var wireValue6 time_2.Time
-	if err := time_2.TimeFromNative(&wireValue6, m.WriteTs); err != nil {
-		return err
-	}
-
-	keyTarget7, fieldTarget8, err := fieldsTarget1.StartField("WriteTs")
-	if err != vdl.ErrFieldNoExist && err != nil {
-		return err
-	}
-	if err != vdl.ErrFieldNoExist {
-
-		if err := wireValue6.FillVDLTarget(fieldTarget8, __VDLType_time_Time); err != nil {
-			return err
-		}
-		if err := fieldsTarget1.FinishField(keyTarget7, fieldTarget8); err != nil {
-			return err
-		}
-	}
-	keyTarget9, fieldTarget10, err := fieldsTarget1.StartField("Selection")
-	if err != vdl.ErrFieldNoExist && err != nil {
-		return err
-	}
-	if err != vdl.ErrFieldNoExist {
-
-		if err := m.Selection.FillVDLTarget(fieldTarget10, __VDLType_v_io_v23_services_syncbase_nosql_ValueSelection); err != nil {
-			return err
-		}
-		if err := fieldsTarget1.FinishField(keyTarget9, fieldTarget10); err != nil {
-			return err
-		}
-	}
-	if err := t.FinishFields(fieldsTarget1); err != nil {
-		return err
-	}
 	return nil
 }
 
-func (m *Value) MakeVDLTarget() vdl.Target {
-	return &ValueTarget{Value: m}
+// map[string]ResolvedRow
+type unnamed_6d61705b737472696e675d762e696f2f7632332f73796e63626173652f6e6f73716c2e5265736f6c766564526f77207374727563747b4b657920737472696e673b526573756c74203f762e696f2f7632332f73796e63626173652f6e6f73716c2e56616c7565207374727563747b537461746520762e696f2f7632332f73657276696365732f73796e63626173652f6e6f73716c2e56616c7565537461746520656e756d7b4578697374733b4e6f4578697374733b44656c657465643b556e6b6e6f776e7d3b56616c205b5d627974653b577269746554732074696d652e54696d65207374727563747b5365636f6e647320696e7436343b4e616e6f7320696e7433327d3b53656c656374696f6e20762e696f2f7632332f73657276696365732f73796e63626173652f6e6f73716c2e56616c756553656c656374696f6e20656e756d7b4c6f63616c3b52656d6f74653b4f746865727d7d7dTarget struct {
+	Value      *map[string]ResolvedRow
+	currKey    string
+	currElem   ResolvedRow
+	keyTarget  vdl.StringTarget
+	elemTarget ResolvedRowTarget
+	vdl.TargetBase
+	vdl.MapTargetBase
 }
 
-func init() {
-	vdl.Register((*Conflict)(nil))
+func (t *unnamed_6d61705b737472696e675d762e696f2f7632332f73796e63626173652f6e6f73716c2e5265736f6c766564526f77207374727563747b4b657920737472696e673b526573756c74203f762e696f2f7632332f73796e63626173652f6e6f73716c2e56616c7565207374727563747b537461746520762e696f2f7632332f73657276696365732f73796e63626173652f6e6f73716c2e56616c7565537461746520656e756d7b4578697374733b4e6f4578697374733b44656c657465643b556e6b6e6f776e7d3b56616c205b5d627974653b577269746554732074696d652e54696d65207374727563747b5365636f6e647320696e7436343b4e616e6f7320696e7433327d3b53656c656374696f6e20762e696f2f7632332f73657276696365732f73796e63626173652f6e6f73716c2e56616c756553656c656374696f6e20656e756d7b4c6f63616c3b52656d6f74653b4f746865727d7d7dTarget) StartMap(tt *vdl.Type, len int) (vdl.MapTarget, error) {
+
+	if ttWant := vdl.TypeOf((*map[string]ResolvedRow)(nil)); !vdl.Compatible(tt, ttWant) {
+		return nil, fmt.Errorf("type %v incompatible with %v", tt, ttWant)
+	}
+	*t.Value = make(map[string]ResolvedRow)
+	return t, nil
+}
+func (t *unnamed_6d61705b737472696e675d762e696f2f7632332f73796e63626173652f6e6f73716c2e5265736f6c766564526f77207374727563747b4b657920737472696e673b526573756c74203f762e696f2f7632332f73796e63626173652f6e6f73716c2e56616c7565207374727563747b537461746520762e696f2f7632332f73657276696365732f73796e63626173652f6e6f73716c2e56616c7565537461746520656e756d7b4578697374733b4e6f4578697374733b44656c657465643b556e6b6e6f776e7d3b56616c205b5d627974653b577269746554732074696d652e54696d65207374727563747b5365636f6e647320696e7436343b4e616e6f7320696e7433327d3b53656c656374696f6e20762e696f2f7632332f73657276696365732f73796e63626173652f6e6f73716c2e56616c756553656c656374696f6e20656e756d7b4c6f63616c3b52656d6f74653b4f746865727d7d7dTarget) StartKey() (key vdl.Target, _ error) {
+	t.currKey = ""
+	t.keyTarget.Value = &t.currKey
+	target, err := &t.keyTarget, error(nil)
+	return target, err
+}
+func (t *unnamed_6d61705b737472696e675d762e696f2f7632332f73796e63626173652f6e6f73716c2e5265736f6c766564526f77207374727563747b4b657920737472696e673b526573756c74203f762e696f2f7632332f73796e63626173652f6e6f73716c2e56616c7565207374727563747b537461746520762e696f2f7632332f73657276696365732f73796e63626173652f6e6f73716c2e56616c7565537461746520656e756d7b4578697374733b4e6f4578697374733b44656c657465643b556e6b6e6f776e7d3b56616c205b5d627974653b577269746554732074696d652e54696d65207374727563747b5365636f6e647320696e7436343b4e616e6f7320696e7433327d3b53656c656374696f6e20762e696f2f7632332f73657276696365732f73796e63626173652f6e6f73716c2e56616c756553656c656374696f6e20656e756d7b4c6f63616c3b52656d6f74653b4f746865727d7d7dTarget) FinishKeyStartField(key vdl.Target) (field vdl.Target, _ error) {
+	t.currElem = reflect.Zero(reflect.TypeOf(t.currElem)).Interface().(ResolvedRow)
+	t.elemTarget.Value = &t.currElem
+	target, err := &t.elemTarget, error(nil)
+	return target, err
+}
+func (t *unnamed_6d61705b737472696e675d762e696f2f7632332f73796e63626173652f6e6f73716c2e5265736f6c766564526f77207374727563747b4b657920737472696e673b526573756c74203f762e696f2f7632332f73796e63626173652f6e6f73716c2e56616c7565207374727563747b537461746520762e696f2f7632332f73657276696365732f73796e63626173652f6e6f73716c2e56616c7565537461746520656e756d7b4578697374733b4e6f4578697374733b44656c657465643b556e6b6e6f776e7d3b56616c205b5d627974653b577269746554732074696d652e54696d65207374727563747b5365636f6e647320696e7436343b4e616e6f7320696e7433327d3b53656c656374696f6e20762e696f2f7632332f73657276696365732f73796e63626173652f6e6f73716c2e56616c756553656c656374696f6e20656e756d7b4c6f63616c3b52656d6f74653b4f746865727d7d7dTarget) FinishField(key, field vdl.Target) error {
+	(*t.Value)[t.currKey] = t.currElem
+	return nil
+}
+func (t *unnamed_6d61705b737472696e675d762e696f2f7632332f73796e63626173652f6e6f73716c2e5265736f6c766564526f77207374727563747b4b657920737472696e673b526573756c74203f762e696f2f7632332f73796e63626173652f6e6f73716c2e56616c7565207374727563747b537461746520762e696f2f7632332f73657276696365732f73796e63626173652f6e6f73716c2e56616c7565537461746520656e756d7b4578697374733b4e6f4578697374733b44656c657465643b556e6b6e6f776e7d3b56616c205b5d627974653b577269746554732074696d652e54696d65207374727563747b5365636f6e647320696e7436343b4e616e6f7320696e7433327d3b53656c656374696f6e20762e696f2f7632332f73657276696365732f73796e63626173652f6e6f73716c2e56616c756553656c656374696f6e20656e756d7b4c6f63616c3b52656d6f74653b4f746865727d7d7dTarget) FinishMap(elem vdl.MapTarget) error {
+	if len(*t.Value) == 0 {
+		*t.Value = nil
+	}
+
+	return nil
+}
+
+var __VDLInitCalled bool
+
+// __VDLInit performs vdl initialization.  It is safe to call multiple times.
+// If you have an init ordering issue, just insert the following line verbatim
+// into your source files in this package, right after the "package foo" clause:
+//
+//    var _ = __VDLInit()
+//
+// The purpose of this function is to ensure that vdl initialization occurs in
+// the right order, and very early in the init sequence.  In particular, vdl
+// registration and package variable initialization needs to occur before
+// functions like vdl.TypeOf will work properly.
+//
+// This function returns a dummy value, so that it can be used to initialize the
+// first var in the file, to take advantage of Go's defined init order.
+func __VDLInit() struct{} {
+	if __VDLInitCalled {
+		return struct{}{}
+	}
+
+	// Register types.
+	vdl.Register((*Value)(nil))
+	vdl.Register((*ConflictRow)(nil))
 	vdl.Register((*ConflictRowSet)(nil))
 	vdl.Register((*ConflictScanSet)(nil))
-	vdl.Register((*ConflictRow)(nil))
-	vdl.Register((*Resolution)(nil))
+	vdl.Register((*Conflict)(nil))
 	vdl.Register((*ResolvedRow)(nil))
-	vdl.Register((*Value)(nil))
-}
+	vdl.Register((*Resolution)(nil))
 
-var __VDLType0 *vdl.Type
-
-func __VDLType0_gen() *vdl.Type {
-	__VDLType0Builder := vdl.TypeBuilder{}
-
-	__VDLType01 := __VDLType0Builder.Optional()
-	__VDLType02 := __VDLType0Builder.Struct()
-	__VDLType03 := __VDLType0Builder.Named("v.io/v23/syncbase/nosql.Conflict").AssignBase(__VDLType02)
-	__VDLType04 := __VDLType0Builder.Optional()
-	__VDLType05 := __VDLType0Builder.Struct()
-	__VDLType06 := __VDLType0Builder.Named("v.io/v23/syncbase/nosql.ConflictRowSet").AssignBase(__VDLType05)
-	__VDLType07 := __VDLType0Builder.Map()
-	__VDLType08 := vdl.StringType
-	__VDLType07.AssignKey(__VDLType08)
-	__VDLType09 := __VDLType0Builder.Struct()
-	__VDLType010 := __VDLType0Builder.Named("v.io/v23/syncbase/nosql.ConflictRow").AssignBase(__VDLType09)
-	__VDLType09.AppendField("Key", __VDLType08)
-	__VDLType011 := __VDLType0Builder.Struct()
-	__VDLType012 := __VDLType0Builder.Named("v.io/v23/syncbase/nosql.Value").AssignBase(__VDLType011)
-	__VDLType013 := __VDLType0Builder.Enum()
-	__VDLType014 := __VDLType0Builder.Named("v.io/v23/services/syncbase/nosql.ValueState").AssignBase(__VDLType013)
-	__VDLType013.AppendLabel("Exists")
-	__VDLType013.AppendLabel("NoExists")
-	__VDLType013.AppendLabel("Deleted")
-	__VDLType013.AppendLabel("Unknown")
-	__VDLType011.AppendField("State", __VDLType014)
-	__VDLType015 := __VDLType0Builder.List()
-	__VDLType016 := vdl.ByteType
-	__VDLType015.AssignElem(__VDLType016)
-	__VDLType011.AppendField("Val", __VDLType015)
-	__VDLType017 := __VDLType0Builder.Struct()
-	__VDLType018 := __VDLType0Builder.Named("time.Time").AssignBase(__VDLType017)
-	__VDLType019 := vdl.Int64Type
-	__VDLType017.AppendField("Seconds", __VDLType019)
-	__VDLType020 := vdl.Int32Type
-	__VDLType017.AppendField("Nanos", __VDLType020)
-	__VDLType011.AppendField("WriteTs", __VDLType018)
-	__VDLType021 := __VDLType0Builder.Enum()
-	__VDLType022 := __VDLType0Builder.Named("v.io/v23/services/syncbase/nosql.ValueSelection").AssignBase(__VDLType021)
-	__VDLType021.AppendLabel("Local")
-	__VDLType021.AppendLabel("Remote")
-	__VDLType021.AppendLabel("Other")
-	__VDLType011.AppendField("Selection", __VDLType022)
-	__VDLType09.AppendField("LocalValue", __VDLType012)
-	__VDLType09.AppendField("RemoteValue", __VDLType012)
-	__VDLType09.AppendField("AncestorValue", __VDLType012)
-	__VDLType023 := __VDLType0Builder.List()
-	__VDLType024 := vdl.Uint64Type
-	__VDLType023.AssignElem(__VDLType024)
-	__VDLType09.AppendField("BatchIds", __VDLType023)
-	__VDLType07.AssignElem(__VDLType010)
-	__VDLType05.AppendField("ByKey", __VDLType07)
-	__VDLType025 := __VDLType0Builder.Map()
-	__VDLType025.AssignKey(__VDLType024)
-	__VDLType026 := __VDLType0Builder.List()
-	__VDLType026.AssignElem(__VDLType010)
-	__VDLType025.AssignElem(__VDLType026)
-	__VDLType05.AppendField("ByBatch", __VDLType025)
-	__VDLType04.AssignElem(__VDLType06)
-	__VDLType02.AppendField("ReadSet", __VDLType04)
-	__VDLType02.AppendField("WriteSet", __VDLType04)
-	__VDLType027 := __VDLType0Builder.Optional()
-	__VDLType028 := __VDLType0Builder.Struct()
-	__VDLType029 := __VDLType0Builder.Named("v.io/v23/syncbase/nosql.ConflictScanSet").AssignBase(__VDLType028)
-	__VDLType030 := __VDLType0Builder.Map()
-	__VDLType030.AssignKey(__VDLType024)
-	__VDLType031 := __VDLType0Builder.List()
-	__VDLType032 := __VDLType0Builder.Struct()
-	__VDLType033 := __VDLType0Builder.Named("v.io/v23/services/syncbase/nosql.ScanOp").AssignBase(__VDLType032)
-	__VDLType032.AppendField("Start", __VDLType08)
-	__VDLType032.AppendField("Limit", __VDLType08)
-	__VDLType031.AssignElem(__VDLType033)
-	__VDLType030.AssignElem(__VDLType031)
-	__VDLType028.AppendField("ByBatch", __VDLType030)
-	__VDLType027.AssignElem(__VDLType029)
-	__VDLType02.AppendField("ScanSet", __VDLType027)
-	__VDLType034 := __VDLType0Builder.Map()
-	__VDLType034.AssignKey(__VDLType024)
-	__VDLType035 := __VDLType0Builder.Struct()
-	__VDLType036 := __VDLType0Builder.Named("v.io/v23/services/syncbase/nosql.BatchInfo").AssignBase(__VDLType035)
-	__VDLType035.AppendField("Id", __VDLType024)
-	__VDLType035.AppendField("Hint", __VDLType08)
-	__VDLType037 := __VDLType0Builder.Enum()
-	__VDLType038 := __VDLType0Builder.Named("v.io/v23/services/syncbase/nosql.BatchSource").AssignBase(__VDLType037)
-	__VDLType037.AppendLabel("Local")
-	__VDLType037.AppendLabel("Remote")
-	__VDLType035.AppendField("Source", __VDLType038)
-	__VDLType034.AssignElem(__VDLType036)
-	__VDLType02.AppendField("Batches", __VDLType034)
-	__VDLType01.AssignElem(__VDLType03)
-	__VDLType0Builder.Build()
-	__VDLType0v, err := __VDLType01.Built()
-	if err != nil {
-		panic(err)
-	}
-	return __VDLType0v
-}
-func init() {
-	__VDLType0 = __VDLType0_gen()
-}
-
-var __VDLType10 *vdl.Type
-
-func __VDLType10_gen() *vdl.Type {
-	__VDLType10Builder := vdl.TypeBuilder{}
-
-	__VDLType101 := __VDLType10Builder.Optional()
-	__VDLType102 := __VDLType10Builder.Struct()
-	__VDLType103 := __VDLType10Builder.Named("v.io/v23/syncbase/nosql.ConflictRow").AssignBase(__VDLType102)
-	__VDLType104 := vdl.StringType
-	__VDLType102.AppendField("Key", __VDLType104)
-	__VDLType105 := __VDLType10Builder.Struct()
-	__VDLType106 := __VDLType10Builder.Named("v.io/v23/syncbase/nosql.Value").AssignBase(__VDLType105)
-	__VDLType107 := __VDLType10Builder.Enum()
-	__VDLType108 := __VDLType10Builder.Named("v.io/v23/services/syncbase/nosql.ValueState").AssignBase(__VDLType107)
-	__VDLType107.AppendLabel("Exists")
-	__VDLType107.AppendLabel("NoExists")
-	__VDLType107.AppendLabel("Deleted")
-	__VDLType107.AppendLabel("Unknown")
-	__VDLType105.AppendField("State", __VDLType108)
-	__VDLType109 := __VDLType10Builder.List()
-	__VDLType1010 := vdl.ByteType
-	__VDLType109.AssignElem(__VDLType1010)
-	__VDLType105.AppendField("Val", __VDLType109)
-	__VDLType1011 := __VDLType10Builder.Struct()
-	__VDLType1012 := __VDLType10Builder.Named("time.Time").AssignBase(__VDLType1011)
-	__VDLType1013 := vdl.Int64Type
-	__VDLType1011.AppendField("Seconds", __VDLType1013)
-	__VDLType1014 := vdl.Int32Type
-	__VDLType1011.AppendField("Nanos", __VDLType1014)
-	__VDLType105.AppendField("WriteTs", __VDLType1012)
-	__VDLType1015 := __VDLType10Builder.Enum()
-	__VDLType1016 := __VDLType10Builder.Named("v.io/v23/services/syncbase/nosql.ValueSelection").AssignBase(__VDLType1015)
-	__VDLType1015.AppendLabel("Local")
-	__VDLType1015.AppendLabel("Remote")
-	__VDLType1015.AppendLabel("Other")
-	__VDLType105.AppendField("Selection", __VDLType1016)
-	__VDLType102.AppendField("LocalValue", __VDLType106)
-	__VDLType102.AppendField("RemoteValue", __VDLType106)
-	__VDLType102.AppendField("AncestorValue", __VDLType106)
-	__VDLType1017 := __VDLType10Builder.List()
-	__VDLType1018 := vdl.Uint64Type
-	__VDLType1017.AssignElem(__VDLType1018)
-	__VDLType102.AppendField("BatchIds", __VDLType1017)
-	__VDLType101.AssignElem(__VDLType103)
-	__VDLType10Builder.Build()
-	__VDLType10v, err := __VDLType101.Built()
-	if err != nil {
-		panic(err)
-	}
-	return __VDLType10v
-}
-func init() {
-	__VDLType10 = __VDLType10_gen()
-}
-
-var __VDLType1 *vdl.Type
-
-func __VDLType1_gen() *vdl.Type {
-	__VDLType1Builder := vdl.TypeBuilder{}
-
-	__VDLType11 := __VDLType1Builder.Optional()
-	__VDLType12 := __VDLType1Builder.Struct()
-	__VDLType13 := __VDLType1Builder.Named("v.io/v23/syncbase/nosql.ConflictRowSet").AssignBase(__VDLType12)
-	__VDLType14 := __VDLType1Builder.Map()
-	__VDLType15 := vdl.StringType
-	__VDLType14.AssignKey(__VDLType15)
-	__VDLType16 := __VDLType1Builder.Struct()
-	__VDLType17 := __VDLType1Builder.Named("v.io/v23/syncbase/nosql.ConflictRow").AssignBase(__VDLType16)
-	__VDLType16.AppendField("Key", __VDLType15)
-	__VDLType18 := __VDLType1Builder.Struct()
-	__VDLType19 := __VDLType1Builder.Named("v.io/v23/syncbase/nosql.Value").AssignBase(__VDLType18)
-	__VDLType110 := __VDLType1Builder.Enum()
-	__VDLType111 := __VDLType1Builder.Named("v.io/v23/services/syncbase/nosql.ValueState").AssignBase(__VDLType110)
-	__VDLType110.AppendLabel("Exists")
-	__VDLType110.AppendLabel("NoExists")
-	__VDLType110.AppendLabel("Deleted")
-	__VDLType110.AppendLabel("Unknown")
-	__VDLType18.AppendField("State", __VDLType111)
-	__VDLType112 := __VDLType1Builder.List()
-	__VDLType113 := vdl.ByteType
-	__VDLType112.AssignElem(__VDLType113)
-	__VDLType18.AppendField("Val", __VDLType112)
-	__VDLType114 := __VDLType1Builder.Struct()
-	__VDLType115 := __VDLType1Builder.Named("time.Time").AssignBase(__VDLType114)
-	__VDLType116 := vdl.Int64Type
-	__VDLType114.AppendField("Seconds", __VDLType116)
-	__VDLType117 := vdl.Int32Type
-	__VDLType114.AppendField("Nanos", __VDLType117)
-	__VDLType18.AppendField("WriteTs", __VDLType115)
-	__VDLType118 := __VDLType1Builder.Enum()
-	__VDLType119 := __VDLType1Builder.Named("v.io/v23/services/syncbase/nosql.ValueSelection").AssignBase(__VDLType118)
-	__VDLType118.AppendLabel("Local")
-	__VDLType118.AppendLabel("Remote")
-	__VDLType118.AppendLabel("Other")
-	__VDLType18.AppendField("Selection", __VDLType119)
-	__VDLType16.AppendField("LocalValue", __VDLType19)
-	__VDLType16.AppendField("RemoteValue", __VDLType19)
-	__VDLType16.AppendField("AncestorValue", __VDLType19)
-	__VDLType120 := __VDLType1Builder.List()
-	__VDLType121 := vdl.Uint64Type
-	__VDLType120.AssignElem(__VDLType121)
-	__VDLType16.AppendField("BatchIds", __VDLType120)
-	__VDLType14.AssignElem(__VDLType17)
-	__VDLType12.AppendField("ByKey", __VDLType14)
-	__VDLType122 := __VDLType1Builder.Map()
-	__VDLType122.AssignKey(__VDLType121)
-	__VDLType123 := __VDLType1Builder.List()
-	__VDLType123.AssignElem(__VDLType17)
-	__VDLType122.AssignElem(__VDLType123)
-	__VDLType12.AppendField("ByBatch", __VDLType122)
-	__VDLType11.AssignElem(__VDLType13)
-	__VDLType1Builder.Build()
-	__VDLType1v, err := __VDLType11.Built()
-	if err != nil {
-		panic(err)
-	}
-	return __VDLType1v
-}
-func init() {
-	__VDLType1 = __VDLType1_gen()
-}
-
-var __VDLType2 *vdl.Type = vdl.TypeOf((*ConflictScanSet)(nil))
-var __VDLType11 *vdl.Type
-
-func __VDLType11_gen() *vdl.Type {
-	__VDLType11Builder := vdl.TypeBuilder{}
-
-	__VDLType111 := __VDLType11Builder.Optional()
-	__VDLType112 := __VDLType11Builder.Struct()
-	__VDLType113 := __VDLType11Builder.Named("v.io/v23/syncbase/nosql.Resolution").AssignBase(__VDLType112)
-	__VDLType114 := __VDLType11Builder.Map()
-	__VDLType115 := vdl.StringType
-	__VDLType114.AssignKey(__VDLType115)
-	__VDLType116 := __VDLType11Builder.Struct()
-	__VDLType117 := __VDLType11Builder.Named("v.io/v23/syncbase/nosql.ResolvedRow").AssignBase(__VDLType116)
-	__VDLType116.AppendField("Key", __VDLType115)
-	__VDLType118 := __VDLType11Builder.Optional()
-	__VDLType119 := __VDLType11Builder.Struct()
-	__VDLType1110 := __VDLType11Builder.Named("v.io/v23/syncbase/nosql.Value").AssignBase(__VDLType119)
-	__VDLType1111 := __VDLType11Builder.Enum()
-	__VDLType1112 := __VDLType11Builder.Named("v.io/v23/services/syncbase/nosql.ValueState").AssignBase(__VDLType1111)
-	__VDLType1111.AppendLabel("Exists")
-	__VDLType1111.AppendLabel("NoExists")
-	__VDLType1111.AppendLabel("Deleted")
-	__VDLType1111.AppendLabel("Unknown")
-	__VDLType119.AppendField("State", __VDLType1112)
-	__VDLType1113 := __VDLType11Builder.List()
-	__VDLType1114 := vdl.ByteType
-	__VDLType1113.AssignElem(__VDLType1114)
-	__VDLType119.AppendField("Val", __VDLType1113)
-	__VDLType1115 := __VDLType11Builder.Struct()
-	__VDLType1116 := __VDLType11Builder.Named("time.Time").AssignBase(__VDLType1115)
-	__VDLType1117 := vdl.Int64Type
-	__VDLType1115.AppendField("Seconds", __VDLType1117)
-	__VDLType1118 := vdl.Int32Type
-	__VDLType1115.AppendField("Nanos", __VDLType1118)
-	__VDLType119.AppendField("WriteTs", __VDLType1116)
-	__VDLType1119 := __VDLType11Builder.Enum()
-	__VDLType1120 := __VDLType11Builder.Named("v.io/v23/services/syncbase/nosql.ValueSelection").AssignBase(__VDLType1119)
-	__VDLType1119.AppendLabel("Local")
-	__VDLType1119.AppendLabel("Remote")
-	__VDLType1119.AppendLabel("Other")
-	__VDLType119.AppendField("Selection", __VDLType1120)
-	__VDLType118.AssignElem(__VDLType1110)
-	__VDLType116.AppendField("Result", __VDLType118)
-	__VDLType114.AssignElem(__VDLType117)
-	__VDLType112.AppendField("ResultSet", __VDLType114)
-	__VDLType111.AssignElem(__VDLType113)
-	__VDLType11Builder.Build()
-	__VDLType11v, err := __VDLType111.Built()
-	if err != nil {
-		panic(err)
-	}
-	return __VDLType11v
-}
-func init() {
-	__VDLType11 = __VDLType11_gen()
-}
-
-var __VDLType13 *vdl.Type
-
-func __VDLType13_gen() *vdl.Type {
-	__VDLType13Builder := vdl.TypeBuilder{}
-
-	__VDLType131 := __VDLType13Builder.Optional()
-	__VDLType132 := __VDLType13Builder.Struct()
-	__VDLType133 := __VDLType13Builder.Named("v.io/v23/syncbase/nosql.ResolvedRow").AssignBase(__VDLType132)
-	__VDLType134 := vdl.StringType
-	__VDLType132.AppendField("Key", __VDLType134)
-	__VDLType135 := __VDLType13Builder.Optional()
-	__VDLType136 := __VDLType13Builder.Struct()
-	__VDLType137 := __VDLType13Builder.Named("v.io/v23/syncbase/nosql.Value").AssignBase(__VDLType136)
-	__VDLType138 := __VDLType13Builder.Enum()
-	__VDLType139 := __VDLType13Builder.Named("v.io/v23/services/syncbase/nosql.ValueState").AssignBase(__VDLType138)
-	__VDLType138.AppendLabel("Exists")
-	__VDLType138.AppendLabel("NoExists")
-	__VDLType138.AppendLabel("Deleted")
-	__VDLType138.AppendLabel("Unknown")
-	__VDLType136.AppendField("State", __VDLType139)
-	__VDLType1310 := __VDLType13Builder.List()
-	__VDLType1311 := vdl.ByteType
-	__VDLType1310.AssignElem(__VDLType1311)
-	__VDLType136.AppendField("Val", __VDLType1310)
-	__VDLType1312 := __VDLType13Builder.Struct()
-	__VDLType1313 := __VDLType13Builder.Named("time.Time").AssignBase(__VDLType1312)
-	__VDLType1314 := vdl.Int64Type
-	__VDLType1312.AppendField("Seconds", __VDLType1314)
-	__VDLType1315 := vdl.Int32Type
-	__VDLType1312.AppendField("Nanos", __VDLType1315)
-	__VDLType136.AppendField("WriteTs", __VDLType1313)
-	__VDLType1316 := __VDLType13Builder.Enum()
-	__VDLType1317 := __VDLType13Builder.Named("v.io/v23/services/syncbase/nosql.ValueSelection").AssignBase(__VDLType1316)
-	__VDLType1316.AppendLabel("Local")
-	__VDLType1316.AppendLabel("Remote")
-	__VDLType1316.AppendLabel("Other")
-	__VDLType136.AppendField("Selection", __VDLType1317)
-	__VDLType135.AssignElem(__VDLType137)
-	__VDLType132.AppendField("Result", __VDLType135)
-	__VDLType131.AssignElem(__VDLType133)
-	__VDLType13Builder.Build()
-	__VDLType13v, err := __VDLType131.Built()
-	if err != nil {
-		panic(err)
-	}
-	return __VDLType13v
-}
-func init() {
-	__VDLType13 = __VDLType13_gen()
-}
-
-var __VDLType14 *vdl.Type
-
-func __VDLType14_gen() *vdl.Type {
-	__VDLType14Builder := vdl.TypeBuilder{}
-
-	__VDLType141 := __VDLType14Builder.Optional()
-	__VDLType142 := __VDLType14Builder.Struct()
-	__VDLType143 := __VDLType14Builder.Named("v.io/v23/syncbase/nosql.Value").AssignBase(__VDLType142)
-	__VDLType144 := __VDLType14Builder.Enum()
-	__VDLType145 := __VDLType14Builder.Named("v.io/v23/services/syncbase/nosql.ValueState").AssignBase(__VDLType144)
-	__VDLType144.AppendLabel("Exists")
-	__VDLType144.AppendLabel("NoExists")
-	__VDLType144.AppendLabel("Deleted")
-	__VDLType144.AppendLabel("Unknown")
-	__VDLType142.AppendField("State", __VDLType145)
-	__VDLType146 := __VDLType14Builder.List()
-	__VDLType147 := vdl.ByteType
-	__VDLType146.AssignElem(__VDLType147)
-	__VDLType142.AppendField("Val", __VDLType146)
-	__VDLType148 := __VDLType14Builder.Struct()
-	__VDLType149 := __VDLType14Builder.Named("time.Time").AssignBase(__VDLType148)
-	__VDLType1410 := vdl.Int64Type
-	__VDLType148.AppendField("Seconds", __VDLType1410)
-	__VDLType1411 := vdl.Int32Type
-	__VDLType148.AppendField("Nanos", __VDLType1411)
-	__VDLType142.AppendField("WriteTs", __VDLType149)
-	__VDLType1412 := __VDLType14Builder.Enum()
-	__VDLType1413 := __VDLType14Builder.Named("v.io/v23/services/syncbase/nosql.ValueSelection").AssignBase(__VDLType1412)
-	__VDLType1412.AppendLabel("Local")
-	__VDLType1412.AppendLabel("Remote")
-	__VDLType1412.AppendLabel("Other")
-	__VDLType142.AppendField("Selection", __VDLType1413)
-	__VDLType141.AssignElem(__VDLType143)
-	__VDLType14Builder.Build()
-	__VDLType14v, err := __VDLType141.Built()
-	if err != nil {
-		panic(err)
-	}
-	return __VDLType14v
-}
-func init() {
-	__VDLType14 = __VDLType14_gen()
-}
-
-var __VDLType15 *vdl.Type = vdl.TypeOf([]byte(nil))
-var __VDLType4 *vdl.Type = vdl.TypeOf([]uint64(nil))
-var __VDLType8 *vdl.Type = vdl.TypeOf([]nosql.ScanOp(nil))
-var __VDLType6 *vdl.Type
-
-func __VDLType6_gen() *vdl.Type {
-	__VDLType6Builder := vdl.TypeBuilder{}
-
-	__VDLType61 := __VDLType6Builder.List()
-	__VDLType62 := __VDLType6Builder.Struct()
-	__VDLType63 := __VDLType6Builder.Named("v.io/v23/syncbase/nosql.ConflictRow").AssignBase(__VDLType62)
-	__VDLType64 := vdl.StringType
-	__VDLType62.AppendField("Key", __VDLType64)
-	__VDLType65 := __VDLType6Builder.Struct()
-	__VDLType66 := __VDLType6Builder.Named("v.io/v23/syncbase/nosql.Value").AssignBase(__VDLType65)
-	__VDLType67 := __VDLType6Builder.Enum()
-	__VDLType68 := __VDLType6Builder.Named("v.io/v23/services/syncbase/nosql.ValueState").AssignBase(__VDLType67)
-	__VDLType67.AppendLabel("Exists")
-	__VDLType67.AppendLabel("NoExists")
-	__VDLType67.AppendLabel("Deleted")
-	__VDLType67.AppendLabel("Unknown")
-	__VDLType65.AppendField("State", __VDLType68)
-	__VDLType69 := __VDLType6Builder.List()
-	__VDLType610 := vdl.ByteType
-	__VDLType69.AssignElem(__VDLType610)
-	__VDLType65.AppendField("Val", __VDLType69)
-	__VDLType611 := __VDLType6Builder.Struct()
-	__VDLType612 := __VDLType6Builder.Named("time.Time").AssignBase(__VDLType611)
-	__VDLType613 := vdl.Int64Type
-	__VDLType611.AppendField("Seconds", __VDLType613)
-	__VDLType614 := vdl.Int32Type
-	__VDLType611.AppendField("Nanos", __VDLType614)
-	__VDLType65.AppendField("WriteTs", __VDLType612)
-	__VDLType615 := __VDLType6Builder.Enum()
-	__VDLType616 := __VDLType6Builder.Named("v.io/v23/services/syncbase/nosql.ValueSelection").AssignBase(__VDLType615)
-	__VDLType615.AppendLabel("Local")
-	__VDLType615.AppendLabel("Remote")
-	__VDLType615.AppendLabel("Other")
-	__VDLType65.AppendField("Selection", __VDLType616)
-	__VDLType62.AppendField("LocalValue", __VDLType66)
-	__VDLType62.AppendField("RemoteValue", __VDLType66)
-	__VDLType62.AppendField("AncestorValue", __VDLType66)
-	__VDLType617 := __VDLType6Builder.List()
-	__VDLType618 := vdl.Uint64Type
-	__VDLType617.AssignElem(__VDLType618)
-	__VDLType62.AppendField("BatchIds", __VDLType617)
-	__VDLType61.AssignElem(__VDLType63)
-	__VDLType6Builder.Build()
-	__VDLType6v, err := __VDLType61.Built()
-	if err != nil {
-		panic(err)
-	}
-	return __VDLType6v
-}
-func init() {
-	__VDLType6 = __VDLType6_gen()
-}
-
-var __VDLType5 *vdl.Type
-
-func __VDLType5_gen() *vdl.Type {
-	__VDLType5Builder := vdl.TypeBuilder{}
-
-	__VDLType51 := __VDLType5Builder.Map()
-	__VDLType52 := vdl.StringType
-	__VDLType51.AssignKey(__VDLType52)
-	__VDLType53 := __VDLType5Builder.Struct()
-	__VDLType54 := __VDLType5Builder.Named("v.io/v23/syncbase/nosql.ConflictRow").AssignBase(__VDLType53)
-	__VDLType53.AppendField("Key", __VDLType52)
-	__VDLType55 := __VDLType5Builder.Struct()
-	__VDLType56 := __VDLType5Builder.Named("v.io/v23/syncbase/nosql.Value").AssignBase(__VDLType55)
-	__VDLType57 := __VDLType5Builder.Enum()
-	__VDLType58 := __VDLType5Builder.Named("v.io/v23/services/syncbase/nosql.ValueState").AssignBase(__VDLType57)
-	__VDLType57.AppendLabel("Exists")
-	__VDLType57.AppendLabel("NoExists")
-	__VDLType57.AppendLabel("Deleted")
-	__VDLType57.AppendLabel("Unknown")
-	__VDLType55.AppendField("State", __VDLType58)
-	__VDLType59 := __VDLType5Builder.List()
-	__VDLType510 := vdl.ByteType
-	__VDLType59.AssignElem(__VDLType510)
-	__VDLType55.AppendField("Val", __VDLType59)
-	__VDLType511 := __VDLType5Builder.Struct()
-	__VDLType512 := __VDLType5Builder.Named("time.Time").AssignBase(__VDLType511)
-	__VDLType513 := vdl.Int64Type
-	__VDLType511.AppendField("Seconds", __VDLType513)
-	__VDLType514 := vdl.Int32Type
-	__VDLType511.AppendField("Nanos", __VDLType514)
-	__VDLType55.AppendField("WriteTs", __VDLType512)
-	__VDLType515 := __VDLType5Builder.Enum()
-	__VDLType516 := __VDLType5Builder.Named("v.io/v23/services/syncbase/nosql.ValueSelection").AssignBase(__VDLType515)
-	__VDLType515.AppendLabel("Local")
-	__VDLType515.AppendLabel("Remote")
-	__VDLType515.AppendLabel("Other")
-	__VDLType55.AppendField("Selection", __VDLType516)
-	__VDLType53.AppendField("LocalValue", __VDLType56)
-	__VDLType53.AppendField("RemoteValue", __VDLType56)
-	__VDLType53.AppendField("AncestorValue", __VDLType56)
-	__VDLType517 := __VDLType5Builder.List()
-	__VDLType518 := vdl.Uint64Type
-	__VDLType517.AssignElem(__VDLType518)
-	__VDLType53.AppendField("BatchIds", __VDLType517)
-	__VDLType51.AssignElem(__VDLType54)
-	__VDLType5Builder.Build()
-	__VDLType5v, err := __VDLType51.Built()
-	if err != nil {
-		panic(err)
-	}
-	return __VDLType5v
-}
-func init() {
-	__VDLType5 = __VDLType5_gen()
-}
-
-var __VDLType12 *vdl.Type
-
-func __VDLType12_gen() *vdl.Type {
-	__VDLType12Builder := vdl.TypeBuilder{}
-
-	__VDLType121 := __VDLType12Builder.Map()
-	__VDLType122 := vdl.StringType
-	__VDLType121.AssignKey(__VDLType122)
-	__VDLType123 := __VDLType12Builder.Struct()
-	__VDLType124 := __VDLType12Builder.Named("v.io/v23/syncbase/nosql.ResolvedRow").AssignBase(__VDLType123)
-	__VDLType123.AppendField("Key", __VDLType122)
-	__VDLType125 := __VDLType12Builder.Optional()
-	__VDLType126 := __VDLType12Builder.Struct()
-	__VDLType127 := __VDLType12Builder.Named("v.io/v23/syncbase/nosql.Value").AssignBase(__VDLType126)
-	__VDLType128 := __VDLType12Builder.Enum()
-	__VDLType129 := __VDLType12Builder.Named("v.io/v23/services/syncbase/nosql.ValueState").AssignBase(__VDLType128)
-	__VDLType128.AppendLabel("Exists")
-	__VDLType128.AppendLabel("NoExists")
-	__VDLType128.AppendLabel("Deleted")
-	__VDLType128.AppendLabel("Unknown")
-	__VDLType126.AppendField("State", __VDLType129)
-	__VDLType1210 := __VDLType12Builder.List()
-	__VDLType1211 := vdl.ByteType
-	__VDLType1210.AssignElem(__VDLType1211)
-	__VDLType126.AppendField("Val", __VDLType1210)
-	__VDLType1212 := __VDLType12Builder.Struct()
-	__VDLType1213 := __VDLType12Builder.Named("time.Time").AssignBase(__VDLType1212)
-	__VDLType1214 := vdl.Int64Type
-	__VDLType1212.AppendField("Seconds", __VDLType1214)
-	__VDLType1215 := vdl.Int32Type
-	__VDLType1212.AppendField("Nanos", __VDLType1215)
-	__VDLType126.AppendField("WriteTs", __VDLType1213)
-	__VDLType1216 := __VDLType12Builder.Enum()
-	__VDLType1217 := __VDLType12Builder.Named("v.io/v23/services/syncbase/nosql.ValueSelection").AssignBase(__VDLType1216)
-	__VDLType1216.AppendLabel("Local")
-	__VDLType1216.AppendLabel("Remote")
-	__VDLType1216.AppendLabel("Other")
-	__VDLType126.AppendField("Selection", __VDLType1217)
-	__VDLType125.AssignElem(__VDLType127)
-	__VDLType123.AppendField("Result", __VDLType125)
-	__VDLType121.AssignElem(__VDLType124)
-	__VDLType12Builder.Build()
-	__VDLType12v, err := __VDLType121.Built()
-	if err != nil {
-		panic(err)
-	}
-	return __VDLType12v
-}
-func init() {
-	__VDLType12 = __VDLType12_gen()
-}
-
-var __VDLType9 *vdl.Type = vdl.TypeOf(map[uint64][]nosql.ScanOp(nil))
-var __VDLType7 *vdl.Type
-
-func __VDLType7_gen() *vdl.Type {
-	__VDLType7Builder := vdl.TypeBuilder{}
-
-	__VDLType71 := __VDLType7Builder.Map()
-	__VDLType72 := vdl.Uint64Type
-	__VDLType71.AssignKey(__VDLType72)
-	__VDLType73 := __VDLType7Builder.List()
-	__VDLType74 := __VDLType7Builder.Struct()
-	__VDLType75 := __VDLType7Builder.Named("v.io/v23/syncbase/nosql.ConflictRow").AssignBase(__VDLType74)
-	__VDLType76 := vdl.StringType
-	__VDLType74.AppendField("Key", __VDLType76)
-	__VDLType77 := __VDLType7Builder.Struct()
-	__VDLType78 := __VDLType7Builder.Named("v.io/v23/syncbase/nosql.Value").AssignBase(__VDLType77)
-	__VDLType79 := __VDLType7Builder.Enum()
-	__VDLType710 := __VDLType7Builder.Named("v.io/v23/services/syncbase/nosql.ValueState").AssignBase(__VDLType79)
-	__VDLType79.AppendLabel("Exists")
-	__VDLType79.AppendLabel("NoExists")
-	__VDLType79.AppendLabel("Deleted")
-	__VDLType79.AppendLabel("Unknown")
-	__VDLType77.AppendField("State", __VDLType710)
-	__VDLType711 := __VDLType7Builder.List()
-	__VDLType712 := vdl.ByteType
-	__VDLType711.AssignElem(__VDLType712)
-	__VDLType77.AppendField("Val", __VDLType711)
-	__VDLType713 := __VDLType7Builder.Struct()
-	__VDLType714 := __VDLType7Builder.Named("time.Time").AssignBase(__VDLType713)
-	__VDLType715 := vdl.Int64Type
-	__VDLType713.AppendField("Seconds", __VDLType715)
-	__VDLType716 := vdl.Int32Type
-	__VDLType713.AppendField("Nanos", __VDLType716)
-	__VDLType77.AppendField("WriteTs", __VDLType714)
-	__VDLType717 := __VDLType7Builder.Enum()
-	__VDLType718 := __VDLType7Builder.Named("v.io/v23/services/syncbase/nosql.ValueSelection").AssignBase(__VDLType717)
-	__VDLType717.AppendLabel("Local")
-	__VDLType717.AppendLabel("Remote")
-	__VDLType717.AppendLabel("Other")
-	__VDLType77.AppendField("Selection", __VDLType718)
-	__VDLType74.AppendField("LocalValue", __VDLType78)
-	__VDLType74.AppendField("RemoteValue", __VDLType78)
-	__VDLType74.AppendField("AncestorValue", __VDLType78)
-	__VDLType719 := __VDLType7Builder.List()
-	__VDLType719.AssignElem(__VDLType72)
-	__VDLType74.AppendField("BatchIds", __VDLType719)
-	__VDLType73.AssignElem(__VDLType75)
-	__VDLType71.AssignElem(__VDLType73)
-	__VDLType7Builder.Build()
-	__VDLType7v, err := __VDLType71.Built()
-	if err != nil {
-		panic(err)
-	}
-	return __VDLType7v
-}
-func init() {
-	__VDLType7 = __VDLType7_gen()
-}
-
-var __VDLType3 *vdl.Type = vdl.TypeOf(map[uint64]nosql.BatchInfo(nil))
-var __VDLType_time_Time *vdl.Type
-
-func __VDLType_time_Time_gen() *vdl.Type {
-	__VDLType_time_TimeBuilder := vdl.TypeBuilder{}
-
-	__VDLType_time_Time1 := __VDLType_time_TimeBuilder.Struct()
-	__VDLType_time_Time2 := __VDLType_time_TimeBuilder.Named("time.Time").AssignBase(__VDLType_time_Time1)
-	__VDLType_time_Time3 := vdl.Int64Type
-	__VDLType_time_Time1.AppendField("Seconds", __VDLType_time_Time3)
-	__VDLType_time_Time4 := vdl.Int32Type
-	__VDLType_time_Time1.AppendField("Nanos", __VDLType_time_Time4)
-	__VDLType_time_TimeBuilder.Build()
-	__VDLType_time_Timev, err := __VDLType_time_Time2.Built()
-	if err != nil {
-		panic(err)
-	}
-	return __VDLType_time_Timev
-}
-func init() {
-	__VDLType_time_Time = __VDLType_time_Time_gen()
-}
-
-var __VDLType_v_io_v23_services_syncbase_nosql_BatchInfo *vdl.Type = vdl.TypeOf(nosql.BatchInfo{})
-var __VDLType_v_io_v23_services_syncbase_nosql_ScanOp *vdl.Type = vdl.TypeOf(nosql.ScanOp{})
-var __VDLType_v_io_v23_services_syncbase_nosql_ValueSelection *vdl.Type = vdl.TypeOf(nosql.ValueSelectionLocal)
-var __VDLType_v_io_v23_services_syncbase_nosql_ValueState *vdl.Type = vdl.TypeOf(nosql.ValueStateExists)
-var __VDLType_v_io_v23_syncbase_nosql_Conflict *vdl.Type
-
-func __VDLType_v_io_v23_syncbase_nosql_Conflict_gen() *vdl.Type {
-	__VDLType_v_io_v23_syncbase_nosql_ConflictBuilder := vdl.TypeBuilder{}
-
-	__VDLType_v_io_v23_syncbase_nosql_Conflict1 := __VDLType_v_io_v23_syncbase_nosql_ConflictBuilder.Struct()
-	__VDLType_v_io_v23_syncbase_nosql_Conflict2 := __VDLType_v_io_v23_syncbase_nosql_ConflictBuilder.Named("v.io/v23/syncbase/nosql.Conflict").AssignBase(__VDLType_v_io_v23_syncbase_nosql_Conflict1)
-	__VDLType_v_io_v23_syncbase_nosql_Conflict3 := __VDLType_v_io_v23_syncbase_nosql_ConflictBuilder.Optional()
-	__VDLType_v_io_v23_syncbase_nosql_Conflict4 := __VDLType_v_io_v23_syncbase_nosql_ConflictBuilder.Struct()
-	__VDLType_v_io_v23_syncbase_nosql_Conflict5 := __VDLType_v_io_v23_syncbase_nosql_ConflictBuilder.Named("v.io/v23/syncbase/nosql.ConflictRowSet").AssignBase(__VDLType_v_io_v23_syncbase_nosql_Conflict4)
-	__VDLType_v_io_v23_syncbase_nosql_Conflict6 := __VDLType_v_io_v23_syncbase_nosql_ConflictBuilder.Map()
-	__VDLType_v_io_v23_syncbase_nosql_Conflict7 := vdl.StringType
-	__VDLType_v_io_v23_syncbase_nosql_Conflict6.AssignKey(__VDLType_v_io_v23_syncbase_nosql_Conflict7)
-	__VDLType_v_io_v23_syncbase_nosql_Conflict8 := __VDLType_v_io_v23_syncbase_nosql_ConflictBuilder.Struct()
-	__VDLType_v_io_v23_syncbase_nosql_Conflict9 := __VDLType_v_io_v23_syncbase_nosql_ConflictBuilder.Named("v.io/v23/syncbase/nosql.ConflictRow").AssignBase(__VDLType_v_io_v23_syncbase_nosql_Conflict8)
-	__VDLType_v_io_v23_syncbase_nosql_Conflict8.AppendField("Key", __VDLType_v_io_v23_syncbase_nosql_Conflict7)
-	__VDLType_v_io_v23_syncbase_nosql_Conflict10 := __VDLType_v_io_v23_syncbase_nosql_ConflictBuilder.Struct()
-	__VDLType_v_io_v23_syncbase_nosql_Conflict11 := __VDLType_v_io_v23_syncbase_nosql_ConflictBuilder.Named("v.io/v23/syncbase/nosql.Value").AssignBase(__VDLType_v_io_v23_syncbase_nosql_Conflict10)
-	__VDLType_v_io_v23_syncbase_nosql_Conflict12 := __VDLType_v_io_v23_syncbase_nosql_ConflictBuilder.Enum()
-	__VDLType_v_io_v23_syncbase_nosql_Conflict13 := __VDLType_v_io_v23_syncbase_nosql_ConflictBuilder.Named("v.io/v23/services/syncbase/nosql.ValueState").AssignBase(__VDLType_v_io_v23_syncbase_nosql_Conflict12)
-	__VDLType_v_io_v23_syncbase_nosql_Conflict12.AppendLabel("Exists")
-	__VDLType_v_io_v23_syncbase_nosql_Conflict12.AppendLabel("NoExists")
-	__VDLType_v_io_v23_syncbase_nosql_Conflict12.AppendLabel("Deleted")
-	__VDLType_v_io_v23_syncbase_nosql_Conflict12.AppendLabel("Unknown")
-	__VDLType_v_io_v23_syncbase_nosql_Conflict10.AppendField("State", __VDLType_v_io_v23_syncbase_nosql_Conflict13)
-	__VDLType_v_io_v23_syncbase_nosql_Conflict14 := __VDLType_v_io_v23_syncbase_nosql_ConflictBuilder.List()
-	__VDLType_v_io_v23_syncbase_nosql_Conflict15 := vdl.ByteType
-	__VDLType_v_io_v23_syncbase_nosql_Conflict14.AssignElem(__VDLType_v_io_v23_syncbase_nosql_Conflict15)
-	__VDLType_v_io_v23_syncbase_nosql_Conflict10.AppendField("Val", __VDLType_v_io_v23_syncbase_nosql_Conflict14)
-	__VDLType_v_io_v23_syncbase_nosql_Conflict16 := __VDLType_v_io_v23_syncbase_nosql_ConflictBuilder.Struct()
-	__VDLType_v_io_v23_syncbase_nosql_Conflict17 := __VDLType_v_io_v23_syncbase_nosql_ConflictBuilder.Named("time.Time").AssignBase(__VDLType_v_io_v23_syncbase_nosql_Conflict16)
-	__VDLType_v_io_v23_syncbase_nosql_Conflict18 := vdl.Int64Type
-	__VDLType_v_io_v23_syncbase_nosql_Conflict16.AppendField("Seconds", __VDLType_v_io_v23_syncbase_nosql_Conflict18)
-	__VDLType_v_io_v23_syncbase_nosql_Conflict19 := vdl.Int32Type
-	__VDLType_v_io_v23_syncbase_nosql_Conflict16.AppendField("Nanos", __VDLType_v_io_v23_syncbase_nosql_Conflict19)
-	__VDLType_v_io_v23_syncbase_nosql_Conflict10.AppendField("WriteTs", __VDLType_v_io_v23_syncbase_nosql_Conflict17)
-	__VDLType_v_io_v23_syncbase_nosql_Conflict20 := __VDLType_v_io_v23_syncbase_nosql_ConflictBuilder.Enum()
-	__VDLType_v_io_v23_syncbase_nosql_Conflict21 := __VDLType_v_io_v23_syncbase_nosql_ConflictBuilder.Named("v.io/v23/services/syncbase/nosql.ValueSelection").AssignBase(__VDLType_v_io_v23_syncbase_nosql_Conflict20)
-	__VDLType_v_io_v23_syncbase_nosql_Conflict20.AppendLabel("Local")
-	__VDLType_v_io_v23_syncbase_nosql_Conflict20.AppendLabel("Remote")
-	__VDLType_v_io_v23_syncbase_nosql_Conflict20.AppendLabel("Other")
-	__VDLType_v_io_v23_syncbase_nosql_Conflict10.AppendField("Selection", __VDLType_v_io_v23_syncbase_nosql_Conflict21)
-	__VDLType_v_io_v23_syncbase_nosql_Conflict8.AppendField("LocalValue", __VDLType_v_io_v23_syncbase_nosql_Conflict11)
-	__VDLType_v_io_v23_syncbase_nosql_Conflict8.AppendField("RemoteValue", __VDLType_v_io_v23_syncbase_nosql_Conflict11)
-	__VDLType_v_io_v23_syncbase_nosql_Conflict8.AppendField("AncestorValue", __VDLType_v_io_v23_syncbase_nosql_Conflict11)
-	__VDLType_v_io_v23_syncbase_nosql_Conflict22 := __VDLType_v_io_v23_syncbase_nosql_ConflictBuilder.List()
-	__VDLType_v_io_v23_syncbase_nosql_Conflict23 := vdl.Uint64Type
-	__VDLType_v_io_v23_syncbase_nosql_Conflict22.AssignElem(__VDLType_v_io_v23_syncbase_nosql_Conflict23)
-	__VDLType_v_io_v23_syncbase_nosql_Conflict8.AppendField("BatchIds", __VDLType_v_io_v23_syncbase_nosql_Conflict22)
-	__VDLType_v_io_v23_syncbase_nosql_Conflict6.AssignElem(__VDLType_v_io_v23_syncbase_nosql_Conflict9)
-	__VDLType_v_io_v23_syncbase_nosql_Conflict4.AppendField("ByKey", __VDLType_v_io_v23_syncbase_nosql_Conflict6)
-	__VDLType_v_io_v23_syncbase_nosql_Conflict24 := __VDLType_v_io_v23_syncbase_nosql_ConflictBuilder.Map()
-	__VDLType_v_io_v23_syncbase_nosql_Conflict24.AssignKey(__VDLType_v_io_v23_syncbase_nosql_Conflict23)
-	__VDLType_v_io_v23_syncbase_nosql_Conflict25 := __VDLType_v_io_v23_syncbase_nosql_ConflictBuilder.List()
-	__VDLType_v_io_v23_syncbase_nosql_Conflict25.AssignElem(__VDLType_v_io_v23_syncbase_nosql_Conflict9)
-	__VDLType_v_io_v23_syncbase_nosql_Conflict24.AssignElem(__VDLType_v_io_v23_syncbase_nosql_Conflict25)
-	__VDLType_v_io_v23_syncbase_nosql_Conflict4.AppendField("ByBatch", __VDLType_v_io_v23_syncbase_nosql_Conflict24)
-	__VDLType_v_io_v23_syncbase_nosql_Conflict3.AssignElem(__VDLType_v_io_v23_syncbase_nosql_Conflict5)
-	__VDLType_v_io_v23_syncbase_nosql_Conflict1.AppendField("ReadSet", __VDLType_v_io_v23_syncbase_nosql_Conflict3)
-	__VDLType_v_io_v23_syncbase_nosql_Conflict1.AppendField("WriteSet", __VDLType_v_io_v23_syncbase_nosql_Conflict3)
-	__VDLType_v_io_v23_syncbase_nosql_Conflict26 := __VDLType_v_io_v23_syncbase_nosql_ConflictBuilder.Optional()
-	__VDLType_v_io_v23_syncbase_nosql_Conflict27 := __VDLType_v_io_v23_syncbase_nosql_ConflictBuilder.Struct()
-	__VDLType_v_io_v23_syncbase_nosql_Conflict28 := __VDLType_v_io_v23_syncbase_nosql_ConflictBuilder.Named("v.io/v23/syncbase/nosql.ConflictScanSet").AssignBase(__VDLType_v_io_v23_syncbase_nosql_Conflict27)
-	__VDLType_v_io_v23_syncbase_nosql_Conflict29 := __VDLType_v_io_v23_syncbase_nosql_ConflictBuilder.Map()
-	__VDLType_v_io_v23_syncbase_nosql_Conflict29.AssignKey(__VDLType_v_io_v23_syncbase_nosql_Conflict23)
-	__VDLType_v_io_v23_syncbase_nosql_Conflict30 := __VDLType_v_io_v23_syncbase_nosql_ConflictBuilder.List()
-	__VDLType_v_io_v23_syncbase_nosql_Conflict31 := __VDLType_v_io_v23_syncbase_nosql_ConflictBuilder.Struct()
-	__VDLType_v_io_v23_syncbase_nosql_Conflict32 := __VDLType_v_io_v23_syncbase_nosql_ConflictBuilder.Named("v.io/v23/services/syncbase/nosql.ScanOp").AssignBase(__VDLType_v_io_v23_syncbase_nosql_Conflict31)
-	__VDLType_v_io_v23_syncbase_nosql_Conflict31.AppendField("Start", __VDLType_v_io_v23_syncbase_nosql_Conflict7)
-	__VDLType_v_io_v23_syncbase_nosql_Conflict31.AppendField("Limit", __VDLType_v_io_v23_syncbase_nosql_Conflict7)
-	__VDLType_v_io_v23_syncbase_nosql_Conflict30.AssignElem(__VDLType_v_io_v23_syncbase_nosql_Conflict32)
-	__VDLType_v_io_v23_syncbase_nosql_Conflict29.AssignElem(__VDLType_v_io_v23_syncbase_nosql_Conflict30)
-	__VDLType_v_io_v23_syncbase_nosql_Conflict27.AppendField("ByBatch", __VDLType_v_io_v23_syncbase_nosql_Conflict29)
-	__VDLType_v_io_v23_syncbase_nosql_Conflict26.AssignElem(__VDLType_v_io_v23_syncbase_nosql_Conflict28)
-	__VDLType_v_io_v23_syncbase_nosql_Conflict1.AppendField("ScanSet", __VDLType_v_io_v23_syncbase_nosql_Conflict26)
-	__VDLType_v_io_v23_syncbase_nosql_Conflict33 := __VDLType_v_io_v23_syncbase_nosql_ConflictBuilder.Map()
-	__VDLType_v_io_v23_syncbase_nosql_Conflict33.AssignKey(__VDLType_v_io_v23_syncbase_nosql_Conflict23)
-	__VDLType_v_io_v23_syncbase_nosql_Conflict34 := __VDLType_v_io_v23_syncbase_nosql_ConflictBuilder.Struct()
-	__VDLType_v_io_v23_syncbase_nosql_Conflict35 := __VDLType_v_io_v23_syncbase_nosql_ConflictBuilder.Named("v.io/v23/services/syncbase/nosql.BatchInfo").AssignBase(__VDLType_v_io_v23_syncbase_nosql_Conflict34)
-	__VDLType_v_io_v23_syncbase_nosql_Conflict34.AppendField("Id", __VDLType_v_io_v23_syncbase_nosql_Conflict23)
-	__VDLType_v_io_v23_syncbase_nosql_Conflict34.AppendField("Hint", __VDLType_v_io_v23_syncbase_nosql_Conflict7)
-	__VDLType_v_io_v23_syncbase_nosql_Conflict36 := __VDLType_v_io_v23_syncbase_nosql_ConflictBuilder.Enum()
-	__VDLType_v_io_v23_syncbase_nosql_Conflict37 := __VDLType_v_io_v23_syncbase_nosql_ConflictBuilder.Named("v.io/v23/services/syncbase/nosql.BatchSource").AssignBase(__VDLType_v_io_v23_syncbase_nosql_Conflict36)
-	__VDLType_v_io_v23_syncbase_nosql_Conflict36.AppendLabel("Local")
-	__VDLType_v_io_v23_syncbase_nosql_Conflict36.AppendLabel("Remote")
-	__VDLType_v_io_v23_syncbase_nosql_Conflict34.AppendField("Source", __VDLType_v_io_v23_syncbase_nosql_Conflict37)
-	__VDLType_v_io_v23_syncbase_nosql_Conflict33.AssignElem(__VDLType_v_io_v23_syncbase_nosql_Conflict35)
-	__VDLType_v_io_v23_syncbase_nosql_Conflict1.AppendField("Batches", __VDLType_v_io_v23_syncbase_nosql_Conflict33)
-	__VDLType_v_io_v23_syncbase_nosql_ConflictBuilder.Build()
-	__VDLType_v_io_v23_syncbase_nosql_Conflictv, err := __VDLType_v_io_v23_syncbase_nosql_Conflict2.Built()
-	if err != nil {
-		panic(err)
-	}
-	return __VDLType_v_io_v23_syncbase_nosql_Conflictv
-}
-func init() {
-	__VDLType_v_io_v23_syncbase_nosql_Conflict = __VDLType_v_io_v23_syncbase_nosql_Conflict_gen()
-}
-
-var __VDLType_v_io_v23_syncbase_nosql_ConflictRow *vdl.Type
-
-func __VDLType_v_io_v23_syncbase_nosql_ConflictRow_gen() *vdl.Type {
-	__VDLType_v_io_v23_syncbase_nosql_ConflictRowBuilder := vdl.TypeBuilder{}
-
-	__VDLType_v_io_v23_syncbase_nosql_ConflictRow1 := __VDLType_v_io_v23_syncbase_nosql_ConflictRowBuilder.Struct()
-	__VDLType_v_io_v23_syncbase_nosql_ConflictRow2 := __VDLType_v_io_v23_syncbase_nosql_ConflictRowBuilder.Named("v.io/v23/syncbase/nosql.ConflictRow").AssignBase(__VDLType_v_io_v23_syncbase_nosql_ConflictRow1)
-	__VDLType_v_io_v23_syncbase_nosql_ConflictRow3 := vdl.StringType
-	__VDLType_v_io_v23_syncbase_nosql_ConflictRow1.AppendField("Key", __VDLType_v_io_v23_syncbase_nosql_ConflictRow3)
-	__VDLType_v_io_v23_syncbase_nosql_ConflictRow4 := __VDLType_v_io_v23_syncbase_nosql_ConflictRowBuilder.Struct()
-	__VDLType_v_io_v23_syncbase_nosql_ConflictRow5 := __VDLType_v_io_v23_syncbase_nosql_ConflictRowBuilder.Named("v.io/v23/syncbase/nosql.Value").AssignBase(__VDLType_v_io_v23_syncbase_nosql_ConflictRow4)
-	__VDLType_v_io_v23_syncbase_nosql_ConflictRow6 := __VDLType_v_io_v23_syncbase_nosql_ConflictRowBuilder.Enum()
-	__VDLType_v_io_v23_syncbase_nosql_ConflictRow7 := __VDLType_v_io_v23_syncbase_nosql_ConflictRowBuilder.Named("v.io/v23/services/syncbase/nosql.ValueState").AssignBase(__VDLType_v_io_v23_syncbase_nosql_ConflictRow6)
-	__VDLType_v_io_v23_syncbase_nosql_ConflictRow6.AppendLabel("Exists")
-	__VDLType_v_io_v23_syncbase_nosql_ConflictRow6.AppendLabel("NoExists")
-	__VDLType_v_io_v23_syncbase_nosql_ConflictRow6.AppendLabel("Deleted")
-	__VDLType_v_io_v23_syncbase_nosql_ConflictRow6.AppendLabel("Unknown")
-	__VDLType_v_io_v23_syncbase_nosql_ConflictRow4.AppendField("State", __VDLType_v_io_v23_syncbase_nosql_ConflictRow7)
-	__VDLType_v_io_v23_syncbase_nosql_ConflictRow8 := __VDLType_v_io_v23_syncbase_nosql_ConflictRowBuilder.List()
-	__VDLType_v_io_v23_syncbase_nosql_ConflictRow9 := vdl.ByteType
-	__VDLType_v_io_v23_syncbase_nosql_ConflictRow8.AssignElem(__VDLType_v_io_v23_syncbase_nosql_ConflictRow9)
-	__VDLType_v_io_v23_syncbase_nosql_ConflictRow4.AppendField("Val", __VDLType_v_io_v23_syncbase_nosql_ConflictRow8)
-	__VDLType_v_io_v23_syncbase_nosql_ConflictRow10 := __VDLType_v_io_v23_syncbase_nosql_ConflictRowBuilder.Struct()
-	__VDLType_v_io_v23_syncbase_nosql_ConflictRow11 := __VDLType_v_io_v23_syncbase_nosql_ConflictRowBuilder.Named("time.Time").AssignBase(__VDLType_v_io_v23_syncbase_nosql_ConflictRow10)
-	__VDLType_v_io_v23_syncbase_nosql_ConflictRow12 := vdl.Int64Type
-	__VDLType_v_io_v23_syncbase_nosql_ConflictRow10.AppendField("Seconds", __VDLType_v_io_v23_syncbase_nosql_ConflictRow12)
-	__VDLType_v_io_v23_syncbase_nosql_ConflictRow13 := vdl.Int32Type
-	__VDLType_v_io_v23_syncbase_nosql_ConflictRow10.AppendField("Nanos", __VDLType_v_io_v23_syncbase_nosql_ConflictRow13)
-	__VDLType_v_io_v23_syncbase_nosql_ConflictRow4.AppendField("WriteTs", __VDLType_v_io_v23_syncbase_nosql_ConflictRow11)
-	__VDLType_v_io_v23_syncbase_nosql_ConflictRow14 := __VDLType_v_io_v23_syncbase_nosql_ConflictRowBuilder.Enum()
-	__VDLType_v_io_v23_syncbase_nosql_ConflictRow15 := __VDLType_v_io_v23_syncbase_nosql_ConflictRowBuilder.Named("v.io/v23/services/syncbase/nosql.ValueSelection").AssignBase(__VDLType_v_io_v23_syncbase_nosql_ConflictRow14)
-	__VDLType_v_io_v23_syncbase_nosql_ConflictRow14.AppendLabel("Local")
-	__VDLType_v_io_v23_syncbase_nosql_ConflictRow14.AppendLabel("Remote")
-	__VDLType_v_io_v23_syncbase_nosql_ConflictRow14.AppendLabel("Other")
-	__VDLType_v_io_v23_syncbase_nosql_ConflictRow4.AppendField("Selection", __VDLType_v_io_v23_syncbase_nosql_ConflictRow15)
-	__VDLType_v_io_v23_syncbase_nosql_ConflictRow1.AppendField("LocalValue", __VDLType_v_io_v23_syncbase_nosql_ConflictRow5)
-	__VDLType_v_io_v23_syncbase_nosql_ConflictRow1.AppendField("RemoteValue", __VDLType_v_io_v23_syncbase_nosql_ConflictRow5)
-	__VDLType_v_io_v23_syncbase_nosql_ConflictRow1.AppendField("AncestorValue", __VDLType_v_io_v23_syncbase_nosql_ConflictRow5)
-	__VDLType_v_io_v23_syncbase_nosql_ConflictRow16 := __VDLType_v_io_v23_syncbase_nosql_ConflictRowBuilder.List()
-	__VDLType_v_io_v23_syncbase_nosql_ConflictRow17 := vdl.Uint64Type
-	__VDLType_v_io_v23_syncbase_nosql_ConflictRow16.AssignElem(__VDLType_v_io_v23_syncbase_nosql_ConflictRow17)
-	__VDLType_v_io_v23_syncbase_nosql_ConflictRow1.AppendField("BatchIds", __VDLType_v_io_v23_syncbase_nosql_ConflictRow16)
-	__VDLType_v_io_v23_syncbase_nosql_ConflictRowBuilder.Build()
-	__VDLType_v_io_v23_syncbase_nosql_ConflictRowv, err := __VDLType_v_io_v23_syncbase_nosql_ConflictRow2.Built()
-	if err != nil {
-		panic(err)
-	}
-	return __VDLType_v_io_v23_syncbase_nosql_ConflictRowv
-}
-func init() {
-	__VDLType_v_io_v23_syncbase_nosql_ConflictRow = __VDLType_v_io_v23_syncbase_nosql_ConflictRow_gen()
-}
-
-var __VDLType_v_io_v23_syncbase_nosql_ConflictRowSet *vdl.Type
-
-func __VDLType_v_io_v23_syncbase_nosql_ConflictRowSet_gen() *vdl.Type {
-	__VDLType_v_io_v23_syncbase_nosql_ConflictRowSetBuilder := vdl.TypeBuilder{}
-
-	__VDLType_v_io_v23_syncbase_nosql_ConflictRowSet1 := __VDLType_v_io_v23_syncbase_nosql_ConflictRowSetBuilder.Struct()
-	__VDLType_v_io_v23_syncbase_nosql_ConflictRowSet2 := __VDLType_v_io_v23_syncbase_nosql_ConflictRowSetBuilder.Named("v.io/v23/syncbase/nosql.ConflictRowSet").AssignBase(__VDLType_v_io_v23_syncbase_nosql_ConflictRowSet1)
-	__VDLType_v_io_v23_syncbase_nosql_ConflictRowSet3 := __VDLType_v_io_v23_syncbase_nosql_ConflictRowSetBuilder.Map()
-	__VDLType_v_io_v23_syncbase_nosql_ConflictRowSet4 := vdl.StringType
-	__VDLType_v_io_v23_syncbase_nosql_ConflictRowSet3.AssignKey(__VDLType_v_io_v23_syncbase_nosql_ConflictRowSet4)
-	__VDLType_v_io_v23_syncbase_nosql_ConflictRowSet5 := __VDLType_v_io_v23_syncbase_nosql_ConflictRowSetBuilder.Struct()
-	__VDLType_v_io_v23_syncbase_nosql_ConflictRowSet6 := __VDLType_v_io_v23_syncbase_nosql_ConflictRowSetBuilder.Named("v.io/v23/syncbase/nosql.ConflictRow").AssignBase(__VDLType_v_io_v23_syncbase_nosql_ConflictRowSet5)
-	__VDLType_v_io_v23_syncbase_nosql_ConflictRowSet5.AppendField("Key", __VDLType_v_io_v23_syncbase_nosql_ConflictRowSet4)
-	__VDLType_v_io_v23_syncbase_nosql_ConflictRowSet7 := __VDLType_v_io_v23_syncbase_nosql_ConflictRowSetBuilder.Struct()
-	__VDLType_v_io_v23_syncbase_nosql_ConflictRowSet8 := __VDLType_v_io_v23_syncbase_nosql_ConflictRowSetBuilder.Named("v.io/v23/syncbase/nosql.Value").AssignBase(__VDLType_v_io_v23_syncbase_nosql_ConflictRowSet7)
-	__VDLType_v_io_v23_syncbase_nosql_ConflictRowSet9 := __VDLType_v_io_v23_syncbase_nosql_ConflictRowSetBuilder.Enum()
-	__VDLType_v_io_v23_syncbase_nosql_ConflictRowSet10 := __VDLType_v_io_v23_syncbase_nosql_ConflictRowSetBuilder.Named("v.io/v23/services/syncbase/nosql.ValueState").AssignBase(__VDLType_v_io_v23_syncbase_nosql_ConflictRowSet9)
-	__VDLType_v_io_v23_syncbase_nosql_ConflictRowSet9.AppendLabel("Exists")
-	__VDLType_v_io_v23_syncbase_nosql_ConflictRowSet9.AppendLabel("NoExists")
-	__VDLType_v_io_v23_syncbase_nosql_ConflictRowSet9.AppendLabel("Deleted")
-	__VDLType_v_io_v23_syncbase_nosql_ConflictRowSet9.AppendLabel("Unknown")
-	__VDLType_v_io_v23_syncbase_nosql_ConflictRowSet7.AppendField("State", __VDLType_v_io_v23_syncbase_nosql_ConflictRowSet10)
-	__VDLType_v_io_v23_syncbase_nosql_ConflictRowSet11 := __VDLType_v_io_v23_syncbase_nosql_ConflictRowSetBuilder.List()
-	__VDLType_v_io_v23_syncbase_nosql_ConflictRowSet12 := vdl.ByteType
-	__VDLType_v_io_v23_syncbase_nosql_ConflictRowSet11.AssignElem(__VDLType_v_io_v23_syncbase_nosql_ConflictRowSet12)
-	__VDLType_v_io_v23_syncbase_nosql_ConflictRowSet7.AppendField("Val", __VDLType_v_io_v23_syncbase_nosql_ConflictRowSet11)
-	__VDLType_v_io_v23_syncbase_nosql_ConflictRowSet13 := __VDLType_v_io_v23_syncbase_nosql_ConflictRowSetBuilder.Struct()
-	__VDLType_v_io_v23_syncbase_nosql_ConflictRowSet14 := __VDLType_v_io_v23_syncbase_nosql_ConflictRowSetBuilder.Named("time.Time").AssignBase(__VDLType_v_io_v23_syncbase_nosql_ConflictRowSet13)
-	__VDLType_v_io_v23_syncbase_nosql_ConflictRowSet15 := vdl.Int64Type
-	__VDLType_v_io_v23_syncbase_nosql_ConflictRowSet13.AppendField("Seconds", __VDLType_v_io_v23_syncbase_nosql_ConflictRowSet15)
-	__VDLType_v_io_v23_syncbase_nosql_ConflictRowSet16 := vdl.Int32Type
-	__VDLType_v_io_v23_syncbase_nosql_ConflictRowSet13.AppendField("Nanos", __VDLType_v_io_v23_syncbase_nosql_ConflictRowSet16)
-	__VDLType_v_io_v23_syncbase_nosql_ConflictRowSet7.AppendField("WriteTs", __VDLType_v_io_v23_syncbase_nosql_ConflictRowSet14)
-	__VDLType_v_io_v23_syncbase_nosql_ConflictRowSet17 := __VDLType_v_io_v23_syncbase_nosql_ConflictRowSetBuilder.Enum()
-	__VDLType_v_io_v23_syncbase_nosql_ConflictRowSet18 := __VDLType_v_io_v23_syncbase_nosql_ConflictRowSetBuilder.Named("v.io/v23/services/syncbase/nosql.ValueSelection").AssignBase(__VDLType_v_io_v23_syncbase_nosql_ConflictRowSet17)
-	__VDLType_v_io_v23_syncbase_nosql_ConflictRowSet17.AppendLabel("Local")
-	__VDLType_v_io_v23_syncbase_nosql_ConflictRowSet17.AppendLabel("Remote")
-	__VDLType_v_io_v23_syncbase_nosql_ConflictRowSet17.AppendLabel("Other")
-	__VDLType_v_io_v23_syncbase_nosql_ConflictRowSet7.AppendField("Selection", __VDLType_v_io_v23_syncbase_nosql_ConflictRowSet18)
-	__VDLType_v_io_v23_syncbase_nosql_ConflictRowSet5.AppendField("LocalValue", __VDLType_v_io_v23_syncbase_nosql_ConflictRowSet8)
-	__VDLType_v_io_v23_syncbase_nosql_ConflictRowSet5.AppendField("RemoteValue", __VDLType_v_io_v23_syncbase_nosql_ConflictRowSet8)
-	__VDLType_v_io_v23_syncbase_nosql_ConflictRowSet5.AppendField("AncestorValue", __VDLType_v_io_v23_syncbase_nosql_ConflictRowSet8)
-	__VDLType_v_io_v23_syncbase_nosql_ConflictRowSet19 := __VDLType_v_io_v23_syncbase_nosql_ConflictRowSetBuilder.List()
-	__VDLType_v_io_v23_syncbase_nosql_ConflictRowSet20 := vdl.Uint64Type
-	__VDLType_v_io_v23_syncbase_nosql_ConflictRowSet19.AssignElem(__VDLType_v_io_v23_syncbase_nosql_ConflictRowSet20)
-	__VDLType_v_io_v23_syncbase_nosql_ConflictRowSet5.AppendField("BatchIds", __VDLType_v_io_v23_syncbase_nosql_ConflictRowSet19)
-	__VDLType_v_io_v23_syncbase_nosql_ConflictRowSet3.AssignElem(__VDLType_v_io_v23_syncbase_nosql_ConflictRowSet6)
-	__VDLType_v_io_v23_syncbase_nosql_ConflictRowSet1.AppendField("ByKey", __VDLType_v_io_v23_syncbase_nosql_ConflictRowSet3)
-	__VDLType_v_io_v23_syncbase_nosql_ConflictRowSet21 := __VDLType_v_io_v23_syncbase_nosql_ConflictRowSetBuilder.Map()
-	__VDLType_v_io_v23_syncbase_nosql_ConflictRowSet21.AssignKey(__VDLType_v_io_v23_syncbase_nosql_ConflictRowSet20)
-	__VDLType_v_io_v23_syncbase_nosql_ConflictRowSet22 := __VDLType_v_io_v23_syncbase_nosql_ConflictRowSetBuilder.List()
-	__VDLType_v_io_v23_syncbase_nosql_ConflictRowSet22.AssignElem(__VDLType_v_io_v23_syncbase_nosql_ConflictRowSet6)
-	__VDLType_v_io_v23_syncbase_nosql_ConflictRowSet21.AssignElem(__VDLType_v_io_v23_syncbase_nosql_ConflictRowSet22)
-	__VDLType_v_io_v23_syncbase_nosql_ConflictRowSet1.AppendField("ByBatch", __VDLType_v_io_v23_syncbase_nosql_ConflictRowSet21)
-	__VDLType_v_io_v23_syncbase_nosql_ConflictRowSetBuilder.Build()
-	__VDLType_v_io_v23_syncbase_nosql_ConflictRowSetv, err := __VDLType_v_io_v23_syncbase_nosql_ConflictRowSet2.Built()
-	if err != nil {
-		panic(err)
-	}
-	return __VDLType_v_io_v23_syncbase_nosql_ConflictRowSetv
-}
-func init() {
-	__VDLType_v_io_v23_syncbase_nosql_ConflictRowSet = __VDLType_v_io_v23_syncbase_nosql_ConflictRowSet_gen()
-}
-
-var __VDLType_v_io_v23_syncbase_nosql_ConflictScanSet *vdl.Type = vdl.TypeOf(ConflictScanSet{})
-var __VDLType_v_io_v23_syncbase_nosql_Resolution *vdl.Type
-
-func __VDLType_v_io_v23_syncbase_nosql_Resolution_gen() *vdl.Type {
-	__VDLType_v_io_v23_syncbase_nosql_ResolutionBuilder := vdl.TypeBuilder{}
-
-	__VDLType_v_io_v23_syncbase_nosql_Resolution1 := __VDLType_v_io_v23_syncbase_nosql_ResolutionBuilder.Struct()
-	__VDLType_v_io_v23_syncbase_nosql_Resolution2 := __VDLType_v_io_v23_syncbase_nosql_ResolutionBuilder.Named("v.io/v23/syncbase/nosql.Resolution").AssignBase(__VDLType_v_io_v23_syncbase_nosql_Resolution1)
-	__VDLType_v_io_v23_syncbase_nosql_Resolution3 := __VDLType_v_io_v23_syncbase_nosql_ResolutionBuilder.Map()
-	__VDLType_v_io_v23_syncbase_nosql_Resolution4 := vdl.StringType
-	__VDLType_v_io_v23_syncbase_nosql_Resolution3.AssignKey(__VDLType_v_io_v23_syncbase_nosql_Resolution4)
-	__VDLType_v_io_v23_syncbase_nosql_Resolution5 := __VDLType_v_io_v23_syncbase_nosql_ResolutionBuilder.Struct()
-	__VDLType_v_io_v23_syncbase_nosql_Resolution6 := __VDLType_v_io_v23_syncbase_nosql_ResolutionBuilder.Named("v.io/v23/syncbase/nosql.ResolvedRow").AssignBase(__VDLType_v_io_v23_syncbase_nosql_Resolution5)
-	__VDLType_v_io_v23_syncbase_nosql_Resolution5.AppendField("Key", __VDLType_v_io_v23_syncbase_nosql_Resolution4)
-	__VDLType_v_io_v23_syncbase_nosql_Resolution7 := __VDLType_v_io_v23_syncbase_nosql_ResolutionBuilder.Optional()
-	__VDLType_v_io_v23_syncbase_nosql_Resolution8 := __VDLType_v_io_v23_syncbase_nosql_ResolutionBuilder.Struct()
-	__VDLType_v_io_v23_syncbase_nosql_Resolution9 := __VDLType_v_io_v23_syncbase_nosql_ResolutionBuilder.Named("v.io/v23/syncbase/nosql.Value").AssignBase(__VDLType_v_io_v23_syncbase_nosql_Resolution8)
-	__VDLType_v_io_v23_syncbase_nosql_Resolution10 := __VDLType_v_io_v23_syncbase_nosql_ResolutionBuilder.Enum()
-	__VDLType_v_io_v23_syncbase_nosql_Resolution11 := __VDLType_v_io_v23_syncbase_nosql_ResolutionBuilder.Named("v.io/v23/services/syncbase/nosql.ValueState").AssignBase(__VDLType_v_io_v23_syncbase_nosql_Resolution10)
-	__VDLType_v_io_v23_syncbase_nosql_Resolution10.AppendLabel("Exists")
-	__VDLType_v_io_v23_syncbase_nosql_Resolution10.AppendLabel("NoExists")
-	__VDLType_v_io_v23_syncbase_nosql_Resolution10.AppendLabel("Deleted")
-	__VDLType_v_io_v23_syncbase_nosql_Resolution10.AppendLabel("Unknown")
-	__VDLType_v_io_v23_syncbase_nosql_Resolution8.AppendField("State", __VDLType_v_io_v23_syncbase_nosql_Resolution11)
-	__VDLType_v_io_v23_syncbase_nosql_Resolution12 := __VDLType_v_io_v23_syncbase_nosql_ResolutionBuilder.List()
-	__VDLType_v_io_v23_syncbase_nosql_Resolution13 := vdl.ByteType
-	__VDLType_v_io_v23_syncbase_nosql_Resolution12.AssignElem(__VDLType_v_io_v23_syncbase_nosql_Resolution13)
-	__VDLType_v_io_v23_syncbase_nosql_Resolution8.AppendField("Val", __VDLType_v_io_v23_syncbase_nosql_Resolution12)
-	__VDLType_v_io_v23_syncbase_nosql_Resolution14 := __VDLType_v_io_v23_syncbase_nosql_ResolutionBuilder.Struct()
-	__VDLType_v_io_v23_syncbase_nosql_Resolution15 := __VDLType_v_io_v23_syncbase_nosql_ResolutionBuilder.Named("time.Time").AssignBase(__VDLType_v_io_v23_syncbase_nosql_Resolution14)
-	__VDLType_v_io_v23_syncbase_nosql_Resolution16 := vdl.Int64Type
-	__VDLType_v_io_v23_syncbase_nosql_Resolution14.AppendField("Seconds", __VDLType_v_io_v23_syncbase_nosql_Resolution16)
-	__VDLType_v_io_v23_syncbase_nosql_Resolution17 := vdl.Int32Type
-	__VDLType_v_io_v23_syncbase_nosql_Resolution14.AppendField("Nanos", __VDLType_v_io_v23_syncbase_nosql_Resolution17)
-	__VDLType_v_io_v23_syncbase_nosql_Resolution8.AppendField("WriteTs", __VDLType_v_io_v23_syncbase_nosql_Resolution15)
-	__VDLType_v_io_v23_syncbase_nosql_Resolution18 := __VDLType_v_io_v23_syncbase_nosql_ResolutionBuilder.Enum()
-	__VDLType_v_io_v23_syncbase_nosql_Resolution19 := __VDLType_v_io_v23_syncbase_nosql_ResolutionBuilder.Named("v.io/v23/services/syncbase/nosql.ValueSelection").AssignBase(__VDLType_v_io_v23_syncbase_nosql_Resolution18)
-	__VDLType_v_io_v23_syncbase_nosql_Resolution18.AppendLabel("Local")
-	__VDLType_v_io_v23_syncbase_nosql_Resolution18.AppendLabel("Remote")
-	__VDLType_v_io_v23_syncbase_nosql_Resolution18.AppendLabel("Other")
-	__VDLType_v_io_v23_syncbase_nosql_Resolution8.AppendField("Selection", __VDLType_v_io_v23_syncbase_nosql_Resolution19)
-	__VDLType_v_io_v23_syncbase_nosql_Resolution7.AssignElem(__VDLType_v_io_v23_syncbase_nosql_Resolution9)
-	__VDLType_v_io_v23_syncbase_nosql_Resolution5.AppendField("Result", __VDLType_v_io_v23_syncbase_nosql_Resolution7)
-	__VDLType_v_io_v23_syncbase_nosql_Resolution3.AssignElem(__VDLType_v_io_v23_syncbase_nosql_Resolution6)
-	__VDLType_v_io_v23_syncbase_nosql_Resolution1.AppendField("ResultSet", __VDLType_v_io_v23_syncbase_nosql_Resolution3)
-	__VDLType_v_io_v23_syncbase_nosql_ResolutionBuilder.Build()
-	__VDLType_v_io_v23_syncbase_nosql_Resolutionv, err := __VDLType_v_io_v23_syncbase_nosql_Resolution2.Built()
-	if err != nil {
-		panic(err)
-	}
-	return __VDLType_v_io_v23_syncbase_nosql_Resolutionv
-}
-func init() {
-	__VDLType_v_io_v23_syncbase_nosql_Resolution = __VDLType_v_io_v23_syncbase_nosql_Resolution_gen()
-}
-
-var __VDLType_v_io_v23_syncbase_nosql_ResolvedRow *vdl.Type
-
-func __VDLType_v_io_v23_syncbase_nosql_ResolvedRow_gen() *vdl.Type {
-	__VDLType_v_io_v23_syncbase_nosql_ResolvedRowBuilder := vdl.TypeBuilder{}
-
-	__VDLType_v_io_v23_syncbase_nosql_ResolvedRow1 := __VDLType_v_io_v23_syncbase_nosql_ResolvedRowBuilder.Struct()
-	__VDLType_v_io_v23_syncbase_nosql_ResolvedRow2 := __VDLType_v_io_v23_syncbase_nosql_ResolvedRowBuilder.Named("v.io/v23/syncbase/nosql.ResolvedRow").AssignBase(__VDLType_v_io_v23_syncbase_nosql_ResolvedRow1)
-	__VDLType_v_io_v23_syncbase_nosql_ResolvedRow3 := vdl.StringType
-	__VDLType_v_io_v23_syncbase_nosql_ResolvedRow1.AppendField("Key", __VDLType_v_io_v23_syncbase_nosql_ResolvedRow3)
-	__VDLType_v_io_v23_syncbase_nosql_ResolvedRow4 := __VDLType_v_io_v23_syncbase_nosql_ResolvedRowBuilder.Optional()
-	__VDLType_v_io_v23_syncbase_nosql_ResolvedRow5 := __VDLType_v_io_v23_syncbase_nosql_ResolvedRowBuilder.Struct()
-	__VDLType_v_io_v23_syncbase_nosql_ResolvedRow6 := __VDLType_v_io_v23_syncbase_nosql_ResolvedRowBuilder.Named("v.io/v23/syncbase/nosql.Value").AssignBase(__VDLType_v_io_v23_syncbase_nosql_ResolvedRow5)
-	__VDLType_v_io_v23_syncbase_nosql_ResolvedRow7 := __VDLType_v_io_v23_syncbase_nosql_ResolvedRowBuilder.Enum()
-	__VDLType_v_io_v23_syncbase_nosql_ResolvedRow8 := __VDLType_v_io_v23_syncbase_nosql_ResolvedRowBuilder.Named("v.io/v23/services/syncbase/nosql.ValueState").AssignBase(__VDLType_v_io_v23_syncbase_nosql_ResolvedRow7)
-	__VDLType_v_io_v23_syncbase_nosql_ResolvedRow7.AppendLabel("Exists")
-	__VDLType_v_io_v23_syncbase_nosql_ResolvedRow7.AppendLabel("NoExists")
-	__VDLType_v_io_v23_syncbase_nosql_ResolvedRow7.AppendLabel("Deleted")
-	__VDLType_v_io_v23_syncbase_nosql_ResolvedRow7.AppendLabel("Unknown")
-	__VDLType_v_io_v23_syncbase_nosql_ResolvedRow5.AppendField("State", __VDLType_v_io_v23_syncbase_nosql_ResolvedRow8)
-	__VDLType_v_io_v23_syncbase_nosql_ResolvedRow9 := __VDLType_v_io_v23_syncbase_nosql_ResolvedRowBuilder.List()
-	__VDLType_v_io_v23_syncbase_nosql_ResolvedRow10 := vdl.ByteType
-	__VDLType_v_io_v23_syncbase_nosql_ResolvedRow9.AssignElem(__VDLType_v_io_v23_syncbase_nosql_ResolvedRow10)
-	__VDLType_v_io_v23_syncbase_nosql_ResolvedRow5.AppendField("Val", __VDLType_v_io_v23_syncbase_nosql_ResolvedRow9)
-	__VDLType_v_io_v23_syncbase_nosql_ResolvedRow11 := __VDLType_v_io_v23_syncbase_nosql_ResolvedRowBuilder.Struct()
-	__VDLType_v_io_v23_syncbase_nosql_ResolvedRow12 := __VDLType_v_io_v23_syncbase_nosql_ResolvedRowBuilder.Named("time.Time").AssignBase(__VDLType_v_io_v23_syncbase_nosql_ResolvedRow11)
-	__VDLType_v_io_v23_syncbase_nosql_ResolvedRow13 := vdl.Int64Type
-	__VDLType_v_io_v23_syncbase_nosql_ResolvedRow11.AppendField("Seconds", __VDLType_v_io_v23_syncbase_nosql_ResolvedRow13)
-	__VDLType_v_io_v23_syncbase_nosql_ResolvedRow14 := vdl.Int32Type
-	__VDLType_v_io_v23_syncbase_nosql_ResolvedRow11.AppendField("Nanos", __VDLType_v_io_v23_syncbase_nosql_ResolvedRow14)
-	__VDLType_v_io_v23_syncbase_nosql_ResolvedRow5.AppendField("WriteTs", __VDLType_v_io_v23_syncbase_nosql_ResolvedRow12)
-	__VDLType_v_io_v23_syncbase_nosql_ResolvedRow15 := __VDLType_v_io_v23_syncbase_nosql_ResolvedRowBuilder.Enum()
-	__VDLType_v_io_v23_syncbase_nosql_ResolvedRow16 := __VDLType_v_io_v23_syncbase_nosql_ResolvedRowBuilder.Named("v.io/v23/services/syncbase/nosql.ValueSelection").AssignBase(__VDLType_v_io_v23_syncbase_nosql_ResolvedRow15)
-	__VDLType_v_io_v23_syncbase_nosql_ResolvedRow15.AppendLabel("Local")
-	__VDLType_v_io_v23_syncbase_nosql_ResolvedRow15.AppendLabel("Remote")
-	__VDLType_v_io_v23_syncbase_nosql_ResolvedRow15.AppendLabel("Other")
-	__VDLType_v_io_v23_syncbase_nosql_ResolvedRow5.AppendField("Selection", __VDLType_v_io_v23_syncbase_nosql_ResolvedRow16)
-	__VDLType_v_io_v23_syncbase_nosql_ResolvedRow4.AssignElem(__VDLType_v_io_v23_syncbase_nosql_ResolvedRow6)
-	__VDLType_v_io_v23_syncbase_nosql_ResolvedRow1.AppendField("Result", __VDLType_v_io_v23_syncbase_nosql_ResolvedRow4)
-	__VDLType_v_io_v23_syncbase_nosql_ResolvedRowBuilder.Build()
-	__VDLType_v_io_v23_syncbase_nosql_ResolvedRowv, err := __VDLType_v_io_v23_syncbase_nosql_ResolvedRow2.Built()
-	if err != nil {
-		panic(err)
-	}
-	return __VDLType_v_io_v23_syncbase_nosql_ResolvedRowv
-}
-func init() {
-	__VDLType_v_io_v23_syncbase_nosql_ResolvedRow = __VDLType_v_io_v23_syncbase_nosql_ResolvedRow_gen()
-}
-
-var __VDLType_v_io_v23_syncbase_nosql_Value *vdl.Type
-
-func __VDLType_v_io_v23_syncbase_nosql_Value_gen() *vdl.Type {
-	__VDLType_v_io_v23_syncbase_nosql_ValueBuilder := vdl.TypeBuilder{}
-
-	__VDLType_v_io_v23_syncbase_nosql_Value1 := __VDLType_v_io_v23_syncbase_nosql_ValueBuilder.Struct()
-	__VDLType_v_io_v23_syncbase_nosql_Value2 := __VDLType_v_io_v23_syncbase_nosql_ValueBuilder.Named("v.io/v23/syncbase/nosql.Value").AssignBase(__VDLType_v_io_v23_syncbase_nosql_Value1)
-	__VDLType_v_io_v23_syncbase_nosql_Value3 := __VDLType_v_io_v23_syncbase_nosql_ValueBuilder.Enum()
-	__VDLType_v_io_v23_syncbase_nosql_Value4 := __VDLType_v_io_v23_syncbase_nosql_ValueBuilder.Named("v.io/v23/services/syncbase/nosql.ValueState").AssignBase(__VDLType_v_io_v23_syncbase_nosql_Value3)
-	__VDLType_v_io_v23_syncbase_nosql_Value3.AppendLabel("Exists")
-	__VDLType_v_io_v23_syncbase_nosql_Value3.AppendLabel("NoExists")
-	__VDLType_v_io_v23_syncbase_nosql_Value3.AppendLabel("Deleted")
-	__VDLType_v_io_v23_syncbase_nosql_Value3.AppendLabel("Unknown")
-	__VDLType_v_io_v23_syncbase_nosql_Value1.AppendField("State", __VDLType_v_io_v23_syncbase_nosql_Value4)
-	__VDLType_v_io_v23_syncbase_nosql_Value5 := __VDLType_v_io_v23_syncbase_nosql_ValueBuilder.List()
-	__VDLType_v_io_v23_syncbase_nosql_Value6 := vdl.ByteType
-	__VDLType_v_io_v23_syncbase_nosql_Value5.AssignElem(__VDLType_v_io_v23_syncbase_nosql_Value6)
-	__VDLType_v_io_v23_syncbase_nosql_Value1.AppendField("Val", __VDLType_v_io_v23_syncbase_nosql_Value5)
-	__VDLType_v_io_v23_syncbase_nosql_Value7 := __VDLType_v_io_v23_syncbase_nosql_ValueBuilder.Struct()
-	__VDLType_v_io_v23_syncbase_nosql_Value8 := __VDLType_v_io_v23_syncbase_nosql_ValueBuilder.Named("time.Time").AssignBase(__VDLType_v_io_v23_syncbase_nosql_Value7)
-	__VDLType_v_io_v23_syncbase_nosql_Value9 := vdl.Int64Type
-	__VDLType_v_io_v23_syncbase_nosql_Value7.AppendField("Seconds", __VDLType_v_io_v23_syncbase_nosql_Value9)
-	__VDLType_v_io_v23_syncbase_nosql_Value10 := vdl.Int32Type
-	__VDLType_v_io_v23_syncbase_nosql_Value7.AppendField("Nanos", __VDLType_v_io_v23_syncbase_nosql_Value10)
-	__VDLType_v_io_v23_syncbase_nosql_Value1.AppendField("WriteTs", __VDLType_v_io_v23_syncbase_nosql_Value8)
-	__VDLType_v_io_v23_syncbase_nosql_Value11 := __VDLType_v_io_v23_syncbase_nosql_ValueBuilder.Enum()
-	__VDLType_v_io_v23_syncbase_nosql_Value12 := __VDLType_v_io_v23_syncbase_nosql_ValueBuilder.Named("v.io/v23/services/syncbase/nosql.ValueSelection").AssignBase(__VDLType_v_io_v23_syncbase_nosql_Value11)
-	__VDLType_v_io_v23_syncbase_nosql_Value11.AppendLabel("Local")
-	__VDLType_v_io_v23_syncbase_nosql_Value11.AppendLabel("Remote")
-	__VDLType_v_io_v23_syncbase_nosql_Value11.AppendLabel("Other")
-	__VDLType_v_io_v23_syncbase_nosql_Value1.AppendField("Selection", __VDLType_v_io_v23_syncbase_nosql_Value12)
-	__VDLType_v_io_v23_syncbase_nosql_ValueBuilder.Build()
-	__VDLType_v_io_v23_syncbase_nosql_Valuev, err := __VDLType_v_io_v23_syncbase_nosql_Value2.Built()
-	if err != nil {
-		panic(err)
-	}
-	return __VDLType_v_io_v23_syncbase_nosql_Valuev
-}
-func init() {
-	__VDLType_v_io_v23_syncbase_nosql_Value = __VDLType_v_io_v23_syncbase_nosql_Value_gen()
-}
-func __VDLEnsureNativeBuilt() {
-	if __VDLType0 == nil {
-		__VDLType0 = __VDLType0_gen()
-	}
-	if __VDLType10 == nil {
-		__VDLType10 = __VDLType10_gen()
-	}
-	if __VDLType1 == nil {
-		__VDLType1 = __VDLType1_gen()
-	}
-	if __VDLType11 == nil {
-		__VDLType11 = __VDLType11_gen()
-	}
-	if __VDLType13 == nil {
-		__VDLType13 = __VDLType13_gen()
-	}
-	if __VDLType14 == nil {
-		__VDLType14 = __VDLType14_gen()
-	}
-	if __VDLType6 == nil {
-		__VDLType6 = __VDLType6_gen()
-	}
-	if __VDLType5 == nil {
-		__VDLType5 = __VDLType5_gen()
-	}
-	if __VDLType12 == nil {
-		__VDLType12 = __VDLType12_gen()
-	}
-	if __VDLType7 == nil {
-		__VDLType7 = __VDLType7_gen()
-	}
-	if __VDLType_time_Time == nil {
-		__VDLType_time_Time = __VDLType_time_Time_gen()
-	}
-	if __VDLType_v_io_v23_syncbase_nosql_Conflict == nil {
-		__VDLType_v_io_v23_syncbase_nosql_Conflict = __VDLType_v_io_v23_syncbase_nosql_Conflict_gen()
-	}
-	if __VDLType_v_io_v23_syncbase_nosql_ConflictRow == nil {
-		__VDLType_v_io_v23_syncbase_nosql_ConflictRow = __VDLType_v_io_v23_syncbase_nosql_ConflictRow_gen()
-	}
-	if __VDLType_v_io_v23_syncbase_nosql_ConflictRowSet == nil {
-		__VDLType_v_io_v23_syncbase_nosql_ConflictRowSet = __VDLType_v_io_v23_syncbase_nosql_ConflictRowSet_gen()
-	}
-	if __VDLType_v_io_v23_syncbase_nosql_Resolution == nil {
-		__VDLType_v_io_v23_syncbase_nosql_Resolution = __VDLType_v_io_v23_syncbase_nosql_Resolution_gen()
-	}
-	if __VDLType_v_io_v23_syncbase_nosql_ResolvedRow == nil {
-		__VDLType_v_io_v23_syncbase_nosql_ResolvedRow = __VDLType_v_io_v23_syncbase_nosql_ResolvedRow_gen()
-	}
-	if __VDLType_v_io_v23_syncbase_nosql_Value == nil {
-		__VDLType_v_io_v23_syncbase_nosql_Value = __VDLType_v_io_v23_syncbase_nosql_Value_gen()
-	}
+	return struct{}{}
 }

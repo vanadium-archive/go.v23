@@ -18,6 +18,11 @@ import (
 	"v.io/v23/vdl"
 )
 
+var _ = __VDLInit() // Must be first; see __VDLInit comments for details.
+
+//////////////////////////////////////////////////
+// Type definitions
+
 // Architecture specifies the hardware architecture of a host.
 type Architecture int
 
@@ -73,7 +78,7 @@ func (Architecture) __VDLReflect(struct {
 }
 
 func (m *Architecture) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
-	if err := t.FromEnumLabel((*m).String(), __VDLType_v_io_v23_services_build_Architecture); err != nil {
+	if err := t.FromEnumLabel((*m).String(), tt); err != nil {
 		return err
 	}
 	return nil
@@ -90,8 +95,8 @@ type ArchitectureTarget struct {
 
 func (t *ArchitectureTarget) FromEnumLabel(src string, tt *vdl.Type) error {
 
-	if !vdl.Compatible(tt, __VDLType_v_io_v23_services_build_Architecture) {
-		return fmt.Errorf("type %v incompatible with %v", tt, __VDLType_v_io_v23_services_build_Architecture)
+	if ttWant := vdl.TypeOf((*Architecture)(nil)); !vdl.Compatible(tt, ttWant) {
+		return fmt.Errorf("type %v incompatible with %v", tt, ttWant)
 	}
 	switch src {
 	case "Amd64":
@@ -101,7 +106,7 @@ func (t *ArchitectureTarget) FromEnumLabel(src string, tt *vdl.Type) error {
 	case "X86":
 		*t.Value = 2
 	default:
-		return fmt.Errorf("label %s not in enum %v", src, __VDLType_v_io_v23_services_build_Architecture)
+		return fmt.Errorf("label %s not in enum v.io/v23/services/build.Architecture", src)
 	}
 
 	return nil
@@ -162,7 +167,7 @@ func (Format) __VDLReflect(struct {
 }
 
 func (m *Format) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
-	if err := t.FromEnumLabel((*m).String(), __VDLType_v_io_v23_services_build_Format); err != nil {
+	if err := t.FromEnumLabel((*m).String(), tt); err != nil {
 		return err
 	}
 	return nil
@@ -179,8 +184,8 @@ type FormatTarget struct {
 
 func (t *FormatTarget) FromEnumLabel(src string, tt *vdl.Type) error {
 
-	if !vdl.Compatible(tt, __VDLType_v_io_v23_services_build_Format) {
-		return fmt.Errorf("type %v incompatible with %v", tt, __VDLType_v_io_v23_services_build_Format)
+	if ttWant := vdl.TypeOf((*Format)(nil)); !vdl.Compatible(tt, ttWant) {
+		return fmt.Errorf("type %v incompatible with %v", tt, ttWant)
 	}
 	switch src {
 	case "Elf":
@@ -190,7 +195,7 @@ func (t *FormatTarget) FromEnumLabel(src string, tt *vdl.Type) error {
 	case "Pe":
 		*t.Value = 2
 	default:
-		return fmt.Errorf("label %s not in enum %v", src, __VDLType_v_io_v23_services_build_Format)
+		return fmt.Errorf("label %s not in enum v.io/v23/services/build.Format", src)
 	}
 
 	return nil
@@ -257,7 +262,7 @@ func (OperatingSystem) __VDLReflect(struct {
 }
 
 func (m *OperatingSystem) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
-	if err := t.FromEnumLabel((*m).String(), __VDLType_v_io_v23_services_build_OperatingSystem); err != nil {
+	if err := t.FromEnumLabel((*m).String(), tt); err != nil {
 		return err
 	}
 	return nil
@@ -274,8 +279,8 @@ type OperatingSystemTarget struct {
 
 func (t *OperatingSystemTarget) FromEnumLabel(src string, tt *vdl.Type) error {
 
-	if !vdl.Compatible(tt, __VDLType_v_io_v23_services_build_OperatingSystem) {
-		return fmt.Errorf("type %v incompatible with %v", tt, __VDLType_v_io_v23_services_build_OperatingSystem)
+	if ttWant := vdl.TypeOf((*OperatingSystem)(nil)); !vdl.Compatible(tt, ttWant) {
+		return fmt.Errorf("type %v incompatible with %v", tt, ttWant)
 	}
 	switch src {
 	case "Darwin":
@@ -287,7 +292,7 @@ func (t *OperatingSystemTarget) FromEnumLabel(src string, tt *vdl.Type) error {
 	case "Android":
 		*t.Value = 3
 	default:
-		return fmt.Errorf("label %s not in enum %v", src, __VDLType_v_io_v23_services_build_OperatingSystem)
+		return fmt.Errorf("label %s not in enum v.io/v23/services/build.OperatingSystem", src)
 	}
 
 	return nil
@@ -305,9 +310,6 @@ func (File) __VDLReflect(struct {
 }
 
 func (m *File) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
-	if __VDLType_v_io_v23_services_build_File == nil || __VDLType0 == nil {
-		panic("Initialization order error: types generated for FillVDLTarget not initialized. Consider moving caller to an init() block.")
-	}
 	fieldsTarget1, err := t.StartFields(tt)
 	if err != nil {
 		return err
@@ -318,7 +320,7 @@ func (m *File) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 		return err
 	}
 	if err != vdl.ErrFieldNoExist {
-		if err := fieldTarget3.FromString(string(m.Name), vdl.StringType); err != nil {
+		if err := fieldTarget3.FromString(string(m.Name), tt.NonOptional().Field(0).Type); err != nil {
 			return err
 		}
 		if err := fieldsTarget1.FinishField(keyTarget2, fieldTarget3); err != nil {
@@ -331,7 +333,7 @@ func (m *File) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 	}
 	if err != vdl.ErrFieldNoExist {
 
-		if err := fieldTarget5.FromBytes([]byte(m.Contents), __VDLType1); err != nil {
+		if err := fieldTarget5.FromBytes([]byte(m.Contents), tt.NonOptional().Field(1).Type); err != nil {
 			return err
 		}
 		if err := fieldsTarget1.FinishField(keyTarget4, fieldTarget5); err != nil {
@@ -358,8 +360,8 @@ type FileTarget struct {
 
 func (t *FileTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
 
-	if !vdl.Compatible(tt, __VDLType_v_io_v23_services_build_File) {
-		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType_v_io_v23_services_build_File)
+	if ttWant := vdl.TypeOf((*File)(nil)).Elem(); !vdl.Compatible(tt, ttWant) {
+		return nil, fmt.Errorf("type %v incompatible with %v", tt, ttWant)
 	}
 	return t, nil
 }
@@ -374,7 +376,7 @@ func (t *FileTarget) StartField(name string) (key, field vdl.Target, _ error) {
 		target, err := &t.contentsTarget, error(nil)
 		return nil, target, err
 	default:
-		return nil, nil, fmt.Errorf("field %s not in struct %v", name, __VDLType_v_io_v23_services_build_File)
+		return nil, nil, fmt.Errorf("field %s not in struct v.io/v23/services/build.File", name)
 	}
 }
 func (t *FileTarget) FinishField(_, _ vdl.Target) error {
@@ -385,22 +387,8 @@ func (t *FileTarget) FinishFields(_ vdl.FieldsTarget) error {
 	return nil
 }
 
-func init() {
-	vdl.Register((*Architecture)(nil))
-	vdl.Register((*Format)(nil))
-	vdl.Register((*OperatingSystem)(nil))
-	vdl.Register((*File)(nil))
-}
-
-var __VDLType0 *vdl.Type = vdl.TypeOf((*File)(nil))
-var __VDLType1 *vdl.Type = vdl.TypeOf([]byte(nil))
-var __VDLType_v_io_v23_services_build_Architecture *vdl.Type = vdl.TypeOf(ArchitectureAmd64)
-var __VDLType_v_io_v23_services_build_File *vdl.Type = vdl.TypeOf(File{})
-var __VDLType_v_io_v23_services_build_Format *vdl.Type = vdl.TypeOf(FormatElf)
-var __VDLType_v_io_v23_services_build_OperatingSystem *vdl.Type = vdl.TypeOf(OperatingSystemDarwin)
-
-func __VDLEnsureNativeBuilt() {
-}
+//////////////////////////////////////////////////
+// Interface definitions
 
 // BuilderClientMethods is the client interface
 // containing Builder methods.
@@ -734,4 +722,33 @@ type implBuilderBuildServerCallSend struct {
 
 func (s implBuilderBuildServerCallSend) Send(item File) error {
 	return s.s.Send(item)
+}
+
+var __VDLInitCalled bool
+
+// __VDLInit performs vdl initialization.  It is safe to call multiple times.
+// If you have an init ordering issue, just insert the following line verbatim
+// into your source files in this package, right after the "package foo" clause:
+//
+//    var _ = __VDLInit()
+//
+// The purpose of this function is to ensure that vdl initialization occurs in
+// the right order, and very early in the init sequence.  In particular, vdl
+// registration and package variable initialization needs to occur before
+// functions like vdl.TypeOf will work properly.
+//
+// This function returns a dummy value, so that it can be used to initialize the
+// first var in the file, to take advantage of Go's defined init order.
+func __VDLInit() struct{} {
+	if __VDLInitCalled {
+		return struct{}{}
+	}
+
+	// Register types.
+	vdl.Register((*Architecture)(nil))
+	vdl.Register((*Format)(nil))
+	vdl.Register((*OperatingSystem)(nil))
+	vdl.Register((*File)(nil))
+
+	return struct{}{}
 }

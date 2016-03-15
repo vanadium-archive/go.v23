@@ -13,9 +13,10 @@ import (
 	"v.io/v23/verror"
 )
 
-func __VDLEnsureNativeBuilt() {
-}
+var _ = __VDLInit() // Must be first; see __VDLInit comments for details.
 
+//////////////////////////////////////////////////
+// Error definitions
 var (
 	ErrBadFieldInWhere                 = verror.Register("v.io/v23/query/syncql.BadFieldInWhere", verror.NoRetry, "{1:}{2:} [{3}]Where field must be 'k' or 'v[{.<ident>}...]'.")
 	ErrBoolInvalidExpression           = verror.Register("v.io/v23/query/syncql.BoolInvalidExpression", verror.NoRetry, "{1:}{2:} [{3}]Boolean operands may only be used in equals and not equals expressions.")
@@ -74,65 +75,6 @@ var (
 	ErrNotWritable                     = verror.Register("v.io/v23/query/syncql.NotWritable", verror.NoRetry, "{1:}{2:} [0]Can't write to table {3} (not supported on batch/connection).")
 	ErrOperationNotSupported           = verror.Register("v.io/v23/query/syncql.OperationNotSupported", verror.NoRetry, "{1:}{2:} [0]{3} not supported.")
 )
-
-func init() {
-	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrBadFieldInWhere.ID), "{1:}{2:} [{3}]Where field must be 'k' or 'v[{.<ident>}...]'.")
-	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrBoolInvalidExpression.ID), "{1:}{2:} [{3}]Boolean operands may only be used in equals and not equals expressions.")
-	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrCheckOfUnknownStatementType.ID), "{1:}{2:} [{3}]Cannot semantically check unknown statement type.")
-	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrCouldNotConvert.ID), "{1:}{2:} [{3}]Could not convert {4} to {5}.")
-	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrDotNotationDisallowedForKey.ID), "{1:}{2:} [{3}]Dot notation may not be used on a key field.")
-	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrErrorCompilingRegularExpression.ID), "{1:}{2:} [{3}]The following error encountered compiling regex '{4}': {5}")
-	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrExecOfUnknownStatementType.ID), "{1:}{2:} [{3}]Cannot execute unknown statement type: {4}.")
-	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrExpected.ID), "{1:}{2:} [{3}]Expected '{4}'.")
-	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrExpectedFrom.ID), "{1:}{2:} [{3}]Expected 'from', found {4}.")
-	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrExpectedIdentifier.ID), "{1:}{2:} [{3}]Expected identifier, found {4}.")
-	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrExpectedOperand.ID), "{1:}{2:} [{3}]Expected operand, found {4}.")
-	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrExpectedOperator.ID), "{1:}{2:} [{3}]Expected operator, found {4}.")
-	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrFunctionArgCount.ID), "{1:}{2:} [{3}]Function '{4}' expects {5} args, found: {6}.")
-	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrFunctionAtLeastArgCount.ID), "{1:}{2:} [{3}]Function '{4}' expects at least {5} args, found: {6}.")
-	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrFunctionTypeInvalidArg.ID), "{1:}{2:} [{3}]Function 'Type()' cannot get type of argument -- expecting object.")
-	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrFunctionLenInvalidArg.ID), "{1:}{2:} [{3}]Function 'Len()' expects array, list, set, map, string or nil.")
-	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrFunctionArgBad.ID), "{1:}{2:} [{3}]Function '{4}' arg '{5}' could not be resolved.")
-	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrFunctionNotFound.ID), "{1:}{2:} [{3}]Function '{4}' not found.")
-	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrArgMustBeField.ID), "{1:}{2:} [{3}]Argument must be a value field (i.e., must begin with 'v').")
-	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrBigIntConversionError.ID), "{1:}{2:} [{3}]Can't convert to BigInt: {4}.")
-	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrBigRatConversionError.ID), "{1:}{2:} [{3}]Can't convert to BigRat: {4}.")
-	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrBoolConversionError.ID), "{1:}{2:} [{3}]Can't convert to Bool: {4}.")
-	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrComplexConversionError.ID), "{1:}{2:} [{3}]Can't convert to Complex: {4}.")
-	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrUintConversionError.ID), "{1:}{2:} [{3}]Can't convert to Uint: {4}.")
-	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrTimeConversionError.ID), "{1:}{2:} [{3}]Can't convert to time: {4}.")
-	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrLocationConversionError.ID), "{1:}{2:} [{3}]Can't convert to location: {4}.")
-	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrStringConversionError.ID), "{1:}{2:} [{3}]Can't convert to string: {4}.")
-	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrFloatConversionError.ID), "{1:}{2:} [{3}]Can't convert to float: {4}.")
-	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrIntConversionError.ID), "{1:}{2:} [{3}]Can't convert to int: {4}.")
-	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrIsIsNotRequireLhsValue.ID), "{1:}{2:} [{3}]'Is/is not' expressions require left operand to be a value operand.")
-	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrIsIsNotRequireRhsNil.ID), "{1:}{2:} [{3}]'Is/is not' expressions require right operand to be nil.")
-	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrInvalidEscapeSequence.ID), "{1:}{2:} [{3}Expected percent, or underscore after escape character.]")
-	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrInvalidSelectField.ID), "{1:}{2:} [{3}]Select field must be 'k' or 'v[{.<ident>}...]'.")
-	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrKeyExpressionLiteral.ID), "{1:}{2:} [{3}]Key (i.e., 'k') compares against literals must be string literal.")
-	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrKeyValueStreamError.ID), "{1:}{2:} [{3}]KeyValueStream error: {4}.")
-	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrLikeExpressionsRequireRhsString.ID), "{1:}{2:} [{3}]Like expressions require right operand of type <string-literal>.")
-	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrLimitMustBeGt0.ID), "{1:}{2:} [{3}]Limit must be > 0.")
-	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrMaxStatementLenExceeded.ID), "{1:}{2:} [{3}]Maximum length of statements is {4}; found {5}.")
-	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrNoStatementFound.ID), "{1:}{2:} [{3}]No statement found.")
-	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrOffsetMustBeGe0.ID), "{1:}{2:} [{3}]Offset must be > 0.")
-	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrScanError.ID), "{1:}{2:} [{3}]Scan error: {4}.")
-	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrTableCantAccess.ID), "{1:}{2:} [{3}]Table {4} does not exist (or cannot be accessed): {5}.")
-	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrUnexpected.ID), "{1:}{2:} [{3}]Unexpected: {4}.")
-	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrUnexpectedEndOfStatement.ID), "{1:}{2:} [{3}]Unexpected end of statement.")
-	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrUnknownIdentifier.ID), "{1:}{2:} [{3}]Unknown identifier: {4}.")
-	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrInvalidEscapeChar.ID), "{1:}{2:} [{3}]Invalid escape character cannot be space or backslash.")
-	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrDidYouMeanLowercaseK.ID), "{1:}{2:} [{3}]Did you mean: 'k'?")
-	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrDidYouMeanLowercaseV.ID), "{1:}{2:} [{3}]Did you mean: 'v'?")
-	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrDidYouMeanFunction.ID), "{1:}{2:} [{3}]Did you mean: '{4}'?")
-	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrNotEnoughParamValuesSpecified.ID), "{1:}{2:} [{3}]Not enough parameter values specified.")
-	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrTooManyParamValuesSpecified.ID), "{1:}{2:} [{3}]Too many parameter values specified.")
-	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrPreparedStatementNotFound.ID), "{1:}{2:} [0]Prepared statement not found.")
-	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrIndexKindNotSupported.ID), "{1:}{2:} [{3}]Index kind {4} of field {5} on table {6} not supported.")
-	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrInvalidIndexField.ID), "{1:}{2:} [{3}]Invalid index field {4} returned by table {5}.")
-	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrNotWritable.ID), "{1:}{2:} [0]Can't write to table {3} (not supported on batch/connection).")
-	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrOperationNotSupported.ID), "{1:}{2:} [0]{3} not supported.")
-}
 
 // NewErrBadFieldInWhere returns an error with the ErrBadFieldInWhere ID.
 func NewErrBadFieldInWhere(ctx *context.T, off int64) error {
@@ -412,4 +354,85 @@ func NewErrNotWritable(ctx *context.T, table string) error {
 // NewErrOperationNotSupported returns an error with the ErrOperationNotSupported ID.
 func NewErrOperationNotSupported(ctx *context.T, operation string) error {
 	return verror.New(ErrOperationNotSupported, ctx, operation)
+}
+
+var __VDLInitCalled bool
+
+// __VDLInit performs vdl initialization.  It is safe to call multiple times.
+// If you have an init ordering issue, just insert the following line verbatim
+// into your source files in this package, right after the "package foo" clause:
+//
+//    var _ = __VDLInit()
+//
+// The purpose of this function is to ensure that vdl initialization occurs in
+// the right order, and very early in the init sequence.  In particular, vdl
+// registration and package variable initialization needs to occur before
+// functions like vdl.TypeOf will work properly.
+//
+// This function returns a dummy value, so that it can be used to initialize the
+// first var in the file, to take advantage of Go's defined init order.
+func __VDLInit() struct{} {
+	if __VDLInitCalled {
+		return struct{}{}
+	}
+
+	// Set error format strings.
+	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrBadFieldInWhere.ID), "{1:}{2:} [{3}]Where field must be 'k' or 'v[{.<ident>}...]'.")
+	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrBoolInvalidExpression.ID), "{1:}{2:} [{3}]Boolean operands may only be used in equals and not equals expressions.")
+	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrCheckOfUnknownStatementType.ID), "{1:}{2:} [{3}]Cannot semantically check unknown statement type.")
+	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrCouldNotConvert.ID), "{1:}{2:} [{3}]Could not convert {4} to {5}.")
+	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrDotNotationDisallowedForKey.ID), "{1:}{2:} [{3}]Dot notation may not be used on a key field.")
+	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrErrorCompilingRegularExpression.ID), "{1:}{2:} [{3}]The following error encountered compiling regex '{4}': {5}")
+	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrExecOfUnknownStatementType.ID), "{1:}{2:} [{3}]Cannot execute unknown statement type: {4}.")
+	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrExpected.ID), "{1:}{2:} [{3}]Expected '{4}'.")
+	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrExpectedFrom.ID), "{1:}{2:} [{3}]Expected 'from', found {4}.")
+	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrExpectedIdentifier.ID), "{1:}{2:} [{3}]Expected identifier, found {4}.")
+	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrExpectedOperand.ID), "{1:}{2:} [{3}]Expected operand, found {4}.")
+	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrExpectedOperator.ID), "{1:}{2:} [{3}]Expected operator, found {4}.")
+	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrFunctionArgCount.ID), "{1:}{2:} [{3}]Function '{4}' expects {5} args, found: {6}.")
+	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrFunctionAtLeastArgCount.ID), "{1:}{2:} [{3}]Function '{4}' expects at least {5} args, found: {6}.")
+	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrFunctionTypeInvalidArg.ID), "{1:}{2:} [{3}]Function 'Type()' cannot get type of argument -- expecting object.")
+	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrFunctionLenInvalidArg.ID), "{1:}{2:} [{3}]Function 'Len()' expects array, list, set, map, string or nil.")
+	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrFunctionArgBad.ID), "{1:}{2:} [{3}]Function '{4}' arg '{5}' could not be resolved.")
+	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrFunctionNotFound.ID), "{1:}{2:} [{3}]Function '{4}' not found.")
+	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrArgMustBeField.ID), "{1:}{2:} [{3}]Argument must be a value field (i.e., must begin with 'v').")
+	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrBigIntConversionError.ID), "{1:}{2:} [{3}]Can't convert to BigInt: {4}.")
+	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrBigRatConversionError.ID), "{1:}{2:} [{3}]Can't convert to BigRat: {4}.")
+	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrBoolConversionError.ID), "{1:}{2:} [{3}]Can't convert to Bool: {4}.")
+	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrComplexConversionError.ID), "{1:}{2:} [{3}]Can't convert to Complex: {4}.")
+	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrUintConversionError.ID), "{1:}{2:} [{3}]Can't convert to Uint: {4}.")
+	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrTimeConversionError.ID), "{1:}{2:} [{3}]Can't convert to time: {4}.")
+	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrLocationConversionError.ID), "{1:}{2:} [{3}]Can't convert to location: {4}.")
+	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrStringConversionError.ID), "{1:}{2:} [{3}]Can't convert to string: {4}.")
+	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrFloatConversionError.ID), "{1:}{2:} [{3}]Can't convert to float: {4}.")
+	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrIntConversionError.ID), "{1:}{2:} [{3}]Can't convert to int: {4}.")
+	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrIsIsNotRequireLhsValue.ID), "{1:}{2:} [{3}]'Is/is not' expressions require left operand to be a value operand.")
+	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrIsIsNotRequireRhsNil.ID), "{1:}{2:} [{3}]'Is/is not' expressions require right operand to be nil.")
+	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrInvalidEscapeSequence.ID), "{1:}{2:} [{3}Expected percent, or underscore after escape character.]")
+	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrInvalidSelectField.ID), "{1:}{2:} [{3}]Select field must be 'k' or 'v[{.<ident>}...]'.")
+	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrKeyExpressionLiteral.ID), "{1:}{2:} [{3}]Key (i.e., 'k') compares against literals must be string literal.")
+	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrKeyValueStreamError.ID), "{1:}{2:} [{3}]KeyValueStream error: {4}.")
+	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrLikeExpressionsRequireRhsString.ID), "{1:}{2:} [{3}]Like expressions require right operand of type <string-literal>.")
+	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrLimitMustBeGt0.ID), "{1:}{2:} [{3}]Limit must be > 0.")
+	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrMaxStatementLenExceeded.ID), "{1:}{2:} [{3}]Maximum length of statements is {4}; found {5}.")
+	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrNoStatementFound.ID), "{1:}{2:} [{3}]No statement found.")
+	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrOffsetMustBeGe0.ID), "{1:}{2:} [{3}]Offset must be > 0.")
+	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrScanError.ID), "{1:}{2:} [{3}]Scan error: {4}.")
+	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrTableCantAccess.ID), "{1:}{2:} [{3}]Table {4} does not exist (or cannot be accessed): {5}.")
+	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrUnexpected.ID), "{1:}{2:} [{3}]Unexpected: {4}.")
+	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrUnexpectedEndOfStatement.ID), "{1:}{2:} [{3}]Unexpected end of statement.")
+	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrUnknownIdentifier.ID), "{1:}{2:} [{3}]Unknown identifier: {4}.")
+	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrInvalidEscapeChar.ID), "{1:}{2:} [{3}]Invalid escape character cannot be space or backslash.")
+	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrDidYouMeanLowercaseK.ID), "{1:}{2:} [{3}]Did you mean: 'k'?")
+	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrDidYouMeanLowercaseV.ID), "{1:}{2:} [{3}]Did you mean: 'v'?")
+	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrDidYouMeanFunction.ID), "{1:}{2:} [{3}]Did you mean: '{4}'?")
+	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrNotEnoughParamValuesSpecified.ID), "{1:}{2:} [{3}]Not enough parameter values specified.")
+	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrTooManyParamValuesSpecified.ID), "{1:}{2:} [{3}]Too many parameter values specified.")
+	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrPreparedStatementNotFound.ID), "{1:}{2:} [0]Prepared statement not found.")
+	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrIndexKindNotSupported.ID), "{1:}{2:} [{3}]Index kind {4} of field {5} on table {6} not supported.")
+	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrInvalidIndexField.ID), "{1:}{2:} [{3}]Invalid index field {4} returned by table {5}.")
+	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrNotWritable.ID), "{1:}{2:} [0]Can't write to table {3} (not supported on batch/connection).")
+	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrOperationNotSupported.ID), "{1:}{2:} [0]{3} not supported.")
+
+	return struct{}{}
 }

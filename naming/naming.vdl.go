@@ -15,6 +15,11 @@ import (
 	"v.io/v23/verror"
 )
 
+var _ = __VDLInit() // Must be first; see __VDLInit comments for details.
+
+//////////////////////////////////////////////////
+// Type definitions
+
 // MountFlag is a bit mask of options to the mount call.
 type MountFlag uint32
 
@@ -24,7 +29,7 @@ func (MountFlag) __VDLReflect(struct {
 }
 
 func (m *MountFlag) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
-	if err := t.FromUint(uint64((*m)), __VDLType_v_io_v23_naming_MountFlag); err != nil {
+	if err := t.FromUint(uint64((*m)), tt); err != nil {
 		return err
 	}
 	return nil
@@ -94,7 +99,6 @@ func (MountedServer) __VDLReflect(struct {
 }
 
 func (m *MountedServer) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
-	__VDLEnsureNativeBuilt()
 	fieldsTarget1, err := t.StartFields(tt)
 	if err != nil {
 		return err
@@ -105,7 +109,7 @@ func (m *MountedServer) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 		return err
 	}
 	if err != vdl.ErrFieldNoExist {
-		if err := fieldTarget3.FromString(string(m.Server), vdl.StringType); err != nil {
+		if err := fieldTarget3.FromString(string(m.Server), tt.NonOptional().Field(0).Type); err != nil {
 			return err
 		}
 		if err := fieldsTarget1.FinishField(keyTarget2, fieldTarget3); err != nil {
@@ -123,7 +127,7 @@ func (m *MountedServer) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 	}
 	if err != vdl.ErrFieldNoExist {
 
-		if err := wireValue4.FillVDLTarget(fieldTarget6, __VDLType_time_WireDeadline); err != nil {
+		if err := wireValue4.FillVDLTarget(fieldTarget6, tt.NonOptional().Field(1).Type); err != nil {
 			return err
 		}
 		if err := fieldsTarget1.FinishField(keyTarget5, fieldTarget6); err != nil {
@@ -150,8 +154,8 @@ type MountedServerTarget struct {
 
 func (t *MountedServerTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
 
-	if !vdl.Compatible(tt, __VDLType_v_io_v23_naming_MountedServer) {
-		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType_v_io_v23_naming_MountedServer)
+	if ttWant := vdl.TypeOf((*MountedServer)(nil)).Elem(); !vdl.Compatible(tt, ttWant) {
+		return nil, fmt.Errorf("type %v incompatible with %v", tt, ttWant)
 	}
 	return t, nil
 }
@@ -166,7 +170,7 @@ func (t *MountedServerTarget) StartField(name string) (key, field vdl.Target, _ 
 		target, err := &t.deadlineTarget, error(nil)
 		return nil, target, err
 	default:
-		return nil, nil, fmt.Errorf("field %s not in struct %v", name, __VDLType_v_io_v23_naming_MountedServer)
+		return nil, nil, fmt.Errorf("field %s not in struct v.io/v23/naming.MountedServer", name)
 	}
 }
 func (t *MountedServerTarget) FinishField(_, _ vdl.Target) error {
@@ -195,7 +199,6 @@ func (MountEntry) __VDLReflect(struct {
 }
 
 func (m *MountEntry) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
-	__VDLEnsureNativeBuilt()
 	fieldsTarget1, err := t.StartFields(tt)
 	if err != nil {
 		return err
@@ -206,7 +209,7 @@ func (m *MountEntry) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 		return err
 	}
 	if err != vdl.ErrFieldNoExist {
-		if err := fieldTarget3.FromString(string(m.Name), vdl.StringType); err != nil {
+		if err := fieldTarget3.FromString(string(m.Name), tt.NonOptional().Field(0).Type); err != nil {
 			return err
 		}
 		if err := fieldsTarget1.FinishField(keyTarget2, fieldTarget3); err != nil {
@@ -219,7 +222,7 @@ func (m *MountEntry) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 	}
 	if err != vdl.ErrFieldNoExist {
 
-		listTarget6, err := fieldTarget5.StartList(__VDLType2, len(m.Servers))
+		listTarget6, err := fieldTarget5.StartList(tt.NonOptional().Field(1).Type, len(m.Servers))
 		if err != nil {
 			return err
 		}
@@ -229,7 +232,7 @@ func (m *MountEntry) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 				return err
 			}
 
-			if err := elem8.FillVDLTarget(elemTarget7, __VDLType_v_io_v23_naming_MountedServer); err != nil {
+			if err := elem8.FillVDLTarget(elemTarget7, tt.NonOptional().Field(1).Type.Elem()); err != nil {
 				return err
 			}
 			if err := listTarget6.FinishElem(elemTarget7); err != nil {
@@ -248,7 +251,7 @@ func (m *MountEntry) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 		return err
 	}
 	if err != vdl.ErrFieldNoExist {
-		if err := fieldTarget10.FromBool(bool(m.ServesMountTable), vdl.BoolType); err != nil {
+		if err := fieldTarget10.FromBool(bool(m.ServesMountTable), tt.NonOptional().Field(2).Type); err != nil {
 			return err
 		}
 		if err := fieldsTarget1.FinishField(keyTarget9, fieldTarget10); err != nil {
@@ -260,7 +263,7 @@ func (m *MountEntry) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 		return err
 	}
 	if err != vdl.ErrFieldNoExist {
-		if err := fieldTarget12.FromBool(bool(m.IsLeaf), vdl.BoolType); err != nil {
+		if err := fieldTarget12.FromBool(bool(m.IsLeaf), tt.NonOptional().Field(3).Type); err != nil {
 			return err
 		}
 		if err := fieldsTarget1.FinishField(keyTarget11, fieldTarget12); err != nil {
@@ -289,8 +292,8 @@ type MountEntryTarget struct {
 
 func (t *MountEntryTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
 
-	if !vdl.Compatible(tt, __VDLType_v_io_v23_naming_MountEntry) {
-		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType_v_io_v23_naming_MountEntry)
+	if ttWant := vdl.TypeOf((*MountEntry)(nil)).Elem(); !vdl.Compatible(tt, ttWant) {
+		return nil, fmt.Errorf("type %v incompatible with %v", tt, ttWant)
 	}
 	return t, nil
 }
@@ -313,7 +316,7 @@ func (t *MountEntryTarget) StartField(name string) (key, field vdl.Target, _ err
 		target, err := &t.isLeafTarget, error(nil)
 		return nil, target, err
 	default:
-		return nil, nil, fmt.Errorf("field %s not in struct %v", name, __VDLType_v_io_v23_naming_MountEntry)
+		return nil, nil, fmt.Errorf("field %s not in struct v.io/v23/naming.MountEntry", name)
 	}
 }
 func (t *MountEntryTarget) FinishField(_, _ vdl.Target) error {
@@ -334,8 +337,8 @@ type unnamed_5b5d762e696f2f7632332f6e616d696e672e4d6f756e74656453657276657220737
 
 func (t *unnamed_5b5d762e696f2f7632332f6e616d696e672e4d6f756e746564536572766572207374727563747b53657276657220737472696e673b446561646c696e652074696d652e57697265446561646c696e65207374727563747b46726f6d4e6f772074696d652e4475726174696f6e207374727563747b5365636f6e647320696e7436343b4e616e6f7320696e7433327d3b4e6f446561646c696e6520626f6f6c7d7dTarget) StartList(tt *vdl.Type, len int) (vdl.ListTarget, error) {
 
-	if !vdl.Compatible(tt, __VDLType2) {
-		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType2)
+	if ttWant := vdl.TypeOf((*[]MountedServer)(nil)); !vdl.Compatible(tt, ttWant) {
+		return nil, fmt.Errorf("type %v incompatible with %v", tt, ttWant)
 	}
 	if cap(*t.Value) < len {
 		*t.Value = make([]MountedServer, len)
@@ -372,9 +375,6 @@ func (GlobError) __VDLReflect(struct {
 }
 
 func (m *GlobError) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
-	if __VDLType_v_io_v23_naming_GlobError == nil || __VDLType3 == nil {
-		panic("Initialization order error: types generated for FillVDLTarget not initialized. Consider moving caller to an init() block.")
-	}
 	fieldsTarget1, err := t.StartFields(tt)
 	if err != nil {
 		return err
@@ -385,7 +385,7 @@ func (m *GlobError) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 		return err
 	}
 	if err != vdl.ErrFieldNoExist {
-		if err := fieldTarget3.FromString(string(m.Name), vdl.StringType); err != nil {
+		if err := fieldTarget3.FromString(string(m.Name), tt.NonOptional().Field(0).Type); err != nil {
 			return err
 		}
 		if err := fieldsTarget1.FinishField(keyTarget2, fieldTarget3); err != nil {
@@ -399,7 +399,7 @@ func (m *GlobError) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 	if err != vdl.ErrFieldNoExist {
 
 		if m.Error == nil {
-			if err := fieldTarget5.FromNil(vdl.ErrorType); err != nil {
+			if err := fieldTarget5.FromNil(tt.NonOptional().Field(1).Type); err != nil {
 				return err
 			}
 		} else {
@@ -436,8 +436,8 @@ type GlobErrorTarget struct {
 
 func (t *GlobErrorTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
 
-	if !vdl.Compatible(tt, __VDLType_v_io_v23_naming_GlobError) {
-		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType_v_io_v23_naming_GlobError)
+	if ttWant := vdl.TypeOf((*GlobError)(nil)).Elem(); !vdl.Compatible(tt, ttWant) {
+		return nil, fmt.Errorf("type %v incompatible with %v", tt, ttWant)
 	}
 	return t, nil
 }
@@ -452,7 +452,7 @@ func (t *GlobErrorTarget) StartField(name string) (key, field vdl.Target, _ erro
 		target, err := &t.errorTarget, error(nil)
 		return nil, target, err
 	default:
-		return nil, nil, fmt.Errorf("field %s not in struct %v", name, __VDLType_v_io_v23_naming_GlobError)
+		return nil, nil, fmt.Errorf("field %s not in struct v.io/v23/naming.GlobError", name)
 	}
 }
 func (t *GlobErrorTarget) FinishField(_, _ vdl.Target) error {
@@ -499,7 +499,7 @@ func (x GlobReplyEntry) Name() string                    { return "Entry" }
 func (x GlobReplyEntry) __VDLReflect(__GlobReplyReflect) {}
 
 func (m GlobReplyEntry) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
-	fieldsTarget1, err := t.StartFields(__VDLType_v_io_v23_naming_GlobReply)
+	fieldsTarget1, err := t.StartFields(tt)
 	if err != nil {
 		return err
 	}
@@ -508,7 +508,7 @@ func (m GlobReplyEntry) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 		return err
 	}
 
-	if err := m.Value.FillVDLTarget(fieldTarget3, __VDLType_v_io_v23_naming_MountEntry); err != nil {
+	if err := m.Value.FillVDLTarget(fieldTarget3, tt.NonOptional().Field(0).Type); err != nil {
 		return err
 	}
 	if err := fieldsTarget1.FinishField(keyTarget2, fieldTarget3); err != nil {
@@ -531,7 +531,7 @@ func (x GlobReplyError) Name() string                    { return "Error" }
 func (x GlobReplyError) __VDLReflect(__GlobReplyReflect) {}
 
 func (m GlobReplyError) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
-	fieldsTarget1, err := t.StartFields(__VDLType_v_io_v23_naming_GlobReply)
+	fieldsTarget1, err := t.StartFields(tt)
 	if err != nil {
 		return err
 	}
@@ -540,7 +540,7 @@ func (m GlobReplyError) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 		return err
 	}
 
-	if err := m.Value.FillVDLTarget(fieldTarget3, __VDLType_v_io_v23_naming_GlobError); err != nil {
+	if err := m.Value.FillVDLTarget(fieldTarget3, tt.NonOptional().Field(1).Type); err != nil {
 		return err
 	}
 	if err := fieldsTarget1.FinishField(keyTarget2, fieldTarget3); err != nil {
@@ -593,7 +593,7 @@ func (x GlobChildrenReplyName) Name() string                            { return
 func (x GlobChildrenReplyName) __VDLReflect(__GlobChildrenReplyReflect) {}
 
 func (m GlobChildrenReplyName) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
-	fieldsTarget1, err := t.StartFields(__VDLType_v_io_v23_naming_GlobChildrenReply)
+	fieldsTarget1, err := t.StartFields(tt)
 	if err != nil {
 		return err
 	}
@@ -601,7 +601,7 @@ func (m GlobChildrenReplyName) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 	if err != nil {
 		return err
 	}
-	if err := fieldTarget3.FromString(string(m.Value), vdl.StringType); err != nil {
+	if err := fieldTarget3.FromString(string(m.Value), tt.NonOptional().Field(0).Type); err != nil {
 		return err
 	}
 	if err := fieldsTarget1.FinishField(keyTarget2, fieldTarget3); err != nil {
@@ -624,7 +624,7 @@ func (x GlobChildrenReplyError) Name() string                            { retur
 func (x GlobChildrenReplyError) __VDLReflect(__GlobChildrenReplyReflect) {}
 
 func (m GlobChildrenReplyError) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
-	fieldsTarget1, err := t.StartFields(__VDLType_v_io_v23_naming_GlobChildrenReply)
+	fieldsTarget1, err := t.StartFields(tt)
 	if err != nil {
 		return err
 	}
@@ -633,7 +633,7 @@ func (m GlobChildrenReplyError) FillVDLTarget(t vdl.Target, tt *vdl.Type) error 
 		return err
 	}
 
-	if err := m.Value.FillVDLTarget(fieldTarget3, __VDLType_v_io_v23_naming_GlobError); err != nil {
+	if err := m.Value.FillVDLTarget(fieldTarget3, tt.NonOptional().Field(1).Type); err != nil {
 		return err
 	}
 	if err := fieldsTarget1.FinishField(keyTarget2, fieldTarget3); err != nil {
@@ -650,317 +650,40 @@ func (m GlobChildrenReplyError) MakeVDLTarget() vdl.Target {
 	return nil
 }
 
-func init() {
+//////////////////////////////////////////////////
+// Const definitions
+
+const Replace = MountFlag(1) // Replace means the mount should replace what is currently at the mount point
+const MT = MountFlag(2)      // MT means that the target server is a mount table.
+const Leaf = MountFlag(4)    // Leaf means that the target server is a leaf.
+
+var __VDLInitCalled bool
+
+// __VDLInit performs vdl initialization.  It is safe to call multiple times.
+// If you have an init ordering issue, just insert the following line verbatim
+// into your source files in this package, right after the "package foo" clause:
+//
+//    var _ = __VDLInit()
+//
+// The purpose of this function is to ensure that vdl initialization occurs in
+// the right order, and very early in the init sequence.  In particular, vdl
+// registration and package variable initialization needs to occur before
+// functions like vdl.TypeOf will work properly.
+//
+// This function returns a dummy value, so that it can be used to initialize the
+// first var in the file, to take advantage of Go's defined init order.
+func __VDLInit() struct{} {
+	if __VDLInitCalled {
+		return struct{}{}
+	}
+
+	// Register types.
 	vdl.Register((*MountFlag)(nil))
 	vdl.Register((*MountedServer)(nil))
 	vdl.Register((*MountEntry)(nil))
 	vdl.Register((*GlobError)(nil))
 	vdl.Register((*GlobReply)(nil))
 	vdl.Register((*GlobChildrenReply)(nil))
+
+	return struct{}{}
 }
-
-var __VDLType3 *vdl.Type = vdl.TypeOf((*GlobError)(nil))
-var __VDLType1 *vdl.Type
-
-func __VDLType1_gen() *vdl.Type {
-	__VDLType1Builder := vdl.TypeBuilder{}
-
-	__VDLType11 := __VDLType1Builder.Optional()
-	__VDLType12 := __VDLType1Builder.Struct()
-	__VDLType13 := __VDLType1Builder.Named("v.io/v23/naming.MountEntry").AssignBase(__VDLType12)
-	__VDLType14 := vdl.StringType
-	__VDLType12.AppendField("Name", __VDLType14)
-	__VDLType15 := __VDLType1Builder.List()
-	__VDLType16 := __VDLType1Builder.Struct()
-	__VDLType17 := __VDLType1Builder.Named("v.io/v23/naming.MountedServer").AssignBase(__VDLType16)
-	__VDLType16.AppendField("Server", __VDLType14)
-	__VDLType18 := __VDLType1Builder.Struct()
-	__VDLType19 := __VDLType1Builder.Named("time.WireDeadline").AssignBase(__VDLType18)
-	__VDLType110 := __VDLType1Builder.Struct()
-	__VDLType111 := __VDLType1Builder.Named("time.Duration").AssignBase(__VDLType110)
-	__VDLType112 := vdl.Int64Type
-	__VDLType110.AppendField("Seconds", __VDLType112)
-	__VDLType113 := vdl.Int32Type
-	__VDLType110.AppendField("Nanos", __VDLType113)
-	__VDLType18.AppendField("FromNow", __VDLType111)
-	__VDLType114 := vdl.BoolType
-	__VDLType18.AppendField("NoDeadline", __VDLType114)
-	__VDLType16.AppendField("Deadline", __VDLType19)
-	__VDLType15.AssignElem(__VDLType17)
-	__VDLType12.AppendField("Servers", __VDLType15)
-	__VDLType12.AppendField("ServesMountTable", __VDLType114)
-	__VDLType12.AppendField("IsLeaf", __VDLType114)
-	__VDLType11.AssignElem(__VDLType13)
-	__VDLType1Builder.Build()
-	__VDLType1v, err := __VDLType11.Built()
-	if err != nil {
-		panic(err)
-	}
-	return __VDLType1v
-}
-func init() {
-	__VDLType1 = __VDLType1_gen()
-}
-
-var __VDLType0 *vdl.Type
-
-func __VDLType0_gen() *vdl.Type {
-	__VDLType0Builder := vdl.TypeBuilder{}
-
-	__VDLType01 := __VDLType0Builder.Optional()
-	__VDLType02 := __VDLType0Builder.Struct()
-	__VDLType03 := __VDLType0Builder.Named("v.io/v23/naming.MountedServer").AssignBase(__VDLType02)
-	__VDLType04 := vdl.StringType
-	__VDLType02.AppendField("Server", __VDLType04)
-	__VDLType05 := __VDLType0Builder.Struct()
-	__VDLType06 := __VDLType0Builder.Named("time.WireDeadline").AssignBase(__VDLType05)
-	__VDLType07 := __VDLType0Builder.Struct()
-	__VDLType08 := __VDLType0Builder.Named("time.Duration").AssignBase(__VDLType07)
-	__VDLType09 := vdl.Int64Type
-	__VDLType07.AppendField("Seconds", __VDLType09)
-	__VDLType010 := vdl.Int32Type
-	__VDLType07.AppendField("Nanos", __VDLType010)
-	__VDLType05.AppendField("FromNow", __VDLType08)
-	__VDLType011 := vdl.BoolType
-	__VDLType05.AppendField("NoDeadline", __VDLType011)
-	__VDLType02.AppendField("Deadline", __VDLType06)
-	__VDLType01.AssignElem(__VDLType03)
-	__VDLType0Builder.Build()
-	__VDLType0v, err := __VDLType01.Built()
-	if err != nil {
-		panic(err)
-	}
-	return __VDLType0v
-}
-func init() {
-	__VDLType0 = __VDLType0_gen()
-}
-
-var __VDLType2 *vdl.Type
-
-func __VDLType2_gen() *vdl.Type {
-	__VDLType2Builder := vdl.TypeBuilder{}
-
-	__VDLType21 := __VDLType2Builder.List()
-	__VDLType22 := __VDLType2Builder.Struct()
-	__VDLType23 := __VDLType2Builder.Named("v.io/v23/naming.MountedServer").AssignBase(__VDLType22)
-	__VDLType24 := vdl.StringType
-	__VDLType22.AppendField("Server", __VDLType24)
-	__VDLType25 := __VDLType2Builder.Struct()
-	__VDLType26 := __VDLType2Builder.Named("time.WireDeadline").AssignBase(__VDLType25)
-	__VDLType27 := __VDLType2Builder.Struct()
-	__VDLType28 := __VDLType2Builder.Named("time.Duration").AssignBase(__VDLType27)
-	__VDLType29 := vdl.Int64Type
-	__VDLType27.AppendField("Seconds", __VDLType29)
-	__VDLType210 := vdl.Int32Type
-	__VDLType27.AppendField("Nanos", __VDLType210)
-	__VDLType25.AppendField("FromNow", __VDLType28)
-	__VDLType211 := vdl.BoolType
-	__VDLType25.AppendField("NoDeadline", __VDLType211)
-	__VDLType22.AppendField("Deadline", __VDLType26)
-	__VDLType21.AssignElem(__VDLType23)
-	__VDLType2Builder.Build()
-	__VDLType2v, err := __VDLType21.Built()
-	if err != nil {
-		panic(err)
-	}
-	return __VDLType2v
-}
-func init() {
-	__VDLType2 = __VDLType2_gen()
-}
-
-var __VDLType_time_WireDeadline *vdl.Type
-
-func __VDLType_time_WireDeadline_gen() *vdl.Type {
-	__VDLType_time_WireDeadlineBuilder := vdl.TypeBuilder{}
-
-	__VDLType_time_WireDeadline1 := __VDLType_time_WireDeadlineBuilder.Struct()
-	__VDLType_time_WireDeadline2 := __VDLType_time_WireDeadlineBuilder.Named("time.WireDeadline").AssignBase(__VDLType_time_WireDeadline1)
-	__VDLType_time_WireDeadline3 := __VDLType_time_WireDeadlineBuilder.Struct()
-	__VDLType_time_WireDeadline4 := __VDLType_time_WireDeadlineBuilder.Named("time.Duration").AssignBase(__VDLType_time_WireDeadline3)
-	__VDLType_time_WireDeadline5 := vdl.Int64Type
-	__VDLType_time_WireDeadline3.AppendField("Seconds", __VDLType_time_WireDeadline5)
-	__VDLType_time_WireDeadline6 := vdl.Int32Type
-	__VDLType_time_WireDeadline3.AppendField("Nanos", __VDLType_time_WireDeadline6)
-	__VDLType_time_WireDeadline1.AppendField("FromNow", __VDLType_time_WireDeadline4)
-	__VDLType_time_WireDeadline7 := vdl.BoolType
-	__VDLType_time_WireDeadline1.AppendField("NoDeadline", __VDLType_time_WireDeadline7)
-	__VDLType_time_WireDeadlineBuilder.Build()
-	__VDLType_time_WireDeadlinev, err := __VDLType_time_WireDeadline2.Built()
-	if err != nil {
-		panic(err)
-	}
-	return __VDLType_time_WireDeadlinev
-}
-func init() {
-	__VDLType_time_WireDeadline = __VDLType_time_WireDeadline_gen()
-}
-
-var __VDLType_v_io_v23_naming_GlobChildrenReply *vdl.Type = vdl.TypeOf(GlobChildrenReply(GlobChildrenReplyName{""}))
-var __VDLType_v_io_v23_naming_GlobError *vdl.Type = vdl.TypeOf(GlobError{})
-var __VDLType_v_io_v23_naming_GlobReply *vdl.Type
-
-func __VDLType_v_io_v23_naming_GlobReply_gen() *vdl.Type {
-	__VDLType_v_io_v23_naming_GlobReplyBuilder := vdl.TypeBuilder{}
-
-	__VDLType_v_io_v23_naming_GlobReply1 := __VDLType_v_io_v23_naming_GlobReplyBuilder.Union()
-	__VDLType_v_io_v23_naming_GlobReply2 := __VDLType_v_io_v23_naming_GlobReplyBuilder.Named("v.io/v23/naming.GlobReply").AssignBase(__VDLType_v_io_v23_naming_GlobReply1)
-	__VDLType_v_io_v23_naming_GlobReply3 := __VDLType_v_io_v23_naming_GlobReplyBuilder.Struct()
-	__VDLType_v_io_v23_naming_GlobReply4 := __VDLType_v_io_v23_naming_GlobReplyBuilder.Named("v.io/v23/naming.MountEntry").AssignBase(__VDLType_v_io_v23_naming_GlobReply3)
-	__VDLType_v_io_v23_naming_GlobReply5 := vdl.StringType
-	__VDLType_v_io_v23_naming_GlobReply3.AppendField("Name", __VDLType_v_io_v23_naming_GlobReply5)
-	__VDLType_v_io_v23_naming_GlobReply6 := __VDLType_v_io_v23_naming_GlobReplyBuilder.List()
-	__VDLType_v_io_v23_naming_GlobReply7 := __VDLType_v_io_v23_naming_GlobReplyBuilder.Struct()
-	__VDLType_v_io_v23_naming_GlobReply8 := __VDLType_v_io_v23_naming_GlobReplyBuilder.Named("v.io/v23/naming.MountedServer").AssignBase(__VDLType_v_io_v23_naming_GlobReply7)
-	__VDLType_v_io_v23_naming_GlobReply7.AppendField("Server", __VDLType_v_io_v23_naming_GlobReply5)
-	__VDLType_v_io_v23_naming_GlobReply9 := __VDLType_v_io_v23_naming_GlobReplyBuilder.Struct()
-	__VDLType_v_io_v23_naming_GlobReply10 := __VDLType_v_io_v23_naming_GlobReplyBuilder.Named("time.WireDeadline").AssignBase(__VDLType_v_io_v23_naming_GlobReply9)
-	__VDLType_v_io_v23_naming_GlobReply11 := __VDLType_v_io_v23_naming_GlobReplyBuilder.Struct()
-	__VDLType_v_io_v23_naming_GlobReply12 := __VDLType_v_io_v23_naming_GlobReplyBuilder.Named("time.Duration").AssignBase(__VDLType_v_io_v23_naming_GlobReply11)
-	__VDLType_v_io_v23_naming_GlobReply13 := vdl.Int64Type
-	__VDLType_v_io_v23_naming_GlobReply11.AppendField("Seconds", __VDLType_v_io_v23_naming_GlobReply13)
-	__VDLType_v_io_v23_naming_GlobReply14 := vdl.Int32Type
-	__VDLType_v_io_v23_naming_GlobReply11.AppendField("Nanos", __VDLType_v_io_v23_naming_GlobReply14)
-	__VDLType_v_io_v23_naming_GlobReply9.AppendField("FromNow", __VDLType_v_io_v23_naming_GlobReply12)
-	__VDLType_v_io_v23_naming_GlobReply15 := vdl.BoolType
-	__VDLType_v_io_v23_naming_GlobReply9.AppendField("NoDeadline", __VDLType_v_io_v23_naming_GlobReply15)
-	__VDLType_v_io_v23_naming_GlobReply7.AppendField("Deadline", __VDLType_v_io_v23_naming_GlobReply10)
-	__VDLType_v_io_v23_naming_GlobReply6.AssignElem(__VDLType_v_io_v23_naming_GlobReply8)
-	__VDLType_v_io_v23_naming_GlobReply3.AppendField("Servers", __VDLType_v_io_v23_naming_GlobReply6)
-	__VDLType_v_io_v23_naming_GlobReply3.AppendField("ServesMountTable", __VDLType_v_io_v23_naming_GlobReply15)
-	__VDLType_v_io_v23_naming_GlobReply3.AppendField("IsLeaf", __VDLType_v_io_v23_naming_GlobReply15)
-	__VDLType_v_io_v23_naming_GlobReply1.AppendField("Entry", __VDLType_v_io_v23_naming_GlobReply4)
-	__VDLType_v_io_v23_naming_GlobReply16 := __VDLType_v_io_v23_naming_GlobReplyBuilder.Struct()
-	__VDLType_v_io_v23_naming_GlobReply17 := __VDLType_v_io_v23_naming_GlobReplyBuilder.Named("v.io/v23/naming.GlobError").AssignBase(__VDLType_v_io_v23_naming_GlobReply16)
-	__VDLType_v_io_v23_naming_GlobReply16.AppendField("Name", __VDLType_v_io_v23_naming_GlobReply5)
-	__VDLType_v_io_v23_naming_GlobReply18 := __VDLType_v_io_v23_naming_GlobReplyBuilder.Optional()
-	__VDLType_v_io_v23_naming_GlobReply19 := __VDLType_v_io_v23_naming_GlobReplyBuilder.Struct()
-	__VDLType_v_io_v23_naming_GlobReply20 := __VDLType_v_io_v23_naming_GlobReplyBuilder.Named("error").AssignBase(__VDLType_v_io_v23_naming_GlobReply19)
-	__VDLType_v_io_v23_naming_GlobReply19.AppendField("Id", __VDLType_v_io_v23_naming_GlobReply5)
-	__VDLType_v_io_v23_naming_GlobReply21 := __VDLType_v_io_v23_naming_GlobReplyBuilder.Enum()
-	__VDLType_v_io_v23_naming_GlobReply21.AppendLabel("NoRetry")
-	__VDLType_v_io_v23_naming_GlobReply21.AppendLabel("RetryConnection")
-	__VDLType_v_io_v23_naming_GlobReply21.AppendLabel("RetryRefetch")
-	__VDLType_v_io_v23_naming_GlobReply21.AppendLabel("RetryBackoff")
-	__VDLType_v_io_v23_naming_GlobReply19.AppendField("RetryCode", __VDLType_v_io_v23_naming_GlobReply21)
-	__VDLType_v_io_v23_naming_GlobReply19.AppendField("Msg", __VDLType_v_io_v23_naming_GlobReply5)
-	__VDLType_v_io_v23_naming_GlobReply22 := __VDLType_v_io_v23_naming_GlobReplyBuilder.List()
-	__VDLType_v_io_v23_naming_GlobReply23 := vdl.AnyType
-	__VDLType_v_io_v23_naming_GlobReply22.AssignElem(__VDLType_v_io_v23_naming_GlobReply23)
-	__VDLType_v_io_v23_naming_GlobReply19.AppendField("ParamList", __VDLType_v_io_v23_naming_GlobReply22)
-	__VDLType_v_io_v23_naming_GlobReply18.AssignElem(__VDLType_v_io_v23_naming_GlobReply20)
-	__VDLType_v_io_v23_naming_GlobReply16.AppendField("Error", __VDLType_v_io_v23_naming_GlobReply18)
-	__VDLType_v_io_v23_naming_GlobReply1.AppendField("Error", __VDLType_v_io_v23_naming_GlobReply17)
-	__VDLType_v_io_v23_naming_GlobReplyBuilder.Build()
-	__VDLType_v_io_v23_naming_GlobReplyv, err := __VDLType_v_io_v23_naming_GlobReply2.Built()
-	if err != nil {
-		panic(err)
-	}
-	return __VDLType_v_io_v23_naming_GlobReplyv
-}
-func init() {
-	__VDLType_v_io_v23_naming_GlobReply = __VDLType_v_io_v23_naming_GlobReply_gen()
-}
-
-var __VDLType_v_io_v23_naming_MountEntry *vdl.Type
-
-func __VDLType_v_io_v23_naming_MountEntry_gen() *vdl.Type {
-	__VDLType_v_io_v23_naming_MountEntryBuilder := vdl.TypeBuilder{}
-
-	__VDLType_v_io_v23_naming_MountEntry1 := __VDLType_v_io_v23_naming_MountEntryBuilder.Struct()
-	__VDLType_v_io_v23_naming_MountEntry2 := __VDLType_v_io_v23_naming_MountEntryBuilder.Named("v.io/v23/naming.MountEntry").AssignBase(__VDLType_v_io_v23_naming_MountEntry1)
-	__VDLType_v_io_v23_naming_MountEntry3 := vdl.StringType
-	__VDLType_v_io_v23_naming_MountEntry1.AppendField("Name", __VDLType_v_io_v23_naming_MountEntry3)
-	__VDLType_v_io_v23_naming_MountEntry4 := __VDLType_v_io_v23_naming_MountEntryBuilder.List()
-	__VDLType_v_io_v23_naming_MountEntry5 := __VDLType_v_io_v23_naming_MountEntryBuilder.Struct()
-	__VDLType_v_io_v23_naming_MountEntry6 := __VDLType_v_io_v23_naming_MountEntryBuilder.Named("v.io/v23/naming.MountedServer").AssignBase(__VDLType_v_io_v23_naming_MountEntry5)
-	__VDLType_v_io_v23_naming_MountEntry5.AppendField("Server", __VDLType_v_io_v23_naming_MountEntry3)
-	__VDLType_v_io_v23_naming_MountEntry7 := __VDLType_v_io_v23_naming_MountEntryBuilder.Struct()
-	__VDLType_v_io_v23_naming_MountEntry8 := __VDLType_v_io_v23_naming_MountEntryBuilder.Named("time.WireDeadline").AssignBase(__VDLType_v_io_v23_naming_MountEntry7)
-	__VDLType_v_io_v23_naming_MountEntry9 := __VDLType_v_io_v23_naming_MountEntryBuilder.Struct()
-	__VDLType_v_io_v23_naming_MountEntry10 := __VDLType_v_io_v23_naming_MountEntryBuilder.Named("time.Duration").AssignBase(__VDLType_v_io_v23_naming_MountEntry9)
-	__VDLType_v_io_v23_naming_MountEntry11 := vdl.Int64Type
-	__VDLType_v_io_v23_naming_MountEntry9.AppendField("Seconds", __VDLType_v_io_v23_naming_MountEntry11)
-	__VDLType_v_io_v23_naming_MountEntry12 := vdl.Int32Type
-	__VDLType_v_io_v23_naming_MountEntry9.AppendField("Nanos", __VDLType_v_io_v23_naming_MountEntry12)
-	__VDLType_v_io_v23_naming_MountEntry7.AppendField("FromNow", __VDLType_v_io_v23_naming_MountEntry10)
-	__VDLType_v_io_v23_naming_MountEntry13 := vdl.BoolType
-	__VDLType_v_io_v23_naming_MountEntry7.AppendField("NoDeadline", __VDLType_v_io_v23_naming_MountEntry13)
-	__VDLType_v_io_v23_naming_MountEntry5.AppendField("Deadline", __VDLType_v_io_v23_naming_MountEntry8)
-	__VDLType_v_io_v23_naming_MountEntry4.AssignElem(__VDLType_v_io_v23_naming_MountEntry6)
-	__VDLType_v_io_v23_naming_MountEntry1.AppendField("Servers", __VDLType_v_io_v23_naming_MountEntry4)
-	__VDLType_v_io_v23_naming_MountEntry1.AppendField("ServesMountTable", __VDLType_v_io_v23_naming_MountEntry13)
-	__VDLType_v_io_v23_naming_MountEntry1.AppendField("IsLeaf", __VDLType_v_io_v23_naming_MountEntry13)
-	__VDLType_v_io_v23_naming_MountEntryBuilder.Build()
-	__VDLType_v_io_v23_naming_MountEntryv, err := __VDLType_v_io_v23_naming_MountEntry2.Built()
-	if err != nil {
-		panic(err)
-	}
-	return __VDLType_v_io_v23_naming_MountEntryv
-}
-func init() {
-	__VDLType_v_io_v23_naming_MountEntry = __VDLType_v_io_v23_naming_MountEntry_gen()
-}
-
-var __VDLType_v_io_v23_naming_MountFlag *vdl.Type = vdl.TypeOf(MountFlag(0))
-var __VDLType_v_io_v23_naming_MountedServer *vdl.Type
-
-func __VDLType_v_io_v23_naming_MountedServer_gen() *vdl.Type {
-	__VDLType_v_io_v23_naming_MountedServerBuilder := vdl.TypeBuilder{}
-
-	__VDLType_v_io_v23_naming_MountedServer1 := __VDLType_v_io_v23_naming_MountedServerBuilder.Struct()
-	__VDLType_v_io_v23_naming_MountedServer2 := __VDLType_v_io_v23_naming_MountedServerBuilder.Named("v.io/v23/naming.MountedServer").AssignBase(__VDLType_v_io_v23_naming_MountedServer1)
-	__VDLType_v_io_v23_naming_MountedServer3 := vdl.StringType
-	__VDLType_v_io_v23_naming_MountedServer1.AppendField("Server", __VDLType_v_io_v23_naming_MountedServer3)
-	__VDLType_v_io_v23_naming_MountedServer4 := __VDLType_v_io_v23_naming_MountedServerBuilder.Struct()
-	__VDLType_v_io_v23_naming_MountedServer5 := __VDLType_v_io_v23_naming_MountedServerBuilder.Named("time.WireDeadline").AssignBase(__VDLType_v_io_v23_naming_MountedServer4)
-	__VDLType_v_io_v23_naming_MountedServer6 := __VDLType_v_io_v23_naming_MountedServerBuilder.Struct()
-	__VDLType_v_io_v23_naming_MountedServer7 := __VDLType_v_io_v23_naming_MountedServerBuilder.Named("time.Duration").AssignBase(__VDLType_v_io_v23_naming_MountedServer6)
-	__VDLType_v_io_v23_naming_MountedServer8 := vdl.Int64Type
-	__VDLType_v_io_v23_naming_MountedServer6.AppendField("Seconds", __VDLType_v_io_v23_naming_MountedServer8)
-	__VDLType_v_io_v23_naming_MountedServer9 := vdl.Int32Type
-	__VDLType_v_io_v23_naming_MountedServer6.AppendField("Nanos", __VDLType_v_io_v23_naming_MountedServer9)
-	__VDLType_v_io_v23_naming_MountedServer4.AppendField("FromNow", __VDLType_v_io_v23_naming_MountedServer7)
-	__VDLType_v_io_v23_naming_MountedServer10 := vdl.BoolType
-	__VDLType_v_io_v23_naming_MountedServer4.AppendField("NoDeadline", __VDLType_v_io_v23_naming_MountedServer10)
-	__VDLType_v_io_v23_naming_MountedServer1.AppendField("Deadline", __VDLType_v_io_v23_naming_MountedServer5)
-	__VDLType_v_io_v23_naming_MountedServerBuilder.Build()
-	__VDLType_v_io_v23_naming_MountedServerv, err := __VDLType_v_io_v23_naming_MountedServer2.Built()
-	if err != nil {
-		panic(err)
-	}
-	return __VDLType_v_io_v23_naming_MountedServerv
-}
-func init() {
-	__VDLType_v_io_v23_naming_MountedServer = __VDLType_v_io_v23_naming_MountedServer_gen()
-}
-func __VDLEnsureNativeBuilt() {
-	if __VDLType1 == nil {
-		__VDLType1 = __VDLType1_gen()
-	}
-	if __VDLType0 == nil {
-		__VDLType0 = __VDLType0_gen()
-	}
-	if __VDLType2 == nil {
-		__VDLType2 = __VDLType2_gen()
-	}
-	if __VDLType_time_WireDeadline == nil {
-		__VDLType_time_WireDeadline = __VDLType_time_WireDeadline_gen()
-	}
-	if __VDLType_v_io_v23_naming_GlobReply == nil {
-		__VDLType_v_io_v23_naming_GlobReply = __VDLType_v_io_v23_naming_GlobReply_gen()
-	}
-	if __VDLType_v_io_v23_naming_MountEntry == nil {
-		__VDLType_v_io_v23_naming_MountEntry = __VDLType_v_io_v23_naming_MountEntry_gen()
-	}
-	if __VDLType_v_io_v23_naming_MountedServer == nil {
-		__VDLType_v_io_v23_naming_MountedServer = __VDLType_v_io_v23_naming_MountedServer_gen()
-	}
-}
-
-const Replace = MountFlag(1) // Replace means the mount should replace what is currently at the mount point
-
-const MT = MountFlag(2) // MT means that the target server is a mount table.
-
-const Leaf = MountFlag(4) // Leaf means that the target server is a leaf.

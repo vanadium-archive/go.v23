@@ -12,10 +12,12 @@ import (
 	"v.io/v23/i18n"
 )
 
-func __VDLEnsureNativeBuilt() {
-}
+var _ = __VDLInit() // Must be first; see __VDLInit comments for details.
 
+//////////////////////////////////////////////////
+// Error definitions
 var (
+
 	// Unknown means the error has no known Id.  A more specific error should
 	// always be used, if possible.  Unknown is typically only used when
 	// automatically converting errors that do not contain an Id.
@@ -73,28 +75,6 @@ var (
 	// for the operation.
 	ErrTimeout = Register("v.io/v23/verror.Timeout", NoRetry, "{1:}{2:} Timeout{:_}")
 )
-
-func init() {
-	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrUnknown.ID), "{1:}{2:} Error{:_}")
-	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrInternal.ID), "{1:}{2:} Internal error{:_}")
-	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrNotImplemented.ID), "{1:}{2:} Not implemented{:_}")
-	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrEndOfFile.ID), "{1:}{2:} End of file{:_}")
-	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrBadArg.ID), "{1:}{2:} Bad argument{:_}")
-	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrBadState.ID), "{1:}{2:} Invalid state{:_}")
-	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrBadVersion.ID), "{1:}{2:} Version is out of date")
-	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrExist.ID), "{1:}{2:} Already exists{:_}")
-	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrNoExist.ID), "{1:}{2:} Does not exist{:_}")
-	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrUnknownMethod.ID), "{1:}{2:} Method does not exist{:_}")
-	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrUnknownSuffix.ID), "{1:}{2:} Suffix does not exist{:_}")
-	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrNoExistOrNoAccess.ID), "{1:}{2:} Does not exist or access denied{:_}")
-	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrNoServers.ID), "{1:}{2:} No usable servers found{:_}")
-	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrNoAccess.ID), "{1:}{2:} Access denied{:_}")
-	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrNotTrusted.ID), "{1:}{2:} Client does not trust server{:_}")
-	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrAborted.ID), "{1:}{2:} Aborted{:_}")
-	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrBadProtocol.ID), "{1:}{2:} Bad protocol or type{:_}")
-	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrCanceled.ID), "{1:}{2:} Canceled{:_}")
-	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrTimeout.ID), "{1:}{2:} Timeout{:_}")
-}
 
 // NewErrUnknown returns an error with the ErrUnknown ID.
 func NewErrUnknown(ctx *context.T) error {
@@ -189,4 +169,48 @@ func NewErrCanceled(ctx *context.T) error {
 // NewErrTimeout returns an error with the ErrTimeout ID.
 func NewErrTimeout(ctx *context.T) error {
 	return New(ErrTimeout, ctx)
+}
+
+var __VDLInitCalled bool
+
+// __VDLInit performs vdl initialization.  It is safe to call multiple times.
+// If you have an init ordering issue, just insert the following line verbatim
+// into your source files in this package, right after the "package foo" clause:
+//
+//    var _ = __VDLInit()
+//
+// The purpose of this function is to ensure that vdl initialization occurs in
+// the right order, and very early in the init sequence.  In particular, vdl
+// registration and package variable initialization needs to occur before
+// functions like vdl.TypeOf will work properly.
+//
+// This function returns a dummy value, so that it can be used to initialize the
+// first var in the file, to take advantage of Go's defined init order.
+func __VDLInit() struct{} {
+	if __VDLInitCalled {
+		return struct{}{}
+	}
+
+	// Set error format strings.
+	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrUnknown.ID), "{1:}{2:} Error{:_}")
+	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrInternal.ID), "{1:}{2:} Internal error{:_}")
+	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrNotImplemented.ID), "{1:}{2:} Not implemented{:_}")
+	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrEndOfFile.ID), "{1:}{2:} End of file{:_}")
+	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrBadArg.ID), "{1:}{2:} Bad argument{:_}")
+	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrBadState.ID), "{1:}{2:} Invalid state{:_}")
+	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrBadVersion.ID), "{1:}{2:} Version is out of date")
+	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrExist.ID), "{1:}{2:} Already exists{:_}")
+	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrNoExist.ID), "{1:}{2:} Does not exist{:_}")
+	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrUnknownMethod.ID), "{1:}{2:} Method does not exist{:_}")
+	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrUnknownSuffix.ID), "{1:}{2:} Suffix does not exist{:_}")
+	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrNoExistOrNoAccess.ID), "{1:}{2:} Does not exist or access denied{:_}")
+	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrNoServers.ID), "{1:}{2:} No usable servers found{:_}")
+	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrNoAccess.ID), "{1:}{2:} Access denied{:_}")
+	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrNotTrusted.ID), "{1:}{2:} Client does not trust server{:_}")
+	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrAborted.ID), "{1:}{2:} Aborted{:_}")
+	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrBadProtocol.ID), "{1:}{2:} Bad protocol or type{:_}")
+	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrCanceled.ID), "{1:}{2:} Canceled{:_}")
+	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrTimeout.ID), "{1:}{2:} Timeout{:_}")
+
+	return struct{}{}
 }
