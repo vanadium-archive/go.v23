@@ -200,6 +200,7 @@ type RequestTarget struct {
 }
 
 func (t *RequestTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
+
 	if !vdl.Compatible(tt, __VDLType_v_io_v23_rpc_Request) {
 		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType_v_io_v23_rpc_Request)
 	}
@@ -380,6 +381,7 @@ type ResponseTarget struct {
 }
 
 func (t *ResponseTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
+
 	if !vdl.Compatible(tt, __VDLType_v_io_v23_rpc_Response) {
 		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType_v_io_v23_rpc_Response)
 	}

@@ -150,6 +150,7 @@ type DevModeUpdateVClockOptsTarget struct {
 }
 
 func (t *DevModeUpdateVClockOptsTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
+
 	if !vdl.Compatible(tt, __VDLType_v_io_v23_services_syncbase_DevModeUpdateVClockOpts) {
 		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType_v_io_v23_services_syncbase_DevModeUpdateVClockOpts)
 	}

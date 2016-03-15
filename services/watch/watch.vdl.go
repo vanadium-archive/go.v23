@@ -190,6 +190,7 @@ type GlobRequestTarget struct {
 }
 
 func (t *GlobRequestTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
+
 	if !vdl.Compatible(tt, __VDLType_v_io_v23_services_watch_GlobRequest) {
 		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType_v_io_v23_services_watch_GlobRequest)
 	}
@@ -223,6 +224,7 @@ type ResumeMarkerTarget struct {
 }
 
 func (t *ResumeMarkerTarget) FromBytes(src []byte, tt *vdl.Type) error {
+
 	if !vdl.Compatible(tt, __VDLType_v_io_v23_services_watch_ResumeMarker) {
 		return fmt.Errorf("type %v incompatible with %v", tt, __VDLType_v_io_v23_services_watch_ResumeMarker)
 	}
@@ -410,6 +412,7 @@ type ChangeTarget struct {
 }
 
 func (t *ChangeTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
+
 	if !vdl.Compatible(tt, __VDLType_v_io_v23_services_watch_Change) {
 		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType_v_io_v23_services_watch_Change)
 	}

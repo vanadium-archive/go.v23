@@ -116,6 +116,7 @@ type DescriptionTarget struct {
 }
 
 func (t *DescriptionTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
+
 	if !vdl.Compatible(tt, __VDLType_v_io_v23_services_binary_Description) {
 		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType_v_io_v23_services_binary_Description)
 	}
@@ -155,6 +156,7 @@ type unnamed_6d61705b737472696e675d626f6f6cTarget struct {
 }
 
 func (t *unnamed_6d61705b737472696e675d626f6f6cTarget) StartMap(tt *vdl.Type, len int) (vdl.MapTarget, error) {
+
 	if !vdl.Compatible(tt, __VDLType1) {
 		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType1)
 	}
@@ -250,6 +252,7 @@ type PartInfoTarget struct {
 }
 
 func (t *PartInfoTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
+
 	if !vdl.Compatible(tt, __VDLType_v_io_v23_services_binary_PartInfo) {
 		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType_v_io_v23_services_binary_PartInfo)
 	}

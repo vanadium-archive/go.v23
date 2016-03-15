@@ -155,6 +155,7 @@ type InterfaceTarget struct {
 }
 
 func (t *InterfaceTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
+
 	if !vdl.Compatible(tt, __VDLType_signature_Interface) {
 		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType_signature_Interface)
 	}
@@ -203,6 +204,7 @@ type unnamed_5b5d7369676e61747572652e456d626564207374727563747b4e616d65207374726
 }
 
 func (t *unnamed_5b5d7369676e61747572652e456d626564207374727563747b4e616d6520737472696e673b506b675061746820737472696e673b446f6320737472696e677dTarget) StartList(tt *vdl.Type, len int) (vdl.ListTarget, error) {
+
 	if !vdl.Compatible(tt, __VDLType1) {
 		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType1)
 	}
@@ -236,6 +238,7 @@ type EmbedTarget struct {
 }
 
 func (t *EmbedTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
+
 	if !vdl.Compatible(tt, __VDLType_signature_Embed) {
 		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType_signature_Embed)
 	}
@@ -276,6 +279,7 @@ type unnamed_5b5d7369676e61747572652e4d6574686f64207374727563747b4e616d652073747
 }
 
 func (t *unnamed_5b5d7369676e61747572652e4d6574686f64207374727563747b4e616d6520737472696e673b446f6320737472696e673b496e41726773205b5d7369676e61747572652e417267207374727563747b4e616d6520737472696e673b446f6320737472696e673b5479706520747970656f626a6563747d3b4f757441726773205b5d7369676e61747572652e4172673b496e53747265616d203f7369676e61747572652e4172673b4f757453747265616d203f7369676e61747572652e4172673b54616773205b5d616e797dTarget) StartList(tt *vdl.Type, len int) (vdl.ListTarget, error) {
+
 	if !vdl.Compatible(tt, __VDLType2) {
 		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType2)
 	}
@@ -313,6 +317,7 @@ type MethodTarget struct {
 }
 
 func (t *MethodTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
+
 	if !vdl.Compatible(tt, __VDLType_signature_Method) {
 		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType_signature_Method)
 	}
@@ -369,6 +374,7 @@ type unnamed_5b5d7369676e61747572652e417267207374727563747b4e616d6520737472696e6
 }
 
 func (t *unnamed_5b5d7369676e61747572652e417267207374727563747b4e616d6520737472696e673b446f6320737472696e673b5479706520747970656f626a6563747dTarget) StartList(tt *vdl.Type, len int) (vdl.ListTarget, error) {
+
 	if !vdl.Compatible(tt, __VDLType3) {
 		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType3)
 	}
@@ -402,6 +408,7 @@ type ArgTarget struct {
 }
 
 func (t *ArgTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
+
 	if !vdl.Compatible(tt, __VDLType_signature_Arg) {
 		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType_signature_Arg)
 	}
@@ -442,6 +449,7 @@ type unnamed_3f7369676e61747572652e417267207374727563747b4e616d6520737472696e673
 }
 
 func (t *unnamed_3f7369676e61747572652e417267207374727563747b4e616d6520737472696e673b446f6320737472696e673b5479706520747970656f626a6563747dTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
+
 	if *t.Value == nil {
 		*t.Value = &Arg{
 			Type: vdl.AnyType,
@@ -459,6 +467,7 @@ func (t *unnamed_3f7369676e61747572652e417267207374727563747b4e616d6520737472696
 	return nil
 }
 func (t *unnamed_3f7369676e61747572652e417267207374727563747b4e616d6520737472696e673b446f6320737472696e673b5479706520747970656f626a6563747dTarget) FromNil(tt *vdl.Type) error {
+
 	*t.Value = nil
 
 	return nil
@@ -473,6 +482,7 @@ type unnamed_5b5d616e79Target struct {
 }
 
 func (t *unnamed_5b5d616e79Target) StartList(tt *vdl.Type, len int) (vdl.ListTarget, error) {
+
 	if !vdl.Compatible(tt, __VDLType4) {
 		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType4)
 	}

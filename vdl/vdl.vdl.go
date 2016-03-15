@@ -131,6 +131,7 @@ type WireErrorTarget struct {
 }
 
 func (t *WireErrorTarget) StartFields(tt *Type) (FieldsTarget, error) {
+
 	if !Compatible(tt, __VDLType_v_io_v23_vdl_WireError) {
 		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType_v_io_v23_vdl_WireError)
 	}
@@ -172,6 +173,7 @@ type WireRetryCodeTarget struct {
 }
 
 func (t *WireRetryCodeTarget) FromEnumLabel(src string, tt *Type) error {
+
 	if !Compatible(tt, __VDLType_v_io_v23_vdl_WireRetryCode) {
 		return fmt.Errorf("type %v incompatible with %v", tt, __VDLType_v_io_v23_vdl_WireRetryCode)
 	}
@@ -200,6 +202,7 @@ type unnamed_5b5d616e79Target struct {
 }
 
 func (t *unnamed_5b5d616e79Target) StartList(tt *Type, len int) (ListTarget, error) {
+
 	if !Compatible(tt, __VDLType1) {
 		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType1)
 	}

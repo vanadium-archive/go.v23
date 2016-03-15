@@ -50,6 +50,7 @@ type BlessingPatternChunkTarget struct {
 }
 
 func (t *BlessingPatternChunkTarget) FromString(src string, tt *vdl.Type) error {
+
 	if !vdl.Compatible(tt, __VDLType_v_io_v23_services_groups_BlessingPatternChunk) {
 		return fmt.Errorf("type %v incompatible with %v", tt, __VDLType_v_io_v23_services_groups_BlessingPatternChunk)
 	}
@@ -92,6 +93,7 @@ type GetRequestTarget struct {
 }
 
 func (t *GetRequestTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
+
 	if !vdl.Compatible(tt, __VDLType_v_io_v23_services_groups_GetRequest) {
 		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType_v_io_v23_services_groups_GetRequest)
 	}
@@ -177,6 +179,7 @@ type GetResponseTarget struct {
 }
 
 func (t *GetResponseTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
+
 	if !vdl.Compatible(tt, __VDLType_v_io_v23_services_groups_GetResponse) {
 		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType_v_io_v23_services_groups_GetResponse)
 	}
@@ -210,6 +213,7 @@ type unnamed_7365745b762e696f2f7632332f73657276696365732f67726f7570732e426c65737
 }
 
 func (t *unnamed_7365745b762e696f2f7632332f73657276696365732f67726f7570732e426c657373696e675061747465726e4368756e6b20737472696e675dTarget) StartSet(tt *vdl.Type, len int) (vdl.SetTarget, error) {
+
 	if !vdl.Compatible(tt, __VDLType2) {
 		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType2)
 	}
@@ -303,6 +307,7 @@ type ApproximationTypeTarget struct {
 }
 
 func (t *ApproximationTypeTarget) FromEnumLabel(src string, tt *vdl.Type) error {
+
 	if !vdl.Compatible(tt, __VDLType_v_io_v23_services_groups_ApproximationType) {
 		return fmt.Errorf("type %v incompatible with %v", tt, __VDLType_v_io_v23_services_groups_ApproximationType)
 	}
@@ -382,6 +387,7 @@ type ApproximationTarget struct {
 }
 
 func (t *ApproximationTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
+
 	if !vdl.Compatible(tt, __VDLType_v_io_v23_services_groups_Approximation) {
 		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType_v_io_v23_services_groups_Approximation)
 	}

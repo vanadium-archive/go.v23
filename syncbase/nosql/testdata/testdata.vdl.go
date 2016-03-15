@@ -105,6 +105,7 @@ type AddressInfoTarget struct {
 }
 
 func (t *AddressInfoTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
+
 	if !vdl.Compatible(tt, __VDLType_v_io_v23_syncbase_nosql_testdata_AddressInfo) {
 		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType_v_io_v23_syncbase_nosql_testdata_AddressInfo)
 	}
@@ -210,6 +211,7 @@ type CreditAgencyTarget struct {
 }
 
 func (t *CreditAgencyTarget) FromEnumLabel(src string, tt *vdl.Type) error {
+
 	if !vdl.Compatible(tt, __VDLType_v_io_v23_syncbase_nosql_testdata_CreditAgency) {
 		return fmt.Errorf("type %v incompatible with %v", tt, __VDLType_v_io_v23_syncbase_nosql_testdata_CreditAgency)
 	}
@@ -291,6 +293,7 @@ type ExperianRatingTarget struct {
 }
 
 func (t *ExperianRatingTarget) FromEnumLabel(src string, tt *vdl.Type) error {
+
 	if !vdl.Compatible(tt, __VDLType_v_io_v23_syncbase_nosql_testdata_ExperianRating) {
 		return fmt.Errorf("type %v incompatible with %v", tt, __VDLType_v_io_v23_syncbase_nosql_testdata_ExperianRating)
 	}
@@ -354,6 +357,7 @@ type EquifaxCreditReportTarget struct {
 }
 
 func (t *EquifaxCreditReportTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
+
 	if !vdl.Compatible(tt, __VDLType_v_io_v23_syncbase_nosql_testdata_EquifaxCreditReport) {
 		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType_v_io_v23_syncbase_nosql_testdata_EquifaxCreditReport)
 	}
@@ -426,6 +430,7 @@ type ExperianCreditReportTarget struct {
 }
 
 func (t *ExperianCreditReportTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
+
 	if !vdl.Compatible(tt, __VDLType_v_io_v23_syncbase_nosql_testdata_ExperianCreditReport) {
 		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType_v_io_v23_syncbase_nosql_testdata_ExperianCreditReport)
 	}
@@ -497,6 +502,7 @@ type TransUnionCreditReportTarget struct {
 }
 
 func (t *TransUnionCreditReportTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
+
 	if !vdl.Compatible(tt, __VDLType_v_io_v23_syncbase_nosql_testdata_TransUnionCreditReport) {
 		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType_v_io_v23_syncbase_nosql_testdata_TransUnionCreditReport)
 	}
@@ -715,6 +721,7 @@ type CreditReportTarget struct {
 }
 
 func (t *CreditReportTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
+
 	if !vdl.Compatible(tt, __VDLType_v_io_v23_syncbase_nosql_testdata_CreditReport) {
 		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType_v_io_v23_syncbase_nosql_testdata_CreditReport)
 	}
@@ -847,6 +854,7 @@ type CustomerTarget struct {
 }
 
 func (t *CustomerTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
+
 	if !vdl.Compatible(tt, __VDLType_v_io_v23_syncbase_nosql_testdata_Customer) {
 		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType_v_io_v23_syncbase_nosql_testdata_Customer)
 	}
@@ -995,6 +1003,7 @@ type InvoiceTarget struct {
 }
 
 func (t *InvoiceTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
+
 	if !vdl.Compatible(tt, __VDLType_v_io_v23_syncbase_nosql_testdata_Invoice) {
 		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType_v_io_v23_syncbase_nosql_testdata_Invoice)
 	}
@@ -1222,6 +1231,7 @@ type NumbersTarget struct {
 }
 
 func (t *NumbersTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
+
 	if !vdl.Compatible(tt, __VDLType_v_io_v23_syncbase_nosql_testdata_Numbers) {
 		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType_v_io_v23_syncbase_nosql_testdata_Numbers)
 	}
@@ -1334,6 +1344,7 @@ type FooTypeTarget struct {
 }
 
 func (t *FooTypeTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
+
 	if !vdl.Compatible(tt, __VDLType_v_io_v23_syncbase_nosql_testdata_FooType) {
 		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType_v_io_v23_syncbase_nosql_testdata_FooType)
 	}
@@ -1365,6 +1376,7 @@ type BarTypeTarget struct {
 }
 
 func (t *BarTypeTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
+
 	if !vdl.Compatible(tt, __VDLType_v_io_v23_syncbase_nosql_testdata_BarType) {
 		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType_v_io_v23_syncbase_nosql_testdata_BarType)
 	}
@@ -1397,6 +1409,7 @@ type BazTypeTarget struct {
 }
 
 func (t *BazTypeTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
+
 	if !vdl.Compatible(tt, __VDLType_v_io_v23_syncbase_nosql_testdata_BazType) {
 		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType_v_io_v23_syncbase_nosql_testdata_BazType)
 	}
@@ -1655,6 +1668,7 @@ type ArrayOfFourTarget struct {
 }
 
 func (t *ArrayOfFourTarget) StartList(tt *vdl.Type, len int) (vdl.ListTarget, error) {
+
 	if !vdl.Compatible(tt, __VDLType_v_io_v23_syncbase_nosql_testdata_ArrayOfFour) {
 		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType_v_io_v23_syncbase_nosql_testdata_ArrayOfFour)
 	}
@@ -1822,6 +1836,7 @@ type KeyIndexDataTarget struct {
 }
 
 func (t *KeyIndexDataTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
+
 	if !vdl.Compatible(tt, __VDLType_v_io_v23_syncbase_nosql_testdata_KeyIndexData) {
 		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType_v_io_v23_syncbase_nosql_testdata_KeyIndexData)
 	}
@@ -1869,6 +1884,7 @@ type unnamed_6d61705b636f6d706c65783132385d737472696e67Target struct {
 }
 
 func (t *unnamed_6d61705b636f6d706c65783132385d737472696e67Target) StartMap(tt *vdl.Type, len int) (vdl.MapTarget, error) {
+
 	if !vdl.Compatible(tt, __VDLType13) {
 		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType13)
 	}
@@ -1909,6 +1925,7 @@ type unnamed_7365745b737472696e675dTarget struct {
 }
 
 func (t *unnamed_7365745b737472696e675dTarget) StartSet(tt *vdl.Type, len int) (vdl.SetTarget, error) {
+
 	if !vdl.Compatible(tt, __VDLType14) {
 		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType14)
 	}
@@ -1981,6 +1998,7 @@ type BigDataTarget struct {
 }
 
 func (t *BigDataTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
+
 	if !vdl.Compatible(tt, __VDLType_v_io_v23_syncbase_nosql_testdata_BigData) {
 		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType_v_io_v23_syncbase_nosql_testdata_BigData)
 	}

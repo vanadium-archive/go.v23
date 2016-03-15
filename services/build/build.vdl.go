@@ -89,6 +89,7 @@ type ArchitectureTarget struct {
 }
 
 func (t *ArchitectureTarget) FromEnumLabel(src string, tt *vdl.Type) error {
+
 	if !vdl.Compatible(tt, __VDLType_v_io_v23_services_build_Architecture) {
 		return fmt.Errorf("type %v incompatible with %v", tt, __VDLType_v_io_v23_services_build_Architecture)
 	}
@@ -177,6 +178,7 @@ type FormatTarget struct {
 }
 
 func (t *FormatTarget) FromEnumLabel(src string, tt *vdl.Type) error {
+
 	if !vdl.Compatible(tt, __VDLType_v_io_v23_services_build_Format) {
 		return fmt.Errorf("type %v incompatible with %v", tt, __VDLType_v_io_v23_services_build_Format)
 	}
@@ -271,6 +273,7 @@ type OperatingSystemTarget struct {
 }
 
 func (t *OperatingSystemTarget) FromEnumLabel(src string, tt *vdl.Type) error {
+
 	if !vdl.Compatible(tt, __VDLType_v_io_v23_services_build_OperatingSystem) {
 		return fmt.Errorf("type %v incompatible with %v", tt, __VDLType_v_io_v23_services_build_OperatingSystem)
 	}
@@ -354,6 +357,7 @@ type FileTarget struct {
 }
 
 func (t *FileTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
+
 	if !vdl.Compatible(tt, __VDLType_v_io_v23_services_build_File) {
 		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType_v_io_v23_services_build_File)
 	}

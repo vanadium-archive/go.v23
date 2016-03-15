@@ -377,6 +377,7 @@ type DumpAtomTarget struct {
 }
 
 func (t *DumpAtomTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
+
 	if !vdl.Compatible(tt, __VDLType_v_io_v23_vom_DumpAtom) {
 		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType_v_io_v23_vom_DumpAtom)
 	}
@@ -417,6 +418,7 @@ type DumpKindTarget struct {
 }
 
 func (t *DumpKindTarget) FromEnumLabel(src string, tt *vdl.Type) error {
+
 	if !vdl.Compatible(tt, __VDLType_v_io_v23_vom_DumpKind) {
 		return fmt.Errorf("type %v incompatible with %v", tt, __VDLType_v_io_v23_vom_DumpKind)
 	}
@@ -666,6 +668,7 @@ type ControlKindTarget struct {
 }
 
 func (t *ControlKindTarget) FromEnumLabel(src string, tt *vdl.Type) error {
+
 	if !vdl.Compatible(tt, __VDLType_v_io_v23_vom_ControlKind) {
 		return fmt.Errorf("type %v incompatible with %v", tt, __VDLType_v_io_v23_vom_ControlKind)
 	}
@@ -708,11 +711,13 @@ type typeIdTarget struct {
 }
 
 func (t *typeIdTarget) FromUint(src uint64, tt *vdl.Type) error {
+
 	*t.Value = typeId(src)
 
 	return nil
 }
 func (t *typeIdTarget) FromInt(src int64, tt *vdl.Type) error {
+
 	val, err := vdlconv.Int64ToUint64(src)
 	if err != nil {
 		return err
@@ -722,6 +727,7 @@ func (t *typeIdTarget) FromInt(src int64, tt *vdl.Type) error {
 	return nil
 }
 func (t *typeIdTarget) FromFloat(src float64, tt *vdl.Type) error {
+
 	val, err := vdlconv.Float64ToUint64(src)
 	if err != nil {
 		return err
@@ -731,6 +737,7 @@ func (t *typeIdTarget) FromFloat(src float64, tt *vdl.Type) error {
 	return nil
 }
 func (t *typeIdTarget) FromComplex(src complex128, tt *vdl.Type) error {
+
 	val, err := vdlconv.Complex128ToUint64(src)
 	if err != nil {
 		return err
@@ -1149,6 +1156,7 @@ type wireNamedTarget struct {
 }
 
 func (t *wireNamedTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
+
 	if !vdl.Compatible(tt, __VDLType_v_io_v23_vom_wireNamed) {
 		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType_v_io_v23_vom_wireNamed)
 	}
@@ -1256,6 +1264,7 @@ type wireEnumTarget struct {
 }
 
 func (t *wireEnumTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
+
 	if !vdl.Compatible(tt, __VDLType_v_io_v23_vom_wireEnum) {
 		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType_v_io_v23_vom_wireEnum)
 	}
@@ -1361,6 +1370,7 @@ type wireArrayTarget struct {
 }
 
 func (t *wireArrayTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
+
 	if !vdl.Compatible(tt, __VDLType_v_io_v23_vom_wireArray) {
 		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType_v_io_v23_vom_wireArray)
 	}
@@ -1456,6 +1466,7 @@ type wireListTarget struct {
 }
 
 func (t *wireListTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
+
 	if !vdl.Compatible(tt, __VDLType_v_io_v23_vom_wireList) {
 		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType_v_io_v23_vom_wireList)
 	}
@@ -1547,6 +1558,7 @@ type wireSetTarget struct {
 }
 
 func (t *wireSetTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
+
 	if !vdl.Compatible(tt, __VDLType_v_io_v23_vom_wireSet) {
 		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType_v_io_v23_vom_wireSet)
 	}
@@ -1653,6 +1665,7 @@ type wireMapTarget struct {
 }
 
 func (t *wireMapTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
+
 	if !vdl.Compatible(tt, __VDLType_v_io_v23_vom_wireMap) {
 		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType_v_io_v23_vom_wireMap)
 	}
@@ -1748,6 +1761,7 @@ type wireFieldTarget struct {
 }
 
 func (t *wireFieldTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
+
 	if !vdl.Compatible(tt, __VDLType_v_io_v23_vom_wireField) {
 		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType_v_io_v23_vom_wireField)
 	}
@@ -1856,6 +1870,7 @@ type wireStructTarget struct {
 }
 
 func (t *wireStructTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
+
 	if !vdl.Compatible(tt, __VDLType_v_io_v23_vom_wireStruct) {
 		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType_v_io_v23_vom_wireStruct)
 	}
@@ -1892,6 +1907,7 @@ type unnamed_5b5d762e696f2f7632332f766f6d2e776972654669656c64207374727563747b4e6
 }
 
 func (t *unnamed_5b5d762e696f2f7632332f766f6d2e776972654669656c64207374727563747b4e616d6520737472696e673b5479706520762e696f2f7632332f766f6d2e7479706549642075696e7436347dTarget) StartList(tt *vdl.Type, len int) (vdl.ListTarget, error) {
+
 	if !vdl.Compatible(tt, __VDLType11) {
 		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType11)
 	}
@@ -1996,6 +2012,7 @@ type wireUnionTarget struct {
 }
 
 func (t *wireUnionTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
+
 	if !vdl.Compatible(tt, __VDLType_v_io_v23_vom_wireUnion) {
 		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType_v_io_v23_vom_wireUnion)
 	}
@@ -2087,6 +2104,7 @@ type wireOptionalTarget struct {
 }
 
 func (t *wireOptionalTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
+
 	if !vdl.Compatible(tt, __VDLType_v_io_v23_vom_wireOptional) {
 		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType_v_io_v23_vom_wireOptional)
 	}

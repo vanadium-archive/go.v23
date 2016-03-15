@@ -105,6 +105,7 @@ type AddressInfoTarget struct {
 }
 
 func (t *AddressInfoTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
+
 	if !vdl.Compatible(tt, __VDLType_v_io_v23_query_engine_internal_testdata_AddressInfo) {
 		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType_v_io_v23_query_engine_internal_testdata_AddressInfo)
 	}
@@ -210,6 +211,7 @@ type CreditAgencyTarget struct {
 }
 
 func (t *CreditAgencyTarget) FromEnumLabel(src string, tt *vdl.Type) error {
+
 	if !vdl.Compatible(tt, __VDLType_v_io_v23_query_engine_internal_testdata_CreditAgency) {
 		return fmt.Errorf("type %v incompatible with %v", tt, __VDLType_v_io_v23_query_engine_internal_testdata_CreditAgency)
 	}
@@ -291,6 +293,7 @@ type ExperianRatingTarget struct {
 }
 
 func (t *ExperianRatingTarget) FromEnumLabel(src string, tt *vdl.Type) error {
+
 	if !vdl.Compatible(tt, __VDLType_v_io_v23_query_engine_internal_testdata_ExperianRating) {
 		return fmt.Errorf("type %v incompatible with %v", tt, __VDLType_v_io_v23_query_engine_internal_testdata_ExperianRating)
 	}
@@ -349,6 +352,7 @@ type RatingsArrayTarget struct {
 }
 
 func (t *RatingsArrayTarget) StartList(tt *vdl.Type, len int) (vdl.ListTarget, error) {
+
 	if !vdl.Compatible(tt, __VDLType_v_io_v23_query_engine_internal_testdata_RatingsArray) {
 		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType_v_io_v23_query_engine_internal_testdata_RatingsArray)
 	}
@@ -430,6 +434,7 @@ type EquifaxCreditReportTarget struct {
 }
 
 func (t *EquifaxCreditReportTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
+
 	if !vdl.Compatible(tt, __VDLType_v_io_v23_query_engine_internal_testdata_EquifaxCreditReport) {
 		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType_v_io_v23_query_engine_internal_testdata_EquifaxCreditReport)
 	}
@@ -527,6 +532,7 @@ type TdhTarget struct {
 }
 
 func (t *TdhTarget) FromEnumLabel(src string, tt *vdl.Type) error {
+
 	if !vdl.Compatible(tt, __VDLType_v_io_v23_query_engine_internal_testdata_Tdh) {
 		return fmt.Errorf("type %v incompatible with %v", tt, __VDLType_v_io_v23_query_engine_internal_testdata_Tdh)
 	}
@@ -640,6 +646,7 @@ type ExperianCreditReportTarget struct {
 }
 
 func (t *ExperianCreditReportTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
+
 	if !vdl.Compatible(tt, __VDLType_v_io_v23_query_engine_internal_testdata_ExperianCreditReport) {
 		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType_v_io_v23_query_engine_internal_testdata_ExperianCreditReport)
 	}
@@ -681,6 +688,7 @@ type unnamed_7365745b762e696f2f7632332f71756572792f656e67696e652f696e7465726e616
 }
 
 func (t *unnamed_7365745b762e696f2f7632332f71756572792f656e67696e652f696e7465726e616c2f74657374646174612e54646820656e756d7b546f6d3b4469636b3b48617272797d5dTarget) StartSet(tt *vdl.Type, len int) (vdl.SetTarget, error) {
+
 	if !vdl.Compatible(tt, __VDLType3) {
 		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType3)
 	}
@@ -791,6 +799,7 @@ type TransUnionCreditReportTarget struct {
 }
 
 func (t *TransUnionCreditReportTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
+
 	if !vdl.Compatible(tt, __VDLType_v_io_v23_query_engine_internal_testdata_TransUnionCreditReport) {
 		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType_v_io_v23_query_engine_internal_testdata_TransUnionCreditReport)
 	}
@@ -830,6 +839,7 @@ type unnamed_6d61705b737472696e675d696e743136Target struct {
 }
 
 func (t *unnamed_6d61705b737472696e675d696e743136Target) StartMap(tt *vdl.Type, len int) (vdl.MapTarget, error) {
+
 	if !vdl.Compatible(tt, __VDLType5) {
 		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType5)
 	}
@@ -1055,6 +1065,7 @@ type CreditReportTarget struct {
 }
 
 func (t *CreditReportTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
+
 	if !vdl.Compatible(tt, __VDLType_v_io_v23_query_engine_internal_testdata_CreditReport) {
 		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType_v_io_v23_query_engine_internal_testdata_CreditReport)
 	}
@@ -1219,6 +1230,7 @@ type CustomerTarget struct {
 }
 
 func (t *CustomerTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
+
 	if !vdl.Compatible(tt, __VDLType_v_io_v23_query_engine_internal_testdata_Customer) {
 		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType_v_io_v23_query_engine_internal_testdata_Customer)
 	}
@@ -1271,6 +1283,7 @@ type unnamed_5b5d762e696f2f7632332f71756572792f656e67696e652f696e7465726e616c2f7
 }
 
 func (t *unnamed_5b5d762e696f2f7632332f71756572792f656e67696e652f696e7465726e616c2f74657374646174612e41646472657373496e666f207374727563747b53747265657420737472696e673b4369747920737472696e673b537461746520737472696e673b5a697020737472696e677dTarget) StartList(tt *vdl.Type, len int) (vdl.ListTarget, error) {
+
 	if !vdl.Compatible(tt, __VDLType8) {
 		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType8)
 	}
@@ -1403,6 +1416,7 @@ type InvoiceTarget struct {
 }
 
 func (t *InvoiceTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
+
 	if !vdl.Compatible(tt, __VDLType_v_io_v23_query_engine_internal_testdata_Invoice) {
 		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType_v_io_v23_query_engine_internal_testdata_Invoice)
 	}
@@ -1630,6 +1644,7 @@ type NumbersTarget struct {
 }
 
 func (t *NumbersTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
+
 	if !vdl.Compatible(tt, __VDLType_v_io_v23_query_engine_internal_testdata_Numbers) {
 		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType_v_io_v23_query_engine_internal_testdata_Numbers)
 	}
@@ -1742,6 +1757,7 @@ type FooTypeTarget struct {
 }
 
 func (t *FooTypeTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
+
 	if !vdl.Compatible(tt, __VDLType_v_io_v23_query_engine_internal_testdata_FooType) {
 		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType_v_io_v23_query_engine_internal_testdata_FooType)
 	}
@@ -1773,6 +1789,7 @@ type BarTypeTarget struct {
 }
 
 func (t *BarTypeTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
+
 	if !vdl.Compatible(tt, __VDLType_v_io_v23_query_engine_internal_testdata_BarType) {
 		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType_v_io_v23_query_engine_internal_testdata_BarType)
 	}
@@ -1805,6 +1822,7 @@ type BazTypeTarget struct {
 }
 
 func (t *BazTypeTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
+
 	if !vdl.Compatible(tt, __VDLType_v_io_v23_query_engine_internal_testdata_BazType) {
 		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType_v_io_v23_query_engine_internal_testdata_BazType)
 	}
@@ -2082,6 +2100,7 @@ type KTarget struct {
 }
 
 func (t *KTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
+
 	if !vdl.Compatible(tt, __VDLType_v_io_v23_query_engine_internal_testdata_K) {
 		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType_v_io_v23_query_engine_internal_testdata_K)
 	}
@@ -2171,6 +2190,7 @@ type VTarget struct {
 }
 
 func (t *VTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
+
 	if !vdl.Compatible(tt, __VDLType_v_io_v23_query_engine_internal_testdata_V) {
 		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType_v_io_v23_query_engine_internal_testdata_V)
 	}
@@ -2359,6 +2379,7 @@ type FunWithMapsTarget struct {
 }
 
 func (t *FunWithMapsTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
+
 	if !vdl.Compatible(tt, __VDLType_v_io_v23_query_engine_internal_testdata_FunWithMaps) {
 		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType_v_io_v23_query_engine_internal_testdata_FunWithMaps)
 	}
@@ -2402,6 +2423,7 @@ type unnamed_6d61705b762e696f2f7632332f71756572792f656e67696e652f696e7465726e616
 }
 
 func (t *unnamed_6d61705b762e696f2f7632332f71756572792f656e67696e652f696e7465726e616c2f74657374646174612e4b207374727563747b4120627974653b4220737472696e677d5d762e696f2f7632332f71756572792f656e67696e652f696e7465726e616c2f74657374646174612e56207374727563747b4120737472696e673b4220666c6f617433327dTarget) StartMap(tt *vdl.Type, len int) (vdl.MapTarget, error) {
+
 	if !vdl.Compatible(tt, __VDLType17) {
 		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType17)
 	}
@@ -2444,6 +2466,7 @@ type unnamed_6d61705b696e7431365d5b5d7365745b737472696e675dTarget struct {
 }
 
 func (t *unnamed_6d61705b696e7431365d5b5d7365745b737472696e675dTarget) StartMap(tt *vdl.Type, len int) (vdl.MapTarget, error) {
+
 	if !vdl.Compatible(tt, __VDLType18) {
 		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType18)
 	}
@@ -2483,6 +2506,7 @@ type unnamed_5b5d7365745b737472696e675dTarget struct {
 }
 
 func (t *unnamed_5b5d7365745b737472696e675dTarget) StartList(tt *vdl.Type, len int) (vdl.ListTarget, error) {
+
 	if !vdl.Compatible(tt, __VDLType19) {
 		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType19)
 	}
@@ -2516,6 +2540,7 @@ type unnamed_7365745b737472696e675dTarget struct {
 }
 
 func (t *unnamed_7365745b737472696e675dTarget) StartSet(tt *vdl.Type, len int) (vdl.SetTarget, error) {
+
 	if !vdl.Compatible(tt, __VDLType20) {
 		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType20)
 	}
@@ -2610,6 +2635,7 @@ type FunWithTypesTarget struct {
 }
 
 func (t *FunWithTypesTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
+
 	if !vdl.Compatible(tt, __VDLType_v_io_v23_query_engine_internal_testdata_FunWithTypes) {
 		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType_v_io_v23_query_engine_internal_testdata_FunWithTypes)
 	}
@@ -3269,6 +3295,7 @@ type ManyMapsTarget struct {
 }
 
 func (t *ManyMapsTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
+
 	if !vdl.Compatible(tt, __VDLType_v_io_v23_query_engine_internal_testdata_ManyMaps) {
 		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType_v_io_v23_query_engine_internal_testdata_ManyMaps)
 	}
@@ -3360,6 +3387,7 @@ type unnamed_6d61705b626f6f6c5d737472696e67Target struct {
 }
 
 func (t *unnamed_6d61705b626f6f6c5d737472696e67Target) StartMap(tt *vdl.Type, len int) (vdl.MapTarget, error) {
+
 	if !vdl.Compatible(tt, __VDLType23) {
 		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType23)
 	}
@@ -3402,6 +3430,7 @@ type unnamed_6d61705b627974655d737472696e67Target struct {
 }
 
 func (t *unnamed_6d61705b627974655d737472696e67Target) StartMap(tt *vdl.Type, len int) (vdl.MapTarget, error) {
+
 	if !vdl.Compatible(tt, __VDLType24) {
 		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType24)
 	}
@@ -3444,6 +3473,7 @@ type unnamed_6d61705b75696e7431365d737472696e67Target struct {
 }
 
 func (t *unnamed_6d61705b75696e7431365d737472696e67Target) StartMap(tt *vdl.Type, len int) (vdl.MapTarget, error) {
+
 	if !vdl.Compatible(tt, __VDLType25) {
 		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType25)
 	}
@@ -3486,6 +3516,7 @@ type unnamed_6d61705b75696e7433325d737472696e67Target struct {
 }
 
 func (t *unnamed_6d61705b75696e7433325d737472696e67Target) StartMap(tt *vdl.Type, len int) (vdl.MapTarget, error) {
+
 	if !vdl.Compatible(tt, __VDLType26) {
 		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType26)
 	}
@@ -3528,6 +3559,7 @@ type unnamed_6d61705b75696e7436345d737472696e67Target struct {
 }
 
 func (t *unnamed_6d61705b75696e7436345d737472696e67Target) StartMap(tt *vdl.Type, len int) (vdl.MapTarget, error) {
+
 	if !vdl.Compatible(tt, __VDLType27) {
 		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType27)
 	}
@@ -3570,6 +3602,7 @@ type unnamed_6d61705b696e7431365d737472696e67Target struct {
 }
 
 func (t *unnamed_6d61705b696e7431365d737472696e67Target) StartMap(tt *vdl.Type, len int) (vdl.MapTarget, error) {
+
 	if !vdl.Compatible(tt, __VDLType28) {
 		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType28)
 	}
@@ -3612,6 +3645,7 @@ type unnamed_6d61705b696e7433325d737472696e67Target struct {
 }
 
 func (t *unnamed_6d61705b696e7433325d737472696e67Target) StartMap(tt *vdl.Type, len int) (vdl.MapTarget, error) {
+
 	if !vdl.Compatible(tt, __VDLType29) {
 		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType29)
 	}
@@ -3654,6 +3688,7 @@ type unnamed_6d61705b696e7436345d737472696e67Target struct {
 }
 
 func (t *unnamed_6d61705b696e7436345d737472696e67Target) StartMap(tt *vdl.Type, len int) (vdl.MapTarget, error) {
+
 	if !vdl.Compatible(tt, __VDLType30) {
 		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType30)
 	}
@@ -3696,6 +3731,7 @@ type unnamed_6d61705b666c6f617433325d737472696e67Target struct {
 }
 
 func (t *unnamed_6d61705b666c6f617433325d737472696e67Target) StartMap(tt *vdl.Type, len int) (vdl.MapTarget, error) {
+
 	if !vdl.Compatible(tt, __VDLType31) {
 		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType31)
 	}
@@ -3738,6 +3774,7 @@ type unnamed_6d61705b666c6f617436345d737472696e67Target struct {
 }
 
 func (t *unnamed_6d61705b666c6f617436345d737472696e67Target) StartMap(tt *vdl.Type, len int) (vdl.MapTarget, error) {
+
 	if !vdl.Compatible(tt, __VDLType32) {
 		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType32)
 	}
@@ -3780,6 +3817,7 @@ type unnamed_6d61705b636f6d706c657836345d737472696e67Target struct {
 }
 
 func (t *unnamed_6d61705b636f6d706c657836345d737472696e67Target) StartMap(tt *vdl.Type, len int) (vdl.MapTarget, error) {
+
 	if !vdl.Compatible(tt, __VDLType33) {
 		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType33)
 	}
@@ -3822,6 +3860,7 @@ type unnamed_6d61705b636f6d706c65783132385d737472696e67Target struct {
 }
 
 func (t *unnamed_6d61705b636f6d706c65783132385d737472696e67Target) StartMap(tt *vdl.Type, len int) (vdl.MapTarget, error) {
+
 	if !vdl.Compatible(tt, __VDLType34) {
 		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType34)
 	}
@@ -3864,6 +3903,7 @@ type unnamed_6d61705b737472696e675d737472696e67Target struct {
 }
 
 func (t *unnamed_6d61705b737472696e675d737472696e67Target) StartMap(tt *vdl.Type, len int) (vdl.MapTarget, error) {
+
 	if !vdl.Compatible(tt, __VDLType35) {
 		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType35)
 	}
@@ -3906,6 +3946,7 @@ type unnamed_6d61705b737472696e675d6d61705b737472696e675d737472696e67Target stru
 }
 
 func (t *unnamed_6d61705b737472696e675d6d61705b737472696e675d737472696e67Target) StartMap(tt *vdl.Type, len int) (vdl.MapTarget, error) {
+
 	if !vdl.Compatible(tt, __VDLType36) {
 		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType36)
 	}
@@ -3948,6 +3989,7 @@ type unnamed_6d61705b74696d652e54696d65207374727563747b5365636f6e647320696e74363
 }
 
 func (t *unnamed_6d61705b74696d652e54696d65207374727563747b5365636f6e647320696e7436343b4e616e6f7320696e7433327d5d737472696e67Target) StartMap(tt *vdl.Type, len int) (vdl.MapTarget, error) {
+
 	if !vdl.Compatible(tt, __VDLType37) {
 		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType37)
 	}
@@ -4450,6 +4492,7 @@ type ManySetsTarget struct {
 }
 
 func (t *ManySetsTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
+
 	if !vdl.Compatible(tt, __VDLType_v_io_v23_query_engine_internal_testdata_ManySets) {
 		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType_v_io_v23_query_engine_internal_testdata_ManySets)
 	}
@@ -4535,6 +4578,7 @@ type unnamed_7365745b626f6f6c5dTarget struct {
 }
 
 func (t *unnamed_7365745b626f6f6c5dTarget) StartSet(tt *vdl.Type, len int) (vdl.SetTarget, error) {
+
 	if !vdl.Compatible(tt, __VDLType39) {
 		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType39)
 	}
@@ -4569,6 +4613,7 @@ type unnamed_7365745b627974655dTarget struct {
 }
 
 func (t *unnamed_7365745b627974655dTarget) StartSet(tt *vdl.Type, len int) (vdl.SetTarget, error) {
+
 	if !vdl.Compatible(tt, __VDLType40) {
 		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType40)
 	}
@@ -4603,6 +4648,7 @@ type unnamed_7365745b75696e7431365dTarget struct {
 }
 
 func (t *unnamed_7365745b75696e7431365dTarget) StartSet(tt *vdl.Type, len int) (vdl.SetTarget, error) {
+
 	if !vdl.Compatible(tt, __VDLType41) {
 		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType41)
 	}
@@ -4637,6 +4683,7 @@ type unnamed_7365745b75696e7433325dTarget struct {
 }
 
 func (t *unnamed_7365745b75696e7433325dTarget) StartSet(tt *vdl.Type, len int) (vdl.SetTarget, error) {
+
 	if !vdl.Compatible(tt, __VDLType42) {
 		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType42)
 	}
@@ -4671,6 +4718,7 @@ type unnamed_7365745b75696e7436345dTarget struct {
 }
 
 func (t *unnamed_7365745b75696e7436345dTarget) StartSet(tt *vdl.Type, len int) (vdl.SetTarget, error) {
+
 	if !vdl.Compatible(tt, __VDLType43) {
 		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType43)
 	}
@@ -4705,6 +4753,7 @@ type unnamed_7365745b696e7431365dTarget struct {
 }
 
 func (t *unnamed_7365745b696e7431365dTarget) StartSet(tt *vdl.Type, len int) (vdl.SetTarget, error) {
+
 	if !vdl.Compatible(tt, __VDLType44) {
 		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType44)
 	}
@@ -4739,6 +4788,7 @@ type unnamed_7365745b696e7433325dTarget struct {
 }
 
 func (t *unnamed_7365745b696e7433325dTarget) StartSet(tt *vdl.Type, len int) (vdl.SetTarget, error) {
+
 	if !vdl.Compatible(tt, __VDLType45) {
 		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType45)
 	}
@@ -4773,6 +4823,7 @@ type unnamed_7365745b696e7436345dTarget struct {
 }
 
 func (t *unnamed_7365745b696e7436345dTarget) StartSet(tt *vdl.Type, len int) (vdl.SetTarget, error) {
+
 	if !vdl.Compatible(tt, __VDLType46) {
 		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType46)
 	}
@@ -4807,6 +4858,7 @@ type unnamed_7365745b666c6f617433325dTarget struct {
 }
 
 func (t *unnamed_7365745b666c6f617433325dTarget) StartSet(tt *vdl.Type, len int) (vdl.SetTarget, error) {
+
 	if !vdl.Compatible(tt, __VDLType47) {
 		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType47)
 	}
@@ -4841,6 +4893,7 @@ type unnamed_7365745b666c6f617436345dTarget struct {
 }
 
 func (t *unnamed_7365745b666c6f617436345dTarget) StartSet(tt *vdl.Type, len int) (vdl.SetTarget, error) {
+
 	if !vdl.Compatible(tt, __VDLType48) {
 		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType48)
 	}
@@ -4875,6 +4928,7 @@ type unnamed_7365745b636f6d706c657836345dTarget struct {
 }
 
 func (t *unnamed_7365745b636f6d706c657836345dTarget) StartSet(tt *vdl.Type, len int) (vdl.SetTarget, error) {
+
 	if !vdl.Compatible(tt, __VDLType49) {
 		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType49)
 	}
@@ -4909,6 +4963,7 @@ type unnamed_7365745b636f6d706c65783132385dTarget struct {
 }
 
 func (t *unnamed_7365745b636f6d706c65783132385dTarget) StartSet(tt *vdl.Type, len int) (vdl.SetTarget, error) {
+
 	if !vdl.Compatible(tt, __VDLType50) {
 		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType50)
 	}
@@ -4943,6 +4998,7 @@ type unnamed_7365745b74696d652e54696d65207374727563747b5365636f6e647320696e74363
 }
 
 func (t *unnamed_7365745b74696d652e54696d65207374727563747b5365636f6e647320696e7436343b4e616e6f7320696e7433327d5dTarget) StartSet(tt *vdl.Type, len int) (vdl.SetTarget, error) {
+
 	if !vdl.Compatible(tt, __VDLType51) {
 		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType51)
 	}
@@ -5015,6 +5071,7 @@ type BigDataTarget struct {
 }
 
 func (t *BigDataTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
+
 	if !vdl.Compatible(tt, __VDLType_v_io_v23_query_engine_internal_testdata_BigData) {
 		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType_v_io_v23_query_engine_internal_testdata_BigData)
 	}

@@ -103,6 +103,7 @@ type AddressInfoTarget struct {
 }
 
 func (t *AddressInfoTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
+
 	if !vdl.Compatible(tt, __VDLType_v_io_v23_vom_internal_AddressInfo) {
 		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType_v_io_v23_vom_internal_AddressInfo)
 	}
@@ -208,6 +209,7 @@ type CreditAgencyTarget struct {
 }
 
 func (t *CreditAgencyTarget) FromEnumLabel(src string, tt *vdl.Type) error {
+
 	if !vdl.Compatible(tt, __VDLType_v_io_v23_vom_internal_CreditAgency) {
 		return fmt.Errorf("type %v incompatible with %v", tt, __VDLType_v_io_v23_vom_internal_CreditAgency)
 	}
@@ -289,6 +291,7 @@ type ExperianRatingTarget struct {
 }
 
 func (t *ExperianRatingTarget) FromEnumLabel(src string, tt *vdl.Type) error {
+
 	if !vdl.Compatible(tt, __VDLType_v_io_v23_vom_internal_ExperianRating) {
 		return fmt.Errorf("type %v incompatible with %v", tt, __VDLType_v_io_v23_vom_internal_ExperianRating)
 	}
@@ -352,6 +355,7 @@ type EquifaxCreditReportTarget struct {
 }
 
 func (t *EquifaxCreditReportTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
+
 	if !vdl.Compatible(tt, __VDLType_v_io_v23_vom_internal_EquifaxCreditReport) {
 		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType_v_io_v23_vom_internal_EquifaxCreditReport)
 	}
@@ -424,6 +428,7 @@ type ExperianCreditReportTarget struct {
 }
 
 func (t *ExperianCreditReportTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
+
 	if !vdl.Compatible(tt, __VDLType_v_io_v23_vom_internal_ExperianCreditReport) {
 		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType_v_io_v23_vom_internal_ExperianCreditReport)
 	}
@@ -495,6 +500,7 @@ type TransUnionCreditReportTarget struct {
 }
 
 func (t *TransUnionCreditReportTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
+
 	if !vdl.Compatible(tt, __VDLType_v_io_v23_vom_internal_TransUnionCreditReport) {
 		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType_v_io_v23_vom_internal_TransUnionCreditReport)
 	}
@@ -713,6 +719,7 @@ type CreditReportTarget struct {
 }
 
 func (t *CreditReportTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
+
 	if !vdl.Compatible(tt, __VDLType_v_io_v23_vom_internal_CreditReport) {
 		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType_v_io_v23_vom_internal_CreditReport)
 	}
@@ -845,6 +852,7 @@ type CustomerTarget struct {
 }
 
 func (t *CustomerTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
+
 	if !vdl.Compatible(tt, __VDLType_v_io_v23_vom_internal_Customer) {
 		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType_v_io_v23_vom_internal_Customer)
 	}

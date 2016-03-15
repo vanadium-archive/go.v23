@@ -37,6 +37,7 @@ type IdTarget struct {
 }
 
 func (t *IdTarget) FromBytes(src []byte, tt *vdl.Type) error {
+
 	if !vdl.Compatible(tt, __VDLType_v_io_v23_uniqueid_Id) {
 		return fmt.Errorf("type %v incompatible with %v", tt, __VDLType_v_io_v23_uniqueid_Id)
 	}

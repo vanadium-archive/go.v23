@@ -95,6 +95,7 @@ type TraceRecordTarget struct {
 }
 
 func (t *TraceRecordTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
+
 	if !vdl.Compatible(tt, __VDLType_v_io_v23_vtrace_TraceRecord) {
 		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType_v_io_v23_vtrace_TraceRecord)
 	}
@@ -131,6 +132,7 @@ type unnamed_5b5d762e696f2f7632332f7674726163652e5370616e5265636f726420737472756
 }
 
 func (t *unnamed_5b5d762e696f2f7632332f7674726163652e5370616e5265636f7264207374727563747b496420762e696f2f7632332f756e6971756569642e4964205b31365d627974653b506172656e7420762e696f2f7632332f756e6971756569642e49643b4e616d6520737472696e673b53746172742074696d652e54696d65207374727563747b5365636f6e647320696e7436343b4e616e6f7320696e7433327d3b456e642074696d652e54696d653b416e6e6f746174696f6e73205b5d762e696f2f7632332f7674726163652e416e6e6f746174696f6e207374727563747b5768656e2074696d652e54696d653b4d65737361676520737472696e677d7dTarget) StartList(tt *vdl.Type, len int) (vdl.ListTarget, error) {
+
 	if !vdl.Compatible(tt, __VDLType1) {
 		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType1)
 	}
@@ -167,6 +169,7 @@ type SpanRecordTarget struct {
 }
 
 func (t *SpanRecordTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
+
 	if !vdl.Compatible(tt, __VDLType_v_io_v23_vtrace_SpanRecord) {
 		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType_v_io_v23_vtrace_SpanRecord)
 	}
@@ -219,6 +222,7 @@ type unnamed_5b5d762e696f2f7632332f7674726163652e416e6e6f746174696f6e20737472756
 }
 
 func (t *unnamed_5b5d762e696f2f7632332f7674726163652e416e6e6f746174696f6e207374727563747b5768656e2074696d652e54696d65207374727563747b5365636f6e647320696e7436343b4e616e6f7320696e7433327d3b4d65737361676520737472696e677dTarget) StartList(tt *vdl.Type, len int) (vdl.ListTarget, error) {
+
 	if !vdl.Compatible(tt, __VDLType2) {
 		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType2)
 	}
@@ -251,6 +255,7 @@ type AnnotationTarget struct {
 }
 
 func (t *AnnotationTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
+
 	if !vdl.Compatible(tt, __VDLType_v_io_v23_vtrace_Annotation) {
 		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType_v_io_v23_vtrace_Annotation)
 	}
@@ -501,6 +506,7 @@ type TraceFlagsTarget struct {
 }
 
 func (t *TraceFlagsTarget) FromUint(src uint64, tt *vdl.Type) error {
+
 	val, err := vdlconv.Uint64ToInt32(src)
 	if err != nil {
 		return err
@@ -510,6 +516,7 @@ func (t *TraceFlagsTarget) FromUint(src uint64, tt *vdl.Type) error {
 	return nil
 }
 func (t *TraceFlagsTarget) FromInt(src int64, tt *vdl.Type) error {
+
 	val, err := vdlconv.Int64ToInt32(src)
 	if err != nil {
 		return err
@@ -519,6 +526,7 @@ func (t *TraceFlagsTarget) FromInt(src int64, tt *vdl.Type) error {
 	return nil
 }
 func (t *TraceFlagsTarget) FromFloat(src float64, tt *vdl.Type) error {
+
 	val, err := vdlconv.Float64ToInt32(src)
 	if err != nil {
 		return err
@@ -528,6 +536,7 @@ func (t *TraceFlagsTarget) FromFloat(src float64, tt *vdl.Type) error {
 	return nil
 }
 func (t *TraceFlagsTarget) FromComplex(src complex128, tt *vdl.Type) error {
+
 	val, err := vdlconv.Complex128ToInt32(src)
 	if err != nil {
 		return err
@@ -631,6 +640,7 @@ type RequestTarget struct {
 }
 
 func (t *RequestTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
+
 	if !vdl.Compatible(tt, __VDLType_v_io_v23_vtrace_Request) {
 		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType_v_io_v23_vtrace_Request)
 	}
@@ -732,6 +742,7 @@ type ResponseTarget struct {
 }
 
 func (t *ResponseTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
+
 	if !vdl.Compatible(tt, __VDLType_v_io_v23_vtrace_Response) {
 		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType_v_io_v23_vtrace_Response)
 	}

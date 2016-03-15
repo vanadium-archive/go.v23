@@ -102,6 +102,7 @@ type BatchOptionsTarget struct {
 }
 
 func (t *BatchOptionsTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
+
 	if !vdl.Compatible(tt, __VDLType_v_io_v23_services_syncbase_nosql_BatchOptions) {
 		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType_v_io_v23_services_syncbase_nosql_BatchOptions)
 	}
@@ -193,6 +194,7 @@ type PrefixPermissionsTarget struct {
 }
 
 func (t *PrefixPermissionsTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
+
 	if !vdl.Compatible(tt, __VDLType_v_io_v23_services_syncbase_nosql_PrefixPermissions) {
 		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType_v_io_v23_services_syncbase_nosql_PrefixPermissions)
 	}
@@ -284,6 +286,7 @@ type KeyValueTarget struct {
 }
 
 func (t *KeyValueTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
+
 	if !vdl.Compatible(tt, __VDLType_v_io_v23_services_syncbase_nosql_KeyValue) {
 		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType_v_io_v23_services_syncbase_nosql_KeyValue)
 	}
@@ -374,6 +377,7 @@ type TableRowTarget struct {
 }
 
 func (t *TableRowTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
+
 	if !vdl.Compatible(tt, __VDLType_v_io_v23_services_syncbase_nosql_TableRow) {
 		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType_v_io_v23_services_syncbase_nosql_TableRow)
 	}
@@ -556,6 +560,7 @@ type SyncgroupSpecTarget struct {
 }
 
 func (t *SyncgroupSpecTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
+
 	if !vdl.Compatible(tt, __VDLType_v_io_v23_services_syncbase_nosql_SyncgroupSpec) {
 		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType_v_io_v23_services_syncbase_nosql_SyncgroupSpec)
 	}
@@ -604,6 +609,7 @@ type unnamed_5b5d762e696f2f7632332f73657276696365732f73796e63626173652f6e6f73716
 }
 
 func (t *unnamed_5b5d762e696f2f7632332f73657276696365732f73796e63626173652f6e6f73716c2e5461626c65526f77207374727563747b5461626c654e616d6520737472696e673b526f7720737472696e677dTarget) StartList(tt *vdl.Type, len int) (vdl.ListTarget, error) {
+
 	if !vdl.Compatible(tt, __VDLType6) {
 		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType6)
 	}
@@ -690,6 +696,7 @@ type SyncgroupMemberInfoTarget struct {
 }
 
 func (t *SyncgroupMemberInfoTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
+
 	if !vdl.Compatible(tt, __VDLType_v_io_v23_services_syncbase_nosql_SyncgroupMemberInfo) {
 		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType_v_io_v23_services_syncbase_nosql_SyncgroupMemberInfo)
 	}
@@ -798,6 +805,7 @@ type ResolverTypeTarget struct {
 }
 
 func (t *ResolverTypeTarget) FromEnumLabel(src string, tt *vdl.Type) error {
+
 	if !vdl.Compatible(tt, __VDLType_v_io_v23_services_syncbase_nosql_ResolverType) {
 		return fmt.Errorf("type %v incompatible with %v", tt, __VDLType_v_io_v23_services_syncbase_nosql_ResolverType)
 	}
@@ -890,6 +898,7 @@ type ConflictInfoTarget struct {
 }
 
 func (t *ConflictInfoTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
+
 	if !vdl.Compatible(tt, __VDLType_v_io_v23_services_syncbase_nosql_ConflictInfo) {
 		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType_v_io_v23_services_syncbase_nosql_ConflictInfo)
 	}
@@ -1095,6 +1104,7 @@ type BatchInfoTarget struct {
 }
 
 func (t *BatchInfoTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
+
 	if !vdl.Compatible(tt, __VDLType_v_io_v23_services_syncbase_nosql_BatchInfo) {
 		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType_v_io_v23_services_syncbase_nosql_BatchInfo)
 	}
@@ -1132,6 +1142,7 @@ type BatchSourceTarget struct {
 }
 
 func (t *BatchSourceTarget) FromEnumLabel(src string, tt *vdl.Type) error {
+
 	if !vdl.Compatible(tt, __VDLType_v_io_v23_services_syncbase_nosql_BatchSource) {
 		return fmt.Errorf("type %v incompatible with %v", tt, __VDLType_v_io_v23_services_syncbase_nosql_BatchSource)
 	}
@@ -1298,6 +1309,7 @@ type RowInfoTarget struct {
 }
 
 func (t *RowInfoTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
+
 	if !vdl.Compatible(tt, __VDLType_v_io_v23_services_syncbase_nosql_RowInfo) {
 		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType_v_io_v23_services_syncbase_nosql_RowInfo)
 	}
@@ -1333,6 +1345,7 @@ type unnamed_5b5d75696e743634Target struct {
 }
 
 func (t *unnamed_5b5d75696e743634Target) StartList(tt *vdl.Type, len int) (vdl.ListTarget, error) {
+
 	if !vdl.Compatible(tt, __VDLType12) {
 		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType12)
 	}
@@ -1613,6 +1626,7 @@ type RowOpTarget struct {
 }
 
 func (t *RowOpTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
+
 	if !vdl.Compatible(tt, __VDLType_v_io_v23_services_syncbase_nosql_RowOp) {
 		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType_v_io_v23_services_syncbase_nosql_RowOp)
 	}
@@ -1657,6 +1671,7 @@ type unnamed_3f762e696f2f7632332f73657276696365732f73796e63626173652f6e6f73716c2
 }
 
 func (t *unnamed_3f762e696f2f7632332f73657276696365732f73796e63626173652f6e6f73716c2e56616c7565207374727563747b537461746520762e696f2f7632332f73657276696365732f73796e63626173652f6e6f73716c2e56616c7565537461746520656e756d7b4578697374733b4e6f4578697374733b44656c657465643b556e6b6e6f776e7d3b4279746573205b5d627974653b577269746554732074696d652e54696d65207374727563747b5365636f6e647320696e7436343b4e616e6f7320696e7433327d7dTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
+
 	if *t.Value == nil {
 		*t.Value = &Value{}
 	}
@@ -1672,6 +1687,7 @@ func (t *unnamed_3f762e696f2f7632332f73657276696365732f73796e63626173652f6e6f737
 	return nil
 }
 func (t *unnamed_3f762e696f2f7632332f73657276696365732f73796e63626173652f6e6f73716c2e56616c7565207374727563747b537461746520762e696f2f7632332f73657276696365732f73796e63626173652f6e6f73716c2e56616c7565537461746520656e756d7b4578697374733b4e6f4578697374733b44656c657465643b556e6b6e6f776e7d3b4279746573205b5d627974653b577269746554732074696d652e54696d65207374727563747b5365636f6e647320696e7436343b4e616e6f7320696e7433327d7dTarget) FromNil(tt *vdl.Type) error {
+
 	*t.Value = nil
 
 	return nil
@@ -1687,6 +1703,7 @@ type ValueTarget struct {
 }
 
 func (t *ValueTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
+
 	if !vdl.Compatible(tt, __VDLType_v_io_v23_services_syncbase_nosql_Value) {
 		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType_v_io_v23_services_syncbase_nosql_Value)
 	}
@@ -1724,6 +1741,7 @@ type ValueStateTarget struct {
 }
 
 func (t *ValueStateTarget) FromEnumLabel(src string, tt *vdl.Type) error {
+
 	if !vdl.Compatible(tt, __VDLType_v_io_v23_services_syncbase_nosql_ValueState) {
 		return fmt.Errorf("type %v incompatible with %v", tt, __VDLType_v_io_v23_services_syncbase_nosql_ValueState)
 	}
@@ -1808,6 +1826,7 @@ type ScanOpTarget struct {
 }
 
 func (t *ScanOpTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
+
 	if !vdl.Compatible(tt, __VDLType_v_io_v23_services_syncbase_nosql_ScanOp) {
 		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType_v_io_v23_services_syncbase_nosql_ScanOp)
 	}
@@ -2056,6 +2075,7 @@ type ValueSelectionTarget struct {
 }
 
 func (t *ValueSelectionTarget) FromEnumLabel(src string, tt *vdl.Type) error {
+
 	if !vdl.Compatible(tt, __VDLType_v_io_v23_services_syncbase_nosql_ValueSelection) {
 		return fmt.Errorf("type %v incompatible with %v", tt, __VDLType_v_io_v23_services_syncbase_nosql_ValueSelection)
 	}
@@ -2181,6 +2201,7 @@ type ResolutionInfoTarget struct {
 }
 
 func (t *ResolutionInfoTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
+
 	if !vdl.Compatible(tt, __VDLType_v_io_v23_services_syncbase_nosql_ResolutionInfo) {
 		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType_v_io_v23_services_syncbase_nosql_ResolutionInfo)
 	}
@@ -2284,6 +2305,7 @@ type SchemaMetadataTarget struct {
 }
 
 func (t *SchemaMetadataTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
+
 	if !vdl.Compatible(tt, __VDLType_v_io_v23_services_syncbase_nosql_SchemaMetadata) {
 		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType_v_io_v23_services_syncbase_nosql_SchemaMetadata)
 	}
@@ -2319,6 +2341,7 @@ type CrPolicyTarget struct {
 }
 
 func (t *CrPolicyTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
+
 	if !vdl.Compatible(tt, __VDLType_v_io_v23_services_syncbase_nosql_CrPolicy) {
 		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType_v_io_v23_services_syncbase_nosql_CrPolicy)
 	}
@@ -2351,6 +2374,7 @@ type unnamed_5b5d762e696f2f7632332f73657276696365732f73796e63626173652f6e6f73716
 }
 
 func (t *unnamed_5b5d762e696f2f7632332f73657276696365732f73796e63626173652f6e6f73716c2e437252756c65207374727563747b5461626c654e616d6520737472696e673b4b657950726566697820737472696e673b5479706520737472696e673b5265736f6c76657220762e696f2f7632332f73657276696365732f73796e63626173652f6e6f73716c2e5265736f6c7665725479706520656e756d7b4c61737457696e733b4170705265736f6c7665733b44656665727d7dTarget) StartList(tt *vdl.Type, len int) (vdl.ListTarget, error) {
+
 	if !vdl.Compatible(tt, __VDLType18) {
 		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType18)
 	}
@@ -2385,6 +2409,7 @@ type CrRuleTarget struct {
 }
 
 func (t *CrRuleTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
+
 	if !vdl.Compatible(tt, __VDLType_v_io_v23_services_syncbase_nosql_CrRule) {
 		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType_v_io_v23_services_syncbase_nosql_CrRule)
 	}
@@ -2597,6 +2622,7 @@ type BlobRefTarget struct {
 }
 
 func (t *BlobRefTarget) FromString(src string, tt *vdl.Type) error {
+
 	if !vdl.Compatible(tt, __VDLType_v_io_v23_services_syncbase_nosql_BlobRef) {
 		return fmt.Errorf("type %v incompatible with %v", tt, __VDLType_v_io_v23_services_syncbase_nosql_BlobRef)
 	}
@@ -2682,6 +2708,7 @@ type BlobFetchStateTarget struct {
 }
 
 func (t *BlobFetchStateTarget) FromEnumLabel(src string, tt *vdl.Type) error {
+
 	if !vdl.Compatible(tt, __VDLType_v_io_v23_services_syncbase_nosql_BlobFetchState) {
 		return fmt.Errorf("type %v incompatible with %v", tt, __VDLType_v_io_v23_services_syncbase_nosql_BlobFetchState)
 	}
@@ -2779,6 +2806,7 @@ type BlobFetchStatusTarget struct {
 }
 
 func (t *BlobFetchStatusTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
+
 	if !vdl.Compatible(tt, __VDLType_v_io_v23_services_syncbase_nosql_BlobFetchStatus) {
 		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType_v_io_v23_services_syncbase_nosql_BlobFetchStatus)
 	}
@@ -2880,6 +2908,7 @@ type StoreChangeTarget struct {
 }
 
 func (t *StoreChangeTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
+
 	if !vdl.Compatible(tt, __VDLType_v_io_v23_services_syncbase_nosql_StoreChange) {
 		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType_v_io_v23_services_syncbase_nosql_StoreChange)
 	}

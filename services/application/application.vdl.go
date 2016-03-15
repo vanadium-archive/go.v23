@@ -236,6 +236,7 @@ type EnvelopeTarget struct {
 }
 
 func (t *EnvelopeTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
+
 	if !vdl.Compatible(tt, __VDLType_v_io_v23_services_application_Envelope) {
 		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType_v_io_v23_services_application_Envelope)
 	}
@@ -296,6 +297,7 @@ type SignedFileTarget struct {
 }
 
 func (t *SignedFileTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
+
 	if !vdl.Compatible(tt, __VDLType_v_io_v23_services_application_SignedFile) {
 		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType_v_io_v23_services_application_SignedFile)
 	}
@@ -334,6 +336,7 @@ type PackagesTarget struct {
 }
 
 func (t *PackagesTarget) StartMap(tt *vdl.Type, len int) (vdl.MapTarget, error) {
+
 	if !vdl.Compatible(tt, __VDLType_v_io_v23_services_application_Packages) {
 		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType_v_io_v23_services_application_Packages)
 	}

@@ -89,6 +89,7 @@ type TaskTarget struct {
 }
 
 func (t *TaskTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
+
 	if !vdl.Compatible(tt, __VDLType_v_io_v23_services_appcycle_Task) {
 		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType_v_io_v23_services_appcycle_Task)
 	}

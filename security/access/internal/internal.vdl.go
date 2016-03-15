@@ -43,6 +43,7 @@ type MyTagTarget struct {
 }
 
 func (t *MyTagTarget) FromString(src string, tt *vdl.Type) error {
+
 	if !vdl.Compatible(tt, __VDLType_v_io_v23_security_access_internal_MyTag) {
 		return fmt.Errorf("type %v incompatible with %v", tt, __VDLType_v_io_v23_security_access_internal_MyTag)
 	}

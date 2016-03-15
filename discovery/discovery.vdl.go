@@ -161,6 +161,7 @@ type AdvertisementTarget struct {
 }
 
 func (t *AdvertisementTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
+
 	if !vdl.Compatible(tt, __VDLType_v_io_v23_discovery_Advertisement) {
 		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType_v_io_v23_discovery_Advertisement)
 	}
@@ -206,6 +207,7 @@ type AdIdTarget struct {
 }
 
 func (t *AdIdTarget) FromBytes(src []byte, tt *vdl.Type) error {
+
 	if !vdl.Compatible(tt, __VDLType_v_io_v23_discovery_AdId) {
 		return fmt.Errorf("type %v incompatible with %v", tt, __VDLType_v_io_v23_discovery_AdId)
 	}
@@ -225,6 +227,7 @@ type AttributesTarget struct {
 }
 
 func (t *AttributesTarget) StartMap(tt *vdl.Type, len int) (vdl.MapTarget, error) {
+
 	if !vdl.Compatible(tt, __VDLType_v_io_v23_discovery_Attributes) {
 		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType_v_io_v23_discovery_Attributes)
 	}
@@ -266,6 +269,7 @@ type AttachmentsTarget struct {
 }
 
 func (t *AttachmentsTarget) StartMap(tt *vdl.Type, len int) (vdl.MapTarget, error) {
+
 	if !vdl.Compatible(tt, __VDLType_v_io_v23_discovery_Attachments) {
 		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType_v_io_v23_discovery_Attachments)
 	}

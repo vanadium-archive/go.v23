@@ -79,6 +79,7 @@ type ConfigTarget struct {
 }
 
 func (t *ConfigTarget) StartMap(tt *vdl.Type, len int) (vdl.MapTarget, error) {
+
 	if !vdl.Compatible(tt, __VDLType_v_io_v23_services_device_Config) {
 		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType_v_io_v23_services_device_Config)
 	}
@@ -175,6 +176,7 @@ type InstallationStateTarget struct {
 }
 
 func (t *InstallationStateTarget) FromEnumLabel(src string, tt *vdl.Type) error {
+
 	if !vdl.Compatible(tt, __VDLType_v_io_v23_services_device_InstallationState) {
 		return fmt.Errorf("type %v incompatible with %v", tt, __VDLType_v_io_v23_services_device_InstallationState)
 	}
@@ -280,6 +282,7 @@ type InstanceStateTarget struct {
 }
 
 func (t *InstanceStateTarget) FromEnumLabel(src string, tt *vdl.Type) error {
+
 	if !vdl.Compatible(tt, __VDLType_v_io_v23_services_device_InstanceState) {
 		return fmt.Errorf("type %v incompatible with %v", tt, __VDLType_v_io_v23_services_device_InstanceState)
 	}
@@ -497,6 +500,7 @@ type InstallationStatusTarget struct {
 }
 
 func (t *InstallationStatusTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
+
 	if !vdl.Compatible(tt, __VDLType_v_io_v23_services_device_InstallationStatus) {
 		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType_v_io_v23_services_device_InstallationStatus)
 	}
@@ -589,6 +593,7 @@ type InstanceStatusTarget struct {
 }
 
 func (t *InstanceStatusTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
+
 	if !vdl.Compatible(tt, __VDLType_v_io_v23_services_device_InstanceStatus) {
 		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType_v_io_v23_services_device_InstanceStatus)
 	}
@@ -681,6 +686,7 @@ type DeviceStatusTarget struct {
 }
 
 func (t *DeviceStatusTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
+
 	if !vdl.Compatible(tt, __VDLType_v_io_v23_services_device_DeviceStatus) {
 		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType_v_io_v23_services_device_DeviceStatus)
 	}
@@ -914,6 +920,7 @@ type DescriptionTarget struct {
 }
 
 func (t *DescriptionTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
+
 	if !vdl.Compatible(tt, __VDLType_v_io_v23_services_device_Description) {
 		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType_v_io_v23_services_device_Description)
 	}
@@ -947,6 +954,7 @@ type unnamed_7365745b737472696e675dTarget struct {
 }
 
 func (t *unnamed_7365745b737472696e675dTarget) StartSet(tt *vdl.Type, len int) (vdl.SetTarget, error) {
+
 	if !vdl.Compatible(tt, __VDLType5) {
 		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType5)
 	}
@@ -1035,6 +1043,7 @@ type AssociationTarget struct {
 }
 
 func (t *AssociationTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
+
 	if !vdl.Compatible(tt, __VDLType_v_io_v23_services_device_Association) {
 		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType_v_io_v23_services_device_Association)
 	}

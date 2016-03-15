@@ -132,6 +132,7 @@ type ConfigTarget struct {
 }
 
 func (t *ConfigTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
+
 	if !vdl.Compatible(tt, __VDLType_vdltool_Config) {
 		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType_vdltool_Config)
 	}
@@ -177,6 +178,7 @@ type unnamed_7365745b76646c746f6f6c2e47656e4c616e677561676520656e756d7b476f3b4a6
 }
 
 func (t *unnamed_7365745b76646c746f6f6c2e47656e4c616e677561676520656e756d7b476f3b4a6176613b4a6176617363726970747d5dTarget) StartSet(tt *vdl.Type, len int) (vdl.SetTarget, error) {
+
 	if !vdl.Compatible(tt, __VDLType1) {
 		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType1)
 	}
@@ -207,6 +209,7 @@ type GenLanguageTarget struct {
 }
 
 func (t *GenLanguageTarget) FromEnumLabel(src string, tt *vdl.Type) error {
+
 	if !vdl.Compatible(tt, __VDLType_vdltool_GenLanguage) {
 		return fmt.Errorf("type %v incompatible with %v", tt, __VDLType_vdltool_GenLanguage)
 	}
@@ -232,6 +235,7 @@ type GoConfigTarget struct {
 }
 
 func (t *GoConfigTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
+
 	if !vdl.Compatible(tt, __VDLType_vdltool_GoConfig) {
 		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType_vdltool_GoConfig)
 	}
@@ -267,6 +271,7 @@ type unnamed_6d61705b737472696e675d76646c746f6f6c2e476f54797065207374727563747b5
 }
 
 func (t *unnamed_6d61705b737472696e675d76646c746f6f6c2e476f54797065207374727563747b5479706520737472696e673b496d706f727473205b5d76646c746f6f6c2e476f496d706f7274207374727563747b5061746820737472696e673b4e616d6520737472696e677d7dTarget) StartMap(tt *vdl.Type, len int) (vdl.MapTarget, error) {
+
 	if !vdl.Compatible(tt, __VDLType3) {
 		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType3)
 	}
@@ -306,6 +311,7 @@ type GoTypeTarget struct {
 }
 
 func (t *GoTypeTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
+
 	if !vdl.Compatible(tt, __VDLType_vdltool_GoType) {
 		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType_vdltool_GoType)
 	}
@@ -342,6 +348,7 @@ type unnamed_5b5d76646c746f6f6c2e476f496d706f7274207374727563747b506174682073747
 }
 
 func (t *unnamed_5b5d76646c746f6f6c2e476f496d706f7274207374727563747b5061746820737472696e673b4e616d6520737472696e677dTarget) StartList(tt *vdl.Type, len int) (vdl.ListTarget, error) {
+
 	if !vdl.Compatible(tt, __VDLType2) {
 		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType2)
 	}
@@ -374,6 +381,7 @@ type GoImportTarget struct {
 }
 
 func (t *GoImportTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
+
 	if !vdl.Compatible(tt, __VDLType_vdltool_GoImport) {
 		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType_vdltool_GoImport)
 	}
@@ -410,6 +418,7 @@ type JavaConfigTarget struct {
 }
 
 func (t *JavaConfigTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
+
 	if !vdl.Compatible(tt, __VDLType_vdltool_JavaConfig) {
 		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType_vdltool_JavaConfig)
 	}
@@ -449,6 +458,7 @@ type unnamed_6d61705b737472696e675d737472696e67Target struct {
 }
 
 func (t *unnamed_6d61705b737472696e675d737472696e67Target) StartMap(tt *vdl.Type, len int) (vdl.MapTarget, error) {
+
 	if !vdl.Compatible(tt, __VDLType4) {
 		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType4)
 	}
@@ -486,6 +496,7 @@ type JavascriptConfigTarget struct {
 }
 
 func (t *JavascriptConfigTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
+
 	if !vdl.Compatible(tt, __VDLType_vdltool_JavascriptConfig) {
 		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType_vdltool_JavascriptConfig)
 	}

@@ -40,6 +40,7 @@ type MountFlagTarget struct {
 }
 
 func (t *MountFlagTarget) FromUint(src uint64, tt *vdl.Type) error {
+
 	val, err := vdlconv.Uint64ToUint32(src)
 	if err != nil {
 		return err
@@ -49,6 +50,7 @@ func (t *MountFlagTarget) FromUint(src uint64, tt *vdl.Type) error {
 	return nil
 }
 func (t *MountFlagTarget) FromInt(src int64, tt *vdl.Type) error {
+
 	val, err := vdlconv.Int64ToUint32(src)
 	if err != nil {
 		return err
@@ -58,6 +60,7 @@ func (t *MountFlagTarget) FromInt(src int64, tt *vdl.Type) error {
 	return nil
 }
 func (t *MountFlagTarget) FromFloat(src float64, tt *vdl.Type) error {
+
 	val, err := vdlconv.Float64ToUint32(src)
 	if err != nil {
 		return err
@@ -67,6 +70,7 @@ func (t *MountFlagTarget) FromFloat(src float64, tt *vdl.Type) error {
 	return nil
 }
 func (t *MountFlagTarget) FromComplex(src complex128, tt *vdl.Type) error {
+
 	val, err := vdlconv.Complex128ToUint32(src)
 	if err != nil {
 		return err
@@ -145,6 +149,7 @@ type MountedServerTarget struct {
 }
 
 func (t *MountedServerTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
+
 	if !vdl.Compatible(tt, __VDLType_v_io_v23_naming_MountedServer) {
 		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType_v_io_v23_naming_MountedServer)
 	}
@@ -283,6 +288,7 @@ type MountEntryTarget struct {
 }
 
 func (t *MountEntryTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
+
 	if !vdl.Compatible(tt, __VDLType_v_io_v23_naming_MountEntry) {
 		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType_v_io_v23_naming_MountEntry)
 	}
@@ -327,6 +333,7 @@ type unnamed_5b5d762e696f2f7632332f6e616d696e672e4d6f756e74656453657276657220737
 }
 
 func (t *unnamed_5b5d762e696f2f7632332f6e616d696e672e4d6f756e746564536572766572207374727563747b53657276657220737472696e673b446561646c696e652074696d652e57697265446561646c696e65207374727563747b46726f6d4e6f772074696d652e4475726174696f6e207374727563747b5365636f6e647320696e7436343b4e616e6f7320696e7433327d3b4e6f446561646c696e6520626f6f6c7d7dTarget) StartList(tt *vdl.Type, len int) (vdl.ListTarget, error) {
+
 	if !vdl.Compatible(tt, __VDLType2) {
 		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType2)
 	}
@@ -428,6 +435,7 @@ type GlobErrorTarget struct {
 }
 
 func (t *GlobErrorTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
+
 	if !vdl.Compatible(tt, __VDLType_v_io_v23_naming_GlobError) {
 		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType_v_io_v23_naming_GlobError)
 	}

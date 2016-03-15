@@ -228,6 +228,7 @@ type AccessListTarget struct {
 }
 
 func (t *AccessListTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
+
 	if !vdl.Compatible(tt, __VDLType_v_io_v23_security_access_AccessList) {
 		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType_v_io_v23_security_access_AccessList)
 	}
@@ -264,6 +265,7 @@ type unnamed_5b5d762e696f2f7632332f73656375726974792e426c657373696e6750617474657
 }
 
 func (t *unnamed_5b5d762e696f2f7632332f73656375726974792e426c657373696e675061747465726e20737472696e67Target) StartList(tt *vdl.Type, len int) (vdl.ListTarget, error) {
+
 	if !vdl.Compatible(tt, __VDLType1) {
 		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType1)
 	}
@@ -347,6 +349,7 @@ type PermissionsTarget struct {
 }
 
 func (t *PermissionsTarget) StartMap(tt *vdl.Type, len int) (vdl.MapTarget, error) {
+
 	if !vdl.Compatible(tt, __VDLType_v_io_v23_security_access_Permissions) {
 		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType_v_io_v23_security_access_Permissions)
 	}
@@ -406,6 +409,7 @@ type TagTarget struct {
 }
 
 func (t *TagTarget) FromString(src string, tt *vdl.Type) error {
+
 	if !vdl.Compatible(tt, __VDLType_v_io_v23_security_access_Tag) {
 		return fmt.Errorf("type %v incompatible with %v", tt, __VDLType_v_io_v23_security_access_Tag)
 	}

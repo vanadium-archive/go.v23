@@ -83,6 +83,7 @@ type LogEntryTarget struct {
 }
 
 func (t *LogEntryTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
+
 	if !vdl.Compatible(tt, __VDLType_v_io_v23_services_logreader_LogEntry) {
 		return nil, fmt.Errorf("type %v incompatible with %v", tt, __VDLType_v_io_v23_services_logreader_LogEntry)
 	}
