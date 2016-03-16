@@ -64,11 +64,9 @@ import (
 //
 //   union{A string} <-> string <-> union{B string}
 func Compatible(a, b *Type) bool {
-	if a.Kind() == Optional {
-		a = a.Elem()
-	}
-	if b.Kind() == Optional {
-		b = b.Elem()
+	a, b = a.NonOptional(), b.NonOptional()
+	if a == b {
+		return true // fastpath for common case
 	}
 	key := compatKey(a, b)
 	if compat, ok := compatCache.lookup(key); ok {
