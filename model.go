@@ -107,7 +107,7 @@ type AppCycle interface {
 type Runtime interface {
 	// Init is a chance to initialize state in the runtime implementation
 	// after the runtime has been registered in the v23 package.
-	// Code that runs in this routine, unlike the code in the runtimes
+	// Code that runs in this routine, unlike the code in the Runtime's
 	// constructor, can use the v23.Get/With methods.
 	Init(ctx *context.T) error
 
@@ -375,24 +375,23 @@ runtime implementation.`)
 // creates a runtime implementation with the required hardware, operating system
 // and library specific dependencies included.
 //
-// The implementations of the RuntimeFactory are intended to capture all of
-// the dependencies implied by that RuntimeFactory. For example, if a RuntimeFactory requires
-// a particular hardware specific library (say Bluetooth support), then the
-// implementation of the RuntimeFactory should include that dependency and
-// the resulting runtime instance; the package implementing
-// the RuntimeFactory should expose the additional APIs needed to use the
-// functionality.
+// The implementations of the RuntimeFactory are intended to capture all of the
+// dependencies implied by that RuntimeFactory. For example, if a RuntimeFactory
+// requires a particular hardware specific library (say Bluetooth support), then
+// the implementation of the RuntimeFactory should include that dependency in
+// the resulting runtime instance; the package implementing the RuntimeFactory
+// should expose the additional APIs needed to use the functionality.
 //
 // RuntimeFactories range from the generic to the very specific (e.g. "linux" or
-// "my-sprinkler-controller-v2". Applications should, in general, use
-// as generic a RuntimeFactory as possbile.
+// "my-sprinkler-controller-v2". Applications should, in general, use as generic
+// a RuntimeFactory as possible.
 //
-// RuntimeFactories are registered using v23.RegisterRuntimeFactory and subsequent
-// registrations will panic. Packages that implement RuntimeFactories will typically
-// call RegisterRuntimeFactory in their init functions so importing a RuntimeFactory will
-// be sufficient to register it. Only one RuntimeFactory can be registered in any
-// program, and subsequent registrations will panic.  Typically a program's main
-// package will be the only place to import a RuntimeFactory.
+// RuntimeFactories are registered using v23.RegisterRuntimeFactory. Packages
+// that implement RuntimeFactories will typically call RegisterRuntimeFactory in
+// their init functions so importing a RuntimeFactory will be sufficient to
+// register it. Only one RuntimeFactory can be registered in any program, and
+// subsequent registrations will panic.  Typically a program's main package will
+// be the only place to import a RuntimeFactory.
 //
 // This scheme allows applications to use a pre-supplied RuntimeFactory as well
 // as for developers to create their own RuntimeFactories (to represent their
@@ -400,10 +399,10 @@ runtime implementation.`)
 //
 // At a minimum a RuntimeFactory must do the following:
 //   - Initialize a Runtime implementation (providing the flags to it)
-//   - Return a Runtime implemenation, initial context, Shutdown func.
+//   - Return a Runtime implementation, initial context, Shutdown func.
 //
-// See the v.io/x/ref/runtime/factories package for a complete description of the
-// precanned RuntimeFactories and how to use them.
+// See the v.io/x/ref/runtime/factories package for a complete description of
+// the precanned RuntimeFactories and how to use them.
 type RuntimeFactory func(ctx *context.T) (Runtime, *context.T, Shutdown, error)
 
 // RegisterRuntimeFactory register the specified RuntimeFactory.
