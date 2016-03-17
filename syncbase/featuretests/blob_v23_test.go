@@ -26,7 +26,7 @@ func TestV23BlobWholeTransfer(t *testing.T) {
 	defer sh.Cleanup()
 	sh.StartRootMountTable()
 
-	sbs := setupSyncbases(t, sh, 2)
+	sbs := setupSyncbases(t, sh, 2, false)
 
 	sgName := naming.Join("s0", util.SyncbaseSuffix, "SG1")
 

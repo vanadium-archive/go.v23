@@ -54,7 +54,7 @@ func BenchmarkPingPongPair(b *testing.B) {
 
 	for iter := 0; iter < b.N; iter++ {
 		// Setup *numSync Syncbases.
-		sbs := setupSyncbases(b, sh, *numSync)
+		sbs := setupSyncbases(b, sh, *numSync, false)
 
 		// Setup *numGroup Syncgroups
 		for g := 0; g < *numGroup; g++ {
@@ -64,9 +64,9 @@ func BenchmarkPingPongPair(b *testing.B) {
 
 			// TODO(alexfandrianto): Was unable to use the empty prefix ("tb:").
 			// Observation: w0's watch isn't working with the empty prefix.
-			// Possible Explanation: The empty prefix ACL receives an initial value from
-			// the Table ACL. If this value is synced over from the opposing peer,
-			// conflict resolution can mean that s0 loses the ability to watch.
+			// Possible explanation: The empty prefix ACL receives an initial value
+			// from the Table ACL. If this value is synced over from the opposing
+			// peer, conflict resolution can mean that s0 loses the ability to watch.
 			syncString := fmt.Sprintf("%s:p", testTable)
 			ok(b, createSyncgroup(sbs[0].clientCtx, sbs[0].sbName, sgName, syncString, "", sbBlessings(sbs), nil))
 
@@ -125,7 +125,7 @@ func BenchmarkPingPongPair(b *testing.B) {
 			sbs[i].cleanup(os.Interrupt)
 		}
 
-		// Log intermediate information
+		// Log intermediate information.
 		b.Logf("Iteration %d of %d\n", iter, b.N)
 		b.Logf("Avg Time from 0 to 1: %d ns\n", t0to1/int64(pingPongPairIterations))
 		b.Logf("Avg Time from 1 to 0: %d ns\n", t1to0/int64(pingPongPairIterations))

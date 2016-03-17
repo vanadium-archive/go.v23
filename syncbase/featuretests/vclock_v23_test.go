@@ -12,6 +12,7 @@ import (
 	"v.io/v23/naming"
 	wire "v.io/v23/services/syncbase"
 	"v.io/x/ref/services/syncbase/server/util"
+	"v.io/x/ref/services/syncbase/syncbaselib"
 	tu "v.io/x/ref/services/syncbase/testutil"
 	"v.io/x/ref/test/v23test"
 )
@@ -39,7 +40,7 @@ func TestV23VClockMovesForward(t *testing.T) {
 
 	ctx := sh.ForkContext("c0")
 	s0Creds := sh.ForkCredentials("s0")
-	sh.StartSyncbase(s0Creds, "s0", "", openPerms, "--dev")
+	sh.StartSyncbase(s0Creds, syncbaselib.Opts{Name: "s0", DevMode: true}, openPerms)
 
 	t0, err := sc("s0").DevModeGetTime(ctx)
 	ok(t, err)
@@ -60,7 +61,7 @@ func TestV23VClockSystemClockUpdate(t *testing.T) {
 
 	ctx := sh.ForkContext("c0")
 	s0Creds := sh.ForkCredentials("s0")
-	sh.StartSyncbase(s0Creds, "s0", "", openPerms, "--dev")
+	sh.StartSyncbase(s0Creds, syncbaselib.Opts{Name: "s0", DevMode: true}, openPerms)
 
 	// Initialize system time.
 	ok(t, sc("s0").DevModeUpdateVClock(ctx, wire.DevModeUpdateVClockOpts{
@@ -119,7 +120,7 @@ func TestV23VClockSystemClockFrequency(t *testing.T) {
 
 	ctx := sh.ForkContext("c0")
 	s0Creds := sh.ForkCredentials("s0")
-	sh.StartSyncbase(s0Creds, "s0", "", openPerms, "--dev")
+	sh.StartSyncbase(s0Creds, syncbaselib.Opts{Name: "s0", DevMode: true}, openPerms)
 
 	checkSbTimeNotEq(t, "s0", ctx, jan2015)
 
@@ -151,7 +152,7 @@ func TestV23VClockNtpUpdate(t *testing.T) {
 
 	ctx := sh.ForkContext("c0")
 	s0Creds := sh.ForkCredentials("s0")
-	sh.StartSyncbase(s0Creds, "s0", "", openPerms, "--dev")
+	sh.StartSyncbase(s0Creds, syncbaselib.Opts{Name: "s0", DevMode: true}, openPerms)
 
 	checkSbTimeNotEq(t, "s0", ctx, jan2015)
 
@@ -179,7 +180,7 @@ func TestV23VClockNtpSkewAfterReboot(t *testing.T) {
 
 	ctx := sh.ForkContext("c0")
 	s0Creds := sh.ForkCredentials("s0")
-	sh.StartSyncbase(s0Creds, "s0", "", openPerms, "--dev")
+	sh.StartSyncbase(s0Creds, syncbaselib.Opts{Name: "s0", DevMode: true}, openPerms)
 
 	// Set s0's local clock.
 	ok(t, sc("s0").DevModeUpdateVClock(ctx, wire.DevModeUpdateVClockOpts{
@@ -218,7 +219,7 @@ func TestV23VClockNtpFrequency(t *testing.T) {
 
 	ctx := sh.ForkContext("c0")
 	s0Creds := sh.ForkCredentials("s0")
-	sh.StartSyncbase(s0Creds, "s0", "", openPerms, "--dev")
+	sh.StartSyncbase(s0Creds, syncbaselib.Opts{Name: "s0", DevMode: true}, openPerms)
 
 	t0, err := sc("s0").DevModeGetTime(ctx)
 	ok(t, err)
@@ -257,7 +258,7 @@ func TestV23VClockSyncBasic(t *testing.T) {
 	defer sh.Cleanup()
 	sh.StartRootMountTable()
 
-	sbs := setupSyncbases(t, sh, 4, "--dev")
+	sbs := setupSyncbases(t, sh, 4, true)
 
 	checkSbTimeNotEq(t, "s0", sbs[0].clientCtx, jan2015)
 
@@ -288,7 +289,7 @@ func TestV23VClockSyncWithLocalNtp(t *testing.T) {
 	defer sh.Cleanup()
 	sh.StartRootMountTable()
 
-	sbs := setupSyncbases(t, sh, 3, "--dev")
+	sbs := setupSyncbases(t, sh, 3, true)
 
 	// Do NTP at s0 and s2.
 	ok(t, sc("s0").DevModeUpdateVClock(sbs[0].clientCtx, wire.DevModeUpdateVClockOpts{
@@ -342,7 +343,7 @@ func TestV23VClockSyncWithReboots(t *testing.T) {
 	defer sh.Cleanup()
 	sh.StartRootMountTable()
 
-	sbs := setupSyncbases(t, sh, 2, "--dev")
+	sbs := setupSyncbases(t, sh, 2, true)
 
 	// Set s0's local clock.
 	ok(t, sc("s0").DevModeUpdateVClock(sbs[0].clientCtx, wire.DevModeUpdateVClockOpts{

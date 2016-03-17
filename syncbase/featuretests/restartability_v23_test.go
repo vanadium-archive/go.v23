@@ -21,6 +21,7 @@ import (
 	"v.io/v23/syncbase/nosql"
 	"v.io/v23/verror"
 	"v.io/v23/vom"
+	"v.io/x/ref/services/syncbase/syncbaselib"
 	tu "v.io/x/ref/services/syncbase/testutil"
 	"v.io/x/ref/test/v23test"
 )
@@ -59,13 +60,13 @@ func TestV23RestartabilityHierarchy(t *testing.T) {
 	sh := v23test.NewShell(t, nil)
 	defer sh.Cleanup()
 	rootDir, clientCtx, serverCreds := restartabilityInit(sh)
-	cleanup := sh.StartSyncbase(serverCreds, testSbName, rootDir, acl)
+	cleanup := sh.StartSyncbase(serverCreds, syncbaselib.Opts{Name: testSbName, RootDir: rootDir}, acl)
 
 	createHierarchy(t, clientCtx)
 	checkHierarchy(t, clientCtx)
 	cleanup(os.Interrupt)
 
-	_ = sh.StartSyncbase(serverCreds, testSbName, rootDir, acl)
+	_ = sh.StartSyncbase(serverCreds, syncbaselib.Opts{Name: testSbName, RootDir: rootDir}, acl)
 	checkHierarchy(t, clientCtx)
 }
 
@@ -76,13 +77,13 @@ func TestV23RestartabilityCrash(t *testing.T) {
 	sh := v23test.NewShell(t, nil)
 	defer sh.Cleanup()
 	rootDir, clientCtx, serverCreds := restartabilityInit(sh)
-	cleanup := sh.StartSyncbase(serverCreds, testSbName, rootDir, acl)
+	cleanup := sh.StartSyncbase(serverCreds, syncbaselib.Opts{Name: testSbName, RootDir: rootDir}, acl)
 
 	createHierarchy(t, clientCtx)
 	checkHierarchy(t, clientCtx)
 	cleanup(os.Kill)
 
-	_ = sh.StartSyncbase(serverCreds, testSbName, rootDir, acl)
+	_ = sh.StartSyncbase(serverCreds, syncbaselib.Opts{Name: testSbName, RootDir: rootDir}, acl)
 	checkHierarchy(t, clientCtx)
 }
 
@@ -159,7 +160,7 @@ func TestV23RestartabilityQuiescent(t *testing.T) {
 	sh := v23test.NewShell(t, nil)
 	defer sh.Cleanup()
 	rootDir, clientCtx, serverCreds := restartabilityInit(sh)
-	cleanup := sh.StartSyncbase(serverCreds, testSbName, rootDir, acl)
+	cleanup := sh.StartSyncbase(serverCreds, syncbaselib.Opts{Name: testSbName, RootDir: rootDir}, acl)
 	d := createAppDatabaseTable(t, clientCtx)
 
 	tb := d.Table("tb")
@@ -179,7 +180,7 @@ func TestV23RestartabilityQuiescent(t *testing.T) {
 
 	cleanup(os.Kill)
 	// Restart syncbase.
-	_ = sh.StartSyncbase(serverCreds, testSbName, rootDir, acl)
+	_ = sh.StartSyncbase(serverCreds, syncbaselib.Opts{Name: testSbName, RootDir: rootDir}, acl)
 
 	if err := r.Get(clientCtx, &result); err != nil {
 		t.Fatalf("r.Get() failed: %v", err)
@@ -195,7 +196,7 @@ func TestV23RestartabilityReadOnlyBatch(t *testing.T) {
 	sh := v23test.NewShell(t, nil)
 	defer sh.Cleanup()
 	rootDir, clientCtx, serverCreds := restartabilityInit(sh)
-	cleanup := sh.StartSyncbase(serverCreds, testSbName, rootDir, acl)
+	cleanup := sh.StartSyncbase(serverCreds, syncbaselib.Opts{Name: testSbName, RootDir: rootDir}, acl)
 	d := createAppDatabaseTable(t, clientCtx)
 
 	// Add one row.
@@ -227,7 +228,7 @@ func TestV23RestartabilityReadOnlyBatch(t *testing.T) {
 	}
 
 	// Restart syncbase.
-	_ = sh.StartSyncbase(serverCreds, testSbName, rootDir, acl)
+	_ = sh.StartSyncbase(serverCreds, syncbaselib.Opts{Name: testSbName, RootDir: rootDir}, acl)
 
 	if err := r.Get(clientCtx, &result); verror.ErrorID(err) != sbwire.ErrUnknownBatch.ID {
 		t.Fatalf("expected r.Get() to fail because of ErrUnknownBatch.  got: %v", err)
@@ -248,7 +249,7 @@ func TestV23RestartabilityReadWriteBatch(t *testing.T) {
 	sh := v23test.NewShell(t, nil)
 	defer sh.Cleanup()
 	rootDir, clientCtx, serverCreds := restartabilityInit(sh)
-	cleanup := sh.StartSyncbase(serverCreds, testSbName, rootDir, acl)
+	cleanup := sh.StartSyncbase(serverCreds, syncbaselib.Opts{Name: testSbName, RootDir: rootDir}, acl)
 	d := createAppDatabaseTable(t, clientCtx)
 
 	batch, err := d.BeginBatch(clientCtx, nosqlwire.BatchOptions{})
@@ -279,7 +280,7 @@ func TestV23RestartabilityReadWriteBatch(t *testing.T) {
 	}
 
 	// Restart syncbase.
-	_ = sh.StartSyncbase(serverCreds, testSbName, rootDir, acl)
+	_ = sh.StartSyncbase(serverCreds, syncbaselib.Opts{Name: testSbName, RootDir: rootDir}, acl)
 
 	if err := r.Get(clientCtx, &result); verror.ErrorID(err) != sbwire.ErrUnknownBatch.ID {
 		t.Fatalf("expected r.Get() to fail because of ErrUnknownBatch.  got: %v", err)
@@ -307,7 +308,7 @@ func TestV23RestartabilityWatch(t *testing.T) {
 	sh := v23test.NewShell(t, nil)
 	defer sh.Cleanup()
 	rootDir, clientCtx, serverCreds := restartabilityInit(sh)
-	cleanup := sh.StartSyncbase(serverCreds, testSbName, rootDir, acl)
+	cleanup := sh.StartSyncbase(serverCreds, syncbaselib.Opts{Name: testSbName, RootDir: rootDir}, acl)
 	d := createAppDatabaseTable(t, clientCtx)
 
 	// Put one row as well as get the initial ResumeMarker.
@@ -353,7 +354,7 @@ func TestV23RestartabilityWatch(t *testing.T) {
 	}
 
 	// Restart syncbased.
-	cleanup = sh.StartSyncbase(serverCreds, testSbName, rootDir, acl)
+	cleanup = sh.StartSyncbase(serverCreds, syncbaselib.Opts{Name: testSbName, RootDir: rootDir}, acl)
 
 	// Put another row.
 	r = d.Table("tb").Row("r")
@@ -421,7 +422,7 @@ func TestV23RestartabilityServiceDBCorruption(t *testing.T) {
 	sh := v23test.NewShell(t, nil)
 	defer sh.Cleanup()
 	rootDir, clientCtx, serverCreds := restartabilityInit(sh)
-	cleanup := sh.StartSyncbase(serverCreds, testSbName, rootDir, acl)
+	cleanup := sh.StartSyncbase(serverCreds, syncbaselib.Opts{Name: testSbName, RootDir: rootDir}, acl)
 
 	createHierarchy(t, clientCtx)
 	checkHierarchy(t, clientCtx)
@@ -446,7 +447,7 @@ func TestV23RestartabilityServiceDBCorruption(t *testing.T) {
 	}
 	t.Logf("syncbased terminated\nstdout: %v\nstderr: %v\n", stdout, stderr)
 
-	cleanup = sh.StartSyncbase(serverCreds, testSbName, rootDir, acl)
+	cleanup = sh.StartSyncbase(serverCreds, syncbaselib.Opts{Name: testSbName, RootDir: rootDir}, acl)
 
 	createHierarchy(t, clientCtx)
 	checkHierarchy(t, clientCtx)
@@ -458,7 +459,7 @@ func TestV23RestartabilityAppDBCorruption(t *testing.T) {
 	sh := v23test.NewShell(t, nil)
 	defer sh.Cleanup()
 	rootDir, clientCtx, serverCreds := restartabilityInit(sh)
-	cleanup := sh.StartSyncbase(serverCreds, testSbName, rootDir, acl)
+	cleanup := sh.StartSyncbase(serverCreds, syncbaselib.Opts{Name: testSbName, RootDir: rootDir}, acl)
 
 	createHierarchy(t, clientCtx)
 	checkHierarchy(t, clientCtx)
@@ -482,7 +483,7 @@ func TestV23RestartabilityAppDBCorruption(t *testing.T) {
 	}
 	t.Logf("syncbased terminated\nstdout: %v\nstderr: %v\n", stdout, stderr)
 
-	cleanup = sh.StartSyncbase(serverCreds, testSbName, rootDir, acl)
+	cleanup = sh.StartSyncbase(serverCreds, syncbaselib.Opts{Name: testSbName, RootDir: rootDir}, acl)
 
 	// Recreate a1/d1 since that is the one that got corrupted.
 	d := syncbase.NewService(testSbName).App("a1").NoSQLDatabase("d1", nil)
@@ -512,7 +513,7 @@ func TestV23RestartabilityStoreGarbageCollect(t *testing.T) {
 	sh := v23test.NewShell(t, nil)
 	defer sh.Cleanup()
 	rootDir, clientCtx, serverCreds := restartabilityInit(sh)
-	cleanup := sh.StartSyncbase(serverCreds, testSbName, rootDir, acl)
+	cleanup := sh.StartSyncbase(serverCreds, syncbaselib.Opts{Name: testSbName, RootDir: rootDir}, acl)
 
 	createHierarchy(t, clientCtx)
 	checkHierarchy(t, clientCtx)
@@ -585,7 +586,7 @@ func TestV23RestartabilityStoreGarbageCollect(t *testing.T) {
 
 	// Restarting syncbased should not affect the hierarchy. Garbage collection
 	// should again fail to destroy leveldbDir.
-	cleanup = sh.StartSyncbase(serverCreds, testSbName, rootDir, acl)
+	cleanup = sh.StartSyncbase(serverCreds, syncbaselib.Opts{Name: testSbName, RootDir: rootDir}, acl)
 	checkHierarchy(t, clientCtx)
 	cleanup(os.Kill)
 
@@ -600,7 +601,7 @@ func TestV23RestartabilityStoreGarbageCollect(t *testing.T) {
 	}
 
 	// Restart syncbased. Garbage collection should now succeed.
-	_ = sh.StartSyncbase(serverCreds, testSbName, rootDir, acl)
+	_ = sh.StartSyncbase(serverCreds, syncbaselib.Opts{Name: testSbName, RootDir: rootDir}, acl)
 
 	// leveldbDir should not exist anymore.
 	if _, err := os.Stat(leveldbDir); !os.IsNotExist(err) {

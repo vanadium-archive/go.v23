@@ -20,6 +20,7 @@ import (
 	wire "v.io/v23/services/syncbase/nosql"
 	"v.io/v23/syncbase"
 	"v.io/v23/syncbase/nosql"
+	"v.io/x/ref/services/syncbase/syncbaselib"
 	tu "v.io/x/ref/services/syncbase/testutil"
 	"v.io/x/ref/test/v23test"
 )
@@ -55,7 +56,7 @@ type testSyncbase struct {
 }
 
 // Spawns "num" Syncbase instances and returns handles to them.
-func setupSyncbases(t testing.TB, sh *v23test.Shell, num int, args ...string) []*testSyncbase {
+func setupSyncbases(t testing.TB, sh *v23test.Shell, num int, devMode bool) []*testSyncbase {
 	sbs := make([]*testSyncbase, num)
 	for i, _ := range sbs {
 		sbName, clientId := fmt.Sprintf("s%d", i), fmt.Sprintf("c%d", i)
@@ -67,7 +68,7 @@ func setupSyncbases(t testing.TB, sh *v23test.Shell, num int, args ...string) []
 		}
 		// Give XRWA permissions to this Syncbase's client.
 		acl := fmt.Sprintf(`{"Resolve":{"In":["root:%s"]},"Read":{"In":["root:%s"]},"Write":{"In":["root:%s"]},"Admin":{"In":["root:%s"]}}`, clientId, clientId, clientId, clientId)
-		sbs[i].cleanup = sh.StartSyncbase(sbs[i].sbCreds, sbs[i].sbName, "", acl, args...)
+		sbs[i].cleanup = sh.StartSyncbase(sbs[i].sbCreds, syncbaselib.Opts{Name: sbs[i].sbName, DevMode: devMode}, acl)
 	}
 	// Call setupHierarchy on each Syncbase.
 	for _, sb := range sbs {

@@ -32,7 +32,7 @@ func TestV23SyncgroupRendezvousOnline(t *testing.T) {
 
 	N := 5
 	// Setup N Syncbases.
-	sbs := setupSyncbases(t, sh, N)
+	sbs := setupSyncbases(t, sh, N, false)
 
 	// Syncbase s0 is the creator.
 	sgName := naming.Join(sbs[0].sbName, constants.SyncbaseSuffix, "SG1")
@@ -74,7 +74,7 @@ func TestV23SyncgroupRendezvousOnlineCloud(t *testing.T) {
 
 	N := 5
 	// Setup N+1 Syncbases (1 for the cloud instance).
-	sbs := setupSyncbases(t, sh, N+1)
+	sbs := setupSyncbases(t, sh, N+1, false)
 
 	// Syncbase s0 is the creator, and sN is the cloud.
 	sgName := naming.Join(sbs[N].sbName, constants.SyncbaseSuffix, "SG1")
@@ -116,7 +116,7 @@ func TestV23SyncgroupNeighborhoodOnly(t *testing.T) {
 	N := 5
 
 	// Setup N Syncbases.
-	sbs := setupSyncbases(t, sh, N)
+	sbs := setupSyncbases(t, sh, N, false)
 
 	// Syncbase s0 is the creator, but the syncgroup refers to non-existent
 	// Syncbase "s6".
@@ -170,7 +170,7 @@ func TestV23SyncgroupPreknownStaggered(t *testing.T) {
 
 	N := 5
 	// Setup N Syncbases.
-	sbs := setupSyncbases(t, sh, N)
+	sbs := setupSyncbases(t, sh, N, false)
 
 	// Syncbase s0 is the first to join or create. Run s0 separately to
 	// stagger the process.

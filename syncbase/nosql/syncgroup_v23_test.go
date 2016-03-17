@@ -26,6 +26,7 @@ import (
 	"v.io/v23/vom"
 	_ "v.io/x/ref/runtime/factories/generic"
 	constants "v.io/x/ref/services/syncbase/server/util"
+	"v.io/x/ref/services/syncbase/syncbaselib"
 	"v.io/x/ref/test/v23test"
 )
 
@@ -51,13 +52,11 @@ func TestV23SyncbasedJoinSyncgroup(t *testing.T) {
 
 	server0Creds := sh.ForkCredentials("s0")
 	client0Ctx := sh.ForkContext("c0")
-	sh.StartSyncbase(server0Creds, "sync0", "",
-		`{"Read": {"In":["root:c0"]}, "Write": {"In":["root:c0"]}}`)
+	sh.StartSyncbase(server0Creds, syncbaselib.Opts{Name: "sync0"}, `{"Read": {"In":["root:c0"]}, "Write": {"In":["root:c0"]}}`)
 
 	server1Creds := sh.ForkCredentials("s1")
 	client1Ctx := sh.ForkContext("c1")
-	sh.StartSyncbase(server1Creds, "sync1", "",
-		`{"Read": {"In":["root:c1"]}, "Write": {"In":["root:c1"]}}`)
+	sh.StartSyncbase(server1Creds, syncbaselib.Opts{Name: "sync1"}, `{"Read": {"In":["root:c1"]}, "Write": {"In":["root:c1"]}}`)
 
 	sgName := naming.Join("sync0", constants.SyncbaseSuffix, "SG1")
 
@@ -81,15 +80,13 @@ func TestV23SyncbasedGetDeltas(t *testing.T) {
 
 	server0Creds := sh.ForkCredentials("s0")
 	client0Ctx := sh.ForkContext("c0")
-	sh.StartSyncbase(server0Creds, "sync0", "",
-		`{"Read": {"In":["root:c0"]}, "Write": {"In":["root:c0"]}}`)
+	sh.StartSyncbase(server0Creds, syncbaselib.Opts{Name: "sync0"}, `{"Read": {"In":["root:c0"]}, "Write": {"In":["root:c0"]}}`)
 
 	server1Creds := sh.ForkCredentials("s1")
 	client1Ctx := sh.ForkContext("c1")
 	// TODO(aghassemi): Resolve permission is currently needed for Watch.
 	// See https://github.com/vanadium/issues/issues/1110
-	sh.StartSyncbase(server1Creds, "sync1", "",
-		`{"Resolve": {"In":["root:c1"]}, "Read": {"In":["root:c1"]}, "Write": {"In":["root:c1"]}}`)
+	sh.StartSyncbase(server1Creds, syncbaselib.Opts{Name: "sync1"}, `{"Resolve": {"In":["root:c1"]}, "Read": {"In":["root:c1"]}, "Write": {"In":["root:c1"]}}`)
 
 	sgName := naming.Join("sync0", constants.SyncbaseSuffix, "SG1")
 
@@ -123,15 +120,13 @@ func TestV23SyncbasedGetDeltasWithDel(t *testing.T) {
 
 	server0Creds := sh.ForkCredentials("s0")
 	client0Ctx := sh.ForkContext("c0")
-	sh.StartSyncbase(server0Creds, "sync0", "",
-		`{"Read": {"In":["root:c0"]}, "Write": {"In":["root:c0"]}}`)
+	sh.StartSyncbase(server0Creds, syncbaselib.Opts{Name: "sync0"}, `{"Read": {"In":["root:c0"]}, "Write": {"In":["root:c0"]}}`)
 
 	server1Creds := sh.ForkCredentials("s1")
 	client1Ctx := sh.ForkContext("c1")
 	// TODO(aghassemi): Resolve permission is currently needed for Watch.
 	// See https://github.com/vanadium/issues/issues/1110
-	sh.StartSyncbase(server1Creds, "sync1", "",
-		`{"Resolve": {"In":["root:c1"]}, "Read": {"In":["root:c1"]}, "Write": {"In":["root:c1"]}}`)
+	sh.StartSyncbase(server1Creds, syncbaselib.Opts{Name: "sync1"}, `{"Resolve": {"In":["root:c1"]}, "Read": {"In":["root:c1"]}, "Write": {"In":["root:c1"]}}`)
 
 	sgName := naming.Join("sync0", constants.SyncbaseSuffix, "SG1")
 
@@ -177,14 +172,12 @@ func TestV23SyncbasedCompEval(t *testing.T) {
 	server0Creds := sh.ForkCredentials("s0")
 	client0Ctx := sh.ForkContext("c0")
 	server0RDir := sh.MakeTempDir()
-	cleanSync0 := sh.StartSyncbase(server0Creds, "sync0", server0RDir,
-		`{"Read": {"In":["root:c0"]}, "Write": {"In":["root:c0"]}}`)
+	cleanSync0 := sh.StartSyncbase(server0Creds, syncbaselib.Opts{Name: "sync0", RootDir: server0RDir}, `{"Read": {"In":["root:c0"]}, "Write": {"In":["root:c0"]}}`)
 
 	server1Creds := sh.ForkCredentials("s1")
 	client1Ctx := sh.ForkContext("c1")
 	server1RDir := sh.MakeTempDir()
-	cleanSync1 := sh.StartSyncbase(server1Creds, "sync1", server1RDir,
-		`{"Read": {"In":["root:c1"]}, "Write": {"In":["root:c1"]}}`)
+	cleanSync1 := sh.StartSyncbase(server1Creds, syncbaselib.Opts{Name: "sync1", RootDir: server1RDir}, `{"Read": {"In":["root:c1"]}, "Write": {"In":["root:c1"]}}`)
 
 	sgName := naming.Join("sync0", constants.SyncbaseSuffix, "SG1")
 
@@ -210,10 +203,8 @@ func TestV23SyncbasedCompEval(t *testing.T) {
 	cleanSync0(os.Interrupt)
 	cleanSync1(os.Interrupt)
 
-	cleanSync0 = sh.StartSyncbase(server0Creds, "sync0", server0RDir,
-		`{"Read": {"In":["root:c0"]}, "Write": {"In":["root:c0"]}}`)
-	cleanSync1 = sh.StartSyncbase(server1Creds, "sync1", server1RDir,
-		`{"Read": {"In":["root:c1"]}, "Write": {"In":["root:c1"]}}`)
+	cleanSync0 = sh.StartSyncbase(server0Creds, syncbaselib.Opts{Name: "sync0", RootDir: server0RDir}, `{"Read": {"In":["root:c0"]}, "Write": {"In":["root:c0"]}}`)
+	cleanSync1 = sh.StartSyncbase(server1Creds, syncbaselib.Opts{Name: "sync1", RootDir: server1RDir}, `{"Read": {"In":["root:c1"]}, "Write": {"In":["root:c1"]}}`)
 
 	ok(t, runSetSyncgroupSpec(client0Ctx, "sync0", sgName, "v2", "tb:foo", "root:s0", "root:s1", "root:s3"))
 	ok(t, runGetSyncgroupSpec(client1Ctx, "sync1", sgName, "v2", "tb:foo", "root:s0", "root:s1", "root:s3"))
@@ -229,10 +220,8 @@ func TestV23SyncbasedCompEval(t *testing.T) {
 	cleanSync0(os.Interrupt)
 	cleanSync1(os.Interrupt)
 
-	_ = sh.StartSyncbase(server0Creds, "sync0", server0RDir,
-		`{"Read": {"In":["root:c0"]}, "Write": {"In":["root:c0"]}}`)
-	_ = sh.StartSyncbase(server1Creds, "sync1", server1RDir,
-		`{"Read": {"In":["root:c1"]}, "Write": {"In":["root:c1"]}}`)
+	_ = sh.StartSyncbase(server0Creds, syncbaselib.Opts{Name: "sync0", RootDir: server0RDir}, `{"Read": {"In":["root:c0"]}, "Write": {"In":["root:c0"]}}`)
+	_ = sh.StartSyncbase(server1Creds, syncbaselib.Opts{Name: "sync1", RootDir: server1RDir}, `{"Read": {"In":["root:c1"]}, "Write": {"In":["root:c1"]}}`)
 
 	ok(t, runGetSyncgroupSpec(client0Ctx, "sync0", sgName, "v3", "tb:foo", "root:s0", "root:s1", "root:s4"))
 	ok(t, runGetSyncgroupSpec(client1Ctx, "sync1", sgName, "v3", "tb:foo", "root:s0", "root:s1", "root:s4"))
@@ -256,13 +245,11 @@ func TestV23SyncbasedExchangeDeltasWithAcls(t *testing.T) {
 
 	server0Creds := sh.ForkCredentials("s0")
 	client0Ctx := sh.ForkContext("c0")
-	sh.StartSyncbase(server0Creds, "sync0", "",
-		`{"Read": {"In":["root:c0"]}, "Write": {"In":["root:c0"]}, "Admin": {"In":["root:c0"]}}`)
+	sh.StartSyncbase(server0Creds, syncbaselib.Opts{Name: "sync0"}, `{"Read": {"In":["root:c0"]}, "Write": {"In":["root:c0"]}, "Admin": {"In":["root:c0"]}}`)
 
 	server1Creds := sh.ForkCredentials("s1")
 	client1Ctx := sh.ForkContext("c1")
-	sh.StartSyncbase(server1Creds, "sync1", "",
-		`{"Read": {"In":["root:c1"]}, "Write": {"In":["root:c1"]}, "Admin": {"In":["root:c1"]}}`)
+	sh.StartSyncbase(server1Creds, syncbaselib.Opts{Name: "sync1"}, `{"Read": {"In":["root:c1"]}, "Write": {"In":["root:c1"]}, "Admin": {"In":["root:c1"]}}`)
 
 	sgName := naming.Join("sync0", constants.SyncbaseSuffix, "SG1")
 
@@ -325,13 +312,11 @@ func testSyncbasedExchangeDeltasWithConflicts(t *testing.T) {
 
 	server0Creds := sh.ForkCredentials("s0")
 	client0Ctx := sh.ForkContext("c0")
-	sh.StartSyncbase(server0Creds, "sync0", "",
-		`{"Read": {"In":["root:c0"]}, "Write": {"In":["root:c0"]}}`)
+	sh.StartSyncbase(server0Creds, syncbaselib.Opts{Name: "sync0"}, `{"Read": {"In":["root:c0"]}, "Write": {"In":["root:c0"]}}`)
 
 	server1Creds := sh.ForkCredentials("s1")
 	client1Ctx := sh.ForkContext("c1")
-	sh.StartSyncbase(server1Creds, "sync1", "",
-		`{"Read": {"In":["root:c1"]}, "Write": {"In":["root:c1"]}}`)
+	sh.StartSyncbase(server1Creds, syncbaselib.Opts{Name: "sync1"}, `{"Read": {"In":["root:c1"]}, "Write": {"In":["root:c1"]}}`)
 
 	sgName := naming.Join("sync0", constants.SyncbaseSuffix, "SG1")
 
@@ -369,13 +354,11 @@ func TestV23NestedSyncgroups(t *testing.T) {
 
 	server0Creds := sh.ForkCredentials("s0")
 	client0Ctx := sh.ForkContext("c0")
-	sh.StartSyncbase(server0Creds, "sync0", "",
-		`{"Read": {"In":["root:c0"]}, "Write": {"In":["root:c0"]}}`)
+	sh.StartSyncbase(server0Creds, syncbaselib.Opts{Name: "sync0"}, `{"Read": {"In":["root:c0"]}, "Write": {"In":["root:c0"]}}`)
 
 	server1Creds := sh.ForkCredentials("s1")
 	client1Ctx := sh.ForkContext("c1")
-	sh.StartSyncbase(server1Creds, "sync1", "",
-		`{"Read": {"In":["root:c1"]}, "Write": {"In":["root:c1"]}}`)
+	sh.StartSyncbase(server1Creds, syncbaselib.Opts{Name: "sync1"}, `{"Read": {"In":["root:c1"]}, "Write": {"In":["root:c1"]}}`)
 
 	sg1Name := naming.Join("sync0", constants.SyncbaseSuffix, "SG1")
 	sg2Name := naming.Join("sync0", constants.SyncbaseSuffix, "SG2")
@@ -410,18 +393,15 @@ func TestV23NestedAndPeerSyncgroups(t *testing.T) {
 
 	server0Creds := sh.ForkCredentials("s0")
 	client0Ctx := sh.ForkContext("c0")
-	sh.StartSyncbase(server0Creds, "sync0", "",
-		`{"Read": {"In":["root:c0"]}, "Write": {"In":["root:c0"]}}`)
+	sh.StartSyncbase(server0Creds, syncbaselib.Opts{Name: "sync0"}, `{"Read": {"In":["root:c0"]}, "Write": {"In":["root:c0"]}}`)
 
 	server1Creds := sh.ForkCredentials("s1")
 	client1Ctx := sh.ForkContext("c1")
-	sh.StartSyncbase(server1Creds, "sync1", "",
-		`{"Read": {"In":["root:c1"]}, "Write": {"In":["root:c1"]}}`)
+	sh.StartSyncbase(server1Creds, syncbaselib.Opts{Name: "sync1"}, `{"Read": {"In":["root:c1"]}, "Write": {"In":["root:c1"]}}`)
 
 	server2Creds := sh.ForkCredentials("s2")
 	client2Ctx := sh.ForkContext("c2")
-	sh.StartSyncbase(server2Creds, "sync2", "",
-		`{"Read": {"In":["root:c2"]}, "Write": {"In":["root:c2"]}}`)
+	sh.StartSyncbase(server2Creds, syncbaselib.Opts{Name: "sync2"}, `{"Read": {"In":["root:c2"]}, "Write": {"In":["root:c2"]}}`)
 
 	sg1Name := naming.Join("sync0", constants.SyncbaseSuffix, "SG1")
 	sg2Name := naming.Join("sync0", constants.SyncbaseSuffix, "SG2")
@@ -459,13 +439,11 @@ func TestV23SyncbasedGetDeltasPrePopulate(t *testing.T) {
 
 	server0Creds := sh.ForkCredentials("s0")
 	client0Ctx := sh.ForkContext("c0")
-	sh.StartSyncbase(server0Creds, "sync0", "",
-		`{"Read": {"In":["root:c0"]}, "Write": {"In":["root:c0"]}}`)
+	sh.StartSyncbase(server0Creds, syncbaselib.Opts{Name: "sync0"}, `{"Read": {"In":["root:c0"]}, "Write": {"In":["root:c0"]}}`)
 
 	server1Creds := sh.ForkCredentials("s1")
 	client1Ctx := sh.ForkContext("c1")
-	sh.StartSyncbase(server1Creds, "sync1", "",
-		`{"Read": {"In":["root:c1"]}, "Write": {"In":["root:c1"]}}`)
+	sh.StartSyncbase(server1Creds, syncbaselib.Opts{Name: "sync1"}, `{"Read": {"In":["root:c1"]}, "Write": {"In":["root:c1"]}}`)
 
 	sgName := naming.Join("sync0", constants.SyncbaseSuffix, "SG1")
 
@@ -495,13 +473,11 @@ func TestV23SyncbasedGetDeltasMultiApp(t *testing.T) {
 
 	server0Creds := sh.ForkCredentials("s0")
 	client0Ctx := sh.ForkContext("c0")
-	sh.StartSyncbase(server0Creds, "sync0", "",
-		`{"Read": {"In":["root:c0"]}, "Write": {"In":["root:c0"]}}`)
+	sh.StartSyncbase(server0Creds, syncbaselib.Opts{Name: "sync0"}, `{"Read": {"In":["root:c0"]}, "Write": {"In":["root:c0"]}}`)
 
 	server1Creds := sh.ForkCredentials("s1")
 	client1Ctx := sh.ForkContext("c1")
-	sh.StartSyncbase(server1Creds, "sync1", "",
-		`{"Read": {"In":["root:c1"]}, "Write": {"In":["root:c1"]}}`)
+	sh.StartSyncbase(server1Creds, syncbaselib.Opts{Name: "sync1"}, `{"Read": {"In":["root:c1"]}, "Write": {"In":["root:c1"]}}`)
 
 	sgNamePrefix := naming.Join("sync0", constants.SyncbaseSuffix)
 	na, nd, nt := 2, 2, 2 // number of apps, dbs, tables
@@ -526,18 +502,15 @@ func TestV23SyncgroupSync(t *testing.T) {
 
 	server0Creds := sh.ForkCredentials("s0")
 	client0Ctx := sh.ForkContext("c0")
-	sh.StartSyncbase(server0Creds, "sync0", "",
-		`{"Read": {"In":["root:c0"]}, "Write": {"In":["root:c0"]}}`)
+	sh.StartSyncbase(server0Creds, syncbaselib.Opts{Name: "sync0"}, `{"Read": {"In":["root:c0"]}, "Write": {"In":["root:c0"]}}`)
 
 	server1Creds := sh.ForkCredentials("s1")
 	client1Ctx := sh.ForkContext("c1")
-	sh.StartSyncbase(server1Creds, "sync1", "",
-		`{"Read": {"In":["root:c1"]}, "Write": {"In":["root:c1"]}}`)
+	sh.StartSyncbase(server1Creds, syncbaselib.Opts{Name: "sync1"}, `{"Read": {"In":["root:c1"]}, "Write": {"In":["root:c1"]}}`)
 
 	server2Creds := sh.ForkCredentials("s2")
 	client2Ctx := sh.ForkContext("c2")
-	sh.StartSyncbase(server2Creds, "sync2", "",
-		`{"Read": {"In":["root:c2"]}, "Write": {"In":["root:c2"]}}`)
+	sh.StartSyncbase(server2Creds, syncbaselib.Opts{Name: "sync2"}, `{"Read": {"In":["root:c2"]}, "Write": {"In":["root:c2"]}}`)
 
 	sgName := naming.Join("sync0", constants.SyncbaseSuffix, "SG1")
 

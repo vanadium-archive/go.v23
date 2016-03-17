@@ -12,6 +12,7 @@ import (
 	"v.io/v23/syncbase"
 	"v.io/v23/syncbase/nosql"
 	"v.io/v23/vom"
+	"v.io/x/ref/services/syncbase/syncbaselib"
 	"v.io/x/ref/test/v23test"
 )
 
@@ -25,7 +26,7 @@ func TestV23SyncbasedPutGet(t *testing.T) {
 	serverCreds := sh.ForkCredentials("server")
 	// TODO(aghassemi): Resolve permission is currently needed for Watch.
 	// See https://github.com/vanadium/issues/issues/1110
-	sh.StartSyncbase(serverCreds, testSbName, "", `{"Resolve": {"In":["root:server", "root:client"]}, "Read": {"In":["root:server", "root:client"]}, "Write": {"In":["root:server", "root:client"]}}`)
+	sh.StartSyncbase(serverCreds, syncbaselib.Opts{Name: testSbName}, `{"Resolve": {"In":["root:server", "root:client"]}, "Read": {"In":["root:server", "root:client"]}, "Write": {"In":["root:server", "root:client"]}}`)
 
 	// Create app, database and table.
 	// TODO(ivanpi): Use setupAppA.
