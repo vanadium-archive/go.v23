@@ -119,6 +119,11 @@ func (t *TaskTarget) FinishFields(_ vdl.FieldsTarget) error {
 	return nil
 }
 
+// Create zero values for each type.
+var (
+	__VDLZeroTask = Task{}
+)
+
 //////////////////////////////////////////////////
 // Interface definitions
 

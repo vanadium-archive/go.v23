@@ -145,6 +145,17 @@ type WireDischarge union {
 	PublicKey  publicKeyDischarge // Discharge for PublicKeyThirdPartyCaveat
 }
 
+// TODO(toddw): We need to disallow exported types from containing non-exported
+// subtypes, since otherwise the VDL compiler can't create constants if the
+// exported type is used to create another type in a different package.
+//
+// E.g. assume the following vdl file in a different package:
+//   package "foo"
+//   type X struct { Y WireDischarge }
+//
+// We can no longer create the zero constant for X, since we can't create
+// X.Y.PublicKey, since we can't access security.publicKeyDischarge.
+
 // RejectedBlessing describes why a blessing failed validation.
 type RejectedBlessing struct {
 	Blessing string
@@ -162,4 +173,3 @@ error (
 
 	EndpointAuthorizationFailed(endpoint string, remote []string, rejected []RejectedBlessing,) { "en": "blessings in endpoint {endpoint} not matched by blessings presented: {remote} (rejected {rejected})"}
 )
-

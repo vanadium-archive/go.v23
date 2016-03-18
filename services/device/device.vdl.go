@@ -907,7 +907,7 @@ func (m *Description) MakeVDLTarget() vdl.Target {
 
 type DescriptionTarget struct {
 	Value          *Description
-	profilesTarget unnamed_7365745b737472696e675dTarget
+	profilesTarget __VDLTarget1_set
 	vdl.TargetBase
 	vdl.FieldsTargetBase
 }
@@ -938,7 +938,7 @@ func (t *DescriptionTarget) FinishFields(_ vdl.FieldsTarget) error {
 }
 
 // map[string]struct{}
-type unnamed_7365745b737472696e675dTarget struct {
+type __VDLTarget1_set struct {
 	Value     *map[string]struct{}
 	currKey   string
 	keyTarget vdl.StringTarget
@@ -946,7 +946,7 @@ type unnamed_7365745b737472696e675dTarget struct {
 	vdl.SetTargetBase
 }
 
-func (t *unnamed_7365745b737472696e675dTarget) StartSet(tt *vdl.Type, len int) (vdl.SetTarget, error) {
+func (t *__VDLTarget1_set) StartSet(tt *vdl.Type, len int) (vdl.SetTarget, error) {
 
 	if ttWant := vdl.TypeOf((*map[string]struct{})(nil)); !vdl.Compatible(tt, ttWant) {
 		return nil, fmt.Errorf("type %v incompatible with %v", tt, ttWant)
@@ -954,17 +954,17 @@ func (t *unnamed_7365745b737472696e675dTarget) StartSet(tt *vdl.Type, len int) (
 	*t.Value = make(map[string]struct{})
 	return t, nil
 }
-func (t *unnamed_7365745b737472696e675dTarget) StartKey() (key vdl.Target, _ error) {
+func (t *__VDLTarget1_set) StartKey() (key vdl.Target, _ error) {
 	t.currKey = ""
 	t.keyTarget.Value = &t.currKey
 	target, err := &t.keyTarget, error(nil)
 	return target, err
 }
-func (t *unnamed_7365745b737472696e675dTarget) FinishKey(key vdl.Target) error {
+func (t *__VDLTarget1_set) FinishKey(key vdl.Target) error {
 	(*t.Value)[t.currKey] = struct{}{}
 	return nil
 }
-func (t *unnamed_7365745b737472696e675dTarget) FinishSet(list vdl.SetTarget) error {
+func (t *__VDLTarget1_set) FinishSet(list vdl.SetTarget) error {
 	if len(*t.Value) == 0 {
 		*t.Value = nil
 	}
@@ -1060,6 +1060,21 @@ func (t *AssociationTarget) FinishFields(_ vdl.FieldsTarget) error {
 
 	return nil
 }
+
+// Create zero values for each type.
+var (
+	__VDLZeroConfig             = Config(nil)
+	__VDLZeroInstallationState  = InstallationStateActive
+	__VDLZeroInstanceState      = InstanceStateLaunching
+	__VDLZeroInstanceStatus     = InstanceStatus{}
+	__VDLZeroInstallationStatus = InstallationStatus{}
+	__VDLZeroDeviceStatus       = DeviceStatus{}
+	__VDLZeroStatus             = Status(StatusInstance{})
+	__VDLZeroBlessServerMessage = BlessServerMessage(BlessServerMessageInstancePublicKey{})
+	__VDLZeroBlessClientMessage = BlessClientMessage(BlessClientMessageAppBlessings{})
+	__VDLZeroDescription        = Description{}
+	__VDLZeroAssociation        = Association{}
+)
 
 //////////////////////////////////////////////////
 // Interface definitions

@@ -400,7 +400,7 @@ func (m *publicKeyThirdPartyCaveatParam) MakeVDLTarget() vdl.Target {
 type publicKeyThirdPartyCaveatParamTarget struct {
 	Value                        *publicKeyThirdPartyCaveatParam
 	nonceTarget                  nonceTarget
-	caveatsTarget                unnamed_5b5d762e696f2f7632332f73656375726974792e436176656174207374727563747b496420762e696f2f7632332f756e6971756569642e4964205b31365d627974653b506172616d566f6d205b5d627974657dTarget
+	caveatsTarget                __VDLTarget1_list
 	dischargerKeyTarget          vdl.BytesTarget
 	dischargerLocationTarget     vdl.StringTarget
 	dischargerRequirementsTarget ThirdPartyRequirementsTarget
@@ -450,14 +450,14 @@ func (t *publicKeyThirdPartyCaveatParamTarget) FinishFields(_ vdl.FieldsTarget) 
 }
 
 // []Caveat
-type unnamed_5b5d762e696f2f7632332f73656375726974792e436176656174207374727563747b496420762e696f2f7632332f756e6971756569642e4964205b31365d627974653b506172616d566f6d205b5d627974657dTarget struct {
+type __VDLTarget1_list struct {
 	Value      *[]Caveat
 	elemTarget CaveatTarget
 	vdl.TargetBase
 	vdl.ListTargetBase
 }
 
-func (t *unnamed_5b5d762e696f2f7632332f73656375726974792e436176656174207374727563747b496420762e696f2f7632332f756e6971756569642e4964205b31365d627974653b506172616d566f6d205b5d627974657dTarget) StartList(tt *vdl.Type, len int) (vdl.ListTarget, error) {
+func (t *__VDLTarget1_list) StartList(tt *vdl.Type, len int) (vdl.ListTarget, error) {
 
 	if ttWant := vdl.TypeOf((*[]Caveat)(nil)); !vdl.Compatible(tt, ttWant) {
 		return nil, fmt.Errorf("type %v incompatible with %v", tt, ttWant)
@@ -469,15 +469,15 @@ func (t *unnamed_5b5d762e696f2f7632332f73656375726974792e43617665617420737472756
 	}
 	return t, nil
 }
-func (t *unnamed_5b5d762e696f2f7632332f73656375726974792e436176656174207374727563747b496420762e696f2f7632332f756e6971756569642e4964205b31365d627974653b506172616d566f6d205b5d627974657dTarget) StartElem(index int) (elem vdl.Target, _ error) {
+func (t *__VDLTarget1_list) StartElem(index int) (elem vdl.Target, _ error) {
 	t.elemTarget.Value = &(*t.Value)[index]
 	target, err := &t.elemTarget, error(nil)
 	return target, err
 }
-func (t *unnamed_5b5d762e696f2f7632332f73656375726974792e436176656174207374727563747b496420762e696f2f7632332f756e6971756569642e4964205b31365d627974653b506172616d566f6d205b5d627974657dTarget) FinishElem(elem vdl.Target) error {
+func (t *__VDLTarget1_list) FinishElem(elem vdl.Target) error {
 	return nil
 }
-func (t *unnamed_5b5d762e696f2f7632332f73656375726974792e436176656174207374727563747b496420762e696f2f7632332f756e6971756569642e4964205b31365d627974653b506172616d566f6d205b5d627974657dTarget) FinishList(elem vdl.ListTarget) error {
+func (t *__VDLTarget1_list) FinishList(elem vdl.ListTarget) error {
 
 	return nil
 }
@@ -740,7 +740,7 @@ func (m *publicKeyDischarge) MakeVDLTarget() vdl.Target {
 type publicKeyDischargeTarget struct {
 	Value                    *publicKeyDischarge
 	thirdPartyCaveatIdTarget vdl.StringTarget
-	caveatsTarget            unnamed_5b5d762e696f2f7632332f73656375726974792e436176656174207374727563747b496420762e696f2f7632332f756e6971756569642e4964205b31365d627974653b506172616d566f6d205b5d627974657dTarget
+	caveatsTarget            __VDLTarget1_list
 	signatureTarget          SignatureTarget
 	vdl.TargetBase
 	vdl.FieldsTargetBase
@@ -942,9 +942,9 @@ func (m *DischargeImpetus) MakeVDLTarget() vdl.Target {
 
 type DischargeImpetusTarget struct {
 	Value           *DischargeImpetus
-	serverTarget    unnamed_5b5d762e696f2f7632332f73656375726974792e426c657373696e675061747465726e20737472696e67Target
+	serverTarget    __VDLTarget2_list
 	methodTarget    vdl.StringTarget
-	argumentsTarget unnamed_5b5d616e79Target
+	argumentsTarget __VDLTarget3_list
 	vdl.TargetBase
 	vdl.FieldsTargetBase
 }
@@ -983,14 +983,14 @@ func (t *DischargeImpetusTarget) FinishFields(_ vdl.FieldsTarget) error {
 }
 
 // []BlessingPattern
-type unnamed_5b5d762e696f2f7632332f73656375726974792e426c657373696e675061747465726e20737472696e67Target struct {
+type __VDLTarget2_list struct {
 	Value      *[]BlessingPattern
 	elemTarget BlessingPatternTarget
 	vdl.TargetBase
 	vdl.ListTargetBase
 }
 
-func (t *unnamed_5b5d762e696f2f7632332f73656375726974792e426c657373696e675061747465726e20737472696e67Target) StartList(tt *vdl.Type, len int) (vdl.ListTarget, error) {
+func (t *__VDLTarget2_list) StartList(tt *vdl.Type, len int) (vdl.ListTarget, error) {
 
 	if ttWant := vdl.TypeOf((*[]BlessingPattern)(nil)); !vdl.Compatible(tt, ttWant) {
 		return nil, fmt.Errorf("type %v incompatible with %v", tt, ttWant)
@@ -1002,28 +1002,28 @@ func (t *unnamed_5b5d762e696f2f7632332f73656375726974792e426c657373696e675061747
 	}
 	return t, nil
 }
-func (t *unnamed_5b5d762e696f2f7632332f73656375726974792e426c657373696e675061747465726e20737472696e67Target) StartElem(index int) (elem vdl.Target, _ error) {
+func (t *__VDLTarget2_list) StartElem(index int) (elem vdl.Target, _ error) {
 	t.elemTarget.Value = &(*t.Value)[index]
 	target, err := &t.elemTarget, error(nil)
 	return target, err
 }
-func (t *unnamed_5b5d762e696f2f7632332f73656375726974792e426c657373696e675061747465726e20737472696e67Target) FinishElem(elem vdl.Target) error {
+func (t *__VDLTarget2_list) FinishElem(elem vdl.Target) error {
 	return nil
 }
-func (t *unnamed_5b5d762e696f2f7632332f73656375726974792e426c657373696e675061747465726e20737472696e67Target) FinishList(elem vdl.ListTarget) error {
+func (t *__VDLTarget2_list) FinishList(elem vdl.ListTarget) error {
 
 	return nil
 }
 
 // []*vom.RawBytes
-type unnamed_5b5d616e79Target struct {
+type __VDLTarget3_list struct {
 	Value *[]*vom.RawBytes
 
 	vdl.TargetBase
 	vdl.ListTargetBase
 }
 
-func (t *unnamed_5b5d616e79Target) StartList(tt *vdl.Type, len int) (vdl.ListTarget, error) {
+func (t *__VDLTarget3_list) StartList(tt *vdl.Type, len int) (vdl.ListTarget, error) {
 
 	if ttWant := vdl.TypeOf((*[]*vom.RawBytes)(nil)); !vdl.Compatible(tt, ttWant) {
 		return nil, fmt.Errorf("type %v incompatible with %v", tt, ttWant)
@@ -1035,14 +1035,14 @@ func (t *unnamed_5b5d616e79Target) StartList(tt *vdl.Type, len int) (vdl.ListTar
 	}
 	return t, nil
 }
-func (t *unnamed_5b5d616e79Target) StartElem(index int) (elem vdl.Target, _ error) {
+func (t *__VDLTarget3_list) StartElem(index int) (elem vdl.Target, _ error) {
 	target, err := vdl.ReflectTarget(reflect.ValueOf(&(*t.Value)[index]))
 	return target, err
 }
-func (t *unnamed_5b5d616e79Target) FinishElem(elem vdl.Target) error {
+func (t *__VDLTarget3_list) FinishElem(elem vdl.Target) error {
 	return nil
 }
-func (t *unnamed_5b5d616e79Target) FinishList(elem vdl.ListTarget) error {
+func (t *__VDLTarget3_list) FinishList(elem vdl.ListTarget) error {
 
 	return nil
 }
@@ -1154,7 +1154,7 @@ type CertificateTarget struct {
 	Value           *Certificate
 	extensionTarget vdl.StringTarget
 	publicKeyTarget vdl.BytesTarget
-	caveatsTarget   unnamed_5b5d762e696f2f7632332f73656375726974792e436176656174207374727563747b496420762e696f2f7632332f756e6971756569642e4964205b31365d627974653b506172616d566f6d205b5d627974657dTarget
+	caveatsTarget   __VDLTarget1_list
 	signatureTarget SignatureTarget
 	vdl.TargetBase
 	vdl.FieldsTargetBase
@@ -1380,7 +1380,7 @@ func (m *WireBlessings) MakeVDLTarget() vdl.Target {
 type WireBlessingsTarget struct {
 	Value                   *Blessings
 	wireValue               WireBlessings
-	certificateChainsTarget unnamed_5b5d5b5d762e696f2f7632332f73656375726974792e4365727469666963617465207374727563747b457874656e73696f6e20737472696e673b5075626c69634b6579205b5d627974653b43617665617473205b5d762e696f2f7632332f73656375726974792e436176656174207374727563747b496420762e696f2f7632332f756e6971756569642e4964205b31365d627974653b506172616d566f6d205b5d627974657d3b5369676e617475726520762e696f2f7632332f73656375726974792e5369676e6174757265207374727563747b507572706f7365205b5d627974653b4861736820762e696f2f7632332f73656375726974792e4861736820737472696e673b52205b5d627974653b53205b5d627974657d7dTarget
+	certificateChainsTarget __VDLTarget4_list
 	vdl.TargetBase
 	vdl.FieldsTargetBase
 }
@@ -1414,14 +1414,14 @@ func (t *WireBlessingsTarget) FinishFields(_ vdl.FieldsTarget) error {
 }
 
 // [][]Certificate
-type unnamed_5b5d5b5d762e696f2f7632332f73656375726974792e4365727469666963617465207374727563747b457874656e73696f6e20737472696e673b5075626c69634b6579205b5d627974653b43617665617473205b5d762e696f2f7632332f73656375726974792e436176656174207374727563747b496420762e696f2f7632332f756e6971756569642e4964205b31365d627974653b506172616d566f6d205b5d627974657d3b5369676e617475726520762e696f2f7632332f73656375726974792e5369676e6174757265207374727563747b507572706f7365205b5d627974653b4861736820762e696f2f7632332f73656375726974792e4861736820737472696e673b52205b5d627974653b53205b5d627974657d7dTarget struct {
+type __VDLTarget4_list struct {
 	Value      *[][]Certificate
-	elemTarget unnamed_5b5d762e696f2f7632332f73656375726974792e4365727469666963617465207374727563747b457874656e73696f6e20737472696e673b5075626c69634b6579205b5d627974653b43617665617473205b5d762e696f2f7632332f73656375726974792e436176656174207374727563747b496420762e696f2f7632332f756e6971756569642e4964205b31365d627974653b506172616d566f6d205b5d627974657d3b5369676e617475726520762e696f2f7632332f73656375726974792e5369676e6174757265207374727563747b507572706f7365205b5d627974653b4861736820762e696f2f7632332f73656375726974792e4861736820737472696e673b52205b5d627974653b53205b5d627974657d7dTarget
+	elemTarget __VDLTarget5_list
 	vdl.TargetBase
 	vdl.ListTargetBase
 }
 
-func (t *unnamed_5b5d5b5d762e696f2f7632332f73656375726974792e4365727469666963617465207374727563747b457874656e73696f6e20737472696e673b5075626c69634b6579205b5d627974653b43617665617473205b5d762e696f2f7632332f73656375726974792e436176656174207374727563747b496420762e696f2f7632332f756e6971756569642e4964205b31365d627974653b506172616d566f6d205b5d627974657d3b5369676e617475726520762e696f2f7632332f73656375726974792e5369676e6174757265207374727563747b507572706f7365205b5d627974653b4861736820762e696f2f7632332f73656375726974792e4861736820737472696e673b52205b5d627974653b53205b5d627974657d7dTarget) StartList(tt *vdl.Type, len int) (vdl.ListTarget, error) {
+func (t *__VDLTarget4_list) StartList(tt *vdl.Type, len int) (vdl.ListTarget, error) {
 
 	if ttWant := vdl.TypeOf((*[][]Certificate)(nil)); !vdl.Compatible(tt, ttWant) {
 		return nil, fmt.Errorf("type %v incompatible with %v", tt, ttWant)
@@ -1433,28 +1433,28 @@ func (t *unnamed_5b5d5b5d762e696f2f7632332f73656375726974792e4365727469666963617
 	}
 	return t, nil
 }
-func (t *unnamed_5b5d5b5d762e696f2f7632332f73656375726974792e4365727469666963617465207374727563747b457874656e73696f6e20737472696e673b5075626c69634b6579205b5d627974653b43617665617473205b5d762e696f2f7632332f73656375726974792e436176656174207374727563747b496420762e696f2f7632332f756e6971756569642e4964205b31365d627974653b506172616d566f6d205b5d627974657d3b5369676e617475726520762e696f2f7632332f73656375726974792e5369676e6174757265207374727563747b507572706f7365205b5d627974653b4861736820762e696f2f7632332f73656375726974792e4861736820737472696e673b52205b5d627974653b53205b5d627974657d7dTarget) StartElem(index int) (elem vdl.Target, _ error) {
+func (t *__VDLTarget4_list) StartElem(index int) (elem vdl.Target, _ error) {
 	t.elemTarget.Value = &(*t.Value)[index]
 	target, err := &t.elemTarget, error(nil)
 	return target, err
 }
-func (t *unnamed_5b5d5b5d762e696f2f7632332f73656375726974792e4365727469666963617465207374727563747b457874656e73696f6e20737472696e673b5075626c69634b6579205b5d627974653b43617665617473205b5d762e696f2f7632332f73656375726974792e436176656174207374727563747b496420762e696f2f7632332f756e6971756569642e4964205b31365d627974653b506172616d566f6d205b5d627974657d3b5369676e617475726520762e696f2f7632332f73656375726974792e5369676e6174757265207374727563747b507572706f7365205b5d627974653b4861736820762e696f2f7632332f73656375726974792e4861736820737472696e673b52205b5d627974653b53205b5d627974657d7dTarget) FinishElem(elem vdl.Target) error {
+func (t *__VDLTarget4_list) FinishElem(elem vdl.Target) error {
 	return nil
 }
-func (t *unnamed_5b5d5b5d762e696f2f7632332f73656375726974792e4365727469666963617465207374727563747b457874656e73696f6e20737472696e673b5075626c69634b6579205b5d627974653b43617665617473205b5d762e696f2f7632332f73656375726974792e436176656174207374727563747b496420762e696f2f7632332f756e6971756569642e4964205b31365d627974653b506172616d566f6d205b5d627974657d3b5369676e617475726520762e696f2f7632332f73656375726974792e5369676e6174757265207374727563747b507572706f7365205b5d627974653b4861736820762e696f2f7632332f73656375726974792e4861736820737472696e673b52205b5d627974653b53205b5d627974657d7dTarget) FinishList(elem vdl.ListTarget) error {
+func (t *__VDLTarget4_list) FinishList(elem vdl.ListTarget) error {
 
 	return nil
 }
 
 // []Certificate
-type unnamed_5b5d762e696f2f7632332f73656375726974792e4365727469666963617465207374727563747b457874656e73696f6e20737472696e673b5075626c69634b6579205b5d627974653b43617665617473205b5d762e696f2f7632332f73656375726974792e436176656174207374727563747b496420762e696f2f7632332f756e6971756569642e4964205b31365d627974653b506172616d566f6d205b5d627974657d3b5369676e617475726520762e696f2f7632332f73656375726974792e5369676e6174757265207374727563747b507572706f7365205b5d627974653b4861736820762e696f2f7632332f73656375726974792e4861736820737472696e673b52205b5d627974653b53205b5d627974657d7dTarget struct {
+type __VDLTarget5_list struct {
 	Value      *[]Certificate
 	elemTarget CertificateTarget
 	vdl.TargetBase
 	vdl.ListTargetBase
 }
 
-func (t *unnamed_5b5d762e696f2f7632332f73656375726974792e4365727469666963617465207374727563747b457874656e73696f6e20737472696e673b5075626c69634b6579205b5d627974653b43617665617473205b5d762e696f2f7632332f73656375726974792e436176656174207374727563747b496420762e696f2f7632332f756e6971756569642e4964205b31365d627974653b506172616d566f6d205b5d627974657d3b5369676e617475726520762e696f2f7632332f73656375726974792e5369676e6174757265207374727563747b507572706f7365205b5d627974653b4861736820762e696f2f7632332f73656375726974792e4861736820737472696e673b52205b5d627974653b53205b5d627974657d7dTarget) StartList(tt *vdl.Type, len int) (vdl.ListTarget, error) {
+func (t *__VDLTarget5_list) StartList(tt *vdl.Type, len int) (vdl.ListTarget, error) {
 
 	if ttWant := vdl.TypeOf((*[]Certificate)(nil)); !vdl.Compatible(tt, ttWant) {
 		return nil, fmt.Errorf("type %v incompatible with %v", tt, ttWant)
@@ -1466,15 +1466,15 @@ func (t *unnamed_5b5d762e696f2f7632332f73656375726974792e43657274696669636174652
 	}
 	return t, nil
 }
-func (t *unnamed_5b5d762e696f2f7632332f73656375726974792e4365727469666963617465207374727563747b457874656e73696f6e20737472696e673b5075626c69634b6579205b5d627974653b43617665617473205b5d762e696f2f7632332f73656375726974792e436176656174207374727563747b496420762e696f2f7632332f756e6971756569642e4964205b31365d627974653b506172616d566f6d205b5d627974657d3b5369676e617475726520762e696f2f7632332f73656375726974792e5369676e6174757265207374727563747b507572706f7365205b5d627974653b4861736820762e696f2f7632332f73656375726974792e4861736820737472696e673b52205b5d627974653b53205b5d627974657d7dTarget) StartElem(index int) (elem vdl.Target, _ error) {
+func (t *__VDLTarget5_list) StartElem(index int) (elem vdl.Target, _ error) {
 	t.elemTarget.Value = &(*t.Value)[index]
 	target, err := &t.elemTarget, error(nil)
 	return target, err
 }
-func (t *unnamed_5b5d762e696f2f7632332f73656375726974792e4365727469666963617465207374727563747b457874656e73696f6e20737472696e673b5075626c69634b6579205b5d627974653b43617665617473205b5d762e696f2f7632332f73656375726974792e436176656174207374727563747b496420762e696f2f7632332f756e6971756569642e4964205b31365d627974653b506172616d566f6d205b5d627974657d3b5369676e617475726520762e696f2f7632332f73656375726974792e5369676e6174757265207374727563747b507572706f7365205b5d627974653b4861736820762e696f2f7632332f73656375726974792e4861736820737472696e673b52205b5d627974653b53205b5d627974657d7dTarget) FinishElem(elem vdl.Target) error {
+func (t *__VDLTarget5_list) FinishElem(elem vdl.Target) error {
 	return nil
 }
-func (t *unnamed_5b5d762e696f2f7632332f73656375726974792e4365727469666963617465207374727563747b457874656e73696f6e20737472696e673b5075626c69634b6579205b5d627974653b43617665617473205b5d762e696f2f7632332f73656375726974792e436176656174207374727563747b496420762e696f2f7632332f756e6971756569642e4964205b31365d627974653b506172616d566f6d205b5d627974657d3b5369676e617475726520762e696f2f7632332f73656375726974792e5369676e6174757265207374727563747b507572706f7365205b5d627974653b4861736820762e696f2f7632332f73656375726974792e4861736820737472696e673b52205b5d627974653b53205b5d627974657d7dTarget) FinishList(elem vdl.ListTarget) error {
+func (t *__VDLTarget5_list) FinishList(elem vdl.ListTarget) error {
 
 	return nil
 }
@@ -1639,13 +1639,45 @@ func (t *RejectedBlessingTarget) FinishFields(_ vdl.FieldsTarget) error {
 	return nil
 }
 
-// Type-check WireBlessings conversion functions.
-var _ func(WireBlessings, *Blessings) error = WireBlessingsToNative
-var _ func(*WireBlessings, Blessings) error = WireBlessingsFromNative
+// Create zero values for each type.
+var (
+	__VDLZerononce                          = nonce{}
+	__VDLZeroCaveat                         = Caveat{}
+	__VDLZeroThirdPartyRequirements         = ThirdPartyRequirements{}
+	__VDLZeropublicKeyThirdPartyCaveatParam = publicKeyThirdPartyCaveatParam{}
+	__VDLZeroHash                           = Hash("")
+	__VDLZeroSignature                      = Signature{}
+	__VDLZeropublicKeyDischarge             = publicKeyDischarge{}
+	__VDLZeroBlessingPattern                = BlessingPattern("")
+	__VDLZeroDischargeImpetus               = DischargeImpetus{}
+	__VDLZeroCertificate                    = Certificate{}
+	__VDLZeroCaveatDescriptor               = CaveatDescriptor{
+		ParamType: vdl.AnyType,
+	}
+	__VDLZeroWireBlessings = func() Blessings {
+		var native Blessings
+		if err := vdl.Convert(&native, WireBlessings{}); err != nil {
+			panic(err)
+		}
+		return native
+	}()
+	__VDLZeroWireDischarge = func() Discharge {
+		var native Discharge
+		if err := vdl.Convert(&native, WireDischarge(WireDischargePublicKey{})); err != nil {
+			panic(err)
+		}
+		return native
+	}()
+	__VDLZeroRejectedBlessing = RejectedBlessing{}
+)
 
-// Type-check WireDischarge conversion functions.
-var _ func(WireDischarge, *Discharge) error = WireDischargeToNative
-var _ func(*WireDischarge, Discharge) error = WireDischargeFromNative
+// Type-check native conversion functions.
+var (
+	_ func(WireBlessings, *Blessings) error = WireBlessingsToNative
+	_ func(*WireBlessings, Blessings) error = WireBlessingsFromNative
+	_ func(WireDischarge, *Discharge) error = WireDischargeToNative
+	_ func(*WireDischarge, Discharge) error = WireDischargeFromNative
+)
 
 //////////////////////////////////////////////////
 // Const definitions

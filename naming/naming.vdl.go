@@ -283,7 +283,7 @@ func (m *MountEntry) MakeVDLTarget() vdl.Target {
 type MountEntryTarget struct {
 	Value                  *MountEntry
 	nameTarget             vdl.StringTarget
-	serversTarget          unnamed_5b5d762e696f2f7632332f6e616d696e672e4d6f756e746564536572766572207374727563747b53657276657220737472696e673b446561646c696e652074696d652e57697265446561646c696e65207374727563747b46726f6d4e6f772074696d652e4475726174696f6e207374727563747b5365636f6e647320696e7436343b4e616e6f7320696e7433327d3b4e6f446561646c696e6520626f6f6c7d7dTarget
+	serversTarget          __VDLTarget1_list
 	servesMountTableTarget vdl.BoolTarget
 	isLeafTarget           vdl.BoolTarget
 	vdl.TargetBase
@@ -328,14 +328,14 @@ func (t *MountEntryTarget) FinishFields(_ vdl.FieldsTarget) error {
 }
 
 // []MountedServer
-type unnamed_5b5d762e696f2f7632332f6e616d696e672e4d6f756e746564536572766572207374727563747b53657276657220737472696e673b446561646c696e652074696d652e57697265446561646c696e65207374727563747b46726f6d4e6f772074696d652e4475726174696f6e207374727563747b5365636f6e647320696e7436343b4e616e6f7320696e7433327d3b4e6f446561646c696e6520626f6f6c7d7dTarget struct {
+type __VDLTarget1_list struct {
 	Value      *[]MountedServer
 	elemTarget MountedServerTarget
 	vdl.TargetBase
 	vdl.ListTargetBase
 }
 
-func (t *unnamed_5b5d762e696f2f7632332f6e616d696e672e4d6f756e746564536572766572207374727563747b53657276657220737472696e673b446561646c696e652074696d652e57697265446561646c696e65207374727563747b46726f6d4e6f772074696d652e4475726174696f6e207374727563747b5365636f6e647320696e7436343b4e616e6f7320696e7433327d3b4e6f446561646c696e6520626f6f6c7d7dTarget) StartList(tt *vdl.Type, len int) (vdl.ListTarget, error) {
+func (t *__VDLTarget1_list) StartList(tt *vdl.Type, len int) (vdl.ListTarget, error) {
 
 	if ttWant := vdl.TypeOf((*[]MountedServer)(nil)); !vdl.Compatible(tt, ttWant) {
 		return nil, fmt.Errorf("type %v incompatible with %v", tt, ttWant)
@@ -347,15 +347,15 @@ func (t *unnamed_5b5d762e696f2f7632332f6e616d696e672e4d6f756e7465645365727665722
 	}
 	return t, nil
 }
-func (t *unnamed_5b5d762e696f2f7632332f6e616d696e672e4d6f756e746564536572766572207374727563747b53657276657220737472696e673b446561646c696e652074696d652e57697265446561646c696e65207374727563747b46726f6d4e6f772074696d652e4475726174696f6e207374727563747b5365636f6e647320696e7436343b4e616e6f7320696e7433327d3b4e6f446561646c696e6520626f6f6c7d7dTarget) StartElem(index int) (elem vdl.Target, _ error) {
+func (t *__VDLTarget1_list) StartElem(index int) (elem vdl.Target, _ error) {
 	t.elemTarget.Value = &(*t.Value)[index]
 	target, err := &t.elemTarget, error(nil)
 	return target, err
 }
-func (t *unnamed_5b5d762e696f2f7632332f6e616d696e672e4d6f756e746564536572766572207374727563747b53657276657220737472696e673b446561646c696e652074696d652e57697265446561646c696e65207374727563747b46726f6d4e6f772074696d652e4475726174696f6e207374727563747b5365636f6e647320696e7436343b4e616e6f7320696e7433327d3b4e6f446561646c696e6520626f6f6c7d7dTarget) FinishElem(elem vdl.Target) error {
+func (t *__VDLTarget1_list) FinishElem(elem vdl.Target) error {
 	return nil
 }
-func (t *unnamed_5b5d762e696f2f7632332f6e616d696e672e4d6f756e746564536572766572207374727563747b53657276657220737472696e673b446561646c696e652074696d652e57697265446561646c696e65207374727563747b46726f6d4e6f772074696d652e4475726174696f6e207374727563747b5365636f6e647320696e7436343b4e616e6f7320696e7433327d3b4e6f446561646c696e6520626f6f6c7d7dTarget) FinishList(elem vdl.ListTarget) error {
+func (t *__VDLTarget1_list) FinishList(elem vdl.ListTarget) error {
 
 	return nil
 }
@@ -649,6 +649,16 @@ func (m GlobChildrenReplyError) FillVDLTarget(t vdl.Target, tt *vdl.Type) error 
 func (m GlobChildrenReplyError) MakeVDLTarget() vdl.Target {
 	return nil
 }
+
+// Create zero values for each type.
+var (
+	__VDLZeroMountFlag         = MountFlag(0)
+	__VDLZeroMountedServer     = MountedServer{}
+	__VDLZeroMountEntry        = MountEntry{}
+	__VDLZeroGlobError         = GlobError{}
+	__VDLZeroGlobReply         = GlobReply(GlobReplyEntry{})
+	__VDLZeroGlobChildrenReply = GlobChildrenReply(GlobChildrenReplyName{})
+)
 
 //////////////////////////////////////////////////
 // Const definitions

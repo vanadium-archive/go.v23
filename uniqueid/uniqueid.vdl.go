@@ -51,6 +51,11 @@ func (t *IdTarget) FromBytes(src []byte, tt *vdl.Type) error {
 	return nil
 }
 
+// Create zero values for each type.
+var (
+	__VDLZeroId = Id{}
+)
+
 var __VDLInitCalled bool
 
 // __VDLInit performs vdl initialization.  It is safe to call multiple times.

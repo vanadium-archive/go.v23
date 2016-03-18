@@ -354,17 +354,40 @@ func (t *WireDeadlineTarget) FinishFields(_ vdl.FieldsTarget) error {
 	return nil
 }
 
-// Type-check Duration conversion functions.
-var _ func(Duration, *time.Duration) error = DurationToNative
-var _ func(*Duration, time.Duration) error = DurationFromNative
+// Create zero values for each type.
+var (
+	__VDLZeroDuration = func() time.Duration {
+		var native time.Duration
+		if err := vdl.Convert(&native, Duration{}); err != nil {
+			panic(err)
+		}
+		return native
+	}()
+	__VDLZeroTime = func() time.Time {
+		var native time.Time
+		if err := vdl.Convert(&native, Time{}); err != nil {
+			panic(err)
+		}
+		return native
+	}()
+	__VDLZeroWireDeadline = func() Deadline {
+		var native Deadline
+		if err := vdl.Convert(&native, WireDeadline{}); err != nil {
+			panic(err)
+		}
+		return native
+	}()
+)
 
-// Type-check Time conversion functions.
-var _ func(Time, *time.Time) error = TimeToNative
-var _ func(*Time, time.Time) error = TimeFromNative
-
-// Type-check WireDeadline conversion functions.
-var _ func(WireDeadline, *Deadline) error = WireDeadlineToNative
-var _ func(*WireDeadline, Deadline) error = WireDeadlineFromNative
+// Type-check native conversion functions.
+var (
+	_ func(Duration, *time.Duration) error = DurationToNative
+	_ func(*Duration, time.Duration) error = DurationFromNative
+	_ func(Time, *time.Time) error         = TimeToNative
+	_ func(*Time, time.Time) error         = TimeFromNative
+	_ func(WireDeadline, *Deadline) error  = WireDeadlineToNative
+	_ func(*WireDeadline, Deadline) error  = WireDeadlineFromNative
+)
 
 var __VDLInitCalled bool
 

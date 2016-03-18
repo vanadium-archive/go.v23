@@ -66,6 +66,11 @@ func (t *TagTarget) FromString(src string, tt *vdl.Type) error {
 	return nil
 }
 
+// Create zero values for each type.
+var (
+	__VDLZeroTag = Tag("")
+)
+
 //////////////////////////////////////////////////
 // Const definitions
 

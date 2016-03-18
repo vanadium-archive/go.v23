@@ -278,7 +278,7 @@ func (m *GoType) MakeVDLTarget() vdl.Target {
 type GoTypeTarget struct {
 	Value         *GoType
 	typeTarget    vdl.StringTarget
-	importsTarget unnamed_5b5d76646c746f6f6c2e476f496d706f7274207374727563747b5061746820737472696e673b4e616d6520737472696e677dTarget
+	importsTarget __VDLTarget1_list
 	vdl.TargetBase
 	vdl.FieldsTargetBase
 }
@@ -313,14 +313,14 @@ func (t *GoTypeTarget) FinishFields(_ vdl.FieldsTarget) error {
 }
 
 // []GoImport
-type unnamed_5b5d76646c746f6f6c2e476f496d706f7274207374727563747b5061746820737472696e673b4e616d6520737472696e677dTarget struct {
+type __VDLTarget1_list struct {
 	Value      *[]GoImport
 	elemTarget GoImportTarget
 	vdl.TargetBase
 	vdl.ListTargetBase
 }
 
-func (t *unnamed_5b5d76646c746f6f6c2e476f496d706f7274207374727563747b5061746820737472696e673b4e616d6520737472696e677dTarget) StartList(tt *vdl.Type, len int) (vdl.ListTarget, error) {
+func (t *__VDLTarget1_list) StartList(tt *vdl.Type, len int) (vdl.ListTarget, error) {
 
 	if ttWant := vdl.TypeOf((*[]GoImport)(nil)); !vdl.Compatible(tt, ttWant) {
 		return nil, fmt.Errorf("type %v incompatible with %v", tt, ttWant)
@@ -332,15 +332,15 @@ func (t *unnamed_5b5d76646c746f6f6c2e476f496d706f7274207374727563747b50617468207
 	}
 	return t, nil
 }
-func (t *unnamed_5b5d76646c746f6f6c2e476f496d706f7274207374727563747b5061746820737472696e673b4e616d6520737472696e677dTarget) StartElem(index int) (elem vdl.Target, _ error) {
+func (t *__VDLTarget1_list) StartElem(index int) (elem vdl.Target, _ error) {
 	t.elemTarget.Value = &(*t.Value)[index]
 	target, err := &t.elemTarget, error(nil)
 	return target, err
 }
-func (t *unnamed_5b5d76646c746f6f6c2e476f496d706f7274207374727563747b5061746820737472696e673b4e616d6520737472696e677dTarget) FinishElem(elem vdl.Target) error {
+func (t *__VDLTarget1_list) FinishElem(elem vdl.Target) error {
 	return nil
 }
-func (t *unnamed_5b5d76646c746f6f6c2e476f496d706f7274207374727563747b5061746820737472696e673b4e616d6520737472696e677dTarget) FinishList(elem vdl.ListTarget) error {
+func (t *__VDLTarget1_list) FinishList(elem vdl.ListTarget) error {
 
 	return nil
 }
@@ -431,7 +431,7 @@ func (m *GoConfig) MakeVDLTarget() vdl.Target {
 
 type GoConfigTarget struct {
 	Value                   *GoConfig
-	wireToNativeTypesTarget unnamed_6d61705b737472696e675d76646c746f6f6c2e476f54797065207374727563747b5479706520737472696e673b496d706f727473205b5d76646c746f6f6c2e476f496d706f7274207374727563747b5061746820737472696e673b4e616d6520737472696e677d7dTarget
+	wireToNativeTypesTarget __VDLTarget2_map
 	vdl.TargetBase
 	vdl.FieldsTargetBase
 }
@@ -462,7 +462,7 @@ func (t *GoConfigTarget) FinishFields(_ vdl.FieldsTarget) error {
 }
 
 // map[string]GoType
-type unnamed_6d61705b737472696e675d76646c746f6f6c2e476f54797065207374727563747b5479706520737472696e673b496d706f727473205b5d76646c746f6f6c2e476f496d706f7274207374727563747b5061746820737472696e673b4e616d6520737472696e677d7dTarget struct {
+type __VDLTarget2_map struct {
 	Value      *map[string]GoType
 	currKey    string
 	currElem   GoType
@@ -472,7 +472,7 @@ type unnamed_6d61705b737472696e675d76646c746f6f6c2e476f54797065207374727563747b5
 	vdl.MapTargetBase
 }
 
-func (t *unnamed_6d61705b737472696e675d76646c746f6f6c2e476f54797065207374727563747b5479706520737472696e673b496d706f727473205b5d76646c746f6f6c2e476f496d706f7274207374727563747b5061746820737472696e673b4e616d6520737472696e677d7dTarget) StartMap(tt *vdl.Type, len int) (vdl.MapTarget, error) {
+func (t *__VDLTarget2_map) StartMap(tt *vdl.Type, len int) (vdl.MapTarget, error) {
 
 	if ttWant := vdl.TypeOf((*map[string]GoType)(nil)); !vdl.Compatible(tt, ttWant) {
 		return nil, fmt.Errorf("type %v incompatible with %v", tt, ttWant)
@@ -480,23 +480,23 @@ func (t *unnamed_6d61705b737472696e675d76646c746f6f6c2e476f547970652073747275637
 	*t.Value = make(map[string]GoType)
 	return t, nil
 }
-func (t *unnamed_6d61705b737472696e675d76646c746f6f6c2e476f54797065207374727563747b5479706520737472696e673b496d706f727473205b5d76646c746f6f6c2e476f496d706f7274207374727563747b5061746820737472696e673b4e616d6520737472696e677d7dTarget) StartKey() (key vdl.Target, _ error) {
+func (t *__VDLTarget2_map) StartKey() (key vdl.Target, _ error) {
 	t.currKey = ""
 	t.keyTarget.Value = &t.currKey
 	target, err := &t.keyTarget, error(nil)
 	return target, err
 }
-func (t *unnamed_6d61705b737472696e675d76646c746f6f6c2e476f54797065207374727563747b5479706520737472696e673b496d706f727473205b5d76646c746f6f6c2e476f496d706f7274207374727563747b5061746820737472696e673b4e616d6520737472696e677d7dTarget) FinishKeyStartField(key vdl.Target) (field vdl.Target, _ error) {
+func (t *__VDLTarget2_map) FinishKeyStartField(key vdl.Target) (field vdl.Target, _ error) {
 	t.currElem = GoType{}
 	t.elemTarget.Value = &t.currElem
 	target, err := &t.elemTarget, error(nil)
 	return target, err
 }
-func (t *unnamed_6d61705b737472696e675d76646c746f6f6c2e476f54797065207374727563747b5479706520737472696e673b496d706f727473205b5d76646c746f6f6c2e476f496d706f7274207374727563747b5061746820737472696e673b4e616d6520737472696e677d7dTarget) FinishField(key, field vdl.Target) error {
+func (t *__VDLTarget2_map) FinishField(key, field vdl.Target) error {
 	(*t.Value)[t.currKey] = t.currElem
 	return nil
 }
-func (t *unnamed_6d61705b737472696e675d76646c746f6f6c2e476f54797065207374727563747b5479706520737472696e673b496d706f727473205b5d76646c746f6f6c2e476f496d706f7274207374727563747b5061746820737472696e673b4e616d6520737472696e677d7dTarget) FinishMap(elem vdl.MapTarget) error {
+func (t *__VDLTarget2_map) FinishMap(elem vdl.MapTarget) error {
 	if len(*t.Value) == 0 {
 		*t.Value = nil
 	}
@@ -635,8 +635,8 @@ func (m *JavaConfig) MakeVDLTarget() vdl.Target {
 
 type JavaConfigTarget struct {
 	Value                   *JavaConfig
-	wireToNativeTypesTarget unnamed_6d61705b737472696e675d737472696e67Target
-	wireTypeRenamesTarget   unnamed_6d61705b737472696e675d737472696e67Target
+	wireToNativeTypesTarget __VDLTarget3_map
+	wireTypeRenamesTarget   __VDLTarget3_map
 	vdl.TargetBase
 	vdl.FieldsTargetBase
 }
@@ -671,7 +671,7 @@ func (t *JavaConfigTarget) FinishFields(_ vdl.FieldsTarget) error {
 }
 
 // map[string]string
-type unnamed_6d61705b737472696e675d737472696e67Target struct {
+type __VDLTarget3_map struct {
 	Value      *map[string]string
 	currKey    string
 	currElem   string
@@ -681,7 +681,7 @@ type unnamed_6d61705b737472696e675d737472696e67Target struct {
 	vdl.MapTargetBase
 }
 
-func (t *unnamed_6d61705b737472696e675d737472696e67Target) StartMap(tt *vdl.Type, len int) (vdl.MapTarget, error) {
+func (t *__VDLTarget3_map) StartMap(tt *vdl.Type, len int) (vdl.MapTarget, error) {
 
 	if ttWant := vdl.TypeOf((*map[string]string)(nil)); !vdl.Compatible(tt, ttWant) {
 		return nil, fmt.Errorf("type %v incompatible with %v", tt, ttWant)
@@ -689,23 +689,23 @@ func (t *unnamed_6d61705b737472696e675d737472696e67Target) StartMap(tt *vdl.Type
 	*t.Value = make(map[string]string)
 	return t, nil
 }
-func (t *unnamed_6d61705b737472696e675d737472696e67Target) StartKey() (key vdl.Target, _ error) {
+func (t *__VDLTarget3_map) StartKey() (key vdl.Target, _ error) {
 	t.currKey = ""
 	t.keyTarget.Value = &t.currKey
 	target, err := &t.keyTarget, error(nil)
 	return target, err
 }
-func (t *unnamed_6d61705b737472696e675d737472696e67Target) FinishKeyStartField(key vdl.Target) (field vdl.Target, _ error) {
+func (t *__VDLTarget3_map) FinishKeyStartField(key vdl.Target) (field vdl.Target, _ error) {
 	t.currElem = ""
 	t.elemTarget.Value = &t.currElem
 	target, err := &t.elemTarget, error(nil)
 	return target, err
 }
-func (t *unnamed_6d61705b737472696e675d737472696e67Target) FinishField(key, field vdl.Target) error {
+func (t *__VDLTarget3_map) FinishField(key, field vdl.Target) error {
 	(*t.Value)[t.currKey] = t.currElem
 	return nil
 }
-func (t *unnamed_6d61705b737472696e675d737472696e67Target) FinishMap(elem vdl.MapTarget) error {
+func (t *__VDLTarget3_map) FinishMap(elem vdl.MapTarget) error {
 	if len(*t.Value) == 0 {
 		*t.Value = nil
 	}
@@ -871,7 +871,7 @@ func (m *Config) MakeVDLTarget() vdl.Target {
 
 type ConfigTarget struct {
 	Value              *Config
-	genLanguagesTarget unnamed_7365745b76646c746f6f6c2e47656e4c616e677561676520656e756d7b476f3b4a6176613b4a6176617363726970747d5dTarget
+	genLanguagesTarget __VDLTarget4_set
 	goTarget           GoConfigTarget
 	javaTarget         JavaConfigTarget
 	javascriptTarget   JavascriptConfigTarget
@@ -917,7 +917,7 @@ func (t *ConfigTarget) FinishFields(_ vdl.FieldsTarget) error {
 }
 
 // map[GenLanguage]struct{}
-type unnamed_7365745b76646c746f6f6c2e47656e4c616e677561676520656e756d7b476f3b4a6176613b4a6176617363726970747d5dTarget struct {
+type __VDLTarget4_set struct {
 	Value     *map[GenLanguage]struct{}
 	currKey   GenLanguage
 	keyTarget GenLanguageTarget
@@ -925,7 +925,7 @@ type unnamed_7365745b76646c746f6f6c2e47656e4c616e677561676520656e756d7b476f3b4a6
 	vdl.SetTargetBase
 }
 
-func (t *unnamed_7365745b76646c746f6f6c2e47656e4c616e677561676520656e756d7b476f3b4a6176613b4a6176617363726970747d5dTarget) StartSet(tt *vdl.Type, len int) (vdl.SetTarget, error) {
+func (t *__VDLTarget4_set) StartSet(tt *vdl.Type, len int) (vdl.SetTarget, error) {
 
 	if ttWant := vdl.TypeOf((*map[GenLanguage]struct{})(nil)); !vdl.Compatible(tt, ttWant) {
 		return nil, fmt.Errorf("type %v incompatible with %v", tt, ttWant)
@@ -933,23 +933,34 @@ func (t *unnamed_7365745b76646c746f6f6c2e47656e4c616e677561676520656e756d7b476f3
 	*t.Value = make(map[GenLanguage]struct{})
 	return t, nil
 }
-func (t *unnamed_7365745b76646c746f6f6c2e47656e4c616e677561676520656e756d7b476f3b4a6176613b4a6176617363726970747d5dTarget) StartKey() (key vdl.Target, _ error) {
+func (t *__VDLTarget4_set) StartKey() (key vdl.Target, _ error) {
 	t.currKey = GenLanguageGo
 	t.keyTarget.Value = &t.currKey
 	target, err := &t.keyTarget, error(nil)
 	return target, err
 }
-func (t *unnamed_7365745b76646c746f6f6c2e47656e4c616e677561676520656e756d7b476f3b4a6176613b4a6176617363726970747d5dTarget) FinishKey(key vdl.Target) error {
+func (t *__VDLTarget4_set) FinishKey(key vdl.Target) error {
 	(*t.Value)[t.currKey] = struct{}{}
 	return nil
 }
-func (t *unnamed_7365745b76646c746f6f6c2e47656e4c616e677561676520656e756d7b476f3b4a6176613b4a6176617363726970747d5dTarget) FinishSet(list vdl.SetTarget) error {
+func (t *__VDLTarget4_set) FinishSet(list vdl.SetTarget) error {
 	if len(*t.Value) == 0 {
 		*t.Value = nil
 	}
 
 	return nil
 }
+
+// Create zero values for each type.
+var (
+	__VDLZeroGenLanguage      = GenLanguageGo
+	__VDLZeroGoImport         = GoImport{}
+	__VDLZeroGoType           = GoType{}
+	__VDLZeroGoConfig         = GoConfig{}
+	__VDLZeroJavaConfig       = JavaConfig{}
+	__VDLZeroJavascriptConfig = JavascriptConfig{}
+	__VDLZeroConfig           = Config{}
+)
 
 var __VDLInitCalled bool
 

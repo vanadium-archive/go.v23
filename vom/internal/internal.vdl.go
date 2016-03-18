@@ -879,6 +879,25 @@ func (t *CustomerTarget) FinishFields(_ vdl.FieldsTarget) error {
 	return nil
 }
 
+// Create zero values for each type.
+var (
+	__VDLZeroAddressInfo            = AddressInfo{}
+	__VDLZeroCreditAgency           = CreditAgencyEquifax
+	__VDLZeroExperianRating         = ExperianRatingGood
+	__VDLZeroEquifaxCreditReport    = EquifaxCreditReport{}
+	__VDLZeroExperianCreditReport   = ExperianCreditReport{}
+	__VDLZeroTransUnionCreditReport = TransUnionCreditReport{}
+	__VDLZeroAgencyReport           = AgencyReport(AgencyReportEquifaxReport{})
+	__VDLZeroCreditReport           = CreditReport{
+		Report: AgencyReportEquifaxReport{},
+	}
+	__VDLZeroCustomer = Customer{
+		Credit: CreditReport{
+			Report: AgencyReportEquifaxReport{},
+		},
+	}
+)
+
 var __VDLInitCalled bool
 
 // __VDLInit performs vdl initialization.  It is safe to call multiple times.

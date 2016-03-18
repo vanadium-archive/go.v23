@@ -1497,7 +1497,7 @@ func (m *wireStruct) MakeVDLTarget() vdl.Target {
 type wireStructTarget struct {
 	Value        *wireStruct
 	nameTarget   vdl.StringTarget
-	fieldsTarget unnamed_5b5d762e696f2f7632332f766f6d2e776972654669656c64207374727563747b4e616d6520737472696e673b5479706520762e696f2f7632332f766f6d2e7479706549642075696e7436347dTarget
+	fieldsTarget __VDLTarget1_list
 	vdl.TargetBase
 	vdl.FieldsTargetBase
 }
@@ -1532,14 +1532,14 @@ func (t *wireStructTarget) FinishFields(_ vdl.FieldsTarget) error {
 }
 
 // []wireField
-type unnamed_5b5d762e696f2f7632332f766f6d2e776972654669656c64207374727563747b4e616d6520737472696e673b5479706520762e696f2f7632332f766f6d2e7479706549642075696e7436347dTarget struct {
+type __VDLTarget1_list struct {
 	Value      *[]wireField
 	elemTarget wireFieldTarget
 	vdl.TargetBase
 	vdl.ListTargetBase
 }
 
-func (t *unnamed_5b5d762e696f2f7632332f766f6d2e776972654669656c64207374727563747b4e616d6520737472696e673b5479706520762e696f2f7632332f766f6d2e7479706549642075696e7436347dTarget) StartList(tt *vdl.Type, len int) (vdl.ListTarget, error) {
+func (t *__VDLTarget1_list) StartList(tt *vdl.Type, len int) (vdl.ListTarget, error) {
 
 	if ttWant := vdl.TypeOf((*[]wireField)(nil)); !vdl.Compatible(tt, ttWant) {
 		return nil, fmt.Errorf("type %v incompatible with %v", tt, ttWant)
@@ -1551,15 +1551,15 @@ func (t *unnamed_5b5d762e696f2f7632332f766f6d2e776972654669656c64207374727563747
 	}
 	return t, nil
 }
-func (t *unnamed_5b5d762e696f2f7632332f766f6d2e776972654669656c64207374727563747b4e616d6520737472696e673b5479706520762e696f2f7632332f766f6d2e7479706549642075696e7436347dTarget) StartElem(index int) (elem vdl.Target, _ error) {
+func (t *__VDLTarget1_list) StartElem(index int) (elem vdl.Target, _ error) {
 	t.elemTarget.Value = &(*t.Value)[index]
 	target, err := &t.elemTarget, error(nil)
 	return target, err
 }
-func (t *unnamed_5b5d762e696f2f7632332f766f6d2e776972654669656c64207374727563747b4e616d6520737472696e673b5479706520762e696f2f7632332f766f6d2e7479706549642075696e7436347dTarget) FinishElem(elem vdl.Target) error {
+func (t *__VDLTarget1_list) FinishElem(elem vdl.Target) error {
 	return nil
 }
-func (t *unnamed_5b5d762e696f2f7632332f766f6d2e776972654669656c64207374727563747b4e616d6520737472696e673b5479706520762e696f2f7632332f766f6d2e7479706549642075696e7436347dTarget) FinishList(elem vdl.ListTarget) error {
+func (t *__VDLTarget1_list) FinishList(elem vdl.ListTarget) error {
 
 	return nil
 }
@@ -1636,7 +1636,7 @@ func (m *wireUnion) MakeVDLTarget() vdl.Target {
 type wireUnionTarget struct {
 	Value        *wireUnion
 	nameTarget   vdl.StringTarget
-	fieldsTarget unnamed_5b5d762e696f2f7632332f766f6d2e776972654669656c64207374727563747b4e616d6520737472696e673b5479706520762e696f2f7632332f766f6d2e7479706549642075696e7436347dTarget
+	fieldsTarget __VDLTarget1_list
 	vdl.TargetBase
 	vdl.FieldsTargetBase
 }
@@ -2103,6 +2103,28 @@ func (m wireTypeOptionalT) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 func (m wireTypeOptionalT) MakeVDLTarget() vdl.Target {
 	return nil
 }
+
+// Create zero values for each type.
+var (
+	__VDLZeroControlKind = ControlKindNil
+	__VDLZeroPrimitive   = Primitive(PrimitivePBool{})
+	__VDLZeroDumpKind    = DumpKindVersion
+	__VDLZeroDumpAtom    = DumpAtom{
+		Data: PrimitivePBool{},
+	}
+	__VDLZerotypeId       = typeId(0)
+	__VDLZerowireNamed    = wireNamed{}
+	__VDLZerowireEnum     = wireEnum{}
+	__VDLZerowireArray    = wireArray{}
+	__VDLZerowireList     = wireList{}
+	__VDLZerowireSet      = wireSet{}
+	__VDLZerowireMap      = wireMap{}
+	__VDLZerowireField    = wireField{}
+	__VDLZerowireStruct   = wireStruct{}
+	__VDLZerowireUnion    = wireUnion{}
+	__VDLZerowireOptional = wireOptional{}
+	__VDLZerowireType     = wireType(wireTypeNamedT{})
+)
 
 //////////////////////////////////////////////////
 // Const definitions

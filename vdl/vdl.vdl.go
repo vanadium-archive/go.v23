@@ -226,7 +226,7 @@ type WireErrorTarget struct {
 	idTarget        StringTarget
 	retryCodeTarget WireRetryCodeTarget
 	msgTarget       StringTarget
-	paramListTarget unnamed_5b5d616e79Target
+	paramListTarget __VDLTarget1_list
 	TargetBase
 	FieldsTargetBase
 }
@@ -269,14 +269,14 @@ func (t *WireErrorTarget) FinishFields(_ FieldsTarget) error {
 }
 
 // []*Value
-type unnamed_5b5d616e79Target struct {
+type __VDLTarget1_list struct {
 	Value *[]*Value
 
 	TargetBase
 	ListTargetBase
 }
 
-func (t *unnamed_5b5d616e79Target) StartList(tt *Type, len int) (ListTarget, error) {
+func (t *__VDLTarget1_list) StartList(tt *Type, len int) (ListTarget, error) {
 
 	if ttWant := TypeOf((*[]*Value)(nil)); !Compatible(tt, ttWant) {
 		return nil, fmt.Errorf("type %v incompatible with %v", tt, ttWant)
@@ -288,17 +288,23 @@ func (t *unnamed_5b5d616e79Target) StartList(tt *Type, len int) (ListTarget, err
 	}
 	return t, nil
 }
-func (t *unnamed_5b5d616e79Target) StartElem(index int) (elem Target, _ error) {
+func (t *__VDLTarget1_list) StartElem(index int) (elem Target, _ error) {
 	target, err := ReflectTarget(reflect.ValueOf(&(*t.Value)[index]))
 	return target, err
 }
-func (t *unnamed_5b5d616e79Target) FinishElem(elem Target) error {
+func (t *__VDLTarget1_list) FinishElem(elem Target) error {
 	return nil
 }
-func (t *unnamed_5b5d616e79Target) FinishList(elem ListTarget) error {
+func (t *__VDLTarget1_list) FinishList(elem ListTarget) error {
 
 	return nil
 }
+
+// Create zero values for each type.
+var (
+	__VDLZeroWireRetryCode = WireRetryCodeNoRetry
+	__VDLZeroWireError     = WireError{}
+)
 
 var __VDLInitCalled bool
 

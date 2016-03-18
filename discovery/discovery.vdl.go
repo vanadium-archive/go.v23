@@ -406,6 +406,14 @@ func (t *AdvertisementTarget) FinishFields(_ vdl.FieldsTarget) error {
 	return nil
 }
 
+// Create zero values for each type.
+var (
+	__VDLZeroAdId          = AdId{}
+	__VDLZeroAttributes    = Attributes(nil)
+	__VDLZeroAttachments   = Attachments(nil)
+	__VDLZeroAdvertisement = Advertisement{}
+)
+
 var __VDLInitCalled bool
 
 // __VDLInit performs vdl initialization.  It is safe to call multiple times.

@@ -113,6 +113,11 @@ func (t *LogEntryTarget) FinishFields(_ vdl.FieldsTarget) error {
 	return nil
 }
 
+// Create zero values for each type.
+var (
+	__VDLZeroLogEntry = LogEntry{}
+)
+
 //////////////////////////////////////////////////
 // Const definitions
 

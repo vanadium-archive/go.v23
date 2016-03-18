@@ -485,6 +485,13 @@ func (t *EnvelopeTarget) FinishFields(_ vdl.FieldsTarget) error {
 	return nil
 }
 
+// Create zero values for each type.
+var (
+	__VDLZeroSignedFile = SignedFile{}
+	__VDLZeroPackages   = Packages(nil)
+	__VDLZeroEnvelope   = Envelope{}
+)
+
 //////////////////////////////////////////////////
 // Const definitions
 

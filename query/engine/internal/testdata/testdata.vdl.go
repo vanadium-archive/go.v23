@@ -635,7 +635,7 @@ func (m *ExperianCreditReport) MakeVDLTarget() vdl.Target {
 type ExperianCreditReportTarget struct {
 	Value              *ExperianCreditReport
 	ratingTarget       ExperianRatingTarget
-	tdhApprovalsTarget unnamed_7365745b762e696f2f7632332f71756572792f656e67696e652f696e7465726e616c2f74657374646174612e54646820656e756d7b546f6d3b4469636b3b48617272797d5dTarget
+	tdhApprovalsTarget __VDLTarget1_set
 	auditorTarget      TdhTarget
 	vdl.TargetBase
 	vdl.FieldsTargetBase
@@ -675,7 +675,7 @@ func (t *ExperianCreditReportTarget) FinishFields(_ vdl.FieldsTarget) error {
 }
 
 // map[Tdh]struct{}
-type unnamed_7365745b762e696f2f7632332f71756572792f656e67696e652f696e7465726e616c2f74657374646174612e54646820656e756d7b546f6d3b4469636b3b48617272797d5dTarget struct {
+type __VDLTarget1_set struct {
 	Value     *map[Tdh]struct{}
 	currKey   Tdh
 	keyTarget TdhTarget
@@ -683,7 +683,7 @@ type unnamed_7365745b762e696f2f7632332f71756572792f656e67696e652f696e7465726e616
 	vdl.SetTargetBase
 }
 
-func (t *unnamed_7365745b762e696f2f7632332f71756572792f656e67696e652f696e7465726e616c2f74657374646174612e54646820656e756d7b546f6d3b4469636b3b48617272797d5dTarget) StartSet(tt *vdl.Type, len int) (vdl.SetTarget, error) {
+func (t *__VDLTarget1_set) StartSet(tt *vdl.Type, len int) (vdl.SetTarget, error) {
 
 	if ttWant := vdl.TypeOf((*map[Tdh]struct{})(nil)); !vdl.Compatible(tt, ttWant) {
 		return nil, fmt.Errorf("type %v incompatible with %v", tt, ttWant)
@@ -691,17 +691,17 @@ func (t *unnamed_7365745b762e696f2f7632332f71756572792f656e67696e652f696e7465726
 	*t.Value = make(map[Tdh]struct{})
 	return t, nil
 }
-func (t *unnamed_7365745b762e696f2f7632332f71756572792f656e67696e652f696e7465726e616c2f74657374646174612e54646820656e756d7b546f6d3b4469636b3b48617272797d5dTarget) StartKey() (key vdl.Target, _ error) {
+func (t *__VDLTarget1_set) StartKey() (key vdl.Target, _ error) {
 	t.currKey = TdhTom
 	t.keyTarget.Value = &t.currKey
 	target, err := &t.keyTarget, error(nil)
 	return target, err
 }
-func (t *unnamed_7365745b762e696f2f7632332f71756572792f656e67696e652f696e7465726e616c2f74657374646174612e54646820656e756d7b546f6d3b4469636b3b48617272797d5dTarget) FinishKey(key vdl.Target) error {
+func (t *__VDLTarget1_set) FinishKey(key vdl.Target) error {
 	(*t.Value)[t.currKey] = struct{}{}
 	return nil
 }
-func (t *unnamed_7365745b762e696f2f7632332f71756572792f656e67696e652f696e7465726e616c2f74657374646174612e54646820656e756d7b546f6d3b4469636b3b48617272797d5dTarget) FinishSet(list vdl.SetTarget) error {
+func (t *__VDLTarget1_set) FinishSet(list vdl.SetTarget) error {
 	if len(*t.Value) == 0 {
 		*t.Value = nil
 	}
@@ -786,7 +786,7 @@ func (m *TransUnionCreditReport) MakeVDLTarget() vdl.Target {
 type TransUnionCreditReportTarget struct {
 	Value                 *TransUnionCreditReport
 	ratingTarget          vdl.Int16Target
-	previousRatingsTarget unnamed_6d61705b737472696e675d696e743136Target
+	previousRatingsTarget __VDLTarget2_map
 	vdl.TargetBase
 	vdl.FieldsTargetBase
 }
@@ -821,7 +821,7 @@ func (t *TransUnionCreditReportTarget) FinishFields(_ vdl.FieldsTarget) error {
 }
 
 // map[string]int16
-type unnamed_6d61705b737472696e675d696e743136Target struct {
+type __VDLTarget2_map struct {
 	Value      *map[string]int16
 	currKey    string
 	currElem   int16
@@ -831,7 +831,7 @@ type unnamed_6d61705b737472696e675d696e743136Target struct {
 	vdl.MapTargetBase
 }
 
-func (t *unnamed_6d61705b737472696e675d696e743136Target) StartMap(tt *vdl.Type, len int) (vdl.MapTarget, error) {
+func (t *__VDLTarget2_map) StartMap(tt *vdl.Type, len int) (vdl.MapTarget, error) {
 
 	if ttWant := vdl.TypeOf((*map[string]int16)(nil)); !vdl.Compatible(tt, ttWant) {
 		return nil, fmt.Errorf("type %v incompatible with %v", tt, ttWant)
@@ -839,23 +839,23 @@ func (t *unnamed_6d61705b737472696e675d696e743136Target) StartMap(tt *vdl.Type, 
 	*t.Value = make(map[string]int16)
 	return t, nil
 }
-func (t *unnamed_6d61705b737472696e675d696e743136Target) StartKey() (key vdl.Target, _ error) {
+func (t *__VDLTarget2_map) StartKey() (key vdl.Target, _ error) {
 	t.currKey = ""
 	t.keyTarget.Value = &t.currKey
 	target, err := &t.keyTarget, error(nil)
 	return target, err
 }
-func (t *unnamed_6d61705b737472696e675d696e743136Target) FinishKeyStartField(key vdl.Target) (field vdl.Target, _ error) {
+func (t *__VDLTarget2_map) FinishKeyStartField(key vdl.Target) (field vdl.Target, _ error) {
 	t.currElem = int16(0)
 	t.elemTarget.Value = &t.currElem
 	target, err := &t.elemTarget, error(nil)
 	return target, err
 }
-func (t *unnamed_6d61705b737472696e675d696e743136Target) FinishField(key, field vdl.Target) error {
+func (t *__VDLTarget2_map) FinishField(key, field vdl.Target) error {
 	(*t.Value)[t.currKey] = t.currElem
 	return nil
 }
-func (t *unnamed_6d61705b737472696e675d696e743136Target) FinishMap(elem vdl.MapTarget) error {
+func (t *__VDLTarget2_map) FinishMap(elem vdl.MapTarget) error {
 	if len(*t.Value) == 0 {
 		*t.Value = nil
 	}
@@ -1210,7 +1210,7 @@ type CustomerTarget struct {
 	idTarget                vdl.Int64Target
 	activeTarget            vdl.BoolTarget
 	addressTarget           AddressInfoTarget
-	previousAddressesTarget unnamed_5b5d762e696f2f7632332f71756572792f656e67696e652f696e7465726e616c2f74657374646174612e41646472657373496e666f207374727563747b53747265657420737472696e673b4369747920737472696e673b537461746520737472696e673b5a697020737472696e677dTarget
+	previousAddressesTarget __VDLTarget3_list
 	creditTarget            CreditReportTarget
 	vdl.TargetBase
 	vdl.FieldsTargetBase
@@ -1262,14 +1262,14 @@ func (t *CustomerTarget) FinishFields(_ vdl.FieldsTarget) error {
 }
 
 // []AddressInfo
-type unnamed_5b5d762e696f2f7632332f71756572792f656e67696e652f696e7465726e616c2f74657374646174612e41646472657373496e666f207374727563747b53747265657420737472696e673b4369747920737472696e673b537461746520737472696e673b5a697020737472696e677dTarget struct {
+type __VDLTarget3_list struct {
 	Value      *[]AddressInfo
 	elemTarget AddressInfoTarget
 	vdl.TargetBase
 	vdl.ListTargetBase
 }
 
-func (t *unnamed_5b5d762e696f2f7632332f71756572792f656e67696e652f696e7465726e616c2f74657374646174612e41646472657373496e666f207374727563747b53747265657420737472696e673b4369747920737472696e673b537461746520737472696e673b5a697020737472696e677dTarget) StartList(tt *vdl.Type, len int) (vdl.ListTarget, error) {
+func (t *__VDLTarget3_list) StartList(tt *vdl.Type, len int) (vdl.ListTarget, error) {
 
 	if ttWant := vdl.TypeOf((*[]AddressInfo)(nil)); !vdl.Compatible(tt, ttWant) {
 		return nil, fmt.Errorf("type %v incompatible with %v", tt, ttWant)
@@ -1281,15 +1281,15 @@ func (t *unnamed_5b5d762e696f2f7632332f71756572792f656e67696e652f696e7465726e616
 	}
 	return t, nil
 }
-func (t *unnamed_5b5d762e696f2f7632332f71756572792f656e67696e652f696e7465726e616c2f74657374646174612e41646472657373496e666f207374727563747b53747265657420737472696e673b4369747920737472696e673b537461746520737472696e673b5a697020737472696e677dTarget) StartElem(index int) (elem vdl.Target, _ error) {
+func (t *__VDLTarget3_list) StartElem(index int) (elem vdl.Target, _ error) {
 	t.elemTarget.Value = &(*t.Value)[index]
 	target, err := &t.elemTarget, error(nil)
 	return target, err
 }
-func (t *unnamed_5b5d762e696f2f7632332f71756572792f656e67696e652f696e7465726e616c2f74657374646174612e41646472657373496e666f207374727563747b53747265657420737472696e673b4369747920737472696e673b537461746520737472696e673b5a697020737472696e677dTarget) FinishElem(elem vdl.Target) error {
+func (t *__VDLTarget3_list) FinishElem(elem vdl.Target) error {
 	return nil
 }
-func (t *unnamed_5b5d762e696f2f7632332f71756572792f656e67696e652f696e7465726e616c2f74657374646174612e41646472657373496e666f207374727563747b53747265657420737472696e673b4369747920737472696e673b537461746520737472696e673b5a697020737472696e677dTarget) FinishList(elem vdl.ListTarget) error {
+func (t *__VDLTarget3_list) FinishList(elem vdl.ListTarget) error {
 
 	return nil
 }
@@ -2337,8 +2337,8 @@ func (m *FunWithMaps) MakeVDLTarget() vdl.Target {
 type FunWithMapsTarget struct {
 	Value           *FunWithMaps
 	keyTarget       KTarget
-	mapTarget       unnamed_6d61705b762e696f2f7632332f71756572792f656e67696e652f696e7465726e616c2f74657374646174612e4b207374727563747b4120627974653b4220737472696e677d5d762e696f2f7632332f71756572792f656e67696e652f696e7465726e616c2f74657374646174612e56207374727563747b4120737472696e673b4220666c6f617433327dTarget
-	confusingTarget unnamed_6d61705b696e7431365d5b5d7365745b737472696e675dTarget
+	mapTarget       __VDLTarget4_map
+	confusingTarget __VDLTarget5_map
 	vdl.TargetBase
 	vdl.FieldsTargetBase
 }
@@ -2377,7 +2377,7 @@ func (t *FunWithMapsTarget) FinishFields(_ vdl.FieldsTarget) error {
 }
 
 // map[K]V
-type unnamed_6d61705b762e696f2f7632332f71756572792f656e67696e652f696e7465726e616c2f74657374646174612e4b207374727563747b4120627974653b4220737472696e677d5d762e696f2f7632332f71756572792f656e67696e652f696e7465726e616c2f74657374646174612e56207374727563747b4120737472696e673b4220666c6f617433327dTarget struct {
+type __VDLTarget4_map struct {
 	Value      *map[K]V
 	currKey    K
 	currElem   V
@@ -2387,7 +2387,7 @@ type unnamed_6d61705b762e696f2f7632332f71756572792f656e67696e652f696e7465726e616
 	vdl.MapTargetBase
 }
 
-func (t *unnamed_6d61705b762e696f2f7632332f71756572792f656e67696e652f696e7465726e616c2f74657374646174612e4b207374727563747b4120627974653b4220737472696e677d5d762e696f2f7632332f71756572792f656e67696e652f696e7465726e616c2f74657374646174612e56207374727563747b4120737472696e673b4220666c6f617433327dTarget) StartMap(tt *vdl.Type, len int) (vdl.MapTarget, error) {
+func (t *__VDLTarget4_map) StartMap(tt *vdl.Type, len int) (vdl.MapTarget, error) {
 
 	if ttWant := vdl.TypeOf((*map[K]V)(nil)); !vdl.Compatible(tt, ttWant) {
 		return nil, fmt.Errorf("type %v incompatible with %v", tt, ttWant)
@@ -2395,23 +2395,23 @@ func (t *unnamed_6d61705b762e696f2f7632332f71756572792f656e67696e652f696e7465726
 	*t.Value = make(map[K]V)
 	return t, nil
 }
-func (t *unnamed_6d61705b762e696f2f7632332f71756572792f656e67696e652f696e7465726e616c2f74657374646174612e4b207374727563747b4120627974653b4220737472696e677d5d762e696f2f7632332f71756572792f656e67696e652f696e7465726e616c2f74657374646174612e56207374727563747b4120737472696e673b4220666c6f617433327dTarget) StartKey() (key vdl.Target, _ error) {
+func (t *__VDLTarget4_map) StartKey() (key vdl.Target, _ error) {
 	t.currKey = K{}
 	t.keyTarget.Value = &t.currKey
 	target, err := &t.keyTarget, error(nil)
 	return target, err
 }
-func (t *unnamed_6d61705b762e696f2f7632332f71756572792f656e67696e652f696e7465726e616c2f74657374646174612e4b207374727563747b4120627974653b4220737472696e677d5d762e696f2f7632332f71756572792f656e67696e652f696e7465726e616c2f74657374646174612e56207374727563747b4120737472696e673b4220666c6f617433327dTarget) FinishKeyStartField(key vdl.Target) (field vdl.Target, _ error) {
+func (t *__VDLTarget4_map) FinishKeyStartField(key vdl.Target) (field vdl.Target, _ error) {
 	t.currElem = V{}
 	t.elemTarget.Value = &t.currElem
 	target, err := &t.elemTarget, error(nil)
 	return target, err
 }
-func (t *unnamed_6d61705b762e696f2f7632332f71756572792f656e67696e652f696e7465726e616c2f74657374646174612e4b207374727563747b4120627974653b4220737472696e677d5d762e696f2f7632332f71756572792f656e67696e652f696e7465726e616c2f74657374646174612e56207374727563747b4120737472696e673b4220666c6f617433327dTarget) FinishField(key, field vdl.Target) error {
+func (t *__VDLTarget4_map) FinishField(key, field vdl.Target) error {
 	(*t.Value)[t.currKey] = t.currElem
 	return nil
 }
-func (t *unnamed_6d61705b762e696f2f7632332f71756572792f656e67696e652f696e7465726e616c2f74657374646174612e4b207374727563747b4120627974653b4220737472696e677d5d762e696f2f7632332f71756572792f656e67696e652f696e7465726e616c2f74657374646174612e56207374727563747b4120737472696e673b4220666c6f617433327dTarget) FinishMap(elem vdl.MapTarget) error {
+func (t *__VDLTarget4_map) FinishMap(elem vdl.MapTarget) error {
 	if len(*t.Value) == 0 {
 		*t.Value = nil
 	}
@@ -2420,17 +2420,17 @@ func (t *unnamed_6d61705b762e696f2f7632332f71756572792f656e67696e652f696e7465726
 }
 
 // map[int16][]map[string]struct{}
-type unnamed_6d61705b696e7431365d5b5d7365745b737472696e675dTarget struct {
+type __VDLTarget5_map struct {
 	Value      *map[int16][]map[string]struct{}
 	currKey    int16
 	currElem   []map[string]struct{}
 	keyTarget  vdl.Int16Target
-	elemTarget unnamed_5b5d7365745b737472696e675dTarget
+	elemTarget __VDLTarget6_list
 	vdl.TargetBase
 	vdl.MapTargetBase
 }
 
-func (t *unnamed_6d61705b696e7431365d5b5d7365745b737472696e675dTarget) StartMap(tt *vdl.Type, len int) (vdl.MapTarget, error) {
+func (t *__VDLTarget5_map) StartMap(tt *vdl.Type, len int) (vdl.MapTarget, error) {
 
 	if ttWant := vdl.TypeOf((*map[int16][]map[string]struct{})(nil)); !vdl.Compatible(tt, ttWant) {
 		return nil, fmt.Errorf("type %v incompatible with %v", tt, ttWant)
@@ -2438,23 +2438,23 @@ func (t *unnamed_6d61705b696e7431365d5b5d7365745b737472696e675dTarget) StartMap(
 	*t.Value = make(map[int16][]map[string]struct{})
 	return t, nil
 }
-func (t *unnamed_6d61705b696e7431365d5b5d7365745b737472696e675dTarget) StartKey() (key vdl.Target, _ error) {
+func (t *__VDLTarget5_map) StartKey() (key vdl.Target, _ error) {
 	t.currKey = int16(0)
 	t.keyTarget.Value = &t.currKey
 	target, err := &t.keyTarget, error(nil)
 	return target, err
 }
-func (t *unnamed_6d61705b696e7431365d5b5d7365745b737472696e675dTarget) FinishKeyStartField(key vdl.Target) (field vdl.Target, _ error) {
+func (t *__VDLTarget5_map) FinishKeyStartField(key vdl.Target) (field vdl.Target, _ error) {
 	t.currElem = []map[string]struct{}(nil)
 	t.elemTarget.Value = &t.currElem
 	target, err := &t.elemTarget, error(nil)
 	return target, err
 }
-func (t *unnamed_6d61705b696e7431365d5b5d7365745b737472696e675dTarget) FinishField(key, field vdl.Target) error {
+func (t *__VDLTarget5_map) FinishField(key, field vdl.Target) error {
 	(*t.Value)[t.currKey] = t.currElem
 	return nil
 }
-func (t *unnamed_6d61705b696e7431365d5b5d7365745b737472696e675dTarget) FinishMap(elem vdl.MapTarget) error {
+func (t *__VDLTarget5_map) FinishMap(elem vdl.MapTarget) error {
 	if len(*t.Value) == 0 {
 		*t.Value = nil
 	}
@@ -2463,14 +2463,14 @@ func (t *unnamed_6d61705b696e7431365d5b5d7365745b737472696e675dTarget) FinishMap
 }
 
 // []map[string]struct{}
-type unnamed_5b5d7365745b737472696e675dTarget struct {
+type __VDLTarget6_list struct {
 	Value      *[]map[string]struct{}
-	elemTarget unnamed_7365745b737472696e675dTarget
+	elemTarget __VDLTarget7_set
 	vdl.TargetBase
 	vdl.ListTargetBase
 }
 
-func (t *unnamed_5b5d7365745b737472696e675dTarget) StartList(tt *vdl.Type, len int) (vdl.ListTarget, error) {
+func (t *__VDLTarget6_list) StartList(tt *vdl.Type, len int) (vdl.ListTarget, error) {
 
 	if ttWant := vdl.TypeOf((*[]map[string]struct{})(nil)); !vdl.Compatible(tt, ttWant) {
 		return nil, fmt.Errorf("type %v incompatible with %v", tt, ttWant)
@@ -2482,21 +2482,21 @@ func (t *unnamed_5b5d7365745b737472696e675dTarget) StartList(tt *vdl.Type, len i
 	}
 	return t, nil
 }
-func (t *unnamed_5b5d7365745b737472696e675dTarget) StartElem(index int) (elem vdl.Target, _ error) {
+func (t *__VDLTarget6_list) StartElem(index int) (elem vdl.Target, _ error) {
 	t.elemTarget.Value = &(*t.Value)[index]
 	target, err := &t.elemTarget, error(nil)
 	return target, err
 }
-func (t *unnamed_5b5d7365745b737472696e675dTarget) FinishElem(elem vdl.Target) error {
+func (t *__VDLTarget6_list) FinishElem(elem vdl.Target) error {
 	return nil
 }
-func (t *unnamed_5b5d7365745b737472696e675dTarget) FinishList(elem vdl.ListTarget) error {
+func (t *__VDLTarget6_list) FinishList(elem vdl.ListTarget) error {
 
 	return nil
 }
 
 // map[string]struct{}
-type unnamed_7365745b737472696e675dTarget struct {
+type __VDLTarget7_set struct {
 	Value     *map[string]struct{}
 	currKey   string
 	keyTarget vdl.StringTarget
@@ -2504,7 +2504,7 @@ type unnamed_7365745b737472696e675dTarget struct {
 	vdl.SetTargetBase
 }
 
-func (t *unnamed_7365745b737472696e675dTarget) StartSet(tt *vdl.Type, len int) (vdl.SetTarget, error) {
+func (t *__VDLTarget7_set) StartSet(tt *vdl.Type, len int) (vdl.SetTarget, error) {
 
 	if ttWant := vdl.TypeOf((*map[string]struct{})(nil)); !vdl.Compatible(tt, ttWant) {
 		return nil, fmt.Errorf("type %v incompatible with %v", tt, ttWant)
@@ -2512,17 +2512,17 @@ func (t *unnamed_7365745b737472696e675dTarget) StartSet(tt *vdl.Type, len int) (
 	*t.Value = make(map[string]struct{})
 	return t, nil
 }
-func (t *unnamed_7365745b737472696e675dTarget) StartKey() (key vdl.Target, _ error) {
+func (t *__VDLTarget7_set) StartKey() (key vdl.Target, _ error) {
 	t.currKey = ""
 	t.keyTarget.Value = &t.currKey
 	target, err := &t.keyTarget, error(nil)
 	return target, err
 }
-func (t *unnamed_7365745b737472696e675dTarget) FinishKey(key vdl.Target) error {
+func (t *__VDLTarget7_set) FinishKey(key vdl.Target) error {
 	(*t.Value)[t.currKey] = struct{}{}
 	return nil
 }
-func (t *unnamed_7365745b737472696e675dTarget) FinishSet(list vdl.SetTarget) error {
+func (t *__VDLTarget7_set) FinishSet(list vdl.SetTarget) error {
 	if len(*t.Value) == 0 {
 		*t.Value = nil
 	}
@@ -3236,21 +3236,21 @@ func (m *ManyMaps) MakeVDLTarget() vdl.Target {
 
 type ManyMapsTarget struct {
 	Value      *ManyMaps
-	bTarget    unnamed_6d61705b626f6f6c5d737472696e67Target
-	byTarget   unnamed_6d61705b627974655d737472696e67Target
-	u16Target  unnamed_6d61705b75696e7431365d737472696e67Target
-	u32Target  unnamed_6d61705b75696e7433325d737472696e67Target
-	u64Target  unnamed_6d61705b75696e7436345d737472696e67Target
-	i16Target  unnamed_6d61705b696e7431365d737472696e67Target
-	i32Target  unnamed_6d61705b696e7433325d737472696e67Target
-	i64Target  unnamed_6d61705b696e7436345d737472696e67Target
-	f32Target  unnamed_6d61705b666c6f617433325d737472696e67Target
-	f64Target  unnamed_6d61705b666c6f617436345d737472696e67Target
-	c64Target  unnamed_6d61705b636f6d706c657836345d737472696e67Target
-	c128Target unnamed_6d61705b636f6d706c65783132385d737472696e67Target
-	sTarget    unnamed_6d61705b737472696e675d737472696e67Target
-	msTarget   unnamed_6d61705b737472696e675d6d61705b737472696e675d737472696e67Target
-	tTarget    unnamed_6d61705b74696d652e54696d65207374727563747b5365636f6e647320696e7436343b4e616e6f7320696e7433327d5d737472696e67Target
+	bTarget    __VDLTarget8_map
+	byTarget   __VDLTarget9_map
+	u16Target  __VDLTarget10_map
+	u32Target  __VDLTarget11_map
+	u64Target  __VDLTarget12_map
+	i16Target  __VDLTarget13_map
+	i32Target  __VDLTarget14_map
+	i64Target  __VDLTarget15_map
+	f32Target  __VDLTarget16_map
+	f64Target  __VDLTarget17_map
+	c64Target  __VDLTarget18_map
+	c128Target __VDLTarget19_map
+	sTarget    __VDLTarget20_map
+	msTarget   __VDLTarget21_map
+	tTarget    __VDLTarget22_map
 	vdl.TargetBase
 	vdl.FieldsTargetBase
 }
@@ -3337,7 +3337,7 @@ func (t *ManyMapsTarget) FinishFields(_ vdl.FieldsTarget) error {
 }
 
 // map[bool]string
-type unnamed_6d61705b626f6f6c5d737472696e67Target struct {
+type __VDLTarget8_map struct {
 	Value      *map[bool]string
 	currKey    bool
 	currElem   string
@@ -3347,7 +3347,7 @@ type unnamed_6d61705b626f6f6c5d737472696e67Target struct {
 	vdl.MapTargetBase
 }
 
-func (t *unnamed_6d61705b626f6f6c5d737472696e67Target) StartMap(tt *vdl.Type, len int) (vdl.MapTarget, error) {
+func (t *__VDLTarget8_map) StartMap(tt *vdl.Type, len int) (vdl.MapTarget, error) {
 
 	if ttWant := vdl.TypeOf((*map[bool]string)(nil)); !vdl.Compatible(tt, ttWant) {
 		return nil, fmt.Errorf("type %v incompatible with %v", tt, ttWant)
@@ -3355,23 +3355,23 @@ func (t *unnamed_6d61705b626f6f6c5d737472696e67Target) StartMap(tt *vdl.Type, le
 	*t.Value = make(map[bool]string)
 	return t, nil
 }
-func (t *unnamed_6d61705b626f6f6c5d737472696e67Target) StartKey() (key vdl.Target, _ error) {
+func (t *__VDLTarget8_map) StartKey() (key vdl.Target, _ error) {
 	t.currKey = false
 	t.keyTarget.Value = &t.currKey
 	target, err := &t.keyTarget, error(nil)
 	return target, err
 }
-func (t *unnamed_6d61705b626f6f6c5d737472696e67Target) FinishKeyStartField(key vdl.Target) (field vdl.Target, _ error) {
+func (t *__VDLTarget8_map) FinishKeyStartField(key vdl.Target) (field vdl.Target, _ error) {
 	t.currElem = ""
 	t.elemTarget.Value = &t.currElem
 	target, err := &t.elemTarget, error(nil)
 	return target, err
 }
-func (t *unnamed_6d61705b626f6f6c5d737472696e67Target) FinishField(key, field vdl.Target) error {
+func (t *__VDLTarget8_map) FinishField(key, field vdl.Target) error {
 	(*t.Value)[t.currKey] = t.currElem
 	return nil
 }
-func (t *unnamed_6d61705b626f6f6c5d737472696e67Target) FinishMap(elem vdl.MapTarget) error {
+func (t *__VDLTarget8_map) FinishMap(elem vdl.MapTarget) error {
 	if len(*t.Value) == 0 {
 		*t.Value = nil
 	}
@@ -3380,7 +3380,7 @@ func (t *unnamed_6d61705b626f6f6c5d737472696e67Target) FinishMap(elem vdl.MapTar
 }
 
 // map[byte]string
-type unnamed_6d61705b627974655d737472696e67Target struct {
+type __VDLTarget9_map struct {
 	Value      *map[byte]string
 	currKey    byte
 	currElem   string
@@ -3390,7 +3390,7 @@ type unnamed_6d61705b627974655d737472696e67Target struct {
 	vdl.MapTargetBase
 }
 
-func (t *unnamed_6d61705b627974655d737472696e67Target) StartMap(tt *vdl.Type, len int) (vdl.MapTarget, error) {
+func (t *__VDLTarget9_map) StartMap(tt *vdl.Type, len int) (vdl.MapTarget, error) {
 
 	if ttWant := vdl.TypeOf((*map[byte]string)(nil)); !vdl.Compatible(tt, ttWant) {
 		return nil, fmt.Errorf("type %v incompatible with %v", tt, ttWant)
@@ -3398,23 +3398,23 @@ func (t *unnamed_6d61705b627974655d737472696e67Target) StartMap(tt *vdl.Type, le
 	*t.Value = make(map[byte]string)
 	return t, nil
 }
-func (t *unnamed_6d61705b627974655d737472696e67Target) StartKey() (key vdl.Target, _ error) {
+func (t *__VDLTarget9_map) StartKey() (key vdl.Target, _ error) {
 	t.currKey = byte(0)
 	t.keyTarget.Value = &t.currKey
 	target, err := &t.keyTarget, error(nil)
 	return target, err
 }
-func (t *unnamed_6d61705b627974655d737472696e67Target) FinishKeyStartField(key vdl.Target) (field vdl.Target, _ error) {
+func (t *__VDLTarget9_map) FinishKeyStartField(key vdl.Target) (field vdl.Target, _ error) {
 	t.currElem = ""
 	t.elemTarget.Value = &t.currElem
 	target, err := &t.elemTarget, error(nil)
 	return target, err
 }
-func (t *unnamed_6d61705b627974655d737472696e67Target) FinishField(key, field vdl.Target) error {
+func (t *__VDLTarget9_map) FinishField(key, field vdl.Target) error {
 	(*t.Value)[t.currKey] = t.currElem
 	return nil
 }
-func (t *unnamed_6d61705b627974655d737472696e67Target) FinishMap(elem vdl.MapTarget) error {
+func (t *__VDLTarget9_map) FinishMap(elem vdl.MapTarget) error {
 	if len(*t.Value) == 0 {
 		*t.Value = nil
 	}
@@ -3423,7 +3423,7 @@ func (t *unnamed_6d61705b627974655d737472696e67Target) FinishMap(elem vdl.MapTar
 }
 
 // map[uint16]string
-type unnamed_6d61705b75696e7431365d737472696e67Target struct {
+type __VDLTarget10_map struct {
 	Value      *map[uint16]string
 	currKey    uint16
 	currElem   string
@@ -3433,7 +3433,7 @@ type unnamed_6d61705b75696e7431365d737472696e67Target struct {
 	vdl.MapTargetBase
 }
 
-func (t *unnamed_6d61705b75696e7431365d737472696e67Target) StartMap(tt *vdl.Type, len int) (vdl.MapTarget, error) {
+func (t *__VDLTarget10_map) StartMap(tt *vdl.Type, len int) (vdl.MapTarget, error) {
 
 	if ttWant := vdl.TypeOf((*map[uint16]string)(nil)); !vdl.Compatible(tt, ttWant) {
 		return nil, fmt.Errorf("type %v incompatible with %v", tt, ttWant)
@@ -3441,23 +3441,23 @@ func (t *unnamed_6d61705b75696e7431365d737472696e67Target) StartMap(tt *vdl.Type
 	*t.Value = make(map[uint16]string)
 	return t, nil
 }
-func (t *unnamed_6d61705b75696e7431365d737472696e67Target) StartKey() (key vdl.Target, _ error) {
+func (t *__VDLTarget10_map) StartKey() (key vdl.Target, _ error) {
 	t.currKey = uint16(0)
 	t.keyTarget.Value = &t.currKey
 	target, err := &t.keyTarget, error(nil)
 	return target, err
 }
-func (t *unnamed_6d61705b75696e7431365d737472696e67Target) FinishKeyStartField(key vdl.Target) (field vdl.Target, _ error) {
+func (t *__VDLTarget10_map) FinishKeyStartField(key vdl.Target) (field vdl.Target, _ error) {
 	t.currElem = ""
 	t.elemTarget.Value = &t.currElem
 	target, err := &t.elemTarget, error(nil)
 	return target, err
 }
-func (t *unnamed_6d61705b75696e7431365d737472696e67Target) FinishField(key, field vdl.Target) error {
+func (t *__VDLTarget10_map) FinishField(key, field vdl.Target) error {
 	(*t.Value)[t.currKey] = t.currElem
 	return nil
 }
-func (t *unnamed_6d61705b75696e7431365d737472696e67Target) FinishMap(elem vdl.MapTarget) error {
+func (t *__VDLTarget10_map) FinishMap(elem vdl.MapTarget) error {
 	if len(*t.Value) == 0 {
 		*t.Value = nil
 	}
@@ -3466,7 +3466,7 @@ func (t *unnamed_6d61705b75696e7431365d737472696e67Target) FinishMap(elem vdl.Ma
 }
 
 // map[uint32]string
-type unnamed_6d61705b75696e7433325d737472696e67Target struct {
+type __VDLTarget11_map struct {
 	Value      *map[uint32]string
 	currKey    uint32
 	currElem   string
@@ -3476,7 +3476,7 @@ type unnamed_6d61705b75696e7433325d737472696e67Target struct {
 	vdl.MapTargetBase
 }
 
-func (t *unnamed_6d61705b75696e7433325d737472696e67Target) StartMap(tt *vdl.Type, len int) (vdl.MapTarget, error) {
+func (t *__VDLTarget11_map) StartMap(tt *vdl.Type, len int) (vdl.MapTarget, error) {
 
 	if ttWant := vdl.TypeOf((*map[uint32]string)(nil)); !vdl.Compatible(tt, ttWant) {
 		return nil, fmt.Errorf("type %v incompatible with %v", tt, ttWant)
@@ -3484,23 +3484,23 @@ func (t *unnamed_6d61705b75696e7433325d737472696e67Target) StartMap(tt *vdl.Type
 	*t.Value = make(map[uint32]string)
 	return t, nil
 }
-func (t *unnamed_6d61705b75696e7433325d737472696e67Target) StartKey() (key vdl.Target, _ error) {
+func (t *__VDLTarget11_map) StartKey() (key vdl.Target, _ error) {
 	t.currKey = uint32(0)
 	t.keyTarget.Value = &t.currKey
 	target, err := &t.keyTarget, error(nil)
 	return target, err
 }
-func (t *unnamed_6d61705b75696e7433325d737472696e67Target) FinishKeyStartField(key vdl.Target) (field vdl.Target, _ error) {
+func (t *__VDLTarget11_map) FinishKeyStartField(key vdl.Target) (field vdl.Target, _ error) {
 	t.currElem = ""
 	t.elemTarget.Value = &t.currElem
 	target, err := &t.elemTarget, error(nil)
 	return target, err
 }
-func (t *unnamed_6d61705b75696e7433325d737472696e67Target) FinishField(key, field vdl.Target) error {
+func (t *__VDLTarget11_map) FinishField(key, field vdl.Target) error {
 	(*t.Value)[t.currKey] = t.currElem
 	return nil
 }
-func (t *unnamed_6d61705b75696e7433325d737472696e67Target) FinishMap(elem vdl.MapTarget) error {
+func (t *__VDLTarget11_map) FinishMap(elem vdl.MapTarget) error {
 	if len(*t.Value) == 0 {
 		*t.Value = nil
 	}
@@ -3509,7 +3509,7 @@ func (t *unnamed_6d61705b75696e7433325d737472696e67Target) FinishMap(elem vdl.Ma
 }
 
 // map[uint64]string
-type unnamed_6d61705b75696e7436345d737472696e67Target struct {
+type __VDLTarget12_map struct {
 	Value      *map[uint64]string
 	currKey    uint64
 	currElem   string
@@ -3519,7 +3519,7 @@ type unnamed_6d61705b75696e7436345d737472696e67Target struct {
 	vdl.MapTargetBase
 }
 
-func (t *unnamed_6d61705b75696e7436345d737472696e67Target) StartMap(tt *vdl.Type, len int) (vdl.MapTarget, error) {
+func (t *__VDLTarget12_map) StartMap(tt *vdl.Type, len int) (vdl.MapTarget, error) {
 
 	if ttWant := vdl.TypeOf((*map[uint64]string)(nil)); !vdl.Compatible(tt, ttWant) {
 		return nil, fmt.Errorf("type %v incompatible with %v", tt, ttWant)
@@ -3527,23 +3527,23 @@ func (t *unnamed_6d61705b75696e7436345d737472696e67Target) StartMap(tt *vdl.Type
 	*t.Value = make(map[uint64]string)
 	return t, nil
 }
-func (t *unnamed_6d61705b75696e7436345d737472696e67Target) StartKey() (key vdl.Target, _ error) {
+func (t *__VDLTarget12_map) StartKey() (key vdl.Target, _ error) {
 	t.currKey = uint64(0)
 	t.keyTarget.Value = &t.currKey
 	target, err := &t.keyTarget, error(nil)
 	return target, err
 }
-func (t *unnamed_6d61705b75696e7436345d737472696e67Target) FinishKeyStartField(key vdl.Target) (field vdl.Target, _ error) {
+func (t *__VDLTarget12_map) FinishKeyStartField(key vdl.Target) (field vdl.Target, _ error) {
 	t.currElem = ""
 	t.elemTarget.Value = &t.currElem
 	target, err := &t.elemTarget, error(nil)
 	return target, err
 }
-func (t *unnamed_6d61705b75696e7436345d737472696e67Target) FinishField(key, field vdl.Target) error {
+func (t *__VDLTarget12_map) FinishField(key, field vdl.Target) error {
 	(*t.Value)[t.currKey] = t.currElem
 	return nil
 }
-func (t *unnamed_6d61705b75696e7436345d737472696e67Target) FinishMap(elem vdl.MapTarget) error {
+func (t *__VDLTarget12_map) FinishMap(elem vdl.MapTarget) error {
 	if len(*t.Value) == 0 {
 		*t.Value = nil
 	}
@@ -3552,7 +3552,7 @@ func (t *unnamed_6d61705b75696e7436345d737472696e67Target) FinishMap(elem vdl.Ma
 }
 
 // map[int16]string
-type unnamed_6d61705b696e7431365d737472696e67Target struct {
+type __VDLTarget13_map struct {
 	Value      *map[int16]string
 	currKey    int16
 	currElem   string
@@ -3562,7 +3562,7 @@ type unnamed_6d61705b696e7431365d737472696e67Target struct {
 	vdl.MapTargetBase
 }
 
-func (t *unnamed_6d61705b696e7431365d737472696e67Target) StartMap(tt *vdl.Type, len int) (vdl.MapTarget, error) {
+func (t *__VDLTarget13_map) StartMap(tt *vdl.Type, len int) (vdl.MapTarget, error) {
 
 	if ttWant := vdl.TypeOf((*map[int16]string)(nil)); !vdl.Compatible(tt, ttWant) {
 		return nil, fmt.Errorf("type %v incompatible with %v", tt, ttWant)
@@ -3570,23 +3570,23 @@ func (t *unnamed_6d61705b696e7431365d737472696e67Target) StartMap(tt *vdl.Type, 
 	*t.Value = make(map[int16]string)
 	return t, nil
 }
-func (t *unnamed_6d61705b696e7431365d737472696e67Target) StartKey() (key vdl.Target, _ error) {
+func (t *__VDLTarget13_map) StartKey() (key vdl.Target, _ error) {
 	t.currKey = int16(0)
 	t.keyTarget.Value = &t.currKey
 	target, err := &t.keyTarget, error(nil)
 	return target, err
 }
-func (t *unnamed_6d61705b696e7431365d737472696e67Target) FinishKeyStartField(key vdl.Target) (field vdl.Target, _ error) {
+func (t *__VDLTarget13_map) FinishKeyStartField(key vdl.Target) (field vdl.Target, _ error) {
 	t.currElem = ""
 	t.elemTarget.Value = &t.currElem
 	target, err := &t.elemTarget, error(nil)
 	return target, err
 }
-func (t *unnamed_6d61705b696e7431365d737472696e67Target) FinishField(key, field vdl.Target) error {
+func (t *__VDLTarget13_map) FinishField(key, field vdl.Target) error {
 	(*t.Value)[t.currKey] = t.currElem
 	return nil
 }
-func (t *unnamed_6d61705b696e7431365d737472696e67Target) FinishMap(elem vdl.MapTarget) error {
+func (t *__VDLTarget13_map) FinishMap(elem vdl.MapTarget) error {
 	if len(*t.Value) == 0 {
 		*t.Value = nil
 	}
@@ -3595,7 +3595,7 @@ func (t *unnamed_6d61705b696e7431365d737472696e67Target) FinishMap(elem vdl.MapT
 }
 
 // map[int32]string
-type unnamed_6d61705b696e7433325d737472696e67Target struct {
+type __VDLTarget14_map struct {
 	Value      *map[int32]string
 	currKey    int32
 	currElem   string
@@ -3605,7 +3605,7 @@ type unnamed_6d61705b696e7433325d737472696e67Target struct {
 	vdl.MapTargetBase
 }
 
-func (t *unnamed_6d61705b696e7433325d737472696e67Target) StartMap(tt *vdl.Type, len int) (vdl.MapTarget, error) {
+func (t *__VDLTarget14_map) StartMap(tt *vdl.Type, len int) (vdl.MapTarget, error) {
 
 	if ttWant := vdl.TypeOf((*map[int32]string)(nil)); !vdl.Compatible(tt, ttWant) {
 		return nil, fmt.Errorf("type %v incompatible with %v", tt, ttWant)
@@ -3613,23 +3613,23 @@ func (t *unnamed_6d61705b696e7433325d737472696e67Target) StartMap(tt *vdl.Type, 
 	*t.Value = make(map[int32]string)
 	return t, nil
 }
-func (t *unnamed_6d61705b696e7433325d737472696e67Target) StartKey() (key vdl.Target, _ error) {
+func (t *__VDLTarget14_map) StartKey() (key vdl.Target, _ error) {
 	t.currKey = int32(0)
 	t.keyTarget.Value = &t.currKey
 	target, err := &t.keyTarget, error(nil)
 	return target, err
 }
-func (t *unnamed_6d61705b696e7433325d737472696e67Target) FinishKeyStartField(key vdl.Target) (field vdl.Target, _ error) {
+func (t *__VDLTarget14_map) FinishKeyStartField(key vdl.Target) (field vdl.Target, _ error) {
 	t.currElem = ""
 	t.elemTarget.Value = &t.currElem
 	target, err := &t.elemTarget, error(nil)
 	return target, err
 }
-func (t *unnamed_6d61705b696e7433325d737472696e67Target) FinishField(key, field vdl.Target) error {
+func (t *__VDLTarget14_map) FinishField(key, field vdl.Target) error {
 	(*t.Value)[t.currKey] = t.currElem
 	return nil
 }
-func (t *unnamed_6d61705b696e7433325d737472696e67Target) FinishMap(elem vdl.MapTarget) error {
+func (t *__VDLTarget14_map) FinishMap(elem vdl.MapTarget) error {
 	if len(*t.Value) == 0 {
 		*t.Value = nil
 	}
@@ -3638,7 +3638,7 @@ func (t *unnamed_6d61705b696e7433325d737472696e67Target) FinishMap(elem vdl.MapT
 }
 
 // map[int64]string
-type unnamed_6d61705b696e7436345d737472696e67Target struct {
+type __VDLTarget15_map struct {
 	Value      *map[int64]string
 	currKey    int64
 	currElem   string
@@ -3648,7 +3648,7 @@ type unnamed_6d61705b696e7436345d737472696e67Target struct {
 	vdl.MapTargetBase
 }
 
-func (t *unnamed_6d61705b696e7436345d737472696e67Target) StartMap(tt *vdl.Type, len int) (vdl.MapTarget, error) {
+func (t *__VDLTarget15_map) StartMap(tt *vdl.Type, len int) (vdl.MapTarget, error) {
 
 	if ttWant := vdl.TypeOf((*map[int64]string)(nil)); !vdl.Compatible(tt, ttWant) {
 		return nil, fmt.Errorf("type %v incompatible with %v", tt, ttWant)
@@ -3656,23 +3656,23 @@ func (t *unnamed_6d61705b696e7436345d737472696e67Target) StartMap(tt *vdl.Type, 
 	*t.Value = make(map[int64]string)
 	return t, nil
 }
-func (t *unnamed_6d61705b696e7436345d737472696e67Target) StartKey() (key vdl.Target, _ error) {
+func (t *__VDLTarget15_map) StartKey() (key vdl.Target, _ error) {
 	t.currKey = int64(0)
 	t.keyTarget.Value = &t.currKey
 	target, err := &t.keyTarget, error(nil)
 	return target, err
 }
-func (t *unnamed_6d61705b696e7436345d737472696e67Target) FinishKeyStartField(key vdl.Target) (field vdl.Target, _ error) {
+func (t *__VDLTarget15_map) FinishKeyStartField(key vdl.Target) (field vdl.Target, _ error) {
 	t.currElem = ""
 	t.elemTarget.Value = &t.currElem
 	target, err := &t.elemTarget, error(nil)
 	return target, err
 }
-func (t *unnamed_6d61705b696e7436345d737472696e67Target) FinishField(key, field vdl.Target) error {
+func (t *__VDLTarget15_map) FinishField(key, field vdl.Target) error {
 	(*t.Value)[t.currKey] = t.currElem
 	return nil
 }
-func (t *unnamed_6d61705b696e7436345d737472696e67Target) FinishMap(elem vdl.MapTarget) error {
+func (t *__VDLTarget15_map) FinishMap(elem vdl.MapTarget) error {
 	if len(*t.Value) == 0 {
 		*t.Value = nil
 	}
@@ -3681,7 +3681,7 @@ func (t *unnamed_6d61705b696e7436345d737472696e67Target) FinishMap(elem vdl.MapT
 }
 
 // map[float32]string
-type unnamed_6d61705b666c6f617433325d737472696e67Target struct {
+type __VDLTarget16_map struct {
 	Value      *map[float32]string
 	currKey    float32
 	currElem   string
@@ -3691,7 +3691,7 @@ type unnamed_6d61705b666c6f617433325d737472696e67Target struct {
 	vdl.MapTargetBase
 }
 
-func (t *unnamed_6d61705b666c6f617433325d737472696e67Target) StartMap(tt *vdl.Type, len int) (vdl.MapTarget, error) {
+func (t *__VDLTarget16_map) StartMap(tt *vdl.Type, len int) (vdl.MapTarget, error) {
 
 	if ttWant := vdl.TypeOf((*map[float32]string)(nil)); !vdl.Compatible(tt, ttWant) {
 		return nil, fmt.Errorf("type %v incompatible with %v", tt, ttWant)
@@ -3699,23 +3699,23 @@ func (t *unnamed_6d61705b666c6f617433325d737472696e67Target) StartMap(tt *vdl.Ty
 	*t.Value = make(map[float32]string)
 	return t, nil
 }
-func (t *unnamed_6d61705b666c6f617433325d737472696e67Target) StartKey() (key vdl.Target, _ error) {
+func (t *__VDLTarget16_map) StartKey() (key vdl.Target, _ error) {
 	t.currKey = float32(0)
 	t.keyTarget.Value = &t.currKey
 	target, err := &t.keyTarget, error(nil)
 	return target, err
 }
-func (t *unnamed_6d61705b666c6f617433325d737472696e67Target) FinishKeyStartField(key vdl.Target) (field vdl.Target, _ error) {
+func (t *__VDLTarget16_map) FinishKeyStartField(key vdl.Target) (field vdl.Target, _ error) {
 	t.currElem = ""
 	t.elemTarget.Value = &t.currElem
 	target, err := &t.elemTarget, error(nil)
 	return target, err
 }
-func (t *unnamed_6d61705b666c6f617433325d737472696e67Target) FinishField(key, field vdl.Target) error {
+func (t *__VDLTarget16_map) FinishField(key, field vdl.Target) error {
 	(*t.Value)[t.currKey] = t.currElem
 	return nil
 }
-func (t *unnamed_6d61705b666c6f617433325d737472696e67Target) FinishMap(elem vdl.MapTarget) error {
+func (t *__VDLTarget16_map) FinishMap(elem vdl.MapTarget) error {
 	if len(*t.Value) == 0 {
 		*t.Value = nil
 	}
@@ -3724,7 +3724,7 @@ func (t *unnamed_6d61705b666c6f617433325d737472696e67Target) FinishMap(elem vdl.
 }
 
 // map[float64]string
-type unnamed_6d61705b666c6f617436345d737472696e67Target struct {
+type __VDLTarget17_map struct {
 	Value      *map[float64]string
 	currKey    float64
 	currElem   string
@@ -3734,7 +3734,7 @@ type unnamed_6d61705b666c6f617436345d737472696e67Target struct {
 	vdl.MapTargetBase
 }
 
-func (t *unnamed_6d61705b666c6f617436345d737472696e67Target) StartMap(tt *vdl.Type, len int) (vdl.MapTarget, error) {
+func (t *__VDLTarget17_map) StartMap(tt *vdl.Type, len int) (vdl.MapTarget, error) {
 
 	if ttWant := vdl.TypeOf((*map[float64]string)(nil)); !vdl.Compatible(tt, ttWant) {
 		return nil, fmt.Errorf("type %v incompatible with %v", tt, ttWant)
@@ -3742,23 +3742,23 @@ func (t *unnamed_6d61705b666c6f617436345d737472696e67Target) StartMap(tt *vdl.Ty
 	*t.Value = make(map[float64]string)
 	return t, nil
 }
-func (t *unnamed_6d61705b666c6f617436345d737472696e67Target) StartKey() (key vdl.Target, _ error) {
+func (t *__VDLTarget17_map) StartKey() (key vdl.Target, _ error) {
 	t.currKey = float64(0)
 	t.keyTarget.Value = &t.currKey
 	target, err := &t.keyTarget, error(nil)
 	return target, err
 }
-func (t *unnamed_6d61705b666c6f617436345d737472696e67Target) FinishKeyStartField(key vdl.Target) (field vdl.Target, _ error) {
+func (t *__VDLTarget17_map) FinishKeyStartField(key vdl.Target) (field vdl.Target, _ error) {
 	t.currElem = ""
 	t.elemTarget.Value = &t.currElem
 	target, err := &t.elemTarget, error(nil)
 	return target, err
 }
-func (t *unnamed_6d61705b666c6f617436345d737472696e67Target) FinishField(key, field vdl.Target) error {
+func (t *__VDLTarget17_map) FinishField(key, field vdl.Target) error {
 	(*t.Value)[t.currKey] = t.currElem
 	return nil
 }
-func (t *unnamed_6d61705b666c6f617436345d737472696e67Target) FinishMap(elem vdl.MapTarget) error {
+func (t *__VDLTarget17_map) FinishMap(elem vdl.MapTarget) error {
 	if len(*t.Value) == 0 {
 		*t.Value = nil
 	}
@@ -3767,7 +3767,7 @@ func (t *unnamed_6d61705b666c6f617436345d737472696e67Target) FinishMap(elem vdl.
 }
 
 // map[complex64]string
-type unnamed_6d61705b636f6d706c657836345d737472696e67Target struct {
+type __VDLTarget18_map struct {
 	Value      *map[complex64]string
 	currKey    complex64
 	currElem   string
@@ -3777,7 +3777,7 @@ type unnamed_6d61705b636f6d706c657836345d737472696e67Target struct {
 	vdl.MapTargetBase
 }
 
-func (t *unnamed_6d61705b636f6d706c657836345d737472696e67Target) StartMap(tt *vdl.Type, len int) (vdl.MapTarget, error) {
+func (t *__VDLTarget18_map) StartMap(tt *vdl.Type, len int) (vdl.MapTarget, error) {
 
 	if ttWant := vdl.TypeOf((*map[complex64]string)(nil)); !vdl.Compatible(tt, ttWant) {
 		return nil, fmt.Errorf("type %v incompatible with %v", tt, ttWant)
@@ -3785,23 +3785,23 @@ func (t *unnamed_6d61705b636f6d706c657836345d737472696e67Target) StartMap(tt *vd
 	*t.Value = make(map[complex64]string)
 	return t, nil
 }
-func (t *unnamed_6d61705b636f6d706c657836345d737472696e67Target) StartKey() (key vdl.Target, _ error) {
+func (t *__VDLTarget18_map) StartKey() (key vdl.Target, _ error) {
 	t.currKey = complex64(0)
 	t.keyTarget.Value = &t.currKey
 	target, err := &t.keyTarget, error(nil)
 	return target, err
 }
-func (t *unnamed_6d61705b636f6d706c657836345d737472696e67Target) FinishKeyStartField(key vdl.Target) (field vdl.Target, _ error) {
+func (t *__VDLTarget18_map) FinishKeyStartField(key vdl.Target) (field vdl.Target, _ error) {
 	t.currElem = ""
 	t.elemTarget.Value = &t.currElem
 	target, err := &t.elemTarget, error(nil)
 	return target, err
 }
-func (t *unnamed_6d61705b636f6d706c657836345d737472696e67Target) FinishField(key, field vdl.Target) error {
+func (t *__VDLTarget18_map) FinishField(key, field vdl.Target) error {
 	(*t.Value)[t.currKey] = t.currElem
 	return nil
 }
-func (t *unnamed_6d61705b636f6d706c657836345d737472696e67Target) FinishMap(elem vdl.MapTarget) error {
+func (t *__VDLTarget18_map) FinishMap(elem vdl.MapTarget) error {
 	if len(*t.Value) == 0 {
 		*t.Value = nil
 	}
@@ -3810,7 +3810,7 @@ func (t *unnamed_6d61705b636f6d706c657836345d737472696e67Target) FinishMap(elem 
 }
 
 // map[complex128]string
-type unnamed_6d61705b636f6d706c65783132385d737472696e67Target struct {
+type __VDLTarget19_map struct {
 	Value      *map[complex128]string
 	currKey    complex128
 	currElem   string
@@ -3820,7 +3820,7 @@ type unnamed_6d61705b636f6d706c65783132385d737472696e67Target struct {
 	vdl.MapTargetBase
 }
 
-func (t *unnamed_6d61705b636f6d706c65783132385d737472696e67Target) StartMap(tt *vdl.Type, len int) (vdl.MapTarget, error) {
+func (t *__VDLTarget19_map) StartMap(tt *vdl.Type, len int) (vdl.MapTarget, error) {
 
 	if ttWant := vdl.TypeOf((*map[complex128]string)(nil)); !vdl.Compatible(tt, ttWant) {
 		return nil, fmt.Errorf("type %v incompatible with %v", tt, ttWant)
@@ -3828,23 +3828,23 @@ func (t *unnamed_6d61705b636f6d706c65783132385d737472696e67Target) StartMap(tt *
 	*t.Value = make(map[complex128]string)
 	return t, nil
 }
-func (t *unnamed_6d61705b636f6d706c65783132385d737472696e67Target) StartKey() (key vdl.Target, _ error) {
+func (t *__VDLTarget19_map) StartKey() (key vdl.Target, _ error) {
 	t.currKey = complex128(0)
 	t.keyTarget.Value = &t.currKey
 	target, err := &t.keyTarget, error(nil)
 	return target, err
 }
-func (t *unnamed_6d61705b636f6d706c65783132385d737472696e67Target) FinishKeyStartField(key vdl.Target) (field vdl.Target, _ error) {
+func (t *__VDLTarget19_map) FinishKeyStartField(key vdl.Target) (field vdl.Target, _ error) {
 	t.currElem = ""
 	t.elemTarget.Value = &t.currElem
 	target, err := &t.elemTarget, error(nil)
 	return target, err
 }
-func (t *unnamed_6d61705b636f6d706c65783132385d737472696e67Target) FinishField(key, field vdl.Target) error {
+func (t *__VDLTarget19_map) FinishField(key, field vdl.Target) error {
 	(*t.Value)[t.currKey] = t.currElem
 	return nil
 }
-func (t *unnamed_6d61705b636f6d706c65783132385d737472696e67Target) FinishMap(elem vdl.MapTarget) error {
+func (t *__VDLTarget19_map) FinishMap(elem vdl.MapTarget) error {
 	if len(*t.Value) == 0 {
 		*t.Value = nil
 	}
@@ -3853,7 +3853,7 @@ func (t *unnamed_6d61705b636f6d706c65783132385d737472696e67Target) FinishMap(ele
 }
 
 // map[string]string
-type unnamed_6d61705b737472696e675d737472696e67Target struct {
+type __VDLTarget20_map struct {
 	Value      *map[string]string
 	currKey    string
 	currElem   string
@@ -3863,7 +3863,7 @@ type unnamed_6d61705b737472696e675d737472696e67Target struct {
 	vdl.MapTargetBase
 }
 
-func (t *unnamed_6d61705b737472696e675d737472696e67Target) StartMap(tt *vdl.Type, len int) (vdl.MapTarget, error) {
+func (t *__VDLTarget20_map) StartMap(tt *vdl.Type, len int) (vdl.MapTarget, error) {
 
 	if ttWant := vdl.TypeOf((*map[string]string)(nil)); !vdl.Compatible(tt, ttWant) {
 		return nil, fmt.Errorf("type %v incompatible with %v", tt, ttWant)
@@ -3871,23 +3871,23 @@ func (t *unnamed_6d61705b737472696e675d737472696e67Target) StartMap(tt *vdl.Type
 	*t.Value = make(map[string]string)
 	return t, nil
 }
-func (t *unnamed_6d61705b737472696e675d737472696e67Target) StartKey() (key vdl.Target, _ error) {
+func (t *__VDLTarget20_map) StartKey() (key vdl.Target, _ error) {
 	t.currKey = ""
 	t.keyTarget.Value = &t.currKey
 	target, err := &t.keyTarget, error(nil)
 	return target, err
 }
-func (t *unnamed_6d61705b737472696e675d737472696e67Target) FinishKeyStartField(key vdl.Target) (field vdl.Target, _ error) {
+func (t *__VDLTarget20_map) FinishKeyStartField(key vdl.Target) (field vdl.Target, _ error) {
 	t.currElem = ""
 	t.elemTarget.Value = &t.currElem
 	target, err := &t.elemTarget, error(nil)
 	return target, err
 }
-func (t *unnamed_6d61705b737472696e675d737472696e67Target) FinishField(key, field vdl.Target) error {
+func (t *__VDLTarget20_map) FinishField(key, field vdl.Target) error {
 	(*t.Value)[t.currKey] = t.currElem
 	return nil
 }
-func (t *unnamed_6d61705b737472696e675d737472696e67Target) FinishMap(elem vdl.MapTarget) error {
+func (t *__VDLTarget20_map) FinishMap(elem vdl.MapTarget) error {
 	if len(*t.Value) == 0 {
 		*t.Value = nil
 	}
@@ -3896,17 +3896,17 @@ func (t *unnamed_6d61705b737472696e675d737472696e67Target) FinishMap(elem vdl.Ma
 }
 
 // map[string]map[string]string
-type unnamed_6d61705b737472696e675d6d61705b737472696e675d737472696e67Target struct {
+type __VDLTarget21_map struct {
 	Value      *map[string]map[string]string
 	currKey    string
 	currElem   map[string]string
 	keyTarget  vdl.StringTarget
-	elemTarget unnamed_6d61705b737472696e675d737472696e67Target
+	elemTarget __VDLTarget20_map
 	vdl.TargetBase
 	vdl.MapTargetBase
 }
 
-func (t *unnamed_6d61705b737472696e675d6d61705b737472696e675d737472696e67Target) StartMap(tt *vdl.Type, len int) (vdl.MapTarget, error) {
+func (t *__VDLTarget21_map) StartMap(tt *vdl.Type, len int) (vdl.MapTarget, error) {
 
 	if ttWant := vdl.TypeOf((*map[string]map[string]string)(nil)); !vdl.Compatible(tt, ttWant) {
 		return nil, fmt.Errorf("type %v incompatible with %v", tt, ttWant)
@@ -3914,23 +3914,23 @@ func (t *unnamed_6d61705b737472696e675d6d61705b737472696e675d737472696e67Target)
 	*t.Value = make(map[string]map[string]string)
 	return t, nil
 }
-func (t *unnamed_6d61705b737472696e675d6d61705b737472696e675d737472696e67Target) StartKey() (key vdl.Target, _ error) {
+func (t *__VDLTarget21_map) StartKey() (key vdl.Target, _ error) {
 	t.currKey = ""
 	t.keyTarget.Value = &t.currKey
 	target, err := &t.keyTarget, error(nil)
 	return target, err
 }
-func (t *unnamed_6d61705b737472696e675d6d61705b737472696e675d737472696e67Target) FinishKeyStartField(key vdl.Target) (field vdl.Target, _ error) {
+func (t *__VDLTarget21_map) FinishKeyStartField(key vdl.Target) (field vdl.Target, _ error) {
 	t.currElem = map[string]string(nil)
 	t.elemTarget.Value = &t.currElem
 	target, err := &t.elemTarget, error(nil)
 	return target, err
 }
-func (t *unnamed_6d61705b737472696e675d6d61705b737472696e675d737472696e67Target) FinishField(key, field vdl.Target) error {
+func (t *__VDLTarget21_map) FinishField(key, field vdl.Target) error {
 	(*t.Value)[t.currKey] = t.currElem
 	return nil
 }
-func (t *unnamed_6d61705b737472696e675d6d61705b737472696e675d737472696e67Target) FinishMap(elem vdl.MapTarget) error {
+func (t *__VDLTarget21_map) FinishMap(elem vdl.MapTarget) error {
 	if len(*t.Value) == 0 {
 		*t.Value = nil
 	}
@@ -3939,7 +3939,7 @@ func (t *unnamed_6d61705b737472696e675d6d61705b737472696e675d737472696e67Target)
 }
 
 // map[time.Time]string
-type unnamed_6d61705b74696d652e54696d65207374727563747b5365636f6e647320696e7436343b4e616e6f7320696e7433327d5d737472696e67Target struct {
+type __VDLTarget22_map struct {
 	Value      *map[time.Time]string
 	currKey    time.Time
 	currElem   string
@@ -3949,31 +3949,31 @@ type unnamed_6d61705b74696d652e54696d65207374727563747b5365636f6e647320696e74363
 	vdl.MapTargetBase
 }
 
-func (t *unnamed_6d61705b74696d652e54696d65207374727563747b5365636f6e647320696e7436343b4e616e6f7320696e7433327d5d737472696e67Target) StartMap(tt *vdl.Type, len int) (vdl.MapTarget, error) {
+func (t *__VDLTarget22_map) StartMap(tt *vdl.Type, len int) (vdl.MapTarget, error) {
 
-	if ttWant := vdl.TypeOf((*map[time_2.Time]string)(nil)); !vdl.Compatible(tt, ttWant) {
+	if ttWant := vdl.TypeOf((*map[time.Time]string)(nil)); !vdl.Compatible(tt, ttWant) {
 		return nil, fmt.Errorf("type %v incompatible with %v", tt, ttWant)
 	}
 	*t.Value = make(map[time.Time]string)
 	return t, nil
 }
-func (t *unnamed_6d61705b74696d652e54696d65207374727563747b5365636f6e647320696e7436343b4e616e6f7320696e7433327d5d737472696e67Target) StartKey() (key vdl.Target, _ error) {
+func (t *__VDLTarget22_map) StartKey() (key vdl.Target, _ error) {
 	t.currKey = reflect.Zero(reflect.TypeOf(t.currKey)).Interface().(time.Time)
 	t.keyTarget.Value = &t.currKey
 	target, err := &t.keyTarget, error(nil)
 	return target, err
 }
-func (t *unnamed_6d61705b74696d652e54696d65207374727563747b5365636f6e647320696e7436343b4e616e6f7320696e7433327d5d737472696e67Target) FinishKeyStartField(key vdl.Target) (field vdl.Target, _ error) {
+func (t *__VDLTarget22_map) FinishKeyStartField(key vdl.Target) (field vdl.Target, _ error) {
 	t.currElem = ""
 	t.elemTarget.Value = &t.currElem
 	target, err := &t.elemTarget, error(nil)
 	return target, err
 }
-func (t *unnamed_6d61705b74696d652e54696d65207374727563747b5365636f6e647320696e7436343b4e616e6f7320696e7433327d5d737472696e67Target) FinishField(key, field vdl.Target) error {
+func (t *__VDLTarget22_map) FinishField(key, field vdl.Target) error {
 	(*t.Value)[t.currKey] = t.currElem
 	return nil
 }
-func (t *unnamed_6d61705b74696d652e54696d65207374727563747b5365636f6e647320696e7436343b4e616e6f7320696e7433327d5d737472696e67Target) FinishMap(elem vdl.MapTarget) error {
+func (t *__VDLTarget22_map) FinishMap(elem vdl.MapTarget) error {
 	if len(*t.Value) == 0 {
 		*t.Value = nil
 	}
@@ -4433,20 +4433,20 @@ func (m *ManySets) MakeVDLTarget() vdl.Target {
 
 type ManySetsTarget struct {
 	Value      *ManySets
-	bTarget    unnamed_7365745b626f6f6c5dTarget
-	byTarget   unnamed_7365745b627974655dTarget
-	u16Target  unnamed_7365745b75696e7431365dTarget
-	u32Target  unnamed_7365745b75696e7433325dTarget
-	u64Target  unnamed_7365745b75696e7436345dTarget
-	i16Target  unnamed_7365745b696e7431365dTarget
-	i32Target  unnamed_7365745b696e7433325dTarget
-	i64Target  unnamed_7365745b696e7436345dTarget
-	f32Target  unnamed_7365745b666c6f617433325dTarget
-	f64Target  unnamed_7365745b666c6f617436345dTarget
-	c64Target  unnamed_7365745b636f6d706c657836345dTarget
-	c128Target unnamed_7365745b636f6d706c65783132385dTarget
-	sTarget    unnamed_7365745b737472696e675dTarget
-	tTarget    unnamed_7365745b74696d652e54696d65207374727563747b5365636f6e647320696e7436343b4e616e6f7320696e7433327d5dTarget
+	bTarget    __VDLTarget23_set
+	byTarget   __VDLTarget24_set
+	u16Target  __VDLTarget25_set
+	u32Target  __VDLTarget26_set
+	u64Target  __VDLTarget27_set
+	i16Target  __VDLTarget28_set
+	i32Target  __VDLTarget29_set
+	i64Target  __VDLTarget30_set
+	f32Target  __VDLTarget31_set
+	f64Target  __VDLTarget32_set
+	c64Target  __VDLTarget33_set
+	c128Target __VDLTarget34_set
+	sTarget    __VDLTarget7_set
+	tTarget    __VDLTarget35_set
 	vdl.TargetBase
 	vdl.FieldsTargetBase
 }
@@ -4529,7 +4529,7 @@ func (t *ManySetsTarget) FinishFields(_ vdl.FieldsTarget) error {
 }
 
 // map[bool]struct{}
-type unnamed_7365745b626f6f6c5dTarget struct {
+type __VDLTarget23_set struct {
 	Value     *map[bool]struct{}
 	currKey   bool
 	keyTarget vdl.BoolTarget
@@ -4537,7 +4537,7 @@ type unnamed_7365745b626f6f6c5dTarget struct {
 	vdl.SetTargetBase
 }
 
-func (t *unnamed_7365745b626f6f6c5dTarget) StartSet(tt *vdl.Type, len int) (vdl.SetTarget, error) {
+func (t *__VDLTarget23_set) StartSet(tt *vdl.Type, len int) (vdl.SetTarget, error) {
 
 	if ttWant := vdl.TypeOf((*map[bool]struct{})(nil)); !vdl.Compatible(tt, ttWant) {
 		return nil, fmt.Errorf("type %v incompatible with %v", tt, ttWant)
@@ -4545,17 +4545,17 @@ func (t *unnamed_7365745b626f6f6c5dTarget) StartSet(tt *vdl.Type, len int) (vdl.
 	*t.Value = make(map[bool]struct{})
 	return t, nil
 }
-func (t *unnamed_7365745b626f6f6c5dTarget) StartKey() (key vdl.Target, _ error) {
+func (t *__VDLTarget23_set) StartKey() (key vdl.Target, _ error) {
 	t.currKey = false
 	t.keyTarget.Value = &t.currKey
 	target, err := &t.keyTarget, error(nil)
 	return target, err
 }
-func (t *unnamed_7365745b626f6f6c5dTarget) FinishKey(key vdl.Target) error {
+func (t *__VDLTarget23_set) FinishKey(key vdl.Target) error {
 	(*t.Value)[t.currKey] = struct{}{}
 	return nil
 }
-func (t *unnamed_7365745b626f6f6c5dTarget) FinishSet(list vdl.SetTarget) error {
+func (t *__VDLTarget23_set) FinishSet(list vdl.SetTarget) error {
 	if len(*t.Value) == 0 {
 		*t.Value = nil
 	}
@@ -4564,7 +4564,7 @@ func (t *unnamed_7365745b626f6f6c5dTarget) FinishSet(list vdl.SetTarget) error {
 }
 
 // map[byte]struct{}
-type unnamed_7365745b627974655dTarget struct {
+type __VDLTarget24_set struct {
 	Value     *map[byte]struct{}
 	currKey   byte
 	keyTarget vdl.ByteTarget
@@ -4572,7 +4572,7 @@ type unnamed_7365745b627974655dTarget struct {
 	vdl.SetTargetBase
 }
 
-func (t *unnamed_7365745b627974655dTarget) StartSet(tt *vdl.Type, len int) (vdl.SetTarget, error) {
+func (t *__VDLTarget24_set) StartSet(tt *vdl.Type, len int) (vdl.SetTarget, error) {
 
 	if ttWant := vdl.TypeOf((*map[byte]struct{})(nil)); !vdl.Compatible(tt, ttWant) {
 		return nil, fmt.Errorf("type %v incompatible with %v", tt, ttWant)
@@ -4580,17 +4580,17 @@ func (t *unnamed_7365745b627974655dTarget) StartSet(tt *vdl.Type, len int) (vdl.
 	*t.Value = make(map[byte]struct{})
 	return t, nil
 }
-func (t *unnamed_7365745b627974655dTarget) StartKey() (key vdl.Target, _ error) {
+func (t *__VDLTarget24_set) StartKey() (key vdl.Target, _ error) {
 	t.currKey = byte(0)
 	t.keyTarget.Value = &t.currKey
 	target, err := &t.keyTarget, error(nil)
 	return target, err
 }
-func (t *unnamed_7365745b627974655dTarget) FinishKey(key vdl.Target) error {
+func (t *__VDLTarget24_set) FinishKey(key vdl.Target) error {
 	(*t.Value)[t.currKey] = struct{}{}
 	return nil
 }
-func (t *unnamed_7365745b627974655dTarget) FinishSet(list vdl.SetTarget) error {
+func (t *__VDLTarget24_set) FinishSet(list vdl.SetTarget) error {
 	if len(*t.Value) == 0 {
 		*t.Value = nil
 	}
@@ -4599,7 +4599,7 @@ func (t *unnamed_7365745b627974655dTarget) FinishSet(list vdl.SetTarget) error {
 }
 
 // map[uint16]struct{}
-type unnamed_7365745b75696e7431365dTarget struct {
+type __VDLTarget25_set struct {
 	Value     *map[uint16]struct{}
 	currKey   uint16
 	keyTarget vdl.Uint16Target
@@ -4607,7 +4607,7 @@ type unnamed_7365745b75696e7431365dTarget struct {
 	vdl.SetTargetBase
 }
 
-func (t *unnamed_7365745b75696e7431365dTarget) StartSet(tt *vdl.Type, len int) (vdl.SetTarget, error) {
+func (t *__VDLTarget25_set) StartSet(tt *vdl.Type, len int) (vdl.SetTarget, error) {
 
 	if ttWant := vdl.TypeOf((*map[uint16]struct{})(nil)); !vdl.Compatible(tt, ttWant) {
 		return nil, fmt.Errorf("type %v incompatible with %v", tt, ttWant)
@@ -4615,17 +4615,17 @@ func (t *unnamed_7365745b75696e7431365dTarget) StartSet(tt *vdl.Type, len int) (
 	*t.Value = make(map[uint16]struct{})
 	return t, nil
 }
-func (t *unnamed_7365745b75696e7431365dTarget) StartKey() (key vdl.Target, _ error) {
+func (t *__VDLTarget25_set) StartKey() (key vdl.Target, _ error) {
 	t.currKey = uint16(0)
 	t.keyTarget.Value = &t.currKey
 	target, err := &t.keyTarget, error(nil)
 	return target, err
 }
-func (t *unnamed_7365745b75696e7431365dTarget) FinishKey(key vdl.Target) error {
+func (t *__VDLTarget25_set) FinishKey(key vdl.Target) error {
 	(*t.Value)[t.currKey] = struct{}{}
 	return nil
 }
-func (t *unnamed_7365745b75696e7431365dTarget) FinishSet(list vdl.SetTarget) error {
+func (t *__VDLTarget25_set) FinishSet(list vdl.SetTarget) error {
 	if len(*t.Value) == 0 {
 		*t.Value = nil
 	}
@@ -4634,7 +4634,7 @@ func (t *unnamed_7365745b75696e7431365dTarget) FinishSet(list vdl.SetTarget) err
 }
 
 // map[uint32]struct{}
-type unnamed_7365745b75696e7433325dTarget struct {
+type __VDLTarget26_set struct {
 	Value     *map[uint32]struct{}
 	currKey   uint32
 	keyTarget vdl.Uint32Target
@@ -4642,7 +4642,7 @@ type unnamed_7365745b75696e7433325dTarget struct {
 	vdl.SetTargetBase
 }
 
-func (t *unnamed_7365745b75696e7433325dTarget) StartSet(tt *vdl.Type, len int) (vdl.SetTarget, error) {
+func (t *__VDLTarget26_set) StartSet(tt *vdl.Type, len int) (vdl.SetTarget, error) {
 
 	if ttWant := vdl.TypeOf((*map[uint32]struct{})(nil)); !vdl.Compatible(tt, ttWant) {
 		return nil, fmt.Errorf("type %v incompatible with %v", tt, ttWant)
@@ -4650,17 +4650,17 @@ func (t *unnamed_7365745b75696e7433325dTarget) StartSet(tt *vdl.Type, len int) (
 	*t.Value = make(map[uint32]struct{})
 	return t, nil
 }
-func (t *unnamed_7365745b75696e7433325dTarget) StartKey() (key vdl.Target, _ error) {
+func (t *__VDLTarget26_set) StartKey() (key vdl.Target, _ error) {
 	t.currKey = uint32(0)
 	t.keyTarget.Value = &t.currKey
 	target, err := &t.keyTarget, error(nil)
 	return target, err
 }
-func (t *unnamed_7365745b75696e7433325dTarget) FinishKey(key vdl.Target) error {
+func (t *__VDLTarget26_set) FinishKey(key vdl.Target) error {
 	(*t.Value)[t.currKey] = struct{}{}
 	return nil
 }
-func (t *unnamed_7365745b75696e7433325dTarget) FinishSet(list vdl.SetTarget) error {
+func (t *__VDLTarget26_set) FinishSet(list vdl.SetTarget) error {
 	if len(*t.Value) == 0 {
 		*t.Value = nil
 	}
@@ -4669,7 +4669,7 @@ func (t *unnamed_7365745b75696e7433325dTarget) FinishSet(list vdl.SetTarget) err
 }
 
 // map[uint64]struct{}
-type unnamed_7365745b75696e7436345dTarget struct {
+type __VDLTarget27_set struct {
 	Value     *map[uint64]struct{}
 	currKey   uint64
 	keyTarget vdl.Uint64Target
@@ -4677,7 +4677,7 @@ type unnamed_7365745b75696e7436345dTarget struct {
 	vdl.SetTargetBase
 }
 
-func (t *unnamed_7365745b75696e7436345dTarget) StartSet(tt *vdl.Type, len int) (vdl.SetTarget, error) {
+func (t *__VDLTarget27_set) StartSet(tt *vdl.Type, len int) (vdl.SetTarget, error) {
 
 	if ttWant := vdl.TypeOf((*map[uint64]struct{})(nil)); !vdl.Compatible(tt, ttWant) {
 		return nil, fmt.Errorf("type %v incompatible with %v", tt, ttWant)
@@ -4685,17 +4685,17 @@ func (t *unnamed_7365745b75696e7436345dTarget) StartSet(tt *vdl.Type, len int) (
 	*t.Value = make(map[uint64]struct{})
 	return t, nil
 }
-func (t *unnamed_7365745b75696e7436345dTarget) StartKey() (key vdl.Target, _ error) {
+func (t *__VDLTarget27_set) StartKey() (key vdl.Target, _ error) {
 	t.currKey = uint64(0)
 	t.keyTarget.Value = &t.currKey
 	target, err := &t.keyTarget, error(nil)
 	return target, err
 }
-func (t *unnamed_7365745b75696e7436345dTarget) FinishKey(key vdl.Target) error {
+func (t *__VDLTarget27_set) FinishKey(key vdl.Target) error {
 	(*t.Value)[t.currKey] = struct{}{}
 	return nil
 }
-func (t *unnamed_7365745b75696e7436345dTarget) FinishSet(list vdl.SetTarget) error {
+func (t *__VDLTarget27_set) FinishSet(list vdl.SetTarget) error {
 	if len(*t.Value) == 0 {
 		*t.Value = nil
 	}
@@ -4704,7 +4704,7 @@ func (t *unnamed_7365745b75696e7436345dTarget) FinishSet(list vdl.SetTarget) err
 }
 
 // map[int16]struct{}
-type unnamed_7365745b696e7431365dTarget struct {
+type __VDLTarget28_set struct {
 	Value     *map[int16]struct{}
 	currKey   int16
 	keyTarget vdl.Int16Target
@@ -4712,7 +4712,7 @@ type unnamed_7365745b696e7431365dTarget struct {
 	vdl.SetTargetBase
 }
 
-func (t *unnamed_7365745b696e7431365dTarget) StartSet(tt *vdl.Type, len int) (vdl.SetTarget, error) {
+func (t *__VDLTarget28_set) StartSet(tt *vdl.Type, len int) (vdl.SetTarget, error) {
 
 	if ttWant := vdl.TypeOf((*map[int16]struct{})(nil)); !vdl.Compatible(tt, ttWant) {
 		return nil, fmt.Errorf("type %v incompatible with %v", tt, ttWant)
@@ -4720,17 +4720,17 @@ func (t *unnamed_7365745b696e7431365dTarget) StartSet(tt *vdl.Type, len int) (vd
 	*t.Value = make(map[int16]struct{})
 	return t, nil
 }
-func (t *unnamed_7365745b696e7431365dTarget) StartKey() (key vdl.Target, _ error) {
+func (t *__VDLTarget28_set) StartKey() (key vdl.Target, _ error) {
 	t.currKey = int16(0)
 	t.keyTarget.Value = &t.currKey
 	target, err := &t.keyTarget, error(nil)
 	return target, err
 }
-func (t *unnamed_7365745b696e7431365dTarget) FinishKey(key vdl.Target) error {
+func (t *__VDLTarget28_set) FinishKey(key vdl.Target) error {
 	(*t.Value)[t.currKey] = struct{}{}
 	return nil
 }
-func (t *unnamed_7365745b696e7431365dTarget) FinishSet(list vdl.SetTarget) error {
+func (t *__VDLTarget28_set) FinishSet(list vdl.SetTarget) error {
 	if len(*t.Value) == 0 {
 		*t.Value = nil
 	}
@@ -4739,7 +4739,7 @@ func (t *unnamed_7365745b696e7431365dTarget) FinishSet(list vdl.SetTarget) error
 }
 
 // map[int32]struct{}
-type unnamed_7365745b696e7433325dTarget struct {
+type __VDLTarget29_set struct {
 	Value     *map[int32]struct{}
 	currKey   int32
 	keyTarget vdl.Int32Target
@@ -4747,7 +4747,7 @@ type unnamed_7365745b696e7433325dTarget struct {
 	vdl.SetTargetBase
 }
 
-func (t *unnamed_7365745b696e7433325dTarget) StartSet(tt *vdl.Type, len int) (vdl.SetTarget, error) {
+func (t *__VDLTarget29_set) StartSet(tt *vdl.Type, len int) (vdl.SetTarget, error) {
 
 	if ttWant := vdl.TypeOf((*map[int32]struct{})(nil)); !vdl.Compatible(tt, ttWant) {
 		return nil, fmt.Errorf("type %v incompatible with %v", tt, ttWant)
@@ -4755,17 +4755,17 @@ func (t *unnamed_7365745b696e7433325dTarget) StartSet(tt *vdl.Type, len int) (vd
 	*t.Value = make(map[int32]struct{})
 	return t, nil
 }
-func (t *unnamed_7365745b696e7433325dTarget) StartKey() (key vdl.Target, _ error) {
+func (t *__VDLTarget29_set) StartKey() (key vdl.Target, _ error) {
 	t.currKey = int32(0)
 	t.keyTarget.Value = &t.currKey
 	target, err := &t.keyTarget, error(nil)
 	return target, err
 }
-func (t *unnamed_7365745b696e7433325dTarget) FinishKey(key vdl.Target) error {
+func (t *__VDLTarget29_set) FinishKey(key vdl.Target) error {
 	(*t.Value)[t.currKey] = struct{}{}
 	return nil
 }
-func (t *unnamed_7365745b696e7433325dTarget) FinishSet(list vdl.SetTarget) error {
+func (t *__VDLTarget29_set) FinishSet(list vdl.SetTarget) error {
 	if len(*t.Value) == 0 {
 		*t.Value = nil
 	}
@@ -4774,7 +4774,7 @@ func (t *unnamed_7365745b696e7433325dTarget) FinishSet(list vdl.SetTarget) error
 }
 
 // map[int64]struct{}
-type unnamed_7365745b696e7436345dTarget struct {
+type __VDLTarget30_set struct {
 	Value     *map[int64]struct{}
 	currKey   int64
 	keyTarget vdl.Int64Target
@@ -4782,7 +4782,7 @@ type unnamed_7365745b696e7436345dTarget struct {
 	vdl.SetTargetBase
 }
 
-func (t *unnamed_7365745b696e7436345dTarget) StartSet(tt *vdl.Type, len int) (vdl.SetTarget, error) {
+func (t *__VDLTarget30_set) StartSet(tt *vdl.Type, len int) (vdl.SetTarget, error) {
 
 	if ttWant := vdl.TypeOf((*map[int64]struct{})(nil)); !vdl.Compatible(tt, ttWant) {
 		return nil, fmt.Errorf("type %v incompatible with %v", tt, ttWant)
@@ -4790,17 +4790,17 @@ func (t *unnamed_7365745b696e7436345dTarget) StartSet(tt *vdl.Type, len int) (vd
 	*t.Value = make(map[int64]struct{})
 	return t, nil
 }
-func (t *unnamed_7365745b696e7436345dTarget) StartKey() (key vdl.Target, _ error) {
+func (t *__VDLTarget30_set) StartKey() (key vdl.Target, _ error) {
 	t.currKey = int64(0)
 	t.keyTarget.Value = &t.currKey
 	target, err := &t.keyTarget, error(nil)
 	return target, err
 }
-func (t *unnamed_7365745b696e7436345dTarget) FinishKey(key vdl.Target) error {
+func (t *__VDLTarget30_set) FinishKey(key vdl.Target) error {
 	(*t.Value)[t.currKey] = struct{}{}
 	return nil
 }
-func (t *unnamed_7365745b696e7436345dTarget) FinishSet(list vdl.SetTarget) error {
+func (t *__VDLTarget30_set) FinishSet(list vdl.SetTarget) error {
 	if len(*t.Value) == 0 {
 		*t.Value = nil
 	}
@@ -4809,7 +4809,7 @@ func (t *unnamed_7365745b696e7436345dTarget) FinishSet(list vdl.SetTarget) error
 }
 
 // map[float32]struct{}
-type unnamed_7365745b666c6f617433325dTarget struct {
+type __VDLTarget31_set struct {
 	Value     *map[float32]struct{}
 	currKey   float32
 	keyTarget vdl.Float32Target
@@ -4817,7 +4817,7 @@ type unnamed_7365745b666c6f617433325dTarget struct {
 	vdl.SetTargetBase
 }
 
-func (t *unnamed_7365745b666c6f617433325dTarget) StartSet(tt *vdl.Type, len int) (vdl.SetTarget, error) {
+func (t *__VDLTarget31_set) StartSet(tt *vdl.Type, len int) (vdl.SetTarget, error) {
 
 	if ttWant := vdl.TypeOf((*map[float32]struct{})(nil)); !vdl.Compatible(tt, ttWant) {
 		return nil, fmt.Errorf("type %v incompatible with %v", tt, ttWant)
@@ -4825,17 +4825,17 @@ func (t *unnamed_7365745b666c6f617433325dTarget) StartSet(tt *vdl.Type, len int)
 	*t.Value = make(map[float32]struct{})
 	return t, nil
 }
-func (t *unnamed_7365745b666c6f617433325dTarget) StartKey() (key vdl.Target, _ error) {
+func (t *__VDLTarget31_set) StartKey() (key vdl.Target, _ error) {
 	t.currKey = float32(0)
 	t.keyTarget.Value = &t.currKey
 	target, err := &t.keyTarget, error(nil)
 	return target, err
 }
-func (t *unnamed_7365745b666c6f617433325dTarget) FinishKey(key vdl.Target) error {
+func (t *__VDLTarget31_set) FinishKey(key vdl.Target) error {
 	(*t.Value)[t.currKey] = struct{}{}
 	return nil
 }
-func (t *unnamed_7365745b666c6f617433325dTarget) FinishSet(list vdl.SetTarget) error {
+func (t *__VDLTarget31_set) FinishSet(list vdl.SetTarget) error {
 	if len(*t.Value) == 0 {
 		*t.Value = nil
 	}
@@ -4844,7 +4844,7 @@ func (t *unnamed_7365745b666c6f617433325dTarget) FinishSet(list vdl.SetTarget) e
 }
 
 // map[float64]struct{}
-type unnamed_7365745b666c6f617436345dTarget struct {
+type __VDLTarget32_set struct {
 	Value     *map[float64]struct{}
 	currKey   float64
 	keyTarget vdl.Float64Target
@@ -4852,7 +4852,7 @@ type unnamed_7365745b666c6f617436345dTarget struct {
 	vdl.SetTargetBase
 }
 
-func (t *unnamed_7365745b666c6f617436345dTarget) StartSet(tt *vdl.Type, len int) (vdl.SetTarget, error) {
+func (t *__VDLTarget32_set) StartSet(tt *vdl.Type, len int) (vdl.SetTarget, error) {
 
 	if ttWant := vdl.TypeOf((*map[float64]struct{})(nil)); !vdl.Compatible(tt, ttWant) {
 		return nil, fmt.Errorf("type %v incompatible with %v", tt, ttWant)
@@ -4860,17 +4860,17 @@ func (t *unnamed_7365745b666c6f617436345dTarget) StartSet(tt *vdl.Type, len int)
 	*t.Value = make(map[float64]struct{})
 	return t, nil
 }
-func (t *unnamed_7365745b666c6f617436345dTarget) StartKey() (key vdl.Target, _ error) {
+func (t *__VDLTarget32_set) StartKey() (key vdl.Target, _ error) {
 	t.currKey = float64(0)
 	t.keyTarget.Value = &t.currKey
 	target, err := &t.keyTarget, error(nil)
 	return target, err
 }
-func (t *unnamed_7365745b666c6f617436345dTarget) FinishKey(key vdl.Target) error {
+func (t *__VDLTarget32_set) FinishKey(key vdl.Target) error {
 	(*t.Value)[t.currKey] = struct{}{}
 	return nil
 }
-func (t *unnamed_7365745b666c6f617436345dTarget) FinishSet(list vdl.SetTarget) error {
+func (t *__VDLTarget32_set) FinishSet(list vdl.SetTarget) error {
 	if len(*t.Value) == 0 {
 		*t.Value = nil
 	}
@@ -4879,7 +4879,7 @@ func (t *unnamed_7365745b666c6f617436345dTarget) FinishSet(list vdl.SetTarget) e
 }
 
 // map[complex64]struct{}
-type unnamed_7365745b636f6d706c657836345dTarget struct {
+type __VDLTarget33_set struct {
 	Value     *map[complex64]struct{}
 	currKey   complex64
 	keyTarget vdl.Complex64Target
@@ -4887,7 +4887,7 @@ type unnamed_7365745b636f6d706c657836345dTarget struct {
 	vdl.SetTargetBase
 }
 
-func (t *unnamed_7365745b636f6d706c657836345dTarget) StartSet(tt *vdl.Type, len int) (vdl.SetTarget, error) {
+func (t *__VDLTarget33_set) StartSet(tt *vdl.Type, len int) (vdl.SetTarget, error) {
 
 	if ttWant := vdl.TypeOf((*map[complex64]struct{})(nil)); !vdl.Compatible(tt, ttWant) {
 		return nil, fmt.Errorf("type %v incompatible with %v", tt, ttWant)
@@ -4895,17 +4895,17 @@ func (t *unnamed_7365745b636f6d706c657836345dTarget) StartSet(tt *vdl.Type, len 
 	*t.Value = make(map[complex64]struct{})
 	return t, nil
 }
-func (t *unnamed_7365745b636f6d706c657836345dTarget) StartKey() (key vdl.Target, _ error) {
+func (t *__VDLTarget33_set) StartKey() (key vdl.Target, _ error) {
 	t.currKey = complex64(0)
 	t.keyTarget.Value = &t.currKey
 	target, err := &t.keyTarget, error(nil)
 	return target, err
 }
-func (t *unnamed_7365745b636f6d706c657836345dTarget) FinishKey(key vdl.Target) error {
+func (t *__VDLTarget33_set) FinishKey(key vdl.Target) error {
 	(*t.Value)[t.currKey] = struct{}{}
 	return nil
 }
-func (t *unnamed_7365745b636f6d706c657836345dTarget) FinishSet(list vdl.SetTarget) error {
+func (t *__VDLTarget33_set) FinishSet(list vdl.SetTarget) error {
 	if len(*t.Value) == 0 {
 		*t.Value = nil
 	}
@@ -4914,7 +4914,7 @@ func (t *unnamed_7365745b636f6d706c657836345dTarget) FinishSet(list vdl.SetTarge
 }
 
 // map[complex128]struct{}
-type unnamed_7365745b636f6d706c65783132385dTarget struct {
+type __VDLTarget34_set struct {
 	Value     *map[complex128]struct{}
 	currKey   complex128
 	keyTarget vdl.Complex128Target
@@ -4922,7 +4922,7 @@ type unnamed_7365745b636f6d706c65783132385dTarget struct {
 	vdl.SetTargetBase
 }
 
-func (t *unnamed_7365745b636f6d706c65783132385dTarget) StartSet(tt *vdl.Type, len int) (vdl.SetTarget, error) {
+func (t *__VDLTarget34_set) StartSet(tt *vdl.Type, len int) (vdl.SetTarget, error) {
 
 	if ttWant := vdl.TypeOf((*map[complex128]struct{})(nil)); !vdl.Compatible(tt, ttWant) {
 		return nil, fmt.Errorf("type %v incompatible with %v", tt, ttWant)
@@ -4930,17 +4930,17 @@ func (t *unnamed_7365745b636f6d706c65783132385dTarget) StartSet(tt *vdl.Type, le
 	*t.Value = make(map[complex128]struct{})
 	return t, nil
 }
-func (t *unnamed_7365745b636f6d706c65783132385dTarget) StartKey() (key vdl.Target, _ error) {
+func (t *__VDLTarget34_set) StartKey() (key vdl.Target, _ error) {
 	t.currKey = complex128(0)
 	t.keyTarget.Value = &t.currKey
 	target, err := &t.keyTarget, error(nil)
 	return target, err
 }
-func (t *unnamed_7365745b636f6d706c65783132385dTarget) FinishKey(key vdl.Target) error {
+func (t *__VDLTarget34_set) FinishKey(key vdl.Target) error {
 	(*t.Value)[t.currKey] = struct{}{}
 	return nil
 }
-func (t *unnamed_7365745b636f6d706c65783132385dTarget) FinishSet(list vdl.SetTarget) error {
+func (t *__VDLTarget34_set) FinishSet(list vdl.SetTarget) error {
 	if len(*t.Value) == 0 {
 		*t.Value = nil
 	}
@@ -4949,7 +4949,7 @@ func (t *unnamed_7365745b636f6d706c65783132385dTarget) FinishSet(list vdl.SetTar
 }
 
 // map[time.Time]struct{}
-type unnamed_7365745b74696d652e54696d65207374727563747b5365636f6e647320696e7436343b4e616e6f7320696e7433327d5dTarget struct {
+type __VDLTarget35_set struct {
 	Value     *map[time.Time]struct{}
 	currKey   time.Time
 	keyTarget time_2.TimeTarget
@@ -4957,25 +4957,25 @@ type unnamed_7365745b74696d652e54696d65207374727563747b5365636f6e647320696e74363
 	vdl.SetTargetBase
 }
 
-func (t *unnamed_7365745b74696d652e54696d65207374727563747b5365636f6e647320696e7436343b4e616e6f7320696e7433327d5dTarget) StartSet(tt *vdl.Type, len int) (vdl.SetTarget, error) {
+func (t *__VDLTarget35_set) StartSet(tt *vdl.Type, len int) (vdl.SetTarget, error) {
 
-	if ttWant := vdl.TypeOf((*map[time_2.Time]struct{})(nil)); !vdl.Compatible(tt, ttWant) {
+	if ttWant := vdl.TypeOf((*map[time.Time]struct{})(nil)); !vdl.Compatible(tt, ttWant) {
 		return nil, fmt.Errorf("type %v incompatible with %v", tt, ttWant)
 	}
 	*t.Value = make(map[time.Time]struct{})
 	return t, nil
 }
-func (t *unnamed_7365745b74696d652e54696d65207374727563747b5365636f6e647320696e7436343b4e616e6f7320696e7433327d5dTarget) StartKey() (key vdl.Target, _ error) {
+func (t *__VDLTarget35_set) StartKey() (key vdl.Target, _ error) {
 	t.currKey = reflect.Zero(reflect.TypeOf(t.currKey)).Interface().(time.Time)
 	t.keyTarget.Value = &t.currKey
 	target, err := &t.keyTarget, error(nil)
 	return target, err
 }
-func (t *unnamed_7365745b74696d652e54696d65207374727563747b5365636f6e647320696e7436343b4e616e6f7320696e7433327d5dTarget) FinishKey(key vdl.Target) error {
+func (t *__VDLTarget35_set) FinishKey(key vdl.Target) error {
 	(*t.Value)[t.currKey] = struct{}{}
 	return nil
 }
-func (t *unnamed_7365745b74696d652e54696d65207374727563747b5365636f6e647320696e7436343b4e616e6f7320696e7433327d5dTarget) FinishSet(list vdl.SetTarget) error {
+func (t *__VDLTarget35_set) FinishSet(list vdl.SetTarget) error {
 	if len(*t.Value) == 0 {
 		*t.Value = nil
 	}
@@ -5051,6 +5051,55 @@ func (t *BigDataTarget) FinishFields(_ vdl.FieldsTarget) error {
 
 	return nil
 }
+
+// Create zero values for each type.
+var (
+	__VDLZeroAddressInfo            = AddressInfo{}
+	__VDLZeroCreditAgency           = CreditAgencyEquifax
+	__VDLZeroExperianRating         = ExperianRatingGood
+	__VDLZeroRatingsArray           = RatingsArray{}
+	__VDLZeroEquifaxCreditReport    = EquifaxCreditReport{}
+	__VDLZeroTdh                    = TdhTom
+	__VDLZeroExperianCreditReport   = ExperianCreditReport{}
+	__VDLZeroTransUnionCreditReport = TransUnionCreditReport{}
+	__VDLZeroAgencyReport           = AgencyReport(AgencyReportEquifaxReport{})
+	__VDLZeroCreditReport           = CreditReport{
+		Report: AgencyReportEquifaxReport{},
+	}
+	__VDLZeroCustomer = Customer{
+		Credit: CreditReport{
+			Report: AgencyReportEquifaxReport{},
+		},
+	}
+	__VDLZeroInvoice          = Invoice{}
+	__VDLZeroNumbers          = Numbers{}
+	__VDLZeroTitleOrValueType = TitleOrValueType(TitleOrValueTypeTitle{})
+	__VDLZeroBazType          = BazType{
+		TitleOrValue: TitleOrValueTypeTitle{},
+	}
+	__VDLZeroBarType = BarType{
+		Baz: BazType{
+			TitleOrValue: TitleOrValueTypeTitle{},
+		},
+	}
+	__VDLZeroFooType = FooType{
+		Bar: BarType{
+			Baz: BazType{
+				TitleOrValue: TitleOrValueTypeTitle{},
+			},
+		},
+	}
+	__VDLZeroK            = K{}
+	__VDLZeroV            = V{}
+	__VDLZeroFunWithMaps  = FunWithMaps{}
+	__VDLZeroFunWithTypes = FunWithTypes{
+		T1: vdl.AnyType,
+		T2: vdl.AnyType,
+	}
+	__VDLZeroManyMaps = ManyMaps{}
+	__VDLZeroManySets = ManySets{}
+	__VDLZeroBigData  = BigData{}
+)
 
 var __VDLInitCalled bool
 

@@ -450,6 +450,13 @@ func (t *ChangeTarget) FinishFields(_ vdl.FieldsTarget) error {
 	return nil
 }
 
+// Create zero values for each type.
+var (
+	__VDLZeroResumeMarker = ResumeMarker(nil)
+	__VDLZeroGlobRequest  = GlobRequest{}
+	__VDLZeroChange       = Change{}
+)
+
 //////////////////////////////////////////////////
 // Const definitions
 

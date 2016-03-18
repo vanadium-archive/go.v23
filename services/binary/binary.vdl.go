@@ -112,7 +112,7 @@ func (m *Description) MakeVDLTarget() vdl.Target {
 type DescriptionTarget struct {
 	Value          *Description
 	nameTarget     vdl.StringTarget
-	profilesTarget unnamed_6d61705b737472696e675d626f6f6cTarget
+	profilesTarget __VDLTarget1_map
 	vdl.TargetBase
 	vdl.FieldsTargetBase
 }
@@ -147,7 +147,7 @@ func (t *DescriptionTarget) FinishFields(_ vdl.FieldsTarget) error {
 }
 
 // map[string]bool
-type unnamed_6d61705b737472696e675d626f6f6cTarget struct {
+type __VDLTarget1_map struct {
 	Value      *map[string]bool
 	currKey    string
 	currElem   bool
@@ -157,7 +157,7 @@ type unnamed_6d61705b737472696e675d626f6f6cTarget struct {
 	vdl.MapTargetBase
 }
 
-func (t *unnamed_6d61705b737472696e675d626f6f6cTarget) StartMap(tt *vdl.Type, len int) (vdl.MapTarget, error) {
+func (t *__VDLTarget1_map) StartMap(tt *vdl.Type, len int) (vdl.MapTarget, error) {
 
 	if ttWant := vdl.TypeOf((*map[string]bool)(nil)); !vdl.Compatible(tt, ttWant) {
 		return nil, fmt.Errorf("type %v incompatible with %v", tt, ttWant)
@@ -165,23 +165,23 @@ func (t *unnamed_6d61705b737472696e675d626f6f6cTarget) StartMap(tt *vdl.Type, le
 	*t.Value = make(map[string]bool)
 	return t, nil
 }
-func (t *unnamed_6d61705b737472696e675d626f6f6cTarget) StartKey() (key vdl.Target, _ error) {
+func (t *__VDLTarget1_map) StartKey() (key vdl.Target, _ error) {
 	t.currKey = ""
 	t.keyTarget.Value = &t.currKey
 	target, err := &t.keyTarget, error(nil)
 	return target, err
 }
-func (t *unnamed_6d61705b737472696e675d626f6f6cTarget) FinishKeyStartField(key vdl.Target) (field vdl.Target, _ error) {
+func (t *__VDLTarget1_map) FinishKeyStartField(key vdl.Target) (field vdl.Target, _ error) {
 	t.currElem = false
 	t.elemTarget.Value = &t.currElem
 	target, err := &t.elemTarget, error(nil)
 	return target, err
 }
-func (t *unnamed_6d61705b737472696e675d626f6f6cTarget) FinishField(key, field vdl.Target) error {
+func (t *__VDLTarget1_map) FinishField(key, field vdl.Target) error {
 	(*t.Value)[t.currKey] = t.currElem
 	return nil
 }
-func (t *unnamed_6d61705b737472696e675d626f6f6cTarget) FinishMap(elem vdl.MapTarget) error {
+func (t *__VDLTarget1_map) FinishMap(elem vdl.MapTarget) error {
 	if len(*t.Value) == 0 {
 		*t.Value = nil
 	}
@@ -278,6 +278,12 @@ func (t *PartInfoTarget) FinishFields(_ vdl.FieldsTarget) error {
 
 	return nil
 }
+
+// Create zero values for each type.
+var (
+	__VDLZeroDescription = Description{}
+	__VDLZeroPartInfo    = PartInfo{}
+)
 
 //////////////////////////////////////////////////
 // Const definitions

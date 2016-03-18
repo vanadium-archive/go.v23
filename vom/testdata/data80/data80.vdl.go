@@ -1575,7 +1575,7 @@ var Tests = []types.TestCase{
 	},
 	{
 		Name:       "types.NUnion{A: false}",
-		Value:      vdl.ValueOf(types.NUnion(types.NUnionA{false})),
+		Value:      vdl.ValueOf(types.NUnion(types.NUnionA{})),
 		TypeString: "v.io/v23/vom/testdata/types.NUnion union{A bool;B string;C int64}",
 		Hex:        "80513a070022762e696f2f7632332f766f6d2f74657374646174612f74797065732e4e556e696f6e01030001410101e10001420103e10001430109e1e152020000",
 		HexVersion: "80",
@@ -1584,7 +1584,7 @@ var Tests = []types.TestCase{
 	},
 	{
 		Name:       "types.NUnion{B: \"\"}",
-		Value:      vdl.ValueOf(types.NUnion(types.NUnionB{""})),
+		Value:      vdl.ValueOf(types.NUnion(types.NUnionB{})),
 		TypeString: "v.io/v23/vom/testdata/types.NUnion union{A bool;B string;C int64}",
 		Hex:        "80513a070022762e696f2f7632332f766f6d2f74657374646174612f74797065732e4e556e696f6e01030001410101e10001420103e10001430109e1e152020100",
 		HexVersion: "80",
@@ -1602,7 +1602,7 @@ var Tests = []types.TestCase{
 	},
 	{
 		Name:       "types.NUnion{C: 0}",
-		Value:      vdl.ValueOf(types.NUnion(types.NUnionC{int64(0)})),
+		Value:      vdl.ValueOf(types.NUnion(types.NUnionC{})),
 		TypeString: "v.io/v23/vom/testdata/types.NUnion union{A bool;B string;C int64}",
 		Hex:        "80513a070022762e696f2f7632332f766f6d2f74657374646174612f74797065732e4e556e696f6e01030001410101e10001420103e10001430109e1e152020200",
 		HexVersion: "80",
@@ -1611,7 +1611,7 @@ var Tests = []types.TestCase{
 	},
 	{
 		Name:       "types.NUnion{C: 123}",
-		Value:      vdl.ValueOf(types.NUnion(types.NUnionC{int64(123)})),
+		Value:      vdl.ValueOf(types.NUnion(types.NUnionC{123})),
 		TypeString: "v.io/v23/vom/testdata/types.NUnion union{A bool;B string;C int64}",
 		Hex:        "80513a070022762e696f2f7632332f766f6d2f74657374646174612f74797065732e4e556e696f6e01030001410101e10001420103e10001430109e1e1520302fff6",
 		HexVersion: "80",
@@ -1620,7 +1620,7 @@ var Tests = []types.TestCase{
 	},
 	{
 		Name:       "types.NUnion{C: -123}",
-		Value:      vdl.ValueOf(types.NUnion(types.NUnionC{int64(-123)})),
+		Value:      vdl.ValueOf(types.NUnion(types.NUnionC{-123})),
 		TypeString: "v.io/v23/vom/testdata/types.NUnion union{A bool;B string;C int64}",
 		Hex:        "80513a070022762e696f2f7632332f766f6d2f74657374646174612f74797065732e4e556e696f6e01030001410101e10001420103e10001430109e1e1520302fff5",
 		HexVersion: "80",
@@ -2421,7 +2421,7 @@ var Tests = []types.TestCase{
 	{
 		Name: "types.StructAny{Any: types.NUnion{A: false}}",
 		Value: vdl.ValueOf(types.StructAny{
-			Any: vdl.ValueOf(types.NUnion(types.NUnionA{false})),
+			Any: vdl.ValueOf(types.NUnion(types.NUnionA{})),
 		}),
 		TypeString: "v.io/v23/vom/testdata/types.StructAny struct{Any any}",
 		Hex:        "805133060025762e696f2f7632332f766f6d2f74657374646174612f74797065732e537472756374416e7901010003416e79010fe1e1533a070022762e696f2f7632332f766f6d2f74657374646174612f74797065732e4e556e696f6e01030001410101e10001420103e10001430109e1e15205002a0000e1",
@@ -2974,7 +2974,7 @@ var Tests = []types.TestCase{
 	},
 	{
 		Name:       "types.NUnion{A: false}",
-		Value:      vdl.ValueOf(types.NUnion(types.NUnionA{false})),
+		Value:      vdl.ValueOf(types.NUnion(types.NUnionA{})),
 		TypeString: "v.io/v23/vom/testdata/types.NUnion union{A bool;B string;C int64}",
 		Hex:        "80513a070022762e696f2f7632332f766f6d2f74657374646174612f74797065732e4e556e696f6e01030001410101e10001420103e10001430109e1e152020000",
 		HexVersion: "80",

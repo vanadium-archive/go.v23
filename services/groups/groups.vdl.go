@@ -172,7 +172,7 @@ func (m *GetResponse) MakeVDLTarget() vdl.Target {
 
 type GetResponseTarget struct {
 	Value         *GetResponse
-	entriesTarget unnamed_7365745b762e696f2f7632332f73657276696365732f67726f7570732e426c657373696e675061747465726e4368756e6b20737472696e675dTarget
+	entriesTarget __VDLTarget1_set
 	vdl.TargetBase
 	vdl.FieldsTargetBase
 }
@@ -203,7 +203,7 @@ func (t *GetResponseTarget) FinishFields(_ vdl.FieldsTarget) error {
 }
 
 // map[BlessingPatternChunk]struct{}
-type unnamed_7365745b762e696f2f7632332f73657276696365732f67726f7570732e426c657373696e675061747465726e4368756e6b20737472696e675dTarget struct {
+type __VDLTarget1_set struct {
 	Value     *map[BlessingPatternChunk]struct{}
 	currKey   BlessingPatternChunk
 	keyTarget BlessingPatternChunkTarget
@@ -211,7 +211,7 @@ type unnamed_7365745b762e696f2f7632332f73657276696365732f67726f7570732e426c65737
 	vdl.SetTargetBase
 }
 
-func (t *unnamed_7365745b762e696f2f7632332f73657276696365732f67726f7570732e426c657373696e675061747465726e4368756e6b20737472696e675dTarget) StartSet(tt *vdl.Type, len int) (vdl.SetTarget, error) {
+func (t *__VDLTarget1_set) StartSet(tt *vdl.Type, len int) (vdl.SetTarget, error) {
 
 	if ttWant := vdl.TypeOf((*map[BlessingPatternChunk]struct{})(nil)); !vdl.Compatible(tt, ttWant) {
 		return nil, fmt.Errorf("type %v incompatible with %v", tt, ttWant)
@@ -219,17 +219,17 @@ func (t *unnamed_7365745b762e696f2f7632332f73657276696365732f67726f7570732e426c6
 	*t.Value = make(map[BlessingPatternChunk]struct{})
 	return t, nil
 }
-func (t *unnamed_7365745b762e696f2f7632332f73657276696365732f67726f7570732e426c657373696e675061747465726e4368756e6b20737472696e675dTarget) StartKey() (key vdl.Target, _ error) {
+func (t *__VDLTarget1_set) StartKey() (key vdl.Target, _ error) {
 	t.currKey = BlessingPatternChunk("")
 	t.keyTarget.Value = &t.currKey
 	target, err := &t.keyTarget, error(nil)
 	return target, err
 }
-func (t *unnamed_7365745b762e696f2f7632332f73657276696365732f67726f7570732e426c657373696e675061747465726e4368756e6b20737472696e675dTarget) FinishKey(key vdl.Target) error {
+func (t *__VDLTarget1_set) FinishKey(key vdl.Target) error {
 	(*t.Value)[t.currKey] = struct{}{}
 	return nil
 }
-func (t *unnamed_7365745b762e696f2f7632332f73657276696365732f67726f7570732e426c657373696e675061747465726e4368756e6b20737472696e675dTarget) FinishSet(list vdl.SetTarget) error {
+func (t *__VDLTarget1_set) FinishSet(list vdl.SetTarget) error {
 	if len(*t.Value) == 0 {
 		*t.Value = nil
 	}
@@ -410,6 +410,15 @@ func (t *ApproximationTarget) FinishFields(_ vdl.FieldsTarget) error {
 
 	return nil
 }
+
+// Create zero values for each type.
+var (
+	__VDLZeroBlessingPatternChunk = BlessingPatternChunk("")
+	__VDLZeroGetRequest           = GetRequest{}
+	__VDLZeroGetResponse          = GetResponse{}
+	__VDLZeroApproximationType    = ApproximationTypeUnder
+	__VDLZeroApproximation        = Approximation{}
+)
 
 //////////////////////////////////////////////////
 // Error definitions

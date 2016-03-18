@@ -387,6 +387,14 @@ func (t *FileTarget) FinishFields(_ vdl.FieldsTarget) error {
 	return nil
 }
 
+// Create zero values for each type.
+var (
+	__VDLZeroArchitecture    = ArchitectureAmd64
+	__VDLZeroFormat          = FormatElf
+	__VDLZeroOperatingSystem = OperatingSystemDarwin
+	__VDLZeroFile            = File{}
+)
+
 //////////////////////////////////////////////////
 // Interface definitions
 

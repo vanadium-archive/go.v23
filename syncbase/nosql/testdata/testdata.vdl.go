@@ -1800,8 +1800,8 @@ type KeyIndexDataTarget struct {
 	Value   *KeyIndexData
 	aTarget ArrayOfFourTarget
 	lTarget vdl.StringSliceTarget
-	mTarget unnamed_6d61705b636f6d706c65783132385d737472696e67Target
-	sTarget unnamed_7365745b737472696e675dTarget
+	mTarget __VDLTarget1_map
+	sTarget __VDLTarget2_set
 	vdl.TargetBase
 	vdl.FieldsTargetBase
 }
@@ -1844,7 +1844,7 @@ func (t *KeyIndexDataTarget) FinishFields(_ vdl.FieldsTarget) error {
 }
 
 // map[complex128]string
-type unnamed_6d61705b636f6d706c65783132385d737472696e67Target struct {
+type __VDLTarget1_map struct {
 	Value      *map[complex128]string
 	currKey    complex128
 	currElem   string
@@ -1854,7 +1854,7 @@ type unnamed_6d61705b636f6d706c65783132385d737472696e67Target struct {
 	vdl.MapTargetBase
 }
 
-func (t *unnamed_6d61705b636f6d706c65783132385d737472696e67Target) StartMap(tt *vdl.Type, len int) (vdl.MapTarget, error) {
+func (t *__VDLTarget1_map) StartMap(tt *vdl.Type, len int) (vdl.MapTarget, error) {
 
 	if ttWant := vdl.TypeOf((*map[complex128]string)(nil)); !vdl.Compatible(tt, ttWant) {
 		return nil, fmt.Errorf("type %v incompatible with %v", tt, ttWant)
@@ -1862,23 +1862,23 @@ func (t *unnamed_6d61705b636f6d706c65783132385d737472696e67Target) StartMap(tt *
 	*t.Value = make(map[complex128]string)
 	return t, nil
 }
-func (t *unnamed_6d61705b636f6d706c65783132385d737472696e67Target) StartKey() (key vdl.Target, _ error) {
+func (t *__VDLTarget1_map) StartKey() (key vdl.Target, _ error) {
 	t.currKey = complex128(0)
 	t.keyTarget.Value = &t.currKey
 	target, err := &t.keyTarget, error(nil)
 	return target, err
 }
-func (t *unnamed_6d61705b636f6d706c65783132385d737472696e67Target) FinishKeyStartField(key vdl.Target) (field vdl.Target, _ error) {
+func (t *__VDLTarget1_map) FinishKeyStartField(key vdl.Target) (field vdl.Target, _ error) {
 	t.currElem = ""
 	t.elemTarget.Value = &t.currElem
 	target, err := &t.elemTarget, error(nil)
 	return target, err
 }
-func (t *unnamed_6d61705b636f6d706c65783132385d737472696e67Target) FinishField(key, field vdl.Target) error {
+func (t *__VDLTarget1_map) FinishField(key, field vdl.Target) error {
 	(*t.Value)[t.currKey] = t.currElem
 	return nil
 }
-func (t *unnamed_6d61705b636f6d706c65783132385d737472696e67Target) FinishMap(elem vdl.MapTarget) error {
+func (t *__VDLTarget1_map) FinishMap(elem vdl.MapTarget) error {
 	if len(*t.Value) == 0 {
 		*t.Value = nil
 	}
@@ -1887,7 +1887,7 @@ func (t *unnamed_6d61705b636f6d706c65783132385d737472696e67Target) FinishMap(ele
 }
 
 // map[string]struct{}
-type unnamed_7365745b737472696e675dTarget struct {
+type __VDLTarget2_set struct {
 	Value     *map[string]struct{}
 	currKey   string
 	keyTarget vdl.StringTarget
@@ -1895,7 +1895,7 @@ type unnamed_7365745b737472696e675dTarget struct {
 	vdl.SetTargetBase
 }
 
-func (t *unnamed_7365745b737472696e675dTarget) StartSet(tt *vdl.Type, len int) (vdl.SetTarget, error) {
+func (t *__VDLTarget2_set) StartSet(tt *vdl.Type, len int) (vdl.SetTarget, error) {
 
 	if ttWant := vdl.TypeOf((*map[string]struct{})(nil)); !vdl.Compatible(tt, ttWant) {
 		return nil, fmt.Errorf("type %v incompatible with %v", tt, ttWant)
@@ -1903,17 +1903,17 @@ func (t *unnamed_7365745b737472696e675dTarget) StartSet(tt *vdl.Type, len int) (
 	*t.Value = make(map[string]struct{})
 	return t, nil
 }
-func (t *unnamed_7365745b737472696e675dTarget) StartKey() (key vdl.Target, _ error) {
+func (t *__VDLTarget2_set) StartKey() (key vdl.Target, _ error) {
 	t.currKey = ""
 	t.keyTarget.Value = &t.currKey
 	target, err := &t.keyTarget, error(nil)
 	return target, err
 }
-func (t *unnamed_7365745b737472696e675dTarget) FinishKey(key vdl.Target) error {
+func (t *__VDLTarget2_set) FinishKey(key vdl.Target) error {
 	(*t.Value)[t.currKey] = struct{}{}
 	return nil
 }
-func (t *unnamed_7365745b737472696e675dTarget) FinishSet(list vdl.SetTarget) error {
+func (t *__VDLTarget2_set) FinishSet(list vdl.SetTarget) error {
 	if len(*t.Value) == 0 {
 		*t.Value = nil
 	}
@@ -1989,6 +1989,46 @@ func (t *BigDataTarget) FinishFields(_ vdl.FieldsTarget) error {
 
 	return nil
 }
+
+// Create zero values for each type.
+var (
+	__VDLZeroAddressInfo            = AddressInfo{}
+	__VDLZeroCreditAgency           = CreditAgencyEquifax
+	__VDLZeroExperianRating         = ExperianRatingGood
+	__VDLZeroEquifaxCreditReport    = EquifaxCreditReport{}
+	__VDLZeroExperianCreditReport   = ExperianCreditReport{}
+	__VDLZeroTransUnionCreditReport = TransUnionCreditReport{}
+	__VDLZeroAgencyReport           = AgencyReport(AgencyReportEquifaxReport{})
+	__VDLZeroCreditReport           = CreditReport{
+		Report: AgencyReportEquifaxReport{},
+	}
+	__VDLZeroCustomer = Customer{
+		Credit: CreditReport{
+			Report: AgencyReportEquifaxReport{},
+		},
+	}
+	__VDLZeroInvoice          = Invoice{}
+	__VDLZeroNumbers          = Numbers{}
+	__VDLZeroTitleOrValueType = TitleOrValueType(TitleOrValueTypeTitle{})
+	__VDLZeroBazType          = BazType{
+		TitleOrValue: TitleOrValueTypeTitle{},
+	}
+	__VDLZeroBarType = BarType{
+		Baz: BazType{
+			TitleOrValue: TitleOrValueTypeTitle{},
+		},
+	}
+	__VDLZeroFooType = FooType{
+		Bar: BarType{
+			Baz: BazType{
+				TitleOrValue: TitleOrValueTypeTitle{},
+			},
+		},
+	}
+	__VDLZeroArrayOfFour  = ArrayOfFour{}
+	__VDLZeroKeyIndexData = KeyIndexData{}
+	__VDLZeroBigData      = BigData{}
+)
 
 var __VDLInitCalled bool
 

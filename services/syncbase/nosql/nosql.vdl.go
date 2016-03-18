@@ -542,7 +542,7 @@ type SyncgroupSpecTarget struct {
 	Value             *SyncgroupSpec
 	descriptionTarget vdl.StringTarget
 	permsTarget       access.PermissionsTarget
-	prefixesTarget    unnamed_5b5d762e696f2f7632332f73657276696365732f73796e63626173652f6e6f73716c2e5461626c65526f77207374727563747b5461626c654e616d6520737472696e673b526f7720737472696e677dTarget
+	prefixesTarget    __VDLTarget1_list
 	mountTablesTarget vdl.StringSliceTarget
 	isPrivateTarget   vdl.BoolTarget
 	vdl.TargetBase
@@ -591,14 +591,14 @@ func (t *SyncgroupSpecTarget) FinishFields(_ vdl.FieldsTarget) error {
 }
 
 // []TableRow
-type unnamed_5b5d762e696f2f7632332f73657276696365732f73796e63626173652f6e6f73716c2e5461626c65526f77207374727563747b5461626c654e616d6520737472696e673b526f7720737472696e677dTarget struct {
+type __VDLTarget1_list struct {
 	Value      *[]TableRow
 	elemTarget TableRowTarget
 	vdl.TargetBase
 	vdl.ListTargetBase
 }
 
-func (t *unnamed_5b5d762e696f2f7632332f73657276696365732f73796e63626173652f6e6f73716c2e5461626c65526f77207374727563747b5461626c654e616d6520737472696e673b526f7720737472696e677dTarget) StartList(tt *vdl.Type, len int) (vdl.ListTarget, error) {
+func (t *__VDLTarget1_list) StartList(tt *vdl.Type, len int) (vdl.ListTarget, error) {
 
 	if ttWant := vdl.TypeOf((*[]TableRow)(nil)); !vdl.Compatible(tt, ttWant) {
 		return nil, fmt.Errorf("type %v incompatible with %v", tt, ttWant)
@@ -610,15 +610,15 @@ func (t *unnamed_5b5d762e696f2f7632332f73657276696365732f73796e63626173652f6e6f7
 	}
 	return t, nil
 }
-func (t *unnamed_5b5d762e696f2f7632332f73657276696365732f73796e63626173652f6e6f73716c2e5461626c65526f77207374727563747b5461626c654e616d6520737472696e673b526f7720737472696e677dTarget) StartElem(index int) (elem vdl.Target, _ error) {
+func (t *__VDLTarget1_list) StartElem(index int) (elem vdl.Target, _ error) {
 	t.elemTarget.Value = &(*t.Value)[index]
 	target, err := &t.elemTarget, error(nil)
 	return target, err
 }
-func (t *unnamed_5b5d762e696f2f7632332f73657276696365732f73796e63626173652f6e6f73716c2e5461626c65526f77207374727563747b5461626c654e616d6520737472696e673b526f7720737472696e677dTarget) FinishElem(elem vdl.Target) error {
+func (t *__VDLTarget1_list) FinishElem(elem vdl.Target) error {
 	return nil
 }
-func (t *unnamed_5b5d762e696f2f7632332f73657276696365732f73796e63626173652f6e6f73716c2e5461626c65526f77207374727563747b5461626c654e616d6520737472696e673b526f7720737472696e677dTarget) FinishList(elem vdl.ListTarget) error {
+func (t *__VDLTarget1_list) FinishList(elem vdl.ListTarget) error {
 
 	return nil
 }
@@ -1327,9 +1327,9 @@ func (m *RowOp) MakeVDLTarget() vdl.Target {
 type RowOpTarget struct {
 	Value               *RowOp
 	keyTarget           vdl.StringTarget
-	localValueTarget    unnamed_3f762e696f2f7632332f73657276696365732f73796e63626173652f6e6f73716c2e56616c7565207374727563747b537461746520762e696f2f7632332f73657276696365732f73796e63626173652f6e6f73716c2e56616c7565537461746520656e756d7b4578697374733b4e6f4578697374733b44656c657465643b556e6b6e6f776e7d3b4279746573205b5d627974653b577269746554732074696d652e54696d65207374727563747b5365636f6e647320696e7436343b4e616e6f7320696e7433327d7dTarget
-	remoteValueTarget   unnamed_3f762e696f2f7632332f73657276696365732f73796e63626173652f6e6f73716c2e56616c7565207374727563747b537461746520762e696f2f7632332f73657276696365732f73796e63626173652f6e6f73716c2e56616c7565537461746520656e756d7b4578697374733b4e6f4578697374733b44656c657465643b556e6b6e6f776e7d3b4279746573205b5d627974653b577269746554732074696d652e54696d65207374727563747b5365636f6e647320696e7436343b4e616e6f7320696e7433327d7dTarget
-	ancestorValueTarget unnamed_3f762e696f2f7632332f73657276696365732f73796e63626173652f6e6f73716c2e56616c7565207374727563747b537461746520762e696f2f7632332f73657276696365732f73796e63626173652f6e6f73716c2e56616c7565537461746520656e756d7b4578697374733b4e6f4578697374733b44656c657465643b556e6b6e6f776e7d3b4279746573205b5d627974653b577269746554732074696d652e54696d65207374727563747b5365636f6e647320696e7436343b4e616e6f7320696e7433327d7dTarget
+	localValueTarget    __VDLTarget2_optional
+	remoteValueTarget   __VDLTarget2_optional
+	ancestorValueTarget __VDLTarget2_optional
 	vdl.TargetBase
 	vdl.FieldsTargetBase
 }
@@ -1372,14 +1372,14 @@ func (t *RowOpTarget) FinishFields(_ vdl.FieldsTarget) error {
 }
 
 // Optional Value
-type unnamed_3f762e696f2f7632332f73657276696365732f73796e63626173652f6e6f73716c2e56616c7565207374727563747b537461746520762e696f2f7632332f73657276696365732f73796e63626173652f6e6f73716c2e56616c7565537461746520656e756d7b4578697374733b4e6f4578697374733b44656c657465643b556e6b6e6f776e7d3b4279746573205b5d627974653b577269746554732074696d652e54696d65207374727563747b5365636f6e647320696e7436343b4e616e6f7320696e7433327d7dTarget struct {
+type __VDLTarget2_optional struct {
 	Value      **Value
 	elemTarget ValueTarget
 	vdl.TargetBase
 	vdl.FieldsTargetBase
 }
 
-func (t *unnamed_3f762e696f2f7632332f73657276696365732f73796e63626173652f6e6f73716c2e56616c7565207374727563747b537461746520762e696f2f7632332f73657276696365732f73796e63626173652f6e6f73716c2e56616c7565537461746520656e756d7b4578697374733b4e6f4578697374733b44656c657465643b556e6b6e6f776e7d3b4279746573205b5d627974653b577269746554732074696d652e54696d65207374727563747b5365636f6e647320696e7436343b4e616e6f7320696e7433327d7dTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
+func (t *__VDLTarget2_optional) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
 
 	if *t.Value == nil {
 		*t.Value = &Value{}
@@ -1391,11 +1391,11 @@ func (t *unnamed_3f762e696f2f7632332f73657276696365732f73796e63626173652f6e6f737
 	}
 	return target.StartFields(tt)
 }
-func (t *unnamed_3f762e696f2f7632332f73657276696365732f73796e63626173652f6e6f73716c2e56616c7565207374727563747b537461746520762e696f2f7632332f73657276696365732f73796e63626173652f6e6f73716c2e56616c7565537461746520656e756d7b4578697374733b4e6f4578697374733b44656c657465643b556e6b6e6f776e7d3b4279746573205b5d627974653b577269746554732074696d652e54696d65207374727563747b5365636f6e647320696e7436343b4e616e6f7320696e7433327d7dTarget) FinishFields(_ vdl.FieldsTarget) error {
+func (t *__VDLTarget2_optional) FinishFields(_ vdl.FieldsTarget) error {
 
 	return nil
 }
-func (t *unnamed_3f762e696f2f7632332f73657276696365732f73796e63626173652f6e6f73716c2e56616c7565207374727563747b537461746520762e696f2f7632332f73657276696365732f73796e63626173652f6e6f73716c2e56616c7565537461746520656e756d7b4578697374733b4e6f4578697374733b44656c657465643b556e6b6e6f776e7d3b4279746573205b5d627974653b577269746554732074696d652e54696d65207374727563747b5365636f6e647320696e7436343b4e616e6f7320696e7433327d7dTarget) FromNil(tt *vdl.Type) error {
+func (t *__VDLTarget2_optional) FromNil(tt *vdl.Type) error {
 
 	*t.Value = nil
 
@@ -1717,7 +1717,7 @@ func (m *RowInfo) MakeVDLTarget() vdl.Target {
 type RowInfoTarget struct {
 	Value *RowInfo
 
-	batchIdsTarget unnamed_5b5d75696e743634Target
+	batchIdsTarget __VDLTarget3_list
 	vdl.TargetBase
 	vdl.FieldsTargetBase
 }
@@ -1751,14 +1751,14 @@ func (t *RowInfoTarget) FinishFields(_ vdl.FieldsTarget) error {
 }
 
 // []uint64
-type unnamed_5b5d75696e743634Target struct {
+type __VDLTarget3_list struct {
 	Value      *[]uint64
 	elemTarget vdl.Uint64Target
 	vdl.TargetBase
 	vdl.ListTargetBase
 }
 
-func (t *unnamed_5b5d75696e743634Target) StartList(tt *vdl.Type, len int) (vdl.ListTarget, error) {
+func (t *__VDLTarget3_list) StartList(tt *vdl.Type, len int) (vdl.ListTarget, error) {
 
 	if ttWant := vdl.TypeOf((*[]uint64)(nil)); !vdl.Compatible(tt, ttWant) {
 		return nil, fmt.Errorf("type %v incompatible with %v", tt, ttWant)
@@ -1770,15 +1770,15 @@ func (t *unnamed_5b5d75696e743634Target) StartList(tt *vdl.Type, len int) (vdl.L
 	}
 	return t, nil
 }
-func (t *unnamed_5b5d75696e743634Target) StartElem(index int) (elem vdl.Target, _ error) {
+func (t *__VDLTarget3_list) StartElem(index int) (elem vdl.Target, _ error) {
 	t.elemTarget.Value = &(*t.Value)[index]
 	target, err := &t.elemTarget, error(nil)
 	return target, err
 }
-func (t *unnamed_5b5d75696e743634Target) FinishElem(elem vdl.Target) error {
+func (t *__VDLTarget3_list) FinishElem(elem vdl.Target) error {
 	return nil
 }
-func (t *unnamed_5b5d75696e743634Target) FinishList(elem vdl.ListTarget) error {
+func (t *__VDLTarget3_list) FinishList(elem vdl.ListTarget) error {
 
 	return nil
 }
@@ -2170,7 +2170,7 @@ type ResolutionInfoTarget struct {
 	Value           *ResolutionInfo
 	keyTarget       vdl.StringTarget
 	selectionTarget ValueSelectionTarget
-	resultTarget    unnamed_3f762e696f2f7632332f73657276696365732f73796e63626173652f6e6f73716c2e56616c7565207374727563747b537461746520762e696f2f7632332f73657276696365732f73796e63626173652f6e6f73716c2e56616c7565537461746520656e756d7b4578697374733b4e6f4578697374733b44656c657465643b556e6b6e6f776e7d3b4279746573205b5d627974653b577269746554732074696d652e54696d65207374727563747b5365636f6e647320696e7436343b4e616e6f7320696e7433327d7dTarget
+	resultTarget    __VDLTarget2_optional
 	continuedTarget vdl.BoolTarget
 	vdl.TargetBase
 	vdl.FieldsTargetBase
@@ -2408,7 +2408,7 @@ func (m *CrPolicy) MakeVDLTarget() vdl.Target {
 
 type CrPolicyTarget struct {
 	Value       *CrPolicy
-	rulesTarget unnamed_5b5d762e696f2f7632332f73657276696365732f73796e63626173652f6e6f73716c2e437252756c65207374727563747b5461626c654e616d6520737472696e673b4b657950726566697820737472696e673b5479706520737472696e673b5265736f6c76657220762e696f2f7632332f73657276696365732f73796e63626173652f6e6f73716c2e5265736f6c7665725479706520656e756d7b4c61737457696e733b4170705265736f6c7665733b44656665727d7dTarget
+	rulesTarget __VDLTarget4_list
 	vdl.TargetBase
 	vdl.FieldsTargetBase
 }
@@ -2439,14 +2439,14 @@ func (t *CrPolicyTarget) FinishFields(_ vdl.FieldsTarget) error {
 }
 
 // []CrRule
-type unnamed_5b5d762e696f2f7632332f73657276696365732f73796e63626173652f6e6f73716c2e437252756c65207374727563747b5461626c654e616d6520737472696e673b4b657950726566697820737472696e673b5479706520737472696e673b5265736f6c76657220762e696f2f7632332f73657276696365732f73796e63626173652f6e6f73716c2e5265736f6c7665725479706520656e756d7b4c61737457696e733b4170705265736f6c7665733b44656665727d7dTarget struct {
+type __VDLTarget4_list struct {
 	Value      *[]CrRule
 	elemTarget CrRuleTarget
 	vdl.TargetBase
 	vdl.ListTargetBase
 }
 
-func (t *unnamed_5b5d762e696f2f7632332f73657276696365732f73796e63626173652f6e6f73716c2e437252756c65207374727563747b5461626c654e616d6520737472696e673b4b657950726566697820737472696e673b5479706520737472696e673b5265736f6c76657220762e696f2f7632332f73657276696365732f73796e63626173652f6e6f73716c2e5265736f6c7665725479706520656e756d7b4c61737457696e733b4170705265736f6c7665733b44656665727d7dTarget) StartList(tt *vdl.Type, len int) (vdl.ListTarget, error) {
+func (t *__VDLTarget4_list) StartList(tt *vdl.Type, len int) (vdl.ListTarget, error) {
 
 	if ttWant := vdl.TypeOf((*[]CrRule)(nil)); !vdl.Compatible(tt, ttWant) {
 		return nil, fmt.Errorf("type %v incompatible with %v", tt, ttWant)
@@ -2458,15 +2458,15 @@ func (t *unnamed_5b5d762e696f2f7632332f73657276696365732f73796e63626173652f6e6f7
 	}
 	return t, nil
 }
-func (t *unnamed_5b5d762e696f2f7632332f73657276696365732f73796e63626173652f6e6f73716c2e437252756c65207374727563747b5461626c654e616d6520737472696e673b4b657950726566697820737472696e673b5479706520737472696e673b5265736f6c76657220762e696f2f7632332f73657276696365732f73796e63626173652f6e6f73716c2e5265736f6c7665725479706520656e756d7b4c61737457696e733b4170705265736f6c7665733b44656665727d7dTarget) StartElem(index int) (elem vdl.Target, _ error) {
+func (t *__VDLTarget4_list) StartElem(index int) (elem vdl.Target, _ error) {
 	t.elemTarget.Value = &(*t.Value)[index]
 	target, err := &t.elemTarget, error(nil)
 	return target, err
 }
-func (t *unnamed_5b5d762e696f2f7632332f73657276696365732f73796e63626173652f6e6f73716c2e437252756c65207374727563747b5461626c654e616d6520737472696e673b4b657950726566697820737472696e673b5479706520737472696e673b5265736f6c76657220762e696f2f7632332f73657276696365732f73796e63626173652f6e6f73716c2e5265736f6c7665725479706520656e756d7b4c61737457696e733b4170705265736f6c7665733b44656665727d7dTarget) FinishElem(elem vdl.Target) error {
+func (t *__VDLTarget4_list) FinishElem(elem vdl.Target) error {
 	return nil
 }
-func (t *unnamed_5b5d762e696f2f7632332f73657276696365732f73796e63626173652f6e6f73716c2e437252756c65207374727563747b5461626c654e616d6520737472696e673b4b657950726566697820737472696e673b5479706520737472696e673b5265736f6c76657220762e696f2f7632332f73657276696365732f73796e63626173652f6e6f73716c2e5265736f6c7665725479706520656e756d7b4c61737457696e733b4170705265736f6c7665733b44656665727d7dTarget) FinishList(elem vdl.ListTarget) error {
+func (t *__VDLTarget4_list) FinishList(elem vdl.ListTarget) error {
 
 	return nil
 }
@@ -2896,6 +2896,40 @@ func (t *StoreChangeTarget) FinishFields(_ vdl.FieldsTarget) error {
 
 	return nil
 }
+
+// Create zero values for each type.
+var (
+	__VDLZeroBatchOptions        = BatchOptions{}
+	__VDLZeroPrefixPermissions   = PrefixPermissions{}
+	__VDLZeroKeyValue            = KeyValue{}
+	__VDLZeroTableRow            = TableRow{}
+	__VDLZeroSyncgroupSpec       = SyncgroupSpec{}
+	__VDLZeroSyncgroupMemberInfo = SyncgroupMemberInfo{}
+	__VDLZeroResolverType        = ResolverTypeLastWins
+	__VDLZeroBatchSource         = BatchSourceLocal
+	__VDLZeroBatchInfo           = BatchInfo{}
+	__VDLZeroValueState          = ValueStateExists
+	__VDLZeroValue               = Value{}
+	__VDLZeroRowOp               = RowOp{}
+	__VDLZeroScanOp              = ScanOp{}
+	__VDLZeroOperation           = Operation(OperationRead{})
+	__VDLZeroRowInfo             = RowInfo{
+		Op: OperationRead{},
+	}
+	__VDLZeroConflictData = ConflictData(ConflictDataBatch{})
+	__VDLZeroConflictInfo = ConflictInfo{
+		Data: ConflictDataBatch{},
+	}
+	__VDLZeroValueSelection  = ValueSelectionLocal
+	__VDLZeroResolutionInfo  = ResolutionInfo{}
+	__VDLZeroCrRule          = CrRule{}
+	__VDLZeroCrPolicy        = CrPolicy{}
+	__VDLZeroSchemaMetadata  = SchemaMetadata{}
+	__VDLZeroBlobRef         = BlobRef("")
+	__VDLZeroBlobFetchState  = BlobFetchStatePending
+	__VDLZeroBlobFetchStatus = BlobFetchStatus{}
+	__VDLZeroStoreChange     = StoreChange{}
+)
 
 //////////////////////////////////////////////////
 // Const definitions
