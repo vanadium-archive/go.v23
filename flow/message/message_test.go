@@ -15,6 +15,7 @@ import (
 	"v.io/v23/rpc/version"
 	"v.io/v23/verror"
 	_ "v.io/x/ref/runtime/factories/fake"
+	"v.io/x/ref/test"
 )
 
 func testMessages(t *testing.T, ctx *context.T, cases []message.Message) {
@@ -127,7 +128,7 @@ func TestMissingBlessings(t *testing.T) {
 }
 
 func TestAddReceiveBuffers(t *testing.T) {
-	ctx, shutdown := v23.Init()
+	ctx, shutdown := test.V23Init()
 	defer shutdown()
 	testMessages(t, ctx, []message.Message{
 		&message.Release{},
@@ -139,7 +140,7 @@ func TestAddReceiveBuffers(t *testing.T) {
 }
 
 func TestData(t *testing.T) {
-	ctx, shutdown := v23.Init()
+	ctx, shutdown := test.V23Init()
 	defer shutdown()
 	testMessages(t, ctx, []message.Message{
 		&message.Data{ID: 1123, Flags: message.CloseFlag, Payload: [][]byte{[]byte("fake payload")}},
@@ -155,7 +156,7 @@ func TestData(t *testing.T) {
 }
 
 func TestProxy(t *testing.T) {
-	ctx, shutdown := v23.Init()
+	ctx, shutdown := test.V23Init()
 	defer shutdown()
 	ep1, err := v23.NewEndpoint(
 		"@6@tcp@foo.com:1234@a,b@00112233445566778899aabbccddeeff@m@v.io/foo")
