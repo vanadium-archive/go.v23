@@ -149,13 +149,13 @@ func basicType(rt reflect.Type) *Type {
 // unexported fields.
 func TypeFromReflect(rt reflect.Type) (*Type, error) {
 	if rt == nil {
+		// Special case to avoid panic for nil rt.
 		return AnyType, nil
 	}
-	rt = normalizeType(rt)
+	// Fastpath - grab the reader lock and check if rt is already in the cache.
 	if t := basicType(rt); t != nil {
 		return t, nil
 	}
-	// Fastpath - grab the reader lock and check if rt is already in the cache.
 	rtCache.RLock()
 	t := rtCache.lookup(rt)
 	rtCache.RUnlock()
@@ -232,11 +232,14 @@ func TypeFromReflect(rt reflect.Type) (*Type, error) {
 //
 // REQUIRES: rtCache is locked
 func typeFromReflectLocked(rt reflect.Type, builder *TypeBuilder, pending map[reflect.Type]TypeOrPending) (TypeOrPending, error) {
+	rtOrig := rt
 	rt = normalizeType(rt)
 	if t := basicType(rt); t != nil {
+		pending[rtOrig] = t
 		return t, nil
 	}
 	if t := rtCache.lookup(rt); t != nil {
+		pending[rtOrig] = t
 		return t, nil
 	}
 	if p, ok := pending[rt]; ok {
@@ -244,7 +247,7 @@ func typeFromReflectLocked(rt reflect.Type, builder *TypeBuilder, pending map[re
 		// infinite loops from recursive types.
 		return p, nil
 	}
-	return makeTypeFromReflectLocked(rt, builder, pending)
+	return makeTypeFromReflectLocked(rtOrig, rt, builder, pending)
 }
 
 // validateType returns a non-nil error if rt is not a valid vdl type.
@@ -270,7 +273,7 @@ func validateType(rt reflect.Type) error {
 // REQUIRES: rtCache is locked
 // PRE-CONDITION:  rt doesn't exist in rtCache or pending.
 // POST-CONDITION: rt exists in pending.
-func makeTypeFromReflectLocked(rt reflect.Type, builder *TypeBuilder, pending map[reflect.Type]TypeOrPending) (TypeOrPending, error) {
+func makeTypeFromReflectLocked(rtOrig, rt reflect.Type, builder *TypeBuilder, pending map[reflect.Type]TypeOrPending) (TypeOrPending, error) {
 	if err := validateType(rt); err != nil {
 		return nil, err
 	}
@@ -278,6 +281,7 @@ func makeTypeFromReflectLocked(rt reflect.Type, builder *TypeBuilder, pending ma
 		// Pointers are turned into Optional.
 		opt := builder.Optional()
 		pending[rt] = opt
+		pending[rtOrig] = opt
 		elem, err := typeFromReflectLocked(rt.Elem(), builder, pending)
 		if err != nil {
 			return nil, err
@@ -298,6 +302,7 @@ func makeTypeFromReflectLocked(rt reflect.Type, builder *TypeBuilder, pending ma
 			return nil, err
 		}
 		pending[ri.Type] = unnamed
+		pending[rtOrig] = unnamed
 		return unnamed, nil
 	}
 	// Named types are trickier, since they may be recursive.  First create the
@@ -306,6 +311,7 @@ func makeTypeFromReflectLocked(rt reflect.Type, builder *TypeBuilder, pending ma
 	// the created vdl type.
 	named := builder.Named(ri.Name)
 	pending[ri.Type] = named
+	pending[rtOrig] = named
 	for _, unionField := range ri.UnionFields {
 		pending[unionField.RepType] = named
 	}
