@@ -16,7 +16,6 @@ import (
 	"testing"
 
 	"v.io/v23/vdl"
-	"v.io/v23/verror"
 	"v.io/v23/vom/testdata/data80"
 	"v.io/v23/vom/testdata/data81"
 	"v.io/v23/vom/testdata/types"
@@ -491,14 +490,10 @@ func TestFuzzDecodeOverflow(t *testing.T) {
 	var v interface{}
 	d := NewDecoder(strings.NewReader("\x81\x51\x04\x03\x01\x29\xe1"))
 
-	// Before the fix, this line caused a stack overflow.
-	err := d.Decode(&v)
-
-	// With the fix, we expect to get a specific error.
-	if err != nil {
-		if verror.ErrorID(err) != errUnnamedRecursiveType.ID {
-			t.Fatal("unexepcted error: ", err)
-		}
+	// Before the fix, this line caused a stack overflow.  After the fix, we
+	// expect an error.
+	if err := d.Decode(&v); err == nil {
+		t.Fatal("unexpected success")
 	}
 }
 

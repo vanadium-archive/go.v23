@@ -550,28 +550,44 @@ func enforceUniqueNames(t *Type, names map[string]*Type) error {
 // contents of each type node.  The seen map breaks infinite loops from
 // recursive types.  Since type cycles may only be created via named types, we
 // keep track of seen types and only dump their names.
-func uniqueTypeStr(t *Type, seen map[*Type]bool) string {
-	if seen[t] && t.name != "" {
-		return t.name
+func uniqueTypeStr(t *Type, inCycle map[*Type]bool, shortCycleName bool) string {
+	if c, ok := inCycle[t]; ok {
+		if t.name != "" {
+			// If the type is named, and we've seen the type at all, regardless of
+			// whether it's in a cycle, always return the name for brevity.  If the
+			// type happens to be in a cycle, this is also necessary to break an
+			// infinite loop.
+			return t.name
+		}
+		if c && shortCycleName {
+			// If we're in a cycle and we want short cycle names, we're only dumping
+			// the type to help debug errors.  Note that the "..." means that the
+			// returned string is no longer unique, but breaks an infinite loop for
+			// unnamed cyclic types.
+			return "..."
+		}
 	}
-	seen[t] = true
+	inCycle[t] = true
+	defer func() {
+		inCycle[t] = false
+	}()
 	s := t.name
 	if s != "" {
 		s += " "
 	}
 	switch t.kind {
 	case Optional:
-		return s + "?" + uniqueTypeStr(t.elem, seen)
+		return s + "?" + uniqueTypeStr(t.elem, inCycle, shortCycleName)
 	case Enum:
 		return s + "enum{" + strings.Join(t.labels, ";") + "}"
 	case Array:
-		return s + "[" + strconv.Itoa(t.len) + "]" + uniqueTypeStr(t.elem, seen)
+		return s + "[" + strconv.Itoa(t.len) + "]" + uniqueTypeStr(t.elem, inCycle, shortCycleName)
 	case List:
-		return s + "[]" + uniqueTypeStr(t.elem, seen)
+		return s + "[]" + uniqueTypeStr(t.elem, inCycle, shortCycleName)
 	case Set:
-		return s + "set[" + uniqueTypeStr(t.key, seen) + "]"
+		return s + "set[" + uniqueTypeStr(t.key, inCycle, shortCycleName) + "]"
 	case Map:
-		return s + "map[" + uniqueTypeStr(t.key, seen) + "]" + uniqueTypeStr(t.elem, seen)
+		return s + "map[" + uniqueTypeStr(t.key, inCycle, shortCycleName) + "]" + uniqueTypeStr(t.elem, inCycle, shortCycleName)
 	case Struct, Union:
 		if t.kind == Struct {
 			s += "struct{"
@@ -582,7 +598,7 @@ func uniqueTypeStr(t *Type, seen map[*Type]bool) string {
 			if index > 0 {
 				s += ";"
 			}
-			s += f.Name + " " + uniqueTypeStr(f.Type, seen)
+			s += f.Name + " " + uniqueTypeStr(f.Type, inCycle, shortCycleName)
 		}
 		return s + "}"
 	default:
@@ -615,7 +631,9 @@ func typeConsLocked(t *Type) *Type {
 	}
 	// Look for the type in our registry, based on its unique string.
 	if t.unique == "" {
-		t.unique = uniqueTypeStr(t, make(map[*Type]bool))
+		// Never use short cycle names; at this point the type is valid, and we need
+		// a fully unique string.
+		t.unique = uniqueTypeStr(t, make(map[*Type]bool), false)
 	}
 	if found := typeReg[t.unique]; found != nil {
 		return found
@@ -646,6 +664,9 @@ func validType(t *Type) error {
 	if err := verifyAndCollectAllTypes(t, allTypes); err != nil {
 		return err
 	}
+	if err := existsUnnamedCycle(allTypes); err != nil {
+		return err
+	}
 	if err := existsStrictCycle(allTypes); err != nil {
 		return err
 	}
@@ -655,33 +676,11 @@ func validType(t *Type) error {
 	return nil
 }
 
-// isValidKey returns true iff t is a valid set or map key.
-func isValidKey(t *Type, seen map[*Type]bool) bool {
-	if seen[t] {
-		return true
-	}
-	seen[t] = true
-	switch t.kind {
-	case Any, List, Map, Optional, Set, TypeObject:
-		return false
-	case Array:
-		return isValidKey(t.elem, seen)
-	case Struct, Union:
-		for _, x := range t.fields {
-			if !isValidKey(x.Type, seen) {
-				return false
-			}
-		}
-	}
-	return true
-}
-
 // existsInvalidKey returns a nil error iff the given Types all have valid set
 // and map keys.
 func existsInvalidKey(allTypes map[*Type]bool) error {
-	seen := make(map[*Type]bool)
 	for t, _ := range allTypes {
-		if (t.kind == Map || t.kind == Set) && !isValidKey(t.key, seen) {
+		if (t.kind == Map || t.kind == Set) && !t.key.CanBeKey() {
 			return fmt.Errorf("invalid key %q in %q", t.key, t)
 		}
 	}
@@ -690,37 +689,77 @@ func existsInvalidKey(allTypes map[*Type]bool) error {
 
 // typeInStrictCycle returns a subtype that belongs to a strict cycle or nil if
 // there are no strict cycles
-func typeInStrictCycle(t *Type, seen map[*Type]int) *Type {
-	if seen[t] == 1 {
-		return t
-	}
-	if seen[t] == 2 {
+func typeInStrictCycle(t *Type, inCycle map[*Type]bool) *Type {
+	if c, ok := inCycle[t]; ok {
+		if c {
+			return t
+		}
 		return nil
 	}
-	seen[t] = 1
+	inCycle[t] = true
 	switch t.kind {
 	case Array:
-		if typeInCycle := typeInStrictCycle(t.elem, seen); typeInCycle != nil {
+		if typeInCycle := typeInStrictCycle(t.elem, inCycle); typeInCycle != nil {
 			return typeInCycle
 		}
 	case Struct, Union:
 		for _, x := range t.fields {
-			if typeInCycle := typeInStrictCycle(x.Type, seen); typeInCycle != nil {
+			if typeInCycle := typeInStrictCycle(x.Type, inCycle); typeInCycle != nil {
 				return typeInCycle
 			}
 		}
 	}
-	seen[t] = 2
+	inCycle[t] = false
 	return nil
 }
 
 // existsStrictCycle returns a nil error iff the given type set has no strict
 // cycles (e.g. type A struct{Elem: A})
 func existsStrictCycle(allTypes map[*Type]bool) error {
-	seen := make(map[*Type]int)
+	inCycle := make(map[*Type]bool)
 	for t, _ := range allTypes {
-		if typeInCycle := typeInStrictCycle(t, seen); typeInCycle != nil {
+		if typeInCycle := typeInStrictCycle(t, inCycle); typeInCycle != nil {
 			return fmt.Errorf("type %q is inside of a strict cycle", typeInCycle)
+		}
+	}
+	return nil
+}
+
+func typeInUnnamedCycle(t *Type, inCycle map[*Type]bool) *Type {
+	if t == nil || t.name != "" {
+		return nil
+	}
+	if c, ok := inCycle[t]; ok {
+		if c {
+			return t
+		}
+		return nil
+	}
+	inCycle[t] = true
+	if typeInCycle := typeInUnnamedCycle(t.key, inCycle); typeInCycle != nil {
+		return typeInCycle
+	}
+	if typeInCycle := typeInUnnamedCycle(t.elem, inCycle); typeInCycle != nil {
+		return typeInCycle
+	}
+	for _, x := range t.fields {
+		if typeInCycle := typeInUnnamedCycle(x.Type, inCycle); typeInCycle != nil {
+			return typeInCycle
+		}
+	}
+	inCycle[t] = false
+	return nil
+}
+
+// existsUnnamedCycle returns a nil error iff the given type set has no unnamed
+// cycles; a cycle where no type is named.  E.g. a PendingList with itself as
+// the elem type.  This can't occur in the VDL language, but can occur with
+// invalid VOM encodings.
+func existsUnnamedCycle(allTypes map[*Type]bool) error {
+	inCycle := make(map[*Type]bool)
+	for t, _ := range allTypes {
+		if typeInCycle := typeInUnnamedCycle(t, inCycle); typeInCycle != nil {
+			return fmt.Errorf("type %q is inside of an unnamed cycle", typeInCycle)
 		}
 	}
 	return nil

@@ -164,7 +164,10 @@ func (t *Type) String() string {
 	if t.unique != "" {
 		return t.unique
 	}
-	return uniqueTypeStr(t, make(map[*Type]bool))
+	// The only time that t.unique isn't set is while we're in the process of
+	// building the type, and we're printing the type for errors.  The type might
+	// have unnamed cycles, so we need to use short cycle names.
+	return uniqueTypeStr(t, make(map[*Type]bool), true)
 }
 
 // CanBeNil returns true iff values of t can be nil.
@@ -186,7 +189,7 @@ func (t *Type) CanBeNamed() bool {
 // Any, List, Map, Optional, Set and TypeObject cannot be keys, nor can
 // composite types that contain these types.
 func (t *Type) CanBeKey() bool {
-	return isValidKey(t, make(map[*Type]bool))
+	return !t.ContainsKind(WalkAll, Any, List, Map, Optional, Set, TypeObject)
 }
 
 // CanBeOptional returns true iff t can be made into an optional type.

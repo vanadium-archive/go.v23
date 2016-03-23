@@ -13,13 +13,11 @@ import (
 )
 
 var (
-	errTypeInvalid          = verror.Register(pkgPath+".errTypeInvalid", verror.NoRetry, "{1:}{2:} vom: type {3} id {4} invalid, the min user type id is {5}{:_}")
-	errAlreadyDefined       = verror.Register(pkgPath+".errAlreadyDefined", verror.NoRetry, "{1:}{2:} vom: type {3} id {4} already defined as {5}{:_}")
-	errUnknownType          = verror.Register(pkgPath+".errUnknownType", verror.NoRetry, "{1:}{2:} vom: unknown type id {3}{:_}")
-	errEmptyName            = verror.Register(pkgPath+".errEmptyName", verror.NoRetry, "{1:}{2:} vom: NamedType has empty name{:_}")
-	errUnknownWireTypeDef   = verror.Register(pkgPath+".errUnknownWireTypeDef", verror.NoRetry, "{1:}{2:} vom: unknown wire type definition {3}{:_}")
-	errStartNotCalled       = verror.Register(pkgPath+".errStartNotCalled", verror.NoRetry, "{1:}{2:} vom: Start has not been called")
-	errUnnamedRecursiveType = verror.Register(pkgPath+".errUnnamedRecursiveType", verror.NoRetry, "{1:}{2:} vom: unnamed recursive type id {3}{:_}")
+	errTypeInvalid        = verror.Register(pkgPath+".errTypeInvalid", verror.NoRetry, "{1:}{2:} vom: type {3} id {4} invalid, the min user type id is {5}{:_}")
+	errAlreadyDefined     = verror.Register(pkgPath+".errAlreadyDefined", verror.NoRetry, "{1:}{2:} vom: type {3} id {4} already defined as {5}{:_}")
+	errUnknownType        = verror.Register(pkgPath+".errUnknownType", verror.NoRetry, "{1:}{2:} vom: unknown type id {3}{:_}")
+	errUnknownWireTypeDef = verror.Register(pkgPath+".errUnknownWireTypeDef", verror.NoRetry, "{1:}{2:} vom: unknown wire type definition {3}{:_}")
+	errStartNotCalled     = verror.Register(pkgPath+".errStartNotCalled", verror.NoRetry, "{1:}{2:} vom: Start has not been called")
 )
 
 // TypeDecoder manages the receipt and unmarshalling of types from the other
@@ -243,17 +241,14 @@ func (d *TypeDecoder) makeType(tid typeId, builder *vdl.TypeBuilder, pending map
 	if wt == nil {
 		return nil, verror.New(errUnknownType, nil, tid)
 	}
-	// Make the type from its wireType representation, adding
-	// it to pending so that subsequent lookups get the pending
-	// type.  Eventually the built type will be added to dt.idToType.
+	// Make the type from its wireType representation.  Both named and unnamed
+	// types may be recursive, so we must populate pending before subsequent
+	// recursive lookups.  Eventually the built type will be added to dt.idToType.
 	if name := wt.(wireTypeGeneric).TypeName(); name != "" {
-		// Named types may be recursive, so we must create the named type first and
-		// add it to pending, before we make the base type. The base type may refer
-		// back to this named type, and will find it in pending.
 		namedType := builder.Named(name)
 		pending[tid] = namedType
 		if wtNamed, ok := wt.(wireTypeNamedT); ok {
-			// This is a NamedType pointing at a base type.
+			// This is a wireNamed pointing at a base type.
 			baseType, err := d.lookupOrMakeType(wtNamed.Value.Base, builder, pending)
 			if err != nil {
 				return nil, err
@@ -261,109 +256,119 @@ func (d *TypeDecoder) makeType(tid typeId, builder *vdl.TypeBuilder, pending map
 			namedType.AssignBase(baseType)
 			return namedType, nil
 		}
-		// This isn't NamedType, but has a non-empty name.
-		baseType, err := d.makeBaseType(wt, builder, pending)
+		// This isn't wireNamed, but has a non-empty name.
+		baseType, err := d.startBaseType(wt, builder)
 		if err != nil {
+			return nil, err
+		}
+		if err := d.finishBaseType(wt, baseType, builder, pending); err != nil {
 			return nil, err
 		}
 		namedType.AssignBase(baseType)
 		return namedType, nil
 	}
-	// Unnamed types are made directly from their base type.  It's fine to update
-	// pending after making the base type, since there's no way to create a
-	// recursive type based solely on unnamed vdl. To prevent infinite loops, we set
-	// a placeholder entry in the pending map, which will result
-	// in an error in lookupOrMakeType if we encounter an unnamed
-	// recursive type.
-	pending[tid] = nil
-	baseType, err := d.makeBaseType(wt, builder, pending)
+	// We make unnamed types in two stages, to ensure that we populate pending
+	// before any recursive lookups.
+	unnamedType, err := d.startBaseType(wt, builder)
 	if err != nil {
 		return nil, err
 	}
-	pending[tid] = baseType
-	return baseType, nil
+	pending[tid] = unnamedType
+	if err := d.finishBaseType(wt, unnamedType, builder, pending); err != nil {
+		return nil, err
+	}
+	return unnamedType, nil
 }
 
-func (d *TypeDecoder) makeBaseType(wt wireType, builder *vdl.TypeBuilder, pending map[typeId]vdl.PendingType) (vdl.PendingType, error) {
+func (d *TypeDecoder) startBaseType(wt wireType, builder *vdl.TypeBuilder) (vdl.PendingType, error) {
 	switch wt := wt.(type) {
-	case wireTypeNamedT:
-		return nil, verror.New(errEmptyName, nil, wt)
 	case wireTypeEnumT:
-		enumType := builder.Enum()
-		for _, label := range wt.Value.Labels {
-			enumType.AppendLabel(label)
-		}
-		return enumType, nil
+		return builder.Enum(), nil
 	case wireTypeArrayT:
-		elemType, err := d.lookupOrMakeType(wt.Value.Elem, builder, pending)
-		if err != nil {
-			return nil, err
-		}
-		return builder.Array().AssignElem(elemType).AssignLen(int(wt.Value.Len)), nil
+		return builder.Array(), nil
 	case wireTypeListT:
-		elemType, err := d.lookupOrMakeType(wt.Value.Elem, builder, pending)
-		if err != nil {
-			return nil, err
-		}
-		return builder.List().AssignElem(elemType), nil
+		return builder.List(), nil
 	case wireTypeSetT:
-		keyType, err := d.lookupOrMakeType(wt.Value.Key, builder, pending)
-		if err != nil {
-			return nil, err
-		}
-		return builder.Set().AssignKey(keyType), nil
+		return builder.Set(), nil
 	case wireTypeMapT:
-		keyType, err := d.lookupOrMakeType(wt.Value.Key, builder, pending)
-		if err != nil {
-			return nil, err
-		}
-		elemType, err := d.lookupOrMakeType(wt.Value.Elem, builder, pending)
-		if err != nil {
-			return nil, err
-		}
-		return builder.Map().AssignKey(keyType).AssignElem(elemType), nil
+		return builder.Map(), nil
 	case wireTypeStructT:
-		structType := builder.Struct()
-		for _, field := range wt.Value.Fields {
-			fieldType, err := d.lookupOrMakeType(field.Type, builder, pending)
-			if err != nil {
-				return nil, err
-			}
-			structType.AppendField(field.Name, fieldType)
-		}
-		return structType, nil
+		return builder.Struct(), nil
 	case wireTypeUnionT:
-		unionType := builder.Union()
-		for _, field := range wt.Value.Fields {
-			fieldType, err := d.lookupOrMakeType(field.Type, builder, pending)
-			if err != nil {
-				return nil, err
-			}
-			unionType.AppendField(field.Name, fieldType)
-		}
-		return unionType, nil
+		return builder.Union(), nil
 	case wireTypeOptionalT:
-		elemType, err := d.lookupOrMakeType(wt.Value.Elem, builder, pending)
-		if err != nil {
-			return nil, err
-		}
-		return builder.Optional().AssignElem(elemType), nil
+		return builder.Optional(), nil
 	default:
 		return nil, verror.New(errUnknownWireTypeDef, nil, wt)
 	}
+}
+
+func (d *TypeDecoder) finishBaseType(wt wireType, p vdl.PendingType, builder *vdl.TypeBuilder, pending map[typeId]vdl.PendingType) error {
+	switch wt := wt.(type) {
+	case wireTypeEnumT:
+		for _, label := range wt.Value.Labels {
+			p.(vdl.PendingEnum).AppendLabel(label)
+		}
+	case wireTypeArrayT:
+		elemType, err := d.lookupOrMakeType(wt.Value.Elem, builder, pending)
+		if err != nil {
+			return err
+		}
+		p.(vdl.PendingArray).AssignElem(elemType).AssignLen(int(wt.Value.Len))
+	case wireTypeListT:
+		elemType, err := d.lookupOrMakeType(wt.Value.Elem, builder, pending)
+		if err != nil {
+			return err
+		}
+		p.(vdl.PendingList).AssignElem(elemType)
+	case wireTypeSetT:
+		keyType, err := d.lookupOrMakeType(wt.Value.Key, builder, pending)
+		if err != nil {
+			return err
+		}
+		p.(vdl.PendingSet).AssignKey(keyType)
+	case wireTypeMapT:
+		keyType, err := d.lookupOrMakeType(wt.Value.Key, builder, pending)
+		if err != nil {
+			return err
+		}
+		elemType, err := d.lookupOrMakeType(wt.Value.Elem, builder, pending)
+		if err != nil {
+			return err
+		}
+		p.(vdl.PendingMap).AssignKey(keyType).AssignElem(elemType)
+	case wireTypeStructT:
+		for _, field := range wt.Value.Fields {
+			fieldType, err := d.lookupOrMakeType(field.Type, builder, pending)
+			if err != nil {
+				return err
+			}
+			p.(vdl.PendingStruct).AppendField(field.Name, fieldType)
+		}
+	case wireTypeUnionT:
+		for _, field := range wt.Value.Fields {
+			fieldType, err := d.lookupOrMakeType(field.Type, builder, pending)
+			if err != nil {
+				return err
+			}
+			p.(vdl.PendingUnion).AppendField(field.Name, fieldType)
+		}
+	case wireTypeOptionalT:
+		elemType, err := d.lookupOrMakeType(wt.Value.Elem, builder, pending)
+		if err != nil {
+			return err
+		}
+		p.(vdl.PendingOptional).AssignElem(elemType)
+	}
+	return nil
 }
 
 func (d *TypeDecoder) lookupOrMakeType(tid typeId, builder *vdl.TypeBuilder, pending map[typeId]vdl.PendingType) (vdl.TypeOrPending, error) {
 	if tt := d.lookupKnownType(tid); tt != nil {
 		return tt, nil
 	}
-
 	if p, ok := pending[tid]; ok {
-		if p == nil {
-			return nil, verror.New(errUnnamedRecursiveType, nil, tid)
-		}
 		return p, nil
 	}
-
 	return d.makeType(tid, builder, pending)
 }
