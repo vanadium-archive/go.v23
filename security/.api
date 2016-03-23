@@ -113,6 +113,10 @@ pkg security, method (*WireBlessingsTarget) FinishField(vdl.Target, vdl.Target) 
 pkg security, method (*WireBlessingsTarget) FinishFields(vdl.FieldsTarget) error
 pkg security, method (*WireBlessingsTarget) StartField(string) (vdl.Target, vdl.Target, error)
 pkg security, method (*WireBlessingsTarget) StartFields(*vdl.Type) (vdl.FieldsTarget, error)
+pkg security, method (*WireDischargeTarget) FinishField(vdl.Target, vdl.Target) error
+pkg security, method (*WireDischargeTarget) FinishFields(vdl.FieldsTarget) error
+pkg security, method (*WireDischargeTarget) StartField(string) (vdl.Target, vdl.Target, error)
+pkg security, method (*WireDischargeTarget) StartFields(*vdl.Type) (vdl.FieldsTarget, error)
 pkg security, method (BlessingPattern) IsValid() bool
 pkg security, method (BlessingPattern) MakeNonExtendable() BlessingPattern
 pkg security, method (BlessingPattern) MatchedBy(...string) bool
@@ -275,6 +279,10 @@ pkg security, type WireDischarge interface, Name() string
 pkg security, type WireDischarge interface, unexported methods
 pkg security, type WireDischargePublicKey struct
 pkg security, type WireDischargePublicKey struct, Value publicKeyDischarge
+pkg security, type WireDischargeTarget struct
+pkg security, type WireDischargeTarget struct, Value *Discharge
+pkg security, type WireDischargeTarget struct, embedded vdl.FieldsTargetBase
+pkg security, type WireDischargeTarget struct, embedded vdl.TargetBase
 pkg security, var ConstCaveat CaveatDescriptor
 pkg security, var ErrAuthorizationFailed verror.IDAction
 pkg security, var ErrCaveatNotRegistered verror.IDAction

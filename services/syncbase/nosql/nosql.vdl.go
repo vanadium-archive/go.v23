@@ -11,7 +11,6 @@ package nosql
 import (
 	"fmt"
 	"io"
-	"reflect"
 	"time"
 	"v.io/v23"
 	"v.io/v23/context"
@@ -1526,9 +1525,10 @@ type (
 	OperationScan struct{ Value ScanOp }
 	// __OperationReflect describes the Operation union type.
 	__OperationReflect struct {
-		Name  string `vdl:"v.io/v23/services/syncbase/nosql.Operation"`
-		Type  Operation
-		Union struct {
+		Name               string `vdl:"v.io/v23/services/syncbase/nosql.Operation"`
+		Type               Operation
+		UnionTargetFactory operationTargetFactory
+		Union              struct {
 			Read  OperationRead
 			Write OperationWrite
 			Scan  OperationScan
@@ -1632,6 +1632,62 @@ func (m OperationScan) MakeVDLTarget() vdl.Target {
 	return nil
 }
 
+type OperationTarget struct {
+	Value     *Operation
+	fieldName string
+
+	vdl.TargetBase
+	vdl.FieldsTargetBase
+}
+
+func (t *OperationTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
+	if ttWant := vdl.TypeOf((*Operation)(nil)); !vdl.Compatible(tt, ttWant) {
+		return nil, fmt.Errorf("type %v incompatible with %v", tt, ttWant)
+	}
+
+	return t, nil
+}
+func (t *OperationTarget) StartField(name string) (key, field vdl.Target, _ error) {
+	t.fieldName = name
+	switch name {
+	case "Read":
+		val := RowOp{}
+		return nil, &RowOpTarget{Value: &val}, nil
+	case "Write":
+		val := RowOp{}
+		return nil, &RowOpTarget{Value: &val}, nil
+	case "Scan":
+		val := ScanOp{}
+		return nil, &ScanOpTarget{Value: &val}, nil
+	default:
+		return nil, nil, fmt.Errorf("field %s not in union v.io/v23/services/syncbase/nosql.Operation", name)
+	}
+}
+func (t *OperationTarget) FinishField(_, fieldTarget vdl.Target) error {
+	switch t.fieldName {
+	case "Read":
+		*t.Value = OperationRead{*(fieldTarget.(*RowOpTarget)).Value}
+	case "Write":
+		*t.Value = OperationWrite{*(fieldTarget.(*RowOpTarget)).Value}
+	case "Scan":
+		*t.Value = OperationScan{*(fieldTarget.(*ScanOpTarget)).Value}
+	}
+	return nil
+}
+func (t *OperationTarget) FinishFields(_ vdl.FieldsTarget) error {
+
+	return nil
+}
+
+type operationTargetFactory struct{}
+
+func (t operationTargetFactory) VDLMakeUnionTarget(union interface{}) (vdl.Target, error) {
+	if typedUnion, ok := union.(*Operation); ok {
+		return &OperationTarget{Value: typedUnion}, nil
+	}
+	return nil, fmt.Errorf("got %T, want *Operation", union)
+}
+
 // RowInfo contains a single operation performed on a row (in case of read or
 // write) or a range or rows (in case of scan) along with a mapping to each
 // of the batches that this operation belongs to.
@@ -1715,8 +1771,8 @@ func (m *RowInfo) MakeVDLTarget() vdl.Target {
 }
 
 type RowInfoTarget struct {
-	Value *RowInfo
-
+	Value          *RowInfo
+	opTarget       OperationTarget
 	batchIdsTarget __VDLTarget3_list
 	vdl.TargetBase
 	vdl.FieldsTargetBase
@@ -1732,7 +1788,8 @@ func (t *RowInfoTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
 func (t *RowInfoTarget) StartField(name string) (key, field vdl.Target, _ error) {
 	switch name {
 	case "Op":
-		target, err := vdl.ReflectTarget(reflect.ValueOf(&t.Value.Op))
+		t.opTarget.Value = &t.Value.Op
+		target, err := &t.opTarget, error(nil)
 		return nil, target, err
 	case "BatchIds":
 		t.batchIdsTarget.Value = &t.Value.BatchIds
@@ -1806,9 +1863,10 @@ type (
 	ConflictDataRow struct{ Value RowInfo }
 	// __ConflictDataReflect describes the ConflictData union type.
 	__ConflictDataReflect struct {
-		Name  string `vdl:"v.io/v23/services/syncbase/nosql.ConflictData"`
-		Type  ConflictData
-		Union struct {
+		Name               string `vdl:"v.io/v23/services/syncbase/nosql.ConflictData"`
+		Type               ConflictData
+		UnionTargetFactory conflictDataTargetFactory
+		Union              struct {
 			Batch ConflictDataBatch
 			Row   ConflictDataRow
 		}
@@ -1879,6 +1937,59 @@ func (m ConflictDataRow) MakeVDLTarget() vdl.Target {
 	return nil
 }
 
+type ConflictDataTarget struct {
+	Value     *ConflictData
+	fieldName string
+
+	vdl.TargetBase
+	vdl.FieldsTargetBase
+}
+
+func (t *ConflictDataTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
+	if ttWant := vdl.TypeOf((*ConflictData)(nil)); !vdl.Compatible(tt, ttWant) {
+		return nil, fmt.Errorf("type %v incompatible with %v", tt, ttWant)
+	}
+
+	return t, nil
+}
+func (t *ConflictDataTarget) StartField(name string) (key, field vdl.Target, _ error) {
+	t.fieldName = name
+	switch name {
+	case "Batch":
+		val := BatchInfo{}
+		return nil, &BatchInfoTarget{Value: &val}, nil
+	case "Row":
+		val := RowInfo{
+			Op: OperationRead{},
+		}
+		return nil, &RowInfoTarget{Value: &val}, nil
+	default:
+		return nil, nil, fmt.Errorf("field %s not in union v.io/v23/services/syncbase/nosql.ConflictData", name)
+	}
+}
+func (t *ConflictDataTarget) FinishField(_, fieldTarget vdl.Target) error {
+	switch t.fieldName {
+	case "Batch":
+		*t.Value = ConflictDataBatch{*(fieldTarget.(*BatchInfoTarget)).Value}
+	case "Row":
+		*t.Value = ConflictDataRow{*(fieldTarget.(*RowInfoTarget)).Value}
+	}
+	return nil
+}
+func (t *ConflictDataTarget) FinishFields(_ vdl.FieldsTarget) error {
+
+	return nil
+}
+
+type conflictDataTargetFactory struct{}
+
+func (t conflictDataTargetFactory) VDLMakeUnionTarget(union interface{}) (vdl.Target, error) {
+	if typedUnion, ok := union.(*ConflictData); ok {
+		return &ConflictDataTarget{Value: typedUnion}, nil
+	}
+	return nil, fmt.Errorf("got %T, want *ConflictData", union)
+}
+
 // ConflictInfo contains information to fully specify a conflict
 // for a key, providing the (local, remote, ancestor) tuple.
 // A key under conflict can be a part of a batch in local, remote or both
@@ -1945,8 +2056,8 @@ func (m *ConflictInfo) MakeVDLTarget() vdl.Target {
 }
 
 type ConflictInfoTarget struct {
-	Value *ConflictInfo
-
+	Value           *ConflictInfo
+	dataTarget      ConflictDataTarget
 	continuedTarget vdl.BoolTarget
 	vdl.TargetBase
 	vdl.FieldsTargetBase
@@ -1962,7 +2073,8 @@ func (t *ConflictInfoTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error)
 func (t *ConflictInfoTarget) StartField(name string) (key, field vdl.Target, _ error) {
 	switch name {
 	case "Data":
-		target, err := vdl.ReflectTarget(reflect.ValueOf(&t.Value.Data))
+		t.dataTarget.Value = &t.Value.Data
+		target, err := &t.dataTarget, error(nil)
 		return nil, target, err
 	case "Continued":
 		t.continuedTarget.Value = &t.Value.Continued

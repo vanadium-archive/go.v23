@@ -15,7 +15,6 @@ package time
 
 import (
 	"fmt"
-	"reflect"
 	"time"
 	"v.io/v23/vdl"
 )
@@ -95,7 +94,7 @@ type DurationTarget struct {
 }
 
 func (t *DurationTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
-	t.wireValue = reflect.Zero(reflect.TypeOf(t.wireValue)).Interface().(Duration)
+	t.wireValue = Duration{}
 	if ttWant := vdl.TypeOf((*Duration)(nil)).Elem(); !vdl.Compatible(tt, ttWant) {
 		return nil, fmt.Errorf("type %v incompatible with %v", tt, ttWant)
 	}
@@ -201,7 +200,7 @@ type TimeTarget struct {
 }
 
 func (t *TimeTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
-	t.wireValue = reflect.Zero(reflect.TypeOf(t.wireValue)).Interface().(Time)
+	t.wireValue = Time{}
 	if ttWant := vdl.TypeOf((*Time)(nil)).Elem(); !vdl.Compatible(tt, ttWant) {
 		return nil, fmt.Errorf("type %v incompatible with %v", tt, ttWant)
 	}
@@ -323,7 +322,7 @@ type WireDeadlineTarget struct {
 }
 
 func (t *WireDeadlineTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
-	t.wireValue = reflect.Zero(reflect.TypeOf(t.wireValue)).Interface().(WireDeadline)
+	t.wireValue = WireDeadline{}
 	if ttWant := vdl.TypeOf((*WireDeadline)(nil)).Elem(); !vdl.Compatible(tt, ttWant) {
 		return nil, fmt.Errorf("type %v incompatible with %v", tt, ttWant)
 	}

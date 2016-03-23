@@ -78,6 +78,10 @@ pkg nosql, method (*BlobManagerPutBlobServerCallStub) RecvStream() interface {  
 pkg nosql, method (*BlobRef) FillVDLTarget(vdl.Target, *vdl.Type) error
 pkg nosql, method (*BlobRef) MakeVDLTarget() vdl.Target
 pkg nosql, method (*BlobRefTarget) FromString(string, *vdl.Type) error
+pkg nosql, method (*ConflictDataTarget) FinishField(vdl.Target, vdl.Target) error
+pkg nosql, method (*ConflictDataTarget) FinishFields(vdl.FieldsTarget) error
+pkg nosql, method (*ConflictDataTarget) StartField(string) (vdl.Target, vdl.Target, error)
+pkg nosql, method (*ConflictDataTarget) StartFields(*vdl.Type) (vdl.FieldsTarget, error)
 pkg nosql, method (*ConflictInfo) FillVDLTarget(vdl.Target, *vdl.Type) error
 pkg nosql, method (*ConflictInfo) MakeVDLTarget() vdl.Target
 pkg nosql, method (*ConflictInfoTarget) FinishField(vdl.Target, vdl.Target) error
@@ -107,6 +111,10 @@ pkg nosql, method (*KeyValueTarget) FinishField(vdl.Target, vdl.Target) error
 pkg nosql, method (*KeyValueTarget) FinishFields(vdl.FieldsTarget) error
 pkg nosql, method (*KeyValueTarget) StartField(string) (vdl.Target, vdl.Target, error)
 pkg nosql, method (*KeyValueTarget) StartFields(*vdl.Type) (vdl.FieldsTarget, error)
+pkg nosql, method (*OperationTarget) FinishField(vdl.Target, vdl.Target) error
+pkg nosql, method (*OperationTarget) FinishFields(vdl.FieldsTarget) error
+pkg nosql, method (*OperationTarget) StartField(string) (vdl.Target, vdl.Target, error)
+pkg nosql, method (*OperationTarget) StartFields(*vdl.Type) (vdl.FieldsTarget, error)
 pkg nosql, method (*PrefixPermissions) FillVDLTarget(vdl.Target, *vdl.Type) error
 pkg nosql, method (*PrefixPermissions) MakeVDLTarget() vdl.Target
 pkg nosql, method (*PrefixPermissionsTarget) FinishField(vdl.Target, vdl.Target) error
@@ -368,6 +376,10 @@ pkg nosql, type ConflictDataBatch struct
 pkg nosql, type ConflictDataBatch struct, Value BatchInfo
 pkg nosql, type ConflictDataRow struct
 pkg nosql, type ConflictDataRow struct, Value RowInfo
+pkg nosql, type ConflictDataTarget struct
+pkg nosql, type ConflictDataTarget struct, Value *ConflictData
+pkg nosql, type ConflictDataTarget struct, embedded vdl.FieldsTargetBase
+pkg nosql, type ConflictDataTarget struct, embedded vdl.TargetBase
 pkg nosql, type ConflictInfo struct
 pkg nosql, type ConflictInfo struct, Continued bool
 pkg nosql, type ConflictInfo struct, Data ConflictData
@@ -631,6 +643,10 @@ pkg nosql, type OperationRead struct
 pkg nosql, type OperationRead struct, Value RowOp
 pkg nosql, type OperationScan struct
 pkg nosql, type OperationScan struct, Value ScanOp
+pkg nosql, type OperationTarget struct
+pkg nosql, type OperationTarget struct, Value *Operation
+pkg nosql, type OperationTarget struct, embedded vdl.FieldsTargetBase
+pkg nosql, type OperationTarget struct, embedded vdl.TargetBase
 pkg nosql, type OperationWrite struct
 pkg nosql, type OperationWrite struct, Value RowOp
 pkg nosql, type PrefixPermissions struct

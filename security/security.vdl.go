@@ -1386,7 +1386,7 @@ type WireBlessingsTarget struct {
 }
 
 func (t *WireBlessingsTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
-	t.wireValue = reflect.Zero(reflect.TypeOf(t.wireValue)).Interface().(WireBlessings)
+	t.wireValue = WireBlessings{}
 	if ttWant := vdl.TypeOf((*WireBlessings)(nil)).Elem(); !vdl.Compatible(tt, ttWant) {
 		return nil, fmt.Errorf("type %v incompatible with %v", tt, ttWant)
 	}
@@ -1499,9 +1499,10 @@ type (
 	WireDischargePublicKey struct{ Value publicKeyDischarge } // Discharge for PublicKeyThirdPartyCaveat
 	// __WireDischargeReflect describes the WireDischarge union type.
 	__WireDischargeReflect struct {
-		Name  string `vdl:"v.io/v23/security.WireDischarge"`
-		Type  WireDischarge
-		Union struct {
+		Name               string `vdl:"v.io/v23/security.WireDischarge"`
+		Type               WireDischarge
+		UnionTargetFactory wireDischargeTargetFactory
+		Union              struct {
 			PublicKey WireDischargePublicKey
 		}
 	}
@@ -1537,6 +1538,56 @@ func (m WireDischargePublicKey) FillVDLTarget(t vdl.Target, tt *vdl.Type) error 
 
 func (m WireDischargePublicKey) MakeVDLTarget() vdl.Target {
 	return nil
+}
+
+type WireDischargeTarget struct {
+	Value     *Discharge
+	wireValue WireDischarge
+	fieldName string
+
+	vdl.TargetBase
+	vdl.FieldsTargetBase
+}
+
+func (t *WireDischargeTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
+	if ttWant := vdl.TypeOf((*WireDischarge)(nil)); !vdl.Compatible(tt, ttWant) {
+		return nil, fmt.Errorf("type %v incompatible with %v", tt, ttWant)
+	}
+	t.wireValue = WireDischarge(WireDischargePublicKey{})
+	return t, nil
+}
+func (t *WireDischargeTarget) StartField(name string) (key, field vdl.Target, _ error) {
+	t.fieldName = name
+	switch name {
+	case "PublicKey":
+		val := publicKeyDischarge{}
+		return nil, &publicKeyDischargeTarget{Value: &val}, nil
+	default:
+		return nil, nil, fmt.Errorf("field %s not in union v.io/v23/security.WireDischarge", name)
+	}
+}
+func (t *WireDischargeTarget) FinishField(_, fieldTarget vdl.Target) error {
+	switch t.fieldName {
+	case "PublicKey":
+		t.wireValue = WireDischargePublicKey{*(fieldTarget.(*publicKeyDischargeTarget)).Value}
+	}
+	return nil
+}
+func (t *WireDischargeTarget) FinishFields(_ vdl.FieldsTarget) error {
+
+	if err := WireDischargeToNative(t.wireValue, t.Value); err != nil {
+		return err
+	}
+	return nil
+}
+
+type wireDischargeTargetFactory struct{}
+
+func (t wireDischargeTargetFactory) VDLMakeUnionTarget(union interface{}) (vdl.Target, error) {
+	if typedUnion, ok := union.(*Discharge); ok {
+		return &WireDischargeTarget{Value: typedUnion}, nil
+	}
+	return nil, fmt.Errorf("got %T, want *Discharge", union)
 }
 
 // RejectedBlessing describes why a blessing failed validation.

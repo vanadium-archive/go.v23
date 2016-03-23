@@ -81,6 +81,10 @@ pkg vom, method (*Dumper) Flush() error
 pkg vom, method (*Dumper) Status()
 pkg vom, method (*Dumper) Write([]byte) (int, error)
 pkg vom, method (*Encoder) Encode(interface{}) error
+pkg vom, method (*PrimitiveTarget) FinishField(vdl.Target, vdl.Target) error
+pkg vom, method (*PrimitiveTarget) FinishFields(vdl.FieldsTarget) error
+pkg vom, method (*PrimitiveTarget) StartField(string) (vdl.Target, vdl.Target, error)
+pkg vom, method (*PrimitiveTarget) StartFields(*vdl.Type) (vdl.FieldsTarget, error)
 pkg vom, method (*RawBytes) FillVDLTarget(vdl.Target, *vdl.Type) error
 pkg vom, method (*RawBytes) MakeVDLTarget() vdl.Target
 pkg vom, method (*RawBytes) String() string
@@ -179,6 +183,10 @@ pkg vom, type PrimitivePString struct
 pkg vom, type PrimitivePString struct, Value string
 pkg vom, type PrimitivePUint struct
 pkg vom, type PrimitivePUint struct, Value uint64
+pkg vom, type PrimitiveTarget struct
+pkg vom, type PrimitiveTarget struct, Value *Primitive
+pkg vom, type PrimitiveTarget struct, embedded vdl.FieldsTargetBase
+pkg vom, type PrimitiveTarget struct, embedded vdl.TargetBase
 pkg vom, type RawBytes struct
 pkg vom, type RawBytes struct, AnyLengths []uint64
 pkg vom, type RawBytes struct, Data []byte

@@ -604,9 +604,10 @@ type (
 	StatusDevice struct{ Value DeviceStatus }
 	// __StatusReflect describes the Status union type.
 	__StatusReflect struct {
-		Name  string `vdl:"v.io/v23/services/device.Status"`
-		Type  Status
-		Union struct {
+		Name               string `vdl:"v.io/v23/services/device.Status"`
+		Type               Status
+		UnionTargetFactory statusTargetFactory
+		Union              struct {
 			Instance     StatusInstance
 			Installation StatusInstallation
 			Device       StatusDevice
@@ -710,6 +711,62 @@ func (m StatusDevice) MakeVDLTarget() vdl.Target {
 	return nil
 }
 
+type StatusTarget struct {
+	Value     *Status
+	fieldName string
+
+	vdl.TargetBase
+	vdl.FieldsTargetBase
+}
+
+func (t *StatusTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
+	if ttWant := vdl.TypeOf((*Status)(nil)); !vdl.Compatible(tt, ttWant) {
+		return nil, fmt.Errorf("type %v incompatible with %v", tt, ttWant)
+	}
+
+	return t, nil
+}
+func (t *StatusTarget) StartField(name string) (key, field vdl.Target, _ error) {
+	t.fieldName = name
+	switch name {
+	case "Instance":
+		val := InstanceStatus{}
+		return nil, &InstanceStatusTarget{Value: &val}, nil
+	case "Installation":
+		val := InstallationStatus{}
+		return nil, &InstallationStatusTarget{Value: &val}, nil
+	case "Device":
+		val := DeviceStatus{}
+		return nil, &DeviceStatusTarget{Value: &val}, nil
+	default:
+		return nil, nil, fmt.Errorf("field %s not in union v.io/v23/services/device.Status", name)
+	}
+}
+func (t *StatusTarget) FinishField(_, fieldTarget vdl.Target) error {
+	switch t.fieldName {
+	case "Instance":
+		*t.Value = StatusInstance{*(fieldTarget.(*InstanceStatusTarget)).Value}
+	case "Installation":
+		*t.Value = StatusInstallation{*(fieldTarget.(*InstallationStatusTarget)).Value}
+	case "Device":
+		*t.Value = StatusDevice{*(fieldTarget.(*DeviceStatusTarget)).Value}
+	}
+	return nil
+}
+func (t *StatusTarget) FinishFields(_ vdl.FieldsTarget) error {
+
+	return nil
+}
+
+type statusTargetFactory struct{}
+
+func (t statusTargetFactory) VDLMakeUnionTarget(union interface{}) (vdl.Target, error) {
+	if typedUnion, ok := union.(*Status); ok {
+		return &StatusTarget{Value: typedUnion}, nil
+	}
+	return nil, fmt.Errorf("got %T, want *Status", union)
+}
+
 type (
 	// BlessServerMessage represents any single field of the BlessServerMessage union type.
 	//
@@ -734,9 +791,10 @@ type (
 	BlessServerMessageInstancePublicKey struct{ Value []byte }
 	// __BlessServerMessageReflect describes the BlessServerMessage union type.
 	__BlessServerMessageReflect struct {
-		Name  string `vdl:"v.io/v23/services/device.BlessServerMessage"`
-		Type  BlessServerMessage
-		Union struct {
+		Name               string `vdl:"v.io/v23/services/device.BlessServerMessage"`
+		Type               BlessServerMessage
+		UnionTargetFactory blessServerMessageTargetFactory
+		Union              struct {
 			InstancePublicKey BlessServerMessageInstancePublicKey
 		}
 	}
@@ -774,6 +832,52 @@ func (m BlessServerMessageInstancePublicKey) MakeVDLTarget() vdl.Target {
 	return nil
 }
 
+type BlessServerMessageTarget struct {
+	Value     *BlessServerMessage
+	fieldName string
+
+	vdl.TargetBase
+	vdl.FieldsTargetBase
+}
+
+func (t *BlessServerMessageTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
+	if ttWant := vdl.TypeOf((*BlessServerMessage)(nil)); !vdl.Compatible(tt, ttWant) {
+		return nil, fmt.Errorf("type %v incompatible with %v", tt, ttWant)
+	}
+
+	return t, nil
+}
+func (t *BlessServerMessageTarget) StartField(name string) (key, field vdl.Target, _ error) {
+	t.fieldName = name
+	switch name {
+	case "InstancePublicKey":
+		val := []byte(nil)
+		return nil, &vdl.BytesTarget{Value: &val}, nil
+	default:
+		return nil, nil, fmt.Errorf("field %s not in union v.io/v23/services/device.BlessServerMessage", name)
+	}
+}
+func (t *BlessServerMessageTarget) FinishField(_, fieldTarget vdl.Target) error {
+	switch t.fieldName {
+	case "InstancePublicKey":
+		*t.Value = BlessServerMessageInstancePublicKey{*(fieldTarget.(*vdl.BytesTarget)).Value}
+	}
+	return nil
+}
+func (t *BlessServerMessageTarget) FinishFields(_ vdl.FieldsTarget) error {
+
+	return nil
+}
+
+type blessServerMessageTargetFactory struct{}
+
+func (t blessServerMessageTargetFactory) VDLMakeUnionTarget(union interface{}) (vdl.Target, error) {
+	if typedUnion, ok := union.(*BlessServerMessage); ok {
+		return &BlessServerMessageTarget{Value: typedUnion}, nil
+	}
+	return nil, fmt.Errorf("got %T, want *BlessServerMessage", union)
+}
+
 type (
 	// BlessClientMessage represents any single field of the BlessClientMessage union type.
 	//
@@ -797,9 +901,10 @@ type (
 	BlessClientMessageAppBlessings struct{ Value security.Blessings }
 	// __BlessClientMessageReflect describes the BlessClientMessage union type.
 	__BlessClientMessageReflect struct {
-		Name  string `vdl:"v.io/v23/services/device.BlessClientMessage"`
-		Type  BlessClientMessage
-		Union struct {
+		Name               string `vdl:"v.io/v23/services/device.BlessClientMessage"`
+		Type               BlessClientMessage
+		UnionTargetFactory blessClientMessageTargetFactory
+		Union              struct {
 			AppBlessings BlessClientMessageAppBlessings
 		}
 	}
@@ -840,6 +945,58 @@ func (m BlessClientMessageAppBlessings) FillVDLTarget(t vdl.Target, tt *vdl.Type
 
 func (m BlessClientMessageAppBlessings) MakeVDLTarget() vdl.Target {
 	return nil
+}
+
+type BlessClientMessageTarget struct {
+	Value     *BlessClientMessage
+	fieldName string
+
+	vdl.TargetBase
+	vdl.FieldsTargetBase
+}
+
+func (t *BlessClientMessageTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
+	if ttWant := vdl.TypeOf((*BlessClientMessage)(nil)); !vdl.Compatible(tt, ttWant) {
+		return nil, fmt.Errorf("type %v incompatible with %v", tt, ttWant)
+	}
+
+	return t, nil
+}
+func (t *BlessClientMessageTarget) StartField(name string) (key, field vdl.Target, _ error) {
+	t.fieldName = name
+	switch name {
+	case "AppBlessings":
+		val := func() security.Blessings {
+			var native security.Blessings
+			if err := vdl.Convert(&native, security.WireBlessings{}); err != nil {
+				panic(err)
+			}
+			return native
+		}()
+		return nil, &security.WireBlessingsTarget{Value: &val}, nil
+	default:
+		return nil, nil, fmt.Errorf("field %s not in union v.io/v23/services/device.BlessClientMessage", name)
+	}
+}
+func (t *BlessClientMessageTarget) FinishField(_, fieldTarget vdl.Target) error {
+	switch t.fieldName {
+	case "AppBlessings":
+		*t.Value = BlessClientMessageAppBlessings{*(fieldTarget.(*security.WireBlessingsTarget)).Value}
+	}
+	return nil
+}
+func (t *BlessClientMessageTarget) FinishFields(_ vdl.FieldsTarget) error {
+
+	return nil
+}
+
+type blessClientMessageTargetFactory struct{}
+
+func (t blessClientMessageTargetFactory) VDLMakeUnionTarget(union interface{}) (vdl.Target, error) {
+	if typedUnion, ok := union.(*BlessClientMessage); ok {
+		return &BlessClientMessageTarget{Value: typedUnion}, nil
+	}
+	return nil, fmt.Errorf("got %T, want *BlessClientMessage", union)
 }
 
 // Description enumerates the profiles that a Device supports.

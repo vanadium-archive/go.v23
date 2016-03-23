@@ -484,9 +484,10 @@ type (
 	GlobReplyError struct{ Value GlobError }
 	// __GlobReplyReflect describes the GlobReply union type.
 	__GlobReplyReflect struct {
-		Name  string `vdl:"v.io/v23/naming.GlobReply"`
-		Type  GlobReply
-		Union struct {
+		Name               string `vdl:"v.io/v23/naming.GlobReply"`
+		Type               GlobReply
+		UnionTargetFactory globReplyTargetFactory
+		Union              struct {
 			Entry GlobReplyEntry
 			Error GlobReplyError
 		}
@@ -557,6 +558,57 @@ func (m GlobReplyError) MakeVDLTarget() vdl.Target {
 	return nil
 }
 
+type GlobReplyTarget struct {
+	Value     *GlobReply
+	fieldName string
+
+	vdl.TargetBase
+	vdl.FieldsTargetBase
+}
+
+func (t *GlobReplyTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
+	if ttWant := vdl.TypeOf((*GlobReply)(nil)); !vdl.Compatible(tt, ttWant) {
+		return nil, fmt.Errorf("type %v incompatible with %v", tt, ttWant)
+	}
+
+	return t, nil
+}
+func (t *GlobReplyTarget) StartField(name string) (key, field vdl.Target, _ error) {
+	t.fieldName = name
+	switch name {
+	case "Entry":
+		val := MountEntry{}
+		return nil, &MountEntryTarget{Value: &val}, nil
+	case "Error":
+		val := GlobError{}
+		return nil, &GlobErrorTarget{Value: &val}, nil
+	default:
+		return nil, nil, fmt.Errorf("field %s not in union v.io/v23/naming.GlobReply", name)
+	}
+}
+func (t *GlobReplyTarget) FinishField(_, fieldTarget vdl.Target) error {
+	switch t.fieldName {
+	case "Entry":
+		*t.Value = GlobReplyEntry{*(fieldTarget.(*MountEntryTarget)).Value}
+	case "Error":
+		*t.Value = GlobReplyError{*(fieldTarget.(*GlobErrorTarget)).Value}
+	}
+	return nil
+}
+func (t *GlobReplyTarget) FinishFields(_ vdl.FieldsTarget) error {
+
+	return nil
+}
+
+type globReplyTargetFactory struct{}
+
+func (t globReplyTargetFactory) VDLMakeUnionTarget(union interface{}) (vdl.Target, error) {
+	if typedUnion, ok := union.(*GlobReply); ok {
+		return &GlobReplyTarget{Value: typedUnion}, nil
+	}
+	return nil, fmt.Errorf("got %T, want *GlobReply", union)
+}
+
 type (
 	// GlobChildrenReply represents any single field of the GlobChildrenReply union type.
 	//
@@ -578,9 +630,10 @@ type (
 	GlobChildrenReplyError struct{ Value GlobError }
 	// __GlobChildrenReplyReflect describes the GlobChildrenReply union type.
 	__GlobChildrenReplyReflect struct {
-		Name  string `vdl:"v.io/v23/naming.GlobChildrenReply"`
-		Type  GlobChildrenReply
-		Union struct {
+		Name               string `vdl:"v.io/v23/naming.GlobChildrenReply"`
+		Type               GlobChildrenReply
+		UnionTargetFactory globChildrenReplyTargetFactory
+		Union              struct {
 			Name  GlobChildrenReplyName
 			Error GlobChildrenReplyError
 		}
@@ -648,6 +701,57 @@ func (m GlobChildrenReplyError) FillVDLTarget(t vdl.Target, tt *vdl.Type) error 
 
 func (m GlobChildrenReplyError) MakeVDLTarget() vdl.Target {
 	return nil
+}
+
+type GlobChildrenReplyTarget struct {
+	Value     *GlobChildrenReply
+	fieldName string
+
+	vdl.TargetBase
+	vdl.FieldsTargetBase
+}
+
+func (t *GlobChildrenReplyTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
+	if ttWant := vdl.TypeOf((*GlobChildrenReply)(nil)); !vdl.Compatible(tt, ttWant) {
+		return nil, fmt.Errorf("type %v incompatible with %v", tt, ttWant)
+	}
+
+	return t, nil
+}
+func (t *GlobChildrenReplyTarget) StartField(name string) (key, field vdl.Target, _ error) {
+	t.fieldName = name
+	switch name {
+	case "Name":
+		val := ""
+		return nil, &vdl.StringTarget{Value: &val}, nil
+	case "Error":
+		val := GlobError{}
+		return nil, &GlobErrorTarget{Value: &val}, nil
+	default:
+		return nil, nil, fmt.Errorf("field %s not in union v.io/v23/naming.GlobChildrenReply", name)
+	}
+}
+func (t *GlobChildrenReplyTarget) FinishField(_, fieldTarget vdl.Target) error {
+	switch t.fieldName {
+	case "Name":
+		*t.Value = GlobChildrenReplyName{*(fieldTarget.(*vdl.StringTarget)).Value}
+	case "Error":
+		*t.Value = GlobChildrenReplyError{*(fieldTarget.(*GlobErrorTarget)).Value}
+	}
+	return nil
+}
+func (t *GlobChildrenReplyTarget) FinishFields(_ vdl.FieldsTarget) error {
+
+	return nil
+}
+
+type globChildrenReplyTargetFactory struct{}
+
+func (t globChildrenReplyTargetFactory) VDLMakeUnionTarget(union interface{}) (vdl.Target, error) {
+	if typedUnion, ok := union.(*GlobChildrenReply); ok {
+		return &GlobChildrenReplyTarget{Value: typedUnion}, nil
+	}
+	return nil, fmt.Errorf("got %T, want *GlobChildrenReply", union)
 }
 
 // Create zero values for each type.

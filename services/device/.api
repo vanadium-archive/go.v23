@@ -23,6 +23,14 @@ pkg device, method (*AssociationTarget) FinishField(vdl.Target, vdl.Target) erro
 pkg device, method (*AssociationTarget) FinishFields(vdl.FieldsTarget) error
 pkg device, method (*AssociationTarget) StartField(string) (vdl.Target, vdl.Target, error)
 pkg device, method (*AssociationTarget) StartFields(*vdl.Type) (vdl.FieldsTarget, error)
+pkg device, method (*BlessClientMessageTarget) FinishField(vdl.Target, vdl.Target) error
+pkg device, method (*BlessClientMessageTarget) FinishFields(vdl.FieldsTarget) error
+pkg device, method (*BlessClientMessageTarget) StartField(string) (vdl.Target, vdl.Target, error)
+pkg device, method (*BlessClientMessageTarget) StartFields(*vdl.Type) (vdl.FieldsTarget, error)
+pkg device, method (*BlessServerMessageTarget) FinishField(vdl.Target, vdl.Target) error
+pkg device, method (*BlessServerMessageTarget) FinishFields(vdl.FieldsTarget) error
+pkg device, method (*BlessServerMessageTarget) StartField(string) (vdl.Target, vdl.Target, error)
+pkg device, method (*BlessServerMessageTarget) StartFields(*vdl.Type) (vdl.FieldsTarget, error)
 pkg device, method (*Config) FillVDLTarget(vdl.Target, *vdl.Type) error
 pkg device, method (*Config) MakeVDLTarget() vdl.Target
 pkg device, method (*ConfigTarget) FinishField(vdl.Target, vdl.Target) error
@@ -62,6 +70,10 @@ pkg device, method (*InstanceStatusTarget) FinishField(vdl.Target, vdl.Target) e
 pkg device, method (*InstanceStatusTarget) FinishFields(vdl.FieldsTarget) error
 pkg device, method (*InstanceStatusTarget) StartField(string) (vdl.Target, vdl.Target, error)
 pkg device, method (*InstanceStatusTarget) StartFields(*vdl.Type) (vdl.FieldsTarget, error)
+pkg device, method (*StatusTarget) FinishField(vdl.Target, vdl.Target) error
+pkg device, method (*StatusTarget) FinishFields(vdl.FieldsTarget) error
+pkg device, method (*StatusTarget) StartField(string) (vdl.Target, vdl.Target, error)
+pkg device, method (*StatusTarget) StartFields(*vdl.Type) (vdl.FieldsTarget, error)
 pkg device, method (BlessClientMessageAppBlessings) FillVDLTarget(vdl.Target, *vdl.Type) error
 pkg device, method (BlessClientMessageAppBlessings) Index() int
 pkg device, method (BlessClientMessageAppBlessings) Interface() interface{}
@@ -191,6 +203,10 @@ pkg device, type BlessClientMessage interface, Name() string
 pkg device, type BlessClientMessage interface, unexported methods
 pkg device, type BlessClientMessageAppBlessings struct
 pkg device, type BlessClientMessageAppBlessings struct, Value security.Blessings
+pkg device, type BlessClientMessageTarget struct
+pkg device, type BlessClientMessageTarget struct, Value *BlessClientMessage
+pkg device, type BlessClientMessageTarget struct, embedded vdl.FieldsTargetBase
+pkg device, type BlessClientMessageTarget struct, embedded vdl.TargetBase
 pkg device, type BlessServerMessage interface, FillVDLTarget(vdl.Target, *vdl.Type) error
 pkg device, type BlessServerMessage interface, Index() int
 pkg device, type BlessServerMessage interface, Interface() interface{}
@@ -198,6 +214,10 @@ pkg device, type BlessServerMessage interface, Name() string
 pkg device, type BlessServerMessage interface, unexported methods
 pkg device, type BlessServerMessageInstancePublicKey struct
 pkg device, type BlessServerMessageInstancePublicKey struct, Value []byte
+pkg device, type BlessServerMessageTarget struct
+pkg device, type BlessServerMessageTarget struct, Value *BlessServerMessage
+pkg device, type BlessServerMessageTarget struct, embedded vdl.FieldsTargetBase
+pkg device, type BlessServerMessageTarget struct, embedded vdl.TargetBase
 pkg device, type ClaimableClientMethods interface { Claim }
 pkg device, type ClaimableClientMethods interface, Claim(*context.T, string, ...rpc.CallOpt) error
 pkg device, type ClaimableClientStub interface { Claim }
@@ -353,6 +373,10 @@ pkg device, type StatusInstallation struct
 pkg device, type StatusInstallation struct, Value InstallationStatus
 pkg device, type StatusInstance struct
 pkg device, type StatusInstance struct, Value InstanceStatus
+pkg device, type StatusTarget struct
+pkg device, type StatusTarget struct, Value *Status
+pkg device, type StatusTarget struct, embedded vdl.FieldsTargetBase
+pkg device, type StatusTarget struct, embedded vdl.TargetBase
 pkg device, var ApplicationDesc rpc.InterfaceDesc
 pkg device, var ClaimableDesc rpc.InterfaceDesc
 pkg device, var DeviceDesc rpc.InterfaceDesc

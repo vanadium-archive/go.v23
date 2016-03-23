@@ -20,12 +20,20 @@ pkg naming, func SplitAddressName(string) (string, string)
 pkg naming, func StripReserved(string) string
 pkg naming, func TrimSuffix(string, string) string
 pkg naming, func Unescape(string) (string, bool)
+pkg naming, method (*GlobChildrenReplyTarget) FinishField(vdl.Target, vdl.Target) error
+pkg naming, method (*GlobChildrenReplyTarget) FinishFields(vdl.FieldsTarget) error
+pkg naming, method (*GlobChildrenReplyTarget) StartField(string) (vdl.Target, vdl.Target, error)
+pkg naming, method (*GlobChildrenReplyTarget) StartFields(*vdl.Type) (vdl.FieldsTarget, error)
 pkg naming, method (*GlobError) FillVDLTarget(vdl.Target, *vdl.Type) error
 pkg naming, method (*GlobError) MakeVDLTarget() vdl.Target
 pkg naming, method (*GlobErrorTarget) FinishField(vdl.Target, vdl.Target) error
 pkg naming, method (*GlobErrorTarget) FinishFields(vdl.FieldsTarget) error
 pkg naming, method (*GlobErrorTarget) StartField(string) (vdl.Target, vdl.Target, error)
 pkg naming, method (*GlobErrorTarget) StartFields(*vdl.Type) (vdl.FieldsTarget, error)
+pkg naming, method (*GlobReplyTarget) FinishField(vdl.Target, vdl.Target) error
+pkg naming, method (*GlobReplyTarget) FinishFields(vdl.FieldsTarget) error
+pkg naming, method (*GlobReplyTarget) StartField(string) (vdl.Target, vdl.Target, error)
+pkg naming, method (*GlobReplyTarget) StartFields(*vdl.Type) (vdl.FieldsTarget, error)
 pkg naming, method (*MountEntry) FillVDLTarget(vdl.Target, *vdl.Type) error
 pkg naming, method (*MountEntry) MakeVDLTarget() vdl.Target
 pkg naming, method (*MountEntry) Names() []string
@@ -103,6 +111,10 @@ pkg naming, type GlobChildrenReplyError struct
 pkg naming, type GlobChildrenReplyError struct, Value GlobError
 pkg naming, type GlobChildrenReplyName struct
 pkg naming, type GlobChildrenReplyName struct, Value string
+pkg naming, type GlobChildrenReplyTarget struct
+pkg naming, type GlobChildrenReplyTarget struct, Value *GlobChildrenReply
+pkg naming, type GlobChildrenReplyTarget struct, embedded vdl.FieldsTargetBase
+pkg naming, type GlobChildrenReplyTarget struct, embedded vdl.TargetBase
 pkg naming, type GlobError struct
 pkg naming, type GlobError struct, Error error
 pkg naming, type GlobError struct, Name string
@@ -119,6 +131,10 @@ pkg naming, type GlobReplyEntry struct
 pkg naming, type GlobReplyEntry struct, Value MountEntry
 pkg naming, type GlobReplyError struct
 pkg naming, type GlobReplyError struct, Value GlobError
+pkg naming, type GlobReplyTarget struct
+pkg naming, type GlobReplyTarget struct, Value *GlobReply
+pkg naming, type GlobReplyTarget struct, embedded vdl.FieldsTargetBase
+pkg naming, type GlobReplyTarget struct, embedded vdl.TargetBase
 pkg naming, type IsLeaf bool
 pkg naming, type MountEntry struct
 pkg naming, type MountEntry struct, IsLeaf bool

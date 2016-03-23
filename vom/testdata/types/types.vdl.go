@@ -2188,9 +2188,10 @@ type (
 	NUnionC struct{ Value int64 }
 	// __NUnionReflect describes the NUnion union type.
 	__NUnionReflect struct {
-		Name  string `vdl:"v.io/v23/vom/testdata/types.NUnion"`
-		Type  NUnion
-		Union struct {
+		Name               string `vdl:"v.io/v23/vom/testdata/types.NUnion"`
+		Type               NUnion
+		UnionTargetFactory nUnionTargetFactory
+		Union              struct {
 			A NUnionA
 			B NUnionB
 			C NUnionC
@@ -2289,6 +2290,62 @@ func (m NUnionC) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 
 func (m NUnionC) MakeVDLTarget() vdl.Target {
 	return nil
+}
+
+type NUnionTarget struct {
+	Value     *NUnion
+	fieldName string
+
+	vdl.TargetBase
+	vdl.FieldsTargetBase
+}
+
+func (t *NUnionTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
+	if ttWant := vdl.TypeOf((*NUnion)(nil)); !vdl.Compatible(tt, ttWant) {
+		return nil, fmt.Errorf("type %v incompatible with %v", tt, ttWant)
+	}
+
+	return t, nil
+}
+func (t *NUnionTarget) StartField(name string) (key, field vdl.Target, _ error) {
+	t.fieldName = name
+	switch name {
+	case "A":
+		val := false
+		return nil, &vdl.BoolTarget{Value: &val}, nil
+	case "B":
+		val := ""
+		return nil, &vdl.StringTarget{Value: &val}, nil
+	case "C":
+		val := int64(0)
+		return nil, &vdl.Int64Target{Value: &val}, nil
+	default:
+		return nil, nil, fmt.Errorf("field %s not in union v.io/v23/vom/testdata/types.NUnion", name)
+	}
+}
+func (t *NUnionTarget) FinishField(_, fieldTarget vdl.Target) error {
+	switch t.fieldName {
+	case "A":
+		*t.Value = NUnionA{*(fieldTarget.(*vdl.BoolTarget)).Value}
+	case "B":
+		*t.Value = NUnionB{*(fieldTarget.(*vdl.StringTarget)).Value}
+	case "C":
+		*t.Value = NUnionC{*(fieldTarget.(*vdl.Int64Target)).Value}
+	}
+	return nil
+}
+func (t *NUnionTarget) FinishFields(_ vdl.FieldsTarget) error {
+
+	return nil
+}
+
+type nUnionTargetFactory struct{}
+
+func (t nUnionTargetFactory) VDLMakeUnionTarget(union interface{}) (vdl.Target, error) {
+	if typedUnion, ok := union.(*NUnion); ok {
+		return &NUnionTarget{Value: typedUnion}, nil
+	}
+	return nil, fmt.Errorf("got %T, want *NUnion", union)
 }
 
 // Nested Custom Types
@@ -5913,9 +5970,10 @@ type (
 	BdeUnionE struct{ Value *vdl.Type }
 	// __BdeUnionReflect describes the BdeUnion union type.
 	__BdeUnionReflect struct {
-		Name  string `vdl:"v.io/v23/vom/testdata/types.BdeUnion"`
-		Type  BdeUnion
-		Union struct {
+		Name               string `vdl:"v.io/v23/vom/testdata/types.BdeUnion"`
+		Type               BdeUnion
+		UnionTargetFactory bdeUnionTargetFactory
+		Union              struct {
 			B BdeUnionB
 			D BdeUnionD
 			E BdeUnionE
@@ -6025,6 +6083,63 @@ func (m BdeUnionE) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 
 func (m BdeUnionE) MakeVDLTarget() vdl.Target {
 	return nil
+}
+
+type BdeUnionTarget struct {
+	Value     *BdeUnion
+	fieldName string
+	anyValue  vdl.Value
+	vdl.TargetBase
+	vdl.FieldsTargetBase
+}
+
+func (t *BdeUnionTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
+	if ttWant := vdl.TypeOf((*BdeUnion)(nil)); !vdl.Compatible(tt, ttWant) {
+		return nil, fmt.Errorf("type %v incompatible with %v", tt, ttWant)
+	}
+
+	return t, nil
+}
+func (t *BdeUnionTarget) StartField(name string) (key, field vdl.Target, _ error) {
+	t.fieldName = name
+	switch name {
+	case "B":
+		val := ""
+		return nil, &vdl.StringTarget{Value: &val}, nil
+	case "D":
+		t.anyValue = vdl.Value{}
+		target, err := vdl.ValueTarget(&t.anyValue)
+		return nil, target, err
+	case "E":
+		val := vdl.AnyType
+		return nil, &vdl.TypeObjectTarget{Value: &val}, nil
+	default:
+		return nil, nil, fmt.Errorf("field %s not in union v.io/v23/vom/testdata/types.BdeUnion", name)
+	}
+}
+func (t *BdeUnionTarget) FinishField(_, fieldTarget vdl.Target) error {
+	switch t.fieldName {
+	case "B":
+		*t.Value = BdeUnionB{*(fieldTarget.(*vdl.StringTarget)).Value}
+	case "D":
+		*t.Value = BdeUnionD{&t.anyValue}
+	case "E":
+		*t.Value = BdeUnionE{*(fieldTarget.(*vdl.TypeObjectTarget)).Value}
+	}
+	return nil
+}
+func (t *BdeUnionTarget) FinishFields(_ vdl.FieldsTarget) error {
+
+	return nil
+}
+
+type bdeUnionTargetFactory struct{}
+
+func (t bdeUnionTargetFactory) VDLMakeUnionTarget(union interface{}) (vdl.Target, error) {
+	if typedUnion, ok := union.(*BdeUnion); ok {
+		return &BdeUnionTarget{Value: typedUnion}, nil
+	}
+	return nil, fmt.Errorf("got %T, want *BdeUnion", union)
 }
 
 type BrieEnum int
@@ -6866,8 +6981,8 @@ type StructManyTypesTarget struct {
 	nSetUint64Target       NSetUint64Target
 	nMapUint64StringTarget NMapUint64StringTarget
 	nStructTarget          NStructTarget
-
-	typeObjectTarget vdl.TypeObjectTarget
+	nUnionTarget           NUnionTarget
+	typeObjectTarget       vdl.TypeObjectTarget
 	vdl.TargetBase
 	vdl.FieldsTargetBase
 }
@@ -6970,7 +7085,8 @@ func (t *StructManyTypesTarget) StartField(name string) (key, field vdl.Target, 
 		target, err := &t.nStructTarget, error(nil)
 		return nil, target, err
 	case "NUnion":
-		target, err := vdl.ReflectTarget(reflect.ValueOf(&t.Value.NUnion))
+		t.nUnionTarget.Value = &t.Value.NUnion
+		target, err := &t.nUnionTarget, error(nil)
 		return nil, target, err
 	case "TypeObject":
 		t.typeObjectTarget.Value = &t.Value.TypeObject

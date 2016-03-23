@@ -9,7 +9,6 @@ package vom
 
 import (
 	"fmt"
-	"reflect"
 	"v.io/v23/vdl"
 	"v.io/v23/vdl/vdlconv"
 )
@@ -140,9 +139,10 @@ type (
 	PrimitivePControl struct{ Value ControlKind }
 	// __PrimitiveReflect describes the Primitive union type.
 	__PrimitiveReflect struct {
-		Name  string `vdl:"v.io/v23/vom.Primitive"`
-		Type  Primitive
-		Union struct {
+		Name               string `vdl:"v.io/v23/vom.Primitive"`
+		Type               Primitive
+		UnionTargetFactory primitiveTargetFactory
+		Union              struct {
 			PBool    PrimitivePBool
 			PByte    PrimitivePByte
 			PUint    PrimitivePUint
@@ -370,6 +370,82 @@ func (m PrimitivePControl) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 
 func (m PrimitivePControl) MakeVDLTarget() vdl.Target {
 	return nil
+}
+
+type PrimitiveTarget struct {
+	Value     *Primitive
+	fieldName string
+
+	vdl.TargetBase
+	vdl.FieldsTargetBase
+}
+
+func (t *PrimitiveTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
+	if ttWant := vdl.TypeOf((*Primitive)(nil)); !vdl.Compatible(tt, ttWant) {
+		return nil, fmt.Errorf("type %v incompatible with %v", tt, ttWant)
+	}
+
+	return t, nil
+}
+func (t *PrimitiveTarget) StartField(name string) (key, field vdl.Target, _ error) {
+	t.fieldName = name
+	switch name {
+	case "PBool":
+		val := false
+		return nil, &vdl.BoolTarget{Value: &val}, nil
+	case "PByte":
+		val := byte(0)
+		return nil, &vdl.ByteTarget{Value: &val}, nil
+	case "PUint":
+		val := uint64(0)
+		return nil, &vdl.Uint64Target{Value: &val}, nil
+	case "PInt":
+		val := int64(0)
+		return nil, &vdl.Int64Target{Value: &val}, nil
+	case "PFloat":
+		val := float64(0)
+		return nil, &vdl.Float64Target{Value: &val}, nil
+	case "PString":
+		val := ""
+		return nil, &vdl.StringTarget{Value: &val}, nil
+	case "PControl":
+		val := ControlKindNil
+		return nil, &ControlKindTarget{Value: &val}, nil
+	default:
+		return nil, nil, fmt.Errorf("field %s not in union v.io/v23/vom.Primitive", name)
+	}
+}
+func (t *PrimitiveTarget) FinishField(_, fieldTarget vdl.Target) error {
+	switch t.fieldName {
+	case "PBool":
+		*t.Value = PrimitivePBool{*(fieldTarget.(*vdl.BoolTarget)).Value}
+	case "PByte":
+		*t.Value = PrimitivePByte{*(fieldTarget.(*vdl.ByteTarget)).Value}
+	case "PUint":
+		*t.Value = PrimitivePUint{*(fieldTarget.(*vdl.Uint64Target)).Value}
+	case "PInt":
+		*t.Value = PrimitivePInt{*(fieldTarget.(*vdl.Int64Target)).Value}
+	case "PFloat":
+		*t.Value = PrimitivePFloat{*(fieldTarget.(*vdl.Float64Target)).Value}
+	case "PString":
+		*t.Value = PrimitivePString{*(fieldTarget.(*vdl.StringTarget)).Value}
+	case "PControl":
+		*t.Value = PrimitivePControl{*(fieldTarget.(*ControlKindTarget)).Value}
+	}
+	return nil
+}
+func (t *PrimitiveTarget) FinishFields(_ vdl.FieldsTarget) error {
+
+	return nil
+}
+
+type primitiveTargetFactory struct{}
+
+func (t primitiveTargetFactory) VDLMakeUnionTarget(union interface{}) (vdl.Target, error) {
+	if typedUnion, ok := union.(*Primitive); ok {
+		return &PrimitiveTarget{Value: typedUnion}, nil
+	}
+	return nil, fmt.Errorf("got %T, want *Primitive", union)
 }
 
 // DumpKind enumerates the different kinds of dump atoms.
@@ -646,7 +722,7 @@ type DumpAtomTarget struct {
 	Value       *DumpAtom
 	kindTarget  DumpKindTarget
 	bytesTarget vdl.BytesTarget
-
+	dataTarget  PrimitiveTarget
 	debugTarget vdl.StringTarget
 	vdl.TargetBase
 	vdl.FieldsTargetBase
@@ -670,7 +746,8 @@ func (t *DumpAtomTarget) StartField(name string) (key, field vdl.Target, _ error
 		target, err := &t.bytesTarget, error(nil)
 		return nil, target, err
 	case "Data":
-		target, err := vdl.ReflectTarget(reflect.ValueOf(&t.Value.Data))
+		t.dataTarget.Value = &t.Value.Data
+		target, err := &t.dataTarget, error(nil)
 		return nil, target, err
 	case "Debug":
 		t.debugTarget.Value = &t.Value.Debug
@@ -1800,9 +1877,10 @@ type (
 	wireTypeOptionalT struct{ Value wireOptional } // INDEX = 8
 	// __wireTypeReflect describes the wireType union type.
 	__wireTypeReflect struct {
-		Name  string `vdl:"v.io/v23/vom.wireType"`
-		Type  wireType
-		Union struct {
+		Name               string `vdl:"v.io/v23/vom.wireType"`
+		Type               wireType
+		UnionTargetFactory wireTypeTargetFactory
+		Union              struct {
 			NamedT    wireTypeNamedT
 			EnumT     wireTypeEnumT
 			ArrayT    wireTypeArrayT
@@ -2102,6 +2180,92 @@ func (m wireTypeOptionalT) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 
 func (m wireTypeOptionalT) MakeVDLTarget() vdl.Target {
 	return nil
+}
+
+type wireTypeTarget struct {
+	Value     *wireType
+	fieldName string
+
+	vdl.TargetBase
+	vdl.FieldsTargetBase
+}
+
+func (t *wireTypeTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
+	if ttWant := vdl.TypeOf((*wireType)(nil)); !vdl.Compatible(tt, ttWant) {
+		return nil, fmt.Errorf("type %v incompatible with %v", tt, ttWant)
+	}
+
+	return t, nil
+}
+func (t *wireTypeTarget) StartField(name string) (key, field vdl.Target, _ error) {
+	t.fieldName = name
+	switch name {
+	case "NamedT":
+		val := wireNamed{}
+		return nil, &wireNamedTarget{Value: &val}, nil
+	case "EnumT":
+		val := wireEnum{}
+		return nil, &wireEnumTarget{Value: &val}, nil
+	case "ArrayT":
+		val := wireArray{}
+		return nil, &wireArrayTarget{Value: &val}, nil
+	case "ListT":
+		val := wireList{}
+		return nil, &wireListTarget{Value: &val}, nil
+	case "SetT":
+		val := wireSet{}
+		return nil, &wireSetTarget{Value: &val}, nil
+	case "MapT":
+		val := wireMap{}
+		return nil, &wireMapTarget{Value: &val}, nil
+	case "StructT":
+		val := wireStruct{}
+		return nil, &wireStructTarget{Value: &val}, nil
+	case "UnionT":
+		val := wireUnion{}
+		return nil, &wireUnionTarget{Value: &val}, nil
+	case "OptionalT":
+		val := wireOptional{}
+		return nil, &wireOptionalTarget{Value: &val}, nil
+	default:
+		return nil, nil, fmt.Errorf("field %s not in union v.io/v23/vom.wireType", name)
+	}
+}
+func (t *wireTypeTarget) FinishField(_, fieldTarget vdl.Target) error {
+	switch t.fieldName {
+	case "NamedT":
+		*t.Value = wireTypeNamedT{*(fieldTarget.(*wireNamedTarget)).Value}
+	case "EnumT":
+		*t.Value = wireTypeEnumT{*(fieldTarget.(*wireEnumTarget)).Value}
+	case "ArrayT":
+		*t.Value = wireTypeArrayT{*(fieldTarget.(*wireArrayTarget)).Value}
+	case "ListT":
+		*t.Value = wireTypeListT{*(fieldTarget.(*wireListTarget)).Value}
+	case "SetT":
+		*t.Value = wireTypeSetT{*(fieldTarget.(*wireSetTarget)).Value}
+	case "MapT":
+		*t.Value = wireTypeMapT{*(fieldTarget.(*wireMapTarget)).Value}
+	case "StructT":
+		*t.Value = wireTypeStructT{*(fieldTarget.(*wireStructTarget)).Value}
+	case "UnionT":
+		*t.Value = wireTypeUnionT{*(fieldTarget.(*wireUnionTarget)).Value}
+	case "OptionalT":
+		*t.Value = wireTypeOptionalT{*(fieldTarget.(*wireOptionalTarget)).Value}
+	}
+	return nil
+}
+func (t *wireTypeTarget) FinishFields(_ vdl.FieldsTarget) error {
+
+	return nil
+}
+
+type wireTypeTargetFactory struct{}
+
+func (t wireTypeTargetFactory) VDLMakeUnionTarget(union interface{}) (vdl.Target, error) {
+	if typedUnion, ok := union.(*wireType); ok {
+		return &wireTypeTarget{Value: typedUnion}, nil
+	}
+	return nil, fmt.Errorf("got %T, want *wireType", union)
 }
 
 // Create zero values for each type.

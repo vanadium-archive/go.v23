@@ -1054,6 +1054,30 @@ func (c convTarget) StartFields(tt *Type) (FieldsTarget, error) {
 		}
 		return wrappedFieldsTarget{fieldsTarget, target}, nil
 	}
+	if c.vv == nil && c.rv.Kind() == reflect.Interface {
+		// TODO(bprosnitz) Union targets are not used for explicit union field structs
+		// It is possible to generate and use targets in this case. Consider
+		// if it is useful.
+		ri, _, err := deriveReflectInfo(c.rv.Type())
+		if err != nil {
+			return nil, err
+		}
+		if ri.UnionTargetFactory != nil {
+			if ni := nativeInfoFromWire(c.rv.Type()); ni == nil {
+				// Wire types are not supported by the generated union target.
+				rv := c.rv.Addr()
+				target, err := ri.UnionTargetFactory.VDLMakeUnionTarget(rv.Interface())
+				if err != nil {
+					return nil, err
+				}
+				fieldsTarget, err := target.StartFields(tt)
+				if err != nil {
+					return nil, err
+				}
+				return wrappedFieldsTarget{fieldsTarget, target}, nil
+			}
+		}
+	}
 	fin, fill, err := startConvert(c, tt)
 	return compConvTarget{fin, fill}, err
 }
