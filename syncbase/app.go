@@ -9,7 +9,6 @@ import (
 	"v.io/v23/naming"
 	"v.io/v23/security/access"
 	wire "v.io/v23/services/syncbase"
-	"v.io/v23/syncbase/nosql"
 	"v.io/v23/syncbase/util"
 )
 
@@ -45,9 +44,9 @@ func (a *app) Exists(ctx *context.T) (bool, error) {
 	return a.c.Exists(ctx)
 }
 
-// NoSQLDatabase implements App.NoSQLDatabase.
-func (a *app) NoSQLDatabase(relativeName string, schema *nosql.Schema) nosql.Database {
-	return nosql.NewDatabase(a.fullName, relativeName, schema)
+// Database implements App.Database.
+func (a *app) Database(relativeName string, schema *Schema) Database {
+	return NewDatabase(a.fullName, relativeName, schema)
 }
 
 // ListDatabases implements App.ListDatabases.

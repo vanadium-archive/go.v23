@@ -14,7 +14,6 @@ import (
 	"v.io/v23/naming"
 	"v.io/v23/services/watch"
 	"v.io/v23/syncbase"
-	"v.io/v23/syncbase/nosql"
 	"v.io/x/ref/services/syncbase/common"
 	"v.io/x/ref/test/v23test"
 )
@@ -143,7 +142,7 @@ func getDelta(lastTime time.Time) (delta int64, nextTime time.Time) {
 
 // sendInt32Sync sends data from 1 syncbase to another.
 // Be sure that the receiving watch stream sees the data and is still ok.
-func sendInt32Sync(b *testing.B, ts *testSyncbase, senderPrefix string, w nosql.WatchStream) {
+func sendInt32Sync(b *testing.B, ts *testSyncbase, senderPrefix string, w syncbase.WatchStream) {
 	ok(b, writeInt32(ts, senderPrefix, -1))
 	if w.Advance() {
 		w.Change() // grab the change, but ignore the value.
@@ -152,12 +151,12 @@ func sendInt32Sync(b *testing.B, ts *testSyncbase, senderPrefix string, w nosql.
 }
 
 // watchInt32s sends the value of each put through to the channel.
-func watchInt32s(b *testing.B, w nosql.WatchStream, c chan int32) {
+func watchInt32s(b *testing.B, w syncbase.WatchStream, c chan int32) {
 	var count int
 	for count < pingPongPairIterations && w.Advance() {
 		var t int32
 		change := w.Change()
-		if change.ChangeType == nosql.DeleteChange {
+		if change.ChangeType == syncbase.DeleteChange {
 			b.Error("Received a delete change")
 		}
 		err := change.Value(&t)
@@ -173,9 +172,9 @@ func watchInt32s(b *testing.B, w nosql.WatchStream, c chan int32) {
 }
 
 // getDbAndTable obtains the database and table handles for a syncbase name.
-func getDbAndTable(syncbaseName string) (d nosql.Database, tb nosql.Table) {
+func getDbAndTable(syncbaseName string) (d syncbase.Database, tb syncbase.Table) {
 	a := syncbase.NewService(syncbaseName).App(testApp)
-	d = a.NoSQLDatabase(testDb, nil)
+	d = a.Database(testDb, nil)
 	tb = d.Table(testTable)
 	return
 }
@@ -195,7 +194,7 @@ func writeInt32(ts *testSyncbase, keyPrefix string, keyValue int32) error {
 }
 
 // watchStreamOk emits an error if the watch stream has an error.
-func watchStreamOk(b *testing.B, w nosql.WatchStream) {
+func watchStreamOk(b *testing.B, w syncbase.WatchStream) {
 	if w.Err() != nil {
 		b.Errorf("stream error: %v", w.Err())
 	}

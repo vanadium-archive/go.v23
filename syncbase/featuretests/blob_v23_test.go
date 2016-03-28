@@ -14,7 +14,7 @@ import (
 
 	"v.io/v23/context"
 	"v.io/v23/naming"
-	wire "v.io/v23/services/syncbase/nosql"
+	wire "v.io/v23/services/syncbase"
 	"v.io/v23/syncbase"
 	"v.io/x/ref/services/syncbase/common"
 	"v.io/x/ref/test/v23test"
@@ -67,7 +67,7 @@ type testStruct struct {
 
 func generateBlob(ctx *context.T, syncbaseName, keyPrefix string, pos int, data []byte) error {
 	a := syncbase.NewService(syncbaseName).App(testApp)
-	d := a.NoSQLDatabase(testDb, nil)
+	d := a.Database(testDb, nil)
 	tb := d.Table(testTable)
 
 	b, err := d.CreateBlob(ctx)
@@ -104,7 +104,7 @@ func generateBlob(ctx *context.T, syncbaseName, keyPrefix string, pos int, data 
 
 func fetchBlob(ctx *context.T, syncbaseName, keyPrefix string, pos int, wantSize int64, skipIncStatus bool) error {
 	a := syncbase.NewService(syncbaseName).App(testApp)
-	d := a.NoSQLDatabase(testDb, nil)
+	d := a.Database(testDb, nil)
 	tb := d.Table(testTable)
 
 	key := fmt.Sprintf("%s%d", keyPrefix, pos)
@@ -173,7 +173,7 @@ func fetchBlob(ctx *context.T, syncbaseName, keyPrefix string, pos int, wantSize
 
 func getBlob(ctx *context.T, syncbaseName, keyPrefix string, pos int, wantVal []byte, offset int64) error {
 	a := syncbase.NewService(syncbaseName).App(testApp)
-	d := a.NoSQLDatabase(testDb, nil)
+	d := a.Database(testDb, nil)
 	tb := d.Table(testTable)
 
 	key := fmt.Sprintf("%s%d", keyPrefix, pos)
@@ -216,7 +216,7 @@ func getBlob(ctx *context.T, syncbaseName, keyPrefix string, pos int, wantVal []
 
 func generateBigBlob(ctx *context.T, syncbaseName, keyPrefix string, pos int) error {
 	a := syncbase.NewService(syncbaseName).App(testApp)
-	d := a.NoSQLDatabase(testDb, nil)
+	d := a.Database(testDb, nil)
 	tb := d.Table(testTable)
 
 	b, err := d.CreateBlob(ctx)
@@ -267,7 +267,7 @@ func generateBigBlob(ctx *context.T, syncbaseName, keyPrefix string, pos int) er
 
 func getBigBlob(ctx *context.T, syncbaseName, keyPrefix string, pos int) error {
 	a := syncbase.NewService(syncbaseName).App(testApp)
-	d := a.NoSQLDatabase(testDb, nil)
+	d := a.Database(testDb, nil)
 	tb := d.Table(testTable)
 
 	key := fmt.Sprintf("%s%d", keyPrefix, pos)

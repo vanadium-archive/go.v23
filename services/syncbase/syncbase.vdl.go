@@ -14,6 +14,7 @@ package syncbase
 
 import (
 	"fmt"
+	"io"
 	"time"
 	"v.io/v23"
 	"v.io/v23/context"
@@ -21,9 +22,11 @@ import (
 	"v.io/v23/rpc"
 	"v.io/v23/security/access"
 	"v.io/v23/services/permissions"
+	"v.io/v23/services/watch"
 	"v.io/v23/vdl"
 	time_2 "v.io/v23/vdlroot/time"
 	"v.io/v23/verror"
+	"v.io/v23/vom"
 )
 
 var _ = __VDLInit() // Must be first; see __VDLInit comments for details.
@@ -194,18 +197,3039 @@ func (t *DevModeUpdateVClockOptsTarget) FinishFields(_ vdl.FieldsTarget) error {
 	return nil
 }
 
+// BatchOptions configures a batch.
+// TODO(sadovsky): Add more options, e.g. to configure isolation, timeouts,
+// whether to track the read set and/or write set, etc.
+// TODO(sadovsky): Maybe add a DefaultBatchOptions() function that initializes
+// BatchOptions with our desired defaults. Clients would be encouraged to
+// initialize their BatchOptions object using that function and then modify it
+// to their liking.
+type BatchOptions struct {
+	// Arbitrary string, typically used to describe the intent behind a batch.
+	// Hints are surfaced to clients during conflict resolution.
+	// TODO(sadovsky): Use "any" here?
+	Hint string
+	// ReadOnly specifies whether the batch should allow writes.
+	// If ReadOnly is set to true, Abort() should be used to release any resources
+	// associated with this batch (though it is not strictly required), and
+	// Commit() will always fail.
+	ReadOnly bool
+}
+
+func (BatchOptions) __VDLReflect(struct {
+	Name string `vdl:"v.io/v23/services/syncbase.BatchOptions"`
+}) {
+}
+
+func (m *BatchOptions) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
+	fieldsTarget1, err := t.StartFields(tt)
+	if err != nil {
+		return err
+	}
+
+	keyTarget2, fieldTarget3, err := fieldsTarget1.StartField("Hint")
+	if err != vdl.ErrFieldNoExist && err != nil {
+		return err
+	}
+	if err != vdl.ErrFieldNoExist {
+		if err := fieldTarget3.FromString(string(m.Hint), tt.NonOptional().Field(0).Type); err != nil {
+			return err
+		}
+		if err := fieldsTarget1.FinishField(keyTarget2, fieldTarget3); err != nil {
+			return err
+		}
+	}
+	keyTarget4, fieldTarget5, err := fieldsTarget1.StartField("ReadOnly")
+	if err != vdl.ErrFieldNoExist && err != nil {
+		return err
+	}
+	if err != vdl.ErrFieldNoExist {
+		if err := fieldTarget5.FromBool(bool(m.ReadOnly), tt.NonOptional().Field(1).Type); err != nil {
+			return err
+		}
+		if err := fieldsTarget1.FinishField(keyTarget4, fieldTarget5); err != nil {
+			return err
+		}
+	}
+	if err := t.FinishFields(fieldsTarget1); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (m *BatchOptions) MakeVDLTarget() vdl.Target {
+	return &BatchOptionsTarget{Value: m}
+}
+
+type BatchOptionsTarget struct {
+	Value          *BatchOptions
+	hintTarget     vdl.StringTarget
+	readOnlyTarget vdl.BoolTarget
+	vdl.TargetBase
+	vdl.FieldsTargetBase
+}
+
+func (t *BatchOptionsTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
+
+	if ttWant := vdl.TypeOf((*BatchOptions)(nil)).Elem(); !vdl.Compatible(tt, ttWant) {
+		return nil, fmt.Errorf("type %v incompatible with %v", tt, ttWant)
+	}
+	return t, nil
+}
+func (t *BatchOptionsTarget) StartField(name string) (key, field vdl.Target, _ error) {
+	switch name {
+	case "Hint":
+		t.hintTarget.Value = &t.Value.Hint
+		target, err := &t.hintTarget, error(nil)
+		return nil, target, err
+	case "ReadOnly":
+		t.readOnlyTarget.Value = &t.Value.ReadOnly
+		target, err := &t.readOnlyTarget, error(nil)
+		return nil, target, err
+	default:
+		return nil, nil, fmt.Errorf("field %s not in struct v.io/v23/services/syncbase.BatchOptions", name)
+	}
+}
+func (t *BatchOptionsTarget) FinishField(_, _ vdl.Target) error {
+	return nil
+}
+func (t *BatchOptionsTarget) FinishFields(_ vdl.FieldsTarget) error {
+
+	return nil
+}
+
+// PrefixPermissions represents a pair of (prefix, perms).
+type PrefixPermissions struct {
+	Prefix string
+	Perms  access.Permissions
+}
+
+func (PrefixPermissions) __VDLReflect(struct {
+	Name string `vdl:"v.io/v23/services/syncbase.PrefixPermissions"`
+}) {
+}
+
+func (m *PrefixPermissions) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
+	fieldsTarget1, err := t.StartFields(tt)
+	if err != nil {
+		return err
+	}
+
+	keyTarget2, fieldTarget3, err := fieldsTarget1.StartField("Prefix")
+	if err != vdl.ErrFieldNoExist && err != nil {
+		return err
+	}
+	if err != vdl.ErrFieldNoExist {
+		if err := fieldTarget3.FromString(string(m.Prefix), tt.NonOptional().Field(0).Type); err != nil {
+			return err
+		}
+		if err := fieldsTarget1.FinishField(keyTarget2, fieldTarget3); err != nil {
+			return err
+		}
+	}
+	keyTarget4, fieldTarget5, err := fieldsTarget1.StartField("Perms")
+	if err != vdl.ErrFieldNoExist && err != nil {
+		return err
+	}
+	if err != vdl.ErrFieldNoExist {
+
+		if err := m.Perms.FillVDLTarget(fieldTarget5, tt.NonOptional().Field(1).Type); err != nil {
+			return err
+		}
+		if err := fieldsTarget1.FinishField(keyTarget4, fieldTarget5); err != nil {
+			return err
+		}
+	}
+	if err := t.FinishFields(fieldsTarget1); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (m *PrefixPermissions) MakeVDLTarget() vdl.Target {
+	return &PrefixPermissionsTarget{Value: m}
+}
+
+type PrefixPermissionsTarget struct {
+	Value        *PrefixPermissions
+	prefixTarget vdl.StringTarget
+	permsTarget  access.PermissionsTarget
+	vdl.TargetBase
+	vdl.FieldsTargetBase
+}
+
+func (t *PrefixPermissionsTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
+
+	if ttWant := vdl.TypeOf((*PrefixPermissions)(nil)).Elem(); !vdl.Compatible(tt, ttWant) {
+		return nil, fmt.Errorf("type %v incompatible with %v", tt, ttWant)
+	}
+	return t, nil
+}
+func (t *PrefixPermissionsTarget) StartField(name string) (key, field vdl.Target, _ error) {
+	switch name {
+	case "Prefix":
+		t.prefixTarget.Value = &t.Value.Prefix
+		target, err := &t.prefixTarget, error(nil)
+		return nil, target, err
+	case "Perms":
+		t.permsTarget.Value = &t.Value.Perms
+		target, err := &t.permsTarget, error(nil)
+		return nil, target, err
+	default:
+		return nil, nil, fmt.Errorf("field %s not in struct v.io/v23/services/syncbase.PrefixPermissions", name)
+	}
+}
+func (t *PrefixPermissionsTarget) FinishField(_, _ vdl.Target) error {
+	return nil
+}
+func (t *PrefixPermissionsTarget) FinishFields(_ vdl.FieldsTarget) error {
+
+	return nil
+}
+
+// KeyValue is a key-value pair.
+type KeyValue struct {
+	Key   string
+	Value []byte
+}
+
+func (KeyValue) __VDLReflect(struct {
+	Name string `vdl:"v.io/v23/services/syncbase.KeyValue"`
+}) {
+}
+
+func (m *KeyValue) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
+	fieldsTarget1, err := t.StartFields(tt)
+	if err != nil {
+		return err
+	}
+
+	keyTarget2, fieldTarget3, err := fieldsTarget1.StartField("Key")
+	if err != vdl.ErrFieldNoExist && err != nil {
+		return err
+	}
+	if err != vdl.ErrFieldNoExist {
+		if err := fieldTarget3.FromString(string(m.Key), tt.NonOptional().Field(0).Type); err != nil {
+			return err
+		}
+		if err := fieldsTarget1.FinishField(keyTarget2, fieldTarget3); err != nil {
+			return err
+		}
+	}
+	keyTarget4, fieldTarget5, err := fieldsTarget1.StartField("Value")
+	if err != vdl.ErrFieldNoExist && err != nil {
+		return err
+	}
+	if err != vdl.ErrFieldNoExist {
+
+		if err := fieldTarget5.FromBytes([]byte(m.Value), tt.NonOptional().Field(1).Type); err != nil {
+			return err
+		}
+		if err := fieldsTarget1.FinishField(keyTarget4, fieldTarget5); err != nil {
+			return err
+		}
+	}
+	if err := t.FinishFields(fieldsTarget1); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (m *KeyValue) MakeVDLTarget() vdl.Target {
+	return &KeyValueTarget{Value: m}
+}
+
+type KeyValueTarget struct {
+	Value       *KeyValue
+	keyTarget   vdl.StringTarget
+	valueTarget vdl.BytesTarget
+	vdl.TargetBase
+	vdl.FieldsTargetBase
+}
+
+func (t *KeyValueTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
+
+	if ttWant := vdl.TypeOf((*KeyValue)(nil)).Elem(); !vdl.Compatible(tt, ttWant) {
+		return nil, fmt.Errorf("type %v incompatible with %v", tt, ttWant)
+	}
+	return t, nil
+}
+func (t *KeyValueTarget) StartField(name string) (key, field vdl.Target, _ error) {
+	switch name {
+	case "Key":
+		t.keyTarget.Value = &t.Value.Key
+		target, err := &t.keyTarget, error(nil)
+		return nil, target, err
+	case "Value":
+		t.valueTarget.Value = &t.Value.Value
+		target, err := &t.valueTarget, error(nil)
+		return nil, target, err
+	default:
+		return nil, nil, fmt.Errorf("field %s not in struct v.io/v23/services/syncbase.KeyValue", name)
+	}
+}
+func (t *KeyValueTarget) FinishField(_, _ vdl.Target) error {
+	return nil
+}
+func (t *KeyValueTarget) FinishFields(_ vdl.FieldsTarget) error {
+
+	return nil
+}
+
+// TableRow encapsulates the table name and row key or row prefix.
+type TableRow struct {
+	TableName string
+	Row       string
+}
+
+func (TableRow) __VDLReflect(struct {
+	Name string `vdl:"v.io/v23/services/syncbase.TableRow"`
+}) {
+}
+
+func (m *TableRow) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
+	fieldsTarget1, err := t.StartFields(tt)
+	if err != nil {
+		return err
+	}
+
+	keyTarget2, fieldTarget3, err := fieldsTarget1.StartField("TableName")
+	if err != vdl.ErrFieldNoExist && err != nil {
+		return err
+	}
+	if err != vdl.ErrFieldNoExist {
+		if err := fieldTarget3.FromString(string(m.TableName), tt.NonOptional().Field(0).Type); err != nil {
+			return err
+		}
+		if err := fieldsTarget1.FinishField(keyTarget2, fieldTarget3); err != nil {
+			return err
+		}
+	}
+	keyTarget4, fieldTarget5, err := fieldsTarget1.StartField("Row")
+	if err != vdl.ErrFieldNoExist && err != nil {
+		return err
+	}
+	if err != vdl.ErrFieldNoExist {
+		if err := fieldTarget5.FromString(string(m.Row), tt.NonOptional().Field(1).Type); err != nil {
+			return err
+		}
+		if err := fieldsTarget1.FinishField(keyTarget4, fieldTarget5); err != nil {
+			return err
+		}
+	}
+	if err := t.FinishFields(fieldsTarget1); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (m *TableRow) MakeVDLTarget() vdl.Target {
+	return &TableRowTarget{Value: m}
+}
+
+type TableRowTarget struct {
+	Value           *TableRow
+	tableNameTarget vdl.StringTarget
+	rowTarget       vdl.StringTarget
+	vdl.TargetBase
+	vdl.FieldsTargetBase
+}
+
+func (t *TableRowTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
+
+	if ttWant := vdl.TypeOf((*TableRow)(nil)).Elem(); !vdl.Compatible(tt, ttWant) {
+		return nil, fmt.Errorf("type %v incompatible with %v", tt, ttWant)
+	}
+	return t, nil
+}
+func (t *TableRowTarget) StartField(name string) (key, field vdl.Target, _ error) {
+	switch name {
+	case "TableName":
+		t.tableNameTarget.Value = &t.Value.TableName
+		target, err := &t.tableNameTarget, error(nil)
+		return nil, target, err
+	case "Row":
+		t.rowTarget.Value = &t.Value.Row
+		target, err := &t.rowTarget, error(nil)
+		return nil, target, err
+	default:
+		return nil, nil, fmt.Errorf("field %s not in struct v.io/v23/services/syncbase.TableRow", name)
+	}
+}
+func (t *TableRowTarget) FinishField(_, _ vdl.Target) error {
+	return nil
+}
+func (t *TableRowTarget) FinishFields(_ vdl.FieldsTarget) error {
+
+	return nil
+}
+
+// SyncgroupSpec contains the specification for a syncgroup.
+type SyncgroupSpec struct {
+	// Human-readable description of this syncgroup.
+	Description string
+	// Permissions governing access to this syncgroup.
+	Perms access.Permissions
+	// Data (tableName-rowPrefix pairs) covered by this syncgroup.
+	Prefixes []TableRow
+	// Mount tables at which to advertise this syncgroup, for rendezvous purposes.
+	// (Note that in addition to these mount tables, Syncbase also uses
+	// network-neighborhood-based discovery for rendezvous.)
+	// We expect most clients to specify a single mount table, but we accept an
+	// array of mount tables to permit the mount table to be changed over time
+	// without disruption.
+	// TODO(hpucha): Figure out a convention for advertising syncgroups in the
+	// mount table.
+	MountTables []string
+	// Specifies the privacy of this syncgroup. More specifically, specifies
+	// whether blobs in this syncgroup can be served to clients presenting
+	// blobrefs obtained from other syncgroups.
+	IsPrivate bool
+}
+
+func (SyncgroupSpec) __VDLReflect(struct {
+	Name string `vdl:"v.io/v23/services/syncbase.SyncgroupSpec"`
+}) {
+}
+
+func (m *SyncgroupSpec) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
+	fieldsTarget1, err := t.StartFields(tt)
+	if err != nil {
+		return err
+	}
+
+	keyTarget2, fieldTarget3, err := fieldsTarget1.StartField("Description")
+	if err != vdl.ErrFieldNoExist && err != nil {
+		return err
+	}
+	if err != vdl.ErrFieldNoExist {
+		if err := fieldTarget3.FromString(string(m.Description), tt.NonOptional().Field(0).Type); err != nil {
+			return err
+		}
+		if err := fieldsTarget1.FinishField(keyTarget2, fieldTarget3); err != nil {
+			return err
+		}
+	}
+	keyTarget4, fieldTarget5, err := fieldsTarget1.StartField("Perms")
+	if err != vdl.ErrFieldNoExist && err != nil {
+		return err
+	}
+	if err != vdl.ErrFieldNoExist {
+
+		if err := m.Perms.FillVDLTarget(fieldTarget5, tt.NonOptional().Field(1).Type); err != nil {
+			return err
+		}
+		if err := fieldsTarget1.FinishField(keyTarget4, fieldTarget5); err != nil {
+			return err
+		}
+	}
+	keyTarget6, fieldTarget7, err := fieldsTarget1.StartField("Prefixes")
+	if err != vdl.ErrFieldNoExist && err != nil {
+		return err
+	}
+	if err != vdl.ErrFieldNoExist {
+
+		listTarget8, err := fieldTarget7.StartList(tt.NonOptional().Field(2).Type, len(m.Prefixes))
+		if err != nil {
+			return err
+		}
+		for i, elem10 := range m.Prefixes {
+			elemTarget9, err := listTarget8.StartElem(i)
+			if err != nil {
+				return err
+			}
+
+			if err := elem10.FillVDLTarget(elemTarget9, tt.NonOptional().Field(2).Type.Elem()); err != nil {
+				return err
+			}
+			if err := listTarget8.FinishElem(elemTarget9); err != nil {
+				return err
+			}
+		}
+		if err := fieldTarget7.FinishList(listTarget8); err != nil {
+			return err
+		}
+		if err := fieldsTarget1.FinishField(keyTarget6, fieldTarget7); err != nil {
+			return err
+		}
+	}
+	keyTarget11, fieldTarget12, err := fieldsTarget1.StartField("MountTables")
+	if err != vdl.ErrFieldNoExist && err != nil {
+		return err
+	}
+	if err != vdl.ErrFieldNoExist {
+
+		listTarget13, err := fieldTarget12.StartList(tt.NonOptional().Field(3).Type, len(m.MountTables))
+		if err != nil {
+			return err
+		}
+		for i, elem15 := range m.MountTables {
+			elemTarget14, err := listTarget13.StartElem(i)
+			if err != nil {
+				return err
+			}
+			if err := elemTarget14.FromString(string(elem15), tt.NonOptional().Field(3).Type.Elem()); err != nil {
+				return err
+			}
+			if err := listTarget13.FinishElem(elemTarget14); err != nil {
+				return err
+			}
+		}
+		if err := fieldTarget12.FinishList(listTarget13); err != nil {
+			return err
+		}
+		if err := fieldsTarget1.FinishField(keyTarget11, fieldTarget12); err != nil {
+			return err
+		}
+	}
+	keyTarget16, fieldTarget17, err := fieldsTarget1.StartField("IsPrivate")
+	if err != vdl.ErrFieldNoExist && err != nil {
+		return err
+	}
+	if err != vdl.ErrFieldNoExist {
+		if err := fieldTarget17.FromBool(bool(m.IsPrivate), tt.NonOptional().Field(4).Type); err != nil {
+			return err
+		}
+		if err := fieldsTarget1.FinishField(keyTarget16, fieldTarget17); err != nil {
+			return err
+		}
+	}
+	if err := t.FinishFields(fieldsTarget1); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (m *SyncgroupSpec) MakeVDLTarget() vdl.Target {
+	return &SyncgroupSpecTarget{Value: m}
+}
+
+type SyncgroupSpecTarget struct {
+	Value             *SyncgroupSpec
+	descriptionTarget vdl.StringTarget
+	permsTarget       access.PermissionsTarget
+	prefixesTarget    __VDLTarget1_list
+	mountTablesTarget vdl.StringSliceTarget
+	isPrivateTarget   vdl.BoolTarget
+	vdl.TargetBase
+	vdl.FieldsTargetBase
+}
+
+func (t *SyncgroupSpecTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
+
+	if ttWant := vdl.TypeOf((*SyncgroupSpec)(nil)).Elem(); !vdl.Compatible(tt, ttWant) {
+		return nil, fmt.Errorf("type %v incompatible with %v", tt, ttWant)
+	}
+	return t, nil
+}
+func (t *SyncgroupSpecTarget) StartField(name string) (key, field vdl.Target, _ error) {
+	switch name {
+	case "Description":
+		t.descriptionTarget.Value = &t.Value.Description
+		target, err := &t.descriptionTarget, error(nil)
+		return nil, target, err
+	case "Perms":
+		t.permsTarget.Value = &t.Value.Perms
+		target, err := &t.permsTarget, error(nil)
+		return nil, target, err
+	case "Prefixes":
+		t.prefixesTarget.Value = &t.Value.Prefixes
+		target, err := &t.prefixesTarget, error(nil)
+		return nil, target, err
+	case "MountTables":
+		t.mountTablesTarget.Value = &t.Value.MountTables
+		target, err := &t.mountTablesTarget, error(nil)
+		return nil, target, err
+	case "IsPrivate":
+		t.isPrivateTarget.Value = &t.Value.IsPrivate
+		target, err := &t.isPrivateTarget, error(nil)
+		return nil, target, err
+	default:
+		return nil, nil, fmt.Errorf("field %s not in struct v.io/v23/services/syncbase.SyncgroupSpec", name)
+	}
+}
+func (t *SyncgroupSpecTarget) FinishField(_, _ vdl.Target) error {
+	return nil
+}
+func (t *SyncgroupSpecTarget) FinishFields(_ vdl.FieldsTarget) error {
+
+	return nil
+}
+
+// []TableRow
+type __VDLTarget1_list struct {
+	Value      *[]TableRow
+	elemTarget TableRowTarget
+	vdl.TargetBase
+	vdl.ListTargetBase
+}
+
+func (t *__VDLTarget1_list) StartList(tt *vdl.Type, len int) (vdl.ListTarget, error) {
+
+	if ttWant := vdl.TypeOf((*[]TableRow)(nil)); !vdl.Compatible(tt, ttWant) {
+		return nil, fmt.Errorf("type %v incompatible with %v", tt, ttWant)
+	}
+	if cap(*t.Value) < len {
+		*t.Value = make([]TableRow, len)
+	} else {
+		*t.Value = (*t.Value)[:len]
+	}
+	return t, nil
+}
+func (t *__VDLTarget1_list) StartElem(index int) (elem vdl.Target, _ error) {
+	t.elemTarget.Value = &(*t.Value)[index]
+	target, err := &t.elemTarget, error(nil)
+	return target, err
+}
+func (t *__VDLTarget1_list) FinishElem(elem vdl.Target) error {
+	return nil
+}
+func (t *__VDLTarget1_list) FinishList(elem vdl.ListTarget) error {
+
+	return nil
+}
+
+// SyncgroupMemberInfo contains per-member metadata.
+type SyncgroupMemberInfo struct {
+	SyncPriority byte
+	IsServer     bool // This member should be given blob ownership preferentially.
+}
+
+func (SyncgroupMemberInfo) __VDLReflect(struct {
+	Name string `vdl:"v.io/v23/services/syncbase.SyncgroupMemberInfo"`
+}) {
+}
+
+func (m *SyncgroupMemberInfo) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
+	fieldsTarget1, err := t.StartFields(tt)
+	if err != nil {
+		return err
+	}
+
+	keyTarget2, fieldTarget3, err := fieldsTarget1.StartField("SyncPriority")
+	if err != vdl.ErrFieldNoExist && err != nil {
+		return err
+	}
+	if err != vdl.ErrFieldNoExist {
+		if err := fieldTarget3.FromUint(uint64(m.SyncPriority), tt.NonOptional().Field(0).Type); err != nil {
+			return err
+		}
+		if err := fieldsTarget1.FinishField(keyTarget2, fieldTarget3); err != nil {
+			return err
+		}
+	}
+	keyTarget4, fieldTarget5, err := fieldsTarget1.StartField("IsServer")
+	if err != vdl.ErrFieldNoExist && err != nil {
+		return err
+	}
+	if err != vdl.ErrFieldNoExist {
+		if err := fieldTarget5.FromBool(bool(m.IsServer), tt.NonOptional().Field(1).Type); err != nil {
+			return err
+		}
+		if err := fieldsTarget1.FinishField(keyTarget4, fieldTarget5); err != nil {
+			return err
+		}
+	}
+	if err := t.FinishFields(fieldsTarget1); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (m *SyncgroupMemberInfo) MakeVDLTarget() vdl.Target {
+	return &SyncgroupMemberInfoTarget{Value: m}
+}
+
+type SyncgroupMemberInfoTarget struct {
+	Value              *SyncgroupMemberInfo
+	syncPriorityTarget vdl.ByteTarget
+	isServerTarget     vdl.BoolTarget
+	vdl.TargetBase
+	vdl.FieldsTargetBase
+}
+
+func (t *SyncgroupMemberInfoTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
+
+	if ttWant := vdl.TypeOf((*SyncgroupMemberInfo)(nil)).Elem(); !vdl.Compatible(tt, ttWant) {
+		return nil, fmt.Errorf("type %v incompatible with %v", tt, ttWant)
+	}
+	return t, nil
+}
+func (t *SyncgroupMemberInfoTarget) StartField(name string) (key, field vdl.Target, _ error) {
+	switch name {
+	case "SyncPriority":
+		t.syncPriorityTarget.Value = &t.Value.SyncPriority
+		target, err := &t.syncPriorityTarget, error(nil)
+		return nil, target, err
+	case "IsServer":
+		t.isServerTarget.Value = &t.Value.IsServer
+		target, err := &t.isServerTarget, error(nil)
+		return nil, target, err
+	default:
+		return nil, nil, fmt.Errorf("field %s not in struct v.io/v23/services/syncbase.SyncgroupMemberInfo", name)
+	}
+}
+func (t *SyncgroupMemberInfoTarget) FinishField(_, _ vdl.Target) error {
+	return nil
+}
+func (t *SyncgroupMemberInfoTarget) FinishFields(_ vdl.FieldsTarget) error {
+
+	return nil
+}
+
+// ResolverType defines the possible conflict resolution policies.
+// A Conflict is defined as presence of two independent sets of updates
+// originating from the same version of an object. Syncbase
+// uses version vectors to determine sequence of changes to a given row. Hence
+// if device A updates a row with key "foo" from version V3 to V4, then syncs
+// with device B which further updates the same row from version V4 to V5 and
+// then V5 is synced back to device A, device A will see V5 as a forward
+// progression of "foo" and not a conflict with V3 of "foo". But in the
+// meantime if device A had already updated "foo" again from version V4 to
+// version V6 then there is a conflict between V5 and V6 with V4 being the
+// common ancestor.
+type ResolverType int
+
+const (
+	ResolverTypeLastWins ResolverType = iota
+	ResolverTypeAppResolves
+	ResolverTypeDefer
+)
+
+// ResolverTypeAll holds all labels for ResolverType.
+var ResolverTypeAll = [...]ResolverType{ResolverTypeLastWins, ResolverTypeAppResolves, ResolverTypeDefer}
+
+// ResolverTypeFromString creates a ResolverType from a string label.
+func ResolverTypeFromString(label string) (x ResolverType, err error) {
+	err = x.Set(label)
+	return
+}
+
+// Set assigns label to x.
+func (x *ResolverType) Set(label string) error {
+	switch label {
+	case "LastWins", "lastwins":
+		*x = ResolverTypeLastWins
+		return nil
+	case "AppResolves", "appresolves":
+		*x = ResolverTypeAppResolves
+		return nil
+	case "Defer", "defer":
+		*x = ResolverTypeDefer
+		return nil
+	}
+	*x = -1
+	return fmt.Errorf("unknown label %q in syncbase.ResolverType", label)
+}
+
+// String returns the string label of x.
+func (x ResolverType) String() string {
+	switch x {
+	case ResolverTypeLastWins:
+		return "LastWins"
+	case ResolverTypeAppResolves:
+		return "AppResolves"
+	case ResolverTypeDefer:
+		return "Defer"
+	}
+	return ""
+}
+
+func (ResolverType) __VDLReflect(struct {
+	Name string `vdl:"v.io/v23/services/syncbase.ResolverType"`
+	Enum struct{ LastWins, AppResolves, Defer string }
+}) {
+}
+
+func (m *ResolverType) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
+	if err := t.FromEnumLabel((*m).String(), tt); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (m *ResolverType) MakeVDLTarget() vdl.Target {
+	return &ResolverTypeTarget{Value: m}
+}
+
+type ResolverTypeTarget struct {
+	Value *ResolverType
+	vdl.TargetBase
+}
+
+func (t *ResolverTypeTarget) FromEnumLabel(src string, tt *vdl.Type) error {
+
+	if ttWant := vdl.TypeOf((*ResolverType)(nil)); !vdl.Compatible(tt, ttWant) {
+		return fmt.Errorf("type %v incompatible with %v", tt, ttWant)
+	}
+	switch src {
+	case "LastWins":
+		*t.Value = 0
+	case "AppResolves":
+		*t.Value = 1
+	case "Defer":
+		*t.Value = 2
+	default:
+		return fmt.Errorf("label %s not in enum v.io/v23/services/syncbase.ResolverType", src)
+	}
+
+	return nil
+}
+
+// BatchSource represents where the batch was committed.
+type BatchSource int
+
+const (
+	BatchSourceLocal BatchSource = iota
+	BatchSourceRemote
+)
+
+// BatchSourceAll holds all labels for BatchSource.
+var BatchSourceAll = [...]BatchSource{BatchSourceLocal, BatchSourceRemote}
+
+// BatchSourceFromString creates a BatchSource from a string label.
+func BatchSourceFromString(label string) (x BatchSource, err error) {
+	err = x.Set(label)
+	return
+}
+
+// Set assigns label to x.
+func (x *BatchSource) Set(label string) error {
+	switch label {
+	case "Local", "local":
+		*x = BatchSourceLocal
+		return nil
+	case "Remote", "remote":
+		*x = BatchSourceRemote
+		return nil
+	}
+	*x = -1
+	return fmt.Errorf("unknown label %q in syncbase.BatchSource", label)
+}
+
+// String returns the string label of x.
+func (x BatchSource) String() string {
+	switch x {
+	case BatchSourceLocal:
+		return "Local"
+	case BatchSourceRemote:
+		return "Remote"
+	}
+	return ""
+}
+
+func (BatchSource) __VDLReflect(struct {
+	Name string `vdl:"v.io/v23/services/syncbase.BatchSource"`
+	Enum struct{ Local, Remote string }
+}) {
+}
+
+func (m *BatchSource) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
+	if err := t.FromEnumLabel((*m).String(), tt); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (m *BatchSource) MakeVDLTarget() vdl.Target {
+	return &BatchSourceTarget{Value: m}
+}
+
+type BatchSourceTarget struct {
+	Value *BatchSource
+	vdl.TargetBase
+}
+
+func (t *BatchSourceTarget) FromEnumLabel(src string, tt *vdl.Type) error {
+
+	if ttWant := vdl.TypeOf((*BatchSource)(nil)); !vdl.Compatible(tt, ttWant) {
+		return fmt.Errorf("type %v incompatible with %v", tt, ttWant)
+	}
+	switch src {
+	case "Local":
+		*t.Value = 0
+	case "Remote":
+		*t.Value = 1
+	default:
+		return fmt.Errorf("label %s not in enum v.io/v23/services/syncbase.BatchSource", src)
+	}
+
+	return nil
+}
+
+type BatchInfo struct {
+	// Id is an identifier for a batch contained in a conflict. It is
+	// unique only in the context of a given conflict. Its purpose is solely to
+	// group one or more RowInfo objects together to represent a batch that
+	// was committed by the client.
+	Id uint64
+	// Hint is the hint provided by the client when this batch was committed.
+	Hint string
+	// Source states where the batch comes from.
+	Source BatchSource
+}
+
+func (BatchInfo) __VDLReflect(struct {
+	Name string `vdl:"v.io/v23/services/syncbase.BatchInfo"`
+}) {
+}
+
+func (m *BatchInfo) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
+	fieldsTarget1, err := t.StartFields(tt)
+	if err != nil {
+		return err
+	}
+
+	keyTarget2, fieldTarget3, err := fieldsTarget1.StartField("Id")
+	if err != vdl.ErrFieldNoExist && err != nil {
+		return err
+	}
+	if err != vdl.ErrFieldNoExist {
+		if err := fieldTarget3.FromUint(uint64(m.Id), tt.NonOptional().Field(0).Type); err != nil {
+			return err
+		}
+		if err := fieldsTarget1.FinishField(keyTarget2, fieldTarget3); err != nil {
+			return err
+		}
+	}
+	keyTarget4, fieldTarget5, err := fieldsTarget1.StartField("Hint")
+	if err != vdl.ErrFieldNoExist && err != nil {
+		return err
+	}
+	if err != vdl.ErrFieldNoExist {
+		if err := fieldTarget5.FromString(string(m.Hint), tt.NonOptional().Field(1).Type); err != nil {
+			return err
+		}
+		if err := fieldsTarget1.FinishField(keyTarget4, fieldTarget5); err != nil {
+			return err
+		}
+	}
+	keyTarget6, fieldTarget7, err := fieldsTarget1.StartField("Source")
+	if err != vdl.ErrFieldNoExist && err != nil {
+		return err
+	}
+	if err != vdl.ErrFieldNoExist {
+
+		if err := m.Source.FillVDLTarget(fieldTarget7, tt.NonOptional().Field(2).Type); err != nil {
+			return err
+		}
+		if err := fieldsTarget1.FinishField(keyTarget6, fieldTarget7); err != nil {
+			return err
+		}
+	}
+	if err := t.FinishFields(fieldsTarget1); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (m *BatchInfo) MakeVDLTarget() vdl.Target {
+	return &BatchInfoTarget{Value: m}
+}
+
+type BatchInfoTarget struct {
+	Value        *BatchInfo
+	idTarget     vdl.Uint64Target
+	hintTarget   vdl.StringTarget
+	sourceTarget BatchSourceTarget
+	vdl.TargetBase
+	vdl.FieldsTargetBase
+}
+
+func (t *BatchInfoTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
+
+	if ttWant := vdl.TypeOf((*BatchInfo)(nil)).Elem(); !vdl.Compatible(tt, ttWant) {
+		return nil, fmt.Errorf("type %v incompatible with %v", tt, ttWant)
+	}
+	return t, nil
+}
+func (t *BatchInfoTarget) StartField(name string) (key, field vdl.Target, _ error) {
+	switch name {
+	case "Id":
+		t.idTarget.Value = &t.Value.Id
+		target, err := &t.idTarget, error(nil)
+		return nil, target, err
+	case "Hint":
+		t.hintTarget.Value = &t.Value.Hint
+		target, err := &t.hintTarget, error(nil)
+		return nil, target, err
+	case "Source":
+		t.sourceTarget.Value = &t.Value.Source
+		target, err := &t.sourceTarget, error(nil)
+		return nil, target, err
+	default:
+		return nil, nil, fmt.Errorf("field %s not in struct v.io/v23/services/syncbase.BatchInfo", name)
+	}
+}
+func (t *BatchInfoTarget) FinishField(_, _ vdl.Target) error {
+	return nil
+}
+func (t *BatchInfoTarget) FinishFields(_ vdl.FieldsTarget) error {
+
+	return nil
+}
+
+// ValueState represents the state for Value object providing information about
+// whether the Value object's Byte field is empty or not.
+type ValueState int
+
+const (
+	ValueStateExists ValueState = iota
+	ValueStateNoExists
+	ValueStateDeleted
+	ValueStateUnknown
+)
+
+// ValueStateAll holds all labels for ValueState.
+var ValueStateAll = [...]ValueState{ValueStateExists, ValueStateNoExists, ValueStateDeleted, ValueStateUnknown}
+
+// ValueStateFromString creates a ValueState from a string label.
+func ValueStateFromString(label string) (x ValueState, err error) {
+	err = x.Set(label)
+	return
+}
+
+// Set assigns label to x.
+func (x *ValueState) Set(label string) error {
+	switch label {
+	case "Exists", "exists":
+		*x = ValueStateExists
+		return nil
+	case "NoExists", "noexists":
+		*x = ValueStateNoExists
+		return nil
+	case "Deleted", "deleted":
+		*x = ValueStateDeleted
+		return nil
+	case "Unknown", "unknown":
+		*x = ValueStateUnknown
+		return nil
+	}
+	*x = -1
+	return fmt.Errorf("unknown label %q in syncbase.ValueState", label)
+}
+
+// String returns the string label of x.
+func (x ValueState) String() string {
+	switch x {
+	case ValueStateExists:
+		return "Exists"
+	case ValueStateNoExists:
+		return "NoExists"
+	case ValueStateDeleted:
+		return "Deleted"
+	case ValueStateUnknown:
+		return "Unknown"
+	}
+	return ""
+}
+
+func (ValueState) __VDLReflect(struct {
+	Name string `vdl:"v.io/v23/services/syncbase.ValueState"`
+	Enum struct{ Exists, NoExists, Deleted, Unknown string }
+}) {
+}
+
+func (m *ValueState) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
+	if err := t.FromEnumLabel((*m).String(), tt); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (m *ValueState) MakeVDLTarget() vdl.Target {
+	return &ValueStateTarget{Value: m}
+}
+
+type ValueStateTarget struct {
+	Value *ValueState
+	vdl.TargetBase
+}
+
+func (t *ValueStateTarget) FromEnumLabel(src string, tt *vdl.Type) error {
+
+	if ttWant := vdl.TypeOf((*ValueState)(nil)); !vdl.Compatible(tt, ttWant) {
+		return fmt.Errorf("type %v incompatible with %v", tt, ttWant)
+	}
+	switch src {
+	case "Exists":
+		*t.Value = 0
+	case "NoExists":
+		*t.Value = 1
+	case "Deleted":
+		*t.Value = 2
+	case "Unknown":
+		*t.Value = 3
+	default:
+		return fmt.Errorf("label %s not in enum v.io/v23/services/syncbase.ValueState", src)
+	}
+
+	return nil
+}
+
+// Value contains the encoded bytes for a row's value stored in syncbase.
+type Value struct {
+	// State provides information about whether the field Bytes is empty or
+	// not and if it is empty then why.
+	State ValueState
+	// VOM encoded bytes for a row's value or nil if the row was deleted.
+	Bytes []byte
+	// Write timestamp for this value
+	WriteTs time.Time
+}
+
+func (Value) __VDLReflect(struct {
+	Name string `vdl:"v.io/v23/services/syncbase.Value"`
+}) {
+}
+
+func (m *Value) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
+	fieldsTarget1, err := t.StartFields(tt)
+	if err != nil {
+		return err
+	}
+
+	keyTarget2, fieldTarget3, err := fieldsTarget1.StartField("State")
+	if err != vdl.ErrFieldNoExist && err != nil {
+		return err
+	}
+	if err != vdl.ErrFieldNoExist {
+
+		if err := m.State.FillVDLTarget(fieldTarget3, tt.NonOptional().Field(0).Type); err != nil {
+			return err
+		}
+		if err := fieldsTarget1.FinishField(keyTarget2, fieldTarget3); err != nil {
+			return err
+		}
+	}
+	keyTarget4, fieldTarget5, err := fieldsTarget1.StartField("Bytes")
+	if err != vdl.ErrFieldNoExist && err != nil {
+		return err
+	}
+	if err != vdl.ErrFieldNoExist {
+
+		if err := fieldTarget5.FromBytes([]byte(m.Bytes), tt.NonOptional().Field(1).Type); err != nil {
+			return err
+		}
+		if err := fieldsTarget1.FinishField(keyTarget4, fieldTarget5); err != nil {
+			return err
+		}
+	}
+	var wireValue6 time_2.Time
+	if err := time_2.TimeFromNative(&wireValue6, m.WriteTs); err != nil {
+		return err
+	}
+
+	keyTarget7, fieldTarget8, err := fieldsTarget1.StartField("WriteTs")
+	if err != vdl.ErrFieldNoExist && err != nil {
+		return err
+	}
+	if err != vdl.ErrFieldNoExist {
+
+		if err := wireValue6.FillVDLTarget(fieldTarget8, tt.NonOptional().Field(2).Type); err != nil {
+			return err
+		}
+		if err := fieldsTarget1.FinishField(keyTarget7, fieldTarget8); err != nil {
+			return err
+		}
+	}
+	if err := t.FinishFields(fieldsTarget1); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (m *Value) MakeVDLTarget() vdl.Target {
+	return &ValueTarget{Value: m}
+}
+
+type ValueTarget struct {
+	Value         *Value
+	stateTarget   ValueStateTarget
+	bytesTarget   vdl.BytesTarget
+	writeTsTarget time_2.TimeTarget
+	vdl.TargetBase
+	vdl.FieldsTargetBase
+}
+
+func (t *ValueTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
+
+	if ttWant := vdl.TypeOf((*Value)(nil)).Elem(); !vdl.Compatible(tt, ttWant) {
+		return nil, fmt.Errorf("type %v incompatible with %v", tt, ttWant)
+	}
+	return t, nil
+}
+func (t *ValueTarget) StartField(name string) (key, field vdl.Target, _ error) {
+	switch name {
+	case "State":
+		t.stateTarget.Value = &t.Value.State
+		target, err := &t.stateTarget, error(nil)
+		return nil, target, err
+	case "Bytes":
+		t.bytesTarget.Value = &t.Value.Bytes
+		target, err := &t.bytesTarget, error(nil)
+		return nil, target, err
+	case "WriteTs":
+		t.writeTsTarget.Value = &t.Value.WriteTs
+		target, err := &t.writeTsTarget, error(nil)
+		return nil, target, err
+	default:
+		return nil, nil, fmt.Errorf("field %s not in struct v.io/v23/services/syncbase.Value", name)
+	}
+}
+func (t *ValueTarget) FinishField(_, _ vdl.Target) error {
+	return nil
+}
+func (t *ValueTarget) FinishFields(_ vdl.FieldsTarget) error {
+
+	return nil
+}
+
+// RowOp represents a read or write operation on a row corresponding to the
+// given key.
+type RowOp struct {
+	// The key under conflict.
+	Key string
+	// LocalValue contains the value read or written by local syncbase or nil.
+	LocalValue *Value
+	// RemoteValue contains the value read or written by remote syncbase or nil.
+	RemoteValue *Value
+	// AncestorValue contains the value for the key which is the lowest common
+	// ancestor of the two values represented by LocalValue and RemoteValue or
+	// nil if no ancestor exists or if the operation was read.
+	AncestorValue *Value
+}
+
+func (RowOp) __VDLReflect(struct {
+	Name string `vdl:"v.io/v23/services/syncbase.RowOp"`
+}) {
+}
+
+func (m *RowOp) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
+	fieldsTarget1, err := t.StartFields(tt)
+	if err != nil {
+		return err
+	}
+
+	keyTarget2, fieldTarget3, err := fieldsTarget1.StartField("Key")
+	if err != vdl.ErrFieldNoExist && err != nil {
+		return err
+	}
+	if err != vdl.ErrFieldNoExist {
+		if err := fieldTarget3.FromString(string(m.Key), tt.NonOptional().Field(0).Type); err != nil {
+			return err
+		}
+		if err := fieldsTarget1.FinishField(keyTarget2, fieldTarget3); err != nil {
+			return err
+		}
+	}
+	keyTarget4, fieldTarget5, err := fieldsTarget1.StartField("LocalValue")
+	if err != vdl.ErrFieldNoExist && err != nil {
+		return err
+	}
+	if err != vdl.ErrFieldNoExist {
+
+		if m.LocalValue == nil {
+			if err := fieldTarget5.FromNil(tt.NonOptional().Field(1).Type); err != nil {
+				return err
+			}
+		} else {
+			if err := m.LocalValue.FillVDLTarget(fieldTarget5, tt.NonOptional().Field(1).Type); err != nil {
+				return err
+			}
+		}
+		if err := fieldsTarget1.FinishField(keyTarget4, fieldTarget5); err != nil {
+			return err
+		}
+	}
+	keyTarget6, fieldTarget7, err := fieldsTarget1.StartField("RemoteValue")
+	if err != vdl.ErrFieldNoExist && err != nil {
+		return err
+	}
+	if err != vdl.ErrFieldNoExist {
+
+		if m.RemoteValue == nil {
+			if err := fieldTarget7.FromNil(tt.NonOptional().Field(2).Type); err != nil {
+				return err
+			}
+		} else {
+			if err := m.RemoteValue.FillVDLTarget(fieldTarget7, tt.NonOptional().Field(2).Type); err != nil {
+				return err
+			}
+		}
+		if err := fieldsTarget1.FinishField(keyTarget6, fieldTarget7); err != nil {
+			return err
+		}
+	}
+	keyTarget8, fieldTarget9, err := fieldsTarget1.StartField("AncestorValue")
+	if err != vdl.ErrFieldNoExist && err != nil {
+		return err
+	}
+	if err != vdl.ErrFieldNoExist {
+
+		if m.AncestorValue == nil {
+			if err := fieldTarget9.FromNil(tt.NonOptional().Field(3).Type); err != nil {
+				return err
+			}
+		} else {
+			if err := m.AncestorValue.FillVDLTarget(fieldTarget9, tt.NonOptional().Field(3).Type); err != nil {
+				return err
+			}
+		}
+		if err := fieldsTarget1.FinishField(keyTarget8, fieldTarget9); err != nil {
+			return err
+		}
+	}
+	if err := t.FinishFields(fieldsTarget1); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (m *RowOp) MakeVDLTarget() vdl.Target {
+	return &RowOpTarget{Value: m}
+}
+
+type RowOpTarget struct {
+	Value               *RowOp
+	keyTarget           vdl.StringTarget
+	localValueTarget    __VDLTarget2_optional
+	remoteValueTarget   __VDLTarget2_optional
+	ancestorValueTarget __VDLTarget2_optional
+	vdl.TargetBase
+	vdl.FieldsTargetBase
+}
+
+func (t *RowOpTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
+
+	if ttWant := vdl.TypeOf((*RowOp)(nil)).Elem(); !vdl.Compatible(tt, ttWant) {
+		return nil, fmt.Errorf("type %v incompatible with %v", tt, ttWant)
+	}
+	return t, nil
+}
+func (t *RowOpTarget) StartField(name string) (key, field vdl.Target, _ error) {
+	switch name {
+	case "Key":
+		t.keyTarget.Value = &t.Value.Key
+		target, err := &t.keyTarget, error(nil)
+		return nil, target, err
+	case "LocalValue":
+		t.localValueTarget.Value = &t.Value.LocalValue
+		target, err := &t.localValueTarget, error(nil)
+		return nil, target, err
+	case "RemoteValue":
+		t.remoteValueTarget.Value = &t.Value.RemoteValue
+		target, err := &t.remoteValueTarget, error(nil)
+		return nil, target, err
+	case "AncestorValue":
+		t.ancestorValueTarget.Value = &t.Value.AncestorValue
+		target, err := &t.ancestorValueTarget, error(nil)
+		return nil, target, err
+	default:
+		return nil, nil, fmt.Errorf("field %s not in struct v.io/v23/services/syncbase.RowOp", name)
+	}
+}
+func (t *RowOpTarget) FinishField(_, _ vdl.Target) error {
+	return nil
+}
+func (t *RowOpTarget) FinishFields(_ vdl.FieldsTarget) error {
+
+	return nil
+}
+
+// Optional Value
+type __VDLTarget2_optional struct {
+	Value      **Value
+	elemTarget ValueTarget
+	vdl.TargetBase
+	vdl.FieldsTargetBase
+}
+
+func (t *__VDLTarget2_optional) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
+
+	if *t.Value == nil {
+		*t.Value = &Value{}
+	}
+	t.elemTarget.Value = *t.Value
+	target, err := &t.elemTarget, error(nil)
+	if err != nil {
+		return nil, err
+	}
+	return target.StartFields(tt)
+}
+func (t *__VDLTarget2_optional) FinishFields(_ vdl.FieldsTarget) error {
+
+	return nil
+}
+func (t *__VDLTarget2_optional) FromNil(tt *vdl.Type) error {
+
+	*t.Value = nil
+
+	return nil
+}
+
+// ScanOp provides details of a scan operation.
+type ScanOp struct {
+	// Start contains the starting key for a range scan.
+	Start string
+	// Limit contains the end key for a range scan.
+	Limit string
+}
+
+func (ScanOp) __VDLReflect(struct {
+	Name string `vdl:"v.io/v23/services/syncbase.ScanOp"`
+}) {
+}
+
+func (m *ScanOp) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
+	fieldsTarget1, err := t.StartFields(tt)
+	if err != nil {
+		return err
+	}
+
+	keyTarget2, fieldTarget3, err := fieldsTarget1.StartField("Start")
+	if err != vdl.ErrFieldNoExist && err != nil {
+		return err
+	}
+	if err != vdl.ErrFieldNoExist {
+		if err := fieldTarget3.FromString(string(m.Start), tt.NonOptional().Field(0).Type); err != nil {
+			return err
+		}
+		if err := fieldsTarget1.FinishField(keyTarget2, fieldTarget3); err != nil {
+			return err
+		}
+	}
+	keyTarget4, fieldTarget5, err := fieldsTarget1.StartField("Limit")
+	if err != vdl.ErrFieldNoExist && err != nil {
+		return err
+	}
+	if err != vdl.ErrFieldNoExist {
+		if err := fieldTarget5.FromString(string(m.Limit), tt.NonOptional().Field(1).Type); err != nil {
+			return err
+		}
+		if err := fieldsTarget1.FinishField(keyTarget4, fieldTarget5); err != nil {
+			return err
+		}
+	}
+	if err := t.FinishFields(fieldsTarget1); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (m *ScanOp) MakeVDLTarget() vdl.Target {
+	return &ScanOpTarget{Value: m}
+}
+
+type ScanOpTarget struct {
+	Value       *ScanOp
+	startTarget vdl.StringTarget
+	limitTarget vdl.StringTarget
+	vdl.TargetBase
+	vdl.FieldsTargetBase
+}
+
+func (t *ScanOpTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
+
+	if ttWant := vdl.TypeOf((*ScanOp)(nil)).Elem(); !vdl.Compatible(tt, ttWant) {
+		return nil, fmt.Errorf("type %v incompatible with %v", tt, ttWant)
+	}
+	return t, nil
+}
+func (t *ScanOpTarget) StartField(name string) (key, field vdl.Target, _ error) {
+	switch name {
+	case "Start":
+		t.startTarget.Value = &t.Value.Start
+		target, err := &t.startTarget, error(nil)
+		return nil, target, err
+	case "Limit":
+		t.limitTarget.Value = &t.Value.Limit
+		target, err := &t.limitTarget, error(nil)
+		return nil, target, err
+	default:
+		return nil, nil, fmt.Errorf("field %s not in struct v.io/v23/services/syncbase.ScanOp", name)
+	}
+}
+func (t *ScanOpTarget) FinishField(_, _ vdl.Target) error {
+	return nil
+}
+func (t *ScanOpTarget) FinishFields(_ vdl.FieldsTarget) error {
+
+	return nil
+}
+
+type (
+	// Operation represents any single field of the Operation union type.
+	//
+	// Operation represents a specific operation on a row or a set of rows that is
+	// a part of the conflict.
+	Operation interface {
+		// Index returns the field index.
+		Index() int
+		// Interface returns the field value as an interface.
+		Interface() interface{}
+		// Name returns the field name.
+		Name() string
+		// __VDLReflect describes the Operation union type.
+		__VDLReflect(__OperationReflect)
+		FillVDLTarget(vdl.Target, *vdl.Type) error
+	}
+	// OperationRead represents field Read of the Operation union type.
+	//
+	// Read represents a read operation performed on a specific row. For a given
+	// row key there can only be at max one Read operation within a conflict.
+	OperationRead struct{ Value RowOp }
+	// OperationWrite represents field Write of the Operation union type.
+	//
+	// Write represents a write operation performed on a specific row. For a
+	// given row key there can only be at max one Write operation within a
+	// conflict.
+	OperationWrite struct{ Value RowOp }
+	// OperationScan represents field Scan of the Operation union type.
+	//
+	// Scan represents a scan operation performed over a specific range of keys.
+	// For a given key range there can be at max one ScanOp within the Conflict.
+	OperationScan struct{ Value ScanOp }
+	// __OperationReflect describes the Operation union type.
+	__OperationReflect struct {
+		Name               string `vdl:"v.io/v23/services/syncbase.Operation"`
+		Type               Operation
+		UnionTargetFactory operationTargetFactory
+		Union              struct {
+			Read  OperationRead
+			Write OperationWrite
+			Scan  OperationScan
+		}
+	}
+)
+
+func (x OperationRead) Index() int                      { return 0 }
+func (x OperationRead) Interface() interface{}          { return x.Value }
+func (x OperationRead) Name() string                    { return "Read" }
+func (x OperationRead) __VDLReflect(__OperationReflect) {}
+
+func (m OperationRead) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
+	fieldsTarget1, err := t.StartFields(tt)
+	if err != nil {
+		return err
+	}
+	keyTarget2, fieldTarget3, err := fieldsTarget1.StartField("Read")
+	if err != nil {
+		return err
+	}
+
+	if err := m.Value.FillVDLTarget(fieldTarget3, tt.NonOptional().Field(0).Type); err != nil {
+		return err
+	}
+	if err := fieldsTarget1.FinishField(keyTarget2, fieldTarget3); err != nil {
+		return err
+	}
+	if err := t.FinishFields(fieldsTarget1); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (m OperationRead) MakeVDLTarget() vdl.Target {
+	return nil
+}
+
+func (x OperationWrite) Index() int                      { return 1 }
+func (x OperationWrite) Interface() interface{}          { return x.Value }
+func (x OperationWrite) Name() string                    { return "Write" }
+func (x OperationWrite) __VDLReflect(__OperationReflect) {}
+
+func (m OperationWrite) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
+	fieldsTarget1, err := t.StartFields(tt)
+	if err != nil {
+		return err
+	}
+	keyTarget2, fieldTarget3, err := fieldsTarget1.StartField("Write")
+	if err != nil {
+		return err
+	}
+
+	if err := m.Value.FillVDLTarget(fieldTarget3, tt.NonOptional().Field(1).Type); err != nil {
+		return err
+	}
+	if err := fieldsTarget1.FinishField(keyTarget2, fieldTarget3); err != nil {
+		return err
+	}
+	if err := t.FinishFields(fieldsTarget1); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (m OperationWrite) MakeVDLTarget() vdl.Target {
+	return nil
+}
+
+func (x OperationScan) Index() int                      { return 2 }
+func (x OperationScan) Interface() interface{}          { return x.Value }
+func (x OperationScan) Name() string                    { return "Scan" }
+func (x OperationScan) __VDLReflect(__OperationReflect) {}
+
+func (m OperationScan) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
+	fieldsTarget1, err := t.StartFields(tt)
+	if err != nil {
+		return err
+	}
+	keyTarget2, fieldTarget3, err := fieldsTarget1.StartField("Scan")
+	if err != nil {
+		return err
+	}
+
+	if err := m.Value.FillVDLTarget(fieldTarget3, tt.NonOptional().Field(2).Type); err != nil {
+		return err
+	}
+	if err := fieldsTarget1.FinishField(keyTarget2, fieldTarget3); err != nil {
+		return err
+	}
+	if err := t.FinishFields(fieldsTarget1); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (m OperationScan) MakeVDLTarget() vdl.Target {
+	return nil
+}
+
+type OperationTarget struct {
+	Value     *Operation
+	fieldName string
+
+	vdl.TargetBase
+	vdl.FieldsTargetBase
+}
+
+func (t *OperationTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
+	if ttWant := vdl.TypeOf((*Operation)(nil)); !vdl.Compatible(tt, ttWant) {
+		return nil, fmt.Errorf("type %v incompatible with %v", tt, ttWant)
+	}
+
+	return t, nil
+}
+func (t *OperationTarget) StartField(name string) (key, field vdl.Target, _ error) {
+	t.fieldName = name
+	switch name {
+	case "Read":
+		val := RowOp{}
+		return nil, &RowOpTarget{Value: &val}, nil
+	case "Write":
+		val := RowOp{}
+		return nil, &RowOpTarget{Value: &val}, nil
+	case "Scan":
+		val := ScanOp{}
+		return nil, &ScanOpTarget{Value: &val}, nil
+	default:
+		return nil, nil, fmt.Errorf("field %s not in union v.io/v23/services/syncbase.Operation", name)
+	}
+}
+func (t *OperationTarget) FinishField(_, fieldTarget vdl.Target) error {
+	switch t.fieldName {
+	case "Read":
+		*t.Value = OperationRead{*(fieldTarget.(*RowOpTarget)).Value}
+	case "Write":
+		*t.Value = OperationWrite{*(fieldTarget.(*RowOpTarget)).Value}
+	case "Scan":
+		*t.Value = OperationScan{*(fieldTarget.(*ScanOpTarget)).Value}
+	}
+	return nil
+}
+func (t *OperationTarget) FinishFields(_ vdl.FieldsTarget) error {
+
+	return nil
+}
+
+type operationTargetFactory struct{}
+
+func (t operationTargetFactory) VDLMakeUnionTarget(union interface{}) (vdl.Target, error) {
+	if typedUnion, ok := union.(*Operation); ok {
+		return &OperationTarget{Value: typedUnion}, nil
+	}
+	return nil, fmt.Errorf("got %T, want *Operation", union)
+}
+
+// RowInfo contains a single operation performed on a row (in case of read or
+// write) or a range or rows (in case of scan) along with a mapping to each
+// of the batches that this operation belongs to.
+// For example, if Row1 was updated on local syncbase conflicting with a write
+// on remote syncbase as part of two separate batches, then it will be
+// represented by a single RowInfo with Write Operation containing the
+// respective local and remote values along with the batch id for both batches
+// stored in the BatchIds field.
+type RowInfo struct {
+	// Op is a specific operation represented by RowInfo
+	Op Operation
+	// BatchIds contains ids of all batches that this RowInfo is a part of.
+	BatchIds []uint64
+}
+
+func (RowInfo) __VDLReflect(struct {
+	Name string `vdl:"v.io/v23/services/syncbase.RowInfo"`
+}) {
+}
+
+func (m *RowInfo) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
+	fieldsTarget1, err := t.StartFields(tt)
+	if err != nil {
+		return err
+	}
+
+	keyTarget2, fieldTarget3, err := fieldsTarget1.StartField("Op")
+	if err != vdl.ErrFieldNoExist && err != nil {
+		return err
+	}
+	if err != vdl.ErrFieldNoExist {
+
+		unionValue4 := m.Op
+		if unionValue4 == nil {
+			unionValue4 = OperationRead{}
+		}
+		if err := unionValue4.FillVDLTarget(fieldTarget3, tt.NonOptional().Field(0).Type); err != nil {
+			return err
+		}
+		if err := fieldsTarget1.FinishField(keyTarget2, fieldTarget3); err != nil {
+			return err
+		}
+	}
+	keyTarget5, fieldTarget6, err := fieldsTarget1.StartField("BatchIds")
+	if err != vdl.ErrFieldNoExist && err != nil {
+		return err
+	}
+	if err != vdl.ErrFieldNoExist {
+
+		listTarget7, err := fieldTarget6.StartList(tt.NonOptional().Field(1).Type, len(m.BatchIds))
+		if err != nil {
+			return err
+		}
+		for i, elem9 := range m.BatchIds {
+			elemTarget8, err := listTarget7.StartElem(i)
+			if err != nil {
+				return err
+			}
+			if err := elemTarget8.FromUint(uint64(elem9), tt.NonOptional().Field(1).Type.Elem()); err != nil {
+				return err
+			}
+			if err := listTarget7.FinishElem(elemTarget8); err != nil {
+				return err
+			}
+		}
+		if err := fieldTarget6.FinishList(listTarget7); err != nil {
+			return err
+		}
+		if err := fieldsTarget1.FinishField(keyTarget5, fieldTarget6); err != nil {
+			return err
+		}
+	}
+	if err := t.FinishFields(fieldsTarget1); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (m *RowInfo) MakeVDLTarget() vdl.Target {
+	return &RowInfoTarget{Value: m}
+}
+
+type RowInfoTarget struct {
+	Value          *RowInfo
+	opTarget       OperationTarget
+	batchIdsTarget __VDLTarget3_list
+	vdl.TargetBase
+	vdl.FieldsTargetBase
+}
+
+func (t *RowInfoTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
+
+	if ttWant := vdl.TypeOf((*RowInfo)(nil)).Elem(); !vdl.Compatible(tt, ttWant) {
+		return nil, fmt.Errorf("type %v incompatible with %v", tt, ttWant)
+	}
+	return t, nil
+}
+func (t *RowInfoTarget) StartField(name string) (key, field vdl.Target, _ error) {
+	switch name {
+	case "Op":
+		t.opTarget.Value = &t.Value.Op
+		target, err := &t.opTarget, error(nil)
+		return nil, target, err
+	case "BatchIds":
+		t.batchIdsTarget.Value = &t.Value.BatchIds
+		target, err := &t.batchIdsTarget, error(nil)
+		return nil, target, err
+	default:
+		return nil, nil, fmt.Errorf("field %s not in struct v.io/v23/services/syncbase.RowInfo", name)
+	}
+}
+func (t *RowInfoTarget) FinishField(_, _ vdl.Target) error {
+	return nil
+}
+func (t *RowInfoTarget) FinishFields(_ vdl.FieldsTarget) error {
+
+	return nil
+}
+
+// []uint64
+type __VDLTarget3_list struct {
+	Value      *[]uint64
+	elemTarget vdl.Uint64Target
+	vdl.TargetBase
+	vdl.ListTargetBase
+}
+
+func (t *__VDLTarget3_list) StartList(tt *vdl.Type, len int) (vdl.ListTarget, error) {
+
+	if ttWant := vdl.TypeOf((*[]uint64)(nil)); !vdl.Compatible(tt, ttWant) {
+		return nil, fmt.Errorf("type %v incompatible with %v", tt, ttWant)
+	}
+	if cap(*t.Value) < len {
+		*t.Value = make([]uint64, len)
+	} else {
+		*t.Value = (*t.Value)[:len]
+	}
+	return t, nil
+}
+func (t *__VDLTarget3_list) StartElem(index int) (elem vdl.Target, _ error) {
+	t.elemTarget.Value = &(*t.Value)[index]
+	target, err := &t.elemTarget, error(nil)
+	return target, err
+}
+func (t *__VDLTarget3_list) FinishElem(elem vdl.Target) error {
+	return nil
+}
+func (t *__VDLTarget3_list) FinishList(elem vdl.ListTarget) error {
+
+	return nil
+}
+
+type (
+	// ConflictData represents any single field of the ConflictData union type.
+	//
+	// ConflictData represents a unit of conflict data sent over the stream. It
+	// can either contain information about a Batch or about an operation done
+	// on a row.
+	ConflictData interface {
+		// Index returns the field index.
+		Index() int
+		// Interface returns the field value as an interface.
+		Interface() interface{}
+		// Name returns the field name.
+		Name() string
+		// __VDLReflect describes the ConflictData union type.
+		__VDLReflect(__ConflictDataReflect)
+		FillVDLTarget(vdl.Target, *vdl.Type) error
+	}
+	// ConflictDataBatch represents field Batch of the ConflictData union type.
+	ConflictDataBatch struct{ Value BatchInfo }
+	// ConflictDataRow represents field Row of the ConflictData union type.
+	ConflictDataRow struct{ Value RowInfo }
+	// __ConflictDataReflect describes the ConflictData union type.
+	__ConflictDataReflect struct {
+		Name               string `vdl:"v.io/v23/services/syncbase.ConflictData"`
+		Type               ConflictData
+		UnionTargetFactory conflictDataTargetFactory
+		Union              struct {
+			Batch ConflictDataBatch
+			Row   ConflictDataRow
+		}
+	}
+)
+
+func (x ConflictDataBatch) Index() int                         { return 0 }
+func (x ConflictDataBatch) Interface() interface{}             { return x.Value }
+func (x ConflictDataBatch) Name() string                       { return "Batch" }
+func (x ConflictDataBatch) __VDLReflect(__ConflictDataReflect) {}
+
+func (m ConflictDataBatch) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
+	fieldsTarget1, err := t.StartFields(tt)
+	if err != nil {
+		return err
+	}
+	keyTarget2, fieldTarget3, err := fieldsTarget1.StartField("Batch")
+	if err != nil {
+		return err
+	}
+
+	if err := m.Value.FillVDLTarget(fieldTarget3, tt.NonOptional().Field(0).Type); err != nil {
+		return err
+	}
+	if err := fieldsTarget1.FinishField(keyTarget2, fieldTarget3); err != nil {
+		return err
+	}
+	if err := t.FinishFields(fieldsTarget1); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (m ConflictDataBatch) MakeVDLTarget() vdl.Target {
+	return nil
+}
+
+func (x ConflictDataRow) Index() int                         { return 1 }
+func (x ConflictDataRow) Interface() interface{}             { return x.Value }
+func (x ConflictDataRow) Name() string                       { return "Row" }
+func (x ConflictDataRow) __VDLReflect(__ConflictDataReflect) {}
+
+func (m ConflictDataRow) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
+	fieldsTarget1, err := t.StartFields(tt)
+	if err != nil {
+		return err
+	}
+	keyTarget2, fieldTarget3, err := fieldsTarget1.StartField("Row")
+	if err != nil {
+		return err
+	}
+
+	if err := m.Value.FillVDLTarget(fieldTarget3, tt.NonOptional().Field(1).Type); err != nil {
+		return err
+	}
+	if err := fieldsTarget1.FinishField(keyTarget2, fieldTarget3); err != nil {
+		return err
+	}
+	if err := t.FinishFields(fieldsTarget1); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (m ConflictDataRow) MakeVDLTarget() vdl.Target {
+	return nil
+}
+
+type ConflictDataTarget struct {
+	Value     *ConflictData
+	fieldName string
+
+	vdl.TargetBase
+	vdl.FieldsTargetBase
+}
+
+func (t *ConflictDataTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
+	if ttWant := vdl.TypeOf((*ConflictData)(nil)); !vdl.Compatible(tt, ttWant) {
+		return nil, fmt.Errorf("type %v incompatible with %v", tt, ttWant)
+	}
+
+	return t, nil
+}
+func (t *ConflictDataTarget) StartField(name string) (key, field vdl.Target, _ error) {
+	t.fieldName = name
+	switch name {
+	case "Batch":
+		val := BatchInfo{}
+		return nil, &BatchInfoTarget{Value: &val}, nil
+	case "Row":
+		val := RowInfo{
+			Op: OperationRead{},
+		}
+		return nil, &RowInfoTarget{Value: &val}, nil
+	default:
+		return nil, nil, fmt.Errorf("field %s not in union v.io/v23/services/syncbase.ConflictData", name)
+	}
+}
+func (t *ConflictDataTarget) FinishField(_, fieldTarget vdl.Target) error {
+	switch t.fieldName {
+	case "Batch":
+		*t.Value = ConflictDataBatch{*(fieldTarget.(*BatchInfoTarget)).Value}
+	case "Row":
+		*t.Value = ConflictDataRow{*(fieldTarget.(*RowInfoTarget)).Value}
+	}
+	return nil
+}
+func (t *ConflictDataTarget) FinishFields(_ vdl.FieldsTarget) error {
+
+	return nil
+}
+
+type conflictDataTargetFactory struct{}
+
+func (t conflictDataTargetFactory) VDLMakeUnionTarget(union interface{}) (vdl.Target, error) {
+	if typedUnion, ok := union.(*ConflictData); ok {
+		return &ConflictDataTarget{Value: typedUnion}, nil
+	}
+	return nil, fmt.Errorf("got %T, want *ConflictData", union)
+}
+
+// ConflictInfo contains information to fully specify a conflict
+// for a key, providing the (local, remote, ancestor) tuple.
+// A key under conflict can be a part of a batch in local, remote or both
+// updates. Since the batches can have more than one key, all ConflictInfos
+// for the keys within the batches are grouped together into a single conflict
+// batch and sent as a stream with the Continued field representing conflict
+// batch boundaries.
+type ConflictInfo struct {
+	// Data is a unit chunk of ConflictInfo which can be sent over the conflict
+	// stream.
+	Data ConflictData
+	// Continued represents whether the batch of ConflictInfos has ended.
+	Continued bool
+}
+
+func (ConflictInfo) __VDLReflect(struct {
+	Name string `vdl:"v.io/v23/services/syncbase.ConflictInfo"`
+}) {
+}
+
+func (m *ConflictInfo) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
+	fieldsTarget1, err := t.StartFields(tt)
+	if err != nil {
+		return err
+	}
+
+	keyTarget2, fieldTarget3, err := fieldsTarget1.StartField("Data")
+	if err != vdl.ErrFieldNoExist && err != nil {
+		return err
+	}
+	if err != vdl.ErrFieldNoExist {
+
+		unionValue4 := m.Data
+		if unionValue4 == nil {
+			unionValue4 = ConflictDataBatch{}
+		}
+		if err := unionValue4.FillVDLTarget(fieldTarget3, tt.NonOptional().Field(0).Type); err != nil {
+			return err
+		}
+		if err := fieldsTarget1.FinishField(keyTarget2, fieldTarget3); err != nil {
+			return err
+		}
+	}
+	keyTarget5, fieldTarget6, err := fieldsTarget1.StartField("Continued")
+	if err != vdl.ErrFieldNoExist && err != nil {
+		return err
+	}
+	if err != vdl.ErrFieldNoExist {
+		if err := fieldTarget6.FromBool(bool(m.Continued), tt.NonOptional().Field(1).Type); err != nil {
+			return err
+		}
+		if err := fieldsTarget1.FinishField(keyTarget5, fieldTarget6); err != nil {
+			return err
+		}
+	}
+	if err := t.FinishFields(fieldsTarget1); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (m *ConflictInfo) MakeVDLTarget() vdl.Target {
+	return &ConflictInfoTarget{Value: m}
+}
+
+type ConflictInfoTarget struct {
+	Value           *ConflictInfo
+	dataTarget      ConflictDataTarget
+	continuedTarget vdl.BoolTarget
+	vdl.TargetBase
+	vdl.FieldsTargetBase
+}
+
+func (t *ConflictInfoTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
+
+	if ttWant := vdl.TypeOf((*ConflictInfo)(nil)).Elem(); !vdl.Compatible(tt, ttWant) {
+		return nil, fmt.Errorf("type %v incompatible with %v", tt, ttWant)
+	}
+	return t, nil
+}
+func (t *ConflictInfoTarget) StartField(name string) (key, field vdl.Target, _ error) {
+	switch name {
+	case "Data":
+		t.dataTarget.Value = &t.Value.Data
+		target, err := &t.dataTarget, error(nil)
+		return nil, target, err
+	case "Continued":
+		t.continuedTarget.Value = &t.Value.Continued
+		target, err := &t.continuedTarget, error(nil)
+		return nil, target, err
+	default:
+		return nil, nil, fmt.Errorf("field %s not in struct v.io/v23/services/syncbase.ConflictInfo", name)
+	}
+}
+func (t *ConflictInfoTarget) FinishField(_, _ vdl.Target) error {
+	return nil
+}
+func (t *ConflictInfoTarget) FinishFields(_ vdl.FieldsTarget) error {
+
+	return nil
+}
+
+// ValueSelection represents the value that was selected as the final resolution
+// for a conflict.
+type ValueSelection int
+
+const (
+	ValueSelectionLocal ValueSelection = iota
+	ValueSelectionRemote
+	ValueSelectionOther
+)
+
+// ValueSelectionAll holds all labels for ValueSelection.
+var ValueSelectionAll = [...]ValueSelection{ValueSelectionLocal, ValueSelectionRemote, ValueSelectionOther}
+
+// ValueSelectionFromString creates a ValueSelection from a string label.
+func ValueSelectionFromString(label string) (x ValueSelection, err error) {
+	err = x.Set(label)
+	return
+}
+
+// Set assigns label to x.
+func (x *ValueSelection) Set(label string) error {
+	switch label {
+	case "Local", "local":
+		*x = ValueSelectionLocal
+		return nil
+	case "Remote", "remote":
+		*x = ValueSelectionRemote
+		return nil
+	case "Other", "other":
+		*x = ValueSelectionOther
+		return nil
+	}
+	*x = -1
+	return fmt.Errorf("unknown label %q in syncbase.ValueSelection", label)
+}
+
+// String returns the string label of x.
+func (x ValueSelection) String() string {
+	switch x {
+	case ValueSelectionLocal:
+		return "Local"
+	case ValueSelectionRemote:
+		return "Remote"
+	case ValueSelectionOther:
+		return "Other"
+	}
+	return ""
+}
+
+func (ValueSelection) __VDLReflect(struct {
+	Name string `vdl:"v.io/v23/services/syncbase.ValueSelection"`
+	Enum struct{ Local, Remote, Other string }
+}) {
+}
+
+func (m *ValueSelection) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
+	if err := t.FromEnumLabel((*m).String(), tt); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (m *ValueSelection) MakeVDLTarget() vdl.Target {
+	return &ValueSelectionTarget{Value: m}
+}
+
+type ValueSelectionTarget struct {
+	Value *ValueSelection
+	vdl.TargetBase
+}
+
+func (t *ValueSelectionTarget) FromEnumLabel(src string, tt *vdl.Type) error {
+
+	if ttWant := vdl.TypeOf((*ValueSelection)(nil)); !vdl.Compatible(tt, ttWant) {
+		return fmt.Errorf("type %v incompatible with %v", tt, ttWant)
+	}
+	switch src {
+	case "Local":
+		*t.Value = 0
+	case "Remote":
+		*t.Value = 1
+	case "Other":
+		*t.Value = 2
+	default:
+		return fmt.Errorf("label %s not in enum v.io/v23/services/syncbase.ValueSelection", src)
+	}
+
+	return nil
+}
+
+// ResolutionInfo contains the application’s reply to a conflict for a key,
+// providing the resolution value. The resolution may be over a group of keys
+// in which case the application must send a stream of ResolutionInfos with
+// the Continued field for the last ResolutionInfo representing the end of the
+// batch with a value false. ResolutionInfos sent as part of a batch will be
+// committed as a batch. If the commit fails, the Conflict will be re-sent.
+type ResolutionInfo struct {
+	// Key is the key under conflict.
+	Key string
+	// Selection represents the value that was selected as resolution.
+	Selection ValueSelection
+	// Result is the resolved value for the key. This field should be used only
+	// if value of Selection field is 'Other'. If the result of a resolution is
+	// delete for this key then add Value with nil Bytes.
+	Result *Value
+	// Continued represents whether the batch of ResolutionInfos has ended.
+	Continued bool
+}
+
+func (ResolutionInfo) __VDLReflect(struct {
+	Name string `vdl:"v.io/v23/services/syncbase.ResolutionInfo"`
+}) {
+}
+
+func (m *ResolutionInfo) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
+	fieldsTarget1, err := t.StartFields(tt)
+	if err != nil {
+		return err
+	}
+
+	keyTarget2, fieldTarget3, err := fieldsTarget1.StartField("Key")
+	if err != vdl.ErrFieldNoExist && err != nil {
+		return err
+	}
+	if err != vdl.ErrFieldNoExist {
+		if err := fieldTarget3.FromString(string(m.Key), tt.NonOptional().Field(0).Type); err != nil {
+			return err
+		}
+		if err := fieldsTarget1.FinishField(keyTarget2, fieldTarget3); err != nil {
+			return err
+		}
+	}
+	keyTarget4, fieldTarget5, err := fieldsTarget1.StartField("Selection")
+	if err != vdl.ErrFieldNoExist && err != nil {
+		return err
+	}
+	if err != vdl.ErrFieldNoExist {
+
+		if err := m.Selection.FillVDLTarget(fieldTarget5, tt.NonOptional().Field(1).Type); err != nil {
+			return err
+		}
+		if err := fieldsTarget1.FinishField(keyTarget4, fieldTarget5); err != nil {
+			return err
+		}
+	}
+	keyTarget6, fieldTarget7, err := fieldsTarget1.StartField("Result")
+	if err != vdl.ErrFieldNoExist && err != nil {
+		return err
+	}
+	if err != vdl.ErrFieldNoExist {
+
+		if m.Result == nil {
+			if err := fieldTarget7.FromNil(tt.NonOptional().Field(2).Type); err != nil {
+				return err
+			}
+		} else {
+			if err := m.Result.FillVDLTarget(fieldTarget7, tt.NonOptional().Field(2).Type); err != nil {
+				return err
+			}
+		}
+		if err := fieldsTarget1.FinishField(keyTarget6, fieldTarget7); err != nil {
+			return err
+		}
+	}
+	keyTarget8, fieldTarget9, err := fieldsTarget1.StartField("Continued")
+	if err != vdl.ErrFieldNoExist && err != nil {
+		return err
+	}
+	if err != vdl.ErrFieldNoExist {
+		if err := fieldTarget9.FromBool(bool(m.Continued), tt.NonOptional().Field(3).Type); err != nil {
+			return err
+		}
+		if err := fieldsTarget1.FinishField(keyTarget8, fieldTarget9); err != nil {
+			return err
+		}
+	}
+	if err := t.FinishFields(fieldsTarget1); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (m *ResolutionInfo) MakeVDLTarget() vdl.Target {
+	return &ResolutionInfoTarget{Value: m}
+}
+
+type ResolutionInfoTarget struct {
+	Value           *ResolutionInfo
+	keyTarget       vdl.StringTarget
+	selectionTarget ValueSelectionTarget
+	resultTarget    __VDLTarget2_optional
+	continuedTarget vdl.BoolTarget
+	vdl.TargetBase
+	vdl.FieldsTargetBase
+}
+
+func (t *ResolutionInfoTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
+
+	if ttWant := vdl.TypeOf((*ResolutionInfo)(nil)).Elem(); !vdl.Compatible(tt, ttWant) {
+		return nil, fmt.Errorf("type %v incompatible with %v", tt, ttWant)
+	}
+	return t, nil
+}
+func (t *ResolutionInfoTarget) StartField(name string) (key, field vdl.Target, _ error) {
+	switch name {
+	case "Key":
+		t.keyTarget.Value = &t.Value.Key
+		target, err := &t.keyTarget, error(nil)
+		return nil, target, err
+	case "Selection":
+		t.selectionTarget.Value = &t.Value.Selection
+		target, err := &t.selectionTarget, error(nil)
+		return nil, target, err
+	case "Result":
+		t.resultTarget.Value = &t.Value.Result
+		target, err := &t.resultTarget, error(nil)
+		return nil, target, err
+	case "Continued":
+		t.continuedTarget.Value = &t.Value.Continued
+		target, err := &t.continuedTarget, error(nil)
+		return nil, target, err
+	default:
+		return nil, nil, fmt.Errorf("field %s not in struct v.io/v23/services/syncbase.ResolutionInfo", name)
+	}
+}
+func (t *ResolutionInfoTarget) FinishField(_, _ vdl.Target) error {
+	return nil
+}
+func (t *ResolutionInfoTarget) FinishFields(_ vdl.FieldsTarget) error {
+
+	return nil
+}
+
+// CrRule provides a filter and the type of resolution to perform for a row
+// under conflict that passes the filter.
+type CrRule struct {
+	// TableName is the name of the table that this rule applies to.
+	TableName string
+	// KeyPrefix represents the set of keys within the given table for which
+	// this policy applies. TableName must not be empty if this field is set.
+	KeyPrefix string
+	// Type includes the full package path for the value type for which this
+	// policy applies.
+	Type string
+	// Policy for resolving conflict.
+	Resolver ResolverType
+}
+
+func (CrRule) __VDLReflect(struct {
+	Name string `vdl:"v.io/v23/services/syncbase.CrRule"`
+}) {
+}
+
+func (m *CrRule) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
+	fieldsTarget1, err := t.StartFields(tt)
+	if err != nil {
+		return err
+	}
+
+	keyTarget2, fieldTarget3, err := fieldsTarget1.StartField("TableName")
+	if err != vdl.ErrFieldNoExist && err != nil {
+		return err
+	}
+	if err != vdl.ErrFieldNoExist {
+		if err := fieldTarget3.FromString(string(m.TableName), tt.NonOptional().Field(0).Type); err != nil {
+			return err
+		}
+		if err := fieldsTarget1.FinishField(keyTarget2, fieldTarget3); err != nil {
+			return err
+		}
+	}
+	keyTarget4, fieldTarget5, err := fieldsTarget1.StartField("KeyPrefix")
+	if err != vdl.ErrFieldNoExist && err != nil {
+		return err
+	}
+	if err != vdl.ErrFieldNoExist {
+		if err := fieldTarget5.FromString(string(m.KeyPrefix), tt.NonOptional().Field(1).Type); err != nil {
+			return err
+		}
+		if err := fieldsTarget1.FinishField(keyTarget4, fieldTarget5); err != nil {
+			return err
+		}
+	}
+	keyTarget6, fieldTarget7, err := fieldsTarget1.StartField("Type")
+	if err != vdl.ErrFieldNoExist && err != nil {
+		return err
+	}
+	if err != vdl.ErrFieldNoExist {
+		if err := fieldTarget7.FromString(string(m.Type), tt.NonOptional().Field(2).Type); err != nil {
+			return err
+		}
+		if err := fieldsTarget1.FinishField(keyTarget6, fieldTarget7); err != nil {
+			return err
+		}
+	}
+	keyTarget8, fieldTarget9, err := fieldsTarget1.StartField("Resolver")
+	if err != vdl.ErrFieldNoExist && err != nil {
+		return err
+	}
+	if err != vdl.ErrFieldNoExist {
+
+		if err := m.Resolver.FillVDLTarget(fieldTarget9, tt.NonOptional().Field(3).Type); err != nil {
+			return err
+		}
+		if err := fieldsTarget1.FinishField(keyTarget8, fieldTarget9); err != nil {
+			return err
+		}
+	}
+	if err := t.FinishFields(fieldsTarget1); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (m *CrRule) MakeVDLTarget() vdl.Target {
+	return &CrRuleTarget{Value: m}
+}
+
+type CrRuleTarget struct {
+	Value           *CrRule
+	tableNameTarget vdl.StringTarget
+	keyPrefixTarget vdl.StringTarget
+	typeTarget      vdl.StringTarget
+	resolverTarget  ResolverTypeTarget
+	vdl.TargetBase
+	vdl.FieldsTargetBase
+}
+
+func (t *CrRuleTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
+
+	if ttWant := vdl.TypeOf((*CrRule)(nil)).Elem(); !vdl.Compatible(tt, ttWant) {
+		return nil, fmt.Errorf("type %v incompatible with %v", tt, ttWant)
+	}
+	return t, nil
+}
+func (t *CrRuleTarget) StartField(name string) (key, field vdl.Target, _ error) {
+	switch name {
+	case "TableName":
+		t.tableNameTarget.Value = &t.Value.TableName
+		target, err := &t.tableNameTarget, error(nil)
+		return nil, target, err
+	case "KeyPrefix":
+		t.keyPrefixTarget.Value = &t.Value.KeyPrefix
+		target, err := &t.keyPrefixTarget, error(nil)
+		return nil, target, err
+	case "Type":
+		t.typeTarget.Value = &t.Value.Type
+		target, err := &t.typeTarget, error(nil)
+		return nil, target, err
+	case "Resolver":
+		t.resolverTarget.Value = &t.Value.Resolver
+		target, err := &t.resolverTarget, error(nil)
+		return nil, target, err
+	default:
+		return nil, nil, fmt.Errorf("field %s not in struct v.io/v23/services/syncbase.CrRule", name)
+	}
+}
+func (t *CrRuleTarget) FinishField(_, _ vdl.Target) error {
+	return nil
+}
+func (t *CrRuleTarget) FinishFields(_ vdl.FieldsTarget) error {
+
+	return nil
+}
+
+// For a given row with a conflict, all rules are matched against the row.
+// If no rules match the row, we default to "LastWins". If multiple
+// rules match the row, ties are broken as follows:
+//  1. If one match has a longer prefix than the other, take that one.
+//  2. Else, if only one match specifies a type, take that one.
+//  3. Else, the two matches are identical; take the last one in the Rules array.
+type CrPolicy struct {
+	Rules []CrRule
+}
+
+func (CrPolicy) __VDLReflect(struct {
+	Name string `vdl:"v.io/v23/services/syncbase.CrPolicy"`
+}) {
+}
+
+func (m *CrPolicy) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
+	fieldsTarget1, err := t.StartFields(tt)
+	if err != nil {
+		return err
+	}
+
+	keyTarget2, fieldTarget3, err := fieldsTarget1.StartField("Rules")
+	if err != vdl.ErrFieldNoExist && err != nil {
+		return err
+	}
+	if err != vdl.ErrFieldNoExist {
+
+		listTarget4, err := fieldTarget3.StartList(tt.NonOptional().Field(0).Type, len(m.Rules))
+		if err != nil {
+			return err
+		}
+		for i, elem6 := range m.Rules {
+			elemTarget5, err := listTarget4.StartElem(i)
+			if err != nil {
+				return err
+			}
+
+			if err := elem6.FillVDLTarget(elemTarget5, tt.NonOptional().Field(0).Type.Elem()); err != nil {
+				return err
+			}
+			if err := listTarget4.FinishElem(elemTarget5); err != nil {
+				return err
+			}
+		}
+		if err := fieldTarget3.FinishList(listTarget4); err != nil {
+			return err
+		}
+		if err := fieldsTarget1.FinishField(keyTarget2, fieldTarget3); err != nil {
+			return err
+		}
+	}
+	if err := t.FinishFields(fieldsTarget1); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (m *CrPolicy) MakeVDLTarget() vdl.Target {
+	return &CrPolicyTarget{Value: m}
+}
+
+type CrPolicyTarget struct {
+	Value       *CrPolicy
+	rulesTarget __VDLTarget4_list
+	vdl.TargetBase
+	vdl.FieldsTargetBase
+}
+
+func (t *CrPolicyTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
+
+	if ttWant := vdl.TypeOf((*CrPolicy)(nil)).Elem(); !vdl.Compatible(tt, ttWant) {
+		return nil, fmt.Errorf("type %v incompatible with %v", tt, ttWant)
+	}
+	return t, nil
+}
+func (t *CrPolicyTarget) StartField(name string) (key, field vdl.Target, _ error) {
+	switch name {
+	case "Rules":
+		t.rulesTarget.Value = &t.Value.Rules
+		target, err := &t.rulesTarget, error(nil)
+		return nil, target, err
+	default:
+		return nil, nil, fmt.Errorf("field %s not in struct v.io/v23/services/syncbase.CrPolicy", name)
+	}
+}
+func (t *CrPolicyTarget) FinishField(_, _ vdl.Target) error {
+	return nil
+}
+func (t *CrPolicyTarget) FinishFields(_ vdl.FieldsTarget) error {
+
+	return nil
+}
+
+// []CrRule
+type __VDLTarget4_list struct {
+	Value      *[]CrRule
+	elemTarget CrRuleTarget
+	vdl.TargetBase
+	vdl.ListTargetBase
+}
+
+func (t *__VDLTarget4_list) StartList(tt *vdl.Type, len int) (vdl.ListTarget, error) {
+
+	if ttWant := vdl.TypeOf((*[]CrRule)(nil)); !vdl.Compatible(tt, ttWant) {
+		return nil, fmt.Errorf("type %v incompatible with %v", tt, ttWant)
+	}
+	if cap(*t.Value) < len {
+		*t.Value = make([]CrRule, len)
+	} else {
+		*t.Value = (*t.Value)[:len]
+	}
+	return t, nil
+}
+func (t *__VDLTarget4_list) StartElem(index int) (elem vdl.Target, _ error) {
+	t.elemTarget.Value = &(*t.Value)[index]
+	target, err := &t.elemTarget, error(nil)
+	return target, err
+}
+func (t *__VDLTarget4_list) FinishElem(elem vdl.Target) error {
+	return nil
+}
+func (t *__VDLTarget4_list) FinishList(elem vdl.ListTarget) error {
+
+	return nil
+}
+
+// SchemaMetadata maintains metadata related to the schema of a given database.
+// There is one SchemaMetadata per database.
+type SchemaMetadata struct {
+	// Non negative Schema version number. Should be increased with every schema change
+	// (e.g. adding fields to structs) that cannot be handled by previous
+	// versions of the app.
+	Version int32
+	Policy  CrPolicy
+}
+
+func (SchemaMetadata) __VDLReflect(struct {
+	Name string `vdl:"v.io/v23/services/syncbase.SchemaMetadata"`
+}) {
+}
+
+func (m *SchemaMetadata) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
+	fieldsTarget1, err := t.StartFields(tt)
+	if err != nil {
+		return err
+	}
+
+	keyTarget2, fieldTarget3, err := fieldsTarget1.StartField("Version")
+	if err != vdl.ErrFieldNoExist && err != nil {
+		return err
+	}
+	if err != vdl.ErrFieldNoExist {
+		if err := fieldTarget3.FromInt(int64(m.Version), tt.NonOptional().Field(0).Type); err != nil {
+			return err
+		}
+		if err := fieldsTarget1.FinishField(keyTarget2, fieldTarget3); err != nil {
+			return err
+		}
+	}
+	keyTarget4, fieldTarget5, err := fieldsTarget1.StartField("Policy")
+	if err != vdl.ErrFieldNoExist && err != nil {
+		return err
+	}
+	if err != vdl.ErrFieldNoExist {
+
+		if err := m.Policy.FillVDLTarget(fieldTarget5, tt.NonOptional().Field(1).Type); err != nil {
+			return err
+		}
+		if err := fieldsTarget1.FinishField(keyTarget4, fieldTarget5); err != nil {
+			return err
+		}
+	}
+	if err := t.FinishFields(fieldsTarget1); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (m *SchemaMetadata) MakeVDLTarget() vdl.Target {
+	return &SchemaMetadataTarget{Value: m}
+}
+
+type SchemaMetadataTarget struct {
+	Value         *SchemaMetadata
+	versionTarget vdl.Int32Target
+	policyTarget  CrPolicyTarget
+	vdl.TargetBase
+	vdl.FieldsTargetBase
+}
+
+func (t *SchemaMetadataTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
+
+	if ttWant := vdl.TypeOf((*SchemaMetadata)(nil)).Elem(); !vdl.Compatible(tt, ttWant) {
+		return nil, fmt.Errorf("type %v incompatible with %v", tt, ttWant)
+	}
+	return t, nil
+}
+func (t *SchemaMetadataTarget) StartField(name string) (key, field vdl.Target, _ error) {
+	switch name {
+	case "Version":
+		t.versionTarget.Value = &t.Value.Version
+		target, err := &t.versionTarget, error(nil)
+		return nil, target, err
+	case "Policy":
+		t.policyTarget.Value = &t.Value.Policy
+		target, err := &t.policyTarget, error(nil)
+		return nil, target, err
+	default:
+		return nil, nil, fmt.Errorf("field %s not in struct v.io/v23/services/syncbase.SchemaMetadata", name)
+	}
+}
+func (t *SchemaMetadataTarget) FinishField(_, _ vdl.Target) error {
+	return nil
+}
+func (t *SchemaMetadataTarget) FinishFields(_ vdl.FieldsTarget) error {
+
+	return nil
+}
+
+// BlobRef is a reference to a blob.
+type BlobRef string
+
+func (BlobRef) __VDLReflect(struct {
+	Name string `vdl:"v.io/v23/services/syncbase.BlobRef"`
+}) {
+}
+
+func (m *BlobRef) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
+	if err := t.FromString(string((*m)), tt); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (m *BlobRef) MakeVDLTarget() vdl.Target {
+	return &BlobRefTarget{Value: m}
+}
+
+type BlobRefTarget struct {
+	Value *BlobRef
+	vdl.TargetBase
+}
+
+func (t *BlobRefTarget) FromString(src string, tt *vdl.Type) error {
+
+	if ttWant := vdl.TypeOf((*BlobRef)(nil)); !vdl.Compatible(tt, ttWant) {
+		return fmt.Errorf("type %v incompatible with %v", tt, ttWant)
+	}
+	*t.Value = BlobRef(src)
+
+	return nil
+}
+
+// BlobFetchState represents the state transitions of a blob fetch.
+type BlobFetchState int
+
+const (
+	BlobFetchStatePending BlobFetchState = iota
+	BlobFetchStateLocating
+	BlobFetchStateFetching
+	BlobFetchStateDone
+)
+
+// BlobFetchStateAll holds all labels for BlobFetchState.
+var BlobFetchStateAll = [...]BlobFetchState{BlobFetchStatePending, BlobFetchStateLocating, BlobFetchStateFetching, BlobFetchStateDone}
+
+// BlobFetchStateFromString creates a BlobFetchState from a string label.
+func BlobFetchStateFromString(label string) (x BlobFetchState, err error) {
+	err = x.Set(label)
+	return
+}
+
+// Set assigns label to x.
+func (x *BlobFetchState) Set(label string) error {
+	switch label {
+	case "Pending", "pending":
+		*x = BlobFetchStatePending
+		return nil
+	case "Locating", "locating":
+		*x = BlobFetchStateLocating
+		return nil
+	case "Fetching", "fetching":
+		*x = BlobFetchStateFetching
+		return nil
+	case "Done", "done":
+		*x = BlobFetchStateDone
+		return nil
+	}
+	*x = -1
+	return fmt.Errorf("unknown label %q in syncbase.BlobFetchState", label)
+}
+
+// String returns the string label of x.
+func (x BlobFetchState) String() string {
+	switch x {
+	case BlobFetchStatePending:
+		return "Pending"
+	case BlobFetchStateLocating:
+		return "Locating"
+	case BlobFetchStateFetching:
+		return "Fetching"
+	case BlobFetchStateDone:
+		return "Done"
+	}
+	return ""
+}
+
+func (BlobFetchState) __VDLReflect(struct {
+	Name string `vdl:"v.io/v23/services/syncbase.BlobFetchState"`
+	Enum struct{ Pending, Locating, Fetching, Done string }
+}) {
+}
+
+func (m *BlobFetchState) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
+	if err := t.FromEnumLabel((*m).String(), tt); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (m *BlobFetchState) MakeVDLTarget() vdl.Target {
+	return &BlobFetchStateTarget{Value: m}
+}
+
+type BlobFetchStateTarget struct {
+	Value *BlobFetchState
+	vdl.TargetBase
+}
+
+func (t *BlobFetchStateTarget) FromEnumLabel(src string, tt *vdl.Type) error {
+
+	if ttWant := vdl.TypeOf((*BlobFetchState)(nil)); !vdl.Compatible(tt, ttWant) {
+		return fmt.Errorf("type %v incompatible with %v", tt, ttWant)
+	}
+	switch src {
+	case "Pending":
+		*t.Value = 0
+	case "Locating":
+		*t.Value = 1
+	case "Fetching":
+		*t.Value = 2
+	case "Done":
+		*t.Value = 3
+	default:
+		return fmt.Errorf("label %s not in enum v.io/v23/services/syncbase.BlobFetchState", src)
+	}
+
+	return nil
+}
+
+// BlobFetchStatus describes the progress of an asynchronous blob fetch.
+type BlobFetchStatus struct {
+	State    BlobFetchState // State of the blob fetch request.
+	Received int64          // Total number of bytes received.
+	Total    int64          // Blob size.
+}
+
+func (BlobFetchStatus) __VDLReflect(struct {
+	Name string `vdl:"v.io/v23/services/syncbase.BlobFetchStatus"`
+}) {
+}
+
+func (m *BlobFetchStatus) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
+	fieldsTarget1, err := t.StartFields(tt)
+	if err != nil {
+		return err
+	}
+
+	keyTarget2, fieldTarget3, err := fieldsTarget1.StartField("State")
+	if err != vdl.ErrFieldNoExist && err != nil {
+		return err
+	}
+	if err != vdl.ErrFieldNoExist {
+
+		if err := m.State.FillVDLTarget(fieldTarget3, tt.NonOptional().Field(0).Type); err != nil {
+			return err
+		}
+		if err := fieldsTarget1.FinishField(keyTarget2, fieldTarget3); err != nil {
+			return err
+		}
+	}
+	keyTarget4, fieldTarget5, err := fieldsTarget1.StartField("Received")
+	if err != vdl.ErrFieldNoExist && err != nil {
+		return err
+	}
+	if err != vdl.ErrFieldNoExist {
+		if err := fieldTarget5.FromInt(int64(m.Received), tt.NonOptional().Field(1).Type); err != nil {
+			return err
+		}
+		if err := fieldsTarget1.FinishField(keyTarget4, fieldTarget5); err != nil {
+			return err
+		}
+	}
+	keyTarget6, fieldTarget7, err := fieldsTarget1.StartField("Total")
+	if err != vdl.ErrFieldNoExist && err != nil {
+		return err
+	}
+	if err != vdl.ErrFieldNoExist {
+		if err := fieldTarget7.FromInt(int64(m.Total), tt.NonOptional().Field(2).Type); err != nil {
+			return err
+		}
+		if err := fieldsTarget1.FinishField(keyTarget6, fieldTarget7); err != nil {
+			return err
+		}
+	}
+	if err := t.FinishFields(fieldsTarget1); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (m *BlobFetchStatus) MakeVDLTarget() vdl.Target {
+	return &BlobFetchStatusTarget{Value: m}
+}
+
+type BlobFetchStatusTarget struct {
+	Value          *BlobFetchStatus
+	stateTarget    BlobFetchStateTarget
+	receivedTarget vdl.Int64Target
+	totalTarget    vdl.Int64Target
+	vdl.TargetBase
+	vdl.FieldsTargetBase
+}
+
+func (t *BlobFetchStatusTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
+
+	if ttWant := vdl.TypeOf((*BlobFetchStatus)(nil)).Elem(); !vdl.Compatible(tt, ttWant) {
+		return nil, fmt.Errorf("type %v incompatible with %v", tt, ttWant)
+	}
+	return t, nil
+}
+func (t *BlobFetchStatusTarget) StartField(name string) (key, field vdl.Target, _ error) {
+	switch name {
+	case "State":
+		t.stateTarget.Value = &t.Value.State
+		target, err := &t.stateTarget, error(nil)
+		return nil, target, err
+	case "Received":
+		t.receivedTarget.Value = &t.Value.Received
+		target, err := &t.receivedTarget, error(nil)
+		return nil, target, err
+	case "Total":
+		t.totalTarget.Value = &t.Value.Total
+		target, err := &t.totalTarget, error(nil)
+		return nil, target, err
+	default:
+		return nil, nil, fmt.Errorf("field %s not in struct v.io/v23/services/syncbase.BlobFetchStatus", name)
+	}
+}
+func (t *BlobFetchStatusTarget) FinishField(_, _ vdl.Target) error {
+	return nil
+}
+func (t *BlobFetchStatusTarget) FinishFields(_ vdl.FieldsTarget) error {
+
+	return nil
+}
+
+// StoreChange is the new value for a watched entity.
+// TODO(rogulenko): Consider adding the Shell state.
+type StoreChange struct {
+	// Value is the new value for the row if the Change state equals to Exists,
+	// otherwise the Value is nil.
+	Value []byte
+	// FromSync indicates whether the change came from sync. If FromSync is
+	// false, then the change originated from the local device.
+	// Note: FromSync is always false for initial state Changes.
+	FromSync bool
+}
+
+func (StoreChange) __VDLReflect(struct {
+	Name string `vdl:"v.io/v23/services/syncbase.StoreChange"`
+}) {
+}
+
+func (m *StoreChange) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
+	fieldsTarget1, err := t.StartFields(tt)
+	if err != nil {
+		return err
+	}
+
+	keyTarget2, fieldTarget3, err := fieldsTarget1.StartField("Value")
+	if err != vdl.ErrFieldNoExist && err != nil {
+		return err
+	}
+	if err != vdl.ErrFieldNoExist {
+
+		if err := fieldTarget3.FromBytes([]byte(m.Value), tt.NonOptional().Field(0).Type); err != nil {
+			return err
+		}
+		if err := fieldsTarget1.FinishField(keyTarget2, fieldTarget3); err != nil {
+			return err
+		}
+	}
+	keyTarget4, fieldTarget5, err := fieldsTarget1.StartField("FromSync")
+	if err != vdl.ErrFieldNoExist && err != nil {
+		return err
+	}
+	if err != vdl.ErrFieldNoExist {
+		if err := fieldTarget5.FromBool(bool(m.FromSync), tt.NonOptional().Field(1).Type); err != nil {
+			return err
+		}
+		if err := fieldsTarget1.FinishField(keyTarget4, fieldTarget5); err != nil {
+			return err
+		}
+	}
+	if err := t.FinishFields(fieldsTarget1); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (m *StoreChange) MakeVDLTarget() vdl.Target {
+	return &StoreChangeTarget{Value: m}
+}
+
+type StoreChangeTarget struct {
+	Value          *StoreChange
+	valueTarget    vdl.BytesTarget
+	fromSyncTarget vdl.BoolTarget
+	vdl.TargetBase
+	vdl.FieldsTargetBase
+}
+
+func (t *StoreChangeTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
+
+	if ttWant := vdl.TypeOf((*StoreChange)(nil)).Elem(); !vdl.Compatible(tt, ttWant) {
+		return nil, fmt.Errorf("type %v incompatible with %v", tt, ttWant)
+	}
+	return t, nil
+}
+func (t *StoreChangeTarget) StartField(name string) (key, field vdl.Target, _ error) {
+	switch name {
+	case "Value":
+		t.valueTarget.Value = &t.Value.Value
+		target, err := &t.valueTarget, error(nil)
+		return nil, target, err
+	case "FromSync":
+		t.fromSyncTarget.Value = &t.Value.FromSync
+		target, err := &t.fromSyncTarget, error(nil)
+		return nil, target, err
+	default:
+		return nil, nil, fmt.Errorf("field %s not in struct v.io/v23/services/syncbase.StoreChange", name)
+	}
+}
+func (t *StoreChangeTarget) FinishField(_, _ vdl.Target) error {
+	return nil
+}
+func (t *StoreChangeTarget) FinishFields(_ vdl.FieldsTarget) error {
+
+	return nil
+}
+
 // Create zero values for each type.
 var (
 	__VDLZeroDevModeUpdateVClockOpts = DevModeUpdateVClockOpts{}
+	__VDLZeroBatchOptions            = BatchOptions{}
+	__VDLZeroPrefixPermissions       = PrefixPermissions{}
+	__VDLZeroKeyValue                = KeyValue{}
+	__VDLZeroTableRow                = TableRow{}
+	__VDLZeroSyncgroupSpec           = SyncgroupSpec{}
+	__VDLZeroSyncgroupMemberInfo     = SyncgroupMemberInfo{}
+	__VDLZeroResolverType            = ResolverTypeLastWins
+	__VDLZeroBatchSource             = BatchSourceLocal
+	__VDLZeroBatchInfo               = BatchInfo{}
+	__VDLZeroValueState              = ValueStateExists
+	__VDLZeroValue                   = Value{}
+	__VDLZeroRowOp                   = RowOp{}
+	__VDLZeroScanOp                  = ScanOp{}
+	__VDLZeroOperation               = Operation(OperationRead{})
+	__VDLZeroRowInfo                 = RowInfo{
+		Op: OperationRead{},
+	}
+	__VDLZeroConflictData = ConflictData(ConflictDataBatch{})
+	__VDLZeroConflictInfo = ConflictInfo{
+		Data: ConflictDataBatch{},
+	}
+	__VDLZeroValueSelection  = ValueSelectionLocal
+	__VDLZeroResolutionInfo  = ResolutionInfo{}
+	__VDLZeroCrRule          = CrRule{}
+	__VDLZeroCrPolicy        = CrPolicy{}
+	__VDLZeroSchemaMetadata  = SchemaMetadata{}
+	__VDLZeroBlobRef         = BlobRef("")
+	__VDLZeroBlobFetchState  = BlobFetchStatePending
+	__VDLZeroBlobFetchStatus = BlobFetchStatus{}
+	__VDLZeroStoreChange     = StoreChange{}
 )
+
+//////////////////////////////////////////////////
+// Const definitions
+
+const NullBlobRef = BlobRef("")
 
 //////////////////////////////////////////////////
 // Error definitions
 var (
-	ErrNotInDevMode    = verror.Register("v.io/v23/services/syncbase.NotInDevMode", verror.NoRetry, "{1:}{2:} not running with --dev=true")
-	ErrInvalidName     = verror.Register("v.io/v23/services/syncbase.InvalidName", verror.NoRetry, "{1:}{2:} invalid name: {3}")
-	ErrCorruptDatabase = verror.Register("v.io/v23/services/syncbase.CorruptDatabase", verror.NoRetry, "{1:}{2:} database corrupt, moved to {3}; client must create a new database")
-	ErrUnknownBatch    = verror.Register("v.io/v23/services/syncbase.UnknownBatch", verror.NoRetry, "{1:}{2:} unknown batch, perhaps the server restarted")
+	ErrNotInDevMode          = verror.Register("v.io/v23/services/syncbase.NotInDevMode", verror.NoRetry, "{1:}{2:} not running with --dev=true")
+	ErrInvalidName           = verror.Register("v.io/v23/services/syncbase.InvalidName", verror.NoRetry, "{1:}{2:} invalid name: {3}")
+	ErrCorruptDatabase       = verror.Register("v.io/v23/services/syncbase.CorruptDatabase", verror.NoRetry, "{1:}{2:} database corrupt, moved to {3}; client must create a new database")
+	ErrUnknownBatch          = verror.Register("v.io/v23/services/syncbase.UnknownBatch", verror.NoRetry, "{1:}{2:} unknown batch, perhaps the server restarted")
+	ErrBoundToBatch          = verror.Register("v.io/v23/services/syncbase.BoundToBatch", verror.NoRetry, "{1:}{2:} bound to batch")
+	ErrNotBoundToBatch       = verror.Register("v.io/v23/services/syncbase.NotBoundToBatch", verror.NoRetry, "{1:}{2:} not bound to batch")
+	ErrReadOnlyBatch         = verror.Register("v.io/v23/services/syncbase.ReadOnlyBatch", verror.NoRetry, "{1:}{2:} batch is read-only")
+	ErrConcurrentBatch       = verror.Register("v.io/v23/services/syncbase.ConcurrentBatch", verror.NoRetry, "{1:}{2:} concurrent batch")
+	ErrSchemaVersionMismatch = verror.Register("v.io/v23/services/syncbase.SchemaVersionMismatch", verror.NoRetry, "{1:}{2:} actual schema version does not match the provided one")
+	ErrBlobNotCommitted      = verror.Register("v.io/v23/services/syncbase.BlobNotCommitted", verror.NoRetry, "{1:}{2:} blob is not yet committed")
+	ErrSyncgroupJoinFailed   = verror.Register("v.io/v23/services/syncbase.SyncgroupJoinFailed", verror.NoRetry, "{1:}{2:} syncgroup join failed")
 )
 
 // NewErrNotInDevMode returns an error with the ErrNotInDevMode ID.
@@ -226,6 +3250,41 @@ func NewErrCorruptDatabase(ctx *context.T, path string) error {
 // NewErrUnknownBatch returns an error with the ErrUnknownBatch ID.
 func NewErrUnknownBatch(ctx *context.T) error {
 	return verror.New(ErrUnknownBatch, ctx)
+}
+
+// NewErrBoundToBatch returns an error with the ErrBoundToBatch ID.
+func NewErrBoundToBatch(ctx *context.T) error {
+	return verror.New(ErrBoundToBatch, ctx)
+}
+
+// NewErrNotBoundToBatch returns an error with the ErrNotBoundToBatch ID.
+func NewErrNotBoundToBatch(ctx *context.T) error {
+	return verror.New(ErrNotBoundToBatch, ctx)
+}
+
+// NewErrReadOnlyBatch returns an error with the ErrReadOnlyBatch ID.
+func NewErrReadOnlyBatch(ctx *context.T) error {
+	return verror.New(ErrReadOnlyBatch, ctx)
+}
+
+// NewErrConcurrentBatch returns an error with the ErrConcurrentBatch ID.
+func NewErrConcurrentBatch(ctx *context.T) error {
+	return verror.New(ErrConcurrentBatch, ctx)
+}
+
+// NewErrSchemaVersionMismatch returns an error with the ErrSchemaVersionMismatch ID.
+func NewErrSchemaVersionMismatch(ctx *context.T) error {
+	return verror.New(ErrSchemaVersionMismatch, ctx)
+}
+
+// NewErrBlobNotCommitted returns an error with the ErrBlobNotCommitted ID.
+func NewErrBlobNotCommitted(ctx *context.T) error {
+	return verror.New(ErrBlobNotCommitted, ctx)
+}
+
+// NewErrSyncgroupJoinFailed returns an error with the ErrSyncgroupJoinFailed ID.
+func NewErrSyncgroupJoinFailed(ctx *context.T) error {
+	return verror.New(ErrSyncgroupJoinFailed, ctx)
 }
 
 //////////////////////////////////////////////////
@@ -713,6 +3772,3296 @@ var descApp = rpc.InterfaceDesc{
 	},
 }
 
+// DatabaseWatcherClientMethods is the client interface
+// containing DatabaseWatcher methods.
+//
+// DatabaseWatcher allows a client to watch for updates to the database. For
+// each watch request, the client will receive a reliable stream of watch events
+// without re-ordering. See watch.GlobWatcher for a detailed explanation of the
+// behavior.
+// TODO(rogulenko): Currently the only supported watch patterns are
+// "<tableName>/<rowPrefix>*". Consider changing that.
+//
+// Watching is done by starting a streaming RPC. The RPC takes a ResumeMarker
+// argument that points to a particular place in the database event log. If an
+// empty ResumeMarker is provided, the WatchStream will begin with a Change
+// batch containing the initial state. Otherwise, the WatchStream will contain
+// only changes since the provided ResumeMarker.
+//
+// The result stream consists of a never-ending sequence of Change messages
+// (until the call fails or is canceled). Each Change contains the Name field
+// in the form "<tableName>/<rowKey>" and the Value field of the StoreChange
+// type. If the client has no access to a row specified in a change, that change
+// is excluded from the result stream.
+//
+// Note: A single Watch Change batch may contain changes from more than one
+// batch as originally committed on a remote Syncbase or obtained from conflict
+// resolution. However, changes from a single original batch will always appear
+// in the same Change batch.
+type DatabaseWatcherClientMethods interface {
+	// GlobWatcher allows a client to receive updates for changes to objects
+	// that match a pattern.  See the package comments for details.
+	watch.GlobWatcherClientMethods
+	// GetResumeMarker returns the ResumeMarker that points to the current end
+	// of the event log. GetResumeMarker() can be called on a batch.
+	GetResumeMarker(*context.T, ...rpc.CallOpt) (watch.ResumeMarker, error)
+}
+
+// DatabaseWatcherClientStub adds universal methods to DatabaseWatcherClientMethods.
+type DatabaseWatcherClientStub interface {
+	DatabaseWatcherClientMethods
+	rpc.UniversalServiceMethods
+}
+
+// DatabaseWatcherClient returns a client stub for DatabaseWatcher.
+func DatabaseWatcherClient(name string) DatabaseWatcherClientStub {
+	return implDatabaseWatcherClientStub{name, watch.GlobWatcherClient(name)}
+}
+
+type implDatabaseWatcherClientStub struct {
+	name string
+
+	watch.GlobWatcherClientStub
+}
+
+func (c implDatabaseWatcherClientStub) GetResumeMarker(ctx *context.T, opts ...rpc.CallOpt) (o0 watch.ResumeMarker, err error) {
+	err = v23.GetClient(ctx).Call(ctx, c.name, "GetResumeMarker", nil, []interface{}{&o0}, opts...)
+	return
+}
+
+// DatabaseWatcherServerMethods is the interface a server writer
+// implements for DatabaseWatcher.
+//
+// DatabaseWatcher allows a client to watch for updates to the database. For
+// each watch request, the client will receive a reliable stream of watch events
+// without re-ordering. See watch.GlobWatcher for a detailed explanation of the
+// behavior.
+// TODO(rogulenko): Currently the only supported watch patterns are
+// "<tableName>/<rowPrefix>*". Consider changing that.
+//
+// Watching is done by starting a streaming RPC. The RPC takes a ResumeMarker
+// argument that points to a particular place in the database event log. If an
+// empty ResumeMarker is provided, the WatchStream will begin with a Change
+// batch containing the initial state. Otherwise, the WatchStream will contain
+// only changes since the provided ResumeMarker.
+//
+// The result stream consists of a never-ending sequence of Change messages
+// (until the call fails or is canceled). Each Change contains the Name field
+// in the form "<tableName>/<rowKey>" and the Value field of the StoreChange
+// type. If the client has no access to a row specified in a change, that change
+// is excluded from the result stream.
+//
+// Note: A single Watch Change batch may contain changes from more than one
+// batch as originally committed on a remote Syncbase or obtained from conflict
+// resolution. However, changes from a single original batch will always appear
+// in the same Change batch.
+type DatabaseWatcherServerMethods interface {
+	// GlobWatcher allows a client to receive updates for changes to objects
+	// that match a pattern.  See the package comments for details.
+	watch.GlobWatcherServerMethods
+	// GetResumeMarker returns the ResumeMarker that points to the current end
+	// of the event log. GetResumeMarker() can be called on a batch.
+	GetResumeMarker(*context.T, rpc.ServerCall) (watch.ResumeMarker, error)
+}
+
+// DatabaseWatcherServerStubMethods is the server interface containing
+// DatabaseWatcher methods, as expected by rpc.Server.
+// The only difference between this interface and DatabaseWatcherServerMethods
+// is the streaming methods.
+type DatabaseWatcherServerStubMethods interface {
+	// GlobWatcher allows a client to receive updates for changes to objects
+	// that match a pattern.  See the package comments for details.
+	watch.GlobWatcherServerStubMethods
+	// GetResumeMarker returns the ResumeMarker that points to the current end
+	// of the event log. GetResumeMarker() can be called on a batch.
+	GetResumeMarker(*context.T, rpc.ServerCall) (watch.ResumeMarker, error)
+}
+
+// DatabaseWatcherServerStub adds universal methods to DatabaseWatcherServerStubMethods.
+type DatabaseWatcherServerStub interface {
+	DatabaseWatcherServerStubMethods
+	// Describe the DatabaseWatcher interfaces.
+	Describe__() []rpc.InterfaceDesc
+}
+
+// DatabaseWatcherServer returns a server stub for DatabaseWatcher.
+// It converts an implementation of DatabaseWatcherServerMethods into
+// an object that may be used by rpc.Server.
+func DatabaseWatcherServer(impl DatabaseWatcherServerMethods) DatabaseWatcherServerStub {
+	stub := implDatabaseWatcherServerStub{
+		impl: impl,
+		GlobWatcherServerStub: watch.GlobWatcherServer(impl),
+	}
+	// Initialize GlobState; always check the stub itself first, to handle the
+	// case where the user has the Glob method defined in their VDL source.
+	if gs := rpc.NewGlobState(stub); gs != nil {
+		stub.gs = gs
+	} else if gs := rpc.NewGlobState(impl); gs != nil {
+		stub.gs = gs
+	}
+	return stub
+}
+
+type implDatabaseWatcherServerStub struct {
+	impl DatabaseWatcherServerMethods
+	watch.GlobWatcherServerStub
+	gs *rpc.GlobState
+}
+
+func (s implDatabaseWatcherServerStub) GetResumeMarker(ctx *context.T, call rpc.ServerCall) (watch.ResumeMarker, error) {
+	return s.impl.GetResumeMarker(ctx, call)
+}
+
+func (s implDatabaseWatcherServerStub) Globber() *rpc.GlobState {
+	return s.gs
+}
+
+func (s implDatabaseWatcherServerStub) Describe__() []rpc.InterfaceDesc {
+	return []rpc.InterfaceDesc{DatabaseWatcherDesc, watch.GlobWatcherDesc}
+}
+
+// DatabaseWatcherDesc describes the DatabaseWatcher interface.
+var DatabaseWatcherDesc rpc.InterfaceDesc = descDatabaseWatcher
+
+// descDatabaseWatcher hides the desc to keep godoc clean.
+var descDatabaseWatcher = rpc.InterfaceDesc{
+	Name:    "DatabaseWatcher",
+	PkgPath: "v.io/v23/services/syncbase",
+	Doc:     "// DatabaseWatcher allows a client to watch for updates to the database. For\n// each watch request, the client will receive a reliable stream of watch events\n// without re-ordering. See watch.GlobWatcher for a detailed explanation of the\n// behavior.\n// TODO(rogulenko): Currently the only supported watch patterns are\n// \"<tableName>/<rowPrefix>*\". Consider changing that.\n//\n// Watching is done by starting a streaming RPC. The RPC takes a ResumeMarker\n// argument that points to a particular place in the database event log. If an\n// empty ResumeMarker is provided, the WatchStream will begin with a Change\n// batch containing the initial state. Otherwise, the WatchStream will contain\n// only changes since the provided ResumeMarker.\n//\n// The result stream consists of a never-ending sequence of Change messages\n// (until the call fails or is canceled). Each Change contains the Name field\n// in the form \"<tableName>/<rowKey>\" and the Value field of the StoreChange\n// type. If the client has no access to a row specified in a change, that change\n// is excluded from the result stream.\n//\n// Note: A single Watch Change batch may contain changes from more than one\n// batch as originally committed on a remote Syncbase or obtained from conflict\n// resolution. However, changes from a single original batch will always appear\n// in the same Change batch.",
+	Embeds: []rpc.EmbedDesc{
+		{"GlobWatcher", "v.io/v23/services/watch", "// GlobWatcher allows a client to receive updates for changes to objects\n// that match a pattern.  See the package comments for details."},
+	},
+	Methods: []rpc.MethodDesc{
+		{
+			Name: "GetResumeMarker",
+			Doc:  "// GetResumeMarker returns the ResumeMarker that points to the current end\n// of the event log. GetResumeMarker() can be called on a batch.",
+			OutArgs: []rpc.ArgDesc{
+				{"", ``}, // watch.ResumeMarker
+			},
+			Tags: []*vdl.Value{vdl.ValueOf(access.Tag("Read"))},
+		},
+	},
+}
+
+// SyncgroupManagerClientMethods is the client interface
+// containing SyncgroupManager methods.
+//
+// SyncgroupManager is the interface for syncgroup operations.
+// TODO(hpucha): Add blessings to create/join and add a refresh method.
+type SyncgroupManagerClientMethods interface {
+	// GetSyncgroupNames returns the global names of all syncgroups attached to
+	// this database.
+	GetSyncgroupNames(*context.T, ...rpc.CallOpt) ([]string, error)
+	// CreateSyncgroup creates a new syncgroup with the given spec.
+	//
+	// Requires: Client must have at least Read access on the Database; prefix ACL
+	// must exist at each syncgroup prefix; Client must have at least Read access
+	// on each of these prefix ACLs.
+	CreateSyncgroup(_ *context.T, sgName string, spec SyncgroupSpec, myInfo SyncgroupMemberInfo, _ ...rpc.CallOpt) error
+	// JoinSyncgroup joins the syncgroup.
+	//
+	// Requires: Client must have at least Read access on the Database and on the
+	// syncgroup ACL.
+	JoinSyncgroup(_ *context.T, sgName string, myInfo SyncgroupMemberInfo, _ ...rpc.CallOpt) (spec SyncgroupSpec, _ error)
+	// LeaveSyncgroup leaves the syncgroup. Previously synced data will continue
+	// to be available.
+	//
+	// Requires: Client must have at least Read access on the Database.
+	LeaveSyncgroup(_ *context.T, sgName string, _ ...rpc.CallOpt) error
+	// DestroySyncgroup destroys the syncgroup. Previously synced data will
+	// continue to be available to all members.
+	//
+	// Requires: Client must have at least Read access on the Database, and must
+	// have Admin access on the syncgroup ACL.
+	DestroySyncgroup(_ *context.T, sgName string, _ ...rpc.CallOpt) error
+	// EjectFromSyncgroup ejects a member from the syncgroup. The ejected member
+	// will not be able to sync further, but will retain any data it has already
+	// synced.
+	//
+	// Requires: Client must have at least Read access on the Database, and must
+	// have Admin access on the syncgroup ACL.
+	EjectFromSyncgroup(_ *context.T, sgName string, member string, _ ...rpc.CallOpt) error
+	// GetSyncgroupSpec gets the syncgroup spec. version allows for atomic
+	// read-modify-write of the spec - see comment for SetSyncgroupSpec.
+	//
+	// Requires: Client must have at least Read access on the Database and on the
+	// syncgroup ACL.
+	GetSyncgroupSpec(_ *context.T, sgName string, _ ...rpc.CallOpt) (spec SyncgroupSpec, version string, _ error)
+	// SetSyncgroupSpec sets the syncgroup spec. version may be either empty or
+	// the value from a previous Get. If not empty, Set will only succeed if the
+	// current version matches the specified one.
+	//
+	// Requires: Client must have at least Read access on the Database, and must
+	// have Admin access on the syncgroup ACL.
+	SetSyncgroupSpec(_ *context.T, sgName string, spec SyncgroupSpec, version string, _ ...rpc.CallOpt) error
+	// GetSyncgroupMembers gets the info objects for members of the syncgroup.
+	//
+	// Requires: Client must have at least Read access on the Database and on the
+	// syncgroup ACL.
+	GetSyncgroupMembers(_ *context.T, sgName string, _ ...rpc.CallOpt) (members map[string]SyncgroupMemberInfo, _ error)
+}
+
+// SyncgroupManagerClientStub adds universal methods to SyncgroupManagerClientMethods.
+type SyncgroupManagerClientStub interface {
+	SyncgroupManagerClientMethods
+	rpc.UniversalServiceMethods
+}
+
+// SyncgroupManagerClient returns a client stub for SyncgroupManager.
+func SyncgroupManagerClient(name string) SyncgroupManagerClientStub {
+	return implSyncgroupManagerClientStub{name}
+}
+
+type implSyncgroupManagerClientStub struct {
+	name string
+}
+
+func (c implSyncgroupManagerClientStub) GetSyncgroupNames(ctx *context.T, opts ...rpc.CallOpt) (o0 []string, err error) {
+	err = v23.GetClient(ctx).Call(ctx, c.name, "GetSyncgroupNames", nil, []interface{}{&o0}, opts...)
+	return
+}
+
+func (c implSyncgroupManagerClientStub) CreateSyncgroup(ctx *context.T, i0 string, i1 SyncgroupSpec, i2 SyncgroupMemberInfo, opts ...rpc.CallOpt) (err error) {
+	err = v23.GetClient(ctx).Call(ctx, c.name, "CreateSyncgroup", []interface{}{i0, i1, i2}, nil, opts...)
+	return
+}
+
+func (c implSyncgroupManagerClientStub) JoinSyncgroup(ctx *context.T, i0 string, i1 SyncgroupMemberInfo, opts ...rpc.CallOpt) (o0 SyncgroupSpec, err error) {
+	err = v23.GetClient(ctx).Call(ctx, c.name, "JoinSyncgroup", []interface{}{i0, i1}, []interface{}{&o0}, opts...)
+	return
+}
+
+func (c implSyncgroupManagerClientStub) LeaveSyncgroup(ctx *context.T, i0 string, opts ...rpc.CallOpt) (err error) {
+	err = v23.GetClient(ctx).Call(ctx, c.name, "LeaveSyncgroup", []interface{}{i0}, nil, opts...)
+	return
+}
+
+func (c implSyncgroupManagerClientStub) DestroySyncgroup(ctx *context.T, i0 string, opts ...rpc.CallOpt) (err error) {
+	err = v23.GetClient(ctx).Call(ctx, c.name, "DestroySyncgroup", []interface{}{i0}, nil, opts...)
+	return
+}
+
+func (c implSyncgroupManagerClientStub) EjectFromSyncgroup(ctx *context.T, i0 string, i1 string, opts ...rpc.CallOpt) (err error) {
+	err = v23.GetClient(ctx).Call(ctx, c.name, "EjectFromSyncgroup", []interface{}{i0, i1}, nil, opts...)
+	return
+}
+
+func (c implSyncgroupManagerClientStub) GetSyncgroupSpec(ctx *context.T, i0 string, opts ...rpc.CallOpt) (o0 SyncgroupSpec, o1 string, err error) {
+	err = v23.GetClient(ctx).Call(ctx, c.name, "GetSyncgroupSpec", []interface{}{i0}, []interface{}{&o0, &o1}, opts...)
+	return
+}
+
+func (c implSyncgroupManagerClientStub) SetSyncgroupSpec(ctx *context.T, i0 string, i1 SyncgroupSpec, i2 string, opts ...rpc.CallOpt) (err error) {
+	err = v23.GetClient(ctx).Call(ctx, c.name, "SetSyncgroupSpec", []interface{}{i0, i1, i2}, nil, opts...)
+	return
+}
+
+func (c implSyncgroupManagerClientStub) GetSyncgroupMembers(ctx *context.T, i0 string, opts ...rpc.CallOpt) (o0 map[string]SyncgroupMemberInfo, err error) {
+	err = v23.GetClient(ctx).Call(ctx, c.name, "GetSyncgroupMembers", []interface{}{i0}, []interface{}{&o0}, opts...)
+	return
+}
+
+// SyncgroupManagerServerMethods is the interface a server writer
+// implements for SyncgroupManager.
+//
+// SyncgroupManager is the interface for syncgroup operations.
+// TODO(hpucha): Add blessings to create/join and add a refresh method.
+type SyncgroupManagerServerMethods interface {
+	// GetSyncgroupNames returns the global names of all syncgroups attached to
+	// this database.
+	GetSyncgroupNames(*context.T, rpc.ServerCall) ([]string, error)
+	// CreateSyncgroup creates a new syncgroup with the given spec.
+	//
+	// Requires: Client must have at least Read access on the Database; prefix ACL
+	// must exist at each syncgroup prefix; Client must have at least Read access
+	// on each of these prefix ACLs.
+	CreateSyncgroup(_ *context.T, _ rpc.ServerCall, sgName string, spec SyncgroupSpec, myInfo SyncgroupMemberInfo) error
+	// JoinSyncgroup joins the syncgroup.
+	//
+	// Requires: Client must have at least Read access on the Database and on the
+	// syncgroup ACL.
+	JoinSyncgroup(_ *context.T, _ rpc.ServerCall, sgName string, myInfo SyncgroupMemberInfo) (spec SyncgroupSpec, _ error)
+	// LeaveSyncgroup leaves the syncgroup. Previously synced data will continue
+	// to be available.
+	//
+	// Requires: Client must have at least Read access on the Database.
+	LeaveSyncgroup(_ *context.T, _ rpc.ServerCall, sgName string) error
+	// DestroySyncgroup destroys the syncgroup. Previously synced data will
+	// continue to be available to all members.
+	//
+	// Requires: Client must have at least Read access on the Database, and must
+	// have Admin access on the syncgroup ACL.
+	DestroySyncgroup(_ *context.T, _ rpc.ServerCall, sgName string) error
+	// EjectFromSyncgroup ejects a member from the syncgroup. The ejected member
+	// will not be able to sync further, but will retain any data it has already
+	// synced.
+	//
+	// Requires: Client must have at least Read access on the Database, and must
+	// have Admin access on the syncgroup ACL.
+	EjectFromSyncgroup(_ *context.T, _ rpc.ServerCall, sgName string, member string) error
+	// GetSyncgroupSpec gets the syncgroup spec. version allows for atomic
+	// read-modify-write of the spec - see comment for SetSyncgroupSpec.
+	//
+	// Requires: Client must have at least Read access on the Database and on the
+	// syncgroup ACL.
+	GetSyncgroupSpec(_ *context.T, _ rpc.ServerCall, sgName string) (spec SyncgroupSpec, version string, _ error)
+	// SetSyncgroupSpec sets the syncgroup spec. version may be either empty or
+	// the value from a previous Get. If not empty, Set will only succeed if the
+	// current version matches the specified one.
+	//
+	// Requires: Client must have at least Read access on the Database, and must
+	// have Admin access on the syncgroup ACL.
+	SetSyncgroupSpec(_ *context.T, _ rpc.ServerCall, sgName string, spec SyncgroupSpec, version string) error
+	// GetSyncgroupMembers gets the info objects for members of the syncgroup.
+	//
+	// Requires: Client must have at least Read access on the Database and on the
+	// syncgroup ACL.
+	GetSyncgroupMembers(_ *context.T, _ rpc.ServerCall, sgName string) (members map[string]SyncgroupMemberInfo, _ error)
+}
+
+// SyncgroupManagerServerStubMethods is the server interface containing
+// SyncgroupManager methods, as expected by rpc.Server.
+// There is no difference between this interface and SyncgroupManagerServerMethods
+// since there are no streaming methods.
+type SyncgroupManagerServerStubMethods SyncgroupManagerServerMethods
+
+// SyncgroupManagerServerStub adds universal methods to SyncgroupManagerServerStubMethods.
+type SyncgroupManagerServerStub interface {
+	SyncgroupManagerServerStubMethods
+	// Describe the SyncgroupManager interfaces.
+	Describe__() []rpc.InterfaceDesc
+}
+
+// SyncgroupManagerServer returns a server stub for SyncgroupManager.
+// It converts an implementation of SyncgroupManagerServerMethods into
+// an object that may be used by rpc.Server.
+func SyncgroupManagerServer(impl SyncgroupManagerServerMethods) SyncgroupManagerServerStub {
+	stub := implSyncgroupManagerServerStub{
+		impl: impl,
+	}
+	// Initialize GlobState; always check the stub itself first, to handle the
+	// case where the user has the Glob method defined in their VDL source.
+	if gs := rpc.NewGlobState(stub); gs != nil {
+		stub.gs = gs
+	} else if gs := rpc.NewGlobState(impl); gs != nil {
+		stub.gs = gs
+	}
+	return stub
+}
+
+type implSyncgroupManagerServerStub struct {
+	impl SyncgroupManagerServerMethods
+	gs   *rpc.GlobState
+}
+
+func (s implSyncgroupManagerServerStub) GetSyncgroupNames(ctx *context.T, call rpc.ServerCall) ([]string, error) {
+	return s.impl.GetSyncgroupNames(ctx, call)
+}
+
+func (s implSyncgroupManagerServerStub) CreateSyncgroup(ctx *context.T, call rpc.ServerCall, i0 string, i1 SyncgroupSpec, i2 SyncgroupMemberInfo) error {
+	return s.impl.CreateSyncgroup(ctx, call, i0, i1, i2)
+}
+
+func (s implSyncgroupManagerServerStub) JoinSyncgroup(ctx *context.T, call rpc.ServerCall, i0 string, i1 SyncgroupMemberInfo) (SyncgroupSpec, error) {
+	return s.impl.JoinSyncgroup(ctx, call, i0, i1)
+}
+
+func (s implSyncgroupManagerServerStub) LeaveSyncgroup(ctx *context.T, call rpc.ServerCall, i0 string) error {
+	return s.impl.LeaveSyncgroup(ctx, call, i0)
+}
+
+func (s implSyncgroupManagerServerStub) DestroySyncgroup(ctx *context.T, call rpc.ServerCall, i0 string) error {
+	return s.impl.DestroySyncgroup(ctx, call, i0)
+}
+
+func (s implSyncgroupManagerServerStub) EjectFromSyncgroup(ctx *context.T, call rpc.ServerCall, i0 string, i1 string) error {
+	return s.impl.EjectFromSyncgroup(ctx, call, i0, i1)
+}
+
+func (s implSyncgroupManagerServerStub) GetSyncgroupSpec(ctx *context.T, call rpc.ServerCall, i0 string) (SyncgroupSpec, string, error) {
+	return s.impl.GetSyncgroupSpec(ctx, call, i0)
+}
+
+func (s implSyncgroupManagerServerStub) SetSyncgroupSpec(ctx *context.T, call rpc.ServerCall, i0 string, i1 SyncgroupSpec, i2 string) error {
+	return s.impl.SetSyncgroupSpec(ctx, call, i0, i1, i2)
+}
+
+func (s implSyncgroupManagerServerStub) GetSyncgroupMembers(ctx *context.T, call rpc.ServerCall, i0 string) (map[string]SyncgroupMemberInfo, error) {
+	return s.impl.GetSyncgroupMembers(ctx, call, i0)
+}
+
+func (s implSyncgroupManagerServerStub) Globber() *rpc.GlobState {
+	return s.gs
+}
+
+func (s implSyncgroupManagerServerStub) Describe__() []rpc.InterfaceDesc {
+	return []rpc.InterfaceDesc{SyncgroupManagerDesc}
+}
+
+// SyncgroupManagerDesc describes the SyncgroupManager interface.
+var SyncgroupManagerDesc rpc.InterfaceDesc = descSyncgroupManager
+
+// descSyncgroupManager hides the desc to keep godoc clean.
+var descSyncgroupManager = rpc.InterfaceDesc{
+	Name:    "SyncgroupManager",
+	PkgPath: "v.io/v23/services/syncbase",
+	Doc:     "// SyncgroupManager is the interface for syncgroup operations.\n// TODO(hpucha): Add blessings to create/join and add a refresh method.",
+	Methods: []rpc.MethodDesc{
+		{
+			Name: "GetSyncgroupNames",
+			Doc:  "// GetSyncgroupNames returns the global names of all syncgroups attached to\n// this database.",
+			OutArgs: []rpc.ArgDesc{
+				{"", ``}, // []string
+			},
+			Tags: []*vdl.Value{vdl.ValueOf(access.Tag("Read"))},
+		},
+		{
+			Name: "CreateSyncgroup",
+			Doc:  "// CreateSyncgroup creates a new syncgroup with the given spec.\n//\n// Requires: Client must have at least Read access on the Database; prefix ACL\n// must exist at each syncgroup prefix; Client must have at least Read access\n// on each of these prefix ACLs.",
+			InArgs: []rpc.ArgDesc{
+				{"sgName", ``}, // string
+				{"spec", ``},   // SyncgroupSpec
+				{"myInfo", ``}, // SyncgroupMemberInfo
+			},
+			Tags: []*vdl.Value{vdl.ValueOf(access.Tag("Read"))},
+		},
+		{
+			Name: "JoinSyncgroup",
+			Doc:  "// JoinSyncgroup joins the syncgroup.\n//\n// Requires: Client must have at least Read access on the Database and on the\n// syncgroup ACL.",
+			InArgs: []rpc.ArgDesc{
+				{"sgName", ``}, // string
+				{"myInfo", ``}, // SyncgroupMemberInfo
+			},
+			OutArgs: []rpc.ArgDesc{
+				{"spec", ``}, // SyncgroupSpec
+			},
+			Tags: []*vdl.Value{vdl.ValueOf(access.Tag("Read"))},
+		},
+		{
+			Name: "LeaveSyncgroup",
+			Doc:  "// LeaveSyncgroup leaves the syncgroup. Previously synced data will continue\n// to be available.\n//\n// Requires: Client must have at least Read access on the Database.",
+			InArgs: []rpc.ArgDesc{
+				{"sgName", ``}, // string
+			},
+			Tags: []*vdl.Value{vdl.ValueOf(access.Tag("Read"))},
+		},
+		{
+			Name: "DestroySyncgroup",
+			Doc:  "// DestroySyncgroup destroys the syncgroup. Previously synced data will\n// continue to be available to all members.\n//\n// Requires: Client must have at least Read access on the Database, and must\n// have Admin access on the syncgroup ACL.",
+			InArgs: []rpc.ArgDesc{
+				{"sgName", ``}, // string
+			},
+			Tags: []*vdl.Value{vdl.ValueOf(access.Tag("Read"))},
+		},
+		{
+			Name: "EjectFromSyncgroup",
+			Doc:  "// EjectFromSyncgroup ejects a member from the syncgroup. The ejected member\n// will not be able to sync further, but will retain any data it has already\n// synced.\n//\n// Requires: Client must have at least Read access on the Database, and must\n// have Admin access on the syncgroup ACL.",
+			InArgs: []rpc.ArgDesc{
+				{"sgName", ``}, // string
+				{"member", ``}, // string
+			},
+			Tags: []*vdl.Value{vdl.ValueOf(access.Tag("Read"))},
+		},
+		{
+			Name: "GetSyncgroupSpec",
+			Doc:  "// GetSyncgroupSpec gets the syncgroup spec. version allows for atomic\n// read-modify-write of the spec - see comment for SetSyncgroupSpec.\n//\n// Requires: Client must have at least Read access on the Database and on the\n// syncgroup ACL.",
+			InArgs: []rpc.ArgDesc{
+				{"sgName", ``}, // string
+			},
+			OutArgs: []rpc.ArgDesc{
+				{"spec", ``},    // SyncgroupSpec
+				{"version", ``}, // string
+			},
+			Tags: []*vdl.Value{vdl.ValueOf(access.Tag("Read"))},
+		},
+		{
+			Name: "SetSyncgroupSpec",
+			Doc:  "// SetSyncgroupSpec sets the syncgroup spec. version may be either empty or\n// the value from a previous Get. If not empty, Set will only succeed if the\n// current version matches the specified one.\n//\n// Requires: Client must have at least Read access on the Database, and must\n// have Admin access on the syncgroup ACL.",
+			InArgs: []rpc.ArgDesc{
+				{"sgName", ``},  // string
+				{"spec", ``},    // SyncgroupSpec
+				{"version", ``}, // string
+			},
+			Tags: []*vdl.Value{vdl.ValueOf(access.Tag("Read"))},
+		},
+		{
+			Name: "GetSyncgroupMembers",
+			Doc:  "// GetSyncgroupMembers gets the info objects for members of the syncgroup.\n//\n// Requires: Client must have at least Read access on the Database and on the\n// syncgroup ACL.",
+			InArgs: []rpc.ArgDesc{
+				{"sgName", ``}, // string
+			},
+			OutArgs: []rpc.ArgDesc{
+				{"members", ``}, // map[string]SyncgroupMemberInfo
+			},
+			Tags: []*vdl.Value{vdl.ValueOf(access.Tag("Read"))},
+		},
+	},
+}
+
+// BlobManagerClientMethods is the client interface
+// containing BlobManager methods.
+//
+// BlobManager is the interface for blob operations.
+//
+// Description of API for resumable blob creation (append-only):
+// - Up until commit, a BlobRef may be used with PutBlob, GetBlobSize,
+//   DeleteBlob, and CommitBlob. Blob creation may be resumed by obtaining the
+//   current blob size via GetBlobSize and appending to the blob via PutBlob.
+// - After commit, a blob is immutable, at which point PutBlob and CommitBlob
+//   may no longer be used.
+// - All other methods (GetBlob, FetchBlob, PinBlob, etc.) may only be used
+//   after commit.
+type BlobManagerClientMethods interface {
+	// CreateBlob returns a BlobRef for a newly created blob.
+	CreateBlob(*context.T, ...rpc.CallOpt) (br BlobRef, _ error)
+	// PutBlob appends the byte stream to the blob.
+	PutBlob(_ *context.T, br BlobRef, _ ...rpc.CallOpt) (BlobManagerPutBlobClientCall, error)
+	// CommitBlob marks the blob as immutable.
+	CommitBlob(_ *context.T, br BlobRef, _ ...rpc.CallOpt) error
+	// GetBlobSize returns the count of bytes written as part of the blob
+	// (committed or uncommitted).
+	GetBlobSize(_ *context.T, br BlobRef, _ ...rpc.CallOpt) (int64, error)
+	// DeleteBlob locally deletes the blob (committed or uncommitted).
+	DeleteBlob(_ *context.T, br BlobRef, _ ...rpc.CallOpt) error
+	// GetBlob returns the byte stream from a committed blob starting at offset.
+	GetBlob(_ *context.T, br BlobRef, offset int64, _ ...rpc.CallOpt) (BlobManagerGetBlobClientCall, error)
+	// FetchBlob initiates fetching a blob if not locally found. priority
+	// controls the network priority of the blob. Higher priority blobs are
+	// fetched before the lower priority ones. However, an ongoing blob
+	// transfer is not interrupted. Status updates are streamed back to the
+	// client as fetch is in progress.
+	FetchBlob(_ *context.T, br BlobRef, priority uint64, _ ...rpc.CallOpt) (BlobManagerFetchBlobClientCall, error)
+	// PinBlob locally pins the blob so that it is not evicted.
+	PinBlob(_ *context.T, br BlobRef, _ ...rpc.CallOpt) error
+	// UnpinBlob locally unpins the blob so that it can be evicted if needed.
+	UnpinBlob(_ *context.T, br BlobRef, _ ...rpc.CallOpt) error
+	// KeepBlob locally caches the blob with the specified rank. Lower
+	// ranked blobs are more eagerly evicted.
+	KeepBlob(_ *context.T, br BlobRef, rank uint64, _ ...rpc.CallOpt) error
+}
+
+// BlobManagerClientStub adds universal methods to BlobManagerClientMethods.
+type BlobManagerClientStub interface {
+	BlobManagerClientMethods
+	rpc.UniversalServiceMethods
+}
+
+// BlobManagerClient returns a client stub for BlobManager.
+func BlobManagerClient(name string) BlobManagerClientStub {
+	return implBlobManagerClientStub{name}
+}
+
+type implBlobManagerClientStub struct {
+	name string
+}
+
+func (c implBlobManagerClientStub) CreateBlob(ctx *context.T, opts ...rpc.CallOpt) (o0 BlobRef, err error) {
+	err = v23.GetClient(ctx).Call(ctx, c.name, "CreateBlob", nil, []interface{}{&o0}, opts...)
+	return
+}
+
+func (c implBlobManagerClientStub) PutBlob(ctx *context.T, i0 BlobRef, opts ...rpc.CallOpt) (ocall BlobManagerPutBlobClientCall, err error) {
+	var call rpc.ClientCall
+	if call, err = v23.GetClient(ctx).StartCall(ctx, c.name, "PutBlob", []interface{}{i0}, opts...); err != nil {
+		return
+	}
+	ocall = &implBlobManagerPutBlobClientCall{ClientCall: call}
+	return
+}
+
+func (c implBlobManagerClientStub) CommitBlob(ctx *context.T, i0 BlobRef, opts ...rpc.CallOpt) (err error) {
+	err = v23.GetClient(ctx).Call(ctx, c.name, "CommitBlob", []interface{}{i0}, nil, opts...)
+	return
+}
+
+func (c implBlobManagerClientStub) GetBlobSize(ctx *context.T, i0 BlobRef, opts ...rpc.CallOpt) (o0 int64, err error) {
+	err = v23.GetClient(ctx).Call(ctx, c.name, "GetBlobSize", []interface{}{i0}, []interface{}{&o0}, opts...)
+	return
+}
+
+func (c implBlobManagerClientStub) DeleteBlob(ctx *context.T, i0 BlobRef, opts ...rpc.CallOpt) (err error) {
+	err = v23.GetClient(ctx).Call(ctx, c.name, "DeleteBlob", []interface{}{i0}, nil, opts...)
+	return
+}
+
+func (c implBlobManagerClientStub) GetBlob(ctx *context.T, i0 BlobRef, i1 int64, opts ...rpc.CallOpt) (ocall BlobManagerGetBlobClientCall, err error) {
+	var call rpc.ClientCall
+	if call, err = v23.GetClient(ctx).StartCall(ctx, c.name, "GetBlob", []interface{}{i0, i1}, opts...); err != nil {
+		return
+	}
+	ocall = &implBlobManagerGetBlobClientCall{ClientCall: call}
+	return
+}
+
+func (c implBlobManagerClientStub) FetchBlob(ctx *context.T, i0 BlobRef, i1 uint64, opts ...rpc.CallOpt) (ocall BlobManagerFetchBlobClientCall, err error) {
+	var call rpc.ClientCall
+	if call, err = v23.GetClient(ctx).StartCall(ctx, c.name, "FetchBlob", []interface{}{i0, i1}, opts...); err != nil {
+		return
+	}
+	ocall = &implBlobManagerFetchBlobClientCall{ClientCall: call}
+	return
+}
+
+func (c implBlobManagerClientStub) PinBlob(ctx *context.T, i0 BlobRef, opts ...rpc.CallOpt) (err error) {
+	err = v23.GetClient(ctx).Call(ctx, c.name, "PinBlob", []interface{}{i0}, nil, opts...)
+	return
+}
+
+func (c implBlobManagerClientStub) UnpinBlob(ctx *context.T, i0 BlobRef, opts ...rpc.CallOpt) (err error) {
+	err = v23.GetClient(ctx).Call(ctx, c.name, "UnpinBlob", []interface{}{i0}, nil, opts...)
+	return
+}
+
+func (c implBlobManagerClientStub) KeepBlob(ctx *context.T, i0 BlobRef, i1 uint64, opts ...rpc.CallOpt) (err error) {
+	err = v23.GetClient(ctx).Call(ctx, c.name, "KeepBlob", []interface{}{i0, i1}, nil, opts...)
+	return
+}
+
+// BlobManagerPutBlobClientStream is the client stream for BlobManager.PutBlob.
+type BlobManagerPutBlobClientStream interface {
+	// SendStream returns the send side of the BlobManager.PutBlob client stream.
+	SendStream() interface {
+		// Send places the item onto the output stream.  Returns errors
+		// encountered while sending, or if Send is called after Close or
+		// the stream has been canceled.  Blocks if there is no buffer
+		// space; will unblock when buffer space is available or after
+		// the stream has been canceled.
+		Send(item []byte) error
+		// Close indicates to the server that no more items will be sent;
+		// server Recv calls will receive io.EOF after all sent items.
+		// This is an optional call - e.g. a client might call Close if it
+		// needs to continue receiving items from the server after it's
+		// done sending.  Returns errors encountered while closing, or if
+		// Close is called after the stream has been canceled.  Like Send,
+		// blocks if there is no buffer space available.
+		Close() error
+	}
+}
+
+// BlobManagerPutBlobClientCall represents the call returned from BlobManager.PutBlob.
+type BlobManagerPutBlobClientCall interface {
+	BlobManagerPutBlobClientStream
+	// Finish performs the equivalent of SendStream().Close, then blocks until
+	// the server is done, and returns the positional return values for the call.
+	//
+	// Finish returns immediately if the call has been canceled; depending on the
+	// timing the output could either be an error signaling cancelation, or the
+	// valid positional return values from the server.
+	//
+	// Calling Finish is mandatory for releasing stream resources, unless the call
+	// has been canceled or any of the other methods return an error.  Finish should
+	// be called at most once.
+	Finish() error
+}
+
+type implBlobManagerPutBlobClientCall struct {
+	rpc.ClientCall
+}
+
+func (c *implBlobManagerPutBlobClientCall) SendStream() interface {
+	Send(item []byte) error
+	Close() error
+} {
+	return implBlobManagerPutBlobClientCallSend{c}
+}
+
+type implBlobManagerPutBlobClientCallSend struct {
+	c *implBlobManagerPutBlobClientCall
+}
+
+func (c implBlobManagerPutBlobClientCallSend) Send(item []byte) error {
+	return c.c.Send(item)
+}
+func (c implBlobManagerPutBlobClientCallSend) Close() error {
+	return c.c.CloseSend()
+}
+func (c *implBlobManagerPutBlobClientCall) Finish() (err error) {
+	err = c.ClientCall.Finish()
+	return
+}
+
+// BlobManagerGetBlobClientStream is the client stream for BlobManager.GetBlob.
+type BlobManagerGetBlobClientStream interface {
+	// RecvStream returns the receiver side of the BlobManager.GetBlob client stream.
+	RecvStream() interface {
+		// Advance stages an item so that it may be retrieved via Value.  Returns
+		// true iff there is an item to retrieve.  Advance must be called before
+		// Value is called.  May block if an item is not available.
+		Advance() bool
+		// Value returns the item that was staged by Advance.  May panic if Advance
+		// returned false or was not called.  Never blocks.
+		Value() []byte
+		// Err returns any error encountered by Advance.  Never blocks.
+		Err() error
+	}
+}
+
+// BlobManagerGetBlobClientCall represents the call returned from BlobManager.GetBlob.
+type BlobManagerGetBlobClientCall interface {
+	BlobManagerGetBlobClientStream
+	// Finish blocks until the server is done, and returns the positional return
+	// values for call.
+	//
+	// Finish returns immediately if the call has been canceled; depending on the
+	// timing the output could either be an error signaling cancelation, or the
+	// valid positional return values from the server.
+	//
+	// Calling Finish is mandatory for releasing stream resources, unless the call
+	// has been canceled or any of the other methods return an error.  Finish should
+	// be called at most once.
+	Finish() error
+}
+
+type implBlobManagerGetBlobClientCall struct {
+	rpc.ClientCall
+	valRecv []byte
+	errRecv error
+}
+
+func (c *implBlobManagerGetBlobClientCall) RecvStream() interface {
+	Advance() bool
+	Value() []byte
+	Err() error
+} {
+	return implBlobManagerGetBlobClientCallRecv{c}
+}
+
+type implBlobManagerGetBlobClientCallRecv struct {
+	c *implBlobManagerGetBlobClientCall
+}
+
+func (c implBlobManagerGetBlobClientCallRecv) Advance() bool {
+	c.c.errRecv = c.c.Recv(&c.c.valRecv)
+	return c.c.errRecv == nil
+}
+func (c implBlobManagerGetBlobClientCallRecv) Value() []byte {
+	return c.c.valRecv
+}
+func (c implBlobManagerGetBlobClientCallRecv) Err() error {
+	if c.c.errRecv == io.EOF {
+		return nil
+	}
+	return c.c.errRecv
+}
+func (c *implBlobManagerGetBlobClientCall) Finish() (err error) {
+	err = c.ClientCall.Finish()
+	return
+}
+
+// BlobManagerFetchBlobClientStream is the client stream for BlobManager.FetchBlob.
+type BlobManagerFetchBlobClientStream interface {
+	// RecvStream returns the receiver side of the BlobManager.FetchBlob client stream.
+	RecvStream() interface {
+		// Advance stages an item so that it may be retrieved via Value.  Returns
+		// true iff there is an item to retrieve.  Advance must be called before
+		// Value is called.  May block if an item is not available.
+		Advance() bool
+		// Value returns the item that was staged by Advance.  May panic if Advance
+		// returned false or was not called.  Never blocks.
+		Value() BlobFetchStatus
+		// Err returns any error encountered by Advance.  Never blocks.
+		Err() error
+	}
+}
+
+// BlobManagerFetchBlobClientCall represents the call returned from BlobManager.FetchBlob.
+type BlobManagerFetchBlobClientCall interface {
+	BlobManagerFetchBlobClientStream
+	// Finish blocks until the server is done, and returns the positional return
+	// values for call.
+	//
+	// Finish returns immediately if the call has been canceled; depending on the
+	// timing the output could either be an error signaling cancelation, or the
+	// valid positional return values from the server.
+	//
+	// Calling Finish is mandatory for releasing stream resources, unless the call
+	// has been canceled or any of the other methods return an error.  Finish should
+	// be called at most once.
+	Finish() error
+}
+
+type implBlobManagerFetchBlobClientCall struct {
+	rpc.ClientCall
+	valRecv BlobFetchStatus
+	errRecv error
+}
+
+func (c *implBlobManagerFetchBlobClientCall) RecvStream() interface {
+	Advance() bool
+	Value() BlobFetchStatus
+	Err() error
+} {
+	return implBlobManagerFetchBlobClientCallRecv{c}
+}
+
+type implBlobManagerFetchBlobClientCallRecv struct {
+	c *implBlobManagerFetchBlobClientCall
+}
+
+func (c implBlobManagerFetchBlobClientCallRecv) Advance() bool {
+	c.c.valRecv = BlobFetchStatus{}
+	c.c.errRecv = c.c.Recv(&c.c.valRecv)
+	return c.c.errRecv == nil
+}
+func (c implBlobManagerFetchBlobClientCallRecv) Value() BlobFetchStatus {
+	return c.c.valRecv
+}
+func (c implBlobManagerFetchBlobClientCallRecv) Err() error {
+	if c.c.errRecv == io.EOF {
+		return nil
+	}
+	return c.c.errRecv
+}
+func (c *implBlobManagerFetchBlobClientCall) Finish() (err error) {
+	err = c.ClientCall.Finish()
+	return
+}
+
+// BlobManagerServerMethods is the interface a server writer
+// implements for BlobManager.
+//
+// BlobManager is the interface for blob operations.
+//
+// Description of API for resumable blob creation (append-only):
+// - Up until commit, a BlobRef may be used with PutBlob, GetBlobSize,
+//   DeleteBlob, and CommitBlob. Blob creation may be resumed by obtaining the
+//   current blob size via GetBlobSize and appending to the blob via PutBlob.
+// - After commit, a blob is immutable, at which point PutBlob and CommitBlob
+//   may no longer be used.
+// - All other methods (GetBlob, FetchBlob, PinBlob, etc.) may only be used
+//   after commit.
+type BlobManagerServerMethods interface {
+	// CreateBlob returns a BlobRef for a newly created blob.
+	CreateBlob(*context.T, rpc.ServerCall) (br BlobRef, _ error)
+	// PutBlob appends the byte stream to the blob.
+	PutBlob(_ *context.T, _ BlobManagerPutBlobServerCall, br BlobRef) error
+	// CommitBlob marks the blob as immutable.
+	CommitBlob(_ *context.T, _ rpc.ServerCall, br BlobRef) error
+	// GetBlobSize returns the count of bytes written as part of the blob
+	// (committed or uncommitted).
+	GetBlobSize(_ *context.T, _ rpc.ServerCall, br BlobRef) (int64, error)
+	// DeleteBlob locally deletes the blob (committed or uncommitted).
+	DeleteBlob(_ *context.T, _ rpc.ServerCall, br BlobRef) error
+	// GetBlob returns the byte stream from a committed blob starting at offset.
+	GetBlob(_ *context.T, _ BlobManagerGetBlobServerCall, br BlobRef, offset int64) error
+	// FetchBlob initiates fetching a blob if not locally found. priority
+	// controls the network priority of the blob. Higher priority blobs are
+	// fetched before the lower priority ones. However, an ongoing blob
+	// transfer is not interrupted. Status updates are streamed back to the
+	// client as fetch is in progress.
+	FetchBlob(_ *context.T, _ BlobManagerFetchBlobServerCall, br BlobRef, priority uint64) error
+	// PinBlob locally pins the blob so that it is not evicted.
+	PinBlob(_ *context.T, _ rpc.ServerCall, br BlobRef) error
+	// UnpinBlob locally unpins the blob so that it can be evicted if needed.
+	UnpinBlob(_ *context.T, _ rpc.ServerCall, br BlobRef) error
+	// KeepBlob locally caches the blob with the specified rank. Lower
+	// ranked blobs are more eagerly evicted.
+	KeepBlob(_ *context.T, _ rpc.ServerCall, br BlobRef, rank uint64) error
+}
+
+// BlobManagerServerStubMethods is the server interface containing
+// BlobManager methods, as expected by rpc.Server.
+// The only difference between this interface and BlobManagerServerMethods
+// is the streaming methods.
+type BlobManagerServerStubMethods interface {
+	// CreateBlob returns a BlobRef for a newly created blob.
+	CreateBlob(*context.T, rpc.ServerCall) (br BlobRef, _ error)
+	// PutBlob appends the byte stream to the blob.
+	PutBlob(_ *context.T, _ *BlobManagerPutBlobServerCallStub, br BlobRef) error
+	// CommitBlob marks the blob as immutable.
+	CommitBlob(_ *context.T, _ rpc.ServerCall, br BlobRef) error
+	// GetBlobSize returns the count of bytes written as part of the blob
+	// (committed or uncommitted).
+	GetBlobSize(_ *context.T, _ rpc.ServerCall, br BlobRef) (int64, error)
+	// DeleteBlob locally deletes the blob (committed or uncommitted).
+	DeleteBlob(_ *context.T, _ rpc.ServerCall, br BlobRef) error
+	// GetBlob returns the byte stream from a committed blob starting at offset.
+	GetBlob(_ *context.T, _ *BlobManagerGetBlobServerCallStub, br BlobRef, offset int64) error
+	// FetchBlob initiates fetching a blob if not locally found. priority
+	// controls the network priority of the blob. Higher priority blobs are
+	// fetched before the lower priority ones. However, an ongoing blob
+	// transfer is not interrupted. Status updates are streamed back to the
+	// client as fetch is in progress.
+	FetchBlob(_ *context.T, _ *BlobManagerFetchBlobServerCallStub, br BlobRef, priority uint64) error
+	// PinBlob locally pins the blob so that it is not evicted.
+	PinBlob(_ *context.T, _ rpc.ServerCall, br BlobRef) error
+	// UnpinBlob locally unpins the blob so that it can be evicted if needed.
+	UnpinBlob(_ *context.T, _ rpc.ServerCall, br BlobRef) error
+	// KeepBlob locally caches the blob with the specified rank. Lower
+	// ranked blobs are more eagerly evicted.
+	KeepBlob(_ *context.T, _ rpc.ServerCall, br BlobRef, rank uint64) error
+}
+
+// BlobManagerServerStub adds universal methods to BlobManagerServerStubMethods.
+type BlobManagerServerStub interface {
+	BlobManagerServerStubMethods
+	// Describe the BlobManager interfaces.
+	Describe__() []rpc.InterfaceDesc
+}
+
+// BlobManagerServer returns a server stub for BlobManager.
+// It converts an implementation of BlobManagerServerMethods into
+// an object that may be used by rpc.Server.
+func BlobManagerServer(impl BlobManagerServerMethods) BlobManagerServerStub {
+	stub := implBlobManagerServerStub{
+		impl: impl,
+	}
+	// Initialize GlobState; always check the stub itself first, to handle the
+	// case where the user has the Glob method defined in their VDL source.
+	if gs := rpc.NewGlobState(stub); gs != nil {
+		stub.gs = gs
+	} else if gs := rpc.NewGlobState(impl); gs != nil {
+		stub.gs = gs
+	}
+	return stub
+}
+
+type implBlobManagerServerStub struct {
+	impl BlobManagerServerMethods
+	gs   *rpc.GlobState
+}
+
+func (s implBlobManagerServerStub) CreateBlob(ctx *context.T, call rpc.ServerCall) (BlobRef, error) {
+	return s.impl.CreateBlob(ctx, call)
+}
+
+func (s implBlobManagerServerStub) PutBlob(ctx *context.T, call *BlobManagerPutBlobServerCallStub, i0 BlobRef) error {
+	return s.impl.PutBlob(ctx, call, i0)
+}
+
+func (s implBlobManagerServerStub) CommitBlob(ctx *context.T, call rpc.ServerCall, i0 BlobRef) error {
+	return s.impl.CommitBlob(ctx, call, i0)
+}
+
+func (s implBlobManagerServerStub) GetBlobSize(ctx *context.T, call rpc.ServerCall, i0 BlobRef) (int64, error) {
+	return s.impl.GetBlobSize(ctx, call, i0)
+}
+
+func (s implBlobManagerServerStub) DeleteBlob(ctx *context.T, call rpc.ServerCall, i0 BlobRef) error {
+	return s.impl.DeleteBlob(ctx, call, i0)
+}
+
+func (s implBlobManagerServerStub) GetBlob(ctx *context.T, call *BlobManagerGetBlobServerCallStub, i0 BlobRef, i1 int64) error {
+	return s.impl.GetBlob(ctx, call, i0, i1)
+}
+
+func (s implBlobManagerServerStub) FetchBlob(ctx *context.T, call *BlobManagerFetchBlobServerCallStub, i0 BlobRef, i1 uint64) error {
+	return s.impl.FetchBlob(ctx, call, i0, i1)
+}
+
+func (s implBlobManagerServerStub) PinBlob(ctx *context.T, call rpc.ServerCall, i0 BlobRef) error {
+	return s.impl.PinBlob(ctx, call, i0)
+}
+
+func (s implBlobManagerServerStub) UnpinBlob(ctx *context.T, call rpc.ServerCall, i0 BlobRef) error {
+	return s.impl.UnpinBlob(ctx, call, i0)
+}
+
+func (s implBlobManagerServerStub) KeepBlob(ctx *context.T, call rpc.ServerCall, i0 BlobRef, i1 uint64) error {
+	return s.impl.KeepBlob(ctx, call, i0, i1)
+}
+
+func (s implBlobManagerServerStub) Globber() *rpc.GlobState {
+	return s.gs
+}
+
+func (s implBlobManagerServerStub) Describe__() []rpc.InterfaceDesc {
+	return []rpc.InterfaceDesc{BlobManagerDesc}
+}
+
+// BlobManagerDesc describes the BlobManager interface.
+var BlobManagerDesc rpc.InterfaceDesc = descBlobManager
+
+// descBlobManager hides the desc to keep godoc clean.
+var descBlobManager = rpc.InterfaceDesc{
+	Name:    "BlobManager",
+	PkgPath: "v.io/v23/services/syncbase",
+	Doc:     "// BlobManager is the interface for blob operations.\n//\n// Description of API for resumable blob creation (append-only):\n// - Up until commit, a BlobRef may be used with PutBlob, GetBlobSize,\n//   DeleteBlob, and CommitBlob. Blob creation may be resumed by obtaining the\n//   current blob size via GetBlobSize and appending to the blob via PutBlob.\n// - After commit, a blob is immutable, at which point PutBlob and CommitBlob\n//   may no longer be used.\n// - All other methods (GetBlob, FetchBlob, PinBlob, etc.) may only be used\n//   after commit.",
+	Methods: []rpc.MethodDesc{
+		{
+			Name: "CreateBlob",
+			Doc:  "// CreateBlob returns a BlobRef for a newly created blob.",
+			OutArgs: []rpc.ArgDesc{
+				{"br", ``}, // BlobRef
+			},
+			Tags: []*vdl.Value{vdl.ValueOf(access.Tag("Write"))},
+		},
+		{
+			Name: "PutBlob",
+			Doc:  "// PutBlob appends the byte stream to the blob.",
+			InArgs: []rpc.ArgDesc{
+				{"br", ``}, // BlobRef
+			},
+			Tags: []*vdl.Value{vdl.ValueOf(access.Tag("Write"))},
+		},
+		{
+			Name: "CommitBlob",
+			Doc:  "// CommitBlob marks the blob as immutable.",
+			InArgs: []rpc.ArgDesc{
+				{"br", ``}, // BlobRef
+			},
+			Tags: []*vdl.Value{vdl.ValueOf(access.Tag("Write"))},
+		},
+		{
+			Name: "GetBlobSize",
+			Doc:  "// GetBlobSize returns the count of bytes written as part of the blob\n// (committed or uncommitted).",
+			InArgs: []rpc.ArgDesc{
+				{"br", ``}, // BlobRef
+			},
+			OutArgs: []rpc.ArgDesc{
+				{"", ``}, // int64
+			},
+			Tags: []*vdl.Value{vdl.ValueOf(access.Tag("Read"))},
+		},
+		{
+			Name: "DeleteBlob",
+			Doc:  "// DeleteBlob locally deletes the blob (committed or uncommitted).",
+			InArgs: []rpc.ArgDesc{
+				{"br", ``}, // BlobRef
+			},
+			Tags: []*vdl.Value{vdl.ValueOf(access.Tag("Write"))},
+		},
+		{
+			Name: "GetBlob",
+			Doc:  "// GetBlob returns the byte stream from a committed blob starting at offset.",
+			InArgs: []rpc.ArgDesc{
+				{"br", ``},     // BlobRef
+				{"offset", ``}, // int64
+			},
+			Tags: []*vdl.Value{vdl.ValueOf(access.Tag("Read"))},
+		},
+		{
+			Name: "FetchBlob",
+			Doc:  "// FetchBlob initiates fetching a blob if not locally found. priority\n// controls the network priority of the blob. Higher priority blobs are\n// fetched before the lower priority ones. However, an ongoing blob\n// transfer is not interrupted. Status updates are streamed back to the\n// client as fetch is in progress.",
+			InArgs: []rpc.ArgDesc{
+				{"br", ``},       // BlobRef
+				{"priority", ``}, // uint64
+			},
+			Tags: []*vdl.Value{vdl.ValueOf(access.Tag("Read"))},
+		},
+		{
+			Name: "PinBlob",
+			Doc:  "// PinBlob locally pins the blob so that it is not evicted.",
+			InArgs: []rpc.ArgDesc{
+				{"br", ``}, // BlobRef
+			},
+			Tags: []*vdl.Value{vdl.ValueOf(access.Tag("Write"))},
+		},
+		{
+			Name: "UnpinBlob",
+			Doc:  "// UnpinBlob locally unpins the blob so that it can be evicted if needed.",
+			InArgs: []rpc.ArgDesc{
+				{"br", ``}, // BlobRef
+			},
+			Tags: []*vdl.Value{vdl.ValueOf(access.Tag("Write"))},
+		},
+		{
+			Name: "KeepBlob",
+			Doc:  "// KeepBlob locally caches the blob with the specified rank. Lower\n// ranked blobs are more eagerly evicted.",
+			InArgs: []rpc.ArgDesc{
+				{"br", ``},   // BlobRef
+				{"rank", ``}, // uint64
+			},
+			Tags: []*vdl.Value{vdl.ValueOf(access.Tag("Write"))},
+		},
+	},
+}
+
+// BlobManagerPutBlobServerStream is the server stream for BlobManager.PutBlob.
+type BlobManagerPutBlobServerStream interface {
+	// RecvStream returns the receiver side of the BlobManager.PutBlob server stream.
+	RecvStream() interface {
+		// Advance stages an item so that it may be retrieved via Value.  Returns
+		// true iff there is an item to retrieve.  Advance must be called before
+		// Value is called.  May block if an item is not available.
+		Advance() bool
+		// Value returns the item that was staged by Advance.  May panic if Advance
+		// returned false or was not called.  Never blocks.
+		Value() []byte
+		// Err returns any error encountered by Advance.  Never blocks.
+		Err() error
+	}
+}
+
+// BlobManagerPutBlobServerCall represents the context passed to BlobManager.PutBlob.
+type BlobManagerPutBlobServerCall interface {
+	rpc.ServerCall
+	BlobManagerPutBlobServerStream
+}
+
+// BlobManagerPutBlobServerCallStub is a wrapper that converts rpc.StreamServerCall into
+// a typesafe stub that implements BlobManagerPutBlobServerCall.
+type BlobManagerPutBlobServerCallStub struct {
+	rpc.StreamServerCall
+	valRecv []byte
+	errRecv error
+}
+
+// Init initializes BlobManagerPutBlobServerCallStub from rpc.StreamServerCall.
+func (s *BlobManagerPutBlobServerCallStub) Init(call rpc.StreamServerCall) {
+	s.StreamServerCall = call
+}
+
+// RecvStream returns the receiver side of the BlobManager.PutBlob server stream.
+func (s *BlobManagerPutBlobServerCallStub) RecvStream() interface {
+	Advance() bool
+	Value() []byte
+	Err() error
+} {
+	return implBlobManagerPutBlobServerCallRecv{s}
+}
+
+type implBlobManagerPutBlobServerCallRecv struct {
+	s *BlobManagerPutBlobServerCallStub
+}
+
+func (s implBlobManagerPutBlobServerCallRecv) Advance() bool {
+	s.s.errRecv = s.s.Recv(&s.s.valRecv)
+	return s.s.errRecv == nil
+}
+func (s implBlobManagerPutBlobServerCallRecv) Value() []byte {
+	return s.s.valRecv
+}
+func (s implBlobManagerPutBlobServerCallRecv) Err() error {
+	if s.s.errRecv == io.EOF {
+		return nil
+	}
+	return s.s.errRecv
+}
+
+// BlobManagerGetBlobServerStream is the server stream for BlobManager.GetBlob.
+type BlobManagerGetBlobServerStream interface {
+	// SendStream returns the send side of the BlobManager.GetBlob server stream.
+	SendStream() interface {
+		// Send places the item onto the output stream.  Returns errors encountered
+		// while sending.  Blocks if there is no buffer space; will unblock when
+		// buffer space is available.
+		Send(item []byte) error
+	}
+}
+
+// BlobManagerGetBlobServerCall represents the context passed to BlobManager.GetBlob.
+type BlobManagerGetBlobServerCall interface {
+	rpc.ServerCall
+	BlobManagerGetBlobServerStream
+}
+
+// BlobManagerGetBlobServerCallStub is a wrapper that converts rpc.StreamServerCall into
+// a typesafe stub that implements BlobManagerGetBlobServerCall.
+type BlobManagerGetBlobServerCallStub struct {
+	rpc.StreamServerCall
+}
+
+// Init initializes BlobManagerGetBlobServerCallStub from rpc.StreamServerCall.
+func (s *BlobManagerGetBlobServerCallStub) Init(call rpc.StreamServerCall) {
+	s.StreamServerCall = call
+}
+
+// SendStream returns the send side of the BlobManager.GetBlob server stream.
+func (s *BlobManagerGetBlobServerCallStub) SendStream() interface {
+	Send(item []byte) error
+} {
+	return implBlobManagerGetBlobServerCallSend{s}
+}
+
+type implBlobManagerGetBlobServerCallSend struct {
+	s *BlobManagerGetBlobServerCallStub
+}
+
+func (s implBlobManagerGetBlobServerCallSend) Send(item []byte) error {
+	return s.s.Send(item)
+}
+
+// BlobManagerFetchBlobServerStream is the server stream for BlobManager.FetchBlob.
+type BlobManagerFetchBlobServerStream interface {
+	// SendStream returns the send side of the BlobManager.FetchBlob server stream.
+	SendStream() interface {
+		// Send places the item onto the output stream.  Returns errors encountered
+		// while sending.  Blocks if there is no buffer space; will unblock when
+		// buffer space is available.
+		Send(item BlobFetchStatus) error
+	}
+}
+
+// BlobManagerFetchBlobServerCall represents the context passed to BlobManager.FetchBlob.
+type BlobManagerFetchBlobServerCall interface {
+	rpc.ServerCall
+	BlobManagerFetchBlobServerStream
+}
+
+// BlobManagerFetchBlobServerCallStub is a wrapper that converts rpc.StreamServerCall into
+// a typesafe stub that implements BlobManagerFetchBlobServerCall.
+type BlobManagerFetchBlobServerCallStub struct {
+	rpc.StreamServerCall
+}
+
+// Init initializes BlobManagerFetchBlobServerCallStub from rpc.StreamServerCall.
+func (s *BlobManagerFetchBlobServerCallStub) Init(call rpc.StreamServerCall) {
+	s.StreamServerCall = call
+}
+
+// SendStream returns the send side of the BlobManager.FetchBlob server stream.
+func (s *BlobManagerFetchBlobServerCallStub) SendStream() interface {
+	Send(item BlobFetchStatus) error
+} {
+	return implBlobManagerFetchBlobServerCallSend{s}
+}
+
+type implBlobManagerFetchBlobServerCallSend struct {
+	s *BlobManagerFetchBlobServerCallStub
+}
+
+func (s implBlobManagerFetchBlobServerCallSend) Send(item BlobFetchStatus) error {
+	return s.s.Send(item)
+}
+
+// SchemaManagerClientMethods is the client interface
+// containing SchemaManager methods.
+//
+// SchemaManager implements the API for managing schema metadata attached
+// to a Database.
+type SchemaManagerClientMethods interface {
+	// GetSchemaMetadata retrieves schema metadata for this database.
+	//
+	// Requires: Client must have at least Read access on the Database.
+	GetSchemaMetadata(*context.T, ...rpc.CallOpt) (SchemaMetadata, error)
+	// SetSchemaMetadata stores schema metadata for this database.
+	//
+	// Requires: Client must have at least Write access on the Database.
+	SetSchemaMetadata(_ *context.T, metadata SchemaMetadata, _ ...rpc.CallOpt) error
+}
+
+// SchemaManagerClientStub adds universal methods to SchemaManagerClientMethods.
+type SchemaManagerClientStub interface {
+	SchemaManagerClientMethods
+	rpc.UniversalServiceMethods
+}
+
+// SchemaManagerClient returns a client stub for SchemaManager.
+func SchemaManagerClient(name string) SchemaManagerClientStub {
+	return implSchemaManagerClientStub{name}
+}
+
+type implSchemaManagerClientStub struct {
+	name string
+}
+
+func (c implSchemaManagerClientStub) GetSchemaMetadata(ctx *context.T, opts ...rpc.CallOpt) (o0 SchemaMetadata, err error) {
+	err = v23.GetClient(ctx).Call(ctx, c.name, "GetSchemaMetadata", nil, []interface{}{&o0}, opts...)
+	return
+}
+
+func (c implSchemaManagerClientStub) SetSchemaMetadata(ctx *context.T, i0 SchemaMetadata, opts ...rpc.CallOpt) (err error) {
+	err = v23.GetClient(ctx).Call(ctx, c.name, "SetSchemaMetadata", []interface{}{i0}, nil, opts...)
+	return
+}
+
+// SchemaManagerServerMethods is the interface a server writer
+// implements for SchemaManager.
+//
+// SchemaManager implements the API for managing schema metadata attached
+// to a Database.
+type SchemaManagerServerMethods interface {
+	// GetSchemaMetadata retrieves schema metadata for this database.
+	//
+	// Requires: Client must have at least Read access on the Database.
+	GetSchemaMetadata(*context.T, rpc.ServerCall) (SchemaMetadata, error)
+	// SetSchemaMetadata stores schema metadata for this database.
+	//
+	// Requires: Client must have at least Write access on the Database.
+	SetSchemaMetadata(_ *context.T, _ rpc.ServerCall, metadata SchemaMetadata) error
+}
+
+// SchemaManagerServerStubMethods is the server interface containing
+// SchemaManager methods, as expected by rpc.Server.
+// There is no difference between this interface and SchemaManagerServerMethods
+// since there are no streaming methods.
+type SchemaManagerServerStubMethods SchemaManagerServerMethods
+
+// SchemaManagerServerStub adds universal methods to SchemaManagerServerStubMethods.
+type SchemaManagerServerStub interface {
+	SchemaManagerServerStubMethods
+	// Describe the SchemaManager interfaces.
+	Describe__() []rpc.InterfaceDesc
+}
+
+// SchemaManagerServer returns a server stub for SchemaManager.
+// It converts an implementation of SchemaManagerServerMethods into
+// an object that may be used by rpc.Server.
+func SchemaManagerServer(impl SchemaManagerServerMethods) SchemaManagerServerStub {
+	stub := implSchemaManagerServerStub{
+		impl: impl,
+	}
+	// Initialize GlobState; always check the stub itself first, to handle the
+	// case where the user has the Glob method defined in their VDL source.
+	if gs := rpc.NewGlobState(stub); gs != nil {
+		stub.gs = gs
+	} else if gs := rpc.NewGlobState(impl); gs != nil {
+		stub.gs = gs
+	}
+	return stub
+}
+
+type implSchemaManagerServerStub struct {
+	impl SchemaManagerServerMethods
+	gs   *rpc.GlobState
+}
+
+func (s implSchemaManagerServerStub) GetSchemaMetadata(ctx *context.T, call rpc.ServerCall) (SchemaMetadata, error) {
+	return s.impl.GetSchemaMetadata(ctx, call)
+}
+
+func (s implSchemaManagerServerStub) SetSchemaMetadata(ctx *context.T, call rpc.ServerCall, i0 SchemaMetadata) error {
+	return s.impl.SetSchemaMetadata(ctx, call, i0)
+}
+
+func (s implSchemaManagerServerStub) Globber() *rpc.GlobState {
+	return s.gs
+}
+
+func (s implSchemaManagerServerStub) Describe__() []rpc.InterfaceDesc {
+	return []rpc.InterfaceDesc{SchemaManagerDesc}
+}
+
+// SchemaManagerDesc describes the SchemaManager interface.
+var SchemaManagerDesc rpc.InterfaceDesc = descSchemaManager
+
+// descSchemaManager hides the desc to keep godoc clean.
+var descSchemaManager = rpc.InterfaceDesc{
+	Name:    "SchemaManager",
+	PkgPath: "v.io/v23/services/syncbase",
+	Doc:     "// SchemaManager implements the API for managing schema metadata attached\n// to a Database.",
+	Methods: []rpc.MethodDesc{
+		{
+			Name: "GetSchemaMetadata",
+			Doc:  "// GetSchemaMetadata retrieves schema metadata for this database.\n//\n// Requires: Client must have at least Read access on the Database.",
+			OutArgs: []rpc.ArgDesc{
+				{"", ``}, // SchemaMetadata
+			},
+			Tags: []*vdl.Value{vdl.ValueOf(access.Tag("Read"))},
+		},
+		{
+			Name: "SetSchemaMetadata",
+			Doc:  "// SetSchemaMetadata stores schema metadata for this database.\n//\n// Requires: Client must have at least Write access on the Database.",
+			InArgs: []rpc.ArgDesc{
+				{"metadata", ``}, // SchemaMetadata
+			},
+			Tags: []*vdl.Value{vdl.ValueOf(access.Tag("Write"))},
+		},
+	},
+}
+
+// ConflictManagerClientMethods is the client interface
+// containing ConflictManager methods.
+//
+// ConflictManager interface provides all the methods necessary to handle
+// conflict resolution for a given database.
+type ConflictManagerClientMethods interface {
+	// StartConflictResolver registers a resolver for the database that is
+	// associated with this ConflictManager and creates a stream to receive
+	// conflicts and send resolutions.
+	// Batches of ConflictInfos will be sent over with the Continued field
+	// within the ConflictInfo representing the batch boundary. Client must
+	// respond with a batch of ResolutionInfos in the same fashion.
+	// A key is under conflict if two different values were written to it
+	// concurrently (in logical time), i.e. neither value is an ancestor of the
+	// other in the history graph.
+	// A key under conflict can be a part of a batch committed on local or
+	// remote or both syncbases. ConflictInfos for all keys in these two batches
+	// are grouped together. These keys may themselves be under conflict; the
+	// presented batch is a transitive closure of all batches containing keys
+	// under conflict.
+	// For example, for local batch {key1, key2} and remote batch {key1, key3},
+	// the batch sent for conflict resolution will be {key1, key2, key3}.
+	// If there was another concurrent batch {key2, key4}, then the batch sent
+	// for conflict resolution will be {key1, key2, key3, key4}.
+	StartConflictResolver(*context.T, ...rpc.CallOpt) (ConflictManagerStartConflictResolverClientCall, error)
+}
+
+// ConflictManagerClientStub adds universal methods to ConflictManagerClientMethods.
+type ConflictManagerClientStub interface {
+	ConflictManagerClientMethods
+	rpc.UniversalServiceMethods
+}
+
+// ConflictManagerClient returns a client stub for ConflictManager.
+func ConflictManagerClient(name string) ConflictManagerClientStub {
+	return implConflictManagerClientStub{name}
+}
+
+type implConflictManagerClientStub struct {
+	name string
+}
+
+func (c implConflictManagerClientStub) StartConflictResolver(ctx *context.T, opts ...rpc.CallOpt) (ocall ConflictManagerStartConflictResolverClientCall, err error) {
+	var call rpc.ClientCall
+	if call, err = v23.GetClient(ctx).StartCall(ctx, c.name, "StartConflictResolver", nil, opts...); err != nil {
+		return
+	}
+	ocall = &implConflictManagerStartConflictResolverClientCall{ClientCall: call}
+	return
+}
+
+// ConflictManagerStartConflictResolverClientStream is the client stream for ConflictManager.StartConflictResolver.
+type ConflictManagerStartConflictResolverClientStream interface {
+	// RecvStream returns the receiver side of the ConflictManager.StartConflictResolver client stream.
+	RecvStream() interface {
+		// Advance stages an item so that it may be retrieved via Value.  Returns
+		// true iff there is an item to retrieve.  Advance must be called before
+		// Value is called.  May block if an item is not available.
+		Advance() bool
+		// Value returns the item that was staged by Advance.  May panic if Advance
+		// returned false or was not called.  Never blocks.
+		Value() ConflictInfo
+		// Err returns any error encountered by Advance.  Never blocks.
+		Err() error
+	}
+	// SendStream returns the send side of the ConflictManager.StartConflictResolver client stream.
+	SendStream() interface {
+		// Send places the item onto the output stream.  Returns errors
+		// encountered while sending, or if Send is called after Close or
+		// the stream has been canceled.  Blocks if there is no buffer
+		// space; will unblock when buffer space is available or after
+		// the stream has been canceled.
+		Send(item ResolutionInfo) error
+		// Close indicates to the server that no more items will be sent;
+		// server Recv calls will receive io.EOF after all sent items.
+		// This is an optional call - e.g. a client might call Close if it
+		// needs to continue receiving items from the server after it's
+		// done sending.  Returns errors encountered while closing, or if
+		// Close is called after the stream has been canceled.  Like Send,
+		// blocks if there is no buffer space available.
+		Close() error
+	}
+}
+
+// ConflictManagerStartConflictResolverClientCall represents the call returned from ConflictManager.StartConflictResolver.
+type ConflictManagerStartConflictResolverClientCall interface {
+	ConflictManagerStartConflictResolverClientStream
+	// Finish performs the equivalent of SendStream().Close, then blocks until
+	// the server is done, and returns the positional return values for the call.
+	//
+	// Finish returns immediately if the call has been canceled; depending on the
+	// timing the output could either be an error signaling cancelation, or the
+	// valid positional return values from the server.
+	//
+	// Calling Finish is mandatory for releasing stream resources, unless the call
+	// has been canceled or any of the other methods return an error.  Finish should
+	// be called at most once.
+	Finish() error
+}
+
+type implConflictManagerStartConflictResolverClientCall struct {
+	rpc.ClientCall
+	valRecv ConflictInfo
+	errRecv error
+}
+
+func (c *implConflictManagerStartConflictResolverClientCall) RecvStream() interface {
+	Advance() bool
+	Value() ConflictInfo
+	Err() error
+} {
+	return implConflictManagerStartConflictResolverClientCallRecv{c}
+}
+
+type implConflictManagerStartConflictResolverClientCallRecv struct {
+	c *implConflictManagerStartConflictResolverClientCall
+}
+
+func (c implConflictManagerStartConflictResolverClientCallRecv) Advance() bool {
+	c.c.valRecv = ConflictInfo{}
+	c.c.errRecv = c.c.Recv(&c.c.valRecv)
+	return c.c.errRecv == nil
+}
+func (c implConflictManagerStartConflictResolverClientCallRecv) Value() ConflictInfo {
+	return c.c.valRecv
+}
+func (c implConflictManagerStartConflictResolverClientCallRecv) Err() error {
+	if c.c.errRecv == io.EOF {
+		return nil
+	}
+	return c.c.errRecv
+}
+func (c *implConflictManagerStartConflictResolverClientCall) SendStream() interface {
+	Send(item ResolutionInfo) error
+	Close() error
+} {
+	return implConflictManagerStartConflictResolverClientCallSend{c}
+}
+
+type implConflictManagerStartConflictResolverClientCallSend struct {
+	c *implConflictManagerStartConflictResolverClientCall
+}
+
+func (c implConflictManagerStartConflictResolverClientCallSend) Send(item ResolutionInfo) error {
+	return c.c.Send(item)
+}
+func (c implConflictManagerStartConflictResolverClientCallSend) Close() error {
+	return c.c.CloseSend()
+}
+func (c *implConflictManagerStartConflictResolverClientCall) Finish() (err error) {
+	err = c.ClientCall.Finish()
+	return
+}
+
+// ConflictManagerServerMethods is the interface a server writer
+// implements for ConflictManager.
+//
+// ConflictManager interface provides all the methods necessary to handle
+// conflict resolution for a given database.
+type ConflictManagerServerMethods interface {
+	// StartConflictResolver registers a resolver for the database that is
+	// associated with this ConflictManager and creates a stream to receive
+	// conflicts and send resolutions.
+	// Batches of ConflictInfos will be sent over with the Continued field
+	// within the ConflictInfo representing the batch boundary. Client must
+	// respond with a batch of ResolutionInfos in the same fashion.
+	// A key is under conflict if two different values were written to it
+	// concurrently (in logical time), i.e. neither value is an ancestor of the
+	// other in the history graph.
+	// A key under conflict can be a part of a batch committed on local or
+	// remote or both syncbases. ConflictInfos for all keys in these two batches
+	// are grouped together. These keys may themselves be under conflict; the
+	// presented batch is a transitive closure of all batches containing keys
+	// under conflict.
+	// For example, for local batch {key1, key2} and remote batch {key1, key3},
+	// the batch sent for conflict resolution will be {key1, key2, key3}.
+	// If there was another concurrent batch {key2, key4}, then the batch sent
+	// for conflict resolution will be {key1, key2, key3, key4}.
+	StartConflictResolver(*context.T, ConflictManagerStartConflictResolverServerCall) error
+}
+
+// ConflictManagerServerStubMethods is the server interface containing
+// ConflictManager methods, as expected by rpc.Server.
+// The only difference between this interface and ConflictManagerServerMethods
+// is the streaming methods.
+type ConflictManagerServerStubMethods interface {
+	// StartConflictResolver registers a resolver for the database that is
+	// associated with this ConflictManager and creates a stream to receive
+	// conflicts and send resolutions.
+	// Batches of ConflictInfos will be sent over with the Continued field
+	// within the ConflictInfo representing the batch boundary. Client must
+	// respond with a batch of ResolutionInfos in the same fashion.
+	// A key is under conflict if two different values were written to it
+	// concurrently (in logical time), i.e. neither value is an ancestor of the
+	// other in the history graph.
+	// A key under conflict can be a part of a batch committed on local or
+	// remote or both syncbases. ConflictInfos for all keys in these two batches
+	// are grouped together. These keys may themselves be under conflict; the
+	// presented batch is a transitive closure of all batches containing keys
+	// under conflict.
+	// For example, for local batch {key1, key2} and remote batch {key1, key3},
+	// the batch sent for conflict resolution will be {key1, key2, key3}.
+	// If there was another concurrent batch {key2, key4}, then the batch sent
+	// for conflict resolution will be {key1, key2, key3, key4}.
+	StartConflictResolver(*context.T, *ConflictManagerStartConflictResolverServerCallStub) error
+}
+
+// ConflictManagerServerStub adds universal methods to ConflictManagerServerStubMethods.
+type ConflictManagerServerStub interface {
+	ConflictManagerServerStubMethods
+	// Describe the ConflictManager interfaces.
+	Describe__() []rpc.InterfaceDesc
+}
+
+// ConflictManagerServer returns a server stub for ConflictManager.
+// It converts an implementation of ConflictManagerServerMethods into
+// an object that may be used by rpc.Server.
+func ConflictManagerServer(impl ConflictManagerServerMethods) ConflictManagerServerStub {
+	stub := implConflictManagerServerStub{
+		impl: impl,
+	}
+	// Initialize GlobState; always check the stub itself first, to handle the
+	// case where the user has the Glob method defined in their VDL source.
+	if gs := rpc.NewGlobState(stub); gs != nil {
+		stub.gs = gs
+	} else if gs := rpc.NewGlobState(impl); gs != nil {
+		stub.gs = gs
+	}
+	return stub
+}
+
+type implConflictManagerServerStub struct {
+	impl ConflictManagerServerMethods
+	gs   *rpc.GlobState
+}
+
+func (s implConflictManagerServerStub) StartConflictResolver(ctx *context.T, call *ConflictManagerStartConflictResolverServerCallStub) error {
+	return s.impl.StartConflictResolver(ctx, call)
+}
+
+func (s implConflictManagerServerStub) Globber() *rpc.GlobState {
+	return s.gs
+}
+
+func (s implConflictManagerServerStub) Describe__() []rpc.InterfaceDesc {
+	return []rpc.InterfaceDesc{ConflictManagerDesc}
+}
+
+// ConflictManagerDesc describes the ConflictManager interface.
+var ConflictManagerDesc rpc.InterfaceDesc = descConflictManager
+
+// descConflictManager hides the desc to keep godoc clean.
+var descConflictManager = rpc.InterfaceDesc{
+	Name:    "ConflictManager",
+	PkgPath: "v.io/v23/services/syncbase",
+	Doc:     "// ConflictManager interface provides all the methods necessary to handle\n// conflict resolution for a given database.",
+	Methods: []rpc.MethodDesc{
+		{
+			Name: "StartConflictResolver",
+			Doc:  "// StartConflictResolver registers a resolver for the database that is\n// associated with this ConflictManager and creates a stream to receive\n// conflicts and send resolutions.\n// Batches of ConflictInfos will be sent over with the Continued field\n// within the ConflictInfo representing the batch boundary. Client must\n// respond with a batch of ResolutionInfos in the same fashion.\n// A key is under conflict if two different values were written to it\n// concurrently (in logical time), i.e. neither value is an ancestor of the\n// other in the history graph.\n// A key under conflict can be a part of a batch committed on local or\n// remote or both syncbases. ConflictInfos for all keys in these two batches\n// are grouped together. These keys may themselves be under conflict; the\n// presented batch is a transitive closure of all batches containing keys\n// under conflict.\n// For example, for local batch {key1, key2} and remote batch {key1, key3},\n// the batch sent for conflict resolution will be {key1, key2, key3}.\n// If there was another concurrent batch {key2, key4}, then the batch sent\n// for conflict resolution will be {key1, key2, key3, key4}.",
+			Tags: []*vdl.Value{vdl.ValueOf(access.Tag("Write"))},
+		},
+	},
+}
+
+// ConflictManagerStartConflictResolverServerStream is the server stream for ConflictManager.StartConflictResolver.
+type ConflictManagerStartConflictResolverServerStream interface {
+	// RecvStream returns the receiver side of the ConflictManager.StartConflictResolver server stream.
+	RecvStream() interface {
+		// Advance stages an item so that it may be retrieved via Value.  Returns
+		// true iff there is an item to retrieve.  Advance must be called before
+		// Value is called.  May block if an item is not available.
+		Advance() bool
+		// Value returns the item that was staged by Advance.  May panic if Advance
+		// returned false or was not called.  Never blocks.
+		Value() ResolutionInfo
+		// Err returns any error encountered by Advance.  Never blocks.
+		Err() error
+	}
+	// SendStream returns the send side of the ConflictManager.StartConflictResolver server stream.
+	SendStream() interface {
+		// Send places the item onto the output stream.  Returns errors encountered
+		// while sending.  Blocks if there is no buffer space; will unblock when
+		// buffer space is available.
+		Send(item ConflictInfo) error
+	}
+}
+
+// ConflictManagerStartConflictResolverServerCall represents the context passed to ConflictManager.StartConflictResolver.
+type ConflictManagerStartConflictResolverServerCall interface {
+	rpc.ServerCall
+	ConflictManagerStartConflictResolverServerStream
+}
+
+// ConflictManagerStartConflictResolverServerCallStub is a wrapper that converts rpc.StreamServerCall into
+// a typesafe stub that implements ConflictManagerStartConflictResolverServerCall.
+type ConflictManagerStartConflictResolverServerCallStub struct {
+	rpc.StreamServerCall
+	valRecv ResolutionInfo
+	errRecv error
+}
+
+// Init initializes ConflictManagerStartConflictResolverServerCallStub from rpc.StreamServerCall.
+func (s *ConflictManagerStartConflictResolverServerCallStub) Init(call rpc.StreamServerCall) {
+	s.StreamServerCall = call
+}
+
+// RecvStream returns the receiver side of the ConflictManager.StartConflictResolver server stream.
+func (s *ConflictManagerStartConflictResolverServerCallStub) RecvStream() interface {
+	Advance() bool
+	Value() ResolutionInfo
+	Err() error
+} {
+	return implConflictManagerStartConflictResolverServerCallRecv{s}
+}
+
+type implConflictManagerStartConflictResolverServerCallRecv struct {
+	s *ConflictManagerStartConflictResolverServerCallStub
+}
+
+func (s implConflictManagerStartConflictResolverServerCallRecv) Advance() bool {
+	s.s.valRecv = ResolutionInfo{}
+	s.s.errRecv = s.s.Recv(&s.s.valRecv)
+	return s.s.errRecv == nil
+}
+func (s implConflictManagerStartConflictResolverServerCallRecv) Value() ResolutionInfo {
+	return s.s.valRecv
+}
+func (s implConflictManagerStartConflictResolverServerCallRecv) Err() error {
+	if s.s.errRecv == io.EOF {
+		return nil
+	}
+	return s.s.errRecv
+}
+
+// SendStream returns the send side of the ConflictManager.StartConflictResolver server stream.
+func (s *ConflictManagerStartConflictResolverServerCallStub) SendStream() interface {
+	Send(item ConflictInfo) error
+} {
+	return implConflictManagerStartConflictResolverServerCallSend{s}
+}
+
+type implConflictManagerStartConflictResolverServerCallSend struct {
+	s *ConflictManagerStartConflictResolverServerCallStub
+}
+
+func (s implConflictManagerStartConflictResolverServerCallSend) Send(item ConflictInfo) error {
+	return s.s.Send(item)
+}
+
+// DatabaseClientMethods is the client interface
+// containing Database methods.
+//
+// Database represents a collection of Tables. Batches, queries, sync, watch,
+// etc. all operate at the Database level.
+// Database.Glob operates over Table names.
+// Param schemaVersion is the version number that the client expects the
+// database to be at. To disable schema version checking, pass -1.
+type DatabaseClientMethods interface {
+	// Object provides access control for Vanadium objects.
+	//
+	// Vanadium services implementing dynamic access control would typically embed
+	// this interface and tag additional methods defined by the service with one of
+	// Admin, Read, Write, Resolve etc. For example, the VDL definition of the
+	// object would be:
+	//
+	//   package mypackage
+	//
+	//   import "v.io/v23/security/access"
+	//   import "v.io/v23/services/permissions"
+	//
+	//   type MyObject interface {
+	//     permissions.Object
+	//     MyRead() (string, error) {access.Read}
+	//     MyWrite(string) error    {access.Write}
+	//   }
+	//
+	// If the set of pre-defined tags is insufficient, services may define their
+	// own tag type and annotate all methods with this new type.
+	//
+	// Instead of embedding this Object interface, define SetPermissions and
+	// GetPermissions in their own interface. Authorization policies will typically
+	// respect annotations of a single type. For example, the VDL definition of an
+	// object would be:
+	//
+	//  package mypackage
+	//
+	//  import "v.io/v23/security/access"
+	//
+	//  type MyTag string
+	//
+	//  const (
+	//    Blue = MyTag("Blue")
+	//    Red  = MyTag("Red")
+	//  )
+	//
+	//  type MyObject interface {
+	//    MyMethod() (string, error) {Blue}
+	//
+	//    // Allow clients to change access via the access.Object interface:
+	//    SetPermissions(perms access.Permissions, version string) error         {Red}
+	//    GetPermissions() (perms access.Permissions, version string, err error) {Blue}
+	//  }
+	permissions.ObjectClientMethods
+	// DatabaseWatcher allows a client to watch for updates to the database. For
+	// each watch request, the client will receive a reliable stream of watch events
+	// without re-ordering. See watch.GlobWatcher for a detailed explanation of the
+	// behavior.
+	// TODO(rogulenko): Currently the only supported watch patterns are
+	// "<tableName>/<rowPrefix>*". Consider changing that.
+	//
+	// Watching is done by starting a streaming RPC. The RPC takes a ResumeMarker
+	// argument that points to a particular place in the database event log. If an
+	// empty ResumeMarker is provided, the WatchStream will begin with a Change
+	// batch containing the initial state. Otherwise, the WatchStream will contain
+	// only changes since the provided ResumeMarker.
+	//
+	// The result stream consists of a never-ending sequence of Change messages
+	// (until the call fails or is canceled). Each Change contains the Name field
+	// in the form "<tableName>/<rowKey>" and the Value field of the StoreChange
+	// type. If the client has no access to a row specified in a change, that change
+	// is excluded from the result stream.
+	//
+	// Note: A single Watch Change batch may contain changes from more than one
+	// batch as originally committed on a remote Syncbase or obtained from conflict
+	// resolution. However, changes from a single original batch will always appear
+	// in the same Change batch.
+	DatabaseWatcherClientMethods
+	// SyncgroupManager is the interface for syncgroup operations.
+	// TODO(hpucha): Add blessings to create/join and add a refresh method.
+	SyncgroupManagerClientMethods
+	// BlobManager is the interface for blob operations.
+	//
+	// Description of API for resumable blob creation (append-only):
+	// - Up until commit, a BlobRef may be used with PutBlob, GetBlobSize,
+	//   DeleteBlob, and CommitBlob. Blob creation may be resumed by obtaining the
+	//   current blob size via GetBlobSize and appending to the blob via PutBlob.
+	// - After commit, a blob is immutable, at which point PutBlob and CommitBlob
+	//   may no longer be used.
+	// - All other methods (GetBlob, FetchBlob, PinBlob, etc.) may only be used
+	//   after commit.
+	BlobManagerClientMethods
+	// SchemaManager implements the API for managing schema metadata attached
+	// to a Database.
+	SchemaManagerClientMethods
+	// ConflictManager interface provides all the methods necessary to handle
+	// conflict resolution for a given database.
+	ConflictManagerClientMethods
+	// Create creates this Database.
+	// If perms is nil, we inherit (copy) the App perms.
+	// Create requires the caller to have Write permission at the App.
+	Create(_ *context.T, metadata *SchemaMetadata, perms access.Permissions, _ ...rpc.CallOpt) error
+	// Destroy destroys this Database, permanently removing all of its data.
+	Destroy(_ *context.T, schemaVersion int32, _ ...rpc.CallOpt) error
+	// Exists returns true only if this Database exists. Insufficient permissions
+	// cause Exists to return false instead of an error.
+	// TODO(ivanpi): Exists may fail with an error if higher levels of hierarchy
+	// do not exist.
+	Exists(_ *context.T, schemaVersion int32, _ ...rpc.CallOpt) (bool, error)
+	// ListTables returns a list of all Table names.
+	// This method exists on Database but not on Service or App because for the
+	// latter we can simply use glob, while for the former glob fails on
+	// BatchDatabase since we encode the batch id in the BatchDatabase object
+	// name. More specifically, the glob client library appears to have two odd
+	// behaviors:
+	// 1) It checks Resolve access on every component along the path (by doing a
+	//    Dispatcher.Lookup), whereas this doesn't happen for other RPCs.
+	// 2) It does a Glob(<prefix>/*) for every prefix path, and only proceeds to
+	//    the next path component if that component appeared in its parent's Glob
+	//    results. This is inefficient in general, and broken for us since
+	//    Glob("app/*") does not return batch database names like "a/d##bId".
+	// TODO(sadovsky): Maybe switch to streaming RPC.
+	ListTables(*context.T, ...rpc.CallOpt) ([]string, error)
+	// Exec executes a syncQL query with positional parameters and returns all
+	// results as specified by the query's select/delete statement.
+	// Concurrency semantics are documented in model.go.
+	Exec(_ *context.T, schemaVersion int32, query string, params []*vom.RawBytes, _ ...rpc.CallOpt) (DatabaseExecClientCall, error)
+	// BeginBatch creates a new batch. It returns a "batch suffix" string to
+	// append to the object name of this Database, yielding an object name for the
+	// Database bound to the created batch. (For example, if this Database is
+	// named "/path/to/db" and BeginBatch returns "##abc", the client should
+	// construct batch Database object name "/path/to/db##abc".) If this Database
+	// is already bound to a batch, BeginBatch() will fail with ErrBoundToBatch.
+	// Concurrency semantics are documented in model.go.
+	// TODO(sadovsky): Maybe make BatchOptions optional. Also, rename it to 'opts'
+	// everywhere now that v.io/i/912 is resolved.
+	BeginBatch(_ *context.T, schemaVersion int32, bo BatchOptions, _ ...rpc.CallOpt) (string, error)
+	// Commit persists the pending changes to the database.
+	// If this Database is not bound to a batch, Commit() will fail with
+	// ErrNotBoundToBatch.
+	Commit(_ *context.T, schemaVersion int32, _ ...rpc.CallOpt) error
+	// Abort notifies the server that any pending changes can be discarded.
+	// It is not strictly required, but it may allow the server to release locks
+	// or other resources sooner than if it was not called.
+	// If this Database is not bound to a batch, Abort() will fail with
+	// ErrNotBoundToBatch.
+	Abort(_ *context.T, schemaVersion int32, _ ...rpc.CallOpt) error
+	// PauseSync pauses sync for this database. Incoming sync, as well as
+	// outgoing sync of subsequent writes, will be disabled until ResumeSync
+	// is called. PauseSync is idempotent.
+	PauseSync(*context.T, ...rpc.CallOpt) error
+	// ResumeSync resumes sync for this database. ResumeSync is idempotent.
+	ResumeSync(*context.T, ...rpc.CallOpt) error
+}
+
+// DatabaseClientStub adds universal methods to DatabaseClientMethods.
+type DatabaseClientStub interface {
+	DatabaseClientMethods
+	rpc.UniversalServiceMethods
+}
+
+// DatabaseClient returns a client stub for Database.
+func DatabaseClient(name string) DatabaseClientStub {
+	return implDatabaseClientStub{name, permissions.ObjectClient(name), DatabaseWatcherClient(name), SyncgroupManagerClient(name), BlobManagerClient(name), SchemaManagerClient(name), ConflictManagerClient(name)}
+}
+
+type implDatabaseClientStub struct {
+	name string
+
+	permissions.ObjectClientStub
+	DatabaseWatcherClientStub
+	SyncgroupManagerClientStub
+	BlobManagerClientStub
+	SchemaManagerClientStub
+	ConflictManagerClientStub
+}
+
+func (c implDatabaseClientStub) Create(ctx *context.T, i0 *SchemaMetadata, i1 access.Permissions, opts ...rpc.CallOpt) (err error) {
+	err = v23.GetClient(ctx).Call(ctx, c.name, "Create", []interface{}{i0, i1}, nil, opts...)
+	return
+}
+
+func (c implDatabaseClientStub) Destroy(ctx *context.T, i0 int32, opts ...rpc.CallOpt) (err error) {
+	err = v23.GetClient(ctx).Call(ctx, c.name, "Destroy", []interface{}{i0}, nil, opts...)
+	return
+}
+
+func (c implDatabaseClientStub) Exists(ctx *context.T, i0 int32, opts ...rpc.CallOpt) (o0 bool, err error) {
+	err = v23.GetClient(ctx).Call(ctx, c.name, "Exists", []interface{}{i0}, []interface{}{&o0}, opts...)
+	return
+}
+
+func (c implDatabaseClientStub) ListTables(ctx *context.T, opts ...rpc.CallOpt) (o0 []string, err error) {
+	err = v23.GetClient(ctx).Call(ctx, c.name, "ListTables", nil, []interface{}{&o0}, opts...)
+	return
+}
+
+func (c implDatabaseClientStub) Exec(ctx *context.T, i0 int32, i1 string, i2 []*vom.RawBytes, opts ...rpc.CallOpt) (ocall DatabaseExecClientCall, err error) {
+	var call rpc.ClientCall
+	if call, err = v23.GetClient(ctx).StartCall(ctx, c.name, "Exec", []interface{}{i0, i1, i2}, opts...); err != nil {
+		return
+	}
+	ocall = &implDatabaseExecClientCall{ClientCall: call}
+	return
+}
+
+func (c implDatabaseClientStub) BeginBatch(ctx *context.T, i0 int32, i1 BatchOptions, opts ...rpc.CallOpt) (o0 string, err error) {
+	err = v23.GetClient(ctx).Call(ctx, c.name, "BeginBatch", []interface{}{i0, i1}, []interface{}{&o0}, opts...)
+	return
+}
+
+func (c implDatabaseClientStub) Commit(ctx *context.T, i0 int32, opts ...rpc.CallOpt) (err error) {
+	err = v23.GetClient(ctx).Call(ctx, c.name, "Commit", []interface{}{i0}, nil, opts...)
+	return
+}
+
+func (c implDatabaseClientStub) Abort(ctx *context.T, i0 int32, opts ...rpc.CallOpt) (err error) {
+	err = v23.GetClient(ctx).Call(ctx, c.name, "Abort", []interface{}{i0}, nil, opts...)
+	return
+}
+
+func (c implDatabaseClientStub) PauseSync(ctx *context.T, opts ...rpc.CallOpt) (err error) {
+	err = v23.GetClient(ctx).Call(ctx, c.name, "PauseSync", nil, nil, opts...)
+	return
+}
+
+func (c implDatabaseClientStub) ResumeSync(ctx *context.T, opts ...rpc.CallOpt) (err error) {
+	err = v23.GetClient(ctx).Call(ctx, c.name, "ResumeSync", nil, nil, opts...)
+	return
+}
+
+// DatabaseExecClientStream is the client stream for Database.Exec.
+type DatabaseExecClientStream interface {
+	// RecvStream returns the receiver side of the Database.Exec client stream.
+	RecvStream() interface {
+		// Advance stages an item so that it may be retrieved via Value.  Returns
+		// true iff there is an item to retrieve.  Advance must be called before
+		// Value is called.  May block if an item is not available.
+		Advance() bool
+		// Value returns the item that was staged by Advance.  May panic if Advance
+		// returned false or was not called.  Never blocks.
+		Value() []*vom.RawBytes
+		// Err returns any error encountered by Advance.  Never blocks.
+		Err() error
+	}
+}
+
+// DatabaseExecClientCall represents the call returned from Database.Exec.
+type DatabaseExecClientCall interface {
+	DatabaseExecClientStream
+	// Finish blocks until the server is done, and returns the positional return
+	// values for call.
+	//
+	// Finish returns immediately if the call has been canceled; depending on the
+	// timing the output could either be an error signaling cancelation, or the
+	// valid positional return values from the server.
+	//
+	// Calling Finish is mandatory for releasing stream resources, unless the call
+	// has been canceled or any of the other methods return an error.  Finish should
+	// be called at most once.
+	Finish() error
+}
+
+type implDatabaseExecClientCall struct {
+	rpc.ClientCall
+	valRecv []*vom.RawBytes
+	errRecv error
+}
+
+func (c *implDatabaseExecClientCall) RecvStream() interface {
+	Advance() bool
+	Value() []*vom.RawBytes
+	Err() error
+} {
+	return implDatabaseExecClientCallRecv{c}
+}
+
+type implDatabaseExecClientCallRecv struct {
+	c *implDatabaseExecClientCall
+}
+
+func (c implDatabaseExecClientCallRecv) Advance() bool {
+	c.c.errRecv = c.c.Recv(&c.c.valRecv)
+	return c.c.errRecv == nil
+}
+func (c implDatabaseExecClientCallRecv) Value() []*vom.RawBytes {
+	return c.c.valRecv
+}
+func (c implDatabaseExecClientCallRecv) Err() error {
+	if c.c.errRecv == io.EOF {
+		return nil
+	}
+	return c.c.errRecv
+}
+func (c *implDatabaseExecClientCall) Finish() (err error) {
+	err = c.ClientCall.Finish()
+	return
+}
+
+// DatabaseServerMethods is the interface a server writer
+// implements for Database.
+//
+// Database represents a collection of Tables. Batches, queries, sync, watch,
+// etc. all operate at the Database level.
+// Database.Glob operates over Table names.
+// Param schemaVersion is the version number that the client expects the
+// database to be at. To disable schema version checking, pass -1.
+type DatabaseServerMethods interface {
+	// Object provides access control for Vanadium objects.
+	//
+	// Vanadium services implementing dynamic access control would typically embed
+	// this interface and tag additional methods defined by the service with one of
+	// Admin, Read, Write, Resolve etc. For example, the VDL definition of the
+	// object would be:
+	//
+	//   package mypackage
+	//
+	//   import "v.io/v23/security/access"
+	//   import "v.io/v23/services/permissions"
+	//
+	//   type MyObject interface {
+	//     permissions.Object
+	//     MyRead() (string, error) {access.Read}
+	//     MyWrite(string) error    {access.Write}
+	//   }
+	//
+	// If the set of pre-defined tags is insufficient, services may define their
+	// own tag type and annotate all methods with this new type.
+	//
+	// Instead of embedding this Object interface, define SetPermissions and
+	// GetPermissions in their own interface. Authorization policies will typically
+	// respect annotations of a single type. For example, the VDL definition of an
+	// object would be:
+	//
+	//  package mypackage
+	//
+	//  import "v.io/v23/security/access"
+	//
+	//  type MyTag string
+	//
+	//  const (
+	//    Blue = MyTag("Blue")
+	//    Red  = MyTag("Red")
+	//  )
+	//
+	//  type MyObject interface {
+	//    MyMethod() (string, error) {Blue}
+	//
+	//    // Allow clients to change access via the access.Object interface:
+	//    SetPermissions(perms access.Permissions, version string) error         {Red}
+	//    GetPermissions() (perms access.Permissions, version string, err error) {Blue}
+	//  }
+	permissions.ObjectServerMethods
+	// DatabaseWatcher allows a client to watch for updates to the database. For
+	// each watch request, the client will receive a reliable stream of watch events
+	// without re-ordering. See watch.GlobWatcher for a detailed explanation of the
+	// behavior.
+	// TODO(rogulenko): Currently the only supported watch patterns are
+	// "<tableName>/<rowPrefix>*". Consider changing that.
+	//
+	// Watching is done by starting a streaming RPC. The RPC takes a ResumeMarker
+	// argument that points to a particular place in the database event log. If an
+	// empty ResumeMarker is provided, the WatchStream will begin with a Change
+	// batch containing the initial state. Otherwise, the WatchStream will contain
+	// only changes since the provided ResumeMarker.
+	//
+	// The result stream consists of a never-ending sequence of Change messages
+	// (until the call fails or is canceled). Each Change contains the Name field
+	// in the form "<tableName>/<rowKey>" and the Value field of the StoreChange
+	// type. If the client has no access to a row specified in a change, that change
+	// is excluded from the result stream.
+	//
+	// Note: A single Watch Change batch may contain changes from more than one
+	// batch as originally committed on a remote Syncbase or obtained from conflict
+	// resolution. However, changes from a single original batch will always appear
+	// in the same Change batch.
+	DatabaseWatcherServerMethods
+	// SyncgroupManager is the interface for syncgroup operations.
+	// TODO(hpucha): Add blessings to create/join and add a refresh method.
+	SyncgroupManagerServerMethods
+	// BlobManager is the interface for blob operations.
+	//
+	// Description of API for resumable blob creation (append-only):
+	// - Up until commit, a BlobRef may be used with PutBlob, GetBlobSize,
+	//   DeleteBlob, and CommitBlob. Blob creation may be resumed by obtaining the
+	//   current blob size via GetBlobSize and appending to the blob via PutBlob.
+	// - After commit, a blob is immutable, at which point PutBlob and CommitBlob
+	//   may no longer be used.
+	// - All other methods (GetBlob, FetchBlob, PinBlob, etc.) may only be used
+	//   after commit.
+	BlobManagerServerMethods
+	// SchemaManager implements the API for managing schema metadata attached
+	// to a Database.
+	SchemaManagerServerMethods
+	// ConflictManager interface provides all the methods necessary to handle
+	// conflict resolution for a given database.
+	ConflictManagerServerMethods
+	// Create creates this Database.
+	// If perms is nil, we inherit (copy) the App perms.
+	// Create requires the caller to have Write permission at the App.
+	Create(_ *context.T, _ rpc.ServerCall, metadata *SchemaMetadata, perms access.Permissions) error
+	// Destroy destroys this Database, permanently removing all of its data.
+	Destroy(_ *context.T, _ rpc.ServerCall, schemaVersion int32) error
+	// Exists returns true only if this Database exists. Insufficient permissions
+	// cause Exists to return false instead of an error.
+	// TODO(ivanpi): Exists may fail with an error if higher levels of hierarchy
+	// do not exist.
+	Exists(_ *context.T, _ rpc.ServerCall, schemaVersion int32) (bool, error)
+	// ListTables returns a list of all Table names.
+	// This method exists on Database but not on Service or App because for the
+	// latter we can simply use glob, while for the former glob fails on
+	// BatchDatabase since we encode the batch id in the BatchDatabase object
+	// name. More specifically, the glob client library appears to have two odd
+	// behaviors:
+	// 1) It checks Resolve access on every component along the path (by doing a
+	//    Dispatcher.Lookup), whereas this doesn't happen for other RPCs.
+	// 2) It does a Glob(<prefix>/*) for every prefix path, and only proceeds to
+	//    the next path component if that component appeared in its parent's Glob
+	//    results. This is inefficient in general, and broken for us since
+	//    Glob("app/*") does not return batch database names like "a/d##bId".
+	// TODO(sadovsky): Maybe switch to streaming RPC.
+	ListTables(*context.T, rpc.ServerCall) ([]string, error)
+	// Exec executes a syncQL query with positional parameters and returns all
+	// results as specified by the query's select/delete statement.
+	// Concurrency semantics are documented in model.go.
+	Exec(_ *context.T, _ DatabaseExecServerCall, schemaVersion int32, query string, params []*vom.RawBytes) error
+	// BeginBatch creates a new batch. It returns a "batch suffix" string to
+	// append to the object name of this Database, yielding an object name for the
+	// Database bound to the created batch. (For example, if this Database is
+	// named "/path/to/db" and BeginBatch returns "##abc", the client should
+	// construct batch Database object name "/path/to/db##abc".) If this Database
+	// is already bound to a batch, BeginBatch() will fail with ErrBoundToBatch.
+	// Concurrency semantics are documented in model.go.
+	// TODO(sadovsky): Maybe make BatchOptions optional. Also, rename it to 'opts'
+	// everywhere now that v.io/i/912 is resolved.
+	BeginBatch(_ *context.T, _ rpc.ServerCall, schemaVersion int32, bo BatchOptions) (string, error)
+	// Commit persists the pending changes to the database.
+	// If this Database is not bound to a batch, Commit() will fail with
+	// ErrNotBoundToBatch.
+	Commit(_ *context.T, _ rpc.ServerCall, schemaVersion int32) error
+	// Abort notifies the server that any pending changes can be discarded.
+	// It is not strictly required, but it may allow the server to release locks
+	// or other resources sooner than if it was not called.
+	// If this Database is not bound to a batch, Abort() will fail with
+	// ErrNotBoundToBatch.
+	Abort(_ *context.T, _ rpc.ServerCall, schemaVersion int32) error
+	// PauseSync pauses sync for this database. Incoming sync, as well as
+	// outgoing sync of subsequent writes, will be disabled until ResumeSync
+	// is called. PauseSync is idempotent.
+	PauseSync(*context.T, rpc.ServerCall) error
+	// ResumeSync resumes sync for this database. ResumeSync is idempotent.
+	ResumeSync(*context.T, rpc.ServerCall) error
+}
+
+// DatabaseServerStubMethods is the server interface containing
+// Database methods, as expected by rpc.Server.
+// The only difference between this interface and DatabaseServerMethods
+// is the streaming methods.
+type DatabaseServerStubMethods interface {
+	// Object provides access control for Vanadium objects.
+	//
+	// Vanadium services implementing dynamic access control would typically embed
+	// this interface and tag additional methods defined by the service with one of
+	// Admin, Read, Write, Resolve etc. For example, the VDL definition of the
+	// object would be:
+	//
+	//   package mypackage
+	//
+	//   import "v.io/v23/security/access"
+	//   import "v.io/v23/services/permissions"
+	//
+	//   type MyObject interface {
+	//     permissions.Object
+	//     MyRead() (string, error) {access.Read}
+	//     MyWrite(string) error    {access.Write}
+	//   }
+	//
+	// If the set of pre-defined tags is insufficient, services may define their
+	// own tag type and annotate all methods with this new type.
+	//
+	// Instead of embedding this Object interface, define SetPermissions and
+	// GetPermissions in their own interface. Authorization policies will typically
+	// respect annotations of a single type. For example, the VDL definition of an
+	// object would be:
+	//
+	//  package mypackage
+	//
+	//  import "v.io/v23/security/access"
+	//
+	//  type MyTag string
+	//
+	//  const (
+	//    Blue = MyTag("Blue")
+	//    Red  = MyTag("Red")
+	//  )
+	//
+	//  type MyObject interface {
+	//    MyMethod() (string, error) {Blue}
+	//
+	//    // Allow clients to change access via the access.Object interface:
+	//    SetPermissions(perms access.Permissions, version string) error         {Red}
+	//    GetPermissions() (perms access.Permissions, version string, err error) {Blue}
+	//  }
+	permissions.ObjectServerStubMethods
+	// DatabaseWatcher allows a client to watch for updates to the database. For
+	// each watch request, the client will receive a reliable stream of watch events
+	// without re-ordering. See watch.GlobWatcher for a detailed explanation of the
+	// behavior.
+	// TODO(rogulenko): Currently the only supported watch patterns are
+	// "<tableName>/<rowPrefix>*". Consider changing that.
+	//
+	// Watching is done by starting a streaming RPC. The RPC takes a ResumeMarker
+	// argument that points to a particular place in the database event log. If an
+	// empty ResumeMarker is provided, the WatchStream will begin with a Change
+	// batch containing the initial state. Otherwise, the WatchStream will contain
+	// only changes since the provided ResumeMarker.
+	//
+	// The result stream consists of a never-ending sequence of Change messages
+	// (until the call fails or is canceled). Each Change contains the Name field
+	// in the form "<tableName>/<rowKey>" and the Value field of the StoreChange
+	// type. If the client has no access to a row specified in a change, that change
+	// is excluded from the result stream.
+	//
+	// Note: A single Watch Change batch may contain changes from more than one
+	// batch as originally committed on a remote Syncbase or obtained from conflict
+	// resolution. However, changes from a single original batch will always appear
+	// in the same Change batch.
+	DatabaseWatcherServerStubMethods
+	// SyncgroupManager is the interface for syncgroup operations.
+	// TODO(hpucha): Add blessings to create/join and add a refresh method.
+	SyncgroupManagerServerStubMethods
+	// BlobManager is the interface for blob operations.
+	//
+	// Description of API for resumable blob creation (append-only):
+	// - Up until commit, a BlobRef may be used with PutBlob, GetBlobSize,
+	//   DeleteBlob, and CommitBlob. Blob creation may be resumed by obtaining the
+	//   current blob size via GetBlobSize and appending to the blob via PutBlob.
+	// - After commit, a blob is immutable, at which point PutBlob and CommitBlob
+	//   may no longer be used.
+	// - All other methods (GetBlob, FetchBlob, PinBlob, etc.) may only be used
+	//   after commit.
+	BlobManagerServerStubMethods
+	// SchemaManager implements the API for managing schema metadata attached
+	// to a Database.
+	SchemaManagerServerStubMethods
+	// ConflictManager interface provides all the methods necessary to handle
+	// conflict resolution for a given database.
+	ConflictManagerServerStubMethods
+	// Create creates this Database.
+	// If perms is nil, we inherit (copy) the App perms.
+	// Create requires the caller to have Write permission at the App.
+	Create(_ *context.T, _ rpc.ServerCall, metadata *SchemaMetadata, perms access.Permissions) error
+	// Destroy destroys this Database, permanently removing all of its data.
+	Destroy(_ *context.T, _ rpc.ServerCall, schemaVersion int32) error
+	// Exists returns true only if this Database exists. Insufficient permissions
+	// cause Exists to return false instead of an error.
+	// TODO(ivanpi): Exists may fail with an error if higher levels of hierarchy
+	// do not exist.
+	Exists(_ *context.T, _ rpc.ServerCall, schemaVersion int32) (bool, error)
+	// ListTables returns a list of all Table names.
+	// This method exists on Database but not on Service or App because for the
+	// latter we can simply use glob, while for the former glob fails on
+	// BatchDatabase since we encode the batch id in the BatchDatabase object
+	// name. More specifically, the glob client library appears to have two odd
+	// behaviors:
+	// 1) It checks Resolve access on every component along the path (by doing a
+	//    Dispatcher.Lookup), whereas this doesn't happen for other RPCs.
+	// 2) It does a Glob(<prefix>/*) for every prefix path, and only proceeds to
+	//    the next path component if that component appeared in its parent's Glob
+	//    results. This is inefficient in general, and broken for us since
+	//    Glob("app/*") does not return batch database names like "a/d##bId".
+	// TODO(sadovsky): Maybe switch to streaming RPC.
+	ListTables(*context.T, rpc.ServerCall) ([]string, error)
+	// Exec executes a syncQL query with positional parameters and returns all
+	// results as specified by the query's select/delete statement.
+	// Concurrency semantics are documented in model.go.
+	Exec(_ *context.T, _ *DatabaseExecServerCallStub, schemaVersion int32, query string, params []*vom.RawBytes) error
+	// BeginBatch creates a new batch. It returns a "batch suffix" string to
+	// append to the object name of this Database, yielding an object name for the
+	// Database bound to the created batch. (For example, if this Database is
+	// named "/path/to/db" and BeginBatch returns "##abc", the client should
+	// construct batch Database object name "/path/to/db##abc".) If this Database
+	// is already bound to a batch, BeginBatch() will fail with ErrBoundToBatch.
+	// Concurrency semantics are documented in model.go.
+	// TODO(sadovsky): Maybe make BatchOptions optional. Also, rename it to 'opts'
+	// everywhere now that v.io/i/912 is resolved.
+	BeginBatch(_ *context.T, _ rpc.ServerCall, schemaVersion int32, bo BatchOptions) (string, error)
+	// Commit persists the pending changes to the database.
+	// If this Database is not bound to a batch, Commit() will fail with
+	// ErrNotBoundToBatch.
+	Commit(_ *context.T, _ rpc.ServerCall, schemaVersion int32) error
+	// Abort notifies the server that any pending changes can be discarded.
+	// It is not strictly required, but it may allow the server to release locks
+	// or other resources sooner than if it was not called.
+	// If this Database is not bound to a batch, Abort() will fail with
+	// ErrNotBoundToBatch.
+	Abort(_ *context.T, _ rpc.ServerCall, schemaVersion int32) error
+	// PauseSync pauses sync for this database. Incoming sync, as well as
+	// outgoing sync of subsequent writes, will be disabled until ResumeSync
+	// is called. PauseSync is idempotent.
+	PauseSync(*context.T, rpc.ServerCall) error
+	// ResumeSync resumes sync for this database. ResumeSync is idempotent.
+	ResumeSync(*context.T, rpc.ServerCall) error
+}
+
+// DatabaseServerStub adds universal methods to DatabaseServerStubMethods.
+type DatabaseServerStub interface {
+	DatabaseServerStubMethods
+	// Describe the Database interfaces.
+	Describe__() []rpc.InterfaceDesc
+}
+
+// DatabaseServer returns a server stub for Database.
+// It converts an implementation of DatabaseServerMethods into
+// an object that may be used by rpc.Server.
+func DatabaseServer(impl DatabaseServerMethods) DatabaseServerStub {
+	stub := implDatabaseServerStub{
+		impl:                       impl,
+		ObjectServerStub:           permissions.ObjectServer(impl),
+		DatabaseWatcherServerStub:  DatabaseWatcherServer(impl),
+		SyncgroupManagerServerStub: SyncgroupManagerServer(impl),
+		BlobManagerServerStub:      BlobManagerServer(impl),
+		SchemaManagerServerStub:    SchemaManagerServer(impl),
+		ConflictManagerServerStub:  ConflictManagerServer(impl),
+	}
+	// Initialize GlobState; always check the stub itself first, to handle the
+	// case where the user has the Glob method defined in their VDL source.
+	if gs := rpc.NewGlobState(stub); gs != nil {
+		stub.gs = gs
+	} else if gs := rpc.NewGlobState(impl); gs != nil {
+		stub.gs = gs
+	}
+	return stub
+}
+
+type implDatabaseServerStub struct {
+	impl DatabaseServerMethods
+	permissions.ObjectServerStub
+	DatabaseWatcherServerStub
+	SyncgroupManagerServerStub
+	BlobManagerServerStub
+	SchemaManagerServerStub
+	ConflictManagerServerStub
+	gs *rpc.GlobState
+}
+
+func (s implDatabaseServerStub) Create(ctx *context.T, call rpc.ServerCall, i0 *SchemaMetadata, i1 access.Permissions) error {
+	return s.impl.Create(ctx, call, i0, i1)
+}
+
+func (s implDatabaseServerStub) Destroy(ctx *context.T, call rpc.ServerCall, i0 int32) error {
+	return s.impl.Destroy(ctx, call, i0)
+}
+
+func (s implDatabaseServerStub) Exists(ctx *context.T, call rpc.ServerCall, i0 int32) (bool, error) {
+	return s.impl.Exists(ctx, call, i0)
+}
+
+func (s implDatabaseServerStub) ListTables(ctx *context.T, call rpc.ServerCall) ([]string, error) {
+	return s.impl.ListTables(ctx, call)
+}
+
+func (s implDatabaseServerStub) Exec(ctx *context.T, call *DatabaseExecServerCallStub, i0 int32, i1 string, i2 []*vom.RawBytes) error {
+	return s.impl.Exec(ctx, call, i0, i1, i2)
+}
+
+func (s implDatabaseServerStub) BeginBatch(ctx *context.T, call rpc.ServerCall, i0 int32, i1 BatchOptions) (string, error) {
+	return s.impl.BeginBatch(ctx, call, i0, i1)
+}
+
+func (s implDatabaseServerStub) Commit(ctx *context.T, call rpc.ServerCall, i0 int32) error {
+	return s.impl.Commit(ctx, call, i0)
+}
+
+func (s implDatabaseServerStub) Abort(ctx *context.T, call rpc.ServerCall, i0 int32) error {
+	return s.impl.Abort(ctx, call, i0)
+}
+
+func (s implDatabaseServerStub) PauseSync(ctx *context.T, call rpc.ServerCall) error {
+	return s.impl.PauseSync(ctx, call)
+}
+
+func (s implDatabaseServerStub) ResumeSync(ctx *context.T, call rpc.ServerCall) error {
+	return s.impl.ResumeSync(ctx, call)
+}
+
+func (s implDatabaseServerStub) Globber() *rpc.GlobState {
+	return s.gs
+}
+
+func (s implDatabaseServerStub) Describe__() []rpc.InterfaceDesc {
+	return []rpc.InterfaceDesc{DatabaseDesc, permissions.ObjectDesc, DatabaseWatcherDesc, watch.GlobWatcherDesc, SyncgroupManagerDesc, BlobManagerDesc, SchemaManagerDesc, ConflictManagerDesc}
+}
+
+// DatabaseDesc describes the Database interface.
+var DatabaseDesc rpc.InterfaceDesc = descDatabase
+
+// descDatabase hides the desc to keep godoc clean.
+var descDatabase = rpc.InterfaceDesc{
+	Name:    "Database",
+	PkgPath: "v.io/v23/services/syncbase",
+	Doc:     "// Database represents a collection of Tables. Batches, queries, sync, watch,\n// etc. all operate at the Database level.\n// Database.Glob operates over Table names.\n// Param schemaVersion is the version number that the client expects the\n// database to be at. To disable schema version checking, pass -1.",
+	Embeds: []rpc.EmbedDesc{
+		{"Object", "v.io/v23/services/permissions", "// Object provides access control for Vanadium objects.\n//\n// Vanadium services implementing dynamic access control would typically embed\n// this interface and tag additional methods defined by the service with one of\n// Admin, Read, Write, Resolve etc. For example, the VDL definition of the\n// object would be:\n//\n//   package mypackage\n//\n//   import \"v.io/v23/security/access\"\n//   import \"v.io/v23/services/permissions\"\n//\n//   type MyObject interface {\n//     permissions.Object\n//     MyRead() (string, error) {access.Read}\n//     MyWrite(string) error    {access.Write}\n//   }\n//\n// If the set of pre-defined tags is insufficient, services may define their\n// own tag type and annotate all methods with this new type.\n//\n// Instead of embedding this Object interface, define SetPermissions and\n// GetPermissions in their own interface. Authorization policies will typically\n// respect annotations of a single type. For example, the VDL definition of an\n// object would be:\n//\n//  package mypackage\n//\n//  import \"v.io/v23/security/access\"\n//\n//  type MyTag string\n//\n//  const (\n//    Blue = MyTag(\"Blue\")\n//    Red  = MyTag(\"Red\")\n//  )\n//\n//  type MyObject interface {\n//    MyMethod() (string, error) {Blue}\n//\n//    // Allow clients to change access via the access.Object interface:\n//    SetPermissions(perms access.Permissions, version string) error         {Red}\n//    GetPermissions() (perms access.Permissions, version string, err error) {Blue}\n//  }"},
+		{"DatabaseWatcher", "v.io/v23/services/syncbase", "// DatabaseWatcher allows a client to watch for updates to the database. For\n// each watch request, the client will receive a reliable stream of watch events\n// without re-ordering. See watch.GlobWatcher for a detailed explanation of the\n// behavior.\n// TODO(rogulenko): Currently the only supported watch patterns are\n// \"<tableName>/<rowPrefix>*\". Consider changing that.\n//\n// Watching is done by starting a streaming RPC. The RPC takes a ResumeMarker\n// argument that points to a particular place in the database event log. If an\n// empty ResumeMarker is provided, the WatchStream will begin with a Change\n// batch containing the initial state. Otherwise, the WatchStream will contain\n// only changes since the provided ResumeMarker.\n//\n// The result stream consists of a never-ending sequence of Change messages\n// (until the call fails or is canceled). Each Change contains the Name field\n// in the form \"<tableName>/<rowKey>\" and the Value field of the StoreChange\n// type. If the client has no access to a row specified in a change, that change\n// is excluded from the result stream.\n//\n// Note: A single Watch Change batch may contain changes from more than one\n// batch as originally committed on a remote Syncbase or obtained from conflict\n// resolution. However, changes from a single original batch will always appear\n// in the same Change batch."},
+		{"SyncgroupManager", "v.io/v23/services/syncbase", "// SyncgroupManager is the interface for syncgroup operations.\n// TODO(hpucha): Add blessings to create/join and add a refresh method."},
+		{"BlobManager", "v.io/v23/services/syncbase", "// BlobManager is the interface for blob operations.\n//\n// Description of API for resumable blob creation (append-only):\n// - Up until commit, a BlobRef may be used with PutBlob, GetBlobSize,\n//   DeleteBlob, and CommitBlob. Blob creation may be resumed by obtaining the\n//   current blob size via GetBlobSize and appending to the blob via PutBlob.\n// - After commit, a blob is immutable, at which point PutBlob and CommitBlob\n//   may no longer be used.\n// - All other methods (GetBlob, FetchBlob, PinBlob, etc.) may only be used\n//   after commit."},
+		{"SchemaManager", "v.io/v23/services/syncbase", "// SchemaManager implements the API for managing schema metadata attached\n// to a Database."},
+		{"ConflictManager", "v.io/v23/services/syncbase", "// ConflictManager interface provides all the methods necessary to handle\n// conflict resolution for a given database."},
+	},
+	Methods: []rpc.MethodDesc{
+		{
+			Name: "Create",
+			Doc:  "// Create creates this Database.\n// If perms is nil, we inherit (copy) the App perms.\n// Create requires the caller to have Write permission at the App.",
+			InArgs: []rpc.ArgDesc{
+				{"metadata", ``}, // *SchemaMetadata
+				{"perms", ``},    // access.Permissions
+			},
+			Tags: []*vdl.Value{vdl.ValueOf(access.Tag("Write"))},
+		},
+		{
+			Name: "Destroy",
+			Doc:  "// Destroy destroys this Database, permanently removing all of its data.",
+			InArgs: []rpc.ArgDesc{
+				{"schemaVersion", ``}, // int32
+			},
+			Tags: []*vdl.Value{vdl.ValueOf(access.Tag("Write"))},
+		},
+		{
+			Name: "Exists",
+			Doc:  "// Exists returns true only if this Database exists. Insufficient permissions\n// cause Exists to return false instead of an error.\n// TODO(ivanpi): Exists may fail with an error if higher levels of hierarchy\n// do not exist.",
+			InArgs: []rpc.ArgDesc{
+				{"schemaVersion", ``}, // int32
+			},
+			OutArgs: []rpc.ArgDesc{
+				{"", ``}, // bool
+			},
+			Tags: []*vdl.Value{vdl.ValueOf(access.Tag("Resolve"))},
+		},
+		{
+			Name: "ListTables",
+			Doc:  "// ListTables returns a list of all Table names.\n// This method exists on Database but not on Service or App because for the\n// latter we can simply use glob, while for the former glob fails on\n// BatchDatabase since we encode the batch id in the BatchDatabase object\n// name. More specifically, the glob client library appears to have two odd\n// behaviors:\n// 1) It checks Resolve access on every component along the path (by doing a\n//    Dispatcher.Lookup), whereas this doesn't happen for other RPCs.\n// 2) It does a Glob(<prefix>/*) for every prefix path, and only proceeds to\n//    the next path component if that component appeared in its parent's Glob\n//    results. This is inefficient in general, and broken for us since\n//    Glob(\"app/*\") does not return batch database names like \"a/d##bId\".\n// TODO(sadovsky): Maybe switch to streaming RPC.",
+			OutArgs: []rpc.ArgDesc{
+				{"", ``}, // []string
+			},
+			Tags: []*vdl.Value{vdl.ValueOf(access.Tag("Read"))},
+		},
+		{
+			Name: "Exec",
+			Doc:  "// Exec executes a syncQL query with positional parameters and returns all\n// results as specified by the query's select/delete statement.\n// Concurrency semantics are documented in model.go.",
+			InArgs: []rpc.ArgDesc{
+				{"schemaVersion", ``}, // int32
+				{"query", ``},         // string
+				{"params", ``},        // []*vom.RawBytes
+			},
+			Tags: []*vdl.Value{vdl.ValueOf(access.Tag("Read"))},
+		},
+		{
+			Name: "BeginBatch",
+			Doc:  "// BeginBatch creates a new batch. It returns a \"batch suffix\" string to\n// append to the object name of this Database, yielding an object name for the\n// Database bound to the created batch. (For example, if this Database is\n// named \"/path/to/db\" and BeginBatch returns \"##abc\", the client should\n// construct batch Database object name \"/path/to/db##abc\".) If this Database\n// is already bound to a batch, BeginBatch() will fail with ErrBoundToBatch.\n// Concurrency semantics are documented in model.go.\n// TODO(sadovsky): Maybe make BatchOptions optional. Also, rename it to 'opts'\n// everywhere now that v.io/i/912 is resolved.",
+			InArgs: []rpc.ArgDesc{
+				{"schemaVersion", ``}, // int32
+				{"bo", ``},            // BatchOptions
+			},
+			OutArgs: []rpc.ArgDesc{
+				{"", ``}, // string
+			},
+			Tags: []*vdl.Value{vdl.ValueOf(access.Tag("Read"))},
+		},
+		{
+			Name: "Commit",
+			Doc:  "// Commit persists the pending changes to the database.\n// If this Database is not bound to a batch, Commit() will fail with\n// ErrNotBoundToBatch.",
+			InArgs: []rpc.ArgDesc{
+				{"schemaVersion", ``}, // int32
+			},
+			Tags: []*vdl.Value{vdl.ValueOf(access.Tag("Read"))},
+		},
+		{
+			Name: "Abort",
+			Doc:  "// Abort notifies the server that any pending changes can be discarded.\n// It is not strictly required, but it may allow the server to release locks\n// or other resources sooner than if it was not called.\n// If this Database is not bound to a batch, Abort() will fail with\n// ErrNotBoundToBatch.",
+			InArgs: []rpc.ArgDesc{
+				{"schemaVersion", ``}, // int32
+			},
+			Tags: []*vdl.Value{vdl.ValueOf(access.Tag("Read"))},
+		},
+		{
+			Name: "PauseSync",
+			Doc:  "// PauseSync pauses sync for this database. Incoming sync, as well as\n// outgoing sync of subsequent writes, will be disabled until ResumeSync\n// is called. PauseSync is idempotent.",
+			Tags: []*vdl.Value{vdl.ValueOf(access.Tag("Write"))},
+		},
+		{
+			Name: "ResumeSync",
+			Doc:  "// ResumeSync resumes sync for this database. ResumeSync is idempotent.",
+			Tags: []*vdl.Value{vdl.ValueOf(access.Tag("Write"))},
+		},
+	},
+}
+
+// DatabaseExecServerStream is the server stream for Database.Exec.
+type DatabaseExecServerStream interface {
+	// SendStream returns the send side of the Database.Exec server stream.
+	SendStream() interface {
+		// Send places the item onto the output stream.  Returns errors encountered
+		// while sending.  Blocks if there is no buffer space; will unblock when
+		// buffer space is available.
+		Send(item []*vom.RawBytes) error
+	}
+}
+
+// DatabaseExecServerCall represents the context passed to Database.Exec.
+type DatabaseExecServerCall interface {
+	rpc.ServerCall
+	DatabaseExecServerStream
+}
+
+// DatabaseExecServerCallStub is a wrapper that converts rpc.StreamServerCall into
+// a typesafe stub that implements DatabaseExecServerCall.
+type DatabaseExecServerCallStub struct {
+	rpc.StreamServerCall
+}
+
+// Init initializes DatabaseExecServerCallStub from rpc.StreamServerCall.
+func (s *DatabaseExecServerCallStub) Init(call rpc.StreamServerCall) {
+	s.StreamServerCall = call
+}
+
+// SendStream returns the send side of the Database.Exec server stream.
+func (s *DatabaseExecServerCallStub) SendStream() interface {
+	Send(item []*vom.RawBytes) error
+} {
+	return implDatabaseExecServerCallSend{s}
+}
+
+type implDatabaseExecServerCallSend struct {
+	s *DatabaseExecServerCallStub
+}
+
+func (s implDatabaseExecServerCallSend) Send(item []*vom.RawBytes) error {
+	return s.s.Send(item)
+}
+
+// TableClientMethods is the client interface
+// containing Table methods.
+//
+// Table represents a collection of Rows.
+// Table.Glob operates over the primary keys of Rows in the Table.
+// SchemaVersion is the version number that the client expects the database
+// to be at. To disable schema version checking, pass -1.
+type TableClientMethods interface {
+	// Create creates this Table.
+	// If perms is nil, we inherit (copy) the Database perms.
+	Create(_ *context.T, schemaVersion int32, perms access.Permissions, _ ...rpc.CallOpt) error
+	// Destroy destroys this Table.
+	Destroy(_ *context.T, schemaVersion int32, _ ...rpc.CallOpt) error
+	// Exists returns true only if this Table exists. Insufficient permissions
+	// cause Exists to return false instead of an error.
+	// TODO(ivanpi): Exists may fail with an error if higher levels of hierarchy
+	// do not exist.
+	Exists(_ *context.T, schemaVersion int32, _ ...rpc.CallOpt) (bool, error)
+	// GetPermissions returns the current Permissions for the Table.
+	GetPermissions(_ *context.T, schemaVersion int32, _ ...rpc.CallOpt) (access.Permissions, error)
+	// SetPermissions replaces the current Permissions for the Table.
+	SetPermissions(_ *context.T, schemaVersion int32, perms access.Permissions, _ ...rpc.CallOpt) error
+	// DeleteRange deletes all rows in the given half-open range [start, limit).
+	// If limit is "", all rows with keys >= start are included.
+	// TODO(sadovsky): Maybe add option to delete prefix perms fully covered by
+	// the row range.
+	DeleteRange(_ *context.T, schemaVersion int32, start []byte, limit []byte, _ ...rpc.CallOpt) error
+	// Scan returns all rows in the given half-open range [start, limit). If limit
+	// is "", all rows with keys >= start are included. Concurrency semantics are
+	// documented in model.go.
+	Scan(_ *context.T, schemaVersion int32, start []byte, limit []byte, _ ...rpc.CallOpt) (TableScanClientCall, error)
+	// GetPrefixPermissions returns an array of (prefix, perms) pairs. The array is
+	// sorted from longest prefix to shortest, so element zero is the one that
+	// applies to the row with the given key. The last element is always the
+	// prefix "" which represents the table's permissions -- the array will always
+	// have at least one element.
+	GetPrefixPermissions(_ *context.T, schemaVersion int32, key string, _ ...rpc.CallOpt) ([]PrefixPermissions, error)
+	// SetPrefixPermissions sets the permissions for all current and future rows with
+	// the given prefix. If the prefix overlaps with an existing prefix, the
+	// longest prefix that matches a row applies. For example:
+	//     SetPrefixPermissions(ctx, Prefix("a/b"), perms1)
+	//     SetPrefixPermissions(ctx, Prefix("a/b/c"), perms2)
+	// The permissions for row "a/b/1" are perms1, and the permissions for row
+	// "a/b/c/1" are perms2.
+	SetPrefixPermissions(_ *context.T, schemaVersion int32, prefix string, perms access.Permissions, _ ...rpc.CallOpt) error
+	// DeletePrefixPermissions deletes the permissions for the specified prefix. Any
+	// rows covered by this prefix will use the next longest prefix's permissions
+	// (see the array returned by GetPrefixPermissions).
+	DeletePrefixPermissions(_ *context.T, schemaVersion int32, prefix string, _ ...rpc.CallOpt) error
+}
+
+// TableClientStub adds universal methods to TableClientMethods.
+type TableClientStub interface {
+	TableClientMethods
+	rpc.UniversalServiceMethods
+}
+
+// TableClient returns a client stub for Table.
+func TableClient(name string) TableClientStub {
+	return implTableClientStub{name}
+}
+
+type implTableClientStub struct {
+	name string
+}
+
+func (c implTableClientStub) Create(ctx *context.T, i0 int32, i1 access.Permissions, opts ...rpc.CallOpt) (err error) {
+	err = v23.GetClient(ctx).Call(ctx, c.name, "Create", []interface{}{i0, i1}, nil, opts...)
+	return
+}
+
+func (c implTableClientStub) Destroy(ctx *context.T, i0 int32, opts ...rpc.CallOpt) (err error) {
+	err = v23.GetClient(ctx).Call(ctx, c.name, "Destroy", []interface{}{i0}, nil, opts...)
+	return
+}
+
+func (c implTableClientStub) Exists(ctx *context.T, i0 int32, opts ...rpc.CallOpt) (o0 bool, err error) {
+	err = v23.GetClient(ctx).Call(ctx, c.name, "Exists", []interface{}{i0}, []interface{}{&o0}, opts...)
+	return
+}
+
+func (c implTableClientStub) GetPermissions(ctx *context.T, i0 int32, opts ...rpc.CallOpt) (o0 access.Permissions, err error) {
+	err = v23.GetClient(ctx).Call(ctx, c.name, "GetPermissions", []interface{}{i0}, []interface{}{&o0}, opts...)
+	return
+}
+
+func (c implTableClientStub) SetPermissions(ctx *context.T, i0 int32, i1 access.Permissions, opts ...rpc.CallOpt) (err error) {
+	err = v23.GetClient(ctx).Call(ctx, c.name, "SetPermissions", []interface{}{i0, i1}, nil, opts...)
+	return
+}
+
+func (c implTableClientStub) DeleteRange(ctx *context.T, i0 int32, i1 []byte, i2 []byte, opts ...rpc.CallOpt) (err error) {
+	err = v23.GetClient(ctx).Call(ctx, c.name, "DeleteRange", []interface{}{i0, i1, i2}, nil, opts...)
+	return
+}
+
+func (c implTableClientStub) Scan(ctx *context.T, i0 int32, i1 []byte, i2 []byte, opts ...rpc.CallOpt) (ocall TableScanClientCall, err error) {
+	var call rpc.ClientCall
+	if call, err = v23.GetClient(ctx).StartCall(ctx, c.name, "Scan", []interface{}{i0, i1, i2}, opts...); err != nil {
+		return
+	}
+	ocall = &implTableScanClientCall{ClientCall: call}
+	return
+}
+
+func (c implTableClientStub) GetPrefixPermissions(ctx *context.T, i0 int32, i1 string, opts ...rpc.CallOpt) (o0 []PrefixPermissions, err error) {
+	err = v23.GetClient(ctx).Call(ctx, c.name, "GetPrefixPermissions", []interface{}{i0, i1}, []interface{}{&o0}, opts...)
+	return
+}
+
+func (c implTableClientStub) SetPrefixPermissions(ctx *context.T, i0 int32, i1 string, i2 access.Permissions, opts ...rpc.CallOpt) (err error) {
+	err = v23.GetClient(ctx).Call(ctx, c.name, "SetPrefixPermissions", []interface{}{i0, i1, i2}, nil, opts...)
+	return
+}
+
+func (c implTableClientStub) DeletePrefixPermissions(ctx *context.T, i0 int32, i1 string, opts ...rpc.CallOpt) (err error) {
+	err = v23.GetClient(ctx).Call(ctx, c.name, "DeletePrefixPermissions", []interface{}{i0, i1}, nil, opts...)
+	return
+}
+
+// TableScanClientStream is the client stream for Table.Scan.
+type TableScanClientStream interface {
+	// RecvStream returns the receiver side of the Table.Scan client stream.
+	RecvStream() interface {
+		// Advance stages an item so that it may be retrieved via Value.  Returns
+		// true iff there is an item to retrieve.  Advance must be called before
+		// Value is called.  May block if an item is not available.
+		Advance() bool
+		// Value returns the item that was staged by Advance.  May panic if Advance
+		// returned false or was not called.  Never blocks.
+		Value() KeyValue
+		// Err returns any error encountered by Advance.  Never blocks.
+		Err() error
+	}
+}
+
+// TableScanClientCall represents the call returned from Table.Scan.
+type TableScanClientCall interface {
+	TableScanClientStream
+	// Finish blocks until the server is done, and returns the positional return
+	// values for call.
+	//
+	// Finish returns immediately if the call has been canceled; depending on the
+	// timing the output could either be an error signaling cancelation, or the
+	// valid positional return values from the server.
+	//
+	// Calling Finish is mandatory for releasing stream resources, unless the call
+	// has been canceled or any of the other methods return an error.  Finish should
+	// be called at most once.
+	Finish() error
+}
+
+type implTableScanClientCall struct {
+	rpc.ClientCall
+	valRecv KeyValue
+	errRecv error
+}
+
+func (c *implTableScanClientCall) RecvStream() interface {
+	Advance() bool
+	Value() KeyValue
+	Err() error
+} {
+	return implTableScanClientCallRecv{c}
+}
+
+type implTableScanClientCallRecv struct {
+	c *implTableScanClientCall
+}
+
+func (c implTableScanClientCallRecv) Advance() bool {
+	c.c.valRecv = KeyValue{}
+	c.c.errRecv = c.c.Recv(&c.c.valRecv)
+	return c.c.errRecv == nil
+}
+func (c implTableScanClientCallRecv) Value() KeyValue {
+	return c.c.valRecv
+}
+func (c implTableScanClientCallRecv) Err() error {
+	if c.c.errRecv == io.EOF {
+		return nil
+	}
+	return c.c.errRecv
+}
+func (c *implTableScanClientCall) Finish() (err error) {
+	err = c.ClientCall.Finish()
+	return
+}
+
+// TableServerMethods is the interface a server writer
+// implements for Table.
+//
+// Table represents a collection of Rows.
+// Table.Glob operates over the primary keys of Rows in the Table.
+// SchemaVersion is the version number that the client expects the database
+// to be at. To disable schema version checking, pass -1.
+type TableServerMethods interface {
+	// Create creates this Table.
+	// If perms is nil, we inherit (copy) the Database perms.
+	Create(_ *context.T, _ rpc.ServerCall, schemaVersion int32, perms access.Permissions) error
+	// Destroy destroys this Table.
+	Destroy(_ *context.T, _ rpc.ServerCall, schemaVersion int32) error
+	// Exists returns true only if this Table exists. Insufficient permissions
+	// cause Exists to return false instead of an error.
+	// TODO(ivanpi): Exists may fail with an error if higher levels of hierarchy
+	// do not exist.
+	Exists(_ *context.T, _ rpc.ServerCall, schemaVersion int32) (bool, error)
+	// GetPermissions returns the current Permissions for the Table.
+	GetPermissions(_ *context.T, _ rpc.ServerCall, schemaVersion int32) (access.Permissions, error)
+	// SetPermissions replaces the current Permissions for the Table.
+	SetPermissions(_ *context.T, _ rpc.ServerCall, schemaVersion int32, perms access.Permissions) error
+	// DeleteRange deletes all rows in the given half-open range [start, limit).
+	// If limit is "", all rows with keys >= start are included.
+	// TODO(sadovsky): Maybe add option to delete prefix perms fully covered by
+	// the row range.
+	DeleteRange(_ *context.T, _ rpc.ServerCall, schemaVersion int32, start []byte, limit []byte) error
+	// Scan returns all rows in the given half-open range [start, limit). If limit
+	// is "", all rows with keys >= start are included. Concurrency semantics are
+	// documented in model.go.
+	Scan(_ *context.T, _ TableScanServerCall, schemaVersion int32, start []byte, limit []byte) error
+	// GetPrefixPermissions returns an array of (prefix, perms) pairs. The array is
+	// sorted from longest prefix to shortest, so element zero is the one that
+	// applies to the row with the given key. The last element is always the
+	// prefix "" which represents the table's permissions -- the array will always
+	// have at least one element.
+	GetPrefixPermissions(_ *context.T, _ rpc.ServerCall, schemaVersion int32, key string) ([]PrefixPermissions, error)
+	// SetPrefixPermissions sets the permissions for all current and future rows with
+	// the given prefix. If the prefix overlaps with an existing prefix, the
+	// longest prefix that matches a row applies. For example:
+	//     SetPrefixPermissions(ctx, Prefix("a/b"), perms1)
+	//     SetPrefixPermissions(ctx, Prefix("a/b/c"), perms2)
+	// The permissions for row "a/b/1" are perms1, and the permissions for row
+	// "a/b/c/1" are perms2.
+	SetPrefixPermissions(_ *context.T, _ rpc.ServerCall, schemaVersion int32, prefix string, perms access.Permissions) error
+	// DeletePrefixPermissions deletes the permissions for the specified prefix. Any
+	// rows covered by this prefix will use the next longest prefix's permissions
+	// (see the array returned by GetPrefixPermissions).
+	DeletePrefixPermissions(_ *context.T, _ rpc.ServerCall, schemaVersion int32, prefix string) error
+}
+
+// TableServerStubMethods is the server interface containing
+// Table methods, as expected by rpc.Server.
+// The only difference between this interface and TableServerMethods
+// is the streaming methods.
+type TableServerStubMethods interface {
+	// Create creates this Table.
+	// If perms is nil, we inherit (copy) the Database perms.
+	Create(_ *context.T, _ rpc.ServerCall, schemaVersion int32, perms access.Permissions) error
+	// Destroy destroys this Table.
+	Destroy(_ *context.T, _ rpc.ServerCall, schemaVersion int32) error
+	// Exists returns true only if this Table exists. Insufficient permissions
+	// cause Exists to return false instead of an error.
+	// TODO(ivanpi): Exists may fail with an error if higher levels of hierarchy
+	// do not exist.
+	Exists(_ *context.T, _ rpc.ServerCall, schemaVersion int32) (bool, error)
+	// GetPermissions returns the current Permissions for the Table.
+	GetPermissions(_ *context.T, _ rpc.ServerCall, schemaVersion int32) (access.Permissions, error)
+	// SetPermissions replaces the current Permissions for the Table.
+	SetPermissions(_ *context.T, _ rpc.ServerCall, schemaVersion int32, perms access.Permissions) error
+	// DeleteRange deletes all rows in the given half-open range [start, limit).
+	// If limit is "", all rows with keys >= start are included.
+	// TODO(sadovsky): Maybe add option to delete prefix perms fully covered by
+	// the row range.
+	DeleteRange(_ *context.T, _ rpc.ServerCall, schemaVersion int32, start []byte, limit []byte) error
+	// Scan returns all rows in the given half-open range [start, limit). If limit
+	// is "", all rows with keys >= start are included. Concurrency semantics are
+	// documented in model.go.
+	Scan(_ *context.T, _ *TableScanServerCallStub, schemaVersion int32, start []byte, limit []byte) error
+	// GetPrefixPermissions returns an array of (prefix, perms) pairs. The array is
+	// sorted from longest prefix to shortest, so element zero is the one that
+	// applies to the row with the given key. The last element is always the
+	// prefix "" which represents the table's permissions -- the array will always
+	// have at least one element.
+	GetPrefixPermissions(_ *context.T, _ rpc.ServerCall, schemaVersion int32, key string) ([]PrefixPermissions, error)
+	// SetPrefixPermissions sets the permissions for all current and future rows with
+	// the given prefix. If the prefix overlaps with an existing prefix, the
+	// longest prefix that matches a row applies. For example:
+	//     SetPrefixPermissions(ctx, Prefix("a/b"), perms1)
+	//     SetPrefixPermissions(ctx, Prefix("a/b/c"), perms2)
+	// The permissions for row "a/b/1" are perms1, and the permissions for row
+	// "a/b/c/1" are perms2.
+	SetPrefixPermissions(_ *context.T, _ rpc.ServerCall, schemaVersion int32, prefix string, perms access.Permissions) error
+	// DeletePrefixPermissions deletes the permissions for the specified prefix. Any
+	// rows covered by this prefix will use the next longest prefix's permissions
+	// (see the array returned by GetPrefixPermissions).
+	DeletePrefixPermissions(_ *context.T, _ rpc.ServerCall, schemaVersion int32, prefix string) error
+}
+
+// TableServerStub adds universal methods to TableServerStubMethods.
+type TableServerStub interface {
+	TableServerStubMethods
+	// Describe the Table interfaces.
+	Describe__() []rpc.InterfaceDesc
+}
+
+// TableServer returns a server stub for Table.
+// It converts an implementation of TableServerMethods into
+// an object that may be used by rpc.Server.
+func TableServer(impl TableServerMethods) TableServerStub {
+	stub := implTableServerStub{
+		impl: impl,
+	}
+	// Initialize GlobState; always check the stub itself first, to handle the
+	// case where the user has the Glob method defined in their VDL source.
+	if gs := rpc.NewGlobState(stub); gs != nil {
+		stub.gs = gs
+	} else if gs := rpc.NewGlobState(impl); gs != nil {
+		stub.gs = gs
+	}
+	return stub
+}
+
+type implTableServerStub struct {
+	impl TableServerMethods
+	gs   *rpc.GlobState
+}
+
+func (s implTableServerStub) Create(ctx *context.T, call rpc.ServerCall, i0 int32, i1 access.Permissions) error {
+	return s.impl.Create(ctx, call, i0, i1)
+}
+
+func (s implTableServerStub) Destroy(ctx *context.T, call rpc.ServerCall, i0 int32) error {
+	return s.impl.Destroy(ctx, call, i0)
+}
+
+func (s implTableServerStub) Exists(ctx *context.T, call rpc.ServerCall, i0 int32) (bool, error) {
+	return s.impl.Exists(ctx, call, i0)
+}
+
+func (s implTableServerStub) GetPermissions(ctx *context.T, call rpc.ServerCall, i0 int32) (access.Permissions, error) {
+	return s.impl.GetPermissions(ctx, call, i0)
+}
+
+func (s implTableServerStub) SetPermissions(ctx *context.T, call rpc.ServerCall, i0 int32, i1 access.Permissions) error {
+	return s.impl.SetPermissions(ctx, call, i0, i1)
+}
+
+func (s implTableServerStub) DeleteRange(ctx *context.T, call rpc.ServerCall, i0 int32, i1 []byte, i2 []byte) error {
+	return s.impl.DeleteRange(ctx, call, i0, i1, i2)
+}
+
+func (s implTableServerStub) Scan(ctx *context.T, call *TableScanServerCallStub, i0 int32, i1 []byte, i2 []byte) error {
+	return s.impl.Scan(ctx, call, i0, i1, i2)
+}
+
+func (s implTableServerStub) GetPrefixPermissions(ctx *context.T, call rpc.ServerCall, i0 int32, i1 string) ([]PrefixPermissions, error) {
+	return s.impl.GetPrefixPermissions(ctx, call, i0, i1)
+}
+
+func (s implTableServerStub) SetPrefixPermissions(ctx *context.T, call rpc.ServerCall, i0 int32, i1 string, i2 access.Permissions) error {
+	return s.impl.SetPrefixPermissions(ctx, call, i0, i1, i2)
+}
+
+func (s implTableServerStub) DeletePrefixPermissions(ctx *context.T, call rpc.ServerCall, i0 int32, i1 string) error {
+	return s.impl.DeletePrefixPermissions(ctx, call, i0, i1)
+}
+
+func (s implTableServerStub) Globber() *rpc.GlobState {
+	return s.gs
+}
+
+func (s implTableServerStub) Describe__() []rpc.InterfaceDesc {
+	return []rpc.InterfaceDesc{TableDesc}
+}
+
+// TableDesc describes the Table interface.
+var TableDesc rpc.InterfaceDesc = descTable
+
+// descTable hides the desc to keep godoc clean.
+var descTable = rpc.InterfaceDesc{
+	Name:    "Table",
+	PkgPath: "v.io/v23/services/syncbase",
+	Doc:     "// Table represents a collection of Rows.\n// Table.Glob operates over the primary keys of Rows in the Table.\n// SchemaVersion is the version number that the client expects the database\n// to be at. To disable schema version checking, pass -1.",
+	Methods: []rpc.MethodDesc{
+		{
+			Name: "Create",
+			Doc:  "// Create creates this Table.\n// If perms is nil, we inherit (copy) the Database perms.",
+			InArgs: []rpc.ArgDesc{
+				{"schemaVersion", ``}, // int32
+				{"perms", ``},         // access.Permissions
+			},
+			Tags: []*vdl.Value{vdl.ValueOf(access.Tag("Write"))},
+		},
+		{
+			Name: "Destroy",
+			Doc:  "// Destroy destroys this Table.",
+			InArgs: []rpc.ArgDesc{
+				{"schemaVersion", ``}, // int32
+			},
+			Tags: []*vdl.Value{vdl.ValueOf(access.Tag("Write"))},
+		},
+		{
+			Name: "Exists",
+			Doc:  "// Exists returns true only if this Table exists. Insufficient permissions\n// cause Exists to return false instead of an error.\n// TODO(ivanpi): Exists may fail with an error if higher levels of hierarchy\n// do not exist.",
+			InArgs: []rpc.ArgDesc{
+				{"schemaVersion", ``}, // int32
+			},
+			OutArgs: []rpc.ArgDesc{
+				{"", ``}, // bool
+			},
+			Tags: []*vdl.Value{vdl.ValueOf(access.Tag("Resolve"))},
+		},
+		{
+			Name: "GetPermissions",
+			Doc:  "// GetPermissions returns the current Permissions for the Table.",
+			InArgs: []rpc.ArgDesc{
+				{"schemaVersion", ``}, // int32
+			},
+			OutArgs: []rpc.ArgDesc{
+				{"", ``}, // access.Permissions
+			},
+			Tags: []*vdl.Value{vdl.ValueOf(access.Tag("Admin"))},
+		},
+		{
+			Name: "SetPermissions",
+			Doc:  "// SetPermissions replaces the current Permissions for the Table.",
+			InArgs: []rpc.ArgDesc{
+				{"schemaVersion", ``}, // int32
+				{"perms", ``},         // access.Permissions
+			},
+			Tags: []*vdl.Value{vdl.ValueOf(access.Tag("Admin"))},
+		},
+		{
+			Name: "DeleteRange",
+			Doc:  "// DeleteRange deletes all rows in the given half-open range [start, limit).\n// If limit is \"\", all rows with keys >= start are included.\n// TODO(sadovsky): Maybe add option to delete prefix perms fully covered by\n// the row range.",
+			InArgs: []rpc.ArgDesc{
+				{"schemaVersion", ``}, // int32
+				{"start", ``},         // []byte
+				{"limit", ``},         // []byte
+			},
+			Tags: []*vdl.Value{vdl.ValueOf(access.Tag("Write"))},
+		},
+		{
+			Name: "Scan",
+			Doc:  "// Scan returns all rows in the given half-open range [start, limit). If limit\n// is \"\", all rows with keys >= start are included. Concurrency semantics are\n// documented in model.go.",
+			InArgs: []rpc.ArgDesc{
+				{"schemaVersion", ``}, // int32
+				{"start", ``},         // []byte
+				{"limit", ``},         // []byte
+			},
+			Tags: []*vdl.Value{vdl.ValueOf(access.Tag("Read"))},
+		},
+		{
+			Name: "GetPrefixPermissions",
+			Doc:  "// GetPrefixPermissions returns an array of (prefix, perms) pairs. The array is\n// sorted from longest prefix to shortest, so element zero is the one that\n// applies to the row with the given key. The last element is always the\n// prefix \"\" which represents the table's permissions -- the array will always\n// have at least one element.",
+			InArgs: []rpc.ArgDesc{
+				{"schemaVersion", ``}, // int32
+				{"key", ``},           // string
+			},
+			OutArgs: []rpc.ArgDesc{
+				{"", ``}, // []PrefixPermissions
+			},
+			Tags: []*vdl.Value{vdl.ValueOf(access.Tag("Admin"))},
+		},
+		{
+			Name: "SetPrefixPermissions",
+			Doc:  "// SetPrefixPermissions sets the permissions for all current and future rows with\n// the given prefix. If the prefix overlaps with an existing prefix, the\n// longest prefix that matches a row applies. For example:\n//     SetPrefixPermissions(ctx, Prefix(\"a/b\"), perms1)\n//     SetPrefixPermissions(ctx, Prefix(\"a/b/c\"), perms2)\n// The permissions for row \"a/b/1\" are perms1, and the permissions for row\n// \"a/b/c/1\" are perms2.",
+			InArgs: []rpc.ArgDesc{
+				{"schemaVersion", ``}, // int32
+				{"prefix", ``},        // string
+				{"perms", ``},         // access.Permissions
+			},
+			Tags: []*vdl.Value{vdl.ValueOf(access.Tag("Admin"))},
+		},
+		{
+			Name: "DeletePrefixPermissions",
+			Doc:  "// DeletePrefixPermissions deletes the permissions for the specified prefix. Any\n// rows covered by this prefix will use the next longest prefix's permissions\n// (see the array returned by GetPrefixPermissions).",
+			InArgs: []rpc.ArgDesc{
+				{"schemaVersion", ``}, // int32
+				{"prefix", ``},        // string
+			},
+			Tags: []*vdl.Value{vdl.ValueOf(access.Tag("Admin"))},
+		},
+	},
+}
+
+// TableScanServerStream is the server stream for Table.Scan.
+type TableScanServerStream interface {
+	// SendStream returns the send side of the Table.Scan server stream.
+	SendStream() interface {
+		// Send places the item onto the output stream.  Returns errors encountered
+		// while sending.  Blocks if there is no buffer space; will unblock when
+		// buffer space is available.
+		Send(item KeyValue) error
+	}
+}
+
+// TableScanServerCall represents the context passed to Table.Scan.
+type TableScanServerCall interface {
+	rpc.ServerCall
+	TableScanServerStream
+}
+
+// TableScanServerCallStub is a wrapper that converts rpc.StreamServerCall into
+// a typesafe stub that implements TableScanServerCall.
+type TableScanServerCallStub struct {
+	rpc.StreamServerCall
+}
+
+// Init initializes TableScanServerCallStub from rpc.StreamServerCall.
+func (s *TableScanServerCallStub) Init(call rpc.StreamServerCall) {
+	s.StreamServerCall = call
+}
+
+// SendStream returns the send side of the Table.Scan server stream.
+func (s *TableScanServerCallStub) SendStream() interface {
+	Send(item KeyValue) error
+} {
+	return implTableScanServerCallSend{s}
+}
+
+type implTableScanServerCallSend struct {
+	s *TableScanServerCallStub
+}
+
+func (s implTableScanServerCallSend) Send(item KeyValue) error {
+	return s.s.Send(item)
+}
+
+// RowClientMethods is the client interface
+// containing Row methods.
+//
+// Row represents a single row in a Table.
+// All access checks are performed against the most specific matching prefix
+// permissions in the Table.
+// SchemaVersion is the version number that the client expects the database
+// to be at. To disable schema version checking, pass -1.
+// NOTE(sadovsky): Currently we send []byte values over the wire for Get, Put,
+// and Scan. If there's a way to avoid encoding/decoding on the server side, we
+// can use vdl.Value everywhere without sacrificing performance.
+type RowClientMethods interface {
+	// Exists returns true only if this Row exists. Insufficient permissions
+	// cause Exists to return false instead of an error.
+	// Note, Exists on Row requires read permissions, unlike higher levels of
+	// hierarchy which require resolve, because Row existence usually carries
+	// more information.
+	// TODO(ivanpi): Exists may fail with an error if higher levels of hierarchy
+	// do not exist.
+	Exists(_ *context.T, schemaVersion int32, _ ...rpc.CallOpt) (bool, error)
+	// Get returns the value for this Row.
+	Get(_ *context.T, schemaVersion int32, _ ...rpc.CallOpt) ([]byte, error)
+	// Put writes the given value for this Row.
+	Put(_ *context.T, schemaVersion int32, value []byte, _ ...rpc.CallOpt) error
+	// Delete deletes this Row.
+	Delete(_ *context.T, schemaVersion int32, _ ...rpc.CallOpt) error
+}
+
+// RowClientStub adds universal methods to RowClientMethods.
+type RowClientStub interface {
+	RowClientMethods
+	rpc.UniversalServiceMethods
+}
+
+// RowClient returns a client stub for Row.
+func RowClient(name string) RowClientStub {
+	return implRowClientStub{name}
+}
+
+type implRowClientStub struct {
+	name string
+}
+
+func (c implRowClientStub) Exists(ctx *context.T, i0 int32, opts ...rpc.CallOpt) (o0 bool, err error) {
+	err = v23.GetClient(ctx).Call(ctx, c.name, "Exists", []interface{}{i0}, []interface{}{&o0}, opts...)
+	return
+}
+
+func (c implRowClientStub) Get(ctx *context.T, i0 int32, opts ...rpc.CallOpt) (o0 []byte, err error) {
+	err = v23.GetClient(ctx).Call(ctx, c.name, "Get", []interface{}{i0}, []interface{}{&o0}, opts...)
+	return
+}
+
+func (c implRowClientStub) Put(ctx *context.T, i0 int32, i1 []byte, opts ...rpc.CallOpt) (err error) {
+	err = v23.GetClient(ctx).Call(ctx, c.name, "Put", []interface{}{i0, i1}, nil, opts...)
+	return
+}
+
+func (c implRowClientStub) Delete(ctx *context.T, i0 int32, opts ...rpc.CallOpt) (err error) {
+	err = v23.GetClient(ctx).Call(ctx, c.name, "Delete", []interface{}{i0}, nil, opts...)
+	return
+}
+
+// RowServerMethods is the interface a server writer
+// implements for Row.
+//
+// Row represents a single row in a Table.
+// All access checks are performed against the most specific matching prefix
+// permissions in the Table.
+// SchemaVersion is the version number that the client expects the database
+// to be at. To disable schema version checking, pass -1.
+// NOTE(sadovsky): Currently we send []byte values over the wire for Get, Put,
+// and Scan. If there's a way to avoid encoding/decoding on the server side, we
+// can use vdl.Value everywhere without sacrificing performance.
+type RowServerMethods interface {
+	// Exists returns true only if this Row exists. Insufficient permissions
+	// cause Exists to return false instead of an error.
+	// Note, Exists on Row requires read permissions, unlike higher levels of
+	// hierarchy which require resolve, because Row existence usually carries
+	// more information.
+	// TODO(ivanpi): Exists may fail with an error if higher levels of hierarchy
+	// do not exist.
+	Exists(_ *context.T, _ rpc.ServerCall, schemaVersion int32) (bool, error)
+	// Get returns the value for this Row.
+	Get(_ *context.T, _ rpc.ServerCall, schemaVersion int32) ([]byte, error)
+	// Put writes the given value for this Row.
+	Put(_ *context.T, _ rpc.ServerCall, schemaVersion int32, value []byte) error
+	// Delete deletes this Row.
+	Delete(_ *context.T, _ rpc.ServerCall, schemaVersion int32) error
+}
+
+// RowServerStubMethods is the server interface containing
+// Row methods, as expected by rpc.Server.
+// There is no difference between this interface and RowServerMethods
+// since there are no streaming methods.
+type RowServerStubMethods RowServerMethods
+
+// RowServerStub adds universal methods to RowServerStubMethods.
+type RowServerStub interface {
+	RowServerStubMethods
+	// Describe the Row interfaces.
+	Describe__() []rpc.InterfaceDesc
+}
+
+// RowServer returns a server stub for Row.
+// It converts an implementation of RowServerMethods into
+// an object that may be used by rpc.Server.
+func RowServer(impl RowServerMethods) RowServerStub {
+	stub := implRowServerStub{
+		impl: impl,
+	}
+	// Initialize GlobState; always check the stub itself first, to handle the
+	// case where the user has the Glob method defined in their VDL source.
+	if gs := rpc.NewGlobState(stub); gs != nil {
+		stub.gs = gs
+	} else if gs := rpc.NewGlobState(impl); gs != nil {
+		stub.gs = gs
+	}
+	return stub
+}
+
+type implRowServerStub struct {
+	impl RowServerMethods
+	gs   *rpc.GlobState
+}
+
+func (s implRowServerStub) Exists(ctx *context.T, call rpc.ServerCall, i0 int32) (bool, error) {
+	return s.impl.Exists(ctx, call, i0)
+}
+
+func (s implRowServerStub) Get(ctx *context.T, call rpc.ServerCall, i0 int32) ([]byte, error) {
+	return s.impl.Get(ctx, call, i0)
+}
+
+func (s implRowServerStub) Put(ctx *context.T, call rpc.ServerCall, i0 int32, i1 []byte) error {
+	return s.impl.Put(ctx, call, i0, i1)
+}
+
+func (s implRowServerStub) Delete(ctx *context.T, call rpc.ServerCall, i0 int32) error {
+	return s.impl.Delete(ctx, call, i0)
+}
+
+func (s implRowServerStub) Globber() *rpc.GlobState {
+	return s.gs
+}
+
+func (s implRowServerStub) Describe__() []rpc.InterfaceDesc {
+	return []rpc.InterfaceDesc{RowDesc}
+}
+
+// RowDesc describes the Row interface.
+var RowDesc rpc.InterfaceDesc = descRow
+
+// descRow hides the desc to keep godoc clean.
+var descRow = rpc.InterfaceDesc{
+	Name:    "Row",
+	PkgPath: "v.io/v23/services/syncbase",
+	Doc:     "// Row represents a single row in a Table.\n// All access checks are performed against the most specific matching prefix\n// permissions in the Table.\n// SchemaVersion is the version number that the client expects the database\n// to be at. To disable schema version checking, pass -1.\n// NOTE(sadovsky): Currently we send []byte values over the wire for Get, Put,\n// and Scan. If there's a way to avoid encoding/decoding on the server side, we\n// can use vdl.Value everywhere without sacrificing performance.",
+	Methods: []rpc.MethodDesc{
+		{
+			Name: "Exists",
+			Doc:  "// Exists returns true only if this Row exists. Insufficient permissions\n// cause Exists to return false instead of an error.\n// Note, Exists on Row requires read permissions, unlike higher levels of\n// hierarchy which require resolve, because Row existence usually carries\n// more information.\n// TODO(ivanpi): Exists may fail with an error if higher levels of hierarchy\n// do not exist.",
+			InArgs: []rpc.ArgDesc{
+				{"schemaVersion", ``}, // int32
+			},
+			OutArgs: []rpc.ArgDesc{
+				{"", ``}, // bool
+			},
+			Tags: []*vdl.Value{vdl.ValueOf(access.Tag("Read"))},
+		},
+		{
+			Name: "Get",
+			Doc:  "// Get returns the value for this Row.",
+			InArgs: []rpc.ArgDesc{
+				{"schemaVersion", ``}, // int32
+			},
+			OutArgs: []rpc.ArgDesc{
+				{"", ``}, // []byte
+			},
+			Tags: []*vdl.Value{vdl.ValueOf(access.Tag("Read"))},
+		},
+		{
+			Name: "Put",
+			Doc:  "// Put writes the given value for this Row.",
+			InArgs: []rpc.ArgDesc{
+				{"schemaVersion", ``}, // int32
+				{"value", ``},         // []byte
+			},
+			Tags: []*vdl.Value{vdl.ValueOf(access.Tag("Write"))},
+		},
+		{
+			Name: "Delete",
+			Doc:  "// Delete deletes this Row.",
+			InArgs: []rpc.ArgDesc{
+				{"schemaVersion", ``}, // int32
+			},
+			Tags: []*vdl.Value{vdl.ValueOf(access.Tag("Write"))},
+		},
+	},
+}
+
 var __VDLInitCalled bool
 
 // __VDLInit performs vdl initialization.  It is safe to call multiple times.
@@ -735,12 +7084,45 @@ func __VDLInit() struct{} {
 
 	// Register types.
 	vdl.Register((*DevModeUpdateVClockOpts)(nil))
+	vdl.Register((*BatchOptions)(nil))
+	vdl.Register((*PrefixPermissions)(nil))
+	vdl.Register((*KeyValue)(nil))
+	vdl.Register((*TableRow)(nil))
+	vdl.Register((*SyncgroupSpec)(nil))
+	vdl.Register((*SyncgroupMemberInfo)(nil))
+	vdl.Register((*ResolverType)(nil))
+	vdl.Register((*BatchSource)(nil))
+	vdl.Register((*BatchInfo)(nil))
+	vdl.Register((*ValueState)(nil))
+	vdl.Register((*Value)(nil))
+	vdl.Register((*RowOp)(nil))
+	vdl.Register((*ScanOp)(nil))
+	vdl.Register((*Operation)(nil))
+	vdl.Register((*RowInfo)(nil))
+	vdl.Register((*ConflictData)(nil))
+	vdl.Register((*ConflictInfo)(nil))
+	vdl.Register((*ValueSelection)(nil))
+	vdl.Register((*ResolutionInfo)(nil))
+	vdl.Register((*CrRule)(nil))
+	vdl.Register((*CrPolicy)(nil))
+	vdl.Register((*SchemaMetadata)(nil))
+	vdl.Register((*BlobRef)(nil))
+	vdl.Register((*BlobFetchState)(nil))
+	vdl.Register((*BlobFetchStatus)(nil))
+	vdl.Register((*StoreChange)(nil))
 
 	// Set error format strings.
 	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrNotInDevMode.ID), "{1:}{2:} not running with --dev=true")
 	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrInvalidName.ID), "{1:}{2:} invalid name: {3}")
 	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrCorruptDatabase.ID), "{1:}{2:} database corrupt, moved to {3}; client must create a new database")
 	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrUnknownBatch.ID), "{1:}{2:} unknown batch, perhaps the server restarted")
+	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrBoundToBatch.ID), "{1:}{2:} bound to batch")
+	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrNotBoundToBatch.ID), "{1:}{2:} not bound to batch")
+	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrReadOnlyBatch.ID), "{1:}{2:} batch is read-only")
+	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrConcurrentBatch.ID), "{1:}{2:} concurrent batch")
+	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrSchemaVersionMismatch.ID), "{1:}{2:} actual schema version does not match the provided one")
+	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrBlobNotCommitted.ID), "{1:}{2:} blob is not yet committed")
+	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrSyncgroupJoinFailed.ID), "{1:}{2:} syncgroup join failed")
 
 	return struct{}{}
 }

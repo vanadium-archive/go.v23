@@ -10,7 +10,6 @@ import (
 
 	"v.io/v23/context"
 	"v.io/v23/syncbase"
-	"v.io/v23/syncbase/nosql"
 	"v.io/v23/vom"
 	"v.io/x/ref/services/syncbase/syncbaselib"
 	"v.io/x/ref/test/v23test"
@@ -35,7 +34,7 @@ func TestV23SyncbasedPutGet(t *testing.T) {
 	if err := a.Create(ctx, nil); err != nil {
 		t.Fatalf("unable to create an app: %v", err)
 	}
-	d := a.NoSQLDatabase("d", nil)
+	d := a.Database("d", nil)
 	if err := d.Create(ctx, nil); err != nil {
 		t.Fatalf("unable to create a database: %v", err)
 	}
@@ -78,7 +77,7 @@ func TestV23SyncbasedPutGet(t *testing.T) {
 	if got, want := change.Row, "testkey"; got != want {
 		t.Fatalf("unexpected watch row: got %q, want %q", got, want)
 	}
-	if got, want := change.ChangeType, nosql.PutChange; got != want {
+	if got, want := change.ChangeType, syncbase.PutChange; got != want {
 		t.Fatalf("unexpected watch change type: got %q, want %q", got, want)
 	}
 	if got, want := change.FromSync, false; got != want {

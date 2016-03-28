@@ -16,10 +16,9 @@ import (
 	"v.io/v23"
 	"v.io/v23/context"
 	"v.io/v23/security/access"
+	wire "v.io/v23/services/syncbase"
 	wire_syncbase "v.io/v23/services/syncbase"
-	wire "v.io/v23/services/syncbase/nosql"
 	"v.io/v23/syncbase"
-	"v.io/v23/syncbase/nosql"
 	"v.io/x/ref/services/syncbase/syncbaselib"
 	tu "v.io/x/ref/services/syncbase/testutil"
 	"v.io/x/ref/test/v23test"
@@ -40,7 +39,7 @@ func setupHierarchy(ctx *context.T, syncbaseName string) error {
 	if err := a.Create(ctx, nil); err != nil {
 		return err
 	}
-	d := a.NoSQLDatabase(testDb, nil)
+	d := a.Database(testDb, nil)
 	if err := d.Create(ctx, nil); err != nil {
 		return err
 	}
@@ -95,7 +94,7 @@ func populateData(ctx *context.T, syncbaseName, keyPrefix string, start, end int
 	}
 
 	a := syncbase.NewService(syncbaseName).App(testApp)
-	d := a.NoSQLDatabase(testDb, nil)
+	d := a.Database(testDb, nil)
 	tb := d.Table(testTable)
 
 	for i := start; i < end; i++ {
@@ -111,7 +110,7 @@ func populateData(ctx *context.T, syncbaseName, keyPrefix string, start, end int
 // TODO(sadovsky): This is eerily similar to populateData. We should strive to
 // avoid such redundancies by implementing common helpers and avoiding spurious
 // differences.
-func updateDataImpl(ctx *context.T, d nosql.DatabaseHandle, syncbaseName string, start, end int, valuePrefix string) error {
+func updateDataImpl(ctx *context.T, d syncbase.DatabaseHandle, syncbaseName string, start, end int, valuePrefix string) error {
 	if end <= start {
 		return fmt.Errorf("end (%d) <= start (%d)", end, start)
 	}
@@ -131,7 +130,7 @@ func updateDataImpl(ctx *context.T, d nosql.DatabaseHandle, syncbaseName string,
 
 func updateData(ctx *context.T, syncbaseName string, start, end int, valuePrefix string) error {
 	a := syncbase.NewService(syncbaseName).App(testApp)
-	d := a.NoSQLDatabase(testDb, nil)
+	d := a.Database(testDb, nil)
 	return updateDataImpl(ctx, d, syncbaseName, start, end, valuePrefix)
 }
 
@@ -141,7 +140,7 @@ func updateData(ctx *context.T, syncbaseName string, start, end int, valuePrefix
 // end.
 func updateDataInBatch(ctx *context.T, syncbaseName string, start, end int, valuePrefix, signalKey string) error {
 	a := syncbase.NewService(syncbaseName).App(testApp)
-	d := a.NoSQLDatabase(testDb, nil)
+	d := a.Database(testDb, nil)
 	batch, err := d.BeginBatch(ctx, wire.BatchOptions{})
 	if err != nil {
 		return fmt.Errorf("BeginBatch failed: %v", err)
@@ -160,7 +159,7 @@ func updateDataInBatch(ctx *context.T, syncbaseName string, start, end int, valu
 
 // TODO(ivanpi): Remove sendSignal now that all functions using it are in the
 // same process.
-func sendSignal(ctx *context.T, d nosql.Database, signalKey string) error {
+func sendSignal(ctx *context.T, d syncbase.Database, signalKey string) error {
 	tb := d.Table(testTable)
 	r := tb.Row(signalKey)
 
@@ -177,7 +176,7 @@ const skipScan = true
 
 func verifySyncgroupData(ctx *context.T, syncbaseName, keyPrefix string, start, count int) error {
 	a := syncbase.NewService(syncbaseName).App(testApp)
-	d := a.NoSQLDatabase(testDb, nil)
+	d := a.Database(testDb, nil)
 	tb := d.Table(testTable)
 
 	// Wait a bit (up to 10 seconds) for the last key to appear.
@@ -206,7 +205,7 @@ func verifySyncgroupData(ctx *context.T, syncbaseName, keyPrefix string, start, 
 	// TODO(sadovsky): Drop this? (Does it buy us much?)
 	if !skipScan {
 		// Re-verify using a scan operation.
-		stream := tb.Scan(ctx, nosql.Prefix(keyPrefix))
+		stream := tb.Scan(ctx, syncbase.Prefix(keyPrefix))
 		for i := 0; stream.Advance(); i++ {
 			got, want := stream.Key(), fmt.Sprintf("%s%d", keyPrefix, i)
 			if got != want {
@@ -241,7 +240,7 @@ func createSyncgroup(ctx *context.T, syncbaseName, sgName, sgPrefixes, mtName, b
 	}
 
 	a := syncbase.NewService(syncbaseName).App(testApp)
-	d := a.NoSQLDatabase(testDb, nil)
+	d := a.Database(testDb, nil)
 
 	if perms == nil {
 		perms = tu.DefaultPerms(strings.Split(blessingPatterns, ";")...)
@@ -264,7 +263,7 @@ func createSyncgroup(ctx *context.T, syncbaseName, sgName, sgPrefixes, mtName, b
 
 func joinSyncgroup(ctx *context.T, syncbaseName, sgName string) error {
 	a := syncbase.NewService(syncbaseName).App(testApp)
-	d := a.NoSQLDatabase(testDb, nil)
+	d := a.Database(testDb, nil)
 
 	sg := d.Syncgroup(sgName)
 	info := wire.SyncgroupMemberInfo{SyncPriority: 10}
@@ -276,7 +275,7 @@ func joinSyncgroup(ctx *context.T, syncbaseName, sgName string) error {
 
 func verifySyncgroupMembers(ctx *context.T, syncbaseName, sgName string, wantMembers int) error {
 	a := syncbase.NewService(syncbaseName).App(testApp)
-	d := a.NoSQLDatabase(testDb, nil)
+	d := a.Database(testDb, nil)
 	sg := d.Syncgroup(sgName)
 
 	var gotMembers int
@@ -298,11 +297,11 @@ func verifySyncgroupMembers(ctx *context.T, syncbaseName, sgName string, wantMem
 }
 
 func pauseSync(ctx *context.T, syncbaseName string) error {
-	return syncbase.NewService(syncbaseName).App(testApp).NoSQLDatabase(testDb, nil).PauseSync(ctx)
+	return syncbase.NewService(syncbaseName).App(testApp).Database(testDb, nil).PauseSync(ctx)
 }
 
 func resumeSync(ctx *context.T, syncbaseName string) error {
-	return syncbase.NewService(syncbaseName).App(testApp).NoSQLDatabase(testDb, nil).ResumeSync(ctx)
+	return syncbase.NewService(syncbaseName).App(testApp).Database(testDb, nil).ResumeSync(ctx)
 }
 
 ////////////////////////////////////////////////////////////

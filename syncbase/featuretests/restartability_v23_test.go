@@ -15,10 +15,8 @@ import (
 	"time"
 
 	"v.io/v23/context"
-	sbwire "v.io/v23/services/syncbase"
-	nosqlwire "v.io/v23/services/syncbase/nosql"
+	wire "v.io/v23/services/syncbase"
 	"v.io/v23/syncbase"
-	"v.io/v23/syncbase/nosql"
 	"v.io/v23/verror"
 	"v.io/v23/vom"
 	"v.io/x/ref/services/syncbase/syncbaselib"
@@ -40,12 +38,12 @@ func restartabilityInit(sh *v23test.Shell) (rootDir string, clientCtx *context.T
 }
 
 // TODO(ivanpi): Duplicate of setupAppA.
-func createAppDatabaseTable(t *testing.T, clientCtx *context.T) nosql.Database {
+func createAppDatabaseTable(t *testing.T, clientCtx *context.T) syncbase.Database {
 	a := syncbase.NewService(testSbName).App("a")
 	if err := a.Create(clientCtx, nil); err != nil {
 		t.Fatalf("unable to create an app: %v", err)
 	}
-	d := a.NoSQLDatabase("d", nil)
+	d := a.Database("d", nil)
 	if err := d.Create(clientCtx, nil); err != nil {
 		t.Fatalf("unable to create a database: %v", err)
 	}
@@ -94,11 +92,11 @@ func createHierarchy(t *testing.T, ctx *context.T) {
 		if err := a.Create(ctx, nil); err != nil {
 			t.Fatalf("a.Create() failed: %v", err)
 		}
-		for _, d := range []nosql.Database{a.NoSQLDatabase("d1", nil), a.NoSQLDatabase("d2", nil)} {
+		for _, d := range []syncbase.Database{a.Database("d1", nil), a.Database("d2", nil)} {
 			if err := d.Create(ctx, nil); err != nil {
 				t.Fatalf("d.Create() failed: %v", err)
 			}
-			for _, tb := range []nosql.Table{d.Table("tb1"), d.Table("tb2")} {
+			for _, tb := range []syncbase.Table{d.Table("tb1"), d.Table("tb2")} {
 				if err := d.Table(tb.Name()).Create(ctx, nil); err != nil {
 					t.Fatalf("d.CreateTable() failed: %v", err)
 				}
@@ -137,7 +135,7 @@ func checkHierarchy(t *testing.T, ctx *context.T) {
 			t.Fatalf("Databases do not match: got %v, want %v", got, want)
 		}
 		for _, dName := range want {
-			d := a.NoSQLDatabase(dName, nil)
+			d := a.Database(dName, nil)
 			if got, err = d.ListTables(ctx); err != nil {
 				t.Fatalf("d.ListTables() failed: %v", err)
 			}
@@ -147,7 +145,7 @@ func checkHierarchy(t *testing.T, ctx *context.T) {
 			}
 			for _, tbName := range want {
 				tb := d.Table(tbName)
-				if err := tu.ScanMatches(ctx, tb, nosql.Prefix(""), []string{"bar", "foo"}, []interface{}{"bar", "foo"}); err != nil {
+				if err := tu.ScanMatches(ctx, tb, syncbase.Prefix(""), []string{"bar", "foo"}, []interface{}{"bar", "foo"}); err != nil {
 					t.Fatalf("Scan does not match: %v", err)
 				}
 			}
@@ -204,7 +202,7 @@ func TestV23RestartabilityReadOnlyBatch(t *testing.T) {
 		t.Fatalf("r.Put() failed: %v", err)
 	}
 
-	batch, err := d.BeginBatch(clientCtx, nosqlwire.BatchOptions{ReadOnly: true})
+	batch, err := d.BeginBatch(clientCtx, wire.BatchOptions{ReadOnly: true})
 	if err != nil {
 		t.Fatalf("unable to start batch: %v", err)
 	}
@@ -230,10 +228,10 @@ func TestV23RestartabilityReadOnlyBatch(t *testing.T) {
 	// Restart syncbase.
 	_ = sh.StartSyncbase(serverCreds, syncbaselib.Opts{Name: testSbName, RootDir: rootDir}, acl)
 
-	if err := r.Get(clientCtx, &result); verror.ErrorID(err) != sbwire.ErrUnknownBatch.ID {
+	if err := r.Get(clientCtx, &result); verror.ErrorID(err) != wire.ErrUnknownBatch.ID {
 		t.Fatalf("expected r.Get() to fail because of ErrUnknownBatch.  got: %v", err)
 	}
-	if err := batch.Commit(clientCtx); verror.ErrorID(err) != sbwire.ErrUnknownBatch.ID {
+	if err := batch.Commit(clientCtx); verror.ErrorID(err) != wire.ErrUnknownBatch.ID {
 		t.Fatalf("expected Commit() to fail because of ErrUnknownBatch.  got: %v", err)
 	}
 
@@ -252,7 +250,7 @@ func TestV23RestartabilityReadWriteBatch(t *testing.T) {
 	cleanup := sh.StartSyncbase(serverCreds, syncbaselib.Opts{Name: testSbName, RootDir: rootDir}, acl)
 	d := createAppDatabaseTable(t, clientCtx)
 
-	batch, err := d.BeginBatch(clientCtx, nosqlwire.BatchOptions{})
+	batch, err := d.BeginBatch(clientCtx, wire.BatchOptions{})
 	if err != nil {
 		t.Fatalf("unable to start batch: %v", err)
 	}
@@ -282,10 +280,10 @@ func TestV23RestartabilityReadWriteBatch(t *testing.T) {
 	// Restart syncbase.
 	_ = sh.StartSyncbase(serverCreds, syncbaselib.Opts{Name: testSbName, RootDir: rootDir}, acl)
 
-	if err := r.Get(clientCtx, &result); verror.ErrorID(err) != sbwire.ErrUnknownBatch.ID {
+	if err := r.Get(clientCtx, &result); verror.ErrorID(err) != wire.ErrUnknownBatch.ID {
 		t.Fatalf("expected r.Get() to fail because of ErrUnknownBatch.  got: %v", err)
 	}
-	if err := batch.Commit(clientCtx); verror.ErrorID(err) != sbwire.ErrUnknownBatch.ID {
+	if err := batch.Commit(clientCtx); verror.ErrorID(err) != wire.ErrUnknownBatch.ID {
 		t.Fatalf("expected Commit() to fail because of ErrUnknownBatch.  got: %v", err)
 	}
 
@@ -312,7 +310,7 @@ func TestV23RestartabilityWatch(t *testing.T) {
 	d := createAppDatabaseTable(t, clientCtx)
 
 	// Put one row as well as get the initial ResumeMarker.
-	batch, err := d.BeginBatch(clientCtx, nosqlwire.BatchOptions{})
+	batch, err := d.BeginBatch(clientCtx, wire.BatchOptions{})
 	if err != nil {
 		t.Fatalf("unable to start batch: %v", err)
 	}
@@ -486,11 +484,11 @@ func TestV23RestartabilityAppDBCorruption(t *testing.T) {
 	cleanup = sh.StartSyncbase(serverCreds, syncbaselib.Opts{Name: testSbName, RootDir: rootDir}, acl)
 
 	// Recreate a1/d1 since that is the one that got corrupted.
-	d := syncbase.NewService(testSbName).App("a1").NoSQLDatabase("d1", nil)
+	d := syncbase.NewService(testSbName).App("a1").Database("d1", nil)
 	if err := d.Create(clientCtx, nil); err != nil {
 		t.Fatalf("d.Create() failed: %v", err)
 	}
-	for _, tb := range []nosql.Table{d.Table("tb1"), d.Table("tb2")} {
+	for _, tb := range []syncbase.Table{d.Table("tb1"), d.Table("tb2")} {
 		if err := tb.Create(clientCtx, nil); err != nil {
 			t.Fatalf("d.CreateTable() failed: %v", err)
 		}

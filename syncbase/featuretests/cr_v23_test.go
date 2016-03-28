@@ -12,10 +12,8 @@ import (
 
 	"v.io/v23/context"
 	"v.io/v23/naming"
-	sbwire "v.io/v23/services/syncbase"
-	wire "v.io/v23/services/syncbase/nosql"
+	wire "v.io/v23/services/syncbase"
 	"v.io/v23/syncbase"
-	"v.io/v23/syncbase/nosql"
 	"v.io/v23/verror"
 	"v.io/x/ref/services/syncbase/common"
 	"v.io/x/ref/test/testutil"
@@ -115,7 +113,7 @@ func TestV23CRGenVectorWinsOverVClock(t *testing.T) {
 	ok(t, pauseSync(client1Ctx, "s1"))
 
 	// Set S1's local clock back in time to begining of Jan 2015
-	ok(t, sc("s1").DevModeUpdateVClock(client1Ctx, sbwire.DevModeUpdateVClockOpts{
+	ok(t, sc("s1").DevModeUpdateVClock(client1Ctx, wire.DevModeUpdateVClockOpts{
 		Now:           jan2015,
 		ElapsedTime:   0,
 		DoLocalUpdate: true,
@@ -401,7 +399,7 @@ func runWithAppBasedResolver(t *testing.T, client0Ctx, client1Ctx *context.T, sc
 func runConflictResolver(ctx *context.T, syncbaseName, prefix, signalKey string, maxCallCount int) error {
 	a := syncbase.NewService(syncbaseName).App("a")
 	resolver := &CRImpl{syncbaseName: syncbaseName}
-	d := a.NoSQLDatabase("d", makeSchema(prefix, resolver))
+	d := a.Database("d", makeSchema(prefix, resolver))
 	defer d.Close()
 	d.EnforceSchema(ctx)
 
@@ -428,7 +426,7 @@ func runConflictResolver(ctx *context.T, syncbaseName, prefix, signalKey string,
 
 func verifyConflictResolvedData(ctx *context.T, syncbaseName, keyPrefix, schemaPrefix string, start, end int, valuePrefix string) error {
 	a := syncbase.NewService(syncbaseName).App("a")
-	d := a.NoSQLDatabase("d", makeSchema(schemaPrefix, &CRImpl{syncbaseName: syncbaseName}))
+	d := a.Database("d", makeSchema(schemaPrefix, &CRImpl{syncbaseName: syncbaseName}))
 
 	tb := d.Table(testTable)
 	for i := start; i < end; i++ {
@@ -447,7 +445,7 @@ func verifyConflictResolvedData(ctx *context.T, syncbaseName, keyPrefix, schemaP
 
 func verifyConflictResolvedBatch(ctx *context.T, syncbaseName, keyPrefix string, start, end int, valuePrefix string) error {
 	a := syncbase.NewService(syncbaseName).App("a")
-	d := a.NoSQLDatabase("d", nil)
+	d := a.Database("d", nil)
 
 	tb := d.Table(testTable)
 	var got string
@@ -474,13 +472,13 @@ func verifyConflictResolvedBatch(ctx *context.T, syncbaseName, keyPrefix string,
 }
 
 func waitForValue(ctx *context.T, syncbaseName, key, valuePrefix, schemaPrefix string) error {
-	var schema *nosql.Schema
+	var schema *syncbase.Schema
 	if schemaPrefix != "" {
 		schema = makeSchema(schemaPrefix, &CRImpl{syncbaseName: syncbaseName})
 	}
 
 	a := syncbase.NewService(syncbaseName).App("a")
-	d := a.NoSQLDatabase("d", schema)
+	d := a.Database("d", schema)
 
 	tb := d.Table(testTable)
 	r := tb.Row(key)
@@ -499,7 +497,7 @@ func waitForValue(ctx *context.T, syncbaseName, key, valuePrefix, schemaPrefix s
 
 func endTest(ctx *context.T, syncbaseName, prefix, signalKey string) error {
 	a := syncbase.NewService(syncbaseName).App("a")
-	d := a.NoSQLDatabase("d", makeSchema(prefix, &CRImpl{syncbaseName: syncbaseName}))
+	d := a.Database("d", makeSchema(prefix, &CRImpl{syncbaseName: syncbaseName}))
 
 	// signal end of test so that conflict resolution can clean up its stream.
 	return sendSignal(ctx, d, signalKey)
@@ -507,13 +505,13 @@ func endTest(ctx *context.T, syncbaseName, prefix, signalKey string) error {
 
 func waitForSignal(ctx *context.T, syncbaseName, prefix, signalKey string) error {
 	a := syncbase.NewService(syncbaseName).App("a")
-	d := a.NoSQLDatabase("d", makeSchema(prefix, &CRImpl{syncbaseName: syncbaseName}))
+	d := a.Database("d", makeSchema(prefix, &CRImpl{syncbaseName: syncbaseName}))
 
 	// wait for signal.
 	return waitSignal(ctx, d, signalKey)
 }
 
-func waitSignal(ctx *context.T, d nosql.Database, signalKey string) error {
+func waitSignal(ctx *context.T, d syncbase.Database, signalKey string) error {
 	tb := d.Table(testTable)
 	r := tb.Row(signalKey)
 
@@ -534,7 +532,7 @@ func waitSignal(ctx *context.T, d nosql.Database, signalKey string) error {
 ////////////////////////////////////////////////////////
 // Conflict Resolution related code.
 
-func makeSchema(keyPrefix string, resolver *CRImpl) *nosql.Schema {
+func makeSchema(keyPrefix string, resolver *CRImpl) *syncbase.Schema {
 	metadata := wire.SchemaMetadata{
 		Version: 1,
 		Policy: wire.CrPolicy{
@@ -547,7 +545,7 @@ func makeSchema(keyPrefix string, resolver *CRImpl) *nosql.Schema {
 			},
 		},
 	}
-	return &nosql.Schema{
+	return &syncbase.Schema{
 		Metadata: metadata,
 		Resolver: resolver,
 	}
@@ -559,12 +557,12 @@ type CRImpl struct {
 	onConflictCallCount int
 }
 
-func (ri *CRImpl) OnConflict(ctx *context.T, conflict *nosql.Conflict) nosql.Resolution {
+func (ri *CRImpl) OnConflict(ctx *context.T, conflict *syncbase.Conflict) syncbase.Resolution {
 	resolvedPrefix := "AppResolvedVal"
 	ri.onConflictCallCount++
-	res := nosql.Resolution{ResultSet: map[string]nosql.ResolvedRow{}}
+	res := syncbase.Resolution{ResultSet: map[string]syncbase.ResolvedRow{}}
 	for rowKey, row := range conflict.WriteSet.ByKey {
-		resolvedRow := nosql.ResolvedRow{}
+		resolvedRow := syncbase.ResolvedRow{}
 		resolvedRow.Key = row.Key
 
 		// Handle objects that dont have conflict but were pulled in because of
@@ -572,7 +570,7 @@ func (ri *CRImpl) OnConflict(ctx *context.T, conflict *nosql.Conflict) nosql.Res
 		// For ease of testing, this is resolved as new value with prefix
 		// "AppResolvedVal".
 		if row.LocalValue.State == wire.ValueStateUnknown || row.RemoteValue.State == wire.ValueStateUnknown {
-			resolvedRow.Result, _ = nosql.NewValue(ctx, resolvedPrefix+keyPart(rowKey))
+			resolvedRow.Result, _ = syncbase.NewValue(ctx, resolvedPrefix+keyPart(rowKey))
 			res.ResultSet[row.Key] = resolvedRow
 			continue
 		}
@@ -588,7 +586,7 @@ func (ri *CRImpl) OnConflict(ctx *context.T, conflict *nosql.Conflict) nosql.Res
 				resolvedRow.Result = &row.LocalValue
 			}
 		} else {
-			resolvedRow.Result, _ = nosql.NewValue(ctx, resolvedPrefix+keyPart(rowKey))
+			resolvedRow.Result, _ = syncbase.NewValue(ctx, resolvedPrefix+keyPart(rowKey))
 		}
 		res.ResultSet[row.Key] = resolvedRow
 	}

@@ -1,17 +1,273 @@
+pkg syncbase, const DeleteChange ChangeType
+pkg syncbase, const PutChange ChangeType
+pkg syncbase, func NewDatabase(string, string, *Schema) *database
 pkg syncbase, func NewService(string) Service
-pkg syncbase, type App interface { Create, Destroy, Exists, FullName, GetPermissions, ListDatabases, Name, NoSQLDatabase, SetPermissions }
+pkg syncbase, func NewValue(*context.T, interface{}) (*Value, error)
+pkg syncbase, func Prefix(string) PrefixRange
+pkg syncbase, func Range(string, string) RowRange
+pkg syncbase, func RunInBatch(*context.T, Database, wire.BatchOptions, func(BatchDatabase) error) error
+pkg syncbase, func SingleRow(string) RowRange
+pkg syncbase, func ToWatchChange(watch.Change) WatchChange
+pkg syncbase, func UUID() string
+pkg syncbase, method (*Conflict) FillVDLTarget(vdl.Target, *vdl.Type) error
+pkg syncbase, method (*Conflict) MakeVDLTarget() vdl.Target
+pkg syncbase, method (*ConflictRow) FillVDLTarget(vdl.Target, *vdl.Type) error
+pkg syncbase, method (*ConflictRow) MakeVDLTarget() vdl.Target
+pkg syncbase, method (*ConflictRowSet) FillVDLTarget(vdl.Target, *vdl.Type) error
+pkg syncbase, method (*ConflictRowSet) MakeVDLTarget() vdl.Target
+pkg syncbase, method (*ConflictRowSetTarget) FinishField(vdl.Target, vdl.Target) error
+pkg syncbase, method (*ConflictRowSetTarget) FinishFields(vdl.FieldsTarget) error
+pkg syncbase, method (*ConflictRowSetTarget) StartField(string) (vdl.Target, vdl.Target, error)
+pkg syncbase, method (*ConflictRowSetTarget) StartFields(*vdl.Type) (vdl.FieldsTarget, error)
+pkg syncbase, method (*ConflictRowTarget) FinishField(vdl.Target, vdl.Target) error
+pkg syncbase, method (*ConflictRowTarget) FinishFields(vdl.FieldsTarget) error
+pkg syncbase, method (*ConflictRowTarget) StartField(string) (vdl.Target, vdl.Target, error)
+pkg syncbase, method (*ConflictRowTarget) StartFields(*vdl.Type) (vdl.FieldsTarget, error)
+pkg syncbase, method (*ConflictScanSet) FillVDLTarget(vdl.Target, *vdl.Type) error
+pkg syncbase, method (*ConflictScanSet) MakeVDLTarget() vdl.Target
+pkg syncbase, method (*ConflictScanSetTarget) FinishField(vdl.Target, vdl.Target) error
+pkg syncbase, method (*ConflictScanSetTarget) FinishFields(vdl.FieldsTarget) error
+pkg syncbase, method (*ConflictScanSetTarget) StartField(string) (vdl.Target, vdl.Target, error)
+pkg syncbase, method (*ConflictScanSetTarget) StartFields(*vdl.Type) (vdl.FieldsTarget, error)
+pkg syncbase, method (*ConflictTarget) FinishField(vdl.Target, vdl.Target) error
+pkg syncbase, method (*ConflictTarget) FinishFields(vdl.FieldsTarget) error
+pkg syncbase, method (*ConflictTarget) StartField(string) (vdl.Target, vdl.Target, error)
+pkg syncbase, method (*ConflictTarget) StartFields(*vdl.Type) (vdl.FieldsTarget, error)
+pkg syncbase, method (*InvalidScanStream) Advance() bool
+pkg syncbase, method (*InvalidScanStream) Cancel()
+pkg syncbase, method (*InvalidScanStream) Err() error
+pkg syncbase, method (*InvalidScanStream) Key() string
+pkg syncbase, method (*InvalidScanStream) Value(interface{}) error
+pkg syncbase, method (*Resolution) FillVDLTarget(vdl.Target, *vdl.Type) error
+pkg syncbase, method (*Resolution) MakeVDLTarget() vdl.Target
+pkg syncbase, method (*ResolutionTarget) FinishField(vdl.Target, vdl.Target) error
+pkg syncbase, method (*ResolutionTarget) FinishFields(vdl.FieldsTarget) error
+pkg syncbase, method (*ResolutionTarget) StartField(string) (vdl.Target, vdl.Target, error)
+pkg syncbase, method (*ResolutionTarget) StartFields(*vdl.Type) (vdl.FieldsTarget, error)
+pkg syncbase, method (*ResolvedRow) FillVDLTarget(vdl.Target, *vdl.Type) error
+pkg syncbase, method (*ResolvedRow) MakeVDLTarget() vdl.Target
+pkg syncbase, method (*ResolvedRowTarget) FinishField(vdl.Target, vdl.Target) error
+pkg syncbase, method (*ResolvedRowTarget) FinishFields(vdl.FieldsTarget) error
+pkg syncbase, method (*ResolvedRowTarget) StartField(string) (vdl.Target, vdl.Target, error)
+pkg syncbase, method (*ResolvedRowTarget) StartFields(*vdl.Type) (vdl.FieldsTarget, error)
+pkg syncbase, method (*Value) FillVDLTarget(vdl.Target, *vdl.Type) error
+pkg syncbase, method (*Value) Get(interface{}) error
+pkg syncbase, method (*Value) MakeVDLTarget() vdl.Target
+pkg syncbase, method (*ValueTarget) FinishField(vdl.Target, vdl.Target) error
+pkg syncbase, method (*ValueTarget) FinishFields(vdl.FieldsTarget) error
+pkg syncbase, method (*ValueTarget) StartField(string) (vdl.Target, vdl.Target, error)
+pkg syncbase, method (*ValueTarget) StartFields(*vdl.Type) (vdl.FieldsTarget, error)
+pkg syncbase, method (*WatchChange) Value(interface{}) error
+pkg syncbase, type App interface { Create, Database, Destroy, Exists, FullName, GetPermissions, ListDatabases, Name, SetPermissions }
 pkg syncbase, type App interface, Create(*context.T, access.Permissions) error
+pkg syncbase, type App interface, Database(string, *Schema) Database
 pkg syncbase, type App interface, Destroy(*context.T) error
 pkg syncbase, type App interface, Exists(*context.T) (bool, error)
 pkg syncbase, type App interface, FullName() string
 pkg syncbase, type App interface, GetPermissions(*context.T) (access.Permissions, string, error)
 pkg syncbase, type App interface, ListDatabases(*context.T) ([]string, error)
 pkg syncbase, type App interface, Name() string
-pkg syncbase, type App interface, NoSQLDatabase(string, *nosql.Schema) nosql.Database
 pkg syncbase, type App interface, SetPermissions(*context.T, access.Permissions, string) error
+pkg syncbase, type BatchDatabase interface { Abort, Close, Commit, Exec, FullName, GetResumeMarker, ListTables, Name, Table }
+pkg syncbase, type BatchDatabase interface, Abort(*context.T) error
+pkg syncbase, type BatchDatabase interface, Close()
+pkg syncbase, type BatchDatabase interface, Commit(*context.T) error
+pkg syncbase, type BatchDatabase interface, Exec(*context.T, string, ...interface{}) ([]string, ResultStream, error)
+pkg syncbase, type BatchDatabase interface, FullName() string
+pkg syncbase, type BatchDatabase interface, GetResumeMarker(*context.T) (watch.ResumeMarker, error)
+pkg syncbase, type BatchDatabase interface, ListTables(*context.T) ([]string, error)
+pkg syncbase, type BatchDatabase interface, Name() string
+pkg syncbase, type BatchDatabase interface, Table(string) Table
+pkg syncbase, type Blob interface { Commit, Delete, Fetch, Get, Keep, Pin, Put, Ref, Size, Unpin }
+pkg syncbase, type Blob interface, Commit(*context.T) error
+pkg syncbase, type Blob interface, Delete(*context.T) error
+pkg syncbase, type Blob interface, Fetch(*context.T, uint64) (BlobStatus, error)
+pkg syncbase, type Blob interface, Get(*context.T, int64) (BlobReader, error)
+pkg syncbase, type Blob interface, Keep(*context.T, uint64) error
+pkg syncbase, type Blob interface, Pin(*context.T) error
+pkg syncbase, type Blob interface, Put(*context.T) (BlobWriter, error)
+pkg syncbase, type Blob interface, Ref() wire.BlobRef
+pkg syncbase, type Blob interface, Size(*context.T) (int64, error)
+pkg syncbase, type Blob interface, Unpin(*context.T) error
+pkg syncbase, type BlobReader interface { Advance, Cancel, Err, Value }
+pkg syncbase, type BlobReader interface, Advance() bool
+pkg syncbase, type BlobReader interface, Cancel()
+pkg syncbase, type BlobReader interface, Err() error
+pkg syncbase, type BlobReader interface, Value() []byte
+pkg syncbase, type BlobStatus interface { Advance, Cancel, Err, Value }
+pkg syncbase, type BlobStatus interface, Advance() bool
+pkg syncbase, type BlobStatus interface, Cancel()
+pkg syncbase, type BlobStatus interface, Err() error
+pkg syncbase, type BlobStatus interface, Value() wire.BlobFetchStatus
+pkg syncbase, type BlobWriter interface { Close, Send }
+pkg syncbase, type BlobWriter interface, Close() error
+pkg syncbase, type BlobWriter interface, Send([]byte) error
+pkg syncbase, type ChangeType uint32
+pkg syncbase, type Conflict struct
+pkg syncbase, type Conflict struct, Batches map[uint64]syncbase.BatchInfo
+pkg syncbase, type Conflict struct, ReadSet *ConflictRowSet
+pkg syncbase, type Conflict struct, ScanSet *ConflictScanSet
+pkg syncbase, type Conflict struct, WriteSet *ConflictRowSet
+pkg syncbase, type ConflictResolver interface { OnConflict }
+pkg syncbase, type ConflictResolver interface, OnConflict(*context.T, *Conflict) Resolution
+pkg syncbase, type ConflictRow struct
+pkg syncbase, type ConflictRow struct, AncestorValue Value
+pkg syncbase, type ConflictRow struct, BatchIds []uint64
+pkg syncbase, type ConflictRow struct, Key string
+pkg syncbase, type ConflictRow struct, LocalValue Value
+pkg syncbase, type ConflictRow struct, RemoteValue Value
+pkg syncbase, type ConflictRowSet struct
+pkg syncbase, type ConflictRowSet struct, ByBatch map[uint64][]ConflictRow
+pkg syncbase, type ConflictRowSet struct, ByKey map[string]ConflictRow
+pkg syncbase, type ConflictRowSetTarget struct
+pkg syncbase, type ConflictRowSetTarget struct, Value *ConflictRowSet
+pkg syncbase, type ConflictRowSetTarget struct, embedded vdl.FieldsTargetBase
+pkg syncbase, type ConflictRowSetTarget struct, embedded vdl.TargetBase
+pkg syncbase, type ConflictRowTarget struct
+pkg syncbase, type ConflictRowTarget struct, Value *ConflictRow
+pkg syncbase, type ConflictRowTarget struct, embedded vdl.FieldsTargetBase
+pkg syncbase, type ConflictRowTarget struct, embedded vdl.TargetBase
+pkg syncbase, type ConflictScanSet struct
+pkg syncbase, type ConflictScanSet struct, ByBatch map[uint64][]syncbase.ScanOp
+pkg syncbase, type ConflictScanSetTarget struct
+pkg syncbase, type ConflictScanSetTarget struct, Value *ConflictScanSet
+pkg syncbase, type ConflictScanSetTarget struct, embedded vdl.FieldsTargetBase
+pkg syncbase, type ConflictScanSetTarget struct, embedded vdl.TargetBase
+pkg syncbase, type ConflictTarget struct
+pkg syncbase, type ConflictTarget struct, Value *Conflict
+pkg syncbase, type ConflictTarget struct, embedded vdl.FieldsTargetBase
+pkg syncbase, type ConflictTarget struct, embedded vdl.TargetBase
+pkg syncbase, type Database interface { BeginBatch, Blob, Close, Create, CreateBlob, Destroy, EnforceSchema, Exec, Exists, FullName, GetPermissions, GetResumeMarker, GetSyncgroupNames, ListTables, Name, PauseSync, ResumeSync, SetPermissions, Syncgroup, Table, Watch }
+pkg syncbase, type Database interface, BeginBatch(*context.T, wire.BatchOptions) (BatchDatabase, error)
+pkg syncbase, type Database interface, Blob(wire.BlobRef) Blob
+pkg syncbase, type Database interface, Close()
+pkg syncbase, type Database interface, Create(*context.T, access.Permissions) error
+pkg syncbase, type Database interface, CreateBlob(*context.T) (Blob, error)
+pkg syncbase, type Database interface, Destroy(*context.T) error
+pkg syncbase, type Database interface, EnforceSchema(*context.T) error
+pkg syncbase, type Database interface, Exec(*context.T, string, ...interface{}) ([]string, ResultStream, error)
+pkg syncbase, type Database interface, Exists(*context.T) (bool, error)
+pkg syncbase, type Database interface, FullName() string
+pkg syncbase, type Database interface, GetPermissions(*context.T) (access.Permissions, string, error)
+pkg syncbase, type Database interface, GetResumeMarker(*context.T) (watch.ResumeMarker, error)
+pkg syncbase, type Database interface, GetSyncgroupNames(*context.T) ([]string, error)
+pkg syncbase, type Database interface, ListTables(*context.T) ([]string, error)
+pkg syncbase, type Database interface, Name() string
+pkg syncbase, type Database interface, PauseSync(*context.T) error
+pkg syncbase, type Database interface, ResumeSync(*context.T) error
+pkg syncbase, type Database interface, SetPermissions(*context.T, access.Permissions, string) error
+pkg syncbase, type Database interface, Syncgroup(string) Syncgroup
+pkg syncbase, type Database interface, Table(string) Table
+pkg syncbase, type Database interface, Watch(*context.T, string, string, watch.ResumeMarker) (WatchStream, error)
+pkg syncbase, type DatabaseHandle interface { Close, Exec, FullName, GetResumeMarker, ListTables, Name, Table }
+pkg syncbase, type DatabaseHandle interface, Close()
+pkg syncbase, type DatabaseHandle interface, Exec(*context.T, string, ...interface{}) ([]string, ResultStream, error)
+pkg syncbase, type DatabaseHandle interface, FullName() string
+pkg syncbase, type DatabaseHandle interface, GetResumeMarker(*context.T) (watch.ResumeMarker, error)
+pkg syncbase, type DatabaseHandle interface, ListTables(*context.T) ([]string, error)
+pkg syncbase, type DatabaseHandle interface, Name() string
+pkg syncbase, type DatabaseHandle interface, Table(string) Table
+pkg syncbase, type InvalidScanStream struct
+pkg syncbase, type InvalidScanStream struct, Error error
+pkg syncbase, type PrefixPermissions struct
+pkg syncbase, type PrefixPermissions struct, Perms access.Permissions
+pkg syncbase, type PrefixPermissions struct, Prefix PrefixRange
+pkg syncbase, type PrefixRange interface { Limit, Prefix, Start }
+pkg syncbase, type PrefixRange interface, Limit() string
+pkg syncbase, type PrefixRange interface, Prefix() string
+pkg syncbase, type PrefixRange interface, Start() string
+pkg syncbase, type Resolution struct
+pkg syncbase, type Resolution struct, ResultSet map[string]ResolvedRow
+pkg syncbase, type ResolutionTarget struct
+pkg syncbase, type ResolutionTarget struct, Value *Resolution
+pkg syncbase, type ResolutionTarget struct, embedded vdl.FieldsTargetBase
+pkg syncbase, type ResolutionTarget struct, embedded vdl.TargetBase
+pkg syncbase, type ResolvedRow struct
+pkg syncbase, type ResolvedRow struct, Key string
+pkg syncbase, type ResolvedRow struct, Result *Value
+pkg syncbase, type ResolvedRowTarget struct
+pkg syncbase, type ResolvedRowTarget struct, Value *ResolvedRow
+pkg syncbase, type ResolvedRowTarget struct, embedded vdl.FieldsTargetBase
+pkg syncbase, type ResolvedRowTarget struct, embedded vdl.TargetBase
+pkg syncbase, type ResultStream interface { Advance, Cancel, Err, Result }
+pkg syncbase, type ResultStream interface, Advance() bool
+pkg syncbase, type ResultStream interface, Cancel()
+pkg syncbase, type ResultStream interface, Err() error
+pkg syncbase, type ResultStream interface, Result() []*vom.RawBytes
+pkg syncbase, type Row interface { Delete, Exists, FullName, Get, Key, Put }
+pkg syncbase, type Row interface, Delete(*context.T) error
+pkg syncbase, type Row interface, Exists(*context.T) (bool, error)
+pkg syncbase, type Row interface, FullName() string
+pkg syncbase, type Row interface, Get(*context.T, interface{}) error
+pkg syncbase, type Row interface, Key() string
+pkg syncbase, type Row interface, Put(*context.T, interface{}) error
+pkg syncbase, type RowRange interface { Limit, Start }
+pkg syncbase, type RowRange interface, Limit() string
+pkg syncbase, type RowRange interface, Start() string
+pkg syncbase, type ScanStream interface { Advance, Cancel, Err, Key, Value }
+pkg syncbase, type ScanStream interface, Advance() bool
+pkg syncbase, type ScanStream interface, Cancel()
+pkg syncbase, type ScanStream interface, Err() error
+pkg syncbase, type ScanStream interface, Key() string
+pkg syncbase, type ScanStream interface, Value(interface{}) error
+pkg syncbase, type Schema struct
+pkg syncbase, type Schema struct, Metadata wire.SchemaMetadata
+pkg syncbase, type Schema struct, Resolver ConflictResolver
 pkg syncbase, type Service interface { App, FullName, GetPermissions, ListApps, SetPermissions }
 pkg syncbase, type Service interface, App(string) App
 pkg syncbase, type Service interface, FullName() string
 pkg syncbase, type Service interface, GetPermissions(*context.T) (access.Permissions, string, error)
 pkg syncbase, type Service interface, ListApps(*context.T) ([]string, error)
 pkg syncbase, type Service interface, SetPermissions(*context.T, access.Permissions, string) error
+pkg syncbase, type Stream interface { Advance, Cancel, Err }
+pkg syncbase, type Stream interface, Advance() bool
+pkg syncbase, type Stream interface, Cancel()
+pkg syncbase, type Stream interface, Err() error
+pkg syncbase, type Syncgroup interface { Create, Destroy, Eject, GetMembers, GetSpec, Join, Leave, SetSpec }
+pkg syncbase, type Syncgroup interface, Create(*context.T, wire.SyncgroupSpec, wire.SyncgroupMemberInfo) error
+pkg syncbase, type Syncgroup interface, Destroy(*context.T) error
+pkg syncbase, type Syncgroup interface, Eject(*context.T, string) error
+pkg syncbase, type Syncgroup interface, GetMembers(*context.T) (map[string]wire.SyncgroupMemberInfo, error)
+pkg syncbase, type Syncgroup interface, GetSpec(*context.T) (wire.SyncgroupSpec, string, error)
+pkg syncbase, type Syncgroup interface, Join(*context.T, wire.SyncgroupMemberInfo) (wire.SyncgroupSpec, error)
+pkg syncbase, type Syncgroup interface, Leave(*context.T) error
+pkg syncbase, type Syncgroup interface, SetSpec(*context.T, wire.SyncgroupSpec, string) error
+pkg syncbase, type Table interface { Create, Delete, DeletePrefixPermissions, DeleteRange, Destroy, Exists, FullName, Get, GetPermissions, GetPrefixPermissions, Name, Put, Row, Scan, SetPermissions, SetPrefixPermissions }
+pkg syncbase, type Table interface, Create(*context.T, access.Permissions) error
+pkg syncbase, type Table interface, Delete(*context.T, string) error
+pkg syncbase, type Table interface, DeletePrefixPermissions(*context.T, PrefixRange) error
+pkg syncbase, type Table interface, DeleteRange(*context.T, RowRange) error
+pkg syncbase, type Table interface, Destroy(*context.T) error
+pkg syncbase, type Table interface, Exists(*context.T) (bool, error)
+pkg syncbase, type Table interface, FullName() string
+pkg syncbase, type Table interface, Get(*context.T, string, interface{}) error
+pkg syncbase, type Table interface, GetPermissions(*context.T) (access.Permissions, error)
+pkg syncbase, type Table interface, GetPrefixPermissions(*context.T, string) ([]PrefixPermissions, error)
+pkg syncbase, type Table interface, Name() string
+pkg syncbase, type Table interface, Put(*context.T, string, interface{}) error
+pkg syncbase, type Table interface, Row(string) Row
+pkg syncbase, type Table interface, Scan(*context.T, RowRange) ScanStream
+pkg syncbase, type Table interface, SetPermissions(*context.T, access.Permissions) error
+pkg syncbase, type Table interface, SetPrefixPermissions(*context.T, PrefixRange, access.Permissions) error
+pkg syncbase, type Value struct
+pkg syncbase, type Value struct, Selection syncbase.ValueSelection
+pkg syncbase, type Value struct, State syncbase.ValueState
+pkg syncbase, type Value struct, Val []byte
+pkg syncbase, type Value struct, WriteTs time.Time
+pkg syncbase, type ValueTarget struct
+pkg syncbase, type ValueTarget struct, Value *Value
+pkg syncbase, type ValueTarget struct, embedded vdl.FieldsTargetBase
+pkg syncbase, type ValueTarget struct, embedded vdl.TargetBase
+pkg syncbase, type WatchChange struct
+pkg syncbase, type WatchChange struct, ChangeType ChangeType
+pkg syncbase, type WatchChange struct, Continued bool
+pkg syncbase, type WatchChange struct, FromSync bool
+pkg syncbase, type WatchChange struct, ResumeMarker watch.ResumeMarker
+pkg syncbase, type WatchChange struct, Row string
+pkg syncbase, type WatchChange struct, Table string
+pkg syncbase, type WatchChange struct, ValueBytes []byte
+pkg syncbase, type WatchStream interface { Advance, Cancel, Change, Err }
+pkg syncbase, type WatchStream interface, Advance() bool
+pkg syncbase, type WatchStream interface, Cancel()
+pkg syncbase, type WatchStream interface, Change() WatchChange
+pkg syncbase, type WatchStream interface, Err() error

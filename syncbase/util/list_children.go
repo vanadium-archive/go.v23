@@ -27,7 +27,7 @@ func ListChildren(ctx *context.T, parentFullName string) ([]string, error) {
 		case *naming.GlobReplyEntry:
 			escName := v.Value.Name[strings.LastIndex(v.Value.Name, "/")+1:]
 			// Component names within object names are always escaped. See comment in
-			// server/nosql/dispatcher.go for explanation.
+			// server/dispatcher.go for explanation.
 			name, ok := Unescape(escName)
 			if !ok {
 				// If this happens, there's a bug in the Syncbase server. Glob should
