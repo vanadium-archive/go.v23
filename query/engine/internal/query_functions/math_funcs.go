@@ -149,26 +149,3 @@ func remainderFunc(db ds.Database, off int64, args []*query_parser.Operand) (*qu
 
 	return makeFloatOp(off, math.Remainder(x.Float, y.Float)), nil
 }
-
-func complexFunc(db ds.Database, off int64, args []*query_parser.Operand) (*query_parser.Operand, error) {
-	r, err := conversions.ConvertValueToFloat(args[0])
-	if err != nil {
-		return nil, err
-	}
-
-	i, err := conversions.ConvertValueToFloat(args[1])
-	if err != nil {
-		return nil, err
-	}
-
-	return makeComplexOp(off, complex(r.Float, i.Float)), nil
-}
-
-func realFunc(db ds.Database, off int64, args []*query_parser.Operand) (*query_parser.Operand, error) {
-	c, err := conversions.ConvertValueToComplex(args[0])
-	if err != nil {
-		return nil, err
-	}
-
-	return makeFloatOp(off, real(c.Complex)), nil
-}

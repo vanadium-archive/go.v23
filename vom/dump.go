@@ -633,20 +633,6 @@ func (d *dumpWorker) decodeValue(tt *vdl.Type, target vdl.Target) error {
 		}
 		d.writeAtom(DumpKindPrimValue, PrimitivePFloat{v}, "float")
 		return target.FromFloat(v, ttFrom)
-	case vdl.Complex64, vdl.Complex128:
-		d.prepareAtom("waiting for complex real value")
-		re, err := binaryDecodeFloat(d.buf)
-		if err != nil {
-			return err
-		}
-		d.writeAtom(DumpKindPrimValue, PrimitivePFloat{re}, "complex real")
-		d.prepareAtom("waiting for complex imag value")
-		im, err := binaryDecodeFloat(d.buf)
-		if err != nil {
-			return err
-		}
-		d.writeAtom(DumpKindPrimValue, PrimitivePFloat{re}, "complex imag")
-		return target.FromComplex(complex(re, im), ttFrom)
 	case vdl.String:
 		d.prepareAtom("waiting for string len")
 		len, err := binaryDecodeLen(d.buf)

@@ -49,13 +49,6 @@ func (t *ByteTarget) FromFloat(src float64, tt *Type) (err error) {
 	*t.Value, err = vdlconv.Float64ToUint8(src)
 	return
 }
-func (t *ByteTarget) FromComplex(src complex128, tt *Type) (err error) {
-	if !Compatible(tt, ByteType) {
-		return fmt.Errorf("Type %v incompatible with expected type %v", tt, ByteType)
-	}
-	*t.Value, err = vdlconv.Complex128ToUint8(src)
-	return
-}
 
 type Uint16Target struct {
 	Value *uint16
@@ -81,13 +74,6 @@ func (t *Uint16Target) FromFloat(src float64, tt *Type) (err error) {
 		return fmt.Errorf("Type %v incompatible with expected type %v", tt, Uint16Type)
 	}
 	*t.Value, err = vdlconv.Float64ToUint16(src)
-	return
-}
-func (t *Uint16Target) FromComplex(src complex128, tt *Type) (err error) {
-	if !Compatible(tt, Uint16Type) {
-		return fmt.Errorf("Type %v incompatible with expected type %v", tt, Uint16Type)
-	}
-	*t.Value, err = vdlconv.Complex128ToUint16(src)
 	return
 }
 
@@ -117,13 +103,6 @@ func (t *Uint32Target) FromFloat(src float64, tt *Type) (err error) {
 	*t.Value, err = vdlconv.Float64ToUint32(src)
 	return
 }
-func (t *Uint32Target) FromComplex(src complex128, tt *Type) (err error) {
-	if !Compatible(tt, Uint32Type) {
-		return fmt.Errorf("Type %v incompatible with expected type %v", tt, Uint32Type)
-	}
-	*t.Value, err = vdlconv.Complex128ToUint32(src)
-	return
-}
 
 type Uint64Target struct {
 	Value *uint64
@@ -149,13 +128,6 @@ func (t *Uint64Target) FromFloat(src float64, tt *Type) (err error) {
 		return fmt.Errorf("Type %v incompatible with expected type %v", tt, Uint64Type)
 	}
 	*t.Value, err = vdlconv.Float64ToUint64(src)
-	return
-}
-func (t *Uint64Target) FromComplex(src complex128, tt *Type) (err error) {
-	if !Compatible(tt, Uint64Type) {
-		return fmt.Errorf("Type %v incompatible with expected type %v", tt, Uint64Type)
-	}
-	*t.Value, err = vdlconv.Complex128ToUint64(src)
 	return
 }
 
@@ -185,13 +157,6 @@ func (t *Int8Target) FromFloat(src float64, tt *Type) (err error) {
 	*t.Value, err = vdlconv.Float64ToInt8(src)
 	return
 }
-func (t *Int8Target) FromComplex(src complex128, tt *Type) (err error) {
-	if !Compatible(tt, Int8Type) {
-		return fmt.Errorf("Type %v incompatible with expected type %v", tt, Int8Type)
-	}
-	*t.Value, err = vdlconv.Complex128ToInt8(src)
-	return
-}
 
 type Int16Target struct {
 	Value *int16
@@ -217,13 +182,6 @@ func (t *Int16Target) FromFloat(src float64, tt *Type) (err error) {
 		return fmt.Errorf("Type %v incompatible with expected type %v", tt, Int16Type)
 	}
 	*t.Value, err = vdlconv.Float64ToInt16(src)
-	return
-}
-func (t *Int16Target) FromComplex(src complex128, tt *Type) (err error) {
-	if !Compatible(tt, Int16Type) {
-		return fmt.Errorf("Type %v incompatible with expected type %v", tt, Int16Type)
-	}
-	*t.Value, err = vdlconv.Complex128ToInt16(src)
 	return
 }
 
@@ -253,13 +211,6 @@ func (t *Int32Target) FromFloat(src float64, tt *Type) (err error) {
 	*t.Value, err = vdlconv.Float64ToInt32(src)
 	return
 }
-func (t *Int32Target) FromComplex(src complex128, tt *Type) (err error) {
-	if !Compatible(tt, Int32Type) {
-		return fmt.Errorf("Type %v incompatible with expected type %v", tt, Int32Type)
-	}
-	*t.Value, err = vdlconv.Complex128ToInt32(src)
-	return
-}
 
 type Int64Target struct {
 	Value *int64
@@ -285,13 +236,6 @@ func (t *Int64Target) FromFloat(src float64, tt *Type) (err error) {
 		return fmt.Errorf("Type %v incompatible with expected type %v", tt, Int64Type)
 	}
 	*t.Value, err = vdlconv.Float64ToInt64(src)
-	return
-}
-func (t *Int64Target) FromComplex(src complex128, tt *Type) (err error) {
-	if !Compatible(tt, Int64Type) {
-		return fmt.Errorf("Type %v incompatible with expected type %v", tt, Int64Type)
-	}
-	*t.Value, err = vdlconv.Complex128ToInt64(src)
 	return
 }
 
@@ -321,13 +265,6 @@ func (t *Float32Target) FromFloat(src float64, tt *Type) (err error) {
 	*t.Value, err = vdlconv.Float64ToFloat32(src)
 	return
 }
-func (t *Float32Target) FromComplex(src complex128, tt *Type) (err error) {
-	if !Compatible(tt, Float32Type) {
-		return fmt.Errorf("Type %v incompatible with expected type %v", tt, Float32Type)
-	}
-	*t.Value, err = vdlconv.Complex128ToFloat32(src)
-	return
-}
 
 type Float64Target struct {
 	Value *float64
@@ -351,81 +288,6 @@ func (t *Float64Target) FromInt(src int64, tt *Type) (err error) {
 func (t *Float64Target) FromFloat(src float64, tt *Type) (err error) {
 	if !Compatible(tt, Float64Type) {
 		return fmt.Errorf("Type %v incompatible with expected type %v", tt, Float64Type)
-	}
-	*t.Value = src
-	return
-}
-func (t *Float64Target) FromComplex(src complex128, tt *Type) (err error) {
-	if !Compatible(tt, Float64Type) {
-		return fmt.Errorf("Type %v incompatible with expected type %v", tt, Float64Type)
-	}
-	*t.Value, err = vdlconv.Complex128ToFloat64(src)
-	return
-}
-
-type Complex64Target struct {
-	Value *complex64
-	TargetBase
-}
-
-func (t *Complex64Target) FromUint(src uint64, tt *Type) (err error) {
-	if !Compatible(tt, Complex64Type) {
-		return fmt.Errorf("Type %v incompatible with expected type %v", tt, Complex64Type)
-	}
-	*t.Value, err = vdlconv.Uint64ToComplex64(src)
-	return
-}
-func (t *Complex64Target) FromInt(src int64, tt *Type) (err error) {
-	if !Compatible(tt, Complex64Type) {
-		return fmt.Errorf("Type %v incompatible with expected type %v", tt, Complex64Type)
-	}
-	*t.Value, err = vdlconv.Int64ToComplex64(src)
-	return
-}
-func (t *Complex64Target) FromFloat(src float64, tt *Type) (err error) {
-	if !Compatible(tt, Complex64Type) {
-		return fmt.Errorf("Type %v incompatible with expected type %v", tt, Complex64Type)
-	}
-	*t.Value, err = vdlconv.Float64ToComplex64(src)
-	return
-}
-func (t *Complex64Target) FromComplex(src complex128, tt *Type) (err error) {
-	if !Compatible(tt, Complex64Type) {
-		return fmt.Errorf("Type %v incompatible with expected type %v", tt, Complex64Type)
-	}
-	*t.Value, err = vdlconv.Complex128ToComplex64(src)
-	return
-}
-
-type Complex128Target struct {
-	Value *complex128
-	TargetBase
-}
-
-func (t *Complex128Target) FromUint(src uint64, tt *Type) (err error) {
-	if !Compatible(tt, Complex128Type) {
-		return fmt.Errorf("Type %v incompatible with expected type %v", tt, Complex128Type)
-	}
-	*t.Value, err = vdlconv.Uint64ToComplex128(src)
-	return
-}
-func (t *Complex128Target) FromInt(src int64, tt *Type) (err error) {
-	if !Compatible(tt, Complex128Type) {
-		return fmt.Errorf("Type %v incompatible with expected type %v", tt, Complex128Type)
-	}
-	*t.Value, err = vdlconv.Int64ToComplex128(src)
-	return
-}
-func (t *Complex128Target) FromFloat(src float64, tt *Type) (err error) {
-	if !Compatible(tt, Complex128Type) {
-		return fmt.Errorf("Type %v incompatible with expected type %v", tt, Complex128Type)
-	}
-	*t.Value, err = vdlconv.Float64ToComplex128(src)
-	return
-}
-func (t *Complex128Target) FromComplex(src complex128, tt *Type) (err error) {
-	if !Compatible(tt, Complex128Type) {
-		return fmt.Errorf("Type %v incompatible with expected type %v", tt, Complex128Type)
 	}
 	*t.Value = src
 	return

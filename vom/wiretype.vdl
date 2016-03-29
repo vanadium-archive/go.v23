@@ -18,8 +18,7 @@ const (
 	WireIdInt64      = typeId(9)
 	WireIdFloat32    = typeId(10)
 	WireIdFloat64    = typeId(11)
-	WireIdComplex64  = typeId(12)
-	WireIdComplex128 = typeId(13)
+	// Wire ids 12 and 13 were previously used for complex64 and complex 128.
 	WireIdTypeObject = typeId(14)
 	WireIdAny        = typeId(15)
 	WireIdInt8       = typeId(16)

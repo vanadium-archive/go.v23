@@ -1510,8 +1510,6 @@ type Numbers struct {
 	I64  int64
 	F32  float32
 	F64  float64
-	C64  complex64
-	C128 complex128
 }
 
 func (Numbers) __VDLReflect(struct {
@@ -1633,30 +1631,6 @@ func (m *Numbers) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 			return err
 		}
 	}
-	keyTarget20, fieldTarget21, err := fieldsTarget1.StartField("C64")
-	if err != vdl.ErrFieldNoExist && err != nil {
-		return err
-	}
-	if err != vdl.ErrFieldNoExist {
-		if err := fieldTarget21.FromComplex(complex128(m.C64), tt.NonOptional().Field(9).Type); err != nil {
-			return err
-		}
-		if err := fieldsTarget1.FinishField(keyTarget20, fieldTarget21); err != nil {
-			return err
-		}
-	}
-	keyTarget22, fieldTarget23, err := fieldsTarget1.StartField("C128")
-	if err != vdl.ErrFieldNoExist && err != nil {
-		return err
-	}
-	if err != vdl.ErrFieldNoExist {
-		if err := fieldTarget23.FromComplex(complex128(m.C128), tt.NonOptional().Field(10).Type); err != nil {
-			return err
-		}
-		if err := fieldsTarget1.FinishField(keyTarget22, fieldTarget23); err != nil {
-			return err
-		}
-	}
 	if err := t.FinishFields(fieldsTarget1); err != nil {
 		return err
 	}
@@ -1678,8 +1652,6 @@ type NumbersTarget struct {
 	i64Target  vdl.Int64Target
 	f32Target  vdl.Float32Target
 	f64Target  vdl.Float64Target
-	c64Target  vdl.Complex64Target
-	c128Target vdl.Complex128Target
 	vdl.TargetBase
 	vdl.FieldsTargetBase
 }
@@ -1728,14 +1700,6 @@ func (t *NumbersTarget) StartField(name string) (key, field vdl.Target, _ error)
 	case "F64":
 		t.f64Target.Value = &t.Value.F64
 		target, err := &t.f64Target, error(nil)
-		return nil, target, err
-	case "C64":
-		t.c64Target.Value = &t.Value.C64
-		target, err := &t.c64Target, error(nil)
-		return nil, target, err
-	case "C128":
-		t.c128Target.Value = &t.Value.C128
-		target, err := &t.c128Target, error(nil)
 		return nil, target, err
 	default:
 		return nil, nil, fmt.Errorf("field %s not in struct v.io/v23/query/engine/internal/testdata.Numbers", name)
@@ -2737,21 +2701,19 @@ func (t *FunWithTypesTarget) FinishFields(_ vdl.FieldsTarget) error {
 }
 
 type ManyMaps struct {
-	B    map[bool]string
-	By   map[byte]string
-	U16  map[uint16]string
-	U32  map[uint32]string
-	U64  map[uint64]string
-	I16  map[int16]string
-	I32  map[int32]string
-	I64  map[int64]string
-	F32  map[float32]string
-	F64  map[float64]string
-	C64  map[complex64]string
-	C128 map[complex128]string
-	S    map[string]string
-	Ms   map[string]map[string]string
-	T    map[time.Time]string
+	B   map[bool]string
+	By  map[byte]string
+	U16 map[uint16]string
+	U32 map[uint32]string
+	U64 map[uint64]string
+	I16 map[int16]string
+	I32 map[int32]string
+	I64 map[int64]string
+	F32 map[float32]string
+	F64 map[float64]string
+	S   map[string]string
+	Ms  map[string]map[string]string
+	T   map[time.Time]string
 }
 
 func (ManyMaps) __VDLReflect(struct {
@@ -3125,22 +3087,22 @@ func (m *ManyMaps) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 			return err
 		}
 	}
-	keyTarget72, fieldTarget73, err := fieldsTarget1.StartField("C64")
+	keyTarget72, fieldTarget73, err := fieldsTarget1.StartField("S")
 	if err != vdl.ErrFieldNoExist && err != nil {
 		return err
 	}
 	if err != vdl.ErrFieldNoExist {
 
-		mapTarget74, err := fieldTarget73.StartMap(tt.NonOptional().Field(10).Type, len(m.C64))
+		mapTarget74, err := fieldTarget73.StartMap(tt.NonOptional().Field(10).Type, len(m.S))
 		if err != nil {
 			return err
 		}
-		for key76, value78 := range m.C64 {
+		for key76, value78 := range m.S {
 			keyTarget75, err := mapTarget74.StartKey()
 			if err != nil {
 				return err
 			}
-			if err := keyTarget75.FromComplex(complex128(key76), tt.NonOptional().Field(10).Type.Key()); err != nil {
+			if err := keyTarget75.FromString(string(key76), tt.NonOptional().Field(10).Type.Key()); err != nil {
 				return err
 			}
 			valueTarget77, err := mapTarget74.FinishKeyStartField(keyTarget75)
@@ -3161,29 +3123,53 @@ func (m *ManyMaps) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 			return err
 		}
 	}
-	keyTarget79, fieldTarget80, err := fieldsTarget1.StartField("C128")
+	keyTarget79, fieldTarget80, err := fieldsTarget1.StartField("Ms")
 	if err != vdl.ErrFieldNoExist && err != nil {
 		return err
 	}
 	if err != vdl.ErrFieldNoExist {
 
-		mapTarget81, err := fieldTarget80.StartMap(tt.NonOptional().Field(11).Type, len(m.C128))
+		mapTarget81, err := fieldTarget80.StartMap(tt.NonOptional().Field(11).Type, len(m.Ms))
 		if err != nil {
 			return err
 		}
-		for key83, value85 := range m.C128 {
+		for key83, value85 := range m.Ms {
 			keyTarget82, err := mapTarget81.StartKey()
 			if err != nil {
 				return err
 			}
-			if err := keyTarget82.FromComplex(complex128(key83), tt.NonOptional().Field(11).Type.Key()); err != nil {
+			if err := keyTarget82.FromString(string(key83), tt.NonOptional().Field(11).Type.Key()); err != nil {
 				return err
 			}
 			valueTarget84, err := mapTarget81.FinishKeyStartField(keyTarget82)
 			if err != nil {
 				return err
 			}
-			if err := valueTarget84.FromString(string(value85), tt.NonOptional().Field(11).Type.Elem()); err != nil {
+
+			mapTarget86, err := valueTarget84.StartMap(tt.NonOptional().Field(11).Type.Elem(), len(value85))
+			if err != nil {
+				return err
+			}
+			for key88, value90 := range value85 {
+				keyTarget87, err := mapTarget86.StartKey()
+				if err != nil {
+					return err
+				}
+				if err := keyTarget87.FromString(string(key88), tt.NonOptional().Field(11).Type.Elem().Key()); err != nil {
+					return err
+				}
+				valueTarget89, err := mapTarget86.FinishKeyStartField(keyTarget87)
+				if err != nil {
+					return err
+				}
+				if err := valueTarget89.FromString(string(value90), tt.NonOptional().Field(11).Type.Elem().Elem()); err != nil {
+					return err
+				}
+				if err := mapTarget86.FinishField(keyTarget87, valueTarget89); err != nil {
+					return err
+				}
+			}
+			if err := valueTarget84.FinishMap(mapTarget86); err != nil {
 				return err
 			}
 			if err := mapTarget81.FinishField(keyTarget82, valueTarget84); err != nil {
@@ -3197,141 +3183,45 @@ func (m *ManyMaps) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 			return err
 		}
 	}
-	keyTarget86, fieldTarget87, err := fieldsTarget1.StartField("S")
+	keyTarget91, fieldTarget92, err := fieldsTarget1.StartField("T")
 	if err != vdl.ErrFieldNoExist && err != nil {
 		return err
 	}
 	if err != vdl.ErrFieldNoExist {
 
-		mapTarget88, err := fieldTarget87.StartMap(tt.NonOptional().Field(12).Type, len(m.S))
+		mapTarget93, err := fieldTarget92.StartMap(tt.NonOptional().Field(12).Type, len(m.T))
 		if err != nil {
 			return err
 		}
-		for key90, value92 := range m.S {
-			keyTarget89, err := mapTarget88.StartKey()
-			if err != nil {
-				return err
-			}
-			if err := keyTarget89.FromString(string(key90), tt.NonOptional().Field(12).Type.Key()); err != nil {
-				return err
-			}
-			valueTarget91, err := mapTarget88.FinishKeyStartField(keyTarget89)
-			if err != nil {
-				return err
-			}
-			if err := valueTarget91.FromString(string(value92), tt.NonOptional().Field(12).Type.Elem()); err != nil {
-				return err
-			}
-			if err := mapTarget88.FinishField(keyTarget89, valueTarget91); err != nil {
-				return err
-			}
-		}
-		if err := fieldTarget87.FinishMap(mapTarget88); err != nil {
-			return err
-		}
-		if err := fieldsTarget1.FinishField(keyTarget86, fieldTarget87); err != nil {
-			return err
-		}
-	}
-	keyTarget93, fieldTarget94, err := fieldsTarget1.StartField("Ms")
-	if err != vdl.ErrFieldNoExist && err != nil {
-		return err
-	}
-	if err != vdl.ErrFieldNoExist {
-
-		mapTarget95, err := fieldTarget94.StartMap(tt.NonOptional().Field(13).Type, len(m.Ms))
-		if err != nil {
-			return err
-		}
-		for key97, value99 := range m.Ms {
-			keyTarget96, err := mapTarget95.StartKey()
-			if err != nil {
-				return err
-			}
-			if err := keyTarget96.FromString(string(key97), tt.NonOptional().Field(13).Type.Key()); err != nil {
-				return err
-			}
-			valueTarget98, err := mapTarget95.FinishKeyStartField(keyTarget96)
+		for key95, value97 := range m.T {
+			keyTarget94, err := mapTarget93.StartKey()
 			if err != nil {
 				return err
 			}
 
-			mapTarget100, err := valueTarget98.StartMap(tt.NonOptional().Field(13).Type.Elem(), len(value99))
-			if err != nil {
-				return err
-			}
-			for key102, value104 := range value99 {
-				keyTarget101, err := mapTarget100.StartKey()
-				if err != nil {
-					return err
-				}
-				if err := keyTarget101.FromString(string(key102), tt.NonOptional().Field(13).Type.Elem().Key()); err != nil {
-					return err
-				}
-				valueTarget103, err := mapTarget100.FinishKeyStartField(keyTarget101)
-				if err != nil {
-					return err
-				}
-				if err := valueTarget103.FromString(string(value104), tt.NonOptional().Field(13).Type.Elem().Elem()); err != nil {
-					return err
-				}
-				if err := mapTarget100.FinishField(keyTarget101, valueTarget103); err != nil {
-					return err
-				}
-			}
-			if err := valueTarget98.FinishMap(mapTarget100); err != nil {
-				return err
-			}
-			if err := mapTarget95.FinishField(keyTarget96, valueTarget98); err != nil {
-				return err
-			}
-		}
-		if err := fieldTarget94.FinishMap(mapTarget95); err != nil {
-			return err
-		}
-		if err := fieldsTarget1.FinishField(keyTarget93, fieldTarget94); err != nil {
-			return err
-		}
-	}
-	keyTarget105, fieldTarget106, err := fieldsTarget1.StartField("T")
-	if err != vdl.ErrFieldNoExist && err != nil {
-		return err
-	}
-	if err != vdl.ErrFieldNoExist {
-
-		mapTarget107, err := fieldTarget106.StartMap(tt.NonOptional().Field(14).Type, len(m.T))
-		if err != nil {
-			return err
-		}
-		for key109, value111 := range m.T {
-			keyTarget108, err := mapTarget107.StartKey()
-			if err != nil {
+			var wireValue98 time_2.Time
+			if err := time_2.TimeFromNative(&wireValue98, key95); err != nil {
 				return err
 			}
 
-			var wireValue112 time_2.Time
-			if err := time_2.TimeFromNative(&wireValue112, key109); err != nil {
+			if err := wireValue98.FillVDLTarget(keyTarget94, tt.NonOptional().Field(12).Type.Key()); err != nil {
 				return err
 			}
-
-			if err := wireValue112.FillVDLTarget(keyTarget108, tt.NonOptional().Field(14).Type.Key()); err != nil {
-				return err
-			}
-			valueTarget110, err := mapTarget107.FinishKeyStartField(keyTarget108)
+			valueTarget96, err := mapTarget93.FinishKeyStartField(keyTarget94)
 			if err != nil {
 				return err
 			}
-			if err := valueTarget110.FromString(string(value111), tt.NonOptional().Field(14).Type.Elem()); err != nil {
+			if err := valueTarget96.FromString(string(value97), tt.NonOptional().Field(12).Type.Elem()); err != nil {
 				return err
 			}
-			if err := mapTarget107.FinishField(keyTarget108, valueTarget110); err != nil {
+			if err := mapTarget93.FinishField(keyTarget94, valueTarget96); err != nil {
 				return err
 			}
 		}
-		if err := fieldTarget106.FinishMap(mapTarget107); err != nil {
+		if err := fieldTarget92.FinishMap(mapTarget93); err != nil {
 			return err
 		}
-		if err := fieldsTarget1.FinishField(keyTarget105, fieldTarget106); err != nil {
+		if err := fieldsTarget1.FinishField(keyTarget91, fieldTarget92); err != nil {
 			return err
 		}
 	}
@@ -3346,22 +3236,20 @@ func (m *ManyMaps) MakeVDLTarget() vdl.Target {
 }
 
 type ManyMapsTarget struct {
-	Value      *ManyMaps
-	bTarget    __VDLTarget8_map
-	byTarget   __VDLTarget9_map
-	u16Target  __VDLTarget10_map
-	u32Target  __VDLTarget11_map
-	u64Target  __VDLTarget12_map
-	i16Target  __VDLTarget13_map
-	i32Target  __VDLTarget14_map
-	i64Target  __VDLTarget15_map
-	f32Target  __VDLTarget16_map
-	f64Target  __VDLTarget17_map
-	c64Target  __VDLTarget18_map
-	c128Target __VDLTarget19_map
-	sTarget    __VDLTarget20_map
-	msTarget   __VDLTarget21_map
-	tTarget    __VDLTarget22_map
+	Value     *ManyMaps
+	bTarget   __VDLTarget8_map
+	byTarget  __VDLTarget9_map
+	u16Target __VDLTarget10_map
+	u32Target __VDLTarget11_map
+	u64Target __VDLTarget12_map
+	i16Target __VDLTarget13_map
+	i32Target __VDLTarget14_map
+	i64Target __VDLTarget15_map
+	f32Target __VDLTarget16_map
+	f64Target __VDLTarget17_map
+	sTarget   __VDLTarget18_map
+	msTarget  __VDLTarget19_map
+	tTarget   __VDLTarget20_map
 	vdl.TargetBase
 	vdl.FieldsTargetBase
 }
@@ -3414,14 +3302,6 @@ func (t *ManyMapsTarget) StartField(name string) (key, field vdl.Target, _ error
 	case "F64":
 		t.f64Target.Value = &t.Value.F64
 		target, err := &t.f64Target, error(nil)
-		return nil, target, err
-	case "C64":
-		t.c64Target.Value = &t.Value.C64
-		target, err := &t.c64Target, error(nil)
-		return nil, target, err
-	case "C128":
-		t.c128Target.Value = &t.Value.C128
-		target, err := &t.c128Target, error(nil)
 		return nil, target, err
 	case "S":
 		t.sTarget.Value = &t.Value.S
@@ -3877,12 +3757,12 @@ func (t *__VDLTarget17_map) FinishMap(elem vdl.MapTarget) error {
 	return nil
 }
 
-// map[complex64]string
+// map[string]string
 type __VDLTarget18_map struct {
-	Value      *map[complex64]string
-	currKey    complex64
+	Value      *map[string]string
+	currKey    string
 	currElem   string
-	keyTarget  vdl.Complex64Target
+	keyTarget  vdl.StringTarget
 	elemTarget vdl.StringTarget
 	vdl.TargetBase
 	vdl.MapTargetBase
@@ -3890,14 +3770,14 @@ type __VDLTarget18_map struct {
 
 func (t *__VDLTarget18_map) StartMap(tt *vdl.Type, len int) (vdl.MapTarget, error) {
 
-	if ttWant := vdl.TypeOf((*map[complex64]string)(nil)); !vdl.Compatible(tt, ttWant) {
+	if ttWant := vdl.TypeOf((*map[string]string)(nil)); !vdl.Compatible(tt, ttWant) {
 		return nil, fmt.Errorf("type %v incompatible with %v", tt, ttWant)
 	}
-	*t.Value = make(map[complex64]string)
+	*t.Value = make(map[string]string)
 	return t, nil
 }
 func (t *__VDLTarget18_map) StartKey() (key vdl.Target, _ error) {
-	t.currKey = complex64(0)
+	t.currKey = ""
 	t.keyTarget.Value = &t.currKey
 	target, err := &t.keyTarget, error(nil)
 	return target, err
@@ -3920,33 +3800,33 @@ func (t *__VDLTarget18_map) FinishMap(elem vdl.MapTarget) error {
 	return nil
 }
 
-// map[complex128]string
+// map[string]map[string]string
 type __VDLTarget19_map struct {
-	Value      *map[complex128]string
-	currKey    complex128
-	currElem   string
-	keyTarget  vdl.Complex128Target
-	elemTarget vdl.StringTarget
+	Value      *map[string]map[string]string
+	currKey    string
+	currElem   map[string]string
+	keyTarget  vdl.StringTarget
+	elemTarget __VDLTarget18_map
 	vdl.TargetBase
 	vdl.MapTargetBase
 }
 
 func (t *__VDLTarget19_map) StartMap(tt *vdl.Type, len int) (vdl.MapTarget, error) {
 
-	if ttWant := vdl.TypeOf((*map[complex128]string)(nil)); !vdl.Compatible(tt, ttWant) {
+	if ttWant := vdl.TypeOf((*map[string]map[string]string)(nil)); !vdl.Compatible(tt, ttWant) {
 		return nil, fmt.Errorf("type %v incompatible with %v", tt, ttWant)
 	}
-	*t.Value = make(map[complex128]string)
+	*t.Value = make(map[string]map[string]string)
 	return t, nil
 }
 func (t *__VDLTarget19_map) StartKey() (key vdl.Target, _ error) {
-	t.currKey = complex128(0)
+	t.currKey = ""
 	t.keyTarget.Value = &t.currKey
 	target, err := &t.keyTarget, error(nil)
 	return target, err
 }
 func (t *__VDLTarget19_map) FinishKeyStartField(key vdl.Target) (field vdl.Target, _ error) {
-	t.currElem = ""
+	t.currElem = map[string]string(nil)
 	t.elemTarget.Value = &t.currElem
 	target, err := &t.elemTarget, error(nil)
 	return target, err
@@ -3963,12 +3843,12 @@ func (t *__VDLTarget19_map) FinishMap(elem vdl.MapTarget) error {
 	return nil
 }
 
-// map[string]string
+// map[time.Time]string
 type __VDLTarget20_map struct {
-	Value      *map[string]string
-	currKey    string
+	Value      *map[time.Time]string
+	currKey    time.Time
 	currElem   string
-	keyTarget  vdl.StringTarget
+	keyTarget  time_2.TimeTarget
 	elemTarget vdl.StringTarget
 	vdl.TargetBase
 	vdl.MapTargetBase
@@ -3976,14 +3856,14 @@ type __VDLTarget20_map struct {
 
 func (t *__VDLTarget20_map) StartMap(tt *vdl.Type, len int) (vdl.MapTarget, error) {
 
-	if ttWant := vdl.TypeOf((*map[string]string)(nil)); !vdl.Compatible(tt, ttWant) {
+	if ttWant := vdl.TypeOf((*map[time.Time]string)(nil)); !vdl.Compatible(tt, ttWant) {
 		return nil, fmt.Errorf("type %v incompatible with %v", tt, ttWant)
 	}
-	*t.Value = make(map[string]string)
+	*t.Value = make(map[time.Time]string)
 	return t, nil
 }
 func (t *__VDLTarget20_map) StartKey() (key vdl.Target, _ error) {
-	t.currKey = ""
+	t.currKey = reflect.Zero(reflect.TypeOf(t.currKey)).Interface().(time.Time)
 	t.keyTarget.Value = &t.currKey
 	target, err := &t.keyTarget, error(nil)
 	return target, err
@@ -4006,107 +3886,19 @@ func (t *__VDLTarget20_map) FinishMap(elem vdl.MapTarget) error {
 	return nil
 }
 
-// map[string]map[string]string
-type __VDLTarget21_map struct {
-	Value      *map[string]map[string]string
-	currKey    string
-	currElem   map[string]string
-	keyTarget  vdl.StringTarget
-	elemTarget __VDLTarget20_map
-	vdl.TargetBase
-	vdl.MapTargetBase
-}
-
-func (t *__VDLTarget21_map) StartMap(tt *vdl.Type, len int) (vdl.MapTarget, error) {
-
-	if ttWant := vdl.TypeOf((*map[string]map[string]string)(nil)); !vdl.Compatible(tt, ttWant) {
-		return nil, fmt.Errorf("type %v incompatible with %v", tt, ttWant)
-	}
-	*t.Value = make(map[string]map[string]string)
-	return t, nil
-}
-func (t *__VDLTarget21_map) StartKey() (key vdl.Target, _ error) {
-	t.currKey = ""
-	t.keyTarget.Value = &t.currKey
-	target, err := &t.keyTarget, error(nil)
-	return target, err
-}
-func (t *__VDLTarget21_map) FinishKeyStartField(key vdl.Target) (field vdl.Target, _ error) {
-	t.currElem = map[string]string(nil)
-	t.elemTarget.Value = &t.currElem
-	target, err := &t.elemTarget, error(nil)
-	return target, err
-}
-func (t *__VDLTarget21_map) FinishField(key, field vdl.Target) error {
-	(*t.Value)[t.currKey] = t.currElem
-	return nil
-}
-func (t *__VDLTarget21_map) FinishMap(elem vdl.MapTarget) error {
-	if len(*t.Value) == 0 {
-		*t.Value = nil
-	}
-
-	return nil
-}
-
-// map[time.Time]string
-type __VDLTarget22_map struct {
-	Value      *map[time.Time]string
-	currKey    time.Time
-	currElem   string
-	keyTarget  time_2.TimeTarget
-	elemTarget vdl.StringTarget
-	vdl.TargetBase
-	vdl.MapTargetBase
-}
-
-func (t *__VDLTarget22_map) StartMap(tt *vdl.Type, len int) (vdl.MapTarget, error) {
-
-	if ttWant := vdl.TypeOf((*map[time.Time]string)(nil)); !vdl.Compatible(tt, ttWant) {
-		return nil, fmt.Errorf("type %v incompatible with %v", tt, ttWant)
-	}
-	*t.Value = make(map[time.Time]string)
-	return t, nil
-}
-func (t *__VDLTarget22_map) StartKey() (key vdl.Target, _ error) {
-	t.currKey = reflect.Zero(reflect.TypeOf(t.currKey)).Interface().(time.Time)
-	t.keyTarget.Value = &t.currKey
-	target, err := &t.keyTarget, error(nil)
-	return target, err
-}
-func (t *__VDLTarget22_map) FinishKeyStartField(key vdl.Target) (field vdl.Target, _ error) {
-	t.currElem = ""
-	t.elemTarget.Value = &t.currElem
-	target, err := &t.elemTarget, error(nil)
-	return target, err
-}
-func (t *__VDLTarget22_map) FinishField(key, field vdl.Target) error {
-	(*t.Value)[t.currKey] = t.currElem
-	return nil
-}
-func (t *__VDLTarget22_map) FinishMap(elem vdl.MapTarget) error {
-	if len(*t.Value) == 0 {
-		*t.Value = nil
-	}
-
-	return nil
-}
-
 type ManySets struct {
-	B    map[bool]struct{}
-	By   map[byte]struct{}
-	U16  map[uint16]struct{}
-	U32  map[uint32]struct{}
-	U64  map[uint64]struct{}
-	I16  map[int16]struct{}
-	I32  map[int32]struct{}
-	I64  map[int64]struct{}
-	F32  map[float32]struct{}
-	F64  map[float64]struct{}
-	C64  map[complex64]struct{}
-	C128 map[complex128]struct{}
-	S    map[string]struct{}
-	T    map[time.Time]struct{}
+	B   map[bool]struct{}
+	By  map[byte]struct{}
+	U16 map[uint16]struct{}
+	U32 map[uint32]struct{}
+	U64 map[uint64]struct{}
+	I16 map[int16]struct{}
+	I32 map[int32]struct{}
+	I64 map[int64]struct{}
+	F32 map[float32]struct{}
+	F64 map[float64]struct{}
+	S   map[string]struct{}
+	T   map[time.Time]struct{}
 }
 
 func (ManySets) __VDLReflect(struct {
@@ -4410,22 +4202,22 @@ func (m *ManySets) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 			return err
 		}
 	}
-	keyTarget52, fieldTarget53, err := fieldsTarget1.StartField("C64")
+	keyTarget52, fieldTarget53, err := fieldsTarget1.StartField("S")
 	if err != vdl.ErrFieldNoExist && err != nil {
 		return err
 	}
 	if err != vdl.ErrFieldNoExist {
 
-		setTarget54, err := fieldTarget53.StartSet(tt.NonOptional().Field(10).Type, len(m.C64))
+		setTarget54, err := fieldTarget53.StartSet(tt.NonOptional().Field(10).Type, len(m.S))
 		if err != nil {
 			return err
 		}
-		for key56 := range m.C64 {
+		for key56 := range m.S {
 			keyTarget55, err := setTarget54.StartKey()
 			if err != nil {
 				return err
 			}
-			if err := keyTarget55.FromComplex(complex128(key56), tt.NonOptional().Field(10).Type.Key()); err != nil {
+			if err := keyTarget55.FromString(string(key56), tt.NonOptional().Field(10).Type.Key()); err != nil {
 				return err
 			}
 			if err := setTarget54.FinishKey(keyTarget55); err != nil {
@@ -4439,22 +4231,28 @@ func (m *ManySets) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 			return err
 		}
 	}
-	keyTarget57, fieldTarget58, err := fieldsTarget1.StartField("C128")
+	keyTarget57, fieldTarget58, err := fieldsTarget1.StartField("T")
 	if err != vdl.ErrFieldNoExist && err != nil {
 		return err
 	}
 	if err != vdl.ErrFieldNoExist {
 
-		setTarget59, err := fieldTarget58.StartSet(tt.NonOptional().Field(11).Type, len(m.C128))
+		setTarget59, err := fieldTarget58.StartSet(tt.NonOptional().Field(11).Type, len(m.T))
 		if err != nil {
 			return err
 		}
-		for key61 := range m.C128 {
+		for key61 := range m.T {
 			keyTarget60, err := setTarget59.StartKey()
 			if err != nil {
 				return err
 			}
-			if err := keyTarget60.FromComplex(complex128(key61), tt.NonOptional().Field(11).Type.Key()); err != nil {
+
+			var wireValue62 time_2.Time
+			if err := time_2.TimeFromNative(&wireValue62, key61); err != nil {
+				return err
+			}
+
+			if err := wireValue62.FillVDLTarget(keyTarget60, tt.NonOptional().Field(11).Type.Key()); err != nil {
 				return err
 			}
 			if err := setTarget59.FinishKey(keyTarget60); err != nil {
@@ -4465,70 +4263,6 @@ func (m *ManySets) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 			return err
 		}
 		if err := fieldsTarget1.FinishField(keyTarget57, fieldTarget58); err != nil {
-			return err
-		}
-	}
-	keyTarget62, fieldTarget63, err := fieldsTarget1.StartField("S")
-	if err != vdl.ErrFieldNoExist && err != nil {
-		return err
-	}
-	if err != vdl.ErrFieldNoExist {
-
-		setTarget64, err := fieldTarget63.StartSet(tt.NonOptional().Field(12).Type, len(m.S))
-		if err != nil {
-			return err
-		}
-		for key66 := range m.S {
-			keyTarget65, err := setTarget64.StartKey()
-			if err != nil {
-				return err
-			}
-			if err := keyTarget65.FromString(string(key66), tt.NonOptional().Field(12).Type.Key()); err != nil {
-				return err
-			}
-			if err := setTarget64.FinishKey(keyTarget65); err != nil {
-				return err
-			}
-		}
-		if err := fieldTarget63.FinishSet(setTarget64); err != nil {
-			return err
-		}
-		if err := fieldsTarget1.FinishField(keyTarget62, fieldTarget63); err != nil {
-			return err
-		}
-	}
-	keyTarget67, fieldTarget68, err := fieldsTarget1.StartField("T")
-	if err != vdl.ErrFieldNoExist && err != nil {
-		return err
-	}
-	if err != vdl.ErrFieldNoExist {
-
-		setTarget69, err := fieldTarget68.StartSet(tt.NonOptional().Field(13).Type, len(m.T))
-		if err != nil {
-			return err
-		}
-		for key71 := range m.T {
-			keyTarget70, err := setTarget69.StartKey()
-			if err != nil {
-				return err
-			}
-
-			var wireValue72 time_2.Time
-			if err := time_2.TimeFromNative(&wireValue72, key71); err != nil {
-				return err
-			}
-
-			if err := wireValue72.FillVDLTarget(keyTarget70, tt.NonOptional().Field(13).Type.Key()); err != nil {
-				return err
-			}
-			if err := setTarget69.FinishKey(keyTarget70); err != nil {
-				return err
-			}
-		}
-		if err := fieldTarget68.FinishSet(setTarget69); err != nil {
-			return err
-		}
-		if err := fieldsTarget1.FinishField(keyTarget67, fieldTarget68); err != nil {
 			return err
 		}
 	}
@@ -4543,21 +4277,19 @@ func (m *ManySets) MakeVDLTarget() vdl.Target {
 }
 
 type ManySetsTarget struct {
-	Value      *ManySets
-	bTarget    __VDLTarget23_set
-	byTarget   __VDLTarget24_set
-	u16Target  __VDLTarget25_set
-	u32Target  __VDLTarget26_set
-	u64Target  __VDLTarget27_set
-	i16Target  __VDLTarget28_set
-	i32Target  __VDLTarget29_set
-	i64Target  __VDLTarget30_set
-	f32Target  __VDLTarget31_set
-	f64Target  __VDLTarget32_set
-	c64Target  __VDLTarget33_set
-	c128Target __VDLTarget34_set
-	sTarget    __VDLTarget7_set
-	tTarget    __VDLTarget35_set
+	Value     *ManySets
+	bTarget   __VDLTarget21_set
+	byTarget  __VDLTarget22_set
+	u16Target __VDLTarget23_set
+	u32Target __VDLTarget24_set
+	u64Target __VDLTarget25_set
+	i16Target __VDLTarget26_set
+	i32Target __VDLTarget27_set
+	i64Target __VDLTarget28_set
+	f32Target __VDLTarget29_set
+	f64Target __VDLTarget30_set
+	sTarget   __VDLTarget7_set
+	tTarget   __VDLTarget31_set
 	vdl.TargetBase
 	vdl.FieldsTargetBase
 }
@@ -4611,14 +4343,6 @@ func (t *ManySetsTarget) StartField(name string) (key, field vdl.Target, _ error
 		t.f64Target.Value = &t.Value.F64
 		target, err := &t.f64Target, error(nil)
 		return nil, target, err
-	case "C64":
-		t.c64Target.Value = &t.Value.C64
-		target, err := &t.c64Target, error(nil)
-		return nil, target, err
-	case "C128":
-		t.c128Target.Value = &t.Value.C128
-		target, err := &t.c128Target, error(nil)
-		return nil, target, err
 	case "S":
 		t.sTarget.Value = &t.Value.S
 		target, err := &t.sTarget, error(nil)
@@ -4640,7 +4364,7 @@ func (t *ManySetsTarget) FinishFields(_ vdl.FieldsTarget) error {
 }
 
 // map[bool]struct{}
-type __VDLTarget23_set struct {
+type __VDLTarget21_set struct {
 	Value     *map[bool]struct{}
 	currKey   bool
 	keyTarget vdl.BoolTarget
@@ -4648,7 +4372,7 @@ type __VDLTarget23_set struct {
 	vdl.SetTargetBase
 }
 
-func (t *__VDLTarget23_set) StartSet(tt *vdl.Type, len int) (vdl.SetTarget, error) {
+func (t *__VDLTarget21_set) StartSet(tt *vdl.Type, len int) (vdl.SetTarget, error) {
 
 	if ttWant := vdl.TypeOf((*map[bool]struct{})(nil)); !vdl.Compatible(tt, ttWant) {
 		return nil, fmt.Errorf("type %v incompatible with %v", tt, ttWant)
@@ -4656,8 +4380,78 @@ func (t *__VDLTarget23_set) StartSet(tt *vdl.Type, len int) (vdl.SetTarget, erro
 	*t.Value = make(map[bool]struct{})
 	return t, nil
 }
-func (t *__VDLTarget23_set) StartKey() (key vdl.Target, _ error) {
+func (t *__VDLTarget21_set) StartKey() (key vdl.Target, _ error) {
 	t.currKey = false
+	t.keyTarget.Value = &t.currKey
+	target, err := &t.keyTarget, error(nil)
+	return target, err
+}
+func (t *__VDLTarget21_set) FinishKey(key vdl.Target) error {
+	(*t.Value)[t.currKey] = struct{}{}
+	return nil
+}
+func (t *__VDLTarget21_set) FinishSet(list vdl.SetTarget) error {
+	if len(*t.Value) == 0 {
+		*t.Value = nil
+	}
+
+	return nil
+}
+
+// map[byte]struct{}
+type __VDLTarget22_set struct {
+	Value     *map[byte]struct{}
+	currKey   byte
+	keyTarget vdl.ByteTarget
+	vdl.TargetBase
+	vdl.SetTargetBase
+}
+
+func (t *__VDLTarget22_set) StartSet(tt *vdl.Type, len int) (vdl.SetTarget, error) {
+
+	if ttWant := vdl.TypeOf((*map[byte]struct{})(nil)); !vdl.Compatible(tt, ttWant) {
+		return nil, fmt.Errorf("type %v incompatible with %v", tt, ttWant)
+	}
+	*t.Value = make(map[byte]struct{})
+	return t, nil
+}
+func (t *__VDLTarget22_set) StartKey() (key vdl.Target, _ error) {
+	t.currKey = byte(0)
+	t.keyTarget.Value = &t.currKey
+	target, err := &t.keyTarget, error(nil)
+	return target, err
+}
+func (t *__VDLTarget22_set) FinishKey(key vdl.Target) error {
+	(*t.Value)[t.currKey] = struct{}{}
+	return nil
+}
+func (t *__VDLTarget22_set) FinishSet(list vdl.SetTarget) error {
+	if len(*t.Value) == 0 {
+		*t.Value = nil
+	}
+
+	return nil
+}
+
+// map[uint16]struct{}
+type __VDLTarget23_set struct {
+	Value     *map[uint16]struct{}
+	currKey   uint16
+	keyTarget vdl.Uint16Target
+	vdl.TargetBase
+	vdl.SetTargetBase
+}
+
+func (t *__VDLTarget23_set) StartSet(tt *vdl.Type, len int) (vdl.SetTarget, error) {
+
+	if ttWant := vdl.TypeOf((*map[uint16]struct{})(nil)); !vdl.Compatible(tt, ttWant) {
+		return nil, fmt.Errorf("type %v incompatible with %v", tt, ttWant)
+	}
+	*t.Value = make(map[uint16]struct{})
+	return t, nil
+}
+func (t *__VDLTarget23_set) StartKey() (key vdl.Target, _ error) {
+	t.currKey = uint16(0)
 	t.keyTarget.Value = &t.currKey
 	target, err := &t.keyTarget, error(nil)
 	return target, err
@@ -4674,25 +4468,25 @@ func (t *__VDLTarget23_set) FinishSet(list vdl.SetTarget) error {
 	return nil
 }
 
-// map[byte]struct{}
+// map[uint32]struct{}
 type __VDLTarget24_set struct {
-	Value     *map[byte]struct{}
-	currKey   byte
-	keyTarget vdl.ByteTarget
+	Value     *map[uint32]struct{}
+	currKey   uint32
+	keyTarget vdl.Uint32Target
 	vdl.TargetBase
 	vdl.SetTargetBase
 }
 
 func (t *__VDLTarget24_set) StartSet(tt *vdl.Type, len int) (vdl.SetTarget, error) {
 
-	if ttWant := vdl.TypeOf((*map[byte]struct{})(nil)); !vdl.Compatible(tt, ttWant) {
+	if ttWant := vdl.TypeOf((*map[uint32]struct{})(nil)); !vdl.Compatible(tt, ttWant) {
 		return nil, fmt.Errorf("type %v incompatible with %v", tt, ttWant)
 	}
-	*t.Value = make(map[byte]struct{})
+	*t.Value = make(map[uint32]struct{})
 	return t, nil
 }
 func (t *__VDLTarget24_set) StartKey() (key vdl.Target, _ error) {
-	t.currKey = byte(0)
+	t.currKey = uint32(0)
 	t.keyTarget.Value = &t.currKey
 	target, err := &t.keyTarget, error(nil)
 	return target, err
@@ -4709,25 +4503,25 @@ func (t *__VDLTarget24_set) FinishSet(list vdl.SetTarget) error {
 	return nil
 }
 
-// map[uint16]struct{}
+// map[uint64]struct{}
 type __VDLTarget25_set struct {
-	Value     *map[uint16]struct{}
-	currKey   uint16
-	keyTarget vdl.Uint16Target
+	Value     *map[uint64]struct{}
+	currKey   uint64
+	keyTarget vdl.Uint64Target
 	vdl.TargetBase
 	vdl.SetTargetBase
 }
 
 func (t *__VDLTarget25_set) StartSet(tt *vdl.Type, len int) (vdl.SetTarget, error) {
 
-	if ttWant := vdl.TypeOf((*map[uint16]struct{})(nil)); !vdl.Compatible(tt, ttWant) {
+	if ttWant := vdl.TypeOf((*map[uint64]struct{})(nil)); !vdl.Compatible(tt, ttWant) {
 		return nil, fmt.Errorf("type %v incompatible with %v", tt, ttWant)
 	}
-	*t.Value = make(map[uint16]struct{})
+	*t.Value = make(map[uint64]struct{})
 	return t, nil
 }
 func (t *__VDLTarget25_set) StartKey() (key vdl.Target, _ error) {
-	t.currKey = uint16(0)
+	t.currKey = uint64(0)
 	t.keyTarget.Value = &t.currKey
 	target, err := &t.keyTarget, error(nil)
 	return target, err
@@ -4744,25 +4538,25 @@ func (t *__VDLTarget25_set) FinishSet(list vdl.SetTarget) error {
 	return nil
 }
 
-// map[uint32]struct{}
+// map[int16]struct{}
 type __VDLTarget26_set struct {
-	Value     *map[uint32]struct{}
-	currKey   uint32
-	keyTarget vdl.Uint32Target
+	Value     *map[int16]struct{}
+	currKey   int16
+	keyTarget vdl.Int16Target
 	vdl.TargetBase
 	vdl.SetTargetBase
 }
 
 func (t *__VDLTarget26_set) StartSet(tt *vdl.Type, len int) (vdl.SetTarget, error) {
 
-	if ttWant := vdl.TypeOf((*map[uint32]struct{})(nil)); !vdl.Compatible(tt, ttWant) {
+	if ttWant := vdl.TypeOf((*map[int16]struct{})(nil)); !vdl.Compatible(tt, ttWant) {
 		return nil, fmt.Errorf("type %v incompatible with %v", tt, ttWant)
 	}
-	*t.Value = make(map[uint32]struct{})
+	*t.Value = make(map[int16]struct{})
 	return t, nil
 }
 func (t *__VDLTarget26_set) StartKey() (key vdl.Target, _ error) {
-	t.currKey = uint32(0)
+	t.currKey = int16(0)
 	t.keyTarget.Value = &t.currKey
 	target, err := &t.keyTarget, error(nil)
 	return target, err
@@ -4779,25 +4573,25 @@ func (t *__VDLTarget26_set) FinishSet(list vdl.SetTarget) error {
 	return nil
 }
 
-// map[uint64]struct{}
+// map[int32]struct{}
 type __VDLTarget27_set struct {
-	Value     *map[uint64]struct{}
-	currKey   uint64
-	keyTarget vdl.Uint64Target
+	Value     *map[int32]struct{}
+	currKey   int32
+	keyTarget vdl.Int32Target
 	vdl.TargetBase
 	vdl.SetTargetBase
 }
 
 func (t *__VDLTarget27_set) StartSet(tt *vdl.Type, len int) (vdl.SetTarget, error) {
 
-	if ttWant := vdl.TypeOf((*map[uint64]struct{})(nil)); !vdl.Compatible(tt, ttWant) {
+	if ttWant := vdl.TypeOf((*map[int32]struct{})(nil)); !vdl.Compatible(tt, ttWant) {
 		return nil, fmt.Errorf("type %v incompatible with %v", tt, ttWant)
 	}
-	*t.Value = make(map[uint64]struct{})
+	*t.Value = make(map[int32]struct{})
 	return t, nil
 }
 func (t *__VDLTarget27_set) StartKey() (key vdl.Target, _ error) {
-	t.currKey = uint64(0)
+	t.currKey = int32(0)
 	t.keyTarget.Value = &t.currKey
 	target, err := &t.keyTarget, error(nil)
 	return target, err
@@ -4814,25 +4608,25 @@ func (t *__VDLTarget27_set) FinishSet(list vdl.SetTarget) error {
 	return nil
 }
 
-// map[int16]struct{}
+// map[int64]struct{}
 type __VDLTarget28_set struct {
-	Value     *map[int16]struct{}
-	currKey   int16
-	keyTarget vdl.Int16Target
+	Value     *map[int64]struct{}
+	currKey   int64
+	keyTarget vdl.Int64Target
 	vdl.TargetBase
 	vdl.SetTargetBase
 }
 
 func (t *__VDLTarget28_set) StartSet(tt *vdl.Type, len int) (vdl.SetTarget, error) {
 
-	if ttWant := vdl.TypeOf((*map[int16]struct{})(nil)); !vdl.Compatible(tt, ttWant) {
+	if ttWant := vdl.TypeOf((*map[int64]struct{})(nil)); !vdl.Compatible(tt, ttWant) {
 		return nil, fmt.Errorf("type %v incompatible with %v", tt, ttWant)
 	}
-	*t.Value = make(map[int16]struct{})
+	*t.Value = make(map[int64]struct{})
 	return t, nil
 }
 func (t *__VDLTarget28_set) StartKey() (key vdl.Target, _ error) {
-	t.currKey = int16(0)
+	t.currKey = int64(0)
 	t.keyTarget.Value = &t.currKey
 	target, err := &t.keyTarget, error(nil)
 	return target, err
@@ -4849,25 +4643,25 @@ func (t *__VDLTarget28_set) FinishSet(list vdl.SetTarget) error {
 	return nil
 }
 
-// map[int32]struct{}
+// map[float32]struct{}
 type __VDLTarget29_set struct {
-	Value     *map[int32]struct{}
-	currKey   int32
-	keyTarget vdl.Int32Target
+	Value     *map[float32]struct{}
+	currKey   float32
+	keyTarget vdl.Float32Target
 	vdl.TargetBase
 	vdl.SetTargetBase
 }
 
 func (t *__VDLTarget29_set) StartSet(tt *vdl.Type, len int) (vdl.SetTarget, error) {
 
-	if ttWant := vdl.TypeOf((*map[int32]struct{})(nil)); !vdl.Compatible(tt, ttWant) {
+	if ttWant := vdl.TypeOf((*map[float32]struct{})(nil)); !vdl.Compatible(tt, ttWant) {
 		return nil, fmt.Errorf("type %v incompatible with %v", tt, ttWant)
 	}
-	*t.Value = make(map[int32]struct{})
+	*t.Value = make(map[float32]struct{})
 	return t, nil
 }
 func (t *__VDLTarget29_set) StartKey() (key vdl.Target, _ error) {
-	t.currKey = int32(0)
+	t.currKey = float32(0)
 	t.keyTarget.Value = &t.currKey
 	target, err := &t.keyTarget, error(nil)
 	return target, err
@@ -4884,25 +4678,25 @@ func (t *__VDLTarget29_set) FinishSet(list vdl.SetTarget) error {
 	return nil
 }
 
-// map[int64]struct{}
+// map[float64]struct{}
 type __VDLTarget30_set struct {
-	Value     *map[int64]struct{}
-	currKey   int64
-	keyTarget vdl.Int64Target
+	Value     *map[float64]struct{}
+	currKey   float64
+	keyTarget vdl.Float64Target
 	vdl.TargetBase
 	vdl.SetTargetBase
 }
 
 func (t *__VDLTarget30_set) StartSet(tt *vdl.Type, len int) (vdl.SetTarget, error) {
 
-	if ttWant := vdl.TypeOf((*map[int64]struct{})(nil)); !vdl.Compatible(tt, ttWant) {
+	if ttWant := vdl.TypeOf((*map[float64]struct{})(nil)); !vdl.Compatible(tt, ttWant) {
 		return nil, fmt.Errorf("type %v incompatible with %v", tt, ttWant)
 	}
-	*t.Value = make(map[int64]struct{})
+	*t.Value = make(map[float64]struct{})
 	return t, nil
 }
 func (t *__VDLTarget30_set) StartKey() (key vdl.Target, _ error) {
-	t.currKey = int64(0)
+	t.currKey = float64(0)
 	t.keyTarget.Value = &t.currKey
 	target, err := &t.keyTarget, error(nil)
 	return target, err
@@ -4919,25 +4713,25 @@ func (t *__VDLTarget30_set) FinishSet(list vdl.SetTarget) error {
 	return nil
 }
 
-// map[float32]struct{}
+// map[time.Time]struct{}
 type __VDLTarget31_set struct {
-	Value     *map[float32]struct{}
-	currKey   float32
-	keyTarget vdl.Float32Target
+	Value     *map[time.Time]struct{}
+	currKey   time.Time
+	keyTarget time_2.TimeTarget
 	vdl.TargetBase
 	vdl.SetTargetBase
 }
 
 func (t *__VDLTarget31_set) StartSet(tt *vdl.Type, len int) (vdl.SetTarget, error) {
 
-	if ttWant := vdl.TypeOf((*map[float32]struct{})(nil)); !vdl.Compatible(tt, ttWant) {
+	if ttWant := vdl.TypeOf((*map[time.Time]struct{})(nil)); !vdl.Compatible(tt, ttWant) {
 		return nil, fmt.Errorf("type %v incompatible with %v", tt, ttWant)
 	}
-	*t.Value = make(map[float32]struct{})
+	*t.Value = make(map[time.Time]struct{})
 	return t, nil
 }
 func (t *__VDLTarget31_set) StartKey() (key vdl.Target, _ error) {
-	t.currKey = float32(0)
+	t.currKey = reflect.Zero(reflect.TypeOf(t.currKey)).Interface().(time.Time)
 	t.keyTarget.Value = &t.currKey
 	target, err := &t.keyTarget, error(nil)
 	return target, err
@@ -4947,146 +4741,6 @@ func (t *__VDLTarget31_set) FinishKey(key vdl.Target) error {
 	return nil
 }
 func (t *__VDLTarget31_set) FinishSet(list vdl.SetTarget) error {
-	if len(*t.Value) == 0 {
-		*t.Value = nil
-	}
-
-	return nil
-}
-
-// map[float64]struct{}
-type __VDLTarget32_set struct {
-	Value     *map[float64]struct{}
-	currKey   float64
-	keyTarget vdl.Float64Target
-	vdl.TargetBase
-	vdl.SetTargetBase
-}
-
-func (t *__VDLTarget32_set) StartSet(tt *vdl.Type, len int) (vdl.SetTarget, error) {
-
-	if ttWant := vdl.TypeOf((*map[float64]struct{})(nil)); !vdl.Compatible(tt, ttWant) {
-		return nil, fmt.Errorf("type %v incompatible with %v", tt, ttWant)
-	}
-	*t.Value = make(map[float64]struct{})
-	return t, nil
-}
-func (t *__VDLTarget32_set) StartKey() (key vdl.Target, _ error) {
-	t.currKey = float64(0)
-	t.keyTarget.Value = &t.currKey
-	target, err := &t.keyTarget, error(nil)
-	return target, err
-}
-func (t *__VDLTarget32_set) FinishKey(key vdl.Target) error {
-	(*t.Value)[t.currKey] = struct{}{}
-	return nil
-}
-func (t *__VDLTarget32_set) FinishSet(list vdl.SetTarget) error {
-	if len(*t.Value) == 0 {
-		*t.Value = nil
-	}
-
-	return nil
-}
-
-// map[complex64]struct{}
-type __VDLTarget33_set struct {
-	Value     *map[complex64]struct{}
-	currKey   complex64
-	keyTarget vdl.Complex64Target
-	vdl.TargetBase
-	vdl.SetTargetBase
-}
-
-func (t *__VDLTarget33_set) StartSet(tt *vdl.Type, len int) (vdl.SetTarget, error) {
-
-	if ttWant := vdl.TypeOf((*map[complex64]struct{})(nil)); !vdl.Compatible(tt, ttWant) {
-		return nil, fmt.Errorf("type %v incompatible with %v", tt, ttWant)
-	}
-	*t.Value = make(map[complex64]struct{})
-	return t, nil
-}
-func (t *__VDLTarget33_set) StartKey() (key vdl.Target, _ error) {
-	t.currKey = complex64(0)
-	t.keyTarget.Value = &t.currKey
-	target, err := &t.keyTarget, error(nil)
-	return target, err
-}
-func (t *__VDLTarget33_set) FinishKey(key vdl.Target) error {
-	(*t.Value)[t.currKey] = struct{}{}
-	return nil
-}
-func (t *__VDLTarget33_set) FinishSet(list vdl.SetTarget) error {
-	if len(*t.Value) == 0 {
-		*t.Value = nil
-	}
-
-	return nil
-}
-
-// map[complex128]struct{}
-type __VDLTarget34_set struct {
-	Value     *map[complex128]struct{}
-	currKey   complex128
-	keyTarget vdl.Complex128Target
-	vdl.TargetBase
-	vdl.SetTargetBase
-}
-
-func (t *__VDLTarget34_set) StartSet(tt *vdl.Type, len int) (vdl.SetTarget, error) {
-
-	if ttWant := vdl.TypeOf((*map[complex128]struct{})(nil)); !vdl.Compatible(tt, ttWant) {
-		return nil, fmt.Errorf("type %v incompatible with %v", tt, ttWant)
-	}
-	*t.Value = make(map[complex128]struct{})
-	return t, nil
-}
-func (t *__VDLTarget34_set) StartKey() (key vdl.Target, _ error) {
-	t.currKey = complex128(0)
-	t.keyTarget.Value = &t.currKey
-	target, err := &t.keyTarget, error(nil)
-	return target, err
-}
-func (t *__VDLTarget34_set) FinishKey(key vdl.Target) error {
-	(*t.Value)[t.currKey] = struct{}{}
-	return nil
-}
-func (t *__VDLTarget34_set) FinishSet(list vdl.SetTarget) error {
-	if len(*t.Value) == 0 {
-		*t.Value = nil
-	}
-
-	return nil
-}
-
-// map[time.Time]struct{}
-type __VDLTarget35_set struct {
-	Value     *map[time.Time]struct{}
-	currKey   time.Time
-	keyTarget time_2.TimeTarget
-	vdl.TargetBase
-	vdl.SetTargetBase
-}
-
-func (t *__VDLTarget35_set) StartSet(tt *vdl.Type, len int) (vdl.SetTarget, error) {
-
-	if ttWant := vdl.TypeOf((*map[time.Time]struct{})(nil)); !vdl.Compatible(tt, ttWant) {
-		return nil, fmt.Errorf("type %v incompatible with %v", tt, ttWant)
-	}
-	*t.Value = make(map[time.Time]struct{})
-	return t, nil
-}
-func (t *__VDLTarget35_set) StartKey() (key vdl.Target, _ error) {
-	t.currKey = reflect.Zero(reflect.TypeOf(t.currKey)).Interface().(time.Time)
-	t.keyTarget.Value = &t.currKey
-	target, err := &t.keyTarget, error(nil)
-	return target, err
-}
-func (t *__VDLTarget35_set) FinishKey(key vdl.Target) error {
-	(*t.Value)[t.currKey] = struct{}{}
-	return nil
-}
-func (t *__VDLTarget35_set) FinishSet(list vdl.SetTarget) error {
 	if len(*t.Value) == 0 {
 		*t.Value = nil
 	}

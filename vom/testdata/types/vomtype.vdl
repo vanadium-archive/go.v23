@@ -28,8 +28,6 @@ type (
 	NInt64      int64
 	NFloat32    float32
 	NFloat64    float64
-	NComplex64  complex64
-	NComplex128 complex128
 
 	NArray2Uint64    [2]uint64
 	NListUint64      []uint64
@@ -122,7 +120,6 @@ type (
 	MapOnlyStruct struct {
 		Key1 int64
 		Key2 uint32
-		Key3 complex128
 	}
 	StructOnlyMap map[string]uint64
 
@@ -177,8 +174,6 @@ type (
 		Bytes []byte
 		Float32 float32
 		Float64 float64
-		Complex64 complex64
-		Complex128 complex128
 		FoodEnum FoodEnum
 		NEnum NEnum
 		NListUint64 NListUint64

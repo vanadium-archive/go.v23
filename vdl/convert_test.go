@@ -91,8 +91,6 @@ var (
 		vdl.SeqNumValue(vdl.Array3Int64TypeN, 1, 2, 3),
 		vdl.SeqNumValue(vdl.Array3Float64Type, 1, 2, 3),
 		vdl.SeqNumValue(vdl.Array3Float64TypeN, 1, 2, 3),
-		vdl.SeqNumValue(vdl.Array3Complex64Type, 1, 2, 3),
-		vdl.SeqNumValue(vdl.Array3Complex64TypeN, 1, 2, 3),
 		vdl.SeqNumValue(vdl.ListByteType, 1, 2, 3),
 		vdl.SeqNumValue(vdl.ListByteTypeN, 1, 2, 3),
 		vdl.SeqNumValue(vdl.ListUint64Type, 1, 2, 3),
@@ -101,8 +99,6 @@ var (
 		vdl.SeqNumValue(vdl.ListInt64TypeN, 1, 2, 3),
 		vdl.SeqNumValue(vdl.ListFloat64Type, 1, 2, 3),
 		vdl.SeqNumValue(vdl.ListFloat64TypeN, 1, 2, 3),
-		vdl.SeqNumValue(vdl.ListComplex64Type, 1, 2, 3),
-		vdl.SeqNumValue(vdl.ListComplex64TypeN, 1, 2, 3),
 	}
 	vvSet123 = []*vdl.Value{
 		vdl.SetNumValue(vdl.SetByteType, 1, 2, 3),
@@ -113,8 +109,6 @@ var (
 		vdl.SetNumValue(vdl.SetInt64TypeN, 1, 2, 3),
 		vdl.SetNumValue(vdl.SetFloat64Type, 1, 2, 3),
 		vdl.SetNumValue(vdl.SetFloat64TypeN, 1, 2, 3),
-		vdl.SetNumValue(vdl.SetComplex64Type, 1, 2, 3),
-		vdl.SetNumValue(vdl.SetComplex64TypeN, 1, 2, 3),
 	}
 	vvMap123True = []*vdl.Value{
 		vdl.MapNumBoolValue(vdl.MapByteBoolType, vdl.NB{1, true}, vdl.NB{2, true}, vdl.NB{3, true}),
@@ -125,8 +119,6 @@ var (
 		vdl.MapNumBoolValue(vdl.MapInt64BoolTypeN, vdl.NB{1, true}, vdl.NB{2, true}, vdl.NB{3, true}),
 		vdl.MapNumBoolValue(vdl.MapFloat64BoolType, vdl.NB{1, true}, vdl.NB{2, true}, vdl.NB{3, true}),
 		vdl.MapNumBoolValue(vdl.MapFloat64BoolTypeN, vdl.NB{1, true}, vdl.NB{2, true}, vdl.NB{3, true}),
-		vdl.MapNumBoolValue(vdl.MapComplex64BoolType, vdl.NB{1, true}, vdl.NB{2, true}, vdl.NB{3, true}),
-		vdl.MapNumBoolValue(vdl.MapComplex64BoolTypeN, vdl.NB{1, true}, vdl.NB{2, true}, vdl.NB{3, true}),
 	}
 	vvSetMap123       = append(vvSet123, vvMap123True...)
 	vvMap123FalseTrue = []*vdl.Value{
@@ -138,8 +130,6 @@ var (
 		vdl.MapNumBoolValue(vdl.MapInt64BoolTypeN, vdl.NB{1, false}, vdl.NB{2, true}, vdl.NB{3, false}),
 		vdl.MapNumBoolValue(vdl.MapFloat64BoolType, vdl.NB{1, false}, vdl.NB{2, true}, vdl.NB{3, false}),
 		vdl.MapNumBoolValue(vdl.MapFloat64BoolTypeN, vdl.NB{1, false}, vdl.NB{2, true}, vdl.NB{3, false}),
-		vdl.MapNumBoolValue(vdl.MapComplex64BoolType, vdl.NB{1, false}, vdl.NB{2, true}, vdl.NB{3, false}),
-		vdl.MapNumBoolValue(vdl.MapComplex64BoolTypeN, vdl.NB{1, false}, vdl.NB{2, true}, vdl.NB{3, false}),
 	}
 	vvSetXYZ = []*vdl.Value{
 		vdl.SetStringValue(vdl.SetStringType, "X", "Y", "Z"),
@@ -178,8 +168,6 @@ var (
 		vdl.MapStringNumValue(vdl.MapStringInt64TypeN, vdl.SN{"V", 1}, vdl.SN{"W", 2}, vdl.SN{"X", 3}),
 		vdl.MapStringNumValue(vdl.MapStringFloat64Type, vdl.SN{"V", 1}, vdl.SN{"W", 2}, vdl.SN{"X", 3}),
 		vdl.MapStringNumValue(vdl.MapStringFloat64TypeN, vdl.SN{"V", 1}, vdl.SN{"W", 2}, vdl.SN{"X", 3}),
-		vdl.MapStringNumValue(vdl.MapStringComplex64Type, vdl.SN{"V", 1}, vdl.SN{"W", 2}, vdl.SN{"X", 3}),
-		vdl.MapStringNumValue(vdl.MapStringComplex64TypeN, vdl.SN{"V", 1}, vdl.SN{"W", 2}, vdl.SN{"X", 3}),
 	}
 	vvStructVWX123 = []*vdl.Value{
 		vdl.StructNumValue(vdl.StructVWXByteType, vdl.SN{"V", 1}, vdl.SN{"W", 2}, vdl.SN{"X", 3}),
@@ -190,8 +178,6 @@ var (
 		vdl.StructNumValue(vdl.StructVWXInt64TypeN, vdl.SN{"V", 1}, vdl.SN{"W", 2}, vdl.SN{"X", 3}),
 		vdl.StructNumValue(vdl.StructVWXFloat64Type, vdl.SN{"V", 1}, vdl.SN{"W", 2}, vdl.SN{"X", 3}),
 		vdl.StructNumValue(vdl.StructVWXFloat64TypeN, vdl.SN{"V", 1}, vdl.SN{"W", 2}, vdl.SN{"X", 3}),
-		vdl.StructNumValue(vdl.StructVWXComplex64Type, vdl.SN{"V", 1}, vdl.SN{"W", 2}, vdl.SN{"X", 3}),
-		vdl.StructNumValue(vdl.StructVWXComplex64TypeN, vdl.SN{"V", 1}, vdl.SN{"W", 2}, vdl.SN{"X", 3}),
 	}
 	vvMapStructVWX123 = append(vvMapVWX123, vvStructVWX123...)
 	vvStructUV01      = []*vdl.Value{
@@ -203,8 +189,6 @@ var (
 		vdl.StructNumValue(vdl.StructUVInt64TypeN, vdl.SN{"U", 0}, vdl.SN{"V", 1}),
 		vdl.StructNumValue(vdl.StructUVFloat64Type, vdl.SN{"U", 0}, vdl.SN{"V", 1}),
 		vdl.StructNumValue(vdl.StructUVFloat64TypeN, vdl.SN{"U", 0}, vdl.SN{"V", 1}),
-		vdl.StructNumValue(vdl.StructUVComplex64Type, vdl.SN{"U", 0}, vdl.SN{"V", 1}),
-		vdl.StructNumValue(vdl.StructUVComplex64TypeN, vdl.SN{"U", 0}, vdl.SN{"V", 1}),
 	}
 
 	rvBoolTrue = []interface{}{
@@ -221,31 +205,26 @@ var (
 		[3]uint64{1, 2, 3}, []uint64{1, 2, 3}, vdl.NArray3Uint64{1, 2, 3}, vdl.NSliceUint64{1, 2, 3},
 		[3]int64{1, 2, 3}, []int64{1, 2, 3}, vdl.NArray3Int64{1, 2, 3}, vdl.NSliceInt64{1, 2, 3},
 		[3]float64{1, 2, 3}, []float64{1, 2, 3}, vdl.NArray3Float64{1, 2, 3}, vdl.NSliceFloat64{1, 2, 3},
-		[3]complex64{1, 2, 3}, []complex64{1, 2, 3}, vdl.NArray3Complex64{1, 2, 3}, vdl.NSliceComplex64{1, 2, 3},
 	}
 	rvSet123 = []interface{}{
 		map[byte]struct{}{1: struct{}{}, 2: struct{}{}, 3: struct{}{}},
 		map[uint64]struct{}{1: struct{}{}, 2: struct{}{}, 3: struct{}{}},
 		map[int64]struct{}{1: struct{}{}, 2: struct{}{}, 3: struct{}{}},
 		map[float64]struct{}{1: struct{}{}, 2: struct{}{}, 3: struct{}{}},
-		map[complex64]struct{}{1: struct{}{}, 2: struct{}{}, 3: struct{}{}},
 		vdl.NMapByteEmpty{1: struct{}{}, 2: struct{}{}, 3: struct{}{}},
 		vdl.NMapUint64Empty{1: struct{}{}, 2: struct{}{}, 3: struct{}{}},
 		vdl.NMapInt64Empty{1: struct{}{}, 2: struct{}{}, 3: struct{}{}},
 		vdl.NMapFloat64Empty{1: struct{}{}, 2: struct{}{}, 3: struct{}{}},
-		vdl.NMapComplex64Empty{1: struct{}{}, 2: struct{}{}, 3: struct{}{}},
 	}
 	rvMap123True = []interface{}{
 		map[byte]bool{1: true, 2: true, 3: true},
 		map[uint64]bool{1: true, 2: true, 3: true},
 		map[int64]bool{1: true, 2: true, 3: true},
 		map[float64]bool{1: true, 2: true, 3: true},
-		map[complex64]bool{1: true, 2: true, 3: true},
 		vdl.NMapByteBool{1: true, 2: true, 3: true},
 		vdl.NMapUint64Bool{1: true, 2: true, 3: true},
 		vdl.NMapInt64Bool{1: true, 2: true, 3: true},
 		vdl.NMapFloat64Bool{1: true, 2: true, 3: true},
-		vdl.NMapComplex64Bool{1: true, 2: true, 3: true},
 	}
 	rvSetMap123       = append(rvSet123, rvMap123True...)
 	rvMap123FalseTrue = []interface{}{
@@ -253,12 +232,10 @@ var (
 		map[uint64]bool{1: false, 2: true, 3: false},
 		map[int64]bool{1: false, 2: true, 3: false},
 		map[float64]bool{1: false, 2: true, 3: false},
-		map[complex64]bool{1: false, 2: true, 3: false},
 		vdl.NMapByteBool{1: false, 2: true, 3: false},
 		vdl.NMapUint64Bool{1: false, 2: true, 3: false},
 		vdl.NMapInt64Bool{1: false, 2: true, 3: false},
 		vdl.NMapFloat64Bool{1: false, 2: true, 3: false},
-		vdl.NMapComplex64Bool{1: false, 2: true, 3: false},
 	}
 	rvSetXYZ = []interface{}{
 		map[string]struct{}{"X": struct{}{}, "Y": struct{}{}, "Z": struct{}{}},
@@ -297,34 +274,30 @@ var (
 		map[string]uint64{"V": 1, "W": 2, "X": 3},
 		map[string]int64{"V": 1, "W": 2, "X": 3},
 		map[string]float64{"V": 1, "W": 2, "X": 3},
-		map[string]complex64{"V": 1, "W": 2, "X": 3},
 		vdl.NMapStringByte{"V": 1, "W": 2, "X": 3},
 		vdl.NMapStringUint64{"V": 1, "W": 2, "X": 3},
 		vdl.NMapStringInt64{"V": 1, "W": 2, "X": 3},
 		vdl.NMapStringFloat64{"V": 1, "W": 2, "X": 3},
-		vdl.NMapStringComplex64{"V": 1, "W": 2, "X": 3},
 	}
 	rvStructVWX123 = []interface{}{
 		struct{ V, W, X byte }{V: 1, W: 2, X: 3},
 		struct{ V, W, X uint64 }{V: 1, W: 2, X: 3},
 		struct{ V, W, X int64 }{V: 1, W: 2, X: 3},
 		struct{ V, W, X float64 }{V: 1, W: 2, X: 3},
-		struct{ V, W, X complex64 }{V: 1, W: 2, X: 3},
 		struct {
 			// Interleave unexported fields, which are ignored.
 			a bool
 			V int64
 			b string
 			W float64
+			X float32
 			c []byte
-			X complex64
 			d interface{}
 		}{V: 1, W: 2, X: 3},
 		vdl.NStructVWXByte{V: 1, W: 2, X: 3},
 		vdl.NStructVWXUint64{V: 1, W: 2, X: 3},
 		vdl.NStructVWXInt64{V: 1, W: 2, X: 3},
 		vdl.NStructVWXFloat64{V: 1, W: 2, X: 3},
-		vdl.NStructVWXComplex64{V: 1, W: 2, X: 3},
 		vdl.NStructVWXMixed{V: 1, W: 2, X: 3},
 	}
 	rvMapStructVWX123 = append(rvMapVWX123, rvStructVWX123...)
@@ -333,7 +306,6 @@ var (
 		struct{ U, V uint64 }{U: 0, V: 1},
 		struct{ U, V int64 }{U: 0, V: 1},
 		struct{ U, V float64 }{U: 0, V: 1},
-		struct{ U, V complex64 }{U: 0, V: 1},
 		struct {
 			// Interleave unexported fields, which are ignored.
 			a bool
@@ -346,7 +318,6 @@ var (
 		vdl.NStructUVUint64{U: 0, V: 1},
 		vdl.NStructUVInt64{U: 0, V: 1},
 		vdl.NStructUVFloat64{U: 0, V: 1},
-		vdl.NStructUVComplex64{U: 0, V: 1},
 		vdl.NStructUVMixed{U: 0, V: 1},
 	}
 	rvEmptyStruct = []interface{}{struct{}{}, vdl.NEmpty{}}
@@ -378,15 +349,12 @@ var (
 		vdl.Int32Type, vdl.Int32TypeN,
 		vdl.Int64Type, vdl.Int64TypeN,
 	}
-	ttFloat32s    = []*vdl.Type{vdl.Float32Type, vdl.Float32TypeN}
-	ttFloat64s    = []*vdl.Type{vdl.Float64Type, vdl.Float64TypeN}
-	ttFloats      = ttJoin(ttFloat32s, ttFloat64s)
-	ttComplex64s  = []*vdl.Type{vdl.Complex64Type, vdl.Complex64TypeN}
-	ttComplex128s = []*vdl.Type{vdl.Complex128Type, vdl.Complex128TypeN}
-	ttComplexes   = ttJoin(ttComplex64s, ttComplex128s)
-	ttIntegers    = ttJoin(ttUints, ttInts)
-	ttNumbers     = ttJoin(ttIntegers, ttFloats, ttComplexes)
-	ttAllTypes    = ttJoin(ttBools, ttStrs, ttTypeObjects, ttNumbers, ttSeq123, ttSetMap123, ttSetMapStructXYZ, ttMapStructVWXNum)
+	ttFloat32s = []*vdl.Type{vdl.Float32Type, vdl.Float32TypeN}
+	ttFloat64s = []*vdl.Type{vdl.Float64Type, vdl.Float64TypeN}
+	ttFloats   = ttJoin(ttFloat32s, ttFloat64s)
+	ttIntegers = ttJoin(ttUints, ttInts)
+	ttNumbers  = ttJoin(ttIntegers, ttFloats)
+	ttAllTypes = ttJoin(ttBools, ttStrs, ttTypeObjects, ttNumbers, ttSeq123, ttSetMap123, ttSetMapStructXYZ, ttMapStructVWXNum)
 
 	rtBools           = rtTypes(rvBoolTrue)
 	rtStrs            = rtTypes(rvStrABC)
@@ -421,17 +389,10 @@ var (
 	rtFloat64s = []reflect.Type{
 		reflect.TypeOf(float64(0)), reflect.TypeOf(vdl.NFloat64(0)),
 	}
-	rtFloats     = rtJoin(rtFloat32s, rtFloat64s)
-	rtComplex64s = []reflect.Type{
-		reflect.TypeOf(complex64(0)), reflect.TypeOf(vdl.NComplex64(0)),
-	}
-	rtComplex128s = []reflect.Type{
-		reflect.TypeOf(complex128(0)), reflect.TypeOf(vdl.NComplex128(0)),
-	}
-	rtComplexes = rtJoin(rtComplex64s, rtComplex128s)
-	rtIntegers  = rtJoin(rtUints, rtInts)
-	rtNumbers   = rtJoin(rtIntegers, rtFloats, rtComplexes)
-	rtAllTypes  = rtJoin(rtBools, rtStrs, rtTypeObjects, rtNumbers, rtSeq123, rtSetMap123, rtSetMapStructXYZ, rtMapStructVWXNum)
+	rtFloats   = rtJoin(rtFloat32s, rtFloat64s)
+	rtIntegers = rtJoin(rtUints, rtInts)
+	rtNumbers  = rtJoin(rtIntegers, rtFloats)
+	rtAllTypes = rtJoin(rtBools, rtStrs, rtTypeObjects, rtNumbers, rtSeq123, rtSetMap123, rtSetMapStructXYZ, rtMapStructVWXNum)
 
 	rtInterface = reflect.TypeOf((*interface{})(nil)).Elem()
 	rtPtrToType = reflect.TypeOf((*vdl.Type)(nil))
@@ -547,7 +508,7 @@ func rvOnlyFrom(values []interface{}, from []reflect.Type) (result []interface{}
 
 // vvFromUint returns all *Values that can represent u without loss of precision.
 func vvFromUint(u uint64) (result []*vdl.Value) {
-	i, f, c := int64(u), float64(u), complex(float64(u), 0)
+	i, f := int64(u), float64(u)
 	switch {
 	case u <= math.MaxInt8:
 		result = append(result,
@@ -573,9 +534,6 @@ func vvFromUint(u uint64) (result []*vdl.Value) {
 		result = append(result,
 			vdl.ZeroValue(vdl.Float32Type).AssignFloat(f),
 			vdl.ZeroValue(vdl.Float32TypeN).AssignFloat(f))
-		result = append(result,
-			vdl.ZeroValue(vdl.Complex64Type).AssignComplex(c),
-			vdl.ZeroValue(vdl.Complex64TypeN).AssignComplex(c))
 		fallthrough
 	case u <= math.MaxInt32:
 		result = append(result,
@@ -591,9 +549,6 @@ func vvFromUint(u uint64) (result []*vdl.Value) {
 		result = append(result,
 			vdl.ZeroValue(vdl.Float64Type).AssignFloat(f),
 			vdl.ZeroValue(vdl.Float64TypeN).AssignFloat(f))
-		result = append(result,
-			vdl.ZeroValue(vdl.Complex128Type).AssignComplex(c),
-			vdl.ZeroValue(vdl.Complex128TypeN).AssignComplex(c))
 		fallthrough
 	case u <= math.MaxInt64:
 		result = append(result,
@@ -610,7 +565,6 @@ func vvFromUint(u uint64) (result []*vdl.Value) {
 
 // rvFromUint returns all values that can represent u without loss of precision.
 func rvFromUint(u uint64) (result []interface{}) {
-	c64, c128 := complex(float32(u), 0), complex(float64(u), 0)
 	switch {
 	case u <= math.MaxInt8:
 		result = append(result, int8(u), vdl.NInt8(u))
@@ -626,7 +580,6 @@ func rvFromUint(u uint64) (result []interface{}) {
 		fallthrough
 	case u <= 1<<24:
 		result = append(result, float32(u), vdl.NFloat32(u))
-		result = append(result, c64, vdl.NComplex64(c64))
 		fallthrough
 	case u <= math.MaxInt32:
 		result = append(result, int32(u), vdl.NInt32(u))
@@ -636,7 +589,6 @@ func rvFromUint(u uint64) (result []interface{}) {
 		fallthrough
 	case u <= 1<<53:
 		result = append(result, float64(u), vdl.NFloat64(u))
-		result = append(result, c128, vdl.NComplex128(c128))
 		fallthrough
 	case u <= math.MaxInt64:
 		result = append(result, int64(u), vdl.NInt64(u))
@@ -649,7 +601,7 @@ func rvFromUint(u uint64) (result []interface{}) {
 
 // vvFromInt returns all *Values that can represent i without loss of precision.
 func vvFromInt(i int64) (result []*vdl.Value) {
-	u, f, c := uint64(i), float64(i), complex(float64(i), 0)
+	u, f := uint64(i), float64(i)
 	switch {
 	case math.MinInt8 <= i && i <= math.MaxInt8:
 		result = append(result,
@@ -665,9 +617,6 @@ func vvFromInt(i int64) (result []*vdl.Value) {
 		result = append(result,
 			vdl.ZeroValue(vdl.Float32Type).AssignFloat(f),
 			vdl.ZeroValue(vdl.Float32TypeN).AssignFloat(f))
-		result = append(result,
-			vdl.ZeroValue(vdl.Complex64Type).AssignComplex(c),
-			vdl.ZeroValue(vdl.Complex64TypeN).AssignComplex(c))
 		fallthrough
 	case math.MinInt32 <= i && i <= math.MaxInt32:
 		result = append(result,
@@ -678,9 +627,6 @@ func vvFromInt(i int64) (result []*vdl.Value) {
 		result = append(result,
 			vdl.ZeroValue(vdl.Float64Type).AssignFloat(f),
 			vdl.ZeroValue(vdl.Float64TypeN).AssignFloat(f))
-		result = append(result,
-			vdl.ZeroValue(vdl.Complex128Type).AssignComplex(c),
-			vdl.ZeroValue(vdl.Complex128TypeN).AssignComplex(c))
 		fallthrough
 	default:
 		result = append(result,
@@ -716,7 +662,6 @@ func vvFromInt(i int64) (result []*vdl.Value) {
 
 // rvFromInt returns all values that can represent i without loss of precision.
 func rvFromInt(i int64) (result []interface{}) {
-	c64, c128 := complex(float32(i), 0), complex(float64(i), 0)
 	switch {
 	case math.MinInt8 <= i && i <= math.MaxInt8:
 		result = append(result, int8(i), vdl.NInt8(i))
@@ -726,14 +671,12 @@ func rvFromInt(i int64) (result []interface{}) {
 		fallthrough
 	case -1<<24 <= i && i <= 1<<24:
 		result = append(result, float32(i), vdl.NFloat32(i))
-		result = append(result, c64, vdl.NComplex64(c64))
 		fallthrough
 	case math.MinInt32 <= i && i <= math.MaxInt32:
 		result = append(result, int32(i), vdl.NInt32(i))
 		fallthrough
 	case -1<<53 <= i && i <= 1<<53:
 		result = append(result, float64(i), vdl.NFloat64(i))
-		result = append(result, c128, vdl.NComplex128(c128))
 		fallthrough
 	default:
 		result = append(result, int64(i), vdl.NInt64(i))
@@ -758,43 +701,18 @@ func rvFromInt(i int64) (result []interface{}) {
 }
 
 func vvFloat(f float64) []*vdl.Value {
-	c := complex(f, 0)
 	return []*vdl.Value{
 		vdl.ZeroValue(vdl.Float32Type).AssignFloat(f),
 		vdl.ZeroValue(vdl.Float32TypeN).AssignFloat(f),
 		vdl.ZeroValue(vdl.Float64Type).AssignFloat(f),
 		vdl.ZeroValue(vdl.Float64TypeN).AssignFloat(f),
-		vdl.ZeroValue(vdl.Complex64Type).AssignComplex(c),
-		vdl.ZeroValue(vdl.Complex64TypeN).AssignComplex(c),
-		vdl.ZeroValue(vdl.Complex128Type).AssignComplex(c),
-		vdl.ZeroValue(vdl.Complex128TypeN).AssignComplex(c),
-	}
-}
-
-func vvComplex(c complex128) []*vdl.Value {
-	return []*vdl.Value{
-		vdl.ZeroValue(vdl.Complex64Type).AssignComplex(c),
-		vdl.ZeroValue(vdl.Complex64TypeN).AssignComplex(c),
-		vdl.ZeroValue(vdl.Complex128Type).AssignComplex(c),
-		vdl.ZeroValue(vdl.Complex128TypeN).AssignComplex(c),
 	}
 }
 
 func rvFloat(f float64) []interface{} {
-	c64, c128 := complex(float32(f), 0), complex(f, 0)
 	return []interface{}{
 		float32(f), vdl.NFloat32(f),
 		float64(f), vdl.NFloat64(f),
-		c64, vdl.NComplex64(c64),
-		c128, vdl.NComplex128(c128),
-	}
-}
-
-func rvComplex(c128 complex128) []interface{} {
-	c64 := complex64(c128)
-	return []interface{}{
-		c64, vdl.NComplex64(c64),
-		c128, vdl.NComplex128(c128),
 	}
 }
 
@@ -1292,24 +1210,22 @@ func TestConverterError(t *testing.T) {
 			vvFromInt(math.MinInt32 - 1),
 			rvFromInt(math.MinInt32 - 1)},
 		// Test int to float max bound.
-		{ttJoin(ttFloat32s, ttComplex64s), rtJoin(rtFloat32s, rtComplex64s),
+		{ttJoin(ttFloat32s), rtJoin(rtFloat32s),
 			vvOnlyFrom(vvFromInt(vdl.Float32MaxInt+1), ttIntegers),
 			rvOnlyFrom(rvFromInt(vdl.Float32MaxInt+1), rtIntegers)},
-		{ttJoin(ttFloat64s, ttComplex128s), rtJoin(rtFloat64s, rtComplex128s),
+		{ttJoin(ttFloat64s), rtJoin(rtFloat64s),
 			vvOnlyFrom(vvFromInt(vdl.Float64MaxInt+1), ttIntegers),
 			rvOnlyFrom(rvFromInt(vdl.Float64MaxInt+1), rtIntegers)},
 		// Test int to float min bound.
-		{ttJoin(ttFloat32s, ttComplex64s), rtJoin(rtFloat32s, rtComplex64s),
+		{ttJoin(ttFloat32s), rtJoin(rtFloat32s),
 			vvOnlyFrom(vvFromInt(vdl.Float32MinInt-1), ttIntegers),
 			rvOnlyFrom(rvFromInt(vdl.Float32MinInt-1), rtIntegers)},
-		{ttJoin(ttFloat64s, ttComplex128s), rtJoin(rtFloat64s, rtComplex128s),
+		{ttJoin(ttFloat64s), rtJoin(rtFloat64s),
 			vvOnlyFrom(vvFromInt(vdl.Float64MinInt-1), ttIntegers),
 			rvOnlyFrom(rvFromInt(vdl.Float64MinInt-1), rtIntegers)},
-		// Test negative uints, fractional integers, imaginary non-complex numbers.
+		// Test negative uints, fractional integers.
 		{ttUints, rtUints, vvFromInt(-1), rvFromInt(-1)},
 		{ttIntegers, rtIntegers, vvFloat(1.5), rvFloat(1.5)},
-		{ttOtherThan(ttNumbers, ttComplexes), rtOtherThan(rtNumbers, rtComplexes),
-			vvComplex(1 + 2i), rvComplex(1 + 2i)},
 	}
 	for _, test := range tests {
 		for _, ttDst := range test.ttDst {

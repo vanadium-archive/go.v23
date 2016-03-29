@@ -472,24 +472,6 @@ func (e *encoder) FromFloat(src float64, tt *vdl.Type) error {
 	return nil
 }
 
-var complexAllowed = []vdl.Kind{vdl.Complex64, vdl.Complex128}
-
-func (e *encoder) FromComplex(src complex128, tt *vdl.Type) error {
-	if err := e.prepareType(tt, complexAllowed...); err != nil {
-		return err
-	}
-	if e.isStructFieldValue() && e.topType().Kind() != vdl.Any {
-		if src != 0 || !e.canIgnoreField(false) {
-			binaryEncodeUint(e.buf, uint64(e.topTypeFieldIndex()))
-		} else {
-			return nil
-		}
-	}
-	binaryEncodeFloat(e.buf, real(src))
-	binaryEncodeFloat(e.buf, imag(src))
-	return nil
-}
-
 func (e *encoder) FromBytes(src []byte, tt *vdl.Type) error {
 	if !tt.IsBytes() {
 		return verror.New(errEncoderWantBytesType, nil, tt)

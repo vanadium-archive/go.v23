@@ -565,21 +565,6 @@ func (c convTarget) FromFloat(src float64, tt *Type) error {
 	return finishConvert(fin, fill)
 }
 
-// FromComplex implements the Target interface method.
-func (c convTarget) FromComplex(src complex128, tt *Type) error {
-	if target := c.makeDirectTarget(); target != nil {
-		return target.FromComplex(src, tt)
-	}
-	fin, fill, err := startConvert(c, tt)
-	if err != nil {
-		return err
-	}
-	if err := fill.fromComplex(src); err != nil {
-		return err
-	}
-	return finishConvert(fin, fill)
-}
-
 // FromBytes implements the Target interface method.
 func (c convTarget) FromBytes(src []byte, tt *Type) error {
 	if target := c.makeDirectTarget(); target != nil {
@@ -666,11 +651,6 @@ func (c convTarget) fromUint(src uint64) error {
 				c.rv.SetFloat(fsrc)
 				return nil
 			}
-		case reflect.Complex64, reflect.Complex128:
-			if fsrc, ok := convertUintToFloat(src, bitlenR(kind)); ok {
-				c.rv.SetComplex(complex(fsrc, 0))
-				return nil
-			}
 		}
 	} else {
 		switch kind := c.vv.Kind(); kind {
@@ -687,11 +667,6 @@ func (c convTarget) fromUint(src uint64) error {
 		case Float32, Float64:
 			if fsrc, ok := convertUintToFloat(src, bitlenV(kind)); ok {
 				c.vv.AssignFloat(fsrc)
-				return nil
-			}
-		case Complex64, Complex128:
-			if fsrc, ok := convertUintToFloat(src, bitlenV(kind)); ok {
-				c.vv.AssignComplex(complex(fsrc, 0))
 				return nil
 			}
 		}
@@ -717,11 +692,6 @@ func (c convTarget) fromInt(src int64) error {
 				c.rv.SetFloat(fsrc)
 				return nil
 			}
-		case reflect.Complex64, reflect.Complex128:
-			if fsrc, ok := convertIntToFloat(src, bitlenR(kind)); ok {
-				c.rv.SetComplex(complex(fsrc, 0))
-				return nil
-			}
 		}
 	} else {
 		switch kind := c.vv.Kind(); kind {
@@ -738,11 +708,6 @@ func (c convTarget) fromInt(src int64) error {
 		case Float32, Float64:
 			if fsrc, ok := convertIntToFloat(src, bitlenV(kind)); ok {
 				c.vv.AssignFloat(fsrc)
-				return nil
-			}
-		case Complex64, Complex128:
-			if fsrc, ok := convertIntToFloat(src, bitlenV(kind)); ok {
-				c.vv.AssignComplex(complex(fsrc, 0))
 				return nil
 			}
 		}
@@ -766,9 +731,6 @@ func (c convTarget) fromFloat(src float64) error {
 		case reflect.Float32, reflect.Float64:
 			c.rv.SetFloat(convertFloatToFloat(src, bitlenR(kind)))
 			return nil
-		case reflect.Complex64, reflect.Complex128:
-			c.rv.SetComplex(complex(convertFloatToFloat(src, bitlenR(kind)), 0))
-			return nil
 		}
 	} else {
 		switch kind := c.vv.Kind(); kind {
@@ -785,63 +747,9 @@ func (c convTarget) fromFloat(src float64) error {
 		case Float32, Float64:
 			c.vv.AssignFloat(convertFloatToFloat(src, bitlenV(kind)))
 			return nil
-		case Complex64, Complex128:
-			c.vv.AssignComplex(complex(convertFloatToFloat(src, bitlenV(kind)), 0))
-			return nil
 		}
 	}
 	return fmt.Errorf("invalid conversion from float(%g) to %v", src, c.tt)
-}
-
-func (c convTarget) fromComplex(src complex128) error {
-	if c.vv == nil {
-		switch kind := c.rv.Kind(); kind {
-		case reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64, reflect.Uint, reflect.Uintptr:
-			if usrc, ok := convertComplexToUint(src, bitlenR(kind)); ok {
-				c.rv.SetUint(usrc)
-				return nil
-			}
-		case reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64, reflect.Int:
-			if isrc, ok := convertComplexToInt(src, bitlenR(kind)); ok {
-				c.rv.SetInt(isrc)
-				return nil
-			}
-		case reflect.Float32, reflect.Float64:
-			if imag(src) == 0 {
-				c.rv.SetFloat(convertFloatToFloat(real(src), bitlenR(kind)))
-				return nil
-			}
-		case reflect.Complex64, reflect.Complex128:
-			re := convertFloatToFloat(real(src), bitlenR(kind))
-			im := convertFloatToFloat(imag(src), bitlenR(kind))
-			c.rv.SetComplex(complex(re, im))
-			return nil
-		}
-	} else {
-		switch kind := c.vv.Kind(); kind {
-		case Byte, Uint16, Uint32, Uint64:
-			if usrc, ok := convertComplexToUint(src, bitlenV(kind)); ok {
-				c.vv.AssignUint(usrc)
-				return nil
-			}
-		case Int8, Int16, Int32, Int64:
-			if isrc, ok := convertComplexToInt(src, bitlenV(kind)); ok {
-				c.vv.AssignInt(isrc)
-				return nil
-			}
-		case Float32, Float64:
-			if imag(src) == 0 {
-				c.vv.AssignFloat(convertFloatToFloat(real(src), bitlenV(kind)))
-				return nil
-			}
-		case Complex64, Complex128:
-			re := convertFloatToFloat(real(src), bitlenV(kind))
-			im := convertFloatToFloat(imag(src), bitlenV(kind))
-			c.vv.AssignComplex(complex(re, im))
-			return nil
-		}
-	}
-	return fmt.Errorf("invalid conversion from complex(%g) to %v", src, c.tt)
 }
 
 func (c convTarget) fromBytes(src []byte, tt *Type) error {

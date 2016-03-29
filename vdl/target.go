@@ -28,9 +28,6 @@ type Target interface {
 	// FromFloat converts from the src float to the target, where tt represents
 	// the concrete type of float.
 	FromFloat(src float64, tt *Type) error
-	// FromComplex converts from the src complex to the target, where tt
-	// represents the concrete type of complex.
-	FromComplex(src complex128, tt *Type) error
 	// FromBytes converts from the src bytes to the target, where tt represents
 	// the concrete type of bytes.
 	FromBytes(src []byte, tt *Type) error
@@ -314,8 +311,6 @@ func FromReflect(target Target, rv reflect.Value) error {
 		return target.FromInt(rv.Int(), ttFrom)
 	case reflect.Float32, reflect.Float64:
 		return target.FromFloat(rv.Float(), ttFrom)
-	case reflect.Complex64, reflect.Complex128:
-		return target.FromComplex(rv.Complex(), ttFrom)
 	case reflect.String:
 		return target.FromString(rv.String(), ttFrom)
 	case reflect.Array, reflect.Slice:
@@ -474,8 +469,6 @@ func FromValue(target Target, vv *Value) error {
 		return target.FromInt(vv.Int(), tt)
 	case Float32, Float64:
 		return target.FromFloat(vv.Float(), tt)
-	case Complex64, Complex128:
-		return target.FromComplex(vv.Complex(), tt)
 	case String:
 		return target.FromString(vv.RawString(), tt)
 	case Enum:

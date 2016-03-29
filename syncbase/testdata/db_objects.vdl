@@ -73,8 +73,6 @@ type Numbers struct {
 	I64  int64
 	F32  float32
 	F64  float64
-	C64  complex64
-	C128 complex128
 }
 
 type FooType struct {
@@ -100,7 +98,7 @@ type ArrayOfFour [4]string
 type KeyIndexData struct {
 	A ArrayOfFour
 	L []string
-	M map[complex128]string
+	M map[int64]string
 	S set[string]
 }
 

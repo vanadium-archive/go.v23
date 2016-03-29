@@ -89,8 +89,6 @@ func init() {
 		WireIdInt64:      vdl.Int64Type,
 		WireIdFloat32:    vdl.Float32Type,
 		WireIdFloat64:    vdl.Float64Type,
-		WireIdComplex64:  vdl.Complex64Type,
-		WireIdComplex128: vdl.Complex128Type,
 		WireIdTypeObject: vdl.TypeObjectType,
 		WireIdAny:        vdl.AnyType,
 	} {

@@ -37,24 +37,6 @@ func ConvertValueToTime(o *query_parser.Operand) (*query_parser.Operand, error) 
 	}
 }
 
-func ConvertValueToComplex(o *query_parser.Operand) (*query_parser.Operand, error) {
-	var c query_parser.Operand
-	c.Type = query_parser.TypComplex
-	switch o.Type {
-	case query_parser.TypComplex:
-		return o, nil
-	case query_parser.TypFloat:
-		c.Complex = complex(o.Float, 0.0i)
-	case query_parser.TypInt:
-		c.Complex = complex(float64(o.Int), 0.0i)
-	case query_parser.TypUint:
-		c.Complex = complex(float64(o.Uint), 0.0i)
-	default:
-		return nil, errors.New("Cannot convert operand to Complex.")
-	}
-	return &c, nil
-}
-
 func ConvertValueToBigRat(o *query_parser.Operand) (*query_parser.Operand, error) {
 	// operand cannot be string literal.
 	var c query_parser.Operand

@@ -35,8 +35,6 @@ func str(db ds.Database, off int64, args []*query_parser.Operand) (*query_parser
 			c.Str = o.BigRat.String()
 		case query_parser.TypBool:
 			c.Str = strconv.FormatBool(o.Bool)
-		case query_parser.TypComplex:
-			c.Str = fmt.Sprintf("%g", o.Complex)
 		case query_parser.TypFloat:
 			c.Str = strconv.FormatFloat(o.Float, 'f', -1, 64)
 		case query_parser.TypInt:
@@ -174,8 +172,6 @@ func sprintf(db ds.Database, off int64, args []*query_parser.Operand) (*query_pa
 			sprintfArgs = append(sprintfArgs, arg.BigRat)
 		case query_parser.TypBool:
 			sprintfArgs = append(sprintfArgs, arg.Bool)
-		case query_parser.TypComplex:
-			sprintfArgs = append(sprintfArgs, arg.Complex)
 		case query_parser.TypFloat:
 			sprintfArgs = append(sprintfArgs, arg.Float)
 		case query_parser.TypInt:

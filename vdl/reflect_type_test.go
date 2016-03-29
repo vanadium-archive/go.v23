@@ -35,8 +35,6 @@ var rtKeyTests = []rtTest{
 	{reflect.TypeOf(int(0)), testIntType()},
 	{reflect.TypeOf(float32(0)), Float32Type},
 	{reflect.TypeOf(float64(0)), Float64Type},
-	{reflect.TypeOf(complex64(0)), Complex64Type},
-	{reflect.TypeOf(complex128(0)), Complex128Type},
 	{reflect.TypeOf(string("")), StringType},
 	// Named scalars
 	{reflect.TypeOf(NBool(false)), NameN("Bool", BoolType)},
@@ -53,8 +51,6 @@ var rtKeyTests = []rtTest{
 	{reflect.TypeOf(NInt(0)), NameN("Int", testIntType())},
 	{reflect.TypeOf(NFloat32(0)), NameN("Float32", Float32Type)},
 	{reflect.TypeOf(NFloat64(0)), NameN("Float64", Float64Type)},
-	{reflect.TypeOf(NComplex64(0)), NameN("Complex64", Complex64Type)},
-	{reflect.TypeOf(NComplex128(0)), NameN("Complex128", Complex128Type)},
 	{reflect.TypeOf(NString("")), NameN("String", StringType)},
 	// Unnamed arrays
 	{reflect.TypeOf([3]bool{}), ArrayType(3, BoolType)},
@@ -71,8 +67,6 @@ var rtKeyTests = []rtTest{
 	{reflect.TypeOf([3]int{}), ArrayType(3, testIntType())},
 	{reflect.TypeOf([3]float32{}), ArrayType(3, Float32Type)},
 	{reflect.TypeOf([3]float64{}), ArrayType(3, Float64Type)},
-	{reflect.TypeOf([3]complex64{}), ArrayType(3, Complex64Type)},
-	{reflect.TypeOf([3]complex128{}), ArrayType(3, Complex128Type)},
 	{reflect.TypeOf([3]string{}), ArrayType(3, StringType)},
 	// Named arrays
 	{reflect.TypeOf(NArray3Bool{}), NameNArray("Bool", BoolType)},
@@ -89,8 +83,6 @@ var rtKeyTests = []rtTest{
 	{reflect.TypeOf(NArray3Int{}), NameNArray("Int", testIntType())},
 	{reflect.TypeOf(NArray3Float32{}), NameNArray("Float32", Float32Type)},
 	{reflect.TypeOf(NArray3Float64{}), NameNArray("Float64", Float64Type)},
-	{reflect.TypeOf(NArray3Complex64{}), NameNArray("Complex64", Complex64Type)},
-	{reflect.TypeOf(NArray3Complex128{}), NameNArray("Complex128", Complex128Type)},
 	{reflect.TypeOf(NArray3String{}), NameNArray("String", StringType)},
 	// Unnamed structs
 	{reflect.TypeOf(struct{ X bool }{}), StructType(Field{"X", BoolType})},
@@ -107,8 +99,6 @@ var rtKeyTests = []rtTest{
 	{reflect.TypeOf(struct{ X int }{}), StructType(Field{"X", testIntType()})},
 	{reflect.TypeOf(struct{ X float32 }{}), StructType(Field{"X", Float32Type})},
 	{reflect.TypeOf(struct{ X float64 }{}), StructType(Field{"X", Float64Type})},
-	{reflect.TypeOf(struct{ X complex64 }{}), StructType(Field{"X", Complex64Type})},
-	{reflect.TypeOf(struct{ X complex128 }{}), StructType(Field{"X", Complex128Type})},
 	{reflect.TypeOf(struct{ X string }{}), StructType(Field{"X", StringType})},
 	// Named structs
 	{reflect.TypeOf(NStructBool{}), NameNStruct("Bool", BoolType)},
@@ -125,8 +115,6 @@ var rtKeyTests = []rtTest{
 	{reflect.TypeOf(NStructInt{}), NameNStruct("Int", testIntType())},
 	{reflect.TypeOf(NStructFloat32{}), NameNStruct("Float32", Float32Type)},
 	{reflect.TypeOf(NStructFloat64{}), NameNStruct("Float64", Float64Type)},
-	{reflect.TypeOf(NStructComplex64{}), NameNStruct("Complex64", Complex64Type)},
-	{reflect.TypeOf(NStructComplex128{}), NameNStruct("Complex128", Complex128Type)},
 	{reflect.TypeOf(NStructString{}), NameNStruct("String", StringType)},
 	// Special-case types
 	{reflect.TypeOf(NEnum(0)), NameN("Enum", EnumType("A", "B", "C", "ABC"))},
@@ -185,8 +173,6 @@ var rtNonKeyTests = []rtTest{
 	{reflect.TypeOf([]int{}), ListType(testIntType())},
 	{reflect.TypeOf([]float32{}), ListType(Float32Type)},
 	{reflect.TypeOf([]float64{}), ListType(Float64Type)},
-	{reflect.TypeOf([]complex64{}), ListType(Complex64Type)},
-	{reflect.TypeOf([]complex128{}), ListType(Complex128Type)},
 	{reflect.TypeOf([]string{}), ListType(StringType)},
 	// Named slices
 	{reflect.TypeOf(NSliceInterface{}), NameNSlice("Interface", AnyType)},
@@ -205,8 +191,6 @@ var rtNonKeyTests = []rtTest{
 	{reflect.TypeOf(NSliceInt{}), NameNSlice("Int", testIntType())},
 	{reflect.TypeOf(NSliceFloat32{}), NameNSlice("Float32", Float32Type)},
 	{reflect.TypeOf(NSliceFloat64{}), NameNSlice("Float64", Float64Type)},
-	{reflect.TypeOf(NSliceComplex64{}), NameNSlice("Complex64", Complex64Type)},
-	{reflect.TypeOf(NSliceComplex128{}), NameNSlice("Complex128", Complex128Type)},
 	{reflect.TypeOf(NSliceString{}), NameNSlice("String", StringType)},
 	// Unnamed sets
 	{reflect.TypeOf(map[bool]struct{}{}), rtSet(BoolType)},
@@ -223,8 +207,6 @@ var rtNonKeyTests = []rtTest{
 	{reflect.TypeOf(map[int]struct{}{}), rtSet(testIntType())},
 	{reflect.TypeOf(map[float32]struct{}{}), rtSet(Float32Type)},
 	{reflect.TypeOf(map[float64]struct{}{}), rtSet(Float64Type)},
-	{reflect.TypeOf(map[complex64]struct{}{}), rtSet(Complex64Type)},
-	{reflect.TypeOf(map[complex128]struct{}{}), rtSet(Complex128Type)},
 	{reflect.TypeOf(map[string]struct{}{}), rtSet(StringType)},
 	// Named sets
 	{reflect.TypeOf(NSetBool{}), NameNSet("Bool", BoolType)},
@@ -241,8 +223,6 @@ var rtNonKeyTests = []rtTest{
 	{reflect.TypeOf(NSetInt{}), NameNSet("Int", testIntType())},
 	{reflect.TypeOf(NSetFloat32{}), NameNSet("Float32", Float32Type)},
 	{reflect.TypeOf(NSetFloat64{}), NameNSet("Float64", Float64Type)},
-	{reflect.TypeOf(NSetComplex64{}), NameNSet("Complex64", Complex64Type)},
-	{reflect.TypeOf(NSetComplex128{}), NameNSet("Complex128", Complex128Type)},
 	{reflect.TypeOf(NSetString{}), NameNSet("String", StringType)},
 	// Unnamed maps
 	{reflect.TypeOf(map[bool]bool{}), rtMap(BoolType)},
@@ -259,8 +239,6 @@ var rtNonKeyTests = []rtTest{
 	{reflect.TypeOf(map[int]int{}), rtMap(testIntType())},
 	{reflect.TypeOf(map[float32]float32{}), rtMap(Float32Type)},
 	{reflect.TypeOf(map[float64]float64{}), rtMap(Float64Type)},
-	{reflect.TypeOf(map[complex64]complex64{}), rtMap(Complex64Type)},
-	{reflect.TypeOf(map[complex128]complex128{}), rtMap(Complex128Type)},
 	{reflect.TypeOf(map[string]string{}), rtMap(StringType)},
 	// Named maps
 	{reflect.TypeOf(NMapBool{}), NameNMap("Bool", BoolType)},
@@ -277,8 +255,6 @@ var rtNonKeyTests = []rtTest{
 	{reflect.TypeOf(NMapInt{}), NameNMap("Int", testIntType())},
 	{reflect.TypeOf(NMapFloat32{}), NameNMap("Float32", Float32Type)},
 	{reflect.TypeOf(NMapFloat64{}), NameNMap("Float64", Float64Type)},
-	{reflect.TypeOf(NMapComplex64{}), NameNMap("Complex64", Complex64Type)},
-	{reflect.TypeOf(NMapComplex128{}), NameNMap("Complex128", Complex128Type)},
 	{reflect.TypeOf(NMapString{}), NameNMap("String", StringType)},
 	// Recursive types
 	{reflect.TypeOf(NRecurseSelf{}), RecurseSelfType()},

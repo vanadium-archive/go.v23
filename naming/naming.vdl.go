@@ -74,16 +74,6 @@ func (t *MountFlagTarget) FromFloat(src float64, tt *vdl.Type) error {
 
 	return nil
 }
-func (t *MountFlagTarget) FromComplex(src complex128, tt *vdl.Type) error {
-
-	val, err := vdlconv.Complex128ToUint32(src)
-	if err != nil {
-		return err
-	}
-	*t.Value = MountFlag(val)
-
-	return nil
-}
 
 // MountedServer represents a server mounted on a specific name.
 type MountedServer struct {

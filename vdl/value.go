@@ -54,8 +54,6 @@ func zeroRep(t *Type) interface{} {
 		return int64(0)
 	case Float32, Float64:
 		return float64(0)
-	case Complex64, Complex128:
-		return complex128(0)
 	case String:
 		return ""
 	case Enum:
@@ -89,8 +87,6 @@ func isZeroRep(t *Type, rep interface{}) bool {
 		return trep == 0
 	case float64:
 		return trep == 0
-	case complex128:
-		return trep == 0
 	case string:
 		return trep == ""
 	case enumIndex:
@@ -120,7 +116,7 @@ func isZeroRep(t *Type, rep interface{}) bool {
 
 func copyRep(t *Type, rep interface{}) interface{} {
 	switch trep := rep.(type) {
-	case bool, uint64, int64, float64, complex128, string, enumIndex, *Type:
+	case bool, uint64, int64, float64, string, enumIndex, *Type:
 		return trep
 	case repBytes:
 		return copyRepBytes(trep)
@@ -143,8 +139,6 @@ func stringRep(t *Type, rep interface{}) string {
 	switch trep := rep.(type) {
 	case bool, uint64, int64, float64:
 		return fmt.Sprint(trep)
-	case complex128:
-		return fmt.Sprintf("%v+%vi", real(trep), imag(trep))
 	case string:
 		return strconv.Quote(trep)
 	case enumIndex:
@@ -213,12 +207,6 @@ func Float32Value(x float32) *Value { return ZeroValue(Float32Type).AssignFloat(
 
 // Float64Value is a convenience to create a Float64 value.
 func Float64Value(x float64) *Value { return ZeroValue(Float64Type).AssignFloat(x) }
-
-// Complex64Value is a convenience to create a Complex64 value.
-func Complex64Value(x complex64) *Value { return ZeroValue(Complex64Type).AssignComplex(complex128(x)) }
-
-// Complex128Value is a convenience to create a Complex128 value.
-func Complex128Value(x complex128) *Value { return ZeroValue(Complex128Type).AssignComplex(x) }
 
 // StringValue is a convenience to create a String value.
 func StringValue(x string) *Value { return ZeroValue(StringType).AssignString(x) }
@@ -299,8 +287,6 @@ func EqualValue(a, b *Value) bool {
 		return arep == b.rep.(int64)
 	case float64:
 		return arep == b.rep.(float64)
-	case complex128:
-		return arep == b.rep.(complex128)
 	case string:
 		return arep == b.rep.(string)
 	case enumIndex:
@@ -373,12 +359,6 @@ func (v *Value) Int() int64 {
 func (v *Value) Float() float64 {
 	v.t.checkKind("Float", Float32, Float64)
 	return v.rep.(float64)
-}
-
-// Complex returns the underlying value of a Complex{64,128}.
-func (v *Value) Complex() complex128 {
-	v.t.checkKind("Complex", Complex64, Complex128)
-	return v.rep.(complex128)
 }
 
 // RawString returns the underlying value of a String.
@@ -597,13 +577,6 @@ func (v *Value) AssignInt(x int64) *Value {
 // AssignFloat assigns the underlying Float{32,64} to x.
 func (v *Value) AssignFloat(x float64) *Value {
 	v.t.checkKind("AssignFloat", Float32, Float64)
-	v.rep = x
-	return v
-}
-
-// AssignComplex assigns the underlying Complex{64,128} to x.
-func (v *Value) AssignComplex(x complex128) *Value {
-	v.t.checkKind("AssignComplex", Complex64, Complex128)
 	v.rep = x
 	return v
 }

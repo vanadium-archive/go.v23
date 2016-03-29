@@ -52,8 +52,6 @@ var singletons = []struct {
 	{Int64, Int64Type, "int64"},
 	{Float32, Float32Type, "float32"},
 	{Float64, Float64Type, "float64"},
-	{Complex64, Complex64Type, "complex64"},
-	{Complex128, Complex128Type, "complex128"},
 	{String, StringType, "string"},
 	{TypeObject, TypeObjectType, "typeobject"},
 }

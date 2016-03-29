@@ -258,15 +258,15 @@ func initTables() {
 	numTable.rows = []kv{
 		kv{
 			"001",
-			vom.RawBytesOf(td.Numbers{byte(12), uint16(1234), uint32(5678), uint64(999888777666), int16(9876), int32(876543), int64(128), float32(3.14159), float64(2.71828182846), complex64(123.0 + 7.0i), complex128(456.789 + 10.1112i)}),
+			vom.RawBytesOf(td.Numbers{byte(12), uint16(1234), uint32(5678), uint64(999888777666), int16(9876), int32(876543), int64(128), float32(3.14159), float64(2.71828182846)}),
 		},
 		kv{
 			"002",
-			vom.RawBytesOf(td.Numbers{byte(9), uint16(99), uint32(999), uint64(9999999), int16(9), int32(99), int64(88), float32(1.41421356237), float64(1.73205080757), complex64(9.87 + 7.65i), complex128(4.32 + 1.0i)}),
+			vom.RawBytesOf(td.Numbers{byte(9), uint16(99), uint32(999), uint64(9999999), int16(9), int32(99), int64(88), float32(1.41421356237), float64(1.73205080757)}),
 		},
 		kv{
 			"003",
-			vom.RawBytesOf(td.Numbers{byte(210), uint16(210), uint32(210), uint64(210), int16(210), int32(210), int64(210), float32(210.0), float64(210.0), complex64(210.0 + 0.0i), complex128(210.0 + 0.0i)}),
+			vom.RawBytesOf(td.Numbers{byte(210), uint16(210), uint32(210), uint64(210), int16(210), int32(210), int64(210), float32(210.0), float64(210.0)}),
 		},
 	}
 	db.tables = append(db.tables, &numTable)
@@ -382,10 +382,7 @@ func initTables() {
 				map[int32]string{33: "it was the season of Light,"},
 				map[int64]string{65: "it was the season of Darkness,"},
 				map[float32]string{32.1: "it was the spring of hope,"},
-				map[float64]string{64.2: "it was the winter of despair,"},
-				map[complex64]string{(456.789 + 10.1112i): "we had everything before us,"},
-				map[complex128]string{(123.456 + 11.2223i): "we had nothing before us,"},
-				map[string]string{"Dickens": "we are all going direct to Heaven,"},
+				map[float64]string{64.2: "it was the winter of despair,"}, map[string]string{"Dickens": "we are all going direct to Heaven,"},
 				map[string]map[string]string{
 					"Charles": map[string]string{"Dickens": "we are all going direct to Heaven,"},
 				},
@@ -410,8 +407,6 @@ func initTables() {
 				map[int64]struct{}{65: {}},
 				map[float32]struct{}{32.1: {}},
 				map[float64]struct{}{64.2: {}},
-				map[complex64]struct{}{(456.789 + 10.1112i): {}},
-				map[complex128]struct{}{(123.456 + 11.2223i): {}},
 				map[string]struct{}{"Dickens": {}},
 				map[time.Time]struct{}{t2015_07_01_01_23_45: {}},
 			}),
@@ -1667,8 +1662,8 @@ func TestSelect(t *testing.T) {
 		},
 		// Test lots of types as map keys
 		{
-			"select v.B[true], v.By[10], v.U16[16], v.U32[32], v.U64[64], v.I16[17], v.I32[33], v.I64[65], v.F32[32.1], v.F64[64.2], v.C64[Complex(456.789, 10.1112)], v.C128[Complex(123.456, 11.2223)], v.S[\"Dickens\"], v.Ms[\"Charles\"][\"Dickens\"], v.T[Time(\"2006-01-02 15:04:05 MST\", \"2015-07-01 01:23:45 PDT\")] from ManyMaps",
-			[]string{"v.B[true]", "v.By[10]", "v.U16[16]", "v.U32[32]", "v.U64[64]", "v.I16[17]", "v.I32[33]", "v.I64[65]", "v.F32[32.1]", "v.F64[64.2]", "v.C64[Complex]", "v.C128[Complex]", "v.S[Dickens]", "v.Ms[Charles][Dickens]", "v.T[Time]"},
+			"select v.B[true], v.By[10], v.U16[16], v.U32[32], v.U64[64], v.I16[17], v.I32[33], v.I64[65], v.F32[32.1], v.F64[64.2], v.S[\"Dickens\"], v.Ms[\"Charles\"][\"Dickens\"], v.T[Time(\"2006-01-02 15:04:05 MST\", \"2015-07-01 01:23:45 PDT\")] from ManyMaps",
+			[]string{"v.B[true]", "v.By[10]", "v.U16[16]", "v.U32[32]", "v.U64[64]", "v.I16[17]", "v.I32[33]", "v.I64[65]", "v.F32[32.1]", "v.F64[64.2]", "v.S[Dickens]", "v.Ms[Charles][Dickens]", "v.T[Time]"},
 			[][]*vom.RawBytes{
 				[]*vom.RawBytes{
 					vom.RawBytesOf("It was the best of times,"),
@@ -1681,8 +1676,6 @@ func TestSelect(t *testing.T) {
 					vom.RawBytesOf("it was the season of Darkness,"),
 					vom.RawBytesOf("it was the spring of hope,"),
 					vom.RawBytesOf("it was the winter of despair,"),
-					vom.RawBytesOf("we had everything before us,"),
-					vom.RawBytesOf("we had nothing before us,"),
 					vom.RawBytesOf("we are all going direct to Heaven,"),
 					vom.RawBytesOf("we are all going direct to Heaven,"),
 					vom.RawBytesOf("we are all going direct the other way"),
@@ -1691,12 +1684,10 @@ func TestSelect(t *testing.T) {
 		},
 		// Test lots of types as set keys
 		{
-			"select v.B[true], v.By[10], v.U16[16], v.U32[32], v.U64[64], v.I16[17], v.I32[33], v.I64[65], v.F32[32.1], v.F64[64.2], v.C64[Complex(456.789, 10.1112)], v.C128[Complex(123.456, 11.2223)], v.S[\"Dickens\"], v.T[Time(\"2006-01-02 15:04:05 MST\", \"2015-07-01 01:23:45 PDT\")] from ManySets",
-			[]string{"v.B[true]", "v.By[10]", "v.U16[16]", "v.U32[32]", "v.U64[64]", "v.I16[17]", "v.I32[33]", "v.I64[65]", "v.F32[32.1]", "v.F64[64.2]", "v.C64[Complex]", "v.C128[Complex]", "v.S[Dickens]", "v.T[Time]"},
+			"select v.B[true], v.By[10], v.U16[16], v.U32[32], v.U64[64], v.I16[17], v.I32[33], v.I64[65], v.F32[32.1], v.F64[64.2], v.S[\"Dickens\"], v.T[Time(\"2006-01-02 15:04:05 MST\", \"2015-07-01 01:23:45 PDT\")] from ManySets",
+			[]string{"v.B[true]", "v.By[10]", "v.U16[16]", "v.U32[32]", "v.U64[64]", "v.I16[17]", "v.I32[33]", "v.I64[65]", "v.F32[32.1]", "v.F64[64.2]", "v.S[Dickens]", "v.T[Time]"},
 			[][]*vom.RawBytes{
 				[]*vom.RawBytes{
-					vom.RawBytesOf(true),
-					vom.RawBytesOf(true),
 					vom.RawBytesOf(true),
 					vom.RawBytesOf(true),
 					vom.RawBytesOf(true),
@@ -2084,22 +2075,6 @@ func TestSelect(t *testing.T) {
 			},
 		},
 		{
-			// Real
-			"select k, Real(v.C64) from Numbers where v.C64 = Complex(123, 7)",
-			[]string{"k", "Real"},
-			[][]*vom.RawBytes{
-				{vom.RawBytesOf("001"), vom.RawBytesOf(float64(123.0))},
-			},
-		},
-		{
-			// Real
-			"select k, Real(v.C128) from Numbers where v.C128 = Complex(456.789, 10.1112)",
-			[]string{"k", "Real"},
-			[][]*vom.RawBytes{
-				{vom.RawBytesOf("001"), vom.RawBytesOf(float64(456.789))},
-			},
-		},
-		{
 			// Ceiling
 			"select k, Ceiling(v.F64) from Numbers where k = \"001\"",
 			[]string{"k", "Ceiling"},
@@ -2189,10 +2164,10 @@ func TestSelect(t *testing.T) {
 		},
 		{
 			// Sprintf
-			"select Sprintf(\"%d, %d, %d, %d, %d, %d, %d, %g, %g, %g, %g\", v.B, v.Ui16, v.Ui32, v.Ui64, v.I16, v.I32, v.I64, v.F32, v.F64, v.C64, v.C128) from Numbers where k = \"001\"",
+			"select Sprintf(\"%d, %d, %d, %d, %d, %d, %d, %g, %g\", v.B, v.Ui16, v.Ui32, v.Ui64, v.I16, v.I32, v.I64, v.F32, v.F64) from Numbers where k = \"001\"",
 			[]string{"Sprintf"},
 			[][]*vom.RawBytes{
-				{vom.RawBytesOf("12, 1234, 5678, 999888777666, 9876, 876543, 128, 3.141590118408203, 2.71828182846, (123+7i), (456.789+10.1112i)")},
+				{vom.RawBytesOf("12, 1234, 5678, 999888777666, 9876, 876543, 128, 3.141590118408203, 2.71828182846")},
 			},
 		},
 		{
@@ -2304,7 +2279,7 @@ func TestSelect(t *testing.T) {
 				rbs = append(rbs, rs.Result())
 			}
 			if got, want := vdl.ValueOf(rbs), vdl.ValueOf(test.r); !vdl.EqualValue(got, want) {
-				t.Errorf("query: %s; got %#v, want %#v", test.query, got, want)
+				t.Errorf("query: %s; got %v, want %v", test.query, got, want)
 			}
 			if !reflect.DeepEqual(test.headers, headers) {
 				t.Errorf("query: %s; got %#v, want %#v", test.query, headers, test.headers)
@@ -3012,22 +2987,6 @@ func TestEval(t *testing.T) {
 			numTable.rows[0].key, numTable.rows[0].value, true,
 		},
 		{
-			"select k, v from Numbers where Str(v.C64) = \"(123+7i)\"",
-			numTable.rows[0].key, numTable.rows[0].value, true,
-		},
-		{
-			"select k, v from Numbers where v.C64 = Complex(123, 7)",
-			numTable.rows[0].key, numTable.rows[0].value, true,
-		},
-		{
-			"select k, v from Numbers where Str(v.C128) = \"(456.789+10.1112i)\"",
-			numTable.rows[0].key, numTable.rows[0].value, true,
-		},
-		{
-			"select k, v from Numbers where v.C128 = Complex(456.789, 10.1112)",
-			numTable.rows[0].key, numTable.rows[0].value, true,
-		},
-		{
 			"select k, v from Numbers where v.Ui16 = 1234",
 			numTable.rows[0].key, numTable.rows[0].value, true,
 		},
@@ -3070,53 +3029,33 @@ func TestEval(t *testing.T) {
 		},
 		{
 			// Test that numeric types can compare to a float64
-			"select v from Numbers where v.F64 = v.B and v.F64 = v.Ui16 and v.F64 = v.Ui32 and v.F64 = v.Ui64 and v.F64 = v.I16 and v.F64 = v.I32 and v.F64 = v.I64 and v.F64 = v.F32 and v.F64 = v.C64 and v.F64 = v.C128",
+			"select v from Numbers where v.F64 = v.B and v.F64 = v.Ui16 and v.F64 = v.Ui32 and v.F64 = v.Ui64 and v.F64 = v.I16 and v.F64 = v.I32 and v.F64 = v.I64 and v.F64 = v.F32",
 			numTable.rows[2].key, numTable.rows[2].value, true,
 		},
 		{
 			// Test that all numeric types can compare to an int32
-			"select v from Numbers where v.I32 = v.B and v.I32 = v.Ui16 and v.I32 = v.Ui32 and v.I32 = v.Ui64 and v.I32 = v.I16 and v.I32 = v.F64 and v.I32 = v.I64 and v.I32 = v.F32 and v.I32 = v.C64 and v.I32 = v.C128",
+			"select v from Numbers where v.I32 = v.B and v.I32 = v.Ui16 and v.I32 = v.Ui32 and v.I32 = v.Ui64 and v.I32 = v.I16 and v.I32 = v.F64 and v.I32 = v.I64 and v.I32 = v.F32",
 			numTable.rows[2].key, numTable.rows[2].value, true,
 		},
 		{
 			// Test that all numeric types can compare to an int16
-			"select v from Numbers where v.I16 = v.B and v.I16 = v.Ui16 and v.I16 = v.Ui32 and v.I16 = v.Ui64 and v.I16 = v.F64 and v.I16 = v.I32 and v.I16 = v.I64 and v.I16 = v.F32 and v.I16 = v.C64 and v.I16 = v.C128",
+			"select v from Numbers where v.I16 = v.B and v.I16 = v.Ui16 and v.I16 = v.Ui32 and v.I16 = v.Ui64 and v.I16 = v.F64 and v.I16 = v.I32 and v.I16 = v.I64 and v.I16 = v.F32",
 			numTable.rows[2].key, numTable.rows[2].value, true,
 		},
 		{
 			// Test that all numeric types can compare to an uint64
-			"select v from Numbers where v.Ui64 = v.B and v.Ui64 = v.Ui16 and v.Ui64 = v.Ui32 and v.Ui64 = v.F64 and v.Ui64 = v.I16 and v.Ui64 = v.I32 and v.Ui64 = v.I64 and v.Ui64 = v.F32 and v.Ui64 = v.C64 and v.Ui64 = v.C128",
+			"select v from Numbers where v.Ui64 = v.B and v.Ui64 = v.Ui16 and v.Ui64 = v.Ui32 and v.Ui64 = v.F64 and v.Ui64 = v.I16 and v.Ui64 = v.I32 and v.Ui64 = v.I64 and v.Ui64 = v.F32",
 			numTable.rows[2].key, numTable.rows[2].value, true,
 		},
 		{
 			// Test that all numeric types can compare to an uint32
-			"select v from Numbers where v.Ui32 = v.B and v.Ui32 = v.Ui16 and v.Ui32 = v.F64 and v.Ui32 = v.Ui64 and v.Ui32 = v.I16 and v.Ui32 = v.I32 and v.Ui32 = v.I64 and v.Ui32 = v.F32 and v.Ui32 = v.C64 and v.Ui32 = v.C128",
+			"select v from Numbers where v.Ui32 = v.B and v.Ui32 = v.Ui16 and v.Ui32 = v.F64 and v.Ui32 = v.Ui64 and v.Ui32 = v.I16 and v.Ui32 = v.I32 and v.Ui32 = v.I64 and v.Ui32 = v.F32",
 			numTable.rows[2].key, numTable.rows[2].value, true,
 		},
 		{
 			// Test that all numeric types can compare to an uint16
-			"select v from Numbers where v.Ui16 = v.B and v.Ui16 = v.F64 and v.Ui16 = v.Ui32 and v.Ui16 = v.Ui64 and v.Ui16 = v.I16 and v.Ui16 = v.I32 and v.Ui16 = v.I64 and v.Ui16 = v.F32 and v.Ui16 = v.C64 and v.Ui16 = v.C128",
+			"select v from Numbers where v.Ui16 = v.B and v.Ui16 = v.F64 and v.Ui16 = v.Ui32 and v.Ui16 = v.Ui64 and v.Ui16 = v.I16 and v.Ui16 = v.I32 and v.Ui16 = v.I64 and v.Ui16 = v.F32",
 			numTable.rows[2].key, numTable.rows[2].value, true,
-		},
-		{
-			// Test C64 = C128
-			"select v from Numbers where v.C64 = v.C128",
-			numTable.rows[2].key, numTable.rows[2].value, true,
-		},
-		{
-			// Test C64 <> C128
-			"select v from Numbers where v.C64 <> v.C128",
-			numTable.rows[0].key, numTable.rows[0].value, true,
-		},
-		{
-			// Complex integers can only compare to themselves and other numerics.
-			// Compare to integer
-			"select v from Numbers where v.C128 <> false",
-			numTable.rows[0].key, numTable.rows[0].value, false,
-		},
-		{
-			"select v from Numbers where Str(v.C128) = \"(456.789+10.1112i)\"",
-			numTable.rows[0].key, numTable.rows[0].value, true,
 		},
 	}
 
@@ -3397,28 +3336,12 @@ func TestExecErrors(t *testing.T) {
 			syncql.NewErrDidYouMeanFunction(db.GetContext(), 7, "Split"),
 		},
 		{
-			"select comPLex(1.0, 2.0) from Customer",
-			syncql.NewErrDidYouMeanFunction(db.GetContext(), 7, "Complex"),
-		},
-		{
 			"select len(\"foo\") from Customer",
 			syncql.NewErrDidYouMeanFunction(db.GetContext(), 7, "Len"),
 		},
 		{
 			"select StrRepeat(\"foo\", \"x\") from Customer",
 			syncql.NewErrIntConversionError(db.GetContext(), 24, errors.New("Cannot convert operand to int64.")),
-		},
-		{
-			"select Complex(23, \"foo\") from Customer",
-			syncql.NewErrFloatConversionError(db.GetContext(), 19, errors.New("Cannot convert operand to float64.")),
-		},
-		{
-			"select Complex(\"foo\", 42) from Customer",
-			syncql.NewErrFloatConversionError(db.GetContext(), 15, errors.New("Cannot convert operand to float64.")),
-		},
-		{
-			"select Complex(42.0) from Customer",
-			syncql.NewErrFunctionArgCount(db.GetContext(), 7, "Complex", 2, 1),
 		},
 		{
 			"select StrCat(v.Address.City, 42) from Customer",

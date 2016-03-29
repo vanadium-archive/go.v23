@@ -410,7 +410,6 @@ func isLiteral(o *query_parser.Operand) bool {
 	return o.Type == query_parser.TypBigInt ||
 		o.Type == query_parser.TypBigRat || // currently, no way to specify as literal
 		o.Type == query_parser.TypBool ||
-		o.Type == query_parser.TypComplex || // currently, no way to specify as literal ||
 		o.Type == query_parser.TypFloat ||
 		o.Type == query_parser.TypInt ||
 		o.Type == query_parser.TypStr ||

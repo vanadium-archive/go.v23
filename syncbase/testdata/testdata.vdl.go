@@ -1096,8 +1096,6 @@ type Numbers struct {
 	I64  int64
 	F32  float32
 	F64  float64
-	C64  complex64
-	C128 complex128
 }
 
 func (Numbers) __VDLReflect(struct {
@@ -1219,30 +1217,6 @@ func (m *Numbers) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 			return err
 		}
 	}
-	keyTarget20, fieldTarget21, err := fieldsTarget1.StartField("C64")
-	if err != vdl.ErrFieldNoExist && err != nil {
-		return err
-	}
-	if err != vdl.ErrFieldNoExist {
-		if err := fieldTarget21.FromComplex(complex128(m.C64), tt.NonOptional().Field(9).Type); err != nil {
-			return err
-		}
-		if err := fieldsTarget1.FinishField(keyTarget20, fieldTarget21); err != nil {
-			return err
-		}
-	}
-	keyTarget22, fieldTarget23, err := fieldsTarget1.StartField("C128")
-	if err != vdl.ErrFieldNoExist && err != nil {
-		return err
-	}
-	if err != vdl.ErrFieldNoExist {
-		if err := fieldTarget23.FromComplex(complex128(m.C128), tt.NonOptional().Field(10).Type); err != nil {
-			return err
-		}
-		if err := fieldsTarget1.FinishField(keyTarget22, fieldTarget23); err != nil {
-			return err
-		}
-	}
 	if err := t.FinishFields(fieldsTarget1); err != nil {
 		return err
 	}
@@ -1264,8 +1238,6 @@ type NumbersTarget struct {
 	i64Target  vdl.Int64Target
 	f32Target  vdl.Float32Target
 	f64Target  vdl.Float64Target
-	c64Target  vdl.Complex64Target
-	c128Target vdl.Complex128Target
 	vdl.TargetBase
 	vdl.FieldsTargetBase
 }
@@ -1314,14 +1286,6 @@ func (t *NumbersTarget) StartField(name string) (key, field vdl.Target, _ error)
 	case "F64":
 		t.f64Target.Value = &t.Value.F64
 		target, err := &t.f64Target, error(nil)
-		return nil, target, err
-	case "C64":
-		t.c64Target.Value = &t.Value.C64
-		target, err := &t.c64Target, error(nil)
-		return nil, target, err
-	case "C128":
-		t.c128Target.Value = &t.Value.C128
-		target, err := &t.c128Target, error(nil)
 		return nil, target, err
 	default:
 		return nil, nil, fmt.Errorf("field %s not in struct v.io/v23/syncbase/testdata.Numbers", name)
@@ -1774,7 +1738,7 @@ func (t *ArrayOfFourTarget) FinishList(elem vdl.ListTarget) error {
 type KeyIndexData struct {
 	A ArrayOfFour
 	L []string
-	M map[complex128]string
+	M map[int64]string
 	S map[string]struct{}
 }
 
@@ -1846,7 +1810,7 @@ func (m *KeyIndexData) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 			if err != nil {
 				return err
 			}
-			if err := keyTarget12.FromComplex(complex128(key13), tt.NonOptional().Field(2).Type.Key()); err != nil {
+			if err := keyTarget12.FromInt(int64(key13), tt.NonOptional().Field(2).Type.Key()); err != nil {
 				return err
 			}
 			valueTarget14, err := mapTarget11.FinishKeyStartField(keyTarget12)
@@ -1953,12 +1917,12 @@ func (t *KeyIndexDataTarget) FinishFields(_ vdl.FieldsTarget) error {
 	return nil
 }
 
-// map[complex128]string
+// map[int64]string
 type __VDLTarget1_map struct {
-	Value      *map[complex128]string
-	currKey    complex128
+	Value      *map[int64]string
+	currKey    int64
 	currElem   string
-	keyTarget  vdl.Complex128Target
+	keyTarget  vdl.Int64Target
 	elemTarget vdl.StringTarget
 	vdl.TargetBase
 	vdl.MapTargetBase
@@ -1966,14 +1930,14 @@ type __VDLTarget1_map struct {
 
 func (t *__VDLTarget1_map) StartMap(tt *vdl.Type, len int) (vdl.MapTarget, error) {
 
-	if ttWant := vdl.TypeOf((*map[complex128]string)(nil)); !vdl.Compatible(tt, ttWant) {
+	if ttWant := vdl.TypeOf((*map[int64]string)(nil)); !vdl.Compatible(tt, ttWant) {
 		return nil, fmt.Errorf("type %v incompatible with %v", tt, ttWant)
 	}
-	*t.Value = make(map[complex128]string)
+	*t.Value = make(map[int64]string)
 	return t, nil
 }
 func (t *__VDLTarget1_map) StartKey() (key vdl.Target, _ error) {
-	t.currKey = complex128(0)
+	t.currKey = int64(0)
 	t.keyTarget.Value = &t.currKey
 	target, err := &t.keyTarget, error(nil)
 	return target, err

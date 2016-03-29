@@ -58,16 +58,14 @@ pkg syncbase, method (*ValueTarget) FinishFields(vdl.FieldsTarget) error
 pkg syncbase, method (*ValueTarget) StartField(string) (vdl.Target, vdl.Target, error)
 pkg syncbase, method (*ValueTarget) StartFields(*vdl.Type) (vdl.FieldsTarget, error)
 pkg syncbase, method (*WatchChange) Value(interface{}) error
-pkg syncbase, type App interface { Create, Database, Destroy, Exists, FullName, GetPermissions, ListDatabases, Name, SetPermissions }
 pkg syncbase, type App interface, Create(*context.T, access.Permissions) error
 pkg syncbase, type App interface, Database(string, *Schema) Database
 pkg syncbase, type App interface, Destroy(*context.T) error
 pkg syncbase, type App interface, Exists(*context.T) (bool, error)
 pkg syncbase, type App interface, FullName() string
-pkg syncbase, type App interface, GetPermissions(*context.T) (access.Permissions, string, error)
 pkg syncbase, type App interface, ListDatabases(*context.T) ([]string, error)
 pkg syncbase, type App interface, Name() string
-pkg syncbase, type App interface, SetPermissions(*context.T, access.Permissions, string) error
+pkg syncbase, type App interface, unexported methods
 pkg syncbase, type BatchDatabase interface { Abort, Close, Commit, Exec, FullName, GetResumeMarker, ListTables, Name, Table }
 pkg syncbase, type BatchDatabase interface, Abort(*context.T) error
 pkg syncbase, type BatchDatabase interface, Close()
@@ -137,7 +135,6 @@ pkg syncbase, type ConflictTarget struct
 pkg syncbase, type ConflictTarget struct, Value *Conflict
 pkg syncbase, type ConflictTarget struct, embedded vdl.FieldsTargetBase
 pkg syncbase, type ConflictTarget struct, embedded vdl.TargetBase
-pkg syncbase, type Database interface { BeginBatch, Blob, Close, Create, CreateBlob, Destroy, EnforceSchema, Exec, Exists, FullName, GetPermissions, GetResumeMarker, GetSyncgroupNames, ListTables, Name, PauseSync, ResumeSync, SetPermissions, Syncgroup, Table, Watch }
 pkg syncbase, type Database interface, BeginBatch(*context.T, wire.BatchOptions) (BatchDatabase, error)
 pkg syncbase, type Database interface, Blob(wire.BlobRef) Blob
 pkg syncbase, type Database interface, Close()
@@ -148,17 +145,16 @@ pkg syncbase, type Database interface, EnforceSchema(*context.T) error
 pkg syncbase, type Database interface, Exec(*context.T, string, ...interface{}) ([]string, ResultStream, error)
 pkg syncbase, type Database interface, Exists(*context.T) (bool, error)
 pkg syncbase, type Database interface, FullName() string
-pkg syncbase, type Database interface, GetPermissions(*context.T) (access.Permissions, string, error)
 pkg syncbase, type Database interface, GetResumeMarker(*context.T) (watch.ResumeMarker, error)
 pkg syncbase, type Database interface, GetSyncgroupNames(*context.T) ([]string, error)
 pkg syncbase, type Database interface, ListTables(*context.T) ([]string, error)
 pkg syncbase, type Database interface, Name() string
 pkg syncbase, type Database interface, PauseSync(*context.T) error
 pkg syncbase, type Database interface, ResumeSync(*context.T) error
-pkg syncbase, type Database interface, SetPermissions(*context.T, access.Permissions, string) error
 pkg syncbase, type Database interface, Syncgroup(string) Syncgroup
 pkg syncbase, type Database interface, Table(string) Table
 pkg syncbase, type Database interface, Watch(*context.T, string, string, watch.ResumeMarker) (WatchStream, error)
+pkg syncbase, type Database interface, unexported methods
 pkg syncbase, type DatabaseHandle interface { Close, Exec, FullName, GetResumeMarker, ListTables, Name, Table }
 pkg syncbase, type DatabaseHandle interface, Close()
 pkg syncbase, type DatabaseHandle interface, Exec(*context.T, string, ...interface{}) ([]string, ResultStream, error)
@@ -213,12 +209,10 @@ pkg syncbase, type ScanStream interface, Value(interface{}) error
 pkg syncbase, type Schema struct
 pkg syncbase, type Schema struct, Metadata wire.SchemaMetadata
 pkg syncbase, type Schema struct, Resolver ConflictResolver
-pkg syncbase, type Service interface { App, FullName, GetPermissions, ListApps, SetPermissions }
 pkg syncbase, type Service interface, App(string) App
 pkg syncbase, type Service interface, FullName() string
-pkg syncbase, type Service interface, GetPermissions(*context.T) (access.Permissions, string, error)
 pkg syncbase, type Service interface, ListApps(*context.T) ([]string, error)
-pkg syncbase, type Service interface, SetPermissions(*context.T, access.Permissions, string) error
+pkg syncbase, type Service interface, unexported methods
 pkg syncbase, type Stream interface { Advance, Cancel, Err }
 pkg syncbase, type Stream interface, Advance() bool
 pkg syncbase, type Stream interface, Cancel()

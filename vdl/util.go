@@ -11,36 +11,32 @@ import (
 
 var (
 	bitlenReflect = [...]uintptr{
-		reflect.Uint8:      8,
-		reflect.Uint16:     16,
-		reflect.Uint32:     32,
-		reflect.Uint64:     64,
-		reflect.Uint:       8 * unsafe.Sizeof(uint(0)),
-		reflect.Uintptr:    8 * unsafe.Sizeof(uintptr(0)),
-		reflect.Int8:       8,
-		reflect.Int16:      16,
-		reflect.Int32:      32,
-		reflect.Int64:      64,
-		reflect.Int:        8 * unsafe.Sizeof(int(0)),
-		reflect.Float32:    32,
-		reflect.Float64:    64,
-		reflect.Complex64:  32, // bitlen of each float
-		reflect.Complex128: 64, // bitlen of each float
+		reflect.Uint8:   8,
+		reflect.Uint16:  16,
+		reflect.Uint32:  32,
+		reflect.Uint64:  64,
+		reflect.Uint:    8 * unsafe.Sizeof(uint(0)),
+		reflect.Uintptr: 8 * unsafe.Sizeof(uintptr(0)),
+		reflect.Int8:    8,
+		reflect.Int16:   16,
+		reflect.Int32:   32,
+		reflect.Int64:   64,
+		reflect.Int:     8 * unsafe.Sizeof(int(0)),
+		reflect.Float32: 32,
+		reflect.Float64: 64,
 	}
 
 	bitlenVDL = [...]uintptr{
-		Byte:       8,
-		Uint16:     16,
-		Uint32:     32,
-		Uint64:     64,
-		Int8:       8,
-		Int16:      16,
-		Int32:      32,
-		Int64:      64,
-		Float32:    32,
-		Float64:    64,
-		Complex64:  32, // bitlen of each float
-		Complex128: 64, // bitlen of each float
+		Byte:    8,
+		Uint16:  16,
+		Uint32:  32,
+		Uint64:  64,
+		Int8:    8,
+		Int16:   16,
+		Int32:   32,
+		Int64:   64,
+		Float32: 32,
+		Float64: 64,
 	}
 )
 

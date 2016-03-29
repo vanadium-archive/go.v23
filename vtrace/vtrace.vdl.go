@@ -537,16 +537,6 @@ func (t *TraceFlagsTarget) FromFloat(src float64, tt *vdl.Type) error {
 
 	return nil
 }
-func (t *TraceFlagsTarget) FromComplex(src complex128, tt *vdl.Type) error {
-
-	val, err := vdlconv.Complex128ToInt32(src)
-	if err != nil {
-		return err
-	}
-	*t.Value = TraceFlags(val)
-
-	return nil
-}
 
 // Request is the object that carries trace informtion between processes.
 type Request struct {

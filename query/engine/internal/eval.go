@@ -71,8 +71,6 @@ func evalComparisonOperators(db ds.Database, k string, v *vdl.Value, e *query_pa
 		return compareBigRats(lhsValue, rhsValue, e.Operator)
 	case query_parser.TypBool:
 		return compareBools(lhsValue, rhsValue, e.Operator)
-	case query_parser.TypComplex:
-		return compareComplex(lhsValue, rhsValue, e.Operator)
 	case query_parser.TypFloat:
 		return compareFloats(lhsValue, rhsValue, e.Operator)
 	case query_parser.TypInt:
@@ -98,22 +96,6 @@ func coerceValues(lhsValue, rhsValue *query_parser.Operand) (*query_parser.Opera
 			return nil, nil, err
 		}
 		if rhsValue, err = conversions.ConvertValueToString(rhsValue); err != nil {
-			return nil, nil, err
-		}
-		return lhsValue, rhsValue, nil
-	}
-	// If either operand is Complex, promote numerics to Complex.
-	// Comparing complex to string is handled above.
-	if lhsValue.Type == query_parser.TypComplex || rhsValue.Type == query_parser.TypComplex {
-		// If both complex, just return them.
-		if lhsValue.Type == query_parser.TypComplex && rhsValue.Type == query_parser.TypComplex {
-			return lhsValue, rhsValue, nil
-		}
-		var err error
-		if lhsValue, err = conversions.ConvertValueToComplex(lhsValue); err != nil {
-			return nil, nil, err
-		}
-		if rhsValue, err = conversions.ConvertValueToComplex(rhsValue); err != nil {
 			return nil, nil, err
 		}
 		return lhsValue, rhsValue, nil
@@ -227,18 +209,6 @@ func compareBigRats(lhsValue, rhsValue *query_parser.Operand, oper *query_parser
 		return lhsValue.BigRat.Cmp(rhsValue.BigRat) >= 0
 	default:
 		// TODO(jkline): Log this logic error and all other similar cases.
-		return false
-	}
-}
-
-func compareComplex(lhsValue, rhsValue *query_parser.Operand, oper *query_parser.BinaryOperator) bool {
-	switch oper.Type {
-	case query_parser.Equal:
-		return lhsValue.Complex == rhsValue.Complex
-	case query_parser.NotEqual:
-		return lhsValue.Complex != rhsValue.Complex
-	default:
-		// Complex values are not ordered.  All other operands return false.
 		return false
 	}
 }
@@ -485,8 +455,6 @@ func valueFromResolvedOperand(o *query_parser.Operand) interface{} {
 		return o.BigRat
 	case query_parser.TypBool:
 		return o.Bool
-	case query_parser.TypComplex:
-		return o.Complex
 	case query_parser.TypFloat:
 		return o.Float
 	case query_parser.TypInt:

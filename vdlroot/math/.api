@@ -1,0 +1,30 @@
+pkg math, func Complex128FromNative(*Complex128, complex128) error
+pkg math, func Complex128ToNative(Complex128, *complex128) error
+pkg math, func Complex64FromNative(*Complex64, complex64) error
+pkg math, func Complex64ToNative(Complex64, *complex64) error
+pkg math, method (*Complex128) FillVDLTarget(vdl.Target, *vdl.Type) error
+pkg math, method (*Complex128) MakeVDLTarget() vdl.Target
+pkg math, method (*Complex128Target) FinishField(vdl.Target, vdl.Target) error
+pkg math, method (*Complex128Target) FinishFields(vdl.FieldsTarget) error
+pkg math, method (*Complex128Target) StartField(string) (vdl.Target, vdl.Target, error)
+pkg math, method (*Complex128Target) StartFields(*vdl.Type) (vdl.FieldsTarget, error)
+pkg math, method (*Complex64) FillVDLTarget(vdl.Target, *vdl.Type) error
+pkg math, method (*Complex64) MakeVDLTarget() vdl.Target
+pkg math, method (*Complex64Target) FinishField(vdl.Target, vdl.Target) error
+pkg math, method (*Complex64Target) FinishFields(vdl.FieldsTarget) error
+pkg math, method (*Complex64Target) StartField(string) (vdl.Target, vdl.Target, error)
+pkg math, method (*Complex64Target) StartFields(*vdl.Type) (vdl.FieldsTarget, error)
+pkg math, type Complex128 struct
+pkg math, type Complex128 struct, Imag float64
+pkg math, type Complex128 struct, Real float64
+pkg math, type Complex128Target struct
+pkg math, type Complex128Target struct, Value *complex128
+pkg math, type Complex128Target struct, embedded vdl.FieldsTargetBase
+pkg math, type Complex128Target struct, embedded vdl.TargetBase
+pkg math, type Complex64 struct
+pkg math, type Complex64 struct, Imag float32
+pkg math, type Complex64 struct, Real float32
+pkg math, type Complex64Target struct
+pkg math, type Complex64Target struct, Value *complex64
+pkg math, type Complex64Target struct, embedded vdl.FieldsTargetBase
+pkg math, type Complex64Target struct, embedded vdl.TargetBase

@@ -185,16 +185,6 @@ func (r *rbTarget) FromFloat(src float64, tt *vdl.Type) error {
 	return r.finish()
 }
 
-func (r *rbTarget) FromComplex(src complex128, tt *vdl.Type) error {
-	if err := r.start(tt); err != nil {
-		return err
-	}
-	if err := r.enc.FromComplex(src, tt); err != nil {
-		return err
-	}
-	return r.finish()
-}
-
 func (r *rbTarget) FromBytes(src []byte, tt *vdl.Type) error {
 	if err := r.start(tt); err != nil {
 		return err

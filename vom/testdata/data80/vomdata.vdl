@@ -1606,96 +1606,6 @@ const Tests = []types.TestCase {
 		"80", "", "16fd2050c0",
 	},
 	// 80                   Version                          128 [vom version 80]
-	// DumpStatus{MsgId: 0, MsgN: 1, Buf(4): "18020000"}
-	// 18                   MsgId                             12
-	//                      ValueMsg                          12 [complex64]
-	// 02                   MsgLen                             2
-	// 00                   PrimValue                          0 [complex real]
-	// 00                   PrimValue                          0 [complex imag]
-	// DumpStatus{MsgId: 12, MsgLen: 2, MsgN: 2, Value: complex64(0+0i)}
-	{
-		`complex64(0)`,
-		complex64(0),
-		"complex64",
-		"8018020000",
-		"80", "", "18020000",
-	},
-	// 80                   Version                          128 [vom version 80]
-	// DumpStatus{MsgId: 0, MsgN: 1, Buf(10): "1808fd205040fd205040"}
-	// 18                   MsgId                             12
-	//                      ValueMsg                          12 [complex64]
-	// 08                   MsgLen                             8
-	// fd205040             PrimValue                       64.5 [complex real]
-	// fd205040             PrimValue                       64.5 [complex imag]
-	// DumpStatus{MsgId: 12, MsgLen: 8, MsgN: 8, Value: complex64(64.5+64.5i)}
-	{
-		`complex64(64.5+64.5i)`,
-		complex64(64.5+64.5i),
-		"complex64",
-		"801808fd205040fd205040",
-		"80", "", "1808fd205040fd205040",
-	},
-	// 80                   Version                          128 [vom version 80]
-	// DumpStatus{MsgId: 0, MsgN: 1, Buf(10): "1808fd205040fd2050c0"}
-	// 18                   MsgId                             12
-	//                      ValueMsg                          12 [complex64]
-	// 08                   MsgLen                             8
-	// fd205040             PrimValue                       64.5 [complex real]
-	// fd2050c0             PrimValue                       64.5 [complex imag]
-	// DumpStatus{MsgId: 12, MsgLen: 8, MsgN: 8, Value: complex64(64.5+-64.5i)}
-	{
-		`complex64(64.5-64.5i)`,
-		complex64(64.5-64.5i),
-		"complex64",
-		"801808fd205040fd2050c0",
-		"80", "", "1808fd205040fd2050c0",
-	},
-	// 80                   Version                          128 [vom version 80]
-	// DumpStatus{MsgId: 0, MsgN: 1, Buf(4): "1a020000"}
-	// 1a                   MsgId                             13
-	//                      ValueMsg                          13 [complex128]
-	// 02                   MsgLen                             2
-	// 00                   PrimValue                          0 [complex real]
-	// 00                   PrimValue                          0 [complex imag]
-	// DumpStatus{MsgId: 13, MsgLen: 2, MsgN: 2, Value: complex128(0+0i)}
-	{
-		`complex128(0)`,
-		complex128(0),
-		"complex128",
-		"801a020000",
-		"80", "", "1a020000",
-	},
-	// 80                   Version                          128 [vom version 80]
-	// DumpStatus{MsgId: 0, MsgN: 1, Buf(10): "1a08fd106040fd106040"}
-	// 1a                   MsgId                             13
-	//                      ValueMsg                          13 [complex128]
-	// 08                   MsgLen                             8
-	// fd106040             PrimValue                      128.5 [complex real]
-	// fd106040             PrimValue                      128.5 [complex imag]
-	// DumpStatus{MsgId: 13, MsgLen: 8, MsgN: 8, Value: complex128(128.5+128.5i)}
-	{
-		`complex128(128.5+128.5i)`,
-		complex128(128.5+128.5i),
-		"complex128",
-		"801a08fd106040fd106040",
-		"80", "", "1a08fd106040fd106040",
-	},
-	// 80                   Version                          128 [vom version 80]
-	// DumpStatus{MsgId: 0, MsgN: 1, Buf(10): "1a08fd106040fd1060c0"}
-	// 1a                   MsgId                             13
-	//                      ValueMsg                          13 [complex128]
-	// 08                   MsgLen                             8
-	// fd106040             PrimValue                      128.5 [complex real]
-	// fd1060c0             PrimValue                      128.5 [complex imag]
-	// DumpStatus{MsgId: 13, MsgLen: 8, MsgN: 8, Value: complex128(128.5+-128.5i)}
-	{
-		`complex128(128.5-128.5i)`,
-		complex128(128.5-128.5i),
-		"complex128",
-		"801a08fd106040fd1060c0",
-		"80", "", "1a08fd106040fd1060c0",
-	},
-	// 80                   Version                          128 [vom version 80]
 	// DumpStatus{MsgId: 0, MsgN: 1, Buf(43): "5127000021762e696f2f7632332f766f6d2f74657374646174612f74797065732e4e426f6f6c0101e15201"}
 	// 51                   MsgId                            -41
 	//                      TypeMsg                           41
@@ -2524,162 +2434,6 @@ const Tests = []types.TestCase {
 		"v.io/v23/vom/testdata/types.NFloat64 float64",
 		"80512a000024762e696f2f7632332f766f6d2f74657374646174612f74797065732e4e466c6f61743634010be152fd2050c0",
 		"80", "512a000024762e696f2f7632332f766f6d2f74657374646174612f74797065732e4e466c6f61743634010be1", "52fd2050c0",
-	},
-	// 80                   Version                          128 [vom version 80]
-	// DumpStatus{MsgId: 0, MsgN: 1, Buf(50): "512c000026762e696f2f7632332f766f6d2f74657374646174612f74797065732e4e436f6d706c65783634010ce152020000"}
-	// 51                   MsgId                            -41
-	//                      TypeMsg                           41
-	// 2c                   MsgLen                            44
-	// 00                   WireTypeIndex                      0 [v.io/v23/vom.wireNamed]
-	// 00                   Index                              0 [v.io/v23/vom.wireNamed.Name]
-	// 26                   ByteLen                           38 [string len]
-	// 762e696f2f7632332f766f6d2f74657374646174612f74797065732e4e436f6d706c65783634 PrimValue       "v.io/v23/vom/testdata/types.NComplex64" [string]
-	// 01                   Index                              1 [v.io/v23/vom.wireNamed.Base]
-	// 0c                   PrimValue                         12 [uint]
-	// e1                   Control                          End [v.io/v23/vom.wireNamed END]
-	// DumpStatus{MsgId: -41, MsgLen: 44, MsgN: 44, Buf(4): "52020000"}
-	// 52                   MsgId                             41
-	//                      ValueMsg                          41 [v.io/v23/vom/testdata/types.NComplex64 complex64]
-	// 02                   MsgLen                             2
-	// 00                   PrimValue                          0 [complex real]
-	// 00                   PrimValue                          0 [complex imag]
-	// DumpStatus{MsgId: 41, MsgLen: 2, MsgN: 2, Value: v.io/v23/vom/testdata/types.NComplex64 complex64(0+0i)}
-	{
-		`types.NComplex64(0)`,
-		types.NComplex64(0),
-		"v.io/v23/vom/testdata/types.NComplex64 complex64",
-		"80512c000026762e696f2f7632332f766f6d2f74657374646174612f74797065732e4e436f6d706c65783634010ce152020000",
-		"80", "512c000026762e696f2f7632332f766f6d2f74657374646174612f74797065732e4e436f6d706c65783634010ce1", "52020000",
-	},
-	// 80                   Version                          128 [vom version 80]
-	// DumpStatus{MsgId: 0, MsgN: 1, Buf(56): "512c000026762e696f2f7632332f766f6d2f74657374646174612f74797065732e4e436f6d706c65783634010ce15208fd205040fd205040"}
-	// 51                   MsgId                            -41
-	//                      TypeMsg                           41
-	// 2c                   MsgLen                            44
-	// 00                   WireTypeIndex                      0 [v.io/v23/vom.wireNamed]
-	// 00                   Index                              0 [v.io/v23/vom.wireNamed.Name]
-	// 26                   ByteLen                           38 [string len]
-	// 762e696f2f7632332f766f6d2f74657374646174612f74797065732e4e436f6d706c65783634 PrimValue       "v.io/v23/vom/testdata/types.NComplex64" [string]
-	// 01                   Index                              1 [v.io/v23/vom.wireNamed.Base]
-	// 0c                   PrimValue                         12 [uint]
-	// e1                   Control                          End [v.io/v23/vom.wireNamed END]
-	// DumpStatus{MsgId: -41, MsgLen: 44, MsgN: 44, Buf(10): "5208fd205040fd205040"}
-	// 52                   MsgId                             41
-	//                      ValueMsg                          41 [v.io/v23/vom/testdata/types.NComplex64 complex64]
-	// 08                   MsgLen                             8
-	// fd205040             PrimValue                       64.5 [complex real]
-	// fd205040             PrimValue                       64.5 [complex imag]
-	// DumpStatus{MsgId: 41, MsgLen: 8, MsgN: 8, Value: v.io/v23/vom/testdata/types.NComplex64 complex64(64.5+64.5i)}
-	{
-		`types.NComplex64(64.5+64.5i)`,
-		types.NComplex64(64.5+64.5i),
-		"v.io/v23/vom/testdata/types.NComplex64 complex64",
-		"80512c000026762e696f2f7632332f766f6d2f74657374646174612f74797065732e4e436f6d706c65783634010ce15208fd205040fd205040",
-		"80", "512c000026762e696f2f7632332f766f6d2f74657374646174612f74797065732e4e436f6d706c65783634010ce1", "5208fd205040fd205040",
-	},
-	// 80                   Version                          128 [vom version 80]
-	// DumpStatus{MsgId: 0, MsgN: 1, Buf(56): "512c000026762e696f2f7632332f766f6d2f74657374646174612f74797065732e4e436f6d706c65783634010ce15208fd205040fd2050c0"}
-	// 51                   MsgId                            -41
-	//                      TypeMsg                           41
-	// 2c                   MsgLen                            44
-	// 00                   WireTypeIndex                      0 [v.io/v23/vom.wireNamed]
-	// 00                   Index                              0 [v.io/v23/vom.wireNamed.Name]
-	// 26                   ByteLen                           38 [string len]
-	// 762e696f2f7632332f766f6d2f74657374646174612f74797065732e4e436f6d706c65783634 PrimValue       "v.io/v23/vom/testdata/types.NComplex64" [string]
-	// 01                   Index                              1 [v.io/v23/vom.wireNamed.Base]
-	// 0c                   PrimValue                         12 [uint]
-	// e1                   Control                          End [v.io/v23/vom.wireNamed END]
-	// DumpStatus{MsgId: -41, MsgLen: 44, MsgN: 44, Buf(10): "5208fd205040fd2050c0"}
-	// 52                   MsgId                             41
-	//                      ValueMsg                          41 [v.io/v23/vom/testdata/types.NComplex64 complex64]
-	// 08                   MsgLen                             8
-	// fd205040             PrimValue                       64.5 [complex real]
-	// fd2050c0             PrimValue                       64.5 [complex imag]
-	// DumpStatus{MsgId: 41, MsgLen: 8, MsgN: 8, Value: v.io/v23/vom/testdata/types.NComplex64 complex64(64.5+-64.5i)}
-	{
-		`types.NComplex64(64.5-64.5i)`,
-		types.NComplex64(64.5-64.5i),
-		"v.io/v23/vom/testdata/types.NComplex64 complex64",
-		"80512c000026762e696f2f7632332f766f6d2f74657374646174612f74797065732e4e436f6d706c65783634010ce15208fd205040fd2050c0",
-		"80", "512c000026762e696f2f7632332f766f6d2f74657374646174612f74797065732e4e436f6d706c65783634010ce1", "5208fd205040fd2050c0",
-	},
-	// 80                   Version                          128 [vom version 80]
-	// DumpStatus{MsgId: 0, MsgN: 1, Buf(51): "512d000027762e696f2f7632332f766f6d2f74657374646174612f74797065732e4e436f6d706c6578313238010de152020000"}
-	// 51                   MsgId                            -41
-	//                      TypeMsg                           41
-	// 2d                   MsgLen                            45
-	// 00                   WireTypeIndex                      0 [v.io/v23/vom.wireNamed]
-	// 00                   Index                              0 [v.io/v23/vom.wireNamed.Name]
-	// 27                   ByteLen                           39 [string len]
-	// 762e696f2f7632332f766f6d2f74657374646174612f74797065732e4e436f6d706c6578313238 PrimValue       "v.io/v23/vom/testdata/types.NComplex128" [string]
-	// 01                   Index                              1 [v.io/v23/vom.wireNamed.Base]
-	// 0d                   PrimValue                         13 [uint]
-	// e1                   Control                          End [v.io/v23/vom.wireNamed END]
-	// DumpStatus{MsgId: -41, MsgLen: 45, MsgN: 45, Buf(4): "52020000"}
-	// 52                   MsgId                             41
-	//                      ValueMsg                          41 [v.io/v23/vom/testdata/types.NComplex128 complex128]
-	// 02                   MsgLen                             2
-	// 00                   PrimValue                          0 [complex real]
-	// 00                   PrimValue                          0 [complex imag]
-	// DumpStatus{MsgId: 41, MsgLen: 2, MsgN: 2, Value: v.io/v23/vom/testdata/types.NComplex128 complex128(0+0i)}
-	{
-		`types.NComplex128(0)`,
-		types.NComplex128(0),
-		"v.io/v23/vom/testdata/types.NComplex128 complex128",
-		"80512d000027762e696f2f7632332f766f6d2f74657374646174612f74797065732e4e436f6d706c6578313238010de152020000",
-		"80", "512d000027762e696f2f7632332f766f6d2f74657374646174612f74797065732e4e436f6d706c6578313238010de1", "52020000",
-	},
-	// 80                   Version                          128 [vom version 80]
-	// DumpStatus{MsgId: 0, MsgN: 1, Buf(57): "512d000027762e696f2f7632332f766f6d2f74657374646174612f74797065732e4e436f6d706c6578313238010de15208fd106040fd106040"}
-	// 51                   MsgId                            -41
-	//                      TypeMsg                           41
-	// 2d                   MsgLen                            45
-	// 00                   WireTypeIndex                      0 [v.io/v23/vom.wireNamed]
-	// 00                   Index                              0 [v.io/v23/vom.wireNamed.Name]
-	// 27                   ByteLen                           39 [string len]
-	// 762e696f2f7632332f766f6d2f74657374646174612f74797065732e4e436f6d706c6578313238 PrimValue       "v.io/v23/vom/testdata/types.NComplex128" [string]
-	// 01                   Index                              1 [v.io/v23/vom.wireNamed.Base]
-	// 0d                   PrimValue                         13 [uint]
-	// e1                   Control                          End [v.io/v23/vom.wireNamed END]
-	// DumpStatus{MsgId: -41, MsgLen: 45, MsgN: 45, Buf(10): "5208fd106040fd106040"}
-	// 52                   MsgId                             41
-	//                      ValueMsg                          41 [v.io/v23/vom/testdata/types.NComplex128 complex128]
-	// 08                   MsgLen                             8
-	// fd106040             PrimValue                      128.5 [complex real]
-	// fd106040             PrimValue                      128.5 [complex imag]
-	// DumpStatus{MsgId: 41, MsgLen: 8, MsgN: 8, Value: v.io/v23/vom/testdata/types.NComplex128 complex128(128.5+128.5i)}
-	{
-		`types.NComplex128(128.5+128.5i)`,
-		types.NComplex128(128.5+128.5i),
-		"v.io/v23/vom/testdata/types.NComplex128 complex128",
-		"80512d000027762e696f2f7632332f766f6d2f74657374646174612f74797065732e4e436f6d706c6578313238010de15208fd106040fd106040",
-		"80", "512d000027762e696f2f7632332f766f6d2f74657374646174612f74797065732e4e436f6d706c6578313238010de1", "5208fd106040fd106040",
-	},
-	// 80                   Version                          128 [vom version 80]
-	// DumpStatus{MsgId: 0, MsgN: 1, Buf(57): "512d000027762e696f2f7632332f766f6d2f74657374646174612f74797065732e4e436f6d706c6578313238010de15208fd106040fd1060c0"}
-	// 51                   MsgId                            -41
-	//                      TypeMsg                           41
-	// 2d                   MsgLen                            45
-	// 00                   WireTypeIndex                      0 [v.io/v23/vom.wireNamed]
-	// 00                   Index                              0 [v.io/v23/vom.wireNamed.Name]
-	// 27                   ByteLen                           39 [string len]
-	// 762e696f2f7632332f766f6d2f74657374646174612f74797065732e4e436f6d706c6578313238 PrimValue       "v.io/v23/vom/testdata/types.NComplex128" [string]
-	// 01                   Index                              1 [v.io/v23/vom.wireNamed.Base]
-	// 0d                   PrimValue                         13 [uint]
-	// e1                   Control                          End [v.io/v23/vom.wireNamed END]
-	// DumpStatus{MsgId: -41, MsgLen: 45, MsgN: 45, Buf(10): "5208fd106040fd1060c0"}
-	// 52                   MsgId                             41
-	//                      ValueMsg                          41 [v.io/v23/vom/testdata/types.NComplex128 complex128]
-	// 08                   MsgLen                             8
-	// fd106040             PrimValue                      128.5 [complex real]
-	// fd1060c0             PrimValue                      128.5 [complex imag]
-	// DumpStatus{MsgId: 41, MsgLen: 8, MsgN: 8, Value: v.io/v23/vom/testdata/types.NComplex128 complex128(128.5+-128.5i)}
-	{
-		`types.NComplex128(128.5-128.5i)`,
-		types.NComplex128(128.5-128.5i),
-		"v.io/v23/vom/testdata/types.NComplex128 complex128",
-		"80512d000027762e696f2f7632332f766f6d2f74657374646174612f74797065732e4e436f6d706c6578313238010de15208fd106040fd1060c0",
-		"80", "512d000027762e696f2f7632332f766f6d2f74657374646174612f74797065732e4e436f6d706c6578313238010de1", "5208fd106040fd1060c0",
 	},
 	// 80                   Version                          128 [vom version 80]
 	// DumpStatus{MsgId: 0, MsgN: 1, Buf(56): "5131020029762e696f2f7632332f766f6d2f74657374646174612f74797065732e4e41727261793255696e74363401060202e15203000102"}
@@ -5079,32 +4833,6 @@ const Tests = []types.TestCase {
 		"80", "", "1c0b",
 	},
 	// 80                   Version                          128 [vom version 80]
-	// DumpStatus{MsgId: 0, MsgN: 1, Buf(2): "1c0c"}
-	// 1c                   MsgId                             14
-	//                      ValueMsg                          14 [typeobject]
-	// 0c                   TypeId                            12 [complex64]
-	// DumpStatus{MsgId: 14, MsgN: 2, Value: typeobject(complex64)}
-	{
-		`typeobject(complex64)`,
-		typeobject(complex64),
-		"typeobject",
-		"801c0c",
-		"80", "", "1c0c",
-	},
-	// 80                   Version                          128 [vom version 80]
-	// DumpStatus{MsgId: 0, MsgN: 1, Buf(2): "1c0d"}
-	// 1c                   MsgId                             14
-	//                      ValueMsg                          14 [typeobject]
-	// 0d                   TypeId                            13 [complex128]
-	// DumpStatus{MsgId: 14, MsgN: 2, Value: typeobject(complex128)}
-	{
-		`typeobject(complex128)`,
-		typeobject(complex128),
-		"typeobject",
-		"801c0d",
-		"80", "", "1c0d",
-	},
-	// 80                   Version                          128 [vom version 80]
 	// DumpStatus{MsgId: 0, MsgN: 1, Buf(43): "5127000021762e696f2f7632332f766f6d2f74657374646174612f74797065732e4e426f6f6c0101e11c29"}
 	// 51                   MsgId                            -41
 	//                      TypeMsg                           41
@@ -5319,54 +5047,6 @@ const Tests = []types.TestCase {
 		"typeobject",
 		"80512a000024762e696f2f7632332f766f6d2f74657374646174612f74797065732e4e466c6f61743634010be11c29",
 		"80", "512a000024762e696f2f7632332f766f6d2f74657374646174612f74797065732e4e466c6f61743634010be1", "1c29",
-	},
-	// 80                   Version                          128 [vom version 80]
-	// DumpStatus{MsgId: 0, MsgN: 1, Buf(48): "512c000026762e696f2f7632332f766f6d2f74657374646174612f74797065732e4e436f6d706c65783634010ce11c29"}
-	// 51                   MsgId                            -41
-	//                      TypeMsg                           41
-	// 2c                   MsgLen                            44
-	// 00                   WireTypeIndex                      0 [v.io/v23/vom.wireNamed]
-	// 00                   Index                              0 [v.io/v23/vom.wireNamed.Name]
-	// 26                   ByteLen                           38 [string len]
-	// 762e696f2f7632332f766f6d2f74657374646174612f74797065732e4e436f6d706c65783634 PrimValue       "v.io/v23/vom/testdata/types.NComplex64" [string]
-	// 01                   Index                              1 [v.io/v23/vom.wireNamed.Base]
-	// 0c                   PrimValue                         12 [uint]
-	// e1                   Control                          End [v.io/v23/vom.wireNamed END]
-	// DumpStatus{MsgId: -41, MsgLen: 44, MsgN: 44, Buf(2): "1c29"}
-	// 1c                   MsgId                             14
-	//                      ValueMsg                          14 [typeobject]
-	// 29                   TypeId                            41 [v.io/v23/vom/testdata/types.NComplex64 complex64]
-	// DumpStatus{MsgId: 14, MsgN: 2, Value: typeobject(v.io/v23/vom/testdata/types.NComplex64 complex64)}
-	{
-		`typeobject(types.NComplex64)`,
-		typeobject(types.NComplex64),
-		"typeobject",
-		"80512c000026762e696f2f7632332f766f6d2f74657374646174612f74797065732e4e436f6d706c65783634010ce11c29",
-		"80", "512c000026762e696f2f7632332f766f6d2f74657374646174612f74797065732e4e436f6d706c65783634010ce1", "1c29",
-	},
-	// 80                   Version                          128 [vom version 80]
-	// DumpStatus{MsgId: 0, MsgN: 1, Buf(49): "512d000027762e696f2f7632332f766f6d2f74657374646174612f74797065732e4e436f6d706c6578313238010de11c29"}
-	// 51                   MsgId                            -41
-	//                      TypeMsg                           41
-	// 2d                   MsgLen                            45
-	// 00                   WireTypeIndex                      0 [v.io/v23/vom.wireNamed]
-	// 00                   Index                              0 [v.io/v23/vom.wireNamed.Name]
-	// 27                   ByteLen                           39 [string len]
-	// 762e696f2f7632332f766f6d2f74657374646174612f74797065732e4e436f6d706c6578313238 PrimValue       "v.io/v23/vom/testdata/types.NComplex128" [string]
-	// 01                   Index                              1 [v.io/v23/vom.wireNamed.Base]
-	// 0d                   PrimValue                         13 [uint]
-	// e1                   Control                          End [v.io/v23/vom.wireNamed END]
-	// DumpStatus{MsgId: -41, MsgLen: 45, MsgN: 45, Buf(2): "1c29"}
-	// 1c                   MsgId                             14
-	//                      ValueMsg                          14 [typeobject]
-	// 29                   TypeId                            41 [v.io/v23/vom/testdata/types.NComplex128 complex128]
-	// DumpStatus{MsgId: 14, MsgN: 2, Value: typeobject(v.io/v23/vom/testdata/types.NComplex128 complex128)}
-	{
-		`typeobject(types.NComplex128)`,
-		typeobject(types.NComplex128),
-		"typeobject",
-		"80512d000027762e696f2f7632332f766f6d2f74657374646174612f74797065732e4e436f6d706c6578313238010de11c29",
-		"80", "512d000027762e696f2f7632332f766f6d2f74657374646174612f74797065732e4e436f6d706c6578313238010de1", "1c29",
 	},
 	// 80                   Version                          128 [vom version 80]
 	// DumpStatus{MsgId: 0, MsgN: 1, Buf(53): "5131020029762e696f2f7632332f766f6d2f74657374646174612f74797065732e4e41727261793255696e74363401060202e11c29"}
@@ -6007,76 +5687,6 @@ const Tests = []types.TestCase {
 		"v.io/v23/vom/testdata/types.StructAny struct{Any any}",
 		"805133060025762e696f2f7632332f766f6d2f74657374646174612f74797065732e537472756374416e7901010003416e79010fe1e15204000b00e1",
 		"80", "5133060025762e696f2f7632332f766f6d2f74657374646174612f74797065732e537472756374416e7901010003416e79010fe1e1", "5204000b00e1",
-	},
-	// 80                   Version                          128 [vom version 80]
-	// DumpStatus{MsgId: 0, MsgN: 1, Buf(60): "5133060025762e696f2f7632332f766f6d2f74657374646174612f74797065732e537472756374416e7901010003416e79010fe1e15205000c0000e1"}
-	// 51                   MsgId                            -41
-	//                      TypeMsg                           41
-	// 33                   MsgLen                            51
-	// 06                   WireTypeIndex                      6 [v.io/v23/vom.wireStruct]
-	// 00                   Index                              0 [v.io/v23/vom.wireStruct.Name]
-	// 25                   ByteLen                           37 [string len]
-	// 762e696f2f7632332f766f6d2f74657374646174612f74797065732e537472756374416e79 PrimValue       "v.io/v23/vom/testdata/types.StructAny" [string]
-	// 01                   Index                              1 [v.io/v23/vom.wireStruct.Fields]
-	// 01                   ValueLen                           1 [list len]
-	// 00                   Index                              0 [v.io/v23/vom.wireField.Name]
-	// 03                   ByteLen                            3 [string len]
-	// 416e79               PrimValue                      "Any" [string]
-	// 01                   Index                              1 [v.io/v23/vom.wireField.Type]
-	// 0f                   PrimValue                         15 [uint]
-	// e1                   Control                          End [v.io/v23/vom.wireField END]
-	// e1                   Control                          End [v.io/v23/vom.wireStruct END]
-	// DumpStatus{MsgId: -41, MsgLen: 51, MsgN: 51, Buf(7): "5205000c0000e1"}
-	// 52                   MsgId                             41
-	//                      ValueMsg                          41 [v.io/v23/vom/testdata/types.StructAny struct{Any any}]
-	// 05                   MsgLen                             5
-	// 00                   Index                              0 [v.io/v23/vom/testdata/types.StructAny.Any]
-	// 0c                   TypeId                            12 [complex64]
-	// 00                   PrimValue                          0 [complex real]
-	// 00                   PrimValue                          0 [complex imag]
-	// e1                   Control                          End [v.io/v23/vom/testdata/types.StructAny END]
-	// DumpStatus{MsgId: 41, MsgLen: 5, MsgN: 5, Value: v.io/v23/vom/testdata/types.StructAny struct{Any any}{Any: complex64(0+0i)}}
-	{
-		`types.StructAny{Any: complex64(0)}`,
-		types.StructAny{Any: complex64(0)},
-		"v.io/v23/vom/testdata/types.StructAny struct{Any any}",
-		"805133060025762e696f2f7632332f766f6d2f74657374646174612f74797065732e537472756374416e7901010003416e79010fe1e15205000c0000e1",
-		"80", "5133060025762e696f2f7632332f766f6d2f74657374646174612f74797065732e537472756374416e7901010003416e79010fe1e1", "5205000c0000e1",
-	},
-	// 80                   Version                          128 [vom version 80]
-	// DumpStatus{MsgId: 0, MsgN: 1, Buf(60): "5133060025762e696f2f7632332f766f6d2f74657374646174612f74797065732e537472756374416e7901010003416e79010fe1e15205000d0000e1"}
-	// 51                   MsgId                            -41
-	//                      TypeMsg                           41
-	// 33                   MsgLen                            51
-	// 06                   WireTypeIndex                      6 [v.io/v23/vom.wireStruct]
-	// 00                   Index                              0 [v.io/v23/vom.wireStruct.Name]
-	// 25                   ByteLen                           37 [string len]
-	// 762e696f2f7632332f766f6d2f74657374646174612f74797065732e537472756374416e79 PrimValue       "v.io/v23/vom/testdata/types.StructAny" [string]
-	// 01                   Index                              1 [v.io/v23/vom.wireStruct.Fields]
-	// 01                   ValueLen                           1 [list len]
-	// 00                   Index                              0 [v.io/v23/vom.wireField.Name]
-	// 03                   ByteLen                            3 [string len]
-	// 416e79               PrimValue                      "Any" [string]
-	// 01                   Index                              1 [v.io/v23/vom.wireField.Type]
-	// 0f                   PrimValue                         15 [uint]
-	// e1                   Control                          End [v.io/v23/vom.wireField END]
-	// e1                   Control                          End [v.io/v23/vom.wireStruct END]
-	// DumpStatus{MsgId: -41, MsgLen: 51, MsgN: 51, Buf(7): "5205000d0000e1"}
-	// 52                   MsgId                             41
-	//                      ValueMsg                          41 [v.io/v23/vom/testdata/types.StructAny struct{Any any}]
-	// 05                   MsgLen                             5
-	// 00                   Index                              0 [v.io/v23/vom/testdata/types.StructAny.Any]
-	// 0d                   TypeId                            13 [complex128]
-	// 00                   PrimValue                          0 [complex real]
-	// 00                   PrimValue                          0 [complex imag]
-	// e1                   Control                          End [v.io/v23/vom/testdata/types.StructAny END]
-	// DumpStatus{MsgId: 41, MsgLen: 5, MsgN: 5, Value: v.io/v23/vom/testdata/types.StructAny struct{Any any}{Any: complex128(0+0i)}}
-	{
-		`types.StructAny{Any: complex128(0)}`,
-		types.StructAny{Any: complex128(0)},
-		"v.io/v23/vom/testdata/types.StructAny struct{Any any}",
-		"805133060025762e696f2f7632332f766f6d2f74657374646174612f74797065732e537472756374416e7901010003416e79010fe1e15205000d0000e1",
-		"80", "5133060025762e696f2f7632332f766f6d2f74657374646174612f74797065732e537472756374416e7901010003416e79010fe1e1", "5205000d0000e1",
 	},
 	// 80                   Version                          128 [vom version 80]
 	// DumpStatus{MsgId: 0, MsgN: 1, Buf(59): "5133060025762e696f2f7632332f766f6d2f74657374646174612f74797065732e537472756374416e7901010003416e79010fe1e15204000300e1"}
@@ -7323,76 +6933,6 @@ const Tests = []types.TestCase {
 		"80", "5133060025762e696f2f7632332f766f6d2f74657374646174612f74797065732e537472756374416e7901010003416e79010fe1e1", "5206000bfef03fe1",
 	},
 	// 80                   Version                          128 [vom version 80]
-	// DumpStatus{MsgId: 0, MsgN: 1, Buf(62): "5133060025762e696f2f7632332f766f6d2f74657374646174612f74797065732e537472756374416e7901010003416e79010fe1e15207000cfef03f00e1"}
-	// 51                   MsgId                            -41
-	//                      TypeMsg                           41
-	// 33                   MsgLen                            51
-	// 06                   WireTypeIndex                      6 [v.io/v23/vom.wireStruct]
-	// 00                   Index                              0 [v.io/v23/vom.wireStruct.Name]
-	// 25                   ByteLen                           37 [string len]
-	// 762e696f2f7632332f766f6d2f74657374646174612f74797065732e537472756374416e79 PrimValue       "v.io/v23/vom/testdata/types.StructAny" [string]
-	// 01                   Index                              1 [v.io/v23/vom.wireStruct.Fields]
-	// 01                   ValueLen                           1 [list len]
-	// 00                   Index                              0 [v.io/v23/vom.wireField.Name]
-	// 03                   ByteLen                            3 [string len]
-	// 416e79               PrimValue                      "Any" [string]
-	// 01                   Index                              1 [v.io/v23/vom.wireField.Type]
-	// 0f                   PrimValue                         15 [uint]
-	// e1                   Control                          End [v.io/v23/vom.wireField END]
-	// e1                   Control                          End [v.io/v23/vom.wireStruct END]
-	// DumpStatus{MsgId: -41, MsgLen: 51, MsgN: 51, Buf(9): "5207000cfef03f00e1"}
-	// 52                   MsgId                             41
-	//                      ValueMsg                          41 [v.io/v23/vom/testdata/types.StructAny struct{Any any}]
-	// 07                   MsgLen                             7
-	// 00                   Index                              0 [v.io/v23/vom/testdata/types.StructAny.Any]
-	// 0c                   TypeId                            12 [complex64]
-	// fef03f               PrimValue                          1 [complex real]
-	// 00                   PrimValue                          1 [complex imag]
-	// e1                   Control                          End [v.io/v23/vom/testdata/types.StructAny END]
-	// DumpStatus{MsgId: 41, MsgLen: 7, MsgN: 7, Value: v.io/v23/vom/testdata/types.StructAny struct{Any any}{Any: complex64(1+0i)}}
-	{
-		`types.StructAny{Any: complex64(1)}`,
-		types.StructAny{Any: complex64(1)},
-		"v.io/v23/vom/testdata/types.StructAny struct{Any any}",
-		"805133060025762e696f2f7632332f766f6d2f74657374646174612f74797065732e537472756374416e7901010003416e79010fe1e15207000cfef03f00e1",
-		"80", "5133060025762e696f2f7632332f766f6d2f74657374646174612f74797065732e537472756374416e7901010003416e79010fe1e1", "5207000cfef03f00e1",
-	},
-	// 80                   Version                          128 [vom version 80]
-	// DumpStatus{MsgId: 0, MsgN: 1, Buf(62): "5133060025762e696f2f7632332f766f6d2f74657374646174612f74797065732e537472756374416e7901010003416e79010fe1e15207000dfef03f00e1"}
-	// 51                   MsgId                            -41
-	//                      TypeMsg                           41
-	// 33                   MsgLen                            51
-	// 06                   WireTypeIndex                      6 [v.io/v23/vom.wireStruct]
-	// 00                   Index                              0 [v.io/v23/vom.wireStruct.Name]
-	// 25                   ByteLen                           37 [string len]
-	// 762e696f2f7632332f766f6d2f74657374646174612f74797065732e537472756374416e79 PrimValue       "v.io/v23/vom/testdata/types.StructAny" [string]
-	// 01                   Index                              1 [v.io/v23/vom.wireStruct.Fields]
-	// 01                   ValueLen                           1 [list len]
-	// 00                   Index                              0 [v.io/v23/vom.wireField.Name]
-	// 03                   ByteLen                            3 [string len]
-	// 416e79               PrimValue                      "Any" [string]
-	// 01                   Index                              1 [v.io/v23/vom.wireField.Type]
-	// 0f                   PrimValue                         15 [uint]
-	// e1                   Control                          End [v.io/v23/vom.wireField END]
-	// e1                   Control                          End [v.io/v23/vom.wireStruct END]
-	// DumpStatus{MsgId: -41, MsgLen: 51, MsgN: 51, Buf(9): "5207000dfef03f00e1"}
-	// 52                   MsgId                             41
-	//                      ValueMsg                          41 [v.io/v23/vom/testdata/types.StructAny struct{Any any}]
-	// 07                   MsgLen                             7
-	// 00                   Index                              0 [v.io/v23/vom/testdata/types.StructAny.Any]
-	// 0d                   TypeId                            13 [complex128]
-	// fef03f               PrimValue                          1 [complex real]
-	// 00                   PrimValue                          1 [complex imag]
-	// e1                   Control                          End [v.io/v23/vom/testdata/types.StructAny END]
-	// DumpStatus{MsgId: 41, MsgLen: 7, MsgN: 7, Value: v.io/v23/vom/testdata/types.StructAny struct{Any any}{Any: complex128(1+0i)}}
-	{
-		`types.StructAny{Any: complex128(1)}`,
-		types.StructAny{Any: complex128(1)},
-		"v.io/v23/vom/testdata/types.StructAny struct{Any any}",
-		"805133060025762e696f2f7632332f766f6d2f74657374646174612f74797065732e537472756374416e7901010003416e79010fe1e15207000dfef03f00e1",
-		"80", "5133060025762e696f2f7632332f766f6d2f74657374646174612f74797065732e537472756374416e7901010003416e79010fe1e1", "5207000dfef03f00e1",
-	},
-	// 80                   Version                          128 [vom version 80]
 	// DumpStatus{MsgId: 0, MsgN: 1, Buf(60): "5133060025762e696f2f7632332f766f6d2f74657374646174612f74797065732e537472756374416e7901010003416e79010fe1e1520500030141e1"}
 	// 51                   MsgId                            -41
 	//                      TypeMsg                           41
@@ -8060,36 +7600,6 @@ const Tests = []types.TestCase {
 		"80", "", "1600",
 	},
 	// 80                   Version                          128 [vom version 80]
-	// DumpStatus{MsgId: 0, MsgN: 1, Buf(4): "18020000"}
-	// 18                   MsgId                             12
-	//                      ValueMsg                          12 [complex64]
-	// 02                   MsgLen                             2
-	// 00                   PrimValue                          0 [complex real]
-	// 00                   PrimValue                          0 [complex imag]
-	// DumpStatus{MsgId: 12, MsgLen: 2, MsgN: 2, Value: complex64(0+0i)}
-	{
-		`complex64(0)`,
-		complex64(0),
-		"complex64",
-		"8018020000",
-		"80", "", "18020000",
-	},
-	// 80                   Version                          128 [vom version 80]
-	// DumpStatus{MsgId: 0, MsgN: 1, Buf(4): "1a020000"}
-	// 1a                   MsgId                             13
-	//                      ValueMsg                          13 [complex128]
-	// 02                   MsgLen                             2
-	// 00                   PrimValue                          0 [complex real]
-	// 00                   PrimValue                          0 [complex imag]
-	// DumpStatus{MsgId: 13, MsgLen: 2, MsgN: 2, Value: complex128(0+0i)}
-	{
-		`complex128(0)`,
-		complex128(0),
-		"complex128",
-		"801a020000",
-		"80", "", "1a020000",
-	},
-	// 80                   Version                          128 [vom version 80]
 	// DumpStatus{MsgId: 0, MsgN: 1, Buf(2): "0600"}
 	// 06                   MsgId                              3
 	//                      ValueMsg                           3 [string]
@@ -8511,36 +8021,6 @@ const Tests = []types.TestCase {
 		"80", "", "16fef03f",
 	},
 	// 80                   Version                          128 [vom version 80]
-	// DumpStatus{MsgId: 0, MsgN: 1, Buf(6): "1804fef03f00"}
-	// 18                   MsgId                             12
-	//                      ValueMsg                          12 [complex64]
-	// 04                   MsgLen                             4
-	// fef03f               PrimValue                          1 [complex real]
-	// 00                   PrimValue                          1 [complex imag]
-	// DumpStatus{MsgId: 12, MsgLen: 4, MsgN: 4, Value: complex64(1+0i)}
-	{
-		`complex64(1)`,
-		complex64(1),
-		"complex64",
-		"801804fef03f00",
-		"80", "", "1804fef03f00",
-	},
-	// 80                   Version                          128 [vom version 80]
-	// DumpStatus{MsgId: 0, MsgN: 1, Buf(6): "1a04fef03f00"}
-	// 1a                   MsgId                             13
-	//                      ValueMsg                          13 [complex128]
-	// 04                   MsgLen                             4
-	// fef03f               PrimValue                          1 [complex real]
-	// 00                   PrimValue                          1 [complex imag]
-	// DumpStatus{MsgId: 13, MsgLen: 4, MsgN: 4, Value: complex128(1+0i)}
-	{
-		`complex128(1)`,
-		complex128(1),
-		"complex128",
-		"801a04fef03f00",
-		"80", "", "1a04fef03f00",
-	},
-	// 80                   Version                          128 [vom version 80]
 	// DumpStatus{MsgId: 0, MsgN: 1, Buf(3): "060141"}
 	// 06                   MsgId                              3
 	//                      ValueMsg                           3 [string]
@@ -8839,7 +8319,7 @@ const Tests = []types.TestCase {
 		"80", "", "1c01",
 	},
 	// 80                   Version                          128 [vom version 80]
-	// DumpStatus{MsgId: 0, MsgN: 1, Buf(905): "533b010024762e696f2f7632332f766f6d2f74657374646174612f74797065732e466f6f64456e756d0103044265616e044272696506436865727279e1552d010021762e696f2f7632332f766f6d2f74657374646174612f74797065732e4e456e756d0103014101420143e1572d030027762e696f2f7632332f766f6d2f74657374646174612f74797065732e4e4c69737455696e7436340106e1592e020026762e696f2f7632332f766f6d2f74657374646174612f74797065732e4e42797465417272617901020204e15b31020029762e696f2f7632332f766f6d2f74657374646174612f74797065732e4e41727261793255696e74363401060202e15d2c040026762e696f2f7632332f766f6d2f74657374646174612f74797065732e4e53657455696e7436340106e15f3405002c762e696f2f7632332f766f6d2f74657374646174612f74797065732e4e4d617055696e743634537472696e6701060203e1613b060023762e696f2f7632332f766f6d2f74657374646174612f74797065732e4e53747275637401030001410101e10001420103e10001430109e1e1633a070022762e696f2f7632332f766f6d2f74657374646174612f74797065732e4e556e696f6e01030001410101e10001420103e10001430109e1e151fe015f06002b762e696f2f7632332f766f6d2f74657374646174612f74797065732e5374727563744d616e79547970657301180004426f6f6c0101e1000541427974650102e10005496e7431360107e10005496e7433320108e10005496e7436340109e1000655696e7431360104e1000655696e7433320105e1000655696e7436340106e10006537472696e670103e1000542797465730127e10007466c6f61743332010ae10007466c6f61743634010be10009436f6d706c65783634010ce1000a436f6d706c6578313238010de10008466f6f64456e756d012ae100054e456e756d012be1000b4e4c69737455696e743634012ce1000a4e427974654172726179012de1000d4e41727261793255696e743634012ee1000a4e53657455696e743634012fe100104e4d617055696e743634537472696e670130e100074e5374727563740131e100064e556e696f6e0132e1000a547970654f626a656374010ee1e15249000101010202030204020501060107010801410901410afef03f0bfef03f0cfef03f000dfef03f000e02100101110041626364120000011301011401010141150001e11600011701e1"}
+	// DumpStatus{MsgId: 0, MsgN: 1, Buf(866): "533b010024762e696f2f7632332f766f6d2f74657374646174612f74797065732e466f6f64456e756d0103044265616e044272696506436865727279e1552d010021762e696f2f7632332f766f6d2f74657374646174612f74797065732e4e456e756d0103014101420143e1572d030027762e696f2f7632332f766f6d2f74657374646174612f74797065732e4e4c69737455696e7436340106e1592e020026762e696f2f7632332f766f6d2f74657374646174612f74797065732e4e42797465417272617901020204e15b31020029762e696f2f7632332f766f6d2f74657374646174612f74797065732e4e41727261793255696e74363401060202e15d2c040026762e696f2f7632332f766f6d2f74657374646174612f74797065732e4e53657455696e7436340106e15f3405002c762e696f2f7632332f766f6d2f74657374646174612f74797065732e4e4d617055696e743634537472696e6701060203e1613b060023762e696f2f7632332f766f6d2f74657374646174612f74797065732e4e53747275637401030001410101e10001420103e10001430109e1e1633a070022762e696f2f7632332f766f6d2f74657374646174612f74797065732e4e556e696f6e01030001410101e10001420103e10001430109e1e151fe014206002b762e696f2f7632332f766f6d2f74657374646174612f74797065732e5374727563744d616e79547970657301160004426f6f6c0101e1000541427974650102e10005496e7431360107e10005496e7433320108e10005496e7436340109e1000655696e7431360104e1000655696e7433320105e1000655696e7436340106e10006537472696e670103e1000542797465730127e10007466c6f61743332010ae10007466c6f61743634010be10008466f6f64456e756d012ae100054e456e756d012be1000b4e4c69737455696e743634012ce1000a4e427974654172726179012de1000d4e41727261793255696e743634012ee1000a4e53657455696e743634012fe100104e4d617055696e743634537472696e670130e100074e5374727563740131e100064e556e696f6e0132e1000a547970654f626a656374010ee1e1523f000101010202030204020501060107010801410901410afef03f0bfef03f0c020e01010f0041626364100000011101011201010141130001e11400011501e1"}
 	// 53                   MsgId                            -42
 	//                      TypeMsg                           42
 	// 3b                   MsgLen                            59
@@ -8856,7 +8336,7 @@ const Tests = []types.TestCase {
 	// 06                   ByteLen                            6 [string len]
 	// 436865727279         PrimValue                   "Cherry" [string]
 	// e1                   Control                          End [v.io/v23/vom.wireEnum END]
-	// DumpStatus{MsgId: -42, MsgLen: 59, MsgN: 59, Buf(844): "552d010021762e696f2f7632332f766f6d2f74657374646174612f74797065732e4e456e756d0103014101420143e1572d030027762e696f2f7632332f766f6d2f74657374646174612f74797065732e4e4c69737455696e7436340106e1592e020026762e696f2f7632332f766f6d2f74657374646174612f74797065732e4e42797465417272617901020204e15b31020029762e696f2f7632332f766f6d2f74657374646174612f74797065732e4e41727261793255696e74363401060202e15d2c040026762e696f2f7632332f766f6d2f74657374646174612f74797065732e4e53657455696e7436340106e15f3405002c762e696f2f7632332f766f6d2f74657374646174612f74797065732e4e4d617055696e743634537472696e6701060203e1613b060023762e696f2f7632332f766f6d2f74657374646174612f74797065732e4e53747275637401030001410101e10001420103e10001430109e1e1633a070022762e696f2f7632332f766f6d2f74657374646174612f74797065732e4e556e696f6e01030001410101e10001420103e10001430109e1e151fe015f06002b762e696f2f7632332f766f6d2f74657374646174612f74797065732e5374727563744d616e79547970657301180004426f6f6c0101e1000541427974650102e10005496e7431360107e10005496e7433320108e10005496e7436340109e1000655696e7431360104e1000655696e7433320105e1000655696e7436340106e10006537472696e670103e1000542797465730127e10007466c6f61743332010ae10007466c6f61743634010be10009436f6d706c65783634010ce1000a436f6d706c6578313238010de10008466f6f64456e756d012ae100054e456e756d012be1000b4e4c69737455696e743634012ce1000a4e427974654172726179012de1000d4e41727261793255696e743634012ee1000a4e53657455696e743634012fe100104e4d617055696e743634537472696e670130e100074e5374727563740131e100064e556e696f6e0132e1000a547970654f626a656374010ee1e15249000101010202030204020501060107010801410901410afef03f0bfef03f0cfef03f000dfef03f000e02100101110041626364120000011301011401010141150001e11600011701e1"}
+	// DumpStatus{MsgId: -42, MsgLen: 59, MsgN: 59, Buf(805): "552d010021762e696f2f7632332f766f6d2f74657374646174612f74797065732e4e456e756d0103014101420143e1572d030027762e696f2f7632332f766f6d2f74657374646174612f74797065732e4e4c69737455696e7436340106e1592e020026762e696f2f7632332f766f6d2f74657374646174612f74797065732e4e42797465417272617901020204e15b31020029762e696f2f7632332f766f6d2f74657374646174612f74797065732e4e41727261793255696e74363401060202e15d2c040026762e696f2f7632332f766f6d2f74657374646174612f74797065732e4e53657455696e7436340106e15f3405002c762e696f2f7632332f766f6d2f74657374646174612f74797065732e4e4d617055696e743634537472696e6701060203e1613b060023762e696f2f7632332f766f6d2f74657374646174612f74797065732e4e53747275637401030001410101e10001420103e10001430109e1e1633a070022762e696f2f7632332f766f6d2f74657374646174612f74797065732e4e556e696f6e01030001410101e10001420103e10001430109e1e151fe014206002b762e696f2f7632332f766f6d2f74657374646174612f74797065732e5374727563744d616e79547970657301160004426f6f6c0101e1000541427974650102e10005496e7431360107e10005496e7433320108e10005496e7436340109e1000655696e7431360104e1000655696e7433320105e1000655696e7436340106e10006537472696e670103e1000542797465730127e10007466c6f61743332010ae10007466c6f61743634010be10008466f6f64456e756d012ae100054e456e756d012be1000b4e4c69737455696e743634012ce1000a4e427974654172726179012de1000d4e41727261793255696e743634012ee1000a4e53657455696e743634012fe100104e4d617055696e743634537472696e670130e100074e5374727563740131e100064e556e696f6e0132e1000a547970654f626a656374010ee1e1523f000101010202030204020501060107010801410901410afef03f0bfef03f0c020e01010f0041626364100000011101011201010141130001e11400011501e1"}
 	// 55                   MsgId                            -43
 	//                      TypeMsg                           43
 	// 2d                   MsgLen                            45
@@ -8873,7 +8353,7 @@ const Tests = []types.TestCase {
 	// 01                   ByteLen                            1 [string len]
 	// 43                   PrimValue                        "C" [string]
 	// e1                   Control                          End [v.io/v23/vom.wireEnum END]
-	// DumpStatus{MsgId: -43, MsgLen: 45, MsgN: 45, Buf(797): "572d030027762e696f2f7632332f766f6d2f74657374646174612f74797065732e4e4c69737455696e7436340106e1592e020026762e696f2f7632332f766f6d2f74657374646174612f74797065732e4e42797465417272617901020204e15b31020029762e696f2f7632332f766f6d2f74657374646174612f74797065732e4e41727261793255696e74363401060202e15d2c040026762e696f2f7632332f766f6d2f74657374646174612f74797065732e4e53657455696e7436340106e15f3405002c762e696f2f7632332f766f6d2f74657374646174612f74797065732e4e4d617055696e743634537472696e6701060203e1613b060023762e696f2f7632332f766f6d2f74657374646174612f74797065732e4e53747275637401030001410101e10001420103e10001430109e1e1633a070022762e696f2f7632332f766f6d2f74657374646174612f74797065732e4e556e696f6e01030001410101e10001420103e10001430109e1e151fe015f06002b762e696f2f7632332f766f6d2f74657374646174612f74797065732e5374727563744d616e79547970657301180004426f6f6c0101e1000541427974650102e10005496e7431360107e10005496e7433320108e10005496e7436340109e1000655696e7431360104e1000655696e7433320105e1000655696e7436340106e10006537472696e670103e1000542797465730127e10007466c6f61743332010ae10007466c6f61743634010be10009436f6d706c65783634010ce1000a436f6d706c6578313238010de10008466f6f64456e756d012ae100054e456e756d012be1000b4e4c69737455696e743634012ce1000a4e427974654172726179012de1000d4e41727261793255696e743634012ee1000a4e53657455696e743634012fe100104e4d617055696e743634537472696e670130e100074e5374727563740131e100064e556e696f6e0132e1000a547970654f626a656374010ee1e15249000101010202030204020501060107010801410901410afef03f0bfef03f0cfef03f000dfef03f000e02100101110041626364120000011301011401010141150001e11600011701e1"}
+	// DumpStatus{MsgId: -43, MsgLen: 45, MsgN: 45, Buf(758): "572d030027762e696f2f7632332f766f6d2f74657374646174612f74797065732e4e4c69737455696e7436340106e1592e020026762e696f2f7632332f766f6d2f74657374646174612f74797065732e4e42797465417272617901020204e15b31020029762e696f2f7632332f766f6d2f74657374646174612f74797065732e4e41727261793255696e74363401060202e15d2c040026762e696f2f7632332f766f6d2f74657374646174612f74797065732e4e53657455696e7436340106e15f3405002c762e696f2f7632332f766f6d2f74657374646174612f74797065732e4e4d617055696e743634537472696e6701060203e1613b060023762e696f2f7632332f766f6d2f74657374646174612f74797065732e4e53747275637401030001410101e10001420103e10001430109e1e1633a070022762e696f2f7632332f766f6d2f74657374646174612f74797065732e4e556e696f6e01030001410101e10001420103e10001430109e1e151fe014206002b762e696f2f7632332f766f6d2f74657374646174612f74797065732e5374727563744d616e79547970657301160004426f6f6c0101e1000541427974650102e10005496e7431360107e10005496e7433320108e10005496e7436340109e1000655696e7431360104e1000655696e7433320105e1000655696e7436340106e10006537472696e670103e1000542797465730127e10007466c6f61743332010ae10007466c6f61743634010be10008466f6f64456e756d012ae100054e456e756d012be1000b4e4c69737455696e743634012ce1000a4e427974654172726179012de1000d4e41727261793255696e743634012ee1000a4e53657455696e743634012fe100104e4d617055696e743634537472696e670130e100074e5374727563740131e100064e556e696f6e0132e1000a547970654f626a656374010ee1e1523f000101010202030204020501060107010801410901410afef03f0bfef03f0c020e01010f0041626364100000011101011201010141130001e11400011501e1"}
 	// 57                   MsgId                            -44
 	//                      TypeMsg                           44
 	// 2d                   MsgLen                            45
@@ -8884,7 +8364,7 @@ const Tests = []types.TestCase {
 	// 01                   Index                              1 [v.io/v23/vom.wireList.Elem]
 	// 06                   PrimValue                          6 [uint]
 	// e1                   Control                          End [v.io/v23/vom.wireList END]
-	// DumpStatus{MsgId: -44, MsgLen: 45, MsgN: 45, Buf(750): "592e020026762e696f2f7632332f766f6d2f74657374646174612f74797065732e4e42797465417272617901020204e15b31020029762e696f2f7632332f766f6d2f74657374646174612f74797065732e4e41727261793255696e74363401060202e15d2c040026762e696f2f7632332f766f6d2f74657374646174612f74797065732e4e53657455696e7436340106e15f3405002c762e696f2f7632332f766f6d2f74657374646174612f74797065732e4e4d617055696e743634537472696e6701060203e1613b060023762e696f2f7632332f766f6d2f74657374646174612f74797065732e4e53747275637401030001410101e10001420103e10001430109e1e1633a070022762e696f2f7632332f766f6d2f74657374646174612f74797065732e4e556e696f6e01030001410101e10001420103e10001430109e1e151fe015f06002b762e696f2f7632332f766f6d2f74657374646174612f74797065732e5374727563744d616e79547970657301180004426f6f6c0101e1000541427974650102e10005496e7431360107e10005496e7433320108e10005496e7436340109e1000655696e7431360104e1000655696e7433320105e1000655696e7436340106e10006537472696e670103e1000542797465730127e10007466c6f61743332010ae10007466c6f61743634010be10009436f6d706c65783634010ce1000a436f6d706c6578313238010de10008466f6f64456e756d012ae100054e456e756d012be1000b4e4c69737455696e743634012ce1000a4e427974654172726179012de1000d4e41727261793255696e743634012ee1000a4e53657455696e743634012fe100104e4d617055696e743634537472696e670130e100074e5374727563740131e100064e556e696f6e0132e1000a547970654f626a656374010ee1e15249000101010202030204020501060107010801410901410afef03f0bfef03f0cfef03f000dfef03f000e02100101110041626364120000011301011401010141150001e11600011701e1"}
+	// DumpStatus{MsgId: -44, MsgLen: 45, MsgN: 45, Buf(711): "592e020026762e696f2f7632332f766f6d2f74657374646174612f74797065732e4e42797465417272617901020204e15b31020029762e696f2f7632332f766f6d2f74657374646174612f74797065732e4e41727261793255696e74363401060202e15d2c040026762e696f2f7632332f766f6d2f74657374646174612f74797065732e4e53657455696e7436340106e15f3405002c762e696f2f7632332f766f6d2f74657374646174612f74797065732e4e4d617055696e743634537472696e6701060203e1613b060023762e696f2f7632332f766f6d2f74657374646174612f74797065732e4e53747275637401030001410101e10001420103e10001430109e1e1633a070022762e696f2f7632332f766f6d2f74657374646174612f74797065732e4e556e696f6e01030001410101e10001420103e10001430109e1e151fe014206002b762e696f2f7632332f766f6d2f74657374646174612f74797065732e5374727563744d616e79547970657301160004426f6f6c0101e1000541427974650102e10005496e7431360107e10005496e7433320108e10005496e7436340109e1000655696e7431360104e1000655696e7433320105e1000655696e7436340106e10006537472696e670103e1000542797465730127e10007466c6f61743332010ae10007466c6f61743634010be10008466f6f64456e756d012ae100054e456e756d012be1000b4e4c69737455696e743634012ce1000a4e427974654172726179012de1000d4e41727261793255696e743634012ee1000a4e53657455696e743634012fe100104e4d617055696e743634537472696e670130e100074e5374727563740131e100064e556e696f6e0132e1000a547970654f626a656374010ee1e1523f000101010202030204020501060107010801410901410afef03f0bfef03f0c020e01010f0041626364100000011101011201010141130001e11400011501e1"}
 	// 59                   MsgId                            -45
 	//                      TypeMsg                           45
 	// 2e                   MsgLen                            46
@@ -8897,7 +8377,7 @@ const Tests = []types.TestCase {
 	// 02                   Index                              2 [v.io/v23/vom.wireArray.Len]
 	// 04                   PrimValue                          4 [uint]
 	// e1                   Control                          End [v.io/v23/vom.wireArray END]
-	// DumpStatus{MsgId: -45, MsgLen: 46, MsgN: 46, Buf(702): "5b31020029762e696f2f7632332f766f6d2f74657374646174612f74797065732e4e41727261793255696e74363401060202e15d2c040026762e696f2f7632332f766f6d2f74657374646174612f74797065732e4e53657455696e7436340106e15f3405002c762e696f2f7632332f766f6d2f74657374646174612f74797065732e4e4d617055696e743634537472696e6701060203e1613b060023762e696f2f7632332f766f6d2f74657374646174612f74797065732e4e53747275637401030001410101e10001420103e10001430109e1e1633a070022762e696f2f7632332f766f6d2f74657374646174612f74797065732e4e556e696f6e01030001410101e10001420103e10001430109e1e151fe015f06002b762e696f2f7632332f766f6d2f74657374646174612f74797065732e5374727563744d616e79547970657301180004426f6f6c0101e1000541427974650102e10005496e7431360107e10005496e7433320108e10005496e7436340109e1000655696e7431360104e1000655696e7433320105e1000655696e7436340106e10006537472696e670103e1000542797465730127e10007466c6f61743332010ae10007466c6f61743634010be10009436f6d706c65783634010ce1000a436f6d706c6578313238010de10008466f6f64456e756d012ae100054e456e756d012be1000b4e4c69737455696e743634012ce1000a4e427974654172726179012de1000d4e41727261793255696e743634012ee1000a4e53657455696e743634012fe100104e4d617055696e743634537472696e670130e100074e5374727563740131e100064e556e696f6e0132e1000a547970654f626a656374010ee1e15249000101010202030204020501060107010801410901410afef03f0bfef03f0cfef03f000dfef03f000e02100101110041626364120000011301011401010141150001e11600011701e1"}
+	// DumpStatus{MsgId: -45, MsgLen: 46, MsgN: 46, Buf(663): "5b31020029762e696f2f7632332f766f6d2f74657374646174612f74797065732e4e41727261793255696e74363401060202e15d2c040026762e696f2f7632332f766f6d2f74657374646174612f74797065732e4e53657455696e7436340106e15f3405002c762e696f2f7632332f766f6d2f74657374646174612f74797065732e4e4d617055696e743634537472696e6701060203e1613b060023762e696f2f7632332f766f6d2f74657374646174612f74797065732e4e53747275637401030001410101e10001420103e10001430109e1e1633a070022762e696f2f7632332f766f6d2f74657374646174612f74797065732e4e556e696f6e01030001410101e10001420103e10001430109e1e151fe014206002b762e696f2f7632332f766f6d2f74657374646174612f74797065732e5374727563744d616e79547970657301160004426f6f6c0101e1000541427974650102e10005496e7431360107e10005496e7433320108e10005496e7436340109e1000655696e7431360104e1000655696e7433320105e1000655696e7436340106e10006537472696e670103e1000542797465730127e10007466c6f61743332010ae10007466c6f61743634010be10008466f6f64456e756d012ae100054e456e756d012be1000b4e4c69737455696e743634012ce1000a4e427974654172726179012de1000d4e41727261793255696e743634012ee1000a4e53657455696e743634012fe100104e4d617055696e743634537472696e670130e100074e5374727563740131e100064e556e696f6e0132e1000a547970654f626a656374010ee1e1523f000101010202030204020501060107010801410901410afef03f0bfef03f0c020e01010f0041626364100000011101011201010141130001e11400011501e1"}
 	// 5b                   MsgId                            -46
 	//                      TypeMsg                           46
 	// 31                   MsgLen                            49
@@ -8910,7 +8390,7 @@ const Tests = []types.TestCase {
 	// 02                   Index                              2 [v.io/v23/vom.wireArray.Len]
 	// 02                   PrimValue                          2 [uint]
 	// e1                   Control                          End [v.io/v23/vom.wireArray END]
-	// DumpStatus{MsgId: -46, MsgLen: 49, MsgN: 49, Buf(651): "5d2c040026762e696f2f7632332f766f6d2f74657374646174612f74797065732e4e53657455696e7436340106e15f3405002c762e696f2f7632332f766f6d2f74657374646174612f74797065732e4e4d617055696e743634537472696e6701060203e1613b060023762e696f2f7632332f766f6d2f74657374646174612f74797065732e4e53747275637401030001410101e10001420103e10001430109e1e1633a070022762e696f2f7632332f766f6d2f74657374646174612f74797065732e4e556e696f6e01030001410101e10001420103e10001430109e1e151fe015f06002b762e696f2f7632332f766f6d2f74657374646174612f74797065732e5374727563744d616e79547970657301180004426f6f6c0101e1000541427974650102e10005496e7431360107e10005496e7433320108e10005496e7436340109e1000655696e7431360104e1000655696e7433320105e1000655696e7436340106e10006537472696e670103e1000542797465730127e10007466c6f61743332010ae10007466c6f61743634010be10009436f6d706c65783634010ce1000a436f6d706c6578313238010de10008466f6f64456e756d012ae100054e456e756d012be1000b4e4c69737455696e743634012ce1000a4e427974654172726179012de1000d4e41727261793255696e743634012ee1000a4e53657455696e743634012fe100104e4d617055696e743634537472696e670130e100074e5374727563740131e100064e556e696f6e0132e1000a547970654f626a656374010ee1e15249000101010202030204020501060107010801410901410afef03f0bfef03f0cfef03f000dfef03f000e02100101110041626364120000011301011401010141150001e11600011701e1"}
+	// DumpStatus{MsgId: -46, MsgLen: 49, MsgN: 49, Buf(612): "5d2c040026762e696f2f7632332f766f6d2f74657374646174612f74797065732e4e53657455696e7436340106e15f3405002c762e696f2f7632332f766f6d2f74657374646174612f74797065732e4e4d617055696e743634537472696e6701060203e1613b060023762e696f2f7632332f766f6d2f74657374646174612f74797065732e4e53747275637401030001410101e10001420103e10001430109e1e1633a070022762e696f2f7632332f766f6d2f74657374646174612f74797065732e4e556e696f6e01030001410101e10001420103e10001430109e1e151fe014206002b762e696f2f7632332f766f6d2f74657374646174612f74797065732e5374727563744d616e79547970657301160004426f6f6c0101e1000541427974650102e10005496e7431360107e10005496e7433320108e10005496e7436340109e1000655696e7431360104e1000655696e7433320105e1000655696e7436340106e10006537472696e670103e1000542797465730127e10007466c6f61743332010ae10007466c6f61743634010be10008466f6f64456e756d012ae100054e456e756d012be1000b4e4c69737455696e743634012ce1000a4e427974654172726179012de1000d4e41727261793255696e743634012ee1000a4e53657455696e743634012fe100104e4d617055696e743634537472696e670130e100074e5374727563740131e100064e556e696f6e0132e1000a547970654f626a656374010ee1e1523f000101010202030204020501060107010801410901410afef03f0bfef03f0c020e01010f0041626364100000011101011201010141130001e11400011501e1"}
 	// 5d                   MsgId                            -47
 	//                      TypeMsg                           47
 	// 2c                   MsgLen                            44
@@ -8921,7 +8401,7 @@ const Tests = []types.TestCase {
 	// 01                   Index                              1 [v.io/v23/vom.wireSet.Key]
 	// 06                   PrimValue                          6 [uint]
 	// e1                   Control                          End [v.io/v23/vom.wireSet END]
-	// DumpStatus{MsgId: -47, MsgLen: 44, MsgN: 44, Buf(605): "5f3405002c762e696f2f7632332f766f6d2f74657374646174612f74797065732e4e4d617055696e743634537472696e6701060203e1613b060023762e696f2f7632332f766f6d2f74657374646174612f74797065732e4e53747275637401030001410101e10001420103e10001430109e1e1633a070022762e696f2f7632332f766f6d2f74657374646174612f74797065732e4e556e696f6e01030001410101e10001420103e10001430109e1e151fe015f06002b762e696f2f7632332f766f6d2f74657374646174612f74797065732e5374727563744d616e79547970657301180004426f6f6c0101e1000541427974650102e10005496e7431360107e10005496e7433320108e10005496e7436340109e1000655696e7431360104e1000655696e7433320105e1000655696e7436340106e10006537472696e670103e1000542797465730127e10007466c6f61743332010ae10007466c6f61743634010be10009436f6d706c65783634010ce1000a436f6d706c6578313238010de10008466f6f64456e756d012ae100054e456e756d012be1000b4e4c69737455696e743634012ce1000a4e427974654172726179012de1000d4e41727261793255696e743634012ee1000a4e53657455696e743634012fe100104e4d617055696e743634537472696e670130e100074e5374727563740131e100064e556e696f6e0132e1000a547970654f626a656374010ee1e15249000101010202030204020501060107010801410901410afef03f0bfef03f0cfef03f000dfef03f000e02100101110041626364120000011301011401010141150001e11600011701e1"}
+	// DumpStatus{MsgId: -47, MsgLen: 44, MsgN: 44, Buf(566): "5f3405002c762e696f2f7632332f766f6d2f74657374646174612f74797065732e4e4d617055696e743634537472696e6701060203e1613b060023762e696f2f7632332f766f6d2f74657374646174612f74797065732e4e53747275637401030001410101e10001420103e10001430109e1e1633a070022762e696f2f7632332f766f6d2f74657374646174612f74797065732e4e556e696f6e01030001410101e10001420103e10001430109e1e151fe014206002b762e696f2f7632332f766f6d2f74657374646174612f74797065732e5374727563744d616e79547970657301160004426f6f6c0101e1000541427974650102e10005496e7431360107e10005496e7433320108e10005496e7436340109e1000655696e7431360104e1000655696e7433320105e1000655696e7436340106e10006537472696e670103e1000542797465730127e10007466c6f61743332010ae10007466c6f61743634010be10008466f6f64456e756d012ae100054e456e756d012be1000b4e4c69737455696e743634012ce1000a4e427974654172726179012de1000d4e41727261793255696e743634012ee1000a4e53657455696e743634012fe100104e4d617055696e743634537472696e670130e100074e5374727563740131e100064e556e696f6e0132e1000a547970654f626a656374010ee1e1523f000101010202030204020501060107010801410901410afef03f0bfef03f0c020e01010f0041626364100000011101011201010141130001e11400011501e1"}
 	// 5f                   MsgId                            -48
 	//                      TypeMsg                           48
 	// 34                   MsgLen                            52
@@ -8934,7 +8414,7 @@ const Tests = []types.TestCase {
 	// 02                   Index                              2 [v.io/v23/vom.wireMap.Elem]
 	// 03                   PrimValue                          3 [uint]
 	// e1                   Control                          End [v.io/v23/vom.wireMap END]
-	// DumpStatus{MsgId: -48, MsgLen: 52, MsgN: 52, Buf(551): "613b060023762e696f2f7632332f766f6d2f74657374646174612f74797065732e4e53747275637401030001410101e10001420103e10001430109e1e1633a070022762e696f2f7632332f766f6d2f74657374646174612f74797065732e4e556e696f6e01030001410101e10001420103e10001430109e1e151fe015f06002b762e696f2f7632332f766f6d2f74657374646174612f74797065732e5374727563744d616e79547970657301180004426f6f6c0101e1000541427974650102e10005496e7431360107e10005496e7433320108e10005496e7436340109e1000655696e7431360104e1000655696e7433320105e1000655696e7436340106e10006537472696e670103e1000542797465730127e10007466c6f61743332010ae10007466c6f61743634010be10009436f6d706c65783634010ce1000a436f6d706c6578313238010de10008466f6f64456e756d012ae100054e456e756d012be1000b4e4c69737455696e743634012ce1000a4e427974654172726179012de1000d4e41727261793255696e743634012ee1000a4e53657455696e743634012fe100104e4d617055696e743634537472696e670130e100074e5374727563740131e100064e556e696f6e0132e1000a547970654f626a656374010ee1e15249000101010202030204020501060107010801410901410afef03f0bfef03f0cfef03f000dfef03f000e02100101110041626364120000011301011401010141150001e11600011701e1"}
+	// DumpStatus{MsgId: -48, MsgLen: 52, MsgN: 52, Buf(512): "613b060023762e696f2f7632332f766f6d2f74657374646174612f74797065732e4e53747275637401030001410101e10001420103e10001430109e1e1633a070022762e696f2f7632332f766f6d2f74657374646174612f74797065732e4e556e696f6e01030001410101e10001420103e10001430109e1e151fe014206002b762e696f2f7632332f766f6d2f74657374646174612f74797065732e5374727563744d616e79547970657301160004426f6f6c0101e1000541427974650102e10005496e7431360107e10005496e7433320108e10005496e7436340109e1000655696e7431360104e1000655696e7433320105e1000655696e7436340106e10006537472696e670103e1000542797465730127e10007466c6f61743332010ae10007466c6f61743634010be10008466f6f64456e756d012ae100054e456e756d012be1000b4e4c69737455696e743634012ce1000a4e427974654172726179012de1000d4e41727261793255696e743634012ee1000a4e53657455696e743634012fe100104e4d617055696e743634537472696e670130e100074e5374727563740131e100064e556e696f6e0132e1000a547970654f626a656374010ee1e1523f000101010202030204020501060107010801410901410afef03f0bfef03f0c020e01010f0041626364100000011101011201010141130001e11400011501e1"}
 	// 61                   MsgId                            -49
 	//                      TypeMsg                           49
 	// 3b                   MsgLen                            59
@@ -8963,7 +8443,7 @@ const Tests = []types.TestCase {
 	// 09                   PrimValue                          9 [uint]
 	// e1                   Control                          End [v.io/v23/vom.wireField END]
 	// e1                   Control                          End [v.io/v23/vom.wireStruct END]
-	// DumpStatus{MsgId: -49, MsgLen: 59, MsgN: 59, Buf(490): "633a070022762e696f2f7632332f766f6d2f74657374646174612f74797065732e4e556e696f6e01030001410101e10001420103e10001430109e1e151fe015f06002b762e696f2f7632332f766f6d2f74657374646174612f74797065732e5374727563744d616e79547970657301180004426f6f6c0101e1000541427974650102e10005496e7431360107e10005496e7433320108e10005496e7436340109e1000655696e7431360104e1000655696e7433320105e1000655696e7436340106e10006537472696e670103e1000542797465730127e10007466c6f61743332010ae10007466c6f61743634010be10009436f6d706c65783634010ce1000a436f6d706c6578313238010de10008466f6f64456e756d012ae100054e456e756d012be1000b4e4c69737455696e743634012ce1000a4e427974654172726179012de1000d4e41727261793255696e743634012ee1000a4e53657455696e743634012fe100104e4d617055696e743634537472696e670130e100074e5374727563740131e100064e556e696f6e0132e1000a547970654f626a656374010ee1e15249000101010202030204020501060107010801410901410afef03f0bfef03f0cfef03f000dfef03f000e02100101110041626364120000011301011401010141150001e11600011701e1"}
+	// DumpStatus{MsgId: -49, MsgLen: 59, MsgN: 59, Buf(451): "633a070022762e696f2f7632332f766f6d2f74657374646174612f74797065732e4e556e696f6e01030001410101e10001420103e10001430109e1e151fe014206002b762e696f2f7632332f766f6d2f74657374646174612f74797065732e5374727563744d616e79547970657301160004426f6f6c0101e1000541427974650102e10005496e7431360107e10005496e7433320108e10005496e7436340109e1000655696e7431360104e1000655696e7433320105e1000655696e7436340106e10006537472696e670103e1000542797465730127e10007466c6f61743332010ae10007466c6f61743634010be10008466f6f64456e756d012ae100054e456e756d012be1000b4e4c69737455696e743634012ce1000a4e427974654172726179012de1000d4e41727261793255696e743634012ee1000a4e53657455696e743634012fe100104e4d617055696e743634537472696e670130e100074e5374727563740131e100064e556e696f6e0132e1000a547970654f626a656374010ee1e1523f000101010202030204020501060107010801410901410afef03f0bfef03f0c020e01010f0041626364100000011101011201010141130001e11400011501e1"}
 	// 63                   MsgId                            -50
 	//                      TypeMsg                           50
 	// 3a                   MsgLen                            58
@@ -8992,16 +8472,16 @@ const Tests = []types.TestCase {
 	// 09                   PrimValue                          9 [uint]
 	// e1                   Control                          End [v.io/v23/vom.wireField END]
 	// e1                   Control                          End [v.io/v23/vom.wireUnion END]
-	// DumpStatus{MsgId: -50, MsgLen: 58, MsgN: 58, Buf(430): "51fe015f06002b762e696f2f7632332f766f6d2f74657374646174612f74797065732e5374727563744d616e79547970657301180004426f6f6c0101e1000541427974650102e10005496e7431360107e10005496e7433320108e10005496e7436340109e1000655696e7431360104e1000655696e7433320105e1000655696e7436340106e10006537472696e670103e1000542797465730127e10007466c6f61743332010ae10007466c6f61743634010be10009436f6d706c65783634010ce1000a436f6d706c6578313238010de10008466f6f64456e756d012ae100054e456e756d012be1000b4e4c69737455696e743634012ce1000a4e427974654172726179012de1000d4e41727261793255696e743634012ee1000a4e53657455696e743634012fe100104e4d617055696e743634537472696e670130e100074e5374727563740131e100064e556e696f6e0132e1000a547970654f626a656374010ee1e15249000101010202030204020501060107010801410901410afef03f0bfef03f0cfef03f000dfef03f000e02100101110041626364120000011301011401010141150001e11600011701e1"}
+	// DumpStatus{MsgId: -50, MsgLen: 58, MsgN: 58, Buf(391): "51fe014206002b762e696f2f7632332f766f6d2f74657374646174612f74797065732e5374727563744d616e79547970657301160004426f6f6c0101e1000541427974650102e10005496e7431360107e10005496e7433320108e10005496e7436340109e1000655696e7431360104e1000655696e7433320105e1000655696e7436340106e10006537472696e670103e1000542797465730127e10007466c6f61743332010ae10007466c6f61743634010be10008466f6f64456e756d012ae100054e456e756d012be1000b4e4c69737455696e743634012ce1000a4e427974654172726179012de1000d4e41727261793255696e743634012ee1000a4e53657455696e743634012fe100104e4d617055696e743634537472696e670130e100074e5374727563740131e100064e556e696f6e0132e1000a547970654f626a656374010ee1e1523f000101010202030204020501060107010801410901410afef03f0bfef03f0c020e01010f0041626364100000011101011201010141130001e11400011501e1"}
 	// 51                   MsgId                            -41
 	//                      TypeMsg                           41
-	// fe015f               MsgLen                           351
+	// fe0142               MsgLen                           322
 	// 06                   WireTypeIndex                      6 [v.io/v23/vom.wireStruct]
 	// 00                   Index                              0 [v.io/v23/vom.wireStruct.Name]
 	// 2b                   ByteLen                           43 [string len]
 	// 762e696f2f7632332f766f6d2f74657374646174612f74797065732e5374727563744d616e795479706573 PrimValue       "v.io/v23/vom/testdata/types.StructManyTypes" [string]
 	// 01                   Index                              1 [v.io/v23/vom.wireStruct.Fields]
-	// 18                   ValueLen                          24 [list len]
+	// 16                   ValueLen                          22 [list len]
 	// 00                   Index                              0 [v.io/v23/vom.wireField.Name]
 	// 04                   ByteLen                            4 [string len]
 	// 426f6f6c             PrimValue                     "Bool" [string]
@@ -9075,18 +8555,6 @@ const Tests = []types.TestCase {
 	// 0b                   PrimValue                         11 [uint]
 	// e1                   Control                          End [v.io/v23/vom.wireField END]
 	// 00                   Index                              0 [v.io/v23/vom.wireField.Name]
-	// 09                   ByteLen                            9 [string len]
-	// 436f6d706c65783634   PrimValue                "Complex64" [string]
-	// 01                   Index                              1 [v.io/v23/vom.wireField.Type]
-	// 0c                   PrimValue                         12 [uint]
-	// e1                   Control                          End [v.io/v23/vom.wireField END]
-	// 00                   Index                              0 [v.io/v23/vom.wireField.Name]
-	// 0a                   ByteLen                           10 [string len]
-	// 436f6d706c6578313238 PrimValue               "Complex128" [string]
-	// 01                   Index                              1 [v.io/v23/vom.wireField.Type]
-	// 0d                   PrimValue                         13 [uint]
-	// e1                   Control                          End [v.io/v23/vom.wireField END]
-	// 00                   Index                              0 [v.io/v23/vom.wireField.Name]
 	// 08                   ByteLen                            8 [string len]
 	// 466f6f64456e756d     PrimValue                 "FoodEnum" [string]
 	// 01                   Index                              1 [v.io/v23/vom.wireField.Type]
@@ -9147,10 +8615,10 @@ const Tests = []types.TestCase {
 	// 0e                   PrimValue                         14 [uint]
 	// e1                   Control                          End [v.io/v23/vom.wireField END]
 	// e1                   Control                          End [v.io/v23/vom.wireStruct END]
-	// DumpStatus{MsgId: -41, MsgLen: 351, MsgN: 351, Buf(75): "5249000101010202030204020501060107010801410901410afef03f0bfef03f0cfef03f000dfef03f000e02100101110041626364120000011301011401010141150001e11600011701e1"}
+	// DumpStatus{MsgId: -41, MsgLen: 322, MsgN: 322, Buf(65): "523f000101010202030204020501060107010801410901410afef03f0bfef03f0c020e01010f0041626364100000011101011201010141130001e11400011501e1"}
 	// 52                   MsgId                             41
-	//                      ValueMsg                          41 [v.io/v23/vom/testdata/types.StructManyTypes struct{Bool bool;AByte byte;Int16 int16;Int32 int32;Int64 int64;Uint16 uint16;Uint32 uint32;Uint64 uint64;String string;Bytes []byte;Float32 float32;Float64 float64;Complex64 complex64;Complex128 complex128;FoodEnum v.io/v23/vom/testdata/types.FoodEnum enum{Bean;Brie;Cherry};NEnum v.io/v23/vom/testdata/types.NEnum enum{A;B;C};NListUint64 v.io/v23/vom/testdata/types.NListUint64 []uint64;NByteArray v.io/v23/vom/testdata/types.NByteArray [4]byte;NArray2Uint64 v.io/v23/vom/testdata/types.NArray2Uint64 [2]uint64;NSetUint64 v.io/v23/vom/testdata/types.NSetUint64 set[uint64];NMapUint64String v.io/v23/vom/testdata/types.NMapUint64String map[uint64]string;NStruct v.io/v23/vom/testdata/types.NStruct struct{A bool;B string;C int64};NUnion v.io/v23/vom/testdata/types.NUnion union{A bool;B string;C int64};TypeObject typeobject}]
-	// 49                   MsgLen                            73
+	//                      ValueMsg                          41 [v.io/v23/vom/testdata/types.StructManyTypes struct{Bool bool;AByte byte;Int16 int16;Int32 int32;Int64 int64;Uint16 uint16;Uint32 uint32;Uint64 uint64;String string;Bytes []byte;Float32 float32;Float64 float64;FoodEnum v.io/v23/vom/testdata/types.FoodEnum enum{Bean;Brie;Cherry};NEnum v.io/v23/vom/testdata/types.NEnum enum{A;B;C};NListUint64 v.io/v23/vom/testdata/types.NListUint64 []uint64;NByteArray v.io/v23/vom/testdata/types.NByteArray [4]byte;NArray2Uint64 v.io/v23/vom/testdata/types.NArray2Uint64 [2]uint64;NSetUint64 v.io/v23/vom/testdata/types.NSetUint64 set[uint64];NMapUint64String v.io/v23/vom/testdata/types.NMapUint64String map[uint64]string;NStruct v.io/v23/vom/testdata/types.NStruct struct{A bool;B string;C int64};NUnion v.io/v23/vom/testdata/types.NUnion union{A bool;B string;C int64};TypeObject typeobject}]
+	// 3f                   MsgLen                            63
 	// 00                   Index                              0 [v.io/v23/vom/testdata/types.StructManyTypes.Bool]
 	// 01                   PrimValue                       true [bool]
 	// 01                   Index                              1 [v.io/v23/vom/testdata/types.StructManyTypes.AByte]
@@ -9177,49 +8645,43 @@ const Tests = []types.TestCase {
 	// fef03f               PrimValue                          1 [float]
 	// 0b                   Index                             11 [v.io/v23/vom/testdata/types.StructManyTypes.Float64]
 	// fef03f               PrimValue                          1 [float]
-	// 0c                   Index                             12 [v.io/v23/vom/testdata/types.StructManyTypes.Complex64]
-	// fef03f               PrimValue                          1 [complex real]
-	// 00                   PrimValue                          1 [complex imag]
-	// 0d                   Index                             13 [v.io/v23/vom/testdata/types.StructManyTypes.Complex128]
-	// fef03f               PrimValue                          1 [complex real]
-	// 00                   PrimValue                          1 [complex imag]
-	// 0e                   Index                             14 [v.io/v23/vom/testdata/types.StructManyTypes.FoodEnum]
+	// 0c                   Index                             12 [v.io/v23/vom/testdata/types.StructManyTypes.FoodEnum]
 	// 02                   Index                              2 [v.io/v23/vom/testdata/types.FoodEnum.Cherry]
-	// 10                   Index                             16 [v.io/v23/vom/testdata/types.StructManyTypes.NListUint64]
+	// 0e                   Index                             14 [v.io/v23/vom/testdata/types.StructManyTypes.NListUint64]
 	// 01                   ValueLen                           1 [list len]
 	// 01                   PrimValue                          1 [uint]
-	// 11                   Index                             17 [v.io/v23/vom/testdata/types.StructManyTypes.NByteArray]
+	// 0f                   Index                             15 [v.io/v23/vom/testdata/types.StructManyTypes.NByteArray]
 	// 00                   ByteLen                            4 [bytes len]
 	// 41626364             PrimValue                     "Abcd" [bytes]
-	// 12                   Index                             18 [v.io/v23/vom/testdata/types.StructManyTypes.NArray2Uint64]
+	// 10                   Index                             16 [v.io/v23/vom/testdata/types.StructManyTypes.NArray2Uint64]
 	// 00                   ValueLen                           2 [list len]
 	// 00                   PrimValue                          0 [uint]
 	// 01                   PrimValue                          1 [uint]
-	// 13                   Index                             19 [v.io/v23/vom/testdata/types.StructManyTypes.NSetUint64]
+	// 11                   Index                             17 [v.io/v23/vom/testdata/types.StructManyTypes.NSetUint64]
 	// 01                   ValueLen                           1 [set len]
 	// 01                   PrimValue                          1 [uint]
-	// 14                   Index                             20 [v.io/v23/vom/testdata/types.StructManyTypes.NMapUint64String]
+	// 12                   Index                             18 [v.io/v23/vom/testdata/types.StructManyTypes.NMapUint64String]
 	// 01                   ValueLen                           1 [map len]
 	// 01                   PrimValue                          1 [uint]
 	// 01                   ByteLen                            1 [string len]
 	// 41                   PrimValue                        "A" [string]
-	// 15                   Index                             21 [v.io/v23/vom/testdata/types.StructManyTypes.NStruct]
+	// 13                   Index                             19 [v.io/v23/vom/testdata/types.StructManyTypes.NStruct]
 	// 00                   Index                              0 [v.io/v23/vom/testdata/types.NStruct.A]
 	// 01                   PrimValue                       true [bool]
 	// e1                   Control                          End [v.io/v23/vom/testdata/types.NStruct END]
-	// 16                   Index                             22 [v.io/v23/vom/testdata/types.StructManyTypes.NUnion]
+	// 14                   Index                             20 [v.io/v23/vom/testdata/types.StructManyTypes.NUnion]
 	// 00                   Index                              0 [v.io/v23/vom/testdata/types.NUnion.A]
 	// 01                   PrimValue                       true [bool]
-	// 17                   Index                             23 [v.io/v23/vom/testdata/types.StructManyTypes.TypeObject]
+	// 15                   Index                             21 [v.io/v23/vom/testdata/types.StructManyTypes.TypeObject]
 	// 01                   TypeId                             1 [bool]
 	// e1                   Control                          End [v.io/v23/vom/testdata/types.StructManyTypes END]
-	// DumpStatus{MsgId: 41, MsgLen: 73, MsgN: 73, Value: v.io/v23/vom/testdata/types.StructManyTypes struct{Bool bool;AByte byte;Int16 int16;Int32 int32;Int64 int64;Uint16 uint16;Uint32 uint32;Uint64 uint64;String string;Bytes []byte;Float32 float32;Float64 float64;Complex64 complex64;Complex128 complex128;FoodEnum v.io/v23/vom/testdata/types.FoodEnum enum{Bean;Brie;Cherry};NEnum v.io/v23/vom/testdata/types.NEnum enum{A;B;C};NListUint64 v.io/v23/vom/testdata/types.NListUint64 []uint64;NByteArray v.io/v23/vom/testdata/types.NByteArray [4]byte;NArray2Uint64 v.io/v23/vom/testdata/types.NArray2Uint64 [2]uint64;NSetUint64 v.io/v23/vom/testdata/types.NSetUint64 set[uint64];NMapUint64String v.io/v23/vom/testdata/types.NMapUint64String map[uint64]string;NStruct v.io/v23/vom/testdata/types.NStruct struct{A bool;B string;C int64};NUnion v.io/v23/vom/testdata/types.NUnion union{A bool;B string;C int64};TypeObject typeobject}{Bool: true, AByte: 1, Int16: 1, Int32: 1, Int64: 1, Uint16: 1, Uint32: 1, Uint64: 1, String: "A", Bytes: "A", Float32: 1, Float64: 1, Complex64: 1+0i, Complex128: 1+0i, FoodEnum: Cherry, NEnum: A, NListUint64: {1}, NByteArray: "Abcd", NArray2Uint64: {0, 1}, NSetUint64: {1}, NMapUint64String: {1: "A"}, NStruct: {A: true, B: "", C: 0}, NUnion: {A: true}, TypeObject: bool}}
+	// DumpStatus{MsgId: 41, MsgLen: 63, MsgN: 63, Value: v.io/v23/vom/testdata/types.StructManyTypes struct{Bool bool;AByte byte;Int16 int16;Int32 int32;Int64 int64;Uint16 uint16;Uint32 uint32;Uint64 uint64;String string;Bytes []byte;Float32 float32;Float64 float64;FoodEnum v.io/v23/vom/testdata/types.FoodEnum enum{Bean;Brie;Cherry};NEnum v.io/v23/vom/testdata/types.NEnum enum{A;B;C};NListUint64 v.io/v23/vom/testdata/types.NListUint64 []uint64;NByteArray v.io/v23/vom/testdata/types.NByteArray [4]byte;NArray2Uint64 v.io/v23/vom/testdata/types.NArray2Uint64 [2]uint64;NSetUint64 v.io/v23/vom/testdata/types.NSetUint64 set[uint64];NMapUint64String v.io/v23/vom/testdata/types.NMapUint64String map[uint64]string;NStruct v.io/v23/vom/testdata/types.NStruct struct{A bool;B string;C int64};NUnion v.io/v23/vom/testdata/types.NUnion union{A bool;B string;C int64};TypeObject typeobject}{Bool: true, AByte: 1, Int16: 1, Int32: 1, Int64: 1, Uint16: 1, Uint32: 1, Uint64: 1, String: "A", Bytes: "A", Float32: 1, Float64: 1, FoodEnum: Cherry, NEnum: A, NListUint64: {1}, NByteArray: "Abcd", NArray2Uint64: {0, 1}, NSetUint64: {1}, NMapUint64String: {1: "A"}, NStruct: {A: true, B: "", C: 0}, NUnion: {A: true}, TypeObject: bool}}
 	{
-		`types.StructManyTypes{Bool: true, AByte: 1, Int16: 1, Int32: 1, Int64: 1, Uint16: 1, Uint32: 1, Uint64: 1, String: "A", Bytes: "A", Float32: 1, Float64: 1, Complex64: 1, Complex128: 1, FoodEnum: types.FoodEnum.Cherry, NListUint64: {1}, NByteArray: "Abcd", NArray2Uint64: {0, 1}, NSetUint64: {1}, NMapUint64String: {1: "A"}, NStruct: {A: true}, NUnion: {A: true}, TypeObject: typeobject(bool)}`,
-		types.StructManyTypes{Bool: true, AByte: 1, Int16: 1, Int32: 1, Int64: 1, Uint16: 1, Uint32: 1, Uint64: 1, String: "A", Bytes: "A", Float32: 1, Float64: 1, Complex64: 1, Complex128: 1, FoodEnum: types.FoodEnum.Cherry, NListUint64: {1}, NByteArray: "Abcd", NArray2Uint64: {0, 1}, NSetUint64: {1}, NMapUint64String: {1: "A"}, NStruct: {A: true}, NUnion: {A: true}, TypeObject: typeobject(bool)},
-		"v.io/v23/vom/testdata/types.StructManyTypes struct{Bool bool;AByte byte;Int16 int16;Int32 int32;Int64 int64;Uint16 uint16;Uint32 uint32;Uint64 uint64;String string;Bytes []byte;Float32 float32;Float64 float64;Complex64 complex64;Complex128 complex128;FoodEnum v.io/v23/vom/testdata/types.FoodEnum enum{Bean;Brie;Cherry};NEnum v.io/v23/vom/testdata/types.NEnum enum{A;B;C};NListUint64 v.io/v23/vom/testdata/types.NListUint64 []uint64;NByteArray v.io/v23/vom/testdata/types.NByteArray [4]byte;NArray2Uint64 v.io/v23/vom/testdata/types.NArray2Uint64 [2]uint64;NSetUint64 v.io/v23/vom/testdata/types.NSetUint64 set[uint64];NMapUint64String v.io/v23/vom/testdata/types.NMapUint64String map[uint64]string;NStruct v.io/v23/vom/testdata/types.NStruct struct{A bool;B string;C int64};NUnion v.io/v23/vom/testdata/types.NUnion union{A bool;B string;C int64};TypeObject typeobject}",
-		"80533b010024762e696f2f7632332f766f6d2f74657374646174612f74797065732e466f6f64456e756d0103044265616e044272696506436865727279e1552d010021762e696f2f7632332f766f6d2f74657374646174612f74797065732e4e456e756d0103014101420143e1572d030027762e696f2f7632332f766f6d2f74657374646174612f74797065732e4e4c69737455696e7436340106e1592e020026762e696f2f7632332f766f6d2f74657374646174612f74797065732e4e42797465417272617901020204e15b31020029762e696f2f7632332f766f6d2f74657374646174612f74797065732e4e41727261793255696e74363401060202e15d2c040026762e696f2f7632332f766f6d2f74657374646174612f74797065732e4e53657455696e7436340106e15f3405002c762e696f2f7632332f766f6d2f74657374646174612f74797065732e4e4d617055696e743634537472696e6701060203e1613b060023762e696f2f7632332f766f6d2f74657374646174612f74797065732e4e53747275637401030001410101e10001420103e10001430109e1e1633a070022762e696f2f7632332f766f6d2f74657374646174612f74797065732e4e556e696f6e01030001410101e10001420103e10001430109e1e151fe015f06002b762e696f2f7632332f766f6d2f74657374646174612f74797065732e5374727563744d616e79547970657301180004426f6f6c0101e1000541427974650102e10005496e7431360107e10005496e7433320108e10005496e7436340109e1000655696e7431360104e1000655696e7433320105e1000655696e7436340106e10006537472696e670103e1000542797465730127e10007466c6f61743332010ae10007466c6f61743634010be10009436f6d706c65783634010ce1000a436f6d706c6578313238010de10008466f6f64456e756d012ae100054e456e756d012be1000b4e4c69737455696e743634012ce1000a4e427974654172726179012de1000d4e41727261793255696e743634012ee1000a4e53657455696e743634012fe100104e4d617055696e743634537472696e670130e100074e5374727563740131e100064e556e696f6e0132e1000a547970654f626a656374010ee1e15249000101010202030204020501060107010801410901410afef03f0bfef03f0cfef03f000dfef03f000e02100101110041626364120000011301011401010141150001e11600011701e1",
-		"80", "533b010024762e696f2f7632332f766f6d2f74657374646174612f74797065732e466f6f64456e756d0103044265616e044272696506436865727279e1552d010021762e696f2f7632332f766f6d2f74657374646174612f74797065732e4e456e756d0103014101420143e1572d030027762e696f2f7632332f766f6d2f74657374646174612f74797065732e4e4c69737455696e7436340106e1592e020026762e696f2f7632332f766f6d2f74657374646174612f74797065732e4e42797465417272617901020204e15b31020029762e696f2f7632332f766f6d2f74657374646174612f74797065732e4e41727261793255696e74363401060202e15d2c040026762e696f2f7632332f766f6d2f74657374646174612f74797065732e4e53657455696e7436340106e15f3405002c762e696f2f7632332f766f6d2f74657374646174612f74797065732e4e4d617055696e743634537472696e6701060203e1613b060023762e696f2f7632332f766f6d2f74657374646174612f74797065732e4e53747275637401030001410101e10001420103e10001430109e1e1633a070022762e696f2f7632332f766f6d2f74657374646174612f74797065732e4e556e696f6e01030001410101e10001420103e10001430109e1e151fe015f06002b762e696f2f7632332f766f6d2f74657374646174612f74797065732e5374727563744d616e79547970657301180004426f6f6c0101e1000541427974650102e10005496e7431360107e10005496e7433320108e10005496e7436340109e1000655696e7431360104e1000655696e7433320105e1000655696e7436340106e10006537472696e670103e1000542797465730127e10007466c6f61743332010ae10007466c6f61743634010be10009436f6d706c65783634010ce1000a436f6d706c6578313238010de10008466f6f64456e756d012ae100054e456e756d012be1000b4e4c69737455696e743634012ce1000a4e427974654172726179012de1000d4e41727261793255696e743634012ee1000a4e53657455696e743634012fe100104e4d617055696e743634537472696e670130e100074e5374727563740131e100064e556e696f6e0132e1000a547970654f626a656374010ee1e1", "5249000101010202030204020501060107010801410901410afef03f0bfef03f0cfef03f000dfef03f000e02100101110041626364120000011301011401010141150001e11600011701e1",
+		`types.StructManyTypes{Bool: true, AByte: 1, Int16: 1, Int32: 1, Int64: 1, Uint16: 1, Uint32: 1, Uint64: 1, String: "A", Bytes: "A", Float32: 1, Float64: 1, FoodEnum: types.FoodEnum.Cherry, NListUint64: {1}, NByteArray: "Abcd", NArray2Uint64: {0, 1}, NSetUint64: {1}, NMapUint64String: {1: "A"}, NStruct: {A: true}, NUnion: {A: true}, TypeObject: typeobject(bool)}`,
+		types.StructManyTypes{Bool: true, AByte: 1, Int16: 1, Int32: 1, Int64: 1, Uint16: 1, Uint32: 1, Uint64: 1, String: "A", Bytes: "A", Float32: 1, Float64: 1, FoodEnum: types.FoodEnum.Cherry, NListUint64: {1}, NByteArray: "Abcd", NArray2Uint64: {0, 1}, NSetUint64: {1}, NMapUint64String: {1: "A"}, NStruct: {A: true}, NUnion: {A: true}, TypeObject: typeobject(bool)},
+		"v.io/v23/vom/testdata/types.StructManyTypes struct{Bool bool;AByte byte;Int16 int16;Int32 int32;Int64 int64;Uint16 uint16;Uint32 uint32;Uint64 uint64;String string;Bytes []byte;Float32 float32;Float64 float64;FoodEnum v.io/v23/vom/testdata/types.FoodEnum enum{Bean;Brie;Cherry};NEnum v.io/v23/vom/testdata/types.NEnum enum{A;B;C};NListUint64 v.io/v23/vom/testdata/types.NListUint64 []uint64;NByteArray v.io/v23/vom/testdata/types.NByteArray [4]byte;NArray2Uint64 v.io/v23/vom/testdata/types.NArray2Uint64 [2]uint64;NSetUint64 v.io/v23/vom/testdata/types.NSetUint64 set[uint64];NMapUint64String v.io/v23/vom/testdata/types.NMapUint64String map[uint64]string;NStruct v.io/v23/vom/testdata/types.NStruct struct{A bool;B string;C int64};NUnion v.io/v23/vom/testdata/types.NUnion union{A bool;B string;C int64};TypeObject typeobject}",
+		"80533b010024762e696f2f7632332f766f6d2f74657374646174612f74797065732e466f6f64456e756d0103044265616e044272696506436865727279e1552d010021762e696f2f7632332f766f6d2f74657374646174612f74797065732e4e456e756d0103014101420143e1572d030027762e696f2f7632332f766f6d2f74657374646174612f74797065732e4e4c69737455696e7436340106e1592e020026762e696f2f7632332f766f6d2f74657374646174612f74797065732e4e42797465417272617901020204e15b31020029762e696f2f7632332f766f6d2f74657374646174612f74797065732e4e41727261793255696e74363401060202e15d2c040026762e696f2f7632332f766f6d2f74657374646174612f74797065732e4e53657455696e7436340106e15f3405002c762e696f2f7632332f766f6d2f74657374646174612f74797065732e4e4d617055696e743634537472696e6701060203e1613b060023762e696f2f7632332f766f6d2f74657374646174612f74797065732e4e53747275637401030001410101e10001420103e10001430109e1e1633a070022762e696f2f7632332f766f6d2f74657374646174612f74797065732e4e556e696f6e01030001410101e10001420103e10001430109e1e151fe014206002b762e696f2f7632332f766f6d2f74657374646174612f74797065732e5374727563744d616e79547970657301160004426f6f6c0101e1000541427974650102e10005496e7431360107e10005496e7433320108e10005496e7436340109e1000655696e7431360104e1000655696e7433320105e1000655696e7436340106e10006537472696e670103e1000542797465730127e10007466c6f61743332010ae10007466c6f61743634010be10008466f6f64456e756d012ae100054e456e756d012be1000b4e4c69737455696e743634012ce1000a4e427974654172726179012de1000d4e41727261793255696e743634012ee1000a4e53657455696e743634012fe100104e4d617055696e743634537472696e670130e100074e5374727563740131e100064e556e696f6e0132e1000a547970654f626a656374010ee1e1523f000101010202030204020501060107010801410901410afef03f0bfef03f0c020e01010f0041626364100000011101011201010141130001e11400011501e1",
+		"80", "533b010024762e696f2f7632332f766f6d2f74657374646174612f74797065732e466f6f64456e756d0103044265616e044272696506436865727279e1552d010021762e696f2f7632332f766f6d2f74657374646174612f74797065732e4e456e756d0103014101420143e1572d030027762e696f2f7632332f766f6d2f74657374646174612f74797065732e4e4c69737455696e7436340106e1592e020026762e696f2f7632332f766f6d2f74657374646174612f74797065732e4e42797465417272617901020204e15b31020029762e696f2f7632332f766f6d2f74657374646174612f74797065732e4e41727261793255696e74363401060202e15d2c040026762e696f2f7632332f766f6d2f74657374646174612f74797065732e4e53657455696e7436340106e15f3405002c762e696f2f7632332f766f6d2f74657374646174612f74797065732e4e4d617055696e743634537472696e6701060203e1613b060023762e696f2f7632332f766f6d2f74657374646174612f74797065732e4e53747275637401030001410101e10001420103e10001430109e1e1633a070022762e696f2f7632332f766f6d2f74657374646174612f74797065732e4e556e696f6e01030001410101e10001420103e10001430109e1e151fe014206002b762e696f2f7632332f766f6d2f74657374646174612f74797065732e5374727563744d616e79547970657301160004426f6f6c0101e1000541427974650102e10005496e7431360107e10005496e7433320108e10005496e7436340109e1000655696e7431360104e1000655696e7433320105e1000655696e7436340106e10006537472696e670103e1000542797465730127e10007466c6f61743332010ae10007466c6f61743634010be10008466f6f64456e756d012ae100054e456e756d012be1000b4e4c69737455696e743634012ce1000a4e427974654172726179012de1000d4e41727261793255696e743634012ee1000a4e53657455696e743634012fe100104e4d617055696e743634537472696e670130e100074e5374727563740131e100064e556e696f6e0132e1000a547970654f626a656374010ee1e1", "523f000101010202030204020501060107010801410901410afef03f0bfef03f0c020e01010f0041626364100000011101011201010141130001e11400011501e1",
 	},
 	// 80                   Version                          128 [vom version 80]
 	// DumpStatus{MsgId: 0, MsgN: 1, Buf(181): "512a030024762e696f2f7632332f766f6d2f74657374646174612f74797065732e416e79536c696365010fe15328000022762e696f2f7632332f766f6d2f74657374646174612f74797065732e4e496e7431360107e15528000022762e696f2f7632332f766f6d2f74657374646174612f74797065732e4e496e7433320108e15728000022762e696f2f7632332f766f6d2f74657374646174612f74797065732e4e496e7436340109e15209042a022b042c062b08"}
@@ -9387,7 +8849,7 @@ const CompatTests = map[string][]typeobject{
 	"map[string]X/struct": []typeobject{typeobject(types.MapOnlyStruct), typeobject(types.StructOnlyMap)},
 	"map[string]bool/set[string]/struct": []typeobject{typeobject(types.MapSetStruct), typeobject(types.SetStructMap), typeobject(types.MapStructSet)},
 	"number list/array": []typeobject{typeobject([]int32), typeobject(types.NArray2Uint64), typeobject(types.NListUint64)},
-	"number": []typeobject{typeobject(uint16), typeobject(uint32), typeobject(uint64), typeobject(int16), typeobject(int32), typeobject(int64), typeobject(float32), typeobject(float64), typeobject(complex64), typeobject(complex128), typeobject(types.NUint16), typeobject(types.NUint32), typeobject(types.NUint64), typeobject(types.NInt16), typeobject(types.NInt32), typeobject(types.NInt64), typeobject(types.NFloat32), typeobject(types.NFloat64), typeobject(types.NComplex64), typeobject(types.NComplex128)},
+	"number": []typeobject{typeobject(uint16), typeobject(uint32), typeobject(uint64), typeobject(int16), typeobject(int32), typeobject(int64), typeobject(float32), typeobject(float64), typeobject(types.NUint16), typeobject(types.NUint32), typeobject(types.NUint64), typeobject(types.NInt16), typeobject(types.NInt32), typeobject(types.NInt64), typeobject(types.NFloat32), typeobject(types.NFloat64)},
 	"string list/array": []typeobject{typeobject([]string), typeobject(types.ListString), typeobject(types.Array3String), typeobject(types.Array4String)},
 	"string/[]byte/enum": []typeobject{typeobject(string), typeobject(types.NString), typeobject([]byte), typeobject(types.NByteSlice), typeobject(types.NByteArray), typeobject(types.NEnum)},
 	"struct A": []typeobject{typeobject(types.NStruct), typeobject(types.AbcStruct), typeobject(types.AdeStruct)},
@@ -9431,32 +8893,27 @@ const ConvertTests = map[string][]types.ConvertGroup{
 		{
 			"byte",
 			typeobject(byte),
-			{ byte(3), uint16(3), int32(3), float64(3), int64(3), complex128(3), },
+			{ byte(3), uint16(3), int32(3), float64(3), int64(3), },
 		},
 		{
 			"uint16",
 			typeobject(uint16),
-			{ uint16(256), int32(256), float64(256), int64(256), complex128(256), },
+			{ uint16(256), int32(256), float64(256), int64(256), },
 		},
 		{
 			"int32",
 			typeobject(int32),
-			{ int32(-5), float64(-5), int64(-5), complex128(-5), },
+			{ int32(-5), float64(-5), int64(-5), },
 		},
 		{
 			"float64",
 			typeobject(float64),
-			{ float64(3.3), complex128(3.3), },
+			{ float64(3.3), },
 		},
 		{
 			"int64",
 			typeobject(int64),
 			{ int64(-9223372036854775808), },
-		},
-		{
-			"complex128",
-			typeobject(complex128),
-			{ complex128(1.5-1i), },
 		},
 	},
 	"string and enum": {
@@ -9510,7 +8967,7 @@ const ConvertTests = map[string][]types.ConvertGroup{
 		{
 			"struct+map",
 			typeobject(types.MapOnlyStruct),
-			{ types.StructOnlyMap{"Key1": 4, "Key2": 5, "Key3": 0}, types.MapOnlyStruct{Key1: 4, Key2: 5}, },
+			{ types.StructOnlyMap{"Key1": 4, "Key2": 5}, types.MapOnlyStruct{Key1: 4, Key2: 5}, },
 		},
 		{
 			"map+set",

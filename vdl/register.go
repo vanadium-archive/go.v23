@@ -423,8 +423,6 @@ var rtFromKind = [...]reflect.Type{
 	Int64:      rtInt64,
 	Float32:    rtFloat32,
 	Float64:    rtFloat64,
-	Complex64:  rtComplex64,
-	Complex128: rtComplex128,
 	String:     rtString,
 	TypeObject: rtPtrToType,
 }

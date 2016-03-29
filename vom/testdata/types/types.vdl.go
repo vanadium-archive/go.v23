@@ -995,16 +995,6 @@ func (t *NByteTarget) FromFloat(src float64, tt *vdl.Type) error {
 
 	return nil
 }
-func (t *NByteTarget) FromComplex(src complex128, tt *vdl.Type) error {
-
-	val, err := vdlconv.Complex128ToUint8(src)
-	if err != nil {
-		return err
-	}
-	*t.Value = NByte(val)
-
-	return nil
-}
 
 type NUint16 uint16
 
@@ -1052,16 +1042,6 @@ func (t *NUint16Target) FromInt(src int64, tt *vdl.Type) error {
 func (t *NUint16Target) FromFloat(src float64, tt *vdl.Type) error {
 
 	val, err := vdlconv.Float64ToUint16(src)
-	if err != nil {
-		return err
-	}
-	*t.Value = NUint16(val)
-
-	return nil
-}
-func (t *NUint16Target) FromComplex(src complex128, tt *vdl.Type) error {
-
-	val, err := vdlconv.Complex128ToUint16(src)
 	if err != nil {
 		return err
 	}
@@ -1123,16 +1103,6 @@ func (t *NUint32Target) FromFloat(src float64, tt *vdl.Type) error {
 
 	return nil
 }
-func (t *NUint32Target) FromComplex(src complex128, tt *vdl.Type) error {
-
-	val, err := vdlconv.Complex128ToUint32(src)
-	if err != nil {
-		return err
-	}
-	*t.Value = NUint32(val)
-
-	return nil
-}
 
 type NUint64 uint64
 
@@ -1176,16 +1146,6 @@ func (t *NUint64Target) FromInt(src int64, tt *vdl.Type) error {
 func (t *NUint64Target) FromFloat(src float64, tt *vdl.Type) error {
 
 	val, err := vdlconv.Float64ToUint64(src)
-	if err != nil {
-		return err
-	}
-	*t.Value = NUint64(val)
-
-	return nil
-}
-func (t *NUint64Target) FromComplex(src complex128, tt *vdl.Type) error {
-
-	val, err := vdlconv.Complex128ToUint64(src)
 	if err != nil {
 		return err
 	}
@@ -1247,16 +1207,6 @@ func (t *NInt8Target) FromFloat(src float64, tt *vdl.Type) error {
 
 	return nil
 }
-func (t *NInt8Target) FromComplex(src complex128, tt *vdl.Type) error {
-
-	val, err := vdlconv.Complex128ToInt8(src)
-	if err != nil {
-		return err
-	}
-	*t.Value = NInt8(val)
-
-	return nil
-}
 
 type NInt16 int16
 
@@ -1304,16 +1254,6 @@ func (t *NInt16Target) FromInt(src int64, tt *vdl.Type) error {
 func (t *NInt16Target) FromFloat(src float64, tt *vdl.Type) error {
 
 	val, err := vdlconv.Float64ToInt16(src)
-	if err != nil {
-		return err
-	}
-	*t.Value = NInt16(val)
-
-	return nil
-}
-func (t *NInt16Target) FromComplex(src complex128, tt *vdl.Type) error {
-
-	val, err := vdlconv.Complex128ToInt16(src)
 	if err != nil {
 		return err
 	}
@@ -1375,16 +1315,6 @@ func (t *NInt32Target) FromFloat(src float64, tt *vdl.Type) error {
 
 	return nil
 }
-func (t *NInt32Target) FromComplex(src complex128, tt *vdl.Type) error {
-
-	val, err := vdlconv.Complex128ToInt32(src)
-	if err != nil {
-		return err
-	}
-	*t.Value = NInt32(val)
-
-	return nil
-}
 
 type NInt64 int64
 
@@ -1428,16 +1358,6 @@ func (t *NInt64Target) FromInt(src int64, tt *vdl.Type) error {
 func (t *NInt64Target) FromFloat(src float64, tt *vdl.Type) error {
 
 	val, err := vdlconv.Float64ToInt64(src)
-	if err != nil {
-		return err
-	}
-	*t.Value = NInt64(val)
-
-	return nil
-}
-func (t *NInt64Target) FromComplex(src complex128, tt *vdl.Type) error {
-
-	val, err := vdlconv.Complex128ToInt64(src)
 	if err != nil {
 		return err
 	}
@@ -1499,16 +1419,6 @@ func (t *NFloat32Target) FromFloat(src float64, tt *vdl.Type) error {
 
 	return nil
 }
-func (t *NFloat32Target) FromComplex(src complex128, tt *vdl.Type) error {
-
-	val, err := vdlconv.Complex128ToFloat32(src)
-	if err != nil {
-		return err
-	}
-	*t.Value = NFloat32(val)
-
-	return nil
-}
 
 type NFloat64 float64
 
@@ -1556,140 +1466,6 @@ func (t *NFloat64Target) FromInt(src int64, tt *vdl.Type) error {
 func (t *NFloat64Target) FromFloat(src float64, tt *vdl.Type) error {
 
 	*t.Value = NFloat64(src)
-
-	return nil
-}
-func (t *NFloat64Target) FromComplex(src complex128, tt *vdl.Type) error {
-
-	val, err := vdlconv.Complex128ToFloat64(src)
-	if err != nil {
-		return err
-	}
-	*t.Value = NFloat64(val)
-
-	return nil
-}
-
-type NComplex64 complex64
-
-func (NComplex64) __VDLReflect(struct {
-	Name string `vdl:"v.io/v23/vom/testdata/types.NComplex64"`
-}) {
-}
-
-func (m *NComplex64) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
-	if err := t.FromComplex(complex128((*m)), tt); err != nil {
-		return err
-	}
-	return nil
-}
-
-func (m *NComplex64) MakeVDLTarget() vdl.Target {
-	return &NComplex64Target{Value: m}
-}
-
-type NComplex64Target struct {
-	Value *NComplex64
-	vdl.TargetBase
-}
-
-func (t *NComplex64Target) FromUint(src uint64, tt *vdl.Type) error {
-
-	val, err := vdlconv.Uint64ToComplex64(src)
-	if err != nil {
-		return err
-	}
-	*t.Value = NComplex64(val)
-
-	return nil
-}
-func (t *NComplex64Target) FromInt(src int64, tt *vdl.Type) error {
-
-	val, err := vdlconv.Int64ToComplex64(src)
-	if err != nil {
-		return err
-	}
-	*t.Value = NComplex64(val)
-
-	return nil
-}
-func (t *NComplex64Target) FromFloat(src float64, tt *vdl.Type) error {
-
-	val, err := vdlconv.Float64ToComplex64(src)
-	if err != nil {
-		return err
-	}
-	*t.Value = NComplex64(val)
-
-	return nil
-}
-func (t *NComplex64Target) FromComplex(src complex128, tt *vdl.Type) error {
-
-	val, err := vdlconv.Complex128ToComplex64(src)
-	if err != nil {
-		return err
-	}
-	*t.Value = NComplex64(val)
-
-	return nil
-}
-
-type NComplex128 complex128
-
-func (NComplex128) __VDLReflect(struct {
-	Name string `vdl:"v.io/v23/vom/testdata/types.NComplex128"`
-}) {
-}
-
-func (m *NComplex128) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
-	if err := t.FromComplex(complex128((*m)), tt); err != nil {
-		return err
-	}
-	return nil
-}
-
-func (m *NComplex128) MakeVDLTarget() vdl.Target {
-	return &NComplex128Target{Value: m}
-}
-
-type NComplex128Target struct {
-	Value *NComplex128
-	vdl.TargetBase
-}
-
-func (t *NComplex128Target) FromUint(src uint64, tt *vdl.Type) error {
-
-	val, err := vdlconv.Uint64ToComplex128(src)
-	if err != nil {
-		return err
-	}
-	*t.Value = NComplex128(val)
-
-	return nil
-}
-func (t *NComplex128Target) FromInt(src int64, tt *vdl.Type) error {
-
-	val, err := vdlconv.Int64ToComplex128(src)
-	if err != nil {
-		return err
-	}
-	*t.Value = NComplex128(val)
-
-	return nil
-}
-func (t *NComplex128Target) FromFloat(src float64, tt *vdl.Type) error {
-
-	val, err := vdlconv.Float64ToComplex128(src)
-	if err != nil {
-		return err
-	}
-	*t.Value = NComplex128(val)
-
-	return nil
-}
-func (t *NComplex128Target) FromComplex(src complex128, tt *vdl.Type) error {
-
-	*t.Value = NComplex128(src)
 
 	return nil
 }
@@ -4660,7 +4436,6 @@ func (t *ZStructTarget) FinishFields(_ vdl.FieldsTarget) error {
 type MapOnlyStruct struct {
 	Key1 int64
 	Key2 uint32
-	Key3 complex128
 }
 
 func (MapOnlyStruct) __VDLReflect(struct {
@@ -4698,18 +4473,6 @@ func (m *MapOnlyStruct) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 			return err
 		}
 	}
-	keyTarget6, fieldTarget7, err := fieldsTarget1.StartField("Key3")
-	if err != vdl.ErrFieldNoExist && err != nil {
-		return err
-	}
-	if err != vdl.ErrFieldNoExist {
-		if err := fieldTarget7.FromComplex(complex128(m.Key3), tt.NonOptional().Field(2).Type); err != nil {
-			return err
-		}
-		if err := fieldsTarget1.FinishField(keyTarget6, fieldTarget7); err != nil {
-			return err
-		}
-	}
 	if err := t.FinishFields(fieldsTarget1); err != nil {
 		return err
 	}
@@ -4724,7 +4487,6 @@ type MapOnlyStructTarget struct {
 	Value      *MapOnlyStruct
 	key1Target vdl.Int64Target
 	key2Target vdl.Uint32Target
-	key3Target vdl.Complex128Target
 	vdl.TargetBase
 	vdl.FieldsTargetBase
 }
@@ -4745,10 +4507,6 @@ func (t *MapOnlyStructTarget) StartField(name string) (key, field vdl.Target, _ 
 	case "Key2":
 		t.key2Target.Value = &t.Value.Key2
 		target, err := &t.key2Target, error(nil)
-		return nil, target, err
-	case "Key3":
-		t.key3Target.Value = &t.Value.Key3
-		target, err := &t.key3Target, error(nil)
 		return nil, target, err
 	default:
 		return nil, nil, fmt.Errorf("field %s not in struct v.io/v23/vom/testdata/types.MapOnlyStruct", name)
@@ -6616,8 +6374,6 @@ type StructManyTypes struct {
 	Bytes            []byte
 	Float32          float32
 	Float64          float64
-	Complex64        complex64
-	Complex128       complex128
 	FoodEnum         FoodEnum
 	NEnum            NEnum
 	NListUint64      NListUint64
@@ -6786,164 +6542,140 @@ func (m *StructManyTypes) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 			return err
 		}
 	}
-	keyTarget26, fieldTarget27, err := fieldsTarget1.StartField("Complex64")
+	keyTarget26, fieldTarget27, err := fieldsTarget1.StartField("FoodEnum")
 	if err != vdl.ErrFieldNoExist && err != nil {
 		return err
 	}
 	if err != vdl.ErrFieldNoExist {
-		if err := fieldTarget27.FromComplex(complex128(m.Complex64), tt.NonOptional().Field(12).Type); err != nil {
+
+		if err := m.FoodEnum.FillVDLTarget(fieldTarget27, tt.NonOptional().Field(12).Type); err != nil {
 			return err
 		}
 		if err := fieldsTarget1.FinishField(keyTarget26, fieldTarget27); err != nil {
 			return err
 		}
 	}
-	keyTarget28, fieldTarget29, err := fieldsTarget1.StartField("Complex128")
+	keyTarget28, fieldTarget29, err := fieldsTarget1.StartField("NEnum")
 	if err != vdl.ErrFieldNoExist && err != nil {
 		return err
 	}
 	if err != vdl.ErrFieldNoExist {
-		if err := fieldTarget29.FromComplex(complex128(m.Complex128), tt.NonOptional().Field(13).Type); err != nil {
+
+		if err := m.NEnum.FillVDLTarget(fieldTarget29, tt.NonOptional().Field(13).Type); err != nil {
 			return err
 		}
 		if err := fieldsTarget1.FinishField(keyTarget28, fieldTarget29); err != nil {
 			return err
 		}
 	}
-	keyTarget30, fieldTarget31, err := fieldsTarget1.StartField("FoodEnum")
+	keyTarget30, fieldTarget31, err := fieldsTarget1.StartField("NListUint64")
 	if err != vdl.ErrFieldNoExist && err != nil {
 		return err
 	}
 	if err != vdl.ErrFieldNoExist {
 
-		if err := m.FoodEnum.FillVDLTarget(fieldTarget31, tt.NonOptional().Field(14).Type); err != nil {
+		if err := m.NListUint64.FillVDLTarget(fieldTarget31, tt.NonOptional().Field(14).Type); err != nil {
 			return err
 		}
 		if err := fieldsTarget1.FinishField(keyTarget30, fieldTarget31); err != nil {
 			return err
 		}
 	}
-	keyTarget32, fieldTarget33, err := fieldsTarget1.StartField("NEnum")
+	keyTarget32, fieldTarget33, err := fieldsTarget1.StartField("NByteArray")
 	if err != vdl.ErrFieldNoExist && err != nil {
 		return err
 	}
 	if err != vdl.ErrFieldNoExist {
 
-		if err := m.NEnum.FillVDLTarget(fieldTarget33, tt.NonOptional().Field(15).Type); err != nil {
+		if err := m.NByteArray.FillVDLTarget(fieldTarget33, tt.NonOptional().Field(15).Type); err != nil {
 			return err
 		}
 		if err := fieldsTarget1.FinishField(keyTarget32, fieldTarget33); err != nil {
 			return err
 		}
 	}
-	keyTarget34, fieldTarget35, err := fieldsTarget1.StartField("NListUint64")
+	keyTarget34, fieldTarget35, err := fieldsTarget1.StartField("NArray2Uint64")
 	if err != vdl.ErrFieldNoExist && err != nil {
 		return err
 	}
 	if err != vdl.ErrFieldNoExist {
 
-		if err := m.NListUint64.FillVDLTarget(fieldTarget35, tt.NonOptional().Field(16).Type); err != nil {
+		if err := m.NArray2Uint64.FillVDLTarget(fieldTarget35, tt.NonOptional().Field(16).Type); err != nil {
 			return err
 		}
 		if err := fieldsTarget1.FinishField(keyTarget34, fieldTarget35); err != nil {
 			return err
 		}
 	}
-	keyTarget36, fieldTarget37, err := fieldsTarget1.StartField("NByteArray")
+	keyTarget36, fieldTarget37, err := fieldsTarget1.StartField("NSetUint64")
 	if err != vdl.ErrFieldNoExist && err != nil {
 		return err
 	}
 	if err != vdl.ErrFieldNoExist {
 
-		if err := m.NByteArray.FillVDLTarget(fieldTarget37, tt.NonOptional().Field(17).Type); err != nil {
+		if err := m.NSetUint64.FillVDLTarget(fieldTarget37, tt.NonOptional().Field(17).Type); err != nil {
 			return err
 		}
 		if err := fieldsTarget1.FinishField(keyTarget36, fieldTarget37); err != nil {
 			return err
 		}
 	}
-	keyTarget38, fieldTarget39, err := fieldsTarget1.StartField("NArray2Uint64")
+	keyTarget38, fieldTarget39, err := fieldsTarget1.StartField("NMapUint64String")
 	if err != vdl.ErrFieldNoExist && err != nil {
 		return err
 	}
 	if err != vdl.ErrFieldNoExist {
 
-		if err := m.NArray2Uint64.FillVDLTarget(fieldTarget39, tt.NonOptional().Field(18).Type); err != nil {
+		if err := m.NMapUint64String.FillVDLTarget(fieldTarget39, tt.NonOptional().Field(18).Type); err != nil {
 			return err
 		}
 		if err := fieldsTarget1.FinishField(keyTarget38, fieldTarget39); err != nil {
 			return err
 		}
 	}
-	keyTarget40, fieldTarget41, err := fieldsTarget1.StartField("NSetUint64")
+	keyTarget40, fieldTarget41, err := fieldsTarget1.StartField("NStruct")
 	if err != vdl.ErrFieldNoExist && err != nil {
 		return err
 	}
 	if err != vdl.ErrFieldNoExist {
 
-		if err := m.NSetUint64.FillVDLTarget(fieldTarget41, tt.NonOptional().Field(19).Type); err != nil {
+		if err := m.NStruct.FillVDLTarget(fieldTarget41, tt.NonOptional().Field(19).Type); err != nil {
 			return err
 		}
 		if err := fieldsTarget1.FinishField(keyTarget40, fieldTarget41); err != nil {
 			return err
 		}
 	}
-	keyTarget42, fieldTarget43, err := fieldsTarget1.StartField("NMapUint64String")
+	keyTarget42, fieldTarget43, err := fieldsTarget1.StartField("NUnion")
 	if err != vdl.ErrFieldNoExist && err != nil {
 		return err
 	}
 	if err != vdl.ErrFieldNoExist {
 
-		if err := m.NMapUint64String.FillVDLTarget(fieldTarget43, tt.NonOptional().Field(20).Type); err != nil {
+		unionValue44 := m.NUnion
+		if unionValue44 == nil {
+			unionValue44 = NUnionA{}
+		}
+		if err := unionValue44.FillVDLTarget(fieldTarget43, tt.NonOptional().Field(20).Type); err != nil {
 			return err
 		}
 		if err := fieldsTarget1.FinishField(keyTarget42, fieldTarget43); err != nil {
 			return err
 		}
 	}
-	keyTarget44, fieldTarget45, err := fieldsTarget1.StartField("NStruct")
+	keyTarget45, fieldTarget46, err := fieldsTarget1.StartField("TypeObject")
 	if err != vdl.ErrFieldNoExist && err != nil {
 		return err
 	}
 	if err != vdl.ErrFieldNoExist {
-
-		if err := m.NStruct.FillVDLTarget(fieldTarget45, tt.NonOptional().Field(21).Type); err != nil {
+		typeObjectVal47 := m.TypeObject
+		if typeObjectVal47 == nil {
+			typeObjectVal47 = vdl.AnyType
+		}
+		if err := fieldTarget46.FromTypeObject(typeObjectVal47); err != nil {
 			return err
 		}
-		if err := fieldsTarget1.FinishField(keyTarget44, fieldTarget45); err != nil {
-			return err
-		}
-	}
-	keyTarget46, fieldTarget47, err := fieldsTarget1.StartField("NUnion")
-	if err != vdl.ErrFieldNoExist && err != nil {
-		return err
-	}
-	if err != vdl.ErrFieldNoExist {
-
-		unionValue48 := m.NUnion
-		if unionValue48 == nil {
-			unionValue48 = NUnionA{}
-		}
-		if err := unionValue48.FillVDLTarget(fieldTarget47, tt.NonOptional().Field(22).Type); err != nil {
-			return err
-		}
-		if err := fieldsTarget1.FinishField(keyTarget46, fieldTarget47); err != nil {
-			return err
-		}
-	}
-	keyTarget49, fieldTarget50, err := fieldsTarget1.StartField("TypeObject")
-	if err != vdl.ErrFieldNoExist && err != nil {
-		return err
-	}
-	if err != vdl.ErrFieldNoExist {
-		typeObjectVal51 := m.TypeObject
-		if typeObjectVal51 == nil {
-			typeObjectVal51 = vdl.AnyType
-		}
-		if err := fieldTarget50.FromTypeObject(typeObjectVal51); err != nil {
-			return err
-		}
-		if err := fieldsTarget1.FinishField(keyTarget49, fieldTarget50); err != nil {
+		if err := fieldsTarget1.FinishField(keyTarget45, fieldTarget46); err != nil {
 			return err
 		}
 	}
@@ -6971,8 +6703,6 @@ type StructManyTypesTarget struct {
 	bytesTarget            vdl.BytesTarget
 	float32Target          vdl.Float32Target
 	float64Target          vdl.Float64Target
-	complex64Target        vdl.Complex64Target
-	complex128Target       vdl.Complex128Target
 	foodEnumTarget         FoodEnumTarget
 	nEnumTarget            NEnumTarget
 	nListUint64Target      NListUint64Target
@@ -7043,14 +6773,6 @@ func (t *StructManyTypesTarget) StartField(name string) (key, field vdl.Target, 
 	case "Float64":
 		t.float64Target.Value = &t.Value.Float64
 		target, err := &t.float64Target, error(nil)
-		return nil, target, err
-	case "Complex64":
-		t.complex64Target.Value = &t.Value.Complex64
-		target, err := &t.complex64Target, error(nil)
-		return nil, target, err
-	case "Complex128":
-		t.complex128Target.Value = &t.Value.Complex128
-		target, err := &t.complex128Target, error(nil)
 		return nil, target, err
 	case "FoodEnum":
 		t.foodEnumTarget.Value = &t.Value.FoodEnum
@@ -7450,8 +7172,6 @@ var (
 	__VDLZeroNInt64           = NInt64(0)
 	__VDLZeroNFloat32         = NFloat32(0)
 	__VDLZeroNFloat64         = NFloat64(0)
-	__VDLZeroNComplex64       = NComplex64(0)
-	__VDLZeroNComplex128      = NComplex128(0)
 	__VDLZeroNArray2Uint64    = NArray2Uint64{}
 	__VDLZeroNListUint64      = NListUint64(nil)
 	__VDLZeroNSetUint64       = NSetUint64(nil)
@@ -7558,8 +7278,6 @@ func __VDLInit() struct{} {
 	vdl.Register((*NInt64)(nil))
 	vdl.Register((*NFloat32)(nil))
 	vdl.Register((*NFloat64)(nil))
-	vdl.Register((*NComplex64)(nil))
-	vdl.Register((*NComplex128)(nil))
 	vdl.Register((*NArray2Uint64)(nil))
 	vdl.Register((*NListUint64)(nil))
 	vdl.Register((*NSetUint64)(nil))

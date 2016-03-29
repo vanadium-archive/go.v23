@@ -815,16 +815,6 @@ func (t *typeIdTarget) FromFloat(src float64, tt *vdl.Type) error {
 
 	return nil
 }
-func (t *typeIdTarget) FromComplex(src complex128, tt *vdl.Type) error {
-
-	val, err := vdlconv.Complex128ToUint64(src)
-	if err != nil {
-		return err
-	}
-	*t.Value = typeId(val)
-
-	return nil
-}
 
 // wireNamed represents a type definition for named primitives.
 type wireNamed struct {
@@ -2305,8 +2295,8 @@ const WireIdInt32 = typeId(8)
 const WireIdInt64 = typeId(9)
 const WireIdFloat32 = typeId(10)
 const WireIdFloat64 = typeId(11)
-const WireIdComplex64 = typeId(12)
-const WireIdComplex128 = typeId(13)
+
+// Wire ids 12 and 13 were previously used for complex64 and complex 128.
 const WireIdTypeObject = typeId(14)
 const WireIdAny = typeId(15)
 const WireIdInt8 = typeId(16)

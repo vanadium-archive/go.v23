@@ -21,7 +21,7 @@ func checkIfPossibleThatArgIsConvertibleToLocation(db ds.Database, arg *query_pa
 	var locStr *query_parser.Operand
 	var err error
 	switch arg.Type {
-	case query_parser.TypBigInt, query_parser.TypBigRat, query_parser.TypBool, query_parser.TypComplex, query_parser.TypFloat, query_parser.TypInt, query_parser.TypStr, query_parser.TypTime, query_parser.TypUint:
+	case query_parser.TypBigInt, query_parser.TypBigRat, query_parser.TypBool, query_parser.TypFloat, query_parser.TypInt, query_parser.TypStr, query_parser.TypTime, query_parser.TypUint:
 		if locStr, err = conversions.ConvertValueToString(arg); err != nil {
 			if err != nil {
 				return syncql.NewErrLocationConversionError(db.GetContext(), arg.Off, err)

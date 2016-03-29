@@ -426,8 +426,6 @@ var (
 	rtInt64              = reflect.TypeOf(int64(0))
 	rtFloat32            = reflect.TypeOf(float32(0))
 	rtFloat64            = reflect.TypeOf(float64(0))
-	rtComplex64          = reflect.TypeOf(complex64(0))
-	rtComplex128         = reflect.TypeOf(complex128(0))
 	rtString             = reflect.TypeOf("")
 	rtError              = reflect.TypeOf((*error)(nil)).Elem()
 	rtWireError          = reflect.TypeOf(WireError{})
@@ -440,23 +438,21 @@ var (
 	rtUnnamedEmptyStruct = reflect.TypeOf(struct{}{})
 
 	typeFromRTKind = [...]*Type{
-		reflect.Bool:       BoolType,
-		reflect.Uint8:      ByteType,
-		reflect.Uint16:     Uint16Type,
-		reflect.Uint32:     Uint32Type,
-		reflect.Uint64:     Uint64Type,
-		reflect.Uint:       uintType(8 * unsafe.Sizeof(uint(0))),
-		reflect.Uintptr:    uintType(8 * unsafe.Sizeof(uintptr(0))),
-		reflect.Int8:       Int8Type,
-		reflect.Int16:      Int16Type,
-		reflect.Int32:      Int32Type,
-		reflect.Int64:      Int64Type,
-		reflect.Int:        intType(8 * unsafe.Sizeof(int(0))),
-		reflect.Float32:    Float32Type,
-		reflect.Float64:    Float64Type,
-		reflect.Complex64:  Complex64Type,
-		reflect.Complex128: Complex128Type,
-		reflect.String:     StringType,
+		reflect.Bool:    BoolType,
+		reflect.Uint8:   ByteType,
+		reflect.Uint16:  Uint16Type,
+		reflect.Uint32:  Uint32Type,
+		reflect.Uint64:  Uint64Type,
+		reflect.Uint:    uintType(8 * unsafe.Sizeof(uint(0))),
+		reflect.Uintptr: uintType(8 * unsafe.Sizeof(uintptr(0))),
+		reflect.Int8:    Int8Type,
+		reflect.Int16:   Int16Type,
+		reflect.Int32:   Int32Type,
+		reflect.Int64:   Int64Type,
+		reflect.Int:     intType(8 * unsafe.Sizeof(int(0))),
+		reflect.Float32: Float32Type,
+		reflect.Float64: Float64Type,
+		reflect.String:  StringType,
 	}
 )
 

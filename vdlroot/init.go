@@ -11,6 +11,7 @@
 package vdlroot
 
 import (
+	_ "v.io/v23/vdlroot/math"
 	_ "v.io/v23/vdlroot/signature"
 	_ "v.io/v23/vdlroot/time"
 	_ "v.io/v23/vdlroot/vdltool"

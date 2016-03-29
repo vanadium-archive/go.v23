@@ -68,7 +68,6 @@ func init() {
 
 	// Math functions
 	functions["Ceiling"] = function{[]query_parser.OperandType{query_parser.TypFloat}, false, query_parser.TypNil, query_parser.TypFloat, ceilingFunc, nil}
-	functions["Complex"] = function{[]query_parser.OperandType{query_parser.TypFloat, query_parser.TypFloat}, false, query_parser.TypNil, query_parser.TypComplex, complexFunc, nil}
 	functions["Floor"] = function{[]query_parser.OperandType{query_parser.TypFloat}, false, query_parser.TypNil, query_parser.TypFloat, floorFunc, nil}
 	functions["Inf"] = function{[]query_parser.OperandType{query_parser.TypInt}, false, query_parser.TypNil, query_parser.TypFloat, infFunc, nil}
 	functions["IsInf"] = function{[]query_parser.OperandType{query_parser.TypFloat, query_parser.TypInt}, false, query_parser.TypNil, query_parser.TypBool, isInfFunc, nil}
@@ -79,7 +78,6 @@ func init() {
 	functions["Pow"] = function{[]query_parser.OperandType{query_parser.TypFloat, query_parser.TypFloat}, false, query_parser.TypNil, query_parser.TypFloat, powFunc, nil}
 	functions["Pow10"] = function{[]query_parser.OperandType{query_parser.TypInt}, false, query_parser.TypNil, query_parser.TypFloat, pow10Func, nil}
 	functions["Mod"] = function{[]query_parser.OperandType{query_parser.TypFloat, query_parser.TypFloat}, false, query_parser.TypNil, query_parser.TypFloat, modFunc, nil}
-	functions["Real"] = function{[]query_parser.OperandType{query_parser.TypComplex}, false, query_parser.TypNil, query_parser.TypFloat, realFunc, nil}
 	functions["Truncate"] = function{[]query_parser.OperandType{query_parser.TypFloat}, false, query_parser.TypNil, query_parser.TypFloat, truncateFunc, nil}
 	functions["Remainder"] = function{[]query_parser.OperandType{query_parser.TypFloat, query_parser.TypFloat}, false, query_parser.TypNil, query_parser.TypFloat, remainderFunc, nil}
 
@@ -121,7 +119,7 @@ func CheckFunction(db ds.Database, f *query_parser.Function) error {
 		okToExecuteNow := true
 		for _, arg := range f.Args {
 			switch arg.Type {
-			case query_parser.TypBigInt, query_parser.TypBigRat, query_parser.TypBool, query_parser.TypComplex, query_parser.TypFloat, query_parser.TypInt, query_parser.TypStr, query_parser.TypTime, query_parser.TypUint:
+			case query_parser.TypBigInt, query_parser.TypBigRat, query_parser.TypBool, query_parser.TypFloat, query_parser.TypInt, query_parser.TypStr, query_parser.TypTime, query_parser.TypUint:
 				// do nothing
 			case query_parser.TypFunction:
 				if !arg.Function.Computed {
@@ -198,8 +196,6 @@ func ConvertFunctionRetValueToRawBytes(o *query_parser.Operand) *vom.RawBytes {
 	switch o.Type {
 	case query_parser.TypBool:
 		return vom.RawBytesOf(o.Bool)
-	case query_parser.TypComplex:
-		return vom.RawBytesOf(o.Complex)
 	case query_parser.TypFloat:
 		return vom.RawBytesOf(o.Float)
 	case query_parser.TypInt:
@@ -236,14 +232,6 @@ func makeBoolOp(off int64, b bool) *query_parser.Operand {
 	return &o
 }
 
-func makeComplexOp(off int64, c complex128) *query_parser.Operand {
-	var o query_parser.Operand
-	o.Off = off
-	o.Type = query_parser.TypComplex
-	o.Complex = c
-	return &o
-}
-
 func makeIntOp(off int64, i int64) *query_parser.Operand {
 	var o query_parser.Operand
 	o.Off = off
@@ -264,7 +252,7 @@ func checkArg(db ds.Database, off int64, argType query_parser.OperandType, arg *
 	// We can't check unless the arg is a literal or an already computed function,
 	var operandToConvert *query_parser.Operand
 	switch arg.Type {
-	case query_parser.TypBigInt, query_parser.TypBigRat, query_parser.TypBool, query_parser.TypComplex, query_parser.TypFloat, query_parser.TypInt, query_parser.TypStr, query_parser.TypTime, query_parser.TypUint:
+	case query_parser.TypBigInt, query_parser.TypBigRat, query_parser.TypBool, query_parser.TypFloat, query_parser.TypInt, query_parser.TypStr, query_parser.TypTime, query_parser.TypUint:
 		operandToConvert = arg
 	case query_parser.TypFunction:
 		if arg.Function.Computed {
@@ -292,11 +280,6 @@ func checkArg(db ds.Database, off int64, argType query_parser.OperandType, arg *
 		_, err = conversions.ConvertValueToBool(operandToConvert)
 		if err != nil {
 			err = syncql.NewErrBoolConversionError(db.GetContext(), arg.Off, err)
-		}
-	case query_parser.TypComplex:
-		_, err = conversions.ConvertValueToComplex(operandToConvert)
-		if err != nil {
-			err = syncql.NewErrComplexConversionError(db.GetContext(), arg.Off, err)
 		}
 	case query_parser.TypFloat:
 		_, err = conversions.ConvertValueToFloat(operandToConvert)

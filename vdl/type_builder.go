@@ -46,8 +46,6 @@ var (
 	Int64Type      = primitiveType(Int64)
 	Float32Type    = primitiveType(Float32)
 	Float64Type    = primitiveType(Float64)
-	Complex64Type  = primitiveType(Complex64)
-	Complex128Type = primitiveType(Complex128)
 	StringType     = primitiveType(String)
 	TypeObjectType = primitiveType(TypeObject)
 )

@@ -38,7 +38,6 @@ pkg vtrace, method (*SpanRecordTarget) StartField(string) (vdl.Target, vdl.Targe
 pkg vtrace, method (*SpanRecordTarget) StartFields(*vdl.Type) (vdl.FieldsTarget, error)
 pkg vtrace, method (*TraceFlags) FillVDLTarget(vdl.Target, *vdl.Type) error
 pkg vtrace, method (*TraceFlags) MakeVDLTarget() vdl.Target
-pkg vtrace, method (*TraceFlagsTarget) FromComplex(complex128, *vdl.Type) error
 pkg vtrace, method (*TraceFlagsTarget) FromFloat(float64, *vdl.Type) error
 pkg vtrace, method (*TraceFlagsTarget) FromInt(int64, *vdl.Type) error
 pkg vtrace, method (*TraceFlagsTarget) FromUint(uint64, *vdl.Type) error

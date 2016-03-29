@@ -79,7 +79,7 @@ func (kv kvPair) String() string {
 func useFastIndex(key *Type) bool {
 	// TODO(toddw): Structs with exactly 1 simple field may also use fast.
 	switch key.kind {
-	case Bool, Byte, Uint16, Uint32, Uint64, Int8, Int16, Int32, Int64, Float32, Float64, Complex64, Complex128, String, Enum:
+	case Bool, Byte, Uint16, Uint32, Uint64, Int8, Int16, Int32, Int64, Float32, Float64, String, Enum:
 		return true
 	}
 	if key.IsBytes() {

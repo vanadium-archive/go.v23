@@ -56,8 +56,6 @@ func TestValue(t *testing.T) {
 		{Int64, Int64Type, "int64(0)"},
 		{Float32, Float32Type, "float32(0)"},
 		{Float64, Float64Type, "float64(0)"},
-		{Complex64, Complex64Type, "complex64(0+0i)"},
-		{Complex128, Complex128Type, "complex128(0+0i)"},
 		{String, StringType, `""`},
 		{List, ListType(ByteType), `[]byte("")`},
 		{Array, ArrayType(3, ByteType), `[3]byte("\x00\x00\x00")`},
@@ -113,7 +111,6 @@ func TestValue(t *testing.T) {
 		assignUint(t, x)
 		assignInt(t, x)
 		assignFloat(t, x)
-		assignComplex(t, x)
 		assignString(t, x)
 		assignEnum(t, x)
 		assignTypeObject(t, x)
@@ -298,26 +295,6 @@ func assignFloat(t *testing.T, x *Value) {
 	default:
 		ExpectMismatchedKind(t, func() { x.Float() })
 		ExpectMismatchedKind(t, func() { x.AssignFloat(newval) })
-	}
-}
-
-func assignComplex(t *testing.T, x *Value) {
-	newval := complex128(1 + 2i)
-	switch x.Kind() {
-	case Complex64, Complex128:
-		if got, want := x.Complex(), complex128(0); got != want {
-			t.Errorf(`Complex zero value got %v, want %v`, got, want)
-		}
-		x.AssignComplex(newval)
-		if got, want := x.Complex(), newval; got != want {
-			t.Errorf(`Complex assign value got %v, want %v`, got, want)
-		}
-		if got, want := x.String(), x.Kind().String()+"(1+2i)"; got != want {
-			t.Errorf(`Complex string got %v, want %v`, got, want)
-		}
-	default:
-		ExpectMismatchedKind(t, func() { x.Complex() })
-		ExpectMismatchedKind(t, func() { x.AssignComplex(newval) })
 	}
 }
 

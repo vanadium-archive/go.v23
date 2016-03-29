@@ -338,16 +338,6 @@ func (d *Decoder) decodeValue(tt *vdl.Type, target vdl.Target) error {
 			return err
 		}
 		return target.FromFloat(v, ttFrom)
-	case vdl.Complex64, vdl.Complex128:
-		re, err := binaryDecodeFloat(d.buf)
-		if err != nil {
-			return err
-		}
-		im, err := binaryDecodeFloat(d.buf)
-		if err != nil {
-			return err
-		}
-		return target.FromComplex(complex(re, im), ttFrom)
 	case vdl.String:
 		v, err := binaryDecodeString(d.buf)
 		if err != nil {
@@ -626,12 +616,6 @@ func (d *Decoder) ignoreValue(tt *vdl.Type) error {
 			return verror.New(errUnsupportedInVOMVersion, nil, "int8", d.buf.version)
 		}
 		// The underlying encoding of all these types is based on uint.
-		return binaryIgnoreUint(d.buf)
-	case vdl.Complex64, vdl.Complex128:
-		// Complex is encoded as two floats, so we can simply ignore two uints.
-		if err := binaryIgnoreUint(d.buf); err != nil {
-			return err
-		}
 		return binaryIgnoreUint(d.buf)
 	case vdl.String:
 		return binaryIgnoreString(d.buf)

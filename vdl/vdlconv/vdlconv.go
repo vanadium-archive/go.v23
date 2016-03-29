@@ -98,20 +98,6 @@ func Uint64ToFloat64(x uint64) (float64, error) {
 	return float64(x), nil
 }
 
-func Uint64ToComplex64(x uint64) (complex64, error) {
-	if x > float32MaxInt {
-		return 0, fmt.Errorf("uint64 value %d cannot be converted to complex64 without loss", x)
-	}
-	return complex(float32(x), 0), nil
-}
-
-func Uint64ToComplex128(x uint64) (complex128, error) {
-	if x > float64MaxInt {
-		return 0, fmt.Errorf("uint64 value %d cannot be converted to complex128 without loss", x)
-	}
-	return complex(float64(x), 0), nil
-}
-
 func Int64ToUint8(x int64) (uint8, error) {
 	ux := uint64(x)
 	if x < 0 || ux != (ux<<shiftFor8Bit)>>shiftFor8Bit {
@@ -180,20 +166,6 @@ func Int64ToFloat64(x int64) (float64, error) {
 	return float64(x), nil
 }
 
-func Int64ToComplex64(x int64) (complex64, error) {
-	if x < float32MinInt || x > float32MaxInt {
-		return 0, fmt.Errorf("int64 value %d cannot be converted to complex64 without loss", x)
-	}
-	return complex(float32(x), 0), nil
-}
-
-func Int64ToComplex128(x int64) (complex128, error) {
-	if x < float64MinInt || x > float64MaxInt {
-		return 0, fmt.Errorf("int64 value %d cannot be converted to complex128 without loss", x)
-	}
-	return complex(float64(x), 0), nil
-}
-
 func Float64ToUint8(x float64) (uint8, error) {
 	ux := uint64(x)
 	if x != float64(ux) || ux != (ux<<shiftFor8Bit)>>shiftFor8Bit {
@@ -260,94 +232,4 @@ func Float64ToInt64(x float64) (int64, error) {
 
 func Float64ToFloat32(x float64) (float32, error) {
 	return float32(x), nil
-}
-
-func Float64ToComplex64(x float64) (complex64, error) {
-	return complex(float32(x), 0), nil
-}
-
-func Float64ToComplex128(x float64) (complex128, error) {
-	return complex(x, 0), nil
-}
-
-func Complex128ToUint8(x complex128) (uint8, error) {
-	ux := uint64(real(x))
-	if x != complex128(complex(float64(ux), 0)) || ux != (ux<<shiftFor8Bit)>>shiftFor8Bit {
-		return 0, fmt.Errorf("complex128 value %f cannot be converted to uint8 without loss", x)
-	}
-	return uint8(ux), nil
-}
-
-func Complex128ToUint16(x complex128) (uint16, error) {
-	ux := uint64(real(x))
-	if x != complex128(complex(float64(ux), 0)) || ux != (ux<<shiftFor16Bit)>>shiftFor16Bit {
-		return 0, fmt.Errorf("complex128 value %f cannot be converted to uint16 without loss", x)
-	}
-	return uint16(ux), nil
-}
-
-func Complex128ToUint32(x complex128) (uint32, error) {
-	ux := uint64(real(x))
-	if x != complex128(complex(float64(ux), 0)) || ux != (ux<<shiftFor32Bit)>>shiftFor32Bit {
-		return 0, fmt.Errorf("complex128 value %f cannot be converted to uint32 without loss", x)
-	}
-	return uint32(ux), nil
-}
-
-func Complex128ToUint64(x complex128) (uint64, error) {
-	ux := uint64(real(x))
-	if x != complex128(complex(float64(ux), 0)) {
-		return 0, fmt.Errorf("complex128 value %f cannot be converted to uint64 without loss", x)
-	}
-	return ux, nil
-}
-
-func Complex128ToInt8(x complex128) (int8, error) {
-	ix := int64(real(x))
-	if x != complex128(complex(float64(ix), 0)) || ix != (ix<<shiftFor8Bit)>>shiftFor8Bit {
-		return 0, fmt.Errorf("complex128 value %f cannot be converted to int8 without loss", x)
-	}
-	return int8(ix), nil
-}
-
-func Complex128ToInt16(x complex128) (int16, error) {
-	ix := int64(real(x))
-	if x != complex128(complex(float64(ix), 0)) || ix != (ix<<shiftFor16Bit)>>shiftFor16Bit {
-		return 0, fmt.Errorf("complex128 value %f cannot be converted to int16 without loss", x)
-	}
-	return int16(ix), nil
-}
-
-func Complex128ToInt32(x complex128) (int32, error) {
-	ix := int64(real(x))
-	if x != complex128(complex(float64(ix), 0)) || ix != (ix<<shiftFor32Bit)>>shiftFor32Bit {
-		return 0, fmt.Errorf("complex128 value %f cannot be converted to int32 without loss", x)
-	}
-	return int32(ix), nil
-}
-
-func Complex128ToInt64(x complex128) (int64, error) {
-	ix := int64(real(x))
-	if x != complex128(complex(float64(ix), 0)) {
-		return 0, fmt.Errorf("complex128 value %f cannot be converted to int64 without loss", x)
-	}
-	return ix, nil
-}
-
-func Complex128ToFloat32(x complex128) (float32, error) {
-	if imag(x) != 0 {
-		return 0, fmt.Errorf("complex128 value %f cannot be converted to float32 without loss", x)
-	}
-	return float32(real(x)), nil
-}
-
-func Complex128ToFloat64(x complex128) (float64, error) {
-	if imag(x) != 0 {
-		return 0, fmt.Errorf("complex128 value %f cannot be converted to float64 without loss", x)
-	}
-	return real(x), nil
-}
-
-func Complex128ToComplex64(x complex128) (complex64, error) {
-	return complex64(x), nil
 }

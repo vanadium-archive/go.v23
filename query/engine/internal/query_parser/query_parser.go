@@ -101,7 +101,6 @@ const (
 	TypBigInt OperandType = 1 + iota // Only as a result of Resolve/Coerce Operand
 	TypBigRat                        // Only as a result of Resolve/Coerce Operand
 	TypBool
-	TypComplex
 	TypExpr
 	TypField
 	TypFloat
@@ -120,7 +119,6 @@ type Operand struct {
 	BigInt    *big.Int
 	BigRat    *big.Rat
 	Bool      bool
-	Complex   complex128
 	Column    *Field
 	Float     float64
 	Function  *Function
@@ -1243,9 +1241,6 @@ func (o Operand) String() string {
 	case TypBigRat:
 		val += "(BigRat)"
 		val += o.BigRat.String()
-	case TypComplex:
-		val += "(Complex)"
-		val += fmt.Sprintf("%g", o.Complex)
 	case TypField:
 		val += "(field)"
 		val += o.Column.String()
@@ -1443,9 +1438,6 @@ func ConvertValueToAnOperand(value *vdl.Value, off int64) (*Operand, error) {
 	case vdl.String:
 		op.Type = TypStr
 		op.Str = value.RawString()
-	case vdl.Complex64, vdl.Complex128:
-		op.Type = TypComplex
-		op.Complex = value.Complex()
 	default: // OpObject for structs, arrays, maps, ...
 		if value.Kind() == vdl.Struct && value.Type().Name() == "time.Time" {
 			op.Type = TypTime

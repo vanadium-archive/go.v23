@@ -201,7 +201,7 @@ func compat(a, b *Type, seenA, seenB map[*Type]bool) bool {
 
 func ttIsNumber(tt *Type) bool {
 	switch tt.Kind() {
-	case Byte, Uint16, Uint32, Uint64, Int8, Int16, Int32, Int64, Float32, Float64, Complex64, Complex128:
+	case Byte, Uint16, Uint32, Uint64, Int8, Int16, Int32, Int64, Float32, Float64:
 		return true
 	}
 	return false

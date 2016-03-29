@@ -28,8 +28,6 @@ const (
 	Int64      // 64 bit signed integer
 	Float32    // 32 bit IEEE 754 floating point
 	Float64    // 64 bit IEEE 754 floating point
-	Complex64  // {real,imag} each 32 bit IEEE 754 floating point
-	Complex128 // {real,imag} each 64 bit IEEE 754 floating point
 	String     // unicode string (encoded as UTF-8 in memory)
 	Enum       // one of a set of labels
 	TypeObject // type represented as a value
@@ -73,10 +71,6 @@ func (k Kind) String() string {
 		return "float32"
 	case Float64:
 		return "float64"
-	case Complex64:
-		return "complex64"
-	case Complex128:
-		return "complex128"
 	case String:
 		return "string"
 	case Enum:

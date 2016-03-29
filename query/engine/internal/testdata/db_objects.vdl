@@ -86,8 +86,6 @@ type Numbers struct {
 	I64  int64
 	F32  float32
 	F64  float64
-	C64  complex64
-	C128 complex128
 }
 
 type FooType struct {
@@ -140,8 +138,6 @@ type ManyMaps struct {
 	I64  map[int64]string
 	F32  map[float32]string
 	F64  map[float64]string
-	C64  map[complex64]string
-	C128 map[complex128]string
 	S    map[string]string
 	Ms   map[string]map[string]string
 	T    map[time.Time]string
@@ -158,8 +154,6 @@ type ManySets struct {
 	I64  set[int64]
 	F32  set[float32]
 	F64  set[float64]
-	C64  set[complex64]
-	C128 set[complex128]
 	S    set[string]
 	T    set[time.Time]
 }

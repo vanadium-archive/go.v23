@@ -26,8 +26,6 @@ pkg vom, const WireIdAny typeId
 pkg vom, const WireIdBool typeId
 pkg vom, const WireIdByte typeId
 pkg vom, const WireIdByteList typeId
-pkg vom, const WireIdComplex128 typeId
-pkg vom, const WireIdComplex64 typeId
 pkg vom, const WireIdFirstUserType typeId
 pkg vom, const WireIdFloat32 typeId
 pkg vom, const WireIdFloat64 typeId

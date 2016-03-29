@@ -43,7 +43,6 @@ pkg naming, method (*MountEntryTarget) StartField(string) (vdl.Target, vdl.Targe
 pkg naming, method (*MountEntryTarget) StartFields(*vdl.Type) (vdl.FieldsTarget, error)
 pkg naming, method (*MountFlag) FillVDLTarget(vdl.Target, *vdl.Type) error
 pkg naming, method (*MountFlag) MakeVDLTarget() vdl.Target
-pkg naming, method (*MountFlagTarget) FromComplex(complex128, *vdl.Type) error
 pkg naming, method (*MountFlagTarget) FromFloat(float64, *vdl.Type) error
 pkg naming, method (*MountFlagTarget) FromInt(int64, *vdl.Type) error
 pkg naming, method (*MountFlagTarget) FromUint(uint64, *vdl.Type) error
@@ -162,9 +161,9 @@ pkg naming, type ReplaceMount bool
 pkg naming, type RouteOpt string
 pkg naming, type RoutingID struct
 pkg naming, type ServesMountTable bool
-pkg naming, var ErrNameExists verror.IDAction
-pkg naming, var ErrNoMountTable verror.IDAction
-pkg naming, var ErrNoSuchName verror.IDAction
-pkg naming, var ErrNoSuchNameRoot verror.IDAction
-pkg naming, var ErrResolutionDepthExceeded verror.IDAction
+pkg naming, var ErrNameExists unknown-type
+pkg naming, var ErrNoMountTable unknown-type
+pkg naming, var ErrNoSuchName unknown-type
+pkg naming, var ErrNoSuchNameRoot unknown-type
+pkg naming, var ErrResolutionDepthExceeded unknown-type
 pkg naming, var NullRoutingID RoutingID

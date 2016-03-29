@@ -5,7 +5,6 @@
 package internal
 
 import (
-	"fmt"
 	"reflect"
 	"strconv"
 	"sync"
@@ -203,8 +202,6 @@ func getSegmentKeyAsHeading(segKey *query_parser.Operand) string {
 		val += segKey.BigInt.String()
 	case query_parser.TypBigRat:
 		val += segKey.BigRat.String()
-	case query_parser.TypComplex:
-		val += fmt.Sprintf("%g", segKey.Complex)
 	case query_parser.TypField:
 		sep := ""
 		for _, segment := range segKey.Column.Segments {

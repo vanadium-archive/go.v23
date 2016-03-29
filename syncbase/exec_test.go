@@ -162,21 +162,21 @@ func initTables(t *testing.T) {
 	}
 
 	k = "001"
-	n := testdata.Numbers{byte(12), uint16(1234), uint32(5678), uint64(999888777666), int16(9876), int32(876543), int64(128), float32(3.14159), float64(2.71828182846), complex64(123.0 + 7.0i), complex128(456.789 + 10.1112i)}
+	n := testdata.Numbers{byte(12), uint16(1234), uint32(5678), uint64(999888777666), int16(9876), int32(876543), int64(128), float32(3.14159), float64(2.71828182846)}
 	numbersEntries = append(numbersEntries, kv{k, vdl.ValueOf(n)})
 	if err := numbersTable.Put(ctx, k, n); err != nil {
 		t.Fatalf("numbersTable.Put() failed: %v", err)
 	}
 
 	k = "002"
-	n = testdata.Numbers{byte(9), uint16(99), uint32(999), uint64(9999999), int16(9), int32(99), int64(88), float32(1.41421356237), float64(1.73205080757), complex64(9.87 + 7.65i), complex128(4.32 + 1.0i)}
+	n = testdata.Numbers{byte(9), uint16(99), uint32(999), uint64(9999999), int16(9), int32(99), int64(88), float32(1.41421356237), float64(1.73205080757)}
 	numbersEntries = append(numbersEntries, kv{k, vdl.ValueOf(n)})
 	if err := numbersTable.Put(ctx, k, n); err != nil {
 		t.Fatalf("numbersTable.Put() failed: %v", err)
 	}
 
 	k = "003"
-	n = testdata.Numbers{byte(210), uint16(210), uint32(210), uint64(210), int16(210), int32(210), int64(210), float32(210.0), float64(210.0), complex64(210.0 + 0.0i), complex128(210.0 + 0.0i)}
+	n = testdata.Numbers{byte(210), uint16(210), uint32(210), uint64(210), int16(210), int32(210), int64(210), float32(210.0), float64(210.0)}
 	numbersEntries = append(numbersEntries, kv{k, vdl.ValueOf(n)})
 	if err := numbersTable.Put(ctx, k, n); err != nil {
 		t.Fatalf("numbersTable.Put() failed: %v", err)
@@ -200,7 +200,7 @@ func initTables(t *testing.T) {
 	kid := testdata.KeyIndexData{
 		[4]string{"Fee", "Fi", "Fo", "Fum"},
 		[]string{"I", "smell", "the", "blood", "of", "an", "Englishman"},
-		map[complex128]string{complex(1.1, 2.2): "Be he living, or be he dead"},
+		map[int64]string{6: "six", 7: "seven"},
 		map[string]struct{}{"I’ll grind his bones to mix my bread": {}},
 	}
 	keyIndexDataEntries = append(keyIndexDataEntries, kv{k, vdl.ValueOf(kid)})
@@ -963,7 +963,7 @@ func TestExecSelect(t *testing.T) {
 		},
 		{
 			// Test that all numeric types can compare to an uint64
-			"select v from Numbers where v.Ui64 = v.B and v.Ui64 = v.Ui16 and v.Ui64 = v.Ui32 and v.Ui64 = v.F64 and v.Ui64 = v.I16 and v.Ui64 = v.I32 and v.Ui64 = v.I64 and v.Ui64 = v.F32 and v.Ui64 = v.C64 and v.Ui64 = v.C128",
+			"select v from Numbers where v.Ui64 = v.B and v.Ui64 = v.Ui16 and v.Ui64 = v.Ui32 and v.Ui64 = v.F64 and v.Ui64 = v.I16 and v.Ui64 = v.I32 and v.Ui64 = v.I64 and v.Ui64 = v.F32",
 			[]string{"v"},
 			[][]*vdl.Value{
 				[]*vdl.Value{numbersEntries[2].value},
@@ -971,12 +971,12 @@ func TestExecSelect(t *testing.T) {
 		},
 		{
 			// array, list, map, set
-			"select v.A[2], v.L[6], v.M[Complex(1.1, 2.2)], v.S[\"I’ll grind his bones to mix my bread\"] from KeyIndexData",
-			[]string{"v.A[2]", "v.L[6]", "v.M[Complex]", "v.S[I’ll grind his bones to mix my bread]"},
+			"select v.A[2], v.L[6], v.M[7], v.S[\"I’ll grind his bones to mix my bread\"] from KeyIndexData",
+			[]string{"v.A[2]", "v.L[6]", "v.M[7]", "v.S[I’ll grind his bones to mix my bread]"},
 			[][]*vdl.Value{[]*vdl.Value{
 				vdl.ValueOf("Fo"),
 				vdl.ValueOf("Englishman"),
-				vdl.ValueOf("Be he living, or be he dead"),
+				vdl.ValueOf("seven"),
 				vdl.ValueOf(true),
 			}},
 		},
@@ -1611,8 +1611,8 @@ func TestQuerySelectClause(t *testing.T) {
 	basic := []execSelectTest{
 		{
 			// Select numeric types
-			"select v.B, v.Ui16, v.Ui32, v.Ui64, v.I16, v.I32, v.I64, v.F32, v.F64, v.C64, v.C128 from Numbers where k = \"001\"",
-			[]string{"v.B", "v.Ui16", "v.Ui32", "v.Ui64", "v.I16", "v.I32", "v.I64", "v.F32", "v.F64", "v.C64", "v.C128"},
+			"select v.B, v.Ui16, v.Ui32, v.Ui64, v.I16, v.I32, v.I64, v.F32, v.F64 from Numbers where k = \"001\"",
+			[]string{"v.B", "v.Ui16", "v.Ui32", "v.Ui64", "v.I16", "v.I32", "v.I64", "v.F32", "v.F64"},
 			[][]*vdl.Value{
 				[]*vdl.Value{
 					vdl.ValueOf(byte(12)),
@@ -1624,8 +1624,6 @@ func TestQuerySelectClause(t *testing.T) {
 					vdl.ValueOf(int64(128)),
 					vdl.ValueOf(float32(3.14159)),
 					vdl.ValueOf(float64(2.71828182846)),
-					vdl.ValueOf(complex64(123.0 + 7.0i)),
-					vdl.ValueOf(complex128(456.789 + 10.1112i)),
 				},
 			},
 		},
@@ -1645,13 +1643,13 @@ func TestQuerySelectClause(t *testing.T) {
 		},
 		{
 			// Select array, list, set, map
-			"select v.A[1], v.L[6], v.M[Complex(1.1,2.2)], v.S[\"I’ll grind his bones to mix my bread\"] from KeyIndexData where k = \"aaa\"",
-			[]string{"v.A[1]", "v.L[6]", "v.M[Complex]", "v.S[I’ll grind his bones to mix my bread]"},
+			"select v.A[1], v.L[6], v.M[7], v.S[\"I’ll grind his bones to mix my bread\"] from KeyIndexData where k = \"aaa\"",
+			[]string{"v.A[1]", "v.L[6]", "v.M[7]", "v.S[I’ll grind his bones to mix my bread]"},
 			[][]*vdl.Value{
 				[]*vdl.Value{
 					vdl.ValueOf("Fi"),
 					vdl.ValueOf("Englishman"),
-					vdl.ValueOf("Be he living, or be he dead"),
+					vdl.ValueOf("seven"),
 					vdl.ValueOf(true),
 				},
 			},
@@ -1707,13 +1705,12 @@ func TestQuerySelectClause(t *testing.T) {
 		},
 		{
 			// Math Functions
-			"select Ceiling(10.1), Ceiling(-10.1), Complex(1.1, 2.2), Floor(10.1), Floor(-10.1), IsInf(100, 1), IsInf(-100, -1), IsInf(Inf(1), 1), IsInf(Inf(-1), -1), IsNaN(100.0), IsNaN(NaN()), Log(2.3), Log10(3.1), Pow(4.3, 10.1), Pow10(12), Mod(12.6, 4.4), Real(Complex(1.1, 2.2)), Truncate(16.9), Truncate(-16.9), Remainder(16.9, 7.1) from Numbers where k = \"001\"",
-			[]string{"Ceiling", "Ceiling", "Complex", "Floor", "Floor", "IsInf", "IsInf", "IsInf", "IsInf", "IsNaN", "IsNaN", "Log", "Log10", "Pow", "Pow10", "Mod", "Real", "Truncate", "Truncate", "Remainder"},
+			"select Ceiling(10.1), Ceiling(-10.1), Floor(10.1), Floor(-10.1), IsInf(100, 1), IsInf(-100, -1), IsInf(Inf(1), 1), IsInf(Inf(-1), -1), IsNaN(100.0), IsNaN(NaN()), Log(2.3), Log10(3.1), Pow(4.3, 10.1), Pow10(12), Mod(12.6, 4.4), Truncate(16.9), Truncate(-16.9), Remainder(16.9, 7.1) from Numbers where k = \"001\"",
+			[]string{"Ceiling", "Ceiling", "Floor", "Floor", "IsInf", "IsInf", "IsInf", "IsInf", "IsNaN", "IsNaN", "Log", "Log10", "Pow", "Pow10", "Mod", "Truncate", "Truncate", "Remainder"},
 			[][]*vdl.Value{
 				[]*vdl.Value{
 					vdl.ValueOf(float64(11)),                     // Ceiling(10.1)
 					vdl.ValueOf(float64(-10)),                    // Ceiling(-10.1)
-					vdl.ValueOf(complex128(1.1 + 2.2i)),          // Complex(1.1, 1.2)
 					vdl.ValueOf(float64(10)),                     // Floor(10.1)
 					vdl.ValueOf(float64(-11)),                    // Floor(-10.1)
 					vdl.ValueOf(false),                           // IsInf(100, 1)
@@ -1727,7 +1724,6 @@ func TestQuerySelectClause(t *testing.T) {
 					vdl.ValueOf(float64(2.5005261539265467e+06)), // Pow(4.3, 10.1)
 					vdl.ValueOf(float64(1e+12)),                  // Pow10(12)
 					vdl.ValueOf(float64(3.799999999999999)),      // Mod(12.6, 4.4)
-					vdl.ValueOf(float64(1.1)),                    // Real(Complex(1.1, 2.2))
 					vdl.ValueOf(float64(16)),                     // Truncate((16.9)
 					vdl.ValueOf(float64(-16)),                    // Truncate((-16.9)
 					vdl.ValueOf(float64(2.6999999999999993)),     // Remainder(16.9, 7.1)
@@ -1744,7 +1740,7 @@ func TestQuerySelectClause(t *testing.T) {
 					vdl.ValueOf(int64(13)), // Len("Hello, 世界")
 					vdl.ValueOf(int64(4)),  // Len(v.A)
 					vdl.ValueOf(int64(7)),  // Len(v.L)
-					vdl.ValueOf(int64(1)),  // Len(v.M)
+					vdl.ValueOf(int64(2)),  // Len(v.M)
 					vdl.ValueOf(int64(1)),  // Len(v.S)
 				},
 			},
@@ -1799,7 +1795,7 @@ func TestQueryWhereClause(t *testing.T) {
 		{
 			// Select on numeric comparisons with equals
 			// (except, allow a range for F32 as the literal is interpreted as a float64.
-			"select k, v from Numbers where v.B = 12 and v.Ui16 = 1234 and v.Ui32 = 5678 and v.Ui64 = 999888777666 and v.I16 = 9876 and v.I32 = 876543 and v.I64 = 128 and v.F32 > 3.14158 and v.F32 < 3.1416 and v.F64 = 2.71828182846 and v.C64 = Complex(123.0, 7.0) and v.C128 = Complex(456.789, 10.1112) and k = \"001\"",
+			"select k, v from Numbers where v.B = 12 and v.Ui16 = 1234 and v.Ui32 = 5678 and v.Ui64 = 999888777666 and v.I16 = 9876 and v.I32 = 876543 and v.I64 = 128 and v.F32 > 3.14158 and v.F32 < 3.1416 and v.F64 = 2.71828182846 and k = \"001\"",
 			[]string{"k", "v"},
 			[][]*vdl.Value{
 				[]*vdl.Value{
@@ -1810,7 +1806,6 @@ func TestQueryWhereClause(t *testing.T) {
 		},
 		{
 			// Select on numeric comparisons with >=
-			// Note: Complex does not support >=
 			"select k, v from Numbers where v.B >= 12 and v.Ui16 >= 1234 and v.Ui32 >= 5678 and v.Ui64 >= 999888777666 and v.I16 >= 9876 and v.I32 >= 876543 and v.I64 >= 128 and v.F32 >= 3.14159 and v.F64 >= 2.71828182846 and k = \"001\"",
 			[]string{"k", "v"},
 			[][]*vdl.Value{
@@ -1822,7 +1817,6 @@ func TestQueryWhereClause(t *testing.T) {
 		},
 		{
 			// Select on numeric comparisons with <=
-			// Note: Complex does not support <=
 			"select k, v from Numbers where v.B <= 12 and v.Ui16 <= 1234 and v.Ui32 <= 5678 and v.Ui64 <= 999888777666 and v.I16 <= 9876 and v.I32 <= 876543 and v.I64 <= 128 and v.F32 <= 3.14160 and v.F64 <= 2.71828182846 and k = \"001\"",
 			[]string{"k", "v"},
 			[][]*vdl.Value{
@@ -1900,22 +1894,6 @@ func TestQueryWhereClause(t *testing.T) {
 		},
 		{
 			"select k from Numbers where v.F64 <> 2.71828182846",
-			[]string{"k"},
-			[][]*vdl.Value{
-				[]*vdl.Value{vdl.ValueOf("002")},
-				[]*vdl.Value{vdl.ValueOf("003")},
-			},
-		},
-		{
-			"select k from Numbers where v.C64 <> Complex(123.0, 7.0)",
-			[]string{"k"},
-			[][]*vdl.Value{
-				[]*vdl.Value{vdl.ValueOf("002")},
-				[]*vdl.Value{vdl.ValueOf("003")},
-			},
-		},
-		{
-			"select k from Numbers where v.C128 <> Complex(456.789, 10.1112)",
 			[]string{"k"},
 			[][]*vdl.Value{
 				[]*vdl.Value{vdl.ValueOf("002")},
@@ -2019,7 +1997,7 @@ func TestQueryWhereClause(t *testing.T) {
 		},
 		// inspect into array, list, set and map in where clause
 		{
-			"select k from KeyIndexData where v.A[1] = \"Fi\" and v.L[3] = \"blood\" and v.M[Complex(1.1,2.2)] = \"Be he living, or be he dead\" and v.S[\"I’ll grind his bones to mix my bread\"] = true",
+			"select k from KeyIndexData where v.A[1] = \"Fi\" and v.L[3] = \"blood\" and v.M[7]=\"seven\" and v.S[\"I’ll grind his bones to mix my bread\"] = true",
 			[]string{"k"},
 			[][]*vdl.Value{
 				[]*vdl.Value{vdl.ValueOf("aaa")},
@@ -2046,7 +2024,7 @@ func TestQueryWhereClause(t *testing.T) {
 		},
 		{
 			// Use math functions in where clause.
-			"select k from Numbers where Ceiling(v.F64) = 2.0 and v.C128 = Complex(4.32, 1.0) and Floor(v.F64) = 1.0 and IsInf(v.F64, 1) = false and IsInf(Inf(1), 1) = true and IsInf(Inf(-1), -1) = true and IsNaN(v.F64) = false and IsNaN(NaN()) = true and Log(v.F64) = 0.5493061443347032 and Log10(v.F64) = 0.23856062736011277 and Pow(v.F64, 3.2) = 5.799546134807319 and Pow10(v.B) = 1e+09 and Pow10(v.Ui32) = Inf(1) and Mod(v.F64, v.F32) = 0.31783726940013923 and Real(v.C128) = 4.32 and Truncate(v.F64) = 1.0 and Remainder(v.F64, v.F32) = 0.31783726940013923",
+			"select k from Numbers where Ceiling(v.F64) = 2.0 and Floor(v.F64) = 1.0 and IsInf(v.F64, 1) = false and IsInf(Inf(1), 1) = true and IsInf(Inf(-1), -1) = true and IsNaN(v.F64) = false and IsNaN(NaN()) = true and Log(v.F64) = 0.5493061443347032 and Log10(v.F64) = 0.23856062736011277 and Pow(v.F64, 3.2) = 5.799546134807319 and Pow10(v.B) = 1e+09 and Pow10(v.Ui32) = Inf(1) and Mod(v.F64, v.F32) = 0.31783726940013923 and Truncate(v.F64) = 1.0 and Remainder(v.F64, v.F32) = 0.31783726940013923",
 			[]string{"k"},
 			[][]*vdl.Value{
 				[]*vdl.Value{vdl.ValueOf("002")},
@@ -2054,7 +2032,7 @@ func TestQueryWhereClause(t *testing.T) {
 		},
 		{
 			// Use Len on string, array, list and set-- in where clause.
-			"select k from KeyIndexData where Len(v.A[0]) = 3 and Len(v.A) = 4 and Len(v.L) = 7 and Len(v.M) = 1 and Len(v.S) = 1",
+			"select k from KeyIndexData where Len(v.A[0]) = 3 and Len(v.A) = 4 and Len(v.L) = 7 and Len(v.M) = 2 and Len(v.S) = 1",
 			[]string{"k"},
 			[][]*vdl.Value{
 				[]*vdl.Value{vdl.ValueOf("aaa")},
@@ -2435,10 +2413,6 @@ func TestQueryErrors(t *testing.T) {
 		// *BigIntConversionError isn't produced as vdl doesn't have big ints
 		// *BigRatConversionError isn't produced as vdl doesn't have big rats
 		// *BoolConversionError isn't currently produced as no functions take a bool arg.
-		{
-			"select Real(\"abc\") from Customer",
-			syncql.NewErrComplexConversionError(ctx, 12, errors.New("Cannot convert operand to Complex.")),
-		},
 		// *UintConversionError isn't currently produced as no functions take a uint arg.
 		{
 			"select Year(\"abc\", \"America/Los_Angeles\") from Customer",
@@ -2450,7 +2424,7 @@ func TestQueryErrors(t *testing.T) {
 			syncql.NewErrStringConversionError(ctx, 17, errors.New("Cannot convert operand to string.")),
 		},
 		{
-			"select Complex(\"abc\", 3.1) from Customer",
+			"select Ceiling(\"abc\") from Customer",
 			syncql.NewErrFloatConversionError(ctx, 15, errors.New("Cannot convert operand to float64.")),
 		},
 		{
@@ -2746,7 +2720,7 @@ func TestExecParamSelect(t *testing.T) {
 				"I’ll grind his bones to mix my bread",
 				42,
 			},
-			[]string{"v.A[2]", "v.L[6]", "v.M[Complex]", "v.S[I’ll grind his bones to mix my bread]"},
+			[]string{"v.A[2]", "v.L[6]", "v.S[I’ll grind his bones to mix my bread]"},
 			[][]*vdl.Value{
 				[]*vdl.Value{
 					vdl.ValueOf("Fo"),
