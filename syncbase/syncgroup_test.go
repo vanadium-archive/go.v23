@@ -37,7 +37,7 @@ func TestCreateSyncgroup(t *testing.T) {
 
 	// Prefill entries before creating a syncgroup to exercise the bootstrap
 	// of a syncgroup through Snapshot operations to the watcher.
-	t1 := tu.CreateTable(t, ctx, d, "t1")
+	t1 := tu.CreateCollection(t, ctx, d, "t1")
 	for _, k := range []string{"foo123", "foobar123", "xyz"} {
 		if err := t1.Put(ctx, k, "value@"+k); err != nil {
 			t.Fatalf("t1.Put() of %s failed: %v", k, err)
@@ -45,11 +45,11 @@ func TestCreateSyncgroup(t *testing.T) {
 	}
 
 	// Create successfully.
-	// TODO(rdaoud): switch prefixes to (table, prefix) tuples.
+	// TODO(rdaoud): switch prefixes to (collection, prefix) tuples.
 	spec = wire.SyncgroupSpec{
 		Description: "test syncgroup sg1",
 		Perms:       nil,
-		Prefixes:    []wire.TableRow{{TableName: "t1", Row: "foo"}},
+		Prefixes:    []wire.CollectionRow{{CollectionName: "t1", Row: "foo"}},
 	}
 	createSyncgroup(t, ctx, d, sg1, spec, verror.ID(""))
 
@@ -73,7 +73,7 @@ func TestCreateSyncgroup(t *testing.T) {
 
 	// Create a nested syncgroup.
 	spec.Description = "test syncgroup sg3"
-	spec.Prefixes = []wire.TableRow{{TableName: "t1", Row: "foobar"}}
+	spec.Prefixes = []wire.CollectionRow{{CollectionName: "t1", Row: "foobar"}}
 	sg3 := naming.Join(sName, common.SyncbaseSuffix, "sg3")
 	createSyncgroup(t, ctx, d, sg3, spec, verror.ID(""))
 
@@ -106,7 +106,7 @@ func TestJoinSyncgroup(t *testing.T) {
 	specA := wire.SyncgroupSpec{
 		Description: "test syncgroup sgA",
 		Perms:       perms("root:client1"),
-		Prefixes:    []wire.TableRow{{TableName: "t1", Row: "foo"}},
+		Prefixes:    []wire.CollectionRow{{CollectionName: "t1", Row: "foo"}},
 	}
 	sgNameA := naming.Join(sName, common.SyncbaseSuffix, "sgA")
 	createSyncgroup(t, ctx1, d1, sgNameA, specA, verror.ID(""))
@@ -141,7 +141,7 @@ func TestJoinSyncgroup(t *testing.T) {
 	specB := wire.SyncgroupSpec{
 		Description: "test syncgroup sgB",
 		Perms:       perms("root:client1", "root:client2"),
-		Prefixes:    []wire.TableRow{{TableName: "t1", Row: "foo"}},
+		Prefixes:    []wire.CollectionRow{{CollectionName: "t1", Row: "foo"}},
 	}
 	sgNameB := naming.Join(sName, common.SyncbaseSuffix, "sgB")
 	createSyncgroup(t, ctx1, d1, sgNameB, specB, verror.ID(""))
@@ -170,7 +170,7 @@ func TestSetSpecSyncgroup(t *testing.T) {
 	spec := wire.SyncgroupSpec{
 		Description: "test syncgroup sg1",
 		Perms:       perms("root:client"),
-		Prefixes:    []wire.TableRow{{TableName: "t1", Row: "foo"}},
+		Prefixes:    []wire.CollectionRow{{CollectionName: "t1", Row: "foo"}},
 	}
 	createSyncgroup(t, ctx, d, sgName, spec, verror.ID(""))
 

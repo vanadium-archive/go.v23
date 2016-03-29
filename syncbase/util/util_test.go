@@ -55,19 +55,19 @@ func TestValidNameFuncs(t *testing.T) {
 			t.Errorf("%q should be invalid", s)
 		}
 	}
-	for _, s := range tu.OkDbTableNames {
+	for _, s := range tu.OkDbCollectionNames {
 		if !util.ValidDatabaseName(s) {
 			t.Errorf("%q should be valid", s)
 		}
-		if !util.ValidTableName(s) {
+		if !util.ValidCollectionName(s) {
 			t.Errorf("%q should be valid", s)
 		}
 	}
-	for _, s := range tu.NotOkDbTableNames {
+	for _, s := range tu.NotOkDbCollectionNames {
 		if util.ValidDatabaseName(s) {
 			t.Errorf("%q should be invalid", s)
 		}
-		if util.ValidTableName(s) {
+		if util.ValidCollectionName(s) {
 			t.Errorf("%q should be invalid", s)
 		}
 	}

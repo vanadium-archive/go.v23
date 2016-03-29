@@ -84,12 +84,12 @@ type DatabaseHandle interface {
 	// FullName returns the object name (escaped) of this DatabaseHandle.
 	FullName() string
 
-	// Table returns the Table with the given name.
+	// Collection returns the Collection with the given name.
 	// relativeName must not contain slashes.
-	Table(relativeName string) Table
+	Collection(relativeName string) Collection
 
-	// ListTables returns a list of all Table names.
-	ListTables(ctx *context.T) ([]string, error)
+	// ListCollections returns a list of all Collection names.
+	ListCollections(ctx *context.T) ([]string, error)
 
 	// Exec executes a syncQL query.
 	// A value must be provided for every positional parameter ('?' placeholder)
@@ -122,7 +122,7 @@ type DatabaseHandle interface {
 	Close()
 }
 
-// Database represents a collection of Tables. Batches, queries, sync, watch,
+// Database represents a set of Collections. Batches, queries, sync, watch,
 // etc. all operate at the Database level.
 type Database interface {
 	DatabaseHandle
@@ -176,7 +176,7 @@ type Database interface {
 	//
 	// TODO(sadovsky): Watch should return just a WatchStream, similar to how Scan
 	// returns just a ScanStream.
-	Watch(ctx *context.T, table, prefix string, resumeMarker watch.ResumeMarker) (WatchStream, error)
+	Watch(ctx *context.T, collection, prefix string, resumeMarker watch.ResumeMarker) (WatchStream, error)
 
 	// Syncgroup returns a handle to the syncgroup with the given name.
 	Syncgroup(sgName string) Syncgroup
@@ -233,37 +233,37 @@ type PrefixPermissions struct {
 	Perms  access.Permissions
 }
 
-// Table represents a collection of Rows.
+// Collection represents a set of Rows.
 //
-// TODO(sadovsky): Currently we provide Get/Put/Delete methods on both Table and
-// Row, because we're not sure which will feel more natural. Eventually, we'll
-// need to pick one.
-type Table interface {
-	// Name returns the relative name of this Table.
+// TODO(sadovsky): Currently we provide Get/Put/Delete methods on both
+// Collection and Row, because we're not sure which will feel more natural.
+// Eventually, we'll need to pick one.
+type Collection interface {
+	// Name returns the relative name of this Collection.
 	Name() string
 
-	// FullName returns the object name (escaped) of this Table.
+	// FullName returns the object name (escaped) of this Collection.
 	FullName() string
 
-	// Exists returns true only if this Table exists. Insufficient permissions
+	// Exists returns true only if this Collection exists. Insufficient permissions
 	// cause Exists to return false instead of an error.
 	// TODO(ivanpi): Exists may fail with an error if higher levels of hierarchy
 	// do not exist.
 	Exists(ctx *context.T) (bool, error)
 
-	// Create creates this Table.
+	// Create creates this Collection.
 	// If perms is nil, we inherit (copy) the Database perms.
 	// Create must not be called from within a batch.
 	Create(ctx *context.T, perms access.Permissions) error
 
-	// Destroy destroys this Table, permanently removing all of its data.
+	// Destroy destroys this Collection, permanently removing all of its data.
 	// Destroy must not be called from within a batch.
 	Destroy(ctx *context.T) error
 
-	// GetPermissions returns the current Permissions for the Table.
+	// GetPermissions returns the current Permissions for the Collection.
 	GetPermissions(ctx *context.T) (access.Permissions, error)
 
-	// SetPermissions replaces the current Permissions for the Table.
+	// SetPermissions replaces the current Permissions for the Collection.
 	SetPermissions(ctx *context.T, perms access.Permissions) error
 
 	// Row returns the Row with the given primary key.
@@ -272,12 +272,12 @@ type Table interface {
 	// Get stores the value for the given primary key in value. If value's type
 	// does not match the stored type, Get will return an error. Expected usage:
 	//     var val mytype
-	//     if err := table.Get(ctx, key, &val); err != nil {
+	//     if err := collection.Get(ctx, key, &val); err != nil {
 	//       return err
 	//     }
 	Get(ctx *context.T, key string, value interface{}) error
 
-	// Put writes the given value to this Table. The value's primary key field
+	// Put writes the given value to this Collection. The value's primary key field
 	// must be set.
 	// TODO(kash): Can VOM handle everything that satisfies interface{}?
 	// Need to talk to Todd.
@@ -307,7 +307,7 @@ type Table interface {
 	// GetPrefixPermissions returns an array of (prefix, perms) pairs. The array is
 	// sorted from longest prefix to shortest, so element zero is the one that
 	// applies to the row with the given key. The last element is always the
-	// prefix "" which represents the table's permissions -- the array will always
+	// prefix "" which represents the collection's permissions -- the array will always
 	// have at least one element.
 	GetPrefixPermissions(ctx *context.T, key string) ([]PrefixPermissions, error)
 
@@ -326,7 +326,7 @@ type Table interface {
 	DeletePrefixPermissions(ctx *context.T, prefix PrefixRange) error
 }
 
-// Row represents a single row in a Table.
+// Row represents a single row in a Collection.
 type Row interface {
 	// Key returns the primary key for this Row.
 	Key() string
@@ -421,16 +421,16 @@ const (
 
 // WatchChange is the new value for a watched entity.
 type WatchChange struct {
-	// Table is the name of the table that contains the changed row.
-	Table string
+	// Collection is the name of the collection that contains the changed row.
+	Collection string
 
 	// Row is the key of the changed row.
 	Row string
 
 	// ChangeType describes the type of the change. If the ChangeType equals to
-	// PutChange, then the row exists in the table and the Value contains the new
+	// PutChange, then the row exists in the collection and the Value contains the new
 	// value for this row. If the state equals to DeleteChange, then the row was
-	// removed from the table.
+	// removed from the collection.
 	ChangeType ChangeType
 
 	// ValueBytes is the new VOM-encoded value for the row if the ChangeType is

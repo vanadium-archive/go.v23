@@ -30,7 +30,7 @@ import (
 )
 
 const (
-	testTable = "tb"
+	testCollection = "c"
 )
 
 // NOTE(sadovsky): These tests take a very long time to run - nearly 4 minutes
@@ -60,7 +60,7 @@ func TestV23SyncbasedJoinSyncgroup(t *testing.T) {
 	sgName := naming.Join("sync0", common.SyncbaseSuffix, "SG1")
 
 	ok(t, runSetupAppA(client0Ctx, "sync0"))
-	ok(t, runCreateSyncgroup(client0Ctx, "sync0", sgName, "tb:foo", "", "root:s0", "root:s1"))
+	ok(t, runCreateSyncgroup(client0Ctx, "sync0", sgName, "c:foo", "", "root:s0", "root:s1"))
 
 	ok(t, runSetupAppA(client1Ctx, "sync1"))
 	ok(t, runJoinSyncgroup(client1Ctx, "sync1", sgName))
@@ -90,7 +90,7 @@ func TestV23SyncbasedGetDeltas(t *testing.T) {
 	sgName := naming.Join("sync0", common.SyncbaseSuffix, "SG1")
 
 	ok(t, runSetupAppA(client0Ctx, "sync0"))
-	ok(t, runCreateSyncgroup(client0Ctx, "sync0", sgName, "tb:foo,tb:bar", "", "root:s0", "root:s1"))
+	ok(t, runCreateSyncgroup(client0Ctx, "sync0", sgName, "c:foo,c:bar", "", "root:s0", "root:s1"))
 	ok(t, runPopulateData(client0Ctx, "sync0", "foo", 0))
 	ok(t, runPopulateNonVomData(client0Ctx, "sync0", "bar", 0))
 
@@ -130,7 +130,7 @@ func TestV23SyncbasedGetDeltasWithDel(t *testing.T) {
 	sgName := naming.Join("sync0", common.SyncbaseSuffix, "SG1")
 
 	ok(t, runSetupAppA(client0Ctx, "sync0"))
-	ok(t, runCreateSyncgroup(client0Ctx, "sync0", sgName, "tb:foo,tb:bar", "", "root:s0", "root:s1"))
+	ok(t, runCreateSyncgroup(client0Ctx, "sync0", sgName, "c:foo,c:bar", "", "root:s0", "root:s1"))
 	ok(t, runPopulateData(client0Ctx, "sync0", "foo", 0))
 
 	ok(t, runSetupAppA(client1Ctx, "sync1"))
@@ -181,7 +181,7 @@ func TestV23SyncbasedCompEval(t *testing.T) {
 	sgName := naming.Join("sync0", common.SyncbaseSuffix, "SG1")
 
 	ok(t, runSetupAppA(client0Ctx, "sync0"))
-	ok(t, runCreateSyncgroup(client0Ctx, "sync0", sgName, "tb:foo", "", "root:s0", "root:s1"))
+	ok(t, runCreateSyncgroup(client0Ctx, "sync0", sgName, "c:foo", "", "root:s0", "root:s1"))
 	ok(t, runPopulateData(client0Ctx, "sync0", "foo", 0))
 
 	// This is a decoy syncgroup that no other Syncbase joins, but is on the
@@ -191,7 +191,7 @@ func TestV23SyncbasedCompEval(t *testing.T) {
 	// syncgroup. This triggers the handling of filtered log records in the
 	// restartability code.
 	sgName1 := naming.Join("sync0", common.SyncbaseSuffix, "SG2")
-	ok(t, runCreateSyncgroup(client0Ctx, "sync0", sgName1, "tb:bar", "", "root:s0", "root:s1"))
+	ok(t, runCreateSyncgroup(client0Ctx, "sync0", sgName1, "c:bar", "", "root:s0", "root:s1"))
 	ok(t, runPopulateData(client0Ctx, "sync0", "bar", 0))
 
 	ok(t, runSetupAppA(client1Ctx, "sync1"))
@@ -205,15 +205,15 @@ func TestV23SyncbasedCompEval(t *testing.T) {
 	cleanSync0 = sh.StartSyncbase(server0Creds, syncbaselib.Opts{Name: "sync0", RootDir: server0RDir}, `{"Read": {"In":["root:c0"]}, "Write": {"In":["root:c0"]}}`)
 	cleanSync1 = sh.StartSyncbase(server1Creds, syncbaselib.Opts{Name: "sync1", RootDir: server1RDir}, `{"Read": {"In":["root:c1"]}, "Write": {"In":["root:c1"]}}`)
 
-	ok(t, runSetSyncgroupSpec(client0Ctx, "sync0", sgName, "v2", "tb:foo", "root:s0", "root:s1", "root:s3"))
-	ok(t, runGetSyncgroupSpec(client1Ctx, "sync1", sgName, "v2", "tb:foo", "root:s0", "root:s1", "root:s3"))
+	ok(t, runSetSyncgroupSpec(client0Ctx, "sync0", sgName, "v2", "c:foo", "root:s0", "root:s1", "root:s3"))
+	ok(t, runGetSyncgroupSpec(client1Ctx, "sync1", sgName, "v2", "c:foo", "root:s0", "root:s1", "root:s3"))
 
 	ok(t, runUpdateData(client1Ctx, "sync1", 5))
 	ok(t, runPopulateData(client1Ctx, "sync1", "foo", 10))
-	ok(t, runSetSyncgroupSpec(client1Ctx, "sync1", sgName, "v3", "tb:foo", "root:s0", "root:s1", "root:s4"))
+	ok(t, runSetSyncgroupSpec(client1Ctx, "sync1", sgName, "v3", "c:foo", "root:s0", "root:s1", "root:s4"))
 
 	ok(t, runVerifyLocalAndRemoteData(client0Ctx, "sync0"))
-	ok(t, runGetSyncgroupSpec(client0Ctx, "sync0", sgName, "v3", "tb:foo", "root:s0", "root:s1", "root:s4"))
+	ok(t, runGetSyncgroupSpec(client0Ctx, "sync0", sgName, "v3", "c:foo", "root:s0", "root:s1", "root:s4"))
 
 	// Shutdown and restart Syncbase instances.
 	cleanSync0(os.Interrupt)
@@ -222,8 +222,8 @@ func TestV23SyncbasedCompEval(t *testing.T) {
 	_ = sh.StartSyncbase(server0Creds, syncbaselib.Opts{Name: "sync0", RootDir: server0RDir}, `{"Read": {"In":["root:c0"]}, "Write": {"In":["root:c0"]}}`)
 	_ = sh.StartSyncbase(server1Creds, syncbaselib.Opts{Name: "sync1", RootDir: server1RDir}, `{"Read": {"In":["root:c1"]}, "Write": {"In":["root:c1"]}}`)
 
-	ok(t, runGetSyncgroupSpec(client0Ctx, "sync0", sgName, "v3", "tb:foo", "root:s0", "root:s1", "root:s4"))
-	ok(t, runGetSyncgroupSpec(client1Ctx, "sync1", sgName, "v3", "tb:foo", "root:s0", "root:s1", "root:s4"))
+	ok(t, runGetSyncgroupSpec(client0Ctx, "sync0", sgName, "v3", "c:foo", "root:s0", "root:s1", "root:s4"))
+	ok(t, runGetSyncgroupSpec(client1Ctx, "sync1", sgName, "v3", "c:foo", "root:s0", "root:s1", "root:s4"))
 	ok(t, runPopulateData(client0Ctx, "sync0", "foo", 20))
 	ok(t, runVerifySyncgroupData(client1Ctx, "sync1", "foo", 20, 10, true))
 }
@@ -253,7 +253,7 @@ func TestV23SyncbasedExchangeDeltasWithAcls(t *testing.T) {
 	sgName := naming.Join("sync0", common.SyncbaseSuffix, "SG1")
 
 	ok(t, runSetupAppA(client0Ctx, "sync0"))
-	ok(t, runCreateSyncgroup(client0Ctx, "sync0", sgName, "tb:foo", "", "root:s0", "root:s1"))
+	ok(t, runCreateSyncgroup(client0Ctx, "sync0", sgName, "c:foo", "", "root:s0", "root:s1"))
 	ok(t, runPopulateData(client0Ctx, "sync0", "foobarbaz", 0))
 	ok(t, runPopulateData(client0Ctx, "sync0", "foo", 0))
 	ok(t, runSetPrefixPermissions(client0Ctx, "sync0", "foo", "root:c0", "root:c1"))
@@ -320,7 +320,7 @@ func testSyncbasedExchangeDeltasWithConflicts(t *testing.T) {
 	sgName := naming.Join("sync0", common.SyncbaseSuffix, "SG1")
 
 	ok(t, runSetupAppA(client0Ctx, "sync0"))
-	ok(t, runCreateSyncgroup(client0Ctx, "sync0", sgName, "tb:foo", "", "root:s0", "root:s1"))
+	ok(t, runCreateSyncgroup(client0Ctx, "sync0", sgName, "c:foo", "", "root:s0", "root:s1"))
 	ok(t, runPopulateData(client0Ctx, "sync0", "foo", 0))
 
 	ok(t, runSetupAppA(client1Ctx, "sync1"))
@@ -363,8 +363,8 @@ func TestV23NestedSyncgroups(t *testing.T) {
 	sg2Name := naming.Join("sync0", common.SyncbaseSuffix, "SG2")
 
 	ok(t, runSetupAppA(client0Ctx, "sync0"))
-	ok(t, runCreateSyncgroup(client0Ctx, "sync0", sg1Name, "tb:foo", "", "root:s0", "root:s1"))
-	ok(t, runCreateSyncgroup(client0Ctx, "sync0", sg2Name, "tb:f", "", "root:s0", "root:s1"))
+	ok(t, runCreateSyncgroup(client0Ctx, "sync0", sg1Name, "c:foo", "", "root:s0", "root:s1"))
+	ok(t, runCreateSyncgroup(client0Ctx, "sync0", sg2Name, "c:f", "", "root:s0", "root:s1"))
 	ok(t, runPopulateData(client0Ctx, "sync0", "f", 0))
 	ok(t, runPopulateData(client0Ctx, "sync0", "foo", 0))
 
@@ -407,15 +407,15 @@ func TestV23NestedAndPeerSyncgroups(t *testing.T) {
 	sg3Name := naming.Join("sync1", common.SyncbaseSuffix, "SG3")
 
 	ok(t, runSetupAppA(client0Ctx, "sync0"))
-	ok(t, runCreateSyncgroup(client0Ctx, "sync0", sg1Name, "tb:foo", "", "root:s0", "root:s1", "root:s2"))
-	ok(t, runCreateSyncgroup(client0Ctx, "sync0", sg2Name, "tb:f", "", "root:s0", "root:s2"))
+	ok(t, runCreateSyncgroup(client0Ctx, "sync0", sg1Name, "c:foo", "", "root:s0", "root:s1", "root:s2"))
+	ok(t, runCreateSyncgroup(client0Ctx, "sync0", sg2Name, "c:f", "", "root:s0", "root:s2"))
 	ok(t, runPopulateData(client0Ctx, "sync0", "f", 0))
 	ok(t, runPopulateData(client0Ctx, "sync0", "foo", 0))
 
 	ok(t, runSetupAppA(client1Ctx, "sync1"))
 	ok(t, runJoinSyncgroup(client1Ctx, "sync1", sg1Name))
 	ok(t, runVerifySyncgroupData(client1Ctx, "sync1", "foo", 0, 10, false))
-	ok(t, runCreateSyncgroup(client1Ctx, "sync1", sg3Name, "tb:f", "", "root:s1", "root:s2"))
+	ok(t, runCreateSyncgroup(client1Ctx, "sync1", sg3Name, "c:f", "", "root:s1", "root:s2"))
 
 	ok(t, runSetupAppA(client2Ctx, "sync2"))
 	ok(t, runJoinSyncgroup(client2Ctx, "sync2", sg2Name))
@@ -446,12 +446,12 @@ func TestV23SyncbasedGetDeltasPrePopulate(t *testing.T) {
 
 	sgName := naming.Join("sync0", common.SyncbaseSuffix, "SG1")
 
-	// Populate table data before creating the syncgroup.  Also populate
+	// Populate collection data before creating the syncgroup.  Also populate
 	// with data that is not part of the syncgroup to verify filtering.
 	ok(t, runSetupAppA(client0Ctx, "sync0"))
 	ok(t, runPopulateData(client0Ctx, "sync0", "foo", 0))
 	ok(t, runPopulateData(client0Ctx, "sync0", "bar", 0))
-	ok(t, runCreateSyncgroup(client0Ctx, "sync0", sgName, "tb:foo", "", "root:s0", "root:s1"))
+	ok(t, runCreateSyncgroup(client0Ctx, "sync0", sgName, "c:foo", "", "root:s0", "root:s1"))
 
 	ok(t, runSetupAppA(client1Ctx, "sync1"))
 	ok(t, runJoinSyncgroup(client1Ctx, "sync1", sgName))
@@ -461,9 +461,9 @@ func TestV23SyncbasedGetDeltasPrePopulate(t *testing.T) {
 
 // TestV23SyncbasedGetDeltasMultiApp tests the sending of deltas between two
 // Syncbase instances and their clients across multiple apps, databases, and
-// tables.  The 1st client puts entries in multiple tables across multiple
-// app databases then creates multiple syncgroups (one per database) over that
-// data.  The 2nd client joins these syncgroups and reads all the data.
+// collections. The 1st client puts entries in multiple collections across
+// multiple app databases then creates multiple syncgroups (one per database)
+// over that data. The 2nd client joins these syncgroups and reads all the data.
 func TestV23SyncbasedGetDeltasMultiApp(t *testing.T) {
 	v23test.SkipUnlessRunningIntegrationTests(t)
 	sh := v23test.NewShell(t, nil)
@@ -479,7 +479,7 @@ func TestV23SyncbasedGetDeltasMultiApp(t *testing.T) {
 	sh.StartSyncbase(server1Creds, syncbaselib.Opts{Name: "sync1"}, `{"Read": {"In":["root:c1"]}, "Write": {"In":["root:c1"]}}`)
 
 	sgNamePrefix := naming.Join("sync0", common.SyncbaseSuffix)
-	na, nd, nt := 2, 2, 2 // number of apps, dbs, tables
+	na, nd, nt := 2, 2, 2 // number of apps, dbs, collections
 
 	ok(t, runSetupAppMulti(client0Ctx, "sync0", na, nd, nt))
 	ok(t, runPopulateSyncgroupMulti(client0Ctx, "sync0", sgNamePrefix, na, nd, nt, "foo", "bar"))
@@ -514,7 +514,7 @@ func TestV23SyncgroupSync(t *testing.T) {
 	sgName := naming.Join("sync0", common.SyncbaseSuffix, "SG1")
 
 	ok(t, runSetupAppA(client0Ctx, "sync0"))
-	ok(t, runCreateSyncgroup(client0Ctx, "sync0", sgName, "tb:foo", "", "root:s0", "root:s1", "root:s2"))
+	ok(t, runCreateSyncgroup(client0Ctx, "sync0", sgName, "c:foo", "", "root:s0", "root:s1", "root:s2"))
 	ok(t, runPopulateData(client0Ctx, "sync0", "foo", 0))
 
 	ok(t, runSetupAppA(client1Ctx, "sync1"))
@@ -534,16 +534,16 @@ func TestV23SyncgroupSync(t *testing.T) {
 // Helpers.
 
 // toSgPrefixes converts, for example, "a:b,c:" to
-// [{TableName: "a", Row: "b"}, {TableName: "c", Row: ""}].
-func toSgPrefixes(csv string) []wire.TableRow {
+// [{CollectionName: "a", Row: "b"}, {CollectionName: "c", Row: ""}].
+func toSgPrefixes(csv string) []wire.CollectionRow {
 	strs := strings.Split(csv, ",")
-	res := make([]wire.TableRow, len(strs))
+	res := make([]wire.CollectionRow, len(strs))
 	for i, v := range strs {
 		parts := strings.SplitN(v, ":", 2)
 		if len(parts) != 2 {
 			panic(fmt.Sprintf("invalid prefix string: %q", v))
 		}
-		res[i] = wire.TableRow{TableName: parts[0], Row: parts[1]}
+		res[i] = wire.CollectionRow{CollectionName: parts[0], Row: parts[1]}
 	}
 	return res
 }
@@ -560,8 +560,8 @@ func runSetupAppA(ctx *context.T, serviceName string) error {
 	if err := d.Create(ctx, nil); err != nil {
 		return err
 	}
-	tb := d.Table(testTable)
-	if err := tb.Create(ctx, nil); err != nil {
+	c := d.Collection(testCollection)
+	if err := c.Create(ctx, nil); err != nil {
 		return err
 	}
 
@@ -680,11 +680,11 @@ func runPopulateData(ctx *context.T, serviceName, keyPrefix string, start uint64
 	d := a.Database("d", nil)
 
 	// Do Puts.
-	tb := d.Table(testTable)
+	c := d.Collection(testCollection)
 
 	for i := start; i < start+10; i++ {
 		key := fmt.Sprintf("%s%d", keyPrefix, i)
-		r := tb.Row(key)
+		r := c.Row(key)
 		if err := r.Put(ctx, "testkey"+key); err != nil {
 			return fmt.Errorf("r.Put() failed: %v\n", err)
 		}
@@ -697,15 +697,15 @@ func runPopulateNonVomData(ctx *context.T, serviceName, keyPrefix string, start 
 	d := a.Database("d", nil)
 
 	// Do Puts.
-	tb := d.Table("tb")
+	c := d.Collection("c")
 
 	for i := start; i < start+10; i++ {
 		key := fmt.Sprintf("%s%d", keyPrefix, i)
-		r := tb.Row(key)
-		c := wire.RowClient(r.FullName())
+		r := c.Row(key)
+		rc := wire.RowClient(r.FullName())
 		val := []byte("nonvomtestkey" + key)
-		if err := c.Put(ctx, -1, val); err != nil {
-			return fmt.Errorf("c.Put() failed: %v\n", err)
+		if err := rc.Put(ctx, -1, val); err != nil {
+			return fmt.Errorf("rc.Put() failed: %v\n", err)
 		}
 	}
 	return nil
@@ -716,11 +716,11 @@ func runUpdateData(ctx *context.T, serviceName string, start uint64) error {
 	d := a.Database("d", nil)
 
 	// Do Puts.
-	tb := d.Table(testTable)
+	c := d.Collection(testCollection)
 
 	for i := start; i < start+5; i++ {
 		key := fmt.Sprintf("foo%d", i)
-		r := tb.Row(key)
+		r := c.Row(key)
 		if err := r.Put(ctx, "testkey"+serviceName+key); err != nil {
 			return fmt.Errorf("r.Put() failed: %v\n", err)
 		}
@@ -734,11 +734,11 @@ func runDeleteData(ctx *context.T, serviceName string, start uint64) error {
 	d := a.Database("d", nil)
 
 	// Do Puts.
-	tb := d.Table(testTable)
+	c := d.Collection(testCollection)
 
 	for i := start; i < start+5; i++ {
 		key := fmt.Sprintf("foo%d", i)
-		r := tb.Row(key)
+		r := c.Row(key)
 		if err := r.Delete(ctx); err != nil {
 			return fmt.Errorf("r.Delete() failed: %v\n", err)
 		}
@@ -752,10 +752,10 @@ func runSetPrefixPermissions(ctx *context.T, serviceName, keyPrefix string, aclB
 	d := a.Database("d", nil)
 
 	// Set acl.
-	tb := d.Table(testTable)
+	c := d.Collection(testCollection)
 
-	if err := tb.SetPrefixPermissions(ctx, syncbase.Prefix(keyPrefix), perms(aclBlessings...)); err != nil {
-		return fmt.Errorf("tb.SetPrefixPermissions() failed: %v\n", err)
+	if err := c.SetPrefixPermissions(ctx, syncbase.Prefix(keyPrefix), perms(aclBlessings...)); err != nil {
+		return fmt.Errorf("c.SetPrefixPermissions() failed: %v\n", err)
 	}
 
 	return nil
@@ -766,11 +766,11 @@ func runVerifySyncgroupData(ctx *context.T, serviceName, keyPrefix string, start
 	d := a.Database("d", nil)
 
 	// Wait for a bit (up to 4 sec) until the last key appears.
-	tb := d.Table(testTable)
+	c := d.Collection(testCollection)
 
 	lastKey := fmt.Sprintf("%s%d", keyPrefix, start+count-1)
 
-	r := tb.Row(lastKey)
+	r := c.Row(lastKey)
 	for i := 0; i < 8; i++ {
 		time.Sleep(500 * time.Millisecond)
 		var value string
@@ -782,7 +782,7 @@ func runVerifySyncgroupData(ctx *context.T, serviceName, keyPrefix string, start
 	// Verify that all keys and values made it correctly.
 	for i := start; i < start+count; i++ {
 		key := fmt.Sprintf("%s%d", keyPrefix, i)
-		r := tb.Row(key)
+		r := c.Row(key)
 		var got string
 		if err := r.Get(ctx, &got); err != nil {
 			return fmt.Errorf("r.Get() failed: %v\n", err)
@@ -795,7 +795,7 @@ func runVerifySyncgroupData(ctx *context.T, serviceName, keyPrefix string, start
 
 	if !skipScan {
 		// Re-verify using a scan operation.
-		stream := tb.Scan(ctx, syncbase.Prefix(keyPrefix))
+		stream := c.Scan(ctx, syncbase.Prefix(keyPrefix))
 		for i := 0; stream.Advance(); i++ {
 			want := fmt.Sprintf("%s%d", keyPrefix, i)
 			got := stream.Key()
@@ -827,7 +827,7 @@ func runVerifySyncgroupDataWithWatch(ctx *context.T, serviceName, keyPrefix stri
 	ctxWithTimeout, cancel := context.WithTimeout(ctx, 10*time.Second)
 	defer cancel()
 
-	stream, err := d.Watch(ctxWithTimeout, testTable, keyPrefix, beforeSyncMarker)
+	stream, err := d.Watch(ctxWithTimeout, testCollection, keyPrefix, beforeSyncMarker)
 	if err != nil {
 		return fmt.Errorf("watch error: %v\n", err)
 	}
@@ -847,8 +847,8 @@ func runVerifySyncgroupDataWithWatch(ctx *context.T, serviceName, keyPrefix stri
 	}
 
 	for i, change := range changes {
-		if got, want := change.Table, "tb"; got != want {
-			return fmt.Errorf("unexpected watch table: got %q, want %q", got, want)
+		if got, want := change.Collection, "c"; got != want {
+			return fmt.Errorf("unexpected watch collection: got %q, want %q", got, want)
 		}
 		if got, want := change.Row, fmt.Sprintf("%s%d", keyPrefix, i); got != want {
 			return fmt.Errorf("unexpected watch row: got %q, want %q", got, want)
@@ -881,15 +881,15 @@ func runVerifySyncgroupNonVomData(ctx *context.T, serviceName, keyPrefix string,
 	d := a.Database("d", nil)
 
 	// Wait for a bit (up to 4 sec) until the last key appears.
-	tb := d.Table("tb")
+	c := d.Collection("c")
 
 	lastKey := fmt.Sprintf("%s%d", keyPrefix, start+count-1)
 
-	r := tb.Row(lastKey)
-	c := wire.RowClient(r.FullName())
+	r := c.Row(lastKey)
+	rc := wire.RowClient(r.FullName())
 	for i := 0; i < 8; i++ {
 		time.Sleep(500 * time.Millisecond)
-		if _, err := c.Get(ctx, -1); err == nil {
+		if _, err := rc.Get(ctx, -1); err == nil {
 			break
 		}
 	}
@@ -897,12 +897,12 @@ func runVerifySyncgroupNonVomData(ctx *context.T, serviceName, keyPrefix string,
 	// Verify that all keys and values made it correctly.
 	for i := start; i < start+count; i++ {
 		key := fmt.Sprintf("%s%d", keyPrefix, i)
-		r := tb.Row(key)
-		c := wire.RowClient(r.FullName())
+		r := c.Row(key)
+		rc := wire.RowClient(r.FullName())
 		var got string
-		val, err := c.Get(ctx, -1)
+		val, err := rc.Get(ctx, -1)
 		if err != nil {
-			return fmt.Errorf("c.Get() failed: %v\n", err)
+			return fmt.Errorf("rc.Get() failed: %v\n", err)
 		}
 		got = string(val)
 		want := "nonvomtestkey" + key
@@ -918,9 +918,9 @@ func runVerifyDeletedData(ctx *context.T, serviceName, keyPrefix string) error {
 	d := a.Database("d", nil)
 
 	// Wait for a bit for deletions to propagate.
-	tb := d.Table(testTable)
+	c := d.Collection(testCollection)
 
-	r := tb.Row("foo4")
+	r := c.Row("foo4")
 	for i := 0; i < 8; i++ {
 		time.Sleep(500 * time.Millisecond)
 		var value string
@@ -930,7 +930,7 @@ func runVerifyDeletedData(ctx *context.T, serviceName, keyPrefix string) error {
 	}
 
 	// Verify using a scan operation.
-	stream := tb.Scan(ctx, syncbase.Prefix(keyPrefix))
+	stream := c.Scan(ctx, syncbase.Prefix(keyPrefix))
 	count := 0
 	for i := 5; stream.Advance(); i++ {
 		want := fmt.Sprintf("%s%d", keyPrefix, i)
@@ -962,7 +962,7 @@ func runVerifyDeletedData(ctx *context.T, serviceName, keyPrefix string) error {
 func runVerifyConflictResolution(ctx *context.T, serviceName string) error {
 	a := syncbase.NewService(serviceName).App("a")
 	d := a.Database("d", nil)
-	tb := d.Table(testTable)
+	c := d.Collection(testCollection)
 
 	wantData := []struct {
 		start  uint64
@@ -977,7 +977,7 @@ func runVerifyConflictResolution(ctx *context.T, serviceName string) error {
 	for _, d := range wantData {
 		for i := d.start; i < d.start+d.count; i++ {
 			key := fmt.Sprintf("foo%d", i)
-			r := tb.Row(key)
+			r := c.Row(key)
 			var got string
 			if err := r.Get(ctx, &got); err != nil {
 				return fmt.Errorf("r.Get() failed: %v\n", err)
@@ -1000,11 +1000,11 @@ func runVerifyConflictResolution(ctx *context.T, serviceName string) error {
 func runVerifyNonSyncgroupData(ctx *context.T, serviceName, keyPrefix string) error {
 	a := syncbase.NewService(serviceName).App("a")
 	d := a.Database("d", nil)
-	tb := d.Table(testTable)
+	c := d.Collection(testCollection)
 
 	// Verify through a scan that none of that data exists.
 	count := 0
-	stream := tb.Scan(ctx, syncbase.Prefix(keyPrefix))
+	stream := c.Scan(ctx, syncbase.Prefix(keyPrefix))
 	for stream.Advance() {
 		count++
 	}
@@ -1022,10 +1022,10 @@ func runVerifyNonSyncgroupData(ctx *context.T, serviceName, keyPrefix string) er
 func runVerifyLocalAndRemoteData(ctx *context.T, serviceName string) error {
 	a := syncbase.NewService(serviceName).App("a")
 	d := a.Database("d", nil)
-	tb := d.Table(testTable)
+	c := d.Collection(testCollection)
 
 	// Wait for a bit (up to 4 sec) until the last key appears.
-	r := tb.Row("foo19")
+	r := c.Row("foo19")
 	for i := 0; i < 8; i++ {
 		time.Sleep(500 * time.Millisecond)
 		var value string
@@ -1048,7 +1048,7 @@ func runVerifyLocalAndRemoteData(ctx *context.T, serviceName string) error {
 	for _, d := range wantData {
 		for i := d.start; i < d.start+d.count; i++ {
 			key := fmt.Sprintf("foo%d", i)
-			r := tb.Row(key)
+			r := c.Row(key)
 			var got string
 			if err := r.Get(ctx, &got); err != nil {
 				return fmt.Errorf("r.Get() failed: %v\n", err)
@@ -1067,11 +1067,11 @@ func runVerifyLostAccess(ctx *context.T, serviceName, keyPrefix string, start, c
 	d := a.Database("d", nil)
 
 	// Wait for a bit (up to 4 sec) until the last key disappears.
-	tb := d.Table(testTable)
+	c := d.Collection(testCollection)
 
 	lastKey := fmt.Sprintf("%s%d", keyPrefix, start+count-1)
 
-	r := tb.Row(lastKey)
+	r := c.Row(lastKey)
 	for i := 0; i < 8; i++ {
 		time.Sleep(500 * time.Millisecond)
 		var value string
@@ -1083,7 +1083,7 @@ func runVerifyLostAccess(ctx *context.T, serviceName, keyPrefix string, start, c
 	// Verify that all keys and values have lost access.
 	for i := start; i < start+count; i++ {
 		key := fmt.Sprintf("%s%d", keyPrefix, i)
-		r := tb.Row(key)
+		r := c.Row(key)
 		var got string
 		if err := r.Get(ctx, &got); verror.ErrorID(err) != verror.ErrNoAccess.ID {
 			return fmt.Errorf("r.Get() didn't fail: %v\n", err)
@@ -1105,9 +1105,9 @@ func runVerifyNestedSyncgroupData(ctx *context.T, serviceName string) error {
 	// conditions. Note that we wait longer than the 2 node tests since more
 	// nodes implies more pair-wise communication before achieving steady
 	// state.
-	tb := d.Table(testTable)
+	c := d.Collection(testCollection)
 
-	r := tb.Row("f9")
+	r := c.Row("f9")
 	for i := 0; i < 8; i++ {
 		time.Sleep(1 * time.Second)
 		var value string
@@ -1121,7 +1121,7 @@ func runVerifyNestedSyncgroupData(ctx *context.T, serviceName string) error {
 	for _, p := range pfxs {
 		for i := 0; i < 10; i++ {
 			key := fmt.Sprintf("%s%d", p, i)
-			r := tb.Row(key)
+			r := c.Row(key)
 			var got string
 			if err := r.Get(ctx, &got); err != nil {
 				return fmt.Errorf("r.Get() failed: %v\n", err)
@@ -1149,8 +1149,8 @@ func runSetupAppMulti(ctx *context.T, serviceName string, numApps, numDbs, numTb
 			d.Create(ctx, nil)
 
 			for k := 0; k < numTbs; k++ {
-				tbName := fmt.Sprintf("tb%d", k)
-				d.Table(tbName).Create(ctx, nil)
+				cName := fmt.Sprintf("c%d", k)
+				d.Collection(cName).Create(ctx, nil)
 			}
 		}
 	}
@@ -1173,20 +1173,20 @@ func runPopulateSyncgroupMulti(ctx *context.T, serviceName, sgNamePrefix string,
 			dbName := fmt.Sprintf("d%d", j)
 			d := a.Database(dbName, nil)
 
-			// For each table, pre-populate entries on each prefix.
+			// For each collection, pre-populate entries on each prefix.
 			// Also determine the syncgroup prefixes.
 			var sgPrefixes []string
 			for k := 0; k < numTbs; k++ {
-				tbName := fmt.Sprintf("tb%d", k)
-				tb := d.Table(tbName)
+				cName := fmt.Sprintf("c%d", k)
+				c := d.Collection(cName)
 
 				for _, pfx := range prefixes {
-					p := fmt.Sprintf("%s:%s", tbName, pfx)
+					p := fmt.Sprintf("%s:%s", cName, pfx)
 					sgPrefixes = append(sgPrefixes, p)
 
 					for n := 0; n < 10; n++ {
 						key := fmt.Sprintf("%s%d", pfx, n)
-						r := tb.Row(key)
+						r := c.Row(key)
 						if err := r.Put(ctx, "testkey"+key); err != nil {
 							return fmt.Errorf("r.Put() failed: %v\n", err)
 						}
@@ -1194,7 +1194,7 @@ func runPopulateSyncgroupMulti(ctx *context.T, serviceName, sgNamePrefix string,
 				}
 			}
 
-			// Create one syncgroup per database across all tables
+			// Create one syncgroup per database across all collections
 			// and prefixes.
 			sgName := naming.Join(sgNamePrefix, appName, dbName)
 			spec := wire.SyncgroupSpec{
@@ -1252,13 +1252,13 @@ func runVerifySyncgroupDataMulti(ctx *context.T, serviceName string, numApps, nu
 			d := a.Database(dbName, nil)
 
 			for k := 0; k < numTbs; k++ {
-				tbName := fmt.Sprintf("tb%d", k)
-				tb := d.Table(tbName)
+				cName := fmt.Sprintf("c%d", k)
+				c := d.Collection(cName)
 
 				for _, pfx := range prefixes {
 					for n := 0; n < 10; n++ {
 						key := fmt.Sprintf("%s%d", pfx, n)
-						r := tb.Row(key)
+						r := c.Row(key)
 						var got string
 						if err := r.Get(ctx, &got); err != nil {
 							return fmt.Errorf("r.Get() failed: %v\n", err)

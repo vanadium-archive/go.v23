@@ -51,25 +51,25 @@ var t2015_07 time.Time
 var t2015_07_01 time.Time
 var t2015_07_01_01_23_45 time.Time
 
-var customerTable syncbase.Table
-var numbersTable syncbase.Table
-var fooTable syncbase.Table
-var keyIndexDataTable syncbase.Table
-var bigTable syncbase.Table
+var customerCollection syncbase.Collection
+var numbersCollection syncbase.Collection
+var fooCollection syncbase.Collection
+var keyIndexDataCollection syncbase.Collection
+var bigCollection syncbase.Collection
 
 func setup(t *testing.T) {
 	var sName string
 	ctx, sName, cleanup = tu.SetupOrDie(nil)
 	a := tu.CreateApp(t, ctx, syncbase.NewService(sName), "a")
 	db = tu.CreateDatabase(t, ctx, a, "db")
-	customerTable = tu.CreateTable(t, ctx, db, "Customer")
-	numbersTable = tu.CreateTable(t, ctx, db, "Numbers")
-	fooTable = tu.CreateTable(t, ctx, db, "Foo")
-	keyIndexDataTable = tu.CreateTable(t, ctx, db, "KeyIndexData")
-	bigTable = tu.CreateTable(t, ctx, db, "BigTable")
+	customerCollection = tu.CreateCollection(t, ctx, db, "Customer")
+	numbersCollection = tu.CreateCollection(t, ctx, db, "Numbers")
+	fooCollection = tu.CreateCollection(t, ctx, db, "Foo")
+	keyIndexDataCollection = tu.CreateCollection(t, ctx, db, "KeyIndexData")
+	bigCollection = tu.CreateCollection(t, ctx, db, "BigCollection")
 }
 
-func initTables(t *testing.T) {
+func initCollections(t *testing.T) {
 	t20150122131101, _ := time.Parse("Jan 2 2006 15:04:05 -0700 MST", "Jan 22 2015 13:11:01 -0800 PST")
 	t20150210161202, _ := time.Parse("Jan 2 2006 15:04:05 -0700 MST", "Feb 10 2015 16:12:02 -0800 PST")
 	t20150311101303, _ := time.Parse("Jan 2 2006 15:04:05 -0700 MST", "Mar 11 2015 10:13:03 -0700 PDT")
@@ -94,106 +94,106 @@ func initTables(t *testing.T) {
 	k := "001"
 	c := testdata.Customer{"John Smith", 1, true, testdata.AddressInfo{"1 Main St.", "Palo Alto", "CA", "94303"}, testdata.CreditReport{Agency: testdata.CreditAgencyEquifax, Report: testdata.AgencyReportEquifaxReport{testdata.EquifaxCreditReport{'A'}}}}
 	customerEntries = append(customerEntries, kv{k, vdl.ValueOf(c)})
-	if err := customerTable.Put(ctx, k, c); err != nil {
-		t.Fatalf("customerTable.Put() failed: %v", err)
+	if err := customerCollection.Put(ctx, k, c); err != nil {
+		t.Fatalf("customerCollection.Put() failed: %v", err)
 	}
 
 	k = "001001"
 	i := testdata.Invoice{1, 1000, t20150122131101, 42, testdata.AddressInfo{"1 Main St.", "Palo Alto", "CA", "94303"}}
 	customerEntries = append(customerEntries, kv{k, vdl.ValueOf(i)})
-	if err := customerTable.Put(ctx, k, i); err != nil {
-		t.Fatalf("customerTable.Put() failed: %v", err)
+	if err := customerCollection.Put(ctx, k, i); err != nil {
+		t.Fatalf("customerCollection.Put() failed: %v", err)
 	}
 
 	k = "001002"
 	i = testdata.Invoice{1, 1003, t20150210161202, 7, testdata.AddressInfo{"2 Main St.", "Palo Alto", "CA", "94303"}}
 	customerEntries = append(customerEntries, kv{k, vdl.ValueOf(i)})
-	if err := customerTable.Put(ctx, k, i); err != nil {
-		t.Fatalf("customerTable.Put() failed: %v", err)
+	if err := customerCollection.Put(ctx, k, i); err != nil {
+		t.Fatalf("customerCollection.Put() failed: %v", err)
 	}
 
 	k = "001003"
 	i = testdata.Invoice{1, 1005, t20150311101303, 88, testdata.AddressInfo{"3 Main St.", "Palo Alto", "CA", "94303"}}
 	customerEntries = append(customerEntries, kv{k, vdl.ValueOf(i)})
-	if err := customerTable.Put(ctx, k, i); err != nil {
-		t.Fatalf("customerTable.Put() failed: %v", err)
+	if err := customerCollection.Put(ctx, k, i); err != nil {
+		t.Fatalf("customerCollection.Put() failed: %v", err)
 	}
 
 	k = "002"
 	c = testdata.Customer{"Bat Masterson", 2, true, testdata.AddressInfo{"777 Any St.", "Collins", "IA", "50055"}, testdata.CreditReport{Agency: testdata.CreditAgencyTransUnion, Report: testdata.AgencyReportTransUnionReport{testdata.TransUnionCreditReport{80}}}}
 	customerEntries = append(customerEntries, kv{k, vdl.ValueOf(c)})
-	if err := customerTable.Put(ctx, k, c); err != nil {
-		t.Fatalf("customerTable.Put() failed: %v", err)
+	if err := customerCollection.Put(ctx, k, c); err != nil {
+		t.Fatalf("customerCollection.Put() failed: %v", err)
 	}
 
 	k = "002001"
 	i = testdata.Invoice{2, 1001, t20150317111404, 166, testdata.AddressInfo{"777 Any St.", "collins", "IA", "50055"}}
 	customerEntries = append(customerEntries, kv{k, vdl.ValueOf(i)})
-	if err := customerTable.Put(ctx, k, i); err != nil {
-		t.Fatalf("customerTable.Put() failed: %v", err)
+	if err := customerCollection.Put(ctx, k, i); err != nil {
+		t.Fatalf("customerCollection.Put() failed: %v", err)
 	}
 
 	k = "002002"
 	i = testdata.Invoice{2, 1002, t20150317131505, 243, testdata.AddressInfo{"888 Any St.", "collins", "IA", "50055"}}
 	customerEntries = append(customerEntries, kv{k, vdl.ValueOf(i)})
-	if err := customerTable.Put(ctx, k, i); err != nil {
-		t.Fatalf("customerTable.Put() failed: %v", err)
+	if err := customerCollection.Put(ctx, k, i); err != nil {
+		t.Fatalf("customerCollection.Put() failed: %v", err)
 	}
 
 	k = "002003"
 	i = testdata.Invoice{2, 1004, t20150412221606, 787, testdata.AddressInfo{"999 Any St.", "collins", "IA", "50055"}}
 	customerEntries = append(customerEntries, kv{k, vdl.ValueOf(i)})
-	if err := customerTable.Put(ctx, k, i); err != nil {
-		t.Fatalf("customerTable.Put() failed: %v", err)
+	if err := customerCollection.Put(ctx, k, i); err != nil {
+		t.Fatalf("customerCollection.Put() failed: %v", err)
 	}
 
 	k = "002004"
 	i = testdata.Invoice{2, 1006, t20150413141707, 88, testdata.AddressInfo{"101010 Any St.", "collins", "IA", "50055"}}
 	customerEntries = append(customerEntries, kv{k, vdl.ValueOf(i)})
-	if err := customerTable.Put(ctx, k, i); err != nil {
-		t.Fatalf("customerTable.Put() failed: %v", err)
+	if err := customerCollection.Put(ctx, k, i); err != nil {
+		t.Fatalf("customerCollection.Put() failed: %v", err)
 	}
 
 	k = "003"
 	c = testdata.Customer{"John \"JOS\" O'Steed", 3, true, testdata.AddressInfo{"100 Queen St.", "New London", "CT", "06320"}, testdata.CreditReport{Agency: testdata.CreditAgencyExperian, Report: testdata.AgencyReportExperianReport{testdata.ExperianCreditReport{testdata.ExperianRatingGood}}}}
 	customerEntries = append(customerEntries, kv{k, vdl.ValueOf(c)})
-	if err := customerTable.Put(ctx, k, c); err != nil {
-		t.Fatalf("customerTable.Put() failed: %v", err)
+	if err := customerCollection.Put(ctx, k, c); err != nil {
+		t.Fatalf("customerCollection.Put() failed: %v", err)
 	}
 
 	k = "001"
 	n := testdata.Numbers{byte(12), uint16(1234), uint32(5678), uint64(999888777666), int16(9876), int32(876543), int64(128), float32(3.14159), float64(2.71828182846)}
 	numbersEntries = append(numbersEntries, kv{k, vdl.ValueOf(n)})
-	if err := numbersTable.Put(ctx, k, n); err != nil {
-		t.Fatalf("numbersTable.Put() failed: %v", err)
+	if err := numbersCollection.Put(ctx, k, n); err != nil {
+		t.Fatalf("numbersCollection.Put() failed: %v", err)
 	}
 
 	k = "002"
 	n = testdata.Numbers{byte(9), uint16(99), uint32(999), uint64(9999999), int16(9), int32(99), int64(88), float32(1.41421356237), float64(1.73205080757)}
 	numbersEntries = append(numbersEntries, kv{k, vdl.ValueOf(n)})
-	if err := numbersTable.Put(ctx, k, n); err != nil {
-		t.Fatalf("numbersTable.Put() failed: %v", err)
+	if err := numbersCollection.Put(ctx, k, n); err != nil {
+		t.Fatalf("numbersCollection.Put() failed: %v", err)
 	}
 
 	k = "003"
 	n = testdata.Numbers{byte(210), uint16(210), uint32(210), uint64(210), int16(210), int32(210), int64(210), float32(210.0), float64(210.0)}
 	numbersEntries = append(numbersEntries, kv{k, vdl.ValueOf(n)})
-	if err := numbersTable.Put(ctx, k, n); err != nil {
-		t.Fatalf("numbersTable.Put() failed: %v", err)
+	if err := numbersCollection.Put(ctx, k, n); err != nil {
+		t.Fatalf("numbersCollection.Put() failed: %v", err)
 	}
 
 	k = "001"
 	f := testdata.FooType{testdata.BarType{testdata.BazType{"FooBarBaz", testdata.TitleOrValueTypeTitle{"Vice President"}}}}
 	fooEntries = append(fooEntries, kv{k, vdl.ValueOf(f)})
-	if err := fooTable.Put(ctx, k, f); err != nil {
-		t.Fatalf("fooTable.Put() failed: %v", err)
+	if err := fooCollection.Put(ctx, k, f); err != nil {
+		t.Fatalf("fooCollection.Put() failed: %v", err)
 	}
 
 	k = "002"
 	f = testdata.FooType{testdata.BarType{testdata.BazType{"BazBarFoo", testdata.TitleOrValueTypeValue{42}}}}
 	fooEntries = append(fooEntries, kv{k, vdl.ValueOf(f)})
-	if err := fooTable.Put(ctx, k, f); err != nil {
-		t.Fatalf("fooTable.Put() failed: %v", err)
+	if err := fooCollection.Put(ctx, k, f); err != nil {
+		t.Fatalf("fooCollection.Put() failed: %v", err)
 	}
 
 	k = "aaa"
@@ -204,15 +204,15 @@ func initTables(t *testing.T) {
 		map[string]struct{}{"I’ll grind his bones to mix my bread": {}},
 	}
 	keyIndexDataEntries = append(keyIndexDataEntries, kv{k, vdl.ValueOf(kid)})
-	if err := keyIndexDataTable.Put(ctx, k, kid); err != nil {
-		t.Fatalf("keyIndexDataTable.Put() failed: %v", err)
+	if err := keyIndexDataCollection.Put(ctx, k, kid); err != nil {
+		t.Fatalf("keyIndexDataCollection.Put() failed: %v", err)
 	}
 
 	for i := 100; i < 301; i++ {
 		k = fmt.Sprintf("%d", i)
 		b := testdata.BigData{k}
-		if err := bigTable.Put(ctx, k, b); err != nil {
-			t.Fatalf("bigTable.Put() failed: %v", err)
+		if err := bigCollection.Put(ctx, k, b); err != nil {
+			t.Fatalf("bigCollection.Put() failed: %v", err)
 		}
 	}
 }
@@ -268,7 +268,7 @@ type execSelectParamErrorTest struct {
 func TestExecSelect(t *testing.T) {
 	setup(t)
 	defer cleanup()
-	initTables(t)
+	initCollections(t)
 	basic := []execSelectTest{
 		{
 			// Select values for all customer records.
@@ -981,12 +981,12 @@ func TestExecSelect(t *testing.T) {
 			}},
 		},
 		{
-			"select k, v.Key from BigTable where k < \"101\" or k = \"200\" or k like \"300%\"",
+			"select k, v.Key from BigCollection where k < \"101\" or k = \"200\" or k like \"300%\"",
 			[]string{"k", "v.Key"},
 			[][]*vdl.Value{svPair("100"), svPair("200"), svPair("300")},
 		},
 		{
-			"select k, v.Key from BigTable where k like \"10_\" or k like \"20_\"",
+			"select k, v.Key from BigCollection where k like \"10_\" or k like \"20_\"",
 			[]string{"k", "v.Key"},
 			[][]*vdl.Value{
 				svPair("100"),
@@ -1012,7 +1012,7 @@ func TestExecSelect(t *testing.T) {
 			},
 		},
 		{
-			"select k, v.Key from BigTable where k like \"_%9\"",
+			"select k, v.Key from BigCollection where k like \"_%9\"",
 			[]string{"k", "v.Key"},
 			[][]*vdl.Value{
 				svPair("109"),
@@ -1038,7 +1038,7 @@ func TestExecSelect(t *testing.T) {
 			},
 		},
 		{
-			"select k, v.Key from BigTable where k like \"__0\"",
+			"select k, v.Key from BigCollection where k like \"__0\"",
 			[]string{"k", "v.Key"},
 			[][]*vdl.Value{
 				svPair("100"),
@@ -1065,7 +1065,7 @@ func TestExecSelect(t *testing.T) {
 			},
 		},
 		{
-			"select k, v.Key from BigTable where k like \"10%\" or  k like \"20%\" or  k like \"30%\"",
+			"select k, v.Key from BigCollection where k like \"10%\" or  k like \"20%\" or  k like \"30%\"",
 			[]string{"k", "v.Key"},
 			[][]*vdl.Value{
 				svPair("100"),
@@ -1092,12 +1092,12 @@ func TestExecSelect(t *testing.T) {
 			},
 		},
 		{
-			"select k, v.Key from BigTable where k like \"1__\" and  k like \"_2_\" and  k like \"__3\"",
+			"select k, v.Key from BigCollection where k like \"1__\" and  k like \"_2_\" and  k like \"__3\"",
 			[]string{"k", "v.Key"},
 			[][]*vdl.Value{svPair("123")},
 		},
 		{
-			"select k, v.Key from BigTable where (k >  \"100\" and k < \"103\") or (k > \"205\" and k < \"208\")",
+			"select k, v.Key from BigCollection where (k >  \"100\" and k < \"103\") or (k > \"205\" and k < \"208\")",
 			[]string{"k", "v.Key"},
 			[][]*vdl.Value{
 				svPair("101"),
@@ -1107,7 +1107,7 @@ func TestExecSelect(t *testing.T) {
 			},
 		},
 		{
-			"select k, v.Key from BigTable where k <=  \"100\" or k = \"101\" or k >= \"300\" or (k <> \"299\" and k not like \"300\" and k >= \"298\")",
+			"select k, v.Key from BigCollection where k <=  \"100\" or k = \"101\" or k >= \"300\" or (k <> \"299\" and k not like \"300\" and k >= \"298\")",
 			[]string{"k", "v.Key"},
 			[][]*vdl.Value{
 				svPair("100"),
@@ -1117,7 +1117,7 @@ func TestExecSelect(t *testing.T) {
 			},
 		},
 		{
-			"select k, v.Key from BigTable where k like  \"1%\" and k like \"%9\"",
+			"select k, v.Key from BigCollection where k like  \"1%\" and k like \"%9\"",
 			[]string{"k", "v.Key"},
 			[][]*vdl.Value{
 				svPair("109"),
@@ -1133,7 +1133,7 @@ func TestExecSelect(t *testing.T) {
 			},
 		},
 		{
-			"select k, v.Key from BigTable where k like  \"3%\" and k like \"30%\" and k like \"300%\"",
+			"select k, v.Key from BigCollection where k like  \"3%\" and k like \"30%\" and k like \"300%\"",
 			[]string{"k", "v.Key"},
 			[][]*vdl.Value{svPair("300")},
 		},
@@ -1162,7 +1162,7 @@ func TestExecSelect(t *testing.T) {
 func TestExecDelete(t *testing.T) {
 	basic := []execDeleteTest{
 		{
-			// Delete all k/v pairs in the customer table.
+			// Delete all k/v pairs in the customer collection.
 			"delete from Customer",
 			[]string{"Count"},
 			[][]*vdl.Value{
@@ -1568,7 +1568,7 @@ func TestExecDelete(t *testing.T) {
 	setup(t)
 	defer cleanup()
 	for _, test := range basic {
-		initTables(t)
+		initCollections(t)
 		headers, rs, err := db.Exec(ctx, test.delQuery)
 		if err != nil {
 			t.Errorf("delQuery: %s; got %v, want nil", test.delQuery, err)
@@ -1607,7 +1607,7 @@ func TestExecDelete(t *testing.T) {
 func TestQuerySelectClause(t *testing.T) {
 	setup(t)
 	defer cleanup()
-	initTables(t)
+	initCollections(t)
 	basic := []execSelectTest{
 		{
 			// Select numeric types
@@ -1790,7 +1790,7 @@ func TestQuerySelectClause(t *testing.T) {
 func TestQueryWhereClause(t *testing.T) {
 	setup(t)
 	defer cleanup()
-	initTables(t)
+	initCollections(t)
 	basic := []execSelectTest{
 		{
 			// Select on numeric comparisons with equals
@@ -2104,7 +2104,7 @@ func TestQueryWhereClause(t *testing.T) {
 func TestQueryEscapeClause(t *testing.T) {
 	setup(t)
 	defer cleanup()
-	initTables(t)
+	initCollections(t)
 	basic := []execSelectTest{
 		{
 			"select k from Customer where \"abc%\" like \"abc^%\" escape '^'",
@@ -2195,7 +2195,7 @@ func TestQueryEscapeClause(t *testing.T) {
 func TestQueryLimitAndOffsetClauses(t *testing.T) {
 	setup(t)
 	defer cleanup()
-	initTables(t)
+	initCollections(t)
 	basic := []execSelectTest{
 		{
 			"select k from Customer limit 2 offset 3",
@@ -2258,7 +2258,7 @@ func svPair(s string) []*vdl.Value {
 func TestPreExecFunctions(t *testing.T) {
 	setup(t)
 	defer cleanup()
-	initTables(t)
+	initCollections(t)
 	basic := []preExecFunctionTest{
 		{
 			"select Now() from Customer",
@@ -2294,7 +2294,7 @@ func TestPreExecFunctions(t *testing.T) {
 func TestExecErrors(t *testing.T) {
 	setup(t)
 	defer cleanup()
-	initTables(t)
+	initCollections(t)
 	basic := []execSelectErrorTest{
 		{
 			"select a from Customer",
@@ -2344,7 +2344,7 @@ func TestExecErrors(t *testing.T) {
 func TestQueryErrors(t *testing.T) {
 	setup(t)
 	defer cleanup()
-	initTables(t)
+	initCollections(t)
 	basic := []execSelectErrorTest{
 		// Produce every error in the book (make that, every one that is possible to produce).
 		{
@@ -2471,7 +2471,7 @@ func TestQueryErrors(t *testing.T) {
 		},
 		// *OffsetMustBeGe0 cannot be produced because the parser won't produce
 		// an offset < 0.
-		// *ScanError Cannot produce a [table].ScanError.
+		// *ScanError Cannot produce a [collection].ScanError.
 		{
 			"select k from Blah",
 			// TODO(sadovsky): Error messages should never contain storage engine
@@ -2532,7 +2532,7 @@ func TestQueryErrors(t *testing.T) {
 func TestQueryErrorsPlatformDependentText(t *testing.T) {
 	setup(t)
 	defer cleanup()
-	initTables(t)
+	initCollections(t)
 	basic := []execSelectErrorTest{
 		// These errors contain installation dependent parts to the error.  The test is
 		// more relaxed (it doesn't check the suffix) in order to account for this.
@@ -2560,7 +2560,7 @@ func TestQueryErrorsPlatformDependentText(t *testing.T) {
 func TestQueryStatementSizeExceeded(t *testing.T) {
 	setup(t)
 	defer cleanup()
-	initTables(t)
+	initCollections(t)
 	q := fmt.Sprintf("select a from b where c = \"%s\"", strings.Repeat("x", 12000))
 
 	_, rs, err := db.Exec(ctx, q)
@@ -2580,7 +2580,7 @@ func TestQueryStatementSizeExceeded(t *testing.T) {
 func TestExecParamSelect(t *testing.T) {
 	setup(t)
 	defer cleanup()
-	initTables(t)
+	initCollections(t)
 	t20120317, _ := time.Parse("2006-01-02 MST", "2012-03-17 PDT")
 	basic := []execSelectParamTest{
 		{
@@ -2747,7 +2747,7 @@ func TestExecParamSelect(t *testing.T) {
 			},
 		},*/
 		{
-			"select k, v.Key from BigTable where k like StrCat(?, \"_\") or k like StrCat(?, \"_\")",
+			"select k, v.Key from BigCollection where k like StrCat(?, \"_\") or k like StrCat(?, \"_\")",
 			[]interface{}{
 				"10",
 				"20",
@@ -2777,7 +2777,7 @@ func TestExecParamSelect(t *testing.T) {
 			},
 		},
 		{
-			"select k, v.Key from BigTable where k <= ? or k = ? or k >= ? or (k <> ? and k not like ? and k >= ?)",
+			"select k, v.Key from BigCollection where k <= ? or k = ? or k >= ? or (k <> ? and k not like ? and k >= ?)",
 			[]interface{}{
 				"100",
 				"101",
@@ -2926,7 +2926,7 @@ func TestExecParamDelete(t *testing.T) {
 	setup(t)
 	defer cleanup()
 	for _, test := range basic {
-		initTables(t)
+		initCollections(t)
 		headers, rs, err := db.Exec(ctx, test.delQuery, test.delParams...)
 		if err != nil {
 			t.Errorf("delQuery: %s, delParams: %v; got %v, want nil", test.delQuery, test.delParams, err)
@@ -2965,7 +2965,7 @@ func TestExecParamDelete(t *testing.T) {
 func TestExecParamErrors(t *testing.T) {
 	setup(t)
 	defer cleanup()
-	initTables(t)
+	initCollections(t)
 	basic := []execSelectParamErrorTest{
 		// Produce parameter related errors.
 		{

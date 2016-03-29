@@ -31,7 +31,7 @@ func TestV23BlobWholeTransfer(t *testing.T) {
 	sgName := naming.Join("s0", common.SyncbaseSuffix, "SG1")
 
 	ok(t, populateData(sbs[0].clientCtx, "s0", "foo", 0, 10))
-	ok(t, createSyncgroup(sbs[0].clientCtx, "s0", sgName, "tb:foo", "", sbBlessings(sbs), nil))
+	ok(t, createSyncgroup(sbs[0].clientCtx, "s0", sgName, "c:foo", "", sbBlessings(sbs), nil))
 	ok(t, joinSyncgroup(sbs[1].clientCtx, "s1", sgName))
 	ok(t, verifySyncgroupData(sbs[1].clientCtx, "s1", "foo", 0, 10))
 
@@ -68,7 +68,7 @@ type testStruct struct {
 func generateBlob(ctx *context.T, syncbaseName, keyPrefix string, pos int, data []byte) error {
 	a := syncbase.NewService(syncbaseName).App(testApp)
 	d := a.Database(testDb, nil)
-	tb := d.Table(testTable)
+	c := d.Collection(testCollection)
 
 	b, err := d.CreateBlob(ctx)
 	if err != nil {
@@ -93,7 +93,7 @@ func generateBlob(ctx *context.T, syncbaseName, keyPrefix string, pos int, data 
 
 	// Put the BlobRef in a key.
 	key := fmt.Sprintf("%s%d", keyPrefix, pos)
-	r := tb.Row(key)
+	r := c.Row(key)
 	s := testStruct{Val: "testkey" + key, Blob: b.Ref()}
 	if err := r.Put(ctx, s); err != nil {
 		return fmt.Errorf("r.Put() failed: %v", err)
@@ -105,10 +105,10 @@ func generateBlob(ctx *context.T, syncbaseName, keyPrefix string, pos int, data 
 func fetchBlob(ctx *context.T, syncbaseName, keyPrefix string, pos int, wantSize int64, skipIncStatus bool) error {
 	a := syncbase.NewService(syncbaseName).App(testApp)
 	d := a.Database(testDb, nil)
-	tb := d.Table(testTable)
+	c := d.Collection(testCollection)
 
 	key := fmt.Sprintf("%s%d", keyPrefix, pos)
-	r := tb.Row(key)
+	r := c.Row(key)
 	var s testStruct
 
 	// Try for 10 seconds to get the new value.
@@ -174,10 +174,10 @@ func fetchBlob(ctx *context.T, syncbaseName, keyPrefix string, pos int, wantSize
 func getBlob(ctx *context.T, syncbaseName, keyPrefix string, pos int, wantVal []byte, offset int64) error {
 	a := syncbase.NewService(syncbaseName).App(testApp)
 	d := a.Database(testDb, nil)
-	tb := d.Table(testTable)
+	c := d.Collection(testCollection)
 
 	key := fmt.Sprintf("%s%d", keyPrefix, pos)
-	r := tb.Row(key)
+	r := c.Row(key)
 	var s testStruct
 
 	// Try for 10 seconds to get the new value.
@@ -217,7 +217,7 @@ func getBlob(ctx *context.T, syncbaseName, keyPrefix string, pos int, wantVal []
 func generateBigBlob(ctx *context.T, syncbaseName, keyPrefix string, pos int) error {
 	a := syncbase.NewService(syncbaseName).App(testApp)
 	d := a.Database(testDb, nil)
-	tb := d.Table(testTable)
+	c := d.Collection(testCollection)
 
 	b, err := d.CreateBlob(ctx)
 	if err != nil {
@@ -253,7 +253,7 @@ func generateBigBlob(ctx *context.T, syncbaseName, keyPrefix string, pos int) er
 
 	// Put the BlobRef in a key.
 	key := fmt.Sprintf("%s%d", keyPrefix, pos)
-	r := tb.Row(key)
+	r := c.Row(key)
 
 	// Blob hash is transferred via structured store.
 	s := testStruct{Val: hashToString(hasher.Sum(nil)), Blob: b.Ref()}
@@ -268,10 +268,10 @@ func generateBigBlob(ctx *context.T, syncbaseName, keyPrefix string, pos int) er
 func getBigBlob(ctx *context.T, syncbaseName, keyPrefix string, pos int) error {
 	a := syncbase.NewService(syncbaseName).App(testApp)
 	d := a.Database(testDb, nil)
-	tb := d.Table(testTable)
+	c := d.Collection(testCollection)
 
 	key := fmt.Sprintf("%s%d", keyPrefix, pos)
-	r := tb.Row(key)
+	r := c.Row(key)
 	var s testStruct
 
 	// Try for 10 seconds to get the new value.

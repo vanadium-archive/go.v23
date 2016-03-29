@@ -25,10 +25,10 @@ import (
 )
 
 const (
-	testSbName = "syncbase" // Name that syncbase mounts itself at.
-	testApp    = "a"
-	testDb     = "d"
-	testTable  = "tb"
+	testSbName     = "syncbase" // Name that syncbase mounts itself at.
+	testApp        = "a"
+	testDb         = "d"
+	testCollection = "c"
 )
 
 ////////////////////////////////////////////////////////////
@@ -43,7 +43,7 @@ func setupHierarchy(ctx *context.T, syncbaseName string) error {
 	if err := d.Create(ctx, nil); err != nil {
 		return err
 	}
-	return d.Table(testTable).Create(ctx, nil)
+	return d.Collection(testCollection).Create(ctx, nil)
 }
 
 type testSyncbase struct {
@@ -95,12 +95,12 @@ func populateData(ctx *context.T, syncbaseName, keyPrefix string, start, end int
 
 	a := syncbase.NewService(syncbaseName).App(testApp)
 	d := a.Database(testDb, nil)
-	tb := d.Table(testTable)
+	c := d.Collection(testCollection)
 
 	for i := start; i < end; i++ {
 		key := fmt.Sprintf("%s%d", keyPrefix, i)
-		if err := tb.Put(ctx, key, "testkey"+key); err != nil {
-			return fmt.Errorf("tb.Put() failed: %v", err)
+		if err := c.Put(ctx, key, "testkey"+key); err != nil {
+			return fmt.Errorf("c.Put() failed: %v", err)
 		}
 	}
 	return nil
@@ -118,11 +118,11 @@ func updateDataImpl(ctx *context.T, d syncbase.DatabaseHandle, syncbaseName stri
 		valuePrefix = "testkey"
 	}
 
-	tb := d.Table(testTable)
+	c := d.Collection(testCollection)
 	for i := start; i < end; i++ {
 		key := fmt.Sprintf("foo%d", i)
-		if err := tb.Put(ctx, key, valuePrefix+syncbaseName+key); err != nil {
-			return fmt.Errorf("tb.Put() failed: %v", err)
+		if err := c.Put(ctx, key, valuePrefix+syncbaseName+key); err != nil {
+			return fmt.Errorf("c.Put() failed: %v", err)
 		}
 	}
 	return nil
@@ -160,8 +160,8 @@ func updateDataInBatch(ctx *context.T, syncbaseName string, start, end int, valu
 // TODO(ivanpi): Remove sendSignal now that all functions using it are in the
 // same process.
 func sendSignal(ctx *context.T, d syncbase.Database, signalKey string) error {
-	tb := d.Table(testTable)
-	r := tb.Row(signalKey)
+	c := d.Collection(testCollection)
+	r := c.Row(signalKey)
 
 	if err := r.Put(ctx, true); err != nil {
 		return fmt.Errorf("r.Put() failed: %v", err)
@@ -177,14 +177,14 @@ const skipScan = true
 func verifySyncgroupData(ctx *context.T, syncbaseName, keyPrefix string, start, count int) error {
 	a := syncbase.NewService(syncbaseName).App(testApp)
 	d := a.Database(testDb, nil)
-	tb := d.Table(testTable)
+	c := d.Collection(testCollection)
 
 	// Wait a bit (up to 10 seconds) for the last key to appear.
 	lastKey := fmt.Sprintf("%s%d", keyPrefix, start+count-1)
 	for i := 0; i < 20; i++ {
 		time.Sleep(500 * time.Millisecond)
 		var value string
-		if err := tb.Get(ctx, lastKey, &value); err == nil {
+		if err := c.Get(ctx, lastKey, &value); err == nil {
 			break
 		}
 	}
@@ -193,8 +193,8 @@ func verifySyncgroupData(ctx *context.T, syncbaseName, keyPrefix string, start, 
 	for i := start; i < start+count; i++ {
 		key := fmt.Sprintf("%s%d", keyPrefix, i)
 		var got string
-		if err := tb.Get(ctx, key, &got); err != nil {
-			return fmt.Errorf("tb.Get() failed: %v", err)
+		if err := c.Get(ctx, key, &got); err != nil {
+			return fmt.Errorf("c.Get() failed: %v", err)
 		}
 		want := "testkey" + key
 		if got != want {
@@ -205,7 +205,7 @@ func verifySyncgroupData(ctx *context.T, syncbaseName, keyPrefix string, start, 
 	// TODO(sadovsky): Drop this? (Does it buy us much?)
 	if !skipScan {
 		// Re-verify using a scan operation.
-		stream := tb.Scan(ctx, syncbase.Prefix(keyPrefix))
+		stream := c.Scan(ctx, syncbase.Prefix(keyPrefix))
 		for i := 0; stream.Advance(); i++ {
 			got, want := stream.Key(), fmt.Sprintf("%s%d", keyPrefix, i)
 			if got != want {
@@ -308,16 +308,16 @@ func resumeSync(ctx *context.T, syncbaseName string) error {
 // Syncbase-specific testing helpers
 
 // parseSgPrefixes converts, for example, "a:b,c:" to
-// [{TableName: testApp, Row: "b"}, {TableName: "c", Row: ""}].
-func parseSgPrefixes(csv string) []wire.TableRow {
+// [{CollectionName: testApp, Row: "b"}, {CollectionName: "c", Row: ""}].
+func parseSgPrefixes(csv string) []wire.CollectionRow {
 	strs := strings.Split(csv, ",")
-	res := make([]wire.TableRow, len(strs))
+	res := make([]wire.CollectionRow, len(strs))
 	for i, v := range strs {
 		parts := strings.SplitN(v, ":", 2)
 		if len(parts) != 2 {
 			panic(fmt.Sprintf("invalid prefix string: %q", v))
 		}
-		res[i] = wire.TableRow{TableName: parts[0], Row: parts[1]}
+		res[i] = wire.CollectionRow{CollectionName: parts[0], Row: parts[1]}
 	}
 	return res
 }

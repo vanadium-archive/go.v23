@@ -56,12 +56,12 @@ func TestBatchBasics(t *testing.T) {
 	defer cleanup()
 	a := tu.CreateApp(t, ctx, syncbase.NewService(sName), "a")
 	d := tu.CreateDatabase(t, ctx, a, "d")
-	tb := tu.CreateTable(t, ctx, d, "tb")
+	c := tu.CreateCollection(t, ctx, d, "c")
 
-	tu.CheckScan(t, ctx, tb, syncbase.Prefix(""), []string{}, []interface{}{})
+	tu.CheckScan(t, ctx, c, syncbase.Prefix(""), []string{}, []interface{}{})
 
 	var b1, b2 syncbase.BatchDatabase
-	var b1tb, b2tb syncbase.Table
+	var b1c, b2c syncbase.Collection
 	var err error
 
 	// Test that the effects of a transaction are not visible until commit.
@@ -69,28 +69,28 @@ func TestBatchBasics(t *testing.T) {
 	if err != nil {
 		t.Fatalf("d.BeginBatch() failed: %v", err)
 	}
-	b1tb = b1.Table("tb")
+	b1c = b1.Collection("c")
 
-	if err := b1tb.Put(ctx, "fooKey", "fooValue"); err != nil {
+	if err := b1c.Put(ctx, "fooKey", "fooValue"); err != nil {
 		t.Fatalf("Put() failed: %v", err)
 	}
 
 	// Check that foo is visible inside of this transaction.
-	tu.CheckScan(t, ctx, b1tb, syncbase.Prefix(""), []string{"fooKey"}, []interface{}{"fooValue"})
+	tu.CheckScan(t, ctx, b1c, syncbase.Prefix(""), []string{"fooKey"}, []interface{}{"fooValue"})
 
 	// Check that foo is not yet visible outside of this transaction.
-	tu.CheckScan(t, ctx, tb, syncbase.Prefix(""), []string{}, []interface{}{})
+	tu.CheckScan(t, ctx, c, syncbase.Prefix(""), []string{}, []interface{}{})
 
 	// Start a scan in b1, advance the scan one row, put a new value that would
 	// occur later in the scan (if it were visible) and then advance the scan to see
 	// that it doesn't show (since we snapshot uncommiteed changes at the start).
 	// Ditto for Exec.
 	// start the scan and exec
-	scanIt := b1tb.Scan(ctx, syncbase.Prefix(""))
+	scanIt := b1c.Scan(ctx, syncbase.Prefix(""))
 	if !scanIt.Advance() {
 		t.Fatal("scanIt.Advance() returned false")
 	}
-	_, execIt, err := b1.Exec(ctx, "select k from tb")
+	_, execIt, err := b1.Exec(ctx, "select k from c")
 	if err != nil {
 		t.Fatalf("b1.Exec() failed: %v", err)
 	}
@@ -98,7 +98,7 @@ func TestBatchBasics(t *testing.T) {
 		t.Fatal("execIt.Advance() returned false")
 	}
 	// put "zzzKey"
-	if err := b1tb.Put(ctx, "zzzKey", "zzzValue"); err != nil {
+	if err := b1c.Put(ctx, "zzzKey", "zzzValue"); err != nil {
 		t.Fatalf("Put() failed: %v", err)
 	}
 	// make sure Scan's Advance doesn't return a "zzzKey"
@@ -129,7 +129,7 @@ func TestBatchBasics(t *testing.T) {
 	}
 
 	// Check that foo is now visible.
-	tu.CheckScan(t, ctx, tb, syncbase.Prefix(""), []string{"fooKey", "zzzKey"}, []interface{}{"fooValue", "zzzValue"})
+	tu.CheckScan(t, ctx, c, syncbase.Prefix(""), []string{"fooKey", "zzzKey"}, []interface{}{"fooValue", "zzzValue"})
 
 	// Test that concurrent transactions are isolated.
 	if b1, err = d.BeginBatch(ctx, wire.BatchOptions{}); err != nil {
@@ -138,20 +138,20 @@ func TestBatchBasics(t *testing.T) {
 	if b2, err = d.BeginBatch(ctx, wire.BatchOptions{}); err != nil {
 		t.Fatalf("d.BeginBatch() failed: %v", err)
 	}
-	b1tb, b2tb = b1.Table("tb"), b2.Table("tb")
+	b1c, b2c = b1.Collection("c"), b2.Collection("c")
 
-	if err := b1tb.Put(ctx, "barKey", "barValue"); err != nil {
+	if err := b1c.Put(ctx, "barKey", "barValue"); err != nil {
 		t.Fatalf("Put() failed: %v", err)
 	}
-	if err := b1tb.Put(ctx, "bazKey", "bazValue"); err != nil {
+	if err := b1c.Put(ctx, "bazKey", "bazValue"); err != nil {
 		t.Fatalf("Put() failed: %v", err)
 	}
 
 	var got string
-	if err := b2tb.Get(ctx, "barKey", &got); verror.ErrorID(err) != verror.ErrNoExist.ID {
+	if err := b2c.Get(ctx, "barKey", &got); verror.ErrorID(err) != verror.ErrNoExist.ID {
 		t.Fatalf("Get() should have failed: %v", err)
 	}
-	if err := b2tb.Put(ctx, "rabKey", "rabValue"); err != nil {
+	if err := b2c.Put(ctx, "rabKey", "rabValue"); err != nil {
 		t.Fatalf("Put() failed: %v", err)
 	}
 
@@ -163,46 +163,47 @@ func TestBatchBasics(t *testing.T) {
 	}
 
 	// Check that foo, bar, baz and zzz (but not rab) are now visible.
-	tu.CheckScan(t, ctx, tb, syncbase.Prefix(""), []string{"barKey", "bazKey", "fooKey", "zzzKey"}, []interface{}{"barValue", "bazValue", "fooValue", "zzzValue"})
+	tu.CheckScan(t, ctx, c, syncbase.Prefix(""), []string{"barKey", "bazKey", "fooKey", "zzzKey"}, []interface{}{"barValue", "bazValue", "fooValue", "zzzValue"})
 }
 
-// Tests that BatchDatabase.ListTables does not see the effect of concurrent
-// table creation.
-// Note, this test fails if Database.ListTables is implemented using glob,
-// because b.ListTables() does not see "tb". The glob client library issues glob
-// on each point along the path to check for Resolve access. Glob("a") returns
-// "a/d" but not "a/d%%batchInfo", so the glob client library does not recurse
-// further.
-func TestBatchListTables(t *testing.T) {
+// Tests that BatchDatabase.ListCollections does not see the effect of
+// concurrent collection creation.
+
+// Note, this test fails if Database.ListCollections is implemented using glob,
+// because b.ListCollections() does not see "c". The glob client library issues
+// glob on each point along the path to check for Resolve access. Glob("a")
+// returns "a/d" but not "a/d%%batchInfo", so the glob client library does not
+// recurse further.
+func TestBatchListCollections(t *testing.T) {
 	ctx, sName, cleanup := tu.SetupOrDie(nil)
 	defer cleanup()
 	a := tu.CreateApp(t, ctx, syncbase.NewService(sName), "a")
 	d := tu.CreateDatabase(t, ctx, a, "d")
-	tu.CreateTable(t, ctx, d, "tb")
+	tu.CreateCollection(t, ctx, d, "c")
 	b, err := d.BeginBatch(ctx, wire.BatchOptions{})
 
-	got, err := d.ListTables(ctx)
-	want := []string{"tb"}
+	got, err := d.ListCollections(ctx)
+	want := []string{"c"}
 	if err != nil {
-		t.Fatalf("self.ListTables() failed: %v", err)
+		t.Fatalf("self.ListCollections() failed: %v", err)
 	}
 	if !reflect.DeepEqual(got, want) {
 		t.Fatalf("Lists do not match: got %v, want %v", got, want)
 	}
 
-	// Table creation/destruction is not allowed within a batch.
-	if err := b.Table("tb_batch").Create(ctx, nil); verror.ErrorID(err) != wire.ErrBoundToBatch.ID {
-		t.Fatalf("b.tb_batch.Create() should have failed: %v", err)
+	// Collection creation/destruction is not allowed within a batch.
+	if err := b.Collection("c_batch").Create(ctx, nil); verror.ErrorID(err) != wire.ErrBoundToBatch.ID {
+		t.Fatalf("b.c_batch.Create() should have failed: %v", err)
 	}
-	if err := b.Table("tb").Destroy(ctx); verror.ErrorID(err) != wire.ErrBoundToBatch.ID {
-		t.Fatalf("b.tb.Destroy() should have failed: %v", err)
+	if err := b.Collection("c").Destroy(ctx); verror.ErrorID(err) != wire.ErrBoundToBatch.ID {
+		t.Fatalf("b.c.Destroy() should have failed: %v", err)
 	}
 
-	tu.CreateTable(t, ctx, d, "tb_nonbatch")
+	tu.CreateCollection(t, ctx, d, "c_nonbatch")
 
-	// Non-batch should see tb_nonbatch; batch should only see tb.
-	got, err = d.ListTables(ctx)
-	want = []string{"tb", "tb_nonbatch"}
+	// Non-batch should see c_nonbatch; batch should only see c.
+	got, err = d.ListCollections(ctx)
+	want = []string{"c", "c_nonbatch"}
 	if err != nil {
 		t.Fatalf("self.ListChildren() failed: %v", err)
 	}
@@ -210,8 +211,8 @@ func TestBatchListTables(t *testing.T) {
 		t.Fatalf("Lists do not match: got %v, want %v", got, want)
 	}
 
-	got, err = b.ListTables(ctx)
-	want = []string{"tb"}
+	got, err = b.ListCollections(ctx)
+	want = []string{"c"}
 	if err != nil {
 		t.Fatalf("self.ListChildren() failed: %v", err)
 	}
@@ -223,34 +224,34 @@ func TestBatchListTables(t *testing.T) {
 // Tests that BatchDatabase.Exec doesn't see changes committed outside the
 // batch.
 // 1. Create a read only batch.
-// 2. query all rows in the table
+// 2. query all rows in the collection
 // 3. commit a new row outside of the batch
-// 4. confirm new row not seen when querying all rows in the table
+// 4. confirm new row not seen when querying all rows in the collection
 // 5. abort the batch and create a new readonly batch
-// 6. confirm new row NOW seen when querying all rows in the table
+// 6. confirm new row NOW seen when querying all rows in the collection
 func TestBatchExecIsolation(t *testing.T) {
 	ctx, sName, cleanup := tu.SetupOrDie(nil)
 	defer cleanup()
 	a := tu.CreateApp(t, ctx, syncbase.NewService(sName), "a")
 	d := tu.CreateDatabase(t, ctx, a, "d")
-	tb := tu.CreateTable(t, ctx, d, "tb")
+	c := tu.CreateCollection(t, ctx, d, "c")
 
 	foo := Foo{I: 4, S: "f"}
-	if err := tb.Put(ctx, "foo", foo); err != nil {
-		t.Fatalf("tb.Put() failed: %v", err)
+	if err := c.Put(ctx, "foo", foo); err != nil {
+		t.Fatalf("c.Put() failed: %v", err)
 	}
 
 	bar := Bar{F: 0.5, S: "b"}
 	// NOTE: not best practice, but store bar as
 	// optional (by passing the address of bar to Put).
 	// This tests auto-dereferencing.
-	if err := tb.Put(ctx, "bar", &bar); err != nil {
-		t.Fatalf("tb.Put() failed: %v", err)
+	if err := c.Put(ctx, "bar", &bar); err != nil {
+		t.Fatalf("c.Put() failed: %v", err)
 	}
 
 	baz := Baz{Name: "John Doe", Active: true}
-	if err := tb.Put(ctx, "baz", baz); err != nil {
-		t.Fatalf("tb.Put() failed: %v", err)
+	if err := c.Put(ctx, "baz", baz); err != nil {
+		t.Fatalf("c.Put() failed: %v", err)
 	}
 
 	// Begin a readonly batch.
@@ -260,7 +261,7 @@ func TestBatchExecIsolation(t *testing.T) {
 	}
 
 	// fetch all rows
-	tu.CheckExec(t, ctx, roBatch, "select k, v from tb",
+	tu.CheckExec(t, ctx, roBatch, "select k, v from c",
 		[]string{"k", "v"},
 		[][]*vom.RawBytes{
 			{vom.RawBytesOf("bar"), vom.RawBytesOf(bar)},
@@ -270,12 +271,12 @@ func TestBatchExecIsolation(t *testing.T) {
 
 	// Add a row outside this batch
 	newRow := Baz{Name: "Alice Wonderland", Active: false}
-	if err := tb.Put(ctx, "newRow", newRow); err != nil {
-		t.Fatalf("tb.Put() failed: %v", err)
+	if err := c.Put(ctx, "newRow", newRow); err != nil {
+		t.Fatalf("c.Put() failed: %v", err)
 	}
 
 	// confirm fetching all rows doesn't get the new row
-	tu.CheckExec(t, ctx, roBatch, "select k, v from tb",
+	tu.CheckExec(t, ctx, roBatch, "select k, v from c",
 		[]string{"k", "v"},
 		[][]*vom.RawBytes{
 			{vom.RawBytesOf("bar"), vom.RawBytesOf(bar)},
@@ -292,7 +293,7 @@ func TestBatchExecIsolation(t *testing.T) {
 	defer roBatch.Abort(ctx)
 
 	// confirm fetching all rows NOW gets the new row
-	tu.CheckExec(t, ctx, roBatch, "select k, v from tb",
+	tu.CheckExec(t, ctx, roBatch, "select k, v from c",
 		[]string{"k", "v"},
 		[][]*vom.RawBytes{
 			{vom.RawBytesOf("bar"), vom.RawBytesOf(bar)},
@@ -311,24 +312,24 @@ func TestBatchReadonlyExecDelete(t *testing.T) {
 	defer cleanup()
 	a := tu.CreateApp(t, ctx, syncbase.NewService(sName), "a")
 	d := tu.CreateDatabase(t, ctx, a, "d")
-	tb := tu.CreateTable(t, ctx, d, "tb")
+	c := tu.CreateCollection(t, ctx, d, "c")
 
 	foo := Foo{I: 4, S: "f"}
-	if err := tb.Put(ctx, "foo", foo); err != nil {
-		t.Fatalf("tb.Put() failed: %v", err)
+	if err := c.Put(ctx, "foo", foo); err != nil {
+		t.Fatalf("c.Put() failed: %v", err)
 	}
 
 	bar := Bar{F: 0.5, S: "b"}
 	// NOTE: not best practice, but store bar as
 	// optional (by passing the address of bar to Put).
 	// This tests auto-dereferencing.
-	if err := tb.Put(ctx, "bar", &bar); err != nil {
-		t.Fatalf("tb.Put() failed: %v", err)
+	if err := c.Put(ctx, "bar", &bar); err != nil {
+		t.Fatalf("c.Put() failed: %v", err)
 	}
 
 	baz := Baz{Name: "John Doe", Active: true}
-	if err := tb.Put(ctx, "baz", baz); err != nil {
-		t.Fatalf("tb.Put() failed: %v", err)
+	if err := c.Put(ctx, "baz", baz); err != nil {
+		t.Fatalf("c.Put() failed: %v", err)
 	}
 
 	// Begin a readonly batch.
@@ -338,7 +339,7 @@ func TestBatchReadonlyExecDelete(t *testing.T) {
 	}
 
 	// Attempt to delete "foo" k/v pair with a syncQL delete.
-	tu.CheckExecError(t, ctx, roBatch, "delete from tb where k = \"foo\"", syncql.ErrTableCantAccess.ID)
+	tu.CheckExecError(t, ctx, roBatch, "delete from c where k = \"foo\"", syncql.ErrTableCantAccess.ID)
 
 	// start a new batch
 	roBatch.Abort(ctx)
@@ -351,24 +352,24 @@ func TestBatchExec(t *testing.T) {
 	defer cleanup()
 	a := tu.CreateApp(t, ctx, syncbase.NewService(sName), "a")
 	d := tu.CreateDatabase(t, ctx, a, "d")
-	tb := tu.CreateTable(t, ctx, d, "tb")
+	c := tu.CreateCollection(t, ctx, d, "c")
 
 	foo := Foo{I: 4, S: "f"}
-	if err := tb.Put(ctx, "foo", foo); err != nil {
-		t.Fatalf("tb.Put() failed: %v", err)
+	if err := c.Put(ctx, "foo", foo); err != nil {
+		t.Fatalf("c.Put() failed: %v", err)
 	}
 
 	bar := Bar{F: 0.5, S: "b"}
 	// NOTE: not best practice, but store bar as
 	// optional (by passing the address of bar to Put).
 	// This tests auto-dereferencing.
-	if err := tb.Put(ctx, "bar", &bar); err != nil {
-		t.Fatalf("tb.Put() failed: %v", err)
+	if err := c.Put(ctx, "bar", &bar); err != nil {
+		t.Fatalf("c.Put() failed: %v", err)
 	}
 
 	baz := Baz{Name: "John Doe", Active: true}
-	if err := tb.Put(ctx, "baz", baz); err != nil {
-		t.Fatalf("tb.Put() failed: %v", err)
+	if err := c.Put(ctx, "baz", baz); err != nil {
+		t.Fatalf("c.Put() failed: %v", err)
 	}
 
 	// Begin a readwrite batch.
@@ -378,7 +379,7 @@ func TestBatchExec(t *testing.T) {
 	}
 
 	// fetch all rows
-	tu.CheckExec(t, ctx, rwBatch, "select k, v from tb",
+	tu.CheckExec(t, ctx, rwBatch, "select k, v from c",
 		[]string{"k", "v"},
 		[][]*vom.RawBytes{
 			{vom.RawBytesOf("bar"), vom.RawBytesOf(bar)},
@@ -386,7 +387,7 @@ func TestBatchExec(t *testing.T) {
 			{vom.RawBytesOf("foo"), vom.RawBytesOf(foo)},
 		})
 
-	rwBatchTb := rwBatch.Table("tb")
+	rwBatchTb := rwBatch.Collection("c")
 
 	// Add a row in this batch
 	newRow := Baz{Name: "Snow White", Active: true}
@@ -395,7 +396,7 @@ func TestBatchExec(t *testing.T) {
 	}
 
 	// confirm fetching all rows DOES get the new row
-	tu.CheckExec(t, ctx, rwBatch, "select k, v from tb",
+	tu.CheckExec(t, ctx, rwBatch, "select k, v from c",
 		[]string{"k", "v"},
 		[][]*vom.RawBytes{
 			{vom.RawBytesOf("bar"), vom.RawBytesOf(bar)},
@@ -407,16 +408,16 @@ func TestBatchExec(t *testing.T) {
 	// Delete the first row (bar) and the last row (newRow).
 	// Change the baz row.  Confirm these rows are no longer fetched and that
 	// the change to baz is seen.
-	tu.CheckExec(t, ctx, rwBatch, "delete from tb where k = \"bar\" or k = \"newRow\"",
+	tu.CheckExec(t, ctx, rwBatch, "delete from c where k = \"bar\" or k = \"newRow\"",
 		[]string{"Count"},
 		[][]*vom.RawBytes{
 			{vom.RawBytesOf(2)},
 		})
 	baz2 := Baz{Name: "Batman", Active: false}
 	if err := rwBatchTb.Put(ctx, "baz", baz2); err != nil {
-		t.Fatalf("tb.Put() failed: %v", err)
+		t.Fatalf("c.Put() failed: %v", err)
 	}
-	tu.CheckExec(t, ctx, rwBatch, "select k, v from tb",
+	tu.CheckExec(t, ctx, rwBatch, "select k, v from c",
 		[]string{"k", "v"},
 		[][]*vom.RawBytes{
 			{vom.RawBytesOf("baz"), vom.RawBytesOf(baz2)},
@@ -435,12 +436,12 @@ func TestBatchExec(t *testing.T) {
 	if err := rwBatchTb.Put(ctx, "newRow", newRow2); err != nil {
 		t.Fatalf("rwBatchTb.Put() failed: %v", err)
 	}
-	tu.CheckExec(t, ctx, rwBatch, "delete from tb where k = \"baz\" or k = \"foo\"",
+	tu.CheckExec(t, ctx, rwBatch, "delete from c where k = \"baz\" or k = \"foo\"",
 		[]string{"Count"},
 		[][]*vom.RawBytes{
 			{vom.RawBytesOf(2)},
 		})
-	tu.CheckExec(t, ctx, rwBatch, "select k, v from tb",
+	tu.CheckExec(t, ctx, rwBatch, "select k, v from c",
 		[]string{"k", "v"},
 		[][]*vom.RawBytes{
 			{vom.RawBytesOf("bar"), vom.RawBytesOf(bar2)},
@@ -458,7 +459,7 @@ func TestBatchExec(t *testing.T) {
 	defer roBatch.Abort(ctx)
 
 	// confirm fetching all rows gets the rows committed above
-	tu.CheckExec(t, ctx, roBatch, "select k, v from tb",
+	tu.CheckExec(t, ctx, roBatch, "select k, v from c",
 		[]string{"k", "v"},
 		[][]*vom.RawBytes{
 			{vom.RawBytesOf("bar"), vom.RawBytesOf(bar2)},
@@ -472,25 +473,25 @@ func TestReadOnlyBatch(t *testing.T) {
 	defer cleanup()
 	a := tu.CreateApp(t, ctx, syncbase.NewService(sName), "a")
 	d := tu.CreateDatabase(t, ctx, a, "d")
-	tb := tu.CreateTable(t, ctx, d, "tb")
+	c := tu.CreateCollection(t, ctx, d, "c")
 
-	if err := tb.Put(ctx, "fooKey", "fooValue"); err != nil {
-		t.Fatalf("tb.Put() failed: %v", err)
+	if err := c.Put(ctx, "fooKey", "fooValue"); err != nil {
+		t.Fatalf("c.Put() failed: %v", err)
 	}
 
 	b1, err := d.BeginBatch(ctx, wire.BatchOptions{ReadOnly: true})
 	if err != nil {
 		t.Fatalf("d.BeginBatch() failed: %v", err)
 	}
-	b1tb := b1.Table("tb")
+	b1c := b1.Collection("c")
 
-	if err := b1tb.Put(ctx, "barKey", "barValue"); verror.ErrorID(err) != wire.ErrReadOnlyBatch.ID {
+	if err := b1c.Put(ctx, "barKey", "barValue"); verror.ErrorID(err) != wire.ErrReadOnlyBatch.ID {
 		t.Fatalf("Put() should have failed: %v", err)
 	}
-	if err := b1tb.DeleteRange(ctx, syncbase.Prefix("fooKey")); verror.ErrorID(err) != wire.ErrReadOnlyBatch.ID {
-		t.Fatalf("Table.DeleteRange() should have failed: %v", err)
+	if err := b1c.DeleteRange(ctx, syncbase.Prefix("fooKey")); verror.ErrorID(err) != wire.ErrReadOnlyBatch.ID {
+		t.Fatalf("Collection.DeleteRange() should have failed: %v", err)
 	}
-	if err := b1tb.Row("fooKey").Delete(ctx); verror.ErrorID(err) != wire.ErrReadOnlyBatch.ID {
+	if err := b1c.Row("fooKey").Delete(ctx); verror.ErrorID(err) != wire.ErrReadOnlyBatch.ID {
 		t.Fatalf("Row.Delete() should have failed: %v", err)
 	}
 }
@@ -501,28 +502,28 @@ func TestOpAfterFinalize(t *testing.T) {
 	defer cleanup()
 	a := tu.CreateApp(t, ctx, syncbase.NewService(sName), "a")
 	d := tu.CreateDatabase(t, ctx, a, "d")
-	tb := tu.CreateTable(t, ctx, d, "tb")
+	c := tu.CreateCollection(t, ctx, d, "c")
 
 	// TODO(sadovsky): Add some sort of "op after finalize" error type and check
 	// for it specifically below.
 	checkOpsFail := func(b syncbase.BatchDatabase) {
-		btb := b.Table("tb")
+		bc := b.Collection("c")
 		var got string
-		if err := btb.Get(ctx, "fooKey", &got); err == nil {
+		if err := bc.Get(ctx, "fooKey", &got); err == nil {
 			tu.Fatal(t, "Get() should have failed")
 		}
-		it := btb.Scan(ctx, syncbase.Prefix(""))
+		it := bc.Scan(ctx, syncbase.Prefix(""))
 		it.Advance()
 		if it.Err() == nil {
 			tu.Fatal(t, "Scan() should have failed")
 		}
-		if err := btb.Put(ctx, "barKey", "barValue"); err == nil {
+		if err := bc.Put(ctx, "barKey", "barValue"); err == nil {
 			tu.Fatal(t, "Put() should have failed")
 		}
-		if err := btb.DeleteRange(ctx, syncbase.Prefix("fooKey")); err == nil {
-			tu.Fatal(t, "Table.DeleteRange() should have failed: %v", err)
+		if err := bc.DeleteRange(ctx, syncbase.Prefix("fooKey")); err == nil {
+			tu.Fatal(t, "Collection.DeleteRange() should have failed: %v", err)
 		}
-		if err := btb.Row("fooKey").Delete(ctx); err == nil {
+		if err := bc.Row("fooKey").Delete(ctx); err == nil {
 			tu.Fatal(t, "Row.Delete() should have failed: %v", err)
 		}
 		if err := b.Commit(ctx); err == nil {
@@ -535,9 +536,9 @@ func TestOpAfterFinalize(t *testing.T) {
 	if err != nil {
 		t.Fatalf("d.BeginBatch() failed: %v", err)
 	}
-	b1tb := b1.Table("tb")
+	b1c := b1.Collection("c")
 
-	if err := b1tb.Put(ctx, "fooKey", "fooValue"); err != nil {
+	if err := b1c.Put(ctx, "fooKey", "fooValue"); err != nil {
 		t.Fatalf("Put() failed: %v", err)
 	}
 	if err := b1.Commit(ctx); err != nil {
@@ -550,15 +551,15 @@ func TestOpAfterFinalize(t *testing.T) {
 	if b1, err = d.BeginBatch(ctx, wire.BatchOptions{}); err != nil {
 		t.Fatalf("d.BeginBatch() failed: %v", err)
 	}
-	b1tb = b1.Table("tb")
+	b1c = b1.Collection("c")
 
-	// Conflicts with future b1tb.Get().
-	if err := tb.Put(ctx, "fooKey", "v2"); err != nil {
-		t.Fatalf("tb.Put() failed: %v", err)
+	// Conflicts with future b1c.Get().
+	if err := c.Put(ctx, "fooKey", "v2"); err != nil {
+		t.Fatalf("c.Put() failed: %v", err)
 	}
 
 	var got string
-	if err := b1tb.Get(ctx, "fooKey", &got); err != nil {
+	if err := b1c.Get(ctx, "fooKey", &got); err != nil {
 		t.Fatalf("Get() failed: %v", err)
 	}
 	want := "fooValue"
@@ -575,7 +576,7 @@ func TestOpAfterFinalize(t *testing.T) {
 	if b1, err = d.BeginBatch(ctx, wire.BatchOptions{}); err != nil {
 		t.Fatalf("d.BeginBatch() failed: %v", err)
 	}
-	b1tb = b1.Table("tb")
+	b1c = b1.Collection("c")
 	b1.Abort(ctx)
 	checkOpsFail(b1)
 }
@@ -627,8 +628,8 @@ func TestDisallowedMethods(t *testing.T) {
 		t.Fatalf("bc.GetSyncgroupNames() should have failed: %v", err)
 	}
 
-	// Test that Table.{Create,Destroy} fail with ErrBoundToBatch.
-	tc := wire.TableClient(naming.Join(b.FullName(), "tb"))
+	// Test that Collection.{Create,Destroy} fail with ErrBoundToBatch.
+	tc := wire.CollectionClient(naming.Join(b.FullName(), "c"))
 	if err := tc.Create(ctx, -1, nil); verror.ErrorID(err) != wire.ErrBoundToBatch.ID {
 		t.Fatalf("tc.Create() should have failed: %v", err)
 	}
@@ -656,18 +657,18 @@ func tryWithConcurrentWrites(t *testing.T, ctx *context.T, d syncbase.Database, 
 	return syncbase.RunInBatch(ctx, d, wire.BatchOptions{}, func(b syncbase.BatchDatabase) error {
 		retries++
 		// Read foo.
-		if err := b.Table("tb").Get(ctx, fmt.Sprintf("foo-%d", retries), &value); verror.ErrorID(err) != verror.ErrNoExist.ID {
+		if err := b.Collection("c").Get(ctx, fmt.Sprintf("foo-%d", retries), &value); verror.ErrorID(err) != verror.ErrNoExist.ID {
 			t.Errorf("b.Get() should have failed with ErrNoExist, got: %v", err)
 		}
 		// If we need to fail, write to foo in a separate concurrent batch. This
 		// is always written on every attempt.
 		if retries < failTimes {
-			if err := d.Table("tb").Put(ctx, fmt.Sprintf("foo-%d", retries), "foo"); err != nil {
+			if err := d.Collection("c").Put(ctx, fmt.Sprintf("foo-%d", retries), "foo"); err != nil {
 				t.Errorf("d.Put() failed: %v", err)
 			}
 		}
 		// Write to bar. This is only committed on a successful attempt.
-		if err := b.Table("tb").Put(ctx, fmt.Sprintf("bar-%d", retries), "bar"); err != nil {
+		if err := b.Collection("c").Put(ctx, fmt.Sprintf("bar-%d", retries), "bar"); err != nil {
 			t.Errorf("b.Put() failed: %v", err)
 		}
 		// Return user defined error.
@@ -681,14 +682,14 @@ func TestRunInBatchRetry(t *testing.T) {
 	defer cleanup()
 	a := tu.CreateApp(t, ctx, syncbase.NewService(sName), "a")
 	d := tu.CreateDatabase(t, ctx, a, "d")
-	tb := tu.CreateTable(t, ctx, d, "tb")
+	c := tu.CreateCollection(t, ctx, d, "c")
 
 	// Succeed (no conflict) on second try.
 	if err := tryWithConcurrentWrites(t, ctx, d, 2, nil); err != nil {
 		t.Errorf("RunInBatch() failed: %v", err)
 	}
 	// First try failed, second succeeded.
-	tu.CheckScan(t, ctx, tb, syncbase.Prefix(""),
+	tu.CheckScan(t, ctx, c, syncbase.Prefix(""),
 		[]string{"bar-2", "foo-1"},
 		[]interface{}{"bar", "foo"})
 }
@@ -699,7 +700,7 @@ func TestRunInBatchMaxRetries(t *testing.T) {
 	defer cleanup()
 	a := tu.CreateApp(t, ctx, syncbase.NewService(sName), "a")
 	d := tu.CreateDatabase(t, ctx, a, "d")
-	tb := tu.CreateTable(t, ctx, d, "tb")
+	c := tu.CreateCollection(t, ctx, d, "c")
 
 	// Succeed (no conflict) on 10th try. RunInBatch will retry 3 times and give
 	// up with ErrConcurrentBatch.
@@ -707,7 +708,7 @@ func TestRunInBatchMaxRetries(t *testing.T) {
 		t.Errorf("RunInBatch() should have failed with ErrConcurrentBatch, got: %v", err)
 	}
 	// Three failed tries.
-	tu.CheckScan(t, ctx, tb, syncbase.Prefix(""),
+	tu.CheckScan(t, ctx, c, syncbase.Prefix(""),
 		[]string{"foo-1", "foo-2", "foo-3"},
 		[]interface{}{"foo", "foo", "foo"})
 }
@@ -718,7 +719,7 @@ func TestRunInBatchError(t *testing.T) {
 	defer cleanup()
 	a := tu.CreateApp(t, ctx, syncbase.NewService(sName), "a")
 	d := tu.CreateDatabase(t, ctx, a, "d")
-	tb := tu.CreateTable(t, ctx, d, "tb")
+	c := tu.CreateCollection(t, ctx, d, "c")
 
 	// Return error from fn. Errors other than ErrConcurrentTransaction are not
 	// retried.
@@ -727,7 +728,7 @@ func TestRunInBatchError(t *testing.T) {
 		t.Errorf("RunInBatch() should have failed with %v, got: %v", dummyError, err)
 	}
 	// Single failed try.
-	tu.CheckScan(t, ctx, tb, syncbase.Prefix(""),
+	tu.CheckScan(t, ctx, c, syncbase.Prefix(""),
 		[]string{"foo-1"},
 		[]interface{}{"foo"})
 }
@@ -738,35 +739,35 @@ func TestRunInBatchReadOnly(t *testing.T) {
 	defer cleanup()
 	a := tu.CreateApp(t, ctx, syncbase.NewService(sName), "a")
 	d := tu.CreateDatabase(t, ctx, a, "d")
-	tb := tu.CreateTable(t, ctx, d, "tb")
+	c := tu.CreateCollection(t, ctx, d, "c")
 
 	// Test readonly batch.
-	if err := tb.Put(ctx, "foo", 1); err != nil {
-		t.Fatalf("tb.Put() failed: %v", err)
+	if err := c.Put(ctx, "foo", 1); err != nil {
+		t.Fatalf("c.Put() failed: %v", err)
 	}
 	if err := syncbase.RunInBatch(ctx, d, wire.BatchOptions{ReadOnly: true}, func(b syncbase.BatchDatabase) error {
 		var value int32
 		// Read foo.
-		if err := b.Table("tb").Get(ctx, "foo", &value); err != nil {
+		if err := b.Collection("c").Get(ctx, "foo", &value); err != nil {
 			t.Fatalf("b.Get() failed: %v", err)
 		}
 		newValue := value + 1
 		// Write to foo in a separate concurrent batch. This is always written on
 		// every iteration. It should not cause a retry since readonly batches are
 		// not committed.
-		if err := d.Table("tb").Put(ctx, "foo", newValue); err != nil {
+		if err := d.Collection("c").Put(ctx, "foo", newValue); err != nil {
 			t.Errorf("d.Put() failed: %v", err)
 		}
 		// Read foo again. Batch should not see the incremented value.
 		var rereadValue int32
-		if err := b.Table("tb").Get(ctx, "foo", &rereadValue); err != nil {
+		if err := b.Collection("c").Get(ctx, "foo", &rereadValue); err != nil {
 			t.Fatalf("b.Get() failed: %v", err)
 		}
 		if value != rereadValue {
 			t.Fatal("batch should not see value change outside batch")
 		}
 		// Try writing to bar. This should fail since the batch is readonly.
-		if err := b.Table("tb").Put(ctx, "bar", value); verror.ErrorID(err) != wire.ErrReadOnlyBatch.ID {
+		if err := b.Collection("c").Put(ctx, "bar", value); verror.ErrorID(err) != wire.ErrReadOnlyBatch.ID {
 			t.Errorf("b.Put() should have failed with ErrReadOnlyBatch, got: %v", err)
 		}
 		return nil
@@ -774,7 +775,7 @@ func TestRunInBatchReadOnly(t *testing.T) {
 		t.Errorf("RunInBatch() failed: %v", err)
 	}
 	// Single uncommitted iteration.
-	tu.CheckScan(t, ctx, tb, syncbase.Prefix(""),
+	tu.CheckScan(t, ctx, c, syncbase.Prefix(""),
 		[]string{"foo"},
 		[]interface{}{int32(2)})
 }

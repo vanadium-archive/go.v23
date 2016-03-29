@@ -37,7 +37,7 @@ func TestV23SyncgroupRendezvousOnline(t *testing.T) {
 	// Syncbase s0 is the creator.
 	sgName := naming.Join(sbs[0].sbName, common.SyncbaseSuffix, "SG1")
 
-	ok(t, createSyncgroup(sbs[0].clientCtx, sbs[0].sbName, sgName, "tb:foo", "", sbBlessings(sbs), nil))
+	ok(t, createSyncgroup(sbs[0].clientCtx, sbs[0].sbName, sgName, "c:foo", "", sbBlessings(sbs), nil))
 
 	// Remaining syncbases run the specified workload concurrently.
 	for i := 1; i < len(sbs); i++ {
@@ -79,7 +79,7 @@ func TestV23SyncgroupRendezvousOnlineCloud(t *testing.T) {
 	// Syncbase s0 is the creator, and sN is the cloud.
 	sgName := naming.Join(sbs[N].sbName, common.SyncbaseSuffix, "SG1")
 
-	ok(t, createSyncgroup(sbs[0].clientCtx, sbs[0].sbName, sgName, "tb:foo", "", sbBlessings(sbs), nil))
+	ok(t, createSyncgroup(sbs[0].clientCtx, sbs[0].sbName, sgName, "c:foo", "", sbBlessings(sbs), nil))
 
 	// Remaining N-1 syncbases run the specified workload concurrently.
 	for i := 1; i < N; i++ {
@@ -136,7 +136,7 @@ func TestV23SyncgroupNeighborhoodOnly(t *testing.T) {
 	}
 	perms.Add(security.BlessingPattern("root:"+sbs[0].sbName), string(access.Admin))
 
-	ok(t, createSyncgroup(sbs[0].clientCtx, sbs[0].sbName, sgName, "tb:foo", "/mttable", "", perms))
+	ok(t, createSyncgroup(sbs[0].clientCtx, sbs[0].sbName, sgName, "c:foo", "/mttable", "", perms))
 
 	// Remaining syncbases run the specified workload concurrently.
 	for i := 1; i < len(sbs); i++ {
@@ -175,12 +175,12 @@ func TestV23SyncgroupPreknownStaggered(t *testing.T) {
 	// Syncbase s0 is the first to join or create. Run s0 separately to
 	// stagger the process.
 	sgName := naming.Join(sbs[0].sbName, common.SyncbaseSuffix, "SG1")
-	ok(t, joinOrCreateSyncgroup(sbs[0].clientCtx, sbs[0].sbName, sgName, "tb:foo", "", sbBlessings(sbs)))
+	ok(t, joinOrCreateSyncgroup(sbs[0].clientCtx, sbs[0].sbName, sgName, "c:foo", "", sbBlessings(sbs)))
 
 	// Remaining syncbases run the specified workload concurrently.
 	for i := 1; i < len(sbs); i++ {
 		go func(i int) {
-			ok(t, joinOrCreateSyncgroup(sbs[i].clientCtx, sbs[i].sbName, sgName, "tb:foo", "", sbBlessings(sbs)))
+			ok(t, joinOrCreateSyncgroup(sbs[i].clientCtx, sbs[i].sbName, sgName, "c:foo", "", sbBlessings(sbs)))
 		}(i)
 	}
 

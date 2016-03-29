@@ -18,7 +18,7 @@ type scanStream struct {
 	// cancel cancels the RPC stream.
 	cancel context.CancelFunc
 	// call is the RPC stream object.
-	call wire.TableScanClientCall
+	call wire.CollectionScanClientCall
 	// curr is the currently staged key-value pair, or nil if nothing is staged.
 	curr *wire.KeyValue
 	// err is the first error encountered during streaming. It may also be
@@ -30,7 +30,7 @@ type scanStream struct {
 
 var _ ScanStream = (*scanStream)(nil)
 
-func newScanStream(cancel context.CancelFunc, call wire.TableScanClientCall) *scanStream {
+func newScanStream(cancel context.CancelFunc, call wire.CollectionScanClientCall) *scanStream {
 	return &scanStream{
 		cancel: cancel,
 		call:   call,

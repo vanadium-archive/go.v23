@@ -45,7 +45,7 @@ func TestSchemaCheck(t *testing.T) {
 	// try to make a new database object for the same database but this time
 	// with a new schema version
 	schema.Metadata.Version = 1
-	rule := wire.CrRule{"table1", "foo", "", wire.ResolverTypeLastWins}
+	rule := wire.CrRule{"collection1", "foo", "", wire.ResolverTypeLastWins}
 	policy := wire.CrPolicy{
 		Rules: []wire.CrRule{rule},
 	}
@@ -78,16 +78,16 @@ func TestRPCSchemaCheckError(t *testing.T) {
 	a := tu.CreateApp(t, ctx, syncbase.NewService(sName), "a")
 	schema := tu.DefaultSchema(0)
 
-	// Create db1 with schema version 0 and add table1 and row1
+	// Create db1 with schema version 0 and add collection1 and row1
 	dbHandle1 := a.Database("db1", schema)
 	if err := dbHandle1.Create(ctx, nil); err != nil {
 		t.Fatalf("db1.Create() failed: %v", err)
 	}
-	if err := dbHandle1.Table("table1").Create(ctx, nil); err != nil {
-		t.Fatalf("db1.CreateTable() failed: %v", err)
+	if err := dbHandle1.Collection("collection1").Create(ctx, nil); err != nil {
+		t.Fatalf("db1.CreateCollection() failed: %v", err)
 	}
-	if err := dbHandle1.Table("table1").Put(ctx, "row1", "value1"); err != nil {
-		t.Fatalf("table1.Put() failed: %v", err)
+	if err := dbHandle1.Collection("collection1").Put(ctx, "row1", "value1"); err != nil {
+		t.Fatalf("collection1.Put() failed: %v", err)
 	}
 
 	// Try writing to database db1 with a db handle with schema version 2
@@ -95,10 +95,10 @@ func TestRPCSchemaCheckError(t *testing.T) {
 	dbHandle2 := a.Database("db1", schema2)
 
 	// verify write rpcs for Database
-	if err := dbHandle2.Table("table1").Create(ctx, nil); !isVersionMismatchErr(err) {
+	if err := dbHandle2.Collection("collection1").Create(ctx, nil); !isVersionMismatchErr(err) {
 		t.Fatal("Expected ErrDatabaseVersionMismatch, found: " + toString(err))
 	}
-	if err := dbHandle2.Table("table1").Destroy(ctx); !isVersionMismatchErr(err) {
+	if err := dbHandle2.Collection("collection1").Destroy(ctx); !isVersionMismatchErr(err) {
 		t.Fatal("Expected ErrDatabaseVersionMismatch, found: " + toString(err))
 	}
 	if err := dbHandle2.Destroy(ctx); !isVersionMismatchErr(err) {
@@ -114,39 +114,39 @@ func TestRPCSchemaCheckError(t *testing.T) {
 		t.Fatal("Expected ErrDatabaseVersionMismatch, found: " + toString(err))
 	}
 
-	// verify write rpcs for Table
-	table := dbHandle2.Table("table1")
-	if _, err := table.Exists(ctx); !isVersionMismatchErr(err) {
+	// verify write rpcs for Collection
+	collection := dbHandle2.Collection("collection1")
+	if _, err := collection.Exists(ctx); !isVersionMismatchErr(err) {
 		t.Fatal("Expected ErrDatabaseVersionMismatch, found: " + toString(err))
 	}
-	if err := table.Delete(ctx, "row1"); !isVersionMismatchErr(err) {
+	if err := collection.Delete(ctx, "row1"); !isVersionMismatchErr(err) {
 		t.Fatal("Expected ErrDatabaseVersionMismatch, found: " + toString(err))
 	}
-	stream := table.Scan(ctx, syncbase.SingleRow("row1"))
+	stream := collection.Scan(ctx, syncbase.SingleRow("row1"))
 	if stream.Advance() {
 		t.Fatalf("Stream advanced unexpectedly")
 	}
 	if !isVersionMismatchErr(stream.Err()) {
 		t.Fatal("Expected ErrDatabaseVersionMismatch, found: " + toString(stream.Err()))
 	}
-	if _, err := table.GetPermissions(ctx); !isVersionMismatchErr(err) {
+	if _, err := collection.GetPermissions(ctx); !isVersionMismatchErr(err) {
 		t.Fatal("Expected ErrDatabaseVersionMismatch, found: " + toString(err))
 	}
-	if err := table.SetPermissions(ctx, nil); !isVersionMismatchErr(err) {
+	if err := collection.SetPermissions(ctx, nil); !isVersionMismatchErr(err) {
 		t.Fatal("Expected ErrDatabaseVersionMismatch, found: " + toString(err))
 	}
-	if _, err := table.GetPrefixPermissions(ctx, "row1"); !isVersionMismatchErr(err) {
+	if _, err := collection.GetPrefixPermissions(ctx, "row1"); !isVersionMismatchErr(err) {
 		t.Fatal("Expected ErrDatabaseVersionMismatch, found: " + toString(err))
 	}
-	if err := table.SetPrefixPermissions(ctx, syncbase.Prefix("row"), nil); !isVersionMismatchErr(err) {
+	if err := collection.SetPrefixPermissions(ctx, syncbase.Prefix("row"), nil); !isVersionMismatchErr(err) {
 		t.Fatal("Expected ErrDatabaseVersionMismatch, found: " + toString(err))
 	}
-	if err := table.DeletePrefixPermissions(ctx, syncbase.Prefix("row")); !isVersionMismatchErr(err) {
+	if err := collection.DeletePrefixPermissions(ctx, syncbase.Prefix("row")); !isVersionMismatchErr(err) {
 		t.Fatal("Expected ErrDatabaseVersionMismatch, found: " + toString(err))
 	}
 
 	// verify write rpcs for Row
-	row := table.Row("row1")
+	row := collection.Row("row1")
 	if _, err := row.Exists(ctx); !isVersionMismatchErr(err) {
 		t.Fatal("Expected ErrDatabaseVersionMismatch, found: " + toString(err))
 	}
@@ -169,16 +169,16 @@ func TestRPCSchemaCheckErrorForBatch(t *testing.T) {
 	a := tu.CreateApp(t, ctx, syncbase.NewService(sName), "a")
 	schema := tu.DefaultSchema(0)
 
-	// Create db1 with schema version 0 and add table1 and row1
+	// Create db1 with schema version 0 and add collection1 and row1
 	dbHandle1 := a.Database("db1", schema)
 	if err := dbHandle1.Create(ctx, nil); err != nil {
 		t.Fatalf("db1.Create() failed: %v", err)
 	}
-	if err := dbHandle1.Table("table1").Create(ctx, nil); err != nil {
-		t.Fatalf("db1.CreateTable() failed: %v", err)
+	if err := dbHandle1.Collection("collection1").Create(ctx, nil); err != nil {
+		t.Fatalf("db1.CreateCollection() failed: %v", err)
 	}
-	if err := dbHandle1.Table("table1").Put(ctx, "row1", "value1"); err != nil {
-		t.Fatalf("table1.Put() failed: %v", err)
+	if err := dbHandle1.Collection("collection1").Put(ctx, "row1", "value1"); err != nil {
+		t.Fatalf("collection1.Put() failed: %v", err)
 	}
 
 	// Create three batches using dbHandle1
@@ -186,13 +186,13 @@ func TestRPCSchemaCheckErrorForBatch(t *testing.T) {
 	if batchErr1 != nil {
 		t.Fatalf("db1.BeginBatch() failed: %v", batchErr1)
 	}
-	batch1.Table("table1").Row("row1").Put(ctx, "newValue1")
+	batch1.Collection("collection1").Row("row1").Put(ctx, "newValue1")
 
 	batch2, batchErr2 := dbHandle1.BeginBatch(ctx, wire.BatchOptions{})
 	if batchErr2 != nil {
 		t.Fatalf("db1.BeginBatch() failed: %v", batchErr2)
 	}
-	batch2.Table("table1").Row("row1").Put(ctx, "newValue2")
+	batch2.Collection("collection1").Row("row1").Put(ctx, "newValue2")
 
 	batch3, batchErr3 := dbHandle1.BeginBatch(ctx, wire.BatchOptions{})
 	if batchErr3 != nil {
@@ -212,14 +212,14 @@ func TestRPCSchemaCheckErrorForBatch(t *testing.T) {
 	if err := batch2.Abort(ctx); !isVersionMismatchErr(err) {
 		t.Fatal("Expected ErrDatabaseVersionMismatch, found: " + toString(err))
 	}
-	if err := batch3.Table("table1").Row("row1").Put(ctx, "newValue3"); !isVersionMismatchErr(err) {
+	if err := batch3.Collection("collection1").Row("row1").Put(ctx, "newValue3"); !isVersionMismatchErr(err) {
 		t.Fatal("Expected ErrDatabaseVersionMismatch, found: " + toString(err))
 	}
 
 	// Verify that the value of row1 is the original value.
 	var value string
-	if err := dbHandle2.Table("table1").Get(ctx, "row1", &value); err != nil {
-		t.Fatalf("table1.Get() failed: %v", err)
+	if err := dbHandle2.Collection("collection1").Get(ctx, "row1", &value); err != nil {
+		t.Fatalf("collection1.Get() failed: %v", err)
 	}
 }
 

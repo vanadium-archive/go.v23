@@ -100,16 +100,16 @@ func (d *database) Exists(ctx *context.T) (bool, error) {
 	return d.c.Exists(ctx, d.schemaVersion())
 }
 
-// Table implements Database.Table.
-func (d *database) Table(relativeName string) Table {
-	return newTable(d.fullName, relativeName, d.schemaVersion())
+// Collection implements Database.Collection.
+func (d *database) Collection(relativeName string) Collection {
+	return newCollection(d.fullName, relativeName, d.schemaVersion())
 }
 
-// ListTables implements Database.ListTables.
-func (d *database) ListTables(ctx *context.T) ([]string, error) {
+// ListCollections implements Database.ListCollections.
+func (d *database) ListCollections(ctx *context.T) ([]string, error) {
 	// See comment in v.io/v23/services/syncbase/service.vdl for why we
-	// can't implement ListTables using Glob (via util.ListChildren).
-	return d.c.ListTables(ctx)
+	// can't implement ListCollections using Glob (via util.ListChildren).
+	return d.c.ListCollections(ctx)
 }
 
 // Create implements Database.Create.
@@ -183,13 +183,13 @@ func (d *database) GetPermissions(ctx *context.T) (perms access.Permissions, ver
 }
 
 // Watch implements the Database interface.
-func (d *database) Watch(ctx *context.T, table, prefix string, resumeMarker watch.ResumeMarker) (WatchStream, error) {
-	if !util.ValidTableName(table) {
-		return nil, verror.New(svcwire.ErrInvalidName, ctx, table)
+func (d *database) Watch(ctx *context.T, collection, prefix string, resumeMarker watch.ResumeMarker) (WatchStream, error) {
+	if !util.ValidCollectionName(collection) {
+		return nil, verror.New(svcwire.ErrInvalidName, ctx, collection)
 	}
 	ctx, cancel := context.WithCancel(ctx)
 	call, err := d.c.WatchGlob(ctx, watch.GlobRequest{
-		Pattern:      naming.Join(table, prefix+"*"),
+		Pattern:      naming.Join(collection, prefix+"*"),
 		ResumeMarker: resumeMarker,
 	})
 	if err != nil {

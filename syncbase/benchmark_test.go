@@ -39,9 +39,9 @@ import (
 	tu "v.io/x/ref/services/syncbase/testutil"
 )
 
-// prepare creates hierarchy "a/d/tb" and returns some handles along with a
+// prepare creates hierarchy "a/d/c" and returns some handles along with a
 // cleanup function.
-func prepare(b *testing.B) (*context.T, syncbase.Database, syncbase.Table, func()) {
+func prepare(b *testing.B) (*context.T, syncbase.Database, syncbase.Collection, func()) {
 	ctx, sName, cleanup := tu.SetupOrDie(nil)
 	s := syncbase.NewService(sName)
 	a := s.App("a")
@@ -52,11 +52,11 @@ func prepare(b *testing.B) (*context.T, syncbase.Database, syncbase.Table, func(
 	if err := d.Create(ctx, nil); err != nil {
 		b.Fatalf("can't create database: %v", err)
 	}
-	tb := d.Table("tb")
-	if err := tb.Create(ctx, nil); err != nil {
-		b.Fatalf("can't create table: %v", err)
+	c := d.Collection("c")
+	if err := c.Create(ctx, nil); err != nil {
+		b.Fatalf("can't create collection: %v", err)
 	}
-	return ctx, d, tb, func() {
+	return ctx, d, c, func() {
 		b.StopTimer()
 		cleanup()
 		b.StartTimer()
@@ -92,46 +92,46 @@ func makeTestStruct100K() interface{} {
 	return testStruct{A: "hello, world!", B: 42, D: byteSlice}
 }
 
-func writeRows(b *testing.B, ctx *context.T, tb syncbase.Table, value interface{}) {
-	writeRowsCustom(b, ctx, tb, value, b.N)
+func writeRows(b *testing.B, ctx *context.T, c syncbase.Collection, value interface{}) {
+	writeRowsCustom(b, ctx, c, value, b.N)
 }
 
-func writeRowsCustom(b *testing.B, ctx *context.T, tb syncbase.Table, value interface{}, n int) {
+func writeRowsCustom(b *testing.B, ctx *context.T, c syncbase.Collection, value interface{}, n int) {
 	for i := 0; i < n; i++ {
-		if err := tb.Put(ctx, makeKey(i), value); err != nil {
+		if err := c.Put(ctx, makeKey(i), value); err != nil {
 			b.Fatal(err)
 		}
 	}
 }
 
 func runPutBenchmark(b *testing.B, value interface{}) {
-	ctx, _, tb, cleanup := prepare(b)
+	ctx, _, c, cleanup := prepare(b)
 	defer cleanup()
 	b.ResetTimer()
-	writeRows(b, ctx, tb, value)
+	writeRows(b, ctx, c, value)
 }
 
 func runGetBenchmark(b *testing.B, value interface{}) {
-	ctx, _, tb, cleanup := prepare(b)
+	ctx, _, c, cleanup := prepare(b)
 	defer cleanup()
-	writeRows(b, ctx, tb, value)
+	writeRows(b, ctx, c, value)
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		var got testStruct
-		if err := tb.Get(ctx, makeKey(i), &got); err != nil {
-			b.Fatalf("tb.Get failed: %v", err)
+		if err := c.Get(ctx, makeKey(i), &got); err != nil {
+			b.Fatalf("c.Get failed: %v", err)
 		}
 	}
 }
 
 func runDeleteBenchmark(b *testing.B, value interface{}) {
-	ctx, _, tb, cleanup := prepare(b)
+	ctx, _, c, cleanup := prepare(b)
 	defer cleanup()
-	writeRows(b, ctx, tb, value)
+	writeRows(b, ctx, c, value)
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		if err := tb.Delete(ctx, makeKey(i)); err != nil {
-			b.Fatalf("tb.Delete failed: %v", err)
+		if err := c.Delete(ctx, makeKey(i)); err != nil {
+			b.Fatalf("c.Delete failed: %v", err)
 		}
 	}
 }
@@ -140,16 +140,16 @@ const numRows = 100
 
 // Measures how long it takes to process 'numRows' rows using scan.
 func runScanBenchmark(b *testing.B, value interface{}) {
-	ctx, _, tb, cleanup := prepare(b)
+	ctx, _, c, cleanup := prepare(b)
 	defer cleanup()
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		b.StopTimer()
 		// TODO(sadovsky): Write rows just once, and clear any read caches on every
 		// iteration.
-		writeRowsCustom(b, ctx, tb, value, numRows)
+		writeRowsCustom(b, ctx, c, value, numRows)
 		b.StartTimer()
-		s := tb.Scan(ctx, syncbase.Prefix(""))
+		s := c.Scan(ctx, syncbase.Prefix(""))
 		var got testStruct
 		for s.Advance() {
 			s.Value(&got)
@@ -162,16 +162,16 @@ func runScanBenchmark(b *testing.B, value interface{}) {
 
 // Measures how long it takes to process 'numRows' rows using exec.
 func runExecBenchmark(b *testing.B, value interface{}) {
-	ctx, d, tb, cleanup := prepare(b)
+	ctx, d, c, cleanup := prepare(b)
 	defer cleanup()
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		b.StopTimer()
 		// TODO(sadovsky): Write rows just once, and clear any read caches on every
 		// iteration.
-		writeRowsCustom(b, ctx, tb, value, numRows)
+		writeRowsCustom(b, ctx, c, value, numRows)
 		b.StartTimer()
-		_, s, err := d.Exec(ctx, "select v from tb")
+		_, s, err := d.Exec(ctx, "select v from c")
 		if err != nil {
 			b.Fatalf("exec error: %s", s.Err())
 		}
@@ -187,11 +187,11 @@ func runExecBenchmark(b *testing.B, value interface{}) {
 // Measures how long it takes to put and get notified about 'numRows' rows.
 func runWatchPutsBenchmark(b *testing.B, value interface{}) {
 	b.Skip("Hangs on occasion, for unknown reasons - v.io/i/1134")
-	ctx, d, tb, cleanup := prepare(b)
+	ctx, d, c, cleanup := prepare(b)
 	defer cleanup()
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		w, err := d.Watch(ctx, "tb", "", watch.ResumeMarker("now"))
+		w, err := d.Watch(ctx, "c", "", watch.ResumeMarker("now"))
 		if err != nil {
 			b.Fatalf("watch error: %v", err)
 		}
@@ -207,7 +207,7 @@ func runWatchPutsBenchmark(b *testing.B, value interface{}) {
 			}
 			close(done)
 		}()
-		writeRowsCustom(b, ctx, tb, value, numRows)
+		writeRowsCustom(b, ctx, c, value, numRows)
 		<-done
 		w.Cancel()
 	}
@@ -216,9 +216,9 @@ func runWatchPutsBenchmark(b *testing.B, value interface{}) {
 // Measures how long it takes to put and get notified about a single value.
 func runWatchOnePutBenchmark(b *testing.B, value interface{}) {
 	b.Skip("Hangs on occasion, for unknown reasons - v.io/i/1134")
-	ctx, d, tb, cleanup := prepare(b)
+	ctx, d, c, cleanup := prepare(b)
 	defer cleanup()
-	w, err := d.Watch(ctx, "tb", "", watch.ResumeMarker("now"))
+	w, err := d.Watch(ctx, "c", "", watch.ResumeMarker("now"))
 	row := make(chan struct{})
 	if err != nil {
 		b.Fatalf("watch error: %v", err)
@@ -236,7 +236,7 @@ func runWatchOnePutBenchmark(b *testing.B, value interface{}) {
 	}()
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		writeRowsCustom(b, ctx, tb, value, 1)
+		writeRowsCustom(b, ctx, c, value, 1)
 		<-row
 	}
 	w.Cancel()

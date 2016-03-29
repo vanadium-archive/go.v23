@@ -27,7 +27,7 @@ func TestV23SyncbasedPutGet(t *testing.T) {
 	// See https://github.com/vanadium/issues/issues/1110
 	sh.StartSyncbase(serverCreds, syncbaselib.Opts{Name: testSbName}, `{"Resolve": {"In":["root:server", "root:client"]}, "Read": {"In":["root:server", "root:client"]}, "Write": {"In":["root:server", "root:client"]}}`)
 
-	// Create app, database and table.
+	// Create app, database and collection.
 	// TODO(ivanpi): Use setupAppA.
 	ctx := sh.ForkContext("client")
 	a := syncbase.NewService(testSbName).App("a")
@@ -38,9 +38,9 @@ func TestV23SyncbasedPutGet(t *testing.T) {
 	if err := d.Create(ctx, nil); err != nil {
 		t.Fatalf("unable to create a database: %v", err)
 	}
-	tb := d.Table("tb")
-	if err := tb.Create(ctx, nil); err != nil {
-		t.Fatalf("unable to create a table: %v", err)
+	c := d.Collection("c")
+	if err := c.Create(ctx, nil); err != nil {
+		t.Fatalf("unable to create a collection: %v", err)
 	}
 	marker, err := d.GetResumeMarker(ctx)
 	if err != nil {
@@ -48,7 +48,7 @@ func TestV23SyncbasedPutGet(t *testing.T) {
 	}
 
 	// Do a Put followed by a Get.
-	r := tb.Row("testkey")
+	r := c.Row("testkey")
 	if err := r.Put(ctx, "testvalue"); err != nil {
 		t.Fatalf("r.Put() failed: %v", err)
 	}
@@ -63,7 +63,7 @@ func TestV23SyncbasedPutGet(t *testing.T) {
 	// Do a watch from the resume marker before the put operation.
 	ctxWithTimeout, cancel := context.WithTimeout(ctx, 10*time.Second)
 	defer cancel()
-	stream, err := d.Watch(ctxWithTimeout, "tb", "", marker)
+	stream, err := d.Watch(ctxWithTimeout, "c", "", marker)
 	if err != nil {
 		t.Fatalf("unable to start a watch %v", err)
 	}
@@ -71,8 +71,8 @@ func TestV23SyncbasedPutGet(t *testing.T) {
 		t.Fatalf("watch stream unexpectedly reached the end: %v", stream.Err())
 	}
 	change := stream.Change()
-	if got, want := change.Table, "tb"; got != want {
-		t.Fatalf("unexpected watch table: got %q, want %q", got, want)
+	if got, want := change.Collection, "c"; got != want {
+		t.Fatalf("unexpected watch collection: got %q, want %q", got, want)
 	}
 	if got, want := change.Row, "testkey"; got != want {
 		t.Fatalf("unexpected watch row: got %q, want %q", got, want)

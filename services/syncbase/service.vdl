@@ -59,9 +59,9 @@ type App interface {
 	permissions.Object
 }
 
-// Database represents a collection of Tables. Batches, queries, sync, watch,
-// etc. all operate at the Database level.
-// Database.Glob operates over Table names.
+// Database represents a set of Collections. Batches, queries, sync, watch, etc.
+// all operate at the Database level.
+// Database.Glob operates over Collection names.
 // Param schemaVersion is the version number that the client expects the
 // database to be at. To disable schema version checking, pass -1.
 type Database interface {
@@ -79,7 +79,7 @@ type Database interface {
 	// do not exist.
 	Exists(schemaVersion int32) (bool | error) {access.Resolve}
 
-	// ListTables returns a list of all Table names.
+	// ListCollections returns a list of all Collection names.
 	// This method exists on Database but not on Service or App because for the
 	// latter we can simply use glob, while for the former glob fails on
 	// BatchDatabase since we encode the batch id in the BatchDatabase object
@@ -92,7 +92,7 @@ type Database interface {
 	//    results. This is inefficient in general, and broken for us since
 	//    Glob("app/*") does not return batch database names like "a/d##bId".
 	// TODO(sadovsky): Maybe switch to streaming RPC.
-	ListTables() ([]string | error) {access.Read}
+	ListCollections() ([]string | error) {access.Read}
 
 	// Exec executes a syncQL query with positional parameters and returns all
 	// results as specified by the query's select/delete statement.
@@ -153,28 +153,28 @@ type Database interface {
 	ConflictManager
 }
 
-// Table represents a collection of Rows.
-// Table.Glob operates over the primary keys of Rows in the Table.
+// Collection represents a collection of Rows.
+// Collection.Glob operates over the primary keys of Rows in the Collection.
 // SchemaVersion is the version number that the client expects the database
 // to be at. To disable schema version checking, pass -1.
-type Table interface {
-	// Create creates this Table.
+type Collection interface {
+	// Create creates this Collection.
 	// If perms is nil, we inherit (copy) the Database perms.
 	Create(schemaVersion int32, perms access.Permissions) error {access.Write}
 
-	// Destroy destroys this Table.
+	// Destroy destroys this Collection.
 	Destroy(schemaVersion int32) error {access.Write}
 
-	// Exists returns true only if this Table exists. Insufficient permissions
-	// cause Exists to return false instead of an error.
+	// Exists returns true only if this Collection exists. Insufficient
+	// permissions cause Exists to return false instead of an error.
 	// TODO(ivanpi): Exists may fail with an error if higher levels of hierarchy
 	// do not exist.
 	Exists(schemaVersion int32) (bool | error) {access.Resolve}
 
-	// GetPermissions returns the current Permissions for the Table.
+	// GetPermissions returns the current Permissions for the Collection.
 	GetPermissions(schemaVersion int32) (access.Permissions | error) {access.Admin}
 
-	// SetPermissions replaces the current Permissions for the Table.
+	// SetPermissions replaces the current Permissions for the Collection.
 	SetPermissions(schemaVersion int32, perms access.Permissions) error {access.Admin}
 
 	// DeleteRange deletes all rows in the given half-open range [start, limit).
@@ -188,11 +188,11 @@ type Table interface {
 	// documented in model.go.
 	Scan(schemaVersion int32, start, limit []byte) stream<_, KeyValue> error {access.Read}
 
-	// GetPrefixPermissions returns an array of (prefix, perms) pairs. The array is
-	// sorted from longest prefix to shortest, so element zero is the one that
+	// GetPrefixPermissions returns an array of (prefix, perms) pairs. The array
+	// is sorted from longest prefix to shortest, so element zero is the one that
 	// applies to the row with the given key. The last element is always the
-	// prefix "" which represents the table's permissions -- the array will always
-	// have at least one element.
+	// prefix "" which represents the collection's permissions -- the array will
+	// always have at least one element.
 	GetPrefixPermissions(schemaVersion int32, key string) ([]PrefixPermissions | error) {access.Admin}
 
 	// SetPrefixPermissions sets the permissions for all current and future rows with
@@ -210,9 +210,9 @@ type Table interface {
 	DeletePrefixPermissions(schemaVersion int32, prefix string) error {access.Admin}
 }
 
-// Row represents a single row in a Table.
+// Row represents a single row in a Collection.
 // All access checks are performed against the most specific matching prefix
-// permissions in the Table.
+// permissions in the Collection.
 // SchemaVersion is the version number that the client expects the database
 // to be at. To disable schema version checking, pass -1.
 // NOTE(sadovsky): Currently we send []byte values over the wire for Get, Put,
@@ -408,7 +408,7 @@ type BlobManager interface {
 // without re-ordering. See watch.GlobWatcher for a detailed explanation of the
 // behavior.
 // TODO(rogulenko): Currently the only supported watch patterns are
-// "<tableName>/<rowPrefix>*". Consider changing that.
+// "<collectionName>/<rowPrefix>*". Consider changing that.
 //
 // Watching is done by starting a streaming RPC. The RPC takes a ResumeMarker
 // argument that points to a particular place in the database event log. If an
@@ -417,8 +417,8 @@ type BlobManager interface {
 // only changes since the provided ResumeMarker.
 //
 // The result stream consists of a never-ending sequence of Change messages
-// (until the call fails or is canceled). Each Change contains the Name field
-// in the form "<tableName>/<rowKey>" and the Value field of the StoreChange
+// (until the call fails or is canceled). Each Change contains the Name field in
+// the form "<collectionName>/<rowKey>" and the Value field of the StoreChange
 // type. If the client has no access to a row specified in a change, that change
 // is excluded from the result stream.
 //

@@ -59,9 +59,9 @@ type KeyValue struct {
 	Value []byte
 }
 
-// TableRow encapsulates the table name and row key or row prefix.
-type TableRow struct {
-	TableName string
+// CollectionRow encapsulates the collection name and row key or row prefix.
+type CollectionRow struct {
+	CollectionName string
 	Row       string
 }
 
@@ -73,8 +73,8 @@ type SyncgroupSpec struct {
 	// Permissions governing access to this syncgroup.
 	Perms access.Permissions
 
-	// Data (tableName-rowPrefix pairs) covered by this syncgroup.
-	Prefixes []TableRow
+	// Data (collectionName-rowPrefix pairs) covered by this syncgroup.
+	Prefixes []CollectionRow
 
 	// Mount tables at which to advertise this syncgroup, for rendezvous purposes.
 	// (Note that in addition to these mount tables, Syncbase also uses
@@ -334,11 +334,11 @@ type CrPolicy struct {
 // CrRule provides a filter and the type of resolution to perform for a row
 // under conflict that passes the filter.
 type CrRule struct {
-	// TableName is the name of the table that this rule applies to.
-	TableName	string
+	// CollectionName is the name of the collection that this rule applies to.
+	CollectionName string
 
-	// KeyPrefix represents the set of keys within the given table for which
-	// this policy applies. TableName must not be empty if this field is set.
+	// KeyPrefix represents the set of keys within the given collection for which
+	// this policy applies. CollectionName must not be empty if this field is set.
 	KeyPrefix	string
 
 	// Type includes the full package path for the value type for which this

@@ -38,7 +38,7 @@ func restartabilityInit(sh *v23test.Shell) (rootDir string, clientCtx *context.T
 }
 
 // TODO(ivanpi): Duplicate of setupAppA.
-func createAppDatabaseTable(t *testing.T, clientCtx *context.T) syncbase.Database {
+func createAppDatabaseCollection(t *testing.T, clientCtx *context.T) syncbase.Database {
 	a := syncbase.NewService(testSbName).App("a")
 	if err := a.Create(clientCtx, nil); err != nil {
 		t.Fatalf("unable to create an app: %v", err)
@@ -47,8 +47,8 @@ func createAppDatabaseTable(t *testing.T, clientCtx *context.T) syncbase.Databas
 	if err := d.Create(clientCtx, nil); err != nil {
 		t.Fatalf("unable to create a database: %v", err)
 	}
-	if err := d.Table("tb").Create(clientCtx, nil); err != nil {
-		t.Fatalf("unable to create a table: %v", err)
+	if err := d.Collection("c").Create(clientCtx, nil); err != nil {
+		t.Fatalf("unable to create a collection: %v", err)
 	}
 	return d
 }
@@ -85,7 +85,7 @@ func TestV23RestartabilityCrash(t *testing.T) {
 	checkHierarchy(t, clientCtx)
 }
 
-// Creates apps, dbs, tables, and rows.
+// Creates apps, dbs, collections, and rows.
 func createHierarchy(t *testing.T, ctx *context.T) {
 	s := syncbase.NewService(testSbName)
 	for _, a := range []syncbase.App{s.App("a1"), s.App("a2")} {
@@ -96,13 +96,13 @@ func createHierarchy(t *testing.T, ctx *context.T) {
 			if err := d.Create(ctx, nil); err != nil {
 				t.Fatalf("d.Create() failed: %v", err)
 			}
-			for _, tb := range []syncbase.Table{d.Table("tb1"), d.Table("tb2")} {
-				if err := d.Table(tb.Name()).Create(ctx, nil); err != nil {
-					t.Fatalf("d.CreateTable() failed: %v", err)
+			for _, c := range []syncbase.Collection{d.Collection("c1"), d.Collection("c2")} {
+				if err := d.Collection(c.Name()).Create(ctx, nil); err != nil {
+					t.Fatalf("d.CreateCollection() failed: %v", err)
 				}
 				for _, k := range []string{"foo", "bar"} {
-					if err := tb.Put(ctx, k, k); err != nil {
-						t.Fatalf("tb.Put() failed: %v", err)
+					if err := c.Put(ctx, k, k); err != nil {
+						t.Fatalf("c.Put() failed: %v", err)
 					}
 				}
 			}
@@ -110,7 +110,7 @@ func createHierarchy(t *testing.T, ctx *context.T) {
 	}
 }
 
-// Checks for the apps, dbs, tables, and rows created by runCreateHierarchy.
+// Checks for the apps, dbs, collections, and rows created by runCreateHierarchy.
 func checkHierarchy(t *testing.T, ctx *context.T) {
 	s := syncbase.NewService(testSbName)
 	var got, want []string
@@ -136,16 +136,16 @@ func checkHierarchy(t *testing.T, ctx *context.T) {
 		}
 		for _, dName := range want {
 			d := a.Database(dName, nil)
-			if got, err = d.ListTables(ctx); err != nil {
-				t.Fatalf("d.ListTables() failed: %v", err)
+			if got, err = d.ListCollections(ctx); err != nil {
+				t.Fatalf("d.ListCollections() failed: %v", err)
 			}
-			want = []string{"tb1", "tb2"}
+			want = []string{"c1", "c2"}
 			if !reflect.DeepEqual(got, want) {
-				t.Fatalf("Tables do not match: got %v, want %v", got, want)
+				t.Fatalf("Collections do not match: got %v, want %v", got, want)
 			}
-			for _, tbName := range want {
-				tb := d.Table(tbName)
-				if err := tu.ScanMatches(ctx, tb, syncbase.Prefix(""), []string{"bar", "foo"}, []interface{}{"bar", "foo"}); err != nil {
+			for _, cName := range want {
+				c := d.Collection(cName)
+				if err := tu.ScanMatches(ctx, c, syncbase.Prefix(""), []string{"bar", "foo"}, []interface{}{"bar", "foo"}); err != nil {
 					t.Fatalf("Scan does not match: %v", err)
 				}
 			}
@@ -159,12 +159,12 @@ func TestV23RestartabilityQuiescent(t *testing.T) {
 	defer sh.Cleanup()
 	rootDir, clientCtx, serverCreds := restartabilityInit(sh)
 	cleanup := sh.StartSyncbase(serverCreds, syncbaselib.Opts{Name: testSbName, RootDir: rootDir}, acl)
-	d := createAppDatabaseTable(t, clientCtx)
+	d := createAppDatabaseCollection(t, clientCtx)
 
-	tb := d.Table("tb")
+	c := d.Collection("c")
 
 	// Do Put followed by Get on a row.
-	r := tb.Row("r")
+	r := c.Row("r")
 	if err := r.Put(clientCtx, "testkey"); err != nil {
 		t.Fatalf("r.Put() failed: %v", err)
 	}
@@ -195,10 +195,10 @@ func TestV23RestartabilityReadOnlyBatch(t *testing.T) {
 	defer sh.Cleanup()
 	rootDir, clientCtx, serverCreds := restartabilityInit(sh)
 	cleanup := sh.StartSyncbase(serverCreds, syncbaselib.Opts{Name: testSbName, RootDir: rootDir}, acl)
-	d := createAppDatabaseTable(t, clientCtx)
+	d := createAppDatabaseCollection(t, clientCtx)
 
 	// Add one row.
-	if err := d.Table("tb").Row("r").Put(clientCtx, "testkey"); err != nil {
+	if err := d.Collection("c").Row("r").Put(clientCtx, "testkey"); err != nil {
 		t.Fatalf("r.Put() failed: %v", err)
 	}
 
@@ -206,8 +206,8 @@ func TestV23RestartabilityReadOnlyBatch(t *testing.T) {
 	if err != nil {
 		t.Fatalf("unable to start batch: %v", err)
 	}
-	tb := batch.Table("tb")
-	r := tb.Row("r")
+	c := batch.Collection("c")
+	r := c.Row("r")
 
 	var result string
 	if err := r.Get(clientCtx, &result); err != nil {
@@ -236,7 +236,7 @@ func TestV23RestartabilityReadOnlyBatch(t *testing.T) {
 	}
 
 	// Try to get the row outside of a batch.  It should exist.
-	if err := d.Table("tb").Row("r").Get(clientCtx, &result); err != nil {
+	if err := d.Collection("c").Row("r").Get(clientCtx, &result); err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
 }
@@ -248,16 +248,16 @@ func TestV23RestartabilityReadWriteBatch(t *testing.T) {
 	defer sh.Cleanup()
 	rootDir, clientCtx, serverCreds := restartabilityInit(sh)
 	cleanup := sh.StartSyncbase(serverCreds, syncbaselib.Opts{Name: testSbName, RootDir: rootDir}, acl)
-	d := createAppDatabaseTable(t, clientCtx)
+	d := createAppDatabaseCollection(t, clientCtx)
 
 	batch, err := d.BeginBatch(clientCtx, wire.BatchOptions{})
 	if err != nil {
 		t.Fatalf("unable to start batch: %v", err)
 	}
-	tb := batch.Table("tb")
+	c := batch.Collection("c")
 
 	// Do Put followed by Get on a row.
-	r := tb.Row("r")
+	r := c.Row("r")
 	if err := r.Put(clientCtx, "testkey"); err != nil {
 		t.Fatalf("r.Put() failed: %v", err)
 	}
@@ -288,7 +288,7 @@ func TestV23RestartabilityReadWriteBatch(t *testing.T) {
 	}
 
 	// Try to get the row outside of a batch.  It should not exist.
-	if err := d.Table("tb").Row("r").Get(clientCtx, &result); verror.ErrorID(err) != verror.ErrNoExist.ID {
+	if err := d.Collection("c").Row("r").Get(clientCtx, &result); verror.ErrorID(err) != verror.ErrNoExist.ID {
 		t.Fatalf("expected r.Get() to fail because of ErrNoExist.  got: %v", err)
 	}
 }
@@ -307,7 +307,7 @@ func TestV23RestartabilityWatch(t *testing.T) {
 	defer sh.Cleanup()
 	rootDir, clientCtx, serverCreds := restartabilityInit(sh)
 	cleanup := sh.StartSyncbase(serverCreds, syncbaselib.Opts{Name: testSbName, RootDir: rootDir}, acl)
-	d := createAppDatabaseTable(t, clientCtx)
+	d := createAppDatabaseCollection(t, clientCtx)
 
 	// Put one row as well as get the initial ResumeMarker.
 	batch, err := d.BeginBatch(clientCtx, wire.BatchOptions{})
@@ -318,7 +318,7 @@ func TestV23RestartabilityWatch(t *testing.T) {
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
-	r := batch.Table("tb").Row("r")
+	r := batch.Collection("c").Row("r")
 	if err := r.Put(clientCtx, "testvalue1"); err != nil {
 		t.Fatalf("r.Put() failed: %v", err)
 	}
@@ -328,7 +328,7 @@ func TestV23RestartabilityWatch(t *testing.T) {
 
 	// Watch for the row change.
 	timeout, _ := context.WithTimeout(clientCtx, time.Second)
-	stream, err := d.Watch(timeout, "tb", "r", marker)
+	stream, err := d.Watch(timeout, "c", "r", marker)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -355,14 +355,14 @@ func TestV23RestartabilityWatch(t *testing.T) {
 	cleanup = sh.StartSyncbase(serverCreds, syncbaselib.Opts{Name: testSbName, RootDir: rootDir}, acl)
 
 	// Put another row.
-	r = d.Table("tb").Row("r")
+	r = d.Collection("c").Row("r")
 	if err := r.Put(clientCtx, "testvalue2"); err != nil {
 		t.Fatalf("r.Put() failed: %v", err)
 	}
 
 	// Resume the watch from after the first Put.  We should see only the second
 	// Put.
-	stream, err = d.Watch(clientCtx, "tb", "", marker)
+	stream, err = d.Watch(clientCtx, "c", "", marker)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -488,13 +488,13 @@ func TestV23RestartabilityAppDBCorruption(t *testing.T) {
 	if err := d.Create(clientCtx, nil); err != nil {
 		t.Fatalf("d.Create() failed: %v", err)
 	}
-	for _, tb := range []syncbase.Table{d.Table("tb1"), d.Table("tb2")} {
-		if err := tb.Create(clientCtx, nil); err != nil {
-			t.Fatalf("d.CreateTable() failed: %v", err)
+	for _, c := range []syncbase.Collection{d.Collection("c1"), d.Collection("c2")} {
+		if err := c.Create(clientCtx, nil); err != nil {
+			t.Fatalf("d.CreateCollection() failed: %v", err)
 		}
 		for _, k := range []string{"foo", "bar"} {
-			if err := tb.Put(clientCtx, k, k); err != nil {
-				t.Fatalf("tb.Put() failed: %v", err)
+			if err := c.Put(clientCtx, k, k); err != nil {
+				t.Fatalf("c.Put() failed: %v", err)
 			}
 		}
 	}

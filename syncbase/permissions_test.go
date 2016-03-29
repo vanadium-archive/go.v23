@@ -27,11 +27,11 @@ type appTest struct {
 }
 
 type databaseTest struct {
-	f func(ctx *context.T, db syncbase.Database) error
+	f func(ctx *context.T, d syncbase.Database) error
 }
 
-type tableTest struct {
-	f func(ctx *context.T, tb syncbase.Table) error
+type collectionTest struct {
+	f func(ctx *context.T, c syncbase.Collection) error
 }
 
 type rowTest struct {
@@ -122,21 +122,21 @@ var securitySpecTestGroups = []securitySpecTestGroup{
 
 	// Database tests.
 	{
-		layer: databaseTest{f: func(ctx *context.T, db syncbase.Database) error {
-			_, _, err := db.GetPermissions(ctx)
+		layer: databaseTest{f: func(ctx *context.T, d syncbase.Database) error {
+			_, _, err := d.GetPermissions(ctx)
 			return err
 		}},
 		name:     "database.GetPermissions",
 		patterns: []string{"__A___"},
 	},
 
-	// Table tests.
+	// Collection tests.
 	{
-		layer: tableTest{f: func(ctx *context.T, tb syncbase.Table) error {
-			_, err := tb.GetPermissions(ctx)
+		layer: collectionTest{f: func(ctx *context.T, c syncbase.Collection) error {
+			_, err := c.GetPermissions(ctx)
 			return err
 		}},
-		name:     "table.GetPermissions",
+		name:     "collection.GetPermissions",
 		patterns: []string{"___A__"},
 	},
 
@@ -163,7 +163,7 @@ var securitySpecTestGroups = []securitySpecTestGroup{
 // 0 - service ACL
 // 1 - app ACL
 // 2 - database ACL
-// 3 - table ACL
+// 3 - collection ACL
 // 4 - longest prefix ACL
 // 5 - syncgroup ACL
 // A pattern defines a set of per-ACL permissions required for a client to call
@@ -184,7 +184,7 @@ var securitySpecTestGroups = []securitySpecTestGroup{
 // Then we pack all tests into runs, where each run has only one type of tests
 // (allowed or denied) and at most one mutating test. For each run we rebuild
 // the following Syncbase structure:
-// service: s; app a; database db; table tb; row prefix (with ACL at 'prefix').
+// service: s; app a; database d; collection c; row prefix (with ACL at 'prefix').
 //
 // For each test inside a run we generate 6 huge ACLs with a record for each
 // of the test + one admin record.
@@ -254,14 +254,14 @@ func runTests(t *testing.T, expectSuccess bool, tests ...securitySpecTest) {
 	addPerms(appPerms, 1, tests...)
 	databasePerms := tu.DefaultPerms("root:admin")
 	addPerms(databasePerms, 2, tests...)
-	tablePerms := tu.DefaultPerms("root:admin")
-	addPerms(tablePerms, 3, tests...)
+	collectionPerms := tu.DefaultPerms("root:admin")
+	addPerms(collectionPerms, 3, tests...)
 	rowPerms := tu.DefaultPerms("root:admin")
 	addPerms(rowPerms, 4, tests...)
 	sgPerms := tu.DefaultPerms("root:admin")
 	addPerms(sgPerms, 5, tests...)
 
-	// Create service/app/database/table/row with permissions above.
+	// Create service/app/database/collection/row with permissions above.
 	ctx, adminCtx, sName, rootp, cleanup := tu.SetupOrDieCustom("admin", "server", nil)
 	defer cleanup()
 	s := syncbase.NewService(sName)
@@ -272,21 +272,21 @@ func runTests(t *testing.T, expectSuccess bool, tests ...securitySpecTest) {
 	if err := a.Create(adminCtx, appPerms); err != nil {
 		tu.Fatalf(t, "a.Create failed: %v", err)
 	}
-	db := a.Database("db", nil)
-	if err := db.Create(adminCtx, databasePerms); err != nil {
-		tu.Fatalf(t, "db.Create failed: %v", err)
+	d := a.Database("d", nil)
+	if err := d.Create(adminCtx, databasePerms); err != nil {
+		tu.Fatalf(t, "d.Create failed: %v", err)
 	}
-	tb := db.Table("tb")
-	if err := tb.Create(adminCtx, tablePerms); err != nil {
-		tu.Fatalf(t, "db.Create failed: %v", err)
+	c := d.Collection("c")
+	if err := c.Create(adminCtx, collectionPerms); err != nil {
+		tu.Fatalf(t, "d.Create failed: %v", err)
 	}
-	if err := tb.SetPrefixPermissions(adminCtx, syncbase.Prefix(""), rowPerms); err != nil {
-		tu.Fatalf(t, "tb.SetPrefixPermissions failed: %v", err)
+	if err := c.SetPrefixPermissions(adminCtx, syncbase.Prefix(""), rowPerms); err != nil {
+		tu.Fatalf(t, "c.SetPrefixPermissions failed: %v", err)
 	}
-	if err := tb.SetPrefixPermissions(adminCtx, syncbase.Prefix("prefix"), rowPerms); err != nil {
-		tu.Fatalf(t, "tb.SetPrefixPermissions failed: %v", err)
+	if err := c.SetPrefixPermissions(adminCtx, syncbase.Prefix("prefix"), rowPerms); err != nil {
+		tu.Fatalf(t, "c.SetPrefixPermissions failed: %v", err)
 	}
-	r := tb.Row("prefix")
+	r := c.Row("prefix")
 	r.Put(adminCtx, "value")
 
 	// Verify tests.
@@ -299,9 +299,9 @@ func runTests(t *testing.T, expectSuccess bool, tests ...securitySpecTest) {
 		case appTest:
 			err = layer.f(clientCtx, a)
 		case databaseTest:
-			err = layer.f(clientCtx, db)
-		case tableTest:
-			err = layer.f(clientCtx, tb)
+			err = layer.f(clientCtx, d)
+		case collectionTest:
+			err = layer.f(clientCtx, c)
 		case rowTest:
 			err = layer.f(clientCtx, r)
 		}

@@ -476,29 +476,29 @@ func (t *KeyValueTarget) FinishFields(_ vdl.FieldsTarget) error {
 	return nil
 }
 
-// TableRow encapsulates the table name and row key or row prefix.
-type TableRow struct {
-	TableName string
-	Row       string
+// CollectionRow encapsulates the collection name and row key or row prefix.
+type CollectionRow struct {
+	CollectionName string
+	Row            string
 }
 
-func (TableRow) __VDLReflect(struct {
-	Name string `vdl:"v.io/v23/services/syncbase.TableRow"`
+func (CollectionRow) __VDLReflect(struct {
+	Name string `vdl:"v.io/v23/services/syncbase.CollectionRow"`
 }) {
 }
 
-func (m *TableRow) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
+func (m *CollectionRow) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 	fieldsTarget1, err := t.StartFields(tt)
 	if err != nil {
 		return err
 	}
 
-	keyTarget2, fieldTarget3, err := fieldsTarget1.StartField("TableName")
+	keyTarget2, fieldTarget3, err := fieldsTarget1.StartField("CollectionName")
 	if err != vdl.ErrFieldNoExist && err != nil {
 		return err
 	}
 	if err != vdl.ErrFieldNoExist {
-		if err := fieldTarget3.FromString(string(m.TableName), tt.NonOptional().Field(0).Type); err != nil {
+		if err := fieldTarget3.FromString(string(m.CollectionName), tt.NonOptional().Field(0).Type); err != nil {
 			return err
 		}
 		if err := fieldsTarget1.FinishField(keyTarget2, fieldTarget3); err != nil {
@@ -523,43 +523,43 @@ func (m *TableRow) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 	return nil
 }
 
-func (m *TableRow) MakeVDLTarget() vdl.Target {
-	return &TableRowTarget{Value: m}
+func (m *CollectionRow) MakeVDLTarget() vdl.Target {
+	return &CollectionRowTarget{Value: m}
 }
 
-type TableRowTarget struct {
-	Value           *TableRow
-	tableNameTarget vdl.StringTarget
-	rowTarget       vdl.StringTarget
+type CollectionRowTarget struct {
+	Value                *CollectionRow
+	collectionNameTarget vdl.StringTarget
+	rowTarget            vdl.StringTarget
 	vdl.TargetBase
 	vdl.FieldsTargetBase
 }
 
-func (t *TableRowTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
+func (t *CollectionRowTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
 
-	if ttWant := vdl.TypeOf((*TableRow)(nil)).Elem(); !vdl.Compatible(tt, ttWant) {
+	if ttWant := vdl.TypeOf((*CollectionRow)(nil)).Elem(); !vdl.Compatible(tt, ttWant) {
 		return nil, fmt.Errorf("type %v incompatible with %v", tt, ttWant)
 	}
 	return t, nil
 }
-func (t *TableRowTarget) StartField(name string) (key, field vdl.Target, _ error) {
+func (t *CollectionRowTarget) StartField(name string) (key, field vdl.Target, _ error) {
 	switch name {
-	case "TableName":
-		t.tableNameTarget.Value = &t.Value.TableName
-		target, err := &t.tableNameTarget, error(nil)
+	case "CollectionName":
+		t.collectionNameTarget.Value = &t.Value.CollectionName
+		target, err := &t.collectionNameTarget, error(nil)
 		return nil, target, err
 	case "Row":
 		t.rowTarget.Value = &t.Value.Row
 		target, err := &t.rowTarget, error(nil)
 		return nil, target, err
 	default:
-		return nil, nil, fmt.Errorf("field %s not in struct v.io/v23/services/syncbase.TableRow", name)
+		return nil, nil, fmt.Errorf("field %s not in struct v.io/v23/services/syncbase.CollectionRow", name)
 	}
 }
-func (t *TableRowTarget) FinishField(_, _ vdl.Target) error {
+func (t *CollectionRowTarget) FinishField(_, _ vdl.Target) error {
 	return nil
 }
-func (t *TableRowTarget) FinishFields(_ vdl.FieldsTarget) error {
+func (t *CollectionRowTarget) FinishFields(_ vdl.FieldsTarget) error {
 
 	return nil
 }
@@ -570,8 +570,8 @@ type SyncgroupSpec struct {
 	Description string
 	// Permissions governing access to this syncgroup.
 	Perms access.Permissions
-	// Data (tableName-rowPrefix pairs) covered by this syncgroup.
-	Prefixes []TableRow
+	// Data (collectionName-rowPrefix pairs) covered by this syncgroup.
+	Prefixes []CollectionRow
 	// Mount tables at which to advertise this syncgroup, for rendezvous purposes.
 	// (Note that in addition to these mount tables, Syncbase also uses
 	// network-neighborhood-based discovery for rendezvous.)
@@ -756,21 +756,21 @@ func (t *SyncgroupSpecTarget) FinishFields(_ vdl.FieldsTarget) error {
 	return nil
 }
 
-// []TableRow
+// []CollectionRow
 type __VDLTarget1_list struct {
-	Value      *[]TableRow
-	elemTarget TableRowTarget
+	Value      *[]CollectionRow
+	elemTarget CollectionRowTarget
 	vdl.TargetBase
 	vdl.ListTargetBase
 }
 
 func (t *__VDLTarget1_list) StartList(tt *vdl.Type, len int) (vdl.ListTarget, error) {
 
-	if ttWant := vdl.TypeOf((*[]TableRow)(nil)); !vdl.Compatible(tt, ttWant) {
+	if ttWant := vdl.TypeOf((*[]CollectionRow)(nil)); !vdl.Compatible(tt, ttWant) {
 		return nil, fmt.Errorf("type %v incompatible with %v", tt, ttWant)
 	}
 	if cap(*t.Value) < len {
-		*t.Value = make([]TableRow, len)
+		*t.Value = make([]CollectionRow, len)
 	} else {
 		*t.Value = (*t.Value)[:len]
 	}
@@ -2495,10 +2495,10 @@ func (t *ResolutionInfoTarget) FinishFields(_ vdl.FieldsTarget) error {
 // CrRule provides a filter and the type of resolution to perform for a row
 // under conflict that passes the filter.
 type CrRule struct {
-	// TableName is the name of the table that this rule applies to.
-	TableName string
-	// KeyPrefix represents the set of keys within the given table for which
-	// this policy applies. TableName must not be empty if this field is set.
+	// CollectionName is the name of the collection that this rule applies to.
+	CollectionName string
+	// KeyPrefix represents the set of keys within the given collection for which
+	// this policy applies. CollectionName must not be empty if this field is set.
 	KeyPrefix string
 	// Type includes the full package path for the value type for which this
 	// policy applies.
@@ -2518,12 +2518,12 @@ func (m *CrRule) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 		return err
 	}
 
-	keyTarget2, fieldTarget3, err := fieldsTarget1.StartField("TableName")
+	keyTarget2, fieldTarget3, err := fieldsTarget1.StartField("CollectionName")
 	if err != vdl.ErrFieldNoExist && err != nil {
 		return err
 	}
 	if err != vdl.ErrFieldNoExist {
-		if err := fieldTarget3.FromString(string(m.TableName), tt.NonOptional().Field(0).Type); err != nil {
+		if err := fieldTarget3.FromString(string(m.CollectionName), tt.NonOptional().Field(0).Type); err != nil {
 			return err
 		}
 		if err := fieldsTarget1.FinishField(keyTarget2, fieldTarget3); err != nil {
@@ -2578,11 +2578,11 @@ func (m *CrRule) MakeVDLTarget() vdl.Target {
 }
 
 type CrRuleTarget struct {
-	Value           *CrRule
-	tableNameTarget vdl.StringTarget
-	keyPrefixTarget vdl.StringTarget
-	typeTarget      vdl.StringTarget
-	resolverTarget  ResolverTypeTarget
+	Value                *CrRule
+	collectionNameTarget vdl.StringTarget
+	keyPrefixTarget      vdl.StringTarget
+	typeTarget           vdl.StringTarget
+	resolverTarget       ResolverTypeTarget
 	vdl.TargetBase
 	vdl.FieldsTargetBase
 }
@@ -2596,9 +2596,9 @@ func (t *CrRuleTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
 }
 func (t *CrRuleTarget) StartField(name string) (key, field vdl.Target, _ error) {
 	switch name {
-	case "TableName":
-		t.tableNameTarget.Value = &t.Value.TableName
-		target, err := &t.tableNameTarget, error(nil)
+	case "CollectionName":
+		t.collectionNameTarget.Value = &t.Value.CollectionName
+		target, err := &t.collectionNameTarget, error(nil)
 		return nil, target, err
 	case "KeyPrefix":
 		t.keyPrefixTarget.Value = &t.Value.KeyPrefix
@@ -3182,7 +3182,7 @@ var (
 	__VDLZeroBatchOptions            = BatchOptions{}
 	__VDLZeroPrefixPermissions       = PrefixPermissions{}
 	__VDLZeroKeyValue                = KeyValue{}
-	__VDLZeroTableRow                = TableRow{}
+	__VDLZeroCollectionRow           = CollectionRow{}
 	__VDLZeroSyncgroupSpec           = SyncgroupSpec{}
 	__VDLZeroSyncgroupMemberInfo     = SyncgroupMemberInfo{}
 	__VDLZeroResolverType            = ResolverTypeLastWins
@@ -3780,7 +3780,7 @@ var descApp = rpc.InterfaceDesc{
 // without re-ordering. See watch.GlobWatcher for a detailed explanation of the
 // behavior.
 // TODO(rogulenko): Currently the only supported watch patterns are
-// "<tableName>/<rowPrefix>*". Consider changing that.
+// "<collectionName>/<rowPrefix>*". Consider changing that.
 //
 // Watching is done by starting a streaming RPC. The RPC takes a ResumeMarker
 // argument that points to a particular place in the database event log. If an
@@ -3789,8 +3789,8 @@ var descApp = rpc.InterfaceDesc{
 // only changes since the provided ResumeMarker.
 //
 // The result stream consists of a never-ending sequence of Change messages
-// (until the call fails or is canceled). Each Change contains the Name field
-// in the form "<tableName>/<rowKey>" and the Value field of the StoreChange
+// (until the call fails or is canceled). Each Change contains the Name field in
+// the form "<collectionName>/<rowKey>" and the Value field of the StoreChange
 // type. If the client has no access to a row specified in a change, that change
 // is excluded from the result stream.
 //
@@ -3837,7 +3837,7 @@ func (c implDatabaseWatcherClientStub) GetResumeMarker(ctx *context.T, opts ...r
 // without re-ordering. See watch.GlobWatcher for a detailed explanation of the
 // behavior.
 // TODO(rogulenko): Currently the only supported watch patterns are
-// "<tableName>/<rowPrefix>*". Consider changing that.
+// "<collectionName>/<rowPrefix>*". Consider changing that.
 //
 // Watching is done by starting a streaming RPC. The RPC takes a ResumeMarker
 // argument that points to a particular place in the database event log. If an
@@ -3846,8 +3846,8 @@ func (c implDatabaseWatcherClientStub) GetResumeMarker(ctx *context.T, opts ...r
 // only changes since the provided ResumeMarker.
 //
 // The result stream consists of a never-ending sequence of Change messages
-// (until the call fails or is canceled). Each Change contains the Name field
-// in the form "<tableName>/<rowKey>" and the Value field of the StoreChange
+// (until the call fails or is canceled). Each Change contains the Name field in
+// the form "<collectionName>/<rowKey>" and the Value field of the StoreChange
 // type. If the client has no access to a row specified in a change, that change
 // is excluded from the result stream.
 //
@@ -3927,7 +3927,7 @@ var DatabaseWatcherDesc rpc.InterfaceDesc = descDatabaseWatcher
 var descDatabaseWatcher = rpc.InterfaceDesc{
 	Name:    "DatabaseWatcher",
 	PkgPath: "v.io/v23/services/syncbase",
-	Doc:     "// DatabaseWatcher allows a client to watch for updates to the database. For\n// each watch request, the client will receive a reliable stream of watch events\n// without re-ordering. See watch.GlobWatcher for a detailed explanation of the\n// behavior.\n// TODO(rogulenko): Currently the only supported watch patterns are\n// \"<tableName>/<rowPrefix>*\". Consider changing that.\n//\n// Watching is done by starting a streaming RPC. The RPC takes a ResumeMarker\n// argument that points to a particular place in the database event log. If an\n// empty ResumeMarker is provided, the WatchStream will begin with a Change\n// batch containing the initial state. Otherwise, the WatchStream will contain\n// only changes since the provided ResumeMarker.\n//\n// The result stream consists of a never-ending sequence of Change messages\n// (until the call fails or is canceled). Each Change contains the Name field\n// in the form \"<tableName>/<rowKey>\" and the Value field of the StoreChange\n// type. If the client has no access to a row specified in a change, that change\n// is excluded from the result stream.\n//\n// Note: A single Watch Change batch may contain changes from more than one\n// batch as originally committed on a remote Syncbase or obtained from conflict\n// resolution. However, changes from a single original batch will always appear\n// in the same Change batch.",
+	Doc:     "// DatabaseWatcher allows a client to watch for updates to the database. For\n// each watch request, the client will receive a reliable stream of watch events\n// without re-ordering. See watch.GlobWatcher for a detailed explanation of the\n// behavior.\n// TODO(rogulenko): Currently the only supported watch patterns are\n// \"<collectionName>/<rowPrefix>*\". Consider changing that.\n//\n// Watching is done by starting a streaming RPC. The RPC takes a ResumeMarker\n// argument that points to a particular place in the database event log. If an\n// empty ResumeMarker is provided, the WatchStream will begin with a Change\n// batch containing the initial state. Otherwise, the WatchStream will contain\n// only changes since the provided ResumeMarker.\n//\n// The result stream consists of a never-ending sequence of Change messages\n// (until the call fails or is canceled). Each Change contains the Name field in\n// the form \"<collectionName>/<rowKey>\" and the Value field of the StoreChange\n// type. If the client has no access to a row specified in a change, that change\n// is excluded from the result stream.\n//\n// Note: A single Watch Change batch may contain changes from more than one\n// batch as originally committed on a remote Syncbase or obtained from conflict\n// resolution. However, changes from a single original batch will always appear\n// in the same Change batch.",
 	Embeds: []rpc.EmbedDesc{
 		{"GlobWatcher", "v.io/v23/services/watch", "// GlobWatcher allows a client to receive updates for changes to objects\n// that match a pattern.  See the package comments for details."},
 	},
@@ -5504,9 +5504,9 @@ func (s implConflictManagerStartConflictResolverServerCallSend) Send(item Confli
 // DatabaseClientMethods is the client interface
 // containing Database methods.
 //
-// Database represents a collection of Tables. Batches, queries, sync, watch,
-// etc. all operate at the Database level.
-// Database.Glob operates over Table names.
+// Database represents a set of Collections. Batches, queries, sync, watch, etc.
+// all operate at the Database level.
+// Database.Glob operates over Collection names.
 // Param schemaVersion is the version number that the client expects the
 // database to be at. To disable schema version checking, pass -1.
 type DatabaseClientMethods interface {
@@ -5560,7 +5560,7 @@ type DatabaseClientMethods interface {
 	// without re-ordering. See watch.GlobWatcher for a detailed explanation of the
 	// behavior.
 	// TODO(rogulenko): Currently the only supported watch patterns are
-	// "<tableName>/<rowPrefix>*". Consider changing that.
+	// "<collectionName>/<rowPrefix>*". Consider changing that.
 	//
 	// Watching is done by starting a streaming RPC. The RPC takes a ResumeMarker
 	// argument that points to a particular place in the database event log. If an
@@ -5569,8 +5569,8 @@ type DatabaseClientMethods interface {
 	// only changes since the provided ResumeMarker.
 	//
 	// The result stream consists of a never-ending sequence of Change messages
-	// (until the call fails or is canceled). Each Change contains the Name field
-	// in the form "<tableName>/<rowKey>" and the Value field of the StoreChange
+	// (until the call fails or is canceled). Each Change contains the Name field in
+	// the form "<collectionName>/<rowKey>" and the Value field of the StoreChange
 	// type. If the client has no access to a row specified in a change, that change
 	// is excluded from the result stream.
 	//
@@ -5610,7 +5610,7 @@ type DatabaseClientMethods interface {
 	// TODO(ivanpi): Exists may fail with an error if higher levels of hierarchy
 	// do not exist.
 	Exists(_ *context.T, schemaVersion int32, _ ...rpc.CallOpt) (bool, error)
-	// ListTables returns a list of all Table names.
+	// ListCollections returns a list of all Collection names.
 	// This method exists on Database but not on Service or App because for the
 	// latter we can simply use glob, while for the former glob fails on
 	// BatchDatabase since we encode the batch id in the BatchDatabase object
@@ -5623,7 +5623,7 @@ type DatabaseClientMethods interface {
 	//    results. This is inefficient in general, and broken for us since
 	//    Glob("app/*") does not return batch database names like "a/d##bId".
 	// TODO(sadovsky): Maybe switch to streaming RPC.
-	ListTables(*context.T, ...rpc.CallOpt) ([]string, error)
+	ListCollections(*context.T, ...rpc.CallOpt) ([]string, error)
 	// Exec executes a syncQL query with positional parameters and returns all
 	// results as specified by the query's select/delete statement.
 	// Concurrency semantics are documented in model.go.
@@ -5693,8 +5693,8 @@ func (c implDatabaseClientStub) Exists(ctx *context.T, i0 int32, opts ...rpc.Cal
 	return
 }
 
-func (c implDatabaseClientStub) ListTables(ctx *context.T, opts ...rpc.CallOpt) (o0 []string, err error) {
-	err = v23.GetClient(ctx).Call(ctx, c.name, "ListTables", nil, []interface{}{&o0}, opts...)
+func (c implDatabaseClientStub) ListCollections(ctx *context.T, opts ...rpc.CallOpt) (o0 []string, err error) {
+	err = v23.GetClient(ctx).Call(ctx, c.name, "ListCollections", nil, []interface{}{&o0}, opts...)
 	return
 }
 
@@ -5803,9 +5803,9 @@ func (c *implDatabaseExecClientCall) Finish() (err error) {
 // DatabaseServerMethods is the interface a server writer
 // implements for Database.
 //
-// Database represents a collection of Tables. Batches, queries, sync, watch,
-// etc. all operate at the Database level.
-// Database.Glob operates over Table names.
+// Database represents a set of Collections. Batches, queries, sync, watch, etc.
+// all operate at the Database level.
+// Database.Glob operates over Collection names.
 // Param schemaVersion is the version number that the client expects the
 // database to be at. To disable schema version checking, pass -1.
 type DatabaseServerMethods interface {
@@ -5859,7 +5859,7 @@ type DatabaseServerMethods interface {
 	// without re-ordering. See watch.GlobWatcher for a detailed explanation of the
 	// behavior.
 	// TODO(rogulenko): Currently the only supported watch patterns are
-	// "<tableName>/<rowPrefix>*". Consider changing that.
+	// "<collectionName>/<rowPrefix>*". Consider changing that.
 	//
 	// Watching is done by starting a streaming RPC. The RPC takes a ResumeMarker
 	// argument that points to a particular place in the database event log. If an
@@ -5868,8 +5868,8 @@ type DatabaseServerMethods interface {
 	// only changes since the provided ResumeMarker.
 	//
 	// The result stream consists of a never-ending sequence of Change messages
-	// (until the call fails or is canceled). Each Change contains the Name field
-	// in the form "<tableName>/<rowKey>" and the Value field of the StoreChange
+	// (until the call fails or is canceled). Each Change contains the Name field in
+	// the form "<collectionName>/<rowKey>" and the Value field of the StoreChange
 	// type. If the client has no access to a row specified in a change, that change
 	// is excluded from the result stream.
 	//
@@ -5909,7 +5909,7 @@ type DatabaseServerMethods interface {
 	// TODO(ivanpi): Exists may fail with an error if higher levels of hierarchy
 	// do not exist.
 	Exists(_ *context.T, _ rpc.ServerCall, schemaVersion int32) (bool, error)
-	// ListTables returns a list of all Table names.
+	// ListCollections returns a list of all Collection names.
 	// This method exists on Database but not on Service or App because for the
 	// latter we can simply use glob, while for the former glob fails on
 	// BatchDatabase since we encode the batch id in the BatchDatabase object
@@ -5922,7 +5922,7 @@ type DatabaseServerMethods interface {
 	//    results. This is inefficient in general, and broken for us since
 	//    Glob("app/*") does not return batch database names like "a/d##bId".
 	// TODO(sadovsky): Maybe switch to streaming RPC.
-	ListTables(*context.T, rpc.ServerCall) ([]string, error)
+	ListCollections(*context.T, rpc.ServerCall) ([]string, error)
 	// Exec executes a syncQL query with positional parameters and returns all
 	// results as specified by the query's select/delete statement.
 	// Concurrency semantics are documented in model.go.
@@ -6010,7 +6010,7 @@ type DatabaseServerStubMethods interface {
 	// without re-ordering. See watch.GlobWatcher for a detailed explanation of the
 	// behavior.
 	// TODO(rogulenko): Currently the only supported watch patterns are
-	// "<tableName>/<rowPrefix>*". Consider changing that.
+	// "<collectionName>/<rowPrefix>*". Consider changing that.
 	//
 	// Watching is done by starting a streaming RPC. The RPC takes a ResumeMarker
 	// argument that points to a particular place in the database event log. If an
@@ -6019,8 +6019,8 @@ type DatabaseServerStubMethods interface {
 	// only changes since the provided ResumeMarker.
 	//
 	// The result stream consists of a never-ending sequence of Change messages
-	// (until the call fails or is canceled). Each Change contains the Name field
-	// in the form "<tableName>/<rowKey>" and the Value field of the StoreChange
+	// (until the call fails or is canceled). Each Change contains the Name field in
+	// the form "<collectionName>/<rowKey>" and the Value field of the StoreChange
 	// type. If the client has no access to a row specified in a change, that change
 	// is excluded from the result stream.
 	//
@@ -6060,7 +6060,7 @@ type DatabaseServerStubMethods interface {
 	// TODO(ivanpi): Exists may fail with an error if higher levels of hierarchy
 	// do not exist.
 	Exists(_ *context.T, _ rpc.ServerCall, schemaVersion int32) (bool, error)
-	// ListTables returns a list of all Table names.
+	// ListCollections returns a list of all Collection names.
 	// This method exists on Database but not on Service or App because for the
 	// latter we can simply use glob, while for the former glob fails on
 	// BatchDatabase since we encode the batch id in the BatchDatabase object
@@ -6073,7 +6073,7 @@ type DatabaseServerStubMethods interface {
 	//    results. This is inefficient in general, and broken for us since
 	//    Glob("app/*") does not return batch database names like "a/d##bId".
 	// TODO(sadovsky): Maybe switch to streaming RPC.
-	ListTables(*context.T, rpc.ServerCall) ([]string, error)
+	ListCollections(*context.T, rpc.ServerCall) ([]string, error)
 	// Exec executes a syncQL query with positional parameters and returns all
 	// results as specified by the query's select/delete statement.
 	// Concurrency semantics are documented in model.go.
@@ -6159,8 +6159,8 @@ func (s implDatabaseServerStub) Exists(ctx *context.T, call rpc.ServerCall, i0 i
 	return s.impl.Exists(ctx, call, i0)
 }
 
-func (s implDatabaseServerStub) ListTables(ctx *context.T, call rpc.ServerCall) ([]string, error) {
-	return s.impl.ListTables(ctx, call)
+func (s implDatabaseServerStub) ListCollections(ctx *context.T, call rpc.ServerCall) ([]string, error) {
+	return s.impl.ListCollections(ctx, call)
 }
 
 func (s implDatabaseServerStub) Exec(ctx *context.T, call *DatabaseExecServerCallStub, i0 int32, i1 string, i2 []*vom.RawBytes) error {
@@ -6202,10 +6202,10 @@ var DatabaseDesc rpc.InterfaceDesc = descDatabase
 var descDatabase = rpc.InterfaceDesc{
 	Name:    "Database",
 	PkgPath: "v.io/v23/services/syncbase",
-	Doc:     "// Database represents a collection of Tables. Batches, queries, sync, watch,\n// etc. all operate at the Database level.\n// Database.Glob operates over Table names.\n// Param schemaVersion is the version number that the client expects the\n// database to be at. To disable schema version checking, pass -1.",
+	Doc:     "// Database represents a set of Collections. Batches, queries, sync, watch, etc.\n// all operate at the Database level.\n// Database.Glob operates over Collection names.\n// Param schemaVersion is the version number that the client expects the\n// database to be at. To disable schema version checking, pass -1.",
 	Embeds: []rpc.EmbedDesc{
 		{"Object", "v.io/v23/services/permissions", "// Object provides access control for Vanadium objects.\n//\n// Vanadium services implementing dynamic access control would typically embed\n// this interface and tag additional methods defined by the service with one of\n// Admin, Read, Write, Resolve etc. For example, the VDL definition of the\n// object would be:\n//\n//   package mypackage\n//\n//   import \"v.io/v23/security/access\"\n//   import \"v.io/v23/services/permissions\"\n//\n//   type MyObject interface {\n//     permissions.Object\n//     MyRead() (string, error) {access.Read}\n//     MyWrite(string) error    {access.Write}\n//   }\n//\n// If the set of pre-defined tags is insufficient, services may define their\n// own tag type and annotate all methods with this new type.\n//\n// Instead of embedding this Object interface, define SetPermissions and\n// GetPermissions in their own interface. Authorization policies will typically\n// respect annotations of a single type. For example, the VDL definition of an\n// object would be:\n//\n//  package mypackage\n//\n//  import \"v.io/v23/security/access\"\n//\n//  type MyTag string\n//\n//  const (\n//    Blue = MyTag(\"Blue\")\n//    Red  = MyTag(\"Red\")\n//  )\n//\n//  type MyObject interface {\n//    MyMethod() (string, error) {Blue}\n//\n//    // Allow clients to change access via the access.Object interface:\n//    SetPermissions(perms access.Permissions, version string) error         {Red}\n//    GetPermissions() (perms access.Permissions, version string, err error) {Blue}\n//  }"},
-		{"DatabaseWatcher", "v.io/v23/services/syncbase", "// DatabaseWatcher allows a client to watch for updates to the database. For\n// each watch request, the client will receive a reliable stream of watch events\n// without re-ordering. See watch.GlobWatcher for a detailed explanation of the\n// behavior.\n// TODO(rogulenko): Currently the only supported watch patterns are\n// \"<tableName>/<rowPrefix>*\". Consider changing that.\n//\n// Watching is done by starting a streaming RPC. The RPC takes a ResumeMarker\n// argument that points to a particular place in the database event log. If an\n// empty ResumeMarker is provided, the WatchStream will begin with a Change\n// batch containing the initial state. Otherwise, the WatchStream will contain\n// only changes since the provided ResumeMarker.\n//\n// The result stream consists of a never-ending sequence of Change messages\n// (until the call fails or is canceled). Each Change contains the Name field\n// in the form \"<tableName>/<rowKey>\" and the Value field of the StoreChange\n// type. If the client has no access to a row specified in a change, that change\n// is excluded from the result stream.\n//\n// Note: A single Watch Change batch may contain changes from more than one\n// batch as originally committed on a remote Syncbase or obtained from conflict\n// resolution. However, changes from a single original batch will always appear\n// in the same Change batch."},
+		{"DatabaseWatcher", "v.io/v23/services/syncbase", "// DatabaseWatcher allows a client to watch for updates to the database. For\n// each watch request, the client will receive a reliable stream of watch events\n// without re-ordering. See watch.GlobWatcher for a detailed explanation of the\n// behavior.\n// TODO(rogulenko): Currently the only supported watch patterns are\n// \"<collectionName>/<rowPrefix>*\". Consider changing that.\n//\n// Watching is done by starting a streaming RPC. The RPC takes a ResumeMarker\n// argument that points to a particular place in the database event log. If an\n// empty ResumeMarker is provided, the WatchStream will begin with a Change\n// batch containing the initial state. Otherwise, the WatchStream will contain\n// only changes since the provided ResumeMarker.\n//\n// The result stream consists of a never-ending sequence of Change messages\n// (until the call fails or is canceled). Each Change contains the Name field in\n// the form \"<collectionName>/<rowKey>\" and the Value field of the StoreChange\n// type. If the client has no access to a row specified in a change, that change\n// is excluded from the result stream.\n//\n// Note: A single Watch Change batch may contain changes from more than one\n// batch as originally committed on a remote Syncbase or obtained from conflict\n// resolution. However, changes from a single original batch will always appear\n// in the same Change batch."},
 		{"SyncgroupManager", "v.io/v23/services/syncbase", "// SyncgroupManager is the interface for syncgroup operations.\n// TODO(hpucha): Add blessings to create/join and add a refresh method."},
 		{"BlobManager", "v.io/v23/services/syncbase", "// BlobManager is the interface for blob operations.\n//\n// Description of API for resumable blob creation (append-only):\n// - Up until commit, a BlobRef may be used with PutBlob, GetBlobSize,\n//   DeleteBlob, and CommitBlob. Blob creation may be resumed by obtaining the\n//   current blob size via GetBlobSize and appending to the blob via PutBlob.\n// - After commit, a blob is immutable, at which point PutBlob and CommitBlob\n//   may no longer be used.\n// - All other methods (GetBlob, FetchBlob, PinBlob, etc.) may only be used\n//   after commit."},
 		{"SchemaManager", "v.io/v23/services/syncbase", "// SchemaManager implements the API for managing schema metadata attached\n// to a Database."},
@@ -6241,8 +6241,8 @@ var descDatabase = rpc.InterfaceDesc{
 			Tags: []*vdl.Value{vdl.ValueOf(access.Tag("Resolve"))},
 		},
 		{
-			Name: "ListTables",
-			Doc:  "// ListTables returns a list of all Table names.\n// This method exists on Database but not on Service or App because for the\n// latter we can simply use glob, while for the former glob fails on\n// BatchDatabase since we encode the batch id in the BatchDatabase object\n// name. More specifically, the glob client library appears to have two odd\n// behaviors:\n// 1) It checks Resolve access on every component along the path (by doing a\n//    Dispatcher.Lookup), whereas this doesn't happen for other RPCs.\n// 2) It does a Glob(<prefix>/*) for every prefix path, and only proceeds to\n//    the next path component if that component appeared in its parent's Glob\n//    results. This is inefficient in general, and broken for us since\n//    Glob(\"app/*\") does not return batch database names like \"a/d##bId\".\n// TODO(sadovsky): Maybe switch to streaming RPC.",
+			Name: "ListCollections",
+			Doc:  "// ListCollections returns a list of all Collection names.\n// This method exists on Database but not on Service or App because for the\n// latter we can simply use glob, while for the former glob fails on\n// BatchDatabase since we encode the batch id in the BatchDatabase object\n// name. More specifically, the glob client library appears to have two odd\n// behaviors:\n// 1) It checks Resolve access on every component along the path (by doing a\n//    Dispatcher.Lookup), whereas this doesn't happen for other RPCs.\n// 2) It does a Glob(<prefix>/*) for every prefix path, and only proceeds to\n//    the next path component if that component appeared in its parent's Glob\n//    results. This is inefficient in general, and broken for us since\n//    Glob(\"app/*\") does not return batch database names like \"a/d##bId\".\n// TODO(sadovsky): Maybe switch to streaming RPC.",
 			OutArgs: []rpc.ArgDesc{
 				{"", ``}, // []string
 			},
@@ -6342,27 +6342,27 @@ func (s implDatabaseExecServerCallSend) Send(item []*vom.RawBytes) error {
 	return s.s.Send(item)
 }
 
-// TableClientMethods is the client interface
-// containing Table methods.
+// CollectionClientMethods is the client interface
+// containing Collection methods.
 //
-// Table represents a collection of Rows.
-// Table.Glob operates over the primary keys of Rows in the Table.
+// Collection represents a collection of Rows.
+// Collection.Glob operates over the primary keys of Rows in the Collection.
 // SchemaVersion is the version number that the client expects the database
 // to be at. To disable schema version checking, pass -1.
-type TableClientMethods interface {
-	// Create creates this Table.
+type CollectionClientMethods interface {
+	// Create creates this Collection.
 	// If perms is nil, we inherit (copy) the Database perms.
 	Create(_ *context.T, schemaVersion int32, perms access.Permissions, _ ...rpc.CallOpt) error
-	// Destroy destroys this Table.
+	// Destroy destroys this Collection.
 	Destroy(_ *context.T, schemaVersion int32, _ ...rpc.CallOpt) error
-	// Exists returns true only if this Table exists. Insufficient permissions
-	// cause Exists to return false instead of an error.
+	// Exists returns true only if this Collection exists. Insufficient
+	// permissions cause Exists to return false instead of an error.
 	// TODO(ivanpi): Exists may fail with an error if higher levels of hierarchy
 	// do not exist.
 	Exists(_ *context.T, schemaVersion int32, _ ...rpc.CallOpt) (bool, error)
-	// GetPermissions returns the current Permissions for the Table.
+	// GetPermissions returns the current Permissions for the Collection.
 	GetPermissions(_ *context.T, schemaVersion int32, _ ...rpc.CallOpt) (access.Permissions, error)
-	// SetPermissions replaces the current Permissions for the Table.
+	// SetPermissions replaces the current Permissions for the Collection.
 	SetPermissions(_ *context.T, schemaVersion int32, perms access.Permissions, _ ...rpc.CallOpt) error
 	// DeleteRange deletes all rows in the given half-open range [start, limit).
 	// If limit is "", all rows with keys >= start are included.
@@ -6372,12 +6372,12 @@ type TableClientMethods interface {
 	// Scan returns all rows in the given half-open range [start, limit). If limit
 	// is "", all rows with keys >= start are included. Concurrency semantics are
 	// documented in model.go.
-	Scan(_ *context.T, schemaVersion int32, start []byte, limit []byte, _ ...rpc.CallOpt) (TableScanClientCall, error)
-	// GetPrefixPermissions returns an array of (prefix, perms) pairs. The array is
-	// sorted from longest prefix to shortest, so element zero is the one that
+	Scan(_ *context.T, schemaVersion int32, start []byte, limit []byte, _ ...rpc.CallOpt) (CollectionScanClientCall, error)
+	// GetPrefixPermissions returns an array of (prefix, perms) pairs. The array
+	// is sorted from longest prefix to shortest, so element zero is the one that
 	// applies to the row with the given key. The last element is always the
-	// prefix "" which represents the table's permissions -- the array will always
-	// have at least one element.
+	// prefix "" which represents the collection's permissions -- the array will
+	// always have at least one element.
 	GetPrefixPermissions(_ *context.T, schemaVersion int32, key string, _ ...rpc.CallOpt) ([]PrefixPermissions, error)
 	// SetPrefixPermissions sets the permissions for all current and future rows with
 	// the given prefix. If the prefix overlaps with an existing prefix, the
@@ -6393,78 +6393,78 @@ type TableClientMethods interface {
 	DeletePrefixPermissions(_ *context.T, schemaVersion int32, prefix string, _ ...rpc.CallOpt) error
 }
 
-// TableClientStub adds universal methods to TableClientMethods.
-type TableClientStub interface {
-	TableClientMethods
+// CollectionClientStub adds universal methods to CollectionClientMethods.
+type CollectionClientStub interface {
+	CollectionClientMethods
 	rpc.UniversalServiceMethods
 }
 
-// TableClient returns a client stub for Table.
-func TableClient(name string) TableClientStub {
-	return implTableClientStub{name}
+// CollectionClient returns a client stub for Collection.
+func CollectionClient(name string) CollectionClientStub {
+	return implCollectionClientStub{name}
 }
 
-type implTableClientStub struct {
+type implCollectionClientStub struct {
 	name string
 }
 
-func (c implTableClientStub) Create(ctx *context.T, i0 int32, i1 access.Permissions, opts ...rpc.CallOpt) (err error) {
+func (c implCollectionClientStub) Create(ctx *context.T, i0 int32, i1 access.Permissions, opts ...rpc.CallOpt) (err error) {
 	err = v23.GetClient(ctx).Call(ctx, c.name, "Create", []interface{}{i0, i1}, nil, opts...)
 	return
 }
 
-func (c implTableClientStub) Destroy(ctx *context.T, i0 int32, opts ...rpc.CallOpt) (err error) {
+func (c implCollectionClientStub) Destroy(ctx *context.T, i0 int32, opts ...rpc.CallOpt) (err error) {
 	err = v23.GetClient(ctx).Call(ctx, c.name, "Destroy", []interface{}{i0}, nil, opts...)
 	return
 }
 
-func (c implTableClientStub) Exists(ctx *context.T, i0 int32, opts ...rpc.CallOpt) (o0 bool, err error) {
+func (c implCollectionClientStub) Exists(ctx *context.T, i0 int32, opts ...rpc.CallOpt) (o0 bool, err error) {
 	err = v23.GetClient(ctx).Call(ctx, c.name, "Exists", []interface{}{i0}, []interface{}{&o0}, opts...)
 	return
 }
 
-func (c implTableClientStub) GetPermissions(ctx *context.T, i0 int32, opts ...rpc.CallOpt) (o0 access.Permissions, err error) {
+func (c implCollectionClientStub) GetPermissions(ctx *context.T, i0 int32, opts ...rpc.CallOpt) (o0 access.Permissions, err error) {
 	err = v23.GetClient(ctx).Call(ctx, c.name, "GetPermissions", []interface{}{i0}, []interface{}{&o0}, opts...)
 	return
 }
 
-func (c implTableClientStub) SetPermissions(ctx *context.T, i0 int32, i1 access.Permissions, opts ...rpc.CallOpt) (err error) {
+func (c implCollectionClientStub) SetPermissions(ctx *context.T, i0 int32, i1 access.Permissions, opts ...rpc.CallOpt) (err error) {
 	err = v23.GetClient(ctx).Call(ctx, c.name, "SetPermissions", []interface{}{i0, i1}, nil, opts...)
 	return
 }
 
-func (c implTableClientStub) DeleteRange(ctx *context.T, i0 int32, i1 []byte, i2 []byte, opts ...rpc.CallOpt) (err error) {
+func (c implCollectionClientStub) DeleteRange(ctx *context.T, i0 int32, i1 []byte, i2 []byte, opts ...rpc.CallOpt) (err error) {
 	err = v23.GetClient(ctx).Call(ctx, c.name, "DeleteRange", []interface{}{i0, i1, i2}, nil, opts...)
 	return
 }
 
-func (c implTableClientStub) Scan(ctx *context.T, i0 int32, i1 []byte, i2 []byte, opts ...rpc.CallOpt) (ocall TableScanClientCall, err error) {
+func (c implCollectionClientStub) Scan(ctx *context.T, i0 int32, i1 []byte, i2 []byte, opts ...rpc.CallOpt) (ocall CollectionScanClientCall, err error) {
 	var call rpc.ClientCall
 	if call, err = v23.GetClient(ctx).StartCall(ctx, c.name, "Scan", []interface{}{i0, i1, i2}, opts...); err != nil {
 		return
 	}
-	ocall = &implTableScanClientCall{ClientCall: call}
+	ocall = &implCollectionScanClientCall{ClientCall: call}
 	return
 }
 
-func (c implTableClientStub) GetPrefixPermissions(ctx *context.T, i0 int32, i1 string, opts ...rpc.CallOpt) (o0 []PrefixPermissions, err error) {
+func (c implCollectionClientStub) GetPrefixPermissions(ctx *context.T, i0 int32, i1 string, opts ...rpc.CallOpt) (o0 []PrefixPermissions, err error) {
 	err = v23.GetClient(ctx).Call(ctx, c.name, "GetPrefixPermissions", []interface{}{i0, i1}, []interface{}{&o0}, opts...)
 	return
 }
 
-func (c implTableClientStub) SetPrefixPermissions(ctx *context.T, i0 int32, i1 string, i2 access.Permissions, opts ...rpc.CallOpt) (err error) {
+func (c implCollectionClientStub) SetPrefixPermissions(ctx *context.T, i0 int32, i1 string, i2 access.Permissions, opts ...rpc.CallOpt) (err error) {
 	err = v23.GetClient(ctx).Call(ctx, c.name, "SetPrefixPermissions", []interface{}{i0, i1, i2}, nil, opts...)
 	return
 }
 
-func (c implTableClientStub) DeletePrefixPermissions(ctx *context.T, i0 int32, i1 string, opts ...rpc.CallOpt) (err error) {
+func (c implCollectionClientStub) DeletePrefixPermissions(ctx *context.T, i0 int32, i1 string, opts ...rpc.CallOpt) (err error) {
 	err = v23.GetClient(ctx).Call(ctx, c.name, "DeletePrefixPermissions", []interface{}{i0, i1}, nil, opts...)
 	return
 }
 
-// TableScanClientStream is the client stream for Table.Scan.
-type TableScanClientStream interface {
-	// RecvStream returns the receiver side of the Table.Scan client stream.
+// CollectionScanClientStream is the client stream for Collection.Scan.
+type CollectionScanClientStream interface {
+	// RecvStream returns the receiver side of the Collection.Scan client stream.
 	RecvStream() interface {
 		// Advance stages an item so that it may be retrieved via Value.  Returns
 		// true iff there is an item to retrieve.  Advance must be called before
@@ -6478,9 +6478,9 @@ type TableScanClientStream interface {
 	}
 }
 
-// TableScanClientCall represents the call returned from Table.Scan.
-type TableScanClientCall interface {
-	TableScanClientStream
+// CollectionScanClientCall represents the call returned from Collection.Scan.
+type CollectionScanClientCall interface {
+	CollectionScanClientStream
 	// Finish blocks until the server is done, and returns the positional return
 	// values for call.
 	//
@@ -6494,64 +6494,64 @@ type TableScanClientCall interface {
 	Finish() error
 }
 
-type implTableScanClientCall struct {
+type implCollectionScanClientCall struct {
 	rpc.ClientCall
 	valRecv KeyValue
 	errRecv error
 }
 
-func (c *implTableScanClientCall) RecvStream() interface {
+func (c *implCollectionScanClientCall) RecvStream() interface {
 	Advance() bool
 	Value() KeyValue
 	Err() error
 } {
-	return implTableScanClientCallRecv{c}
+	return implCollectionScanClientCallRecv{c}
 }
 
-type implTableScanClientCallRecv struct {
-	c *implTableScanClientCall
+type implCollectionScanClientCallRecv struct {
+	c *implCollectionScanClientCall
 }
 
-func (c implTableScanClientCallRecv) Advance() bool {
+func (c implCollectionScanClientCallRecv) Advance() bool {
 	c.c.valRecv = KeyValue{}
 	c.c.errRecv = c.c.Recv(&c.c.valRecv)
 	return c.c.errRecv == nil
 }
-func (c implTableScanClientCallRecv) Value() KeyValue {
+func (c implCollectionScanClientCallRecv) Value() KeyValue {
 	return c.c.valRecv
 }
-func (c implTableScanClientCallRecv) Err() error {
+func (c implCollectionScanClientCallRecv) Err() error {
 	if c.c.errRecv == io.EOF {
 		return nil
 	}
 	return c.c.errRecv
 }
-func (c *implTableScanClientCall) Finish() (err error) {
+func (c *implCollectionScanClientCall) Finish() (err error) {
 	err = c.ClientCall.Finish()
 	return
 }
 
-// TableServerMethods is the interface a server writer
-// implements for Table.
+// CollectionServerMethods is the interface a server writer
+// implements for Collection.
 //
-// Table represents a collection of Rows.
-// Table.Glob operates over the primary keys of Rows in the Table.
+// Collection represents a collection of Rows.
+// Collection.Glob operates over the primary keys of Rows in the Collection.
 // SchemaVersion is the version number that the client expects the database
 // to be at. To disable schema version checking, pass -1.
-type TableServerMethods interface {
-	// Create creates this Table.
+type CollectionServerMethods interface {
+	// Create creates this Collection.
 	// If perms is nil, we inherit (copy) the Database perms.
 	Create(_ *context.T, _ rpc.ServerCall, schemaVersion int32, perms access.Permissions) error
-	// Destroy destroys this Table.
+	// Destroy destroys this Collection.
 	Destroy(_ *context.T, _ rpc.ServerCall, schemaVersion int32) error
-	// Exists returns true only if this Table exists. Insufficient permissions
-	// cause Exists to return false instead of an error.
+	// Exists returns true only if this Collection exists. Insufficient
+	// permissions cause Exists to return false instead of an error.
 	// TODO(ivanpi): Exists may fail with an error if higher levels of hierarchy
 	// do not exist.
 	Exists(_ *context.T, _ rpc.ServerCall, schemaVersion int32) (bool, error)
-	// GetPermissions returns the current Permissions for the Table.
+	// GetPermissions returns the current Permissions for the Collection.
 	GetPermissions(_ *context.T, _ rpc.ServerCall, schemaVersion int32) (access.Permissions, error)
-	// SetPermissions replaces the current Permissions for the Table.
+	// SetPermissions replaces the current Permissions for the Collection.
 	SetPermissions(_ *context.T, _ rpc.ServerCall, schemaVersion int32, perms access.Permissions) error
 	// DeleteRange deletes all rows in the given half-open range [start, limit).
 	// If limit is "", all rows with keys >= start are included.
@@ -6561,12 +6561,12 @@ type TableServerMethods interface {
 	// Scan returns all rows in the given half-open range [start, limit). If limit
 	// is "", all rows with keys >= start are included. Concurrency semantics are
 	// documented in model.go.
-	Scan(_ *context.T, _ TableScanServerCall, schemaVersion int32, start []byte, limit []byte) error
-	// GetPrefixPermissions returns an array of (prefix, perms) pairs. The array is
-	// sorted from longest prefix to shortest, so element zero is the one that
+	Scan(_ *context.T, _ CollectionScanServerCall, schemaVersion int32, start []byte, limit []byte) error
+	// GetPrefixPermissions returns an array of (prefix, perms) pairs. The array
+	// is sorted from longest prefix to shortest, so element zero is the one that
 	// applies to the row with the given key. The last element is always the
-	// prefix "" which represents the table's permissions -- the array will always
-	// have at least one element.
+	// prefix "" which represents the collection's permissions -- the array will
+	// always have at least one element.
 	GetPrefixPermissions(_ *context.T, _ rpc.ServerCall, schemaVersion int32, key string) ([]PrefixPermissions, error)
 	// SetPrefixPermissions sets the permissions for all current and future rows with
 	// the given prefix. If the prefix overlaps with an existing prefix, the
@@ -6582,24 +6582,24 @@ type TableServerMethods interface {
 	DeletePrefixPermissions(_ *context.T, _ rpc.ServerCall, schemaVersion int32, prefix string) error
 }
 
-// TableServerStubMethods is the server interface containing
-// Table methods, as expected by rpc.Server.
-// The only difference between this interface and TableServerMethods
+// CollectionServerStubMethods is the server interface containing
+// Collection methods, as expected by rpc.Server.
+// The only difference between this interface and CollectionServerMethods
 // is the streaming methods.
-type TableServerStubMethods interface {
-	// Create creates this Table.
+type CollectionServerStubMethods interface {
+	// Create creates this Collection.
 	// If perms is nil, we inherit (copy) the Database perms.
 	Create(_ *context.T, _ rpc.ServerCall, schemaVersion int32, perms access.Permissions) error
-	// Destroy destroys this Table.
+	// Destroy destroys this Collection.
 	Destroy(_ *context.T, _ rpc.ServerCall, schemaVersion int32) error
-	// Exists returns true only if this Table exists. Insufficient permissions
-	// cause Exists to return false instead of an error.
+	// Exists returns true only if this Collection exists. Insufficient
+	// permissions cause Exists to return false instead of an error.
 	// TODO(ivanpi): Exists may fail with an error if higher levels of hierarchy
 	// do not exist.
 	Exists(_ *context.T, _ rpc.ServerCall, schemaVersion int32) (bool, error)
-	// GetPermissions returns the current Permissions for the Table.
+	// GetPermissions returns the current Permissions for the Collection.
 	GetPermissions(_ *context.T, _ rpc.ServerCall, schemaVersion int32) (access.Permissions, error)
-	// SetPermissions replaces the current Permissions for the Table.
+	// SetPermissions replaces the current Permissions for the Collection.
 	SetPermissions(_ *context.T, _ rpc.ServerCall, schemaVersion int32, perms access.Permissions) error
 	// DeleteRange deletes all rows in the given half-open range [start, limit).
 	// If limit is "", all rows with keys >= start are included.
@@ -6609,12 +6609,12 @@ type TableServerStubMethods interface {
 	// Scan returns all rows in the given half-open range [start, limit). If limit
 	// is "", all rows with keys >= start are included. Concurrency semantics are
 	// documented in model.go.
-	Scan(_ *context.T, _ *TableScanServerCallStub, schemaVersion int32, start []byte, limit []byte) error
-	// GetPrefixPermissions returns an array of (prefix, perms) pairs. The array is
-	// sorted from longest prefix to shortest, so element zero is the one that
+	Scan(_ *context.T, _ *CollectionScanServerCallStub, schemaVersion int32, start []byte, limit []byte) error
+	// GetPrefixPermissions returns an array of (prefix, perms) pairs. The array
+	// is sorted from longest prefix to shortest, so element zero is the one that
 	// applies to the row with the given key. The last element is always the
-	// prefix "" which represents the table's permissions -- the array will always
-	// have at least one element.
+	// prefix "" which represents the collection's permissions -- the array will
+	// always have at least one element.
 	GetPrefixPermissions(_ *context.T, _ rpc.ServerCall, schemaVersion int32, key string) ([]PrefixPermissions, error)
 	// SetPrefixPermissions sets the permissions for all current and future rows with
 	// the given prefix. If the prefix overlaps with an existing prefix, the
@@ -6630,18 +6630,18 @@ type TableServerStubMethods interface {
 	DeletePrefixPermissions(_ *context.T, _ rpc.ServerCall, schemaVersion int32, prefix string) error
 }
 
-// TableServerStub adds universal methods to TableServerStubMethods.
-type TableServerStub interface {
-	TableServerStubMethods
-	// Describe the Table interfaces.
+// CollectionServerStub adds universal methods to CollectionServerStubMethods.
+type CollectionServerStub interface {
+	CollectionServerStubMethods
+	// Describe the Collection interfaces.
 	Describe__() []rpc.InterfaceDesc
 }
 
-// TableServer returns a server stub for Table.
-// It converts an implementation of TableServerMethods into
+// CollectionServer returns a server stub for Collection.
+// It converts an implementation of CollectionServerMethods into
 // an object that may be used by rpc.Server.
-func TableServer(impl TableServerMethods) TableServerStub {
-	stub := implTableServerStub{
+func CollectionServer(impl CollectionServerMethods) CollectionServerStub {
+	stub := implCollectionServerStub{
 		impl: impl,
 	}
 	// Initialize GlobState; always check the stub itself first, to handle the
@@ -6654,71 +6654,71 @@ func TableServer(impl TableServerMethods) TableServerStub {
 	return stub
 }
 
-type implTableServerStub struct {
-	impl TableServerMethods
+type implCollectionServerStub struct {
+	impl CollectionServerMethods
 	gs   *rpc.GlobState
 }
 
-func (s implTableServerStub) Create(ctx *context.T, call rpc.ServerCall, i0 int32, i1 access.Permissions) error {
+func (s implCollectionServerStub) Create(ctx *context.T, call rpc.ServerCall, i0 int32, i1 access.Permissions) error {
 	return s.impl.Create(ctx, call, i0, i1)
 }
 
-func (s implTableServerStub) Destroy(ctx *context.T, call rpc.ServerCall, i0 int32) error {
+func (s implCollectionServerStub) Destroy(ctx *context.T, call rpc.ServerCall, i0 int32) error {
 	return s.impl.Destroy(ctx, call, i0)
 }
 
-func (s implTableServerStub) Exists(ctx *context.T, call rpc.ServerCall, i0 int32) (bool, error) {
+func (s implCollectionServerStub) Exists(ctx *context.T, call rpc.ServerCall, i0 int32) (bool, error) {
 	return s.impl.Exists(ctx, call, i0)
 }
 
-func (s implTableServerStub) GetPermissions(ctx *context.T, call rpc.ServerCall, i0 int32) (access.Permissions, error) {
+func (s implCollectionServerStub) GetPermissions(ctx *context.T, call rpc.ServerCall, i0 int32) (access.Permissions, error) {
 	return s.impl.GetPermissions(ctx, call, i0)
 }
 
-func (s implTableServerStub) SetPermissions(ctx *context.T, call rpc.ServerCall, i0 int32, i1 access.Permissions) error {
+func (s implCollectionServerStub) SetPermissions(ctx *context.T, call rpc.ServerCall, i0 int32, i1 access.Permissions) error {
 	return s.impl.SetPermissions(ctx, call, i0, i1)
 }
 
-func (s implTableServerStub) DeleteRange(ctx *context.T, call rpc.ServerCall, i0 int32, i1 []byte, i2 []byte) error {
+func (s implCollectionServerStub) DeleteRange(ctx *context.T, call rpc.ServerCall, i0 int32, i1 []byte, i2 []byte) error {
 	return s.impl.DeleteRange(ctx, call, i0, i1, i2)
 }
 
-func (s implTableServerStub) Scan(ctx *context.T, call *TableScanServerCallStub, i0 int32, i1 []byte, i2 []byte) error {
+func (s implCollectionServerStub) Scan(ctx *context.T, call *CollectionScanServerCallStub, i0 int32, i1 []byte, i2 []byte) error {
 	return s.impl.Scan(ctx, call, i0, i1, i2)
 }
 
-func (s implTableServerStub) GetPrefixPermissions(ctx *context.T, call rpc.ServerCall, i0 int32, i1 string) ([]PrefixPermissions, error) {
+func (s implCollectionServerStub) GetPrefixPermissions(ctx *context.T, call rpc.ServerCall, i0 int32, i1 string) ([]PrefixPermissions, error) {
 	return s.impl.GetPrefixPermissions(ctx, call, i0, i1)
 }
 
-func (s implTableServerStub) SetPrefixPermissions(ctx *context.T, call rpc.ServerCall, i0 int32, i1 string, i2 access.Permissions) error {
+func (s implCollectionServerStub) SetPrefixPermissions(ctx *context.T, call rpc.ServerCall, i0 int32, i1 string, i2 access.Permissions) error {
 	return s.impl.SetPrefixPermissions(ctx, call, i0, i1, i2)
 }
 
-func (s implTableServerStub) DeletePrefixPermissions(ctx *context.T, call rpc.ServerCall, i0 int32, i1 string) error {
+func (s implCollectionServerStub) DeletePrefixPermissions(ctx *context.T, call rpc.ServerCall, i0 int32, i1 string) error {
 	return s.impl.DeletePrefixPermissions(ctx, call, i0, i1)
 }
 
-func (s implTableServerStub) Globber() *rpc.GlobState {
+func (s implCollectionServerStub) Globber() *rpc.GlobState {
 	return s.gs
 }
 
-func (s implTableServerStub) Describe__() []rpc.InterfaceDesc {
-	return []rpc.InterfaceDesc{TableDesc}
+func (s implCollectionServerStub) Describe__() []rpc.InterfaceDesc {
+	return []rpc.InterfaceDesc{CollectionDesc}
 }
 
-// TableDesc describes the Table interface.
-var TableDesc rpc.InterfaceDesc = descTable
+// CollectionDesc describes the Collection interface.
+var CollectionDesc rpc.InterfaceDesc = descCollection
 
-// descTable hides the desc to keep godoc clean.
-var descTable = rpc.InterfaceDesc{
-	Name:    "Table",
+// descCollection hides the desc to keep godoc clean.
+var descCollection = rpc.InterfaceDesc{
+	Name:    "Collection",
 	PkgPath: "v.io/v23/services/syncbase",
-	Doc:     "// Table represents a collection of Rows.\n// Table.Glob operates over the primary keys of Rows in the Table.\n// SchemaVersion is the version number that the client expects the database\n// to be at. To disable schema version checking, pass -1.",
+	Doc:     "// Collection represents a collection of Rows.\n// Collection.Glob operates over the primary keys of Rows in the Collection.\n// SchemaVersion is the version number that the client expects the database\n// to be at. To disable schema version checking, pass -1.",
 	Methods: []rpc.MethodDesc{
 		{
 			Name: "Create",
-			Doc:  "// Create creates this Table.\n// If perms is nil, we inherit (copy) the Database perms.",
+			Doc:  "// Create creates this Collection.\n// If perms is nil, we inherit (copy) the Database perms.",
 			InArgs: []rpc.ArgDesc{
 				{"schemaVersion", ``}, // int32
 				{"perms", ``},         // access.Permissions
@@ -6727,7 +6727,7 @@ var descTable = rpc.InterfaceDesc{
 		},
 		{
 			Name: "Destroy",
-			Doc:  "// Destroy destroys this Table.",
+			Doc:  "// Destroy destroys this Collection.",
 			InArgs: []rpc.ArgDesc{
 				{"schemaVersion", ``}, // int32
 			},
@@ -6735,7 +6735,7 @@ var descTable = rpc.InterfaceDesc{
 		},
 		{
 			Name: "Exists",
-			Doc:  "// Exists returns true only if this Table exists. Insufficient permissions\n// cause Exists to return false instead of an error.\n// TODO(ivanpi): Exists may fail with an error if higher levels of hierarchy\n// do not exist.",
+			Doc:  "// Exists returns true only if this Collection exists. Insufficient\n// permissions cause Exists to return false instead of an error.\n// TODO(ivanpi): Exists may fail with an error if higher levels of hierarchy\n// do not exist.",
 			InArgs: []rpc.ArgDesc{
 				{"schemaVersion", ``}, // int32
 			},
@@ -6746,7 +6746,7 @@ var descTable = rpc.InterfaceDesc{
 		},
 		{
 			Name: "GetPermissions",
-			Doc:  "// GetPermissions returns the current Permissions for the Table.",
+			Doc:  "// GetPermissions returns the current Permissions for the Collection.",
 			InArgs: []rpc.ArgDesc{
 				{"schemaVersion", ``}, // int32
 			},
@@ -6757,7 +6757,7 @@ var descTable = rpc.InterfaceDesc{
 		},
 		{
 			Name: "SetPermissions",
-			Doc:  "// SetPermissions replaces the current Permissions for the Table.",
+			Doc:  "// SetPermissions replaces the current Permissions for the Collection.",
 			InArgs: []rpc.ArgDesc{
 				{"schemaVersion", ``}, // int32
 				{"perms", ``},         // access.Permissions
@@ -6786,7 +6786,7 @@ var descTable = rpc.InterfaceDesc{
 		},
 		{
 			Name: "GetPrefixPermissions",
-			Doc:  "// GetPrefixPermissions returns an array of (prefix, perms) pairs. The array is\n// sorted from longest prefix to shortest, so element zero is the one that\n// applies to the row with the given key. The last element is always the\n// prefix \"\" which represents the table's permissions -- the array will always\n// have at least one element.",
+			Doc:  "// GetPrefixPermissions returns an array of (prefix, perms) pairs. The array\n// is sorted from longest prefix to shortest, so element zero is the one that\n// applies to the row with the given key. The last element is always the\n// prefix \"\" which represents the collection's permissions -- the array will\n// always have at least one element.",
 			InArgs: []rpc.ArgDesc{
 				{"schemaVersion", ``}, // int32
 				{"key", ``},           // string
@@ -6818,9 +6818,9 @@ var descTable = rpc.InterfaceDesc{
 	},
 }
 
-// TableScanServerStream is the server stream for Table.Scan.
-type TableScanServerStream interface {
-	// SendStream returns the send side of the Table.Scan server stream.
+// CollectionScanServerStream is the server stream for Collection.Scan.
+type CollectionScanServerStream interface {
+	// SendStream returns the send side of the Collection.Scan server stream.
 	SendStream() interface {
 		// Send places the item onto the output stream.  Returns errors encountered
 		// while sending.  Blocks if there is no buffer space; will unblock when
@@ -6829,44 +6829,44 @@ type TableScanServerStream interface {
 	}
 }
 
-// TableScanServerCall represents the context passed to Table.Scan.
-type TableScanServerCall interface {
+// CollectionScanServerCall represents the context passed to Collection.Scan.
+type CollectionScanServerCall interface {
 	rpc.ServerCall
-	TableScanServerStream
+	CollectionScanServerStream
 }
 
-// TableScanServerCallStub is a wrapper that converts rpc.StreamServerCall into
-// a typesafe stub that implements TableScanServerCall.
-type TableScanServerCallStub struct {
+// CollectionScanServerCallStub is a wrapper that converts rpc.StreamServerCall into
+// a typesafe stub that implements CollectionScanServerCall.
+type CollectionScanServerCallStub struct {
 	rpc.StreamServerCall
 }
 
-// Init initializes TableScanServerCallStub from rpc.StreamServerCall.
-func (s *TableScanServerCallStub) Init(call rpc.StreamServerCall) {
+// Init initializes CollectionScanServerCallStub from rpc.StreamServerCall.
+func (s *CollectionScanServerCallStub) Init(call rpc.StreamServerCall) {
 	s.StreamServerCall = call
 }
 
-// SendStream returns the send side of the Table.Scan server stream.
-func (s *TableScanServerCallStub) SendStream() interface {
+// SendStream returns the send side of the Collection.Scan server stream.
+func (s *CollectionScanServerCallStub) SendStream() interface {
 	Send(item KeyValue) error
 } {
-	return implTableScanServerCallSend{s}
+	return implCollectionScanServerCallSend{s}
 }
 
-type implTableScanServerCallSend struct {
-	s *TableScanServerCallStub
+type implCollectionScanServerCallSend struct {
+	s *CollectionScanServerCallStub
 }
 
-func (s implTableScanServerCallSend) Send(item KeyValue) error {
+func (s implCollectionScanServerCallSend) Send(item KeyValue) error {
 	return s.s.Send(item)
 }
 
 // RowClientMethods is the client interface
 // containing Row methods.
 //
-// Row represents a single row in a Table.
+// Row represents a single row in a Collection.
 // All access checks are performed against the most specific matching prefix
-// permissions in the Table.
+// permissions in the Collection.
 // SchemaVersion is the version number that the client expects the database
 // to be at. To disable schema version checking, pass -1.
 // NOTE(sadovsky): Currently we send []byte values over the wire for Get, Put,
@@ -6927,9 +6927,9 @@ func (c implRowClientStub) Delete(ctx *context.T, i0 int32, opts ...rpc.CallOpt)
 // RowServerMethods is the interface a server writer
 // implements for Row.
 //
-// Row represents a single row in a Table.
+// Row represents a single row in a Collection.
 // All access checks are performed against the most specific matching prefix
-// permissions in the Table.
+// permissions in the Collection.
 // SchemaVersion is the version number that the client expects the database
 // to be at. To disable schema version checking, pass -1.
 // NOTE(sadovsky): Currently we send []byte values over the wire for Get, Put,
@@ -7018,7 +7018,7 @@ var RowDesc rpc.InterfaceDesc = descRow
 var descRow = rpc.InterfaceDesc{
 	Name:    "Row",
 	PkgPath: "v.io/v23/services/syncbase",
-	Doc:     "// Row represents a single row in a Table.\n// All access checks are performed against the most specific matching prefix\n// permissions in the Table.\n// SchemaVersion is the version number that the client expects the database\n// to be at. To disable schema version checking, pass -1.\n// NOTE(sadovsky): Currently we send []byte values over the wire for Get, Put,\n// and Scan. If there's a way to avoid encoding/decoding on the server side, we\n// can use vdl.Value everywhere without sacrificing performance.",
+	Doc:     "// Row represents a single row in a Collection.\n// All access checks are performed against the most specific matching prefix\n// permissions in the Collection.\n// SchemaVersion is the version number that the client expects the database\n// to be at. To disable schema version checking, pass -1.\n// NOTE(sadovsky): Currently we send []byte values over the wire for Get, Put,\n// and Scan. If there's a way to avoid encoding/decoding on the server side, we\n// can use vdl.Value everywhere without sacrificing performance.",
 	Methods: []rpc.MethodDesc{
 		{
 			Name: "Exists",
@@ -7087,7 +7087,7 @@ func __VDLInit() struct{} {
 	vdl.Register((*BatchOptions)(nil))
 	vdl.Register((*PrefixPermissions)(nil))
 	vdl.Register((*KeyValue)(nil))
-	vdl.Register((*TableRow)(nil))
+	vdl.Register((*CollectionRow)(nil))
 	vdl.Register((*SyncgroupSpec)(nil))
 	vdl.Register((*SyncgroupMemberInfo)(nil))
 	vdl.Register((*ResolverType)(nil))

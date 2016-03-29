@@ -51,7 +51,7 @@ func validIdentifier(s string) bool {
 	return identifierRegexp.MatchString(s)
 }
 
-// maxNameLen is the max allowed number of bytes in app, db, and table names.
+// maxNameLen is the max allowed number of bytes in app, db, and collection names.
 const maxNameLen = 64
 
 // ValidAppName returns true iff the given string is a valid app name.
@@ -70,8 +70,8 @@ func ValidDatabaseName(s string) bool {
 	return validIdentifier(s)
 }
 
-// ValidTableName returns true iff the given string is a valid table name.
-func ValidTableName(s string) bool {
+// ValidCollectionName returns true iff the given string is a valid collection name.
+func ValidCollectionName(s string) bool {
 	if len([]byte(s)) > maxNameLen {
 		return false
 	}
@@ -83,21 +83,21 @@ func ValidRowKey(s string) bool {
 	return s != "" && !containsReservedByte(s)
 }
 
-// ParseTableRowPair splits the "<table>/<row>" part of a Syncbase object name
-// into the table name and the row key or prefix.
-func ParseTableRowPair(ctx *context.T, pattern string) (string, string, error) {
+// ParseCollectionRowPair splits the "<collection>/<row>" part of a Syncbase
+// object name into the collection name and the row key or prefix.
+func ParseCollectionRowPair(ctx *context.T, pattern string) (string, string, error) {
 	parts := strings.SplitN(pattern, "/", 2)
-	if len(parts) != 2 { // require both table and row parts
+	if len(parts) != 2 { // require both collection and row parts
 		return "", "", verror.New(verror.ErrBadArg, ctx, pattern)
 	}
-	table, row := parts[0], parts[1]
-	if !ValidTableName(table) {
-		return "", "", verror.New(wire.ErrInvalidName, ctx, table)
+	collection, row := parts[0], parts[1]
+	if !ValidCollectionName(collection) {
+		return "", "", verror.New(wire.ErrInvalidName, ctx, collection)
 	}
 	if row != "" && !ValidRowKey(row) {
 		return "", "", verror.New(wire.ErrInvalidName, ctx, row)
 	}
-	return table, row, nil
+	return collection, row, nil
 }
 
 // PrefixRangeStart returns the start of the row range for the given prefix.

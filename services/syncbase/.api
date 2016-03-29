@@ -21,6 +21,8 @@ pkg syncbase, func BatchSourceFromString(string) (BatchSource, error)
 pkg syncbase, func BlobFetchStateFromString(string) (BlobFetchState, error)
 pkg syncbase, func BlobManagerClient(string) BlobManagerClientStub
 pkg syncbase, func BlobManagerServer(BlobManagerServerMethods) BlobManagerServerStub
+pkg syncbase, func CollectionClient(string) CollectionClientStub
+pkg syncbase, func CollectionServer(CollectionServerMethods) CollectionServerStub
 pkg syncbase, func ConflictManagerClient(string) ConflictManagerClientStub
 pkg syncbase, func ConflictManagerServer(ConflictManagerServerMethods) ConflictManagerServerStub
 pkg syncbase, func DatabaseClient(string) DatabaseClientStub
@@ -47,8 +49,6 @@ pkg syncbase, func ServiceClient(string) ServiceClientStub
 pkg syncbase, func ServiceServer(ServiceServerMethods) ServiceServerStub
 pkg syncbase, func SyncgroupManagerClient(string) SyncgroupManagerClientStub
 pkg syncbase, func SyncgroupManagerServer(SyncgroupManagerServerMethods) SyncgroupManagerServerStub
-pkg syncbase, func TableClient(string) TableClientStub
-pkg syncbase, func TableServer(TableServerMethods) TableServerStub
 pkg syncbase, func ValueSelectionFromString(string) (ValueSelection, error)
 pkg syncbase, func ValueStateFromString(string) (ValueState, error)
 pkg syncbase, method (*BatchInfo) FillVDLTarget(vdl.Target, *vdl.Type) error
@@ -86,6 +86,14 @@ pkg syncbase, method (*BlobManagerPutBlobServerCallStub) RecvStream() interface 
 pkg syncbase, method (*BlobRef) FillVDLTarget(vdl.Target, *vdl.Type) error
 pkg syncbase, method (*BlobRef) MakeVDLTarget() vdl.Target
 pkg syncbase, method (*BlobRefTarget) FromString(string, *vdl.Type) error
+pkg syncbase, method (*CollectionRow) FillVDLTarget(vdl.Target, *vdl.Type) error
+pkg syncbase, method (*CollectionRow) MakeVDLTarget() vdl.Target
+pkg syncbase, method (*CollectionRowTarget) FinishField(vdl.Target, vdl.Target) error
+pkg syncbase, method (*CollectionRowTarget) FinishFields(vdl.FieldsTarget) error
+pkg syncbase, method (*CollectionRowTarget) StartField(string) (vdl.Target, vdl.Target, error)
+pkg syncbase, method (*CollectionRowTarget) StartFields(*vdl.Type) (vdl.FieldsTarget, error)
+pkg syncbase, method (*CollectionScanServerCallStub) Init(rpc.StreamServerCall)
+pkg syncbase, method (*CollectionScanServerCallStub) SendStream() interface {  Send(item KeyValue) error;}
 pkg syncbase, method (*ConflictDataTarget) FinishField(vdl.Target, vdl.Target) error
 pkg syncbase, method (*ConflictDataTarget) FinishFields(vdl.FieldsTarget) error
 pkg syncbase, method (*ConflictDataTarget) StartField(string) (vdl.Target, vdl.Target, error)
@@ -187,14 +195,6 @@ pkg syncbase, method (*SyncgroupSpecTarget) FinishField(vdl.Target, vdl.Target) 
 pkg syncbase, method (*SyncgroupSpecTarget) FinishFields(vdl.FieldsTarget) error
 pkg syncbase, method (*SyncgroupSpecTarget) StartField(string) (vdl.Target, vdl.Target, error)
 pkg syncbase, method (*SyncgroupSpecTarget) StartFields(*vdl.Type) (vdl.FieldsTarget, error)
-pkg syncbase, method (*TableRow) FillVDLTarget(vdl.Target, *vdl.Type) error
-pkg syncbase, method (*TableRow) MakeVDLTarget() vdl.Target
-pkg syncbase, method (*TableRowTarget) FinishField(vdl.Target, vdl.Target) error
-pkg syncbase, method (*TableRowTarget) FinishFields(vdl.FieldsTarget) error
-pkg syncbase, method (*TableRowTarget) StartField(string) (vdl.Target, vdl.Target, error)
-pkg syncbase, method (*TableRowTarget) StartFields(*vdl.Type) (vdl.FieldsTarget, error)
-pkg syncbase, method (*TableScanServerCallStub) Init(rpc.StreamServerCall)
-pkg syncbase, method (*TableScanServerCallStub) SendStream() interface {  Send(item KeyValue) error;}
 pkg syncbase, method (*Value) FillVDLTarget(vdl.Target, *vdl.Type) error
 pkg syncbase, method (*Value) MakeVDLTarget() vdl.Target
 pkg syncbase, method (*ValueSelection) FillVDLTarget(vdl.Target, *vdl.Type) error
@@ -239,24 +239,18 @@ pkg syncbase, method (OperationWrite) Name() string
 pkg syncbase, method (ResolverType) String() string
 pkg syncbase, method (ValueSelection) String() string
 pkg syncbase, method (ValueState) String() string
-pkg syncbase, type AppClientMethods interface { Create, Destroy, Exists, GetPermissions, SetPermissions }
 pkg syncbase, type AppClientMethods interface, Create(*context.T, access.Permissions, ...rpc.CallOpt) error
 pkg syncbase, type AppClientMethods interface, Destroy(*context.T, ...rpc.CallOpt) error
 pkg syncbase, type AppClientMethods interface, Exists(*context.T, ...rpc.CallOpt) (bool, error)
-pkg syncbase, type AppClientMethods interface, GetPermissions(*context.T, ...rpc.CallOpt) (access.Permissions, string, error)
-pkg syncbase, type AppClientMethods interface, SetPermissions(*context.T, access.Permissions, string, ...rpc.CallOpt) error
-pkg syncbase, type AppClientStub interface { Create, Destroy, Exists, GetPermissions, SetPermissions }
+pkg syncbase, type AppClientMethods interface, unexported methods
 pkg syncbase, type AppClientStub interface, Create(*context.T, access.Permissions, ...rpc.CallOpt) error
 pkg syncbase, type AppClientStub interface, Destroy(*context.T, ...rpc.CallOpt) error
 pkg syncbase, type AppClientStub interface, Exists(*context.T, ...rpc.CallOpt) (bool, error)
-pkg syncbase, type AppClientStub interface, GetPermissions(*context.T, ...rpc.CallOpt) (access.Permissions, string, error)
-pkg syncbase, type AppClientStub interface, SetPermissions(*context.T, access.Permissions, string, ...rpc.CallOpt) error
-pkg syncbase, type AppServerMethods interface { Create, Destroy, Exists, GetPermissions, SetPermissions }
+pkg syncbase, type AppClientStub interface, unexported methods
 pkg syncbase, type AppServerMethods interface, Create(*context.T, rpc.ServerCall, access.Permissions) error
 pkg syncbase, type AppServerMethods interface, Destroy(*context.T, rpc.ServerCall) error
 pkg syncbase, type AppServerMethods interface, Exists(*context.T, rpc.ServerCall) (bool, error)
-pkg syncbase, type AppServerMethods interface, GetPermissions(*context.T, rpc.ServerCall) (access.Permissions, string, error)
-pkg syncbase, type AppServerMethods interface, SetPermissions(*context.T, rpc.ServerCall, access.Permissions, string) error
+pkg syncbase, type AppServerMethods interface, unexported methods
 pkg syncbase, type AppServerStub interface, Describe__() []rpc.InterfaceDesc
 pkg syncbase, type AppServerStub interface, unexported methods
 pkg syncbase, type AppServerStubMethods AppServerMethods
@@ -302,7 +296,6 @@ pkg syncbase, type BlobManagerClientMethods interface, KeepBlob(*context.T, Blob
 pkg syncbase, type BlobManagerClientMethods interface, PinBlob(*context.T, BlobRef, ...rpc.CallOpt) error
 pkg syncbase, type BlobManagerClientMethods interface, PutBlob(*context.T, BlobRef, ...rpc.CallOpt) (BlobManagerPutBlobClientCall, error)
 pkg syncbase, type BlobManagerClientMethods interface, UnpinBlob(*context.T, BlobRef, ...rpc.CallOpt) error
-pkg syncbase, type BlobManagerClientStub interface { CommitBlob, CreateBlob, DeleteBlob, FetchBlob, GetBlob, GetBlobSize, KeepBlob, PinBlob, PutBlob, UnpinBlob }
 pkg syncbase, type BlobManagerClientStub interface, CommitBlob(*context.T, BlobRef, ...rpc.CallOpt) error
 pkg syncbase, type BlobManagerClientStub interface, CreateBlob(*context.T, ...rpc.CallOpt) (BlobRef, error)
 pkg syncbase, type BlobManagerClientStub interface, DeleteBlob(*context.T, BlobRef, ...rpc.CallOpt) error
@@ -313,19 +306,14 @@ pkg syncbase, type BlobManagerClientStub interface, KeepBlob(*context.T, BlobRef
 pkg syncbase, type BlobManagerClientStub interface, PinBlob(*context.T, BlobRef, ...rpc.CallOpt) error
 pkg syncbase, type BlobManagerClientStub interface, PutBlob(*context.T, BlobRef, ...rpc.CallOpt) (BlobManagerPutBlobClientCall, error)
 pkg syncbase, type BlobManagerClientStub interface, UnpinBlob(*context.T, BlobRef, ...rpc.CallOpt) error
+pkg syncbase, type BlobManagerClientStub interface, unexported methods
 pkg syncbase, type BlobManagerFetchBlobClientCall interface { Finish, RecvStream }
 pkg syncbase, type BlobManagerFetchBlobClientCall interface, Finish() error
 pkg syncbase, type BlobManagerFetchBlobClientCall interface, RecvStream() interface {  Advance() bool;; Value() BlobFetchStatus;; Err() error;}
 pkg syncbase, type BlobManagerFetchBlobClientStream interface { RecvStream }
 pkg syncbase, type BlobManagerFetchBlobClientStream interface, RecvStream() interface {  Advance() bool;; Value() BlobFetchStatus;; Err() error;}
-pkg syncbase, type BlobManagerFetchBlobServerCall interface { GrantedBlessings, LocalEndpoint, RemoteEndpoint, Security, SendStream, Server, Suffix }
-pkg syncbase, type BlobManagerFetchBlobServerCall interface, GrantedBlessings() security.Blessings
-pkg syncbase, type BlobManagerFetchBlobServerCall interface, LocalEndpoint() naming.Endpoint
-pkg syncbase, type BlobManagerFetchBlobServerCall interface, RemoteEndpoint() naming.Endpoint
-pkg syncbase, type BlobManagerFetchBlobServerCall interface, Security() security.Call
 pkg syncbase, type BlobManagerFetchBlobServerCall interface, SendStream() interface {  Send(item BlobFetchStatus) error;}
-pkg syncbase, type BlobManagerFetchBlobServerCall interface, Server() Server
-pkg syncbase, type BlobManagerFetchBlobServerCall interface, Suffix() string
+pkg syncbase, type BlobManagerFetchBlobServerCall interface, unexported methods
 pkg syncbase, type BlobManagerFetchBlobServerCallStub struct
 pkg syncbase, type BlobManagerFetchBlobServerCallStub struct, embedded rpc.StreamServerCall
 pkg syncbase, type BlobManagerFetchBlobServerStream interface { SendStream }
@@ -335,14 +323,8 @@ pkg syncbase, type BlobManagerGetBlobClientCall interface, Finish() error
 pkg syncbase, type BlobManagerGetBlobClientCall interface, RecvStream() interface {  Advance() bool;; Value() []byte;; Err() error;}
 pkg syncbase, type BlobManagerGetBlobClientStream interface { RecvStream }
 pkg syncbase, type BlobManagerGetBlobClientStream interface, RecvStream() interface {  Advance() bool;; Value() []byte;; Err() error;}
-pkg syncbase, type BlobManagerGetBlobServerCall interface { GrantedBlessings, LocalEndpoint, RemoteEndpoint, Security, SendStream, Server, Suffix }
-pkg syncbase, type BlobManagerGetBlobServerCall interface, GrantedBlessings() security.Blessings
-pkg syncbase, type BlobManagerGetBlobServerCall interface, LocalEndpoint() naming.Endpoint
-pkg syncbase, type BlobManagerGetBlobServerCall interface, RemoteEndpoint() naming.Endpoint
-pkg syncbase, type BlobManagerGetBlobServerCall interface, Security() security.Call
 pkg syncbase, type BlobManagerGetBlobServerCall interface, SendStream() interface {  Send(item []byte) error;}
-pkg syncbase, type BlobManagerGetBlobServerCall interface, Server() Server
-pkg syncbase, type BlobManagerGetBlobServerCall interface, Suffix() string
+pkg syncbase, type BlobManagerGetBlobServerCall interface, unexported methods
 pkg syncbase, type BlobManagerGetBlobServerCallStub struct
 pkg syncbase, type BlobManagerGetBlobServerCallStub struct, embedded rpc.StreamServerCall
 pkg syncbase, type BlobManagerGetBlobServerStream interface { SendStream }
@@ -352,14 +334,8 @@ pkg syncbase, type BlobManagerPutBlobClientCall interface, Finish() error
 pkg syncbase, type BlobManagerPutBlobClientCall interface, SendStream() interface {  Send(item []byte) error;; Close() error;}
 pkg syncbase, type BlobManagerPutBlobClientStream interface { SendStream }
 pkg syncbase, type BlobManagerPutBlobClientStream interface, SendStream() interface {  Send(item []byte) error;; Close() error;}
-pkg syncbase, type BlobManagerPutBlobServerCall interface { GrantedBlessings, LocalEndpoint, RecvStream, RemoteEndpoint, Security, Server, Suffix }
-pkg syncbase, type BlobManagerPutBlobServerCall interface, GrantedBlessings() security.Blessings
-pkg syncbase, type BlobManagerPutBlobServerCall interface, LocalEndpoint() naming.Endpoint
 pkg syncbase, type BlobManagerPutBlobServerCall interface, RecvStream() interface {  Advance() bool;; Value() []byte;; Err() error;}
-pkg syncbase, type BlobManagerPutBlobServerCall interface, RemoteEndpoint() naming.Endpoint
-pkg syncbase, type BlobManagerPutBlobServerCall interface, Security() security.Call
-pkg syncbase, type BlobManagerPutBlobServerCall interface, Server() Server
-pkg syncbase, type BlobManagerPutBlobServerCall interface, Suffix() string
+pkg syncbase, type BlobManagerPutBlobServerCall interface, unexported methods
 pkg syncbase, type BlobManagerPutBlobServerCallStub struct
 pkg syncbase, type BlobManagerPutBlobServerCallStub struct, embedded rpc.StreamServerCall
 pkg syncbase, type BlobManagerPutBlobServerStream interface { RecvStream }
@@ -402,6 +378,80 @@ pkg syncbase, type BlobRef string
 pkg syncbase, type BlobRefTarget struct
 pkg syncbase, type BlobRefTarget struct, Value *BlobRef
 pkg syncbase, type BlobRefTarget struct, embedded vdl.TargetBase
+pkg syncbase, type CollectionClientMethods interface { Create, DeletePrefixPermissions, DeleteRange, Destroy, Exists, GetPermissions, GetPrefixPermissions, Scan, SetPermissions, SetPrefixPermissions }
+pkg syncbase, type CollectionClientMethods interface, Create(*context.T, int32, access.Permissions, ...rpc.CallOpt) error
+pkg syncbase, type CollectionClientMethods interface, DeletePrefixPermissions(*context.T, int32, string, ...rpc.CallOpt) error
+pkg syncbase, type CollectionClientMethods interface, DeleteRange(*context.T, int32, []byte, []byte, ...rpc.CallOpt) error
+pkg syncbase, type CollectionClientMethods interface, Destroy(*context.T, int32, ...rpc.CallOpt) error
+pkg syncbase, type CollectionClientMethods interface, Exists(*context.T, int32, ...rpc.CallOpt) (bool, error)
+pkg syncbase, type CollectionClientMethods interface, GetPermissions(*context.T, int32, ...rpc.CallOpt) (access.Permissions, error)
+pkg syncbase, type CollectionClientMethods interface, GetPrefixPermissions(*context.T, int32, string, ...rpc.CallOpt) ([]PrefixPermissions, error)
+pkg syncbase, type CollectionClientMethods interface, Scan(*context.T, int32, []byte, []byte, ...rpc.CallOpt) (CollectionScanClientCall, error)
+pkg syncbase, type CollectionClientMethods interface, SetPermissions(*context.T, int32, access.Permissions, ...rpc.CallOpt) error
+pkg syncbase, type CollectionClientMethods interface, SetPrefixPermissions(*context.T, int32, string, access.Permissions, ...rpc.CallOpt) error
+pkg syncbase, type CollectionClientStub interface, Create(*context.T, int32, access.Permissions, ...rpc.CallOpt) error
+pkg syncbase, type CollectionClientStub interface, DeletePrefixPermissions(*context.T, int32, string, ...rpc.CallOpt) error
+pkg syncbase, type CollectionClientStub interface, DeleteRange(*context.T, int32, []byte, []byte, ...rpc.CallOpt) error
+pkg syncbase, type CollectionClientStub interface, Destroy(*context.T, int32, ...rpc.CallOpt) error
+pkg syncbase, type CollectionClientStub interface, Exists(*context.T, int32, ...rpc.CallOpt) (bool, error)
+pkg syncbase, type CollectionClientStub interface, GetPermissions(*context.T, int32, ...rpc.CallOpt) (access.Permissions, error)
+pkg syncbase, type CollectionClientStub interface, GetPrefixPermissions(*context.T, int32, string, ...rpc.CallOpt) ([]PrefixPermissions, error)
+pkg syncbase, type CollectionClientStub interface, Scan(*context.T, int32, []byte, []byte, ...rpc.CallOpt) (CollectionScanClientCall, error)
+pkg syncbase, type CollectionClientStub interface, SetPermissions(*context.T, int32, access.Permissions, ...rpc.CallOpt) error
+pkg syncbase, type CollectionClientStub interface, SetPrefixPermissions(*context.T, int32, string, access.Permissions, ...rpc.CallOpt) error
+pkg syncbase, type CollectionClientStub interface, unexported methods
+pkg syncbase, type CollectionRow struct
+pkg syncbase, type CollectionRow struct, CollectionName string
+pkg syncbase, type CollectionRow struct, Row string
+pkg syncbase, type CollectionRowTarget struct
+pkg syncbase, type CollectionRowTarget struct, Value *CollectionRow
+pkg syncbase, type CollectionRowTarget struct, embedded vdl.FieldsTargetBase
+pkg syncbase, type CollectionRowTarget struct, embedded vdl.TargetBase
+pkg syncbase, type CollectionScanClientCall interface { Finish, RecvStream }
+pkg syncbase, type CollectionScanClientCall interface, Finish() error
+pkg syncbase, type CollectionScanClientCall interface, RecvStream() interface {  Advance() bool;; Value() KeyValue;; Err() error;}
+pkg syncbase, type CollectionScanClientStream interface { RecvStream }
+pkg syncbase, type CollectionScanClientStream interface, RecvStream() interface {  Advance() bool;; Value() KeyValue;; Err() error;}
+pkg syncbase, type CollectionScanServerCall interface, SendStream() interface {  Send(item KeyValue) error;}
+pkg syncbase, type CollectionScanServerCall interface, unexported methods
+pkg syncbase, type CollectionScanServerCallStub struct
+pkg syncbase, type CollectionScanServerCallStub struct, embedded rpc.StreamServerCall
+pkg syncbase, type CollectionScanServerStream interface { SendStream }
+pkg syncbase, type CollectionScanServerStream interface, SendStream() interface {  Send(item KeyValue) error;}
+pkg syncbase, type CollectionServerMethods interface { Create, DeletePrefixPermissions, DeleteRange, Destroy, Exists, GetPermissions, GetPrefixPermissions, Scan, SetPermissions, SetPrefixPermissions }
+pkg syncbase, type CollectionServerMethods interface, Create(*context.T, rpc.ServerCall, int32, access.Permissions) error
+pkg syncbase, type CollectionServerMethods interface, DeletePrefixPermissions(*context.T, rpc.ServerCall, int32, string) error
+pkg syncbase, type CollectionServerMethods interface, DeleteRange(*context.T, rpc.ServerCall, int32, []byte, []byte) error
+pkg syncbase, type CollectionServerMethods interface, Destroy(*context.T, rpc.ServerCall, int32) error
+pkg syncbase, type CollectionServerMethods interface, Exists(*context.T, rpc.ServerCall, int32) (bool, error)
+pkg syncbase, type CollectionServerMethods interface, GetPermissions(*context.T, rpc.ServerCall, int32) (access.Permissions, error)
+pkg syncbase, type CollectionServerMethods interface, GetPrefixPermissions(*context.T, rpc.ServerCall, int32, string) ([]PrefixPermissions, error)
+pkg syncbase, type CollectionServerMethods interface, Scan(*context.T, CollectionScanServerCall, int32, []byte, []byte) error
+pkg syncbase, type CollectionServerMethods interface, SetPermissions(*context.T, rpc.ServerCall, int32, access.Permissions) error
+pkg syncbase, type CollectionServerMethods interface, SetPrefixPermissions(*context.T, rpc.ServerCall, int32, string, access.Permissions) error
+pkg syncbase, type CollectionServerStub interface { Create, DeletePrefixPermissions, DeleteRange, Describe__, Destroy, Exists, GetPermissions, GetPrefixPermissions, Scan, SetPermissions, SetPrefixPermissions }
+pkg syncbase, type CollectionServerStub interface, Create(*context.T, rpc.ServerCall, int32, access.Permissions) error
+pkg syncbase, type CollectionServerStub interface, DeletePrefixPermissions(*context.T, rpc.ServerCall, int32, string) error
+pkg syncbase, type CollectionServerStub interface, DeleteRange(*context.T, rpc.ServerCall, int32, []byte, []byte) error
+pkg syncbase, type CollectionServerStub interface, Describe__() []rpc.InterfaceDesc
+pkg syncbase, type CollectionServerStub interface, Destroy(*context.T, rpc.ServerCall, int32) error
+pkg syncbase, type CollectionServerStub interface, Exists(*context.T, rpc.ServerCall, int32) (bool, error)
+pkg syncbase, type CollectionServerStub interface, GetPermissions(*context.T, rpc.ServerCall, int32) (access.Permissions, error)
+pkg syncbase, type CollectionServerStub interface, GetPrefixPermissions(*context.T, rpc.ServerCall, int32, string) ([]PrefixPermissions, error)
+pkg syncbase, type CollectionServerStub interface, Scan(*context.T, *CollectionScanServerCallStub, int32, []byte, []byte) error
+pkg syncbase, type CollectionServerStub interface, SetPermissions(*context.T, rpc.ServerCall, int32, access.Permissions) error
+pkg syncbase, type CollectionServerStub interface, SetPrefixPermissions(*context.T, rpc.ServerCall, int32, string, access.Permissions) error
+pkg syncbase, type CollectionServerStubMethods interface { Create, DeletePrefixPermissions, DeleteRange, Destroy, Exists, GetPermissions, GetPrefixPermissions, Scan, SetPermissions, SetPrefixPermissions }
+pkg syncbase, type CollectionServerStubMethods interface, Create(*context.T, rpc.ServerCall, int32, access.Permissions) error
+pkg syncbase, type CollectionServerStubMethods interface, DeletePrefixPermissions(*context.T, rpc.ServerCall, int32, string) error
+pkg syncbase, type CollectionServerStubMethods interface, DeleteRange(*context.T, rpc.ServerCall, int32, []byte, []byte) error
+pkg syncbase, type CollectionServerStubMethods interface, Destroy(*context.T, rpc.ServerCall, int32) error
+pkg syncbase, type CollectionServerStubMethods interface, Exists(*context.T, rpc.ServerCall, int32) (bool, error)
+pkg syncbase, type CollectionServerStubMethods interface, GetPermissions(*context.T, rpc.ServerCall, int32) (access.Permissions, error)
+pkg syncbase, type CollectionServerStubMethods interface, GetPrefixPermissions(*context.T, rpc.ServerCall, int32, string) ([]PrefixPermissions, error)
+pkg syncbase, type CollectionServerStubMethods interface, Scan(*context.T, *CollectionScanServerCallStub, int32, []byte, []byte) error
+pkg syncbase, type CollectionServerStubMethods interface, SetPermissions(*context.T, rpc.ServerCall, int32, access.Permissions) error
+pkg syncbase, type CollectionServerStubMethods interface, SetPrefixPermissions(*context.T, rpc.ServerCall, int32, string, access.Permissions) error
 pkg syncbase, type ConflictData interface, FillVDLTarget(vdl.Target, *vdl.Type) error
 pkg syncbase, type ConflictData interface, Index() int
 pkg syncbase, type ConflictData interface, Interface() interface{}
@@ -424,8 +474,8 @@ pkg syncbase, type ConflictInfoTarget struct, embedded vdl.FieldsTargetBase
 pkg syncbase, type ConflictInfoTarget struct, embedded vdl.TargetBase
 pkg syncbase, type ConflictManagerClientMethods interface { StartConflictResolver }
 pkg syncbase, type ConflictManagerClientMethods interface, StartConflictResolver(*context.T, ...rpc.CallOpt) (ConflictManagerStartConflictResolverClientCall, error)
-pkg syncbase, type ConflictManagerClientStub interface { StartConflictResolver }
 pkg syncbase, type ConflictManagerClientStub interface, StartConflictResolver(*context.T, ...rpc.CallOpt) (ConflictManagerStartConflictResolverClientCall, error)
+pkg syncbase, type ConflictManagerClientStub interface, unexported methods
 pkg syncbase, type ConflictManagerServerMethods interface { StartConflictResolver }
 pkg syncbase, type ConflictManagerServerMethods interface, StartConflictResolver(*context.T, ConflictManagerStartConflictResolverServerCall) error
 pkg syncbase, type ConflictManagerServerStub interface { Describe__, StartConflictResolver }
@@ -440,15 +490,9 @@ pkg syncbase, type ConflictManagerStartConflictResolverClientCall interface, Sen
 pkg syncbase, type ConflictManagerStartConflictResolverClientStream interface { RecvStream, SendStream }
 pkg syncbase, type ConflictManagerStartConflictResolverClientStream interface, RecvStream() interface {  Advance() bool;; Value() ConflictInfo;; Err() error;}
 pkg syncbase, type ConflictManagerStartConflictResolverClientStream interface, SendStream() interface {  Send(item ResolutionInfo) error;; Close() error;}
-pkg syncbase, type ConflictManagerStartConflictResolverServerCall interface { GrantedBlessings, LocalEndpoint, RecvStream, RemoteEndpoint, Security, SendStream, Server, Suffix }
-pkg syncbase, type ConflictManagerStartConflictResolverServerCall interface, GrantedBlessings() security.Blessings
-pkg syncbase, type ConflictManagerStartConflictResolverServerCall interface, LocalEndpoint() naming.Endpoint
 pkg syncbase, type ConflictManagerStartConflictResolverServerCall interface, RecvStream() interface {  Advance() bool;; Value() ResolutionInfo;; Err() error;}
-pkg syncbase, type ConflictManagerStartConflictResolverServerCall interface, RemoteEndpoint() naming.Endpoint
-pkg syncbase, type ConflictManagerStartConflictResolverServerCall interface, Security() security.Call
 pkg syncbase, type ConflictManagerStartConflictResolverServerCall interface, SendStream() interface {  Send(item ConflictInfo) error;}
-pkg syncbase, type ConflictManagerStartConflictResolverServerCall interface, Server() Server
-pkg syncbase, type ConflictManagerStartConflictResolverServerCall interface, Suffix() string
+pkg syncbase, type ConflictManagerStartConflictResolverServerCall interface, unexported methods
 pkg syncbase, type ConflictManagerStartConflictResolverServerCallStub struct
 pkg syncbase, type ConflictManagerStartConflictResolverServerCallStub struct, embedded rpc.StreamServerCall
 pkg syncbase, type ConflictManagerStartConflictResolverServerStream interface { RecvStream, SendStream }
@@ -461,15 +505,14 @@ pkg syncbase, type CrPolicyTarget struct, Value *CrPolicy
 pkg syncbase, type CrPolicyTarget struct, embedded vdl.FieldsTargetBase
 pkg syncbase, type CrPolicyTarget struct, embedded vdl.TargetBase
 pkg syncbase, type CrRule struct
+pkg syncbase, type CrRule struct, CollectionName string
 pkg syncbase, type CrRule struct, KeyPrefix string
 pkg syncbase, type CrRule struct, Resolver ResolverType
-pkg syncbase, type CrRule struct, TableName string
 pkg syncbase, type CrRule struct, Type string
 pkg syncbase, type CrRuleTarget struct
 pkg syncbase, type CrRuleTarget struct, Value *CrRule
 pkg syncbase, type CrRuleTarget struct, embedded vdl.FieldsTargetBase
 pkg syncbase, type CrRuleTarget struct, embedded vdl.TargetBase
-pkg syncbase, type DatabaseClientMethods interface { Abort, BeginBatch, Commit, CommitBlob, Create, CreateBlob, CreateSyncgroup, DeleteBlob, Destroy, DestroySyncgroup, EjectFromSyncgroup, Exec, Exists, FetchBlob, GetBlob, GetBlobSize, GetPermissions, GetResumeMarker, GetSchemaMetadata, GetSyncgroupMembers, GetSyncgroupNames, GetSyncgroupSpec, JoinSyncgroup, KeepBlob, LeaveSyncgroup, ListTables, PauseSync, PinBlob, PutBlob, ResumeSync, SetPermissions, SetSchemaMetadata, SetSyncgroupSpec, StartConflictResolver, UnpinBlob, WatchGlob }
 pkg syncbase, type DatabaseClientMethods interface, Abort(*context.T, int32, ...rpc.CallOpt) error
 pkg syncbase, type DatabaseClientMethods interface, BeginBatch(*context.T, int32, BatchOptions, ...rpc.CallOpt) (string, error)
 pkg syncbase, type DatabaseClientMethods interface, Commit(*context.T, int32, ...rpc.CallOpt) error
@@ -486,7 +529,6 @@ pkg syncbase, type DatabaseClientMethods interface, Exists(*context.T, int32, ..
 pkg syncbase, type DatabaseClientMethods interface, FetchBlob(*context.T, BlobRef, uint64, ...rpc.CallOpt) (BlobManagerFetchBlobClientCall, error)
 pkg syncbase, type DatabaseClientMethods interface, GetBlob(*context.T, BlobRef, int64, ...rpc.CallOpt) (BlobManagerGetBlobClientCall, error)
 pkg syncbase, type DatabaseClientMethods interface, GetBlobSize(*context.T, BlobRef, ...rpc.CallOpt) (int64, error)
-pkg syncbase, type DatabaseClientMethods interface, GetPermissions(*context.T, ...rpc.CallOpt) (access.Permissions, string, error)
 pkg syncbase, type DatabaseClientMethods interface, GetResumeMarker(*context.T, ...rpc.CallOpt) (watch.ResumeMarker, error)
 pkg syncbase, type DatabaseClientMethods interface, GetSchemaMetadata(*context.T, ...rpc.CallOpt) (SchemaMetadata, error)
 pkg syncbase, type DatabaseClientMethods interface, GetSyncgroupMembers(*context.T, string, ...rpc.CallOpt) (map[string]SyncgroupMemberInfo, error)
@@ -495,18 +537,16 @@ pkg syncbase, type DatabaseClientMethods interface, GetSyncgroupSpec(*context.T,
 pkg syncbase, type DatabaseClientMethods interface, JoinSyncgroup(*context.T, string, SyncgroupMemberInfo, ...rpc.CallOpt) (SyncgroupSpec, error)
 pkg syncbase, type DatabaseClientMethods interface, KeepBlob(*context.T, BlobRef, uint64, ...rpc.CallOpt) error
 pkg syncbase, type DatabaseClientMethods interface, LeaveSyncgroup(*context.T, string, ...rpc.CallOpt) error
-pkg syncbase, type DatabaseClientMethods interface, ListTables(*context.T, ...rpc.CallOpt) ([]string, error)
+pkg syncbase, type DatabaseClientMethods interface, ListCollections(*context.T, ...rpc.CallOpt) ([]string, error)
 pkg syncbase, type DatabaseClientMethods interface, PauseSync(*context.T, ...rpc.CallOpt) error
 pkg syncbase, type DatabaseClientMethods interface, PinBlob(*context.T, BlobRef, ...rpc.CallOpt) error
 pkg syncbase, type DatabaseClientMethods interface, PutBlob(*context.T, BlobRef, ...rpc.CallOpt) (BlobManagerPutBlobClientCall, error)
 pkg syncbase, type DatabaseClientMethods interface, ResumeSync(*context.T, ...rpc.CallOpt) error
-pkg syncbase, type DatabaseClientMethods interface, SetPermissions(*context.T, access.Permissions, string, ...rpc.CallOpt) error
 pkg syncbase, type DatabaseClientMethods interface, SetSchemaMetadata(*context.T, SchemaMetadata, ...rpc.CallOpt) error
 pkg syncbase, type DatabaseClientMethods interface, SetSyncgroupSpec(*context.T, string, SyncgroupSpec, string, ...rpc.CallOpt) error
 pkg syncbase, type DatabaseClientMethods interface, StartConflictResolver(*context.T, ...rpc.CallOpt) (ConflictManagerStartConflictResolverClientCall, error)
 pkg syncbase, type DatabaseClientMethods interface, UnpinBlob(*context.T, BlobRef, ...rpc.CallOpt) error
-pkg syncbase, type DatabaseClientMethods interface, WatchGlob(*context.T, GlobRequest, ...rpc.CallOpt) (GlobWatcherWatchGlobClientCall, error)
-pkg syncbase, type DatabaseClientStub interface { Abort, BeginBatch, Commit, CommitBlob, Create, CreateBlob, CreateSyncgroup, DeleteBlob, Destroy, DestroySyncgroup, EjectFromSyncgroup, Exec, Exists, FetchBlob, GetBlob, GetBlobSize, GetPermissions, GetResumeMarker, GetSchemaMetadata, GetSyncgroupMembers, GetSyncgroupNames, GetSyncgroupSpec, JoinSyncgroup, KeepBlob, LeaveSyncgroup, ListTables, PauseSync, PinBlob, PutBlob, ResumeSync, SetPermissions, SetSchemaMetadata, SetSyncgroupSpec, StartConflictResolver, UnpinBlob, WatchGlob }
+pkg syncbase, type DatabaseClientMethods interface, unexported methods
 pkg syncbase, type DatabaseClientStub interface, Abort(*context.T, int32, ...rpc.CallOpt) error
 pkg syncbase, type DatabaseClientStub interface, BeginBatch(*context.T, int32, BatchOptions, ...rpc.CallOpt) (string, error)
 pkg syncbase, type DatabaseClientStub interface, Commit(*context.T, int32, ...rpc.CallOpt) error
@@ -523,7 +563,6 @@ pkg syncbase, type DatabaseClientStub interface, Exists(*context.T, int32, ...rp
 pkg syncbase, type DatabaseClientStub interface, FetchBlob(*context.T, BlobRef, uint64, ...rpc.CallOpt) (BlobManagerFetchBlobClientCall, error)
 pkg syncbase, type DatabaseClientStub interface, GetBlob(*context.T, BlobRef, int64, ...rpc.CallOpt) (BlobManagerGetBlobClientCall, error)
 pkg syncbase, type DatabaseClientStub interface, GetBlobSize(*context.T, BlobRef, ...rpc.CallOpt) (int64, error)
-pkg syncbase, type DatabaseClientStub interface, GetPermissions(*context.T, ...rpc.CallOpt) (access.Permissions, string, error)
 pkg syncbase, type DatabaseClientStub interface, GetResumeMarker(*context.T, ...rpc.CallOpt) (watch.ResumeMarker, error)
 pkg syncbase, type DatabaseClientStub interface, GetSchemaMetadata(*context.T, ...rpc.CallOpt) (SchemaMetadata, error)
 pkg syncbase, type DatabaseClientStub interface, GetSyncgroupMembers(*context.T, string, ...rpc.CallOpt) (map[string]SyncgroupMemberInfo, error)
@@ -532,35 +571,27 @@ pkg syncbase, type DatabaseClientStub interface, GetSyncgroupSpec(*context.T, st
 pkg syncbase, type DatabaseClientStub interface, JoinSyncgroup(*context.T, string, SyncgroupMemberInfo, ...rpc.CallOpt) (SyncgroupSpec, error)
 pkg syncbase, type DatabaseClientStub interface, KeepBlob(*context.T, BlobRef, uint64, ...rpc.CallOpt) error
 pkg syncbase, type DatabaseClientStub interface, LeaveSyncgroup(*context.T, string, ...rpc.CallOpt) error
-pkg syncbase, type DatabaseClientStub interface, ListTables(*context.T, ...rpc.CallOpt) ([]string, error)
+pkg syncbase, type DatabaseClientStub interface, ListCollections(*context.T, ...rpc.CallOpt) ([]string, error)
 pkg syncbase, type DatabaseClientStub interface, PauseSync(*context.T, ...rpc.CallOpt) error
 pkg syncbase, type DatabaseClientStub interface, PinBlob(*context.T, BlobRef, ...rpc.CallOpt) error
 pkg syncbase, type DatabaseClientStub interface, PutBlob(*context.T, BlobRef, ...rpc.CallOpt) (BlobManagerPutBlobClientCall, error)
 pkg syncbase, type DatabaseClientStub interface, ResumeSync(*context.T, ...rpc.CallOpt) error
-pkg syncbase, type DatabaseClientStub interface, SetPermissions(*context.T, access.Permissions, string, ...rpc.CallOpt) error
 pkg syncbase, type DatabaseClientStub interface, SetSchemaMetadata(*context.T, SchemaMetadata, ...rpc.CallOpt) error
 pkg syncbase, type DatabaseClientStub interface, SetSyncgroupSpec(*context.T, string, SyncgroupSpec, string, ...rpc.CallOpt) error
 pkg syncbase, type DatabaseClientStub interface, StartConflictResolver(*context.T, ...rpc.CallOpt) (ConflictManagerStartConflictResolverClientCall, error)
 pkg syncbase, type DatabaseClientStub interface, UnpinBlob(*context.T, BlobRef, ...rpc.CallOpt) error
-pkg syncbase, type DatabaseClientStub interface, WatchGlob(*context.T, GlobRequest, ...rpc.CallOpt) (GlobWatcherWatchGlobClientCall, error)
+pkg syncbase, type DatabaseClientStub interface, unexported methods
 pkg syncbase, type DatabaseExecClientCall interface { Finish, RecvStream }
 pkg syncbase, type DatabaseExecClientCall interface, Finish() error
 pkg syncbase, type DatabaseExecClientCall interface, RecvStream() interface {  Advance() bool;; Value() []*vom.RawBytes;; Err() error;}
 pkg syncbase, type DatabaseExecClientStream interface { RecvStream }
 pkg syncbase, type DatabaseExecClientStream interface, RecvStream() interface {  Advance() bool;; Value() []*vom.RawBytes;; Err() error;}
-pkg syncbase, type DatabaseExecServerCall interface { GrantedBlessings, LocalEndpoint, RemoteEndpoint, Security, SendStream, Server, Suffix }
-pkg syncbase, type DatabaseExecServerCall interface, GrantedBlessings() security.Blessings
-pkg syncbase, type DatabaseExecServerCall interface, LocalEndpoint() naming.Endpoint
-pkg syncbase, type DatabaseExecServerCall interface, RemoteEndpoint() naming.Endpoint
-pkg syncbase, type DatabaseExecServerCall interface, Security() security.Call
 pkg syncbase, type DatabaseExecServerCall interface, SendStream() interface {  Send(item []*vom.RawBytes) error;}
-pkg syncbase, type DatabaseExecServerCall interface, Server() Server
-pkg syncbase, type DatabaseExecServerCall interface, Suffix() string
+pkg syncbase, type DatabaseExecServerCall interface, unexported methods
 pkg syncbase, type DatabaseExecServerCallStub struct
 pkg syncbase, type DatabaseExecServerCallStub struct, embedded rpc.StreamServerCall
 pkg syncbase, type DatabaseExecServerStream interface { SendStream }
 pkg syncbase, type DatabaseExecServerStream interface, SendStream() interface {  Send(item []*vom.RawBytes) error;}
-pkg syncbase, type DatabaseServerMethods interface { Abort, BeginBatch, Commit, CommitBlob, Create, CreateBlob, CreateSyncgroup, DeleteBlob, Destroy, DestroySyncgroup, EjectFromSyncgroup, Exec, Exists, FetchBlob, GetBlob, GetBlobSize, GetPermissions, GetResumeMarker, GetSchemaMetadata, GetSyncgroupMembers, GetSyncgroupNames, GetSyncgroupSpec, JoinSyncgroup, KeepBlob, LeaveSyncgroup, ListTables, PauseSync, PinBlob, PutBlob, ResumeSync, SetPermissions, SetSchemaMetadata, SetSyncgroupSpec, StartConflictResolver, UnpinBlob, WatchGlob }
 pkg syncbase, type DatabaseServerMethods interface, Abort(*context.T, rpc.ServerCall, int32) error
 pkg syncbase, type DatabaseServerMethods interface, BeginBatch(*context.T, rpc.ServerCall, int32, BatchOptions) (string, error)
 pkg syncbase, type DatabaseServerMethods interface, Commit(*context.T, rpc.ServerCall, int32) error
@@ -577,7 +608,6 @@ pkg syncbase, type DatabaseServerMethods interface, Exists(*context.T, rpc.Serve
 pkg syncbase, type DatabaseServerMethods interface, FetchBlob(*context.T, BlobManagerFetchBlobServerCall, BlobRef, uint64) error
 pkg syncbase, type DatabaseServerMethods interface, GetBlob(*context.T, BlobManagerGetBlobServerCall, BlobRef, int64) error
 pkg syncbase, type DatabaseServerMethods interface, GetBlobSize(*context.T, rpc.ServerCall, BlobRef) (int64, error)
-pkg syncbase, type DatabaseServerMethods interface, GetPermissions(*context.T, rpc.ServerCall) (access.Permissions, string, error)
 pkg syncbase, type DatabaseServerMethods interface, GetResumeMarker(*context.T, rpc.ServerCall) (watch.ResumeMarker, error)
 pkg syncbase, type DatabaseServerMethods interface, GetSchemaMetadata(*context.T, rpc.ServerCall) (SchemaMetadata, error)
 pkg syncbase, type DatabaseServerMethods interface, GetSyncgroupMembers(*context.T, rpc.ServerCall, string) (map[string]SyncgroupMemberInfo, error)
@@ -586,17 +616,16 @@ pkg syncbase, type DatabaseServerMethods interface, GetSyncgroupSpec(*context.T,
 pkg syncbase, type DatabaseServerMethods interface, JoinSyncgroup(*context.T, rpc.ServerCall, string, SyncgroupMemberInfo) (SyncgroupSpec, error)
 pkg syncbase, type DatabaseServerMethods interface, KeepBlob(*context.T, rpc.ServerCall, BlobRef, uint64) error
 pkg syncbase, type DatabaseServerMethods interface, LeaveSyncgroup(*context.T, rpc.ServerCall, string) error
-pkg syncbase, type DatabaseServerMethods interface, ListTables(*context.T, rpc.ServerCall) ([]string, error)
+pkg syncbase, type DatabaseServerMethods interface, ListCollections(*context.T, rpc.ServerCall) ([]string, error)
 pkg syncbase, type DatabaseServerMethods interface, PauseSync(*context.T, rpc.ServerCall) error
 pkg syncbase, type DatabaseServerMethods interface, PinBlob(*context.T, rpc.ServerCall, BlobRef) error
 pkg syncbase, type DatabaseServerMethods interface, PutBlob(*context.T, BlobManagerPutBlobServerCall, BlobRef) error
 pkg syncbase, type DatabaseServerMethods interface, ResumeSync(*context.T, rpc.ServerCall) error
-pkg syncbase, type DatabaseServerMethods interface, SetPermissions(*context.T, rpc.ServerCall, access.Permissions, string) error
 pkg syncbase, type DatabaseServerMethods interface, SetSchemaMetadata(*context.T, rpc.ServerCall, SchemaMetadata) error
 pkg syncbase, type DatabaseServerMethods interface, SetSyncgroupSpec(*context.T, rpc.ServerCall, string, SyncgroupSpec, string) error
 pkg syncbase, type DatabaseServerMethods interface, StartConflictResolver(*context.T, ConflictManagerStartConflictResolverServerCall) error
 pkg syncbase, type DatabaseServerMethods interface, UnpinBlob(*context.T, rpc.ServerCall, BlobRef) error
-pkg syncbase, type DatabaseServerMethods interface, WatchGlob(*context.T, GlobWatcherWatchGlobServerCall, GlobRequest) error
+pkg syncbase, type DatabaseServerMethods interface, unexported methods
 pkg syncbase, type DatabaseServerStub interface, Abort(*context.T, rpc.ServerCall, int32) error
 pkg syncbase, type DatabaseServerStub interface, BeginBatch(*context.T, rpc.ServerCall, int32, BatchOptions) (string, error)
 pkg syncbase, type DatabaseServerStub interface, Commit(*context.T, rpc.ServerCall, int32) error
@@ -613,14 +642,13 @@ pkg syncbase, type DatabaseServerStub interface, GetBlob(*context.T, *BlobManage
 pkg syncbase, type DatabaseServerStub interface, GetBlobSize(*context.T, rpc.ServerCall, BlobRef) (int64, error)
 pkg syncbase, type DatabaseServerStub interface, GetResumeMarker(*context.T, rpc.ServerCall) (watch.ResumeMarker, error)
 pkg syncbase, type DatabaseServerStub interface, KeepBlob(*context.T, rpc.ServerCall, BlobRef, uint64) error
-pkg syncbase, type DatabaseServerStub interface, ListTables(*context.T, rpc.ServerCall) ([]string, error)
+pkg syncbase, type DatabaseServerStub interface, ListCollections(*context.T, rpc.ServerCall) ([]string, error)
 pkg syncbase, type DatabaseServerStub interface, PauseSync(*context.T, rpc.ServerCall) error
 pkg syncbase, type DatabaseServerStub interface, PinBlob(*context.T, rpc.ServerCall, BlobRef) error
 pkg syncbase, type DatabaseServerStub interface, PutBlob(*context.T, *BlobManagerPutBlobServerCallStub, BlobRef) error
 pkg syncbase, type DatabaseServerStub interface, ResumeSync(*context.T, rpc.ServerCall) error
 pkg syncbase, type DatabaseServerStub interface, StartConflictResolver(*context.T, *ConflictManagerStartConflictResolverServerCallStub) error
 pkg syncbase, type DatabaseServerStub interface, UnpinBlob(*context.T, rpc.ServerCall, BlobRef) error
-pkg syncbase, type DatabaseServerStub interface, WatchGlob(*context.T, *GlobWatcherWatchGlobServerCallStub, GlobRequest) error
 pkg syncbase, type DatabaseServerStub interface, unexported methods
 pkg syncbase, type DatabaseServerStubMethods interface, Abort(*context.T, rpc.ServerCall, int32) error
 pkg syncbase, type DatabaseServerStubMethods interface, BeginBatch(*context.T, rpc.ServerCall, int32, BatchOptions) (string, error)
@@ -637,31 +665,25 @@ pkg syncbase, type DatabaseServerStubMethods interface, GetBlob(*context.T, *Blo
 pkg syncbase, type DatabaseServerStubMethods interface, GetBlobSize(*context.T, rpc.ServerCall, BlobRef) (int64, error)
 pkg syncbase, type DatabaseServerStubMethods interface, GetResumeMarker(*context.T, rpc.ServerCall) (watch.ResumeMarker, error)
 pkg syncbase, type DatabaseServerStubMethods interface, KeepBlob(*context.T, rpc.ServerCall, BlobRef, uint64) error
-pkg syncbase, type DatabaseServerStubMethods interface, ListTables(*context.T, rpc.ServerCall) ([]string, error)
+pkg syncbase, type DatabaseServerStubMethods interface, ListCollections(*context.T, rpc.ServerCall) ([]string, error)
 pkg syncbase, type DatabaseServerStubMethods interface, PauseSync(*context.T, rpc.ServerCall) error
 pkg syncbase, type DatabaseServerStubMethods interface, PinBlob(*context.T, rpc.ServerCall, BlobRef) error
 pkg syncbase, type DatabaseServerStubMethods interface, PutBlob(*context.T, *BlobManagerPutBlobServerCallStub, BlobRef) error
 pkg syncbase, type DatabaseServerStubMethods interface, ResumeSync(*context.T, rpc.ServerCall) error
 pkg syncbase, type DatabaseServerStubMethods interface, StartConflictResolver(*context.T, *ConflictManagerStartConflictResolverServerCallStub) error
 pkg syncbase, type DatabaseServerStubMethods interface, UnpinBlob(*context.T, rpc.ServerCall, BlobRef) error
-pkg syncbase, type DatabaseServerStubMethods interface, WatchGlob(*context.T, *GlobWatcherWatchGlobServerCallStub, GlobRequest) error
 pkg syncbase, type DatabaseServerStubMethods interface, unexported methods
-pkg syncbase, type DatabaseWatcherClientMethods interface { GetResumeMarker, WatchGlob }
 pkg syncbase, type DatabaseWatcherClientMethods interface, GetResumeMarker(*context.T, ...rpc.CallOpt) (watch.ResumeMarker, error)
-pkg syncbase, type DatabaseWatcherClientMethods interface, WatchGlob(*context.T, GlobRequest, ...rpc.CallOpt) (GlobWatcherWatchGlobClientCall, error)
-pkg syncbase, type DatabaseWatcherClientStub interface { GetResumeMarker, WatchGlob }
+pkg syncbase, type DatabaseWatcherClientMethods interface, unexported methods
 pkg syncbase, type DatabaseWatcherClientStub interface, GetResumeMarker(*context.T, ...rpc.CallOpt) (watch.ResumeMarker, error)
-pkg syncbase, type DatabaseWatcherClientStub interface, WatchGlob(*context.T, GlobRequest, ...rpc.CallOpt) (GlobWatcherWatchGlobClientCall, error)
-pkg syncbase, type DatabaseWatcherServerMethods interface { GetResumeMarker, WatchGlob }
+pkg syncbase, type DatabaseWatcherClientStub interface, unexported methods
 pkg syncbase, type DatabaseWatcherServerMethods interface, GetResumeMarker(*context.T, rpc.ServerCall) (watch.ResumeMarker, error)
-pkg syncbase, type DatabaseWatcherServerMethods interface, WatchGlob(*context.T, GlobWatcherWatchGlobServerCall, GlobRequest) error
-pkg syncbase, type DatabaseWatcherServerStub interface { Describe__, GetResumeMarker, WatchGlob }
+pkg syncbase, type DatabaseWatcherServerMethods interface, unexported methods
 pkg syncbase, type DatabaseWatcherServerStub interface, Describe__() []rpc.InterfaceDesc
 pkg syncbase, type DatabaseWatcherServerStub interface, GetResumeMarker(*context.T, rpc.ServerCall) (watch.ResumeMarker, error)
-pkg syncbase, type DatabaseWatcherServerStub interface, WatchGlob(*context.T, *GlobWatcherWatchGlobServerCallStub, GlobRequest) error
-pkg syncbase, type DatabaseWatcherServerStubMethods interface { GetResumeMarker, WatchGlob }
+pkg syncbase, type DatabaseWatcherServerStub interface, unexported methods
 pkg syncbase, type DatabaseWatcherServerStubMethods interface, GetResumeMarker(*context.T, rpc.ServerCall) (watch.ResumeMarker, error)
-pkg syncbase, type DatabaseWatcherServerStubMethods interface, WatchGlob(*context.T, *GlobWatcherWatchGlobServerCallStub, GlobRequest) error
+pkg syncbase, type DatabaseWatcherServerStubMethods interface, unexported methods
 pkg syncbase, type DevModeUpdateVClockOpts struct
 pkg syncbase, type DevModeUpdateVClockOpts struct, DoLocalUpdate bool
 pkg syncbase, type DevModeUpdateVClockOpts struct, DoNtpUpdate bool
@@ -719,11 +741,11 @@ pkg syncbase, type RowClientMethods interface, Delete(*context.T, int32, ...rpc.
 pkg syncbase, type RowClientMethods interface, Exists(*context.T, int32, ...rpc.CallOpt) (bool, error)
 pkg syncbase, type RowClientMethods interface, Get(*context.T, int32, ...rpc.CallOpt) ([]byte, error)
 pkg syncbase, type RowClientMethods interface, Put(*context.T, int32, []byte, ...rpc.CallOpt) error
-pkg syncbase, type RowClientStub interface { Delete, Exists, Get, Put }
 pkg syncbase, type RowClientStub interface, Delete(*context.T, int32, ...rpc.CallOpt) error
 pkg syncbase, type RowClientStub interface, Exists(*context.T, int32, ...rpc.CallOpt) (bool, error)
 pkg syncbase, type RowClientStub interface, Get(*context.T, int32, ...rpc.CallOpt) ([]byte, error)
 pkg syncbase, type RowClientStub interface, Put(*context.T, int32, []byte, ...rpc.CallOpt) error
+pkg syncbase, type RowClientStub interface, unexported methods
 pkg syncbase, type RowInfo struct
 pkg syncbase, type RowInfo struct, BatchIds []uint64
 pkg syncbase, type RowInfo struct, Op Operation
@@ -758,9 +780,9 @@ pkg syncbase, type ScanOpTarget struct, embedded vdl.TargetBase
 pkg syncbase, type SchemaManagerClientMethods interface { GetSchemaMetadata, SetSchemaMetadata }
 pkg syncbase, type SchemaManagerClientMethods interface, GetSchemaMetadata(*context.T, ...rpc.CallOpt) (SchemaMetadata, error)
 pkg syncbase, type SchemaManagerClientMethods interface, SetSchemaMetadata(*context.T, SchemaMetadata, ...rpc.CallOpt) error
-pkg syncbase, type SchemaManagerClientStub interface { GetSchemaMetadata, SetSchemaMetadata }
 pkg syncbase, type SchemaManagerClientStub interface, GetSchemaMetadata(*context.T, ...rpc.CallOpt) (SchemaMetadata, error)
 pkg syncbase, type SchemaManagerClientStub interface, SetSchemaMetadata(*context.T, SchemaMetadata, ...rpc.CallOpt) error
+pkg syncbase, type SchemaManagerClientStub interface, unexported methods
 pkg syncbase, type SchemaManagerServerMethods interface { GetSchemaMetadata, SetSchemaMetadata }
 pkg syncbase, type SchemaManagerServerMethods interface, GetSchemaMetadata(*context.T, rpc.ServerCall) (SchemaMetadata, error)
 pkg syncbase, type SchemaManagerServerMethods interface, SetSchemaMetadata(*context.T, rpc.ServerCall, SchemaMetadata) error
@@ -774,21 +796,15 @@ pkg syncbase, type SchemaMetadataTarget struct
 pkg syncbase, type SchemaMetadataTarget struct, Value *SchemaMetadata
 pkg syncbase, type SchemaMetadataTarget struct, embedded vdl.FieldsTargetBase
 pkg syncbase, type SchemaMetadataTarget struct, embedded vdl.TargetBase
-pkg syncbase, type ServiceClientMethods interface { DevModeGetTime, DevModeUpdateVClock, GetPermissions, SetPermissions }
 pkg syncbase, type ServiceClientMethods interface, DevModeGetTime(*context.T, ...rpc.CallOpt) (time.Time, error)
 pkg syncbase, type ServiceClientMethods interface, DevModeUpdateVClock(*context.T, DevModeUpdateVClockOpts, ...rpc.CallOpt) error
-pkg syncbase, type ServiceClientMethods interface, GetPermissions(*context.T, ...rpc.CallOpt) (access.Permissions, string, error)
-pkg syncbase, type ServiceClientMethods interface, SetPermissions(*context.T, access.Permissions, string, ...rpc.CallOpt) error
-pkg syncbase, type ServiceClientStub interface { DevModeGetTime, DevModeUpdateVClock, GetPermissions, SetPermissions }
+pkg syncbase, type ServiceClientMethods interface, unexported methods
 pkg syncbase, type ServiceClientStub interface, DevModeGetTime(*context.T, ...rpc.CallOpt) (time.Time, error)
 pkg syncbase, type ServiceClientStub interface, DevModeUpdateVClock(*context.T, DevModeUpdateVClockOpts, ...rpc.CallOpt) error
-pkg syncbase, type ServiceClientStub interface, GetPermissions(*context.T, ...rpc.CallOpt) (access.Permissions, string, error)
-pkg syncbase, type ServiceClientStub interface, SetPermissions(*context.T, access.Permissions, string, ...rpc.CallOpt) error
-pkg syncbase, type ServiceServerMethods interface { DevModeGetTime, DevModeUpdateVClock, GetPermissions, SetPermissions }
+pkg syncbase, type ServiceClientStub interface, unexported methods
 pkg syncbase, type ServiceServerMethods interface, DevModeGetTime(*context.T, rpc.ServerCall) (time.Time, error)
 pkg syncbase, type ServiceServerMethods interface, DevModeUpdateVClock(*context.T, rpc.ServerCall, DevModeUpdateVClockOpts) error
-pkg syncbase, type ServiceServerMethods interface, GetPermissions(*context.T, rpc.ServerCall) (access.Permissions, string, error)
-pkg syncbase, type ServiceServerMethods interface, SetPermissions(*context.T, rpc.ServerCall, access.Permissions, string) error
+pkg syncbase, type ServiceServerMethods interface, unexported methods
 pkg syncbase, type ServiceServerStub interface, Describe__() []rpc.InterfaceDesc
 pkg syncbase, type ServiceServerStub interface, unexported methods
 pkg syncbase, type ServiceServerStubMethods ServiceServerMethods
@@ -809,7 +825,6 @@ pkg syncbase, type SyncgroupManagerClientMethods interface, GetSyncgroupSpec(*co
 pkg syncbase, type SyncgroupManagerClientMethods interface, JoinSyncgroup(*context.T, string, SyncgroupMemberInfo, ...rpc.CallOpt) (SyncgroupSpec, error)
 pkg syncbase, type SyncgroupManagerClientMethods interface, LeaveSyncgroup(*context.T, string, ...rpc.CallOpt) error
 pkg syncbase, type SyncgroupManagerClientMethods interface, SetSyncgroupSpec(*context.T, string, SyncgroupSpec, string, ...rpc.CallOpt) error
-pkg syncbase, type SyncgroupManagerClientStub interface { CreateSyncgroup, DestroySyncgroup, EjectFromSyncgroup, GetSyncgroupMembers, GetSyncgroupNames, GetSyncgroupSpec, JoinSyncgroup, LeaveSyncgroup, SetSyncgroupSpec }
 pkg syncbase, type SyncgroupManagerClientStub interface, CreateSyncgroup(*context.T, string, SyncgroupSpec, SyncgroupMemberInfo, ...rpc.CallOpt) error
 pkg syncbase, type SyncgroupManagerClientStub interface, DestroySyncgroup(*context.T, string, ...rpc.CallOpt) error
 pkg syncbase, type SyncgroupManagerClientStub interface, EjectFromSyncgroup(*context.T, string, string, ...rpc.CallOpt) error
@@ -819,6 +834,7 @@ pkg syncbase, type SyncgroupManagerClientStub interface, GetSyncgroupSpec(*conte
 pkg syncbase, type SyncgroupManagerClientStub interface, JoinSyncgroup(*context.T, string, SyncgroupMemberInfo, ...rpc.CallOpt) (SyncgroupSpec, error)
 pkg syncbase, type SyncgroupManagerClientStub interface, LeaveSyncgroup(*context.T, string, ...rpc.CallOpt) error
 pkg syncbase, type SyncgroupManagerClientStub interface, SetSyncgroupSpec(*context.T, string, SyncgroupSpec, string, ...rpc.CallOpt) error
+pkg syncbase, type SyncgroupManagerClientStub interface, unexported methods
 pkg syncbase, type SyncgroupManagerServerMethods interface { CreateSyncgroup, DestroySyncgroup, EjectFromSyncgroup, GetSyncgroupMembers, GetSyncgroupNames, GetSyncgroupSpec, JoinSyncgroup, LeaveSyncgroup, SetSyncgroupSpec }
 pkg syncbase, type SyncgroupManagerServerMethods interface, CreateSyncgroup(*context.T, rpc.ServerCall, string, SyncgroupSpec, SyncgroupMemberInfo) error
 pkg syncbase, type SyncgroupManagerServerMethods interface, DestroySyncgroup(*context.T, rpc.ServerCall, string) error
@@ -844,91 +860,11 @@ pkg syncbase, type SyncgroupSpec struct, Description string
 pkg syncbase, type SyncgroupSpec struct, IsPrivate bool
 pkg syncbase, type SyncgroupSpec struct, MountTables []string
 pkg syncbase, type SyncgroupSpec struct, Perms access.Permissions
-pkg syncbase, type SyncgroupSpec struct, Prefixes []TableRow
+pkg syncbase, type SyncgroupSpec struct, Prefixes []CollectionRow
 pkg syncbase, type SyncgroupSpecTarget struct
 pkg syncbase, type SyncgroupSpecTarget struct, Value *SyncgroupSpec
 pkg syncbase, type SyncgroupSpecTarget struct, embedded vdl.FieldsTargetBase
 pkg syncbase, type SyncgroupSpecTarget struct, embedded vdl.TargetBase
-pkg syncbase, type TableClientMethods interface { Create, DeletePrefixPermissions, DeleteRange, Destroy, Exists, GetPermissions, GetPrefixPermissions, Scan, SetPermissions, SetPrefixPermissions }
-pkg syncbase, type TableClientMethods interface, Create(*context.T, int32, access.Permissions, ...rpc.CallOpt) error
-pkg syncbase, type TableClientMethods interface, DeletePrefixPermissions(*context.T, int32, string, ...rpc.CallOpt) error
-pkg syncbase, type TableClientMethods interface, DeleteRange(*context.T, int32, []byte, []byte, ...rpc.CallOpt) error
-pkg syncbase, type TableClientMethods interface, Destroy(*context.T, int32, ...rpc.CallOpt) error
-pkg syncbase, type TableClientMethods interface, Exists(*context.T, int32, ...rpc.CallOpt) (bool, error)
-pkg syncbase, type TableClientMethods interface, GetPermissions(*context.T, int32, ...rpc.CallOpt) (access.Permissions, error)
-pkg syncbase, type TableClientMethods interface, GetPrefixPermissions(*context.T, int32, string, ...rpc.CallOpt) ([]PrefixPermissions, error)
-pkg syncbase, type TableClientMethods interface, Scan(*context.T, int32, []byte, []byte, ...rpc.CallOpt) (TableScanClientCall, error)
-pkg syncbase, type TableClientMethods interface, SetPermissions(*context.T, int32, access.Permissions, ...rpc.CallOpt) error
-pkg syncbase, type TableClientMethods interface, SetPrefixPermissions(*context.T, int32, string, access.Permissions, ...rpc.CallOpt) error
-pkg syncbase, type TableClientStub interface { Create, DeletePrefixPermissions, DeleteRange, Destroy, Exists, GetPermissions, GetPrefixPermissions, Scan, SetPermissions, SetPrefixPermissions }
-pkg syncbase, type TableClientStub interface, Create(*context.T, int32, access.Permissions, ...rpc.CallOpt) error
-pkg syncbase, type TableClientStub interface, DeletePrefixPermissions(*context.T, int32, string, ...rpc.CallOpt) error
-pkg syncbase, type TableClientStub interface, DeleteRange(*context.T, int32, []byte, []byte, ...rpc.CallOpt) error
-pkg syncbase, type TableClientStub interface, Destroy(*context.T, int32, ...rpc.CallOpt) error
-pkg syncbase, type TableClientStub interface, Exists(*context.T, int32, ...rpc.CallOpt) (bool, error)
-pkg syncbase, type TableClientStub interface, GetPermissions(*context.T, int32, ...rpc.CallOpt) (access.Permissions, error)
-pkg syncbase, type TableClientStub interface, GetPrefixPermissions(*context.T, int32, string, ...rpc.CallOpt) ([]PrefixPermissions, error)
-pkg syncbase, type TableClientStub interface, Scan(*context.T, int32, []byte, []byte, ...rpc.CallOpt) (TableScanClientCall, error)
-pkg syncbase, type TableClientStub interface, SetPermissions(*context.T, int32, access.Permissions, ...rpc.CallOpt) error
-pkg syncbase, type TableClientStub interface, SetPrefixPermissions(*context.T, int32, string, access.Permissions, ...rpc.CallOpt) error
-pkg syncbase, type TableRow struct
-pkg syncbase, type TableRow struct, Row string
-pkg syncbase, type TableRow struct, TableName string
-pkg syncbase, type TableRowTarget struct
-pkg syncbase, type TableRowTarget struct, Value *TableRow
-pkg syncbase, type TableRowTarget struct, embedded vdl.FieldsTargetBase
-pkg syncbase, type TableRowTarget struct, embedded vdl.TargetBase
-pkg syncbase, type TableScanClientCall interface { Finish, RecvStream }
-pkg syncbase, type TableScanClientCall interface, Finish() error
-pkg syncbase, type TableScanClientCall interface, RecvStream() interface {  Advance() bool;; Value() KeyValue;; Err() error;}
-pkg syncbase, type TableScanClientStream interface { RecvStream }
-pkg syncbase, type TableScanClientStream interface, RecvStream() interface {  Advance() bool;; Value() KeyValue;; Err() error;}
-pkg syncbase, type TableScanServerCall interface { GrantedBlessings, LocalEndpoint, RemoteEndpoint, Security, SendStream, Server, Suffix }
-pkg syncbase, type TableScanServerCall interface, GrantedBlessings() security.Blessings
-pkg syncbase, type TableScanServerCall interface, LocalEndpoint() naming.Endpoint
-pkg syncbase, type TableScanServerCall interface, RemoteEndpoint() naming.Endpoint
-pkg syncbase, type TableScanServerCall interface, Security() security.Call
-pkg syncbase, type TableScanServerCall interface, SendStream() interface {  Send(item KeyValue) error;}
-pkg syncbase, type TableScanServerCall interface, Server() Server
-pkg syncbase, type TableScanServerCall interface, Suffix() string
-pkg syncbase, type TableScanServerCallStub struct
-pkg syncbase, type TableScanServerCallStub struct, embedded rpc.StreamServerCall
-pkg syncbase, type TableScanServerStream interface { SendStream }
-pkg syncbase, type TableScanServerStream interface, SendStream() interface {  Send(item KeyValue) error;}
-pkg syncbase, type TableServerMethods interface { Create, DeletePrefixPermissions, DeleteRange, Destroy, Exists, GetPermissions, GetPrefixPermissions, Scan, SetPermissions, SetPrefixPermissions }
-pkg syncbase, type TableServerMethods interface, Create(*context.T, rpc.ServerCall, int32, access.Permissions) error
-pkg syncbase, type TableServerMethods interface, DeletePrefixPermissions(*context.T, rpc.ServerCall, int32, string) error
-pkg syncbase, type TableServerMethods interface, DeleteRange(*context.T, rpc.ServerCall, int32, []byte, []byte) error
-pkg syncbase, type TableServerMethods interface, Destroy(*context.T, rpc.ServerCall, int32) error
-pkg syncbase, type TableServerMethods interface, Exists(*context.T, rpc.ServerCall, int32) (bool, error)
-pkg syncbase, type TableServerMethods interface, GetPermissions(*context.T, rpc.ServerCall, int32) (access.Permissions, error)
-pkg syncbase, type TableServerMethods interface, GetPrefixPermissions(*context.T, rpc.ServerCall, int32, string) ([]PrefixPermissions, error)
-pkg syncbase, type TableServerMethods interface, Scan(*context.T, TableScanServerCall, int32, []byte, []byte) error
-pkg syncbase, type TableServerMethods interface, SetPermissions(*context.T, rpc.ServerCall, int32, access.Permissions) error
-pkg syncbase, type TableServerMethods interface, SetPrefixPermissions(*context.T, rpc.ServerCall, int32, string, access.Permissions) error
-pkg syncbase, type TableServerStub interface { Create, DeletePrefixPermissions, DeleteRange, Describe__, Destroy, Exists, GetPermissions, GetPrefixPermissions, Scan, SetPermissions, SetPrefixPermissions }
-pkg syncbase, type TableServerStub interface, Create(*context.T, rpc.ServerCall, int32, access.Permissions) error
-pkg syncbase, type TableServerStub interface, DeletePrefixPermissions(*context.T, rpc.ServerCall, int32, string) error
-pkg syncbase, type TableServerStub interface, DeleteRange(*context.T, rpc.ServerCall, int32, []byte, []byte) error
-pkg syncbase, type TableServerStub interface, Describe__() []rpc.InterfaceDesc
-pkg syncbase, type TableServerStub interface, Destroy(*context.T, rpc.ServerCall, int32) error
-pkg syncbase, type TableServerStub interface, Exists(*context.T, rpc.ServerCall, int32) (bool, error)
-pkg syncbase, type TableServerStub interface, GetPermissions(*context.T, rpc.ServerCall, int32) (access.Permissions, error)
-pkg syncbase, type TableServerStub interface, GetPrefixPermissions(*context.T, rpc.ServerCall, int32, string) ([]PrefixPermissions, error)
-pkg syncbase, type TableServerStub interface, Scan(*context.T, *TableScanServerCallStub, int32, []byte, []byte) error
-pkg syncbase, type TableServerStub interface, SetPermissions(*context.T, rpc.ServerCall, int32, access.Permissions) error
-pkg syncbase, type TableServerStub interface, SetPrefixPermissions(*context.T, rpc.ServerCall, int32, string, access.Permissions) error
-pkg syncbase, type TableServerStubMethods interface { Create, DeletePrefixPermissions, DeleteRange, Destroy, Exists, GetPermissions, GetPrefixPermissions, Scan, SetPermissions, SetPrefixPermissions }
-pkg syncbase, type TableServerStubMethods interface, Create(*context.T, rpc.ServerCall, int32, access.Permissions) error
-pkg syncbase, type TableServerStubMethods interface, DeletePrefixPermissions(*context.T, rpc.ServerCall, int32, string) error
-pkg syncbase, type TableServerStubMethods interface, DeleteRange(*context.T, rpc.ServerCall, int32, []byte, []byte) error
-pkg syncbase, type TableServerStubMethods interface, Destroy(*context.T, rpc.ServerCall, int32) error
-pkg syncbase, type TableServerStubMethods interface, Exists(*context.T, rpc.ServerCall, int32) (bool, error)
-pkg syncbase, type TableServerStubMethods interface, GetPermissions(*context.T, rpc.ServerCall, int32) (access.Permissions, error)
-pkg syncbase, type TableServerStubMethods interface, GetPrefixPermissions(*context.T, rpc.ServerCall, int32, string) ([]PrefixPermissions, error)
-pkg syncbase, type TableServerStubMethods interface, Scan(*context.T, *TableScanServerCallStub, int32, []byte, []byte) error
-pkg syncbase, type TableServerStubMethods interface, SetPermissions(*context.T, rpc.ServerCall, int32, access.Permissions) error
-pkg syncbase, type TableServerStubMethods interface, SetPrefixPermissions(*context.T, rpc.ServerCall, int32, string, access.Permissions) error
 pkg syncbase, type Value struct
 pkg syncbase, type Value struct, Bytes []byte
 pkg syncbase, type Value struct, State ValueState
@@ -949,25 +885,25 @@ pkg syncbase, var AppDesc rpc.InterfaceDesc
 pkg syncbase, var BatchSourceAll [...]BatchSource
 pkg syncbase, var BlobFetchStateAll [...]BlobFetchState
 pkg syncbase, var BlobManagerDesc rpc.InterfaceDesc
+pkg syncbase, var CollectionDesc rpc.InterfaceDesc
 pkg syncbase, var ConflictManagerDesc rpc.InterfaceDesc
 pkg syncbase, var DatabaseDesc rpc.InterfaceDesc
 pkg syncbase, var DatabaseWatcherDesc rpc.InterfaceDesc
-pkg syncbase, var ErrBlobNotCommitted verror.IDAction
-pkg syncbase, var ErrBoundToBatch verror.IDAction
-pkg syncbase, var ErrConcurrentBatch verror.IDAction
-pkg syncbase, var ErrCorruptDatabase verror.IDAction
-pkg syncbase, var ErrInvalidName verror.IDAction
-pkg syncbase, var ErrNotBoundToBatch verror.IDAction
-pkg syncbase, var ErrNotInDevMode verror.IDAction
-pkg syncbase, var ErrReadOnlyBatch verror.IDAction
-pkg syncbase, var ErrSchemaVersionMismatch verror.IDAction
-pkg syncbase, var ErrSyncgroupJoinFailed verror.IDAction
-pkg syncbase, var ErrUnknownBatch verror.IDAction
+pkg syncbase, var ErrBlobNotCommitted unknown-type
+pkg syncbase, var ErrBoundToBatch unknown-type
+pkg syncbase, var ErrConcurrentBatch unknown-type
+pkg syncbase, var ErrCorruptDatabase unknown-type
+pkg syncbase, var ErrInvalidName unknown-type
+pkg syncbase, var ErrNotBoundToBatch unknown-type
+pkg syncbase, var ErrNotInDevMode unknown-type
+pkg syncbase, var ErrReadOnlyBatch unknown-type
+pkg syncbase, var ErrSchemaVersionMismatch unknown-type
+pkg syncbase, var ErrSyncgroupJoinFailed unknown-type
+pkg syncbase, var ErrUnknownBatch unknown-type
 pkg syncbase, var ResolverTypeAll [...]ResolverType
 pkg syncbase, var RowDesc rpc.InterfaceDesc
 pkg syncbase, var SchemaManagerDesc rpc.InterfaceDesc
 pkg syncbase, var ServiceDesc rpc.InterfaceDesc
 pkg syncbase, var SyncgroupManagerDesc rpc.InterfaceDesc
-pkg syncbase, var TableDesc rpc.InterfaceDesc
 pkg syncbase, var ValueSelectionAll [...]ValueSelection
 pkg syncbase, var ValueStateAll [...]ValueState

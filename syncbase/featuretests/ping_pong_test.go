@@ -28,11 +28,11 @@ var numGroup *int = flag.Int("numGroup", 1, "run test with 1 or more syncgroups"
 //
 // This benchmark performs the following operations:
 // - Create two syncbase instances and have them join the same syncgroup.
-// - Each watches the other syncbase's "section" of the table.
+// - Each watches the other syncbase's "section" of the collection.
 // - A preliminary write by each syncbase ensures that clocks are synced.
 // - During Ping Pong, each syncbase instance writes data to its own section of
-//   the table. The other syncbase watches that section for writes. Once a write
-//   is received, it does the same.
+//   the collection. The other syncbase watches that section for writes. Once a
+//   write is received, it does the same.
 //
 // After the benchmark completes, the "ns/op" value refers to the average time
 // for |pingPongPairIterations| of Ping Pong roundtrips completed.
@@ -61,12 +61,12 @@ func BenchmarkPingPongPair(b *testing.B) {
 			sgSuffix := fmt.Sprintf("SG%d", g+1)
 			sgName := naming.Join(sbs[0].sbName, common.SyncbaseSuffix, sgSuffix)
 
-			// TODO(alexfandrianto): Was unable to use the empty prefix ("tb:").
+			// TODO(alexfandrianto): Was unable to use the empty prefix ("c:").
 			// Observation: w0's watch isn't working with the empty prefix.
 			// Possible explanation: The empty prefix ACL receives an initial value
-			// from the Table ACL. If this value is synced over from the opposing
+			// from the Collection ACL. If this value is synced over from the opposing
 			// peer, conflict resolution can mean that s0 loses the ability to watch.
-			syncString := fmt.Sprintf("%s:p", testTable)
+			syncString := fmt.Sprintf("%s:p", testCollection)
 			ok(b, createSyncgroup(sbs[0].clientCtx, sbs[0].sbName, sgName, syncString, "", sbBlessings(sbs), nil))
 
 			// The other syncbases will attempt to join the syncgroup.
@@ -76,19 +76,19 @@ func BenchmarkPingPongPair(b *testing.B) {
 		}
 
 		// Obtain the handles to the databases.
-		db0, _ := getDbAndTable(sbs[0].sbName)
-		db1, _ := getDbAndTable(sbs[1].sbName)
+		db0, _ := getDbAndCollection(sbs[0].sbName)
+		db1, _ := getDbAndCollection(sbs[1].sbName)
 
 		// Setup the remaining syncbases
 		for i := 2; i < *numSync; i++ {
-			getDbAndTable(sbs[i].sbName)
+			getDbAndCollection(sbs[i].sbName)
 		}
 
 		// Set up the watch streams (watching the other syncbase's prefix).
 		prefix0, prefix1 := "prefix0", "prefix1"
-		w0, err := db0.Watch(sbs[0].clientCtx, testTable, prefix1, watch.ResumeMarker("now"))
+		w0, err := db0.Watch(sbs[0].clientCtx, testCollection, prefix1, watch.ResumeMarker("now"))
 		ok(b, err)
-		w1, err := db1.Watch(sbs[1].clientCtx, testTable, prefix0, watch.ResumeMarker("now"))
+		w1, err := db1.Watch(sbs[1].clientCtx, testCollection, prefix0, watch.ResumeMarker("now"))
 		ok(b, err)
 
 		// The join has succeeded, so make sure sync is initialized.
@@ -171,11 +171,12 @@ func watchInt32s(b *testing.B, w syncbase.WatchStream, c chan int32) {
 	w.Cancel() // The stream can be canceled since we've seen enough iterations.
 }
 
-// getDbAndTable obtains the database and table handles for a syncbase name.
-func getDbAndTable(syncbaseName string) (d syncbase.Database, tb syncbase.Table) {
+// getDbAndCollection obtains the database and collection handles for a syncbase
+// name.
+func getDbAndCollection(syncbaseName string) (d syncbase.Database, c syncbase.Collection) {
 	a := syncbase.NewService(syncbaseName).App(testApp)
 	d = a.Database(testDb, nil)
-	tb = d.Table(testTable)
+	c = d.Collection(testCollection)
 	return
 }
 
@@ -183,12 +184,12 @@ func getDbAndTable(syncbaseName string) (d syncbase.Database, tb syncbase.Table)
 func writeInt32(ts *testSyncbase, keyPrefix string, keyValue int32) error {
 	ctx := ts.clientCtx
 	syncbaseName := ts.sbName
-	_, tb := getDbAndTable(syncbaseName)
+	_, c := getDbAndCollection(syncbaseName)
 
 	key := fmt.Sprintf("%s/%d", keyPrefix, keyValue)
 
-	if err := tb.Put(ctx, key, keyValue); err != nil {
-		return fmt.Errorf("tb.Put() failed: %v", err)
+	if err := c.Put(ctx, key, keyValue); err != nil {
+		return fmt.Errorf("c.Put() failed: %v", err)
 	}
 	return nil
 }

@@ -326,7 +326,7 @@ func setupCRTest(t *testing.T, sh *v23test.Shell, numInitRows int, devMode bool)
 	sgName = naming.Join("s0", common.SyncbaseSuffix, "SG1")
 
 	// Create syncgroup and populate data on s0.
-	ok(t, createSyncgroup(sbs[0].clientCtx, "s0", sgName, "tb:foo", "", sbBlessings(sbs), nil))
+	ok(t, createSyncgroup(sbs[0].clientCtx, "s0", sgName, "c:foo", "", sbBlessings(sbs), nil))
 	ok(t, populateData(sbs[0].clientCtx, "s0", "foo", 0, numInitRows))
 
 	// Join syncgroup and verify data on s1.
@@ -428,11 +428,11 @@ func verifyConflictResolvedData(ctx *context.T, syncbaseName, keyPrefix, schemaP
 	a := syncbase.NewService(syncbaseName).App("a")
 	d := a.Database("d", makeSchema(schemaPrefix, &CRImpl{syncbaseName: syncbaseName}))
 
-	tb := d.Table(testTable)
+	c := d.Collection(testCollection)
 	for i := start; i < end; i++ {
 		var got string
 		key := fmt.Sprintf("%s%d", keyPrefix, i)
-		r := tb.Row(key)
+		r := c.Row(key)
 		if err := r.Get(ctx, &got); err != nil {
 			return fmt.Errorf("r.Get() failed: %v", err)
 		}
@@ -447,12 +447,12 @@ func verifyConflictResolvedBatch(ctx *context.T, syncbaseName, keyPrefix string,
 	a := syncbase.NewService(syncbaseName).App("a")
 	d := a.Database("d", nil)
 
-	tb := d.Table(testTable)
+	c := d.Collection(testCollection)
 	var got string
 
 	// get first row
 	firstKey := fmt.Sprintf("%s%d", keyPrefix, start)
-	r := tb.Row(firstKey)
+	r := c.Row(firstKey)
 	if err := r.Get(ctx, &got); err != nil {
 		return fmt.Errorf("r.Get() failed: %v\n", err)
 	}
@@ -460,7 +460,7 @@ func verifyConflictResolvedBatch(ctx *context.T, syncbaseName, keyPrefix string,
 
 	for i := start; i < end; i++ {
 		key := fmt.Sprintf("%s%d", keyPrefix, i)
-		r := tb.Row(key)
+		r := c.Row(key)
 		if err := r.Get(ctx, &got); err != nil {
 			return fmt.Errorf("r.Get() failed: %v\n", err)
 		}
@@ -480,8 +480,8 @@ func waitForValue(ctx *context.T, syncbaseName, key, valuePrefix, schemaPrefix s
 	a := syncbase.NewService(syncbaseName).App("a")
 	d := a.Database("d", schema)
 
-	tb := d.Table(testTable)
-	r := tb.Row(key)
+	c := d.Collection(testCollection)
+	r := c.Row(key)
 	want := valuePrefix + key
 
 	var value string
@@ -512,8 +512,8 @@ func waitForSignal(ctx *context.T, syncbaseName, prefix, signalKey string) error
 }
 
 func waitSignal(ctx *context.T, d syncbase.Database, signalKey string) error {
-	tb := d.Table(testTable)
-	r := tb.Row(signalKey)
+	c := d.Collection(testCollection)
+	r := c.Row(signalKey)
 
 	var end bool
 	return testutil.RetryFor(10*time.Second, func() error {
@@ -538,9 +538,9 @@ func makeSchema(keyPrefix string, resolver *CRImpl) *syncbase.Schema {
 		Policy: wire.CrPolicy{
 			Rules: []wire.CrRule{
 				wire.CrRule{
-					TableName: testTable,
-					KeyPrefix: keyPrefix,
-					Resolver:  wire.ResolverTypeAppResolves,
+					CollectionName: testCollection,
+					KeyPrefix:      keyPrefix,
+					Resolver:       wire.ResolverTypeAppResolves,
 				},
 			},
 		},

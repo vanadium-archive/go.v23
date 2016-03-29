@@ -95,8 +95,8 @@ func (s *watchStream) Cancel() {
 // v.io/v23/services/watch to a Syncbase-specific WatchChange struct as defined
 // in v.io/v23/syncbase.
 func ToWatchChange(c watch.Change) WatchChange {
-	// Parse the table and the row.
-	table, row, err := util.ParseTableRowPair(nil, c.Name)
+	// Parse the collection and the row.
+	collection, row, err := util.ParseCollectionRowPair(nil, c.Name)
 	if err != nil {
 		panic(err)
 	}
@@ -123,7 +123,7 @@ func ToWatchChange(c watch.Change) WatchChange {
 		panic(fmt.Sprintf("unsupported watch change state: %v", c.State))
 	}
 	return WatchChange{
-		Table:        table,
+		Collection:   collection,
 		Row:          row,
 		ChangeType:   changeType,
 		ValueBytes:   storeChange.Value,
