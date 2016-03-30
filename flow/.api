@@ -80,12 +80,12 @@ pkg flow, type Protocol interface { Dial, Listen, Resolve }
 pkg flow, type Protocol interface, Dial(*context.T, string, string, time.Duration) (Conn, error)
 pkg flow, type Protocol interface, Listen(*context.T, string, string) (Listener, error)
 pkg flow, type Protocol interface, Resolve(*context.T, string, string) (string, []string, error)
-pkg flow, var ErrAborted verror.IDAction
-pkg flow, var ErrAuth verror.IDAction
-pkg flow, var ErrBadArg verror.IDAction
-pkg flow, var ErrBadState verror.IDAction
-pkg flow, var ErrDialFailed verror.IDAction
-pkg flow, var ErrNetwork verror.IDAction
-pkg flow, var ErrNotTrusted verror.IDAction
-pkg flow, var ErrProxy verror.IDAction
-pkg flow, var ErrResolveFailed verror.IDAction
+pkg flow, var ErrAborted unknown-type
+pkg flow, var ErrAuth unknown-type
+pkg flow, var ErrBadArg unknown-type
+pkg flow, var ErrBadState unknown-type
+pkg flow, var ErrDialFailed unknown-type
+pkg flow, var ErrNetwork unknown-type
+pkg flow, var ErrNotTrusted unknown-type
+pkg flow, var ErrProxy unknown-type
+pkg flow, var ErrResolveFailed unknown-type

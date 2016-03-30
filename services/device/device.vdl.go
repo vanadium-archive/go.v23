@@ -114,6 +114,10 @@ func (t *ConfigTarget) FinishMap(elem vdl.MapTarget) error {
 
 	return nil
 }
+func (t *ConfigTarget) FromZero(tt *vdl.Type) error {
+	*t.Value = Config(nil)
+	return nil
+}
 
 // InstallationState describes the states that an installation can be in at any
 // time.
@@ -191,9 +195,13 @@ func (t *InstallationStateTarget) FromEnumLabel(src string, tt *vdl.Type) error 
 	case "Uninstalled":
 		*t.Value = 1
 	default:
-		return fmt.Errorf("label %s not in enum v.io/v23/services/device.InstallationState", src)
+		return fmt.Errorf("label %s not in enum InstallationState", src)
 	}
 
+	return nil
+}
+func (t *InstallationStateTarget) FromZero(tt *vdl.Type) error {
+	*t.Value = InstallationStateActive
 	return nil
 }
 
@@ -305,9 +313,13 @@ func (t *InstanceStateTarget) FromEnumLabel(src string, tt *vdl.Type) error {
 	case "Deleted":
 		*t.Value = 5
 	default:
-		return fmt.Errorf("label %s not in enum v.io/v23/services/device.InstanceState", src)
+		return fmt.Errorf("label %s not in enum InstanceState", src)
 	}
 
+	return nil
+}
+func (t *InstanceStateTarget) FromZero(tt *vdl.Type) error {
+	*t.Value = InstanceStateLaunching
 	return nil
 }
 
@@ -328,29 +340,44 @@ func (m *InstanceStatus) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 	if err != nil {
 		return err
 	}
-
 	keyTarget2, fieldTarget3, err := fieldsTarget1.StartField("State")
 	if err != vdl.ErrFieldNoExist && err != nil {
 		return err
 	}
 	if err != vdl.ErrFieldNoExist {
 
-		if err := m.State.FillVDLTarget(fieldTarget3, tt.NonOptional().Field(0).Type); err != nil {
-			return err
+		var4 := (m.State == InstanceStateLaunching)
+		if var4 {
+			if err := fieldTarget3.FromZero(tt.NonOptional().Field(0).Type); err != nil {
+				return err
+			}
+		} else {
+
+			if err := m.State.FillVDLTarget(fieldTarget3, tt.NonOptional().Field(0).Type); err != nil {
+				return err
+			}
 		}
 		if err := fieldsTarget1.FinishField(keyTarget2, fieldTarget3); err != nil {
 			return err
 		}
 	}
-	keyTarget4, fieldTarget5, err := fieldsTarget1.StartField("Version")
+	keyTarget5, fieldTarget6, err := fieldsTarget1.StartField("Version")
 	if err != vdl.ErrFieldNoExist && err != nil {
 		return err
 	}
 	if err != vdl.ErrFieldNoExist {
-		if err := fieldTarget5.FromString(string(m.Version), tt.NonOptional().Field(1).Type); err != nil {
-			return err
+
+		var7 := (m.Version == "")
+		if var7 {
+			if err := fieldTarget6.FromZero(tt.NonOptional().Field(1).Type); err != nil {
+				return err
+			}
+		} else {
+			if err := fieldTarget6.FromString(string(m.Version), tt.NonOptional().Field(1).Type); err != nil {
+				return err
+			}
 		}
-		if err := fieldsTarget1.FinishField(keyTarget4, fieldTarget5); err != nil {
+		if err := fieldsTarget1.FinishField(keyTarget5, fieldTarget6); err != nil {
 			return err
 		}
 	}
@@ -400,6 +427,10 @@ func (t *InstanceStatusTarget) FinishFields(_ vdl.FieldsTarget) error {
 
 	return nil
 }
+func (t *InstanceStatusTarget) FromZero(tt *vdl.Type) error {
+	*t.Value = InstanceStatus{}
+	return nil
+}
 
 // InstallationStatus specifies the Status returned by the Application Status
 // method for installation objects.
@@ -418,29 +449,44 @@ func (m *InstallationStatus) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 	if err != nil {
 		return err
 	}
-
 	keyTarget2, fieldTarget3, err := fieldsTarget1.StartField("State")
 	if err != vdl.ErrFieldNoExist && err != nil {
 		return err
 	}
 	if err != vdl.ErrFieldNoExist {
 
-		if err := m.State.FillVDLTarget(fieldTarget3, tt.NonOptional().Field(0).Type); err != nil {
-			return err
+		var4 := (m.State == InstallationStateActive)
+		if var4 {
+			if err := fieldTarget3.FromZero(tt.NonOptional().Field(0).Type); err != nil {
+				return err
+			}
+		} else {
+
+			if err := m.State.FillVDLTarget(fieldTarget3, tt.NonOptional().Field(0).Type); err != nil {
+				return err
+			}
 		}
 		if err := fieldsTarget1.FinishField(keyTarget2, fieldTarget3); err != nil {
 			return err
 		}
 	}
-	keyTarget4, fieldTarget5, err := fieldsTarget1.StartField("Version")
+	keyTarget5, fieldTarget6, err := fieldsTarget1.StartField("Version")
 	if err != vdl.ErrFieldNoExist && err != nil {
 		return err
 	}
 	if err != vdl.ErrFieldNoExist {
-		if err := fieldTarget5.FromString(string(m.Version), tt.NonOptional().Field(1).Type); err != nil {
-			return err
+
+		var7 := (m.Version == "")
+		if var7 {
+			if err := fieldTarget6.FromZero(tt.NonOptional().Field(1).Type); err != nil {
+				return err
+			}
+		} else {
+			if err := fieldTarget6.FromString(string(m.Version), tt.NonOptional().Field(1).Type); err != nil {
+				return err
+			}
 		}
-		if err := fieldsTarget1.FinishField(keyTarget4, fieldTarget5); err != nil {
+		if err := fieldsTarget1.FinishField(keyTarget5, fieldTarget6); err != nil {
 			return err
 		}
 	}
@@ -490,6 +536,10 @@ func (t *InstallationStatusTarget) FinishFields(_ vdl.FieldsTarget) error {
 
 	return nil
 }
+func (t *InstallationStatusTarget) FromZero(tt *vdl.Type) error {
+	*t.Value = InstallationStatus{}
+	return nil
+}
 
 // DeviceStatus specifies the Status returned by the Application Status method
 // for the device service object.
@@ -508,29 +558,44 @@ func (m *DeviceStatus) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 	if err != nil {
 		return err
 	}
-
 	keyTarget2, fieldTarget3, err := fieldsTarget1.StartField("State")
 	if err != vdl.ErrFieldNoExist && err != nil {
 		return err
 	}
 	if err != vdl.ErrFieldNoExist {
 
-		if err := m.State.FillVDLTarget(fieldTarget3, tt.NonOptional().Field(0).Type); err != nil {
-			return err
+		var4 := (m.State == InstanceStateLaunching)
+		if var4 {
+			if err := fieldTarget3.FromZero(tt.NonOptional().Field(0).Type); err != nil {
+				return err
+			}
+		} else {
+
+			if err := m.State.FillVDLTarget(fieldTarget3, tt.NonOptional().Field(0).Type); err != nil {
+				return err
+			}
 		}
 		if err := fieldsTarget1.FinishField(keyTarget2, fieldTarget3); err != nil {
 			return err
 		}
 	}
-	keyTarget4, fieldTarget5, err := fieldsTarget1.StartField("Version")
+	keyTarget5, fieldTarget6, err := fieldsTarget1.StartField("Version")
 	if err != vdl.ErrFieldNoExist && err != nil {
 		return err
 	}
 	if err != vdl.ErrFieldNoExist {
-		if err := fieldTarget5.FromString(string(m.Version), tt.NonOptional().Field(1).Type); err != nil {
-			return err
+
+		var7 := (m.Version == "")
+		if var7 {
+			if err := fieldTarget6.FromZero(tt.NonOptional().Field(1).Type); err != nil {
+				return err
+			}
+		} else {
+			if err := fieldTarget6.FromString(string(m.Version), tt.NonOptional().Field(1).Type); err != nil {
+				return err
+			}
 		}
-		if err := fieldsTarget1.FinishField(keyTarget4, fieldTarget5); err != nil {
+		if err := fieldsTarget1.FinishField(keyTarget5, fieldTarget6); err != nil {
 			return err
 		}
 	}
@@ -578,6 +643,10 @@ func (t *DeviceStatusTarget) FinishField(_, _ vdl.Target) error {
 }
 func (t *DeviceStatusTarget) FinishFields(_ vdl.FieldsTarget) error {
 
+	return nil
+}
+func (t *DeviceStatusTarget) FromZero(tt *vdl.Type) error {
+	*t.Value = DeviceStatus{}
 	return nil
 }
 
@@ -757,6 +826,10 @@ func (t *StatusTarget) FinishFields(_ vdl.FieldsTarget) error {
 
 	return nil
 }
+func (t *StatusTarget) FromZero(tt *vdl.Type) error {
+	*t.Value = Status(StatusInstance{})
+	return nil
+}
 
 type statusTargetFactory struct{}
 
@@ -866,6 +939,10 @@ func (t *BlessServerMessageTarget) FinishField(_, fieldTarget vdl.Target) error 
 }
 func (t *BlessServerMessageTarget) FinishFields(_ vdl.FieldsTarget) error {
 
+	return nil
+}
+func (t *BlessServerMessageTarget) FromZero(tt *vdl.Type) error {
+	*t.Value = BlessServerMessage(BlessServerMessageInstancePublicKey{})
 	return nil
 }
 
@@ -989,6 +1066,10 @@ func (t *BlessClientMessageTarget) FinishFields(_ vdl.FieldsTarget) error {
 
 	return nil
 }
+func (t *BlessClientMessageTarget) FromZero(tt *vdl.Type) error {
+	*t.Value = BlessClientMessage(BlessClientMessageAppBlessings{})
+	return nil
+}
 
 type blessClientMessageTargetFactory struct{}
 
@@ -1022,31 +1103,41 @@ func (m *Description) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 	if err != nil {
 		return err
 	}
-
 	keyTarget2, fieldTarget3, err := fieldsTarget1.StartField("Profiles")
 	if err != vdl.ErrFieldNoExist && err != nil {
 		return err
 	}
 	if err != vdl.ErrFieldNoExist {
 
-		setTarget4, err := fieldTarget3.StartSet(tt.NonOptional().Field(0).Type, len(m.Profiles))
-		if err != nil {
-			return err
+		var var4 bool
+		if len(m.Profiles) == 0 {
+			var4 = true
 		}
-		for key6 := range m.Profiles {
-			keyTarget5, err := setTarget4.StartKey()
+		if var4 {
+			if err := fieldTarget3.FromZero(tt.NonOptional().Field(0).Type); err != nil {
+				return err
+			}
+		} else {
+
+			setTarget5, err := fieldTarget3.StartSet(tt.NonOptional().Field(0).Type, len(m.Profiles))
 			if err != nil {
 				return err
 			}
-			if err := keyTarget5.FromString(string(key6), tt.NonOptional().Field(0).Type.Key()); err != nil {
+			for key7 := range m.Profiles {
+				keyTarget6, err := setTarget5.StartKey()
+				if err != nil {
+					return err
+				}
+				if err := keyTarget6.FromString(string(key7), tt.NonOptional().Field(0).Type.Key()); err != nil {
+					return err
+				}
+				if err := setTarget5.FinishKey(keyTarget6); err != nil {
+					return err
+				}
+			}
+			if err := fieldTarget3.FinishSet(setTarget5); err != nil {
 				return err
 			}
-			if err := setTarget4.FinishKey(keyTarget5); err != nil {
-				return err
-			}
-		}
-		if err := fieldTarget3.FinishSet(setTarget4); err != nil {
-			return err
 		}
 		if err := fieldsTarget1.FinishField(keyTarget2, fieldTarget3); err != nil {
 			return err
@@ -1093,6 +1184,10 @@ func (t *DescriptionTarget) FinishFields(_ vdl.FieldsTarget) error {
 
 	return nil
 }
+func (t *DescriptionTarget) FromZero(tt *vdl.Type) error {
+	*t.Value = Description{}
+	return nil
+}
 
 // map[string]struct{}
 type __VDLTarget1_set struct {
@@ -1128,6 +1223,10 @@ func (t *__VDLTarget1_set) FinishSet(list vdl.SetTarget) error {
 
 	return nil
 }
+func (t *__VDLTarget1_set) FromZero(tt *vdl.Type) error {
+	*t.Value = map[string]struct{}(nil)
+	return nil
+}
 
 // Association is a tuple containing an association between a Vanadium
 // identity and a system account name.
@@ -1146,28 +1245,43 @@ func (m *Association) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 	if err != nil {
 		return err
 	}
-
 	keyTarget2, fieldTarget3, err := fieldsTarget1.StartField("IdentityName")
 	if err != vdl.ErrFieldNoExist && err != nil {
 		return err
 	}
 	if err != vdl.ErrFieldNoExist {
-		if err := fieldTarget3.FromString(string(m.IdentityName), tt.NonOptional().Field(0).Type); err != nil {
-			return err
+
+		var4 := (m.IdentityName == "")
+		if var4 {
+			if err := fieldTarget3.FromZero(tt.NonOptional().Field(0).Type); err != nil {
+				return err
+			}
+		} else {
+			if err := fieldTarget3.FromString(string(m.IdentityName), tt.NonOptional().Field(0).Type); err != nil {
+				return err
+			}
 		}
 		if err := fieldsTarget1.FinishField(keyTarget2, fieldTarget3); err != nil {
 			return err
 		}
 	}
-	keyTarget4, fieldTarget5, err := fieldsTarget1.StartField("AccountName")
+	keyTarget5, fieldTarget6, err := fieldsTarget1.StartField("AccountName")
 	if err != vdl.ErrFieldNoExist && err != nil {
 		return err
 	}
 	if err != vdl.ErrFieldNoExist {
-		if err := fieldTarget5.FromString(string(m.AccountName), tt.NonOptional().Field(1).Type); err != nil {
-			return err
+
+		var7 := (m.AccountName == "")
+		if var7 {
+			if err := fieldTarget6.FromZero(tt.NonOptional().Field(1).Type); err != nil {
+				return err
+			}
+		} else {
+			if err := fieldTarget6.FromString(string(m.AccountName), tt.NonOptional().Field(1).Type); err != nil {
+				return err
+			}
 		}
-		if err := fieldsTarget1.FinishField(keyTarget4, fieldTarget5); err != nil {
+		if err := fieldsTarget1.FinishField(keyTarget5, fieldTarget6); err != nil {
 			return err
 		}
 	}
@@ -1217,21 +1331,10 @@ func (t *AssociationTarget) FinishFields(_ vdl.FieldsTarget) error {
 
 	return nil
 }
-
-// Create zero values for each type.
-var (
-	__VDLZeroConfig             = Config(nil)
-	__VDLZeroInstallationState  = InstallationStateActive
-	__VDLZeroInstanceState      = InstanceStateLaunching
-	__VDLZeroInstanceStatus     = InstanceStatus{}
-	__VDLZeroInstallationStatus = InstallationStatus{}
-	__VDLZeroDeviceStatus       = DeviceStatus{}
-	__VDLZeroStatus             = Status(StatusInstance{})
-	__VDLZeroBlessServerMessage = BlessServerMessage(BlessServerMessageInstancePublicKey{})
-	__VDLZeroBlessClientMessage = BlessClientMessage(BlessClientMessageAppBlessings{})
-	__VDLZeroDescription        = Description{}
-	__VDLZeroAssociation        = Association{}
-)
+func (t *AssociationTarget) FromZero(tt *vdl.Type) error {
+	*t.Value = Association{}
+	return nil
+}
 
 //////////////////////////////////////////////////
 // Interface definitions
@@ -2967,6 +3070,7 @@ func __VDLInit() struct{} {
 	if __VDLInitCalled {
 		return struct{}{}
 	}
+	__VDLInitCalled = true
 
 	// Register types.
 	vdl.Register((*Config)(nil))

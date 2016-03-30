@@ -32,28 +32,43 @@ func (m *Complex64) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 	if err != nil {
 		return err
 	}
-
 	keyTarget2, fieldTarget3, err := fieldsTarget1.StartField("Real")
 	if err != vdl.ErrFieldNoExist && err != nil {
 		return err
 	}
 	if err != vdl.ErrFieldNoExist {
-		if err := fieldTarget3.FromFloat(float64(m.Real), tt.NonOptional().Field(0).Type); err != nil {
-			return err
+
+		var4 := (m.Real == float32(0))
+		if var4 {
+			if err := fieldTarget3.FromZero(tt.NonOptional().Field(0).Type); err != nil {
+				return err
+			}
+		} else {
+			if err := fieldTarget3.FromFloat(float64(m.Real), tt.NonOptional().Field(0).Type); err != nil {
+				return err
+			}
 		}
 		if err := fieldsTarget1.FinishField(keyTarget2, fieldTarget3); err != nil {
 			return err
 		}
 	}
-	keyTarget4, fieldTarget5, err := fieldsTarget1.StartField("Imag")
+	keyTarget5, fieldTarget6, err := fieldsTarget1.StartField("Imag")
 	if err != vdl.ErrFieldNoExist && err != nil {
 		return err
 	}
 	if err != vdl.ErrFieldNoExist {
-		if err := fieldTarget5.FromFloat(float64(m.Imag), tt.NonOptional().Field(1).Type); err != nil {
-			return err
+
+		var7 := (m.Imag == float32(0))
+		if var7 {
+			if err := fieldTarget6.FromZero(tt.NonOptional().Field(1).Type); err != nil {
+				return err
+			}
+		} else {
+			if err := fieldTarget6.FromFloat(float64(m.Imag), tt.NonOptional().Field(1).Type); err != nil {
+				return err
+			}
 		}
-		if err := fieldsTarget1.FinishField(keyTarget4, fieldTarget5); err != nil {
+		if err := fieldsTarget1.FinishField(keyTarget5, fieldTarget6); err != nil {
 			return err
 		}
 	}
@@ -107,6 +122,16 @@ func (t *Complex64Target) FinishFields(_ vdl.FieldsTarget) error {
 	}
 	return nil
 }
+func (t *Complex64Target) FromZero(tt *vdl.Type) error {
+	*t.Value = func() complex64 {
+		var native complex64
+		if err := vdl.Convert(&native, Complex64{}); err != nil {
+			panic(err)
+		}
+		return native
+	}()
+	return nil
+}
 
 type Complex128 struct {
 	Real float64
@@ -123,28 +148,43 @@ func (m *Complex128) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 	if err != nil {
 		return err
 	}
-
 	keyTarget2, fieldTarget3, err := fieldsTarget1.StartField("Real")
 	if err != vdl.ErrFieldNoExist && err != nil {
 		return err
 	}
 	if err != vdl.ErrFieldNoExist {
-		if err := fieldTarget3.FromFloat(float64(m.Real), tt.NonOptional().Field(0).Type); err != nil {
-			return err
+
+		var4 := (m.Real == float64(0))
+		if var4 {
+			if err := fieldTarget3.FromZero(tt.NonOptional().Field(0).Type); err != nil {
+				return err
+			}
+		} else {
+			if err := fieldTarget3.FromFloat(float64(m.Real), tt.NonOptional().Field(0).Type); err != nil {
+				return err
+			}
 		}
 		if err := fieldsTarget1.FinishField(keyTarget2, fieldTarget3); err != nil {
 			return err
 		}
 	}
-	keyTarget4, fieldTarget5, err := fieldsTarget1.StartField("Imag")
+	keyTarget5, fieldTarget6, err := fieldsTarget1.StartField("Imag")
 	if err != vdl.ErrFieldNoExist && err != nil {
 		return err
 	}
 	if err != vdl.ErrFieldNoExist {
-		if err := fieldTarget5.FromFloat(float64(m.Imag), tt.NonOptional().Field(1).Type); err != nil {
-			return err
+
+		var7 := (m.Imag == float64(0))
+		if var7 {
+			if err := fieldTarget6.FromZero(tt.NonOptional().Field(1).Type); err != nil {
+				return err
+			}
+		} else {
+			if err := fieldTarget6.FromFloat(float64(m.Imag), tt.NonOptional().Field(1).Type); err != nil {
+				return err
+			}
 		}
-		if err := fieldsTarget1.FinishField(keyTarget4, fieldTarget5); err != nil {
+		if err := fieldsTarget1.FinishField(keyTarget5, fieldTarget6); err != nil {
 			return err
 		}
 	}
@@ -198,24 +238,16 @@ func (t *Complex128Target) FinishFields(_ vdl.FieldsTarget) error {
 	}
 	return nil
 }
-
-// Create zero values for each type.
-var (
-	__VDLZeroComplex64 = func() complex64 {
-		var native complex64
-		if err := vdl.Convert(&native, Complex64{}); err != nil {
-			panic(err)
-		}
-		return native
-	}()
-	__VDLZeroComplex128 = func() complex128 {
+func (t *Complex128Target) FromZero(tt *vdl.Type) error {
+	*t.Value = func() complex128 {
 		var native complex128
 		if err := vdl.Convert(&native, Complex128{}); err != nil {
 			panic(err)
 		}
 		return native
 	}()
-)
+	return nil
+}
 
 // Type-check native conversion functions.
 var (
@@ -244,6 +276,7 @@ func __VDLInit() struct{} {
 	if __VDLInitCalled {
 		return struct{}{}
 	}
+	__VDLInitCalled = true
 
 	// Register native type conversions first, so that vdl.TypeOf works.
 	vdl.RegisterNative(Complex128ToNative, Complex128FromNative)

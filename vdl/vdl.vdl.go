@@ -110,9 +110,13 @@ func (t *WireRetryCodeTarget) FromEnumLabel(src string, tt *Type) error {
 	case "RetryBackoff":
 		*t.Value = 3
 	default:
-		return fmt.Errorf("label %s not in enum v.io/v23/vdl.WireRetryCode", src)
+		return fmt.Errorf("label %s not in enum WireRetryCode", src)
 	}
 
+	return nil
+}
+func (t *WireRetryCodeTarget) FromZero(tt *Type) error {
+	*t.Value = WireRetryCodeNoRetry
 	return nil
 }
 
@@ -137,77 +141,111 @@ func (m *WireError) FillVDLTarget(t Target, tt *Type) error {
 	if err != nil {
 		return err
 	}
-
 	keyTarget2, fieldTarget3, err := fieldsTarget1.StartField("Id")
 	if err != ErrFieldNoExist && err != nil {
 		return err
 	}
 	if err != ErrFieldNoExist {
-		if err := fieldTarget3.FromString(string(m.Id), tt.NonOptional().Field(0).Type); err != nil {
-			return err
+
+		var4 := (m.Id == "")
+		if var4 {
+			if err := fieldTarget3.FromZero(tt.NonOptional().Field(0).Type); err != nil {
+				return err
+			}
+		} else {
+			if err := fieldTarget3.FromString(string(m.Id), tt.NonOptional().Field(0).Type); err != nil {
+				return err
+			}
 		}
 		if err := fieldsTarget1.FinishField(keyTarget2, fieldTarget3); err != nil {
 			return err
 		}
 	}
-	keyTarget4, fieldTarget5, err := fieldsTarget1.StartField("RetryCode")
+	keyTarget5, fieldTarget6, err := fieldsTarget1.StartField("RetryCode")
 	if err != ErrFieldNoExist && err != nil {
 		return err
 	}
 	if err != ErrFieldNoExist {
 
-		if err := m.RetryCode.FillVDLTarget(fieldTarget5, tt.NonOptional().Field(1).Type); err != nil {
-			return err
+		var7 := (m.RetryCode == WireRetryCodeNoRetry)
+		if var7 {
+			if err := fieldTarget6.FromZero(tt.NonOptional().Field(1).Type); err != nil {
+				return err
+			}
+		} else {
+
+			if err := m.RetryCode.FillVDLTarget(fieldTarget6, tt.NonOptional().Field(1).Type); err != nil {
+				return err
+			}
 		}
-		if err := fieldsTarget1.FinishField(keyTarget4, fieldTarget5); err != nil {
-			return err
-		}
-	}
-	keyTarget6, fieldTarget7, err := fieldsTarget1.StartField("Msg")
-	if err != ErrFieldNoExist && err != nil {
-		return err
-	}
-	if err != ErrFieldNoExist {
-		if err := fieldTarget7.FromString(string(m.Msg), tt.NonOptional().Field(2).Type); err != nil {
-			return err
-		}
-		if err := fieldsTarget1.FinishField(keyTarget6, fieldTarget7); err != nil {
+		if err := fieldsTarget1.FinishField(keyTarget5, fieldTarget6); err != nil {
 			return err
 		}
 	}
-	keyTarget8, fieldTarget9, err := fieldsTarget1.StartField("ParamList")
+	keyTarget8, fieldTarget9, err := fieldsTarget1.StartField("Msg")
 	if err != ErrFieldNoExist && err != nil {
 		return err
 	}
 	if err != ErrFieldNoExist {
 
-		listTarget10, err := fieldTarget9.StartList(tt.NonOptional().Field(3).Type, len(m.ParamList))
-		if err != nil {
+		var10 := (m.Msg == "")
+		if var10 {
+			if err := fieldTarget9.FromZero(tt.NonOptional().Field(2).Type); err != nil {
+				return err
+			}
+		} else {
+			if err := fieldTarget9.FromString(string(m.Msg), tt.NonOptional().Field(2).Type); err != nil {
+				return err
+			}
+		}
+		if err := fieldsTarget1.FinishField(keyTarget8, fieldTarget9); err != nil {
 			return err
 		}
-		for i, elem12 := range m.ParamList {
-			elemTarget11, err := listTarget10.StartElem(i)
+	}
+	keyTarget11, fieldTarget12, err := fieldsTarget1.StartField("ParamList")
+	if err != ErrFieldNoExist && err != nil {
+		return err
+	}
+	if err != ErrFieldNoExist {
+
+		var var13 bool
+		if len(m.ParamList) == 0 {
+			var13 = true
+		}
+		if var13 {
+			if err := fieldTarget12.FromZero(tt.NonOptional().Field(3).Type); err != nil {
+				return err
+			}
+		} else {
+
+			listTarget14, err := fieldTarget12.StartList(tt.NonOptional().Field(3).Type, len(m.ParamList))
 			if err != nil {
 				return err
 			}
-
-			if elem12 == nil {
-				if err := elemTarget11.FromNil(tt.NonOptional().Field(3).Type.Elem()); err != nil {
+			for i, elem16 := range m.ParamList {
+				elemTarget15, err := listTarget14.StartElem(i)
+				if err != nil {
 					return err
 				}
-			} else {
-				if err := FromValue(elemTarget11, elem12); err != nil {
+
+				if elem16 == nil {
+					if err := elemTarget15.FromZero(tt.NonOptional().Field(3).Type.Elem()); err != nil {
+						return err
+					}
+				} else {
+					if err := FromValue(elemTarget15, elem16); err != nil {
+						return err
+					}
+				}
+				if err := listTarget14.FinishElem(elemTarget15); err != nil {
 					return err
 				}
 			}
-			if err := listTarget10.FinishElem(elemTarget11); err != nil {
+			if err := fieldTarget12.FinishList(listTarget14); err != nil {
 				return err
 			}
 		}
-		if err := fieldTarget9.FinishList(listTarget10); err != nil {
-			return err
-		}
-		if err := fieldsTarget1.FinishField(keyTarget8, fieldTarget9); err != nil {
+		if err := fieldsTarget1.FinishField(keyTarget11, fieldTarget12); err != nil {
 			return err
 		}
 	}
@@ -267,6 +305,10 @@ func (t *WireErrorTarget) FinishFields(_ FieldsTarget) error {
 
 	return nil
 }
+func (t *WireErrorTarget) FromZero(tt *Type) error {
+	*t.Value = WireError{}
+	return nil
+}
 
 // []*Value
 type __VDLTarget1_list struct {
@@ -299,12 +341,10 @@ func (t *__VDLTarget1_list) FinishList(elem ListTarget) error {
 
 	return nil
 }
-
-// Create zero values for each type.
-var (
-	__VDLZeroWireRetryCode = WireRetryCodeNoRetry
-	__VDLZeroWireError     = WireError{}
-)
+func (t *__VDLTarget1_list) FromZero(tt *Type) error {
+	*t.Value = []*Value(nil)
+	return nil
+}
 
 var __VDLInitCalled bool
 
@@ -325,6 +365,7 @@ func __VDLInit() struct{} {
 	if __VDLInitCalled {
 		return struct{}{}
 	}
+	__VDLInitCalled = true
 
 	// Register types.
 	Register((*WireRetryCode)(nil))

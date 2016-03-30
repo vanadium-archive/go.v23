@@ -36,52 +36,83 @@ func (m *AddressInfo) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 	if err != nil {
 		return err
 	}
-
 	keyTarget2, fieldTarget3, err := fieldsTarget1.StartField("Street")
 	if err != vdl.ErrFieldNoExist && err != nil {
 		return err
 	}
 	if err != vdl.ErrFieldNoExist {
-		if err := fieldTarget3.FromString(string(m.Street), tt.NonOptional().Field(0).Type); err != nil {
-			return err
+
+		var4 := (m.Street == "")
+		if var4 {
+			if err := fieldTarget3.FromZero(tt.NonOptional().Field(0).Type); err != nil {
+				return err
+			}
+		} else {
+			if err := fieldTarget3.FromString(string(m.Street), tt.NonOptional().Field(0).Type); err != nil {
+				return err
+			}
 		}
 		if err := fieldsTarget1.FinishField(keyTarget2, fieldTarget3); err != nil {
 			return err
 		}
 	}
-	keyTarget4, fieldTarget5, err := fieldsTarget1.StartField("City")
+	keyTarget5, fieldTarget6, err := fieldsTarget1.StartField("City")
 	if err != vdl.ErrFieldNoExist && err != nil {
 		return err
 	}
 	if err != vdl.ErrFieldNoExist {
-		if err := fieldTarget5.FromString(string(m.City), tt.NonOptional().Field(1).Type); err != nil {
-			return err
+
+		var7 := (m.City == "")
+		if var7 {
+			if err := fieldTarget6.FromZero(tt.NonOptional().Field(1).Type); err != nil {
+				return err
+			}
+		} else {
+			if err := fieldTarget6.FromString(string(m.City), tt.NonOptional().Field(1).Type); err != nil {
+				return err
+			}
 		}
-		if err := fieldsTarget1.FinishField(keyTarget4, fieldTarget5); err != nil {
+		if err := fieldsTarget1.FinishField(keyTarget5, fieldTarget6); err != nil {
 			return err
 		}
 	}
-	keyTarget6, fieldTarget7, err := fieldsTarget1.StartField("State")
+	keyTarget8, fieldTarget9, err := fieldsTarget1.StartField("State")
 	if err != vdl.ErrFieldNoExist && err != nil {
 		return err
 	}
 	if err != vdl.ErrFieldNoExist {
-		if err := fieldTarget7.FromString(string(m.State), tt.NonOptional().Field(2).Type); err != nil {
-			return err
-		}
-		if err := fieldsTarget1.FinishField(keyTarget6, fieldTarget7); err != nil {
-			return err
-		}
-	}
-	keyTarget8, fieldTarget9, err := fieldsTarget1.StartField("Zip")
-	if err != vdl.ErrFieldNoExist && err != nil {
-		return err
-	}
-	if err != vdl.ErrFieldNoExist {
-		if err := fieldTarget9.FromString(string(m.Zip), tt.NonOptional().Field(3).Type); err != nil {
-			return err
+
+		var10 := (m.State == "")
+		if var10 {
+			if err := fieldTarget9.FromZero(tt.NonOptional().Field(2).Type); err != nil {
+				return err
+			}
+		} else {
+			if err := fieldTarget9.FromString(string(m.State), tt.NonOptional().Field(2).Type); err != nil {
+				return err
+			}
 		}
 		if err := fieldsTarget1.FinishField(keyTarget8, fieldTarget9); err != nil {
+			return err
+		}
+	}
+	keyTarget11, fieldTarget12, err := fieldsTarget1.StartField("Zip")
+	if err != vdl.ErrFieldNoExist && err != nil {
+		return err
+	}
+	if err != vdl.ErrFieldNoExist {
+
+		var13 := (m.Zip == "")
+		if var13 {
+			if err := fieldTarget12.FromZero(tt.NonOptional().Field(3).Type); err != nil {
+				return err
+			}
+		} else {
+			if err := fieldTarget12.FromString(string(m.Zip), tt.NonOptional().Field(3).Type); err != nil {
+				return err
+			}
+		}
+		if err := fieldsTarget1.FinishField(keyTarget11, fieldTarget12); err != nil {
 			return err
 		}
 	}
@@ -139,6 +170,10 @@ func (t *AddressInfoTarget) FinishField(_, _ vdl.Target) error {
 }
 func (t *AddressInfoTarget) FinishFields(_ vdl.FieldsTarget) error {
 
+	return nil
+}
+func (t *AddressInfoTarget) FromZero(tt *vdl.Type) error {
+	*t.Value = AddressInfo{}
 	return nil
 }
 
@@ -224,9 +259,13 @@ func (t *CreditAgencyTarget) FromEnumLabel(src string, tt *vdl.Type) error {
 	case "TransUnion":
 		*t.Value = 2
 	default:
-		return fmt.Errorf("label %s not in enum v.io/v23/syncbase/testdata.CreditAgency", src)
+		return fmt.Errorf("label %s not in enum CreditAgency", src)
 	}
 
+	return nil
+}
+func (t *CreditAgencyTarget) FromZero(tt *vdl.Type) error {
+	*t.Value = CreditAgencyEquifax
 	return nil
 }
 
@@ -304,9 +343,13 @@ func (t *ExperianRatingTarget) FromEnumLabel(src string, tt *vdl.Type) error {
 	case "Bad":
 		*t.Value = 1
 	default:
-		return fmt.Errorf("label %s not in enum v.io/v23/syncbase/testdata.ExperianRating", src)
+		return fmt.Errorf("label %s not in enum ExperianRating", src)
 	}
 
+	return nil
+}
+func (t *ExperianRatingTarget) FromZero(tt *vdl.Type) error {
+	*t.Value = ExperianRatingGood
 	return nil
 }
 
@@ -324,14 +367,21 @@ func (m *EquifaxCreditReport) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 	if err != nil {
 		return err
 	}
-
 	keyTarget2, fieldTarget3, err := fieldsTarget1.StartField("Rating")
 	if err != vdl.ErrFieldNoExist && err != nil {
 		return err
 	}
 	if err != vdl.ErrFieldNoExist {
-		if err := fieldTarget3.FromUint(uint64(m.Rating), tt.NonOptional().Field(0).Type); err != nil {
-			return err
+
+		var4 := (m.Rating == byte(0))
+		if var4 {
+			if err := fieldTarget3.FromZero(tt.NonOptional().Field(0).Type); err != nil {
+				return err
+			}
+		} else {
+			if err := fieldTarget3.FromUint(uint64(m.Rating), tt.NonOptional().Field(0).Type); err != nil {
+				return err
+			}
 		}
 		if err := fieldsTarget1.FinishField(keyTarget2, fieldTarget3); err != nil {
 			return err
@@ -378,6 +428,10 @@ func (t *EquifaxCreditReportTarget) FinishFields(_ vdl.FieldsTarget) error {
 
 	return nil
 }
+func (t *EquifaxCreditReportTarget) FromZero(tt *vdl.Type) error {
+	*t.Value = EquifaxCreditReport{}
+	return nil
+}
 
 type ExperianCreditReport struct {
 	Rating ExperianRating
@@ -393,15 +447,22 @@ func (m *ExperianCreditReport) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 	if err != nil {
 		return err
 	}
-
 	keyTarget2, fieldTarget3, err := fieldsTarget1.StartField("Rating")
 	if err != vdl.ErrFieldNoExist && err != nil {
 		return err
 	}
 	if err != vdl.ErrFieldNoExist {
 
-		if err := m.Rating.FillVDLTarget(fieldTarget3, tt.NonOptional().Field(0).Type); err != nil {
-			return err
+		var4 := (m.Rating == ExperianRatingGood)
+		if var4 {
+			if err := fieldTarget3.FromZero(tt.NonOptional().Field(0).Type); err != nil {
+				return err
+			}
+		} else {
+
+			if err := m.Rating.FillVDLTarget(fieldTarget3, tt.NonOptional().Field(0).Type); err != nil {
+				return err
+			}
 		}
 		if err := fieldsTarget1.FinishField(keyTarget2, fieldTarget3); err != nil {
 			return err
@@ -448,6 +509,10 @@ func (t *ExperianCreditReportTarget) FinishFields(_ vdl.FieldsTarget) error {
 
 	return nil
 }
+func (t *ExperianCreditReportTarget) FromZero(tt *vdl.Type) error {
+	*t.Value = ExperianCreditReport{}
+	return nil
+}
 
 type TransUnionCreditReport struct {
 	Rating int16
@@ -463,14 +528,21 @@ func (m *TransUnionCreditReport) FillVDLTarget(t vdl.Target, tt *vdl.Type) error
 	if err != nil {
 		return err
 	}
-
 	keyTarget2, fieldTarget3, err := fieldsTarget1.StartField("Rating")
 	if err != vdl.ErrFieldNoExist && err != nil {
 		return err
 	}
 	if err != vdl.ErrFieldNoExist {
-		if err := fieldTarget3.FromInt(int64(m.Rating), tt.NonOptional().Field(0).Type); err != nil {
-			return err
+
+		var4 := (m.Rating == int16(0))
+		if var4 {
+			if err := fieldTarget3.FromZero(tt.NonOptional().Field(0).Type); err != nil {
+				return err
+			}
+		} else {
+			if err := fieldTarget3.FromInt(int64(m.Rating), tt.NonOptional().Field(0).Type); err != nil {
+				return err
+			}
 		}
 		if err := fieldsTarget1.FinishField(keyTarget2, fieldTarget3); err != nil {
 			return err
@@ -515,6 +587,10 @@ func (t *TransUnionCreditReportTarget) FinishField(_, _ vdl.Target) error {
 }
 func (t *TransUnionCreditReportTarget) FinishFields(_ vdl.FieldsTarget) error {
 
+	return nil
+}
+func (t *TransUnionCreditReportTarget) FromZero(tt *vdl.Type) error {
+	*t.Value = TransUnionCreditReport{}
 	return nil
 }
 
@@ -692,6 +768,10 @@ func (t *AgencyReportTarget) FinishFields(_ vdl.FieldsTarget) error {
 
 	return nil
 }
+func (t *AgencyReportTarget) FromZero(tt *vdl.Type) error {
+	*t.Value = AgencyReport(AgencyReportEquifaxReport{})
+	return nil
+}
 
 type agencyReportTargetFactory struct{}
 
@@ -717,34 +797,54 @@ func (m *CreditReport) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 	if err != nil {
 		return err
 	}
-
 	keyTarget2, fieldTarget3, err := fieldsTarget1.StartField("Agency")
 	if err != vdl.ErrFieldNoExist && err != nil {
 		return err
 	}
 	if err != vdl.ErrFieldNoExist {
 
-		if err := m.Agency.FillVDLTarget(fieldTarget3, tt.NonOptional().Field(0).Type); err != nil {
-			return err
+		var4 := (m.Agency == CreditAgencyEquifax)
+		if var4 {
+			if err := fieldTarget3.FromZero(tt.NonOptional().Field(0).Type); err != nil {
+				return err
+			}
+		} else {
+
+			if err := m.Agency.FillVDLTarget(fieldTarget3, tt.NonOptional().Field(0).Type); err != nil {
+				return err
+			}
 		}
 		if err := fieldsTarget1.FinishField(keyTarget2, fieldTarget3); err != nil {
 			return err
 		}
 	}
-	keyTarget4, fieldTarget5, err := fieldsTarget1.StartField("Report")
+	keyTarget5, fieldTarget6, err := fieldsTarget1.StartField("Report")
 	if err != vdl.ErrFieldNoExist && err != nil {
 		return err
 	}
 	if err != vdl.ErrFieldNoExist {
 
-		unionValue6 := m.Report
-		if unionValue6 == nil {
-			unionValue6 = AgencyReportEquifaxReport{}
+		var var7 bool
+		if field, ok := m.Report.(AgencyReportEquifaxReport); ok {
+
+			var8 := (field.Value == EquifaxCreditReport{})
+			var7 = var8
 		}
-		if err := unionValue6.FillVDLTarget(fieldTarget5, tt.NonOptional().Field(1).Type); err != nil {
-			return err
+		if var7 {
+			if err := fieldTarget6.FromZero(tt.NonOptional().Field(1).Type); err != nil {
+				return err
+			}
+		} else {
+
+			unionValue9 := m.Report
+			if unionValue9 == nil {
+				unionValue9 = AgencyReportEquifaxReport{}
+			}
+			if err := unionValue9.FillVDLTarget(fieldTarget6, tt.NonOptional().Field(1).Type); err != nil {
+				return err
+			}
 		}
-		if err := fieldsTarget1.FinishField(keyTarget4, fieldTarget5); err != nil {
+		if err := fieldsTarget1.FinishField(keyTarget5, fieldTarget6); err != nil {
 			return err
 		}
 	}
@@ -794,6 +894,12 @@ func (t *CreditReportTarget) FinishFields(_ vdl.FieldsTarget) error {
 
 	return nil
 }
+func (t *CreditReportTarget) FromZero(tt *vdl.Type) error {
+	*t.Value = CreditReport{
+		Report: AgencyReportEquifaxReport{},
+	}
+	return nil
+}
 
 type Customer struct {
 	Name    string
@@ -813,66 +919,107 @@ func (m *Customer) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 	if err != nil {
 		return err
 	}
-
 	keyTarget2, fieldTarget3, err := fieldsTarget1.StartField("Name")
 	if err != vdl.ErrFieldNoExist && err != nil {
 		return err
 	}
 	if err != vdl.ErrFieldNoExist {
-		if err := fieldTarget3.FromString(string(m.Name), tt.NonOptional().Field(0).Type); err != nil {
-			return err
+
+		var4 := (m.Name == "")
+		if var4 {
+			if err := fieldTarget3.FromZero(tt.NonOptional().Field(0).Type); err != nil {
+				return err
+			}
+		} else {
+			if err := fieldTarget3.FromString(string(m.Name), tt.NonOptional().Field(0).Type); err != nil {
+				return err
+			}
 		}
 		if err := fieldsTarget1.FinishField(keyTarget2, fieldTarget3); err != nil {
 			return err
 		}
 	}
-	keyTarget4, fieldTarget5, err := fieldsTarget1.StartField("Id")
-	if err != vdl.ErrFieldNoExist && err != nil {
-		return err
-	}
-	if err != vdl.ErrFieldNoExist {
-		if err := fieldTarget5.FromInt(int64(m.Id), tt.NonOptional().Field(1).Type); err != nil {
-			return err
-		}
-		if err := fieldsTarget1.FinishField(keyTarget4, fieldTarget5); err != nil {
-			return err
-		}
-	}
-	keyTarget6, fieldTarget7, err := fieldsTarget1.StartField("Active")
-	if err != vdl.ErrFieldNoExist && err != nil {
-		return err
-	}
-	if err != vdl.ErrFieldNoExist {
-		if err := fieldTarget7.FromBool(bool(m.Active), tt.NonOptional().Field(2).Type); err != nil {
-			return err
-		}
-		if err := fieldsTarget1.FinishField(keyTarget6, fieldTarget7); err != nil {
-			return err
-		}
-	}
-	keyTarget8, fieldTarget9, err := fieldsTarget1.StartField("Address")
+	keyTarget5, fieldTarget6, err := fieldsTarget1.StartField("Id")
 	if err != vdl.ErrFieldNoExist && err != nil {
 		return err
 	}
 	if err != vdl.ErrFieldNoExist {
 
-		if err := m.Address.FillVDLTarget(fieldTarget9, tt.NonOptional().Field(3).Type); err != nil {
+		var7 := (m.Id == int64(0))
+		if var7 {
+			if err := fieldTarget6.FromZero(tt.NonOptional().Field(1).Type); err != nil {
+				return err
+			}
+		} else {
+			if err := fieldTarget6.FromInt(int64(m.Id), tt.NonOptional().Field(1).Type); err != nil {
+				return err
+			}
+		}
+		if err := fieldsTarget1.FinishField(keyTarget5, fieldTarget6); err != nil {
 			return err
+		}
+	}
+	keyTarget8, fieldTarget9, err := fieldsTarget1.StartField("Active")
+	if err != vdl.ErrFieldNoExist && err != nil {
+		return err
+	}
+	if err != vdl.ErrFieldNoExist {
+
+		var10 := (m.Active == false)
+		if var10 {
+			if err := fieldTarget9.FromZero(tt.NonOptional().Field(2).Type); err != nil {
+				return err
+			}
+		} else {
+			if err := fieldTarget9.FromBool(bool(m.Active), tt.NonOptional().Field(2).Type); err != nil {
+				return err
+			}
 		}
 		if err := fieldsTarget1.FinishField(keyTarget8, fieldTarget9); err != nil {
 			return err
 		}
 	}
-	keyTarget10, fieldTarget11, err := fieldsTarget1.StartField("Credit")
+	keyTarget11, fieldTarget12, err := fieldsTarget1.StartField("Address")
 	if err != vdl.ErrFieldNoExist && err != nil {
 		return err
 	}
 	if err != vdl.ErrFieldNoExist {
 
-		if err := m.Credit.FillVDLTarget(fieldTarget11, tt.NonOptional().Field(4).Type); err != nil {
+		var13 := (m.Address == AddressInfo{})
+		if var13 {
+			if err := fieldTarget12.FromZero(tt.NonOptional().Field(3).Type); err != nil {
+				return err
+			}
+		} else {
+
+			if err := m.Address.FillVDLTarget(fieldTarget12, tt.NonOptional().Field(3).Type); err != nil {
+				return err
+			}
+		}
+		if err := fieldsTarget1.FinishField(keyTarget11, fieldTarget12); err != nil {
 			return err
 		}
-		if err := fieldsTarget1.FinishField(keyTarget10, fieldTarget11); err != nil {
+	}
+	keyTarget14, fieldTarget15, err := fieldsTarget1.StartField("Credit")
+	if err != vdl.ErrFieldNoExist && err != nil {
+		return err
+	}
+	if err != vdl.ErrFieldNoExist {
+
+		var16 := (m.Credit == CreditReport{
+			Report: AgencyReportEquifaxReport{},
+		})
+		if var16 {
+			if err := fieldTarget15.FromZero(tt.NonOptional().Field(4).Type); err != nil {
+				return err
+			}
+		} else {
+
+			if err := m.Credit.FillVDLTarget(fieldTarget15, tt.NonOptional().Field(4).Type); err != nil {
+				return err
+			}
+		}
+		if err := fieldsTarget1.FinishField(keyTarget14, fieldTarget15); err != nil {
 			return err
 		}
 	}
@@ -937,6 +1084,14 @@ func (t *CustomerTarget) FinishFields(_ vdl.FieldsTarget) error {
 
 	return nil
 }
+func (t *CustomerTarget) FromZero(tt *vdl.Type) error {
+	*t.Value = Customer{
+		Credit: CreditReport{
+			Report: AgencyReportEquifaxReport{},
+		},
+	}
+	return nil
+}
 
 type Invoice struct {
 	CustId      int64
@@ -956,71 +1111,110 @@ func (m *Invoice) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 	if err != nil {
 		return err
 	}
-
 	keyTarget2, fieldTarget3, err := fieldsTarget1.StartField("CustId")
 	if err != vdl.ErrFieldNoExist && err != nil {
 		return err
 	}
 	if err != vdl.ErrFieldNoExist {
-		if err := fieldTarget3.FromInt(int64(m.CustId), tt.NonOptional().Field(0).Type); err != nil {
-			return err
+
+		var4 := (m.CustId == int64(0))
+		if var4 {
+			if err := fieldTarget3.FromZero(tt.NonOptional().Field(0).Type); err != nil {
+				return err
+			}
+		} else {
+			if err := fieldTarget3.FromInt(int64(m.CustId), tt.NonOptional().Field(0).Type); err != nil {
+				return err
+			}
 		}
 		if err := fieldsTarget1.FinishField(keyTarget2, fieldTarget3); err != nil {
 			return err
 		}
 	}
-	keyTarget4, fieldTarget5, err := fieldsTarget1.StartField("InvoiceNum")
-	if err != vdl.ErrFieldNoExist && err != nil {
-		return err
-	}
-	if err != vdl.ErrFieldNoExist {
-		if err := fieldTarget5.FromInt(int64(m.InvoiceNum), tt.NonOptional().Field(1).Type); err != nil {
-			return err
-		}
-		if err := fieldsTarget1.FinishField(keyTarget4, fieldTarget5); err != nil {
-			return err
-		}
-	}
-	var wireValue6 time_2.Time
-	if err := time_2.TimeFromNative(&wireValue6, m.InvoiceDate); err != nil {
-		return err
-	}
-
-	keyTarget7, fieldTarget8, err := fieldsTarget1.StartField("InvoiceDate")
+	keyTarget5, fieldTarget6, err := fieldsTarget1.StartField("InvoiceNum")
 	if err != vdl.ErrFieldNoExist && err != nil {
 		return err
 	}
 	if err != vdl.ErrFieldNoExist {
 
-		if err := wireValue6.FillVDLTarget(fieldTarget8, tt.NonOptional().Field(2).Type); err != nil {
-			return err
+		var7 := (m.InvoiceNum == int64(0))
+		if var7 {
+			if err := fieldTarget6.FromZero(tt.NonOptional().Field(1).Type); err != nil {
+				return err
+			}
+		} else {
+			if err := fieldTarget6.FromInt(int64(m.InvoiceNum), tt.NonOptional().Field(1).Type); err != nil {
+				return err
+			}
 		}
-		if err := fieldsTarget1.FinishField(keyTarget7, fieldTarget8); err != nil {
+		if err := fieldsTarget1.FinishField(keyTarget5, fieldTarget6); err != nil {
 			return err
 		}
 	}
-	keyTarget9, fieldTarget10, err := fieldsTarget1.StartField("Amount")
+	var wireValue8 time_2.Time
+	if err := time_2.TimeFromNative(&wireValue8, m.InvoiceDate); err != nil {
+		return err
+	}
+
+	keyTarget9, fieldTarget10, err := fieldsTarget1.StartField("InvoiceDate")
 	if err != vdl.ErrFieldNoExist && err != nil {
 		return err
 	}
 	if err != vdl.ErrFieldNoExist {
-		if err := fieldTarget10.FromInt(int64(m.Amount), tt.NonOptional().Field(3).Type); err != nil {
-			return err
+
+		var11 := (wireValue8 == time_2.Time{})
+		if var11 {
+			if err := fieldTarget10.FromZero(tt.NonOptional().Field(2).Type); err != nil {
+				return err
+			}
+		} else {
+
+			if err := wireValue8.FillVDLTarget(fieldTarget10, tt.NonOptional().Field(2).Type); err != nil {
+				return err
+			}
 		}
 		if err := fieldsTarget1.FinishField(keyTarget9, fieldTarget10); err != nil {
 			return err
 		}
 	}
-	keyTarget11, fieldTarget12, err := fieldsTarget1.StartField("ShipTo")
+	keyTarget12, fieldTarget13, err := fieldsTarget1.StartField("Amount")
 	if err != vdl.ErrFieldNoExist && err != nil {
 		return err
 	}
 	if err != vdl.ErrFieldNoExist {
 
-		if err := m.ShipTo.FillVDLTarget(fieldTarget12, tt.NonOptional().Field(4).Type); err != nil {
+		var14 := (m.Amount == int64(0))
+		if var14 {
+			if err := fieldTarget13.FromZero(tt.NonOptional().Field(3).Type); err != nil {
+				return err
+			}
+		} else {
+			if err := fieldTarget13.FromInt(int64(m.Amount), tt.NonOptional().Field(3).Type); err != nil {
+				return err
+			}
+		}
+		if err := fieldsTarget1.FinishField(keyTarget12, fieldTarget13); err != nil {
 			return err
 		}
-		if err := fieldsTarget1.FinishField(keyTarget11, fieldTarget12); err != nil {
+	}
+	keyTarget15, fieldTarget16, err := fieldsTarget1.StartField("ShipTo")
+	if err != vdl.ErrFieldNoExist && err != nil {
+		return err
+	}
+	if err != vdl.ErrFieldNoExist {
+
+		var17 := (m.ShipTo == AddressInfo{})
+		if var17 {
+			if err := fieldTarget16.FromZero(tt.NonOptional().Field(4).Type); err != nil {
+				return err
+			}
+		} else {
+
+			if err := m.ShipTo.FillVDLTarget(fieldTarget16, tt.NonOptional().Field(4).Type); err != nil {
+				return err
+			}
+		}
+		if err := fieldsTarget1.FinishField(keyTarget15, fieldTarget16); err != nil {
 			return err
 		}
 	}
@@ -1085,6 +1279,10 @@ func (t *InvoiceTarget) FinishFields(_ vdl.FieldsTarget) error {
 
 	return nil
 }
+func (t *InvoiceTarget) FromZero(tt *vdl.Type) error {
+	*t.Value = Invoice{}
+	return nil
+}
 
 type Numbers struct {
 	B    byte
@@ -1108,112 +1306,183 @@ func (m *Numbers) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 	if err != nil {
 		return err
 	}
-
 	keyTarget2, fieldTarget3, err := fieldsTarget1.StartField("B")
 	if err != vdl.ErrFieldNoExist && err != nil {
 		return err
 	}
 	if err != vdl.ErrFieldNoExist {
-		if err := fieldTarget3.FromUint(uint64(m.B), tt.NonOptional().Field(0).Type); err != nil {
-			return err
+
+		var4 := (m.B == byte(0))
+		if var4 {
+			if err := fieldTarget3.FromZero(tt.NonOptional().Field(0).Type); err != nil {
+				return err
+			}
+		} else {
+			if err := fieldTarget3.FromUint(uint64(m.B), tt.NonOptional().Field(0).Type); err != nil {
+				return err
+			}
 		}
 		if err := fieldsTarget1.FinishField(keyTarget2, fieldTarget3); err != nil {
 			return err
 		}
 	}
-	keyTarget4, fieldTarget5, err := fieldsTarget1.StartField("Ui16")
+	keyTarget5, fieldTarget6, err := fieldsTarget1.StartField("Ui16")
 	if err != vdl.ErrFieldNoExist && err != nil {
 		return err
 	}
 	if err != vdl.ErrFieldNoExist {
-		if err := fieldTarget5.FromUint(uint64(m.Ui16), tt.NonOptional().Field(1).Type); err != nil {
-			return err
+
+		var7 := (m.Ui16 == uint16(0))
+		if var7 {
+			if err := fieldTarget6.FromZero(tt.NonOptional().Field(1).Type); err != nil {
+				return err
+			}
+		} else {
+			if err := fieldTarget6.FromUint(uint64(m.Ui16), tt.NonOptional().Field(1).Type); err != nil {
+				return err
+			}
 		}
-		if err := fieldsTarget1.FinishField(keyTarget4, fieldTarget5); err != nil {
+		if err := fieldsTarget1.FinishField(keyTarget5, fieldTarget6); err != nil {
 			return err
 		}
 	}
-	keyTarget6, fieldTarget7, err := fieldsTarget1.StartField("Ui32")
+	keyTarget8, fieldTarget9, err := fieldsTarget1.StartField("Ui32")
 	if err != vdl.ErrFieldNoExist && err != nil {
 		return err
 	}
 	if err != vdl.ErrFieldNoExist {
-		if err := fieldTarget7.FromUint(uint64(m.Ui32), tt.NonOptional().Field(2).Type); err != nil {
-			return err
-		}
-		if err := fieldsTarget1.FinishField(keyTarget6, fieldTarget7); err != nil {
-			return err
-		}
-	}
-	keyTarget8, fieldTarget9, err := fieldsTarget1.StartField("Ui64")
-	if err != vdl.ErrFieldNoExist && err != nil {
-		return err
-	}
-	if err != vdl.ErrFieldNoExist {
-		if err := fieldTarget9.FromUint(uint64(m.Ui64), tt.NonOptional().Field(3).Type); err != nil {
-			return err
+
+		var10 := (m.Ui32 == uint32(0))
+		if var10 {
+			if err := fieldTarget9.FromZero(tt.NonOptional().Field(2).Type); err != nil {
+				return err
+			}
+		} else {
+			if err := fieldTarget9.FromUint(uint64(m.Ui32), tt.NonOptional().Field(2).Type); err != nil {
+				return err
+			}
 		}
 		if err := fieldsTarget1.FinishField(keyTarget8, fieldTarget9); err != nil {
 			return err
 		}
 	}
-	keyTarget10, fieldTarget11, err := fieldsTarget1.StartField("I16")
+	keyTarget11, fieldTarget12, err := fieldsTarget1.StartField("Ui64")
 	if err != vdl.ErrFieldNoExist && err != nil {
 		return err
 	}
 	if err != vdl.ErrFieldNoExist {
-		if err := fieldTarget11.FromInt(int64(m.I16), tt.NonOptional().Field(4).Type); err != nil {
-			return err
+
+		var13 := (m.Ui64 == uint64(0))
+		if var13 {
+			if err := fieldTarget12.FromZero(tt.NonOptional().Field(3).Type); err != nil {
+				return err
+			}
+		} else {
+			if err := fieldTarget12.FromUint(uint64(m.Ui64), tt.NonOptional().Field(3).Type); err != nil {
+				return err
+			}
 		}
-		if err := fieldsTarget1.FinishField(keyTarget10, fieldTarget11); err != nil {
+		if err := fieldsTarget1.FinishField(keyTarget11, fieldTarget12); err != nil {
 			return err
 		}
 	}
-	keyTarget12, fieldTarget13, err := fieldsTarget1.StartField("I32")
+	keyTarget14, fieldTarget15, err := fieldsTarget1.StartField("I16")
 	if err != vdl.ErrFieldNoExist && err != nil {
 		return err
 	}
 	if err != vdl.ErrFieldNoExist {
-		if err := fieldTarget13.FromInt(int64(m.I32), tt.NonOptional().Field(5).Type); err != nil {
-			return err
-		}
-		if err := fieldsTarget1.FinishField(keyTarget12, fieldTarget13); err != nil {
-			return err
-		}
-	}
-	keyTarget14, fieldTarget15, err := fieldsTarget1.StartField("I64")
-	if err != vdl.ErrFieldNoExist && err != nil {
-		return err
-	}
-	if err != vdl.ErrFieldNoExist {
-		if err := fieldTarget15.FromInt(int64(m.I64), tt.NonOptional().Field(6).Type); err != nil {
-			return err
+
+		var16 := (m.I16 == int16(0))
+		if var16 {
+			if err := fieldTarget15.FromZero(tt.NonOptional().Field(4).Type); err != nil {
+				return err
+			}
+		} else {
+			if err := fieldTarget15.FromInt(int64(m.I16), tt.NonOptional().Field(4).Type); err != nil {
+				return err
+			}
 		}
 		if err := fieldsTarget1.FinishField(keyTarget14, fieldTarget15); err != nil {
 			return err
 		}
 	}
-	keyTarget16, fieldTarget17, err := fieldsTarget1.StartField("F32")
+	keyTarget17, fieldTarget18, err := fieldsTarget1.StartField("I32")
 	if err != vdl.ErrFieldNoExist && err != nil {
 		return err
 	}
 	if err != vdl.ErrFieldNoExist {
-		if err := fieldTarget17.FromFloat(float64(m.F32), tt.NonOptional().Field(7).Type); err != nil {
-			return err
+
+		var19 := (m.I32 == int32(0))
+		if var19 {
+			if err := fieldTarget18.FromZero(tt.NonOptional().Field(5).Type); err != nil {
+				return err
+			}
+		} else {
+			if err := fieldTarget18.FromInt(int64(m.I32), tt.NonOptional().Field(5).Type); err != nil {
+				return err
+			}
 		}
-		if err := fieldsTarget1.FinishField(keyTarget16, fieldTarget17); err != nil {
+		if err := fieldsTarget1.FinishField(keyTarget17, fieldTarget18); err != nil {
 			return err
 		}
 	}
-	keyTarget18, fieldTarget19, err := fieldsTarget1.StartField("F64")
+	keyTarget20, fieldTarget21, err := fieldsTarget1.StartField("I64")
 	if err != vdl.ErrFieldNoExist && err != nil {
 		return err
 	}
 	if err != vdl.ErrFieldNoExist {
-		if err := fieldTarget19.FromFloat(float64(m.F64), tt.NonOptional().Field(8).Type); err != nil {
+
+		var22 := (m.I64 == int64(0))
+		if var22 {
+			if err := fieldTarget21.FromZero(tt.NonOptional().Field(6).Type); err != nil {
+				return err
+			}
+		} else {
+			if err := fieldTarget21.FromInt(int64(m.I64), tt.NonOptional().Field(6).Type); err != nil {
+				return err
+			}
+		}
+		if err := fieldsTarget1.FinishField(keyTarget20, fieldTarget21); err != nil {
 			return err
 		}
-		if err := fieldsTarget1.FinishField(keyTarget18, fieldTarget19); err != nil {
+	}
+	keyTarget23, fieldTarget24, err := fieldsTarget1.StartField("F32")
+	if err != vdl.ErrFieldNoExist && err != nil {
+		return err
+	}
+	if err != vdl.ErrFieldNoExist {
+
+		var25 := (m.F32 == float32(0))
+		if var25 {
+			if err := fieldTarget24.FromZero(tt.NonOptional().Field(7).Type); err != nil {
+				return err
+			}
+		} else {
+			if err := fieldTarget24.FromFloat(float64(m.F32), tt.NonOptional().Field(7).Type); err != nil {
+				return err
+			}
+		}
+		if err := fieldsTarget1.FinishField(keyTarget23, fieldTarget24); err != nil {
+			return err
+		}
+	}
+	keyTarget26, fieldTarget27, err := fieldsTarget1.StartField("F64")
+	if err != vdl.ErrFieldNoExist && err != nil {
+		return err
+	}
+	if err != vdl.ErrFieldNoExist {
+
+		var28 := (m.F64 == float64(0))
+		if var28 {
+			if err := fieldTarget27.FromZero(tt.NonOptional().Field(8).Type); err != nil {
+				return err
+			}
+		} else {
+			if err := fieldTarget27.FromFloat(float64(m.F64), tt.NonOptional().Field(8).Type); err != nil {
+				return err
+			}
+		}
+		if err := fieldsTarget1.FinishField(keyTarget26, fieldTarget27); err != nil {
 			return err
 		}
 	}
@@ -1296,6 +1565,10 @@ func (t *NumbersTarget) FinishField(_, _ vdl.Target) error {
 }
 func (t *NumbersTarget) FinishFields(_ vdl.FieldsTarget) error {
 
+	return nil
+}
+func (t *NumbersTarget) FromZero(tt *vdl.Type) error {
+	*t.Value = Numbers{}
 	return nil
 }
 
@@ -1431,6 +1704,10 @@ func (t *TitleOrValueTypeTarget) FinishFields(_ vdl.FieldsTarget) error {
 
 	return nil
 }
+func (t *TitleOrValueTypeTarget) FromZero(tt *vdl.Type) error {
+	*t.Value = TitleOrValueType(TitleOrValueTypeTitle{})
+	return nil
+}
 
 type titleOrValueTypeTargetFactory struct{}
 
@@ -1456,33 +1733,53 @@ func (m *BazType) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 	if err != nil {
 		return err
 	}
-
 	keyTarget2, fieldTarget3, err := fieldsTarget1.StartField("Name")
 	if err != vdl.ErrFieldNoExist && err != nil {
 		return err
 	}
 	if err != vdl.ErrFieldNoExist {
-		if err := fieldTarget3.FromString(string(m.Name), tt.NonOptional().Field(0).Type); err != nil {
-			return err
+
+		var4 := (m.Name == "")
+		if var4 {
+			if err := fieldTarget3.FromZero(tt.NonOptional().Field(0).Type); err != nil {
+				return err
+			}
+		} else {
+			if err := fieldTarget3.FromString(string(m.Name), tt.NonOptional().Field(0).Type); err != nil {
+				return err
+			}
 		}
 		if err := fieldsTarget1.FinishField(keyTarget2, fieldTarget3); err != nil {
 			return err
 		}
 	}
-	keyTarget4, fieldTarget5, err := fieldsTarget1.StartField("TitleOrValue")
+	keyTarget5, fieldTarget6, err := fieldsTarget1.StartField("TitleOrValue")
 	if err != vdl.ErrFieldNoExist && err != nil {
 		return err
 	}
 	if err != vdl.ErrFieldNoExist {
 
-		unionValue6 := m.TitleOrValue
-		if unionValue6 == nil {
-			unionValue6 = TitleOrValueTypeTitle{}
+		var var7 bool
+		if field, ok := m.TitleOrValue.(TitleOrValueTypeTitle); ok {
+
+			var8 := (field.Value == "")
+			var7 = var8
 		}
-		if err := unionValue6.FillVDLTarget(fieldTarget5, tt.NonOptional().Field(1).Type); err != nil {
-			return err
+		if var7 {
+			if err := fieldTarget6.FromZero(tt.NonOptional().Field(1).Type); err != nil {
+				return err
+			}
+		} else {
+
+			unionValue9 := m.TitleOrValue
+			if unionValue9 == nil {
+				unionValue9 = TitleOrValueTypeTitle{}
+			}
+			if err := unionValue9.FillVDLTarget(fieldTarget6, tt.NonOptional().Field(1).Type); err != nil {
+				return err
+			}
 		}
-		if err := fieldsTarget1.FinishField(keyTarget4, fieldTarget5); err != nil {
+		if err := fieldsTarget1.FinishField(keyTarget5, fieldTarget6); err != nil {
 			return err
 		}
 	}
@@ -1532,6 +1829,12 @@ func (t *BazTypeTarget) FinishFields(_ vdl.FieldsTarget) error {
 
 	return nil
 }
+func (t *BazTypeTarget) FromZero(tt *vdl.Type) error {
+	*t.Value = BazType{
+		TitleOrValue: TitleOrValueTypeTitle{},
+	}
+	return nil
+}
 
 type BarType struct {
 	Baz BazType
@@ -1547,15 +1850,24 @@ func (m *BarType) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 	if err != nil {
 		return err
 	}
-
 	keyTarget2, fieldTarget3, err := fieldsTarget1.StartField("Baz")
 	if err != vdl.ErrFieldNoExist && err != nil {
 		return err
 	}
 	if err != vdl.ErrFieldNoExist {
 
-		if err := m.Baz.FillVDLTarget(fieldTarget3, tt.NonOptional().Field(0).Type); err != nil {
-			return err
+		var4 := (m.Baz == BazType{
+			TitleOrValue: TitleOrValueTypeTitle{},
+		})
+		if var4 {
+			if err := fieldTarget3.FromZero(tt.NonOptional().Field(0).Type); err != nil {
+				return err
+			}
+		} else {
+
+			if err := m.Baz.FillVDLTarget(fieldTarget3, tt.NonOptional().Field(0).Type); err != nil {
+				return err
+			}
 		}
 		if err := fieldsTarget1.FinishField(keyTarget2, fieldTarget3); err != nil {
 			return err
@@ -1602,6 +1914,14 @@ func (t *BarTypeTarget) FinishFields(_ vdl.FieldsTarget) error {
 
 	return nil
 }
+func (t *BarTypeTarget) FromZero(tt *vdl.Type) error {
+	*t.Value = BarType{
+		Baz: BazType{
+			TitleOrValue: TitleOrValueTypeTitle{},
+		},
+	}
+	return nil
+}
 
 type FooType struct {
 	Bar BarType
@@ -1617,15 +1937,26 @@ func (m *FooType) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 	if err != nil {
 		return err
 	}
-
 	keyTarget2, fieldTarget3, err := fieldsTarget1.StartField("Bar")
 	if err != vdl.ErrFieldNoExist && err != nil {
 		return err
 	}
 	if err != vdl.ErrFieldNoExist {
 
-		if err := m.Bar.FillVDLTarget(fieldTarget3, tt.NonOptional().Field(0).Type); err != nil {
-			return err
+		var4 := (m.Bar == BarType{
+			Baz: BazType{
+				TitleOrValue: TitleOrValueTypeTitle{},
+			},
+		})
+		if var4 {
+			if err := fieldTarget3.FromZero(tt.NonOptional().Field(0).Type); err != nil {
+				return err
+			}
+		} else {
+
+			if err := m.Bar.FillVDLTarget(fieldTarget3, tt.NonOptional().Field(0).Type); err != nil {
+				return err
+			}
 		}
 		if err := fieldsTarget1.FinishField(keyTarget2, fieldTarget3); err != nil {
 			return err
@@ -1670,6 +2001,16 @@ func (t *FooTypeTarget) FinishField(_, _ vdl.Target) error {
 }
 func (t *FooTypeTarget) FinishFields(_ vdl.FieldsTarget) error {
 
+	return nil
+}
+func (t *FooTypeTarget) FromZero(tt *vdl.Type) error {
+	*t.Value = FooType{
+		Bar: BarType{
+			Baz: BazType{
+				TitleOrValue: TitleOrValueTypeTitle{},
+			},
+		},
+	}
 	return nil
 }
 
@@ -1734,6 +2075,10 @@ func (t *ArrayOfFourTarget) FinishList(elem vdl.ListTarget) error {
 
 	return nil
 }
+func (t *ArrayOfFourTarget) FromZero(tt *vdl.Type) error {
+	*t.Value = ArrayOfFour{}
+	return nil
+}
 
 type KeyIndexData struct {
 	A ArrayOfFour
@@ -1752,111 +2097,151 @@ func (m *KeyIndexData) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 	if err != nil {
 		return err
 	}
-
 	keyTarget2, fieldTarget3, err := fieldsTarget1.StartField("A")
 	if err != vdl.ErrFieldNoExist && err != nil {
 		return err
 	}
 	if err != vdl.ErrFieldNoExist {
 
-		if err := m.A.FillVDLTarget(fieldTarget3, tt.NonOptional().Field(0).Type); err != nil {
-			return err
+		var4 := (m.A == ArrayOfFour{})
+		if var4 {
+			if err := fieldTarget3.FromZero(tt.NonOptional().Field(0).Type); err != nil {
+				return err
+			}
+		} else {
+
+			if err := m.A.FillVDLTarget(fieldTarget3, tt.NonOptional().Field(0).Type); err != nil {
+				return err
+			}
 		}
 		if err := fieldsTarget1.FinishField(keyTarget2, fieldTarget3); err != nil {
 			return err
 		}
 	}
-	keyTarget4, fieldTarget5, err := fieldsTarget1.StartField("L")
+	keyTarget5, fieldTarget6, err := fieldsTarget1.StartField("L")
 	if err != vdl.ErrFieldNoExist && err != nil {
 		return err
 	}
 	if err != vdl.ErrFieldNoExist {
 
-		listTarget6, err := fieldTarget5.StartList(tt.NonOptional().Field(1).Type, len(m.L))
-		if err != nil {
-			return err
+		var var7 bool
+		if len(m.L) == 0 {
+			var7 = true
 		}
-		for i, elem8 := range m.L {
-			elemTarget7, err := listTarget6.StartElem(i)
+		if var7 {
+			if err := fieldTarget6.FromZero(tt.NonOptional().Field(1).Type); err != nil {
+				return err
+			}
+		} else {
+
+			listTarget8, err := fieldTarget6.StartList(tt.NonOptional().Field(1).Type, len(m.L))
 			if err != nil {
 				return err
 			}
-			if err := elemTarget7.FromString(string(elem8), tt.NonOptional().Field(1).Type.Elem()); err != nil {
-				return err
+			for i, elem10 := range m.L {
+				elemTarget9, err := listTarget8.StartElem(i)
+				if err != nil {
+					return err
+				}
+				if err := elemTarget9.FromString(string(elem10), tt.NonOptional().Field(1).Type.Elem()); err != nil {
+					return err
+				}
+				if err := listTarget8.FinishElem(elemTarget9); err != nil {
+					return err
+				}
 			}
-			if err := listTarget6.FinishElem(elemTarget7); err != nil {
+			if err := fieldTarget6.FinishList(listTarget8); err != nil {
 				return err
 			}
 		}
-		if err := fieldTarget5.FinishList(listTarget6); err != nil {
-			return err
-		}
-		if err := fieldsTarget1.FinishField(keyTarget4, fieldTarget5); err != nil {
+		if err := fieldsTarget1.FinishField(keyTarget5, fieldTarget6); err != nil {
 			return err
 		}
 	}
-	keyTarget9, fieldTarget10, err := fieldsTarget1.StartField("M")
+	keyTarget11, fieldTarget12, err := fieldsTarget1.StartField("M")
 	if err != vdl.ErrFieldNoExist && err != nil {
 		return err
 	}
 	if err != vdl.ErrFieldNoExist {
 
-		mapTarget11, err := fieldTarget10.StartMap(tt.NonOptional().Field(2).Type, len(m.M))
-		if err != nil {
-			return err
+		var var13 bool
+		if len(m.M) == 0 {
+			var13 = true
 		}
-		for key13, value15 := range m.M {
-			keyTarget12, err := mapTarget11.StartKey()
+		if var13 {
+			if err := fieldTarget12.FromZero(tt.NonOptional().Field(2).Type); err != nil {
+				return err
+			}
+		} else {
+
+			mapTarget14, err := fieldTarget12.StartMap(tt.NonOptional().Field(2).Type, len(m.M))
 			if err != nil {
 				return err
 			}
-			if err := keyTarget12.FromInt(int64(key13), tt.NonOptional().Field(2).Type.Key()); err != nil {
-				return err
+			for key16, value18 := range m.M {
+				keyTarget15, err := mapTarget14.StartKey()
+				if err != nil {
+					return err
+				}
+				if err := keyTarget15.FromInt(int64(key16), tt.NonOptional().Field(2).Type.Key()); err != nil {
+					return err
+				}
+				valueTarget17, err := mapTarget14.FinishKeyStartField(keyTarget15)
+				if err != nil {
+					return err
+				}
+				if err := valueTarget17.FromString(string(value18), tt.NonOptional().Field(2).Type.Elem()); err != nil {
+					return err
+				}
+				if err := mapTarget14.FinishField(keyTarget15, valueTarget17); err != nil {
+					return err
+				}
 			}
-			valueTarget14, err := mapTarget11.FinishKeyStartField(keyTarget12)
-			if err != nil {
-				return err
-			}
-			if err := valueTarget14.FromString(string(value15), tt.NonOptional().Field(2).Type.Elem()); err != nil {
-				return err
-			}
-			if err := mapTarget11.FinishField(keyTarget12, valueTarget14); err != nil {
+			if err := fieldTarget12.FinishMap(mapTarget14); err != nil {
 				return err
 			}
 		}
-		if err := fieldTarget10.FinishMap(mapTarget11); err != nil {
-			return err
-		}
-		if err := fieldsTarget1.FinishField(keyTarget9, fieldTarget10); err != nil {
+		if err := fieldsTarget1.FinishField(keyTarget11, fieldTarget12); err != nil {
 			return err
 		}
 	}
-	keyTarget16, fieldTarget17, err := fieldsTarget1.StartField("S")
+	keyTarget19, fieldTarget20, err := fieldsTarget1.StartField("S")
 	if err != vdl.ErrFieldNoExist && err != nil {
 		return err
 	}
 	if err != vdl.ErrFieldNoExist {
 
-		setTarget18, err := fieldTarget17.StartSet(tt.NonOptional().Field(3).Type, len(m.S))
-		if err != nil {
-			return err
+		var var21 bool
+		if len(m.S) == 0 {
+			var21 = true
 		}
-		for key20 := range m.S {
-			keyTarget19, err := setTarget18.StartKey()
+		if var21 {
+			if err := fieldTarget20.FromZero(tt.NonOptional().Field(3).Type); err != nil {
+				return err
+			}
+		} else {
+
+			setTarget22, err := fieldTarget20.StartSet(tt.NonOptional().Field(3).Type, len(m.S))
 			if err != nil {
 				return err
 			}
-			if err := keyTarget19.FromString(string(key20), tt.NonOptional().Field(3).Type.Key()); err != nil {
-				return err
+			for key24 := range m.S {
+				keyTarget23, err := setTarget22.StartKey()
+				if err != nil {
+					return err
+				}
+				if err := keyTarget23.FromString(string(key24), tt.NonOptional().Field(3).Type.Key()); err != nil {
+					return err
+				}
+				if err := setTarget22.FinishKey(keyTarget23); err != nil {
+					return err
+				}
 			}
-			if err := setTarget18.FinishKey(keyTarget19); err != nil {
+			if err := fieldTarget20.FinishSet(setTarget22); err != nil {
 				return err
 			}
 		}
-		if err := fieldTarget17.FinishSet(setTarget18); err != nil {
-			return err
-		}
-		if err := fieldsTarget1.FinishField(keyTarget16, fieldTarget17); err != nil {
+		if err := fieldsTarget1.FinishField(keyTarget19, fieldTarget20); err != nil {
 			return err
 		}
 	}
@@ -1916,6 +2301,10 @@ func (t *KeyIndexDataTarget) FinishFields(_ vdl.FieldsTarget) error {
 
 	return nil
 }
+func (t *KeyIndexDataTarget) FromZero(tt *vdl.Type) error {
+	*t.Value = KeyIndexData{}
+	return nil
+}
 
 // map[int64]string
 type __VDLTarget1_map struct {
@@ -1959,6 +2348,10 @@ func (t *__VDLTarget1_map) FinishMap(elem vdl.MapTarget) error {
 
 	return nil
 }
+func (t *__VDLTarget1_map) FromZero(tt *vdl.Type) error {
+	*t.Value = map[int64]string(nil)
+	return nil
+}
 
 // map[string]struct{}
 type __VDLTarget2_set struct {
@@ -1994,6 +2387,10 @@ func (t *__VDLTarget2_set) FinishSet(list vdl.SetTarget) error {
 
 	return nil
 }
+func (t *__VDLTarget2_set) FromZero(tt *vdl.Type) error {
+	*t.Value = map[string]struct{}(nil)
+	return nil
+}
 
 type BigData struct {
 	Key string // A dup of the key stored in the value.
@@ -2009,14 +2406,21 @@ func (m *BigData) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 	if err != nil {
 		return err
 	}
-
 	keyTarget2, fieldTarget3, err := fieldsTarget1.StartField("Key")
 	if err != vdl.ErrFieldNoExist && err != nil {
 		return err
 	}
 	if err != vdl.ErrFieldNoExist {
-		if err := fieldTarget3.FromString(string(m.Key), tt.NonOptional().Field(0).Type); err != nil {
-			return err
+
+		var4 := (m.Key == "")
+		if var4 {
+			if err := fieldTarget3.FromZero(tt.NonOptional().Field(0).Type); err != nil {
+				return err
+			}
+		} else {
+			if err := fieldTarget3.FromString(string(m.Key), tt.NonOptional().Field(0).Type); err != nil {
+				return err
+			}
 		}
 		if err := fieldsTarget1.FinishField(keyTarget2, fieldTarget3); err != nil {
 			return err
@@ -2063,46 +2467,10 @@ func (t *BigDataTarget) FinishFields(_ vdl.FieldsTarget) error {
 
 	return nil
 }
-
-// Create zero values for each type.
-var (
-	__VDLZeroAddressInfo            = AddressInfo{}
-	__VDLZeroCreditAgency           = CreditAgencyEquifax
-	__VDLZeroExperianRating         = ExperianRatingGood
-	__VDLZeroEquifaxCreditReport    = EquifaxCreditReport{}
-	__VDLZeroExperianCreditReport   = ExperianCreditReport{}
-	__VDLZeroTransUnionCreditReport = TransUnionCreditReport{}
-	__VDLZeroAgencyReport           = AgencyReport(AgencyReportEquifaxReport{})
-	__VDLZeroCreditReport           = CreditReport{
-		Report: AgencyReportEquifaxReport{},
-	}
-	__VDLZeroCustomer = Customer{
-		Credit: CreditReport{
-			Report: AgencyReportEquifaxReport{},
-		},
-	}
-	__VDLZeroInvoice          = Invoice{}
-	__VDLZeroNumbers          = Numbers{}
-	__VDLZeroTitleOrValueType = TitleOrValueType(TitleOrValueTypeTitle{})
-	__VDLZeroBazType          = BazType{
-		TitleOrValue: TitleOrValueTypeTitle{},
-	}
-	__VDLZeroBarType = BarType{
-		Baz: BazType{
-			TitleOrValue: TitleOrValueTypeTitle{},
-		},
-	}
-	__VDLZeroFooType = FooType{
-		Bar: BarType{
-			Baz: BazType{
-				TitleOrValue: TitleOrValueTypeTitle{},
-			},
-		},
-	}
-	__VDLZeroArrayOfFour  = ArrayOfFour{}
-	__VDLZeroKeyIndexData = KeyIndexData{}
-	__VDLZeroBigData      = BigData{}
-)
+func (t *BigDataTarget) FromZero(tt *vdl.Type) error {
+	*t.Value = BigData{}
+	return nil
+}
 
 var __VDLInitCalled bool
 
@@ -2123,6 +2491,7 @@ func __VDLInit() struct{} {
 	if __VDLInitCalled {
 		return struct{}{}
 	}
+	__VDLInitCalled = true
 
 	// Register types.
 	vdl.Register((*AddressInfo)(nil))

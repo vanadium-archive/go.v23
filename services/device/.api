@@ -21,14 +21,17 @@ pkg device, method (*Association) FillVDLTarget(vdl.Target, *vdl.Type) error
 pkg device, method (*Association) MakeVDLTarget() vdl.Target
 pkg device, method (*AssociationTarget) FinishField(vdl.Target, vdl.Target) error
 pkg device, method (*AssociationTarget) FinishFields(vdl.FieldsTarget) error
+pkg device, method (*AssociationTarget) FromZero(*vdl.Type) error
 pkg device, method (*AssociationTarget) StartField(string) (vdl.Target, vdl.Target, error)
 pkg device, method (*AssociationTarget) StartFields(*vdl.Type) (vdl.FieldsTarget, error)
 pkg device, method (*BlessClientMessageTarget) FinishField(vdl.Target, vdl.Target) error
 pkg device, method (*BlessClientMessageTarget) FinishFields(vdl.FieldsTarget) error
+pkg device, method (*BlessClientMessageTarget) FromZero(*vdl.Type) error
 pkg device, method (*BlessClientMessageTarget) StartField(string) (vdl.Target, vdl.Target, error)
 pkg device, method (*BlessClientMessageTarget) StartFields(*vdl.Type) (vdl.FieldsTarget, error)
 pkg device, method (*BlessServerMessageTarget) FinishField(vdl.Target, vdl.Target) error
 pkg device, method (*BlessServerMessageTarget) FinishFields(vdl.FieldsTarget) error
+pkg device, method (*BlessServerMessageTarget) FromZero(*vdl.Type) error
 pkg device, method (*BlessServerMessageTarget) StartField(string) (vdl.Target, vdl.Target, error)
 pkg device, method (*BlessServerMessageTarget) StartFields(*vdl.Type) (vdl.FieldsTarget, error)
 pkg device, method (*Config) FillVDLTarget(vdl.Target, *vdl.Type) error
@@ -36,42 +39,50 @@ pkg device, method (*Config) MakeVDLTarget() vdl.Target
 pkg device, method (*ConfigTarget) FinishField(vdl.Target, vdl.Target) error
 pkg device, method (*ConfigTarget) FinishKeyStartField(vdl.Target) (vdl.Target, error)
 pkg device, method (*ConfigTarget) FinishMap(vdl.MapTarget) error
+pkg device, method (*ConfigTarget) FromZero(*vdl.Type) error
 pkg device, method (*ConfigTarget) StartKey() (vdl.Target, error)
 pkg device, method (*ConfigTarget) StartMap(*vdl.Type, int) (vdl.MapTarget, error)
 pkg device, method (*Description) FillVDLTarget(vdl.Target, *vdl.Type) error
 pkg device, method (*Description) MakeVDLTarget() vdl.Target
 pkg device, method (*DescriptionTarget) FinishField(vdl.Target, vdl.Target) error
 pkg device, method (*DescriptionTarget) FinishFields(vdl.FieldsTarget) error
+pkg device, method (*DescriptionTarget) FromZero(*vdl.Type) error
 pkg device, method (*DescriptionTarget) StartField(string) (vdl.Target, vdl.Target, error)
 pkg device, method (*DescriptionTarget) StartFields(*vdl.Type) (vdl.FieldsTarget, error)
 pkg device, method (*DeviceStatus) FillVDLTarget(vdl.Target, *vdl.Type) error
 pkg device, method (*DeviceStatus) MakeVDLTarget() vdl.Target
 pkg device, method (*DeviceStatusTarget) FinishField(vdl.Target, vdl.Target) error
 pkg device, method (*DeviceStatusTarget) FinishFields(vdl.FieldsTarget) error
+pkg device, method (*DeviceStatusTarget) FromZero(*vdl.Type) error
 pkg device, method (*DeviceStatusTarget) StartField(string) (vdl.Target, vdl.Target, error)
 pkg device, method (*DeviceStatusTarget) StartFields(*vdl.Type) (vdl.FieldsTarget, error)
 pkg device, method (*InstallationState) FillVDLTarget(vdl.Target, *vdl.Type) error
 pkg device, method (*InstallationState) MakeVDLTarget() vdl.Target
 pkg device, method (*InstallationState) Set(string) error
 pkg device, method (*InstallationStateTarget) FromEnumLabel(string, *vdl.Type) error
+pkg device, method (*InstallationStateTarget) FromZero(*vdl.Type) error
 pkg device, method (*InstallationStatus) FillVDLTarget(vdl.Target, *vdl.Type) error
 pkg device, method (*InstallationStatus) MakeVDLTarget() vdl.Target
 pkg device, method (*InstallationStatusTarget) FinishField(vdl.Target, vdl.Target) error
 pkg device, method (*InstallationStatusTarget) FinishFields(vdl.FieldsTarget) error
+pkg device, method (*InstallationStatusTarget) FromZero(*vdl.Type) error
 pkg device, method (*InstallationStatusTarget) StartField(string) (vdl.Target, vdl.Target, error)
 pkg device, method (*InstallationStatusTarget) StartFields(*vdl.Type) (vdl.FieldsTarget, error)
 pkg device, method (*InstanceState) FillVDLTarget(vdl.Target, *vdl.Type) error
 pkg device, method (*InstanceState) MakeVDLTarget() vdl.Target
 pkg device, method (*InstanceState) Set(string) error
 pkg device, method (*InstanceStateTarget) FromEnumLabel(string, *vdl.Type) error
+pkg device, method (*InstanceStateTarget) FromZero(*vdl.Type) error
 pkg device, method (*InstanceStatus) FillVDLTarget(vdl.Target, *vdl.Type) error
 pkg device, method (*InstanceStatus) MakeVDLTarget() vdl.Target
 pkg device, method (*InstanceStatusTarget) FinishField(vdl.Target, vdl.Target) error
 pkg device, method (*InstanceStatusTarget) FinishFields(vdl.FieldsTarget) error
+pkg device, method (*InstanceStatusTarget) FromZero(*vdl.Type) error
 pkg device, method (*InstanceStatusTarget) StartField(string) (vdl.Target, vdl.Target, error)
 pkg device, method (*InstanceStatusTarget) StartFields(*vdl.Type) (vdl.FieldsTarget, error)
 pkg device, method (*StatusTarget) FinishField(vdl.Target, vdl.Target) error
 pkg device, method (*StatusTarget) FinishFields(vdl.FieldsTarget) error
+pkg device, method (*StatusTarget) FromZero(*vdl.Type) error
 pkg device, method (*StatusTarget) StartField(string) (vdl.Target, vdl.Target, error)
 pkg device, method (*StatusTarget) StartFields(*vdl.Type) (vdl.FieldsTarget, error)
 pkg device, method (BlessClientMessageAppBlessings) FillVDLTarget(vdl.Target, *vdl.Type) error
@@ -101,34 +112,30 @@ pkg device, method (StatusInstance) Index() int
 pkg device, method (StatusInstance) Interface() interface{}
 pkg device, method (StatusInstance) MakeVDLTarget() vdl.Target
 pkg device, method (StatusInstance) Name() string
-pkg device, type ApplicationClientMethods interface { Debug, Delete, GetPermissions, Install, Instantiate, Kill, Revert, Run, SetPermissions, Status, Uninstall, Update, UpdateTo }
 pkg device, type ApplicationClientMethods interface, Debug(*context.T, ...rpc.CallOpt) (string, error)
 pkg device, type ApplicationClientMethods interface, Delete(*context.T, ...rpc.CallOpt) error
-pkg device, type ApplicationClientMethods interface, GetPermissions(*context.T, ...rpc.CallOpt) (access.Permissions, string, error)
 pkg device, type ApplicationClientMethods interface, Install(*context.T, string, Config, application.Packages, ...rpc.CallOpt) (string, error)
 pkg device, type ApplicationClientMethods interface, Instantiate(*context.T, ...rpc.CallOpt) (ApplicationInstantiateClientCall, error)
 pkg device, type ApplicationClientMethods interface, Kill(*context.T, time.Duration, ...rpc.CallOpt) error
 pkg device, type ApplicationClientMethods interface, Revert(*context.T, ...rpc.CallOpt) error
 pkg device, type ApplicationClientMethods interface, Run(*context.T, ...rpc.CallOpt) error
-pkg device, type ApplicationClientMethods interface, SetPermissions(*context.T, access.Permissions, string, ...rpc.CallOpt) error
 pkg device, type ApplicationClientMethods interface, Status(*context.T, ...rpc.CallOpt) (Status, error)
 pkg device, type ApplicationClientMethods interface, Uninstall(*context.T, ...rpc.CallOpt) error
 pkg device, type ApplicationClientMethods interface, Update(*context.T, ...rpc.CallOpt) error
 pkg device, type ApplicationClientMethods interface, UpdateTo(*context.T, string, ...rpc.CallOpt) error
-pkg device, type ApplicationClientStub interface { Debug, Delete, GetPermissions, Install, Instantiate, Kill, Revert, Run, SetPermissions, Status, Uninstall, Update, UpdateTo }
+pkg device, type ApplicationClientMethods interface, unexported methods
 pkg device, type ApplicationClientStub interface, Debug(*context.T, ...rpc.CallOpt) (string, error)
 pkg device, type ApplicationClientStub interface, Delete(*context.T, ...rpc.CallOpt) error
-pkg device, type ApplicationClientStub interface, GetPermissions(*context.T, ...rpc.CallOpt) (access.Permissions, string, error)
 pkg device, type ApplicationClientStub interface, Install(*context.T, string, Config, application.Packages, ...rpc.CallOpt) (string, error)
 pkg device, type ApplicationClientStub interface, Instantiate(*context.T, ...rpc.CallOpt) (ApplicationInstantiateClientCall, error)
 pkg device, type ApplicationClientStub interface, Kill(*context.T, time.Duration, ...rpc.CallOpt) error
 pkg device, type ApplicationClientStub interface, Revert(*context.T, ...rpc.CallOpt) error
 pkg device, type ApplicationClientStub interface, Run(*context.T, ...rpc.CallOpt) error
-pkg device, type ApplicationClientStub interface, SetPermissions(*context.T, access.Permissions, string, ...rpc.CallOpt) error
 pkg device, type ApplicationClientStub interface, Status(*context.T, ...rpc.CallOpt) (Status, error)
 pkg device, type ApplicationClientStub interface, Uninstall(*context.T, ...rpc.CallOpt) error
 pkg device, type ApplicationClientStub interface, Update(*context.T, ...rpc.CallOpt) error
 pkg device, type ApplicationClientStub interface, UpdateTo(*context.T, string, ...rpc.CallOpt) error
+pkg device, type ApplicationClientStub interface, unexported methods
 pkg device, type ApplicationInstantiateClientCall interface { Finish, RecvStream, SendStream }
 pkg device, type ApplicationInstantiateClientCall interface, Finish() (string, error)
 pkg device, type ApplicationInstantiateClientCall interface, RecvStream() interface {  Advance() bool;; Value() BlessServerMessage;; Err() error;}
@@ -136,34 +143,26 @@ pkg device, type ApplicationInstantiateClientCall interface, SendStream() interf
 pkg device, type ApplicationInstantiateClientStream interface { RecvStream, SendStream }
 pkg device, type ApplicationInstantiateClientStream interface, RecvStream() interface {  Advance() bool;; Value() BlessServerMessage;; Err() error;}
 pkg device, type ApplicationInstantiateClientStream interface, SendStream() interface {  Send(item BlessClientMessage) error;; Close() error;}
-pkg device, type ApplicationInstantiateServerCall interface { GrantedBlessings, LocalEndpoint, RecvStream, RemoteEndpoint, Security, SendStream, Server, Suffix }
-pkg device, type ApplicationInstantiateServerCall interface, GrantedBlessings() security.Blessings
-pkg device, type ApplicationInstantiateServerCall interface, LocalEndpoint() naming.Endpoint
 pkg device, type ApplicationInstantiateServerCall interface, RecvStream() interface {  Advance() bool;; Value() BlessClientMessage;; Err() error;}
-pkg device, type ApplicationInstantiateServerCall interface, RemoteEndpoint() naming.Endpoint
-pkg device, type ApplicationInstantiateServerCall interface, Security() security.Call
 pkg device, type ApplicationInstantiateServerCall interface, SendStream() interface {  Send(item BlessServerMessage) error;}
-pkg device, type ApplicationInstantiateServerCall interface, Server() Server
-pkg device, type ApplicationInstantiateServerCall interface, Suffix() string
+pkg device, type ApplicationInstantiateServerCall interface, unexported methods
 pkg device, type ApplicationInstantiateServerCallStub struct
 pkg device, type ApplicationInstantiateServerCallStub struct, embedded rpc.StreamServerCall
 pkg device, type ApplicationInstantiateServerStream interface { RecvStream, SendStream }
 pkg device, type ApplicationInstantiateServerStream interface, RecvStream() interface {  Advance() bool;; Value() BlessClientMessage;; Err() error;}
 pkg device, type ApplicationInstantiateServerStream interface, SendStream() interface {  Send(item BlessServerMessage) error;}
-pkg device, type ApplicationServerMethods interface { Debug, Delete, GetPermissions, Install, Instantiate, Kill, Revert, Run, SetPermissions, Status, Uninstall, Update, UpdateTo }
 pkg device, type ApplicationServerMethods interface, Debug(*context.T, rpc.ServerCall) (string, error)
 pkg device, type ApplicationServerMethods interface, Delete(*context.T, rpc.ServerCall) error
-pkg device, type ApplicationServerMethods interface, GetPermissions(*context.T, rpc.ServerCall) (access.Permissions, string, error)
 pkg device, type ApplicationServerMethods interface, Install(*context.T, rpc.ServerCall, string, Config, application.Packages) (string, error)
 pkg device, type ApplicationServerMethods interface, Instantiate(*context.T, ApplicationInstantiateServerCall) (string, error)
 pkg device, type ApplicationServerMethods interface, Kill(*context.T, rpc.ServerCall, time.Duration) error
 pkg device, type ApplicationServerMethods interface, Revert(*context.T, rpc.ServerCall) error
 pkg device, type ApplicationServerMethods interface, Run(*context.T, rpc.ServerCall) error
-pkg device, type ApplicationServerMethods interface, SetPermissions(*context.T, rpc.ServerCall, access.Permissions, string) error
 pkg device, type ApplicationServerMethods interface, Status(*context.T, rpc.ServerCall) (Status, error)
 pkg device, type ApplicationServerMethods interface, Uninstall(*context.T, rpc.ServerCall) error
 pkg device, type ApplicationServerMethods interface, Update(*context.T, rpc.ServerCall) error
 pkg device, type ApplicationServerMethods interface, UpdateTo(*context.T, rpc.ServerCall, string) error
+pkg device, type ApplicationServerMethods interface, unexported methods
 pkg device, type ApplicationServerStub interface, Debug(*context.T, rpc.ServerCall) (string, error)
 pkg device, type ApplicationServerStub interface, Delete(*context.T, rpc.ServerCall) error
 pkg device, type ApplicationServerStub interface, Describe__() []rpc.InterfaceDesc
@@ -220,8 +219,8 @@ pkg device, type BlessServerMessageTarget struct, embedded vdl.FieldsTargetBase
 pkg device, type BlessServerMessageTarget struct, embedded vdl.TargetBase
 pkg device, type ClaimableClientMethods interface { Claim }
 pkg device, type ClaimableClientMethods interface, Claim(*context.T, string, ...rpc.CallOpt) error
-pkg device, type ClaimableClientStub interface { Claim }
 pkg device, type ClaimableClientStub interface, Claim(*context.T, string, ...rpc.CallOpt) error
+pkg device, type ClaimableClientStub interface, unexported methods
 pkg device, type ClaimableServerMethods interface { Claim }
 pkg device, type ClaimableServerMethods interface, Claim(*context.T, rpc.ServerCall, string) error
 pkg device, type ClaimableServerStub interface, Describe__() []rpc.InterfaceDesc
@@ -238,12 +237,10 @@ pkg device, type DescriptionTarget struct
 pkg device, type DescriptionTarget struct, Value *Description
 pkg device, type DescriptionTarget struct, embedded vdl.FieldsTargetBase
 pkg device, type DescriptionTarget struct, embedded vdl.TargetBase
-pkg device, type DeviceClientMethods interface { AssociateAccount, Debug, Delete, Describe, GetPermissions, Install, Instantiate, IsRunnable, Kill, ListAssociations, Reset, Revert, Run, SetPermissions, Status, TidyNow, Uninstall, Update, UpdateTo }
 pkg device, type DeviceClientMethods interface, AssociateAccount(*context.T, []string, string, ...rpc.CallOpt) error
 pkg device, type DeviceClientMethods interface, Debug(*context.T, ...rpc.CallOpt) (string, error)
 pkg device, type DeviceClientMethods interface, Delete(*context.T, ...rpc.CallOpt) error
 pkg device, type DeviceClientMethods interface, Describe(*context.T, ...rpc.CallOpt) (Description, error)
-pkg device, type DeviceClientMethods interface, GetPermissions(*context.T, ...rpc.CallOpt) (access.Permissions, string, error)
 pkg device, type DeviceClientMethods interface, Install(*context.T, string, Config, application.Packages, ...rpc.CallOpt) (string, error)
 pkg device, type DeviceClientMethods interface, Instantiate(*context.T, ...rpc.CallOpt) (ApplicationInstantiateClientCall, error)
 pkg device, type DeviceClientMethods interface, IsRunnable(*context.T, binary.Description, ...rpc.CallOpt) (bool, error)
@@ -252,18 +249,15 @@ pkg device, type DeviceClientMethods interface, ListAssociations(*context.T, ...
 pkg device, type DeviceClientMethods interface, Reset(*context.T, time.Duration, ...rpc.CallOpt) error
 pkg device, type DeviceClientMethods interface, Revert(*context.T, ...rpc.CallOpt) error
 pkg device, type DeviceClientMethods interface, Run(*context.T, ...rpc.CallOpt) error
-pkg device, type DeviceClientMethods interface, SetPermissions(*context.T, access.Permissions, string, ...rpc.CallOpt) error
 pkg device, type DeviceClientMethods interface, Status(*context.T, ...rpc.CallOpt) (Status, error)
-pkg device, type DeviceClientMethods interface, TidyNow(*context.T, ...rpc.CallOpt) error
 pkg device, type DeviceClientMethods interface, Uninstall(*context.T, ...rpc.CallOpt) error
 pkg device, type DeviceClientMethods interface, Update(*context.T, ...rpc.CallOpt) error
 pkg device, type DeviceClientMethods interface, UpdateTo(*context.T, string, ...rpc.CallOpt) error
-pkg device, type DeviceClientStub interface { AssociateAccount, Debug, Delete, Describe, GetPermissions, Install, Instantiate, IsRunnable, Kill, ListAssociations, Reset, Revert, Run, SetPermissions, Status, TidyNow, Uninstall, Update, UpdateTo }
+pkg device, type DeviceClientMethods interface, unexported methods
 pkg device, type DeviceClientStub interface, AssociateAccount(*context.T, []string, string, ...rpc.CallOpt) error
 pkg device, type DeviceClientStub interface, Debug(*context.T, ...rpc.CallOpt) (string, error)
 pkg device, type DeviceClientStub interface, Delete(*context.T, ...rpc.CallOpt) error
 pkg device, type DeviceClientStub interface, Describe(*context.T, ...rpc.CallOpt) (Description, error)
-pkg device, type DeviceClientStub interface, GetPermissions(*context.T, ...rpc.CallOpt) (access.Permissions, string, error)
 pkg device, type DeviceClientStub interface, Install(*context.T, string, Config, application.Packages, ...rpc.CallOpt) (string, error)
 pkg device, type DeviceClientStub interface, Instantiate(*context.T, ...rpc.CallOpt) (ApplicationInstantiateClientCall, error)
 pkg device, type DeviceClientStub interface, IsRunnable(*context.T, binary.Description, ...rpc.CallOpt) (bool, error)
@@ -272,18 +266,15 @@ pkg device, type DeviceClientStub interface, ListAssociations(*context.T, ...rpc
 pkg device, type DeviceClientStub interface, Reset(*context.T, time.Duration, ...rpc.CallOpt) error
 pkg device, type DeviceClientStub interface, Revert(*context.T, ...rpc.CallOpt) error
 pkg device, type DeviceClientStub interface, Run(*context.T, ...rpc.CallOpt) error
-pkg device, type DeviceClientStub interface, SetPermissions(*context.T, access.Permissions, string, ...rpc.CallOpt) error
 pkg device, type DeviceClientStub interface, Status(*context.T, ...rpc.CallOpt) (Status, error)
-pkg device, type DeviceClientStub interface, TidyNow(*context.T, ...rpc.CallOpt) error
 pkg device, type DeviceClientStub interface, Uninstall(*context.T, ...rpc.CallOpt) error
 pkg device, type DeviceClientStub interface, Update(*context.T, ...rpc.CallOpt) error
 pkg device, type DeviceClientStub interface, UpdateTo(*context.T, string, ...rpc.CallOpt) error
-pkg device, type DeviceServerMethods interface { AssociateAccount, Debug, Delete, Describe, GetPermissions, Install, Instantiate, IsRunnable, Kill, ListAssociations, Reset, Revert, Run, SetPermissions, Status, TidyNow, Uninstall, Update, UpdateTo }
+pkg device, type DeviceClientStub interface, unexported methods
 pkg device, type DeviceServerMethods interface, AssociateAccount(*context.T, rpc.ServerCall, []string, string) error
 pkg device, type DeviceServerMethods interface, Debug(*context.T, rpc.ServerCall) (string, error)
 pkg device, type DeviceServerMethods interface, Delete(*context.T, rpc.ServerCall) error
 pkg device, type DeviceServerMethods interface, Describe(*context.T, rpc.ServerCall) (Description, error)
-pkg device, type DeviceServerMethods interface, GetPermissions(*context.T, rpc.ServerCall) (access.Permissions, string, error)
 pkg device, type DeviceServerMethods interface, Install(*context.T, rpc.ServerCall, string, Config, application.Packages) (string, error)
 pkg device, type DeviceServerMethods interface, Instantiate(*context.T, ApplicationInstantiateServerCall) (string, error)
 pkg device, type DeviceServerMethods interface, IsRunnable(*context.T, rpc.ServerCall, binary.Description) (bool, error)
@@ -292,12 +283,11 @@ pkg device, type DeviceServerMethods interface, ListAssociations(*context.T, rpc
 pkg device, type DeviceServerMethods interface, Reset(*context.T, rpc.ServerCall, time.Duration) error
 pkg device, type DeviceServerMethods interface, Revert(*context.T, rpc.ServerCall) error
 pkg device, type DeviceServerMethods interface, Run(*context.T, rpc.ServerCall) error
-pkg device, type DeviceServerMethods interface, SetPermissions(*context.T, rpc.ServerCall, access.Permissions, string) error
 pkg device, type DeviceServerMethods interface, Status(*context.T, rpc.ServerCall) (Status, error)
-pkg device, type DeviceServerMethods interface, TidyNow(*context.T, rpc.ServerCall) error
 pkg device, type DeviceServerMethods interface, Uninstall(*context.T, rpc.ServerCall) error
 pkg device, type DeviceServerMethods interface, Update(*context.T, rpc.ServerCall) error
 pkg device, type DeviceServerMethods interface, UpdateTo(*context.T, rpc.ServerCall, string) error
+pkg device, type DeviceServerMethods interface, unexported methods
 pkg device, type DeviceServerStub interface, AssociateAccount(*context.T, rpc.ServerCall, []string, string) error
 pkg device, type DeviceServerStub interface, Debug(*context.T, rpc.ServerCall) (string, error)
 pkg device, type DeviceServerStub interface, Delete(*context.T, rpc.ServerCall) error

@@ -101,9 +101,13 @@ func (t *ControlKindTarget) FromEnumLabel(src string, tt *vdl.Type) error {
 	case "IncompleteType":
 		*t.Value = 2
 	default:
-		return fmt.Errorf("label %s not in enum v.io/v23/vom.ControlKind", src)
+		return fmt.Errorf("label %s not in enum ControlKind", src)
 	}
 
+	return nil
+}
+func (t *ControlKindTarget) FromZero(tt *vdl.Type) error {
+	*t.Value = ControlKindNil
 	return nil
 }
 
@@ -438,6 +442,10 @@ func (t *PrimitiveTarget) FinishFields(_ vdl.FieldsTarget) error {
 
 	return nil
 }
+func (t *PrimitiveTarget) FromZero(tt *vdl.Type) error {
+	*t.Value = Primitive(PrimitivePBool{})
+	return nil
+}
 
 type primitiveTargetFactory struct{}
 
@@ -627,9 +635,13 @@ func (t *DumpKindTarget) FromEnumLabel(src string, tt *vdl.Type) error {
 	case "WireTypeIndex":
 		*t.Value = 14
 	default:
-		return fmt.Errorf("label %s not in enum v.io/v23/vom.DumpKind", src)
+		return fmt.Errorf("label %s not in enum DumpKind", src)
 	}
 
+	return nil
+}
+func (t *DumpKindTarget) FromZero(tt *vdl.Type) error {
+	*t.Value = DumpKindVersion
 	return nil
 }
 
@@ -652,59 +664,98 @@ func (m *DumpAtom) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 	if err != nil {
 		return err
 	}
-
 	keyTarget2, fieldTarget3, err := fieldsTarget1.StartField("Kind")
 	if err != vdl.ErrFieldNoExist && err != nil {
 		return err
 	}
 	if err != vdl.ErrFieldNoExist {
 
-		if err := m.Kind.FillVDLTarget(fieldTarget3, tt.NonOptional().Field(0).Type); err != nil {
-			return err
+		var4 := (m.Kind == DumpKindVersion)
+		if var4 {
+			if err := fieldTarget3.FromZero(tt.NonOptional().Field(0).Type); err != nil {
+				return err
+			}
+		} else {
+
+			if err := m.Kind.FillVDLTarget(fieldTarget3, tt.NonOptional().Field(0).Type); err != nil {
+				return err
+			}
 		}
 		if err := fieldsTarget1.FinishField(keyTarget2, fieldTarget3); err != nil {
 			return err
 		}
 	}
-	keyTarget4, fieldTarget5, err := fieldsTarget1.StartField("Bytes")
+	keyTarget5, fieldTarget6, err := fieldsTarget1.StartField("Bytes")
 	if err != vdl.ErrFieldNoExist && err != nil {
 		return err
 	}
 	if err != vdl.ErrFieldNoExist {
 
-		if err := fieldTarget5.FromBytes([]byte(m.Bytes), tt.NonOptional().Field(1).Type); err != nil {
-			return err
+		var var7 bool
+		if len(m.Bytes) == 0 {
+			var7 = true
 		}
-		if err := fieldsTarget1.FinishField(keyTarget4, fieldTarget5); err != nil {
+		if var7 {
+			if err := fieldTarget6.FromZero(tt.NonOptional().Field(1).Type); err != nil {
+				return err
+			}
+		} else {
+
+			if err := fieldTarget6.FromBytes([]byte(m.Bytes), tt.NonOptional().Field(1).Type); err != nil {
+				return err
+			}
+		}
+		if err := fieldsTarget1.FinishField(keyTarget5, fieldTarget6); err != nil {
 			return err
 		}
 	}
-	keyTarget6, fieldTarget7, err := fieldsTarget1.StartField("Data")
+	keyTarget8, fieldTarget9, err := fieldsTarget1.StartField("Data")
 	if err != vdl.ErrFieldNoExist && err != nil {
 		return err
 	}
 	if err != vdl.ErrFieldNoExist {
 
-		unionValue8 := m.Data
-		if unionValue8 == nil {
-			unionValue8 = PrimitivePBool{}
+		var var10 bool
+		if field, ok := m.Data.(PrimitivePBool); ok {
+
+			var11 := (field.Value == false)
+			var10 = var11
 		}
-		if err := unionValue8.FillVDLTarget(fieldTarget7, tt.NonOptional().Field(2).Type); err != nil {
-			return err
+		if var10 {
+			if err := fieldTarget9.FromZero(tt.NonOptional().Field(2).Type); err != nil {
+				return err
+			}
+		} else {
+
+			unionValue12 := m.Data
+			if unionValue12 == nil {
+				unionValue12 = PrimitivePBool{}
+			}
+			if err := unionValue12.FillVDLTarget(fieldTarget9, tt.NonOptional().Field(2).Type); err != nil {
+				return err
+			}
 		}
-		if err := fieldsTarget1.FinishField(keyTarget6, fieldTarget7); err != nil {
+		if err := fieldsTarget1.FinishField(keyTarget8, fieldTarget9); err != nil {
 			return err
 		}
 	}
-	keyTarget9, fieldTarget10, err := fieldsTarget1.StartField("Debug")
+	keyTarget13, fieldTarget14, err := fieldsTarget1.StartField("Debug")
 	if err != vdl.ErrFieldNoExist && err != nil {
 		return err
 	}
 	if err != vdl.ErrFieldNoExist {
-		if err := fieldTarget10.FromString(string(m.Debug), tt.NonOptional().Field(3).Type); err != nil {
-			return err
+
+		var15 := (m.Debug == "")
+		if var15 {
+			if err := fieldTarget14.FromZero(tt.NonOptional().Field(3).Type); err != nil {
+				return err
+			}
+		} else {
+			if err := fieldTarget14.FromString(string(m.Debug), tt.NonOptional().Field(3).Type); err != nil {
+				return err
+			}
 		}
-		if err := fieldsTarget1.FinishField(keyTarget9, fieldTarget10); err != nil {
+		if err := fieldsTarget1.FinishField(keyTarget13, fieldTarget14); err != nil {
 			return err
 		}
 	}
@@ -764,6 +815,12 @@ func (t *DumpAtomTarget) FinishFields(_ vdl.FieldsTarget) error {
 
 	return nil
 }
+func (t *DumpAtomTarget) FromZero(tt *vdl.Type) error {
+	*t.Value = DumpAtom{
+		Data: PrimitivePBool{},
+	}
+	return nil
+}
 
 // typeId uniquely identifies a type definition within a vom stream.
 type typeId uint64
@@ -815,6 +872,10 @@ func (t *typeIdTarget) FromFloat(src float64, tt *vdl.Type) error {
 
 	return nil
 }
+func (t *typeIdTarget) FromZero(tt *vdl.Type) error {
+	*t.Value = typeId(0)
+	return nil
+}
 
 // wireNamed represents a type definition for named primitives.
 type wireNamed struct {
@@ -832,29 +893,44 @@ func (m *wireNamed) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 	if err != nil {
 		return err
 	}
-
 	keyTarget2, fieldTarget3, err := fieldsTarget1.StartField("Name")
 	if err != vdl.ErrFieldNoExist && err != nil {
 		return err
 	}
 	if err != vdl.ErrFieldNoExist {
-		if err := fieldTarget3.FromString(string(m.Name), tt.NonOptional().Field(0).Type); err != nil {
-			return err
+
+		var4 := (m.Name == "")
+		if var4 {
+			if err := fieldTarget3.FromZero(tt.NonOptional().Field(0).Type); err != nil {
+				return err
+			}
+		} else {
+			if err := fieldTarget3.FromString(string(m.Name), tt.NonOptional().Field(0).Type); err != nil {
+				return err
+			}
 		}
 		if err := fieldsTarget1.FinishField(keyTarget2, fieldTarget3); err != nil {
 			return err
 		}
 	}
-	keyTarget4, fieldTarget5, err := fieldsTarget1.StartField("Base")
+	keyTarget5, fieldTarget6, err := fieldsTarget1.StartField("Base")
 	if err != vdl.ErrFieldNoExist && err != nil {
 		return err
 	}
 	if err != vdl.ErrFieldNoExist {
 
-		if err := m.Base.FillVDLTarget(fieldTarget5, tt.NonOptional().Field(1).Type); err != nil {
-			return err
+		var7 := (m.Base == typeId(0))
+		if var7 {
+			if err := fieldTarget6.FromZero(tt.NonOptional().Field(1).Type); err != nil {
+				return err
+			}
+		} else {
+
+			if err := m.Base.FillVDLTarget(fieldTarget6, tt.NonOptional().Field(1).Type); err != nil {
+				return err
+			}
 		}
-		if err := fieldsTarget1.FinishField(keyTarget4, fieldTarget5); err != nil {
+		if err := fieldsTarget1.FinishField(keyTarget5, fieldTarget6); err != nil {
 			return err
 		}
 	}
@@ -904,6 +980,10 @@ func (t *wireNamedTarget) FinishFields(_ vdl.FieldsTarget) error {
 
 	return nil
 }
+func (t *wireNamedTarget) FromZero(tt *vdl.Type) error {
+	*t.Value = wireNamed{}
+	return nil
+}
 
 // wireEnum represents an type definition for enum types.
 type wireEnum struct {
@@ -921,45 +1001,63 @@ func (m *wireEnum) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 	if err != nil {
 		return err
 	}
-
 	keyTarget2, fieldTarget3, err := fieldsTarget1.StartField("Name")
 	if err != vdl.ErrFieldNoExist && err != nil {
 		return err
 	}
 	if err != vdl.ErrFieldNoExist {
-		if err := fieldTarget3.FromString(string(m.Name), tt.NonOptional().Field(0).Type); err != nil {
-			return err
+
+		var4 := (m.Name == "")
+		if var4 {
+			if err := fieldTarget3.FromZero(tt.NonOptional().Field(0).Type); err != nil {
+				return err
+			}
+		} else {
+			if err := fieldTarget3.FromString(string(m.Name), tt.NonOptional().Field(0).Type); err != nil {
+				return err
+			}
 		}
 		if err := fieldsTarget1.FinishField(keyTarget2, fieldTarget3); err != nil {
 			return err
 		}
 	}
-	keyTarget4, fieldTarget5, err := fieldsTarget1.StartField("Labels")
+	keyTarget5, fieldTarget6, err := fieldsTarget1.StartField("Labels")
 	if err != vdl.ErrFieldNoExist && err != nil {
 		return err
 	}
 	if err != vdl.ErrFieldNoExist {
 
-		listTarget6, err := fieldTarget5.StartList(tt.NonOptional().Field(1).Type, len(m.Labels))
-		if err != nil {
-			return err
+		var var7 bool
+		if len(m.Labels) == 0 {
+			var7 = true
 		}
-		for i, elem8 := range m.Labels {
-			elemTarget7, err := listTarget6.StartElem(i)
+		if var7 {
+			if err := fieldTarget6.FromZero(tt.NonOptional().Field(1).Type); err != nil {
+				return err
+			}
+		} else {
+
+			listTarget8, err := fieldTarget6.StartList(tt.NonOptional().Field(1).Type, len(m.Labels))
 			if err != nil {
 				return err
 			}
-			if err := elemTarget7.FromString(string(elem8), tt.NonOptional().Field(1).Type.Elem()); err != nil {
-				return err
+			for i, elem10 := range m.Labels {
+				elemTarget9, err := listTarget8.StartElem(i)
+				if err != nil {
+					return err
+				}
+				if err := elemTarget9.FromString(string(elem10), tt.NonOptional().Field(1).Type.Elem()); err != nil {
+					return err
+				}
+				if err := listTarget8.FinishElem(elemTarget9); err != nil {
+					return err
+				}
 			}
-			if err := listTarget6.FinishElem(elemTarget7); err != nil {
+			if err := fieldTarget6.FinishList(listTarget8); err != nil {
 				return err
 			}
 		}
-		if err := fieldTarget5.FinishList(listTarget6); err != nil {
-			return err
-		}
-		if err := fieldsTarget1.FinishField(keyTarget4, fieldTarget5); err != nil {
+		if err := fieldsTarget1.FinishField(keyTarget5, fieldTarget6); err != nil {
 			return err
 		}
 	}
@@ -1009,6 +1107,10 @@ func (t *wireEnumTarget) FinishFields(_ vdl.FieldsTarget) error {
 
 	return nil
 }
+func (t *wireEnumTarget) FromZero(tt *vdl.Type) error {
+	*t.Value = wireEnum{}
+	return nil
+}
 
 // wireArray represents an type definition for array types.
 type wireArray struct {
@@ -1027,41 +1129,64 @@ func (m *wireArray) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 	if err != nil {
 		return err
 	}
-
 	keyTarget2, fieldTarget3, err := fieldsTarget1.StartField("Name")
 	if err != vdl.ErrFieldNoExist && err != nil {
 		return err
 	}
 	if err != vdl.ErrFieldNoExist {
-		if err := fieldTarget3.FromString(string(m.Name), tt.NonOptional().Field(0).Type); err != nil {
-			return err
+
+		var4 := (m.Name == "")
+		if var4 {
+			if err := fieldTarget3.FromZero(tt.NonOptional().Field(0).Type); err != nil {
+				return err
+			}
+		} else {
+			if err := fieldTarget3.FromString(string(m.Name), tt.NonOptional().Field(0).Type); err != nil {
+				return err
+			}
 		}
 		if err := fieldsTarget1.FinishField(keyTarget2, fieldTarget3); err != nil {
 			return err
 		}
 	}
-	keyTarget4, fieldTarget5, err := fieldsTarget1.StartField("Elem")
+	keyTarget5, fieldTarget6, err := fieldsTarget1.StartField("Elem")
 	if err != vdl.ErrFieldNoExist && err != nil {
 		return err
 	}
 	if err != vdl.ErrFieldNoExist {
 
-		if err := m.Elem.FillVDLTarget(fieldTarget5, tt.NonOptional().Field(1).Type); err != nil {
-			return err
+		var7 := (m.Elem == typeId(0))
+		if var7 {
+			if err := fieldTarget6.FromZero(tt.NonOptional().Field(1).Type); err != nil {
+				return err
+			}
+		} else {
+
+			if err := m.Elem.FillVDLTarget(fieldTarget6, tt.NonOptional().Field(1).Type); err != nil {
+				return err
+			}
 		}
-		if err := fieldsTarget1.FinishField(keyTarget4, fieldTarget5); err != nil {
+		if err := fieldsTarget1.FinishField(keyTarget5, fieldTarget6); err != nil {
 			return err
 		}
 	}
-	keyTarget6, fieldTarget7, err := fieldsTarget1.StartField("Len")
+	keyTarget8, fieldTarget9, err := fieldsTarget1.StartField("Len")
 	if err != vdl.ErrFieldNoExist && err != nil {
 		return err
 	}
 	if err != vdl.ErrFieldNoExist {
-		if err := fieldTarget7.FromUint(uint64(m.Len), tt.NonOptional().Field(2).Type); err != nil {
-			return err
+
+		var10 := (m.Len == uint64(0))
+		if var10 {
+			if err := fieldTarget9.FromZero(tt.NonOptional().Field(2).Type); err != nil {
+				return err
+			}
+		} else {
+			if err := fieldTarget9.FromUint(uint64(m.Len), tt.NonOptional().Field(2).Type); err != nil {
+				return err
+			}
 		}
-		if err := fieldsTarget1.FinishField(keyTarget6, fieldTarget7); err != nil {
+		if err := fieldsTarget1.FinishField(keyTarget8, fieldTarget9); err != nil {
 			return err
 		}
 	}
@@ -1116,6 +1241,10 @@ func (t *wireArrayTarget) FinishFields(_ vdl.FieldsTarget) error {
 
 	return nil
 }
+func (t *wireArrayTarget) FromZero(tt *vdl.Type) error {
+	*t.Value = wireArray{}
+	return nil
+}
 
 // wireList represents a type definition for list types.
 type wireList struct {
@@ -1133,29 +1262,44 @@ func (m *wireList) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 	if err != nil {
 		return err
 	}
-
 	keyTarget2, fieldTarget3, err := fieldsTarget1.StartField("Name")
 	if err != vdl.ErrFieldNoExist && err != nil {
 		return err
 	}
 	if err != vdl.ErrFieldNoExist {
-		if err := fieldTarget3.FromString(string(m.Name), tt.NonOptional().Field(0).Type); err != nil {
-			return err
+
+		var4 := (m.Name == "")
+		if var4 {
+			if err := fieldTarget3.FromZero(tt.NonOptional().Field(0).Type); err != nil {
+				return err
+			}
+		} else {
+			if err := fieldTarget3.FromString(string(m.Name), tt.NonOptional().Field(0).Type); err != nil {
+				return err
+			}
 		}
 		if err := fieldsTarget1.FinishField(keyTarget2, fieldTarget3); err != nil {
 			return err
 		}
 	}
-	keyTarget4, fieldTarget5, err := fieldsTarget1.StartField("Elem")
+	keyTarget5, fieldTarget6, err := fieldsTarget1.StartField("Elem")
 	if err != vdl.ErrFieldNoExist && err != nil {
 		return err
 	}
 	if err != vdl.ErrFieldNoExist {
 
-		if err := m.Elem.FillVDLTarget(fieldTarget5, tt.NonOptional().Field(1).Type); err != nil {
-			return err
+		var7 := (m.Elem == typeId(0))
+		if var7 {
+			if err := fieldTarget6.FromZero(tt.NonOptional().Field(1).Type); err != nil {
+				return err
+			}
+		} else {
+
+			if err := m.Elem.FillVDLTarget(fieldTarget6, tt.NonOptional().Field(1).Type); err != nil {
+				return err
+			}
 		}
-		if err := fieldsTarget1.FinishField(keyTarget4, fieldTarget5); err != nil {
+		if err := fieldsTarget1.FinishField(keyTarget5, fieldTarget6); err != nil {
 			return err
 		}
 	}
@@ -1205,6 +1349,10 @@ func (t *wireListTarget) FinishFields(_ vdl.FieldsTarget) error {
 
 	return nil
 }
+func (t *wireListTarget) FromZero(tt *vdl.Type) error {
+	*t.Value = wireList{}
+	return nil
+}
 
 // wireSet represents a type definition for set types.
 type wireSet struct {
@@ -1222,29 +1370,44 @@ func (m *wireSet) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 	if err != nil {
 		return err
 	}
-
 	keyTarget2, fieldTarget3, err := fieldsTarget1.StartField("Name")
 	if err != vdl.ErrFieldNoExist && err != nil {
 		return err
 	}
 	if err != vdl.ErrFieldNoExist {
-		if err := fieldTarget3.FromString(string(m.Name), tt.NonOptional().Field(0).Type); err != nil {
-			return err
+
+		var4 := (m.Name == "")
+		if var4 {
+			if err := fieldTarget3.FromZero(tt.NonOptional().Field(0).Type); err != nil {
+				return err
+			}
+		} else {
+			if err := fieldTarget3.FromString(string(m.Name), tt.NonOptional().Field(0).Type); err != nil {
+				return err
+			}
 		}
 		if err := fieldsTarget1.FinishField(keyTarget2, fieldTarget3); err != nil {
 			return err
 		}
 	}
-	keyTarget4, fieldTarget5, err := fieldsTarget1.StartField("Key")
+	keyTarget5, fieldTarget6, err := fieldsTarget1.StartField("Key")
 	if err != vdl.ErrFieldNoExist && err != nil {
 		return err
 	}
 	if err != vdl.ErrFieldNoExist {
 
-		if err := m.Key.FillVDLTarget(fieldTarget5, tt.NonOptional().Field(1).Type); err != nil {
-			return err
+		var7 := (m.Key == typeId(0))
+		if var7 {
+			if err := fieldTarget6.FromZero(tt.NonOptional().Field(1).Type); err != nil {
+				return err
+			}
+		} else {
+
+			if err := m.Key.FillVDLTarget(fieldTarget6, tt.NonOptional().Field(1).Type); err != nil {
+				return err
+			}
 		}
-		if err := fieldsTarget1.FinishField(keyTarget4, fieldTarget5); err != nil {
+		if err := fieldsTarget1.FinishField(keyTarget5, fieldTarget6); err != nil {
 			return err
 		}
 	}
@@ -1294,6 +1457,10 @@ func (t *wireSetTarget) FinishFields(_ vdl.FieldsTarget) error {
 
 	return nil
 }
+func (t *wireSetTarget) FromZero(tt *vdl.Type) error {
+	*t.Value = wireSet{}
+	return nil
+}
 
 // wireMap represents a type definition for map types.
 type wireMap struct {
@@ -1312,42 +1479,65 @@ func (m *wireMap) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 	if err != nil {
 		return err
 	}
-
 	keyTarget2, fieldTarget3, err := fieldsTarget1.StartField("Name")
 	if err != vdl.ErrFieldNoExist && err != nil {
 		return err
 	}
 	if err != vdl.ErrFieldNoExist {
-		if err := fieldTarget3.FromString(string(m.Name), tt.NonOptional().Field(0).Type); err != nil {
-			return err
+
+		var4 := (m.Name == "")
+		if var4 {
+			if err := fieldTarget3.FromZero(tt.NonOptional().Field(0).Type); err != nil {
+				return err
+			}
+		} else {
+			if err := fieldTarget3.FromString(string(m.Name), tt.NonOptional().Field(0).Type); err != nil {
+				return err
+			}
 		}
 		if err := fieldsTarget1.FinishField(keyTarget2, fieldTarget3); err != nil {
 			return err
 		}
 	}
-	keyTarget4, fieldTarget5, err := fieldsTarget1.StartField("Key")
+	keyTarget5, fieldTarget6, err := fieldsTarget1.StartField("Key")
 	if err != vdl.ErrFieldNoExist && err != nil {
 		return err
 	}
 	if err != vdl.ErrFieldNoExist {
 
-		if err := m.Key.FillVDLTarget(fieldTarget5, tt.NonOptional().Field(1).Type); err != nil {
-			return err
+		var7 := (m.Key == typeId(0))
+		if var7 {
+			if err := fieldTarget6.FromZero(tt.NonOptional().Field(1).Type); err != nil {
+				return err
+			}
+		} else {
+
+			if err := m.Key.FillVDLTarget(fieldTarget6, tt.NonOptional().Field(1).Type); err != nil {
+				return err
+			}
 		}
-		if err := fieldsTarget1.FinishField(keyTarget4, fieldTarget5); err != nil {
+		if err := fieldsTarget1.FinishField(keyTarget5, fieldTarget6); err != nil {
 			return err
 		}
 	}
-	keyTarget6, fieldTarget7, err := fieldsTarget1.StartField("Elem")
+	keyTarget8, fieldTarget9, err := fieldsTarget1.StartField("Elem")
 	if err != vdl.ErrFieldNoExist && err != nil {
 		return err
 	}
 	if err != vdl.ErrFieldNoExist {
 
-		if err := m.Elem.FillVDLTarget(fieldTarget7, tt.NonOptional().Field(2).Type); err != nil {
-			return err
+		var10 := (m.Elem == typeId(0))
+		if var10 {
+			if err := fieldTarget9.FromZero(tt.NonOptional().Field(2).Type); err != nil {
+				return err
+			}
+		} else {
+
+			if err := m.Elem.FillVDLTarget(fieldTarget9, tt.NonOptional().Field(2).Type); err != nil {
+				return err
+			}
 		}
-		if err := fieldsTarget1.FinishField(keyTarget6, fieldTarget7); err != nil {
+		if err := fieldsTarget1.FinishField(keyTarget8, fieldTarget9); err != nil {
 			return err
 		}
 	}
@@ -1402,6 +1592,10 @@ func (t *wireMapTarget) FinishFields(_ vdl.FieldsTarget) error {
 
 	return nil
 }
+func (t *wireMapTarget) FromZero(tt *vdl.Type) error {
+	*t.Value = wireMap{}
+	return nil
+}
 
 // wireField represents a field in a struct or union type.
 type wireField struct {
@@ -1419,29 +1613,44 @@ func (m *wireField) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 	if err != nil {
 		return err
 	}
-
 	keyTarget2, fieldTarget3, err := fieldsTarget1.StartField("Name")
 	if err != vdl.ErrFieldNoExist && err != nil {
 		return err
 	}
 	if err != vdl.ErrFieldNoExist {
-		if err := fieldTarget3.FromString(string(m.Name), tt.NonOptional().Field(0).Type); err != nil {
-			return err
+
+		var4 := (m.Name == "")
+		if var4 {
+			if err := fieldTarget3.FromZero(tt.NonOptional().Field(0).Type); err != nil {
+				return err
+			}
+		} else {
+			if err := fieldTarget3.FromString(string(m.Name), tt.NonOptional().Field(0).Type); err != nil {
+				return err
+			}
 		}
 		if err := fieldsTarget1.FinishField(keyTarget2, fieldTarget3); err != nil {
 			return err
 		}
 	}
-	keyTarget4, fieldTarget5, err := fieldsTarget1.StartField("Type")
+	keyTarget5, fieldTarget6, err := fieldsTarget1.StartField("Type")
 	if err != vdl.ErrFieldNoExist && err != nil {
 		return err
 	}
 	if err != vdl.ErrFieldNoExist {
 
-		if err := m.Type.FillVDLTarget(fieldTarget5, tt.NonOptional().Field(1).Type); err != nil {
-			return err
+		var7 := (m.Type == typeId(0))
+		if var7 {
+			if err := fieldTarget6.FromZero(tt.NonOptional().Field(1).Type); err != nil {
+				return err
+			}
+		} else {
+
+			if err := m.Type.FillVDLTarget(fieldTarget6, tt.NonOptional().Field(1).Type); err != nil {
+				return err
+			}
 		}
-		if err := fieldsTarget1.FinishField(keyTarget4, fieldTarget5); err != nil {
+		if err := fieldsTarget1.FinishField(keyTarget5, fieldTarget6); err != nil {
 			return err
 		}
 	}
@@ -1491,6 +1700,10 @@ func (t *wireFieldTarget) FinishFields(_ vdl.FieldsTarget) error {
 
 	return nil
 }
+func (t *wireFieldTarget) FromZero(tt *vdl.Type) error {
+	*t.Value = wireField{}
+	return nil
+}
 
 // wireStruct represents a type definition for struct types.
 type wireStruct struct {
@@ -1508,46 +1721,64 @@ func (m *wireStruct) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 	if err != nil {
 		return err
 	}
-
 	keyTarget2, fieldTarget3, err := fieldsTarget1.StartField("Name")
 	if err != vdl.ErrFieldNoExist && err != nil {
 		return err
 	}
 	if err != vdl.ErrFieldNoExist {
-		if err := fieldTarget3.FromString(string(m.Name), tt.NonOptional().Field(0).Type); err != nil {
-			return err
+
+		var4 := (m.Name == "")
+		if var4 {
+			if err := fieldTarget3.FromZero(tt.NonOptional().Field(0).Type); err != nil {
+				return err
+			}
+		} else {
+			if err := fieldTarget3.FromString(string(m.Name), tt.NonOptional().Field(0).Type); err != nil {
+				return err
+			}
 		}
 		if err := fieldsTarget1.FinishField(keyTarget2, fieldTarget3); err != nil {
 			return err
 		}
 	}
-	keyTarget4, fieldTarget5, err := fieldsTarget1.StartField("Fields")
+	keyTarget5, fieldTarget6, err := fieldsTarget1.StartField("Fields")
 	if err != vdl.ErrFieldNoExist && err != nil {
 		return err
 	}
 	if err != vdl.ErrFieldNoExist {
 
-		listTarget6, err := fieldTarget5.StartList(tt.NonOptional().Field(1).Type, len(m.Fields))
-		if err != nil {
-			return err
+		var var7 bool
+		if len(m.Fields) == 0 {
+			var7 = true
 		}
-		for i, elem8 := range m.Fields {
-			elemTarget7, err := listTarget6.StartElem(i)
+		if var7 {
+			if err := fieldTarget6.FromZero(tt.NonOptional().Field(1).Type); err != nil {
+				return err
+			}
+		} else {
+
+			listTarget8, err := fieldTarget6.StartList(tt.NonOptional().Field(1).Type, len(m.Fields))
 			if err != nil {
 				return err
 			}
+			for i, elem10 := range m.Fields {
+				elemTarget9, err := listTarget8.StartElem(i)
+				if err != nil {
+					return err
+				}
 
-			if err := elem8.FillVDLTarget(elemTarget7, tt.NonOptional().Field(1).Type.Elem()); err != nil {
-				return err
+				if err := elem10.FillVDLTarget(elemTarget9, tt.NonOptional().Field(1).Type.Elem()); err != nil {
+					return err
+				}
+				if err := listTarget8.FinishElem(elemTarget9); err != nil {
+					return err
+				}
 			}
-			if err := listTarget6.FinishElem(elemTarget7); err != nil {
+			if err := fieldTarget6.FinishList(listTarget8); err != nil {
 				return err
 			}
 		}
-		if err := fieldTarget5.FinishList(listTarget6); err != nil {
-			return err
-		}
-		if err := fieldsTarget1.FinishField(keyTarget4, fieldTarget5); err != nil {
+		if err := fieldsTarget1.FinishField(keyTarget5, fieldTarget6); err != nil {
 			return err
 		}
 	}
@@ -1597,6 +1828,10 @@ func (t *wireStructTarget) FinishFields(_ vdl.FieldsTarget) error {
 
 	return nil
 }
+func (t *wireStructTarget) FromZero(tt *vdl.Type) error {
+	*t.Value = wireStruct{}
+	return nil
+}
 
 // []wireField
 type __VDLTarget1_list struct {
@@ -1630,6 +1865,10 @@ func (t *__VDLTarget1_list) FinishList(elem vdl.ListTarget) error {
 
 	return nil
 }
+func (t *__VDLTarget1_list) FromZero(tt *vdl.Type) error {
+	*t.Value = []wireField(nil)
+	return nil
+}
 
 // wireUnion represents a type definition for union types.
 type wireUnion struct {
@@ -1647,46 +1886,64 @@ func (m *wireUnion) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 	if err != nil {
 		return err
 	}
-
 	keyTarget2, fieldTarget3, err := fieldsTarget1.StartField("Name")
 	if err != vdl.ErrFieldNoExist && err != nil {
 		return err
 	}
 	if err != vdl.ErrFieldNoExist {
-		if err := fieldTarget3.FromString(string(m.Name), tt.NonOptional().Field(0).Type); err != nil {
-			return err
+
+		var4 := (m.Name == "")
+		if var4 {
+			if err := fieldTarget3.FromZero(tt.NonOptional().Field(0).Type); err != nil {
+				return err
+			}
+		} else {
+			if err := fieldTarget3.FromString(string(m.Name), tt.NonOptional().Field(0).Type); err != nil {
+				return err
+			}
 		}
 		if err := fieldsTarget1.FinishField(keyTarget2, fieldTarget3); err != nil {
 			return err
 		}
 	}
-	keyTarget4, fieldTarget5, err := fieldsTarget1.StartField("Fields")
+	keyTarget5, fieldTarget6, err := fieldsTarget1.StartField("Fields")
 	if err != vdl.ErrFieldNoExist && err != nil {
 		return err
 	}
 	if err != vdl.ErrFieldNoExist {
 
-		listTarget6, err := fieldTarget5.StartList(tt.NonOptional().Field(1).Type, len(m.Fields))
-		if err != nil {
-			return err
+		var var7 bool
+		if len(m.Fields) == 0 {
+			var7 = true
 		}
-		for i, elem8 := range m.Fields {
-			elemTarget7, err := listTarget6.StartElem(i)
+		if var7 {
+			if err := fieldTarget6.FromZero(tt.NonOptional().Field(1).Type); err != nil {
+				return err
+			}
+		} else {
+
+			listTarget8, err := fieldTarget6.StartList(tt.NonOptional().Field(1).Type, len(m.Fields))
 			if err != nil {
 				return err
 			}
+			for i, elem10 := range m.Fields {
+				elemTarget9, err := listTarget8.StartElem(i)
+				if err != nil {
+					return err
+				}
 
-			if err := elem8.FillVDLTarget(elemTarget7, tt.NonOptional().Field(1).Type.Elem()); err != nil {
-				return err
+				if err := elem10.FillVDLTarget(elemTarget9, tt.NonOptional().Field(1).Type.Elem()); err != nil {
+					return err
+				}
+				if err := listTarget8.FinishElem(elemTarget9); err != nil {
+					return err
+				}
 			}
-			if err := listTarget6.FinishElem(elemTarget7); err != nil {
+			if err := fieldTarget6.FinishList(listTarget8); err != nil {
 				return err
 			}
 		}
-		if err := fieldTarget5.FinishList(listTarget6); err != nil {
-			return err
-		}
-		if err := fieldsTarget1.FinishField(keyTarget4, fieldTarget5); err != nil {
+		if err := fieldsTarget1.FinishField(keyTarget5, fieldTarget6); err != nil {
 			return err
 		}
 	}
@@ -1736,6 +1993,10 @@ func (t *wireUnionTarget) FinishFields(_ vdl.FieldsTarget) error {
 
 	return nil
 }
+func (t *wireUnionTarget) FromZero(tt *vdl.Type) error {
+	*t.Value = wireUnion{}
+	return nil
+}
 
 // wireOptional represents an type definition for optional types.
 type wireOptional struct {
@@ -1753,29 +2014,44 @@ func (m *wireOptional) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 	if err != nil {
 		return err
 	}
-
 	keyTarget2, fieldTarget3, err := fieldsTarget1.StartField("Name")
 	if err != vdl.ErrFieldNoExist && err != nil {
 		return err
 	}
 	if err != vdl.ErrFieldNoExist {
-		if err := fieldTarget3.FromString(string(m.Name), tt.NonOptional().Field(0).Type); err != nil {
-			return err
+
+		var4 := (m.Name == "")
+		if var4 {
+			if err := fieldTarget3.FromZero(tt.NonOptional().Field(0).Type); err != nil {
+				return err
+			}
+		} else {
+			if err := fieldTarget3.FromString(string(m.Name), tt.NonOptional().Field(0).Type); err != nil {
+				return err
+			}
 		}
 		if err := fieldsTarget1.FinishField(keyTarget2, fieldTarget3); err != nil {
 			return err
 		}
 	}
-	keyTarget4, fieldTarget5, err := fieldsTarget1.StartField("Elem")
+	keyTarget5, fieldTarget6, err := fieldsTarget1.StartField("Elem")
 	if err != vdl.ErrFieldNoExist && err != nil {
 		return err
 	}
 	if err != vdl.ErrFieldNoExist {
 
-		if err := m.Elem.FillVDLTarget(fieldTarget5, tt.NonOptional().Field(1).Type); err != nil {
-			return err
+		var7 := (m.Elem == typeId(0))
+		if var7 {
+			if err := fieldTarget6.FromZero(tt.NonOptional().Field(1).Type); err != nil {
+				return err
+			}
+		} else {
+
+			if err := m.Elem.FillVDLTarget(fieldTarget6, tt.NonOptional().Field(1).Type); err != nil {
+				return err
+			}
 		}
-		if err := fieldsTarget1.FinishField(keyTarget4, fieldTarget5); err != nil {
+		if err := fieldsTarget1.FinishField(keyTarget5, fieldTarget6); err != nil {
 			return err
 		}
 	}
@@ -1823,6 +2099,10 @@ func (t *wireOptionalTarget) FinishField(_, _ vdl.Target) error {
 }
 func (t *wireOptionalTarget) FinishFields(_ vdl.FieldsTarget) error {
 
+	return nil
+}
+func (t *wireOptionalTarget) FromZero(tt *vdl.Type) error {
+	*t.Value = wireOptional{}
 	return nil
 }
 
@@ -2248,6 +2528,10 @@ func (t *wireTypeTarget) FinishFields(_ vdl.FieldsTarget) error {
 
 	return nil
 }
+func (t *wireTypeTarget) FromZero(tt *vdl.Type) error {
+	*t.Value = wireType(wireTypeNamedT{})
+	return nil
+}
 
 type wireTypeTargetFactory struct{}
 
@@ -2257,28 +2541,6 @@ func (t wireTypeTargetFactory) VDLMakeUnionTarget(union interface{}) (vdl.Target
 	}
 	return nil, fmt.Errorf("got %T, want *wireType", union)
 }
-
-// Create zero values for each type.
-var (
-	__VDLZeroControlKind = ControlKindNil
-	__VDLZeroPrimitive   = Primitive(PrimitivePBool{})
-	__VDLZeroDumpKind    = DumpKindVersion
-	__VDLZeroDumpAtom    = DumpAtom{
-		Data: PrimitivePBool{},
-	}
-	__VDLZerotypeId       = typeId(0)
-	__VDLZerowireNamed    = wireNamed{}
-	__VDLZerowireEnum     = wireEnum{}
-	__VDLZerowireArray    = wireArray{}
-	__VDLZerowireList     = wireList{}
-	__VDLZerowireSet      = wireSet{}
-	__VDLZerowireMap      = wireMap{}
-	__VDLZerowireField    = wireField{}
-	__VDLZerowireStruct   = wireStruct{}
-	__VDLZerowireUnion    = wireUnion{}
-	__VDLZerowireOptional = wireOptional{}
-	__VDLZerowireType     = wireType(wireTypeNamedT{})
-)
 
 //////////////////////////////////////////////////
 // Const definitions
@@ -2330,6 +2592,7 @@ func __VDLInit() struct{} {
 	if __VDLInitCalled {
 		return struct{}{}
 	}
+	__VDLInitCalled = true
 
 	// Register types.
 	vdl.Register((*ControlKind)(nil))

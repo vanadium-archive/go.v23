@@ -81,10 +81,10 @@ pkg vdl, method (*BoolTarget) FromComplex(complex128, *Type) error
 pkg vdl, method (*BoolTarget) FromEnumLabel(string, *Type) error
 pkg vdl, method (*BoolTarget) FromFloat(float64, *Type) error
 pkg vdl, method (*BoolTarget) FromInt(int64, *Type) error
-pkg vdl, method (*BoolTarget) FromNil(*Type) error
 pkg vdl, method (*BoolTarget) FromString(string, *Type) error
 pkg vdl, method (*BoolTarget) FromTypeObject(*Type) error
 pkg vdl, method (*BoolTarget) FromUint(uint64, *Type) error
+pkg vdl, method (*BoolTarget) FromZero(*Type) error
 pkg vdl, method (*BoolTarget) StartFields(*Type) (FieldsTarget, error)
 pkg vdl, method (*BoolTarget) StartList(*Type, int) (ListTarget, error)
 pkg vdl, method (*BoolTarget) StartMap(*Type, int) (MapTarget, error)
@@ -99,10 +99,10 @@ pkg vdl, method (*ByteTarget) FromComplex(complex128, *Type) error
 pkg vdl, method (*ByteTarget) FromEnumLabel(string, *Type) error
 pkg vdl, method (*ByteTarget) FromFloat(float64, *Type) error
 pkg vdl, method (*ByteTarget) FromInt(int64, *Type) error
-pkg vdl, method (*ByteTarget) FromNil(*Type) error
 pkg vdl, method (*ByteTarget) FromString(string, *Type) error
 pkg vdl, method (*ByteTarget) FromTypeObject(*Type) error
 pkg vdl, method (*ByteTarget) FromUint(uint64, *Type) error
+pkg vdl, method (*ByteTarget) FromZero(*Type) error
 pkg vdl, method (*ByteTarget) StartFields(*Type) (FieldsTarget, error)
 pkg vdl, method (*ByteTarget) StartList(*Type, int) (ListTarget, error)
 pkg vdl, method (*ByteTarget) StartMap(*Type, int) (MapTarget, error)
@@ -117,10 +117,10 @@ pkg vdl, method (*BytesTarget) FromComplex(complex128, *Type) error
 pkg vdl, method (*BytesTarget) FromEnumLabel(string, *Type) error
 pkg vdl, method (*BytesTarget) FromFloat(float64, *Type) error
 pkg vdl, method (*BytesTarget) FromInt(int64, *Type) error
-pkg vdl, method (*BytesTarget) FromNil(*Type) error
 pkg vdl, method (*BytesTarget) FromString(string, *Type) error
 pkg vdl, method (*BytesTarget) FromTypeObject(*Type) error
 pkg vdl, method (*BytesTarget) FromUint(uint64, *Type) error
+pkg vdl, method (*BytesTarget) FromZero(*Type) error
 pkg vdl, method (*BytesTarget) StartFields(*Type) (FieldsTarget, error)
 pkg vdl, method (*BytesTarget) StartList(*Type, int) (ListTarget, error)
 pkg vdl, method (*BytesTarget) StartMap(*Type, int) (MapTarget, error)
@@ -137,10 +137,10 @@ pkg vdl, method (*Float32Target) FromComplex(complex128, *Type) error
 pkg vdl, method (*Float32Target) FromEnumLabel(string, *Type) error
 pkg vdl, method (*Float32Target) FromFloat(float64, *Type) error
 pkg vdl, method (*Float32Target) FromInt(int64, *Type) error
-pkg vdl, method (*Float32Target) FromNil(*Type) error
 pkg vdl, method (*Float32Target) FromString(string, *Type) error
 pkg vdl, method (*Float32Target) FromTypeObject(*Type) error
 pkg vdl, method (*Float32Target) FromUint(uint64, *Type) error
+pkg vdl, method (*Float32Target) FromZero(*Type) error
 pkg vdl, method (*Float32Target) StartFields(*Type) (FieldsTarget, error)
 pkg vdl, method (*Float32Target) StartList(*Type, int) (ListTarget, error)
 pkg vdl, method (*Float32Target) StartMap(*Type, int) (MapTarget, error)
@@ -155,10 +155,10 @@ pkg vdl, method (*Float64Target) FromComplex(complex128, *Type) error
 pkg vdl, method (*Float64Target) FromEnumLabel(string, *Type) error
 pkg vdl, method (*Float64Target) FromFloat(float64, *Type) error
 pkg vdl, method (*Float64Target) FromInt(int64, *Type) error
-pkg vdl, method (*Float64Target) FromNil(*Type) error
 pkg vdl, method (*Float64Target) FromString(string, *Type) error
 pkg vdl, method (*Float64Target) FromTypeObject(*Type) error
 pkg vdl, method (*Float64Target) FromUint(uint64, *Type) error
+pkg vdl, method (*Float64Target) FromZero(*Type) error
 pkg vdl, method (*Float64Target) StartFields(*Type) (FieldsTarget, error)
 pkg vdl, method (*Float64Target) StartList(*Type, int) (ListTarget, error)
 pkg vdl, method (*Float64Target) StartMap(*Type, int) (MapTarget, error)
@@ -173,10 +173,10 @@ pkg vdl, method (*Int16Target) FromComplex(complex128, *Type) error
 pkg vdl, method (*Int16Target) FromEnumLabel(string, *Type) error
 pkg vdl, method (*Int16Target) FromFloat(float64, *Type) error
 pkg vdl, method (*Int16Target) FromInt(int64, *Type) error
-pkg vdl, method (*Int16Target) FromNil(*Type) error
 pkg vdl, method (*Int16Target) FromString(string, *Type) error
 pkg vdl, method (*Int16Target) FromTypeObject(*Type) error
 pkg vdl, method (*Int16Target) FromUint(uint64, *Type) error
+pkg vdl, method (*Int16Target) FromZero(*Type) error
 pkg vdl, method (*Int16Target) StartFields(*Type) (FieldsTarget, error)
 pkg vdl, method (*Int16Target) StartList(*Type, int) (ListTarget, error)
 pkg vdl, method (*Int16Target) StartMap(*Type, int) (MapTarget, error)
@@ -191,10 +191,10 @@ pkg vdl, method (*Int32Target) FromComplex(complex128, *Type) error
 pkg vdl, method (*Int32Target) FromEnumLabel(string, *Type) error
 pkg vdl, method (*Int32Target) FromFloat(float64, *Type) error
 pkg vdl, method (*Int32Target) FromInt(int64, *Type) error
-pkg vdl, method (*Int32Target) FromNil(*Type) error
 pkg vdl, method (*Int32Target) FromString(string, *Type) error
 pkg vdl, method (*Int32Target) FromTypeObject(*Type) error
 pkg vdl, method (*Int32Target) FromUint(uint64, *Type) error
+pkg vdl, method (*Int32Target) FromZero(*Type) error
 pkg vdl, method (*Int32Target) StartFields(*Type) (FieldsTarget, error)
 pkg vdl, method (*Int32Target) StartList(*Type, int) (ListTarget, error)
 pkg vdl, method (*Int32Target) StartMap(*Type, int) (MapTarget, error)
@@ -209,10 +209,10 @@ pkg vdl, method (*Int64Target) FromComplex(complex128, *Type) error
 pkg vdl, method (*Int64Target) FromEnumLabel(string, *Type) error
 pkg vdl, method (*Int64Target) FromFloat(float64, *Type) error
 pkg vdl, method (*Int64Target) FromInt(int64, *Type) error
-pkg vdl, method (*Int64Target) FromNil(*Type) error
 pkg vdl, method (*Int64Target) FromString(string, *Type) error
 pkg vdl, method (*Int64Target) FromTypeObject(*Type) error
 pkg vdl, method (*Int64Target) FromUint(uint64, *Type) error
+pkg vdl, method (*Int64Target) FromZero(*Type) error
 pkg vdl, method (*Int64Target) StartFields(*Type) (FieldsTarget, error)
 pkg vdl, method (*Int64Target) StartList(*Type, int) (ListTarget, error)
 pkg vdl, method (*Int64Target) StartMap(*Type, int) (MapTarget, error)
@@ -227,10 +227,10 @@ pkg vdl, method (*Int8Target) FromComplex(complex128, *Type) error
 pkg vdl, method (*Int8Target) FromEnumLabel(string, *Type) error
 pkg vdl, method (*Int8Target) FromFloat(float64, *Type) error
 pkg vdl, method (*Int8Target) FromInt(int64, *Type) error
-pkg vdl, method (*Int8Target) FromNil(*Type) error
 pkg vdl, method (*Int8Target) FromString(string, *Type) error
 pkg vdl, method (*Int8Target) FromTypeObject(*Type) error
 pkg vdl, method (*Int8Target) FromUint(uint64, *Type) error
+pkg vdl, method (*Int8Target) FromZero(*Type) error
 pkg vdl, method (*Int8Target) StartFields(*Type) (FieldsTarget, error)
 pkg vdl, method (*Int8Target) StartList(*Type, int) (ListTarget, error)
 pkg vdl, method (*Int8Target) StartMap(*Type, int) (MapTarget, error)
@@ -253,10 +253,10 @@ pkg vdl, method (*StringSliceTarget) FromComplex(complex128, *Type) error
 pkg vdl, method (*StringSliceTarget) FromEnumLabel(string, *Type) error
 pkg vdl, method (*StringSliceTarget) FromFloat(float64, *Type) error
 pkg vdl, method (*StringSliceTarget) FromInt(int64, *Type) error
-pkg vdl, method (*StringSliceTarget) FromNil(*Type) error
 pkg vdl, method (*StringSliceTarget) FromString(string, *Type) error
 pkg vdl, method (*StringSliceTarget) FromTypeObject(*Type) error
 pkg vdl, method (*StringSliceTarget) FromUint(uint64, *Type) error
+pkg vdl, method (*StringSliceTarget) FromZero(*Type) error
 pkg vdl, method (*StringSliceTarget) StartElem(int) (Target, error)
 pkg vdl, method (*StringSliceTarget) StartFields(*Type) (FieldsTarget, error)
 pkg vdl, method (*StringSliceTarget) StartList(*Type, int) (ListTarget, error)
@@ -272,10 +272,10 @@ pkg vdl, method (*StringTarget) FromComplex(complex128, *Type) error
 pkg vdl, method (*StringTarget) FromEnumLabel(string, *Type) error
 pkg vdl, method (*StringTarget) FromFloat(float64, *Type) error
 pkg vdl, method (*StringTarget) FromInt(int64, *Type) error
-pkg vdl, method (*StringTarget) FromNil(*Type) error
 pkg vdl, method (*StringTarget) FromString(string, *Type) error
 pkg vdl, method (*StringTarget) FromTypeObject(*Type) error
 pkg vdl, method (*StringTarget) FromUint(uint64, *Type) error
+pkg vdl, method (*StringTarget) FromZero(*Type) error
 pkg vdl, method (*StringTarget) StartFields(*Type) (FieldsTarget, error)
 pkg vdl, method (*StringTarget) StartList(*Type, int) (ListTarget, error)
 pkg vdl, method (*StringTarget) StartMap(*Type, int) (MapTarget, error)
@@ -290,10 +290,10 @@ pkg vdl, method (*TargetBase) FromComplex(complex128, *Type) error
 pkg vdl, method (*TargetBase) FromEnumLabel(string, *Type) error
 pkg vdl, method (*TargetBase) FromFloat(float64, *Type) error
 pkg vdl, method (*TargetBase) FromInt(int64, *Type) error
-pkg vdl, method (*TargetBase) FromNil(*Type) error
 pkg vdl, method (*TargetBase) FromString(string, *Type) error
 pkg vdl, method (*TargetBase) FromTypeObject(*Type) error
 pkg vdl, method (*TargetBase) FromUint(uint64, *Type) error
+pkg vdl, method (*TargetBase) FromZero(*Type) error
 pkg vdl, method (*TargetBase) StartFields(*Type) (FieldsTarget, error)
 pkg vdl, method (*TargetBase) StartList(*Type, int) (ListTarget, error)
 pkg vdl, method (*TargetBase) StartMap(*Type, int) (MapTarget, error)
@@ -340,10 +340,10 @@ pkg vdl, method (*TypeObjectTarget) FromComplex(complex128, *Type) error
 pkg vdl, method (*TypeObjectTarget) FromEnumLabel(string, *Type) error
 pkg vdl, method (*TypeObjectTarget) FromFloat(float64, *Type) error
 pkg vdl, method (*TypeObjectTarget) FromInt(int64, *Type) error
-pkg vdl, method (*TypeObjectTarget) FromNil(*Type) error
 pkg vdl, method (*TypeObjectTarget) FromString(string, *Type) error
 pkg vdl, method (*TypeObjectTarget) FromTypeObject(*Type) error
 pkg vdl, method (*TypeObjectTarget) FromUint(uint64, *Type) error
+pkg vdl, method (*TypeObjectTarget) FromZero(*Type) error
 pkg vdl, method (*TypeObjectTarget) StartFields(*Type) (FieldsTarget, error)
 pkg vdl, method (*TypeObjectTarget) StartList(*Type, int) (ListTarget, error)
 pkg vdl, method (*TypeObjectTarget) StartMap(*Type, int) (MapTarget, error)
@@ -358,10 +358,10 @@ pkg vdl, method (*Uint16Target) FromComplex(complex128, *Type) error
 pkg vdl, method (*Uint16Target) FromEnumLabel(string, *Type) error
 pkg vdl, method (*Uint16Target) FromFloat(float64, *Type) error
 pkg vdl, method (*Uint16Target) FromInt(int64, *Type) error
-pkg vdl, method (*Uint16Target) FromNil(*Type) error
 pkg vdl, method (*Uint16Target) FromString(string, *Type) error
 pkg vdl, method (*Uint16Target) FromTypeObject(*Type) error
 pkg vdl, method (*Uint16Target) FromUint(uint64, *Type) error
+pkg vdl, method (*Uint16Target) FromZero(*Type) error
 pkg vdl, method (*Uint16Target) StartFields(*Type) (FieldsTarget, error)
 pkg vdl, method (*Uint16Target) StartList(*Type, int) (ListTarget, error)
 pkg vdl, method (*Uint16Target) StartMap(*Type, int) (MapTarget, error)
@@ -376,10 +376,10 @@ pkg vdl, method (*Uint32Target) FromComplex(complex128, *Type) error
 pkg vdl, method (*Uint32Target) FromEnumLabel(string, *Type) error
 pkg vdl, method (*Uint32Target) FromFloat(float64, *Type) error
 pkg vdl, method (*Uint32Target) FromInt(int64, *Type) error
-pkg vdl, method (*Uint32Target) FromNil(*Type) error
 pkg vdl, method (*Uint32Target) FromString(string, *Type) error
 pkg vdl, method (*Uint32Target) FromTypeObject(*Type) error
 pkg vdl, method (*Uint32Target) FromUint(uint64, *Type) error
+pkg vdl, method (*Uint32Target) FromZero(*Type) error
 pkg vdl, method (*Uint32Target) StartFields(*Type) (FieldsTarget, error)
 pkg vdl, method (*Uint32Target) StartList(*Type, int) (ListTarget, error)
 pkg vdl, method (*Uint32Target) StartMap(*Type, int) (MapTarget, error)
@@ -394,10 +394,10 @@ pkg vdl, method (*Uint64Target) FromComplex(complex128, *Type) error
 pkg vdl, method (*Uint64Target) FromEnumLabel(string, *Type) error
 pkg vdl, method (*Uint64Target) FromFloat(float64, *Type) error
 pkg vdl, method (*Uint64Target) FromInt(int64, *Type) error
-pkg vdl, method (*Uint64Target) FromNil(*Type) error
 pkg vdl, method (*Uint64Target) FromString(string, *Type) error
 pkg vdl, method (*Uint64Target) FromTypeObject(*Type) error
 pkg vdl, method (*Uint64Target) FromUint(uint64, *Type) error
+pkg vdl, method (*Uint64Target) FromZero(*Type) error
 pkg vdl, method (*Uint64Target) StartFields(*Type) (FieldsTarget, error)
 pkg vdl, method (*Uint64Target) StartList(*Type, int) (ListTarget, error)
 pkg vdl, method (*Uint64Target) StartMap(*Type, int) (MapTarget, error)
@@ -455,10 +455,10 @@ pkg vdl, method (*WireErrorTarget) FromComplex(complex128, *Type) error
 pkg vdl, method (*WireErrorTarget) FromEnumLabel(string, *Type) error
 pkg vdl, method (*WireErrorTarget) FromFloat(float64, *Type) error
 pkg vdl, method (*WireErrorTarget) FromInt(int64, *Type) error
-pkg vdl, method (*WireErrorTarget) FromNil(*Type) error
 pkg vdl, method (*WireErrorTarget) FromString(string, *Type) error
 pkg vdl, method (*WireErrorTarget) FromTypeObject(*Type) error
 pkg vdl, method (*WireErrorTarget) FromUint(uint64, *Type) error
+pkg vdl, method (*WireErrorTarget) FromZero(*Type) error
 pkg vdl, method (*WireErrorTarget) StartField(string) (Target, Target, error)
 pkg vdl, method (*WireErrorTarget) StartFields(*Type) (FieldsTarget, error)
 pkg vdl, method (*WireErrorTarget) StartList(*Type, int) (ListTarget, error)
@@ -477,10 +477,10 @@ pkg vdl, method (*WireRetryCodeTarget) FromComplex(complex128, *Type) error
 pkg vdl, method (*WireRetryCodeTarget) FromEnumLabel(string, *Type) error
 pkg vdl, method (*WireRetryCodeTarget) FromFloat(float64, *Type) error
 pkg vdl, method (*WireRetryCodeTarget) FromInt(int64, *Type) error
-pkg vdl, method (*WireRetryCodeTarget) FromNil(*Type) error
 pkg vdl, method (*WireRetryCodeTarget) FromString(string, *Type) error
 pkg vdl, method (*WireRetryCodeTarget) FromTypeObject(*Type) error
 pkg vdl, method (*WireRetryCodeTarget) FromUint(uint64, *Type) error
+pkg vdl, method (*WireRetryCodeTarget) FromZero(*Type) error
 pkg vdl, method (*WireRetryCodeTarget) StartFields(*Type) (FieldsTarget, error)
 pkg vdl, method (*WireRetryCodeTarget) StartList(*Type, int) (ListTarget, error)
 pkg vdl, method (*WireRetryCodeTarget) StartMap(*Type, int) (MapTarget, error)
@@ -575,7 +575,7 @@ pkg vdl, type StringSliceTarget struct, embedded TargetBase
 pkg vdl, type StringTarget struct
 pkg vdl, type StringTarget struct, Value *string
 pkg vdl, type StringTarget struct, embedded TargetBase
-pkg vdl, type Target interface { FinishFields, FinishList, FinishMap, FinishSet, FromBool, FromBytes, FromEnumLabel, FromFloat, FromInt, FromNil, FromString, FromTypeObject, FromUint, StartFields, StartList, StartMap, StartSet }
+pkg vdl, type Target interface { FinishFields, FinishList, FinishMap, FinishSet, FromBool, FromBytes, FromEnumLabel, FromFloat, FromInt, FromString, FromTypeObject, FromUint, FromZero, StartFields, StartList, StartMap, StartSet }
 pkg vdl, type Target interface, FinishFields(FieldsTarget) error
 pkg vdl, type Target interface, FinishList(ListTarget) error
 pkg vdl, type Target interface, FinishMap(MapTarget) error
@@ -585,10 +585,10 @@ pkg vdl, type Target interface, FromBytes([]byte, *Type) error
 pkg vdl, type Target interface, FromEnumLabel(string, *Type) error
 pkg vdl, type Target interface, FromFloat(float64, *Type) error
 pkg vdl, type Target interface, FromInt(int64, *Type) error
-pkg vdl, type Target interface, FromNil(*Type) error
 pkg vdl, type Target interface, FromString(string, *Type) error
 pkg vdl, type Target interface, FromTypeObject(*Type) error
 pkg vdl, type Target interface, FromUint(uint64, *Type) error
+pkg vdl, type Target interface, FromZero(*Type) error
 pkg vdl, type Target interface, StartFields(*Type) (FieldsTarget, error)
 pkg vdl, type Target interface, StartList(*Type, int) (ListTarget, error)
 pkg vdl, type Target interface, StartMap(*Type, int) (MapTarget, error)

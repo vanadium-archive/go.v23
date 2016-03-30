@@ -12,70 +12,50 @@ pkg repository, method (*MediaInfo) FillVDLTarget(vdl.Target, *vdl.Type) error
 pkg repository, method (*MediaInfo) MakeVDLTarget() vdl.Target
 pkg repository, method (*MediaInfoTarget) FinishField(vdl.Target, vdl.Target) error
 pkg repository, method (*MediaInfoTarget) FinishFields(vdl.FieldsTarget) error
+pkg repository, method (*MediaInfoTarget) FromZero(*vdl.Type) error
 pkg repository, method (*MediaInfoTarget) StartField(string) (vdl.Target, vdl.Target, error)
 pkg repository, method (*MediaInfoTarget) StartFields(*vdl.Type) (vdl.FieldsTarget, error)
-pkg repository, type ApplicationClientMethods interface { GetPermissions, Match, SetPermissions, TidyNow }
-pkg repository, type ApplicationClientMethods interface, GetPermissions(*context.T, ...rpc.CallOpt) (access.Permissions, string, error)
 pkg repository, type ApplicationClientMethods interface, Match(*context.T, []string, ...rpc.CallOpt) (application.Envelope, error)
-pkg repository, type ApplicationClientMethods interface, SetPermissions(*context.T, access.Permissions, string, ...rpc.CallOpt) error
-pkg repository, type ApplicationClientMethods interface, TidyNow(*context.T, ...rpc.CallOpt) error
-pkg repository, type ApplicationClientStub interface { GetPermissions, Match, SetPermissions, TidyNow }
-pkg repository, type ApplicationClientStub interface, GetPermissions(*context.T, ...rpc.CallOpt) (access.Permissions, string, error)
+pkg repository, type ApplicationClientMethods interface, unexported methods
 pkg repository, type ApplicationClientStub interface, Match(*context.T, []string, ...rpc.CallOpt) (application.Envelope, error)
-pkg repository, type ApplicationClientStub interface, SetPermissions(*context.T, access.Permissions, string, ...rpc.CallOpt) error
-pkg repository, type ApplicationClientStub interface, TidyNow(*context.T, ...rpc.CallOpt) error
-pkg repository, type ApplicationServerMethods interface { GetPermissions, Match, SetPermissions, TidyNow }
-pkg repository, type ApplicationServerMethods interface, GetPermissions(*context.T, rpc.ServerCall) (access.Permissions, string, error)
+pkg repository, type ApplicationClientStub interface, unexported methods
 pkg repository, type ApplicationServerMethods interface, Match(*context.T, rpc.ServerCall, []string) (application.Envelope, error)
-pkg repository, type ApplicationServerMethods interface, SetPermissions(*context.T, rpc.ServerCall, access.Permissions, string) error
-pkg repository, type ApplicationServerMethods interface, TidyNow(*context.T, rpc.ServerCall) error
+pkg repository, type ApplicationServerMethods interface, unexported methods
 pkg repository, type ApplicationServerStub interface, Describe__() []rpc.InterfaceDesc
 pkg repository, type ApplicationServerStub interface, unexported methods
 pkg repository, type ApplicationServerStubMethods ApplicationServerMethods
-pkg repository, type BinaryClientMethods interface { Create, Delete, Download, DownloadUrl, GetPermissions, SetPermissions, Stat, Upload }
 pkg repository, type BinaryClientMethods interface, Create(*context.T, int32, MediaInfo, ...rpc.CallOpt) error
 pkg repository, type BinaryClientMethods interface, Delete(*context.T, ...rpc.CallOpt) error
 pkg repository, type BinaryClientMethods interface, Download(*context.T, int32, ...rpc.CallOpt) (BinaryDownloadClientCall, error)
 pkg repository, type BinaryClientMethods interface, DownloadUrl(*context.T, ...rpc.CallOpt) (string, int64, error)
-pkg repository, type BinaryClientMethods interface, GetPermissions(*context.T, ...rpc.CallOpt) (access.Permissions, string, error)
-pkg repository, type BinaryClientMethods interface, SetPermissions(*context.T, access.Permissions, string, ...rpc.CallOpt) error
 pkg repository, type BinaryClientMethods interface, Stat(*context.T, ...rpc.CallOpt) ([]binary.PartInfo, MediaInfo, error)
 pkg repository, type BinaryClientMethods interface, Upload(*context.T, int32, ...rpc.CallOpt) (BinaryUploadClientCall, error)
-pkg repository, type BinaryClientStub interface { Create, Delete, Download, DownloadUrl, GetPermissions, SetPermissions, Stat, Upload }
+pkg repository, type BinaryClientMethods interface, unexported methods
 pkg repository, type BinaryClientStub interface, Create(*context.T, int32, MediaInfo, ...rpc.CallOpt) error
 pkg repository, type BinaryClientStub interface, Delete(*context.T, ...rpc.CallOpt) error
 pkg repository, type BinaryClientStub interface, Download(*context.T, int32, ...rpc.CallOpt) (BinaryDownloadClientCall, error)
 pkg repository, type BinaryClientStub interface, DownloadUrl(*context.T, ...rpc.CallOpt) (string, int64, error)
-pkg repository, type BinaryClientStub interface, GetPermissions(*context.T, ...rpc.CallOpt) (access.Permissions, string, error)
-pkg repository, type BinaryClientStub interface, SetPermissions(*context.T, access.Permissions, string, ...rpc.CallOpt) error
 pkg repository, type BinaryClientStub interface, Stat(*context.T, ...rpc.CallOpt) ([]binary.PartInfo, MediaInfo, error)
 pkg repository, type BinaryClientStub interface, Upload(*context.T, int32, ...rpc.CallOpt) (BinaryUploadClientCall, error)
+pkg repository, type BinaryClientStub interface, unexported methods
 pkg repository, type BinaryDownloadClientCall interface { Finish, RecvStream }
 pkg repository, type BinaryDownloadClientCall interface, Finish() error
 pkg repository, type BinaryDownloadClientCall interface, RecvStream() interface {  Advance() bool;; Value() []byte;; Err() error;}
 pkg repository, type BinaryDownloadClientStream interface { RecvStream }
 pkg repository, type BinaryDownloadClientStream interface, RecvStream() interface {  Advance() bool;; Value() []byte;; Err() error;}
-pkg repository, type BinaryDownloadServerCall interface { GrantedBlessings, LocalEndpoint, RemoteEndpoint, Security, SendStream, Server, Suffix }
-pkg repository, type BinaryDownloadServerCall interface, GrantedBlessings() security.Blessings
-pkg repository, type BinaryDownloadServerCall interface, LocalEndpoint() naming.Endpoint
-pkg repository, type BinaryDownloadServerCall interface, RemoteEndpoint() naming.Endpoint
-pkg repository, type BinaryDownloadServerCall interface, Security() security.Call
 pkg repository, type BinaryDownloadServerCall interface, SendStream() interface {  Send(item []byte) error;}
-pkg repository, type BinaryDownloadServerCall interface, Server() Server
-pkg repository, type BinaryDownloadServerCall interface, Suffix() string
+pkg repository, type BinaryDownloadServerCall interface, unexported methods
 pkg repository, type BinaryDownloadServerCallStub struct
 pkg repository, type BinaryDownloadServerCallStub struct, embedded rpc.StreamServerCall
 pkg repository, type BinaryDownloadServerStream interface { SendStream }
 pkg repository, type BinaryDownloadServerStream interface, SendStream() interface {  Send(item []byte) error;}
-pkg repository, type BinaryServerMethods interface { Create, Delete, Download, DownloadUrl, GetPermissions, SetPermissions, Stat, Upload }
 pkg repository, type BinaryServerMethods interface, Create(*context.T, rpc.ServerCall, int32, MediaInfo) error
 pkg repository, type BinaryServerMethods interface, Delete(*context.T, rpc.ServerCall) error
 pkg repository, type BinaryServerMethods interface, Download(*context.T, BinaryDownloadServerCall, int32) error
 pkg repository, type BinaryServerMethods interface, DownloadUrl(*context.T, rpc.ServerCall) (string, int64, error)
-pkg repository, type BinaryServerMethods interface, GetPermissions(*context.T, rpc.ServerCall) (access.Permissions, string, error)
-pkg repository, type BinaryServerMethods interface, SetPermissions(*context.T, rpc.ServerCall, access.Permissions, string) error
 pkg repository, type BinaryServerMethods interface, Stat(*context.T, rpc.ServerCall) ([]binary.PartInfo, MediaInfo, error)
 pkg repository, type BinaryServerMethods interface, Upload(*context.T, BinaryUploadServerCall, int32) error
+pkg repository, type BinaryServerMethods interface, unexported methods
 pkg repository, type BinaryServerStub interface, Create(*context.T, rpc.ServerCall, int32, MediaInfo) error
 pkg repository, type BinaryServerStub interface, Delete(*context.T, rpc.ServerCall) error
 pkg repository, type BinaryServerStub interface, Describe__() []rpc.InterfaceDesc
@@ -96,14 +76,8 @@ pkg repository, type BinaryUploadClientCall interface, Finish() error
 pkg repository, type BinaryUploadClientCall interface, SendStream() interface {  Send(item []byte) error;; Close() error;}
 pkg repository, type BinaryUploadClientStream interface { SendStream }
 pkg repository, type BinaryUploadClientStream interface, SendStream() interface {  Send(item []byte) error;; Close() error;}
-pkg repository, type BinaryUploadServerCall interface { GrantedBlessings, LocalEndpoint, RecvStream, RemoteEndpoint, Security, Server, Suffix }
-pkg repository, type BinaryUploadServerCall interface, GrantedBlessings() security.Blessings
-pkg repository, type BinaryUploadServerCall interface, LocalEndpoint() naming.Endpoint
 pkg repository, type BinaryUploadServerCall interface, RecvStream() interface {  Advance() bool;; Value() []byte;; Err() error;}
-pkg repository, type BinaryUploadServerCall interface, RemoteEndpoint() naming.Endpoint
-pkg repository, type BinaryUploadServerCall interface, Security() security.Call
-pkg repository, type BinaryUploadServerCall interface, Server() Server
-pkg repository, type BinaryUploadServerCall interface, Suffix() string
+pkg repository, type BinaryUploadServerCall interface, unexported methods
 pkg repository, type BinaryUploadServerCallStub struct
 pkg repository, type BinaryUploadServerCallStub struct, embedded rpc.StreamServerCall
 pkg repository, type BinaryUploadServerStream interface { RecvStream }
@@ -118,9 +92,9 @@ pkg repository, type MediaInfoTarget struct, embedded vdl.TargetBase
 pkg repository, type ProfileClientMethods interface { Description, Label }
 pkg repository, type ProfileClientMethods interface, Description(*context.T, ...rpc.CallOpt) (string, error)
 pkg repository, type ProfileClientMethods interface, Label(*context.T, ...rpc.CallOpt) (string, error)
-pkg repository, type ProfileClientStub interface { Description, Label }
 pkg repository, type ProfileClientStub interface, Description(*context.T, ...rpc.CallOpt) (string, error)
 pkg repository, type ProfileClientStub interface, Label(*context.T, ...rpc.CallOpt) (string, error)
+pkg repository, type ProfileClientStub interface, unexported methods
 pkg repository, type ProfileServerMethods interface { Description, Label }
 pkg repository, type ProfileServerMethods interface, Description(*context.T, rpc.ServerCall) (string, error)
 pkg repository, type ProfileServerMethods interface, Label(*context.T, rpc.ServerCall) (string, error)

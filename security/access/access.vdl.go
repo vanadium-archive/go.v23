@@ -151,63 +151,84 @@ func (m *AccessList) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 	if err != nil {
 		return err
 	}
-
 	keyTarget2, fieldTarget3, err := fieldsTarget1.StartField("In")
 	if err != vdl.ErrFieldNoExist && err != nil {
 		return err
 	}
 	if err != vdl.ErrFieldNoExist {
 
-		listTarget4, err := fieldTarget3.StartList(tt.NonOptional().Field(0).Type, len(m.In))
-		if err != nil {
-			return err
+		var var4 bool
+		if len(m.In) == 0 {
+			var4 = true
 		}
-		for i, elem6 := range m.In {
-			elemTarget5, err := listTarget4.StartElem(i)
+		if var4 {
+			if err := fieldTarget3.FromZero(tt.NonOptional().Field(0).Type); err != nil {
+				return err
+			}
+		} else {
+
+			listTarget5, err := fieldTarget3.StartList(tt.NonOptional().Field(0).Type, len(m.In))
 			if err != nil {
 				return err
 			}
+			for i, elem7 := range m.In {
+				elemTarget6, err := listTarget5.StartElem(i)
+				if err != nil {
+					return err
+				}
 
-			if err := elem6.FillVDLTarget(elemTarget5, tt.NonOptional().Field(0).Type.Elem()); err != nil {
+				if err := elem7.FillVDLTarget(elemTarget6, tt.NonOptional().Field(0).Type.Elem()); err != nil {
+					return err
+				}
+				if err := listTarget5.FinishElem(elemTarget6); err != nil {
+					return err
+				}
+			}
+			if err := fieldTarget3.FinishList(listTarget5); err != nil {
 				return err
 			}
-			if err := listTarget4.FinishElem(elemTarget5); err != nil {
-				return err
-			}
-		}
-		if err := fieldTarget3.FinishList(listTarget4); err != nil {
-			return err
 		}
 		if err := fieldsTarget1.FinishField(keyTarget2, fieldTarget3); err != nil {
 			return err
 		}
 	}
-	keyTarget7, fieldTarget8, err := fieldsTarget1.StartField("NotIn")
+	keyTarget8, fieldTarget9, err := fieldsTarget1.StartField("NotIn")
 	if err != vdl.ErrFieldNoExist && err != nil {
 		return err
 	}
 	if err != vdl.ErrFieldNoExist {
 
-		listTarget9, err := fieldTarget8.StartList(tt.NonOptional().Field(1).Type, len(m.NotIn))
-		if err != nil {
-			return err
+		var var10 bool
+		if len(m.NotIn) == 0 {
+			var10 = true
 		}
-		for i, elem11 := range m.NotIn {
-			elemTarget10, err := listTarget9.StartElem(i)
+		if var10 {
+			if err := fieldTarget9.FromZero(tt.NonOptional().Field(1).Type); err != nil {
+				return err
+			}
+		} else {
+
+			listTarget11, err := fieldTarget9.StartList(tt.NonOptional().Field(1).Type, len(m.NotIn))
 			if err != nil {
 				return err
 			}
-			if err := elemTarget10.FromString(string(elem11), tt.NonOptional().Field(1).Type.Elem()); err != nil {
-				return err
+			for i, elem13 := range m.NotIn {
+				elemTarget12, err := listTarget11.StartElem(i)
+				if err != nil {
+					return err
+				}
+				if err := elemTarget12.FromString(string(elem13), tt.NonOptional().Field(1).Type.Elem()); err != nil {
+					return err
+				}
+				if err := listTarget11.FinishElem(elemTarget12); err != nil {
+					return err
+				}
 			}
-			if err := listTarget9.FinishElem(elemTarget10); err != nil {
+			if err := fieldTarget9.FinishList(listTarget11); err != nil {
 				return err
 			}
 		}
-		if err := fieldTarget8.FinishList(listTarget9); err != nil {
-			return err
-		}
-		if err := fieldsTarget1.FinishField(keyTarget7, fieldTarget8); err != nil {
+		if err := fieldsTarget1.FinishField(keyTarget8, fieldTarget9); err != nil {
 			return err
 		}
 	}
@@ -257,6 +278,10 @@ func (t *AccessListTarget) FinishFields(_ vdl.FieldsTarget) error {
 
 	return nil
 }
+func (t *AccessListTarget) FromZero(tt *vdl.Type) error {
+	*t.Value = AccessList{}
+	return nil
+}
 
 // []security.BlessingPattern
 type __VDLTarget1_list struct {
@@ -288,6 +313,10 @@ func (t *__VDLTarget1_list) FinishElem(elem vdl.Target) error {
 }
 func (t *__VDLTarget1_list) FinishList(elem vdl.ListTarget) error {
 
+	return nil
+}
+func (t *__VDLTarget1_list) FromZero(tt *vdl.Type) error {
+	*t.Value = []security.BlessingPattern(nil)
 	return nil
 }
 
@@ -381,6 +410,10 @@ func (t *PermissionsTarget) FinishMap(elem vdl.MapTarget) error {
 
 	return nil
 }
+func (t *PermissionsTarget) FromZero(tt *vdl.Type) error {
+	*t.Value = Permissions(nil)
+	return nil
+}
 
 // Tag is used to associate methods with an AccessList in a Permissions.
 //
@@ -419,13 +452,10 @@ func (t *TagTarget) FromString(src string, tt *vdl.Type) error {
 
 	return nil
 }
-
-// Create zero values for each type.
-var (
-	__VDLZeroAccessList  = AccessList{}
-	__VDLZeroPermissions = Permissions(nil)
-	__VDLZeroTag         = Tag("")
-)
+func (t *TagTarget) FromZero(tt *vdl.Type) error {
+	*t.Value = Tag("")
+	return nil
+}
 
 //////////////////////////////////////////////////
 // Const definitions
@@ -521,6 +551,7 @@ func __VDLInit() struct{} {
 	if __VDLInitCalled {
 		return struct{}{}
 	}
+	__VDLInitCalled = true
 
 	// Register types.
 	vdl.Register((*AccessList)(nil))

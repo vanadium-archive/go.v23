@@ -49,28 +49,43 @@ func (m *Duration) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 	if err != nil {
 		return err
 	}
-
 	keyTarget2, fieldTarget3, err := fieldsTarget1.StartField("Seconds")
 	if err != vdl.ErrFieldNoExist && err != nil {
 		return err
 	}
 	if err != vdl.ErrFieldNoExist {
-		if err := fieldTarget3.FromInt(int64(m.Seconds), tt.NonOptional().Field(0).Type); err != nil {
-			return err
+
+		var4 := (m.Seconds == int64(0))
+		if var4 {
+			if err := fieldTarget3.FromZero(tt.NonOptional().Field(0).Type); err != nil {
+				return err
+			}
+		} else {
+			if err := fieldTarget3.FromInt(int64(m.Seconds), tt.NonOptional().Field(0).Type); err != nil {
+				return err
+			}
 		}
 		if err := fieldsTarget1.FinishField(keyTarget2, fieldTarget3); err != nil {
 			return err
 		}
 	}
-	keyTarget4, fieldTarget5, err := fieldsTarget1.StartField("Nanos")
+	keyTarget5, fieldTarget6, err := fieldsTarget1.StartField("Nanos")
 	if err != vdl.ErrFieldNoExist && err != nil {
 		return err
 	}
 	if err != vdl.ErrFieldNoExist {
-		if err := fieldTarget5.FromInt(int64(m.Nanos), tt.NonOptional().Field(1).Type); err != nil {
-			return err
+
+		var7 := (m.Nanos == int32(0))
+		if var7 {
+			if err := fieldTarget6.FromZero(tt.NonOptional().Field(1).Type); err != nil {
+				return err
+			}
+		} else {
+			if err := fieldTarget6.FromInt(int64(m.Nanos), tt.NonOptional().Field(1).Type); err != nil {
+				return err
+			}
 		}
-		if err := fieldsTarget1.FinishField(keyTarget4, fieldTarget5); err != nil {
+		if err := fieldsTarget1.FinishField(keyTarget5, fieldTarget6); err != nil {
 			return err
 		}
 	}
@@ -124,6 +139,16 @@ func (t *DurationTarget) FinishFields(_ vdl.FieldsTarget) error {
 	}
 	return nil
 }
+func (t *DurationTarget) FromZero(tt *vdl.Type) error {
+	*t.Value = func() time.Duration {
+		var native time.Duration
+		if err := vdl.Convert(&native, Duration{}); err != nil {
+			panic(err)
+		}
+		return native
+	}()
+	return nil
+}
 
 // Time represents an absolute point in time with up to nanosecond precision.
 //
@@ -155,28 +180,43 @@ func (m *Time) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 	if err != nil {
 		return err
 	}
-
 	keyTarget2, fieldTarget3, err := fieldsTarget1.StartField("Seconds")
 	if err != vdl.ErrFieldNoExist && err != nil {
 		return err
 	}
 	if err != vdl.ErrFieldNoExist {
-		if err := fieldTarget3.FromInt(int64(m.Seconds), tt.NonOptional().Field(0).Type); err != nil {
-			return err
+
+		var4 := (m.Seconds == int64(0))
+		if var4 {
+			if err := fieldTarget3.FromZero(tt.NonOptional().Field(0).Type); err != nil {
+				return err
+			}
+		} else {
+			if err := fieldTarget3.FromInt(int64(m.Seconds), tt.NonOptional().Field(0).Type); err != nil {
+				return err
+			}
 		}
 		if err := fieldsTarget1.FinishField(keyTarget2, fieldTarget3); err != nil {
 			return err
 		}
 	}
-	keyTarget4, fieldTarget5, err := fieldsTarget1.StartField("Nanos")
+	keyTarget5, fieldTarget6, err := fieldsTarget1.StartField("Nanos")
 	if err != vdl.ErrFieldNoExist && err != nil {
 		return err
 	}
 	if err != vdl.ErrFieldNoExist {
-		if err := fieldTarget5.FromInt(int64(m.Nanos), tt.NonOptional().Field(1).Type); err != nil {
-			return err
+
+		var7 := (m.Nanos == int32(0))
+		if var7 {
+			if err := fieldTarget6.FromZero(tt.NonOptional().Field(1).Type); err != nil {
+				return err
+			}
+		} else {
+			if err := fieldTarget6.FromInt(int64(m.Nanos), tt.NonOptional().Field(1).Type); err != nil {
+				return err
+			}
 		}
-		if err := fieldsTarget1.FinishField(keyTarget4, fieldTarget5); err != nil {
+		if err := fieldsTarget1.FinishField(keyTarget5, fieldTarget6); err != nil {
 			return err
 		}
 	}
@@ -230,6 +270,16 @@ func (t *TimeTarget) FinishFields(_ vdl.FieldsTarget) error {
 	}
 	return nil
 }
+func (t *TimeTarget) FromZero(tt *vdl.Type) error {
+	*t.Value = func() time.Time {
+		var native time.Time
+		if err := vdl.Convert(&native, Time{}); err != nil {
+			panic(err)
+		}
+		return native
+	}()
+	return nil
+}
 
 // WireDeadline represents the deadline for an operation, where the operation is
 // expected to finish before the deadline.  The intended usage is for a client
@@ -271,7 +321,6 @@ func (m *WireDeadline) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 	if err != nil {
 		return err
 	}
-
 	var wireValue2 Duration
 	if err := DurationFromNative(&wireValue2, m.FromNow); err != nil {
 		return err
@@ -283,22 +332,38 @@ func (m *WireDeadline) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 	}
 	if err != vdl.ErrFieldNoExist {
 
-		if err := wireValue2.FillVDLTarget(fieldTarget4, tt.NonOptional().Field(0).Type); err != nil {
-			return err
+		var5 := (wireValue2 == Duration{})
+		if var5 {
+			if err := fieldTarget4.FromZero(tt.NonOptional().Field(0).Type); err != nil {
+				return err
+			}
+		} else {
+
+			if err := wireValue2.FillVDLTarget(fieldTarget4, tt.NonOptional().Field(0).Type); err != nil {
+				return err
+			}
 		}
 		if err := fieldsTarget1.FinishField(keyTarget3, fieldTarget4); err != nil {
 			return err
 		}
 	}
-	keyTarget5, fieldTarget6, err := fieldsTarget1.StartField("NoDeadline")
+	keyTarget6, fieldTarget7, err := fieldsTarget1.StartField("NoDeadline")
 	if err != vdl.ErrFieldNoExist && err != nil {
 		return err
 	}
 	if err != vdl.ErrFieldNoExist {
-		if err := fieldTarget6.FromBool(bool(m.NoDeadline), tt.NonOptional().Field(1).Type); err != nil {
-			return err
+
+		var8 := (m.NoDeadline == false)
+		if var8 {
+			if err := fieldTarget7.FromZero(tt.NonOptional().Field(1).Type); err != nil {
+				return err
+			}
+		} else {
+			if err := fieldTarget7.FromBool(bool(m.NoDeadline), tt.NonOptional().Field(1).Type); err != nil {
+				return err
+			}
 		}
-		if err := fieldsTarget1.FinishField(keyTarget5, fieldTarget6); err != nil {
+		if err := fieldsTarget1.FinishField(keyTarget6, fieldTarget7); err != nil {
 			return err
 		}
 	}
@@ -352,31 +417,16 @@ func (t *WireDeadlineTarget) FinishFields(_ vdl.FieldsTarget) error {
 	}
 	return nil
 }
-
-// Create zero values for each type.
-var (
-	__VDLZeroDuration = func() time.Duration {
-		var native time.Duration
-		if err := vdl.Convert(&native, Duration{}); err != nil {
-			panic(err)
-		}
-		return native
-	}()
-	__VDLZeroTime = func() time.Time {
-		var native time.Time
-		if err := vdl.Convert(&native, Time{}); err != nil {
-			panic(err)
-		}
-		return native
-	}()
-	__VDLZeroWireDeadline = func() Deadline {
+func (t *WireDeadlineTarget) FromZero(tt *vdl.Type) error {
+	*t.Value = func() Deadline {
 		var native Deadline
 		if err := vdl.Convert(&native, WireDeadline{}); err != nil {
 			panic(err)
 		}
 		return native
 	}()
-)
+	return nil
+}
 
 // Type-check native conversion functions.
 var (
@@ -407,6 +457,7 @@ func __VDLInit() struct{} {
 	if __VDLInitCalled {
 		return struct{}{}
 	}
+	__VDLInitCalled = true
 
 	// Register native type conversions first, so that vdl.TypeOf works.
 	vdl.RegisterNative(DurationToNative, DurationFromNative)

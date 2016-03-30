@@ -256,6 +256,9 @@ func toGoValue(value *vdl.Value) (interface{}, error) {
 	if value == nil {
 		return nil, nil
 	}
+	if value.Kind() == vdl.Any {
+		return nil, nil
+	}
 	rt := vdl.TypeToReflect(value.Type())
 	if rt == nil {
 		return reflect.Value{}, fmt.Errorf("TypeToReflect(%v) failed", value.Type())

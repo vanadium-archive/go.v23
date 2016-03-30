@@ -18,7 +18,7 @@ var (
 	errFromString          = errors.New("method FromString invalid for this target type")
 	errFromEnumLabel       = errors.New("method FromEnumLabel invalid for this target type")
 	errFromTypeObject      = errors.New("method FromTypeObject invalid for this target type")
-	errFromNil             = errors.New("method FromNil invalid for this target type")
+	errFromZero            = errors.New("method FromZero invalid for this target type")
 	errStartList           = errors.New("method StartList invalid for this target type")
 	errFinishList          = errors.New("method FinishList invalid for this target type")
 	errStartSet            = errors.New("method StartSet invalid for this target type")
@@ -49,7 +49,7 @@ func (*TargetBase) FromBytes(_ []byte, _ *Type) error            { return errFro
 func (*TargetBase) FromString(_ string, _ *Type) error           { return errFromString }
 func (*TargetBase) FromEnumLabel(_ string, _ *Type) error        { return errFromEnumLabel }
 func (*TargetBase) FromTypeObject(_ *Type) error                 { return errFromTypeObject }
-func (*TargetBase) FromNil(_ *Type) error                        { return errFromNil }
+func (*TargetBase) FromZero(_ *Type) error                       { return errFromZero }
 func (*TargetBase) StartList(_ *Type, _ int) (ListTarget, error) { return nil, errStartList }
 func (*TargetBase) FinishList(_ ListTarget) error                { return errFinishList }
 func (*TargetBase) StartSet(_ *Type, _ int) (SetTarget, error)   { return nil, errStartSet }

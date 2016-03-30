@@ -6,14 +6,15 @@ pkg appcycle, method (*Task) FillVDLTarget(vdl.Target, *vdl.Type) error
 pkg appcycle, method (*Task) MakeVDLTarget() vdl.Target
 pkg appcycle, method (*TaskTarget) FinishField(vdl.Target, vdl.Target) error
 pkg appcycle, method (*TaskTarget) FinishFields(vdl.FieldsTarget) error
+pkg appcycle, method (*TaskTarget) FromZero(*vdl.Type) error
 pkg appcycle, method (*TaskTarget) StartField(string) (vdl.Target, vdl.Target, error)
 pkg appcycle, method (*TaskTarget) StartFields(*vdl.Type) (vdl.FieldsTarget, error)
 pkg appcycle, type AppCycleClientMethods interface { ForceStop, Stop }
 pkg appcycle, type AppCycleClientMethods interface, ForceStop(*context.T, ...rpc.CallOpt) error
 pkg appcycle, type AppCycleClientMethods interface, Stop(*context.T, ...rpc.CallOpt) (AppCycleStopClientCall, error)
-pkg appcycle, type AppCycleClientStub interface { ForceStop, Stop }
 pkg appcycle, type AppCycleClientStub interface, ForceStop(*context.T, ...rpc.CallOpt) error
 pkg appcycle, type AppCycleClientStub interface, Stop(*context.T, ...rpc.CallOpt) (AppCycleStopClientCall, error)
+pkg appcycle, type AppCycleClientStub interface, unexported methods
 pkg appcycle, type AppCycleServerMethods interface { ForceStop, Stop }
 pkg appcycle, type AppCycleServerMethods interface, ForceStop(*context.T, rpc.ServerCall) error
 pkg appcycle, type AppCycleServerMethods interface, Stop(*context.T, AppCycleStopServerCall) error
@@ -29,14 +30,8 @@ pkg appcycle, type AppCycleStopClientCall interface, Finish() error
 pkg appcycle, type AppCycleStopClientCall interface, RecvStream() interface {  Advance() bool;; Value() Task;; Err() error;}
 pkg appcycle, type AppCycleStopClientStream interface { RecvStream }
 pkg appcycle, type AppCycleStopClientStream interface, RecvStream() interface {  Advance() bool;; Value() Task;; Err() error;}
-pkg appcycle, type AppCycleStopServerCall interface { GrantedBlessings, LocalEndpoint, RemoteEndpoint, Security, SendStream, Server, Suffix }
-pkg appcycle, type AppCycleStopServerCall interface, GrantedBlessings() security.Blessings
-pkg appcycle, type AppCycleStopServerCall interface, LocalEndpoint() naming.Endpoint
-pkg appcycle, type AppCycleStopServerCall interface, RemoteEndpoint() naming.Endpoint
-pkg appcycle, type AppCycleStopServerCall interface, Security() security.Call
 pkg appcycle, type AppCycleStopServerCall interface, SendStream() interface {  Send(item Task) error;}
-pkg appcycle, type AppCycleStopServerCall interface, Server() Server
-pkg appcycle, type AppCycleStopServerCall interface, Suffix() string
+pkg appcycle, type AppCycleStopServerCall interface, unexported methods
 pkg appcycle, type AppCycleStopServerCallStub struct
 pkg appcycle, type AppCycleStopServerCallStub struct, embedded rpc.StreamServerCall
 pkg appcycle, type AppCycleStopServerStream interface { SendStream }

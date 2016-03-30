@@ -62,18 +62,21 @@ pkg vom, method (*ControlKind) FillVDLTarget(vdl.Target, *vdl.Type) error
 pkg vom, method (*ControlKind) MakeVDLTarget() vdl.Target
 pkg vom, method (*ControlKind) Set(string) error
 pkg vom, method (*ControlKindTarget) FromEnumLabel(string, *vdl.Type) error
+pkg vom, method (*ControlKindTarget) FromZero(*vdl.Type) error
 pkg vom, method (*Decoder) Decode(interface{}) error
 pkg vom, method (*Decoder) Ignore() error
 pkg vom, method (*DumpAtom) FillVDLTarget(vdl.Target, *vdl.Type) error
 pkg vom, method (*DumpAtom) MakeVDLTarget() vdl.Target
 pkg vom, method (*DumpAtomTarget) FinishField(vdl.Target, vdl.Target) error
 pkg vom, method (*DumpAtomTarget) FinishFields(vdl.FieldsTarget) error
+pkg vom, method (*DumpAtomTarget) FromZero(*vdl.Type) error
 pkg vom, method (*DumpAtomTarget) StartField(string) (vdl.Target, vdl.Target, error)
 pkg vom, method (*DumpAtomTarget) StartFields(*vdl.Type) (vdl.FieldsTarget, error)
 pkg vom, method (*DumpKind) FillVDLTarget(vdl.Target, *vdl.Type) error
 pkg vom, method (*DumpKind) MakeVDLTarget() vdl.Target
 pkg vom, method (*DumpKind) Set(string) error
 pkg vom, method (*DumpKindTarget) FromEnumLabel(string, *vdl.Type) error
+pkg vom, method (*DumpKindTarget) FromZero(*vdl.Type) error
 pkg vom, method (*Dumper) Close() error
 pkg vom, method (*Dumper) Flush() error
 pkg vom, method (*Dumper) Status()
@@ -81,6 +84,7 @@ pkg vom, method (*Dumper) Write([]byte) (int, error)
 pkg vom, method (*Encoder) Encode(interface{}) error
 pkg vom, method (*PrimitiveTarget) FinishField(vdl.Target, vdl.Target) error
 pkg vom, method (*PrimitiveTarget) FinishFields(vdl.FieldsTarget) error
+pkg vom, method (*PrimitiveTarget) FromZero(*vdl.Type) error
 pkg vom, method (*PrimitiveTarget) StartField(string) (vdl.Target, vdl.Target, error)
 pkg vom, method (*PrimitiveTarget) StartFields(*vdl.Type) (vdl.FieldsTarget, error)
 pkg vom, method (*RawBytes) FillVDLTarget(vdl.Target, *vdl.Type) error

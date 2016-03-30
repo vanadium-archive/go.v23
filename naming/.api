@@ -22,16 +22,19 @@ pkg naming, func TrimSuffix(string, string) string
 pkg naming, func Unescape(string) (string, bool)
 pkg naming, method (*GlobChildrenReplyTarget) FinishField(vdl.Target, vdl.Target) error
 pkg naming, method (*GlobChildrenReplyTarget) FinishFields(vdl.FieldsTarget) error
+pkg naming, method (*GlobChildrenReplyTarget) FromZero(*vdl.Type) error
 pkg naming, method (*GlobChildrenReplyTarget) StartField(string) (vdl.Target, vdl.Target, error)
 pkg naming, method (*GlobChildrenReplyTarget) StartFields(*vdl.Type) (vdl.FieldsTarget, error)
 pkg naming, method (*GlobError) FillVDLTarget(vdl.Target, *vdl.Type) error
 pkg naming, method (*GlobError) MakeVDLTarget() vdl.Target
 pkg naming, method (*GlobErrorTarget) FinishField(vdl.Target, vdl.Target) error
 pkg naming, method (*GlobErrorTarget) FinishFields(vdl.FieldsTarget) error
+pkg naming, method (*GlobErrorTarget) FromZero(*vdl.Type) error
 pkg naming, method (*GlobErrorTarget) StartField(string) (vdl.Target, vdl.Target, error)
 pkg naming, method (*GlobErrorTarget) StartFields(*vdl.Type) (vdl.FieldsTarget, error)
 pkg naming, method (*GlobReplyTarget) FinishField(vdl.Target, vdl.Target) error
 pkg naming, method (*GlobReplyTarget) FinishFields(vdl.FieldsTarget) error
+pkg naming, method (*GlobReplyTarget) FromZero(*vdl.Type) error
 pkg naming, method (*GlobReplyTarget) StartField(string) (vdl.Target, vdl.Target, error)
 pkg naming, method (*GlobReplyTarget) StartFields(*vdl.Type) (vdl.FieldsTarget, error)
 pkg naming, method (*MountEntry) FillVDLTarget(vdl.Target, *vdl.Type) error
@@ -39,6 +42,7 @@ pkg naming, method (*MountEntry) MakeVDLTarget() vdl.Target
 pkg naming, method (*MountEntry) Names() []string
 pkg naming, method (*MountEntryTarget) FinishField(vdl.Target, vdl.Target) error
 pkg naming, method (*MountEntryTarget) FinishFields(vdl.FieldsTarget) error
+pkg naming, method (*MountEntryTarget) FromZero(*vdl.Type) error
 pkg naming, method (*MountEntryTarget) StartField(string) (vdl.Target, vdl.Target, error)
 pkg naming, method (*MountEntryTarget) StartFields(*vdl.Type) (vdl.FieldsTarget, error)
 pkg naming, method (*MountFlag) FillVDLTarget(vdl.Target, *vdl.Type) error
@@ -46,10 +50,12 @@ pkg naming, method (*MountFlag) MakeVDLTarget() vdl.Target
 pkg naming, method (*MountFlagTarget) FromFloat(float64, *vdl.Type) error
 pkg naming, method (*MountFlagTarget) FromInt(int64, *vdl.Type) error
 pkg naming, method (*MountFlagTarget) FromUint(uint64, *vdl.Type) error
+pkg naming, method (*MountFlagTarget) FromZero(*vdl.Type) error
 pkg naming, method (*MountedServer) FillVDLTarget(vdl.Target, *vdl.Type) error
 pkg naming, method (*MountedServer) MakeVDLTarget() vdl.Target
 pkg naming, method (*MountedServerTarget) FinishField(vdl.Target, vdl.Target) error
 pkg naming, method (*MountedServerTarget) FinishFields(vdl.FieldsTarget) error
+pkg naming, method (*MountedServerTarget) FromZero(*vdl.Type) error
 pkg naming, method (*MountedServerTarget) StartField(string) (vdl.Target, vdl.Target, error)
 pkg naming, method (*MountedServerTarget) StartFields(*vdl.Type) (vdl.FieldsTarget, error)
 pkg naming, method (*RoutingID) FromString(string) error

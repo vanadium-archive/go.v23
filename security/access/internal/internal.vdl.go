@@ -56,11 +56,10 @@ func (t *MyTagTarget) FromString(src string, tt *vdl.Type) error {
 
 	return nil
 }
-
-// Create zero values for each type.
-var (
-	__VDLZeroMyTag = MyTag("")
-)
+func (t *MyTagTarget) FromZero(tt *vdl.Type) error {
+	*t.Value = MyTag("")
+	return nil
+}
 
 //////////////////////////////////////////////////
 // Const definitions
@@ -236,6 +235,7 @@ func __VDLInit() struct{} {
 	if __VDLInitCalled {
 		return struct{}{}
 	}
+	__VDLInitCalled = true
 
 	// Register types.
 	vdl.Register((*MyTag)(nil))

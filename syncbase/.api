@@ -17,20 +17,24 @@ pkg syncbase, method (*ConflictRowSet) FillVDLTarget(vdl.Target, *vdl.Type) erro
 pkg syncbase, method (*ConflictRowSet) MakeVDLTarget() vdl.Target
 pkg syncbase, method (*ConflictRowSetTarget) FinishField(vdl.Target, vdl.Target) error
 pkg syncbase, method (*ConflictRowSetTarget) FinishFields(vdl.FieldsTarget) error
+pkg syncbase, method (*ConflictRowSetTarget) FromZero(*vdl.Type) error
 pkg syncbase, method (*ConflictRowSetTarget) StartField(string) (vdl.Target, vdl.Target, error)
 pkg syncbase, method (*ConflictRowSetTarget) StartFields(*vdl.Type) (vdl.FieldsTarget, error)
 pkg syncbase, method (*ConflictRowTarget) FinishField(vdl.Target, vdl.Target) error
 pkg syncbase, method (*ConflictRowTarget) FinishFields(vdl.FieldsTarget) error
+pkg syncbase, method (*ConflictRowTarget) FromZero(*vdl.Type) error
 pkg syncbase, method (*ConflictRowTarget) StartField(string) (vdl.Target, vdl.Target, error)
 pkg syncbase, method (*ConflictRowTarget) StartFields(*vdl.Type) (vdl.FieldsTarget, error)
 pkg syncbase, method (*ConflictScanSet) FillVDLTarget(vdl.Target, *vdl.Type) error
 pkg syncbase, method (*ConflictScanSet) MakeVDLTarget() vdl.Target
 pkg syncbase, method (*ConflictScanSetTarget) FinishField(vdl.Target, vdl.Target) error
 pkg syncbase, method (*ConflictScanSetTarget) FinishFields(vdl.FieldsTarget) error
+pkg syncbase, method (*ConflictScanSetTarget) FromZero(*vdl.Type) error
 pkg syncbase, method (*ConflictScanSetTarget) StartField(string) (vdl.Target, vdl.Target, error)
 pkg syncbase, method (*ConflictScanSetTarget) StartFields(*vdl.Type) (vdl.FieldsTarget, error)
 pkg syncbase, method (*ConflictTarget) FinishField(vdl.Target, vdl.Target) error
 pkg syncbase, method (*ConflictTarget) FinishFields(vdl.FieldsTarget) error
+pkg syncbase, method (*ConflictTarget) FromZero(*vdl.Type) error
 pkg syncbase, method (*ConflictTarget) StartField(string) (vdl.Target, vdl.Target, error)
 pkg syncbase, method (*ConflictTarget) StartFields(*vdl.Type) (vdl.FieldsTarget, error)
 pkg syncbase, method (*InvalidScanStream) Advance() bool
@@ -42,12 +46,14 @@ pkg syncbase, method (*Resolution) FillVDLTarget(vdl.Target, *vdl.Type) error
 pkg syncbase, method (*Resolution) MakeVDLTarget() vdl.Target
 pkg syncbase, method (*ResolutionTarget) FinishField(vdl.Target, vdl.Target) error
 pkg syncbase, method (*ResolutionTarget) FinishFields(vdl.FieldsTarget) error
+pkg syncbase, method (*ResolutionTarget) FromZero(*vdl.Type) error
 pkg syncbase, method (*ResolutionTarget) StartField(string) (vdl.Target, vdl.Target, error)
 pkg syncbase, method (*ResolutionTarget) StartFields(*vdl.Type) (vdl.FieldsTarget, error)
 pkg syncbase, method (*ResolvedRow) FillVDLTarget(vdl.Target, *vdl.Type) error
 pkg syncbase, method (*ResolvedRow) MakeVDLTarget() vdl.Target
 pkg syncbase, method (*ResolvedRowTarget) FinishField(vdl.Target, vdl.Target) error
 pkg syncbase, method (*ResolvedRowTarget) FinishFields(vdl.FieldsTarget) error
+pkg syncbase, method (*ResolvedRowTarget) FromZero(*vdl.Type) error
 pkg syncbase, method (*ResolvedRowTarget) StartField(string) (vdl.Target, vdl.Target, error)
 pkg syncbase, method (*ResolvedRowTarget) StartFields(*vdl.Type) (vdl.FieldsTarget, error)
 pkg syncbase, method (*Value) FillVDLTarget(vdl.Target, *vdl.Type) error
@@ -55,6 +61,7 @@ pkg syncbase, method (*Value) Get(interface{}) error
 pkg syncbase, method (*Value) MakeVDLTarget() vdl.Target
 pkg syncbase, method (*ValueTarget) FinishField(vdl.Target, vdl.Target) error
 pkg syncbase, method (*ValueTarget) FinishFields(vdl.FieldsTarget) error
+pkg syncbase, method (*ValueTarget) FromZero(*vdl.Type) error
 pkg syncbase, method (*ValueTarget) StartField(string) (vdl.Target, vdl.Target, error)
 pkg syncbase, method (*ValueTarget) StartFields(*vdl.Type) (vdl.FieldsTarget, error)
 pkg syncbase, method (*WatchChange) Value(interface{}) error

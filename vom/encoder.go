@@ -325,6 +325,7 @@ func (e *encoder) prepareTypeHelper(tt *vdl.Type, fromNil bool) error {
 			return err
 		}
 	}
+
 	// Handle the type id for Any values.
 	switch {
 	case len(e.typeStack) == 0:
@@ -332,7 +333,7 @@ func (e *encoder) prepareTypeHelper(tt *vdl.Type, fromNil bool) error {
 		// is called, to handle positive and negative ids, and the message length.
 		e.pushType(tt)
 	case !fromNil && e.topType().Kind() == vdl.Any:
-		if e.isStructFieldValue() {
+		if e.isFieldValue() {
 			binaryEncodeUint(e.buf, uint64(e.topTypeFieldIndex()))
 		}
 		if e.version == Version80 {
@@ -371,7 +372,7 @@ func (e *encoder) topType() *vdl.Type {
 	return e.typeStack[len(e.typeStack)-1].tt
 }
 
-func (e *encoder) isStructFieldValue() bool {
+func (e *encoder) isFieldValue() bool {
 	return e.topTypeFieldIndex() >= 0
 }
 
@@ -403,12 +404,11 @@ func (e *encoder) FromBool(src bool, tt *vdl.Type) error {
 	if err := e.prepareType(tt, boolAllowed...); err != nil {
 		return err
 	}
-	if e.isStructFieldValue() && e.topType().Kind() != vdl.Any {
-		if src == true || !e.canIgnoreField(false) {
-			binaryEncodeUint(e.buf, uint64(e.topTypeFieldIndex()))
-		} else {
+	if e.isFieldValue() && e.topType().Kind() != vdl.Any {
+		if src == false && e.canIgnoreField(false) {
 			return nil
 		}
+		binaryEncodeUint(e.buf, uint64(e.topTypeFieldIndex()))
 	}
 	binaryEncodeBool(e.buf, src)
 	return nil
@@ -420,12 +420,11 @@ func (e *encoder) FromUint(src uint64, tt *vdl.Type) error {
 	if err := e.prepareType(tt, uintAllowed...); err != nil {
 		return err
 	}
-	if e.isStructFieldValue() && e.topType().Kind() != vdl.Any {
-		if src != 0 || !e.canIgnoreField(false) {
-			binaryEncodeUint(e.buf, uint64(e.topTypeFieldIndex()))
-		} else {
+	if e.isFieldValue() && e.topType().Kind() != vdl.Any {
+		if src == 0 && e.canIgnoreField(false) {
 			return nil
 		}
+		binaryEncodeUint(e.buf, uint64(e.topTypeFieldIndex()))
 	}
 	if e.version == Version80 && tt.Kind() == vdl.Byte {
 		e.buf.WriteOneByte(byte(src))
@@ -444,12 +443,11 @@ func (e *encoder) FromInt(src int64, tt *vdl.Type) error {
 	if e.version == Version80 && tt.Kind() == vdl.Int8 {
 		return verror.New(errUnsupportedInVOMVersion, nil, "int8", e.version)
 	}
-	if e.isStructFieldValue() && e.topType().Kind() != vdl.Any {
-		if src != 0 || !e.canIgnoreField(false) {
-			binaryEncodeUint(e.buf, uint64(e.topTypeFieldIndex()))
-		} else {
+	if e.isFieldValue() && e.topType().Kind() != vdl.Any {
+		if src == 0 && e.canIgnoreField(false) {
 			return nil
 		}
+		binaryEncodeUint(e.buf, uint64(e.topTypeFieldIndex()))
 	}
 	binaryEncodeInt(e.buf, src)
 	return nil
@@ -461,12 +459,11 @@ func (e *encoder) FromFloat(src float64, tt *vdl.Type) error {
 	if err := e.prepareType(tt, floatAllowed...); err != nil {
 		return err
 	}
-	if e.isStructFieldValue() && e.topType().Kind() != vdl.Any {
-		if src != 0 || !e.canIgnoreField(false) {
-			binaryEncodeUint(e.buf, uint64(e.topTypeFieldIndex()))
-		} else {
+	if e.isFieldValue() && e.topType().Kind() != vdl.Any {
+		if src == 0 && e.canIgnoreField(false) {
 			return nil
 		}
+		binaryEncodeUint(e.buf, uint64(e.topTypeFieldIndex()))
 	}
 	binaryEncodeFloat(e.buf, src)
 	return nil
@@ -479,31 +476,25 @@ func (e *encoder) FromBytes(src []byte, tt *vdl.Type) error {
 	if err := e.prepareTypeHelper(tt, false); err != nil {
 		return err
 	}
-	if tt.Kind() == vdl.List {
-		if e.isStructFieldValue() && e.topType().Kind() != vdl.Any {
-			if len(src) != 0 || !e.canIgnoreField(false) {
-				binaryEncodeUint(e.buf, uint64(e.topTypeFieldIndex()))
-			} else {
-				return nil
-			}
+	if e.isFieldValue() && e.topType().Kind() != vdl.Any {
+		if len(src) == 0 && e.canIgnoreField(false) {
+			return nil
 		}
-		binaryEncodeUint(e.buf, uint64(len(src)))
-	} else {
-		// We always encode array length to 0.
-		if e.isStructFieldValue() && e.topType().Kind() != vdl.Any {
-			var orData byte
-			for _, b := range src {
-				orData |= b
-			}
-			if orData != 0 || !e.canIgnoreField(false) {
-				binaryEncodeUint(e.buf, uint64(e.topTypeFieldIndex()))
-			} else {
-				return nil
-			}
-		}
-		binaryEncodeUint(e.buf, uint64(0))
+		binaryEncodeUint(e.buf, uint64(e.topTypeFieldIndex()))
 	}
-
+	switch tt.Kind() {
+	case vdl.List:
+		binaryEncodeUint(e.buf, uint64(len(src)))
+	case vdl.Array:
+		// Special-case the array length to always encode 0.  We
+		// already have the length in the type, so technically
+		// we don't need to send any length for arrays.  But if we
+		// don't encode a length, we'll be encoding the first array
+		// elem directly, so we won't be able to encode any flags.
+		// E.g. we won't be able to encode ?[3]byte.  So we encode
+		// a dummy 0 length.
+		binaryEncodeUint(e.buf, 0)
+	}
 	e.buf.Write(src)
 	return nil
 }
@@ -514,12 +505,11 @@ func (e *encoder) FromString(src string, tt *vdl.Type) error {
 	if err := e.prepareType(tt, stringAllowed...); err != nil {
 		return err
 	}
-	if e.isStructFieldValue() && e.topType().Kind() != vdl.Any {
-		if len(src) != 0 || !e.canIgnoreField(false) {
-			binaryEncodeUint(e.buf, uint64(e.topTypeFieldIndex()))
-		} else {
+	if e.isFieldValue() && e.topType().Kind() != vdl.Any {
+		if src == "" && e.canIgnoreField(false) {
 			return nil
 		}
+		binaryEncodeUint(e.buf, uint64(e.topTypeFieldIndex()))
 	}
 	binaryEncodeString(e.buf, src)
 	return nil
@@ -535,12 +525,11 @@ func (e *encoder) FromEnumLabel(src string, tt *vdl.Type) error {
 	if index < 0 {
 		return verror.New(errLabelNotInType, nil, src, tt)
 	}
-	if e.isStructFieldValue() && e.topType().Kind() != vdl.Any {
-		if index != 0 || !e.canIgnoreField(false) {
-			binaryEncodeUint(e.buf, uint64(e.topTypeFieldIndex()))
-		} else {
+	if e.isFieldValue() && e.topType().Kind() != vdl.Any {
+		if index == 0 && e.canIgnoreField(false) {
 			return nil
 		}
+		binaryEncodeUint(e.buf, uint64(e.topTypeFieldIndex()))
 	}
 	binaryEncodeUint(e.buf, uint64(index))
 	return nil
@@ -557,8 +546,8 @@ func (e *encoder) FromTypeObject(src *vdl.Type) error {
 	if err != nil {
 		return err
 	}
-	if e.isStructFieldValue() && e.topType().Kind() != vdl.Any {
-		if src.Kind() == vdl.Any && e.canIgnoreField(true) {
+	if e.isFieldValue() && e.topType().Kind() != vdl.Any {
+		if src == vdl.AnyType && e.canIgnoreField(false) {
 			return nil
 		}
 		binaryEncodeUint(e.buf, uint64(e.topTypeFieldIndex()))
@@ -572,9 +561,92 @@ func (e *encoder) FromTypeObject(src *vdl.Type) error {
 	return nil
 }
 
+func (e *encoder) FromZero(tt *vdl.Type) error {
+	// TODO(bprosnitz) Some cases such as unions, struct-valued struct fields and arrays aren't encoded as
+	// 0 and the full object is outputted. Fix this.
+	switch tt.Kind() {
+	case vdl.Bool:
+		return e.FromBool(false, tt)
+	case vdl.Byte, vdl.Uint16, vdl.Uint32, vdl.Uint64:
+		return e.FromUint(0, tt)
+	case vdl.Int8, vdl.Int16, vdl.Int32, vdl.Int64:
+		return e.FromInt(0, tt)
+	case vdl.Float32, vdl.Float64:
+		return e.FromFloat(0, tt)
+	case vdl.String:
+		return e.FromString("", tt)
+	case vdl.Enum:
+		return e.FromEnumLabel(tt.EnumLabel(0), tt)
+	case vdl.TypeObject:
+		return e.FromTypeObject(vdl.AnyType)
+	case vdl.Any, vdl.Optional:
+		return e.fromNil(tt)
+	case vdl.List:
+		lt, err := e.StartList(tt, 0)
+		if err != nil {
+			return nil
+		}
+		return e.FinishList(lt)
+	case vdl.Array:
+		lt, err := e.StartList(tt, tt.Len())
+		if err != nil {
+			return nil
+		}
+		for i := 0; i < tt.Len(); i++ {
+			t, err := lt.StartElem(i)
+			if err != nil {
+				return err
+			}
+			if err := t.FromZero(tt.Elem()); err != nil {
+				return err
+			}
+			if err := lt.FinishElem(t); err != nil {
+				return err
+			}
+		}
+		return e.FinishList(lt)
+	case vdl.Map:
+		mt, err := e.StartMap(tt, 0)
+		if err != nil {
+			return nil
+		}
+		return e.FinishMap(mt)
+	case vdl.Set:
+		st, err := e.StartSet(tt, 0)
+		if err != nil {
+			return nil
+		}
+		return e.FinishSet(st)
+	case vdl.Struct:
+		ft, err := e.StartFields(tt)
+		if err != nil {
+			return err
+		}
+		return e.FinishFields(ft)
+	case vdl.Union:
+		ft, err := e.StartFields(tt)
+		if err != nil {
+			return err
+		}
+		key, field, err := ft.StartField(tt.Field(0).Name)
+		if err != nil {
+			return err
+		}
+		if err := field.FromZero(tt.Field(0).Type); err != nil {
+			return err
+		}
+		if err := ft.FinishField(key, field); err != nil {
+			return err
+		}
+		return e.FinishFields(ft)
+	default:
+		return fmt.Errorf("unknown kind: %v", tt.Kind())
+	}
+}
+
 var nilAllowed = []vdl.Kind{vdl.Any, vdl.Optional}
 
-func (e *encoder) FromNil(tt *vdl.Type) error {
+func (e *encoder) fromNil(tt *vdl.Type) error {
 	if !tt.CanBeNil() {
 		return errTypeMismatch(tt, nilAllowed...)
 	}
@@ -583,7 +655,7 @@ func (e *encoder) FromNil(tt *vdl.Type) error {
 	}
 	switch tt.Kind() {
 	case vdl.Optional:
-		if e.isStructFieldValue() {
+		if e.isFieldValue() {
 			if !e.canIgnoreField(true) && e.topType().Kind() != vdl.Any {
 				binaryEncodeUint(e.buf, uint64(e.topTypeFieldIndex()))
 				e.buf.WriteOneByte(WireCtrlNil)
@@ -592,7 +664,7 @@ func (e *encoder) FromNil(tt *vdl.Type) error {
 			e.buf.WriteOneByte(WireCtrlNil)
 		}
 	case vdl.Any:
-		if e.isStructFieldValue() {
+		if e.isFieldValue() {
 			if !e.canIgnoreField(true) && e.topType().Kind() != vdl.Any {
 				e.buf.WriteOneByte(WireCtrlNil)
 			}
@@ -609,25 +681,18 @@ func (e *encoder) StartList(tt *vdl.Type, len int) (vdl.ListTarget, error) {
 	if err := e.prepareType(tt, listAllowed...); err != nil {
 		return nil, err
 	}
-	if tt.Kind() == vdl.List {
-		if e.isStructFieldValue() && e.topType().Kind() != vdl.Any {
-			if len != 0 || !e.canIgnoreField(false) {
-				binaryEncodeUint(e.buf, uint64(e.topTypeFieldIndex()))
-				binaryEncodeUint(e.buf, uint64(len))
-			}
-		} else {
-			binaryEncodeUint(e.buf, uint64(len))
+	if e.isFieldValue() && e.topType().Kind() != vdl.Any {
+		if len == 0 && e.canIgnoreField(false) {
+			e.pushType(tt)
+			return e, nil
 		}
-	} else {
-		// We always encode array length to 0.
-		if e.isStructFieldValue() && e.topType().Kind() != vdl.Any {
-			if len != 0 || !e.canIgnoreField(false) {
-				binaryEncodeUint(e.buf, uint64(e.topTypeFieldIndex()))
-				binaryEncodeUint(e.buf, uint64(0))
-			}
-		} else {
-			binaryEncodeUint(e.buf, uint64(0))
-		}
+		binaryEncodeUint(e.buf, uint64(e.topTypeFieldIndex()))
+	}
+	switch tt.Kind() {
+	case vdl.List:
+		binaryEncodeUint(e.buf, uint64(len))
+	case vdl.Array:
+		binaryEncodeUint(e.buf, uint64(0))
 	}
 	e.pushType(tt)
 	return e, nil
@@ -639,14 +704,14 @@ func (e *encoder) StartSet(tt *vdl.Type, len int) (vdl.SetTarget, error) {
 	if err := e.prepareType(tt, setAllowed...); err != nil {
 		return nil, err
 	}
-	if e.isStructFieldValue() && e.topType().Kind() != vdl.Any {
-		if len != 0 || !e.canIgnoreField(false) {
-			binaryEncodeUint(e.buf, uint64(e.topTypeFieldIndex()))
-			binaryEncodeUint(e.buf, uint64(len))
+	if e.isFieldValue() && e.topType().Kind() != vdl.Any {
+		if len == 0 && e.canIgnoreField(false) {
+			e.pushType(tt)
+			return e, nil
 		}
-	} else {
-		binaryEncodeUint(e.buf, uint64(len))
+		binaryEncodeUint(e.buf, uint64(e.topTypeFieldIndex()))
 	}
+	binaryEncodeUint(e.buf, uint64(len))
 	e.pushType(tt)
 	return e, nil
 }
@@ -657,14 +722,14 @@ func (e *encoder) StartMap(tt *vdl.Type, len int) (vdl.MapTarget, error) {
 	if err := e.prepareType(tt, mapAllowed...); err != nil {
 		return nil, err
 	}
-	if e.isStructFieldValue() && e.topType().Kind() != vdl.Any {
-		if len != 0 || !e.canIgnoreField(false) {
-			binaryEncodeUint(e.buf, uint64(e.topTypeFieldIndex()))
-			binaryEncodeUint(e.buf, uint64(len))
+	if e.isFieldValue() && e.topType().Kind() != vdl.Any {
+		if len == 0 && e.canIgnoreField(false) {
+			e.pushType(tt)
+			return e, nil
 		}
-	} else {
-		binaryEncodeUint(e.buf, uint64(len))
+		binaryEncodeUint(e.buf, uint64(e.topTypeFieldIndex()))
 	}
+	binaryEncodeUint(e.buf, uint64(len))
 	e.pushType(tt)
 	return e, nil
 }
@@ -672,7 +737,7 @@ func (e *encoder) StartMap(tt *vdl.Type, len int) (vdl.MapTarget, error) {
 var fieldsAllowed = []vdl.Kind{vdl.Struct, vdl.Union}
 
 func (e *encoder) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
-	if e.isStructFieldValue() && e.topType().Kind() != vdl.Any {
+	if e.isFieldValue() && e.topType().Kind() != vdl.Any {
 		// TODO(bprosnitz) We shouldn't need to write the struct field index for fields that are empty structs/unions
 		binaryEncodeUint(e.buf, uint64(e.topTypeFieldIndex()))
 	}

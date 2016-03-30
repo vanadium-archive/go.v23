@@ -448,20 +448,99 @@ func (c convTarget) makeDirectTarget() Target {
 	return nil
 }
 
-// FromNil implements the Target interface method.
-func (c convTarget) FromNil(tt *Type) error {
-	if c.tt == AnyType {
-		// Optional is not currently supported for FromNil() direct targets
+// FromZero implements the Target interface method.
+func (c convTarget) FromZero(tt *Type) error {
+	if tt.Kind() != Optional {
+		// Optional is not currently supported for FromZero() direct targets
 		// because there is no way to get a generated optional struct target
 		// for an arbitrary struct. (the struct target itself doesn't support
-		// the FromNil method).
+		// the FromZero method).
 		if target := c.makeDirectTarget(); target != nil {
-			return target.FromNil(tt)
+			return target.FromZero(tt)
 		}
 	}
 	if !Compatible(c.tt, tt) {
 		return fmt.Errorf("types %q and %q aren't compatible", c.tt, tt)
 	}
+	switch tt.Kind() {
+	case Bool:
+		return c.FromBool(false, tt)
+	case Byte, Uint16, Uint32, Uint64:
+		return c.FromUint(0, tt)
+	case Int8, Int16, Int32, Int64:
+		return c.FromInt(0, tt)
+	case Float32, Float64:
+		return c.FromFloat(0, tt)
+	case String:
+		return c.FromString("", tt)
+	case Enum:
+		return c.FromEnumLabel(tt.EnumLabel(0), tt)
+	case TypeObject:
+		return c.FromTypeObject(AnyType)
+	case List, Array:
+		listTarget, err := c.StartList(tt, 0)
+		if err != nil {
+			return err
+		}
+		return c.FinishList(listTarget)
+	case Map:
+		mapTarget, err := c.StartMap(tt, 0)
+		if err != nil {
+			return err
+		}
+		return c.FinishMap(mapTarget)
+	case Set:
+		setTarget, err := c.StartSet(tt, 0)
+		if err != nil {
+			return err
+		}
+		return c.FinishSet(setTarget)
+	case Union:
+		fieldsTarget, err := c.StartFields(tt)
+		if err != nil {
+			return err
+		}
+		defaultField := tt.Field(0)
+		keyTarget, fieldTarget, err := fieldsTarget.StartField(defaultField.Name)
+		if err != nil {
+			return err
+		}
+		if err := fieldTarget.FromZero(defaultField.Type); err != nil {
+			return err
+		}
+		if err := fieldsTarget.FinishField(keyTarget, fieldTarget); err != nil {
+			return err
+		}
+		return c.FinishFields(fieldsTarget)
+	case Struct:
+		fieldsTarget, err := c.StartFields(tt)
+		if err != nil {
+			return err
+		}
+		for i := 0; i < tt.NumField(); i++ {
+			fld := tt.Field(i)
+			keyTarget, fieldTarget, err := fieldsTarget.StartField(fld.Name)
+			if err != ErrFieldNoExist {
+				if err != nil {
+					return err
+				}
+				if err := fieldTarget.FromZero(fld.Type); err != nil {
+					return err
+				}
+				if err := fieldsTarget.FinishField(keyTarget, fieldTarget); err != nil {
+					return err
+				}
+			}
+		}
+		return c.FinishFields(fieldsTarget)
+	case Any, Optional:
+		return c.fromNil(tt)
+	default:
+		return fmt.Errorf("unhandled kind: %v", tt.Kind())
+	}
+}
+
+func (c convTarget) fromNil(tt *Type) error {
 	if !tt.CanBeNil() || !c.tt.CanBeNil() {
 		return fmt.Errorf("invalid conversion from %v(nil) to %v", tt, c.tt)
 	}
@@ -495,14 +574,15 @@ func (c convTarget) FromNil(tt *Type) error {
 		// Set the zero value of the pointer or interface, which will give us nil of
 		// the correct type.
 		rv.Set(reflect.Zero(rt))
+		return nil
 	} else {
 		vvNil := ZeroValue(tt)
 		if to, from := c.vv.Type(), vvNil; !to.AssignableFrom(from) {
 			return fmt.Errorf("%v not assignable from %v", to, from)
 		}
 		c.vv.Assign(vvNil)
+		return nil
 	}
-	return nil
 }
 
 // FromBool implements the Target interface method.
@@ -1167,21 +1247,22 @@ func (c convTarget) finishKeyStartField(key convTarget) (convTarget, error) {
 			}
 			return reflectConv(rvField, ttField)
 		case reflect.Struct:
+			fieldName := key.rv.String()
 			if tt.Kind() == Union {
 				// Special-case: the fill target is a union concrete field struct.  This
 				// means that we should only return a field if the field name matches.
-				name := c.rv.Interface().(nameable).Name()
-				if name != key.rv.String() {
+				existingName := c.rv.Interface().(nameable).Name()
+				if existingName != fieldName {
 					return convTarget{}, ErrFieldNoExist
 				}
-				ttField, _ := tt.FieldByName(name)
+				ttField, _ := tt.FieldByName(fieldName)
 				return reflectConv(c.rv.FieldByName("Value"), ttField.Type)
 			}
 			// TODO(toddw): How should we handle anonymous (aka embedded) fields?
 			// Note that unexported embedded fields may themselves have exported
 			// fields.  See https://github.com/golang/go/issues/12367
-			rvField := c.rv.FieldByName(key.rv.String())
-			ttField, index := tt.FieldByName(key.rv.String())
+			rvField := c.rv.FieldByName(fieldName)
+			ttField, index := tt.FieldByName(fieldName)
 			if !rvField.IsValid() || index < 0 {
 				// TODO(toddw): Add a way to track extra and missing fields.
 				return convTarget{}, ErrFieldNoExist

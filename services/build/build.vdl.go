@@ -106,9 +106,13 @@ func (t *ArchitectureTarget) FromEnumLabel(src string, tt *vdl.Type) error {
 	case "X86":
 		*t.Value = 2
 	default:
-		return fmt.Errorf("label %s not in enum v.io/v23/services/build.Architecture", src)
+		return fmt.Errorf("label %s not in enum Architecture", src)
 	}
 
+	return nil
+}
+func (t *ArchitectureTarget) FromZero(tt *vdl.Type) error {
+	*t.Value = ArchitectureAmd64
 	return nil
 }
 
@@ -195,9 +199,13 @@ func (t *FormatTarget) FromEnumLabel(src string, tt *vdl.Type) error {
 	case "Pe":
 		*t.Value = 2
 	default:
-		return fmt.Errorf("label %s not in enum v.io/v23/services/build.Format", src)
+		return fmt.Errorf("label %s not in enum Format", src)
 	}
 
+	return nil
+}
+func (t *FormatTarget) FromZero(tt *vdl.Type) error {
+	*t.Value = FormatElf
 	return nil
 }
 
@@ -292,9 +300,13 @@ func (t *OperatingSystemTarget) FromEnumLabel(src string, tt *vdl.Type) error {
 	case "Android":
 		*t.Value = 3
 	default:
-		return fmt.Errorf("label %s not in enum v.io/v23/services/build.OperatingSystem", src)
+		return fmt.Errorf("label %s not in enum OperatingSystem", src)
 	}
 
+	return nil
+}
+func (t *OperatingSystemTarget) FromZero(tt *vdl.Type) error {
+	*t.Value = OperatingSystemDarwin
 	return nil
 }
 
@@ -314,29 +326,47 @@ func (m *File) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 	if err != nil {
 		return err
 	}
-
 	keyTarget2, fieldTarget3, err := fieldsTarget1.StartField("Name")
 	if err != vdl.ErrFieldNoExist && err != nil {
 		return err
 	}
 	if err != vdl.ErrFieldNoExist {
-		if err := fieldTarget3.FromString(string(m.Name), tt.NonOptional().Field(0).Type); err != nil {
-			return err
+
+		var4 := (m.Name == "")
+		if var4 {
+			if err := fieldTarget3.FromZero(tt.NonOptional().Field(0).Type); err != nil {
+				return err
+			}
+		} else {
+			if err := fieldTarget3.FromString(string(m.Name), tt.NonOptional().Field(0).Type); err != nil {
+				return err
+			}
 		}
 		if err := fieldsTarget1.FinishField(keyTarget2, fieldTarget3); err != nil {
 			return err
 		}
 	}
-	keyTarget4, fieldTarget5, err := fieldsTarget1.StartField("Contents")
+	keyTarget5, fieldTarget6, err := fieldsTarget1.StartField("Contents")
 	if err != vdl.ErrFieldNoExist && err != nil {
 		return err
 	}
 	if err != vdl.ErrFieldNoExist {
 
-		if err := fieldTarget5.FromBytes([]byte(m.Contents), tt.NonOptional().Field(1).Type); err != nil {
-			return err
+		var var7 bool
+		if len(m.Contents) == 0 {
+			var7 = true
 		}
-		if err := fieldsTarget1.FinishField(keyTarget4, fieldTarget5); err != nil {
+		if var7 {
+			if err := fieldTarget6.FromZero(tt.NonOptional().Field(1).Type); err != nil {
+				return err
+			}
+		} else {
+
+			if err := fieldTarget6.FromBytes([]byte(m.Contents), tt.NonOptional().Field(1).Type); err != nil {
+				return err
+			}
+		}
+		if err := fieldsTarget1.FinishField(keyTarget5, fieldTarget6); err != nil {
 			return err
 		}
 	}
@@ -386,14 +416,10 @@ func (t *FileTarget) FinishFields(_ vdl.FieldsTarget) error {
 
 	return nil
 }
-
-// Create zero values for each type.
-var (
-	__VDLZeroArchitecture    = ArchitectureAmd64
-	__VDLZeroFormat          = FormatElf
-	__VDLZeroOperatingSystem = OperatingSystemDarwin
-	__VDLZeroFile            = File{}
-)
+func (t *FileTarget) FromZero(tt *vdl.Type) error {
+	*t.Value = File{}
+	return nil
+}
 
 //////////////////////////////////////////////////
 // Interface definitions
@@ -751,6 +777,7 @@ func __VDLInit() struct{} {
 	if __VDLInitCalled {
 		return struct{}{}
 	}
+	__VDLInitCalled = true
 
 	// Register types.
 	vdl.Register((*Architecture)(nil))

@@ -11,6 +11,7 @@ package vdltool
 
 import (
 	"fmt"
+	"reflect"
 	"v.io/v23/vdl"
 )
 
@@ -81,7 +82,7 @@ func (m *GenLanguage) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 }
 
 func (m *GenLanguage) MakeVDLTarget() vdl.Target {
-	return &GenLanguageTarget{Value: m}
+	return nil
 }
 
 type GenLanguageTarget struct {
@@ -102,9 +103,13 @@ func (t *GenLanguageTarget) FromEnumLabel(src string, tt *vdl.Type) error {
 	case "Javascript":
 		*t.Value = 2
 	default:
-		return fmt.Errorf("label %s not in enum vdltool.GenLanguage", src)
+		return fmt.Errorf("label %s not in enum GenLanguage", src)
 	}
 
+	return nil
+}
+func (t *GenLanguageTarget) FromZero(tt *vdl.Type) error {
+	*t.Value = GenLanguageGo
 	return nil
 }
 
@@ -128,28 +133,43 @@ func (m *GoImport) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 	if err != nil {
 		return err
 	}
-
 	keyTarget2, fieldTarget3, err := fieldsTarget1.StartField("Path")
 	if err != vdl.ErrFieldNoExist && err != nil {
 		return err
 	}
 	if err != vdl.ErrFieldNoExist {
-		if err := fieldTarget3.FromString(string(m.Path), tt.NonOptional().Field(0).Type); err != nil {
-			return err
+
+		var4 := (m.Path == "")
+		if var4 {
+			if err := fieldTarget3.FromZero(tt.NonOptional().Field(0).Type); err != nil {
+				return err
+			}
+		} else {
+			if err := fieldTarget3.FromString(string(m.Path), tt.NonOptional().Field(0).Type); err != nil {
+				return err
+			}
 		}
 		if err := fieldsTarget1.FinishField(keyTarget2, fieldTarget3); err != nil {
 			return err
 		}
 	}
-	keyTarget4, fieldTarget5, err := fieldsTarget1.StartField("Name")
+	keyTarget5, fieldTarget6, err := fieldsTarget1.StartField("Name")
 	if err != vdl.ErrFieldNoExist && err != nil {
 		return err
 	}
 	if err != vdl.ErrFieldNoExist {
-		if err := fieldTarget5.FromString(string(m.Name), tt.NonOptional().Field(1).Type); err != nil {
-			return err
+
+		var7 := (m.Name == "")
+		if var7 {
+			if err := fieldTarget6.FromZero(tt.NonOptional().Field(1).Type); err != nil {
+				return err
+			}
+		} else {
+			if err := fieldTarget6.FromString(string(m.Name), tt.NonOptional().Field(1).Type); err != nil {
+				return err
+			}
 		}
-		if err := fieldsTarget1.FinishField(keyTarget4, fieldTarget5); err != nil {
+		if err := fieldsTarget1.FinishField(keyTarget5, fieldTarget6); err != nil {
 			return err
 		}
 	}
@@ -160,13 +180,12 @@ func (m *GoImport) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 }
 
 func (m *GoImport) MakeVDLTarget() vdl.Target {
-	return &GoImportTarget{Value: m}
+	return nil
 }
 
 type GoImportTarget struct {
-	Value      *GoImport
-	pathTarget vdl.StringTarget
-	nameTarget vdl.StringTarget
+	Value *GoImport
+
 	vdl.TargetBase
 	vdl.FieldsTargetBase
 }
@@ -181,12 +200,10 @@ func (t *GoImportTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
 func (t *GoImportTarget) StartField(name string) (key, field vdl.Target, _ error) {
 	switch name {
 	case "Path":
-		t.pathTarget.Value = &t.Value.Path
-		target, err := &t.pathTarget, error(nil)
+		target, err := vdl.ReflectTarget(reflect.ValueOf(&t.Value.Path))
 		return nil, target, err
 	case "Name":
-		t.nameTarget.Value = &t.Value.Name
-		target, err := &t.nameTarget, error(nil)
+		target, err := vdl.ReflectTarget(reflect.ValueOf(&t.Value.Name))
 		return nil, target, err
 	default:
 		return nil, nil, fmt.Errorf("field %s not in struct vdltool.GoImport", name)
@@ -197,6 +214,10 @@ func (t *GoImportTarget) FinishField(_, _ vdl.Target) error {
 }
 func (t *GoImportTarget) FinishFields(_ vdl.FieldsTarget) error {
 
+	return nil
+}
+func (t *GoImportTarget) FromZero(tt *vdl.Type) error {
+	*t.Value = GoImport{}
 	return nil
 }
 
@@ -222,46 +243,64 @@ func (m *GoType) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 	if err != nil {
 		return err
 	}
-
 	keyTarget2, fieldTarget3, err := fieldsTarget1.StartField("Type")
 	if err != vdl.ErrFieldNoExist && err != nil {
 		return err
 	}
 	if err != vdl.ErrFieldNoExist {
-		if err := fieldTarget3.FromString(string(m.Type), tt.NonOptional().Field(0).Type); err != nil {
-			return err
+
+		var4 := (m.Type == "")
+		if var4 {
+			if err := fieldTarget3.FromZero(tt.NonOptional().Field(0).Type); err != nil {
+				return err
+			}
+		} else {
+			if err := fieldTarget3.FromString(string(m.Type), tt.NonOptional().Field(0).Type); err != nil {
+				return err
+			}
 		}
 		if err := fieldsTarget1.FinishField(keyTarget2, fieldTarget3); err != nil {
 			return err
 		}
 	}
-	keyTarget4, fieldTarget5, err := fieldsTarget1.StartField("Imports")
+	keyTarget5, fieldTarget6, err := fieldsTarget1.StartField("Imports")
 	if err != vdl.ErrFieldNoExist && err != nil {
 		return err
 	}
 	if err != vdl.ErrFieldNoExist {
 
-		listTarget6, err := fieldTarget5.StartList(tt.NonOptional().Field(1).Type, len(m.Imports))
-		if err != nil {
-			return err
+		var var7 bool
+		if len(m.Imports) == 0 {
+			var7 = true
 		}
-		for i, elem8 := range m.Imports {
-			elemTarget7, err := listTarget6.StartElem(i)
+		if var7 {
+			if err := fieldTarget6.FromZero(tt.NonOptional().Field(1).Type); err != nil {
+				return err
+			}
+		} else {
+
+			listTarget8, err := fieldTarget6.StartList(tt.NonOptional().Field(1).Type, len(m.Imports))
 			if err != nil {
 				return err
 			}
+			for i, elem10 := range m.Imports {
+				elemTarget9, err := listTarget8.StartElem(i)
+				if err != nil {
+					return err
+				}
 
-			if err := elem8.FillVDLTarget(elemTarget7, tt.NonOptional().Field(1).Type.Elem()); err != nil {
-				return err
+				if err := elem10.FillVDLTarget(elemTarget9, tt.NonOptional().Field(1).Type.Elem()); err != nil {
+					return err
+				}
+				if err := listTarget8.FinishElem(elemTarget9); err != nil {
+					return err
+				}
 			}
-			if err := listTarget6.FinishElem(elemTarget7); err != nil {
+			if err := fieldTarget6.FinishList(listTarget8); err != nil {
 				return err
 			}
 		}
-		if err := fieldTarget5.FinishList(listTarget6); err != nil {
-			return err
-		}
-		if err := fieldsTarget1.FinishField(keyTarget4, fieldTarget5); err != nil {
+		if err := fieldsTarget1.FinishField(keyTarget5, fieldTarget6); err != nil {
 			return err
 		}
 	}
@@ -272,13 +311,12 @@ func (m *GoType) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 }
 
 func (m *GoType) MakeVDLTarget() vdl.Target {
-	return &GoTypeTarget{Value: m}
+	return nil
 }
 
 type GoTypeTarget struct {
-	Value         *GoType
-	typeTarget    vdl.StringTarget
-	importsTarget __VDLTarget1_list
+	Value *GoType
+
 	vdl.TargetBase
 	vdl.FieldsTargetBase
 }
@@ -293,12 +331,10 @@ func (t *GoTypeTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
 func (t *GoTypeTarget) StartField(name string) (key, field vdl.Target, _ error) {
 	switch name {
 	case "Type":
-		t.typeTarget.Value = &t.Value.Type
-		target, err := &t.typeTarget, error(nil)
+		target, err := vdl.ReflectTarget(reflect.ValueOf(&t.Value.Type))
 		return nil, target, err
 	case "Imports":
-		t.importsTarget.Value = &t.Value.Imports
-		target, err := &t.importsTarget, error(nil)
+		target, err := vdl.ReflectTarget(reflect.ValueOf(&t.Value.Imports))
 		return nil, target, err
 	default:
 		return nil, nil, fmt.Errorf("field %s not in struct vdltool.GoType", name)
@@ -311,37 +347,8 @@ func (t *GoTypeTarget) FinishFields(_ vdl.FieldsTarget) error {
 
 	return nil
 }
-
-// []GoImport
-type __VDLTarget1_list struct {
-	Value      *[]GoImport
-	elemTarget GoImportTarget
-	vdl.TargetBase
-	vdl.ListTargetBase
-}
-
-func (t *__VDLTarget1_list) StartList(tt *vdl.Type, len int) (vdl.ListTarget, error) {
-
-	if ttWant := vdl.TypeOf((*[]GoImport)(nil)); !vdl.Compatible(tt, ttWant) {
-		return nil, fmt.Errorf("type %v incompatible with %v", tt, ttWant)
-	}
-	if cap(*t.Value) < len {
-		*t.Value = make([]GoImport, len)
-	} else {
-		*t.Value = (*t.Value)[:len]
-	}
-	return t, nil
-}
-func (t *__VDLTarget1_list) StartElem(index int) (elem vdl.Target, _ error) {
-	t.elemTarget.Value = &(*t.Value)[index]
-	target, err := &t.elemTarget, error(nil)
-	return target, err
-}
-func (t *__VDLTarget1_list) FinishElem(elem vdl.Target) error {
-	return nil
-}
-func (t *__VDLTarget1_list) FinishList(elem vdl.ListTarget) error {
-
+func (t *GoTypeTarget) FromZero(tt *vdl.Type) error {
+	*t.Value = GoType{}
 	return nil
 }
 
@@ -381,39 +388,49 @@ func (m *GoConfig) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 	if err != nil {
 		return err
 	}
-
 	keyTarget2, fieldTarget3, err := fieldsTarget1.StartField("WireToNativeTypes")
 	if err != vdl.ErrFieldNoExist && err != nil {
 		return err
 	}
 	if err != vdl.ErrFieldNoExist {
 
-		mapTarget4, err := fieldTarget3.StartMap(tt.NonOptional().Field(0).Type, len(m.WireToNativeTypes))
-		if err != nil {
-			return err
+		var var4 bool
+		if len(m.WireToNativeTypes) == 0 {
+			var4 = true
 		}
-		for key6, value8 := range m.WireToNativeTypes {
-			keyTarget5, err := mapTarget4.StartKey()
-			if err != nil {
+		if var4 {
+			if err := fieldTarget3.FromZero(tt.NonOptional().Field(0).Type); err != nil {
 				return err
 			}
-			if err := keyTarget5.FromString(string(key6), tt.NonOptional().Field(0).Type.Key()); err != nil {
-				return err
-			}
-			valueTarget7, err := mapTarget4.FinishKeyStartField(keyTarget5)
-			if err != nil {
-				return err
-			}
+		} else {
 
-			if err := value8.FillVDLTarget(valueTarget7, tt.NonOptional().Field(0).Type.Elem()); err != nil {
+			mapTarget5, err := fieldTarget3.StartMap(tt.NonOptional().Field(0).Type, len(m.WireToNativeTypes))
+			if err != nil {
 				return err
 			}
-			if err := mapTarget4.FinishField(keyTarget5, valueTarget7); err != nil {
+			for key7, value9 := range m.WireToNativeTypes {
+				keyTarget6, err := mapTarget5.StartKey()
+				if err != nil {
+					return err
+				}
+				if err := keyTarget6.FromString(string(key7), tt.NonOptional().Field(0).Type.Key()); err != nil {
+					return err
+				}
+				valueTarget8, err := mapTarget5.FinishKeyStartField(keyTarget6)
+				if err != nil {
+					return err
+				}
+
+				if err := value9.FillVDLTarget(valueTarget8, tt.NonOptional().Field(0).Type.Elem()); err != nil {
+					return err
+				}
+				if err := mapTarget5.FinishField(keyTarget6, valueTarget8); err != nil {
+					return err
+				}
+			}
+			if err := fieldTarget3.FinishMap(mapTarget5); err != nil {
 				return err
 			}
-		}
-		if err := fieldTarget3.FinishMap(mapTarget4); err != nil {
-			return err
 		}
 		if err := fieldsTarget1.FinishField(keyTarget2, fieldTarget3); err != nil {
 			return err
@@ -426,12 +443,12 @@ func (m *GoConfig) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 }
 
 func (m *GoConfig) MakeVDLTarget() vdl.Target {
-	return &GoConfigTarget{Value: m}
+	return nil
 }
 
 type GoConfigTarget struct {
-	Value                   *GoConfig
-	wireToNativeTypesTarget __VDLTarget2_map
+	Value *GoConfig
+
 	vdl.TargetBase
 	vdl.FieldsTargetBase
 }
@@ -446,8 +463,7 @@ func (t *GoConfigTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
 func (t *GoConfigTarget) StartField(name string) (key, field vdl.Target, _ error) {
 	switch name {
 	case "WireToNativeTypes":
-		t.wireToNativeTypesTarget.Value = &t.Value.WireToNativeTypes
-		target, err := &t.wireToNativeTypesTarget, error(nil)
+		target, err := vdl.ReflectTarget(reflect.ValueOf(&t.Value.WireToNativeTypes))
 		return nil, target, err
 	default:
 		return nil, nil, fmt.Errorf("field %s not in struct vdltool.GoConfig", name)
@@ -460,47 +476,8 @@ func (t *GoConfigTarget) FinishFields(_ vdl.FieldsTarget) error {
 
 	return nil
 }
-
-// map[string]GoType
-type __VDLTarget2_map struct {
-	Value      *map[string]GoType
-	currKey    string
-	currElem   GoType
-	keyTarget  vdl.StringTarget
-	elemTarget GoTypeTarget
-	vdl.TargetBase
-	vdl.MapTargetBase
-}
-
-func (t *__VDLTarget2_map) StartMap(tt *vdl.Type, len int) (vdl.MapTarget, error) {
-
-	if ttWant := vdl.TypeOf((*map[string]GoType)(nil)); !vdl.Compatible(tt, ttWant) {
-		return nil, fmt.Errorf("type %v incompatible with %v", tt, ttWant)
-	}
-	*t.Value = make(map[string]GoType)
-	return t, nil
-}
-func (t *__VDLTarget2_map) StartKey() (key vdl.Target, _ error) {
-	t.currKey = ""
-	t.keyTarget.Value = &t.currKey
-	target, err := &t.keyTarget, error(nil)
-	return target, err
-}
-func (t *__VDLTarget2_map) FinishKeyStartField(key vdl.Target) (field vdl.Target, _ error) {
-	t.currElem = GoType{}
-	t.elemTarget.Value = &t.currElem
-	target, err := &t.elemTarget, error(nil)
-	return target, err
-}
-func (t *__VDLTarget2_map) FinishField(key, field vdl.Target) error {
-	(*t.Value)[t.currKey] = t.currElem
-	return nil
-}
-func (t *__VDLTarget2_map) FinishMap(elem vdl.MapTarget) error {
-	if len(*t.Value) == 0 {
-		*t.Value = nil
-	}
-
+func (t *GoConfigTarget) FromZero(tt *vdl.Type) error {
+	*t.Value = GoConfig{}
 	return nil
 }
 
@@ -550,76 +527,97 @@ func (m *JavaConfig) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 	if err != nil {
 		return err
 	}
-
 	keyTarget2, fieldTarget3, err := fieldsTarget1.StartField("WireToNativeTypes")
 	if err != vdl.ErrFieldNoExist && err != nil {
 		return err
 	}
 	if err != vdl.ErrFieldNoExist {
 
-		mapTarget4, err := fieldTarget3.StartMap(tt.NonOptional().Field(0).Type, len(m.WireToNativeTypes))
-		if err != nil {
-			return err
+		var var4 bool
+		if len(m.WireToNativeTypes) == 0 {
+			var4 = true
 		}
-		for key6, value8 := range m.WireToNativeTypes {
-			keyTarget5, err := mapTarget4.StartKey()
+		if var4 {
+			if err := fieldTarget3.FromZero(tt.NonOptional().Field(0).Type); err != nil {
+				return err
+			}
+		} else {
+
+			mapTarget5, err := fieldTarget3.StartMap(tt.NonOptional().Field(0).Type, len(m.WireToNativeTypes))
 			if err != nil {
 				return err
 			}
-			if err := keyTarget5.FromString(string(key6), tt.NonOptional().Field(0).Type.Key()); err != nil {
+			for key7, value9 := range m.WireToNativeTypes {
+				keyTarget6, err := mapTarget5.StartKey()
+				if err != nil {
+					return err
+				}
+				if err := keyTarget6.FromString(string(key7), tt.NonOptional().Field(0).Type.Key()); err != nil {
+					return err
+				}
+				valueTarget8, err := mapTarget5.FinishKeyStartField(keyTarget6)
+				if err != nil {
+					return err
+				}
+				if err := valueTarget8.FromString(string(value9), tt.NonOptional().Field(0).Type.Elem()); err != nil {
+					return err
+				}
+				if err := mapTarget5.FinishField(keyTarget6, valueTarget8); err != nil {
+					return err
+				}
+			}
+			if err := fieldTarget3.FinishMap(mapTarget5); err != nil {
 				return err
 			}
-			valueTarget7, err := mapTarget4.FinishKeyStartField(keyTarget5)
-			if err != nil {
-				return err
-			}
-			if err := valueTarget7.FromString(string(value8), tt.NonOptional().Field(0).Type.Elem()); err != nil {
-				return err
-			}
-			if err := mapTarget4.FinishField(keyTarget5, valueTarget7); err != nil {
-				return err
-			}
-		}
-		if err := fieldTarget3.FinishMap(mapTarget4); err != nil {
-			return err
 		}
 		if err := fieldsTarget1.FinishField(keyTarget2, fieldTarget3); err != nil {
 			return err
 		}
 	}
-	keyTarget9, fieldTarget10, err := fieldsTarget1.StartField("WireTypeRenames")
+	keyTarget10, fieldTarget11, err := fieldsTarget1.StartField("WireTypeRenames")
 	if err != vdl.ErrFieldNoExist && err != nil {
 		return err
 	}
 	if err != vdl.ErrFieldNoExist {
 
-		mapTarget11, err := fieldTarget10.StartMap(tt.NonOptional().Field(1).Type, len(m.WireTypeRenames))
-		if err != nil {
-			return err
+		var var12 bool
+		if len(m.WireTypeRenames) == 0 {
+			var12 = true
 		}
-		for key13, value15 := range m.WireTypeRenames {
-			keyTarget12, err := mapTarget11.StartKey()
+		if var12 {
+			if err := fieldTarget11.FromZero(tt.NonOptional().Field(1).Type); err != nil {
+				return err
+			}
+		} else {
+
+			mapTarget13, err := fieldTarget11.StartMap(tt.NonOptional().Field(1).Type, len(m.WireTypeRenames))
 			if err != nil {
 				return err
 			}
-			if err := keyTarget12.FromString(string(key13), tt.NonOptional().Field(1).Type.Key()); err != nil {
-				return err
+			for key15, value17 := range m.WireTypeRenames {
+				keyTarget14, err := mapTarget13.StartKey()
+				if err != nil {
+					return err
+				}
+				if err := keyTarget14.FromString(string(key15), tt.NonOptional().Field(1).Type.Key()); err != nil {
+					return err
+				}
+				valueTarget16, err := mapTarget13.FinishKeyStartField(keyTarget14)
+				if err != nil {
+					return err
+				}
+				if err := valueTarget16.FromString(string(value17), tt.NonOptional().Field(1).Type.Elem()); err != nil {
+					return err
+				}
+				if err := mapTarget13.FinishField(keyTarget14, valueTarget16); err != nil {
+					return err
+				}
 			}
-			valueTarget14, err := mapTarget11.FinishKeyStartField(keyTarget12)
-			if err != nil {
-				return err
-			}
-			if err := valueTarget14.FromString(string(value15), tt.NonOptional().Field(1).Type.Elem()); err != nil {
-				return err
-			}
-			if err := mapTarget11.FinishField(keyTarget12, valueTarget14); err != nil {
+			if err := fieldTarget11.FinishMap(mapTarget13); err != nil {
 				return err
 			}
 		}
-		if err := fieldTarget10.FinishMap(mapTarget11); err != nil {
-			return err
-		}
-		if err := fieldsTarget1.FinishField(keyTarget9, fieldTarget10); err != nil {
+		if err := fieldsTarget1.FinishField(keyTarget10, fieldTarget11); err != nil {
 			return err
 		}
 	}
@@ -630,13 +628,12 @@ func (m *JavaConfig) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 }
 
 func (m *JavaConfig) MakeVDLTarget() vdl.Target {
-	return &JavaConfigTarget{Value: m}
+	return nil
 }
 
 type JavaConfigTarget struct {
-	Value                   *JavaConfig
-	wireToNativeTypesTarget __VDLTarget3_map
-	wireTypeRenamesTarget   __VDLTarget3_map
+	Value *JavaConfig
+
 	vdl.TargetBase
 	vdl.FieldsTargetBase
 }
@@ -651,12 +648,10 @@ func (t *JavaConfigTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
 func (t *JavaConfigTarget) StartField(name string) (key, field vdl.Target, _ error) {
 	switch name {
 	case "WireToNativeTypes":
-		t.wireToNativeTypesTarget.Value = &t.Value.WireToNativeTypes
-		target, err := &t.wireToNativeTypesTarget, error(nil)
+		target, err := vdl.ReflectTarget(reflect.ValueOf(&t.Value.WireToNativeTypes))
 		return nil, target, err
 	case "WireTypeRenames":
-		t.wireTypeRenamesTarget.Value = &t.Value.WireTypeRenames
-		target, err := &t.wireTypeRenamesTarget, error(nil)
+		target, err := vdl.ReflectTarget(reflect.ValueOf(&t.Value.WireTypeRenames))
 		return nil, target, err
 	default:
 		return nil, nil, fmt.Errorf("field %s not in struct vdltool.JavaConfig", name)
@@ -669,47 +664,8 @@ func (t *JavaConfigTarget) FinishFields(_ vdl.FieldsTarget) error {
 
 	return nil
 }
-
-// map[string]string
-type __VDLTarget3_map struct {
-	Value      *map[string]string
-	currKey    string
-	currElem   string
-	keyTarget  vdl.StringTarget
-	elemTarget vdl.StringTarget
-	vdl.TargetBase
-	vdl.MapTargetBase
-}
-
-func (t *__VDLTarget3_map) StartMap(tt *vdl.Type, len int) (vdl.MapTarget, error) {
-
-	if ttWant := vdl.TypeOf((*map[string]string)(nil)); !vdl.Compatible(tt, ttWant) {
-		return nil, fmt.Errorf("type %v incompatible with %v", tt, ttWant)
-	}
-	*t.Value = make(map[string]string)
-	return t, nil
-}
-func (t *__VDLTarget3_map) StartKey() (key vdl.Target, _ error) {
-	t.currKey = ""
-	t.keyTarget.Value = &t.currKey
-	target, err := &t.keyTarget, error(nil)
-	return target, err
-}
-func (t *__VDLTarget3_map) FinishKeyStartField(key vdl.Target) (field vdl.Target, _ error) {
-	t.currElem = ""
-	t.elemTarget.Value = &t.currElem
-	target, err := &t.elemTarget, error(nil)
-	return target, err
-}
-func (t *__VDLTarget3_map) FinishField(key, field vdl.Target) error {
-	(*t.Value)[t.currKey] = t.currElem
-	return nil
-}
-func (t *__VDLTarget3_map) FinishMap(elem vdl.MapTarget) error {
-	if len(*t.Value) == 0 {
-		*t.Value = nil
-	}
-
+func (t *JavaConfigTarget) FromZero(tt *vdl.Type) error {
+	*t.Value = JavaConfig{}
 	return nil
 }
 
@@ -727,7 +683,6 @@ func (m *JavascriptConfig) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 	if err != nil {
 		return err
 	}
-
 	if err := t.FinishFields(fieldsTarget1); err != nil {
 		return err
 	}
@@ -735,7 +690,7 @@ func (m *JavascriptConfig) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 }
 
 func (m *JavascriptConfig) MakeVDLTarget() vdl.Target {
-	return &JavascriptConfigTarget{Value: m}
+	return nil
 }
 
 type JavascriptConfigTarget struct {
@@ -764,6 +719,10 @@ func (t *JavascriptConfigTarget) FinishFields(_ vdl.FieldsTarget) error {
 
 	return nil
 }
+func (t *JavascriptConfigTarget) FromZero(tt *vdl.Type) error {
+	*t.Value = JavascriptConfig{}
+	return nil
+}
 
 // Config specifies the configuration for the vdl tool.  This is typically
 // represented in optional "vdl.config" files in each vdl source package.  Each
@@ -789,73 +748,122 @@ func (m *Config) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 	if err != nil {
 		return err
 	}
-
 	keyTarget2, fieldTarget3, err := fieldsTarget1.StartField("GenLanguages")
 	if err != vdl.ErrFieldNoExist && err != nil {
 		return err
 	}
 	if err != vdl.ErrFieldNoExist {
 
-		setTarget4, err := fieldTarget3.StartSet(tt.NonOptional().Field(0).Type, len(m.GenLanguages))
-		if err != nil {
-			return err
+		var var4 bool
+		if len(m.GenLanguages) == 0 {
+			var4 = true
 		}
-		for key6 := range m.GenLanguages {
-			keyTarget5, err := setTarget4.StartKey()
+		if var4 {
+			if err := fieldTarget3.FromZero(tt.NonOptional().Field(0).Type); err != nil {
+				return err
+			}
+		} else {
+
+			setTarget5, err := fieldTarget3.StartSet(tt.NonOptional().Field(0).Type, len(m.GenLanguages))
 			if err != nil {
 				return err
 			}
+			for key7 := range m.GenLanguages {
+				keyTarget6, err := setTarget5.StartKey()
+				if err != nil {
+					return err
+				}
 
-			if err := key6.FillVDLTarget(keyTarget5, tt.NonOptional().Field(0).Type.Key()); err != nil {
+				if err := key7.FillVDLTarget(keyTarget6, tt.NonOptional().Field(0).Type.Key()); err != nil {
+					return err
+				}
+				if err := setTarget5.FinishKey(keyTarget6); err != nil {
+					return err
+				}
+			}
+			if err := fieldTarget3.FinishSet(setTarget5); err != nil {
 				return err
 			}
-			if err := setTarget4.FinishKey(keyTarget5); err != nil {
-				return err
-			}
-		}
-		if err := fieldTarget3.FinishSet(setTarget4); err != nil {
-			return err
 		}
 		if err := fieldsTarget1.FinishField(keyTarget2, fieldTarget3); err != nil {
 			return err
 		}
 	}
-	keyTarget7, fieldTarget8, err := fieldsTarget1.StartField("Go")
+	keyTarget8, fieldTarget9, err := fieldsTarget1.StartField("Go")
 	if err != vdl.ErrFieldNoExist && err != nil {
 		return err
 	}
 	if err != vdl.ErrFieldNoExist {
 
-		if err := m.Go.FillVDLTarget(fieldTarget8, tt.NonOptional().Field(1).Type); err != nil {
-			return err
+		var10 := true
+		var var11 bool
+		if len(m.Go.WireToNativeTypes) == 0 {
+			var11 = true
 		}
-		if err := fieldsTarget1.FinishField(keyTarget7, fieldTarget8); err != nil {
+		var10 = var10 && var11
+		if var10 {
+			if err := fieldTarget9.FromZero(tt.NonOptional().Field(1).Type); err != nil {
+				return err
+			}
+		} else {
+
+			if err := m.Go.FillVDLTarget(fieldTarget9, tt.NonOptional().Field(1).Type); err != nil {
+				return err
+			}
+		}
+		if err := fieldsTarget1.FinishField(keyTarget8, fieldTarget9); err != nil {
 			return err
 		}
 	}
-	keyTarget9, fieldTarget10, err := fieldsTarget1.StartField("Java")
+	keyTarget12, fieldTarget13, err := fieldsTarget1.StartField("Java")
 	if err != vdl.ErrFieldNoExist && err != nil {
 		return err
 	}
 	if err != vdl.ErrFieldNoExist {
 
-		if err := m.Java.FillVDLTarget(fieldTarget10, tt.NonOptional().Field(2).Type); err != nil {
-			return err
+		var14 := true
+		var var15 bool
+		if len(m.Java.WireToNativeTypes) == 0 {
+			var15 = true
 		}
-		if err := fieldsTarget1.FinishField(keyTarget9, fieldTarget10); err != nil {
+		var14 = var14 && var15
+		var var16 bool
+		if len(m.Java.WireTypeRenames) == 0 {
+			var16 = true
+		}
+		var14 = var14 && var16
+		if var14 {
+			if err := fieldTarget13.FromZero(tt.NonOptional().Field(2).Type); err != nil {
+				return err
+			}
+		} else {
+
+			if err := m.Java.FillVDLTarget(fieldTarget13, tt.NonOptional().Field(2).Type); err != nil {
+				return err
+			}
+		}
+		if err := fieldsTarget1.FinishField(keyTarget12, fieldTarget13); err != nil {
 			return err
 		}
 	}
-	keyTarget11, fieldTarget12, err := fieldsTarget1.StartField("Javascript")
+	keyTarget17, fieldTarget18, err := fieldsTarget1.StartField("Javascript")
 	if err != vdl.ErrFieldNoExist && err != nil {
 		return err
 	}
 	if err != vdl.ErrFieldNoExist {
 
-		if err := m.Javascript.FillVDLTarget(fieldTarget12, tt.NonOptional().Field(3).Type); err != nil {
-			return err
+		var19 := (m.Javascript == JavascriptConfig{})
+		if var19 {
+			if err := fieldTarget18.FromZero(tt.NonOptional().Field(3).Type); err != nil {
+				return err
+			}
+		} else {
+
+			if err := m.Javascript.FillVDLTarget(fieldTarget18, tt.NonOptional().Field(3).Type); err != nil {
+				return err
+			}
 		}
-		if err := fieldsTarget1.FinishField(keyTarget11, fieldTarget12); err != nil {
+		if err := fieldsTarget1.FinishField(keyTarget17, fieldTarget18); err != nil {
 			return err
 		}
 	}
@@ -866,15 +874,12 @@ func (m *Config) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 }
 
 func (m *Config) MakeVDLTarget() vdl.Target {
-	return &ConfigTarget{Value: m}
+	return nil
 }
 
 type ConfigTarget struct {
-	Value              *Config
-	genLanguagesTarget __VDLTarget4_set
-	goTarget           GoConfigTarget
-	javaTarget         JavaConfigTarget
-	javascriptTarget   JavascriptConfigTarget
+	Value *Config
+
 	vdl.TargetBase
 	vdl.FieldsTargetBase
 }
@@ -889,20 +894,16 @@ func (t *ConfigTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
 func (t *ConfigTarget) StartField(name string) (key, field vdl.Target, _ error) {
 	switch name {
 	case "GenLanguages":
-		t.genLanguagesTarget.Value = &t.Value.GenLanguages
-		target, err := &t.genLanguagesTarget, error(nil)
+		target, err := vdl.ReflectTarget(reflect.ValueOf(&t.Value.GenLanguages))
 		return nil, target, err
 	case "Go":
-		t.goTarget.Value = &t.Value.Go
-		target, err := &t.goTarget, error(nil)
+		target, err := vdl.ReflectTarget(reflect.ValueOf(&t.Value.Go))
 		return nil, target, err
 	case "Java":
-		t.javaTarget.Value = &t.Value.Java
-		target, err := &t.javaTarget, error(nil)
+		target, err := vdl.ReflectTarget(reflect.ValueOf(&t.Value.Java))
 		return nil, target, err
 	case "Javascript":
-		t.javascriptTarget.Value = &t.Value.Javascript
-		target, err := &t.javascriptTarget, error(nil)
+		target, err := vdl.ReflectTarget(reflect.ValueOf(&t.Value.Javascript))
 		return nil, target, err
 	default:
 		return nil, nil, fmt.Errorf("field %s not in struct vdltool.Config", name)
@@ -915,52 +916,10 @@ func (t *ConfigTarget) FinishFields(_ vdl.FieldsTarget) error {
 
 	return nil
 }
-
-// map[GenLanguage]struct{}
-type __VDLTarget4_set struct {
-	Value     *map[GenLanguage]struct{}
-	currKey   GenLanguage
-	keyTarget GenLanguageTarget
-	vdl.TargetBase
-	vdl.SetTargetBase
-}
-
-func (t *__VDLTarget4_set) StartSet(tt *vdl.Type, len int) (vdl.SetTarget, error) {
-
-	if ttWant := vdl.TypeOf((*map[GenLanguage]struct{})(nil)); !vdl.Compatible(tt, ttWant) {
-		return nil, fmt.Errorf("type %v incompatible with %v", tt, ttWant)
-	}
-	*t.Value = make(map[GenLanguage]struct{})
-	return t, nil
-}
-func (t *__VDLTarget4_set) StartKey() (key vdl.Target, _ error) {
-	t.currKey = GenLanguageGo
-	t.keyTarget.Value = &t.currKey
-	target, err := &t.keyTarget, error(nil)
-	return target, err
-}
-func (t *__VDLTarget4_set) FinishKey(key vdl.Target) error {
-	(*t.Value)[t.currKey] = struct{}{}
+func (t *ConfigTarget) FromZero(tt *vdl.Type) error {
+	*t.Value = Config{}
 	return nil
 }
-func (t *__VDLTarget4_set) FinishSet(list vdl.SetTarget) error {
-	if len(*t.Value) == 0 {
-		*t.Value = nil
-	}
-
-	return nil
-}
-
-// Create zero values for each type.
-var (
-	__VDLZeroGenLanguage      = GenLanguageGo
-	__VDLZeroGoImport         = GoImport{}
-	__VDLZeroGoType           = GoType{}
-	__VDLZeroGoConfig         = GoConfig{}
-	__VDLZeroJavaConfig       = JavaConfig{}
-	__VDLZeroJavascriptConfig = JavascriptConfig{}
-	__VDLZeroConfig           = Config{}
-)
 
 var __VDLInitCalled bool
 
@@ -981,6 +940,7 @@ func __VDLInit() struct{} {
 	if __VDLInitCalled {
 		return struct{}{}
 	}
+	__VDLInitCalled = true
 
 	// Register types.
 	vdl.Register((*GenLanguage)(nil))

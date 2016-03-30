@@ -8,27 +8,22 @@ pkg mounttable, func MountTableServer(MountTableServerMethods) MountTableServerS
 pkg mounttable, method (*Tag) FillVDLTarget(vdl.Target, *vdl.Type) error
 pkg mounttable, method (*Tag) MakeVDLTarget() vdl.Target
 pkg mounttable, method (*TagTarget) FromString(string, *vdl.Type) error
-pkg mounttable, type MountTableClientMethods interface { Delete, GetPermissions, Mount, ResolveStep, SetPermissions, Unmount }
+pkg mounttable, method (*TagTarget) FromZero(*vdl.Type) error
 pkg mounttable, type MountTableClientMethods interface, Delete(*context.T, bool, ...rpc.CallOpt) error
-pkg mounttable, type MountTableClientMethods interface, GetPermissions(*context.T, ...rpc.CallOpt) (access.Permissions, string, error)
 pkg mounttable, type MountTableClientMethods interface, Mount(*context.T, string, uint32, naming.MountFlag, ...rpc.CallOpt) error
 pkg mounttable, type MountTableClientMethods interface, ResolveStep(*context.T, ...rpc.CallOpt) (naming.MountEntry, error)
-pkg mounttable, type MountTableClientMethods interface, SetPermissions(*context.T, access.Permissions, string, ...rpc.CallOpt) error
 pkg mounttable, type MountTableClientMethods interface, Unmount(*context.T, string, ...rpc.CallOpt) error
-pkg mounttable, type MountTableClientStub interface { Delete, GetPermissions, Mount, ResolveStep, SetPermissions, Unmount }
+pkg mounttable, type MountTableClientMethods interface, unexported methods
 pkg mounttable, type MountTableClientStub interface, Delete(*context.T, bool, ...rpc.CallOpt) error
-pkg mounttable, type MountTableClientStub interface, GetPermissions(*context.T, ...rpc.CallOpt) (access.Permissions, string, error)
 pkg mounttable, type MountTableClientStub interface, Mount(*context.T, string, uint32, naming.MountFlag, ...rpc.CallOpt) error
 pkg mounttable, type MountTableClientStub interface, ResolveStep(*context.T, ...rpc.CallOpt) (naming.MountEntry, error)
-pkg mounttable, type MountTableClientStub interface, SetPermissions(*context.T, access.Permissions, string, ...rpc.CallOpt) error
 pkg mounttable, type MountTableClientStub interface, Unmount(*context.T, string, ...rpc.CallOpt) error
-pkg mounttable, type MountTableServerMethods interface { Delete, GetPermissions, Mount, ResolveStep, SetPermissions, Unmount }
+pkg mounttable, type MountTableClientStub interface, unexported methods
 pkg mounttable, type MountTableServerMethods interface, Delete(*context.T, rpc.ServerCall, bool) error
-pkg mounttable, type MountTableServerMethods interface, GetPermissions(*context.T, rpc.ServerCall) (access.Permissions, string, error)
 pkg mounttable, type MountTableServerMethods interface, Mount(*context.T, rpc.ServerCall, string, uint32, naming.MountFlag) error
 pkg mounttable, type MountTableServerMethods interface, ResolveStep(*context.T, rpc.ServerCall) (naming.MountEntry, error)
-pkg mounttable, type MountTableServerMethods interface, SetPermissions(*context.T, rpc.ServerCall, access.Permissions, string) error
 pkg mounttable, type MountTableServerMethods interface, Unmount(*context.T, rpc.ServerCall, string) error
+pkg mounttable, type MountTableServerMethods interface, unexported methods
 pkg mounttable, type MountTableServerStub interface, Describe__() []rpc.InterfaceDesc
 pkg mounttable, type MountTableServerStub interface, unexported methods
 pkg mounttable, type MountTableServerStubMethods MountTableServerMethods

@@ -11,10 +11,13 @@ import (
 	"v.io/v23/vdl"
 )
 
-// The Config's MakeVdlTarget is used to decode values in the vdl file.
-// Ensure that it decodes the values correctly. If this is not the case,
-// the vdl generator behaves incorrectly.
-func TestConfigMakeVdlTarget(t *testing.T) {
+// Ensure that a config can be loaded to a concrete value.
+// The reason this test is useful is to ensure that either the generated VdlConfig
+// target works correctly, or if it is not generated it is still possible to write
+// to the config using reflect.
+// If this is not the case (perhaps because of a broken vdltool.vdl.go),
+// unexpected behavior can result when generating files.
+func TestLoadingVdlConfig(t *testing.T) {
 	config := Config{
 		Go: GoConfig{
 			WireToNativeTypes: map[string]GoType{
@@ -56,7 +59,11 @@ func TestConfigMakeVdlTarget(t *testing.T) {
 	configVdlValue := vdl.ValueOf(config)
 
 	var finalConfig Config
-	if err := vdl.FromValue(finalConfig.MakeVDLTarget(), configVdlValue); err != nil {
+	target, err := vdl.ReflectTarget(reflect.ValueOf(&finalConfig))
+	if err != nil {
+		t.Fatalf("Error creating reflect target: %v", err)
+	}
+	if err := vdl.FromValue(target, configVdlValue); err != nil {
 		t.Fatalf("error while using ConfigTarget: %v", err)
 	}
 

@@ -1550,6 +1550,7 @@ var Tests = []types.TestCase{
 			B: true,
 			C: true,
 			E: vdl.AnyType,
+			F: vdl.ZeroValue(vdl.AnyType),
 		}),
 		TypeString: "v.io/v23/vom/testdata/types.MStruct struct{A bool;B v.io/v23/vom/testdata/types.NBool bool;C v.io/v23/vom/testdata/types.MBool bool;D ?v.io/v23/vom/testdata/types.NStruct struct{A bool;B string;C int64};E typeobject;F any}",
 		Hex:        "815327000021762e696f2f7632332f766f6d2f74657374646174612f74797065732e4e426f6f6c0101e15527000021762e696f2f7632332f766f6d2f74657374646174612f74797065732e4d426f6f6c0101e1593b060023762e696f2f7632332f766f6d2f74657374646174612f74797065732e4e53747275637401030001410101e10001420103e10001430109e1e1570408012de1514d060023762e696f2f7632332f766f6d2f74657374646174612f74797065732e4d53747275637401060001410101e1000142012ae1000143012be1000144012ce1000145010ee1000146010fe1e152000007000101010201e1",
@@ -1561,6 +1562,7 @@ var Tests = []types.TestCase{
 		Name: "types.MStruct{}",
 		Value: vdl.ValueOf(types.MStruct{
 			E: vdl.AnyType,
+			F: vdl.ZeroValue(vdl.AnyType),
 		}),
 		TypeString: "v.io/v23/vom/testdata/types.MStruct struct{A bool;B v.io/v23/vom/testdata/types.NBool bool;C v.io/v23/vom/testdata/types.MBool bool;D ?v.io/v23/vom/testdata/types.NStruct struct{A bool;B string;C int64};E typeobject;F any}",
 		Hex:        "815327000021762e696f2f7632332f766f6d2f74657374646174612f74797065732e4e426f6f6c0101e15527000021762e696f2f7632332f766f6d2f74657374646174612f74797065732e4d426f6f6c0101e1593b060023762e696f2f7632332f766f6d2f74657374646174612f74797065732e4e53747275637401030001410101e10001420103e10001430109e1e1570408012de1514d060023762e696f2f7632332f766f6d2f74657374646174612f74797065732e4d53747275637401060001410101e1000142012ae1000143012be1000144012ce1000145010ee1000146010fe1e152000001e1",
@@ -1573,6 +1575,7 @@ var Tests = []types.TestCase{
 		Value: vdl.ValueOf(types.MStruct{
 			D: &types.NStruct{},
 			E: vdl.AnyType,
+			F: vdl.ZeroValue(vdl.AnyType),
 		}),
 		TypeString: "v.io/v23/vom/testdata/types.MStruct struct{A bool;B v.io/v23/vom/testdata/types.NBool bool;C v.io/v23/vom/testdata/types.MBool bool;D ?v.io/v23/vom/testdata/types.NStruct struct{A bool;B string;C int64};E typeobject;F any}",
 		Hex:        "815327000021762e696f2f7632332f766f6d2f74657374646174612f74797065732e4e426f6f6c0101e15527000021762e696f2f7632332f766f6d2f74657374646174612f74797065732e4d426f6f6c0101e1593b060023762e696f2f7632332f766f6d2f74657374646174612f74797065732e4e53747275637401030001410101e10001420103e10001430109e1e1570408012de1514d060023762e696f2f7632332f766f6d2f74657374646174612f74797065732e4d53747275637401060001410101e1000142012ae1000143012be1000144012ce1000145010ee1000146010fe1e15200000303e1e1",
@@ -1589,6 +1592,7 @@ var Tests = []types.TestCase{
 				C: 123,
 			},
 			E: vdl.AnyType,
+			F: vdl.ZeroValue(vdl.AnyType),
 		}),
 		TypeString: "v.io/v23/vom/testdata/types.MStruct struct{A bool;B v.io/v23/vom/testdata/types.NBool bool;C v.io/v23/vom/testdata/types.MBool bool;D ?v.io/v23/vom/testdata/types.NStruct struct{A bool;B string;C int64};E typeobject;F any}",
 		Hex:        "815327000021762e696f2f7632332f766f6d2f74657374646174612f74797065732e4e426f6f6c0101e15527000021762e696f2f7632332f766f6d2f74657374646174612f74797065732e4d426f6f6c0101e1593b060023762e696f2f7632332f766f6d2f74657374646174612f74797065732e4e53747275637401030001410101e10001420103e10001430109e1e1570408012de1514d060023762e696f2f7632332f766f6d2f74657374646174612f74797065732e4d53747275637401060001410101e1000142012ae1000143012be1000144012ce1000145010ee1000146010fe1e15200000d030001010361626302fff6e1e1",
@@ -2054,8 +2058,10 @@ var Tests = []types.TestCase{
 		HexValue:   "52020f0103020001",
 	},
 	{
-		Name:       "types.StructAny{}",
-		Value:      vdl.ValueOf(types.StructAny{}),
+		Name: "types.StructAny{}",
+		Value: vdl.ValueOf(types.StructAny{
+			Any: vdl.ZeroValue(vdl.AnyType),
+		}),
 		TypeString: "v.io/v23/vom/testdata/types.StructAny struct{Any any}",
 		Hex:        "815133060025762e696f2f7632332f766f6d2f74657374646174612f74797065732e537472756374416e7901010003416e79010fe1e152000001e1",
 		HexVersion: "81",
@@ -2318,8 +2324,10 @@ var Tests = []types.TestCase{
 		HexValue:   "52000001e0",
 	},
 	{
-		Name:       "?types.StructAny{}",
-		Value:      vdl.ValueOf(&types.StructAny{}),
+		Name: "?types.StructAny{}",
+		Value: vdl.ValueOf(&types.StructAny{
+			Any: vdl.ZeroValue(vdl.AnyType),
+		}),
 		TypeString: "?v.io/v23/vom/testdata/types.StructAny struct{Any any}",
 		Hex:        "815333060025762e696f2f7632332f766f6d2f74657374646174612f74797065732e537472756374416e7901010003416e79010fe1e1510408012ae152000001e1",
 		HexVersion: "81",
@@ -2612,6 +2620,7 @@ var Tests = []types.TestCase{
 	},
 	{
 		Name:       "any(nil)",
+		Value:      vdl.ZeroValue(vdl.AnyType),
 		TypeString: "any",
 		Hex:        "811e000001e0",
 		HexVersion: "81",
@@ -3451,6 +3460,7 @@ var ConvertTests = map[string][]types.ConvertGroup{
 				}),
 				vdl.ValueOf(types.AdeStruct{
 					A: true,
+					D: vdl.ZeroValue(vdl.AnyType),
 					E: vdl.AnyType,
 				}),
 				vdl.ValueOf(types.NStruct{
@@ -3584,6 +3594,7 @@ func __VDLInit() struct{} {
 	if __VDLInitCalled {
 		return struct{}{}
 	}
+	__VDLInitCalled = true
 
 	return struct{}{}
 }

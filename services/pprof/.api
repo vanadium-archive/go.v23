@@ -10,25 +10,19 @@ pkg pprof, type PProfClientMethods interface, CpuProfile(*context.T, int32, ...r
 pkg pprof, type PProfClientMethods interface, Profile(*context.T, string, int32, ...rpc.CallOpt) (PProfProfileClientCall, error)
 pkg pprof, type PProfClientMethods interface, Profiles(*context.T, ...rpc.CallOpt) ([]string, error)
 pkg pprof, type PProfClientMethods interface, Symbol(*context.T, []uint64, ...rpc.CallOpt) ([]string, error)
-pkg pprof, type PProfClientStub interface { CmdLine, CpuProfile, Profile, Profiles, Symbol }
 pkg pprof, type PProfClientStub interface, CmdLine(*context.T, ...rpc.CallOpt) ([]string, error)
 pkg pprof, type PProfClientStub interface, CpuProfile(*context.T, int32, ...rpc.CallOpt) (PProfCpuProfileClientCall, error)
 pkg pprof, type PProfClientStub interface, Profile(*context.T, string, int32, ...rpc.CallOpt) (PProfProfileClientCall, error)
 pkg pprof, type PProfClientStub interface, Profiles(*context.T, ...rpc.CallOpt) ([]string, error)
 pkg pprof, type PProfClientStub interface, Symbol(*context.T, []uint64, ...rpc.CallOpt) ([]string, error)
+pkg pprof, type PProfClientStub interface, unexported methods
 pkg pprof, type PProfCpuProfileClientCall interface { Finish, RecvStream }
 pkg pprof, type PProfCpuProfileClientCall interface, Finish() error
 pkg pprof, type PProfCpuProfileClientCall interface, RecvStream() interface {  Advance() bool;; Value() []byte;; Err() error;}
 pkg pprof, type PProfCpuProfileClientStream interface { RecvStream }
 pkg pprof, type PProfCpuProfileClientStream interface, RecvStream() interface {  Advance() bool;; Value() []byte;; Err() error;}
-pkg pprof, type PProfCpuProfileServerCall interface { GrantedBlessings, LocalEndpoint, RemoteEndpoint, Security, SendStream, Server, Suffix }
-pkg pprof, type PProfCpuProfileServerCall interface, GrantedBlessings() security.Blessings
-pkg pprof, type PProfCpuProfileServerCall interface, LocalEndpoint() naming.Endpoint
-pkg pprof, type PProfCpuProfileServerCall interface, RemoteEndpoint() naming.Endpoint
-pkg pprof, type PProfCpuProfileServerCall interface, Security() security.Call
 pkg pprof, type PProfCpuProfileServerCall interface, SendStream() interface {  Send(item []byte) error;}
-pkg pprof, type PProfCpuProfileServerCall interface, Server() Server
-pkg pprof, type PProfCpuProfileServerCall interface, Suffix() string
+pkg pprof, type PProfCpuProfileServerCall interface, unexported methods
 pkg pprof, type PProfCpuProfileServerCallStub struct
 pkg pprof, type PProfCpuProfileServerCallStub struct, embedded rpc.StreamServerCall
 pkg pprof, type PProfCpuProfileServerStream interface { SendStream }
@@ -38,14 +32,8 @@ pkg pprof, type PProfProfileClientCall interface, Finish() error
 pkg pprof, type PProfProfileClientCall interface, RecvStream() interface {  Advance() bool;; Value() []byte;; Err() error;}
 pkg pprof, type PProfProfileClientStream interface { RecvStream }
 pkg pprof, type PProfProfileClientStream interface, RecvStream() interface {  Advance() bool;; Value() []byte;; Err() error;}
-pkg pprof, type PProfProfileServerCall interface { GrantedBlessings, LocalEndpoint, RemoteEndpoint, Security, SendStream, Server, Suffix }
-pkg pprof, type PProfProfileServerCall interface, GrantedBlessings() security.Blessings
-pkg pprof, type PProfProfileServerCall interface, LocalEndpoint() naming.Endpoint
-pkg pprof, type PProfProfileServerCall interface, RemoteEndpoint() naming.Endpoint
-pkg pprof, type PProfProfileServerCall interface, Security() security.Call
 pkg pprof, type PProfProfileServerCall interface, SendStream() interface {  Send(item []byte) error;}
-pkg pprof, type PProfProfileServerCall interface, Server() Server
-pkg pprof, type PProfProfileServerCall interface, Suffix() string
+pkg pprof, type PProfProfileServerCall interface, unexported methods
 pkg pprof, type PProfProfileServerCallStub struct
 pkg pprof, type PProfProfileServerCallStub struct, embedded rpc.StreamServerCall
 pkg pprof, type PProfProfileServerStream interface { SendStream }

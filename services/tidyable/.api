@@ -2,8 +2,8 @@ pkg tidyable, func TidyableClient(string) TidyableClientStub
 pkg tidyable, func TidyableServer(TidyableServerMethods) TidyableServerStub
 pkg tidyable, type TidyableClientMethods interface { TidyNow }
 pkg tidyable, type TidyableClientMethods interface, TidyNow(*context.T, ...rpc.CallOpt) error
-pkg tidyable, type TidyableClientStub interface { TidyNow }
 pkg tidyable, type TidyableClientStub interface, TidyNow(*context.T, ...rpc.CallOpt) error
+pkg tidyable, type TidyableClientStub interface, unexported methods
 pkg tidyable, type TidyableServerMethods interface { TidyNow }
 pkg tidyable, type TidyableServerMethods interface, TidyNow(*context.T, rpc.ServerCall) error
 pkg tidyable, type TidyableServerStub interface, Describe__() []rpc.InterfaceDesc

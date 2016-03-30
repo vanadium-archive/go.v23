@@ -50,52 +50,70 @@ func (m *Description) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 	if err != nil {
 		return err
 	}
-
 	keyTarget2, fieldTarget3, err := fieldsTarget1.StartField("Name")
 	if err != vdl.ErrFieldNoExist && err != nil {
 		return err
 	}
 	if err != vdl.ErrFieldNoExist {
-		if err := fieldTarget3.FromString(string(m.Name), tt.NonOptional().Field(0).Type); err != nil {
-			return err
+
+		var4 := (m.Name == "")
+		if var4 {
+			if err := fieldTarget3.FromZero(tt.NonOptional().Field(0).Type); err != nil {
+				return err
+			}
+		} else {
+			if err := fieldTarget3.FromString(string(m.Name), tt.NonOptional().Field(0).Type); err != nil {
+				return err
+			}
 		}
 		if err := fieldsTarget1.FinishField(keyTarget2, fieldTarget3); err != nil {
 			return err
 		}
 	}
-	keyTarget4, fieldTarget5, err := fieldsTarget1.StartField("Profiles")
+	keyTarget5, fieldTarget6, err := fieldsTarget1.StartField("Profiles")
 	if err != vdl.ErrFieldNoExist && err != nil {
 		return err
 	}
 	if err != vdl.ErrFieldNoExist {
 
-		mapTarget6, err := fieldTarget5.StartMap(tt.NonOptional().Field(1).Type, len(m.Profiles))
-		if err != nil {
-			return err
+		var var7 bool
+		if len(m.Profiles) == 0 {
+			var7 = true
 		}
-		for key8, value10 := range m.Profiles {
-			keyTarget7, err := mapTarget6.StartKey()
+		if var7 {
+			if err := fieldTarget6.FromZero(tt.NonOptional().Field(1).Type); err != nil {
+				return err
+			}
+		} else {
+
+			mapTarget8, err := fieldTarget6.StartMap(tt.NonOptional().Field(1).Type, len(m.Profiles))
 			if err != nil {
 				return err
 			}
-			if err := keyTarget7.FromString(string(key8), tt.NonOptional().Field(1).Type.Key()); err != nil {
-				return err
+			for key10, value12 := range m.Profiles {
+				keyTarget9, err := mapTarget8.StartKey()
+				if err != nil {
+					return err
+				}
+				if err := keyTarget9.FromString(string(key10), tt.NonOptional().Field(1).Type.Key()); err != nil {
+					return err
+				}
+				valueTarget11, err := mapTarget8.FinishKeyStartField(keyTarget9)
+				if err != nil {
+					return err
+				}
+				if err := valueTarget11.FromBool(bool(value12), tt.NonOptional().Field(1).Type.Elem()); err != nil {
+					return err
+				}
+				if err := mapTarget8.FinishField(keyTarget9, valueTarget11); err != nil {
+					return err
+				}
 			}
-			valueTarget9, err := mapTarget6.FinishKeyStartField(keyTarget7)
-			if err != nil {
-				return err
-			}
-			if err := valueTarget9.FromBool(bool(value10), tt.NonOptional().Field(1).Type.Elem()); err != nil {
-				return err
-			}
-			if err := mapTarget6.FinishField(keyTarget7, valueTarget9); err != nil {
+			if err := fieldTarget6.FinishMap(mapTarget8); err != nil {
 				return err
 			}
 		}
-		if err := fieldTarget5.FinishMap(mapTarget6); err != nil {
-			return err
-		}
-		if err := fieldsTarget1.FinishField(keyTarget4, fieldTarget5); err != nil {
+		if err := fieldsTarget1.FinishField(keyTarget5, fieldTarget6); err != nil {
 			return err
 		}
 	}
@@ -145,6 +163,10 @@ func (t *DescriptionTarget) FinishFields(_ vdl.FieldsTarget) error {
 
 	return nil
 }
+func (t *DescriptionTarget) FromZero(tt *vdl.Type) error {
+	*t.Value = Description{}
+	return nil
+}
 
 // map[string]bool
 type __VDLTarget1_map struct {
@@ -188,6 +210,10 @@ func (t *__VDLTarget1_map) FinishMap(elem vdl.MapTarget) error {
 
 	return nil
 }
+func (t *__VDLTarget1_map) FromZero(tt *vdl.Type) error {
+	*t.Value = map[string]bool(nil)
+	return nil
+}
 
 // PartInfo holds information describing a binary part.
 type PartInfo struct {
@@ -207,28 +233,43 @@ func (m *PartInfo) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 	if err != nil {
 		return err
 	}
-
 	keyTarget2, fieldTarget3, err := fieldsTarget1.StartField("Checksum")
 	if err != vdl.ErrFieldNoExist && err != nil {
 		return err
 	}
 	if err != vdl.ErrFieldNoExist {
-		if err := fieldTarget3.FromString(string(m.Checksum), tt.NonOptional().Field(0).Type); err != nil {
-			return err
+
+		var4 := (m.Checksum == "")
+		if var4 {
+			if err := fieldTarget3.FromZero(tt.NonOptional().Field(0).Type); err != nil {
+				return err
+			}
+		} else {
+			if err := fieldTarget3.FromString(string(m.Checksum), tt.NonOptional().Field(0).Type); err != nil {
+				return err
+			}
 		}
 		if err := fieldsTarget1.FinishField(keyTarget2, fieldTarget3); err != nil {
 			return err
 		}
 	}
-	keyTarget4, fieldTarget5, err := fieldsTarget1.StartField("Size")
+	keyTarget5, fieldTarget6, err := fieldsTarget1.StartField("Size")
 	if err != vdl.ErrFieldNoExist && err != nil {
 		return err
 	}
 	if err != vdl.ErrFieldNoExist {
-		if err := fieldTarget5.FromInt(int64(m.Size), tt.NonOptional().Field(1).Type); err != nil {
-			return err
+
+		var7 := (m.Size == int64(0))
+		if var7 {
+			if err := fieldTarget6.FromZero(tt.NonOptional().Field(1).Type); err != nil {
+				return err
+			}
+		} else {
+			if err := fieldTarget6.FromInt(int64(m.Size), tt.NonOptional().Field(1).Type); err != nil {
+				return err
+			}
 		}
-		if err := fieldsTarget1.FinishField(keyTarget4, fieldTarget5); err != nil {
+		if err := fieldsTarget1.FinishField(keyTarget5, fieldTarget6); err != nil {
 			return err
 		}
 	}
@@ -278,12 +319,10 @@ func (t *PartInfoTarget) FinishFields(_ vdl.FieldsTarget) error {
 
 	return nil
 }
-
-// Create zero values for each type.
-var (
-	__VDLZeroDescription = Description{}
-	__VDLZeroPartInfo    = PartInfo{}
-)
+func (t *PartInfoTarget) FromZero(tt *vdl.Type) error {
+	*t.Value = PartInfo{}
+	return nil
+}
 
 //////////////////////////////////////////////////
 // Const definitions
@@ -310,6 +349,7 @@ func __VDLInit() struct{} {
 	if __VDLInitCalled {
 		return struct{}{}
 	}
+	__VDLInitCalled = true
 
 	// Register types.
 	vdl.Register((*Description)(nil))

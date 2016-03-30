@@ -284,7 +284,7 @@ func (d *Decoder) decodeValue(tt *vdl.Type, target vdl.Target) error {
 			return err
 		case ctrl == WireCtrlNil:
 			d.buf.Skip(1)
-			return target.FromNil(ttFrom)
+			return target.FromZero(ttFrom)
 		}
 		tt = tt.Elem()
 	}
@@ -478,7 +478,7 @@ func (d *Decoder) decodeValue(tt *vdl.Type, target vdl.Target) error {
 					case err != nil:
 						return err
 					default:
-						if err := vdl.FromValue(field, vdl.ZeroValue(ttfield.Type)); err != nil {
+						if err := field.FromZero(ttfield.Type); err != nil {
 							return err
 						}
 						if err := fieldsTarget.FinishField(key, field); err != nil {
@@ -540,7 +540,7 @@ func (d *Decoder) decodeValue(tt *vdl.Type, target vdl.Target) error {
 			return err
 		}
 		if elemType == nil {
-			return target.FromNil(tt)
+			return target.FromZero(tt)
 		}
 		if hax, ok := target.(hasRvHack); ok {
 			rv := hax.HackGetRv()

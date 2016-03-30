@@ -225,11 +225,12 @@ func (r *rbTarget) FromTypeObject(src *vdl.Type) error {
 	return r.finish()
 }
 
-func (r *rbTarget) FromNil(tt *vdl.Type) error {
+func (r *rbTarget) FromZero(tt *vdl.Type) error {
+	// TODO(bprosnitz) This is likely slow, look into optimizing it
 	if err := r.start(tt); err != nil {
 		return err
 	}
-	if err := r.enc.FromNil(tt); err != nil {
+	if err := vdl.FromValue(r.enc, vdl.ZeroValue(tt)); err != nil {
 		return err
 	}
 	return r.finish()

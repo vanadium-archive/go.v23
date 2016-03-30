@@ -40,29 +40,61 @@ func (m *SignedFile) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 	if err != nil {
 		return err
 	}
-
 	keyTarget2, fieldTarget3, err := fieldsTarget1.StartField("File")
 	if err != vdl.ErrFieldNoExist && err != nil {
 		return err
 	}
 	if err != vdl.ErrFieldNoExist {
-		if err := fieldTarget3.FromString(string(m.File), tt.NonOptional().Field(0).Type); err != nil {
-			return err
+
+		var4 := (m.File == "")
+		if var4 {
+			if err := fieldTarget3.FromZero(tt.NonOptional().Field(0).Type); err != nil {
+				return err
+			}
+		} else {
+			if err := fieldTarget3.FromString(string(m.File), tt.NonOptional().Field(0).Type); err != nil {
+				return err
+			}
 		}
 		if err := fieldsTarget1.FinishField(keyTarget2, fieldTarget3); err != nil {
 			return err
 		}
 	}
-	keyTarget4, fieldTarget5, err := fieldsTarget1.StartField("Signature")
+	keyTarget5, fieldTarget6, err := fieldsTarget1.StartField("Signature")
 	if err != vdl.ErrFieldNoExist && err != nil {
 		return err
 	}
 	if err != vdl.ErrFieldNoExist {
 
-		if err := m.Signature.FillVDLTarget(fieldTarget5, tt.NonOptional().Field(1).Type); err != nil {
-			return err
+		var7 := true
+		var var8 bool
+		if len(m.Signature.Purpose) == 0 {
+			var8 = true
 		}
-		if err := fieldsTarget1.FinishField(keyTarget4, fieldTarget5); err != nil {
+		var7 = var7 && var8
+		var9 := (m.Signature.Hash == security.Hash(""))
+		var7 = var7 && var9
+		var var10 bool
+		if len(m.Signature.R) == 0 {
+			var10 = true
+		}
+		var7 = var7 && var10
+		var var11 bool
+		if len(m.Signature.S) == 0 {
+			var11 = true
+		}
+		var7 = var7 && var11
+		if var7 {
+			if err := fieldTarget6.FromZero(tt.NonOptional().Field(1).Type); err != nil {
+				return err
+			}
+		} else {
+
+			if err := m.Signature.FillVDLTarget(fieldTarget6, tt.NonOptional().Field(1).Type); err != nil {
+				return err
+			}
+		}
+		if err := fieldsTarget1.FinishField(keyTarget5, fieldTarget6); err != nil {
 			return err
 		}
 	}
@@ -110,6 +142,10 @@ func (t *SignedFileTarget) FinishField(_, _ vdl.Target) error {
 }
 func (t *SignedFileTarget) FinishFields(_ vdl.FieldsTarget) error {
 
+	return nil
+}
+func (t *SignedFileTarget) FromZero(tt *vdl.Type) error {
+	*t.Value = SignedFile{}
 	return nil
 }
 
@@ -213,6 +249,10 @@ func (t *PackagesTarget) FinishMap(elem vdl.MapTarget) error {
 
 	return nil
 }
+func (t *PackagesTarget) FromZero(tt *vdl.Type) error {
+	*t.Value = Packages(nil)
+	return nil
+}
 
 // Envelope is a collection of metadata that describes an application.
 type Envelope struct {
@@ -263,148 +303,246 @@ func (m *Envelope) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 	if err != nil {
 		return err
 	}
-
 	keyTarget2, fieldTarget3, err := fieldsTarget1.StartField("Title")
 	if err != vdl.ErrFieldNoExist && err != nil {
 		return err
 	}
 	if err != vdl.ErrFieldNoExist {
-		if err := fieldTarget3.FromString(string(m.Title), tt.NonOptional().Field(0).Type); err != nil {
-			return err
+
+		var4 := (m.Title == "")
+		if var4 {
+			if err := fieldTarget3.FromZero(tt.NonOptional().Field(0).Type); err != nil {
+				return err
+			}
+		} else {
+			if err := fieldTarget3.FromString(string(m.Title), tt.NonOptional().Field(0).Type); err != nil {
+				return err
+			}
 		}
 		if err := fieldsTarget1.FinishField(keyTarget2, fieldTarget3); err != nil {
 			return err
 		}
 	}
-	keyTarget4, fieldTarget5, err := fieldsTarget1.StartField("Args")
+	keyTarget5, fieldTarget6, err := fieldsTarget1.StartField("Args")
 	if err != vdl.ErrFieldNoExist && err != nil {
 		return err
 	}
 	if err != vdl.ErrFieldNoExist {
 
-		listTarget6, err := fieldTarget5.StartList(tt.NonOptional().Field(1).Type, len(m.Args))
-		if err != nil {
-			return err
+		var var7 bool
+		if len(m.Args) == 0 {
+			var7 = true
 		}
-		for i, elem8 := range m.Args {
-			elemTarget7, err := listTarget6.StartElem(i)
+		if var7 {
+			if err := fieldTarget6.FromZero(tt.NonOptional().Field(1).Type); err != nil {
+				return err
+			}
+		} else {
+
+			listTarget8, err := fieldTarget6.StartList(tt.NonOptional().Field(1).Type, len(m.Args))
 			if err != nil {
 				return err
 			}
-			if err := elemTarget7.FromString(string(elem8), tt.NonOptional().Field(1).Type.Elem()); err != nil {
-				return err
+			for i, elem10 := range m.Args {
+				elemTarget9, err := listTarget8.StartElem(i)
+				if err != nil {
+					return err
+				}
+				if err := elemTarget9.FromString(string(elem10), tt.NonOptional().Field(1).Type.Elem()); err != nil {
+					return err
+				}
+				if err := listTarget8.FinishElem(elemTarget9); err != nil {
+					return err
+				}
 			}
-			if err := listTarget6.FinishElem(elemTarget7); err != nil {
+			if err := fieldTarget6.FinishList(listTarget8); err != nil {
 				return err
 			}
 		}
-		if err := fieldTarget5.FinishList(listTarget6); err != nil {
-			return err
-		}
-		if err := fieldsTarget1.FinishField(keyTarget4, fieldTarget5); err != nil {
+		if err := fieldsTarget1.FinishField(keyTarget5, fieldTarget6); err != nil {
 			return err
 		}
 	}
-	keyTarget9, fieldTarget10, err := fieldsTarget1.StartField("Binary")
+	keyTarget11, fieldTarget12, err := fieldsTarget1.StartField("Binary")
 	if err != vdl.ErrFieldNoExist && err != nil {
 		return err
 	}
 	if err != vdl.ErrFieldNoExist {
 
-		if err := m.Binary.FillVDLTarget(fieldTarget10, tt.NonOptional().Field(2).Type); err != nil {
-			return err
+		var13 := true
+		var14 := (m.Binary.File == "")
+		var13 = var13 && var14
+		var15 := true
+		var var16 bool
+		if len(m.Binary.Signature.Purpose) == 0 {
+			var16 = true
 		}
-		if err := fieldsTarget1.FinishField(keyTarget9, fieldTarget10); err != nil {
-			return err
+		var15 = var15 && var16
+		var17 := (m.Binary.Signature.Hash == security.Hash(""))
+		var15 = var15 && var17
+		var var18 bool
+		if len(m.Binary.Signature.R) == 0 {
+			var18 = true
 		}
-	}
-	var wireValue11 security.WireBlessings
-	if err := security.WireBlessingsFromNative(&wireValue11, m.Publisher); err != nil {
-		return err
-	}
-
-	keyTarget12, fieldTarget13, err := fieldsTarget1.StartField("Publisher")
-	if err != vdl.ErrFieldNoExist && err != nil {
-		return err
-	}
-	if err != vdl.ErrFieldNoExist {
-
-		if err := wireValue11.FillVDLTarget(fieldTarget13, tt.NonOptional().Field(3).Type); err != nil {
-			return err
+		var15 = var15 && var18
+		var var19 bool
+		if len(m.Binary.Signature.S) == 0 {
+			var19 = true
 		}
-		if err := fieldsTarget1.FinishField(keyTarget12, fieldTarget13); err != nil {
-			return err
-		}
-	}
-	keyTarget14, fieldTarget15, err := fieldsTarget1.StartField("Env")
-	if err != vdl.ErrFieldNoExist && err != nil {
-		return err
-	}
-	if err != vdl.ErrFieldNoExist {
-
-		listTarget16, err := fieldTarget15.StartList(tt.NonOptional().Field(4).Type, len(m.Env))
-		if err != nil {
-			return err
-		}
-		for i, elem18 := range m.Env {
-			elemTarget17, err := listTarget16.StartElem(i)
-			if err != nil {
+		var15 = var15 && var19
+		var13 = var13 && var15
+		if var13 {
+			if err := fieldTarget12.FromZero(tt.NonOptional().Field(2).Type); err != nil {
 				return err
 			}
-			if err := elemTarget17.FromString(string(elem18), tt.NonOptional().Field(4).Type.Elem()); err != nil {
-				return err
-			}
-			if err := listTarget16.FinishElem(elemTarget17); err != nil {
+		} else {
+
+			if err := m.Binary.FillVDLTarget(fieldTarget12, tt.NonOptional().Field(2).Type); err != nil {
 				return err
 			}
 		}
-		if err := fieldTarget15.FinishList(listTarget16); err != nil {
-			return err
-		}
-		if err := fieldsTarget1.FinishField(keyTarget14, fieldTarget15); err != nil {
+		if err := fieldsTarget1.FinishField(keyTarget11, fieldTarget12); err != nil {
 			return err
 		}
 	}
-	keyTarget19, fieldTarget20, err := fieldsTarget1.StartField("Packages")
+	var wireValue20 security.WireBlessings
+	if err := security.WireBlessingsFromNative(&wireValue20, m.Publisher); err != nil {
+		return err
+	}
+
+	keyTarget21, fieldTarget22, err := fieldsTarget1.StartField("Publisher")
 	if err != vdl.ErrFieldNoExist && err != nil {
 		return err
 	}
 	if err != vdl.ErrFieldNoExist {
 
-		if err := m.Packages.FillVDLTarget(fieldTarget20, tt.NonOptional().Field(5).Type); err != nil {
-			return err
+		var23 := true
+		var var24 bool
+		if len(wireValue20.CertificateChains) == 0 {
+			var24 = true
 		}
-		if err := fieldsTarget1.FinishField(keyTarget19, fieldTarget20); err != nil {
-			return err
-		}
-	}
-	keyTarget21, fieldTarget22, err := fieldsTarget1.StartField("Restarts")
-	if err != vdl.ErrFieldNoExist && err != nil {
-		return err
-	}
-	if err != vdl.ErrFieldNoExist {
-		if err := fieldTarget22.FromInt(int64(m.Restarts), tt.NonOptional().Field(6).Type); err != nil {
-			return err
+		var23 = var23 && var24
+		if var23 {
+			if err := fieldTarget22.FromZero(tt.NonOptional().Field(3).Type); err != nil {
+				return err
+			}
+		} else {
+
+			if err := wireValue20.FillVDLTarget(fieldTarget22, tt.NonOptional().Field(3).Type); err != nil {
+				return err
+			}
 		}
 		if err := fieldsTarget1.FinishField(keyTarget21, fieldTarget22); err != nil {
 			return err
 		}
 	}
-	var wireValue23 time_2.Duration
-	if err := time_2.DurationFromNative(&wireValue23, m.RestartTimeWindow); err != nil {
-		return err
-	}
-
-	keyTarget24, fieldTarget25, err := fieldsTarget1.StartField("RestartTimeWindow")
+	keyTarget25, fieldTarget26, err := fieldsTarget1.StartField("Env")
 	if err != vdl.ErrFieldNoExist && err != nil {
 		return err
 	}
 	if err != vdl.ErrFieldNoExist {
 
-		if err := wireValue23.FillVDLTarget(fieldTarget25, tt.NonOptional().Field(7).Type); err != nil {
+		var var27 bool
+		if len(m.Env) == 0 {
+			var27 = true
+		}
+		if var27 {
+			if err := fieldTarget26.FromZero(tt.NonOptional().Field(4).Type); err != nil {
+				return err
+			}
+		} else {
+
+			listTarget28, err := fieldTarget26.StartList(tt.NonOptional().Field(4).Type, len(m.Env))
+			if err != nil {
+				return err
+			}
+			for i, elem30 := range m.Env {
+				elemTarget29, err := listTarget28.StartElem(i)
+				if err != nil {
+					return err
+				}
+				if err := elemTarget29.FromString(string(elem30), tt.NonOptional().Field(4).Type.Elem()); err != nil {
+					return err
+				}
+				if err := listTarget28.FinishElem(elemTarget29); err != nil {
+					return err
+				}
+			}
+			if err := fieldTarget26.FinishList(listTarget28); err != nil {
+				return err
+			}
+		}
+		if err := fieldsTarget1.FinishField(keyTarget25, fieldTarget26); err != nil {
 			return err
 		}
-		if err := fieldsTarget1.FinishField(keyTarget24, fieldTarget25); err != nil {
+	}
+	keyTarget31, fieldTarget32, err := fieldsTarget1.StartField("Packages")
+	if err != vdl.ErrFieldNoExist && err != nil {
+		return err
+	}
+	if err != vdl.ErrFieldNoExist {
+
+		var var33 bool
+		if len(m.Packages) == 0 {
+			var33 = true
+		}
+		if var33 {
+			if err := fieldTarget32.FromZero(tt.NonOptional().Field(5).Type); err != nil {
+				return err
+			}
+		} else {
+
+			if err := m.Packages.FillVDLTarget(fieldTarget32, tt.NonOptional().Field(5).Type); err != nil {
+				return err
+			}
+		}
+		if err := fieldsTarget1.FinishField(keyTarget31, fieldTarget32); err != nil {
+			return err
+		}
+	}
+	keyTarget34, fieldTarget35, err := fieldsTarget1.StartField("Restarts")
+	if err != vdl.ErrFieldNoExist && err != nil {
+		return err
+	}
+	if err != vdl.ErrFieldNoExist {
+
+		var36 := (m.Restarts == int32(0))
+		if var36 {
+			if err := fieldTarget35.FromZero(tt.NonOptional().Field(6).Type); err != nil {
+				return err
+			}
+		} else {
+			if err := fieldTarget35.FromInt(int64(m.Restarts), tt.NonOptional().Field(6).Type); err != nil {
+				return err
+			}
+		}
+		if err := fieldsTarget1.FinishField(keyTarget34, fieldTarget35); err != nil {
+			return err
+		}
+	}
+	var wireValue37 time_2.Duration
+	if err := time_2.DurationFromNative(&wireValue37, m.RestartTimeWindow); err != nil {
+		return err
+	}
+
+	keyTarget38, fieldTarget39, err := fieldsTarget1.StartField("RestartTimeWindow")
+	if err != vdl.ErrFieldNoExist && err != nil {
+		return err
+	}
+	if err != vdl.ErrFieldNoExist {
+
+		var40 := (wireValue37 == time_2.Duration{})
+		if var40 {
+			if err := fieldTarget39.FromZero(tt.NonOptional().Field(7).Type); err != nil {
+				return err
+			}
+		} else {
+
+			if err := wireValue37.FillVDLTarget(fieldTarget39, tt.NonOptional().Field(7).Type); err != nil {
+				return err
+			}
+		}
+		if err := fieldsTarget1.FinishField(keyTarget38, fieldTarget39); err != nil {
 			return err
 		}
 	}
@@ -484,13 +622,10 @@ func (t *EnvelopeTarget) FinishFields(_ vdl.FieldsTarget) error {
 
 	return nil
 }
-
-// Create zero values for each type.
-var (
-	__VDLZeroSignedFile = SignedFile{}
-	__VDLZeroPackages   = Packages(nil)
-	__VDLZeroEnvelope   = Envelope{}
-)
+func (t *EnvelopeTarget) FromZero(tt *vdl.Type) error {
+	*t.Value = Envelope{}
+	return nil
+}
 
 //////////////////////////////////////////////////
 // Const definitions
@@ -517,6 +652,7 @@ func __VDLInit() struct{} {
 	if __VDLInitCalled {
 		return struct{}{}
 	}
+	__VDLInitCalled = true
 
 	// Register types.
 	vdl.Register((*SignedFile)(nil))

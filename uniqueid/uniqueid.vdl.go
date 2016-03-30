@@ -50,11 +50,10 @@ func (t *IdTarget) FromBytes(src []byte, tt *vdl.Type) error {
 
 	return nil
 }
-
-// Create zero values for each type.
-var (
-	__VDLZeroId = Id{}
-)
+func (t *IdTarget) FromZero(tt *vdl.Type) error {
+	*t.Value = Id{}
+	return nil
+}
 
 var __VDLInitCalled bool
 
@@ -75,6 +74,7 @@ func __VDLInit() struct{} {
 	if __VDLInitCalled {
 		return struct{}{}
 	}
+	__VDLInitCalled = true
 
 	// Register types.
 	vdl.Register((*Id)(nil))

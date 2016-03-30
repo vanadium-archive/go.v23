@@ -50,7 +50,7 @@ pkg message, type Setup struct, SharedTokens uint64
 pkg message, type Setup struct, Versions version.RPCVersionRange
 pkg message, type TearDown struct
 pkg message, type TearDown struct, Message string
-pkg message, var ErrInvalidMsg verror.IDAction
-pkg message, var ErrInvalidSetupOption verror.IDAction
-pkg message, var ErrMissingBlessings verror.IDAction
-pkg message, var ErrUnknownMsg verror.IDAction
+pkg message, var ErrInvalidMsg unknown-type
+pkg message, var ErrInvalidSetupOption unknown-type
+pkg message, var ErrMissingBlessings unknown-type
+pkg message, var ErrUnknownMsg unknown-type
