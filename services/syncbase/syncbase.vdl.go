@@ -360,117 +360,6 @@ func (t *BatchOptionsTarget) FromZero(tt *vdl.Type) error {
 	return nil
 }
 
-// PrefixPermissions represents a pair of (prefix, perms).
-type PrefixPermissions struct {
-	Prefix string
-	Perms  access.Permissions
-}
-
-func (PrefixPermissions) __VDLReflect(struct {
-	Name string `vdl:"v.io/v23/services/syncbase.PrefixPermissions"`
-}) {
-}
-
-func (m *PrefixPermissions) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
-	fieldsTarget1, err := t.StartFields(tt)
-	if err != nil {
-		return err
-	}
-	keyTarget2, fieldTarget3, err := fieldsTarget1.StartField("Prefix")
-	if err != vdl.ErrFieldNoExist && err != nil {
-		return err
-	}
-	if err != vdl.ErrFieldNoExist {
-
-		var4 := (m.Prefix == "")
-		if var4 {
-			if err := fieldTarget3.FromZero(tt.NonOptional().Field(0).Type); err != nil {
-				return err
-			}
-		} else {
-			if err := fieldTarget3.FromString(string(m.Prefix), tt.NonOptional().Field(0).Type); err != nil {
-				return err
-			}
-		}
-		if err := fieldsTarget1.FinishField(keyTarget2, fieldTarget3); err != nil {
-			return err
-		}
-	}
-	keyTarget5, fieldTarget6, err := fieldsTarget1.StartField("Perms")
-	if err != vdl.ErrFieldNoExist && err != nil {
-		return err
-	}
-	if err != vdl.ErrFieldNoExist {
-
-		var var7 bool
-		if len(m.Perms) == 0 {
-			var7 = true
-		}
-		if var7 {
-			if err := fieldTarget6.FromZero(tt.NonOptional().Field(1).Type); err != nil {
-				return err
-			}
-		} else {
-
-			if err := m.Perms.FillVDLTarget(fieldTarget6, tt.NonOptional().Field(1).Type); err != nil {
-				return err
-			}
-		}
-		if err := fieldsTarget1.FinishField(keyTarget5, fieldTarget6); err != nil {
-			return err
-		}
-	}
-	if err := t.FinishFields(fieldsTarget1); err != nil {
-		return err
-	}
-	return nil
-}
-
-func (m *PrefixPermissions) MakeVDLTarget() vdl.Target {
-	return &PrefixPermissionsTarget{Value: m}
-}
-
-type PrefixPermissionsTarget struct {
-	Value        *PrefixPermissions
-	prefixTarget vdl.StringTarget
-	permsTarget  access.PermissionsTarget
-	vdl.TargetBase
-	vdl.FieldsTargetBase
-}
-
-func (t *PrefixPermissionsTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
-
-	if ttWant := vdl.TypeOf((*PrefixPermissions)(nil)).Elem(); !vdl.Compatible(tt, ttWant) {
-		return nil, fmt.Errorf("type %v incompatible with %v", tt, ttWant)
-	}
-	return t, nil
-}
-func (t *PrefixPermissionsTarget) StartField(name string) (key, field vdl.Target, _ error) {
-	switch name {
-	case "Prefix":
-		t.prefixTarget.Value = &t.Value.Prefix
-		target, err := &t.prefixTarget, error(nil)
-		return nil, target, err
-	case "Perms":
-		t.permsTarget.Value = &t.Value.Perms
-		target, err := &t.permsTarget, error(nil)
-		return nil, target, err
-	default:
-		return nil, nil, fmt.Errorf("field %s not in struct v.io/v23/services/syncbase.PrefixPermissions", name)
-	}
-}
-func (t *PrefixPermissionsTarget) FinishField(_, _ vdl.Target) error {
-	return nil
-}
-func (t *PrefixPermissionsTarget) FinishFields(_ vdl.FieldsTarget) error {
-
-	return nil
-}
-func (t *PrefixPermissionsTarget) FromZero(tt *vdl.Type) error {
-	*t.Value = PrefixPermissions{}
-	return nil
-}
-
 // KeyValue is a key-value pair.
 type KeyValue struct {
 	Key   string
@@ -4464,9 +4353,9 @@ type SyncgroupManagerClientMethods interface {
 	GetSyncgroupNames(*context.T, ...rpc.CallOpt) ([]string, error)
 	// CreateSyncgroup creates a new syncgroup with the given spec.
 	//
-	// Requires: Client must have at least Read access on the Database; prefix ACL
-	// must exist at each syncgroup prefix; Client must have at least Read access
-	// on each of these prefix ACLs.
+	// Requires: Client must have at least Read access on the Database; all
+	// Collections specified in prefixes must exist; Client must have at least
+	// Read access on each of the Collection ACLs.
 	CreateSyncgroup(_ *context.T, sgName string, spec SyncgroupSpec, myInfo SyncgroupMemberInfo, _ ...rpc.CallOpt) error
 	// JoinSyncgroup joins the syncgroup.
 	//
@@ -4582,9 +4471,9 @@ type SyncgroupManagerServerMethods interface {
 	GetSyncgroupNames(*context.T, rpc.ServerCall) ([]string, error)
 	// CreateSyncgroup creates a new syncgroup with the given spec.
 	//
-	// Requires: Client must have at least Read access on the Database; prefix ACL
-	// must exist at each syncgroup prefix; Client must have at least Read access
-	// on each of these prefix ACLs.
+	// Requires: Client must have at least Read access on the Database; all
+	// Collections specified in prefixes must exist; Client must have at least
+	// Read access on each of the Collection ACLs.
 	CreateSyncgroup(_ *context.T, _ rpc.ServerCall, sgName string, spec SyncgroupSpec, myInfo SyncgroupMemberInfo) error
 	// JoinSyncgroup joins the syncgroup.
 	//
@@ -4727,7 +4616,7 @@ var descSyncgroupManager = rpc.InterfaceDesc{
 		},
 		{
 			Name: "CreateSyncgroup",
-			Doc:  "// CreateSyncgroup creates a new syncgroup with the given spec.\n//\n// Requires: Client must have at least Read access on the Database; prefix ACL\n// must exist at each syncgroup prefix; Client must have at least Read access\n// on each of these prefix ACLs.",
+			Doc:  "// CreateSyncgroup creates a new syncgroup with the given spec.\n//\n// Requires: Client must have at least Read access on the Database; all\n// Collections specified in prefixes must exist; Client must have at least\n// Read access on each of the Collection ACLs.",
 			InArgs: []rpc.ArgDesc{
 				{"sgName", ``}, // string
 				{"spec", ``},   // SyncgroupSpec
@@ -6128,6 +6017,7 @@ type DatabaseClientMethods interface {
 	// behaviors:
 	// 1) It checks Resolve access on every component along the path (by doing a
 	//    Dispatcher.Lookup), whereas this doesn't happen for other RPCs.
+	// TODO(ivanpi): Resolve should be checked on all RPCs.
 	// 2) It does a Glob(<prefix>/*) for every prefix path, and only proceeds to
 	//    the next path component if that component appeared in its parent's Glob
 	//    results. This is inefficient in general, and broken for us since
@@ -6427,6 +6317,7 @@ type DatabaseServerMethods interface {
 	// behaviors:
 	// 1) It checks Resolve access on every component along the path (by doing a
 	//    Dispatcher.Lookup), whereas this doesn't happen for other RPCs.
+	// TODO(ivanpi): Resolve should be checked on all RPCs.
 	// 2) It does a Glob(<prefix>/*) for every prefix path, and only proceeds to
 	//    the next path component if that component appeared in its parent's Glob
 	//    results. This is inefficient in general, and broken for us since
@@ -6578,6 +6469,7 @@ type DatabaseServerStubMethods interface {
 	// behaviors:
 	// 1) It checks Resolve access on every component along the path (by doing a
 	//    Dispatcher.Lookup), whereas this doesn't happen for other RPCs.
+	// TODO(ivanpi): Resolve should be checked on all RPCs.
 	// 2) It does a Glob(<prefix>/*) for every prefix path, and only proceeds to
 	//    the next path component if that component appeared in its parent's Glob
 	//    results. This is inefficient in general, and broken for us since
@@ -6752,7 +6644,7 @@ var descDatabase = rpc.InterfaceDesc{
 		},
 		{
 			Name: "ListCollections",
-			Doc:  "// ListCollections returns a list of all Collection names.\n// This method exists on Database but not on Service or App because for the\n// latter we can simply use glob, while for the former glob fails on\n// BatchDatabase since we encode the batch id in the BatchDatabase object\n// name. More specifically, the glob client library appears to have two odd\n// behaviors:\n// 1) It checks Resolve access on every component along the path (by doing a\n//    Dispatcher.Lookup), whereas this doesn't happen for other RPCs.\n// 2) It does a Glob(<prefix>/*) for every prefix path, and only proceeds to\n//    the next path component if that component appeared in its parent's Glob\n//    results. This is inefficient in general, and broken for us since\n//    Glob(\"app/*\") does not return batch database names like \"a/d##bId\".\n// TODO(sadovsky): Maybe switch to streaming RPC.",
+			Doc:  "// ListCollections returns a list of all Collection names.\n// This method exists on Database but not on Service or App because for the\n// latter we can simply use glob, while for the former glob fails on\n// BatchDatabase since we encode the batch id in the BatchDatabase object\n// name. More specifically, the glob client library appears to have two odd\n// behaviors:\n// 1) It checks Resolve access on every component along the path (by doing a\n//    Dispatcher.Lookup), whereas this doesn't happen for other RPCs.\n// TODO(ivanpi): Resolve should be checked on all RPCs.\n// 2) It does a Glob(<prefix>/*) for every prefix path, and only proceeds to\n//    the next path component if that component appeared in its parent's Glob\n//    results. This is inefficient in general, and broken for us since\n//    Glob(\"app/*\") does not return batch database names like \"a/d##bId\".\n// TODO(sadovsky): Maybe switch to streaming RPC.",
 			OutArgs: []rpc.ArgDesc{
 				{"", ``}, // []string
 			},
@@ -6876,31 +6768,11 @@ type CollectionClientMethods interface {
 	SetPermissions(_ *context.T, schemaVersion int32, perms access.Permissions, _ ...rpc.CallOpt) error
 	// DeleteRange deletes all rows in the given half-open range [start, limit).
 	// If limit is "", all rows with keys >= start are included.
-	// TODO(sadovsky): Maybe add option to delete prefix perms fully covered by
-	// the row range.
 	DeleteRange(_ *context.T, schemaVersion int32, start []byte, limit []byte, _ ...rpc.CallOpt) error
 	// Scan returns all rows in the given half-open range [start, limit). If limit
 	// is "", all rows with keys >= start are included. Concurrency semantics are
 	// documented in model.go.
 	Scan(_ *context.T, schemaVersion int32, start []byte, limit []byte, _ ...rpc.CallOpt) (CollectionScanClientCall, error)
-	// GetPrefixPermissions returns an array of (prefix, perms) pairs. The array
-	// is sorted from longest prefix to shortest, so element zero is the one that
-	// applies to the row with the given key. The last element is always the
-	// prefix "" which represents the collection's permissions -- the array will
-	// always have at least one element.
-	GetPrefixPermissions(_ *context.T, schemaVersion int32, key string, _ ...rpc.CallOpt) ([]PrefixPermissions, error)
-	// SetPrefixPermissions sets the permissions for all current and future rows with
-	// the given prefix. If the prefix overlaps with an existing prefix, the
-	// longest prefix that matches a row applies. For example:
-	//     SetPrefixPermissions(ctx, Prefix("a/b"), perms1)
-	//     SetPrefixPermissions(ctx, Prefix("a/b/c"), perms2)
-	// The permissions for row "a/b/1" are perms1, and the permissions for row
-	// "a/b/c/1" are perms2.
-	SetPrefixPermissions(_ *context.T, schemaVersion int32, prefix string, perms access.Permissions, _ ...rpc.CallOpt) error
-	// DeletePrefixPermissions deletes the permissions for the specified prefix. Any
-	// rows covered by this prefix will use the next longest prefix's permissions
-	// (see the array returned by GetPrefixPermissions).
-	DeletePrefixPermissions(_ *context.T, schemaVersion int32, prefix string, _ ...rpc.CallOpt) error
 }
 
 // CollectionClientStub adds universal methods to CollectionClientMethods.
@@ -6954,21 +6826,6 @@ func (c implCollectionClientStub) Scan(ctx *context.T, i0 int32, i1 []byte, i2 [
 		return
 	}
 	ocall = &implCollectionScanClientCall{ClientCall: call}
-	return
-}
-
-func (c implCollectionClientStub) GetPrefixPermissions(ctx *context.T, i0 int32, i1 string, opts ...rpc.CallOpt) (o0 []PrefixPermissions, err error) {
-	err = v23.GetClient(ctx).Call(ctx, c.name, "GetPrefixPermissions", []interface{}{i0, i1}, []interface{}{&o0}, opts...)
-	return
-}
-
-func (c implCollectionClientStub) SetPrefixPermissions(ctx *context.T, i0 int32, i1 string, i2 access.Permissions, opts ...rpc.CallOpt) (err error) {
-	err = v23.GetClient(ctx).Call(ctx, c.name, "SetPrefixPermissions", []interface{}{i0, i1, i2}, nil, opts...)
-	return
-}
-
-func (c implCollectionClientStub) DeletePrefixPermissions(ctx *context.T, i0 int32, i1 string, opts ...rpc.CallOpt) (err error) {
-	err = v23.GetClient(ctx).Call(ctx, c.name, "DeletePrefixPermissions", []interface{}{i0, i1}, nil, opts...)
 	return
 }
 
@@ -7065,31 +6922,11 @@ type CollectionServerMethods interface {
 	SetPermissions(_ *context.T, _ rpc.ServerCall, schemaVersion int32, perms access.Permissions) error
 	// DeleteRange deletes all rows in the given half-open range [start, limit).
 	// If limit is "", all rows with keys >= start are included.
-	// TODO(sadovsky): Maybe add option to delete prefix perms fully covered by
-	// the row range.
 	DeleteRange(_ *context.T, _ rpc.ServerCall, schemaVersion int32, start []byte, limit []byte) error
 	// Scan returns all rows in the given half-open range [start, limit). If limit
 	// is "", all rows with keys >= start are included. Concurrency semantics are
 	// documented in model.go.
 	Scan(_ *context.T, _ CollectionScanServerCall, schemaVersion int32, start []byte, limit []byte) error
-	// GetPrefixPermissions returns an array of (prefix, perms) pairs. The array
-	// is sorted from longest prefix to shortest, so element zero is the one that
-	// applies to the row with the given key. The last element is always the
-	// prefix "" which represents the collection's permissions -- the array will
-	// always have at least one element.
-	GetPrefixPermissions(_ *context.T, _ rpc.ServerCall, schemaVersion int32, key string) ([]PrefixPermissions, error)
-	// SetPrefixPermissions sets the permissions for all current and future rows with
-	// the given prefix. If the prefix overlaps with an existing prefix, the
-	// longest prefix that matches a row applies. For example:
-	//     SetPrefixPermissions(ctx, Prefix("a/b"), perms1)
-	//     SetPrefixPermissions(ctx, Prefix("a/b/c"), perms2)
-	// The permissions for row "a/b/1" are perms1, and the permissions for row
-	// "a/b/c/1" are perms2.
-	SetPrefixPermissions(_ *context.T, _ rpc.ServerCall, schemaVersion int32, prefix string, perms access.Permissions) error
-	// DeletePrefixPermissions deletes the permissions for the specified prefix. Any
-	// rows covered by this prefix will use the next longest prefix's permissions
-	// (see the array returned by GetPrefixPermissions).
-	DeletePrefixPermissions(_ *context.T, _ rpc.ServerCall, schemaVersion int32, prefix string) error
 }
 
 // CollectionServerStubMethods is the server interface containing
@@ -7113,31 +6950,11 @@ type CollectionServerStubMethods interface {
 	SetPermissions(_ *context.T, _ rpc.ServerCall, schemaVersion int32, perms access.Permissions) error
 	// DeleteRange deletes all rows in the given half-open range [start, limit).
 	// If limit is "", all rows with keys >= start are included.
-	// TODO(sadovsky): Maybe add option to delete prefix perms fully covered by
-	// the row range.
 	DeleteRange(_ *context.T, _ rpc.ServerCall, schemaVersion int32, start []byte, limit []byte) error
 	// Scan returns all rows in the given half-open range [start, limit). If limit
 	// is "", all rows with keys >= start are included. Concurrency semantics are
 	// documented in model.go.
 	Scan(_ *context.T, _ *CollectionScanServerCallStub, schemaVersion int32, start []byte, limit []byte) error
-	// GetPrefixPermissions returns an array of (prefix, perms) pairs. The array
-	// is sorted from longest prefix to shortest, so element zero is the one that
-	// applies to the row with the given key. The last element is always the
-	// prefix "" which represents the collection's permissions -- the array will
-	// always have at least one element.
-	GetPrefixPermissions(_ *context.T, _ rpc.ServerCall, schemaVersion int32, key string) ([]PrefixPermissions, error)
-	// SetPrefixPermissions sets the permissions for all current and future rows with
-	// the given prefix. If the prefix overlaps with an existing prefix, the
-	// longest prefix that matches a row applies. For example:
-	//     SetPrefixPermissions(ctx, Prefix("a/b"), perms1)
-	//     SetPrefixPermissions(ctx, Prefix("a/b/c"), perms2)
-	// The permissions for row "a/b/1" are perms1, and the permissions for row
-	// "a/b/c/1" are perms2.
-	SetPrefixPermissions(_ *context.T, _ rpc.ServerCall, schemaVersion int32, prefix string, perms access.Permissions) error
-	// DeletePrefixPermissions deletes the permissions for the specified prefix. Any
-	// rows covered by this prefix will use the next longest prefix's permissions
-	// (see the array returned by GetPrefixPermissions).
-	DeletePrefixPermissions(_ *context.T, _ rpc.ServerCall, schemaVersion int32, prefix string) error
 }
 
 // CollectionServerStub adds universal methods to CollectionServerStubMethods.
@@ -7195,18 +7012,6 @@ func (s implCollectionServerStub) DeleteRange(ctx *context.T, call rpc.ServerCal
 
 func (s implCollectionServerStub) Scan(ctx *context.T, call *CollectionScanServerCallStub, i0 int32, i1 []byte, i2 []byte) error {
 	return s.impl.Scan(ctx, call, i0, i1, i2)
-}
-
-func (s implCollectionServerStub) GetPrefixPermissions(ctx *context.T, call rpc.ServerCall, i0 int32, i1 string) ([]PrefixPermissions, error) {
-	return s.impl.GetPrefixPermissions(ctx, call, i0, i1)
-}
-
-func (s implCollectionServerStub) SetPrefixPermissions(ctx *context.T, call rpc.ServerCall, i0 int32, i1 string, i2 access.Permissions) error {
-	return s.impl.SetPrefixPermissions(ctx, call, i0, i1, i2)
-}
-
-func (s implCollectionServerStub) DeletePrefixPermissions(ctx *context.T, call rpc.ServerCall, i0 int32, i1 string) error {
-	return s.impl.DeletePrefixPermissions(ctx, call, i0, i1)
 }
 
 func (s implCollectionServerStub) Globber() *rpc.GlobState {
@@ -7276,7 +7081,7 @@ var descCollection = rpc.InterfaceDesc{
 		},
 		{
 			Name: "DeleteRange",
-			Doc:  "// DeleteRange deletes all rows in the given half-open range [start, limit).\n// If limit is \"\", all rows with keys >= start are included.\n// TODO(sadovsky): Maybe add option to delete prefix perms fully covered by\n// the row range.",
+			Doc:  "// DeleteRange deletes all rows in the given half-open range [start, limit).\n// If limit is \"\", all rows with keys >= start are included.",
 			InArgs: []rpc.ArgDesc{
 				{"schemaVersion", ``}, // int32
 				{"start", ``},         // []byte
@@ -7293,37 +7098,6 @@ var descCollection = rpc.InterfaceDesc{
 				{"limit", ``},         // []byte
 			},
 			Tags: []*vdl.Value{vdl.ValueOf(access.Tag("Read"))},
-		},
-		{
-			Name: "GetPrefixPermissions",
-			Doc:  "// GetPrefixPermissions returns an array of (prefix, perms) pairs. The array\n// is sorted from longest prefix to shortest, so element zero is the one that\n// applies to the row with the given key. The last element is always the\n// prefix \"\" which represents the collection's permissions -- the array will\n// always have at least one element.",
-			InArgs: []rpc.ArgDesc{
-				{"schemaVersion", ``}, // int32
-				{"key", ``},           // string
-			},
-			OutArgs: []rpc.ArgDesc{
-				{"", ``}, // []PrefixPermissions
-			},
-			Tags: []*vdl.Value{vdl.ValueOf(access.Tag("Admin"))},
-		},
-		{
-			Name: "SetPrefixPermissions",
-			Doc:  "// SetPrefixPermissions sets the permissions for all current and future rows with\n// the given prefix. If the prefix overlaps with an existing prefix, the\n// longest prefix that matches a row applies. For example:\n//     SetPrefixPermissions(ctx, Prefix(\"a/b\"), perms1)\n//     SetPrefixPermissions(ctx, Prefix(\"a/b/c\"), perms2)\n// The permissions for row \"a/b/1\" are perms1, and the permissions for row\n// \"a/b/c/1\" are perms2.",
-			InArgs: []rpc.ArgDesc{
-				{"schemaVersion", ``}, // int32
-				{"prefix", ``},        // string
-				{"perms", ``},         // access.Permissions
-			},
-			Tags: []*vdl.Value{vdl.ValueOf(access.Tag("Admin"))},
-		},
-		{
-			Name: "DeletePrefixPermissions",
-			Doc:  "// DeletePrefixPermissions deletes the permissions for the specified prefix. Any\n// rows covered by this prefix will use the next longest prefix's permissions\n// (see the array returned by GetPrefixPermissions).",
-			InArgs: []rpc.ArgDesc{
-				{"schemaVersion", ``}, // int32
-				{"prefix", ``},        // string
-			},
-			Tags: []*vdl.Value{vdl.ValueOf(access.Tag("Admin"))},
 		},
 	},
 }
@@ -7375,8 +7149,7 @@ func (s implCollectionScanServerCallSend) Send(item KeyValue) error {
 // containing Row methods.
 //
 // Row represents a single row in a Collection.
-// All access checks are performed against the most specific matching prefix
-// permissions in the Collection.
+// All access checks are performed against the Collection ACL.
 // SchemaVersion is the version number that the client expects the database
 // to be at. To disable schema version checking, pass -1.
 // NOTE(sadovsky): Currently we send []byte values over the wire for Get, Put,
@@ -7438,8 +7211,7 @@ func (c implRowClientStub) Delete(ctx *context.T, i0 int32, opts ...rpc.CallOpt)
 // implements for Row.
 //
 // Row represents a single row in a Collection.
-// All access checks are performed against the most specific matching prefix
-// permissions in the Collection.
+// All access checks are performed against the Collection ACL.
 // SchemaVersion is the version number that the client expects the database
 // to be at. To disable schema version checking, pass -1.
 // NOTE(sadovsky): Currently we send []byte values over the wire for Get, Put,
@@ -7528,7 +7300,7 @@ var RowDesc rpc.InterfaceDesc = descRow
 var descRow = rpc.InterfaceDesc{
 	Name:    "Row",
 	PkgPath: "v.io/v23/services/syncbase",
-	Doc:     "// Row represents a single row in a Collection.\n// All access checks are performed against the most specific matching prefix\n// permissions in the Collection.\n// SchemaVersion is the version number that the client expects the database\n// to be at. To disable schema version checking, pass -1.\n// NOTE(sadovsky): Currently we send []byte values over the wire for Get, Put,\n// and Scan. If there's a way to avoid encoding/decoding on the server side, we\n// can use vdl.Value everywhere without sacrificing performance.",
+	Doc:     "// Row represents a single row in a Collection.\n// All access checks are performed against the Collection ACL.\n// SchemaVersion is the version number that the client expects the database\n// to be at. To disable schema version checking, pass -1.\n// NOTE(sadovsky): Currently we send []byte values over the wire for Get, Put,\n// and Scan. If there's a way to avoid encoding/decoding on the server side, we\n// can use vdl.Value everywhere without sacrificing performance.",
 	Methods: []rpc.MethodDesc{
 		{
 			Name: "Exists",
@@ -7596,7 +7368,6 @@ func __VDLInit() struct{} {
 	// Register types.
 	vdl.Register((*DevModeUpdateVClockOpts)(nil))
 	vdl.Register((*BatchOptions)(nil))
-	vdl.Register((*PrefixPermissions)(nil))
 	vdl.Register((*KeyValue)(nil))
 	vdl.Register((*CollectionRow)(nil))
 	vdl.Register((*SyncgroupSpec)(nil))

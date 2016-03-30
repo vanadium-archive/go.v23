@@ -227,12 +227,6 @@ type BatchDatabase interface {
 	Abort(ctx *context.T) error
 }
 
-// PrefixPermissions represents a pair of (prefix, perms).
-type PrefixPermissions struct {
-	Prefix PrefixRange
-	Perms  access.Permissions
-}
-
 // Collection represents a set of Rows.
 //
 // TODO(sadovsky): Currently we provide Get/Put/Delete methods on both
@@ -290,8 +284,6 @@ type Collection interface {
 
 	// DeleteRange deletes all rows in the given half-open range [start, limit).
 	// If limit is "", all rows with keys >= start are included.
-	// TODO(sadovsky): Maybe add option to delete prefix perms fully covered by
-	// the row range.
 	// See helpers Prefix(), Range(), SingleRow().
 	DeleteRange(ctx *context.T, r RowRange) error
 
@@ -303,27 +295,6 @@ type Collection interface {
 	// reflect subsequent writes to keys not yet reached by the stream.
 	// See helpers Prefix(), Range(), SingleRow().
 	Scan(ctx *context.T, r RowRange) ScanStream
-
-	// GetPrefixPermissions returns an array of (prefix, perms) pairs. The array is
-	// sorted from longest prefix to shortest, so element zero is the one that
-	// applies to the row with the given key. The last element is always the
-	// prefix "" which represents the collection's permissions -- the array will always
-	// have at least one element.
-	GetPrefixPermissions(ctx *context.T, key string) ([]PrefixPermissions, error)
-
-	// SetPrefixPermissions sets the permissions for all current and future rows with
-	// the given prefix. If the prefix overlaps with an existing prefix, the
-	// longest prefix that matches a row applies. For example:
-	//     SetPrefixPermissions(ctx, Prefix("a/b"), perms1)
-	//     SetPrefixPermissions(ctx, Prefix("a/b/c"), perms2)
-	// The permissions for row "a/b/1" are perms1, and the permissions for row
-	// "a/b/c/1" are perms2.
-	SetPrefixPermissions(ctx *context.T, prefix PrefixRange, perms access.Permissions) error
-
-	// DeletePrefixPermissions deletes the permissions for the specified prefix. Any
-	// rows covered by this prefix will use the next longest prefix's permissions
-	// (see the array returned by GetPrefixPermissions).
-	DeletePrefixPermissions(ctx *context.T, prefix PrefixRange) error
 }
 
 // Row represents a single row in a Collection.
@@ -466,9 +437,9 @@ func (c *WatchChange) Value(value interface{}) error {
 type Syncgroup interface {
 	// Create creates a new syncgroup with the given spec.
 	//
-	// Requires: Client must have at least Read access on the Database; prefix ACL
-	// must exist at each syncgroup prefix; Client must have at least Read access
-	// on each of these prefix ACLs.
+	// Requires: Client must have at least Read access on the Database; all
+	// Collections specified in prefixes must exist; Client must have at least
+	// Read access on each of the Collection ACLs.
 	Create(ctx *context.T, spec wire.SyncgroupSpec, myInfo wire.SyncgroupMemberInfo) error
 
 	// Join joins a syncgroup.

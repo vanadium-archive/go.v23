@@ -2304,8 +2304,8 @@ func TestExecErrors(t *testing.T) {
 			"select v from Unknown",
 			// The following error text is dependent on the implementation of the query.Database interface.
 			// TODO(sadovsky): Error messages should never contain storage engine
-			// prefixes ("t") and delimiters ("\xfe").
-			syncql.NewErrTableCantAccess(ctx, 14, "Unknown", errors.New("syncbase.test:\"a/db\".Exec: Does not exist: t\xfeUnknown")),
+			// prefixes ("c") and delimiters ("\xfe").
+			syncql.NewErrTableCantAccess(ctx, 14, "Unknown", errors.New("syncbase.test:\"a/db\".Exec: Does not exist: c\xfeUnknown\xfe")),
 		},
 		{
 			"select v from Customer offset -1",
@@ -2475,7 +2475,8 @@ func TestQueryErrors(t *testing.T) {
 		{
 			"select k from Blah",
 			// TODO(sadovsky): Error messages should never contain storage engine
-			syncql.NewErrTableCantAccess(ctx, 14, "Blah", errors.New("syncbase.test:\"a/db\".Exec: Does not exist: t\xfeBlah")),
+			// prefixes ("c") and delimiters ("\xfe").
+			syncql.NewErrTableCantAccess(ctx, 14, "Blah", errors.New("syncbase.test:\"a/db\".Exec: Does not exist: c\xfeBlah\xfe")),
 		},
 		{
 			"select k, v from Customer where a = b)",

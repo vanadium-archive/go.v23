@@ -229,13 +229,13 @@ func TestV23SyncbasedCompEval(t *testing.T) {
 }
 
 // TestV23SyncbasedExchangeDeltasWithAcls tests the exchange of deltas including
-// acls between two Syncbase instances and their clients.  The 1st client
-// creates a syncgroup at "foo", sets an acl, and puts some database entries in
-// it.  The 2nd client joins that syncgroup and reads the database entries.  The
-// 2nd client then adds a prefix acl with access to only itself at "foobar".
-// The 1st client should be unable to access the subset of keys under
-// "foobar". The 2nd client then modifies the prefix acl at "foobar" with access
-// to both clients. The 1st client should regain access.
+// acls between two Syncbase instances and their clients. The 1st client creates
+// a syncgroup on a collection and puts some database entries in it. The 2nd
+// client joins that syncgroup and reads the database entries. The 2nd client
+// then changes the collection acl to allow access to only itself. The 1st
+// client should be unable to access the keys. The 2nd client then modifies the
+// collection acl to restore access to both clients. The 1st client should
+// regain access.
 func TestV23SyncbasedExchangeDeltasWithAcls(t *testing.T) {
 	v23test.SkipUnlessRunningIntegrationTests(t)
 	sh := v23test.NewShell(t, nil)
@@ -252,23 +252,24 @@ func TestV23SyncbasedExchangeDeltasWithAcls(t *testing.T) {
 
 	sgName := naming.Join("sync0", common.SyncbaseSuffix, "SG1")
 
+	// Note, since collection ACLs are resolved last-one-wins, both collections
+	// must be set up before calling runSetCollectionPermissions to ensure the
+	// newly set value is the latest.
 	ok(t, runSetupAppA(client0Ctx, "sync0"))
-	ok(t, runCreateSyncgroup(client0Ctx, "sync0", sgName, "c:foo", "", "root:s0", "root:s1"))
-	ok(t, runPopulateData(client0Ctx, "sync0", "foobarbaz", 0))
-	ok(t, runPopulateData(client0Ctx, "sync0", "foo", 0))
-	ok(t, runSetPrefixPermissions(client0Ctx, "sync0", "foo", "root:c0", "root:c1"))
-
 	ok(t, runSetupAppA(client1Ctx, "sync1"))
+
+	ok(t, runCreateSyncgroup(client0Ctx, "sync0", sgName, "c:", "", "root:s0", "root:s1"))
+	ok(t, runPopulateData(client0Ctx, "sync0", "foo", 0))
+	ok(t, runSetCollectionPermissions(client0Ctx, "sync0", "root:c0", "root:c1"))
+
 	ok(t, runJoinSyncgroup(client1Ctx, "sync1", sgName))
-	ok(t, runVerifySyncgroupData(client1Ctx, "sync1", "foobarbaz", 0, 10, false))
 	ok(t, runVerifySyncgroupData(client1Ctx, "sync1", "foo", 0, 10, true))
 
-	ok(t, runSetPrefixPermissions(client1Ctx, "sync1", "foobar", "root:c1"))
-	ok(t, runVerifyLostAccess(client0Ctx, "sync0", "foobarbaz", 0, 10))
-	ok(t, runVerifySyncgroupData(client0Ctx, "sync0", "foo", 0, 10, true))
+	ok(t, runSetCollectionPermissions(client1Ctx, "sync1", "root:c1"))
+	ok(t, runVerifyLostAccess(client0Ctx, "sync0", "foo", 0, 10))
 
-	ok(t, runSetPrefixPermissions(client1Ctx, "sync1", "foobar", "root:c0", "root:c1"))
-	ok(t, runVerifySyncgroupData(client0Ctx, "sync0", "foobarbaz", 0, 10, false))
+	ok(t, runSetCollectionPermissions(client1Ctx, "sync1", "root:c0", "root:c1"))
+	ok(t, runVerifySyncgroupData(client0Ctx, "sync0", "foo", 0, 10, false))
 }
 
 // TestV23SyncbasedExchangeDeltasWithConflicts tests the exchange of deltas
@@ -747,15 +748,15 @@ func runDeleteData(ctx *context.T, serviceName string, start uint64) error {
 	return nil
 }
 
-func runSetPrefixPermissions(ctx *context.T, serviceName, keyPrefix string, aclBlessings ...string) error {
+func runSetCollectionPermissions(ctx *context.T, serviceName string, aclBlessings ...string) error {
 	a := syncbase.NewService(serviceName).App("a")
 	d := a.Database("d", nil)
 
 	// Set acl.
 	c := d.Collection(testCollection)
 
-	if err := c.SetPrefixPermissions(ctx, syncbase.Prefix(keyPrefix), perms(aclBlessings...)); err != nil {
-		return fmt.Errorf("c.SetPrefixPermissions() failed: %v\n", err)
+	if err := c.SetPermissions(ctx, perms(aclBlessings...)); err != nil {
+		return fmt.Errorf("c.SetPermissions() failed: %v\n", err)
 	}
 
 	return nil

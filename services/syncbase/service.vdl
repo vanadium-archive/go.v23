@@ -87,6 +87,7 @@ type Database interface {
 	// behaviors:
 	// 1) It checks Resolve access on every component along the path (by doing a
 	//    Dispatcher.Lookup), whereas this doesn't happen for other RPCs.
+	// TODO(ivanpi): Resolve should be checked on all RPCs.
 	// 2) It does a Glob(<prefix>/*) for every prefix path, and only proceeds to
 	//    the next path component if that component appeared in its parent's Glob
 	//    results. This is inefficient in general, and broken for us since
@@ -179,40 +180,16 @@ type Collection interface {
 
 	// DeleteRange deletes all rows in the given half-open range [start, limit).
 	// If limit is "", all rows with keys >= start are included.
-	// TODO(sadovsky): Maybe add option to delete prefix perms fully covered by
-	// the row range.
 	DeleteRange(schemaVersion int32, start, limit []byte) error {access.Write}
 
 	// Scan returns all rows in the given half-open range [start, limit). If limit
 	// is "", all rows with keys >= start are included. Concurrency semantics are
 	// documented in model.go.
 	Scan(schemaVersion int32, start, limit []byte) stream<_, KeyValue> error {access.Read}
-
-	// GetPrefixPermissions returns an array of (prefix, perms) pairs. The array
-	// is sorted from longest prefix to shortest, so element zero is the one that
-	// applies to the row with the given key. The last element is always the
-	// prefix "" which represents the collection's permissions -- the array will
-	// always have at least one element.
-	GetPrefixPermissions(schemaVersion int32, key string) ([]PrefixPermissions | error) {access.Admin}
-
-	// SetPrefixPermissions sets the permissions for all current and future rows with
-	// the given prefix. If the prefix overlaps with an existing prefix, the
-	// longest prefix that matches a row applies. For example:
-	//     SetPrefixPermissions(ctx, Prefix("a/b"), perms1)
-	//     SetPrefixPermissions(ctx, Prefix("a/b/c"), perms2)
-	// The permissions for row "a/b/1" are perms1, and the permissions for row
-	// "a/b/c/1" are perms2.
-	SetPrefixPermissions(schemaVersion int32, prefix string, perms access.Permissions) error {access.Admin}
-
-	// DeletePrefixPermissions deletes the permissions for the specified prefix. Any
-	// rows covered by this prefix will use the next longest prefix's permissions
-	// (see the array returned by GetPrefixPermissions).
-	DeletePrefixPermissions(schemaVersion int32, prefix string) error {access.Admin}
 }
 
 // Row represents a single row in a Collection.
-// All access checks are performed against the most specific matching prefix
-// permissions in the Collection.
+// All access checks are performed against the Collection ACL.
 // SchemaVersion is the version number that the client expects the database
 // to be at. To disable schema version checking, pass -1.
 // NOTE(sadovsky): Currently we send []byte values over the wire for Get, Put,
@@ -247,9 +224,9 @@ type SyncgroupManager interface {
 
 	// CreateSyncgroup creates a new syncgroup with the given spec.
 	//
-	// Requires: Client must have at least Read access on the Database; prefix ACL
-	// must exist at each syncgroup prefix; Client must have at least Read access
-	// on each of these prefix ACLs.
+	// Requires: Client must have at least Read access on the Database; all
+	// Collections specified in prefixes must exist; Client must have at least
+	// Read access on each of the Collection ACLs.
 	CreateSyncgroup(sgName string, spec SyncgroupSpec, myInfo SyncgroupMemberInfo) error {access.Read}
 
 	// JoinSyncgroup joins the syncgroup.

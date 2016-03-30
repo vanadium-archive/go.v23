@@ -6,7 +6,6 @@ package syncbase_test
 
 import (
 	"reflect"
-	"strings"
 	"testing"
 	"time"
 
@@ -131,18 +130,18 @@ func TestAppDestroyAndRecreate(t *testing.T) {
 	if err := c.Put(ctx, "foo", "B"); err != nil {
 		t.Fatalf("c.Put() failed: %v", err)
 	}
-	// Remove admin and write permissions from "bar" and d2.
+	// Remove admin and write permissions from c and d2.
 	fullPerms := tu.DefaultPerms("root:client").Normalize()
 	readPerms := fullPerms.Copy()
 	readPerms.Clear("root:client", string(access.Write), string(access.Admin))
 	readPerms.Normalize()
-	if err := c.SetPrefixPermissions(ctx, syncbase.Prefix("bar"), readPerms); err != nil {
-		t.Fatalf("c.SetPrefixPermissions() failed: %v", err)
+	if err := c.SetPermissions(ctx, readPerms); err != nil {
+		t.Fatalf("c.SetPermissions() failed: %v", err)
 	}
 	if err := d2.SetPermissions(ctx, readPerms, ""); err != nil {
 		t.Fatalf("d2.SetPermissions() failed: %v", err)
 	}
-	// Verify we have no write access to "bar" anymore.
+	// Verify we have no write access to c anymore.
 	if err := c.Put(ctx, "bar/bat", "C"); verror.ErrorID(err) != verror.ErrNoAccess.ID {
 		t.Fatalf("c.Put() should have failed with ErrNoAccess, got: %v", err)
 	}
@@ -151,7 +150,7 @@ func TestAppDestroyAndRecreate(t *testing.T) {
 		t.Fatalf("d2.Destroy() should have failed with ErrNoAccess, got: %v", err)
 	}
 	// Destroy app. Destroy needs only admin permissions on the app, so it
-	// shouldn't be affected by the read-only prefix or database ACL.
+	// shouldn't be affected by the read-only collection or database ACL.
 	if err := a.Destroy(ctx); err != nil {
 		t.Fatalf("a.Destroy() failed: %v", err)
 	}
@@ -162,7 +161,7 @@ func TestAppDestroyAndRecreate(t *testing.T) {
 	c = tu.CreateCollection(t, ctx, d, "c")
 	// Verify collection is empty.
 	tu.CheckScan(t, ctx, c, syncbase.Prefix(""), []string{}, []interface{}{})
-	// Verify we again have write access to "bar".
+	// Verify we again have write access to c.
 	if err := c.Put(ctx, "bar/bat", "C"); err != nil {
 		t.Fatalf("c.Put() failed: %v", err)
 	}
@@ -328,300 +327,7 @@ func TestCollectionDestroy(t *testing.T) {
 	tu.TestDestroy(t, ctx, d)
 }
 
-// Tests that Collection.{Set,Get,Delete}Permissions methods work as expected.
-func TestCollectionPerms(t *testing.T) {
-	ctx, clientACtx, sName, rootp, cleanup := tu.SetupOrDieCustom("clientA", "server", nil)
-	defer cleanup()
-	clientBCtx := tu.NewCtx(ctx, rootp, "clientB")
-	a := tu.CreateApp(t, clientACtx, syncbase.NewService(sName), "a")
-	d := tu.CreateDatabase(t, clientACtx, a, "d")
-	c := tu.CreateCollection(t, clientACtx, d, "c")
-
-	// Permission objects.
-	aAndB := tu.DefaultPerms("root:clientA", "root:clientB")
-	aOnly := tu.DefaultPerms("root:clientA")
-	bOnly := tu.DefaultPerms("root:clientB")
-
-	// Set initial permissions.
-	if err := c.SetPermissions(clientACtx, aAndB); err != nil {
-		t.Fatalf("c.SetPermissions() failed: %v", err)
-	}
-	if err := c.SetPrefixPermissions(clientACtx, syncbase.Prefix(""), aAndB); err != nil {
-		t.Fatalf("c.SetPrefixPermissions() failed: %v", err)
-	}
-	if err := c.SetPrefixPermissions(clientACtx, syncbase.Prefix("prefix"), aAndB); err != nil {
-		t.Fatalf("c.SetPrefixPermissions() failed: %v", err)
-	}
-	if err := c.SetPrefixPermissions(clientBCtx, syncbase.Prefix("prefix"), aAndB); err != nil {
-		t.Fatalf("c.SetPrefixPermissions() failed: %v", err)
-	}
-	if err := c.SetPrefixPermissions(clientACtx, syncbase.Prefix("prefix_a"), aOnly); err != nil {
-		t.Fatalf("c.SetPrefixPermissions() failed: %v", err)
-	}
-	if err := c.SetPrefixPermissions(clientBCtx, syncbase.Prefix("prefix_b"), bOnly); err != nil {
-		t.Fatalf("c.SetPrefixPermissions() failed: %v", err)
-	}
-
-	// Checks A has no access to 'prefix_b' and vice versa.
-	if err := c.SetPrefixPermissions(clientACtx, syncbase.Prefix("prefix_b"), aOnly); verror.ErrorID(err) != verror.ErrNoAccess.ID {
-		t.Fatalf("c.SetPrefixPermissions() should have failed: %v", err)
-	}
-	if err := c.SetPrefixPermissions(clientACtx, syncbase.Prefix("prefix_b_suffix"), aOnly); verror.ErrorID(err) != verror.ErrNoAccess.ID {
-		t.Fatalf("c.SetPrefixPermissions() should have failed: %v", err)
-	}
-	if err := c.SetPrefixPermissions(clientBCtx, syncbase.Prefix("prefix_a"), bOnly); verror.ErrorID(err) != verror.ErrNoAccess.ID {
-		t.Fatalf("c.SetPrefixPermissions() should have failed: %v", err)
-	}
-	if err := c.SetPrefixPermissions(clientBCtx, syncbase.Prefix("prefix_a_suffix"), bOnly); verror.ErrorID(err) != verror.ErrNoAccess.ID {
-		t.Fatalf("c.SetPrefixPermissions() should have failed: %v", err)
-	}
-
-	// Check GetPrefixPermissions.
-	wantPerms := []syncbase.PrefixPermissions{
-		syncbase.PrefixPermissions{Prefix: syncbase.Prefix(""), Perms: aAndB},
-	}
-	if got, _ := c.GetPrefixPermissions(clientACtx, ""); !reflect.DeepEqual(got, wantPerms) {
-		t.Fatalf("Unexpected permissions: got %v, want %v", got, wantPerms)
-	}
-	if got, _ := c.GetPrefixPermissions(clientACtx, "abc"); !reflect.DeepEqual(got, wantPerms) {
-		t.Fatalf("Unexpected permissions: got %v, want %v", got, wantPerms)
-	}
-	wantPerms = []syncbase.PrefixPermissions{
-		syncbase.PrefixPermissions{Prefix: syncbase.Prefix("prefix"), Perms: aAndB},
-		syncbase.PrefixPermissions{Prefix: syncbase.Prefix(""), Perms: aAndB},
-	}
-	if got, _ := c.GetPrefixPermissions(clientACtx, "prefix"); !reflect.DeepEqual(got, wantPerms) {
-		t.Fatalf("Unexpected permissions: got %v, want %v", got, wantPerms)
-	}
-	if got, _ := c.GetPrefixPermissions(clientACtx, "prefix_c"); !reflect.DeepEqual(got, wantPerms) {
-		t.Fatalf("Unexpected permissions: got %v, want %v", got, wantPerms)
-	}
-	wantPerms = []syncbase.PrefixPermissions{
-		syncbase.PrefixPermissions{Prefix: syncbase.Prefix("prefix_a"), Perms: aOnly},
-		syncbase.PrefixPermissions{Prefix: syncbase.Prefix("prefix"), Perms: aAndB},
-		syncbase.PrefixPermissions{Prefix: syncbase.Prefix(""), Perms: aAndB},
-	}
-	if got, _ := c.GetPrefixPermissions(clientACtx, "prefix_a"); !reflect.DeepEqual(got, wantPerms) {
-		t.Fatalf("Unexpected permissions: got %v, want %v", got, wantPerms)
-	}
-	if got, _ := c.GetPrefixPermissions(clientACtx, "prefix_a_suffix"); !reflect.DeepEqual(got, wantPerms) {
-		t.Fatalf("Unexpected permissions: got %v, want %v", got, wantPerms)
-	}
-	wantPerms = []syncbase.PrefixPermissions{
-		syncbase.PrefixPermissions{Prefix: syncbase.Prefix("prefix_b"), Perms: bOnly},
-		syncbase.PrefixPermissions{Prefix: syncbase.Prefix("prefix"), Perms: aAndB},
-		syncbase.PrefixPermissions{Prefix: syncbase.Prefix(""), Perms: aAndB},
-	}
-	if got, _ := c.GetPrefixPermissions(clientACtx, "prefix_b"); !reflect.DeepEqual(got, wantPerms) {
-		t.Fatalf("Unexpected permissions: got %v, want %v", got, wantPerms)
-	}
-	if got, _ := c.GetPrefixPermissions(clientACtx, "prefix_b_suffix"); !reflect.DeepEqual(got, wantPerms) {
-		t.Fatalf("Unexpected permissions: got %v, want %v", got, wantPerms)
-	}
-
-	// Delete some prefix permissions and check again.
-	// Check that A can't delete permissions of B.
-	if err := c.DeletePrefixPermissions(clientACtx, syncbase.Prefix("prefix_b")); verror.ErrorID(err) != verror.ErrNoAccess.ID {
-		t.Fatalf("c.DeletePrefixPermissions() should have failed: %v", err)
-	}
-	if err := c.DeletePrefixPermissions(clientBCtx, syncbase.Prefix("prefix_a")); verror.ErrorID(err) != verror.ErrNoAccess.ID {
-		t.Fatalf("c.DeletePrefixPermissions() should have failed: %v", err)
-	}
-	// Delete 'prefix' and 'prefix_a'
-	if err := c.DeletePrefixPermissions(clientACtx, syncbase.Prefix("prefix")); err != nil {
-		t.Fatalf("c.DeletePrefixPermissions() failed: %v", err)
-	}
-	if err := c.DeletePrefixPermissions(clientACtx, syncbase.Prefix("prefix_a")); err != nil {
-		t.Fatalf("c.DeletePrefixPermissions() failed: %v", err)
-	}
-	// Check DeletePrefixPermissions is idempotent.
-	if err := c.DeletePrefixPermissions(clientACtx, syncbase.Prefix("prefix")); err != nil {
-		t.Fatalf("c.DeletePrefixPermissions() failed: %v", err)
-	}
-
-	// Check GetPrefixPermissions again.
-	wantPerms = []syncbase.PrefixPermissions{
-		syncbase.PrefixPermissions{Prefix: syncbase.Prefix(""), Perms: aAndB},
-	}
-	if got, _ := c.GetPrefixPermissions(clientACtx, ""); !reflect.DeepEqual(got, wantPerms) {
-		t.Fatalf("Unexpected permissions: got %v, want %v", got, wantPerms)
-	}
-	if got, _ := c.GetPrefixPermissions(clientACtx, "prefix"); !reflect.DeepEqual(got, wantPerms) {
-		t.Fatalf("Unexpected permissions: got %v, want %v", got, wantPerms)
-	}
-	if got, _ := c.GetPrefixPermissions(clientACtx, "prefix_a"); !reflect.DeepEqual(got, wantPerms) {
-		t.Fatalf("Unexpected permissions: got %v, want %v", got, wantPerms)
-	}
-	if got, _ := c.GetPrefixPermissions(clientACtx, "prefix_a_suffix"); !reflect.DeepEqual(got, wantPerms) {
-		t.Fatalf("Unexpected permissions: got %v, want %v", got, wantPerms)
-	}
-	wantPerms = []syncbase.PrefixPermissions{
-		syncbase.PrefixPermissions{Prefix: syncbase.Prefix("prefix_b"), Perms: bOnly},
-		syncbase.PrefixPermissions{Prefix: syncbase.Prefix(""), Perms: aAndB},
-	}
-	if got, _ := c.GetPrefixPermissions(clientACtx, "prefix_b"); !reflect.DeepEqual(got, wantPerms) {
-		t.Fatalf("Unexpected permissions: got %v, want %v", got, wantPerms)
-	}
-	if got, _ := c.GetPrefixPermissions(clientACtx, "prefix_b_suffix"); !reflect.DeepEqual(got, wantPerms) {
-		t.Fatalf("Unexpected permissions: got %v, want %v", got, wantPerms)
-	}
-
-	// Remove B from collection-level permissions and check B has no access.
-	if err := c.SetPermissions(clientACtx, aOnly); err != nil {
-		t.Fatalf("c.SetPermissions() failed: %v", err)
-	}
-	if err := c.SetPrefixPermissions(clientACtx, syncbase.Prefix(""), aOnly); err != nil {
-		t.Fatalf("c.SetPrefixPermissions() failed: %v", err)
-	}
-	if _, err := c.GetPrefixPermissions(clientBCtx, ""); verror.ErrorID(err) != verror.ErrNoAccess.ID {
-		t.Fatalf("c.GetPrefixPermissions() should have failed: %v", err)
-	}
-	if _, err := c.GetPrefixPermissions(clientBCtx, "prefix_b"); verror.ErrorID(err) != verror.ErrNoAccess.ID {
-		t.Fatalf("c.GetPrefixPermissions() should have failed: %v", err)
-	}
-	if err := c.SetPermissions(clientBCtx, bOnly); verror.ErrorID(err) != verror.ErrNoAccess.ID {
-		t.Fatalf("c.SetPermissions() should have failed: %v", err)
-	}
-	if err := c.SetPrefixPermissions(clientBCtx, syncbase.Prefix("prefix_b"), bOnly); verror.ErrorID(err) != verror.ErrNoAccess.ID {
-		t.Fatalf("c.SetPrefixPermissions() should have failed: %v", err)
-	}
-}
-
-// Tests that Collection.{Set,Get}Permissions methods work as expected.
-func TestCollectionPermsDifferentOrder(t *testing.T) {
-	ctx, clientACtx, sName, rootp, cleanup := tu.SetupOrDieCustom("clientA", "server", nil)
-	defer cleanup()
-	clientBCtx := tu.NewCtx(ctx, rootp, "clientB")
-	a := tu.CreateApp(t, clientACtx, syncbase.NewService(sName), "a")
-	d := tu.CreateDatabase(t, clientACtx, a, "d")
-	c := tu.CreateCollection(t, clientACtx, d, "c")
-
-	// Permission objects.
-	aAndB := tu.DefaultPerms("root:clientA", "root:clientB")
-	aOnly := tu.DefaultPerms("root:clientA")
-	bOnly := tu.DefaultPerms("root:clientB")
-
-	// Set initial permissions.
-	if err := c.SetPermissions(clientACtx, aAndB); err != nil {
-		t.Fatalf("c.SetPermissions() failed: %v", err)
-	}
-	if err := c.SetPrefixPermissions(clientACtx, syncbase.Prefix(""), aAndB); err != nil {
-		t.Fatalf("c.SetPrefixPermissions() failed: %v", err)
-	}
-	if err := c.SetPrefixPermissions(clientACtx, syncbase.Prefix("prefix"), aAndB); err != nil {
-		t.Fatalf("c.SetPrefixPermissions() failed: %v", err)
-	}
-	if err := c.SetPrefixPermissions(clientBCtx, syncbase.Prefix("prefix_b"), bOnly); err != nil {
-		t.Fatalf("c.SetPrefixPermissions() failed: %v", err)
-	}
-	if err := c.SetPrefixPermissions(clientACtx, syncbase.Prefix("prefix_a"), aOnly); err != nil {
-		t.Fatalf("c.SetPrefixPermissions() failed: %v", err)
-	}
-
-	wantPerms := []syncbase.PrefixPermissions{
-		syncbase.PrefixPermissions{Prefix: syncbase.Prefix("prefix_a"), Perms: aOnly},
-		syncbase.PrefixPermissions{Prefix: syncbase.Prefix("prefix"), Perms: aAndB},
-		syncbase.PrefixPermissions{Prefix: syncbase.Prefix(""), Perms: aAndB},
-	}
-	if got, _ := c.GetPrefixPermissions(clientACtx, "prefix_a"); !reflect.DeepEqual(got, wantPerms) {
-		t.Fatalf("Unexpected permissions: got %v, want %v", got, wantPerms)
-	}
-	if got, _ := c.GetPrefixPermissions(clientACtx, "prefix_a_suffix"); !reflect.DeepEqual(got, wantPerms) {
-		t.Fatalf("Unexpected permissions: got %v, want %v", got, wantPerms)
-	}
-	wantPerms = []syncbase.PrefixPermissions{
-		syncbase.PrefixPermissions{Prefix: syncbase.Prefix("prefix_b"), Perms: bOnly},
-		syncbase.PrefixPermissions{Prefix: syncbase.Prefix("prefix"), Perms: aAndB},
-		syncbase.PrefixPermissions{Prefix: syncbase.Prefix(""), Perms: aAndB},
-	}
-	if got, _ := c.GetPrefixPermissions(clientACtx, "prefix_b"); !reflect.DeepEqual(got, wantPerms) {
-		t.Fatalf("Unexpected permissions: got %v, want %v", got, wantPerms)
-	}
-	if got, _ := c.GetPrefixPermissions(clientACtx, "prefix_b_suffix"); !reflect.DeepEqual(got, wantPerms) {
-		t.Fatalf("Unexpected permissions: got %v, want %v", got, wantPerms)
-	}
-}
-
-// bitmaskToPrefix converts first length bits of bitmask to a string.
-// Bits are converted the following way: 0 -> 'b', 1 -> 'a'.
-// The lowest bit becomes the first character in the string.
-// For example, (0x8, 4) -> "bbba".
-func bitmaskToPrefix(bitmask, length int) string {
-	prefix := ""
-	for k := 0; k < length; k++ {
-		prefix += string('b' - ((bitmask >> uint32(k)) & 1))
-	}
-	return prefix
-}
-
-func checkGetPermissions(t *testing.T, ctx *context.T, c syncbase.Collection, prefix string, max, min int) {
-	perms := tu.DefaultPerms("root:client")
-	for len(prefix) < max {
-		prefix += "a"
-	}
-	var wantPerms []syncbase.PrefixPermissions
-	for k := max; k >= min; k-- {
-		wantPerms = append(wantPerms, syncbase.PrefixPermissions{Prefix: syncbase.Prefix(prefix[:k]), Perms: perms})
-	}
-	wantPerms = append(wantPerms, syncbase.PrefixPermissions{Prefix: syncbase.Prefix(""), Perms: perms})
-	if gotPerms, _ := c.GetPrefixPermissions(ctx, prefix); !reflect.DeepEqual(gotPerms, wantPerms) {
-		tu.Fatalf(t, "Unexpected permissions for %q: got %v, want %v", prefix, gotPerms, wantPerms)
-	}
-}
-
-// Tests that Collection.{Set,Get,Delete}Permissions methods work as expected
-// for nested prefixes.
-func TestCollectionPermsNested(t *testing.T) {
-	ctx, sName, cleanup := tu.SetupOrDie(nil)
-	defer cleanup()
-	a := tu.CreateApp(t, ctx, syncbase.NewService(sName), "a")
-	d := tu.CreateDatabase(t, ctx, a, "d")
-	c := tu.CreateCollection(t, ctx, d, "c")
-	// The permission object.
-	perms := tu.DefaultPerms("root:client")
-	depth := 4
-	// Set permissions in order b, a, bb, ba, ab, aa, ...
-	for i := 1; i <= depth; i++ {
-		for j := 0; j < 1<<uint32(i); j++ {
-			prefix := bitmaskToPrefix(j, i)
-			if err := c.SetPrefixPermissions(ctx, syncbase.Prefix(prefix), perms); err != nil {
-				t.Fatalf("c.SetPrefixPermissions() failed for %q: %v", prefix, err)
-			}
-			checkGetPermissions(t, ctx, c, prefix, i, 1)
-		}
-	}
-	// Delete permissions in the reverse order.
-	for i := depth; i >= 1; i-- {
-		for j := 0; j < 1<<uint32(i); j++ {
-			prefix := bitmaskToPrefix(j, i)
-			if err := c.DeletePrefixPermissions(ctx, syncbase.Prefix(prefix)); err != nil {
-				t.Fatalf("c.DeletePrefixPermissions() failed for %q: %v", prefix, err)
-			}
-			checkGetPermissions(t, ctx, c, prefix, i-1, 1)
-		}
-	}
-	// Do again the first two steps in the reverse order.
-	for i := depth; i >= 1; i-- {
-		for j := 0; j < 1<<uint32(i); j++ {
-			prefix := bitmaskToPrefix(j, i)
-			if err := c.SetPrefixPermissions(ctx, syncbase.Prefix(prefix), perms); err != nil {
-				t.Fatalf("c.SetPrefixPermissions() failed for %q: %v", prefix, err)
-			}
-			checkGetPermissions(t, ctx, c, prefix, depth, i)
-		}
-	}
-	for i := 1; i <= depth; i++ {
-		for j := 0; j < 1<<uint32(i); j++ {
-			prefix := bitmaskToPrefix(j, i)
-			if err := c.DeletePrefixPermissions(ctx, syncbase.Prefix(prefix)); err != nil {
-				t.Fatalf("c.DeletePrefixPermissions() failed for %q: %v", prefix, err)
-			}
-			checkGetPermissions(t, ctx, c, prefix, depth, i+1)
-		}
-	}
-}
-
-// Tests that Collection.Destroy deletes all rows and ACLs in the collection.
+// Tests that Collection.Destroy deletes all rows in the collection.
 func TestCollectionDestroyAndRecreate(t *testing.T) {
 	ctx, sName, cleanup := tu.SetupOrDie(nil)
 	defer cleanup()
@@ -635,20 +341,23 @@ func TestCollectionDestroyAndRecreate(t *testing.T) {
 	if err := c.Put(ctx, "foo", "B"); err != nil {
 		t.Fatalf("c.Put() failed: %v", err)
 	}
-	// Remove admin and write permissions from "bar".
-	fullPerms := tu.DefaultPerms("root:client").Normalize()
-	readPerms := fullPerms.Copy()
-	readPerms.Clear("root:client", string(access.Write), string(access.Admin))
-	readPerms.Normalize()
-	if err := c.SetPrefixPermissions(ctx, syncbase.Prefix("bar"), readPerms); err != nil {
-		t.Fatalf("c.SetPrefixPermissions() failed: %v", err)
-	}
-	// Verify we have no write access to "bar" anymore.
-	if err := c.Put(ctx, "bar/bat", "C"); verror.ErrorID(err) != verror.ErrNoAccess.ID {
-		t.Fatalf("c.Put() should have failed with ErrNoAccess, got: %v", err)
-	}
+	/*
+		// Remove write permissions from collection.
+		fullPerms := tu.DefaultPerms("root:client").Normalize()
+		readPerms := fullPerms.Copy()
+		readPerms.Clear("root:client", string(access.Write))
+		readPerms.Normalize()
+		if err := c.SetPermissions(ctx, readPerms); err != nil {
+			t.Fatalf("c.SetPermissions() failed: %v", err)
+		}
+		// Verify we have no write access to "bar" anymore.
+		if err := c.Put(ctx, "bar/bat", "C"); verror.ErrorID(err) != verror.ErrNoAccess.ID {
+			t.Fatalf("c.Put() should have failed with ErrNoAccess, got: %v", err)
+		}
+	*/
 	// Destroy collection. Destroy needs only admin permissions on the collection,
-	// so it shouldn't be affected by the read-only prefix ACL.
+	// so it shouldn't be affected by the lack of Write access.
+	// TODO(ivanpi): Destroy currently needs Write, reenable code above when fixed.
 	if err := c.Destroy(ctx); err != nil {
 		t.Fatalf("c.Destroy() failed: %v", err)
 	}
@@ -860,51 +569,34 @@ func TestRowNameValidation(t *testing.T) {
 
 // Test permission checking in Row.{Get,Put,Delete} and
 // Collection.{Scan, DeleteRange}.
+// TODO(ivanpi): Redundant with permissions_test?
 func TestRowPermissions(t *testing.T) {
-	ctx, clientACtx, sName, rootp, cleanup := tu.SetupOrDieCustom("clientA", "server", nil)
+	_, clientACtx, sName, _, cleanup := tu.SetupOrDieCustom("clientA", "server", nil)
 	defer cleanup()
-	clientBCtx := tu.NewCtx(ctx, rootp, "clientB")
 	a := tu.CreateApp(t, clientACtx, syncbase.NewService(sName), "a")
 	d := tu.CreateDatabase(t, clientACtx, a, "d")
 	c := tu.CreateCollection(t, clientACtx, d, "c")
 
-	// Permission objects.
-	aAndB := tu.DefaultPerms("root:clientA", "root:clientB")
-	aOnly := tu.DefaultPerms("root:clientA")
-	bOnly := tu.DefaultPerms("root:clientB")
+	// Add some key-value pairs.
+	r := c.Row("foo")
+	if err := r.Put(clientACtx, Foo{}); err != nil {
+		t.Fatalf("r.Put() failed: %v", err)
+	}
 
-	// Set initial permissions.
-	if err := c.SetPermissions(clientACtx, aAndB); err != nil {
+	// Lock A out of c.
+	bOnly := tu.DefaultPerms("root:clientB")
+	if err := c.SetPermissions(clientACtx, bOnly); err != nil {
 		t.Fatalf("c.SetPermissions() failed: %v", err)
 	}
-	if err := c.SetPrefixPermissions(clientACtx, syncbase.Prefix(""), aAndB); err != nil {
-		t.Fatalf("c.SetPrefixPermissions() failed: %v", err)
-	}
-	if err := c.SetPrefixPermissions(clientACtx, syncbase.Prefix("a"), aOnly); err != nil {
-		t.Fatalf("c.SetPrefixPermissions() failed: %v", err)
-	}
-	if err := c.SetPrefixPermissions(clientBCtx, syncbase.Prefix("b"), bOnly); err != nil {
-		t.Fatalf("c.SetPrefixPermissions() failed: %v", err)
-	}
 
-	// Add some key-value pairs.
-	ra := c.Row("afoo")
-	rb := c.Row("bfoo")
-	if err := ra.Put(clientACtx, Foo{}); err != nil {
-		t.Fatalf("ra.Put() failed: %v", err)
-	}
-	if err := rb.Put(clientBCtx, Foo{}); err != nil {
-		t.Fatalf("rb.Put() failed: %v", err)
-	}
-
-	// Check A doesn't have access to 'b'.
-	if err := rb.Get(clientACtx, &Foo{}); verror.ErrorID(err) != verror.ErrNoAccess.ID {
+	// Check A doesn't have access.
+	if err := r.Get(clientACtx, &Foo{}); verror.ErrorID(err) != verror.ErrNoAccess.ID {
 		t.Fatalf("rb.Get() should have failed: %v", err)
 	}
-	if err := rb.Put(clientACtx, Foo{}); verror.ErrorID(err) != verror.ErrNoAccess.ID {
+	if err := r.Put(clientACtx, Foo{}); verror.ErrorID(err) != verror.ErrNoAccess.ID {
 		t.Fatalf("rb.Put() should have failed: %v", err)
 	}
-	if err := rb.Delete(clientACtx); verror.ErrorID(err) != verror.ErrNoAccess.ID {
+	if err := r.Delete(clientACtx); verror.ErrorID(err) != verror.ErrNoAccess.ID {
 		t.Fatalf("rb.Delete() should have failed: %v", err)
 	}
 	// Test Collection.DeleteRange and Scan.
@@ -912,12 +604,6 @@ func TestRowPermissions(t *testing.T) {
 		t.Fatalf("c.DeleteRange should have failed: %v", err)
 	}
 	s := c.Scan(clientACtx, syncbase.Prefix(""))
-	if !s.Advance() {
-		t.Fatalf("Stream should have advanced: %v", s.Err())
-	}
-	if s.Key() != "afoo" {
-		t.Fatalf("Unexpected key: got %q, want %q", s.Key(), "afoo")
-	}
 	if s.Advance() {
 		t.Fatalf("Stream advanced unexpectedly")
 	}
@@ -926,8 +612,9 @@ func TestRowPermissions(t *testing.T) {
 	}
 }
 
-// Tests prefix perms where get is allowed but put is not.
-func TestMixedPrefixPerms(t *testing.T) {
+// Tests collection perms where get is allowed but put is not.
+// TODO(ivanpi): Redundant with permissions_test?
+func TestMixedCollectionPerms(t *testing.T) {
 	ctx, clientACtx, sName, rootp, cleanup := tu.SetupOrDieCustom("clientA", "server", nil)
 	defer cleanup()
 	clientBCtx := tu.NewCtx(ctx, rootp, "clientB")
@@ -935,138 +622,33 @@ func TestMixedPrefixPerms(t *testing.T) {
 	d := tu.CreateDatabase(t, clientACtx, a, "d")
 	c := tu.CreateCollection(t, clientACtx, d, "c")
 
-	// Permission objects.
-	aAndB := tu.DefaultPerms("root:clientA", "root:clientB")
+	// Set permissions.
 	aAllBRead := tu.DefaultPerms("root:clientA")
 	aAllBRead.Add(security.BlessingPattern("root:clientB"), string(access.Read))
-
-	// Set initial permissions.
-	if err := c.SetPermissions(clientACtx, aAndB); err != nil {
+	if err := c.SetPermissions(clientACtx, aAllBRead); err != nil {
 		t.Fatalf("c.SetPermissions() failed: %v", err)
 	}
-	if err := c.SetPrefixPermissions(clientACtx, syncbase.Prefix(""), aAndB); err != nil {
-		t.Fatalf("c.SetPrefixPermissions() failed: %v", err)
-	}
-	if err := c.SetPrefixPermissions(clientACtx, syncbase.Prefix("a"), aAllBRead); err != nil {
-		t.Fatalf("c.SetPrefixPermissions() failed: %v", err)
-	}
 
-	// Both A and B can read and write row key "z".
-	r := c.Row("z")
-	if err := r.Put(clientACtx, Foo{}); err != nil {
-		t.Fatalf("client A r.Put() failed: %v", err)
-	}
-	if err := r.Put(clientBCtx, Foo{}); err != nil {
-		t.Fatalf("client B r.Put() failed: %v", err)
-	}
-	if err := r.Get(clientACtx, &Foo{}); err != nil {
-		t.Fatalf("client A r.Get() failed: %v", err)
-	}
-	if err := r.Get(clientBCtx, &Foo{}); err != nil {
-		t.Fatalf("client B r.Get() failed: %v", err)
+	// Test GetPermissions.
+	if got, err := c.GetPermissions(clientACtx); err != nil {
+		t.Fatalf("c.GetPermissions() failed: %v", err)
+	} else if want := aAllBRead; !reflect.DeepEqual(got, want) {
+		t.Fatalf("Unexpected collection permissions: got %v, want %v", got, want)
 	}
 
 	// Both A and B can read row key "a", but only A can write it.
-	r = c.Row("a")
-	if err := r.Put(clientACtx, Foo{}); err != nil {
-		t.Fatalf("client A r.Put() failed: %v", err)
-	}
-	if err := r.Put(clientBCtx, Foo{}); verror.ErrorID(err) != verror.ErrNoAccess.ID {
-		t.Fatalf("client B r.Put() should have failed: %v", err)
-	}
-	if err := r.Get(clientACtx, &Foo{}); err != nil {
-		t.Fatalf("client A r.Get() failed: %v", err)
-	}
-	if err := r.Get(clientBCtx, &Foo{}); err != nil {
-		t.Fatalf("client B r.Get() failed: %v", err)
-	}
-
-	// Same for a:foo.
-	r = c.Row("a:foo")
-	if err := r.Put(clientACtx, Foo{}); err != nil {
-		t.Fatalf("client A r.Put() failed: %v", err)
-	}
-	if err := r.Put(clientBCtx, Foo{}); verror.ErrorID(err) != verror.ErrNoAccess.ID {
-		t.Fatalf("client B r.Put() should have failed: %v", err)
-	}
-	if err := r.Get(clientACtx, &Foo{}); err != nil {
-		t.Fatalf("client A r.Get() failed: %v", err)
-	}
-	if err := r.Get(clientBCtx, &Foo{}); err != nil {
-		t.Fatalf("client B r.Get() failed: %v", err)
-	}
-}
-
-// Tests prefix perms where client A has full access to everything except for a
-// particular prefix, while client B can only read/write that prefix.
-// Originally inspired by syncslides example app.
-func TestNestedMixedPrefixPerms(t *testing.T) {
-	ctx, clientACtx, sName, rootp, cleanup := tu.SetupOrDieCustom("clientA", "server", nil)
-	defer cleanup()
-	clientBCtx := tu.NewCtx(ctx, rootp, "clientB")
-	a := tu.CreateApp(t, clientACtx, syncbase.NewService(sName), "a")
-	d := tu.CreateDatabase(t, clientACtx, a, "d")
-	c := tu.CreateCollection(t, clientACtx, d, "c")
-
-	// On "", resolve should be open, and only A should have read/write/admin.
-	// On "b", read/resolve should be open, and only B should have write/admin.
-	prefixEmpty, err := access.ReadPermissions(strings.NewReader(`{"Read":{"In":["root:clientA"],"NotIn":[]},"Admin":{"In":["root:clientA"],"NotIn":[]},"Resolve":{"In":["..."],"NotIn":[]},"Write":{"In":["root:clientA"],"NotIn":[]}}`))
-	if err != nil {
-		t.Fatalf("ReadPermissions failed: %v", err)
-	}
-	prefixB, err := access.ReadPermissions(strings.NewReader(`{"Admin":{"In":["root:clientB"],"NotIn":[]},"Read":{"In":["..."],"NotIn":[]},"Write":{"In":["root:clientB"],"NotIn":[]},"Resolve":{"In":["..."],"NotIn":[]}}}`))
-	if err != nil {
-		t.Fatalf("ReadPermissions failed: %v", err)
-	}
-
-	// Set initial permissions.
-	aAndB := tu.DefaultPerms("root:clientA", "root:clientB")
-	if err := c.SetPermissions(clientACtx, aAndB); err != nil {
-		t.Fatalf("c.SetPermissions() failed: %v", err)
-	}
-	if err := c.SetPrefixPermissions(clientACtx, syncbase.Prefix(""), prefixEmpty); err != nil {
-		t.Fatalf("c.SetPrefixPermissions() failed: %v", err)
-	}
-	// Note that with the current perms, A must write these perms on B's behalf.
-	if err := c.SetPrefixPermissions(clientACtx, syncbase.Prefix("b"), prefixB); err != nil {
-		t.Fatalf("c.SetPrefixPermissions() failed: %v", err)
-	}
-
-	// A should be able to read/write "a".
-	// B should be able to to read/write "b".
-	// B should not be able to read/write "a".
-	// A should not be able to write "b", but should be able to read it.
-
 	r := c.Row("a")
 	if err := r.Put(clientACtx, Foo{}); err != nil {
 		t.Fatalf("client A r.Put() failed: %v", err)
 	}
-	if err := r.Get(clientACtx, &Foo{}); err != nil {
-		t.Fatalf("client A r.Get() failed: %v", err)
-	}
-
-	r = c.Row("b")
-	if err := r.Put(clientBCtx, Foo{}); err != nil {
-		t.Fatalf("client B r.Put() failed: %v", err)
-	}
-	if err := r.Get(clientBCtx, &Foo{}); err != nil {
-		t.Fatalf("client B r.Get() failed: %v", err)
-	}
-
-	r = c.Row("a")
 	if err := r.Put(clientBCtx, Foo{}); verror.ErrorID(err) != verror.ErrNoAccess.ID {
 		t.Fatalf("client B r.Put() should have failed: %v", err)
 	}
-	if err := r.Get(clientBCtx, &Foo{}); verror.ErrorID(err) != verror.ErrNoAccess.ID {
-		t.Fatalf("client B r.Get() should have failed: %v", err)
-	}
-
-	r = c.Row("b")
-	if err := r.Put(clientACtx, Foo{}); verror.ErrorID(err) != verror.ErrNoAccess.ID {
-		t.Fatalf("client A r.Put() should have failed: %v", err)
-	}
 	if err := r.Get(clientACtx, &Foo{}); err != nil {
 		t.Fatalf("client A r.Get() failed: %v", err)
+	}
+	if err := r.Get(clientBCtx, &Foo{}); err != nil {
+		t.Fatalf("client B r.Get() failed: %v", err)
 	}
 }
 
@@ -1152,123 +734,51 @@ func TestWatchBasic(t *testing.T) {
 	tu.CheckWatch(t, wstream, allChanges[1:2])
 }
 
-// TestWatchWithBatchAndPerms test that the client watch correctly handles
-// batches and prefix perms.
-func TestWatchWithBatchAndPerms(t *testing.T) {
-	ctx, clientACtx, sName, rootp, cleanup := tu.SetupOrDieCustom("clientA", "server", nil)
-	defer cleanup()
-	clientBCtx := tu.NewCtx(ctx, rootp, "clientB")
-	a := tu.CreateApp(t, clientACtx, syncbase.NewService(sName), "a")
-	d := tu.CreateDatabase(t, clientACtx, a, "d")
-	c := tu.CreateCollection(t, clientACtx, d, "c")
-
-	// Set initial permissions.
-	aAndB := tu.DefaultPerms("root:clientA", "root:clientB")
-	aOnly := tu.DefaultPerms("root:clientA")
-	if err := c.SetPermissions(clientACtx, aAndB); err != nil {
-		t.Fatalf("c.SetPermissions() failed: %v", err)
-	}
-	if err := c.SetPrefixPermissions(clientACtx, syncbase.Prefix(""), aAndB); err != nil {
-		t.Fatalf("c.SetPrefixPermissions() failed: %v", err)
-	}
-	if err := c.SetPrefixPermissions(clientACtx, syncbase.Prefix("a"), aOnly); err != nil {
-		t.Fatalf("c.SetPrefixPermissions() failed: %v", err)
-	}
-	// Get the initial resume marker.
-	resumeMarker, err := d.GetResumeMarker(clientACtx)
-	if err != nil {
-		t.Fatalf("d.GetResumeMarker() failed: %v", err)
-	}
-	initMarker := resumeMarker
-	// Do two puts in a batch.
-	if err := syncbase.RunInBatch(clientACtx, d, wire.BatchOptions{}, func(b syncbase.BatchDatabase) error {
-		c := b.Collection("c")
-		if err := c.Put(clientACtx, "a", "value"); err != nil {
-			return err
-		}
-		return c.Put(clientACtx, "b", "value")
-	}); err != nil {
-		t.Fatalf("RunInBatch failed: %v", err)
-	}
-
-	if resumeMarker, err = d.GetResumeMarker(clientACtx); err != nil {
-		t.Fatalf("d.GetResumeMarker() failed: %v", err)
-	}
-	vomValue, _ := vom.Encode("value")
-	allChanges := []syncbase.WatchChange{
-		syncbase.WatchChange{
-			Collection:   "c",
-			Row:          "a",
-			ChangeType:   syncbase.PutChange,
-			ValueBytes:   vomValue,
-			ResumeMarker: nil,
-			Continued:    true,
-		},
-		syncbase.WatchChange{
-			Collection:   "c",
-			Row:          "b",
-			ChangeType:   syncbase.PutChange,
-			ValueBytes:   vomValue,
-			ResumeMarker: resumeMarker,
-		},
-	}
-
-	ctxAWithTimeout, cancelA := context.WithTimeout(clientACtx, 10*time.Second)
-	defer cancelA()
-	ctxBWithTimeout, cancelB := context.WithTimeout(clientBCtx, 10*time.Second)
-	defer cancelB()
-	// ClientA should see both changes as one batch.
-	wstream, _ := d.Watch(ctxAWithTimeout, "c", "", initMarker)
-	tu.CheckWatch(t, wstream, allChanges)
-	// ClientB should see only one change.
-	wstream, _ = d.Watch(ctxBWithTimeout, "c", "", initMarker)
-	tu.CheckWatch(t, wstream, allChanges[1:])
-}
-
-// TestWatchWithInitialState test that the client watch correctly handles
-// fetching initial state on empty resume marker, including batches and
-// prefix perms.
-func TestWatchWithInitialState(t *testing.T) {
+// TestWatchWithBatchAndInitialState test that the client watch correctly
+// handles batches and fetching initial state on empty resume marker.
+func TestWatchWithBatchAndInitialState(t *testing.T) {
 	ctx, adminCtx, sName, rootp, cleanup := tu.SetupOrDieCustom("admin", "server", nil)
 	defer cleanup()
 	clientCtx := tu.NewCtx(ctx, rootp, "client")
 	a := tu.CreateApp(t, adminCtx, syncbase.NewService(sName), "a")
 	d := tu.CreateDatabase(t, adminCtx, a, "d")
-	c := tu.CreateCollection(t, adminCtx, d, "c")
+	cp := tu.CreateCollection(t, adminCtx, d, "cpublic")
+	ch := tu.CreateCollection(t, adminCtx, d, "chidden")
 
-	// Set permissions. Lock client out of "b".
+	// Set permissions. Lock client out of ch.
 	openAcl := tu.DefaultPerms("root:admin", "root:client")
 	adminAcl := tu.DefaultPerms("root:admin")
-	if err := c.SetPermissions(adminCtx, openAcl); err != nil {
-		t.Fatalf("c.SetPermissions() failed: %v", err)
+	if err := cp.SetPermissions(adminCtx, openAcl); err != nil {
+		t.Fatalf("cp.SetPermissions() failed: %v", err)
 	}
-	if err := c.SetPrefixPermissions(adminCtx, syncbase.Prefix(""), openAcl); err != nil {
-		t.Fatalf("c.SetPrefixPermissions() failed: %v", err)
-	}
-	if err := c.SetPrefixPermissions(adminCtx, syncbase.Prefix("b"), adminAcl); err != nil {
-		t.Fatalf("c.SetPrefixPermissions() failed: %v", err)
+	if err := ch.SetPermissions(adminCtx, adminAcl); err != nil {
+		t.Fatalf("ch.SetPermissions() failed: %v", err)
 	}
 
-	// Put "a/1" and "b/1" in a batch.
+	// Put cp:"a/1" and ch:"b/1" in a batch.
 	if err := syncbase.RunInBatch(adminCtx, d, wire.BatchOptions{}, func(b syncbase.BatchDatabase) error {
-		c := b.Collection("c")
-		if err := c.Put(adminCtx, "a/1", "value"); err != nil {
+		cp := b.Collection("cpublic")
+		if err := cp.Put(adminCtx, "a/1", "value"); err != nil {
 			return err
 		}
-		return c.Put(adminCtx, "b/1", "value")
+		ch := b.Collection("chidden")
+		return ch.Put(adminCtx, "b/1", "value")
 	}); err != nil {
 		t.Fatalf("RunInBatch failed: %v", err)
 	}
-	// Put "c/1".
-	if err := c.Put(adminCtx, "c/1", "value"); err != nil {
-		t.Fatalf("c.Put() failed: %v", err)
+	// Put cp:"c/1".
+	if err := cp.Put(adminCtx, "c/1", "value"); err != nil {
+		t.Fatalf("cp.Put() failed: %v", err)
 	}
 
 	ctxWithTimeout, cancel := context.WithTimeout(clientCtx, 10*time.Second)
 	defer cancel()
 	// Start watches with empty resume marker.
-	wstreamAll, _ := d.Watch(ctxWithTimeout, "c", "", nil)
-	wstreamD, _ := d.Watch(ctxWithTimeout, "c", "d", nil)
+	// TODO(ivanpi): Empty prefix watch should watch both collections using both
+	// admin and client contexts, checking that chidden updates are visible only
+	// to admin.
+	wstreamAll, _ := d.Watch(ctxWithTimeout, "cpublic", "", nil)
+	wstreamD, _ := d.Watch(ctxWithTimeout, "cpublic", "d", nil)
 
 	resumeMarkerInitial, err := d.GetResumeMarker(clientCtx)
 	if err != nil {
@@ -1277,7 +787,7 @@ func TestWatchWithInitialState(t *testing.T) {
 	vomValue, _ := vom.Encode("value")
 	initialChanges := []syncbase.WatchChange{
 		syncbase.WatchChange{
-			Collection:   "c",
+			Collection:   "cpublic",
 			Row:          "a/1",
 			ChangeType:   syncbase.PutChange,
 			ValueBytes:   vomValue,
@@ -1285,7 +795,7 @@ func TestWatchWithInitialState(t *testing.T) {
 			Continued:    true,
 		},
 		syncbase.WatchChange{
-			Collection:   "c",
+			Collection:   "cpublic",
 			Row:          "c/1",
 			ChangeType:   syncbase.PutChange,
 			ValueBytes:   vomValue,
@@ -1293,17 +803,18 @@ func TestWatchWithInitialState(t *testing.T) {
 		},
 	}
 	// Watch with empty prefix should have seen the initial state as one batch,
-	// omitting the inaccessible row.
+	// omitting the row in the secret collection.
 	tu.CheckWatch(t, wstreamAll, initialChanges)
 
 	// More writes.
-	// Put "a/2" and "b/2" in a batch.
+	// Put cp:"a/2" and cs:"b/2" in a batch.
 	if err := syncbase.RunInBatch(adminCtx, d, wire.BatchOptions{}, func(b syncbase.BatchDatabase) error {
-		c := b.Collection("c")
-		if err := c.Put(adminCtx, "a/2", "value"); err != nil {
+		cp := b.Collection("cpublic")
+		if err := cp.Put(adminCtx, "a/2", "value"); err != nil {
 			return err
 		}
-		return c.Put(adminCtx, "b/2", "value")
+		ch := b.Collection("chidden")
+		return ch.Put(adminCtx, "b/2", "value")
 	}); err != nil {
 		t.Fatalf("RunInBatch failed: %v", err)
 	}
@@ -1311,37 +822,51 @@ func TestWatchWithInitialState(t *testing.T) {
 	if err != nil {
 		t.Fatalf("d.GetResumeMarker() failed: %v", err)
 	}
-	// Put "d/1".
-	if err := c.Put(adminCtx, "d/1", "value"); err != nil {
-		t.Fatalf("c.Put() failed: %v", err)
+	// Put cp:"a/3" and cp:"d/1" in a batch.
+	if err := syncbase.RunInBatch(adminCtx, d, wire.BatchOptions{}, func(b syncbase.BatchDatabase) error {
+		cp := b.Collection("cpublic")
+		if err := cp.Put(adminCtx, "a/3", "value"); err != nil {
+			return err
+		}
+		return cp.Put(adminCtx, "d/1", "value")
+	}); err != nil {
+		t.Fatalf("RunInBatch failed: %v", err)
 	}
-	resumeMarkerAfterD1, err := d.GetResumeMarker(clientCtx)
+	resumeMarkerAfterA3D1, err := d.GetResumeMarker(clientCtx)
 	if err != nil {
 		t.Fatalf("d.GetResumeMarker() failed: %v", err)
 	}
 
 	continuedChanges := []syncbase.WatchChange{
 		syncbase.WatchChange{
-			Collection:   "c",
+			Collection:   "cpublic",
 			Row:          "a/2",
 			ChangeType:   syncbase.PutChange,
 			ValueBytes:   vomValue,
 			ResumeMarker: resumeMarkerAfterA2B2,
 		},
 		syncbase.WatchChange{
-			Collection:   "c",
+			Collection:   "cpublic",
+			Row:          "a/3",
+			ChangeType:   syncbase.PutChange,
+			ValueBytes:   vomValue,
+			ResumeMarker: nil,
+			Continued:    true,
+		},
+		syncbase.WatchChange{
+			Collection:   "cpublic",
 			Row:          "d/1",
 			ChangeType:   syncbase.PutChange,
 			ValueBytes:   vomValue,
-			ResumeMarker: resumeMarkerAfterD1,
+			ResumeMarker: resumeMarkerAfterA3D1,
 		},
 	}
 	// Watch with empty prefix should have seen the continued changes as separate
-	// batches, omitting inaccessible rows.
+	// batches, omitting rows in the secret collection.
 	tu.CheckWatch(t, wstreamAll, continuedChanges)
 	// Watch with prefix "d" should have seen only the last change; its initial
 	// state was empty.
-	tu.CheckWatch(t, wstreamD, continuedChanges[1:])
+	tu.CheckWatch(t, wstreamD, continuedChanges[2:])
 }
 
 // TestBlockingWatch tests that the server side of the client watch correctly
@@ -1381,7 +906,7 @@ func TestBlockingWatch(t *testing.T) {
 			ResumeMarker: resumeMarker,
 		}
 		if got := wstream.Change(); !reflect.DeepEqual(got, want) {
-			t.Fatalf("unexpected watch change: got %v, want %v", got, want)
+			t.Fatalf("Unexpected watch change: got %v, want %v", got, want)
 		}
 	}
 }
@@ -1408,6 +933,6 @@ func TestBlockedWatchCancel(t *testing.T) {
 		t.Fatal("wstream should not have advanced")
 	}
 	if got, want := verror.ErrorID(wstream.Err()), verror.ErrCanceled.ID; got != want {
-		t.Errorf("unexpected wstream error ID: got %v, want %v", got, want)
+		t.Errorf("Unexpected wstream error ID: got %v, want %v", got, want)
 	}
 }

@@ -104,23 +104,3 @@ func (c *collection) Scan(ctx *context.T, r RowRange) ScanStream {
 	}
 	return newScanStream(cancel, call)
 }
-
-// GetPrefixPermissions implements Collection.GetPrefixPermissions.
-func (c *collection) GetPrefixPermissions(ctx *context.T, key string) ([]PrefixPermissions, error) {
-	wirePermsList, err := c.c.GetPrefixPermissions(ctx, c.dbSchemaVersion, key)
-	permsList := []PrefixPermissions{}
-	for _, v := range wirePermsList {
-		permsList = append(permsList, PrefixPermissions{Prefix: Prefix(v.Prefix), Perms: v.Perms})
-	}
-	return permsList, err
-}
-
-// SetPrefixPermissions implements Collection.SetPrefixPermissions.
-func (c *collection) SetPrefixPermissions(ctx *context.T, prefix PrefixRange, perms access.Permissions) error {
-	return c.c.SetPrefixPermissions(ctx, c.dbSchemaVersion, prefix.Prefix(), perms)
-}
-
-// DeletePrefixPermissions implements Collection.DeletePrefixPermissions.
-func (c *collection) DeletePrefixPermissions(ctx *context.T, prefix PrefixRange) error {
-	return c.c.DeletePrefixPermissions(ctx, c.dbSchemaVersion, prefix.Prefix())
-}

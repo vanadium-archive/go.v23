@@ -60,14 +60,14 @@ var securitySpecTestGroups = []securitySpecTestGroup{
 			return err
 		}},
 		name:     "service.DevModeGetTime",
-		patterns: []string{"A_____"},
+		patterns: []string{"A____"},
 	},
 	{
 		layer: serviceTest{f: func(ctx *context.T, s syncbase.Service) error {
 			return wire.ServiceClient(s.FullName()).DevModeUpdateVClock(ctx, wire.DevModeUpdateVClockOpts{})
 		}},
 		name:     "service.DevModeUpdateVClock",
-		patterns: []string{"A_____"},
+		patterns: []string{"A____"},
 	},
 	{
 		layer: serviceTest{f: func(ctx *context.T, s syncbase.Service) error {
@@ -75,14 +75,14 @@ var securitySpecTestGroups = []securitySpecTestGroup{
 			return err
 		}},
 		name:     "service.GetPermissions",
-		patterns: []string{"A_____"},
+		patterns: []string{"A____"},
 	},
 	{
 		layer: serviceTest{f: func(ctx *context.T, s syncbase.Service) error {
 			return s.SetPermissions(ctx, nil, "")
 		}},
 		name:     "service.SetPermissions",
-		patterns: []string{"A_____"},
+		patterns: []string{"A____"},
 		mutating: true,
 	},
 
@@ -92,7 +92,7 @@ var securitySpecTestGroups = []securitySpecTestGroup{
 			return s.App("newApp").Create(ctx, nil)
 		}},
 		name:     "app.Create",
-		patterns: []string{"W_____"},
+		patterns: []string{"W____"},
 		mutating: true,
 	},
 	{
@@ -100,7 +100,7 @@ var securitySpecTestGroups = []securitySpecTestGroup{
 			return a.Destroy(ctx)
 		}},
 		name:     "app.Destroy",
-		patterns: []string{"_W____"},
+		patterns: []string{"_W___"},
 		mutating: true,
 	},
 	{
@@ -109,14 +109,14 @@ var securitySpecTestGroups = []securitySpecTestGroup{
 			return err
 		}},
 		name:     "app.GetPermissions",
-		patterns: []string{"_A____"},
+		patterns: []string{"_A___"},
 	},
 	{
 		layer: appTest{f: func(ctx *context.T, a syncbase.App) error {
 			return a.SetPermissions(ctx, nil, "")
 		}},
 		name:     "app.SetPermissions",
-		patterns: []string{"_A____"},
+		patterns: []string{"_A___"},
 		mutating: true,
 	},
 
@@ -127,7 +127,7 @@ var securitySpecTestGroups = []securitySpecTestGroup{
 			return err
 		}},
 		name:     "database.GetPermissions",
-		patterns: []string{"__A___"},
+		patterns: []string{"__A__"},
 	},
 
 	// Collection tests.
@@ -137,7 +137,7 @@ var securitySpecTestGroups = []securitySpecTestGroup{
 			return err
 		}},
 		name:     "collection.GetPermissions",
-		patterns: []string{"___A__"},
+		patterns: []string{"___A_"},
 	},
 
 	// Row tests.
@@ -147,7 +147,7 @@ var securitySpecTestGroups = []securitySpecTestGroup{
 			return r.Get(ctx, &value)
 		}},
 		name:     "row.Get",
-		patterns: []string{"___RR_"},
+		patterns: []string{"___R_"},
 	},
 }
 
@@ -156,16 +156,15 @@ var securitySpecTestGroups = []securitySpecTestGroup{
 //
 // Each test group describes a Syncbase public method and a list of security
 // patterns that should allow a client to call the method.
-// A method might be service.GetPermissions and the pattern for it is "A_____".
-// A security pattern is a string of 6 bytes where each byte is an '_' or
+// A method might be service.GetPermissions and the pattern for it is "A____".
+// A security pattern is a string of 5 bytes where each byte is an '_' or
 // one of X (resolve), R (read), W (write), A (admin).
 // The character index stands for:
 // 0 - service ACL
 // 1 - app ACL
 // 2 - database ACL
 // 3 - collection ACL
-// 4 - longest prefix ACL
-// 5 - syncgroup ACL
+// 4 - syncgroup ACL
 // A pattern defines a set of per-ACL permissions required for a client to call
 // the method.
 //
@@ -184,9 +183,9 @@ var securitySpecTestGroups = []securitySpecTestGroup{
 // Then we pack all tests into runs, where each run has only one type of tests
 // (allowed or denied) and at most one mutating test. For each run we rebuild
 // the following Syncbase structure:
-// service: s; app a; database d; collection c; row prefix (with ACL at 'prefix').
+// service s; app a; database d; collection c; row prefix.
 //
-// For each test inside a run we generate 6 huge ACLs with a record for each
+// For each test inside a run we generate 5 huge ACLs with a record for each
 // of the test + one admin record.
 func TestSecuritySpec(t *testing.T) {
 	deniedTests, staticAllowedTests, mutatingAllowedTests := prepareTests()
@@ -256,10 +255,8 @@ func runTests(t *testing.T, expectSuccess bool, tests ...securitySpecTest) {
 	addPerms(databasePerms, 2, tests...)
 	collectionPerms := tu.DefaultPerms("root:admin")
 	addPerms(collectionPerms, 3, tests...)
-	rowPerms := tu.DefaultPerms("root:admin")
-	addPerms(rowPerms, 4, tests...)
 	sgPerms := tu.DefaultPerms("root:admin")
-	addPerms(sgPerms, 5, tests...)
+	addPerms(sgPerms, 4, tests...)
 
 	// Create service/app/database/collection/row with permissions above.
 	ctx, adminCtx, sName, rootp, cleanup := tu.SetupOrDieCustom("admin", "server", nil)
@@ -279,12 +276,6 @@ func runTests(t *testing.T, expectSuccess bool, tests ...securitySpecTest) {
 	c := d.Collection("c")
 	if err := c.Create(adminCtx, collectionPerms); err != nil {
 		tu.Fatalf(t, "d.Create failed: %v", err)
-	}
-	if err := c.SetPrefixPermissions(adminCtx, syncbase.Prefix(""), rowPerms); err != nil {
-		tu.Fatalf(t, "c.SetPrefixPermissions failed: %v", err)
-	}
-	if err := c.SetPrefixPermissions(adminCtx, syncbase.Prefix("prefix"), rowPerms); err != nil {
-		tu.Fatalf(t, "c.SetPrefixPermissions failed: %v", err)
 	}
 	r := c.Row("prefix")
 	r.Put(adminCtx, "value")

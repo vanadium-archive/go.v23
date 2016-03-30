@@ -135,15 +135,6 @@ func TestRPCSchemaCheckError(t *testing.T) {
 	if err := collection.SetPermissions(ctx, nil); !isVersionMismatchErr(err) {
 		t.Fatal("Expected ErrDatabaseVersionMismatch, found: " + toString(err))
 	}
-	if _, err := collection.GetPrefixPermissions(ctx, "row1"); !isVersionMismatchErr(err) {
-		t.Fatal("Expected ErrDatabaseVersionMismatch, found: " + toString(err))
-	}
-	if err := collection.SetPrefixPermissions(ctx, syncbase.Prefix("row"), nil); !isVersionMismatchErr(err) {
-		t.Fatal("Expected ErrDatabaseVersionMismatch, found: " + toString(err))
-	}
-	if err := collection.DeletePrefixPermissions(ctx, syncbase.Prefix("row")); !isVersionMismatchErr(err) {
-		t.Fatal("Expected ErrDatabaseVersionMismatch, found: " + toString(err))
-	}
 
 	// verify write rpcs for Row
 	row := collection.Row("row1")

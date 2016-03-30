@@ -151,13 +151,6 @@ pkg syncbase, method (*OperationTarget) FinishFields(vdl.FieldsTarget) error
 pkg syncbase, method (*OperationTarget) FromZero(*vdl.Type) error
 pkg syncbase, method (*OperationTarget) StartField(string) (vdl.Target, vdl.Target, error)
 pkg syncbase, method (*OperationTarget) StartFields(*vdl.Type) (vdl.FieldsTarget, error)
-pkg syncbase, method (*PrefixPermissions) FillVDLTarget(vdl.Target, *vdl.Type) error
-pkg syncbase, method (*PrefixPermissions) MakeVDLTarget() vdl.Target
-pkg syncbase, method (*PrefixPermissionsTarget) FinishField(vdl.Target, vdl.Target) error
-pkg syncbase, method (*PrefixPermissionsTarget) FinishFields(vdl.FieldsTarget) error
-pkg syncbase, method (*PrefixPermissionsTarget) FromZero(*vdl.Type) error
-pkg syncbase, method (*PrefixPermissionsTarget) StartField(string) (vdl.Target, vdl.Target, error)
-pkg syncbase, method (*PrefixPermissionsTarget) StartFields(*vdl.Type) (vdl.FieldsTarget, error)
 pkg syncbase, method (*ResolutionInfo) FillVDLTarget(vdl.Target, *vdl.Type) error
 pkg syncbase, method (*ResolutionInfo) MakeVDLTarget() vdl.Target
 pkg syncbase, method (*ResolutionInfoTarget) FinishField(vdl.Target, vdl.Target) error
@@ -405,27 +398,21 @@ pkg syncbase, type BlobRef string
 pkg syncbase, type BlobRefTarget struct
 pkg syncbase, type BlobRefTarget struct, Value *BlobRef
 pkg syncbase, type BlobRefTarget struct, embedded vdl.TargetBase
-pkg syncbase, type CollectionClientMethods interface { Create, DeletePrefixPermissions, DeleteRange, Destroy, Exists, GetPermissions, GetPrefixPermissions, Scan, SetPermissions, SetPrefixPermissions }
+pkg syncbase, type CollectionClientMethods interface { Create, DeleteRange, Destroy, Exists, GetPermissions, Scan, SetPermissions }
 pkg syncbase, type CollectionClientMethods interface, Create(*context.T, int32, access.Permissions, ...rpc.CallOpt) error
-pkg syncbase, type CollectionClientMethods interface, DeletePrefixPermissions(*context.T, int32, string, ...rpc.CallOpt) error
 pkg syncbase, type CollectionClientMethods interface, DeleteRange(*context.T, int32, []byte, []byte, ...rpc.CallOpt) error
 pkg syncbase, type CollectionClientMethods interface, Destroy(*context.T, int32, ...rpc.CallOpt) error
 pkg syncbase, type CollectionClientMethods interface, Exists(*context.T, int32, ...rpc.CallOpt) (bool, error)
 pkg syncbase, type CollectionClientMethods interface, GetPermissions(*context.T, int32, ...rpc.CallOpt) (access.Permissions, error)
-pkg syncbase, type CollectionClientMethods interface, GetPrefixPermissions(*context.T, int32, string, ...rpc.CallOpt) ([]PrefixPermissions, error)
 pkg syncbase, type CollectionClientMethods interface, Scan(*context.T, int32, []byte, []byte, ...rpc.CallOpt) (CollectionScanClientCall, error)
 pkg syncbase, type CollectionClientMethods interface, SetPermissions(*context.T, int32, access.Permissions, ...rpc.CallOpt) error
-pkg syncbase, type CollectionClientMethods interface, SetPrefixPermissions(*context.T, int32, string, access.Permissions, ...rpc.CallOpt) error
 pkg syncbase, type CollectionClientStub interface, Create(*context.T, int32, access.Permissions, ...rpc.CallOpt) error
-pkg syncbase, type CollectionClientStub interface, DeletePrefixPermissions(*context.T, int32, string, ...rpc.CallOpt) error
 pkg syncbase, type CollectionClientStub interface, DeleteRange(*context.T, int32, []byte, []byte, ...rpc.CallOpt) error
 pkg syncbase, type CollectionClientStub interface, Destroy(*context.T, int32, ...rpc.CallOpt) error
 pkg syncbase, type CollectionClientStub interface, Exists(*context.T, int32, ...rpc.CallOpt) (bool, error)
 pkg syncbase, type CollectionClientStub interface, GetPermissions(*context.T, int32, ...rpc.CallOpt) (access.Permissions, error)
-pkg syncbase, type CollectionClientStub interface, GetPrefixPermissions(*context.T, int32, string, ...rpc.CallOpt) ([]PrefixPermissions, error)
 pkg syncbase, type CollectionClientStub interface, Scan(*context.T, int32, []byte, []byte, ...rpc.CallOpt) (CollectionScanClientCall, error)
 pkg syncbase, type CollectionClientStub interface, SetPermissions(*context.T, int32, access.Permissions, ...rpc.CallOpt) error
-pkg syncbase, type CollectionClientStub interface, SetPrefixPermissions(*context.T, int32, string, access.Permissions, ...rpc.CallOpt) error
 pkg syncbase, type CollectionClientStub interface, unexported methods
 pkg syncbase, type CollectionRow struct
 pkg syncbase, type CollectionRow struct, CollectionName string
@@ -445,40 +432,31 @@ pkg syncbase, type CollectionScanServerCallStub struct
 pkg syncbase, type CollectionScanServerCallStub struct, embedded rpc.StreamServerCall
 pkg syncbase, type CollectionScanServerStream interface { SendStream }
 pkg syncbase, type CollectionScanServerStream interface, SendStream() interface {  Send(item KeyValue) error;}
-pkg syncbase, type CollectionServerMethods interface { Create, DeletePrefixPermissions, DeleteRange, Destroy, Exists, GetPermissions, GetPrefixPermissions, Scan, SetPermissions, SetPrefixPermissions }
+pkg syncbase, type CollectionServerMethods interface { Create, DeleteRange, Destroy, Exists, GetPermissions, Scan, SetPermissions }
 pkg syncbase, type CollectionServerMethods interface, Create(*context.T, rpc.ServerCall, int32, access.Permissions) error
-pkg syncbase, type CollectionServerMethods interface, DeletePrefixPermissions(*context.T, rpc.ServerCall, int32, string) error
 pkg syncbase, type CollectionServerMethods interface, DeleteRange(*context.T, rpc.ServerCall, int32, []byte, []byte) error
 pkg syncbase, type CollectionServerMethods interface, Destroy(*context.T, rpc.ServerCall, int32) error
 pkg syncbase, type CollectionServerMethods interface, Exists(*context.T, rpc.ServerCall, int32) (bool, error)
 pkg syncbase, type CollectionServerMethods interface, GetPermissions(*context.T, rpc.ServerCall, int32) (access.Permissions, error)
-pkg syncbase, type CollectionServerMethods interface, GetPrefixPermissions(*context.T, rpc.ServerCall, int32, string) ([]PrefixPermissions, error)
 pkg syncbase, type CollectionServerMethods interface, Scan(*context.T, CollectionScanServerCall, int32, []byte, []byte) error
 pkg syncbase, type CollectionServerMethods interface, SetPermissions(*context.T, rpc.ServerCall, int32, access.Permissions) error
-pkg syncbase, type CollectionServerMethods interface, SetPrefixPermissions(*context.T, rpc.ServerCall, int32, string, access.Permissions) error
-pkg syncbase, type CollectionServerStub interface { Create, DeletePrefixPermissions, DeleteRange, Describe__, Destroy, Exists, GetPermissions, GetPrefixPermissions, Scan, SetPermissions, SetPrefixPermissions }
+pkg syncbase, type CollectionServerStub interface { Create, DeleteRange, Describe__, Destroy, Exists, GetPermissions, Scan, SetPermissions }
 pkg syncbase, type CollectionServerStub interface, Create(*context.T, rpc.ServerCall, int32, access.Permissions) error
-pkg syncbase, type CollectionServerStub interface, DeletePrefixPermissions(*context.T, rpc.ServerCall, int32, string) error
 pkg syncbase, type CollectionServerStub interface, DeleteRange(*context.T, rpc.ServerCall, int32, []byte, []byte) error
 pkg syncbase, type CollectionServerStub interface, Describe__() []rpc.InterfaceDesc
 pkg syncbase, type CollectionServerStub interface, Destroy(*context.T, rpc.ServerCall, int32) error
 pkg syncbase, type CollectionServerStub interface, Exists(*context.T, rpc.ServerCall, int32) (bool, error)
 pkg syncbase, type CollectionServerStub interface, GetPermissions(*context.T, rpc.ServerCall, int32) (access.Permissions, error)
-pkg syncbase, type CollectionServerStub interface, GetPrefixPermissions(*context.T, rpc.ServerCall, int32, string) ([]PrefixPermissions, error)
 pkg syncbase, type CollectionServerStub interface, Scan(*context.T, *CollectionScanServerCallStub, int32, []byte, []byte) error
 pkg syncbase, type CollectionServerStub interface, SetPermissions(*context.T, rpc.ServerCall, int32, access.Permissions) error
-pkg syncbase, type CollectionServerStub interface, SetPrefixPermissions(*context.T, rpc.ServerCall, int32, string, access.Permissions) error
-pkg syncbase, type CollectionServerStubMethods interface { Create, DeletePrefixPermissions, DeleteRange, Destroy, Exists, GetPermissions, GetPrefixPermissions, Scan, SetPermissions, SetPrefixPermissions }
+pkg syncbase, type CollectionServerStubMethods interface { Create, DeleteRange, Destroy, Exists, GetPermissions, Scan, SetPermissions }
 pkg syncbase, type CollectionServerStubMethods interface, Create(*context.T, rpc.ServerCall, int32, access.Permissions) error
-pkg syncbase, type CollectionServerStubMethods interface, DeletePrefixPermissions(*context.T, rpc.ServerCall, int32, string) error
 pkg syncbase, type CollectionServerStubMethods interface, DeleteRange(*context.T, rpc.ServerCall, int32, []byte, []byte) error
 pkg syncbase, type CollectionServerStubMethods interface, Destroy(*context.T, rpc.ServerCall, int32) error
 pkg syncbase, type CollectionServerStubMethods interface, Exists(*context.T, rpc.ServerCall, int32) (bool, error)
 pkg syncbase, type CollectionServerStubMethods interface, GetPermissions(*context.T, rpc.ServerCall, int32) (access.Permissions, error)
-pkg syncbase, type CollectionServerStubMethods interface, GetPrefixPermissions(*context.T, rpc.ServerCall, int32, string) ([]PrefixPermissions, error)
 pkg syncbase, type CollectionServerStubMethods interface, Scan(*context.T, *CollectionScanServerCallStub, int32, []byte, []byte) error
 pkg syncbase, type CollectionServerStubMethods interface, SetPermissions(*context.T, rpc.ServerCall, int32, access.Permissions) error
-pkg syncbase, type CollectionServerStubMethods interface, SetPrefixPermissions(*context.T, rpc.ServerCall, int32, string, access.Permissions) error
 pkg syncbase, type ConflictData interface, FillVDLTarget(vdl.Target, *vdl.Type) error
 pkg syncbase, type ConflictData interface, Index() int
 pkg syncbase, type ConflictData interface, Interface() interface{}
@@ -743,13 +721,6 @@ pkg syncbase, type OperationTarget struct, embedded vdl.FieldsTargetBase
 pkg syncbase, type OperationTarget struct, embedded vdl.TargetBase
 pkg syncbase, type OperationWrite struct
 pkg syncbase, type OperationWrite struct, Value RowOp
-pkg syncbase, type PrefixPermissions struct
-pkg syncbase, type PrefixPermissions struct, Perms access.Permissions
-pkg syncbase, type PrefixPermissions struct, Prefix string
-pkg syncbase, type PrefixPermissionsTarget struct
-pkg syncbase, type PrefixPermissionsTarget struct, Value *PrefixPermissions
-pkg syncbase, type PrefixPermissionsTarget struct, embedded vdl.FieldsTargetBase
-pkg syncbase, type PrefixPermissionsTarget struct, embedded vdl.TargetBase
 pkg syncbase, type ResolutionInfo struct
 pkg syncbase, type ResolutionInfo struct, Continued bool
 pkg syncbase, type ResolutionInfo struct, Key string
