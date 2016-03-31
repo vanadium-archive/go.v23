@@ -15,6 +15,7 @@ package syncbase
 import (
 	"fmt"
 	"io"
+	"reflect"
 	"time"
 	"v.io/v23"
 	"v.io/v23/context"
@@ -3498,7 +3499,7 @@ func (t *BlobFetchStatusTarget) FromZero(tt *vdl.Type) error {
 type StoreChange struct {
 	// Value is the new value for the row if the Change state equals to Exists,
 	// otherwise the Value is nil.
-	Value []byte
+	Value *vom.RawBytes
 	// FromSync indicates whether the change came from sync. If FromSync is
 	// false, then the change originated from the local device.
 	// Note: FromSync is always false for initial state Changes.
@@ -3521,18 +3522,21 @@ func (m *StoreChange) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 	}
 	if err != vdl.ErrFieldNoExist {
 
-		var var4 bool
-		if len(m.Value) == 0 {
-			var4 = true
-		}
+		var4 := (m.Value == vom.RawBytesOf(vdl.ZeroValue(vdl.AnyType)))
 		if var4 {
 			if err := fieldTarget3.FromZero(tt.NonOptional().Field(0).Type); err != nil {
 				return err
 			}
 		} else {
 
-			if err := fieldTarget3.FromBytes([]byte(m.Value), tt.NonOptional().Field(0).Type); err != nil {
-				return err
+			if m.Value == nil {
+				if err := fieldTarget3.FromZero(tt.NonOptional().Field(0).Type); err != nil {
+					return err
+				}
+			} else {
+				if err := m.Value.FillVDLTarget(fieldTarget3, tt.NonOptional().Field(0).Type); err != nil {
+					return err
+				}
 			}
 		}
 		if err := fieldsTarget1.FinishField(keyTarget2, fieldTarget3); err != nil {
@@ -3570,8 +3574,8 @@ func (m *StoreChange) MakeVDLTarget() vdl.Target {
 }
 
 type StoreChangeTarget struct {
-	Value          *StoreChange
-	valueTarget    vdl.BytesTarget
+	Value *StoreChange
+
 	fromSyncTarget vdl.BoolTarget
 	vdl.TargetBase
 	vdl.FieldsTargetBase
@@ -3587,8 +3591,7 @@ func (t *StoreChangeTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) 
 func (t *StoreChangeTarget) StartField(name string) (key, field vdl.Target, _ error) {
 	switch name {
 	case "Value":
-		t.valueTarget.Value = &t.Value.Value
-		target, err := &t.valueTarget, error(nil)
+		target, err := vdl.ReflectTarget(reflect.ValueOf(&t.Value.Value))
 		return nil, target, err
 	case "FromSync":
 		t.fromSyncTarget.Value = &t.Value.FromSync
@@ -3606,7 +3609,9 @@ func (t *StoreChangeTarget) FinishFields(_ vdl.FieldsTarget) error {
 	return nil
 }
 func (t *StoreChangeTarget) FromZero(tt *vdl.Type) error {
-	*t.Value = StoreChange{}
+	*t.Value = StoreChange{
+		Value: vom.RawBytesOf(vdl.ZeroValue(vdl.AnyType)),
+	}
 	return nil
 }
 
@@ -3629,6 +3634,7 @@ var (
 	ErrSchemaVersionMismatch = verror.Register("v.io/v23/services/syncbase.SchemaVersionMismatch", verror.NoRetry, "{1:}{2:} actual schema version does not match the provided one")
 	ErrBlobNotCommitted      = verror.Register("v.io/v23/services/syncbase.BlobNotCommitted", verror.NoRetry, "{1:}{2:} blob is not yet committed")
 	ErrSyncgroupJoinFailed   = verror.Register("v.io/v23/services/syncbase.SyncgroupJoinFailed", verror.NoRetry, "{1:}{2:} syncgroup join failed")
+	ErrBadExecStreamHeader   = verror.Register("v.io/v23/services/syncbase.BadExecStreamHeader", verror.NoRetry, "{1:}{2:} Exec stream header improperly formatted")
 )
 
 // NewErrNotInDevMode returns an error with the ErrNotInDevMode ID.
@@ -3684,6 +3690,11 @@ func NewErrBlobNotCommitted(ctx *context.T) error {
 // NewErrSyncgroupJoinFailed returns an error with the ErrSyncgroupJoinFailed ID.
 func NewErrSyncgroupJoinFailed(ctx *context.T) error {
 	return verror.New(ErrSyncgroupJoinFailed, ctx)
+}
+
+// NewErrBadExecStreamHeader returns an error with the ErrBadExecStreamHeader ID.
+func NewErrBadExecStreamHeader(ctx *context.T) error {
+	return verror.New(ErrBadExecStreamHeader, ctx)
 }
 
 //////////////////////////////////////////////////
@@ -7405,6 +7416,7 @@ func __VDLInit() struct{} {
 	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrSchemaVersionMismatch.ID), "{1:}{2:} actual schema version does not match the provided one")
 	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrBlobNotCommitted.ID), "{1:}{2:} blob is not yet committed")
 	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrSyncgroupJoinFailed.ID), "{1:}{2:} syncgroup join failed")
+	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrBadExecStreamHeader.ID), "{1:}{2:} Exec stream header improperly formatted")
 
 	return struct{}{}
 }

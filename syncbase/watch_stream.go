@@ -126,7 +126,7 @@ func ToWatchChange(c watch.Change) WatchChange {
 		Collection:   collection,
 		Row:          row,
 		ChangeType:   changeType,
-		ValueBytes:   storeChange.Value,
+		value:        storeChange.Value,
 		ResumeMarker: c.ResumeMarker,
 		FromSync:     storeChange.FromSync,
 		Continued:    c.Continued,

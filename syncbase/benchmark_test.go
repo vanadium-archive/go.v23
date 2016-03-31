@@ -176,7 +176,7 @@ func runExecBenchmark(b *testing.B, value interface{}) {
 			b.Fatalf("exec error: %s", s.Err())
 		}
 		for s.Advance() {
-			s.Result()
+			s.ResultCount()
 		}
 		if s.Err() != nil {
 			b.Fatalf("stream error: %s", s.Err())

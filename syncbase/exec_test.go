@@ -18,7 +18,6 @@ import (
 	"v.io/v23/syncbase/testdata"
 	"v.io/v23/vdl"
 	"v.io/v23/verror"
-	"v.io/v23/vom"
 	_ "v.io/x/ref/runtime/factories/generic"
 	tu "v.io/x/ref/services/syncbase/testutil"
 )
@@ -1145,9 +1144,9 @@ func TestExecSelect(t *testing.T) {
 			t.Errorf("query: %s; got %v, want nil", test.query, err)
 		} else {
 			// Collect results.
-			rbs := [][]*vom.RawBytes{}
+			rbs := [][]interface{}{}
 			for rs.Advance() {
-				rbs = append(rbs, rs.Result())
+				rbs = append(rbs, execResultsAsVector(t, rs, test.query))
 			}
 			if got, want := vdl.ValueOf(rbs), vdl.ValueOf(test.r); !vdl.EqualValue(got, want) {
 				t.Errorf("query: %s; got %v, want %v", test.query, got, want)
@@ -1157,6 +1156,18 @@ func TestExecSelect(t *testing.T) {
 			}
 		}
 	}
+}
+
+// execResultsAsVector retuns the results of an element in a syncbase.ResultStream
+// as a vector of interface{}.
+func execResultsAsVector(t *testing.T, rs syncbase.ResultStream, query string) []interface{} {
+	result := make([]interface{}, rs.ResultCount())
+	for i := 0; i != len(result); i++ {
+		if err := rs.Result(i, &result[i]); err != nil {
+			t.Errorf("query: %s; can't get decoded result %d: %v", query, i, err)
+		}
+	}
+	return result
 }
 
 func TestExecDelete(t *testing.T) {
@@ -1574,9 +1585,9 @@ func TestExecDelete(t *testing.T) {
 			t.Errorf("delQuery: %s; got %v, want nil", test.delQuery, err)
 		} else {
 			// Collect results.
-			rbs := [][]*vom.RawBytes{}
+			rbs := [][]interface{}{}
 			for rs.Advance() {
-				rbs = append(rbs, rs.Result())
+				rbs = append(rbs, execResultsAsVector(t, rs, test.delQuery))
 			}
 			if got, want := vdl.ValueOf(rbs), vdl.ValueOf(test.delResults); !vdl.EqualValue(got, want) {
 				t.Errorf("delQuery: %s; got %v, want %v", test.delQuery, got, want)
@@ -1590,9 +1601,9 @@ func TestExecDelete(t *testing.T) {
 			t.Errorf("delQuery: %s; got %v, want nil", test.delQuery, err)
 		} else {
 			// Collect results.
-			rbs := [][]*vom.RawBytes{}
+			rbs := [][]interface{}{}
 			for rs.Advance() {
-				rbs = append(rbs, rs.Result())
+				rbs = append(rbs, execResultsAsVector(t, rs, test.delQuery))
 			}
 			if got, want := vdl.ValueOf(rbs), vdl.ValueOf(test.selResults); !vdl.EqualValue(got, want) {
 				t.Errorf("delQuery: %s; got %v, want %v", test.delQuery, got, want)
@@ -1773,9 +1784,9 @@ func TestQuerySelectClause(t *testing.T) {
 			t.Errorf("query: %s; got %v, want nil", test.query, err)
 		} else {
 			// Collect results.
-			rbs := [][]*vom.RawBytes{}
+			rbs := [][]interface{}{}
 			for rs.Advance() {
-				rbs = append(rbs, rs.Result())
+				rbs = append(rbs, execResultsAsVector(t, rs, test.query))
 			}
 			if got, want := vdl.ValueOf(rbs), vdl.ValueOf(test.r); !vdl.EqualValue(got, want) {
 				t.Errorf("query: %s; got %v, want %v", test.query, got, want)
@@ -2087,9 +2098,9 @@ func TestQueryWhereClause(t *testing.T) {
 			t.Errorf("query: %s; got %v, want nil", test.query, err)
 		} else {
 			// Collect results.
-			rbs := [][]*vom.RawBytes{}
+			rbs := [][]interface{}{}
 			for rs.Advance() {
-				rbs = append(rbs, rs.Result())
+				rbs = append(rbs, execResultsAsVector(t, rs, test.query))
 			}
 			if got, want := vdl.ValueOf(rbs), vdl.ValueOf(test.r); !vdl.EqualValue(got, want) {
 				t.Errorf("query: %s; got %v, want %v", test.query, got, want)
@@ -2178,9 +2189,9 @@ func TestQueryEscapeClause(t *testing.T) {
 			t.Errorf("query: %s; got %v, want nil", test.query, err)
 		} else {
 			// Collect results.
-			rbs := [][]*vom.RawBytes{}
+			rbs := [][]interface{}{}
 			for rs.Advance() {
-				rbs = append(rbs, rs.Result())
+				rbs = append(rbs, execResultsAsVector(t, rs, test.query))
 			}
 			if got, want := vdl.ValueOf(rbs), vdl.ValueOf(test.r); !vdl.EqualValue(got, want) {
 				t.Errorf("query: %s; got %v, want %v", test.query, got, want)
@@ -2234,9 +2245,9 @@ func TestQueryLimitAndOffsetClauses(t *testing.T) {
 			t.Errorf("query: %s; got %v, want nil", test.query, err)
 		} else {
 			// Collect results.
-			rbs := [][]*vom.RawBytes{}
+			rbs := [][]interface{}{}
 			for rs.Advance() {
-				rbs = append(rbs, rs.Result())
+				rbs = append(rbs, execResultsAsVector(t, rs, test.query))
 			}
 			if got, want := vdl.ValueOf(rbs), vdl.ValueOf(test.r); !vdl.EqualValue(got, want) {
 				t.Errorf("query: %s; got %v, want %v", test.query, got, want)
@@ -2275,9 +2286,9 @@ func TestPreExecFunctions(t *testing.T) {
 		} else {
 			// Check that all results are identical.
 			// Collect results.
-			var last []*vom.RawBytes
+			var last []interface{}
 			for rs.Advance() {
-				result := rs.Result()
+				result := execResultsAsVector(t, rs, test.query)
 				if last != nil && !reflect.DeepEqual(last, result) {
 					t.Errorf("query: %s; got %v, want %v", test.query, result, last)
 				}
@@ -2830,9 +2841,9 @@ func TestExecParamSelect(t *testing.T) {
 			t.Errorf("query: %s, params: %v; got %v, want nil", test.query, test.params, err)
 		} else {
 			// Collect results.
-			rbs := [][]*vom.RawBytes{}
+			rbs := [][]interface{}{}
 			for rs.Advance() {
-				rbs = append(rbs, rs.Result())
+				rbs = append(rbs, execResultsAsVector(t, rs, test.query))
 			}
 			if got, want := vdl.ValueOf(rbs), vdl.ValueOf(test.r); !vdl.EqualValue(got, want) {
 				t.Errorf("query: %s, params: %v; got %v, want %v", test.query, test.params, got, want)
@@ -2933,9 +2944,9 @@ func TestExecParamDelete(t *testing.T) {
 			t.Errorf("delQuery: %s, delParams: %v; got %v, want nil", test.delQuery, test.delParams, err)
 		} else {
 			// Collect results.
-			rbs := [][]*vom.RawBytes{}
+			rbs := [][]interface{}{}
 			for rs.Advance() {
-				rbs = append(rbs, rs.Result())
+				rbs = append(rbs, execResultsAsVector(t, rs, test.delQuery))
 			}
 			if got, want := vdl.ValueOf(rbs), vdl.ValueOf(test.delResults); !vdl.EqualValue(got, want) {
 				t.Errorf("delQuery: %s, delParams: %v; got %v, want %v", test.delQuery, test.delParams, got, want)
@@ -2949,9 +2960,9 @@ func TestExecParamDelete(t *testing.T) {
 			t.Errorf("delQuery: %s, delParams: %v; got %v, want nil", test.delQuery, test.delParams, err)
 		} else {
 			// Collect results.
-			rbs := [][]*vom.RawBytes{}
+			rbs := [][]interface{}{}
 			for rs.Advance() {
-				rbs = append(rbs, rs.Result())
+				rbs = append(rbs, execResultsAsVector(t, rs, test.delQuery))
 			}
 			if got, want := vdl.ValueOf(rbs), vdl.ValueOf(test.selResults); !vdl.EqualValue(got, want) {
 				t.Errorf("delQuery: %s, delParams: %v; got %v, want %v", test.delQuery, test.delParams, got, want)

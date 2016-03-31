@@ -53,26 +53,25 @@ func (rs *resultStream) Advance() bool {
 		}
 		return false
 	}
-	curr := rs.call.RecvStream().Value()
-	rs.curr = curr
+	rs.curr = rs.call.RecvStream().Value()
 	return true
 }
 
-func (rs *resultStream) Result() []*vom.RawBytes {
+func (rs *resultStream) ResultCount() int {
 	rs.mu.Lock()
 	defer rs.mu.Unlock()
-	if rs.curr == nil {
-		panic("nothing staged")
-	}
-	return rs.curr
+	return len(rs.curr)
+}
+
+func (rs *resultStream) Result(i int, value interface{}) error {
+	rs.mu.Lock()
+	defer rs.mu.Unlock()
+	return rs.curr[i].ToValue(value)
 }
 
 func (rs *resultStream) Err() error {
 	rs.mu.Lock()
 	defer rs.mu.Unlock()
-	if rs.err == nil {
-		return nil
-	}
 	return rs.err
 }
 

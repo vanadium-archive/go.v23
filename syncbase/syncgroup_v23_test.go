@@ -22,7 +22,6 @@ import (
 	"v.io/v23/services/watch"
 	"v.io/v23/syncbase"
 	"v.io/v23/verror"
-	"v.io/v23/vom"
 	_ "v.io/x/ref/runtime/factories/generic"
 	"v.io/x/ref/services/syncbase/common"
 	"v.io/x/ref/services/syncbase/syncbaselib"
@@ -867,7 +866,7 @@ func runVerifySyncgroupDataWithWatch(ctx *context.T, serviceName, keyPrefix stri
 		if got, want := change.ChangeType, syncbase.PutChange; got != want {
 			return fmt.Errorf("unexpected watch change type: got %q, want %q", got, want)
 		}
-		if err := vom.Decode(change.ValueBytes, &result); err != nil {
+		if err := change.Value(&result); err != nil {
 			return fmt.Errorf("couldn't decode watch value: %v", err)
 		}
 		if got, want := result, fmt.Sprintf("testkey%s%d", keyPrefix, i); got != want {

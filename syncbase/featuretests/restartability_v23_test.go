@@ -18,7 +18,6 @@ import (
 	wire "v.io/v23/services/syncbase"
 	"v.io/v23/syncbase"
 	"v.io/v23/verror"
-	"v.io/v23/vom"
 	"v.io/x/ref/services/syncbase/syncbaselib"
 	tu "v.io/x/ref/services/syncbase/testutil"
 	"v.io/x/ref/test/v23test"
@@ -293,9 +292,9 @@ func TestV23RestartabilityReadWriteBatch(t *testing.T) {
 	}
 }
 
-func decodeString(t *testing.T, val []byte) string {
+func decodeString(t *testing.T, change syncbase.WatchChange) string {
 	var ret string
-	if err := vom.Decode(val, &ret); err != nil {
+	if err := change.Value(&ret); err != nil {
 		t.Fatalf("unable to decode: %v", err)
 	}
 	return ret
@@ -337,7 +336,7 @@ func TestV23RestartabilityWatch(t *testing.T) {
 		t.Fatalf("expected to be able to Advance: %v", stream.Err())
 	}
 	change := stream.Change()
-	val := decodeString(t, change.ValueBytes)
+	val := decodeString(t, change)
 	if change.Row != "r" || val != "testvalue1" {
 		t.Fatalf("unexpected row: %s", change.Row)
 	}
@@ -370,7 +369,7 @@ func TestV23RestartabilityWatch(t *testing.T) {
 		t.Fatalf("expected to be able to Advance: %v", stream.Err())
 	}
 	change = stream.Change()
-	val = decodeString(t, change.ValueBytes)
+	val = decodeString(t, change)
 	if change.Row != "r" || val != "testvalue2" {
 		t.Fatalf("unexpected row: %s, %s", change.Row, val)
 	}

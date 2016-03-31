@@ -10,7 +10,6 @@ import (
 
 	"v.io/v23/context"
 	"v.io/v23/syncbase"
-	"v.io/v23/vom"
 	"v.io/x/ref/services/syncbase/syncbaselib"
 	"v.io/x/ref/test/v23test"
 )
@@ -83,7 +82,7 @@ func TestV23SyncbasedPutGet(t *testing.T) {
 	if got, want := change.FromSync, false; got != want {
 		t.Fatalf("unexpected FromSync value: got %t, want %t", got, want)
 	}
-	if err := vom.Decode(change.ValueBytes, &result); err != nil {
+	if err := change.Value(&result); err != nil {
 		t.Fatalf("couldn't decode watch value: %v", err)
 	}
 	if got, want := result, "testvalue"; got != want {

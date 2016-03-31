@@ -153,12 +153,13 @@ func (d *database) Exec(ctx *context.T, query string, params ...interface{}) ([]
 			return nil, nil, err
 		}
 	}
-	for _, header := range resultStream.Result() {
-		var str string
-		if err := header.ToValue(&str); err != nil {
-			return nil, nil, err
+	for i, n := 0, resultStream.ResultCount(); i != n; i++ {
+		var header string
+		if err := resultStream.Result(i, &header); err == nil {
+			headers = append(headers, header)
+		} else {
+			return nil, nil, verror.New(svcwire.ErrBadExecStreamHeader, ctx, query)
 		}
-		headers = append(headers, str)
 	}
 	return headers, resultStream, nil
 }

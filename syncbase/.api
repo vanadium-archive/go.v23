@@ -203,11 +203,12 @@ pkg syncbase, type ResolvedRowTarget struct
 pkg syncbase, type ResolvedRowTarget struct, Value *ResolvedRow
 pkg syncbase, type ResolvedRowTarget struct, embedded vdl.FieldsTargetBase
 pkg syncbase, type ResolvedRowTarget struct, embedded vdl.TargetBase
-pkg syncbase, type ResultStream interface { Advance, Cancel, Err, Result }
+pkg syncbase, type ResultStream interface { Advance, Cancel, Err, Result, ResultCount }
 pkg syncbase, type ResultStream interface, Advance() bool
 pkg syncbase, type ResultStream interface, Cancel()
 pkg syncbase, type ResultStream interface, Err() error
-pkg syncbase, type ResultStream interface, Result() []*vom.RawBytes
+pkg syncbase, type ResultStream interface, Result(int, interface{}) error
+pkg syncbase, type ResultStream interface, ResultCount() int
 pkg syncbase, type Row interface { Delete, Exists, FullName, Get, Key, Put }
 pkg syncbase, type Row interface, Delete(*context.T) error
 pkg syncbase, type Row interface, Exists(*context.T) (bool, error)
@@ -260,7 +261,6 @@ pkg syncbase, type WatchChange struct, Continued bool
 pkg syncbase, type WatchChange struct, FromSync bool
 pkg syncbase, type WatchChange struct, ResumeMarker watch.ResumeMarker
 pkg syncbase, type WatchChange struct, Row string
-pkg syncbase, type WatchChange struct, ValueBytes []byte
 pkg syncbase, type WatchStream interface { Advance, Cancel, Change, Err }
 pkg syncbase, type WatchStream interface, Advance() bool
 pkg syncbase, type WatchStream interface, Cancel()

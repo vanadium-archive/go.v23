@@ -370,7 +370,7 @@ type BlobFetchStatus struct {
 type StoreChange struct {
 	// Value is the new value for the row if the Change state equals to Exists,
 	// otherwise the Value is nil.
-	Value []byte
+	Value any
 
 	// FromSync indicates whether the change came from sync. If FromSync is
 	// false, then the change originated from the local device.

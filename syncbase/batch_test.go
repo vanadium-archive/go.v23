@@ -108,13 +108,13 @@ func TestBatchBasics(t *testing.T) {
 		}
 	}
 	if scanIt.Err() != nil {
-		t.Fatalf("scanIt.Advance() failed: %v", err)
+		t.Fatalf("scanIt.Advance() failed: %v", scanIt.Err())
 	}
 	// make sure Exec's Advance doesn't return a "zzzKey"
 	for execIt.Advance() {
 		var str string
-		if err := execIt.Result()[0].ToValue(&str); err != nil {
-			t.Fatal(err)
+		if err := execIt.Result(0, &str); err != nil {
+			t.Fatal("execIt.Result()[0] is not a string: %v", err)
 		}
 		if str == "zzzKey" {
 			t.Fatal("execIt.Advance() found zzzKey")

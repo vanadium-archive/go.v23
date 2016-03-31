@@ -696,27 +696,33 @@ func TestWatchBasic(t *testing.T) {
 	}
 	resumeMarkers = append(resumeMarkers, resumeMarker)
 
-	vomValue, _ := vom.Encode("value")
-	allChanges := []syncbase.WatchChange{
-		syncbase.WatchChange{
-			Collection:   "c",
-			Row:          "abc",
-			ChangeType:   syncbase.PutChange,
-			ValueBytes:   vomValue,
-			ResumeMarker: resumeMarkers[1],
+	valueBytes, _ := vom.RawBytesFromValue("value")
+	allChanges := []tu.WatchChangeTest{
+		tu.WatchChangeTest{
+			WatchChange: syncbase.WatchChange{
+				Collection:   "c",
+				Row:          "abc",
+				ChangeType:   syncbase.PutChange,
+				ResumeMarker: resumeMarkers[1],
+			},
+			ValueBytes: valueBytes,
 		},
-		syncbase.WatchChange{
-			Collection:   "c",
-			Row:          "abc",
-			ChangeType:   syncbase.DeleteChange,
-			ResumeMarker: resumeMarkers[2],
+		tu.WatchChangeTest{
+			WatchChange: syncbase.WatchChange{
+				Collection:   "c",
+				Row:          "abc",
+				ChangeType:   syncbase.DeleteChange,
+				ResumeMarker: resumeMarkers[2],
+			},
 		},
-		syncbase.WatchChange{
-			Collection:   "c",
-			Row:          "a",
-			ChangeType:   syncbase.PutChange,
-			ValueBytes:   vomValue,
-			ResumeMarker: resumeMarkers[3],
+		tu.WatchChangeTest{
+			WatchChange: syncbase.WatchChange{
+				Collection:   "c",
+				Row:          "a",
+				ChangeType:   syncbase.PutChange,
+				ResumeMarker: resumeMarkers[3],
+			},
+			ValueBytes: valueBytes,
 		},
 	}
 	ctxWithTimeout, cancel := context.WithTimeout(ctx, 10*time.Second)
@@ -784,22 +790,26 @@ func TestWatchWithBatchAndInitialState(t *testing.T) {
 	if err != nil {
 		t.Fatalf("d.GetResumeMarker() failed: %v", err)
 	}
-	vomValue, _ := vom.Encode("value")
-	initialChanges := []syncbase.WatchChange{
-		syncbase.WatchChange{
-			Collection:   "cpublic",
-			Row:          "a/1",
-			ChangeType:   syncbase.PutChange,
-			ValueBytes:   vomValue,
-			ResumeMarker: nil,
-			Continued:    true,
+	valueBytes, _ := vom.RawBytesFromValue("value")
+	initialChanges := []tu.WatchChangeTest{
+		tu.WatchChangeTest{
+			WatchChange: syncbase.WatchChange{
+				Collection:   "cpublic",
+				Row:          "a/1",
+				ChangeType:   syncbase.PutChange,
+				ResumeMarker: nil,
+				Continued:    true,
+			},
+			ValueBytes: valueBytes,
 		},
-		syncbase.WatchChange{
-			Collection:   "cpublic",
-			Row:          "c/1",
-			ChangeType:   syncbase.PutChange,
-			ValueBytes:   vomValue,
-			ResumeMarker: resumeMarkerInitial,
+		tu.WatchChangeTest{
+			WatchChange: syncbase.WatchChange{
+				Collection:   "cpublic",
+				Row:          "c/1",
+				ChangeType:   syncbase.PutChange,
+				ResumeMarker: resumeMarkerInitial,
+			},
+			ValueBytes: valueBytes,
 		},
 	}
 	// Watch with empty prefix should have seen the initial state as one batch,
@@ -837,28 +847,34 @@ func TestWatchWithBatchAndInitialState(t *testing.T) {
 		t.Fatalf("d.GetResumeMarker() failed: %v", err)
 	}
 
-	continuedChanges := []syncbase.WatchChange{
-		syncbase.WatchChange{
-			Collection:   "cpublic",
-			Row:          "a/2",
-			ChangeType:   syncbase.PutChange,
-			ValueBytes:   vomValue,
-			ResumeMarker: resumeMarkerAfterA2B2,
+	continuedChanges := []tu.WatchChangeTest{
+		tu.WatchChangeTest{
+			WatchChange: syncbase.WatchChange{
+				Collection:   "cpublic",
+				Row:          "a/2",
+				ChangeType:   syncbase.PutChange,
+				ResumeMarker: resumeMarkerAfterA2B2,
+			},
+			ValueBytes: valueBytes,
 		},
-		syncbase.WatchChange{
-			Collection:   "cpublic",
-			Row:          "a/3",
-			ChangeType:   syncbase.PutChange,
-			ValueBytes:   vomValue,
-			ResumeMarker: nil,
-			Continued:    true,
+		tu.WatchChangeTest{
+			WatchChange: syncbase.WatchChange{
+				Collection:   "cpublic",
+				Row:          "a/3",
+				ChangeType:   syncbase.PutChange,
+				ResumeMarker: nil,
+				Continued:    true,
+			},
+			ValueBytes: valueBytes,
 		},
-		syncbase.WatchChange{
-			Collection:   "cpublic",
-			Row:          "d/1",
-			ChangeType:   syncbase.PutChange,
-			ValueBytes:   vomValue,
-			ResumeMarker: resumeMarkerAfterA3D1,
+		tu.WatchChangeTest{
+			WatchChange: syncbase.WatchChange{
+				Collection:   "cpublic",
+				Row:          "d/1",
+				ChangeType:   syncbase.PutChange,
+				ResumeMarker: resumeMarkerAfterA3D1,
+			},
+			ValueBytes: valueBytes,
 		},
 	}
 	// Watch with empty prefix should have seen the continued changes as separate
@@ -885,7 +901,7 @@ func TestBlockingWatch(t *testing.T) {
 	ctxWithTimeout, cancel := context.WithTimeout(ctx, 10*time.Second)
 	defer cancel()
 	wstream, _ := d.Watch(ctxWithTimeout, "c", "a", resumeMarker)
-	vomValue, _ := vom.Encode("value")
+	valueBytes, _ := vom.RawBytesFromValue("value")
 	for i := 0; i < 10; i++ {
 		// Put "abc".
 		r := c.Row("abc")
@@ -898,14 +914,16 @@ func TestBlockingWatch(t *testing.T) {
 		if !wstream.Advance() {
 			t.Fatalf("wstream.Advance() reached the end: %v", wstream.Err())
 		}
-		want := syncbase.WatchChange{
-			Collection:   "c",
-			Row:          "abc",
-			ChangeType:   syncbase.PutChange,
-			ValueBytes:   vomValue,
-			ResumeMarker: resumeMarker,
+		want := tu.WatchChangeTest{
+			WatchChange: syncbase.WatchChange{
+				Collection:   "c",
+				Row:          "abc",
+				ChangeType:   syncbase.PutChange,
+				ResumeMarker: resumeMarker,
+			},
+			ValueBytes: valueBytes,
 		}
-		if got := wstream.Change(); !reflect.DeepEqual(got, want) {
+		if got := wstream.Change(); !tu.WatchChangeEq(&got, &want) {
 			t.Fatalf("Unexpected watch change: got %v, want %v", got, want)
 		}
 	}

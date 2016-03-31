@@ -423,4 +423,5 @@ error (
 	SchemaVersionMismatch() {"en": "actual schema version does not match the provided one"}
 	BlobNotCommitted() {"en": "blob is not yet committed"}
 	SyncgroupJoinFailed() {"en": "syncgroup join failed"}
+	BadExecStreamHeader() {"en": "Exec stream header improperly formatted"}
 )

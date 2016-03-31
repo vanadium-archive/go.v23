@@ -364,10 +364,17 @@ type ScanStream interface {
 type ResultStream interface {
 	Stream
 
-	// Result returns the result that was staged by Advance.
-	// Result may panic if Advance returned false or was not called at all.
-	// Result does not block.
-	Result() []*vom.RawBytes
+	// ResultCount returns the number of results for the stream element
+	// prepared by the most recent call to Advance().  Requires that the
+	// last call to Advance() was successful.
+	ResultCount() int
+
+	// ResultValue places in value the result numbered i.
+	// Requires 0 <= i < ResultCount(), and that the last call to Advance()
+	// was successful.
+	// Errors represent possible decoding errors for individual values,
+	// rather than errors that would necessarily terminate the stream.
+	Result(i int, value interface{}) error
 }
 
 // WatchStream is an interface for receiving database updates.
@@ -404,9 +411,9 @@ type WatchChange struct {
 	// removed from the collection.
 	ChangeType ChangeType
 
-	// ValueBytes is the new VOM-encoded value for the row if the ChangeType is
-	// Put or nil otherwise.
-	ValueBytes []byte
+	// value is the new value for the row if the ChangeType is Put or nil
+	// otherwise.
+	value *vom.RawBytes
 
 	// ResumeMarker provides a compact representation of all the messages
 	// that have been received by the caller for the given Watch call.
@@ -430,7 +437,7 @@ func (c *WatchChange) Value(value interface{}) error {
 	if c.ChangeType == DeleteChange {
 		panic("invalid change type")
 	}
-	return vom.Decode(c.ValueBytes, value)
+	return c.value.ToValue(value)
 }
 
 // Syncgroup is the interface for a syncgroup in the store.

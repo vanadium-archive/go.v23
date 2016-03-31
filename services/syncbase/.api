@@ -29,6 +29,7 @@ pkg syncbase, func DatabaseClient(string) DatabaseClientStub
 pkg syncbase, func DatabaseServer(DatabaseServerMethods) DatabaseServerStub
 pkg syncbase, func DatabaseWatcherClient(string) DatabaseWatcherClientStub
 pkg syncbase, func DatabaseWatcherServer(DatabaseWatcherServerMethods) DatabaseWatcherServerStub
+pkg syncbase, func NewErrBadExecStreamHeader(*context.T) error
 pkg syncbase, func NewErrBlobNotCommitted(*context.T) error
 pkg syncbase, func NewErrBoundToBatch(*context.T) error
 pkg syncbase, func NewErrConcurrentBatch(*context.T) error
@@ -808,7 +809,7 @@ pkg syncbase, type ServiceServerStub interface, unexported methods
 pkg syncbase, type ServiceServerStubMethods ServiceServerMethods
 pkg syncbase, type StoreChange struct
 pkg syncbase, type StoreChange struct, FromSync bool
-pkg syncbase, type StoreChange struct, Value []byte
+pkg syncbase, type StoreChange struct, Value *vom.RawBytes
 pkg syncbase, type StoreChangeTarget struct
 pkg syncbase, type StoreChangeTarget struct, Value *StoreChange
 pkg syncbase, type StoreChangeTarget struct, embedded vdl.FieldsTargetBase
@@ -887,6 +888,7 @@ pkg syncbase, var CollectionDesc rpc.InterfaceDesc
 pkg syncbase, var ConflictManagerDesc rpc.InterfaceDesc
 pkg syncbase, var DatabaseDesc rpc.InterfaceDesc
 pkg syncbase, var DatabaseWatcherDesc rpc.InterfaceDesc
+pkg syncbase, var ErrBadExecStreamHeader unknown-type
 pkg syncbase, var ErrBlobNotCommitted unknown-type
 pkg syncbase, var ErrBoundToBatch unknown-type
 pkg syncbase, var ErrConcurrentBatch unknown-type
