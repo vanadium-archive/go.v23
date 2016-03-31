@@ -1,5 +1,8 @@
 pkg syncbase, const BatchSourceLocal BatchSource
 pkg syncbase, const BatchSourceRemote BatchSource
+pkg syncbase, const BlobDevTypeLeaf int32
+pkg syncbase, const BlobDevTypeNormal int32
+pkg syncbase, const BlobDevTypeServer int32
 pkg syncbase, const BlobFetchStateDone BlobFetchState
 pkg syncbase, const BlobFetchStateFetching BlobFetchState
 pkg syncbase, const BlobFetchStateLocating BlobFetchState
@@ -848,7 +851,7 @@ pkg syncbase, type SyncgroupManagerServerStub interface, Describe__() []rpc.Inte
 pkg syncbase, type SyncgroupManagerServerStub interface, unexported methods
 pkg syncbase, type SyncgroupManagerServerStubMethods SyncgroupManagerServerMethods
 pkg syncbase, type SyncgroupMemberInfo struct
-pkg syncbase, type SyncgroupMemberInfo struct, IsServer bool
+pkg syncbase, type SyncgroupMemberInfo struct, BlobDevType byte
 pkg syncbase, type SyncgroupMemberInfo struct, SyncPriority byte
 pkg syncbase, type SyncgroupMemberInfoTarget struct
 pkg syncbase, type SyncgroupMemberInfoTarget struct, Value *SyncgroupMemberInfo

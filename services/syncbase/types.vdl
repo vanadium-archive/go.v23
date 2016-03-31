@@ -89,8 +89,15 @@ type SyncgroupSpec struct {
 // SyncgroupMemberInfo contains per-member metadata.
 type SyncgroupMemberInfo struct {
 	SyncPriority byte
-	IsServer     bool  // This member should be given blob ownership preferentially.
+	BlobDevType  byte // See BlobDevType* constants.
 }
+
+// Types of device for blob ownership priority.  Blobs tend to migrate to lower BlobDevType* values.
+const (
+	BlobDevTypeServer = int32(0) // Blobs migrate toward servers, which store them.  (example: server in cloud)
+	BlobDevTypeNormal = int32(1) // Ordinary devices (example: laptop)
+	BlobDevTypeLeaf   = int32(2) // Blobs migrate from leaves, which have less storage (examples: a camera, phone)
+)
 
 // ResolverType defines the possible conflict resolution policies.
 // A Conflict is defined as presence of two independent sets of updates

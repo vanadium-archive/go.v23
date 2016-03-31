@@ -863,7 +863,7 @@ func (t *__VDLTarget1_list) FromZero(tt *vdl.Type) error {
 // SyncgroupMemberInfo contains per-member metadata.
 type SyncgroupMemberInfo struct {
 	SyncPriority byte
-	IsServer     bool // This member should be given blob ownership preferentially.
+	BlobDevType  byte // See BlobDevType* constants.
 }
 
 func (SyncgroupMemberInfo) __VDLReflect(struct {
@@ -896,19 +896,19 @@ func (m *SyncgroupMemberInfo) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 			return err
 		}
 	}
-	keyTarget5, fieldTarget6, err := fieldsTarget1.StartField("IsServer")
+	keyTarget5, fieldTarget6, err := fieldsTarget1.StartField("BlobDevType")
 	if err != vdl.ErrFieldNoExist && err != nil {
 		return err
 	}
 	if err != vdl.ErrFieldNoExist {
 
-		var7 := (m.IsServer == false)
+		var7 := (m.BlobDevType == byte(0))
 		if var7 {
 			if err := fieldTarget6.FromZero(tt.NonOptional().Field(1).Type); err != nil {
 				return err
 			}
 		} else {
-			if err := fieldTarget6.FromBool(bool(m.IsServer), tt.NonOptional().Field(1).Type); err != nil {
+			if err := fieldTarget6.FromUint(uint64(m.BlobDevType), tt.NonOptional().Field(1).Type); err != nil {
 				return err
 			}
 		}
@@ -929,7 +929,7 @@ func (m *SyncgroupMemberInfo) MakeVDLTarget() vdl.Target {
 type SyncgroupMemberInfoTarget struct {
 	Value              *SyncgroupMemberInfo
 	syncPriorityTarget vdl.ByteTarget
-	isServerTarget     vdl.BoolTarget
+	blobDevTypeTarget  vdl.ByteTarget
 	vdl.TargetBase
 	vdl.FieldsTargetBase
 }
@@ -947,9 +947,9 @@ func (t *SyncgroupMemberInfoTarget) StartField(name string) (key, field vdl.Targ
 		t.syncPriorityTarget.Value = &t.Value.SyncPriority
 		target, err := &t.syncPriorityTarget, error(nil)
 		return nil, target, err
-	case "IsServer":
-		t.isServerTarget.Value = &t.Value.IsServer
-		target, err := &t.isServerTarget, error(nil)
+	case "BlobDevType":
+		t.blobDevTypeTarget.Value = &t.Value.BlobDevType
+		target, err := &t.blobDevTypeTarget, error(nil)
 		return nil, target, err
 	default:
 		return nil, nil, fmt.Errorf("field %s not in struct v.io/v23/services/syncbase.SyncgroupMemberInfo", name)
@@ -3618,6 +3618,9 @@ func (t *StoreChangeTarget) FromZero(tt *vdl.Type) error {
 //////////////////////////////////////////////////
 // Const definitions
 
+const BlobDevTypeServer = int32(0) // Blobs migrate toward servers, which store them.  (example: server in cloud)
+const BlobDevTypeNormal = int32(1) // Ordinary devices (example: laptop)
+const BlobDevTypeLeaf = int32(2)   // Blobs migrate from leaves, which have less storage (examples: a camera, phone)
 const NullBlobRef = BlobRef("")
 
 //////////////////////////////////////////////////
