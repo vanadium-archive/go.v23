@@ -253,15 +253,19 @@ type Advertisement struct {
 	//
 	// The key must be US-ASCII printable characters, excluding the '=' character
 	// and should not start with '_' character.
+	//
+	// We limit the maximum number of attachments to 32.
 	Attributes Attributes
 	// Attachments as a key/value pair.
 	// E.g., {'thumbnail': binary_data }.
 	//
 	// Unlike attributes, attachments are for binary data and they are not queryable.
-	// We limit the maximum size of a single attachment to 4K bytes.
 	//
 	// The key must be US-ASCII printable characters, excluding the '=' character
 	// and should not start with '_' character.
+	//
+	// We limit the maximum number of attachments to 32 and the maximum size of each
+	// attachment is 4K bytes.
 	Attachments Attachments
 }
 
