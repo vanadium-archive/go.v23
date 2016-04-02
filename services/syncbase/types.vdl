@@ -56,7 +56,7 @@ type KeyValue struct {
 // CollectionRow encapsulates the collection name and row key or row prefix.
 type CollectionRow struct {
 	CollectionName string
-	Row       string
+	Row            string
 }
 
 // SyncgroupSpec contains the specification for a syncgroup.
@@ -157,7 +157,7 @@ type ConflictInfo struct {
 // on a row.
 type ConflictData union {
 	Batch BatchInfo
-	Row RowInfo
+	Row   RowInfo
 }
 
 type BatchInfo struct {
@@ -315,9 +315,11 @@ type ResolutionInfo struct {
 // SchemaMetadata maintains metadata related to the schema of a given database.
 // There is one SchemaMetadata per database.
 type SchemaMetadata struct {
-	// Non negative Schema version number. Should be increased with every schema change
-	// (e.g. adding fields to structs) that cannot be handled by previous
+	// Non negative Schema version number. Should be increased with every schema
+	// change (e.g. adding fields to structs) that cannot be handled by previous
 	// versions of the app.
+	// TODO(jlodhia,ivanpi): Deprecated, needs update to multiple parallel version
+	// semantics.
 	Version int32
 	Policy  CrPolicy
 }
@@ -344,10 +346,10 @@ type CrRule struct {
 
 	// Type includes the full package path for the value type for which this
 	// policy applies.
-	Type 		string
+	Type string
 
 	// Policy for resolving conflict.
-	Resolver 	ResolverType
+	Resolver ResolverType
 }
 
 // BlobRef is a reference to a blob.
@@ -359,17 +361,17 @@ const (
 
 // BlobFetchState represents the state transitions of a blob fetch.
 type BlobFetchState enum {
-	Pending // Fetch request is queued.
+	Pending  // Fetch request is queued.
 	Locating // Blob discovery is in progress to find a source for the blob.
 	Fetching // Blob transfer is in progress.
-	Done // Blob is locally cached.
+	Done     // Blob is locally cached.
 }
 
 // BlobFetchStatus describes the progress of an asynchronous blob fetch.
 type BlobFetchStatus struct {
-	State BlobFetchState // State of the blob fetch request.
+	State    BlobFetchState // State of the blob fetch request.
 	Received int64 // Total number of bytes received.
-	Total int64 // Blob size.
+	Total    int64 // Blob size.
 }
 
 // StoreChange is the new value for a watched entity.

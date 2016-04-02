@@ -12,25 +12,23 @@ import (
 	"v.io/v23/syncbase/util"
 )
 
-func newCollection(parentFullName, relativeName string, schemaVersion int32) Collection {
+func newCollection(parentFullName, relativeName string) Collection {
 	// Escape relativeName so that any forward slashes get dropped, thus ensuring
 	// that the server will interpret fullName as referring to a collection
 	// object. Note that the server will still reject this name if
 	// util.ValidCollectionName returns false.
 	fullName := naming.Join(parentFullName, util.Escape(relativeName))
 	return &collection{
-		c:               wire.CollectionClient(fullName),
-		fullName:        fullName,
-		name:            relativeName,
-		dbSchemaVersion: schemaVersion,
+		c:        wire.CollectionClient(fullName),
+		fullName: fullName,
+		name:     relativeName,
 	}
 }
 
 type collection struct {
-	c               wire.CollectionClientMethods
-	fullName        string
-	name            string
-	dbSchemaVersion int32
+	c        wire.CollectionClientMethods
+	fullName string
+	name     string
 }
 
 var _ Collection = (*collection)(nil)
@@ -47,32 +45,32 @@ func (c *collection) FullName() string {
 
 // Exists implements Collection.Exists.
 func (c *collection) Exists(ctx *context.T) (bool, error) {
-	return c.c.Exists(ctx, c.dbSchemaVersion)
+	return c.c.Exists(ctx)
 }
 
 // Create implements Collection.Create.
 func (c *collection) Create(ctx *context.T, perms access.Permissions) error {
-	return c.c.Create(ctx, c.dbSchemaVersion, perms)
+	return c.c.Create(ctx, perms)
 }
 
 // Destroy implements Collection.Destroy.
 func (c *collection) Destroy(ctx *context.T) error {
-	return c.c.Destroy(ctx, c.dbSchemaVersion)
+	return c.c.Destroy(ctx)
 }
 
 // GetPermissions implements Collection.GetPermissions.
 func (c *collection) GetPermissions(ctx *context.T) (access.Permissions, error) {
-	return c.c.GetPermissions(ctx, c.dbSchemaVersion)
+	return c.c.GetPermissions(ctx)
 }
 
 // SetPermissions implements Collection.SetPermissions.
 func (c *collection) SetPermissions(ctx *context.T, perms access.Permissions) error {
-	return c.c.SetPermissions(ctx, c.dbSchemaVersion, perms)
+	return c.c.SetPermissions(ctx, perms)
 }
 
 // Row implements Collection.Row.
 func (c *collection) Row(key string) Row {
-	return newRow(c.fullName, key, c.dbSchemaVersion)
+	return newRow(c.fullName, key)
 }
 
 // Get implements Collection.Get.
@@ -92,13 +90,13 @@ func (c *collection) Delete(ctx *context.T, key string) error {
 
 // DeleteRange implements Collection.DeleteRange.
 func (c *collection) DeleteRange(ctx *context.T, r RowRange) error {
-	return c.c.DeleteRange(ctx, c.dbSchemaVersion, []byte(r.Start()), []byte(r.Limit()))
+	return c.c.DeleteRange(ctx, []byte(r.Start()), []byte(r.Limit()))
 }
 
 // Scan implements Collection.Scan.
 func (c *collection) Scan(ctx *context.T, r RowRange) ScanStream {
 	ctx, cancel := context.WithCancel(ctx)
-	call, err := c.c.Scan(ctx, c.dbSchemaVersion, []byte(r.Start()), []byte(r.Limit()))
+	call, err := c.c.Scan(ctx, []byte(r.Start()), []byte(r.Limit()))
 	if err != nil {
 		return &InvalidScanStream{Error: err}
 	}

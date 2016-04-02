@@ -97,12 +97,12 @@ func (d *database) FullName() string {
 
 // Exists implements Database.Exists.
 func (d *database) Exists(ctx *context.T) (bool, error) {
-	return d.c.Exists(ctx, d.schemaVersion())
+	return d.c.Exists(ctx)
 }
 
 // Collection implements Database.Collection.
 func (d *database) Collection(relativeName string) Collection {
-	return newCollection(d.fullName, relativeName, d.schemaVersion())
+	return newCollection(d.fullName, relativeName)
 }
 
 // ListCollections implements Database.ListCollections.
@@ -123,7 +123,7 @@ func (d *database) Create(ctx *context.T, perms access.Permissions) error {
 
 // Destroy implements Database.Destroy.
 func (d *database) Destroy(ctx *context.T) error {
-	return d.c.Destroy(ctx, d.schemaVersion())
+	return d.c.Destroy(ctx)
 }
 
 // Exec implements Database.Exec.
@@ -138,7 +138,7 @@ func (d *database) Exec(ctx *context.T, query string, params ...interface{}) ([]
 		}
 	}
 	ctx, cancel := context.WithCancel(ctx)
-	call, err := d.c.Exec(ctx, d.schemaVersion(), query, paramsVom)
+	call, err := d.c.Exec(ctx, query, paramsVom)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -166,7 +166,7 @@ func (d *database) Exec(ctx *context.T, query string, params ...interface{}) ([]
 
 // BeginBatch implements Database.BeginBatch.
 func (d *database) BeginBatch(ctx *context.T, opts wire.BatchOptions) (BatchDatabase, error) {
-	batchSuffix, err := d.c.BeginBatch(ctx, d.schemaVersion(), opts)
+	batchSuffix, err := d.c.BeginBatch(ctx, opts)
 	if err != nil {
 		return nil, err
 	}
@@ -470,11 +470,4 @@ func needsResolver(metadata wire.SchemaMetadata) bool {
 
 func (d *database) getSchemaManager() schemaManagerImpl {
 	return newSchemaManager(d.c)
-}
-
-func (d *database) schemaVersion() int32 {
-	if d.schema == nil {
-		return -1
-	}
-	return d.schema.Metadata.Version
 }

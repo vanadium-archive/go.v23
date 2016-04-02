@@ -704,7 +704,7 @@ func runPopulateNonVomData(ctx *context.T, serviceName, keyPrefix string, start 
 		r := c.Row(key)
 		rc := wire.RowClient(r.FullName())
 		val := []byte("nonvomtestkey" + key)
-		if err := rc.Put(ctx, -1, val); err != nil {
+		if err := rc.Put(ctx, val); err != nil {
 			return fmt.Errorf("rc.Put() failed: %v\n", err)
 		}
 	}
@@ -889,7 +889,7 @@ func runVerifySyncgroupNonVomData(ctx *context.T, serviceName, keyPrefix string,
 	rc := wire.RowClient(r.FullName())
 	for i := 0; i < 8; i++ {
 		time.Sleep(500 * time.Millisecond)
-		if _, err := rc.Get(ctx, -1); err == nil {
+		if _, err := rc.Get(ctx); err == nil {
 			break
 		}
 	}
@@ -900,7 +900,7 @@ func runVerifySyncgroupNonVomData(ctx *context.T, serviceName, keyPrefix string,
 		r := c.Row(key)
 		rc := wire.RowClient(r.FullName())
 		var got string
-		val, err := rc.Get(ctx, -1)
+		val, err := rc.Get(ctx)
 		if err != nil {
 			return fmt.Errorf("rc.Get() failed: %v\n", err)
 		}
