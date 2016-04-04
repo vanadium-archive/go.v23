@@ -50,10 +50,6 @@ func (t *AdIdTarget) FromBytes(src []byte, tt *vdl.Type) error {
 
 	return nil
 }
-func (t *AdIdTarget) FromZero(tt *vdl.Type) error {
-	*t.Value = AdId{}
-	return nil
-}
 
 // Attributes represents service attributes as a key/value pair.
 type Attributes map[string]string
@@ -136,10 +132,6 @@ func (t *AttributesTarget) FinishMap(elem vdl.MapTarget) error {
 		*t.Value = nil
 	}
 
-	return nil
-}
-func (t *AttributesTarget) FromZero(tt *vdl.Type) error {
-	*t.Value = Attributes(nil)
 	return nil
 }
 
@@ -227,10 +219,6 @@ func (t *AttachmentsTarget) FinishMap(elem vdl.MapTarget) error {
 
 	return nil
 }
-func (t *AttachmentsTarget) FromZero(tt *vdl.Type) error {
-	*t.Value = Attachments(nil)
-	return nil
-}
 
 // Advertisement represents a feed into advertiser to broadcast its contents
 // to scanners.
@@ -279,62 +267,59 @@ func (m *Advertisement) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 	if err != nil {
 		return err
 	}
-	keyTarget2, fieldTarget3, err := fieldsTarget1.StartField("Id")
-	if err != vdl.ErrFieldNoExist && err != nil {
-		return err
-	}
-	if err != vdl.ErrFieldNoExist {
-
-		var4 := (m.Id == AdId{})
-		if var4 {
-			if err := fieldTarget3.FromZero(tt.NonOptional().Field(0).Type); err != nil {
+	var4 := (m.Id == AdId{})
+	if var4 {
+		if err := fieldsTarget1.ZeroField("Id"); err != nil && err != vdl.ErrFieldNoExist {
+			return err
+		}
+	} else {
+		keyTarget2, fieldTarget3, err := fieldsTarget1.StartField("Id")
+		if err != vdl.ErrFieldNoExist {
+			if err != nil {
 				return err
 			}
-		} else {
 
 			if err := m.Id.FillVDLTarget(fieldTarget3, tt.NonOptional().Field(0).Type); err != nil {
 				return err
 			}
-		}
-		if err := fieldsTarget1.FinishField(keyTarget2, fieldTarget3); err != nil {
-			return err
-		}
-	}
-	keyTarget5, fieldTarget6, err := fieldsTarget1.StartField("InterfaceName")
-	if err != vdl.ErrFieldNoExist && err != nil {
-		return err
-	}
-	if err != vdl.ErrFieldNoExist {
-
-		var7 := (m.InterfaceName == "")
-		if var7 {
-			if err := fieldTarget6.FromZero(tt.NonOptional().Field(1).Type); err != nil {
+			if err := fieldsTarget1.FinishField(keyTarget2, fieldTarget3); err != nil {
 				return err
 			}
-		} else {
+		}
+	}
+	var7 := (m.InterfaceName == "")
+	if var7 {
+		if err := fieldsTarget1.ZeroField("InterfaceName"); err != nil && err != vdl.ErrFieldNoExist {
+			return err
+		}
+	} else {
+		keyTarget5, fieldTarget6, err := fieldsTarget1.StartField("InterfaceName")
+		if err != vdl.ErrFieldNoExist {
+			if err != nil {
+				return err
+			}
 			if err := fieldTarget6.FromString(string(m.InterfaceName), tt.NonOptional().Field(1).Type); err != nil {
 				return err
 			}
-		}
-		if err := fieldsTarget1.FinishField(keyTarget5, fieldTarget6); err != nil {
-			return err
-		}
-	}
-	keyTarget8, fieldTarget9, err := fieldsTarget1.StartField("Addresses")
-	if err != vdl.ErrFieldNoExist && err != nil {
-		return err
-	}
-	if err != vdl.ErrFieldNoExist {
-
-		var var10 bool
-		if len(m.Addresses) == 0 {
-			var10 = true
-		}
-		if var10 {
-			if err := fieldTarget9.FromZero(tt.NonOptional().Field(2).Type); err != nil {
+			if err := fieldsTarget1.FinishField(keyTarget5, fieldTarget6); err != nil {
 				return err
 			}
-		} else {
+		}
+	}
+	var var10 bool
+	if len(m.Addresses) == 0 {
+		var10 = true
+	}
+	if var10 {
+		if err := fieldsTarget1.ZeroField("Addresses"); err != nil && err != vdl.ErrFieldNoExist {
+			return err
+		}
+	} else {
+		keyTarget8, fieldTarget9, err := fieldsTarget1.StartField("Addresses")
+		if err != vdl.ErrFieldNoExist {
+			if err != nil {
+				return err
+			}
 
 			listTarget11, err := fieldTarget9.StartList(tt.NonOptional().Field(2).Type, len(m.Addresses))
 			if err != nil {
@@ -355,57 +340,55 @@ func (m *Advertisement) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 			if err := fieldTarget9.FinishList(listTarget11); err != nil {
 				return err
 			}
-		}
-		if err := fieldsTarget1.FinishField(keyTarget8, fieldTarget9); err != nil {
-			return err
-		}
-	}
-	keyTarget14, fieldTarget15, err := fieldsTarget1.StartField("Attributes")
-	if err != vdl.ErrFieldNoExist && err != nil {
-		return err
-	}
-	if err != vdl.ErrFieldNoExist {
-
-		var var16 bool
-		if len(m.Attributes) == 0 {
-			var16 = true
-		}
-		if var16 {
-			if err := fieldTarget15.FromZero(tt.NonOptional().Field(3).Type); err != nil {
+			if err := fieldsTarget1.FinishField(keyTarget8, fieldTarget9); err != nil {
 				return err
 			}
-		} else {
+		}
+	}
+	var var16 bool
+	if len(m.Attributes) == 0 {
+		var16 = true
+	}
+	if var16 {
+		if err := fieldsTarget1.ZeroField("Attributes"); err != nil && err != vdl.ErrFieldNoExist {
+			return err
+		}
+	} else {
+		keyTarget14, fieldTarget15, err := fieldsTarget1.StartField("Attributes")
+		if err != vdl.ErrFieldNoExist {
+			if err != nil {
+				return err
+			}
 
 			if err := m.Attributes.FillVDLTarget(fieldTarget15, tt.NonOptional().Field(3).Type); err != nil {
 				return err
 			}
-		}
-		if err := fieldsTarget1.FinishField(keyTarget14, fieldTarget15); err != nil {
-			return err
-		}
-	}
-	keyTarget17, fieldTarget18, err := fieldsTarget1.StartField("Attachments")
-	if err != vdl.ErrFieldNoExist && err != nil {
-		return err
-	}
-	if err != vdl.ErrFieldNoExist {
-
-		var var19 bool
-		if len(m.Attachments) == 0 {
-			var19 = true
-		}
-		if var19 {
-			if err := fieldTarget18.FromZero(tt.NonOptional().Field(4).Type); err != nil {
+			if err := fieldsTarget1.FinishField(keyTarget14, fieldTarget15); err != nil {
 				return err
 			}
-		} else {
+		}
+	}
+	var var19 bool
+	if len(m.Attachments) == 0 {
+		var19 = true
+	}
+	if var19 {
+		if err := fieldsTarget1.ZeroField("Attachments"); err != nil && err != vdl.ErrFieldNoExist {
+			return err
+		}
+	} else {
+		keyTarget17, fieldTarget18, err := fieldsTarget1.StartField("Attachments")
+		if err != vdl.ErrFieldNoExist {
+			if err != nil {
+				return err
+			}
 
 			if err := m.Attachments.FillVDLTarget(fieldTarget18, tt.NonOptional().Field(4).Type); err != nil {
 				return err
 			}
-		}
-		if err := fieldsTarget1.FinishField(keyTarget17, fieldTarget18); err != nil {
-			return err
+			if err := fieldsTarget1.FinishField(keyTarget17, fieldTarget18); err != nil {
+				return err
+			}
 		}
 	}
 	if err := t.FinishFields(fieldsTarget1); err != nil {
@@ -465,12 +448,29 @@ func (t *AdvertisementTarget) StartField(name string) (key, field vdl.Target, _ 
 func (t *AdvertisementTarget) FinishField(_, _ vdl.Target) error {
 	return nil
 }
+func (t *AdvertisementTarget) ZeroField(name string) error {
+	switch name {
+	case "Id":
+		t.Value.Id = AdId{}
+		return nil
+	case "InterfaceName":
+		t.Value.InterfaceName = ""
+		return nil
+	case "Addresses":
+		t.Value.Addresses = []string(nil)
+		return nil
+	case "Attributes":
+		t.Value.Attributes = Attributes(nil)
+		return nil
+	case "Attachments":
+		t.Value.Attachments = Attachments(nil)
+		return nil
+	default:
+		return fmt.Errorf("field %s not in struct v.io/v23/discovery.Advertisement", name)
+	}
+}
 func (t *AdvertisementTarget) FinishFields(_ vdl.FieldsTarget) error {
 
-	return nil
-}
-func (t *AdvertisementTarget) FromZero(tt *vdl.Type) error {
-	*t.Value = Advertisement{}
 	return nil
 }
 

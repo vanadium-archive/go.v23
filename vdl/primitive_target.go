@@ -22,13 +22,6 @@ func (t *BoolTarget) FromBool(src bool, tt *Type) error {
 	*t.Value = src
 	return nil
 }
-func (t *BoolTarget) FromZero(tt *Type) error {
-	if !Compatible(tt, BoolType) {
-		return fmt.Errorf("Type %v incompatible with expected type %v", tt, BoolType)
-	}
-	*t.Value = false
-	return nil
-}
 
 type ByteTarget struct {
 	Value *byte
@@ -55,13 +48,6 @@ func (t *ByteTarget) FromFloat(src float64, tt *Type) (err error) {
 	}
 	*t.Value, err = vdlconv.Float64ToUint8(src)
 	return
-}
-func (t *ByteTarget) FromZero(tt *Type) error {
-	if !Compatible(tt, ByteType) {
-		return fmt.Errorf("Type %v incompatible with expected type %v", tt, ByteType)
-	}
-	*t.Value = 0
-	return nil
 }
 
 type Uint16Target struct {
@@ -90,13 +76,6 @@ func (t *Uint16Target) FromFloat(src float64, tt *Type) (err error) {
 	*t.Value, err = vdlconv.Float64ToUint16(src)
 	return
 }
-func (t *Uint16Target) FromZero(tt *Type) error {
-	if !Compatible(tt, Uint16Type) {
-		return fmt.Errorf("Type %v incompatible with expected type %v", tt, Uint16Type)
-	}
-	*t.Value = 0
-	return nil
-}
 
 type Uint32Target struct {
 	Value *uint32
@@ -123,13 +102,6 @@ func (t *Uint32Target) FromFloat(src float64, tt *Type) (err error) {
 	}
 	*t.Value, err = vdlconv.Float64ToUint32(src)
 	return
-}
-func (t *Uint32Target) FromZero(tt *Type) error {
-	if !Compatible(tt, Uint32Type) {
-		return fmt.Errorf("Type %v incompatible with expected type %v", tt, Uint32Type)
-	}
-	*t.Value = 0
-	return nil
 }
 
 type Uint64Target struct {
@@ -158,13 +130,6 @@ func (t *Uint64Target) FromFloat(src float64, tt *Type) (err error) {
 	*t.Value, err = vdlconv.Float64ToUint64(src)
 	return
 }
-func (t *Uint64Target) FromZero(tt *Type) error {
-	if !Compatible(tt, Uint64Type) {
-		return fmt.Errorf("Type %v incompatible with expected type %v", tt, Uint64Type)
-	}
-	*t.Value = 0
-	return nil
-}
 
 type Int8Target struct {
 	Value *int8
@@ -191,13 +156,6 @@ func (t *Int8Target) FromFloat(src float64, tt *Type) (err error) {
 	}
 	*t.Value, err = vdlconv.Float64ToInt8(src)
 	return
-}
-func (t *Int8Target) FromZero(tt *Type) error {
-	if !Compatible(tt, Int8Type) {
-		return fmt.Errorf("Type %v incompatible with expected type %v", tt, Int8Type)
-	}
-	*t.Value = 0
-	return nil
 }
 
 type Int16Target struct {
@@ -226,13 +184,6 @@ func (t *Int16Target) FromFloat(src float64, tt *Type) (err error) {
 	*t.Value, err = vdlconv.Float64ToInt16(src)
 	return
 }
-func (t *Int16Target) FromZero(tt *Type) error {
-	if !Compatible(tt, Int16Type) {
-		return fmt.Errorf("Type %v incompatible with expected type %v", tt, Int16Type)
-	}
-	*t.Value = 0
-	return nil
-}
 
 type Int32Target struct {
 	Value *int32
@@ -259,13 +210,6 @@ func (t *Int32Target) FromFloat(src float64, tt *Type) (err error) {
 	}
 	*t.Value, err = vdlconv.Float64ToInt32(src)
 	return
-}
-func (t *Int32Target) FromZero(tt *Type) error {
-	if !Compatible(tt, Int32Type) {
-		return fmt.Errorf("Type %v incompatible with expected type %v", tt, Int32Type)
-	}
-	*t.Value = 0
-	return nil
 }
 
 type Int64Target struct {
@@ -294,13 +238,6 @@ func (t *Int64Target) FromFloat(src float64, tt *Type) (err error) {
 	*t.Value, err = vdlconv.Float64ToInt64(src)
 	return
 }
-func (t *Int64Target) FromZero(tt *Type) error {
-	if !Compatible(tt, Int64Type) {
-		return fmt.Errorf("Type %v incompatible with expected type %v", tt, Int64Type)
-	}
-	*t.Value = 0
-	return nil
-}
 
 type Float32Target struct {
 	Value *float32
@@ -327,13 +264,6 @@ func (t *Float32Target) FromFloat(src float64, tt *Type) (err error) {
 	}
 	*t.Value, err = vdlconv.Float64ToFloat32(src)
 	return
-}
-func (t *Float32Target) FromZero(tt *Type) error {
-	if !Compatible(tt, Float32Type) {
-		return fmt.Errorf("Type %v incompatible with expected type %v", tt, Float32Type)
-	}
-	*t.Value = 0
-	return nil
 }
 
 type Float64Target struct {
@@ -362,13 +292,6 @@ func (t *Float64Target) FromFloat(src float64, tt *Type) (err error) {
 	*t.Value = src
 	return
 }
-func (t *Float64Target) FromZero(tt *Type) error {
-	if !Compatible(tt, Float64Type) {
-		return fmt.Errorf("Type %v incompatible with expected type %v", tt, Float64Type)
-	}
-	*t.Value = 0
-	return nil
-}
 
 type StringTarget struct {
 	Value *string
@@ -380,13 +303,6 @@ func (t *StringTarget) FromString(src string, tt *Type) error {
 		return fmt.Errorf("Type %v incompatible with expected type %v", tt, StringType)
 	}
 	*t.Value = src
-	return nil
-}
-func (t *StringTarget) FromZero(tt *Type) error {
-	if !Compatible(tt, StringType) {
-		return fmt.Errorf("Type %v incompatible with expected type %v", tt, StringType)
-	}
-	*t.Value = ""
 	return nil
 }
 
@@ -409,13 +325,6 @@ func (t *BytesTarget) FromBytes(src []byte, tt *Type) error {
 	}
 	return nil
 }
-func (t *BytesTarget) FromZero(tt *Type) error {
-	if !Compatible(tt, bytesType) {
-		return fmt.Errorf("Type %v incompatible with expected type %v", tt, bytesType)
-	}
-	*t.Value = nil
-	return nil
-}
 
 type TypeObjectTarget struct {
 	Value **Type
@@ -424,13 +333,6 @@ type TypeObjectTarget struct {
 
 func (t *TypeObjectTarget) FromTypeObject(tt *Type) error {
 	*t.Value = tt
-	return nil
-}
-func (t *TypeObjectTarget) FromZero(tt *Type) error {
-	if !Compatible(tt, TypeObjectType) {
-		return fmt.Errorf("Type %v incompatible with expected type %v", tt, TypeObjectType)
-	}
-	*t.Value = AnyType
 	return nil
 }
 
@@ -460,12 +362,5 @@ func (t *StringSliceTarget) FinishElem(elem Target) error {
 	return nil
 }
 func (t *StringSliceTarget) FinishList(elem ListTarget) error {
-	return nil
-}
-func (t *StringSliceTarget) FromZero(tt *Type) error {
-	if !Compatible(tt, stringSliceType) {
-		return fmt.Errorf("Type %v incompatible with expected type %v", tt, stringSliceType)
-	}
-	*t.Value = nil
 	return nil
 }

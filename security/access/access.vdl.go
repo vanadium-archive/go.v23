@@ -151,21 +151,20 @@ func (m *AccessList) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 	if err != nil {
 		return err
 	}
-	keyTarget2, fieldTarget3, err := fieldsTarget1.StartField("In")
-	if err != vdl.ErrFieldNoExist && err != nil {
-		return err
+	var var4 bool
+	if len(m.In) == 0 {
+		var4 = true
 	}
-	if err != vdl.ErrFieldNoExist {
-
-		var var4 bool
-		if len(m.In) == 0 {
-			var4 = true
+	if var4 {
+		if err := fieldsTarget1.ZeroField("In"); err != nil && err != vdl.ErrFieldNoExist {
+			return err
 		}
-		if var4 {
-			if err := fieldTarget3.FromZero(tt.NonOptional().Field(0).Type); err != nil {
+	} else {
+		keyTarget2, fieldTarget3, err := fieldsTarget1.StartField("In")
+		if err != vdl.ErrFieldNoExist {
+			if err != nil {
 				return err
 			}
-		} else {
 
 			listTarget5, err := fieldTarget3.StartList(tt.NonOptional().Field(0).Type, len(m.In))
 			if err != nil {
@@ -187,26 +186,25 @@ func (m *AccessList) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 			if err := fieldTarget3.FinishList(listTarget5); err != nil {
 				return err
 			}
-		}
-		if err := fieldsTarget1.FinishField(keyTarget2, fieldTarget3); err != nil {
-			return err
-		}
-	}
-	keyTarget8, fieldTarget9, err := fieldsTarget1.StartField("NotIn")
-	if err != vdl.ErrFieldNoExist && err != nil {
-		return err
-	}
-	if err != vdl.ErrFieldNoExist {
-
-		var var10 bool
-		if len(m.NotIn) == 0 {
-			var10 = true
-		}
-		if var10 {
-			if err := fieldTarget9.FromZero(tt.NonOptional().Field(1).Type); err != nil {
+			if err := fieldsTarget1.FinishField(keyTarget2, fieldTarget3); err != nil {
 				return err
 			}
-		} else {
+		}
+	}
+	var var10 bool
+	if len(m.NotIn) == 0 {
+		var10 = true
+	}
+	if var10 {
+		if err := fieldsTarget1.ZeroField("NotIn"); err != nil && err != vdl.ErrFieldNoExist {
+			return err
+		}
+	} else {
+		keyTarget8, fieldTarget9, err := fieldsTarget1.StartField("NotIn")
+		if err != vdl.ErrFieldNoExist {
+			if err != nil {
+				return err
+			}
 
 			listTarget11, err := fieldTarget9.StartList(tt.NonOptional().Field(1).Type, len(m.NotIn))
 			if err != nil {
@@ -227,9 +225,9 @@ func (m *AccessList) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 			if err := fieldTarget9.FinishList(listTarget11); err != nil {
 				return err
 			}
-		}
-		if err := fieldsTarget1.FinishField(keyTarget8, fieldTarget9); err != nil {
-			return err
+			if err := fieldsTarget1.FinishField(keyTarget8, fieldTarget9); err != nil {
+				return err
+			}
 		}
 	}
 	if err := t.FinishFields(fieldsTarget1); err != nil {
@@ -274,12 +272,20 @@ func (t *AccessListTarget) StartField(name string) (key, field vdl.Target, _ err
 func (t *AccessListTarget) FinishField(_, _ vdl.Target) error {
 	return nil
 }
+func (t *AccessListTarget) ZeroField(name string) error {
+	switch name {
+	case "In":
+		t.Value.In = []security.BlessingPattern(nil)
+		return nil
+	case "NotIn":
+		t.Value.NotIn = []string(nil)
+		return nil
+	default:
+		return fmt.Errorf("field %s not in struct v.io/v23/security/access.AccessList", name)
+	}
+}
 func (t *AccessListTarget) FinishFields(_ vdl.FieldsTarget) error {
 
-	return nil
-}
-func (t *AccessListTarget) FromZero(tt *vdl.Type) error {
-	*t.Value = AccessList{}
 	return nil
 }
 
@@ -313,10 +319,6 @@ func (t *__VDLTarget1_list) FinishElem(elem vdl.Target) error {
 }
 func (t *__VDLTarget1_list) FinishList(elem vdl.ListTarget) error {
 
-	return nil
-}
-func (t *__VDLTarget1_list) FromZero(tt *vdl.Type) error {
-	*t.Value = []security.BlessingPattern(nil)
 	return nil
 }
 
@@ -410,10 +412,6 @@ func (t *PermissionsTarget) FinishMap(elem vdl.MapTarget) error {
 
 	return nil
 }
-func (t *PermissionsTarget) FromZero(tt *vdl.Type) error {
-	*t.Value = Permissions(nil)
-	return nil
-}
 
 // Tag is used to associate methods with an AccessList in a Permissions.
 //
@@ -450,10 +448,6 @@ func (t *TagTarget) FromString(src string, tt *vdl.Type) error {
 	}
 	*t.Value = Tag(src)
 
-	return nil
-}
-func (t *TagTarget) FromZero(tt *vdl.Type) error {
-	*t.Value = Tag("")
 	return nil
 }
 

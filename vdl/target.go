@@ -39,8 +39,9 @@ type Target interface {
 	FromEnumLabel(src string, tt *Type) error
 	// FromTypeObject converts from the src type to the target.
 	FromTypeObject(src *Type) error
-	// FromZero converts from a zero value of type tt.
-	FromZero(tt *Type) error
+	// FromNil converts from a nil (nonexistent) value of type tt, where tt must
+	// be of kind Optional or Any.
+	FromNil(tt *Type) error
 
 	// StartList prepares conversion from a list or array of type tt, with the
 	// given len.  FinishList must be called to finish the list.
@@ -122,6 +123,9 @@ type FieldsTarget interface {
 	StartField(name string) (key, field Target, _ error)
 	// FinishField finishes a prior StartField call.
 	FinishField(key, field Target) error
+	// ZeroField writes a zero-valued field.
+	// This is a no-op in the encoder for struct fields.
+	ZeroField(name string) error
 }
 
 // Convert converts from src to dst - it is a helper for calling
@@ -174,7 +178,7 @@ type nameable interface {
 func FromReflect(target Target, rv reflect.Value) error {
 	// Special-case to treat interface{}(nil) as any(nil).
 	if !rv.IsValid() {
-		return target.FromZero(AnyType)
+		return target.FromNil(AnyType)
 	}
 
 	// Flatten pointers and interfaces in rv, and handle special-cases.  We track
@@ -212,7 +216,7 @@ func FromReflect(target Target, rv reflect.Value) error {
 				// Treat nil Union interface as the value of the type at index 0.
 				return FromValue(target, ZeroValue(tt))
 			}
-			return target.FromZero(tt)
+			return target.FromNil(tt)
 		case rt.ConvertibleTo(rtPtrToType):
 			// If rv is convertible to *Type, fill from it directly.
 			return target.FromTypeObject(rv.Convert(rtPtrToType).Interface().(*Type))
@@ -440,15 +444,18 @@ func fromError(target Target, rv reflect.Value) error {
 // the appropriate methods on the target.
 func FromValue(target Target, vv *Value) error {
 	tt := vv.Type()
-	if vv.IsZero() {
-		return target.FromZero(tt)
-	}
 	if tt.Kind() == Any {
+		if vv.IsNil() {
+			return target.FromNil(tt)
+		}
 		// Non-nil any simply converts from the elem.
 		vv = vv.Elem()
 		tt = vv.Type()
 	}
 	if tt.Kind() == Optional {
+		if vv.IsNil() {
+			return target.FromNil(tt)
+		}
 		// Non-nil optional is special - we keep tt as the optional type, but use
 		// the elem value for the actual value below.
 		vv = vv.Elem()
@@ -544,6 +551,13 @@ func FromValue(target Target, vv *Value) error {
 			return err
 		}
 		for fx := 0; fx < vv.Type().NumField(); fx++ {
+			if vv.StructField(fx).IsZero() {
+				err := fieldsTarget.ZeroField(vv.Type().Field(fx).Name)
+				if err != nil && err != ErrFieldNoExist {
+					return err
+				}
+				continue
+			}
 			key, field, err := fieldsTarget.StartField(vv.Type().Field(fx).Name)
 			switch {
 			case err == ErrFieldNoExist:

@@ -40,7 +40,7 @@ pkg verror, func WireFromNative(*vdl.WireError, error) error
 pkg verror, func WireToNative(vdl.WireError, *E) error
 pkg verror, func WithComponentName(*context.T, string) *context.T
 pkg verror, method (*ErrorTarget) FinishFields(vdl.FieldsTarget) error
-pkg verror, method (*ErrorTarget) FromZero(*vdl.Type) error
+pkg verror, method (*ErrorTarget) FromNil(*vdl.Type) error
 pkg verror, method (*ErrorTarget) StartFields(*vdl.Type) (vdl.FieldsTarget, error)
 pkg verror, method (ActionCode) RetryAction() ActionCode
 pkg verror, method (E) Error() string

@@ -8,7 +8,6 @@ pkg mounttable, func MountTableServer(MountTableServerMethods) MountTableServerS
 pkg mounttable, method (*Tag) FillVDLTarget(vdl.Target, *vdl.Type) error
 pkg mounttable, method (*Tag) MakeVDLTarget() vdl.Target
 pkg mounttable, method (*TagTarget) FromString(string, *vdl.Type) error
-pkg mounttable, method (*TagTarget) FromZero(*vdl.Type) error
 pkg mounttable, type MountTableClientMethods interface, Delete(*context.T, bool, ...rpc.CallOpt) error
 pkg mounttable, type MountTableClientMethods interface, Mount(*context.T, string, uint32, naming.MountFlag, ...rpc.CallOpt) error
 pkg mounttable, type MountTableClientMethods interface, ResolveStep(*context.T, ...rpc.CallOpt) (naming.MountEntry, error)

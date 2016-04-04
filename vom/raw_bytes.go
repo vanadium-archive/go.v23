@@ -86,6 +86,9 @@ func (rb *RawBytes) MakeVDLTarget() vdl.Target {
 }
 
 func (rb *RawBytes) FillVDLTarget(target vdl.Target, _ *vdl.Type) error {
+	if rb == nil {
+		return vdl.FromValue(target, vdl.ZeroValue(vdl.AnyType))
+	}
 	var buf bytes.Buffer
 	enc := NewVersionedEncoder(rb.Version, &buf)
 	if err := enc.enc.encodeRaw(rb); err != nil {
@@ -93,6 +96,16 @@ func (rb *RawBytes) FillVDLTarget(target vdl.Target, _ *vdl.Type) error {
 	}
 	dec := NewDecoder(bytes.NewReader(buf.Bytes()))
 	return dec.decodeToTarget(target)
+}
+
+func (rb *RawBytes) IsNilAny() bool {
+	if rb == nil {
+		return true
+	}
+	if rb.Type != vdl.AnyType {
+		return false
+	}
+	return len(rb.Data) == 1 && rb.Data[0] == WireCtrlNil
 }
 
 func (RawBytes) __VDLReflect(struct {
@@ -225,12 +238,12 @@ func (r *rbTarget) FromTypeObject(src *vdl.Type) error {
 	return r.finish()
 }
 
-func (r *rbTarget) FromZero(tt *vdl.Type) error {
+func (r *rbTarget) FromNil(tt *vdl.Type) error {
 	// TODO(bprosnitz) This is likely slow, look into optimizing it
 	if err := r.start(tt); err != nil {
 		return err
 	}
-	if err := vdl.FromValue(r.enc, vdl.ZeroValue(tt)); err != nil {
+	if err := r.enc.FromNil(tt); err != nil {
 		return err
 	}
 	return r.finish()
@@ -338,6 +351,10 @@ func (r *rbTarget) StartField(key string) (vdl.Target, vdl.Target, error) {
 		return nil, nil, err
 	}
 	return r, r, nil
+}
+
+func (r *rbTarget) ZeroField(key string) error {
+	return r.enc.ZeroField(key)
 }
 
 func (r *rbTarget) FinishField(_, _ vdl.Target) error {

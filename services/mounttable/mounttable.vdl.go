@@ -65,10 +65,6 @@ func (t *TagTarget) FromString(src string, tt *vdl.Type) error {
 
 	return nil
 }
-func (t *TagTarget) FromZero(tt *vdl.Type) error {
-	*t.Value = Tag("")
-	return nil
-}
 
 //////////////////////////////////////////////////
 // Const definitions

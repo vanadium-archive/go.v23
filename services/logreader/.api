@@ -5,9 +5,9 @@ pkg logreader, method (*LogEntry) FillVDLTarget(vdl.Target, *vdl.Type) error
 pkg logreader, method (*LogEntry) MakeVDLTarget() vdl.Target
 pkg logreader, method (*LogEntryTarget) FinishField(vdl.Target, vdl.Target) error
 pkg logreader, method (*LogEntryTarget) FinishFields(vdl.FieldsTarget) error
-pkg logreader, method (*LogEntryTarget) FromZero(*vdl.Type) error
 pkg logreader, method (*LogEntryTarget) StartField(string) (vdl.Target, vdl.Target, error)
 pkg logreader, method (*LogEntryTarget) StartFields(*vdl.Type) (vdl.FieldsTarget, error)
+pkg logreader, method (*LogEntryTarget) ZeroField(string) error
 pkg logreader, method (*LogFileReadLogServerCallStub) Init(rpc.StreamServerCall)
 pkg logreader, method (*LogFileReadLogServerCallStub) SendStream() interface {  Send(item LogEntry) error;}
 pkg logreader, type LogEntry struct

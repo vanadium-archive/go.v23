@@ -49,44 +49,42 @@ func (m *Duration) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 	if err != nil {
 		return err
 	}
-	keyTarget2, fieldTarget3, err := fieldsTarget1.StartField("Seconds")
-	if err != vdl.ErrFieldNoExist && err != nil {
-		return err
-	}
-	if err != vdl.ErrFieldNoExist {
-
-		var4 := (m.Seconds == int64(0))
-		if var4 {
-			if err := fieldTarget3.FromZero(tt.NonOptional().Field(0).Type); err != nil {
+	var4 := (m.Seconds == int64(0))
+	if var4 {
+		if err := fieldsTarget1.ZeroField("Seconds"); err != nil && err != vdl.ErrFieldNoExist {
+			return err
+		}
+	} else {
+		keyTarget2, fieldTarget3, err := fieldsTarget1.StartField("Seconds")
+		if err != vdl.ErrFieldNoExist {
+			if err != nil {
 				return err
 			}
-		} else {
 			if err := fieldTarget3.FromInt(int64(m.Seconds), tt.NonOptional().Field(0).Type); err != nil {
 				return err
 			}
-		}
-		if err := fieldsTarget1.FinishField(keyTarget2, fieldTarget3); err != nil {
-			return err
-		}
-	}
-	keyTarget5, fieldTarget6, err := fieldsTarget1.StartField("Nanos")
-	if err != vdl.ErrFieldNoExist && err != nil {
-		return err
-	}
-	if err != vdl.ErrFieldNoExist {
-
-		var7 := (m.Nanos == int32(0))
-		if var7 {
-			if err := fieldTarget6.FromZero(tt.NonOptional().Field(1).Type); err != nil {
+			if err := fieldsTarget1.FinishField(keyTarget2, fieldTarget3); err != nil {
 				return err
 			}
-		} else {
+		}
+	}
+	var7 := (m.Nanos == int32(0))
+	if var7 {
+		if err := fieldsTarget1.ZeroField("Nanos"); err != nil && err != vdl.ErrFieldNoExist {
+			return err
+		}
+	} else {
+		keyTarget5, fieldTarget6, err := fieldsTarget1.StartField("Nanos")
+		if err != vdl.ErrFieldNoExist {
+			if err != nil {
+				return err
+			}
 			if err := fieldTarget6.FromInt(int64(m.Nanos), tt.NonOptional().Field(1).Type); err != nil {
 				return err
 			}
-		}
-		if err := fieldsTarget1.FinishField(keyTarget5, fieldTarget6); err != nil {
-			return err
+			if err := fieldsTarget1.FinishField(keyTarget5, fieldTarget6); err != nil {
+				return err
+			}
 		}
 	}
 	if err := t.FinishFields(fieldsTarget1); err != nil {
@@ -132,21 +130,23 @@ func (t *DurationTarget) StartField(name string) (key, field vdl.Target, _ error
 func (t *DurationTarget) FinishField(_, _ vdl.Target) error {
 	return nil
 }
+func (t *DurationTarget) ZeroField(name string) error {
+	switch name {
+	case "Seconds":
+		t.wireValue.Seconds = int64(0)
+		return nil
+	case "Nanos":
+		t.wireValue.Nanos = int32(0)
+		return nil
+	default:
+		return fmt.Errorf("field %s not in struct time.Duration", name)
+	}
+}
 func (t *DurationTarget) FinishFields(_ vdl.FieldsTarget) error {
 
 	if err := DurationToNative(t.wireValue, t.Value); err != nil {
 		return err
 	}
-	return nil
-}
-func (t *DurationTarget) FromZero(tt *vdl.Type) error {
-	*t.Value = func() time.Duration {
-		var native time.Duration
-		if err := vdl.Convert(&native, Duration{}); err != nil {
-			panic(err)
-		}
-		return native
-	}()
 	return nil
 }
 
@@ -180,44 +180,42 @@ func (m *Time) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 	if err != nil {
 		return err
 	}
-	keyTarget2, fieldTarget3, err := fieldsTarget1.StartField("Seconds")
-	if err != vdl.ErrFieldNoExist && err != nil {
-		return err
-	}
-	if err != vdl.ErrFieldNoExist {
-
-		var4 := (m.Seconds == int64(0))
-		if var4 {
-			if err := fieldTarget3.FromZero(tt.NonOptional().Field(0).Type); err != nil {
+	var4 := (m.Seconds == int64(0))
+	if var4 {
+		if err := fieldsTarget1.ZeroField("Seconds"); err != nil && err != vdl.ErrFieldNoExist {
+			return err
+		}
+	} else {
+		keyTarget2, fieldTarget3, err := fieldsTarget1.StartField("Seconds")
+		if err != vdl.ErrFieldNoExist {
+			if err != nil {
 				return err
 			}
-		} else {
 			if err := fieldTarget3.FromInt(int64(m.Seconds), tt.NonOptional().Field(0).Type); err != nil {
 				return err
 			}
-		}
-		if err := fieldsTarget1.FinishField(keyTarget2, fieldTarget3); err != nil {
-			return err
-		}
-	}
-	keyTarget5, fieldTarget6, err := fieldsTarget1.StartField("Nanos")
-	if err != vdl.ErrFieldNoExist && err != nil {
-		return err
-	}
-	if err != vdl.ErrFieldNoExist {
-
-		var7 := (m.Nanos == int32(0))
-		if var7 {
-			if err := fieldTarget6.FromZero(tt.NonOptional().Field(1).Type); err != nil {
+			if err := fieldsTarget1.FinishField(keyTarget2, fieldTarget3); err != nil {
 				return err
 			}
-		} else {
+		}
+	}
+	var7 := (m.Nanos == int32(0))
+	if var7 {
+		if err := fieldsTarget1.ZeroField("Nanos"); err != nil && err != vdl.ErrFieldNoExist {
+			return err
+		}
+	} else {
+		keyTarget5, fieldTarget6, err := fieldsTarget1.StartField("Nanos")
+		if err != vdl.ErrFieldNoExist {
+			if err != nil {
+				return err
+			}
 			if err := fieldTarget6.FromInt(int64(m.Nanos), tt.NonOptional().Field(1).Type); err != nil {
 				return err
 			}
-		}
-		if err := fieldsTarget1.FinishField(keyTarget5, fieldTarget6); err != nil {
-			return err
+			if err := fieldsTarget1.FinishField(keyTarget5, fieldTarget6); err != nil {
+				return err
+			}
 		}
 	}
 	if err := t.FinishFields(fieldsTarget1); err != nil {
@@ -263,21 +261,23 @@ func (t *TimeTarget) StartField(name string) (key, field vdl.Target, _ error) {
 func (t *TimeTarget) FinishField(_, _ vdl.Target) error {
 	return nil
 }
+func (t *TimeTarget) ZeroField(name string) error {
+	switch name {
+	case "Seconds":
+		t.wireValue.Seconds = int64(0)
+		return nil
+	case "Nanos":
+		t.wireValue.Nanos = int32(0)
+		return nil
+	default:
+		return fmt.Errorf("field %s not in struct time.Time", name)
+	}
+}
 func (t *TimeTarget) FinishFields(_ vdl.FieldsTarget) error {
 
 	if err := TimeToNative(t.wireValue, t.Value); err != nil {
 		return err
 	}
-	return nil
-}
-func (t *TimeTarget) FromZero(tt *vdl.Type) error {
-	*t.Value = func() time.Time {
-		var native time.Time
-		if err := vdl.Convert(&native, Time{}); err != nil {
-			panic(err)
-		}
-		return native
-	}()
 	return nil
 }
 
@@ -326,45 +326,43 @@ func (m *WireDeadline) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 		return err
 	}
 
-	keyTarget3, fieldTarget4, err := fieldsTarget1.StartField("FromNow")
-	if err != vdl.ErrFieldNoExist && err != nil {
-		return err
-	}
-	if err != vdl.ErrFieldNoExist {
-
-		var5 := (wireValue2 == Duration{})
-		if var5 {
-			if err := fieldTarget4.FromZero(tt.NonOptional().Field(0).Type); err != nil {
+	var5 := (wireValue2 == Duration{})
+	if var5 {
+		if err := fieldsTarget1.ZeroField("FromNow"); err != nil && err != vdl.ErrFieldNoExist {
+			return err
+		}
+	} else {
+		keyTarget3, fieldTarget4, err := fieldsTarget1.StartField("FromNow")
+		if err != vdl.ErrFieldNoExist {
+			if err != nil {
 				return err
 			}
-		} else {
 
 			if err := wireValue2.FillVDLTarget(fieldTarget4, tt.NonOptional().Field(0).Type); err != nil {
 				return err
 			}
-		}
-		if err := fieldsTarget1.FinishField(keyTarget3, fieldTarget4); err != nil {
-			return err
-		}
-	}
-	keyTarget6, fieldTarget7, err := fieldsTarget1.StartField("NoDeadline")
-	if err != vdl.ErrFieldNoExist && err != nil {
-		return err
-	}
-	if err != vdl.ErrFieldNoExist {
-
-		var8 := (m.NoDeadline == false)
-		if var8 {
-			if err := fieldTarget7.FromZero(tt.NonOptional().Field(1).Type); err != nil {
+			if err := fieldsTarget1.FinishField(keyTarget3, fieldTarget4); err != nil {
 				return err
 			}
-		} else {
+		}
+	}
+	var8 := (m.NoDeadline == false)
+	if var8 {
+		if err := fieldsTarget1.ZeroField("NoDeadline"); err != nil && err != vdl.ErrFieldNoExist {
+			return err
+		}
+	} else {
+		keyTarget6, fieldTarget7, err := fieldsTarget1.StartField("NoDeadline")
+		if err != vdl.ErrFieldNoExist {
+			if err != nil {
+				return err
+			}
 			if err := fieldTarget7.FromBool(bool(m.NoDeadline), tt.NonOptional().Field(1).Type); err != nil {
 				return err
 			}
-		}
-		if err := fieldsTarget1.FinishField(keyTarget6, fieldTarget7); err != nil {
-			return err
+			if err := fieldsTarget1.FinishField(keyTarget6, fieldTarget7); err != nil {
+				return err
+			}
 		}
 	}
 	if err := t.FinishFields(fieldsTarget1); err != nil {
@@ -410,21 +408,29 @@ func (t *WireDeadlineTarget) StartField(name string) (key, field vdl.Target, _ e
 func (t *WireDeadlineTarget) FinishField(_, _ vdl.Target) error {
 	return nil
 }
+func (t *WireDeadlineTarget) ZeroField(name string) error {
+	switch name {
+	case "FromNow":
+		t.wireValue.FromNow = func() time.Duration {
+			var native time.Duration
+			if err := vdl.Convert(&native, Duration{}); err != nil {
+				panic(err)
+			}
+			return native
+		}()
+		return nil
+	case "NoDeadline":
+		t.wireValue.NoDeadline = false
+		return nil
+	default:
+		return fmt.Errorf("field %s not in struct time.WireDeadline", name)
+	}
+}
 func (t *WireDeadlineTarget) FinishFields(_ vdl.FieldsTarget) error {
 
 	if err := WireDeadlineToNative(t.wireValue, t.Value); err != nil {
 		return err
 	}
-	return nil
-}
-func (t *WireDeadlineTarget) FromZero(tt *vdl.Type) error {
-	*t.Value = func() Deadline {
-		var native Deadline
-		if err := vdl.Convert(&native, WireDeadline{}); err != nil {
-			panic(err)
-		}
-		return native
-	}()
 	return nil
 }
 

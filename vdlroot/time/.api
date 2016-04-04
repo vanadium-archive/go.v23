@@ -9,23 +9,23 @@ pkg time, method (*Duration) FillVDLTarget(vdl.Target, *vdl.Type) error
 pkg time, method (*Duration) MakeVDLTarget() vdl.Target
 pkg time, method (*DurationTarget) FinishField(vdl.Target, vdl.Target) error
 pkg time, method (*DurationTarget) FinishFields(vdl.FieldsTarget) error
-pkg time, method (*DurationTarget) FromZero(*vdl.Type) error
 pkg time, method (*DurationTarget) StartField(string) (vdl.Target, vdl.Target, error)
 pkg time, method (*DurationTarget) StartFields(*vdl.Type) (vdl.FieldsTarget, error)
+pkg time, method (*DurationTarget) ZeroField(string) error
 pkg time, method (*Time) FillVDLTarget(vdl.Target, *vdl.Type) error
 pkg time, method (*Time) MakeVDLTarget() vdl.Target
 pkg time, method (*TimeTarget) FinishField(vdl.Target, vdl.Target) error
 pkg time, method (*TimeTarget) FinishFields(vdl.FieldsTarget) error
-pkg time, method (*TimeTarget) FromZero(*vdl.Type) error
 pkg time, method (*TimeTarget) StartField(string) (vdl.Target, vdl.Target, error)
 pkg time, method (*TimeTarget) StartFields(*vdl.Type) (vdl.FieldsTarget, error)
+pkg time, method (*TimeTarget) ZeroField(string) error
 pkg time, method (*WireDeadline) FillVDLTarget(vdl.Target, *vdl.Type) error
 pkg time, method (*WireDeadline) MakeVDLTarget() vdl.Target
 pkg time, method (*WireDeadlineTarget) FinishField(vdl.Target, vdl.Target) error
 pkg time, method (*WireDeadlineTarget) FinishFields(vdl.FieldsTarget) error
-pkg time, method (*WireDeadlineTarget) FromZero(*vdl.Type) error
 pkg time, method (*WireDeadlineTarget) StartField(string) (vdl.Target, vdl.Target, error)
 pkg time, method (*WireDeadlineTarget) StartFields(*vdl.Type) (vdl.FieldsTarget, error)
+pkg time, method (*WireDeadlineTarget) ZeroField(string) error
 pkg time, method (Duration) Normalize() Duration
 pkg time, method (Time) Normalize() Time
 pkg time, type Deadline struct

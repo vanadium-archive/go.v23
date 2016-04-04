@@ -333,9 +333,6 @@ func (e *encoder) prepareTypeHelper(tt *vdl.Type, fromNil bool) error {
 		// is called, to handle positive and negative ids, and the message length.
 		e.pushType(tt)
 	case !fromNil && e.topType().Kind() == vdl.Any:
-		if e.isFieldValue() {
-			binaryEncodeUint(e.buf, uint64(e.topTypeFieldIndex()))
-		}
 		if e.version == Version80 {
 			binaryEncodeUint(e.buf, uint64(tid))
 		} else {
@@ -372,29 +369,11 @@ func (e *encoder) topType() *vdl.Type {
 	return e.typeStack[len(e.typeStack)-1].tt
 }
 
-func (e *encoder) isFieldValue() bool {
-	return e.topTypeFieldIndex() >= 0
-}
-
 func (e *encoder) topTypeFieldIndex() int {
 	if len(e.typeStack) == 0 {
 		return -1
 	}
 	return e.typeStack[len(e.typeStack)-1].fieldIndex
-}
-
-// canIgnoreField returns true iff a zero-value field can be ignored.
-func (e *encoder) canIgnoreField(fromNil bool) bool {
-	if len(e.typeStack) < 2 {
-		return false
-	}
-	if !fromNil && e.typeStack[len(e.typeStack)-1].tt.Kind() == vdl.Any {
-		// Struct fields of type any can only be ignored if the value is nil.
-		// E.g. type X{ A any } can ignore X{nil}, but can't ignore X{false}.
-		return false
-	}
-	top2 := e.typeStack[len(e.typeStack)-2].tt
-	return top2.Kind() == vdl.Struct || (top2.Kind() == vdl.Optional && top2.Elem().Kind() == vdl.Struct)
 }
 
 // Implementation of vdl.Target interface.
@@ -403,12 +382,6 @@ var boolAllowed = []vdl.Kind{vdl.Bool}
 func (e *encoder) FromBool(src bool, tt *vdl.Type) error {
 	if err := e.prepareType(tt, boolAllowed...); err != nil {
 		return err
-	}
-	if e.isFieldValue() && e.topType().Kind() != vdl.Any {
-		if src == false && e.canIgnoreField(false) {
-			return nil
-		}
-		binaryEncodeUint(e.buf, uint64(e.topTypeFieldIndex()))
 	}
 	binaryEncodeBool(e.buf, src)
 	return nil
@@ -419,12 +392,6 @@ var uintAllowed = []vdl.Kind{vdl.Byte, vdl.Uint16, vdl.Uint32, vdl.Uint64}
 func (e *encoder) FromUint(src uint64, tt *vdl.Type) error {
 	if err := e.prepareType(tt, uintAllowed...); err != nil {
 		return err
-	}
-	if e.isFieldValue() && e.topType().Kind() != vdl.Any {
-		if src == 0 && e.canIgnoreField(false) {
-			return nil
-		}
-		binaryEncodeUint(e.buf, uint64(e.topTypeFieldIndex()))
 	}
 	if e.version == Version80 && tt.Kind() == vdl.Byte {
 		e.buf.WriteOneByte(byte(src))
@@ -443,12 +410,6 @@ func (e *encoder) FromInt(src int64, tt *vdl.Type) error {
 	if e.version == Version80 && tt.Kind() == vdl.Int8 {
 		return verror.New(errUnsupportedInVOMVersion, nil, "int8", e.version)
 	}
-	if e.isFieldValue() && e.topType().Kind() != vdl.Any {
-		if src == 0 && e.canIgnoreField(false) {
-			return nil
-		}
-		binaryEncodeUint(e.buf, uint64(e.topTypeFieldIndex()))
-	}
 	binaryEncodeInt(e.buf, src)
 	return nil
 }
@@ -458,12 +419,6 @@ var floatAllowed = []vdl.Kind{vdl.Float32, vdl.Float64}
 func (e *encoder) FromFloat(src float64, tt *vdl.Type) error {
 	if err := e.prepareType(tt, floatAllowed...); err != nil {
 		return err
-	}
-	if e.isFieldValue() && e.topType().Kind() != vdl.Any {
-		if src == 0 && e.canIgnoreField(false) {
-			return nil
-		}
-		binaryEncodeUint(e.buf, uint64(e.topTypeFieldIndex()))
 	}
 	binaryEncodeFloat(e.buf, src)
 	return nil
@@ -475,12 +430,6 @@ func (e *encoder) FromBytes(src []byte, tt *vdl.Type) error {
 	}
 	if err := e.prepareTypeHelper(tt, false); err != nil {
 		return err
-	}
-	if e.isFieldValue() && e.topType().Kind() != vdl.Any {
-		if len(src) == 0 && e.canIgnoreField(false) {
-			return nil
-		}
-		binaryEncodeUint(e.buf, uint64(e.topTypeFieldIndex()))
 	}
 	switch tt.Kind() {
 	case vdl.List:
@@ -505,12 +454,6 @@ func (e *encoder) FromString(src string, tt *vdl.Type) error {
 	if err := e.prepareType(tt, stringAllowed...); err != nil {
 		return err
 	}
-	if e.isFieldValue() && e.topType().Kind() != vdl.Any {
-		if src == "" && e.canIgnoreField(false) {
-			return nil
-		}
-		binaryEncodeUint(e.buf, uint64(e.topTypeFieldIndex()))
-	}
 	binaryEncodeString(e.buf, src)
 	return nil
 }
@@ -524,12 +467,6 @@ func (e *encoder) FromEnumLabel(src string, tt *vdl.Type) error {
 	index := tt.EnumIndex(src)
 	if index < 0 {
 		return verror.New(errLabelNotInType, nil, src, tt)
-	}
-	if e.isFieldValue() && e.topType().Kind() != vdl.Any {
-		if index == 0 && e.canIgnoreField(false) {
-			return nil
-		}
-		binaryEncodeUint(e.buf, uint64(e.topTypeFieldIndex()))
 	}
 	binaryEncodeUint(e.buf, uint64(index))
 	return nil
@@ -546,12 +483,6 @@ func (e *encoder) FromTypeObject(src *vdl.Type) error {
 	if err != nil {
 		return err
 	}
-	if e.isFieldValue() && e.topType().Kind() != vdl.Any {
-		if src == vdl.AnyType && e.canIgnoreField(false) {
-			return nil
-		}
-		binaryEncodeUint(e.buf, uint64(e.topTypeFieldIndex()))
-	}
 	switch e.version {
 	case Version80:
 		binaryEncodeUint(e.buf, uint64(tid))
@@ -561,9 +492,7 @@ func (e *encoder) FromTypeObject(src *vdl.Type) error {
 	return nil
 }
 
-func (e *encoder) FromZero(tt *vdl.Type) error {
-	// TODO(bprosnitz) Some cases such as unions, struct-valued struct fields and arrays aren't encoded as
-	// 0 and the full object is outputted. Fix this.
+func (e *encoder) fromZero(tt *vdl.Type) error {
 	switch tt.Kind() {
 	case vdl.Bool:
 		return e.FromBool(false, tt)
@@ -580,7 +509,7 @@ func (e *encoder) FromZero(tt *vdl.Type) error {
 	case vdl.TypeObject:
 		return e.FromTypeObject(vdl.AnyType)
 	case vdl.Any, vdl.Optional:
-		return e.fromNil(tt)
+		return e.FromNil(tt)
 	case vdl.List:
 		lt, err := e.StartList(tt, 0)
 		if err != nil {
@@ -597,7 +526,7 @@ func (e *encoder) FromZero(tt *vdl.Type) error {
 			if err != nil {
 				return err
 			}
-			if err := t.FromZero(tt.Elem()); err != nil {
+			if err := t.(*encoder).fromZero(tt.Elem()); err != nil {
 				return err
 			}
 			if err := lt.FinishElem(t); err != nil {
@@ -632,7 +561,7 @@ func (e *encoder) FromZero(tt *vdl.Type) error {
 		if err != nil {
 			return err
 		}
-		if err := field.FromZero(tt.Field(0).Type); err != nil {
+		if err := field.(*encoder).fromZero(tt.Field(0).Type); err != nil {
 			return err
 		}
 		if err := ft.FinishField(key, field); err != nil {
@@ -646,32 +575,14 @@ func (e *encoder) FromZero(tt *vdl.Type) error {
 
 var nilAllowed = []vdl.Kind{vdl.Any, vdl.Optional}
 
-func (e *encoder) fromNil(tt *vdl.Type) error {
+func (e *encoder) FromNil(tt *vdl.Type) error {
 	if !tt.CanBeNil() {
 		return errTypeMismatch(tt, nilAllowed...)
 	}
 	if err := e.prepareTypeHelper(tt, true); err != nil {
 		return err
 	}
-	switch tt.Kind() {
-	case vdl.Optional:
-		if e.isFieldValue() {
-			if !e.canIgnoreField(true) && e.topType().Kind() != vdl.Any {
-				binaryEncodeUint(e.buf, uint64(e.topTypeFieldIndex()))
-				e.buf.WriteOneByte(WireCtrlNil)
-			}
-		} else {
-			e.buf.WriteOneByte(WireCtrlNil)
-		}
-	case vdl.Any:
-		if e.isFieldValue() {
-			if !e.canIgnoreField(true) && e.topType().Kind() != vdl.Any {
-				e.buf.WriteOneByte(WireCtrlNil)
-			}
-		} else {
-			e.buf.WriteOneByte(WireCtrlNil)
-		}
-	}
+	e.buf.WriteOneByte(WireCtrlNil)
 	return nil
 }
 
@@ -680,13 +591,6 @@ var listAllowed = []vdl.Kind{vdl.Array, vdl.List}
 func (e *encoder) StartList(tt *vdl.Type, len int) (vdl.ListTarget, error) {
 	if err := e.prepareType(tt, listAllowed...); err != nil {
 		return nil, err
-	}
-	if e.isFieldValue() && e.topType().Kind() != vdl.Any {
-		if len == 0 && e.canIgnoreField(false) {
-			e.pushType(tt)
-			return e, nil
-		}
-		binaryEncodeUint(e.buf, uint64(e.topTypeFieldIndex()))
 	}
 	switch tt.Kind() {
 	case vdl.List:
@@ -704,13 +608,6 @@ func (e *encoder) StartSet(tt *vdl.Type, len int) (vdl.SetTarget, error) {
 	if err := e.prepareType(tt, setAllowed...); err != nil {
 		return nil, err
 	}
-	if e.isFieldValue() && e.topType().Kind() != vdl.Any {
-		if len == 0 && e.canIgnoreField(false) {
-			e.pushType(tt)
-			return e, nil
-		}
-		binaryEncodeUint(e.buf, uint64(e.topTypeFieldIndex()))
-	}
 	binaryEncodeUint(e.buf, uint64(len))
 	e.pushType(tt)
 	return e, nil
@@ -722,13 +619,6 @@ func (e *encoder) StartMap(tt *vdl.Type, len int) (vdl.MapTarget, error) {
 	if err := e.prepareType(tt, mapAllowed...); err != nil {
 		return nil, err
 	}
-	if e.isFieldValue() && e.topType().Kind() != vdl.Any {
-		if len == 0 && e.canIgnoreField(false) {
-			e.pushType(tt)
-			return e, nil
-		}
-		binaryEncodeUint(e.buf, uint64(e.topTypeFieldIndex()))
-	}
 	binaryEncodeUint(e.buf, uint64(len))
 	e.pushType(tt)
 	return e, nil
@@ -737,10 +627,6 @@ func (e *encoder) StartMap(tt *vdl.Type, len int) (vdl.MapTarget, error) {
 var fieldsAllowed = []vdl.Kind{vdl.Struct, vdl.Union}
 
 func (e *encoder) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
-	if e.isFieldValue() && e.topType().Kind() != vdl.Any {
-		// TODO(bprosnitz) We shouldn't need to write the struct field index for fields that are empty structs/unions
-		binaryEncodeUint(e.buf, uint64(e.topTypeFieldIndex()))
-	}
 	if err := e.prepareType(tt, fieldsAllowed...); err != nil {
 		return nil, err
 	}
@@ -762,8 +648,6 @@ func (e *encoder) FinishMap(vdl.MapTarget) error {
 
 func (e *encoder) FinishFields(vdl.FieldsTarget) error {
 	top := e.topType()
-	// Pop the type stack first to let canIgnoreField() see the correct
-	// parent type.
 	if err := e.popType(); err != nil {
 		return err
 	}
@@ -813,6 +697,7 @@ func (e *encoder) StartField(name string) (_, _ vdl.Target, _ error) {
 	// always consists of a single field, while structs use a CtrlEnd terminator.
 	if vfield, index := top.FieldByName(name); index >= 0 {
 		e.pushFieldType(vfield.Type, index)
+		binaryEncodeUint(e.buf, uint64(e.topTypeFieldIndex()))
 		return nil, e, nil
 	}
 	return nil, nil, verror.New(errFieldNotInTopType, nil, name, top)
@@ -820,6 +705,25 @@ func (e *encoder) StartField(name string) (_, _ vdl.Target, _ error) {
 
 func (e *encoder) FinishField(key, field vdl.Target) error {
 	return e.popType()
+}
+
+func (e *encoder) ZeroField(name string) error {
+	top := e.topType()
+	if top.Kind() == vdl.Optional {
+		top = top.Elem()
+	}
+	switch top.Kind() {
+	case vdl.Struct:
+		return nil
+	case vdl.Union:
+		fld, index := top.FieldByName(name)
+		if index < 0 {
+			return vdl.ErrFieldNoExist
+		}
+		return vdl.FromValue(e, vdl.ZeroValue(fld.Type))
+	default:
+		return verror.New(errInvalid, nil)
+	}
 }
 
 func (e *encoder) startMessage(hasAny, hasTypeObject, hasLen, typeIncomplete bool, mid int64) error {

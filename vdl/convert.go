@@ -448,99 +448,7 @@ func (c convTarget) makeDirectTarget() Target {
 	return nil
 }
 
-// FromZero implements the Target interface method.
-func (c convTarget) FromZero(tt *Type) error {
-	if tt.Kind() != Optional {
-		// Optional is not currently supported for FromZero() direct targets
-		// because there is no way to get a generated optional struct target
-		// for an arbitrary struct. (the struct target itself doesn't support
-		// the FromZero method).
-		if target := c.makeDirectTarget(); target != nil {
-			return target.FromZero(tt)
-		}
-	}
-	if !Compatible(c.tt, tt) {
-		return fmt.Errorf("types %q and %q aren't compatible", c.tt, tt)
-	}
-	switch tt.Kind() {
-	case Bool:
-		return c.FromBool(false, tt)
-	case Byte, Uint16, Uint32, Uint64:
-		return c.FromUint(0, tt)
-	case Int8, Int16, Int32, Int64:
-		return c.FromInt(0, tt)
-	case Float32, Float64:
-		return c.FromFloat(0, tt)
-	case String:
-		return c.FromString("", tt)
-	case Enum:
-		return c.FromEnumLabel(tt.EnumLabel(0), tt)
-	case TypeObject:
-		return c.FromTypeObject(AnyType)
-	case List, Array:
-		listTarget, err := c.StartList(tt, 0)
-		if err != nil {
-			return err
-		}
-		return c.FinishList(listTarget)
-	case Map:
-		mapTarget, err := c.StartMap(tt, 0)
-		if err != nil {
-			return err
-		}
-		return c.FinishMap(mapTarget)
-	case Set:
-		setTarget, err := c.StartSet(tt, 0)
-		if err != nil {
-			return err
-		}
-		return c.FinishSet(setTarget)
-	case Union:
-		fieldsTarget, err := c.StartFields(tt)
-		if err != nil {
-			return err
-		}
-		defaultField := tt.Field(0)
-		keyTarget, fieldTarget, err := fieldsTarget.StartField(defaultField.Name)
-		if err != nil {
-			return err
-		}
-		if err := fieldTarget.FromZero(defaultField.Type); err != nil {
-			return err
-		}
-		if err := fieldsTarget.FinishField(keyTarget, fieldTarget); err != nil {
-			return err
-		}
-		return c.FinishFields(fieldsTarget)
-	case Struct:
-		fieldsTarget, err := c.StartFields(tt)
-		if err != nil {
-			return err
-		}
-		for i := 0; i < tt.NumField(); i++ {
-			fld := tt.Field(i)
-			keyTarget, fieldTarget, err := fieldsTarget.StartField(fld.Name)
-			if err != ErrFieldNoExist {
-				if err != nil {
-					return err
-				}
-				if err := fieldTarget.FromZero(fld.Type); err != nil {
-					return err
-				}
-				if err := fieldsTarget.FinishField(keyTarget, fieldTarget); err != nil {
-					return err
-				}
-			}
-		}
-		return c.FinishFields(fieldsTarget)
-	case Any, Optional:
-		return c.fromNil(tt)
-	default:
-		return fmt.Errorf("unhandled kind: %v", tt.Kind())
-	}
-}
-
-func (c convTarget) fromNil(tt *Type) error {
+func (c convTarget) FromNil(tt *Type) error {
 	if !tt.CanBeNil() || !c.tt.CanBeNil() {
 		return fmt.Errorf("invalid conversion from %v(nil) to %v", tt, c.tt)
 	}
@@ -1127,6 +1035,35 @@ func (cc compConvTarget) StartField(name string) (key, field Target, _ error) {
 		return nil, nil, err
 	}
 	return
+}
+
+// ZeroField implements the FieldsTarget interface method.
+func (cc compConvTarget) ZeroField(name string) error {
+	key, field, err := cc.StartField(name)
+	if err != nil {
+		return err
+	}
+	tt := cc.fill.tt
+	if tt.Kind() == Optional {
+		tt = tt.Elem()
+	}
+	var ztt *Type
+	switch tt.Kind() {
+	case Struct, Union:
+		fld, index := tt.FieldByName(name)
+		if index < 0 {
+			return ErrFieldNoExist
+		}
+		ztt = fld.Type
+	case Map:
+		ztt = tt.Elem()
+	case Set:
+		ztt = TypeOf(struct{}{})
+	}
+	if err := FromValue(field, ZeroValue(ztt)); err != nil {
+		return err
+	}
+	return cc.FinishField(key, field)
 }
 
 // FinishKey implements the SetTarget interface method.

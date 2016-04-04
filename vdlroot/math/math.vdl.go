@@ -32,44 +32,42 @@ func (m *Complex64) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 	if err != nil {
 		return err
 	}
-	keyTarget2, fieldTarget3, err := fieldsTarget1.StartField("Real")
-	if err != vdl.ErrFieldNoExist && err != nil {
-		return err
-	}
-	if err != vdl.ErrFieldNoExist {
-
-		var4 := (m.Real == float32(0))
-		if var4 {
-			if err := fieldTarget3.FromZero(tt.NonOptional().Field(0).Type); err != nil {
+	var4 := (m.Real == float32(0))
+	if var4 {
+		if err := fieldsTarget1.ZeroField("Real"); err != nil && err != vdl.ErrFieldNoExist {
+			return err
+		}
+	} else {
+		keyTarget2, fieldTarget3, err := fieldsTarget1.StartField("Real")
+		if err != vdl.ErrFieldNoExist {
+			if err != nil {
 				return err
 			}
-		} else {
 			if err := fieldTarget3.FromFloat(float64(m.Real), tt.NonOptional().Field(0).Type); err != nil {
 				return err
 			}
-		}
-		if err := fieldsTarget1.FinishField(keyTarget2, fieldTarget3); err != nil {
-			return err
-		}
-	}
-	keyTarget5, fieldTarget6, err := fieldsTarget1.StartField("Imag")
-	if err != vdl.ErrFieldNoExist && err != nil {
-		return err
-	}
-	if err != vdl.ErrFieldNoExist {
-
-		var7 := (m.Imag == float32(0))
-		if var7 {
-			if err := fieldTarget6.FromZero(tt.NonOptional().Field(1).Type); err != nil {
+			if err := fieldsTarget1.FinishField(keyTarget2, fieldTarget3); err != nil {
 				return err
 			}
-		} else {
+		}
+	}
+	var7 := (m.Imag == float32(0))
+	if var7 {
+		if err := fieldsTarget1.ZeroField("Imag"); err != nil && err != vdl.ErrFieldNoExist {
+			return err
+		}
+	} else {
+		keyTarget5, fieldTarget6, err := fieldsTarget1.StartField("Imag")
+		if err != vdl.ErrFieldNoExist {
+			if err != nil {
+				return err
+			}
 			if err := fieldTarget6.FromFloat(float64(m.Imag), tt.NonOptional().Field(1).Type); err != nil {
 				return err
 			}
-		}
-		if err := fieldsTarget1.FinishField(keyTarget5, fieldTarget6); err != nil {
-			return err
+			if err := fieldsTarget1.FinishField(keyTarget5, fieldTarget6); err != nil {
+				return err
+			}
 		}
 	}
 	if err := t.FinishFields(fieldsTarget1); err != nil {
@@ -115,21 +113,23 @@ func (t *Complex64Target) StartField(name string) (key, field vdl.Target, _ erro
 func (t *Complex64Target) FinishField(_, _ vdl.Target) error {
 	return nil
 }
+func (t *Complex64Target) ZeroField(name string) error {
+	switch name {
+	case "Real":
+		t.wireValue.Real = float32(0)
+		return nil
+	case "Imag":
+		t.wireValue.Imag = float32(0)
+		return nil
+	default:
+		return fmt.Errorf("field %s not in struct math.Complex64", name)
+	}
+}
 func (t *Complex64Target) FinishFields(_ vdl.FieldsTarget) error {
 
 	if err := Complex64ToNative(t.wireValue, t.Value); err != nil {
 		return err
 	}
-	return nil
-}
-func (t *Complex64Target) FromZero(tt *vdl.Type) error {
-	*t.Value = func() complex64 {
-		var native complex64
-		if err := vdl.Convert(&native, Complex64{}); err != nil {
-			panic(err)
-		}
-		return native
-	}()
 	return nil
 }
 
@@ -148,44 +148,42 @@ func (m *Complex128) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 	if err != nil {
 		return err
 	}
-	keyTarget2, fieldTarget3, err := fieldsTarget1.StartField("Real")
-	if err != vdl.ErrFieldNoExist && err != nil {
-		return err
-	}
-	if err != vdl.ErrFieldNoExist {
-
-		var4 := (m.Real == float64(0))
-		if var4 {
-			if err := fieldTarget3.FromZero(tt.NonOptional().Field(0).Type); err != nil {
+	var4 := (m.Real == float64(0))
+	if var4 {
+		if err := fieldsTarget1.ZeroField("Real"); err != nil && err != vdl.ErrFieldNoExist {
+			return err
+		}
+	} else {
+		keyTarget2, fieldTarget3, err := fieldsTarget1.StartField("Real")
+		if err != vdl.ErrFieldNoExist {
+			if err != nil {
 				return err
 			}
-		} else {
 			if err := fieldTarget3.FromFloat(float64(m.Real), tt.NonOptional().Field(0).Type); err != nil {
 				return err
 			}
-		}
-		if err := fieldsTarget1.FinishField(keyTarget2, fieldTarget3); err != nil {
-			return err
-		}
-	}
-	keyTarget5, fieldTarget6, err := fieldsTarget1.StartField("Imag")
-	if err != vdl.ErrFieldNoExist && err != nil {
-		return err
-	}
-	if err != vdl.ErrFieldNoExist {
-
-		var7 := (m.Imag == float64(0))
-		if var7 {
-			if err := fieldTarget6.FromZero(tt.NonOptional().Field(1).Type); err != nil {
+			if err := fieldsTarget1.FinishField(keyTarget2, fieldTarget3); err != nil {
 				return err
 			}
-		} else {
+		}
+	}
+	var7 := (m.Imag == float64(0))
+	if var7 {
+		if err := fieldsTarget1.ZeroField("Imag"); err != nil && err != vdl.ErrFieldNoExist {
+			return err
+		}
+	} else {
+		keyTarget5, fieldTarget6, err := fieldsTarget1.StartField("Imag")
+		if err != vdl.ErrFieldNoExist {
+			if err != nil {
+				return err
+			}
 			if err := fieldTarget6.FromFloat(float64(m.Imag), tt.NonOptional().Field(1).Type); err != nil {
 				return err
 			}
-		}
-		if err := fieldsTarget1.FinishField(keyTarget5, fieldTarget6); err != nil {
-			return err
+			if err := fieldsTarget1.FinishField(keyTarget5, fieldTarget6); err != nil {
+				return err
+			}
 		}
 	}
 	if err := t.FinishFields(fieldsTarget1); err != nil {
@@ -231,21 +229,23 @@ func (t *Complex128Target) StartField(name string) (key, field vdl.Target, _ err
 func (t *Complex128Target) FinishField(_, _ vdl.Target) error {
 	return nil
 }
+func (t *Complex128Target) ZeroField(name string) error {
+	switch name {
+	case "Real":
+		t.wireValue.Real = float64(0)
+		return nil
+	case "Imag":
+		t.wireValue.Imag = float64(0)
+		return nil
+	default:
+		return fmt.Errorf("field %s not in struct math.Complex128", name)
+	}
+}
 func (t *Complex128Target) FinishFields(_ vdl.FieldsTarget) error {
 
 	if err := Complex128ToNative(t.wireValue, t.Value); err != nil {
 		return err
 	}
-	return nil
-}
-func (t *Complex128Target) FromZero(tt *vdl.Type) error {
-	*t.Value = func() complex128 {
-		var native complex128
-		if err := vdl.Convert(&native, Complex128{}); err != nil {
-			panic(err)
-		}
-		return native
-	}()
 	return nil
 }
 

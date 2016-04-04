@@ -58,7 +58,6 @@ pkg security, func WireDischargeToNative(WireDischarge, *Discharge) error
 pkg security, method (*BlessingPattern) FillVDLTarget(vdl.Target, *vdl.Type) error
 pkg security, method (*BlessingPattern) MakeVDLTarget() vdl.Target
 pkg security, method (*BlessingPatternTarget) FromString(string, *vdl.Type) error
-pkg security, method (*BlessingPatternTarget) FromZero(*vdl.Type) error
 pkg security, method (*CallParams) Copy(Call)
 pkg security, method (*Caveat) FillVDLTarget(vdl.Target, *vdl.Type) error
 pkg security, method (*Caveat) MakeVDLTarget() vdl.Target
@@ -68,64 +67,62 @@ pkg security, method (*CaveatDescriptor) FillVDLTarget(vdl.Target, *vdl.Type) er
 pkg security, method (*CaveatDescriptor) MakeVDLTarget() vdl.Target
 pkg security, method (*CaveatDescriptorTarget) FinishField(vdl.Target, vdl.Target) error
 pkg security, method (*CaveatDescriptorTarget) FinishFields(vdl.FieldsTarget) error
-pkg security, method (*CaveatDescriptorTarget) FromZero(*vdl.Type) error
 pkg security, method (*CaveatDescriptorTarget) StartField(string) (vdl.Target, vdl.Target, error)
 pkg security, method (*CaveatDescriptorTarget) StartFields(*vdl.Type) (vdl.FieldsTarget, error)
+pkg security, method (*CaveatDescriptorTarget) ZeroField(string) error
 pkg security, method (*CaveatTarget) FinishField(vdl.Target, vdl.Target) error
 pkg security, method (*CaveatTarget) FinishFields(vdl.FieldsTarget) error
-pkg security, method (*CaveatTarget) FromZero(*vdl.Type) error
 pkg security, method (*CaveatTarget) StartField(string) (vdl.Target, vdl.Target, error)
 pkg security, method (*CaveatTarget) StartFields(*vdl.Type) (vdl.FieldsTarget, error)
+pkg security, method (*CaveatTarget) ZeroField(string) error
 pkg security, method (*Certificate) FillVDLTarget(vdl.Target, *vdl.Type) error
 pkg security, method (*Certificate) MakeVDLTarget() vdl.Target
 pkg security, method (*CertificateTarget) FinishField(vdl.Target, vdl.Target) error
 pkg security, method (*CertificateTarget) FinishFields(vdl.FieldsTarget) error
-pkg security, method (*CertificateTarget) FromZero(*vdl.Type) error
 pkg security, method (*CertificateTarget) StartField(string) (vdl.Target, vdl.Target, error)
 pkg security, method (*CertificateTarget) StartFields(*vdl.Type) (vdl.FieldsTarget, error)
+pkg security, method (*CertificateTarget) ZeroField(string) error
 pkg security, method (*DischargeImpetus) FillVDLTarget(vdl.Target, *vdl.Type) error
 pkg security, method (*DischargeImpetus) MakeVDLTarget() vdl.Target
 pkg security, method (*DischargeImpetusTarget) FinishField(vdl.Target, vdl.Target) error
 pkg security, method (*DischargeImpetusTarget) FinishFields(vdl.FieldsTarget) error
-pkg security, method (*DischargeImpetusTarget) FromZero(*vdl.Type) error
 pkg security, method (*DischargeImpetusTarget) StartField(string) (vdl.Target, vdl.Target, error)
 pkg security, method (*DischargeImpetusTarget) StartFields(*vdl.Type) (vdl.FieldsTarget, error)
+pkg security, method (*DischargeImpetusTarget) ZeroField(string) error
 pkg security, method (*Hash) FillVDLTarget(vdl.Target, *vdl.Type) error
 pkg security, method (*Hash) MakeVDLTarget() vdl.Target
 pkg security, method (*HashTarget) FromString(string, *vdl.Type) error
-pkg security, method (*HashTarget) FromZero(*vdl.Type) error
 pkg security, method (*RejectedBlessing) FillVDLTarget(vdl.Target, *vdl.Type) error
 pkg security, method (*RejectedBlessing) MakeVDLTarget() vdl.Target
 pkg security, method (*RejectedBlessingTarget) FinishField(vdl.Target, vdl.Target) error
 pkg security, method (*RejectedBlessingTarget) FinishFields(vdl.FieldsTarget) error
-pkg security, method (*RejectedBlessingTarget) FromZero(*vdl.Type) error
 pkg security, method (*RejectedBlessingTarget) StartField(string) (vdl.Target, vdl.Target, error)
 pkg security, method (*RejectedBlessingTarget) StartFields(*vdl.Type) (vdl.FieldsTarget, error)
+pkg security, method (*RejectedBlessingTarget) ZeroField(string) error
 pkg security, method (*Signature) FillVDLTarget(vdl.Target, *vdl.Type) error
 pkg security, method (*Signature) MakeVDLTarget() vdl.Target
 pkg security, method (*Signature) Verify(PublicKey, []byte) bool
 pkg security, method (*SignatureTarget) FinishField(vdl.Target, vdl.Target) error
 pkg security, method (*SignatureTarget) FinishFields(vdl.FieldsTarget) error
-pkg security, method (*SignatureTarget) FromZero(*vdl.Type) error
 pkg security, method (*SignatureTarget) StartField(string) (vdl.Target, vdl.Target, error)
 pkg security, method (*SignatureTarget) StartFields(*vdl.Type) (vdl.FieldsTarget, error)
+pkg security, method (*SignatureTarget) ZeroField(string) error
 pkg security, method (*ThirdPartyRequirements) FillVDLTarget(vdl.Target, *vdl.Type) error
 pkg security, method (*ThirdPartyRequirements) MakeVDLTarget() vdl.Target
 pkg security, method (*ThirdPartyRequirementsTarget) FinishField(vdl.Target, vdl.Target) error
 pkg security, method (*ThirdPartyRequirementsTarget) FinishFields(vdl.FieldsTarget) error
-pkg security, method (*ThirdPartyRequirementsTarget) FromZero(*vdl.Type) error
 pkg security, method (*ThirdPartyRequirementsTarget) StartField(string) (vdl.Target, vdl.Target, error)
 pkg security, method (*ThirdPartyRequirementsTarget) StartFields(*vdl.Type) (vdl.FieldsTarget, error)
+pkg security, method (*ThirdPartyRequirementsTarget) ZeroField(string) error
 pkg security, method (*WireBlessings) FillVDLTarget(vdl.Target, *vdl.Type) error
 pkg security, method (*WireBlessings) MakeVDLTarget() vdl.Target
 pkg security, method (*WireBlessingsTarget) FinishField(vdl.Target, vdl.Target) error
 pkg security, method (*WireBlessingsTarget) FinishFields(vdl.FieldsTarget) error
-pkg security, method (*WireBlessingsTarget) FromZero(*vdl.Type) error
 pkg security, method (*WireBlessingsTarget) StartField(string) (vdl.Target, vdl.Target, error)
 pkg security, method (*WireBlessingsTarget) StartFields(*vdl.Type) (vdl.FieldsTarget, error)
+pkg security, method (*WireBlessingsTarget) ZeroField(string) error
 pkg security, method (*WireDischargeTarget) FinishField(vdl.Target, vdl.Target) error
 pkg security, method (*WireDischargeTarget) FinishFields(vdl.FieldsTarget) error
-pkg security, method (*WireDischargeTarget) FromZero(*vdl.Type) error
 pkg security, method (*WireDischargeTarget) StartField(string) (vdl.Target, vdl.Target, error)
 pkg security, method (*WireDischargeTarget) StartFields(*vdl.Type) (vdl.FieldsTarget, error)
 pkg security, method (BlessingPattern) IsValid() bool

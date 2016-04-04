@@ -74,10 +74,6 @@ func (t *MountFlagTarget) FromFloat(src float64, tt *vdl.Type) error {
 
 	return nil
 }
-func (t *MountFlagTarget) FromZero(tt *vdl.Type) error {
-	*t.Value = MountFlag(0)
-	return nil
-}
 
 // MountedServer represents a server mounted on a specific name.
 type MountedServer struct {
@@ -97,24 +93,23 @@ func (m *MountedServer) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 	if err != nil {
 		return err
 	}
-	keyTarget2, fieldTarget3, err := fieldsTarget1.StartField("Server")
-	if err != vdl.ErrFieldNoExist && err != nil {
-		return err
-	}
-	if err != vdl.ErrFieldNoExist {
-
-		var4 := (m.Server == "")
-		if var4 {
-			if err := fieldTarget3.FromZero(tt.NonOptional().Field(0).Type); err != nil {
+	var4 := (m.Server == "")
+	if var4 {
+		if err := fieldsTarget1.ZeroField("Server"); err != nil && err != vdl.ErrFieldNoExist {
+			return err
+		}
+	} else {
+		keyTarget2, fieldTarget3, err := fieldsTarget1.StartField("Server")
+		if err != vdl.ErrFieldNoExist {
+			if err != nil {
 				return err
 			}
-		} else {
 			if err := fieldTarget3.FromString(string(m.Server), tt.NonOptional().Field(0).Type); err != nil {
 				return err
 			}
-		}
-		if err := fieldsTarget1.FinishField(keyTarget2, fieldTarget3); err != nil {
-			return err
+			if err := fieldsTarget1.FinishField(keyTarget2, fieldTarget3); err != nil {
+				return err
+			}
 		}
 	}
 	var wireValue5 time.WireDeadline
@@ -122,25 +117,24 @@ func (m *MountedServer) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 		return err
 	}
 
-	keyTarget6, fieldTarget7, err := fieldsTarget1.StartField("Deadline")
-	if err != vdl.ErrFieldNoExist && err != nil {
-		return err
-	}
-	if err != vdl.ErrFieldNoExist {
-
-		var8 := (wireValue5 == time.WireDeadline{})
-		if var8 {
-			if err := fieldTarget7.FromZero(tt.NonOptional().Field(1).Type); err != nil {
+	var8 := (wireValue5 == time.WireDeadline{})
+	if var8 {
+		if err := fieldsTarget1.ZeroField("Deadline"); err != nil && err != vdl.ErrFieldNoExist {
+			return err
+		}
+	} else {
+		keyTarget6, fieldTarget7, err := fieldsTarget1.StartField("Deadline")
+		if err != vdl.ErrFieldNoExist {
+			if err != nil {
 				return err
 			}
-		} else {
 
 			if err := wireValue5.FillVDLTarget(fieldTarget7, tt.NonOptional().Field(1).Type); err != nil {
 				return err
 			}
-		}
-		if err := fieldsTarget1.FinishField(keyTarget6, fieldTarget7); err != nil {
-			return err
+			if err := fieldsTarget1.FinishField(keyTarget6, fieldTarget7); err != nil {
+				return err
+			}
 		}
 	}
 	if err := t.FinishFields(fieldsTarget1); err != nil {
@@ -185,12 +179,26 @@ func (t *MountedServerTarget) StartField(name string) (key, field vdl.Target, _ 
 func (t *MountedServerTarget) FinishField(_, _ vdl.Target) error {
 	return nil
 }
+func (t *MountedServerTarget) ZeroField(name string) error {
+	switch name {
+	case "Server":
+		t.Value.Server = ""
+		return nil
+	case "Deadline":
+		t.Value.Deadline = func() time.Deadline {
+			var native time.Deadline
+			if err := vdl.Convert(&native, time.WireDeadline{}); err != nil {
+				panic(err)
+			}
+			return native
+		}()
+		return nil
+	default:
+		return fmt.Errorf("field %s not in struct v.io/v23/naming.MountedServer", name)
+	}
+}
 func (t *MountedServerTarget) FinishFields(_ vdl.FieldsTarget) error {
 
-	return nil
-}
-func (t *MountedServerTarget) FromZero(tt *vdl.Type) error {
-	*t.Value = MountedServer{}
 	return nil
 }
 
@@ -216,41 +224,39 @@ func (m *MountEntry) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 	if err != nil {
 		return err
 	}
-	keyTarget2, fieldTarget3, err := fieldsTarget1.StartField("Name")
-	if err != vdl.ErrFieldNoExist && err != nil {
-		return err
-	}
-	if err != vdl.ErrFieldNoExist {
-
-		var4 := (m.Name == "")
-		if var4 {
-			if err := fieldTarget3.FromZero(tt.NonOptional().Field(0).Type); err != nil {
+	var4 := (m.Name == "")
+	if var4 {
+		if err := fieldsTarget1.ZeroField("Name"); err != nil && err != vdl.ErrFieldNoExist {
+			return err
+		}
+	} else {
+		keyTarget2, fieldTarget3, err := fieldsTarget1.StartField("Name")
+		if err != vdl.ErrFieldNoExist {
+			if err != nil {
 				return err
 			}
-		} else {
 			if err := fieldTarget3.FromString(string(m.Name), tt.NonOptional().Field(0).Type); err != nil {
 				return err
 			}
-		}
-		if err := fieldsTarget1.FinishField(keyTarget2, fieldTarget3); err != nil {
-			return err
-		}
-	}
-	keyTarget5, fieldTarget6, err := fieldsTarget1.StartField("Servers")
-	if err != vdl.ErrFieldNoExist && err != nil {
-		return err
-	}
-	if err != vdl.ErrFieldNoExist {
-
-		var var7 bool
-		if len(m.Servers) == 0 {
-			var7 = true
-		}
-		if var7 {
-			if err := fieldTarget6.FromZero(tt.NonOptional().Field(1).Type); err != nil {
+			if err := fieldsTarget1.FinishField(keyTarget2, fieldTarget3); err != nil {
 				return err
 			}
-		} else {
+		}
+	}
+	var var7 bool
+	if len(m.Servers) == 0 {
+		var7 = true
+	}
+	if var7 {
+		if err := fieldsTarget1.ZeroField("Servers"); err != nil && err != vdl.ErrFieldNoExist {
+			return err
+		}
+	} else {
+		keyTarget5, fieldTarget6, err := fieldsTarget1.StartField("Servers")
+		if err != vdl.ErrFieldNoExist {
+			if err != nil {
+				return err
+			}
 
 			listTarget8, err := fieldTarget6.StartList(tt.NonOptional().Field(1).Type, len(m.Servers))
 			if err != nil {
@@ -272,49 +278,47 @@ func (m *MountEntry) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 			if err := fieldTarget6.FinishList(listTarget8); err != nil {
 				return err
 			}
-		}
-		if err := fieldsTarget1.FinishField(keyTarget5, fieldTarget6); err != nil {
-			return err
-		}
-	}
-	keyTarget11, fieldTarget12, err := fieldsTarget1.StartField("ServesMountTable")
-	if err != vdl.ErrFieldNoExist && err != nil {
-		return err
-	}
-	if err != vdl.ErrFieldNoExist {
-
-		var13 := (m.ServesMountTable == false)
-		if var13 {
-			if err := fieldTarget12.FromZero(tt.NonOptional().Field(2).Type); err != nil {
+			if err := fieldsTarget1.FinishField(keyTarget5, fieldTarget6); err != nil {
 				return err
 			}
-		} else {
+		}
+	}
+	var13 := (m.ServesMountTable == false)
+	if var13 {
+		if err := fieldsTarget1.ZeroField("ServesMountTable"); err != nil && err != vdl.ErrFieldNoExist {
+			return err
+		}
+	} else {
+		keyTarget11, fieldTarget12, err := fieldsTarget1.StartField("ServesMountTable")
+		if err != vdl.ErrFieldNoExist {
+			if err != nil {
+				return err
+			}
 			if err := fieldTarget12.FromBool(bool(m.ServesMountTable), tt.NonOptional().Field(2).Type); err != nil {
 				return err
 			}
-		}
-		if err := fieldsTarget1.FinishField(keyTarget11, fieldTarget12); err != nil {
-			return err
-		}
-	}
-	keyTarget14, fieldTarget15, err := fieldsTarget1.StartField("IsLeaf")
-	if err != vdl.ErrFieldNoExist && err != nil {
-		return err
-	}
-	if err != vdl.ErrFieldNoExist {
-
-		var16 := (m.IsLeaf == false)
-		if var16 {
-			if err := fieldTarget15.FromZero(tt.NonOptional().Field(3).Type); err != nil {
+			if err := fieldsTarget1.FinishField(keyTarget11, fieldTarget12); err != nil {
 				return err
 			}
-		} else {
+		}
+	}
+	var16 := (m.IsLeaf == false)
+	if var16 {
+		if err := fieldsTarget1.ZeroField("IsLeaf"); err != nil && err != vdl.ErrFieldNoExist {
+			return err
+		}
+	} else {
+		keyTarget14, fieldTarget15, err := fieldsTarget1.StartField("IsLeaf")
+		if err != vdl.ErrFieldNoExist {
+			if err != nil {
+				return err
+			}
 			if err := fieldTarget15.FromBool(bool(m.IsLeaf), tt.NonOptional().Field(3).Type); err != nil {
 				return err
 			}
-		}
-		if err := fieldsTarget1.FinishField(keyTarget14, fieldTarget15); err != nil {
-			return err
+			if err := fieldsTarget1.FinishField(keyTarget14, fieldTarget15); err != nil {
+				return err
+			}
 		}
 	}
 	if err := t.FinishFields(fieldsTarget1); err != nil {
@@ -369,12 +373,26 @@ func (t *MountEntryTarget) StartField(name string) (key, field vdl.Target, _ err
 func (t *MountEntryTarget) FinishField(_, _ vdl.Target) error {
 	return nil
 }
+func (t *MountEntryTarget) ZeroField(name string) error {
+	switch name {
+	case "Name":
+		t.Value.Name = ""
+		return nil
+	case "Servers":
+		t.Value.Servers = []MountedServer(nil)
+		return nil
+	case "ServesMountTable":
+		t.Value.ServesMountTable = false
+		return nil
+	case "IsLeaf":
+		t.Value.IsLeaf = false
+		return nil
+	default:
+		return fmt.Errorf("field %s not in struct v.io/v23/naming.MountEntry", name)
+	}
+}
 func (t *MountEntryTarget) FinishFields(_ vdl.FieldsTarget) error {
 
-	return nil
-}
-func (t *MountEntryTarget) FromZero(tt *vdl.Type) error {
-	*t.Value = MountEntry{}
 	return nil
 }
 
@@ -410,10 +428,6 @@ func (t *__VDLTarget1_list) FinishList(elem vdl.ListTarget) error {
 
 	return nil
 }
-func (t *__VDLTarget1_list) FromZero(tt *vdl.Type) error {
-	*t.Value = []MountedServer(nil)
-	return nil
-}
 
 // GlobError is returned by namespace.Glob to indicate a subtree of the namespace
 // that could not be traversed.
@@ -434,38 +448,36 @@ func (m *GlobError) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 	if err != nil {
 		return err
 	}
-	keyTarget2, fieldTarget3, err := fieldsTarget1.StartField("Name")
-	if err != vdl.ErrFieldNoExist && err != nil {
-		return err
-	}
-	if err != vdl.ErrFieldNoExist {
-
-		var4 := (m.Name == "")
-		if var4 {
-			if err := fieldTarget3.FromZero(tt.NonOptional().Field(0).Type); err != nil {
+	var4 := (m.Name == "")
+	if var4 {
+		if err := fieldsTarget1.ZeroField("Name"); err != nil && err != vdl.ErrFieldNoExist {
+			return err
+		}
+	} else {
+		keyTarget2, fieldTarget3, err := fieldsTarget1.StartField("Name")
+		if err != vdl.ErrFieldNoExist {
+			if err != nil {
 				return err
 			}
-		} else {
 			if err := fieldTarget3.FromString(string(m.Name), tt.NonOptional().Field(0).Type); err != nil {
 				return err
 			}
-		}
-		if err := fieldsTarget1.FinishField(keyTarget2, fieldTarget3); err != nil {
-			return err
-		}
-	}
-	keyTarget5, fieldTarget6, err := fieldsTarget1.StartField("Error")
-	if err != vdl.ErrFieldNoExist && err != nil {
-		return err
-	}
-	if err != vdl.ErrFieldNoExist {
-
-		var7 := (m.Error == (error)(nil))
-		if var7 {
-			if err := fieldTarget6.FromZero(tt.NonOptional().Field(1).Type); err != nil {
+			if err := fieldsTarget1.FinishField(keyTarget2, fieldTarget3); err != nil {
 				return err
 			}
-		} else {
+		}
+	}
+	var7 := (m.Error == (error)(nil))
+	if var7 {
+		if err := fieldsTarget1.ZeroField("Error"); err != nil && err != vdl.ErrFieldNoExist {
+			return err
+		}
+	} else {
+		keyTarget5, fieldTarget6, err := fieldsTarget1.StartField("Error")
+		if err != vdl.ErrFieldNoExist {
+			if err != nil {
+				return err
+			}
 
 			var wireError8 vdl.WireError
 			if err := verror.WireFromNative(&wireError8, m.Error); err != nil {
@@ -475,9 +487,9 @@ func (m *GlobError) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 				return err
 			}
 
-		}
-		if err := fieldsTarget1.FinishField(keyTarget5, fieldTarget6); err != nil {
-			return err
+			if err := fieldsTarget1.FinishField(keyTarget5, fieldTarget6); err != nil {
+				return err
+			}
 		}
 	}
 	if err := t.FinishFields(fieldsTarget1); err != nil {
@@ -522,12 +534,20 @@ func (t *GlobErrorTarget) StartField(name string) (key, field vdl.Target, _ erro
 func (t *GlobErrorTarget) FinishField(_, _ vdl.Target) error {
 	return nil
 }
+func (t *GlobErrorTarget) ZeroField(name string) error {
+	switch name {
+	case "Name":
+		t.Value.Name = ""
+		return nil
+	case "Error":
+		t.Value.Error = (error)(nil)
+		return nil
+	default:
+		return fmt.Errorf("field %s not in struct v.io/v23/naming.GlobError", name)
+	}
+}
 func (t *GlobErrorTarget) FinishFields(_ vdl.FieldsTarget) error {
 
-	return nil
-}
-func (t *GlobErrorTarget) FromZero(tt *vdl.Type) error {
-	*t.Value = GlobError{}
 	return nil
 }
 
@@ -665,10 +685,6 @@ func (t *GlobReplyTarget) FinishField(_, fieldTarget vdl.Target) error {
 }
 func (t *GlobReplyTarget) FinishFields(_ vdl.FieldsTarget) error {
 
-	return nil
-}
-func (t *GlobReplyTarget) FromZero(tt *vdl.Type) error {
-	*t.Value = GlobReply(GlobReplyEntry{})
 	return nil
 }
 
@@ -814,10 +830,6 @@ func (t *GlobChildrenReplyTarget) FinishField(_, fieldTarget vdl.Target) error {
 }
 func (t *GlobChildrenReplyTarget) FinishFields(_ vdl.FieldsTarget) error {
 
-	return nil
-}
-func (t *GlobChildrenReplyTarget) FromZero(tt *vdl.Type) error {
-	*t.Value = GlobChildrenReply(GlobChildrenReplyName{})
 	return nil
 }
 

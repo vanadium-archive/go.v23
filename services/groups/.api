@@ -16,32 +16,30 @@ pkg groups, method (*Approximation) FillVDLTarget(vdl.Target, *vdl.Type) error
 pkg groups, method (*Approximation) MakeVDLTarget() vdl.Target
 pkg groups, method (*ApproximationTarget) FinishField(vdl.Target, vdl.Target) error
 pkg groups, method (*ApproximationTarget) FinishFields(vdl.FieldsTarget) error
-pkg groups, method (*ApproximationTarget) FromZero(*vdl.Type) error
 pkg groups, method (*ApproximationTarget) StartField(string) (vdl.Target, vdl.Target, error)
 pkg groups, method (*ApproximationTarget) StartFields(*vdl.Type) (vdl.FieldsTarget, error)
+pkg groups, method (*ApproximationTarget) ZeroField(string) error
 pkg groups, method (*ApproximationType) FillVDLTarget(vdl.Target, *vdl.Type) error
 pkg groups, method (*ApproximationType) MakeVDLTarget() vdl.Target
 pkg groups, method (*ApproximationType) Set(string) error
 pkg groups, method (*ApproximationTypeTarget) FromEnumLabel(string, *vdl.Type) error
-pkg groups, method (*ApproximationTypeTarget) FromZero(*vdl.Type) error
 pkg groups, method (*BlessingPatternChunk) FillVDLTarget(vdl.Target, *vdl.Type) error
 pkg groups, method (*BlessingPatternChunk) MakeVDLTarget() vdl.Target
 pkg groups, method (*BlessingPatternChunkTarget) FromString(string, *vdl.Type) error
-pkg groups, method (*BlessingPatternChunkTarget) FromZero(*vdl.Type) error
 pkg groups, method (*GetRequest) FillVDLTarget(vdl.Target, *vdl.Type) error
 pkg groups, method (*GetRequest) MakeVDLTarget() vdl.Target
 pkg groups, method (*GetRequestTarget) FinishField(vdl.Target, vdl.Target) error
 pkg groups, method (*GetRequestTarget) FinishFields(vdl.FieldsTarget) error
-pkg groups, method (*GetRequestTarget) FromZero(*vdl.Type) error
 pkg groups, method (*GetRequestTarget) StartField(string) (vdl.Target, vdl.Target, error)
 pkg groups, method (*GetRequestTarget) StartFields(*vdl.Type) (vdl.FieldsTarget, error)
+pkg groups, method (*GetRequestTarget) ZeroField(string) error
 pkg groups, method (*GetResponse) FillVDLTarget(vdl.Target, *vdl.Type) error
 pkg groups, method (*GetResponse) MakeVDLTarget() vdl.Target
 pkg groups, method (*GetResponseTarget) FinishField(vdl.Target, vdl.Target) error
 pkg groups, method (*GetResponseTarget) FinishFields(vdl.FieldsTarget) error
-pkg groups, method (*GetResponseTarget) FromZero(*vdl.Type) error
 pkg groups, method (*GetResponseTarget) StartField(string) (vdl.Target, vdl.Target, error)
 pkg groups, method (*GetResponseTarget) StartFields(*vdl.Type) (vdl.FieldsTarget, error)
+pkg groups, method (*GetResponseTarget) ZeroField(string) error
 pkg groups, method (ApproximationType) String() string
 pkg groups, type Approximation struct
 pkg groups, type Approximation struct, Details string

@@ -58,33 +58,31 @@ pkg syncbase, method (*BatchInfo) FillVDLTarget(vdl.Target, *vdl.Type) error
 pkg syncbase, method (*BatchInfo) MakeVDLTarget() vdl.Target
 pkg syncbase, method (*BatchInfoTarget) FinishField(vdl.Target, vdl.Target) error
 pkg syncbase, method (*BatchInfoTarget) FinishFields(vdl.FieldsTarget) error
-pkg syncbase, method (*BatchInfoTarget) FromZero(*vdl.Type) error
 pkg syncbase, method (*BatchInfoTarget) StartField(string) (vdl.Target, vdl.Target, error)
 pkg syncbase, method (*BatchInfoTarget) StartFields(*vdl.Type) (vdl.FieldsTarget, error)
+pkg syncbase, method (*BatchInfoTarget) ZeroField(string) error
 pkg syncbase, method (*BatchOptions) FillVDLTarget(vdl.Target, *vdl.Type) error
 pkg syncbase, method (*BatchOptions) MakeVDLTarget() vdl.Target
 pkg syncbase, method (*BatchOptionsTarget) FinishField(vdl.Target, vdl.Target) error
 pkg syncbase, method (*BatchOptionsTarget) FinishFields(vdl.FieldsTarget) error
-pkg syncbase, method (*BatchOptionsTarget) FromZero(*vdl.Type) error
 pkg syncbase, method (*BatchOptionsTarget) StartField(string) (vdl.Target, vdl.Target, error)
 pkg syncbase, method (*BatchOptionsTarget) StartFields(*vdl.Type) (vdl.FieldsTarget, error)
+pkg syncbase, method (*BatchOptionsTarget) ZeroField(string) error
 pkg syncbase, method (*BatchSource) FillVDLTarget(vdl.Target, *vdl.Type) error
 pkg syncbase, method (*BatchSource) MakeVDLTarget() vdl.Target
 pkg syncbase, method (*BatchSource) Set(string) error
 pkg syncbase, method (*BatchSourceTarget) FromEnumLabel(string, *vdl.Type) error
-pkg syncbase, method (*BatchSourceTarget) FromZero(*vdl.Type) error
 pkg syncbase, method (*BlobFetchState) FillVDLTarget(vdl.Target, *vdl.Type) error
 pkg syncbase, method (*BlobFetchState) MakeVDLTarget() vdl.Target
 pkg syncbase, method (*BlobFetchState) Set(string) error
 pkg syncbase, method (*BlobFetchStateTarget) FromEnumLabel(string, *vdl.Type) error
-pkg syncbase, method (*BlobFetchStateTarget) FromZero(*vdl.Type) error
 pkg syncbase, method (*BlobFetchStatus) FillVDLTarget(vdl.Target, *vdl.Type) error
 pkg syncbase, method (*BlobFetchStatus) MakeVDLTarget() vdl.Target
 pkg syncbase, method (*BlobFetchStatusTarget) FinishField(vdl.Target, vdl.Target) error
 pkg syncbase, method (*BlobFetchStatusTarget) FinishFields(vdl.FieldsTarget) error
-pkg syncbase, method (*BlobFetchStatusTarget) FromZero(*vdl.Type) error
 pkg syncbase, method (*BlobFetchStatusTarget) StartField(string) (vdl.Target, vdl.Target, error)
 pkg syncbase, method (*BlobFetchStatusTarget) StartFields(*vdl.Type) (vdl.FieldsTarget, error)
+pkg syncbase, method (*BlobFetchStatusTarget) ZeroField(string) error
 pkg syncbase, method (*BlobManagerFetchBlobServerCallStub) Init(rpc.StreamServerCall)
 pkg syncbase, method (*BlobManagerFetchBlobServerCallStub) SendStream() interface {  Send(item BlobFetchStatus) error;}
 pkg syncbase, method (*BlobManagerGetBlobServerCallStub) Init(rpc.StreamServerCall)
@@ -94,28 +92,26 @@ pkg syncbase, method (*BlobManagerPutBlobServerCallStub) RecvStream() interface 
 pkg syncbase, method (*BlobRef) FillVDLTarget(vdl.Target, *vdl.Type) error
 pkg syncbase, method (*BlobRef) MakeVDLTarget() vdl.Target
 pkg syncbase, method (*BlobRefTarget) FromString(string, *vdl.Type) error
-pkg syncbase, method (*BlobRefTarget) FromZero(*vdl.Type) error
 pkg syncbase, method (*CollectionRow) FillVDLTarget(vdl.Target, *vdl.Type) error
 pkg syncbase, method (*CollectionRow) MakeVDLTarget() vdl.Target
 pkg syncbase, method (*CollectionRowTarget) FinishField(vdl.Target, vdl.Target) error
 pkg syncbase, method (*CollectionRowTarget) FinishFields(vdl.FieldsTarget) error
-pkg syncbase, method (*CollectionRowTarget) FromZero(*vdl.Type) error
 pkg syncbase, method (*CollectionRowTarget) StartField(string) (vdl.Target, vdl.Target, error)
 pkg syncbase, method (*CollectionRowTarget) StartFields(*vdl.Type) (vdl.FieldsTarget, error)
+pkg syncbase, method (*CollectionRowTarget) ZeroField(string) error
 pkg syncbase, method (*CollectionScanServerCallStub) Init(rpc.StreamServerCall)
 pkg syncbase, method (*CollectionScanServerCallStub) SendStream() interface {  Send(item KeyValue) error;}
 pkg syncbase, method (*ConflictDataTarget) FinishField(vdl.Target, vdl.Target) error
 pkg syncbase, method (*ConflictDataTarget) FinishFields(vdl.FieldsTarget) error
-pkg syncbase, method (*ConflictDataTarget) FromZero(*vdl.Type) error
 pkg syncbase, method (*ConflictDataTarget) StartField(string) (vdl.Target, vdl.Target, error)
 pkg syncbase, method (*ConflictDataTarget) StartFields(*vdl.Type) (vdl.FieldsTarget, error)
 pkg syncbase, method (*ConflictInfo) FillVDLTarget(vdl.Target, *vdl.Type) error
 pkg syncbase, method (*ConflictInfo) MakeVDLTarget() vdl.Target
 pkg syncbase, method (*ConflictInfoTarget) FinishField(vdl.Target, vdl.Target) error
 pkg syncbase, method (*ConflictInfoTarget) FinishFields(vdl.FieldsTarget) error
-pkg syncbase, method (*ConflictInfoTarget) FromZero(*vdl.Type) error
 pkg syncbase, method (*ConflictInfoTarget) StartField(string) (vdl.Target, vdl.Target, error)
 pkg syncbase, method (*ConflictInfoTarget) StartFields(*vdl.Type) (vdl.FieldsTarget, error)
+pkg syncbase, method (*ConflictInfoTarget) ZeroField(string) error
 pkg syncbase, method (*ConflictManagerStartConflictResolverServerCallStub) Init(rpc.StreamServerCall)
 pkg syncbase, method (*ConflictManagerStartConflictResolverServerCallStub) RecvStream() interface {  Advance() bool; Value() ResolutionInfo; Err() error;}
 pkg syncbase, method (*ConflictManagerStartConflictResolverServerCallStub) SendStream() interface {  Send(item ConflictInfo) error;}
@@ -123,115 +119,111 @@ pkg syncbase, method (*CrPolicy) FillVDLTarget(vdl.Target, *vdl.Type) error
 pkg syncbase, method (*CrPolicy) MakeVDLTarget() vdl.Target
 pkg syncbase, method (*CrPolicyTarget) FinishField(vdl.Target, vdl.Target) error
 pkg syncbase, method (*CrPolicyTarget) FinishFields(vdl.FieldsTarget) error
-pkg syncbase, method (*CrPolicyTarget) FromZero(*vdl.Type) error
 pkg syncbase, method (*CrPolicyTarget) StartField(string) (vdl.Target, vdl.Target, error)
 pkg syncbase, method (*CrPolicyTarget) StartFields(*vdl.Type) (vdl.FieldsTarget, error)
+pkg syncbase, method (*CrPolicyTarget) ZeroField(string) error
 pkg syncbase, method (*CrRule) FillVDLTarget(vdl.Target, *vdl.Type) error
 pkg syncbase, method (*CrRule) MakeVDLTarget() vdl.Target
 pkg syncbase, method (*CrRuleTarget) FinishField(vdl.Target, vdl.Target) error
 pkg syncbase, method (*CrRuleTarget) FinishFields(vdl.FieldsTarget) error
-pkg syncbase, method (*CrRuleTarget) FromZero(*vdl.Type) error
 pkg syncbase, method (*CrRuleTarget) StartField(string) (vdl.Target, vdl.Target, error)
 pkg syncbase, method (*CrRuleTarget) StartFields(*vdl.Type) (vdl.FieldsTarget, error)
+pkg syncbase, method (*CrRuleTarget) ZeroField(string) error
 pkg syncbase, method (*DatabaseExecServerCallStub) Init(rpc.StreamServerCall)
 pkg syncbase, method (*DatabaseExecServerCallStub) SendStream() interface {  Send(item []*vom.RawBytes) error;}
 pkg syncbase, method (*DevModeUpdateVClockOpts) FillVDLTarget(vdl.Target, *vdl.Type) error
 pkg syncbase, method (*DevModeUpdateVClockOpts) MakeVDLTarget() vdl.Target
 pkg syncbase, method (*DevModeUpdateVClockOptsTarget) FinishField(vdl.Target, vdl.Target) error
 pkg syncbase, method (*DevModeUpdateVClockOptsTarget) FinishFields(vdl.FieldsTarget) error
-pkg syncbase, method (*DevModeUpdateVClockOptsTarget) FromZero(*vdl.Type) error
 pkg syncbase, method (*DevModeUpdateVClockOptsTarget) StartField(string) (vdl.Target, vdl.Target, error)
 pkg syncbase, method (*DevModeUpdateVClockOptsTarget) StartFields(*vdl.Type) (vdl.FieldsTarget, error)
+pkg syncbase, method (*DevModeUpdateVClockOptsTarget) ZeroField(string) error
 pkg syncbase, method (*KeyValue) FillVDLTarget(vdl.Target, *vdl.Type) error
 pkg syncbase, method (*KeyValue) MakeVDLTarget() vdl.Target
 pkg syncbase, method (*KeyValueTarget) FinishField(vdl.Target, vdl.Target) error
 pkg syncbase, method (*KeyValueTarget) FinishFields(vdl.FieldsTarget) error
-pkg syncbase, method (*KeyValueTarget) FromZero(*vdl.Type) error
 pkg syncbase, method (*KeyValueTarget) StartField(string) (vdl.Target, vdl.Target, error)
 pkg syncbase, method (*KeyValueTarget) StartFields(*vdl.Type) (vdl.FieldsTarget, error)
+pkg syncbase, method (*KeyValueTarget) ZeroField(string) error
 pkg syncbase, method (*OperationTarget) FinishField(vdl.Target, vdl.Target) error
 pkg syncbase, method (*OperationTarget) FinishFields(vdl.FieldsTarget) error
-pkg syncbase, method (*OperationTarget) FromZero(*vdl.Type) error
 pkg syncbase, method (*OperationTarget) StartField(string) (vdl.Target, vdl.Target, error)
 pkg syncbase, method (*OperationTarget) StartFields(*vdl.Type) (vdl.FieldsTarget, error)
 pkg syncbase, method (*ResolutionInfo) FillVDLTarget(vdl.Target, *vdl.Type) error
 pkg syncbase, method (*ResolutionInfo) MakeVDLTarget() vdl.Target
 pkg syncbase, method (*ResolutionInfoTarget) FinishField(vdl.Target, vdl.Target) error
 pkg syncbase, method (*ResolutionInfoTarget) FinishFields(vdl.FieldsTarget) error
-pkg syncbase, method (*ResolutionInfoTarget) FromZero(*vdl.Type) error
 pkg syncbase, method (*ResolutionInfoTarget) StartField(string) (vdl.Target, vdl.Target, error)
 pkg syncbase, method (*ResolutionInfoTarget) StartFields(*vdl.Type) (vdl.FieldsTarget, error)
+pkg syncbase, method (*ResolutionInfoTarget) ZeroField(string) error
 pkg syncbase, method (*ResolverType) FillVDLTarget(vdl.Target, *vdl.Type) error
 pkg syncbase, method (*ResolverType) MakeVDLTarget() vdl.Target
 pkg syncbase, method (*ResolverType) Set(string) error
 pkg syncbase, method (*ResolverTypeTarget) FromEnumLabel(string, *vdl.Type) error
-pkg syncbase, method (*ResolverTypeTarget) FromZero(*vdl.Type) error
 pkg syncbase, method (*RowInfo) FillVDLTarget(vdl.Target, *vdl.Type) error
 pkg syncbase, method (*RowInfo) MakeVDLTarget() vdl.Target
 pkg syncbase, method (*RowInfoTarget) FinishField(vdl.Target, vdl.Target) error
 pkg syncbase, method (*RowInfoTarget) FinishFields(vdl.FieldsTarget) error
-pkg syncbase, method (*RowInfoTarget) FromZero(*vdl.Type) error
 pkg syncbase, method (*RowInfoTarget) StartField(string) (vdl.Target, vdl.Target, error)
 pkg syncbase, method (*RowInfoTarget) StartFields(*vdl.Type) (vdl.FieldsTarget, error)
+pkg syncbase, method (*RowInfoTarget) ZeroField(string) error
 pkg syncbase, method (*RowOp) FillVDLTarget(vdl.Target, *vdl.Type) error
 pkg syncbase, method (*RowOp) MakeVDLTarget() vdl.Target
 pkg syncbase, method (*RowOpTarget) FinishField(vdl.Target, vdl.Target) error
 pkg syncbase, method (*RowOpTarget) FinishFields(vdl.FieldsTarget) error
-pkg syncbase, method (*RowOpTarget) FromZero(*vdl.Type) error
 pkg syncbase, method (*RowOpTarget) StartField(string) (vdl.Target, vdl.Target, error)
 pkg syncbase, method (*RowOpTarget) StartFields(*vdl.Type) (vdl.FieldsTarget, error)
+pkg syncbase, method (*RowOpTarget) ZeroField(string) error
 pkg syncbase, method (*ScanOp) FillVDLTarget(vdl.Target, *vdl.Type) error
 pkg syncbase, method (*ScanOp) MakeVDLTarget() vdl.Target
 pkg syncbase, method (*ScanOpTarget) FinishField(vdl.Target, vdl.Target) error
 pkg syncbase, method (*ScanOpTarget) FinishFields(vdl.FieldsTarget) error
-pkg syncbase, method (*ScanOpTarget) FromZero(*vdl.Type) error
 pkg syncbase, method (*ScanOpTarget) StartField(string) (vdl.Target, vdl.Target, error)
 pkg syncbase, method (*ScanOpTarget) StartFields(*vdl.Type) (vdl.FieldsTarget, error)
+pkg syncbase, method (*ScanOpTarget) ZeroField(string) error
 pkg syncbase, method (*SchemaMetadata) FillVDLTarget(vdl.Target, *vdl.Type) error
 pkg syncbase, method (*SchemaMetadata) MakeVDLTarget() vdl.Target
 pkg syncbase, method (*SchemaMetadataTarget) FinishField(vdl.Target, vdl.Target) error
 pkg syncbase, method (*SchemaMetadataTarget) FinishFields(vdl.FieldsTarget) error
-pkg syncbase, method (*SchemaMetadataTarget) FromZero(*vdl.Type) error
 pkg syncbase, method (*SchemaMetadataTarget) StartField(string) (vdl.Target, vdl.Target, error)
 pkg syncbase, method (*SchemaMetadataTarget) StartFields(*vdl.Type) (vdl.FieldsTarget, error)
+pkg syncbase, method (*SchemaMetadataTarget) ZeroField(string) error
 pkg syncbase, method (*StoreChange) FillVDLTarget(vdl.Target, *vdl.Type) error
 pkg syncbase, method (*StoreChange) MakeVDLTarget() vdl.Target
 pkg syncbase, method (*StoreChangeTarget) FinishField(vdl.Target, vdl.Target) error
 pkg syncbase, method (*StoreChangeTarget) FinishFields(vdl.FieldsTarget) error
-pkg syncbase, method (*StoreChangeTarget) FromZero(*vdl.Type) error
 pkg syncbase, method (*StoreChangeTarget) StartField(string) (vdl.Target, vdl.Target, error)
 pkg syncbase, method (*StoreChangeTarget) StartFields(*vdl.Type) (vdl.FieldsTarget, error)
+pkg syncbase, method (*StoreChangeTarget) ZeroField(string) error
 pkg syncbase, method (*SyncgroupMemberInfo) FillVDLTarget(vdl.Target, *vdl.Type) error
 pkg syncbase, method (*SyncgroupMemberInfo) MakeVDLTarget() vdl.Target
 pkg syncbase, method (*SyncgroupMemberInfoTarget) FinishField(vdl.Target, vdl.Target) error
 pkg syncbase, method (*SyncgroupMemberInfoTarget) FinishFields(vdl.FieldsTarget) error
-pkg syncbase, method (*SyncgroupMemberInfoTarget) FromZero(*vdl.Type) error
 pkg syncbase, method (*SyncgroupMemberInfoTarget) StartField(string) (vdl.Target, vdl.Target, error)
 pkg syncbase, method (*SyncgroupMemberInfoTarget) StartFields(*vdl.Type) (vdl.FieldsTarget, error)
+pkg syncbase, method (*SyncgroupMemberInfoTarget) ZeroField(string) error
 pkg syncbase, method (*SyncgroupSpec) FillVDLTarget(vdl.Target, *vdl.Type) error
 pkg syncbase, method (*SyncgroupSpec) MakeVDLTarget() vdl.Target
 pkg syncbase, method (*SyncgroupSpecTarget) FinishField(vdl.Target, vdl.Target) error
 pkg syncbase, method (*SyncgroupSpecTarget) FinishFields(vdl.FieldsTarget) error
-pkg syncbase, method (*SyncgroupSpecTarget) FromZero(*vdl.Type) error
 pkg syncbase, method (*SyncgroupSpecTarget) StartField(string) (vdl.Target, vdl.Target, error)
 pkg syncbase, method (*SyncgroupSpecTarget) StartFields(*vdl.Type) (vdl.FieldsTarget, error)
+pkg syncbase, method (*SyncgroupSpecTarget) ZeroField(string) error
 pkg syncbase, method (*Value) FillVDLTarget(vdl.Target, *vdl.Type) error
 pkg syncbase, method (*Value) MakeVDLTarget() vdl.Target
 pkg syncbase, method (*ValueSelection) FillVDLTarget(vdl.Target, *vdl.Type) error
 pkg syncbase, method (*ValueSelection) MakeVDLTarget() vdl.Target
 pkg syncbase, method (*ValueSelection) Set(string) error
 pkg syncbase, method (*ValueSelectionTarget) FromEnumLabel(string, *vdl.Type) error
-pkg syncbase, method (*ValueSelectionTarget) FromZero(*vdl.Type) error
 pkg syncbase, method (*ValueState) FillVDLTarget(vdl.Target, *vdl.Type) error
 pkg syncbase, method (*ValueState) MakeVDLTarget() vdl.Target
 pkg syncbase, method (*ValueState) Set(string) error
 pkg syncbase, method (*ValueStateTarget) FromEnumLabel(string, *vdl.Type) error
-pkg syncbase, method (*ValueStateTarget) FromZero(*vdl.Type) error
 pkg syncbase, method (*ValueTarget) FinishField(vdl.Target, vdl.Target) error
 pkg syncbase, method (*ValueTarget) FinishFields(vdl.FieldsTarget) error
-pkg syncbase, method (*ValueTarget) FromZero(*vdl.Type) error
 pkg syncbase, method (*ValueTarget) StartField(string) (vdl.Target, vdl.Target, error)
 pkg syncbase, method (*ValueTarget) StartFields(*vdl.Type) (vdl.FieldsTarget, error)
+pkg syncbase, method (*ValueTarget) ZeroField(string) error
 pkg syncbase, method (BatchSource) String() string
 pkg syncbase, method (BlobFetchState) String() string
 pkg syncbase, method (ConflictDataBatch) FillVDLTarget(vdl.Target, *vdl.Type) error

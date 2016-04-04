@@ -6,16 +6,16 @@ pkg math, method (*Complex128) FillVDLTarget(vdl.Target, *vdl.Type) error
 pkg math, method (*Complex128) MakeVDLTarget() vdl.Target
 pkg math, method (*Complex128Target) FinishField(vdl.Target, vdl.Target) error
 pkg math, method (*Complex128Target) FinishFields(vdl.FieldsTarget) error
-pkg math, method (*Complex128Target) FromZero(*vdl.Type) error
 pkg math, method (*Complex128Target) StartField(string) (vdl.Target, vdl.Target, error)
 pkg math, method (*Complex128Target) StartFields(*vdl.Type) (vdl.FieldsTarget, error)
+pkg math, method (*Complex128Target) ZeroField(string) error
 pkg math, method (*Complex64) FillVDLTarget(vdl.Target, *vdl.Type) error
 pkg math, method (*Complex64) MakeVDLTarget() vdl.Target
 pkg math, method (*Complex64Target) FinishField(vdl.Target, vdl.Target) error
 pkg math, method (*Complex64Target) FinishFields(vdl.FieldsTarget) error
-pkg math, method (*Complex64Target) FromZero(*vdl.Type) error
 pkg math, method (*Complex64Target) StartField(string) (vdl.Target, vdl.Target, error)
 pkg math, method (*Complex64Target) StartFields(*vdl.Type) (vdl.FieldsTarget, error)
+pkg math, method (*Complex64Target) ZeroField(string) error
 pkg math, type Complex128 struct
 pkg math, type Complex128 struct, Imag float64
 pkg math, type Complex128 struct, Real float64

@@ -4,24 +4,23 @@ pkg application, method (*Envelope) MakeVDLTarget() vdl.Target
 pkg application, method (*Envelope) UnmarshalJSON([]byte) error
 pkg application, method (*EnvelopeTarget) FinishField(vdl.Target, vdl.Target) error
 pkg application, method (*EnvelopeTarget) FinishFields(vdl.FieldsTarget) error
-pkg application, method (*EnvelopeTarget) FromZero(*vdl.Type) error
 pkg application, method (*EnvelopeTarget) StartField(string) (vdl.Target, vdl.Target, error)
 pkg application, method (*EnvelopeTarget) StartFields(*vdl.Type) (vdl.FieldsTarget, error)
+pkg application, method (*EnvelopeTarget) ZeroField(string) error
 pkg application, method (*Packages) FillVDLTarget(vdl.Target, *vdl.Type) error
 pkg application, method (*Packages) MakeVDLTarget() vdl.Target
 pkg application, method (*PackagesTarget) FinishField(vdl.Target, vdl.Target) error
 pkg application, method (*PackagesTarget) FinishKeyStartField(vdl.Target) (vdl.Target, error)
 pkg application, method (*PackagesTarget) FinishMap(vdl.MapTarget) error
-pkg application, method (*PackagesTarget) FromZero(*vdl.Type) error
 pkg application, method (*PackagesTarget) StartKey() (vdl.Target, error)
 pkg application, method (*PackagesTarget) StartMap(*vdl.Type, int) (vdl.MapTarget, error)
 pkg application, method (*SignedFile) FillVDLTarget(vdl.Target, *vdl.Type) error
 pkg application, method (*SignedFile) MakeVDLTarget() vdl.Target
 pkg application, method (*SignedFileTarget) FinishField(vdl.Target, vdl.Target) error
 pkg application, method (*SignedFileTarget) FinishFields(vdl.FieldsTarget) error
-pkg application, method (*SignedFileTarget) FromZero(*vdl.Type) error
 pkg application, method (*SignedFileTarget) StartField(string) (vdl.Target, vdl.Target, error)
 pkg application, method (*SignedFileTarget) StartFields(*vdl.Type) (vdl.FieldsTarget, error)
+pkg application, method (*SignedFileTarget) ZeroField(string) error
 pkg application, method (Envelope) MarshalJSON() ([]byte, error)
 pkg application, type Envelope struct
 pkg application, type Envelope struct, Args []string

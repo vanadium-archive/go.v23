@@ -63,10 +63,6 @@ func (t *BlessingPatternChunkTarget) FromString(src string, tt *vdl.Type) error 
 
 	return nil
 }
-func (t *BlessingPatternChunkTarget) FromZero(tt *vdl.Type) error {
-	*t.Value = BlessingPatternChunk("")
-	return nil
-}
 
 type GetRequest struct {
 }
@@ -113,12 +109,14 @@ func (t *GetRequestTarget) StartField(name string) (key, field vdl.Target, _ err
 func (t *GetRequestTarget) FinishField(_, _ vdl.Target) error {
 	return nil
 }
+func (t *GetRequestTarget) ZeroField(name string) error {
+	switch name {
+	default:
+		return fmt.Errorf("field %s not in struct v.io/v23/services/groups.GetRequest", name)
+	}
+}
 func (t *GetRequestTarget) FinishFields(_ vdl.FieldsTarget) error {
 
-	return nil
-}
-func (t *GetRequestTarget) FromZero(tt *vdl.Type) error {
-	*t.Value = GetRequest{}
 	return nil
 }
 
@@ -136,21 +134,20 @@ func (m *GetResponse) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 	if err != nil {
 		return err
 	}
-	keyTarget2, fieldTarget3, err := fieldsTarget1.StartField("Entries")
-	if err != vdl.ErrFieldNoExist && err != nil {
-		return err
+	var var4 bool
+	if len(m.Entries) == 0 {
+		var4 = true
 	}
-	if err != vdl.ErrFieldNoExist {
-
-		var var4 bool
-		if len(m.Entries) == 0 {
-			var4 = true
+	if var4 {
+		if err := fieldsTarget1.ZeroField("Entries"); err != nil && err != vdl.ErrFieldNoExist {
+			return err
 		}
-		if var4 {
-			if err := fieldTarget3.FromZero(tt.NonOptional().Field(0).Type); err != nil {
+	} else {
+		keyTarget2, fieldTarget3, err := fieldsTarget1.StartField("Entries")
+		if err != vdl.ErrFieldNoExist {
+			if err != nil {
 				return err
 			}
-		} else {
 
 			setTarget5, err := fieldTarget3.StartSet(tt.NonOptional().Field(0).Type, len(m.Entries))
 			if err != nil {
@@ -172,9 +169,9 @@ func (m *GetResponse) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 			if err := fieldTarget3.FinishSet(setTarget5); err != nil {
 				return err
 			}
-		}
-		if err := fieldsTarget1.FinishField(keyTarget2, fieldTarget3); err != nil {
-			return err
+			if err := fieldsTarget1.FinishField(keyTarget2, fieldTarget3); err != nil {
+				return err
+			}
 		}
 	}
 	if err := t.FinishFields(fieldsTarget1); err != nil {
@@ -214,12 +211,17 @@ func (t *GetResponseTarget) StartField(name string) (key, field vdl.Target, _ er
 func (t *GetResponseTarget) FinishField(_, _ vdl.Target) error {
 	return nil
 }
+func (t *GetResponseTarget) ZeroField(name string) error {
+	switch name {
+	case "Entries":
+		t.Value.Entries = map[BlessingPatternChunk]struct{}(nil)
+		return nil
+	default:
+		return fmt.Errorf("field %s not in struct v.io/v23/services/groups.GetResponse", name)
+	}
+}
 func (t *GetResponseTarget) FinishFields(_ vdl.FieldsTarget) error {
 
-	return nil
-}
-func (t *GetResponseTarget) FromZero(tt *vdl.Type) error {
-	*t.Value = GetResponse{}
 	return nil
 }
 
@@ -255,10 +257,6 @@ func (t *__VDLTarget1_set) FinishSet(list vdl.SetTarget) error {
 		*t.Value = nil
 	}
 
-	return nil
-}
-func (t *__VDLTarget1_set) FromZero(tt *vdl.Type) error {
-	*t.Value = map[BlessingPatternChunk]struct{}(nil)
 	return nil
 }
 
@@ -346,10 +344,6 @@ func (t *ApproximationTypeTarget) FromEnumLabel(src string, tt *vdl.Type) error 
 
 	return nil
 }
-func (t *ApproximationTypeTarget) FromZero(tt *vdl.Type) error {
-	*t.Value = ApproximationTypeUnder
-	return nil
-}
 
 // Approximation contains information about membership approximations made
 // during a Relate call.
@@ -368,44 +362,42 @@ func (m *Approximation) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 	if err != nil {
 		return err
 	}
-	keyTarget2, fieldTarget3, err := fieldsTarget1.StartField("Reason")
-	if err != vdl.ErrFieldNoExist && err != nil {
-		return err
-	}
-	if err != vdl.ErrFieldNoExist {
-
-		var4 := (m.Reason == "")
-		if var4 {
-			if err := fieldTarget3.FromZero(tt.NonOptional().Field(0).Type); err != nil {
+	var4 := (m.Reason == "")
+	if var4 {
+		if err := fieldsTarget1.ZeroField("Reason"); err != nil && err != vdl.ErrFieldNoExist {
+			return err
+		}
+	} else {
+		keyTarget2, fieldTarget3, err := fieldsTarget1.StartField("Reason")
+		if err != vdl.ErrFieldNoExist {
+			if err != nil {
 				return err
 			}
-		} else {
 			if err := fieldTarget3.FromString(string(m.Reason), tt.NonOptional().Field(0).Type); err != nil {
 				return err
 			}
-		}
-		if err := fieldsTarget1.FinishField(keyTarget2, fieldTarget3); err != nil {
-			return err
-		}
-	}
-	keyTarget5, fieldTarget6, err := fieldsTarget1.StartField("Details")
-	if err != vdl.ErrFieldNoExist && err != nil {
-		return err
-	}
-	if err != vdl.ErrFieldNoExist {
-
-		var7 := (m.Details == "")
-		if var7 {
-			if err := fieldTarget6.FromZero(tt.NonOptional().Field(1).Type); err != nil {
+			if err := fieldsTarget1.FinishField(keyTarget2, fieldTarget3); err != nil {
 				return err
 			}
-		} else {
+		}
+	}
+	var7 := (m.Details == "")
+	if var7 {
+		if err := fieldsTarget1.ZeroField("Details"); err != nil && err != vdl.ErrFieldNoExist {
+			return err
+		}
+	} else {
+		keyTarget5, fieldTarget6, err := fieldsTarget1.StartField("Details")
+		if err != vdl.ErrFieldNoExist {
+			if err != nil {
+				return err
+			}
 			if err := fieldTarget6.FromString(string(m.Details), tt.NonOptional().Field(1).Type); err != nil {
 				return err
 			}
-		}
-		if err := fieldsTarget1.FinishField(keyTarget5, fieldTarget6); err != nil {
-			return err
+			if err := fieldsTarget1.FinishField(keyTarget5, fieldTarget6); err != nil {
+				return err
+			}
 		}
 	}
 	if err := t.FinishFields(fieldsTarget1); err != nil {
@@ -450,12 +442,20 @@ func (t *ApproximationTarget) StartField(name string) (key, field vdl.Target, _ 
 func (t *ApproximationTarget) FinishField(_, _ vdl.Target) error {
 	return nil
 }
+func (t *ApproximationTarget) ZeroField(name string) error {
+	switch name {
+	case "Reason":
+		t.Value.Reason = ""
+		return nil
+	case "Details":
+		t.Value.Details = ""
+		return nil
+	default:
+		return fmt.Errorf("field %s not in struct v.io/v23/services/groups.Approximation", name)
+	}
+}
 func (t *ApproximationTarget) FinishFields(_ vdl.FieldsTarget) error {
 
-	return nil
-}
-func (t *ApproximationTarget) FromZero(tt *vdl.Type) error {
-	*t.Value = Approximation{}
 	return nil
 }
 

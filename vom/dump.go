@@ -554,7 +554,7 @@ func (d *dumpWorker) decodeValue(tt *vdl.Type, target vdl.Target) error {
 		case ctrl == WireCtrlNil:
 			d.buf.Skip(1)
 			d.writeAtom(DumpKindControl, PrimitivePControl{ControlKindNil}, "%v is nil", ttFrom)
-			return target.FromZero(ttFrom)
+			return target.FromNil(ttFrom)
 		}
 		tt = tt.Elem()
 	}
@@ -835,7 +835,7 @@ func (d *dumpWorker) decodeValue(tt *vdl.Type, target vdl.Target) error {
 			return err
 		case ctrl == WireCtrlNil:
 			d.writeAtom(DumpKindControl, PrimitivePControl{ControlKindNil}, "any(nil)")
-			return target.FromZero(vdl.AnyType)
+			return target.FromNil(vdl.AnyType)
 		case ctrl != 0:
 			return verror.New(errUnexpectedControlByte, nil, ctrl)
 		default:

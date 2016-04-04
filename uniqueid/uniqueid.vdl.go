@@ -50,10 +50,6 @@ func (t *IdTarget) FromBytes(src []byte, tt *vdl.Type) error {
 
 	return nil
 }
-func (t *IdTarget) FromZero(tt *vdl.Type) error {
-	*t.Value = Id{}
-	return nil
-}
 
 var __VDLInitCalled bool
 

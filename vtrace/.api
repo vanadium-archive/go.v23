@@ -16,43 +16,42 @@ pkg vtrace, method (*Annotation) FillVDLTarget(vdl.Target, *vdl.Type) error
 pkg vtrace, method (*Annotation) MakeVDLTarget() vdl.Target
 pkg vtrace, method (*AnnotationTarget) FinishField(vdl.Target, vdl.Target) error
 pkg vtrace, method (*AnnotationTarget) FinishFields(vdl.FieldsTarget) error
-pkg vtrace, method (*AnnotationTarget) FromZero(*vdl.Type) error
 pkg vtrace, method (*AnnotationTarget) StartField(string) (vdl.Target, vdl.Target, error)
 pkg vtrace, method (*AnnotationTarget) StartFields(*vdl.Type) (vdl.FieldsTarget, error)
+pkg vtrace, method (*AnnotationTarget) ZeroField(string) error
 pkg vtrace, method (*Request) FillVDLTarget(vdl.Target, *vdl.Type) error
 pkg vtrace, method (*Request) MakeVDLTarget() vdl.Target
 pkg vtrace, method (*RequestTarget) FinishField(vdl.Target, vdl.Target) error
 pkg vtrace, method (*RequestTarget) FinishFields(vdl.FieldsTarget) error
-pkg vtrace, method (*RequestTarget) FromZero(*vdl.Type) error
 pkg vtrace, method (*RequestTarget) StartField(string) (vdl.Target, vdl.Target, error)
 pkg vtrace, method (*RequestTarget) StartFields(*vdl.Type) (vdl.FieldsTarget, error)
+pkg vtrace, method (*RequestTarget) ZeroField(string) error
 pkg vtrace, method (*Response) FillVDLTarget(vdl.Target, *vdl.Type) error
 pkg vtrace, method (*Response) MakeVDLTarget() vdl.Target
 pkg vtrace, method (*ResponseTarget) FinishField(vdl.Target, vdl.Target) error
 pkg vtrace, method (*ResponseTarget) FinishFields(vdl.FieldsTarget) error
-pkg vtrace, method (*ResponseTarget) FromZero(*vdl.Type) error
 pkg vtrace, method (*ResponseTarget) StartField(string) (vdl.Target, vdl.Target, error)
 pkg vtrace, method (*ResponseTarget) StartFields(*vdl.Type) (vdl.FieldsTarget, error)
+pkg vtrace, method (*ResponseTarget) ZeroField(string) error
 pkg vtrace, method (*SpanRecord) FillVDLTarget(vdl.Target, *vdl.Type) error
 pkg vtrace, method (*SpanRecord) MakeVDLTarget() vdl.Target
 pkg vtrace, method (*SpanRecordTarget) FinishField(vdl.Target, vdl.Target) error
 pkg vtrace, method (*SpanRecordTarget) FinishFields(vdl.FieldsTarget) error
-pkg vtrace, method (*SpanRecordTarget) FromZero(*vdl.Type) error
 pkg vtrace, method (*SpanRecordTarget) StartField(string) (vdl.Target, vdl.Target, error)
 pkg vtrace, method (*SpanRecordTarget) StartFields(*vdl.Type) (vdl.FieldsTarget, error)
+pkg vtrace, method (*SpanRecordTarget) ZeroField(string) error
 pkg vtrace, method (*TraceFlags) FillVDLTarget(vdl.Target, *vdl.Type) error
 pkg vtrace, method (*TraceFlags) MakeVDLTarget() vdl.Target
 pkg vtrace, method (*TraceFlagsTarget) FromFloat(float64, *vdl.Type) error
 pkg vtrace, method (*TraceFlagsTarget) FromInt(int64, *vdl.Type) error
 pkg vtrace, method (*TraceFlagsTarget) FromUint(uint64, *vdl.Type) error
-pkg vtrace, method (*TraceFlagsTarget) FromZero(*vdl.Type) error
 pkg vtrace, method (*TraceRecord) FillVDLTarget(vdl.Target, *vdl.Type) error
 pkg vtrace, method (*TraceRecord) MakeVDLTarget() vdl.Target
 pkg vtrace, method (*TraceRecordTarget) FinishField(vdl.Target, vdl.Target) error
 pkg vtrace, method (*TraceRecordTarget) FinishFields(vdl.FieldsTarget) error
-pkg vtrace, method (*TraceRecordTarget) FromZero(*vdl.Type) error
 pkg vtrace, method (*TraceRecordTarget) StartField(string) (vdl.Target, vdl.Target, error)
 pkg vtrace, method (*TraceRecordTarget) StartFields(*vdl.Type) (vdl.FieldsTarget, error)
+pkg vtrace, method (*TraceRecordTarget) ZeroField(string) error
 pkg vtrace, type Annotation struct
 pkg vtrace, type Annotation struct, Message string
 pkg vtrace, type Annotation struct, When time.Time

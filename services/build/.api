@@ -18,7 +18,6 @@ pkg build, method (*Architecture) MakeVDLTarget() vdl.Target
 pkg build, method (*Architecture) Set(string) error
 pkg build, method (*Architecture) SetFromGoArch(string) error
 pkg build, method (*ArchitectureTarget) FromEnumLabel(string, *vdl.Type) error
-pkg build, method (*ArchitectureTarget) FromZero(*vdl.Type) error
 pkg build, method (*BuilderBuildServerCallStub) Init(rpc.StreamServerCall)
 pkg build, method (*BuilderBuildServerCallStub) RecvStream() interface {  Advance() bool; Value() File; Err() error;}
 pkg build, method (*BuilderBuildServerCallStub) SendStream() interface {  Send(item File) error;}
@@ -26,20 +25,18 @@ pkg build, method (*File) FillVDLTarget(vdl.Target, *vdl.Type) error
 pkg build, method (*File) MakeVDLTarget() vdl.Target
 pkg build, method (*FileTarget) FinishField(vdl.Target, vdl.Target) error
 pkg build, method (*FileTarget) FinishFields(vdl.FieldsTarget) error
-pkg build, method (*FileTarget) FromZero(*vdl.Type) error
 pkg build, method (*FileTarget) StartField(string) (vdl.Target, vdl.Target, error)
 pkg build, method (*FileTarget) StartFields(*vdl.Type) (vdl.FieldsTarget, error)
+pkg build, method (*FileTarget) ZeroField(string) error
 pkg build, method (*Format) FillVDLTarget(vdl.Target, *vdl.Type) error
 pkg build, method (*Format) MakeVDLTarget() vdl.Target
 pkg build, method (*Format) Set(string) error
 pkg build, method (*FormatTarget) FromEnumLabel(string, *vdl.Type) error
-pkg build, method (*FormatTarget) FromZero(*vdl.Type) error
 pkg build, method (*OperatingSystem) FillVDLTarget(vdl.Target, *vdl.Type) error
 pkg build, method (*OperatingSystem) MakeVDLTarget() vdl.Target
 pkg build, method (*OperatingSystem) Set(string) error
 pkg build, method (*OperatingSystem) SetFromGoOS(string) error
 pkg build, method (*OperatingSystemTarget) FromEnumLabel(string, *vdl.Type) error
-pkg build, method (*OperatingSystemTarget) FromZero(*vdl.Type) error
 pkg build, method (Architecture) String() string
 pkg build, method (Architecture) ToGoArch() string
 pkg build, method (Format) String() string

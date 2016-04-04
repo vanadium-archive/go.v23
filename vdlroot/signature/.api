@@ -11,31 +11,31 @@ pkg signature, method (*Arg) FillVDLTarget(vdl.Target, *vdl.Type) error
 pkg signature, method (*Arg) MakeVDLTarget() vdl.Target
 pkg signature, method (*ArgTarget) FinishField(vdl.Target, vdl.Target) error
 pkg signature, method (*ArgTarget) FinishFields(vdl.FieldsTarget) error
-pkg signature, method (*ArgTarget) FromZero(*vdl.Type) error
 pkg signature, method (*ArgTarget) StartField(string) (vdl.Target, vdl.Target, error)
 pkg signature, method (*ArgTarget) StartFields(*vdl.Type) (vdl.FieldsTarget, error)
+pkg signature, method (*ArgTarget) ZeroField(string) error
 pkg signature, method (*Embed) FillVDLTarget(vdl.Target, *vdl.Type) error
 pkg signature, method (*Embed) MakeVDLTarget() vdl.Target
 pkg signature, method (*EmbedTarget) FinishField(vdl.Target, vdl.Target) error
 pkg signature, method (*EmbedTarget) FinishFields(vdl.FieldsTarget) error
-pkg signature, method (*EmbedTarget) FromZero(*vdl.Type) error
 pkg signature, method (*EmbedTarget) StartField(string) (vdl.Target, vdl.Target, error)
 pkg signature, method (*EmbedTarget) StartFields(*vdl.Type) (vdl.FieldsTarget, error)
+pkg signature, method (*EmbedTarget) ZeroField(string) error
 pkg signature, method (*Interface) FillVDLTarget(vdl.Target, *vdl.Type) error
 pkg signature, method (*Interface) FindMethod(string) (Method, bool)
 pkg signature, method (*Interface) MakeVDLTarget() vdl.Target
 pkg signature, method (*InterfaceTarget) FinishField(vdl.Target, vdl.Target) error
 pkg signature, method (*InterfaceTarget) FinishFields(vdl.FieldsTarget) error
-pkg signature, method (*InterfaceTarget) FromZero(*vdl.Type) error
 pkg signature, method (*InterfaceTarget) StartField(string) (vdl.Target, vdl.Target, error)
 pkg signature, method (*InterfaceTarget) StartFields(*vdl.Type) (vdl.FieldsTarget, error)
+pkg signature, method (*InterfaceTarget) ZeroField(string) error
 pkg signature, method (*Method) FillVDLTarget(vdl.Target, *vdl.Type) error
 pkg signature, method (*Method) MakeVDLTarget() vdl.Target
 pkg signature, method (*MethodTarget) FinishField(vdl.Target, vdl.Target) error
 pkg signature, method (*MethodTarget) FinishFields(vdl.FieldsTarget) error
-pkg signature, method (*MethodTarget) FromZero(*vdl.Type) error
 pkg signature, method (*MethodTarget) StartField(string) (vdl.Target, vdl.Target, error)
 pkg signature, method (*MethodTarget) StartFields(*vdl.Type) (vdl.FieldsTarget, error)
+pkg signature, method (*MethodTarget) ZeroField(string) error
 pkg signature, method (SortableMethods) Len() int
 pkg signature, method (SortableMethods) Less(int, int) bool
 pkg signature, method (SortableMethods) Swap(int, int)

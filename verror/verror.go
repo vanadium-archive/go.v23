@@ -653,7 +653,7 @@ type ErrorTarget struct {
 	vdl.FieldsTargetBase
 }
 
-func (t *ErrorTarget) FromZero(tt *vdl.Type) error {
+func (t *ErrorTarget) FromNil(tt *vdl.Type) error {
 	if !vdl.Compatible(tt, vdl.ErrorType) {
 		return fmt.Errorf("Type %v incompatible with expected type %v", tt, vdl.ErrorType)
 	}

@@ -111,10 +111,6 @@ func (t *ArchitectureTarget) FromEnumLabel(src string, tt *vdl.Type) error {
 
 	return nil
 }
-func (t *ArchitectureTarget) FromZero(tt *vdl.Type) error {
-	*t.Value = ArchitectureAmd64
-	return nil
-}
 
 // Format specifies the file format of a host.
 type Format int
@@ -202,10 +198,6 @@ func (t *FormatTarget) FromEnumLabel(src string, tt *vdl.Type) error {
 		return fmt.Errorf("label %s not in enum Format", src)
 	}
 
-	return nil
-}
-func (t *FormatTarget) FromZero(tt *vdl.Type) error {
-	*t.Value = FormatElf
 	return nil
 }
 
@@ -305,10 +297,6 @@ func (t *OperatingSystemTarget) FromEnumLabel(src string, tt *vdl.Type) error {
 
 	return nil
 }
-func (t *OperatingSystemTarget) FromZero(tt *vdl.Type) error {
-	*t.Value = OperatingSystemDarwin
-	return nil
-}
 
 // File records the name and contents of a file.
 type File struct {
@@ -326,48 +314,46 @@ func (m *File) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 	if err != nil {
 		return err
 	}
-	keyTarget2, fieldTarget3, err := fieldsTarget1.StartField("Name")
-	if err != vdl.ErrFieldNoExist && err != nil {
-		return err
-	}
-	if err != vdl.ErrFieldNoExist {
-
-		var4 := (m.Name == "")
-		if var4 {
-			if err := fieldTarget3.FromZero(tt.NonOptional().Field(0).Type); err != nil {
+	var4 := (m.Name == "")
+	if var4 {
+		if err := fieldsTarget1.ZeroField("Name"); err != nil && err != vdl.ErrFieldNoExist {
+			return err
+		}
+	} else {
+		keyTarget2, fieldTarget3, err := fieldsTarget1.StartField("Name")
+		if err != vdl.ErrFieldNoExist {
+			if err != nil {
 				return err
 			}
-		} else {
 			if err := fieldTarget3.FromString(string(m.Name), tt.NonOptional().Field(0).Type); err != nil {
 				return err
 			}
-		}
-		if err := fieldsTarget1.FinishField(keyTarget2, fieldTarget3); err != nil {
-			return err
-		}
-	}
-	keyTarget5, fieldTarget6, err := fieldsTarget1.StartField("Contents")
-	if err != vdl.ErrFieldNoExist && err != nil {
-		return err
-	}
-	if err != vdl.ErrFieldNoExist {
-
-		var var7 bool
-		if len(m.Contents) == 0 {
-			var7 = true
-		}
-		if var7 {
-			if err := fieldTarget6.FromZero(tt.NonOptional().Field(1).Type); err != nil {
+			if err := fieldsTarget1.FinishField(keyTarget2, fieldTarget3); err != nil {
 				return err
 			}
-		} else {
+		}
+	}
+	var var7 bool
+	if len(m.Contents) == 0 {
+		var7 = true
+	}
+	if var7 {
+		if err := fieldsTarget1.ZeroField("Contents"); err != nil && err != vdl.ErrFieldNoExist {
+			return err
+		}
+	} else {
+		keyTarget5, fieldTarget6, err := fieldsTarget1.StartField("Contents")
+		if err != vdl.ErrFieldNoExist {
+			if err != nil {
+				return err
+			}
 
 			if err := fieldTarget6.FromBytes([]byte(m.Contents), tt.NonOptional().Field(1).Type); err != nil {
 				return err
 			}
-		}
-		if err := fieldsTarget1.FinishField(keyTarget5, fieldTarget6); err != nil {
-			return err
+			if err := fieldsTarget1.FinishField(keyTarget5, fieldTarget6); err != nil {
+				return err
+			}
 		}
 	}
 	if err := t.FinishFields(fieldsTarget1); err != nil {
@@ -412,12 +398,20 @@ func (t *FileTarget) StartField(name string) (key, field vdl.Target, _ error) {
 func (t *FileTarget) FinishField(_, _ vdl.Target) error {
 	return nil
 }
+func (t *FileTarget) ZeroField(name string) error {
+	switch name {
+	case "Name":
+		t.Value.Name = ""
+		return nil
+	case "Contents":
+		t.Value.Contents = []byte(nil)
+		return nil
+	default:
+		return fmt.Errorf("field %s not in struct v.io/v23/services/build.File", name)
+	}
+}
 func (t *FileTarget) FinishFields(_ vdl.FieldsTarget) error {
 
-	return nil
-}
-func (t *FileTarget) FromZero(tt *vdl.Type) error {
-	*t.Value = File{}
 	return nil
 }
 

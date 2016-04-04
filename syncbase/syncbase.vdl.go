@@ -46,49 +46,47 @@ func (m *Value) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 	if err != nil {
 		return err
 	}
-	keyTarget2, fieldTarget3, err := fieldsTarget1.StartField("State")
-	if err != vdl.ErrFieldNoExist && err != nil {
-		return err
-	}
-	if err != vdl.ErrFieldNoExist {
-
-		var4 := (m.State == syncbase.ValueStateExists)
-		if var4 {
-			if err := fieldTarget3.FromZero(tt.NonOptional().Field(0).Type); err != nil {
+	var4 := (m.State == syncbase.ValueStateExists)
+	if var4 {
+		if err := fieldsTarget1.ZeroField("State"); err != nil && err != vdl.ErrFieldNoExist {
+			return err
+		}
+	} else {
+		keyTarget2, fieldTarget3, err := fieldsTarget1.StartField("State")
+		if err != vdl.ErrFieldNoExist {
+			if err != nil {
 				return err
 			}
-		} else {
 
 			if err := m.State.FillVDLTarget(fieldTarget3, tt.NonOptional().Field(0).Type); err != nil {
 				return err
 			}
-		}
-		if err := fieldsTarget1.FinishField(keyTarget2, fieldTarget3); err != nil {
-			return err
-		}
-	}
-	keyTarget5, fieldTarget6, err := fieldsTarget1.StartField("Val")
-	if err != vdl.ErrFieldNoExist && err != nil {
-		return err
-	}
-	if err != vdl.ErrFieldNoExist {
-
-		var var7 bool
-		if len(m.Val) == 0 {
-			var7 = true
-		}
-		if var7 {
-			if err := fieldTarget6.FromZero(tt.NonOptional().Field(1).Type); err != nil {
+			if err := fieldsTarget1.FinishField(keyTarget2, fieldTarget3); err != nil {
 				return err
 			}
-		} else {
+		}
+	}
+	var var7 bool
+	if len(m.Val) == 0 {
+		var7 = true
+	}
+	if var7 {
+		if err := fieldsTarget1.ZeroField("Val"); err != nil && err != vdl.ErrFieldNoExist {
+			return err
+		}
+	} else {
+		keyTarget5, fieldTarget6, err := fieldsTarget1.StartField("Val")
+		if err != vdl.ErrFieldNoExist {
+			if err != nil {
+				return err
+			}
 
 			if err := fieldTarget6.FromBytes([]byte(m.Val), tt.NonOptional().Field(1).Type); err != nil {
 				return err
 			}
-		}
-		if err := fieldsTarget1.FinishField(keyTarget5, fieldTarget6); err != nil {
-			return err
+			if err := fieldsTarget1.FinishField(keyTarget5, fieldTarget6); err != nil {
+				return err
+			}
 		}
 	}
 	var wireValue8 time_2.Time
@@ -96,46 +94,44 @@ func (m *Value) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 		return err
 	}
 
-	keyTarget9, fieldTarget10, err := fieldsTarget1.StartField("WriteTs")
-	if err != vdl.ErrFieldNoExist && err != nil {
-		return err
-	}
-	if err != vdl.ErrFieldNoExist {
-
-		var11 := (wireValue8 == time_2.Time{})
-		if var11 {
-			if err := fieldTarget10.FromZero(tt.NonOptional().Field(2).Type); err != nil {
+	var11 := (wireValue8 == time_2.Time{})
+	if var11 {
+		if err := fieldsTarget1.ZeroField("WriteTs"); err != nil && err != vdl.ErrFieldNoExist {
+			return err
+		}
+	} else {
+		keyTarget9, fieldTarget10, err := fieldsTarget1.StartField("WriteTs")
+		if err != vdl.ErrFieldNoExist {
+			if err != nil {
 				return err
 			}
-		} else {
 
 			if err := wireValue8.FillVDLTarget(fieldTarget10, tt.NonOptional().Field(2).Type); err != nil {
 				return err
 			}
-		}
-		if err := fieldsTarget1.FinishField(keyTarget9, fieldTarget10); err != nil {
-			return err
-		}
-	}
-	keyTarget12, fieldTarget13, err := fieldsTarget1.StartField("Selection")
-	if err != vdl.ErrFieldNoExist && err != nil {
-		return err
-	}
-	if err != vdl.ErrFieldNoExist {
-
-		var14 := (m.Selection == syncbase.ValueSelectionLocal)
-		if var14 {
-			if err := fieldTarget13.FromZero(tt.NonOptional().Field(3).Type); err != nil {
+			if err := fieldsTarget1.FinishField(keyTarget9, fieldTarget10); err != nil {
 				return err
 			}
-		} else {
+		}
+	}
+	var14 := (m.Selection == syncbase.ValueSelectionLocal)
+	if var14 {
+		if err := fieldsTarget1.ZeroField("Selection"); err != nil && err != vdl.ErrFieldNoExist {
+			return err
+		}
+	} else {
+		keyTarget12, fieldTarget13, err := fieldsTarget1.StartField("Selection")
+		if err != vdl.ErrFieldNoExist {
+			if err != nil {
+				return err
+			}
 
 			if err := m.Selection.FillVDLTarget(fieldTarget13, tt.NonOptional().Field(3).Type); err != nil {
 				return err
 			}
-		}
-		if err := fieldsTarget1.FinishField(keyTarget12, fieldTarget13); err != nil {
-			return err
+			if err := fieldsTarget1.FinishField(keyTarget12, fieldTarget13); err != nil {
+				return err
+			}
 		}
 	}
 	if err := t.FinishFields(fieldsTarget1); err != nil {
@@ -190,12 +186,32 @@ func (t *ValueTarget) StartField(name string) (key, field vdl.Target, _ error) {
 func (t *ValueTarget) FinishField(_, _ vdl.Target) error {
 	return nil
 }
+func (t *ValueTarget) ZeroField(name string) error {
+	switch name {
+	case "State":
+		t.Value.State = syncbase.ValueStateExists
+		return nil
+	case "Val":
+		t.Value.Val = []byte(nil)
+		return nil
+	case "WriteTs":
+		t.Value.WriteTs = func() time.Time {
+			var native time.Time
+			if err := vdl.Convert(&native, time_2.Time{}); err != nil {
+				panic(err)
+			}
+			return native
+		}()
+		return nil
+	case "Selection":
+		t.Value.Selection = syncbase.ValueSelectionLocal
+		return nil
+	default:
+		return fmt.Errorf("field %s not in struct v.io/v23/syncbase.Value", name)
+	}
+}
 func (t *ValueTarget) FinishFields(_ vdl.FieldsTarget) error {
 
-	return nil
-}
-func (t *ValueTarget) FromZero(tt *vdl.Type) error {
-	*t.Value = Value{}
 	return nil
 }
 
@@ -225,152 +241,147 @@ func (m *ConflictRow) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 	if err != nil {
 		return err
 	}
-	keyTarget2, fieldTarget3, err := fieldsTarget1.StartField("Key")
-	if err != vdl.ErrFieldNoExist && err != nil {
-		return err
-	}
-	if err != vdl.ErrFieldNoExist {
-
-		var4 := (m.Key == "")
-		if var4 {
-			if err := fieldTarget3.FromZero(tt.NonOptional().Field(0).Type); err != nil {
+	var4 := (m.Key == "")
+	if var4 {
+		if err := fieldsTarget1.ZeroField("Key"); err != nil && err != vdl.ErrFieldNoExist {
+			return err
+		}
+	} else {
+		keyTarget2, fieldTarget3, err := fieldsTarget1.StartField("Key")
+		if err != vdl.ErrFieldNoExist {
+			if err != nil {
 				return err
 			}
-		} else {
 			if err := fieldTarget3.FromString(string(m.Key), tt.NonOptional().Field(0).Type); err != nil {
 				return err
 			}
-		}
-		if err := fieldsTarget1.FinishField(keyTarget2, fieldTarget3); err != nil {
-			return err
-		}
-	}
-	keyTarget5, fieldTarget6, err := fieldsTarget1.StartField("LocalValue")
-	if err != vdl.ErrFieldNoExist && err != nil {
-		return err
-	}
-	if err != vdl.ErrFieldNoExist {
-
-		var7 := true
-		var8 := (m.LocalValue.State == syncbase.ValueStateExists)
-		var7 = var7 && var8
-		var var9 bool
-		if len(m.LocalValue.Val) == 0 {
-			var9 = true
-		}
-		var7 = var7 && var9
-		var wireValue10 time_2.Time
-		if err := time_2.TimeFromNative(&wireValue10, m.LocalValue.WriteTs); err != nil {
-			return fmt.Errorf("error converting m.LocalValue.WriteTs to wiretype")
-		}
-
-		var11 := (wireValue10 == time_2.Time{})
-		var7 = var7 && var11
-		var12 := (m.LocalValue.Selection == syncbase.ValueSelectionLocal)
-		var7 = var7 && var12
-		if var7 {
-			if err := fieldTarget6.FromZero(tt.NonOptional().Field(1).Type); err != nil {
+			if err := fieldsTarget1.FinishField(keyTarget2, fieldTarget3); err != nil {
 				return err
 			}
-		} else {
+		}
+	}
+	var7 := true
+	var8 := (m.LocalValue.State == syncbase.ValueStateExists)
+	var7 = var7 && var8
+	var var9 bool
+	if len(m.LocalValue.Val) == 0 {
+		var9 = true
+	}
+	var7 = var7 && var9
+	var wireValue10 time_2.Time
+	if err := time_2.TimeFromNative(&wireValue10, m.LocalValue.WriteTs); err != nil {
+		return fmt.Errorf("error converting m.LocalValue.WriteTs to wiretype")
+	}
+
+	var11 := (wireValue10 == time_2.Time{})
+	var7 = var7 && var11
+	var12 := (m.LocalValue.Selection == syncbase.ValueSelectionLocal)
+	var7 = var7 && var12
+	if var7 {
+		if err := fieldsTarget1.ZeroField("LocalValue"); err != nil && err != vdl.ErrFieldNoExist {
+			return err
+		}
+	} else {
+		keyTarget5, fieldTarget6, err := fieldsTarget1.StartField("LocalValue")
+		if err != vdl.ErrFieldNoExist {
+			if err != nil {
+				return err
+			}
 
 			if err := m.LocalValue.FillVDLTarget(fieldTarget6, tt.NonOptional().Field(1).Type); err != nil {
 				return err
 			}
-		}
-		if err := fieldsTarget1.FinishField(keyTarget5, fieldTarget6); err != nil {
-			return err
-		}
-	}
-	keyTarget13, fieldTarget14, err := fieldsTarget1.StartField("RemoteValue")
-	if err != vdl.ErrFieldNoExist && err != nil {
-		return err
-	}
-	if err != vdl.ErrFieldNoExist {
-
-		var15 := true
-		var16 := (m.RemoteValue.State == syncbase.ValueStateExists)
-		var15 = var15 && var16
-		var var17 bool
-		if len(m.RemoteValue.Val) == 0 {
-			var17 = true
-		}
-		var15 = var15 && var17
-		var wireValue18 time_2.Time
-		if err := time_2.TimeFromNative(&wireValue18, m.RemoteValue.WriteTs); err != nil {
-			return fmt.Errorf("error converting m.RemoteValue.WriteTs to wiretype")
-		}
-
-		var19 := (wireValue18 == time_2.Time{})
-		var15 = var15 && var19
-		var20 := (m.RemoteValue.Selection == syncbase.ValueSelectionLocal)
-		var15 = var15 && var20
-		if var15 {
-			if err := fieldTarget14.FromZero(tt.NonOptional().Field(2).Type); err != nil {
+			if err := fieldsTarget1.FinishField(keyTarget5, fieldTarget6); err != nil {
 				return err
 			}
-		} else {
+		}
+	}
+	var15 := true
+	var16 := (m.RemoteValue.State == syncbase.ValueStateExists)
+	var15 = var15 && var16
+	var var17 bool
+	if len(m.RemoteValue.Val) == 0 {
+		var17 = true
+	}
+	var15 = var15 && var17
+	var wireValue18 time_2.Time
+	if err := time_2.TimeFromNative(&wireValue18, m.RemoteValue.WriteTs); err != nil {
+		return fmt.Errorf("error converting m.RemoteValue.WriteTs to wiretype")
+	}
+
+	var19 := (wireValue18 == time_2.Time{})
+	var15 = var15 && var19
+	var20 := (m.RemoteValue.Selection == syncbase.ValueSelectionLocal)
+	var15 = var15 && var20
+	if var15 {
+		if err := fieldsTarget1.ZeroField("RemoteValue"); err != nil && err != vdl.ErrFieldNoExist {
+			return err
+		}
+	} else {
+		keyTarget13, fieldTarget14, err := fieldsTarget1.StartField("RemoteValue")
+		if err != vdl.ErrFieldNoExist {
+			if err != nil {
+				return err
+			}
 
 			if err := m.RemoteValue.FillVDLTarget(fieldTarget14, tt.NonOptional().Field(2).Type); err != nil {
 				return err
 			}
-		}
-		if err := fieldsTarget1.FinishField(keyTarget13, fieldTarget14); err != nil {
-			return err
-		}
-	}
-	keyTarget21, fieldTarget22, err := fieldsTarget1.StartField("AncestorValue")
-	if err != vdl.ErrFieldNoExist && err != nil {
-		return err
-	}
-	if err != vdl.ErrFieldNoExist {
-
-		var23 := true
-		var24 := (m.AncestorValue.State == syncbase.ValueStateExists)
-		var23 = var23 && var24
-		var var25 bool
-		if len(m.AncestorValue.Val) == 0 {
-			var25 = true
-		}
-		var23 = var23 && var25
-		var wireValue26 time_2.Time
-		if err := time_2.TimeFromNative(&wireValue26, m.AncestorValue.WriteTs); err != nil {
-			return fmt.Errorf("error converting m.AncestorValue.WriteTs to wiretype")
-		}
-
-		var27 := (wireValue26 == time_2.Time{})
-		var23 = var23 && var27
-		var28 := (m.AncestorValue.Selection == syncbase.ValueSelectionLocal)
-		var23 = var23 && var28
-		if var23 {
-			if err := fieldTarget22.FromZero(tt.NonOptional().Field(3).Type); err != nil {
+			if err := fieldsTarget1.FinishField(keyTarget13, fieldTarget14); err != nil {
 				return err
 			}
-		} else {
+		}
+	}
+	var23 := true
+	var24 := (m.AncestorValue.State == syncbase.ValueStateExists)
+	var23 = var23 && var24
+	var var25 bool
+	if len(m.AncestorValue.Val) == 0 {
+		var25 = true
+	}
+	var23 = var23 && var25
+	var wireValue26 time_2.Time
+	if err := time_2.TimeFromNative(&wireValue26, m.AncestorValue.WriteTs); err != nil {
+		return fmt.Errorf("error converting m.AncestorValue.WriteTs to wiretype")
+	}
+
+	var27 := (wireValue26 == time_2.Time{})
+	var23 = var23 && var27
+	var28 := (m.AncestorValue.Selection == syncbase.ValueSelectionLocal)
+	var23 = var23 && var28
+	if var23 {
+		if err := fieldsTarget1.ZeroField("AncestorValue"); err != nil && err != vdl.ErrFieldNoExist {
+			return err
+		}
+	} else {
+		keyTarget21, fieldTarget22, err := fieldsTarget1.StartField("AncestorValue")
+		if err != vdl.ErrFieldNoExist {
+			if err != nil {
+				return err
+			}
 
 			if err := m.AncestorValue.FillVDLTarget(fieldTarget22, tt.NonOptional().Field(3).Type); err != nil {
 				return err
 			}
-		}
-		if err := fieldsTarget1.FinishField(keyTarget21, fieldTarget22); err != nil {
-			return err
-		}
-	}
-	keyTarget29, fieldTarget30, err := fieldsTarget1.StartField("BatchIds")
-	if err != vdl.ErrFieldNoExist && err != nil {
-		return err
-	}
-	if err != vdl.ErrFieldNoExist {
-
-		var var31 bool
-		if len(m.BatchIds) == 0 {
-			var31 = true
-		}
-		if var31 {
-			if err := fieldTarget30.FromZero(tt.NonOptional().Field(4).Type); err != nil {
+			if err := fieldsTarget1.FinishField(keyTarget21, fieldTarget22); err != nil {
 				return err
 			}
-		} else {
+		}
+	}
+	var var31 bool
+	if len(m.BatchIds) == 0 {
+		var31 = true
+	}
+	if var31 {
+		if err := fieldsTarget1.ZeroField("BatchIds"); err != nil && err != vdl.ErrFieldNoExist {
+			return err
+		}
+	} else {
+		keyTarget29, fieldTarget30, err := fieldsTarget1.StartField("BatchIds")
+		if err != vdl.ErrFieldNoExist {
+			if err != nil {
+				return err
+			}
 
 			listTarget32, err := fieldTarget30.StartList(tt.NonOptional().Field(4).Type, len(m.BatchIds))
 			if err != nil {
@@ -391,9 +402,9 @@ func (m *ConflictRow) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 			if err := fieldTarget30.FinishList(listTarget32); err != nil {
 				return err
 			}
-		}
-		if err := fieldsTarget1.FinishField(keyTarget29, fieldTarget30); err != nil {
-			return err
+			if err := fieldsTarget1.FinishField(keyTarget29, fieldTarget30); err != nil {
+				return err
+			}
 		}
 	}
 	if err := t.FinishFields(fieldsTarget1); err != nil {
@@ -453,12 +464,29 @@ func (t *ConflictRowTarget) StartField(name string) (key, field vdl.Target, _ er
 func (t *ConflictRowTarget) FinishField(_, _ vdl.Target) error {
 	return nil
 }
+func (t *ConflictRowTarget) ZeroField(name string) error {
+	switch name {
+	case "Key":
+		t.Value.Key = ""
+		return nil
+	case "LocalValue":
+		t.Value.LocalValue = Value{}
+		return nil
+	case "RemoteValue":
+		t.Value.RemoteValue = Value{}
+		return nil
+	case "AncestorValue":
+		t.Value.AncestorValue = Value{}
+		return nil
+	case "BatchIds":
+		t.Value.BatchIds = []uint64(nil)
+		return nil
+	default:
+		return fmt.Errorf("field %s not in struct v.io/v23/syncbase.ConflictRow", name)
+	}
+}
 func (t *ConflictRowTarget) FinishFields(_ vdl.FieldsTarget) error {
 
-	return nil
-}
-func (t *ConflictRowTarget) FromZero(tt *vdl.Type) error {
-	*t.Value = ConflictRow{}
 	return nil
 }
 
@@ -494,10 +522,6 @@ func (t *__VDLTarget1_list) FinishList(elem vdl.ListTarget) error {
 
 	return nil
 }
-func (t *__VDLTarget1_list) FromZero(tt *vdl.Type) error {
-	*t.Value = []uint64(nil)
-	return nil
-}
 
 // ConflictRowSet contains a set of rows under conflict. It provides two different
 // ways to access the same set.
@@ -519,21 +543,20 @@ func (m *ConflictRowSet) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 	if err != nil {
 		return err
 	}
-	keyTarget2, fieldTarget3, err := fieldsTarget1.StartField("ByKey")
-	if err != vdl.ErrFieldNoExist && err != nil {
-		return err
+	var var4 bool
+	if len(m.ByKey) == 0 {
+		var4 = true
 	}
-	if err != vdl.ErrFieldNoExist {
-
-		var var4 bool
-		if len(m.ByKey) == 0 {
-			var4 = true
+	if var4 {
+		if err := fieldsTarget1.ZeroField("ByKey"); err != nil && err != vdl.ErrFieldNoExist {
+			return err
 		}
-		if var4 {
-			if err := fieldTarget3.FromZero(tt.NonOptional().Field(0).Type); err != nil {
+	} else {
+		keyTarget2, fieldTarget3, err := fieldsTarget1.StartField("ByKey")
+		if err != vdl.ErrFieldNoExist {
+			if err != nil {
 				return err
 			}
-		} else {
 
 			mapTarget5, err := fieldTarget3.StartMap(tt.NonOptional().Field(0).Type, len(m.ByKey))
 			if err != nil {
@@ -562,26 +585,25 @@ func (m *ConflictRowSet) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 			if err := fieldTarget3.FinishMap(mapTarget5); err != nil {
 				return err
 			}
-		}
-		if err := fieldsTarget1.FinishField(keyTarget2, fieldTarget3); err != nil {
-			return err
-		}
-	}
-	keyTarget10, fieldTarget11, err := fieldsTarget1.StartField("ByBatch")
-	if err != vdl.ErrFieldNoExist && err != nil {
-		return err
-	}
-	if err != vdl.ErrFieldNoExist {
-
-		var var12 bool
-		if len(m.ByBatch) == 0 {
-			var12 = true
-		}
-		if var12 {
-			if err := fieldTarget11.FromZero(tt.NonOptional().Field(1).Type); err != nil {
+			if err := fieldsTarget1.FinishField(keyTarget2, fieldTarget3); err != nil {
 				return err
 			}
-		} else {
+		}
+	}
+	var var12 bool
+	if len(m.ByBatch) == 0 {
+		var12 = true
+	}
+	if var12 {
+		if err := fieldsTarget1.ZeroField("ByBatch"); err != nil && err != vdl.ErrFieldNoExist {
+			return err
+		}
+	} else {
+		keyTarget10, fieldTarget11, err := fieldsTarget1.StartField("ByBatch")
+		if err != vdl.ErrFieldNoExist {
+			if err != nil {
+				return err
+			}
 
 			mapTarget13, err := fieldTarget11.StartMap(tt.NonOptional().Field(1).Type, len(m.ByBatch))
 			if err != nil {
@@ -627,9 +649,9 @@ func (m *ConflictRowSet) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 			if err := fieldTarget11.FinishMap(mapTarget13); err != nil {
 				return err
 			}
-		}
-		if err := fieldsTarget1.FinishField(keyTarget10, fieldTarget11); err != nil {
-			return err
+			if err := fieldsTarget1.FinishField(keyTarget10, fieldTarget11); err != nil {
+				return err
+			}
 		}
 	}
 	if err := t.FinishFields(fieldsTarget1); err != nil {
@@ -674,12 +696,20 @@ func (t *ConflictRowSetTarget) StartField(name string) (key, field vdl.Target, _
 func (t *ConflictRowSetTarget) FinishField(_, _ vdl.Target) error {
 	return nil
 }
+func (t *ConflictRowSetTarget) ZeroField(name string) error {
+	switch name {
+	case "ByKey":
+		t.Value.ByKey = map[string]ConflictRow(nil)
+		return nil
+	case "ByBatch":
+		t.Value.ByBatch = map[uint64][]ConflictRow(nil)
+		return nil
+	default:
+		return fmt.Errorf("field %s not in struct v.io/v23/syncbase.ConflictRowSet", name)
+	}
+}
 func (t *ConflictRowSetTarget) FinishFields(_ vdl.FieldsTarget) error {
 
-	return nil
-}
-func (t *ConflictRowSetTarget) FromZero(tt *vdl.Type) error {
-	*t.Value = ConflictRowSet{}
 	return nil
 }
 
@@ -725,10 +755,6 @@ func (t *__VDLTarget2_map) FinishMap(elem vdl.MapTarget) error {
 
 	return nil
 }
-func (t *__VDLTarget2_map) FromZero(tt *vdl.Type) error {
-	*t.Value = map[string]ConflictRow(nil)
-	return nil
-}
 
 // map[uint64][]ConflictRow
 type __VDLTarget3_map struct {
@@ -772,10 +798,6 @@ func (t *__VDLTarget3_map) FinishMap(elem vdl.MapTarget) error {
 
 	return nil
 }
-func (t *__VDLTarget3_map) FromZero(tt *vdl.Type) error {
-	*t.Value = map[uint64][]ConflictRow(nil)
-	return nil
-}
 
 // []ConflictRow
 type __VDLTarget4_list struct {
@@ -809,10 +831,6 @@ func (t *__VDLTarget4_list) FinishList(elem vdl.ListTarget) error {
 
 	return nil
 }
-func (t *__VDLTarget4_list) FromZero(tt *vdl.Type) error {
-	*t.Value = []ConflictRow(nil)
-	return nil
-}
 
 // ConflictScanSet contains a set of scans under conflict.
 // ByBatch is a map of array of ScanOps keyed by batch id.
@@ -830,21 +848,20 @@ func (m *ConflictScanSet) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 	if err != nil {
 		return err
 	}
-	keyTarget2, fieldTarget3, err := fieldsTarget1.StartField("ByBatch")
-	if err != vdl.ErrFieldNoExist && err != nil {
-		return err
+	var var4 bool
+	if len(m.ByBatch) == 0 {
+		var4 = true
 	}
-	if err != vdl.ErrFieldNoExist {
-
-		var var4 bool
-		if len(m.ByBatch) == 0 {
-			var4 = true
+	if var4 {
+		if err := fieldsTarget1.ZeroField("ByBatch"); err != nil && err != vdl.ErrFieldNoExist {
+			return err
 		}
-		if var4 {
-			if err := fieldTarget3.FromZero(tt.NonOptional().Field(0).Type); err != nil {
+	} else {
+		keyTarget2, fieldTarget3, err := fieldsTarget1.StartField("ByBatch")
+		if err != vdl.ErrFieldNoExist {
+			if err != nil {
 				return err
 			}
-		} else {
 
 			mapTarget5, err := fieldTarget3.StartMap(tt.NonOptional().Field(0).Type, len(m.ByBatch))
 			if err != nil {
@@ -890,9 +907,9 @@ func (m *ConflictScanSet) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 			if err := fieldTarget3.FinishMap(mapTarget5); err != nil {
 				return err
 			}
-		}
-		if err := fieldsTarget1.FinishField(keyTarget2, fieldTarget3); err != nil {
-			return err
+			if err := fieldsTarget1.FinishField(keyTarget2, fieldTarget3); err != nil {
+				return err
+			}
 		}
 	}
 	if err := t.FinishFields(fieldsTarget1); err != nil {
@@ -932,12 +949,17 @@ func (t *ConflictScanSetTarget) StartField(name string) (key, field vdl.Target, 
 func (t *ConflictScanSetTarget) FinishField(_, _ vdl.Target) error {
 	return nil
 }
+func (t *ConflictScanSetTarget) ZeroField(name string) error {
+	switch name {
+	case "ByBatch":
+		t.Value.ByBatch = map[uint64][]syncbase.ScanOp(nil)
+		return nil
+	default:
+		return fmt.Errorf("field %s not in struct v.io/v23/syncbase.ConflictScanSet", name)
+	}
+}
 func (t *ConflictScanSetTarget) FinishFields(_ vdl.FieldsTarget) error {
 
-	return nil
-}
-func (t *ConflictScanSetTarget) FromZero(tt *vdl.Type) error {
-	*t.Value = ConflictScanSet{}
 	return nil
 }
 
@@ -983,10 +1005,6 @@ func (t *__VDLTarget5_map) FinishMap(elem vdl.MapTarget) error {
 
 	return nil
 }
-func (t *__VDLTarget5_map) FromZero(tt *vdl.Type) error {
-	*t.Value = map[uint64][]syncbase.ScanOp(nil)
-	return nil
-}
 
 // []syncbase.ScanOp
 type __VDLTarget6_list struct {
@@ -1018,10 +1036,6 @@ func (t *__VDLTarget6_list) FinishElem(elem vdl.Target) error {
 }
 func (t *__VDLTarget6_list) FinishList(elem vdl.ListTarget) error {
 
-	return nil
-}
-func (t *__VDLTarget6_list) FromZero(tt *vdl.Type) error {
-	*t.Value = []syncbase.ScanOp(nil)
 	return nil
 }
 
@@ -1056,84 +1070,80 @@ func (m *Conflict) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 	if err != nil {
 		return err
 	}
-	keyTarget2, fieldTarget3, err := fieldsTarget1.StartField("ReadSet")
-	if err != vdl.ErrFieldNoExist && err != nil {
-		return err
-	}
-	if err != vdl.ErrFieldNoExist {
-
-		var4 := (m.ReadSet == (*ConflictRowSet)(nil))
-		if var4 {
-			if err := fieldTarget3.FromZero(tt.NonOptional().Field(0).Type); err != nil {
+	var4 := (m.ReadSet == (*ConflictRowSet)(nil))
+	if var4 {
+		if err := fieldsTarget1.ZeroField("ReadSet"); err != nil && err != vdl.ErrFieldNoExist {
+			return err
+		}
+	} else {
+		keyTarget2, fieldTarget3, err := fieldsTarget1.StartField("ReadSet")
+		if err != vdl.ErrFieldNoExist {
+			if err != nil {
 				return err
 			}
-		} else {
 
 			if err := m.ReadSet.FillVDLTarget(fieldTarget3, tt.NonOptional().Field(0).Type); err != nil {
 				return err
 			}
-		}
-		if err := fieldsTarget1.FinishField(keyTarget2, fieldTarget3); err != nil {
-			return err
-		}
-	}
-	keyTarget5, fieldTarget6, err := fieldsTarget1.StartField("WriteSet")
-	if err != vdl.ErrFieldNoExist && err != nil {
-		return err
-	}
-	if err != vdl.ErrFieldNoExist {
-
-		var7 := (m.WriteSet == (*ConflictRowSet)(nil))
-		if var7 {
-			if err := fieldTarget6.FromZero(tt.NonOptional().Field(1).Type); err != nil {
+			if err := fieldsTarget1.FinishField(keyTarget2, fieldTarget3); err != nil {
 				return err
 			}
-		} else {
+		}
+	}
+	var7 := (m.WriteSet == (*ConflictRowSet)(nil))
+	if var7 {
+		if err := fieldsTarget1.ZeroField("WriteSet"); err != nil && err != vdl.ErrFieldNoExist {
+			return err
+		}
+	} else {
+		keyTarget5, fieldTarget6, err := fieldsTarget1.StartField("WriteSet")
+		if err != vdl.ErrFieldNoExist {
+			if err != nil {
+				return err
+			}
 
 			if err := m.WriteSet.FillVDLTarget(fieldTarget6, tt.NonOptional().Field(1).Type); err != nil {
 				return err
 			}
-		}
-		if err := fieldsTarget1.FinishField(keyTarget5, fieldTarget6); err != nil {
-			return err
-		}
-	}
-	keyTarget8, fieldTarget9, err := fieldsTarget1.StartField("ScanSet")
-	if err != vdl.ErrFieldNoExist && err != nil {
-		return err
-	}
-	if err != vdl.ErrFieldNoExist {
-
-		var10 := (m.ScanSet == (*ConflictScanSet)(nil))
-		if var10 {
-			if err := fieldTarget9.FromZero(tt.NonOptional().Field(2).Type); err != nil {
+			if err := fieldsTarget1.FinishField(keyTarget5, fieldTarget6); err != nil {
 				return err
 			}
-		} else {
+		}
+	}
+	var10 := (m.ScanSet == (*ConflictScanSet)(nil))
+	if var10 {
+		if err := fieldsTarget1.ZeroField("ScanSet"); err != nil && err != vdl.ErrFieldNoExist {
+			return err
+		}
+	} else {
+		keyTarget8, fieldTarget9, err := fieldsTarget1.StartField("ScanSet")
+		if err != vdl.ErrFieldNoExist {
+			if err != nil {
+				return err
+			}
 
 			if err := m.ScanSet.FillVDLTarget(fieldTarget9, tt.NonOptional().Field(2).Type); err != nil {
 				return err
 			}
-		}
-		if err := fieldsTarget1.FinishField(keyTarget8, fieldTarget9); err != nil {
-			return err
-		}
-	}
-	keyTarget11, fieldTarget12, err := fieldsTarget1.StartField("Batches")
-	if err != vdl.ErrFieldNoExist && err != nil {
-		return err
-	}
-	if err != vdl.ErrFieldNoExist {
-
-		var var13 bool
-		if len(m.Batches) == 0 {
-			var13 = true
-		}
-		if var13 {
-			if err := fieldTarget12.FromZero(tt.NonOptional().Field(3).Type); err != nil {
+			if err := fieldsTarget1.FinishField(keyTarget8, fieldTarget9); err != nil {
 				return err
 			}
-		} else {
+		}
+	}
+	var var13 bool
+	if len(m.Batches) == 0 {
+		var13 = true
+	}
+	if var13 {
+		if err := fieldsTarget1.ZeroField("Batches"); err != nil && err != vdl.ErrFieldNoExist {
+			return err
+		}
+	} else {
+		keyTarget11, fieldTarget12, err := fieldsTarget1.StartField("Batches")
+		if err != vdl.ErrFieldNoExist {
+			if err != nil {
+				return err
+			}
 
 			mapTarget14, err := fieldTarget12.StartMap(tt.NonOptional().Field(3).Type, len(m.Batches))
 			if err != nil {
@@ -1162,9 +1172,9 @@ func (m *Conflict) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 			if err := fieldTarget12.FinishMap(mapTarget14); err != nil {
 				return err
 			}
-		}
-		if err := fieldsTarget1.FinishField(keyTarget11, fieldTarget12); err != nil {
-			return err
+			if err := fieldsTarget1.FinishField(keyTarget11, fieldTarget12); err != nil {
+				return err
+			}
 		}
 	}
 	if err := t.FinishFields(fieldsTarget1); err != nil {
@@ -1219,12 +1229,26 @@ func (t *ConflictTarget) StartField(name string) (key, field vdl.Target, _ error
 func (t *ConflictTarget) FinishField(_, _ vdl.Target) error {
 	return nil
 }
+func (t *ConflictTarget) ZeroField(name string) error {
+	switch name {
+	case "ReadSet":
+		t.Value.ReadSet = (*ConflictRowSet)(nil)
+		return nil
+	case "WriteSet":
+		t.Value.WriteSet = (*ConflictRowSet)(nil)
+		return nil
+	case "ScanSet":
+		t.Value.ScanSet = (*ConflictScanSet)(nil)
+		return nil
+	case "Batches":
+		t.Value.Batches = map[uint64]syncbase.BatchInfo(nil)
+		return nil
+	default:
+		return fmt.Errorf("field %s not in struct v.io/v23/syncbase.Conflict", name)
+	}
+}
 func (t *ConflictTarget) FinishFields(_ vdl.FieldsTarget) error {
 
-	return nil
-}
-func (t *ConflictTarget) FromZero(tt *vdl.Type) error {
-	*t.Value = Conflict{}
 	return nil
 }
 
@@ -1252,7 +1276,7 @@ func (t *__VDLTarget7_optional) FinishFields(_ vdl.FieldsTarget) error {
 
 	return nil
 }
-func (t *__VDLTarget7_optional) FromZero(tt *vdl.Type) error {
+func (t *__VDLTarget7_optional) FromNil(tt *vdl.Type) error {
 	*t.Value = (*ConflictRowSet)(nil)
 	return nil
 }
@@ -1281,7 +1305,7 @@ func (t *__VDLTarget8_optional) FinishFields(_ vdl.FieldsTarget) error {
 
 	return nil
 }
-func (t *__VDLTarget8_optional) FromZero(tt *vdl.Type) error {
+func (t *__VDLTarget8_optional) FromNil(tt *vdl.Type) error {
 	*t.Value = (*ConflictScanSet)(nil)
 	return nil
 }
@@ -1328,10 +1352,6 @@ func (t *__VDLTarget9_map) FinishMap(elem vdl.MapTarget) error {
 
 	return nil
 }
-func (t *__VDLTarget9_map) FromZero(tt *vdl.Type) error {
-	*t.Value = map[uint64]syncbase.BatchInfo(nil)
-	return nil
-}
 
 // ResolvedRow represents a result of resolution of a row under conflict.
 // Key is the key for the row.
@@ -1352,45 +1372,43 @@ func (m *ResolvedRow) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 	if err != nil {
 		return err
 	}
-	keyTarget2, fieldTarget3, err := fieldsTarget1.StartField("Key")
-	if err != vdl.ErrFieldNoExist && err != nil {
-		return err
-	}
-	if err != vdl.ErrFieldNoExist {
-
-		var4 := (m.Key == "")
-		if var4 {
-			if err := fieldTarget3.FromZero(tt.NonOptional().Field(0).Type); err != nil {
+	var4 := (m.Key == "")
+	if var4 {
+		if err := fieldsTarget1.ZeroField("Key"); err != nil && err != vdl.ErrFieldNoExist {
+			return err
+		}
+	} else {
+		keyTarget2, fieldTarget3, err := fieldsTarget1.StartField("Key")
+		if err != vdl.ErrFieldNoExist {
+			if err != nil {
 				return err
 			}
-		} else {
 			if err := fieldTarget3.FromString(string(m.Key), tt.NonOptional().Field(0).Type); err != nil {
 				return err
 			}
-		}
-		if err := fieldsTarget1.FinishField(keyTarget2, fieldTarget3); err != nil {
-			return err
-		}
-	}
-	keyTarget5, fieldTarget6, err := fieldsTarget1.StartField("Result")
-	if err != vdl.ErrFieldNoExist && err != nil {
-		return err
-	}
-	if err != vdl.ErrFieldNoExist {
-
-		var7 := (m.Result == (*Value)(nil))
-		if var7 {
-			if err := fieldTarget6.FromZero(tt.NonOptional().Field(1).Type); err != nil {
+			if err := fieldsTarget1.FinishField(keyTarget2, fieldTarget3); err != nil {
 				return err
 			}
-		} else {
+		}
+	}
+	var7 := (m.Result == (*Value)(nil))
+	if var7 {
+		if err := fieldsTarget1.ZeroField("Result"); err != nil && err != vdl.ErrFieldNoExist {
+			return err
+		}
+	} else {
+		keyTarget5, fieldTarget6, err := fieldsTarget1.StartField("Result")
+		if err != vdl.ErrFieldNoExist {
+			if err != nil {
+				return err
+			}
 
 			if err := m.Result.FillVDLTarget(fieldTarget6, tt.NonOptional().Field(1).Type); err != nil {
 				return err
 			}
-		}
-		if err := fieldsTarget1.FinishField(keyTarget5, fieldTarget6); err != nil {
-			return err
+			if err := fieldsTarget1.FinishField(keyTarget5, fieldTarget6); err != nil {
+				return err
+			}
 		}
 	}
 	if err := t.FinishFields(fieldsTarget1); err != nil {
@@ -1435,12 +1453,20 @@ func (t *ResolvedRowTarget) StartField(name string) (key, field vdl.Target, _ er
 func (t *ResolvedRowTarget) FinishField(_, _ vdl.Target) error {
 	return nil
 }
+func (t *ResolvedRowTarget) ZeroField(name string) error {
+	switch name {
+	case "Key":
+		t.Value.Key = ""
+		return nil
+	case "Result":
+		t.Value.Result = (*Value)(nil)
+		return nil
+	default:
+		return fmt.Errorf("field %s not in struct v.io/v23/syncbase.ResolvedRow", name)
+	}
+}
 func (t *ResolvedRowTarget) FinishFields(_ vdl.FieldsTarget) error {
 
-	return nil
-}
-func (t *ResolvedRowTarget) FromZero(tt *vdl.Type) error {
-	*t.Value = ResolvedRow{}
 	return nil
 }
 
@@ -1468,7 +1494,7 @@ func (t *__VDLTarget10_optional) FinishFields(_ vdl.FieldsTarget) error {
 
 	return nil
 }
-func (t *__VDLTarget10_optional) FromZero(tt *vdl.Type) error {
+func (t *__VDLTarget10_optional) FromNil(tt *vdl.Type) error {
 	*t.Value = (*Value)(nil)
 	return nil
 }
@@ -1491,21 +1517,20 @@ func (m *Resolution) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 	if err != nil {
 		return err
 	}
-	keyTarget2, fieldTarget3, err := fieldsTarget1.StartField("ResultSet")
-	if err != vdl.ErrFieldNoExist && err != nil {
-		return err
+	var var4 bool
+	if len(m.ResultSet) == 0 {
+		var4 = true
 	}
-	if err != vdl.ErrFieldNoExist {
-
-		var var4 bool
-		if len(m.ResultSet) == 0 {
-			var4 = true
+	if var4 {
+		if err := fieldsTarget1.ZeroField("ResultSet"); err != nil && err != vdl.ErrFieldNoExist {
+			return err
 		}
-		if var4 {
-			if err := fieldTarget3.FromZero(tt.NonOptional().Field(0).Type); err != nil {
+	} else {
+		keyTarget2, fieldTarget3, err := fieldsTarget1.StartField("ResultSet")
+		if err != vdl.ErrFieldNoExist {
+			if err != nil {
 				return err
 			}
-		} else {
 
 			mapTarget5, err := fieldTarget3.StartMap(tt.NonOptional().Field(0).Type, len(m.ResultSet))
 			if err != nil {
@@ -1534,9 +1559,9 @@ func (m *Resolution) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 			if err := fieldTarget3.FinishMap(mapTarget5); err != nil {
 				return err
 			}
-		}
-		if err := fieldsTarget1.FinishField(keyTarget2, fieldTarget3); err != nil {
-			return err
+			if err := fieldsTarget1.FinishField(keyTarget2, fieldTarget3); err != nil {
+				return err
+			}
 		}
 	}
 	if err := t.FinishFields(fieldsTarget1); err != nil {
@@ -1576,12 +1601,17 @@ func (t *ResolutionTarget) StartField(name string) (key, field vdl.Target, _ err
 func (t *ResolutionTarget) FinishField(_, _ vdl.Target) error {
 	return nil
 }
+func (t *ResolutionTarget) ZeroField(name string) error {
+	switch name {
+	case "ResultSet":
+		t.Value.ResultSet = map[string]ResolvedRow(nil)
+		return nil
+	default:
+		return fmt.Errorf("field %s not in struct v.io/v23/syncbase.Resolution", name)
+	}
+}
 func (t *ResolutionTarget) FinishFields(_ vdl.FieldsTarget) error {
 
-	return nil
-}
-func (t *ResolutionTarget) FromZero(tt *vdl.Type) error {
-	*t.Value = Resolution{}
 	return nil
 }
 
@@ -1625,10 +1655,6 @@ func (t *__VDLTarget11_map) FinishMap(elem vdl.MapTarget) error {
 		*t.Value = nil
 	}
 
-	return nil
-}
-func (t *__VDLTarget11_map) FromZero(tt *vdl.Type) error {
-	*t.Value = map[string]ResolvedRow(nil)
 	return nil
 }
 

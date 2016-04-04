@@ -6,9 +6,9 @@ pkg appcycle, method (*Task) FillVDLTarget(vdl.Target, *vdl.Type) error
 pkg appcycle, method (*Task) MakeVDLTarget() vdl.Target
 pkg appcycle, method (*TaskTarget) FinishField(vdl.Target, vdl.Target) error
 pkg appcycle, method (*TaskTarget) FinishFields(vdl.FieldsTarget) error
-pkg appcycle, method (*TaskTarget) FromZero(*vdl.Type) error
 pkg appcycle, method (*TaskTarget) StartField(string) (vdl.Target, vdl.Target, error)
 pkg appcycle, method (*TaskTarget) StartFields(*vdl.Type) (vdl.FieldsTarget, error)
+pkg appcycle, method (*TaskTarget) ZeroField(string) error
 pkg appcycle, type AppCycleClientMethods interface { ForceStop, Stop }
 pkg appcycle, type AppCycleClientMethods interface, ForceStop(*context.T, ...rpc.CallOpt) error
 pkg appcycle, type AppCycleClientMethods interface, Stop(*context.T, ...rpc.CallOpt) (AppCycleStopClientCall, error)

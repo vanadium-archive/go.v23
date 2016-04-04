@@ -284,7 +284,7 @@ func (d *Decoder) decodeValue(tt *vdl.Type, target vdl.Target) error {
 			return err
 		case ctrl == WireCtrlNil:
 			d.buf.Skip(1)
-			return target.FromZero(ttFrom)
+			return target.FromNil(ttFrom)
 		}
 		tt = tt.Elem()
 	}
@@ -472,18 +472,12 @@ func (d *Decoder) decodeValue(tt *vdl.Type, target vdl.Target) error {
 						continue
 					}
 					ttfield := tt.Field(index)
-					switch key, field, err := fieldsTarget.StartField(ttfield.Name); {
+					switch err := fieldsTarget.ZeroField(ttfield.Name); {
 					case err == vdl.ErrFieldNoExist:
 						// Ignore it.
 					case err != nil:
 						return err
-					default:
-						if err := field.FromZero(ttfield.Type); err != nil {
-							return err
-						}
-						if err := fieldsTarget.FinishField(key, field); err != nil {
-							return err
-						}
+
 					}
 				}
 				return target.FinishFields(fieldsTarget)
@@ -540,7 +534,7 @@ func (d *Decoder) decodeValue(tt *vdl.Type, target vdl.Target) error {
 			return err
 		}
 		if elemType == nil {
-			return target.FromZero(tt)
+			return target.FromNil(tt)
 		}
 		if hax, ok := target.(hasRvHack); ok {
 			rv := hax.HackGetRv()

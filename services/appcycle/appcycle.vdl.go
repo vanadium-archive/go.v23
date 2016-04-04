@@ -47,44 +47,42 @@ func (m *Task) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 	if err != nil {
 		return err
 	}
-	keyTarget2, fieldTarget3, err := fieldsTarget1.StartField("Progress")
-	if err != vdl.ErrFieldNoExist && err != nil {
-		return err
-	}
-	if err != vdl.ErrFieldNoExist {
-
-		var4 := (m.Progress == int32(0))
-		if var4 {
-			if err := fieldTarget3.FromZero(tt.NonOptional().Field(0).Type); err != nil {
+	var4 := (m.Progress == int32(0))
+	if var4 {
+		if err := fieldsTarget1.ZeroField("Progress"); err != nil && err != vdl.ErrFieldNoExist {
+			return err
+		}
+	} else {
+		keyTarget2, fieldTarget3, err := fieldsTarget1.StartField("Progress")
+		if err != vdl.ErrFieldNoExist {
+			if err != nil {
 				return err
 			}
-		} else {
 			if err := fieldTarget3.FromInt(int64(m.Progress), tt.NonOptional().Field(0).Type); err != nil {
 				return err
 			}
-		}
-		if err := fieldsTarget1.FinishField(keyTarget2, fieldTarget3); err != nil {
-			return err
-		}
-	}
-	keyTarget5, fieldTarget6, err := fieldsTarget1.StartField("Goal")
-	if err != vdl.ErrFieldNoExist && err != nil {
-		return err
-	}
-	if err != vdl.ErrFieldNoExist {
-
-		var7 := (m.Goal == int32(0))
-		if var7 {
-			if err := fieldTarget6.FromZero(tt.NonOptional().Field(1).Type); err != nil {
+			if err := fieldsTarget1.FinishField(keyTarget2, fieldTarget3); err != nil {
 				return err
 			}
-		} else {
+		}
+	}
+	var7 := (m.Goal == int32(0))
+	if var7 {
+		if err := fieldsTarget1.ZeroField("Goal"); err != nil && err != vdl.ErrFieldNoExist {
+			return err
+		}
+	} else {
+		keyTarget5, fieldTarget6, err := fieldsTarget1.StartField("Goal")
+		if err != vdl.ErrFieldNoExist {
+			if err != nil {
+				return err
+			}
 			if err := fieldTarget6.FromInt(int64(m.Goal), tt.NonOptional().Field(1).Type); err != nil {
 				return err
 			}
-		}
-		if err := fieldsTarget1.FinishField(keyTarget5, fieldTarget6); err != nil {
-			return err
+			if err := fieldsTarget1.FinishField(keyTarget5, fieldTarget6); err != nil {
+				return err
+			}
 		}
 	}
 	if err := t.FinishFields(fieldsTarget1); err != nil {
@@ -129,12 +127,20 @@ func (t *TaskTarget) StartField(name string) (key, field vdl.Target, _ error) {
 func (t *TaskTarget) FinishField(_, _ vdl.Target) error {
 	return nil
 }
+func (t *TaskTarget) ZeroField(name string) error {
+	switch name {
+	case "Progress":
+		t.Value.Progress = int32(0)
+		return nil
+	case "Goal":
+		t.Value.Goal = int32(0)
+		return nil
+	default:
+		return fmt.Errorf("field %s not in struct v.io/v23/services/appcycle.Task", name)
+	}
+}
 func (t *TaskTarget) FinishFields(_ vdl.FieldsTarget) error {
 
-	return nil
-}
-func (t *TaskTarget) FromZero(tt *vdl.Type) error {
-	*t.Value = Task{}
 	return nil
 }
 
