@@ -13,7 +13,7 @@
 // compatibility, but there's no guarantee until version 1.0.
 //
 // For more information about the Vanadium project, please visit
-// https://github.com/vanadium/docs.
+// https://vanadium.github.io.
 package v23
 
 import (
