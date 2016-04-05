@@ -27,10 +27,11 @@ const (
 	GenLanguageGo GenLanguage = iota
 	GenLanguageJava
 	GenLanguageJavascript
+	GenLanguageSwift
 )
 
 // GenLanguageAll holds all labels for GenLanguage.
-var GenLanguageAll = [...]GenLanguage{GenLanguageGo, GenLanguageJava, GenLanguageJavascript}
+var GenLanguageAll = [...]GenLanguage{GenLanguageGo, GenLanguageJava, GenLanguageJavascript, GenLanguageSwift}
 
 // GenLanguageFromString creates a GenLanguage from a string label.
 func GenLanguageFromString(label string) (x GenLanguage, err error) {
@@ -50,6 +51,9 @@ func (x *GenLanguage) Set(label string) error {
 	case "Javascript", "javascript":
 		*x = GenLanguageJavascript
 		return nil
+	case "Swift", "swift":
+		*x = GenLanguageSwift
+		return nil
 	}
 	*x = -1
 	return fmt.Errorf("unknown label %q in vdltool.GenLanguage", label)
@@ -64,13 +68,15 @@ func (x GenLanguage) String() string {
 		return "Java"
 	case GenLanguageJavascript:
 		return "Javascript"
+	case GenLanguageSwift:
+		return "Swift"
 	}
 	return ""
 }
 
 func (GenLanguage) __VDLReflect(struct {
 	Name string `vdl:"vdltool.GenLanguage"`
-	Enum struct{ Go, Java, Javascript string }
+	Enum struct{ Go, Java, Javascript, Swift string }
 }) {
 }
 
@@ -102,6 +108,8 @@ func (t *GenLanguageTarget) FromEnumLabel(src string, tt *vdl.Type) error {
 		*t.Value = 1
 	case "Javascript":
 		*t.Value = 2
+	case "Swift":
+		*t.Value = 3
 	default:
 		return fmt.Errorf("label %s not in enum GenLanguage", src)
 	}
@@ -744,6 +752,153 @@ func (t *JavascriptConfigTarget) FinishFields(_ vdl.FieldsTarget) error {
 	return nil
 }
 
+// SwiftConfig specifies swift specific configuration for this package.
+// Note that despite the SwiftConfig options for a given package (which should be
+// very rare in practice), we still need to know the name of the swift module
+// that this package relates to to properly understand import boundaries between
+// projects/frameworks/modules.
+//
+// We do this by defining a file called "swiftmodule" that contains JUST the
+// name of the Swift module at the root of your VDL packages. For example,
+// if you have the VDL files for your Xcode project/target called UberForCats
+// at /Users/aaron/uberforcats/vdl, then create
+// /Users/aaron/uberforcats/vdl/com.uberforcats/swiftmodule and have it just contain
+// "UberForCats". We then will treat any VDL files contained in that directory and
+// any subdirectories as part of the UberForCats Swift module, ultimately letting
+// the compiler and will automatically do the right thing if others import your package.
+// If you don't do this then nobody will be able to import your VDL types in Swift,
+// and you might end up with extra long class/pkg names (ComuberforcatsServicesProfit
+// instead of ServicesProfit for $VDLROOT/com.uberforcats/services/profit).
+//
+// If you are creating multiple Swift modules for a given $VDLROOT then just place
+// swiftmodule files at the logical boundaries. For eample, we do this for v.io/v23
+// to be exported to the VanadiumCore framework, but everything under v.io/v23/services
+// lives in the VanadiumServices framework.
+type SwiftConfig struct {
+	// WireToNativeTypes specifies the mapping from a VDL wire type to its Swift
+	// native type representation.  This is rarely used and easy to configure
+	// incorrectly; usage is currently restricted to packages that are explicitly
+	// whitelisted.
+	//
+	// WireToNativeTypes are meant for scenarios where there is an idiomatic Swift
+	// type used in your code, but you need a standard VDL representation for wire
+	// compatibility.  E.g. the VDL time package defines Duration and Time for
+	// wire compatibility, but we want the generated code to use NSDate or NSTimeInterval
+	//
+	// The key of the map is the name of the VDL type (aka WireType), which must
+	// be defined in the vdl package associated with the vdl.config file.
+	//
+	// The code generator assumes that the conversion functions will be registered
+	// in Swift vdl package.
+	WireToNativeTypes map[string]string
+}
+
+func (SwiftConfig) __VDLReflect(struct {
+	Name string `vdl:"vdltool.SwiftConfig"`
+}) {
+}
+
+func (m *SwiftConfig) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
+	fieldsTarget1, err := t.StartFields(tt)
+	if err != nil {
+		return err
+	}
+	var var4 bool
+	if len(m.WireToNativeTypes) == 0 {
+		var4 = true
+	}
+	if var4 {
+		if err := fieldsTarget1.ZeroField("WireToNativeTypes"); err != nil && err != vdl.ErrFieldNoExist {
+			return err
+		}
+	} else {
+		keyTarget2, fieldTarget3, err := fieldsTarget1.StartField("WireToNativeTypes")
+		if err != vdl.ErrFieldNoExist {
+			if err != nil {
+				return err
+			}
+
+			mapTarget5, err := fieldTarget3.StartMap(tt.NonOptional().Field(0).Type, len(m.WireToNativeTypes))
+			if err != nil {
+				return err
+			}
+			for key7, value9 := range m.WireToNativeTypes {
+				keyTarget6, err := mapTarget5.StartKey()
+				if err != nil {
+					return err
+				}
+				if err := keyTarget6.FromString(string(key7), tt.NonOptional().Field(0).Type.Key()); err != nil {
+					return err
+				}
+				valueTarget8, err := mapTarget5.FinishKeyStartField(keyTarget6)
+				if err != nil {
+					return err
+				}
+				if err := valueTarget8.FromString(string(value9), tt.NonOptional().Field(0).Type.Elem()); err != nil {
+					return err
+				}
+				if err := mapTarget5.FinishField(keyTarget6, valueTarget8); err != nil {
+					return err
+				}
+			}
+			if err := fieldTarget3.FinishMap(mapTarget5); err != nil {
+				return err
+			}
+			if err := fieldsTarget1.FinishField(keyTarget2, fieldTarget3); err != nil {
+				return err
+			}
+		}
+	}
+	if err := t.FinishFields(fieldsTarget1); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (m *SwiftConfig) MakeVDLTarget() vdl.Target {
+	return nil
+}
+
+type SwiftConfigTarget struct {
+	Value *SwiftConfig
+
+	vdl.TargetBase
+	vdl.FieldsTargetBase
+}
+
+func (t *SwiftConfigTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
+
+	if ttWant := vdl.TypeOf((*SwiftConfig)(nil)).Elem(); !vdl.Compatible(tt, ttWant) {
+		return nil, fmt.Errorf("type %v incompatible with %v", tt, ttWant)
+	}
+	return t, nil
+}
+func (t *SwiftConfigTarget) StartField(name string) (key, field vdl.Target, _ error) {
+	switch name {
+	case "WireToNativeTypes":
+		target, err := vdl.ReflectTarget(reflect.ValueOf(&t.Value.WireToNativeTypes))
+		return nil, target, err
+	default:
+		return nil, nil, fmt.Errorf("field %s not in struct vdltool.SwiftConfig", name)
+	}
+}
+func (t *SwiftConfigTarget) FinishField(_, _ vdl.Target) error {
+	return nil
+}
+func (t *SwiftConfigTarget) ZeroField(name string) error {
+	switch name {
+	case "WireToNativeTypes":
+		t.Value.WireToNativeTypes = map[string]string(nil)
+		return nil
+	default:
+		return fmt.Errorf("field %s not in struct vdltool.SwiftConfig", name)
+	}
+}
+func (t *SwiftConfigTarget) FinishFields(_ vdl.FieldsTarget) error {
+
+	return nil
+}
+
 // Config specifies the configuration for the vdl tool.  This is typically
 // represented in optional "vdl.config" files in each vdl source package.  Each
 // vdl.config file implicitly imports this package.  E.g. you may refer to
@@ -756,6 +911,7 @@ type Config struct {
 	Go         GoConfig
 	Java       JavaConfig
 	Javascript JavascriptConfig
+	Swift      SwiftConfig
 }
 
 func (Config) __VDLReflect(struct {
@@ -883,6 +1039,31 @@ func (m *Config) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 			}
 		}
 	}
+	var22 := true
+	var var23 bool
+	if len(m.Swift.WireToNativeTypes) == 0 {
+		var23 = true
+	}
+	var22 = var22 && var23
+	if var22 {
+		if err := fieldsTarget1.ZeroField("Swift"); err != nil && err != vdl.ErrFieldNoExist {
+			return err
+		}
+	} else {
+		keyTarget20, fieldTarget21, err := fieldsTarget1.StartField("Swift")
+		if err != vdl.ErrFieldNoExist {
+			if err != nil {
+				return err
+			}
+
+			if err := m.Swift.FillVDLTarget(fieldTarget21, tt.NonOptional().Field(4).Type); err != nil {
+				return err
+			}
+			if err := fieldsTarget1.FinishField(keyTarget20, fieldTarget21); err != nil {
+				return err
+			}
+		}
+	}
 	if err := t.FinishFields(fieldsTarget1); err != nil {
 		return err
 	}
@@ -921,6 +1102,9 @@ func (t *ConfigTarget) StartField(name string) (key, field vdl.Target, _ error) 
 	case "Javascript":
 		target, err := vdl.ReflectTarget(reflect.ValueOf(&t.Value.Javascript))
 		return nil, target, err
+	case "Swift":
+		target, err := vdl.ReflectTarget(reflect.ValueOf(&t.Value.Swift))
+		return nil, target, err
 	default:
 		return nil, nil, fmt.Errorf("field %s not in struct vdltool.Config", name)
 	}
@@ -941,6 +1125,9 @@ func (t *ConfigTarget) ZeroField(name string) error {
 		return nil
 	case "Javascript":
 		t.Value.Javascript = JavascriptConfig{}
+		return nil
+	case "Swift":
+		t.Value.Swift = SwiftConfig{}
 		return nil
 	default:
 		return fmt.Errorf("field %s not in struct vdltool.Config", name)
@@ -979,6 +1166,7 @@ func __VDLInit() struct{} {
 	vdl.Register((*GoConfig)(nil))
 	vdl.Register((*JavaConfig)(nil))
 	vdl.Register((*JavascriptConfig)(nil))
+	vdl.Register((*SwiftConfig)(nil))
 	vdl.Register((*Config)(nil))
 
 	return struct{}{}

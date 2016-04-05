@@ -19,6 +19,7 @@ type Config struct {
 	Go         GoConfig
 	Java       JavaConfig
 	Javascript JavascriptConfig
+	Swift      SwiftConfig
 }
 
 // GenLanguage enumerates the known code generation languages.
@@ -26,6 +27,7 @@ type GenLanguage enum {
 	Go
 	Java
 	Javascript
+	Swift
 }
 
 // GoConfig specifies go specific configuration.
@@ -115,4 +117,45 @@ type JavaConfig struct {
 
 // JavascriptConfig specifies javascript specific configuration.
 type JavascriptConfig struct {
+}
+
+// SwiftConfig specifies swift specific configuration for this package.
+// Note that despite the SwiftConfig options for a given package (which should be
+// very rare in practice), we still need to know the name of the swift module
+// that this package relates to to properly understand import boundaries between
+// projects/frameworks/modules.
+//
+// We do this by defining a file called "swiftmodule" that contains JUST the
+// name of the Swift module at the root of your VDL packages. For example,
+// if you have the VDL files for your Xcode project/target called UberForCats
+// at /Users/aaron/uberforcats/vdl, then create
+// /Users/aaron/uberforcats/vdl/com.uberforcats/swiftmodule and have it just contain
+// "UberForCats". We then will treat any VDL files contained in that directory and
+// any subdirectories as part of the UberForCats Swift module, ultimately letting
+// the compiler and will automatically do the right thing if others import your package.
+// If you don't do this then nobody will be able to import your VDL types in Swift,
+// and you might end up with extra long class/pkg names (ComuberforcatsServicesProfit
+// instead of ServicesProfit for $VDLROOT/com.uberforcats/services/profit).
+//
+// If you are creating multiple Swift modules for a given $VDLROOT then just place
+// swiftmodule files at the logical boundaries. For eample, we do this for v.io/v23
+// to be exported to the VanadiumCore framework, but everything under v.io/v23/services
+// lives in the VanadiumServices framework.
+type SwiftConfig struct {
+	// WireToNativeTypes specifies the mapping from a VDL wire type to its Swift
+	// native type representation.  This is rarely used and easy to configure
+	// incorrectly; usage is currently restricted to packages that are explicitly
+	// whitelisted.
+	//
+	// WireToNativeTypes are meant for scenarios where there is an idiomatic Swift
+	// type used in your code, but you need a standard VDL representation for wire
+	// compatibility.  E.g. the VDL time package defines Duration and Time for
+	// wire compatibility, but we want the generated code to use NSDate or NSTimeInterval
+	//
+	// The key of the map is the name of the VDL type (aka WireType), which must
+	// be defined in the vdl package associated with the vdl.config file.
+	//
+	// The code generator assumes that the conversion functions will be registered
+	// in Swift vdl package.
+	WireToNativeTypes map[string]string
 }

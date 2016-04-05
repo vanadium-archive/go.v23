@@ -1,6 +1,7 @@
 pkg vdltool, const GenLanguageGo GenLanguage
 pkg vdltool, const GenLanguageJava GenLanguage
 pkg vdltool, const GenLanguageJavascript GenLanguage
+pkg vdltool, const GenLanguageSwift GenLanguage
 pkg vdltool, func GenLanguageFromString(string) (GenLanguage, error)
 pkg vdltool, method (*Config) FillVDLTarget(vdl.Target, *vdl.Type) error
 pkg vdltool, method (*Config) MakeVDLTarget() vdl.Target
@@ -48,12 +49,20 @@ pkg vdltool, method (*JavascriptConfigTarget) FinishFields(vdl.FieldsTarget) err
 pkg vdltool, method (*JavascriptConfigTarget) StartField(string) (vdl.Target, vdl.Target, error)
 pkg vdltool, method (*JavascriptConfigTarget) StartFields(*vdl.Type) (vdl.FieldsTarget, error)
 pkg vdltool, method (*JavascriptConfigTarget) ZeroField(string) error
+pkg vdltool, method (*SwiftConfig) FillVDLTarget(vdl.Target, *vdl.Type) error
+pkg vdltool, method (*SwiftConfig) MakeVDLTarget() vdl.Target
+pkg vdltool, method (*SwiftConfigTarget) FinishField(vdl.Target, vdl.Target) error
+pkg vdltool, method (*SwiftConfigTarget) FinishFields(vdl.FieldsTarget) error
+pkg vdltool, method (*SwiftConfigTarget) StartField(string) (vdl.Target, vdl.Target, error)
+pkg vdltool, method (*SwiftConfigTarget) StartFields(*vdl.Type) (vdl.FieldsTarget, error)
+pkg vdltool, method (*SwiftConfigTarget) ZeroField(string) error
 pkg vdltool, method (GenLanguage) String() string
 pkg vdltool, type Config struct
 pkg vdltool, type Config struct, GenLanguages map[GenLanguage]struct{}
 pkg vdltool, type Config struct, Go GoConfig
 pkg vdltool, type Config struct, Java JavaConfig
 pkg vdltool, type Config struct, Javascript JavascriptConfig
+pkg vdltool, type Config struct, Swift SwiftConfig
 pkg vdltool, type ConfigTarget struct
 pkg vdltool, type ConfigTarget struct, Value *Config
 pkg vdltool, type ConfigTarget struct, embedded vdl.FieldsTargetBase
@@ -94,4 +103,10 @@ pkg vdltool, type JavascriptConfigTarget struct
 pkg vdltool, type JavascriptConfigTarget struct, Value *JavascriptConfig
 pkg vdltool, type JavascriptConfigTarget struct, embedded vdl.FieldsTargetBase
 pkg vdltool, type JavascriptConfigTarget struct, embedded vdl.TargetBase
+pkg vdltool, type SwiftConfig struct
+pkg vdltool, type SwiftConfig struct, WireToNativeTypes map[string]string
+pkg vdltool, type SwiftConfigTarget struct
+pkg vdltool, type SwiftConfigTarget struct, Value *SwiftConfig
+pkg vdltool, type SwiftConfigTarget struct, embedded vdl.FieldsTargetBase
+pkg vdltool, type SwiftConfigTarget struct, embedded vdl.TargetBase
 pkg vdltool, var GenLanguageAll [...]GenLanguage
