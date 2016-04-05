@@ -397,9 +397,8 @@ func runWithAppBasedResolver(t *testing.T, client0Ctx, client1Ctx *context.T, sc
 // Helpers specific to ConflictResolution
 
 func runConflictResolver(ctx *context.T, syncbaseName, prefix, signalKey string, maxCallCount int) error {
-	a := syncbase.NewService(syncbaseName).App("a")
 	resolver := &CRImpl{syncbaseName: syncbaseName}
-	d := a.Database("d", makeSchema(prefix, resolver))
+	d := syncbase.NewService(syncbaseName).DatabaseForId(testDb, makeSchema(prefix, resolver))
 	defer d.Close()
 	d.EnforceSchema(ctx)
 
@@ -425,8 +424,7 @@ func runConflictResolver(ctx *context.T, syncbaseName, prefix, signalKey string,
 }
 
 func verifyConflictResolvedData(ctx *context.T, syncbaseName, keyPrefix, schemaPrefix string, start, end int, valuePrefix string) error {
-	a := syncbase.NewService(syncbaseName).App("a")
-	d := a.Database("d", makeSchema(schemaPrefix, &CRImpl{syncbaseName: syncbaseName}))
+	d := syncbase.NewService(syncbaseName).DatabaseForId(testDb, makeSchema(schemaPrefix, &CRImpl{syncbaseName: syncbaseName}))
 
 	c := d.Collection(testCollection)
 	for i := start; i < end; i++ {
@@ -444,8 +442,7 @@ func verifyConflictResolvedData(ctx *context.T, syncbaseName, keyPrefix, schemaP
 }
 
 func verifyConflictResolvedBatch(ctx *context.T, syncbaseName, keyPrefix string, start, end int, valuePrefix string) error {
-	a := syncbase.NewService(syncbaseName).App("a")
-	d := a.Database("d", nil)
+	d := syncbase.NewService(syncbaseName).DatabaseForId(testDb, nil)
 
 	c := d.Collection(testCollection)
 	var got string
@@ -477,8 +474,7 @@ func waitForValue(ctx *context.T, syncbaseName, key, valuePrefix, schemaPrefix s
 		schema = makeSchema(schemaPrefix, &CRImpl{syncbaseName: syncbaseName})
 	}
 
-	a := syncbase.NewService(syncbaseName).App("a")
-	d := a.Database("d", schema)
+	d := syncbase.NewService(syncbaseName).DatabaseForId(testDb, schema)
 
 	c := d.Collection(testCollection)
 	r := c.Row(key)
@@ -496,16 +492,14 @@ func waitForValue(ctx *context.T, syncbaseName, key, valuePrefix, schemaPrefix s
 }
 
 func endTest(ctx *context.T, syncbaseName, prefix, signalKey string) error {
-	a := syncbase.NewService(syncbaseName).App("a")
-	d := a.Database("d", makeSchema(prefix, &CRImpl{syncbaseName: syncbaseName}))
+	d := syncbase.NewService(syncbaseName).DatabaseForId(testDb, makeSchema(prefix, &CRImpl{syncbaseName: syncbaseName}))
 
 	// signal end of test so that conflict resolution can clean up its stream.
 	return sendSignal(ctx, d, signalKey)
 }
 
 func waitForSignal(ctx *context.T, syncbaseName, prefix, signalKey string) error {
-	a := syncbase.NewService(syncbaseName).App("a")
-	d := a.Database("d", makeSchema(prefix, &CRImpl{syncbaseName: syncbaseName}))
+	d := syncbase.NewService(syncbaseName).DatabaseForId(testDb, makeSchema(prefix, &CRImpl{syncbaseName: syncbaseName}))
 
 	// wait for signal.
 	return waitSignal(ctx, d, signalKey)

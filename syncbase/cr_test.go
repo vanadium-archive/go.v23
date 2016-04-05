@@ -268,7 +268,7 @@ func TestConflictResolutionListDelete(t *testing.T) {
 }
 
 func RunTest(t *testing.T, mockConflict []wire.ConflictInfo, expResult map[string]wire.ResolutionInfo, singleBatch bool) {
-	db := NewDatabase("parentName", "db1", getSchema(&ConflictResolverImpl{}))
+	db := NewDatabase("parentName", wire.Id{"a1", "db1"}, getSchema(&ConflictResolverImpl{}))
 	advance := func(st *crtestutil.State) bool {
 		if st.ValIndex >= len(mockConflict) {
 			st.SetIsBlocked(true)

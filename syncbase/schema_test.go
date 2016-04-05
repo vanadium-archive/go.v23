@@ -13,20 +13,20 @@ import (
 	tu "v.io/x/ref/services/syncbase/testutil"
 )
 
-// Tests schema checking logic within App.Database() method.
+// Tests schema checking logic within Service.DatabaseForId() method.
 // This test as following steps:
-// 1) Call Database() for a non existent db.
+// 1) Call DatabaseForId() for a non existent db.
 // 2) Create the database, and verify if Schema got stored properly.
-// 3) Call Database() on the same db to create a new handle with new
+// 3) Call DatabaseForId() on the same db to create a new handle with new
 //    schema metadata, call EnforceSchema() and check if the new metadata was
 //    stored appropriately.
 func TestSchemaCheck(t *testing.T) {
 	ctx, sName, cleanup := tu.SetupOrDie(nil)
 	defer cleanup()
-	a := tu.CreateApp(t, ctx, syncbase.NewService(sName), "a")
+	s := syncbase.NewService(sName)
 	schema := tu.DefaultSchema(0)
 
-	db1 := a.Database("db1", schema)
+	db1 := s.DatabaseForId(wire.Id{"a", "db1"}, schema)
 
 	if err := db1.EnforceSchema(ctx); err != nil {
 		t.Fatalf("db1.EnforceSchema() failed: %v", err)
@@ -49,7 +49,7 @@ func TestSchemaCheck(t *testing.T) {
 		Rules: []wire.CrRule{rule},
 	}
 	schema.Metadata.Policy = policy
-	otherdb1 := a.Database("db1", schema)
+	otherdb1 := s.DatabaseForId(wire.Id{"a", "db1"}, schema)
 	if err := otherdb1.EnforceSchema(ctx); err != nil {
 		t.Fatalf("otherdb1.EnforceSchema() failed: %v", err)
 	}

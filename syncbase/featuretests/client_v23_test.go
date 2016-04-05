@@ -29,11 +29,7 @@ func TestV23SyncbasedPutGet(t *testing.T) {
 	// Create app, database and collection.
 	// TODO(ivanpi): Use setupAppA.
 	ctx := sh.ForkContext("client")
-	a := syncbase.NewService(testSbName).App("a")
-	if err := a.Create(ctx, nil); err != nil {
-		t.Fatalf("unable to create an app: %v", err)
-	}
-	d := a.Database("d", nil)
+	d := syncbase.NewService(testSbName).DatabaseForId(testDb, nil)
 	if err := d.Create(ctx, nil); err != nil {
 		t.Fatalf("unable to create a database: %v", err)
 	}

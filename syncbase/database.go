@@ -11,7 +11,6 @@ import (
 	"v.io/v23/context"
 	"v.io/v23/naming"
 	"v.io/v23/security/access"
-	svcwire "v.io/v23/services/syncbase"
 	wire "v.io/v23/services/syncbase"
 	"v.io/v23/services/watch"
 	"v.io/v23/syncbase/util"
@@ -26,17 +25,17 @@ const (
 	reconnectionCount           = "rcc"
 )
 
-func newDatabaseImpl(parentFullName, relativeName, batchSuffix string, schema *Schema) *database {
+func newDatabaseImpl(parentFullName string, id wire.Id, batchSuffix string, schema *Schema) *database {
 	// Escape relativeName so that any forward slashes get dropped, thus ensuring
 	// that the server will interpret fullName as referring to a database object.
 	// Note that the server will still reject this name if util.ValidDatabaseName
 	// returns false.
-	fullName := naming.Join(parentFullName, util.Escape(relativeName)+batchSuffix)
+	fullName := naming.Join(parentFullName, util.EncodeId(id)+batchSuffix)
 	return &database{
 		c:              wire.DatabaseClient(fullName),
 		parentFullName: parentFullName,
 		fullName:       fullName,
-		name:           relativeName,
+		id:             id,
 		schema:         schema,
 		crState: conflictResolutionState{
 			reconnectWaitTime: waitBeforeReconnectInMillis,
@@ -46,15 +45,15 @@ func newDatabaseImpl(parentFullName, relativeName, batchSuffix string, schema *S
 
 // TODO(sadovsky): Make this private. For some reason,
 // v.io/x/jni/v23/syncbase/jni.go calls it directly.
-func NewDatabase(parentFullName, relativeName string, schema *Schema) *database {
-	return newDatabaseImpl(parentFullName, relativeName, "", schema)
+func NewDatabase(parentFullName string, id wire.Id, schema *Schema) *database {
+	return newDatabaseImpl(parentFullName, id, "", schema)
 }
 
 type database struct {
 	c              wire.DatabaseClientMethods
 	parentFullName string
 	fullName       string
-	name           string
+	id             wire.Id
 	schema         *Schema
 	crState        conflictResolutionState
 }
@@ -85,19 +84,14 @@ func (crs *conflictResolutionState) isDisconnected() bool {
 
 var _ Database = (*database)(nil)
 
-// Name implements Database.Name.
-func (d *database) Name() string {
-	return d.name
+// Name implements Database.Id.
+func (d *database) Id() wire.Id {
+	return d.id
 }
 
 // FullName implements Database.FullName.
 func (d *database) FullName() string {
 	return d.fullName
-}
-
-// Exists implements Database.Exists.
-func (d *database) Exists(ctx *context.T) (bool, error) {
-	return d.c.Exists(ctx)
 }
 
 // Collection implements Database.Collection.
@@ -107,8 +101,10 @@ func (d *database) Collection(relativeName string) Collection {
 
 // ListCollections implements Database.ListCollections.
 func (d *database) ListCollections(ctx *context.T) ([]string, error) {
-	// See comment in v.io/v23/services/syncbase/service.vdl for why we
-	// can't implement ListCollections using Glob (via util.ListChildren).
+	// See comment in v.io/v23/services/syncbase/service.vdl for why we can't
+	// implement ListCollections using Glob (via util.ListChildren).
+	// TODO(sadovsky): Stop encoding batch ids in names, then switch to using
+	// util.ListChildren or util.ListChildIds.
 	return d.c.ListCollections(ctx)
 }
 
@@ -126,9 +122,14 @@ func (d *database) Destroy(ctx *context.T) error {
 	return d.c.Destroy(ctx)
 }
 
+// Exists implements Database.Exists.
+func (d *database) Exists(ctx *context.T) (bool, error) {
+	return d.c.Exists(ctx)
+}
+
 // Exec implements Database.Exec.
 // TODO(ivanpi): Parameterized Exec currently allows struct comparisons, which
-// we wish to prevent. However, cases like Javascript JSValue benefit from this.
+// we wish to prevent. However, cases like JavaScript JSValue benefit from this.
 func (d *database) Exec(ctx *context.T, query string, params ...interface{}) ([]string, ResultStream, error) {
 	paramsVom := make([]*vom.RawBytes, len(params))
 	for i, p := range params {
@@ -158,7 +159,7 @@ func (d *database) Exec(ctx *context.T, query string, params ...interface{}) ([]
 		if err := resultStream.Result(i, &header); err == nil {
 			headers = append(headers, header)
 		} else {
-			return nil, nil, verror.New(svcwire.ErrBadExecStreamHeader, ctx, query)
+			return nil, nil, verror.New(wire.ErrBadExecStreamHeader, ctx, query)
 		}
 	}
 	return headers, resultStream, nil
@@ -170,7 +171,7 @@ func (d *database) BeginBatch(ctx *context.T, opts wire.BatchOptions) (BatchData
 	if err != nil {
 		return nil, err
 	}
-	return &batch{database: *newDatabaseImpl(d.parentFullName, d.name, batchSuffix, d.schema)}, nil
+	return &batch{database: *newDatabaseImpl(d.parentFullName, d.id, batchSuffix, d.schema)}, nil
 }
 
 // SetPermissions implements Database.SetPermissions.
@@ -183,10 +184,10 @@ func (d *database) GetPermissions(ctx *context.T) (perms access.Permissions, ver
 	return d.c.GetPermissions(ctx)
 }
 
-// Watch implements the Database interface.
+// Watch implements Database.Watch.
 func (d *database) Watch(ctx *context.T, collection, prefix string, resumeMarker watch.ResumeMarker) (WatchStream, error) {
 	if !util.ValidCollectionName(collection) {
-		return nil, verror.New(svcwire.ErrInvalidName, ctx, collection)
+		return nil, verror.New(wire.ErrInvalidName, ctx, collection)
 	}
 	ctx, cancel := context.WithCancel(ctx)
 	call, err := d.c.WatchGlob(ctx, watch.GlobRequest{
@@ -199,7 +200,7 @@ func (d *database) Watch(ctx *context.T, collection, prefix string, resumeMarker
 	return newWatchStream(cancel, call), nil
 }
 
-// GetResumeMarker implements the Database interface.
+// GetResumeMarker implements Database.GetResumeMarker.
 func (d *database) GetResumeMarker(ctx *context.T) (watch.ResumeMarker, error) {
 	return d.c.GetResumeMarker(ctx)
 }

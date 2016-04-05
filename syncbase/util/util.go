@@ -5,28 +5,55 @@
 package util
 
 import (
+	"fmt"
 	"regexp"
 	"strings"
 
 	"v.io/v23/context"
 	"v.io/v23/naming"
+	"v.io/v23/security"
 	"v.io/v23/security/access"
 	wire "v.io/v23/services/syncbase"
 	"v.io/v23/verror"
 )
 
-// Escape escapes a component name for use in a Syncbase object name. In
+// Encode escapes a component name for use in a Syncbase object name. In
 // particular, it replaces bytes "%" and "/" with the "%" character followed by
 // the byte's two-digit hex code. Clients using the client library need not
 // escape names themselves; the client library does so on their behalf.
-func Escape(s string) string {
+func Encode(s string) string {
 	return naming.EncodeAsNameElement(s)
 }
 
-// Unescape applies the inverse of Escape. It returns false if the given string
-// is not a valid escaped string.
-func Unescape(s string) (string, bool) {
-	return naming.DecodeFromNameElement(s)
+// Decode is the inverse of Encode.
+func Decode(s string) (string, error) {
+	res, ok := naming.DecodeFromNameElement(s)
+	if !ok {
+		return "", fmt.Errorf("failed to decode component name: %s", s)
+	}
+	return res, nil
+}
+
+// EncodeId encodes the given Id for use in a Syncbase object name.
+func EncodeId(id wire.Id) string {
+	// Note that "," is not allowed to appear in blessing patterns. We also
+	// could've used "/" as a separator, but then we would've had to be more
+	// careful with decoding and splitting name components elsewhere.
+	// TODO(sadovsky): Maybe define "," constant in v23/services/syncbase.
+	return Encode(id.Blessing + "," + id.Name)
+}
+
+// DecodeId is the inverse of EncodeId.
+func DecodeId(s string) (wire.Id, error) {
+	dec, err := Decode(s)
+	if err != nil {
+		return wire.Id{}, err
+	}
+	parts := strings.SplitN(dec, ",", 2)
+	if len(parts) != 2 {
+		return wire.Id{}, fmt.Errorf("failed to decode id: %s", s)
+	}
+	return wire.Id{Blessing: parts[0], Name: parts[1]}, nil
 }
 
 // Currently we use \xff for perms index storage and \xfe as a component
@@ -51,26 +78,27 @@ func validIdentifier(s string) bool {
 	return identifierRegexp.MatchString(s)
 }
 
-// maxNameLen is the max allowed number of bytes in app, db, and collection names.
+// maxNameLen is the max allowed number of bytes in database blessings and names
+// and in collection names.
+// TODO(sadovsky): Revisit whether 64 bytes is enough for app blessings.
 const maxNameLen = 64
 
-// ValidAppName returns true iff the given string is a valid app name.
-func ValidAppName(s string) bool {
-	if len([]byte(s)) > maxNameLen {
+// ValidDatabaseId returns true iff the given Id is a valid database id.
+func ValidDatabaseId(id wire.Id) bool {
+	if x := len([]byte(id.Blessing)); x == 0 || x > maxNameLen {
 		return false
 	}
-	return s != "" && !containsReservedByte(s)
-}
-
-// ValidDatabaseName returns true iff the given string is a valid database name.
-func ValidDatabaseName(s string) bool {
-	if len([]byte(s)) > maxNameLen {
+	if x := len([]byte(id.Name)); x == 0 || x > maxNameLen {
 		return false
 	}
-	return validIdentifier(s)
+	if !security.BlessingPattern(id.Blessing).IsValid() {
+		return false
+	}
+	return !containsReservedByte(id.Blessing) && validIdentifier(id.Name)
 }
 
-// ValidCollectionName returns true iff the given string is a valid collection name.
+// ValidCollectionName returns true iff the given string is a valid collection
+// name.
 func ValidCollectionName(s string) bool {
 	if len([]byte(s)) > maxNameLen {
 		return false
@@ -138,4 +166,13 @@ type AccessController interface {
 	// GetPermissions returns the current Permissions for an object.
 	// For detailed documentation, see Object.GetPermissions.
 	GetPermissions(ctx *context.T) (perms access.Permissions, version string, err error)
+}
+
+// AppBlessingFromContext returns an app blessing pattern from the given
+// context.
+// TODO(sadovsky,ashankar): Implement.
+func AppBlessingFromContext(ctx *context.T) (string, error) {
+	// NOTE(sadovsky): For now, we use a blessing string that will be easy to
+	// find-replace when we actually implement this method.
+	return "v.io:xyz", nil
 }

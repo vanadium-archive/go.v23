@@ -39,16 +39,11 @@ import (
 	tu "v.io/x/ref/services/syncbase/testutil"
 )
 
-// prepare creates hierarchy "a/d/c" and returns some handles along with a
+// prepare creates hierarchy "{a,d}/c" and returns some handles along with a
 // cleanup function.
 func prepare(b *testing.B) (*context.T, syncbase.Database, syncbase.Collection, func()) {
 	ctx, sName, cleanup := tu.SetupOrDie(nil)
-	s := syncbase.NewService(sName)
-	a := s.App("a")
-	if err := a.Create(ctx, nil); err != nil {
-		b.Fatalf("can't create app: %v", err)
-	}
-	d := a.Database("d", nil)
+	d := syncbase.NewService(sName).DatabaseForId(wire.Id{"a", "d"}, nil)
 	if err := d.Create(ctx, nil); err != nil {
 		b.Fatalf("can't create database: %v", err)
 	}

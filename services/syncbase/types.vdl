@@ -9,6 +9,13 @@ import (
 	"v.io/v23/security/access"
 )
 
+// Id is a {blessing, name} pair, used to identify a database or a collection.
+// TODO(sadovsky): Maybe implement Id.String().
+type Id struct {
+	Blessing string
+	Name     string
+}
+
 // DevModeUpdateVClockOpts specifies what DevModeUpdateVClock should do, as
 // described below.
 type DevModeUpdateVClockOpts struct {

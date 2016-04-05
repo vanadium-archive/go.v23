@@ -32,6 +32,10 @@ const (
 	testCollection = "c"
 )
 
+func dbHandle(serviceName string) syncbase.Database {
+	return syncbase.NewService(serviceName).DatabaseForId(wire.Id{"a", "d"}, nil)
+}
+
 // NOTE(sadovsky): These tests take a very long time to run - nearly 4 minutes
 // on my Macbook Pro! Various instances of time.Sleep() below likely contribute
 // to the problem.
@@ -552,11 +556,7 @@ func toSgPrefixes(csv string) []wire.CollectionRow {
 // avoiding gets when we can scan.
 
 func runSetupAppA(ctx *context.T, serviceName string) error {
-	a := syncbase.NewService(serviceName).App("a")
-	if err := a.Create(ctx, nil); err != nil {
-		return err
-	}
-	d := a.Database("d", nil)
+	d := dbHandle(serviceName)
 	if err := d.Create(ctx, nil); err != nil {
 		return err
 	}
@@ -569,8 +569,7 @@ func runSetupAppA(ctx *context.T, serviceName string) error {
 }
 
 func runCreateSyncgroup(ctx *context.T, serviceName, sgName, sgPrefixes, mtName string, sgBlessings ...string) error {
-	a := syncbase.NewService(serviceName).App("a")
-	d := a.Database("d", nil)
+	d := dbHandle(serviceName)
 
 	mtNames := v23.GetNamespace(ctx).Roots()
 	if mtName != "" {
@@ -593,8 +592,7 @@ func runCreateSyncgroup(ctx *context.T, serviceName, sgName, sgPrefixes, mtName 
 }
 
 func runJoinSyncgroup(ctx *context.T, serviceName, sgName string) error {
-	a := syncbase.NewService(serviceName).App("a")
-	d := a.Database("d", nil)
+	d := dbHandle(serviceName)
 	sg := d.Syncgroup(sgName)
 	info := wire.SyncgroupMemberInfo{SyncPriority: 10}
 	if _, err := sg.Join(ctx, info); err != nil {
@@ -604,9 +602,7 @@ func runJoinSyncgroup(ctx *context.T, serviceName, sgName string) error {
 }
 
 func runSetSyncgroupSpec(ctx *context.T, serviceName, sgName, sgDesc, sgPrefixes string, sgBlessings ...string) error {
-	a := syncbase.NewService(serviceName).App("a")
-	d := a.Database("d", nil)
-
+	d := dbHandle(serviceName)
 	sg := d.Syncgroup(sgName)
 
 	mtNames := v23.GetNamespace(ctx).Roots()
@@ -624,9 +620,7 @@ func runSetSyncgroupSpec(ctx *context.T, serviceName, sgName, sgDesc, sgPrefixes
 }
 
 func runGetSyncgroupSpec(ctx *context.T, serviceName, sgName, wantDesc, wantPrefixes string, wantBlessings ...string) error {
-	a := syncbase.NewService(serviceName).App("a")
-	d := a.Database("d", nil)
-
+	d := dbHandle(serviceName)
 	sg := d.Syncgroup(sgName)
 
 	wantPfxs := toSgPrefixes(wantPrefixes)
@@ -651,9 +645,7 @@ func runGetSyncgroupSpec(ctx *context.T, serviceName, sgName, wantDesc, wantPref
 }
 
 func runGetSyncgroupMembers(ctx *context.T, serviceName, sgName string, wantMembers uint64) error {
-	a := syncbase.NewService(serviceName).App("a")
-	d := a.Database("d", nil)
-
+	d := dbHandle(serviceName)
 	sg := d.Syncgroup(sgName)
 
 	var gotMembers uint64
@@ -676,8 +668,7 @@ func runGetSyncgroupMembers(ctx *context.T, serviceName, sgName string, wantMemb
 }
 
 func runPopulateData(ctx *context.T, serviceName, keyPrefix string, start uint64) error {
-	a := syncbase.NewService(serviceName).App("a")
-	d := a.Database("d", nil)
+	d := dbHandle(serviceName)
 
 	// Do Puts.
 	c := d.Collection(testCollection)
@@ -693,8 +684,7 @@ func runPopulateData(ctx *context.T, serviceName, keyPrefix string, start uint64
 }
 
 func runPopulateNonVomData(ctx *context.T, serviceName, keyPrefix string, start uint64) error {
-	a := syncbase.NewService(serviceName).App("a")
-	d := a.Database("d", nil)
+	d := dbHandle(serviceName)
 
 	// Do Puts.
 	c := d.Collection("c")
@@ -712,8 +702,7 @@ func runPopulateNonVomData(ctx *context.T, serviceName, keyPrefix string, start 
 }
 
 func runUpdateData(ctx *context.T, serviceName string, start uint64) error {
-	a := syncbase.NewService(serviceName).App("a")
-	d := a.Database("d", nil)
+	d := dbHandle(serviceName)
 
 	// Do Puts.
 	c := d.Collection(testCollection)
@@ -730,8 +719,7 @@ func runUpdateData(ctx *context.T, serviceName string, start uint64) error {
 }
 
 func runDeleteData(ctx *context.T, serviceName string, start uint64) error {
-	a := syncbase.NewService(serviceName).App("a")
-	d := a.Database("d", nil)
+	d := dbHandle(serviceName)
 
 	// Do Puts.
 	c := d.Collection(testCollection)
@@ -748,8 +736,7 @@ func runDeleteData(ctx *context.T, serviceName string, start uint64) error {
 }
 
 func runSetCollectionPermissions(ctx *context.T, serviceName string, aclBlessings ...string) error {
-	a := syncbase.NewService(serviceName).App("a")
-	d := a.Database("d", nil)
+	d := dbHandle(serviceName)
 
 	// Set acl.
 	c := d.Collection(testCollection)
@@ -762,8 +749,7 @@ func runSetCollectionPermissions(ctx *context.T, serviceName string, aclBlessing
 }
 
 func runVerifySyncgroupData(ctx *context.T, serviceName, keyPrefix string, start, count uint64, skipScan bool) error {
-	a := syncbase.NewService(serviceName).App("a")
-	d := a.Database("d", nil)
+	d := dbHandle(serviceName)
 
 	// Wait for a bit (up to 4 sec) until the last key appears.
 	c := d.Collection(testCollection)
@@ -822,8 +808,7 @@ func runVerifySyncgroupDataWithWatch(ctx *context.T, serviceName, keyPrefix stri
 	if count == 0 {
 		return fmt.Errorf("count cannot be 0: got %d", count)
 	}
-	a := syncbase.NewService(serviceName).App("a")
-	d := a.Database("d", nil)
+	d := dbHandle(serviceName)
 	ctxWithTimeout, cancel := context.WithTimeout(ctx, 10*time.Second)
 	defer cancel()
 
@@ -877,8 +862,7 @@ func runVerifySyncgroupDataWithWatch(ctx *context.T, serviceName, keyPrefix stri
 }
 
 func runVerifySyncgroupNonVomData(ctx *context.T, serviceName, keyPrefix string, start, count uint64) error {
-	a := syncbase.NewService(serviceName).App("a")
-	d := a.Database("d", nil)
+	d := dbHandle(serviceName)
 
 	// Wait for a bit (up to 4 sec) until the last key appears.
 	c := d.Collection("c")
@@ -914,8 +898,7 @@ func runVerifySyncgroupNonVomData(ctx *context.T, serviceName, keyPrefix string,
 }
 
 func runVerifyDeletedData(ctx *context.T, serviceName, keyPrefix string) error {
-	a := syncbase.NewService(serviceName).App("a")
-	d := a.Database("d", nil)
+	d := dbHandle(serviceName)
 
 	// Wait for a bit for deletions to propagate.
 	c := d.Collection(testCollection)
@@ -960,8 +943,7 @@ func runVerifyDeletedData(ctx *context.T, serviceName, keyPrefix string) error {
 }
 
 func runVerifyConflictResolution(ctx *context.T, serviceName string) error {
-	a := syncbase.NewService(serviceName).App("a")
-	d := a.Database("d", nil)
+	d := dbHandle(serviceName)
 	c := d.Collection(testCollection)
 
 	wantData := []struct {
@@ -998,8 +980,7 @@ func runVerifyConflictResolution(ctx *context.T, serviceName string) error {
 }
 
 func runVerifyNonSyncgroupData(ctx *context.T, serviceName, keyPrefix string) error {
-	a := syncbase.NewService(serviceName).App("a")
-	d := a.Database("d", nil)
+	d := dbHandle(serviceName)
 	c := d.Collection(testCollection)
 
 	// Verify through a scan that none of that data exists.
@@ -1020,8 +1001,7 @@ func runVerifyNonSyncgroupData(ctx *context.T, serviceName, keyPrefix string) er
 }
 
 func runVerifyLocalAndRemoteData(ctx *context.T, serviceName string) error {
-	a := syncbase.NewService(serviceName).App("a")
-	d := a.Database("d", nil)
+	d := dbHandle(serviceName)
 	c := d.Collection(testCollection)
 
 	// Wait for a bit (up to 4 sec) until the last key appears.
@@ -1063,8 +1043,7 @@ func runVerifyLocalAndRemoteData(ctx *context.T, serviceName string) error {
 }
 
 func runVerifyLostAccess(ctx *context.T, serviceName, keyPrefix string, start, count uint64) error {
-	a := syncbase.NewService(serviceName).App("a")
-	d := a.Database("d", nil)
+	d := dbHandle(serviceName)
 
 	// Wait for a bit (up to 4 sec) until the last key disappears.
 	c := d.Collection(testCollection)
@@ -1094,8 +1073,7 @@ func runVerifyLostAccess(ctx *context.T, serviceName, keyPrefix string, start, c
 }
 
 func runVerifyNestedSyncgroupData(ctx *context.T, serviceName string) error {
-	a := syncbase.NewService(serviceName).App("a")
-	d := a.Database("d", nil)
+	d := dbHandle(serviceName)
 
 	// Wait for a bit (up to 8 sec) until the last key appears. This chosen
 	// time interval is dependent on how fast the membership view is
@@ -1135,20 +1113,18 @@ func runVerifyNestedSyncgroupData(ctx *context.T, serviceName string) error {
 	return nil
 }
 
-func runSetupAppMulti(ctx *context.T, serviceName string, numApps, numDbs, numTbs int) error {
+func runSetupAppMulti(ctx *context.T, serviceName string, numApps, numDbs, numCxs int) error {
 	svc := syncbase.NewService(serviceName)
 
 	for i := 0; i < numApps; i++ {
 		appName := fmt.Sprintf("a%d", i)
-		a := svc.App(appName)
-		a.Create(ctx, nil)
 
 		for j := 0; j < numDbs; j++ {
 			dbName := fmt.Sprintf("d%d", j)
-			d := a.Database(dbName, nil)
+			d := svc.DatabaseForId(wire.Id{appName, dbName}, nil)
 			d.Create(ctx, nil)
 
-			for k := 0; k < numTbs; k++ {
+			for k := 0; k < numCxs; k++ {
 				cName := fmt.Sprintf("c%d", k)
 				d.Collection(cName).Create(ctx, nil)
 			}
@@ -1158,25 +1134,22 @@ func runSetupAppMulti(ctx *context.T, serviceName string, numApps, numDbs, numTb
 	return nil
 }
 
-func runPopulateSyncgroupMulti(ctx *context.T, serviceName, sgNamePrefix string, numApps, numDbs, numTbs int, prefixes ...string) error {
+func runPopulateSyncgroupMulti(ctx *context.T, serviceName, sgNamePrefix string, numApps, numDbs, numCxs int, prefixes ...string) error {
 	mtNames := v23.GetNamespace(ctx).Roots()
 
 	svc := syncbase.NewService(serviceName)
 
-	// For each app...
 	for i := 0; i < numApps; i++ {
 		appName := fmt.Sprintf("a%d", i)
-		a := svc.App(appName)
 
-		// For each database...
 		for j := 0; j < numDbs; j++ {
 			dbName := fmt.Sprintf("d%d", j)
-			d := a.Database(dbName, nil)
+			d := svc.DatabaseForId(wire.Id{appName, dbName}, nil)
 
 			// For each collection, pre-populate entries on each prefix.
 			// Also determine the syncgroup prefixes.
 			var sgPrefixes []string
-			for k := 0; k < numTbs; k++ {
+			for k := 0; k < numCxs; k++ {
 				cName := fmt.Sprintf("c%d", k)
 				c := d.Collection(cName)
 
@@ -1220,11 +1193,10 @@ func runJoinSyncgroupMulti(ctx *context.T, serviceName, sgNamePrefix string, num
 
 	for i := 0; i < numApps; i++ {
 		appName := fmt.Sprintf("a%d", i)
-		a := svc.App(appName)
 
 		for j := 0; j < numDbs; j++ {
 			dbName := fmt.Sprintf("d%d", j)
-			d := a.Database(dbName, nil)
+			d := svc.DatabaseForId(wire.Id{appName, dbName}, nil)
 
 			sgName := naming.Join(sgNamePrefix, appName, dbName)
 			sg := d.Syncgroup(sgName)
@@ -1238,20 +1210,19 @@ func runJoinSyncgroupMulti(ctx *context.T, serviceName, sgNamePrefix string, num
 	return nil
 }
 
-func runVerifySyncgroupDataMulti(ctx *context.T, serviceName string, numApps, numDbs, numTbs int, prefixes ...string) error {
+func runVerifySyncgroupDataMulti(ctx *context.T, serviceName string, numApps, numDbs, numCxs int, prefixes ...string) error {
 	svc := syncbase.NewService(serviceName)
 
 	time.Sleep(20 * time.Second)
 
 	for i := 0; i < numApps; i++ {
 		appName := fmt.Sprintf("a%d", i)
-		a := svc.App(appName)
 
 		for j := 0; j < numDbs; j++ {
 			dbName := fmt.Sprintf("d%d", j)
-			d := a.Database(dbName, nil)
+			d := svc.DatabaseForId(wire.Id{appName, dbName}, nil)
 
-			for k := 0; k < numTbs; k++ {
+			for k := 0; k < numCxs; k++ {
 				cName := fmt.Sprintf("c%d", k)
 				c := d.Collection(cName)
 
@@ -1278,8 +1249,7 @@ func runVerifySyncgroupDataMulti(ctx *context.T, serviceName string, numApps, nu
 }
 
 func getResumeMarker(ctx *context.T, serviceName string) (watch.ResumeMarker, error) {
-	a := syncbase.NewService(serviceName).App("a")
-	d := a.Database("d", nil)
+	d := dbHandle(serviceName)
 	return d.GetResumeMarker(ctx)
 }
 

@@ -59,8 +59,7 @@ var bigCollection syncbase.Collection
 func setup(t *testing.T) {
 	var sName string
 	ctx, sName, cleanup = tu.SetupOrDie(nil)
-	a := tu.CreateApp(t, ctx, syncbase.NewService(sName), "a")
-	db = tu.CreateDatabase(t, ctx, a, "db")
+	db = tu.CreateDatabase(t, ctx, syncbase.NewService(sName), "d")
 	customerCollection = tu.CreateCollection(t, ctx, db, "Customer")
 	numbersCollection = tu.CreateCollection(t, ctx, db, "Numbers")
 	fooCollection = tu.CreateCollection(t, ctx, db, "Foo")
@@ -2316,7 +2315,7 @@ func TestExecErrors(t *testing.T) {
 			// The following error text is dependent on the implementation of the query.Database interface.
 			// TODO(sadovsky): Error messages should never contain storage engine
 			// prefixes ("c") and delimiters ("\xfe").
-			syncql.NewErrTableCantAccess(ctx, 14, "Unknown", errors.New("syncbase.test:\"a/db\".Exec: Does not exist: c\xfeUnknown\xfe")),
+			syncql.NewErrTableCantAccess(ctx, 14, "Unknown", errors.New("syncbase.test:\"v.io:xyz,d\".Exec: Does not exist: c\xfeUnknown\xfe")),
 		},
 		{
 			"select v from Customer offset -1",
@@ -2487,7 +2486,7 @@ func TestQueryErrors(t *testing.T) {
 			"select k from Blah",
 			// TODO(sadovsky): Error messages should never contain storage engine
 			// prefixes ("c") and delimiters ("\xfe").
-			syncql.NewErrTableCantAccess(ctx, 14, "Blah", errors.New("syncbase.test:\"a/db\".Exec: Does not exist: c\xfeBlah\xfe")),
+			syncql.NewErrTableCantAccess(ctx, 14, "Blah", errors.New("syncbase.test:\"v.io:xyz,d\".Exec: Does not exist: c\xfeBlah\xfe")),
 		},
 		{
 			"select k, v from Customer where a = b)",

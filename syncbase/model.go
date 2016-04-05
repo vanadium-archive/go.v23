@@ -2,7 +2,20 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
+// Package syncbase defines the Syncbase client library.
 package syncbase
+
+// Namespace: <serviceName>/<encDbId>/<encCxId>/<encRowKey>, where:
+//   <encDbId> is encode(<dbId>), where <dbId> is <appBlessing>,<dbName>
+//   <encCxId> is encode(<cxId>), where <cxId> is <userBlessing>,<cxName>
+// (Note that blessing strings cannot contain ",".)
+
+// NOTE(sadovsky): Various methods below may end up needing additional options.
+// One can add options to a Go method in a backwards-compatible way by making
+// the method variadic.
+
+// TODO(sadovsky): Document the access control policy for every method where
+// it's not obvious.
 
 import (
 	"time"
@@ -16,58 +29,23 @@ import (
 	"v.io/v23/vom"
 )
 
-// NOTE(sadovsky): Various methods below may end up needing additional options.
-// One can add options to a Go method in a backwards-compatible way by making
-// the method variadic.
-
-// TODO(sadovsky): Document the access control policy for every method where
-// it's not obvious.
-
 // Service represents a Vanadium Syncbase service.
-// Use syncbase.NewService to get a Service.
+// Use NewService to get a Service.
 type Service interface {
-	// FullName returns the object name (escaped) of this Service.
+	// FullName returns the object name (encoded) of this Service.
 	FullName() string
 
-	// App returns the App with the given name.
-	App(relativeName string) App
+	// Database returns the Database with the given context and relative name.
+	// The app blessing is derived from the context.
+	// TODO(sadovsky): Revisit API for schema stuff.
+	Database(ctx *context.T, name string, schema *Schema) Database
 
-	// ListApps returns a list of all App names.
-	ListApps(ctx *context.T) ([]string, error)
+	// DatabaseForId returns the Database with the given app blessing and name.
+	DatabaseForId(id wire.Id, schema *Schema) Database
 
-	// SetPermissions and GetPermissions are included from the AccessController
-	// interface.
-	util.AccessController
-}
-
-// App represents the data for a specific app instance (possibly a combination
-// of user, device, and app).
-type App interface {
-	// Name returns the relative name of this App.
-	Name() string
-
-	// FullName returns the object name (escaped) of this App.
-	FullName() string
-
-	// Exists returns true only if this App exists. Insufficient permissions
-	// cause Exists to return false instead of an error.
-	Exists(ctx *context.T) (bool, error)
-
-	// Database returns the Database with the given name.
-	// relativeName must not contain slashes.
-	// schema can be nil only if schema was never set for the database in the
-	// first place. See Schema for more details.
-	Database(relativeName string, schema *Schema) Database
-
-	// ListDatabases returns a list of all Database names.
-	ListDatabases(ctx *context.T) ([]string, error)
-
-	// Create creates this App.
-	// If perms is nil, we inherit (copy) the Service perms.
-	Create(ctx *context.T, perms access.Permissions) error
-
-	// Destroy destroys this App.
-	Destroy(ctx *context.T) error
+	// ListDatabases returns a list of all database names that the caller is
+	// allowed to see.
+	ListDatabases(ctx *context.T) ([]wire.Id, error)
 
 	// SetPermissions and GetPermissions are included from the AccessController
 	// interface.
@@ -78,10 +56,10 @@ type App interface {
 // It allows clients to pass the handle to helper methods that are
 // batch-agnostic.
 type DatabaseHandle interface {
-	// Name returns the relative name of this DatabaseHandle.
-	Name() string
+	// Id returns the id of this DatabaseHandle.
+	Id() wire.Id
 
-	// FullName returns the object name (escaped) of this DatabaseHandle.
+	// FullName returns the object name (encoded) of this DatabaseHandle.
 	FullName() string
 
 	// Collection returns the Collection with the given name.
@@ -92,6 +70,7 @@ type DatabaseHandle interface {
 	ListCollections(ctx *context.T) ([]string, error)
 
 	// Exec executes a syncQL query.
+	//
 	// A value must be provided for every positional parameter ('?' placeholder)
 	// in the query.
 	//
@@ -109,17 +88,13 @@ type DatabaseHandle interface {
 	//
 	// Concurrency semantics: It is legal to perform writes concurrently with
 	// Exec. The returned stream reads from a consistent snapshot taken at the
-	// time of the RPC, and will not reflect subsequent writes to keys not yet
-	// reached by the stream.
+	// time of the RPC (or at the time of BeginBatch, if in a batch), and will not
+	// reflect subsequent writes to keys not yet reached by the stream.
 	Exec(ctx *context.T, query string, params ...interface{}) ([]string, ResultStream, error)
 
-	// GetResumeMarker returns the ResumeMarker that points to the current end
-	// of the event log.
+	// GetResumeMarker returns a ResumeMarker that points to the current end of
+	// the event log.
 	GetResumeMarker(ctx *context.T) (watch.ResumeMarker, error)
-
-	// Close cleans up any state associated with this client handle including
-	// shutting down any open conflict resolution stream.
-	Close()
 }
 
 // Database represents a set of Collections. Batches, queries, sync, watch,
@@ -128,10 +103,11 @@ type Database interface {
 	DatabaseHandle
 
 	// Create creates this Database.
-	// If perms is nil, we inherit (copy) the App perms.
+	// TODO(sadovsky): Specify what happens if perms is nil.
 	Create(ctx *context.T, perms access.Permissions) error
 
 	// Destroy destroys this Database, permanently removing all of its data.
+	// TODO(sadovsky): Specify what happens to syncgroups.
 	Destroy(ctx *context.T) error
 
 	// Exists returns true only if this Database exists. Insufficient permissions
@@ -158,7 +134,7 @@ type Database interface {
 	// fail with no effect.
 	//
 	// Concurrency semantics can be configured using BatchOptions.
-	// TODO(sadovsky): Maybe use varargs for options.
+	// TODO(sadovsky): Use varargs for options.
 	BeginBatch(ctx *context.T, opts wire.BatchOptions) (BatchDatabase, error)
 
 	// SetPermissions and GetPermissions are included from the AccessController
@@ -167,7 +143,7 @@ type Database interface {
 
 	// Watch allows a client to watch for updates to the database. For each watch
 	// request, the client will receive a reliable stream of watch events without
-	// re-ordering. See watch.GlobWatcher for a detailed explanation of the
+	// reordering. See watch.GlobWatcher for a detailed explanation of the
 	// behavior.
 	//
 	// If a nil ResumeMarker is provided, the WatchStream will begin with a Change
@@ -181,31 +157,37 @@ type Database interface {
 	// Syncgroup returns a handle to the syncgroup with the given name.
 	Syncgroup(sgName string) Syncgroup
 
-	// GetSyncgroupNames returns the global names of all syncgroups attached to
-	// this database.
+	// GetSyncgroupNames returns the names of all syncgroups attached to this
+	// database.
+	// TODO(sadovsky): Rename to ListSyncgroups, for parity with ListDatabases.
 	GetSyncgroupNames(ctx *context.T) ([]string, error)
 
-	// CreateBlob returns a handle to the new Blob instantiated by Syncbase.
+	// CreateBlob creates a new blob and returns a handle to it.
 	CreateBlob(ctx *context.T) (Blob, error)
 
 	// Blob returns a handle to the blob with the given BlobRef.
 	Blob(br wire.BlobRef) Blob
 
-	// EnforceSchema compares the current schema version of the database
-	// with the schema version provided while creating this database handle and
-	// updates the schema metadata if required.
+	// EnforceSchema compares the current schema version of the database with the
+	// schema version provided while creating this database handle, and updates
+	// the schema metadata if required.
+	//
 	// This method also registers a conflict resolver with syncbase to receive
-	// conflicts. Note: schema can be nil, in which case this method should not
-	// be called and the caller is responsible for maintaining schema sanity.
+	// conflicts. Note: schema can be nil, in which case this method should not be
+	// called and the caller is responsible for maintaining schema sanity.
 	EnforceSchema(ctx *context.T) error
 
-	// PauseSync pauses sync for this database. Incoming sync, as well as
-	// outgoing sync of subsequent writes, will be disabled until ResumeSync
-	// is called. PauseSync is idempotent.
+	// PauseSync pauses sync for this database. Incoming sync, as well as outgoing
+	// sync of subsequent writes, will be disabled until ResumeSync is called.
+	// PauseSync is idempotent.
 	PauseSync(ctx *context.T) error
 
 	// ResumeSync resumes sync for this database. ResumeSync is idempotent.
 	ResumeSync(ctx *context.T) error
+
+	// Close cleans up any state associated with this client handle including
+	// shutting down any open conflict resolution stream.
+	Close()
 }
 
 // BatchDatabase is a handle to a set of reads and writes to the database that
@@ -236,7 +218,7 @@ type Collection interface {
 	// Name returns the relative name of this Collection.
 	Name() string
 
-	// FullName returns the object name (escaped) of this Collection.
+	// FullName returns the object name (encoded) of this Collection.
 	FullName() string
 
 	// Exists returns true only if this Collection exists. Insufficient permissions
@@ -302,7 +284,7 @@ type Row interface {
 	// Key returns the primary key for this Row.
 	Key() string
 
-	// FullName returns the object name (escaped) of this Row.
+	// FullName returns the object name (encoded) of this Row.
 	FullName() string
 
 	// Exists returns true only if this Row exists. Insufficient permissions

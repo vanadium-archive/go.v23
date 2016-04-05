@@ -25,7 +25,7 @@ var (
 	errBadBlessingBadSubstring    = verror.Register(pkgPath+".errBadBlessingBadSubstring", verror.NoRetry, "{1:}{2:}invalid blessing extension({3} has {4} as a substring){:_}")
 
 	// invalidBlessingSubStrings are strings that a blessing extension cannot have as a substring.
-	invalidBlessingSubStrings = []string{string(AllPrincipals), ChainSeparator + ChainSeparator /* double slash not allowed */, ",", "@@", "(", ")", "<", ">", "/"}
+	invalidBlessingSubStrings = []string{string(AllPrincipals), ChainSeparator + ChainSeparator /* double chain separator not allowed */, ",", "@@", "(", ")", "<", ">", "/"}
 	// invalidBlessingExtensions are strings that are disallowed as blessing extensions.
 	invalidBlessingExtensions = []string{string(NoExtension)}
 

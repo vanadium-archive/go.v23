@@ -35,6 +35,120 @@ var _ = __VDLInit() // Must be first; see __VDLInit comments for details.
 //////////////////////////////////////////////////
 // Type definitions
 
+// Id is a {blessing, name} pair, used to identify a database or a collection.
+// TODO(sadovsky): Maybe implement Id.String().
+type Id struct {
+	Blessing string
+	Name     string
+}
+
+func (Id) __VDLReflect(struct {
+	Name string `vdl:"v.io/v23/services/syncbase.Id"`
+}) {
+}
+
+func (m *Id) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
+	fieldsTarget1, err := t.StartFields(tt)
+	if err != nil {
+		return err
+	}
+	var4 := (m.Blessing == "")
+	if var4 {
+		if err := fieldsTarget1.ZeroField("Blessing"); err != nil && err != vdl.ErrFieldNoExist {
+			return err
+		}
+	} else {
+		keyTarget2, fieldTarget3, err := fieldsTarget1.StartField("Blessing")
+		if err != vdl.ErrFieldNoExist {
+			if err != nil {
+				return err
+			}
+			if err := fieldTarget3.FromString(string(m.Blessing), tt.NonOptional().Field(0).Type); err != nil {
+				return err
+			}
+			if err := fieldsTarget1.FinishField(keyTarget2, fieldTarget3); err != nil {
+				return err
+			}
+		}
+	}
+	var7 := (m.Name == "")
+	if var7 {
+		if err := fieldsTarget1.ZeroField("Name"); err != nil && err != vdl.ErrFieldNoExist {
+			return err
+		}
+	} else {
+		keyTarget5, fieldTarget6, err := fieldsTarget1.StartField("Name")
+		if err != vdl.ErrFieldNoExist {
+			if err != nil {
+				return err
+			}
+			if err := fieldTarget6.FromString(string(m.Name), tt.NonOptional().Field(1).Type); err != nil {
+				return err
+			}
+			if err := fieldsTarget1.FinishField(keyTarget5, fieldTarget6); err != nil {
+				return err
+			}
+		}
+	}
+	if err := t.FinishFields(fieldsTarget1); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (m *Id) MakeVDLTarget() vdl.Target {
+	return &IdTarget{Value: m}
+}
+
+type IdTarget struct {
+	Value          *Id
+	blessingTarget vdl.StringTarget
+	nameTarget     vdl.StringTarget
+	vdl.TargetBase
+	vdl.FieldsTargetBase
+}
+
+func (t *IdTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
+
+	if ttWant := vdl.TypeOf((*Id)(nil)).Elem(); !vdl.Compatible(tt, ttWant) {
+		return nil, fmt.Errorf("type %v incompatible with %v", tt, ttWant)
+	}
+	return t, nil
+}
+func (t *IdTarget) StartField(name string) (key, field vdl.Target, _ error) {
+	switch name {
+	case "Blessing":
+		t.blessingTarget.Value = &t.Value.Blessing
+		target, err := &t.blessingTarget, error(nil)
+		return nil, target, err
+	case "Name":
+		t.nameTarget.Value = &t.Value.Name
+		target, err := &t.nameTarget, error(nil)
+		return nil, target, err
+	default:
+		return nil, nil, fmt.Errorf("field %s not in struct v.io/v23/services/syncbase.Id", name)
+	}
+}
+func (t *IdTarget) FinishField(_, _ vdl.Target) error {
+	return nil
+}
+func (t *IdTarget) ZeroField(name string) error {
+	switch name {
+	case "Blessing":
+		t.Value.Blessing = ""
+		return nil
+	case "Name":
+		t.Value.Name = ""
+		return nil
+	default:
+		return fmt.Errorf("field %s not in struct v.io/v23/services/syncbase.Id", name)
+	}
+}
+func (t *IdTarget) FinishFields(_ vdl.FieldsTarget) error {
+
+	return nil
+}
+
 // DevModeUpdateVClockOpts specifies what DevModeUpdateVClock should do, as
 // described below.
 type DevModeUpdateVClockOpts struct {
@@ -3848,8 +3962,8 @@ type ServiceClientMethods interface {
 	//    GetPermissions() (perms access.Permissions, version string, err error) {Blue}
 	//  }
 	permissions.ObjectClientMethods
-	// DevModeUpdateVClock updates various bits of Syncbase virtual clock and clock
-	// daemon state based on the specified options.
+	// DevModeUpdateVClock updates various bits of Syncbase virtual clock and
+	// clock daemon state based on the specified options.
 	// Requires --dev flag to be set (in addition to Admin check).
 	DevModeUpdateVClock(_ *context.T, uco DevModeUpdateVClockOpts, _ ...rpc.CallOpt) error
 	// DevModeGetTime returns the current time per the Syncbase clock.
@@ -3935,8 +4049,8 @@ type ServiceServerMethods interface {
 	//    GetPermissions() (perms access.Permissions, version string, err error) {Blue}
 	//  }
 	permissions.ObjectServerMethods
-	// DevModeUpdateVClock updates various bits of Syncbase virtual clock and clock
-	// daemon state based on the specified options.
+	// DevModeUpdateVClock updates various bits of Syncbase virtual clock and
+	// clock daemon state based on the specified options.
 	// Requires --dev flag to be set (in addition to Admin check).
 	DevModeUpdateVClock(_ *context.T, _ rpc.ServerCall, uco DevModeUpdateVClockOpts) error
 	// DevModeGetTime returns the current time per the Syncbase clock.
@@ -4011,7 +4125,7 @@ var descService = rpc.InterfaceDesc{
 	Methods: []rpc.MethodDesc{
 		{
 			Name: "DevModeUpdateVClock",
-			Doc:  "// DevModeUpdateVClock updates various bits of Syncbase virtual clock and clock\n// daemon state based on the specified options.\n// Requires --dev flag to be set (in addition to Admin check).",
+			Doc:  "// DevModeUpdateVClock updates various bits of Syncbase virtual clock and\n// clock daemon state based on the specified options.\n// Requires --dev flag to be set (in addition to Admin check).",
 			InArgs: []rpc.ArgDesc{
 				{"uco", ``}, // DevModeUpdateVClockOpts
 			},
@@ -7425,6 +7539,7 @@ func __VDLInit() struct{} {
 	__VDLInitCalled = true
 
 	// Register types.
+	vdl.Register((*Id)(nil))
 	vdl.Register((*DevModeUpdateVClockOpts)(nil))
 	vdl.Register((*BatchOptions)(nil))
 	vdl.Register((*KeyValue)(nil))

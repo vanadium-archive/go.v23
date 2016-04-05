@@ -22,10 +22,6 @@ type serviceTest struct {
 	f func(ctx *context.T, s syncbase.Service) error
 }
 
-type appTest struct {
-	f func(ctx *context.T, a syncbase.App) error
-}
-
 type databaseTest struct {
 	f func(ctx *context.T, d syncbase.Database) error
 }
@@ -60,14 +56,14 @@ var securitySpecTestGroups = []securitySpecTestGroup{
 			return err
 		}},
 		name:     "service.DevModeGetTime",
-		patterns: []string{"A____"},
+		patterns: []string{"A___"},
 	},
 	{
 		layer: serviceTest{f: func(ctx *context.T, s syncbase.Service) error {
 			return wire.ServiceClient(s.FullName()).DevModeUpdateVClock(ctx, wire.DevModeUpdateVClockOpts{})
 		}},
 		name:     "service.DevModeUpdateVClock",
-		patterns: []string{"A____"},
+		patterns: []string{"A___"},
 	},
 	{
 		layer: serviceTest{f: func(ctx *context.T, s syncbase.Service) error {
@@ -75,59 +71,49 @@ var securitySpecTestGroups = []securitySpecTestGroup{
 			return err
 		}},
 		name:     "service.GetPermissions",
-		patterns: []string{"A____"},
+		patterns: []string{"A___"},
 	},
 	{
 		layer: serviceTest{f: func(ctx *context.T, s syncbase.Service) error {
 			return s.SetPermissions(ctx, nil, "")
 		}},
 		name:     "service.SetPermissions",
-		patterns: []string{"A____"},
-		mutating: true,
-	},
-
-	// App tests.
-	{
-		layer: serviceTest{f: func(ctx *context.T, s syncbase.Service) error {
-			return s.App("newApp").Create(ctx, nil)
-		}},
-		name:     "app.Create",
-		patterns: []string{"W____"},
-		mutating: true,
-	},
-	{
-		layer: appTest{f: func(ctx *context.T, a syncbase.App) error {
-			return a.Destroy(ctx)
-		}},
-		name:     "app.Destroy",
-		patterns: []string{"_W___"},
-		mutating: true,
-	},
-	{
-		layer: appTest{f: func(ctx *context.T, a syncbase.App) error {
-			_, _, err := a.GetPermissions(ctx)
-			return err
-		}},
-		name:     "app.GetPermissions",
-		patterns: []string{"_A___"},
-	},
-	{
-		layer: appTest{f: func(ctx *context.T, a syncbase.App) error {
-			return a.SetPermissions(ctx, nil, "")
-		}},
-		name:     "app.SetPermissions",
-		patterns: []string{"_A___"},
+		patterns: []string{"A___"},
 		mutating: true,
 	},
 
 	// Database tests.
+	{
+		layer: serviceTest{f: func(ctx *context.T, s syncbase.Service) error {
+			return s.DatabaseForId(wire.Id{"a", "dNew"}, nil).Create(ctx, nil)
+		}},
+		name:     "database.Create",
+		patterns: []string{"W___"},
+		mutating: true,
+	},
+	{
+		layer: databaseTest{f: func(ctx *context.T, d syncbase.Database) error {
+			return d.Destroy(ctx)
+		}},
+		name:     "database.Destroy",
+		patterns: []string{"_W__"},
+		mutating: true,
+	},
 	{
 		layer: databaseTest{f: func(ctx *context.T, d syncbase.Database) error {
 			_, _, err := d.GetPermissions(ctx)
 			return err
 		}},
 		name:     "database.GetPermissions",
-		patterns: []string{"__A__"},
+		patterns: []string{"_A__"},
+	},
+	{
+		layer: databaseTest{f: func(ctx *context.T, d syncbase.Database) error {
+			return d.SetPermissions(ctx, nil, "")
+		}},
+		name:     "database.SetPermissions",
+		patterns: []string{"_A__"},
+		mutating: true,
 	},
 
 	// Collection tests.
@@ -137,7 +123,7 @@ var securitySpecTestGroups = []securitySpecTestGroup{
 			return err
 		}},
 		name:     "collection.GetPermissions",
-		patterns: []string{"___A_"},
+		patterns: []string{"__A_"},
 	},
 
 	// Row tests.
@@ -147,7 +133,7 @@ var securitySpecTestGroups = []securitySpecTestGroup{
 			return r.Get(ctx, &value)
 		}},
 		name:     "row.Get",
-		patterns: []string{"___R_"},
+		patterns: []string{"__R_"},
 	},
 }
 
@@ -156,15 +142,14 @@ var securitySpecTestGroups = []securitySpecTestGroup{
 //
 // Each test group describes a Syncbase public method and a list of security
 // patterns that should allow a client to call the method.
-// A method might be service.GetPermissions and the pattern for it is "A____".
-// A security pattern is a string of 5 bytes where each byte is an '_' or
+// A method might be service.GetPermissions and the pattern for it is "A___".
+// A security pattern is a string of 4 bytes where each byte is an '_' or
 // one of X (resolve), R (read), W (write), A (admin).
 // The character index stands for:
 // 0 - service ACL
-// 1 - app ACL
-// 2 - database ACL
-// 3 - collection ACL
-// 4 - syncgroup ACL
+// 1 - database ACL
+// 2 - collection ACL
+// 3 - syncgroup ACL
 // A pattern defines a set of per-ACL permissions required for a client to call
 // the method.
 //
@@ -183,7 +168,7 @@ var securitySpecTestGroups = []securitySpecTestGroup{
 // Then we pack all tests into runs, where each run has only one type of tests
 // (allowed or denied) and at most one mutating test. For each run we rebuild
 // the following Syncbase structure:
-// service s; app a; database d; collection c; row prefix.
+// service s; database {a,d}; collection c; row prefix.
 //
 // For each test inside a run we generate 5 huge ACLs with a record for each
 // of the test + one admin record.
@@ -249,33 +234,27 @@ func runTests(t *testing.T, expectSuccess bool, tests ...securitySpecTest) {
 	// Create permissions.
 	servicePerms := tu.DefaultPerms("root:admin")
 	addPerms(servicePerms, 0, tests...)
-	appPerms := tu.DefaultPerms("root:admin")
-	addPerms(appPerms, 1, tests...)
 	databasePerms := tu.DefaultPerms("root:admin")
-	addPerms(databasePerms, 2, tests...)
+	addPerms(databasePerms, 1, tests...)
 	collectionPerms := tu.DefaultPerms("root:admin")
-	addPerms(collectionPerms, 3, tests...)
+	addPerms(collectionPerms, 2, tests...)
 	sgPerms := tu.DefaultPerms("root:admin")
-	addPerms(sgPerms, 4, tests...)
+	addPerms(sgPerms, 3, tests...)
 
-	// Create service/app/database/collection/row with permissions above.
+	// Create service/database/collection/row with permissions above.
 	ctx, adminCtx, sName, rootp, cleanup := tu.SetupOrDieCustom("admin", "server", nil)
 	defer cleanup()
 	s := syncbase.NewService(sName)
 	if err := s.SetPermissions(adminCtx, servicePerms, ""); err != nil {
 		tu.Fatalf(t, "s.SetPermissions failed: %v", err)
 	}
-	a := s.App("a")
-	if err := a.Create(adminCtx, appPerms); err != nil {
-		tu.Fatalf(t, "a.Create failed: %v", err)
-	}
-	d := a.Database("d", nil)
+	d := s.DatabaseForId(wire.Id{"a", "d"}, nil)
 	if err := d.Create(adminCtx, databasePerms); err != nil {
 		tu.Fatalf(t, "d.Create failed: %v", err)
 	}
 	c := d.Collection("c")
 	if err := c.Create(adminCtx, collectionPerms); err != nil {
-		tu.Fatalf(t, "d.Create failed: %v", err)
+		tu.Fatalf(t, "c.Create failed: %v", err)
 	}
 	r := c.Row("prefix")
 	r.Put(adminCtx, "value")
@@ -287,8 +266,6 @@ func runTests(t *testing.T, expectSuccess bool, tests ...securitySpecTest) {
 		switch layer := test.layer.(type) {
 		case serviceTest:
 			err = layer.f(clientCtx, s)
-		case appTest:
-			err = layer.f(clientCtx, a)
 		case databaseTest:
 			err = layer.f(clientCtx, d)
 		case collectionTest:

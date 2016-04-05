@@ -174,8 +174,7 @@ func watchInt32s(b *testing.B, w syncbase.WatchStream, c chan int32) {
 // getDbAndCollection obtains the database and collection handles for a syncbase
 // name.
 func getDbAndCollection(syncbaseName string) (d syncbase.Database, c syncbase.Collection) {
-	a := syncbase.NewService(syncbaseName).App(testApp)
-	d = a.Database(testDb, nil)
+	d = syncbase.NewService(syncbaseName).DatabaseForId(testDb, nil)
 	c = d.Collection(testCollection)
 	return
 }

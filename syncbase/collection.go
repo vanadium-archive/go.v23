@@ -13,11 +13,11 @@ import (
 )
 
 func newCollection(parentFullName, relativeName string) Collection {
-	// Escape relativeName so that any forward slashes get dropped, thus ensuring
+	// Encode relativeName so that any forward slashes get dropped, thus ensuring
 	// that the server will interpret fullName as referring to a collection
 	// object. Note that the server will still reject this name if
 	// util.ValidCollectionName returns false.
-	fullName := naming.Join(parentFullName, util.Escape(relativeName))
+	fullName := naming.Join(parentFullName, util.Encode(relativeName))
 	return &collection{
 		c:        wire.CollectionClient(fullName),
 		fullName: fullName,

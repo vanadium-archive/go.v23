@@ -25,49 +25,41 @@ import (
 
 // TODO(rogulenko): Test perms checking for Glob and Exec.
 
-// Tests various Name, FullName, and Key methods.
-func TestNameAndKey(t *testing.T) {
+// Tests various Id, Name, FullName, and Key methods.
+func TestIdNameAndKey(t *testing.T) {
 	s := syncbase.NewService("s")
-	a := s.App("a")
-	d := a.Database("d", nil)
+	d := s.DatabaseForId(wire.Id{"a", "d"}, nil)
 	c := d.Collection("c")
 	r := c.Row("r")
 
 	if s.FullName() != "s" {
 		t.Errorf("Wrong full name: %q", s.FullName())
 	}
-	if a.Name() != "a" {
-		t.Errorf("Wrong name: %q", a.Name())
+	if d.Id() != (wire.Id{"a", "d"}) {
+		t.Errorf("Wrong id: %q", d.Id())
 	}
-	if a.FullName() != naming.Join("s", "a") {
-		t.Errorf("Wrong name: %q", a.FullName())
-	}
-	if d.Name() != "d" {
-		t.Errorf("Wrong name: %q", d.Name())
-	}
-	if d.FullName() != naming.Join("s", "a", "d") {
+	if d.FullName() != naming.Join("s", "a,d") {
 		t.Errorf("Wrong full name: %q", d.FullName())
 	}
 	if c.Name() != "c" {
 		t.Errorf("Wrong name: %q", c.Name())
 	}
-	if c.FullName() != naming.Join("s", "a", "d", "c") {
+	if c.FullName() != naming.Join("s", "a,d", "c") {
 		t.Errorf("Wrong full name: %q", c.FullName())
 	}
 	if r.Key() != "r" {
 		t.Errorf("Wrong key: %q", r.Key())
 	}
-	if r.FullName() != naming.Join("s", "a", "d", "c", "r") {
+	if r.FullName() != naming.Join("s", "a,d", "c", "r") {
 		t.Errorf("Wrong full name: %q", r.FullName())
 	}
 }
 
-// Tests that Service.ListApps works as expected.
-func TestListApps(t *testing.T) {
+// Tests that Service.ListDatabases works as expected.
+func TestListDatabases(t *testing.T) {
 	ctx, sName, cleanup := tu.SetupOrDie(nil)
 	defer cleanup()
-	s := syncbase.NewService(sName)
-	tu.TestListChildren(t, ctx, s, tu.OkAppNames)
+	tu.TestListChildIds(t, ctx, syncbase.NewService(sName), tu.OkAppBlessings, tu.OkDbNames)
 }
 
 // Tests that Service.{Set,Get}Permissions work as expected.
@@ -77,118 +69,27 @@ func TestServicePerms(t *testing.T) {
 	tu.TestPerms(t, ctx, syncbase.NewService(sName))
 }
 
-// Tests that App.Create works as expected.
-func TestAppCreate(t *testing.T) {
+// Tests that Database.Create works as expected.
+func TestDatabaseCreate(t *testing.T) {
 	ctx, sName, cleanup := tu.SetupOrDie(nil)
 	defer cleanup()
 	tu.TestCreate(t, ctx, syncbase.NewService(sName))
 }
 
-// Tests that App.Create checks names as expected.
-func TestAppCreateNameValidation(t *testing.T) {
-	ctx, sName, cleanup := tu.SetupOrDie(nil)
-	defer cleanup()
-	tu.TestCreateNameValidation(t, ctx, syncbase.NewService(sName), tu.OkAppNames, tu.NotOkAppNames)
-}
-
-// Tests that App.Destroy works as expected.
-func TestAppDestroy(t *testing.T) {
-	ctx, sName, cleanup := tu.SetupOrDie(nil)
-	defer cleanup()
-	tu.TestDestroy(t, ctx, syncbase.NewService(sName))
-}
-
-// Tests that App.ListDatabases works as expected.
-func TestListDatabases(t *testing.T) {
-	ctx, sName, cleanup := tu.SetupOrDie(nil)
-	defer cleanup()
-	a := tu.CreateApp(t, ctx, syncbase.NewService(sName), "app/a#%b")
-	tu.TestListChildren(t, ctx, a, tu.OkDbCollectionNames)
-}
-
-// Tests that App.{Set,Get}Permissions work as expected.
-func TestAppPerms(t *testing.T) {
-	ctx, sName, cleanup := tu.SetupOrDie(nil)
-	defer cleanup()
-	a := tu.CreateApp(t, ctx, syncbase.NewService(sName), "a")
-	tu.TestPerms(t, ctx, a)
-}
-
-// Tests that App.Destroy destroys all databases in the app.
-func TestAppDestroyAndRecreate(t *testing.T) {
-	ctx, sName, cleanup := tu.SetupOrDie(nil)
-	defer cleanup()
-	// Create the hierarchy.
-	a := tu.CreateApp(t, ctx, syncbase.NewService(sName), "a")
-	d := tu.CreateDatabase(t, ctx, a, "d")
-	d2 := tu.CreateDatabase(t, ctx, a, "d2")
-	c := tu.CreateCollection(t, ctx, d, "c")
-	// Write some data.
-	if err := c.Put(ctx, "bar/baz", "A"); err != nil {
-		t.Fatalf("c.Put() failed: %v", err)
-	}
-	if err := c.Put(ctx, "foo", "B"); err != nil {
-		t.Fatalf("c.Put() failed: %v", err)
-	}
-	// Remove admin and write permissions from c and d2.
-	fullPerms := tu.DefaultPerms("root:client").Normalize()
-	readPerms := fullPerms.Copy()
-	readPerms.Clear("root:client", string(access.Write), string(access.Admin))
-	readPerms.Normalize()
-	if err := c.SetPermissions(ctx, readPerms); err != nil {
-		t.Fatalf("c.SetPermissions() failed: %v", err)
-	}
-	if err := d2.SetPermissions(ctx, readPerms, ""); err != nil {
-		t.Fatalf("d2.SetPermissions() failed: %v", err)
-	}
-	// Verify we have no write access to c anymore.
-	if err := c.Put(ctx, "bar/bat", "C"); verror.ErrorID(err) != verror.ErrNoAccess.ID {
-		t.Fatalf("c.Put() should have failed with ErrNoAccess, got: %v", err)
-	}
-	// Verify we cannot destroy d2.
-	if err := d2.Destroy(ctx); verror.ErrorID(err) != verror.ErrNoAccess.ID {
-		t.Fatalf("d2.Destroy() should have failed with ErrNoAccess, got: %v", err)
-	}
-	// Destroy app. Destroy needs only admin permissions on the app, so it
-	// shouldn't be affected by the read-only collection or database ACL.
-	if err := a.Destroy(ctx); err != nil {
-		t.Fatalf("a.Destroy() failed: %v", err)
-	}
-	// Recreate the hierarchy.
-	a = tu.CreateApp(t, ctx, syncbase.NewService(sName), "a")
-	d = tu.CreateDatabase(t, ctx, a, "d")
-	d2 = tu.CreateDatabase(t, ctx, a, "d2")
-	c = tu.CreateCollection(t, ctx, d, "c")
-	// Verify collection is empty.
-	tu.CheckScan(t, ctx, c, syncbase.Prefix(""), []string{}, []interface{}{})
-	// Verify we again have write access to c.
-	if err := c.Put(ctx, "bar/bat", "C"); err != nil {
-		t.Fatalf("c.Put() failed: %v", err)
-	}
-}
-
-// Tests that Database.Create works as expected.
-func TestDatabaseCreate(t *testing.T) {
-	ctx, sName, cleanup := tu.SetupOrDie(nil)
-	defer cleanup()
-	a := tu.CreateApp(t, ctx, syncbase.NewService(sName), "a")
-	tu.TestCreate(t, ctx, a)
-}
-
 // Tests name-checking on database creation.
+// TODO(sadovsky): Also test blessing validation. We should rewrite some of
+// these tests. Let's do this after we update collections to use ids.
 func TestDatabaseCreateNameValidation(t *testing.T) {
 	ctx, sName, cleanup := tu.SetupOrDie(nil)
 	defer cleanup()
-	a := tu.CreateApp(t, ctx, syncbase.NewService(sName), "a")
-	tu.TestCreateNameValidation(t, ctx, a, tu.OkDbCollectionNames, tu.NotOkDbCollectionNames)
+	tu.TestCreateNameValidation(t, ctx, syncbase.NewService(sName), tu.OkDbNames, tu.NotOkDbNames)
 }
 
 // Tests that Database.Destroy works as expected.
 func TestDatabaseDestroy(t *testing.T) {
 	ctx, sName, cleanup := tu.SetupOrDie(nil)
 	defer cleanup()
-	a := tu.CreateApp(t, ctx, syncbase.NewService(sName), "a")
-	tu.TestDestroy(t, ctx, a)
+	tu.TestDestroy(t, ctx, syncbase.NewService(sName))
 }
 
 // Tests that Database.Exec works as expected.
@@ -197,8 +98,7 @@ func TestDatabaseDestroy(t *testing.T) {
 func TestExec(t *testing.T) {
 	ctx, sName, cleanup := tu.SetupOrDie(nil)
 	defer cleanup()
-	a := tu.CreateApp(t, ctx, syncbase.NewService(sName), "a")
-	d := tu.CreateDatabase(t, ctx, a, "d")
+	d := tu.CreateDatabase(t, ctx, syncbase.NewService(sName), "d")
 	c := tu.CreateCollection(t, ctx, d, "c")
 
 	foo := Foo{I: 4, S: "f"}
@@ -286,17 +186,15 @@ func TestExec(t *testing.T) {
 func TestListCollections(t *testing.T) {
 	ctx, sName, cleanup := tu.SetupOrDie(nil)
 	defer cleanup()
-	a := tu.CreateApp(t, ctx, syncbase.NewService(sName), "app/a#%b")
-	d := tu.CreateDatabase(t, ctx, a, "d")
-	tu.TestListChildren(t, ctx, d, tu.OkDbCollectionNames)
+	d := tu.CreateDatabase(t, ctx, syncbase.NewService(sName), "d")
+	tu.TestListChildren(t, ctx, d, tu.OkCollectionNames)
 }
 
 // Tests that Database.{Set,Get}Permissions work as expected.
 func TestDatabasePerms(t *testing.T) {
 	ctx, sName, cleanup := tu.SetupOrDie(nil)
 	defer cleanup()
-	a := tu.CreateApp(t, ctx, syncbase.NewService(sName), "a")
-	d := tu.CreateDatabase(t, ctx, a, "d")
+	d := tu.CreateDatabase(t, ctx, syncbase.NewService(sName), "d")
 	tu.TestPerms(t, ctx, d)
 }
 
@@ -304,8 +202,7 @@ func TestDatabasePerms(t *testing.T) {
 func TestCollectionCreate(t *testing.T) {
 	ctx, sName, cleanup := tu.SetupOrDie(nil)
 	defer cleanup()
-	a := tu.CreateApp(t, ctx, syncbase.NewService(sName), "a")
-	d := tu.CreateDatabase(t, ctx, a, "d")
+	d := tu.CreateDatabase(t, ctx, syncbase.NewService(sName), "d")
 	tu.TestCreate(t, ctx, d)
 }
 
@@ -313,17 +210,15 @@ func TestCollectionCreate(t *testing.T) {
 func TestCollectionCreateNameValidation(t *testing.T) {
 	ctx, sName, cleanup := tu.SetupOrDie(nil)
 	defer cleanup()
-	a := tu.CreateApp(t, ctx, syncbase.NewService(sName), "a")
-	d := tu.CreateDatabase(t, ctx, a, "d")
-	tu.TestCreateNameValidation(t, ctx, d, tu.OkDbCollectionNames, tu.NotOkDbCollectionNames)
+	d := tu.CreateDatabase(t, ctx, syncbase.NewService(sName), "d")
+	tu.TestCreateNameValidation(t, ctx, d, tu.OkCollectionNames, tu.NotOkCollectionNames)
 }
 
 // Tests that Collection.Destroy works as expected.
 func TestCollectionDestroy(t *testing.T) {
 	ctx, sName, cleanup := tu.SetupOrDie(nil)
 	defer cleanup()
-	a := tu.CreateApp(t, ctx, syncbase.NewService(sName), "a")
-	d := tu.CreateDatabase(t, ctx, a, "d")
+	d := tu.CreateDatabase(t, ctx, syncbase.NewService(sName), "d")
 	tu.TestDestroy(t, ctx, d)
 }
 
@@ -331,8 +226,7 @@ func TestCollectionDestroy(t *testing.T) {
 func TestCollectionDestroyAndRecreate(t *testing.T) {
 	ctx, sName, cleanup := tu.SetupOrDie(nil)
 	defer cleanup()
-	a := tu.CreateApp(t, ctx, syncbase.NewService(sName), "a")
-	d := tu.CreateDatabase(t, ctx, a, "d")
+	d := tu.CreateDatabase(t, ctx, syncbase.NewService(sName), "d")
 	c := tu.CreateCollection(t, ctx, d, "c")
 	// Write some data.
 	if err := c.Put(ctx, "bar/baz", "A"); err != nil {
@@ -395,8 +289,7 @@ type Baz struct {
 func TestCollectionScan(t *testing.T) {
 	ctx, sName, cleanup := tu.SetupOrDie(nil)
 	defer cleanup()
-	a := tu.CreateApp(t, ctx, syncbase.NewService(sName), "a")
-	d := tu.CreateDatabase(t, ctx, a, "d")
+	d := tu.CreateDatabase(t, ctx, syncbase.NewService(sName), "d")
 	c := tu.CreateCollection(t, ctx, d, "c")
 
 	tu.CheckScan(t, ctx, c, syncbase.Prefix(""), []string{}, []interface{}{})
@@ -440,8 +333,7 @@ func TestCollectionScan(t *testing.T) {
 func TestCollectionDeleteRange(t *testing.T) {
 	ctx, sName, cleanup := tu.SetupOrDie(nil)
 	defer cleanup()
-	a := tu.CreateApp(t, ctx, syncbase.NewService(sName), "a")
-	d := tu.CreateDatabase(t, ctx, a, "d")
+	d := tu.CreateDatabase(t, ctx, syncbase.NewService(sName), "d")
 	c := tu.CreateCollection(t, ctx, d, "c")
 
 	tu.CheckScan(t, ctx, c, syncbase.Prefix(""), []string{}, []interface{}{})
@@ -480,8 +372,7 @@ func TestCollectionDeleteRange(t *testing.T) {
 func TestCollectionRowMethods(t *testing.T) {
 	ctx, sName, cleanup := tu.SetupOrDie(nil)
 	defer cleanup()
-	a := tu.CreateApp(t, ctx, syncbase.NewService(sName), "a")
-	d := tu.CreateDatabase(t, ctx, a, "d")
+	d := tu.CreateDatabase(t, ctx, syncbase.NewService(sName), "d")
 	c := tu.CreateCollection(t, ctx, d, "c")
 
 	got, want := Foo{}, Foo{I: 4, S: "foo"}
@@ -520,8 +411,7 @@ func TestCollectionRowMethods(t *testing.T) {
 func TestRowMethods(t *testing.T) {
 	ctx, sName, cleanup := tu.SetupOrDie(nil)
 	defer cleanup()
-	a := tu.CreateApp(t, ctx, syncbase.NewService(sName), "a")
-	d := tu.CreateDatabase(t, ctx, a, "d")
+	d := tu.CreateDatabase(t, ctx, syncbase.NewService(sName), "d")
 	c := tu.CreateCollection(t, ctx, d, "c")
 
 	r := c.Row("f")
@@ -558,13 +448,12 @@ func TestRowMethods(t *testing.T) {
 }
 
 // Tests name-checking on row creation.
-func TestRowNameValidation(t *testing.T) {
+func TestRowKeyValidation(t *testing.T) {
 	ctx, sName, cleanup := tu.SetupOrDie(nil)
 	defer cleanup()
-	a := tu.CreateApp(t, ctx, syncbase.NewService(sName), "a")
-	d := tu.CreateDatabase(t, ctx, a, "d")
+	d := tu.CreateDatabase(t, ctx, syncbase.NewService(sName), "d")
 	c := tu.CreateCollection(t, ctx, d, "c")
-	tu.TestCreateNameValidation(t, ctx, c, tu.OkRowNames, tu.NotOkRowNames)
+	tu.TestCreateNameValidation(t, ctx, c, tu.OkRowKeys, tu.NotOkRowKeys)
 }
 
 // Test permission checking in Row.{Get,Put,Delete} and
@@ -573,8 +462,7 @@ func TestRowNameValidation(t *testing.T) {
 func TestRowPermissions(t *testing.T) {
 	_, clientACtx, sName, _, cleanup := tu.SetupOrDieCustom("clientA", "server", nil)
 	defer cleanup()
-	a := tu.CreateApp(t, clientACtx, syncbase.NewService(sName), "a")
-	d := tu.CreateDatabase(t, clientACtx, a, "d")
+	d := tu.CreateDatabase(t, clientACtx, syncbase.NewService(sName), "d")
 	c := tu.CreateCollection(t, clientACtx, d, "c")
 
 	// Add some key-value pairs.
@@ -618,8 +506,7 @@ func TestMixedCollectionPerms(t *testing.T) {
 	ctx, clientACtx, sName, rootp, cleanup := tu.SetupOrDieCustom("clientA", "server", nil)
 	defer cleanup()
 	clientBCtx := tu.NewCtx(ctx, rootp, "clientB")
-	a := tu.CreateApp(t, clientACtx, syncbase.NewService(sName), "a")
-	d := tu.CreateDatabase(t, clientACtx, a, "d")
+	d := tu.CreateDatabase(t, clientACtx, syncbase.NewService(sName), "d")
 	c := tu.CreateCollection(t, clientACtx, d, "c")
 
 	// Set permissions.
@@ -657,8 +544,7 @@ func TestMixedCollectionPerms(t *testing.T) {
 func TestWatchBasic(t *testing.T) {
 	ctx, sName, cleanup := tu.SetupOrDie(nil)
 	defer cleanup()
-	a := tu.CreateApp(t, ctx, syncbase.NewService(sName), "a")
-	d := tu.CreateDatabase(t, ctx, a, "d")
+	d := tu.CreateDatabase(t, ctx, syncbase.NewService(sName), "d")
 	c := tu.CreateCollection(t, ctx, d, "c")
 	var resumeMarkers []watch.ResumeMarker
 
@@ -746,8 +632,7 @@ func TestWatchWithBatchAndInitialState(t *testing.T) {
 	ctx, adminCtx, sName, rootp, cleanup := tu.SetupOrDieCustom("admin", "server", nil)
 	defer cleanup()
 	clientCtx := tu.NewCtx(ctx, rootp, "client")
-	a := tu.CreateApp(t, adminCtx, syncbase.NewService(sName), "a")
-	d := tu.CreateDatabase(t, adminCtx, a, "d")
+	d := tu.CreateDatabase(t, adminCtx, syncbase.NewService(sName), "d")
 	cp := tu.CreateCollection(t, adminCtx, d, "cpublic")
 	ch := tu.CreateCollection(t, adminCtx, d, "chidden")
 
@@ -890,8 +775,7 @@ func TestWatchWithBatchAndInitialState(t *testing.T) {
 func TestBlockingWatch(t *testing.T) {
 	ctx, sName, cleanup := tu.SetupOrDie(nil)
 	defer cleanup()
-	a := tu.CreateApp(t, ctx, syncbase.NewService(sName), "a")
-	d := tu.CreateDatabase(t, ctx, a, "d")
+	d := tu.CreateDatabase(t, ctx, syncbase.NewService(sName), "d")
 	c := tu.CreateCollection(t, ctx, d, "c")
 
 	resumeMarker, err := d.GetResumeMarker(ctx)
@@ -934,8 +818,7 @@ func TestBlockingWatch(t *testing.T) {
 func TestBlockedWatchCancel(t *testing.T) {
 	ctx, sName, cleanup := tu.SetupOrDie(nil)
 	defer cleanup()
-	a := tu.CreateApp(t, ctx, syncbase.NewService(sName), "a")
-	d := tu.CreateDatabase(t, ctx, a, "d")
+	d := tu.CreateDatabase(t, ctx, syncbase.NewService(sName), "d")
 
 	resumeMarker, err := d.GetResumeMarker(ctx)
 	if err != nil {

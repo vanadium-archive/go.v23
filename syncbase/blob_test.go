@@ -19,8 +19,7 @@ import (
 func TestLocalBlobPutGet(t *testing.T) {
 	ctx, sName, cleanup := tu.SetupOrDie(perms("root:client"))
 	defer cleanup()
-	a := tu.CreateApp(t, ctx, syncbase.NewService(sName), "a")
-	d := tu.CreateDatabase(t, ctx, a, "d")
+	d := tu.CreateDatabase(t, ctx, syncbase.NewService(sName), "d")
 
 	b, err := d.CreateBlob(ctx)
 	if err != nil {

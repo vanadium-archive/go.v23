@@ -30,14 +30,24 @@ func (s *service) FullName() string {
 	return s.fullName
 }
 
-// App implements Service.App.
-func (s *service) App(relativeName string) App {
-	return newApp(s.fullName, relativeName)
+// Database implements Service.Database.
+func (s *service) Database(ctx *context.T, name string, schema *Schema) Database {
+	blessing, err := util.AppBlessingFromContext(ctx)
+	if err != nil {
+		// TODO(sadovsky): Return invalid Database handle.
+		panic(err)
+	}
+	return NewDatabase(s.fullName, wire.Id{Blessing: blessing, Name: name}, schema)
 }
 
-// ListApps implements Service.ListApps.
-func (s *service) ListApps(ctx *context.T) ([]string, error) {
-	return util.ListChildren(ctx, s.fullName)
+// DatabaseForId implements Service.DatabaseForId.
+func (s *service) DatabaseForId(id wire.Id, schema *Schema) Database {
+	return NewDatabase(s.fullName, id, schema)
+}
+
+// ListDatabases implements Service.ListDatabases.
+func (s *service) ListDatabases(ctx *context.T) ([]wire.Id, error) {
+	return util.ListChildIds(ctx, s.fullName)
 }
 
 // SetPermissions implements Service.SetPermissions.

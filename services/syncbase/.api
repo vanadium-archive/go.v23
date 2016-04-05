@@ -138,6 +138,13 @@ pkg syncbase, method (*DevModeUpdateVClockOptsTarget) FinishFields(vdl.FieldsTar
 pkg syncbase, method (*DevModeUpdateVClockOptsTarget) StartField(string) (vdl.Target, vdl.Target, error)
 pkg syncbase, method (*DevModeUpdateVClockOptsTarget) StartFields(*vdl.Type) (vdl.FieldsTarget, error)
 pkg syncbase, method (*DevModeUpdateVClockOptsTarget) ZeroField(string) error
+pkg syncbase, method (*Id) FillVDLTarget(vdl.Target, *vdl.Type) error
+pkg syncbase, method (*Id) MakeVDLTarget() vdl.Target
+pkg syncbase, method (*IdTarget) FinishField(vdl.Target, vdl.Target) error
+pkg syncbase, method (*IdTarget) FinishFields(vdl.FieldsTarget) error
+pkg syncbase, method (*IdTarget) StartField(string) (vdl.Target, vdl.Target, error)
+pkg syncbase, method (*IdTarget) StartFields(*vdl.Type) (vdl.FieldsTarget, error)
+pkg syncbase, method (*IdTarget) ZeroField(string) error
 pkg syncbase, method (*KeyValue) FillVDLTarget(vdl.Target, *vdl.Type) error
 pkg syncbase, method (*KeyValue) MakeVDLTarget() vdl.Target
 pkg syncbase, method (*KeyValueTarget) FinishField(vdl.Target, vdl.Target) error
@@ -694,6 +701,13 @@ pkg syncbase, type DevModeUpdateVClockOptsTarget struct
 pkg syncbase, type DevModeUpdateVClockOptsTarget struct, Value *DevModeUpdateVClockOpts
 pkg syncbase, type DevModeUpdateVClockOptsTarget struct, embedded vdl.FieldsTargetBase
 pkg syncbase, type DevModeUpdateVClockOptsTarget struct, embedded vdl.TargetBase
+pkg syncbase, type Id struct
+pkg syncbase, type Id struct, Blessing string
+pkg syncbase, type Id struct, Name string
+pkg syncbase, type IdTarget struct
+pkg syncbase, type IdTarget struct, Value *Id
+pkg syncbase, type IdTarget struct, embedded vdl.FieldsTargetBase
+pkg syncbase, type IdTarget struct, embedded vdl.TargetBase
 pkg syncbase, type KeyValue struct
 pkg syncbase, type KeyValue struct, Key string
 pkg syncbase, type KeyValue struct, Value []byte

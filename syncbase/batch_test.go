@@ -18,6 +18,7 @@ import (
 	"v.io/v23/query/syncql"
 	wire "v.io/v23/services/syncbase"
 	"v.io/v23/syncbase"
+	"v.io/v23/syncbase/util"
 	"v.io/v23/verror"
 	"v.io/v23/vom"
 	_ "v.io/x/ref/runtime/factories/generic"
@@ -28,22 +29,21 @@ import (
 func TestName(t *testing.T) {
 	ctx, sName, cleanup := tu.SetupOrDie(nil)
 	defer cleanup()
-	a := tu.CreateApp(t, ctx, syncbase.NewService(sName), "a")
-	d := tu.CreateDatabase(t, ctx, a, "d")
+	d := tu.CreateDatabase(t, ctx, syncbase.NewService(sName), "d")
 
 	b, err := d.BeginBatch(ctx, wire.BatchOptions{})
 	if err != nil {
 		t.Fatalf("d.BeginBatch() failed: %v", err)
 	}
 
-	if d.Name() != "d" {
-		t.Errorf("Wrong name: %q", d.Name())
+	if d.Id() != (wire.Id{"v.io:xyz", "d"}) {
+		t.Errorf("Wrong id: %q", d.Id())
 	}
-	if d.FullName() != naming.Join(sName, "a", "d") {
+	if d.FullName() != naming.Join(sName, util.EncodeId(d.Id())) {
 		t.Errorf("Wrong full name: %q", d.FullName())
 	}
-	if b.Name() != d.Name() {
-		t.Errorf("Names should match: %q, %q", b.Name(), d.Name())
+	if b.Id() != d.Id() {
+		t.Errorf("Ids should match: %q, %q", b.Id(), d.Id())
 	}
 	if b.FullName() == d.FullName() {
 		t.Errorf("Full names should not match: %q", b.FullName())
@@ -54,8 +54,7 @@ func TestName(t *testing.T) {
 func TestBatchBasics(t *testing.T) {
 	ctx, sName, cleanup := tu.SetupOrDie(nil)
 	defer cleanup()
-	a := tu.CreateApp(t, ctx, syncbase.NewService(sName), "a")
-	d := tu.CreateDatabase(t, ctx, a, "d")
+	d := tu.CreateDatabase(t, ctx, syncbase.NewService(sName), "d")
 	c := tu.CreateCollection(t, ctx, d, "c")
 
 	tu.CheckScan(t, ctx, c, syncbase.Prefix(""), []string{}, []interface{}{})
@@ -177,8 +176,7 @@ func TestBatchBasics(t *testing.T) {
 func TestBatchListCollections(t *testing.T) {
 	ctx, sName, cleanup := tu.SetupOrDie(nil)
 	defer cleanup()
-	a := tu.CreateApp(t, ctx, syncbase.NewService(sName), "a")
-	d := tu.CreateDatabase(t, ctx, a, "d")
+	d := tu.CreateDatabase(t, ctx, syncbase.NewService(sName), "d")
 	tu.CreateCollection(t, ctx, d, "c")
 	b, err := d.BeginBatch(ctx, wire.BatchOptions{})
 
@@ -232,8 +230,7 @@ func TestBatchListCollections(t *testing.T) {
 func TestBatchExecIsolation(t *testing.T) {
 	ctx, sName, cleanup := tu.SetupOrDie(nil)
 	defer cleanup()
-	a := tu.CreateApp(t, ctx, syncbase.NewService(sName), "a")
-	d := tu.CreateDatabase(t, ctx, a, "d")
+	d := tu.CreateDatabase(t, ctx, syncbase.NewService(sName), "d")
 	c := tu.CreateCollection(t, ctx, d, "c")
 
 	foo := Foo{I: 4, S: "f"}
@@ -310,8 +307,7 @@ func TestBatchExecIsolation(t *testing.T) {
 func TestBatchReadonlyExecDelete(t *testing.T) {
 	ctx, sName, cleanup := tu.SetupOrDie(nil)
 	defer cleanup()
-	a := tu.CreateApp(t, ctx, syncbase.NewService(sName), "a")
-	d := tu.CreateDatabase(t, ctx, a, "d")
+	d := tu.CreateDatabase(t, ctx, syncbase.NewService(sName), "d")
 	c := tu.CreateCollection(t, ctx, d, "c")
 
 	foo := Foo{I: 4, S: "f"}
@@ -350,8 +346,7 @@ func TestBatchReadonlyExecDelete(t *testing.T) {
 func TestBatchExec(t *testing.T) {
 	ctx, sName, cleanup := tu.SetupOrDie(nil)
 	defer cleanup()
-	a := tu.CreateApp(t, ctx, syncbase.NewService(sName), "a")
-	d := tu.CreateDatabase(t, ctx, a, "d")
+	d := tu.CreateDatabase(t, ctx, syncbase.NewService(sName), "d")
 	c := tu.CreateCollection(t, ctx, d, "c")
 
 	foo := Foo{I: 4, S: "f"}
@@ -471,8 +466,7 @@ func TestBatchExec(t *testing.T) {
 func TestReadOnlyBatch(t *testing.T) {
 	ctx, sName, cleanup := tu.SetupOrDie(nil)
 	defer cleanup()
-	a := tu.CreateApp(t, ctx, syncbase.NewService(sName), "a")
-	d := tu.CreateDatabase(t, ctx, a, "d")
+	d := tu.CreateDatabase(t, ctx, syncbase.NewService(sName), "d")
 	c := tu.CreateCollection(t, ctx, d, "c")
 
 	if err := c.Put(ctx, "fooKey", "fooValue"); err != nil {
@@ -500,8 +494,7 @@ func TestReadOnlyBatch(t *testing.T) {
 func TestOpAfterFinalize(t *testing.T) {
 	ctx, sName, cleanup := tu.SetupOrDie(nil)
 	defer cleanup()
-	a := tu.CreateApp(t, ctx, syncbase.NewService(sName), "a")
-	d := tu.CreateDatabase(t, ctx, a, "d")
+	d := tu.CreateDatabase(t, ctx, syncbase.NewService(sName), "d")
 	c := tu.CreateCollection(t, ctx, d, "c")
 
 	// TODO(sadovsky): Add some sort of "op after finalize" error type and check
@@ -586,8 +579,7 @@ func TestOpAfterFinalize(t *testing.T) {
 func TestDisallowedMethods(t *testing.T) {
 	ctx, sName, cleanup := tu.SetupOrDie(nil)
 	defer cleanup()
-	a := tu.CreateApp(t, ctx, syncbase.NewService(sName), "a")
-	d := tu.CreateDatabase(t, ctx, a, "d")
+	d := tu.CreateDatabase(t, ctx, syncbase.NewService(sName), "d")
 	b, err := d.BeginBatch(ctx, wire.BatchOptions{})
 	if err != nil {
 		t.Fatalf("d.BeginBatch() failed: %v", err)
@@ -642,8 +634,7 @@ func TestDisallowedMethods(t *testing.T) {
 func TestBeginBatchWithNonexistentDatabase(t *testing.T) {
 	ctx, sName, cleanup := tu.SetupOrDie(nil)
 	defer cleanup()
-	a := tu.CreateApp(t, ctx, syncbase.NewService(sName), "a")
-	d := a.Database("d", nil)
+	d := syncbase.NewService(sName).DatabaseForId(wire.Id{"a", "d"}, nil)
 	if _, err := d.BeginBatch(ctx, wire.BatchOptions{}); verror.ErrorID(err) != verror.ErrNoExist.ID {
 		t.Fatalf("d.BeginBatch() should have failed: %v", err)
 	}
@@ -680,8 +671,7 @@ func tryWithConcurrentWrites(t *testing.T, ctx *context.T, d syncbase.Database, 
 func TestRunInBatchRetry(t *testing.T) {
 	ctx, sName, cleanup := tu.SetupOrDie(nil)
 	defer cleanup()
-	a := tu.CreateApp(t, ctx, syncbase.NewService(sName), "a")
-	d := tu.CreateDatabase(t, ctx, a, "d")
+	d := tu.CreateDatabase(t, ctx, syncbase.NewService(sName), "d")
 	c := tu.CreateCollection(t, ctx, d, "c")
 
 	// Succeed (no conflict) on second try.
@@ -698,8 +688,7 @@ func TestRunInBatchRetry(t *testing.T) {
 func TestRunInBatchMaxRetries(t *testing.T) {
 	ctx, sName, cleanup := tu.SetupOrDie(nil)
 	defer cleanup()
-	a := tu.CreateApp(t, ctx, syncbase.NewService(sName), "a")
-	d := tu.CreateDatabase(t, ctx, a, "d")
+	d := tu.CreateDatabase(t, ctx, syncbase.NewService(sName), "d")
 	c := tu.CreateCollection(t, ctx, d, "c")
 
 	// Succeed (no conflict) on 10th try. RunInBatch will retry 3 times and give
@@ -717,8 +706,7 @@ func TestRunInBatchMaxRetries(t *testing.T) {
 func TestRunInBatchError(t *testing.T) {
 	ctx, sName, cleanup := tu.SetupOrDie(nil)
 	defer cleanup()
-	a := tu.CreateApp(t, ctx, syncbase.NewService(sName), "a")
-	d := tu.CreateDatabase(t, ctx, a, "d")
+	d := tu.CreateDatabase(t, ctx, syncbase.NewService(sName), "d")
 	c := tu.CreateCollection(t, ctx, d, "c")
 
 	// Return error from fn. Errors other than ErrConcurrentTransaction are not
@@ -737,8 +725,7 @@ func TestRunInBatchError(t *testing.T) {
 func TestRunInBatchReadOnly(t *testing.T) {
 	ctx, sName, cleanup := tu.SetupOrDie(nil)
 	defer cleanup()
-	a := tu.CreateApp(t, ctx, syncbase.NewService(sName), "a")
-	d := tu.CreateDatabase(t, ctx, a, "d")
+	d := tu.CreateDatabase(t, ctx, syncbase.NewService(sName), "d")
 	c := tu.CreateCollection(t, ctx, d, "c")
 
 	// Test readonly batch.

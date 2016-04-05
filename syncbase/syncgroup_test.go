@@ -23,8 +23,7 @@ import (
 func TestCreateSyncgroup(t *testing.T) {
 	ctx, sName, cleanup := tu.SetupOrDie(perms("root:client"))
 	defer cleanup()
-	a := tu.CreateApp(t, ctx, syncbase.NewService(sName), "a")
-	d := tu.CreateDatabase(t, ctx, a, "d")
+	d := tu.CreateDatabase(t, ctx, syncbase.NewService(sName), "d")
 
 	// Check if create fails with empty spec.
 	spec := wire.SyncgroupSpec{}
@@ -101,8 +100,7 @@ func TestJoinSyncgroup(t *testing.T) {
 	ctx, ctx1, sName, rootp, cleanup := tu.SetupOrDieCustom("client1", "server", perms("root:client1"))
 	defer cleanup()
 
-	a1 := tu.CreateApp(t, ctx1, syncbase.NewService(sName), "a")
-	d1 := tu.CreateDatabase(t, ctx1, a1, "d")
+	d1 := tu.CreateDatabase(t, ctx1, syncbase.NewService(sName), "d")
 	specA := wire.SyncgroupSpec{
 		Description: "test syncgroup sgA",
 		Perms:       perms("root:client1"),
@@ -116,8 +114,7 @@ func TestJoinSyncgroup(t *testing.T) {
 
 	// Create client2.
 	ctx2 := tu.NewCtx(ctx, rootp, "client2")
-	a2 := syncbase.NewService(sName).App("a")
-	d2 := a2.Database("d", nil)
+	d2 := syncbase.NewService(sName).DatabaseForId(wire.Id{"v.io:xyz", "d"}, nil)
 
 	// Check that client2's join fails if the perms disallow access.
 	joinSyncgroup(t, ctx2, d2, sgNameA, verror.ErrNoAccess.ID)
@@ -162,8 +159,7 @@ func TestJoinSyncgroup(t *testing.T) {
 func TestSetSpecSyncgroup(t *testing.T) {
 	ctx, sName, cleanup := tu.SetupOrDie(perms("root:client"))
 	defer cleanup()
-	a := tu.CreateApp(t, ctx, syncbase.NewService(sName), "a")
-	d := tu.CreateDatabase(t, ctx, a, "d")
+	d := tu.CreateDatabase(t, ctx, syncbase.NewService(sName), "d")
 
 	// Create successfully.
 	sgName := naming.Join(sName, common.SyncbaseSuffix, "sg1")

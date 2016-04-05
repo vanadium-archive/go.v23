@@ -66,8 +66,7 @@ type testStruct struct {
 }
 
 func generateBlob(ctx *context.T, syncbaseName, keyPrefix string, pos int, data []byte) error {
-	a := syncbase.NewService(syncbaseName).App(testApp)
-	d := a.Database(testDb, nil)
+	d := syncbase.NewService(syncbaseName).DatabaseForId(testDb, nil)
 	c := d.Collection(testCollection)
 
 	b, err := d.CreateBlob(ctx)
@@ -103,8 +102,7 @@ func generateBlob(ctx *context.T, syncbaseName, keyPrefix string, pos int, data 
 }
 
 func fetchBlob(ctx *context.T, syncbaseName, keyPrefix string, pos int, wantSize int64, skipIncStatus bool) error {
-	a := syncbase.NewService(syncbaseName).App(testApp)
-	d := a.Database(testDb, nil)
+	d := syncbase.NewService(syncbaseName).DatabaseForId(testDb, nil)
 	c := d.Collection(testCollection)
 
 	key := fmt.Sprintf("%s%d", keyPrefix, pos)
@@ -172,8 +170,7 @@ func fetchBlob(ctx *context.T, syncbaseName, keyPrefix string, pos int, wantSize
 }
 
 func getBlob(ctx *context.T, syncbaseName, keyPrefix string, pos int, wantVal []byte, offset int64) error {
-	a := syncbase.NewService(syncbaseName).App(testApp)
-	d := a.Database(testDb, nil)
+	d := syncbase.NewService(syncbaseName).DatabaseForId(testDb, nil)
 	c := d.Collection(testCollection)
 
 	key := fmt.Sprintf("%s%d", keyPrefix, pos)
@@ -215,8 +212,7 @@ func getBlob(ctx *context.T, syncbaseName, keyPrefix string, pos int, wantVal []
 }
 
 func generateBigBlob(ctx *context.T, syncbaseName, keyPrefix string, pos int) error {
-	a := syncbase.NewService(syncbaseName).App(testApp)
-	d := a.Database(testDb, nil)
+	d := syncbase.NewService(syncbaseName).DatabaseForId(testDb, nil)
 	c := d.Collection(testCollection)
 
 	b, err := d.CreateBlob(ctx)
@@ -266,8 +262,7 @@ func generateBigBlob(ctx *context.T, syncbaseName, keyPrefix string, pos int) er
 }
 
 func getBigBlob(ctx *context.T, syncbaseName, keyPrefix string, pos int) error {
-	a := syncbase.NewService(syncbaseName).App(testApp)
-	d := a.Database(testDb, nil)
+	d := syncbase.NewService(syncbaseName).DatabaseForId(testDb, nil)
 	c := d.Collection(testCollection)
 
 	key := fmt.Sprintf("%s%d", keyPrefix, pos)

@@ -1,6 +1,6 @@
 pkg syncbase, const DeleteChange ChangeType
 pkg syncbase, const PutChange ChangeType
-pkg syncbase, func NewDatabase(string, string, *Schema) *database
+pkg syncbase, func NewDatabase(string, wire.Id, *Schema) *database
 pkg syncbase, func NewService(string) Service
 pkg syncbase, func NewValue(*context.T, interface{}) (*Value, error)
 pkg syncbase, func Prefix(string) PrefixRange
@@ -65,24 +65,15 @@ pkg syncbase, method (*ValueTarget) StartField(string) (vdl.Target, vdl.Target, 
 pkg syncbase, method (*ValueTarget) StartFields(*vdl.Type) (vdl.FieldsTarget, error)
 pkg syncbase, method (*ValueTarget) ZeroField(string) error
 pkg syncbase, method (*WatchChange) Value(interface{}) error
-pkg syncbase, type App interface, Create(*context.T, access.Permissions) error
-pkg syncbase, type App interface, Database(string, *Schema) Database
-pkg syncbase, type App interface, Destroy(*context.T) error
-pkg syncbase, type App interface, Exists(*context.T) (bool, error)
-pkg syncbase, type App interface, FullName() string
-pkg syncbase, type App interface, ListDatabases(*context.T) ([]string, error)
-pkg syncbase, type App interface, Name() string
-pkg syncbase, type App interface, unexported methods
-pkg syncbase, type BatchDatabase interface { Abort, Close, Collection, Commit, Exec, FullName, GetResumeMarker, ListCollections, Name }
+pkg syncbase, type BatchDatabase interface { Abort, Collection, Commit, Exec, FullName, GetResumeMarker, Id, ListCollections }
 pkg syncbase, type BatchDatabase interface, Abort(*context.T) error
-pkg syncbase, type BatchDatabase interface, Close()
 pkg syncbase, type BatchDatabase interface, Collection(string) Collection
 pkg syncbase, type BatchDatabase interface, Commit(*context.T) error
 pkg syncbase, type BatchDatabase interface, Exec(*context.T, string, ...interface{}) ([]string, ResultStream, error)
 pkg syncbase, type BatchDatabase interface, FullName() string
 pkg syncbase, type BatchDatabase interface, GetResumeMarker(*context.T) (watch.ResumeMarker, error)
+pkg syncbase, type BatchDatabase interface, Id() wire.Id
 pkg syncbase, type BatchDatabase interface, ListCollections(*context.T) ([]string, error)
-pkg syncbase, type BatchDatabase interface, Name() string
 pkg syncbase, type Blob interface { Commit, Delete, Fetch, Get, Keep, Pin, Put, Ref, Size, Unpin }
 pkg syncbase, type Blob interface, Commit(*context.T) error
 pkg syncbase, type Blob interface, Delete(*context.T) error
@@ -169,21 +160,20 @@ pkg syncbase, type Database interface, Exists(*context.T) (bool, error)
 pkg syncbase, type Database interface, FullName() string
 pkg syncbase, type Database interface, GetResumeMarker(*context.T) (watch.ResumeMarker, error)
 pkg syncbase, type Database interface, GetSyncgroupNames(*context.T) ([]string, error)
+pkg syncbase, type Database interface, Id() wire.Id
 pkg syncbase, type Database interface, ListCollections(*context.T) ([]string, error)
-pkg syncbase, type Database interface, Name() string
 pkg syncbase, type Database interface, PauseSync(*context.T) error
 pkg syncbase, type Database interface, ResumeSync(*context.T) error
 pkg syncbase, type Database interface, Syncgroup(string) Syncgroup
 pkg syncbase, type Database interface, Watch(*context.T, string, string, watch.ResumeMarker) (WatchStream, error)
 pkg syncbase, type Database interface, unexported methods
-pkg syncbase, type DatabaseHandle interface { Close, Collection, Exec, FullName, GetResumeMarker, ListCollections, Name }
-pkg syncbase, type DatabaseHandle interface, Close()
+pkg syncbase, type DatabaseHandle interface { Collection, Exec, FullName, GetResumeMarker, Id, ListCollections }
 pkg syncbase, type DatabaseHandle interface, Collection(string) Collection
 pkg syncbase, type DatabaseHandle interface, Exec(*context.T, string, ...interface{}) ([]string, ResultStream, error)
 pkg syncbase, type DatabaseHandle interface, FullName() string
 pkg syncbase, type DatabaseHandle interface, GetResumeMarker(*context.T) (watch.ResumeMarker, error)
+pkg syncbase, type DatabaseHandle interface, Id() wire.Id
 pkg syncbase, type DatabaseHandle interface, ListCollections(*context.T) ([]string, error)
-pkg syncbase, type DatabaseHandle interface, Name() string
 pkg syncbase, type InvalidScanStream struct
 pkg syncbase, type InvalidScanStream struct, Error error
 pkg syncbase, type PrefixRange interface { Limit, Prefix, Start }
@@ -228,9 +218,10 @@ pkg syncbase, type ScanStream interface, Value(interface{}) error
 pkg syncbase, type Schema struct
 pkg syncbase, type Schema struct, Metadata wire.SchemaMetadata
 pkg syncbase, type Schema struct, Resolver ConflictResolver
-pkg syncbase, type Service interface, App(string) App
+pkg syncbase, type Service interface, Database(*context.T, string, *Schema) Database
+pkg syncbase, type Service interface, DatabaseForId(wire.Id, *Schema) Database
 pkg syncbase, type Service interface, FullName() string
-pkg syncbase, type Service interface, ListApps(*context.T) ([]string, error)
+pkg syncbase, type Service interface, ListDatabases(*context.T) ([]wire.Id, error)
 pkg syncbase, type Service interface, unexported methods
 pkg syncbase, type Stream interface { Advance, Cancel, Err }
 pkg syncbase, type Stream interface, Advance() bool

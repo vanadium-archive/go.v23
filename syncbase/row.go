@@ -13,9 +13,9 @@ import (
 )
 
 func newRow(parentFullName, key string) Row {
-	// Note, we immediately unescape row keys on the server side. See comment in
+	// Note, we immediately decode row keys on the server side. See comment in
 	// server/dispatcher.go for explanation.
-	fullName := naming.Join(parentFullName, util.Escape(key))
+	fullName := naming.Join(parentFullName, util.Encode(key))
 	return &row{
 		c:        wire.RowClient(fullName),
 		fullName: fullName,

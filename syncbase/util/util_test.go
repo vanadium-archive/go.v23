@@ -8,66 +8,91 @@ import (
 	"strings"
 	"testing"
 
+	wire "v.io/v23/services/syncbase"
 	"v.io/v23/syncbase/util"
 	tu "v.io/x/ref/services/syncbase/testutil"
 )
 
-func TestEscapeUnescape(t *testing.T) {
+func TestEncodeDecode(t *testing.T) {
 	strs := []string{}
-	copy(strs, tu.OkRowNames)
-	strs = append(strs, tu.NotOkRowNames...)
+	copy(strs, tu.OkRowKeys)
+	strs = append(strs, tu.NotOkRowKeys...)
 	for _, s := range strs {
-		esc := util.Escape(s)
-		unesc, ok := util.Unescape(esc)
-		if !ok {
-			t.Fatalf("unescape failed: %q, %q", s, esc)
+		enc := util.Encode(s)
+		dec, err := util.Decode(enc)
+		if err != nil {
+			t.Fatalf("decode failed: %q, %v", s, err)
 		}
-		if strings.ContainsAny(esc, "/") {
-			t.Errorf("%q was escaped to %q, which contains bad chars", s, esc)
+		if strings.ContainsAny(enc, "/") {
+			t.Errorf("%q was escaped to %q, which contains bad chars", s, enc)
 		}
-		if !strings.ContainsAny(s, "%/") && s != esc {
-			t.Errorf("%q should equal %q", s, esc)
+		if !strings.ContainsAny(s, "%/") && s != enc {
+			t.Errorf("%q should equal %q", s, enc)
 		}
-		if s != unesc {
-			t.Errorf("%q should equal %q", s, unesc)
+		if s != dec {
+			t.Errorf("%q should equal %q", s, dec)
+		}
+	}
+}
+
+func TestEncodeIdDecodeId(t *testing.T) {
+	for _, blessing := range tu.OkAppBlessings {
+		for _, name := range tu.OkDbNames {
+			id := wire.Id{blessing, name}
+			enc := util.EncodeId(id)
+			dec, err := util.DecodeId(enc)
+			if err != nil {
+				t.Fatalf("decode failed: %v, %v", id, err)
+			}
+			if id != dec {
+				t.Errorf("%v should equal %v", id, dec)
+			}
 		}
 	}
 }
 
 func TestValidNameFuncs(t *testing.T) {
-	for _, s := range tu.OkAppNames {
-		if !util.ValidAppName(s) {
-			t.Errorf("%q should be valid", s)
+	for _, a := range tu.OkAppBlessings {
+		for _, d := range tu.OkDbNames {
+			id := wire.Id{Blessing: a, Name: d}
+			if !util.ValidDatabaseId(id) {
+				t.Errorf("%v should be valid", id)
+			}
 		}
 	}
-	for _, s := range tu.NotOkAppNames {
-		if util.ValidAppName(s) {
-			t.Errorf("%q should be invalid", s)
+	for _, a := range tu.NotOkAppBlessings {
+		for _, d := range append(tu.OkDbNames, tu.NotOkDbNames...) {
+			id := wire.Id{Blessing: a, Name: d}
+			if util.ValidDatabaseId(id) {
+				t.Errorf("%v should be invalid", id)
+			}
 		}
 	}
-	for _, s := range tu.OkRowNames {
-		if !util.ValidRowKey(s) {
-			t.Errorf("%q should be valid", s)
+	for _, d := range tu.NotOkDbNames {
+		for _, a := range append(tu.OkAppBlessings, tu.NotOkAppBlessings...) {
+			id := wire.Id{Blessing: a, Name: d}
+			if util.ValidDatabaseId(id) {
+				t.Errorf("%v should be invalid", id)
+			}
 		}
 	}
-	for _, s := range tu.NotOkRowNames {
-		if util.ValidRowKey(s) {
-			t.Errorf("%q should be invalid", s)
-		}
-	}
-	for _, s := range tu.OkDbCollectionNames {
-		if !util.ValidDatabaseName(s) {
-			t.Errorf("%q should be valid", s)
-		}
+	for _, s := range tu.OkCollectionNames {
 		if !util.ValidCollectionName(s) {
 			t.Errorf("%q should be valid", s)
 		}
 	}
-	for _, s := range tu.NotOkDbCollectionNames {
-		if util.ValidDatabaseName(s) {
+	for _, s := range tu.NotOkCollectionNames {
+		if util.ValidCollectionName(s) {
 			t.Errorf("%q should be invalid", s)
 		}
-		if util.ValidCollectionName(s) {
+	}
+	for _, s := range tu.OkRowKeys {
+		if !util.ValidRowKey(s) {
+			t.Errorf("%q should be valid", s)
+		}
+	}
+	for _, s := range tu.NotOkRowKeys {
+		if util.ValidRowKey(s) {
 			t.Errorf("%q should be invalid", s)
 		}
 	}

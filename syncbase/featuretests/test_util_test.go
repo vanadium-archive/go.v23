@@ -17,7 +17,6 @@ import (
 	"v.io/v23/context"
 	"v.io/v23/security/access"
 	wire "v.io/v23/services/syncbase"
-	wire_syncbase "v.io/v23/services/syncbase"
 	"v.io/v23/syncbase"
 	"v.io/x/ref/services/syncbase/syncbaselib"
 	tu "v.io/x/ref/services/syncbase/testutil"
@@ -26,20 +25,16 @@ import (
 
 const (
 	testSbName     = "syncbase" // Name that syncbase mounts itself at.
-	testApp        = "a"
-	testDb         = "d"
 	testCollection = "c"
 )
+
+var testDb = wire.Id{Blessing: "a", Name: "d"}
 
 ////////////////////////////////////////////////////////////
 // Helpers for setting up Syncbases, apps, and dbs
 
 func setupHierarchy(ctx *context.T, syncbaseName string) error {
-	a := syncbase.NewService(syncbaseName).App(testApp)
-	if err := a.Create(ctx, nil); err != nil {
-		return err
-	}
-	d := a.Database(testDb, nil)
+	d := syncbase.NewService(syncbaseName).DatabaseForId(testDb, nil)
 	if err := d.Create(ctx, nil); err != nil {
 		return err
 	}
@@ -93,8 +88,7 @@ func populateData(ctx *context.T, syncbaseName, keyPrefix string, start, end int
 		return fmt.Errorf("end (%d) <= start (%d)", end, start)
 	}
 
-	a := syncbase.NewService(syncbaseName).App(testApp)
-	d := a.Database(testDb, nil)
+	d := syncbase.NewService(syncbaseName).DatabaseForId(testDb, nil)
 	c := d.Collection(testCollection)
 
 	for i := start; i < end; i++ {
@@ -129,8 +123,7 @@ func updateDataImpl(ctx *context.T, d syncbase.DatabaseHandle, syncbaseName stri
 }
 
 func updateData(ctx *context.T, syncbaseName string, start, end int, valuePrefix string) error {
-	a := syncbase.NewService(syncbaseName).App(testApp)
-	d := a.Database(testDb, nil)
+	d := syncbase.NewService(syncbaseName).DatabaseForId(testDb, nil)
 	return updateDataImpl(ctx, d, syncbaseName, start, end, valuePrefix)
 }
 
@@ -139,8 +132,7 @@ func updateData(ctx *context.T, syncbaseName string, start, end int, valuePrefix
 // if the module is run as a goroutine and the parent needs to wait for it to
 // end.
 func updateDataInBatch(ctx *context.T, syncbaseName string, start, end int, valuePrefix, signalKey string) error {
-	a := syncbase.NewService(syncbaseName).App(testApp)
-	d := a.Database(testDb, nil)
+	d := syncbase.NewService(syncbaseName).DatabaseForId(testDb, nil)
 	batch, err := d.BeginBatch(ctx, wire.BatchOptions{})
 	if err != nil {
 		return fmt.Errorf("BeginBatch failed: %v", err)
@@ -175,8 +167,7 @@ func sendSignal(ctx *context.T, d syncbase.Database, signalKey string) error {
 const skipScan = true
 
 func verifySyncgroupData(ctx *context.T, syncbaseName, keyPrefix string, start, count int) error {
-	a := syncbase.NewService(syncbaseName).App(testApp)
-	d := a.Database(testDb, nil)
+	d := syncbase.NewService(syncbaseName).DatabaseForId(testDb, nil)
 	c := d.Collection(testCollection)
 
 	// Wait a bit (up to 10 seconds) for the last key to appear.
@@ -239,8 +230,7 @@ func createSyncgroup(ctx *context.T, syncbaseName, sgName, sgPrefixes, mtName, b
 		mtName = roots[0]
 	}
 
-	a := syncbase.NewService(syncbaseName).App(testApp)
-	d := a.Database(testDb, nil)
+	d := syncbase.NewService(syncbaseName).DatabaseForId(testDb, nil)
 
 	if perms == nil {
 		perms = tu.DefaultPerms(strings.Split(blessingPatterns, ";")...)
@@ -262,9 +252,7 @@ func createSyncgroup(ctx *context.T, syncbaseName, sgName, sgPrefixes, mtName, b
 }
 
 func joinSyncgroup(ctx *context.T, syncbaseName, sgName string) error {
-	a := syncbase.NewService(syncbaseName).App(testApp)
-	d := a.Database(testDb, nil)
-
+	d := syncbase.NewService(syncbaseName).DatabaseForId(testDb, nil)
 	sg := d.Syncgroup(sgName)
 	info := wire.SyncgroupMemberInfo{SyncPriority: 10}
 	if _, err := sg.Join(ctx, info); err != nil {
@@ -274,8 +262,7 @@ func joinSyncgroup(ctx *context.T, syncbaseName, sgName string) error {
 }
 
 func verifySyncgroupMembers(ctx *context.T, syncbaseName, sgName string, wantMembers int) error {
-	a := syncbase.NewService(syncbaseName).App(testApp)
-	d := a.Database(testDb, nil)
+	d := syncbase.NewService(syncbaseName).DatabaseForId(testDb, nil)
 	sg := d.Syncgroup(sgName)
 
 	var gotMembers int
@@ -297,11 +284,11 @@ func verifySyncgroupMembers(ctx *context.T, syncbaseName, sgName string, wantMem
 }
 
 func pauseSync(ctx *context.T, syncbaseName string) error {
-	return syncbase.NewService(syncbaseName).App(testApp).Database(testDb, nil).PauseSync(ctx)
+	return syncbase.NewService(syncbaseName).DatabaseForId(testDb, nil).PauseSync(ctx)
 }
 
 func resumeSync(ctx *context.T, syncbaseName string) error {
-	return syncbase.NewService(syncbaseName).App(testApp).Database(testDb, nil).ResumeSync(ctx)
+	return syncbase.NewService(syncbaseName).DatabaseForId(testDb, nil).ResumeSync(ctx)
 }
 
 ////////////////////////////////////////////////////////////
@@ -325,9 +312,8 @@ func parseSgPrefixes(csv string) []wire.CollectionRow {
 ////////////////////////////////////////////////////////////
 // Helpers to interact with the Syncbase service directly.
 
-// Obtain the Syncbase client stub.
-func sc(name string) wire_syncbase.ServiceClientStub {
-	return wire_syncbase.ServiceClient(name)
+func sc(name string) wire.ServiceClientStub {
+	return wire.ServiceClient(name)
 }
 
 ////////////////////////////////////////////////////////////

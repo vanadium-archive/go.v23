@@ -1,13 +1,15 @@
-pkg util, func Escape(string) string
+pkg util, func AppBlessingFromContext(*context.T) (string, error)
+pkg util, func Decode(string) (string, error)
+pkg util, func DecodeId(string) (wire.Id, error)
+pkg util, func Encode(string) string
+pkg util, func EncodeId(wire.Id) string
 pkg util, func IsPrefix(string, string) bool
-pkg util, func ListChildren(*context.T, string) ([]string, error)
+pkg util, func ListChildIds(*context.T, string) ([]wire.Id, error)
 pkg util, func ParseCollectionRowPair(*context.T, string) (string, string, error)
 pkg util, func PrefixRangeLimit(string) string
 pkg util, func PrefixRangeStart(string) string
-pkg util, func Unescape(string) (string, bool)
-pkg util, func ValidAppName(string) bool
 pkg util, func ValidCollectionName(string) bool
-pkg util, func ValidDatabaseName(string) bool
+pkg util, func ValidDatabaseId(wire.Id) bool
 pkg util, func ValidRowKey(string) bool
 pkg util, type AccessController interface { GetPermissions, SetPermissions }
 pkg util, type AccessController interface, GetPermissions(*context.T) (access.Permissions, string, error)

@@ -11,34 +11,47 @@ import (
 	"v.io/v23"
 	"v.io/v23/context"
 	"v.io/v23/naming"
+	wire "v.io/v23/services/syncbase"
 	"v.io/v23/verror"
 )
 
-// ListChildren returns the relative names of all children of parentFullName.
-func ListChildren(ctx *context.T, parentFullName string) ([]string, error) {
+// byId implements sort.Interface for []wire.Id. Sorts by blessing, then name.
+type byId []wire.Id
+
+func (a byId) Len() int      { return len(a) }
+func (a byId) Swap(i, j int) { a[i], a[j] = a[j], a[i] }
+func (a byId) Less(i, j int) bool {
+	if a[i].Blessing != a[j].Blessing {
+		return a[i].Blessing < a[j].Blessing
+	}
+	return a[i].Name < a[j].Name
+}
+
+// ListChildIds returns a sorted list of ids of all children of parentFullName.
+func ListChildIds(ctx *context.T, parentFullName string) ([]wire.Id, error) {
 	ns := v23.GetNamespace(ctx)
 	ch, err := ns.Glob(ctx, naming.Join(parentFullName, "*"))
 	if err != nil {
 		return nil, err
 	}
-	names := []string{}
+	ids := []wire.Id{}
 	for globReply := range ch {
 		switch v := globReply.(type) {
 		case *naming.GlobReplyEntry:
-			escName := v.Value.Name[strings.LastIndex(v.Value.Name, "/")+1:]
-			// Component names within object names are always escaped. See comment in
+			encId := v.Value.Name[strings.LastIndex(v.Value.Name, "/")+1:]
+			// Component ids within object names are always encoded. See comment in
 			// server/dispatcher.go for explanation.
-			name, ok := Unescape(escName)
-			if !ok {
+			id, err := DecodeId(encId)
+			if err != nil {
 				// If this happens, there's a bug in the Syncbase server. Glob should
 				// return names with escaped components.
-				return nil, verror.New(verror.ErrInternal, ctx, escName)
+				return nil, verror.New(verror.ErrInternal, ctx, err)
 			}
-			names = append(names, name)
+			ids = append(ids, id)
 		case *naming.GlobReplyError:
 			// TODO(sadovsky): Surface these errors somehow.
 		}
 	}
-	sort.Strings(names)
-	return names, nil
+	sort.Sort(byId(ids))
+	return ids, nil
 }
