@@ -3915,7 +3915,7 @@ func NewErrBadExecStreamHeader(ctx *context.T) error {
 // containing Service methods.
 //
 // Service represents a Vanadium Syncbase service.
-// Service.Glob operates over App names.
+// Service.Glob operates over Database ids.
 type ServiceClientMethods interface {
 	// Object provides access control for Vanadium objects.
 	//
@@ -4002,7 +4002,7 @@ func (c implServiceClientStub) DevModeGetTime(ctx *context.T, opts ...rpc.CallOp
 // implements for Service.
 //
 // Service represents a Vanadium Syncbase service.
-// Service.Glob operates over App names.
+// Service.Glob operates over Database ids.
 type ServiceServerMethods interface {
 	// Object provides access control for Vanadium objects.
 	//
@@ -4118,7 +4118,7 @@ var ServiceDesc rpc.InterfaceDesc = descService
 var descService = rpc.InterfaceDesc{
 	Name:    "Service",
 	PkgPath: "v.io/v23/services/syncbase",
-	Doc:     "// Service represents a Vanadium Syncbase service.\n// Service.Glob operates over App names.",
+	Doc:     "// Service represents a Vanadium Syncbase service.\n// Service.Glob operates over Database ids.",
 	Embeds: []rpc.EmbedDesc{
 		{"Object", "v.io/v23/services/permissions", "// Object provides access control for Vanadium objects.\n//\n// Vanadium services implementing dynamic access control would typically embed\n// this interface and tag additional methods defined by the service with one of\n// Admin, Read, Write, Resolve etc. For example, the VDL definition of the\n// object would be:\n//\n//   package mypackage\n//\n//   import \"v.io/v23/security/access\"\n//   import \"v.io/v23/services/permissions\"\n//\n//   type MyObject interface {\n//     permissions.Object\n//     MyRead() (string, error) {access.Read}\n//     MyWrite(string) error    {access.Write}\n//   }\n//\n// If the set of pre-defined tags is insufficient, services may define their\n// own tag type and annotate all methods with this new type.\n//\n// Instead of embedding this Object interface, define SetPermissions and\n// GetPermissions in their own interface. Authorization policies will typically\n// respect annotations of a single type. For example, the VDL definition of an\n// object would be:\n//\n//  package mypackage\n//\n//  import \"v.io/v23/security/access\"\n//\n//  type MyTag string\n//\n//  const (\n//    Blue = MyTag(\"Blue\")\n//    Red  = MyTag(\"Red\")\n//  )\n//\n//  type MyObject interface {\n//    MyMethod() (string, error) {Blue}\n//\n//    // Allow clients to change access via the access.Object interface:\n//    SetPermissions(perms access.Permissions, version string) error         {Red}\n//    GetPermissions() (perms access.Permissions, version string, err error) {Blue}\n//  }"},
 	},
@@ -4138,257 +4138,6 @@ var descService = rpc.InterfaceDesc{
 				{"", ``}, // time.Time
 			},
 			Tags: []*vdl.Value{vdl.ValueOf(access.Tag("Admin"))},
-		},
-	},
-}
-
-// AppClientMethods is the client interface
-// containing App methods.
-//
-// App represents the data for a specific app instance (possibly a combination
-// of user, device, and app).
-// App.Glob operates over Database names.
-type AppClientMethods interface {
-	// Object provides access control for Vanadium objects.
-	//
-	// Vanadium services implementing dynamic access control would typically embed
-	// this interface and tag additional methods defined by the service with one of
-	// Admin, Read, Write, Resolve etc. For example, the VDL definition of the
-	// object would be:
-	//
-	//   package mypackage
-	//
-	//   import "v.io/v23/security/access"
-	//   import "v.io/v23/services/permissions"
-	//
-	//   type MyObject interface {
-	//     permissions.Object
-	//     MyRead() (string, error) {access.Read}
-	//     MyWrite(string) error    {access.Write}
-	//   }
-	//
-	// If the set of pre-defined tags is insufficient, services may define their
-	// own tag type and annotate all methods with this new type.
-	//
-	// Instead of embedding this Object interface, define SetPermissions and
-	// GetPermissions in their own interface. Authorization policies will typically
-	// respect annotations of a single type. For example, the VDL definition of an
-	// object would be:
-	//
-	//  package mypackage
-	//
-	//  import "v.io/v23/security/access"
-	//
-	//  type MyTag string
-	//
-	//  const (
-	//    Blue = MyTag("Blue")
-	//    Red  = MyTag("Red")
-	//  )
-	//
-	//  type MyObject interface {
-	//    MyMethod() (string, error) {Blue}
-	//
-	//    // Allow clients to change access via the access.Object interface:
-	//    SetPermissions(perms access.Permissions, version string) error         {Red}
-	//    GetPermissions() (perms access.Permissions, version string, err error) {Blue}
-	//  }
-	permissions.ObjectClientMethods
-	// Create creates this App.
-	// If perms is nil, we inherit (copy) the Service perms.
-	// Create requires the caller to have Write permission at the Service.
-	Create(_ *context.T, perms access.Permissions, _ ...rpc.CallOpt) error
-	// Destroy destroys this App.
-	Destroy(*context.T, ...rpc.CallOpt) error
-	// Exists returns true only if this App exists. Insufficient permissions
-	// cause Exists to return false instead of an error.
-	Exists(*context.T, ...rpc.CallOpt) (bool, error)
-}
-
-// AppClientStub adds universal methods to AppClientMethods.
-type AppClientStub interface {
-	AppClientMethods
-	rpc.UniversalServiceMethods
-}
-
-// AppClient returns a client stub for App.
-func AppClient(name string) AppClientStub {
-	return implAppClientStub{name, permissions.ObjectClient(name)}
-}
-
-type implAppClientStub struct {
-	name string
-
-	permissions.ObjectClientStub
-}
-
-func (c implAppClientStub) Create(ctx *context.T, i0 access.Permissions, opts ...rpc.CallOpt) (err error) {
-	err = v23.GetClient(ctx).Call(ctx, c.name, "Create", []interface{}{i0}, nil, opts...)
-	return
-}
-
-func (c implAppClientStub) Destroy(ctx *context.T, opts ...rpc.CallOpt) (err error) {
-	err = v23.GetClient(ctx).Call(ctx, c.name, "Destroy", nil, nil, opts...)
-	return
-}
-
-func (c implAppClientStub) Exists(ctx *context.T, opts ...rpc.CallOpt) (o0 bool, err error) {
-	err = v23.GetClient(ctx).Call(ctx, c.name, "Exists", nil, []interface{}{&o0}, opts...)
-	return
-}
-
-// AppServerMethods is the interface a server writer
-// implements for App.
-//
-// App represents the data for a specific app instance (possibly a combination
-// of user, device, and app).
-// App.Glob operates over Database names.
-type AppServerMethods interface {
-	// Object provides access control for Vanadium objects.
-	//
-	// Vanadium services implementing dynamic access control would typically embed
-	// this interface and tag additional methods defined by the service with one of
-	// Admin, Read, Write, Resolve etc. For example, the VDL definition of the
-	// object would be:
-	//
-	//   package mypackage
-	//
-	//   import "v.io/v23/security/access"
-	//   import "v.io/v23/services/permissions"
-	//
-	//   type MyObject interface {
-	//     permissions.Object
-	//     MyRead() (string, error) {access.Read}
-	//     MyWrite(string) error    {access.Write}
-	//   }
-	//
-	// If the set of pre-defined tags is insufficient, services may define their
-	// own tag type and annotate all methods with this new type.
-	//
-	// Instead of embedding this Object interface, define SetPermissions and
-	// GetPermissions in their own interface. Authorization policies will typically
-	// respect annotations of a single type. For example, the VDL definition of an
-	// object would be:
-	//
-	//  package mypackage
-	//
-	//  import "v.io/v23/security/access"
-	//
-	//  type MyTag string
-	//
-	//  const (
-	//    Blue = MyTag("Blue")
-	//    Red  = MyTag("Red")
-	//  )
-	//
-	//  type MyObject interface {
-	//    MyMethod() (string, error) {Blue}
-	//
-	//    // Allow clients to change access via the access.Object interface:
-	//    SetPermissions(perms access.Permissions, version string) error         {Red}
-	//    GetPermissions() (perms access.Permissions, version string, err error) {Blue}
-	//  }
-	permissions.ObjectServerMethods
-	// Create creates this App.
-	// If perms is nil, we inherit (copy) the Service perms.
-	// Create requires the caller to have Write permission at the Service.
-	Create(_ *context.T, _ rpc.ServerCall, perms access.Permissions) error
-	// Destroy destroys this App.
-	Destroy(*context.T, rpc.ServerCall) error
-	// Exists returns true only if this App exists. Insufficient permissions
-	// cause Exists to return false instead of an error.
-	Exists(*context.T, rpc.ServerCall) (bool, error)
-}
-
-// AppServerStubMethods is the server interface containing
-// App methods, as expected by rpc.Server.
-// There is no difference between this interface and AppServerMethods
-// since there are no streaming methods.
-type AppServerStubMethods AppServerMethods
-
-// AppServerStub adds universal methods to AppServerStubMethods.
-type AppServerStub interface {
-	AppServerStubMethods
-	// Describe the App interfaces.
-	Describe__() []rpc.InterfaceDesc
-}
-
-// AppServer returns a server stub for App.
-// It converts an implementation of AppServerMethods into
-// an object that may be used by rpc.Server.
-func AppServer(impl AppServerMethods) AppServerStub {
-	stub := implAppServerStub{
-		impl:             impl,
-		ObjectServerStub: permissions.ObjectServer(impl),
-	}
-	// Initialize GlobState; always check the stub itself first, to handle the
-	// case where the user has the Glob method defined in their VDL source.
-	if gs := rpc.NewGlobState(stub); gs != nil {
-		stub.gs = gs
-	} else if gs := rpc.NewGlobState(impl); gs != nil {
-		stub.gs = gs
-	}
-	return stub
-}
-
-type implAppServerStub struct {
-	impl AppServerMethods
-	permissions.ObjectServerStub
-	gs *rpc.GlobState
-}
-
-func (s implAppServerStub) Create(ctx *context.T, call rpc.ServerCall, i0 access.Permissions) error {
-	return s.impl.Create(ctx, call, i0)
-}
-
-func (s implAppServerStub) Destroy(ctx *context.T, call rpc.ServerCall) error {
-	return s.impl.Destroy(ctx, call)
-}
-
-func (s implAppServerStub) Exists(ctx *context.T, call rpc.ServerCall) (bool, error) {
-	return s.impl.Exists(ctx, call)
-}
-
-func (s implAppServerStub) Globber() *rpc.GlobState {
-	return s.gs
-}
-
-func (s implAppServerStub) Describe__() []rpc.InterfaceDesc {
-	return []rpc.InterfaceDesc{AppDesc, permissions.ObjectDesc}
-}
-
-// AppDesc describes the App interface.
-var AppDesc rpc.InterfaceDesc = descApp
-
-// descApp hides the desc to keep godoc clean.
-var descApp = rpc.InterfaceDesc{
-	Name:    "App",
-	PkgPath: "v.io/v23/services/syncbase",
-	Doc:     "// App represents the data for a specific app instance (possibly a combination\n// of user, device, and app).\n// App.Glob operates over Database names.",
-	Embeds: []rpc.EmbedDesc{
-		{"Object", "v.io/v23/services/permissions", "// Object provides access control for Vanadium objects.\n//\n// Vanadium services implementing dynamic access control would typically embed\n// this interface and tag additional methods defined by the service with one of\n// Admin, Read, Write, Resolve etc. For example, the VDL definition of the\n// object would be:\n//\n//   package mypackage\n//\n//   import \"v.io/v23/security/access\"\n//   import \"v.io/v23/services/permissions\"\n//\n//   type MyObject interface {\n//     permissions.Object\n//     MyRead() (string, error) {access.Read}\n//     MyWrite(string) error    {access.Write}\n//   }\n//\n// If the set of pre-defined tags is insufficient, services may define their\n// own tag type and annotate all methods with this new type.\n//\n// Instead of embedding this Object interface, define SetPermissions and\n// GetPermissions in their own interface. Authorization policies will typically\n// respect annotations of a single type. For example, the VDL definition of an\n// object would be:\n//\n//  package mypackage\n//\n//  import \"v.io/v23/security/access\"\n//\n//  type MyTag string\n//\n//  const (\n//    Blue = MyTag(\"Blue\")\n//    Red  = MyTag(\"Red\")\n//  )\n//\n//  type MyObject interface {\n//    MyMethod() (string, error) {Blue}\n//\n//    // Allow clients to change access via the access.Object interface:\n//    SetPermissions(perms access.Permissions, version string) error         {Red}\n//    GetPermissions() (perms access.Permissions, version string, err error) {Blue}\n//  }"},
-	},
-	Methods: []rpc.MethodDesc{
-		{
-			Name: "Create",
-			Doc:  "// Create creates this App.\n// If perms is nil, we inherit (copy) the Service perms.\n// Create requires the caller to have Write permission at the Service.",
-			InArgs: []rpc.ArgDesc{
-				{"perms", ``}, // access.Permissions
-			},
-			Tags: []*vdl.Value{vdl.ValueOf(access.Tag("Write"))},
-		},
-		{
-			Name: "Destroy",
-			Doc:  "// Destroy destroys this App.",
-			Tags: []*vdl.Value{vdl.ValueOf(access.Tag("Write"))},
-		},
-		{
-			Name: "Exists",
-			Doc:  "// Exists returns true only if this App exists. Insufficient permissions\n// cause Exists to return false instead of an error.",
-			OutArgs: []rpc.ArgDesc{
-				{"", ``}, // bool
-			},
-			Tags: []*vdl.Value{vdl.ValueOf(access.Tag("Resolve"))},
 		},
 	},
 }
@@ -6219,8 +5968,8 @@ type DatabaseClientMethods interface {
 	// conflict resolution for a given database.
 	ConflictManagerClientMethods
 	// Create creates this Database.
-	// If perms is nil, we inherit (copy) the App perms.
-	// Create requires the caller to have Write permission at the App.
+	// TODO(sadovsky): Specify what happens if perms is nil.
+	// Create requires the caller to have Write permission at the Service.
 	Create(_ *context.T, metadata *SchemaMetadata, perms access.Permissions, _ ...rpc.CallOpt) error
 	// Destroy destroys this Database, permanently removing all of its data.
 	Destroy(*context.T, ...rpc.CallOpt) error
@@ -6230,18 +5979,18 @@ type DatabaseClientMethods interface {
 	// do not exist.
 	Exists(*context.T, ...rpc.CallOpt) (bool, error)
 	// ListCollections returns a list of all Collection names.
-	// This method exists on Database but not on Service or App because for the
-	// latter we can simply use glob, while for the former glob fails on
-	// BatchDatabase since we encode the batch id in the BatchDatabase object
-	// name. More specifically, the glob client library appears to have two odd
-	// behaviors:
+	// This method exists on Database but not on Service because for the latter
+	// we can simply use glob, while for the former glob fails on BatchDatabase
+	// since we encode the batch id in the BatchDatabase object name. More
+	// specifically, the glob client library appears to have two odd behaviors:
 	// 1) It checks Resolve access on every component along the path (by doing a
 	//    Dispatcher.Lookup), whereas this doesn't happen for other RPCs.
 	// TODO(ivanpi): Resolve should be checked on all RPCs.
 	// 2) It does a Glob(<prefix>/*) for every prefix path, and only proceeds to
 	//    the next path component if that component appeared in its parent's Glob
 	//    results. This is inefficient in general, and broken for us since
-	//    Glob("app/*") does not return batch database names like "a/d##bId".
+	//    Glob("*") does not return batch database names like "d##bId".
+	// TODO(ivanpi): This concern goes away once batch ids are removed from names.
 	// TODO(sadovsky): Maybe switch to streaming RPC.
 	ListCollections(*context.T, ...rpc.CallOpt) ([]string, error)
 	// Exec executes a syncQL query with positional parameters and returns all
@@ -6517,8 +6266,8 @@ type DatabaseServerMethods interface {
 	// conflict resolution for a given database.
 	ConflictManagerServerMethods
 	// Create creates this Database.
-	// If perms is nil, we inherit (copy) the App perms.
-	// Create requires the caller to have Write permission at the App.
+	// TODO(sadovsky): Specify what happens if perms is nil.
+	// Create requires the caller to have Write permission at the Service.
 	Create(_ *context.T, _ rpc.ServerCall, metadata *SchemaMetadata, perms access.Permissions) error
 	// Destroy destroys this Database, permanently removing all of its data.
 	Destroy(*context.T, rpc.ServerCall) error
@@ -6528,18 +6277,18 @@ type DatabaseServerMethods interface {
 	// do not exist.
 	Exists(*context.T, rpc.ServerCall) (bool, error)
 	// ListCollections returns a list of all Collection names.
-	// This method exists on Database but not on Service or App because for the
-	// latter we can simply use glob, while for the former glob fails on
-	// BatchDatabase since we encode the batch id in the BatchDatabase object
-	// name. More specifically, the glob client library appears to have two odd
-	// behaviors:
+	// This method exists on Database but not on Service because for the latter
+	// we can simply use glob, while for the former glob fails on BatchDatabase
+	// since we encode the batch id in the BatchDatabase object name. More
+	// specifically, the glob client library appears to have two odd behaviors:
 	// 1) It checks Resolve access on every component along the path (by doing a
 	//    Dispatcher.Lookup), whereas this doesn't happen for other RPCs.
 	// TODO(ivanpi): Resolve should be checked on all RPCs.
 	// 2) It does a Glob(<prefix>/*) for every prefix path, and only proceeds to
 	//    the next path component if that component appeared in its parent's Glob
 	//    results. This is inefficient in general, and broken for us since
-	//    Glob("app/*") does not return batch database names like "a/d##bId".
+	//    Glob("*") does not return batch database names like "d##bId".
+	// TODO(ivanpi): This concern goes away once batch ids are removed from names.
 	// TODO(sadovsky): Maybe switch to streaming RPC.
 	ListCollections(*context.T, rpc.ServerCall) ([]string, error)
 	// Exec executes a syncQL query with positional parameters and returns all
@@ -6669,8 +6418,8 @@ type DatabaseServerStubMethods interface {
 	// conflict resolution for a given database.
 	ConflictManagerServerStubMethods
 	// Create creates this Database.
-	// If perms is nil, we inherit (copy) the App perms.
-	// Create requires the caller to have Write permission at the App.
+	// TODO(sadovsky): Specify what happens if perms is nil.
+	// Create requires the caller to have Write permission at the Service.
 	Create(_ *context.T, _ rpc.ServerCall, metadata *SchemaMetadata, perms access.Permissions) error
 	// Destroy destroys this Database, permanently removing all of its data.
 	Destroy(*context.T, rpc.ServerCall) error
@@ -6680,18 +6429,18 @@ type DatabaseServerStubMethods interface {
 	// do not exist.
 	Exists(*context.T, rpc.ServerCall) (bool, error)
 	// ListCollections returns a list of all Collection names.
-	// This method exists on Database but not on Service or App because for the
-	// latter we can simply use glob, while for the former glob fails on
-	// BatchDatabase since we encode the batch id in the BatchDatabase object
-	// name. More specifically, the glob client library appears to have two odd
-	// behaviors:
+	// This method exists on Database but not on Service because for the latter
+	// we can simply use glob, while for the former glob fails on BatchDatabase
+	// since we encode the batch id in the BatchDatabase object name. More
+	// specifically, the glob client library appears to have two odd behaviors:
 	// 1) It checks Resolve access on every component along the path (by doing a
 	//    Dispatcher.Lookup), whereas this doesn't happen for other RPCs.
 	// TODO(ivanpi): Resolve should be checked on all RPCs.
 	// 2) It does a Glob(<prefix>/*) for every prefix path, and only proceeds to
 	//    the next path component if that component appeared in its parent's Glob
 	//    results. This is inefficient in general, and broken for us since
-	//    Glob("app/*") does not return batch database names like "a/d##bId".
+	//    Glob("*") does not return batch database names like "d##bId".
+	// TODO(ivanpi): This concern goes away once batch ids are removed from names.
 	// TODO(sadovsky): Maybe switch to streaming RPC.
 	ListCollections(*context.T, rpc.ServerCall) ([]string, error)
 	// Exec executes a syncQL query with positional parameters and returns all
@@ -6834,7 +6583,7 @@ var descDatabase = rpc.InterfaceDesc{
 	Methods: []rpc.MethodDesc{
 		{
 			Name: "Create",
-			Doc:  "// Create creates this Database.\n// If perms is nil, we inherit (copy) the App perms.\n// Create requires the caller to have Write permission at the App.",
+			Doc:  "// Create creates this Database.\n// TODO(sadovsky): Specify what happens if perms is nil.\n// Create requires the caller to have Write permission at the Service.",
 			InArgs: []rpc.ArgDesc{
 				{"metadata", ``}, // *SchemaMetadata
 				{"perms", ``},    // access.Permissions
@@ -6856,7 +6605,7 @@ var descDatabase = rpc.InterfaceDesc{
 		},
 		{
 			Name: "ListCollections",
-			Doc:  "// ListCollections returns a list of all Collection names.\n// This method exists on Database but not on Service or App because for the\n// latter we can simply use glob, while for the former glob fails on\n// BatchDatabase since we encode the batch id in the BatchDatabase object\n// name. More specifically, the glob client library appears to have two odd\n// behaviors:\n// 1) It checks Resolve access on every component along the path (by doing a\n//    Dispatcher.Lookup), whereas this doesn't happen for other RPCs.\n// TODO(ivanpi): Resolve should be checked on all RPCs.\n// 2) It does a Glob(<prefix>/*) for every prefix path, and only proceeds to\n//    the next path component if that component appeared in its parent's Glob\n//    results. This is inefficient in general, and broken for us since\n//    Glob(\"app/*\") does not return batch database names like \"a/d##bId\".\n// TODO(sadovsky): Maybe switch to streaming RPC.",
+			Doc:  "// ListCollections returns a list of all Collection names.\n// This method exists on Database but not on Service because for the latter\n// we can simply use glob, while for the former glob fails on BatchDatabase\n// since we encode the batch id in the BatchDatabase object name. More\n// specifically, the glob client library appears to have two odd behaviors:\n// 1) It checks Resolve access on every component along the path (by doing a\n//    Dispatcher.Lookup), whereas this doesn't happen for other RPCs.\n// TODO(ivanpi): Resolve should be checked on all RPCs.\n// 2) It does a Glob(<prefix>/*) for every prefix path, and only proceeds to\n//    the next path component if that component appeared in its parent's Glob\n//    results. This is inefficient in general, and broken for us since\n//    Glob(\"*\") does not return batch database names like \"d##bId\".\n// TODO(ivanpi): This concern goes away once batch ids are removed from names.\n// TODO(sadovsky): Maybe switch to streaming RPC.",
 			OutArgs: []rpc.ArgDesc{
 				{"", ``}, // []string
 			},

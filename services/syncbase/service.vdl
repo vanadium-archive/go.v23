@@ -24,7 +24,7 @@ import (
 // RPC methods if the --dev flag is not set.
 
 // Service represents a Vanadium Syncbase service.
-// Service.Glob operates over App names.
+// Service.Glob operates over Database ids.
 type Service interface {
 	// DevModeUpdateVClock updates various bits of Syncbase virtual clock and
 	// clock daemon state based on the specified options.
@@ -39,33 +39,13 @@ type Service interface {
 	permissions.Object
 }
 
-// App represents the data for a specific app instance (possibly a combination
-// of user, device, and app).
-// App.Glob operates over Database names.
-type App interface {
-	// Create creates this App.
-	// If perms is nil, we inherit (copy) the Service perms.
-	// Create requires the caller to have Write permission at the Service.
-	Create(perms access.Permissions) error {access.Write}
-
-	// Destroy destroys this App.
-	Destroy() error {access.Write}
-
-	// Exists returns true only if this App exists. Insufficient permissions
-	// cause Exists to return false instead of an error.
-	Exists() (bool | error) {access.Resolve}
-
-	// SetPermissions and GetPermissions are included from the Object interface.
-	permissions.Object
-}
-
 // Database represents a set of Collections. Batches, queries, sync, watch, etc.
 // all operate at the Database level.
 // Database.Glob operates over Collection names.
 type Database interface {
 	// Create creates this Database.
-	// If perms is nil, we inherit (copy) the App perms.
-	// Create requires the caller to have Write permission at the App.
+	// TODO(sadovsky): Specify what happens if perms is nil.
+	// Create requires the caller to have Write permission at the Service.
 	Create(metadata ?SchemaMetadata, perms access.Permissions) error {access.Write}
 
 	// Destroy destroys this Database, permanently removing all of its data.
@@ -78,18 +58,18 @@ type Database interface {
 	Exists() (bool | error) {access.Resolve}
 
 	// ListCollections returns a list of all Collection names.
-	// This method exists on Database but not on Service or App because for the
-	// latter we can simply use glob, while for the former glob fails on
-	// BatchDatabase since we encode the batch id in the BatchDatabase object
-	// name. More specifically, the glob client library appears to have two odd
-	// behaviors:
+	// This method exists on Database but not on Service because for the latter
+	// we can simply use glob, while for the former glob fails on BatchDatabase
+	// since we encode the batch id in the BatchDatabase object name. More
+	// specifically, the glob client library appears to have two odd behaviors:
 	// 1) It checks Resolve access on every component along the path (by doing a
 	//    Dispatcher.Lookup), whereas this doesn't happen for other RPCs.
 	// TODO(ivanpi): Resolve should be checked on all RPCs.
 	// 2) It does a Glob(<prefix>/*) for every prefix path, and only proceeds to
 	//    the next path component if that component appeared in its parent's Glob
 	//    results. This is inefficient in general, and broken for us since
-	//    Glob("app/*") does not return batch database names like "a/d##bId".
+	//    Glob("*") does not return batch database names like "d##bId".
+	// TODO(ivanpi): This concern goes away once batch ids are removed from names.
 	// TODO(sadovsky): Maybe switch to streaming RPC.
 	ListCollections() ([]string | error) {access.Read}
 

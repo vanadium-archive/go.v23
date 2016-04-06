@@ -593,7 +593,7 @@ type Schema struct {
 	Resolver ConflictResolver
 }
 
-// ConflictResolver interface allows the App to define resolution of conflicts
+// ConflictResolver interface allows the app to define resolution of conflicts
 // that it requested to handle.
 type ConflictResolver interface {
 	OnConflict(ctx *context.T, conflict *Conflict) Resolution

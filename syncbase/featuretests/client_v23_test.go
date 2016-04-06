@@ -26,7 +26,7 @@ func TestV23SyncbasedPutGet(t *testing.T) {
 	// See https://github.com/vanadium/issues/issues/1110
 	sh.StartSyncbase(serverCreds, syncbaselib.Opts{Name: testSbName}, `{"Resolve": {"In":["root:server", "root:client"]}, "Read": {"In":["root:server", "root:client"]}, "Write": {"In":["root:server", "root:client"]}}`)
 
-	// Create app, database and collection.
+	// Create database and collection.
 	// TODO(ivanpi): Use setupAppA.
 	ctx := sh.ForkContext("client")
 	d := syncbase.NewService(testSbName).DatabaseForId(testDb, nil)

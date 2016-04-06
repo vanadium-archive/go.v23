@@ -31,7 +31,7 @@ const (
 var testDb = wire.Id{Blessing: "a", Name: "d"}
 
 ////////////////////////////////////////////////////////////
-// Helpers for setting up Syncbases, apps, and dbs
+// Helpers for setting up Syncbases, dbs, and collections
 
 func setupHierarchy(ctx *context.T, syncbaseName string) error {
 	d := syncbase.NewService(syncbaseName).DatabaseForId(testDb, nil)

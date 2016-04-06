@@ -464,10 +464,10 @@ func TestV23SyncbasedGetDeltasPrePopulate(t *testing.T) {
 }
 
 // TestV23SyncbasedGetDeltasMultiApp tests the sending of deltas between two
-// Syncbase instances and their clients across multiple apps, databases, and
+// Syncbase instances and their clients across multiple databases and
 // collections. The 1st client puts entries in multiple collections across
-// multiple app databases then creates multiple syncgroups (one per database)
-// over that data. The 2nd client joins these syncgroups and reads all the data.
+// multiple databases then creates multiple syncgroups (one per database) over
+// that data. The 2nd client joins these syncgroups and reads all the data.
 func TestV23SyncbasedGetDeltasMultiApp(t *testing.T) {
 	v23test.SkipUnlessRunningIntegrationTests(t)
 	sh := v23test.NewShell(t, nil)

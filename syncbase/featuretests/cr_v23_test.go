@@ -24,7 +24,7 @@ import (
 // Setup:
 // S0 and S1 both have data for keys foo0 to foo9 prepopulated.
 // CR Rules are defined as:
-//     keys with prefix foo0 -> App based resolution
+//     keys with prefix foo0 -> app based resolution
 //     remaining -> default
 // S0 and S1 update all rows concurrently causing a conflict for each key.
 // Result: foo0 is sent for app based resolution while rest are resolved by

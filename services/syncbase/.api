@@ -18,8 +18,6 @@ pkg syncbase, const ValueStateDeleted ValueState
 pkg syncbase, const ValueStateExists ValueState
 pkg syncbase, const ValueStateNoExists ValueState
 pkg syncbase, const ValueStateUnknown ValueState
-pkg syncbase, func AppClient(string) AppClientStub
-pkg syncbase, func AppServer(AppServerMethods) AppServerStub
 pkg syncbase, func BatchSourceFromString(string) (BatchSource, error)
 pkg syncbase, func BlobFetchStateFromString(string) (BlobFetchState, error)
 pkg syncbase, func BlobManagerClient(string) BlobManagerClientStub
@@ -261,21 +259,6 @@ pkg syncbase, method (OperationWrite) Name() string
 pkg syncbase, method (ResolverType) String() string
 pkg syncbase, method (ValueSelection) String() string
 pkg syncbase, method (ValueState) String() string
-pkg syncbase, type AppClientMethods interface, Create(*context.T, access.Permissions, ...rpc.CallOpt) error
-pkg syncbase, type AppClientMethods interface, Destroy(*context.T, ...rpc.CallOpt) error
-pkg syncbase, type AppClientMethods interface, Exists(*context.T, ...rpc.CallOpt) (bool, error)
-pkg syncbase, type AppClientMethods interface, unexported methods
-pkg syncbase, type AppClientStub interface, Create(*context.T, access.Permissions, ...rpc.CallOpt) error
-pkg syncbase, type AppClientStub interface, Destroy(*context.T, ...rpc.CallOpt) error
-pkg syncbase, type AppClientStub interface, Exists(*context.T, ...rpc.CallOpt) (bool, error)
-pkg syncbase, type AppClientStub interface, unexported methods
-pkg syncbase, type AppServerMethods interface, Create(*context.T, rpc.ServerCall, access.Permissions) error
-pkg syncbase, type AppServerMethods interface, Destroy(*context.T, rpc.ServerCall) error
-pkg syncbase, type AppServerMethods interface, Exists(*context.T, rpc.ServerCall) (bool, error)
-pkg syncbase, type AppServerMethods interface, unexported methods
-pkg syncbase, type AppServerStub interface, Describe__() []rpc.InterfaceDesc
-pkg syncbase, type AppServerStub interface, unexported methods
-pkg syncbase, type AppServerStubMethods AppServerMethods
 pkg syncbase, type BatchInfo struct
 pkg syncbase, type BatchInfo struct, Hint string
 pkg syncbase, type BatchInfo struct, Id uint64
@@ -888,7 +871,6 @@ pkg syncbase, type ValueTarget struct
 pkg syncbase, type ValueTarget struct, Value *Value
 pkg syncbase, type ValueTarget struct, embedded vdl.FieldsTargetBase
 pkg syncbase, type ValueTarget struct, embedded vdl.TargetBase
-pkg syncbase, var AppDesc rpc.InterfaceDesc
 pkg syncbase, var BatchSourceAll [...]BatchSource
 pkg syncbase, var BlobFetchStateAll [...]BlobFetchState
 pkg syncbase, var BlobManagerDesc rpc.InterfaceDesc

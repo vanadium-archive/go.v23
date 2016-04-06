@@ -130,13 +130,13 @@ type ResolverType enum {
 	// track NTP time and correct any skews suffered by the local system clock.
 	LastWins
 
-	// AppResolves is a policy which allows an App to handle resolution of a
+	// AppResolves is a policy which allows an app to handle resolution of a
 	// conflict on its own. In order to receive the conflicts, the app needs to
 	// register a conflict resolution stream using
 	// Database.StartConflictResolver().
 	AppResolves
 
-	// Defer is a policy that allows an instance of an App to outsource its
+	// Defer is a policy that allows an instance of an app to outsource its
 	// conflict resolution to some other instance, typically a more capable
 	// instance (in terms of resources, knowledge or permissions) such as a
 	// cloud or admin instance.

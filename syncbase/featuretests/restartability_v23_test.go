@@ -544,7 +544,6 @@ func TestV23RestartabilityStoreGarbageCollect(t *testing.T) {
 		}
 	}
 	// TODO(ivanpi): Add Exists() checks.
-	// TODO(ivanpi): Destroy databases individually instead of apps.
 
 	// leveldbDir should still exist.
 	// TODO(ivanpi): Check that other stores have been destroyed.
