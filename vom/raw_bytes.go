@@ -16,7 +16,7 @@ type RawBytes struct {
 	Version    Version
 	Type       *vdl.Type
 	RefTypes   []*vdl.Type
-	AnyLengths []uint64
+	AnyLengths []int
 	Data       []byte
 }
 
@@ -64,7 +64,7 @@ func (rb *RawBytes) String() string {
 			if i > 0 {
 				buf.WriteString(", ")
 			}
-			buf.WriteString(strconv.FormatUint(l, 10))
+			buf.WriteString(strconv.Itoa(l))
 		}
 		buf.WriteString("}, ")
 	}

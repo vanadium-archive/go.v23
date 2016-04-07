@@ -35,7 +35,7 @@ const (
 
 // lenUint retuns the number of bytes used to represent the provided
 // uint value
-func lenUint(v uint64) uint64 {
+func lenUint(v uint64) int {
 	switch {
 	case v <= 0x7f:
 		return 1

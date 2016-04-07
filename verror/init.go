@@ -4,7 +4,11 @@
 
 package verror
 
-import "v.io/v23/vdl"
+import (
+	"fmt"
+
+	"v.io/v23/vdl"
+)
 
 func init() {
 	// We must register the error conversion functions between vdl.WireError and
@@ -91,4 +95,29 @@ func retryFromAction(action ActionCode) vdl.WireRetryCode {
 	}
 	// Backoff to no retry by default.
 	return vdl.WireRetryCodeNoRetry
+}
+
+// VDLRead implements the logic to populate error from dec.
+func VDLRead(dec vdl.Decoder, error *error) error {
+	if err := dec.StartValue(); err != nil {
+		return err
+	}
+	if dec.IsOptional() && dec.IsNil() {
+		if !vdl.Compatible(dec.Type(), vdl.ErrorType) {
+			return fmt.Errorf("incompatible types, got %v, want error", dec.Type())
+		}
+		*error = nil
+		return dec.FinishValue()
+	}
+	dec.IgnoreNextStartValue()
+	var wire vdl.WireError
+	if err := wire.VDLRead(dec); err != nil {
+		return err
+	}
+	var verror E
+	if err := WireToNative(wire, &verror); err != nil {
+		return err
+	}
+	*error = verror
+	return nil
 }

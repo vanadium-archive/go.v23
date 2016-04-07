@@ -337,9 +337,9 @@ func (e *encoder) prepareTypeHelper(tt *vdl.Type, fromNil bool) error {
 			binaryEncodeUint(e.buf, uint64(tid))
 		} else {
 			binaryEncodeUint(e.buf, e.tids.ReferenceTypeID(tid))
-			anyStartRef := e.anyLens.StartAny(uint64(e.buf.Len()))
+			anyStartRef := e.anyLens.StartAny(e.buf.Len())
 			e.typeStack[len(e.typeStack)-1].anyStartRef = anyStartRef
-			binaryEncodeUint(e.buf, anyStartRef.index)
+			binaryEncodeUint(e.buf, uint64(anyStartRef.index))
 		}
 	}
 	return nil
@@ -359,7 +359,7 @@ func (e *encoder) popType() error {
 	}
 	topEntry := e.typeStack[len(e.typeStack)-1]
 	if topEntry.anyStartRef != nil {
-		e.anyLens.FinishAny(topEntry.anyStartRef, uint64(e.buf.Len()))
+		e.anyLens.FinishAny(topEntry.anyStartRef, e.buf.Len())
 	}
 	e.typeStack = e.typeStack[:len(e.typeStack)-1]
 	return nil
@@ -756,9 +756,9 @@ func (e *encoder) finishMessage() error {
 		}
 		if e.hasAny || e.hasTypeObject {
 			ids := e.tids.NewIDs()
-			var anys []uint64
+			var anyLens []int
 			if e.hasAny {
-				anys = e.anyLens.NewAnyLens()
+				anyLens = e.anyLens.NewAnyLens()
 			}
 			headerBuf := newEncbuf()
 			binaryEncodeInt(headerBuf, e.mid)
@@ -767,8 +767,8 @@ func (e *encoder) finishMessage() error {
 				binaryEncodeUint(headerBuf, uint64(id))
 			}
 			if e.hasAny {
-				binaryEncodeUint(headerBuf, uint64(len(anys)))
-				for _, anyLen := range anys {
+				binaryEncodeUint(headerBuf, uint64(len(anyLens)))
+				for _, anyLen := range anyLens {
 					binaryEncodeUint(headerBuf, uint64(anyLen))
 				}
 			}
@@ -836,30 +836,30 @@ func (l *typeIDList) NewIDs() []typeId {
 
 func newAnyLenList() *anyLenList {
 	return &anyLenList{
-		lens: make([]uint64, 0, anyLenListInitialSize),
+		lens: make([]int, 0, anyLenListInitialSize),
 	}
 }
 
 type anyStartRef struct {
-	index  uint64 // index into the anyLen list
-	marker uint64 // position marker for the start of the any
+	index  int // index into the anyLen list
+	marker int // position marker for the start of the any
 }
 
 type anyLenList struct {
-	lens      []uint64
+	lens      []int
 	totalSent int
 }
 
-func (l *anyLenList) StartAny(startMarker uint64) *anyStartRef {
+func (l *anyLenList) StartAny(startMarker int) *anyStartRef {
 	l.lens = append(l.lens, 0)
-	index := uint64(len(l.lens) - 1)
+	index := len(l.lens) - 1
 	return &anyStartRef{
 		index:  index,
-		marker: startMarker + lenUint(index),
+		marker: startMarker + lenUint(uint64(index)),
 	}
 }
 
-func (l *anyLenList) FinishAny(start *anyStartRef, endMarker uint64) {
+func (l *anyLenList) FinishAny(start *anyStartRef, endMarker int) {
 	l.lens[start.index] = endMarker - start.marker
 }
 
@@ -872,8 +872,8 @@ func (l *anyLenList) Reset() error {
 	return nil
 }
 
-func (l *anyLenList) NewAnyLens() []uint64 {
-	var newAnyLens []uint64
+func (l *anyLenList) NewAnyLens() []int {
+	var newAnyLens []int
 	if l.totalSent < len(l.lens) {
 		newAnyLens = l.lens[l.totalSent:]
 	}

@@ -136,7 +136,7 @@ func (d *Decoder) decodeToTarget(target vdl.Target) error {
 		if err != nil {
 			return err
 		}
-		if isRawBytes, err := d.tryDecodeRaw(valType, uint64(valLen), rv); err != nil {
+		if isRawBytes, err := d.tryDecodeRaw(valType, valLen, rv); err != nil {
 			return err
 		} else if isRawBytes {
 			return d.endMessage()
@@ -223,10 +223,10 @@ func (d *Decoder) decodeValueByteLen(tt *vdl.Type) (int, error) {
 	}
 }
 
-func (d *Decoder) decodeRaw(tt *vdl.Type, valLength uint64, raw *RawBytes) error {
+func (d *Decoder) decodeRaw(tt *vdl.Type, valLen int, raw *RawBytes) error {
 	raw.Version = d.buf.version
 	raw.Type = tt
-	raw.Data = make([]byte, valLength)
+	raw.Data = make([]byte, valLen)
 	if err := d.buf.ReadIntoBuf(raw.Data); err != nil {
 		return err
 	}
@@ -250,7 +250,7 @@ type hasRvHack interface {
 	HackGetRv() reflect.Value
 }
 
-func (d *Decoder) tryDecodeRaw(tt *vdl.Type, valLen uint64, rv reflect.Value) (isRawBytes bool, _ error) {
+func (d *Decoder) tryDecodeRaw(tt *vdl.Type, valLen int, rv reflect.Value) (isRawBytes bool, _ error) {
 	// Dereference pointers down to at most one remaining *.
 	for rv.IsValid() && rv.Kind() == reflect.Ptr && rv.Elem().IsValid() && rv.Elem().Kind() == reflect.Ptr {
 		rv = rv.Elem()
@@ -265,7 +265,7 @@ func (d *Decoder) tryDecodeRaw(tt *vdl.Type, valLen uint64, rv reflect.Value) (i
 	}
 	if rv.IsValid() && rv.Type() == rtRawBytes {
 		rb := rv.Addr().Interface().(*RawBytes)
-		if err := d.decodeRaw(tt, uint64(valLen), rb); err != nil {
+		if err := d.decodeRaw(tt, valLen, rb); err != nil {
 			return true, err
 		}
 		return true, nil
@@ -529,7 +529,7 @@ func (d *Decoder) decodeValue(tt *vdl.Type, target vdl.Target) error {
 		}
 		return target.FinishFields(fieldsTarget)
 	case vdl.Any:
-		elemType, valLen, err := d.readAnyHeader(tt, target)
+		elemType, valLen, err := d.readAnyHeader()
 		if err != nil {
 			return err
 		}
@@ -548,47 +548,47 @@ func (d *Decoder) decodeValue(tt *vdl.Type, target vdl.Target) error {
 	}
 }
 
-func (d *Decoder) readAnyHeader(tt *vdl.Type, target vdl.Target) (*vdl.Type, uint64, error) {
-	var elemTid typeId
-	var valLen uint64
-	switch x, ctrl, err := binaryDecodeUintWithControl(d.buf); {
+func (d *Decoder) readAnyHeader() (*vdl.Type, int, error) {
+	// Read either WireCtrlNil or the index of the referenced type id.
+	typeIndex, ctrl, err := binaryDecodeUintWithControl(d.buf)
+	switch {
 	case err != nil:
 		return nil, 0, err
 	case ctrl == WireCtrlNil:
-		return nil, 0, nil
+		return nil, 0, nil // nil any
 	case ctrl != 0:
 		return nil, 0, verror.New(errUnexpectedControlByte, nil, ctrl)
-	case d.buf.version == Version80:
-		elemTid = typeId(x)
-	default:
-		if elemTid, err = d.refTypes.ReferencedTypeId(x); err != nil {
-			return nil, 0, err
-		}
 	}
-	elemType, err := d.typeDec.lookupType(elemTid)
+	var tid typeId
+	if d.buf.version == Version80 {
+		tid = typeId(typeIndex)
+	} else if tid, err = d.refTypes.ReferencedTypeId(typeIndex); err != nil {
+		return nil, 0, err
+	}
+	// Look up the referenced type id.
+	ttElem, err := d.typeDec.lookupType(tid)
 	if err != nil {
 		return nil, 0, err
 	}
+	var anyLen int
 	if d.buf.version != Version80 {
-		switch x, ctrl, err := binaryDecodeUintWithControl(d.buf); {
-		case err != nil:
+		// Read and lookup the index of the any byte length.  Reference the any len,
+		// even if it isn't used, to report missing references.
+		lenIndex, err := binaryDecodeUint(d.buf)
+		if err != nil {
 			return nil, 0, err
-		case ctrl != 0:
-			return nil, 0, verror.New(errUnexpectedControlByte, nil, ctrl)
-		default:
-			// Reference the any len even if it isn't used so that we can
-			// report the case where references are missing.
-			if valLen, err = d.refAnyLens.ReferencedAnyLen(x); err != nil {
-				return nil, 0, err
-			}
+		}
+		if anyLen, err = d.refAnyLens.ReferencedAnyLen(lenIndex); err != nil {
+			return nil, 0, err
 		}
 	}
-	return elemType, valLen, nil
+	return ttElem, anyLen, nil
 }
 
 // ignoreValue ignores the rest of the value of type t. This is used to ignore
 // unknown struct fields.
 func (d *Decoder) ignoreValue(tt *vdl.Type) error {
+	// TODO(toddw): How about ignoring optional values?
 	if tt.IsBytes() {
 		len, err := binaryDecodeLenOrArrayLen(d.buf, tt)
 		if err != nil {
@@ -768,7 +768,7 @@ func (d *Decoder) nextMessage() (typeId, error) {
 			return 0, err
 		}
 		for i := 0; i < int(l); i++ {
-			refAnyLen, err := binaryDecodeUint(d.buf)
+			refAnyLen, err := binaryDecodeLen(d.buf)
 			if err != nil {
 				return 0, err
 			}
@@ -849,7 +849,7 @@ func (refTypes *referencedTypes) Mark() {
 }
 
 type referencedAnyLens struct {
-	lens   []uint64
+	lens   []int
 	marker int
 }
 
@@ -858,11 +858,11 @@ func (refAnys *referencedAnyLens) Reset() (err error) {
 	return
 }
 
-func (refAnys *referencedAnyLens) AddAnyLen(length uint64) {
-	refAnys.lens = append(refAnys.lens, length)
+func (refAnys *referencedAnyLens) AddAnyLen(len int) {
+	refAnys.lens = append(refAnys.lens, len)
 }
 
-func (refAnys *referencedAnyLens) ReferencedAnyLen(index uint64) (uint64, error) {
+func (refAnys *referencedAnyLens) ReferencedAnyLen(index uint64) (int, error) {
 	if index >= uint64(len(refAnys.lens)) {
 		return 0, verror.New(errInvalidAnyIndex, nil)
 	}

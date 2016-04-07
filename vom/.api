@@ -55,6 +55,8 @@ pkg vom, func NewTypeEncoder(io.Writer) *TypeEncoder
 pkg vom, func NewVersionedEncoder(Version, io.Writer) *Encoder
 pkg vom, func NewVersionedEncoderWithTypeEncoder(Version, io.Writer, *TypeEncoder) *Encoder
 pkg vom, func NewVersionedTypeEncoder(Version, io.Writer) *TypeEncoder
+pkg vom, func NewXDecoder(io.Reader) *XDecoder
+pkg vom, func NewXDecoderWithTypeDecoder(io.Reader, *TypeDecoder) *XDecoder
 pkg vom, func RawBytesFromValue(interface{}) (*RawBytes, error)
 pkg vom, func RawBytesOf(interface{}) *RawBytes
 pkg vom, func VersionedEncode(Version, interface{}) ([]byte, error)
@@ -91,6 +93,8 @@ pkg vom, method (*RawBytes) String() string
 pkg vom, method (*RawBytes) ToValue(interface{}) error
 pkg vom, method (*TypeDecoder) Start()
 pkg vom, method (*TypeDecoder) Stop()
+pkg vom, method (*XDecoder) Decode(interface{}) error
+pkg vom, method (*XDecoder) Decoder() vdl.Decoder
 pkg vom, method (ControlKind) String() string
 pkg vom, method (DumpAtom) String() string
 pkg vom, method (DumpKind) String() string
@@ -188,7 +192,7 @@ pkg vom, type PrimitiveTarget struct, Value *Primitive
 pkg vom, type PrimitiveTarget struct, embedded vdl.FieldsTargetBase
 pkg vom, type PrimitiveTarget struct, embedded vdl.TargetBase
 pkg vom, type RawBytes struct
-pkg vom, type RawBytes struct, AnyLengths []uint64
+pkg vom, type RawBytes struct, AnyLengths []int
 pkg vom, type RawBytes struct, Data []byte
 pkg vom, type RawBytes struct, RefTypes []*vdl.Type
 pkg vom, type RawBytes struct, Type *vdl.Type
@@ -196,5 +200,6 @@ pkg vom, type RawBytes struct, Version Version
 pkg vom, type TypeDecoder struct
 pkg vom, type TypeEncoder struct
 pkg vom, type Version byte
+pkg vom, type XDecoder struct
 pkg vom, var ControlKindAll [...]ControlKind
 pkg vom, var DumpKindAll [...]DumpKind
