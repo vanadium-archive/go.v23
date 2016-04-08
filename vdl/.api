@@ -421,6 +421,7 @@ pkg vdl, method (*Value) Bool() bool
 pkg vdl, method (*Value) Bytes() []byte
 pkg vdl, method (*Value) ContainsKey(*Value) bool
 pkg vdl, method (*Value) CopyBytes([]byte) *Value
+pkg vdl, method (*Value) Decoder() Decoder
 pkg vdl, method (*Value) DeleteSetKey(*Value) *Value
 pkg vdl, method (*Value) Elem() *Value
 pkg vdl, method (*Value) EnumIndex() int
@@ -443,6 +444,7 @@ pkg vdl, method (*Value) Type() *Type
 pkg vdl, method (*Value) TypeObject() *Type
 pkg vdl, method (*Value) Uint() uint64
 pkg vdl, method (*Value) UnionField() (int, *Value)
+pkg vdl, method (*Value) VDLRead(Decoder) error
 pkg vdl, method (*WireError) FillVDLTarget(Target, *Type) error
 pkg vdl, method (*WireError) MakeVDLTarget() Target
 pkg vdl, method (*WireError) VDLRead(Decoder) error

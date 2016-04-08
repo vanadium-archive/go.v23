@@ -314,7 +314,7 @@ func (e *encoder) prepareType(tt *vdl.Type, kinds ...vdl.Kind) error {
 // prepareTypeHelper encodes any unsent types, and manages the type stack. If
 // fromNil is true, we skip encoding the typeid for any type, since we'll be
 // encoding a nil instead.
-func (e *encoder) prepareTypeHelper(tt *vdl.Type, fromNil bool) error {
+func (e *encoder) prepareTypeHelper(tt *vdl.Type, preventAnyWrap bool) error {
 	var tid typeId
 	// Check the bootstrap wire types first to avoid recursive calls to the type
 	// encoder for wire types.
@@ -332,7 +332,7 @@ func (e *encoder) prepareTypeHelper(tt *vdl.Type, fromNil bool) error {
 		// Encoding the top-level. We postpone encoding of the tid until writeMsg
 		// is called, to handle positive and negative ids, and the message length.
 		e.pushType(tt)
-	case !fromNil && e.topType().Kind() == vdl.Any:
+	case !preventAnyWrap && e.topType().Kind() == vdl.Any:
 		if e.version == Version80 {
 			binaryEncodeUint(e.buf, uint64(tid))
 		} else {
@@ -579,7 +579,9 @@ func (e *encoder) FromNil(tt *vdl.Type) error {
 	if !tt.CanBeNil() {
 		return errTypeMismatch(tt, nilAllowed...)
 	}
-	if err := e.prepareTypeHelper(tt, true); err != nil {
+	// Emit any wrapper iff this is a nil optional within an any.
+	preventAnyWrap := len(e.typeStack) == 0 || e.topType() != vdl.AnyType || tt.Kind() != vdl.Optional
+	if err := e.prepareTypeHelper(tt, preventAnyWrap); err != nil {
 		return err
 	}
 	e.buf.WriteOneByte(WireCtrlNil)
