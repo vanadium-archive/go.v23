@@ -215,6 +215,65 @@ func (t *ValueTarget) FinishFields(_ vdl.FieldsTarget) error {
 	return nil
 }
 
+func (x *Value) VDLRead(dec vdl.Decoder) error {
+	*x = Value{}
+	var err error
+	if err = dec.StartValue(); err != nil {
+		return err
+	}
+	if dec.Type().Kind() != vdl.Struct {
+		return fmt.Errorf("incompatible struct %T, from %v", *x, dec.Type())
+	}
+	match := 0
+	for {
+		f, err := dec.NextField()
+		if err != nil {
+			return err
+		}
+		switch f {
+		case "":
+			if match == 0 && dec.Type().NumField() > 0 {
+				return fmt.Errorf("no matching fields in struct %T, from %v", *x, dec.Type())
+			}
+			return dec.FinishValue()
+		case "State":
+			match++
+			if err = x.State.VDLRead(dec); err != nil {
+				return err
+			}
+		case "Val":
+			match++
+			if err = dec.StartValue(); err != nil {
+				return err
+			}
+			if err = dec.DecodeBytes(-1, &x.Val); err != nil {
+				return err
+			}
+			if err = dec.FinishValue(); err != nil {
+				return err
+			}
+		case "WriteTs":
+			match++
+			var wire time_2.Time
+			if err = wire.VDLRead(dec); err != nil {
+				return err
+			}
+			if err = time_2.TimeToNative(wire, &x.WriteTs); err != nil {
+				return err
+			}
+		case "Selection":
+			match++
+			if err = x.Selection.VDLRead(dec); err != nil {
+				return err
+			}
+		default:
+			if err = dec.SkipValue(); err != nil {
+				return err
+			}
+		}
+	}
+}
+
 // ConflictRow represents a row under conflict.
 // Key is the key for the row.
 // LocalValue is the value present in the local db.
@@ -521,6 +580,101 @@ func (t *__VDLTarget1_list) FinishElem(elem vdl.Target) error {
 func (t *__VDLTarget1_list) FinishList(elem vdl.ListTarget) error {
 
 	return nil
+}
+
+func (x *ConflictRow) VDLRead(dec vdl.Decoder) error {
+	*x = ConflictRow{}
+	var err error
+	if err = dec.StartValue(); err != nil {
+		return err
+	}
+	if dec.Type().Kind() != vdl.Struct {
+		return fmt.Errorf("incompatible struct %T, from %v", *x, dec.Type())
+	}
+	match := 0
+	for {
+		f, err := dec.NextField()
+		if err != nil {
+			return err
+		}
+		switch f {
+		case "":
+			if match == 0 && dec.Type().NumField() > 0 {
+				return fmt.Errorf("no matching fields in struct %T, from %v", *x, dec.Type())
+			}
+			return dec.FinishValue()
+		case "Key":
+			match++
+			if err = dec.StartValue(); err != nil {
+				return err
+			}
+			if x.Key, err = dec.DecodeString(); err != nil {
+				return err
+			}
+			if err = dec.FinishValue(); err != nil {
+				return err
+			}
+		case "LocalValue":
+			match++
+			if err = x.LocalValue.VDLRead(dec); err != nil {
+				return err
+			}
+		case "RemoteValue":
+			match++
+			if err = x.RemoteValue.VDLRead(dec); err != nil {
+				return err
+			}
+		case "AncestorValue":
+			match++
+			if err = x.AncestorValue.VDLRead(dec); err != nil {
+				return err
+			}
+		case "BatchIds":
+			match++
+			if err = __VDLRead1_list(dec, &x.BatchIds); err != nil {
+				return err
+			}
+		default:
+			if err = dec.SkipValue(); err != nil {
+				return err
+			}
+		}
+	}
+}
+
+func __VDLRead1_list(dec vdl.Decoder, x *[]uint64) error {
+	var err error
+	if err = dec.StartValue(); err != nil {
+		return err
+	}
+	if k := dec.Type().Kind(); k != vdl.Array && k != vdl.List {
+		return fmt.Errorf("incompatible list %T, from %v", *x, dec.Type())
+	}
+	switch len := dec.LenHint(); {
+	case len == 0:
+		*x = nil
+	case len > 0:
+		*x = make([]uint64, 0, len)
+	}
+	for {
+		switch done, err := dec.NextEntry(); {
+		case err != nil:
+			return err
+		case done:
+			return dec.FinishValue()
+		}
+		var elem uint64
+		if err = dec.StartValue(); err != nil {
+			return err
+		}
+		if elem, err = dec.DecodeUint(64); err != nil {
+			return err
+		}
+		if err = dec.FinishValue(); err != nil {
+			return err
+		}
+		*x = append(*x, elem)
+	}
 }
 
 // ConflictRowSet contains a set of rows under conflict. It provides two different
@@ -832,6 +986,166 @@ func (t *__VDLTarget4_list) FinishList(elem vdl.ListTarget) error {
 	return nil
 }
 
+func (x *ConflictRowSet) VDLRead(dec vdl.Decoder) error {
+	*x = ConflictRowSet{}
+	var err error
+	if err = dec.StartValue(); err != nil {
+		return err
+	}
+	if dec.Type().Kind() != vdl.Struct {
+		return fmt.Errorf("incompatible struct %T, from %v", *x, dec.Type())
+	}
+	match := 0
+	for {
+		f, err := dec.NextField()
+		if err != nil {
+			return err
+		}
+		switch f {
+		case "":
+			if match == 0 && dec.Type().NumField() > 0 {
+				return fmt.Errorf("no matching fields in struct %T, from %v", *x, dec.Type())
+			}
+			return dec.FinishValue()
+		case "ByKey":
+			match++
+			if err = __VDLRead2_map(dec, &x.ByKey); err != nil {
+				return err
+			}
+		case "ByBatch":
+			match++
+			if err = __VDLRead3_map(dec, &x.ByBatch); err != nil {
+				return err
+			}
+		default:
+			if err = dec.SkipValue(); err != nil {
+				return err
+			}
+		}
+	}
+}
+
+func __VDLRead2_map(dec vdl.Decoder, x *map[string]ConflictRow) error {
+	var err error
+	if err = dec.StartValue(); err != nil {
+		return err
+	}
+	if k := dec.Type().Kind(); k != vdl.Map {
+		return fmt.Errorf("incompatible map %T, from %v", *x, dec.Type())
+	}
+	switch len := dec.LenHint(); {
+	case len == 0:
+		*x = nil
+		return dec.FinishValue()
+	case len > 0:
+		*x = make(map[string]ConflictRow, len)
+	default:
+		*x = make(map[string]ConflictRow)
+	}
+	for {
+		switch done, err := dec.NextEntry(); {
+		case err != nil:
+			return err
+		case done:
+			return dec.FinishValue()
+		}
+		var key string
+		{
+			if err = dec.StartValue(); err != nil {
+				return err
+			}
+			if key, err = dec.DecodeString(); err != nil {
+				return err
+			}
+			if err = dec.FinishValue(); err != nil {
+				return err
+			}
+		}
+		var elem ConflictRow
+		{
+			if err = elem.VDLRead(dec); err != nil {
+				return err
+			}
+		}
+		(*x)[key] = elem
+	}
+}
+
+func __VDLRead3_map(dec vdl.Decoder, x *map[uint64][]ConflictRow) error {
+	var err error
+	if err = dec.StartValue(); err != nil {
+		return err
+	}
+	if k := dec.Type().Kind(); k != vdl.Map {
+		return fmt.Errorf("incompatible map %T, from %v", *x, dec.Type())
+	}
+	switch len := dec.LenHint(); {
+	case len == 0:
+		*x = nil
+		return dec.FinishValue()
+	case len > 0:
+		*x = make(map[uint64][]ConflictRow, len)
+	default:
+		*x = make(map[uint64][]ConflictRow)
+	}
+	for {
+		switch done, err := dec.NextEntry(); {
+		case err != nil:
+			return err
+		case done:
+			return dec.FinishValue()
+		}
+		var key uint64
+		{
+			if err = dec.StartValue(); err != nil {
+				return err
+			}
+			if key, err = dec.DecodeUint(64); err != nil {
+				return err
+			}
+			if err = dec.FinishValue(); err != nil {
+				return err
+			}
+		}
+		var elem []ConflictRow
+		{
+			if err = __VDLRead4_list(dec, &elem); err != nil {
+				return err
+			}
+		}
+		(*x)[key] = elem
+	}
+}
+
+func __VDLRead4_list(dec vdl.Decoder, x *[]ConflictRow) error {
+	var err error
+	if err = dec.StartValue(); err != nil {
+		return err
+	}
+	if k := dec.Type().Kind(); k != vdl.Array && k != vdl.List {
+		return fmt.Errorf("incompatible list %T, from %v", *x, dec.Type())
+	}
+	switch len := dec.LenHint(); {
+	case len == 0:
+		*x = nil
+	case len > 0:
+		*x = make([]ConflictRow, 0, len)
+	}
+	for {
+		switch done, err := dec.NextEntry(); {
+		case err != nil:
+			return err
+		case done:
+			return dec.FinishValue()
+		}
+		var elem ConflictRow
+		if err = elem.VDLRead(dec); err != nil {
+			return err
+		}
+		*x = append(*x, elem)
+	}
+}
+
 // ConflictScanSet contains a set of scans under conflict.
 // ByBatch is a map of array of ScanOps keyed by batch id.
 type ConflictScanSet struct {
@@ -1037,6 +1351,115 @@ func (t *__VDLTarget6_list) FinishElem(elem vdl.Target) error {
 func (t *__VDLTarget6_list) FinishList(elem vdl.ListTarget) error {
 
 	return nil
+}
+
+func (x *ConflictScanSet) VDLRead(dec vdl.Decoder) error {
+	*x = ConflictScanSet{}
+	var err error
+	if err = dec.StartValue(); err != nil {
+		return err
+	}
+	if dec.Type().Kind() != vdl.Struct {
+		return fmt.Errorf("incompatible struct %T, from %v", *x, dec.Type())
+	}
+	match := 0
+	for {
+		f, err := dec.NextField()
+		if err != nil {
+			return err
+		}
+		switch f {
+		case "":
+			if match == 0 && dec.Type().NumField() > 0 {
+				return fmt.Errorf("no matching fields in struct %T, from %v", *x, dec.Type())
+			}
+			return dec.FinishValue()
+		case "ByBatch":
+			match++
+			if err = __VDLRead5_map(dec, &x.ByBatch); err != nil {
+				return err
+			}
+		default:
+			if err = dec.SkipValue(); err != nil {
+				return err
+			}
+		}
+	}
+}
+
+func __VDLRead5_map(dec vdl.Decoder, x *map[uint64][]syncbase.ScanOp) error {
+	var err error
+	if err = dec.StartValue(); err != nil {
+		return err
+	}
+	if k := dec.Type().Kind(); k != vdl.Map {
+		return fmt.Errorf("incompatible map %T, from %v", *x, dec.Type())
+	}
+	switch len := dec.LenHint(); {
+	case len == 0:
+		*x = nil
+		return dec.FinishValue()
+	case len > 0:
+		*x = make(map[uint64][]syncbase.ScanOp, len)
+	default:
+		*x = make(map[uint64][]syncbase.ScanOp)
+	}
+	for {
+		switch done, err := dec.NextEntry(); {
+		case err != nil:
+			return err
+		case done:
+			return dec.FinishValue()
+		}
+		var key uint64
+		{
+			if err = dec.StartValue(); err != nil {
+				return err
+			}
+			if key, err = dec.DecodeUint(64); err != nil {
+				return err
+			}
+			if err = dec.FinishValue(); err != nil {
+				return err
+			}
+		}
+		var elem []syncbase.ScanOp
+		{
+			if err = __VDLRead6_list(dec, &elem); err != nil {
+				return err
+			}
+		}
+		(*x)[key] = elem
+	}
+}
+
+func __VDLRead6_list(dec vdl.Decoder, x *[]syncbase.ScanOp) error {
+	var err error
+	if err = dec.StartValue(); err != nil {
+		return err
+	}
+	if k := dec.Type().Kind(); k != vdl.Array && k != vdl.List {
+		return fmt.Errorf("incompatible list %T, from %v", *x, dec.Type())
+	}
+	switch len := dec.LenHint(); {
+	case len == 0:
+		*x = nil
+	case len > 0:
+		*x = make([]syncbase.ScanOp, 0, len)
+	}
+	for {
+		switch done, err := dec.NextEntry(); {
+		case err != nil:
+			return err
+		case done:
+			return dec.FinishValue()
+		}
+		var elem syncbase.ScanOp
+		if err = elem.VDLRead(dec); err != nil {
+			return err
+		}
+		*x = append(*x, elem)
+	}
 }
 
 // Conflict contains information to fully specify a conflict. Since syncbase
@@ -1353,6 +1776,146 @@ func (t *__VDLTarget9_map) FinishMap(elem vdl.MapTarget) error {
 	return nil
 }
 
+func (x *Conflict) VDLRead(dec vdl.Decoder) error {
+	*x = Conflict{}
+	var err error
+	if err = dec.StartValue(); err != nil {
+		return err
+	}
+	if dec.Type().Kind() != vdl.Struct {
+		return fmt.Errorf("incompatible struct %T, from %v", *x, dec.Type())
+	}
+	match := 0
+	for {
+		f, err := dec.NextField()
+		if err != nil {
+			return err
+		}
+		switch f {
+		case "":
+			if match == 0 && dec.Type().NumField() > 0 {
+				return fmt.Errorf("no matching fields in struct %T, from %v", *x, dec.Type())
+			}
+			return dec.FinishValue()
+		case "ReadSet":
+			match++
+			if err = dec.StartValue(); err != nil {
+				return err
+			}
+			if dec.IsNil() {
+				if !vdl.Compatible(dec.Type(), vdl.TypeOf(x.ReadSet)) {
+					return fmt.Errorf("incompatible optional %T, from %v", x.ReadSet, dec.Type())
+				}
+				x.ReadSet = nil
+				if err = dec.FinishValue(); err != nil {
+					return err
+				}
+			} else {
+				x.ReadSet = new(ConflictRowSet)
+				dec.IgnoreNextStartValue()
+				if err = x.ReadSet.VDLRead(dec); err != nil {
+					return err
+				}
+			}
+		case "WriteSet":
+			match++
+			if err = dec.StartValue(); err != nil {
+				return err
+			}
+			if dec.IsNil() {
+				if !vdl.Compatible(dec.Type(), vdl.TypeOf(x.WriteSet)) {
+					return fmt.Errorf("incompatible optional %T, from %v", x.WriteSet, dec.Type())
+				}
+				x.WriteSet = nil
+				if err = dec.FinishValue(); err != nil {
+					return err
+				}
+			} else {
+				x.WriteSet = new(ConflictRowSet)
+				dec.IgnoreNextStartValue()
+				if err = x.WriteSet.VDLRead(dec); err != nil {
+					return err
+				}
+			}
+		case "ScanSet":
+			match++
+			if err = dec.StartValue(); err != nil {
+				return err
+			}
+			if dec.IsNil() {
+				if !vdl.Compatible(dec.Type(), vdl.TypeOf(x.ScanSet)) {
+					return fmt.Errorf("incompatible optional %T, from %v", x.ScanSet, dec.Type())
+				}
+				x.ScanSet = nil
+				if err = dec.FinishValue(); err != nil {
+					return err
+				}
+			} else {
+				x.ScanSet = new(ConflictScanSet)
+				dec.IgnoreNextStartValue()
+				if err = x.ScanSet.VDLRead(dec); err != nil {
+					return err
+				}
+			}
+		case "Batches":
+			match++
+			if err = __VDLRead7_map(dec, &x.Batches); err != nil {
+				return err
+			}
+		default:
+			if err = dec.SkipValue(); err != nil {
+				return err
+			}
+		}
+	}
+}
+
+func __VDLRead7_map(dec vdl.Decoder, x *map[uint64]syncbase.BatchInfo) error {
+	var err error
+	if err = dec.StartValue(); err != nil {
+		return err
+	}
+	if k := dec.Type().Kind(); k != vdl.Map {
+		return fmt.Errorf("incompatible map %T, from %v", *x, dec.Type())
+	}
+	switch len := dec.LenHint(); {
+	case len == 0:
+		*x = nil
+		return dec.FinishValue()
+	case len > 0:
+		*x = make(map[uint64]syncbase.BatchInfo, len)
+	default:
+		*x = make(map[uint64]syncbase.BatchInfo)
+	}
+	for {
+		switch done, err := dec.NextEntry(); {
+		case err != nil:
+			return err
+		case done:
+			return dec.FinishValue()
+		}
+		var key uint64
+		{
+			if err = dec.StartValue(); err != nil {
+				return err
+			}
+			if key, err = dec.DecodeUint(64); err != nil {
+				return err
+			}
+			if err = dec.FinishValue(); err != nil {
+				return err
+			}
+		}
+		var elem syncbase.BatchInfo
+		{
+			if err = elem.VDLRead(dec); err != nil {
+				return err
+			}
+		}
+		(*x)[key] = elem
+	}
+}
+
 // ResolvedRow represents a result of resolution of a row under conflict.
 // Key is the key for the row.
 // Result is the result of the conflict resolution. Delete is represented
@@ -1497,6 +2060,66 @@ func (t *__VDLTarget10_optional) FinishFields(_ vdl.FieldsTarget) error {
 func (t *__VDLTarget10_optional) FromNil(tt *vdl.Type) error {
 	*t.Value = (*Value)(nil)
 	return nil
+}
+
+func (x *ResolvedRow) VDLRead(dec vdl.Decoder) error {
+	*x = ResolvedRow{}
+	var err error
+	if err = dec.StartValue(); err != nil {
+		return err
+	}
+	if dec.Type().Kind() != vdl.Struct {
+		return fmt.Errorf("incompatible struct %T, from %v", *x, dec.Type())
+	}
+	match := 0
+	for {
+		f, err := dec.NextField()
+		if err != nil {
+			return err
+		}
+		switch f {
+		case "":
+			if match == 0 && dec.Type().NumField() > 0 {
+				return fmt.Errorf("no matching fields in struct %T, from %v", *x, dec.Type())
+			}
+			return dec.FinishValue()
+		case "Key":
+			match++
+			if err = dec.StartValue(); err != nil {
+				return err
+			}
+			if x.Key, err = dec.DecodeString(); err != nil {
+				return err
+			}
+			if err = dec.FinishValue(); err != nil {
+				return err
+			}
+		case "Result":
+			match++
+			if err = dec.StartValue(); err != nil {
+				return err
+			}
+			if dec.IsNil() {
+				if !vdl.Compatible(dec.Type(), vdl.TypeOf(x.Result)) {
+					return fmt.Errorf("incompatible optional %T, from %v", x.Result, dec.Type())
+				}
+				x.Result = nil
+				if err = dec.FinishValue(); err != nil {
+					return err
+				}
+			} else {
+				x.Result = new(Value)
+				dec.IgnoreNextStartValue()
+				if err = x.Result.VDLRead(dec); err != nil {
+					return err
+				}
+			}
+		default:
+			if err = dec.SkipValue(); err != nil {
+				return err
+			}
+		}
+	}
 }
 
 // Resolution contains the application’s reply to a conflict. It must contain a
@@ -1656,6 +2279,86 @@ func (t *__VDLTarget11_map) FinishMap(elem vdl.MapTarget) error {
 	}
 
 	return nil
+}
+
+func (x *Resolution) VDLRead(dec vdl.Decoder) error {
+	*x = Resolution{}
+	var err error
+	if err = dec.StartValue(); err != nil {
+		return err
+	}
+	if dec.Type().Kind() != vdl.Struct {
+		return fmt.Errorf("incompatible struct %T, from %v", *x, dec.Type())
+	}
+	match := 0
+	for {
+		f, err := dec.NextField()
+		if err != nil {
+			return err
+		}
+		switch f {
+		case "":
+			if match == 0 && dec.Type().NumField() > 0 {
+				return fmt.Errorf("no matching fields in struct %T, from %v", *x, dec.Type())
+			}
+			return dec.FinishValue()
+		case "ResultSet":
+			match++
+			if err = __VDLRead8_map(dec, &x.ResultSet); err != nil {
+				return err
+			}
+		default:
+			if err = dec.SkipValue(); err != nil {
+				return err
+			}
+		}
+	}
+}
+
+func __VDLRead8_map(dec vdl.Decoder, x *map[string]ResolvedRow) error {
+	var err error
+	if err = dec.StartValue(); err != nil {
+		return err
+	}
+	if k := dec.Type().Kind(); k != vdl.Map {
+		return fmt.Errorf("incompatible map %T, from %v", *x, dec.Type())
+	}
+	switch len := dec.LenHint(); {
+	case len == 0:
+		*x = nil
+		return dec.FinishValue()
+	case len > 0:
+		*x = make(map[string]ResolvedRow, len)
+	default:
+		*x = make(map[string]ResolvedRow)
+	}
+	for {
+		switch done, err := dec.NextEntry(); {
+		case err != nil:
+			return err
+		case done:
+			return dec.FinishValue()
+		}
+		var key string
+		{
+			if err = dec.StartValue(); err != nil {
+				return err
+			}
+			if key, err = dec.DecodeString(); err != nil {
+				return err
+			}
+			if err = dec.FinishValue(); err != nil {
+				return err
+			}
+		}
+		var elem ResolvedRow
+		{
+			if err = elem.VDLRead(dec); err != nil {
+				return err
+			}
+		}
+		(*x)[key] = elem
+	}
 }
 
 var __VDLInitCalled bool

@@ -20,6 +20,7 @@ pkg access, func TypicalTagTypePermissionsAuthorizer(Permissions) security.Autho
 pkg access, func WritePermissions(io.Writer, Permissions) error
 pkg access, method (*AccessList) FillVDLTarget(vdl.Target, *vdl.Type) error
 pkg access, method (*AccessList) MakeVDLTarget() vdl.Target
+pkg access, method (*AccessList) VDLRead(vdl.Decoder) error
 pkg access, method (*AccessListTarget) FinishField(vdl.Target, vdl.Target) error
 pkg access, method (*AccessListTarget) FinishFields(vdl.FieldsTarget) error
 pkg access, method (*AccessListTarget) StartField(string) (vdl.Target, vdl.Target, error)
@@ -27,6 +28,7 @@ pkg access, method (*AccessListTarget) StartFields(*vdl.Type) (vdl.FieldsTarget,
 pkg access, method (*AccessListTarget) ZeroField(string) error
 pkg access, method (*Permissions) FillVDLTarget(vdl.Target, *vdl.Type) error
 pkg access, method (*Permissions) MakeVDLTarget() vdl.Target
+pkg access, method (*Permissions) VDLRead(vdl.Decoder) error
 pkg access, method (*PermissionsTarget) FinishField(vdl.Target, vdl.Target) error
 pkg access, method (*PermissionsTarget) FinishKeyStartField(vdl.Target) (vdl.Target, error)
 pkg access, method (*PermissionsTarget) FinishMap(vdl.MapTarget) error
@@ -34,6 +36,7 @@ pkg access, method (*PermissionsTarget) StartKey() (vdl.Target, error)
 pkg access, method (*PermissionsTarget) StartMap(*vdl.Type, int) (vdl.MapTarget, error)
 pkg access, method (*Tag) FillVDLTarget(vdl.Target, *vdl.Type) error
 pkg access, method (*Tag) MakeVDLTarget() vdl.Target
+pkg access, method (*Tag) VDLRead(vdl.Decoder) error
 pkg access, method (*TagTarget) FromString(string, *vdl.Type) error
 pkg access, method (AccessList) Authorize(*context.T, security.Call) error
 pkg access, method (AccessList) Enforceable(*context.T, security.Principal) error

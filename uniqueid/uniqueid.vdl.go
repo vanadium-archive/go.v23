@@ -51,6 +51,18 @@ func (t *IdTarget) FromBytes(src []byte, tt *vdl.Type) error {
 	return nil
 }
 
+func (x *Id) VDLRead(dec vdl.Decoder) error {
+	var err error
+	if err = dec.StartValue(); err != nil {
+		return err
+	}
+	bytes := x[:]
+	if err = dec.DecodeBytes(16, &bytes); err != nil {
+		return err
+	}
+	return dec.FinishValue()
+}
+
 var __VDLInitCalled bool
 
 // __VDLInit performs vdl initialization.  It is safe to call multiple times.

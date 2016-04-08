@@ -185,6 +185,79 @@ func (t *AddressInfoTarget) FinishFields(_ vdl.FieldsTarget) error {
 	return nil
 }
 
+func (x *AddressInfo) VDLRead(dec vdl.Decoder) error {
+	*x = AddressInfo{}
+	var err error
+	if err = dec.StartValue(); err != nil {
+		return err
+	}
+	if dec.Type().Kind() != vdl.Struct {
+		return fmt.Errorf("incompatible struct %T, from %v", *x, dec.Type())
+	}
+	match := 0
+	for {
+		f, err := dec.NextField()
+		if err != nil {
+			return err
+		}
+		switch f {
+		case "":
+			if match == 0 && dec.Type().NumField() > 0 {
+				return fmt.Errorf("no matching fields in struct %T, from %v", *x, dec.Type())
+			}
+			return dec.FinishValue()
+		case "Street":
+			match++
+			if err = dec.StartValue(); err != nil {
+				return err
+			}
+			if x.Street, err = dec.DecodeString(); err != nil {
+				return err
+			}
+			if err = dec.FinishValue(); err != nil {
+				return err
+			}
+		case "City":
+			match++
+			if err = dec.StartValue(); err != nil {
+				return err
+			}
+			if x.City, err = dec.DecodeString(); err != nil {
+				return err
+			}
+			if err = dec.FinishValue(); err != nil {
+				return err
+			}
+		case "State":
+			match++
+			if err = dec.StartValue(); err != nil {
+				return err
+			}
+			if x.State, err = dec.DecodeString(); err != nil {
+				return err
+			}
+			if err = dec.FinishValue(); err != nil {
+				return err
+			}
+		case "Zip":
+			match++
+			if err = dec.StartValue(); err != nil {
+				return err
+			}
+			if x.Zip, err = dec.DecodeString(); err != nil {
+				return err
+			}
+			if err = dec.FinishValue(); err != nil {
+				return err
+			}
+		default:
+			if err = dec.SkipValue(); err != nil {
+				return err
+			}
+		}
+	}
+}
+
 type CreditAgency int
 
 const (
@@ -273,6 +346,21 @@ func (t *CreditAgencyTarget) FromEnumLabel(src string, tt *vdl.Type) error {
 	return nil
 }
 
+func (x *CreditAgency) VDLRead(dec vdl.Decoder) error {
+	var err error
+	if err = dec.StartValue(); err != nil {
+		return err
+	}
+	enum, err := dec.DecodeString()
+	if err != nil {
+		return err
+	}
+	if err = x.Set(enum); err != nil {
+		return err
+	}
+	return dec.FinishValue()
+}
+
 type ExperianRating int
 
 const (
@@ -351,6 +439,21 @@ func (t *ExperianRatingTarget) FromEnumLabel(src string, tt *vdl.Type) error {
 	}
 
 	return nil
+}
+
+func (x *ExperianRating) VDLRead(dec vdl.Decoder) error {
+	var err error
+	if err = dec.StartValue(); err != nil {
+		return err
+	}
+	enum, err := dec.DecodeString()
+	if err != nil {
+		return err
+	}
+	if err = x.Set(enum); err != nil {
+		return err
+	}
+	return dec.FinishValue()
 }
 
 type EquifaxCreditReport struct {
@@ -435,6 +538,48 @@ func (t *EquifaxCreditReportTarget) ZeroField(name string) error {
 func (t *EquifaxCreditReportTarget) FinishFields(_ vdl.FieldsTarget) error {
 
 	return nil
+}
+
+func (x *EquifaxCreditReport) VDLRead(dec vdl.Decoder) error {
+	*x = EquifaxCreditReport{}
+	var err error
+	if err = dec.StartValue(); err != nil {
+		return err
+	}
+	if dec.Type().Kind() != vdl.Struct {
+		return fmt.Errorf("incompatible struct %T, from %v", *x, dec.Type())
+	}
+	match := 0
+	for {
+		f, err := dec.NextField()
+		if err != nil {
+			return err
+		}
+		switch f {
+		case "":
+			if match == 0 && dec.Type().NumField() > 0 {
+				return fmt.Errorf("no matching fields in struct %T, from %v", *x, dec.Type())
+			}
+			return dec.FinishValue()
+		case "Rating":
+			match++
+			if err = dec.StartValue(); err != nil {
+				return err
+			}
+			tmp, err := dec.DecodeUint(8)
+			if err != nil {
+				return err
+			}
+			x.Rating = byte(tmp)
+			if err = dec.FinishValue(); err != nil {
+				return err
+			}
+		default:
+			if err = dec.SkipValue(); err != nil {
+				return err
+			}
+		}
+	}
 }
 
 type ExperianCreditReport struct {
@@ -522,6 +667,40 @@ func (t *ExperianCreditReportTarget) FinishFields(_ vdl.FieldsTarget) error {
 	return nil
 }
 
+func (x *ExperianCreditReport) VDLRead(dec vdl.Decoder) error {
+	*x = ExperianCreditReport{}
+	var err error
+	if err = dec.StartValue(); err != nil {
+		return err
+	}
+	if dec.Type().Kind() != vdl.Struct {
+		return fmt.Errorf("incompatible struct %T, from %v", *x, dec.Type())
+	}
+	match := 0
+	for {
+		f, err := dec.NextField()
+		if err != nil {
+			return err
+		}
+		switch f {
+		case "":
+			if match == 0 && dec.Type().NumField() > 0 {
+				return fmt.Errorf("no matching fields in struct %T, from %v", *x, dec.Type())
+			}
+			return dec.FinishValue()
+		case "Rating":
+			match++
+			if err = x.Rating.VDLRead(dec); err != nil {
+				return err
+			}
+		default:
+			if err = dec.SkipValue(); err != nil {
+				return err
+			}
+		}
+	}
+}
+
 type TransUnionCreditReport struct {
 	Rating int16
 }
@@ -604,6 +783,48 @@ func (t *TransUnionCreditReportTarget) ZeroField(name string) error {
 func (t *TransUnionCreditReportTarget) FinishFields(_ vdl.FieldsTarget) error {
 
 	return nil
+}
+
+func (x *TransUnionCreditReport) VDLRead(dec vdl.Decoder) error {
+	*x = TransUnionCreditReport{}
+	var err error
+	if err = dec.StartValue(); err != nil {
+		return err
+	}
+	if dec.Type().Kind() != vdl.Struct {
+		return fmt.Errorf("incompatible struct %T, from %v", *x, dec.Type())
+	}
+	match := 0
+	for {
+		f, err := dec.NextField()
+		if err != nil {
+			return err
+		}
+		switch f {
+		case "":
+			if match == 0 && dec.Type().NumField() > 0 {
+				return fmt.Errorf("no matching fields in struct %T, from %v", *x, dec.Type())
+			}
+			return dec.FinishValue()
+		case "Rating":
+			match++
+			if err = dec.StartValue(); err != nil {
+				return err
+			}
+			tmp, err := dec.DecodeInt(16)
+			if err != nil {
+				return err
+			}
+			x.Rating = int16(tmp)
+			if err = dec.FinishValue(); err != nil {
+				return err
+			}
+		default:
+			if err = dec.SkipValue(); err != nil {
+				return err
+			}
+		}
+	}
 }
 
 type (
@@ -790,6 +1011,51 @@ func (t agencyReportTargetFactory) VDLMakeUnionTarget(union interface{}) (vdl.Ta
 	return nil, fmt.Errorf("got %T, want *AgencyReport", union)
 }
 
+func VDLReadAgencyReport(dec vdl.Decoder, x *AgencyReport) error {
+	var err error
+	if err = dec.StartValue(); err != nil {
+		return err
+	}
+	if dec.Type().Kind() != vdl.Union {
+		return fmt.Errorf("incompatible union %T, from %v", *x, dec.Type())
+	}
+	f, err := dec.NextField()
+	if err != nil {
+		return err
+	}
+	switch f {
+	case "EquifaxReport":
+		var field AgencyReportEquifaxReport
+		if err = field.Value.VDLRead(dec); err != nil {
+			return err
+		}
+		*x = field
+	case "ExperianReport":
+		var field AgencyReportExperianReport
+		if err = field.Value.VDLRead(dec); err != nil {
+			return err
+		}
+		*x = field
+	case "TransUnionReport":
+		var field AgencyReportTransUnionReport
+		if err = field.Value.VDLRead(dec); err != nil {
+			return err
+		}
+		*x = field
+	case "":
+		return fmt.Errorf("missing field in union %T, from %v", x, dec.Type())
+	default:
+		return fmt.Errorf("field %q not in union %T, from %v", f, x, dec.Type())
+	}
+	switch f, err := dec.NextField(); {
+	case err != nil:
+		return err
+	case f != "":
+		return fmt.Errorf("extra field %q in union %T, from %v", f, x, dec.Type())
+	}
+	return dec.FinishValue()
+}
+
 type CreditReport struct {
 	Agency CreditAgency
 	Report AgencyReport
@@ -911,6 +1177,47 @@ func (t *CreditReportTarget) ZeroField(name string) error {
 func (t *CreditReportTarget) FinishFields(_ vdl.FieldsTarget) error {
 
 	return nil
+}
+
+func (x *CreditReport) VDLRead(dec vdl.Decoder) error {
+	*x = CreditReport{
+		Report: AgencyReportEquifaxReport{},
+	}
+	var err error
+	if err = dec.StartValue(); err != nil {
+		return err
+	}
+	if dec.Type().Kind() != vdl.Struct {
+		return fmt.Errorf("incompatible struct %T, from %v", *x, dec.Type())
+	}
+	match := 0
+	for {
+		f, err := dec.NextField()
+		if err != nil {
+			return err
+		}
+		switch f {
+		case "":
+			if match == 0 && dec.Type().NumField() > 0 {
+				return fmt.Errorf("no matching fields in struct %T, from %v", *x, dec.Type())
+			}
+			return dec.FinishValue()
+		case "Agency":
+			match++
+			if err = x.Agency.VDLRead(dec); err != nil {
+				return err
+			}
+		case "Report":
+			match++
+			if err = VDLReadAgencyReport(dec, &x.Report); err != nil {
+				return err
+			}
+		default:
+			if err = dec.SkipValue(); err != nil {
+				return err
+			}
+		}
+	}
 }
 
 type Customer struct {
@@ -1113,6 +1420,82 @@ func (t *CustomerTarget) ZeroField(name string) error {
 func (t *CustomerTarget) FinishFields(_ vdl.FieldsTarget) error {
 
 	return nil
+}
+
+func (x *Customer) VDLRead(dec vdl.Decoder) error {
+	*x = Customer{
+		Credit: CreditReport{
+			Report: AgencyReportEquifaxReport{},
+		},
+	}
+	var err error
+	if err = dec.StartValue(); err != nil {
+		return err
+	}
+	if dec.Type().Kind() != vdl.Struct {
+		return fmt.Errorf("incompatible struct %T, from %v", *x, dec.Type())
+	}
+	match := 0
+	for {
+		f, err := dec.NextField()
+		if err != nil {
+			return err
+		}
+		switch f {
+		case "":
+			if match == 0 && dec.Type().NumField() > 0 {
+				return fmt.Errorf("no matching fields in struct %T, from %v", *x, dec.Type())
+			}
+			return dec.FinishValue()
+		case "Name":
+			match++
+			if err = dec.StartValue(); err != nil {
+				return err
+			}
+			if x.Name, err = dec.DecodeString(); err != nil {
+				return err
+			}
+			if err = dec.FinishValue(); err != nil {
+				return err
+			}
+		case "Id":
+			match++
+			if err = dec.StartValue(); err != nil {
+				return err
+			}
+			if x.Id, err = dec.DecodeInt(64); err != nil {
+				return err
+			}
+			if err = dec.FinishValue(); err != nil {
+				return err
+			}
+		case "Active":
+			match++
+			if err = dec.StartValue(); err != nil {
+				return err
+			}
+			if x.Active, err = dec.DecodeBool(); err != nil {
+				return err
+			}
+			if err = dec.FinishValue(); err != nil {
+				return err
+			}
+		case "Address":
+			match++
+			if err = x.Address.VDLRead(dec); err != nil {
+				return err
+			}
+		case "Credit":
+			match++
+			if err = x.Credit.VDLRead(dec); err != nil {
+				return err
+			}
+		default:
+			if err = dec.SkipValue(); err != nil {
+				return err
+			}
+		}
+	}
 }
 
 var __VDLInitCalled bool

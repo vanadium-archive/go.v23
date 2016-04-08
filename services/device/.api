@@ -14,11 +14,15 @@ pkg device, func DeviceClient(string) DeviceClientStub
 pkg device, func DeviceServer(DeviceServerMethods) DeviceServerStub
 pkg device, func InstallationStateFromString(string) (InstallationState, error)
 pkg device, func InstanceStateFromString(string) (InstanceState, error)
+pkg device, func VDLReadBlessClientMessage(vdl.Decoder, *BlessClientMessage) error
+pkg device, func VDLReadBlessServerMessage(vdl.Decoder, *BlessServerMessage) error
+pkg device, func VDLReadStatus(vdl.Decoder, *Status) error
 pkg device, method (*ApplicationInstantiateServerCallStub) Init(rpc.StreamServerCall)
 pkg device, method (*ApplicationInstantiateServerCallStub) RecvStream() interface {  Advance() bool; Value() BlessClientMessage; Err() error;}
 pkg device, method (*ApplicationInstantiateServerCallStub) SendStream() interface {  Send(item BlessServerMessage) error;}
 pkg device, method (*Association) FillVDLTarget(vdl.Target, *vdl.Type) error
 pkg device, method (*Association) MakeVDLTarget() vdl.Target
+pkg device, method (*Association) VDLRead(vdl.Decoder) error
 pkg device, method (*AssociationTarget) FinishField(vdl.Target, vdl.Target) error
 pkg device, method (*AssociationTarget) FinishFields(vdl.FieldsTarget) error
 pkg device, method (*AssociationTarget) StartField(string) (vdl.Target, vdl.Target, error)
@@ -34,6 +38,7 @@ pkg device, method (*BlessServerMessageTarget) StartField(string) (vdl.Target, v
 pkg device, method (*BlessServerMessageTarget) StartFields(*vdl.Type) (vdl.FieldsTarget, error)
 pkg device, method (*Config) FillVDLTarget(vdl.Target, *vdl.Type) error
 pkg device, method (*Config) MakeVDLTarget() vdl.Target
+pkg device, method (*Config) VDLRead(vdl.Decoder) error
 pkg device, method (*ConfigTarget) FinishField(vdl.Target, vdl.Target) error
 pkg device, method (*ConfigTarget) FinishKeyStartField(vdl.Target) (vdl.Target, error)
 pkg device, method (*ConfigTarget) FinishMap(vdl.MapTarget) error
@@ -41,6 +46,7 @@ pkg device, method (*ConfigTarget) StartKey() (vdl.Target, error)
 pkg device, method (*ConfigTarget) StartMap(*vdl.Type, int) (vdl.MapTarget, error)
 pkg device, method (*Description) FillVDLTarget(vdl.Target, *vdl.Type) error
 pkg device, method (*Description) MakeVDLTarget() vdl.Target
+pkg device, method (*Description) VDLRead(vdl.Decoder) error
 pkg device, method (*DescriptionTarget) FinishField(vdl.Target, vdl.Target) error
 pkg device, method (*DescriptionTarget) FinishFields(vdl.FieldsTarget) error
 pkg device, method (*DescriptionTarget) StartField(string) (vdl.Target, vdl.Target, error)
@@ -48,6 +54,7 @@ pkg device, method (*DescriptionTarget) StartFields(*vdl.Type) (vdl.FieldsTarget
 pkg device, method (*DescriptionTarget) ZeroField(string) error
 pkg device, method (*DeviceStatus) FillVDLTarget(vdl.Target, *vdl.Type) error
 pkg device, method (*DeviceStatus) MakeVDLTarget() vdl.Target
+pkg device, method (*DeviceStatus) VDLRead(vdl.Decoder) error
 pkg device, method (*DeviceStatusTarget) FinishField(vdl.Target, vdl.Target) error
 pkg device, method (*DeviceStatusTarget) FinishFields(vdl.FieldsTarget) error
 pkg device, method (*DeviceStatusTarget) StartField(string) (vdl.Target, vdl.Target, error)
@@ -56,9 +63,11 @@ pkg device, method (*DeviceStatusTarget) ZeroField(string) error
 pkg device, method (*InstallationState) FillVDLTarget(vdl.Target, *vdl.Type) error
 pkg device, method (*InstallationState) MakeVDLTarget() vdl.Target
 pkg device, method (*InstallationState) Set(string) error
+pkg device, method (*InstallationState) VDLRead(vdl.Decoder) error
 pkg device, method (*InstallationStateTarget) FromEnumLabel(string, *vdl.Type) error
 pkg device, method (*InstallationStatus) FillVDLTarget(vdl.Target, *vdl.Type) error
 pkg device, method (*InstallationStatus) MakeVDLTarget() vdl.Target
+pkg device, method (*InstallationStatus) VDLRead(vdl.Decoder) error
 pkg device, method (*InstallationStatusTarget) FinishField(vdl.Target, vdl.Target) error
 pkg device, method (*InstallationStatusTarget) FinishFields(vdl.FieldsTarget) error
 pkg device, method (*InstallationStatusTarget) StartField(string) (vdl.Target, vdl.Target, error)
@@ -67,9 +76,11 @@ pkg device, method (*InstallationStatusTarget) ZeroField(string) error
 pkg device, method (*InstanceState) FillVDLTarget(vdl.Target, *vdl.Type) error
 pkg device, method (*InstanceState) MakeVDLTarget() vdl.Target
 pkg device, method (*InstanceState) Set(string) error
+pkg device, method (*InstanceState) VDLRead(vdl.Decoder) error
 pkg device, method (*InstanceStateTarget) FromEnumLabel(string, *vdl.Type) error
 pkg device, method (*InstanceStatus) FillVDLTarget(vdl.Target, *vdl.Type) error
 pkg device, method (*InstanceStatus) MakeVDLTarget() vdl.Target
+pkg device, method (*InstanceStatus) VDLRead(vdl.Decoder) error
 pkg device, method (*InstanceStatusTarget) FinishField(vdl.Target, vdl.Target) error
 pkg device, method (*InstanceStatusTarget) FinishFields(vdl.FieldsTarget) error
 pkg device, method (*InstanceStatusTarget) StartField(string) (vdl.Target, vdl.Target, error)

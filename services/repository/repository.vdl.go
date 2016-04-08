@@ -141,6 +141,57 @@ func (t *MediaInfoTarget) FinishFields(_ vdl.FieldsTarget) error {
 	return nil
 }
 
+func (x *MediaInfo) VDLRead(dec vdl.Decoder) error {
+	*x = MediaInfo{}
+	var err error
+	if err = dec.StartValue(); err != nil {
+		return err
+	}
+	if dec.Type().Kind() != vdl.Struct {
+		return fmt.Errorf("incompatible struct %T, from %v", *x, dec.Type())
+	}
+	match := 0
+	for {
+		f, err := dec.NextField()
+		if err != nil {
+			return err
+		}
+		switch f {
+		case "":
+			if match == 0 && dec.Type().NumField() > 0 {
+				return fmt.Errorf("no matching fields in struct %T, from %v", *x, dec.Type())
+			}
+			return dec.FinishValue()
+		case "Type":
+			match++
+			if err = dec.StartValue(); err != nil {
+				return err
+			}
+			if x.Type, err = dec.DecodeString(); err != nil {
+				return err
+			}
+			if err = dec.FinishValue(); err != nil {
+				return err
+			}
+		case "Encoding":
+			match++
+			if err = dec.StartValue(); err != nil {
+				return err
+			}
+			if x.Encoding, err = dec.DecodeString(); err != nil {
+				return err
+			}
+			if err = dec.FinishValue(); err != nil {
+				return err
+			}
+		default:
+			if err = dec.SkipValue(); err != nil {
+				return err
+			}
+		}
+	}
+}
+
 //////////////////////////////////////////////////
 // Interface definitions
 

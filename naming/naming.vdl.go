@@ -75,6 +75,19 @@ func (t *MountFlagTarget) FromFloat(src float64, tt *vdl.Type) error {
 	return nil
 }
 
+func (x *MountFlag) VDLRead(dec vdl.Decoder) error {
+	var err error
+	if err = dec.StartValue(); err != nil {
+		return err
+	}
+	tmp, err := dec.DecodeUint(32)
+	if err != nil {
+		return err
+	}
+	*x = MountFlag(tmp)
+	return dec.FinishValue()
+}
+
 // MountedServer represents a server mounted on a specific name.
 type MountedServer struct {
 	// Server is the OA that's mounted.
@@ -200,6 +213,55 @@ func (t *MountedServerTarget) ZeroField(name string) error {
 func (t *MountedServerTarget) FinishFields(_ vdl.FieldsTarget) error {
 
 	return nil
+}
+
+func (x *MountedServer) VDLRead(dec vdl.Decoder) error {
+	*x = MountedServer{}
+	var err error
+	if err = dec.StartValue(); err != nil {
+		return err
+	}
+	if dec.Type().Kind() != vdl.Struct {
+		return fmt.Errorf("incompatible struct %T, from %v", *x, dec.Type())
+	}
+	match := 0
+	for {
+		f, err := dec.NextField()
+		if err != nil {
+			return err
+		}
+		switch f {
+		case "":
+			if match == 0 && dec.Type().NumField() > 0 {
+				return fmt.Errorf("no matching fields in struct %T, from %v", *x, dec.Type())
+			}
+			return dec.FinishValue()
+		case "Server":
+			match++
+			if err = dec.StartValue(); err != nil {
+				return err
+			}
+			if x.Server, err = dec.DecodeString(); err != nil {
+				return err
+			}
+			if err = dec.FinishValue(); err != nil {
+				return err
+			}
+		case "Deadline":
+			match++
+			var wire time.WireDeadline
+			if err = wire.VDLRead(dec); err != nil {
+				return err
+			}
+			if err = time.WireDeadlineToNative(wire, &x.Deadline); err != nil {
+				return err
+			}
+		default:
+			if err = dec.SkipValue(); err != nil {
+				return err
+			}
+		}
+	}
 }
 
 // MountEntry represents a given name mounted in the mounttable.
@@ -429,6 +491,102 @@ func (t *__VDLTarget1_list) FinishList(elem vdl.ListTarget) error {
 	return nil
 }
 
+func (x *MountEntry) VDLRead(dec vdl.Decoder) error {
+	*x = MountEntry{}
+	var err error
+	if err = dec.StartValue(); err != nil {
+		return err
+	}
+	if dec.Type().Kind() != vdl.Struct {
+		return fmt.Errorf("incompatible struct %T, from %v", *x, dec.Type())
+	}
+	match := 0
+	for {
+		f, err := dec.NextField()
+		if err != nil {
+			return err
+		}
+		switch f {
+		case "":
+			if match == 0 && dec.Type().NumField() > 0 {
+				return fmt.Errorf("no matching fields in struct %T, from %v", *x, dec.Type())
+			}
+			return dec.FinishValue()
+		case "Name":
+			match++
+			if err = dec.StartValue(); err != nil {
+				return err
+			}
+			if x.Name, err = dec.DecodeString(); err != nil {
+				return err
+			}
+			if err = dec.FinishValue(); err != nil {
+				return err
+			}
+		case "Servers":
+			match++
+			if err = __VDLRead1_list(dec, &x.Servers); err != nil {
+				return err
+			}
+		case "ServesMountTable":
+			match++
+			if err = dec.StartValue(); err != nil {
+				return err
+			}
+			if x.ServesMountTable, err = dec.DecodeBool(); err != nil {
+				return err
+			}
+			if err = dec.FinishValue(); err != nil {
+				return err
+			}
+		case "IsLeaf":
+			match++
+			if err = dec.StartValue(); err != nil {
+				return err
+			}
+			if x.IsLeaf, err = dec.DecodeBool(); err != nil {
+				return err
+			}
+			if err = dec.FinishValue(); err != nil {
+				return err
+			}
+		default:
+			if err = dec.SkipValue(); err != nil {
+				return err
+			}
+		}
+	}
+}
+
+func __VDLRead1_list(dec vdl.Decoder, x *[]MountedServer) error {
+	var err error
+	if err = dec.StartValue(); err != nil {
+		return err
+	}
+	if k := dec.Type().Kind(); k != vdl.Array && k != vdl.List {
+		return fmt.Errorf("incompatible list %T, from %v", *x, dec.Type())
+	}
+	switch len := dec.LenHint(); {
+	case len == 0:
+		*x = nil
+	case len > 0:
+		*x = make([]MountedServer, 0, len)
+	}
+	for {
+		switch done, err := dec.NextEntry(); {
+		case err != nil:
+			return err
+		case done:
+			return dec.FinishValue()
+		}
+		var elem MountedServer
+		if err = elem.VDLRead(dec); err != nil {
+			return err
+		}
+		*x = append(*x, elem)
+	}
+}
+
 // GlobError is returned by namespace.Glob to indicate a subtree of the namespace
 // that could not be traversed.
 type GlobError struct {
@@ -549,6 +707,51 @@ func (t *GlobErrorTarget) ZeroField(name string) error {
 func (t *GlobErrorTarget) FinishFields(_ vdl.FieldsTarget) error {
 
 	return nil
+}
+
+func (x *GlobError) VDLRead(dec vdl.Decoder) error {
+	*x = GlobError{}
+	var err error
+	if err = dec.StartValue(); err != nil {
+		return err
+	}
+	if dec.Type().Kind() != vdl.Struct {
+		return fmt.Errorf("incompatible struct %T, from %v", *x, dec.Type())
+	}
+	match := 0
+	for {
+		f, err := dec.NextField()
+		if err != nil {
+			return err
+		}
+		switch f {
+		case "":
+			if match == 0 && dec.Type().NumField() > 0 {
+				return fmt.Errorf("no matching fields in struct %T, from %v", *x, dec.Type())
+			}
+			return dec.FinishValue()
+		case "Name":
+			match++
+			if err = dec.StartValue(); err != nil {
+				return err
+			}
+			if x.Name, err = dec.DecodeString(); err != nil {
+				return err
+			}
+			if err = dec.FinishValue(); err != nil {
+				return err
+			}
+		case "Error":
+			match++
+			if err = verror.VDLRead(dec, &x.Error); err != nil {
+				return err
+			}
+		default:
+			if err = dec.SkipValue(); err != nil {
+				return err
+			}
+		}
+	}
 }
 
 type (
@@ -697,6 +900,45 @@ func (t globReplyTargetFactory) VDLMakeUnionTarget(union interface{}) (vdl.Targe
 	return nil, fmt.Errorf("got %T, want *GlobReply", union)
 }
 
+func VDLReadGlobReply(dec vdl.Decoder, x *GlobReply) error {
+	var err error
+	if err = dec.StartValue(); err != nil {
+		return err
+	}
+	if dec.Type().Kind() != vdl.Union {
+		return fmt.Errorf("incompatible union %T, from %v", *x, dec.Type())
+	}
+	f, err := dec.NextField()
+	if err != nil {
+		return err
+	}
+	switch f {
+	case "Entry":
+		var field GlobReplyEntry
+		if err = field.Value.VDLRead(dec); err != nil {
+			return err
+		}
+		*x = field
+	case "Error":
+		var field GlobReplyError
+		if err = field.Value.VDLRead(dec); err != nil {
+			return err
+		}
+		*x = field
+	case "":
+		return fmt.Errorf("missing field in union %T, from %v", x, dec.Type())
+	default:
+		return fmt.Errorf("field %q not in union %T, from %v", f, x, dec.Type())
+	}
+	switch f, err := dec.NextField(); {
+	case err != nil:
+		return err
+	case f != "":
+		return fmt.Errorf("extra field %q in union %T, from %v", f, x, dec.Type())
+	}
+	return dec.FinishValue()
+}
+
 type (
 	// GlobChildrenReply represents any single field of the GlobChildrenReply union type.
 	//
@@ -840,6 +1082,51 @@ func (t globChildrenReplyTargetFactory) VDLMakeUnionTarget(union interface{}) (v
 		return &GlobChildrenReplyTarget{Value: typedUnion}, nil
 	}
 	return nil, fmt.Errorf("got %T, want *GlobChildrenReply", union)
+}
+
+func VDLReadGlobChildrenReply(dec vdl.Decoder, x *GlobChildrenReply) error {
+	var err error
+	if err = dec.StartValue(); err != nil {
+		return err
+	}
+	if dec.Type().Kind() != vdl.Union {
+		return fmt.Errorf("incompatible union %T, from %v", *x, dec.Type())
+	}
+	f, err := dec.NextField()
+	if err != nil {
+		return err
+	}
+	switch f {
+	case "Name":
+		var field GlobChildrenReplyName
+		if err = dec.StartValue(); err != nil {
+			return err
+		}
+		if field.Value, err = dec.DecodeString(); err != nil {
+			return err
+		}
+		if err = dec.FinishValue(); err != nil {
+			return err
+		}
+		*x = field
+	case "Error":
+		var field GlobChildrenReplyError
+		if err = field.Value.VDLRead(dec); err != nil {
+			return err
+		}
+		*x = field
+	case "":
+		return fmt.Errorf("missing field in union %T, from %v", x, dec.Type())
+	default:
+		return fmt.Errorf("field %q not in union %T, from %v", f, x, dec.Type())
+	}
+	switch f, err := dec.NextField(); {
+	case err != nil:
+		return err
+	case f != "":
+		return fmt.Errorf("extra field %q in union %T, from %v", f, x, dec.Type())
+	}
+	return dec.FinishValue()
 }
 
 //////////////////////////////////////////////////

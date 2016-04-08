@@ -2,6 +2,7 @@ pkg binary, const MissingChecksum ideal-string
 pkg binary, const MissingSize int64
 pkg binary, method (*Description) FillVDLTarget(vdl.Target, *vdl.Type) error
 pkg binary, method (*Description) MakeVDLTarget() vdl.Target
+pkg binary, method (*Description) VDLRead(vdl.Decoder) error
 pkg binary, method (*DescriptionTarget) FinishField(vdl.Target, vdl.Target) error
 pkg binary, method (*DescriptionTarget) FinishFields(vdl.FieldsTarget) error
 pkg binary, method (*DescriptionTarget) StartField(string) (vdl.Target, vdl.Target, error)
@@ -9,6 +10,7 @@ pkg binary, method (*DescriptionTarget) StartFields(*vdl.Type) (vdl.FieldsTarget
 pkg binary, method (*DescriptionTarget) ZeroField(string) error
 pkg binary, method (*PartInfo) FillVDLTarget(vdl.Target, *vdl.Type) error
 pkg binary, method (*PartInfo) MakeVDLTarget() vdl.Target
+pkg binary, method (*PartInfo) VDLRead(vdl.Decoder) error
 pkg binary, method (*PartInfoTarget) FinishField(vdl.Target, vdl.Target) error
 pkg binary, method (*PartInfoTarget) FinishFields(vdl.FieldsTarget) error
 pkg binary, method (*PartInfoTarget) StartField(string) (vdl.Target, vdl.Target, error)

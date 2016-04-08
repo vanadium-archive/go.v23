@@ -58,6 +58,18 @@ func (t *nonceTarget) FromBytes(src []byte, tt *vdl.Type) error {
 	return nil
 }
 
+func (x *nonce) VDLRead(dec vdl.Decoder) error {
+	var err error
+	if err = dec.StartValue(); err != nil {
+		return err
+	}
+	bytes := x[:]
+	if err = dec.DecodeBytes(16, &bytes); err != nil {
+		return err
+	}
+	return dec.FinishValue()
+}
+
 // Caveat is a condition on the validity of a blessing/discharge.
 //
 // These conditions are provided when asking a principal to create
@@ -181,6 +193,51 @@ func (t *CaveatTarget) ZeroField(name string) error {
 func (t *CaveatTarget) FinishFields(_ vdl.FieldsTarget) error {
 
 	return nil
+}
+
+func (x *Caveat) VDLRead(dec vdl.Decoder) error {
+	*x = Caveat{}
+	var err error
+	if err = dec.StartValue(); err != nil {
+		return err
+	}
+	if dec.Type().Kind() != vdl.Struct {
+		return fmt.Errorf("incompatible struct %T, from %v", *x, dec.Type())
+	}
+	match := 0
+	for {
+		f, err := dec.NextField()
+		if err != nil {
+			return err
+		}
+		switch f {
+		case "":
+			if match == 0 && dec.Type().NumField() > 0 {
+				return fmt.Errorf("no matching fields in struct %T, from %v", *x, dec.Type())
+			}
+			return dec.FinishValue()
+		case "Id":
+			match++
+			if err = x.Id.VDLRead(dec); err != nil {
+				return err
+			}
+		case "ParamVom":
+			match++
+			if err = dec.StartValue(); err != nil {
+				return err
+			}
+			if err = dec.DecodeBytes(-1, &x.ParamVom); err != nil {
+				return err
+			}
+			if err = dec.FinishValue(); err != nil {
+				return err
+			}
+		default:
+			if err = dec.SkipValue(); err != nil {
+				return err
+			}
+		}
+	}
 }
 
 // ThirdPartyRequirements specifies the information required by the third-party
@@ -326,6 +383,68 @@ func (t *ThirdPartyRequirementsTarget) ZeroField(name string) error {
 func (t *ThirdPartyRequirementsTarget) FinishFields(_ vdl.FieldsTarget) error {
 
 	return nil
+}
+
+func (x *ThirdPartyRequirements) VDLRead(dec vdl.Decoder) error {
+	*x = ThirdPartyRequirements{}
+	var err error
+	if err = dec.StartValue(); err != nil {
+		return err
+	}
+	if dec.Type().Kind() != vdl.Struct {
+		return fmt.Errorf("incompatible struct %T, from %v", *x, dec.Type())
+	}
+	match := 0
+	for {
+		f, err := dec.NextField()
+		if err != nil {
+			return err
+		}
+		switch f {
+		case "":
+			if match == 0 && dec.Type().NumField() > 0 {
+				return fmt.Errorf("no matching fields in struct %T, from %v", *x, dec.Type())
+			}
+			return dec.FinishValue()
+		case "ReportServer":
+			match++
+			if err = dec.StartValue(); err != nil {
+				return err
+			}
+			if x.ReportServer, err = dec.DecodeBool(); err != nil {
+				return err
+			}
+			if err = dec.FinishValue(); err != nil {
+				return err
+			}
+		case "ReportMethod":
+			match++
+			if err = dec.StartValue(); err != nil {
+				return err
+			}
+			if x.ReportMethod, err = dec.DecodeBool(); err != nil {
+				return err
+			}
+			if err = dec.FinishValue(); err != nil {
+				return err
+			}
+		case "ReportArguments":
+			match++
+			if err = dec.StartValue(); err != nil {
+				return err
+			}
+			if x.ReportArguments, err = dec.DecodeBool(); err != nil {
+				return err
+			}
+			if err = dec.FinishValue(); err != nil {
+				return err
+			}
+		default:
+			if err = dec.SkipValue(); err != nil {
+				return err
+			}
+		}
+	}
 }
 
 // publicKeyThirdPartyCaveatParam represents a third-party caveat that requires
@@ -606,6 +725,101 @@ func (t *__VDLTarget1_list) FinishList(elem vdl.ListTarget) error {
 	return nil
 }
 
+func (x *publicKeyThirdPartyCaveatParam) VDLRead(dec vdl.Decoder) error {
+	*x = publicKeyThirdPartyCaveatParam{}
+	var err error
+	if err = dec.StartValue(); err != nil {
+		return err
+	}
+	if dec.Type().Kind() != vdl.Struct {
+		return fmt.Errorf("incompatible struct %T, from %v", *x, dec.Type())
+	}
+	match := 0
+	for {
+		f, err := dec.NextField()
+		if err != nil {
+			return err
+		}
+		switch f {
+		case "":
+			if match == 0 && dec.Type().NumField() > 0 {
+				return fmt.Errorf("no matching fields in struct %T, from %v", *x, dec.Type())
+			}
+			return dec.FinishValue()
+		case "Nonce":
+			match++
+			if err = x.Nonce.VDLRead(dec); err != nil {
+				return err
+			}
+		case "Caveats":
+			match++
+			if err = __VDLRead1_list(dec, &x.Caveats); err != nil {
+				return err
+			}
+		case "DischargerKey":
+			match++
+			if err = dec.StartValue(); err != nil {
+				return err
+			}
+			if err = dec.DecodeBytes(-1, &x.DischargerKey); err != nil {
+				return err
+			}
+			if err = dec.FinishValue(); err != nil {
+				return err
+			}
+		case "DischargerLocation":
+			match++
+			if err = dec.StartValue(); err != nil {
+				return err
+			}
+			if x.DischargerLocation, err = dec.DecodeString(); err != nil {
+				return err
+			}
+			if err = dec.FinishValue(); err != nil {
+				return err
+			}
+		case "DischargerRequirements":
+			match++
+			if err = x.DischargerRequirements.VDLRead(dec); err != nil {
+				return err
+			}
+		default:
+			if err = dec.SkipValue(); err != nil {
+				return err
+			}
+		}
+	}
+}
+
+func __VDLRead1_list(dec vdl.Decoder, x *[]Caveat) error {
+	var err error
+	if err = dec.StartValue(); err != nil {
+		return err
+	}
+	if k := dec.Type().Kind(); k != vdl.Array && k != vdl.List {
+		return fmt.Errorf("incompatible list %T, from %v", *x, dec.Type())
+	}
+	switch len := dec.LenHint(); {
+	case len == 0:
+		*x = nil
+	case len > 0:
+		*x = make([]Caveat, 0, len)
+	}
+	for {
+		switch done, err := dec.NextEntry(); {
+		case err != nil:
+			return err
+		case done:
+			return dec.FinishValue()
+		}
+		var elem Caveat
+		if err = elem.VDLRead(dec); err != nil {
+			return err
+		}
+		*x = append(*x, elem)
+	}
+}
+
 // Hash identifies a cryptographic hash function approved for use in signature algorithms.
 type Hash string
 
@@ -638,6 +852,19 @@ func (t *HashTarget) FromString(src string, tt *vdl.Type) error {
 	*t.Value = Hash(src)
 
 	return nil
+}
+
+func (x *Hash) VDLRead(dec vdl.Decoder) error {
+	var err error
+	if err = dec.StartValue(); err != nil {
+		return err
+	}
+	tmp, err := dec.DecodeString()
+	if err != nil {
+		return err
+	}
+	*x = Hash(tmp)
+	return dec.FinishValue()
 }
 
 // Signature represents a digital signature.
@@ -827,6 +1054,73 @@ func (t *SignatureTarget) FinishFields(_ vdl.FieldsTarget) error {
 	return nil
 }
 
+func (x *Signature) VDLRead(dec vdl.Decoder) error {
+	*x = Signature{}
+	var err error
+	if err = dec.StartValue(); err != nil {
+		return err
+	}
+	if dec.Type().Kind() != vdl.Struct {
+		return fmt.Errorf("incompatible struct %T, from %v", *x, dec.Type())
+	}
+	match := 0
+	for {
+		f, err := dec.NextField()
+		if err != nil {
+			return err
+		}
+		switch f {
+		case "":
+			if match == 0 && dec.Type().NumField() > 0 {
+				return fmt.Errorf("no matching fields in struct %T, from %v", *x, dec.Type())
+			}
+			return dec.FinishValue()
+		case "Purpose":
+			match++
+			if err = dec.StartValue(); err != nil {
+				return err
+			}
+			if err = dec.DecodeBytes(-1, &x.Purpose); err != nil {
+				return err
+			}
+			if err = dec.FinishValue(); err != nil {
+				return err
+			}
+		case "Hash":
+			match++
+			if err = x.Hash.VDLRead(dec); err != nil {
+				return err
+			}
+		case "R":
+			match++
+			if err = dec.StartValue(); err != nil {
+				return err
+			}
+			if err = dec.DecodeBytes(-1, &x.R); err != nil {
+				return err
+			}
+			if err = dec.FinishValue(); err != nil {
+				return err
+			}
+		case "S":
+			match++
+			if err = dec.StartValue(); err != nil {
+				return err
+			}
+			if err = dec.DecodeBytes(-1, &x.S); err != nil {
+				return err
+			}
+			if err = dec.FinishValue(); err != nil {
+				return err
+			}
+		default:
+			if err = dec.SkipValue(); err != nil {
+				return err
+			}
+		}
+	}
+}
+
 // publicKeyDischarge represents the discharge issued for publicKeyThirdPartyCaveatParams.
 //
 // The message digest of this structure is computed as follows:
@@ -1012,6 +1306,56 @@ func (t *publicKeyDischargeTarget) FinishFields(_ vdl.FieldsTarget) error {
 	return nil
 }
 
+func (x *publicKeyDischarge) VDLRead(dec vdl.Decoder) error {
+	*x = publicKeyDischarge{}
+	var err error
+	if err = dec.StartValue(); err != nil {
+		return err
+	}
+	if dec.Type().Kind() != vdl.Struct {
+		return fmt.Errorf("incompatible struct %T, from %v", *x, dec.Type())
+	}
+	match := 0
+	for {
+		f, err := dec.NextField()
+		if err != nil {
+			return err
+		}
+		switch f {
+		case "":
+			if match == 0 && dec.Type().NumField() > 0 {
+				return fmt.Errorf("no matching fields in struct %T, from %v", *x, dec.Type())
+			}
+			return dec.FinishValue()
+		case "ThirdPartyCaveatId":
+			match++
+			if err = dec.StartValue(); err != nil {
+				return err
+			}
+			if x.ThirdPartyCaveatId, err = dec.DecodeString(); err != nil {
+				return err
+			}
+			if err = dec.FinishValue(); err != nil {
+				return err
+			}
+		case "Caveats":
+			match++
+			if err = __VDLRead1_list(dec, &x.Caveats); err != nil {
+				return err
+			}
+		case "Signature":
+			match++
+			if err = x.Signature.VDLRead(dec); err != nil {
+				return err
+			}
+		default:
+			if err = dec.SkipValue(); err != nil {
+				return err
+			}
+		}
+	}
+}
+
 // BlessingPattern is a pattern that is matched by specific blessings.
 //
 // A pattern can either be a blessing (slash-separated human-readable string)
@@ -1056,6 +1400,19 @@ func (t *BlessingPatternTarget) FromString(src string, tt *vdl.Type) error {
 	*t.Value = BlessingPattern(src)
 
 	return nil
+}
+
+func (x *BlessingPattern) VDLRead(dec vdl.Decoder) error {
+	var err error
+	if err = dec.StartValue(); err != nil {
+		return err
+	}
+	tmp, err := dec.DecodeString()
+	if err != nil {
+		return err
+	}
+	*x = BlessingPattern(tmp)
+	return dec.FinishValue()
 }
 
 // DischargeImpetus encapsulates the motivation for a discharge being sought.
@@ -1315,6 +1672,112 @@ func (t *__VDLTarget3_list) FinishList(elem vdl.ListTarget) error {
 	return nil
 }
 
+func (x *DischargeImpetus) VDLRead(dec vdl.Decoder) error {
+	*x = DischargeImpetus{}
+	var err error
+	if err = dec.StartValue(); err != nil {
+		return err
+	}
+	if dec.Type().Kind() != vdl.Struct {
+		return fmt.Errorf("incompatible struct %T, from %v", *x, dec.Type())
+	}
+	match := 0
+	for {
+		f, err := dec.NextField()
+		if err != nil {
+			return err
+		}
+		switch f {
+		case "":
+			if match == 0 && dec.Type().NumField() > 0 {
+				return fmt.Errorf("no matching fields in struct %T, from %v", *x, dec.Type())
+			}
+			return dec.FinishValue()
+		case "Server":
+			match++
+			if err = __VDLRead2_list(dec, &x.Server); err != nil {
+				return err
+			}
+		case "Method":
+			match++
+			if err = dec.StartValue(); err != nil {
+				return err
+			}
+			if x.Method, err = dec.DecodeString(); err != nil {
+				return err
+			}
+			if err = dec.FinishValue(); err != nil {
+				return err
+			}
+		case "Arguments":
+			match++
+			if err = __VDLRead3_list(dec, &x.Arguments); err != nil {
+				return err
+			}
+		default:
+			if err = dec.SkipValue(); err != nil {
+				return err
+			}
+		}
+	}
+}
+
+func __VDLRead2_list(dec vdl.Decoder, x *[]BlessingPattern) error {
+	var err error
+	if err = dec.StartValue(); err != nil {
+		return err
+	}
+	if k := dec.Type().Kind(); k != vdl.Array && k != vdl.List {
+		return fmt.Errorf("incompatible list %T, from %v", *x, dec.Type())
+	}
+	switch len := dec.LenHint(); {
+	case len == 0:
+		*x = nil
+	case len > 0:
+		*x = make([]BlessingPattern, 0, len)
+	}
+	for {
+		switch done, err := dec.NextEntry(); {
+		case err != nil:
+			return err
+		case done:
+			return dec.FinishValue()
+		}
+		var elem BlessingPattern
+		if err = elem.VDLRead(dec); err != nil {
+			return err
+		}
+		*x = append(*x, elem)
+	}
+}
+
+func __VDLRead3_list(dec vdl.Decoder, x *[]*vom.RawBytes) error {
+	var err error
+	if err = dec.StartValue(); err != nil {
+		return err
+	}
+	if k := dec.Type().Kind(); k != vdl.Array && k != vdl.List {
+		return fmt.Errorf("incompatible list %T, from %v", *x, dec.Type())
+	}
+	switch len := dec.LenHint(); {
+	case len == 0:
+		*x = nil
+	case len > 0:
+		*x = make([]*vom.RawBytes, 0, len)
+	}
+	for {
+		switch done, err := dec.NextEntry(); {
+		case err != nil:
+			return err
+		case done:
+			return dec.FinishValue()
+		}
+		var elem *vom.RawBytes
+		// TODO(toddw): implement any
+		*x = append(*x, elem)
+	}
+}
+
 // Certificate represents the cryptographic proof of the binding of
 // extensions of a blessing held by one principal to another (represented by
 // a public key) under specific caveats.
@@ -1533,6 +1996,67 @@ func (t *CertificateTarget) FinishFields(_ vdl.FieldsTarget) error {
 	return nil
 }
 
+func (x *Certificate) VDLRead(dec vdl.Decoder) error {
+	*x = Certificate{}
+	var err error
+	if err = dec.StartValue(); err != nil {
+		return err
+	}
+	if dec.Type().Kind() != vdl.Struct {
+		return fmt.Errorf("incompatible struct %T, from %v", *x, dec.Type())
+	}
+	match := 0
+	for {
+		f, err := dec.NextField()
+		if err != nil {
+			return err
+		}
+		switch f {
+		case "":
+			if match == 0 && dec.Type().NumField() > 0 {
+				return fmt.Errorf("no matching fields in struct %T, from %v", *x, dec.Type())
+			}
+			return dec.FinishValue()
+		case "Extension":
+			match++
+			if err = dec.StartValue(); err != nil {
+				return err
+			}
+			if x.Extension, err = dec.DecodeString(); err != nil {
+				return err
+			}
+			if err = dec.FinishValue(); err != nil {
+				return err
+			}
+		case "PublicKey":
+			match++
+			if err = dec.StartValue(); err != nil {
+				return err
+			}
+			if err = dec.DecodeBytes(-1, &x.PublicKey); err != nil {
+				return err
+			}
+			if err = dec.FinishValue(); err != nil {
+				return err
+			}
+		case "Caveats":
+			match++
+			if err = __VDLRead1_list(dec, &x.Caveats); err != nil {
+				return err
+			}
+		case "Signature":
+			match++
+			if err = x.Signature.VDLRead(dec); err != nil {
+				return err
+			}
+		default:
+			if err = dec.SkipValue(); err != nil {
+				return err
+			}
+		}
+	}
+}
+
 // CaveatDescriptor defines an association between a caveat validation function
 // (addressed by globally unique identifier) and the data needed by the
 // validation function.
@@ -1654,6 +2178,53 @@ func (t *CaveatDescriptorTarget) ZeroField(name string) error {
 func (t *CaveatDescriptorTarget) FinishFields(_ vdl.FieldsTarget) error {
 
 	return nil
+}
+
+func (x *CaveatDescriptor) VDLRead(dec vdl.Decoder) error {
+	*x = CaveatDescriptor{
+		ParamType: vdl.AnyType,
+	}
+	var err error
+	if err = dec.StartValue(); err != nil {
+		return err
+	}
+	if dec.Type().Kind() != vdl.Struct {
+		return fmt.Errorf("incompatible struct %T, from %v", *x, dec.Type())
+	}
+	match := 0
+	for {
+		f, err := dec.NextField()
+		if err != nil {
+			return err
+		}
+		switch f {
+		case "":
+			if match == 0 && dec.Type().NumField() > 0 {
+				return fmt.Errorf("no matching fields in struct %T, from %v", *x, dec.Type())
+			}
+			return dec.FinishValue()
+		case "Id":
+			match++
+			if err = x.Id.VDLRead(dec); err != nil {
+				return err
+			}
+		case "ParamType":
+			match++
+			if err = dec.StartValue(); err != nil {
+				return err
+			}
+			if x.ParamType, err = dec.DecodeTypeObject(); err != nil {
+				return err
+			}
+			if err = dec.FinishValue(); err != nil {
+				return err
+			}
+		default:
+			if err = dec.SkipValue(); err != nil {
+				return err
+			}
+		}
+	}
 }
 
 // WireBlessings encapsulates wire format of a set of blessings and the
@@ -1858,6 +2429,98 @@ func (t *__VDLTarget5_list) FinishList(elem vdl.ListTarget) error {
 	return nil
 }
 
+func (x *WireBlessings) VDLRead(dec vdl.Decoder) error {
+	*x = WireBlessings{}
+	var err error
+	if err = dec.StartValue(); err != nil {
+		return err
+	}
+	if dec.Type().Kind() != vdl.Struct {
+		return fmt.Errorf("incompatible struct %T, from %v", *x, dec.Type())
+	}
+	match := 0
+	for {
+		f, err := dec.NextField()
+		if err != nil {
+			return err
+		}
+		switch f {
+		case "":
+			if match == 0 && dec.Type().NumField() > 0 {
+				return fmt.Errorf("no matching fields in struct %T, from %v", *x, dec.Type())
+			}
+			return dec.FinishValue()
+		case "CertificateChains":
+			match++
+			if err = __VDLRead4_list(dec, &x.CertificateChains); err != nil {
+				return err
+			}
+		default:
+			if err = dec.SkipValue(); err != nil {
+				return err
+			}
+		}
+	}
+}
+
+func __VDLRead4_list(dec vdl.Decoder, x *[][]Certificate) error {
+	var err error
+	if err = dec.StartValue(); err != nil {
+		return err
+	}
+	if k := dec.Type().Kind(); k != vdl.Array && k != vdl.List {
+		return fmt.Errorf("incompatible list %T, from %v", *x, dec.Type())
+	}
+	switch len := dec.LenHint(); {
+	case len == 0:
+		*x = nil
+	case len > 0:
+		*x = make([][]Certificate, 0, len)
+	}
+	for {
+		switch done, err := dec.NextEntry(); {
+		case err != nil:
+			return err
+		case done:
+			return dec.FinishValue()
+		}
+		var elem []Certificate
+		if err = __VDLRead5_list(dec, &elem); err != nil {
+			return err
+		}
+		*x = append(*x, elem)
+	}
+}
+
+func __VDLRead5_list(dec vdl.Decoder, x *[]Certificate) error {
+	var err error
+	if err = dec.StartValue(); err != nil {
+		return err
+	}
+	if k := dec.Type().Kind(); k != vdl.Array && k != vdl.List {
+		return fmt.Errorf("incompatible list %T, from %v", *x, dec.Type())
+	}
+	switch len := dec.LenHint(); {
+	case len == 0:
+		*x = nil
+	case len > 0:
+		*x = make([]Certificate, 0, len)
+	}
+	for {
+		switch done, err := dec.NextEntry(); {
+		case err != nil:
+			return err
+		case done:
+			return dec.FinishValue()
+		}
+		var elem Certificate
+		if err = elem.VDLRead(dec); err != nil {
+			return err
+		}
+		*x = append(*x, elem)
+	}
+}
+
 type (
 	// WireDischarge represents any single field of the WireDischarge union type.
 	//
@@ -1967,6 +2630,39 @@ func (t wireDischargeTargetFactory) VDLMakeUnionTarget(union interface{}) (vdl.T
 		return &WireDischargeTarget{Value: typedUnion}, nil
 	}
 	return nil, fmt.Errorf("got %T, want *Discharge", union)
+}
+
+func VDLReadWireDischarge(dec vdl.Decoder, x *WireDischarge) error {
+	var err error
+	if err = dec.StartValue(); err != nil {
+		return err
+	}
+	if dec.Type().Kind() != vdl.Union {
+		return fmt.Errorf("incompatible union %T, from %v", *x, dec.Type())
+	}
+	f, err := dec.NextField()
+	if err != nil {
+		return err
+	}
+	switch f {
+	case "PublicKey":
+		var field WireDischargePublicKey
+		if err = field.Value.VDLRead(dec); err != nil {
+			return err
+		}
+		*x = field
+	case "":
+		return fmt.Errorf("missing field in union %T, from %v", x, dec.Type())
+	default:
+		return fmt.Errorf("field %q not in union %T, from %v", f, x, dec.Type())
+	}
+	switch f, err := dec.NextField(); {
+	case err != nil:
+		return err
+	case f != "":
+		return fmt.Errorf("extra field %q in union %T, from %v", f, x, dec.Type())
+	}
+	return dec.FinishValue()
 }
 
 // RejectedBlessing describes why a blessing failed validation.
@@ -2086,6 +2782,51 @@ func (t *RejectedBlessingTarget) ZeroField(name string) error {
 func (t *RejectedBlessingTarget) FinishFields(_ vdl.FieldsTarget) error {
 
 	return nil
+}
+
+func (x *RejectedBlessing) VDLRead(dec vdl.Decoder) error {
+	*x = RejectedBlessing{}
+	var err error
+	if err = dec.StartValue(); err != nil {
+		return err
+	}
+	if dec.Type().Kind() != vdl.Struct {
+		return fmt.Errorf("incompatible struct %T, from %v", *x, dec.Type())
+	}
+	match := 0
+	for {
+		f, err := dec.NextField()
+		if err != nil {
+			return err
+		}
+		switch f {
+		case "":
+			if match == 0 && dec.Type().NumField() > 0 {
+				return fmt.Errorf("no matching fields in struct %T, from %v", *x, dec.Type())
+			}
+			return dec.FinishValue()
+		case "Blessing":
+			match++
+			if err = dec.StartValue(); err != nil {
+				return err
+			}
+			if x.Blessing, err = dec.DecodeString(); err != nil {
+				return err
+			}
+			if err = dec.FinishValue(); err != nil {
+				return err
+			}
+		case "Err":
+			match++
+			if err = verror.VDLRead(dec, &x.Err); err != nil {
+				return err
+			}
+		default:
+			if err = dec.SkipValue(); err != nil {
+				return err
+			}
+		}
+	}
 }
 
 // Type-check native conversion functions.

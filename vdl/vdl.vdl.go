@@ -116,6 +116,21 @@ func (t *WireRetryCodeTarget) FromEnumLabel(src string, tt *Type) error {
 	return nil
 }
 
+func (x *WireRetryCode) VDLRead(dec Decoder) error {
+	var err error
+	if err = dec.StartValue(); err != nil {
+		return err
+	}
+	enum, err := dec.DecodeString()
+	if err != nil {
+		return err
+	}
+	if err = x.Set(enum); err != nil {
+		return err
+	}
+	return dec.FinishValue()
+}
+
 // WireError is the wire representation for the built-in error type.  Errors and
 // exceptions in each programming environment are converted to this type to
 // ensure wire compatibility.  Generated code for each environment provides
@@ -340,6 +355,94 @@ func (t *__VDLTarget1_list) FinishElem(elem Target) error {
 func (t *__VDLTarget1_list) FinishList(elem ListTarget) error {
 
 	return nil
+}
+
+func (x *WireError) VDLRead(dec Decoder) error {
+	*x = WireError{}
+	var err error
+	if err = dec.StartValue(); err != nil {
+		return err
+	}
+	if dec.Type().Kind() != Struct {
+		return fmt.Errorf("incompatible struct %T, from %v", *x, dec.Type())
+	}
+	match := 0
+	for {
+		f, err := dec.NextField()
+		if err != nil {
+			return err
+		}
+		switch f {
+		case "":
+			if match == 0 && dec.Type().NumField() > 0 {
+				return fmt.Errorf("no matching fields in struct %T, from %v", *x, dec.Type())
+			}
+			return dec.FinishValue()
+		case "Id":
+			match++
+			if err = dec.StartValue(); err != nil {
+				return err
+			}
+			if x.Id, err = dec.DecodeString(); err != nil {
+				return err
+			}
+			if err = dec.FinishValue(); err != nil {
+				return err
+			}
+		case "RetryCode":
+			match++
+			if err = x.RetryCode.VDLRead(dec); err != nil {
+				return err
+			}
+		case "Msg":
+			match++
+			if err = dec.StartValue(); err != nil {
+				return err
+			}
+			if x.Msg, err = dec.DecodeString(); err != nil {
+				return err
+			}
+			if err = dec.FinishValue(); err != nil {
+				return err
+			}
+		case "ParamList":
+			match++
+			if err = __VDLRead1_list(dec, &x.ParamList); err != nil {
+				return err
+			}
+		default:
+			if err = dec.SkipValue(); err != nil {
+				return err
+			}
+		}
+	}
+}
+
+func __VDLRead1_list(dec Decoder, x *[]*Value) error {
+	var err error
+	if err = dec.StartValue(); err != nil {
+		return err
+	}
+	if k := dec.Type().Kind(); k != Array && k != List {
+		return fmt.Errorf("incompatible list %T, from %v", *x, dec.Type())
+	}
+	switch len := dec.LenHint(); {
+	case len == 0:
+		*x = nil
+	case len > 0:
+		*x = make([]*Value, 0, len)
+	}
+	for {
+		switch done, err := dec.NextEntry(); {
+		case err != nil:
+			return err
+		case done:
+			return dec.FinishValue()
+		}
+		var elem *Value
+		// TODO(toddw): implement any
+		*x = append(*x, elem)
+	}
 }
 
 var __VDLInitCalled bool

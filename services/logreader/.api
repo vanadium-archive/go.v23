@@ -3,6 +3,7 @@ pkg logreader, func LogFileClient(string) LogFileClientStub
 pkg logreader, func LogFileServer(LogFileServerMethods) LogFileServerStub
 pkg logreader, method (*LogEntry) FillVDLTarget(vdl.Target, *vdl.Type) error
 pkg logreader, method (*LogEntry) MakeVDLTarget() vdl.Target
+pkg logreader, method (*LogEntry) VDLRead(vdl.Decoder) error
 pkg logreader, method (*LogEntryTarget) FinishField(vdl.Target, vdl.Target) error
 pkg logreader, method (*LogEntryTarget) FinishFields(vdl.FieldsTarget) error
 pkg logreader, method (*LogEntryTarget) StartField(string) (vdl.Target, vdl.Target, error)

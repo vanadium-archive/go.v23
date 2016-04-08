@@ -150,6 +150,55 @@ func (t *AnnotationTarget) FinishFields(_ vdl.FieldsTarget) error {
 	return nil
 }
 
+func (x *Annotation) VDLRead(dec vdl.Decoder) error {
+	*x = Annotation{}
+	var err error
+	if err = dec.StartValue(); err != nil {
+		return err
+	}
+	if dec.Type().Kind() != vdl.Struct {
+		return fmt.Errorf("incompatible struct %T, from %v", *x, dec.Type())
+	}
+	match := 0
+	for {
+		f, err := dec.NextField()
+		if err != nil {
+			return err
+		}
+		switch f {
+		case "":
+			if match == 0 && dec.Type().NumField() > 0 {
+				return fmt.Errorf("no matching fields in struct %T, from %v", *x, dec.Type())
+			}
+			return dec.FinishValue()
+		case "When":
+			match++
+			var wire time_2.Time
+			if err = wire.VDLRead(dec); err != nil {
+				return err
+			}
+			if err = time_2.TimeToNative(wire, &x.When); err != nil {
+				return err
+			}
+		case "Message":
+			match++
+			if err = dec.StartValue(); err != nil {
+				return err
+			}
+			if x.Message, err = dec.DecodeString(); err != nil {
+				return err
+			}
+			if err = dec.FinishValue(); err != nil {
+				return err
+			}
+		default:
+			if err = dec.SkipValue(); err != nil {
+				return err
+			}
+		}
+	}
+}
+
 // A SpanRecord is the wire format for a Span.
 type SpanRecord struct {
 	Id     uniqueid.Id // The Id of the Span.
@@ -456,6 +505,108 @@ func (t *__VDLTarget1_list) FinishList(elem vdl.ListTarget) error {
 	return nil
 }
 
+func (x *SpanRecord) VDLRead(dec vdl.Decoder) error {
+	*x = SpanRecord{}
+	var err error
+	if err = dec.StartValue(); err != nil {
+		return err
+	}
+	if dec.Type().Kind() != vdl.Struct {
+		return fmt.Errorf("incompatible struct %T, from %v", *x, dec.Type())
+	}
+	match := 0
+	for {
+		f, err := dec.NextField()
+		if err != nil {
+			return err
+		}
+		switch f {
+		case "":
+			if match == 0 && dec.Type().NumField() > 0 {
+				return fmt.Errorf("no matching fields in struct %T, from %v", *x, dec.Type())
+			}
+			return dec.FinishValue()
+		case "Id":
+			match++
+			if err = x.Id.VDLRead(dec); err != nil {
+				return err
+			}
+		case "Parent":
+			match++
+			if err = x.Parent.VDLRead(dec); err != nil {
+				return err
+			}
+		case "Name":
+			match++
+			if err = dec.StartValue(); err != nil {
+				return err
+			}
+			if x.Name, err = dec.DecodeString(); err != nil {
+				return err
+			}
+			if err = dec.FinishValue(); err != nil {
+				return err
+			}
+		case "Start":
+			match++
+			var wire time_2.Time
+			if err = wire.VDLRead(dec); err != nil {
+				return err
+			}
+			if err = time_2.TimeToNative(wire, &x.Start); err != nil {
+				return err
+			}
+		case "End":
+			match++
+			var wire time_2.Time
+			if err = wire.VDLRead(dec); err != nil {
+				return err
+			}
+			if err = time_2.TimeToNative(wire, &x.End); err != nil {
+				return err
+			}
+		case "Annotations":
+			match++
+			if err = __VDLRead1_list(dec, &x.Annotations); err != nil {
+				return err
+			}
+		default:
+			if err = dec.SkipValue(); err != nil {
+				return err
+			}
+		}
+	}
+}
+
+func __VDLRead1_list(dec vdl.Decoder, x *[]Annotation) error {
+	var err error
+	if err = dec.StartValue(); err != nil {
+		return err
+	}
+	if k := dec.Type().Kind(); k != vdl.Array && k != vdl.List {
+		return fmt.Errorf("incompatible list %T, from %v", *x, dec.Type())
+	}
+	switch len := dec.LenHint(); {
+	case len == 0:
+		*x = nil
+	case len > 0:
+		*x = make([]Annotation, 0, len)
+	}
+	for {
+		switch done, err := dec.NextEntry(); {
+		case err != nil:
+			return err
+		case done:
+			return dec.FinishValue()
+		}
+		var elem Annotation
+		if err = elem.VDLRead(dec); err != nil {
+			return err
+		}
+		*x = append(*x, elem)
+	}
+}
+
 type TraceRecord struct {
 	Id    uniqueid.Id
 	Spans []SpanRecord
@@ -623,6 +774,74 @@ func (t *__VDLTarget2_list) FinishList(elem vdl.ListTarget) error {
 	return nil
 }
 
+func (x *TraceRecord) VDLRead(dec vdl.Decoder) error {
+	*x = TraceRecord{}
+	var err error
+	if err = dec.StartValue(); err != nil {
+		return err
+	}
+	if dec.Type().Kind() != vdl.Struct {
+		return fmt.Errorf("incompatible struct %T, from %v", *x, dec.Type())
+	}
+	match := 0
+	for {
+		f, err := dec.NextField()
+		if err != nil {
+			return err
+		}
+		switch f {
+		case "":
+			if match == 0 && dec.Type().NumField() > 0 {
+				return fmt.Errorf("no matching fields in struct %T, from %v", *x, dec.Type())
+			}
+			return dec.FinishValue()
+		case "Id":
+			match++
+			if err = x.Id.VDLRead(dec); err != nil {
+				return err
+			}
+		case "Spans":
+			match++
+			if err = __VDLRead2_list(dec, &x.Spans); err != nil {
+				return err
+			}
+		default:
+			if err = dec.SkipValue(); err != nil {
+				return err
+			}
+		}
+	}
+}
+
+func __VDLRead2_list(dec vdl.Decoder, x *[]SpanRecord) error {
+	var err error
+	if err = dec.StartValue(); err != nil {
+		return err
+	}
+	if k := dec.Type().Kind(); k != vdl.Array && k != vdl.List {
+		return fmt.Errorf("incompatible list %T, from %v", *x, dec.Type())
+	}
+	switch len := dec.LenHint(); {
+	case len == 0:
+		*x = nil
+	case len > 0:
+		*x = make([]SpanRecord, 0, len)
+	}
+	for {
+		switch done, err := dec.NextEntry(); {
+		case err != nil:
+			return err
+		case done:
+			return dec.FinishValue()
+		}
+		var elem SpanRecord
+		if err = elem.VDLRead(dec); err != nil {
+			return err
+		}
+		*x = append(*x, elem)
+	}
+}
+
 type TraceFlags int32
 
 func (TraceFlags) __VDLReflect(struct {
@@ -675,6 +894,19 @@ func (t *TraceFlagsTarget) FromFloat(src float64, tt *vdl.Type) error {
 	*t.Value = TraceFlags(val)
 
 	return nil
+}
+
+func (x *TraceFlags) VDLRead(dec vdl.Decoder) error {
+	var err error
+	if err = dec.StartValue(); err != nil {
+		return err
+	}
+	tmp, err := dec.DecodeInt(32)
+	if err != nil {
+		return err
+	}
+	*x = TraceFlags(tmp)
+	return dec.FinishValue()
 }
 
 // Request is the object that carries trace informtion between processes.
@@ -849,6 +1081,63 @@ func (t *RequestTarget) FinishFields(_ vdl.FieldsTarget) error {
 	return nil
 }
 
+func (x *Request) VDLRead(dec vdl.Decoder) error {
+	*x = Request{}
+	var err error
+	if err = dec.StartValue(); err != nil {
+		return err
+	}
+	if dec.Type().Kind() != vdl.Struct {
+		return fmt.Errorf("incompatible struct %T, from %v", *x, dec.Type())
+	}
+	match := 0
+	for {
+		f, err := dec.NextField()
+		if err != nil {
+			return err
+		}
+		switch f {
+		case "":
+			if match == 0 && dec.Type().NumField() > 0 {
+				return fmt.Errorf("no matching fields in struct %T, from %v", *x, dec.Type())
+			}
+			return dec.FinishValue()
+		case "SpanId":
+			match++
+			if err = x.SpanId.VDLRead(dec); err != nil {
+				return err
+			}
+		case "TraceId":
+			match++
+			if err = x.TraceId.VDLRead(dec); err != nil {
+				return err
+			}
+		case "Flags":
+			match++
+			if err = x.Flags.VDLRead(dec); err != nil {
+				return err
+			}
+		case "LogLevel":
+			match++
+			if err = dec.StartValue(); err != nil {
+				return err
+			}
+			tmp, err := dec.DecodeInt(32)
+			if err != nil {
+				return err
+			}
+			x.LogLevel = int32(tmp)
+			if err = dec.FinishValue(); err != nil {
+				return err
+			}
+		default:
+			if err = dec.SkipValue(); err != nil {
+				return err
+			}
+		}
+	}
+}
+
 type Response struct {
 	// Flags give options for trace collection, the client should alter its
 	// collection for this trace according to the flags sent back from the
@@ -972,6 +1261,45 @@ func (t *ResponseTarget) ZeroField(name string) error {
 func (t *ResponseTarget) FinishFields(_ vdl.FieldsTarget) error {
 
 	return nil
+}
+
+func (x *Response) VDLRead(dec vdl.Decoder) error {
+	*x = Response{}
+	var err error
+	if err = dec.StartValue(); err != nil {
+		return err
+	}
+	if dec.Type().Kind() != vdl.Struct {
+		return fmt.Errorf("incompatible struct %T, from %v", *x, dec.Type())
+	}
+	match := 0
+	for {
+		f, err := dec.NextField()
+		if err != nil {
+			return err
+		}
+		switch f {
+		case "":
+			if match == 0 && dec.Type().NumField() > 0 {
+				return fmt.Errorf("no matching fields in struct %T, from %v", *x, dec.Type())
+			}
+			return dec.FinishValue()
+		case "Flags":
+			match++
+			if err = x.Flags.VDLRead(dec); err != nil {
+				return err
+			}
+		case "Trace":
+			match++
+			if err = x.Trace.VDLRead(dec); err != nil {
+				return err
+			}
+		default:
+			if err = dec.SkipValue(); err != nil {
+				return err
+			}
+		}
+	}
 }
 
 //////////////////////////////////////////////////

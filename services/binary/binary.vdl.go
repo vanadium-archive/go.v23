@@ -217,6 +217,103 @@ func (t *__VDLTarget1_map) FinishMap(elem vdl.MapTarget) error {
 	return nil
 }
 
+func (x *Description) VDLRead(dec vdl.Decoder) error {
+	*x = Description{}
+	var err error
+	if err = dec.StartValue(); err != nil {
+		return err
+	}
+	if dec.Type().Kind() != vdl.Struct {
+		return fmt.Errorf("incompatible struct %T, from %v", *x, dec.Type())
+	}
+	match := 0
+	for {
+		f, err := dec.NextField()
+		if err != nil {
+			return err
+		}
+		switch f {
+		case "":
+			if match == 0 && dec.Type().NumField() > 0 {
+				return fmt.Errorf("no matching fields in struct %T, from %v", *x, dec.Type())
+			}
+			return dec.FinishValue()
+		case "Name":
+			match++
+			if err = dec.StartValue(); err != nil {
+				return err
+			}
+			if x.Name, err = dec.DecodeString(); err != nil {
+				return err
+			}
+			if err = dec.FinishValue(); err != nil {
+				return err
+			}
+		case "Profiles":
+			match++
+			if err = __VDLRead1_map(dec, &x.Profiles); err != nil {
+				return err
+			}
+		default:
+			if err = dec.SkipValue(); err != nil {
+				return err
+			}
+		}
+	}
+}
+
+func __VDLRead1_map(dec vdl.Decoder, x *map[string]bool) error {
+	var err error
+	if err = dec.StartValue(); err != nil {
+		return err
+	}
+	if k := dec.Type().Kind(); k != vdl.Map {
+		return fmt.Errorf("incompatible map %T, from %v", *x, dec.Type())
+	}
+	switch len := dec.LenHint(); {
+	case len == 0:
+		*x = nil
+		return dec.FinishValue()
+	case len > 0:
+		*x = make(map[string]bool, len)
+	default:
+		*x = make(map[string]bool)
+	}
+	for {
+		switch done, err := dec.NextEntry(); {
+		case err != nil:
+			return err
+		case done:
+			return dec.FinishValue()
+		}
+		var key string
+		{
+			if err = dec.StartValue(); err != nil {
+				return err
+			}
+			if key, err = dec.DecodeString(); err != nil {
+				return err
+			}
+			if err = dec.FinishValue(); err != nil {
+				return err
+			}
+		}
+		var elem bool
+		{
+			if err = dec.StartValue(); err != nil {
+				return err
+			}
+			if elem, err = dec.DecodeBool(); err != nil {
+				return err
+			}
+			if err = dec.FinishValue(); err != nil {
+				return err
+			}
+		}
+		(*x)[key] = elem
+	}
+}
+
 // PartInfo holds information describing a binary part.
 type PartInfo struct {
 	// Checksum holds the hex-encoded MD5 checksum of the binary part.
@@ -330,6 +427,57 @@ func (t *PartInfoTarget) ZeroField(name string) error {
 func (t *PartInfoTarget) FinishFields(_ vdl.FieldsTarget) error {
 
 	return nil
+}
+
+func (x *PartInfo) VDLRead(dec vdl.Decoder) error {
+	*x = PartInfo{}
+	var err error
+	if err = dec.StartValue(); err != nil {
+		return err
+	}
+	if dec.Type().Kind() != vdl.Struct {
+		return fmt.Errorf("incompatible struct %T, from %v", *x, dec.Type())
+	}
+	match := 0
+	for {
+		f, err := dec.NextField()
+		if err != nil {
+			return err
+		}
+		switch f {
+		case "":
+			if match == 0 && dec.Type().NumField() > 0 {
+				return fmt.Errorf("no matching fields in struct %T, from %v", *x, dec.Type())
+			}
+			return dec.FinishValue()
+		case "Checksum":
+			match++
+			if err = dec.StartValue(); err != nil {
+				return err
+			}
+			if x.Checksum, err = dec.DecodeString(); err != nil {
+				return err
+			}
+			if err = dec.FinishValue(); err != nil {
+				return err
+			}
+		case "Size":
+			match++
+			if err = dec.StartValue(); err != nil {
+				return err
+			}
+			if x.Size, err = dec.DecodeInt(64); err != nil {
+				return err
+			}
+			if err = dec.FinishValue(); err != nil {
+				return err
+			}
+		default:
+			if err = dec.SkipValue(); err != nil {
+				return err
+			}
+		}
+	}
 }
 
 //////////////////////////////////////////////////

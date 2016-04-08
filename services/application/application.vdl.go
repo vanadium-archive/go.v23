@@ -155,6 +155,51 @@ func (t *SignedFileTarget) FinishFields(_ vdl.FieldsTarget) error {
 	return nil
 }
 
+func (x *SignedFile) VDLRead(dec vdl.Decoder) error {
+	*x = SignedFile{}
+	var err error
+	if err = dec.StartValue(); err != nil {
+		return err
+	}
+	if dec.Type().Kind() != vdl.Struct {
+		return fmt.Errorf("incompatible struct %T, from %v", *x, dec.Type())
+	}
+	match := 0
+	for {
+		f, err := dec.NextField()
+		if err != nil {
+			return err
+		}
+		switch f {
+		case "":
+			if match == 0 && dec.Type().NumField() > 0 {
+				return fmt.Errorf("no matching fields in struct %T, from %v", *x, dec.Type())
+			}
+			return dec.FinishValue()
+		case "File":
+			match++
+			if err = dec.StartValue(); err != nil {
+				return err
+			}
+			if x.File, err = dec.DecodeString(); err != nil {
+				return err
+			}
+			if err = dec.FinishValue(); err != nil {
+				return err
+			}
+		case "Signature":
+			match++
+			if err = x.Signature.VDLRead(dec); err != nil {
+				return err
+			}
+		default:
+			if err = dec.SkipValue(); err != nil {
+				return err
+			}
+		}
+	}
+}
+
 // Packages represents a set of packages. The map key is the local
 // file/directory name, relative to the instance's packages directory, where the
 // package should be installed. For archives, this name represents a directory
@@ -254,6 +299,52 @@ func (t *PackagesTarget) FinishMap(elem vdl.MapTarget) error {
 	}
 
 	return nil
+}
+
+func (x *Packages) VDLRead(dec vdl.Decoder) error {
+	var err error
+	if err = dec.StartValue(); err != nil {
+		return err
+	}
+	if k := dec.Type().Kind(); k != vdl.Map {
+		return fmt.Errorf("incompatible map %T, from %v", *x, dec.Type())
+	}
+	switch len := dec.LenHint(); {
+	case len == 0:
+		*x = nil
+		return dec.FinishValue()
+	case len > 0:
+		*x = make(Packages, len)
+	default:
+		*x = make(Packages)
+	}
+	for {
+		switch done, err := dec.NextEntry(); {
+		case err != nil:
+			return err
+		case done:
+			return dec.FinishValue()
+		}
+		var key string
+		{
+			if err = dec.StartValue(); err != nil {
+				return err
+			}
+			if key, err = dec.DecodeString(); err != nil {
+				return err
+			}
+			if err = dec.FinishValue(); err != nil {
+				return err
+			}
+		}
+		var elem SignedFile
+		{
+			if err = elem.VDLRead(dec); err != nil {
+				return err
+			}
+		}
+		(*x)[key] = elem
+	}
 }
 
 // Envelope is a collection of metadata that describes an application.
@@ -657,6 +748,132 @@ func (t *EnvelopeTarget) ZeroField(name string) error {
 func (t *EnvelopeTarget) FinishFields(_ vdl.FieldsTarget) error {
 
 	return nil
+}
+
+func (x *Envelope) VDLRead(dec vdl.Decoder) error {
+	*x = Envelope{}
+	var err error
+	if err = dec.StartValue(); err != nil {
+		return err
+	}
+	if dec.Type().Kind() != vdl.Struct {
+		return fmt.Errorf("incompatible struct %T, from %v", *x, dec.Type())
+	}
+	match := 0
+	for {
+		f, err := dec.NextField()
+		if err != nil {
+			return err
+		}
+		switch f {
+		case "":
+			if match == 0 && dec.Type().NumField() > 0 {
+				return fmt.Errorf("no matching fields in struct %T, from %v", *x, dec.Type())
+			}
+			return dec.FinishValue()
+		case "Title":
+			match++
+			if err = dec.StartValue(); err != nil {
+				return err
+			}
+			if x.Title, err = dec.DecodeString(); err != nil {
+				return err
+			}
+			if err = dec.FinishValue(); err != nil {
+				return err
+			}
+		case "Args":
+			match++
+			if err = __VDLRead1_list(dec, &x.Args); err != nil {
+				return err
+			}
+		case "Binary":
+			match++
+			if err = x.Binary.VDLRead(dec); err != nil {
+				return err
+			}
+		case "Publisher":
+			match++
+			var wire security.WireBlessings
+			if err = wire.VDLRead(dec); err != nil {
+				return err
+			}
+			if err = security.WireBlessingsToNative(wire, &x.Publisher); err != nil {
+				return err
+			}
+		case "Env":
+			match++
+			if err = __VDLRead1_list(dec, &x.Env); err != nil {
+				return err
+			}
+		case "Packages":
+			match++
+			if err = x.Packages.VDLRead(dec); err != nil {
+				return err
+			}
+		case "Restarts":
+			match++
+			if err = dec.StartValue(); err != nil {
+				return err
+			}
+			tmp, err := dec.DecodeInt(32)
+			if err != nil {
+				return err
+			}
+			x.Restarts = int32(tmp)
+			if err = dec.FinishValue(); err != nil {
+				return err
+			}
+		case "RestartTimeWindow":
+			match++
+			var wire time_2.Duration
+			if err = wire.VDLRead(dec); err != nil {
+				return err
+			}
+			if err = time_2.DurationToNative(wire, &x.RestartTimeWindow); err != nil {
+				return err
+			}
+		default:
+			if err = dec.SkipValue(); err != nil {
+				return err
+			}
+		}
+	}
+}
+
+func __VDLRead1_list(dec vdl.Decoder, x *[]string) error {
+	var err error
+	if err = dec.StartValue(); err != nil {
+		return err
+	}
+	if k := dec.Type().Kind(); k != vdl.Array && k != vdl.List {
+		return fmt.Errorf("incompatible list %T, from %v", *x, dec.Type())
+	}
+	switch len := dec.LenHint(); {
+	case len == 0:
+		*x = nil
+	case len > 0:
+		*x = make([]string, 0, len)
+	}
+	for {
+		switch done, err := dec.NextEntry(); {
+		case err != nil:
+			return err
+		case done:
+			return dec.FinishValue()
+		}
+		var elem string
+		if err = dec.StartValue(); err != nil {
+			return err
+		}
+		if elem, err = dec.DecodeString(); err != nil {
+			return err
+		}
+		if err = dec.FinishValue(); err != nil {
+			return err
+		}
+		*x = append(*x, elem)
+	}
 }
 
 //////////////////////////////////////////////////

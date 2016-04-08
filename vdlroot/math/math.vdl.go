@@ -133,6 +133,61 @@ func (t *Complex64Target) FinishFields(_ vdl.FieldsTarget) error {
 	return nil
 }
 
+func (x *Complex64) VDLRead(dec vdl.Decoder) error {
+	*x = Complex64{}
+	var err error
+	if err = dec.StartValue(); err != nil {
+		return err
+	}
+	if dec.Type().Kind() != vdl.Struct {
+		return fmt.Errorf("incompatible struct %T, from %v", *x, dec.Type())
+	}
+	match := 0
+	for {
+		f, err := dec.NextField()
+		if err != nil {
+			return err
+		}
+		switch f {
+		case "":
+			if match == 0 && dec.Type().NumField() > 0 {
+				return fmt.Errorf("no matching fields in struct %T, from %v", *x, dec.Type())
+			}
+			return dec.FinishValue()
+		case "Real":
+			match++
+			if err = dec.StartValue(); err != nil {
+				return err
+			}
+			tmp, err := dec.DecodeFloat(32)
+			if err != nil {
+				return err
+			}
+			x.Real = float32(tmp)
+			if err = dec.FinishValue(); err != nil {
+				return err
+			}
+		case "Imag":
+			match++
+			if err = dec.StartValue(); err != nil {
+				return err
+			}
+			tmp, err := dec.DecodeFloat(32)
+			if err != nil {
+				return err
+			}
+			x.Imag = float32(tmp)
+			if err = dec.FinishValue(); err != nil {
+				return err
+			}
+		default:
+			if err = dec.SkipValue(); err != nil {
+				return err
+			}
+		}
+	}
+}
+
 type Complex128 struct {
 	Real float64
 	Imag float64
@@ -247,6 +302,57 @@ func (t *Complex128Target) FinishFields(_ vdl.FieldsTarget) error {
 		return err
 	}
 	return nil
+}
+
+func (x *Complex128) VDLRead(dec vdl.Decoder) error {
+	*x = Complex128{}
+	var err error
+	if err = dec.StartValue(); err != nil {
+		return err
+	}
+	if dec.Type().Kind() != vdl.Struct {
+		return fmt.Errorf("incompatible struct %T, from %v", *x, dec.Type())
+	}
+	match := 0
+	for {
+		f, err := dec.NextField()
+		if err != nil {
+			return err
+		}
+		switch f {
+		case "":
+			if match == 0 && dec.Type().NumField() > 0 {
+				return fmt.Errorf("no matching fields in struct %T, from %v", *x, dec.Type())
+			}
+			return dec.FinishValue()
+		case "Real":
+			match++
+			if err = dec.StartValue(); err != nil {
+				return err
+			}
+			if x.Real, err = dec.DecodeFloat(64); err != nil {
+				return err
+			}
+			if err = dec.FinishValue(); err != nil {
+				return err
+			}
+		case "Imag":
+			match++
+			if err = dec.StartValue(); err != nil {
+				return err
+			}
+			if x.Imag, err = dec.DecodeFloat(64); err != nil {
+				return err
+			}
+			if err = dec.FinishValue(); err != nil {
+				return err
+			}
+		default:
+			if err = dec.SkipValue(); err != nil {
+				return err
+			}
+		}
+	}
 }
 
 // Type-check native conversion functions.

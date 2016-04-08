@@ -66,6 +66,19 @@ func (t *TagTarget) FromString(src string, tt *vdl.Type) error {
 	return nil
 }
 
+func (x *Tag) VDLRead(dec vdl.Decoder) error {
+	var err error
+	if err = dec.StartValue(); err != nil {
+		return err
+	}
+	tmp, err := dec.DecodeString()
+	if err != nil {
+		return err
+	}
+	*x = Tag(tmp)
+	return dec.FinishValue()
+}
+
 //////////////////////////////////////////////////
 // Const definitions
 

@@ -150,6 +150,59 @@ func (t *DurationTarget) FinishFields(_ vdl.FieldsTarget) error {
 	return nil
 }
 
+func (x *Duration) VDLRead(dec vdl.Decoder) error {
+	*x = Duration{}
+	var err error
+	if err = dec.StartValue(); err != nil {
+		return err
+	}
+	if dec.Type().Kind() != vdl.Struct {
+		return fmt.Errorf("incompatible struct %T, from %v", *x, dec.Type())
+	}
+	match := 0
+	for {
+		f, err := dec.NextField()
+		if err != nil {
+			return err
+		}
+		switch f {
+		case "":
+			if match == 0 && dec.Type().NumField() > 0 {
+				return fmt.Errorf("no matching fields in struct %T, from %v", *x, dec.Type())
+			}
+			return dec.FinishValue()
+		case "Seconds":
+			match++
+			if err = dec.StartValue(); err != nil {
+				return err
+			}
+			if x.Seconds, err = dec.DecodeInt(64); err != nil {
+				return err
+			}
+			if err = dec.FinishValue(); err != nil {
+				return err
+			}
+		case "Nanos":
+			match++
+			if err = dec.StartValue(); err != nil {
+				return err
+			}
+			tmp, err := dec.DecodeInt(32)
+			if err != nil {
+				return err
+			}
+			x.Nanos = int32(tmp)
+			if err = dec.FinishValue(); err != nil {
+				return err
+			}
+		default:
+			if err = dec.SkipValue(); err != nil {
+				return err
+			}
+		}
+	}
+}
+
 // Time represents an absolute point in time with up to nanosecond precision.
 //
 // Time is represented as the duration before or after a fixed epoch.  The zero
@@ -279,6 +332,59 @@ func (t *TimeTarget) FinishFields(_ vdl.FieldsTarget) error {
 		return err
 	}
 	return nil
+}
+
+func (x *Time) VDLRead(dec vdl.Decoder) error {
+	*x = Time{}
+	var err error
+	if err = dec.StartValue(); err != nil {
+		return err
+	}
+	if dec.Type().Kind() != vdl.Struct {
+		return fmt.Errorf("incompatible struct %T, from %v", *x, dec.Type())
+	}
+	match := 0
+	for {
+		f, err := dec.NextField()
+		if err != nil {
+			return err
+		}
+		switch f {
+		case "":
+			if match == 0 && dec.Type().NumField() > 0 {
+				return fmt.Errorf("no matching fields in struct %T, from %v", *x, dec.Type())
+			}
+			return dec.FinishValue()
+		case "Seconds":
+			match++
+			if err = dec.StartValue(); err != nil {
+				return err
+			}
+			if x.Seconds, err = dec.DecodeInt(64); err != nil {
+				return err
+			}
+			if err = dec.FinishValue(); err != nil {
+				return err
+			}
+		case "Nanos":
+			match++
+			if err = dec.StartValue(); err != nil {
+				return err
+			}
+			tmp, err := dec.DecodeInt(32)
+			if err != nil {
+				return err
+			}
+			x.Nanos = int32(tmp)
+			if err = dec.FinishValue(); err != nil {
+				return err
+			}
+		default:
+			if err = dec.SkipValue(); err != nil {
+				return err
+			}
+		}
+	}
 }
 
 // WireDeadline represents the deadline for an operation, where the operation is
@@ -432,6 +538,55 @@ func (t *WireDeadlineTarget) FinishFields(_ vdl.FieldsTarget) error {
 		return err
 	}
 	return nil
+}
+
+func (x *WireDeadline) VDLRead(dec vdl.Decoder) error {
+	*x = WireDeadline{}
+	var err error
+	if err = dec.StartValue(); err != nil {
+		return err
+	}
+	if dec.Type().Kind() != vdl.Struct {
+		return fmt.Errorf("incompatible struct %T, from %v", *x, dec.Type())
+	}
+	match := 0
+	for {
+		f, err := dec.NextField()
+		if err != nil {
+			return err
+		}
+		switch f {
+		case "":
+			if match == 0 && dec.Type().NumField() > 0 {
+				return fmt.Errorf("no matching fields in struct %T, from %v", *x, dec.Type())
+			}
+			return dec.FinishValue()
+		case "FromNow":
+			match++
+			var wire Duration
+			if err = wire.VDLRead(dec); err != nil {
+				return err
+			}
+			if err = DurationToNative(wire, &x.FromNow); err != nil {
+				return err
+			}
+		case "NoDeadline":
+			match++
+			if err = dec.StartValue(); err != nil {
+				return err
+			}
+			if x.NoDeadline, err = dec.DecodeBool(); err != nil {
+				return err
+			}
+			if err = dec.FinishValue(); err != nil {
+				return err
+			}
+		default:
+			if err = dec.SkipValue(); err != nil {
+				return err
+			}
+		}
+	}
 }
 
 // Type-check native conversion functions.

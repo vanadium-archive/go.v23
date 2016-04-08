@@ -195,6 +195,19 @@ func (t *ResumeMarkerTarget) FromBytes(src []byte, tt *vdl.Type) error {
 	return nil
 }
 
+func (x *ResumeMarker) VDLRead(dec vdl.Decoder) error {
+	var err error
+	if err = dec.StartValue(); err != nil {
+		return err
+	}
+	var bytes []byte
+	if err = dec.DecodeBytes(-1, &bytes); err != nil {
+		return err
+	}
+	*x = bytes
+	return dec.FinishValue()
+}
+
 // GlobRequest specifies which entities should be watched and, optionally,
 // how to resume from a previous Watch call.
 type GlobRequest struct {
@@ -315,6 +328,51 @@ func (t *GlobRequestTarget) ZeroField(name string) error {
 func (t *GlobRequestTarget) FinishFields(_ vdl.FieldsTarget) error {
 
 	return nil
+}
+
+func (x *GlobRequest) VDLRead(dec vdl.Decoder) error {
+	*x = GlobRequest{}
+	var err error
+	if err = dec.StartValue(); err != nil {
+		return err
+	}
+	if dec.Type().Kind() != vdl.Struct {
+		return fmt.Errorf("incompatible struct %T, from %v", *x, dec.Type())
+	}
+	match := 0
+	for {
+		f, err := dec.NextField()
+		if err != nil {
+			return err
+		}
+		switch f {
+		case "":
+			if match == 0 && dec.Type().NumField() > 0 {
+				return fmt.Errorf("no matching fields in struct %T, from %v", *x, dec.Type())
+			}
+			return dec.FinishValue()
+		case "Pattern":
+			match++
+			if err = dec.StartValue(); err != nil {
+				return err
+			}
+			if x.Pattern, err = dec.DecodeString(); err != nil {
+				return err
+			}
+			if err = dec.FinishValue(); err != nil {
+				return err
+			}
+		case "ResumeMarker":
+			match++
+			if err = x.ResumeMarker.VDLRead(dec); err != nil {
+				return err
+			}
+		default:
+			if err = dec.SkipValue(); err != nil {
+				return err
+			}
+		}
+	}
 }
 
 // Change is the new value for a watched entity.
@@ -528,6 +586,80 @@ func (t *ChangeTarget) ZeroField(name string) error {
 func (t *ChangeTarget) FinishFields(_ vdl.FieldsTarget) error {
 
 	return nil
+}
+
+func (x *Change) VDLRead(dec vdl.Decoder) error {
+	*x = Change{
+		Value: vom.RawBytesOf(vdl.ZeroValue(vdl.AnyType)),
+	}
+	var err error
+	if err = dec.StartValue(); err != nil {
+		return err
+	}
+	if dec.Type().Kind() != vdl.Struct {
+		return fmt.Errorf("incompatible struct %T, from %v", *x, dec.Type())
+	}
+	match := 0
+	for {
+		f, err := dec.NextField()
+		if err != nil {
+			return err
+		}
+		switch f {
+		case "":
+			if match == 0 && dec.Type().NumField() > 0 {
+				return fmt.Errorf("no matching fields in struct %T, from %v", *x, dec.Type())
+			}
+			return dec.FinishValue()
+		case "Name":
+			match++
+			if err = dec.StartValue(); err != nil {
+				return err
+			}
+			if x.Name, err = dec.DecodeString(); err != nil {
+				return err
+			}
+			if err = dec.FinishValue(); err != nil {
+				return err
+			}
+		case "State":
+			match++
+			if err = dec.StartValue(); err != nil {
+				return err
+			}
+			tmp, err := dec.DecodeInt(32)
+			if err != nil {
+				return err
+			}
+			x.State = int32(tmp)
+			if err = dec.FinishValue(); err != nil {
+				return err
+			}
+		case "Value":
+			match++
+			// TODO(toddw): implement any
+		case "ResumeMarker":
+			match++
+			if err = x.ResumeMarker.VDLRead(dec); err != nil {
+				return err
+			}
+		case "Continued":
+			match++
+			if err = dec.StartValue(); err != nil {
+				return err
+			}
+			if x.Continued, err = dec.DecodeBool(); err != nil {
+				return err
+			}
+			if err = dec.FinishValue(); err != nil {
+				return err
+			}
+		default:
+			if err = dec.SkipValue(); err != nil {
+				return err
+			}
+		}
+	}
 }
 
 //////////////////////////////////////////////////

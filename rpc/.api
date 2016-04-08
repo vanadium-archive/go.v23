@@ -17,6 +17,7 @@ pkg rpc, func ReflectInvokerOrDie(interface{}) Invoker
 pkg rpc, func TypeCheckMethods(interface{}) map[string]error
 pkg rpc, method (*Request) FillVDLTarget(vdl.Target, *vdl.Type) error
 pkg rpc, method (*Request) MakeVDLTarget() vdl.Target
+pkg rpc, method (*Request) VDLRead(vdl.Decoder) error
 pkg rpc, method (*RequestTarget) FinishField(vdl.Target, vdl.Target) error
 pkg rpc, method (*RequestTarget) FinishFields(vdl.FieldsTarget) error
 pkg rpc, method (*RequestTarget) StartField(string) (vdl.Target, vdl.Target, error)
@@ -24,6 +25,7 @@ pkg rpc, method (*RequestTarget) StartFields(*vdl.Type) (vdl.FieldsTarget, error
 pkg rpc, method (*RequestTarget) ZeroField(string) error
 pkg rpc, method (*Response) FillVDLTarget(vdl.Target, *vdl.Type) error
 pkg rpc, method (*Response) MakeVDLTarget() vdl.Target
+pkg rpc, method (*Response) VDLRead(vdl.Decoder) error
 pkg rpc, method (*ResponseTarget) FinishField(vdl.Target, vdl.Target) error
 pkg rpc, method (*ResponseTarget) FinishFields(vdl.FieldsTarget) error
 pkg rpc, method (*ResponseTarget) StartField(string) (vdl.Target, vdl.Target, error)

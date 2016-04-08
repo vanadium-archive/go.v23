@@ -6,6 +6,7 @@ pkg watch, func GlobWatcherServer(GlobWatcherServerMethods) GlobWatcherServerStu
 pkg watch, func NewErrUnknownResumeMarker(*context.T) error
 pkg watch, method (*Change) FillVDLTarget(vdl.Target, *vdl.Type) error
 pkg watch, method (*Change) MakeVDLTarget() vdl.Target
+pkg watch, method (*Change) VDLRead(vdl.Decoder) error
 pkg watch, method (*ChangeTarget) FinishField(vdl.Target, vdl.Target) error
 pkg watch, method (*ChangeTarget) FinishFields(vdl.FieldsTarget) error
 pkg watch, method (*ChangeTarget) StartField(string) (vdl.Target, vdl.Target, error)
@@ -13,6 +14,7 @@ pkg watch, method (*ChangeTarget) StartFields(*vdl.Type) (vdl.FieldsTarget, erro
 pkg watch, method (*ChangeTarget) ZeroField(string) error
 pkg watch, method (*GlobRequest) FillVDLTarget(vdl.Target, *vdl.Type) error
 pkg watch, method (*GlobRequest) MakeVDLTarget() vdl.Target
+pkg watch, method (*GlobRequest) VDLRead(vdl.Decoder) error
 pkg watch, method (*GlobRequestTarget) FinishField(vdl.Target, vdl.Target) error
 pkg watch, method (*GlobRequestTarget) FinishFields(vdl.FieldsTarget) error
 pkg watch, method (*GlobRequestTarget) StartField(string) (vdl.Target, vdl.Target, error)
@@ -22,6 +24,7 @@ pkg watch, method (*GlobWatcherWatchGlobServerCallStub) Init(rpc.StreamServerCal
 pkg watch, method (*GlobWatcherWatchGlobServerCallStub) SendStream() interface {  Send(item Change) error;}
 pkg watch, method (*ResumeMarker) FillVDLTarget(vdl.Target, *vdl.Type) error
 pkg watch, method (*ResumeMarker) MakeVDLTarget() vdl.Target
+pkg watch, method (*ResumeMarker) VDLRead(vdl.Decoder) error
 pkg watch, method (*ResumeMarkerTarget) FromBytes([]byte, *vdl.Type) error
 pkg watch, type Change struct
 pkg watch, type Change struct, Continued bool

@@ -149,6 +149,57 @@ func (t *IdTarget) FinishFields(_ vdl.FieldsTarget) error {
 	return nil
 }
 
+func (x *Id) VDLRead(dec vdl.Decoder) error {
+	*x = Id{}
+	var err error
+	if err = dec.StartValue(); err != nil {
+		return err
+	}
+	if dec.Type().Kind() != vdl.Struct {
+		return fmt.Errorf("incompatible struct %T, from %v", *x, dec.Type())
+	}
+	match := 0
+	for {
+		f, err := dec.NextField()
+		if err != nil {
+			return err
+		}
+		switch f {
+		case "":
+			if match == 0 && dec.Type().NumField() > 0 {
+				return fmt.Errorf("no matching fields in struct %T, from %v", *x, dec.Type())
+			}
+			return dec.FinishValue()
+		case "Blessing":
+			match++
+			if err = dec.StartValue(); err != nil {
+				return err
+			}
+			if x.Blessing, err = dec.DecodeString(); err != nil {
+				return err
+			}
+			if err = dec.FinishValue(); err != nil {
+				return err
+			}
+		case "Name":
+			match++
+			if err = dec.StartValue(); err != nil {
+				return err
+			}
+			if x.Name, err = dec.DecodeString(); err != nil {
+				return err
+			}
+			if err = dec.FinishValue(); err != nil {
+				return err
+			}
+		default:
+			if err = dec.SkipValue(); err != nil {
+				return err
+			}
+		}
+	}
+}
+
 // DevModeUpdateVClockOpts specifies what DevModeUpdateVClock should do, as
 // described below.
 type DevModeUpdateVClockOpts struct {
@@ -379,6 +430,86 @@ func (t *DevModeUpdateVClockOptsTarget) FinishFields(_ vdl.FieldsTarget) error {
 	return nil
 }
 
+func (x *DevModeUpdateVClockOpts) VDLRead(dec vdl.Decoder) error {
+	*x = DevModeUpdateVClockOpts{}
+	var err error
+	if err = dec.StartValue(); err != nil {
+		return err
+	}
+	if dec.Type().Kind() != vdl.Struct {
+		return fmt.Errorf("incompatible struct %T, from %v", *x, dec.Type())
+	}
+	match := 0
+	for {
+		f, err := dec.NextField()
+		if err != nil {
+			return err
+		}
+		switch f {
+		case "":
+			if match == 0 && dec.Type().NumField() > 0 {
+				return fmt.Errorf("no matching fields in struct %T, from %v", *x, dec.Type())
+			}
+			return dec.FinishValue()
+		case "NtpHost":
+			match++
+			if err = dec.StartValue(); err != nil {
+				return err
+			}
+			if x.NtpHost, err = dec.DecodeString(); err != nil {
+				return err
+			}
+			if err = dec.FinishValue(); err != nil {
+				return err
+			}
+		case "Now":
+			match++
+			var wire time_2.Time
+			if err = wire.VDLRead(dec); err != nil {
+				return err
+			}
+			if err = time_2.TimeToNative(wire, &x.Now); err != nil {
+				return err
+			}
+		case "ElapsedTime":
+			match++
+			var wire time_2.Duration
+			if err = wire.VDLRead(dec); err != nil {
+				return err
+			}
+			if err = time_2.DurationToNative(wire, &x.ElapsedTime); err != nil {
+				return err
+			}
+		case "DoNtpUpdate":
+			match++
+			if err = dec.StartValue(); err != nil {
+				return err
+			}
+			if x.DoNtpUpdate, err = dec.DecodeBool(); err != nil {
+				return err
+			}
+			if err = dec.FinishValue(); err != nil {
+				return err
+			}
+		case "DoLocalUpdate":
+			match++
+			if err = dec.StartValue(); err != nil {
+				return err
+			}
+			if x.DoLocalUpdate, err = dec.DecodeBool(); err != nil {
+				return err
+			}
+			if err = dec.FinishValue(); err != nil {
+				return err
+			}
+		default:
+			if err = dec.SkipValue(); err != nil {
+				return err
+			}
+		}
+	}
+}
+
 // BatchOptions configures a batch.
 // TODO(sadovsky): Add more options, e.g. to configure isolation, timeouts,
 // whether to track the read set and/or write set, etc.
@@ -505,6 +636,57 @@ func (t *BatchOptionsTarget) FinishFields(_ vdl.FieldsTarget) error {
 	return nil
 }
 
+func (x *BatchOptions) VDLRead(dec vdl.Decoder) error {
+	*x = BatchOptions{}
+	var err error
+	if err = dec.StartValue(); err != nil {
+		return err
+	}
+	if dec.Type().Kind() != vdl.Struct {
+		return fmt.Errorf("incompatible struct %T, from %v", *x, dec.Type())
+	}
+	match := 0
+	for {
+		f, err := dec.NextField()
+		if err != nil {
+			return err
+		}
+		switch f {
+		case "":
+			if match == 0 && dec.Type().NumField() > 0 {
+				return fmt.Errorf("no matching fields in struct %T, from %v", *x, dec.Type())
+			}
+			return dec.FinishValue()
+		case "Hint":
+			match++
+			if err = dec.StartValue(); err != nil {
+				return err
+			}
+			if x.Hint, err = dec.DecodeString(); err != nil {
+				return err
+			}
+			if err = dec.FinishValue(); err != nil {
+				return err
+			}
+		case "ReadOnly":
+			match++
+			if err = dec.StartValue(); err != nil {
+				return err
+			}
+			if x.ReadOnly, err = dec.DecodeBool(); err != nil {
+				return err
+			}
+			if err = dec.FinishValue(); err != nil {
+				return err
+			}
+		default:
+			if err = dec.SkipValue(); err != nil {
+				return err
+			}
+		}
+	}
+}
+
 // KeyValue is a key-value pair.
 type KeyValue struct {
 	Key   string
@@ -622,6 +804,57 @@ func (t *KeyValueTarget) FinishFields(_ vdl.FieldsTarget) error {
 	return nil
 }
 
+func (x *KeyValue) VDLRead(dec vdl.Decoder) error {
+	*x = KeyValue{}
+	var err error
+	if err = dec.StartValue(); err != nil {
+		return err
+	}
+	if dec.Type().Kind() != vdl.Struct {
+		return fmt.Errorf("incompatible struct %T, from %v", *x, dec.Type())
+	}
+	match := 0
+	for {
+		f, err := dec.NextField()
+		if err != nil {
+			return err
+		}
+		switch f {
+		case "":
+			if match == 0 && dec.Type().NumField() > 0 {
+				return fmt.Errorf("no matching fields in struct %T, from %v", *x, dec.Type())
+			}
+			return dec.FinishValue()
+		case "Key":
+			match++
+			if err = dec.StartValue(); err != nil {
+				return err
+			}
+			if x.Key, err = dec.DecodeString(); err != nil {
+				return err
+			}
+			if err = dec.FinishValue(); err != nil {
+				return err
+			}
+		case "Value":
+			match++
+			if err = dec.StartValue(); err != nil {
+				return err
+			}
+			if err = dec.DecodeBytes(-1, &x.Value); err != nil {
+				return err
+			}
+			if err = dec.FinishValue(); err != nil {
+				return err
+			}
+		default:
+			if err = dec.SkipValue(); err != nil {
+				return err
+			}
+		}
+	}
+}
+
 // CollectionRow encapsulates the collection name and row key or row prefix.
 type CollectionRow struct {
 	CollectionName string
@@ -733,6 +966,57 @@ func (t *CollectionRowTarget) ZeroField(name string) error {
 func (t *CollectionRowTarget) FinishFields(_ vdl.FieldsTarget) error {
 
 	return nil
+}
+
+func (x *CollectionRow) VDLRead(dec vdl.Decoder) error {
+	*x = CollectionRow{}
+	var err error
+	if err = dec.StartValue(); err != nil {
+		return err
+	}
+	if dec.Type().Kind() != vdl.Struct {
+		return fmt.Errorf("incompatible struct %T, from %v", *x, dec.Type())
+	}
+	match := 0
+	for {
+		f, err := dec.NextField()
+		if err != nil {
+			return err
+		}
+		switch f {
+		case "":
+			if match == 0 && dec.Type().NumField() > 0 {
+				return fmt.Errorf("no matching fields in struct %T, from %v", *x, dec.Type())
+			}
+			return dec.FinishValue()
+		case "CollectionName":
+			match++
+			if err = dec.StartValue(); err != nil {
+				return err
+			}
+			if x.CollectionName, err = dec.DecodeString(); err != nil {
+				return err
+			}
+			if err = dec.FinishValue(); err != nil {
+				return err
+			}
+		case "Row":
+			match++
+			if err = dec.StartValue(); err != nil {
+				return err
+			}
+			if x.Row, err = dec.DecodeString(); err != nil {
+				return err
+			}
+			if err = dec.FinishValue(); err != nil {
+				return err
+			}
+		default:
+			if err = dec.SkipValue(); err != nil {
+				return err
+			}
+		}
+	}
 }
 
 // SyncgroupSpec contains the specification for a syncgroup.
@@ -1024,6 +1308,136 @@ func (t *__VDLTarget1_list) FinishList(elem vdl.ListTarget) error {
 	return nil
 }
 
+func (x *SyncgroupSpec) VDLRead(dec vdl.Decoder) error {
+	*x = SyncgroupSpec{}
+	var err error
+	if err = dec.StartValue(); err != nil {
+		return err
+	}
+	if dec.Type().Kind() != vdl.Struct {
+		return fmt.Errorf("incompatible struct %T, from %v", *x, dec.Type())
+	}
+	match := 0
+	for {
+		f, err := dec.NextField()
+		if err != nil {
+			return err
+		}
+		switch f {
+		case "":
+			if match == 0 && dec.Type().NumField() > 0 {
+				return fmt.Errorf("no matching fields in struct %T, from %v", *x, dec.Type())
+			}
+			return dec.FinishValue()
+		case "Description":
+			match++
+			if err = dec.StartValue(); err != nil {
+				return err
+			}
+			if x.Description, err = dec.DecodeString(); err != nil {
+				return err
+			}
+			if err = dec.FinishValue(); err != nil {
+				return err
+			}
+		case "Perms":
+			match++
+			if err = x.Perms.VDLRead(dec); err != nil {
+				return err
+			}
+		case "Prefixes":
+			match++
+			if err = __VDLRead1_list(dec, &x.Prefixes); err != nil {
+				return err
+			}
+		case "MountTables":
+			match++
+			if err = __VDLRead2_list(dec, &x.MountTables); err != nil {
+				return err
+			}
+		case "IsPrivate":
+			match++
+			if err = dec.StartValue(); err != nil {
+				return err
+			}
+			if x.IsPrivate, err = dec.DecodeBool(); err != nil {
+				return err
+			}
+			if err = dec.FinishValue(); err != nil {
+				return err
+			}
+		default:
+			if err = dec.SkipValue(); err != nil {
+				return err
+			}
+		}
+	}
+}
+
+func __VDLRead1_list(dec vdl.Decoder, x *[]CollectionRow) error {
+	var err error
+	if err = dec.StartValue(); err != nil {
+		return err
+	}
+	if k := dec.Type().Kind(); k != vdl.Array && k != vdl.List {
+		return fmt.Errorf("incompatible list %T, from %v", *x, dec.Type())
+	}
+	switch len := dec.LenHint(); {
+	case len == 0:
+		*x = nil
+	case len > 0:
+		*x = make([]CollectionRow, 0, len)
+	}
+	for {
+		switch done, err := dec.NextEntry(); {
+		case err != nil:
+			return err
+		case done:
+			return dec.FinishValue()
+		}
+		var elem CollectionRow
+		if err = elem.VDLRead(dec); err != nil {
+			return err
+		}
+		*x = append(*x, elem)
+	}
+}
+
+func __VDLRead2_list(dec vdl.Decoder, x *[]string) error {
+	var err error
+	if err = dec.StartValue(); err != nil {
+		return err
+	}
+	if k := dec.Type().Kind(); k != vdl.Array && k != vdl.List {
+		return fmt.Errorf("incompatible list %T, from %v", *x, dec.Type())
+	}
+	switch len := dec.LenHint(); {
+	case len == 0:
+		*x = nil
+	case len > 0:
+		*x = make([]string, 0, len)
+	}
+	for {
+		switch done, err := dec.NextEntry(); {
+		case err != nil:
+			return err
+		case done:
+			return dec.FinishValue()
+		}
+		var elem string
+		if err = dec.StartValue(); err != nil {
+			return err
+		}
+		if elem, err = dec.DecodeString(); err != nil {
+			return err
+		}
+		if err = dec.FinishValue(); err != nil {
+			return err
+		}
+		*x = append(*x, elem)
+	}
+}
+
 // SyncgroupMemberInfo contains per-member metadata.
 type SyncgroupMemberInfo struct {
 	SyncPriority byte
@@ -1137,6 +1551,61 @@ func (t *SyncgroupMemberInfoTarget) FinishFields(_ vdl.FieldsTarget) error {
 	return nil
 }
 
+func (x *SyncgroupMemberInfo) VDLRead(dec vdl.Decoder) error {
+	*x = SyncgroupMemberInfo{}
+	var err error
+	if err = dec.StartValue(); err != nil {
+		return err
+	}
+	if dec.Type().Kind() != vdl.Struct {
+		return fmt.Errorf("incompatible struct %T, from %v", *x, dec.Type())
+	}
+	match := 0
+	for {
+		f, err := dec.NextField()
+		if err != nil {
+			return err
+		}
+		switch f {
+		case "":
+			if match == 0 && dec.Type().NumField() > 0 {
+				return fmt.Errorf("no matching fields in struct %T, from %v", *x, dec.Type())
+			}
+			return dec.FinishValue()
+		case "SyncPriority":
+			match++
+			if err = dec.StartValue(); err != nil {
+				return err
+			}
+			tmp, err := dec.DecodeUint(8)
+			if err != nil {
+				return err
+			}
+			x.SyncPriority = byte(tmp)
+			if err = dec.FinishValue(); err != nil {
+				return err
+			}
+		case "BlobDevType":
+			match++
+			if err = dec.StartValue(); err != nil {
+				return err
+			}
+			tmp, err := dec.DecodeUint(8)
+			if err != nil {
+				return err
+			}
+			x.BlobDevType = byte(tmp)
+			if err = dec.FinishValue(); err != nil {
+				return err
+			}
+		default:
+			if err = dec.SkipValue(); err != nil {
+				return err
+			}
+		}
+	}
+}
+
 // ResolverType defines the possible conflict resolution policies.
 // A Conflict is defined as presence of two independent sets of updates
 // originating from the same version of an object. Syncbase
@@ -1236,6 +1705,21 @@ func (t *ResolverTypeTarget) FromEnumLabel(src string, tt *vdl.Type) error {
 	return nil
 }
 
+func (x *ResolverType) VDLRead(dec vdl.Decoder) error {
+	var err error
+	if err = dec.StartValue(); err != nil {
+		return err
+	}
+	enum, err := dec.DecodeString()
+	if err != nil {
+		return err
+	}
+	if err = x.Set(enum); err != nil {
+		return err
+	}
+	return dec.FinishValue()
+}
+
 // BatchSource represents where the batch was committed.
 type BatchSource int
 
@@ -1315,6 +1799,21 @@ func (t *BatchSourceTarget) FromEnumLabel(src string, tt *vdl.Type) error {
 	}
 
 	return nil
+}
+
+func (x *BatchSource) VDLRead(dec vdl.Decoder) error {
+	var err error
+	if err = dec.StartValue(); err != nil {
+		return err
+	}
+	enum, err := dec.DecodeString()
+	if err != nil {
+		return err
+	}
+	if err = x.Set(enum); err != nil {
+		return err
+	}
+	return dec.FinishValue()
 }
 
 type BatchInfo struct {
@@ -1464,6 +1963,62 @@ func (t *BatchInfoTarget) FinishFields(_ vdl.FieldsTarget) error {
 	return nil
 }
 
+func (x *BatchInfo) VDLRead(dec vdl.Decoder) error {
+	*x = BatchInfo{}
+	var err error
+	if err = dec.StartValue(); err != nil {
+		return err
+	}
+	if dec.Type().Kind() != vdl.Struct {
+		return fmt.Errorf("incompatible struct %T, from %v", *x, dec.Type())
+	}
+	match := 0
+	for {
+		f, err := dec.NextField()
+		if err != nil {
+			return err
+		}
+		switch f {
+		case "":
+			if match == 0 && dec.Type().NumField() > 0 {
+				return fmt.Errorf("no matching fields in struct %T, from %v", *x, dec.Type())
+			}
+			return dec.FinishValue()
+		case "Id":
+			match++
+			if err = dec.StartValue(); err != nil {
+				return err
+			}
+			if x.Id, err = dec.DecodeUint(64); err != nil {
+				return err
+			}
+			if err = dec.FinishValue(); err != nil {
+				return err
+			}
+		case "Hint":
+			match++
+			if err = dec.StartValue(); err != nil {
+				return err
+			}
+			if x.Hint, err = dec.DecodeString(); err != nil {
+				return err
+			}
+			if err = dec.FinishValue(); err != nil {
+				return err
+			}
+		case "Source":
+			match++
+			if err = x.Source.VDLRead(dec); err != nil {
+				return err
+			}
+		default:
+			if err = dec.SkipValue(); err != nil {
+				return err
+			}
+		}
+	}
+}
+
 // ValueState represents the state for Value object providing information about
 // whether the Value object's Byte field is empty or not.
 type ValueState int
@@ -1560,6 +2115,21 @@ func (t *ValueStateTarget) FromEnumLabel(src string, tt *vdl.Type) error {
 	}
 
 	return nil
+}
+
+func (x *ValueState) VDLRead(dec vdl.Decoder) error {
+	var err error
+	if err = dec.StartValue(); err != nil {
+		return err
+	}
+	enum, err := dec.DecodeString()
+	if err != nil {
+		return err
+	}
+	if err = x.Set(enum); err != nil {
+		return err
+	}
+	return dec.FinishValue()
 }
 
 // Value contains the encoded bytes for a row's value stored in syncbase.
@@ -1722,6 +2292,60 @@ func (t *ValueTarget) ZeroField(name string) error {
 func (t *ValueTarget) FinishFields(_ vdl.FieldsTarget) error {
 
 	return nil
+}
+
+func (x *Value) VDLRead(dec vdl.Decoder) error {
+	*x = Value{}
+	var err error
+	if err = dec.StartValue(); err != nil {
+		return err
+	}
+	if dec.Type().Kind() != vdl.Struct {
+		return fmt.Errorf("incompatible struct %T, from %v", *x, dec.Type())
+	}
+	match := 0
+	for {
+		f, err := dec.NextField()
+		if err != nil {
+			return err
+		}
+		switch f {
+		case "":
+			if match == 0 && dec.Type().NumField() > 0 {
+				return fmt.Errorf("no matching fields in struct %T, from %v", *x, dec.Type())
+			}
+			return dec.FinishValue()
+		case "State":
+			match++
+			if err = x.State.VDLRead(dec); err != nil {
+				return err
+			}
+		case "Bytes":
+			match++
+			if err = dec.StartValue(); err != nil {
+				return err
+			}
+			if err = dec.DecodeBytes(-1, &x.Bytes); err != nil {
+				return err
+			}
+			if err = dec.FinishValue(); err != nil {
+				return err
+			}
+		case "WriteTs":
+			match++
+			var wire time_2.Time
+			if err = wire.VDLRead(dec); err != nil {
+				return err
+			}
+			if err = time_2.TimeToNative(wire, &x.WriteTs); err != nil {
+				return err
+			}
+		default:
+			if err = dec.SkipValue(); err != nil {
+				return err
+			}
+		}
+	}
 }
 
 // RowOp represents a read or write operation on a row corresponding to the
@@ -1932,6 +2556,106 @@ func (t *__VDLTarget2_optional) FromNil(tt *vdl.Type) error {
 	return nil
 }
 
+func (x *RowOp) VDLRead(dec vdl.Decoder) error {
+	*x = RowOp{}
+	var err error
+	if err = dec.StartValue(); err != nil {
+		return err
+	}
+	if dec.Type().Kind() != vdl.Struct {
+		return fmt.Errorf("incompatible struct %T, from %v", *x, dec.Type())
+	}
+	match := 0
+	for {
+		f, err := dec.NextField()
+		if err != nil {
+			return err
+		}
+		switch f {
+		case "":
+			if match == 0 && dec.Type().NumField() > 0 {
+				return fmt.Errorf("no matching fields in struct %T, from %v", *x, dec.Type())
+			}
+			return dec.FinishValue()
+		case "Key":
+			match++
+			if err = dec.StartValue(); err != nil {
+				return err
+			}
+			if x.Key, err = dec.DecodeString(); err != nil {
+				return err
+			}
+			if err = dec.FinishValue(); err != nil {
+				return err
+			}
+		case "LocalValue":
+			match++
+			if err = dec.StartValue(); err != nil {
+				return err
+			}
+			if dec.IsNil() {
+				if !vdl.Compatible(dec.Type(), vdl.TypeOf(x.LocalValue)) {
+					return fmt.Errorf("incompatible optional %T, from %v", x.LocalValue, dec.Type())
+				}
+				x.LocalValue = nil
+				if err = dec.FinishValue(); err != nil {
+					return err
+				}
+			} else {
+				x.LocalValue = new(Value)
+				dec.IgnoreNextStartValue()
+				if err = x.LocalValue.VDLRead(dec); err != nil {
+					return err
+				}
+			}
+		case "RemoteValue":
+			match++
+			if err = dec.StartValue(); err != nil {
+				return err
+			}
+			if dec.IsNil() {
+				if !vdl.Compatible(dec.Type(), vdl.TypeOf(x.RemoteValue)) {
+					return fmt.Errorf("incompatible optional %T, from %v", x.RemoteValue, dec.Type())
+				}
+				x.RemoteValue = nil
+				if err = dec.FinishValue(); err != nil {
+					return err
+				}
+			} else {
+				x.RemoteValue = new(Value)
+				dec.IgnoreNextStartValue()
+				if err = x.RemoteValue.VDLRead(dec); err != nil {
+					return err
+				}
+			}
+		case "AncestorValue":
+			match++
+			if err = dec.StartValue(); err != nil {
+				return err
+			}
+			if dec.IsNil() {
+				if !vdl.Compatible(dec.Type(), vdl.TypeOf(x.AncestorValue)) {
+					return fmt.Errorf("incompatible optional %T, from %v", x.AncestorValue, dec.Type())
+				}
+				x.AncestorValue = nil
+				if err = dec.FinishValue(); err != nil {
+					return err
+				}
+			} else {
+				x.AncestorValue = new(Value)
+				dec.IgnoreNextStartValue()
+				if err = x.AncestorValue.VDLRead(dec); err != nil {
+					return err
+				}
+			}
+		default:
+			if err = dec.SkipValue(); err != nil {
+				return err
+			}
+		}
+	}
+}
+
 // ScanOp provides details of a scan operation.
 type ScanOp struct {
 	// Start contains the starting key for a range scan.
@@ -2045,6 +2769,57 @@ func (t *ScanOpTarget) ZeroField(name string) error {
 func (t *ScanOpTarget) FinishFields(_ vdl.FieldsTarget) error {
 
 	return nil
+}
+
+func (x *ScanOp) VDLRead(dec vdl.Decoder) error {
+	*x = ScanOp{}
+	var err error
+	if err = dec.StartValue(); err != nil {
+		return err
+	}
+	if dec.Type().Kind() != vdl.Struct {
+		return fmt.Errorf("incompatible struct %T, from %v", *x, dec.Type())
+	}
+	match := 0
+	for {
+		f, err := dec.NextField()
+		if err != nil {
+			return err
+		}
+		switch f {
+		case "":
+			if match == 0 && dec.Type().NumField() > 0 {
+				return fmt.Errorf("no matching fields in struct %T, from %v", *x, dec.Type())
+			}
+			return dec.FinishValue()
+		case "Start":
+			match++
+			if err = dec.StartValue(); err != nil {
+				return err
+			}
+			if x.Start, err = dec.DecodeString(); err != nil {
+				return err
+			}
+			if err = dec.FinishValue(); err != nil {
+				return err
+			}
+		case "Limit":
+			match++
+			if err = dec.StartValue(); err != nil {
+				return err
+			}
+			if x.Limit, err = dec.DecodeString(); err != nil {
+				return err
+			}
+			if err = dec.FinishValue(); err != nil {
+				return err
+			}
+		default:
+			if err = dec.SkipValue(); err != nil {
+				return err
+			}
+		}
+	}
 }
 
 type (
@@ -2244,6 +3019,51 @@ func (t operationTargetFactory) VDLMakeUnionTarget(union interface{}) (vdl.Targe
 	return nil, fmt.Errorf("got %T, want *Operation", union)
 }
 
+func VDLReadOperation(dec vdl.Decoder, x *Operation) error {
+	var err error
+	if err = dec.StartValue(); err != nil {
+		return err
+	}
+	if dec.Type().Kind() != vdl.Union {
+		return fmt.Errorf("incompatible union %T, from %v", *x, dec.Type())
+	}
+	f, err := dec.NextField()
+	if err != nil {
+		return err
+	}
+	switch f {
+	case "Read":
+		var field OperationRead
+		if err = field.Value.VDLRead(dec); err != nil {
+			return err
+		}
+		*x = field
+	case "Write":
+		var field OperationWrite
+		if err = field.Value.VDLRead(dec); err != nil {
+			return err
+		}
+		*x = field
+	case "Scan":
+		var field OperationScan
+		if err = field.Value.VDLRead(dec); err != nil {
+			return err
+		}
+		*x = field
+	case "":
+		return fmt.Errorf("missing field in union %T, from %v", x, dec.Type())
+	default:
+		return fmt.Errorf("field %q not in union %T, from %v", f, x, dec.Type())
+	}
+	switch f, err := dec.NextField(); {
+	case err != nil:
+		return err
+	case f != "":
+		return fmt.Errorf("extra field %q in union %T, from %v", f, x, dec.Type())
+	}
+	return dec.FinishValue()
+}
+
 // RowInfo contains a single operation performed on a row (in case of read or
 // write) or a range or rows (in case of scan) along with a mapping to each
 // of the batches that this operation belongs to.
@@ -2437,6 +3257,82 @@ func (t *__VDLTarget3_list) FinishList(elem vdl.ListTarget) error {
 	return nil
 }
 
+func (x *RowInfo) VDLRead(dec vdl.Decoder) error {
+	*x = RowInfo{
+		Op: OperationRead{},
+	}
+	var err error
+	if err = dec.StartValue(); err != nil {
+		return err
+	}
+	if dec.Type().Kind() != vdl.Struct {
+		return fmt.Errorf("incompatible struct %T, from %v", *x, dec.Type())
+	}
+	match := 0
+	for {
+		f, err := dec.NextField()
+		if err != nil {
+			return err
+		}
+		switch f {
+		case "":
+			if match == 0 && dec.Type().NumField() > 0 {
+				return fmt.Errorf("no matching fields in struct %T, from %v", *x, dec.Type())
+			}
+			return dec.FinishValue()
+		case "Op":
+			match++
+			if err = VDLReadOperation(dec, &x.Op); err != nil {
+				return err
+			}
+		case "BatchIds":
+			match++
+			if err = __VDLRead3_list(dec, &x.BatchIds); err != nil {
+				return err
+			}
+		default:
+			if err = dec.SkipValue(); err != nil {
+				return err
+			}
+		}
+	}
+}
+
+func __VDLRead3_list(dec vdl.Decoder, x *[]uint64) error {
+	var err error
+	if err = dec.StartValue(); err != nil {
+		return err
+	}
+	if k := dec.Type().Kind(); k != vdl.Array && k != vdl.List {
+		return fmt.Errorf("incompatible list %T, from %v", *x, dec.Type())
+	}
+	switch len := dec.LenHint(); {
+	case len == 0:
+		*x = nil
+	case len > 0:
+		*x = make([]uint64, 0, len)
+	}
+	for {
+		switch done, err := dec.NextEntry(); {
+		case err != nil:
+			return err
+		case done:
+			return dec.FinishValue()
+		}
+		var elem uint64
+		if err = dec.StartValue(); err != nil {
+			return err
+		}
+		if elem, err = dec.DecodeUint(64); err != nil {
+			return err
+		}
+		if err = dec.FinishValue(); err != nil {
+			return err
+		}
+		*x = append(*x, elem)
+	}
+}
+
 type (
 	// ConflictData represents any single field of the ConflictData union type.
 	//
@@ -2587,6 +3483,45 @@ func (t conflictDataTargetFactory) VDLMakeUnionTarget(union interface{}) (vdl.Ta
 	return nil, fmt.Errorf("got %T, want *ConflictData", union)
 }
 
+func VDLReadConflictData(dec vdl.Decoder, x *ConflictData) error {
+	var err error
+	if err = dec.StartValue(); err != nil {
+		return err
+	}
+	if dec.Type().Kind() != vdl.Union {
+		return fmt.Errorf("incompatible union %T, from %v", *x, dec.Type())
+	}
+	f, err := dec.NextField()
+	if err != nil {
+		return err
+	}
+	switch f {
+	case "Batch":
+		var field ConflictDataBatch
+		if err = field.Value.VDLRead(dec); err != nil {
+			return err
+		}
+		*x = field
+	case "Row":
+		var field ConflictDataRow
+		if err = field.Value.VDLRead(dec); err != nil {
+			return err
+		}
+		*x = field
+	case "":
+		return fmt.Errorf("missing field in union %T, from %v", x, dec.Type())
+	default:
+		return fmt.Errorf("field %q not in union %T, from %v", f, x, dec.Type())
+	}
+	switch f, err := dec.NextField(); {
+	case err != nil:
+		return err
+	case f != "":
+		return fmt.Errorf("extra field %q in union %T, from %v", f, x, dec.Type())
+	}
+	return dec.FinishValue()
+}
+
 // ConflictInfo contains information to fully specify a conflict
 // for a key, providing the (local, remote, ancestor) tuple.
 // A key under conflict can be a part of a batch in local, remote or both
@@ -2719,6 +3654,53 @@ func (t *ConflictInfoTarget) FinishFields(_ vdl.FieldsTarget) error {
 	return nil
 }
 
+func (x *ConflictInfo) VDLRead(dec vdl.Decoder) error {
+	*x = ConflictInfo{
+		Data: ConflictDataBatch{},
+	}
+	var err error
+	if err = dec.StartValue(); err != nil {
+		return err
+	}
+	if dec.Type().Kind() != vdl.Struct {
+		return fmt.Errorf("incompatible struct %T, from %v", *x, dec.Type())
+	}
+	match := 0
+	for {
+		f, err := dec.NextField()
+		if err != nil {
+			return err
+		}
+		switch f {
+		case "":
+			if match == 0 && dec.Type().NumField() > 0 {
+				return fmt.Errorf("no matching fields in struct %T, from %v", *x, dec.Type())
+			}
+			return dec.FinishValue()
+		case "Data":
+			match++
+			if err = VDLReadConflictData(dec, &x.Data); err != nil {
+				return err
+			}
+		case "Continued":
+			match++
+			if err = dec.StartValue(); err != nil {
+				return err
+			}
+			if x.Continued, err = dec.DecodeBool(); err != nil {
+				return err
+			}
+			if err = dec.FinishValue(); err != nil {
+				return err
+			}
+		default:
+			if err = dec.SkipValue(); err != nil {
+				return err
+			}
+		}
+	}
+}
+
 // ValueSelection represents the value that was selected as the final resolution
 // for a conflict.
 type ValueSelection int
@@ -2807,6 +3789,21 @@ func (t *ValueSelectionTarget) FromEnumLabel(src string, tt *vdl.Type) error {
 	}
 
 	return nil
+}
+
+func (x *ValueSelection) VDLRead(dec vdl.Decoder) error {
+	var err error
+	if err = dec.StartValue(); err != nil {
+		return err
+	}
+	enum, err := dec.DecodeString()
+	if err != nil {
+		return err
+	}
+	if err = x.Set(enum); err != nil {
+		return err
+	}
+	return dec.FinishValue()
 }
 
 // ResolutionInfo contains the application’s reply to a conflict for a key,
@@ -2991,6 +3988,82 @@ func (t *ResolutionInfoTarget) FinishFields(_ vdl.FieldsTarget) error {
 	return nil
 }
 
+func (x *ResolutionInfo) VDLRead(dec vdl.Decoder) error {
+	*x = ResolutionInfo{}
+	var err error
+	if err = dec.StartValue(); err != nil {
+		return err
+	}
+	if dec.Type().Kind() != vdl.Struct {
+		return fmt.Errorf("incompatible struct %T, from %v", *x, dec.Type())
+	}
+	match := 0
+	for {
+		f, err := dec.NextField()
+		if err != nil {
+			return err
+		}
+		switch f {
+		case "":
+			if match == 0 && dec.Type().NumField() > 0 {
+				return fmt.Errorf("no matching fields in struct %T, from %v", *x, dec.Type())
+			}
+			return dec.FinishValue()
+		case "Key":
+			match++
+			if err = dec.StartValue(); err != nil {
+				return err
+			}
+			if x.Key, err = dec.DecodeString(); err != nil {
+				return err
+			}
+			if err = dec.FinishValue(); err != nil {
+				return err
+			}
+		case "Selection":
+			match++
+			if err = x.Selection.VDLRead(dec); err != nil {
+				return err
+			}
+		case "Result":
+			match++
+			if err = dec.StartValue(); err != nil {
+				return err
+			}
+			if dec.IsNil() {
+				if !vdl.Compatible(dec.Type(), vdl.TypeOf(x.Result)) {
+					return fmt.Errorf("incompatible optional %T, from %v", x.Result, dec.Type())
+				}
+				x.Result = nil
+				if err = dec.FinishValue(); err != nil {
+					return err
+				}
+			} else {
+				x.Result = new(Value)
+				dec.IgnoreNextStartValue()
+				if err = x.Result.VDLRead(dec); err != nil {
+					return err
+				}
+			}
+		case "Continued":
+			match++
+			if err = dec.StartValue(); err != nil {
+				return err
+			}
+			if x.Continued, err = dec.DecodeBool(); err != nil {
+				return err
+			}
+			if err = dec.FinishValue(); err != nil {
+				return err
+			}
+		default:
+			if err = dec.SkipValue(); err != nil {
+				return err
+			}
+		}
+	}
+}
+
 // CrRule provides a filter and the type of resolution to perform for a row
 // under conflict that passes the filter.
 type CrRule struct {
@@ -3168,6 +4241,73 @@ func (t *CrRuleTarget) FinishFields(_ vdl.FieldsTarget) error {
 	return nil
 }
 
+func (x *CrRule) VDLRead(dec vdl.Decoder) error {
+	*x = CrRule{}
+	var err error
+	if err = dec.StartValue(); err != nil {
+		return err
+	}
+	if dec.Type().Kind() != vdl.Struct {
+		return fmt.Errorf("incompatible struct %T, from %v", *x, dec.Type())
+	}
+	match := 0
+	for {
+		f, err := dec.NextField()
+		if err != nil {
+			return err
+		}
+		switch f {
+		case "":
+			if match == 0 && dec.Type().NumField() > 0 {
+				return fmt.Errorf("no matching fields in struct %T, from %v", *x, dec.Type())
+			}
+			return dec.FinishValue()
+		case "CollectionName":
+			match++
+			if err = dec.StartValue(); err != nil {
+				return err
+			}
+			if x.CollectionName, err = dec.DecodeString(); err != nil {
+				return err
+			}
+			if err = dec.FinishValue(); err != nil {
+				return err
+			}
+		case "KeyPrefix":
+			match++
+			if err = dec.StartValue(); err != nil {
+				return err
+			}
+			if x.KeyPrefix, err = dec.DecodeString(); err != nil {
+				return err
+			}
+			if err = dec.FinishValue(); err != nil {
+				return err
+			}
+		case "Type":
+			match++
+			if err = dec.StartValue(); err != nil {
+				return err
+			}
+			if x.Type, err = dec.DecodeString(); err != nil {
+				return err
+			}
+			if err = dec.FinishValue(); err != nil {
+				return err
+			}
+		case "Resolver":
+			match++
+			if err = x.Resolver.VDLRead(dec); err != nil {
+				return err
+			}
+		default:
+			if err = dec.SkipValue(); err != nil {
+				return err
+			}
+		}
+	}
+}
+
 // For a given row with a conflict, all rules are matched against the row.
 // If no rules match the row, we default to "LastWins". If multiple
 // rules match the row, ties are broken as follows:
@@ -3312,6 +4452,69 @@ func (t *__VDLTarget4_list) FinishList(elem vdl.ListTarget) error {
 	return nil
 }
 
+func (x *CrPolicy) VDLRead(dec vdl.Decoder) error {
+	*x = CrPolicy{}
+	var err error
+	if err = dec.StartValue(); err != nil {
+		return err
+	}
+	if dec.Type().Kind() != vdl.Struct {
+		return fmt.Errorf("incompatible struct %T, from %v", *x, dec.Type())
+	}
+	match := 0
+	for {
+		f, err := dec.NextField()
+		if err != nil {
+			return err
+		}
+		switch f {
+		case "":
+			if match == 0 && dec.Type().NumField() > 0 {
+				return fmt.Errorf("no matching fields in struct %T, from %v", *x, dec.Type())
+			}
+			return dec.FinishValue()
+		case "Rules":
+			match++
+			if err = __VDLRead4_list(dec, &x.Rules); err != nil {
+				return err
+			}
+		default:
+			if err = dec.SkipValue(); err != nil {
+				return err
+			}
+		}
+	}
+}
+
+func __VDLRead4_list(dec vdl.Decoder, x *[]CrRule) error {
+	var err error
+	if err = dec.StartValue(); err != nil {
+		return err
+	}
+	if k := dec.Type().Kind(); k != vdl.Array && k != vdl.List {
+		return fmt.Errorf("incompatible list %T, from %v", *x, dec.Type())
+	}
+	switch len := dec.LenHint(); {
+	case len == 0:
+		*x = nil
+	case len > 0:
+		*x = make([]CrRule, 0, len)
+	}
+	for {
+		switch done, err := dec.NextEntry(); {
+		case err != nil:
+			return err
+		case done:
+			return dec.FinishValue()
+		}
+		var elem CrRule
+		if err = elem.VDLRead(dec); err != nil {
+			return err
+		}
+		*x = append(*x, elem)
+	}
+}
+
 // SchemaMetadata maintains metadata related to the schema of a given database.
 // There is one SchemaMetadata per database.
 type SchemaMetadata struct {
@@ -3437,6 +4640,53 @@ func (t *SchemaMetadataTarget) FinishFields(_ vdl.FieldsTarget) error {
 	return nil
 }
 
+func (x *SchemaMetadata) VDLRead(dec vdl.Decoder) error {
+	*x = SchemaMetadata{}
+	var err error
+	if err = dec.StartValue(); err != nil {
+		return err
+	}
+	if dec.Type().Kind() != vdl.Struct {
+		return fmt.Errorf("incompatible struct %T, from %v", *x, dec.Type())
+	}
+	match := 0
+	for {
+		f, err := dec.NextField()
+		if err != nil {
+			return err
+		}
+		switch f {
+		case "":
+			if match == 0 && dec.Type().NumField() > 0 {
+				return fmt.Errorf("no matching fields in struct %T, from %v", *x, dec.Type())
+			}
+			return dec.FinishValue()
+		case "Version":
+			match++
+			if err = dec.StartValue(); err != nil {
+				return err
+			}
+			tmp, err := dec.DecodeInt(32)
+			if err != nil {
+				return err
+			}
+			x.Version = int32(tmp)
+			if err = dec.FinishValue(); err != nil {
+				return err
+			}
+		case "Policy":
+			match++
+			if err = x.Policy.VDLRead(dec); err != nil {
+				return err
+			}
+		default:
+			if err = dec.SkipValue(); err != nil {
+				return err
+			}
+		}
+	}
+}
+
 // BlobRef is a reference to a blob.
 type BlobRef string
 
@@ -3469,6 +4719,19 @@ func (t *BlobRefTarget) FromString(src string, tt *vdl.Type) error {
 	*t.Value = BlobRef(src)
 
 	return nil
+}
+
+func (x *BlobRef) VDLRead(dec vdl.Decoder) error {
+	var err error
+	if err = dec.StartValue(); err != nil {
+		return err
+	}
+	tmp, err := dec.DecodeString()
+	if err != nil {
+		return err
+	}
+	*x = BlobRef(tmp)
+	return dec.FinishValue()
 }
 
 // BlobFetchState represents the state transitions of a blob fetch.
@@ -3566,6 +4829,21 @@ func (t *BlobFetchStateTarget) FromEnumLabel(src string, tt *vdl.Type) error {
 	}
 
 	return nil
+}
+
+func (x *BlobFetchState) VDLRead(dec vdl.Decoder) error {
+	var err error
+	if err = dec.StartValue(); err != nil {
+		return err
+	}
+	enum, err := dec.DecodeString()
+	if err != nil {
+		return err
+	}
+	if err = x.Set(enum); err != nil {
+		return err
+	}
+	return dec.FinishValue()
 }
 
 // BlobFetchStatus describes the progress of an asynchronous blob fetch.
@@ -3710,6 +4988,62 @@ func (t *BlobFetchStatusTarget) FinishFields(_ vdl.FieldsTarget) error {
 	return nil
 }
 
+func (x *BlobFetchStatus) VDLRead(dec vdl.Decoder) error {
+	*x = BlobFetchStatus{}
+	var err error
+	if err = dec.StartValue(); err != nil {
+		return err
+	}
+	if dec.Type().Kind() != vdl.Struct {
+		return fmt.Errorf("incompatible struct %T, from %v", *x, dec.Type())
+	}
+	match := 0
+	for {
+		f, err := dec.NextField()
+		if err != nil {
+			return err
+		}
+		switch f {
+		case "":
+			if match == 0 && dec.Type().NumField() > 0 {
+				return fmt.Errorf("no matching fields in struct %T, from %v", *x, dec.Type())
+			}
+			return dec.FinishValue()
+		case "State":
+			match++
+			if err = x.State.VDLRead(dec); err != nil {
+				return err
+			}
+		case "Received":
+			match++
+			if err = dec.StartValue(); err != nil {
+				return err
+			}
+			if x.Received, err = dec.DecodeInt(64); err != nil {
+				return err
+			}
+			if err = dec.FinishValue(); err != nil {
+				return err
+			}
+		case "Total":
+			match++
+			if err = dec.StartValue(); err != nil {
+				return err
+			}
+			if x.Total, err = dec.DecodeInt(64); err != nil {
+				return err
+			}
+			if err = dec.FinishValue(); err != nil {
+				return err
+			}
+		default:
+			if err = dec.SkipValue(); err != nil {
+				return err
+			}
+		}
+	}
+}
+
 // StoreChange is the new value for a watched entity.
 // TODO(rogulenko): Consider adding the Shell state.
 type StoreChange struct {
@@ -3827,6 +5161,51 @@ func (t *StoreChangeTarget) ZeroField(name string) error {
 func (t *StoreChangeTarget) FinishFields(_ vdl.FieldsTarget) error {
 
 	return nil
+}
+
+func (x *StoreChange) VDLRead(dec vdl.Decoder) error {
+	*x = StoreChange{
+		Value: vom.RawBytesOf(vdl.ZeroValue(vdl.AnyType)),
+	}
+	var err error
+	if err = dec.StartValue(); err != nil {
+		return err
+	}
+	if dec.Type().Kind() != vdl.Struct {
+		return fmt.Errorf("incompatible struct %T, from %v", *x, dec.Type())
+	}
+	match := 0
+	for {
+		f, err := dec.NextField()
+		if err != nil {
+			return err
+		}
+		switch f {
+		case "":
+			if match == 0 && dec.Type().NumField() > 0 {
+				return fmt.Errorf("no matching fields in struct %T, from %v", *x, dec.Type())
+			}
+			return dec.FinishValue()
+		case "Value":
+			match++
+			// TODO(toddw): implement any
+		case "FromSync":
+			match++
+			if err = dec.StartValue(); err != nil {
+				return err
+			}
+			if x.FromSync, err = dec.DecodeBool(); err != nil {
+				return err
+			}
+			if err = dec.FinishValue(); err != nil {
+				return err
+			}
+		default:
+			if err = dec.SkipValue(); err != nil {
+				return err
+			}
+		}
+	}
 }
 
 //////////////////////////////////////////////////

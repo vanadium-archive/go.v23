@@ -10,6 +10,7 @@ pkg repository, method (*BinaryUploadServerCallStub) Init(rpc.StreamServerCall)
 pkg repository, method (*BinaryUploadServerCallStub) RecvStream() interface {  Advance() bool; Value() []byte; Err() error;}
 pkg repository, method (*MediaInfo) FillVDLTarget(vdl.Target, *vdl.Type) error
 pkg repository, method (*MediaInfo) MakeVDLTarget() vdl.Target
+pkg repository, method (*MediaInfo) VDLRead(vdl.Decoder) error
 pkg repository, method (*MediaInfoTarget) FinishField(vdl.Target, vdl.Target) error
 pkg repository, method (*MediaInfoTarget) FinishFields(vdl.FieldsTarget) error
 pkg repository, method (*MediaInfoTarget) StartField(string) (vdl.Target, vdl.Target, error)

@@ -64,6 +64,19 @@ func (t *BlessingPatternChunkTarget) FromString(src string, tt *vdl.Type) error 
 	return nil
 }
 
+func (x *BlessingPatternChunk) VDLRead(dec vdl.Decoder) error {
+	var err error
+	if err = dec.StartValue(); err != nil {
+		return err
+	}
+	tmp, err := dec.DecodeString()
+	if err != nil {
+		return err
+	}
+	*x = BlessingPatternChunk(tmp)
+	return dec.FinishValue()
+}
+
 type GetRequest struct {
 }
 
@@ -118,6 +131,29 @@ func (t *GetRequestTarget) ZeroField(name string) error {
 func (t *GetRequestTarget) FinishFields(_ vdl.FieldsTarget) error {
 
 	return nil
+}
+
+func (x *GetRequest) VDLRead(dec vdl.Decoder) error {
+	*x = GetRequest{}
+	var err error
+	if err = dec.StartValue(); err != nil {
+		return err
+	}
+	if dec.Type().Kind() != vdl.Struct {
+		return fmt.Errorf("incompatible struct %T, from %v", *x, dec.Type())
+	}
+	for {
+		switch f, err := dec.NextField(); {
+		case err != nil:
+			return err
+		case f == "":
+			return dec.FinishValue()
+		default:
+			if err = dec.SkipValue(); err != nil {
+				return err
+			}
+		}
+	}
 }
 
 type GetResponse struct {
@@ -260,6 +296,74 @@ func (t *__VDLTarget1_set) FinishSet(list vdl.SetTarget) error {
 	return nil
 }
 
+func (x *GetResponse) VDLRead(dec vdl.Decoder) error {
+	*x = GetResponse{}
+	var err error
+	if err = dec.StartValue(); err != nil {
+		return err
+	}
+	if dec.Type().Kind() != vdl.Struct {
+		return fmt.Errorf("incompatible struct %T, from %v", *x, dec.Type())
+	}
+	match := 0
+	for {
+		f, err := dec.NextField()
+		if err != nil {
+			return err
+		}
+		switch f {
+		case "":
+			if match == 0 && dec.Type().NumField() > 0 {
+				return fmt.Errorf("no matching fields in struct %T, from %v", *x, dec.Type())
+			}
+			return dec.FinishValue()
+		case "Entries":
+			match++
+			if err = __VDLRead1_set(dec, &x.Entries); err != nil {
+				return err
+			}
+		default:
+			if err = dec.SkipValue(); err != nil {
+				return err
+			}
+		}
+	}
+}
+
+func __VDLRead1_set(dec vdl.Decoder, x *map[BlessingPatternChunk]struct{}) error {
+	var err error
+	if err = dec.StartValue(); err != nil {
+		return err
+	}
+	if k := dec.Type().Kind(); k != vdl.Set {
+		return fmt.Errorf("incompatible set %T, from %v", *x, dec.Type())
+	}
+	switch len := dec.LenHint(); {
+	case len == 0:
+		*x = nil
+		return dec.FinishValue()
+	case len > 0:
+		*x = make(map[BlessingPatternChunk]struct{}, len)
+	default:
+		*x = make(map[BlessingPatternChunk]struct{})
+	}
+	for {
+		switch done, err := dec.NextEntry(); {
+		case err != nil:
+			return err
+		case done:
+			return dec.FinishValue()
+		}
+		var key BlessingPatternChunk
+		{
+			if err = key.VDLRead(dec); err != nil {
+				return err
+			}
+		}
+		(*x)[key] = struct{}{}
+	}
+}
+
 // ApproximationType defines the type of approximation desired when a Relate
 // call encounters an error (inaccessible or undefined group in a blessing
 // pattern, cyclic group definitions, storage errors, invalid patterns
@@ -343,6 +447,21 @@ func (t *ApproximationTypeTarget) FromEnumLabel(src string, tt *vdl.Type) error 
 	}
 
 	return nil
+}
+
+func (x *ApproximationType) VDLRead(dec vdl.Decoder) error {
+	var err error
+	if err = dec.StartValue(); err != nil {
+		return err
+	}
+	enum, err := dec.DecodeString()
+	if err != nil {
+		return err
+	}
+	if err = x.Set(enum); err != nil {
+		return err
+	}
+	return dec.FinishValue()
 }
 
 // Approximation contains information about membership approximations made
@@ -457,6 +576,57 @@ func (t *ApproximationTarget) ZeroField(name string) error {
 func (t *ApproximationTarget) FinishFields(_ vdl.FieldsTarget) error {
 
 	return nil
+}
+
+func (x *Approximation) VDLRead(dec vdl.Decoder) error {
+	*x = Approximation{}
+	var err error
+	if err = dec.StartValue(); err != nil {
+		return err
+	}
+	if dec.Type().Kind() != vdl.Struct {
+		return fmt.Errorf("incompatible struct %T, from %v", *x, dec.Type())
+	}
+	match := 0
+	for {
+		f, err := dec.NextField()
+		if err != nil {
+			return err
+		}
+		switch f {
+		case "":
+			if match == 0 && dec.Type().NumField() > 0 {
+				return fmt.Errorf("no matching fields in struct %T, from %v", *x, dec.Type())
+			}
+			return dec.FinishValue()
+		case "Reason":
+			match++
+			if err = dec.StartValue(); err != nil {
+				return err
+			}
+			if x.Reason, err = dec.DecodeString(); err != nil {
+				return err
+			}
+			if err = dec.FinishValue(); err != nil {
+				return err
+			}
+		case "Details":
+			match++
+			if err = dec.StartValue(); err != nil {
+				return err
+			}
+			if x.Details, err = dec.DecodeString(); err != nil {
+				return err
+			}
+			if err = dec.FinishValue(); err != nil {
+				return err
+			}
+		default:
+			if err = dec.SkipValue(); err != nil {
+				return err
+			}
+		}
+	}
 }
 
 //////////////////////////////////////////////////

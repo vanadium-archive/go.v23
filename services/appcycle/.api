@@ -4,6 +4,7 @@ pkg appcycle, method (*AppCycleStopServerCallStub) Init(rpc.StreamServerCall)
 pkg appcycle, method (*AppCycleStopServerCallStub) SendStream() interface {  Send(item Task) error;}
 pkg appcycle, method (*Task) FillVDLTarget(vdl.Target, *vdl.Type) error
 pkg appcycle, method (*Task) MakeVDLTarget() vdl.Target
+pkg appcycle, method (*Task) VDLRead(vdl.Decoder) error
 pkg appcycle, method (*TaskTarget) FinishField(vdl.Target, vdl.Target) error
 pkg appcycle, method (*TaskTarget) FinishFields(vdl.FieldsTarget) error
 pkg appcycle, method (*TaskTarget) StartField(string) (vdl.Target, vdl.Target, error)

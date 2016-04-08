@@ -359,6 +359,113 @@ func (t *RequestTarget) FinishFields(_ vdl.FieldsTarget) error {
 	return nil
 }
 
+func (x *Request) VDLRead(dec vdl.Decoder) error {
+	*x = Request{}
+	var err error
+	if err = dec.StartValue(); err != nil {
+		return err
+	}
+	if dec.Type().Kind() != vdl.Struct {
+		return fmt.Errorf("incompatible struct %T, from %v", *x, dec.Type())
+	}
+	match := 0
+	for {
+		f, err := dec.NextField()
+		if err != nil {
+			return err
+		}
+		switch f {
+		case "":
+			if match == 0 && dec.Type().NumField() > 0 {
+				return fmt.Errorf("no matching fields in struct %T, from %v", *x, dec.Type())
+			}
+			return dec.FinishValue()
+		case "Suffix":
+			match++
+			if err = dec.StartValue(); err != nil {
+				return err
+			}
+			if x.Suffix, err = dec.DecodeString(); err != nil {
+				return err
+			}
+			if err = dec.FinishValue(); err != nil {
+				return err
+			}
+		case "Method":
+			match++
+			if err = dec.StartValue(); err != nil {
+				return err
+			}
+			if x.Method, err = dec.DecodeString(); err != nil {
+				return err
+			}
+			if err = dec.FinishValue(); err != nil {
+				return err
+			}
+		case "NumPosArgs":
+			match++
+			if err = dec.StartValue(); err != nil {
+				return err
+			}
+			if x.NumPosArgs, err = dec.DecodeUint(64); err != nil {
+				return err
+			}
+			if err = dec.FinishValue(); err != nil {
+				return err
+			}
+		case "EndStreamArgs":
+			match++
+			if err = dec.StartValue(); err != nil {
+				return err
+			}
+			if x.EndStreamArgs, err = dec.DecodeBool(); err != nil {
+				return err
+			}
+			if err = dec.FinishValue(); err != nil {
+				return err
+			}
+		case "Deadline":
+			match++
+			var wire time.WireDeadline
+			if err = wire.VDLRead(dec); err != nil {
+				return err
+			}
+			if err = time.WireDeadlineToNative(wire, &x.Deadline); err != nil {
+				return err
+			}
+		case "GrantedBlessings":
+			match++
+			var wire security.WireBlessings
+			if err = wire.VDLRead(dec); err != nil {
+				return err
+			}
+			if err = security.WireBlessingsToNative(wire, &x.GrantedBlessings); err != nil {
+				return err
+			}
+		case "TraceRequest":
+			match++
+			if err = x.TraceRequest.VDLRead(dec); err != nil {
+				return err
+			}
+		case "Language":
+			match++
+			if err = dec.StartValue(); err != nil {
+				return err
+			}
+			if x.Language, err = dec.DecodeString(); err != nil {
+				return err
+			}
+			if err = dec.FinishValue(); err != nil {
+				return err
+			}
+		default:
+			if err = dec.SkipValue(); err != nil {
+				return err
+			}
+		}
+	}
+}
+
 // Response describes the response header sent by the server to the client.  A
 // zero response header is sent before each streaming arg.  Thereafter a
 // non-zero response header is sent at the end of the RPC call, right before
@@ -585,6 +692,78 @@ func (t *ResponseTarget) ZeroField(name string) error {
 func (t *ResponseTarget) FinishFields(_ vdl.FieldsTarget) error {
 
 	return nil
+}
+
+func (x *Response) VDLRead(dec vdl.Decoder) error {
+	*x = Response{}
+	var err error
+	if err = dec.StartValue(); err != nil {
+		return err
+	}
+	if dec.Type().Kind() != vdl.Struct {
+		return fmt.Errorf("incompatible struct %T, from %v", *x, dec.Type())
+	}
+	match := 0
+	for {
+		f, err := dec.NextField()
+		if err != nil {
+			return err
+		}
+		switch f {
+		case "":
+			if match == 0 && dec.Type().NumField() > 0 {
+				return fmt.Errorf("no matching fields in struct %T, from %v", *x, dec.Type())
+			}
+			return dec.FinishValue()
+		case "Error":
+			match++
+			if err = verror.VDLRead(dec, &x.Error); err != nil {
+				return err
+			}
+		case "EndStreamResults":
+			match++
+			if err = dec.StartValue(); err != nil {
+				return err
+			}
+			if x.EndStreamResults, err = dec.DecodeBool(); err != nil {
+				return err
+			}
+			if err = dec.FinishValue(); err != nil {
+				return err
+			}
+		case "NumPosResults":
+			match++
+			if err = dec.StartValue(); err != nil {
+				return err
+			}
+			if x.NumPosResults, err = dec.DecodeUint(64); err != nil {
+				return err
+			}
+			if err = dec.FinishValue(); err != nil {
+				return err
+			}
+		case "TraceResponse":
+			match++
+			if err = x.TraceResponse.VDLRead(dec); err != nil {
+				return err
+			}
+		case "AckBlessings":
+			match++
+			if err = dec.StartValue(); err != nil {
+				return err
+			}
+			if x.AckBlessings, err = dec.DecodeBool(); err != nil {
+				return err
+			}
+			if err = dec.FinishValue(); err != nil {
+				return err
+			}
+		default:
+			if err = dec.SkipValue(); err != nil {
+				return err
+			}
+		}
+	}
 }
 
 //////////////////////////////////////////////////

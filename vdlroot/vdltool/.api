@@ -5,6 +5,7 @@ pkg vdltool, const GenLanguageSwift GenLanguage
 pkg vdltool, func GenLanguageFromString(string) (GenLanguage, error)
 pkg vdltool, method (*Config) FillVDLTarget(vdl.Target, *vdl.Type) error
 pkg vdltool, method (*Config) MakeVDLTarget() vdl.Target
+pkg vdltool, method (*Config) VDLRead(vdl.Decoder) error
 pkg vdltool, method (*ConfigTarget) FinishField(vdl.Target, vdl.Target) error
 pkg vdltool, method (*ConfigTarget) FinishFields(vdl.FieldsTarget) error
 pkg vdltool, method (*ConfigTarget) StartField(string) (vdl.Target, vdl.Target, error)
@@ -13,9 +14,11 @@ pkg vdltool, method (*ConfigTarget) ZeroField(string) error
 pkg vdltool, method (*GenLanguage) FillVDLTarget(vdl.Target, *vdl.Type) error
 pkg vdltool, method (*GenLanguage) MakeVDLTarget() vdl.Target
 pkg vdltool, method (*GenLanguage) Set(string) error
+pkg vdltool, method (*GenLanguage) VDLRead(vdl.Decoder) error
 pkg vdltool, method (*GenLanguageTarget) FromEnumLabel(string, *vdl.Type) error
 pkg vdltool, method (*GoConfig) FillVDLTarget(vdl.Target, *vdl.Type) error
 pkg vdltool, method (*GoConfig) MakeVDLTarget() vdl.Target
+pkg vdltool, method (*GoConfig) VDLRead(vdl.Decoder) error
 pkg vdltool, method (*GoConfigTarget) FinishField(vdl.Target, vdl.Target) error
 pkg vdltool, method (*GoConfigTarget) FinishFields(vdl.FieldsTarget) error
 pkg vdltool, method (*GoConfigTarget) StartField(string) (vdl.Target, vdl.Target, error)
@@ -23,6 +26,7 @@ pkg vdltool, method (*GoConfigTarget) StartFields(*vdl.Type) (vdl.FieldsTarget, 
 pkg vdltool, method (*GoConfigTarget) ZeroField(string) error
 pkg vdltool, method (*GoImport) FillVDLTarget(vdl.Target, *vdl.Type) error
 pkg vdltool, method (*GoImport) MakeVDLTarget() vdl.Target
+pkg vdltool, method (*GoImport) VDLRead(vdl.Decoder) error
 pkg vdltool, method (*GoImportTarget) FinishField(vdl.Target, vdl.Target) error
 pkg vdltool, method (*GoImportTarget) FinishFields(vdl.FieldsTarget) error
 pkg vdltool, method (*GoImportTarget) StartField(string) (vdl.Target, vdl.Target, error)
@@ -30,6 +34,7 @@ pkg vdltool, method (*GoImportTarget) StartFields(*vdl.Type) (vdl.FieldsTarget, 
 pkg vdltool, method (*GoImportTarget) ZeroField(string) error
 pkg vdltool, method (*GoType) FillVDLTarget(vdl.Target, *vdl.Type) error
 pkg vdltool, method (*GoType) MakeVDLTarget() vdl.Target
+pkg vdltool, method (*GoType) VDLRead(vdl.Decoder) error
 pkg vdltool, method (*GoTypeTarget) FinishField(vdl.Target, vdl.Target) error
 pkg vdltool, method (*GoTypeTarget) FinishFields(vdl.FieldsTarget) error
 pkg vdltool, method (*GoTypeTarget) StartField(string) (vdl.Target, vdl.Target, error)
@@ -37,6 +42,7 @@ pkg vdltool, method (*GoTypeTarget) StartFields(*vdl.Type) (vdl.FieldsTarget, er
 pkg vdltool, method (*GoTypeTarget) ZeroField(string) error
 pkg vdltool, method (*JavaConfig) FillVDLTarget(vdl.Target, *vdl.Type) error
 pkg vdltool, method (*JavaConfig) MakeVDLTarget() vdl.Target
+pkg vdltool, method (*JavaConfig) VDLRead(vdl.Decoder) error
 pkg vdltool, method (*JavaConfigTarget) FinishField(vdl.Target, vdl.Target) error
 pkg vdltool, method (*JavaConfigTarget) FinishFields(vdl.FieldsTarget) error
 pkg vdltool, method (*JavaConfigTarget) StartField(string) (vdl.Target, vdl.Target, error)
@@ -44,6 +50,7 @@ pkg vdltool, method (*JavaConfigTarget) StartFields(*vdl.Type) (vdl.FieldsTarget
 pkg vdltool, method (*JavaConfigTarget) ZeroField(string) error
 pkg vdltool, method (*JavascriptConfig) FillVDLTarget(vdl.Target, *vdl.Type) error
 pkg vdltool, method (*JavascriptConfig) MakeVDLTarget() vdl.Target
+pkg vdltool, method (*JavascriptConfig) VDLRead(vdl.Decoder) error
 pkg vdltool, method (*JavascriptConfigTarget) FinishField(vdl.Target, vdl.Target) error
 pkg vdltool, method (*JavascriptConfigTarget) FinishFields(vdl.FieldsTarget) error
 pkg vdltool, method (*JavascriptConfigTarget) StartField(string) (vdl.Target, vdl.Target, error)
@@ -51,6 +58,7 @@ pkg vdltool, method (*JavascriptConfigTarget) StartFields(*vdl.Type) (vdl.Fields
 pkg vdltool, method (*JavascriptConfigTarget) ZeroField(string) error
 pkg vdltool, method (*SwiftConfig) FillVDLTarget(vdl.Target, *vdl.Type) error
 pkg vdltool, method (*SwiftConfig) MakeVDLTarget() vdl.Target
+pkg vdltool, method (*SwiftConfig) VDLRead(vdl.Decoder) error
 pkg vdltool, method (*SwiftConfigTarget) FinishField(vdl.Target, vdl.Target) error
 pkg vdltool, method (*SwiftConfigTarget) FinishFields(vdl.FieldsTarget) error
 pkg vdltool, method (*SwiftConfigTarget) StartField(string) (vdl.Target, vdl.Target, error)

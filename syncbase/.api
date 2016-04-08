@@ -11,10 +11,13 @@ pkg syncbase, func ToWatchChange(watch.Change) WatchChange
 pkg syncbase, func UUID() string
 pkg syncbase, method (*Conflict) FillVDLTarget(vdl.Target, *vdl.Type) error
 pkg syncbase, method (*Conflict) MakeVDLTarget() vdl.Target
+pkg syncbase, method (*Conflict) VDLRead(vdl.Decoder) error
 pkg syncbase, method (*ConflictRow) FillVDLTarget(vdl.Target, *vdl.Type) error
 pkg syncbase, method (*ConflictRow) MakeVDLTarget() vdl.Target
+pkg syncbase, method (*ConflictRow) VDLRead(vdl.Decoder) error
 pkg syncbase, method (*ConflictRowSet) FillVDLTarget(vdl.Target, *vdl.Type) error
 pkg syncbase, method (*ConflictRowSet) MakeVDLTarget() vdl.Target
+pkg syncbase, method (*ConflictRowSet) VDLRead(vdl.Decoder) error
 pkg syncbase, method (*ConflictRowSetTarget) FinishField(vdl.Target, vdl.Target) error
 pkg syncbase, method (*ConflictRowSetTarget) FinishFields(vdl.FieldsTarget) error
 pkg syncbase, method (*ConflictRowSetTarget) StartField(string) (vdl.Target, vdl.Target, error)
@@ -27,6 +30,7 @@ pkg syncbase, method (*ConflictRowTarget) StartFields(*vdl.Type) (vdl.FieldsTarg
 pkg syncbase, method (*ConflictRowTarget) ZeroField(string) error
 pkg syncbase, method (*ConflictScanSet) FillVDLTarget(vdl.Target, *vdl.Type) error
 pkg syncbase, method (*ConflictScanSet) MakeVDLTarget() vdl.Target
+pkg syncbase, method (*ConflictScanSet) VDLRead(vdl.Decoder) error
 pkg syncbase, method (*ConflictScanSetTarget) FinishField(vdl.Target, vdl.Target) error
 pkg syncbase, method (*ConflictScanSetTarget) FinishFields(vdl.FieldsTarget) error
 pkg syncbase, method (*ConflictScanSetTarget) StartField(string) (vdl.Target, vdl.Target, error)
@@ -44,6 +48,7 @@ pkg syncbase, method (*InvalidScanStream) Key() string
 pkg syncbase, method (*InvalidScanStream) Value(interface{}) error
 pkg syncbase, method (*Resolution) FillVDLTarget(vdl.Target, *vdl.Type) error
 pkg syncbase, method (*Resolution) MakeVDLTarget() vdl.Target
+pkg syncbase, method (*Resolution) VDLRead(vdl.Decoder) error
 pkg syncbase, method (*ResolutionTarget) FinishField(vdl.Target, vdl.Target) error
 pkg syncbase, method (*ResolutionTarget) FinishFields(vdl.FieldsTarget) error
 pkg syncbase, method (*ResolutionTarget) StartField(string) (vdl.Target, vdl.Target, error)
@@ -51,6 +56,7 @@ pkg syncbase, method (*ResolutionTarget) StartFields(*vdl.Type) (vdl.FieldsTarge
 pkg syncbase, method (*ResolutionTarget) ZeroField(string) error
 pkg syncbase, method (*ResolvedRow) FillVDLTarget(vdl.Target, *vdl.Type) error
 pkg syncbase, method (*ResolvedRow) MakeVDLTarget() vdl.Target
+pkg syncbase, method (*ResolvedRow) VDLRead(vdl.Decoder) error
 pkg syncbase, method (*ResolvedRowTarget) FinishField(vdl.Target, vdl.Target) error
 pkg syncbase, method (*ResolvedRowTarget) FinishFields(vdl.FieldsTarget) error
 pkg syncbase, method (*ResolvedRowTarget) StartField(string) (vdl.Target, vdl.Target, error)
@@ -59,6 +65,7 @@ pkg syncbase, method (*ResolvedRowTarget) ZeroField(string) error
 pkg syncbase, method (*Value) FillVDLTarget(vdl.Target, *vdl.Type) error
 pkg syncbase, method (*Value) Get(interface{}) error
 pkg syncbase, method (*Value) MakeVDLTarget() vdl.Target
+pkg syncbase, method (*Value) VDLRead(vdl.Decoder) error
 pkg syncbase, method (*ValueTarget) FinishField(vdl.Target, vdl.Target) error
 pkg syncbase, method (*ValueTarget) FinishFields(vdl.FieldsTarget) error
 pkg syncbase, method (*ValueTarget) StartField(string) (vdl.Target, vdl.Target, error)

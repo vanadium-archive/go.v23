@@ -51,6 +51,18 @@ func (t *AdIdTarget) FromBytes(src []byte, tt *vdl.Type) error {
 	return nil
 }
 
+func (x *AdId) VDLRead(dec vdl.Decoder) error {
+	var err error
+	if err = dec.StartValue(); err != nil {
+		return err
+	}
+	bytes := x[:]
+	if err = dec.DecodeBytes(16, &bytes); err != nil {
+		return err
+	}
+	return dec.FinishValue()
+}
+
 // Attributes represents service attributes as a key/value pair.
 type Attributes map[string]string
 
@@ -133,6 +145,58 @@ func (t *AttributesTarget) FinishMap(elem vdl.MapTarget) error {
 	}
 
 	return nil
+}
+
+func (x *Attributes) VDLRead(dec vdl.Decoder) error {
+	var err error
+	if err = dec.StartValue(); err != nil {
+		return err
+	}
+	if k := dec.Type().Kind(); k != vdl.Map {
+		return fmt.Errorf("incompatible map %T, from %v", *x, dec.Type())
+	}
+	switch len := dec.LenHint(); {
+	case len == 0:
+		*x = nil
+		return dec.FinishValue()
+	case len > 0:
+		*x = make(Attributes, len)
+	default:
+		*x = make(Attributes)
+	}
+	for {
+		switch done, err := dec.NextEntry(); {
+		case err != nil:
+			return err
+		case done:
+			return dec.FinishValue()
+		}
+		var key string
+		{
+			if err = dec.StartValue(); err != nil {
+				return err
+			}
+			if key, err = dec.DecodeString(); err != nil {
+				return err
+			}
+			if err = dec.FinishValue(); err != nil {
+				return err
+			}
+		}
+		var elem string
+		{
+			if err = dec.StartValue(); err != nil {
+				return err
+			}
+			if elem, err = dec.DecodeString(); err != nil {
+				return err
+			}
+			if err = dec.FinishValue(); err != nil {
+				return err
+			}
+		}
+		(*x)[key] = elem
+	}
 }
 
 // Attachments represents service attachments as a key/value pair.
@@ -218,6 +282,58 @@ func (t *AttachmentsTarget) FinishMap(elem vdl.MapTarget) error {
 	}
 
 	return nil
+}
+
+func (x *Attachments) VDLRead(dec vdl.Decoder) error {
+	var err error
+	if err = dec.StartValue(); err != nil {
+		return err
+	}
+	if k := dec.Type().Kind(); k != vdl.Map {
+		return fmt.Errorf("incompatible map %T, from %v", *x, dec.Type())
+	}
+	switch len := dec.LenHint(); {
+	case len == 0:
+		*x = nil
+		return dec.FinishValue()
+	case len > 0:
+		*x = make(Attachments, len)
+	default:
+		*x = make(Attachments)
+	}
+	for {
+		switch done, err := dec.NextEntry(); {
+		case err != nil:
+			return err
+		case done:
+			return dec.FinishValue()
+		}
+		var key string
+		{
+			if err = dec.StartValue(); err != nil {
+				return err
+			}
+			if key, err = dec.DecodeString(); err != nil {
+				return err
+			}
+			if err = dec.FinishValue(); err != nil {
+				return err
+			}
+		}
+		var elem []byte
+		{
+			if err = dec.StartValue(); err != nil {
+				return err
+			}
+			if err = dec.DecodeBytes(-1, &elem); err != nil {
+				return err
+			}
+			if err = dec.FinishValue(); err != nil {
+				return err
+			}
+		}
+		(*x)[key] = elem
+	}
 }
 
 // Advertisement represents a feed into advertiser to broadcast its contents
@@ -472,6 +588,101 @@ func (t *AdvertisementTarget) ZeroField(name string) error {
 func (t *AdvertisementTarget) FinishFields(_ vdl.FieldsTarget) error {
 
 	return nil
+}
+
+func (x *Advertisement) VDLRead(dec vdl.Decoder) error {
+	*x = Advertisement{}
+	var err error
+	if err = dec.StartValue(); err != nil {
+		return err
+	}
+	if dec.Type().Kind() != vdl.Struct {
+		return fmt.Errorf("incompatible struct %T, from %v", *x, dec.Type())
+	}
+	match := 0
+	for {
+		f, err := dec.NextField()
+		if err != nil {
+			return err
+		}
+		switch f {
+		case "":
+			if match == 0 && dec.Type().NumField() > 0 {
+				return fmt.Errorf("no matching fields in struct %T, from %v", *x, dec.Type())
+			}
+			return dec.FinishValue()
+		case "Id":
+			match++
+			if err = x.Id.VDLRead(dec); err != nil {
+				return err
+			}
+		case "InterfaceName":
+			match++
+			if err = dec.StartValue(); err != nil {
+				return err
+			}
+			if x.InterfaceName, err = dec.DecodeString(); err != nil {
+				return err
+			}
+			if err = dec.FinishValue(); err != nil {
+				return err
+			}
+		case "Addresses":
+			match++
+			if err = __VDLRead1_list(dec, &x.Addresses); err != nil {
+				return err
+			}
+		case "Attributes":
+			match++
+			if err = x.Attributes.VDLRead(dec); err != nil {
+				return err
+			}
+		case "Attachments":
+			match++
+			if err = x.Attachments.VDLRead(dec); err != nil {
+				return err
+			}
+		default:
+			if err = dec.SkipValue(); err != nil {
+				return err
+			}
+		}
+	}
+}
+
+func __VDLRead1_list(dec vdl.Decoder, x *[]string) error {
+	var err error
+	if err = dec.StartValue(); err != nil {
+		return err
+	}
+	if k := dec.Type().Kind(); k != vdl.Array && k != vdl.List {
+		return fmt.Errorf("incompatible list %T, from %v", *x, dec.Type())
+	}
+	switch len := dec.LenHint(); {
+	case len == 0:
+		*x = nil
+	case len > 0:
+		*x = make([]string, 0, len)
+	}
+	for {
+		switch done, err := dec.NextEntry(); {
+		case err != nil:
+			return err
+		case done:
+			return dec.FinishValue()
+		}
+		var elem string
+		if err = dec.StartValue(); err != nil {
+			return err
+		}
+		if elem, err = dec.DecodeString(); err != nil {
+			return err
+		}
+		if err = dec.FinishValue(); err != nil {
+			return err
+		}
+		*x = append(*x, elem)
+	}
 }
 
 var __VDLInitCalled bool
