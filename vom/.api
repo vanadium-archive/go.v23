@@ -90,6 +90,7 @@ pkg vom, method (*PrimitiveTarget) FinishField(vdl.Target, vdl.Target) error
 pkg vom, method (*PrimitiveTarget) FinishFields(vdl.FieldsTarget) error
 pkg vom, method (*PrimitiveTarget) StartField(string) (vdl.Target, vdl.Target, error)
 pkg vom, method (*PrimitiveTarget) StartFields(*vdl.Type) (vdl.FieldsTarget, error)
+pkg vom, method (*RawBytes) Decoder() vdl.Decoder
 pkg vom, method (*RawBytes) FillVDLTarget(vdl.Target, *vdl.Type) error
 pkg vom, method (*RawBytes) IsNilAny() bool
 pkg vom, method (*RawBytes) MakeVDLTarget() vdl.Target

@@ -502,7 +502,7 @@ pkg vdl, type ByteTarget struct, embedded TargetBase
 pkg vdl, type BytesTarget struct
 pkg vdl, type BytesTarget struct, Value *[]byte
 pkg vdl, type BytesTarget struct, embedded TargetBase
-pkg vdl, type Decoder interface { DecodeBool, DecodeBytes, DecodeFloat, DecodeInt, DecodeString, DecodeTypeObject, DecodeUint, FinishValue, IgnoreNextStartValue, Index, IsAny, IsNil, IsOptional, LenHint, NextEntry, NextField, SkipValue, StartValue, Type }
+pkg vdl, type Decoder interface { DecodeBool, DecodeBytes, DecodeFloat, DecodeInt, DecodeString, DecodeTypeObject, DecodeUint, FinishValue, IgnoreNextStartValue, Index, IsAny, IsNil, IsOptional, LenHint, NextEntry, NextField, SkipValue, StackDepth, StartValue, Type }
 pkg vdl, type Decoder interface, DecodeBool() (bool, error)
 pkg vdl, type Decoder interface, DecodeBytes(int, *[]byte) error
 pkg vdl, type Decoder interface, DecodeFloat(uint) (float64, error)
@@ -520,6 +520,7 @@ pkg vdl, type Decoder interface, LenHint() int
 pkg vdl, type Decoder interface, NextEntry() (bool, error)
 pkg vdl, type Decoder interface, NextField() (string, error)
 pkg vdl, type Decoder interface, SkipValue() error
+pkg vdl, type Decoder interface, StackDepth() int
 pkg vdl, type Decoder interface, StartValue() error
 pkg vdl, type Decoder interface, Type() *Type
 pkg vdl, type Encoder interface { EncodeBool, EncodeBytes, EncodeFloat, EncodeInt, EncodeLenHint, EncodeString, EncodeTopLevelZero, EncodeTypeObject, EncodeUint, EncodeZero, FinishComposite, FinishValue, StartComposite, StartValue }

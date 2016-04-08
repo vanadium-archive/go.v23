@@ -81,6 +81,10 @@ func (d *xDecoder) IgnoreNextStartValue() {
 	d.ignoreNextStartValue = true
 }
 
+func (d *xDecoder) StackDepth() int {
+	return len(d.stack)
+}
+
 func (d *xDecoder) StartValue() error {
 	//defer func() { fmt.Printf("HACK: StartValue  %+v\n", d.stack) }()
 	if d.ignoreNextStartValue {
@@ -91,11 +95,16 @@ func (d *xDecoder) StartValue() error {
 	if err != nil {
 		return err
 	}
+	return d.setupValue(tt)
+}
+
+func (d *xDecoder) setupValue(tt *vdl.Type) error {
 	// Handle any, which may be nil.  We "dereference" non-nil any to the inner
 	// type.  If that happens to be an optional, it's handled below.
 	isAny, anyLen := false, 0
 	if tt.Kind() == vdl.Any {
 		isAny = true
+		var err error
 		switch tt, anyLen, err = d.old.readAnyHeader(); {
 		case err != nil:
 			return err

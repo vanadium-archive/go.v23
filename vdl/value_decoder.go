@@ -90,6 +90,10 @@ func (d *valueDecoder) StartValue() error {
 	return nil
 }
 
+func (d *valueDecoder) StackDepth() int {
+	return len(d.stack)
+}
+
 func (d *valueDecoder) IgnoreNextStartValue() {
 	d.ignoreNext = true
 }

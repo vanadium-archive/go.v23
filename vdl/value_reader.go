@@ -155,7 +155,7 @@ func (vv *Value) readFillValue(dec Decoder) error {
 }
 
 func (vv *Value) readSet(dec Decoder) error {
-	if dec.Type().Kind() != Set {
+	if (dec.StackDepth() == 1 || dec.IsAny()) && !Compatible(vv.Type(), dec.Type()) {
 		return fmt.Errorf("cannot decode into set from %v", dec.Type())
 	}
 	for {
@@ -174,10 +174,8 @@ func (vv *Value) readSet(dec Decoder) error {
 }
 
 func (vv *Value) readArray(dec Decoder) error {
-	switch dec.Type().Kind() {
-	case Array, List:
-	default:
-		return fmt.Errorf("cannot decode into array from %v", dec.Type())
+	if (dec.StackDepth() == 1 || dec.IsAny()) && !Compatible(vv.Type(), dec.Type()) {
+		return fmt.Errorf("incompatible array %v, from %v", vv, dec.Type())
 	}
 	index := 0
 	for {
@@ -198,9 +196,7 @@ func (vv *Value) readArray(dec Decoder) error {
 }
 
 func (vv *Value) readList(dec Decoder) error {
-	switch dec.Type().Kind() {
-	case Array, List:
-	default:
+	if (dec.StackDepth() == 1 || dec.IsAny()) && !Compatible(vv.Type(), dec.Type()) {
 		return fmt.Errorf("cannot decode into list from %v", dec.Type())
 	}
 	if len := dec.LenHint(); len >= 0 {
@@ -226,7 +222,7 @@ func (vv *Value) readList(dec Decoder) error {
 }
 
 func (vv *Value) readMap(dec Decoder) error {
-	if dec.Type().Kind() != Map {
+	if (dec.StackDepth() == 1 || dec.IsAny()) && !Compatible(vv.Type(), dec.Type()) {
 		return fmt.Errorf("cannot decode into map from %v", dec.Type())
 	}
 	for {
@@ -250,19 +246,15 @@ func (vv *Value) readMap(dec Decoder) error {
 }
 
 func (vv *Value) readStruct(dec Decoder) error {
-	if dec.Type().Kind() != Struct {
+	if (dec.StackDepth() == 1 || dec.IsAny()) && !Compatible(vv.Type(), dec.Type()) {
 		return fmt.Errorf("cannot decode into struct from %v", dec.Type())
 	}
-	var matches int
 	for {
 		name, err := dec.NextField()
 		if err != nil {
 			return err
 		}
 		if name == "" {
-			if matches == 0 && dec.Type().NumField() > 0 && vv.Type().NumField() > 0 {
-				return fmt.Errorf("no matching fields found when decoding into struct of type %v", vv.Type())
-			}
 			return nil
 		}
 
@@ -272,7 +264,6 @@ func (vv *Value) readStruct(dec Decoder) error {
 				return err
 			}
 		} else {
-			matches++
 			if err := field.VDLRead(dec); err != nil {
 				return err
 			}
@@ -281,7 +272,7 @@ func (vv *Value) readStruct(dec Decoder) error {
 }
 
 func (vv *Value) readUnion(dec Decoder) error {
-	if dec.Type().Kind() != Union {
+	if (dec.StackDepth() == 1 || dec.IsAny()) && !Compatible(vv.Type(), dec.Type()) {
 		return fmt.Errorf("cannot decode into union from %v", dec.Type())
 	}
 	name, err := dec.NextField()

@@ -36,9 +36,8 @@ type ReadWriter interface {
 type Decoder interface {
 	StartValue() error
 	FinishValue() error
-
+	StackDepth() int
 	SkipValue() error
-
 	IgnoreNextStartValue()
 
 	NextEntry() (bool, error)

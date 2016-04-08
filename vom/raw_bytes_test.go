@@ -609,3 +609,17 @@ func TestRawBytesNonVomPayload(t *testing.T) {
 		t.Errorf("encoded RawBytes. got %v, want %v", got, want)
 	}
 }
+
+func TestRawBytesDecoder(t *testing.T) {
+	for _, test := range data81.Tests {
+		in := RawBytesOf(test.Value)
+		out := vdl.ZeroValue(test.Value.Type())
+		if err := out.VDLRead(in.Decoder()); err != nil {
+			t.Errorf("%s: error in ValueRead: %v", test.Name, err)
+			continue
+		}
+		if !vdl.EqualValue(test.Value, out) {
+			t.Errorf("%s: got %v, want %v", test.Name, out, test.Value)
+		}
+	}
+}

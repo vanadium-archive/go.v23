@@ -113,6 +113,27 @@ func (RawBytes) __VDLReflect(struct {
 }) {
 }
 
+func (rb *RawBytes) Decoder() vdl.Decoder {
+	dec := NewDecoder(bytes.NewReader(rb.Data))
+	dec.buf.version = rb.Version
+	dec.refTypes.tids = make([]typeId, len(rb.RefTypes))
+	for i, refType := range rb.RefTypes {
+		tid := typeId(i) + WireIdFirstUserType
+		dec.typeDec.idToType[tid] = refType
+		dec.refTypes.tids[i] = tid
+	}
+	dec.refAnyLens.lens = make([]int, len(rb.AnyLengths))
+	for i, anyLen := range rb.AnyLengths {
+		dec.refAnyLens.lens[i] = anyLen
+	}
+	xd := &xDecoder{old: dec}
+	if err := xd.setupValue(rb.Type); err != nil {
+		panic(err)
+	}
+	xd.ignoreNextStartValue = true
+	return xd
+}
+
 // vdl.Target that writes to a vom.RawBytes.  This structure is intended to be
 // one-time-use and created via RawBytes.MakeVDLTarget.
 type rbTarget struct {
