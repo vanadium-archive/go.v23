@@ -54,6 +54,9 @@ type BatchOptions struct {
 	ReadOnly bool
 }
 
+// BatchHandle is a reference to a batch.
+type BatchHandle string
+
 // KeyValue is a key-value pair.
 type KeyValue struct {
 	Key   string

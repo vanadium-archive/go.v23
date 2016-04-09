@@ -15,7 +15,6 @@ import (
 	"v.io/v23/services/watch"
 	"v.io/v23/syncbase/util"
 	"v.io/v23/verror"
-	"v.io/v23/vom"
 	"v.io/x/lib/vlog"
 )
 
@@ -25,37 +24,22 @@ const (
 	reconnectionCount           = "rcc"
 )
 
-func newDatabaseImpl(parentFullName string, id wire.Id, batchSuffix string, schema *Schema) *database {
-	// Escape relativeName so that any forward slashes get dropped, thus ensuring
-	// that the server will interpret fullName as referring to a database object.
-	// Note that the server will still reject this name if util.ValidDatabaseName
-	// returns false.
-	fullName := naming.Join(parentFullName, util.EncodeId(id)+batchSuffix)
+// TODO(sadovsky): Make this private. For some reason,
+// v.io/x/jni/v23/syncbase/jni.go calls it directly.
+func NewDatabase(parentFullName string, id wire.Id, schema *Schema) *database {
 	return &database{
-		c:              wire.DatabaseClient(fullName),
-		parentFullName: parentFullName,
-		fullName:       fullName,
-		id:             id,
-		schema:         schema,
+		databaseBatch: *newDatabaseBatch(parentFullName, id, ""),
+		schema:        schema,
 		crState: conflictResolutionState{
 			reconnectWaitTime: waitBeforeReconnectInMillis,
 		},
 	}
 }
 
-// TODO(sadovsky): Make this private. For some reason,
-// v.io/x/jni/v23/syncbase/jni.go calls it directly.
-func NewDatabase(parentFullName string, id wire.Id, schema *Schema) *database {
-	return newDatabaseImpl(parentFullName, id, "", schema)
-}
-
 type database struct {
-	c              wire.DatabaseClientMethods
-	parentFullName string
-	fullName       string
-	id             wire.Id
-	schema         *Schema
-	crState        conflictResolutionState
+	databaseBatch
+	schema  *Schema
+	crState conflictResolutionState
 }
 
 // conflictResolutionState maintains data about the connection of a conflict
@@ -84,30 +68,6 @@ func (crs *conflictResolutionState) isDisconnected() bool {
 
 var _ Database = (*database)(nil)
 
-// Name implements Database.Id.
-func (d *database) Id() wire.Id {
-	return d.id
-}
-
-// FullName implements Database.FullName.
-func (d *database) FullName() string {
-	return d.fullName
-}
-
-// Collection implements Database.Collection.
-func (d *database) Collection(relativeName string) Collection {
-	return newCollection(d.fullName, relativeName)
-}
-
-// ListCollections implements Database.ListCollections.
-func (d *database) ListCollections(ctx *context.T) ([]string, error) {
-	// See comment in v.io/v23/services/syncbase/service.vdl for why we can't
-	// implement ListCollections using Glob (via util.ListChildren).
-	// TODO(sadovsky): Stop encoding batch ids in names, then switch to using
-	// util.ListChildren or util.ListChildIds.
-	return d.c.ListCollections(ctx)
-}
-
 // Create implements Database.Create.
 func (d *database) Create(ctx *context.T, perms access.Permissions) error {
 	var schemaMetadata *wire.SchemaMetadata = nil
@@ -127,51 +87,13 @@ func (d *database) Exists(ctx *context.T) (bool, error) {
 	return d.c.Exists(ctx)
 }
 
-// Exec implements Database.Exec.
-// TODO(ivanpi): Parameterized Exec currently allows struct comparisons, which
-// we wish to prevent. However, cases like JavaScript JSValue benefit from this.
-func (d *database) Exec(ctx *context.T, query string, params ...interface{}) ([]string, ResultStream, error) {
-	paramsVom := make([]*vom.RawBytes, len(params))
-	for i, p := range params {
-		var err error
-		if paramsVom[i], err = vom.RawBytesFromValue(p); err != nil {
-			return nil, nil, err
-		}
-	}
-	ctx, cancel := context.WithCancel(ctx)
-	call, err := d.c.Exec(ctx, query, paramsVom)
-	if err != nil {
-		return nil, nil, err
-	}
-	resultStream := newResultStream(cancel, call)
-	// The first row contains column headers. Pull them off the stream
-	// and return them separately.
-	var headers []string
-	if !resultStream.Advance() {
-		if err = resultStream.Err(); err != nil {
-			// Since there was an error, can't get headers.
-			// Just return the error.
-			return nil, nil, err
-		}
-	}
-	for i, n := 0, resultStream.ResultCount(); i != n; i++ {
-		var header string
-		if err := resultStream.Result(i, &header); err == nil {
-			headers = append(headers, header)
-		} else {
-			return nil, nil, verror.New(wire.ErrBadExecStreamHeader, ctx, query)
-		}
-	}
-	return headers, resultStream, nil
-}
-
 // BeginBatch implements Database.BeginBatch.
 func (d *database) BeginBatch(ctx *context.T, opts wire.BatchOptions) (BatchDatabase, error) {
-	batchSuffix, err := d.c.BeginBatch(ctx, opts)
+	batchHandle, err := d.c.BeginBatch(ctx, opts)
 	if err != nil {
 		return nil, err
 	}
-	return &batch{database: *newDatabaseImpl(d.parentFullName, d.id, batchSuffix, d.schema)}, nil
+	return newBatch(d.parentFullName, d.id, batchHandle), nil
 }
 
 // SetPermissions implements Database.SetPermissions.
@@ -198,11 +120,6 @@ func (d *database) Watch(ctx *context.T, collection, prefix string, resumeMarker
 		return nil, err
 	}
 	return newWatchStream(cancel, call), nil
-}
-
-// GetResumeMarker implements Database.GetResumeMarker.
-func (d *database) GetResumeMarker(ctx *context.T) (watch.ResumeMarker, error) {
-	return d.c.GetResumeMarker(ctx)
 }
 
 // Syncgroup implements Database.Syncgroup.
@@ -269,6 +186,7 @@ func (d *database) EnforceSchema(ctx *context.T) error {
 // Close implements Database.Close.
 func (d *database) Close() {
 	d.crState.disconnect()
+	// TODO(ivanpi): Abort all batches.
 }
 
 // updateSchemaMetadata reads the current SchemaMetadata from db and checks

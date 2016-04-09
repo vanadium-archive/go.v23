@@ -45,8 +45,8 @@ func TestName(t *testing.T) {
 	if b.Id() != d.Id() {
 		t.Errorf("Ids should match: %q, %q", b.Id(), d.Id())
 	}
-	if b.FullName() == d.FullName() {
-		t.Errorf("Full names should not match: %q", b.FullName())
+	if b.FullName() != d.FullName() {
+		t.Errorf("Full names should match: %q", b.FullName())
 	}
 }
 
@@ -189,21 +189,13 @@ func TestBatchListCollections(t *testing.T) {
 		t.Fatalf("Lists do not match: got %v, want %v", got, want)
 	}
 
-	// Collection creation/destruction is not allowed within a batch.
-	if err := b.Collection("c_batch").Create(ctx, nil); verror.ErrorID(err) != wire.ErrBoundToBatch.ID {
-		t.Fatalf("b.c_batch.Create() should have failed: %v", err)
-	}
-	if err := b.Collection("c").Destroy(ctx); verror.ErrorID(err) != wire.ErrBoundToBatch.ID {
-		t.Fatalf("b.c.Destroy() should have failed: %v", err)
-	}
-
 	tu.CreateCollection(t, ctx, d, "c_nonbatch")
 
 	// Non-batch should see c_nonbatch; batch should only see c.
 	got, err = d.ListCollections(ctx)
 	want = []string{"c", "c_nonbatch"}
 	if err != nil {
-		t.Fatalf("self.ListChildren() failed: %v", err)
+		t.Fatalf("self.ListCollections() failed: %v", err)
 	}
 	if !reflect.DeepEqual(got, want) {
 		t.Fatalf("Lists do not match: got %v, want %v", got, want)
@@ -212,10 +204,42 @@ func TestBatchListCollections(t *testing.T) {
 	got, err = b.ListCollections(ctx)
 	want = []string{"c"}
 	if err != nil {
-		t.Fatalf("self.ListChildren() failed: %v", err)
+		t.Fatalf("self.ListCollections() failed: %v", err)
 	}
 	if !reflect.DeepEqual(got, want) {
 		t.Fatalf("Lists do not match: got %v, want %v", got, want)
+	}
+
+	// Create and destroy collections within a batch.
+	if err := b.Collection("c_batch").Create(ctx, nil); err != nil {
+		t.Fatalf("b.c_batch.Create() failed: %v", err)
+	}
+	if err := b.Collection("c").Destroy(ctx); err != nil {
+		t.Fatalf("b.c.Destroy() failed: %v", err)
+	}
+
+	// Non-batch should see c and c_nonbatch; batch should only see c_batch.
+	got, err = d.ListCollections(ctx)
+	want = []string{"c", "c_nonbatch"}
+	if err != nil {
+		t.Fatalf("self.ListCollections() failed: %v", err)
+	}
+	if !reflect.DeepEqual(got, want) {
+		t.Fatalf("Lists do not match: got %v, want %v", got, want)
+	}
+
+	got, err = b.ListCollections(ctx)
+	want = []string{"c_batch"}
+	if err != nil {
+		t.Fatalf("self.ListCollections() failed: %v", err)
+	}
+	if !reflect.DeepEqual(got, want) {
+		t.Fatalf("Lists do not match: got %v, want %v", got, want)
+	}
+
+	// Commit should fail because ListCollections conflicts with Create/Destroy.
+	if err := b.Commit(ctx); verror.ErrorID(err) != wire.ErrConcurrentBatch.ID {
+		t.Fatalf("b.Commit() should have failed with ErrConcurrentBatch, got: %v", err)
 	}
 }
 
@@ -574,59 +598,18 @@ func TestOpAfterFinalize(t *testing.T) {
 	checkOpsFail(b1)
 }
 
-// Tests that batch methods called on non-batch return ErrNotBoundToBatch and
-// that non-batch methods called on batch return ErrBoundToBatch.
+// Tests that batch methods called on non-batch return ErrNotBoundToBatch.
 func TestDisallowedMethods(t *testing.T) {
 	ctx, sName, cleanup := tu.SetupOrDie(nil)
 	defer cleanup()
 	d := tu.CreateDatabase(t, ctx, syncbase.NewService(sName), "d")
-	b, err := d.BeginBatch(ctx, wire.BatchOptions{})
-	if err != nil {
-		t.Fatalf("d.BeginBatch() failed: %v", err)
-	}
 
-	// Batch methods on non-batch.
 	dc := wire.DatabaseClient(d.FullName())
-	if err := dc.Commit(ctx); verror.ErrorID(err) != wire.ErrNotBoundToBatch.ID {
+	if err := dc.Commit(ctx, ""); verror.ErrorID(err) != wire.ErrNotBoundToBatch.ID {
 		t.Fatalf("dc.Commit() should have failed: %v", err)
 	}
-	if err := dc.Abort(ctx); verror.ErrorID(err) != wire.ErrNotBoundToBatch.ID {
+	if err := dc.Abort(ctx, ""); verror.ErrorID(err) != wire.ErrNotBoundToBatch.ID {
 		t.Fatalf("dc.Abort() should have failed: %v", err)
-	}
-
-	// Non-batch methods on batch.
-	bc := wire.DatabaseClient(b.FullName())
-	// For bc.Create(), we check that err is not nil instead of checking for
-	// ErrBoundToBatch specifically since in practice bc.Create() will return
-	// either ErrExist or "invalid name" depending on whether the database and
-	// batch exist.
-	if err := bc.Create(ctx, nil, nil); err == nil {
-		t.Fatalf("bc.Create() should have failed: %v", err)
-	}
-	if err := bc.Destroy(ctx); verror.ErrorID(err) != wire.ErrBoundToBatch.ID {
-		t.Fatalf("bc.Destroy() should have failed: %v", err)
-	}
-	if _, err := bc.BeginBatch(ctx, wire.BatchOptions{}); verror.ErrorID(err) != wire.ErrBoundToBatch.ID {
-		t.Fatalf("bc.BeginBatch() should have failed: %v", err)
-	}
-	if _, _, err := bc.GetPermissions(ctx); verror.ErrorID(err) != wire.ErrBoundToBatch.ID {
-		t.Fatalf("bc.GetPermissions() should have failed: %v", err)
-	}
-	if err := bc.SetPermissions(ctx, nil, ""); verror.ErrorID(err) != wire.ErrBoundToBatch.ID {
-		t.Fatalf("bc.SetPermissions() should have failed: %v", err)
-	}
-	// TODO(sadovsky): Test all other SyncgroupManager methods.
-	if _, err := bc.GetSyncgroupNames(ctx); verror.ErrorID(err) != wire.ErrBoundToBatch.ID {
-		t.Fatalf("bc.GetSyncgroupNames() should have failed: %v", err)
-	}
-
-	// Test that Collection.{Create,Destroy} fail with ErrBoundToBatch.
-	tc := wire.CollectionClient(naming.Join(b.FullName(), "c"))
-	if err := tc.Create(ctx, nil); verror.ErrorID(err) != wire.ErrBoundToBatch.ID {
-		t.Fatalf("tc.Create() should have failed: %v", err)
-	}
-	if err := tc.Destroy(ctx); verror.ErrorID(err) != wire.ErrBoundToBatch.ID {
-		t.Fatalf("tc.Destroy() should have failed: %v", err)
 	}
 }
 

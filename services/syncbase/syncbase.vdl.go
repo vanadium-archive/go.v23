@@ -687,6 +687,53 @@ func (x *BatchOptions) VDLRead(dec vdl.Decoder) error {
 	}
 }
 
+// BatchHandle is a reference to a batch.
+type BatchHandle string
+
+func (BatchHandle) __VDLReflect(struct {
+	Name string `vdl:"v.io/v23/services/syncbase.BatchHandle"`
+}) {
+}
+
+func (m *BatchHandle) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
+	if err := t.FromString(string((*m)), tt); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (m *BatchHandle) MakeVDLTarget() vdl.Target {
+	return &BatchHandleTarget{Value: m}
+}
+
+type BatchHandleTarget struct {
+	Value *BatchHandle
+	vdl.TargetBase
+}
+
+func (t *BatchHandleTarget) FromString(src string, tt *vdl.Type) error {
+
+	if ttWant := vdl.TypeOf((*BatchHandle)(nil)); !vdl.Compatible(tt, ttWant) {
+		return fmt.Errorf("type %v incompatible with %v", tt, ttWant)
+	}
+	*t.Value = BatchHandle(src)
+
+	return nil
+}
+
+func (x *BatchHandle) VDLRead(dec vdl.Decoder) error {
+	var err error
+	if err = dec.StartValue(); err != nil {
+		return err
+	}
+	tmp, err := dec.DecodeString()
+	if err != nil {
+		return err
+	}
+	*x = BatchHandle(tmp)
+	return dec.FinishValue()
+}
+
 // KeyValue is a key-value pair.
 type KeyValue struct {
 	Key   string
@@ -5223,7 +5270,6 @@ var (
 	ErrInvalidName         = verror.Register("v.io/v23/services/syncbase.InvalidName", verror.NoRetry, "{1:}{2:} invalid name: {3}")
 	ErrCorruptDatabase     = verror.Register("v.io/v23/services/syncbase.CorruptDatabase", verror.NoRetry, "{1:}{2:} database corrupt, moved to {3}; client must create a new database")
 	ErrUnknownBatch        = verror.Register("v.io/v23/services/syncbase.UnknownBatch", verror.NoRetry, "{1:}{2:} unknown batch, perhaps the server restarted")
-	ErrBoundToBatch        = verror.Register("v.io/v23/services/syncbase.BoundToBatch", verror.NoRetry, "{1:}{2:} bound to batch")
 	ErrNotBoundToBatch     = verror.Register("v.io/v23/services/syncbase.NotBoundToBatch", verror.NoRetry, "{1:}{2:} not bound to batch")
 	ErrReadOnlyBatch       = verror.Register("v.io/v23/services/syncbase.ReadOnlyBatch", verror.NoRetry, "{1:}{2:} batch is read-only")
 	ErrConcurrentBatch     = verror.Register("v.io/v23/services/syncbase.ConcurrentBatch", verror.NoRetry, "{1:}{2:} concurrent batch")
@@ -5250,11 +5296,6 @@ func NewErrCorruptDatabase(ctx *context.T, path string) error {
 // NewErrUnknownBatch returns an error with the ErrUnknownBatch ID.
 func NewErrUnknownBatch(ctx *context.T) error {
 	return verror.New(ErrUnknownBatch, ctx)
-}
-
-// NewErrBoundToBatch returns an error with the ErrBoundToBatch ID.
-func NewErrBoundToBatch(ctx *context.T) error {
-	return verror.New(ErrBoundToBatch, ctx)
 }
 
 // NewErrNotBoundToBatch returns an error with the ErrNotBoundToBatch ID.
@@ -5553,7 +5594,7 @@ type DatabaseWatcherClientMethods interface {
 	watch.GlobWatcherClientMethods
 	// GetResumeMarker returns the ResumeMarker that points to the current end
 	// of the event log. GetResumeMarker() can be called on a batch.
-	GetResumeMarker(*context.T, ...rpc.CallOpt) (watch.ResumeMarker, error)
+	GetResumeMarker(_ *context.T, bh BatchHandle, _ ...rpc.CallOpt) (watch.ResumeMarker, error)
 }
 
 // DatabaseWatcherClientStub adds universal methods to DatabaseWatcherClientMethods.
@@ -5573,8 +5614,8 @@ type implDatabaseWatcherClientStub struct {
 	watch.GlobWatcherClientStub
 }
 
-func (c implDatabaseWatcherClientStub) GetResumeMarker(ctx *context.T, opts ...rpc.CallOpt) (o0 watch.ResumeMarker, err error) {
-	err = v23.GetClient(ctx).Call(ctx, c.name, "GetResumeMarker", nil, []interface{}{&o0}, opts...)
+func (c implDatabaseWatcherClientStub) GetResumeMarker(ctx *context.T, i0 BatchHandle, opts ...rpc.CallOpt) (o0 watch.ResumeMarker, err error) {
+	err = v23.GetClient(ctx).Call(ctx, c.name, "GetResumeMarker", []interface{}{i0}, []interface{}{&o0}, opts...)
 	return
 }
 
@@ -5610,7 +5651,7 @@ type DatabaseWatcherServerMethods interface {
 	watch.GlobWatcherServerMethods
 	// GetResumeMarker returns the ResumeMarker that points to the current end
 	// of the event log. GetResumeMarker() can be called on a batch.
-	GetResumeMarker(*context.T, rpc.ServerCall) (watch.ResumeMarker, error)
+	GetResumeMarker(_ *context.T, _ rpc.ServerCall, bh BatchHandle) (watch.ResumeMarker, error)
 }
 
 // DatabaseWatcherServerStubMethods is the server interface containing
@@ -5623,7 +5664,7 @@ type DatabaseWatcherServerStubMethods interface {
 	watch.GlobWatcherServerStubMethods
 	// GetResumeMarker returns the ResumeMarker that points to the current end
 	// of the event log. GetResumeMarker() can be called on a batch.
-	GetResumeMarker(*context.T, rpc.ServerCall) (watch.ResumeMarker, error)
+	GetResumeMarker(_ *context.T, _ rpc.ServerCall, bh BatchHandle) (watch.ResumeMarker, error)
 }
 
 // DatabaseWatcherServerStub adds universal methods to DatabaseWatcherServerStubMethods.
@@ -5657,8 +5698,8 @@ type implDatabaseWatcherServerStub struct {
 	gs *rpc.GlobState
 }
 
-func (s implDatabaseWatcherServerStub) GetResumeMarker(ctx *context.T, call rpc.ServerCall) (watch.ResumeMarker, error) {
-	return s.impl.GetResumeMarker(ctx, call)
+func (s implDatabaseWatcherServerStub) GetResumeMarker(ctx *context.T, call rpc.ServerCall, i0 BatchHandle) (watch.ResumeMarker, error) {
+	return s.impl.GetResumeMarker(ctx, call, i0)
 }
 
 func (s implDatabaseWatcherServerStub) Globber() *rpc.GlobState {
@@ -5684,6 +5725,9 @@ var descDatabaseWatcher = rpc.InterfaceDesc{
 		{
 			Name: "GetResumeMarker",
 			Doc:  "// GetResumeMarker returns the ResumeMarker that points to the current end\n// of the event log. GetResumeMarker() can be called on a batch.",
+			InArgs: []rpc.ArgDesc{
+				{"bh", ``}, // BatchHandle
+			},
 			OutArgs: []rpc.ArgDesc{
 				{"", ``}, // watch.ResumeMarker
 			},
@@ -7359,43 +7403,37 @@ type DatabaseClientMethods interface {
 	Exists(*context.T, ...rpc.CallOpt) (bool, error)
 	// ListCollections returns a list of all Collection names.
 	// This method exists on Database but not on Service because for the latter
-	// we can simply use glob, while for the former glob fails on BatchDatabase
-	// since we encode the batch id in the BatchDatabase object name. More
-	// specifically, the glob client library appears to have two odd behaviors:
-	// 1) It checks Resolve access on every component along the path (by doing a
-	//    Dispatcher.Lookup), whereas this doesn't happen for other RPCs.
+	// we can simply use glob, while for the former glob lists only Collections
+	// visible in a new snapshot of the Database, ignoring user batches.
+	// (Note that the same issue is present in glob on Collection, where Scan can
+	// be used instead if batch awareness is required.)
+	// Note, the glob client library checks Resolve access on every component
+	// along the path (by doing a Dispatcher.Lookup), whereas this doesn't happen
+	// for other RPCs.
 	// TODO(ivanpi): Resolve should be checked on all RPCs.
-	// 2) It does a Glob(<prefix>/*) for every prefix path, and only proceeds to
-	//    the next path component if that component appeared in its parent's Glob
-	//    results. This is inefficient in general, and broken for us since
-	//    Glob("*") does not return batch database names like "d##bId".
-	// TODO(ivanpi): This concern goes away once batch ids are removed from names.
 	// TODO(sadovsky): Maybe switch to streaming RPC.
-	ListCollections(*context.T, ...rpc.CallOpt) ([]string, error)
+	ListCollections(_ *context.T, bh BatchHandle, _ ...rpc.CallOpt) ([]string, error)
 	// Exec executes a syncQL query with positional parameters and returns all
 	// results as specified by the query's select/delete statement.
 	// Concurrency semantics are documented in model.go.
-	Exec(_ *context.T, query string, params []*vom.RawBytes, _ ...rpc.CallOpt) (DatabaseExecClientCall, error)
-	// BeginBatch creates a new batch. It returns a "batch suffix" string to
-	// append to the object name of this Database, yielding an object name for the
-	// Database bound to the created batch. (For example, if this Database is
-	// named "/path/to/db" and BeginBatch returns "##abc", the client should
-	// construct batch Database object name "/path/to/db##abc".) If this Database
-	// is already bound to a batch, BeginBatch() will fail with ErrBoundToBatch.
+	Exec(_ *context.T, bh BatchHandle, query string, params []*vom.RawBytes, _ ...rpc.CallOpt) (DatabaseExecClientCall, error)
+	// BeginBatch creates a new batch. It returns a batch handle to pass in when
+	// calling batch-aware RPCs.
 	// Concurrency semantics are documented in model.go.
+	// All batch-aware RPCs can also be called outside a batch (with an empty
+	// handle), with the exception of Commit and Abort which only make sense on
+	// a batch. Note that glob RPCs are not batch-aware.
 	// TODO(sadovsky): Maybe make BatchOptions optional. Also, rename it to 'opts'
 	// everywhere now that v.io/i/912 is resolved.
-	BeginBatch(_ *context.T, bo BatchOptions, _ ...rpc.CallOpt) (string, error)
+	BeginBatch(_ *context.T, bo BatchOptions, _ ...rpc.CallOpt) (BatchHandle, error)
 	// Commit persists the pending changes to the database.
-	// If this Database is not bound to a batch, Commit() will fail with
-	// ErrNotBoundToBatch.
-	Commit(*context.T, ...rpc.CallOpt) error
+	// If the BatchHandle is empty, Commit() will fail with ErrNotBoundToBatch.
+	Commit(_ *context.T, bh BatchHandle, _ ...rpc.CallOpt) error
 	// Abort notifies the server that any pending changes can be discarded.
 	// It is not strictly required, but it may allow the server to release locks
 	// or other resources sooner than if it was not called.
-	// If this Database is not bound to a batch, Abort() will fail with
-	// ErrNotBoundToBatch.
-	Abort(*context.T, ...rpc.CallOpt) error
+	// If the BatchHandle is empty, Abort() will fail with ErrNotBoundToBatch.
+	Abort(_ *context.T, bh BatchHandle, _ ...rpc.CallOpt) error
 	// PauseSync pauses sync for this database. Incoming sync, as well as
 	// outgoing sync of subsequent writes, will be disabled until ResumeSync
 	// is called. PauseSync is idempotent.
@@ -7441,32 +7479,32 @@ func (c implDatabaseClientStub) Exists(ctx *context.T, opts ...rpc.CallOpt) (o0 
 	return
 }
 
-func (c implDatabaseClientStub) ListCollections(ctx *context.T, opts ...rpc.CallOpt) (o0 []string, err error) {
-	err = v23.GetClient(ctx).Call(ctx, c.name, "ListCollections", nil, []interface{}{&o0}, opts...)
+func (c implDatabaseClientStub) ListCollections(ctx *context.T, i0 BatchHandle, opts ...rpc.CallOpt) (o0 []string, err error) {
+	err = v23.GetClient(ctx).Call(ctx, c.name, "ListCollections", []interface{}{i0}, []interface{}{&o0}, opts...)
 	return
 }
 
-func (c implDatabaseClientStub) Exec(ctx *context.T, i0 string, i1 []*vom.RawBytes, opts ...rpc.CallOpt) (ocall DatabaseExecClientCall, err error) {
+func (c implDatabaseClientStub) Exec(ctx *context.T, i0 BatchHandle, i1 string, i2 []*vom.RawBytes, opts ...rpc.CallOpt) (ocall DatabaseExecClientCall, err error) {
 	var call rpc.ClientCall
-	if call, err = v23.GetClient(ctx).StartCall(ctx, c.name, "Exec", []interface{}{i0, i1}, opts...); err != nil {
+	if call, err = v23.GetClient(ctx).StartCall(ctx, c.name, "Exec", []interface{}{i0, i1, i2}, opts...); err != nil {
 		return
 	}
 	ocall = &implDatabaseExecClientCall{ClientCall: call}
 	return
 }
 
-func (c implDatabaseClientStub) BeginBatch(ctx *context.T, i0 BatchOptions, opts ...rpc.CallOpt) (o0 string, err error) {
+func (c implDatabaseClientStub) BeginBatch(ctx *context.T, i0 BatchOptions, opts ...rpc.CallOpt) (o0 BatchHandle, err error) {
 	err = v23.GetClient(ctx).Call(ctx, c.name, "BeginBatch", []interface{}{i0}, []interface{}{&o0}, opts...)
 	return
 }
 
-func (c implDatabaseClientStub) Commit(ctx *context.T, opts ...rpc.CallOpt) (err error) {
-	err = v23.GetClient(ctx).Call(ctx, c.name, "Commit", nil, nil, opts...)
+func (c implDatabaseClientStub) Commit(ctx *context.T, i0 BatchHandle, opts ...rpc.CallOpt) (err error) {
+	err = v23.GetClient(ctx).Call(ctx, c.name, "Commit", []interface{}{i0}, nil, opts...)
 	return
 }
 
-func (c implDatabaseClientStub) Abort(ctx *context.T, opts ...rpc.CallOpt) (err error) {
-	err = v23.GetClient(ctx).Call(ctx, c.name, "Abort", nil, nil, opts...)
+func (c implDatabaseClientStub) Abort(ctx *context.T, i0 BatchHandle, opts ...rpc.CallOpt) (err error) {
+	err = v23.GetClient(ctx).Call(ctx, c.name, "Abort", []interface{}{i0}, nil, opts...)
 	return
 }
 
@@ -7657,43 +7695,37 @@ type DatabaseServerMethods interface {
 	Exists(*context.T, rpc.ServerCall) (bool, error)
 	// ListCollections returns a list of all Collection names.
 	// This method exists on Database but not on Service because for the latter
-	// we can simply use glob, while for the former glob fails on BatchDatabase
-	// since we encode the batch id in the BatchDatabase object name. More
-	// specifically, the glob client library appears to have two odd behaviors:
-	// 1) It checks Resolve access on every component along the path (by doing a
-	//    Dispatcher.Lookup), whereas this doesn't happen for other RPCs.
+	// we can simply use glob, while for the former glob lists only Collections
+	// visible in a new snapshot of the Database, ignoring user batches.
+	// (Note that the same issue is present in glob on Collection, where Scan can
+	// be used instead if batch awareness is required.)
+	// Note, the glob client library checks Resolve access on every component
+	// along the path (by doing a Dispatcher.Lookup), whereas this doesn't happen
+	// for other RPCs.
 	// TODO(ivanpi): Resolve should be checked on all RPCs.
-	// 2) It does a Glob(<prefix>/*) for every prefix path, and only proceeds to
-	//    the next path component if that component appeared in its parent's Glob
-	//    results. This is inefficient in general, and broken for us since
-	//    Glob("*") does not return batch database names like "d##bId".
-	// TODO(ivanpi): This concern goes away once batch ids are removed from names.
 	// TODO(sadovsky): Maybe switch to streaming RPC.
-	ListCollections(*context.T, rpc.ServerCall) ([]string, error)
+	ListCollections(_ *context.T, _ rpc.ServerCall, bh BatchHandle) ([]string, error)
 	// Exec executes a syncQL query with positional parameters and returns all
 	// results as specified by the query's select/delete statement.
 	// Concurrency semantics are documented in model.go.
-	Exec(_ *context.T, _ DatabaseExecServerCall, query string, params []*vom.RawBytes) error
-	// BeginBatch creates a new batch. It returns a "batch suffix" string to
-	// append to the object name of this Database, yielding an object name for the
-	// Database bound to the created batch. (For example, if this Database is
-	// named "/path/to/db" and BeginBatch returns "##abc", the client should
-	// construct batch Database object name "/path/to/db##abc".) If this Database
-	// is already bound to a batch, BeginBatch() will fail with ErrBoundToBatch.
+	Exec(_ *context.T, _ DatabaseExecServerCall, bh BatchHandle, query string, params []*vom.RawBytes) error
+	// BeginBatch creates a new batch. It returns a batch handle to pass in when
+	// calling batch-aware RPCs.
 	// Concurrency semantics are documented in model.go.
+	// All batch-aware RPCs can also be called outside a batch (with an empty
+	// handle), with the exception of Commit and Abort which only make sense on
+	// a batch. Note that glob RPCs are not batch-aware.
 	// TODO(sadovsky): Maybe make BatchOptions optional. Also, rename it to 'opts'
 	// everywhere now that v.io/i/912 is resolved.
-	BeginBatch(_ *context.T, _ rpc.ServerCall, bo BatchOptions) (string, error)
+	BeginBatch(_ *context.T, _ rpc.ServerCall, bo BatchOptions) (BatchHandle, error)
 	// Commit persists the pending changes to the database.
-	// If this Database is not bound to a batch, Commit() will fail with
-	// ErrNotBoundToBatch.
-	Commit(*context.T, rpc.ServerCall) error
+	// If the BatchHandle is empty, Commit() will fail with ErrNotBoundToBatch.
+	Commit(_ *context.T, _ rpc.ServerCall, bh BatchHandle) error
 	// Abort notifies the server that any pending changes can be discarded.
 	// It is not strictly required, but it may allow the server to release locks
 	// or other resources sooner than if it was not called.
-	// If this Database is not bound to a batch, Abort() will fail with
-	// ErrNotBoundToBatch.
-	Abort(*context.T, rpc.ServerCall) error
+	// If the BatchHandle is empty, Abort() will fail with ErrNotBoundToBatch.
+	Abort(_ *context.T, _ rpc.ServerCall, bh BatchHandle) error
 	// PauseSync pauses sync for this database. Incoming sync, as well as
 	// outgoing sync of subsequent writes, will be disabled until ResumeSync
 	// is called. PauseSync is idempotent.
@@ -7809,43 +7841,37 @@ type DatabaseServerStubMethods interface {
 	Exists(*context.T, rpc.ServerCall) (bool, error)
 	// ListCollections returns a list of all Collection names.
 	// This method exists on Database but not on Service because for the latter
-	// we can simply use glob, while for the former glob fails on BatchDatabase
-	// since we encode the batch id in the BatchDatabase object name. More
-	// specifically, the glob client library appears to have two odd behaviors:
-	// 1) It checks Resolve access on every component along the path (by doing a
-	//    Dispatcher.Lookup), whereas this doesn't happen for other RPCs.
+	// we can simply use glob, while for the former glob lists only Collections
+	// visible in a new snapshot of the Database, ignoring user batches.
+	// (Note that the same issue is present in glob on Collection, where Scan can
+	// be used instead if batch awareness is required.)
+	// Note, the glob client library checks Resolve access on every component
+	// along the path (by doing a Dispatcher.Lookup), whereas this doesn't happen
+	// for other RPCs.
 	// TODO(ivanpi): Resolve should be checked on all RPCs.
-	// 2) It does a Glob(<prefix>/*) for every prefix path, and only proceeds to
-	//    the next path component if that component appeared in its parent's Glob
-	//    results. This is inefficient in general, and broken for us since
-	//    Glob("*") does not return batch database names like "d##bId".
-	// TODO(ivanpi): This concern goes away once batch ids are removed from names.
 	// TODO(sadovsky): Maybe switch to streaming RPC.
-	ListCollections(*context.T, rpc.ServerCall) ([]string, error)
+	ListCollections(_ *context.T, _ rpc.ServerCall, bh BatchHandle) ([]string, error)
 	// Exec executes a syncQL query with positional parameters and returns all
 	// results as specified by the query's select/delete statement.
 	// Concurrency semantics are documented in model.go.
-	Exec(_ *context.T, _ *DatabaseExecServerCallStub, query string, params []*vom.RawBytes) error
-	// BeginBatch creates a new batch. It returns a "batch suffix" string to
-	// append to the object name of this Database, yielding an object name for the
-	// Database bound to the created batch. (For example, if this Database is
-	// named "/path/to/db" and BeginBatch returns "##abc", the client should
-	// construct batch Database object name "/path/to/db##abc".) If this Database
-	// is already bound to a batch, BeginBatch() will fail with ErrBoundToBatch.
+	Exec(_ *context.T, _ *DatabaseExecServerCallStub, bh BatchHandle, query string, params []*vom.RawBytes) error
+	// BeginBatch creates a new batch. It returns a batch handle to pass in when
+	// calling batch-aware RPCs.
 	// Concurrency semantics are documented in model.go.
+	// All batch-aware RPCs can also be called outside a batch (with an empty
+	// handle), with the exception of Commit and Abort which only make sense on
+	// a batch. Note that glob RPCs are not batch-aware.
 	// TODO(sadovsky): Maybe make BatchOptions optional. Also, rename it to 'opts'
 	// everywhere now that v.io/i/912 is resolved.
-	BeginBatch(_ *context.T, _ rpc.ServerCall, bo BatchOptions) (string, error)
+	BeginBatch(_ *context.T, _ rpc.ServerCall, bo BatchOptions) (BatchHandle, error)
 	// Commit persists the pending changes to the database.
-	// If this Database is not bound to a batch, Commit() will fail with
-	// ErrNotBoundToBatch.
-	Commit(*context.T, rpc.ServerCall) error
+	// If the BatchHandle is empty, Commit() will fail with ErrNotBoundToBatch.
+	Commit(_ *context.T, _ rpc.ServerCall, bh BatchHandle) error
 	// Abort notifies the server that any pending changes can be discarded.
 	// It is not strictly required, but it may allow the server to release locks
 	// or other resources sooner than if it was not called.
-	// If this Database is not bound to a batch, Abort() will fail with
-	// ErrNotBoundToBatch.
-	Abort(*context.T, rpc.ServerCall) error
+	// If the BatchHandle is empty, Abort() will fail with ErrNotBoundToBatch.
+	Abort(_ *context.T, _ rpc.ServerCall, bh BatchHandle) error
 	// PauseSync pauses sync for this database. Incoming sync, as well as
 	// outgoing sync of subsequent writes, will be disabled until ResumeSync
 	// is called. PauseSync is idempotent.
@@ -7907,24 +7933,24 @@ func (s implDatabaseServerStub) Exists(ctx *context.T, call rpc.ServerCall) (boo
 	return s.impl.Exists(ctx, call)
 }
 
-func (s implDatabaseServerStub) ListCollections(ctx *context.T, call rpc.ServerCall) ([]string, error) {
-	return s.impl.ListCollections(ctx, call)
+func (s implDatabaseServerStub) ListCollections(ctx *context.T, call rpc.ServerCall, i0 BatchHandle) ([]string, error) {
+	return s.impl.ListCollections(ctx, call, i0)
 }
 
-func (s implDatabaseServerStub) Exec(ctx *context.T, call *DatabaseExecServerCallStub, i0 string, i1 []*vom.RawBytes) error {
-	return s.impl.Exec(ctx, call, i0, i1)
+func (s implDatabaseServerStub) Exec(ctx *context.T, call *DatabaseExecServerCallStub, i0 BatchHandle, i1 string, i2 []*vom.RawBytes) error {
+	return s.impl.Exec(ctx, call, i0, i1, i2)
 }
 
-func (s implDatabaseServerStub) BeginBatch(ctx *context.T, call rpc.ServerCall, i0 BatchOptions) (string, error) {
+func (s implDatabaseServerStub) BeginBatch(ctx *context.T, call rpc.ServerCall, i0 BatchOptions) (BatchHandle, error) {
 	return s.impl.BeginBatch(ctx, call, i0)
 }
 
-func (s implDatabaseServerStub) Commit(ctx *context.T, call rpc.ServerCall) error {
-	return s.impl.Commit(ctx, call)
+func (s implDatabaseServerStub) Commit(ctx *context.T, call rpc.ServerCall, i0 BatchHandle) error {
+	return s.impl.Commit(ctx, call, i0)
 }
 
-func (s implDatabaseServerStub) Abort(ctx *context.T, call rpc.ServerCall) error {
-	return s.impl.Abort(ctx, call)
+func (s implDatabaseServerStub) Abort(ctx *context.T, call rpc.ServerCall, i0 BatchHandle) error {
+	return s.impl.Abort(ctx, call, i0)
 }
 
 func (s implDatabaseServerStub) PauseSync(ctx *context.T, call rpc.ServerCall) error {
@@ -7984,7 +8010,10 @@ var descDatabase = rpc.InterfaceDesc{
 		},
 		{
 			Name: "ListCollections",
-			Doc:  "// ListCollections returns a list of all Collection names.\n// This method exists on Database but not on Service because for the latter\n// we can simply use glob, while for the former glob fails on BatchDatabase\n// since we encode the batch id in the BatchDatabase object name. More\n// specifically, the glob client library appears to have two odd behaviors:\n// 1) It checks Resolve access on every component along the path (by doing a\n//    Dispatcher.Lookup), whereas this doesn't happen for other RPCs.\n// TODO(ivanpi): Resolve should be checked on all RPCs.\n// 2) It does a Glob(<prefix>/*) for every prefix path, and only proceeds to\n//    the next path component if that component appeared in its parent's Glob\n//    results. This is inefficient in general, and broken for us since\n//    Glob(\"*\") does not return batch database names like \"d##bId\".\n// TODO(ivanpi): This concern goes away once batch ids are removed from names.\n// TODO(sadovsky): Maybe switch to streaming RPC.",
+			Doc:  "// ListCollections returns a list of all Collection names.\n// This method exists on Database but not on Service because for the latter\n// we can simply use glob, while for the former glob lists only Collections\n// visible in a new snapshot of the Database, ignoring user batches.\n// (Note that the same issue is present in glob on Collection, where Scan can\n// be used instead if batch awareness is required.)\n// Note, the glob client library checks Resolve access on every component\n// along the path (by doing a Dispatcher.Lookup), whereas this doesn't happen\n// for other RPCs.\n// TODO(ivanpi): Resolve should be checked on all RPCs.\n// TODO(sadovsky): Maybe switch to streaming RPC.",
+			InArgs: []rpc.ArgDesc{
+				{"bh", ``}, // BatchHandle
+			},
 			OutArgs: []rpc.ArgDesc{
 				{"", ``}, // []string
 			},
@@ -7994,6 +8023,7 @@ var descDatabase = rpc.InterfaceDesc{
 			Name: "Exec",
 			Doc:  "// Exec executes a syncQL query with positional parameters and returns all\n// results as specified by the query's select/delete statement.\n// Concurrency semantics are documented in model.go.",
 			InArgs: []rpc.ArgDesc{
+				{"bh", ``},     // BatchHandle
 				{"query", ``},  // string
 				{"params", ``}, // []*vom.RawBytes
 			},
@@ -8001,23 +8031,29 @@ var descDatabase = rpc.InterfaceDesc{
 		},
 		{
 			Name: "BeginBatch",
-			Doc:  "// BeginBatch creates a new batch. It returns a \"batch suffix\" string to\n// append to the object name of this Database, yielding an object name for the\n// Database bound to the created batch. (For example, if this Database is\n// named \"/path/to/db\" and BeginBatch returns \"##abc\", the client should\n// construct batch Database object name \"/path/to/db##abc\".) If this Database\n// is already bound to a batch, BeginBatch() will fail with ErrBoundToBatch.\n// Concurrency semantics are documented in model.go.\n// TODO(sadovsky): Maybe make BatchOptions optional. Also, rename it to 'opts'\n// everywhere now that v.io/i/912 is resolved.",
+			Doc:  "// BeginBatch creates a new batch. It returns a batch handle to pass in when\n// calling batch-aware RPCs.\n// Concurrency semantics are documented in model.go.\n// All batch-aware RPCs can also be called outside a batch (with an empty\n// handle), with the exception of Commit and Abort which only make sense on\n// a batch. Note that glob RPCs are not batch-aware.\n// TODO(sadovsky): Maybe make BatchOptions optional. Also, rename it to 'opts'\n// everywhere now that v.io/i/912 is resolved.",
 			InArgs: []rpc.ArgDesc{
 				{"bo", ``}, // BatchOptions
 			},
 			OutArgs: []rpc.ArgDesc{
-				{"", ``}, // string
+				{"", ``}, // BatchHandle
 			},
 			Tags: []*vdl.Value{vdl.ValueOf(access.Tag("Read"))},
 		},
 		{
 			Name: "Commit",
-			Doc:  "// Commit persists the pending changes to the database.\n// If this Database is not bound to a batch, Commit() will fail with\n// ErrNotBoundToBatch.",
+			Doc:  "// Commit persists the pending changes to the database.\n// If the BatchHandle is empty, Commit() will fail with ErrNotBoundToBatch.",
+			InArgs: []rpc.ArgDesc{
+				{"bh", ``}, // BatchHandle
+			},
 			Tags: []*vdl.Value{vdl.ValueOf(access.Tag("Read"))},
 		},
 		{
 			Name: "Abort",
-			Doc:  "// Abort notifies the server that any pending changes can be discarded.\n// It is not strictly required, but it may allow the server to release locks\n// or other resources sooner than if it was not called.\n// If this Database is not bound to a batch, Abort() will fail with\n// ErrNotBoundToBatch.",
+			Doc:  "// Abort notifies the server that any pending changes can be discarded.\n// It is not strictly required, but it may allow the server to release locks\n// or other resources sooner than if it was not called.\n// If the BatchHandle is empty, Abort() will fail with ErrNotBoundToBatch.",
+			InArgs: []rpc.ArgDesc{
+				{"bh", ``}, // BatchHandle
+			},
 			Tags: []*vdl.Value{vdl.ValueOf(access.Tag("Read"))},
 		},
 		{
@@ -8084,25 +8120,25 @@ func (s implDatabaseExecServerCallSend) Send(item []*vom.RawBytes) error {
 type CollectionClientMethods interface {
 	// Create creates this Collection.
 	// If perms is nil, we inherit (copy) the Database perms.
-	Create(_ *context.T, perms access.Permissions, _ ...rpc.CallOpt) error
+	Create(_ *context.T, bh BatchHandle, perms access.Permissions, _ ...rpc.CallOpt) error
 	// Destroy destroys this Collection.
-	Destroy(*context.T, ...rpc.CallOpt) error
+	Destroy(_ *context.T, bh BatchHandle, _ ...rpc.CallOpt) error
 	// Exists returns true only if this Collection exists. Insufficient
 	// permissions cause Exists to return false instead of an error.
 	// TODO(ivanpi): Exists may fail with an error if higher levels of hierarchy
 	// do not exist.
-	Exists(*context.T, ...rpc.CallOpt) (bool, error)
+	Exists(_ *context.T, bh BatchHandle, _ ...rpc.CallOpt) (bool, error)
 	// GetPermissions returns the current Permissions for the Collection.
-	GetPermissions(*context.T, ...rpc.CallOpt) (access.Permissions, error)
+	GetPermissions(_ *context.T, bh BatchHandle, _ ...rpc.CallOpt) (access.Permissions, error)
 	// SetPermissions replaces the current Permissions for the Collection.
-	SetPermissions(_ *context.T, perms access.Permissions, _ ...rpc.CallOpt) error
+	SetPermissions(_ *context.T, bh BatchHandle, perms access.Permissions, _ ...rpc.CallOpt) error
 	// DeleteRange deletes all rows in the given half-open range [start, limit).
 	// If limit is "", all rows with keys >= start are included.
-	DeleteRange(_ *context.T, start []byte, limit []byte, _ ...rpc.CallOpt) error
+	DeleteRange(_ *context.T, bh BatchHandle, start []byte, limit []byte, _ ...rpc.CallOpt) error
 	// Scan returns all rows in the given half-open range [start, limit). If limit
 	// is "", all rows with keys >= start are included. Concurrency semantics are
 	// documented in model.go.
-	Scan(_ *context.T, start []byte, limit []byte, _ ...rpc.CallOpt) (CollectionScanClientCall, error)
+	Scan(_ *context.T, bh BatchHandle, start []byte, limit []byte, _ ...rpc.CallOpt) (CollectionScanClientCall, error)
 }
 
 // CollectionClientStub adds universal methods to CollectionClientMethods.
@@ -8120,39 +8156,39 @@ type implCollectionClientStub struct {
 	name string
 }
 
-func (c implCollectionClientStub) Create(ctx *context.T, i0 access.Permissions, opts ...rpc.CallOpt) (err error) {
-	err = v23.GetClient(ctx).Call(ctx, c.name, "Create", []interface{}{i0}, nil, opts...)
+func (c implCollectionClientStub) Create(ctx *context.T, i0 BatchHandle, i1 access.Permissions, opts ...rpc.CallOpt) (err error) {
+	err = v23.GetClient(ctx).Call(ctx, c.name, "Create", []interface{}{i0, i1}, nil, opts...)
 	return
 }
 
-func (c implCollectionClientStub) Destroy(ctx *context.T, opts ...rpc.CallOpt) (err error) {
-	err = v23.GetClient(ctx).Call(ctx, c.name, "Destroy", nil, nil, opts...)
+func (c implCollectionClientStub) Destroy(ctx *context.T, i0 BatchHandle, opts ...rpc.CallOpt) (err error) {
+	err = v23.GetClient(ctx).Call(ctx, c.name, "Destroy", []interface{}{i0}, nil, opts...)
 	return
 }
 
-func (c implCollectionClientStub) Exists(ctx *context.T, opts ...rpc.CallOpt) (o0 bool, err error) {
-	err = v23.GetClient(ctx).Call(ctx, c.name, "Exists", nil, []interface{}{&o0}, opts...)
+func (c implCollectionClientStub) Exists(ctx *context.T, i0 BatchHandle, opts ...rpc.CallOpt) (o0 bool, err error) {
+	err = v23.GetClient(ctx).Call(ctx, c.name, "Exists", []interface{}{i0}, []interface{}{&o0}, opts...)
 	return
 }
 
-func (c implCollectionClientStub) GetPermissions(ctx *context.T, opts ...rpc.CallOpt) (o0 access.Permissions, err error) {
-	err = v23.GetClient(ctx).Call(ctx, c.name, "GetPermissions", nil, []interface{}{&o0}, opts...)
+func (c implCollectionClientStub) GetPermissions(ctx *context.T, i0 BatchHandle, opts ...rpc.CallOpt) (o0 access.Permissions, err error) {
+	err = v23.GetClient(ctx).Call(ctx, c.name, "GetPermissions", []interface{}{i0}, []interface{}{&o0}, opts...)
 	return
 }
 
-func (c implCollectionClientStub) SetPermissions(ctx *context.T, i0 access.Permissions, opts ...rpc.CallOpt) (err error) {
-	err = v23.GetClient(ctx).Call(ctx, c.name, "SetPermissions", []interface{}{i0}, nil, opts...)
+func (c implCollectionClientStub) SetPermissions(ctx *context.T, i0 BatchHandle, i1 access.Permissions, opts ...rpc.CallOpt) (err error) {
+	err = v23.GetClient(ctx).Call(ctx, c.name, "SetPermissions", []interface{}{i0, i1}, nil, opts...)
 	return
 }
 
-func (c implCollectionClientStub) DeleteRange(ctx *context.T, i0 []byte, i1 []byte, opts ...rpc.CallOpt) (err error) {
-	err = v23.GetClient(ctx).Call(ctx, c.name, "DeleteRange", []interface{}{i0, i1}, nil, opts...)
+func (c implCollectionClientStub) DeleteRange(ctx *context.T, i0 BatchHandle, i1 []byte, i2 []byte, opts ...rpc.CallOpt) (err error) {
+	err = v23.GetClient(ctx).Call(ctx, c.name, "DeleteRange", []interface{}{i0, i1, i2}, nil, opts...)
 	return
 }
 
-func (c implCollectionClientStub) Scan(ctx *context.T, i0 []byte, i1 []byte, opts ...rpc.CallOpt) (ocall CollectionScanClientCall, err error) {
+func (c implCollectionClientStub) Scan(ctx *context.T, i0 BatchHandle, i1 []byte, i2 []byte, opts ...rpc.CallOpt) (ocall CollectionScanClientCall, err error) {
 	var call rpc.ClientCall
-	if call, err = v23.GetClient(ctx).StartCall(ctx, c.name, "Scan", []interface{}{i0, i1}, opts...); err != nil {
+	if call, err = v23.GetClient(ctx).StartCall(ctx, c.name, "Scan", []interface{}{i0, i1, i2}, opts...); err != nil {
 		return
 	}
 	ocall = &implCollectionScanClientCall{ClientCall: call}
@@ -8236,25 +8272,25 @@ func (c *implCollectionScanClientCall) Finish() (err error) {
 type CollectionServerMethods interface {
 	// Create creates this Collection.
 	// If perms is nil, we inherit (copy) the Database perms.
-	Create(_ *context.T, _ rpc.ServerCall, perms access.Permissions) error
+	Create(_ *context.T, _ rpc.ServerCall, bh BatchHandle, perms access.Permissions) error
 	// Destroy destroys this Collection.
-	Destroy(*context.T, rpc.ServerCall) error
+	Destroy(_ *context.T, _ rpc.ServerCall, bh BatchHandle) error
 	// Exists returns true only if this Collection exists. Insufficient
 	// permissions cause Exists to return false instead of an error.
 	// TODO(ivanpi): Exists may fail with an error if higher levels of hierarchy
 	// do not exist.
-	Exists(*context.T, rpc.ServerCall) (bool, error)
+	Exists(_ *context.T, _ rpc.ServerCall, bh BatchHandle) (bool, error)
 	// GetPermissions returns the current Permissions for the Collection.
-	GetPermissions(*context.T, rpc.ServerCall) (access.Permissions, error)
+	GetPermissions(_ *context.T, _ rpc.ServerCall, bh BatchHandle) (access.Permissions, error)
 	// SetPermissions replaces the current Permissions for the Collection.
-	SetPermissions(_ *context.T, _ rpc.ServerCall, perms access.Permissions) error
+	SetPermissions(_ *context.T, _ rpc.ServerCall, bh BatchHandle, perms access.Permissions) error
 	// DeleteRange deletes all rows in the given half-open range [start, limit).
 	// If limit is "", all rows with keys >= start are included.
-	DeleteRange(_ *context.T, _ rpc.ServerCall, start []byte, limit []byte) error
+	DeleteRange(_ *context.T, _ rpc.ServerCall, bh BatchHandle, start []byte, limit []byte) error
 	// Scan returns all rows in the given half-open range [start, limit). If limit
 	// is "", all rows with keys >= start are included. Concurrency semantics are
 	// documented in model.go.
-	Scan(_ *context.T, _ CollectionScanServerCall, start []byte, limit []byte) error
+	Scan(_ *context.T, _ CollectionScanServerCall, bh BatchHandle, start []byte, limit []byte) error
 }
 
 // CollectionServerStubMethods is the server interface containing
@@ -8264,25 +8300,25 @@ type CollectionServerMethods interface {
 type CollectionServerStubMethods interface {
 	// Create creates this Collection.
 	// If perms is nil, we inherit (copy) the Database perms.
-	Create(_ *context.T, _ rpc.ServerCall, perms access.Permissions) error
+	Create(_ *context.T, _ rpc.ServerCall, bh BatchHandle, perms access.Permissions) error
 	// Destroy destroys this Collection.
-	Destroy(*context.T, rpc.ServerCall) error
+	Destroy(_ *context.T, _ rpc.ServerCall, bh BatchHandle) error
 	// Exists returns true only if this Collection exists. Insufficient
 	// permissions cause Exists to return false instead of an error.
 	// TODO(ivanpi): Exists may fail with an error if higher levels of hierarchy
 	// do not exist.
-	Exists(*context.T, rpc.ServerCall) (bool, error)
+	Exists(_ *context.T, _ rpc.ServerCall, bh BatchHandle) (bool, error)
 	// GetPermissions returns the current Permissions for the Collection.
-	GetPermissions(*context.T, rpc.ServerCall) (access.Permissions, error)
+	GetPermissions(_ *context.T, _ rpc.ServerCall, bh BatchHandle) (access.Permissions, error)
 	// SetPermissions replaces the current Permissions for the Collection.
-	SetPermissions(_ *context.T, _ rpc.ServerCall, perms access.Permissions) error
+	SetPermissions(_ *context.T, _ rpc.ServerCall, bh BatchHandle, perms access.Permissions) error
 	// DeleteRange deletes all rows in the given half-open range [start, limit).
 	// If limit is "", all rows with keys >= start are included.
-	DeleteRange(_ *context.T, _ rpc.ServerCall, start []byte, limit []byte) error
+	DeleteRange(_ *context.T, _ rpc.ServerCall, bh BatchHandle, start []byte, limit []byte) error
 	// Scan returns all rows in the given half-open range [start, limit). If limit
 	// is "", all rows with keys >= start are included. Concurrency semantics are
 	// documented in model.go.
-	Scan(_ *context.T, _ *CollectionScanServerCallStub, start []byte, limit []byte) error
+	Scan(_ *context.T, _ *CollectionScanServerCallStub, bh BatchHandle, start []byte, limit []byte) error
 }
 
 // CollectionServerStub adds universal methods to CollectionServerStubMethods.
@@ -8314,32 +8350,32 @@ type implCollectionServerStub struct {
 	gs   *rpc.GlobState
 }
 
-func (s implCollectionServerStub) Create(ctx *context.T, call rpc.ServerCall, i0 access.Permissions) error {
-	return s.impl.Create(ctx, call, i0)
+func (s implCollectionServerStub) Create(ctx *context.T, call rpc.ServerCall, i0 BatchHandle, i1 access.Permissions) error {
+	return s.impl.Create(ctx, call, i0, i1)
 }
 
-func (s implCollectionServerStub) Destroy(ctx *context.T, call rpc.ServerCall) error {
-	return s.impl.Destroy(ctx, call)
+func (s implCollectionServerStub) Destroy(ctx *context.T, call rpc.ServerCall, i0 BatchHandle) error {
+	return s.impl.Destroy(ctx, call, i0)
 }
 
-func (s implCollectionServerStub) Exists(ctx *context.T, call rpc.ServerCall) (bool, error) {
-	return s.impl.Exists(ctx, call)
+func (s implCollectionServerStub) Exists(ctx *context.T, call rpc.ServerCall, i0 BatchHandle) (bool, error) {
+	return s.impl.Exists(ctx, call, i0)
 }
 
-func (s implCollectionServerStub) GetPermissions(ctx *context.T, call rpc.ServerCall) (access.Permissions, error) {
-	return s.impl.GetPermissions(ctx, call)
+func (s implCollectionServerStub) GetPermissions(ctx *context.T, call rpc.ServerCall, i0 BatchHandle) (access.Permissions, error) {
+	return s.impl.GetPermissions(ctx, call, i0)
 }
 
-func (s implCollectionServerStub) SetPermissions(ctx *context.T, call rpc.ServerCall, i0 access.Permissions) error {
-	return s.impl.SetPermissions(ctx, call, i0)
+func (s implCollectionServerStub) SetPermissions(ctx *context.T, call rpc.ServerCall, i0 BatchHandle, i1 access.Permissions) error {
+	return s.impl.SetPermissions(ctx, call, i0, i1)
 }
 
-func (s implCollectionServerStub) DeleteRange(ctx *context.T, call rpc.ServerCall, i0 []byte, i1 []byte) error {
-	return s.impl.DeleteRange(ctx, call, i0, i1)
+func (s implCollectionServerStub) DeleteRange(ctx *context.T, call rpc.ServerCall, i0 BatchHandle, i1 []byte, i2 []byte) error {
+	return s.impl.DeleteRange(ctx, call, i0, i1, i2)
 }
 
-func (s implCollectionServerStub) Scan(ctx *context.T, call *CollectionScanServerCallStub, i0 []byte, i1 []byte) error {
-	return s.impl.Scan(ctx, call, i0, i1)
+func (s implCollectionServerStub) Scan(ctx *context.T, call *CollectionScanServerCallStub, i0 BatchHandle, i1 []byte, i2 []byte) error {
+	return s.impl.Scan(ctx, call, i0, i1, i2)
 }
 
 func (s implCollectionServerStub) Globber() *rpc.GlobState {
@@ -8363,6 +8399,7 @@ var descCollection = rpc.InterfaceDesc{
 			Name: "Create",
 			Doc:  "// Create creates this Collection.\n// If perms is nil, we inherit (copy) the Database perms.",
 			InArgs: []rpc.ArgDesc{
+				{"bh", ``},    // BatchHandle
 				{"perms", ``}, // access.Permissions
 			},
 			Tags: []*vdl.Value{vdl.ValueOf(access.Tag("Write"))},
@@ -8370,11 +8407,17 @@ var descCollection = rpc.InterfaceDesc{
 		{
 			Name: "Destroy",
 			Doc:  "// Destroy destroys this Collection.",
+			InArgs: []rpc.ArgDesc{
+				{"bh", ``}, // BatchHandle
+			},
 			Tags: []*vdl.Value{vdl.ValueOf(access.Tag("Write"))},
 		},
 		{
 			Name: "Exists",
 			Doc:  "// Exists returns true only if this Collection exists. Insufficient\n// permissions cause Exists to return false instead of an error.\n// TODO(ivanpi): Exists may fail with an error if higher levels of hierarchy\n// do not exist.",
+			InArgs: []rpc.ArgDesc{
+				{"bh", ``}, // BatchHandle
+			},
 			OutArgs: []rpc.ArgDesc{
 				{"", ``}, // bool
 			},
@@ -8383,6 +8426,9 @@ var descCollection = rpc.InterfaceDesc{
 		{
 			Name: "GetPermissions",
 			Doc:  "// GetPermissions returns the current Permissions for the Collection.",
+			InArgs: []rpc.ArgDesc{
+				{"bh", ``}, // BatchHandle
+			},
 			OutArgs: []rpc.ArgDesc{
 				{"", ``}, // access.Permissions
 			},
@@ -8392,6 +8438,7 @@ var descCollection = rpc.InterfaceDesc{
 			Name: "SetPermissions",
 			Doc:  "// SetPermissions replaces the current Permissions for the Collection.",
 			InArgs: []rpc.ArgDesc{
+				{"bh", ``},    // BatchHandle
 				{"perms", ``}, // access.Permissions
 			},
 			Tags: []*vdl.Value{vdl.ValueOf(access.Tag("Admin"))},
@@ -8400,6 +8447,7 @@ var descCollection = rpc.InterfaceDesc{
 			Name: "DeleteRange",
 			Doc:  "// DeleteRange deletes all rows in the given half-open range [start, limit).\n// If limit is \"\", all rows with keys >= start are included.",
 			InArgs: []rpc.ArgDesc{
+				{"bh", ``},    // BatchHandle
 				{"start", ``}, // []byte
 				{"limit", ``}, // []byte
 			},
@@ -8409,6 +8457,7 @@ var descCollection = rpc.InterfaceDesc{
 			Name: "Scan",
 			Doc:  "// Scan returns all rows in the given half-open range [start, limit). If limit\n// is \"\", all rows with keys >= start are included. Concurrency semantics are\n// documented in model.go.",
 			InArgs: []rpc.ArgDesc{
+				{"bh", ``},    // BatchHandle
 				{"start", ``}, // []byte
 				{"limit", ``}, // []byte
 			},
@@ -8476,13 +8525,13 @@ type RowClientMethods interface {
 	// more information.
 	// TODO(ivanpi): Exists may fail with an error if higher levels of hierarchy
 	// do not exist.
-	Exists(*context.T, ...rpc.CallOpt) (bool, error)
+	Exists(_ *context.T, bh BatchHandle, _ ...rpc.CallOpt) (bool, error)
 	// Get returns the value for this Row.
-	Get(*context.T, ...rpc.CallOpt) ([]byte, error)
+	Get(_ *context.T, bh BatchHandle, _ ...rpc.CallOpt) ([]byte, error)
 	// Put writes the given value for this Row.
-	Put(_ *context.T, value []byte, _ ...rpc.CallOpt) error
+	Put(_ *context.T, bh BatchHandle, value []byte, _ ...rpc.CallOpt) error
 	// Delete deletes this Row.
-	Delete(*context.T, ...rpc.CallOpt) error
+	Delete(_ *context.T, bh BatchHandle, _ ...rpc.CallOpt) error
 }
 
 // RowClientStub adds universal methods to RowClientMethods.
@@ -8500,23 +8549,23 @@ type implRowClientStub struct {
 	name string
 }
 
-func (c implRowClientStub) Exists(ctx *context.T, opts ...rpc.CallOpt) (o0 bool, err error) {
-	err = v23.GetClient(ctx).Call(ctx, c.name, "Exists", nil, []interface{}{&o0}, opts...)
+func (c implRowClientStub) Exists(ctx *context.T, i0 BatchHandle, opts ...rpc.CallOpt) (o0 bool, err error) {
+	err = v23.GetClient(ctx).Call(ctx, c.name, "Exists", []interface{}{i0}, []interface{}{&o0}, opts...)
 	return
 }
 
-func (c implRowClientStub) Get(ctx *context.T, opts ...rpc.CallOpt) (o0 []byte, err error) {
-	err = v23.GetClient(ctx).Call(ctx, c.name, "Get", nil, []interface{}{&o0}, opts...)
+func (c implRowClientStub) Get(ctx *context.T, i0 BatchHandle, opts ...rpc.CallOpt) (o0 []byte, err error) {
+	err = v23.GetClient(ctx).Call(ctx, c.name, "Get", []interface{}{i0}, []interface{}{&o0}, opts...)
 	return
 }
 
-func (c implRowClientStub) Put(ctx *context.T, i0 []byte, opts ...rpc.CallOpt) (err error) {
-	err = v23.GetClient(ctx).Call(ctx, c.name, "Put", []interface{}{i0}, nil, opts...)
+func (c implRowClientStub) Put(ctx *context.T, i0 BatchHandle, i1 []byte, opts ...rpc.CallOpt) (err error) {
+	err = v23.GetClient(ctx).Call(ctx, c.name, "Put", []interface{}{i0, i1}, nil, opts...)
 	return
 }
 
-func (c implRowClientStub) Delete(ctx *context.T, opts ...rpc.CallOpt) (err error) {
-	err = v23.GetClient(ctx).Call(ctx, c.name, "Delete", nil, nil, opts...)
+func (c implRowClientStub) Delete(ctx *context.T, i0 BatchHandle, opts ...rpc.CallOpt) (err error) {
+	err = v23.GetClient(ctx).Call(ctx, c.name, "Delete", []interface{}{i0}, nil, opts...)
 	return
 }
 
@@ -8536,13 +8585,13 @@ type RowServerMethods interface {
 	// more information.
 	// TODO(ivanpi): Exists may fail with an error if higher levels of hierarchy
 	// do not exist.
-	Exists(*context.T, rpc.ServerCall) (bool, error)
+	Exists(_ *context.T, _ rpc.ServerCall, bh BatchHandle) (bool, error)
 	// Get returns the value for this Row.
-	Get(*context.T, rpc.ServerCall) ([]byte, error)
+	Get(_ *context.T, _ rpc.ServerCall, bh BatchHandle) ([]byte, error)
 	// Put writes the given value for this Row.
-	Put(_ *context.T, _ rpc.ServerCall, value []byte) error
+	Put(_ *context.T, _ rpc.ServerCall, bh BatchHandle, value []byte) error
 	// Delete deletes this Row.
-	Delete(*context.T, rpc.ServerCall) error
+	Delete(_ *context.T, _ rpc.ServerCall, bh BatchHandle) error
 }
 
 // RowServerStubMethods is the server interface containing
@@ -8580,20 +8629,20 @@ type implRowServerStub struct {
 	gs   *rpc.GlobState
 }
 
-func (s implRowServerStub) Exists(ctx *context.T, call rpc.ServerCall) (bool, error) {
-	return s.impl.Exists(ctx, call)
+func (s implRowServerStub) Exists(ctx *context.T, call rpc.ServerCall, i0 BatchHandle) (bool, error) {
+	return s.impl.Exists(ctx, call, i0)
 }
 
-func (s implRowServerStub) Get(ctx *context.T, call rpc.ServerCall) ([]byte, error) {
-	return s.impl.Get(ctx, call)
+func (s implRowServerStub) Get(ctx *context.T, call rpc.ServerCall, i0 BatchHandle) ([]byte, error) {
+	return s.impl.Get(ctx, call, i0)
 }
 
-func (s implRowServerStub) Put(ctx *context.T, call rpc.ServerCall, i0 []byte) error {
-	return s.impl.Put(ctx, call, i0)
+func (s implRowServerStub) Put(ctx *context.T, call rpc.ServerCall, i0 BatchHandle, i1 []byte) error {
+	return s.impl.Put(ctx, call, i0, i1)
 }
 
-func (s implRowServerStub) Delete(ctx *context.T, call rpc.ServerCall) error {
-	return s.impl.Delete(ctx, call)
+func (s implRowServerStub) Delete(ctx *context.T, call rpc.ServerCall, i0 BatchHandle) error {
+	return s.impl.Delete(ctx, call, i0)
 }
 
 func (s implRowServerStub) Globber() *rpc.GlobState {
@@ -8616,6 +8665,9 @@ var descRow = rpc.InterfaceDesc{
 		{
 			Name: "Exists",
 			Doc:  "// Exists returns true only if this Row exists. Insufficient permissions\n// cause Exists to return false instead of an error.\n// Note, Exists on Row requires read permissions, unlike higher levels of\n// hierarchy which require resolve, because Row existence usually carries\n// more information.\n// TODO(ivanpi): Exists may fail with an error if higher levels of hierarchy\n// do not exist.",
+			InArgs: []rpc.ArgDesc{
+				{"bh", ``}, // BatchHandle
+			},
 			OutArgs: []rpc.ArgDesc{
 				{"", ``}, // bool
 			},
@@ -8624,6 +8676,9 @@ var descRow = rpc.InterfaceDesc{
 		{
 			Name: "Get",
 			Doc:  "// Get returns the value for this Row.",
+			InArgs: []rpc.ArgDesc{
+				{"bh", ``}, // BatchHandle
+			},
 			OutArgs: []rpc.ArgDesc{
 				{"", ``}, // []byte
 			},
@@ -8633,6 +8688,7 @@ var descRow = rpc.InterfaceDesc{
 			Name: "Put",
 			Doc:  "// Put writes the given value for this Row.",
 			InArgs: []rpc.ArgDesc{
+				{"bh", ``},    // BatchHandle
 				{"value", ``}, // []byte
 			},
 			Tags: []*vdl.Value{vdl.ValueOf(access.Tag("Write"))},
@@ -8640,6 +8696,9 @@ var descRow = rpc.InterfaceDesc{
 		{
 			Name: "Delete",
 			Doc:  "// Delete deletes this Row.",
+			InArgs: []rpc.ArgDesc{
+				{"bh", ``}, // BatchHandle
+			},
 			Tags: []*vdl.Value{vdl.ValueOf(access.Tag("Write"))},
 		},
 	},
@@ -8670,6 +8729,7 @@ func __VDLInit() struct{} {
 	vdl.Register((*Id)(nil))
 	vdl.Register((*DevModeUpdateVClockOpts)(nil))
 	vdl.Register((*BatchOptions)(nil))
+	vdl.Register((*BatchHandle)(nil))
 	vdl.Register((*KeyValue)(nil))
 	vdl.Register((*CollectionRow)(nil))
 	vdl.Register((*SyncgroupSpec)(nil))
@@ -8700,7 +8760,6 @@ func __VDLInit() struct{} {
 	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrInvalidName.ID), "{1:}{2:} invalid name: {3}")
 	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrCorruptDatabase.ID), "{1:}{2:} database corrupt, moved to {3}; client must create a new database")
 	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrUnknownBatch.ID), "{1:}{2:} unknown batch, perhaps the server restarted")
-	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrBoundToBatch.ID), "{1:}{2:} bound to batch")
 	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrNotBoundToBatch.ID), "{1:}{2:} not bound to batch")
 	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrReadOnlyBatch.ID), "{1:}{2:} batch is read-only")
 	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrConcurrentBatch.ID), "{1:}{2:} concurrent batch")

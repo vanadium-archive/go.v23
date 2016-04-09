@@ -10,20 +10,27 @@ import (
 	"v.io/v23/verror"
 )
 
+func newBatch(parentFullName string, id wire.Id, batchHandle wire.BatchHandle) *batch {
+	if batchHandle == "" {
+		panic("batch must have non-empty handle")
+	}
+	return &batch{databaseBatch: *newDatabaseBatch(parentFullName, id, batchHandle)}
+}
+
 type batch struct {
-	database
+	databaseBatch
 }
 
 var _ BatchDatabase = (*batch)(nil)
 
 // Commit implements BatchDatabase.Commit.
 func (b *batch) Commit(ctx *context.T) error {
-	return b.c.Commit(ctx)
+	return b.c.Commit(ctx, b.bh)
 }
 
 // Abort implements BatchDatabase.Abort.
 func (b *batch) Abort(ctx *context.T) error {
-	return b.c.Abort(ctx)
+	return b.c.Abort(ctx, b.bh)
 }
 
 // RunInBatch runs the given fn in a batch, managing retries and commit/abort.

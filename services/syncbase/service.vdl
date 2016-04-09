@@ -59,47 +59,41 @@ type Database interface {
 
 	// ListCollections returns a list of all Collection names.
 	// This method exists on Database but not on Service because for the latter
-	// we can simply use glob, while for the former glob fails on BatchDatabase
-	// since we encode the batch id in the BatchDatabase object name. More
-	// specifically, the glob client library appears to have two odd behaviors:
-	// 1) It checks Resolve access on every component along the path (by doing a
-	//    Dispatcher.Lookup), whereas this doesn't happen for other RPCs.
+	// we can simply use glob, while for the former glob lists only Collections
+	// visible in a new snapshot of the Database, ignoring user batches.
+	// (Note that the same issue is present in glob on Collection, where Scan can
+	// be used instead if batch awareness is required.)
+	// Note, the glob client library checks Resolve access on every component
+	// along the path (by doing a Dispatcher.Lookup), whereas this doesn't happen
+	// for other RPCs.
 	// TODO(ivanpi): Resolve should be checked on all RPCs.
-	// 2) It does a Glob(<prefix>/*) for every prefix path, and only proceeds to
-	//    the next path component if that component appeared in its parent's Glob
-	//    results. This is inefficient in general, and broken for us since
-	//    Glob("*") does not return batch database names like "d##bId".
-	// TODO(ivanpi): This concern goes away once batch ids are removed from names.
 	// TODO(sadovsky): Maybe switch to streaming RPC.
-	ListCollections() ([]string | error) {access.Read}
+	ListCollections(bh BatchHandle) ([]string | error) {access.Read}
 
 	// Exec executes a syncQL query with positional parameters and returns all
 	// results as specified by the query's select/delete statement.
 	// Concurrency semantics are documented in model.go.
-	Exec(query string, params []any) stream<_, []any> error {access.Read}
+	Exec(bh BatchHandle, query string, params []any) stream<_, []any> error {access.Read}
 
-	// BeginBatch creates a new batch. It returns a "batch suffix" string to
-	// append to the object name of this Database, yielding an object name for the
-	// Database bound to the created batch. (For example, if this Database is
-	// named "/path/to/db" and BeginBatch returns "##abc", the client should
-	// construct batch Database object name "/path/to/db##abc".) If this Database
-	// is already bound to a batch, BeginBatch() will fail with ErrBoundToBatch.
+	// BeginBatch creates a new batch. It returns a batch handle to pass in when
+	// calling batch-aware RPCs.
 	// Concurrency semantics are documented in model.go.
+	// All batch-aware RPCs can also be called outside a batch (with an empty
+	// handle), with the exception of Commit and Abort which only make sense on
+	// a batch. Note that glob RPCs are not batch-aware.
 	// TODO(sadovsky): Maybe make BatchOptions optional. Also, rename it to 'opts'
 	// everywhere now that v.io/i/912 is resolved.
-	BeginBatch(bo BatchOptions) (string | error) {access.Read}
+	BeginBatch(bo BatchOptions) (BatchHandle | error) {access.Read}
 
 	// Commit persists the pending changes to the database.
-	// If this Database is not bound to a batch, Commit() will fail with
-	// ErrNotBoundToBatch.
-	Commit() error {access.Read}
+	// If the BatchHandle is empty, Commit() will fail with ErrNotBoundToBatch.
+	Commit(bh BatchHandle) error {access.Read}
 
 	// Abort notifies the server that any pending changes can be discarded.
 	// It is not strictly required, but it may allow the server to release locks
 	// or other resources sooner than if it was not called.
-	// If this Database is not bound to a batch, Abort() will fail with
-	// ErrNotBoundToBatch.
-	Abort() error {access.Read}
+	// If the BatchHandle is empty, Abort() will fail with ErrNotBoundToBatch.
+	Abort(bh BatchHandle) error {access.Read}
 
 	// PauseSync pauses sync for this database. Incoming sync, as well as
 	// outgoing sync of subsequent writes, will be disabled until ResumeSync
@@ -137,31 +131,31 @@ type Database interface {
 type Collection interface {
 	// Create creates this Collection.
 	// If perms is nil, we inherit (copy) the Database perms.
-	Create(perms access.Permissions) error {access.Write}
+	Create(bh BatchHandle, perms access.Permissions) error {access.Write}
 
 	// Destroy destroys this Collection.
-	Destroy() error {access.Write}
+	Destroy(bh BatchHandle) error {access.Write}
 
 	// Exists returns true only if this Collection exists. Insufficient
 	// permissions cause Exists to return false instead of an error.
 	// TODO(ivanpi): Exists may fail with an error if higher levels of hierarchy
 	// do not exist.
-	Exists() (bool | error) {access.Resolve}
+	Exists(bh BatchHandle) (bool | error) {access.Resolve}
 
 	// GetPermissions returns the current Permissions for the Collection.
-	GetPermissions() (access.Permissions | error) {access.Admin}
+	GetPermissions(bh BatchHandle) (access.Permissions | error) {access.Admin}
 
 	// SetPermissions replaces the current Permissions for the Collection.
-	SetPermissions(perms access.Permissions) error {access.Admin}
+	SetPermissions(bh BatchHandle, perms access.Permissions) error {access.Admin}
 
 	// DeleteRange deletes all rows in the given half-open range [start, limit).
 	// If limit is "", all rows with keys >= start are included.
-	DeleteRange(start, limit []byte) error {access.Write}
+	DeleteRange(bh BatchHandle, start, limit []byte) error {access.Write}
 
 	// Scan returns all rows in the given half-open range [start, limit). If limit
 	// is "", all rows with keys >= start are included. Concurrency semantics are
 	// documented in model.go.
-	Scan(start, limit []byte) stream<_, KeyValue> error {access.Read}
+	Scan(bh BatchHandle, start, limit []byte) stream<_, KeyValue> error {access.Read}
 }
 
 // Row represents a single row in a Collection.
@@ -177,16 +171,16 @@ type Row interface {
 	// more information.
 	// TODO(ivanpi): Exists may fail with an error if higher levels of hierarchy
 	// do not exist.
-	Exists() (bool | error) {access.Read}
+	Exists(bh BatchHandle) (bool | error) {access.Read}
 
 	// Get returns the value for this Row.
-	Get() ([]byte | error) {access.Read}
+	Get(bh BatchHandle) ([]byte | error) {access.Read}
 
 	// Put writes the given value for this Row.
-	Put(value []byte) error {access.Write}
+	Put(bh BatchHandle, value []byte) error {access.Write}
 
 	// Delete deletes this Row.
-	Delete() error {access.Write}
+	Delete(bh BatchHandle) error {access.Write}
 }
 
 // SyncgroupManager is the interface for syncgroup operations.
@@ -382,7 +376,7 @@ type DatabaseWatcher interface {
 
 	// GetResumeMarker returns the ResumeMarker that points to the current end
 	// of the event log. GetResumeMarker() can be called on a batch.
-	GetResumeMarker() (watch.ResumeMarker | error) {access.Read}
+	GetResumeMarker(bh BatchHandle) (watch.ResumeMarker | error) {access.Read}
 }
 
 error (
@@ -390,7 +384,6 @@ error (
 	InvalidName(name string) {"en": "invalid name: {name}"}
 	CorruptDatabase(path string) {"en": "database corrupt, moved to {path}; client must create a new database"}
 	UnknownBatch() {"en": "unknown batch, perhaps the server restarted"}
-	BoundToBatch() {"en": "bound to batch"}
 	NotBoundToBatch() {"en": "not bound to batch"}
 	ReadOnlyBatch() {"en": "batch is read-only"}
 	ConcurrentBatch() {"en": "concurrent batch"}

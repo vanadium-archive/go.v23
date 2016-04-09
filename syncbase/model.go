@@ -195,6 +195,8 @@ type Database interface {
 // semantics.
 // TODO(sadovsky): If/when needed, add a CommitWillFail() method so that clients
 // can avoid doing extra work inside a doomed batch.
+// TODO(ivanpi): Document Abort-after-failed-Commit semantics and update all
+// client RunInBatch methods.
 type BatchDatabase interface {
 	DatabaseHandle
 
@@ -229,11 +231,9 @@ type Collection interface {
 
 	// Create creates this Collection.
 	// If perms is nil, we inherit (copy) the Database perms.
-	// Create must not be called from within a batch.
 	Create(ctx *context.T, perms access.Permissions) error
 
 	// Destroy destroys this Collection, permanently removing all of its data.
-	// Destroy must not be called from within a batch.
 	Destroy(ctx *context.T) error
 
 	// GetPermissions returns the current Permissions for the Collection.

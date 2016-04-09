@@ -12,7 +12,7 @@ import (
 	"v.io/v23/vom"
 )
 
-func newRow(parentFullName, key string) Row {
+func newRow(parentFullName, key string, bh wire.BatchHandle) Row {
 	// Note, we immediately decode row keys on the server side. See comment in
 	// server/dispatcher.go for explanation.
 	fullName := naming.Join(parentFullName, util.Encode(key))
@@ -20,6 +20,7 @@ func newRow(parentFullName, key string) Row {
 		c:        wire.RowClient(fullName),
 		fullName: fullName,
 		key:      key,
+		bh:       bh,
 	}
 }
 
@@ -27,6 +28,7 @@ type row struct {
 	c        wire.RowClientMethods
 	fullName string
 	key      string
+	bh       wire.BatchHandle
 }
 
 var _ Row = (*row)(nil)
@@ -43,12 +45,12 @@ func (r *row) FullName() string {
 
 // Exists implements Row.Exists.
 func (r *row) Exists(ctx *context.T) (bool, error) {
-	return r.c.Exists(ctx)
+	return r.c.Exists(ctx, r.bh)
 }
 
 // Get implements Row.Get.
 func (r *row) Get(ctx *context.T, value interface{}) error {
-	bytes, err := r.c.Get(ctx)
+	bytes, err := r.c.Get(ctx, r.bh)
 	if err != nil {
 		return err
 	}
@@ -61,10 +63,10 @@ func (r *row) Put(ctx *context.T, value interface{}) error {
 	if err != nil {
 		return err
 	}
-	return r.c.Put(ctx, bytes)
+	return r.c.Put(ctx, r.bh, bytes)
 }
 
 // Delete implements Row.Delete.
 func (r *row) Delete(ctx *context.T) error {
-	return r.c.Delete(ctx)
+	return r.c.Delete(ctx, r.bh)
 }
