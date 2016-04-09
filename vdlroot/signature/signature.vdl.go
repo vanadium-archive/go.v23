@@ -904,8 +904,8 @@ func (x *Method) VDLRead(dec vdl.Decoder) error {
 				return err
 			}
 			if dec.IsNil() {
-				if (dec.StackDepth() == 1 || dec.IsAny()) && !vdl.Compatible(vdl.TypeOf(*x), dec.Type()) {
-					return fmt.Errorf("incompatible union %T, from %v", *x.InStream, dec.Type())
+				if (dec.StackDepth() == 1 || dec.IsAny()) && !vdl.Compatible(vdl.TypeOf(x.InStream), dec.Type()) {
+					return fmt.Errorf("incompatible optional %T, from %v", x.InStream, dec.Type())
 				}
 				x.InStream = nil
 				if err = dec.FinishValue(); err != nil {
@@ -924,8 +924,8 @@ func (x *Method) VDLRead(dec vdl.Decoder) error {
 				return err
 			}
 			if dec.IsNil() {
-				if (dec.StackDepth() == 1 || dec.IsAny()) && !vdl.Compatible(vdl.TypeOf(*x), dec.Type()) {
-					return fmt.Errorf("incompatible union %T, from %v", *x.OutStream, dec.Type())
+				if (dec.StackDepth() == 1 || dec.IsAny()) && !vdl.Compatible(vdl.TypeOf(x.OutStream), dec.Type()) {
+					return fmt.Errorf("incompatible optional %T, from %v", x.OutStream, dec.Type())
 				}
 				x.OutStream = nil
 				if err = dec.FinishValue(); err != nil {
@@ -957,7 +957,7 @@ func __VDLRead1_list(dec vdl.Decoder, x *[]Arg) error {
 		return err
 	}
 	if (dec.StackDepth() == 1 || dec.IsAny()) && !vdl.Compatible(vdl.TypeOf(*x), dec.Type()) {
-		return fmt.Errorf("incompatible array %T, from %v", *x, dec.Type())
+		return fmt.Errorf("incompatible list %T, from %v", *x, dec.Type())
 	}
 	switch len := dec.LenHint(); {
 	case len == 0:
@@ -986,7 +986,7 @@ func __VDLRead2_list(dec vdl.Decoder, x *[]*vdl.Value) error {
 		return err
 	}
 	if (dec.StackDepth() == 1 || dec.IsAny()) && !vdl.Compatible(vdl.TypeOf(*x), dec.Type()) {
-		return fmt.Errorf("incompatible array %T, from %v", *x, dec.Type())
+		return fmt.Errorf("incompatible list %T, from %v", *x, dec.Type())
 	}
 	switch len := dec.LenHint(); {
 	case len == 0:
@@ -1390,7 +1390,7 @@ func __VDLRead3_list(dec vdl.Decoder, x *[]Embed) error {
 		return err
 	}
 	if (dec.StackDepth() == 1 || dec.IsAny()) && !vdl.Compatible(vdl.TypeOf(*x), dec.Type()) {
-		return fmt.Errorf("incompatible array %T, from %v", *x, dec.Type())
+		return fmt.Errorf("incompatible list %T, from %v", *x, dec.Type())
 	}
 	switch len := dec.LenHint(); {
 	case len == 0:
@@ -1419,7 +1419,7 @@ func __VDLRead4_list(dec vdl.Decoder, x *[]Method) error {
 		return err
 	}
 	if (dec.StackDepth() == 1 || dec.IsAny()) && !vdl.Compatible(vdl.TypeOf(*x), dec.Type()) {
-		return fmt.Errorf("incompatible array %T, from %v", *x, dec.Type())
+		return fmt.Errorf("incompatible list %T, from %v", *x, dec.Type())
 	}
 	switch len := dec.LenHint(); {
 	case len == 0:
