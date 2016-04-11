@@ -159,7 +159,6 @@ func (x *Annotation) VDLRead(dec vdl.Decoder) error {
 	if (dec.StackDepth() == 1 || dec.IsAny()) && !vdl.Compatible(vdl.TypeOf(*x), dec.Type()) {
 		return fmt.Errorf("incompatible struct %T, from %v", *x, dec.Type())
 	}
-	match := 0
 	for {
 		f, err := dec.NextField()
 		if err != nil {
@@ -167,12 +166,8 @@ func (x *Annotation) VDLRead(dec vdl.Decoder) error {
 		}
 		switch f {
 		case "":
-			if match == 0 && dec.Type().NumField() > 0 {
-				return fmt.Errorf("no matching fields in struct %T, from %v", *x, dec.Type())
-			}
 			return dec.FinishValue()
 		case "When":
-			match++
 			var wire time_2.Time
 			if err = wire.VDLRead(dec); err != nil {
 				return err
@@ -181,7 +176,6 @@ func (x *Annotation) VDLRead(dec vdl.Decoder) error {
 				return err
 			}
 		case "Message":
-			match++
 			if err = dec.StartValue(); err != nil {
 				return err
 			}
@@ -514,7 +508,6 @@ func (x *SpanRecord) VDLRead(dec vdl.Decoder) error {
 	if (dec.StackDepth() == 1 || dec.IsAny()) && !vdl.Compatible(vdl.TypeOf(*x), dec.Type()) {
 		return fmt.Errorf("incompatible struct %T, from %v", *x, dec.Type())
 	}
-	match := 0
 	for {
 		f, err := dec.NextField()
 		if err != nil {
@@ -522,22 +515,16 @@ func (x *SpanRecord) VDLRead(dec vdl.Decoder) error {
 		}
 		switch f {
 		case "":
-			if match == 0 && dec.Type().NumField() > 0 {
-				return fmt.Errorf("no matching fields in struct %T, from %v", *x, dec.Type())
-			}
 			return dec.FinishValue()
 		case "Id":
-			match++
 			if err = x.Id.VDLRead(dec); err != nil {
 				return err
 			}
 		case "Parent":
-			match++
 			if err = x.Parent.VDLRead(dec); err != nil {
 				return err
 			}
 		case "Name":
-			match++
 			if err = dec.StartValue(); err != nil {
 				return err
 			}
@@ -548,7 +535,6 @@ func (x *SpanRecord) VDLRead(dec vdl.Decoder) error {
 				return err
 			}
 		case "Start":
-			match++
 			var wire time_2.Time
 			if err = wire.VDLRead(dec); err != nil {
 				return err
@@ -557,7 +543,6 @@ func (x *SpanRecord) VDLRead(dec vdl.Decoder) error {
 				return err
 			}
 		case "End":
-			match++
 			var wire time_2.Time
 			if err = wire.VDLRead(dec); err != nil {
 				return err
@@ -566,7 +551,6 @@ func (x *SpanRecord) VDLRead(dec vdl.Decoder) error {
 				return err
 			}
 		case "Annotations":
-			match++
 			if err = __VDLRead1_list(dec, &x.Annotations); err != nil {
 				return err
 			}
@@ -587,10 +571,10 @@ func __VDLRead1_list(dec vdl.Decoder, x *[]Annotation) error {
 		return fmt.Errorf("incompatible list %T, from %v", *x, dec.Type())
 	}
 	switch len := dec.LenHint(); {
-	case len == 0:
-		*x = nil
 	case len > 0:
 		*x = make([]Annotation, 0, len)
+	default:
+		*x = nil
 	}
 	for {
 		switch done, err := dec.NextEntry(); {
@@ -783,7 +767,6 @@ func (x *TraceRecord) VDLRead(dec vdl.Decoder) error {
 	if (dec.StackDepth() == 1 || dec.IsAny()) && !vdl.Compatible(vdl.TypeOf(*x), dec.Type()) {
 		return fmt.Errorf("incompatible struct %T, from %v", *x, dec.Type())
 	}
-	match := 0
 	for {
 		f, err := dec.NextField()
 		if err != nil {
@@ -791,17 +774,12 @@ func (x *TraceRecord) VDLRead(dec vdl.Decoder) error {
 		}
 		switch f {
 		case "":
-			if match == 0 && dec.Type().NumField() > 0 {
-				return fmt.Errorf("no matching fields in struct %T, from %v", *x, dec.Type())
-			}
 			return dec.FinishValue()
 		case "Id":
-			match++
 			if err = x.Id.VDLRead(dec); err != nil {
 				return err
 			}
 		case "Spans":
-			match++
 			if err = __VDLRead2_list(dec, &x.Spans); err != nil {
 				return err
 			}
@@ -822,10 +800,10 @@ func __VDLRead2_list(dec vdl.Decoder, x *[]SpanRecord) error {
 		return fmt.Errorf("incompatible list %T, from %v", *x, dec.Type())
 	}
 	switch len := dec.LenHint(); {
-	case len == 0:
-		*x = nil
 	case len > 0:
 		*x = make([]SpanRecord, 0, len)
+	default:
+		*x = nil
 	}
 	for {
 		switch done, err := dec.NextEntry(); {
@@ -1090,7 +1068,6 @@ func (x *Request) VDLRead(dec vdl.Decoder) error {
 	if (dec.StackDepth() == 1 || dec.IsAny()) && !vdl.Compatible(vdl.TypeOf(*x), dec.Type()) {
 		return fmt.Errorf("incompatible struct %T, from %v", *x, dec.Type())
 	}
-	match := 0
 	for {
 		f, err := dec.NextField()
 		if err != nil {
@@ -1098,27 +1075,20 @@ func (x *Request) VDLRead(dec vdl.Decoder) error {
 		}
 		switch f {
 		case "":
-			if match == 0 && dec.Type().NumField() > 0 {
-				return fmt.Errorf("no matching fields in struct %T, from %v", *x, dec.Type())
-			}
 			return dec.FinishValue()
 		case "SpanId":
-			match++
 			if err = x.SpanId.VDLRead(dec); err != nil {
 				return err
 			}
 		case "TraceId":
-			match++
 			if err = x.TraceId.VDLRead(dec); err != nil {
 				return err
 			}
 		case "Flags":
-			match++
 			if err = x.Flags.VDLRead(dec); err != nil {
 				return err
 			}
 		case "LogLevel":
-			match++
 			if err = dec.StartValue(); err != nil {
 				return err
 			}
@@ -1272,7 +1242,6 @@ func (x *Response) VDLRead(dec vdl.Decoder) error {
 	if (dec.StackDepth() == 1 || dec.IsAny()) && !vdl.Compatible(vdl.TypeOf(*x), dec.Type()) {
 		return fmt.Errorf("incompatible struct %T, from %v", *x, dec.Type())
 	}
-	match := 0
 	for {
 		f, err := dec.NextField()
 		if err != nil {
@@ -1280,17 +1249,12 @@ func (x *Response) VDLRead(dec vdl.Decoder) error {
 		}
 		switch f {
 		case "":
-			if match == 0 && dec.Type().NumField() > 0 {
-				return fmt.Errorf("no matching fields in struct %T, from %v", *x, dec.Type())
-			}
 			return dec.FinishValue()
 		case "Flags":
-			match++
 			if err = x.Flags.VDLRead(dec); err != nil {
 				return err
 			}
 		case "Trace":
-			match++
 			if err = x.Trace.VDLRead(dec); err != nil {
 				return err
 			}

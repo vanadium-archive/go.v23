@@ -194,7 +194,6 @@ func (x *AddressInfo) VDLRead(dec vdl.Decoder) error {
 	if (dec.StackDepth() == 1 || dec.IsAny()) && !vdl.Compatible(vdl.TypeOf(*x), dec.Type()) {
 		return fmt.Errorf("incompatible struct %T, from %v", *x, dec.Type())
 	}
-	match := 0
 	for {
 		f, err := dec.NextField()
 		if err != nil {
@@ -202,12 +201,8 @@ func (x *AddressInfo) VDLRead(dec vdl.Decoder) error {
 		}
 		switch f {
 		case "":
-			if match == 0 && dec.Type().NumField() > 0 {
-				return fmt.Errorf("no matching fields in struct %T, from %v", *x, dec.Type())
-			}
 			return dec.FinishValue()
 		case "Street":
-			match++
 			if err = dec.StartValue(); err != nil {
 				return err
 			}
@@ -218,7 +213,6 @@ func (x *AddressInfo) VDLRead(dec vdl.Decoder) error {
 				return err
 			}
 		case "City":
-			match++
 			if err = dec.StartValue(); err != nil {
 				return err
 			}
@@ -229,7 +223,6 @@ func (x *AddressInfo) VDLRead(dec vdl.Decoder) error {
 				return err
 			}
 		case "State":
-			match++
 			if err = dec.StartValue(); err != nil {
 				return err
 			}
@@ -240,7 +233,6 @@ func (x *AddressInfo) VDLRead(dec vdl.Decoder) error {
 				return err
 			}
 		case "Zip":
-			match++
 			if err = dec.StartValue(); err != nil {
 				return err
 			}
@@ -549,7 +541,6 @@ func (x *EquifaxCreditReport) VDLRead(dec vdl.Decoder) error {
 	if (dec.StackDepth() == 1 || dec.IsAny()) && !vdl.Compatible(vdl.TypeOf(*x), dec.Type()) {
 		return fmt.Errorf("incompatible struct %T, from %v", *x, dec.Type())
 	}
-	match := 0
 	for {
 		f, err := dec.NextField()
 		if err != nil {
@@ -557,12 +548,8 @@ func (x *EquifaxCreditReport) VDLRead(dec vdl.Decoder) error {
 		}
 		switch f {
 		case "":
-			if match == 0 && dec.Type().NumField() > 0 {
-				return fmt.Errorf("no matching fields in struct %T, from %v", *x, dec.Type())
-			}
 			return dec.FinishValue()
 		case "Rating":
-			match++
 			if err = dec.StartValue(); err != nil {
 				return err
 			}
@@ -676,7 +663,6 @@ func (x *ExperianCreditReport) VDLRead(dec vdl.Decoder) error {
 	if (dec.StackDepth() == 1 || dec.IsAny()) && !vdl.Compatible(vdl.TypeOf(*x), dec.Type()) {
 		return fmt.Errorf("incompatible struct %T, from %v", *x, dec.Type())
 	}
-	match := 0
 	for {
 		f, err := dec.NextField()
 		if err != nil {
@@ -684,12 +670,8 @@ func (x *ExperianCreditReport) VDLRead(dec vdl.Decoder) error {
 		}
 		switch f {
 		case "":
-			if match == 0 && dec.Type().NumField() > 0 {
-				return fmt.Errorf("no matching fields in struct %T, from %v", *x, dec.Type())
-			}
 			return dec.FinishValue()
 		case "Rating":
-			match++
 			if err = x.Rating.VDLRead(dec); err != nil {
 				return err
 			}
@@ -794,7 +776,6 @@ func (x *TransUnionCreditReport) VDLRead(dec vdl.Decoder) error {
 	if (dec.StackDepth() == 1 || dec.IsAny()) && !vdl.Compatible(vdl.TypeOf(*x), dec.Type()) {
 		return fmt.Errorf("incompatible struct %T, from %v", *x, dec.Type())
 	}
-	match := 0
 	for {
 		f, err := dec.NextField()
 		if err != nil {
@@ -802,12 +783,8 @@ func (x *TransUnionCreditReport) VDLRead(dec vdl.Decoder) error {
 		}
 		switch f {
 		case "":
-			if match == 0 && dec.Type().NumField() > 0 {
-				return fmt.Errorf("no matching fields in struct %T, from %v", *x, dec.Type())
-			}
 			return dec.FinishValue()
 		case "Rating":
-			match++
 			if err = dec.StartValue(); err != nil {
 				return err
 			}
@@ -1190,7 +1167,6 @@ func (x *CreditReport) VDLRead(dec vdl.Decoder) error {
 	if (dec.StackDepth() == 1 || dec.IsAny()) && !vdl.Compatible(vdl.TypeOf(*x), dec.Type()) {
 		return fmt.Errorf("incompatible struct %T, from %v", *x, dec.Type())
 	}
-	match := 0
 	for {
 		f, err := dec.NextField()
 		if err != nil {
@@ -1198,17 +1174,12 @@ func (x *CreditReport) VDLRead(dec vdl.Decoder) error {
 		}
 		switch f {
 		case "":
-			if match == 0 && dec.Type().NumField() > 0 {
-				return fmt.Errorf("no matching fields in struct %T, from %v", *x, dec.Type())
-			}
 			return dec.FinishValue()
 		case "Agency":
-			match++
 			if err = x.Agency.VDLRead(dec); err != nil {
 				return err
 			}
 		case "Report":
-			match++
 			if err = VDLReadAgencyReport(dec, &x.Report); err != nil {
 				return err
 			}
@@ -1435,7 +1406,6 @@ func (x *Customer) VDLRead(dec vdl.Decoder) error {
 	if (dec.StackDepth() == 1 || dec.IsAny()) && !vdl.Compatible(vdl.TypeOf(*x), dec.Type()) {
 		return fmt.Errorf("incompatible struct %T, from %v", *x, dec.Type())
 	}
-	match := 0
 	for {
 		f, err := dec.NextField()
 		if err != nil {
@@ -1443,12 +1413,8 @@ func (x *Customer) VDLRead(dec vdl.Decoder) error {
 		}
 		switch f {
 		case "":
-			if match == 0 && dec.Type().NumField() > 0 {
-				return fmt.Errorf("no matching fields in struct %T, from %v", *x, dec.Type())
-			}
 			return dec.FinishValue()
 		case "Name":
-			match++
 			if err = dec.StartValue(); err != nil {
 				return err
 			}
@@ -1459,7 +1425,6 @@ func (x *Customer) VDLRead(dec vdl.Decoder) error {
 				return err
 			}
 		case "Id":
-			match++
 			if err = dec.StartValue(); err != nil {
 				return err
 			}
@@ -1470,7 +1435,6 @@ func (x *Customer) VDLRead(dec vdl.Decoder) error {
 				return err
 			}
 		case "Active":
-			match++
 			if err = dec.StartValue(); err != nil {
 				return err
 			}
@@ -1481,12 +1445,10 @@ func (x *Customer) VDLRead(dec vdl.Decoder) error {
 				return err
 			}
 		case "Address":
-			match++
 			if err = x.Address.VDLRead(dec); err != nil {
 				return err
 			}
 		case "Credit":
-			match++
 			if err = x.Credit.VDLRead(dec); err != nil {
 				return err
 			}

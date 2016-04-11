@@ -164,7 +164,6 @@ func (x *SignedFile) VDLRead(dec vdl.Decoder) error {
 	if (dec.StackDepth() == 1 || dec.IsAny()) && !vdl.Compatible(vdl.TypeOf(*x), dec.Type()) {
 		return fmt.Errorf("incompatible struct %T, from %v", *x, dec.Type())
 	}
-	match := 0
 	for {
 		f, err := dec.NextField()
 		if err != nil {
@@ -172,12 +171,8 @@ func (x *SignedFile) VDLRead(dec vdl.Decoder) error {
 		}
 		switch f {
 		case "":
-			if match == 0 && dec.Type().NumField() > 0 {
-				return fmt.Errorf("no matching fields in struct %T, from %v", *x, dec.Type())
-			}
 			return dec.FinishValue()
 		case "File":
-			match++
 			if err = dec.StartValue(); err != nil {
 				return err
 			}
@@ -188,7 +183,6 @@ func (x *SignedFile) VDLRead(dec vdl.Decoder) error {
 				return err
 			}
 		case "Signature":
-			match++
 			if err = x.Signature.VDLRead(dec); err != nil {
 				return err
 			}
@@ -309,20 +303,16 @@ func (x *Packages) VDLRead(dec vdl.Decoder) error {
 	if (dec.StackDepth() == 1 || dec.IsAny()) && !vdl.Compatible(vdl.TypeOf(*x), dec.Type()) {
 		return fmt.Errorf("incompatible map %T, from %v", *x, dec.Type())
 	}
-	switch len := dec.LenHint(); {
-	case len == 0:
-		*x = nil
-		return dec.FinishValue()
-	case len > 0:
-		*x = make(Packages, len)
-	default:
-		*x = make(Packages)
+	var tmpMap Packages
+	if len := dec.LenHint(); len > 0 {
+		tmpMap = make(Packages, len)
 	}
 	for {
 		switch done, err := dec.NextEntry(); {
 		case err != nil:
 			return err
 		case done:
+			*x = tmpMap
 			return dec.FinishValue()
 		}
 		var key string
@@ -343,7 +333,10 @@ func (x *Packages) VDLRead(dec vdl.Decoder) error {
 				return err
 			}
 		}
-		(*x)[key] = elem
+		if tmpMap == nil {
+			tmpMap = make(Packages)
+		}
+		tmpMap[key] = elem
 	}
 }
 
@@ -759,7 +752,6 @@ func (x *Envelope) VDLRead(dec vdl.Decoder) error {
 	if (dec.StackDepth() == 1 || dec.IsAny()) && !vdl.Compatible(vdl.TypeOf(*x), dec.Type()) {
 		return fmt.Errorf("incompatible struct %T, from %v", *x, dec.Type())
 	}
-	match := 0
 	for {
 		f, err := dec.NextField()
 		if err != nil {
@@ -767,12 +759,8 @@ func (x *Envelope) VDLRead(dec vdl.Decoder) error {
 		}
 		switch f {
 		case "":
-			if match == 0 && dec.Type().NumField() > 0 {
-				return fmt.Errorf("no matching fields in struct %T, from %v", *x, dec.Type())
-			}
 			return dec.FinishValue()
 		case "Title":
-			match++
 			if err = dec.StartValue(); err != nil {
 				return err
 			}
@@ -783,17 +771,14 @@ func (x *Envelope) VDLRead(dec vdl.Decoder) error {
 				return err
 			}
 		case "Args":
-			match++
 			if err = __VDLRead1_list(dec, &x.Args); err != nil {
 				return err
 			}
 		case "Binary":
-			match++
 			if err = x.Binary.VDLRead(dec); err != nil {
 				return err
 			}
 		case "Publisher":
-			match++
 			var wire security.WireBlessings
 			if err = wire.VDLRead(dec); err != nil {
 				return err
@@ -802,17 +787,14 @@ func (x *Envelope) VDLRead(dec vdl.Decoder) error {
 				return err
 			}
 		case "Env":
-			match++
 			if err = __VDLRead1_list(dec, &x.Env); err != nil {
 				return err
 			}
 		case "Packages":
-			match++
 			if err = x.Packages.VDLRead(dec); err != nil {
 				return err
 			}
 		case "Restarts":
-			match++
 			if err = dec.StartValue(); err != nil {
 				return err
 			}
@@ -825,7 +807,6 @@ func (x *Envelope) VDLRead(dec vdl.Decoder) error {
 				return err
 			}
 		case "RestartTimeWindow":
-			match++
 			var wire time_2.Duration
 			if err = wire.VDLRead(dec); err != nil {
 				return err
@@ -850,10 +831,10 @@ func __VDLRead1_list(dec vdl.Decoder, x *[]string) error {
 		return fmt.Errorf("incompatible list %T, from %v", *x, dec.Type())
 	}
 	switch len := dec.LenHint(); {
-	case len == 0:
-		*x = nil
 	case len > 0:
 		*x = make([]string, 0, len)
+	default:
+		*x = nil
 	}
 	for {
 		switch done, err := dec.NextEntry(); {

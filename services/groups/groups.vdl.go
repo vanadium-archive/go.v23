@@ -143,10 +143,12 @@ func (x *GetRequest) VDLRead(dec vdl.Decoder) error {
 		return fmt.Errorf("incompatible struct %T, from %v", *x, dec.Type())
 	}
 	for {
-		switch f, err := dec.NextField(); {
-		case err != nil:
+		f, err := dec.NextField()
+		if err != nil {
 			return err
-		case f == "":
+		}
+		switch f {
+		case "":
 			return dec.FinishValue()
 		default:
 			if err = dec.SkipValue(); err != nil {
@@ -305,7 +307,6 @@ func (x *GetResponse) VDLRead(dec vdl.Decoder) error {
 	if (dec.StackDepth() == 1 || dec.IsAny()) && !vdl.Compatible(vdl.TypeOf(*x), dec.Type()) {
 		return fmt.Errorf("incompatible struct %T, from %v", *x, dec.Type())
 	}
-	match := 0
 	for {
 		f, err := dec.NextField()
 		if err != nil {
@@ -313,12 +314,8 @@ func (x *GetResponse) VDLRead(dec vdl.Decoder) error {
 		}
 		switch f {
 		case "":
-			if match == 0 && dec.Type().NumField() > 0 {
-				return fmt.Errorf("no matching fields in struct %T, from %v", *x, dec.Type())
-			}
 			return dec.FinishValue()
 		case "Entries":
-			match++
 			if err = __VDLRead1_set(dec, &x.Entries); err != nil {
 				return err
 			}
@@ -338,20 +335,16 @@ func __VDLRead1_set(dec vdl.Decoder, x *map[BlessingPatternChunk]struct{}) error
 	if (dec.StackDepth() == 1 || dec.IsAny()) && !vdl.Compatible(vdl.TypeOf(*x), dec.Type()) {
 		return fmt.Errorf("incompatible set %T, from %v", *x, dec.Type())
 	}
-	switch len := dec.LenHint(); {
-	case len == 0:
-		*x = nil
-		return dec.FinishValue()
-	case len > 0:
-		*x = make(map[BlessingPatternChunk]struct{}, len)
-	default:
-		*x = make(map[BlessingPatternChunk]struct{})
+	var tmpMap map[BlessingPatternChunk]struct{}
+	if len := dec.LenHint(); len > 0 {
+		tmpMap = make(map[BlessingPatternChunk]struct{}, len)
 	}
 	for {
 		switch done, err := dec.NextEntry(); {
 		case err != nil:
 			return err
 		case done:
+			*x = tmpMap
 			return dec.FinishValue()
 		}
 		var key BlessingPatternChunk
@@ -360,7 +353,10 @@ func __VDLRead1_set(dec vdl.Decoder, x *map[BlessingPatternChunk]struct{}) error
 				return err
 			}
 		}
-		(*x)[key] = struct{}{}
+		if tmpMap == nil {
+			tmpMap = make(map[BlessingPatternChunk]struct{})
+		}
+		tmpMap[key] = struct{}{}
 	}
 }
 
@@ -587,7 +583,6 @@ func (x *Approximation) VDLRead(dec vdl.Decoder) error {
 	if (dec.StackDepth() == 1 || dec.IsAny()) && !vdl.Compatible(vdl.TypeOf(*x), dec.Type()) {
 		return fmt.Errorf("incompatible struct %T, from %v", *x, dec.Type())
 	}
-	match := 0
 	for {
 		f, err := dec.NextField()
 		if err != nil {
@@ -595,12 +590,8 @@ func (x *Approximation) VDLRead(dec vdl.Decoder) error {
 		}
 		switch f {
 		case "":
-			if match == 0 && dec.Type().NumField() > 0 {
-				return fmt.Errorf("no matching fields in struct %T, from %v", *x, dec.Type())
-			}
 			return dec.FinishValue()
 		case "Reason":
-			match++
 			if err = dec.StartValue(); err != nil {
 				return err
 			}
@@ -611,7 +602,6 @@ func (x *Approximation) VDLRead(dec vdl.Decoder) error {
 				return err
 			}
 		case "Details":
-			match++
 			if err = dec.StartValue(); err != nil {
 				return err
 			}

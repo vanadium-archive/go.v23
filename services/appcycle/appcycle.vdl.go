@@ -153,7 +153,6 @@ func (x *Task) VDLRead(dec vdl.Decoder) error {
 	if (dec.StackDepth() == 1 || dec.IsAny()) && !vdl.Compatible(vdl.TypeOf(*x), dec.Type()) {
 		return fmt.Errorf("incompatible struct %T, from %v", *x, dec.Type())
 	}
-	match := 0
 	for {
 		f, err := dec.NextField()
 		if err != nil {
@@ -161,12 +160,8 @@ func (x *Task) VDLRead(dec vdl.Decoder) error {
 		}
 		switch f {
 		case "":
-			if match == 0 && dec.Type().NumField() > 0 {
-				return fmt.Errorf("no matching fields in struct %T, from %v", *x, dec.Type())
-			}
 			return dec.FinishValue()
 		case "Progress":
-			match++
 			if err = dec.StartValue(); err != nil {
 				return err
 			}
@@ -179,7 +174,6 @@ func (x *Task) VDLRead(dec vdl.Decoder) error {
 				return err
 			}
 		case "Goal":
-			match++
 			if err = dec.StartValue(); err != nil {
 				return err
 			}

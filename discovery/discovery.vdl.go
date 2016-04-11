@@ -155,20 +155,16 @@ func (x *Attributes) VDLRead(dec vdl.Decoder) error {
 	if (dec.StackDepth() == 1 || dec.IsAny()) && !vdl.Compatible(vdl.TypeOf(*x), dec.Type()) {
 		return fmt.Errorf("incompatible map %T, from %v", *x, dec.Type())
 	}
-	switch len := dec.LenHint(); {
-	case len == 0:
-		*x = nil
-		return dec.FinishValue()
-	case len > 0:
-		*x = make(Attributes, len)
-	default:
-		*x = make(Attributes)
+	var tmpMap Attributes
+	if len := dec.LenHint(); len > 0 {
+		tmpMap = make(Attributes, len)
 	}
 	for {
 		switch done, err := dec.NextEntry(); {
 		case err != nil:
 			return err
 		case done:
+			*x = tmpMap
 			return dec.FinishValue()
 		}
 		var key string
@@ -195,7 +191,10 @@ func (x *Attributes) VDLRead(dec vdl.Decoder) error {
 				return err
 			}
 		}
-		(*x)[key] = elem
+		if tmpMap == nil {
+			tmpMap = make(Attributes)
+		}
+		tmpMap[key] = elem
 	}
 }
 
@@ -292,20 +291,16 @@ func (x *Attachments) VDLRead(dec vdl.Decoder) error {
 	if (dec.StackDepth() == 1 || dec.IsAny()) && !vdl.Compatible(vdl.TypeOf(*x), dec.Type()) {
 		return fmt.Errorf("incompatible map %T, from %v", *x, dec.Type())
 	}
-	switch len := dec.LenHint(); {
-	case len == 0:
-		*x = nil
-		return dec.FinishValue()
-	case len > 0:
-		*x = make(Attachments, len)
-	default:
-		*x = make(Attachments)
+	var tmpMap Attachments
+	if len := dec.LenHint(); len > 0 {
+		tmpMap = make(Attachments, len)
 	}
 	for {
 		switch done, err := dec.NextEntry(); {
 		case err != nil:
 			return err
 		case done:
+			*x = tmpMap
 			return dec.FinishValue()
 		}
 		var key string
@@ -332,7 +327,10 @@ func (x *Attachments) VDLRead(dec vdl.Decoder) error {
 				return err
 			}
 		}
-		(*x)[key] = elem
+		if tmpMap == nil {
+			tmpMap = make(Attachments)
+		}
+		tmpMap[key] = elem
 	}
 }
 
@@ -599,7 +597,6 @@ func (x *Advertisement) VDLRead(dec vdl.Decoder) error {
 	if (dec.StackDepth() == 1 || dec.IsAny()) && !vdl.Compatible(vdl.TypeOf(*x), dec.Type()) {
 		return fmt.Errorf("incompatible struct %T, from %v", *x, dec.Type())
 	}
-	match := 0
 	for {
 		f, err := dec.NextField()
 		if err != nil {
@@ -607,17 +604,12 @@ func (x *Advertisement) VDLRead(dec vdl.Decoder) error {
 		}
 		switch f {
 		case "":
-			if match == 0 && dec.Type().NumField() > 0 {
-				return fmt.Errorf("no matching fields in struct %T, from %v", *x, dec.Type())
-			}
 			return dec.FinishValue()
 		case "Id":
-			match++
 			if err = x.Id.VDLRead(dec); err != nil {
 				return err
 			}
 		case "InterfaceName":
-			match++
 			if err = dec.StartValue(); err != nil {
 				return err
 			}
@@ -628,17 +620,14 @@ func (x *Advertisement) VDLRead(dec vdl.Decoder) error {
 				return err
 			}
 		case "Addresses":
-			match++
 			if err = __VDLRead1_list(dec, &x.Addresses); err != nil {
 				return err
 			}
 		case "Attributes":
-			match++
 			if err = x.Attributes.VDLRead(dec); err != nil {
 				return err
 			}
 		case "Attachments":
-			match++
 			if err = x.Attachments.VDLRead(dec); err != nil {
 				return err
 			}
@@ -659,10 +648,10 @@ func __VDLRead1_list(dec vdl.Decoder, x *[]string) error {
 		return fmt.Errorf("incompatible list %T, from %v", *x, dec.Type())
 	}
 	switch len := dec.LenHint(); {
-	case len == 0:
-		*x = nil
 	case len > 0:
 		*x = make([]string, 0, len)
+	default:
+		*x = nil
 	}
 	for {
 		switch done, err := dec.NextEntry(); {

@@ -63,7 +63,6 @@ func (vv *Value) readHandleNil(dec Decoder) error {
 }
 
 func (vv *Value) readFillValue(dec Decoder) error {
-	// Fill in the value.
 	if vv.Type().IsBytes() {
 		fixedLength := -1
 		if vv.Kind() == Array {
@@ -118,7 +117,6 @@ func (vv *Value) readFillValue(dec Decoder) error {
 		if err != nil {
 			return err
 		}
-
 		index := vv.Type().EnumIndex(val)
 		if index == -1 {
 			return fmt.Errorf("vdl: %v invalid enum label %q", vv.Type(), val)
@@ -149,33 +147,21 @@ func (vv *Value) readFillValue(dec Decoder) error {
 			return err
 		}
 	default:
-		panic(fmt.Sprintf("unhandled type: %v", dec.Type()))
+		panic(fmt.Sprintf("unhandled type: %v", vv.Type()))
 	}
 	return nil
 }
 
-func (vv *Value) readSet(dec Decoder) error {
+func (vv *Value) checkCompatible(dec Decoder) error {
 	if (dec.StackDepth() == 1 || dec.IsAny()) && !Compatible(vv.Type(), dec.Type()) {
-		return fmt.Errorf("cannot decode into set from %v", dec.Type())
+		return fmt.Errorf("incompatible %v %v, from %v", vv.Kind(), vv.Type(), dec.Type())
 	}
-	for {
-		switch done, err := dec.NextEntry(); {
-		case err != nil:
-			return err
-		case done:
-			return nil
-		}
-		key := ZeroValue(vv.Type().Key())
-		if err := key.VDLRead(dec); err != nil {
-			return err
-		}
-		vv.AssignSetKey(key)
-	}
+	return nil
 }
 
 func (vv *Value) readArray(dec Decoder) error {
-	if (dec.StackDepth() == 1 || dec.IsAny()) && !Compatible(vv.Type(), dec.Type()) {
-		return fmt.Errorf("incompatible array %v, from %v", vv, dec.Type())
+	if err := vv.checkCompatible(dec); err != nil {
+		return err
 	}
 	index := 0
 	for {
@@ -192,15 +178,18 @@ func (vv *Value) readArray(dec Decoder) error {
 		}
 		index++
 	}
-	return nil
 }
 
 func (vv *Value) readList(dec Decoder) error {
-	if (dec.StackDepth() == 1 || dec.IsAny()) && !Compatible(vv.Type(), dec.Type()) {
-		return fmt.Errorf("cannot decode into list from %v", dec.Type())
+	if err := vv.checkCompatible(dec); err != nil {
+		return err
 	}
-	if len := dec.LenHint(); len >= 0 {
+	switch len := dec.LenHint(); {
+	case len >= 0:
 		vv.AssignLen(len)
+	default:
+		// Assign 0 length when we don't have a hint.
+		vv.AssignLen(0)
 	}
 	index := 0
 	for {
@@ -210,20 +199,31 @@ func (vv *Value) readList(dec Decoder) error {
 		case done:
 			return nil
 		}
-		if index >= vv.Len() {
-			vv.AssignLen(index + 1)
+		if needLen := index + 1; needLen > vv.Len() {
+			var cap int
+			if needLen <= 1024 {
+				cap = needLen * 2
+			} else {
+				cap = needLen + needLen/4
+			}
+			// Grow the underlying buffer.  The first AssignLen grows the buffer to
+			// the capacity, while the second AssignLen sets the actual length.
+			//
+			// TODO(toddw): Consider changing the Value API to either add an Append
+			// method, or to allow the user to explicitly manage the capacity.
+			vv.AssignLen(cap)
+			vv.AssignLen(needLen)
 		}
 		if err := vv.Index(index).VDLRead(dec); err != nil {
 			return err
 		}
 		index++
 	}
-	return nil
 }
 
-func (vv *Value) readMap(dec Decoder) error {
-	if (dec.StackDepth() == 1 || dec.IsAny()) && !Compatible(vv.Type(), dec.Type()) {
-		return fmt.Errorf("cannot decode into map from %v", dec.Type())
+func (vv *Value) readSet(dec Decoder) error {
+	if err := vv.checkCompatible(dec); err != nil {
+		return err
 	}
 	for {
 		switch done, err := dec.NextEntry(); {
@@ -233,38 +233,57 @@ func (vv *Value) readMap(dec Decoder) error {
 			return nil
 		}
 		key := ZeroValue(vv.Type().Key())
-		elem := ZeroValue(vv.Type().Elem())
 		if err := key.VDLRead(dec); err != nil {
 			return err
 		}
+		vv.AssignSetKey(key)
+	}
+}
+
+func (vv *Value) readMap(dec Decoder) error {
+	if err := vv.checkCompatible(dec); err != nil {
+		return err
+	}
+	for {
+		switch done, err := dec.NextEntry(); {
+		case err != nil:
+			return err
+		case done:
+			return nil
+		}
+		key := ZeroValue(vv.Type().Key())
+		if err := key.VDLRead(dec); err != nil {
+			return err
+		}
+		elem := ZeroValue(vv.Type().Elem())
 		if err := elem.VDLRead(dec); err != nil {
 			return err
 		}
 		vv.AssignMapIndex(key, elem)
 	}
-	return nil
 }
 
 func (vv *Value) readStruct(dec Decoder) error {
-	if (dec.StackDepth() == 1 || dec.IsAny()) && !Compatible(vv.Type(), dec.Type()) {
-		return fmt.Errorf("cannot decode into struct from %v", dec.Type())
+	if err := vv.checkCompatible(dec); err != nil {
+		return err
 	}
+	// Reset to zero struct, since fields may be missing.
+	vv.Assign(nil)
 	for {
 		name, err := dec.NextField()
-		if err != nil {
+		switch {
+		case err != nil:
 			return err
-		}
-		if name == "" {
+		case name == "":
 			return nil
 		}
-
-		field := vv.StructFieldByName(name)
-		if field == nil {
-			if err := dec.SkipValue(); err != nil {
+		switch field := vv.StructFieldByName(name); {
+		case field != nil:
+			if err := field.VDLRead(dec); err != nil {
 				return err
 			}
-		} else {
-			if err := field.VDLRead(dec); err != nil {
+		default:
+			if err := dec.SkipValue(); err != nil {
 				return err
 			}
 		}
@@ -272,27 +291,30 @@ func (vv *Value) readStruct(dec Decoder) error {
 }
 
 func (vv *Value) readUnion(dec Decoder) error {
-	if (dec.StackDepth() == 1 || dec.IsAny()) && !Compatible(vv.Type(), dec.Type()) {
-		return fmt.Errorf("cannot decode into union from %v", dec.Type())
+	if err := vv.checkCompatible(dec); err != nil {
+		return err
 	}
 	name, err := dec.NextField()
-	if err != nil {
+	switch {
+	case err != nil:
 		return err
+	case name == "":
+		return fmt.Errorf("missing field in union %v, from %v", vv.Type(), dec.Type())
 	}
-	fld, index := vv.Type().FieldByName(name)
+	field, index := vv.Type().FieldByName(name)
 	if index < 0 {
-		return fmt.Errorf("invalid field name %s when decoding into union %v", name, vv.Type())
+		return fmt.Errorf("field %q not in union %v, from %v", name, vv.Type(), dec.Type())
 	}
-	unionElem := ZeroValue(fld.Type)
-	if err := unionElem.VDLRead(dec); err != nil {
+	elem := ZeroValue(field.Type)
+	if err := elem.VDLRead(dec); err != nil {
 		return err
 	}
-	vv.AssignUnionField(index, unionElem)
+	vv.AssignUnionField(index, elem)
 	switch name, err := dec.NextField(); {
 	case err != nil:
 		return err
 	case name != "":
-		return fmt.Errorf("multiple fields illegally specified for union")
+		return fmt.Errorf("extra field %q in union %v, from %v", name, vv.Type(), dec.Type())
 	}
 	return nil
 }

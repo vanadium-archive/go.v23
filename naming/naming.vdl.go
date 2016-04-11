@@ -224,7 +224,6 @@ func (x *MountedServer) VDLRead(dec vdl.Decoder) error {
 	if (dec.StackDepth() == 1 || dec.IsAny()) && !vdl.Compatible(vdl.TypeOf(*x), dec.Type()) {
 		return fmt.Errorf("incompatible struct %T, from %v", *x, dec.Type())
 	}
-	match := 0
 	for {
 		f, err := dec.NextField()
 		if err != nil {
@@ -232,12 +231,8 @@ func (x *MountedServer) VDLRead(dec vdl.Decoder) error {
 		}
 		switch f {
 		case "":
-			if match == 0 && dec.Type().NumField() > 0 {
-				return fmt.Errorf("no matching fields in struct %T, from %v", *x, dec.Type())
-			}
 			return dec.FinishValue()
 		case "Server":
-			match++
 			if err = dec.StartValue(); err != nil {
 				return err
 			}
@@ -248,7 +243,6 @@ func (x *MountedServer) VDLRead(dec vdl.Decoder) error {
 				return err
 			}
 		case "Deadline":
-			match++
 			var wire time.WireDeadline
 			if err = wire.VDLRead(dec); err != nil {
 				return err
@@ -500,7 +494,6 @@ func (x *MountEntry) VDLRead(dec vdl.Decoder) error {
 	if (dec.StackDepth() == 1 || dec.IsAny()) && !vdl.Compatible(vdl.TypeOf(*x), dec.Type()) {
 		return fmt.Errorf("incompatible struct %T, from %v", *x, dec.Type())
 	}
-	match := 0
 	for {
 		f, err := dec.NextField()
 		if err != nil {
@@ -508,12 +501,8 @@ func (x *MountEntry) VDLRead(dec vdl.Decoder) error {
 		}
 		switch f {
 		case "":
-			if match == 0 && dec.Type().NumField() > 0 {
-				return fmt.Errorf("no matching fields in struct %T, from %v", *x, dec.Type())
-			}
 			return dec.FinishValue()
 		case "Name":
-			match++
 			if err = dec.StartValue(); err != nil {
 				return err
 			}
@@ -524,12 +513,10 @@ func (x *MountEntry) VDLRead(dec vdl.Decoder) error {
 				return err
 			}
 		case "Servers":
-			match++
 			if err = __VDLRead1_list(dec, &x.Servers); err != nil {
 				return err
 			}
 		case "ServesMountTable":
-			match++
 			if err = dec.StartValue(); err != nil {
 				return err
 			}
@@ -540,7 +527,6 @@ func (x *MountEntry) VDLRead(dec vdl.Decoder) error {
 				return err
 			}
 		case "IsLeaf":
-			match++
 			if err = dec.StartValue(); err != nil {
 				return err
 			}
@@ -567,10 +553,10 @@ func __VDLRead1_list(dec vdl.Decoder, x *[]MountedServer) error {
 		return fmt.Errorf("incompatible list %T, from %v", *x, dec.Type())
 	}
 	switch len := dec.LenHint(); {
-	case len == 0:
-		*x = nil
 	case len > 0:
 		*x = make([]MountedServer, 0, len)
+	default:
+		*x = nil
 	}
 	for {
 		switch done, err := dec.NextEntry(); {
@@ -718,7 +704,6 @@ func (x *GlobError) VDLRead(dec vdl.Decoder) error {
 	if (dec.StackDepth() == 1 || dec.IsAny()) && !vdl.Compatible(vdl.TypeOf(*x), dec.Type()) {
 		return fmt.Errorf("incompatible struct %T, from %v", *x, dec.Type())
 	}
-	match := 0
 	for {
 		f, err := dec.NextField()
 		if err != nil {
@@ -726,12 +711,8 @@ func (x *GlobError) VDLRead(dec vdl.Decoder) error {
 		}
 		switch f {
 		case "":
-			if match == 0 && dec.Type().NumField() > 0 {
-				return fmt.Errorf("no matching fields in struct %T, from %v", *x, dec.Type())
-			}
 			return dec.FinishValue()
 		case "Name":
-			match++
 			if err = dec.StartValue(); err != nil {
 				return err
 			}
@@ -742,7 +723,6 @@ func (x *GlobError) VDLRead(dec vdl.Decoder) error {
 				return err
 			}
 		case "Error":
-			match++
 			if err = verror.VDLRead(dec, &x.Error); err != nil {
 				return err
 			}
