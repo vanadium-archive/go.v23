@@ -42,7 +42,7 @@ func createDbAndCollection(t *testing.T, clientCtx *context.T) syncbase.Database
 	if err := d.Create(clientCtx, nil); err != nil {
 		t.Fatalf("unable to create a database: %v", err)
 	}
-	if err := d.Collection("c").Create(clientCtx, nil); err != nil {
+	if err := d.CollectionForId(testCx).Create(clientCtx, nil); err != nil {
 		t.Fatalf("unable to create a collection: %v", err)
 	}
 	return d
@@ -80,7 +80,10 @@ func TestV23RestartabilityCrash(t *testing.T) {
 	checkHierarchy(t, clientCtx)
 }
 
-var dbIds = []wire.Id{{"a1", "d1"}, {"a1", "d2"}, {"a2", "d1"}, {"a2", "d2"}}
+var (
+	dbIds = []wire.Id{{"a1", "d1"}, {"a1", "d2"}, {"a2", "d1"}, {"a2", "d2"}}
+	cxIds = []wire.Id{{"u", "c1"}, {"u", "c2"}}
+)
 
 // Creates dbs, collections, and rows.
 func createHierarchy(t *testing.T, ctx *context.T) {
@@ -90,8 +93,9 @@ func createHierarchy(t *testing.T, ctx *context.T) {
 		if err := d.Create(ctx, nil); err != nil {
 			tu.Fatalf(t, "d.Create() failed: %v", err)
 		}
-		for _, c := range []syncbase.Collection{d.Collection("c1"), d.Collection("c2")} {
-			if err := d.Collection(c.Name()).Create(ctx, nil); err != nil {
+		for _, cxId := range cxIds {
+			c := d.CollectionForId(cxId)
+			if err := c.Create(ctx, nil); err != nil {
 				tu.Fatalf(t, "c.Create() failed: %v", err)
 			}
 			for _, k := range []string{"foo", "bar"} {
@@ -119,15 +123,15 @@ func checkHierarchy(t *testing.T, ctx *context.T) {
 	}
 	for _, dbId := range wantIds {
 		d := s.DatabaseForId(dbId, nil)
-		var got, want []string = nil, []string{"c1", "c2"}
+		var got, want []wire.Id = nil, []wire.Id{{"u", "c1"}, {"u", "c2"}}
 		if got, err = d.ListCollections(ctx); err != nil {
 			tu.Fatalf(t, "d.ListCollections() failed: %v", err)
 		}
 		if !reflect.DeepEqual(got, want) {
 			tu.Fatalf(t, "Collections do not match: got %v, want %v", got, want)
 		}
-		for _, cName := range want {
-			c := d.Collection(cName)
+		for _, cxId := range want {
+			c := d.CollectionForId(cxId)
 			if err := tu.ScanMatches(ctx, c, syncbase.Prefix(""), []string{"bar", "foo"}, []interface{}{"bar", "foo"}); err != nil {
 				tu.Fatalf(t, "Scan does not match: %v", err)
 			}
@@ -143,7 +147,7 @@ func TestV23RestartabilityQuiescent(t *testing.T) {
 	cleanup := sh.StartSyncbase(serverCreds, syncbaselib.Opts{Name: testSbName, RootDir: rootDir}, acl)
 	d := createDbAndCollection(t, clientCtx)
 
-	c := d.Collection("c")
+	c := d.CollectionForId(testCx)
 
 	// Do Put followed by Get on a row.
 	r := c.Row("r")
@@ -180,7 +184,7 @@ func TestV23RestartabilityReadOnlyBatch(t *testing.T) {
 	d := createDbAndCollection(t, clientCtx)
 
 	// Add one row.
-	if err := d.Collection("c").Row("r").Put(clientCtx, "testkey"); err != nil {
+	if err := d.CollectionForId(testCx).Row("r").Put(clientCtx, "testkey"); err != nil {
 		t.Fatalf("r.Put() failed: %v", err)
 	}
 
@@ -188,7 +192,7 @@ func TestV23RestartabilityReadOnlyBatch(t *testing.T) {
 	if err != nil {
 		t.Fatalf("unable to start batch: %v", err)
 	}
-	c := batch.Collection("c")
+	c := batch.CollectionForId(testCx)
 	r := c.Row("r")
 
 	var result string
@@ -218,7 +222,7 @@ func TestV23RestartabilityReadOnlyBatch(t *testing.T) {
 	}
 
 	// Try to get the row outside of a batch.  It should exist.
-	if err := d.Collection("c").Row("r").Get(clientCtx, &result); err != nil {
+	if err := d.CollectionForId(testCx).Row("r").Get(clientCtx, &result); err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
 }
@@ -236,7 +240,7 @@ func TestV23RestartabilityReadWriteBatch(t *testing.T) {
 	if err != nil {
 		t.Fatalf("unable to start batch: %v", err)
 	}
-	c := batch.Collection("c")
+	c := batch.CollectionForId(testCx)
 
 	// Do Put followed by Get on a row.
 	r := c.Row("r")
@@ -270,7 +274,7 @@ func TestV23RestartabilityReadWriteBatch(t *testing.T) {
 	}
 
 	// Try to get the row outside of a batch.  It should not exist.
-	if err := d.Collection("c").Row("r").Get(clientCtx, &result); verror.ErrorID(err) != verror.ErrNoExist.ID {
+	if err := d.CollectionForId(testCx).Row("r").Get(clientCtx, &result); verror.ErrorID(err) != verror.ErrNoExist.ID {
 		t.Fatalf("expected r.Get() to fail because of ErrNoExist.  got: %v", err)
 	}
 }
@@ -300,7 +304,7 @@ func TestV23RestartabilityWatch(t *testing.T) {
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
-	r := batch.Collection("c").Row("r")
+	r := batch.CollectionForId(testCx).Row("r")
 	if err := r.Put(clientCtx, "testvalue1"); err != nil {
 		t.Fatalf("r.Put() failed: %v", err)
 	}
@@ -310,7 +314,7 @@ func TestV23RestartabilityWatch(t *testing.T) {
 
 	// Watch for the row change.
 	timeout, _ := context.WithTimeout(clientCtx, time.Second)
-	stream, err := d.Watch(timeout, "c", "r", marker)
+	stream, err := d.Watch(timeout, testCx, "r", marker)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -337,14 +341,14 @@ func TestV23RestartabilityWatch(t *testing.T) {
 	cleanup = sh.StartSyncbase(serverCreds, syncbaselib.Opts{Name: testSbName, RootDir: rootDir}, acl)
 
 	// Put another row.
-	r = d.Collection("c").Row("r")
+	r = d.CollectionForId(testCx).Row("r")
 	if err := r.Put(clientCtx, "testvalue2"); err != nil {
 		t.Fatalf("r.Put() failed: %v", err)
 	}
 
 	// Resume the watch from after the first Put.  We should see only the second
 	// Put.
-	stream, err = d.Watch(clientCtx, "c", "", marker)
+	stream, err = d.Watch(clientCtx, testCx, "", marker)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -470,9 +474,10 @@ func TestV23RestartabilityAppDBCorruption(t *testing.T) {
 	if err := d.Create(clientCtx, nil); err != nil {
 		t.Fatalf("d.Create() failed: %v", err)
 	}
-	for _, c := range []syncbase.Collection{d.Collection("c1"), d.Collection("c2")} {
+	for _, cxId := range []wire.Id{{"u", "c1"}, {"u", "c2"}} {
+		c := d.CollectionForId(cxId)
 		if err := c.Create(clientCtx, nil); err != nil {
-			t.Fatalf("d.CreateCollection() failed: %v", err)
+			t.Fatalf("c.Create() failed: %v", err)
 		}
 		for _, k := range []string{"foo", "bar"} {
 			if err := c.Put(clientCtx, k, k); err != nil {

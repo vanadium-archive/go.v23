@@ -48,7 +48,7 @@ func TestCreateSyncgroup(t *testing.T) {
 	spec = wire.SyncgroupSpec{
 		Description: "test syncgroup sg1",
 		Perms:       nil,
-		Prefixes:    []wire.CollectionRow{{CollectionName: "t1", Row: "foo"}},
+		Prefixes:    []wire.CollectionRow{{CollectionId: testCollection, Row: "foo"}},
 	}
 	createSyncgroup(t, ctx, d, sg1, spec, verror.ID(""))
 
@@ -72,7 +72,7 @@ func TestCreateSyncgroup(t *testing.T) {
 
 	// Create a nested syncgroup.
 	spec.Description = "test syncgroup sg3"
-	spec.Prefixes = []wire.CollectionRow{{CollectionName: "t1", Row: "foobar"}}
+	spec.Prefixes = []wire.CollectionRow{{CollectionId: testCollection, Row: "foobar"}}
 	sg3 := naming.Join(sName, common.SyncbaseSuffix, "sg3")
 	createSyncgroup(t, ctx, d, sg3, spec, verror.ID(""))
 
@@ -104,7 +104,7 @@ func TestJoinSyncgroup(t *testing.T) {
 	specA := wire.SyncgroupSpec{
 		Description: "test syncgroup sgA",
 		Perms:       perms("root:client1"),
-		Prefixes:    []wire.CollectionRow{{CollectionName: "t1", Row: "foo"}},
+		Prefixes:    []wire.CollectionRow{{CollectionId: testCollection, Row: "foo"}},
 	}
 	sgNameA := naming.Join(sName, common.SyncbaseSuffix, "sgA")
 	createSyncgroup(t, ctx1, d1, sgNameA, specA, verror.ID(""))
@@ -114,7 +114,7 @@ func TestJoinSyncgroup(t *testing.T) {
 
 	// Create client2.
 	ctx2 := tu.NewCtx(ctx, rootp, "client2")
-	d2 := syncbase.NewService(sName).DatabaseForId(wire.Id{"v.io:xyz", "d"}, nil)
+	d2 := syncbase.NewService(sName).DatabaseForId(tu.DbId("d"), nil)
 
 	// Check that client2's join fails if the perms disallow access.
 	joinSyncgroup(t, ctx2, d2, sgNameA, verror.ErrNoAccess.ID)
@@ -138,7 +138,7 @@ func TestJoinSyncgroup(t *testing.T) {
 	specB := wire.SyncgroupSpec{
 		Description: "test syncgroup sgB",
 		Perms:       perms("root:client1", "root:client2"),
-		Prefixes:    []wire.CollectionRow{{CollectionName: "t1", Row: "foo"}},
+		Prefixes:    []wire.CollectionRow{{CollectionId: testCollection, Row: "foo"}},
 	}
 	sgNameB := naming.Join(sName, common.SyncbaseSuffix, "sgB")
 	createSyncgroup(t, ctx1, d1, sgNameB, specB, verror.ID(""))
@@ -166,7 +166,7 @@ func TestSetSpecSyncgroup(t *testing.T) {
 	spec := wire.SyncgroupSpec{
 		Description: "test syncgroup sg1",
 		Perms:       perms("root:client"),
-		Prefixes:    []wire.CollectionRow{{CollectionName: "t1", Row: "foo"}},
+		Prefixes:    []wire.CollectionRow{{CollectionId: testCollection, Row: "foo"}},
 	}
 	createSyncgroup(t, ctx, d, sgName, spec, verror.ID(""))
 

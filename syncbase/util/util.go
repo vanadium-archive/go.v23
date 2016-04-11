@@ -78,13 +78,13 @@ func validIdentifier(s string) bool {
 	return identifierRegexp.MatchString(s)
 }
 
-// maxNameLen is the max allowed number of bytes in database blessings and names
-// and in collection names.
-// TODO(sadovsky): Revisit whether 64 bytes is enough for app blessings.
+// maxNameLen is the max allowed number of bytes in database and collection
+// blessings and names.
+// TODO(sadovsky): Revisit whether 64 bytes is enough for blessings.
 const maxNameLen = 64
 
-// ValidDatabaseId returns true iff the given Id is a valid database id.
-func ValidDatabaseId(id wire.Id) bool {
+// ValidId returns true iff the given Id is a valid database or collection id.
+func ValidId(id wire.Id) bool {
 	if x := len([]byte(id.Blessing)); x == 0 || x > maxNameLen {
 		return false
 	}
@@ -97,33 +97,25 @@ func ValidDatabaseId(id wire.Id) bool {
 	return !containsReservedByte(id.Blessing) && validIdentifier(id.Name)
 }
 
-// ValidCollectionName returns true iff the given string is a valid collection
-// name.
-func ValidCollectionName(s string) bool {
-	if len([]byte(s)) > maxNameLen {
-		return false
-	}
-	return validIdentifier(s)
-}
-
 // ValidRowKey returns true iff the given string is a valid row key.
 func ValidRowKey(s string) bool {
 	return s != "" && !containsReservedByte(s)
 }
 
-// ParseCollectionRowPair splits the "<collection>/<row>" part of a Syncbase
-// object name into the collection name and the row key or prefix.
-func ParseCollectionRowPair(ctx *context.T, pattern string) (string, string, error) {
+// ParseCollectionRowPair splits the "<collectionId>/<row>" part of a Syncbase
+// object name into the collection id and the row key or prefix.
+func ParseCollectionRowPair(ctx *context.T, pattern string) (wire.Id, string, error) {
 	parts := strings.SplitN(pattern, "/", 2)
 	if len(parts) != 2 { // require both collection and row parts
-		return "", "", verror.New(verror.ErrBadArg, ctx, pattern)
+		return wire.Id{}, "", verror.New(verror.ErrBadArg, ctx, pattern)
 	}
-	collection, row := parts[0], parts[1]
-	if !ValidCollectionName(collection) {
-		return "", "", verror.New(wire.ErrInvalidName, ctx, collection)
+	collectionEnc, row := parts[0], parts[1]
+	collection, err := DecodeId(parts[0])
+	if err != nil || !ValidId(collection) {
+		return wire.Id{}, "", verror.New(wire.ErrInvalidName, ctx, collectionEnc)
 	}
 	if row != "" && !ValidRowKey(row) {
-		return "", "", verror.New(wire.ErrInvalidName, ctx, row)
+		return wire.Id{}, "", verror.New(wire.ErrInvalidName, ctx, row)
 	}
 	return collection, row, nil
 }
@@ -174,5 +166,14 @@ type AccessController interface {
 func AppBlessingFromContext(ctx *context.T) (string, error) {
 	// NOTE(sadovsky): For now, we use a blessing string that will be easy to
 	// find-replace when we actually implement this method.
-	return "v.io:xyz", nil
+	return "v.io:a:xyz", nil
+}
+
+// UserBlessingFromContext returns a user blessing pattern from the given
+// context.
+// TODO(sadovsky,ashankar): Implement.
+func UserBlessingFromContext(ctx *context.T) (string, error) {
+	// NOTE(sadovsky): For now, we use a blessing string that will be easy to
+	// find-replace when we actually implement this method.
+	return "v.io:u:sam", nil
 }

@@ -27,6 +27,11 @@ func (a byId) Less(i, j int) bool {
 	return a[i].Name < a[j].Name
 }
 
+// SortIds sorts a list of ids by blessing, then name.
+func SortIds(ids []wire.Id) {
+	sort.Sort(byId(ids))
+}
+
 // ListChildIds returns a sorted list of ids of all children of parentFullName.
 func ListChildIds(ctx *context.T, parentFullName string) ([]wire.Id, error) {
 	ns := v23.GetNamespace(ctx)
@@ -52,6 +57,6 @@ func ListChildIds(ctx *context.T, parentFullName string) ([]wire.Id, error) {
 			// TODO(sadovsky): Surface these errors somehow.
 		}
 	}
-	sort.Sort(byId(ids))
+	SortIds(ids)
 	return ids, nil
 }

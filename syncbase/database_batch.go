@@ -46,15 +46,30 @@ func (d *databaseBatch) FullName() string {
 }
 
 // Collection implements DatabaseHandle.Collection.
-func (d *databaseBatch) Collection(relativeName string) Collection {
-	return newCollection(d.fullName, relativeName, d.bh)
+func (d *databaseBatch) Collection(ctx *context.T, name string) Collection {
+	blessing, err := util.UserBlessingFromContext(ctx)
+	if err != nil {
+		// TODO(sadovsky): Return invalid Collection handle.
+		panic(err)
+	}
+	return newCollection(d.fullName, wire.Id{Blessing: blessing, Name: name}, d.bh)
+}
+
+// CollectionForId implements DatabaseHandle.CollectionForId.
+func (d *databaseBatch) CollectionForId(id wire.Id) Collection {
+	return newCollection(d.fullName, id, d.bh)
 }
 
 // ListCollections implements DatabaseHandle.ListCollections.
-func (d *databaseBatch) ListCollections(ctx *context.T) ([]string, error) {
+func (d *databaseBatch) ListCollections(ctx *context.T) ([]wire.Id, error) {
 	// See comment in v.io/v23/services/syncbase/service.vdl for why we
 	// can't implement ListCollections using Glob (via util.ListChildren).
-	return d.c.ListCollections(ctx, d.bh)
+	ids, err := d.c.ListCollections(ctx, d.bh)
+	if err != nil {
+		return nil, err
+	}
+	util.SortIds(ids)
+	return ids, nil
 }
 
 // Exec implements DatabaseHandle.Exec.

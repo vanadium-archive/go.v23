@@ -39,7 +39,7 @@ import (
 	tu "v.io/x/ref/services/syncbase/testutil"
 )
 
-// prepare creates hierarchy "{a,d}/c" and returns some handles along with a
+// prepare creates hierarchy "{a,d}/{u,c}" and returns some handles along with a
 // cleanup function.
 func prepare(b *testing.B) (*context.T, syncbase.Database, syncbase.Collection, func()) {
 	ctx, sName, cleanup := tu.SetupOrDie(nil)
@@ -47,7 +47,7 @@ func prepare(b *testing.B) (*context.T, syncbase.Database, syncbase.Collection, 
 	if err := d.Create(ctx, nil); err != nil {
 		b.Fatalf("can't create database: %v", err)
 	}
-	c := d.Collection("c")
+	c := d.CollectionForId(wire.Id{"u", "c"})
 	if err := c.Create(ctx, nil); err != nil {
 		b.Fatalf("can't create collection: %v", err)
 	}
@@ -186,7 +186,7 @@ func runWatchPutsBenchmark(b *testing.B, value interface{}) {
 	defer cleanup()
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		w, err := d.Watch(ctx, "c", "", watch.ResumeMarker("now"))
+		w, err := d.Watch(ctx, wire.Id{"u", "c"}, "", watch.ResumeMarker("now"))
 		if err != nil {
 			b.Fatalf("watch error: %v", err)
 		}
@@ -213,7 +213,7 @@ func runWatchOnePutBenchmark(b *testing.B, value interface{}) {
 	b.Skip("Hangs on occasion, for unknown reasons - v.io/i/1134")
 	ctx, d, c, cleanup := prepare(b)
 	defer cleanup()
-	w, err := d.Watch(ctx, "c", "", watch.ResumeMarker("now"))
+	w, err := d.Watch(ctx, wire.Id{"u", "c"}, "", watch.ResumeMarker("now"))
 	row := make(chan struct{})
 	if err != nil {
 		b.Fatalf("watch error: %v", err)

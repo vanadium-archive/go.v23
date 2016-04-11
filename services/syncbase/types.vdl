@@ -63,10 +63,10 @@ type KeyValue struct {
 	Value []byte
 }
 
-// CollectionRow encapsulates the collection name and row key or row prefix.
+// CollectionRow encapsulates a collection id and row key or row prefix.
 type CollectionRow struct {
-	CollectionName string
-	Row            string
+	CollectionId Id
+	Row          string
 }
 
 // SyncgroupSpec contains the specification for a syncgroup.
@@ -77,7 +77,7 @@ type SyncgroupSpec struct {
 	// Permissions governing access to this syncgroup.
 	Perms access.Permissions
 
-	// Data (collectionName-rowPrefix pairs) covered by this syncgroup.
+	// Data (collectionId-rowPrefix pairs) covered by this syncgroup.
 	Prefixes []CollectionRow
 
 	// Mount tables at which to advertise this syncgroup, for rendezvous purposes.
@@ -347,11 +347,11 @@ type CrPolicy struct {
 // CrRule provides a filter and the type of resolution to perform for a row
 // under conflict that passes the filter.
 type CrRule struct {
-	// CollectionName is the name of the collection that this rule applies to.
-	CollectionName string
+	// CollectionId is the id of the collection that this rule applies to.
+	CollectionId Id
 
 	// KeyPrefix represents the set of keys within the given collection for which
-	// this policy applies. CollectionName must not be empty if this field is set.
+	// this policy applies. CollectionId must not be empty if this field is set.
 	KeyPrefix	string
 
 	// Type includes the full package path for the value type for which this

@@ -24,11 +24,13 @@ import (
 )
 
 const (
-	testSbName     = "syncbase" // Name that syncbase mounts itself at.
-	testCollection = "c"
+	testSbName = "syncbase" // Name that syncbase mounts itself at.
 )
 
-var testDb = wire.Id{Blessing: "a", Name: "d"}
+var (
+	testDb = wire.Id{Blessing: "a", Name: "d"}
+	testCx = wire.Id{Blessing: "u", Name: "c"}
+)
 
 ////////////////////////////////////////////////////////////
 // Helpers for setting up Syncbases, dbs, and collections
@@ -38,7 +40,7 @@ func setupHierarchy(ctx *context.T, syncbaseName string) error {
 	if err := d.Create(ctx, nil); err != nil {
 		return err
 	}
-	return d.Collection(testCollection).Create(ctx, nil)
+	return d.CollectionForId(testCx).Create(ctx, nil)
 }
 
 type testSyncbase struct {
@@ -89,7 +91,7 @@ func populateData(ctx *context.T, syncbaseName, keyPrefix string, start, end int
 	}
 
 	d := syncbase.NewService(syncbaseName).DatabaseForId(testDb, nil)
-	c := d.Collection(testCollection)
+	c := d.CollectionForId(testCx)
 
 	for i := start; i < end; i++ {
 		key := fmt.Sprintf("%s%d", keyPrefix, i)
@@ -112,7 +114,7 @@ func updateDataImpl(ctx *context.T, d syncbase.DatabaseHandle, syncbaseName stri
 		valuePrefix = "testkey"
 	}
 
-	c := d.Collection(testCollection)
+	c := d.CollectionForId(testCx)
 	for i := start; i < end; i++ {
 		key := fmt.Sprintf("foo%d", i)
 		if err := c.Put(ctx, key, valuePrefix+syncbaseName+key); err != nil {
@@ -152,7 +154,7 @@ func updateDataInBatch(ctx *context.T, syncbaseName string, start, end int, valu
 // TODO(ivanpi): Remove sendSignal now that all functions using it are in the
 // same process.
 func sendSignal(ctx *context.T, d syncbase.Database, signalKey string) error {
-	c := d.Collection(testCollection)
+	c := d.CollectionForId(testCx)
 	r := c.Row(signalKey)
 
 	if err := r.Put(ctx, true); err != nil {
@@ -168,7 +170,7 @@ const skipScan = true
 
 func verifySyncgroupData(ctx *context.T, syncbaseName, keyPrefix string, start, count int) error {
 	d := syncbase.NewService(syncbaseName).DatabaseForId(testDb, nil)
-	c := d.Collection(testCollection)
+	c := d.CollectionForId(testCx)
 
 	// Wait a bit (up to 10 seconds) for the last key to appear.
 	lastKey := fmt.Sprintf("%s%d", keyPrefix, start+count-1)
@@ -295,7 +297,8 @@ func resumeSync(ctx *context.T, syncbaseName string) error {
 // Syncbase-specific testing helpers
 
 // parseSgPrefixes converts, for example, "a:b,c:" to
-// [{CollectionName: testApp, Row: "b"}, {CollectionName: "c", Row: ""}].
+// [{Collection: {"u", "a"}, Row: "b"}, {Collection: {"u", "c"}, Row: ""}].
+// TODO(ivanpi): Change format to support user blessings other than "u".
 func parseSgPrefixes(csv string) []wire.CollectionRow {
 	strs := strings.Split(csv, ",")
 	res := make([]wire.CollectionRow, len(strs))
@@ -304,7 +307,7 @@ func parseSgPrefixes(csv string) []wire.CollectionRow {
 		if len(parts) != 2 {
 			panic(fmt.Sprintf("invalid prefix string: %q", v))
 		}
-		res[i] = wire.CollectionRow{CollectionName: parts[0], Row: parts[1]}
+		res[i] = wire.CollectionRow{CollectionId: wire.Id{"u", parts[0]}, Row: parts[1]}
 	}
 	return res
 }

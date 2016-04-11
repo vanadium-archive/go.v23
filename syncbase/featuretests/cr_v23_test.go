@@ -426,7 +426,7 @@ func runConflictResolver(ctx *context.T, syncbaseName, prefix, signalKey string,
 func verifyConflictResolvedData(ctx *context.T, syncbaseName, keyPrefix, schemaPrefix string, start, end int, valuePrefix string) error {
 	d := syncbase.NewService(syncbaseName).DatabaseForId(testDb, makeSchema(schemaPrefix, &CRImpl{syncbaseName: syncbaseName}))
 
-	c := d.Collection(testCollection)
+	c := d.CollectionForId(testCx)
 	for i := start; i < end; i++ {
 		var got string
 		key := fmt.Sprintf("%s%d", keyPrefix, i)
@@ -444,7 +444,7 @@ func verifyConflictResolvedData(ctx *context.T, syncbaseName, keyPrefix, schemaP
 func verifyConflictResolvedBatch(ctx *context.T, syncbaseName, keyPrefix string, start, end int, valuePrefix string) error {
 	d := syncbase.NewService(syncbaseName).DatabaseForId(testDb, nil)
 
-	c := d.Collection(testCollection)
+	c := d.CollectionForId(testCx)
 	var got string
 
 	// get first row
@@ -476,7 +476,7 @@ func waitForValue(ctx *context.T, syncbaseName, key, valuePrefix, schemaPrefix s
 
 	d := syncbase.NewService(syncbaseName).DatabaseForId(testDb, schema)
 
-	c := d.Collection(testCollection)
+	c := d.CollectionForId(testCx)
 	r := c.Row(key)
 	want := valuePrefix + key
 
@@ -506,7 +506,7 @@ func waitForSignal(ctx *context.T, syncbaseName, prefix, signalKey string) error
 }
 
 func waitSignal(ctx *context.T, d syncbase.Database, signalKey string) error {
-	c := d.Collection(testCollection)
+	c := d.CollectionForId(testCx)
 	r := c.Row(signalKey)
 
 	var end bool
@@ -532,9 +532,9 @@ func makeSchema(keyPrefix string, resolver *CRImpl) *syncbase.Schema {
 		Policy: wire.CrPolicy{
 			Rules: []wire.CrRule{
 				wire.CrRule{
-					CollectionName: testCollection,
-					KeyPrefix:      keyPrefix,
-					Resolver:       wire.ResolverTypeAppResolves,
+					CollectionId: testCx,
+					KeyPrefix:    keyPrefix,
+					Resolver:     wire.ResolverTypeAppResolves,
 				},
 			},
 		},

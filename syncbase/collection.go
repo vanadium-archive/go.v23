@@ -12,16 +12,12 @@ import (
 	"v.io/v23/syncbase/util"
 )
 
-func newCollection(parentFullName, relativeName string, bh wire.BatchHandle) Collection {
-	// Encode relativeName so that any forward slashes get dropped, thus ensuring
-	// that the server will interpret fullName as referring to a collection
-	// object. Note that the server will still reject this name if
-	// util.ValidCollectionName returns false.
-	fullName := naming.Join(parentFullName, util.Encode(relativeName))
+func newCollection(parentFullName string, id wire.Id, bh wire.BatchHandle) Collection {
+	fullName := naming.Join(parentFullName, util.EncodeId(id))
 	return &collection{
 		c:        wire.CollectionClient(fullName),
 		fullName: fullName,
-		name:     relativeName,
+		id:       id,
 		bh:       bh,
 	}
 }
@@ -29,15 +25,15 @@ func newCollection(parentFullName, relativeName string, bh wire.BatchHandle) Col
 type collection struct {
 	c        wire.CollectionClientMethods
 	fullName string
-	name     string
+	id       wire.Id
 	bh       wire.BatchHandle
 }
 
 var _ Collection = (*collection)(nil)
 
-// Name implements Collection.Name.
-func (c *collection) Name() string {
-	return c.name
+// Id implements Collection.Id.
+func (c *collection) Id() wire.Id {
+	return c.id
 }
 
 // FullName implements Collection.FullName.

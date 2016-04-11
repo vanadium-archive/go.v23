@@ -252,7 +252,7 @@ func runTests(t *testing.T, expectSuccess bool, tests ...securitySpecTest) {
 	if err := d.Create(adminCtx, databasePerms); err != nil {
 		tu.Fatalf(t, "d.Create failed: %v", err)
 	}
-	c := d.Collection("c")
+	c := d.CollectionForId(wire.Id{"u", "c"})
 	if err := c.Create(adminCtx, collectionPerms); err != nil {
 		tu.Fatalf(t, "c.Create failed: %v", err)
 	}

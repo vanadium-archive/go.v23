@@ -398,7 +398,7 @@ func setupChain(t *testing.T, sbs []*testSyncbase) {
 		}
 		a, b := sbs[i], sbs[i+1]
 		sgName := naming.Join(a.sbName, common.SyncbaseSuffix, "syncgroup")
-		ok(t, createSyncgroup(a.clientCtx, a.sbName, sgName, testCollection+":"+a.sbName+b.sbName, "", "root", nil))
+		ok(t, createSyncgroup(a.clientCtx, a.sbName, sgName, testCx.Name+":"+a.sbName+b.sbName, "", "root", nil))
 		ok(t, joinSyncgroup(b.clientCtx, b.sbName, sgName))
 		// Wait for a to see b.
 		ok(t, verifySyncgroupMembers(a.clientCtx, a.sbName, sgName, 2))

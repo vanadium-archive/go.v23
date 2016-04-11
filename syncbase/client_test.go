@@ -29,28 +29,28 @@ import (
 func TestIdNameAndKey(t *testing.T) {
 	s := syncbase.NewService("s")
 	d := s.DatabaseForId(wire.Id{"a", "d"}, nil)
-	c := d.Collection("c")
+	c := d.CollectionForId(wire.Id{"u", "c"})
 	r := c.Row("r")
 
 	if s.FullName() != "s" {
 		t.Errorf("Wrong full name: %q", s.FullName())
 	}
 	if d.Id() != (wire.Id{"a", "d"}) {
-		t.Errorf("Wrong id: %q", d.Id())
+		t.Errorf("Wrong id: %v", d.Id())
 	}
 	if d.FullName() != naming.Join("s", "a,d") {
 		t.Errorf("Wrong full name: %q", d.FullName())
 	}
-	if c.Name() != "c" {
-		t.Errorf("Wrong name: %q", c.Name())
+	if c.Id() != (wire.Id{"u", "c"}) {
+		t.Errorf("Wrong id: %v", c.Id())
 	}
-	if c.FullName() != naming.Join("s", "a,d", "c") {
+	if c.FullName() != naming.Join("s", "a,d", "u,c") {
 		t.Errorf("Wrong full name: %q", c.FullName())
 	}
 	if r.Key() != "r" {
 		t.Errorf("Wrong key: %q", r.Key())
 	}
-	if r.FullName() != naming.Join("s", "a,d", "c", "r") {
+	if r.FullName() != naming.Join("s", "a,d", "u,c", "r") {
 		t.Errorf("Wrong full name: %q", r.FullName())
 	}
 }
@@ -59,7 +59,7 @@ func TestIdNameAndKey(t *testing.T) {
 func TestListDatabases(t *testing.T) {
 	ctx, sName, cleanup := tu.SetupOrDie(nil)
 	defer cleanup()
-	tu.TestListChildIds(t, ctx, syncbase.NewService(sName), tu.OkAppBlessings, tu.OkDbNames)
+	tu.TestListChildIds(t, ctx, syncbase.NewService(sName), tu.OkAppUserBlessings, tu.OkDbCxNames)
 }
 
 // Tests that Service.{Set,Get}Permissions work as expected.
@@ -82,7 +82,7 @@ func TestDatabaseCreate(t *testing.T) {
 func TestDatabaseCreateNameValidation(t *testing.T) {
 	ctx, sName, cleanup := tu.SetupOrDie(nil)
 	defer cleanup()
-	tu.TestCreateNameValidation(t, ctx, syncbase.NewService(sName), tu.OkDbNames, tu.NotOkDbNames)
+	tu.TestCreateNameValidation(t, ctx, syncbase.NewService(sName), tu.OkDbCxNames, tu.NotOkDbCxNames)
 }
 
 // Tests that Database.Destroy works as expected.
@@ -187,7 +187,7 @@ func TestListCollections(t *testing.T) {
 	ctx, sName, cleanup := tu.SetupOrDie(nil)
 	defer cleanup()
 	d := tu.CreateDatabase(t, ctx, syncbase.NewService(sName), "d")
-	tu.TestListChildren(t, ctx, d, tu.OkCollectionNames)
+	tu.TestListChildIds(t, ctx, d, tu.OkAppUserBlessings, tu.OkDbCxNames)
 }
 
 // Tests that Database.{Set,Get}Permissions work as expected.
@@ -207,11 +207,13 @@ func TestCollectionCreate(t *testing.T) {
 }
 
 // Tests name-checking on collection creation.
+// TODO(sadovsky): Also test blessing validation. We should rewrite some of
+// these tests. Let's do this after we update collections to use ids.
 func TestCollectionCreateNameValidation(t *testing.T) {
 	ctx, sName, cleanup := tu.SetupOrDie(nil)
 	defer cleanup()
 	d := tu.CreateDatabase(t, ctx, syncbase.NewService(sName), "d")
-	tu.TestCreateNameValidation(t, ctx, d, tu.OkCollectionNames, tu.NotOkCollectionNames)
+	tu.TestCreateNameValidation(t, ctx, d, tu.OkDbCxNames, tu.NotOkDbCxNames)
 }
 
 // Tests that Collection.Destroy works as expected.
@@ -586,7 +588,7 @@ func TestWatchBasic(t *testing.T) {
 	allChanges := []tu.WatchChangeTest{
 		tu.WatchChangeTest{
 			WatchChange: syncbase.WatchChange{
-				Collection:   "c",
+				Collection:   tu.CxId("c"),
 				Row:          "abc",
 				ChangeType:   syncbase.PutChange,
 				ResumeMarker: resumeMarkers[1],
@@ -595,7 +597,7 @@ func TestWatchBasic(t *testing.T) {
 		},
 		tu.WatchChangeTest{
 			WatchChange: syncbase.WatchChange{
-				Collection:   "c",
+				Collection:   tu.CxId("c"),
 				Row:          "abc",
 				ChangeType:   syncbase.DeleteChange,
 				ResumeMarker: resumeMarkers[2],
@@ -603,7 +605,7 @@ func TestWatchBasic(t *testing.T) {
 		},
 		tu.WatchChangeTest{
 			WatchChange: syncbase.WatchChange{
-				Collection:   "c",
+				Collection:   tu.CxId("c"),
 				Row:          "a",
 				ChangeType:   syncbase.PutChange,
 				ResumeMarker: resumeMarkers[3],
@@ -613,16 +615,16 @@ func TestWatchBasic(t *testing.T) {
 	}
 	ctxWithTimeout, cancel := context.WithTimeout(ctx, 10*time.Second)
 	defer cancel()
-	wstream, _ := d.Watch(ctxWithTimeout, "c", "a", resumeMarkers[0])
+	wstream, _ := d.Watch(ctxWithTimeout, tu.CxId("c"), "a", resumeMarkers[0])
 	tu.CheckWatch(t, wstream, allChanges)
-	wstream, _ = d.Watch(ctxWithTimeout, "c", "a", resumeMarkers[1])
+	wstream, _ = d.Watch(ctxWithTimeout, tu.CxId("c"), "a", resumeMarkers[1])
 	tu.CheckWatch(t, wstream, allChanges[1:])
-	wstream, _ = d.Watch(ctxWithTimeout, "c", "a", resumeMarkers[2])
+	wstream, _ = d.Watch(ctxWithTimeout, tu.CxId("c"), "a", resumeMarkers[2])
 	tu.CheckWatch(t, wstream, allChanges[2:])
 
-	wstream, _ = d.Watch(ctxWithTimeout, "c", "abc", resumeMarkers[0])
+	wstream, _ = d.Watch(ctxWithTimeout, tu.CxId("c"), "abc", resumeMarkers[0])
 	tu.CheckWatch(t, wstream, allChanges[:2])
-	wstream, _ = d.Watch(ctxWithTimeout, "c", "abc", resumeMarkers[1])
+	wstream, _ = d.Watch(ctxWithTimeout, tu.CxId("c"), "abc", resumeMarkers[1])
 	tu.CheckWatch(t, wstream, allChanges[1:2])
 }
 
@@ -648,11 +650,11 @@ func TestWatchWithBatchAndInitialState(t *testing.T) {
 
 	// Put cp:"a/1" and ch:"b/1" in a batch.
 	if err := syncbase.RunInBatch(adminCtx, d, wire.BatchOptions{}, func(b syncbase.BatchDatabase) error {
-		cp := b.Collection("cpublic")
+		cp := b.CollectionForId(tu.CxId("cpublic"))
 		if err := cp.Put(adminCtx, "a/1", "value"); err != nil {
 			return err
 		}
-		ch := b.Collection("chidden")
+		ch := b.CollectionForId(tu.CxId("chidden"))
 		return ch.Put(adminCtx, "b/1", "value")
 	}); err != nil {
 		t.Fatalf("RunInBatch failed: %v", err)
@@ -668,8 +670,8 @@ func TestWatchWithBatchAndInitialState(t *testing.T) {
 	// TODO(ivanpi): Empty prefix watch should watch both collections using both
 	// admin and client contexts, checking that chidden updates are visible only
 	// to admin.
-	wstreamAll, _ := d.Watch(ctxWithTimeout, "cpublic", "", nil)
-	wstreamD, _ := d.Watch(ctxWithTimeout, "cpublic", "d", nil)
+	wstreamAll, _ := d.Watch(ctxWithTimeout, tu.CxId("cpublic"), "", nil)
+	wstreamD, _ := d.Watch(ctxWithTimeout, tu.CxId("cpublic"), "d", nil)
 
 	resumeMarkerInitial, err := d.GetResumeMarker(clientCtx)
 	if err != nil {
@@ -679,7 +681,7 @@ func TestWatchWithBatchAndInitialState(t *testing.T) {
 	initialChanges := []tu.WatchChangeTest{
 		tu.WatchChangeTest{
 			WatchChange: syncbase.WatchChange{
-				Collection:   "cpublic",
+				Collection:   tu.CxId("cpublic"),
 				Row:          "a/1",
 				ChangeType:   syncbase.PutChange,
 				ResumeMarker: nil,
@@ -689,7 +691,7 @@ func TestWatchWithBatchAndInitialState(t *testing.T) {
 		},
 		tu.WatchChangeTest{
 			WatchChange: syncbase.WatchChange{
-				Collection:   "cpublic",
+				Collection:   tu.CxId("cpublic"),
 				Row:          "c/1",
 				ChangeType:   syncbase.PutChange,
 				ResumeMarker: resumeMarkerInitial,
@@ -704,11 +706,11 @@ func TestWatchWithBatchAndInitialState(t *testing.T) {
 	// More writes.
 	// Put cp:"a/2" and cs:"b/2" in a batch.
 	if err := syncbase.RunInBatch(adminCtx, d, wire.BatchOptions{}, func(b syncbase.BatchDatabase) error {
-		cp := b.Collection("cpublic")
+		cp := b.CollectionForId(tu.CxId("cpublic"))
 		if err := cp.Put(adminCtx, "a/2", "value"); err != nil {
 			return err
 		}
-		ch := b.Collection("chidden")
+		ch := b.CollectionForId(tu.CxId("chidden"))
 		return ch.Put(adminCtx, "b/2", "value")
 	}); err != nil {
 		t.Fatalf("RunInBatch failed: %v", err)
@@ -719,7 +721,7 @@ func TestWatchWithBatchAndInitialState(t *testing.T) {
 	}
 	// Put cp:"a/3" and cp:"d/1" in a batch.
 	if err := syncbase.RunInBatch(adminCtx, d, wire.BatchOptions{}, func(b syncbase.BatchDatabase) error {
-		cp := b.Collection("cpublic")
+		cp := b.CollectionForId(tu.CxId("cpublic"))
 		if err := cp.Put(adminCtx, "a/3", "value"); err != nil {
 			return err
 		}
@@ -735,7 +737,7 @@ func TestWatchWithBatchAndInitialState(t *testing.T) {
 	continuedChanges := []tu.WatchChangeTest{
 		tu.WatchChangeTest{
 			WatchChange: syncbase.WatchChange{
-				Collection:   "cpublic",
+				Collection:   tu.CxId("cpublic"),
 				Row:          "a/2",
 				ChangeType:   syncbase.PutChange,
 				ResumeMarker: resumeMarkerAfterA2B2,
@@ -744,7 +746,7 @@ func TestWatchWithBatchAndInitialState(t *testing.T) {
 		},
 		tu.WatchChangeTest{
 			WatchChange: syncbase.WatchChange{
-				Collection:   "cpublic",
+				Collection:   tu.CxId("cpublic"),
 				Row:          "a/3",
 				ChangeType:   syncbase.PutChange,
 				ResumeMarker: nil,
@@ -754,7 +756,7 @@ func TestWatchWithBatchAndInitialState(t *testing.T) {
 		},
 		tu.WatchChangeTest{
 			WatchChange: syncbase.WatchChange{
-				Collection:   "cpublic",
+				Collection:   tu.CxId("cpublic"),
 				Row:          "d/1",
 				ChangeType:   syncbase.PutChange,
 				ResumeMarker: resumeMarkerAfterA3D1,
@@ -784,7 +786,7 @@ func TestBlockingWatch(t *testing.T) {
 	}
 	ctxWithTimeout, cancel := context.WithTimeout(ctx, 10*time.Second)
 	defer cancel()
-	wstream, _ := d.Watch(ctxWithTimeout, "c", "a", resumeMarker)
+	wstream, _ := d.Watch(ctxWithTimeout, tu.CxId("c"), "a", resumeMarker)
 	valueBytes, _ := vom.RawBytesFromValue("value")
 	for i := 0; i < 10; i++ {
 		// Put "abc".
@@ -800,7 +802,7 @@ func TestBlockingWatch(t *testing.T) {
 		}
 		want := tu.WatchChangeTest{
 			WatchChange: syncbase.WatchChange{
-				Collection:   "c",
+				Collection:   tu.CxId("c"),
 				Row:          "abc",
 				ChangeType:   syncbase.PutChange,
 				ResumeMarker: resumeMarker,
@@ -825,7 +827,7 @@ func TestBlockedWatchCancel(t *testing.T) {
 		t.Fatalf("d.GetResumeMarker() failed: %v", err)
 	}
 	ctxCancel, cancel := context.WithCancel(ctx)
-	wstream, err := d.Watch(ctxCancel, "c", "a", resumeMarker)
+	wstream, err := d.Watch(ctxCancel, tu.CxId("c"), "a", resumeMarker)
 	if err != nil {
 		t.Fatalf("d.Watch() failed: %v", err)
 	}

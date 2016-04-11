@@ -28,9 +28,7 @@ import (
 	"v.io/x/ref/test/v23test"
 )
 
-const (
-	testCollection = "c"
-)
+var testCollection = wire.Id{"u", "c"}
 
 func dbHandle(serviceName string) syncbase.Database {
 	return syncbase.NewService(serviceName).DatabaseForId(wire.Id{"a", "d"}, nil)
@@ -538,7 +536,7 @@ func TestV23SyncgroupSync(t *testing.T) {
 // Helpers.
 
 // toSgPrefixes converts, for example, "a:b,c:" to
-// [{CollectionName: "a", Row: "b"}, {CollectionName: "c", Row: ""}].
+// [{Collection: {"u", "a"}, Row: "b"}, {Collection: {"u", "c"}, Row: ""}].
 func toSgPrefixes(csv string) []wire.CollectionRow {
 	strs := strings.Split(csv, ",")
 	res := make([]wire.CollectionRow, len(strs))
@@ -547,7 +545,7 @@ func toSgPrefixes(csv string) []wire.CollectionRow {
 		if len(parts) != 2 {
 			panic(fmt.Sprintf("invalid prefix string: %q", v))
 		}
-		res[i] = wire.CollectionRow{CollectionName: parts[0], Row: parts[1]}
+		res[i] = wire.CollectionRow{CollectionId: wire.Id{"u", parts[0]}, Row: parts[1]}
 	}
 	return res
 }
@@ -560,7 +558,7 @@ func runSetupAppA(ctx *context.T, serviceName string) error {
 	if err := d.Create(ctx, nil); err != nil {
 		return err
 	}
-	c := d.Collection(testCollection)
+	c := d.CollectionForId(testCollection)
 	if err := c.Create(ctx, nil); err != nil {
 		return err
 	}
@@ -671,7 +669,7 @@ func runPopulateData(ctx *context.T, serviceName, keyPrefix string, start uint64
 	d := dbHandle(serviceName)
 
 	// Do Puts.
-	c := d.Collection(testCollection)
+	c := d.CollectionForId(testCollection)
 
 	for i := start; i < start+10; i++ {
 		key := fmt.Sprintf("%s%d", keyPrefix, i)
@@ -687,7 +685,7 @@ func runPopulateNonVomData(ctx *context.T, serviceName, keyPrefix string, start 
 	d := dbHandle(serviceName)
 
 	// Do Puts.
-	c := d.Collection("c")
+	c := d.CollectionForId(testCollection)
 
 	for i := start; i < start+10; i++ {
 		key := fmt.Sprintf("%s%d", keyPrefix, i)
@@ -705,7 +703,7 @@ func runUpdateData(ctx *context.T, serviceName string, start uint64) error {
 	d := dbHandle(serviceName)
 
 	// Do Puts.
-	c := d.Collection(testCollection)
+	c := d.CollectionForId(testCollection)
 
 	for i := start; i < start+5; i++ {
 		key := fmt.Sprintf("foo%d", i)
@@ -722,7 +720,7 @@ func runDeleteData(ctx *context.T, serviceName string, start uint64) error {
 	d := dbHandle(serviceName)
 
 	// Do Puts.
-	c := d.Collection(testCollection)
+	c := d.CollectionForId(testCollection)
 
 	for i := start; i < start+5; i++ {
 		key := fmt.Sprintf("foo%d", i)
@@ -739,7 +737,7 @@ func runSetCollectionPermissions(ctx *context.T, serviceName string, aclBlessing
 	d := dbHandle(serviceName)
 
 	// Set acl.
-	c := d.Collection(testCollection)
+	c := d.CollectionForId(testCollection)
 
 	if err := c.SetPermissions(ctx, perms(aclBlessings...)); err != nil {
 		return fmt.Errorf("c.SetPermissions() failed: %v\n", err)
@@ -752,7 +750,7 @@ func runVerifySyncgroupData(ctx *context.T, serviceName, keyPrefix string, start
 	d := dbHandle(serviceName)
 
 	// Wait for a bit (up to 4 sec) until the last key appears.
-	c := d.Collection(testCollection)
+	c := d.CollectionForId(testCollection)
 
 	lastKey := fmt.Sprintf("%s%d", keyPrefix, start+count-1)
 
@@ -832,8 +830,8 @@ func runVerifySyncgroupDataWithWatch(ctx *context.T, serviceName, keyPrefix stri
 	}
 
 	for i, change := range changes {
-		if got, want := change.Collection, "c"; got != want {
-			return fmt.Errorf("unexpected watch collection: got %q, want %q", got, want)
+		if got, want := change.Collection, testCollection; got != want {
+			return fmt.Errorf("unexpected watch collection: got %v, want %v", got, want)
 		}
 		if got, want := change.Row, fmt.Sprintf("%s%d", keyPrefix, i); got != want {
 			return fmt.Errorf("unexpected watch row: got %q, want %q", got, want)
@@ -865,7 +863,7 @@ func runVerifySyncgroupNonVomData(ctx *context.T, serviceName, keyPrefix string,
 	d := dbHandle(serviceName)
 
 	// Wait for a bit (up to 4 sec) until the last key appears.
-	c := d.Collection("c")
+	c := d.CollectionForId(testCollection)
 
 	lastKey := fmt.Sprintf("%s%d", keyPrefix, start+count-1)
 
@@ -901,7 +899,7 @@ func runVerifyDeletedData(ctx *context.T, serviceName, keyPrefix string) error {
 	d := dbHandle(serviceName)
 
 	// Wait for a bit for deletions to propagate.
-	c := d.Collection(testCollection)
+	c := d.CollectionForId(testCollection)
 
 	r := c.Row("foo4")
 	for i := 0; i < 8; i++ {
@@ -944,7 +942,7 @@ func runVerifyDeletedData(ctx *context.T, serviceName, keyPrefix string) error {
 
 func runVerifyConflictResolution(ctx *context.T, serviceName string) error {
 	d := dbHandle(serviceName)
-	c := d.Collection(testCollection)
+	c := d.CollectionForId(testCollection)
 
 	wantData := []struct {
 		start  uint64
@@ -981,7 +979,7 @@ func runVerifyConflictResolution(ctx *context.T, serviceName string) error {
 
 func runVerifyNonSyncgroupData(ctx *context.T, serviceName, keyPrefix string) error {
 	d := dbHandle(serviceName)
-	c := d.Collection(testCollection)
+	c := d.CollectionForId(testCollection)
 
 	// Verify through a scan that none of that data exists.
 	count := 0
@@ -994,7 +992,7 @@ func runVerifyNonSyncgroupData(ctx *context.T, serviceName, keyPrefix string) er
 		return fmt.Errorf("scan stream error: %v\n", err)
 	}
 	if count > 0 {
-		return fmt.Errorf("found %d entries in %s prefix that should not be there\n", count, keyPrefix)
+		return fmt.Errorf("found %d entries in %q prefix that should not be there\n", count, keyPrefix)
 	}
 
 	return nil
@@ -1002,7 +1000,7 @@ func runVerifyNonSyncgroupData(ctx *context.T, serviceName, keyPrefix string) er
 
 func runVerifyLocalAndRemoteData(ctx *context.T, serviceName string) error {
 	d := dbHandle(serviceName)
-	c := d.Collection(testCollection)
+	c := d.CollectionForId(testCollection)
 
 	// Wait for a bit (up to 4 sec) until the last key appears.
 	r := c.Row("foo19")
@@ -1046,7 +1044,7 @@ func runVerifyLostAccess(ctx *context.T, serviceName, keyPrefix string, start, c
 	d := dbHandle(serviceName)
 
 	// Wait for a bit (up to 4 sec) until the last key disappears.
-	c := d.Collection(testCollection)
+	c := d.CollectionForId(testCollection)
 
 	lastKey := fmt.Sprintf("%s%d", keyPrefix, start+count-1)
 
@@ -1083,7 +1081,7 @@ func runVerifyNestedSyncgroupData(ctx *context.T, serviceName string) error {
 	// conditions. Note that we wait longer than the 2 node tests since more
 	// nodes implies more pair-wise communication before achieving steady
 	// state.
-	c := d.Collection(testCollection)
+	c := d.CollectionForId(testCollection)
 
 	r := c.Row("f9")
 	for i := 0; i < 8; i++ {
@@ -1126,7 +1124,7 @@ func runSetupAppMulti(ctx *context.T, serviceName string, numApps, numDbs, numCx
 
 			for k := 0; k < numCxs; k++ {
 				cName := fmt.Sprintf("c%d", k)
-				d.Collection(cName).Create(ctx, nil)
+				d.CollectionForId(wire.Id{"u", cName}).Create(ctx, nil)
 			}
 		}
 	}
@@ -1151,7 +1149,7 @@ func runPopulateSyncgroupMulti(ctx *context.T, serviceName, sgNamePrefix string,
 			var sgPrefixes []string
 			for k := 0; k < numCxs; k++ {
 				cName := fmt.Sprintf("c%d", k)
-				c := d.Collection(cName)
+				c := d.CollectionForId(wire.Id{"u", cName})
 
 				for _, pfx := range prefixes {
 					p := fmt.Sprintf("%s:%s", cName, pfx)
@@ -1224,7 +1222,7 @@ func runVerifySyncgroupDataMulti(ctx *context.T, serviceName string, numApps, nu
 
 			for k := 0; k < numCxs; k++ {
 				cName := fmt.Sprintf("c%d", k)
-				c := d.Collection(cName)
+				c := d.CollectionForId(wire.Id{"u", cName})
 
 				for _, pfx := range prefixes {
 					for n := 0; n < 10; n++ {

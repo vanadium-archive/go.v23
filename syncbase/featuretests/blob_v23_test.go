@@ -67,7 +67,7 @@ type testStruct struct {
 
 func generateBlob(ctx *context.T, syncbaseName, keyPrefix string, pos int, data []byte) error {
 	d := syncbase.NewService(syncbaseName).DatabaseForId(testDb, nil)
-	c := d.Collection(testCollection)
+	c := d.CollectionForId(testCx)
 
 	b, err := d.CreateBlob(ctx)
 	if err != nil {
@@ -103,7 +103,7 @@ func generateBlob(ctx *context.T, syncbaseName, keyPrefix string, pos int, data 
 
 func fetchBlob(ctx *context.T, syncbaseName, keyPrefix string, pos int, wantSize int64, skipIncStatus bool) error {
 	d := syncbase.NewService(syncbaseName).DatabaseForId(testDb, nil)
-	c := d.Collection(testCollection)
+	c := d.CollectionForId(testCx)
 
 	key := fmt.Sprintf("%s%d", keyPrefix, pos)
 	r := c.Row(key)
@@ -171,7 +171,7 @@ func fetchBlob(ctx *context.T, syncbaseName, keyPrefix string, pos int, wantSize
 
 func getBlob(ctx *context.T, syncbaseName, keyPrefix string, pos int, wantVal []byte, offset int64) error {
 	d := syncbase.NewService(syncbaseName).DatabaseForId(testDb, nil)
-	c := d.Collection(testCollection)
+	c := d.CollectionForId(testCx)
 
 	key := fmt.Sprintf("%s%d", keyPrefix, pos)
 	r := c.Row(key)
@@ -213,7 +213,7 @@ func getBlob(ctx *context.T, syncbaseName, keyPrefix string, pos int, wantVal []
 
 func generateBigBlob(ctx *context.T, syncbaseName, keyPrefix string, pos int) error {
 	d := syncbase.NewService(syncbaseName).DatabaseForId(testDb, nil)
-	c := d.Collection(testCollection)
+	c := d.CollectionForId(testCx)
 
 	b, err := d.CreateBlob(ctx)
 	if err != nil {
@@ -263,7 +263,7 @@ func generateBigBlob(ctx *context.T, syncbaseName, keyPrefix string, pos int) er
 
 func getBigBlob(ctx *context.T, syncbaseName, keyPrefix string, pos int) error {
 	d := syncbase.NewService(syncbaseName).DatabaseForId(testDb, nil)
-	c := d.Collection(testCollection)
+	c := d.CollectionForId(testCx)
 
 	key := fmt.Sprintf("%s%d", keyPrefix, pos)
 	r := c.Row(key)

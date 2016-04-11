@@ -44,7 +44,7 @@ func TestSchemaCheck(t *testing.T) {
 	// try to make a new database object for the same database but this time
 	// with a new schema version
 	schema.Metadata.Version = 1
-	rule := wire.CrRule{"collection1", "foo", "", wire.ResolverTypeLastWins}
+	rule := wire.CrRule{wire.Id{"u", "c1"}, "foo", "", wire.ResolverTypeLastWins}
 	policy := wire.CrPolicy{
 		Rules: []wire.CrRule{rule},
 	}

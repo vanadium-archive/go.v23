@@ -33,7 +33,7 @@ func TestV23SyncbasedPutGet(t *testing.T) {
 	if err := d.Create(ctx, nil); err != nil {
 		t.Fatalf("unable to create a database: %v", err)
 	}
-	c := d.Collection("c")
+	c := d.CollectionForId(testCx)
 	if err := c.Create(ctx, nil); err != nil {
 		t.Fatalf("unable to create a collection: %v", err)
 	}
@@ -58,7 +58,7 @@ func TestV23SyncbasedPutGet(t *testing.T) {
 	// Do a watch from the resume marker before the put operation.
 	ctxWithTimeout, cancel := context.WithTimeout(ctx, 10*time.Second)
 	defer cancel()
-	stream, err := d.Watch(ctxWithTimeout, "c", "", marker)
+	stream, err := d.Watch(ctxWithTimeout, testCx, "", marker)
 	if err != nil {
 		t.Fatalf("unable to start a watch %v", err)
 	}
@@ -66,7 +66,7 @@ func TestV23SyncbasedPutGet(t *testing.T) {
 		t.Fatalf("watch stream unexpectedly reached the end: %v", stream.Err())
 	}
 	change := stream.Change()
-	if got, want := change.Collection, "c"; got != want {
+	if got, want := change.Collection, testCx; got != want {
 		t.Fatalf("unexpected watch collection: got %q, want %q", got, want)
 	}
 	if got, want := change.Row, "testkey"; got != want {

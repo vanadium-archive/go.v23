@@ -875,10 +875,10 @@ func (x *KeyValue) VDLRead(dec vdl.Decoder) error {
 	}
 }
 
-// CollectionRow encapsulates the collection name and row key or row prefix.
+// CollectionRow encapsulates a collection id and row key or row prefix.
 type CollectionRow struct {
-	CollectionName string
-	Row            string
+	CollectionId Id
+	Row          string
 }
 
 func (CollectionRow) __VDLReflect(struct {
@@ -891,18 +891,19 @@ func (m *CollectionRow) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 	if err != nil {
 		return err
 	}
-	var4 := (m.CollectionName == "")
+	var4 := (m.CollectionId == Id{})
 	if var4 {
-		if err := fieldsTarget1.ZeroField("CollectionName"); err != nil && err != vdl.ErrFieldNoExist {
+		if err := fieldsTarget1.ZeroField("CollectionId"); err != nil && err != vdl.ErrFieldNoExist {
 			return err
 		}
 	} else {
-		keyTarget2, fieldTarget3, err := fieldsTarget1.StartField("CollectionName")
+		keyTarget2, fieldTarget3, err := fieldsTarget1.StartField("CollectionId")
 		if err != vdl.ErrFieldNoExist {
 			if err != nil {
 				return err
 			}
-			if err := fieldTarget3.FromString(string(m.CollectionName), tt.NonOptional().Field(0).Type); err != nil {
+
+			if err := m.CollectionId.FillVDLTarget(fieldTarget3, tt.NonOptional().Field(0).Type); err != nil {
 				return err
 			}
 			if err := fieldsTarget1.FinishField(keyTarget2, fieldTarget3); err != nil {
@@ -940,9 +941,9 @@ func (m *CollectionRow) MakeVDLTarget() vdl.Target {
 }
 
 type CollectionRowTarget struct {
-	Value                *CollectionRow
-	collectionNameTarget vdl.StringTarget
-	rowTarget            vdl.StringTarget
+	Value              *CollectionRow
+	collectionIdTarget IdTarget
+	rowTarget          vdl.StringTarget
 	vdl.TargetBase
 	vdl.FieldsTargetBase
 }
@@ -956,9 +957,9 @@ func (t *CollectionRowTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error
 }
 func (t *CollectionRowTarget) StartField(name string) (key, field vdl.Target, _ error) {
 	switch name {
-	case "CollectionName":
-		t.collectionNameTarget.Value = &t.Value.CollectionName
-		target, err := &t.collectionNameTarget, error(nil)
+	case "CollectionId":
+		t.collectionIdTarget.Value = &t.Value.CollectionId
+		target, err := &t.collectionIdTarget, error(nil)
 		return nil, target, err
 	case "Row":
 		t.rowTarget.Value = &t.Value.Row
@@ -973,8 +974,8 @@ func (t *CollectionRowTarget) FinishField(_, _ vdl.Target) error {
 }
 func (t *CollectionRowTarget) ZeroField(name string) error {
 	switch name {
-	case "CollectionName":
-		t.Value.CollectionName = ""
+	case "CollectionId":
+		t.Value.CollectionId = Id{}
 		return nil
 	case "Row":
 		t.Value.Row = ""
@@ -1005,14 +1006,8 @@ func (x *CollectionRow) VDLRead(dec vdl.Decoder) error {
 		switch f {
 		case "":
 			return dec.FinishValue()
-		case "CollectionName":
-			if err = dec.StartValue(); err != nil {
-				return err
-			}
-			if x.CollectionName, err = dec.DecodeString(); err != nil {
-				return err
-			}
-			if err = dec.FinishValue(); err != nil {
+		case "CollectionId":
+			if err = x.CollectionId.VDLRead(dec); err != nil {
 				return err
 			}
 		case "Row":
@@ -1039,7 +1034,7 @@ type SyncgroupSpec struct {
 	Description string
 	// Permissions governing access to this syncgroup.
 	Perms access.Permissions
-	// Data (collectionName-rowPrefix pairs) covered by this syncgroup.
+	// Data (collectionId-rowPrefix pairs) covered by this syncgroup.
 	Prefixes []CollectionRow
 	// Mount tables at which to advertise this syncgroup, for rendezvous purposes.
 	// (Note that in addition to these mount tables, Syncbase also uses
@@ -4018,10 +4013,10 @@ func (x *ResolutionInfo) VDLRead(dec vdl.Decoder) error {
 // CrRule provides a filter and the type of resolution to perform for a row
 // under conflict that passes the filter.
 type CrRule struct {
-	// CollectionName is the name of the collection that this rule applies to.
-	CollectionName string
+	// CollectionId is the id of the collection that this rule applies to.
+	CollectionId Id
 	// KeyPrefix represents the set of keys within the given collection for which
-	// this policy applies. CollectionName must not be empty if this field is set.
+	// this policy applies. CollectionId must not be empty if this field is set.
 	KeyPrefix string
 	// Type includes the full package path for the value type for which this
 	// policy applies.
@@ -4040,18 +4035,19 @@ func (m *CrRule) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 	if err != nil {
 		return err
 	}
-	var4 := (m.CollectionName == "")
+	var4 := (m.CollectionId == Id{})
 	if var4 {
-		if err := fieldsTarget1.ZeroField("CollectionName"); err != nil && err != vdl.ErrFieldNoExist {
+		if err := fieldsTarget1.ZeroField("CollectionId"); err != nil && err != vdl.ErrFieldNoExist {
 			return err
 		}
 	} else {
-		keyTarget2, fieldTarget3, err := fieldsTarget1.StartField("CollectionName")
+		keyTarget2, fieldTarget3, err := fieldsTarget1.StartField("CollectionId")
 		if err != vdl.ErrFieldNoExist {
 			if err != nil {
 				return err
 			}
-			if err := fieldTarget3.FromString(string(m.CollectionName), tt.NonOptional().Field(0).Type); err != nil {
+
+			if err := m.CollectionId.FillVDLTarget(fieldTarget3, tt.NonOptional().Field(0).Type); err != nil {
 				return err
 			}
 			if err := fieldsTarget1.FinishField(keyTarget2, fieldTarget3); err != nil {
@@ -4128,11 +4124,11 @@ func (m *CrRule) MakeVDLTarget() vdl.Target {
 }
 
 type CrRuleTarget struct {
-	Value                *CrRule
-	collectionNameTarget vdl.StringTarget
-	keyPrefixTarget      vdl.StringTarget
-	typeTarget           vdl.StringTarget
-	resolverTarget       ResolverTypeTarget
+	Value              *CrRule
+	collectionIdTarget IdTarget
+	keyPrefixTarget    vdl.StringTarget
+	typeTarget         vdl.StringTarget
+	resolverTarget     ResolverTypeTarget
 	vdl.TargetBase
 	vdl.FieldsTargetBase
 }
@@ -4146,9 +4142,9 @@ func (t *CrRuleTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
 }
 func (t *CrRuleTarget) StartField(name string) (key, field vdl.Target, _ error) {
 	switch name {
-	case "CollectionName":
-		t.collectionNameTarget.Value = &t.Value.CollectionName
-		target, err := &t.collectionNameTarget, error(nil)
+	case "CollectionId":
+		t.collectionIdTarget.Value = &t.Value.CollectionId
+		target, err := &t.collectionIdTarget, error(nil)
 		return nil, target, err
 	case "KeyPrefix":
 		t.keyPrefixTarget.Value = &t.Value.KeyPrefix
@@ -4171,8 +4167,8 @@ func (t *CrRuleTarget) FinishField(_, _ vdl.Target) error {
 }
 func (t *CrRuleTarget) ZeroField(name string) error {
 	switch name {
-	case "CollectionName":
-		t.Value.CollectionName = ""
+	case "CollectionId":
+		t.Value.CollectionId = Id{}
 		return nil
 	case "KeyPrefix":
 		t.Value.KeyPrefix = ""
@@ -4209,14 +4205,8 @@ func (x *CrRule) VDLRead(dec vdl.Decoder) error {
 		switch f {
 		case "":
 			return dec.FinishValue()
-		case "CollectionName":
-			if err = dec.StartValue(); err != nil {
-				return err
-			}
-			if x.CollectionName, err = dec.DecodeString(); err != nil {
-				return err
-			}
-			if err = dec.FinishValue(); err != nil {
+		case "CollectionId":
+			if err = x.CollectionId.VDLRead(dec); err != nil {
 				return err
 			}
 		case "KeyPrefix":
@@ -5442,7 +5432,7 @@ var descService = rpc.InterfaceDesc{
 // without re-ordering. See watch.GlobWatcher for a detailed explanation of the
 // behavior.
 // TODO(rogulenko): Currently the only supported watch patterns are
-// "<collectionName>/<rowPrefix>*". Consider changing that.
+// "<collectionId>/<rowPrefix>*". Consider changing that.
 //
 // Watching is done by starting a streaming RPC. The RPC takes a ResumeMarker
 // argument that points to a particular place in the database event log. If an
@@ -5452,7 +5442,7 @@ var descService = rpc.InterfaceDesc{
 //
 // The result stream consists of a never-ending sequence of Change messages
 // (until the call fails or is canceled). Each Change contains the Name field in
-// the form "<collectionName>/<rowKey>" and the Value field of the StoreChange
+// the form "<collectionId>/<rowKey>" and the Value field of the StoreChange
 // type. If the client has no access to a row specified in a change, that change
 // is excluded from the result stream.
 //
@@ -5499,7 +5489,7 @@ func (c implDatabaseWatcherClientStub) GetResumeMarker(ctx *context.T, i0 BatchH
 // without re-ordering. See watch.GlobWatcher for a detailed explanation of the
 // behavior.
 // TODO(rogulenko): Currently the only supported watch patterns are
-// "<collectionName>/<rowPrefix>*". Consider changing that.
+// "<collectionId>/<rowPrefix>*". Consider changing that.
 //
 // Watching is done by starting a streaming RPC. The RPC takes a ResumeMarker
 // argument that points to a particular place in the database event log. If an
@@ -5509,7 +5499,7 @@ func (c implDatabaseWatcherClientStub) GetResumeMarker(ctx *context.T, i0 BatchH
 //
 // The result stream consists of a never-ending sequence of Change messages
 // (until the call fails or is canceled). Each Change contains the Name field in
-// the form "<collectionName>/<rowKey>" and the Value field of the StoreChange
+// the form "<collectionId>/<rowKey>" and the Value field of the StoreChange
 // type. If the client has no access to a row specified in a change, that change
 // is excluded from the result stream.
 //
@@ -5589,7 +5579,7 @@ var DatabaseWatcherDesc rpc.InterfaceDesc = descDatabaseWatcher
 var descDatabaseWatcher = rpc.InterfaceDesc{
 	Name:    "DatabaseWatcher",
 	PkgPath: "v.io/v23/services/syncbase",
-	Doc:     "// DatabaseWatcher allows a client to watch for updates to the database. For\n// each watch request, the client will receive a reliable stream of watch events\n// without re-ordering. See watch.GlobWatcher for a detailed explanation of the\n// behavior.\n// TODO(rogulenko): Currently the only supported watch patterns are\n// \"<collectionName>/<rowPrefix>*\". Consider changing that.\n//\n// Watching is done by starting a streaming RPC. The RPC takes a ResumeMarker\n// argument that points to a particular place in the database event log. If an\n// empty ResumeMarker is provided, the WatchStream will begin with a Change\n// batch containing the initial state. Otherwise, the WatchStream will contain\n// only changes since the provided ResumeMarker.\n//\n// The result stream consists of a never-ending sequence of Change messages\n// (until the call fails or is canceled). Each Change contains the Name field in\n// the form \"<collectionName>/<rowKey>\" and the Value field of the StoreChange\n// type. If the client has no access to a row specified in a change, that change\n// is excluded from the result stream.\n//\n// Note: A single Watch Change batch may contain changes from more than one\n// batch as originally committed on a remote Syncbase or obtained from conflict\n// resolution. However, changes from a single original batch will always appear\n// in the same Change batch.",
+	Doc:     "// DatabaseWatcher allows a client to watch for updates to the database. For\n// each watch request, the client will receive a reliable stream of watch events\n// without re-ordering. See watch.GlobWatcher for a detailed explanation of the\n// behavior.\n// TODO(rogulenko): Currently the only supported watch patterns are\n// \"<collectionId>/<rowPrefix>*\". Consider changing that.\n//\n// Watching is done by starting a streaming RPC. The RPC takes a ResumeMarker\n// argument that points to a particular place in the database event log. If an\n// empty ResumeMarker is provided, the WatchStream will begin with a Change\n// batch containing the initial state. Otherwise, the WatchStream will contain\n// only changes since the provided ResumeMarker.\n//\n// The result stream consists of a never-ending sequence of Change messages\n// (until the call fails or is canceled). Each Change contains the Name field in\n// the form \"<collectionId>/<rowKey>\" and the Value field of the StoreChange\n// type. If the client has no access to a row specified in a change, that change\n// is excluded from the result stream.\n//\n// Note: A single Watch Change batch may contain changes from more than one\n// batch as originally committed on a remote Syncbase or obtained from conflict\n// resolution. However, changes from a single original batch will always appear\n// in the same Change batch.",
 	Embeds: []rpc.EmbedDesc{
 		{"GlobWatcher", "v.io/v23/services/watch", "// GlobWatcher allows a client to receive updates for changes to objects\n// that match a pattern.  See the package comments for details."},
 	},
@@ -7169,9 +7159,9 @@ func (s implConflictManagerStartConflictResolverServerCallSend) Send(item Confli
 // DatabaseClientMethods is the client interface
 // containing Database methods.
 //
-// Database represents a set of Collections. Batches, queries, sync, watch, etc.
-// all operate at the Database level.
-// Database.Glob operates over Collection names.
+// Database represents a set of Collections. Batches, queries, syncgroups, and
+// watch all operate at the Database level.
+// Database.Glob operates over Collection ids.
 type DatabaseClientMethods interface {
 	// Object provides access control for Vanadium objects.
 	//
@@ -7223,7 +7213,7 @@ type DatabaseClientMethods interface {
 	// without re-ordering. See watch.GlobWatcher for a detailed explanation of the
 	// behavior.
 	// TODO(rogulenko): Currently the only supported watch patterns are
-	// "<collectionName>/<rowPrefix>*". Consider changing that.
+	// "<collectionId>/<rowPrefix>*". Consider changing that.
 	//
 	// Watching is done by starting a streaming RPC. The RPC takes a ResumeMarker
 	// argument that points to a particular place in the database event log. If an
@@ -7233,7 +7223,7 @@ type DatabaseClientMethods interface {
 	//
 	// The result stream consists of a never-ending sequence of Change messages
 	// (until the call fails or is canceled). Each Change contains the Name field in
-	// the form "<collectionName>/<rowKey>" and the Value field of the StoreChange
+	// the form "<collectionId>/<rowKey>" and the Value field of the StoreChange
 	// type. If the client has no access to a row specified in a change, that change
 	// is excluded from the result stream.
 	//
@@ -7267,13 +7257,13 @@ type DatabaseClientMethods interface {
 	// Create requires the caller to have Write permission at the Service.
 	Create(_ *context.T, metadata *SchemaMetadata, perms access.Permissions, _ ...rpc.CallOpt) error
 	// Destroy destroys this Database, permanently removing all of its data.
+	// TODO(sadovsky): Specify what happens to syncgroups.
 	Destroy(*context.T, ...rpc.CallOpt) error
 	// Exists returns true only if this Database exists. Insufficient permissions
 	// cause Exists to return false instead of an error.
-	// TODO(ivanpi): Exists may fail with an error if higher levels of hierarchy
-	// do not exist.
 	Exists(*context.T, ...rpc.CallOpt) (bool, error)
-	// ListCollections returns a list of all Collection names.
+	// ListCollections returns an unsorted list of all Collection ids that the
+	// caller is allowed to see.
 	// This method exists on Database but not on Service because for the latter
 	// we can simply use glob, while for the former glob lists only Collections
 	// visible in a new snapshot of the Database, ignoring user batches.
@@ -7284,7 +7274,7 @@ type DatabaseClientMethods interface {
 	// for other RPCs.
 	// TODO(ivanpi): Resolve should be checked on all RPCs.
 	// TODO(sadovsky): Maybe switch to streaming RPC.
-	ListCollections(_ *context.T, bh BatchHandle, _ ...rpc.CallOpt) ([]string, error)
+	ListCollections(_ *context.T, bh BatchHandle, _ ...rpc.CallOpt) ([]Id, error)
 	// Exec executes a syncQL query with positional parameters and returns all
 	// results as specified by the query's select/delete statement.
 	// Concurrency semantics are documented in model.go.
@@ -7299,6 +7289,8 @@ type DatabaseClientMethods interface {
 	// everywhere now that v.io/i/912 is resolved.
 	BeginBatch(_ *context.T, bo BatchOptions, _ ...rpc.CallOpt) (BatchHandle, error)
 	// Commit persists the pending changes to the database.
+	// If the batch is readonly, Commit() will fail with ErrReadOnlyBatch; Abort()
+	// should be used instead.
 	// If the BatchHandle is empty, Commit() will fail with ErrNotBoundToBatch.
 	Commit(_ *context.T, bh BatchHandle, _ ...rpc.CallOpt) error
 	// Abort notifies the server that any pending changes can be discarded.
@@ -7306,9 +7298,9 @@ type DatabaseClientMethods interface {
 	// or other resources sooner than if it was not called.
 	// If the BatchHandle is empty, Abort() will fail with ErrNotBoundToBatch.
 	Abort(_ *context.T, bh BatchHandle, _ ...rpc.CallOpt) error
-	// PauseSync pauses sync for this database. Incoming sync, as well as
-	// outgoing sync of subsequent writes, will be disabled until ResumeSync
-	// is called. PauseSync is idempotent.
+	// PauseSync pauses sync for this database. Incoming sync, as well as outgoing
+	// sync of subsequent writes, will be disabled until ResumeSync is called.
+	// PauseSync is idempotent.
 	PauseSync(*context.T, ...rpc.CallOpt) error
 	// ResumeSync resumes sync for this database. ResumeSync is idempotent.
 	ResumeSync(*context.T, ...rpc.CallOpt) error
@@ -7351,7 +7343,7 @@ func (c implDatabaseClientStub) Exists(ctx *context.T, opts ...rpc.CallOpt) (o0 
 	return
 }
 
-func (c implDatabaseClientStub) ListCollections(ctx *context.T, i0 BatchHandle, opts ...rpc.CallOpt) (o0 []string, err error) {
+func (c implDatabaseClientStub) ListCollections(ctx *context.T, i0 BatchHandle, opts ...rpc.CallOpt) (o0 []Id, err error) {
 	err = v23.GetClient(ctx).Call(ctx, c.name, "ListCollections", []interface{}{i0}, []interface{}{&o0}, opts...)
 	return
 }
@@ -7461,9 +7453,9 @@ func (c *implDatabaseExecClientCall) Finish() (err error) {
 // DatabaseServerMethods is the interface a server writer
 // implements for Database.
 //
-// Database represents a set of Collections. Batches, queries, sync, watch, etc.
-// all operate at the Database level.
-// Database.Glob operates over Collection names.
+// Database represents a set of Collections. Batches, queries, syncgroups, and
+// watch all operate at the Database level.
+// Database.Glob operates over Collection ids.
 type DatabaseServerMethods interface {
 	// Object provides access control for Vanadium objects.
 	//
@@ -7515,7 +7507,7 @@ type DatabaseServerMethods interface {
 	// without re-ordering. See watch.GlobWatcher for a detailed explanation of the
 	// behavior.
 	// TODO(rogulenko): Currently the only supported watch patterns are
-	// "<collectionName>/<rowPrefix>*". Consider changing that.
+	// "<collectionId>/<rowPrefix>*". Consider changing that.
 	//
 	// Watching is done by starting a streaming RPC. The RPC takes a ResumeMarker
 	// argument that points to a particular place in the database event log. If an
@@ -7525,7 +7517,7 @@ type DatabaseServerMethods interface {
 	//
 	// The result stream consists of a never-ending sequence of Change messages
 	// (until the call fails or is canceled). Each Change contains the Name field in
-	// the form "<collectionName>/<rowKey>" and the Value field of the StoreChange
+	// the form "<collectionId>/<rowKey>" and the Value field of the StoreChange
 	// type. If the client has no access to a row specified in a change, that change
 	// is excluded from the result stream.
 	//
@@ -7559,13 +7551,13 @@ type DatabaseServerMethods interface {
 	// Create requires the caller to have Write permission at the Service.
 	Create(_ *context.T, _ rpc.ServerCall, metadata *SchemaMetadata, perms access.Permissions) error
 	// Destroy destroys this Database, permanently removing all of its data.
+	// TODO(sadovsky): Specify what happens to syncgroups.
 	Destroy(*context.T, rpc.ServerCall) error
 	// Exists returns true only if this Database exists. Insufficient permissions
 	// cause Exists to return false instead of an error.
-	// TODO(ivanpi): Exists may fail with an error if higher levels of hierarchy
-	// do not exist.
 	Exists(*context.T, rpc.ServerCall) (bool, error)
-	// ListCollections returns a list of all Collection names.
+	// ListCollections returns an unsorted list of all Collection ids that the
+	// caller is allowed to see.
 	// This method exists on Database but not on Service because for the latter
 	// we can simply use glob, while for the former glob lists only Collections
 	// visible in a new snapshot of the Database, ignoring user batches.
@@ -7576,7 +7568,7 @@ type DatabaseServerMethods interface {
 	// for other RPCs.
 	// TODO(ivanpi): Resolve should be checked on all RPCs.
 	// TODO(sadovsky): Maybe switch to streaming RPC.
-	ListCollections(_ *context.T, _ rpc.ServerCall, bh BatchHandle) ([]string, error)
+	ListCollections(_ *context.T, _ rpc.ServerCall, bh BatchHandle) ([]Id, error)
 	// Exec executes a syncQL query with positional parameters and returns all
 	// results as specified by the query's select/delete statement.
 	// Concurrency semantics are documented in model.go.
@@ -7591,6 +7583,8 @@ type DatabaseServerMethods interface {
 	// everywhere now that v.io/i/912 is resolved.
 	BeginBatch(_ *context.T, _ rpc.ServerCall, bo BatchOptions) (BatchHandle, error)
 	// Commit persists the pending changes to the database.
+	// If the batch is readonly, Commit() will fail with ErrReadOnlyBatch; Abort()
+	// should be used instead.
 	// If the BatchHandle is empty, Commit() will fail with ErrNotBoundToBatch.
 	Commit(_ *context.T, _ rpc.ServerCall, bh BatchHandle) error
 	// Abort notifies the server that any pending changes can be discarded.
@@ -7598,9 +7592,9 @@ type DatabaseServerMethods interface {
 	// or other resources sooner than if it was not called.
 	// If the BatchHandle is empty, Abort() will fail with ErrNotBoundToBatch.
 	Abort(_ *context.T, _ rpc.ServerCall, bh BatchHandle) error
-	// PauseSync pauses sync for this database. Incoming sync, as well as
-	// outgoing sync of subsequent writes, will be disabled until ResumeSync
-	// is called. PauseSync is idempotent.
+	// PauseSync pauses sync for this database. Incoming sync, as well as outgoing
+	// sync of subsequent writes, will be disabled until ResumeSync is called.
+	// PauseSync is idempotent.
 	PauseSync(*context.T, rpc.ServerCall) error
 	// ResumeSync resumes sync for this database. ResumeSync is idempotent.
 	ResumeSync(*context.T, rpc.ServerCall) error
@@ -7661,7 +7655,7 @@ type DatabaseServerStubMethods interface {
 	// without re-ordering. See watch.GlobWatcher for a detailed explanation of the
 	// behavior.
 	// TODO(rogulenko): Currently the only supported watch patterns are
-	// "<collectionName>/<rowPrefix>*". Consider changing that.
+	// "<collectionId>/<rowPrefix>*". Consider changing that.
 	//
 	// Watching is done by starting a streaming RPC. The RPC takes a ResumeMarker
 	// argument that points to a particular place in the database event log. If an
@@ -7671,7 +7665,7 @@ type DatabaseServerStubMethods interface {
 	//
 	// The result stream consists of a never-ending sequence of Change messages
 	// (until the call fails or is canceled). Each Change contains the Name field in
-	// the form "<collectionName>/<rowKey>" and the Value field of the StoreChange
+	// the form "<collectionId>/<rowKey>" and the Value field of the StoreChange
 	// type. If the client has no access to a row specified in a change, that change
 	// is excluded from the result stream.
 	//
@@ -7705,13 +7699,13 @@ type DatabaseServerStubMethods interface {
 	// Create requires the caller to have Write permission at the Service.
 	Create(_ *context.T, _ rpc.ServerCall, metadata *SchemaMetadata, perms access.Permissions) error
 	// Destroy destroys this Database, permanently removing all of its data.
+	// TODO(sadovsky): Specify what happens to syncgroups.
 	Destroy(*context.T, rpc.ServerCall) error
 	// Exists returns true only if this Database exists. Insufficient permissions
 	// cause Exists to return false instead of an error.
-	// TODO(ivanpi): Exists may fail with an error if higher levels of hierarchy
-	// do not exist.
 	Exists(*context.T, rpc.ServerCall) (bool, error)
-	// ListCollections returns a list of all Collection names.
+	// ListCollections returns an unsorted list of all Collection ids that the
+	// caller is allowed to see.
 	// This method exists on Database but not on Service because for the latter
 	// we can simply use glob, while for the former glob lists only Collections
 	// visible in a new snapshot of the Database, ignoring user batches.
@@ -7722,7 +7716,7 @@ type DatabaseServerStubMethods interface {
 	// for other RPCs.
 	// TODO(ivanpi): Resolve should be checked on all RPCs.
 	// TODO(sadovsky): Maybe switch to streaming RPC.
-	ListCollections(_ *context.T, _ rpc.ServerCall, bh BatchHandle) ([]string, error)
+	ListCollections(_ *context.T, _ rpc.ServerCall, bh BatchHandle) ([]Id, error)
 	// Exec executes a syncQL query with positional parameters and returns all
 	// results as specified by the query's select/delete statement.
 	// Concurrency semantics are documented in model.go.
@@ -7737,6 +7731,8 @@ type DatabaseServerStubMethods interface {
 	// everywhere now that v.io/i/912 is resolved.
 	BeginBatch(_ *context.T, _ rpc.ServerCall, bo BatchOptions) (BatchHandle, error)
 	// Commit persists the pending changes to the database.
+	// If the batch is readonly, Commit() will fail with ErrReadOnlyBatch; Abort()
+	// should be used instead.
 	// If the BatchHandle is empty, Commit() will fail with ErrNotBoundToBatch.
 	Commit(_ *context.T, _ rpc.ServerCall, bh BatchHandle) error
 	// Abort notifies the server that any pending changes can be discarded.
@@ -7744,9 +7740,9 @@ type DatabaseServerStubMethods interface {
 	// or other resources sooner than if it was not called.
 	// If the BatchHandle is empty, Abort() will fail with ErrNotBoundToBatch.
 	Abort(_ *context.T, _ rpc.ServerCall, bh BatchHandle) error
-	// PauseSync pauses sync for this database. Incoming sync, as well as
-	// outgoing sync of subsequent writes, will be disabled until ResumeSync
-	// is called. PauseSync is idempotent.
+	// PauseSync pauses sync for this database. Incoming sync, as well as outgoing
+	// sync of subsequent writes, will be disabled until ResumeSync is called.
+	// PauseSync is idempotent.
 	PauseSync(*context.T, rpc.ServerCall) error
 	// ResumeSync resumes sync for this database. ResumeSync is idempotent.
 	ResumeSync(*context.T, rpc.ServerCall) error
@@ -7805,7 +7801,7 @@ func (s implDatabaseServerStub) Exists(ctx *context.T, call rpc.ServerCall) (boo
 	return s.impl.Exists(ctx, call)
 }
 
-func (s implDatabaseServerStub) ListCollections(ctx *context.T, call rpc.ServerCall, i0 BatchHandle) ([]string, error) {
+func (s implDatabaseServerStub) ListCollections(ctx *context.T, call rpc.ServerCall, i0 BatchHandle) ([]Id, error) {
 	return s.impl.ListCollections(ctx, call, i0)
 }
 
@@ -7848,10 +7844,10 @@ var DatabaseDesc rpc.InterfaceDesc = descDatabase
 var descDatabase = rpc.InterfaceDesc{
 	Name:    "Database",
 	PkgPath: "v.io/v23/services/syncbase",
-	Doc:     "// Database represents a set of Collections. Batches, queries, sync, watch, etc.\n// all operate at the Database level.\n// Database.Glob operates over Collection names.",
+	Doc:     "// Database represents a set of Collections. Batches, queries, syncgroups, and\n// watch all operate at the Database level.\n// Database.Glob operates over Collection ids.",
 	Embeds: []rpc.EmbedDesc{
 		{"Object", "v.io/v23/services/permissions", "// Object provides access control for Vanadium objects.\n//\n// Vanadium services implementing dynamic access control would typically embed\n// this interface and tag additional methods defined by the service with one of\n// Admin, Read, Write, Resolve etc. For example, the VDL definition of the\n// object would be:\n//\n//   package mypackage\n//\n//   import \"v.io/v23/security/access\"\n//   import \"v.io/v23/services/permissions\"\n//\n//   type MyObject interface {\n//     permissions.Object\n//     MyRead() (string, error) {access.Read}\n//     MyWrite(string) error    {access.Write}\n//   }\n//\n// If the set of pre-defined tags is insufficient, services may define their\n// own tag type and annotate all methods with this new type.\n//\n// Instead of embedding this Object interface, define SetPermissions and\n// GetPermissions in their own interface. Authorization policies will typically\n// respect annotations of a single type. For example, the VDL definition of an\n// object would be:\n//\n//  package mypackage\n//\n//  import \"v.io/v23/security/access\"\n//\n//  type MyTag string\n//\n//  const (\n//    Blue = MyTag(\"Blue\")\n//    Red  = MyTag(\"Red\")\n//  )\n//\n//  type MyObject interface {\n//    MyMethod() (string, error) {Blue}\n//\n//    // Allow clients to change access via the access.Object interface:\n//    SetPermissions(perms access.Permissions, version string) error         {Red}\n//    GetPermissions() (perms access.Permissions, version string, err error) {Blue}\n//  }"},
-		{"DatabaseWatcher", "v.io/v23/services/syncbase", "// DatabaseWatcher allows a client to watch for updates to the database. For\n// each watch request, the client will receive a reliable stream of watch events\n// without re-ordering. See watch.GlobWatcher for a detailed explanation of the\n// behavior.\n// TODO(rogulenko): Currently the only supported watch patterns are\n// \"<collectionName>/<rowPrefix>*\". Consider changing that.\n//\n// Watching is done by starting a streaming RPC. The RPC takes a ResumeMarker\n// argument that points to a particular place in the database event log. If an\n// empty ResumeMarker is provided, the WatchStream will begin with a Change\n// batch containing the initial state. Otherwise, the WatchStream will contain\n// only changes since the provided ResumeMarker.\n//\n// The result stream consists of a never-ending sequence of Change messages\n// (until the call fails or is canceled). Each Change contains the Name field in\n// the form \"<collectionName>/<rowKey>\" and the Value field of the StoreChange\n// type. If the client has no access to a row specified in a change, that change\n// is excluded from the result stream.\n//\n// Note: A single Watch Change batch may contain changes from more than one\n// batch as originally committed on a remote Syncbase or obtained from conflict\n// resolution. However, changes from a single original batch will always appear\n// in the same Change batch."},
+		{"DatabaseWatcher", "v.io/v23/services/syncbase", "// DatabaseWatcher allows a client to watch for updates to the database. For\n// each watch request, the client will receive a reliable stream of watch events\n// without re-ordering. See watch.GlobWatcher for a detailed explanation of the\n// behavior.\n// TODO(rogulenko): Currently the only supported watch patterns are\n// \"<collectionId>/<rowPrefix>*\". Consider changing that.\n//\n// Watching is done by starting a streaming RPC. The RPC takes a ResumeMarker\n// argument that points to a particular place in the database event log. If an\n// empty ResumeMarker is provided, the WatchStream will begin with a Change\n// batch containing the initial state. Otherwise, the WatchStream will contain\n// only changes since the provided ResumeMarker.\n//\n// The result stream consists of a never-ending sequence of Change messages\n// (until the call fails or is canceled). Each Change contains the Name field in\n// the form \"<collectionId>/<rowKey>\" and the Value field of the StoreChange\n// type. If the client has no access to a row specified in a change, that change\n// is excluded from the result stream.\n//\n// Note: A single Watch Change batch may contain changes from more than one\n// batch as originally committed on a remote Syncbase or obtained from conflict\n// resolution. However, changes from a single original batch will always appear\n// in the same Change batch."},
 		{"SyncgroupManager", "v.io/v23/services/syncbase", "// SyncgroupManager is the interface for syncgroup operations.\n// TODO(hpucha): Add blessings to create/join and add a refresh method."},
 		{"BlobManager", "v.io/v23/services/syncbase", "// BlobManager is the interface for blob operations.\n//\n// Description of API for resumable blob creation (append-only):\n// - Up until commit, a BlobRef may be used with PutBlob, GetBlobSize,\n//   DeleteBlob, and CommitBlob. Blob creation may be resumed by obtaining the\n//   current blob size via GetBlobSize and appending to the blob via PutBlob.\n// - After commit, a blob is immutable, at which point PutBlob and CommitBlob\n//   may no longer be used.\n// - All other methods (GetBlob, FetchBlob, PinBlob, etc.) may only be used\n//   after commit."},
 		{"SchemaManager", "v.io/v23/services/syncbase", "// SchemaManager implements the API for managing schema metadata attached\n// to a Database."},
@@ -7869,12 +7865,12 @@ var descDatabase = rpc.InterfaceDesc{
 		},
 		{
 			Name: "Destroy",
-			Doc:  "// Destroy destroys this Database, permanently removing all of its data.",
+			Doc:  "// Destroy destroys this Database, permanently removing all of its data.\n// TODO(sadovsky): Specify what happens to syncgroups.",
 			Tags: []*vdl.Value{vdl.ValueOf(access.Tag("Write"))},
 		},
 		{
 			Name: "Exists",
-			Doc:  "// Exists returns true only if this Database exists. Insufficient permissions\n// cause Exists to return false instead of an error.\n// TODO(ivanpi): Exists may fail with an error if higher levels of hierarchy\n// do not exist.",
+			Doc:  "// Exists returns true only if this Database exists. Insufficient permissions\n// cause Exists to return false instead of an error.",
 			OutArgs: []rpc.ArgDesc{
 				{"", ``}, // bool
 			},
@@ -7882,12 +7878,12 @@ var descDatabase = rpc.InterfaceDesc{
 		},
 		{
 			Name: "ListCollections",
-			Doc:  "// ListCollections returns a list of all Collection names.\n// This method exists on Database but not on Service because for the latter\n// we can simply use glob, while for the former glob lists only Collections\n// visible in a new snapshot of the Database, ignoring user batches.\n// (Note that the same issue is present in glob on Collection, where Scan can\n// be used instead if batch awareness is required.)\n// Note, the glob client library checks Resolve access on every component\n// along the path (by doing a Dispatcher.Lookup), whereas this doesn't happen\n// for other RPCs.\n// TODO(ivanpi): Resolve should be checked on all RPCs.\n// TODO(sadovsky): Maybe switch to streaming RPC.",
+			Doc:  "// ListCollections returns an unsorted list of all Collection ids that the\n// caller is allowed to see.\n// This method exists on Database but not on Service because for the latter\n// we can simply use glob, while for the former glob lists only Collections\n// visible in a new snapshot of the Database, ignoring user batches.\n// (Note that the same issue is present in glob on Collection, where Scan can\n// be used instead if batch awareness is required.)\n// Note, the glob client library checks Resolve access on every component\n// along the path (by doing a Dispatcher.Lookup), whereas this doesn't happen\n// for other RPCs.\n// TODO(ivanpi): Resolve should be checked on all RPCs.\n// TODO(sadovsky): Maybe switch to streaming RPC.",
 			InArgs: []rpc.ArgDesc{
 				{"bh", ``}, // BatchHandle
 			},
 			OutArgs: []rpc.ArgDesc{
-				{"", ``}, // []string
+				{"", ``}, // []Id
 			},
 			Tags: []*vdl.Value{vdl.ValueOf(access.Tag("Read"))},
 		},
@@ -7914,7 +7910,7 @@ var descDatabase = rpc.InterfaceDesc{
 		},
 		{
 			Name: "Commit",
-			Doc:  "// Commit persists the pending changes to the database.\n// If the BatchHandle is empty, Commit() will fail with ErrNotBoundToBatch.",
+			Doc:  "// Commit persists the pending changes to the database.\n// If the batch is readonly, Commit() will fail with ErrReadOnlyBatch; Abort()\n// should be used instead.\n// If the BatchHandle is empty, Commit() will fail with ErrNotBoundToBatch.",
 			InArgs: []rpc.ArgDesc{
 				{"bh", ``}, // BatchHandle
 			},
@@ -7930,7 +7926,7 @@ var descDatabase = rpc.InterfaceDesc{
 		},
 		{
 			Name: "PauseSync",
-			Doc:  "// PauseSync pauses sync for this database. Incoming sync, as well as\n// outgoing sync of subsequent writes, will be disabled until ResumeSync\n// is called. PauseSync is idempotent.",
+			Doc:  "// PauseSync pauses sync for this database. Incoming sync, as well as outgoing\n// sync of subsequent writes, will be disabled until ResumeSync is called.\n// PauseSync is idempotent.",
 			Tags: []*vdl.Value{vdl.ValueOf(access.Tag("Write"))},
 		},
 		{
@@ -7987,13 +7983,14 @@ func (s implDatabaseExecServerCallSend) Send(item []*vom.RawBytes) error {
 // CollectionClientMethods is the client interface
 // containing Collection methods.
 //
-// Collection represents a collection of Rows.
-// Collection.Glob operates over the primary keys of Rows in the Collection.
+// Collection represents a set of Rows.
+// Collection.Glob operates over keys of Rows in the Collection.
 type CollectionClientMethods interface {
 	// Create creates this Collection.
-	// If perms is nil, we inherit (copy) the Database perms.
+	// TODO(sadovsky): Specify what happens if perms is nil.
 	Create(_ *context.T, bh BatchHandle, perms access.Permissions, _ ...rpc.CallOpt) error
-	// Destroy destroys this Collection.
+	// Destroy destroys this Collection, permanently removing all of its data.
+	// TODO(sadovsky): Specify what happens to syncgroups.
 	Destroy(_ *context.T, bh BatchHandle, _ ...rpc.CallOpt) error
 	// Exists returns true only if this Collection exists. Insufficient
 	// permissions cause Exists to return false instead of an error.
@@ -8008,8 +8005,8 @@ type CollectionClientMethods interface {
 	// If limit is "", all rows with keys >= start are included.
 	DeleteRange(_ *context.T, bh BatchHandle, start []byte, limit []byte, _ ...rpc.CallOpt) error
 	// Scan returns all rows in the given half-open range [start, limit). If limit
-	// is "", all rows with keys >= start are included. Concurrency semantics are
-	// documented in model.go.
+	// is "", all rows with keys >= start are included.
+	// Concurrency semantics are documented in model.go.
 	Scan(_ *context.T, bh BatchHandle, start []byte, limit []byte, _ ...rpc.CallOpt) (CollectionScanClientCall, error)
 }
 
@@ -8139,13 +8136,14 @@ func (c *implCollectionScanClientCall) Finish() (err error) {
 // CollectionServerMethods is the interface a server writer
 // implements for Collection.
 //
-// Collection represents a collection of Rows.
-// Collection.Glob operates over the primary keys of Rows in the Collection.
+// Collection represents a set of Rows.
+// Collection.Glob operates over keys of Rows in the Collection.
 type CollectionServerMethods interface {
 	// Create creates this Collection.
-	// If perms is nil, we inherit (copy) the Database perms.
+	// TODO(sadovsky): Specify what happens if perms is nil.
 	Create(_ *context.T, _ rpc.ServerCall, bh BatchHandle, perms access.Permissions) error
-	// Destroy destroys this Collection.
+	// Destroy destroys this Collection, permanently removing all of its data.
+	// TODO(sadovsky): Specify what happens to syncgroups.
 	Destroy(_ *context.T, _ rpc.ServerCall, bh BatchHandle) error
 	// Exists returns true only if this Collection exists. Insufficient
 	// permissions cause Exists to return false instead of an error.
@@ -8160,8 +8158,8 @@ type CollectionServerMethods interface {
 	// If limit is "", all rows with keys >= start are included.
 	DeleteRange(_ *context.T, _ rpc.ServerCall, bh BatchHandle, start []byte, limit []byte) error
 	// Scan returns all rows in the given half-open range [start, limit). If limit
-	// is "", all rows with keys >= start are included. Concurrency semantics are
-	// documented in model.go.
+	// is "", all rows with keys >= start are included.
+	// Concurrency semantics are documented in model.go.
 	Scan(_ *context.T, _ CollectionScanServerCall, bh BatchHandle, start []byte, limit []byte) error
 }
 
@@ -8171,9 +8169,10 @@ type CollectionServerMethods interface {
 // is the streaming methods.
 type CollectionServerStubMethods interface {
 	// Create creates this Collection.
-	// If perms is nil, we inherit (copy) the Database perms.
+	// TODO(sadovsky): Specify what happens if perms is nil.
 	Create(_ *context.T, _ rpc.ServerCall, bh BatchHandle, perms access.Permissions) error
-	// Destroy destroys this Collection.
+	// Destroy destroys this Collection, permanently removing all of its data.
+	// TODO(sadovsky): Specify what happens to syncgroups.
 	Destroy(_ *context.T, _ rpc.ServerCall, bh BatchHandle) error
 	// Exists returns true only if this Collection exists. Insufficient
 	// permissions cause Exists to return false instead of an error.
@@ -8188,8 +8187,8 @@ type CollectionServerStubMethods interface {
 	// If limit is "", all rows with keys >= start are included.
 	DeleteRange(_ *context.T, _ rpc.ServerCall, bh BatchHandle, start []byte, limit []byte) error
 	// Scan returns all rows in the given half-open range [start, limit). If limit
-	// is "", all rows with keys >= start are included. Concurrency semantics are
-	// documented in model.go.
+	// is "", all rows with keys >= start are included.
+	// Concurrency semantics are documented in model.go.
 	Scan(_ *context.T, _ *CollectionScanServerCallStub, bh BatchHandle, start []byte, limit []byte) error
 }
 
@@ -8265,11 +8264,11 @@ var CollectionDesc rpc.InterfaceDesc = descCollection
 var descCollection = rpc.InterfaceDesc{
 	Name:    "Collection",
 	PkgPath: "v.io/v23/services/syncbase",
-	Doc:     "// Collection represents a collection of Rows.\n// Collection.Glob operates over the primary keys of Rows in the Collection.",
+	Doc:     "// Collection represents a set of Rows.\n// Collection.Glob operates over keys of Rows in the Collection.",
 	Methods: []rpc.MethodDesc{
 		{
 			Name: "Create",
-			Doc:  "// Create creates this Collection.\n// If perms is nil, we inherit (copy) the Database perms.",
+			Doc:  "// Create creates this Collection.\n// TODO(sadovsky): Specify what happens if perms is nil.",
 			InArgs: []rpc.ArgDesc{
 				{"bh", ``},    // BatchHandle
 				{"perms", ``}, // access.Permissions
@@ -8278,7 +8277,7 @@ var descCollection = rpc.InterfaceDesc{
 		},
 		{
 			Name: "Destroy",
-			Doc:  "// Destroy destroys this Collection.",
+			Doc:  "// Destroy destroys this Collection, permanently removing all of its data.\n// TODO(sadovsky): Specify what happens to syncgroups.",
 			InArgs: []rpc.ArgDesc{
 				{"bh", ``}, // BatchHandle
 			},
@@ -8327,7 +8326,7 @@ var descCollection = rpc.InterfaceDesc{
 		},
 		{
 			Name: "Scan",
-			Doc:  "// Scan returns all rows in the given half-open range [start, limit). If limit\n// is \"\", all rows with keys >= start are included. Concurrency semantics are\n// documented in model.go.",
+			Doc:  "// Scan returns all rows in the given half-open range [start, limit). If limit\n// is \"\", all rows with keys >= start are included.\n// Concurrency semantics are documented in model.go.",
 			InArgs: []rpc.ArgDesc{
 				{"bh", ``},    // BatchHandle
 				{"start", ``}, // []byte

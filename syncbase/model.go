@@ -35,7 +35,7 @@ type Service interface {
 	// FullName returns the object name (encoded) of this Service.
 	FullName() string
 
-	// Database returns the Database with the given context and relative name.
+	// Database returns the Database with the given relative name.
 	// The app blessing is derived from the context.
 	// TODO(sadovsky): Revisit API for schema stuff.
 	Database(ctx *context.T, name string, schema *Schema) Database
@@ -43,8 +43,8 @@ type Service interface {
 	// DatabaseForId returns the Database with the given app blessing and name.
 	DatabaseForId(id wire.Id, schema *Schema) Database
 
-	// ListDatabases returns a list of all database names that the caller is
-	// allowed to see.
+	// ListDatabases returns a list of all Database ids that the caller is allowed
+	// to see. The list is sorted by blessing, then by name.
 	ListDatabases(ctx *context.T) ([]wire.Id, error)
 
 	// SetPermissions and GetPermissions are included from the AccessController
@@ -62,12 +62,17 @@ type DatabaseHandle interface {
 	// FullName returns the object name (encoded) of this DatabaseHandle.
 	FullName() string
 
-	// Collection returns the Collection with the given name.
-	// relativeName must not contain slashes.
-	Collection(relativeName string) Collection
+	// Collection returns the Collection with the given relative name.
+	// The user blessing is derived from the context.
+	Collection(ctx *context.T, name string) Collection
 
-	// ListCollections returns a list of all Collection names.
-	ListCollections(ctx *context.T) ([]string, error)
+	// CollectionForId returns the Collection with the given user blessing and
+	// name.
+	CollectionForId(id wire.Id) Collection
+
+	// ListCollections returns a list of all Collection ids that the caller is
+	// allowed to see. The list is sorted by blessing, then by name.
+	ListCollections(ctx *context.T) ([]wire.Id, error)
 
 	// Exec executes a syncQL query.
 	//
@@ -75,16 +80,15 @@ type DatabaseHandle interface {
 	// in the query.
 	//
 	// For select statements:
-	// If no error is returned, Exec returns an array of headers (i.e., column
-	// names) and a result stream which contains an array of values for each row
-	// that matches the query.  The number of values returned in each row of the
-	// result stream will match the size of the headers string array.
+	// If no error is returned, Exec returns an array of headers (i.e. column
+	// names) and a result stream with an array of values for each row that
+	// matches the query. The number of values returned in each row of the
+	// result stream will match the size of the headers array.
 	//
 	// For delete statements:
-	// If no error is returned, Exec returns an array of headers with exactly
-	// one column: "Count" and a result stream which contains an array of length
-	// one, with a single element of type vdl.Int64.  The value represents
-	// the number of k/v pairs deleted by the statement.
+	// If no error is returned, Exec returns an array of headers with exactly one
+	// column, "Count", and a result stream with an array containing a single
+	// element of type vdl.Int64. The value represents the number of rows deleted.
 	//
 	// Concurrency semantics: It is legal to perform writes concurrently with
 	// Exec. The returned stream reads from a consistent snapshot taken at the
@@ -97,8 +101,7 @@ type DatabaseHandle interface {
 	GetResumeMarker(ctx *context.T) (watch.ResumeMarker, error)
 }
 
-// Database represents a set of Collections. Batches, queries, sync, watch,
-// etc. all operate at the Database level.
+// Database represents a set of Collections.
 type Database interface {
 	DatabaseHandle
 
@@ -112,8 +115,6 @@ type Database interface {
 
 	// Exists returns true only if this Database exists. Insufficient permissions
 	// cause Exists to return false instead of an error.
-	// TODO(ivanpi): Exists may fail with an error if higher levels of hierarchy
-	// do not exist.
 	Exists(ctx *context.T) (bool, error)
 
 	// BeginBatch creates a new batch. Instead of calling this function directly,
@@ -152,7 +153,7 @@ type Database interface {
 	//
 	// TODO(sadovsky): Watch should return just a WatchStream, similar to how Scan
 	// returns just a ScanStream.
-	Watch(ctx *context.T, collection, prefix string, resumeMarker watch.ResumeMarker) (WatchStream, error)
+	Watch(ctx *context.T, collection wire.Id, prefix string, resumeMarker watch.ResumeMarker) (WatchStream, error)
 
 	// Syncgroup returns a handle to the syncgroup with the given name.
 	Syncgroup(sgName string) Syncgroup
@@ -169,10 +170,10 @@ type Database interface {
 	Blob(br wire.BlobRef) Blob
 
 	// EnforceSchema compares the current schema version of the database with the
-	// schema version provided while creating this database handle, and updates
-	// the schema metadata if required.
+	// schema version provided when creating this database handle, and updates the
+	// schema metadata if required.
 	//
-	// This method also registers a conflict resolver with syncbase to receive
+	// This method also registers a conflict resolver with Syncbase to receive
 	// conflicts. Note: schema can be nil, in which case this method should not be
 	// called and the caller is responsible for maintaining schema sanity.
 	EnforceSchema(ctx *context.T) error
@@ -185,8 +186,8 @@ type Database interface {
 	// ResumeSync resumes sync for this database. ResumeSync is idempotent.
 	ResumeSync(ctx *context.T) error
 
-	// Close cleans up any state associated with this client handle including
-	// shutting down any open conflict resolution stream.
+	// Close cleans up any state associated with this database handle, including
+	// closing the conflict resolution stream (if open).
 	Close()
 }
 
@@ -217,55 +218,63 @@ type BatchDatabase interface {
 // Collection and Row, because we're not sure which will feel more natural.
 // Eventually, we'll need to pick one.
 type Collection interface {
-	// Name returns the relative name of this Collection.
-	Name() string
+	// Id returns the id of this Collection.
+	Id() wire.Id
 
 	// FullName returns the object name (encoded) of this Collection.
 	FullName() string
 
-	// Exists returns true only if this Collection exists. Insufficient permissions
-	// cause Exists to return false instead of an error.
+	// Exists returns true only if this Collection exists. Insufficient
+	// permissions cause Exists to return false instead of an error.
 	// TODO(ivanpi): Exists may fail with an error if higher levels of hierarchy
 	// do not exist.
 	Exists(ctx *context.T) (bool, error)
 
 	// Create creates this Collection.
-	// If perms is nil, we inherit (copy) the Database perms.
+	// TODO(sadovsky): Specify what happens if perms is nil.
 	Create(ctx *context.T, perms access.Permissions) error
 
 	// Destroy destroys this Collection, permanently removing all of its data.
+	// TODO(sadovsky): Specify what happens to syncgroups.
 	Destroy(ctx *context.T) error
 
 	// GetPermissions returns the current Permissions for the Collection.
+	// The Read bit on the ACL does not affect who this Collection's rows are
+	// synced to; all members of syncgroups that include this Collection will
+	// receive the rows in this Collection. It only determines which clients
+	// are allowed to retrieve the value using a Syncbase RPC.
 	GetPermissions(ctx *context.T) (access.Permissions, error)
 
 	// SetPermissions replaces the current Permissions for the Collection.
 	SetPermissions(ctx *context.T, perms access.Permissions) error
 
-	// Row returns the Row with the given primary key.
+	// Row returns the Row with the given key.
 	Row(key string) Row
 
-	// Get stores the value for the given primary key in value. If value's type
-	// does not match the stored type, Get will return an error. Expected usage:
-	//     var val mytype
-	//     if err := collection.Get(ctx, key, &val); err != nil {
+	// Get loads the value stored under the given key into the given value.
+	// If the given value's type does not match the stored value's type, Get
+	// will return an error. Expected usage:
+	//     var value MyType
+	//     if err := cx.Get(ctx, key, &value); err != nil {
 	//       return err
 	//     }
 	Get(ctx *context.T, key string, value interface{}) error
 
-	// Put writes the given value to this Collection. The value's primary key field
-	// must be set.
+	// Put writes the given value to this Collection under the given key.
 	// TODO(kash): Can VOM handle everything that satisfies interface{}?
 	// Need to talk to Todd.
 	// TODO(sadovsky): Maybe distinguish insert from update (and also offer
 	// upsert) so that last-one-wins can have deletes trump updates.
 	Put(ctx *context.T, key string, value interface{}) error
 
-	// Delete deletes the row for the given primary key.
+	// Delete deletes the row for the given key.
 	Delete(ctx *context.T, key string) error
 
 	// DeleteRange deletes all rows in the given half-open range [start, limit).
 	// If limit is "", all rows with keys >= start are included.
+	// TODO(sadovsky): Document how this deletion is considered during conflict
+	// detection: is it considered as a range deletion, or as a bunch of point
+	// deletions?
 	// See helpers Prefix(), Range(), SingleRow().
 	DeleteRange(ctx *context.T, r RowRange) error
 
@@ -281,19 +290,25 @@ type Collection interface {
 
 // Row represents a single row in a Collection.
 type Row interface {
-	// Key returns the primary key for this Row.
+	// Key returns the key for this Row.
 	Key() string
 
 	// FullName returns the object name (encoded) of this Row.
 	FullName() string
 
-	// Exists returns true only if this Row exists. Insufficient permissions
-	// cause Exists to return false instead of an error.
+	// Exists returns true only if this Row exists. Insufficient permissions cause
+	// Exists to return false instead of an error.
 	// TODO(ivanpi): Exists may fail with an error if higher levels of hierarchy
 	// do not exist.
 	Exists(ctx *context.T) (bool, error)
 
-	// Get returns the value for this Row.
+	// Get loads the value stored in this Row into the given value. If the given
+	// value's type does not match the stored value's type, Get will return an
+	// error. Expected usage:
+	//     var value MyType
+	//     if err := row.Get(ctx, &value); err != nil {
+	//       return err
+	//     }
 	Get(ctx *context.T, value interface{}) error
 
 	// Put writes the given value for this Row.
@@ -341,8 +356,7 @@ type ScanStream interface {
 	Value(value interface{}) error
 }
 
-// ResultStream is an interface for iterating through rows resulting from an
-// Exec.
+// ResultStream is an interface for iterating through Exec query results.
 type ResultStream interface {
 	Stream
 
@@ -351,7 +365,7 @@ type ResultStream interface {
 	// last call to Advance() was successful.
 	ResultCount() int
 
-	// ResultValue places in value the result numbered i.
+	// ResultValue loads the result numbered i into the given value.
 	// Requires 0 <= i < ResultCount(), and that the last call to Advance()
 	// was successful.
 	// Errors represent possible decoding errors for individual values,
@@ -370,8 +384,8 @@ type WatchStream interface {
 }
 
 // ChangeType describes the type of the row change: Put or Delete.
-// TODO(rogulenko): Add types to represent changes to ACLs and syncgroups in
-// this database. Also, consider adding the Shell type.
+// TODO(sadovsky): Add types to represent changes to collections, syncgroups,
+// and ACLs in this database.
 type ChangeType uint32
 
 const (
@@ -379,33 +393,33 @@ const (
 	DeleteChange
 )
 
-// WatchChange is the new value for a watched entity.
+// WatchChange represents a change to a watched entity.
 type WatchChange struct {
-	// Collection is the name of the collection that contains the changed row.
-	Collection string
+	// Collection is the id of the collection that contains the changed row.
+	Collection wire.Id
 
 	// Row is the key of the changed row.
 	Row string
 
-	// ChangeType describes the type of the change. If the ChangeType equals to
-	// PutChange, then the row exists in the collection and the Value contains the new
-	// value for this row. If the state equals to DeleteChange, then the row was
+	// ChangeType describes the type of the change. If ChangeType is PutChange,
+	// then the row exists in the collection, and Value can be called to obtain
+	// the new value for this row. If ChangeType is DeleteChange, then the row was
 	// removed from the collection.
 	ChangeType ChangeType
 
-	// value is the new value for the row if the ChangeType is Put or nil
+	// value is the new value for the row if the ChangeType is PutChange, or nil
 	// otherwise.
 	value *vom.RawBytes
 
-	// ResumeMarker provides a compact representation of all the messages
-	// that have been received by the caller for the given Watch call.
+	// ResumeMarker provides a compact representation of all the messages that
+	// have been received by the caller for the given Watch call.
 	// This marker can be provided in the Request message to allow the caller
 	// to resume the stream watching at a specific point without fetching the
 	// initial state.
 	ResumeMarker watch.ResumeMarker
 
-	// FromSync indicates whether the change came from sync. If FromSync is
-	// false, then the change originated from the local device.
+	// FromSync indicates whether the change came from sync. If FromSync is false,
+	// then the change originated from the local device.
 	FromSync bool
 
 	// If true, this WatchChange is followed by more WatchChanges that are in the

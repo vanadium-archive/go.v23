@@ -66,7 +66,7 @@ func BenchmarkPingPongPair(b *testing.B) {
 			// Possible explanation: The empty prefix ACL receives an initial value
 			// from the Collection ACL. If this value is synced over from the opposing
 			// peer, conflict resolution can mean that s0 loses the ability to watch.
-			syncString := fmt.Sprintf("%s:p", testCollection)
+			syncString := fmt.Sprintf("%s:p", testCx.Name)
 			ok(b, createSyncgroup(sbs[0].clientCtx, sbs[0].sbName, sgName, syncString, "", sbBlessings(sbs), nil))
 
 			// The other syncbases will attempt to join the syncgroup.
@@ -86,9 +86,9 @@ func BenchmarkPingPongPair(b *testing.B) {
 
 		// Set up the watch streams (watching the other syncbase's prefix).
 		prefix0, prefix1 := "prefix0", "prefix1"
-		w0, err := db0.Watch(sbs[0].clientCtx, testCollection, prefix1, watch.ResumeMarker("now"))
+		w0, err := db0.Watch(sbs[0].clientCtx, testCx, prefix1, watch.ResumeMarker("now"))
 		ok(b, err)
-		w1, err := db1.Watch(sbs[1].clientCtx, testCollection, prefix0, watch.ResumeMarker("now"))
+		w1, err := db1.Watch(sbs[1].clientCtx, testCx, prefix0, watch.ResumeMarker("now"))
 		ok(b, err)
 
 		// The join has succeeded, so make sure sync is initialized.
@@ -175,7 +175,7 @@ func watchInt32s(b *testing.B, w syncbase.WatchStream, c chan int32) {
 // name.
 func getDbAndCollection(syncbaseName string) (d syncbase.Database, c syncbase.Collection) {
 	d = syncbase.NewService(syncbaseName).DatabaseForId(testDb, nil)
-	c = d.Collection(testCollection)
+	c = d.CollectionForId(testCx)
 	return
 }
 

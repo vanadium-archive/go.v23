@@ -434,7 +434,7 @@ pkg syncbase, type CollectionClientStub interface, Scan(*context.T, BatchHandle,
 pkg syncbase, type CollectionClientStub interface, SetPermissions(*context.T, BatchHandle, access.Permissions, ...rpc.CallOpt) error
 pkg syncbase, type CollectionClientStub interface, unexported methods
 pkg syncbase, type CollectionRow struct
-pkg syncbase, type CollectionRow struct, CollectionName string
+pkg syncbase, type CollectionRow struct, CollectionId Id
 pkg syncbase, type CollectionRow struct, Row string
 pkg syncbase, type CollectionRowTarget struct
 pkg syncbase, type CollectionRowTarget struct, Value *CollectionRow
@@ -529,7 +529,7 @@ pkg syncbase, type CrPolicyTarget struct, Value *CrPolicy
 pkg syncbase, type CrPolicyTarget struct, embedded vdl.FieldsTargetBase
 pkg syncbase, type CrPolicyTarget struct, embedded vdl.TargetBase
 pkg syncbase, type CrRule struct
-pkg syncbase, type CrRule struct, CollectionName string
+pkg syncbase, type CrRule struct, CollectionId Id
 pkg syncbase, type CrRule struct, KeyPrefix string
 pkg syncbase, type CrRule struct, Resolver ResolverType
 pkg syncbase, type CrRule struct, Type string
@@ -561,7 +561,7 @@ pkg syncbase, type DatabaseClientMethods interface, GetSyncgroupSpec(*context.T,
 pkg syncbase, type DatabaseClientMethods interface, JoinSyncgroup(*context.T, string, SyncgroupMemberInfo, ...rpc.CallOpt) (SyncgroupSpec, error)
 pkg syncbase, type DatabaseClientMethods interface, KeepBlob(*context.T, BlobRef, uint64, ...rpc.CallOpt) error
 pkg syncbase, type DatabaseClientMethods interface, LeaveSyncgroup(*context.T, string, ...rpc.CallOpt) error
-pkg syncbase, type DatabaseClientMethods interface, ListCollections(*context.T, BatchHandle, ...rpc.CallOpt) ([]string, error)
+pkg syncbase, type DatabaseClientMethods interface, ListCollections(*context.T, BatchHandle, ...rpc.CallOpt) ([]Id, error)
 pkg syncbase, type DatabaseClientMethods interface, PauseSync(*context.T, ...rpc.CallOpt) error
 pkg syncbase, type DatabaseClientMethods interface, PinBlob(*context.T, BlobRef, ...rpc.CallOpt) error
 pkg syncbase, type DatabaseClientMethods interface, PutBlob(*context.T, BlobRef, ...rpc.CallOpt) (BlobManagerPutBlobClientCall, error)
@@ -595,7 +595,7 @@ pkg syncbase, type DatabaseClientStub interface, GetSyncgroupSpec(*context.T, st
 pkg syncbase, type DatabaseClientStub interface, JoinSyncgroup(*context.T, string, SyncgroupMemberInfo, ...rpc.CallOpt) (SyncgroupSpec, error)
 pkg syncbase, type DatabaseClientStub interface, KeepBlob(*context.T, BlobRef, uint64, ...rpc.CallOpt) error
 pkg syncbase, type DatabaseClientStub interface, LeaveSyncgroup(*context.T, string, ...rpc.CallOpt) error
-pkg syncbase, type DatabaseClientStub interface, ListCollections(*context.T, BatchHandle, ...rpc.CallOpt) ([]string, error)
+pkg syncbase, type DatabaseClientStub interface, ListCollections(*context.T, BatchHandle, ...rpc.CallOpt) ([]Id, error)
 pkg syncbase, type DatabaseClientStub interface, PauseSync(*context.T, ...rpc.CallOpt) error
 pkg syncbase, type DatabaseClientStub interface, PinBlob(*context.T, BlobRef, ...rpc.CallOpt) error
 pkg syncbase, type DatabaseClientStub interface, PutBlob(*context.T, BlobRef, ...rpc.CallOpt) (BlobManagerPutBlobClientCall, error)
@@ -640,7 +640,7 @@ pkg syncbase, type DatabaseServerMethods interface, GetSyncgroupSpec(*context.T,
 pkg syncbase, type DatabaseServerMethods interface, JoinSyncgroup(*context.T, rpc.ServerCall, string, SyncgroupMemberInfo) (SyncgroupSpec, error)
 pkg syncbase, type DatabaseServerMethods interface, KeepBlob(*context.T, rpc.ServerCall, BlobRef, uint64) error
 pkg syncbase, type DatabaseServerMethods interface, LeaveSyncgroup(*context.T, rpc.ServerCall, string) error
-pkg syncbase, type DatabaseServerMethods interface, ListCollections(*context.T, rpc.ServerCall, BatchHandle) ([]string, error)
+pkg syncbase, type DatabaseServerMethods interface, ListCollections(*context.T, rpc.ServerCall, BatchHandle) ([]Id, error)
 pkg syncbase, type DatabaseServerMethods interface, PauseSync(*context.T, rpc.ServerCall) error
 pkg syncbase, type DatabaseServerMethods interface, PinBlob(*context.T, rpc.ServerCall, BlobRef) error
 pkg syncbase, type DatabaseServerMethods interface, PutBlob(*context.T, BlobManagerPutBlobServerCall, BlobRef) error
@@ -666,7 +666,7 @@ pkg syncbase, type DatabaseServerStub interface, GetBlob(*context.T, *BlobManage
 pkg syncbase, type DatabaseServerStub interface, GetBlobSize(*context.T, rpc.ServerCall, BlobRef) (int64, error)
 pkg syncbase, type DatabaseServerStub interface, GetResumeMarker(*context.T, rpc.ServerCall, BatchHandle) (watch.ResumeMarker, error)
 pkg syncbase, type DatabaseServerStub interface, KeepBlob(*context.T, rpc.ServerCall, BlobRef, uint64) error
-pkg syncbase, type DatabaseServerStub interface, ListCollections(*context.T, rpc.ServerCall, BatchHandle) ([]string, error)
+pkg syncbase, type DatabaseServerStub interface, ListCollections(*context.T, rpc.ServerCall, BatchHandle) ([]Id, error)
 pkg syncbase, type DatabaseServerStub interface, PauseSync(*context.T, rpc.ServerCall) error
 pkg syncbase, type DatabaseServerStub interface, PinBlob(*context.T, rpc.ServerCall, BlobRef) error
 pkg syncbase, type DatabaseServerStub interface, PutBlob(*context.T, *BlobManagerPutBlobServerCallStub, BlobRef) error
@@ -689,7 +689,7 @@ pkg syncbase, type DatabaseServerStubMethods interface, GetBlob(*context.T, *Blo
 pkg syncbase, type DatabaseServerStubMethods interface, GetBlobSize(*context.T, rpc.ServerCall, BlobRef) (int64, error)
 pkg syncbase, type DatabaseServerStubMethods interface, GetResumeMarker(*context.T, rpc.ServerCall, BatchHandle) (watch.ResumeMarker, error)
 pkg syncbase, type DatabaseServerStubMethods interface, KeepBlob(*context.T, rpc.ServerCall, BlobRef, uint64) error
-pkg syncbase, type DatabaseServerStubMethods interface, ListCollections(*context.T, rpc.ServerCall, BatchHandle) ([]string, error)
+pkg syncbase, type DatabaseServerStubMethods interface, ListCollections(*context.T, rpc.ServerCall, BatchHandle) ([]Id, error)
 pkg syncbase, type DatabaseServerStubMethods interface, PauseSync(*context.T, rpc.ServerCall) error
 pkg syncbase, type DatabaseServerStubMethods interface, PinBlob(*context.T, rpc.ServerCall, BlobRef) error
 pkg syncbase, type DatabaseServerStubMethods interface, PutBlob(*context.T, *BlobManagerPutBlobServerCallStub, BlobRef) error

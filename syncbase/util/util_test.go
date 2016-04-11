@@ -36,8 +36,8 @@ func TestEncodeDecode(t *testing.T) {
 }
 
 func TestEncodeIdDecodeId(t *testing.T) {
-	for _, blessing := range tu.OkAppBlessings {
-		for _, name := range tu.OkDbNames {
+	for _, blessing := range tu.OkAppUserBlessings {
+		for _, name := range tu.OkDbCxNames {
 			id := wire.Id{blessing, name}
 			enc := util.EncodeId(id)
 			dec, err := util.DecodeId(enc)
@@ -52,38 +52,28 @@ func TestEncodeIdDecodeId(t *testing.T) {
 }
 
 func TestValidNameFuncs(t *testing.T) {
-	for _, a := range tu.OkAppBlessings {
-		for _, d := range tu.OkDbNames {
+	for _, a := range tu.OkAppUserBlessings {
+		for _, d := range tu.OkDbCxNames {
 			id := wire.Id{Blessing: a, Name: d}
-			if !util.ValidDatabaseId(id) {
+			if !util.ValidId(id) {
 				t.Errorf("%v should be valid", id)
 			}
 		}
 	}
-	for _, a := range tu.NotOkAppBlessings {
-		for _, d := range append(tu.OkDbNames, tu.NotOkDbNames...) {
+	for _, a := range tu.NotOkAppUserBlessings {
+		for _, d := range append(tu.OkDbCxNames, tu.NotOkDbCxNames...) {
 			id := wire.Id{Blessing: a, Name: d}
-			if util.ValidDatabaseId(id) {
+			if util.ValidId(id) {
 				t.Errorf("%v should be invalid", id)
 			}
 		}
 	}
-	for _, d := range tu.NotOkDbNames {
-		for _, a := range append(tu.OkAppBlessings, tu.NotOkAppBlessings...) {
+	for _, d := range tu.NotOkDbCxNames {
+		for _, a := range append(tu.OkAppUserBlessings, tu.NotOkAppUserBlessings...) {
 			id := wire.Id{Blessing: a, Name: d}
-			if util.ValidDatabaseId(id) {
+			if util.ValidId(id) {
 				t.Errorf("%v should be invalid", id)
 			}
-		}
-	}
-	for _, s := range tu.OkCollectionNames {
-		if !util.ValidCollectionName(s) {
-			t.Errorf("%q should be valid", s)
-		}
-	}
-	for _, s := range tu.NotOkCollectionNames {
-		if util.ValidCollectionName(s) {
-			t.Errorf("%q should be invalid", s)
 		}
 	}
 	for _, s := range tu.OkRowKeys {

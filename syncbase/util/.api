@@ -5,11 +5,12 @@ pkg util, func Encode(string) string
 pkg util, func EncodeId(wire.Id) string
 pkg util, func IsPrefix(string, string) bool
 pkg util, func ListChildIds(*context.T, string) ([]wire.Id, error)
-pkg util, func ParseCollectionRowPair(*context.T, string) (string, string, error)
+pkg util, func ParseCollectionRowPair(*context.T, string) (wire.Id, string, error)
 pkg util, func PrefixRangeLimit(string) string
 pkg util, func PrefixRangeStart(string) string
-pkg util, func ValidCollectionName(string) bool
-pkg util, func ValidDatabaseId(wire.Id) bool
+pkg util, func SortIds([]wire.Id)
+pkg util, func UserBlessingFromContext(*context.T) (string, error)
+pkg util, func ValidId(wire.Id) bool
 pkg util, func ValidRowKey(string) bool
 pkg util, type AccessController interface { GetPermissions, SetPermissions }
 pkg util, type AccessController interface, GetPermissions(*context.T) (access.Permissions, string, error)
