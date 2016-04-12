@@ -114,10 +114,10 @@ func VDLRead(dec vdl.Decoder, error *error) error {
 	if err := wire.VDLRead(dec); err != nil {
 		return err
 	}
-	var verror E
-	if err := WireToNative(wire, &verror); err != nil {
+	nativePtr := new(E)
+	if err := WireToNative(wire, nativePtr); err != nil {
 		return err
 	}
-	*error = verror
+	*error = nativePtr
 	return nil
 }

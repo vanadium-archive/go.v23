@@ -66,15 +66,7 @@ func (d *XDecoder) Decoder() vdl.Decoder {
 }
 
 func (d *XDecoder) Decode(v interface{}) error {
-	if v == nil {
-		return verror.New(errDecodeNil, nil)
-	}
-	if vt, ok := v.(vdl.Reader); ok {
-		return vt.VDLRead(d.dec)
-	}
-	// TODO(toddw): detect common types and handle directly above?
-	// TODO(toddw): backoff to reflect-based decoder.
-	panic(fmt.Errorf("VDLRead not supported by %#v", v))
+	return vdl.Read(d.dec, v)
 }
 
 func (d *xDecoder) IgnoreNextStartValue() {

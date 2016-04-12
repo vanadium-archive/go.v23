@@ -50,6 +50,8 @@ pkg vdl, func NamedType(string, *Type) *Type
 pkg vdl, func NonNilZeroValue(*Type) *Value
 pkg vdl, func OptionalType(*Type) *Type
 pkg vdl, func OptionalValue(*Value) *Value
+pkg vdl, func Read(Decoder, interface{}) error
+pkg vdl, func ReadReflect(Decoder, reflect.Value) error
 pkg vdl, func ReflectTarget(reflect.Value) (Target, error)
 pkg vdl, func Register(interface{})
 pkg vdl, func RegisterNative(interface{}, interface{})

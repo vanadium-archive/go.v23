@@ -4,6 +4,8 @@
 
 package vdl
 
+import "fmt"
+
 // Reader is the interface that wraps the VDLRead method.
 //
 // VDLRead fills in the the underlying value (that implements this method) from
@@ -50,19 +52,26 @@ type Decoder interface {
 	Index() int
 	LenHint() int
 
+	// DecodeBool decodes and returns a bool.
 	DecodeBool() (bool, error)
-	DecodeUint(bitlen uint) (uint64, error)
-	DecodeInt(bitlen uint) (int64, error)
-	DecodeFloat(bitlen uint) (float64, error)
-	DecodeBytes(fixedlen int, v *[]byte) error
+	// DecodeString decodes and returns a string.
 	DecodeString() (string, error)
+	// DecodeTypeObject decodes and returns a type.
 	DecodeTypeObject() (*Type, error)
-
-	// TODO(toddw): Add support for RawBytes.  We might not need any methods here;
-	// vom.RawBytes can type-check whether the Decoder is a vom decoder.  If we do
-	// need methods, we might do the following.  But what about ref types?
-	//SupportsRawBytes() bool
-	//DecodeRawBytes() ([]byte, error)
+	// DecodeUint decodes and returns a uint, where the result has bitlen bits.
+	// Errors are returned on loss of precision.
+	DecodeUint(bitlen uint) (uint64, error)
+	// DecodeInt decodes and returns an int, where the result has bitlen bits.
+	// Errors are returned on loss of precision.
+	DecodeInt(bitlen uint) (int64, error)
+	// DecodeFloat decodes and returns a float, where the result has bitlen bits.
+	// Errors are returned on loss of precision.
+	DecodeFloat(bitlen uint) (float64, error)
+	// DecodeBytes decodes bytes into x.  If fixedlen >= 0 the decoded bytes must
+	// be exactly that length, otherwise there is no restriction on the number of
+	// decoded bytes.  If cap(*x) is not large enough to fit the decoded bytes, a
+	// new byte slice is assigned to *x.
+	DecodeBytes(fixedlen int, x *[]byte) error
 }
 
 // Encoder defines the interface for an encoder of vdl values.
@@ -112,4 +121,11 @@ type Encoder interface {
 	// TODO(toddw): Add support for RawBytes, perhaps like this:
 	//SupportsVomBytes() bool
 	//EncodeVomBytes(src []byte) error
+}
+
+func decoderCompatible(dec Decoder, tt *Type) error {
+	if (dec.StackDepth() == 1 || dec.IsAny()) && !Compatible(tt, dec.Type()) {
+		return fmt.Errorf("incompatible %v %v, from %v", tt.Kind(), tt, dec.Type())
+	}
+	return nil
 }

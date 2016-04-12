@@ -375,15 +375,19 @@ func TypeToReflect(t *Type) reflect.Type {
 		}
 		return nil
 	}
-	// We can make some unnamed types via Go reflect.  Everything else drops
-	// through and returns nil.
+	// We can make some unnamed types via Go reflect.  Return nil otherwise.
 	switch t.Kind() {
-	case Any, Array, Enum, Union:
+	case Any, Enum, Union:
 		// We can't make unnamed versions of any of these types.
 		return nil
 	case Optional:
 		if elem := TypeToReflect(t.Elem()); elem != nil {
 			return reflect.PtrTo(elem)
+		}
+		return nil
+	case Array:
+		if elem := TypeToReflect(t.Elem()); elem != nil {
+			return reflect.ArrayOf(t.Len(), elem)
 		}
 		return nil
 	case List:

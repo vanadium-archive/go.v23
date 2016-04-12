@@ -152,15 +152,8 @@ func (vv *Value) readFillValue(dec Decoder) error {
 	return nil
 }
 
-func (vv *Value) checkCompatible(dec Decoder) error {
-	if (dec.StackDepth() == 1 || dec.IsAny()) && !Compatible(vv.Type(), dec.Type()) {
-		return fmt.Errorf("incompatible %v %v, from %v", vv.Kind(), vv.Type(), dec.Type())
-	}
-	return nil
-}
-
 func (vv *Value) readArray(dec Decoder) error {
-	if err := vv.checkCompatible(dec); err != nil {
+	if err := decoderCompatible(dec, vv.Type()); err != nil {
 		return err
 	}
 	index := 0
@@ -181,7 +174,7 @@ func (vv *Value) readArray(dec Decoder) error {
 }
 
 func (vv *Value) readList(dec Decoder) error {
-	if err := vv.checkCompatible(dec); err != nil {
+	if err := decoderCompatible(dec, vv.Type()); err != nil {
 		return err
 	}
 	switch len := dec.LenHint(); {
@@ -222,7 +215,7 @@ func (vv *Value) readList(dec Decoder) error {
 }
 
 func (vv *Value) readSet(dec Decoder) error {
-	if err := vv.checkCompatible(dec); err != nil {
+	if err := decoderCompatible(dec, vv.Type()); err != nil {
 		return err
 	}
 	for {
@@ -241,7 +234,7 @@ func (vv *Value) readSet(dec Decoder) error {
 }
 
 func (vv *Value) readMap(dec Decoder) error {
-	if err := vv.checkCompatible(dec); err != nil {
+	if err := decoderCompatible(dec, vv.Type()); err != nil {
 		return err
 	}
 	for {
@@ -264,7 +257,7 @@ func (vv *Value) readMap(dec Decoder) error {
 }
 
 func (vv *Value) readStruct(dec Decoder) error {
-	if err := vv.checkCompatible(dec); err != nil {
+	if err := decoderCompatible(dec, vv.Type()); err != nil {
 		return err
 	}
 	// Reset to zero struct, since fields may be missing.
@@ -291,7 +284,7 @@ func (vv *Value) readStruct(dec Decoder) error {
 }
 
 func (vv *Value) readUnion(dec Decoder) error {
-	if err := vv.checkCompatible(dec); err != nil {
+	if err := decoderCompatible(dec, vv.Type()); err != nil {
 		return err
 	}
 	name, err := dec.NextField()
