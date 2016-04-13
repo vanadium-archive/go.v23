@@ -8,68 +8,86 @@ import (
 	"fmt"
 )
 
-// VDLRead reads from a decoder into this vdl Value.
+// VDLRead uses dec to decode a value in vv.  If vv isn't valid (i.e. has no
+// type), it will be filled in the exact type of value read from the decoder.
+// Otherwise the type of vv must be compatible with the type of the value read
+// from the decoder.
 func (vv *Value) VDLRead(dec Decoder) error {
-	if vv == nil || vv.t == nil {
-		return fmt.Errorf("cannot decode into nil vdl value")
+	if vv == nil {
+		return errReadIntoNilValue
 	}
 	if err := dec.StartValue(); err != nil {
 		return err
 	}
-	if dec.IsNil() {
-		return vv.readHandleNil(dec)
-	}
-	fillvvAny := vv
-	if vv.Kind() == Any {
-		innerType := dec.Type()
-		if dec.IsOptional() {
-			innerType = OptionalType(innerType)
+	if !vv.IsValid() {
+		// Initialize vv to the zero value of the exact type read from the decoder.
+		// It is as if vv were initialized to that type to begin with.
+		switch {
+		case dec.IsAny():
+			*vv = *ZeroValue(AnyType)
+		case dec.IsOptional():
+			*vv = *ZeroValue(OptionalType(dec.Type()))
+		default:
+			*vv = *ZeroValue(dec.Type())
 		}
-		fillvvAny = ZeroValue(innerType)
 	}
-	fillvv := fillvvAny
-	if fillvvAny.Kind() == Optional {
-		fillvv = ZeroValue(fillvvAny.Type().Elem())
-	}
-
-	if err := fillvv.readFillValue(dec); err != nil {
+	if err := decoderCompatible(dec, vv.Type()); err != nil {
 		return err
 	}
-
-	if fillvvAny.Kind() == Optional {
-		fillvvAny.Assign(OptionalValue(fillvv))
+	// Handle nil decoded values first, to simplify the rest of the cases.
+	if dec.IsNil() {
+		return vv.readFromNil(dec)
 	}
-	if vv.Kind() == Any {
-		vv.Assign(fillvvAny)
+	// Handle non-nil values.  If vv is any or optional we need to treat it
+	// specially, since it needs to be assigned after the value is read.
+	vvFill, makeOptional := vv, false
+	switch {
+	case vv.Kind() == Any:
+		// Fill in a value of the type read from the decoder.
+		vvFill = ZeroValue(dec.Type())
+		makeOptional = dec.IsOptional()
+	case vv.Kind() == Optional:
+		// Fill in a value of our elem type.
+		vvFill = ZeroValue(vv.Type().Elem())
+		makeOptional = true
+	}
+	if err := vvFill.readNonNilValue(dec); err != nil {
+		return err
+	}
+	// Finished reading, handle any and optional cases.
+	if makeOptional {
+		vvFill = OptionalValue(vvFill)
+	}
+	if vv.Kind() == Any || vv.Kind() == Optional {
+		vv.Assign(vvFill)
 	}
 	return dec.FinishValue()
 }
 
-// readHandleNil handles the case that dec.IsNil() is true
-func (vv *Value) readHandleNil(dec Decoder) error {
+func (vv *Value) readFromNil(dec Decoder) error {
+	// We've already checked for compatibility above, so we know that we're
+	// allowed to set the nil value.
 	switch {
-	case dec.IsOptional():
-		// handles optional inside-any and optional on-its-own cases
-		if dec.Type().Kind() != Optional {
-			return fmt.Errorf("invalid optional value returned from decoder of type %v", dec.Type())
-		}
+	case vv.Kind() == Any:
+		// Make sure that any(nil) and ?T(nil) are retained correctly in the any.
 		vv.Assign(ZeroValue(dec.Type()))
-	case dec.IsAny():
+	case vv.Kind() == Optional:
+		// Just set the optional to nil.
 		vv.Assign(nil)
 	default:
-		return fmt.Errorf("invalid non-any, non-optional nil value of type %v", dec.Type())
+		return fmt.Errorf("vdl: can't decode nil into non-any non-optional %v", vv.Type())
 	}
 	return dec.FinishValue()
 }
 
-func (vv *Value) readFillValue(dec Decoder) error {
+func (vv *Value) readNonNilValue(dec Decoder) error {
 	if vv.Type().IsBytes() {
-		fixedLength := -1
+		fixedLen := -1
 		if vv.Kind() == Array {
-			fixedLength = vv.Type().Len()
+			fixedLen = vv.Type().Len()
 		}
 		var val []byte
-		if err := dec.DecodeBytes(fixedLength, &val); err != nil {
+		if err := dec.DecodeBytes(fixedLen, &val); err != nil {
 			return err
 		}
 		vv.AssignBytes(val)
@@ -82,36 +100,42 @@ func (vv *Value) readFillValue(dec Decoder) error {
 			return err
 		}
 		vv.AssignBool(val)
+		return nil
 	case Byte, Uint16, Uint32, Uint64:
 		val, err := dec.DecodeUint(uint(bitlenV(vv.Kind())))
 		if err != nil {
 			return err
 		}
 		vv.AssignUint(val)
+		return nil
 	case Int8, Int16, Int32, Int64:
 		val, err := dec.DecodeInt(uint(bitlenV(vv.Kind())))
 		if err != nil {
 			return err
 		}
 		vv.AssignInt(val)
+		return nil
 	case Float32, Float64:
 		val, err := dec.DecodeFloat(uint(bitlenV(vv.Kind())))
 		if err != nil {
 			return err
 		}
 		vv.AssignFloat(val)
+		return nil
 	case String:
 		val, err := dec.DecodeString()
 		if err != nil {
 			return err
 		}
 		vv.AssignString(val)
+		return nil
 	case TypeObject:
 		val, err := dec.DecodeTypeObject()
 		if err != nil {
 			return err
 		}
 		vv.AssignTypeObject(val)
+		return nil
 	case Enum:
 		val, err := dec.DecodeString()
 		if err != nil {
@@ -122,34 +146,21 @@ func (vv *Value) readFillValue(dec Decoder) error {
 			return fmt.Errorf("vdl: %v invalid enum label %q", vv.Type(), val)
 		}
 		vv.AssignEnumIndex(index)
+		return nil
 	case Array:
-		if err := vv.readArray(dec); err != nil {
-			return err
-		}
+		return vv.readArray(dec)
 	case List:
-		if err := vv.readList(dec); err != nil {
-			return err
-		}
+		return vv.readList(dec)
 	case Set:
-		if err := vv.readSet(dec); err != nil {
-			return err
-		}
+		return vv.readSet(dec)
 	case Map:
-		if err := vv.readMap(dec); err != nil {
-			return err
-		}
+		return vv.readMap(dec)
 	case Struct:
-		if err := vv.readStruct(dec); err != nil {
-			return err
-		}
+		return vv.readStruct(dec)
 	case Union:
-		if err := vv.readUnion(dec); err != nil {
-			return err
-		}
-	default:
-		panic(fmt.Sprintf("unhandled type: %v", vv.Type()))
+		return vv.readUnion(dec)
 	}
-	return nil
+	panic(fmt.Errorf("vdl: unhandled type %v in VDLRead", vv.Type()))
 }
 
 func (vv *Value) readArray(dec Decoder) error {

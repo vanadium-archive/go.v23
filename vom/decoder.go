@@ -132,7 +132,7 @@ func (d *Decoder) decodeToTarget(target vdl.Target) error {
 	}
 	if hax, ok := target.(hasRvHack); ok {
 		rv := hax.HackGetRv()
-		valLen, err := d.decodeValueByteLen(valType)
+		valLen, err := d.peekValueByteLen(valType)
 		if err != nil {
 			return err
 		}
@@ -161,7 +161,7 @@ func (d *Decoder) Ignore() error {
 	if err != nil {
 		return err
 	}
-	valLen, err := d.decodeValueByteLen(valType)
+	valLen, err := d.peekValueByteLen(valType)
 	if err != nil {
 		return err
 	}
@@ -190,8 +190,8 @@ func (d *Decoder) decodeWireType(wt *wireType) (typeId, error) {
 	return tid, d.endMessage()
 }
 
-// decodeValueByteLen returns the byte length of the next value.
-func (d *Decoder) decodeValueByteLen(tt *vdl.Type) (int, error) {
+// peekValueByteLen returns the byte length of the next value.
+func (d *Decoder) peekValueByteLen(tt *vdl.Type) (int, error) {
 	if hasChunkLen(tt) {
 		// Use the explicit message length.
 		return d.buf.lim, nil

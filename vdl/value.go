@@ -173,7 +173,7 @@ func AnyValue(x *Value) *Value { return ZeroValue(AnyType).Assign(x) }
 
 // OptionalValue returns an optional value with elem assigned to x.  Panics if
 // the type of x cannot be made optional.
-func OptionalValue(x *Value) *Value { return &Value{OptionalType(x.t), x} }
+func OptionalValue(x *Value) *Value { return &Value{OptionalType(x.t), CopyValue(x)} }
 
 // BoolValue is a convenience to create a Bool value.
 func BoolValue(x bool) *Value { return ZeroValue(BoolType).AssignBool(x) }
@@ -319,8 +319,8 @@ func (v *Value) IsNil() bool {
 	return ok && vrep == nil
 }
 
-// IsValid returns true iff v is valid.  Nil and new(Value) are invalid; most
-// other methods panic if called on an invalid Value.
+// IsValid returns true iff v is valid, where v == nil and v == new(Value) are
+// invalid.  Most other methods panic if called on an invalid Value.
 func (v *Value) IsValid() bool {
 	return v != nil && v.t != nil
 }

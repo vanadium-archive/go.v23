@@ -20,6 +20,11 @@ type RawBytes struct {
 	Data       []byte
 }
 
+func (RawBytes) __VDLReflect(struct {
+	Type interface{} // ensure vdl.TypeOf(RawBytes{}) returns vdl.AnyType
+}) {
+}
+
 func RawBytesOf(value interface{}) *RawBytes {
 	rb, err := RawBytesFromValue(value)
 	if err != nil {
@@ -108,11 +113,6 @@ func (rb *RawBytes) IsNilAny() bool {
 	return len(rb.Data) == 1 && rb.Data[0] == WireCtrlNil
 }
 
-func (RawBytes) __VDLReflect(struct {
-	Type interface{} // ensure vdl.TypeOf(RawBytes{}) returns vdl.AnyType
-}) {
-}
-
 func (rb *RawBytes) Decoder() vdl.Decoder {
 	dec := NewDecoder(bytes.NewReader(rb.Data))
 	dec.buf.version = rb.Version
@@ -132,6 +132,16 @@ func (rb *RawBytes) Decoder() vdl.Decoder {
 	}
 	xd.ignoreNextStartValue = true
 	return xd
+}
+
+func (rb *RawBytes) VDLRead(dec vdl.Decoder) error {
+	// Fastpath: the bytes are already available in the xDecoder.  Note that this
+	// also handles the case where dec is RawBytes.Decoder().
+	if d, ok := dec.(*xDecoder); ok {
+		return d.readRawBytes(rb)
+	}
+	// Slowpath: the bytes are not available, we must encode new bytes.
+	return fmt.Errorf("vom: RawBytes.VDLRead slowpath not implemented")
 }
 
 // vdl.Target that writes to a vom.RawBytes.  This structure is intended to be

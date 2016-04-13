@@ -11,10 +11,11 @@ import (
 )
 
 var (
-	errMustReflect          = errors.New("vdl: value must be handled via reflection")
-	errNilValue             = errors.New("vdl: nil value is invalid")
-	errReflectCantSet       = errors.New("vdl: reflect.Value cannot be set")
-	errReadAnyInterfaceOnly = errors.New("vdl: read into any only supported for interfaces")
+	errReadMustReflect       = errors.New("vdl: read must be handled via reflection")
+	errReadIntoNilValue      = errors.New("vdl: read into nil value")
+	errReadReflectCantSet    = errors.New("vdl: read into unsettable reflect.Value")
+	errReadAnyAlreadyStarted = errors.New("vdl: read into any after StartValue called")
+	errReadAnyInterfaceOnly  = errors.New("vdl: read into any only supported for interfaces")
 )
 
 // Read uses dec to decode a value into v, calling VDLRead methods and fast
@@ -22,7 +23,7 @@ var (
 // basically an all-purpose VDLRead implementation.
 func Read(dec Decoder, v interface{}) error {
 	if v == nil {
-		return errNilValue
+		return errReadIntoNilValue
 	}
 	rv := reflect.ValueOf(v)
 	if rv.Kind() == reflect.Ptr && !rv.IsNil() {
@@ -32,7 +33,7 @@ func Read(dec Decoder, v interface{}) error {
 		//
 		// TODO(toddw): If reflection is too slow, add the nil pointer check to all
 		// VDLRead methods, as well as other readNonReflect cases below.
-		if err := readNonReflect(dec, false, v); err != errMustReflect {
+		if err := readNonReflect(dec, false, v); err != errReadMustReflect {
 			return err
 		}
 	}
@@ -75,21 +76,21 @@ func readNonReflect(dec Decoder, calledStart bool, v interface{}) error {
 		}
 		return dec.FinishValue()
 	}
-	return errMustReflect
+	return errReadMustReflect
 }
 
 // ReadReflect is like Read, but takes a reflect.Value argument.  Use Read if
 // performance is important and you have an interface{} handy.
 func ReadReflect(dec Decoder, rv reflect.Value) error {
 	if !rv.IsValid() {
-		return errNilValue
+		return errReadIntoNilValue
 	}
 	if !rv.CanSet() && rv.Kind() == reflect.Ptr && !rv.IsNil() {
 		// Dereference the pointer a single time to make rv settable.
 		rv = rv.Elem()
 	}
 	if !rv.CanSet() {
-		return errReflectCantSet
+		return errReadReflectCantSet
 	}
 	tt, err := TypeFromReflect(rv.Type())
 	if err != nil {
@@ -114,6 +115,12 @@ func readReflect(dec Decoder, calledStart bool, rv reflect.Value, tt *Type) erro
 }
 
 func readNonNative(dec Decoder, calledStart bool, rv reflect.Value, tt *Type) error {
+	// Any is handled first, since any(nil) is handled differently from ?T(nil)
+	// contained in an any value, so this factoring makes things simpler.
+	if tt == AnyType {
+		return readAny(dec, calledStart, rv)
+	}
+	// Now we can start the decoder value, if we haven't already.
 	if !calledStart {
 		if err := dec.StartValue(); err != nil {
 			return err
@@ -122,28 +129,24 @@ func readNonNative(dec Decoder, calledStart bool, rv reflect.Value, tt *Type) er
 			return err
 		}
 	}
-	switch {
-	case tt == AnyType:
-		// Any is handled first, to treat any(nil) differently from ?T(nil).
-		return readAny(dec, rv)
-	case dec.IsNil():
-		// Nil decoded values are handled next, to special-case the pointer
-		// handling; we don't create pointers all the way down to the actual value.
-		return readNil(dec, rv, tt)
+	// Nil decoded values are handled next, to special-case the pointer handling;
+	// we don't create pointers all the way down to the actual value.
+	if dec.IsNil() {
+		return readFromNil(dec, rv, tt)
 	}
 	// Now we know that the decoded value isn't nil.  Walk pointers and check for
 	// faster non-reflect support.
 	rv = readWalkPointers(rv)
-	if err := readNonReflect(dec, true, rv.Addr().Interface()); err != errMustReflect {
+	if err := readNonReflect(dec, true, rv.Addr().Interface()); err != errReadMustReflect {
 		return err
 	}
 	// Special-case the error interface, and fill it in with the native error
-	// representation verror.E.  Nil errors are handled above in readNil.
+	// representation verror.E.  Nil errors are handled above in readFromNil.
 	if rv.Type() == rtError {
 		return readNonNilError(dec, rv)
 	}
-	// Handle the non-nil value.
-	if err := readNonNil(dec, rv, tt.NonOptional()); err != nil {
+	// Handle the non-nil decoded value.
+	if err := readNonNilValue(dec, rv, tt.NonOptional()); err != nil {
 		return err
 	}
 	return dec.FinishValue()
@@ -165,17 +168,31 @@ func readWalkPointers(rv reflect.Value) reflect.Value {
 	return rv
 }
 
-func readAny(dec Decoder, rv reflect.Value) error {
+func readAny(dec Decoder, calledStart bool, rv reflect.Value) error {
+	if calledStart {
+		// The existing code ensures that calledStart is always false here, since
+		// readReflect(dec, true, ...) is only called below in this function, which
+		// never calls it with another any type.  If we did, we'd have a vdl
+		// any(any), which isn't allowed.  This error tries to prevent future
+		// changes that will break this requirement.
+		//
+		// Also note that the implementation of vom.RawBytes.VDLRead requires that
+		// StartValue has not been called yet.
+		return errReadAnyAlreadyStarted
+	}
 	// Walk pointers and check for faster non-reflect support, which handles
 	// vdl.Value and vom.RawBytes, and any other special-cases.
 	rv = readWalkPointers(rv)
-	if err := readNonReflect(dec, true, rv.Addr().Interface()); err != errMustReflect {
+	if err := readNonReflect(dec, true, rv.Addr().Interface()); err != errReadMustReflect {
 		return err
 	}
 	// The only case left is to handle interfaces.  We allow decoding into
 	// interface{}, as well as any other interface.
 	if rv.Kind() != reflect.Interface {
 		return errReadAnyInterfaceOnly
+	}
+	if err := dec.StartValue(); err != nil {
+		return err
 	}
 	// Handle decoding any(nil) by setting the interface to nil.  Note that the
 	// only case where dec.Type() is AnyType is when the value is any(nil).
@@ -185,7 +202,10 @@ func readAny(dec Decoder, rv reflect.Value) error {
 	}
 	// Lookup the reflect type based on the decoder type, and create a new value
 	// to decode into.
-	rtDecode := TypeToReflect(dec.Type())
+	//
+	// TODO(toddw): Replace typeToReflectFixed with TypeToReflect, after we've
+	// fixed it to treat the error type correctly.
+	rtDecode := typeToReflectFixed(dec.Type())
 	switch {
 	case rtDecode == nil:
 		return fmt.Errorf("vdl: %v not registered, call vdl.Register, or use vdl.Value or vom.RawBytes instead", dec.Type())
@@ -209,11 +229,12 @@ func readAny(dec Decoder, rv reflect.Value) error {
 	return nil
 }
 
-func readNil(dec Decoder, rv reflect.Value, tt *Type) error {
+func readFromNil(dec Decoder, rv reflect.Value, tt *Type) error {
 	if tt.Kind() != Optional {
-		return fmt.Errorf("can't decode nil into non-optional %v", tt)
+		return fmt.Errorf("vdl: can't decode nil into non-optional %v", tt)
 	}
-	// Note that rv is always a pointer, since tt is optional.
+	// Note that since tt is optional, we know that rv is always a pointer, or the
+	// special-case error interface.
 	rv.Set(reflect.Zero(rv.Type()))
 	return dec.FinishValue()
 }
@@ -240,7 +261,7 @@ func readNonNilError(dec Decoder, rv reflect.Value) error {
 	return nil
 }
 
-func readNonNil(dec Decoder, rv reflect.Value, tt *Type) error {
+func readNonNilValue(dec Decoder, rv reflect.Value, tt *Type) error {
 	// Handle named and unnamed []byte and [N]byte, where the element type is the
 	// unnamed byte type.  Cases like []MyByte fall through and are handled as
 	// regular lists, since we can't easily convert []MyByte to []byte.
@@ -313,8 +334,8 @@ func readNonNil(dec Decoder, rv reflect.Value, tt *Type) error {
 		return readUnion(dec, rv, tt)
 	}
 	// Note that Any was already handled via readAny, Optional was handled via
-	// readNil (or stripped off for non-nil values), and TypeObject was handled
-	// via the readNonReflect special-case.
+	// readFromNil (or stripped off for non-nil values), and TypeObject was
+	// handled via the readNonReflect special-case.
 	panic(fmt.Errorf("vdl: unhandled type %v in Read", tt))
 }
 

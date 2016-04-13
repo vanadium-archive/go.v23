@@ -27,7 +27,9 @@ const (
 )
 
 var (
-	errEmptyDecoderStack = errors.New("vom: empty decoder stack")
+	errEmptyDecoderStack          = errors.New("vom: empty decoder stack")
+	errReadRawBytesAlreadyStarted = errors.New("vom: read into vom.RawBytes after StartValue called")
+	errReadRawBytesFromNonAny     = errors.New("vom: read into vom.RawBytes only supported on any values")
 )
 
 type XDecoder struct {
@@ -77,6 +79,56 @@ func (d *xDecoder) StackDepth() int {
 	return len(d.stack)
 }
 
+// readRawBytes fills in rb with the next value.  It can be called for both
+// top-level and internal values.
+func (d *xDecoder) readRawBytes(rb *RawBytes) error {
+	if d.ignoreNextStartValue {
+		// If the user has already called StartValue on the decoder, it's harder to
+		// capture all the raw bytes, since the optional flag and length hints have
+		// already been decoded.  So we simply disallow this from happening.
+		return errReadRawBytesAlreadyStarted
+	}
+	tt, err := d.dfsNextType()
+	if err != nil {
+		return err
+	}
+	// Handle top-level values.  All types of values are supported, since we can
+	// simply copy the message bytes.
+	if len(d.stack) == 0 {
+		anyLen, err := d.old.peekValueByteLen(tt)
+		if err != nil {
+			return err
+		}
+		if err := d.old.decodeRaw(tt, anyLen, rb); err != nil {
+			return err
+		}
+		return d.old.endMessage()
+	}
+	// Handle internal values.  Only any values are supported at the moment, since
+	// they come with a header that tells us the exact length to read.
+	//
+	// TODO(toddw): Handle other types, either by reading and skipping bytes based
+	// on the type, or by falling back to a decode / re-encode slowpath.
+	if tt.Kind() != vdl.Any {
+		return errReadRawBytesFromNonAny
+	}
+	ttElem, anyLen, err := d.old.readAnyHeader()
+	if err != nil {
+		return err
+	}
+	if ttElem == nil {
+		// This is a nil any value, which has already been read by readAnyHeader.
+		// We simply fill in RawBytes with the single WireCtrlNil byte.
+		rb.Version = d.old.buf.version
+		rb.Type = vdl.AnyType
+		rb.RefTypes = nil
+		rb.AnyLengths = nil
+		rb.Data = []byte{WireCtrlNil}
+		return nil
+	}
+	return d.old.decodeRaw(ttElem, anyLen, rb)
+}
+
 func (d *xDecoder) StartValue() error {
 	//defer func() { fmt.Printf("HACK: StartValue  %+v\n", d.stack) }()
 	if d.ignoreNextStartValue {
@@ -93,11 +145,11 @@ func (d *xDecoder) StartValue() error {
 func (d *xDecoder) setupValue(tt *vdl.Type) error {
 	// Handle any, which may be nil.  We "dereference" non-nil any to the inner
 	// type.  If that happens to be an optional, it's handled below.
-	isAny, anyLen := false, 0
+	isAny := false
 	if tt.Kind() == vdl.Any {
 		isAny = true
 		var err error
-		switch tt, anyLen, err = d.old.readAnyHeader(); {
+		switch tt, _, err = d.old.readAnyHeader(); {
 		case err != nil:
 			return err
 		case tt == nil:
@@ -122,7 +174,6 @@ func (d *xDecoder) setupValue(tt *vdl.Type) error {
 			tt = tt.Elem() // non-nil optional
 		}
 	}
-	_ = anyLen // TODO(toddw): Do something about RawBytes.
 	// Initialize LenHint for composite types.
 	entry := decoderStackEntry{
 		Type:       tt,

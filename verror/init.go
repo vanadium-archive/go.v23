@@ -98,15 +98,15 @@ func retryFromAction(action ActionCode) vdl.WireRetryCode {
 }
 
 // VDLRead implements the logic to populate error from dec.
-func VDLRead(dec vdl.Decoder, error *error) error {
+func VDLRead(dec vdl.Decoder, x *error) error {
 	if err := dec.StartValue(); err != nil {
 		return err
 	}
-	if dec.IsOptional() && dec.IsNil() {
-		if !vdl.Compatible(dec.Type(), vdl.ErrorType) {
-			return fmt.Errorf("incompatible types, got %v, want error", dec.Type())
+	if dec.IsNil() {
+		if (dec.StackDepth() == 1 || dec.IsAny()) && !vdl.Compatible(vdl.ErrorType, dec.Type()) {
+			return fmt.Errorf("incompatible error, from %v", dec.Type())
 		}
-		*error = nil
+		*x = nil
 		return dec.FinishValue()
 	}
 	dec.IgnoreNextStartValue()
@@ -118,6 +118,6 @@ func VDLRead(dec vdl.Decoder, error *error) error {
 	if err := WireToNative(wire, nativePtr); err != nil {
 		return err
 	}
-	*error = nativePtr
+	*x = nativePtr
 	return nil
 }

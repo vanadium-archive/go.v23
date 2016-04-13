@@ -96,6 +96,7 @@ pkg vom, method (*RawBytes) IsNilAny() bool
 pkg vom, method (*RawBytes) MakeVDLTarget() vdl.Target
 pkg vom, method (*RawBytes) String() string
 pkg vom, method (*RawBytes) ToValue(interface{}) error
+pkg vom, method (*RawBytes) VDLRead(vdl.Decoder) error
 pkg vom, method (*TypeDecoder) Start()
 pkg vom, method (*TypeDecoder) Stop()
 pkg vom, method (*XDecoder) Decode(interface{}) error
