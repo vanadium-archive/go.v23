@@ -2,10 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// +build go1.6 !cgo noopenssl !linux,!openssl android !amd64,!openssl
-
-// See comments in ecdsa_openssl.go for an explanation of the choice of
-// build tags.
+// +build !openssl
 
 package security
 

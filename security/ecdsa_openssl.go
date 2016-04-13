@@ -2,31 +2,12 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// +build !go1.6,!android,linux,amd64,cgo,!noopenssl openssl,cgo
+// +build openssl
 
-// The purpose of this file is to improve performance, as demonstrated by
-// benchmarks when linked against openssl-1.0.1f (with further improvements in
-// openssl-1.0.2, at the time this comment was written).
-//   go test -bench ECDSA v.io/v23/security
-//
-// With Go 1.6, the Go standard library will have performance on-par with
-// OpenSSL for amd64 (see https://go-review.googlesource.com/#/c/8968/).
-// Prior to that however, using OpenSSL (via cgo) provides a significant
-// performance improvement.
-//
-// By default (without an explicit build tag), this is disabled for darwin
-// since OpenSSL has been marked deprecated on OS X since version 10.7.  The
-// last openssl release on OS X was version 0.9.8 and compiling this file will
-// show these deprecation warnings.  Those sensitive to performance are
-// encouraged to move to Go 1.6.
-//
-// Currently, this file is disabled for linux/arm as a temporary hack.  In
-// practice, linux/arm binaries are often cross-compiled on a linux/amd64 host.
-// The author of this comment hadn't changed the vanadium devtools to download
-// and build a cross-compiled OpenSSL library at the time this comment was
-// written.
-//
-// TODO(ashankar): Figure out how to remove the "amd64" tag hack.
+// OpenSSL's libcrypto may have faster implementations of ECDSA signing and
+// verification on some architectures (not amd64 after Go 1.6 which includes
+// https://go-review.googlesource.com/#/c/8968/). This file enables use
+// of libcrypto's implementation of ECDSA operations in those situations.
 
 package security
 
@@ -40,8 +21,8 @@ package security
 // #include <openssl/x509.h>
 //
 // void openssl_init_locks();
-// EC_KEY* openssl_d2i_EC_PUBKEY(const unsigned char** data, long len, unsigned long* e);
-// EC_KEY* openssl_d2i_ECPrivateKey(const unsigned char** data, long len, unsigned long* e);
+// EC_KEY* openssl_d2i_EC_PUBKEY(const unsigned char* data, long len, unsigned long* e);
+// EC_KEY* openssl_d2i_ECPrivateKey(const unsigned char* data, long len, unsigned long* e);
 // ECDSA_SIG* openssl_ECDSA_do_sign(const unsigned char* data, int len, EC_KEY* key, unsigned long *e);
 import "C"
 
@@ -153,8 +134,7 @@ func newOpenSSLSigner(golang *ecdsa.PrivateKey) (Signer, error) {
 		return nil, err
 	}
 	var errno C.ulong
-	in := uchar(der)
-	k := C.openssl_d2i_ECPrivateKey(&in, C.long(len(der)), &errno)
+	k := C.openssl_d2i_ECPrivateKey(uchar(der), C.long(len(der)), &errno)
 	if k == nil {
 		return nil, opensslMakeError(errno)
 	}
@@ -211,8 +191,7 @@ func newECDSAPublicKeyImpl(key *ecdsa.PublicKey) PublicKey {
 
 func unmarshalPublicKeyImpl(der []byte) (PublicKey, error) {
 	var errno C.ulong
-	in := uchar(der)
-	k := C.openssl_d2i_EC_PUBKEY(&in, C.long(len(der)), &errno)
+	k := C.openssl_d2i_EC_PUBKEY(uchar(der), C.long(len(der)), &errno)
 	if k == nil {
 		return nil, opensslMakeError(errno)
 	}

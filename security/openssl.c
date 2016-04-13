@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// +build !go1.6,!android,linux,amd64,cgo,!noopenssl openssl,cgo
+// +build openssl
 
 #include <openssl/crypto.h>
 #include <openssl/ec.h>
@@ -23,8 +23,8 @@ void openssl_init_locks() {
 // as the call to d2i_ECPrivateKey. If the two were called from Go, the goroutine
 // might be pre-empted and rescheduled on another thread leading to an
 // inconsistent error.
-EC_KEY* openssl_d2i_ECPrivateKey(const unsigned char** data, long len, unsigned long* e) {
-	EC_KEY* k = d2i_ECPrivateKey(NULL, data, len);
+EC_KEY* openssl_d2i_ECPrivateKey(const unsigned char* data, long len, unsigned long* e) {
+	EC_KEY* k = d2i_ECPrivateKey(NULL, &data, len);
 	if (k != NULL) {
 		*e = 0;
 		return k;
@@ -38,8 +38,8 @@ EC_KEY* openssl_d2i_ECPrivateKey(const unsigned char** data, long len, unsigned 
 // as the call to d2i_EC_PUBKEY. If the two were called from Go, the goroutine
 // might be pre-empted and rescheduled on another thread leading to an
 // inconsistent error.
-EC_KEY* openssl_d2i_EC_PUBKEY(const unsigned char** data, long len, unsigned long* e) {
-	EC_KEY* k = d2i_EC_PUBKEY(NULL, data, len);
+EC_KEY* openssl_d2i_EC_PUBKEY(const unsigned char* data, long len, unsigned long* e) {
+	EC_KEY* k = d2i_EC_PUBKEY(NULL, &data, len);
 	if (k != NULL) {
 		*e = 0;
 		return k;
