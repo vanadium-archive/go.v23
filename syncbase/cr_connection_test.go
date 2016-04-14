@@ -33,7 +33,7 @@ func (ri *resolverImpl1) OnConflict(ctx *context.T, conflict *Conflict) (r Resol
 // Expected result:
 //   - The CR thread should not get/remain blocked on Advance() after db.Close()
 func TestCrConnectionClose(t *testing.T) {
-	db := NewDatabase("parentFullName", wire.Id{"a1", "db1"}, getSchema(&resolverImpl1{}))
+	db := newDatabase("parentFullName", wire.Id{"a1", "db1"}, getSchema(&resolverImpl1{}))
 	advance := func(st *crtestutil.State) bool {
 		st.SetIsBlocked(true)
 		st.Mu.Lock()
@@ -84,7 +84,7 @@ func TestCrConnectionClose(t *testing.T) {
 //   - Advance() should get blocked after some time.
 //   - st.advanceCount should be equal to 3
 func TestCrConnectionReestablish(t *testing.T) {
-	db := NewDatabase("parentFullName", wire.Id{"a1", "db1"}, getSchema(&resolverImpl1{}))
+	db := newDatabase("parentFullName", wire.Id{"a1", "db1"}, getSchema(&resolverImpl1{}))
 	advance := func(st *crtestutil.State) bool {
 		st.IncrementAdvanceCount()
 		if st.GetAdvanceCount() > 2 {

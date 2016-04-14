@@ -24,9 +24,7 @@ const (
 	reconnectionCount           = "rcc"
 )
 
-// TODO(sadovsky): Make this private. For some reason,
-// v.io/x/jni/v23/syncbase/jni.go calls it directly.
-func NewDatabase(parentFullName string, id wire.Id, schema *Schema) *database {
+func newDatabase(parentFullName string, id wire.Id, schema *Schema) *database {
 	return &database{
 		databaseBatch: *newDatabaseBatch(parentFullName, id, ""),
 		schema:        schema,

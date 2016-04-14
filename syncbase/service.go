@@ -37,12 +37,12 @@ func (s *service) Database(ctx *context.T, name string, schema *Schema) Database
 		// TODO(sadovsky): Return invalid Database handle.
 		panic(err)
 	}
-	return NewDatabase(s.fullName, wire.Id{Blessing: blessing, Name: name}, schema)
+	return newDatabase(s.fullName, wire.Id{Blessing: blessing, Name: name}, schema)
 }
 
 // DatabaseForId implements Service.DatabaseForId.
 func (s *service) DatabaseForId(id wire.Id, schema *Schema) Database {
-	return NewDatabase(s.fullName, id, schema)
+	return newDatabase(s.fullName, id, schema)
 }
 
 // ListDatabases implements Service.ListDatabases.

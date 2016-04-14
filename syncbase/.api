@@ -1,6 +1,5 @@
 pkg syncbase, const DeleteChange ChangeType
 pkg syncbase, const PutChange ChangeType
-pkg syncbase, func NewDatabase(string, wire.Id, *Schema) *database
 pkg syncbase, func NewService(string) Service
 pkg syncbase, func NewValue(*context.T, interface{}) (*Value, error)
 pkg syncbase, func Prefix(string) PrefixRange
