@@ -624,7 +624,9 @@ func (x *Change) VDLRead(dec vdl.Decoder) error {
 				return err
 			}
 		case "Value":
-			// TODO(toddw): implement any
+			if err = x.Value.VDLRead(dec); err != nil {
+				return err
+			}
 		case "ResumeMarker":
 			if err = x.ResumeMarker.VDLRead(dec); err != nil {
 				return err

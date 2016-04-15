@@ -81,7 +81,7 @@ func testDecodeVDL(t *testing.T, name, bin string, value *vdl.Value) {
 			return
 		}
 		if want := value; !vdl.EqualValue(got, want) {
-			t.Errorf("%s: Decode mismatch\nGOT %v\nWANT %v", head, got, want)
+			t.Errorf("%s: Decode mismatch\nGOT  %v\nWANT %v", head, got, want)
 			return
 		}
 	}
@@ -99,7 +99,7 @@ func testDecodeVDLSingleShot(t *testing.T, name, bin string, value *vdl.Value) {
 		return
 	}
 	if want := value; !vdl.EqualValue(got, want) {
-		t.Errorf("%s: Decode mismatch\nGOT %v\nWANT %v", head, got, want)
+		t.Errorf("%s: Decode mismatch\nGOT  %v\nWANT %v", head, got, want)
 		return
 	}
 }
@@ -119,7 +119,7 @@ func testDecodeVDLWithTypeDecoder(t *testing.T, name, binversion, bintype, binva
 			return
 		}
 		if want := value; !vdl.EqualValue(got, want) {
-			t.Errorf("%s: Decode mismatch\nGOT %v\nWANT %v", head, got, want)
+			t.Errorf("%s: Decode mismatch\nGOT  %v\nWANT %v", head, got, want)
 			return
 		}
 		typedec.Stop()
@@ -138,8 +138,8 @@ func testDecodeGo(t *testing.T, name, bin string, rt reflect.Type, want interfac
 			t.Errorf("%s: Decode failed: %v", head, err)
 			return
 		}
-		if !reflect.DeepEqual(got, want) {
-			t.Errorf("%s: Decode mismatch\nGOT %T %#v\nWANT %T %#v", head, got, got, want, want)
+		if !vdl.DeepEqual(got, want) {
+			t.Errorf("%s: Decode mismatch\nGOT  %T %+v\nWANT %T %+v", head, got, got, want, want)
 			return
 		}
 	}
@@ -158,8 +158,8 @@ func testDecodeGoSingleShot(t *testing.T, name, bin string, rt reflect.Type, wan
 		t.Errorf("%s: Decode failed: %v", head, err)
 		return
 	}
-	if !reflect.DeepEqual(got, want) {
-		t.Errorf("%s: Decode mismatch\nGOT %T %#v\nWANT %T %#v", head, got, got, want, want)
+	if !vdl.DeepEqual(got, want) {
+		t.Errorf("%s: Decode mismatch\nGOT  %T %+v\nWANT %T %+v", head, got, got, want, want)
 		return
 	}
 }
@@ -178,8 +178,8 @@ func testDecodeGoWithTypeDecoder(t *testing.T, name, binversion, bintype, binval
 			t.Errorf("%s: Decode failed: %v", head, err)
 			return
 		}
-		if !reflect.DeepEqual(got, want) {
-			t.Errorf("%s: Decode mismatch\nGOT %T %#v\nWANT %T %#v", head, got, got, want, want)
+		if !vdl.DeepEqual(got, want) {
+			t.Errorf("%s: Decode mismatch\nGOT  %T %+v\nWANT %T %+v", head, got, got, want, want)
 			return
 		}
 		typedec.Stop()
@@ -272,7 +272,7 @@ func testRoundtrip(t *testing.T, withTypeEncoderDecoder bool, concurrency int) {
 			defer wg.Done()
 			for _, n := range rand.Perm(len(tests) * 10) {
 				test := tests[n%len(tests)]
-				name := fmt.Sprintf("[%d]:%#v,%#v", n, test.In, test.Want)
+				name := fmt.Sprintf("[%d]:%+v,%+v", n, test.In, test.Want)
 
 				var (
 					encoder *Encoder
@@ -288,7 +288,7 @@ func testRoundtrip(t *testing.T, withTypeEncoderDecoder bool, concurrency int) {
 				}
 
 				if err := encoder.Encode(test.In); err != nil {
-					t.Errorf("%s: Encode(%#v) failed: %v", name, test.In, err)
+					t.Errorf("%s: Encode(%+v) failed: %v", name, test.In, err)
 					return
 				}
 				rv := reflect.New(reflect.TypeOf(test.Want))
@@ -296,8 +296,8 @@ func testRoundtrip(t *testing.T, withTypeEncoderDecoder bool, concurrency int) {
 					t.Errorf("%s: Decode failed: %v", name, err)
 					return
 				}
-				if got := rv.Elem().Interface(); !reflect.DeepEqual(got, test.Want) {
-					t.Errorf("%s: Decode mismatch\nGOT %T %#v\nWANT %T %#v", name, got, got, test.Want, test.Want)
+				if got := rv.Elem().Interface(); !vdl.DeepEqual(got, test.Want) {
+					t.Errorf("%s: Decode mismatch\nGOT  %T %+v\nWANT %T %+v", name, got, got, test.Want, test.Want)
 					return
 				}
 			}
@@ -377,9 +377,9 @@ func (er *extractErrReader) WaitForError() error {
 
 // Test that no EOF is returned from Decode() if the type stream finished before the value stream.
 func TestTypeStreamEndsFirst(t *testing.T) {
-	hexversion := "80"
-	hextype := "5137060029762e696f2f7632332f766f6d2f74657374646174612f7465737474797065732e537472756374416e7901010003416e79010fe1e1533502002d762e696f2f7632332f766f6d2f74657374646174612f7465737474797065732e4e41727261793255696e74363401060202e1"
-	hexvalue := "5206002a000001e1"
+	hexversion := "81"
+	hextype := "5133060025762e696f2f7632332f766f6d2f74657374646174612f74797065732e537472756374416e7901010003416e79010fe1e1533b060023762e696f2f7632332f766f6d2f74657374646174612f74797065732e4e53747275637401030001410101e10001420103e10001430109e1e1"
+	hexvalue := "52012a0103070000000001e1e1"
 	binversion := string(hex2Bin(t, hexversion))
 	bintype := string(hex2Bin(t, hextype))
 	binvalue := string(hex2Bin(t, hexvalue))

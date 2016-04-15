@@ -8,7 +8,7 @@ import (
 	"fmt"
 )
 
-// VDLRead uses dec to decode a value in vv.  If vv isn't valid (i.e. has no
+// VDLRead uses dec to decode a value into vv.  If vv isn't valid (i.e. has no
 // type), it will be filled in the exact type of value read from the decoder.
 // Otherwise the type of vv must be compatible with the type of the value read
 // from the decoder.
@@ -21,15 +21,22 @@ func (vv *Value) VDLRead(dec Decoder) error {
 	}
 	if !vv.IsValid() {
 		// Initialize vv to the zero value of the exact type read from the decoder.
-		// It is as if vv were initialized to that type to begin with.
+		// It is as if vv were initialized with that type to begin with.  The
+		// top-level any type is dropped.
 		switch {
-		case dec.IsAny():
-			*vv = *ZeroValue(AnyType)
-		case dec.IsOptional():
+		case dec.IsOptional() && !dec.IsNil():
 			*vv = *ZeroValue(OptionalType(dec.Type()))
 		default:
 			*vv = *ZeroValue(dec.Type())
 		}
+	}
+	dec.IgnoreNextStartValue()
+	return vv.read(dec)
+}
+
+func (vv *Value) read(dec Decoder) error {
+	if err := dec.StartValue(); err != nil {
+		return err
 	}
 	if err := decoderCompatible(dec, vv.Type()); err != nil {
 		return err
@@ -177,7 +184,7 @@ func (vv *Value) readArray(dec Decoder) error {
 		case done:
 			return nil
 		}
-		if err := vv.Index(index).VDLRead(dec); err != nil {
+		if err := vv.Index(index).read(dec); err != nil {
 			return err
 		}
 		index++
@@ -218,7 +225,7 @@ func (vv *Value) readList(dec Decoder) error {
 			vv.AssignLen(cap)
 			vv.AssignLen(needLen)
 		}
-		if err := vv.Index(index).VDLRead(dec); err != nil {
+		if err := vv.Index(index).read(dec); err != nil {
 			return err
 		}
 		index++
@@ -237,7 +244,7 @@ func (vv *Value) readSet(dec Decoder) error {
 			return nil
 		}
 		key := ZeroValue(vv.Type().Key())
-		if err := key.VDLRead(dec); err != nil {
+		if err := key.read(dec); err != nil {
 			return err
 		}
 		vv.AssignSetKey(key)
@@ -256,11 +263,11 @@ func (vv *Value) readMap(dec Decoder) error {
 			return nil
 		}
 		key := ZeroValue(vv.Type().Key())
-		if err := key.VDLRead(dec); err != nil {
+		if err := key.read(dec); err != nil {
 			return err
 		}
 		elem := ZeroValue(vv.Type().Elem())
-		if err := elem.VDLRead(dec); err != nil {
+		if err := elem.read(dec); err != nil {
 			return err
 		}
 		vv.AssignMapIndex(key, elem)
@@ -283,7 +290,7 @@ func (vv *Value) readStruct(dec Decoder) error {
 		}
 		switch field := vv.StructFieldByName(name); {
 		case field != nil:
-			if err := field.VDLRead(dec); err != nil {
+			if err := field.read(dec); err != nil {
 				return err
 			}
 		default:
@@ -310,7 +317,7 @@ func (vv *Value) readUnion(dec Decoder) error {
 		return fmt.Errorf("field %q not in union %v, from %v", name, vv.Type(), dec.Type())
 	}
 	elem := ZeroValue(field.Type)
-	if err := elem.VDLRead(dec); err != nil {
+	if err := elem.read(dec); err != nil {
 		return err
 	}
 	vv.AssignUnionField(index, elem)

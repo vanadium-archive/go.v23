@@ -183,7 +183,7 @@ func readAny(dec Decoder, calledStart bool, rv reflect.Value) error {
 	// Walk pointers and check for faster non-reflect support, which handles
 	// vdl.Value and vom.RawBytes, and any other special-cases.
 	rv = readWalkPointers(rv)
-	if err := readNonReflect(dec, true, rv.Addr().Interface()); err != errReadMustReflect {
+	if err := readNonReflect(dec, false, rv.Addr().Interface()); err != errReadMustReflect {
 		return err
 	}
 	// The only case left is to handle interfaces.  We allow decoding into
@@ -206,10 +206,16 @@ func readAny(dec Decoder, calledStart bool, rv reflect.Value) error {
 	// TODO(toddw): Replace typeToReflectFixed with TypeToReflect, after we've
 	// fixed it to treat the error type correctly.
 	rtDecode := typeToReflectFixed(dec.Type())
-	switch {
-	case rtDecode == nil:
+	if rtDecode == nil {
 		return fmt.Errorf("vdl: %v not registered, call vdl.Register, or use vdl.Value or vom.RawBytes instead", dec.Type())
-	case !rtDecode.Implements(rv.Type()):
+	}
+	// If we decoded an optional type, ensure that it is a pointer.  Note that if
+	// we decoded a nil, dec.Type() is already optional, so rtDecode will already
+	// be a pointer.
+	if dec.IsOptional() && !dec.IsNil() {
+		rtDecode = reflect.PtrTo(rtDecode)
+	}
+	if !rtDecode.Implements(rv.Type()) {
 		return fmt.Errorf("vdl: %v doesn't implement %v", rtDecode, rv.Type())
 	}
 	// Handle decoding optional(nil), by setting rv to a nil pointer of the
@@ -377,7 +383,7 @@ func readList(dec Decoder, rv reflect.Value, tt *Type) error {
 		if err := readReflect(dec, false, elem, tt.Elem()); err != nil {
 			return err
 		}
-		rv = reflect.Append(rv, elem)
+		rv.Set(reflect.Append(rv, elem))
 	}
 }
 
@@ -433,11 +439,8 @@ func readMap(dec Decoder, rv reflect.Value, tt *Type) error {
 
 func readStruct(dec Decoder, rv reflect.Value, tt *Type) error {
 	rt := rv.Type()
-	// Reset to zero struct, since fields may be missing.
-	//
-	// TODO(toddw): We need something like rvSettableZeroValue here, unless we can
-	// ensure go zero values represent VDL zero values as well.
-	rv.Set(reflect.Zero(rt))
+	// Reset to the zero struct, since fields may be missing.
+	rv.Set(rvSettableZeroValue(rt, tt))
 	for {
 		name, err := dec.NextField()
 		switch {

@@ -71,6 +71,10 @@ func (d *XDecoder) Decode(v interface{}) error {
 	return vdl.Read(d.dec, v)
 }
 
+func (d *XDecoder) Ignore() error {
+	return d.dec.old.Ignore()
+}
+
 func (d *xDecoder) IgnoreNextStartValue() {
 	d.ignoreNextStartValue = true
 }
@@ -79,9 +83,34 @@ func (d *xDecoder) StackDepth() int {
 	return len(d.stack)
 }
 
-// readRawBytes fills in rb with the next value.  It can be called for both
+func (d *xDecoder) decodeWireType(wt *wireType) (typeId, error) {
+	// TODO(toddw): Flip useOldDecoder=false to enable XDecoder.
+	const useOldDecoder = true
+	if useOldDecoder {
+		return d.old.decodeWireType(wt)
+	}
+	// Type messages are just a regularly encoded wireType, which is a union.  To
+	// decode we pre-populate the stack with an entry for the wire type, and run
+	// the code-generated vdlReadWireType method.
+	tid, err := d.old.nextMessage()
+	if err != nil {
+		return 0, err
+	}
+	d.stack = append(d.stack, decoderStackEntry{
+		Type:    wireTypeType,
+		Index:   -1,
+		LenHint: 1, // wireType is a union
+	})
+	d.ignoreNextStartValue = true
+	if err := vdlReadWireType(d, wt); err != nil {
+		return 0, err
+	}
+	return tid, nil
+}
+
+// readRawBytes fills in raw with the next value.  It can be called for both
 // top-level and internal values.
-func (d *xDecoder) readRawBytes(rb *RawBytes) error {
+func (d *xDecoder) readRawBytes(raw *RawBytes) error {
 	if d.ignoreNextStartValue {
 		// If the user has already called StartValue on the decoder, it's harder to
 		// capture all the raw bytes, since the optional flag and length hints have
@@ -99,7 +128,7 @@ func (d *xDecoder) readRawBytes(rb *RawBytes) error {
 		if err != nil {
 			return err
 		}
-		if err := d.old.decodeRaw(tt, anyLen, rb); err != nil {
+		if err := d.old.decodeRaw(tt, anyLen, raw); err != nil {
 			return err
 		}
 		return d.old.endMessage()
@@ -119,14 +148,14 @@ func (d *xDecoder) readRawBytes(rb *RawBytes) error {
 	if ttElem == nil {
 		// This is a nil any value, which has already been read by readAnyHeader.
 		// We simply fill in RawBytes with the single WireCtrlNil byte.
-		rb.Version = d.old.buf.version
-		rb.Type = vdl.AnyType
-		rb.RefTypes = nil
-		rb.AnyLengths = nil
-		rb.Data = []byte{WireCtrlNil}
+		raw.Version = d.old.buf.version
+		raw.Type = vdl.AnyType
+		raw.RefTypes = nil
+		raw.AnyLengths = nil
+		raw.Data = []byte{WireCtrlNil}
 		return nil
 	}
-	return d.old.decodeRaw(ttElem, anyLen, rb)
+	return d.old.decodeRaw(ttElem, anyLen, raw)
 }
 
 func (d *xDecoder) StartValue() error {

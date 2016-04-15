@@ -302,7 +302,10 @@ func (x *TestCase) VDLRead(dec vdl.Decoder) error {
 				return err
 			}
 		case "Value":
-			// TODO(toddw): implement any
+			x.Value = new(vdl.Value)
+			if err = x.Value.VDLRead(dec); err != nil {
+				return err
+			}
 		case "TypeString":
 			if err = dec.StartValue(); err != nil {
 				return err
@@ -632,7 +635,10 @@ func __VDLRead1_list(dec vdl.Decoder, x *[]*vdl.Value) error {
 			return dec.FinishValue()
 		}
 		var elem *vdl.Value
-		// TODO(toddw): implement any
+		elem = new(vdl.Value)
+		if err = elem.VDLRead(dec); err != nil {
+			return err
+		}
 		*x = append(*x, elem)
 	}
 }
@@ -3548,7 +3554,10 @@ func (x *MStruct) VDLRead(dec vdl.Decoder) error {
 				return err
 			}
 		case "F":
-			// TODO(toddw): implement any
+			x.F = new(vdl.Value)
+			if err = x.F.VDLRead(dec); err != nil {
+				return err
+			}
 		default:
 			if err = dec.SkipValue(); err != nil {
 				return err
@@ -6369,7 +6378,10 @@ func (x *AdeStruct) VDLRead(dec vdl.Decoder) error {
 				return err
 			}
 		case "D":
-			// TODO(toddw): implement any
+			x.D = new(vdl.Value)
+			if err = x.D.VDLRead(dec); err != nil {
+				return err
+			}
 		case "E":
 			if err = dec.StartValue(); err != nil {
 				return err
@@ -7824,7 +7836,10 @@ func (x *SometimesSetMap) VDLRead(dec vdl.Decoder) error {
 		}
 		var elem *vdl.Value
 		{
-			// TODO(toddw): implement any
+			elem = new(vdl.Value)
+			if err = elem.VDLRead(dec); err != nil {
+				return err
+			}
 		}
 		if tmpMap == nil {
 			tmpMap = make(SometimesSetMap)
@@ -9104,7 +9119,10 @@ func VDLReadBdeUnion(dec vdl.Decoder, x *BdeUnion) error {
 		*x = field
 	case "D":
 		var field BdeUnionD
-		// TODO(toddw): implement any
+		field.Value = new(vdl.Value)
+		if err = field.Value.VDLRead(dec); err != nil {
+			return err
+		}
 		*x = field
 	case "E":
 		var field BdeUnionE
@@ -9529,7 +9547,10 @@ func (x *StructAny) VDLRead(dec vdl.Decoder) error {
 		case "":
 			return dec.FinishValue()
 		case "Any":
-			// TODO(toddw): implement any
+			x.Any = new(vdl.Value)
+			if err = x.Any.VDLRead(dec); err != nil {
+				return err
+			}
 		default:
 			if err = dec.SkipValue(); err != nil {
 				return err
@@ -10776,7 +10797,10 @@ func (x *AnySlice) VDLRead(dec vdl.Decoder) error {
 			return dec.FinishValue()
 		}
 		var elem *vdl.Value
-		// TODO(toddw): implement any
+		elem = new(vdl.Value)
+		if err = elem.VDLRead(dec); err != nil {
+			return err
+		}
 		*x = append(*x, elem)
 	}
 }
@@ -11140,7 +11164,10 @@ func (x *LargeAnyMessageType) VDLRead(dec vdl.Decoder) error {
 		case "":
 			return dec.FinishValue()
 		case "Payload":
-			// TODO(toddw): implement any
+			x.Payload = new(vdl.Value)
+			if err = x.Payload.VDLRead(dec); err != nil {
+				return err
+			}
 		case "Next":
 			if err = dec.StartValue(); err != nil {
 				return err

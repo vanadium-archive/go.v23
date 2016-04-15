@@ -1729,7 +1729,9 @@ func __VDLRead3_list(dec vdl.Decoder, x *[]*vom.RawBytes) error {
 			return dec.FinishValue()
 		}
 		var elem *vom.RawBytes
-		// TODO(toddw): implement any
+		if err = elem.VDLRead(dec); err != nil {
+			return err
+		}
 		*x = append(*x, elem)
 	}
 }

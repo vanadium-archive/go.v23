@@ -101,6 +101,7 @@ pkg vom, method (*TypeDecoder) Start()
 pkg vom, method (*TypeDecoder) Stop()
 pkg vom, method (*XDecoder) Decode(interface{}) error
 pkg vom, method (*XDecoder) Decoder() vdl.Decoder
+pkg vom, method (*XDecoder) Ignore() error
 pkg vom, method (ControlKind) String() string
 pkg vom, method (DumpAtom) String() string
 pkg vom, method (DumpKind) String() string

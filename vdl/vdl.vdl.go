@@ -432,7 +432,10 @@ func __VDLRead1_list(dec Decoder, x *[]*Value) error {
 			return dec.FinishValue()
 		}
 		var elem *Value
-		// TODO(toddw): implement any
+		elem = new(Value)
+		if err = elem.VDLRead(dec); err != nil {
+			return err
+		}
 		*x = append(*x, elem)
 	}
 }

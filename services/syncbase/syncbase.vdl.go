@@ -5098,7 +5098,9 @@ func (x *StoreChange) VDLRead(dec vdl.Decoder) error {
 		case "":
 			return dec.FinishValue()
 		case "Value":
-			// TODO(toddw): implement any
+			if err = x.Value.VDLRead(dec); err != nil {
+				return err
+			}
 		case "FromSync":
 			if err = dec.StartValue(); err != nil {
 				return err

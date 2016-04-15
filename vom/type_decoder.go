@@ -35,7 +35,7 @@ type TypeDecoder struct {
 	buildCond *sync.Cond
 	err       error               // GUARDED_BY(buildMu)
 	idToWire  map[typeId]wireType // GUARDED_BY(buildMu)
-	dec       *Decoder            // GUARDED_BY(buildMu)
+	dec       *xDecoder           // GUARDED_BY(buildMu)
 
 	processingControlMu sync.Mutex
 	goroutineRunning    bool // GUARDED_BY(processingControlMu)
@@ -52,10 +52,7 @@ func newTypeDecoderInternal(buf *decbuf) *TypeDecoder {
 	td := &TypeDecoder{
 		idToType: make(map[typeId]*vdl.Type),
 		idToWire: make(map[typeId]wireType),
-		dec: &Decoder{
-			buf:     buf,
-			typeDec: nil,
-		},
+		dec:      &xDecoder{old: &Decoder{buf: buf}},
 	}
 	td.buildCond = sync.NewCond(&td.buildMu)
 	return td
@@ -65,10 +62,7 @@ func newDerivedTypeDecoderInternal(buf *decbuf, orig *TypeDecoder) *TypeDecoder 
 	td := &TypeDecoder{
 		idToType: orig.idToType,
 		idToWire: orig.idToWire,
-		dec: &Decoder{
-			buf:     buf,
-			typeDec: nil,
-		},
+		dec:      &xDecoder{old: &Decoder{buf: buf}},
 	}
 	td.buildCond = sync.NewCond(&td.buildMu)
 	return td
@@ -130,8 +124,8 @@ func (d *TypeDecoder) readSingleType() error {
 		return err
 	}
 
-	if !d.dec.typeIncomplete {
-		if err := d.buildType(curTypeID); d.dec.buf.version >= Version81 && err != nil {
+	if !d.dec.old.typeIncomplete {
+		if err := d.buildType(curTypeID); d.dec.old.buf.version >= Version81 && err != nil {
 			return err
 		}
 	}

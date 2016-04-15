@@ -331,6 +331,11 @@ func (v *Value) Kind() Kind { return v.t.kind }
 // Type returns the type of v.  All valid values have a non-nil type.
 func (v *Value) Type() *Type { return v.t }
 
+// VDLEqual implements the Equaler interface method.
+func (v *Value) VDLEqual(x interface{}) bool {
+	return EqualValue(v, x.(*Value))
+}
+
 // Bool returns the underlying value of a Bool.
 func (v *Value) Bool() bool {
 	v.t.checkKind("Bool", Bool)

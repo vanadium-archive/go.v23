@@ -34,6 +34,7 @@ pkg vdl, func BytesValue([]byte) *Value
 pkg vdl, func Compatible(*Type, *Type) bool
 pkg vdl, func Convert(interface{}, interface{}) error
 pkg vdl, func CopyValue(*Value) *Value
+pkg vdl, func DeepEqual(interface{}, interface{}) bool
 pkg vdl, func EnumType(...string) *Type
 pkg vdl, func EqualValue(*Value, *Value) bool
 pkg vdl, func Float32Value(float32) *Value
@@ -446,6 +447,7 @@ pkg vdl, method (*Value) Type() *Type
 pkg vdl, method (*Value) TypeObject() *Type
 pkg vdl, method (*Value) Uint() uint64
 pkg vdl, method (*Value) UnionField() (int, *Value)
+pkg vdl, method (*Value) VDLEqual(interface{}) bool
 pkg vdl, method (*Value) VDLRead(Decoder) error
 pkg vdl, method (*WireError) FillVDLTarget(Target, *Type) error
 pkg vdl, method (*WireError) MakeVDLTarget() Target
@@ -540,6 +542,8 @@ pkg vdl, type Encoder interface, FinishComposite() error
 pkg vdl, type Encoder interface, FinishValue() error
 pkg vdl, type Encoder interface, StartComposite() error
 pkg vdl, type Encoder interface, StartValue(*Type) error
+pkg vdl, type Equaler interface { VDLEqual }
+pkg vdl, type Equaler interface, VDLEqual(interface{}) bool
 pkg vdl, type Field struct
 pkg vdl, type Field struct, Name string
 pkg vdl, type Field struct, Type *Type

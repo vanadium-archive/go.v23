@@ -8,9 +8,9 @@ import "fmt"
 
 // Reader is the interface that wraps the VDLRead method.
 //
-// VDLRead fills in the the underlying value (that implements this method) from
-// the Decoder.  This method is auto-generated for all types defined in vdl.  It
-// may be implemented for regular Go types not defined in vdl, to customize the
+// VDLRead fills in the the receiver that implements this method from the
+// Decoder.  This method is auto-generated for all types defined in vdl.  It may
+// be implemented for regular Go types not defined in vdl, to customize the
 // decoding.
 type Reader interface {
 	VDLRead(dec Decoder) error
@@ -18,9 +18,9 @@ type Reader interface {
 
 // Writer is the interface that wraps the VDLWrite method.
 //
-// VDLWrite writes out the underlying value (that implements this method) to the
-// Encoder.  This method is auto-generated for all types defined in vdl.  It may
-// be implemented for regular Go types not defined in vdl, to customize the
+// VDLWrite writes out the receiver that implements this method to the Encoder.
+// This method is auto-generated for all types defined in vdl.  It may be
+// implemented for regular Go types not defined in vdl, to customize the
 // encoding.
 type Writer interface {
 	VDLWrite(enc Encoder) error
@@ -125,7 +125,7 @@ type Encoder interface {
 
 func decoderCompatible(dec Decoder, tt *Type) error {
 	if (dec.StackDepth() == 1 || dec.IsAny()) && !Compatible(tt, dec.Type()) {
-		return fmt.Errorf("incompatible %v %v, from %v", tt.Kind(), tt, dec.Type())
+		return fmt.Errorf("incompatible %v, from %v", tt, dec.Type())
 	}
 	return nil
 }
