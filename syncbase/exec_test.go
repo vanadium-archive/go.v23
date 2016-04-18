@@ -18,7 +18,7 @@ import (
 	"v.io/v23/syncbase/testdata"
 	"v.io/v23/vdl"
 	"v.io/v23/verror"
-	_ "v.io/x/ref/runtime/factories/generic"
+	_ "v.io/x/ref/runtime/factories/roaming"
 	tu "v.io/x/ref/services/syncbase/testutil"
 )
 

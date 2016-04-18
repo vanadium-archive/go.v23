@@ -19,7 +19,7 @@ import (
 	"v.io/v23/syncbase"
 	"v.io/v23/verror"
 	"v.io/v23/vom"
-	_ "v.io/x/ref/runtime/factories/generic"
+	_ "v.io/x/ref/runtime/factories/roaming"
 	tu "v.io/x/ref/services/syncbase/testutil"
 )
 

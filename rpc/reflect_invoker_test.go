@@ -23,7 +23,7 @@ import (
 	"v.io/v23/vdl"
 	"v.io/v23/vdlroot/signature"
 	"v.io/v23/verror"
-	_ "v.io/x/ref/runtime/factories/generic"
+	_ "v.io/x/ref/runtime/factories/roaming"
 	"v.io/x/ref/test"
 	"v.io/x/ref/test/testutil"
 )

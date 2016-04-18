@@ -35,7 +35,7 @@ import (
 	wire "v.io/v23/services/syncbase"
 	"v.io/v23/services/watch"
 	"v.io/v23/syncbase"
-	_ "v.io/x/ref/runtime/factories/generic"
+	_ "v.io/x/ref/runtime/factories/roaming"
 	tu "v.io/x/ref/services/syncbase/testutil"
 )
 

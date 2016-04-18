@@ -22,7 +22,7 @@ import (
 	"v.io/v23/services/watch"
 	"v.io/v23/syncbase"
 	"v.io/v23/verror"
-	_ "v.io/x/ref/runtime/factories/generic"
+	_ "v.io/x/ref/runtime/factories/roaming"
 	"v.io/x/ref/services/syncbase/common"
 	"v.io/x/ref/services/syncbase/syncbaselib"
 	"v.io/x/ref/test/v23test"

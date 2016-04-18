@@ -7,7 +7,7 @@ package featuretests_test
 import (
 	"testing"
 
-	_ "v.io/x/ref/runtime/factories/generic"
+	_ "v.io/x/ref/runtime/factories/roaming"
 	"v.io/x/ref/test/v23test"
 )
 

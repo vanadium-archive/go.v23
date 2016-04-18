@@ -15,7 +15,7 @@ import (
 	"v.io/v23/verror"
 	"v.io/v23/vtrace"
 
-	_ "v.io/x/ref/runtime/factories/generic"
+	_ "v.io/x/ref/runtime/factories/roaming"
 	"v.io/x/ref/test"
 )
 
