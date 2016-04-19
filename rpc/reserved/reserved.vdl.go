@@ -17,6 +17,7 @@ var _ = __VDLInit() // Must be first; see __VDLInit comments for details.
 
 //////////////////////////////////////////////////
 // Error definitions
+
 var (
 
 	// GlobMaxRecursionReached indicates that the Glob request exceeded the

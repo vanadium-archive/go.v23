@@ -17,6 +17,7 @@ var _ = __VDLInit() // Must be first; see __VDLInit comments for details.
 
 //////////////////////////////////////////////////
 // Error definitions
+
 var (
 	ErrAuth          = verror.Register("v.io/v23/flow.Auth", verror.NoRetry, "{1:}{2:} {:3}")
 	ErrNotTrusted    = verror.Register("v.io/v23/flow.NotTrusted", verror.NoRetry, "{1:}{2:} {:3}")

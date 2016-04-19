@@ -16,6 +16,7 @@ var _ = __VDLInit() // Must be first; see __VDLInit comments for details.
 
 //////////////////////////////////////////////////
 // Error definitions
+
 var (
 
 	// Unknown means the error has no known Id.  A more specific error should

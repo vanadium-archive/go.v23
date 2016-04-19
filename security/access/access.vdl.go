@@ -457,7 +457,13 @@ func __VDLWrite1_list(enc vdl.Encoder, x *[]security.BlessingPattern) error {
 	if err := enc.StartValue(vdl.TypeOf((*[]security.BlessingPattern)(nil))); err != nil {
 		return err
 	}
+	if err := enc.SetLenHint(len(*x)); err != nil {
+		return err
+	}
 	for i := 0; i < len(*x); i++ {
+		if err := enc.NextEntry(false); err != nil {
+			return err
+		}
 		if err := (*x)[i].VDLWrite(enc); err != nil {
 			return err
 		}
@@ -472,7 +478,13 @@ func __VDLWrite2_list(enc vdl.Encoder, x *[]string) error {
 	if err := enc.StartValue(vdl.TypeOf((*[]string)(nil))); err != nil {
 		return err
 	}
+	if err := enc.SetLenHint(len(*x)); err != nil {
+		return err
+	}
 	for i := 0; i < len(*x); i++ {
+		if err := enc.NextEntry(false); err != nil {
+			return err
+		}
 		if err := enc.StartValue(vdl.TypeOf((*string)(nil))); err != nil {
 			return err
 		}
@@ -629,7 +641,13 @@ func (x Permissions) VDLWrite(enc vdl.Encoder) error {
 	if err := enc.StartValue(vdl.TypeOf((*Permissions)(nil))); err != nil {
 		return err
 	}
+	if err := enc.SetLenHint(len(x)); err != nil {
+		return err
+	}
 	for key, elem := range x {
+		if err := enc.NextEntry(false); err != nil {
+			return err
+		}
 		if err := enc.StartValue(vdl.TypeOf((*string)(nil))); err != nil {
 			return err
 		}
@@ -744,6 +762,7 @@ var AccessTagCaveat = security.CaveatDescriptor{
 
 //////////////////////////////////////////////////
 // Error definitions
+
 var (
 
 	// The AccessList is too big.  Use groups to represent large sets of principals.

@@ -641,6 +641,9 @@ func (x RatingsArray) VDLWrite(enc vdl.Encoder) error {
 		return err
 	}
 	for i := 0; i < 4; i++ {
+		if err := enc.NextEntry(false); err != nil {
+			return err
+		}
 		if err := enc.StartValue(vdl.TypeOf((*int16)(nil))); err != nil {
 			return err
 		}
@@ -1270,7 +1273,13 @@ func __VDLWrite1_set(enc vdl.Encoder, x *map[Tdh]struct{}) error {
 	if err := enc.StartValue(vdl.TypeOf((*map[Tdh]struct{})(nil))); err != nil {
 		return err
 	}
+	if err := enc.SetLenHint(len(*x)); err != nil {
+		return err
+	}
 	for key := range *x {
+		if err := enc.NextEntry(false); err != nil {
+			return err
+		}
 		if err := key.VDLWrite(enc); err != nil {
 			return err
 		}
@@ -1598,7 +1607,13 @@ func __VDLWrite2_map(enc vdl.Encoder, x *map[string]int16) error {
 	if err := enc.StartValue(vdl.TypeOf((*map[string]int16)(nil))); err != nil {
 		return err
 	}
+	if err := enc.SetLenHint(len(*x)); err != nil {
+		return err
+	}
 	for key, elem := range *x {
+		if err := enc.NextEntry(false); err != nil {
+			return err
+		}
 		if err := enc.StartValue(vdl.TypeOf((*string)(nil))); err != nil {
 			return err
 		}
@@ -2580,7 +2595,13 @@ func __VDLWrite3_list(enc vdl.Encoder, x *[]AddressInfo) error {
 	if err := enc.StartValue(vdl.TypeOf((*[]AddressInfo)(nil))); err != nil {
 		return err
 	}
+	if err := enc.SetLenHint(len(*x)); err != nil {
+		return err
+	}
 	for i := 0; i < len(*x); i++ {
+		if err := enc.NextEntry(false); err != nil {
+			return err
+		}
 		if err := (*x)[i].VDLWrite(enc); err != nil {
 			return err
 		}
@@ -5283,7 +5304,13 @@ func __VDLWrite4_map(enc vdl.Encoder, x *map[K]V) error {
 	if err := enc.StartValue(vdl.TypeOf((*map[K]V)(nil))); err != nil {
 		return err
 	}
+	if err := enc.SetLenHint(len(*x)); err != nil {
+		return err
+	}
 	for key, elem := range *x {
+		if err := enc.NextEntry(false); err != nil {
+			return err
+		}
 		if err := key.VDLWrite(enc); err != nil {
 			return err
 		}
@@ -5301,7 +5328,13 @@ func __VDLWrite5_map(enc vdl.Encoder, x *map[int16][]map[string]struct{}) error 
 	if err := enc.StartValue(vdl.TypeOf((*map[int16][]map[string]struct{})(nil))); err != nil {
 		return err
 	}
+	if err := enc.SetLenHint(len(*x)); err != nil {
+		return err
+	}
 	for key, elem := range *x {
+		if err := enc.NextEntry(false); err != nil {
+			return err
+		}
 		if err := enc.StartValue(vdl.TypeOf((*int16)(nil))); err != nil {
 			return err
 		}
@@ -5325,7 +5358,13 @@ func __VDLWrite6_list(enc vdl.Encoder, x *[]map[string]struct{}) error {
 	if err := enc.StartValue(vdl.TypeOf((*[]map[string]struct{})(nil))); err != nil {
 		return err
 	}
+	if err := enc.SetLenHint(len(*x)); err != nil {
+		return err
+	}
 	for i := 0; i < len(*x); i++ {
+		if err := enc.NextEntry(false); err != nil {
+			return err
+		}
 		if err := __VDLWrite7_set(enc, &(*x)[i]); err != nil {
 			return err
 		}
@@ -5340,7 +5379,13 @@ func __VDLWrite7_set(enc vdl.Encoder, x *map[string]struct{}) error {
 	if err := enc.StartValue(vdl.TypeOf((*map[string]struct{})(nil))); err != nil {
 		return err
 	}
+	if err := enc.SetLenHint(len(*x)); err != nil {
+		return err
+	}
 	for key := range *x {
+		if err := enc.NextEntry(false); err != nil {
+			return err
+		}
 		if err := enc.StartValue(vdl.TypeOf((*string)(nil))); err != nil {
 			return err
 		}
@@ -5534,13 +5579,7 @@ func (x FunWithTypes) VDLWrite(enc vdl.Encoder) error {
 		if err := enc.NextField("T1"); err != nil {
 			return err
 		}
-		if err := enc.StartValue(vdl.TypeObjectType); err != nil {
-			return err
-		}
-		if err := enc.EncodeTypeObject(x.T1); err != nil {
-			return err
-		}
-		if err := enc.FinishValue(); err != nil {
+		if err := x.T1.VDLWrite(enc); err != nil {
 			return err
 		}
 	}
@@ -5549,13 +5588,7 @@ func (x FunWithTypes) VDLWrite(enc vdl.Encoder) error {
 		if err := enc.NextField("T2"); err != nil {
 			return err
 		}
-		if err := enc.StartValue(vdl.TypeObjectType); err != nil {
-			return err
-		}
-		if err := enc.EncodeTypeObject(x.T2); err != nil {
-			return err
-		}
-		if err := enc.FinishValue(); err != nil {
+		if err := x.T2.VDLWrite(enc); err != nil {
 			return err
 		}
 	}
@@ -7839,7 +7872,13 @@ func __VDLWrite8_map(enc vdl.Encoder, x *map[bool]string) error {
 	if err := enc.StartValue(vdl.TypeOf((*map[bool]string)(nil))); err != nil {
 		return err
 	}
+	if err := enc.SetLenHint(len(*x)); err != nil {
+		return err
+	}
 	for key, elem := range *x {
+		if err := enc.NextEntry(false); err != nil {
+			return err
+		}
 		if err := enc.StartValue(vdl.TypeOf((*bool)(nil))); err != nil {
 			return err
 		}
@@ -7869,7 +7908,13 @@ func __VDLWrite9_map(enc vdl.Encoder, x *map[byte]string) error {
 	if err := enc.StartValue(vdl.TypeOf((*map[byte]string)(nil))); err != nil {
 		return err
 	}
+	if err := enc.SetLenHint(len(*x)); err != nil {
+		return err
+	}
 	for key, elem := range *x {
+		if err := enc.NextEntry(false); err != nil {
+			return err
+		}
 		if err := enc.StartValue(vdl.TypeOf((*byte)(nil))); err != nil {
 			return err
 		}
@@ -7899,7 +7944,13 @@ func __VDLWrite10_map(enc vdl.Encoder, x *map[uint16]string) error {
 	if err := enc.StartValue(vdl.TypeOf((*map[uint16]string)(nil))); err != nil {
 		return err
 	}
+	if err := enc.SetLenHint(len(*x)); err != nil {
+		return err
+	}
 	for key, elem := range *x {
+		if err := enc.NextEntry(false); err != nil {
+			return err
+		}
 		if err := enc.StartValue(vdl.TypeOf((*uint16)(nil))); err != nil {
 			return err
 		}
@@ -7929,7 +7980,13 @@ func __VDLWrite11_map(enc vdl.Encoder, x *map[uint32]string) error {
 	if err := enc.StartValue(vdl.TypeOf((*map[uint32]string)(nil))); err != nil {
 		return err
 	}
+	if err := enc.SetLenHint(len(*x)); err != nil {
+		return err
+	}
 	for key, elem := range *x {
+		if err := enc.NextEntry(false); err != nil {
+			return err
+		}
 		if err := enc.StartValue(vdl.TypeOf((*uint32)(nil))); err != nil {
 			return err
 		}
@@ -7959,7 +8016,13 @@ func __VDLWrite12_map(enc vdl.Encoder, x *map[uint64]string) error {
 	if err := enc.StartValue(vdl.TypeOf((*map[uint64]string)(nil))); err != nil {
 		return err
 	}
+	if err := enc.SetLenHint(len(*x)); err != nil {
+		return err
+	}
 	for key, elem := range *x {
+		if err := enc.NextEntry(false); err != nil {
+			return err
+		}
 		if err := enc.StartValue(vdl.TypeOf((*uint64)(nil))); err != nil {
 			return err
 		}
@@ -7989,7 +8052,13 @@ func __VDLWrite13_map(enc vdl.Encoder, x *map[int16]string) error {
 	if err := enc.StartValue(vdl.TypeOf((*map[int16]string)(nil))); err != nil {
 		return err
 	}
+	if err := enc.SetLenHint(len(*x)); err != nil {
+		return err
+	}
 	for key, elem := range *x {
+		if err := enc.NextEntry(false); err != nil {
+			return err
+		}
 		if err := enc.StartValue(vdl.TypeOf((*int16)(nil))); err != nil {
 			return err
 		}
@@ -8019,7 +8088,13 @@ func __VDLWrite14_map(enc vdl.Encoder, x *map[int32]string) error {
 	if err := enc.StartValue(vdl.TypeOf((*map[int32]string)(nil))); err != nil {
 		return err
 	}
+	if err := enc.SetLenHint(len(*x)); err != nil {
+		return err
+	}
 	for key, elem := range *x {
+		if err := enc.NextEntry(false); err != nil {
+			return err
+		}
 		if err := enc.StartValue(vdl.TypeOf((*int32)(nil))); err != nil {
 			return err
 		}
@@ -8049,7 +8124,13 @@ func __VDLWrite15_map(enc vdl.Encoder, x *map[int64]string) error {
 	if err := enc.StartValue(vdl.TypeOf((*map[int64]string)(nil))); err != nil {
 		return err
 	}
+	if err := enc.SetLenHint(len(*x)); err != nil {
+		return err
+	}
 	for key, elem := range *x {
+		if err := enc.NextEntry(false); err != nil {
+			return err
+		}
 		if err := enc.StartValue(vdl.TypeOf((*int64)(nil))); err != nil {
 			return err
 		}
@@ -8079,7 +8160,13 @@ func __VDLWrite16_map(enc vdl.Encoder, x *map[float32]string) error {
 	if err := enc.StartValue(vdl.TypeOf((*map[float32]string)(nil))); err != nil {
 		return err
 	}
+	if err := enc.SetLenHint(len(*x)); err != nil {
+		return err
+	}
 	for key, elem := range *x {
+		if err := enc.NextEntry(false); err != nil {
+			return err
+		}
 		if err := enc.StartValue(vdl.TypeOf((*float32)(nil))); err != nil {
 			return err
 		}
@@ -8109,7 +8196,13 @@ func __VDLWrite17_map(enc vdl.Encoder, x *map[float64]string) error {
 	if err := enc.StartValue(vdl.TypeOf((*map[float64]string)(nil))); err != nil {
 		return err
 	}
+	if err := enc.SetLenHint(len(*x)); err != nil {
+		return err
+	}
 	for key, elem := range *x {
+		if err := enc.NextEntry(false); err != nil {
+			return err
+		}
 		if err := enc.StartValue(vdl.TypeOf((*float64)(nil))); err != nil {
 			return err
 		}
@@ -8139,7 +8232,13 @@ func __VDLWrite18_map(enc vdl.Encoder, x *map[string]string) error {
 	if err := enc.StartValue(vdl.TypeOf((*map[string]string)(nil))); err != nil {
 		return err
 	}
+	if err := enc.SetLenHint(len(*x)); err != nil {
+		return err
+	}
 	for key, elem := range *x {
+		if err := enc.NextEntry(false); err != nil {
+			return err
+		}
 		if err := enc.StartValue(vdl.TypeOf((*string)(nil))); err != nil {
 			return err
 		}
@@ -8169,7 +8268,13 @@ func __VDLWrite19_map(enc vdl.Encoder, x *map[string]map[string]string) error {
 	if err := enc.StartValue(vdl.TypeOf((*map[string]map[string]string)(nil))); err != nil {
 		return err
 	}
+	if err := enc.SetLenHint(len(*x)); err != nil {
+		return err
+	}
 	for key, elem := range *x {
+		if err := enc.NextEntry(false); err != nil {
+			return err
+		}
 		if err := enc.StartValue(vdl.TypeOf((*string)(nil))); err != nil {
 			return err
 		}
@@ -8193,7 +8298,13 @@ func __VDLWrite20_map(enc vdl.Encoder, x *map[time.Time]string) error {
 	if err := enc.StartValue(vdl.TypeOf((*map[time.Time]string)(nil))); err != nil {
 		return err
 	}
+	if err := enc.SetLenHint(len(*x)); err != nil {
+		return err
+	}
 	for key, elem := range *x {
+		if err := enc.NextEntry(false); err != nil {
+			return err
+		}
 		var wire time_2.Time
 		if err := time_2.TimeFromNative(&wire, key); err != nil {
 			return err
@@ -9910,7 +10021,13 @@ func __VDLWrite21_set(enc vdl.Encoder, x *map[bool]struct{}) error {
 	if err := enc.StartValue(vdl.TypeOf((*map[bool]struct{})(nil))); err != nil {
 		return err
 	}
+	if err := enc.SetLenHint(len(*x)); err != nil {
+		return err
+	}
 	for key := range *x {
+		if err := enc.NextEntry(false); err != nil {
+			return err
+		}
 		if err := enc.StartValue(vdl.TypeOf((*bool)(nil))); err != nil {
 			return err
 		}
@@ -9931,7 +10048,13 @@ func __VDLWrite22_set(enc vdl.Encoder, x *map[byte]struct{}) error {
 	if err := enc.StartValue(vdl.TypeOf((*map[byte]struct{})(nil))); err != nil {
 		return err
 	}
+	if err := enc.SetLenHint(len(*x)); err != nil {
+		return err
+	}
 	for key := range *x {
+		if err := enc.NextEntry(false); err != nil {
+			return err
+		}
 		if err := enc.StartValue(vdl.TypeOf((*byte)(nil))); err != nil {
 			return err
 		}
@@ -9952,7 +10075,13 @@ func __VDLWrite23_set(enc vdl.Encoder, x *map[uint16]struct{}) error {
 	if err := enc.StartValue(vdl.TypeOf((*map[uint16]struct{})(nil))); err != nil {
 		return err
 	}
+	if err := enc.SetLenHint(len(*x)); err != nil {
+		return err
+	}
 	for key := range *x {
+		if err := enc.NextEntry(false); err != nil {
+			return err
+		}
 		if err := enc.StartValue(vdl.TypeOf((*uint16)(nil))); err != nil {
 			return err
 		}
@@ -9973,7 +10102,13 @@ func __VDLWrite24_set(enc vdl.Encoder, x *map[uint32]struct{}) error {
 	if err := enc.StartValue(vdl.TypeOf((*map[uint32]struct{})(nil))); err != nil {
 		return err
 	}
+	if err := enc.SetLenHint(len(*x)); err != nil {
+		return err
+	}
 	for key := range *x {
+		if err := enc.NextEntry(false); err != nil {
+			return err
+		}
 		if err := enc.StartValue(vdl.TypeOf((*uint32)(nil))); err != nil {
 			return err
 		}
@@ -9994,7 +10129,13 @@ func __VDLWrite25_set(enc vdl.Encoder, x *map[uint64]struct{}) error {
 	if err := enc.StartValue(vdl.TypeOf((*map[uint64]struct{})(nil))); err != nil {
 		return err
 	}
+	if err := enc.SetLenHint(len(*x)); err != nil {
+		return err
+	}
 	for key := range *x {
+		if err := enc.NextEntry(false); err != nil {
+			return err
+		}
 		if err := enc.StartValue(vdl.TypeOf((*uint64)(nil))); err != nil {
 			return err
 		}
@@ -10015,7 +10156,13 @@ func __VDLWrite26_set(enc vdl.Encoder, x *map[int16]struct{}) error {
 	if err := enc.StartValue(vdl.TypeOf((*map[int16]struct{})(nil))); err != nil {
 		return err
 	}
+	if err := enc.SetLenHint(len(*x)); err != nil {
+		return err
+	}
 	for key := range *x {
+		if err := enc.NextEntry(false); err != nil {
+			return err
+		}
 		if err := enc.StartValue(vdl.TypeOf((*int16)(nil))); err != nil {
 			return err
 		}
@@ -10036,7 +10183,13 @@ func __VDLWrite27_set(enc vdl.Encoder, x *map[int32]struct{}) error {
 	if err := enc.StartValue(vdl.TypeOf((*map[int32]struct{})(nil))); err != nil {
 		return err
 	}
+	if err := enc.SetLenHint(len(*x)); err != nil {
+		return err
+	}
 	for key := range *x {
+		if err := enc.NextEntry(false); err != nil {
+			return err
+		}
 		if err := enc.StartValue(vdl.TypeOf((*int32)(nil))); err != nil {
 			return err
 		}
@@ -10057,7 +10210,13 @@ func __VDLWrite28_set(enc vdl.Encoder, x *map[int64]struct{}) error {
 	if err := enc.StartValue(vdl.TypeOf((*map[int64]struct{})(nil))); err != nil {
 		return err
 	}
+	if err := enc.SetLenHint(len(*x)); err != nil {
+		return err
+	}
 	for key := range *x {
+		if err := enc.NextEntry(false); err != nil {
+			return err
+		}
 		if err := enc.StartValue(vdl.TypeOf((*int64)(nil))); err != nil {
 			return err
 		}
@@ -10078,7 +10237,13 @@ func __VDLWrite29_set(enc vdl.Encoder, x *map[float32]struct{}) error {
 	if err := enc.StartValue(vdl.TypeOf((*map[float32]struct{})(nil))); err != nil {
 		return err
 	}
+	if err := enc.SetLenHint(len(*x)); err != nil {
+		return err
+	}
 	for key := range *x {
+		if err := enc.NextEntry(false); err != nil {
+			return err
+		}
 		if err := enc.StartValue(vdl.TypeOf((*float32)(nil))); err != nil {
 			return err
 		}
@@ -10099,7 +10264,13 @@ func __VDLWrite30_set(enc vdl.Encoder, x *map[float64]struct{}) error {
 	if err := enc.StartValue(vdl.TypeOf((*map[float64]struct{})(nil))); err != nil {
 		return err
 	}
+	if err := enc.SetLenHint(len(*x)); err != nil {
+		return err
+	}
 	for key := range *x {
+		if err := enc.NextEntry(false); err != nil {
+			return err
+		}
 		if err := enc.StartValue(vdl.TypeOf((*float64)(nil))); err != nil {
 			return err
 		}
@@ -10120,7 +10291,13 @@ func __VDLWrite31_set(enc vdl.Encoder, x *map[time.Time]struct{}) error {
 	if err := enc.StartValue(vdl.TypeOf((*map[time.Time]struct{})(nil))); err != nil {
 		return err
 	}
+	if err := enc.SetLenHint(len(*x)); err != nil {
+		return err
+	}
 	for key := range *x {
+		if err := enc.NextEntry(false); err != nil {
+			return err
+		}
 		var wire time_2.Time
 		if err := time_2.TimeFromNative(&wire, key); err != nil {
 			return err

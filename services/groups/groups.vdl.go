@@ -406,7 +406,13 @@ func __VDLWrite1_set(enc vdl.Encoder, x *map[BlessingPatternChunk]struct{}) erro
 	if err := enc.StartValue(vdl.TypeOf((*map[BlessingPatternChunk]struct{})(nil))); err != nil {
 		return err
 	}
+	if err := enc.SetLenHint(len(*x)); err != nil {
+		return err
+	}
 	for key := range *x {
+		if err := enc.NextEntry(false); err != nil {
+			return err
+		}
 		if err := key.VDLWrite(enc); err != nil {
 			return err
 		}
@@ -728,6 +734,7 @@ func (x Approximation) VDLWrite(enc vdl.Encoder) error {
 
 //////////////////////////////////////////////////
 // Error definitions
+
 var (
 	ErrNoBlessings         = verror.Register("v.io/v23/services/groups.NoBlessings", verror.NoRetry, "{1:}{2:} No blessings recognized; cannot create group Permissions")
 	ErrExcessiveContention = verror.Register("v.io/v23/services/groups.ExcessiveContention", verror.RetryBackoff, "{1:}{2:} Gave up after encountering excessive contention; try again later")

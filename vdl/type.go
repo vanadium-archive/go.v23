@@ -314,6 +314,17 @@ func (t *Type) AssignableFrom(f *Value) bool {
 	return t == f.t || t.kind == Any || (t.kind == Optional && f.t.kind == Any && f.IsNil())
 }
 
+// VDLWrite uses enc to encode type t.
+func (t *Type) VDLWrite(enc Encoder) error {
+	if err := enc.StartValue(TypeObjectType); err != nil {
+		return err
+	}
+	if err := enc.EncodeTypeObject(t); err != nil {
+		return err
+	}
+	return enc.FinishValue()
+}
+
 // ptype implements the TypeOrPending interface.
 func (t *Type) ptype() *Type { return t }
 

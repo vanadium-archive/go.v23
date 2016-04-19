@@ -511,13 +511,7 @@ func (x Arg) VDLWrite(enc vdl.Encoder) error {
 		if err := enc.NextField("Type"); err != nil {
 			return err
 		}
-		if err := enc.StartValue(vdl.TypeObjectType); err != nil {
-			return err
-		}
-		if err := enc.EncodeTypeObject(x.Type); err != nil {
-			return err
-		}
-		if err := enc.FinishValue(); err != nil {
+		if err := x.Type.VDLWrite(enc); err != nil {
 			return err
 		}
 	}
@@ -1213,7 +1207,13 @@ func __VDLWrite1_list(enc vdl.Encoder, x *[]Arg) error {
 	if err := enc.StartValue(vdl.TypeOf((*[]Arg)(nil))); err != nil {
 		return err
 	}
+	if err := enc.SetLenHint(len(*x)); err != nil {
+		return err
+	}
 	for i := 0; i < len(*x); i++ {
+		if err := enc.NextEntry(false); err != nil {
+			return err
+		}
 		if err := (*x)[i].VDLWrite(enc); err != nil {
 			return err
 		}
@@ -1228,7 +1228,13 @@ func __VDLWrite2_list(enc vdl.Encoder, x *[]*vdl.Value) error {
 	if err := enc.StartValue(vdl.TypeOf((*[]*vdl.Value)(nil))); err != nil {
 		return err
 	}
+	if err := enc.SetLenHint(len(*x)); err != nil {
+		return err
+	}
 	for i := 0; i < len(*x); i++ {
+		if err := enc.NextEntry(false); err != nil {
+			return err
+		}
 		if err := enc.StartValue(vdl.AnyType); err != nil {
 			return err
 		}
@@ -1760,7 +1766,13 @@ func __VDLWrite3_list(enc vdl.Encoder, x *[]Embed) error {
 	if err := enc.StartValue(vdl.TypeOf((*[]Embed)(nil))); err != nil {
 		return err
 	}
+	if err := enc.SetLenHint(len(*x)); err != nil {
+		return err
+	}
 	for i := 0; i < len(*x); i++ {
+		if err := enc.NextEntry(false); err != nil {
+			return err
+		}
 		if err := (*x)[i].VDLWrite(enc); err != nil {
 			return err
 		}
@@ -1775,7 +1787,13 @@ func __VDLWrite4_list(enc vdl.Encoder, x *[]Method) error {
 	if err := enc.StartValue(vdl.TypeOf((*[]Method)(nil))); err != nil {
 		return err
 	}
+	if err := enc.SetLenHint(len(*x)); err != nil {
+		return err
+	}
 	for i := 0; i < len(*x); i++ {
+		if err := enc.NextEntry(false); err != nil {
+			return err
+		}
 		if err := (*x)[i].VDLWrite(enc); err != nil {
 			return err
 		}

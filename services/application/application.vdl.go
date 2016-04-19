@@ -395,7 +395,13 @@ func (x Packages) VDLWrite(enc vdl.Encoder) error {
 	if err := enc.StartValue(vdl.TypeOf((*Packages)(nil))); err != nil {
 		return err
 	}
+	if err := enc.SetLenHint(len(x)); err != nil {
+		return err
+	}
 	for key, elem := range x {
+		if err := enc.NextEntry(false); err != nil {
+			return err
+		}
 		if err := enc.StartValue(vdl.TypeOf((*string)(nil))); err != nil {
 			return err
 		}
@@ -1083,7 +1089,13 @@ func __VDLWrite1_list(enc vdl.Encoder, x *[]string) error {
 	if err := enc.StartValue(vdl.TypeOf((*[]string)(nil))); err != nil {
 		return err
 	}
+	if err := enc.SetLenHint(len(*x)); err != nil {
+		return err
+	}
 	for i := 0; i < len(*x); i++ {
+		if err := enc.NextEntry(false); err != nil {
+			return err
+		}
 		if err := enc.StartValue(vdl.TypeOf((*string)(nil))); err != nil {
 			return err
 		}

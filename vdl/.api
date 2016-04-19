@@ -319,6 +319,7 @@ pkg vdl, method (*Type) NonOptional() *Type
 pkg vdl, method (*Type) NumEnumLabel() int
 pkg vdl, method (*Type) NumField() int
 pkg vdl, method (*Type) String() string
+pkg vdl, method (*Type) VDLWrite(Encoder) error
 pkg vdl, method (*Type) Walk(WalkMode, func(*Type) bool) bool
 pkg vdl, method (*TypeBuilder) Array() PendingArray
 pkg vdl, method (*TypeBuilder) Build()

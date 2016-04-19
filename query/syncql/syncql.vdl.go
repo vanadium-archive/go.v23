@@ -17,6 +17,7 @@ var _ = __VDLInit() // Must be first; see __VDLInit comments for details.
 
 //////////////////////////////////////////////////
 // Error definitions
+
 var (
 	ErrBadFieldInWhere                 = verror.Register("v.io/v23/query/syncql.BadFieldInWhere", verror.NoRetry, "{1:}{2:} [{3}]Where field must be 'k' or 'v[{.<ident>}...]'.")
 	ErrBoolInvalidExpression           = verror.Register("v.io/v23/query/syncql.BoolInvalidExpression", verror.NoRetry, "{1:}{2:} [{3}]Boolean operands may only be used in equals and not equals expressions.")

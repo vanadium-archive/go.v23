@@ -977,7 +977,13 @@ func __VDLWrite1_list(enc vdl.Encoder, x *[]Caveat) error {
 	if err := enc.StartValue(vdl.TypeOf((*[]Caveat)(nil))); err != nil {
 		return err
 	}
+	if err := enc.SetLenHint(len(*x)); err != nil {
+		return err
+	}
 	for i := 0; i < len(*x); i++ {
+		if err := enc.NextEntry(false); err != nil {
+			return err
+		}
 		if err := (*x)[i].VDLWrite(enc); err != nil {
 			return err
 		}
@@ -2135,7 +2141,13 @@ func __VDLWrite2_list(enc vdl.Encoder, x *[]BlessingPattern) error {
 	if err := enc.StartValue(vdl.TypeOf((*[]BlessingPattern)(nil))); err != nil {
 		return err
 	}
+	if err := enc.SetLenHint(len(*x)); err != nil {
+		return err
+	}
 	for i := 0; i < len(*x); i++ {
+		if err := enc.NextEntry(false); err != nil {
+			return err
+		}
 		if err := (*x)[i].VDLWrite(enc); err != nil {
 			return err
 		}
@@ -2150,7 +2162,13 @@ func __VDLWrite3_list(enc vdl.Encoder, x *[]*vom.RawBytes) error {
 	if err := enc.StartValue(vdl.TypeOf((*[]*vom.RawBytes)(nil))); err != nil {
 		return err
 	}
+	if err := enc.SetLenHint(len(*x)); err != nil {
+		return err
+	}
 	for i := 0; i < len(*x); i++ {
+		if err := enc.NextEntry(false); err != nil {
+			return err
+		}
 		if err := enc.StartValue(vdl.AnyType); err != nil {
 			return err
 		}
@@ -2707,13 +2725,7 @@ func (x CaveatDescriptor) VDLWrite(enc vdl.Encoder) error {
 		if err := enc.NextField("ParamType"); err != nil {
 			return err
 		}
-		if err := enc.StartValue(vdl.TypeObjectType); err != nil {
-			return err
-		}
-		if err := enc.EncodeTypeObject(x.ParamType); err != nil {
-			return err
-		}
-		if err := enc.FinishValue(); err != nil {
+		if err := x.ParamType.VDLWrite(enc); err != nil {
 			return err
 		}
 	}
@@ -3038,7 +3050,13 @@ func __VDLWrite4_list(enc vdl.Encoder, x *[][]Certificate) error {
 	if err := enc.StartValue(vdl.TypeOf((*[][]Certificate)(nil))); err != nil {
 		return err
 	}
+	if err := enc.SetLenHint(len(*x)); err != nil {
+		return err
+	}
 	for i := 0; i < len(*x); i++ {
+		if err := enc.NextEntry(false); err != nil {
+			return err
+		}
 		if err := __VDLWrite5_list(enc, &(*x)[i]); err != nil {
 			return err
 		}
@@ -3053,7 +3071,13 @@ func __VDLWrite5_list(enc vdl.Encoder, x *[]Certificate) error {
 	if err := enc.StartValue(vdl.TypeOf((*[]Certificate)(nil))); err != nil {
 		return err
 	}
+	if err := enc.SetLenHint(len(*x)); err != nil {
+		return err
+	}
 	for i := 0; i < len(*x); i++ {
+		if err := enc.NextEntry(false); err != nil {
+			return err
+		}
 		if err := (*x)[i].VDLWrite(enc); err != nil {
 			return err
 		}
@@ -3548,6 +3572,7 @@ const SignatureForDischarge = "D1"            // Signature.Purpose used by a Pri
 
 //////////////////////////////////////////////////
 // Error definitions
+
 var (
 	ErrCaveatNotRegistered           = verror.Register("v.io/v23/security.CaveatNotRegistered", verror.NoRetry, "{1:}{2:} no validation function registered for caveat id {3}")
 	ErrCaveatParamAny                = verror.Register("v.io/v23/security.CaveatParamAny", verror.NoRetry, "{1:}{2:} caveat {3} uses illegal param type any")

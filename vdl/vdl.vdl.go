@@ -515,7 +515,13 @@ func __VDLWrite1_list(enc Encoder, x *[]*Value) error {
 	if err := enc.StartValue(TypeOf((*[]*Value)(nil))); err != nil {
 		return err
 	}
+	if err := enc.SetLenHint(len(*x)); err != nil {
+		return err
+	}
 	for i := 0; i < len(*x); i++ {
+		if err := enc.NextEntry(false); err != nil {
+			return err
+		}
 		if err := enc.StartValue(AnyType); err != nil {
 			return err
 		}

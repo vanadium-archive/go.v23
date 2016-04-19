@@ -1776,7 +1776,13 @@ func __VDLWrite1_list(enc vdl.Encoder, x *[]CollectionRow) error {
 	if err := enc.StartValue(vdl.TypeOf((*[]CollectionRow)(nil))); err != nil {
 		return err
 	}
+	if err := enc.SetLenHint(len(*x)); err != nil {
+		return err
+	}
 	for i := 0; i < len(*x); i++ {
+		if err := enc.NextEntry(false); err != nil {
+			return err
+		}
 		if err := (*x)[i].VDLWrite(enc); err != nil {
 			return err
 		}
@@ -1791,7 +1797,13 @@ func __VDLWrite2_list(enc vdl.Encoder, x *[]string) error {
 	if err := enc.StartValue(vdl.TypeOf((*[]string)(nil))); err != nil {
 		return err
 	}
+	if err := enc.SetLenHint(len(*x)); err != nil {
+		return err
+	}
 	for i := 0; i < len(*x); i++ {
+		if err := enc.NextEntry(false); err != nil {
+			return err
+		}
 		if err := enc.StartValue(vdl.TypeOf((*string)(nil))); err != nil {
 			return err
 		}
@@ -4054,7 +4066,13 @@ func __VDLWrite3_list(enc vdl.Encoder, x *[]uint64) error {
 	if err := enc.StartValue(vdl.TypeOf((*[]uint64)(nil))); err != nil {
 		return err
 	}
+	if err := enc.SetLenHint(len(*x)); err != nil {
+		return err
+	}
 	for i := 0; i < len(*x); i++ {
+		if err := enc.NextEntry(false); err != nil {
+			return err
+		}
 		if err := enc.StartValue(vdl.TypeOf((*uint64)(nil))); err != nil {
 			return err
 		}
@@ -5454,7 +5472,13 @@ func __VDLWrite4_list(enc vdl.Encoder, x *[]CrRule) error {
 	if err := enc.StartValue(vdl.TypeOf((*[]CrRule)(nil))); err != nil {
 		return err
 	}
+	if err := enc.SetLenHint(len(*x)); err != nil {
+		return err
+	}
 	for i := 0; i < len(*x); i++ {
+		if err := enc.NextEntry(false); err != nil {
+			return err
+		}
 		if err := (*x)[i].VDLWrite(enc); err != nil {
 			return err
 		}
@@ -6305,6 +6329,7 @@ const NullBlobRef = BlobRef("")
 
 //////////////////////////////////////////////////
 // Error definitions
+
 var (
 	ErrNotInDevMode        = verror.Register("v.io/v23/services/syncbase.NotInDevMode", verror.NoRetry, "{1:}{2:} not running with --dev=true")
 	ErrInvalidName         = verror.Register("v.io/v23/services/syncbase.InvalidName", verror.NoRetry, "{1:}{2:} invalid name: {3}")

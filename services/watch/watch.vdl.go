@@ -801,6 +801,7 @@ const InitialStateSkipped = int32(2)
 
 //////////////////////////////////////////////////
 // Error definitions
+
 var (
 	ErrUnknownResumeMarker = verror.Register("v.io/v23/services/watch.UnknownResumeMarker", verror.NoRetry, "{1:}{2:} unknown resume marker {_}")
 )

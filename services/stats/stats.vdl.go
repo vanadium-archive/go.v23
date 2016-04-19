@@ -25,6 +25,7 @@ var _ = __VDLInit() // Must be first; see __VDLInit comments for details.
 
 //////////////////////////////////////////////////
 // Error definitions
+
 var (
 	ErrNoValue = verror.Register("v.io/v23/services/stats.NoValue", verror.NoRetry, "{1:}{2:} object has no value, suffix: {3}")
 )

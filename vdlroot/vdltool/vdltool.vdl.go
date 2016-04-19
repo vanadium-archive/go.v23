@@ -587,7 +587,13 @@ func __VDLWrite1_list(enc vdl.Encoder, x *[]GoImport) error {
 	if err := enc.StartValue(vdl.TypeOf((*[]GoImport)(nil))); err != nil {
 		return err
 	}
+	if err := enc.SetLenHint(len(*x)); err != nil {
+		return err
+	}
 	for i := 0; i < len(*x); i++ {
+		if err := enc.NextEntry(false); err != nil {
+			return err
+		}
 		if err := (*x)[i].VDLWrite(enc); err != nil {
 			return err
 		}
@@ -831,7 +837,13 @@ func __VDLWrite2_map(enc vdl.Encoder, x *map[string]GoType) error {
 	if err := enc.StartValue(vdl.TypeOf((*map[string]GoType)(nil))); err != nil {
 		return err
 	}
+	if err := enc.SetLenHint(len(*x)); err != nil {
+		return err
+	}
 	for key, elem := range *x {
+		if err := enc.NextEntry(false); err != nil {
+			return err
+		}
 		if err := enc.StartValue(vdl.TypeOf((*string)(nil))); err != nil {
 			return err
 		}
@@ -1167,7 +1179,13 @@ func __VDLWrite3_map(enc vdl.Encoder, x *map[string]string) error {
 	if err := enc.StartValue(vdl.TypeOf((*map[string]string)(nil))); err != nil {
 		return err
 	}
+	if err := enc.SetLenHint(len(*x)); err != nil {
+		return err
+	}
 	for key, elem := range *x {
+		if err := enc.NextEntry(false); err != nil {
+			return err
+		}
 		if err := enc.StartValue(vdl.TypeOf((*string)(nil))); err != nil {
 			return err
 		}
@@ -1882,7 +1900,13 @@ func __VDLWrite4_set(enc vdl.Encoder, x *map[GenLanguage]struct{}) error {
 	if err := enc.StartValue(vdl.TypeOf((*map[GenLanguage]struct{})(nil))); err != nil {
 		return err
 	}
+	if err := enc.SetLenHint(len(*x)); err != nil {
+		return err
+	}
 	for key := range *x {
+		if err := enc.NextEntry(false); err != nil {
+			return err
+		}
 		if err := key.VDLWrite(enc); err != nil {
 			return err
 		}

@@ -17,6 +17,7 @@ var _ = __VDLInit() // Must be first; see __VDLInit comments for details.
 
 //////////////////////////////////////////////////
 // Error definitions
+
 var (
 	ErrNoCompatibleVersion = verror.Register("v.io/v23/rpc/version.NoCompatibleVersion", verror.NoRetry, "{1:}{2:} There were no compatible versions between ({3},{4}) and ({5},{6}).")
 )
