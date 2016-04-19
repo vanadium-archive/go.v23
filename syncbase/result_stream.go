@@ -9,14 +9,14 @@ import (
 
 	"v.io/v23/context"
 	wire "v.io/v23/services/syncbase"
-	"v.io/v23/verror"
 	"v.io/v23/vom"
 )
 
 type resultStream struct {
-	mu sync.Mutex
 	// cancel cancels the RPC resultStream.
 	cancel context.CancelFunc
+
+	mu sync.Mutex
 	// call is the RPC resultStream object.
 	call wire.DatabaseExecClientCall
 	// curr is the currently staged result, or nil if nothing is staged.
@@ -40,17 +40,20 @@ func newResultStream(cancel context.CancelFunc, call wire.DatabaseExecClientCall
 func (rs *resultStream) Advance() bool {
 	rs.mu.Lock()
 	defer rs.mu.Unlock()
-	if rs.err != nil || rs.finished {
+	if rs.finished {
 		return false
 	}
+	// Advance never blocks if the context has been cancelled.
 	if !rs.call.RecvStream().Advance() {
-		if rs.call.RecvStream().Err() != nil {
-			rs.err = rs.call.RecvStream().Err()
-		} else {
-			rs.err = rs.call.Finish()
-			rs.cancel() // TODO(jkline): Copied from stream.go, is this needed?
-			rs.finished = true
+		// TODO(ivanpi): Query tests rely on simpler error formatting in RecvStream
+		// error vs Finish, so keep the redundant error assignment for now.
+		rs.err = rs.call.RecvStream().Err()
+		err := rs.call.Finish()
+		if rs.err == nil {
+			rs.err = err
 		}
+		rs.cancel()
+		rs.finished = true
 		return false
 	}
 	rs.curr = rs.call.RecvStream().Value()
@@ -75,10 +78,18 @@ func (rs *resultStream) Err() error {
 	return rs.err
 }
 
-// TODO(jkline): Make Cancel non-blocking (TODO copied from stream.go)
 func (rs *resultStream) Cancel() {
+	rs.cancel()
 	rs.mu.Lock()
 	defer rs.mu.Unlock()
-	rs.cancel()
-	rs.err = verror.New(verror.ErrCanceled, nil)
+	if !rs.finished {
+		// TODO(ivanpi): Query tests rely on simpler error formatting in RecvStream
+		// error vs Finish, so keep the redundant error assignment for now.
+		rs.err = rs.call.RecvStream().Err()
+		err := rs.call.Finish()
+		if rs.err == nil {
+			rs.err = err
+		}
+		rs.finished = true
+	}
 }

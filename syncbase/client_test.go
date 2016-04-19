@@ -826,12 +826,13 @@ func TestBlockedWatchCancel(t *testing.T) {
 	if err != nil {
 		t.Fatalf("d.GetResumeMarker() failed: %v", err)
 	}
-	ctxCancel, cancel := context.WithCancel(ctx)
-	wstream, err := d.Watch(ctxCancel, tu.CxId("c"), "a", resumeMarker)
+	ctxWithTimeout, cancel := context.WithTimeout(ctx, 10*time.Second)
+	defer cancel()
+	wstream, err := d.Watch(ctxWithTimeout, tu.CxId("c"), "a", resumeMarker)
 	if err != nil {
 		t.Fatalf("d.Watch() failed: %v", err)
 	}
-	time.AfterFunc(500*time.Millisecond, cancel)
+	time.AfterFunc(500*time.Millisecond, wstream.Cancel)
 	if wstream.Advance() {
 		t.Fatal("wstream should not have advanced")
 	}

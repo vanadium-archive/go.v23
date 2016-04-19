@@ -18,9 +18,10 @@ import (
 )
 
 type watchStream struct {
-	mu sync.Mutex
 	// cancel cancels the RPC stream.
 	cancel context.CancelFunc
+
+	mu sync.Mutex
 	// call is the RPC stream object.
 	call watch.GlobWatcherWatchGlobClientCall
 	// curr is the currently staged element, or nil if nothing is staged.
@@ -45,20 +46,18 @@ func newWatchStream(cancel context.CancelFunc, call watch.GlobWatcherWatchGlobCl
 func (s *watchStream) Advance() bool {
 	s.mu.Lock()
 	defer s.mu.Unlock()
-	if s.err != nil || s.finished {
+	if s.finished {
 		return false
 	}
+	// Advance never blocks if the context has been cancelled.
 	if !s.call.RecvStream().Advance() {
-		if s.err = s.call.RecvStream().Err(); s.err == nil {
-			s.err = s.call.Finish()
-			s.cancel()
-			s.finished = true
-		}
+		s.err = s.call.Finish()
+		s.cancel()
+		s.finished = true
 		return false
 	}
 	watchChange := ToWatchChange(s.call.RecvStream().Value())
 	s.curr = &watchChange
-
 	return true
 }
 
@@ -83,12 +82,14 @@ func (s *watchStream) Err() error {
 }
 
 // Cancel implements Stream interface.
-// TODO(rogulenko): Make Cancel non-blocking.
 func (s *watchStream) Cancel() {
+	s.cancel()
 	s.mu.Lock()
 	defer s.mu.Unlock()
-	s.cancel()
-	s.err = verror.New(verror.ErrCanceled, nil)
+	if !s.finished {
+		s.err = s.call.Finish()
+		s.finished = true
+	}
 }
 
 // ToWatchChange converts a generic Change struct as defined in

@@ -14,9 +14,10 @@ import (
 )
 
 type scanStream struct {
-	mu sync.Mutex
 	// cancel cancels the RPC stream.
 	cancel context.CancelFunc
+
+	mu sync.Mutex
 	// call is the RPC stream object.
 	call wire.CollectionScanClientCall
 	// curr is the currently staged key-value pair, or nil if nothing is staged.
@@ -41,17 +42,14 @@ func newScanStream(cancel context.CancelFunc, call wire.CollectionScanClientCall
 func (s *scanStream) Advance() bool {
 	s.mu.Lock()
 	defer s.mu.Unlock()
-	if s.err != nil || s.finished {
+	if s.finished {
 		return false
 	}
+	// Advance never blocks if the context has been cancelled.
 	if !s.call.RecvStream().Advance() {
-		if s.call.RecvStream().Err() != nil {
-			s.err = s.call.RecvStream().Err()
-		} else {
-			s.err = s.call.Finish()
-			s.cancel()
-			s.finished = true
-		}
+		s.err = s.call.Finish()
+		s.cancel()
+		s.finished = true
 		return false
 	}
 	curr := s.call.RecvStream().Value()
@@ -90,10 +88,12 @@ func (s *scanStream) Err() error {
 }
 
 // Cancel implements the Stream interface.
-// TODO(sadovsky): Make Cancel non-blocking.
 func (s *scanStream) Cancel() {
+	s.cancel()
 	s.mu.Lock()
 	defer s.mu.Unlock()
-	s.cancel()
-	s.err = verror.New(verror.ErrCanceled, nil)
+	if !s.finished {
+		s.err = s.call.Finish()
+		s.finished = true
+	}
 }

@@ -9,7 +9,6 @@ import (
 
 	"v.io/v23/context"
 	wire "v.io/v23/services/syncbase"
-	"v.io/v23/verror"
 )
 
 var _ Blob = (*blob)(nil)
@@ -143,9 +142,10 @@ func (bw *blobWriter) Close() error {
 // (similar to methods in stream.go).
 
 type blobReader struct {
-	mu sync.Mutex
 	// cancel cancels the RPC stream.
 	cancel context.CancelFunc
+
+	mu sync.Mutex
 	// call is the RPC stream object.
 	call wire.BlobManagerGetBlobClientCall
 	// curr is the currently staged bytes, or nil if nothing is staged.
@@ -170,19 +170,16 @@ func newBlobReader(cancel context.CancelFunc, call wire.BlobManagerGetBlobClient
 func (br *blobReader) Advance() bool {
 	br.mu.Lock()
 	defer br.mu.Unlock()
-	if br.err != nil || br.finished {
+	if br.finished {
 		return false
 	}
+	// Advance never blocks if the context has been cancelled.
 	if br.call.RecvStream().Advance() {
 		br.curr = br.call.RecvStream().Value()
 		return true
 	}
 
-	br.err = br.call.RecvStream().Err()
-	err := br.call.Finish()
-	if br.err == nil {
-		br.err = err
-	}
+	br.err = br.call.Finish()
 	br.cancel()
 	br.finished = true
 	return false
@@ -206,13 +203,14 @@ func (br *blobReader) Err() error {
 }
 
 // Cancel implements BlobReader.Cancel.
-// TODO(hpucha): Make Cancel non-blocking. Copied from stream.go
 func (br *blobReader) Cancel() {
+	br.cancel()
 	br.mu.Lock()
 	defer br.mu.Unlock()
-	br.cancel()
-	br.call.Finish()
-	br.err = verror.New(verror.ErrCanceled, nil)
+	if !br.finished {
+		br.err = br.call.Finish()
+		br.finished = true
+	}
 }
 
 ////////////////////////////////////////
@@ -220,9 +218,10 @@ func (br *blobReader) Cancel() {
 // (similar to methods in stream.go).
 
 type blobStatus struct {
-	mu sync.Mutex
 	// cancel cancels the RPC stream.
 	cancel context.CancelFunc
+
+	mu sync.Mutex
 	// call is the RPC stream object.
 	call wire.BlobManagerFetchBlobClientCall
 	// curr is the currently staged item, or nil if nothing is staged.
@@ -247,20 +246,17 @@ func newBlobStatus(cancel context.CancelFunc, call wire.BlobManagerFetchBlobClie
 func (bs *blobStatus) Advance() bool {
 	bs.mu.Lock()
 	defer bs.mu.Unlock()
-	if bs.err != nil || bs.finished {
+	if bs.finished {
 		return false
 	}
+	// Advance never blocks if the context has been cancelled.
 	if bs.call.RecvStream().Advance() {
 		val := bs.call.RecvStream().Value()
 		bs.curr = &val
 		return true
 	}
 
-	bs.err = bs.call.RecvStream().Err()
-	err := bs.call.Finish()
-	if bs.err == nil {
-		bs.err = err
-	}
+	bs.err = bs.call.Finish()
 	bs.cancel()
 	bs.finished = true
 	return false
@@ -284,11 +280,12 @@ func (bs *blobStatus) Err() error {
 }
 
 // Cancel implements BlobStatus.Cancel.
-// TODO(hpucha): Make Cancel non-blocking. Copied from stream.go
 func (bs *blobStatus) Cancel() {
+	bs.cancel()
 	bs.mu.Lock()
 	defer bs.mu.Unlock()
-	bs.cancel()
-	bs.call.Finish()
-	bs.err = verror.New(verror.ErrCanceled, nil)
+	if !bs.finished {
+		bs.err = bs.call.Finish()
+		bs.finished = true
+	}
 }
