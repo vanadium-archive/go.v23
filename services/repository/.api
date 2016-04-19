@@ -16,6 +16,7 @@ pkg repository, method (*MediaInfoTarget) FinishFields(vdl.FieldsTarget) error
 pkg repository, method (*MediaInfoTarget) StartField(string) (vdl.Target, vdl.Target, error)
 pkg repository, method (*MediaInfoTarget) StartFields(*vdl.Type) (vdl.FieldsTarget, error)
 pkg repository, method (*MediaInfoTarget) ZeroField(string) error
+pkg repository, method (MediaInfo) VDLWrite(vdl.Encoder) error
 pkg repository, type ApplicationClientMethods interface, Match(*context.T, []string, ...rpc.CallOpt) (application.Envelope, error)
 pkg repository, type ApplicationClientMethods interface, unexported methods
 pkg repository, type ApplicationClientStub interface, Match(*context.T, []string, ...rpc.CallOpt) (application.Envelope, error)

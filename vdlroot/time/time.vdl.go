@@ -197,6 +197,46 @@ func (x *Duration) VDLRead(dec vdl.Decoder) error {
 	}
 }
 
+func (x Duration) VDLWrite(enc vdl.Encoder) error {
+	if err := enc.StartValue(vdl.TypeOf((*Duration)(nil)).Elem()); err != nil {
+		return err
+	}
+	var1 := (x.Seconds == int64(0))
+	if !(var1) {
+		if err := enc.NextField("Seconds"); err != nil {
+			return err
+		}
+		if err := enc.StartValue(vdl.TypeOf((*int64)(nil))); err != nil {
+			return err
+		}
+		if err := enc.EncodeInt(x.Seconds); err != nil {
+			return err
+		}
+		if err := enc.FinishValue(); err != nil {
+			return err
+		}
+	}
+	var2 := (x.Nanos == int32(0))
+	if !(var2) {
+		if err := enc.NextField("Nanos"); err != nil {
+			return err
+		}
+		if err := enc.StartValue(vdl.TypeOf((*int32)(nil))); err != nil {
+			return err
+		}
+		if err := enc.EncodeInt(int64(x.Nanos)); err != nil {
+			return err
+		}
+		if err := enc.FinishValue(); err != nil {
+			return err
+		}
+	}
+	if err := enc.NextField(""); err != nil {
+		return err
+	}
+	return enc.FinishValue()
+}
+
 // Time represents an absolute point in time with up to nanosecond precision.
 //
 // Time is represented as the duration before or after a fixed epoch.  The zero
@@ -373,6 +413,46 @@ func (x *Time) VDLRead(dec vdl.Decoder) error {
 			}
 		}
 	}
+}
+
+func (x Time) VDLWrite(enc vdl.Encoder) error {
+	if err := enc.StartValue(vdl.TypeOf((*Time)(nil)).Elem()); err != nil {
+		return err
+	}
+	var1 := (x.Seconds == int64(0))
+	if !(var1) {
+		if err := enc.NextField("Seconds"); err != nil {
+			return err
+		}
+		if err := enc.StartValue(vdl.TypeOf((*int64)(nil))); err != nil {
+			return err
+		}
+		if err := enc.EncodeInt(x.Seconds); err != nil {
+			return err
+		}
+		if err := enc.FinishValue(); err != nil {
+			return err
+		}
+	}
+	var2 := (x.Nanos == int32(0))
+	if !(var2) {
+		if err := enc.NextField("Nanos"); err != nil {
+			return err
+		}
+		if err := enc.StartValue(vdl.TypeOf((*int32)(nil))); err != nil {
+			return err
+		}
+		if err := enc.EncodeInt(int64(x.Nanos)); err != nil {
+			return err
+		}
+		if err := enc.FinishValue(); err != nil {
+			return err
+		}
+	}
+	if err := enc.NextField(""); err != nil {
+		return err
+	}
+	return enc.FinishValue()
 }
 
 // WireDeadline represents the deadline for an operation, where the operation is
@@ -569,6 +649,49 @@ func (x *WireDeadline) VDLRead(dec vdl.Decoder) error {
 			}
 		}
 	}
+}
+
+func (x WireDeadline) VDLWrite(enc vdl.Encoder) error {
+	if err := enc.StartValue(vdl.TypeOf((*WireDeadline)(nil)).Elem()); err != nil {
+		return err
+	}
+	var wireValue1 Duration
+	if err := DurationFromNative(&wireValue1, x.FromNow); err != nil {
+		return fmt.Errorf("error converting x.FromNow to wiretype")
+	}
+
+	var2 := (wireValue1 == Duration{})
+	if !(var2) {
+		if err := enc.NextField("FromNow"); err != nil {
+			return err
+		}
+		var wire Duration
+		if err := DurationFromNative(&wire, x.FromNow); err != nil {
+			return err
+		}
+		if err := wire.VDLWrite(enc); err != nil {
+			return err
+		}
+	}
+	var3 := (x.NoDeadline == false)
+	if !(var3) {
+		if err := enc.NextField("NoDeadline"); err != nil {
+			return err
+		}
+		if err := enc.StartValue(vdl.TypeOf((*bool)(nil))); err != nil {
+			return err
+		}
+		if err := enc.EncodeBool(x.NoDeadline); err != nil {
+			return err
+		}
+		if err := enc.FinishValue(); err != nil {
+			return err
+		}
+	}
+	if err := enc.NextField(""); err != nil {
+		return err
+	}
+	return enc.FinishValue()
 }
 
 // Type-check native conversion functions.

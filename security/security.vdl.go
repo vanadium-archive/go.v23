@@ -70,6 +70,16 @@ func (x *nonce) VDLRead(dec vdl.Decoder) error {
 	return dec.FinishValue()
 }
 
+func (x nonce) VDLWrite(enc vdl.Encoder) error {
+	if err := enc.StartValue(vdl.TypeOf((*nonce)(nil))); err != nil {
+		return err
+	}
+	if err := enc.EncodeBytes([]byte(x[:])); err != nil {
+		return err
+	}
+	return enc.FinishValue()
+}
+
 // Caveat is a condition on the validity of a blessing/discharge.
 //
 // These conditions are provided when asking a principal to create
@@ -232,6 +242,43 @@ func (x *Caveat) VDLRead(dec vdl.Decoder) error {
 			}
 		}
 	}
+}
+
+func (x Caveat) VDLWrite(enc vdl.Encoder) error {
+	if err := enc.StartValue(vdl.TypeOf((*Caveat)(nil)).Elem()); err != nil {
+		return err
+	}
+	var1 := (x.Id == uniqueid.Id{})
+	if !(var1) {
+		if err := enc.NextField("Id"); err != nil {
+			return err
+		}
+		if err := x.Id.VDLWrite(enc); err != nil {
+			return err
+		}
+	}
+	var var2 bool
+	if len(x.ParamVom) == 0 {
+		var2 = true
+	}
+	if !(var2) {
+		if err := enc.NextField("ParamVom"); err != nil {
+			return err
+		}
+		if err := enc.StartValue(vdl.TypeOf((*[]byte)(nil))); err != nil {
+			return err
+		}
+		if err := enc.EncodeBytes(x.ParamVom); err != nil {
+			return err
+		}
+		if err := enc.FinishValue(); err != nil {
+			return err
+		}
+	}
+	if err := enc.NextField(""); err != nil {
+		return err
+	}
+	return enc.FinishValue()
 }
 
 // ThirdPartyRequirements specifies the information required by the third-party
@@ -432,6 +479,61 @@ func (x *ThirdPartyRequirements) VDLRead(dec vdl.Decoder) error {
 			}
 		}
 	}
+}
+
+func (x ThirdPartyRequirements) VDLWrite(enc vdl.Encoder) error {
+	if err := enc.StartValue(vdl.TypeOf((*ThirdPartyRequirements)(nil)).Elem()); err != nil {
+		return err
+	}
+	var1 := (x.ReportServer == false)
+	if !(var1) {
+		if err := enc.NextField("ReportServer"); err != nil {
+			return err
+		}
+		if err := enc.StartValue(vdl.TypeOf((*bool)(nil))); err != nil {
+			return err
+		}
+		if err := enc.EncodeBool(x.ReportServer); err != nil {
+			return err
+		}
+		if err := enc.FinishValue(); err != nil {
+			return err
+		}
+	}
+	var2 := (x.ReportMethod == false)
+	if !(var2) {
+		if err := enc.NextField("ReportMethod"); err != nil {
+			return err
+		}
+		if err := enc.StartValue(vdl.TypeOf((*bool)(nil))); err != nil {
+			return err
+		}
+		if err := enc.EncodeBool(x.ReportMethod); err != nil {
+			return err
+		}
+		if err := enc.FinishValue(); err != nil {
+			return err
+		}
+	}
+	var3 := (x.ReportArguments == false)
+	if !(var3) {
+		if err := enc.NextField("ReportArguments"); err != nil {
+			return err
+		}
+		if err := enc.StartValue(vdl.TypeOf((*bool)(nil))); err != nil {
+			return err
+		}
+		if err := enc.EncodeBool(x.ReportArguments); err != nil {
+			return err
+		}
+		if err := enc.FinishValue(); err != nil {
+			return err
+		}
+	}
+	if err := enc.NextField(""); err != nil {
+		return err
+	}
+	return enc.FinishValue()
 }
 
 // publicKeyThirdPartyCaveatParam represents a third-party caveat that requires
@@ -798,6 +900,94 @@ func __VDLRead1_list(dec vdl.Decoder, x *[]Caveat) error {
 	}
 }
 
+func (x publicKeyThirdPartyCaveatParam) VDLWrite(enc vdl.Encoder) error {
+	if err := enc.StartValue(vdl.TypeOf((*publicKeyThirdPartyCaveatParam)(nil)).Elem()); err != nil {
+		return err
+	}
+	var1 := (x.Nonce == nonce{})
+	if !(var1) {
+		if err := enc.NextField("Nonce"); err != nil {
+			return err
+		}
+		if err := x.Nonce.VDLWrite(enc); err != nil {
+			return err
+		}
+	}
+	var var2 bool
+	if len(x.Caveats) == 0 {
+		var2 = true
+	}
+	if !(var2) {
+		if err := enc.NextField("Caveats"); err != nil {
+			return err
+		}
+		if err := __VDLWrite1_list(enc, &x.Caveats); err != nil {
+			return err
+		}
+	}
+	var var3 bool
+	if len(x.DischargerKey) == 0 {
+		var3 = true
+	}
+	if !(var3) {
+		if err := enc.NextField("DischargerKey"); err != nil {
+			return err
+		}
+		if err := enc.StartValue(vdl.TypeOf((*[]byte)(nil))); err != nil {
+			return err
+		}
+		if err := enc.EncodeBytes(x.DischargerKey); err != nil {
+			return err
+		}
+		if err := enc.FinishValue(); err != nil {
+			return err
+		}
+	}
+	var4 := (x.DischargerLocation == "")
+	if !(var4) {
+		if err := enc.NextField("DischargerLocation"); err != nil {
+			return err
+		}
+		if err := enc.StartValue(vdl.TypeOf((*string)(nil))); err != nil {
+			return err
+		}
+		if err := enc.EncodeString(x.DischargerLocation); err != nil {
+			return err
+		}
+		if err := enc.FinishValue(); err != nil {
+			return err
+		}
+	}
+	var5 := (x.DischargerRequirements == ThirdPartyRequirements{})
+	if !(var5) {
+		if err := enc.NextField("DischargerRequirements"); err != nil {
+			return err
+		}
+		if err := x.DischargerRequirements.VDLWrite(enc); err != nil {
+			return err
+		}
+	}
+	if err := enc.NextField(""); err != nil {
+		return err
+	}
+	return enc.FinishValue()
+}
+
+func __VDLWrite1_list(enc vdl.Encoder, x *[]Caveat) error {
+	if err := enc.StartValue(vdl.TypeOf((*[]Caveat)(nil))); err != nil {
+		return err
+	}
+	for i := 0; i < len(*x); i++ {
+		if err := (*x)[i].VDLWrite(enc); err != nil {
+			return err
+		}
+	}
+	if err := enc.NextEntry(true); err != nil {
+		return err
+	}
+	return enc.FinishValue()
+}
+
 // Hash identifies a cryptographic hash function approved for use in signature algorithms.
 type Hash string
 
@@ -843,6 +1033,16 @@ func (x *Hash) VDLRead(dec vdl.Decoder) error {
 	}
 	*x = Hash(tmp)
 	return dec.FinishValue()
+}
+
+func (x Hash) VDLWrite(enc vdl.Encoder) error {
+	if err := enc.StartValue(vdl.TypeOf((*Hash)(nil))); err != nil {
+		return err
+	}
+	if err := enc.EncodeString(string(x)); err != nil {
+		return err
+	}
+	return enc.FinishValue()
 }
 
 // Signature represents a digital signature.
@@ -1091,6 +1291,79 @@ func (x *Signature) VDLRead(dec vdl.Decoder) error {
 	}
 }
 
+func (x Signature) VDLWrite(enc vdl.Encoder) error {
+	if err := enc.StartValue(vdl.TypeOf((*Signature)(nil)).Elem()); err != nil {
+		return err
+	}
+	var var1 bool
+	if len(x.Purpose) == 0 {
+		var1 = true
+	}
+	if !(var1) {
+		if err := enc.NextField("Purpose"); err != nil {
+			return err
+		}
+		if err := enc.StartValue(vdl.TypeOf((*[]byte)(nil))); err != nil {
+			return err
+		}
+		if err := enc.EncodeBytes(x.Purpose); err != nil {
+			return err
+		}
+		if err := enc.FinishValue(); err != nil {
+			return err
+		}
+	}
+	var2 := (x.Hash == Hash(""))
+	if !(var2) {
+		if err := enc.NextField("Hash"); err != nil {
+			return err
+		}
+		if err := x.Hash.VDLWrite(enc); err != nil {
+			return err
+		}
+	}
+	var var3 bool
+	if len(x.R) == 0 {
+		var3 = true
+	}
+	if !(var3) {
+		if err := enc.NextField("R"); err != nil {
+			return err
+		}
+		if err := enc.StartValue(vdl.TypeOf((*[]byte)(nil))); err != nil {
+			return err
+		}
+		if err := enc.EncodeBytes(x.R); err != nil {
+			return err
+		}
+		if err := enc.FinishValue(); err != nil {
+			return err
+		}
+	}
+	var var4 bool
+	if len(x.S) == 0 {
+		var4 = true
+	}
+	if !(var4) {
+		if err := enc.NextField("S"); err != nil {
+			return err
+		}
+		if err := enc.StartValue(vdl.TypeOf((*[]byte)(nil))); err != nil {
+			return err
+		}
+		if err := enc.EncodeBytes(x.S); err != nil {
+			return err
+		}
+		if err := enc.FinishValue(); err != nil {
+			return err
+		}
+	}
+	if err := enc.NextField(""); err != nil {
+		return err
+	}
+	return enc.FinishValue()
+}
+
 // publicKeyDischarge represents the discharge issued for publicKeyThirdPartyCaveatParams.
 //
 // The message digest of this structure is computed as follows:
@@ -1319,6 +1592,69 @@ func (x *publicKeyDischarge) VDLRead(dec vdl.Decoder) error {
 	}
 }
 
+func (x publicKeyDischarge) VDLWrite(enc vdl.Encoder) error {
+	if err := enc.StartValue(vdl.TypeOf((*publicKeyDischarge)(nil)).Elem()); err != nil {
+		return err
+	}
+	var1 := (x.ThirdPartyCaveatId == "")
+	if !(var1) {
+		if err := enc.NextField("ThirdPartyCaveatId"); err != nil {
+			return err
+		}
+		if err := enc.StartValue(vdl.TypeOf((*string)(nil))); err != nil {
+			return err
+		}
+		if err := enc.EncodeString(x.ThirdPartyCaveatId); err != nil {
+			return err
+		}
+		if err := enc.FinishValue(); err != nil {
+			return err
+		}
+	}
+	var var2 bool
+	if len(x.Caveats) == 0 {
+		var2 = true
+	}
+	if !(var2) {
+		if err := enc.NextField("Caveats"); err != nil {
+			return err
+		}
+		if err := __VDLWrite1_list(enc, &x.Caveats); err != nil {
+			return err
+		}
+	}
+	var3 := true
+	var var4 bool
+	if len(x.Signature.Purpose) == 0 {
+		var4 = true
+	}
+	var3 = var3 && var4
+	var5 := (x.Signature.Hash == Hash(""))
+	var3 = var3 && var5
+	var var6 bool
+	if len(x.Signature.R) == 0 {
+		var6 = true
+	}
+	var3 = var3 && var6
+	var var7 bool
+	if len(x.Signature.S) == 0 {
+		var7 = true
+	}
+	var3 = var3 && var7
+	if !(var3) {
+		if err := enc.NextField("Signature"); err != nil {
+			return err
+		}
+		if err := x.Signature.VDLWrite(enc); err != nil {
+			return err
+		}
+	}
+	if err := enc.NextField(""); err != nil {
+		return err
+	}
+	return enc.FinishValue()
+}
+
 // BlessingPattern is a pattern that is matched by specific blessings.
 //
 // A pattern can either be a blessing (slash-separated human-readable string)
@@ -1376,6 +1712,16 @@ func (x *BlessingPattern) VDLRead(dec vdl.Decoder) error {
 	}
 	*x = BlessingPattern(tmp)
 	return dec.FinishValue()
+}
+
+func (x BlessingPattern) VDLWrite(enc vdl.Encoder) error {
+	if err := enc.StartValue(vdl.TypeOf((*BlessingPattern)(nil))); err != nil {
+		return err
+	}
+	if err := enc.EncodeString(string(x)); err != nil {
+		return err
+	}
+	return enc.FinishValue()
 }
 
 // DischargeImpetus encapsulates the motivation for a discharge being sought.
@@ -1736,6 +2082,97 @@ func __VDLRead3_list(dec vdl.Decoder, x *[]*vom.RawBytes) error {
 	}
 }
 
+func (x DischargeImpetus) VDLWrite(enc vdl.Encoder) error {
+	if err := enc.StartValue(vdl.TypeOf((*DischargeImpetus)(nil)).Elem()); err != nil {
+		return err
+	}
+	var var1 bool
+	if len(x.Server) == 0 {
+		var1 = true
+	}
+	if !(var1) {
+		if err := enc.NextField("Server"); err != nil {
+			return err
+		}
+		if err := __VDLWrite2_list(enc, &x.Server); err != nil {
+			return err
+		}
+	}
+	var2 := (x.Method == "")
+	if !(var2) {
+		if err := enc.NextField("Method"); err != nil {
+			return err
+		}
+		if err := enc.StartValue(vdl.TypeOf((*string)(nil))); err != nil {
+			return err
+		}
+		if err := enc.EncodeString(x.Method); err != nil {
+			return err
+		}
+		if err := enc.FinishValue(); err != nil {
+			return err
+		}
+	}
+	var var3 bool
+	if len(x.Arguments) == 0 {
+		var3 = true
+	}
+	if !(var3) {
+		if err := enc.NextField("Arguments"); err != nil {
+			return err
+		}
+		if err := __VDLWrite3_list(enc, &x.Arguments); err != nil {
+			return err
+		}
+	}
+	if err := enc.NextField(""); err != nil {
+		return err
+	}
+	return enc.FinishValue()
+}
+
+func __VDLWrite2_list(enc vdl.Encoder, x *[]BlessingPattern) error {
+	if err := enc.StartValue(vdl.TypeOf((*[]BlessingPattern)(nil))); err != nil {
+		return err
+	}
+	for i := 0; i < len(*x); i++ {
+		if err := (*x)[i].VDLWrite(enc); err != nil {
+			return err
+		}
+	}
+	if err := enc.NextEntry(true); err != nil {
+		return err
+	}
+	return enc.FinishValue()
+}
+
+func __VDLWrite3_list(enc vdl.Encoder, x *[]*vom.RawBytes) error {
+	if err := enc.StartValue(vdl.TypeOf((*[]*vom.RawBytes)(nil))); err != nil {
+		return err
+	}
+	for i := 0; i < len(*x); i++ {
+		if err := enc.StartValue(vdl.AnyType); err != nil {
+			return err
+		}
+		if (*x)[i].IsNil() {
+			if err := enc.NilValue((*x)[i].Type); err != nil {
+				return err
+			}
+		} else {
+			if err := (*x)[i].VDLWrite(enc); err != nil {
+				return err
+			}
+		}
+		if err := enc.FinishValue(); err != nil {
+			return err
+		}
+	}
+	if err := enc.NextEntry(true); err != nil {
+		return err
+	}
+	return enc.FinishValue()
+}
+
 // Certificate represents the cryptographic proof of the binding of
 // extensions of a blessing held by one principal to another (represented by
 // a public key) under specific caveats.
@@ -2007,6 +2444,87 @@ func (x *Certificate) VDLRead(dec vdl.Decoder) error {
 	}
 }
 
+func (x Certificate) VDLWrite(enc vdl.Encoder) error {
+	if err := enc.StartValue(vdl.TypeOf((*Certificate)(nil)).Elem()); err != nil {
+		return err
+	}
+	var1 := (x.Extension == "")
+	if !(var1) {
+		if err := enc.NextField("Extension"); err != nil {
+			return err
+		}
+		if err := enc.StartValue(vdl.TypeOf((*string)(nil))); err != nil {
+			return err
+		}
+		if err := enc.EncodeString(x.Extension); err != nil {
+			return err
+		}
+		if err := enc.FinishValue(); err != nil {
+			return err
+		}
+	}
+	var var2 bool
+	if len(x.PublicKey) == 0 {
+		var2 = true
+	}
+	if !(var2) {
+		if err := enc.NextField("PublicKey"); err != nil {
+			return err
+		}
+		if err := enc.StartValue(vdl.TypeOf((*[]byte)(nil))); err != nil {
+			return err
+		}
+		if err := enc.EncodeBytes(x.PublicKey); err != nil {
+			return err
+		}
+		if err := enc.FinishValue(); err != nil {
+			return err
+		}
+	}
+	var var3 bool
+	if len(x.Caveats) == 0 {
+		var3 = true
+	}
+	if !(var3) {
+		if err := enc.NextField("Caveats"); err != nil {
+			return err
+		}
+		if err := __VDLWrite1_list(enc, &x.Caveats); err != nil {
+			return err
+		}
+	}
+	var4 := true
+	var var5 bool
+	if len(x.Signature.Purpose) == 0 {
+		var5 = true
+	}
+	var4 = var4 && var5
+	var6 := (x.Signature.Hash == Hash(""))
+	var4 = var4 && var6
+	var var7 bool
+	if len(x.Signature.R) == 0 {
+		var7 = true
+	}
+	var4 = var4 && var7
+	var var8 bool
+	if len(x.Signature.S) == 0 {
+		var8 = true
+	}
+	var4 = var4 && var8
+	if !(var4) {
+		if err := enc.NextField("Signature"); err != nil {
+			return err
+		}
+		if err := x.Signature.VDLWrite(enc); err != nil {
+			return err
+		}
+	}
+	if err := enc.NextField(""); err != nil {
+		return err
+	}
+	return enc.FinishValue()
+}
+
 // CaveatDescriptor defines an association between a caveat validation function
 // (addressed by globally unique identifier) and the data needed by the
 // validation function.
@@ -2169,6 +2687,40 @@ func (x *CaveatDescriptor) VDLRead(dec vdl.Decoder) error {
 			}
 		}
 	}
+}
+
+func (x CaveatDescriptor) VDLWrite(enc vdl.Encoder) error {
+	if err := enc.StartValue(vdl.TypeOf((*CaveatDescriptor)(nil)).Elem()); err != nil {
+		return err
+	}
+	var1 := (x.Id == uniqueid.Id{})
+	if !(var1) {
+		if err := enc.NextField("Id"); err != nil {
+			return err
+		}
+		if err := x.Id.VDLWrite(enc); err != nil {
+			return err
+		}
+	}
+	var2 := (x.ParamType == nil || x.ParamType == vdl.AnyType)
+	if !(var2) {
+		if err := enc.NextField("ParamType"); err != nil {
+			return err
+		}
+		if err := enc.StartValue(vdl.TypeObjectType); err != nil {
+			return err
+		}
+		if err := enc.EncodeTypeObject(x.ParamType); err != nil {
+			return err
+		}
+		if err := enc.FinishValue(); err != nil {
+			return err
+		}
+	}
+	if err := enc.NextField(""); err != nil {
+		return err
+	}
+	return enc.FinishValue()
 }
 
 // WireBlessings encapsulates wire format of a set of blessings and the
@@ -2460,6 +3012,58 @@ func __VDLRead5_list(dec vdl.Decoder, x *[]Certificate) error {
 	}
 }
 
+func (x WireBlessings) VDLWrite(enc vdl.Encoder) error {
+	if err := enc.StartValue(vdl.TypeOf((*WireBlessings)(nil)).Elem()); err != nil {
+		return err
+	}
+	var var1 bool
+	if len(x.CertificateChains) == 0 {
+		var1 = true
+	}
+	if !(var1) {
+		if err := enc.NextField("CertificateChains"); err != nil {
+			return err
+		}
+		if err := __VDLWrite4_list(enc, &x.CertificateChains); err != nil {
+			return err
+		}
+	}
+	if err := enc.NextField(""); err != nil {
+		return err
+	}
+	return enc.FinishValue()
+}
+
+func __VDLWrite4_list(enc vdl.Encoder, x *[][]Certificate) error {
+	if err := enc.StartValue(vdl.TypeOf((*[][]Certificate)(nil))); err != nil {
+		return err
+	}
+	for i := 0; i < len(*x); i++ {
+		if err := __VDLWrite5_list(enc, &(*x)[i]); err != nil {
+			return err
+		}
+	}
+	if err := enc.NextEntry(true); err != nil {
+		return err
+	}
+	return enc.FinishValue()
+}
+
+func __VDLWrite5_list(enc vdl.Encoder, x *[]Certificate) error {
+	if err := enc.StartValue(vdl.TypeOf((*[]Certificate)(nil))); err != nil {
+		return err
+	}
+	for i := 0; i < len(*x); i++ {
+		if err := (*x)[i].VDLWrite(enc); err != nil {
+			return err
+		}
+	}
+	if err := enc.NextEntry(true); err != nil {
+		return err
+	}
+	return enc.FinishValue()
+}
+
 type (
 	// WireDischarge represents any single field of the WireDischarge union type.
 	//
@@ -2475,6 +3079,7 @@ type (
 		// __VDLReflect describes the WireDischarge union type.
 		__VDLReflect(__WireDischargeReflect)
 		FillVDLTarget(vdl.Target, *vdl.Type) error
+		VDLWrite(vdl.Encoder) error
 	}
 	// WireDischargePublicKey represents field PublicKey of the WireDischarge union type.
 	WireDischargePublicKey struct{ Value publicKeyDischarge } // Discharge for PublicKeyThirdPartyCaveat
@@ -2602,6 +3207,22 @@ func VDLReadWireDischarge(dec vdl.Decoder, x *WireDischarge) error {
 		return fmt.Errorf("extra field %q in union %T, from %v", f, x, dec.Type())
 	}
 	return dec.FinishValue()
+}
+
+func (x WireDischargePublicKey) VDLWrite(enc vdl.Encoder) error {
+	if err := enc.StartValue(vdl.TypeOf((*WireDischarge)(nil))); err != nil {
+		return err
+	}
+	if err := enc.NextField("PublicKey"); err != nil {
+		return err
+	}
+	if err := x.Value.VDLWrite(enc); err != nil {
+		return err
+	}
+	if err := enc.NextField(""); err != nil {
+		return err
+	}
+	return enc.FinishValue()
 }
 
 // RejectedBlessing describes why a blessing failed validation.
@@ -2760,6 +3381,40 @@ func (x *RejectedBlessing) VDLRead(dec vdl.Decoder) error {
 			}
 		}
 	}
+}
+
+func (x RejectedBlessing) VDLWrite(enc vdl.Encoder) error {
+	if err := enc.StartValue(vdl.TypeOf((*RejectedBlessing)(nil)).Elem()); err != nil {
+		return err
+	}
+	var1 := (x.Blessing == "")
+	if !(var1) {
+		if err := enc.NextField("Blessing"); err != nil {
+			return err
+		}
+		if err := enc.StartValue(vdl.TypeOf((*string)(nil))); err != nil {
+			return err
+		}
+		if err := enc.EncodeString(x.Blessing); err != nil {
+			return err
+		}
+		if err := enc.FinishValue(); err != nil {
+			return err
+		}
+	}
+	var2 := (x.Err == (error)(nil))
+	if !(var2) {
+		if err := enc.NextField("Err"); err != nil {
+			return err
+		}
+		if err := verror.VDLWrite(enc, x.Err); err != nil {
+			return err
+		}
+	}
+	if err := enc.NextField(""); err != nil {
+		return err
+	}
+	return enc.FinishValue()
 }
 
 // Type-check native conversion functions.

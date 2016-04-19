@@ -182,6 +182,46 @@ func (x *Complex64) VDLRead(dec vdl.Decoder) error {
 	}
 }
 
+func (x Complex64) VDLWrite(enc vdl.Encoder) error {
+	if err := enc.StartValue(vdl.TypeOf((*Complex64)(nil)).Elem()); err != nil {
+		return err
+	}
+	var1 := (x.Real == float32(0))
+	if !(var1) {
+		if err := enc.NextField("Real"); err != nil {
+			return err
+		}
+		if err := enc.StartValue(vdl.TypeOf((*float32)(nil))); err != nil {
+			return err
+		}
+		if err := enc.EncodeFloat(float64(x.Real)); err != nil {
+			return err
+		}
+		if err := enc.FinishValue(); err != nil {
+			return err
+		}
+	}
+	var2 := (x.Imag == float32(0))
+	if !(var2) {
+		if err := enc.NextField("Imag"); err != nil {
+			return err
+		}
+		if err := enc.StartValue(vdl.TypeOf((*float32)(nil))); err != nil {
+			return err
+		}
+		if err := enc.EncodeFloat(float64(x.Imag)); err != nil {
+			return err
+		}
+		if err := enc.FinishValue(); err != nil {
+			return err
+		}
+	}
+	if err := enc.NextField(""); err != nil {
+		return err
+	}
+	return enc.FinishValue()
+}
+
 type Complex128 struct {
 	Real float64
 	Imag float64
@@ -341,6 +381,46 @@ func (x *Complex128) VDLRead(dec vdl.Decoder) error {
 			}
 		}
 	}
+}
+
+func (x Complex128) VDLWrite(enc vdl.Encoder) error {
+	if err := enc.StartValue(vdl.TypeOf((*Complex128)(nil)).Elem()); err != nil {
+		return err
+	}
+	var1 := (x.Real == float64(0))
+	if !(var1) {
+		if err := enc.NextField("Real"); err != nil {
+			return err
+		}
+		if err := enc.StartValue(vdl.TypeOf((*float64)(nil))); err != nil {
+			return err
+		}
+		if err := enc.EncodeFloat(x.Real); err != nil {
+			return err
+		}
+		if err := enc.FinishValue(); err != nil {
+			return err
+		}
+	}
+	var2 := (x.Imag == float64(0))
+	if !(var2) {
+		if err := enc.NextField("Imag"); err != nil {
+			return err
+		}
+		if err := enc.StartValue(vdl.TypeOf((*float64)(nil))); err != nil {
+			return err
+		}
+		if err := enc.EncodeFloat(x.Imag); err != nil {
+			return err
+		}
+		if err := enc.FinishValue(); err != nil {
+			return err
+		}
+	}
+	if err := enc.NextField(""); err != nil {
+		return err
+	}
+	return enc.FinishValue()
 }
 
 // Type-check native conversion functions.

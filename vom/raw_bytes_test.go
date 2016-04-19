@@ -611,7 +611,12 @@ func TestRawBytesNonVomPayload(t *testing.T) {
 }
 
 func TestRawBytesDecoder(t *testing.T) {
+	regex := filterRegex(t)
 	for _, test := range data81.Tests {
+		if !regex.MatchString(test.Name) {
+			continue
+		}
+
 		in := RawBytesOf(test.Value)
 		out := vdl.ZeroValue(test.Value.Type())
 		if err := out.VDLRead(in.Decoder()); err != nil {
@@ -620,6 +625,25 @@ func TestRawBytesDecoder(t *testing.T) {
 		}
 		if !vdl.EqualValue(test.Value, out) {
 			t.Errorf("%s: got %v, want %v", test.Name, out, test.Value)
+		}
+	}
+}
+
+func TestRawBytesWriter(t *testing.T) {
+	regex := filterRegex(t)
+	for _, test := range data81.Tests {
+		if !regex.MatchString(test.Name) {
+			continue
+		}
+
+		var buf bytes.Buffer
+		enc := NewXEncoder(&buf)
+		if err := RawBytesOf(test.Value).VDLWrite(enc.Encoder()); err != nil {
+			t.Errorf("%s: error in transcode: %v", test.Name, err)
+			continue
+		}
+		if got, want := buf.Bytes(), hex2Bin(t, test.Hex); !bytes.Equal(got, want) {
+			t.Errorf("%s: got %x, want %x", test.Name, got, want)
 		}
 	}
 }

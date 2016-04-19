@@ -132,6 +132,16 @@ func (x *GenLanguage) VDLRead(dec vdl.Decoder) error {
 	return dec.FinishValue()
 }
 
+func (x GenLanguage) VDLWrite(enc vdl.Encoder) error {
+	if err := enc.StartValue(vdl.TypeOf((*GenLanguage)(nil))); err != nil {
+		return err
+	}
+	if err := enc.EncodeString(x.String()); err != nil {
+		return err
+	}
+	return enc.FinishValue()
+}
+
 // GoImport describes Go import information.
 type GoImport struct {
 	// Path is the package path that uniquely identifies the imported package.
@@ -289,6 +299,46 @@ func (x *GoImport) VDLRead(dec vdl.Decoder) error {
 			}
 		}
 	}
+}
+
+func (x GoImport) VDLWrite(enc vdl.Encoder) error {
+	if err := enc.StartValue(vdl.TypeOf((*GoImport)(nil)).Elem()); err != nil {
+		return err
+	}
+	var1 := (x.Path == "")
+	if !(var1) {
+		if err := enc.NextField("Path"); err != nil {
+			return err
+		}
+		if err := enc.StartValue(vdl.TypeOf((*string)(nil))); err != nil {
+			return err
+		}
+		if err := enc.EncodeString(x.Path); err != nil {
+			return err
+		}
+		if err := enc.FinishValue(); err != nil {
+			return err
+		}
+	}
+	var2 := (x.Name == "")
+	if !(var2) {
+		if err := enc.NextField("Name"); err != nil {
+			return err
+		}
+		if err := enc.StartValue(vdl.TypeOf((*string)(nil))); err != nil {
+			return err
+		}
+		if err := enc.EncodeString(x.Name); err != nil {
+			return err
+		}
+		if err := enc.FinishValue(); err != nil {
+			return err
+		}
+	}
+	if err := enc.NextField(""); err != nil {
+		return err
+	}
+	return enc.FinishValue()
 }
 
 // GoType describes the Go type information associated with a VDL type.
@@ -496,6 +546,58 @@ func __VDLRead1_list(dec vdl.Decoder, x *[]GoImport) error {
 	}
 }
 
+func (x GoType) VDLWrite(enc vdl.Encoder) error {
+	if err := enc.StartValue(vdl.TypeOf((*GoType)(nil)).Elem()); err != nil {
+		return err
+	}
+	var1 := (x.Type == "")
+	if !(var1) {
+		if err := enc.NextField("Type"); err != nil {
+			return err
+		}
+		if err := enc.StartValue(vdl.TypeOf((*string)(nil))); err != nil {
+			return err
+		}
+		if err := enc.EncodeString(x.Type); err != nil {
+			return err
+		}
+		if err := enc.FinishValue(); err != nil {
+			return err
+		}
+	}
+	var var2 bool
+	if len(x.Imports) == 0 {
+		var2 = true
+	}
+	if !(var2) {
+		if err := enc.NextField("Imports"); err != nil {
+			return err
+		}
+		if err := __VDLWrite1_list(enc, &x.Imports); err != nil {
+			return err
+		}
+	}
+	if err := enc.NextField(""); err != nil {
+		return err
+	}
+	return enc.FinishValue()
+}
+
+func __VDLWrite1_list(enc vdl.Encoder, x *[]GoImport) error {
+	if err := enc.StartValue(vdl.TypeOf((*[]GoImport)(nil))); err != nil {
+		return err
+	}
+	for i := 0; i < len(*x); i++ {
+		if err := (*x)[i].VDLWrite(enc); err != nil {
+			return err
+		}
+	}
+	if err := enc.NextEntry(true); err != nil {
+		return err
+	}
+	return enc.FinishValue()
+}
+
 // GoConfig specifies go specific configuration.
 type GoConfig struct {
 	// WireToNativeTypes specifies the mapping from a VDL wire type to its Go
@@ -701,6 +803,52 @@ func __VDLRead2_map(dec vdl.Decoder, x *map[string]GoType) error {
 		}
 		tmpMap[key] = elem
 	}
+}
+
+func (x GoConfig) VDLWrite(enc vdl.Encoder) error {
+	if err := enc.StartValue(vdl.TypeOf((*GoConfig)(nil)).Elem()); err != nil {
+		return err
+	}
+	var var1 bool
+	if len(x.WireToNativeTypes) == 0 {
+		var1 = true
+	}
+	if !(var1) {
+		if err := enc.NextField("WireToNativeTypes"); err != nil {
+			return err
+		}
+		if err := __VDLWrite2_map(enc, &x.WireToNativeTypes); err != nil {
+			return err
+		}
+	}
+	if err := enc.NextField(""); err != nil {
+		return err
+	}
+	return enc.FinishValue()
+}
+
+func __VDLWrite2_map(enc vdl.Encoder, x *map[string]GoType) error {
+	if err := enc.StartValue(vdl.TypeOf((*map[string]GoType)(nil))); err != nil {
+		return err
+	}
+	for key, elem := range *x {
+		if err := enc.StartValue(vdl.TypeOf((*string)(nil))); err != nil {
+			return err
+		}
+		if err := enc.EncodeString(key); err != nil {
+			return err
+		}
+		if err := enc.FinishValue(); err != nil {
+			return err
+		}
+		if err := elem.VDLWrite(enc); err != nil {
+			return err
+		}
+	}
+	if err := enc.NextEntry(true); err != nil {
+		return err
+	}
+	return enc.FinishValue()
 }
 
 // JavaConfig specifies java specific configuration.
@@ -981,6 +1129,70 @@ func __VDLRead3_map(dec vdl.Decoder, x *map[string]string) error {
 	}
 }
 
+func (x JavaConfig) VDLWrite(enc vdl.Encoder) error {
+	if err := enc.StartValue(vdl.TypeOf((*JavaConfig)(nil)).Elem()); err != nil {
+		return err
+	}
+	var var1 bool
+	if len(x.WireToNativeTypes) == 0 {
+		var1 = true
+	}
+	if !(var1) {
+		if err := enc.NextField("WireToNativeTypes"); err != nil {
+			return err
+		}
+		if err := __VDLWrite3_map(enc, &x.WireToNativeTypes); err != nil {
+			return err
+		}
+	}
+	var var2 bool
+	if len(x.WireTypeRenames) == 0 {
+		var2 = true
+	}
+	if !(var2) {
+		if err := enc.NextField("WireTypeRenames"); err != nil {
+			return err
+		}
+		if err := __VDLWrite3_map(enc, &x.WireTypeRenames); err != nil {
+			return err
+		}
+	}
+	if err := enc.NextField(""); err != nil {
+		return err
+	}
+	return enc.FinishValue()
+}
+
+func __VDLWrite3_map(enc vdl.Encoder, x *map[string]string) error {
+	if err := enc.StartValue(vdl.TypeOf((*map[string]string)(nil))); err != nil {
+		return err
+	}
+	for key, elem := range *x {
+		if err := enc.StartValue(vdl.TypeOf((*string)(nil))); err != nil {
+			return err
+		}
+		if err := enc.EncodeString(key); err != nil {
+			return err
+		}
+		if err := enc.FinishValue(); err != nil {
+			return err
+		}
+		if err := enc.StartValue(vdl.TypeOf((*string)(nil))); err != nil {
+			return err
+		}
+		if err := enc.EncodeString(elem); err != nil {
+			return err
+		}
+		if err := enc.FinishValue(); err != nil {
+			return err
+		}
+	}
+	if err := enc.NextEntry(true); err != nil {
+		return err
+	}
+	return enc.FinishValue()
+}
+
 // JavascriptConfig specifies javascript specific configuration.
 type JavascriptConfig struct {
 }
@@ -1061,6 +1273,16 @@ func (x *JavascriptConfig) VDLRead(dec vdl.Decoder) error {
 			}
 		}
 	}
+}
+
+func (x JavascriptConfig) VDLWrite(enc vdl.Encoder) error {
+	if err := enc.StartValue(vdl.TypeOf((*JavascriptConfig)(nil)).Elem()); err != nil {
+		return err
+	}
+	if err := enc.NextField(""); err != nil {
+		return err
+	}
+	return enc.FinishValue()
 }
 
 // SwiftConfig specifies swift specific configuration for this package.
@@ -1237,6 +1459,28 @@ func (x *SwiftConfig) VDLRead(dec vdl.Decoder) error {
 			}
 		}
 	}
+}
+
+func (x SwiftConfig) VDLWrite(enc vdl.Encoder) error {
+	if err := enc.StartValue(vdl.TypeOf((*SwiftConfig)(nil)).Elem()); err != nil {
+		return err
+	}
+	var var1 bool
+	if len(x.WireToNativeTypes) == 0 {
+		var1 = true
+	}
+	if !(var1) {
+		if err := enc.NextField("WireToNativeTypes"); err != nil {
+			return err
+		}
+		if err := __VDLWrite3_map(enc, &x.WireToNativeTypes); err != nil {
+			return err
+		}
+	}
+	if err := enc.NextField(""); err != nil {
+		return err
+	}
+	return enc.FinishValue()
 }
 
 // Config specifies the configuration for the vdl tool.  This is typically
@@ -1554,6 +1798,99 @@ func __VDLRead4_set(dec vdl.Decoder, x *map[GenLanguage]struct{}) error {
 		}
 		tmpMap[key] = struct{}{}
 	}
+}
+
+func (x Config) VDLWrite(enc vdl.Encoder) error {
+	if err := enc.StartValue(vdl.TypeOf((*Config)(nil)).Elem()); err != nil {
+		return err
+	}
+	var var1 bool
+	if len(x.GenLanguages) == 0 {
+		var1 = true
+	}
+	if !(var1) {
+		if err := enc.NextField("GenLanguages"); err != nil {
+			return err
+		}
+		if err := __VDLWrite4_set(enc, &x.GenLanguages); err != nil {
+			return err
+		}
+	}
+	var2 := true
+	var var3 bool
+	if len(x.Go.WireToNativeTypes) == 0 {
+		var3 = true
+	}
+	var2 = var2 && var3
+	if !(var2) {
+		if err := enc.NextField("Go"); err != nil {
+			return err
+		}
+		if err := x.Go.VDLWrite(enc); err != nil {
+			return err
+		}
+	}
+	var4 := true
+	var var5 bool
+	if len(x.Java.WireToNativeTypes) == 0 {
+		var5 = true
+	}
+	var4 = var4 && var5
+	var var6 bool
+	if len(x.Java.WireTypeRenames) == 0 {
+		var6 = true
+	}
+	var4 = var4 && var6
+	if !(var4) {
+		if err := enc.NextField("Java"); err != nil {
+			return err
+		}
+		if err := x.Java.VDLWrite(enc); err != nil {
+			return err
+		}
+	}
+	var7 := (x.Javascript == JavascriptConfig{})
+	if !(var7) {
+		if err := enc.NextField("Javascript"); err != nil {
+			return err
+		}
+		if err := x.Javascript.VDLWrite(enc); err != nil {
+			return err
+		}
+	}
+	var8 := true
+	var var9 bool
+	if len(x.Swift.WireToNativeTypes) == 0 {
+		var9 = true
+	}
+	var8 = var8 && var9
+	if !(var8) {
+		if err := enc.NextField("Swift"); err != nil {
+			return err
+		}
+		if err := x.Swift.VDLWrite(enc); err != nil {
+			return err
+		}
+	}
+	if err := enc.NextField(""); err != nil {
+		return err
+	}
+	return enc.FinishValue()
+}
+
+func __VDLWrite4_set(enc vdl.Encoder, x *map[GenLanguage]struct{}) error {
+	if err := enc.StartValue(vdl.TypeOf((*map[GenLanguage]struct{})(nil))); err != nil {
+		return err
+	}
+	for key := range *x {
+		if err := key.VDLWrite(enc); err != nil {
+			return err
+		}
+	}
+	if err := enc.NextEntry(true); err != nil {
+		return err
+	}
+	return enc.FinishValue()
 }
 
 var __VDLInitCalled bool

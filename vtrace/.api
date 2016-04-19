@@ -58,6 +58,12 @@ pkg vtrace, method (*TraceRecordTarget) FinishFields(vdl.FieldsTarget) error
 pkg vtrace, method (*TraceRecordTarget) StartField(string) (vdl.Target, vdl.Target, error)
 pkg vtrace, method (*TraceRecordTarget) StartFields(*vdl.Type) (vdl.FieldsTarget, error)
 pkg vtrace, method (*TraceRecordTarget) ZeroField(string) error
+pkg vtrace, method (Annotation) VDLWrite(vdl.Encoder) error
+pkg vtrace, method (Request) VDLWrite(vdl.Encoder) error
+pkg vtrace, method (Response) VDLWrite(vdl.Encoder) error
+pkg vtrace, method (SpanRecord) VDLWrite(vdl.Encoder) error
+pkg vtrace, method (TraceFlags) VDLWrite(vdl.Encoder) error
+pkg vtrace, method (TraceRecord) VDLWrite(vdl.Encoder) error
 pkg vtrace, type Annotation struct
 pkg vtrace, type Annotation struct, Message string
 pkg vtrace, type Annotation struct, When time.Time

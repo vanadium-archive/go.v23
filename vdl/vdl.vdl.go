@@ -131,6 +131,16 @@ func (x *WireRetryCode) VDLRead(dec Decoder) error {
 	return dec.FinishValue()
 }
 
+func (x WireRetryCode) VDLWrite(enc Encoder) error {
+	if err := enc.StartValue(TypeOf((*WireRetryCode)(nil))); err != nil {
+		return err
+	}
+	if err := enc.EncodeString(x.String()); err != nil {
+		return err
+	}
+	return enc.FinishValue()
+}
+
 // WireError is the wire representation for the built-in error type.  Errors and
 // exceptions in each programming environment are converted to this type to
 // ensure wire compatibility.  Generated code for each environment provides
@@ -438,6 +448,94 @@ func __VDLRead1_list(dec Decoder, x *[]*Value) error {
 		}
 		*x = append(*x, elem)
 	}
+}
+
+func (x WireError) VDLWrite(enc Encoder) error {
+	if err := enc.StartValue(TypeOf((*WireError)(nil)).Elem()); err != nil {
+		return err
+	}
+	var1 := (x.Id == "")
+	if !(var1) {
+		if err := enc.NextField("Id"); err != nil {
+			return err
+		}
+		if err := enc.StartValue(TypeOf((*string)(nil))); err != nil {
+			return err
+		}
+		if err := enc.EncodeString(x.Id); err != nil {
+			return err
+		}
+		if err := enc.FinishValue(); err != nil {
+			return err
+		}
+	}
+	var2 := (x.RetryCode == WireRetryCodeNoRetry)
+	if !(var2) {
+		if err := enc.NextField("RetryCode"); err != nil {
+			return err
+		}
+		if err := x.RetryCode.VDLWrite(enc); err != nil {
+			return err
+		}
+	}
+	var3 := (x.Msg == "")
+	if !(var3) {
+		if err := enc.NextField("Msg"); err != nil {
+			return err
+		}
+		if err := enc.StartValue(TypeOf((*string)(nil))); err != nil {
+			return err
+		}
+		if err := enc.EncodeString(x.Msg); err != nil {
+			return err
+		}
+		if err := enc.FinishValue(); err != nil {
+			return err
+		}
+	}
+	var var4 bool
+	if len(x.ParamList) == 0 {
+		var4 = true
+	}
+	if !(var4) {
+		if err := enc.NextField("ParamList"); err != nil {
+			return err
+		}
+		if err := __VDLWrite1_list(enc, &x.ParamList); err != nil {
+			return err
+		}
+	}
+	if err := enc.NextField(""); err != nil {
+		return err
+	}
+	return enc.FinishValue()
+}
+
+func __VDLWrite1_list(enc Encoder, x *[]*Value) error {
+	if err := enc.StartValue(TypeOf((*[]*Value)(nil))); err != nil {
+		return err
+	}
+	for i := 0; i < len(*x); i++ {
+		if err := enc.StartValue(AnyType); err != nil {
+			return err
+		}
+		if (*x)[i].IsNil() {
+			if err := enc.NilValue((*x)[i].Type()); err != nil {
+				return err
+			}
+		} else {
+			if err := (*x)[i].VDLWrite(enc); err != nil {
+				return err
+			}
+		}
+		if err := enc.FinishValue(); err != nil {
+			return err
+		}
+	}
+	if err := enc.NextEntry(true); err != nil {
+		return err
+	}
+	return enc.FinishValue()
 }
 
 var __VDLInitCalled bool

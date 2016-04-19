@@ -78,49 +78,28 @@ type Decoder interface {
 //
 // TODO(toddw): This is a work in progress.  Update the comments.
 type Encoder interface {
-	// {Start,Finish}Value must be called for every new value and nested any.
-	// This is needed to bracket each value for the encoder, and also to tell us
-	// the elem type of any.  The encoder still needs to keep a stack of types, so
-	// that it knows where we are in the DFS, e.g. for enum and field indices.
-	//
-	// TODO(toddw): can we make the encoder not need a type stack?
+	SetNextStartValueIsOptional()
+	// {Start,Finish}Value must be called before / after every concrete value
+	// tt must be non-any and non-optional
 	StartValue(tt *Type) error
 	FinishValue() error
+	// NilValue takes the place of StartValue and FinishValue for nil values.
+	NilValue(tt *Type) error
 
-	StartComposite() error
-	FinishComposite() error
+	// NextEntry must be called for every entry.
+	NextEntry(done bool) error
+	// NextField must be called for every field.
+	NextField(name string) error
 
-	// HintLen is an optional hint to the encoder.
-	//
-	// TODO(toddw): change VOM so that collections can either start with a length,
-	// or end with a terminator.  Use a flag for "has terminator".  Or do we
-	// really gain anything by having the length?
-	EncodeLenHint(len int) error
+	SetLenHint(lenHint int) error
 
-	// We need two different EncodeZero because we need to distinguish between a
-	// composite being zero, or its items being zero.
-	//
-	// EncodeTopLevelZero means that the value that we just started is zero, as
-	// opposed to EncodeZero, which means that the sub-value is zero.  Calling
-	// EncodeTopLevelZero is optional; it's only meant to improve performance for
-	// large composite types that are zero.
-	//
-	// TODO(toddw): Should we split back into EncodeNil(), and then deal with
-	// zero-valued struct fields specially?
-	EncodeTopLevelZero() error
-	EncodeZero() error
-
-	EncodeBool(v bool) error
-	EncodeUint(v uint64) error
-	EncodeInt(v int64) error
-	EncodeFloat(v float64) error
-	EncodeBytes(v []byte) error
-	EncodeString(v string) error
-	EncodeTypeObject(v *Type) error
-
-	// TODO(toddw): Add support for RawBytes, perhaps like this:
-	//SupportsVomBytes() bool
-	//EncodeVomBytes(src []byte) error
+	EncodeBool(v bool) error        // bool
+	EncodeUint(v uint64) error      // byte, uint16, uint32, uint64
+	EncodeInt(v int64) error        // int8, int16, int32, int64
+	EncodeFloat(v float64) error    // float32, float64
+	EncodeBytes(v []byte) error     // []byte
+	EncodeString(v string) error    // string, enum
+	EncodeTypeObject(v *Type) error // *Type
 }
 
 func decoderCompatible(dec Decoder, tt *Type) error {

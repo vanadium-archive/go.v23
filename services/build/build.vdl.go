@@ -127,6 +127,16 @@ func (x *Architecture) VDLRead(dec vdl.Decoder) error {
 	return dec.FinishValue()
 }
 
+func (x Architecture) VDLWrite(enc vdl.Encoder) error {
+	if err := enc.StartValue(vdl.TypeOf((*Architecture)(nil))); err != nil {
+		return err
+	}
+	if err := enc.EncodeString(x.String()); err != nil {
+		return err
+	}
+	return enc.FinishValue()
+}
+
 // Format specifies the file format of a host.
 type Format int
 
@@ -229,6 +239,16 @@ func (x *Format) VDLRead(dec vdl.Decoder) error {
 		return err
 	}
 	return dec.FinishValue()
+}
+
+func (x Format) VDLWrite(enc vdl.Encoder) error {
+	if err := enc.StartValue(vdl.TypeOf((*Format)(nil))); err != nil {
+		return err
+	}
+	if err := enc.EncodeString(x.String()); err != nil {
+		return err
+	}
+	return enc.FinishValue()
 }
 
 // OperatingSystem specifies the operating system of a host.
@@ -341,6 +361,16 @@ func (x *OperatingSystem) VDLRead(dec vdl.Decoder) error {
 		return err
 	}
 	return dec.FinishValue()
+}
+
+func (x OperatingSystem) VDLWrite(enc vdl.Encoder) error {
+	if err := enc.StartValue(vdl.TypeOf((*OperatingSystem)(nil))); err != nil {
+		return err
+	}
+	if err := enc.EncodeString(x.String()); err != nil {
+		return err
+	}
+	return enc.FinishValue()
 }
 
 // File records the name and contents of a file.
@@ -503,6 +533,49 @@ func (x *File) VDLRead(dec vdl.Decoder) error {
 			}
 		}
 	}
+}
+
+func (x File) VDLWrite(enc vdl.Encoder) error {
+	if err := enc.StartValue(vdl.TypeOf((*File)(nil)).Elem()); err != nil {
+		return err
+	}
+	var1 := (x.Name == "")
+	if !(var1) {
+		if err := enc.NextField("Name"); err != nil {
+			return err
+		}
+		if err := enc.StartValue(vdl.TypeOf((*string)(nil))); err != nil {
+			return err
+		}
+		if err := enc.EncodeString(x.Name); err != nil {
+			return err
+		}
+		if err := enc.FinishValue(); err != nil {
+			return err
+		}
+	}
+	var var2 bool
+	if len(x.Contents) == 0 {
+		var2 = true
+	}
+	if !(var2) {
+		if err := enc.NextField("Contents"); err != nil {
+			return err
+		}
+		if err := enc.StartValue(vdl.TypeOf((*[]byte)(nil))); err != nil {
+			return err
+		}
+		if err := enc.EncodeBytes(x.Contents); err != nil {
+			return err
+		}
+		if err := enc.FinishValue(); err != nil {
+			return err
+		}
+	}
+	if err := enc.NextField(""); err != nil {
+		return err
+	}
+	return enc.FinishValue()
 }
 
 //////////////////////////////////////////////////

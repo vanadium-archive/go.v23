@@ -37,6 +37,7 @@ pkg verror, func SetDefaultContext(*context.T)
 pkg verror, func Stack(error) PCs
 pkg verror, func StackToText(io.Writer, []uintptr) error
 pkg verror, func VDLRead(vdl.Decoder, *error) error
+pkg verror, func VDLWrite(vdl.Encoder, error) error
 pkg verror, func WireFromNative(*vdl.WireError, error) error
 pkg verror, func WireToNative(vdl.WireError, *E) error
 pkg verror, func WithComponentName(*context.T, string) *context.T

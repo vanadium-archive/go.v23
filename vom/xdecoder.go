@@ -33,7 +33,7 @@ var (
 )
 
 type XDecoder struct {
-	dec *xDecoder
+	dec xDecoder
 }
 
 type xDecoder struct {
@@ -52,23 +52,23 @@ type decoderStackEntry struct {
 }
 
 func NewXDecoder(r io.Reader) *XDecoder {
-	return &XDecoder{&xDecoder{
+	return &XDecoder{xDecoder{
 		old: NewDecoder(r),
 	}}
 }
 
 func NewXDecoderWithTypeDecoder(r io.Reader, typeDec *TypeDecoder) *XDecoder {
-	return &XDecoder{&xDecoder{
+	return &XDecoder{xDecoder{
 		old: NewDecoderWithTypeDecoder(r, typeDec),
 	}}
 }
 
 func (d *XDecoder) Decoder() vdl.Decoder {
-	return d.dec
+	return &d.dec
 }
 
 func (d *XDecoder) Decode(v interface{}) error {
-	return vdl.Read(d.dec, v)
+	return vdl.Read(&d.dec, v)
 }
 
 func (d *XDecoder) Ignore() error {

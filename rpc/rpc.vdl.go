@@ -454,6 +454,141 @@ func (x *Request) VDLRead(dec vdl.Decoder) error {
 	}
 }
 
+func (x Request) VDLWrite(enc vdl.Encoder) error {
+	if err := enc.StartValue(vdl.TypeOf((*Request)(nil)).Elem()); err != nil {
+		return err
+	}
+	var1 := (x.Suffix == "")
+	if !(var1) {
+		if err := enc.NextField("Suffix"); err != nil {
+			return err
+		}
+		if err := enc.StartValue(vdl.TypeOf((*string)(nil))); err != nil {
+			return err
+		}
+		if err := enc.EncodeString(x.Suffix); err != nil {
+			return err
+		}
+		if err := enc.FinishValue(); err != nil {
+			return err
+		}
+	}
+	var2 := (x.Method == "")
+	if !(var2) {
+		if err := enc.NextField("Method"); err != nil {
+			return err
+		}
+		if err := enc.StartValue(vdl.TypeOf((*string)(nil))); err != nil {
+			return err
+		}
+		if err := enc.EncodeString(x.Method); err != nil {
+			return err
+		}
+		if err := enc.FinishValue(); err != nil {
+			return err
+		}
+	}
+	var3 := (x.NumPosArgs == uint64(0))
+	if !(var3) {
+		if err := enc.NextField("NumPosArgs"); err != nil {
+			return err
+		}
+		if err := enc.StartValue(vdl.TypeOf((*uint64)(nil))); err != nil {
+			return err
+		}
+		if err := enc.EncodeUint(x.NumPosArgs); err != nil {
+			return err
+		}
+		if err := enc.FinishValue(); err != nil {
+			return err
+		}
+	}
+	var4 := (x.EndStreamArgs == false)
+	if !(var4) {
+		if err := enc.NextField("EndStreamArgs"); err != nil {
+			return err
+		}
+		if err := enc.StartValue(vdl.TypeOf((*bool)(nil))); err != nil {
+			return err
+		}
+		if err := enc.EncodeBool(x.EndStreamArgs); err != nil {
+			return err
+		}
+		if err := enc.FinishValue(); err != nil {
+			return err
+		}
+	}
+	var wireValue5 time.WireDeadline
+	if err := time.WireDeadlineFromNative(&wireValue5, x.Deadline); err != nil {
+		return fmt.Errorf("error converting x.Deadline to wiretype")
+	}
+
+	var6 := (wireValue5 == time.WireDeadline{})
+	if !(var6) {
+		if err := enc.NextField("Deadline"); err != nil {
+			return err
+		}
+		var wire time.WireDeadline
+		if err := time.WireDeadlineFromNative(&wire, x.Deadline); err != nil {
+			return err
+		}
+		if err := wire.VDLWrite(enc); err != nil {
+			return err
+		}
+	}
+	var wireValue7 security.WireBlessings
+	if err := security.WireBlessingsFromNative(&wireValue7, x.GrantedBlessings); err != nil {
+		return fmt.Errorf("error converting x.GrantedBlessings to wiretype")
+	}
+
+	var8 := true
+	var var9 bool
+	if len(wireValue7.CertificateChains) == 0 {
+		var9 = true
+	}
+	var8 = var8 && var9
+	if !(var8) {
+		if err := enc.NextField("GrantedBlessings"); err != nil {
+			return err
+		}
+		var wire security.WireBlessings
+		if err := security.WireBlessingsFromNative(&wire, x.GrantedBlessings); err != nil {
+			return err
+		}
+		if err := wire.VDLWrite(enc); err != nil {
+			return err
+		}
+	}
+	var10 := (x.TraceRequest == vtrace.Request{})
+	if !(var10) {
+		if err := enc.NextField("TraceRequest"); err != nil {
+			return err
+		}
+		if err := x.TraceRequest.VDLWrite(enc); err != nil {
+			return err
+		}
+	}
+	var11 := (x.Language == "")
+	if !(var11) {
+		if err := enc.NextField("Language"); err != nil {
+			return err
+		}
+		if err := enc.StartValue(vdl.TypeOf((*string)(nil))); err != nil {
+			return err
+		}
+		if err := enc.EncodeString(x.Language); err != nil {
+			return err
+		}
+		if err := enc.FinishValue(); err != nil {
+			return err
+		}
+	}
+	if err := enc.NextField(""); err != nil {
+		return err
+	}
+	return enc.FinishValue()
+}
+
 // Response describes the response header sent by the server to the client.  A
 // zero response header is sent before each streaming arg.  Thereafter a
 // non-zero response header is sent at the end of the RPC call, right before
@@ -743,6 +878,90 @@ func (x *Response) VDLRead(dec vdl.Decoder) error {
 			}
 		}
 	}
+}
+
+func (x Response) VDLWrite(enc vdl.Encoder) error {
+	if err := enc.StartValue(vdl.TypeOf((*Response)(nil)).Elem()); err != nil {
+		return err
+	}
+	var1 := (x.Error == (error)(nil))
+	if !(var1) {
+		if err := enc.NextField("Error"); err != nil {
+			return err
+		}
+		if err := verror.VDLWrite(enc, x.Error); err != nil {
+			return err
+		}
+	}
+	var2 := (x.EndStreamResults == false)
+	if !(var2) {
+		if err := enc.NextField("EndStreamResults"); err != nil {
+			return err
+		}
+		if err := enc.StartValue(vdl.TypeOf((*bool)(nil))); err != nil {
+			return err
+		}
+		if err := enc.EncodeBool(x.EndStreamResults); err != nil {
+			return err
+		}
+		if err := enc.FinishValue(); err != nil {
+			return err
+		}
+	}
+	var3 := (x.NumPosResults == uint64(0))
+	if !(var3) {
+		if err := enc.NextField("NumPosResults"); err != nil {
+			return err
+		}
+		if err := enc.StartValue(vdl.TypeOf((*uint64)(nil))); err != nil {
+			return err
+		}
+		if err := enc.EncodeUint(x.NumPosResults); err != nil {
+			return err
+		}
+		if err := enc.FinishValue(); err != nil {
+			return err
+		}
+	}
+	var4 := true
+	var5 := (x.TraceResponse.Flags == vtrace.TraceFlags(0))
+	var4 = var4 && var5
+	var6 := true
+	var7 := (x.TraceResponse.Trace.Id == uniqueid.Id{})
+	var6 = var6 && var7
+	var var8 bool
+	if len(x.TraceResponse.Trace.Spans) == 0 {
+		var8 = true
+	}
+	var6 = var6 && var8
+	var4 = var4 && var6
+	if !(var4) {
+		if err := enc.NextField("TraceResponse"); err != nil {
+			return err
+		}
+		if err := x.TraceResponse.VDLWrite(enc); err != nil {
+			return err
+		}
+	}
+	var9 := (x.AckBlessings == false)
+	if !(var9) {
+		if err := enc.NextField("AckBlessings"); err != nil {
+			return err
+		}
+		if err := enc.StartValue(vdl.TypeOf((*bool)(nil))); err != nil {
+			return err
+		}
+		if err := enc.EncodeBool(x.AckBlessings); err != nil {
+			return err
+		}
+		if err := enc.FinishValue(); err != nil {
+			return err
+		}
+	}
+	if err := enc.NextField(""); err != nil {
+		return err
+	}
+	return enc.FinishValue()
 }
 
 //////////////////////////////////////////////////

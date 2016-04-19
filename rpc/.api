@@ -36,6 +36,8 @@ pkg rpc, method (ListenSpec) Copy() ListenSpec
 pkg rpc, method (ListenSpec) String() string
 pkg rpc, method (PublisherEntry) String() string
 pkg rpc, method (PublisherState) String() string
+pkg rpc, method (Request) VDLWrite(vdl.Encoder) error
+pkg rpc, method (Response) VDLWrite(vdl.Encoder) error
 pkg rpc, method (ServerState) String() string
 pkg rpc, type AddressChooser interface { ChooseAddresses }
 pkg rpc, type AddressChooser interface, ChooseAddresses(string, []net.Addr) ([]net.Addr, error)

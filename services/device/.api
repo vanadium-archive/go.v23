@@ -90,33 +90,46 @@ pkg device, method (*StatusTarget) FinishField(vdl.Target, vdl.Target) error
 pkg device, method (*StatusTarget) FinishFields(vdl.FieldsTarget) error
 pkg device, method (*StatusTarget) StartField(string) (vdl.Target, vdl.Target, error)
 pkg device, method (*StatusTarget) StartFields(*vdl.Type) (vdl.FieldsTarget, error)
+pkg device, method (Association) VDLWrite(vdl.Encoder) error
 pkg device, method (BlessClientMessageAppBlessings) FillVDLTarget(vdl.Target, *vdl.Type) error
 pkg device, method (BlessClientMessageAppBlessings) Index() int
 pkg device, method (BlessClientMessageAppBlessings) Interface() interface{}
 pkg device, method (BlessClientMessageAppBlessings) MakeVDLTarget() vdl.Target
 pkg device, method (BlessClientMessageAppBlessings) Name() string
+pkg device, method (BlessClientMessageAppBlessings) VDLWrite(vdl.Encoder) error
 pkg device, method (BlessServerMessageInstancePublicKey) FillVDLTarget(vdl.Target, *vdl.Type) error
 pkg device, method (BlessServerMessageInstancePublicKey) Index() int
 pkg device, method (BlessServerMessageInstancePublicKey) Interface() interface{}
 pkg device, method (BlessServerMessageInstancePublicKey) MakeVDLTarget() vdl.Target
 pkg device, method (BlessServerMessageInstancePublicKey) Name() string
+pkg device, method (BlessServerMessageInstancePublicKey) VDLWrite(vdl.Encoder) error
+pkg device, method (Config) VDLWrite(vdl.Encoder) error
+pkg device, method (Description) VDLWrite(vdl.Encoder) error
+pkg device, method (DeviceStatus) VDLWrite(vdl.Encoder) error
 pkg device, method (InstallationState) String() string
+pkg device, method (InstallationState) VDLWrite(vdl.Encoder) error
+pkg device, method (InstallationStatus) VDLWrite(vdl.Encoder) error
 pkg device, method (InstanceState) String() string
+pkg device, method (InstanceState) VDLWrite(vdl.Encoder) error
+pkg device, method (InstanceStatus) VDLWrite(vdl.Encoder) error
 pkg device, method (StatusDevice) FillVDLTarget(vdl.Target, *vdl.Type) error
 pkg device, method (StatusDevice) Index() int
 pkg device, method (StatusDevice) Interface() interface{}
 pkg device, method (StatusDevice) MakeVDLTarget() vdl.Target
 pkg device, method (StatusDevice) Name() string
+pkg device, method (StatusDevice) VDLWrite(vdl.Encoder) error
 pkg device, method (StatusInstallation) FillVDLTarget(vdl.Target, *vdl.Type) error
 pkg device, method (StatusInstallation) Index() int
 pkg device, method (StatusInstallation) Interface() interface{}
 pkg device, method (StatusInstallation) MakeVDLTarget() vdl.Target
 pkg device, method (StatusInstallation) Name() string
+pkg device, method (StatusInstallation) VDLWrite(vdl.Encoder) error
 pkg device, method (StatusInstance) FillVDLTarget(vdl.Target, *vdl.Type) error
 pkg device, method (StatusInstance) Index() int
 pkg device, method (StatusInstance) Interface() interface{}
 pkg device, method (StatusInstance) MakeVDLTarget() vdl.Target
 pkg device, method (StatusInstance) Name() string
+pkg device, method (StatusInstance) VDLWrite(vdl.Encoder) error
 pkg device, type ApplicationClientMethods interface, Debug(*context.T, ...rpc.CallOpt) (string, error)
 pkg device, type ApplicationClientMethods interface, Delete(*context.T, ...rpc.CallOpt) error
 pkg device, type ApplicationClientMethods interface, Install(*context.T, string, Config, application.Packages, ...rpc.CallOpt) (string, error)
@@ -204,6 +217,7 @@ pkg device, type BlessClientMessage interface, FillVDLTarget(vdl.Target, *vdl.Ty
 pkg device, type BlessClientMessage interface, Index() int
 pkg device, type BlessClientMessage interface, Interface() interface{}
 pkg device, type BlessClientMessage interface, Name() string
+pkg device, type BlessClientMessage interface, VDLWrite(vdl.Encoder) error
 pkg device, type BlessClientMessage interface, unexported methods
 pkg device, type BlessClientMessageAppBlessings struct
 pkg device, type BlessClientMessageAppBlessings struct, Value security.Blessings
@@ -215,6 +229,7 @@ pkg device, type BlessServerMessage interface, FillVDLTarget(vdl.Target, *vdl.Ty
 pkg device, type BlessServerMessage interface, Index() int
 pkg device, type BlessServerMessage interface, Interface() interface{}
 pkg device, type BlessServerMessage interface, Name() string
+pkg device, type BlessServerMessage interface, VDLWrite(vdl.Encoder) error
 pkg device, type BlessServerMessage interface, unexported methods
 pkg device, type BlessServerMessageInstancePublicKey struct
 pkg device, type BlessServerMessageInstancePublicKey struct, Value []byte
@@ -361,6 +376,7 @@ pkg device, type Status interface, FillVDLTarget(vdl.Target, *vdl.Type) error
 pkg device, type Status interface, Index() int
 pkg device, type Status interface, Interface() interface{}
 pkg device, type Status interface, Name() string
+pkg device, type Status interface, VDLWrite(vdl.Encoder) error
 pkg device, type Status interface, unexported methods
 pkg device, type StatusDevice struct
 pkg device, type StatusDevice struct, Value DeviceStatus

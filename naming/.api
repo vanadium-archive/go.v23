@@ -69,22 +69,30 @@ pkg naming, method (GlobChildrenReplyError) Index() int
 pkg naming, method (GlobChildrenReplyError) Interface() interface{}
 pkg naming, method (GlobChildrenReplyError) MakeVDLTarget() vdl.Target
 pkg naming, method (GlobChildrenReplyError) Name() string
+pkg naming, method (GlobChildrenReplyError) VDLWrite(vdl.Encoder) error
 pkg naming, method (GlobChildrenReplyName) FillVDLTarget(vdl.Target, *vdl.Type) error
 pkg naming, method (GlobChildrenReplyName) Index() int
 pkg naming, method (GlobChildrenReplyName) Interface() interface{}
 pkg naming, method (GlobChildrenReplyName) MakeVDLTarget() vdl.Target
 pkg naming, method (GlobChildrenReplyName) Name() string
+pkg naming, method (GlobChildrenReplyName) VDLWrite(vdl.Encoder) error
+pkg naming, method (GlobError) VDLWrite(vdl.Encoder) error
 pkg naming, method (GlobReplyEntry) FillVDLTarget(vdl.Target, *vdl.Type) error
 pkg naming, method (GlobReplyEntry) Index() int
 pkg naming, method (GlobReplyEntry) Interface() interface{}
 pkg naming, method (GlobReplyEntry) MakeVDLTarget() vdl.Target
 pkg naming, method (GlobReplyEntry) Name() string
+pkg naming, method (GlobReplyEntry) VDLWrite(vdl.Encoder) error
 pkg naming, method (GlobReplyError) FillVDLTarget(vdl.Target, *vdl.Type) error
 pkg naming, method (GlobReplyError) Index() int
 pkg naming, method (GlobReplyError) Interface() interface{}
 pkg naming, method (GlobReplyError) MakeVDLTarget() vdl.Target
 pkg naming, method (GlobReplyError) Name() string
+pkg naming, method (GlobReplyError) VDLWrite(vdl.Encoder) error
 pkg naming, method (IsLeaf) NSOpt()
+pkg naming, method (MountEntry) VDLWrite(vdl.Encoder) error
+pkg naming, method (MountFlag) VDLWrite(vdl.Encoder) error
+pkg naming, method (MountedServer) VDLWrite(vdl.Encoder) error
 pkg naming, method (ReplaceMount) NSOpt()
 pkg naming, method (RouteOpt) EndpointOpt()
 pkg naming, method (RoutingID) EndpointOpt()
@@ -114,6 +122,7 @@ pkg naming, type GlobChildrenReply interface, FillVDLTarget(vdl.Target, *vdl.Typ
 pkg naming, type GlobChildrenReply interface, Index() int
 pkg naming, type GlobChildrenReply interface, Interface() interface{}
 pkg naming, type GlobChildrenReply interface, Name() string
+pkg naming, type GlobChildrenReply interface, VDLWrite(vdl.Encoder) error
 pkg naming, type GlobChildrenReply interface, unexported methods
 pkg naming, type GlobChildrenReplyError struct
 pkg naming, type GlobChildrenReplyError struct, Value GlobError
@@ -134,6 +143,7 @@ pkg naming, type GlobReply interface, FillVDLTarget(vdl.Target, *vdl.Type) error
 pkg naming, type GlobReply interface, Index() int
 pkg naming, type GlobReply interface, Interface() interface{}
 pkg naming, type GlobReply interface, Name() string
+pkg naming, type GlobReply interface, VDLWrite(vdl.Encoder) error
 pkg naming, type GlobReply interface, unexported methods
 pkg naming, type GlobReplyEntry struct
 pkg naming, type GlobReplyEntry struct, Value MountEntry

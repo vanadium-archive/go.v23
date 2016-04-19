@@ -259,36 +259,67 @@ pkg syncbase, method (*ValueTarget) FinishFields(vdl.FieldsTarget) error
 pkg syncbase, method (*ValueTarget) StartField(string) (vdl.Target, vdl.Target, error)
 pkg syncbase, method (*ValueTarget) StartFields(*vdl.Type) (vdl.FieldsTarget, error)
 pkg syncbase, method (*ValueTarget) ZeroField(string) error
+pkg syncbase, method (BatchHandle) VDLWrite(vdl.Encoder) error
+pkg syncbase, method (BatchInfo) VDLWrite(vdl.Encoder) error
+pkg syncbase, method (BatchOptions) VDLWrite(vdl.Encoder) error
 pkg syncbase, method (BatchSource) String() string
+pkg syncbase, method (BatchSource) VDLWrite(vdl.Encoder) error
 pkg syncbase, method (BlobFetchState) String() string
+pkg syncbase, method (BlobFetchState) VDLWrite(vdl.Encoder) error
+pkg syncbase, method (BlobFetchStatus) VDLWrite(vdl.Encoder) error
+pkg syncbase, method (BlobRef) VDLWrite(vdl.Encoder) error
+pkg syncbase, method (CollectionRow) VDLWrite(vdl.Encoder) error
 pkg syncbase, method (ConflictDataBatch) FillVDLTarget(vdl.Target, *vdl.Type) error
 pkg syncbase, method (ConflictDataBatch) Index() int
 pkg syncbase, method (ConflictDataBatch) Interface() interface{}
 pkg syncbase, method (ConflictDataBatch) MakeVDLTarget() vdl.Target
 pkg syncbase, method (ConflictDataBatch) Name() string
+pkg syncbase, method (ConflictDataBatch) VDLWrite(vdl.Encoder) error
 pkg syncbase, method (ConflictDataRow) FillVDLTarget(vdl.Target, *vdl.Type) error
 pkg syncbase, method (ConflictDataRow) Index() int
 pkg syncbase, method (ConflictDataRow) Interface() interface{}
 pkg syncbase, method (ConflictDataRow) MakeVDLTarget() vdl.Target
 pkg syncbase, method (ConflictDataRow) Name() string
+pkg syncbase, method (ConflictDataRow) VDLWrite(vdl.Encoder) error
+pkg syncbase, method (ConflictInfo) VDLWrite(vdl.Encoder) error
+pkg syncbase, method (CrPolicy) VDLWrite(vdl.Encoder) error
+pkg syncbase, method (CrRule) VDLWrite(vdl.Encoder) error
+pkg syncbase, method (DevModeUpdateVClockOpts) VDLWrite(vdl.Encoder) error
+pkg syncbase, method (Id) VDLWrite(vdl.Encoder) error
+pkg syncbase, method (KeyValue) VDLWrite(vdl.Encoder) error
 pkg syncbase, method (OperationRead) FillVDLTarget(vdl.Target, *vdl.Type) error
 pkg syncbase, method (OperationRead) Index() int
 pkg syncbase, method (OperationRead) Interface() interface{}
 pkg syncbase, method (OperationRead) MakeVDLTarget() vdl.Target
 pkg syncbase, method (OperationRead) Name() string
+pkg syncbase, method (OperationRead) VDLWrite(vdl.Encoder) error
 pkg syncbase, method (OperationScan) FillVDLTarget(vdl.Target, *vdl.Type) error
 pkg syncbase, method (OperationScan) Index() int
 pkg syncbase, method (OperationScan) Interface() interface{}
 pkg syncbase, method (OperationScan) MakeVDLTarget() vdl.Target
 pkg syncbase, method (OperationScan) Name() string
+pkg syncbase, method (OperationScan) VDLWrite(vdl.Encoder) error
 pkg syncbase, method (OperationWrite) FillVDLTarget(vdl.Target, *vdl.Type) error
 pkg syncbase, method (OperationWrite) Index() int
 pkg syncbase, method (OperationWrite) Interface() interface{}
 pkg syncbase, method (OperationWrite) MakeVDLTarget() vdl.Target
 pkg syncbase, method (OperationWrite) Name() string
+pkg syncbase, method (OperationWrite) VDLWrite(vdl.Encoder) error
+pkg syncbase, method (ResolutionInfo) VDLWrite(vdl.Encoder) error
 pkg syncbase, method (ResolverType) String() string
+pkg syncbase, method (ResolverType) VDLWrite(vdl.Encoder) error
+pkg syncbase, method (RowInfo) VDLWrite(vdl.Encoder) error
+pkg syncbase, method (RowOp) VDLWrite(vdl.Encoder) error
+pkg syncbase, method (ScanOp) VDLWrite(vdl.Encoder) error
+pkg syncbase, method (SchemaMetadata) VDLWrite(vdl.Encoder) error
+pkg syncbase, method (StoreChange) VDLWrite(vdl.Encoder) error
+pkg syncbase, method (SyncgroupMemberInfo) VDLWrite(vdl.Encoder) error
+pkg syncbase, method (SyncgroupSpec) VDLWrite(vdl.Encoder) error
+pkg syncbase, method (Value) VDLWrite(vdl.Encoder) error
 pkg syncbase, method (ValueSelection) String() string
+pkg syncbase, method (ValueSelection) VDLWrite(vdl.Encoder) error
 pkg syncbase, method (ValueState) String() string
+pkg syncbase, method (ValueState) VDLWrite(vdl.Encoder) error
 pkg syncbase, type BatchHandle string
 pkg syncbase, type BatchHandleTarget struct
 pkg syncbase, type BatchHandleTarget struct, Value *BatchHandle
@@ -480,6 +511,7 @@ pkg syncbase, type ConflictData interface, FillVDLTarget(vdl.Target, *vdl.Type) 
 pkg syncbase, type ConflictData interface, Index() int
 pkg syncbase, type ConflictData interface, Interface() interface{}
 pkg syncbase, type ConflictData interface, Name() string
+pkg syncbase, type ConflictData interface, VDLWrite(vdl.Encoder) error
 pkg syncbase, type ConflictData interface, unexported methods
 pkg syncbase, type ConflictDataBatch struct
 pkg syncbase, type ConflictDataBatch struct, Value BatchInfo
@@ -736,6 +768,7 @@ pkg syncbase, type Operation interface, FillVDLTarget(vdl.Target, *vdl.Type) err
 pkg syncbase, type Operation interface, Index() int
 pkg syncbase, type Operation interface, Interface() interface{}
 pkg syncbase, type Operation interface, Name() string
+pkg syncbase, type Operation interface, VDLWrite(vdl.Encoder) error
 pkg syncbase, type Operation interface, unexported methods
 pkg syncbase, type OperationRead struct
 pkg syncbase, type OperationRead struct, Value RowOp

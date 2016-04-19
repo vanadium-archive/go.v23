@@ -208,6 +208,16 @@ func (x *ResumeMarker) VDLRead(dec vdl.Decoder) error {
 	return dec.FinishValue()
 }
 
+func (x ResumeMarker) VDLWrite(enc vdl.Encoder) error {
+	if err := enc.StartValue(vdl.TypeOf((*ResumeMarker)(nil))); err != nil {
+		return err
+	}
+	if err := enc.EncodeBytes([]byte(x)); err != nil {
+		return err
+	}
+	return enc.FinishValue()
+}
+
 // GlobRequest specifies which entities should be watched and, optionally,
 // how to resume from a previous Watch call.
 type GlobRequest struct {
@@ -369,6 +379,43 @@ func (x *GlobRequest) VDLRead(dec vdl.Decoder) error {
 	}
 }
 
+func (x GlobRequest) VDLWrite(enc vdl.Encoder) error {
+	if err := enc.StartValue(vdl.TypeOf((*GlobRequest)(nil)).Elem()); err != nil {
+		return err
+	}
+	var1 := (x.Pattern == "")
+	if !(var1) {
+		if err := enc.NextField("Pattern"); err != nil {
+			return err
+		}
+		if err := enc.StartValue(vdl.TypeOf((*string)(nil))); err != nil {
+			return err
+		}
+		if err := enc.EncodeString(x.Pattern); err != nil {
+			return err
+		}
+		if err := enc.FinishValue(); err != nil {
+			return err
+		}
+	}
+	var var2 bool
+	if len(x.ResumeMarker) == 0 {
+		var2 = true
+	}
+	if !(var2) {
+		if err := enc.NextField("ResumeMarker"); err != nil {
+			return err
+		}
+		if err := x.ResumeMarker.VDLWrite(enc); err != nil {
+			return err
+		}
+	}
+	if err := enc.NextField(""); err != nil {
+		return err
+	}
+	return enc.FinishValue()
+}
+
 // Change is the new value for a watched entity.
 type Change struct {
 	// Name is the Object name of the entity that changed.  This name is relative
@@ -438,7 +485,7 @@ func (m *Change) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 			}
 		}
 	}
-	var10 := m.Value == nil || m.Value.IsNilAny()
+	var10 := m.Value == nil || (m.Value.Type.Kind() == vdl.Any && m.Value.IsNil())
 	if var10 {
 		if err := fieldsTarget1.ZeroField("Value"); err != nil && err != vdl.ErrFieldNoExist {
 			return err
@@ -647,6 +694,94 @@ func (x *Change) VDLRead(dec vdl.Decoder) error {
 			}
 		}
 	}
+}
+
+func (x Change) VDLWrite(enc vdl.Encoder) error {
+	if err := enc.StartValue(vdl.TypeOf((*Change)(nil)).Elem()); err != nil {
+		return err
+	}
+	var1 := (x.Name == "")
+	if !(var1) {
+		if err := enc.NextField("Name"); err != nil {
+			return err
+		}
+		if err := enc.StartValue(vdl.TypeOf((*string)(nil))); err != nil {
+			return err
+		}
+		if err := enc.EncodeString(x.Name); err != nil {
+			return err
+		}
+		if err := enc.FinishValue(); err != nil {
+			return err
+		}
+	}
+	var2 := (x.State == int32(0))
+	if !(var2) {
+		if err := enc.NextField("State"); err != nil {
+			return err
+		}
+		if err := enc.StartValue(vdl.TypeOf((*int32)(nil))); err != nil {
+			return err
+		}
+		if err := enc.EncodeInt(int64(x.State)); err != nil {
+			return err
+		}
+		if err := enc.FinishValue(); err != nil {
+			return err
+		}
+	}
+	var3 := x.Value == nil || (x.Value.Type.Kind() == vdl.Any && x.Value.IsNil())
+	if !(var3) {
+		if err := enc.NextField("Value"); err != nil {
+			return err
+		}
+		if err := enc.StartValue(vdl.AnyType); err != nil {
+			return err
+		}
+		if x.Value.IsNil() {
+			if err := enc.NilValue(x.Value.Type); err != nil {
+				return err
+			}
+		} else {
+			if err := x.Value.VDLWrite(enc); err != nil {
+				return err
+			}
+		}
+		if err := enc.FinishValue(); err != nil {
+			return err
+		}
+	}
+	var var4 bool
+	if len(x.ResumeMarker) == 0 {
+		var4 = true
+	}
+	if !(var4) {
+		if err := enc.NextField("ResumeMarker"); err != nil {
+			return err
+		}
+		if err := x.ResumeMarker.VDLWrite(enc); err != nil {
+			return err
+		}
+	}
+	var5 := (x.Continued == false)
+	if !(var5) {
+		if err := enc.NextField("Continued"); err != nil {
+			return err
+		}
+		if err := enc.StartValue(vdl.TypeOf((*bool)(nil))); err != nil {
+			return err
+		}
+		if err := enc.EncodeBool(x.Continued); err != nil {
+			return err
+		}
+		if err := enc.FinishValue(); err != nil {
+			return err
+		}
+	}
+	if err := enc.NextField(""); err != nil {
+		return err
+	}
+	return enc.FinishValue()
 }
 
 //////////////////////////////////////////////////

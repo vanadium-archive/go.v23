@@ -186,6 +186,46 @@ func (x *MediaInfo) VDLRead(dec vdl.Decoder) error {
 	}
 }
 
+func (x MediaInfo) VDLWrite(enc vdl.Encoder) error {
+	if err := enc.StartValue(vdl.TypeOf((*MediaInfo)(nil)).Elem()); err != nil {
+		return err
+	}
+	var1 := (x.Type == "")
+	if !(var1) {
+		if err := enc.NextField("Type"); err != nil {
+			return err
+		}
+		if err := enc.StartValue(vdl.TypeOf((*string)(nil))); err != nil {
+			return err
+		}
+		if err := enc.EncodeString(x.Type); err != nil {
+			return err
+		}
+		if err := enc.FinishValue(); err != nil {
+			return err
+		}
+	}
+	var2 := (x.Encoding == "")
+	if !(var2) {
+		if err := enc.NextField("Encoding"); err != nil {
+			return err
+		}
+		if err := enc.StartValue(vdl.TypeOf((*string)(nil))); err != nil {
+			return err
+		}
+		if err := enc.EncodeString(x.Encoding); err != nil {
+			return err
+		}
+		if err := enc.FinishValue(); err != nil {
+			return err
+		}
+	}
+	if err := enc.NextField(""); err != nil {
+		return err
+	}
+	return enc.FinishValue()
+}
+
 //////////////////////////////////////////////////
 // Interface definitions
 

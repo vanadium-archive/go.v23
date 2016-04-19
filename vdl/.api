@@ -61,6 +61,7 @@ pkg vdl, func SortValuesAsString([]*Value) []*Value
 pkg vdl, func SplitIdent(string) (string, string)
 pkg vdl, func StringValue(string) *Value
 pkg vdl, func StructType(...Field) *Type
+pkg vdl, func Transcode(Encoder, Decoder) error
 pkg vdl, func TypeFromReflect(reflect.Type) (*Type, error)
 pkg vdl, func TypeObjectValue(*Type) *Value
 pkg vdl, func TypeOf(interface{}) *Type
@@ -449,6 +450,7 @@ pkg vdl, method (*Value) Uint() uint64
 pkg vdl, method (*Value) UnionField() (int, *Value)
 pkg vdl, method (*Value) VDLEqual(interface{}) bool
 pkg vdl, method (*Value) VDLRead(Decoder) error
+pkg vdl, method (*Value) VDLWrite(Encoder) error
 pkg vdl, method (*WireError) FillVDLTarget(Target, *Type) error
 pkg vdl, method (*WireError) MakeVDLTarget() Target
 pkg vdl, method (*WireError) VDLRead(Decoder) error
@@ -496,7 +498,9 @@ pkg vdl, method (*WireRetryCodeTarget) StartList(*Type, int) (ListTarget, error)
 pkg vdl, method (*WireRetryCodeTarget) StartMap(*Type, int) (MapTarget, error)
 pkg vdl, method (*WireRetryCodeTarget) StartSet(*Type, int) (SetTarget, error)
 pkg vdl, method (Kind) String() string
+pkg vdl, method (WireError) VDLWrite(Encoder) error
 pkg vdl, method (WireRetryCode) String() string
+pkg vdl, method (WireRetryCode) VDLWrite(Encoder) error
 pkg vdl, type BoolTarget struct
 pkg vdl, type BoolTarget struct, Value *bool
 pkg vdl, type BoolTarget struct, embedded TargetBase
@@ -527,20 +531,20 @@ pkg vdl, type Decoder interface, SkipValue() error
 pkg vdl, type Decoder interface, StackDepth() int
 pkg vdl, type Decoder interface, StartValue() error
 pkg vdl, type Decoder interface, Type() *Type
-pkg vdl, type Encoder interface { EncodeBool, EncodeBytes, EncodeFloat, EncodeInt, EncodeLenHint, EncodeString, EncodeTopLevelZero, EncodeTypeObject, EncodeUint, EncodeZero, FinishComposite, FinishValue, StartComposite, StartValue }
+pkg vdl, type Encoder interface { EncodeBool, EncodeBytes, EncodeFloat, EncodeInt, EncodeString, EncodeTypeObject, EncodeUint, FinishValue, NextEntry, NextField, NilValue, SetLenHint, SetNextStartValueIsOptional, StartValue }
 pkg vdl, type Encoder interface, EncodeBool(bool) error
 pkg vdl, type Encoder interface, EncodeBytes([]byte) error
 pkg vdl, type Encoder interface, EncodeFloat(float64) error
 pkg vdl, type Encoder interface, EncodeInt(int64) error
-pkg vdl, type Encoder interface, EncodeLenHint(int) error
 pkg vdl, type Encoder interface, EncodeString(string) error
-pkg vdl, type Encoder interface, EncodeTopLevelZero() error
 pkg vdl, type Encoder interface, EncodeTypeObject(*Type) error
 pkg vdl, type Encoder interface, EncodeUint(uint64) error
-pkg vdl, type Encoder interface, EncodeZero() error
-pkg vdl, type Encoder interface, FinishComposite() error
 pkg vdl, type Encoder interface, FinishValue() error
-pkg vdl, type Encoder interface, StartComposite() error
+pkg vdl, type Encoder interface, NextEntry(bool) error
+pkg vdl, type Encoder interface, NextField(string) error
+pkg vdl, type Encoder interface, NilValue(*Type) error
+pkg vdl, type Encoder interface, SetLenHint(int) error
+pkg vdl, type Encoder interface, SetNextStartValueIsOptional()
 pkg vdl, type Encoder interface, StartValue(*Type) error
 pkg vdl, type Equaler interface { VDLEqual }
 pkg vdl, type Equaler interface, VDLEqual(interface{}) bool

@@ -250,6 +250,76 @@ func (x *AddressInfo) VDLRead(dec vdl.Decoder) error {
 	}
 }
 
+func (x AddressInfo) VDLWrite(enc vdl.Encoder) error {
+	if err := enc.StartValue(vdl.TypeOf((*AddressInfo)(nil)).Elem()); err != nil {
+		return err
+	}
+	var1 := (x.Street == "")
+	if !(var1) {
+		if err := enc.NextField("Street"); err != nil {
+			return err
+		}
+		if err := enc.StartValue(vdl.TypeOf((*string)(nil))); err != nil {
+			return err
+		}
+		if err := enc.EncodeString(x.Street); err != nil {
+			return err
+		}
+		if err := enc.FinishValue(); err != nil {
+			return err
+		}
+	}
+	var2 := (x.City == "")
+	if !(var2) {
+		if err := enc.NextField("City"); err != nil {
+			return err
+		}
+		if err := enc.StartValue(vdl.TypeOf((*string)(nil))); err != nil {
+			return err
+		}
+		if err := enc.EncodeString(x.City); err != nil {
+			return err
+		}
+		if err := enc.FinishValue(); err != nil {
+			return err
+		}
+	}
+	var3 := (x.State == "")
+	if !(var3) {
+		if err := enc.NextField("State"); err != nil {
+			return err
+		}
+		if err := enc.StartValue(vdl.TypeOf((*string)(nil))); err != nil {
+			return err
+		}
+		if err := enc.EncodeString(x.State); err != nil {
+			return err
+		}
+		if err := enc.FinishValue(); err != nil {
+			return err
+		}
+	}
+	var4 := (x.Zip == "")
+	if !(var4) {
+		if err := enc.NextField("Zip"); err != nil {
+			return err
+		}
+		if err := enc.StartValue(vdl.TypeOf((*string)(nil))); err != nil {
+			return err
+		}
+		if err := enc.EncodeString(x.Zip); err != nil {
+			return err
+		}
+		if err := enc.FinishValue(); err != nil {
+			return err
+		}
+	}
+	if err := enc.NextField(""); err != nil {
+		return err
+	}
+	return enc.FinishValue()
+}
+
 type CreditAgency int
 
 const (
@@ -353,6 +423,16 @@ func (x *CreditAgency) VDLRead(dec vdl.Decoder) error {
 	return dec.FinishValue()
 }
 
+func (x CreditAgency) VDLWrite(enc vdl.Encoder) error {
+	if err := enc.StartValue(vdl.TypeOf((*CreditAgency)(nil))); err != nil {
+		return err
+	}
+	if err := enc.EncodeString(x.String()); err != nil {
+		return err
+	}
+	return enc.FinishValue()
+}
+
 type ExperianRating int
 
 const (
@@ -446,6 +526,16 @@ func (x *ExperianRating) VDLRead(dec vdl.Decoder) error {
 		return err
 	}
 	return dec.FinishValue()
+}
+
+func (x ExperianRating) VDLWrite(enc vdl.Encoder) error {
+	if err := enc.StartValue(vdl.TypeOf((*ExperianRating)(nil))); err != nil {
+		return err
+	}
+	if err := enc.EncodeString(x.String()); err != nil {
+		return err
+	}
+	return enc.FinishValue()
 }
 
 type EquifaxCreditReport struct {
@@ -569,6 +659,31 @@ func (x *EquifaxCreditReport) VDLRead(dec vdl.Decoder) error {
 	}
 }
 
+func (x EquifaxCreditReport) VDLWrite(enc vdl.Encoder) error {
+	if err := enc.StartValue(vdl.TypeOf((*EquifaxCreditReport)(nil)).Elem()); err != nil {
+		return err
+	}
+	var1 := (x.Rating == byte(0))
+	if !(var1) {
+		if err := enc.NextField("Rating"); err != nil {
+			return err
+		}
+		if err := enc.StartValue(vdl.TypeOf((*byte)(nil))); err != nil {
+			return err
+		}
+		if err := enc.EncodeUint(uint64(x.Rating)); err != nil {
+			return err
+		}
+		if err := enc.FinishValue(); err != nil {
+			return err
+		}
+	}
+	if err := enc.NextField(""); err != nil {
+		return err
+	}
+	return enc.FinishValue()
+}
+
 type ExperianCreditReport struct {
 	Rating ExperianRating
 }
@@ -681,6 +796,25 @@ func (x *ExperianCreditReport) VDLRead(dec vdl.Decoder) error {
 			}
 		}
 	}
+}
+
+func (x ExperianCreditReport) VDLWrite(enc vdl.Encoder) error {
+	if err := enc.StartValue(vdl.TypeOf((*ExperianCreditReport)(nil)).Elem()); err != nil {
+		return err
+	}
+	var1 := (x.Rating == ExperianRatingGood)
+	if !(var1) {
+		if err := enc.NextField("Rating"); err != nil {
+			return err
+		}
+		if err := x.Rating.VDLWrite(enc); err != nil {
+			return err
+		}
+	}
+	if err := enc.NextField(""); err != nil {
+		return err
+	}
+	return enc.FinishValue()
 }
 
 type TransUnionCreditReport struct {
@@ -804,6 +938,31 @@ func (x *TransUnionCreditReport) VDLRead(dec vdl.Decoder) error {
 	}
 }
 
+func (x TransUnionCreditReport) VDLWrite(enc vdl.Encoder) error {
+	if err := enc.StartValue(vdl.TypeOf((*TransUnionCreditReport)(nil)).Elem()); err != nil {
+		return err
+	}
+	var1 := (x.Rating == int16(0))
+	if !(var1) {
+		if err := enc.NextField("Rating"); err != nil {
+			return err
+		}
+		if err := enc.StartValue(vdl.TypeOf((*int16)(nil))); err != nil {
+			return err
+		}
+		if err := enc.EncodeInt(int64(x.Rating)); err != nil {
+			return err
+		}
+		if err := enc.FinishValue(); err != nil {
+			return err
+		}
+	}
+	if err := enc.NextField(""); err != nil {
+		return err
+	}
+	return enc.FinishValue()
+}
+
 type (
 	// AgencyReport represents any single field of the AgencyReport union type.
 	AgencyReport interface {
@@ -816,6 +975,7 @@ type (
 		// __VDLReflect describes the AgencyReport union type.
 		__VDLReflect(__AgencyReportReflect)
 		FillVDLTarget(vdl.Target, *vdl.Type) error
+		VDLWrite(vdl.Encoder) error
 	}
 	// AgencyReportEquifaxReport represents field EquifaxReport of the AgencyReport union type.
 	AgencyReportEquifaxReport struct{ Value EquifaxCreditReport }
@@ -1033,6 +1193,52 @@ func VDLReadAgencyReport(dec vdl.Decoder, x *AgencyReport) error {
 	return dec.FinishValue()
 }
 
+func (x AgencyReportEquifaxReport) VDLWrite(enc vdl.Encoder) error {
+	if err := enc.StartValue(vdl.TypeOf((*AgencyReport)(nil))); err != nil {
+		return err
+	}
+	if err := enc.NextField("EquifaxReport"); err != nil {
+		return err
+	}
+	if err := x.Value.VDLWrite(enc); err != nil {
+		return err
+	}
+	if err := enc.NextField(""); err != nil {
+		return err
+	}
+	return enc.FinishValue()
+}
+func (x AgencyReportExperianReport) VDLWrite(enc vdl.Encoder) error {
+	if err := enc.StartValue(vdl.TypeOf((*AgencyReport)(nil))); err != nil {
+		return err
+	}
+	if err := enc.NextField("ExperianReport"); err != nil {
+		return err
+	}
+	if err := x.Value.VDLWrite(enc); err != nil {
+		return err
+	}
+	if err := enc.NextField(""); err != nil {
+		return err
+	}
+	return enc.FinishValue()
+}
+func (x AgencyReportTransUnionReport) VDLWrite(enc vdl.Encoder) error {
+	if err := enc.StartValue(vdl.TypeOf((*AgencyReport)(nil))); err != nil {
+		return err
+	}
+	if err := enc.NextField("TransUnionReport"); err != nil {
+		return err
+	}
+	if err := x.Value.VDLWrite(enc); err != nil {
+		return err
+	}
+	if err := enc.NextField(""); err != nil {
+		return err
+	}
+	return enc.FinishValue()
+}
+
 type CreditReport struct {
 	Agency CreditAgency
 	Report AgencyReport
@@ -1189,6 +1395,39 @@ func (x *CreditReport) VDLRead(dec vdl.Decoder) error {
 			}
 		}
 	}
+}
+
+func (x CreditReport) VDLWrite(enc vdl.Encoder) error {
+	if err := enc.StartValue(vdl.TypeOf((*CreditReport)(nil)).Elem()); err != nil {
+		return err
+	}
+	var1 := (x.Agency == CreditAgencyEquifax)
+	if !(var1) {
+		if err := enc.NextField("Agency"); err != nil {
+			return err
+		}
+		if err := x.Agency.VDLWrite(enc); err != nil {
+			return err
+		}
+	}
+	var var2 bool
+	if field, ok := x.Report.(AgencyReportEquifaxReport); ok {
+
+		var3 := (field.Value == EquifaxCreditReport{})
+		var2 = var3
+	}
+	if !(var2) {
+		if err := enc.NextField("Report"); err != nil {
+			return err
+		}
+		if err := x.Report.VDLWrite(enc); err != nil {
+			return err
+		}
+	}
+	if err := enc.NextField(""); err != nil {
+		return err
+	}
+	return enc.FinishValue()
 }
 
 type Customer struct {
@@ -1458,6 +1697,81 @@ func (x *Customer) VDLRead(dec vdl.Decoder) error {
 			}
 		}
 	}
+}
+
+func (x Customer) VDLWrite(enc vdl.Encoder) error {
+	if err := enc.StartValue(vdl.TypeOf((*Customer)(nil)).Elem()); err != nil {
+		return err
+	}
+	var1 := (x.Name == "")
+	if !(var1) {
+		if err := enc.NextField("Name"); err != nil {
+			return err
+		}
+		if err := enc.StartValue(vdl.TypeOf((*string)(nil))); err != nil {
+			return err
+		}
+		if err := enc.EncodeString(x.Name); err != nil {
+			return err
+		}
+		if err := enc.FinishValue(); err != nil {
+			return err
+		}
+	}
+	var2 := (x.Id == int64(0))
+	if !(var2) {
+		if err := enc.NextField("Id"); err != nil {
+			return err
+		}
+		if err := enc.StartValue(vdl.TypeOf((*int64)(nil))); err != nil {
+			return err
+		}
+		if err := enc.EncodeInt(x.Id); err != nil {
+			return err
+		}
+		if err := enc.FinishValue(); err != nil {
+			return err
+		}
+	}
+	var3 := (x.Active == false)
+	if !(var3) {
+		if err := enc.NextField("Active"); err != nil {
+			return err
+		}
+		if err := enc.StartValue(vdl.TypeOf((*bool)(nil))); err != nil {
+			return err
+		}
+		if err := enc.EncodeBool(x.Active); err != nil {
+			return err
+		}
+		if err := enc.FinishValue(); err != nil {
+			return err
+		}
+	}
+	var4 := (x.Address == AddressInfo{})
+	if !(var4) {
+		if err := enc.NextField("Address"); err != nil {
+			return err
+		}
+		if err := x.Address.VDLWrite(enc); err != nil {
+			return err
+		}
+	}
+	var5 := (x.Credit == CreditReport{
+		Report: AgencyReportEquifaxReport{},
+	})
+	if !(var5) {
+		if err := enc.NextField("Credit"); err != nil {
+			return err
+		}
+		if err := x.Credit.VDLWrite(enc); err != nil {
+			return err
+		}
+	}
+	if err := enc.NextField(""); err != nil {
+		return err
+	}
+	return enc.FinishValue()
 }
 
 var __VDLInitCalled bool

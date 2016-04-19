@@ -77,6 +77,16 @@ func (x *BlessingPatternChunk) VDLRead(dec vdl.Decoder) error {
 	return dec.FinishValue()
 }
 
+func (x BlessingPatternChunk) VDLWrite(enc vdl.Encoder) error {
+	if err := enc.StartValue(vdl.TypeOf((*BlessingPatternChunk)(nil))); err != nil {
+		return err
+	}
+	if err := enc.EncodeString(string(x)); err != nil {
+		return err
+	}
+	return enc.FinishValue()
+}
+
 type GetRequest struct {
 }
 
@@ -156,6 +166,16 @@ func (x *GetRequest) VDLRead(dec vdl.Decoder) error {
 			}
 		}
 	}
+}
+
+func (x GetRequest) VDLWrite(enc vdl.Encoder) error {
+	if err := enc.StartValue(vdl.TypeOf((*GetRequest)(nil)).Elem()); err != nil {
+		return err
+	}
+	if err := enc.NextField(""); err != nil {
+		return err
+	}
+	return enc.FinishValue()
 }
 
 type GetResponse struct {
@@ -360,6 +380,43 @@ func __VDLRead1_set(dec vdl.Decoder, x *map[BlessingPatternChunk]struct{}) error
 	}
 }
 
+func (x GetResponse) VDLWrite(enc vdl.Encoder) error {
+	if err := enc.StartValue(vdl.TypeOf((*GetResponse)(nil)).Elem()); err != nil {
+		return err
+	}
+	var var1 bool
+	if len(x.Entries) == 0 {
+		var1 = true
+	}
+	if !(var1) {
+		if err := enc.NextField("Entries"); err != nil {
+			return err
+		}
+		if err := __VDLWrite1_set(enc, &x.Entries); err != nil {
+			return err
+		}
+	}
+	if err := enc.NextField(""); err != nil {
+		return err
+	}
+	return enc.FinishValue()
+}
+
+func __VDLWrite1_set(enc vdl.Encoder, x *map[BlessingPatternChunk]struct{}) error {
+	if err := enc.StartValue(vdl.TypeOf((*map[BlessingPatternChunk]struct{})(nil))); err != nil {
+		return err
+	}
+	for key := range *x {
+		if err := key.VDLWrite(enc); err != nil {
+			return err
+		}
+	}
+	if err := enc.NextEntry(true); err != nil {
+		return err
+	}
+	return enc.FinishValue()
+}
+
 // ApproximationType defines the type of approximation desired when a Relate
 // call encounters an error (inaccessible or undefined group in a blessing
 // pattern, cyclic group definitions, storage errors, invalid patterns
@@ -458,6 +515,16 @@ func (x *ApproximationType) VDLRead(dec vdl.Decoder) error {
 		return err
 	}
 	return dec.FinishValue()
+}
+
+func (x ApproximationType) VDLWrite(enc vdl.Encoder) error {
+	if err := enc.StartValue(vdl.TypeOf((*ApproximationType)(nil))); err != nil {
+		return err
+	}
+	if err := enc.EncodeString(x.String()); err != nil {
+		return err
+	}
+	return enc.FinishValue()
 }
 
 // Approximation contains information about membership approximations made
@@ -617,6 +684,46 @@ func (x *Approximation) VDLRead(dec vdl.Decoder) error {
 			}
 		}
 	}
+}
+
+func (x Approximation) VDLWrite(enc vdl.Encoder) error {
+	if err := enc.StartValue(vdl.TypeOf((*Approximation)(nil)).Elem()); err != nil {
+		return err
+	}
+	var1 := (x.Reason == "")
+	if !(var1) {
+		if err := enc.NextField("Reason"); err != nil {
+			return err
+		}
+		if err := enc.StartValue(vdl.TypeOf((*string)(nil))); err != nil {
+			return err
+		}
+		if err := enc.EncodeString(x.Reason); err != nil {
+			return err
+		}
+		if err := enc.FinishValue(); err != nil {
+			return err
+		}
+	}
+	var2 := (x.Details == "")
+	if !(var2) {
+		if err := enc.NextField("Details"); err != nil {
+			return err
+		}
+		if err := enc.StartValue(vdl.TypeOf((*string)(nil))); err != nil {
+			return err
+		}
+		if err := enc.EncodeString(x.Details); err != nil {
+			return err
+		}
+		if err := enc.FinishValue(); err != nil {
+			return err
+		}
+	}
+	if err := enc.NextField(""); err != nil {
+		return err
+	}
+	return enc.FinishValue()
 }
 
 //////////////////////////////////////////////////

@@ -183,6 +183,46 @@ func (x *LogEntry) VDLRead(dec vdl.Decoder) error {
 	}
 }
 
+func (x LogEntry) VDLWrite(enc vdl.Encoder) error {
+	if err := enc.StartValue(vdl.TypeOf((*LogEntry)(nil)).Elem()); err != nil {
+		return err
+	}
+	var1 := (x.Position == int64(0))
+	if !(var1) {
+		if err := enc.NextField("Position"); err != nil {
+			return err
+		}
+		if err := enc.StartValue(vdl.TypeOf((*int64)(nil))); err != nil {
+			return err
+		}
+		if err := enc.EncodeInt(x.Position); err != nil {
+			return err
+		}
+		if err := enc.FinishValue(); err != nil {
+			return err
+		}
+	}
+	var2 := (x.Line == "")
+	if !(var2) {
+		if err := enc.NextField("Line"); err != nil {
+			return err
+		}
+		if err := enc.StartValue(vdl.TypeOf((*string)(nil))); err != nil {
+			return err
+		}
+		if err := enc.EncodeString(x.Line); err != nil {
+			return err
+		}
+		if err := enc.FinishValue(); err != nil {
+			return err
+		}
+	}
+	if err := enc.NextField(""); err != nil {
+		return err
+	}
+	return enc.FinishValue()
+}
+
 //////////////////////////////////////////////////
 // Const definitions
 

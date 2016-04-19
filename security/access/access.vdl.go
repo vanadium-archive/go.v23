@@ -419,6 +419,76 @@ func __VDLRead2_list(dec vdl.Decoder, x *[]string) error {
 	}
 }
 
+func (x AccessList) VDLWrite(enc vdl.Encoder) error {
+	if err := enc.StartValue(vdl.TypeOf((*AccessList)(nil)).Elem()); err != nil {
+		return err
+	}
+	var var1 bool
+	if len(x.In) == 0 {
+		var1 = true
+	}
+	if !(var1) {
+		if err := enc.NextField("In"); err != nil {
+			return err
+		}
+		if err := __VDLWrite1_list(enc, &x.In); err != nil {
+			return err
+		}
+	}
+	var var2 bool
+	if len(x.NotIn) == 0 {
+		var2 = true
+	}
+	if !(var2) {
+		if err := enc.NextField("NotIn"); err != nil {
+			return err
+		}
+		if err := __VDLWrite2_list(enc, &x.NotIn); err != nil {
+			return err
+		}
+	}
+	if err := enc.NextField(""); err != nil {
+		return err
+	}
+	return enc.FinishValue()
+}
+
+func __VDLWrite1_list(enc vdl.Encoder, x *[]security.BlessingPattern) error {
+	if err := enc.StartValue(vdl.TypeOf((*[]security.BlessingPattern)(nil))); err != nil {
+		return err
+	}
+	for i := 0; i < len(*x); i++ {
+		if err := (*x)[i].VDLWrite(enc); err != nil {
+			return err
+		}
+	}
+	if err := enc.NextEntry(true); err != nil {
+		return err
+	}
+	return enc.FinishValue()
+}
+
+func __VDLWrite2_list(enc vdl.Encoder, x *[]string) error {
+	if err := enc.StartValue(vdl.TypeOf((*[]string)(nil))); err != nil {
+		return err
+	}
+	for i := 0; i < len(*x); i++ {
+		if err := enc.StartValue(vdl.TypeOf((*string)(nil))); err != nil {
+			return err
+		}
+		if err := enc.EncodeString((*x)[i]); err != nil {
+			return err
+		}
+		if err := enc.FinishValue(); err != nil {
+			return err
+		}
+	}
+	if err := enc.NextEntry(true); err != nil {
+		return err
+	}
+	return enc.FinishValue()
+}
+
 // Permissions maps string tags to access lists specifying the blessings
 // required to invoke methods with that tag.
 //
@@ -555,6 +625,30 @@ func (x *Permissions) VDLRead(dec vdl.Decoder) error {
 	}
 }
 
+func (x Permissions) VDLWrite(enc vdl.Encoder) error {
+	if err := enc.StartValue(vdl.TypeOf((*Permissions)(nil))); err != nil {
+		return err
+	}
+	for key, elem := range x {
+		if err := enc.StartValue(vdl.TypeOf((*string)(nil))); err != nil {
+			return err
+		}
+		if err := enc.EncodeString(key); err != nil {
+			return err
+		}
+		if err := enc.FinishValue(); err != nil {
+			return err
+		}
+		if err := elem.VDLWrite(enc); err != nil {
+			return err
+		}
+	}
+	if err := enc.NextEntry(true); err != nil {
+		return err
+	}
+	return enc.FinishValue()
+}
+
 // Tag is used to associate methods with an AccessList in a Permissions.
 //
 // While services can define their own tag type and values, many
@@ -604,6 +698,16 @@ func (x *Tag) VDLRead(dec vdl.Decoder) error {
 	}
 	*x = Tag(tmp)
 	return dec.FinishValue()
+}
+
+func (x Tag) VDLWrite(enc vdl.Encoder) error {
+	if err := enc.StartValue(vdl.TypeOf((*Tag)(nil))); err != nil {
+		return err
+	}
+	if err := enc.EncodeString(string(x)); err != nil {
+		return err
+	}
+	return enc.FinishValue()
 }
 
 //////////////////////////////////////////////////

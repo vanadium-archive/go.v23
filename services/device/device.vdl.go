@@ -166,6 +166,36 @@ func (x *Config) VDLRead(dec vdl.Decoder) error {
 	}
 }
 
+func (x Config) VDLWrite(enc vdl.Encoder) error {
+	if err := enc.StartValue(vdl.TypeOf((*Config)(nil))); err != nil {
+		return err
+	}
+	for key, elem := range x {
+		if err := enc.StartValue(vdl.TypeOf((*string)(nil))); err != nil {
+			return err
+		}
+		if err := enc.EncodeString(key); err != nil {
+			return err
+		}
+		if err := enc.FinishValue(); err != nil {
+			return err
+		}
+		if err := enc.StartValue(vdl.TypeOf((*string)(nil))); err != nil {
+			return err
+		}
+		if err := enc.EncodeString(elem); err != nil {
+			return err
+		}
+		if err := enc.FinishValue(); err != nil {
+			return err
+		}
+	}
+	if err := enc.NextEntry(true); err != nil {
+		return err
+	}
+	return enc.FinishValue()
+}
+
 // InstallationState describes the states that an installation can be in at any
 // time.
 type InstallationState int
@@ -261,6 +291,16 @@ func (x *InstallationState) VDLRead(dec vdl.Decoder) error {
 		return err
 	}
 	return dec.FinishValue()
+}
+
+func (x InstallationState) VDLWrite(enc vdl.Encoder) error {
+	if err := enc.StartValue(vdl.TypeOf((*InstallationState)(nil))); err != nil {
+		return err
+	}
+	if err := enc.EncodeString(x.String()); err != nil {
+		return err
+	}
+	return enc.FinishValue()
 }
 
 // InstanceState describes the states that an instance can be in at any
@@ -390,6 +430,16 @@ func (x *InstanceState) VDLRead(dec vdl.Decoder) error {
 		return err
 	}
 	return dec.FinishValue()
+}
+
+func (x InstanceState) VDLWrite(enc vdl.Encoder) error {
+	if err := enc.StartValue(vdl.TypeOf((*InstanceState)(nil))); err != nil {
+		return err
+	}
+	if err := enc.EncodeString(x.String()); err != nil {
+		return err
+	}
+	return enc.FinishValue()
 }
 
 // InstanceStatus specifies the Status returned by the Application Status method
@@ -546,6 +596,40 @@ func (x *InstanceStatus) VDLRead(dec vdl.Decoder) error {
 	}
 }
 
+func (x InstanceStatus) VDLWrite(enc vdl.Encoder) error {
+	if err := enc.StartValue(vdl.TypeOf((*InstanceStatus)(nil)).Elem()); err != nil {
+		return err
+	}
+	var1 := (x.State == InstanceStateLaunching)
+	if !(var1) {
+		if err := enc.NextField("State"); err != nil {
+			return err
+		}
+		if err := x.State.VDLWrite(enc); err != nil {
+			return err
+		}
+	}
+	var2 := (x.Version == "")
+	if !(var2) {
+		if err := enc.NextField("Version"); err != nil {
+			return err
+		}
+		if err := enc.StartValue(vdl.TypeOf((*string)(nil))); err != nil {
+			return err
+		}
+		if err := enc.EncodeString(x.Version); err != nil {
+			return err
+		}
+		if err := enc.FinishValue(); err != nil {
+			return err
+		}
+	}
+	if err := enc.NextField(""); err != nil {
+		return err
+	}
+	return enc.FinishValue()
+}
+
 // InstallationStatus specifies the Status returned by the Application Status
 // method for installation objects.
 type InstallationStatus struct {
@@ -698,6 +782,40 @@ func (x *InstallationStatus) VDLRead(dec vdl.Decoder) error {
 			}
 		}
 	}
+}
+
+func (x InstallationStatus) VDLWrite(enc vdl.Encoder) error {
+	if err := enc.StartValue(vdl.TypeOf((*InstallationStatus)(nil)).Elem()); err != nil {
+		return err
+	}
+	var1 := (x.State == InstallationStateActive)
+	if !(var1) {
+		if err := enc.NextField("State"); err != nil {
+			return err
+		}
+		if err := x.State.VDLWrite(enc); err != nil {
+			return err
+		}
+	}
+	var2 := (x.Version == "")
+	if !(var2) {
+		if err := enc.NextField("Version"); err != nil {
+			return err
+		}
+		if err := enc.StartValue(vdl.TypeOf((*string)(nil))); err != nil {
+			return err
+		}
+		if err := enc.EncodeString(x.Version); err != nil {
+			return err
+		}
+		if err := enc.FinishValue(); err != nil {
+			return err
+		}
+	}
+	if err := enc.NextField(""); err != nil {
+		return err
+	}
+	return enc.FinishValue()
 }
 
 // DeviceStatus specifies the Status returned by the Application Status method
@@ -854,6 +972,40 @@ func (x *DeviceStatus) VDLRead(dec vdl.Decoder) error {
 	}
 }
 
+func (x DeviceStatus) VDLWrite(enc vdl.Encoder) error {
+	if err := enc.StartValue(vdl.TypeOf((*DeviceStatus)(nil)).Elem()); err != nil {
+		return err
+	}
+	var1 := (x.State == InstanceStateLaunching)
+	if !(var1) {
+		if err := enc.NextField("State"); err != nil {
+			return err
+		}
+		if err := x.State.VDLWrite(enc); err != nil {
+			return err
+		}
+	}
+	var2 := (x.Version == "")
+	if !(var2) {
+		if err := enc.NextField("Version"); err != nil {
+			return err
+		}
+		if err := enc.StartValue(vdl.TypeOf((*string)(nil))); err != nil {
+			return err
+		}
+		if err := enc.EncodeString(x.Version); err != nil {
+			return err
+		}
+		if err := enc.FinishValue(); err != nil {
+			return err
+		}
+	}
+	if err := enc.NextField(""); err != nil {
+		return err
+	}
+	return enc.FinishValue()
+}
+
 type (
 	// Status represents any single field of the Status union type.
 	//
@@ -868,6 +1020,7 @@ type (
 		// __VDLReflect describes the Status union type.
 		__VDLReflect(__StatusReflect)
 		FillVDLTarget(vdl.Target, *vdl.Type) error
+		VDLWrite(vdl.Encoder) error
 	}
 	// StatusInstance represents field Instance of the Status union type.
 	StatusInstance struct{ Value InstanceStatus }
@@ -1085,6 +1238,52 @@ func VDLReadStatus(dec vdl.Decoder, x *Status) error {
 	return dec.FinishValue()
 }
 
+func (x StatusInstance) VDLWrite(enc vdl.Encoder) error {
+	if err := enc.StartValue(vdl.TypeOf((*Status)(nil))); err != nil {
+		return err
+	}
+	if err := enc.NextField("Instance"); err != nil {
+		return err
+	}
+	if err := x.Value.VDLWrite(enc); err != nil {
+		return err
+	}
+	if err := enc.NextField(""); err != nil {
+		return err
+	}
+	return enc.FinishValue()
+}
+func (x StatusInstallation) VDLWrite(enc vdl.Encoder) error {
+	if err := enc.StartValue(vdl.TypeOf((*Status)(nil))); err != nil {
+		return err
+	}
+	if err := enc.NextField("Installation"); err != nil {
+		return err
+	}
+	if err := x.Value.VDLWrite(enc); err != nil {
+		return err
+	}
+	if err := enc.NextField(""); err != nil {
+		return err
+	}
+	return enc.FinishValue()
+}
+func (x StatusDevice) VDLWrite(enc vdl.Encoder) error {
+	if err := enc.StartValue(vdl.TypeOf((*Status)(nil))); err != nil {
+		return err
+	}
+	if err := enc.NextField("Device"); err != nil {
+		return err
+	}
+	if err := x.Value.VDLWrite(enc); err != nil {
+		return err
+	}
+	if err := enc.NextField(""); err != nil {
+		return err
+	}
+	return enc.FinishValue()
+}
+
 type (
 	// BlessServerMessage represents any single field of the BlessServerMessage union type.
 	//
@@ -1101,6 +1300,7 @@ type (
 		// __VDLReflect describes the BlessServerMessage union type.
 		__VDLReflect(__BlessServerMessageReflect)
 		FillVDLTarget(vdl.Target, *vdl.Type) error
+		VDLWrite(vdl.Encoder) error
 	}
 	// BlessServerMessageInstancePublicKey represents field InstancePublicKey of the BlessServerMessage union type.
 	//
@@ -1235,6 +1435,28 @@ func VDLReadBlessServerMessage(dec vdl.Decoder, x *BlessServerMessage) error {
 	return dec.FinishValue()
 }
 
+func (x BlessServerMessageInstancePublicKey) VDLWrite(enc vdl.Encoder) error {
+	if err := enc.StartValue(vdl.TypeOf((*BlessServerMessage)(nil))); err != nil {
+		return err
+	}
+	if err := enc.NextField("InstancePublicKey"); err != nil {
+		return err
+	}
+	if err := enc.StartValue(vdl.TypeOf((*[]byte)(nil))); err != nil {
+		return err
+	}
+	if err := enc.EncodeBytes(x.Value); err != nil {
+		return err
+	}
+	if err := enc.FinishValue(); err != nil {
+		return err
+	}
+	if err := enc.NextField(""); err != nil {
+		return err
+	}
+	return enc.FinishValue()
+}
+
 type (
 	// BlessClientMessage represents any single field of the BlessClientMessage union type.
 	//
@@ -1251,6 +1473,7 @@ type (
 		// __VDLReflect describes the BlessClientMessage union type.
 		__VDLReflect(__BlessClientMessageReflect)
 		FillVDLTarget(vdl.Target, *vdl.Type) error
+		VDLWrite(vdl.Encoder) error
 	}
 	// BlessClientMessageAppBlessings represents field AppBlessings of the BlessClientMessage union type.
 	//
@@ -1391,6 +1614,26 @@ func VDLReadBlessClientMessage(dec vdl.Decoder, x *BlessClientMessage) error {
 		return fmt.Errorf("extra field %q in union %T, from %v", f, x, dec.Type())
 	}
 	return dec.FinishValue()
+}
+
+func (x BlessClientMessageAppBlessings) VDLWrite(enc vdl.Encoder) error {
+	if err := enc.StartValue(vdl.TypeOf((*BlessClientMessage)(nil))); err != nil {
+		return err
+	}
+	if err := enc.NextField("AppBlessings"); err != nil {
+		return err
+	}
+	var wire security.WireBlessings
+	if err := security.WireBlessingsFromNative(&wire, x.Value); err != nil {
+		return err
+	}
+	if err := wire.VDLWrite(enc); err != nil {
+		return err
+	}
+	if err := enc.NextField(""); err != nil {
+		return err
+	}
+	return enc.FinishValue()
 }
 
 // Description enumerates the profiles that a Device supports.
@@ -1609,6 +1852,49 @@ func __VDLRead1_set(dec vdl.Decoder, x *map[string]struct{}) error {
 	}
 }
 
+func (x Description) VDLWrite(enc vdl.Encoder) error {
+	if err := enc.StartValue(vdl.TypeOf((*Description)(nil)).Elem()); err != nil {
+		return err
+	}
+	var var1 bool
+	if len(x.Profiles) == 0 {
+		var1 = true
+	}
+	if !(var1) {
+		if err := enc.NextField("Profiles"); err != nil {
+			return err
+		}
+		if err := __VDLWrite1_set(enc, &x.Profiles); err != nil {
+			return err
+		}
+	}
+	if err := enc.NextField(""); err != nil {
+		return err
+	}
+	return enc.FinishValue()
+}
+
+func __VDLWrite1_set(enc vdl.Encoder, x *map[string]struct{}) error {
+	if err := enc.StartValue(vdl.TypeOf((*map[string]struct{})(nil))); err != nil {
+		return err
+	}
+	for key := range *x {
+		if err := enc.StartValue(vdl.TypeOf((*string)(nil))); err != nil {
+			return err
+		}
+		if err := enc.EncodeString(key); err != nil {
+			return err
+		}
+		if err := enc.FinishValue(); err != nil {
+			return err
+		}
+	}
+	if err := enc.NextEntry(true); err != nil {
+		return err
+	}
+	return enc.FinishValue()
+}
+
 // Association is a tuple containing an association between a Vanadium
 // identity and a system account name.
 type Association struct {
@@ -1766,6 +2052,46 @@ func (x *Association) VDLRead(dec vdl.Decoder) error {
 			}
 		}
 	}
+}
+
+func (x Association) VDLWrite(enc vdl.Encoder) error {
+	if err := enc.StartValue(vdl.TypeOf((*Association)(nil)).Elem()); err != nil {
+		return err
+	}
+	var1 := (x.IdentityName == "")
+	if !(var1) {
+		if err := enc.NextField("IdentityName"); err != nil {
+			return err
+		}
+		if err := enc.StartValue(vdl.TypeOf((*string)(nil))); err != nil {
+			return err
+		}
+		if err := enc.EncodeString(x.IdentityName); err != nil {
+			return err
+		}
+		if err := enc.FinishValue(); err != nil {
+			return err
+		}
+	}
+	var2 := (x.AccountName == "")
+	if !(var2) {
+		if err := enc.NextField("AccountName"); err != nil {
+			return err
+		}
+		if err := enc.StartValue(vdl.TypeOf((*string)(nil))); err != nil {
+			return err
+		}
+		if err := enc.EncodeString(x.AccountName); err != nil {
+			return err
+		}
+		if err := enc.FinishValue(); err != nil {
+			return err
+		}
+	}
+	if err := enc.NextField(""); err != nil {
+		return err
+	}
+	return enc.FinishValue()
 }
 
 //////////////////////////////////////////////////

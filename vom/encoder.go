@@ -90,7 +90,6 @@ type encoder struct {
 	hasLen, hasAny, hasTypeObject bool
 	typeIncomplete                bool
 	mid                           int64 // message id
-	w                             io.Writer
 }
 
 type typeStackEntry struct {
@@ -338,7 +337,7 @@ func (e *encoder) prepareTypeHelper(tt *vdl.Type, preventAnyWrap bool) error {
 		} else {
 			binaryEncodeUint(e.buf, e.tids.ReferenceTypeID(tid))
 			anyStartRef := e.anyLens.StartAny(e.buf.Len())
-			e.typeStack[len(e.typeStack)-1].anyStartRef = anyStartRef
+			e.typeStack[len(e.typeStack)-1].anyStartRef = &anyStartRef
 			binaryEncodeUint(e.buf, uint64(anyStartRef.index))
 		}
 	}
@@ -359,7 +358,7 @@ func (e *encoder) popType() error {
 	}
 	topEntry := e.typeStack[len(e.typeStack)-1]
 	if topEntry.anyStartRef != nil {
-		e.anyLens.FinishAny(topEntry.anyStartRef, e.buf.Len())
+		e.anyLens.FinishAny(*topEntry.anyStartRef, e.buf.Len())
 	}
 	e.typeStack = e.typeStack[:len(e.typeStack)-1]
 	return nil
@@ -852,16 +851,16 @@ type anyLenList struct {
 	totalSent int
 }
 
-func (l *anyLenList) StartAny(startMarker int) *anyStartRef {
+func (l *anyLenList) StartAny(startMarker int) anyStartRef {
 	l.lens = append(l.lens, 0)
 	index := len(l.lens) - 1
-	return &anyStartRef{
+	return anyStartRef{
 		index:  index,
 		marker: startMarker + lenUint(uint64(index)),
 	}
 }
 
-func (l *anyLenList) FinishAny(start *anyStartRef, endMarker int) {
+func (l *anyLenList) FinishAny(start anyStartRef, endMarker int) {
 	l.lens[start.index] = endMarker - start.marker
 }
 

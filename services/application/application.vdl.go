@@ -194,6 +194,57 @@ func (x *SignedFile) VDLRead(dec vdl.Decoder) error {
 	}
 }
 
+func (x SignedFile) VDLWrite(enc vdl.Encoder) error {
+	if err := enc.StartValue(vdl.TypeOf((*SignedFile)(nil)).Elem()); err != nil {
+		return err
+	}
+	var1 := (x.File == "")
+	if !(var1) {
+		if err := enc.NextField("File"); err != nil {
+			return err
+		}
+		if err := enc.StartValue(vdl.TypeOf((*string)(nil))); err != nil {
+			return err
+		}
+		if err := enc.EncodeString(x.File); err != nil {
+			return err
+		}
+		if err := enc.FinishValue(); err != nil {
+			return err
+		}
+	}
+	var2 := true
+	var var3 bool
+	if len(x.Signature.Purpose) == 0 {
+		var3 = true
+	}
+	var2 = var2 && var3
+	var4 := (x.Signature.Hash == security.Hash(""))
+	var2 = var2 && var4
+	var var5 bool
+	if len(x.Signature.R) == 0 {
+		var5 = true
+	}
+	var2 = var2 && var5
+	var var6 bool
+	if len(x.Signature.S) == 0 {
+		var6 = true
+	}
+	var2 = var2 && var6
+	if !(var2) {
+		if err := enc.NextField("Signature"); err != nil {
+			return err
+		}
+		if err := x.Signature.VDLWrite(enc); err != nil {
+			return err
+		}
+	}
+	if err := enc.NextField(""); err != nil {
+		return err
+	}
+	return enc.FinishValue()
+}
+
 // Packages represents a set of packages. The map key is the local
 // file/directory name, relative to the instance's packages directory, where the
 // package should be installed. For archives, this name represents a directory
@@ -338,6 +389,30 @@ func (x *Packages) VDLRead(dec vdl.Decoder) error {
 		}
 		tmpMap[key] = elem
 	}
+}
+
+func (x Packages) VDLWrite(enc vdl.Encoder) error {
+	if err := enc.StartValue(vdl.TypeOf((*Packages)(nil))); err != nil {
+		return err
+	}
+	for key, elem := range x {
+		if err := enc.StartValue(vdl.TypeOf((*string)(nil))); err != nil {
+			return err
+		}
+		if err := enc.EncodeString(key); err != nil {
+			return err
+		}
+		if err := enc.FinishValue(); err != nil {
+			return err
+		}
+		if err := elem.VDLWrite(enc); err != nil {
+			return err
+		}
+	}
+	if err := enc.NextEntry(true); err != nil {
+		return err
+	}
+	return enc.FinishValue()
 }
 
 // Envelope is a collection of metadata that describes an application.
@@ -855,6 +930,174 @@ func __VDLRead1_list(dec vdl.Decoder, x *[]string) error {
 		}
 		*x = append(*x, elem)
 	}
+}
+
+func (x Envelope) VDLWrite(enc vdl.Encoder) error {
+	if err := enc.StartValue(vdl.TypeOf((*Envelope)(nil)).Elem()); err != nil {
+		return err
+	}
+	var1 := (x.Title == "")
+	if !(var1) {
+		if err := enc.NextField("Title"); err != nil {
+			return err
+		}
+		if err := enc.StartValue(vdl.TypeOf((*string)(nil))); err != nil {
+			return err
+		}
+		if err := enc.EncodeString(x.Title); err != nil {
+			return err
+		}
+		if err := enc.FinishValue(); err != nil {
+			return err
+		}
+	}
+	var var2 bool
+	if len(x.Args) == 0 {
+		var2 = true
+	}
+	if !(var2) {
+		if err := enc.NextField("Args"); err != nil {
+			return err
+		}
+		if err := __VDLWrite1_list(enc, &x.Args); err != nil {
+			return err
+		}
+	}
+	var3 := true
+	var4 := (x.Binary.File == "")
+	var3 = var3 && var4
+	var5 := true
+	var var6 bool
+	if len(x.Binary.Signature.Purpose) == 0 {
+		var6 = true
+	}
+	var5 = var5 && var6
+	var7 := (x.Binary.Signature.Hash == security.Hash(""))
+	var5 = var5 && var7
+	var var8 bool
+	if len(x.Binary.Signature.R) == 0 {
+		var8 = true
+	}
+	var5 = var5 && var8
+	var var9 bool
+	if len(x.Binary.Signature.S) == 0 {
+		var9 = true
+	}
+	var5 = var5 && var9
+	var3 = var3 && var5
+	if !(var3) {
+		if err := enc.NextField("Binary"); err != nil {
+			return err
+		}
+		if err := x.Binary.VDLWrite(enc); err != nil {
+			return err
+		}
+	}
+	var wireValue10 security.WireBlessings
+	if err := security.WireBlessingsFromNative(&wireValue10, x.Publisher); err != nil {
+		return fmt.Errorf("error converting x.Publisher to wiretype")
+	}
+
+	var11 := true
+	var var12 bool
+	if len(wireValue10.CertificateChains) == 0 {
+		var12 = true
+	}
+	var11 = var11 && var12
+	if !(var11) {
+		if err := enc.NextField("Publisher"); err != nil {
+			return err
+		}
+		var wire security.WireBlessings
+		if err := security.WireBlessingsFromNative(&wire, x.Publisher); err != nil {
+			return err
+		}
+		if err := wire.VDLWrite(enc); err != nil {
+			return err
+		}
+	}
+	var var13 bool
+	if len(x.Env) == 0 {
+		var13 = true
+	}
+	if !(var13) {
+		if err := enc.NextField("Env"); err != nil {
+			return err
+		}
+		if err := __VDLWrite1_list(enc, &x.Env); err != nil {
+			return err
+		}
+	}
+	var var14 bool
+	if len(x.Packages) == 0 {
+		var14 = true
+	}
+	if !(var14) {
+		if err := enc.NextField("Packages"); err != nil {
+			return err
+		}
+		if err := x.Packages.VDLWrite(enc); err != nil {
+			return err
+		}
+	}
+	var15 := (x.Restarts == int32(0))
+	if !(var15) {
+		if err := enc.NextField("Restarts"); err != nil {
+			return err
+		}
+		if err := enc.StartValue(vdl.TypeOf((*int32)(nil))); err != nil {
+			return err
+		}
+		if err := enc.EncodeInt(int64(x.Restarts)); err != nil {
+			return err
+		}
+		if err := enc.FinishValue(); err != nil {
+			return err
+		}
+	}
+	var wireValue16 time_2.Duration
+	if err := time_2.DurationFromNative(&wireValue16, x.RestartTimeWindow); err != nil {
+		return fmt.Errorf("error converting x.RestartTimeWindow to wiretype")
+	}
+
+	var17 := (wireValue16 == time_2.Duration{})
+	if !(var17) {
+		if err := enc.NextField("RestartTimeWindow"); err != nil {
+			return err
+		}
+		var wire time_2.Duration
+		if err := time_2.DurationFromNative(&wire, x.RestartTimeWindow); err != nil {
+			return err
+		}
+		if err := wire.VDLWrite(enc); err != nil {
+			return err
+		}
+	}
+	if err := enc.NextField(""); err != nil {
+		return err
+	}
+	return enc.FinishValue()
+}
+
+func __VDLWrite1_list(enc vdl.Encoder, x *[]string) error {
+	if err := enc.StartValue(vdl.TypeOf((*[]string)(nil))); err != nil {
+		return err
+	}
+	for i := 0; i < len(*x); i++ {
+		if err := enc.StartValue(vdl.TypeOf((*string)(nil))); err != nil {
+			return err
+		}
+		if err := enc.EncodeString((*x)[i]); err != nil {
+			return err
+		}
+		if err := enc.FinishValue(); err != nil {
+			return err
+		}
+	}
+	if err := enc.NextEntry(true); err != nil {
+		return err
+	}
+	return enc.FinishValue()
 }
 
 //////////////////////////////////////////////////

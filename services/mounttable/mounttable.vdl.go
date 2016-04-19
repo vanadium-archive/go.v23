@@ -79,6 +79,16 @@ func (x *Tag) VDLRead(dec vdl.Decoder) error {
 	return dec.FinishValue()
 }
 
+func (x Tag) VDLWrite(enc vdl.Encoder) error {
+	if err := enc.StartValue(vdl.TypeOf((*Tag)(nil))); err != nil {
+		return err
+	}
+	if err := enc.EncodeString(string(x)); err != nil {
+		return err
+	}
+	return enc.FinishValue()
+}
+
 //////////////////////////////////////////////////
 // Const definitions
 

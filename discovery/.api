@@ -30,6 +30,10 @@ pkg discovery, method (*AttributesTarget) StartKey() (vdl.Target, error)
 pkg discovery, method (*AttributesTarget) StartMap(*vdl.Type, int) (vdl.MapTarget, error)
 pkg discovery, method (AdId) IsValid() bool
 pkg discovery, method (AdId) String() string
+pkg discovery, method (AdId) VDLWrite(vdl.Encoder) error
+pkg discovery, method (Advertisement) VDLWrite(vdl.Encoder) error
+pkg discovery, method (Attachments) VDLWrite(vdl.Encoder) error
+pkg discovery, method (Attributes) VDLWrite(vdl.Encoder) error
 pkg discovery, type AdId [16]byte
 pkg discovery, type AdIdTarget struct
 pkg discovery, type AdIdTarget struct, Value *AdId

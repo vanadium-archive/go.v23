@@ -103,11 +103,11 @@ func (rb *RawBytes) FillVDLTarget(target vdl.Target, _ *vdl.Type) error {
 	return dec.decodeToTarget(target)
 }
 
-func (rb *RawBytes) IsNilAny() bool {
+func (rb *RawBytes) IsNil() bool {
 	if rb == nil {
 		return true
 	}
-	if rb.Type != vdl.AnyType {
+	if rb.Type != vdl.AnyType && rb.Type.Kind() != vdl.Optional {
 		return false
 	}
 	return len(rb.Data) == 1 && rb.Data[0] == WireCtrlNil
@@ -142,6 +142,13 @@ func (rb *RawBytes) VDLRead(dec vdl.Decoder) error {
 	}
 	// Slowpath: the bytes are not available, we must encode new bytes.
 	return fmt.Errorf("vom: RawBytes.VDLRead slowpath not implemented")
+}
+
+func (rb *RawBytes) VDLWrite(enc vdl.Encoder) error {
+	if e, ok := enc.(*xEncoder); ok && e.version == rb.Version {
+		return e.writeRawBytes(rb)
+	}
+	return vdl.Transcode(enc, rb.Decoder())
 }
 
 // vdl.Target that writes to a vom.RawBytes.  This structure is intended to be

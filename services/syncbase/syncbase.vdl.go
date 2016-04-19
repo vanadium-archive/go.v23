@@ -194,6 +194,46 @@ func (x *Id) VDLRead(dec vdl.Decoder) error {
 	}
 }
 
+func (x Id) VDLWrite(enc vdl.Encoder) error {
+	if err := enc.StartValue(vdl.TypeOf((*Id)(nil)).Elem()); err != nil {
+		return err
+	}
+	var1 := (x.Blessing == "")
+	if !(var1) {
+		if err := enc.NextField("Blessing"); err != nil {
+			return err
+		}
+		if err := enc.StartValue(vdl.TypeOf((*string)(nil))); err != nil {
+			return err
+		}
+		if err := enc.EncodeString(x.Blessing); err != nil {
+			return err
+		}
+		if err := enc.FinishValue(); err != nil {
+			return err
+		}
+	}
+	var2 := (x.Name == "")
+	if !(var2) {
+		if err := enc.NextField("Name"); err != nil {
+			return err
+		}
+		if err := enc.StartValue(vdl.TypeOf((*string)(nil))); err != nil {
+			return err
+		}
+		if err := enc.EncodeString(x.Name); err != nil {
+			return err
+		}
+		if err := enc.FinishValue(); err != nil {
+			return err
+		}
+	}
+	if err := enc.NextField(""); err != nil {
+		return err
+	}
+	return enc.FinishValue()
+}
+
 // DevModeUpdateVClockOpts specifies what DevModeUpdateVClock should do, as
 // described below.
 type DevModeUpdateVClockOpts struct {
@@ -495,6 +535,97 @@ func (x *DevModeUpdateVClockOpts) VDLRead(dec vdl.Decoder) error {
 	}
 }
 
+func (x DevModeUpdateVClockOpts) VDLWrite(enc vdl.Encoder) error {
+	if err := enc.StartValue(vdl.TypeOf((*DevModeUpdateVClockOpts)(nil)).Elem()); err != nil {
+		return err
+	}
+	var1 := (x.NtpHost == "")
+	if !(var1) {
+		if err := enc.NextField("NtpHost"); err != nil {
+			return err
+		}
+		if err := enc.StartValue(vdl.TypeOf((*string)(nil))); err != nil {
+			return err
+		}
+		if err := enc.EncodeString(x.NtpHost); err != nil {
+			return err
+		}
+		if err := enc.FinishValue(); err != nil {
+			return err
+		}
+	}
+	var wireValue2 time_2.Time
+	if err := time_2.TimeFromNative(&wireValue2, x.Now); err != nil {
+		return fmt.Errorf("error converting x.Now to wiretype")
+	}
+
+	var3 := (wireValue2 == time_2.Time{})
+	if !(var3) {
+		if err := enc.NextField("Now"); err != nil {
+			return err
+		}
+		var wire time_2.Time
+		if err := time_2.TimeFromNative(&wire, x.Now); err != nil {
+			return err
+		}
+		if err := wire.VDLWrite(enc); err != nil {
+			return err
+		}
+	}
+	var wireValue4 time_2.Duration
+	if err := time_2.DurationFromNative(&wireValue4, x.ElapsedTime); err != nil {
+		return fmt.Errorf("error converting x.ElapsedTime to wiretype")
+	}
+
+	var5 := (wireValue4 == time_2.Duration{})
+	if !(var5) {
+		if err := enc.NextField("ElapsedTime"); err != nil {
+			return err
+		}
+		var wire time_2.Duration
+		if err := time_2.DurationFromNative(&wire, x.ElapsedTime); err != nil {
+			return err
+		}
+		if err := wire.VDLWrite(enc); err != nil {
+			return err
+		}
+	}
+	var6 := (x.DoNtpUpdate == false)
+	if !(var6) {
+		if err := enc.NextField("DoNtpUpdate"); err != nil {
+			return err
+		}
+		if err := enc.StartValue(vdl.TypeOf((*bool)(nil))); err != nil {
+			return err
+		}
+		if err := enc.EncodeBool(x.DoNtpUpdate); err != nil {
+			return err
+		}
+		if err := enc.FinishValue(); err != nil {
+			return err
+		}
+	}
+	var7 := (x.DoLocalUpdate == false)
+	if !(var7) {
+		if err := enc.NextField("DoLocalUpdate"); err != nil {
+			return err
+		}
+		if err := enc.StartValue(vdl.TypeOf((*bool)(nil))); err != nil {
+			return err
+		}
+		if err := enc.EncodeBool(x.DoLocalUpdate); err != nil {
+			return err
+		}
+		if err := enc.FinishValue(); err != nil {
+			return err
+		}
+	}
+	if err := enc.NextField(""); err != nil {
+		return err
+	}
+	return enc.FinishValue()
+}
+
 // BatchOptions configures a batch.
 // TODO(sadovsky): Add more options, e.g. to configure isolation, timeouts,
 // whether to track the read set and/or write set, etc.
@@ -666,6 +797,46 @@ func (x *BatchOptions) VDLRead(dec vdl.Decoder) error {
 	}
 }
 
+func (x BatchOptions) VDLWrite(enc vdl.Encoder) error {
+	if err := enc.StartValue(vdl.TypeOf((*BatchOptions)(nil)).Elem()); err != nil {
+		return err
+	}
+	var1 := (x.Hint == "")
+	if !(var1) {
+		if err := enc.NextField("Hint"); err != nil {
+			return err
+		}
+		if err := enc.StartValue(vdl.TypeOf((*string)(nil))); err != nil {
+			return err
+		}
+		if err := enc.EncodeString(x.Hint); err != nil {
+			return err
+		}
+		if err := enc.FinishValue(); err != nil {
+			return err
+		}
+	}
+	var2 := (x.ReadOnly == false)
+	if !(var2) {
+		if err := enc.NextField("ReadOnly"); err != nil {
+			return err
+		}
+		if err := enc.StartValue(vdl.TypeOf((*bool)(nil))); err != nil {
+			return err
+		}
+		if err := enc.EncodeBool(x.ReadOnly); err != nil {
+			return err
+		}
+		if err := enc.FinishValue(); err != nil {
+			return err
+		}
+	}
+	if err := enc.NextField(""); err != nil {
+		return err
+	}
+	return enc.FinishValue()
+}
+
 // BatchHandle is a reference to a batch.
 type BatchHandle string
 
@@ -711,6 +882,16 @@ func (x *BatchHandle) VDLRead(dec vdl.Decoder) error {
 	}
 	*x = BatchHandle(tmp)
 	return dec.FinishValue()
+}
+
+func (x BatchHandle) VDLWrite(enc vdl.Encoder) error {
+	if err := enc.StartValue(vdl.TypeOf((*BatchHandle)(nil))); err != nil {
+		return err
+	}
+	if err := enc.EncodeString(string(x)); err != nil {
+		return err
+	}
+	return enc.FinishValue()
 }
 
 // KeyValue is a key-value pair.
@@ -875,6 +1056,49 @@ func (x *KeyValue) VDLRead(dec vdl.Decoder) error {
 	}
 }
 
+func (x KeyValue) VDLWrite(enc vdl.Encoder) error {
+	if err := enc.StartValue(vdl.TypeOf((*KeyValue)(nil)).Elem()); err != nil {
+		return err
+	}
+	var1 := (x.Key == "")
+	if !(var1) {
+		if err := enc.NextField("Key"); err != nil {
+			return err
+		}
+		if err := enc.StartValue(vdl.TypeOf((*string)(nil))); err != nil {
+			return err
+		}
+		if err := enc.EncodeString(x.Key); err != nil {
+			return err
+		}
+		if err := enc.FinishValue(); err != nil {
+			return err
+		}
+	}
+	var var2 bool
+	if len(x.Value) == 0 {
+		var2 = true
+	}
+	if !(var2) {
+		if err := enc.NextField("Value"); err != nil {
+			return err
+		}
+		if err := enc.StartValue(vdl.TypeOf((*[]byte)(nil))); err != nil {
+			return err
+		}
+		if err := enc.EncodeBytes(x.Value); err != nil {
+			return err
+		}
+		if err := enc.FinishValue(); err != nil {
+			return err
+		}
+	}
+	if err := enc.NextField(""); err != nil {
+		return err
+	}
+	return enc.FinishValue()
+}
+
 // CollectionRow encapsulates a collection id and row key or row prefix.
 type CollectionRow struct {
 	CollectionId Id
@@ -1026,6 +1250,40 @@ func (x *CollectionRow) VDLRead(dec vdl.Decoder) error {
 			}
 		}
 	}
+}
+
+func (x CollectionRow) VDLWrite(enc vdl.Encoder) error {
+	if err := enc.StartValue(vdl.TypeOf((*CollectionRow)(nil)).Elem()); err != nil {
+		return err
+	}
+	var1 := (x.CollectionId == Id{})
+	if !(var1) {
+		if err := enc.NextField("CollectionId"); err != nil {
+			return err
+		}
+		if err := x.CollectionId.VDLWrite(enc); err != nil {
+			return err
+		}
+	}
+	var2 := (x.Row == "")
+	if !(var2) {
+		if err := enc.NextField("Row"); err != nil {
+			return err
+		}
+		if err := enc.StartValue(vdl.TypeOf((*string)(nil))); err != nil {
+			return err
+		}
+		if err := enc.EncodeString(x.Row); err != nil {
+			return err
+		}
+		if err := enc.FinishValue(); err != nil {
+			return err
+		}
+	}
+	if err := enc.NextField(""); err != nil {
+		return err
+	}
+	return enc.FinishValue()
 }
 
 // SyncgroupSpec contains the specification for a syncgroup.
@@ -1438,6 +1696,118 @@ func __VDLRead2_list(dec vdl.Decoder, x *[]string) error {
 	}
 }
 
+func (x SyncgroupSpec) VDLWrite(enc vdl.Encoder) error {
+	if err := enc.StartValue(vdl.TypeOf((*SyncgroupSpec)(nil)).Elem()); err != nil {
+		return err
+	}
+	var1 := (x.Description == "")
+	if !(var1) {
+		if err := enc.NextField("Description"); err != nil {
+			return err
+		}
+		if err := enc.StartValue(vdl.TypeOf((*string)(nil))); err != nil {
+			return err
+		}
+		if err := enc.EncodeString(x.Description); err != nil {
+			return err
+		}
+		if err := enc.FinishValue(); err != nil {
+			return err
+		}
+	}
+	var var2 bool
+	if len(x.Perms) == 0 {
+		var2 = true
+	}
+	if !(var2) {
+		if err := enc.NextField("Perms"); err != nil {
+			return err
+		}
+		if err := x.Perms.VDLWrite(enc); err != nil {
+			return err
+		}
+	}
+	var var3 bool
+	if len(x.Prefixes) == 0 {
+		var3 = true
+	}
+	if !(var3) {
+		if err := enc.NextField("Prefixes"); err != nil {
+			return err
+		}
+		if err := __VDLWrite1_list(enc, &x.Prefixes); err != nil {
+			return err
+		}
+	}
+	var var4 bool
+	if len(x.MountTables) == 0 {
+		var4 = true
+	}
+	if !(var4) {
+		if err := enc.NextField("MountTables"); err != nil {
+			return err
+		}
+		if err := __VDLWrite2_list(enc, &x.MountTables); err != nil {
+			return err
+		}
+	}
+	var5 := (x.IsPrivate == false)
+	if !(var5) {
+		if err := enc.NextField("IsPrivate"); err != nil {
+			return err
+		}
+		if err := enc.StartValue(vdl.TypeOf((*bool)(nil))); err != nil {
+			return err
+		}
+		if err := enc.EncodeBool(x.IsPrivate); err != nil {
+			return err
+		}
+		if err := enc.FinishValue(); err != nil {
+			return err
+		}
+	}
+	if err := enc.NextField(""); err != nil {
+		return err
+	}
+	return enc.FinishValue()
+}
+
+func __VDLWrite1_list(enc vdl.Encoder, x *[]CollectionRow) error {
+	if err := enc.StartValue(vdl.TypeOf((*[]CollectionRow)(nil))); err != nil {
+		return err
+	}
+	for i := 0; i < len(*x); i++ {
+		if err := (*x)[i].VDLWrite(enc); err != nil {
+			return err
+		}
+	}
+	if err := enc.NextEntry(true); err != nil {
+		return err
+	}
+	return enc.FinishValue()
+}
+
+func __VDLWrite2_list(enc vdl.Encoder, x *[]string) error {
+	if err := enc.StartValue(vdl.TypeOf((*[]string)(nil))); err != nil {
+		return err
+	}
+	for i := 0; i < len(*x); i++ {
+		if err := enc.StartValue(vdl.TypeOf((*string)(nil))); err != nil {
+			return err
+		}
+		if err := enc.EncodeString((*x)[i]); err != nil {
+			return err
+		}
+		if err := enc.FinishValue(); err != nil {
+			return err
+		}
+	}
+	if err := enc.NextEntry(true); err != nil {
+		return err
+	}
+	return enc.FinishValue()
+}
+
 // SyncgroupMemberInfo contains per-member metadata.
 type SyncgroupMemberInfo struct {
 	SyncPriority byte
@@ -1600,6 +1970,46 @@ func (x *SyncgroupMemberInfo) VDLRead(dec vdl.Decoder) error {
 	}
 }
 
+func (x SyncgroupMemberInfo) VDLWrite(enc vdl.Encoder) error {
+	if err := enc.StartValue(vdl.TypeOf((*SyncgroupMemberInfo)(nil)).Elem()); err != nil {
+		return err
+	}
+	var1 := (x.SyncPriority == byte(0))
+	if !(var1) {
+		if err := enc.NextField("SyncPriority"); err != nil {
+			return err
+		}
+		if err := enc.StartValue(vdl.TypeOf((*byte)(nil))); err != nil {
+			return err
+		}
+		if err := enc.EncodeUint(uint64(x.SyncPriority)); err != nil {
+			return err
+		}
+		if err := enc.FinishValue(); err != nil {
+			return err
+		}
+	}
+	var2 := (x.BlobDevType == byte(0))
+	if !(var2) {
+		if err := enc.NextField("BlobDevType"); err != nil {
+			return err
+		}
+		if err := enc.StartValue(vdl.TypeOf((*byte)(nil))); err != nil {
+			return err
+		}
+		if err := enc.EncodeUint(uint64(x.BlobDevType)); err != nil {
+			return err
+		}
+		if err := enc.FinishValue(); err != nil {
+			return err
+		}
+	}
+	if err := enc.NextField(""); err != nil {
+		return err
+	}
+	return enc.FinishValue()
+}
+
 // ResolverType defines the possible conflict resolution policies.
 // A Conflict is defined as presence of two independent sets of updates
 // originating from the same version of an object. Syncbase
@@ -1714,6 +2124,16 @@ func (x *ResolverType) VDLRead(dec vdl.Decoder) error {
 	return dec.FinishValue()
 }
 
+func (x ResolverType) VDLWrite(enc vdl.Encoder) error {
+	if err := enc.StartValue(vdl.TypeOf((*ResolverType)(nil))); err != nil {
+		return err
+	}
+	if err := enc.EncodeString(x.String()); err != nil {
+		return err
+	}
+	return enc.FinishValue()
+}
+
 // BatchSource represents where the batch was committed.
 type BatchSource int
 
@@ -1808,6 +2228,16 @@ func (x *BatchSource) VDLRead(dec vdl.Decoder) error {
 		return err
 	}
 	return dec.FinishValue()
+}
+
+func (x BatchSource) VDLWrite(enc vdl.Encoder) error {
+	if err := enc.StartValue(vdl.TypeOf((*BatchSource)(nil))); err != nil {
+		return err
+	}
+	if err := enc.EncodeString(x.String()); err != nil {
+		return err
+	}
+	return enc.FinishValue()
 }
 
 type BatchInfo struct {
@@ -2006,6 +2436,55 @@ func (x *BatchInfo) VDLRead(dec vdl.Decoder) error {
 	}
 }
 
+func (x BatchInfo) VDLWrite(enc vdl.Encoder) error {
+	if err := enc.StartValue(vdl.TypeOf((*BatchInfo)(nil)).Elem()); err != nil {
+		return err
+	}
+	var1 := (x.Id == uint64(0))
+	if !(var1) {
+		if err := enc.NextField("Id"); err != nil {
+			return err
+		}
+		if err := enc.StartValue(vdl.TypeOf((*uint64)(nil))); err != nil {
+			return err
+		}
+		if err := enc.EncodeUint(x.Id); err != nil {
+			return err
+		}
+		if err := enc.FinishValue(); err != nil {
+			return err
+		}
+	}
+	var2 := (x.Hint == "")
+	if !(var2) {
+		if err := enc.NextField("Hint"); err != nil {
+			return err
+		}
+		if err := enc.StartValue(vdl.TypeOf((*string)(nil))); err != nil {
+			return err
+		}
+		if err := enc.EncodeString(x.Hint); err != nil {
+			return err
+		}
+		if err := enc.FinishValue(); err != nil {
+			return err
+		}
+	}
+	var3 := (x.Source == BatchSourceLocal)
+	if !(var3) {
+		if err := enc.NextField("Source"); err != nil {
+			return err
+		}
+		if err := x.Source.VDLWrite(enc); err != nil {
+			return err
+		}
+	}
+	if err := enc.NextField(""); err != nil {
+		return err
+	}
+	return enc.FinishValue()
+}
+
 // ValueState represents the state for Value object providing information about
 // whether the Value object's Byte field is empty or not.
 type ValueState int
@@ -2117,6 +2596,16 @@ func (x *ValueState) VDLRead(dec vdl.Decoder) error {
 		return err
 	}
 	return dec.FinishValue()
+}
+
+func (x ValueState) VDLWrite(enc vdl.Encoder) error {
+	if err := enc.StartValue(vdl.TypeOf((*ValueState)(nil))); err != nil {
+		return err
+	}
+	if err := enc.EncodeString(x.String()); err != nil {
+		return err
+	}
+	return enc.FinishValue()
 }
 
 // Value contains the encoded bytes for a row's value stored in syncbase.
@@ -2326,6 +2815,61 @@ func (x *Value) VDLRead(dec vdl.Decoder) error {
 			}
 		}
 	}
+}
+
+func (x Value) VDLWrite(enc vdl.Encoder) error {
+	if err := enc.StartValue(vdl.TypeOf((*Value)(nil)).Elem()); err != nil {
+		return err
+	}
+	var1 := (x.State == ValueStateExists)
+	if !(var1) {
+		if err := enc.NextField("State"); err != nil {
+			return err
+		}
+		if err := x.State.VDLWrite(enc); err != nil {
+			return err
+		}
+	}
+	var var2 bool
+	if len(x.Bytes) == 0 {
+		var2 = true
+	}
+	if !(var2) {
+		if err := enc.NextField("Bytes"); err != nil {
+			return err
+		}
+		if err := enc.StartValue(vdl.TypeOf((*[]byte)(nil))); err != nil {
+			return err
+		}
+		if err := enc.EncodeBytes(x.Bytes); err != nil {
+			return err
+		}
+		if err := enc.FinishValue(); err != nil {
+			return err
+		}
+	}
+	var wireValue3 time_2.Time
+	if err := time_2.TimeFromNative(&wireValue3, x.WriteTs); err != nil {
+		return fmt.Errorf("error converting x.WriteTs to wiretype")
+	}
+
+	var4 := (wireValue3 == time_2.Time{})
+	if !(var4) {
+		if err := enc.NextField("WriteTs"); err != nil {
+			return err
+		}
+		var wire time_2.Time
+		if err := time_2.TimeFromNative(&wire, x.WriteTs); err != nil {
+			return err
+		}
+		if err := wire.VDLWrite(enc); err != nil {
+			return err
+		}
+	}
+	if err := enc.NextField(""); err != nil {
+		return err
+	}
+	return enc.FinishValue()
 }
 
 // RowOp represents a read or write operation on a row corresponding to the
@@ -2628,6 +3172,88 @@ func (x *RowOp) VDLRead(dec vdl.Decoder) error {
 	}
 }
 
+func (x RowOp) VDLWrite(enc vdl.Encoder) error {
+	if err := enc.StartValue(vdl.TypeOf((*RowOp)(nil)).Elem()); err != nil {
+		return err
+	}
+	var1 := (x.Key == "")
+	if !(var1) {
+		if err := enc.NextField("Key"); err != nil {
+			return err
+		}
+		if err := enc.StartValue(vdl.TypeOf((*string)(nil))); err != nil {
+			return err
+		}
+		if err := enc.EncodeString(x.Key); err != nil {
+			return err
+		}
+		if err := enc.FinishValue(); err != nil {
+			return err
+		}
+	}
+	var2 := (x.LocalValue == (*Value)(nil))
+	if !(var2) {
+		if err := enc.NextField("LocalValue"); err != nil {
+			return err
+		}
+		if err := enc.StartValue(vdl.TypeOf((**Value)(nil))); err != nil {
+			return err
+		}
+		if x.LocalValue == nil {
+			if err := enc.NilValue(vdl.TypeOf((**Value)(nil))); err != nil {
+				return err
+			}
+		} else {
+			enc.SetNextStartValueIsOptional()
+			if err := x.LocalValue.VDLWrite(enc); err != nil {
+				return err
+			}
+		}
+	}
+	var3 := (x.RemoteValue == (*Value)(nil))
+	if !(var3) {
+		if err := enc.NextField("RemoteValue"); err != nil {
+			return err
+		}
+		if err := enc.StartValue(vdl.TypeOf((**Value)(nil))); err != nil {
+			return err
+		}
+		if x.RemoteValue == nil {
+			if err := enc.NilValue(vdl.TypeOf((**Value)(nil))); err != nil {
+				return err
+			}
+		} else {
+			enc.SetNextStartValueIsOptional()
+			if err := x.RemoteValue.VDLWrite(enc); err != nil {
+				return err
+			}
+		}
+	}
+	var4 := (x.AncestorValue == (*Value)(nil))
+	if !(var4) {
+		if err := enc.NextField("AncestorValue"); err != nil {
+			return err
+		}
+		if err := enc.StartValue(vdl.TypeOf((**Value)(nil))); err != nil {
+			return err
+		}
+		if x.AncestorValue == nil {
+			if err := enc.NilValue(vdl.TypeOf((**Value)(nil))); err != nil {
+				return err
+			}
+		} else {
+			enc.SetNextStartValueIsOptional()
+			if err := x.AncestorValue.VDLWrite(enc); err != nil {
+				return err
+			}
+		}
+	}
+	if err := enc.NextField(""); err != nil {
+		return err
+	}
+	return enc.FinishValue()
+}
+
 // ScanOp provides details of a scan operation.
 type ScanOp struct {
 	// Start contains the starting key for a range scan.
@@ -2788,6 +3414,46 @@ func (x *ScanOp) VDLRead(dec vdl.Decoder) error {
 	}
 }
 
+func (x ScanOp) VDLWrite(enc vdl.Encoder) error {
+	if err := enc.StartValue(vdl.TypeOf((*ScanOp)(nil)).Elem()); err != nil {
+		return err
+	}
+	var1 := (x.Start == "")
+	if !(var1) {
+		if err := enc.NextField("Start"); err != nil {
+			return err
+		}
+		if err := enc.StartValue(vdl.TypeOf((*string)(nil))); err != nil {
+			return err
+		}
+		if err := enc.EncodeString(x.Start); err != nil {
+			return err
+		}
+		if err := enc.FinishValue(); err != nil {
+			return err
+		}
+	}
+	var2 := (x.Limit == "")
+	if !(var2) {
+		if err := enc.NextField("Limit"); err != nil {
+			return err
+		}
+		if err := enc.StartValue(vdl.TypeOf((*string)(nil))); err != nil {
+			return err
+		}
+		if err := enc.EncodeString(x.Limit); err != nil {
+			return err
+		}
+		if err := enc.FinishValue(); err != nil {
+			return err
+		}
+	}
+	if err := enc.NextField(""); err != nil {
+		return err
+	}
+	return enc.FinishValue()
+}
+
 type (
 	// Operation represents any single field of the Operation union type.
 	//
@@ -2803,6 +3469,7 @@ type (
 		// __VDLReflect describes the Operation union type.
 		__VDLReflect(__OperationReflect)
 		FillVDLTarget(vdl.Target, *vdl.Type) error
+		VDLWrite(vdl.Encoder) error
 	}
 	// OperationRead represents field Read of the Operation union type.
 	//
@@ -3028,6 +3695,52 @@ func VDLReadOperation(dec vdl.Decoder, x *Operation) error {
 		return fmt.Errorf("extra field %q in union %T, from %v", f, x, dec.Type())
 	}
 	return dec.FinishValue()
+}
+
+func (x OperationRead) VDLWrite(enc vdl.Encoder) error {
+	if err := enc.StartValue(vdl.TypeOf((*Operation)(nil))); err != nil {
+		return err
+	}
+	if err := enc.NextField("Read"); err != nil {
+		return err
+	}
+	if err := x.Value.VDLWrite(enc); err != nil {
+		return err
+	}
+	if err := enc.NextField(""); err != nil {
+		return err
+	}
+	return enc.FinishValue()
+}
+func (x OperationWrite) VDLWrite(enc vdl.Encoder) error {
+	if err := enc.StartValue(vdl.TypeOf((*Operation)(nil))); err != nil {
+		return err
+	}
+	if err := enc.NextField("Write"); err != nil {
+		return err
+	}
+	if err := x.Value.VDLWrite(enc); err != nil {
+		return err
+	}
+	if err := enc.NextField(""); err != nil {
+		return err
+	}
+	return enc.FinishValue()
+}
+func (x OperationScan) VDLWrite(enc vdl.Encoder) error {
+	if err := enc.StartValue(vdl.TypeOf((*Operation)(nil))); err != nil {
+		return err
+	}
+	if err := enc.NextField("Scan"); err != nil {
+		return err
+	}
+	if err := x.Value.VDLWrite(enc); err != nil {
+		return err
+	}
+	if err := enc.NextField(""); err != nil {
+		return err
+	}
+	return enc.FinishValue()
 }
 
 // RowInfo contains a single operation performed on a row (in case of read or
@@ -3293,6 +4006,71 @@ func __VDLRead3_list(dec vdl.Decoder, x *[]uint64) error {
 	}
 }
 
+func (x RowInfo) VDLWrite(enc vdl.Encoder) error {
+	if err := enc.StartValue(vdl.TypeOf((*RowInfo)(nil)).Elem()); err != nil {
+		return err
+	}
+	var var1 bool
+	if field, ok := x.Op.(OperationRead); ok {
+
+		var2 := true
+		var3 := (field.Value.Key == "")
+		var2 = var2 && var3
+		var4 := (field.Value.LocalValue == (*Value)(nil))
+		var2 = var2 && var4
+		var5 := (field.Value.RemoteValue == (*Value)(nil))
+		var2 = var2 && var5
+		var6 := (field.Value.AncestorValue == (*Value)(nil))
+		var2 = var2 && var6
+		var1 = var2
+	}
+	if !(var1) {
+		if err := enc.NextField("Op"); err != nil {
+			return err
+		}
+		if err := x.Op.VDLWrite(enc); err != nil {
+			return err
+		}
+	}
+	var var7 bool
+	if len(x.BatchIds) == 0 {
+		var7 = true
+	}
+	if !(var7) {
+		if err := enc.NextField("BatchIds"); err != nil {
+			return err
+		}
+		if err := __VDLWrite3_list(enc, &x.BatchIds); err != nil {
+			return err
+		}
+	}
+	if err := enc.NextField(""); err != nil {
+		return err
+	}
+	return enc.FinishValue()
+}
+
+func __VDLWrite3_list(enc vdl.Encoder, x *[]uint64) error {
+	if err := enc.StartValue(vdl.TypeOf((*[]uint64)(nil))); err != nil {
+		return err
+	}
+	for i := 0; i < len(*x); i++ {
+		if err := enc.StartValue(vdl.TypeOf((*uint64)(nil))); err != nil {
+			return err
+		}
+		if err := enc.EncodeUint((*x)[i]); err != nil {
+			return err
+		}
+		if err := enc.FinishValue(); err != nil {
+			return err
+		}
+	}
+	if err := enc.NextEntry(true); err != nil {
+		return err
+	}
+	return enc.FinishValue()
+}
+
 type (
 	// ConflictData represents any single field of the ConflictData union type.
 	//
@@ -3309,6 +4087,7 @@ type (
 		// __VDLReflect describes the ConflictData union type.
 		__VDLReflect(__ConflictDataReflect)
 		FillVDLTarget(vdl.Target, *vdl.Type) error
+		VDLWrite(vdl.Encoder) error
 	}
 	// ConflictDataBatch represents field Batch of the ConflictData union type.
 	ConflictDataBatch struct{ Value BatchInfo }
@@ -3480,6 +4259,37 @@ func VDLReadConflictData(dec vdl.Decoder, x *ConflictData) error {
 		return fmt.Errorf("extra field %q in union %T, from %v", f, x, dec.Type())
 	}
 	return dec.FinishValue()
+}
+
+func (x ConflictDataBatch) VDLWrite(enc vdl.Encoder) error {
+	if err := enc.StartValue(vdl.TypeOf((*ConflictData)(nil))); err != nil {
+		return err
+	}
+	if err := enc.NextField("Batch"); err != nil {
+		return err
+	}
+	if err := x.Value.VDLWrite(enc); err != nil {
+		return err
+	}
+	if err := enc.NextField(""); err != nil {
+		return err
+	}
+	return enc.FinishValue()
+}
+func (x ConflictDataRow) VDLWrite(enc vdl.Encoder) error {
+	if err := enc.StartValue(vdl.TypeOf((*ConflictData)(nil))); err != nil {
+		return err
+	}
+	if err := enc.NextField("Row"); err != nil {
+		return err
+	}
+	if err := x.Value.VDLWrite(enc); err != nil {
+		return err
+	}
+	if err := enc.NextField(""); err != nil {
+		return err
+	}
+	return enc.FinishValue()
 }
 
 // ConflictInfo contains information to fully specify a conflict
@@ -3655,6 +4465,45 @@ func (x *ConflictInfo) VDLRead(dec vdl.Decoder) error {
 	}
 }
 
+func (x ConflictInfo) VDLWrite(enc vdl.Encoder) error {
+	if err := enc.StartValue(vdl.TypeOf((*ConflictInfo)(nil)).Elem()); err != nil {
+		return err
+	}
+	var var1 bool
+	if field, ok := x.Data.(ConflictDataBatch); ok {
+
+		var2 := (field.Value == BatchInfo{})
+		var1 = var2
+	}
+	if !(var1) {
+		if err := enc.NextField("Data"); err != nil {
+			return err
+		}
+		if err := x.Data.VDLWrite(enc); err != nil {
+			return err
+		}
+	}
+	var3 := (x.Continued == false)
+	if !(var3) {
+		if err := enc.NextField("Continued"); err != nil {
+			return err
+		}
+		if err := enc.StartValue(vdl.TypeOf((*bool)(nil))); err != nil {
+			return err
+		}
+		if err := enc.EncodeBool(x.Continued); err != nil {
+			return err
+		}
+		if err := enc.FinishValue(); err != nil {
+			return err
+		}
+	}
+	if err := enc.NextField(""); err != nil {
+		return err
+	}
+	return enc.FinishValue()
+}
+
 // ValueSelection represents the value that was selected as the final resolution
 // for a conflict.
 type ValueSelection int
@@ -3758,6 +4607,16 @@ func (x *ValueSelection) VDLRead(dec vdl.Decoder) error {
 		return err
 	}
 	return dec.FinishValue()
+}
+
+func (x ValueSelection) VDLWrite(enc vdl.Encoder) error {
+	if err := enc.StartValue(vdl.TypeOf((*ValueSelection)(nil))); err != nil {
+		return err
+	}
+	if err := enc.EncodeString(x.String()); err != nil {
+		return err
+	}
+	return enc.FinishValue()
 }
 
 // ResolutionInfo contains the application’s reply to a conflict for a key,
@@ -4010,6 +4869,74 @@ func (x *ResolutionInfo) VDLRead(dec vdl.Decoder) error {
 	}
 }
 
+func (x ResolutionInfo) VDLWrite(enc vdl.Encoder) error {
+	if err := enc.StartValue(vdl.TypeOf((*ResolutionInfo)(nil)).Elem()); err != nil {
+		return err
+	}
+	var1 := (x.Key == "")
+	if !(var1) {
+		if err := enc.NextField("Key"); err != nil {
+			return err
+		}
+		if err := enc.StartValue(vdl.TypeOf((*string)(nil))); err != nil {
+			return err
+		}
+		if err := enc.EncodeString(x.Key); err != nil {
+			return err
+		}
+		if err := enc.FinishValue(); err != nil {
+			return err
+		}
+	}
+	var2 := (x.Selection == ValueSelectionLocal)
+	if !(var2) {
+		if err := enc.NextField("Selection"); err != nil {
+			return err
+		}
+		if err := x.Selection.VDLWrite(enc); err != nil {
+			return err
+		}
+	}
+	var3 := (x.Result == (*Value)(nil))
+	if !(var3) {
+		if err := enc.NextField("Result"); err != nil {
+			return err
+		}
+		if err := enc.StartValue(vdl.TypeOf((**Value)(nil))); err != nil {
+			return err
+		}
+		if x.Result == nil {
+			if err := enc.NilValue(vdl.TypeOf((**Value)(nil))); err != nil {
+				return err
+			}
+		} else {
+			enc.SetNextStartValueIsOptional()
+			if err := x.Result.VDLWrite(enc); err != nil {
+				return err
+			}
+		}
+	}
+	var4 := (x.Continued == false)
+	if !(var4) {
+		if err := enc.NextField("Continued"); err != nil {
+			return err
+		}
+		if err := enc.StartValue(vdl.TypeOf((*bool)(nil))); err != nil {
+			return err
+		}
+		if err := enc.EncodeBool(x.Continued); err != nil {
+			return err
+		}
+		if err := enc.FinishValue(); err != nil {
+			return err
+		}
+	}
+	if err := enc.NextField(""); err != nil {
+		return err
+	}
+	return enc.FinishValue()
+}
+
 // CrRule provides a filter and the type of resolution to perform for a row
 // under conflict that passes the filter.
 type CrRule struct {
@@ -4241,6 +5168,64 @@ func (x *CrRule) VDLRead(dec vdl.Decoder) error {
 	}
 }
 
+func (x CrRule) VDLWrite(enc vdl.Encoder) error {
+	if err := enc.StartValue(vdl.TypeOf((*CrRule)(nil)).Elem()); err != nil {
+		return err
+	}
+	var1 := (x.CollectionId == Id{})
+	if !(var1) {
+		if err := enc.NextField("CollectionId"); err != nil {
+			return err
+		}
+		if err := x.CollectionId.VDLWrite(enc); err != nil {
+			return err
+		}
+	}
+	var2 := (x.KeyPrefix == "")
+	if !(var2) {
+		if err := enc.NextField("KeyPrefix"); err != nil {
+			return err
+		}
+		if err := enc.StartValue(vdl.TypeOf((*string)(nil))); err != nil {
+			return err
+		}
+		if err := enc.EncodeString(x.KeyPrefix); err != nil {
+			return err
+		}
+		if err := enc.FinishValue(); err != nil {
+			return err
+		}
+	}
+	var3 := (x.Type == "")
+	if !(var3) {
+		if err := enc.NextField("Type"); err != nil {
+			return err
+		}
+		if err := enc.StartValue(vdl.TypeOf((*string)(nil))); err != nil {
+			return err
+		}
+		if err := enc.EncodeString(x.Type); err != nil {
+			return err
+		}
+		if err := enc.FinishValue(); err != nil {
+			return err
+		}
+	}
+	var4 := (x.Resolver == ResolverTypeLastWins)
+	if !(var4) {
+		if err := enc.NextField("Resolver"); err != nil {
+			return err
+		}
+		if err := x.Resolver.VDLWrite(enc); err != nil {
+			return err
+		}
+	}
+	if err := enc.NextField(""); err != nil {
+		return err
+	}
+	return enc.FinishValue()
+}
+
 // For a given row with a conflict, all rules are matched against the row.
 // If no rules match the row, we default to "LastWins". If multiple
 // rules match the row, ties are broken as follows:
@@ -4443,6 +5428,43 @@ func __VDLRead4_list(dec vdl.Decoder, x *[]CrRule) error {
 	}
 }
 
+func (x CrPolicy) VDLWrite(enc vdl.Encoder) error {
+	if err := enc.StartValue(vdl.TypeOf((*CrPolicy)(nil)).Elem()); err != nil {
+		return err
+	}
+	var var1 bool
+	if len(x.Rules) == 0 {
+		var1 = true
+	}
+	if !(var1) {
+		if err := enc.NextField("Rules"); err != nil {
+			return err
+		}
+		if err := __VDLWrite4_list(enc, &x.Rules); err != nil {
+			return err
+		}
+	}
+	if err := enc.NextField(""); err != nil {
+		return err
+	}
+	return enc.FinishValue()
+}
+
+func __VDLWrite4_list(enc vdl.Encoder, x *[]CrRule) error {
+	if err := enc.StartValue(vdl.TypeOf((*[]CrRule)(nil))); err != nil {
+		return err
+	}
+	for i := 0; i < len(*x); i++ {
+		if err := (*x)[i].VDLWrite(enc); err != nil {
+			return err
+		}
+	}
+	if err := enc.NextEntry(true); err != nil {
+		return err
+	}
+	return enc.FinishValue()
+}
+
 // SchemaMetadata maintains metadata related to the schema of a given database.
 // There is one SchemaMetadata per database.
 type SchemaMetadata struct {
@@ -4609,6 +5631,45 @@ func (x *SchemaMetadata) VDLRead(dec vdl.Decoder) error {
 	}
 }
 
+func (x SchemaMetadata) VDLWrite(enc vdl.Encoder) error {
+	if err := enc.StartValue(vdl.TypeOf((*SchemaMetadata)(nil)).Elem()); err != nil {
+		return err
+	}
+	var1 := (x.Version == int32(0))
+	if !(var1) {
+		if err := enc.NextField("Version"); err != nil {
+			return err
+		}
+		if err := enc.StartValue(vdl.TypeOf((*int32)(nil))); err != nil {
+			return err
+		}
+		if err := enc.EncodeInt(int64(x.Version)); err != nil {
+			return err
+		}
+		if err := enc.FinishValue(); err != nil {
+			return err
+		}
+	}
+	var2 := true
+	var var3 bool
+	if len(x.Policy.Rules) == 0 {
+		var3 = true
+	}
+	var2 = var2 && var3
+	if !(var2) {
+		if err := enc.NextField("Policy"); err != nil {
+			return err
+		}
+		if err := x.Policy.VDLWrite(enc); err != nil {
+			return err
+		}
+	}
+	if err := enc.NextField(""); err != nil {
+		return err
+	}
+	return enc.FinishValue()
+}
+
 // BlobRef is a reference to a blob.
 type BlobRef string
 
@@ -4654,6 +5715,16 @@ func (x *BlobRef) VDLRead(dec vdl.Decoder) error {
 	}
 	*x = BlobRef(tmp)
 	return dec.FinishValue()
+}
+
+func (x BlobRef) VDLWrite(enc vdl.Encoder) error {
+	if err := enc.StartValue(vdl.TypeOf((*BlobRef)(nil))); err != nil {
+		return err
+	}
+	if err := enc.EncodeString(string(x)); err != nil {
+		return err
+	}
+	return enc.FinishValue()
 }
 
 // BlobFetchState represents the state transitions of a blob fetch.
@@ -4766,6 +5837,16 @@ func (x *BlobFetchState) VDLRead(dec vdl.Decoder) error {
 		return err
 	}
 	return dec.FinishValue()
+}
+
+func (x BlobFetchState) VDLWrite(enc vdl.Encoder) error {
+	if err := enc.StartValue(vdl.TypeOf((*BlobFetchState)(nil))); err != nil {
+		return err
+	}
+	if err := enc.EncodeString(x.String()); err != nil {
+		return err
+	}
+	return enc.FinishValue()
 }
 
 // BlobFetchStatus describes the progress of an asynchronous blob fetch.
@@ -4959,6 +6040,55 @@ func (x *BlobFetchStatus) VDLRead(dec vdl.Decoder) error {
 	}
 }
 
+func (x BlobFetchStatus) VDLWrite(enc vdl.Encoder) error {
+	if err := enc.StartValue(vdl.TypeOf((*BlobFetchStatus)(nil)).Elem()); err != nil {
+		return err
+	}
+	var1 := (x.State == BlobFetchStatePending)
+	if !(var1) {
+		if err := enc.NextField("State"); err != nil {
+			return err
+		}
+		if err := x.State.VDLWrite(enc); err != nil {
+			return err
+		}
+	}
+	var2 := (x.Received == int64(0))
+	if !(var2) {
+		if err := enc.NextField("Received"); err != nil {
+			return err
+		}
+		if err := enc.StartValue(vdl.TypeOf((*int64)(nil))); err != nil {
+			return err
+		}
+		if err := enc.EncodeInt(x.Received); err != nil {
+			return err
+		}
+		if err := enc.FinishValue(); err != nil {
+			return err
+		}
+	}
+	var3 := (x.Total == int64(0))
+	if !(var3) {
+		if err := enc.NextField("Total"); err != nil {
+			return err
+		}
+		if err := enc.StartValue(vdl.TypeOf((*int64)(nil))); err != nil {
+			return err
+		}
+		if err := enc.EncodeInt(x.Total); err != nil {
+			return err
+		}
+		if err := enc.FinishValue(); err != nil {
+			return err
+		}
+	}
+	if err := enc.NextField(""); err != nil {
+		return err
+	}
+	return enc.FinishValue()
+}
+
 // StoreChange is the new value for a watched entity.
 // TODO(rogulenko): Consider adding the Shell state.
 type StoreChange struct {
@@ -4981,7 +6111,7 @@ func (m *StoreChange) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 	if err != nil {
 		return err
 	}
-	var4 := m.Value == nil || m.Value.IsNilAny()
+	var4 := m.Value == nil || (m.Value.Type.Kind() == vdl.Any && m.Value.IsNil())
 	if var4 {
 		if err := fieldsTarget1.ZeroField("Value"); err != nil && err != vdl.ErrFieldNoExist {
 			return err
@@ -5117,6 +6247,52 @@ func (x *StoreChange) VDLRead(dec vdl.Decoder) error {
 			}
 		}
 	}
+}
+
+func (x StoreChange) VDLWrite(enc vdl.Encoder) error {
+	if err := enc.StartValue(vdl.TypeOf((*StoreChange)(nil)).Elem()); err != nil {
+		return err
+	}
+	var1 := x.Value == nil || (x.Value.Type.Kind() == vdl.Any && x.Value.IsNil())
+	if !(var1) {
+		if err := enc.NextField("Value"); err != nil {
+			return err
+		}
+		if err := enc.StartValue(vdl.AnyType); err != nil {
+			return err
+		}
+		if x.Value.IsNil() {
+			if err := enc.NilValue(x.Value.Type); err != nil {
+				return err
+			}
+		} else {
+			if err := x.Value.VDLWrite(enc); err != nil {
+				return err
+			}
+		}
+		if err := enc.FinishValue(); err != nil {
+			return err
+		}
+	}
+	var2 := (x.FromSync == false)
+	if !(var2) {
+		if err := enc.NextField("FromSync"); err != nil {
+			return err
+		}
+		if err := enc.StartValue(vdl.TypeOf((*bool)(nil))); err != nil {
+			return err
+		}
+		if err := enc.EncodeBool(x.FromSync); err != nil {
+			return err
+		}
+		if err := enc.FinishValue(); err != nil {
+			return err
+		}
+	}
+	if err := enc.NextField(""); err != nil {
+		return err
+	}
+	return enc.FinishValue()
 }
 
 //////////////////////////////////////////////////

@@ -88,6 +88,16 @@ func (x *MountFlag) VDLRead(dec vdl.Decoder) error {
 	return dec.FinishValue()
 }
 
+func (x MountFlag) VDLWrite(enc vdl.Encoder) error {
+	if err := enc.StartValue(vdl.TypeOf((*MountFlag)(nil))); err != nil {
+		return err
+	}
+	if err := enc.EncodeUint(uint64(x)); err != nil {
+		return err
+	}
+	return enc.FinishValue()
+}
+
 // MountedServer represents a server mounted on a specific name.
 type MountedServer struct {
 	// Server is the OA that's mounted.
@@ -256,6 +266,49 @@ func (x *MountedServer) VDLRead(dec vdl.Decoder) error {
 			}
 		}
 	}
+}
+
+func (x MountedServer) VDLWrite(enc vdl.Encoder) error {
+	if err := enc.StartValue(vdl.TypeOf((*MountedServer)(nil)).Elem()); err != nil {
+		return err
+	}
+	var1 := (x.Server == "")
+	if !(var1) {
+		if err := enc.NextField("Server"); err != nil {
+			return err
+		}
+		if err := enc.StartValue(vdl.TypeOf((*string)(nil))); err != nil {
+			return err
+		}
+		if err := enc.EncodeString(x.Server); err != nil {
+			return err
+		}
+		if err := enc.FinishValue(); err != nil {
+			return err
+		}
+	}
+	var wireValue2 time.WireDeadline
+	if err := time.WireDeadlineFromNative(&wireValue2, x.Deadline); err != nil {
+		return fmt.Errorf("error converting x.Deadline to wiretype")
+	}
+
+	var3 := (wireValue2 == time.WireDeadline{})
+	if !(var3) {
+		if err := enc.NextField("Deadline"); err != nil {
+			return err
+		}
+		var wire time.WireDeadline
+		if err := time.WireDeadlineFromNative(&wire, x.Deadline); err != nil {
+			return err
+		}
+		if err := wire.VDLWrite(enc); err != nil {
+			return err
+		}
+	}
+	if err := enc.NextField(""); err != nil {
+		return err
+	}
+	return enc.FinishValue()
 }
 
 // MountEntry represents a given name mounted in the mounttable.
@@ -573,6 +626,88 @@ func __VDLRead1_list(dec vdl.Decoder, x *[]MountedServer) error {
 	}
 }
 
+func (x MountEntry) VDLWrite(enc vdl.Encoder) error {
+	if err := enc.StartValue(vdl.TypeOf((*MountEntry)(nil)).Elem()); err != nil {
+		return err
+	}
+	var1 := (x.Name == "")
+	if !(var1) {
+		if err := enc.NextField("Name"); err != nil {
+			return err
+		}
+		if err := enc.StartValue(vdl.TypeOf((*string)(nil))); err != nil {
+			return err
+		}
+		if err := enc.EncodeString(x.Name); err != nil {
+			return err
+		}
+		if err := enc.FinishValue(); err != nil {
+			return err
+		}
+	}
+	var var2 bool
+	if len(x.Servers) == 0 {
+		var2 = true
+	}
+	if !(var2) {
+		if err := enc.NextField("Servers"); err != nil {
+			return err
+		}
+		if err := __VDLWrite1_list(enc, &x.Servers); err != nil {
+			return err
+		}
+	}
+	var3 := (x.ServesMountTable == false)
+	if !(var3) {
+		if err := enc.NextField("ServesMountTable"); err != nil {
+			return err
+		}
+		if err := enc.StartValue(vdl.TypeOf((*bool)(nil))); err != nil {
+			return err
+		}
+		if err := enc.EncodeBool(x.ServesMountTable); err != nil {
+			return err
+		}
+		if err := enc.FinishValue(); err != nil {
+			return err
+		}
+	}
+	var4 := (x.IsLeaf == false)
+	if !(var4) {
+		if err := enc.NextField("IsLeaf"); err != nil {
+			return err
+		}
+		if err := enc.StartValue(vdl.TypeOf((*bool)(nil))); err != nil {
+			return err
+		}
+		if err := enc.EncodeBool(x.IsLeaf); err != nil {
+			return err
+		}
+		if err := enc.FinishValue(); err != nil {
+			return err
+		}
+	}
+	if err := enc.NextField(""); err != nil {
+		return err
+	}
+	return enc.FinishValue()
+}
+
+func __VDLWrite1_list(enc vdl.Encoder, x *[]MountedServer) error {
+	if err := enc.StartValue(vdl.TypeOf((*[]MountedServer)(nil))); err != nil {
+		return err
+	}
+	for i := 0; i < len(*x); i++ {
+		if err := (*x)[i].VDLWrite(enc); err != nil {
+			return err
+		}
+	}
+	if err := enc.NextEntry(true); err != nil {
+		return err
+	}
+	return enc.FinishValue()
+}
+
 // GlobError is returned by namespace.Glob to indicate a subtree of the namespace
 // that could not be traversed.
 type GlobError struct {
@@ -734,6 +869,40 @@ func (x *GlobError) VDLRead(dec vdl.Decoder) error {
 	}
 }
 
+func (x GlobError) VDLWrite(enc vdl.Encoder) error {
+	if err := enc.StartValue(vdl.TypeOf((*GlobError)(nil)).Elem()); err != nil {
+		return err
+	}
+	var1 := (x.Name == "")
+	if !(var1) {
+		if err := enc.NextField("Name"); err != nil {
+			return err
+		}
+		if err := enc.StartValue(vdl.TypeOf((*string)(nil))); err != nil {
+			return err
+		}
+		if err := enc.EncodeString(x.Name); err != nil {
+			return err
+		}
+		if err := enc.FinishValue(); err != nil {
+			return err
+		}
+	}
+	var2 := (x.Error == (error)(nil))
+	if !(var2) {
+		if err := enc.NextField("Error"); err != nil {
+			return err
+		}
+		if err := verror.VDLWrite(enc, x.Error); err != nil {
+			return err
+		}
+	}
+	if err := enc.NextField(""); err != nil {
+		return err
+	}
+	return enc.FinishValue()
+}
+
 type (
 	// GlobReply represents any single field of the GlobReply union type.
 	//
@@ -748,6 +917,7 @@ type (
 		// __VDLReflect describes the GlobReply union type.
 		__VDLReflect(__GlobReplyReflect)
 		FillVDLTarget(vdl.Target, *vdl.Type) error
+		VDLWrite(vdl.Encoder) error
 	}
 	// GlobReplyEntry represents field Entry of the GlobReply union type.
 	GlobReplyEntry struct{ Value MountEntry }
@@ -919,6 +1089,37 @@ func VDLReadGlobReply(dec vdl.Decoder, x *GlobReply) error {
 	return dec.FinishValue()
 }
 
+func (x GlobReplyEntry) VDLWrite(enc vdl.Encoder) error {
+	if err := enc.StartValue(vdl.TypeOf((*GlobReply)(nil))); err != nil {
+		return err
+	}
+	if err := enc.NextField("Entry"); err != nil {
+		return err
+	}
+	if err := x.Value.VDLWrite(enc); err != nil {
+		return err
+	}
+	if err := enc.NextField(""); err != nil {
+		return err
+	}
+	return enc.FinishValue()
+}
+func (x GlobReplyError) VDLWrite(enc vdl.Encoder) error {
+	if err := enc.StartValue(vdl.TypeOf((*GlobReply)(nil))); err != nil {
+		return err
+	}
+	if err := enc.NextField("Error"); err != nil {
+		return err
+	}
+	if err := x.Value.VDLWrite(enc); err != nil {
+		return err
+	}
+	if err := enc.NextField(""); err != nil {
+		return err
+	}
+	return enc.FinishValue()
+}
+
 type (
 	// GlobChildrenReply represents any single field of the GlobChildrenReply union type.
 	//
@@ -933,6 +1134,7 @@ type (
 		// __VDLReflect describes the GlobChildrenReply union type.
 		__VDLReflect(__GlobChildrenReplyReflect)
 		FillVDLTarget(vdl.Target, *vdl.Type) error
+		VDLWrite(vdl.Encoder) error
 	}
 	// GlobChildrenReplyName represents field Name of the GlobChildrenReply union type.
 	GlobChildrenReplyName struct{ Value string }
@@ -1107,6 +1309,43 @@ func VDLReadGlobChildrenReply(dec vdl.Decoder, x *GlobChildrenReply) error {
 		return fmt.Errorf("extra field %q in union %T, from %v", f, x, dec.Type())
 	}
 	return dec.FinishValue()
+}
+
+func (x GlobChildrenReplyName) VDLWrite(enc vdl.Encoder) error {
+	if err := enc.StartValue(vdl.TypeOf((*GlobChildrenReply)(nil))); err != nil {
+		return err
+	}
+	if err := enc.NextField("Name"); err != nil {
+		return err
+	}
+	if err := enc.StartValue(vdl.TypeOf((*string)(nil))); err != nil {
+		return err
+	}
+	if err := enc.EncodeString(x.Value); err != nil {
+		return err
+	}
+	if err := enc.FinishValue(); err != nil {
+		return err
+	}
+	if err := enc.NextField(""); err != nil {
+		return err
+	}
+	return enc.FinishValue()
+}
+func (x GlobChildrenReplyError) VDLWrite(enc vdl.Encoder) error {
+	if err := enc.StartValue(vdl.TypeOf((*GlobChildrenReply)(nil))); err != nil {
+		return err
+	}
+	if err := enc.NextField("Error"); err != nil {
+		return err
+	}
+	if err := x.Value.VDLWrite(enc); err != nil {
+		return err
+	}
+	if err := enc.NextField(""); err != nil {
+		return err
+	}
+	return enc.FinishValue()
 }
 
 //////////////////////////////////////////////////

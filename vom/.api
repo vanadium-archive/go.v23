@@ -55,8 +55,12 @@ pkg vom, func NewTypeEncoder(io.Writer) *TypeEncoder
 pkg vom, func NewVersionedEncoder(Version, io.Writer) *Encoder
 pkg vom, func NewVersionedEncoderWithTypeEncoder(Version, io.Writer, *TypeEncoder) *Encoder
 pkg vom, func NewVersionedTypeEncoder(Version, io.Writer) *TypeEncoder
+pkg vom, func NewVersionedXEncoder(Version, io.Writer) *XEncoder
+pkg vom, func NewVersionedXEncoderWithTypeEncoder(Version, io.Writer, *TypeEncoder) *XEncoder
 pkg vom, func NewXDecoder(io.Reader) *XDecoder
 pkg vom, func NewXDecoderWithTypeDecoder(io.Reader, *TypeDecoder) *XDecoder
+pkg vom, func NewXEncoder(io.Writer) *XEncoder
+pkg vom, func NewXEncoderWithTypeEncoder(io.Writer, *TypeEncoder) *XEncoder
 pkg vom, func RawBytesFromValue(interface{}) (*RawBytes, error)
 pkg vom, func RawBytesOf(interface{}) *RawBytes
 pkg vom, func VDLReadPrimitive(vdl.Decoder, *Primitive) error
@@ -92,55 +96,68 @@ pkg vom, method (*PrimitiveTarget) StartField(string) (vdl.Target, vdl.Target, e
 pkg vom, method (*PrimitiveTarget) StartFields(*vdl.Type) (vdl.FieldsTarget, error)
 pkg vom, method (*RawBytes) Decoder() vdl.Decoder
 pkg vom, method (*RawBytes) FillVDLTarget(vdl.Target, *vdl.Type) error
-pkg vom, method (*RawBytes) IsNilAny() bool
+pkg vom, method (*RawBytes) IsNil() bool
 pkg vom, method (*RawBytes) MakeVDLTarget() vdl.Target
 pkg vom, method (*RawBytes) String() string
 pkg vom, method (*RawBytes) ToValue(interface{}) error
 pkg vom, method (*RawBytes) VDLRead(vdl.Decoder) error
+pkg vom, method (*RawBytes) VDLWrite(vdl.Encoder) error
 pkg vom, method (*TypeDecoder) Start()
 pkg vom, method (*TypeDecoder) Stop()
 pkg vom, method (*XDecoder) Decode(interface{}) error
 pkg vom, method (*XDecoder) Decoder() vdl.Decoder
 pkg vom, method (*XDecoder) Ignore() error
+pkg vom, method (*XEncoder) Encode(interface{}) error
+pkg vom, method (*XEncoder) Encoder() vdl.Encoder
 pkg vom, method (ControlKind) String() string
+pkg vom, method (ControlKind) VDLWrite(vdl.Encoder) error
 pkg vom, method (DumpAtom) String() string
+pkg vom, method (DumpAtom) VDLWrite(vdl.Encoder) error
 pkg vom, method (DumpKind) String() string
+pkg vom, method (DumpKind) VDLWrite(vdl.Encoder) error
 pkg vom, method (DumpStatus) String() string
 pkg vom, method (PrimitivePBool) FillVDLTarget(vdl.Target, *vdl.Type) error
 pkg vom, method (PrimitivePBool) Index() int
 pkg vom, method (PrimitivePBool) Interface() interface{}
 pkg vom, method (PrimitivePBool) MakeVDLTarget() vdl.Target
 pkg vom, method (PrimitivePBool) Name() string
+pkg vom, method (PrimitivePBool) VDLWrite(vdl.Encoder) error
 pkg vom, method (PrimitivePByte) FillVDLTarget(vdl.Target, *vdl.Type) error
 pkg vom, method (PrimitivePByte) Index() int
 pkg vom, method (PrimitivePByte) Interface() interface{}
 pkg vom, method (PrimitivePByte) MakeVDLTarget() vdl.Target
 pkg vom, method (PrimitivePByte) Name() string
+pkg vom, method (PrimitivePByte) VDLWrite(vdl.Encoder) error
 pkg vom, method (PrimitivePControl) FillVDLTarget(vdl.Target, *vdl.Type) error
 pkg vom, method (PrimitivePControl) Index() int
 pkg vom, method (PrimitivePControl) Interface() interface{}
 pkg vom, method (PrimitivePControl) MakeVDLTarget() vdl.Target
 pkg vom, method (PrimitivePControl) Name() string
+pkg vom, method (PrimitivePControl) VDLWrite(vdl.Encoder) error
 pkg vom, method (PrimitivePFloat) FillVDLTarget(vdl.Target, *vdl.Type) error
 pkg vom, method (PrimitivePFloat) Index() int
 pkg vom, method (PrimitivePFloat) Interface() interface{}
 pkg vom, method (PrimitivePFloat) MakeVDLTarget() vdl.Target
 pkg vom, method (PrimitivePFloat) Name() string
+pkg vom, method (PrimitivePFloat) VDLWrite(vdl.Encoder) error
 pkg vom, method (PrimitivePInt) FillVDLTarget(vdl.Target, *vdl.Type) error
 pkg vom, method (PrimitivePInt) Index() int
 pkg vom, method (PrimitivePInt) Interface() interface{}
 pkg vom, method (PrimitivePInt) MakeVDLTarget() vdl.Target
 pkg vom, method (PrimitivePInt) Name() string
+pkg vom, method (PrimitivePInt) VDLWrite(vdl.Encoder) error
 pkg vom, method (PrimitivePString) FillVDLTarget(vdl.Target, *vdl.Type) error
 pkg vom, method (PrimitivePString) Index() int
 pkg vom, method (PrimitivePString) Interface() interface{}
 pkg vom, method (PrimitivePString) MakeVDLTarget() vdl.Target
 pkg vom, method (PrimitivePString) Name() string
+pkg vom, method (PrimitivePString) VDLWrite(vdl.Encoder) error
 pkg vom, method (PrimitivePUint) FillVDLTarget(vdl.Target, *vdl.Type) error
 pkg vom, method (PrimitivePUint) Index() int
 pkg vom, method (PrimitivePUint) Interface() interface{}
 pkg vom, method (PrimitivePUint) MakeVDLTarget() vdl.Target
 pkg vom, method (PrimitivePUint) Name() string
+pkg vom, method (PrimitivePUint) VDLWrite(vdl.Encoder) error
 pkg vom, method (Version) String() string
 pkg vom, type ControlKind int
 pkg vom, type ControlKindTarget struct
@@ -179,6 +196,7 @@ pkg vom, type Primitive interface, FillVDLTarget(vdl.Target, *vdl.Type) error
 pkg vom, type Primitive interface, Index() int
 pkg vom, type Primitive interface, Interface() interface{}
 pkg vom, type Primitive interface, Name() string
+pkg vom, type Primitive interface, VDLWrite(vdl.Encoder) error
 pkg vom, type Primitive interface, unexported methods
 pkg vom, type PrimitivePBool struct
 pkg vom, type PrimitivePBool struct, Value bool
@@ -208,5 +226,6 @@ pkg vom, type TypeDecoder struct
 pkg vom, type TypeEncoder struct
 pkg vom, type Version byte
 pkg vom, type XDecoder struct
+pkg vom, type XEncoder struct
 pkg vom, var ControlKindAll [...]ControlKind
 pkg vom, var DumpKindAll [...]DumpKind

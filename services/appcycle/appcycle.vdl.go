@@ -193,6 +193,46 @@ func (x *Task) VDLRead(dec vdl.Decoder) error {
 	}
 }
 
+func (x Task) VDLWrite(enc vdl.Encoder) error {
+	if err := enc.StartValue(vdl.TypeOf((*Task)(nil)).Elem()); err != nil {
+		return err
+	}
+	var1 := (x.Progress == int32(0))
+	if !(var1) {
+		if err := enc.NextField("Progress"); err != nil {
+			return err
+		}
+		if err := enc.StartValue(vdl.TypeOf((*int32)(nil))); err != nil {
+			return err
+		}
+		if err := enc.EncodeInt(int64(x.Progress)); err != nil {
+			return err
+		}
+		if err := enc.FinishValue(); err != nil {
+			return err
+		}
+	}
+	var2 := (x.Goal == int32(0))
+	if !(var2) {
+		if err := enc.NextField("Goal"); err != nil {
+			return err
+		}
+		if err := enc.StartValue(vdl.TypeOf((*int32)(nil))); err != nil {
+			return err
+		}
+		if err := enc.EncodeInt(int64(x.Goal)); err != nil {
+			return err
+		}
+		if err := enc.FinishValue(); err != nil {
+			return err
+		}
+	}
+	if err := enc.NextField(""); err != nil {
+		return err
+	}
+	return enc.FinishValue()
+}
+
 //////////////////////////////////////////////////
 // Interface definitions
 

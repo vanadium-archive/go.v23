@@ -63,6 +63,16 @@ func (x *AdId) VDLRead(dec vdl.Decoder) error {
 	return dec.FinishValue()
 }
 
+func (x AdId) VDLWrite(enc vdl.Encoder) error {
+	if err := enc.StartValue(vdl.TypeOf((*AdId)(nil))); err != nil {
+		return err
+	}
+	if err := enc.EncodeBytes([]byte(x[:])); err != nil {
+		return err
+	}
+	return enc.FinishValue()
+}
+
 // Attributes represents service attributes as a key/value pair.
 type Attributes map[string]string
 
@@ -196,6 +206,36 @@ func (x *Attributes) VDLRead(dec vdl.Decoder) error {
 		}
 		tmpMap[key] = elem
 	}
+}
+
+func (x Attributes) VDLWrite(enc vdl.Encoder) error {
+	if err := enc.StartValue(vdl.TypeOf((*Attributes)(nil))); err != nil {
+		return err
+	}
+	for key, elem := range x {
+		if err := enc.StartValue(vdl.TypeOf((*string)(nil))); err != nil {
+			return err
+		}
+		if err := enc.EncodeString(key); err != nil {
+			return err
+		}
+		if err := enc.FinishValue(); err != nil {
+			return err
+		}
+		if err := enc.StartValue(vdl.TypeOf((*string)(nil))); err != nil {
+			return err
+		}
+		if err := enc.EncodeString(elem); err != nil {
+			return err
+		}
+		if err := enc.FinishValue(); err != nil {
+			return err
+		}
+	}
+	if err := enc.NextEntry(true); err != nil {
+		return err
+	}
+	return enc.FinishValue()
 }
 
 // Attachments represents service attachments as a key/value pair.
@@ -332,6 +372,36 @@ func (x *Attachments) VDLRead(dec vdl.Decoder) error {
 		}
 		tmpMap[key] = elem
 	}
+}
+
+func (x Attachments) VDLWrite(enc vdl.Encoder) error {
+	if err := enc.StartValue(vdl.TypeOf((*Attachments)(nil))); err != nil {
+		return err
+	}
+	for key, elem := range x {
+		if err := enc.StartValue(vdl.TypeOf((*string)(nil))); err != nil {
+			return err
+		}
+		if err := enc.EncodeString(key); err != nil {
+			return err
+		}
+		if err := enc.FinishValue(); err != nil {
+			return err
+		}
+		if err := enc.StartValue(vdl.TypeOf((*[]byte)(nil))); err != nil {
+			return err
+		}
+		if err := enc.EncodeBytes(elem); err != nil {
+			return err
+		}
+		if err := enc.FinishValue(); err != nil {
+			return err
+		}
+	}
+	if err := enc.NextEntry(true); err != nil {
+		return err
+	}
+	return enc.FinishValue()
 }
 
 // Advertisement represents a feed into advertiser to broadcast its contents
@@ -672,6 +742,97 @@ func __VDLRead1_list(dec vdl.Decoder, x *[]string) error {
 		}
 		*x = append(*x, elem)
 	}
+}
+
+func (x Advertisement) VDLWrite(enc vdl.Encoder) error {
+	if err := enc.StartValue(vdl.TypeOf((*Advertisement)(nil)).Elem()); err != nil {
+		return err
+	}
+	var1 := (x.Id == AdId{})
+	if !(var1) {
+		if err := enc.NextField("Id"); err != nil {
+			return err
+		}
+		if err := x.Id.VDLWrite(enc); err != nil {
+			return err
+		}
+	}
+	var2 := (x.InterfaceName == "")
+	if !(var2) {
+		if err := enc.NextField("InterfaceName"); err != nil {
+			return err
+		}
+		if err := enc.StartValue(vdl.TypeOf((*string)(nil))); err != nil {
+			return err
+		}
+		if err := enc.EncodeString(x.InterfaceName); err != nil {
+			return err
+		}
+		if err := enc.FinishValue(); err != nil {
+			return err
+		}
+	}
+	var var3 bool
+	if len(x.Addresses) == 0 {
+		var3 = true
+	}
+	if !(var3) {
+		if err := enc.NextField("Addresses"); err != nil {
+			return err
+		}
+		if err := __VDLWrite1_list(enc, &x.Addresses); err != nil {
+			return err
+		}
+	}
+	var var4 bool
+	if len(x.Attributes) == 0 {
+		var4 = true
+	}
+	if !(var4) {
+		if err := enc.NextField("Attributes"); err != nil {
+			return err
+		}
+		if err := x.Attributes.VDLWrite(enc); err != nil {
+			return err
+		}
+	}
+	var var5 bool
+	if len(x.Attachments) == 0 {
+		var5 = true
+	}
+	if !(var5) {
+		if err := enc.NextField("Attachments"); err != nil {
+			return err
+		}
+		if err := x.Attachments.VDLWrite(enc); err != nil {
+			return err
+		}
+	}
+	if err := enc.NextField(""); err != nil {
+		return err
+	}
+	return enc.FinishValue()
+}
+
+func __VDLWrite1_list(enc vdl.Encoder, x *[]string) error {
+	if err := enc.StartValue(vdl.TypeOf((*[]string)(nil))); err != nil {
+		return err
+	}
+	for i := 0; i < len(*x); i++ {
+		if err := enc.StartValue(vdl.TypeOf((*string)(nil))); err != nil {
+			return err
+		}
+		if err := enc.EncodeString((*x)[i]); err != nil {
+			return err
+		}
+		if err := enc.FinishValue(); err != nil {
+			return err
+		}
+	}
+	if err := enc.NextEntry(true); err != nil {
+		return err
+	}
+	return enc.FinishValue()
 }
 
 var __VDLInitCalled bool

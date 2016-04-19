@@ -364,6 +364,127 @@ func (x *TestCase) VDLRead(dec vdl.Decoder) error {
 	}
 }
 
+func (x TestCase) VDLWrite(enc vdl.Encoder) error {
+	if err := enc.StartValue(vdl.TypeOf((*TestCase)(nil)).Elem()); err != nil {
+		return err
+	}
+	var1 := (x.Name == "")
+	if !(var1) {
+		if err := enc.NextField("Name"); err != nil {
+			return err
+		}
+		if err := enc.StartValue(vdl.TypeOf((*string)(nil))); err != nil {
+			return err
+		}
+		if err := enc.EncodeString(x.Name); err != nil {
+			return err
+		}
+		if err := enc.FinishValue(); err != nil {
+			return err
+		}
+	}
+	var2 := x.Value == nil || (x.Value.Kind() == vdl.Any && x.Value.IsZero())
+	if !(var2) {
+		if err := enc.NextField("Value"); err != nil {
+			return err
+		}
+		if err := enc.StartValue(vdl.AnyType); err != nil {
+			return err
+		}
+		if x.Value.IsNil() {
+			if err := enc.NilValue(x.Value.Type()); err != nil {
+				return err
+			}
+		} else {
+			if err := x.Value.VDLWrite(enc); err != nil {
+				return err
+			}
+		}
+		if err := enc.FinishValue(); err != nil {
+			return err
+		}
+	}
+	var3 := (x.TypeString == "")
+	if !(var3) {
+		if err := enc.NextField("TypeString"); err != nil {
+			return err
+		}
+		if err := enc.StartValue(vdl.TypeOf((*string)(nil))); err != nil {
+			return err
+		}
+		if err := enc.EncodeString(x.TypeString); err != nil {
+			return err
+		}
+		if err := enc.FinishValue(); err != nil {
+			return err
+		}
+	}
+	var4 := (x.Hex == "")
+	if !(var4) {
+		if err := enc.NextField("Hex"); err != nil {
+			return err
+		}
+		if err := enc.StartValue(vdl.TypeOf((*string)(nil))); err != nil {
+			return err
+		}
+		if err := enc.EncodeString(x.Hex); err != nil {
+			return err
+		}
+		if err := enc.FinishValue(); err != nil {
+			return err
+		}
+	}
+	var5 := (x.HexVersion == "")
+	if !(var5) {
+		if err := enc.NextField("HexVersion"); err != nil {
+			return err
+		}
+		if err := enc.StartValue(vdl.TypeOf((*string)(nil))); err != nil {
+			return err
+		}
+		if err := enc.EncodeString(x.HexVersion); err != nil {
+			return err
+		}
+		if err := enc.FinishValue(); err != nil {
+			return err
+		}
+	}
+	var6 := (x.HexType == "")
+	if !(var6) {
+		if err := enc.NextField("HexType"); err != nil {
+			return err
+		}
+		if err := enc.StartValue(vdl.TypeOf((*string)(nil))); err != nil {
+			return err
+		}
+		if err := enc.EncodeString(x.HexType); err != nil {
+			return err
+		}
+		if err := enc.FinishValue(); err != nil {
+			return err
+		}
+	}
+	var7 := (x.HexValue == "")
+	if !(var7) {
+		if err := enc.NextField("HexValue"); err != nil {
+			return err
+		}
+		if err := enc.StartValue(vdl.TypeOf((*string)(nil))); err != nil {
+			return err
+		}
+		if err := enc.EncodeString(x.HexValue); err != nil {
+			return err
+		}
+		if err := enc.FinishValue(); err != nil {
+			return err
+		}
+	}
+	if err := enc.NextField(""); err != nil {
+		return err
+	}
+	return enc.FinishValue()
+}
+
 // vomdata config types
 type ConvertGroup struct {
 	Name        string
@@ -641,6 +762,85 @@ func __VDLRead1_list(dec vdl.Decoder, x *[]*vdl.Value) error {
 		}
 		*x = append(*x, elem)
 	}
+}
+
+func (x ConvertGroup) VDLWrite(enc vdl.Encoder) error {
+	if err := enc.StartValue(vdl.TypeOf((*ConvertGroup)(nil)).Elem()); err != nil {
+		return err
+	}
+	var1 := (x.Name == "")
+	if !(var1) {
+		if err := enc.NextField("Name"); err != nil {
+			return err
+		}
+		if err := enc.StartValue(vdl.TypeOf((*string)(nil))); err != nil {
+			return err
+		}
+		if err := enc.EncodeString(x.Name); err != nil {
+			return err
+		}
+		if err := enc.FinishValue(); err != nil {
+			return err
+		}
+	}
+	var2 := (x.PrimaryType == nil || x.PrimaryType == vdl.AnyType)
+	if !(var2) {
+		if err := enc.NextField("PrimaryType"); err != nil {
+			return err
+		}
+		if err := enc.StartValue(vdl.TypeObjectType); err != nil {
+			return err
+		}
+		if err := enc.EncodeTypeObject(x.PrimaryType); err != nil {
+			return err
+		}
+		if err := enc.FinishValue(); err != nil {
+			return err
+		}
+	}
+	var var3 bool
+	if len(x.Values) == 0 {
+		var3 = true
+	}
+	if !(var3) {
+		if err := enc.NextField("Values"); err != nil {
+			return err
+		}
+		if err := __VDLWrite1_list(enc, &x.Values); err != nil {
+			return err
+		}
+	}
+	if err := enc.NextField(""); err != nil {
+		return err
+	}
+	return enc.FinishValue()
+}
+
+func __VDLWrite1_list(enc vdl.Encoder, x *[]*vdl.Value) error {
+	if err := enc.StartValue(vdl.TypeOf((*[]*vdl.Value)(nil))); err != nil {
+		return err
+	}
+	for i := 0; i < len(*x); i++ {
+		if err := enc.StartValue(vdl.AnyType); err != nil {
+			return err
+		}
+		if (*x)[i].IsNil() {
+			if err := enc.NilValue((*x)[i].Type()); err != nil {
+				return err
+			}
+		} else {
+			if err := (*x)[i].VDLWrite(enc); err != nil {
+				return err
+			}
+		}
+		if err := enc.FinishValue(); err != nil {
+			return err
+		}
+	}
+	if err := enc.NextEntry(true); err != nil {
+		return err
+	}
+	return enc.FinishValue()
 }
 
 type VomdataStruct struct {
@@ -1354,6 +1554,160 @@ func __VDLRead6_list(dec vdl.Decoder, x *[]ConvertGroup) error {
 	}
 }
 
+func (x VomdataStruct) VDLWrite(enc vdl.Encoder) error {
+	if err := enc.StartValue(vdl.TypeOf((*VomdataStruct)(nil)).Elem()); err != nil {
+		return err
+	}
+	var var1 bool
+	if len(x.EncodeDecodeData) == 0 {
+		var1 = true
+	}
+	if !(var1) {
+		if err := enc.NextField("EncodeDecodeData"); err != nil {
+			return err
+		}
+		if err := __VDLWrite2_map(enc, &x.EncodeDecodeData); err != nil {
+			return err
+		}
+	}
+	var var2 bool
+	if len(x.CompatData) == 0 {
+		var2 = true
+	}
+	if !(var2) {
+		if err := enc.NextField("CompatData"); err != nil {
+			return err
+		}
+		if err := __VDLWrite3_map(enc, &x.CompatData); err != nil {
+			return err
+		}
+	}
+	var var3 bool
+	if len(x.ConvertData) == 0 {
+		var3 = true
+	}
+	if !(var3) {
+		if err := enc.NextField("ConvertData"); err != nil {
+			return err
+		}
+		if err := __VDLWrite4_map(enc, &x.ConvertData); err != nil {
+			return err
+		}
+	}
+	if err := enc.NextField(""); err != nil {
+		return err
+	}
+	return enc.FinishValue()
+}
+
+func __VDLWrite2_map(enc vdl.Encoder, x *map[byte][]*vdl.Value) error {
+	if err := enc.StartValue(vdl.TypeOf((*map[byte][]*vdl.Value)(nil))); err != nil {
+		return err
+	}
+	for key, elem := range *x {
+		if err := enc.StartValue(vdl.TypeOf((*byte)(nil))); err != nil {
+			return err
+		}
+		if err := enc.EncodeUint(uint64(key)); err != nil {
+			return err
+		}
+		if err := enc.FinishValue(); err != nil {
+			return err
+		}
+		if err := __VDLWrite1_list(enc, &elem); err != nil {
+			return err
+		}
+	}
+	if err := enc.NextEntry(true); err != nil {
+		return err
+	}
+	return enc.FinishValue()
+}
+
+func __VDLWrite3_map(enc vdl.Encoder, x *map[string][]*vdl.Type) error {
+	if err := enc.StartValue(vdl.TypeOf((*map[string][]*vdl.Type)(nil))); err != nil {
+		return err
+	}
+	for key, elem := range *x {
+		if err := enc.StartValue(vdl.TypeOf((*string)(nil))); err != nil {
+			return err
+		}
+		if err := enc.EncodeString(key); err != nil {
+			return err
+		}
+		if err := enc.FinishValue(); err != nil {
+			return err
+		}
+		if err := __VDLWrite5_list(enc, &elem); err != nil {
+			return err
+		}
+	}
+	if err := enc.NextEntry(true); err != nil {
+		return err
+	}
+	return enc.FinishValue()
+}
+
+func __VDLWrite4_map(enc vdl.Encoder, x *map[string][]ConvertGroup) error {
+	if err := enc.StartValue(vdl.TypeOf((*map[string][]ConvertGroup)(nil))); err != nil {
+		return err
+	}
+	for key, elem := range *x {
+		if err := enc.StartValue(vdl.TypeOf((*string)(nil))); err != nil {
+			return err
+		}
+		if err := enc.EncodeString(key); err != nil {
+			return err
+		}
+		if err := enc.FinishValue(); err != nil {
+			return err
+		}
+		if err := __VDLWrite6_list(enc, &elem); err != nil {
+			return err
+		}
+	}
+	if err := enc.NextEntry(true); err != nil {
+		return err
+	}
+	return enc.FinishValue()
+}
+
+func __VDLWrite5_list(enc vdl.Encoder, x *[]*vdl.Type) error {
+	if err := enc.StartValue(vdl.TypeOf((*[]*vdl.Type)(nil))); err != nil {
+		return err
+	}
+	for i := 0; i < len(*x); i++ {
+		if err := enc.StartValue(vdl.TypeObjectType); err != nil {
+			return err
+		}
+		if err := enc.EncodeTypeObject((*x)[i]); err != nil {
+			return err
+		}
+		if err := enc.FinishValue(); err != nil {
+			return err
+		}
+	}
+	if err := enc.NextEntry(true); err != nil {
+		return err
+	}
+	return enc.FinishValue()
+}
+
+func __VDLWrite6_list(enc vdl.Encoder, x *[]ConvertGroup) error {
+	if err := enc.StartValue(vdl.TypeOf((*[]ConvertGroup)(nil))); err != nil {
+		return err
+	}
+	for i := 0; i < len(*x); i++ {
+		if err := (*x)[i].VDLWrite(enc); err != nil {
+			return err
+		}
+	}
+	if err := enc.NextEntry(true); err != nil {
+		return err
+	}
+	return enc.FinishValue()
+}
+
 // Named Types
 type NBool bool
 
@@ -1401,6 +1755,16 @@ func (x *NBool) VDLRead(dec vdl.Decoder) error {
 	return dec.FinishValue()
 }
 
+func (x NBool) VDLWrite(enc vdl.Encoder) error {
+	if err := enc.StartValue(vdl.TypeOf((*NBool)(nil))); err != nil {
+		return err
+	}
+	if err := enc.EncodeBool(bool(x)); err != nil {
+		return err
+	}
+	return enc.FinishValue()
+}
+
 type NString string
 
 func (NString) __VDLReflect(struct {
@@ -1445,6 +1809,16 @@ func (x *NString) VDLRead(dec vdl.Decoder) error {
 	}
 	*x = NString(tmp)
 	return dec.FinishValue()
+}
+
+func (x NString) VDLWrite(enc vdl.Encoder) error {
+	if err := enc.StartValue(vdl.TypeOf((*NString)(nil))); err != nil {
+		return err
+	}
+	if err := enc.EncodeString(string(x)); err != nil {
+		return err
+	}
+	return enc.FinishValue()
 }
 
 type NByteSlice []byte
@@ -1498,6 +1872,16 @@ func (x *NByteSlice) VDLRead(dec vdl.Decoder) error {
 	return dec.FinishValue()
 }
 
+func (x NByteSlice) VDLWrite(enc vdl.Encoder) error {
+	if err := enc.StartValue(vdl.TypeOf((*NByteSlice)(nil))); err != nil {
+		return err
+	}
+	if err := enc.EncodeBytes([]byte(x)); err != nil {
+		return err
+	}
+	return enc.FinishValue()
+}
+
 type NByteArray [4]byte
 
 func (NByteArray) __VDLReflect(struct {
@@ -1541,6 +1925,16 @@ func (x *NByteArray) VDLRead(dec vdl.Decoder) error {
 		return err
 	}
 	return dec.FinishValue()
+}
+
+func (x NByteArray) VDLWrite(enc vdl.Encoder) error {
+	if err := enc.StartValue(vdl.TypeOf((*NByteArray)(nil))); err != nil {
+		return err
+	}
+	if err := enc.EncodeBytes([]byte(x[:])); err != nil {
+		return err
+	}
+	return enc.FinishValue()
 }
 
 type NByte byte
@@ -1610,6 +2004,16 @@ func (x *NByte) VDLRead(dec vdl.Decoder) error {
 	return dec.FinishValue()
 }
 
+func (x NByte) VDLWrite(enc vdl.Encoder) error {
+	if err := enc.StartValue(vdl.TypeOf((*NByte)(nil))); err != nil {
+		return err
+	}
+	if err := enc.EncodeUint(uint64(x)); err != nil {
+		return err
+	}
+	return enc.FinishValue()
+}
+
 type NUint16 uint16
 
 func (NUint16) __VDLReflect(struct {
@@ -1675,6 +2079,16 @@ func (x *NUint16) VDLRead(dec vdl.Decoder) error {
 	}
 	*x = NUint16(tmp)
 	return dec.FinishValue()
+}
+
+func (x NUint16) VDLWrite(enc vdl.Encoder) error {
+	if err := enc.StartValue(vdl.TypeOf((*NUint16)(nil))); err != nil {
+		return err
+	}
+	if err := enc.EncodeUint(uint64(x)); err != nil {
+		return err
+	}
+	return enc.FinishValue()
 }
 
 type NUint32 uint32
@@ -1744,6 +2158,16 @@ func (x *NUint32) VDLRead(dec vdl.Decoder) error {
 	return dec.FinishValue()
 }
 
+func (x NUint32) VDLWrite(enc vdl.Encoder) error {
+	if err := enc.StartValue(vdl.TypeOf((*NUint32)(nil))); err != nil {
+		return err
+	}
+	if err := enc.EncodeUint(uint64(x)); err != nil {
+		return err
+	}
+	return enc.FinishValue()
+}
+
 type NUint64 uint64
 
 func (NUint64) __VDLReflect(struct {
@@ -1805,6 +2229,16 @@ func (x *NUint64) VDLRead(dec vdl.Decoder) error {
 	}
 	*x = NUint64(tmp)
 	return dec.FinishValue()
+}
+
+func (x NUint64) VDLWrite(enc vdl.Encoder) error {
+	if err := enc.StartValue(vdl.TypeOf((*NUint64)(nil))); err != nil {
+		return err
+	}
+	if err := enc.EncodeUint(uint64(x)); err != nil {
+		return err
+	}
+	return enc.FinishValue()
 }
 
 type NInt8 int8
@@ -1874,6 +2308,16 @@ func (x *NInt8) VDLRead(dec vdl.Decoder) error {
 	return dec.FinishValue()
 }
 
+func (x NInt8) VDLWrite(enc vdl.Encoder) error {
+	if err := enc.StartValue(vdl.TypeOf((*NInt8)(nil))); err != nil {
+		return err
+	}
+	if err := enc.EncodeInt(int64(x)); err != nil {
+		return err
+	}
+	return enc.FinishValue()
+}
+
 type NInt16 int16
 
 func (NInt16) __VDLReflect(struct {
@@ -1939,6 +2383,16 @@ func (x *NInt16) VDLRead(dec vdl.Decoder) error {
 	}
 	*x = NInt16(tmp)
 	return dec.FinishValue()
+}
+
+func (x NInt16) VDLWrite(enc vdl.Encoder) error {
+	if err := enc.StartValue(vdl.TypeOf((*NInt16)(nil))); err != nil {
+		return err
+	}
+	if err := enc.EncodeInt(int64(x)); err != nil {
+		return err
+	}
+	return enc.FinishValue()
 }
 
 type NInt32 int32
@@ -2008,6 +2462,16 @@ func (x *NInt32) VDLRead(dec vdl.Decoder) error {
 	return dec.FinishValue()
 }
 
+func (x NInt32) VDLWrite(enc vdl.Encoder) error {
+	if err := enc.StartValue(vdl.TypeOf((*NInt32)(nil))); err != nil {
+		return err
+	}
+	if err := enc.EncodeInt(int64(x)); err != nil {
+		return err
+	}
+	return enc.FinishValue()
+}
+
 type NInt64 int64
 
 func (NInt64) __VDLReflect(struct {
@@ -2069,6 +2533,16 @@ func (x *NInt64) VDLRead(dec vdl.Decoder) error {
 	}
 	*x = NInt64(tmp)
 	return dec.FinishValue()
+}
+
+func (x NInt64) VDLWrite(enc vdl.Encoder) error {
+	if err := enc.StartValue(vdl.TypeOf((*NInt64)(nil))); err != nil {
+		return err
+	}
+	if err := enc.EncodeInt(int64(x)); err != nil {
+		return err
+	}
+	return enc.FinishValue()
 }
 
 type NFloat32 float32
@@ -2138,6 +2612,16 @@ func (x *NFloat32) VDLRead(dec vdl.Decoder) error {
 	return dec.FinishValue()
 }
 
+func (x NFloat32) VDLWrite(enc vdl.Encoder) error {
+	if err := enc.StartValue(vdl.TypeOf((*NFloat32)(nil))); err != nil {
+		return err
+	}
+	if err := enc.EncodeFloat(float64(x)); err != nil {
+		return err
+	}
+	return enc.FinishValue()
+}
+
 type NFloat64 float64
 
 func (NFloat64) __VDLReflect(struct {
@@ -2199,6 +2683,16 @@ func (x *NFloat64) VDLRead(dec vdl.Decoder) error {
 	}
 	*x = NFloat64(tmp)
 	return dec.FinishValue()
+}
+
+func (x NFloat64) VDLWrite(enc vdl.Encoder) error {
+	if err := enc.StartValue(vdl.TypeOf((*NFloat64)(nil))); err != nil {
+		return err
+	}
+	if err := enc.EncodeFloat(float64(x)); err != nil {
+		return err
+	}
+	return enc.FinishValue()
 }
 
 type NArray2Uint64 [2]uint64
@@ -2292,6 +2786,27 @@ func (x *NArray2Uint64) VDLRead(dec vdl.Decoder) error {
 		}
 		index++
 	}
+}
+
+func (x NArray2Uint64) VDLWrite(enc vdl.Encoder) error {
+	if err := enc.StartValue(vdl.TypeOf((*NArray2Uint64)(nil))); err != nil {
+		return err
+	}
+	for i := 0; i < 2; i++ {
+		if err := enc.StartValue(vdl.TypeOf((*uint64)(nil))); err != nil {
+			return err
+		}
+		if err := enc.EncodeUint(x[i]); err != nil {
+			return err
+		}
+		if err := enc.FinishValue(); err != nil {
+			return err
+		}
+	}
+	if err := enc.NextEntry(true); err != nil {
+		return err
+	}
+	return enc.FinishValue()
 }
 
 type NListUint64 []uint64
@@ -2394,6 +2909,27 @@ func (x *NListUint64) VDLRead(dec vdl.Decoder) error {
 		}
 		*x = append(*x, elem)
 	}
+}
+
+func (x NListUint64) VDLWrite(enc vdl.Encoder) error {
+	if err := enc.StartValue(vdl.TypeOf((*NListUint64)(nil))); err != nil {
+		return err
+	}
+	for i := 0; i < len(x); i++ {
+		if err := enc.StartValue(vdl.TypeOf((*uint64)(nil))); err != nil {
+			return err
+		}
+		if err := enc.EncodeUint(x[i]); err != nil {
+			return err
+		}
+		if err := enc.FinishValue(); err != nil {
+			return err
+		}
+	}
+	if err := enc.NextEntry(true); err != nil {
+		return err
+	}
+	return enc.FinishValue()
 }
 
 type NSetUint64 map[uint64]struct{}
@@ -2501,6 +3037,27 @@ func (x *NSetUint64) VDLRead(dec vdl.Decoder) error {
 		}
 		tmpMap[key] = struct{}{}
 	}
+}
+
+func (x NSetUint64) VDLWrite(enc vdl.Encoder) error {
+	if err := enc.StartValue(vdl.TypeOf((*NSetUint64)(nil))); err != nil {
+		return err
+	}
+	for key := range x {
+		if err := enc.StartValue(vdl.TypeOf((*uint64)(nil))); err != nil {
+			return err
+		}
+		if err := enc.EncodeUint(key); err != nil {
+			return err
+		}
+		if err := enc.FinishValue(); err != nil {
+			return err
+		}
+	}
+	if err := enc.NextEntry(true); err != nil {
+		return err
+	}
+	return enc.FinishValue()
 }
 
 type NMapUint64String map[uint64]string
@@ -2635,6 +3192,36 @@ func (x *NMapUint64String) VDLRead(dec vdl.Decoder) error {
 		}
 		tmpMap[key] = elem
 	}
+}
+
+func (x NMapUint64String) VDLWrite(enc vdl.Encoder) error {
+	if err := enc.StartValue(vdl.TypeOf((*NMapUint64String)(nil))); err != nil {
+		return err
+	}
+	for key, elem := range x {
+		if err := enc.StartValue(vdl.TypeOf((*uint64)(nil))); err != nil {
+			return err
+		}
+		if err := enc.EncodeUint(key); err != nil {
+			return err
+		}
+		if err := enc.FinishValue(); err != nil {
+			return err
+		}
+		if err := enc.StartValue(vdl.TypeOf((*string)(nil))); err != nil {
+			return err
+		}
+		if err := enc.EncodeString(elem); err != nil {
+			return err
+		}
+		if err := enc.FinishValue(); err != nil {
+			return err
+		}
+	}
+	if err := enc.NextEntry(true); err != nil {
+		return err
+	}
+	return enc.FinishValue()
 }
 
 type NStruct struct {
@@ -2832,6 +3419,61 @@ func (x *NStruct) VDLRead(dec vdl.Decoder) error {
 	}
 }
 
+func (x NStruct) VDLWrite(enc vdl.Encoder) error {
+	if err := enc.StartValue(vdl.TypeOf((*NStruct)(nil)).Elem()); err != nil {
+		return err
+	}
+	var1 := (x.A == false)
+	if !(var1) {
+		if err := enc.NextField("A"); err != nil {
+			return err
+		}
+		if err := enc.StartValue(vdl.TypeOf((*bool)(nil))); err != nil {
+			return err
+		}
+		if err := enc.EncodeBool(x.A); err != nil {
+			return err
+		}
+		if err := enc.FinishValue(); err != nil {
+			return err
+		}
+	}
+	var2 := (x.B == "")
+	if !(var2) {
+		if err := enc.NextField("B"); err != nil {
+			return err
+		}
+		if err := enc.StartValue(vdl.TypeOf((*string)(nil))); err != nil {
+			return err
+		}
+		if err := enc.EncodeString(x.B); err != nil {
+			return err
+		}
+		if err := enc.FinishValue(); err != nil {
+			return err
+		}
+	}
+	var3 := (x.C == int64(0))
+	if !(var3) {
+		if err := enc.NextField("C"); err != nil {
+			return err
+		}
+		if err := enc.StartValue(vdl.TypeOf((*int64)(nil))); err != nil {
+			return err
+		}
+		if err := enc.EncodeInt(x.C); err != nil {
+			return err
+		}
+		if err := enc.FinishValue(); err != nil {
+			return err
+		}
+	}
+	if err := enc.NextField(""); err != nil {
+		return err
+	}
+	return enc.FinishValue()
+}
+
 type NEnum int
 
 const (
@@ -2935,6 +3577,16 @@ func (x *NEnum) VDLRead(dec vdl.Decoder) error {
 	return dec.FinishValue()
 }
 
+func (x NEnum) VDLWrite(enc vdl.Encoder) error {
+	if err := enc.StartValue(vdl.TypeOf((*NEnum)(nil))); err != nil {
+		return err
+	}
+	if err := enc.EncodeString(x.String()); err != nil {
+		return err
+	}
+	return enc.FinishValue()
+}
+
 type (
 	// NUnion represents any single field of the NUnion union type.
 	NUnion interface {
@@ -2947,6 +3599,7 @@ type (
 		// __VDLReflect describes the NUnion union type.
 		__VDLReflect(__NUnionReflect)
 		FillVDLTarget(vdl.Target, *vdl.Type) error
+		VDLWrite(vdl.Encoder) error
 	}
 	// NUnionA represents field A of the NUnion union type.
 	NUnionA struct{ Value bool }
@@ -3179,6 +3832,70 @@ func VDLReadNUnion(dec vdl.Decoder, x *NUnion) error {
 	return dec.FinishValue()
 }
 
+func (x NUnionA) VDLWrite(enc vdl.Encoder) error {
+	if err := enc.StartValue(vdl.TypeOf((*NUnion)(nil))); err != nil {
+		return err
+	}
+	if err := enc.NextField("A"); err != nil {
+		return err
+	}
+	if err := enc.StartValue(vdl.TypeOf((*bool)(nil))); err != nil {
+		return err
+	}
+	if err := enc.EncodeBool(x.Value); err != nil {
+		return err
+	}
+	if err := enc.FinishValue(); err != nil {
+		return err
+	}
+	if err := enc.NextField(""); err != nil {
+		return err
+	}
+	return enc.FinishValue()
+}
+func (x NUnionB) VDLWrite(enc vdl.Encoder) error {
+	if err := enc.StartValue(vdl.TypeOf((*NUnion)(nil))); err != nil {
+		return err
+	}
+	if err := enc.NextField("B"); err != nil {
+		return err
+	}
+	if err := enc.StartValue(vdl.TypeOf((*string)(nil))); err != nil {
+		return err
+	}
+	if err := enc.EncodeString(x.Value); err != nil {
+		return err
+	}
+	if err := enc.FinishValue(); err != nil {
+		return err
+	}
+	if err := enc.NextField(""); err != nil {
+		return err
+	}
+	return enc.FinishValue()
+}
+func (x NUnionC) VDLWrite(enc vdl.Encoder) error {
+	if err := enc.StartValue(vdl.TypeOf((*NUnion)(nil))); err != nil {
+		return err
+	}
+	if err := enc.NextField("C"); err != nil {
+		return err
+	}
+	if err := enc.StartValue(vdl.TypeOf((*int64)(nil))); err != nil {
+		return err
+	}
+	if err := enc.EncodeInt(x.Value); err != nil {
+		return err
+	}
+	if err := enc.FinishValue(); err != nil {
+		return err
+	}
+	if err := enc.NextField(""); err != nil {
+		return err
+	}
+	return enc.FinishValue()
+}
+
 // Nested Custom Types
 type MBool NBool
 
@@ -3224,6 +3941,16 @@ func (x *MBool) VDLRead(dec vdl.Decoder) error {
 	}
 	*x = MBool(tmp)
 	return dec.FinishValue()
+}
+
+func (x MBool) VDLWrite(enc vdl.Encoder) error {
+	if err := enc.StartValue(vdl.TypeOf((*MBool)(nil))); err != nil {
+		return err
+	}
+	if err := enc.EncodeBool(bool(x)); err != nil {
+		return err
+	}
+	return enc.FinishValue()
 }
 
 type MStruct struct {
@@ -3566,6 +4293,104 @@ func (x *MStruct) VDLRead(dec vdl.Decoder) error {
 	}
 }
 
+func (x MStruct) VDLWrite(enc vdl.Encoder) error {
+	if err := enc.StartValue(vdl.TypeOf((*MStruct)(nil)).Elem()); err != nil {
+		return err
+	}
+	var1 := (x.A == false)
+	if !(var1) {
+		if err := enc.NextField("A"); err != nil {
+			return err
+		}
+		if err := enc.StartValue(vdl.TypeOf((*bool)(nil))); err != nil {
+			return err
+		}
+		if err := enc.EncodeBool(x.A); err != nil {
+			return err
+		}
+		if err := enc.FinishValue(); err != nil {
+			return err
+		}
+	}
+	var2 := (x.B == NBool(false))
+	if !(var2) {
+		if err := enc.NextField("B"); err != nil {
+			return err
+		}
+		if err := x.B.VDLWrite(enc); err != nil {
+			return err
+		}
+	}
+	var3 := (x.C == MBool(false))
+	if !(var3) {
+		if err := enc.NextField("C"); err != nil {
+			return err
+		}
+		if err := x.C.VDLWrite(enc); err != nil {
+			return err
+		}
+	}
+	var4 := (x.D == (*NStruct)(nil))
+	if !(var4) {
+		if err := enc.NextField("D"); err != nil {
+			return err
+		}
+		if err := enc.StartValue(vdl.TypeOf((**NStruct)(nil))); err != nil {
+			return err
+		}
+		if x.D == nil {
+			if err := enc.NilValue(vdl.TypeOf((**NStruct)(nil))); err != nil {
+				return err
+			}
+		} else {
+			enc.SetNextStartValueIsOptional()
+			if err := x.D.VDLWrite(enc); err != nil {
+				return err
+			}
+		}
+	}
+	var5 := (x.E == nil || x.E == vdl.AnyType)
+	if !(var5) {
+		if err := enc.NextField("E"); err != nil {
+			return err
+		}
+		if err := enc.StartValue(vdl.TypeObjectType); err != nil {
+			return err
+		}
+		if err := enc.EncodeTypeObject(x.E); err != nil {
+			return err
+		}
+		if err := enc.FinishValue(); err != nil {
+			return err
+		}
+	}
+	var6 := x.F == nil || (x.F.Kind() == vdl.Any && x.F.IsZero())
+	if !(var6) {
+		if err := enc.NextField("F"); err != nil {
+			return err
+		}
+		if err := enc.StartValue(vdl.AnyType); err != nil {
+			return err
+		}
+		if x.F.IsNil() {
+			if err := enc.NilValue(x.F.Type()); err != nil {
+				return err
+			}
+		} else {
+			if err := x.F.VDLWrite(enc); err != nil {
+				return err
+			}
+		}
+		if err := enc.FinishValue(); err != nil {
+			return err
+		}
+	}
+	if err := enc.NextField(""); err != nil {
+		return err
+	}
+	return enc.FinishValue()
+}
+
 type MList []NListUint64
 
 func (MList) __VDLReflect(struct {
@@ -3661,6 +4486,21 @@ func (x *MList) VDLRead(dec vdl.Decoder) error {
 		}
 		*x = append(*x, elem)
 	}
+}
+
+func (x MList) VDLWrite(enc vdl.Encoder) error {
+	if err := enc.StartValue(vdl.TypeOf((*MList)(nil))); err != nil {
+		return err
+	}
+	for i := 0; i < len(x); i++ {
+		if err := x[i].VDLWrite(enc); err != nil {
+			return err
+		}
+	}
+	if err := enc.NextEntry(true); err != nil {
+		return err
+	}
+	return enc.FinishValue()
 }
 
 type MMap map[NFloat32]NListUint64
@@ -3787,6 +4627,24 @@ func (x *MMap) VDLRead(dec vdl.Decoder) error {
 	}
 }
 
+func (x MMap) VDLWrite(enc vdl.Encoder) error {
+	if err := enc.StartValue(vdl.TypeOf((*MMap)(nil))); err != nil {
+		return err
+	}
+	for key, elem := range x {
+		if err := key.VDLWrite(enc); err != nil {
+			return err
+		}
+		if err := elem.VDLWrite(enc); err != nil {
+			return err
+		}
+	}
+	if err := enc.NextEntry(true); err != nil {
+		return err
+	}
+	return enc.FinishValue()
+}
+
 type MByteSlice []byte
 
 func (MByteSlice) __VDLReflect(struct {
@@ -3836,6 +4694,16 @@ func (x *MByteSlice) VDLRead(dec vdl.Decoder) error {
 	}
 	*x = bytes
 	return dec.FinishValue()
+}
+
+func (x MByteSlice) VDLWrite(enc vdl.Encoder) error {
+	if err := enc.StartValue(vdl.TypeOf((*MByteSlice)(nil))); err != nil {
+		return err
+	}
+	if err := enc.EncodeBytes([]byte(x)); err != nil {
+		return err
+	}
+	return enc.FinishValue()
 }
 
 type MInt8Slice []int8
@@ -3942,6 +4810,27 @@ func (x *MInt8Slice) VDLRead(dec vdl.Decoder) error {
 	}
 }
 
+func (x MInt8Slice) VDLWrite(enc vdl.Encoder) error {
+	if err := enc.StartValue(vdl.TypeOf((*MInt8Slice)(nil))); err != nil {
+		return err
+	}
+	for i := 0; i < len(x); i++ {
+		if err := enc.StartValue(vdl.TypeOf((*int8)(nil))); err != nil {
+			return err
+		}
+		if err := enc.EncodeInt(int64(x[i])); err != nil {
+			return err
+		}
+		if err := enc.FinishValue(); err != nil {
+			return err
+		}
+	}
+	if err := enc.NextEntry(true); err != nil {
+		return err
+	}
+	return enc.FinishValue()
+}
+
 // Recursive Type Definitions
 type RecA []RecA
 
@@ -4037,6 +4926,21 @@ func (x *RecA) VDLRead(dec vdl.Decoder) error {
 		}
 		*x = append(*x, elem)
 	}
+}
+
+func (x RecA) VDLWrite(enc vdl.Encoder) error {
+	if err := enc.StartValue(vdl.TypeOf((*RecA)(nil))); err != nil {
+		return err
+	}
+	for i := 0; i < len(x); i++ {
+		if err := x[i].VDLWrite(enc); err != nil {
+			return err
+		}
+	}
+	if err := enc.NextEntry(true); err != nil {
+		return err
+	}
+	return enc.FinishValue()
 }
 
 type RecY []RecX
@@ -4167,6 +5071,21 @@ func (x *RecY) VDLRead(dec vdl.Decoder) error {
 	}
 }
 
+func (x RecY) VDLWrite(enc vdl.Encoder) error {
+	if err := enc.StartValue(vdl.TypeOf((*RecY)(nil))); err != nil {
+		return err
+	}
+	for i := 0; i < len(x); i++ {
+		if err := x[i].VDLWrite(enc); err != nil {
+			return err
+		}
+	}
+	if err := enc.NextEntry(true); err != nil {
+		return err
+	}
+	return enc.FinishValue()
+}
+
 type RecX []RecY
 
 func (RecX) __VDLReflect(struct {
@@ -4229,6 +5148,21 @@ func (x *RecX) VDLRead(dec vdl.Decoder) error {
 		}
 		*x = append(*x, elem)
 	}
+}
+
+func (x RecX) VDLWrite(enc vdl.Encoder) error {
+	if err := enc.StartValue(vdl.TypeOf((*RecX)(nil))); err != nil {
+		return err
+	}
+	for i := 0; i < len(x); i++ {
+		if err := x[i].VDLWrite(enc); err != nil {
+			return err
+		}
+	}
+	if err := enc.NextEntry(true); err != nil {
+		return err
+	}
+	return enc.FinishValue()
 }
 
 type Rec4 []Rec1
@@ -4423,6 +5357,21 @@ func (x *Rec4) VDLRead(dec vdl.Decoder) error {
 	}
 }
 
+func (x Rec4) VDLWrite(enc vdl.Encoder) error {
+	if err := enc.StartValue(vdl.TypeOf((*Rec4)(nil))); err != nil {
+		return err
+	}
+	for i := 0; i < len(x); i++ {
+		if err := x[i].VDLWrite(enc); err != nil {
+			return err
+		}
+	}
+	if err := enc.NextEntry(true); err != nil {
+		return err
+	}
+	return enc.FinishValue()
+}
+
 type Rec3 []Rec4
 
 func (Rec3) __VDLReflect(struct {
@@ -4485,6 +5434,21 @@ func (x *Rec3) VDLRead(dec vdl.Decoder) error {
 		}
 		*x = append(*x, elem)
 	}
+}
+
+func (x Rec3) VDLWrite(enc vdl.Encoder) error {
+	if err := enc.StartValue(vdl.TypeOf((*Rec3)(nil))); err != nil {
+		return err
+	}
+	for i := 0; i < len(x); i++ {
+		if err := x[i].VDLWrite(enc); err != nil {
+			return err
+		}
+	}
+	if err := enc.NextEntry(true); err != nil {
+		return err
+	}
+	return enc.FinishValue()
 }
 
 type Rec2 []Rec3
@@ -4551,6 +5515,21 @@ func (x *Rec2) VDLRead(dec vdl.Decoder) error {
 	}
 }
 
+func (x Rec2) VDLWrite(enc vdl.Encoder) error {
+	if err := enc.StartValue(vdl.TypeOf((*Rec2)(nil))); err != nil {
+		return err
+	}
+	for i := 0; i < len(x); i++ {
+		if err := x[i].VDLWrite(enc); err != nil {
+			return err
+		}
+	}
+	if err := enc.NextEntry(true); err != nil {
+		return err
+	}
+	return enc.FinishValue()
+}
+
 type Rec1 []Rec2
 
 func (Rec1) __VDLReflect(struct {
@@ -4613,6 +5592,21 @@ func (x *Rec1) VDLRead(dec vdl.Decoder) error {
 		}
 		*x = append(*x, elem)
 	}
+}
+
+func (x Rec1) VDLWrite(enc vdl.Encoder) error {
+	if err := enc.StartValue(vdl.TypeOf((*Rec1)(nil))); err != nil {
+		return err
+	}
+	for i := 0; i < len(x); i++ {
+		if err := x[i].VDLWrite(enc); err != nil {
+			return err
+		}
+	}
+	if err := enc.NextEntry(true); err != nil {
+		return err
+	}
+	return enc.FinishValue()
 }
 
 type RecStruct struct {
@@ -4769,6 +5763,35 @@ func (x *RecStruct) VDLRead(dec vdl.Decoder) error {
 			}
 		}
 	}
+}
+
+func (x RecStruct) VDLWrite(enc vdl.Encoder) error {
+	if err := enc.StartValue(vdl.TypeOf((*RecStruct)(nil)).Elem()); err != nil {
+		return err
+	}
+	var1 := (x.A == (*RecStruct)(nil))
+	if !(var1) {
+		if err := enc.NextField("A"); err != nil {
+			return err
+		}
+		if err := enc.StartValue(vdl.TypeOf((**RecStruct)(nil))); err != nil {
+			return err
+		}
+		if x.A == nil {
+			if err := enc.NilValue(vdl.TypeOf((**RecStruct)(nil))); err != nil {
+				return err
+			}
+		} else {
+			enc.SetNextStartValueIsOptional()
+			if err := x.A.VDLWrite(enc); err != nil {
+				return err
+			}
+		}
+	}
+	if err := enc.NextField(""); err != nil {
+		return err
+	}
+	return enc.FinishValue()
 }
 
 type Rec1234 struct {
@@ -4994,6 +6017,64 @@ func (x *Rec1234) VDLRead(dec vdl.Decoder) error {
 			}
 		}
 	}
+}
+
+func (x Rec1234) VDLWrite(enc vdl.Encoder) error {
+	if err := enc.StartValue(vdl.TypeOf((*Rec1234)(nil)).Elem()); err != nil {
+		return err
+	}
+	var var1 bool
+	if len(x.R1) == 0 {
+		var1 = true
+	}
+	if !(var1) {
+		if err := enc.NextField("R1"); err != nil {
+			return err
+		}
+		if err := x.R1.VDLWrite(enc); err != nil {
+			return err
+		}
+	}
+	var var2 bool
+	if len(x.R2) == 0 {
+		var2 = true
+	}
+	if !(var2) {
+		if err := enc.NextField("R2"); err != nil {
+			return err
+		}
+		if err := x.R2.VDLWrite(enc); err != nil {
+			return err
+		}
+	}
+	var var3 bool
+	if len(x.R3) == 0 {
+		var3 = true
+	}
+	if !(var3) {
+		if err := enc.NextField("R3"); err != nil {
+			return err
+		}
+		if err := x.R3.VDLWrite(enc); err != nil {
+			return err
+		}
+	}
+	var var4 bool
+	if len(x.R4) == 0 {
+		var4 = true
+	}
+	if !(var4) {
+		if err := enc.NextField("R4"); err != nil {
+			return err
+		}
+		if err := x.R4.VDLWrite(enc); err != nil {
+			return err
+		}
+	}
+	if err := enc.NextField(""); err != nil {
+		return err
+	}
+	return enc.FinishValue()
 }
 
 type Rec1234A struct {
@@ -5305,6 +6386,70 @@ func __VDLRead8_list(dec vdl.Decoder, x *[]Rec1234) error {
 	}
 }
 
+func (x Rec1234A) VDLWrite(enc vdl.Encoder) error {
+	if err := enc.StartValue(vdl.TypeOf((*Rec1234A)(nil)).Elem()); err != nil {
+		return err
+	}
+	var var1 bool
+	if len(x.A) == 0 {
+		var1 = true
+	}
+	if !(var1) {
+		if err := enc.NextField("A"); err != nil {
+			return err
+		}
+		if err := __VDLWrite7_list(enc, &x.A); err != nil {
+			return err
+		}
+	}
+	var var2 bool
+	if len(x.Rec1234) == 0 {
+		var2 = true
+	}
+	if !(var2) {
+		if err := enc.NextField("Rec1234"); err != nil {
+			return err
+		}
+		if err := __VDLWrite8_list(enc, &x.Rec1234); err != nil {
+			return err
+		}
+	}
+	if err := enc.NextField(""); err != nil {
+		return err
+	}
+	return enc.FinishValue()
+}
+
+func __VDLWrite7_list(enc vdl.Encoder, x *[]Rec1234A) error {
+	if err := enc.StartValue(vdl.TypeOf((*[]Rec1234A)(nil))); err != nil {
+		return err
+	}
+	for i := 0; i < len(*x); i++ {
+		if err := (*x)[i].VDLWrite(enc); err != nil {
+			return err
+		}
+	}
+	if err := enc.NextEntry(true); err != nil {
+		return err
+	}
+	return enc.FinishValue()
+}
+
+func __VDLWrite8_list(enc vdl.Encoder, x *[]Rec1234) error {
+	if err := enc.StartValue(vdl.TypeOf((*[]Rec1234)(nil))); err != nil {
+		return err
+	}
+	for i := 0; i < len(*x); i++ {
+		if err := (*x)[i].VDLWrite(enc); err != nil {
+			return err
+		}
+	}
+	if err := enc.NextEntry(true); err != nil {
+		return err
+	}
+	return enc.FinishValue()
+}
+
 type Rec1234B struct {
 	B       []Rec1234B
 	Rec1234 []Rec1234
@@ -5552,6 +6697,55 @@ func __VDLRead9_list(dec vdl.Decoder, x *[]Rec1234B) error {
 	}
 }
 
+func (x Rec1234B) VDLWrite(enc vdl.Encoder) error {
+	if err := enc.StartValue(vdl.TypeOf((*Rec1234B)(nil)).Elem()); err != nil {
+		return err
+	}
+	var var1 bool
+	if len(x.B) == 0 {
+		var1 = true
+	}
+	if !(var1) {
+		if err := enc.NextField("B"); err != nil {
+			return err
+		}
+		if err := __VDLWrite9_list(enc, &x.B); err != nil {
+			return err
+		}
+	}
+	var var2 bool
+	if len(x.Rec1234) == 0 {
+		var2 = true
+	}
+	if !(var2) {
+		if err := enc.NextField("Rec1234"); err != nil {
+			return err
+		}
+		if err := __VDLWrite8_list(enc, &x.Rec1234); err != nil {
+			return err
+		}
+	}
+	if err := enc.NextField(""); err != nil {
+		return err
+	}
+	return enc.FinishValue()
+}
+
+func __VDLWrite9_list(enc vdl.Encoder, x *[]Rec1234B) error {
+	if err := enc.StartValue(vdl.TypeOf((*[]Rec1234B)(nil))); err != nil {
+		return err
+	}
+	for i := 0; i < len(*x); i++ {
+		if err := (*x)[i].VDLWrite(enc); err != nil {
+			return err
+		}
+	}
+	if err := enc.NextEntry(true); err != nil {
+		return err
+	}
+	return enc.FinishValue()
+}
+
 type Rec1234All struct {
 	A Rec1234A
 	B Rec1234B
@@ -5719,6 +6913,54 @@ func (x *Rec1234All) VDLRead(dec vdl.Decoder) error {
 	}
 }
 
+func (x Rec1234All) VDLWrite(enc vdl.Encoder) error {
+	if err := enc.StartValue(vdl.TypeOf((*Rec1234All)(nil)).Elem()); err != nil {
+		return err
+	}
+	var1 := true
+	var var2 bool
+	if len(x.A.A) == 0 {
+		var2 = true
+	}
+	var1 = var1 && var2
+	var var3 bool
+	if len(x.A.Rec1234) == 0 {
+		var3 = true
+	}
+	var1 = var1 && var3
+	if !(var1) {
+		if err := enc.NextField("A"); err != nil {
+			return err
+		}
+		if err := x.A.VDLWrite(enc); err != nil {
+			return err
+		}
+	}
+	var4 := true
+	var var5 bool
+	if len(x.B.B) == 0 {
+		var5 = true
+	}
+	var4 = var4 && var5
+	var var6 bool
+	if len(x.B.Rec1234) == 0 {
+		var6 = true
+	}
+	var4 = var4 && var6
+	if !(var4) {
+		if err := enc.NextField("B"); err != nil {
+			return err
+		}
+		if err := x.B.VDLWrite(enc); err != nil {
+			return err
+		}
+	}
+	if err := enc.NextField(""); err != nil {
+		return err
+	}
+	return enc.FinishValue()
+}
+
 // Additional types for compatibility and conversion checks
 type ListString []string
 
@@ -5822,6 +7064,27 @@ func (x *ListString) VDLRead(dec vdl.Decoder) error {
 	}
 }
 
+func (x ListString) VDLWrite(enc vdl.Encoder) error {
+	if err := enc.StartValue(vdl.TypeOf((*ListString)(nil))); err != nil {
+		return err
+	}
+	for i := 0; i < len(x); i++ {
+		if err := enc.StartValue(vdl.TypeOf((*string)(nil))); err != nil {
+			return err
+		}
+		if err := enc.EncodeString(x[i]); err != nil {
+			return err
+		}
+		if err := enc.FinishValue(); err != nil {
+			return err
+		}
+	}
+	if err := enc.NextEntry(true); err != nil {
+		return err
+	}
+	return enc.FinishValue()
+}
+
 type Array3String [3]string
 
 func (Array3String) __VDLReflect(struct {
@@ -5915,6 +7178,27 @@ func (x *Array3String) VDLRead(dec vdl.Decoder) error {
 	}
 }
 
+func (x Array3String) VDLWrite(enc vdl.Encoder) error {
+	if err := enc.StartValue(vdl.TypeOf((*Array3String)(nil))); err != nil {
+		return err
+	}
+	for i := 0; i < 3; i++ {
+		if err := enc.StartValue(vdl.TypeOf((*string)(nil))); err != nil {
+			return err
+		}
+		if err := enc.EncodeString(x[i]); err != nil {
+			return err
+		}
+		if err := enc.FinishValue(); err != nil {
+			return err
+		}
+	}
+	if err := enc.NextEntry(true); err != nil {
+		return err
+	}
+	return enc.FinishValue()
+}
+
 type Array4String [4]string
 
 func (Array4String) __VDLReflect(struct {
@@ -6006,6 +7290,27 @@ func (x *Array4String) VDLRead(dec vdl.Decoder) error {
 		}
 		index++
 	}
+}
+
+func (x Array4String) VDLWrite(enc vdl.Encoder) error {
+	if err := enc.StartValue(vdl.TypeOf((*Array4String)(nil))); err != nil {
+		return err
+	}
+	for i := 0; i < 4; i++ {
+		if err := enc.StartValue(vdl.TypeOf((*string)(nil))); err != nil {
+			return err
+		}
+		if err := enc.EncodeString(x[i]); err != nil {
+			return err
+		}
+		if err := enc.FinishValue(); err != nil {
+			return err
+		}
+	}
+	if err := enc.NextEntry(true); err != nil {
+		return err
+	}
+	return enc.FinishValue()
 }
 
 type AbcStruct struct {
@@ -6201,6 +7506,61 @@ func (x *AbcStruct) VDLRead(dec vdl.Decoder) error {
 			}
 		}
 	}
+}
+
+func (x AbcStruct) VDLWrite(enc vdl.Encoder) error {
+	if err := enc.StartValue(vdl.TypeOf((*AbcStruct)(nil)).Elem()); err != nil {
+		return err
+	}
+	var1 := (x.A == false)
+	if !(var1) {
+		if err := enc.NextField("A"); err != nil {
+			return err
+		}
+		if err := enc.StartValue(vdl.TypeOf((*bool)(nil))); err != nil {
+			return err
+		}
+		if err := enc.EncodeBool(x.A); err != nil {
+			return err
+		}
+		if err := enc.FinishValue(); err != nil {
+			return err
+		}
+	}
+	var2 := (x.B == "")
+	if !(var2) {
+		if err := enc.NextField("B"); err != nil {
+			return err
+		}
+		if err := enc.StartValue(vdl.TypeOf((*string)(nil))); err != nil {
+			return err
+		}
+		if err := enc.EncodeString(x.B); err != nil {
+			return err
+		}
+		if err := enc.FinishValue(); err != nil {
+			return err
+		}
+	}
+	var3 := (x.C == int64(0))
+	if !(var3) {
+		if err := enc.NextField("C"); err != nil {
+			return err
+		}
+		if err := enc.StartValue(vdl.TypeOf((*int64)(nil))); err != nil {
+			return err
+		}
+		if err := enc.EncodeInt(x.C); err != nil {
+			return err
+		}
+		if err := enc.FinishValue(); err != nil {
+			return err
+		}
+	}
+	if err := enc.NextField(""); err != nil {
+		return err
+	}
+	return enc.FinishValue()
 }
 
 type AdeStruct struct {
@@ -6400,6 +7760,67 @@ func (x *AdeStruct) VDLRead(dec vdl.Decoder) error {
 	}
 }
 
+func (x AdeStruct) VDLWrite(enc vdl.Encoder) error {
+	if err := enc.StartValue(vdl.TypeOf((*AdeStruct)(nil)).Elem()); err != nil {
+		return err
+	}
+	var1 := (x.A == false)
+	if !(var1) {
+		if err := enc.NextField("A"); err != nil {
+			return err
+		}
+		if err := enc.StartValue(vdl.TypeOf((*bool)(nil))); err != nil {
+			return err
+		}
+		if err := enc.EncodeBool(x.A); err != nil {
+			return err
+		}
+		if err := enc.FinishValue(); err != nil {
+			return err
+		}
+	}
+	var2 := x.D == nil || (x.D.Kind() == vdl.Any && x.D.IsZero())
+	if !(var2) {
+		if err := enc.NextField("D"); err != nil {
+			return err
+		}
+		if err := enc.StartValue(vdl.AnyType); err != nil {
+			return err
+		}
+		if x.D.IsNil() {
+			if err := enc.NilValue(x.D.Type()); err != nil {
+				return err
+			}
+		} else {
+			if err := x.D.VDLWrite(enc); err != nil {
+				return err
+			}
+		}
+		if err := enc.FinishValue(); err != nil {
+			return err
+		}
+	}
+	var3 := (x.E == nil || x.E == vdl.AnyType)
+	if !(var3) {
+		if err := enc.NextField("E"); err != nil {
+			return err
+		}
+		if err := enc.StartValue(vdl.TypeObjectType); err != nil {
+			return err
+		}
+		if err := enc.EncodeTypeObject(x.E); err != nil {
+			return err
+		}
+		if err := enc.FinishValue(); err != nil {
+			return err
+		}
+	}
+	if err := enc.NextField(""); err != nil {
+		return err
+	}
+	return enc.FinishValue()
+}
+
 type XyzStruct struct {
 	X bool
 	Y MBool
@@ -6590,6 +8011,55 @@ func (x *XyzStruct) VDLRead(dec vdl.Decoder) error {
 	}
 }
 
+func (x XyzStruct) VDLWrite(enc vdl.Encoder) error {
+	if err := enc.StartValue(vdl.TypeOf((*XyzStruct)(nil)).Elem()); err != nil {
+		return err
+	}
+	var1 := (x.X == false)
+	if !(var1) {
+		if err := enc.NextField("X"); err != nil {
+			return err
+		}
+		if err := enc.StartValue(vdl.TypeOf((*bool)(nil))); err != nil {
+			return err
+		}
+		if err := enc.EncodeBool(x.X); err != nil {
+			return err
+		}
+		if err := enc.FinishValue(); err != nil {
+			return err
+		}
+	}
+	var2 := (x.Y == MBool(false))
+	if !(var2) {
+		if err := enc.NextField("Y"); err != nil {
+			return err
+		}
+		if err := x.Y.VDLWrite(enc); err != nil {
+			return err
+		}
+	}
+	var3 := (x.Z == "")
+	if !(var3) {
+		if err := enc.NextField("Z"); err != nil {
+			return err
+		}
+		if err := enc.StartValue(vdl.TypeOf((*string)(nil))); err != nil {
+			return err
+		}
+		if err := enc.EncodeString(x.Z); err != nil {
+			return err
+		}
+		if err := enc.FinishValue(); err != nil {
+			return err
+		}
+	}
+	if err := enc.NextField(""); err != nil {
+		return err
+	}
+	return enc.FinishValue()
+}
+
 type YzStruct struct {
 	Y NBool
 	Z NString
@@ -6737,6 +8207,34 @@ func (x *YzStruct) VDLRead(dec vdl.Decoder) error {
 	}
 }
 
+func (x YzStruct) VDLWrite(enc vdl.Encoder) error {
+	if err := enc.StartValue(vdl.TypeOf((*YzStruct)(nil)).Elem()); err != nil {
+		return err
+	}
+	var1 := (x.Y == NBool(false))
+	if !(var1) {
+		if err := enc.NextField("Y"); err != nil {
+			return err
+		}
+		if err := x.Y.VDLWrite(enc); err != nil {
+			return err
+		}
+	}
+	var2 := (x.Z == NString(""))
+	if !(var2) {
+		if err := enc.NextField("Z"); err != nil {
+			return err
+		}
+		if err := x.Z.VDLWrite(enc); err != nil {
+			return err
+		}
+	}
+	if err := enc.NextField(""); err != nil {
+		return err
+	}
+	return enc.FinishValue()
+}
+
 type ZStruct struct {
 	Z string
 }
@@ -6854,6 +8352,31 @@ func (x *ZStruct) VDLRead(dec vdl.Decoder) error {
 			}
 		}
 	}
+}
+
+func (x ZStruct) VDLWrite(enc vdl.Encoder) error {
+	if err := enc.StartValue(vdl.TypeOf((*ZStruct)(nil)).Elem()); err != nil {
+		return err
+	}
+	var1 := (x.Z == "")
+	if !(var1) {
+		if err := enc.NextField("Z"); err != nil {
+			return err
+		}
+		if err := enc.StartValue(vdl.TypeOf((*string)(nil))); err != nil {
+			return err
+		}
+		if err := enc.EncodeString(x.Z); err != nil {
+			return err
+		}
+		if err := enc.FinishValue(); err != nil {
+			return err
+		}
+	}
+	if err := enc.NextField(""); err != nil {
+		return err
+	}
+	return enc.FinishValue()
 }
 
 type MapOnlyStruct struct {
@@ -7015,6 +8538,46 @@ func (x *MapOnlyStruct) VDLRead(dec vdl.Decoder) error {
 	}
 }
 
+func (x MapOnlyStruct) VDLWrite(enc vdl.Encoder) error {
+	if err := enc.StartValue(vdl.TypeOf((*MapOnlyStruct)(nil)).Elem()); err != nil {
+		return err
+	}
+	var1 := (x.Key1 == int64(0))
+	if !(var1) {
+		if err := enc.NextField("Key1"); err != nil {
+			return err
+		}
+		if err := enc.StartValue(vdl.TypeOf((*int64)(nil))); err != nil {
+			return err
+		}
+		if err := enc.EncodeInt(x.Key1); err != nil {
+			return err
+		}
+		if err := enc.FinishValue(); err != nil {
+			return err
+		}
+	}
+	var2 := (x.Key2 == uint32(0))
+	if !(var2) {
+		if err := enc.NextField("Key2"); err != nil {
+			return err
+		}
+		if err := enc.StartValue(vdl.TypeOf((*uint32)(nil))); err != nil {
+			return err
+		}
+		if err := enc.EncodeUint(uint64(x.Key2)); err != nil {
+			return err
+		}
+		if err := enc.FinishValue(); err != nil {
+			return err
+		}
+	}
+	if err := enc.NextField(""); err != nil {
+		return err
+	}
+	return enc.FinishValue()
+}
+
 type StructOnlyMap map[string]uint64
 
 func (StructOnlyMap) __VDLReflect(struct {
@@ -7147,6 +8710,36 @@ func (x *StructOnlyMap) VDLRead(dec vdl.Decoder) error {
 		}
 		tmpMap[key] = elem
 	}
+}
+
+func (x StructOnlyMap) VDLWrite(enc vdl.Encoder) error {
+	if err := enc.StartValue(vdl.TypeOf((*StructOnlyMap)(nil))); err != nil {
+		return err
+	}
+	for key, elem := range x {
+		if err := enc.StartValue(vdl.TypeOf((*string)(nil))); err != nil {
+			return err
+		}
+		if err := enc.EncodeString(key); err != nil {
+			return err
+		}
+		if err := enc.FinishValue(); err != nil {
+			return err
+		}
+		if err := enc.StartValue(vdl.TypeOf((*uint64)(nil))); err != nil {
+			return err
+		}
+		if err := enc.EncodeUint(elem); err != nil {
+			return err
+		}
+		if err := enc.FinishValue(); err != nil {
+			return err
+		}
+	}
+	if err := enc.NextEntry(true); err != nil {
+		return err
+	}
+	return enc.FinishValue()
 }
 
 type MapSetStruct struct {
@@ -7344,6 +8937,61 @@ func (x *MapSetStruct) VDLRead(dec vdl.Decoder) error {
 	}
 }
 
+func (x MapSetStruct) VDLWrite(enc vdl.Encoder) error {
+	if err := enc.StartValue(vdl.TypeOf((*MapSetStruct)(nil)).Elem()); err != nil {
+		return err
+	}
+	var1 := (x.Feat == false)
+	if !(var1) {
+		if err := enc.NextField("Feat"); err != nil {
+			return err
+		}
+		if err := enc.StartValue(vdl.TypeOf((*bool)(nil))); err != nil {
+			return err
+		}
+		if err := enc.EncodeBool(x.Feat); err != nil {
+			return err
+		}
+		if err := enc.FinishValue(); err != nil {
+			return err
+		}
+	}
+	var2 := (x.Tire == false)
+	if !(var2) {
+		if err := enc.NextField("Tire"); err != nil {
+			return err
+		}
+		if err := enc.StartValue(vdl.TypeOf((*bool)(nil))); err != nil {
+			return err
+		}
+		if err := enc.EncodeBool(x.Tire); err != nil {
+			return err
+		}
+		if err := enc.FinishValue(); err != nil {
+			return err
+		}
+	}
+	var3 := (x.Eel == false)
+	if !(var3) {
+		if err := enc.NextField("Eel"); err != nil {
+			return err
+		}
+		if err := enc.StartValue(vdl.TypeOf((*bool)(nil))); err != nil {
+			return err
+		}
+		if err := enc.EncodeBool(x.Eel); err != nil {
+			return err
+		}
+		if err := enc.FinishValue(); err != nil {
+			return err
+		}
+	}
+	if err := enc.NextField(""); err != nil {
+		return err
+	}
+	return enc.FinishValue()
+}
+
 type SetStructMap map[string]bool
 
 func (SetStructMap) __VDLReflect(struct {
@@ -7478,6 +9126,36 @@ func (x *SetStructMap) VDLRead(dec vdl.Decoder) error {
 	}
 }
 
+func (x SetStructMap) VDLWrite(enc vdl.Encoder) error {
+	if err := enc.StartValue(vdl.TypeOf((*SetStructMap)(nil))); err != nil {
+		return err
+	}
+	for key, elem := range x {
+		if err := enc.StartValue(vdl.TypeOf((*string)(nil))); err != nil {
+			return err
+		}
+		if err := enc.EncodeString(key); err != nil {
+			return err
+		}
+		if err := enc.FinishValue(); err != nil {
+			return err
+		}
+		if err := enc.StartValue(vdl.TypeOf((*bool)(nil))); err != nil {
+			return err
+		}
+		if err := enc.EncodeBool(elem); err != nil {
+			return err
+		}
+		if err := enc.FinishValue(); err != nil {
+			return err
+		}
+	}
+	if err := enc.NextEntry(true); err != nil {
+		return err
+	}
+	return enc.FinishValue()
+}
+
 type MapStructSet map[string]struct{}
 
 func (MapStructSet) __VDLReflect(struct {
@@ -7583,6 +9261,27 @@ func (x *MapStructSet) VDLRead(dec vdl.Decoder) error {
 		}
 		tmpMap[key] = struct{}{}
 	}
+}
+
+func (x MapStructSet) VDLWrite(enc vdl.Encoder) error {
+	if err := enc.StartValue(vdl.TypeOf((*MapStructSet)(nil))); err != nil {
+		return err
+	}
+	for key := range x {
+		if err := enc.StartValue(vdl.TypeOf((*string)(nil))); err != nil {
+			return err
+		}
+		if err := enc.EncodeString(key); err != nil {
+			return err
+		}
+		if err := enc.FinishValue(); err != nil {
+			return err
+		}
+	}
+	if err := enc.NextEntry(true); err != nil {
+		return err
+	}
+	return enc.FinishValue()
 }
 
 type SetOnlyMap map[float64]bool
@@ -7719,6 +9418,36 @@ func (x *SetOnlyMap) VDLRead(dec vdl.Decoder) error {
 	}
 }
 
+func (x SetOnlyMap) VDLWrite(enc vdl.Encoder) error {
+	if err := enc.StartValue(vdl.TypeOf((*SetOnlyMap)(nil))); err != nil {
+		return err
+	}
+	for key, elem := range x {
+		if err := enc.StartValue(vdl.TypeOf((*float64)(nil))); err != nil {
+			return err
+		}
+		if err := enc.EncodeFloat(key); err != nil {
+			return err
+		}
+		if err := enc.FinishValue(); err != nil {
+			return err
+		}
+		if err := enc.StartValue(vdl.TypeOf((*bool)(nil))); err != nil {
+			return err
+		}
+		if err := enc.EncodeBool(elem); err != nil {
+			return err
+		}
+		if err := enc.FinishValue(); err != nil {
+			return err
+		}
+	}
+	if err := enc.NextEntry(true); err != nil {
+		return err
+	}
+	return enc.FinishValue()
+}
+
 type SometimesSetMap map[float64]*vdl.Value
 
 func (SometimesSetMap) __VDLReflect(struct {
@@ -7848,6 +9577,42 @@ func (x *SometimesSetMap) VDLRead(dec vdl.Decoder) error {
 	}
 }
 
+func (x SometimesSetMap) VDLWrite(enc vdl.Encoder) error {
+	if err := enc.StartValue(vdl.TypeOf((*SometimesSetMap)(nil))); err != nil {
+		return err
+	}
+	for key, elem := range x {
+		if err := enc.StartValue(vdl.TypeOf((*float64)(nil))); err != nil {
+			return err
+		}
+		if err := enc.EncodeFloat(key); err != nil {
+			return err
+		}
+		if err := enc.FinishValue(); err != nil {
+			return err
+		}
+		if err := enc.StartValue(vdl.AnyType); err != nil {
+			return err
+		}
+		if elem.IsNil() {
+			if err := enc.NilValue(elem.Type()); err != nil {
+				return err
+			}
+		} else {
+			if err := elem.VDLWrite(enc); err != nil {
+				return err
+			}
+		}
+		if err := enc.FinishValue(); err != nil {
+			return err
+		}
+	}
+	if err := enc.NextEntry(true); err != nil {
+		return err
+	}
+	return enc.FinishValue()
+}
+
 type MapOnlySet map[float64]struct{}
 
 func (MapOnlySet) __VDLReflect(struct {
@@ -7953,6 +9718,27 @@ func (x *MapOnlySet) VDLRead(dec vdl.Decoder) error {
 		}
 		tmpMap[key] = struct{}{}
 	}
+}
+
+func (x MapOnlySet) VDLWrite(enc vdl.Encoder) error {
+	if err := enc.StartValue(vdl.TypeOf((*MapOnlySet)(nil))); err != nil {
+		return err
+	}
+	for key := range x {
+		if err := enc.StartValue(vdl.TypeOf((*float64)(nil))); err != nil {
+			return err
+		}
+		if err := enc.EncodeFloat(key); err != nil {
+			return err
+		}
+		if err := enc.FinishValue(); err != nil {
+			return err
+		}
+	}
+	if err := enc.NextEntry(true); err != nil {
+		return err
+	}
+	return enc.FinishValue()
 }
 
 type SetOnlyA map[bool]struct{}
@@ -8062,6 +9848,27 @@ func (x *SetOnlyA) VDLRead(dec vdl.Decoder) error {
 	}
 }
 
+func (x SetOnlyA) VDLWrite(enc vdl.Encoder) error {
+	if err := enc.StartValue(vdl.TypeOf((*SetOnlyA)(nil))); err != nil {
+		return err
+	}
+	for key := range x {
+		if err := enc.StartValue(vdl.TypeOf((*bool)(nil))); err != nil {
+			return err
+		}
+		if err := enc.EncodeBool(key); err != nil {
+			return err
+		}
+		if err := enc.FinishValue(); err != nil {
+			return err
+		}
+	}
+	if err := enc.NextEntry(true); err != nil {
+		return err
+	}
+	return enc.FinishValue()
+}
+
 type SetOnlyA2 map[NBool]struct{}
 
 func (SetOnlyA2) __VDLReflect(struct {
@@ -8162,6 +9969,21 @@ func (x *SetOnlyA2) VDLRead(dec vdl.Decoder) error {
 		}
 		tmpMap[key] = struct{}{}
 	}
+}
+
+func (x SetOnlyA2) VDLWrite(enc vdl.Encoder) error {
+	if err := enc.StartValue(vdl.TypeOf((*SetOnlyA2)(nil))); err != nil {
+		return err
+	}
+	for key := range x {
+		if err := key.VDLWrite(enc); err != nil {
+			return err
+		}
+	}
+	if err := enc.NextEntry(true); err != nil {
+		return err
+	}
+	return enc.FinishValue()
 }
 
 type SetOnlyB map[int16]struct{}
@@ -8273,6 +10095,27 @@ func (x *SetOnlyB) VDLRead(dec vdl.Decoder) error {
 	}
 }
 
+func (x SetOnlyB) VDLWrite(enc vdl.Encoder) error {
+	if err := enc.StartValue(vdl.TypeOf((*SetOnlyB)(nil))); err != nil {
+		return err
+	}
+	for key := range x {
+		if err := enc.StartValue(vdl.TypeOf((*int16)(nil))); err != nil {
+			return err
+		}
+		if err := enc.EncodeInt(int64(key)); err != nil {
+			return err
+		}
+		if err := enc.FinishValue(); err != nil {
+			return err
+		}
+	}
+	if err := enc.NextEntry(true); err != nil {
+		return err
+	}
+	return enc.FinishValue()
+}
+
 type SetOnlyB2 map[NInt16]struct{}
 
 func (SetOnlyB2) __VDLReflect(struct {
@@ -8373,6 +10216,21 @@ func (x *SetOnlyB2) VDLRead(dec vdl.Decoder) error {
 		}
 		tmpMap[key] = struct{}{}
 	}
+}
+
+func (x SetOnlyB2) VDLWrite(enc vdl.Encoder) error {
+	if err := enc.StartValue(vdl.TypeOf((*SetOnlyB2)(nil))); err != nil {
+		return err
+	}
+	for key := range x {
+		if err := key.VDLWrite(enc); err != nil {
+			return err
+		}
+	}
+	if err := enc.NextEntry(true); err != nil {
+		return err
+	}
+	return enc.FinishValue()
 }
 
 type MapOnlyA map[uint32]uint32
@@ -8513,6 +10371,36 @@ func (x *MapOnlyA) VDLRead(dec vdl.Decoder) error {
 	}
 }
 
+func (x MapOnlyA) VDLWrite(enc vdl.Encoder) error {
+	if err := enc.StartValue(vdl.TypeOf((*MapOnlyA)(nil))); err != nil {
+		return err
+	}
+	for key, elem := range x {
+		if err := enc.StartValue(vdl.TypeOf((*uint32)(nil))); err != nil {
+			return err
+		}
+		if err := enc.EncodeUint(uint64(key)); err != nil {
+			return err
+		}
+		if err := enc.FinishValue(); err != nil {
+			return err
+		}
+		if err := enc.StartValue(vdl.TypeOf((*uint32)(nil))); err != nil {
+			return err
+		}
+		if err := enc.EncodeUint(uint64(elem)); err != nil {
+			return err
+		}
+		if err := enc.FinishValue(); err != nil {
+			return err
+		}
+	}
+	if err := enc.NextEntry(true); err != nil {
+		return err
+	}
+	return enc.FinishValue()
+}
+
 type MapOnlyA2 map[int64]float64
 
 func (MapOnlyA2) __VDLReflect(struct {
@@ -8645,6 +10533,36 @@ func (x *MapOnlyA2) VDLRead(dec vdl.Decoder) error {
 		}
 		tmpMap[key] = elem
 	}
+}
+
+func (x MapOnlyA2) VDLWrite(enc vdl.Encoder) error {
+	if err := enc.StartValue(vdl.TypeOf((*MapOnlyA2)(nil))); err != nil {
+		return err
+	}
+	for key, elem := range x {
+		if err := enc.StartValue(vdl.TypeOf((*int64)(nil))); err != nil {
+			return err
+		}
+		if err := enc.EncodeInt(key); err != nil {
+			return err
+		}
+		if err := enc.FinishValue(); err != nil {
+			return err
+		}
+		if err := enc.StartValue(vdl.TypeOf((*float64)(nil))); err != nil {
+			return err
+		}
+		if err := enc.EncodeFloat(elem); err != nil {
+			return err
+		}
+		if err := enc.FinishValue(); err != nil {
+			return err
+		}
+	}
+	if err := enc.NextEntry(true); err != nil {
+		return err
+	}
+	return enc.FinishValue()
 }
 
 type MapOnlyB map[bool]string
@@ -8781,6 +10699,36 @@ func (x *MapOnlyB) VDLRead(dec vdl.Decoder) error {
 	}
 }
 
+func (x MapOnlyB) VDLWrite(enc vdl.Encoder) error {
+	if err := enc.StartValue(vdl.TypeOf((*MapOnlyB)(nil))); err != nil {
+		return err
+	}
+	for key, elem := range x {
+		if err := enc.StartValue(vdl.TypeOf((*bool)(nil))); err != nil {
+			return err
+		}
+		if err := enc.EncodeBool(key); err != nil {
+			return err
+		}
+		if err := enc.FinishValue(); err != nil {
+			return err
+		}
+		if err := enc.StartValue(vdl.TypeOf((*string)(nil))); err != nil {
+			return err
+		}
+		if err := enc.EncodeString(elem); err != nil {
+			return err
+		}
+		if err := enc.FinishValue(); err != nil {
+			return err
+		}
+	}
+	if err := enc.NextEntry(true); err != nil {
+		return err
+	}
+	return enc.FinishValue()
+}
+
 type MapOnlyB2 map[NBool]NString
 
 func (MapOnlyB2) __VDLReflect(struct {
@@ -8905,6 +10853,24 @@ func (x *MapOnlyB2) VDLRead(dec vdl.Decoder) error {
 	}
 }
 
+func (x MapOnlyB2) VDLWrite(enc vdl.Encoder) error {
+	if err := enc.StartValue(vdl.TypeOf((*MapOnlyB2)(nil))); err != nil {
+		return err
+	}
+	for key, elem := range x {
+		if err := key.VDLWrite(enc); err != nil {
+			return err
+		}
+		if err := elem.VDLWrite(enc); err != nil {
+			return err
+		}
+	}
+	if err := enc.NextEntry(true); err != nil {
+		return err
+	}
+	return enc.FinishValue()
+}
+
 type (
 	// BdeUnion represents any single field of the BdeUnion union type.
 	BdeUnion interface {
@@ -8917,6 +10883,7 @@ type (
 		// __VDLReflect describes the BdeUnion union type.
 		__VDLReflect(__BdeUnionReflect)
 		FillVDLTarget(vdl.Target, *vdl.Type) error
+		VDLWrite(vdl.Encoder) error
 	}
 	// BdeUnionB represents field B of the BdeUnion union type.
 	BdeUnionB struct{ Value string }
@@ -9150,6 +11117,76 @@ func VDLReadBdeUnion(dec vdl.Decoder, x *BdeUnion) error {
 	return dec.FinishValue()
 }
 
+func (x BdeUnionB) VDLWrite(enc vdl.Encoder) error {
+	if err := enc.StartValue(vdl.TypeOf((*BdeUnion)(nil))); err != nil {
+		return err
+	}
+	if err := enc.NextField("B"); err != nil {
+		return err
+	}
+	if err := enc.StartValue(vdl.TypeOf((*string)(nil))); err != nil {
+		return err
+	}
+	if err := enc.EncodeString(x.Value); err != nil {
+		return err
+	}
+	if err := enc.FinishValue(); err != nil {
+		return err
+	}
+	if err := enc.NextField(""); err != nil {
+		return err
+	}
+	return enc.FinishValue()
+}
+func (x BdeUnionD) VDLWrite(enc vdl.Encoder) error {
+	if err := enc.StartValue(vdl.TypeOf((*BdeUnion)(nil))); err != nil {
+		return err
+	}
+	if err := enc.NextField("D"); err != nil {
+		return err
+	}
+	if err := enc.StartValue(vdl.AnyType); err != nil {
+		return err
+	}
+	if x.Value.IsNil() {
+		if err := enc.NilValue(x.Value.Type()); err != nil {
+			return err
+		}
+	} else {
+		if err := x.Value.VDLWrite(enc); err != nil {
+			return err
+		}
+	}
+	if err := enc.FinishValue(); err != nil {
+		return err
+	}
+	if err := enc.NextField(""); err != nil {
+		return err
+	}
+	return enc.FinishValue()
+}
+func (x BdeUnionE) VDLWrite(enc vdl.Encoder) error {
+	if err := enc.StartValue(vdl.TypeOf((*BdeUnion)(nil))); err != nil {
+		return err
+	}
+	if err := enc.NextField("E"); err != nil {
+		return err
+	}
+	if err := enc.StartValue(vdl.TypeObjectType); err != nil {
+		return err
+	}
+	if err := enc.EncodeTypeObject(x.Value); err != nil {
+		return err
+	}
+	if err := enc.FinishValue(); err != nil {
+		return err
+	}
+	if err := enc.NextField(""); err != nil {
+		return err
+	}
+	return enc.FinishValue()
+}
+
 type BrieEnum int
 
 const (
@@ -9253,6 +11290,16 @@ func (x *BrieEnum) VDLRead(dec vdl.Decoder) error {
 	return dec.FinishValue()
 }
 
+func (x BrieEnum) VDLWrite(enc vdl.Encoder) error {
+	if err := enc.StartValue(vdl.TypeOf((*BrieEnum)(nil))); err != nil {
+		return err
+	}
+	if err := enc.EncodeString(x.String()); err != nil {
+		return err
+	}
+	return enc.FinishValue()
+}
+
 type BeanEnum int
 
 const (
@@ -9338,6 +11385,16 @@ func (x *BeanEnum) VDLRead(dec vdl.Decoder) error {
 		return err
 	}
 	return dec.FinishValue()
+}
+
+func (x BeanEnum) VDLWrite(enc vdl.Encoder) error {
+	if err := enc.StartValue(vdl.TypeOf((*BeanEnum)(nil))); err != nil {
+		return err
+	}
+	if err := enc.EncodeString(x.String()); err != nil {
+		return err
+	}
+	return enc.FinishValue()
 }
 
 type FoodEnum int
@@ -9441,6 +11498,16 @@ func (x *FoodEnum) VDLRead(dec vdl.Decoder) error {
 		return err
 	}
 	return dec.FinishValue()
+}
+
+func (x FoodEnum) VDLWrite(enc vdl.Encoder) error {
+	if err := enc.StartValue(vdl.TypeOf((*FoodEnum)(nil))); err != nil {
+		return err
+	}
+	if err := enc.EncodeString(x.String()); err != nil {
+		return err
+	}
+	return enc.FinishValue()
 }
 
 type StructAny struct {
@@ -9557,6 +11624,37 @@ func (x *StructAny) VDLRead(dec vdl.Decoder) error {
 			}
 		}
 	}
+}
+
+func (x StructAny) VDLWrite(enc vdl.Encoder) error {
+	if err := enc.StartValue(vdl.TypeOf((*StructAny)(nil)).Elem()); err != nil {
+		return err
+	}
+	var1 := x.Any == nil || (x.Any.Kind() == vdl.Any && x.Any.IsZero())
+	if !(var1) {
+		if err := enc.NextField("Any"); err != nil {
+			return err
+		}
+		if err := enc.StartValue(vdl.AnyType); err != nil {
+			return err
+		}
+		if x.Any.IsNil() {
+			if err := enc.NilValue(x.Any.Type()); err != nil {
+				return err
+			}
+		} else {
+			if err := x.Any.VDLWrite(enc); err != nil {
+				return err
+			}
+		}
+		if err := enc.FinishValue(); err != nil {
+			return err
+		}
+	}
+	if err := enc.NextField(""); err != nil {
+		return err
+	}
+	return enc.FinishValue()
 }
 
 type StructMap struct {
@@ -9791,6 +11889,58 @@ func __VDLRead10_map(dec vdl.Decoder, x *map[int64]int64) error {
 		}
 		tmpMap[key] = elem
 	}
+}
+
+func (x StructMap) VDLWrite(enc vdl.Encoder) error {
+	if err := enc.StartValue(vdl.TypeOf((*StructMap)(nil)).Elem()); err != nil {
+		return err
+	}
+	var var1 bool
+	if len(x.Map) == 0 {
+		var1 = true
+	}
+	if !(var1) {
+		if err := enc.NextField("Map"); err != nil {
+			return err
+		}
+		if err := __VDLWrite10_map(enc, &x.Map); err != nil {
+			return err
+		}
+	}
+	if err := enc.NextField(""); err != nil {
+		return err
+	}
+	return enc.FinishValue()
+}
+
+func __VDLWrite10_map(enc vdl.Encoder, x *map[int64]int64) error {
+	if err := enc.StartValue(vdl.TypeOf((*map[int64]int64)(nil))); err != nil {
+		return err
+	}
+	for key, elem := range *x {
+		if err := enc.StartValue(vdl.TypeOf((*int64)(nil))); err != nil {
+			return err
+		}
+		if err := enc.EncodeInt(key); err != nil {
+			return err
+		}
+		if err := enc.FinishValue(); err != nil {
+			return err
+		}
+		if err := enc.StartValue(vdl.TypeOf((*int64)(nil))); err != nil {
+			return err
+		}
+		if err := enc.EncodeInt(elem); err != nil {
+			return err
+		}
+		if err := enc.FinishValue(); err != nil {
+			return err
+		}
+	}
+	if err := enc.NextEntry(true); err != nil {
+		return err
+	}
+	return enc.FinishValue()
 }
 
 // Since the encoding changes if struct fields are zero values,
@@ -10708,6 +12858,309 @@ func (x *StructManyTypes) VDLRead(dec vdl.Decoder) error {
 	}
 }
 
+func (x StructManyTypes) VDLWrite(enc vdl.Encoder) error {
+	if err := enc.StartValue(vdl.TypeOf((*StructManyTypes)(nil)).Elem()); err != nil {
+		return err
+	}
+	var1 := (x.Bool == false)
+	if !(var1) {
+		if err := enc.NextField("Bool"); err != nil {
+			return err
+		}
+		if err := enc.StartValue(vdl.TypeOf((*bool)(nil))); err != nil {
+			return err
+		}
+		if err := enc.EncodeBool(x.Bool); err != nil {
+			return err
+		}
+		if err := enc.FinishValue(); err != nil {
+			return err
+		}
+	}
+	var2 := (x.AByte == byte(0))
+	if !(var2) {
+		if err := enc.NextField("AByte"); err != nil {
+			return err
+		}
+		if err := enc.StartValue(vdl.TypeOf((*byte)(nil))); err != nil {
+			return err
+		}
+		if err := enc.EncodeUint(uint64(x.AByte)); err != nil {
+			return err
+		}
+		if err := enc.FinishValue(); err != nil {
+			return err
+		}
+	}
+	var3 := (x.Int16 == int16(0))
+	if !(var3) {
+		if err := enc.NextField("Int16"); err != nil {
+			return err
+		}
+		if err := enc.StartValue(vdl.TypeOf((*int16)(nil))); err != nil {
+			return err
+		}
+		if err := enc.EncodeInt(int64(x.Int16)); err != nil {
+			return err
+		}
+		if err := enc.FinishValue(); err != nil {
+			return err
+		}
+	}
+	var4 := (x.Int32 == int32(0))
+	if !(var4) {
+		if err := enc.NextField("Int32"); err != nil {
+			return err
+		}
+		if err := enc.StartValue(vdl.TypeOf((*int32)(nil))); err != nil {
+			return err
+		}
+		if err := enc.EncodeInt(int64(x.Int32)); err != nil {
+			return err
+		}
+		if err := enc.FinishValue(); err != nil {
+			return err
+		}
+	}
+	var5 := (x.Int64 == int64(0))
+	if !(var5) {
+		if err := enc.NextField("Int64"); err != nil {
+			return err
+		}
+		if err := enc.StartValue(vdl.TypeOf((*int64)(nil))); err != nil {
+			return err
+		}
+		if err := enc.EncodeInt(x.Int64); err != nil {
+			return err
+		}
+		if err := enc.FinishValue(); err != nil {
+			return err
+		}
+	}
+	var6 := (x.Uint16 == uint16(0))
+	if !(var6) {
+		if err := enc.NextField("Uint16"); err != nil {
+			return err
+		}
+		if err := enc.StartValue(vdl.TypeOf((*uint16)(nil))); err != nil {
+			return err
+		}
+		if err := enc.EncodeUint(uint64(x.Uint16)); err != nil {
+			return err
+		}
+		if err := enc.FinishValue(); err != nil {
+			return err
+		}
+	}
+	var7 := (x.Uint32 == uint32(0))
+	if !(var7) {
+		if err := enc.NextField("Uint32"); err != nil {
+			return err
+		}
+		if err := enc.StartValue(vdl.TypeOf((*uint32)(nil))); err != nil {
+			return err
+		}
+		if err := enc.EncodeUint(uint64(x.Uint32)); err != nil {
+			return err
+		}
+		if err := enc.FinishValue(); err != nil {
+			return err
+		}
+	}
+	var8 := (x.Uint64 == uint64(0))
+	if !(var8) {
+		if err := enc.NextField("Uint64"); err != nil {
+			return err
+		}
+		if err := enc.StartValue(vdl.TypeOf((*uint64)(nil))); err != nil {
+			return err
+		}
+		if err := enc.EncodeUint(x.Uint64); err != nil {
+			return err
+		}
+		if err := enc.FinishValue(); err != nil {
+			return err
+		}
+	}
+	var9 := (x.String == "")
+	if !(var9) {
+		if err := enc.NextField("String"); err != nil {
+			return err
+		}
+		if err := enc.StartValue(vdl.TypeOf((*string)(nil))); err != nil {
+			return err
+		}
+		if err := enc.EncodeString(x.String); err != nil {
+			return err
+		}
+		if err := enc.FinishValue(); err != nil {
+			return err
+		}
+	}
+	var var10 bool
+	if len(x.Bytes) == 0 {
+		var10 = true
+	}
+	if !(var10) {
+		if err := enc.NextField("Bytes"); err != nil {
+			return err
+		}
+		if err := enc.StartValue(vdl.TypeOf((*[]byte)(nil))); err != nil {
+			return err
+		}
+		if err := enc.EncodeBytes(x.Bytes); err != nil {
+			return err
+		}
+		if err := enc.FinishValue(); err != nil {
+			return err
+		}
+	}
+	var11 := (x.Float32 == float32(0))
+	if !(var11) {
+		if err := enc.NextField("Float32"); err != nil {
+			return err
+		}
+		if err := enc.StartValue(vdl.TypeOf((*float32)(nil))); err != nil {
+			return err
+		}
+		if err := enc.EncodeFloat(float64(x.Float32)); err != nil {
+			return err
+		}
+		if err := enc.FinishValue(); err != nil {
+			return err
+		}
+	}
+	var12 := (x.Float64 == float64(0))
+	if !(var12) {
+		if err := enc.NextField("Float64"); err != nil {
+			return err
+		}
+		if err := enc.StartValue(vdl.TypeOf((*float64)(nil))); err != nil {
+			return err
+		}
+		if err := enc.EncodeFloat(x.Float64); err != nil {
+			return err
+		}
+		if err := enc.FinishValue(); err != nil {
+			return err
+		}
+	}
+	var13 := (x.FoodEnum == FoodEnumBean)
+	if !(var13) {
+		if err := enc.NextField("FoodEnum"); err != nil {
+			return err
+		}
+		if err := x.FoodEnum.VDLWrite(enc); err != nil {
+			return err
+		}
+	}
+	var14 := (x.NEnum == NEnumA)
+	if !(var14) {
+		if err := enc.NextField("NEnum"); err != nil {
+			return err
+		}
+		if err := x.NEnum.VDLWrite(enc); err != nil {
+			return err
+		}
+	}
+	var var15 bool
+	if len(x.NListUint64) == 0 {
+		var15 = true
+	}
+	if !(var15) {
+		if err := enc.NextField("NListUint64"); err != nil {
+			return err
+		}
+		if err := x.NListUint64.VDLWrite(enc); err != nil {
+			return err
+		}
+	}
+	var16 := (x.NByteArray == NByteArray{})
+	if !(var16) {
+		if err := enc.NextField("NByteArray"); err != nil {
+			return err
+		}
+		if err := x.NByteArray.VDLWrite(enc); err != nil {
+			return err
+		}
+	}
+	var17 := (x.NArray2Uint64 == NArray2Uint64{})
+	if !(var17) {
+		if err := enc.NextField("NArray2Uint64"); err != nil {
+			return err
+		}
+		if err := x.NArray2Uint64.VDLWrite(enc); err != nil {
+			return err
+		}
+	}
+	var var18 bool
+	if len(x.NSetUint64) == 0 {
+		var18 = true
+	}
+	if !(var18) {
+		if err := enc.NextField("NSetUint64"); err != nil {
+			return err
+		}
+		if err := x.NSetUint64.VDLWrite(enc); err != nil {
+			return err
+		}
+	}
+	var var19 bool
+	if len(x.NMapUint64String) == 0 {
+		var19 = true
+	}
+	if !(var19) {
+		if err := enc.NextField("NMapUint64String"); err != nil {
+			return err
+		}
+		if err := x.NMapUint64String.VDLWrite(enc); err != nil {
+			return err
+		}
+	}
+	var20 := (x.NStruct == NStruct{})
+	if !(var20) {
+		if err := enc.NextField("NStruct"); err != nil {
+			return err
+		}
+		if err := x.NStruct.VDLWrite(enc); err != nil {
+			return err
+		}
+	}
+	var var21 bool
+	if field, ok := x.NUnion.(NUnionA); ok {
+
+		var22 := (field.Value == false)
+		var21 = var22
+	}
+	if !(var21) {
+		if err := enc.NextField("NUnion"); err != nil {
+			return err
+		}
+		if err := x.NUnion.VDLWrite(enc); err != nil {
+			return err
+		}
+	}
+	var23 := (x.TypeObject == nil || x.TypeObject == vdl.AnyType)
+	if !(var23) {
+		if err := enc.NextField("TypeObject"); err != nil {
+			return err
+		}
+		if err := enc.StartValue(vdl.TypeObjectType); err != nil {
+			return err
+		}
+		if err := enc.EncodeTypeObject(x.TypeObject); err != nil {
+			return err
+		}
+		if err := enc.FinishValue(); err != nil {
+			return err
+		}
+	}
+	if err := enc.NextField(""); err != nil {
+		return err
+	}
+	return enc.FinishValue()
+}
+
 type AnySlice []*vdl.Value
 
 func (AnySlice) __VDLReflect(struct {
@@ -10803,6 +13256,33 @@ func (x *AnySlice) VDLRead(dec vdl.Decoder) error {
 		}
 		*x = append(*x, elem)
 	}
+}
+
+func (x AnySlice) VDLWrite(enc vdl.Encoder) error {
+	if err := enc.StartValue(vdl.TypeOf((*AnySlice)(nil))); err != nil {
+		return err
+	}
+	for i := 0; i < len(x); i++ {
+		if err := enc.StartValue(vdl.AnyType); err != nil {
+			return err
+		}
+		if x[i].IsNil() {
+			if err := enc.NilValue(x[i].Type()); err != nil {
+				return err
+			}
+		} else {
+			if err := x[i].VDLWrite(enc); err != nil {
+				return err
+			}
+		}
+		if err := enc.FinishValue(); err != nil {
+			return err
+		}
+	}
+	if err := enc.NextEntry(true); err != nil {
+		return err
+	}
+	return enc.FinishValue()
 }
 
 type LargeMessageType struct {
@@ -11003,6 +13483,53 @@ func (x *LargeMessageType) VDLRead(dec vdl.Decoder) error {
 	}
 }
 
+func (x LargeMessageType) VDLWrite(enc vdl.Encoder) error {
+	if err := enc.StartValue(vdl.TypeOf((*LargeMessageType)(nil)).Elem()); err != nil {
+		return err
+	}
+	var var1 bool
+	if len(x.Payload) == 0 {
+		var1 = true
+	}
+	if !(var1) {
+		if err := enc.NextField("Payload"); err != nil {
+			return err
+		}
+		if err := enc.StartValue(vdl.TypeOf((*[]byte)(nil))); err != nil {
+			return err
+		}
+		if err := enc.EncodeBytes(x.Payload); err != nil {
+			return err
+		}
+		if err := enc.FinishValue(); err != nil {
+			return err
+		}
+	}
+	var2 := (x.Next == (*LargeMessageType)(nil))
+	if !(var2) {
+		if err := enc.NextField("Next"); err != nil {
+			return err
+		}
+		if err := enc.StartValue(vdl.TypeOf((**LargeMessageType)(nil))); err != nil {
+			return err
+		}
+		if x.Next == nil {
+			if err := enc.NilValue(vdl.TypeOf((**LargeMessageType)(nil))); err != nil {
+				return err
+			}
+		} else {
+			enc.SetNextStartValueIsOptional()
+			if err := x.Next.VDLWrite(enc); err != nil {
+				return err
+			}
+		}
+	}
+	if err := enc.NextField(""); err != nil {
+		return err
+	}
+	return enc.FinishValue()
+}
+
 type LargeAnyMessageType struct {
 	Payload *vdl.Value
 	Next    *LargeAnyMessageType
@@ -11193,6 +13720,56 @@ func (x *LargeAnyMessageType) VDLRead(dec vdl.Decoder) error {
 			}
 		}
 	}
+}
+
+func (x LargeAnyMessageType) VDLWrite(enc vdl.Encoder) error {
+	if err := enc.StartValue(vdl.TypeOf((*LargeAnyMessageType)(nil)).Elem()); err != nil {
+		return err
+	}
+	var1 := x.Payload == nil || (x.Payload.Kind() == vdl.Any && x.Payload.IsZero())
+	if !(var1) {
+		if err := enc.NextField("Payload"); err != nil {
+			return err
+		}
+		if err := enc.StartValue(vdl.AnyType); err != nil {
+			return err
+		}
+		if x.Payload.IsNil() {
+			if err := enc.NilValue(x.Payload.Type()); err != nil {
+				return err
+			}
+		} else {
+			if err := x.Payload.VDLWrite(enc); err != nil {
+				return err
+			}
+		}
+		if err := enc.FinishValue(); err != nil {
+			return err
+		}
+	}
+	var2 := (x.Next == (*LargeAnyMessageType)(nil))
+	if !(var2) {
+		if err := enc.NextField("Next"); err != nil {
+			return err
+		}
+		if err := enc.StartValue(vdl.TypeOf((**LargeAnyMessageType)(nil))); err != nil {
+			return err
+		}
+		if x.Next == nil {
+			if err := enc.NilValue(vdl.TypeOf((**LargeAnyMessageType)(nil))); err != nil {
+				return err
+			}
+		} else {
+			enc.SetNextStartValueIsOptional()
+			if err := x.Next.VDLWrite(enc); err != nil {
+				return err
+			}
+		}
+	}
+	if err := enc.NextField(""); err != nil {
+		return err
+	}
+	return enc.FinishValue()
 }
 
 var __VDLInitCalled bool

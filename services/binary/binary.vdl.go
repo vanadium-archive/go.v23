@@ -307,6 +307,73 @@ func __VDLRead1_map(dec vdl.Decoder, x *map[string]bool) error {
 	}
 }
 
+func (x Description) VDLWrite(enc vdl.Encoder) error {
+	if err := enc.StartValue(vdl.TypeOf((*Description)(nil)).Elem()); err != nil {
+		return err
+	}
+	var1 := (x.Name == "")
+	if !(var1) {
+		if err := enc.NextField("Name"); err != nil {
+			return err
+		}
+		if err := enc.StartValue(vdl.TypeOf((*string)(nil))); err != nil {
+			return err
+		}
+		if err := enc.EncodeString(x.Name); err != nil {
+			return err
+		}
+		if err := enc.FinishValue(); err != nil {
+			return err
+		}
+	}
+	var var2 bool
+	if len(x.Profiles) == 0 {
+		var2 = true
+	}
+	if !(var2) {
+		if err := enc.NextField("Profiles"); err != nil {
+			return err
+		}
+		if err := __VDLWrite1_map(enc, &x.Profiles); err != nil {
+			return err
+		}
+	}
+	if err := enc.NextField(""); err != nil {
+		return err
+	}
+	return enc.FinishValue()
+}
+
+func __VDLWrite1_map(enc vdl.Encoder, x *map[string]bool) error {
+	if err := enc.StartValue(vdl.TypeOf((*map[string]bool)(nil))); err != nil {
+		return err
+	}
+	for key, elem := range *x {
+		if err := enc.StartValue(vdl.TypeOf((*string)(nil))); err != nil {
+			return err
+		}
+		if err := enc.EncodeString(key); err != nil {
+			return err
+		}
+		if err := enc.FinishValue(); err != nil {
+			return err
+		}
+		if err := enc.StartValue(vdl.TypeOf((*bool)(nil))); err != nil {
+			return err
+		}
+		if err := enc.EncodeBool(elem); err != nil {
+			return err
+		}
+		if err := enc.FinishValue(); err != nil {
+			return err
+		}
+	}
+	if err := enc.NextEntry(true); err != nil {
+		return err
+	}
+	return enc.FinishValue()
+}
+
 // PartInfo holds information describing a binary part.
 type PartInfo struct {
 	// Checksum holds the hex-encoded MD5 checksum of the binary part.
@@ -465,6 +532,46 @@ func (x *PartInfo) VDLRead(dec vdl.Decoder) error {
 			}
 		}
 	}
+}
+
+func (x PartInfo) VDLWrite(enc vdl.Encoder) error {
+	if err := enc.StartValue(vdl.TypeOf((*PartInfo)(nil)).Elem()); err != nil {
+		return err
+	}
+	var1 := (x.Checksum == "")
+	if !(var1) {
+		if err := enc.NextField("Checksum"); err != nil {
+			return err
+		}
+		if err := enc.StartValue(vdl.TypeOf((*string)(nil))); err != nil {
+			return err
+		}
+		if err := enc.EncodeString(x.Checksum); err != nil {
+			return err
+		}
+		if err := enc.FinishValue(); err != nil {
+			return err
+		}
+	}
+	var2 := (x.Size == int64(0))
+	if !(var2) {
+		if err := enc.NextField("Size"); err != nil {
+			return err
+		}
+		if err := enc.StartValue(vdl.TypeOf((*int64)(nil))); err != nil {
+			return err
+		}
+		if err := enc.EncodeInt(x.Size); err != nil {
+			return err
+		}
+		if err := enc.FinishValue(); err != nil {
+			return err
+		}
+	}
+	if err := enc.NextField(""); err != nil {
+		return err
+	}
+	return enc.FinishValue()
 }
 
 //////////////////////////////////////////////////

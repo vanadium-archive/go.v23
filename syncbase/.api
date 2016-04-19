@@ -71,6 +71,13 @@ pkg syncbase, method (*ValueTarget) StartField(string) (vdl.Target, vdl.Target, 
 pkg syncbase, method (*ValueTarget) StartFields(*vdl.Type) (vdl.FieldsTarget, error)
 pkg syncbase, method (*ValueTarget) ZeroField(string) error
 pkg syncbase, method (*WatchChange) Value(interface{}) error
+pkg syncbase, method (Conflict) VDLWrite(vdl.Encoder) error
+pkg syncbase, method (ConflictRow) VDLWrite(vdl.Encoder) error
+pkg syncbase, method (ConflictRowSet) VDLWrite(vdl.Encoder) error
+pkg syncbase, method (ConflictScanSet) VDLWrite(vdl.Encoder) error
+pkg syncbase, method (Resolution) VDLWrite(vdl.Encoder) error
+pkg syncbase, method (ResolvedRow) VDLWrite(vdl.Encoder) error
+pkg syncbase, method (Value) VDLWrite(vdl.Encoder) error
 pkg syncbase, type BatchDatabase interface { Abort, Collection, CollectionForId, Commit, Exec, FullName, GetResumeMarker, Id, ListCollections }
 pkg syncbase, type BatchDatabase interface, Abort(*context.T) error
 pkg syncbase, type BatchDatabase interface, Collection(*context.T, string) Collection
