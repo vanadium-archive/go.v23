@@ -73,11 +73,11 @@ var (
 	vvError3 = errorValue(rvError3)
 
 	vvBoolTrue = []*vdl.Value{
-		vdl.BoolValue(true), vdl.ZeroValue(vdl.BoolTypeN).AssignBool(true),
+		vdl.BoolValue(nil, true), vdl.BoolValue(vdl.BoolTypeN, true),
 	}
 	vvStrABC = []*vdl.Value{
-		vdl.StringValue("ABC"), vdl.ZeroValue(vdl.StringTypeN).AssignString("ABC"),
-		vdl.ZeroValue(vdl.EnumTypeN).AssignEnumLabel("ABC"),
+		vdl.StringValue(nil, "ABC"), vdl.StringValue(vdl.StringTypeN, "ABC"),
+		vdl.EnumValue(vdl.EnumTypeN, "ABC"),
 	}
 	vvTypeObjectBool = []*vdl.Value{
 		vdl.TypeObjectValue(vdl.BoolType),
@@ -512,53 +512,53 @@ func vvFromUint(u uint64) (result []*vdl.Value) {
 	switch {
 	case u <= math.MaxInt8:
 		result = append(result,
-			vdl.ZeroValue(vdl.Int8Type).AssignInt(i),
-			vdl.ZeroValue(vdl.Int8TypeN).AssignInt(i))
+			vdl.IntValue(vdl.Int8Type, i),
+			vdl.IntValue(vdl.Int8TypeN, i))
 		fallthrough
 	case u <= math.MaxUint8:
 		result = append(result,
-			vdl.ZeroValue(vdl.ByteType).AssignUint(u),
-			vdl.ZeroValue(vdl.ByteTypeN).AssignUint(u))
+			vdl.UintValue(vdl.ByteType, u),
+			vdl.UintValue(vdl.ByteTypeN, u))
 		fallthrough
 	case u <= math.MaxInt16:
 		result = append(result,
-			vdl.ZeroValue(vdl.Int16Type).AssignInt(i),
-			vdl.ZeroValue(vdl.Int16TypeN).AssignInt(i))
+			vdl.IntValue(vdl.Int16Type, i),
+			vdl.IntValue(vdl.Int16TypeN, i))
 		fallthrough
 	case u <= math.MaxUint16:
 		result = append(result,
-			vdl.ZeroValue(vdl.Uint16Type).AssignUint(u),
-			vdl.ZeroValue(vdl.Uint16TypeN).AssignUint(u))
+			vdl.UintValue(vdl.Uint16Type, u),
+			vdl.UintValue(vdl.Uint16TypeN, u))
 		fallthrough
 	case u <= 1<<24:
 		result = append(result,
-			vdl.ZeroValue(vdl.Float32Type).AssignFloat(f),
-			vdl.ZeroValue(vdl.Float32TypeN).AssignFloat(f))
+			vdl.FloatValue(vdl.Float32Type, f),
+			vdl.FloatValue(vdl.Float32TypeN, f))
 		fallthrough
 	case u <= math.MaxInt32:
 		result = append(result,
-			vdl.ZeroValue(vdl.Int32Type).AssignInt(i),
-			vdl.ZeroValue(vdl.Int32TypeN).AssignInt(i))
+			vdl.IntValue(vdl.Int32Type, i),
+			vdl.IntValue(vdl.Int32TypeN, i))
 		fallthrough
 	case u <= math.MaxUint32:
 		result = append(result,
-			vdl.ZeroValue(vdl.Uint32Type).AssignUint(u),
-			vdl.ZeroValue(vdl.Uint32TypeN).AssignUint(u))
+			vdl.UintValue(vdl.Uint32Type, u),
+			vdl.UintValue(vdl.Uint32TypeN, u))
 		fallthrough
 	case u <= 1<<53:
 		result = append(result,
-			vdl.ZeroValue(vdl.Float64Type).AssignFloat(f),
-			vdl.ZeroValue(vdl.Float64TypeN).AssignFloat(f))
+			vdl.FloatValue(vdl.Float64Type, f),
+			vdl.FloatValue(vdl.Float64TypeN, f))
 		fallthrough
 	case u <= math.MaxInt64:
 		result = append(result,
-			vdl.ZeroValue(vdl.Int64Type).AssignInt(i),
-			vdl.ZeroValue(vdl.Int64TypeN).AssignInt(i))
+			vdl.IntValue(vdl.Int64Type, i),
+			vdl.IntValue(vdl.Int64TypeN, i))
 		fallthrough
 	default:
 		result = append(result,
-			vdl.ZeroValue(vdl.Uint64Type).AssignUint(u),
-			vdl.ZeroValue(vdl.Uint64TypeN).AssignUint(u))
+			vdl.UintValue(vdl.Uint64Type, u),
+			vdl.UintValue(vdl.Uint64TypeN, u))
 	}
 	return result
 }
@@ -605,33 +605,33 @@ func vvFromInt(i int64) (result []*vdl.Value) {
 	switch {
 	case math.MinInt8 <= i && i <= math.MaxInt8:
 		result = append(result,
-			vdl.ZeroValue(vdl.Int8Type).AssignInt(i),
-			vdl.ZeroValue(vdl.Int8TypeN).AssignInt(i))
+			vdl.IntValue(vdl.Int8Type, i),
+			vdl.IntValue(vdl.Int8TypeN, i))
 		fallthrough
 	case math.MinInt16 <= i && i <= math.MaxInt16:
 		result = append(result,
-			vdl.ZeroValue(vdl.Int16Type).AssignInt(i),
-			vdl.ZeroValue(vdl.Int16TypeN).AssignInt(i))
+			vdl.IntValue(vdl.Int16Type, i),
+			vdl.IntValue(vdl.Int16TypeN, i))
 		fallthrough
 	case -1<<24 <= i && i <= 1<<24:
 		result = append(result,
-			vdl.ZeroValue(vdl.Float32Type).AssignFloat(f),
-			vdl.ZeroValue(vdl.Float32TypeN).AssignFloat(f))
+			vdl.FloatValue(vdl.Float32Type, f),
+			vdl.FloatValue(vdl.Float32TypeN, f))
 		fallthrough
 	case math.MinInt32 <= i && i <= math.MaxInt32:
 		result = append(result,
-			vdl.ZeroValue(vdl.Int32Type).AssignInt(i),
-			vdl.ZeroValue(vdl.Int32TypeN).AssignInt(i))
+			vdl.IntValue(vdl.Int32Type, i),
+			vdl.IntValue(vdl.Int32TypeN, i))
 		fallthrough
 	case -1<<53 <= i && i <= 1<<53:
 		result = append(result,
-			vdl.ZeroValue(vdl.Float64Type).AssignFloat(f),
-			vdl.ZeroValue(vdl.Float64TypeN).AssignFloat(f))
+			vdl.FloatValue(vdl.Float64Type, f),
+			vdl.FloatValue(vdl.Float64TypeN, f))
 		fallthrough
 	default:
 		result = append(result,
-			vdl.ZeroValue(vdl.Int64Type).AssignInt(i),
-			vdl.ZeroValue(vdl.Int64TypeN).AssignInt(i))
+			vdl.IntValue(vdl.Int64Type, i),
+			vdl.IntValue(vdl.Int64TypeN, i))
 	}
 	if i < 0 {
 		return
@@ -639,23 +639,23 @@ func vvFromInt(i int64) (result []*vdl.Value) {
 	switch {
 	case i <= math.MaxUint8:
 		result = append(result,
-			vdl.ZeroValue(vdl.ByteType).AssignUint(u),
-			vdl.ZeroValue(vdl.ByteTypeN).AssignUint(u))
+			vdl.UintValue(vdl.ByteType, u),
+			vdl.UintValue(vdl.ByteTypeN, u))
 		fallthrough
 	case i <= math.MaxUint16:
 		result = append(result,
-			vdl.ZeroValue(vdl.Uint16Type).AssignUint(u),
-			vdl.ZeroValue(vdl.Uint16TypeN).AssignUint(u))
+			vdl.UintValue(vdl.Uint16Type, u),
+			vdl.UintValue(vdl.Uint16TypeN, u))
 		fallthrough
 	case i <= math.MaxUint32:
 		result = append(result,
-			vdl.ZeroValue(vdl.Uint32Type).AssignUint(u),
-			vdl.ZeroValue(vdl.Uint32TypeN).AssignUint(u))
+			vdl.UintValue(vdl.Uint32Type, u),
+			vdl.UintValue(vdl.Uint32TypeN, u))
 		fallthrough
 	default:
 		result = append(result,
-			vdl.ZeroValue(vdl.Uint64Type).AssignUint(u),
-			vdl.ZeroValue(vdl.Uint64TypeN).AssignUint(u))
+			vdl.UintValue(vdl.Uint64Type, u),
+			vdl.UintValue(vdl.Uint64TypeN, u))
 	}
 	return
 }
@@ -702,10 +702,10 @@ func rvFromInt(i int64) (result []interface{}) {
 
 func vvFloat(f float64) []*vdl.Value {
 	return []*vdl.Value{
-		vdl.ZeroValue(vdl.Float32Type).AssignFloat(f),
-		vdl.ZeroValue(vdl.Float32TypeN).AssignFloat(f),
-		vdl.ZeroValue(vdl.Float64Type).AssignFloat(f),
-		vdl.ZeroValue(vdl.Float64TypeN).AssignFloat(f),
+		vdl.FloatValue(vdl.Float32Type, f),
+		vdl.FloatValue(vdl.Float32TypeN, f),
+		vdl.FloatValue(vdl.Float64Type, f),
+		vdl.FloatValue(vdl.Float64TypeN, f),
 	}
 }
 
@@ -787,9 +787,9 @@ func TestConverterStructDropIgnore(t *testing.T) {
 // Test successful conversions to and from union values.
 func TestConverterUnion(t *testing.T) {
 	// values for union component types
-	vvTrue := vdl.BoolValue(true)
-	vv123 := vdl.Int64Value(123)
-	vvAbc := vdl.StringValue("Abc")
+	vvTrue := vdl.BoolValue(nil, true)
+	vv123 := vdl.IntValue(vdl.Int64Type, 123)
+	vvAbc := vdl.StringValue(nil, "Abc")
 	vvStruct123 := vdl.ZeroValue(vdl.StructInt64TypeN)
 	vvStruct123.StructField(0).Assign(vv123)
 	rvTrue := bool(true)
@@ -797,9 +797,9 @@ func TestConverterUnion(t *testing.T) {
 	rvAbc := string("Abc")
 	rvStruct123 := vdl.NStructInt64{123}
 	// values for union{A bool;B string;C struct}
-	vvTrueABC := vdl.ZeroValue(vdl.UnionABCTypeN).AssignUnionField(0, vvTrue)
-	vvAbcABC := vdl.ZeroValue(vdl.UnionABCTypeN).AssignUnionField(1, vvAbc)
-	vvStruct123ABC := vdl.ZeroValue(vdl.UnionABCTypeN).AssignUnionField(2, vvStruct123)
+	vvTrueABC := vdl.UnionValue(vdl.UnionABCTypeN, 0, vvTrue)
+	vvAbcABC := vdl.UnionValue(vdl.UnionABCTypeN, 1, vvAbc)
+	vvStruct123ABC := vdl.UnionValue(vdl.UnionABCTypeN, 2, vvStruct123)
 	rvTrueABC := vdl.NUnionABCA{rvTrue}
 	rvAbcABC := vdl.NUnionABCB{rvAbc}
 	rvStruct123ABC := vdl.NUnionABCC{rvStruct123}
@@ -807,9 +807,9 @@ func TestConverterUnion(t *testing.T) {
 	rvAbcABCi := vdl.NUnionABC(rvAbcABC)
 	rvStruct123ABCi := vdl.NUnionABC(rvStruct123ABC)
 	// values for union{B string;C struct;D int64}
-	vvAbcBCD := vdl.ZeroValue(vdl.UnionBCDTypeN).AssignUnionField(0, vvAbc)
-	vvStruct123BCD := vdl.ZeroValue(vdl.UnionBCDTypeN).AssignUnionField(1, vvStruct123)
-	vv123BCD := vdl.ZeroValue(vdl.UnionBCDTypeN).AssignUnionField(2, vv123)
+	vvAbcBCD := vdl.UnionValue(vdl.UnionBCDTypeN, 0, vvAbc)
+	vvStruct123BCD := vdl.UnionValue(vdl.UnionBCDTypeN, 1, vvStruct123)
+	vv123BCD := vdl.UnionValue(vdl.UnionBCDTypeN, 2, vv123)
 	rvAbcBCD := vdl.NUnionBCDB{rvAbc}
 	rvStruct123BCD := vdl.NUnionBCDC{rvStruct123}
 	rv123BCD := vdl.NUnionBCDD{rv123}
@@ -817,8 +817,8 @@ func TestConverterUnion(t *testing.T) {
 	rvStruct123BCDi := vdl.NUnionBCD(rvStruct123BCD)
 	rv123BCDi := vdl.NUnionBCD(rv123BCD)
 	// values for union{X string;Y struct}, which has no Go equivalent.
-	vvAbcXY := vdl.ZeroValue(vdl.UnionXYTypeN).AssignUnionField(0, vvAbc)
-	vvStruct123XY := vdl.ZeroValue(vdl.UnionXYTypeN).AssignUnionField(1, vvStruct123)
+	vvAbcXY := vdl.UnionValue(vdl.UnionXYTypeN, 0, vvAbc)
+	vvStruct123XY := vdl.UnionValue(vdl.UnionXYTypeN, 1, vvStruct123)
 
 	tests := []struct {
 		vvWant *vdl.Value

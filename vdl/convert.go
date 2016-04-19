@@ -1110,7 +1110,8 @@ func (c convTarget) startElem(index int) (convTarget, error) {
 			if newlen < c.vv.Len() {
 				newlen = c.vv.Len()
 			}
-			return valueConv(c.vv.AssignLen(newlen).Index(index)), nil
+			c.vv.AssignLen(newlen)
+			return valueConv(c.vv.Index(index)), nil
 		}
 	}
 	return convTarget{}, fmt.Errorf("type %v doesn't support StartElem", c.tt)
@@ -1226,7 +1227,7 @@ func (c convTarget) finishKeyStartField(key convTarget) (convTarget, error) {
 	} else {
 		switch c.vv.Kind() {
 		case Set:
-			return valueConv(BoolValue(true)), nil
+			return valueConv(BoolValue(nil, true)), nil
 		case Map:
 			vvField := ZeroValue(c.vv.Type().Elem())
 			if vvField.Kind() == Bool {
@@ -1306,7 +1307,7 @@ func (c convTarget) finishField(key, field convTarget) error {
 			return nil
 		case Union:
 			_, index := c.vv.Type().FieldByName(key.vv.RawString())
-			c.vv.AssignUnionField(index, field.vv)
+			c.vv.AssignField(index, field.vv)
 			return nil
 		}
 	}

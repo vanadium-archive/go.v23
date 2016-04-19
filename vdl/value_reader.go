@@ -320,7 +320,7 @@ func (vv *Value) readUnion(dec Decoder) error {
 	if err := elem.read(dec); err != nil {
 		return err
 	}
-	vv.AssignUnionField(index, elem)
+	vv.AssignField(index, elem)
 	switch name, err := dec.NextField(); {
 	case err != nil:
 		return err

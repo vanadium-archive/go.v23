@@ -75,11 +75,11 @@ var (
 
 // test tags.
 var (
-	tagAlpha   = vdl.StringValue("alpha")
-	tagBeta    = vdl.StringValue("beta")
-	tagGamma   = vdl.StringValue("gamma")
-	tagDelta   = vdl.StringValue("gamma")
-	tagEpsilon = vdl.StringValue("epsilon")
+	tagAlpha   = vdl.StringValue(nil, "alpha")
+	tagBeta    = vdl.StringValue(nil, "beta")
+	tagGamma   = vdl.StringValue(nil, "gamma")
+	tagDelta   = vdl.StringValue(nil, "delta")
+	tagEpsilon = vdl.StringValue(nil, "epsilon")
 )
 
 // All objects used for success testing are based on testObj, which captures the

@@ -413,7 +413,7 @@ func resolveWithKey(db ds.Database, k string, v *vdl.Value, object *vdl.Value, s
 			// vdl can't make an int.
 			// int is guaranteed to be at least 32-bits.
 			// So have vdl make an int32 and then convert it to an int.
-			index32 := vdl.Int32Value(0)
+			index32 := vdl.IntValue(vdl.Int32Type, 0)
 			if err := vdl.Convert(index32, proposedKey); err != nil {
 				return vdl.ValueOf(nil)
 			}
@@ -476,7 +476,7 @@ func valueFromResolvedOperand(o *query_parser.Operand) interface{} {
 // Resolve a field.
 func ResolveField(db ds.Database, k string, v *vdl.Value, f *query_parser.Field) *vdl.Value {
 	if query_checker.IsKeyField(f) {
-		return vdl.StringValue(k)
+		return vdl.StringValue(nil, k)
 	}
 	// Auto-dereference Any and Optional values
 	v = autoDereference(v)

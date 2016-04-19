@@ -149,7 +149,7 @@ func TestCaveat(t *testing.T) {
 		t.Errorf("Got '%v' (errorid=%v), want errorid=%v", err, verror.ErrorID(err), ErrCaveatParamTypeMismatch.ID)
 	}
 	// A param of type *vdl.Value with underlying type string should succeed.
-	if _, err := NewCaveat(cd, vdl.StringValue("")); err != nil {
+	if _, err := NewCaveat(cd, vdl.StringValue(nil, "")); err != nil {
 		t.Errorf("vdl value should have succeeded: %v", err)
 	}
 	call := NewCall(&CallParams{

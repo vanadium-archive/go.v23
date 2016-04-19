@@ -17,26 +17,56 @@ type repBytes []byte
 // of 0 bytes after resizing.
 var allZeroBytes = make(repBytes, 1024)
 
-func copyRepBytes(rep repBytes) repBytes {
-	cp := make(repBytes, len(rep))
-	copy(cp, rep)
-	return cp
+func zeroRepBytes(len int) *repBytes {
+	if len == 0 {
+		return new(repBytes)
+	}
+	rep := make(repBytes, len)
+	return &rep
 }
 
-func (rep repBytes) IsZero(t *Type) bool {
-	switch t.kind {
-	case List:
-		return len(rep) == 0
-	case Array:
-		// TODO(toddw): Speed up the zero checking loop over each byte.
-		for _, b := range rep {
-			if b != 0 {
-				return false
-			}
-		}
-		return true
+func copyRepBytes(rep *repBytes) *repBytes {
+	if *rep == nil {
+		return new(repBytes)
 	}
-	panic(t.errBytes("IsZero"))
+	cp := make(repBytes, len(*rep))
+	copy(cp, *rep)
+	return &cp
+}
+
+func (rep *repBytes) AllBytesZero() bool {
+	for _, b := range *rep {
+		if b != 0 {
+			return false
+		}
+	}
+	return true
+}
+
+// Resize resizes rep to size n, ignoring existing bytes.
+func (rep *repBytes) Resize(n int) {
+	if n <= cap(*rep) {
+		*rep = (*rep)[:n]
+	} else {
+		*rep = make(repBytes, n)
+	}
+}
+
+// AssignLen resizes rep to size n, ensuring existing bytes are transferred, and
+// all bytes beyond the original length are initialized to zero.
+func (rep *repBytes) AssignLen(n int) {
+	if n <= cap(*rep) {
+		// Increase rep length, and fill rep[oldlen:n] with zero bytes.
+		oldlen := len(*rep)
+		*rep = (*rep)[:n]
+		for ix := oldlen; ix < n; {
+			ix += copy((*rep)[ix:], allZeroBytes)
+		}
+	} else {
+		oldrep := *rep
+		*rep = make(repBytes, n)
+		copy(*rep, oldrep)
+	}
 }
 
 // repMap represents set and map values.  There are two underlying
@@ -51,13 +81,10 @@ func (rep repBytes) IsZero(t *Type) bool {
 // as a slice of fields, but slices aren't allowed as Go map keys, so that must
 // use slow.
 //
-// The slowIndex is *[]kvPair rather than []kvPair because Value holds a repMap
-// (and not a *repMap), and we need to update the slice.
-//
 // TODO(toddw): Slow is really slow; e.g. Equal is quadratic.  Speed this up.
 type repMap struct {
 	fastIndex map[interface{}]kvPair // maps with scalar keys use the fast rep
-	slowIndex *[]kvPair              // everything else uses the slow rep
+	slowIndex []kvPair               // everything else uses the slow rep
 }
 
 type kvPair struct {
@@ -92,40 +119,39 @@ func useFastIndex(key *Type) bool {
 // map.  It's only called on keys where useFastIndex returns true.
 func fastKeyRep(key *Value) interface{} {
 	if key.t.IsBytes() {
+		// Turn []byte into a string so that it can be used as a map key.
 		return string(key.Bytes())
 	}
 	return key.rep
 }
 
-func zeroRepMap(key *Type) repMap {
-	rep := repMap{}
+func zeroRepMap(key *Type) *repMap {
+	rep := &repMap{}
 	if useFastIndex(key) {
 		rep.fastIndex = make(map[interface{}]kvPair)
-	} else {
-		slow := make([]kvPair, 0)
-		rep.slowIndex = &slow
 	}
 	return rep
 }
 
-func copyRepMap(rep repMap) repMap {
-	cp := repMap{}
+func copyRepMap(rep *repMap) *repMap {
+	cp := &repMap{}
 	if rep.fastIndex != nil {
 		cp.fastIndex = make(map[interface{}]kvPair, len(rep.fastIndex))
 		for keyrep, kv := range rep.fastIndex {
 			cp.fastIndex[keyrep] = copyKVPair(kv)
 		}
 	} else {
-		slow := make([]kvPair, len(*rep.slowIndex))
-		cp.slowIndex = &slow
-		for index, kv := range *rep.slowIndex {
-			(*cp.slowIndex)[index] = copyKVPair(kv)
+		if len(rep.slowIndex) > 0 {
+			cp.slowIndex = make([]kvPair, len(rep.slowIndex))
+			for index, kv := range rep.slowIndex {
+				cp.slowIndex[index] = copyKVPair(kv)
+			}
 		}
 	}
 	return cp
 }
 
-func equalRepMap(a, b repMap) bool {
+func equalRepMap(a, b *repMap) bool {
 	if a.Len() != b.Len() {
 		return false
 	}
@@ -136,7 +162,7 @@ func equalRepMap(a, b repMap) bool {
 			}
 		}
 	} else {
-		for _, akv := range *a.slowIndex {
+		for _, akv := range a.slowIndex {
 			if !b.hasKV(akv) {
 				return false
 			}
@@ -145,7 +171,7 @@ func equalRepMap(a, b repMap) bool {
 	return true
 }
 
-func (rep repMap) hasKV(kv kvPair) bool {
+func (rep *repMap) hasKV(kv kvPair) bool {
 	val, ok := rep.Index(kv.key)
 	if !ok {
 		return false
@@ -153,15 +179,15 @@ func (rep repMap) hasKV(kv kvPair) bool {
 	return EqualValue(kv.val, val)
 }
 
-func (rep repMap) Len() int {
+func (rep *repMap) Len() int {
 	if rep.fastIndex != nil {
 		return len(rep.fastIndex)
 	} else {
-		return len(*rep.slowIndex)
+		return len(rep.slowIndex)
 	}
 }
 
-func (rep repMap) String() string {
+func (rep *repMap) String() string {
 	s := "{"
 	if rep.fastIndex != nil {
 		first := true
@@ -173,7 +199,7 @@ func (rep repMap) String() string {
 			first = false
 		}
 	} else {
-		for index, kv := range *rep.slowIndex {
+		for index, kv := range rep.slowIndex {
 			if index > 0 {
 				s += ", "
 			}
@@ -183,32 +209,33 @@ func (rep repMap) String() string {
 	return s + "}"
 }
 
-func (rep repMap) Keys() []*Value {
-	// TODO(toddw): Make returned keys immutable?
+func (rep *repMap) Keys() []*Value {
+	len := rep.Len()
+	if len == 0 {
+		return nil
+	}
+	keys := make([]*Value, len)
 	if rep.fastIndex != nil {
-		keys := make([]*Value, len(rep.fastIndex))
 		index := 0
 		for _, kv := range rep.fastIndex {
-			keys[index] = kv.key
+			keys[index] = CopyValue(kv.key)
 			index++
 		}
-		return keys
 	} else {
-		keys := make([]*Value, len(*rep.slowIndex))
-		for index, kv := range *rep.slowIndex {
-			keys[index] = kv.key
+		for index, kv := range rep.slowIndex {
+			keys[index] = CopyValue(kv.key)
 		}
-		return keys
 	}
+	return keys
 }
 
-func (rep repMap) Index(key *Value) (*Value, bool) {
+func (rep *repMap) Index(key *Value) (*Value, bool) {
 	if rep.fastIndex != nil {
 		if kv, ok := rep.fastIndex[fastKeyRep(key)]; ok {
 			return kv.val, true
 		}
 	} else {
-		for _, kv := range *rep.slowIndex {
+		for _, kv := range rep.slowIndex {
 			if EqualValue(kv.key, key) {
 				return kv.val, true
 			}
@@ -217,31 +244,31 @@ func (rep repMap) Index(key *Value) (*Value, bool) {
 	return nil, false
 }
 
-func (rep repMap) Assign(key, elem *Value) {
+func (rep *repMap) Assign(key, elem *Value) {
 	if rep.fastIndex != nil {
 		rep.fastIndex[fastKeyRep(key)] = kvPair{key, elem}
 	} else {
-		for ix := 0; ix < len(*rep.slowIndex); ix++ {
-			if EqualValue((*rep.slowIndex)[ix].key, key) {
-				(*rep.slowIndex)[ix].val = elem
+		for ix := 0; ix < len(rep.slowIndex); ix++ {
+			if EqualValue(rep.slowIndex[ix].key, key) {
+				rep.slowIndex[ix].val = elem
 				return
 			}
 		}
 		// The key doesn't exist in the slow index; append it.
-		*rep.slowIndex = append(*rep.slowIndex, kvPair{key, elem})
+		rep.slowIndex = append(rep.slowIndex, kvPair{key, elem})
 	}
 }
 
-func (rep repMap) Delete(key *Value) {
+func (rep *repMap) Delete(key *Value) {
 	if rep.fastIndex != nil {
 		delete(rep.fastIndex, fastKeyRep(key))
 	} else {
-		for ix := 0; ix < len(*rep.slowIndex); ix++ {
-			if EqualValue((*rep.slowIndex)[ix].key, key) {
-				// Delete entry ix by copying last entry into ix and shrinking by 1.
-				last := len(*rep.slowIndex) - 1
-				(*rep.slowIndex)[ix] = (*rep.slowIndex)[last]
-				(*rep.slowIndex) = (*rep.slowIndex)[:last]
+		for ix := 0; ix < len(rep.slowIndex); ix++ {
+			if EqualValue(rep.slowIndex[ix].key, key) {
+				// Delete entry ix by moving last entry into ix and shrinking by 1.
+				last := len(rep.slowIndex) - 1
+				rep.slowIndex[ix] = rep.slowIndex[last]
+				rep.slowIndex = rep.slowIndex[:last]
 				return
 			}
 		}
@@ -256,24 +283,32 @@ func (rep repMap) Delete(key *Value) {
 // initialized to nil.
 type repSequence []*Value
 
-func copyRepSequence(rep repSequence) repSequence {
-	if rep == nil {
-		return nil
+func zeroRepSequence(len int) *repSequence {
+	if len == 0 {
+		return new(repSequence)
 	}
-	cp := make(repSequence, len(rep))
-	for index, val := range rep {
-		cp[index] = CopyValue(val)
-	}
-	return cp
+	rep := make(repSequence, len)
+	return &rep
 }
 
-func equalRepSequence(a, b repSequence) bool {
-	if len(a) != len(b) {
+func copyRepSequence(rep *repSequence) *repSequence {
+	if *rep == nil {
+		return new(repSequence)
+	}
+	cp := make(repSequence, len(*rep))
+	for index, val := range *rep {
+		cp[index] = CopyValue(val)
+	}
+	return &cp
+}
+
+func equalRepSequence(a, b *repSequence) bool {
+	if len(*a) != len(*b) {
 		return false
 	}
-	for index, aval := range a {
+	for index, aval := range *a {
 		// Handle cases where we're using nil to represent zero values.
-		switch bval := b[index]; {
+		switch bval := (*b)[index]; {
 		case aval == nil && bval != nil:
 			if !bval.IsZero() {
 				return false
@@ -289,8 +324,8 @@ func equalRepSequence(a, b repSequence) bool {
 	return true
 }
 
-func (rep repSequence) AllValuesZero() bool {
-	for _, val := range rep {
+func (rep *repSequence) AllValuesZero() bool {
+	for _, val := range *rep {
 		if val != nil && !val.IsZero() {
 			return false
 		}
@@ -298,9 +333,9 @@ func (rep repSequence) AllValuesZero() bool {
 	return true
 }
 
-func (rep repSequence) String(t *Type) string {
+func (rep *repSequence) String(t *Type) string {
 	s := "{"
-	for index, val := range rep {
+	for index, val := range *rep {
 		if index > 0 {
 			s += ", "
 		}
@@ -319,13 +354,30 @@ func (rep repSequence) String(t *Type) string {
 	return s + "}"
 }
 
-func (rep repSequence) Index(t *Type, index int) *Value {
-	if oldval := rep[index]; oldval != nil {
+// AssignLen resizes rep to size n, ensuring existing values are transferred,
+// and all values beyond the original length are initialized to nil.
+func (rep *repSequence) AssignLen(n int) {
+	if n <= cap(*rep) {
+		// Increase rep length, and fill rep[oldlen:n] with nil values.
+		oldlen := len(*rep)
+		*rep = (*rep)[:n]
+		for ix := oldlen; ix < n; ix++ {
+			(*rep)[ix] = nil
+		}
+	} else {
+		oldrep := *rep
+		*rep = make(repSequence, n)
+		copy(*rep, oldrep)
+	}
+}
+
+func (rep *repSequence) Index(t *Type, index int) *Value {
+	if oldval := (*rep)[index]; oldval != nil {
 		return oldval
 	}
 	// Lazy initialization; create the new value upon first access.
 	newval := ZeroValue(t)
-	rep[index] = newval
+	(*rep)[index] = newval
 	return newval
 }
 
@@ -336,19 +388,11 @@ type repUnion struct {
 	value *Value
 }
 
-func copyRepUnion(rep repUnion) repUnion {
-	return repUnion{rep.index, CopyValue(rep.value)}
-}
-
-func equalRepUnion(a, b repUnion) bool {
+func equalRepUnion(a, b *repUnion) bool {
 	return a.index == b.index && EqualValue(a.value, b.value)
 }
 
-func (rep repUnion) IsZero() bool {
-	return rep.index == 0 && rep.value.IsZero()
-}
-
-func (rep repUnion) String(t *Type) string {
+func (rep *repUnion) String(t *Type) string {
 	v := rep.value
 	return "{" + t.fields[rep.index].Name + ": " + stringRep(v.t, v.rep) + "}"
 }

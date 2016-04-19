@@ -15,8 +15,8 @@ import (
 var (
 	keyType = StructType([]Field{{"I", Int64Type}, {"S", StringType}}...)
 
-	strA, strB, strC = StringValue("A"), StringValue("B"), StringValue("C")
-	int1, int2       = Int64Value(1), Int64Value(2)
+	strA, strB, strC = StringValue(nil, "A"), StringValue(nil, "B"), StringValue(nil, "C")
+	int1, int2       = IntValue(Int64Type, 1), IntValue(Int64Type, 2)
 	key1, key2, key3 = makeKey(1, "A"), makeKey(2, "B"), makeKey(3, "C")
 )
 
@@ -462,7 +462,6 @@ func assignList(t *testing.T, x *Value) {
 
 func assignBytes(t *testing.T, x *Value) {
 	abval, abcval, abcdval := []byte("ab"), []byte("abc"), []byte("abcd")
-	efgval, efghval := []byte("efg"), []byte("efgh")
 	zeroval, typestr := []byte{}, "[]byte"
 	if x.Kind() == Array {
 		zeroval, typestr = []byte{0, 0, 0}, "[3]byte"
@@ -475,7 +474,7 @@ func assignBytes(t *testing.T, x *Value) {
 	// bytes len, and automatically assigns the len for lists.
 	x.AssignBytes(abcval)
 	if got, want := x.Bytes(), abcval; !bytes.Equal(got, want) {
-		t.Errorf(`Bytes CopyBytes got %v, want %v`, got, want)
+		t.Errorf(`Bytes AssignBytes got %v, want %v`, got, want)
 	}
 	if got, want := x.String(), typestr+`("abc")`; got != want {
 		t.Errorf(`Bytes string got %v, want %v`, got, want)
@@ -495,40 +494,32 @@ func assignBytes(t *testing.T, x *Value) {
 	} else {
 		x.AssignBytes(abval)
 		if got, want := x.Bytes(), abval; !bytes.Equal(got, want) {
-			t.Errorf(`Bytes CopyBytes got %v, want %v`, got, want)
+			t.Errorf(`Bytes AssignBytes got %v, want %v`, got, want)
 		}
 		if got, want := x.String(), typestr+`("ab")`; got != want {
 			t.Errorf(`Bytes string got %v, want %v`, got, want)
 		}
 		x.AssignBytes(abcdval)
 		if got, want := x.Bytes(), abcdval; !bytes.Equal(got, want) {
-			t.Errorf(`Bytes CopyBytes got %v, want %v`, got, want)
+			t.Errorf(`Bytes AssignBytes got %v, want %v`, got, want)
 		}
 		if got, want := x.String(), typestr+`("abcd")`; got != want {
 			t.Errorf(`Bytes string got %v, want %v`, got, want)
 		}
 		x.AssignLen(3)
 		if got, want := x.Bytes(), []byte("abc"); !bytes.Equal(got, want) {
-			t.Errorf(`Bytes CopyBytes got %v, want %v`, got, want)
+			t.Errorf(`Bytes AssignBytes got %v, want %v`, got, want)
 		}
 		if got, want := x.String(), typestr+`("abc")`; got != want {
 			t.Errorf(`Bytes string got %v, want %v`, got, want)
 		}
 	}
-	// CopyBytes ignores extra bytes, just like regular copy().
-	x.CopyBytes(efghval)
-	if got, want := x.Bytes(), efgval; !bytes.Equal(got, want) {
-		t.Errorf(`Bytes CopyBytes got %v, want %v`, got, want)
-	}
-	if got, want := x.String(), typestr+`("efg")`; got != want {
-		t.Errorf(`Bytes string got %v, want %v`, got, want)
-	}
 	// Bytes gives the underlying byteslice, which may be mutated.
 	x.Bytes()[1] = 'Z'
-	if got, want := x.Bytes(), []byte("eZg"); !bytes.Equal(got, want) {
+	if got, want := x.Bytes(), []byte("aZc"); !bytes.Equal(got, want) {
 		t.Errorf(`Bytes got %v, want %v`, got, want)
 	}
-	if got, want := x.String(), typestr+`("eZg")`; got != want {
+	if got, want := x.String(), typestr+`("aZc")`; got != want {
 		t.Errorf(`Bytes string got %v, want %v`, got, want)
 	}
 	// Indexing also works, just like for any other list.
@@ -542,7 +533,7 @@ func assignBytes(t *testing.T, x *Value) {
 	if got, want := index.Uint(), uint64('Z'); got != want {
 		t.Errorf(`Bytes index Byte got %v, want %v`, got, want)
 	}
-	if got, want := index, ByteValue('Z'); !EqualValue(got, want) {
+	if got, want := index, UintValue(ByteType, 'Z'); !EqualValue(got, want) {
 		t.Errorf(`Bytes index value got %v, want %v`, got, want)
 	}
 	index.AssignUint(uint64('Y'))
@@ -552,14 +543,14 @@ func assignBytes(t *testing.T, x *Value) {
 	if got, want := index.Uint(), uint64('Y'); got != want {
 		t.Errorf(`Bytes index Byte got %v, want %v`, got, want)
 	}
-	if got, want := index, ByteValue('Y'); !EqualValue(got, want) {
+	if got, want := index, UintValue(ByteType, 'Y'); !EqualValue(got, want) {
 		t.Errorf(`Bytes index value got %v, want %v`, got, want)
 	}
 	// Make sure the original bytes were mutated.
-	if got, want := x.Bytes(), []byte("eYg"); !bytes.Equal(got, want) {
+	if got, want := x.Bytes(), []byte("aYc"); !bytes.Equal(got, want) {
 		t.Errorf(`Bytes got %v, want %v`, got, want)
 	}
-	if got, want := x.String(), typestr+`("eYg")`; got != want {
+	if got, want := x.String(), typestr+`("aYc")`; got != want {
 		t.Errorf(`Bytes string got %v, want %v`, got, want)
 	}
 }
@@ -733,7 +724,7 @@ func assignMap(t *testing.T, x *Value) {
 		if got, want := x.String(), mapstr1; !matchMapString(got, want) {
 			t.Errorf(`Map string got %v, want %v`, got, want)
 		}
-		x.AssignMapIndex(k1, nil)
+		x.DeleteMapIndex(k1)
 		if got, want := x.Keys(), []*Value{k1, k2}; !matchKeys(got, want) {
 			t.Errorf(`Map Keys got %v, want %v`, got, want)
 		}
@@ -761,6 +752,7 @@ func assignMap(t *testing.T, x *Value) {
 	} else {
 		ExpectMismatchedKind(t, func() { x.MapIndex(nil) })
 		ExpectMismatchedKind(t, func() { x.AssignMapIndex(nil, nil) })
+		ExpectMismatchedKind(t, func() { x.DeleteMapIndex(nil) })
 		if x.Kind() != Set {
 			// Keys and ContainsKey are allowed for Set and Map
 			ExpectMismatchedKind(t, func() { x.Keys() })
@@ -806,6 +798,10 @@ func assignStruct(t *testing.T, x *Value) {
 	} else {
 		ExpectMismatchedKind(t, func() { x.StructField(0) })
 		ExpectMismatchedKind(t, func() { x.StructFieldByName("A") })
+		if x.Kind() != Union {
+			// AssignField is also allowed for Union
+			ExpectMismatchedKind(t, func() { x.AssignField(0, nil) })
+		}
 	}
 }
 
@@ -815,10 +811,10 @@ func assignUnion(t *testing.T, x *Value) {
 		if got, want := goti, 0; got != want {
 			t.Errorf(`Union zero value got index %v, want %v`, got, want)
 		}
-		if got, want := gotv, Int64Value(0); !EqualValue(got, want) {
+		if got, want := gotv, IntValue(Int64Type, 0); !EqualValue(got, want) {
 			t.Errorf(`Union zero value got value %v, want %v`, got, want)
 		}
-		x.AssignUnionField(1, strA)
+		x.AssignField(1, strA)
 		goti, gotv = x.UnionField()
 		if got, want := goti, 1; got != want {
 			t.Errorf(`Union assign B value got index %v, want %v`, got, want)
@@ -834,7 +830,10 @@ func assignUnion(t *testing.T, x *Value) {
 		}
 	} else {
 		ExpectMismatchedKind(t, func() { x.UnionField() })
-		ExpectMismatchedKind(t, func() { x.AssignUnionField(0, nil) })
+		if x.Kind() != Struct {
+			// AssignField is also allowed for Struct
+			ExpectMismatchedKind(t, func() { x.AssignField(0, nil) })
+		}
 	}
 }
 

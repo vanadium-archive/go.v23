@@ -43,7 +43,7 @@ func zeroRep(t *Type) interface{} {
 	if t.IsBytes() {
 		// Represent []byte and [N]byte as repBytes.
 		// Represent repBytes.Index as *byte.
-		return make(repBytes, t.len)
+		return zeroRepBytes(t.len)
 	}
 	switch t.kind {
 	case Bool:
@@ -61,15 +61,15 @@ func zeroRep(t *Type) interface{} {
 	case TypeObject:
 		return zeroTypeObject
 	case Array:
-		return make(repSequence, t.len)
+		return zeroRepSequence(t.len)
 	case List:
-		return repSequence(nil)
+		return zeroRepSequence(0)
 	case Set, Map:
 		return zeroRepMap(t.key)
 	case Struct:
-		return make(repSequence, len(t.fields))
+		return zeroRepSequence(len(t.fields))
 	case Union:
-		return repUnion{0, ZeroValue(t.fields[0].Type)}
+		return &repUnion{0, ZeroValue(t.fields[0].Type)}
 	case Any, Optional:
 		return (*Value)(nil) // nil represents nonexistence
 	default:
@@ -93,21 +93,26 @@ func isZeroRep(t *Type, rep interface{}) bool {
 		return trep == 0
 	case *Type:
 		return trep == zeroTypeObject
-	case repBytes:
-		return trep.IsZero(t)
-	case *byte:
-		return *trep == 0
-	case repMap:
-		return trep.Len() == 0
-	case repSequence:
+	case *repBytes:
 		switch t.Kind() {
 		case List:
-			return len(trep) == 0
+			return len(*trep) == 0
+		case Array:
+			return trep.AllBytesZero()
+		}
+	case *byte:
+		return *trep == 0
+	case *repMap:
+		return trep.Len() == 0
+	case *repSequence:
+		switch t.Kind() {
+		case List:
+			return len(*trep) == 0
 		case Array, Struct:
 			return trep.AllValuesZero()
 		}
-	case repUnion:
-		return trep.IsZero()
+	case *repUnion:
+		return trep.index == 0 && trep.value.IsZero()
 	case *Value:
 		return trep == nil
 	}
@@ -118,16 +123,16 @@ func copyRep(t *Type, rep interface{}) interface{} {
 	switch trep := rep.(type) {
 	case bool, uint64, int64, float64, string, enumIndex, *Type:
 		return trep
-	case repBytes:
+	case *repBytes:
 		return copyRepBytes(trep)
 	case *byte:
 		return uint64(*trep) // convert to standard uint64 representation
-	case repMap:
+	case *repMap:
 		return copyRepMap(trep)
-	case repSequence:
+	case *repSequence:
 		return copyRepSequence(trep)
-	case repUnion:
-		return copyRepUnion(trep)
+	case *repUnion:
+		return &repUnion{trep.index, CopyValue(trep.value)}
 	case *Value:
 		return CopyValue(trep)
 	default:
@@ -145,15 +150,15 @@ func stringRep(t *Type, rep interface{}) string {
 		return t.labels[int(trep)]
 	case *Type:
 		return trep.String()
-	case repBytes:
-		return strconv.Quote(string(trep))
+	case *repBytes:
+		return strconv.Quote(string(*trep))
 	case *byte:
 		return fmt.Sprint(*trep)
-	case repMap:
+	case *repMap:
 		return trep.String()
-	case repSequence:
+	case *repSequence:
 		return trep.String(t)
-	case repUnion:
+	case *repUnion:
 		return trep.String(t)
 	case *Value:
 		switch {
@@ -169,53 +174,100 @@ func stringRep(t *Type, rep interface{}) string {
 }
 
 // AnyValue is a convenience to create an Any value.
-func AnyValue(x *Value) *Value { return ZeroValue(AnyType).Assign(x) }
+//
+// TODO(toddw): Remove this function when we disallow non-nil any.
+func AnyValue(x *Value) *Value {
+	v := ZeroValue(AnyType)
+	v.Assign(x)
+	return v
+}
 
 // OptionalValue returns an optional value with elem assigned to x.  Panics if
 // the type of x cannot be made optional.
-func OptionalValue(x *Value) *Value { return &Value{OptionalType(x.t), CopyValue(x)} }
+func OptionalValue(x *Value) *Value {
+	return &Value{OptionalType(x.t), CopyValue(x)}
+}
 
-// BoolValue is a convenience to create a Bool value.
-func BoolValue(x bool) *Value { return ZeroValue(BoolType).AssignBool(x) }
+// BoolValue is a convenience to create a Bool value.  If tt is nil, a value of
+// BoolType is returned, otherwise requires tt must be of the Bool kind.
+func BoolValue(tt *Type, x bool) *Value {
+	if tt == nil {
+		tt = BoolType
+	}
+	v := ZeroValue(tt)
+	v.AssignBool(x)
+	return v
+}
 
-// ByteValue is a convenience to create an Byte value.
-func ByteValue(x byte) *Value { return ZeroValue(ByteType).AssignUint(uint64(x)) }
+// UintValue is a convenience to create a Byte, Uint16, Uint32 or Uint64 value.
+// Requires that tt is one of those kinds.
+func UintValue(tt *Type, x uint64) *Value {
+	v := ZeroValue(tt)
+	v.AssignUint(x)
+	return v
+}
 
-// Uint16Value is a convenience to create an Uint16 value.
-func Uint16Value(x uint16) *Value { return ZeroValue(Uint16Type).AssignUint(uint64(x)) }
+// IntValue is a convenience to create a Int8, Int16, Int32 or Int64 value.
+// Requires that tt is one of those kinds.
+func IntValue(tt *Type, x int64) *Value {
+	v := ZeroValue(tt)
+	v.AssignInt(x)
+	return v
+}
 
-// Uint32Value is a convenience to create an Uint32 value.
-func Uint32Value(x uint32) *Value { return ZeroValue(Uint32Type).AssignUint(uint64(x)) }
+// FloatValue is a convenience to create a Float32 or Float64 value.
+// Requires that tt is one of those kinds.
+func FloatValue(tt *Type, x float64) *Value {
+	v := ZeroValue(tt)
+	v.AssignFloat(x)
+	return v
+}
 
-// Uint64Value is a convenience to create an Uint64 value.
-func Uint64Value(x uint64) *Value { return ZeroValue(Uint64Type).AssignUint(x) }
-
-// Int8Value is a convenience to create an Int8 value.
-func Int8Value(x int8) *Value { return ZeroValue(Int8Type).AssignInt(int64(x)) }
-
-// Int16Value is a convenience to create an Int16 value.
-func Int16Value(x int16) *Value { return ZeroValue(Int16Type).AssignInt(int64(x)) }
-
-// Int32Value is a convenience to create an Int32 value.
-func Int32Value(x int32) *Value { return ZeroValue(Int32Type).AssignInt(int64(x)) }
-
-// Int64Value is a convenience to create an Int64 value.
-func Int64Value(x int64) *Value { return ZeroValue(Int64Type).AssignInt(x) }
-
-// Float32Value is a convenience to create a Float32 value.
-func Float32Value(x float32) *Value { return ZeroValue(Float32Type).AssignFloat(float64(x)) }
-
-// Float64Value is a convenience to create a Float64 value.
-func Float64Value(x float64) *Value { return ZeroValue(Float64Type).AssignFloat(x) }
-
-// StringValue is a convenience to create a String value.
-func StringValue(x string) *Value { return ZeroValue(StringType).AssignString(x) }
+// StringValue is a convenience to create a String value.  If tt is nil, a value of
+// StringType is returned, otherwise requires tt must be of the String kind.
+func StringValue(tt *Type, x string) *Value {
+	if tt == nil {
+		tt = StringType
+	}
+	v := ZeroValue(tt)
+	v.AssignString(x)
+	return v
+}
 
 // BytesValue is a convenience to create a []byte value.  The bytes are copied.
-func BytesValue(x []byte) *Value { return ZeroValue(ListType(ByteType)).AssignBytes(x) }
+// If tt is nil, a value of ListType(ByteType) is returned, otherwise tt.IsBytes
+// must be true.
+func BytesValue(tt *Type, x []byte) *Value {
+	if tt == nil {
+		tt = ListType(ByteType)
+	}
+	v := ZeroValue(tt)
+	v.AssignBytes(x)
+	return v
+}
+
+// EnumValue is a convenience to create an Enum value.
+// Requires that tt is of the Enum kind.
+func EnumValue(tt *Type, x string) *Value {
+	v := ZeroValue(tt)
+	v.AssignEnumLabel(x)
+	return v
+}
+
+// UnionValue is a convenience to create a Union value.
+// Requires that tt is of the Union kind.
+func UnionValue(tt *Type, index int, x *Value) *Value {
+	v := ZeroValue(tt)
+	v.AssignField(index, x)
+	return v
+}
 
 // TypeObjectValue is a convenience to create a TypeObject value.
-func TypeObjectValue(x *Type) *Value { return ZeroValue(TypeObjectType).AssignTypeObject(x) }
+func TypeObjectValue(x *Type) *Value {
+	v := ZeroValue(TypeObjectType)
+	v.AssignTypeObject(x)
+	return v
+}
 
 // ZeroValue returns a new Value of type t representing the zero value for t:
 //   o Bool:       false
@@ -267,10 +319,26 @@ func CopyValue(v *Value) *Value {
 }
 
 // EqualValue returns true iff a and b have the same type, and equal values.
+//
+// TODO(toddw): The Value representation currently allows non-nil any,
+// e.g. Value{Type:AnyType, Rep: ...}.  We will soon remove this support.
+// EqualValue does not distinguish non-nil any from the inner value.
 func EqualValue(a, b *Value) bool {
 	if a == nil || b == nil {
 		return a == nil && b == nil
 	}
+	// Don't distinguish outer any.
+	// TODO(toddw): Change Value representation to disallow non-nil any.
+	if a.t == AnyType {
+		a = a.rep.(*Value)
+	}
+	if b.t == AnyType {
+		b = b.rep.(*Value)
+	}
+	if a == nil || b == nil {
+		return a == nil && b == nil
+	}
+	// Types must be identical.
 	if a.t != b.t {
 		return false
 	}
@@ -293,14 +361,14 @@ func EqualValue(a, b *Value) bool {
 		return arep == b.rep.(enumIndex)
 	case *Type:
 		return arep == b.rep.(*Type)
-	case repBytes:
-		return bytes.Equal(arep, b.rep.(repBytes))
-	case repMap:
-		return equalRepMap(arep, b.rep.(repMap))
-	case repSequence:
-		return equalRepSequence(arep, b.rep.(repSequence))
-	case repUnion:
-		return equalRepUnion(arep, b.rep.(repUnion))
+	case *repBytes:
+		return bytes.Equal(*arep, *b.rep.(*repBytes))
+	case *repMap:
+		return equalRepMap(arep, b.rep.(*repMap))
+	case *repSequence:
+		return equalRepSequence(arep, b.rep.(*repSequence))
+	case *repUnion:
+		return equalRepUnion(arep, b.rep.(*repUnion))
 	case *Value:
 		return EqualValue(arep, b.rep.(*Value))
 	default:
@@ -398,7 +466,7 @@ func (v *Value) String() string {
 // returned value are reflected in the underlying value.
 func (v *Value) Bytes() []byte {
 	v.t.checkIsBytes("Bytes")
-	return v.rep.(repBytes)
+	return *v.rep.(*repBytes)
 }
 
 // EnumIndex returns the index of the underlying Enum.
@@ -422,32 +490,32 @@ func (v *Value) TypeObject() *Type {
 // Len returns the length of the underlying Array, List, Set or Map.
 func (v *Value) Len() int {
 	switch trep := v.rep.(type) {
-	case repMap:
+	case *repMap:
 		return trep.Len()
-	case repSequence:
+	case *repSequence:
 		if v.t.kind != Struct { // Len not allowed on Struct
-			return len(trep)
+			return len(*trep)
 		}
-	case repBytes:
-		return len(trep)
+	case *repBytes:
+		return len(*trep)
 	}
 	panic(v.t.errKind("Len", Array, List, Set, Map))
 }
 
-// Index returns the i'th element of the underlying Array or List.  Panics if
-// the index is out of range.
+// Index returns the index'th element of the underlying Array or List.  Panics
+// if the index is out of range.
 func (v *Value) Index(index int) *Value {
 	switch trep := v.rep.(type) {
-	case repSequence:
+	case *repSequence:
 		if v.t.kind != Struct { // Index not allowed on Struct
 			return trep.Index(v.t.elem, index)
 		}
-	case repBytes:
+	case *repBytes:
 		// The user is trying to index into a []byte or [N]byte, and we need to
 		// return a valid Value that behaves as usual; e.g. AssignByte should work
 		// correctly and update the underlying byteslice.  The strategy is to return
 		// a new Value with rep set to the indexed *byte.
-		return &Value{ByteType, &trep[index]}
+		return &Value{v.t.elem, &(*trep)[index]}
 	}
 	panic(v.t.errKind("Index", Array, List))
 }
@@ -456,13 +524,13 @@ func (v *Value) Index(index int) *Value {
 // keys are in an arbitrary order; do not rely on the ordering.
 func (v *Value) Keys() []*Value {
 	v.t.checkKind("Keys", Set, Map)
-	return v.rep.(repMap).Keys()
+	return v.rep.(*repMap).Keys()
 }
 
 // ContainsKey returns true iff key is present in the underlying Set or Map.
 func (v *Value) ContainsKey(key *Value) bool {
 	v.t.checkKind("ContainsKey", Set, Map)
-	_, ok := v.rep.(repMap).Index(typedCopy(v.t.key, key))
+	_, ok := v.rep.(*repMap).Index(typedCopy(v.t.key, key))
 	return ok
 }
 
@@ -471,7 +539,7 @@ func (v *Value) ContainsKey(key *Value) bool {
 // to the map's key type.
 func (v *Value) MapIndex(key *Value) *Value {
 	v.t.checkKind("MapIndex", Map)
-	val, _ := v.rep.(repMap).Index(typedCopy(v.t.key, key))
+	val, _ := v.rep.(*repMap).Index(typedCopy(v.t.key, key))
 	return val
 }
 
@@ -479,7 +547,7 @@ func (v *Value) MapIndex(key *Value) *Value {
 // is out of range.
 func (v *Value) StructField(index int) *Value {
 	v.t.checkKind("StructField", Struct)
-	return v.rep.(repSequence).Index(v.t.fields[index].Type, index)
+	return v.rep.(*repSequence).Index(v.t.fields[index].Type, index)
 }
 
 // StructFieldByName returns the Struct field for the given name.  Returns nil
@@ -490,13 +558,13 @@ func (v *Value) StructFieldByName(name string) *Value {
 	if index == -1 {
 		return nil
 	}
-	return v.rep.(repSequence).Index(v.t.fields[index].Type, index)
+	return v.rep.(*repSequence).Index(v.t.fields[index].Type, index)
 }
 
 // UnionField returns the field index and value from the underlying Union.
 func (v *Value) UnionField() (int, *Value) {
 	v.t.checkKind("UnionField", Union)
-	union := v.rep.(repUnion)
+	union := v.rep.(*repUnion)
 	return union.index, union.value
 }
 
@@ -509,6 +577,8 @@ func (v *Value) Elem() *Value {
 
 // Assign the value v to x.  If x is nil, v is set to its zero value.  Panics if
 // the type of v is not assignable from the type of x.
+//
+// TODO(toddw): Remove this method when we disallow non-nil any.
 func (v *Value) Assign(x *Value) *Value {
 	// The logic here mirrors our definition of Type.AssignableFrom.
 	switch {
@@ -544,19 +614,17 @@ func (v *Value) Assign(x *Value) *Value {
 // of type t aren't assignable from v.
 func typedCopy(t *Type, v *Value) *Value {
 	cp := &Value{t: t}
-	cp.Assign(v)
-	return cp
+	return cp.Assign(v)
 }
 
 // AssignBool assigns the underlying Bool to x.
-func (v *Value) AssignBool(x bool) *Value {
+func (v *Value) AssignBool(x bool) {
 	v.t.checkKind("AssignBool", Bool)
 	v.rep = x
-	return v
 }
 
 // AssignUint assigns the underlying Uint{16,32,64} or Byte to x.
-func (v *Value) AssignUint(x uint64) *Value {
+func (v *Value) AssignUint(x uint64) {
 	v.t.checkKind("AssignUint", Byte, Uint16, Uint32, Uint64)
 	switch trep := v.rep.(type) {
 	case uint64, nil:
@@ -569,173 +637,148 @@ func (v *Value) AssignUint(x uint64) *Value {
 	default:
 		panic(fmt.Errorf("vdl: AssignUint mismatched rep %v %T %v", v.t, v.rep, v.rep))
 	}
-	return v
 }
 
 // AssignInt assigns the underlying Int{8,16,32,64} to x.
-func (v *Value) AssignInt(x int64) *Value {
+func (v *Value) AssignInt(x int64) {
 	v.t.checkKind("AssignInt", Int8, Int16, Int32, Int64)
 	v.rep = x
-	return v
 }
 
 // AssignFloat assigns the underlying Float{32,64} to x.
-func (v *Value) AssignFloat(x float64) *Value {
+func (v *Value) AssignFloat(x float64) {
 	v.t.checkKind("AssignFloat", Float32, Float64)
 	v.rep = x
-	return v
 }
 
 // AssignString assigns the underlying String to x.
-func (v *Value) AssignString(x string) *Value {
+func (v *Value) AssignString(x string) {
 	v.t.checkKind("AssignString", String)
 	v.rep = x
-	return v
 }
 
 // AssignBytes assigns the underlying []byte or [N]byte to a copy of x.  If the
 // underlying value is []byte, the resulting v has len == len(x).  If the
 // underlying value is [N]byte, we require len(x) == N, otherwise panics.
-func (v *Value) AssignBytes(x []byte) *Value {
+func (v *Value) AssignBytes(x []byte) {
 	v.t.checkIsBytes("AssignBytes")
-	switch v.t.kind {
-	case Array:
-		rep := v.rep.(repBytes)
+	rep := v.rep.(*repBytes)
+	if v.t.kind == Array {
 		if v.t.len != len(x) {
 			panic(fmt.Errorf("vdl: AssignBytes on type [%d]byte with len %d", v.t.len, len(x)))
 		}
-		copy(rep, x)
-	case List:
-		oldrep, newlen := v.rep.(repBytes), len(x)
-		var newrep repBytes
-		if newlen <= cap(oldrep) {
-			newrep = oldrep[:newlen]
-		} else {
-			newrep = make(repBytes, newlen)
-		}
-		copy(newrep, x)
-		v.rep = newrep
-	default:
-		panic(v.t.errBytes("AssignBytes"))
+	} else {
+		rep.Resize(len(x))
 	}
-	return v
-}
-
-// CopyBytes copies bytes from x to v for the underlying []byte or [N]byte.  The
-// semantics are the same as the built-in copy function; min(v.Len(), len(x))
-// bytes are copied from x to v.
-func (v *Value) CopyBytes(x []byte) *Value {
-	v.t.checkIsBytes("CopyBytes")
-	copy(v.rep.(repBytes), x)
-	return v
+	copy(*rep, x)
 }
 
 // AssignEnumIndex assigns the underlying Enum to the label corresponding to
 // index.  Panics if the index is out of range.
-func (v *Value) AssignEnumIndex(index int) *Value {
+func (v *Value) AssignEnumIndex(index int) {
 	v.t.checkKind("AssignEnumIndex", Enum)
 	if index < 0 || index >= len(v.t.labels) {
 		panic(fmt.Errorf("vdl: enum %q index %d out of range", v.t.name, index))
 	}
 	v.rep = enumIndex(index)
-	return v
 }
 
 // AssignEnumLabel assigns the underlying Enum to the label.  Panics if the
 // label doesn't exist in the Enum.
-func (v *Value) AssignEnumLabel(label string) *Value {
+func (v *Value) AssignEnumLabel(label string) {
 	v.t.checkKind("AssignEnumLabel", Enum)
 	index := v.t.EnumIndex(label)
 	if index == -1 {
 		panic(fmt.Errorf("vdl: enum %q doesn't have label %q", v.t.name, label))
 	}
 	v.rep = enumIndex(index)
-	return v
 }
 
 // AssignTypeObject assigns the underlying TypeObject to x.  If x == nil we
 // assign the zero TypeObject.
-func (v *Value) AssignTypeObject(x *Type) *Value {
+func (v *Value) AssignTypeObject(x *Type) {
 	v.t.checkKind("AssignTypeObject", TypeObject)
 	if x == nil {
 		x = zeroTypeObject
 	}
 	v.rep = x
-	return v
 }
 
 // AssignLen assigns the length of the underlying List to n.  Unlike Go slices,
 // Lists do not have a separate notion of capacity.
-func (v *Value) AssignLen(n int) *Value {
+func (v *Value) AssignLen(n int) {
 	v.t.checkKind("AssignLen", List)
-	if oldrep, ok := v.rep.(repBytes); ok {
-		var newrep repBytes
-		if n <= cap(oldrep) {
-			newrep = oldrep[:n]
-			// Fill newrep[oldlen:n] with zero bytes.
-			for zx := len(oldrep); zx < n; {
-				zx += copy(newrep[zx:], allZeroBytes)
-			}
-		} else {
-			newrep = make(repBytes, n)
-			copy(newrep, oldrep)
-		}
-		v.rep = newrep
-		return v
+	switch rep := v.rep.(type) {
+	case *repBytes:
+		rep.AssignLen(n)
+	case *repSequence:
+		rep.AssignLen(n)
 	}
-	oldrep := v.rep.(repSequence)
-	var newrep repSequence
-	if n <= cap(oldrep) {
-		newrep = oldrep[:n]
-		for ix := len(oldrep); ix < n; ix++ {
-			newrep[ix] = nil
-		}
-	} else {
-		newrep = make(repSequence, n)
-		copy(newrep, oldrep)
-	}
-	v.rep = newrep
-	return v
 }
 
-// AssignSetKey assigns key to the underlying Set.  Panics if the key isn't
-// assignable to the set's key type.
-func (v *Value) AssignSetKey(key *Value) *Value {
+// AssignIndex assigns the index'th element of the underlying Array or List to
+// elem.  Panics if the index is out of range, or if elem isn't assignable to
+// the Array or List element type.
+func (v *Value) AssignIndex(index int, elem *Value) {
+	v.t.checkKind("AssignIndex", Array, List)
+	if index >= v.Len() {
+		panic(fmt.Errorf("vdl: index %d out of range for %v", index, v.t))
+	}
+	switch rep := v.rep.(type) {
+	case *repBytes:
+		(*rep)[index] = byte(elem.Uint())
+	case *repSequence:
+		(*rep)[index] = typedCopy(v.t.elem, elem)
+	}
+}
+
+// AssignSetKey assigns key to the underlying Set.  Panics if key isn't
+// assignable to the Set key type.
+func (v *Value) AssignSetKey(key *Value) {
 	v.t.checkKind("AssignSetKey", Set)
-	v.rep.(repMap).Assign(typedCopy(v.t.key, key), nil)
-	return v
+	v.rep.(*repMap).Assign(typedCopy(v.t.key, key), nil)
 }
 
-// DeleteSetKey deletes key from the underlying Set.
-func (v *Value) DeleteSetKey(key *Value) *Value {
+// DeleteSetKey deletes key from the underlying Set.  Panics if key isn't
+// assignable to the Set key type.
+func (v *Value) DeleteSetKey(key *Value) {
 	v.t.checkKind("DeleteSetKey", Set)
-	v.rep.(repMap).Delete(typedCopy(v.t.key, key))
-	return v
+	v.rep.(*repMap).Delete(typedCopy(v.t.key, key))
 }
 
 // AssignMapIndex assigns the value associated with key to elem in the
-// underlying Map.  If elem is nil, AssignMapIndex deletes the key from the Map.
-// Panics if the key isn't assignable to the map's key type, and ditto for elem.
-func (v *Value) AssignMapIndex(key, elem *Value) *Value {
+// underlying Map.  Panics if key isn't assignable to the Map key type, or if
+// elem isn't assignable to the Map elem type.
+func (v *Value) AssignMapIndex(key, elem *Value) {
 	v.t.checkKind("AssignMapIndex", Map)
-	if elem == nil {
-		v.rep.(repMap).Delete(typedCopy(v.t.key, key))
-	} else {
-		v.rep.(repMap).Assign(typedCopy(v.t.key, key), typedCopy(v.t.elem, elem))
-	}
-	return v
+	v.rep.(*repMap).Assign(typedCopy(v.t.key, key), typedCopy(v.t.elem, elem))
 }
 
-// AssignUnionField assigns the field index and value to the underlying Union.
-// Panics if the index is out of range, or if the value isn't assignable to the
-// field type.
-func (v *Value) AssignUnionField(index int, value *Value) *Value {
-	v.t.checkKind("AssignUnionField", Union)
+// DeleteMapIndex deletes key from the underlying Map.  Panics if the key isn't
+// assignable to the Map key type.
+func (v *Value) DeleteMapIndex(key *Value) {
+	v.t.checkKind("DeleteMapIndex", Map)
+	v.rep.(*repMap).Delete(typedCopy(v.t.key, key))
+}
+
+// AssignField assigns the index'th field of the underlying Struct or Union to
+// value.  This chooses the field for union values; if the union value currently
+// represents a different field, or the same field with a different value, it is
+// overwritten.  This doesn't affect other fields of struct values.  Panics if
+// the index is out of range, or if value isn't assignable to the Struct or
+// Union field type.
+func (v *Value) AssignField(index int, value *Value) {
+	v.t.checkKind("AssignField", Struct, Union)
 	if index >= len(v.t.fields) {
-		panic(fmt.Errorf("vdl: union %q index %d out of range", v.t, index))
+		panic(fmt.Errorf("vdl: field index %d out of range for %v", index, v.t))
 	}
-	v.rep = repUnion{index, typedCopy(v.t.fields[index].Type, value)}
-	return v
+	switch rep := v.rep.(type) {
+	case *repSequence:
+		(*rep)[index] = typedCopy(v.t.fields[index].Type, value)
+	case *repUnion:
+		rep.index = index
+		rep.value = typedCopy(v.t.fields[index].Type, value)
+	}
 }
 
 // SortValuesAsString sorts values by their String representation.  The order of

@@ -618,7 +618,7 @@ func NameNMap(suffix string, base *Type) *Type {
 func SetStringValue(t *Type, x ...string) *Value {
 	res := ZeroValue(t)
 	for _, vx := range x {
-		key := ZeroValue(t.Key()).AssignString(vx)
+		key := StringValue(t.Key(), vx)
 		res.AssignSetKey(key)
 	}
 	return res
@@ -632,8 +632,8 @@ type SB struct {
 func MapStringBoolValue(t *Type, x ...SB) *Value {
 	res := ZeroValue(t)
 	for _, sb := range x {
-		key := ZeroValue(t.Key()).AssignString(sb.S)
-		val := ZeroValue(t.Elem()).AssignBool(sb.B)
+		key := StringValue(t.Key(), sb.S)
+		val := BoolValue(t.Elem(), sb.B)
 		res.AssignMapIndex(key, val)
 	}
 	return res
@@ -642,7 +642,7 @@ func MapStringBoolValue(t *Type, x ...SB) *Value {
 func MapStringEmptyValue(t *Type, x ...string) *Value {
 	res := ZeroValue(t)
 	for _, vx := range x {
-		key := ZeroValue(t.Key()).AssignString(vx)
+		key := StringValue(t.Key(), vx)
 		val := ZeroValue(t.Elem())
 		res.AssignMapIndex(key, val)
 	}
@@ -700,7 +700,7 @@ func MapNumBoolValue(t *Type, x ...NB) *Value {
 	res := ZeroValue(t)
 	for _, nb := range x {
 		key := AssignNum(ZeroValue(t.Key()), nb.N)
-		val := ZeroValue(t.Elem()).AssignBool(nb.B)
+		val := BoolValue(t.Elem(), nb.B)
 		res.AssignMapIndex(key, val)
 	}
 	return res
@@ -714,7 +714,7 @@ type SN struct {
 func MapStringNumValue(t *Type, x ...SN) *Value {
 	res := ZeroValue(t)
 	for _, sn := range x {
-		key := ZeroValue(t.Key()).AssignString(sn.S)
+		key := StringValue(t.Key(), sn.S)
 		val := AssignNum(ZeroValue(t.Elem()), sn.N)
 		res.AssignMapIndex(key, val)
 	}

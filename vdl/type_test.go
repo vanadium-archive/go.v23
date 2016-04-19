@@ -773,17 +773,17 @@ func TestAssignableFrom(t *testing.T) {
 		from *Value
 		want bool
 	}{
-		{BoolType, BoolValue(false), true},
+		{BoolType, BoolValue(nil, false), true},
 		{optType, optValue, true},
 		{optType, ZeroValue(AnyType), true},
-		{AnyType, BoolValue(false), true},
+		{AnyType, BoolValue(nil, false), true},
 		{AnyType, optValue, true},
 		{AnyType, ZeroValue(AnyType), true},
 
-		{BoolType, Int32Value(123), false},
+		{BoolType, IntValue(Int32Type, 123), false},
 		{BoolType, optValue, false},
 		{BoolType, AnyValue(optValue), false},
-		{optType, BoolValue(false), false},
+		{optType, BoolValue(nil, false), false},
 		{optType, AnyValue(optValue), false},
 	}
 	for _, test := range tests {

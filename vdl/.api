@@ -28,23 +28,19 @@ pkg vdl, const WireRetryCodeRetryConnection WireRetryCode
 pkg vdl, const WireRetryCodeRetryRefetch WireRetryCode
 pkg vdl, func AnyValue(*Value) *Value
 pkg vdl, func ArrayType(int, *Type) *Type
-pkg vdl, func BoolValue(bool) *Value
-pkg vdl, func ByteValue(byte) *Value
-pkg vdl, func BytesValue([]byte) *Value
+pkg vdl, func BoolValue(*Type, bool) *Value
+pkg vdl, func BytesValue(*Type, []byte) *Value
 pkg vdl, func Compatible(*Type, *Type) bool
 pkg vdl, func Convert(interface{}, interface{}) error
 pkg vdl, func CopyValue(*Value) *Value
 pkg vdl, func DeepEqual(interface{}, interface{}) bool
 pkg vdl, func EnumType(...string) *Type
+pkg vdl, func EnumValue(*Type, string) *Value
 pkg vdl, func EqualValue(*Value, *Value) bool
-pkg vdl, func Float32Value(float32) *Value
-pkg vdl, func Float64Value(float64) *Value
+pkg vdl, func FloatValue(*Type, float64) *Value
 pkg vdl, func FromReflect(Target, reflect.Value) error
 pkg vdl, func FromValue(Target, *Value) error
-pkg vdl, func Int16Value(int16) *Value
-pkg vdl, func Int32Value(int32) *Value
-pkg vdl, func Int64Value(int64) *Value
-pkg vdl, func Int8Value(int8) *Value
+pkg vdl, func IntValue(*Type, int64) *Value
 pkg vdl, func ListType(*Type) *Type
 pkg vdl, func MapType(*Type, *Type) *Type
 pkg vdl, func NamedType(string, *Type) *Type
@@ -59,17 +55,16 @@ pkg vdl, func RegisterNative(interface{}, interface{})
 pkg vdl, func SetType(*Type) *Type
 pkg vdl, func SortValuesAsString([]*Value) []*Value
 pkg vdl, func SplitIdent(string) (string, string)
-pkg vdl, func StringValue(string) *Value
+pkg vdl, func StringValue(*Type, string) *Value
 pkg vdl, func StructType(...Field) *Type
 pkg vdl, func Transcode(Encoder, Decoder) error
 pkg vdl, func TypeFromReflect(reflect.Type) (*Type, error)
 pkg vdl, func TypeObjectValue(*Type) *Value
 pkg vdl, func TypeOf(interface{}) *Type
 pkg vdl, func TypeToReflect(*Type) reflect.Type
-pkg vdl, func Uint16Value(uint16) *Value
-pkg vdl, func Uint32Value(uint32) *Value
-pkg vdl, func Uint64Value(uint64) *Value
+pkg vdl, func UintValue(*Type, uint64) *Value
 pkg vdl, func UnionType(...Field) *Type
+pkg vdl, func UnionValue(*Type, int, *Value) *Value
 pkg vdl, func ValueFromReflect(reflect.Value) (*Value, error)
 pkg vdl, func ValueOf(interface{}) *Value
 pkg vdl, func ValueTarget(*Value) (Target, error)
@@ -408,25 +403,26 @@ pkg vdl, method (*Uint64Target) StartList(*Type, int) (ListTarget, error)
 pkg vdl, method (*Uint64Target) StartMap(*Type, int) (MapTarget, error)
 pkg vdl, method (*Uint64Target) StartSet(*Type, int) (SetTarget, error)
 pkg vdl, method (*Value) Assign(*Value) *Value
-pkg vdl, method (*Value) AssignBool(bool) *Value
-pkg vdl, method (*Value) AssignBytes([]byte) *Value
-pkg vdl, method (*Value) AssignEnumIndex(int) *Value
-pkg vdl, method (*Value) AssignEnumLabel(string) *Value
-pkg vdl, method (*Value) AssignFloat(float64) *Value
-pkg vdl, method (*Value) AssignInt(int64) *Value
-pkg vdl, method (*Value) AssignLen(int) *Value
-pkg vdl, method (*Value) AssignMapIndex(*Value, *Value) *Value
-pkg vdl, method (*Value) AssignSetKey(*Value) *Value
-pkg vdl, method (*Value) AssignString(string) *Value
-pkg vdl, method (*Value) AssignTypeObject(*Type) *Value
-pkg vdl, method (*Value) AssignUint(uint64) *Value
-pkg vdl, method (*Value) AssignUnionField(int, *Value) *Value
+pkg vdl, method (*Value) AssignBool(bool)
+pkg vdl, method (*Value) AssignBytes([]byte)
+pkg vdl, method (*Value) AssignEnumIndex(int)
+pkg vdl, method (*Value) AssignEnumLabel(string)
+pkg vdl, method (*Value) AssignField(int, *Value)
+pkg vdl, method (*Value) AssignFloat(float64)
+pkg vdl, method (*Value) AssignIndex(int, *Value)
+pkg vdl, method (*Value) AssignInt(int64)
+pkg vdl, method (*Value) AssignLen(int)
+pkg vdl, method (*Value) AssignMapIndex(*Value, *Value)
+pkg vdl, method (*Value) AssignSetKey(*Value)
+pkg vdl, method (*Value) AssignString(string)
+pkg vdl, method (*Value) AssignTypeObject(*Type)
+pkg vdl, method (*Value) AssignUint(uint64)
 pkg vdl, method (*Value) Bool() bool
 pkg vdl, method (*Value) Bytes() []byte
 pkg vdl, method (*Value) ContainsKey(*Value) bool
-pkg vdl, method (*Value) CopyBytes([]byte) *Value
 pkg vdl, method (*Value) Decoder() Decoder
-pkg vdl, method (*Value) DeleteSetKey(*Value) *Value
+pkg vdl, method (*Value) DeleteMapIndex(*Value)
+pkg vdl, method (*Value) DeleteSetKey(*Value)
 pkg vdl, method (*Value) Elem() *Value
 pkg vdl, method (*Value) EnumIndex() int
 pkg vdl, method (*Value) EnumLabel() string

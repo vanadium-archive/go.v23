@@ -60,7 +60,7 @@ func WireFromNative(wire *vdl.WireError, native error) error {
 			// the conversion failure above in errorFromWire.
 			//
 			// TODO(toddw): Consider whether there is a better strategy.
-			pWire = vdl.StringValue(err.Error())
+			pWire = vdl.StringValue(nil, err.Error())
 		}
 		wire.ParamList = append(wire.ParamList, pWire)
 	}
