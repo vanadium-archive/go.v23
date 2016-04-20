@@ -19,7 +19,7 @@ var (
 )
 
 // Read uses dec to decode a value into v, calling VDLRead methods and fast
-// compiled decoders when available, and using reflection otherwise.  This is
+// compiled readers when available, and using reflection otherwise.  This is
 // basically an all-purpose VDLRead implementation.
 func Read(dec Decoder, v interface{}) error {
 	if v == nil {
@@ -152,8 +152,8 @@ func readNonNative(dec Decoder, calledStart bool, rv reflect.Value, tt *Type) er
 	return dec.FinishValue()
 }
 
-// readWalkPointers repeatedly dereferences pointers, creating new values if
-// the pointer is nil, and returns the final non-pointer reflect value.
+// readWalkPointers repeatedly dereferences pointers, creating new values if the
+// pointer is nil, and returns the final non-pointer reflect value.
 func readWalkPointers(rv reflect.Value) reflect.Value {
 	for rv.Kind() == reflect.Ptr {
 		// Special-case to stop at *Type, which is filled in via readNonReflect.
@@ -342,7 +342,7 @@ func readNonNilValue(dec Decoder, rv reflect.Value, tt *Type) error {
 	// Note that Any was already handled via readAny, Optional was handled via
 	// readFromNil (or stripped off for non-nil values), and TypeObject was
 	// handled via the readNonReflect special-case.
-	panic(fmt.Errorf("vdl: unhandled type %v in Read", tt))
+	return fmt.Errorf("vdl: Read unhandled type %v %v", rv.Type(), tt)
 }
 
 func readArray(dec Decoder, rv reflect.Value, tt *Type) error {
@@ -440,7 +440,13 @@ func readMap(dec Decoder, rv reflect.Value, tt *Type) error {
 func readStruct(dec Decoder, rv reflect.Value, tt *Type) error {
 	rt := rv.Type()
 	// Reset to the zero struct, since fields may be missing.
-	rv.Set(rvSettableZeroValue(rt, tt))
+	//
+	// TODO(toddw): Avoid repeated zero-setting of nested structs.
+	rvZero, err := rvZeroValue(rt, tt)
+	if err != nil {
+		return err
+	}
+	rv.Set(rvZero)
 	for {
 		name, err := dec.NextField()
 		switch {
@@ -476,29 +482,17 @@ func readUnion(dec Decoder, rv reflect.Value, tt *Type) error {
 	if index == -1 {
 		return fmt.Errorf("field %q not in union %v, from %v", name, rt, dec.Type())
 	}
-	switch {
-	case rt.Kind() == reflect.Struct:
-		// We have a concrete union field struct.  This means that we should only
-		// set the field value if the name matches.
-		if exist := rv.Addr().Interface().(nameable).Name(); exist != name {
-			return fmt.Errorf("field %q mismatch in union struct %v, from %v", name, rt, dec.Type())
-		}
-		if err := readReflect(dec, false, rv.Field(0), ttField.Type); err != nil {
-			return err
-		}
-	default:
-		// We have a union interface.  Create a new field based on its rep type,
-		// fill in its value, and assign the field to the interface.
-		ri, _, err := deriveReflectInfo(rt)
-		if err != nil {
-			return err
-		}
-		rvField := reflect.New(ri.UnionFields[index].RepType).Elem()
-		if err := readReflect(dec, false, rvField.Field(0), ttField.Type); err != nil {
-			return err
-		}
-		rv.Set(rvField)
+	// We have a union interface.  Create a new field based on its rep type, fill
+	// in its value, and assign the field to the interface.
+	ri, _, err := deriveReflectInfo(rt)
+	if err != nil {
+		return err
 	}
+	rvField := reflect.New(ri.UnionFields[index].RepType).Elem()
+	if err := readReflect(dec, false, rvField.Field(0), ttField.Type); err != nil {
+		return err
+	}
+	rv.Set(rvField)
 	switch name, err := dec.NextField(); {
 	case err != nil:
 		return err

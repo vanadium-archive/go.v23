@@ -53,11 +53,9 @@ func (vv *Value) writeNonNilValue(enc Encoder) error {
 	case Enum:
 		return enc.EncodeString(vv.EnumLabel())
 	case Array, List:
-		return vv.writeListOrArray(enc)
-	case Set:
-		return vv.writeSet(enc)
-	case Map:
-		return vv.writeMap(enc)
+		return vv.writeArrayOrList(enc)
+	case Set, Map:
+		return vv.writeSetOrMap(enc)
 	case Struct:
 		return vv.writeStruct(enc)
 	case Union:
@@ -66,7 +64,7 @@ func (vv *Value) writeNonNilValue(enc Encoder) error {
 	panic(fmt.Sprintf("unknown kind", vv.Kind()))
 }
 
-func (vv *Value) writeListOrArray(enc Encoder) error {
+func (vv *Value) writeArrayOrList(enc Encoder) error {
 	if vv.Kind() == List {
 		if err := enc.SetLenHint(vv.Len()); err != nil {
 			return err
@@ -83,7 +81,7 @@ func (vv *Value) writeListOrArray(enc Encoder) error {
 	return enc.NextEntry(true)
 }
 
-func (vv *Value) writeSet(enc Encoder) error {
+func (vv *Value) writeSetOrMap(enc Encoder) error {
 	if err := enc.SetLenHint(vv.Len()); err != nil {
 		return err
 	}
@@ -94,23 +92,10 @@ func (vv *Value) writeSet(enc Encoder) error {
 		if err := key.VDLWrite(enc); err != nil {
 			return err
 		}
-	}
-	return enc.NextEntry(true)
-}
-
-func (vv *Value) writeMap(enc Encoder) error {
-	if err := enc.SetLenHint(vv.Len()); err != nil {
-		return err
-	}
-	for _, key := range vv.Keys() {
-		if err := enc.NextEntry(false); err != nil {
-			return err
-		}
-		if err := key.VDLWrite(enc); err != nil {
-			return err
-		}
-		if err := vv.MapIndex(key).VDLWrite(enc); err != nil {
-			return err
+		if vv.Kind() == Map {
+			if err := vv.MapIndex(key).VDLWrite(enc); err != nil {
+				return err
+			}
 		}
 	}
 	return enc.NextEntry(true)

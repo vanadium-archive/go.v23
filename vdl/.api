@@ -69,6 +69,8 @@ pkg vdl, func ValueFromReflect(reflect.Value) (*Value, error)
 pkg vdl, func ValueOf(interface{}) *Value
 pkg vdl, func ValueTarget(*Value) (Target, error)
 pkg vdl, func WireRetryCodeFromString(string) (WireRetryCode, error)
+pkg vdl, func Write(Encoder, interface{}) error
+pkg vdl, func WriteReflect(Encoder, reflect.Value) error
 pkg vdl, func ZeroValue(*Type) *Value
 pkg vdl, method (*BoolTarget) FinishFields(FieldsTarget) error
 pkg vdl, method (*BoolTarget) FinishList(ListTarget) error
@@ -571,6 +573,8 @@ pkg vdl, type Int64Target struct, embedded TargetBase
 pkg vdl, type Int8Target struct
 pkg vdl, type Int8Target struct, Value *int8
 pkg vdl, type Int8Target struct, embedded TargetBase
+pkg vdl, type IsZeroer interface { VDLIsZero }
+pkg vdl, type IsZeroer interface, VDLIsZero() bool
 pkg vdl, type Kind uint
 pkg vdl, type ListTarget interface { FinishElem, StartElem }
 pkg vdl, type ListTarget interface, FinishElem(Target) error

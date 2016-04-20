@@ -161,18 +161,6 @@ func ValueFromReflect(rv reflect.Value) (*Value, error) {
 	return result, nil
 }
 
-// stringable exists to avoid a call to reflect.Call() to invoke String()
-// which results in an allocation
-type stringable interface {
-	String() string
-}
-
-// nameable exists to avoid a call to reflect.Call() to invoke Name()
-// which results in an allocation
-type nameable interface {
-	Name() string
-}
-
 // FromReflect converts from rv to the target, by walking through rv and calling
 // the appropriate methods on the target.
 func FromReflect(target Target, rv reflect.Value) error {
@@ -277,11 +265,11 @@ func FromReflect(target Target, rv reflect.Value) error {
 	// has already validated the methods, so we can call without error checking.
 	switch tt.Kind() {
 	case Enum:
-		label := rv.Interface().(stringable).String()
+		label := rv.Interface().(stringer).String()
 		return target.FromEnumLabel(label, ttFrom)
 	case Union:
 		// We're guaranteed rv is the concrete field struct.
-		name := rv.Interface().(nameable).Name()
+		name := rv.Interface().(namer).Name()
 		fieldsTarget, err := target.StartFields(ttFrom)
 		if err != nil {
 			return err

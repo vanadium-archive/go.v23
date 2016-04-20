@@ -353,8 +353,6 @@ func finishConvert(fin, fill convTarget) error {
 	return nil
 }
 
-var typeobjectOrUnionKind []Kind = []Kind{TypeObject, Union}
-
 // rvSettableZeroValue returns a settable zero value corresponding to rt / tt.
 // This isn't trivial since VDL and Go define zero values slightly differently.
 // In particular in VDL:
@@ -374,7 +372,7 @@ func rvSettableZeroValue(rt reflect.Type, tt *Type) reflect.Value {
 	rv := reflect.New(rt).Elem()
 	// Easy fastpath; if the type doesn't contain inline typeobject or union, the
 	// regular Go zero value is good enough.
-	if !tt.ContainsKind(WalkInline, typeobjectOrUnionKind...) {
+	if !tt.ContainsKind(WalkInline, kkTypeObjectOrUnion...) {
 		return rv
 	}
 	// Handle typeobject, which has the zero value of AnyType.
@@ -1189,7 +1187,7 @@ func (c convTarget) finishKeyStartField(key convTarget) (convTarget, error) {
 			if tt.Kind() == Union {
 				// Special-case: the fill target is a union concrete field struct.  This
 				// means that we should only return a field if the field name matches.
-				existingName := c.rv.Interface().(nameable).Name()
+				existingName := c.rv.Interface().(namer).Name()
 				if existingName != fieldName {
 					return convTarget{}, ErrFieldNoExist
 				}

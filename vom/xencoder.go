@@ -39,7 +39,6 @@ func NewVersionedXEncoder(version Version, w io.Writer) *XEncoder {
 		typeEnc:         newTypeEncoderWithoutVersionByte(version, w),
 		sentVersionByte: false,
 		version:         version,
-		stack:           nil, //TODO(bprosnitz) Should the stack be initialized to some default size?
 	}}
 }
 
@@ -53,7 +52,6 @@ func NewVersionedXEncoderWithTypeEncoder(version Version, w io.Writer, typeEnc *
 		typeEnc:         typeEnc,
 		sentVersionByte: false,
 		version:         version,
-		stack:           nil, //TODO(bprosnitz) Should the stack be initialized to some default size?
 	}}
 }
 
@@ -62,9 +60,7 @@ func (e *XEncoder) Encoder() vdl.Encoder {
 }
 
 func (e *XEncoder) Encode(v interface{}) error {
-	//TODO(bprosnitz) Replace with:
-	// return vdl.Write(&e.enc, v)
-	panic("Encode not yet implemented")
+	return vdl.Write(&e.enc, v)
 }
 
 type xEncoder struct {

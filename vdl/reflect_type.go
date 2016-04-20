@@ -417,6 +417,7 @@ var (
 	rtInterface          = reflect.TypeOf((*interface{})(nil)).Elem()
 	rtBool               = reflect.TypeOf(false)
 	rtByte               = reflect.TypeOf(byte(0))
+	rtByteList           = reflect.TypeOf([]byte(nil))
 	rtUint16             = reflect.TypeOf(uint16(0))
 	rtUint32             = reflect.TypeOf(uint32(0))
 	rtUint64             = reflect.TypeOf(uint64(0))
@@ -435,6 +436,9 @@ var (
 	rtPtrToValue         = reflect.TypeOf((*Value)(nil))
 	rtReflectValue       = reflect.TypeOf(reflect.Value{})
 	rtTargeter           = reflect.TypeOf((*Targeter)(nil)).Elem()
+	rtNamer              = reflect.TypeOf((*namer)(nil)).Elem()
+	rtIndexer            = reflect.TypeOf((*indexer)(nil)).Elem()
+	rtIsZeroer           = reflect.TypeOf((*IsZeroer)(nil)).Elem()
 	rtUnnamedEmptyStruct = reflect.TypeOf(struct{}{})
 
 	typeFromRTKind = [...]*Type{

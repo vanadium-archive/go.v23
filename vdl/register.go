@@ -346,15 +346,19 @@ func describeUnion(unionReflect, rt reflect.Type, ri *reflectInfo) error {
 			RepType: f.Type,
 		})
 	}
-	// Check for Name method on interface and all concrete field structs.
-	if n, ok := ri.Type.MethodByName("Name"); !ok || n.Type.NumIn() != 0 ||
-		n.Type.NumOut() != 1 || n.Type.Out(0) != rtString {
+	// Check for Name and Index methods on interface and concrete field structs.
+	if !ri.Type.Implements(rtNamer) {
 		return fmt.Errorf("union interface type %q must have method Name() string", ri.Type)
 	}
+	if !ri.Type.Implements(rtIndexer) {
+		return fmt.Errorf("union interface type %q must have method Index() int", ri.Type)
+	}
 	for _, f := range ri.UnionFields {
-		if n, ok := f.RepType.MethodByName("Name"); !ok || n.Type.NumIn() != 1 ||
-			n.Type.NumOut() != 1 || n.Type.Out(0) != rtString {
+		if !f.RepType.Implements(rtNamer) {
 			return fmt.Errorf("union field %q type %q must have method Name() string", f.Name, f.RepType)
+		}
+		if !f.RepType.Implements(rtIndexer) {
+			return fmt.Errorf("union field %q type %q must have method Index() int", f.Name, f.RepType)
 		}
 	}
 	return nil

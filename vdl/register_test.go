@@ -137,6 +137,8 @@ type (
 	nBadUnionField3   struct{}
 	nBadUnionName1    struct{ Value bool }
 	nBadUnionName2    struct{ Value bool }
+	nBadUnionIndex1   struct{ Value bool }
+	nBadUnionIndex2   struct{ Value bool }
 )
 
 // No description
@@ -239,6 +241,26 @@ func (nBadUnionName2) __VDLReflect(struct {
 	panic("X")
 }
 
+// Index method isn't Index() int
+func (nBadUnionIndex1) Name() string { panic("X") }
+func (nBadUnionIndex1) Index()       { panic("X") }
+func (nBadUnionIndex1) __VDLReflect(struct {
+	Type  NUnionABC
+	Union struct{ A nBadUnionIndex1 }
+}) {
+	panic("X")
+}
+
+// Index method isn't Index() int
+func (nBadUnionIndex2) Name() string { panic("X") }
+func (nBadUnionIndex2) Index() bool  { panic("X") }
+func (nBadUnionIndex2) __VDLReflect(struct {
+	Type  NUnionABC
+	Union struct{ A nBadUnionIndex2 }
+}) {
+	panic("X")
+}
+
 // rtErrorTest describes a test case with rt as input, and errstr as output.
 type rtErrorTest struct {
 	rt     reflect.Type
@@ -251,6 +273,7 @@ const (
 	badEnumSet    = `must have pointer method Set(string) error`
 	badUnionField = `bad concrete field type`
 	badUnionName  = `must have method Name() string`
+	badUnionIndex = `must have method Index() int`
 )
 
 var reflectInfoErrorTests = []rtErrorTest{
@@ -272,6 +295,8 @@ var reflectInfoErrorTests = []rtErrorTest{
 	{reflect.TypeOf(nBadUnionField3{}), badUnionField},
 	{reflect.TypeOf(nBadUnionName1{}), badUnionName},
 	{reflect.TypeOf(nBadUnionName2{}), badUnionName},
+	{reflect.TypeOf(nBadUnionIndex1{}), badUnionIndex},
+	{reflect.TypeOf(nBadUnionIndex2{}), badUnionIndex},
 }
 
 // Test deriveReflectInfo errors.
