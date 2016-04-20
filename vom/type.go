@@ -13,11 +13,11 @@ import "v.io/v23/vdl"
 // Bootstrap mappings between type, id and kind.
 var (
 	bootstrapWireTypes map[*vdl.Type]struct{}
-	bootstrapIdToType  map[typeId]*vdl.Type
-	bootstrapTypeToId  map[*vdl.Type]typeId
-	bootstrapKindToId  map[vdl.Kind]typeId
+	bootstrapIdToType  map[TypeId]*vdl.Type
+	bootstrapTypeToId  map[*vdl.Type]TypeId
+	bootstrapKindToId  map[vdl.Kind]TypeId
 
-	typeIDType        = vdl.TypeOf(typeId(0))
+	typeIDType        = vdl.TypeOf(TypeId(0))
 	wireTypeType      = vdl.TypeOf((*wireType)(nil))
 	wireNamedType     = vdl.TypeOf(wireNamed{})
 	wireEnumType      = vdl.TypeOf(wireEnum{})
@@ -71,12 +71,12 @@ func init() {
 		bootstrapWireTypes[tt] = struct{}{}
 	}
 
-	bootstrapIdToType = make(map[typeId]*vdl.Type)
-	bootstrapTypeToId = make(map[*vdl.Type]typeId)
-	bootstrapKindToId = make(map[vdl.Kind]typeId)
+	bootstrapIdToType = make(map[TypeId]*vdl.Type)
+	bootstrapTypeToId = make(map[*vdl.Type]TypeId)
+	bootstrapKindToId = make(map[vdl.Kind]TypeId)
 
 	// The basic bootstrap types can be converted between type, id and kind.
-	for id, tt := range map[typeId]*vdl.Type{
+	for id, tt := range map[TypeId]*vdl.Type{
 		WireIdBool:       vdl.BoolType,
 		WireIdByte:       vdl.ByteType,
 		WireIdString:     vdl.StringType,
@@ -97,7 +97,7 @@ func init() {
 		bootstrapKindToId[tt.Kind()] = id
 	}
 	// The extra bootstrap types can be converted between type and id.
-	for id, tt := range map[typeId]*vdl.Type{
+	for id, tt := range map[TypeId]*vdl.Type{
 		WireIdByteList:   wireByteListType,
 		WireIdStringList: wireStringListType,
 	} {

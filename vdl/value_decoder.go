@@ -108,6 +108,7 @@ func (d *valueDecoder) FinishValue() error {
 }
 
 func (d *valueDecoder) SkipValue() error {
+	d.ignoreNext = false
 	return nil
 }
 

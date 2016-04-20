@@ -22,23 +22,23 @@ pkg vom, const Version81 Version
 pkg vom, const WireCtrlEnd byte
 pkg vom, const WireCtrlNil byte
 pkg vom, const WireCtrlTypeIncomplete byte
-pkg vom, const WireIdAny typeId
-pkg vom, const WireIdBool typeId
-pkg vom, const WireIdByte typeId
-pkg vom, const WireIdByteList typeId
-pkg vom, const WireIdFirstUserType typeId
-pkg vom, const WireIdFloat32 typeId
-pkg vom, const WireIdFloat64 typeId
-pkg vom, const WireIdInt16 typeId
-pkg vom, const WireIdInt32 typeId
-pkg vom, const WireIdInt64 typeId
-pkg vom, const WireIdInt8 typeId
-pkg vom, const WireIdString typeId
-pkg vom, const WireIdStringList typeId
-pkg vom, const WireIdTypeObject typeId
-pkg vom, const WireIdUint16 typeId
-pkg vom, const WireIdUint32 typeId
-pkg vom, const WireIdUint64 typeId
+pkg vom, const WireIdAny TypeId
+pkg vom, const WireIdBool TypeId
+pkg vom, const WireIdByte TypeId
+pkg vom, const WireIdByteList TypeId
+pkg vom, const WireIdFirstUserType TypeId
+pkg vom, const WireIdFloat32 TypeId
+pkg vom, const WireIdFloat64 TypeId
+pkg vom, const WireIdInt16 TypeId
+pkg vom, const WireIdInt32 TypeId
+pkg vom, const WireIdInt64 TypeId
+pkg vom, const WireIdInt8 TypeId
+pkg vom, const WireIdString TypeId
+pkg vom, const WireIdStringList TypeId
+pkg vom, const WireIdTypeObject TypeId
+pkg vom, const WireIdUint16 TypeId
+pkg vom, const WireIdUint32 TypeId
+pkg vom, const WireIdUint64 TypeId
 pkg vom, func ControlKindFromString(string) (ControlKind, error)
 pkg vom, func Decode([]byte, interface{}) error
 pkg vom, func Dump([]byte) (string, error)
@@ -104,6 +104,12 @@ pkg vom, method (*RawBytes) VDLRead(vdl.Decoder) error
 pkg vom, method (*RawBytes) VDLWrite(vdl.Encoder) error
 pkg vom, method (*TypeDecoder) Start()
 pkg vom, method (*TypeDecoder) Stop()
+pkg vom, method (*TypeId) FillVDLTarget(vdl.Target, *vdl.Type) error
+pkg vom, method (*TypeId) MakeVDLTarget() vdl.Target
+pkg vom, method (*TypeId) VDLRead(vdl.Decoder) error
+pkg vom, method (*TypeIdTarget) FromFloat(float64, *vdl.Type) error
+pkg vom, method (*TypeIdTarget) FromInt(int64, *vdl.Type) error
+pkg vom, method (*TypeIdTarget) FromUint(uint64, *vdl.Type) error
 pkg vom, method (*XDecoder) Decode(interface{}) error
 pkg vom, method (*XDecoder) Decoder() vdl.Decoder
 pkg vom, method (*XDecoder) Ignore() error
@@ -158,6 +164,7 @@ pkg vom, method (PrimitivePUint) Interface() interface{}
 pkg vom, method (PrimitivePUint) MakeVDLTarget() vdl.Target
 pkg vom, method (PrimitivePUint) Name() string
 pkg vom, method (PrimitivePUint) VDLWrite(vdl.Encoder) error
+pkg vom, method (TypeId) VDLWrite(vdl.Encoder) error
 pkg vom, method (Version) String() string
 pkg vom, type ControlKind int
 pkg vom, type ControlKindTarget struct
@@ -224,6 +231,10 @@ pkg vom, type RawBytes struct, Type *vdl.Type
 pkg vom, type RawBytes struct, Version Version
 pkg vom, type TypeDecoder struct
 pkg vom, type TypeEncoder struct
+pkg vom, type TypeId uint64
+pkg vom, type TypeIdTarget struct
+pkg vom, type TypeIdTarget struct, Value *TypeId
+pkg vom, type TypeIdTarget struct, embedded vdl.TargetBase
 pkg vom, type Version byte
 pkg vom, type XDecoder struct
 pkg vom, type XEncoder struct

@@ -83,7 +83,7 @@ func (d *xDecoder) StackDepth() int {
 	return len(d.stack)
 }
 
-func (d *xDecoder) decodeWireType(wt *wireType) (typeId, error) {
+func (d *xDecoder) decodeWireType(wt *wireType) (TypeId, error) {
 	// TODO(toddw): Flip useOldDecoder=false to enable XDecoder.
 	const useOldDecoder = true
 	if useOldDecoder {

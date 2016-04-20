@@ -116,9 +116,9 @@ func (rb *RawBytes) IsNil() bool {
 func (rb *RawBytes) Decoder() vdl.Decoder {
 	dec := NewDecoder(bytes.NewReader(rb.Data))
 	dec.buf.version = rb.Version
-	dec.refTypes.tids = make([]typeId, len(rb.RefTypes))
+	dec.refTypes.tids = make([]TypeId, len(rb.RefTypes))
 	for i, refType := range rb.RefTypes {
-		tid := typeId(i) + WireIdFirstUserType
+		tid := TypeId(i) + WireIdFirstUserType
 		dec.typeDec.idToType[tid] = refType
 		dec.refTypes.tids[i] = tid
 	}

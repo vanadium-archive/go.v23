@@ -22,8 +22,8 @@ var (
 // side of a connection.
 type TypeEncoder struct {
 	typeMu   sync.RWMutex
-	typeToId map[*vdl.Type]typeId // GUARDED_BY(typeMu)
-	nextId   typeId               // GUARDED_BY(typeMu)
+	typeToId map[*vdl.Type]TypeId // GUARDED_BY(typeMu)
+	nextId   TypeId               // GUARDED_BY(typeMu)
 
 	encMu           sync.Mutex
 	enc             *encoder // GUARDED_BY(encMu)
@@ -44,7 +44,7 @@ func NewVersionedTypeEncoder(version Version, w io.Writer) *TypeEncoder {
 
 func newTypeEncoderWithVersionByte(version Version, w io.Writer) *TypeEncoder {
 	return &TypeEncoder{
-		typeToId:        make(map[*vdl.Type]typeId),
+		typeToId:        make(map[*vdl.Type]TypeId),
 		nextId:          WireIdFirstUserType,
 		enc:             newEncoderWithoutVersionByte(version, w, nil),
 		sentVersionByte: false,
@@ -53,7 +53,7 @@ func newTypeEncoderWithVersionByte(version Version, w io.Writer) *TypeEncoder {
 
 func newTypeEncoderWithoutVersionByte(version Version, w io.Writer) *TypeEncoder {
 	return &TypeEncoder{
-		typeToId:        make(map[*vdl.Type]typeId),
+		typeToId:        make(map[*vdl.Type]TypeId),
 		nextId:          WireIdFirstUserType,
 		enc:             newEncoderWithoutVersionByte(version, w, nil),
 		sentVersionByte: true,
@@ -64,7 +64,7 @@ func newTypeEncoderWithoutVersionByte(version Version, w io.Writer) *TypeEncoder
 // any children of the type before the type itself. Type ids are allocated in
 // the order that we recurse and consequentially may be sent out of sequential
 // order if type information for children is sent (before the parent type).
-func (e *TypeEncoder) encode(tt *vdl.Type) (typeId, error) {
+func (e *TypeEncoder) encode(tt *vdl.Type) (TypeId, error) {
 	if tid := e.lookupTypeId(tt); tid != 0 {
 		return tid, nil
 	}
@@ -96,7 +96,7 @@ func (e *TypeEncoder) encode(tt *vdl.Type) (typeId, error) {
 }
 
 // encodeType encodes the type
-func (e *TypeEncoder) encodeType(tt *vdl.Type, pending map[*vdl.Type]bool) (typeId, error) {
+func (e *TypeEncoder) encodeType(tt *vdl.Type, pending map[*vdl.Type]bool) (TypeId, error) {
 	// Lookup a type Id for tt or assign a new one.
 	tid, isNew, err := e.lookupOrAssignTypeId(tt)
 	if err != nil {
@@ -193,7 +193,7 @@ func (e *TypeEncoder) encodeType(tt *vdl.Type, pending map[*vdl.Type]bool) (type
 
 // lookupTypeId returns the id for the type tt if it is already encoded;
 // otherwise zero id is returned.
-func (e *TypeEncoder) lookupTypeId(tt *vdl.Type) typeId {
+func (e *TypeEncoder) lookupTypeId(tt *vdl.Type) TypeId {
 	if tid := bootstrapTypeToId[tt]; tid != 0 {
 		return tid
 	}
@@ -203,7 +203,7 @@ func (e *TypeEncoder) lookupTypeId(tt *vdl.Type) typeId {
 	return tid
 }
 
-func (e *TypeEncoder) lookupOrAssignTypeId(tt *vdl.Type) (typeId, bool, error) {
+func (e *TypeEncoder) lookupOrAssignTypeId(tt *vdl.Type) (TypeId, bool, error) {
 	if tid := bootstrapTypeToId[tt]; tid != 0 {
 		return tid, false, nil
 	}

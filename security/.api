@@ -99,6 +99,15 @@ pkg security, method (*Hash) FillVDLTarget(vdl.Target, *vdl.Type) error
 pkg security, method (*Hash) MakeVDLTarget() vdl.Target
 pkg security, method (*Hash) VDLRead(vdl.Decoder) error
 pkg security, method (*HashTarget) FromString(string, *vdl.Type) error
+pkg security, method (*PublicKeyDischarge) FillVDLTarget(vdl.Target, *vdl.Type) error
+pkg security, method (*PublicKeyDischarge) MakeVDLTarget() vdl.Target
+pkg security, method (*PublicKeyDischarge) String() string
+pkg security, method (*PublicKeyDischarge) VDLRead(vdl.Decoder) error
+pkg security, method (*PublicKeyDischargeTarget) FinishField(vdl.Target, vdl.Target) error
+pkg security, method (*PublicKeyDischargeTarget) FinishFields(vdl.FieldsTarget) error
+pkg security, method (*PublicKeyDischargeTarget) StartField(string) (vdl.Target, vdl.Target, error)
+pkg security, method (*PublicKeyDischargeTarget) StartFields(*vdl.Type) (vdl.FieldsTarget, error)
+pkg security, method (*PublicKeyDischargeTarget) ZeroField(string) error
 pkg security, method (*RejectedBlessing) FillVDLTarget(vdl.Target, *vdl.Type) error
 pkg security, method (*RejectedBlessing) MakeVDLTarget() vdl.Target
 pkg security, method (*RejectedBlessing) VDLRead(vdl.Decoder) error
@@ -159,6 +168,7 @@ pkg security, method (Discharge) ID() string
 pkg security, method (Discharge) ThirdPartyCaveats() []ThirdPartyCaveat
 pkg security, method (DischargeImpetus) VDLWrite(vdl.Encoder) error
 pkg security, method (Hash) VDLWrite(vdl.Encoder) error
+pkg security, method (PublicKeyDischarge) VDLWrite(vdl.Encoder) error
 pkg security, method (RejectedBlessing) String() string
 pkg security, method (RejectedBlessing) VDLWrite(vdl.Encoder) error
 pkg security, method (Signature) VDLWrite(vdl.Encoder) error
@@ -264,6 +274,14 @@ pkg security, type Principal interface, Sign([]byte) (Signature, error)
 pkg security, type PublicKey interface, MarshalBinary() ([]byte, error)
 pkg security, type PublicKey interface, String() string
 pkg security, type PublicKey interface, unexported methods
+pkg security, type PublicKeyDischarge struct
+pkg security, type PublicKeyDischarge struct, Caveats []Caveat
+pkg security, type PublicKeyDischarge struct, Signature Signature
+pkg security, type PublicKeyDischarge struct, ThirdPartyCaveatId string
+pkg security, type PublicKeyDischargeTarget struct
+pkg security, type PublicKeyDischargeTarget struct, Value *PublicKeyDischarge
+pkg security, type PublicKeyDischargeTarget struct, embedded vdl.FieldsTargetBase
+pkg security, type PublicKeyDischargeTarget struct, embedded vdl.TargetBase
 pkg security, type RejectedBlessing struct
 pkg security, type RejectedBlessing struct, Blessing string
 pkg security, type RejectedBlessing struct, Err error
@@ -309,7 +327,7 @@ pkg security, type WireDischarge interface, Name() string
 pkg security, type WireDischarge interface, VDLWrite(vdl.Encoder) error
 pkg security, type WireDischarge interface, unexported methods
 pkg security, type WireDischargePublicKey struct
-pkg security, type WireDischargePublicKey struct, Value publicKeyDischarge
+pkg security, type WireDischargePublicKey struct, Value PublicKeyDischarge
 pkg security, type WireDischargeTarget struct
 pkg security, type WireDischargeTarget struct, Value *Discharge
 pkg security, type WireDischargeTarget struct, embedded vdl.FieldsTargetBase

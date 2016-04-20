@@ -537,7 +537,7 @@ func (x ThirdPartyRequirements) VDLWrite(enc vdl.Encoder) error {
 }
 
 // publicKeyThirdPartyCaveatParam represents a third-party caveat that requires
-// discharges to be issued by a principal identified by a public key.
+// PublicKeyDischarge(s) to be issued by a principal identified by a public key.
 //
 // The Id of the caveat is base64-encoded:
 // hash(hash(Nonce), hash(DischargerKey), hash(Caveats[0]), hash(Caveats[1]), ...)
@@ -1370,24 +1370,26 @@ func (x Signature) VDLWrite(enc vdl.Encoder) error {
 	return enc.FinishValue()
 }
 
-// publicKeyDischarge represents the discharge issued for publicKeyThirdPartyCaveatParams.
+// PublicKeyDischarge represents a discharge for third party caveats that
+// require a signature from a third-party's public key.
 //
 // The message digest of this structure is computed as follows:
 // hash(hash(ThirdPartyCaveatId), hash(Caveats[0]), hash(Caveats[1]), ...),
-// where hash is a cryptographic hash function with a security strength equivalent to the
-// strength of the public key of the principal issuing the discharge.
-type publicKeyDischarge struct {
+// where hash is a cryptographic hash function with a security strength
+// equivalent to the strength of the public key of the principal issuing the
+// discharge.
+type PublicKeyDischarge struct {
 	ThirdPartyCaveatId string    // Id of the third party caveat for which this discharge was issued.
 	Caveats            []Caveat  // Caveats on the use of this discharge.
 	Signature          Signature // Signature of the content hash of this discharge by the discharger.
 }
 
-func (publicKeyDischarge) __VDLReflect(struct {
-	Name string `vdl:"v.io/v23/security.publicKeyDischarge"`
+func (PublicKeyDischarge) __VDLReflect(struct {
+	Name string `vdl:"v.io/v23/security.PublicKeyDischarge"`
 }) {
 }
 
-func (m *publicKeyDischarge) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
+func (m *PublicKeyDischarge) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 	fieldsTarget1, err := t.StartFields(tt)
 	if err != nil {
 		return err
@@ -1494,12 +1496,12 @@ func (m *publicKeyDischarge) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 	return nil
 }
 
-func (m *publicKeyDischarge) MakeVDLTarget() vdl.Target {
-	return &publicKeyDischargeTarget{Value: m}
+func (m *PublicKeyDischarge) MakeVDLTarget() vdl.Target {
+	return &PublicKeyDischargeTarget{Value: m}
 }
 
-type publicKeyDischargeTarget struct {
-	Value                    *publicKeyDischarge
+type PublicKeyDischargeTarget struct {
+	Value                    *PublicKeyDischarge
 	thirdPartyCaveatIdTarget vdl.StringTarget
 	caveatsTarget            __VDLTarget1_list
 	signatureTarget          SignatureTarget
@@ -1507,14 +1509,14 @@ type publicKeyDischargeTarget struct {
 	vdl.FieldsTargetBase
 }
 
-func (t *publicKeyDischargeTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
+func (t *PublicKeyDischargeTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
 
-	if ttWant := vdl.TypeOf((*publicKeyDischarge)(nil)).Elem(); !vdl.Compatible(tt, ttWant) {
+	if ttWant := vdl.TypeOf((*PublicKeyDischarge)(nil)).Elem(); !vdl.Compatible(tt, ttWant) {
 		return nil, fmt.Errorf("type %v incompatible with %v", tt, ttWant)
 	}
 	return t, nil
 }
-func (t *publicKeyDischargeTarget) StartField(name string) (key, field vdl.Target, _ error) {
+func (t *PublicKeyDischargeTarget) StartField(name string) (key, field vdl.Target, _ error) {
 	switch name {
 	case "ThirdPartyCaveatId":
 		t.thirdPartyCaveatIdTarget.Value = &t.Value.ThirdPartyCaveatId
@@ -1529,13 +1531,13 @@ func (t *publicKeyDischargeTarget) StartField(name string) (key, field vdl.Targe
 		target, err := &t.signatureTarget, error(nil)
 		return nil, target, err
 	default:
-		return nil, nil, fmt.Errorf("field %s not in struct v.io/v23/security.publicKeyDischarge", name)
+		return nil, nil, fmt.Errorf("field %s not in struct v.io/v23/security.PublicKeyDischarge", name)
 	}
 }
-func (t *publicKeyDischargeTarget) FinishField(_, _ vdl.Target) error {
+func (t *PublicKeyDischargeTarget) FinishField(_, _ vdl.Target) error {
 	return nil
 }
-func (t *publicKeyDischargeTarget) ZeroField(name string) error {
+func (t *PublicKeyDischargeTarget) ZeroField(name string) error {
 	switch name {
 	case "ThirdPartyCaveatId":
 		t.Value.ThirdPartyCaveatId = ""
@@ -1547,16 +1549,16 @@ func (t *publicKeyDischargeTarget) ZeroField(name string) error {
 		t.Value.Signature = Signature{}
 		return nil
 	default:
-		return fmt.Errorf("field %s not in struct v.io/v23/security.publicKeyDischarge", name)
+		return fmt.Errorf("field %s not in struct v.io/v23/security.PublicKeyDischarge", name)
 	}
 }
-func (t *publicKeyDischargeTarget) FinishFields(_ vdl.FieldsTarget) error {
+func (t *PublicKeyDischargeTarget) FinishFields(_ vdl.FieldsTarget) error {
 
 	return nil
 }
 
-func (x *publicKeyDischarge) VDLRead(dec vdl.Decoder) error {
-	*x = publicKeyDischarge{}
+func (x *PublicKeyDischarge) VDLRead(dec vdl.Decoder) error {
+	*x = PublicKeyDischarge{}
 	var err error
 	if err = dec.StartValue(); err != nil {
 		return err
@@ -1598,8 +1600,8 @@ func (x *publicKeyDischarge) VDLRead(dec vdl.Decoder) error {
 	}
 }
 
-func (x publicKeyDischarge) VDLWrite(enc vdl.Encoder) error {
-	if err := enc.StartValue(vdl.TypeOf((*publicKeyDischarge)(nil)).Elem()); err != nil {
+func (x PublicKeyDischarge) VDLWrite(enc vdl.Encoder) error {
+	if err := enc.StartValue(vdl.TypeOf((*PublicKeyDischarge)(nil)).Elem()); err != nil {
 		return err
 	}
 	var1 := (x.ThirdPartyCaveatId == "")
@@ -3106,7 +3108,7 @@ type (
 		VDLWrite(vdl.Encoder) error
 	}
 	// WireDischargePublicKey represents field PublicKey of the WireDischarge union type.
-	WireDischargePublicKey struct{ Value publicKeyDischarge } // Discharge for PublicKeyThirdPartyCaveat
+	WireDischargePublicKey struct{ Value PublicKeyDischarge } // Discharge for PublicKeyThirdPartyCaveat
 	// __WireDischargeReflect describes the WireDischarge union type.
 	__WireDischargeReflect struct {
 		Name               string `vdl:"v.io/v23/security.WireDischarge"`
@@ -3170,8 +3172,8 @@ func (t *WireDischargeTarget) StartField(name string) (key, field vdl.Target, _ 
 	t.fieldName = name
 	switch name {
 	case "PublicKey":
-		val := publicKeyDischarge{}
-		return nil, &publicKeyDischargeTarget{Value: &val}, nil
+		val := PublicKeyDischarge{}
+		return nil, &PublicKeyDischargeTarget{Value: &val}, nil
 	default:
 		return nil, nil, fmt.Errorf("field %s not in union v.io/v23/security.WireDischarge", name)
 	}
@@ -3179,7 +3181,7 @@ func (t *WireDischargeTarget) StartField(name string) (key, field vdl.Target, _ 
 func (t *WireDischargeTarget) FinishField(_, fieldTarget vdl.Target) error {
 	switch t.fieldName {
 	case "PublicKey":
-		t.wireValue = WireDischargePublicKey{*(fieldTarget.(*publicKeyDischargeTarget)).Value}
+		t.wireValue = WireDischargePublicKey{*(fieldTarget.(*PublicKeyDischargeTarget)).Value}
 	}
 	return nil
 }
@@ -3692,7 +3694,7 @@ func __VDLInit() struct{} {
 	vdl.Register((*publicKeyThirdPartyCaveatParam)(nil))
 	vdl.Register((*Hash)(nil))
 	vdl.Register((*Signature)(nil))
-	vdl.Register((*publicKeyDischarge)(nil))
+	vdl.Register((*PublicKeyDischarge)(nil))
 	vdl.Register((*BlessingPattern)(nil))
 	vdl.Register((*DischargeImpetus)(nil))
 	vdl.Register((*Certificate)(nil))

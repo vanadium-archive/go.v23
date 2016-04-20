@@ -63,7 +63,7 @@ func init() {
 			return verror.New(errMissingDischarge, ctx, params.ID())
 		}
 		// Must be of the valid type.
-		var d *publicKeyDischarge
+		var d *PublicKeyDischarge
 		switch v := discharge.wire.(type) {
 		case WireDischargePublicKey:
 			d = &v.Value

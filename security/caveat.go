@@ -301,7 +301,7 @@ func (c publicKeyThirdPartyCaveatParam) String() string {
 	return fmt.Sprintf("%v@%v [%+v]", c.ID(), c.Location(), c.Requirements())
 }
 
-func (d *publicKeyDischarge) digest(hash Hash) []byte {
+func (d *PublicKeyDischarge) digest(hash Hash) []byte {
 	msg := hash.sum([]byte(d.ThirdPartyCaveatId))
 	for _, cav := range d.Caveats {
 		msg = append(msg, cav.digest(hash)...)
@@ -309,7 +309,7 @@ func (d *publicKeyDischarge) digest(hash Hash) []byte {
 	return hash.sum(msg)
 }
 
-func (d *publicKeyDischarge) verify(ctx *context.T, key PublicKey) error {
+func (d *PublicKeyDischarge) verify(ctx *context.T, key PublicKey) error {
 	if !bytes.Equal(d.Signature.Purpose, dischargePurpose) {
 		return verror.New(errInapproriateDischargeSignature, ctx, d.ThirdPartyCaveatId, d.Signature.Purpose)
 	}
@@ -325,7 +325,7 @@ func (d *publicKeyDischarge) verify(ctx *context.T, key PublicKey) error {
 	return nil
 }
 
-func (d *publicKeyDischarge) signatureCacheKey(digest []byte, key PublicKey, signature Signature) ([]byte, error) {
+func (d *PublicKeyDischarge) signatureCacheKey(digest []byte, key PublicKey, signature Signature) ([]byte, error) {
 	// Every "argument" to signature verification must make it into the cache key.
 	keybytes, err := key.MarshalBinary()
 	if err != nil {
@@ -336,12 +336,12 @@ func (d *publicKeyDischarge) signatureCacheKey(digest []byte, key PublicKey, sig
 	return append(keyhash[:], append(sighash, digest...)...), nil
 }
 
-func (d *publicKeyDischarge) sign(signer Signer) error {
+func (d *PublicKeyDischarge) sign(signer Signer) error {
 	var err error
 	d.Signature, err = signer.Sign(dischargePurpose, d.digest(signer.PublicKey().hash()))
 	return err
 }
 
-func (d *publicKeyDischarge) String() string {
+func (d *PublicKeyDischarge) String() string {
 	return fmt.Sprint(*d)
 }

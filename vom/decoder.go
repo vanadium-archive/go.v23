@@ -174,7 +174,7 @@ func (d *Decoder) Ignore() error {
 
 // decodeWireType decodes the next type definition message and returns its
 // type id.
-func (d *Decoder) decodeWireType(wt *wireType) (typeId, error) {
+func (d *Decoder) decodeWireType(wt *wireType) (TypeId, error) {
 	tid, err := d.nextMessage()
 	if err != nil {
 		return 0, err
@@ -358,9 +358,9 @@ func (d *Decoder) decodeValue(tt *vdl.Type, target vdl.Target) error {
 		if err != nil {
 			return err
 		}
-		var tid typeId
+		var tid TypeId
 		if d.buf.version == Version80 {
-			tid = typeId(x)
+			tid = TypeId(x)
 		} else {
 			tid, err = d.refTypes.ReferencedTypeId(x)
 			if err != nil {
@@ -559,9 +559,9 @@ func (d *Decoder) readAnyHeader() (*vdl.Type, int, error) {
 	case ctrl != 0:
 		return nil, 0, verror.New(errUnexpectedControlByte, nil, ctrl)
 	}
-	var tid typeId
+	var tid TypeId
 	if d.buf.version == Version80 {
-		tid = typeId(typeIndex)
+		tid = TypeId(typeIndex)
 	} else if tid, err = d.refTypes.ReferencedTypeId(typeIndex); err != nil {
 		return nil, 0, err
 	}
@@ -661,7 +661,7 @@ func (d *Decoder) ignoreValue(tt *vdl.Type) error {
 			return d.ignoreValue(ttfield.Type)
 		}
 	case vdl.Any:
-		var elemTid typeId
+		var elemTid TypeId
 		switch x, ctrl, err := binaryDecodeUintWithControl(d.buf); {
 		case err != nil:
 			return err
@@ -670,7 +670,7 @@ func (d *Decoder) ignoreValue(tt *vdl.Type) error {
 		case ctrl != 0:
 			return verror.New(errUnexpectedControlByte, nil, ctrl)
 		case d.buf.version == Version80:
-			elemTid = typeId(x)
+			elemTid = TypeId(x)
 		default:
 			if elemTid, err = d.refTypes.ReferencedTypeId(x); err != nil {
 				return err
@@ -686,7 +686,7 @@ func (d *Decoder) ignoreValue(tt *vdl.Type) error {
 	}
 }
 
-func (d *Decoder) nextMessage() (typeId, error) {
+func (d *Decoder) nextMessage() (TypeId, error) {
 	if leftover := d.buf.RemoveLimit(); leftover > 0 {
 		return 0, verror.New(errLeftOverBytes, nil, leftover)
 	}
@@ -727,17 +727,17 @@ func (d *Decoder) nextMessage() (typeId, error) {
 		return 0, verror.New(errBadControlCode, nil)
 	}
 
-	var tid typeId
+	var tid TypeId
 	var hasAny, hasTypeObject bool
 	var hasLength bool
 	switch {
 	case mid < 0:
-		tid = typeId(-mid)
+		tid = TypeId(-mid)
 		hasLength = true
 		hasAny = false
 		hasTypeObject = false
 	case mid > 0:
-		tid = typeId(mid)
+		tid = TypeId(mid)
 		t, err := d.typeDec.lookupType(tid)
 		if err != nil {
 			return 0, err
@@ -759,7 +759,7 @@ func (d *Decoder) nextMessage() (typeId, error) {
 			if err != nil {
 				return 0, err
 			}
-			d.refTypes.AddTypeID(typeId(refId))
+			d.refTypes.AddTypeID(TypeId(refId))
 		}
 	}
 	if hasAny && d.buf.version != Version80 {
@@ -823,7 +823,7 @@ func (d *Decoder) reset() error {
 }
 
 type referencedTypes struct {
-	tids   []typeId
+	tids   []TypeId
 	marker int
 }
 
@@ -833,11 +833,11 @@ func (refTypes *referencedTypes) Reset() (err error) {
 	return
 }
 
-func (refTypes *referencedTypes) AddTypeID(tid typeId) {
+func (refTypes *referencedTypes) AddTypeID(tid TypeId) {
 	refTypes.tids = append(refTypes.tids, tid)
 }
 
-func (refTypes *referencedTypes) ReferencedTypeId(index uint64) (typeId, error) {
+func (refTypes *referencedTypes) ReferencedTypeId(index uint64) (TypeId, error) {
 	if index >= uint64(len(refTypes.tids)) {
 		return 0, verror.New(errInvalidTypeIdIndex, nil)
 	}

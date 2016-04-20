@@ -266,7 +266,7 @@ func (e *encoder) encodeRaw(raw *RawBytes) error {
 	return nil
 }
 
-func (e *encoder) encodeWireType(tid typeId, wt wireType, typeIncomplete bool) error {
+func (e *encoder) encodeWireType(tid TypeId, wt wireType, typeIncomplete bool) error {
 	if err := e.startEncode(false, false, true, typeIncomplete, int64(-tid)); err != nil {
 		return err
 	}
@@ -314,7 +314,7 @@ func (e *encoder) prepareType(tt *vdl.Type, kinds ...vdl.Kind) error {
 // fromNil is true, we skip encoding the typeid for any type, since we'll be
 // encoding a nil instead.
 func (e *encoder) prepareTypeHelper(tt *vdl.Type, preventAnyWrap bool) error {
-	var tid typeId
+	var tid TypeId
 	// Check the bootstrap wire types first to avoid recursive calls to the type
 	// encoder for wire types.
 	if _, exists := bootstrapWireTypes[tt]; !exists {
@@ -797,16 +797,16 @@ func (e *encoder) finishMessage() error {
 
 func newTypeIDList() *typeIDList {
 	return &typeIDList{
-		tids: make([]typeId, 0, typeIDListInitialSize),
+		tids: make([]TypeId, 0, typeIDListInitialSize),
 	}
 }
 
 type typeIDList struct {
-	tids      []typeId
+	tids      []TypeId
 	totalSent int
 }
 
-func (l *typeIDList) ReferenceTypeID(tid typeId) uint64 {
+func (l *typeIDList) ReferenceTypeID(tid TypeId) uint64 {
 	for index, existingTid := range l.tids {
 		if existingTid == tid {
 			return uint64(index)
@@ -826,8 +826,8 @@ func (l *typeIDList) Reset() error {
 	return nil
 }
 
-func (l *typeIDList) NewIDs() []typeId {
-	var newIDs []typeId
+func (l *typeIDList) NewIDs() []TypeId {
+	var newIDs []TypeId
 	if l.totalSent < len(l.tids) {
 		newIDs = l.tids[l.totalSent:]
 	}

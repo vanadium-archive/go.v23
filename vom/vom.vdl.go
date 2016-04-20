@@ -1239,58 +1239,58 @@ func (x DumpAtom) VDLWrite(enc vdl.Encoder) error {
 	return enc.FinishValue()
 }
 
-// typeId uniquely identifies a type definition within a vom stream.
-type typeId uint64
+// TypeId uniquely identifies a type definition within a vom stream.
+type TypeId uint64
 
-func (typeId) __VDLReflect(struct {
-	Name string `vdl:"v.io/v23/vom.typeId"`
+func (TypeId) __VDLReflect(struct {
+	Name string `vdl:"v.io/v23/vom.TypeId"`
 }) {
 }
 
-func (m *typeId) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
+func (m *TypeId) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 	if err := t.FromUint(uint64((*m)), tt); err != nil {
 		return err
 	}
 	return nil
 }
 
-func (m *typeId) MakeVDLTarget() vdl.Target {
-	return &typeIdTarget{Value: m}
+func (m *TypeId) MakeVDLTarget() vdl.Target {
+	return &TypeIdTarget{Value: m}
 }
 
-type typeIdTarget struct {
-	Value *typeId
+type TypeIdTarget struct {
+	Value *TypeId
 	vdl.TargetBase
 }
 
-func (t *typeIdTarget) FromUint(src uint64, tt *vdl.Type) error {
+func (t *TypeIdTarget) FromUint(src uint64, tt *vdl.Type) error {
 
-	*t.Value = typeId(src)
+	*t.Value = TypeId(src)
 
 	return nil
 }
-func (t *typeIdTarget) FromInt(src int64, tt *vdl.Type) error {
+func (t *TypeIdTarget) FromInt(src int64, tt *vdl.Type) error {
 
 	val, err := vdlconv.Int64ToUint64(src)
 	if err != nil {
 		return err
 	}
-	*t.Value = typeId(val)
+	*t.Value = TypeId(val)
 
 	return nil
 }
-func (t *typeIdTarget) FromFloat(src float64, tt *vdl.Type) error {
+func (t *TypeIdTarget) FromFloat(src float64, tt *vdl.Type) error {
 
 	val, err := vdlconv.Float64ToUint64(src)
 	if err != nil {
 		return err
 	}
-	*t.Value = typeId(val)
+	*t.Value = TypeId(val)
 
 	return nil
 }
 
-func (x *typeId) VDLRead(dec vdl.Decoder) error {
+func (x *TypeId) VDLRead(dec vdl.Decoder) error {
 	var err error
 	if err = dec.StartValue(); err != nil {
 		return err
@@ -1299,12 +1299,12 @@ func (x *typeId) VDLRead(dec vdl.Decoder) error {
 	if err != nil {
 		return err
 	}
-	*x = typeId(tmp)
+	*x = TypeId(tmp)
 	return dec.FinishValue()
 }
 
-func (x typeId) VDLWrite(enc vdl.Encoder) error {
-	if err := enc.StartValue(vdl.TypeOf((*typeId)(nil))); err != nil {
+func (x TypeId) VDLWrite(enc vdl.Encoder) error {
+	if err := enc.StartValue(vdl.TypeOf((*TypeId)(nil))); err != nil {
 		return err
 	}
 	if err := enc.EncodeUint(uint64(x)); err != nil {
@@ -1316,7 +1316,7 @@ func (x typeId) VDLWrite(enc vdl.Encoder) error {
 // wireNamed represents a type definition for named primitives.
 type wireNamed struct {
 	Name string
-	Base typeId
+	Base TypeId
 }
 
 func (wireNamed) __VDLReflect(struct {
@@ -1348,7 +1348,7 @@ func (m *wireNamed) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 			}
 		}
 	}
-	var7 := (m.Base == typeId(0))
+	var7 := (m.Base == TypeId(0))
 	if var7 {
 		if err := fieldsTarget1.ZeroField("Base"); err != nil && err != vdl.ErrFieldNoExist {
 			return err
@@ -1381,7 +1381,7 @@ func (m *wireNamed) MakeVDLTarget() vdl.Target {
 type wireNamedTarget struct {
 	Value      *wireNamed
 	nameTarget vdl.StringTarget
-	baseTarget typeIdTarget
+	baseTarget TypeIdTarget
 	vdl.TargetBase
 	vdl.FieldsTargetBase
 }
@@ -1416,7 +1416,7 @@ func (t *wireNamedTarget) ZeroField(name string) error {
 		t.Value.Name = ""
 		return nil
 	case "Base":
-		t.Value.Base = typeId(0)
+		t.Value.Base = TypeId(0)
 		return nil
 	default:
 		return fmt.Errorf("field %s not in struct v.io/v23/vom.wireNamed", name)
@@ -1485,7 +1485,7 @@ func (x wireNamed) VDLWrite(enc vdl.Encoder) error {
 			return err
 		}
 	}
-	var2 := (x.Base == typeId(0))
+	var2 := (x.Base == TypeId(0))
 	if !(var2) {
 		if err := enc.NextField("Base"); err != nil {
 			return err
@@ -1774,7 +1774,7 @@ func __VDLWrite1_list(enc vdl.Encoder, x *[]string) error {
 // wireArray represents an type definition for array types.
 type wireArray struct {
 	Name string
-	Elem typeId
+	Elem TypeId
 	Len  uint64
 }
 
@@ -1807,7 +1807,7 @@ func (m *wireArray) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 			}
 		}
 	}
-	var7 := (m.Elem == typeId(0))
+	var7 := (m.Elem == TypeId(0))
 	if var7 {
 		if err := fieldsTarget1.ZeroField("Elem"); err != nil && err != vdl.ErrFieldNoExist {
 			return err
@@ -1859,7 +1859,7 @@ func (m *wireArray) MakeVDLTarget() vdl.Target {
 type wireArrayTarget struct {
 	Value      *wireArray
 	nameTarget vdl.StringTarget
-	elemTarget typeIdTarget
+	elemTarget TypeIdTarget
 	lenTarget  vdl.Uint64Target
 	vdl.TargetBase
 	vdl.FieldsTargetBase
@@ -1899,7 +1899,7 @@ func (t *wireArrayTarget) ZeroField(name string) error {
 		t.Value.Name = ""
 		return nil
 	case "Elem":
-		t.Value.Elem = typeId(0)
+		t.Value.Elem = TypeId(0)
 		return nil
 	case "Len":
 		t.Value.Len = uint64(0)
@@ -1981,7 +1981,7 @@ func (x wireArray) VDLWrite(enc vdl.Encoder) error {
 			return err
 		}
 	}
-	var2 := (x.Elem == typeId(0))
+	var2 := (x.Elem == TypeId(0))
 	if !(var2) {
 		if err := enc.NextField("Elem"); err != nil {
 			return err
@@ -2014,7 +2014,7 @@ func (x wireArray) VDLWrite(enc vdl.Encoder) error {
 // wireList represents a type definition for list types.
 type wireList struct {
 	Name string
-	Elem typeId
+	Elem TypeId
 }
 
 func (wireList) __VDLReflect(struct {
@@ -2046,7 +2046,7 @@ func (m *wireList) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 			}
 		}
 	}
-	var7 := (m.Elem == typeId(0))
+	var7 := (m.Elem == TypeId(0))
 	if var7 {
 		if err := fieldsTarget1.ZeroField("Elem"); err != nil && err != vdl.ErrFieldNoExist {
 			return err
@@ -2079,7 +2079,7 @@ func (m *wireList) MakeVDLTarget() vdl.Target {
 type wireListTarget struct {
 	Value      *wireList
 	nameTarget vdl.StringTarget
-	elemTarget typeIdTarget
+	elemTarget TypeIdTarget
 	vdl.TargetBase
 	vdl.FieldsTargetBase
 }
@@ -2114,7 +2114,7 @@ func (t *wireListTarget) ZeroField(name string) error {
 		t.Value.Name = ""
 		return nil
 	case "Elem":
-		t.Value.Elem = typeId(0)
+		t.Value.Elem = TypeId(0)
 		return nil
 	default:
 		return fmt.Errorf("field %s not in struct v.io/v23/vom.wireList", name)
@@ -2183,7 +2183,7 @@ func (x wireList) VDLWrite(enc vdl.Encoder) error {
 			return err
 		}
 	}
-	var2 := (x.Elem == typeId(0))
+	var2 := (x.Elem == TypeId(0))
 	if !(var2) {
 		if err := enc.NextField("Elem"); err != nil {
 			return err
@@ -2201,7 +2201,7 @@ func (x wireList) VDLWrite(enc vdl.Encoder) error {
 // wireSet represents a type definition for set types.
 type wireSet struct {
 	Name string
-	Key  typeId
+	Key  TypeId
 }
 
 func (wireSet) __VDLReflect(struct {
@@ -2233,7 +2233,7 @@ func (m *wireSet) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 			}
 		}
 	}
-	var7 := (m.Key == typeId(0))
+	var7 := (m.Key == TypeId(0))
 	if var7 {
 		if err := fieldsTarget1.ZeroField("Key"); err != nil && err != vdl.ErrFieldNoExist {
 			return err
@@ -2266,7 +2266,7 @@ func (m *wireSet) MakeVDLTarget() vdl.Target {
 type wireSetTarget struct {
 	Value      *wireSet
 	nameTarget vdl.StringTarget
-	keyTarget  typeIdTarget
+	keyTarget  TypeIdTarget
 	vdl.TargetBase
 	vdl.FieldsTargetBase
 }
@@ -2301,7 +2301,7 @@ func (t *wireSetTarget) ZeroField(name string) error {
 		t.Value.Name = ""
 		return nil
 	case "Key":
-		t.Value.Key = typeId(0)
+		t.Value.Key = TypeId(0)
 		return nil
 	default:
 		return fmt.Errorf("field %s not in struct v.io/v23/vom.wireSet", name)
@@ -2370,7 +2370,7 @@ func (x wireSet) VDLWrite(enc vdl.Encoder) error {
 			return err
 		}
 	}
-	var2 := (x.Key == typeId(0))
+	var2 := (x.Key == TypeId(0))
 	if !(var2) {
 		if err := enc.NextField("Key"); err != nil {
 			return err
@@ -2388,8 +2388,8 @@ func (x wireSet) VDLWrite(enc vdl.Encoder) error {
 // wireMap represents a type definition for map types.
 type wireMap struct {
 	Name string
-	Key  typeId
-	Elem typeId
+	Key  TypeId
+	Elem TypeId
 }
 
 func (wireMap) __VDLReflect(struct {
@@ -2421,7 +2421,7 @@ func (m *wireMap) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 			}
 		}
 	}
-	var7 := (m.Key == typeId(0))
+	var7 := (m.Key == TypeId(0))
 	if var7 {
 		if err := fieldsTarget1.ZeroField("Key"); err != nil && err != vdl.ErrFieldNoExist {
 			return err
@@ -2441,7 +2441,7 @@ func (m *wireMap) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 			}
 		}
 	}
-	var10 := (m.Elem == typeId(0))
+	var10 := (m.Elem == TypeId(0))
 	if var10 {
 		if err := fieldsTarget1.ZeroField("Elem"); err != nil && err != vdl.ErrFieldNoExist {
 			return err
@@ -2474,8 +2474,8 @@ func (m *wireMap) MakeVDLTarget() vdl.Target {
 type wireMapTarget struct {
 	Value      *wireMap
 	nameTarget vdl.StringTarget
-	keyTarget  typeIdTarget
-	elemTarget typeIdTarget
+	keyTarget  TypeIdTarget
+	elemTarget TypeIdTarget
 	vdl.TargetBase
 	vdl.FieldsTargetBase
 }
@@ -2514,10 +2514,10 @@ func (t *wireMapTarget) ZeroField(name string) error {
 		t.Value.Name = ""
 		return nil
 	case "Key":
-		t.Value.Key = typeId(0)
+		t.Value.Key = TypeId(0)
 		return nil
 	case "Elem":
-		t.Value.Elem = typeId(0)
+		t.Value.Elem = TypeId(0)
 		return nil
 	default:
 		return fmt.Errorf("field %s not in struct v.io/v23/vom.wireMap", name)
@@ -2590,7 +2590,7 @@ func (x wireMap) VDLWrite(enc vdl.Encoder) error {
 			return err
 		}
 	}
-	var2 := (x.Key == typeId(0))
+	var2 := (x.Key == TypeId(0))
 	if !(var2) {
 		if err := enc.NextField("Key"); err != nil {
 			return err
@@ -2599,7 +2599,7 @@ func (x wireMap) VDLWrite(enc vdl.Encoder) error {
 			return err
 		}
 	}
-	var3 := (x.Elem == typeId(0))
+	var3 := (x.Elem == TypeId(0))
 	if !(var3) {
 		if err := enc.NextField("Elem"); err != nil {
 			return err
@@ -2617,7 +2617,7 @@ func (x wireMap) VDLWrite(enc vdl.Encoder) error {
 // wireField represents a field in a struct or union type.
 type wireField struct {
 	Name string
-	Type typeId
+	Type TypeId
 }
 
 func (wireField) __VDLReflect(struct {
@@ -2649,7 +2649,7 @@ func (m *wireField) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 			}
 		}
 	}
-	var7 := (m.Type == typeId(0))
+	var7 := (m.Type == TypeId(0))
 	if var7 {
 		if err := fieldsTarget1.ZeroField("Type"); err != nil && err != vdl.ErrFieldNoExist {
 			return err
@@ -2682,7 +2682,7 @@ func (m *wireField) MakeVDLTarget() vdl.Target {
 type wireFieldTarget struct {
 	Value      *wireField
 	nameTarget vdl.StringTarget
-	typeTarget typeIdTarget
+	typeTarget TypeIdTarget
 	vdl.TargetBase
 	vdl.FieldsTargetBase
 }
@@ -2717,7 +2717,7 @@ func (t *wireFieldTarget) ZeroField(name string) error {
 		t.Value.Name = ""
 		return nil
 	case "Type":
-		t.Value.Type = typeId(0)
+		t.Value.Type = TypeId(0)
 		return nil
 	default:
 		return fmt.Errorf("field %s not in struct v.io/v23/vom.wireField", name)
@@ -2786,7 +2786,7 @@ func (x wireField) VDLWrite(enc vdl.Encoder) error {
 			return err
 		}
 	}
-	var2 := (x.Type == typeId(0))
+	var2 := (x.Type == TypeId(0))
 	if !(var2) {
 		if err := enc.NextField("Type"); err != nil {
 			return err
@@ -3307,7 +3307,7 @@ func (x wireUnion) VDLWrite(enc vdl.Encoder) error {
 // wireOptional represents an type definition for optional types.
 type wireOptional struct {
 	Name string
-	Elem typeId
+	Elem TypeId
 }
 
 func (wireOptional) __VDLReflect(struct {
@@ -3339,7 +3339,7 @@ func (m *wireOptional) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 			}
 		}
 	}
-	var7 := (m.Elem == typeId(0))
+	var7 := (m.Elem == TypeId(0))
 	if var7 {
 		if err := fieldsTarget1.ZeroField("Elem"); err != nil && err != vdl.ErrFieldNoExist {
 			return err
@@ -3372,7 +3372,7 @@ func (m *wireOptional) MakeVDLTarget() vdl.Target {
 type wireOptionalTarget struct {
 	Value      *wireOptional
 	nameTarget vdl.StringTarget
-	elemTarget typeIdTarget
+	elemTarget TypeIdTarget
 	vdl.TargetBase
 	vdl.FieldsTargetBase
 }
@@ -3407,7 +3407,7 @@ func (t *wireOptionalTarget) ZeroField(name string) error {
 		t.Value.Name = ""
 		return nil
 	case "Elem":
-		t.Value.Elem = typeId(0)
+		t.Value.Elem = TypeId(0)
 		return nil
 	default:
 		return fmt.Errorf("field %s not in struct v.io/v23/vom.wireOptional", name)
@@ -3476,7 +3476,7 @@ func (x wireOptional) VDLWrite(enc vdl.Encoder) error {
 			return err
 		}
 	}
-	var2 := (x.Elem == typeId(0))
+	var2 := (x.Elem == TypeId(0))
 	if !(var2) {
 		if err := enc.NextField("Elem"); err != nil {
 			return err
@@ -4145,29 +4145,29 @@ func (x wireTypeOptionalT) VDLWrite(enc vdl.Encoder) error {
 // Const definitions
 
 // Primitive types.
-const WireIdBool = typeId(1)
-const WireIdByte = typeId(2)
-const WireIdString = typeId(3)
-const WireIdUint16 = typeId(4)
-const WireIdUint32 = typeId(5)
-const WireIdUint64 = typeId(6)
-const WireIdInt16 = typeId(7)
-const WireIdInt32 = typeId(8)
-const WireIdInt64 = typeId(9)
-const WireIdFloat32 = typeId(10)
-const WireIdFloat64 = typeId(11)
+const WireIdBool = TypeId(1)
+const WireIdByte = TypeId(2)
+const WireIdString = TypeId(3)
+const WireIdUint16 = TypeId(4)
+const WireIdUint32 = TypeId(5)
+const WireIdUint64 = TypeId(6)
+const WireIdInt16 = TypeId(7)
+const WireIdInt32 = TypeId(8)
+const WireIdInt64 = TypeId(9)
+const WireIdFloat32 = TypeId(10)
+const WireIdFloat64 = TypeId(11)
 
 // Wire ids 12 and 13 were previously used for complex64 and complex 128.
-const WireIdTypeObject = typeId(14)
-const WireIdAny = typeId(15)
-const WireIdInt8 = typeId(16)
+const WireIdTypeObject = TypeId(14)
+const WireIdAny = TypeId(15)
+const WireIdInt8 = TypeId(16)
 
 // Other commonly used composites.
-const WireIdByteList = typeId(39)
-const WireIdStringList = typeId(40)
+const WireIdByteList = TypeId(39)
+const WireIdStringList = TypeId(40)
 
-// The first user-defined typeId is 41.
-const WireIdFirstUserType = typeId(41)
+// The first user-defined TypeId is 41.
+const WireIdFirstUserType = TypeId(41)
 const WireCtrlNil = byte(224)            // Nil in optional or any
 const WireCtrlEnd = byte(225)            // End of struct or union
 const WireCtrlTypeIncomplete = byte(226) // Marks that the type message is incomplete until future messages are received
@@ -4198,7 +4198,7 @@ func __VDLInit() struct{} {
 	vdl.Register((*Primitive)(nil))
 	vdl.Register((*DumpKind)(nil))
 	vdl.Register((*DumpAtom)(nil))
-	vdl.Register((*typeId)(nil))
+	vdl.Register((*TypeId)(nil))
 	vdl.Register((*wireNamed)(nil))
 	vdl.Register((*wireEnum)(nil))
 	vdl.Register((*wireArray)(nil))

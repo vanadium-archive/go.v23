@@ -446,7 +446,7 @@ func (d *dumpWorker) decodeValueType() (*vdl.Type, error) {
 			return nil, verror.New(errDecodeZeroTypeID, nil)
 		case id > 0:
 			// This is a value message, the typeID is +id.
-			tid := typeId(+id)
+			tid := TypeId(+id)
 			tt, err := d.typeDec.lookupType(tid)
 			if err != nil {
 				d.writeAtom(DumpKindValueMsg, PrimitivePUint{uint64(tid)}, "%v", err)
@@ -456,7 +456,7 @@ func (d *dumpWorker) decodeValueType() (*vdl.Type, error) {
 			return tt, nil
 		}
 		// This is a type message, the typeID is -id.
-		tid := typeId(-id)
+		tid := TypeId(-id)
 		d.writeAtom(DumpKindTypeMsg, PrimitivePUint{uint64(tid)}, "")
 		// Decode the wireType like a regular value, and store it in typeDec.  The
 		// type will actually be built when a value message arrives using this tid.
@@ -497,7 +497,7 @@ func (d *dumpWorker) decodeValueMsg(tt *vdl.Type, target vdl.Target) error {
 			if err != nil {
 				return err
 			}
-			d.status.RefTypes[i], err = d.typeDec.lookupType(typeId(tid))
+			d.status.RefTypes[i], err = d.typeDec.lookupType(TypeId(tid))
 			d.writeAtom(DumpKindTypeId, PrimitivePUint{tid}, "")
 		}
 		if containsAny(tt) {
@@ -670,7 +670,7 @@ func (d *dumpWorker) decodeValue(tt *vdl.Type, target vdl.Target) error {
 		var typeobj *vdl.Type
 		switch d.version {
 		case Version80:
-			typeobj, err = d.typeDec.lookupType(typeId(id))
+			typeobj, err = d.typeDec.lookupType(TypeId(id))
 		default:
 			if id >= uint64(len(d.status.RefTypes)) {
 				return fmt.Errorf("type index %d out of bounds", id)
@@ -843,7 +843,7 @@ func (d *dumpWorker) decodeValue(tt *vdl.Type, target vdl.Target) error {
 			var elemType *vdl.Type
 			switch d.version {
 			case Version80:
-				elemType, err = d.typeDec.lookupType(typeId(id))
+				elemType, err = d.typeDec.lookupType(TypeId(id))
 			default:
 				if id >= uint64(len(d.status.RefTypes)) {
 					return fmt.Errorf("type index %d out of bounds", id)

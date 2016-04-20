@@ -29,12 +29,12 @@ type TypeDecoder struct {
 	// a time. This is for simplifying the workflow and avoid unnecessary blocking
 	// for type lookups.
 	typeMu   sync.RWMutex
-	idToType map[typeId]*vdl.Type // GUARDED_BY(typeMu)
+	idToType map[TypeId]*vdl.Type // GUARDED_BY(typeMu)
 
 	buildMu   sync.Mutex
 	buildCond *sync.Cond
 	err       error               // GUARDED_BY(buildMu)
-	idToWire  map[typeId]wireType // GUARDED_BY(buildMu)
+	idToWire  map[TypeId]wireType // GUARDED_BY(buildMu)
 	dec       *xDecoder           // GUARDED_BY(buildMu)
 
 	processingControlMu sync.Mutex
@@ -50,8 +50,8 @@ func NewTypeDecoder(r io.Reader) *TypeDecoder {
 
 func newTypeDecoderInternal(buf *decbuf) *TypeDecoder {
 	td := &TypeDecoder{
-		idToType: make(map[typeId]*vdl.Type),
-		idToWire: make(map[typeId]wireType),
+		idToType: make(map[TypeId]*vdl.Type),
+		idToWire: make(map[TypeId]wireType),
 		dec:      &xDecoder{old: &Decoder{buf: buf}},
 	}
 	td.buildCond = sync.NewCond(&td.buildMu)
@@ -135,7 +135,7 @@ func (d *TypeDecoder) readSingleType() error {
 
 // LookupType returns the type for tid. If the type is not yet available,
 // this will wait until it arrives and is built.
-func (d *TypeDecoder) lookupType(tid typeId) (*vdl.Type, error) {
+func (d *TypeDecoder) lookupType(tid TypeId) (*vdl.Type, error) {
 	if tt := d.lookupKnownType(tid); tt != nil {
 		return tt, nil
 	}
@@ -169,14 +169,14 @@ func (d *TypeDecoder) lookupType(tid typeId) (*vdl.Type, error) {
 }
 
 // addWireType adds the wire type wt with the type id tid.
-func (d *TypeDecoder) addWireType(tid typeId, wt wireType) error {
+func (d *TypeDecoder) addWireType(tid TypeId, wt wireType) error {
 	d.buildMu.Lock()
 	err := d.addWireTypeBuildLocked(tid, wt)
 	d.buildMu.Unlock()
 	return err
 }
 
-func (d *TypeDecoder) addWireTypeBuildLocked(tid typeId, wt wireType) error {
+func (d *TypeDecoder) addWireTypeBuildLocked(tid TypeId, wt wireType) error {
 	if tid < WireIdFirstUserType {
 		return verror.New(errTypeInvalid, nil, wt, tid, WireIdFirstUserType)
 	}
@@ -192,7 +192,7 @@ func (d *TypeDecoder) addWireTypeBuildLocked(tid typeId, wt wireType) error {
 	return nil
 }
 
-func (d *TypeDecoder) lookupKnownType(tid typeId) *vdl.Type {
+func (d *TypeDecoder) lookupKnownType(tid TypeId) *vdl.Type {
 	if tt := bootstrapIdToType[tid]; tt != nil {
 		return tt
 	}
@@ -203,15 +203,15 @@ func (d *TypeDecoder) lookupKnownType(tid typeId) *vdl.Type {
 }
 
 // buildType builds the type from the given wire type.
-func (d *TypeDecoder) buildType(tid typeId) error {
+func (d *TypeDecoder) buildType(tid TypeId) error {
 	builder := vdl.TypeBuilder{}
-	pending := make(map[typeId]vdl.PendingType)
+	pending := make(map[TypeId]vdl.PendingType)
 	_, err := d.makeType(tid, &builder, pending)
 	if err != nil {
 		return err
 	}
 	builder.Build()
-	types := make(map[typeId]*vdl.Type)
+	types := make(map[TypeId]*vdl.Type)
 	for tid, pt := range pending {
 		tt, err := pt.Built()
 		if err != nil {
@@ -230,7 +230,7 @@ func (d *TypeDecoder) buildType(tid typeId) error {
 }
 
 // makeType makes the pending type from its wire type representation.
-func (d *TypeDecoder) makeType(tid typeId, builder *vdl.TypeBuilder, pending map[typeId]vdl.PendingType) (vdl.PendingType, error) {
+func (d *TypeDecoder) makeType(tid TypeId, builder *vdl.TypeBuilder, pending map[TypeId]vdl.PendingType) (vdl.PendingType, error) {
 	wt := d.idToWire[tid]
 	if wt == nil {
 		return nil, verror.New(errUnknownType, nil, tid)
@@ -297,7 +297,7 @@ func (d *TypeDecoder) startBaseType(wt wireType, builder *vdl.TypeBuilder) (vdl.
 	}
 }
 
-func (d *TypeDecoder) finishBaseType(wt wireType, p vdl.PendingType, builder *vdl.TypeBuilder, pending map[typeId]vdl.PendingType) error {
+func (d *TypeDecoder) finishBaseType(wt wireType, p vdl.PendingType, builder *vdl.TypeBuilder, pending map[TypeId]vdl.PendingType) error {
 	switch wt := wt.(type) {
 	case wireTypeEnumT:
 		for _, label := range wt.Value.Labels {
@@ -357,7 +357,7 @@ func (d *TypeDecoder) finishBaseType(wt wireType, p vdl.PendingType, builder *vd
 	return nil
 }
 
-func (d *TypeDecoder) lookupOrMakeType(tid typeId, builder *vdl.TypeBuilder, pending map[typeId]vdl.PendingType) (vdl.TypeOrPending, error) {
+func (d *TypeDecoder) lookupOrMakeType(tid TypeId, builder *vdl.TypeBuilder, pending map[TypeId]vdl.PendingType) (vdl.TypeOrPending, error) {
 	if tt := d.lookupKnownType(tid); tt != nil {
 		return tt, nil
 	}
