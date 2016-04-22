@@ -18,7 +18,9 @@ pkg math, method (*Complex64Target) FinishFields(vdl.FieldsTarget) error
 pkg math, method (*Complex64Target) StartField(string) (vdl.Target, vdl.Target, error)
 pkg math, method (*Complex64Target) StartFields(*vdl.Type) (vdl.FieldsTarget, error)
 pkg math, method (*Complex64Target) ZeroField(string) error
+pkg math, method (Complex128) VDLIsZero() (bool, error)
 pkg math, method (Complex128) VDLWrite(vdl.Encoder) error
+pkg math, method (Complex64) VDLIsZero() (bool, error)
 pkg math, method (Complex64) VDLWrite(vdl.Encoder) error
 pkg math, type Complex128 struct
 pkg math, type Complex128 struct, Imag float64

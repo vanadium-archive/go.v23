@@ -134,6 +134,10 @@ func (rb *RawBytes) Decoder() vdl.Decoder {
 	return xd
 }
 
+func (rb *RawBytes) VDLIsZero() (bool, error) {
+	return rb == nil || (rb.Type == vdl.AnyType && rb.IsNil()), nil
+}
+
 func (rb *RawBytes) VDLRead(dec vdl.Decoder) error {
 	// Fastpath: the bytes are already available in the xDecoder.  Note that this
 	// also handles the case where dec is RawBytes.Decoder().

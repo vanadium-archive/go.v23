@@ -25,8 +25,11 @@ pkg application, method (*SignedFileTarget) StartField(string) (vdl.Target, vdl.
 pkg application, method (*SignedFileTarget) StartFields(*vdl.Type) (vdl.FieldsTarget, error)
 pkg application, method (*SignedFileTarget) ZeroField(string) error
 pkg application, method (Envelope) MarshalJSON() ([]byte, error)
+pkg application, method (Envelope) VDLIsZero() (bool, error)
 pkg application, method (Envelope) VDLWrite(vdl.Encoder) error
+pkg application, method (Packages) VDLIsZero() (bool, error)
 pkg application, method (Packages) VDLWrite(vdl.Encoder) error
+pkg application, method (SignedFile) VDLIsZero() (bool, error)
 pkg application, method (SignedFile) VDLWrite(vdl.Encoder) error
 pkg application, type Envelope struct
 pkg application, type Envelope struct, Args []string

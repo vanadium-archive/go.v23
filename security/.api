@@ -149,6 +149,7 @@ pkg security, method (BlessingPattern) IsValid() bool
 pkg security, method (BlessingPattern) MakeNonExtendable() BlessingPattern
 pkg security, method (BlessingPattern) MatchedBy(...string) bool
 pkg security, method (BlessingPattern) PrefixPatterns() []BlessingPattern
+pkg security, method (BlessingPattern) VDLIsZero() (bool, error)
 pkg security, method (BlessingPattern) VDLWrite(vdl.Encoder) error
 pkg security, method (Blessings) CouldHaveNames([]string) bool
 pkg security, method (Blessings) Equivalent(Blessings) bool
@@ -159,26 +160,37 @@ pkg security, method (Blessings) String() string
 pkg security, method (Blessings) ThirdPartyCaveats() []Caveat
 pkg security, method (Blessings) UniqueID() []byte
 pkg security, method (Caveat) String() string
+pkg security, method (Caveat) VDLIsZero() (bool, error)
 pkg security, method (Caveat) VDLWrite(vdl.Encoder) error
+pkg security, method (CaveatDescriptor) VDLIsZero() (bool, error)
 pkg security, method (CaveatDescriptor) VDLWrite(vdl.Encoder) error
+pkg security, method (Certificate) VDLIsZero() (bool, error)
 pkg security, method (Certificate) VDLWrite(vdl.Encoder) error
 pkg security, method (Discharge) Equivalent(Discharge) bool
 pkg security, method (Discharge) Expiry() time.Time
 pkg security, method (Discharge) ID() string
 pkg security, method (Discharge) ThirdPartyCaveats() []ThirdPartyCaveat
+pkg security, method (DischargeImpetus) VDLIsZero() (bool, error)
 pkg security, method (DischargeImpetus) VDLWrite(vdl.Encoder) error
+pkg security, method (Hash) VDLIsZero() (bool, error)
 pkg security, method (Hash) VDLWrite(vdl.Encoder) error
+pkg security, method (PublicKeyDischarge) VDLIsZero() (bool, error)
 pkg security, method (PublicKeyDischarge) VDLWrite(vdl.Encoder) error
 pkg security, method (RejectedBlessing) String() string
+pkg security, method (RejectedBlessing) VDLIsZero() (bool, error)
 pkg security, method (RejectedBlessing) VDLWrite(vdl.Encoder) error
+pkg security, method (Signature) VDLIsZero() (bool, error)
 pkg security, method (Signature) VDLWrite(vdl.Encoder) error
+pkg security, method (ThirdPartyRequirements) VDLIsZero() (bool, error)
 pkg security, method (ThirdPartyRequirements) VDLWrite(vdl.Encoder) error
+pkg security, method (WireBlessings) VDLIsZero() (bool, error)
 pkg security, method (WireBlessings) VDLWrite(vdl.Encoder) error
 pkg security, method (WireDischargePublicKey) FillVDLTarget(vdl.Target, *vdl.Type) error
 pkg security, method (WireDischargePublicKey) Index() int
 pkg security, method (WireDischargePublicKey) Interface() interface{}
 pkg security, method (WireDischargePublicKey) MakeVDLTarget() vdl.Target
 pkg security, method (WireDischargePublicKey) Name() string
+pkg security, method (WireDischargePublicKey) VDLIsZero() (bool, error)
 pkg security, method (WireDischargePublicKey) VDLWrite(vdl.Encoder) error
 pkg security, type Authorizer interface { Authorize }
 pkg security, type Authorizer interface, Authorize(*context.T, Call) error
@@ -324,6 +336,7 @@ pkg security, type WireDischarge interface, FillVDLTarget(vdl.Target, *vdl.Type)
 pkg security, type WireDischarge interface, Index() int
 pkg security, type WireDischarge interface, Interface() interface{}
 pkg security, type WireDischarge interface, Name() string
+pkg security, type WireDischarge interface, VDLIsZero() (bool, error)
 pkg security, type WireDischarge interface, VDLWrite(vdl.Encoder) error
 pkg security, type WireDischarge interface, unexported methods
 pkg security, type WireDischargePublicKey struct

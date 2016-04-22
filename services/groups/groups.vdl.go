@@ -64,17 +64,8 @@ func (t *BlessingPatternChunkTarget) FromString(src string, tt *vdl.Type) error 
 	return nil
 }
 
-func (x *BlessingPatternChunk) VDLRead(dec vdl.Decoder) error {
-	var err error
-	if err = dec.StartValue(); err != nil {
-		return err
-	}
-	tmp, err := dec.DecodeString()
-	if err != nil {
-		return err
-	}
-	*x = BlessingPatternChunk(tmp)
-	return dec.FinishValue()
+func (x BlessingPatternChunk) VDLIsZero() (bool, error) {
+	return x == "", nil
 }
 
 func (x BlessingPatternChunk) VDLWrite(enc vdl.Encoder) error {
@@ -85,6 +76,18 @@ func (x BlessingPatternChunk) VDLWrite(enc vdl.Encoder) error {
 		return err
 	}
 	return enc.FinishValue()
+}
+
+func (x *BlessingPatternChunk) VDLRead(dec vdl.Decoder) error {
+	if err := dec.StartValue(); err != nil {
+		return err
+	}
+	tmp, err := dec.DecodeString()
+	if err != nil {
+		return err
+	}
+	*x = BlessingPatternChunk(tmp)
+	return dec.FinishValue()
 }
 
 type GetRequest struct {
@@ -143,10 +146,23 @@ func (t *GetRequestTarget) FinishFields(_ vdl.FieldsTarget) error {
 	return nil
 }
 
+func (x GetRequest) VDLIsZero() (bool, error) {
+	return x == GetRequest{}, nil
+}
+
+func (x GetRequest) VDLWrite(enc vdl.Encoder) error {
+	if err := enc.StartValue(vdl.TypeOf((*GetRequest)(nil)).Elem()); err != nil {
+		return err
+	}
+	if err := enc.NextField(""); err != nil {
+		return err
+	}
+	return enc.FinishValue()
+}
+
 func (x *GetRequest) VDLRead(dec vdl.Decoder) error {
 	*x = GetRequest{}
-	var err error
-	if err = dec.StartValue(); err != nil {
+	if err := dec.StartValue(); err != nil {
 		return err
 	}
 	if (dec.StackDepth() == 1 || dec.IsAny()) && !vdl.Compatible(vdl.TypeOf(*x), dec.Type()) {
@@ -161,21 +177,11 @@ func (x *GetRequest) VDLRead(dec vdl.Decoder) error {
 		case "":
 			return dec.FinishValue()
 		default:
-			if err = dec.SkipValue(); err != nil {
+			if err := dec.SkipValue(); err != nil {
 				return err
 			}
 		}
 	}
-}
-
-func (x GetRequest) VDLWrite(enc vdl.Encoder) error {
-	if err := enc.StartValue(vdl.TypeOf((*GetRequest)(nil)).Elem()); err != nil {
-		return err
-	}
-	if err := enc.NextField(""); err != nil {
-		return err
-	}
-	return enc.FinishValue()
 }
 
 type GetResponse struct {
@@ -318,10 +324,55 @@ func (t *__VDLTarget1_set) FinishSet(list vdl.SetTarget) error {
 	return nil
 }
 
+func (x GetResponse) VDLIsZero() (bool, error) {
+	if len(x.Entries) != 0 {
+		return false, nil
+	}
+	return true, nil
+}
+
+func (x GetResponse) VDLWrite(enc vdl.Encoder) error {
+	if err := enc.StartValue(vdl.TypeOf((*GetResponse)(nil)).Elem()); err != nil {
+		return err
+	}
+	if len(x.Entries) != 0 {
+		if err := enc.NextField("Entries"); err != nil {
+			return err
+		}
+		if err := __VDLWriteAnon_set_1(enc, x.Entries); err != nil {
+			return err
+		}
+	}
+	if err := enc.NextField(""); err != nil {
+		return err
+	}
+	return enc.FinishValue()
+}
+
+func __VDLWriteAnon_set_1(enc vdl.Encoder, x map[BlessingPatternChunk]struct{}) error {
+	if err := enc.StartValue(vdl.TypeOf((*map[BlessingPatternChunk]struct{})(nil))); err != nil {
+		return err
+	}
+	if err := enc.SetLenHint(len(x)); err != nil {
+		return err
+	}
+	for key := range x {
+		if err := enc.NextEntry(false); err != nil {
+			return err
+		}
+		if err := key.VDLWrite(enc); err != nil {
+			return err
+		}
+	}
+	if err := enc.NextEntry(true); err != nil {
+		return err
+	}
+	return enc.FinishValue()
+}
+
 func (x *GetResponse) VDLRead(dec vdl.Decoder) error {
 	*x = GetResponse{}
-	var err error
-	if err = dec.StartValue(); err != nil {
+	if err := dec.StartValue(); err != nil {
 		return err
 	}
 	if (dec.StackDepth() == 1 || dec.IsAny()) && !vdl.Compatible(vdl.TypeOf(*x), dec.Type()) {
@@ -336,20 +387,19 @@ func (x *GetResponse) VDLRead(dec vdl.Decoder) error {
 		case "":
 			return dec.FinishValue()
 		case "Entries":
-			if err = __VDLRead1_set(dec, &x.Entries); err != nil {
+			if err := __VDLReadAnon_set_1(dec, &x.Entries); err != nil {
 				return err
 			}
 		default:
-			if err = dec.SkipValue(); err != nil {
+			if err := dec.SkipValue(); err != nil {
 				return err
 			}
 		}
 	}
 }
 
-func __VDLRead1_set(dec vdl.Decoder, x *map[BlessingPatternChunk]struct{}) error {
-	var err error
-	if err = dec.StartValue(); err != nil {
+func __VDLReadAnon_set_1(dec vdl.Decoder, x *map[BlessingPatternChunk]struct{}) error {
+	if err := dec.StartValue(); err != nil {
 		return err
 	}
 	if (dec.StackDepth() == 1 || dec.IsAny()) && !vdl.Compatible(vdl.TypeOf(*x), dec.Type()) {
@@ -369,7 +419,7 @@ func __VDLRead1_set(dec vdl.Decoder, x *map[BlessingPatternChunk]struct{}) error
 		}
 		var key BlessingPatternChunk
 		{
-			if err = key.VDLRead(dec); err != nil {
+			if err := key.VDLRead(dec); err != nil {
 				return err
 			}
 		}
@@ -378,49 +428,6 @@ func __VDLRead1_set(dec vdl.Decoder, x *map[BlessingPatternChunk]struct{}) error
 		}
 		tmpMap[key] = struct{}{}
 	}
-}
-
-func (x GetResponse) VDLWrite(enc vdl.Encoder) error {
-	if err := enc.StartValue(vdl.TypeOf((*GetResponse)(nil)).Elem()); err != nil {
-		return err
-	}
-	var var1 bool
-	if len(x.Entries) == 0 {
-		var1 = true
-	}
-	if !(var1) {
-		if err := enc.NextField("Entries"); err != nil {
-			return err
-		}
-		if err := __VDLWrite1_set(enc, &x.Entries); err != nil {
-			return err
-		}
-	}
-	if err := enc.NextField(""); err != nil {
-		return err
-	}
-	return enc.FinishValue()
-}
-
-func __VDLWrite1_set(enc vdl.Encoder, x *map[BlessingPatternChunk]struct{}) error {
-	if err := enc.StartValue(vdl.TypeOf((*map[BlessingPatternChunk]struct{})(nil))); err != nil {
-		return err
-	}
-	if err := enc.SetLenHint(len(*x)); err != nil {
-		return err
-	}
-	for key := range *x {
-		if err := enc.NextEntry(false); err != nil {
-			return err
-		}
-		if err := key.VDLWrite(enc); err != nil {
-			return err
-		}
-	}
-	if err := enc.NextEntry(true); err != nil {
-		return err
-	}
-	return enc.FinishValue()
 }
 
 // ApproximationType defines the type of approximation desired when a Relate
@@ -508,19 +515,8 @@ func (t *ApproximationTypeTarget) FromEnumLabel(src string, tt *vdl.Type) error 
 	return nil
 }
 
-func (x *ApproximationType) VDLRead(dec vdl.Decoder) error {
-	var err error
-	if err = dec.StartValue(); err != nil {
-		return err
-	}
-	enum, err := dec.DecodeString()
-	if err != nil {
-		return err
-	}
-	if err = x.Set(enum); err != nil {
-		return err
-	}
-	return dec.FinishValue()
+func (x ApproximationType) VDLIsZero() (bool, error) {
+	return x == ApproximationTypeUnder, nil
 }
 
 func (x ApproximationType) VDLWrite(enc vdl.Encoder) error {
@@ -531,6 +527,20 @@ func (x ApproximationType) VDLWrite(enc vdl.Encoder) error {
 		return err
 	}
 	return enc.FinishValue()
+}
+
+func (x *ApproximationType) VDLRead(dec vdl.Decoder) error {
+	if err := dec.StartValue(); err != nil {
+		return err
+	}
+	enum, err := dec.DecodeString()
+	if err != nil {
+		return err
+	}
+	if err := x.Set(enum); err != nil {
+		return err
+	}
+	return dec.FinishValue()
 }
 
 // Approximation contains information about membership approximations made
@@ -647,57 +657,15 @@ func (t *ApproximationTarget) FinishFields(_ vdl.FieldsTarget) error {
 	return nil
 }
 
-func (x *Approximation) VDLRead(dec vdl.Decoder) error {
-	*x = Approximation{}
-	var err error
-	if err = dec.StartValue(); err != nil {
-		return err
-	}
-	if (dec.StackDepth() == 1 || dec.IsAny()) && !vdl.Compatible(vdl.TypeOf(*x), dec.Type()) {
-		return fmt.Errorf("incompatible struct %T, from %v", *x, dec.Type())
-	}
-	for {
-		f, err := dec.NextField()
-		if err != nil {
-			return err
-		}
-		switch f {
-		case "":
-			return dec.FinishValue()
-		case "Reason":
-			if err = dec.StartValue(); err != nil {
-				return err
-			}
-			if x.Reason, err = dec.DecodeString(); err != nil {
-				return err
-			}
-			if err = dec.FinishValue(); err != nil {
-				return err
-			}
-		case "Details":
-			if err = dec.StartValue(); err != nil {
-				return err
-			}
-			if x.Details, err = dec.DecodeString(); err != nil {
-				return err
-			}
-			if err = dec.FinishValue(); err != nil {
-				return err
-			}
-		default:
-			if err = dec.SkipValue(); err != nil {
-				return err
-			}
-		}
-	}
+func (x Approximation) VDLIsZero() (bool, error) {
+	return x == Approximation{}, nil
 }
 
 func (x Approximation) VDLWrite(enc vdl.Encoder) error {
 	if err := enc.StartValue(vdl.TypeOf((*Approximation)(nil)).Elem()); err != nil {
 		return err
 	}
-	var1 := (x.Reason == "")
-	if !(var1) {
+	if x.Reason != "" {
 		if err := enc.NextField("Reason"); err != nil {
 			return err
 		}
@@ -711,8 +679,7 @@ func (x Approximation) VDLWrite(enc vdl.Encoder) error {
 			return err
 		}
 	}
-	var2 := (x.Details == "")
-	if !(var2) {
+	if x.Details != "" {
 		if err := enc.NextField("Details"); err != nil {
 			return err
 		}
@@ -730,6 +697,52 @@ func (x Approximation) VDLWrite(enc vdl.Encoder) error {
 		return err
 	}
 	return enc.FinishValue()
+}
+
+func (x *Approximation) VDLRead(dec vdl.Decoder) error {
+	*x = Approximation{}
+	if err := dec.StartValue(); err != nil {
+		return err
+	}
+	if (dec.StackDepth() == 1 || dec.IsAny()) && !vdl.Compatible(vdl.TypeOf(*x), dec.Type()) {
+		return fmt.Errorf("incompatible struct %T, from %v", *x, dec.Type())
+	}
+	for {
+		f, err := dec.NextField()
+		if err != nil {
+			return err
+		}
+		switch f {
+		case "":
+			return dec.FinishValue()
+		case "Reason":
+			if err := dec.StartValue(); err != nil {
+				return err
+			}
+			var err error
+			if x.Reason, err = dec.DecodeString(); err != nil {
+				return err
+			}
+			if err := dec.FinishValue(); err != nil {
+				return err
+			}
+		case "Details":
+			if err := dec.StartValue(); err != nil {
+				return err
+			}
+			var err error
+			if x.Details, err = dec.DecodeString(); err != nil {
+				return err
+			}
+			if err := dec.FinishValue(); err != nil {
+				return err
+			}
+		default:
+			if err := dec.SkipValue(); err != nil {
+				return err
+			}
+		}
+	}
 }
 
 //////////////////////////////////////////////////

@@ -41,13 +41,16 @@ pkg access, method (*TagTarget) FromString(string, *vdl.Type) error
 pkg access, method (AccessList) Authorize(*context.T, security.Call) error
 pkg access, method (AccessList) Enforceable(*context.T, security.Principal) error
 pkg access, method (AccessList) Includes(...string) bool
+pkg access, method (AccessList) VDLIsZero() (bool, error)
 pkg access, method (AccessList) VDLWrite(vdl.Encoder) error
 pkg access, method (Permissions) Add(security.BlessingPattern, ...string) Permissions
 pkg access, method (Permissions) Blacklist(string, ...string) Permissions
 pkg access, method (Permissions) Clear(string, ...string) Permissions
 pkg access, method (Permissions) Copy() Permissions
 pkg access, method (Permissions) Normalize() Permissions
+pkg access, method (Permissions) VDLIsZero() (bool, error)
 pkg access, method (Permissions) VDLWrite(vdl.Encoder) error
+pkg access, method (Tag) VDLIsZero() (bool, error)
 pkg access, method (Tag) VDLWrite(vdl.Encoder) error
 pkg access, type AccessList struct
 pkg access, type AccessList struct, In []security.BlessingPattern

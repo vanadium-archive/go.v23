@@ -141,57 +141,15 @@ func (t *MediaInfoTarget) FinishFields(_ vdl.FieldsTarget) error {
 	return nil
 }
 
-func (x *MediaInfo) VDLRead(dec vdl.Decoder) error {
-	*x = MediaInfo{}
-	var err error
-	if err = dec.StartValue(); err != nil {
-		return err
-	}
-	if (dec.StackDepth() == 1 || dec.IsAny()) && !vdl.Compatible(vdl.TypeOf(*x), dec.Type()) {
-		return fmt.Errorf("incompatible struct %T, from %v", *x, dec.Type())
-	}
-	for {
-		f, err := dec.NextField()
-		if err != nil {
-			return err
-		}
-		switch f {
-		case "":
-			return dec.FinishValue()
-		case "Type":
-			if err = dec.StartValue(); err != nil {
-				return err
-			}
-			if x.Type, err = dec.DecodeString(); err != nil {
-				return err
-			}
-			if err = dec.FinishValue(); err != nil {
-				return err
-			}
-		case "Encoding":
-			if err = dec.StartValue(); err != nil {
-				return err
-			}
-			if x.Encoding, err = dec.DecodeString(); err != nil {
-				return err
-			}
-			if err = dec.FinishValue(); err != nil {
-				return err
-			}
-		default:
-			if err = dec.SkipValue(); err != nil {
-				return err
-			}
-		}
-	}
+func (x MediaInfo) VDLIsZero() (bool, error) {
+	return x == MediaInfo{}, nil
 }
 
 func (x MediaInfo) VDLWrite(enc vdl.Encoder) error {
 	if err := enc.StartValue(vdl.TypeOf((*MediaInfo)(nil)).Elem()); err != nil {
 		return err
 	}
-	var1 := (x.Type == "")
-	if !(var1) {
+	if x.Type != "" {
 		if err := enc.NextField("Type"); err != nil {
 			return err
 		}
@@ -205,8 +163,7 @@ func (x MediaInfo) VDLWrite(enc vdl.Encoder) error {
 			return err
 		}
 	}
-	var2 := (x.Encoding == "")
-	if !(var2) {
+	if x.Encoding != "" {
 		if err := enc.NextField("Encoding"); err != nil {
 			return err
 		}
@@ -224,6 +181,52 @@ func (x MediaInfo) VDLWrite(enc vdl.Encoder) error {
 		return err
 	}
 	return enc.FinishValue()
+}
+
+func (x *MediaInfo) VDLRead(dec vdl.Decoder) error {
+	*x = MediaInfo{}
+	if err := dec.StartValue(); err != nil {
+		return err
+	}
+	if (dec.StackDepth() == 1 || dec.IsAny()) && !vdl.Compatible(vdl.TypeOf(*x), dec.Type()) {
+		return fmt.Errorf("incompatible struct %T, from %v", *x, dec.Type())
+	}
+	for {
+		f, err := dec.NextField()
+		if err != nil {
+			return err
+		}
+		switch f {
+		case "":
+			return dec.FinishValue()
+		case "Type":
+			if err := dec.StartValue(); err != nil {
+				return err
+			}
+			var err error
+			if x.Type, err = dec.DecodeString(); err != nil {
+				return err
+			}
+			if err := dec.FinishValue(); err != nil {
+				return err
+			}
+		case "Encoding":
+			if err := dec.StartValue(); err != nil {
+				return err
+			}
+			var err error
+			if x.Encoding, err = dec.DecodeString(); err != nil {
+				return err
+			}
+			if err := dec.FinishValue(); err != nil {
+				return err
+			}
+		default:
+			if err := dec.SkipValue(); err != nil {
+				return err
+			}
+		}
+	}
 }
 
 //////////////////////////////////////////////////

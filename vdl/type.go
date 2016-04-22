@@ -314,8 +314,19 @@ func (t *Type) AssignableFrom(f *Value) bool {
 	return t == f.t || t.kind == Any || (t.kind == Optional && f.t.kind == Any && f.IsNil())
 }
 
+// VDLIsZero returns true if t is nil or AnyType.
+func (t *Type) VDLIsZero() (bool, error) {
+	return t == nil || t == AnyType, nil
+}
+
 // VDLWrite uses enc to encode type t.
+//
+// Unlike regular VDLWrite implementations, this handles the case where t
+// contains a nil value, to make code generation simpler.
 func (t *Type) VDLWrite(enc Encoder) error {
+	if t == nil {
+		t = AnyType
+	}
 	if err := enc.StartValue(TypeObjectType); err != nil {
 		return err
 	}

@@ -45,11 +45,16 @@ pkg groups, method (*GetResponseTarget) FinishFields(vdl.FieldsTarget) error
 pkg groups, method (*GetResponseTarget) StartField(string) (vdl.Target, vdl.Target, error)
 pkg groups, method (*GetResponseTarget) StartFields(*vdl.Type) (vdl.FieldsTarget, error)
 pkg groups, method (*GetResponseTarget) ZeroField(string) error
+pkg groups, method (Approximation) VDLIsZero() (bool, error)
 pkg groups, method (Approximation) VDLWrite(vdl.Encoder) error
 pkg groups, method (ApproximationType) String() string
+pkg groups, method (ApproximationType) VDLIsZero() (bool, error)
 pkg groups, method (ApproximationType) VDLWrite(vdl.Encoder) error
+pkg groups, method (BlessingPatternChunk) VDLIsZero() (bool, error)
 pkg groups, method (BlessingPatternChunk) VDLWrite(vdl.Encoder) error
+pkg groups, method (GetRequest) VDLIsZero() (bool, error)
 pkg groups, method (GetRequest) VDLWrite(vdl.Encoder) error
+pkg groups, method (GetResponse) VDLIsZero() (bool, error)
 pkg groups, method (GetResponse) VDLWrite(vdl.Encoder) error
 pkg groups, type Approximation struct
 pkg groups, type Approximation struct, Details string

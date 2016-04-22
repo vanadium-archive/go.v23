@@ -43,12 +43,16 @@ pkg build, method (*OperatingSystem) VDLRead(vdl.Decoder) error
 pkg build, method (*OperatingSystemTarget) FromEnumLabel(string, *vdl.Type) error
 pkg build, method (Architecture) String() string
 pkg build, method (Architecture) ToGoArch() string
+pkg build, method (Architecture) VDLIsZero() (bool, error)
 pkg build, method (Architecture) VDLWrite(vdl.Encoder) error
+pkg build, method (File) VDLIsZero() (bool, error)
 pkg build, method (File) VDLWrite(vdl.Encoder) error
 pkg build, method (Format) String() string
+pkg build, method (Format) VDLIsZero() (bool, error)
 pkg build, method (Format) VDLWrite(vdl.Encoder) error
 pkg build, method (OperatingSystem) String() string
 pkg build, method (OperatingSystem) ToGoOS() string
+pkg build, method (OperatingSystem) VDLIsZero() (bool, error)
 pkg build, method (OperatingSystem) VDLWrite(vdl.Encoder) error
 pkg build, type Architecture int
 pkg build, type ArchitectureTarget struct

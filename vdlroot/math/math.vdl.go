@@ -133,61 +133,15 @@ func (t *Complex64Target) FinishFields(_ vdl.FieldsTarget) error {
 	return nil
 }
 
-func (x *Complex64) VDLRead(dec vdl.Decoder) error {
-	*x = Complex64{}
-	var err error
-	if err = dec.StartValue(); err != nil {
-		return err
-	}
-	if (dec.StackDepth() == 1 || dec.IsAny()) && !vdl.Compatible(vdl.TypeOf(*x), dec.Type()) {
-		return fmt.Errorf("incompatible struct %T, from %v", *x, dec.Type())
-	}
-	for {
-		f, err := dec.NextField()
-		if err != nil {
-			return err
-		}
-		switch f {
-		case "":
-			return dec.FinishValue()
-		case "Real":
-			if err = dec.StartValue(); err != nil {
-				return err
-			}
-			tmp, err := dec.DecodeFloat(32)
-			if err != nil {
-				return err
-			}
-			x.Real = float32(tmp)
-			if err = dec.FinishValue(); err != nil {
-				return err
-			}
-		case "Imag":
-			if err = dec.StartValue(); err != nil {
-				return err
-			}
-			tmp, err := dec.DecodeFloat(32)
-			if err != nil {
-				return err
-			}
-			x.Imag = float32(tmp)
-			if err = dec.FinishValue(); err != nil {
-				return err
-			}
-		default:
-			if err = dec.SkipValue(); err != nil {
-				return err
-			}
-		}
-	}
+func (x Complex64) VDLIsZero() (bool, error) {
+	return x == Complex64{}, nil
 }
 
 func (x Complex64) VDLWrite(enc vdl.Encoder) error {
 	if err := enc.StartValue(vdl.TypeOf((*Complex64)(nil)).Elem()); err != nil {
 		return err
 	}
-	var1 := (x.Real == float32(0))
-	if !(var1) {
+	if x.Real != 0 {
 		if err := enc.NextField("Real"); err != nil {
 			return err
 		}
@@ -201,8 +155,7 @@ func (x Complex64) VDLWrite(enc vdl.Encoder) error {
 			return err
 		}
 	}
-	var2 := (x.Imag == float32(0))
-	if !(var2) {
+	if x.Imag != 0 {
 		if err := enc.NextField("Imag"); err != nil {
 			return err
 		}
@@ -220,6 +173,54 @@ func (x Complex64) VDLWrite(enc vdl.Encoder) error {
 		return err
 	}
 	return enc.FinishValue()
+}
+
+func (x *Complex64) VDLRead(dec vdl.Decoder) error {
+	*x = Complex64{}
+	if err := dec.StartValue(); err != nil {
+		return err
+	}
+	if (dec.StackDepth() == 1 || dec.IsAny()) && !vdl.Compatible(vdl.TypeOf(*x), dec.Type()) {
+		return fmt.Errorf("incompatible struct %T, from %v", *x, dec.Type())
+	}
+	for {
+		f, err := dec.NextField()
+		if err != nil {
+			return err
+		}
+		switch f {
+		case "":
+			return dec.FinishValue()
+		case "Real":
+			if err := dec.StartValue(); err != nil {
+				return err
+			}
+			tmp, err := dec.DecodeFloat(32)
+			if err != nil {
+				return err
+			}
+			x.Real = float32(tmp)
+			if err := dec.FinishValue(); err != nil {
+				return err
+			}
+		case "Imag":
+			if err := dec.StartValue(); err != nil {
+				return err
+			}
+			tmp, err := dec.DecodeFloat(32)
+			if err != nil {
+				return err
+			}
+			x.Imag = float32(tmp)
+			if err := dec.FinishValue(); err != nil {
+				return err
+			}
+		default:
+			if err := dec.SkipValue(); err != nil {
+				return err
+			}
+		}
+	}
 }
 
 type Complex128 struct {
@@ -338,57 +339,15 @@ func (t *Complex128Target) FinishFields(_ vdl.FieldsTarget) error {
 	return nil
 }
 
-func (x *Complex128) VDLRead(dec vdl.Decoder) error {
-	*x = Complex128{}
-	var err error
-	if err = dec.StartValue(); err != nil {
-		return err
-	}
-	if (dec.StackDepth() == 1 || dec.IsAny()) && !vdl.Compatible(vdl.TypeOf(*x), dec.Type()) {
-		return fmt.Errorf("incompatible struct %T, from %v", *x, dec.Type())
-	}
-	for {
-		f, err := dec.NextField()
-		if err != nil {
-			return err
-		}
-		switch f {
-		case "":
-			return dec.FinishValue()
-		case "Real":
-			if err = dec.StartValue(); err != nil {
-				return err
-			}
-			if x.Real, err = dec.DecodeFloat(64); err != nil {
-				return err
-			}
-			if err = dec.FinishValue(); err != nil {
-				return err
-			}
-		case "Imag":
-			if err = dec.StartValue(); err != nil {
-				return err
-			}
-			if x.Imag, err = dec.DecodeFloat(64); err != nil {
-				return err
-			}
-			if err = dec.FinishValue(); err != nil {
-				return err
-			}
-		default:
-			if err = dec.SkipValue(); err != nil {
-				return err
-			}
-		}
-	}
+func (x Complex128) VDLIsZero() (bool, error) {
+	return x == Complex128{}, nil
 }
 
 func (x Complex128) VDLWrite(enc vdl.Encoder) error {
 	if err := enc.StartValue(vdl.TypeOf((*Complex128)(nil)).Elem()); err != nil {
 		return err
 	}
-	var1 := (x.Real == float64(0))
-	if !(var1) {
+	if x.Real != 0 {
 		if err := enc.NextField("Real"); err != nil {
 			return err
 		}
@@ -402,8 +361,7 @@ func (x Complex128) VDLWrite(enc vdl.Encoder) error {
 			return err
 		}
 	}
-	var2 := (x.Imag == float64(0))
-	if !(var2) {
+	if x.Imag != 0 {
 		if err := enc.NextField("Imag"); err != nil {
 			return err
 		}
@@ -421,6 +379,52 @@ func (x Complex128) VDLWrite(enc vdl.Encoder) error {
 		return err
 	}
 	return enc.FinishValue()
+}
+
+func (x *Complex128) VDLRead(dec vdl.Decoder) error {
+	*x = Complex128{}
+	if err := dec.StartValue(); err != nil {
+		return err
+	}
+	if (dec.StackDepth() == 1 || dec.IsAny()) && !vdl.Compatible(vdl.TypeOf(*x), dec.Type()) {
+		return fmt.Errorf("incompatible struct %T, from %v", *x, dec.Type())
+	}
+	for {
+		f, err := dec.NextField()
+		if err != nil {
+			return err
+		}
+		switch f {
+		case "":
+			return dec.FinishValue()
+		case "Real":
+			if err := dec.StartValue(); err != nil {
+				return err
+			}
+			var err error
+			if x.Real, err = dec.DecodeFloat(64); err != nil {
+				return err
+			}
+			if err := dec.FinishValue(); err != nil {
+				return err
+			}
+		case "Imag":
+			if err := dec.StartValue(); err != nil {
+				return err
+			}
+			var err error
+			if x.Imag, err = dec.DecodeFloat(64); err != nil {
+				return err
+			}
+			if err := dec.FinishValue(); err != nil {
+				return err
+			}
+		default:
+			if err := dec.SkipValue(); err != nil {
+				return err
+			}
+		}
+	}
 }
 
 // Type-check native conversion functions.

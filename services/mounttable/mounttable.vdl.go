@@ -66,17 +66,8 @@ func (t *TagTarget) FromString(src string, tt *vdl.Type) error {
 	return nil
 }
 
-func (x *Tag) VDLRead(dec vdl.Decoder) error {
-	var err error
-	if err = dec.StartValue(); err != nil {
-		return err
-	}
-	tmp, err := dec.DecodeString()
-	if err != nil {
-		return err
-	}
-	*x = Tag(tmp)
-	return dec.FinishValue()
+func (x Tag) VDLIsZero() (bool, error) {
+	return x == "", nil
 }
 
 func (x Tag) VDLWrite(enc vdl.Encoder) error {
@@ -87,6 +78,18 @@ func (x Tag) VDLWrite(enc vdl.Encoder) error {
 		return err
 	}
 	return enc.FinishValue()
+}
+
+func (x *Tag) VDLRead(dec vdl.Decoder) error {
+	if err := dec.StartValue(); err != nil {
+		return err
+	}
+	tmp, err := dec.DecodeString()
+	if err != nil {
+		return err
+	}
+	*x = Tag(tmp)
+	return dec.FinishValue()
 }
 
 //////////////////////////////////////////////////

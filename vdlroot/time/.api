@@ -30,9 +30,12 @@ pkg time, method (*WireDeadlineTarget) StartField(string) (vdl.Target, vdl.Targe
 pkg time, method (*WireDeadlineTarget) StartFields(*vdl.Type) (vdl.FieldsTarget, error)
 pkg time, method (*WireDeadlineTarget) ZeroField(string) error
 pkg time, method (Duration) Normalize() Duration
+pkg time, method (Duration) VDLIsZero() (bool, error)
 pkg time, method (Duration) VDLWrite(vdl.Encoder) error
 pkg time, method (Time) Normalize() Time
+pkg time, method (Time) VDLIsZero() (bool, error)
 pkg time, method (Time) VDLWrite(vdl.Encoder) error
+pkg time, method (WireDeadline) VDLIsZero() (bool, error)
 pkg time, method (WireDeadline) VDLWrite(vdl.Encoder) error
 pkg time, type Deadline struct
 pkg time, type Deadline struct, embedded time.Time

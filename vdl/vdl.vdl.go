@@ -116,19 +116,8 @@ func (t *WireRetryCodeTarget) FromEnumLabel(src string, tt *Type) error {
 	return nil
 }
 
-func (x *WireRetryCode) VDLRead(dec Decoder) error {
-	var err error
-	if err = dec.StartValue(); err != nil {
-		return err
-	}
-	enum, err := dec.DecodeString()
-	if err != nil {
-		return err
-	}
-	if err = x.Set(enum); err != nil {
-		return err
-	}
-	return dec.FinishValue()
+func (x WireRetryCode) VDLIsZero() (bool, error) {
+	return x == WireRetryCodeNoRetry, nil
 }
 
 func (x WireRetryCode) VDLWrite(enc Encoder) error {
@@ -139,6 +128,20 @@ func (x WireRetryCode) VDLWrite(enc Encoder) error {
 		return err
 	}
 	return enc.FinishValue()
+}
+
+func (x *WireRetryCode) VDLRead(dec Decoder) error {
+	if err := dec.StartValue(); err != nil {
+		return err
+	}
+	enum, err := dec.DecodeString()
+	if err != nil {
+		return err
+	}
+	if err := x.Set(enum); err != nil {
+		return err
+	}
+	return dec.FinishValue()
 }
 
 // WireError is the wire representation for the built-in error type.  Errors and
@@ -367,10 +370,117 @@ func (t *__VDLTarget1_list) FinishList(elem ListTarget) error {
 	return nil
 }
 
+func (x WireError) VDLIsZero() (bool, error) {
+	if x.Id != "" {
+		return false, nil
+	}
+	if x.RetryCode != WireRetryCodeNoRetry {
+		return false, nil
+	}
+	if x.Msg != "" {
+		return false, nil
+	}
+	if len(x.ParamList) != 0 {
+		return false, nil
+	}
+	return true, nil
+}
+
+func (x WireError) VDLWrite(enc Encoder) error {
+	if err := enc.StartValue(TypeOf((*WireError)(nil)).Elem()); err != nil {
+		return err
+	}
+	if x.Id != "" {
+		if err := enc.NextField("Id"); err != nil {
+			return err
+		}
+		if err := enc.StartValue(TypeOf((*string)(nil))); err != nil {
+			return err
+		}
+		if err := enc.EncodeString(x.Id); err != nil {
+			return err
+		}
+		if err := enc.FinishValue(); err != nil {
+			return err
+		}
+	}
+	if x.RetryCode != WireRetryCodeNoRetry {
+		if err := enc.NextField("RetryCode"); err != nil {
+			return err
+		}
+		if err := x.RetryCode.VDLWrite(enc); err != nil {
+			return err
+		}
+	}
+	if x.Msg != "" {
+		if err := enc.NextField("Msg"); err != nil {
+			return err
+		}
+		if err := enc.StartValue(TypeOf((*string)(nil))); err != nil {
+			return err
+		}
+		if err := enc.EncodeString(x.Msg); err != nil {
+			return err
+		}
+		if err := enc.FinishValue(); err != nil {
+			return err
+		}
+	}
+	if len(x.ParamList) != 0 {
+		if err := enc.NextField("ParamList"); err != nil {
+			return err
+		}
+		if err := __VDLWriteAnon_list_1(enc, x.ParamList); err != nil {
+			return err
+		}
+	}
+	if err := enc.NextField(""); err != nil {
+		return err
+	}
+	return enc.FinishValue()
+}
+
+func __VDLWriteAnon_list_1(enc Encoder, x []*Value) error {
+	if err := enc.StartValue(TypeOf((*[]*Value)(nil))); err != nil {
+		return err
+	}
+	if err := enc.SetLenHint(len(x)); err != nil {
+		return err
+	}
+	for i := 0; i < len(x); i++ {
+		if err := enc.NextEntry(false); err != nil {
+			return err
+		}
+		if err := enc.StartValue(AnyType); err != nil {
+			return err
+		}
+		switch {
+		case x[i] == nil:
+			if err := enc.NilValue(AnyType); err != nil {
+				return err
+			}
+		case x[i].IsNil():
+			if err := enc.NilValue(x[i].Type()); err != nil {
+				return err
+			}
+		default:
+			if err := x[i].VDLWrite(enc); err != nil {
+				return err
+			}
+		}
+		if err := enc.FinishValue(); err != nil {
+			return err
+		}
+	}
+	if err := enc.NextEntry(true); err != nil {
+		return err
+	}
+	return enc.FinishValue()
+}
+
 func (x *WireError) VDLRead(dec Decoder) error {
 	*x = WireError{}
-	var err error
-	if err = dec.StartValue(); err != nil {
+	if err := dec.StartValue(); err != nil {
 		return err
 	}
 	if (dec.StackDepth() == 1 || dec.IsAny()) && !Compatible(TypeOf(*x), dec.Type()) {
@@ -385,44 +495,45 @@ func (x *WireError) VDLRead(dec Decoder) error {
 		case "":
 			return dec.FinishValue()
 		case "Id":
-			if err = dec.StartValue(); err != nil {
+			if err := dec.StartValue(); err != nil {
 				return err
 			}
+			var err error
 			if x.Id, err = dec.DecodeString(); err != nil {
 				return err
 			}
-			if err = dec.FinishValue(); err != nil {
+			if err := dec.FinishValue(); err != nil {
 				return err
 			}
 		case "RetryCode":
-			if err = x.RetryCode.VDLRead(dec); err != nil {
+			if err := x.RetryCode.VDLRead(dec); err != nil {
 				return err
 			}
 		case "Msg":
-			if err = dec.StartValue(); err != nil {
+			if err := dec.StartValue(); err != nil {
 				return err
 			}
+			var err error
 			if x.Msg, err = dec.DecodeString(); err != nil {
 				return err
 			}
-			if err = dec.FinishValue(); err != nil {
+			if err := dec.FinishValue(); err != nil {
 				return err
 			}
 		case "ParamList":
-			if err = __VDLRead1_list(dec, &x.ParamList); err != nil {
+			if err := __VDLReadAnon_list_1(dec, &x.ParamList); err != nil {
 				return err
 			}
 		default:
-			if err = dec.SkipValue(); err != nil {
+			if err := dec.SkipValue(); err != nil {
 				return err
 			}
 		}
 	}
 }
 
-func __VDLRead1_list(dec Decoder, x *[]*Value) error {
-	var err error
-	if err = dec.StartValue(); err != nil {
+func __VDLReadAnon_list_1(dec Decoder, x *[]*Value) error {
+	if err := dec.StartValue(); err != nil {
 		return err
 	}
 	if (dec.StackDepth() == 1 || dec.IsAny()) && !Compatible(TypeOf(*x), dec.Type()) {
@@ -443,105 +554,11 @@ func __VDLRead1_list(dec Decoder, x *[]*Value) error {
 		}
 		var elem *Value
 		elem = new(Value)
-		if err = elem.VDLRead(dec); err != nil {
+		if err := elem.VDLRead(dec); err != nil {
 			return err
 		}
 		*x = append(*x, elem)
 	}
-}
-
-func (x WireError) VDLWrite(enc Encoder) error {
-	if err := enc.StartValue(TypeOf((*WireError)(nil)).Elem()); err != nil {
-		return err
-	}
-	var1 := (x.Id == "")
-	if !(var1) {
-		if err := enc.NextField("Id"); err != nil {
-			return err
-		}
-		if err := enc.StartValue(TypeOf((*string)(nil))); err != nil {
-			return err
-		}
-		if err := enc.EncodeString(x.Id); err != nil {
-			return err
-		}
-		if err := enc.FinishValue(); err != nil {
-			return err
-		}
-	}
-	var2 := (x.RetryCode == WireRetryCodeNoRetry)
-	if !(var2) {
-		if err := enc.NextField("RetryCode"); err != nil {
-			return err
-		}
-		if err := x.RetryCode.VDLWrite(enc); err != nil {
-			return err
-		}
-	}
-	var3 := (x.Msg == "")
-	if !(var3) {
-		if err := enc.NextField("Msg"); err != nil {
-			return err
-		}
-		if err := enc.StartValue(TypeOf((*string)(nil))); err != nil {
-			return err
-		}
-		if err := enc.EncodeString(x.Msg); err != nil {
-			return err
-		}
-		if err := enc.FinishValue(); err != nil {
-			return err
-		}
-	}
-	var var4 bool
-	if len(x.ParamList) == 0 {
-		var4 = true
-	}
-	if !(var4) {
-		if err := enc.NextField("ParamList"); err != nil {
-			return err
-		}
-		if err := __VDLWrite1_list(enc, &x.ParamList); err != nil {
-			return err
-		}
-	}
-	if err := enc.NextField(""); err != nil {
-		return err
-	}
-	return enc.FinishValue()
-}
-
-func __VDLWrite1_list(enc Encoder, x *[]*Value) error {
-	if err := enc.StartValue(TypeOf((*[]*Value)(nil))); err != nil {
-		return err
-	}
-	if err := enc.SetLenHint(len(*x)); err != nil {
-		return err
-	}
-	for i := 0; i < len(*x); i++ {
-		if err := enc.NextEntry(false); err != nil {
-			return err
-		}
-		if err := enc.StartValue(AnyType); err != nil {
-			return err
-		}
-		if (*x)[i].IsNil() {
-			if err := enc.NilValue((*x)[i].Type()); err != nil {
-				return err
-			}
-		} else {
-			if err := (*x)[i].VDLWrite(enc); err != nil {
-				return err
-			}
-		}
-		if err := enc.FinishValue(); err != nil {
-			return err
-		}
-	}
-	if err := enc.NextEntry(true); err != nil {
-		return err
-	}
-	return enc.FinishValue()
 }
 
 var __VDLInitCalled bool

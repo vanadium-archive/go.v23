@@ -777,6 +777,7 @@ func verifyAndCollectAllTypes(t *Type, allTypes map[*Type]bool) error {
 		return fmt.Errorf("internal kind %d used in verifyAndCollectAllTypes", t.kind)
 	}
 	// Check name
+	// TODO(toddw): Disallow Optional from being named.
 	switch t.kind {
 	case Any, TypeObject:
 		if t.name != "" {

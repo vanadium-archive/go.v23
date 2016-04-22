@@ -195,17 +195,8 @@ func (t *ResumeMarkerTarget) FromBytes(src []byte, tt *vdl.Type) error {
 	return nil
 }
 
-func (x *ResumeMarker) VDLRead(dec vdl.Decoder) error {
-	var err error
-	if err = dec.StartValue(); err != nil {
-		return err
-	}
-	var bytes []byte
-	if err = dec.DecodeBytes(-1, &bytes); err != nil {
-		return err
-	}
-	*x = bytes
-	return dec.FinishValue()
+func (x ResumeMarker) VDLIsZero() (bool, error) {
+	return len(x) == 0, nil
 }
 
 func (x ResumeMarker) VDLWrite(enc vdl.Encoder) error {
@@ -216,6 +207,18 @@ func (x ResumeMarker) VDLWrite(enc vdl.Encoder) error {
 		return err
 	}
 	return enc.FinishValue()
+}
+
+func (x *ResumeMarker) VDLRead(dec vdl.Decoder) error {
+	if err := dec.StartValue(); err != nil {
+		return err
+	}
+	var bytes []byte
+	if err := dec.DecodeBytes(-1, &bytes); err != nil {
+		return err
+	}
+	*x = bytes
+	return dec.FinishValue()
 }
 
 // GlobRequest specifies which entities should be watched and, optionally,
@@ -340,10 +343,51 @@ func (t *GlobRequestTarget) FinishFields(_ vdl.FieldsTarget) error {
 	return nil
 }
 
+func (x GlobRequest) VDLIsZero() (bool, error) {
+	if x.Pattern != "" {
+		return false, nil
+	}
+	if len(x.ResumeMarker) != 0 {
+		return false, nil
+	}
+	return true, nil
+}
+
+func (x GlobRequest) VDLWrite(enc vdl.Encoder) error {
+	if err := enc.StartValue(vdl.TypeOf((*GlobRequest)(nil)).Elem()); err != nil {
+		return err
+	}
+	if x.Pattern != "" {
+		if err := enc.NextField("Pattern"); err != nil {
+			return err
+		}
+		if err := enc.StartValue(vdl.TypeOf((*string)(nil))); err != nil {
+			return err
+		}
+		if err := enc.EncodeString(x.Pattern); err != nil {
+			return err
+		}
+		if err := enc.FinishValue(); err != nil {
+			return err
+		}
+	}
+	if len(x.ResumeMarker) != 0 {
+		if err := enc.NextField("ResumeMarker"); err != nil {
+			return err
+		}
+		if err := x.ResumeMarker.VDLWrite(enc); err != nil {
+			return err
+		}
+	}
+	if err := enc.NextField(""); err != nil {
+		return err
+	}
+	return enc.FinishValue()
+}
+
 func (x *GlobRequest) VDLRead(dec vdl.Decoder) error {
 	*x = GlobRequest{}
-	var err error
-	if err = dec.StartValue(); err != nil {
+	if err := dec.StartValue(); err != nil {
 		return err
 	}
 	if (dec.StackDepth() == 1 || dec.IsAny()) && !vdl.Compatible(vdl.TypeOf(*x), dec.Type()) {
@@ -358,62 +402,26 @@ func (x *GlobRequest) VDLRead(dec vdl.Decoder) error {
 		case "":
 			return dec.FinishValue()
 		case "Pattern":
-			if err = dec.StartValue(); err != nil {
+			if err := dec.StartValue(); err != nil {
 				return err
 			}
+			var err error
 			if x.Pattern, err = dec.DecodeString(); err != nil {
 				return err
 			}
-			if err = dec.FinishValue(); err != nil {
+			if err := dec.FinishValue(); err != nil {
 				return err
 			}
 		case "ResumeMarker":
-			if err = x.ResumeMarker.VDLRead(dec); err != nil {
+			if err := x.ResumeMarker.VDLRead(dec); err != nil {
 				return err
 			}
 		default:
-			if err = dec.SkipValue(); err != nil {
+			if err := dec.SkipValue(); err != nil {
 				return err
 			}
 		}
 	}
-}
-
-func (x GlobRequest) VDLWrite(enc vdl.Encoder) error {
-	if err := enc.StartValue(vdl.TypeOf((*GlobRequest)(nil)).Elem()); err != nil {
-		return err
-	}
-	var1 := (x.Pattern == "")
-	if !(var1) {
-		if err := enc.NextField("Pattern"); err != nil {
-			return err
-		}
-		if err := enc.StartValue(vdl.TypeOf((*string)(nil))); err != nil {
-			return err
-		}
-		if err := enc.EncodeString(x.Pattern); err != nil {
-			return err
-		}
-		if err := enc.FinishValue(); err != nil {
-			return err
-		}
-	}
-	var var2 bool
-	if len(x.ResumeMarker) == 0 {
-		var2 = true
-	}
-	if !(var2) {
-		if err := enc.NextField("ResumeMarker"); err != nil {
-			return err
-		}
-		if err := x.ResumeMarker.VDLWrite(enc); err != nil {
-			return err
-		}
-	}
-	if err := enc.NextField(""); err != nil {
-		return err
-	}
-	return enc.FinishValue()
 }
 
 // Change is the new value for a watched entity.
@@ -629,79 +637,37 @@ func (t *ChangeTarget) FinishFields(_ vdl.FieldsTarget) error {
 	return nil
 }
 
-func (x *Change) VDLRead(dec vdl.Decoder) error {
-	*x = Change{
-		Value: vom.RawBytesOf(vdl.ZeroValue(vdl.AnyType)),
+func (x Change) VDLIsZero() (bool, error) {
+	if x.Name != "" {
+		return false, nil
 	}
-	var err error
-	if err = dec.StartValue(); err != nil {
-		return err
+	if x.State != 0 {
+		return false, nil
 	}
-	if (dec.StackDepth() == 1 || dec.IsAny()) && !vdl.Compatible(vdl.TypeOf(*x), dec.Type()) {
-		return fmt.Errorf("incompatible struct %T, from %v", *x, dec.Type())
-	}
-	for {
-		f, err := dec.NextField()
-		if err != nil {
-			return err
-		}
-		switch f {
-		case "":
-			return dec.FinishValue()
-		case "Name":
-			if err = dec.StartValue(); err != nil {
-				return err
-			}
-			if x.Name, err = dec.DecodeString(); err != nil {
-				return err
-			}
-			if err = dec.FinishValue(); err != nil {
-				return err
-			}
-		case "State":
-			if err = dec.StartValue(); err != nil {
-				return err
-			}
-			tmp, err := dec.DecodeInt(32)
-			if err != nil {
-				return err
-			}
-			x.State = int32(tmp)
-			if err = dec.FinishValue(); err != nil {
-				return err
-			}
-		case "Value":
-			if err = x.Value.VDLRead(dec); err != nil {
-				return err
-			}
-		case "ResumeMarker":
-			if err = x.ResumeMarker.VDLRead(dec); err != nil {
-				return err
-			}
-		case "Continued":
-			if err = dec.StartValue(); err != nil {
-				return err
-			}
-			if x.Continued, err = dec.DecodeBool(); err != nil {
-				return err
-			}
-			if err = dec.FinishValue(); err != nil {
-				return err
-			}
-		default:
-			if err = dec.SkipValue(); err != nil {
-				return err
-			}
+	var isZeroValue bool
+	if x.Value != nil {
+		var err error
+		if isZeroValue, err = x.Value.VDLIsZero(); err != nil {
+			return false, err
 		}
 	}
+	if x.Value != nil && !isZeroValue {
+		return false, nil
+	}
+	if len(x.ResumeMarker) != 0 {
+		return false, nil
+	}
+	if x.Continued {
+		return false, nil
+	}
+	return true, nil
 }
 
 func (x Change) VDLWrite(enc vdl.Encoder) error {
 	if err := enc.StartValue(vdl.TypeOf((*Change)(nil)).Elem()); err != nil {
 		return err
 	}
-	var1 := (x.Name == "")
-	if !(var1) {
+	if x.Name != "" {
 		if err := enc.NextField("Name"); err != nil {
 			return err
 		}
@@ -715,8 +681,7 @@ func (x Change) VDLWrite(enc vdl.Encoder) error {
 			return err
 		}
 	}
-	var2 := (x.State == int32(0))
-	if !(var2) {
+	if x.State != 0 {
 		if err := enc.NextField("State"); err != nil {
 			return err
 		}
@@ -730,19 +695,26 @@ func (x Change) VDLWrite(enc vdl.Encoder) error {
 			return err
 		}
 	}
-	var3 := x.Value == nil || (x.Value.Type.Kind() == vdl.Any && x.Value.IsNil())
-	if !(var3) {
+	var isZeroValue bool
+	if x.Value != nil {
+		var err error
+		if isZeroValue, err = x.Value.VDLIsZero(); err != nil {
+			return err
+		}
+	}
+	if x.Value != nil && !isZeroValue {
 		if err := enc.NextField("Value"); err != nil {
 			return err
 		}
 		if err := enc.StartValue(vdl.AnyType); err != nil {
 			return err
 		}
-		if x.Value.IsNil() {
+		switch {
+		case x.Value.IsNil():
 			if err := enc.NilValue(x.Value.Type); err != nil {
 				return err
 			}
-		} else {
+		default:
 			if err := x.Value.VDLWrite(enc); err != nil {
 				return err
 			}
@@ -751,11 +723,7 @@ func (x Change) VDLWrite(enc vdl.Encoder) error {
 			return err
 		}
 	}
-	var var4 bool
-	if len(x.ResumeMarker) == 0 {
-		var4 = true
-	}
-	if !(var4) {
+	if len(x.ResumeMarker) != 0 {
 		if err := enc.NextField("ResumeMarker"); err != nil {
 			return err
 		}
@@ -763,8 +731,7 @@ func (x Change) VDLWrite(enc vdl.Encoder) error {
 			return err
 		}
 	}
-	var5 := (x.Continued == false)
-	if !(var5) {
+	if x.Continued {
 		if err := enc.NextField("Continued"); err != nil {
 			return err
 		}
@@ -782,6 +749,74 @@ func (x Change) VDLWrite(enc vdl.Encoder) error {
 		return err
 	}
 	return enc.FinishValue()
+}
+
+func (x *Change) VDLRead(dec vdl.Decoder) error {
+	*x = Change{
+		Value: vom.RawBytesOf(vdl.ZeroValue(vdl.AnyType)),
+	}
+	if err := dec.StartValue(); err != nil {
+		return err
+	}
+	if (dec.StackDepth() == 1 || dec.IsAny()) && !vdl.Compatible(vdl.TypeOf(*x), dec.Type()) {
+		return fmt.Errorf("incompatible struct %T, from %v", *x, dec.Type())
+	}
+	for {
+		f, err := dec.NextField()
+		if err != nil {
+			return err
+		}
+		switch f {
+		case "":
+			return dec.FinishValue()
+		case "Name":
+			if err := dec.StartValue(); err != nil {
+				return err
+			}
+			var err error
+			if x.Name, err = dec.DecodeString(); err != nil {
+				return err
+			}
+			if err := dec.FinishValue(); err != nil {
+				return err
+			}
+		case "State":
+			if err := dec.StartValue(); err != nil {
+				return err
+			}
+			tmp, err := dec.DecodeInt(32)
+			if err != nil {
+				return err
+			}
+			x.State = int32(tmp)
+			if err := dec.FinishValue(); err != nil {
+				return err
+			}
+		case "Value":
+			if err := x.Value.VDLRead(dec); err != nil {
+				return err
+			}
+		case "ResumeMarker":
+			if err := x.ResumeMarker.VDLRead(dec); err != nil {
+				return err
+			}
+		case "Continued":
+			if err := dec.StartValue(); err != nil {
+				return err
+			}
+			var err error
+			if x.Continued, err = dec.DecodeBool(); err != nil {
+				return err
+			}
+			if err := dec.FinishValue(); err != nil {
+				return err
+			}
+		default:
+			if err := dec.SkipValue(); err != nil {
+				return err
+			}
+		}
+	}
 }
 
 //////////////////////////////////////////////////

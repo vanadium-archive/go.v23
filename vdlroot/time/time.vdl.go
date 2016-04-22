@@ -150,59 +150,15 @@ func (t *DurationTarget) FinishFields(_ vdl.FieldsTarget) error {
 	return nil
 }
 
-func (x *Duration) VDLRead(dec vdl.Decoder) error {
-	*x = Duration{}
-	var err error
-	if err = dec.StartValue(); err != nil {
-		return err
-	}
-	if (dec.StackDepth() == 1 || dec.IsAny()) && !vdl.Compatible(vdl.TypeOf(*x), dec.Type()) {
-		return fmt.Errorf("incompatible struct %T, from %v", *x, dec.Type())
-	}
-	for {
-		f, err := dec.NextField()
-		if err != nil {
-			return err
-		}
-		switch f {
-		case "":
-			return dec.FinishValue()
-		case "Seconds":
-			if err = dec.StartValue(); err != nil {
-				return err
-			}
-			if x.Seconds, err = dec.DecodeInt(64); err != nil {
-				return err
-			}
-			if err = dec.FinishValue(); err != nil {
-				return err
-			}
-		case "Nanos":
-			if err = dec.StartValue(); err != nil {
-				return err
-			}
-			tmp, err := dec.DecodeInt(32)
-			if err != nil {
-				return err
-			}
-			x.Nanos = int32(tmp)
-			if err = dec.FinishValue(); err != nil {
-				return err
-			}
-		default:
-			if err = dec.SkipValue(); err != nil {
-				return err
-			}
-		}
-	}
+func (x Duration) VDLIsZero() (bool, error) {
+	return x == Duration{}, nil
 }
 
 func (x Duration) VDLWrite(enc vdl.Encoder) error {
 	if err := enc.StartValue(vdl.TypeOf((*Duration)(nil)).Elem()); err != nil {
 		return err
 	}
-	var1 := (x.Seconds == int64(0))
-	if !(var1) {
+	if x.Seconds != 0 {
 		if err := enc.NextField("Seconds"); err != nil {
 			return err
 		}
@@ -216,8 +172,7 @@ func (x Duration) VDLWrite(enc vdl.Encoder) error {
 			return err
 		}
 	}
-	var2 := (x.Nanos == int32(0))
-	if !(var2) {
+	if x.Nanos != 0 {
 		if err := enc.NextField("Nanos"); err != nil {
 			return err
 		}
@@ -235,6 +190,53 @@ func (x Duration) VDLWrite(enc vdl.Encoder) error {
 		return err
 	}
 	return enc.FinishValue()
+}
+
+func (x *Duration) VDLRead(dec vdl.Decoder) error {
+	*x = Duration{}
+	if err := dec.StartValue(); err != nil {
+		return err
+	}
+	if (dec.StackDepth() == 1 || dec.IsAny()) && !vdl.Compatible(vdl.TypeOf(*x), dec.Type()) {
+		return fmt.Errorf("incompatible struct %T, from %v", *x, dec.Type())
+	}
+	for {
+		f, err := dec.NextField()
+		if err != nil {
+			return err
+		}
+		switch f {
+		case "":
+			return dec.FinishValue()
+		case "Seconds":
+			if err := dec.StartValue(); err != nil {
+				return err
+			}
+			var err error
+			if x.Seconds, err = dec.DecodeInt(64); err != nil {
+				return err
+			}
+			if err := dec.FinishValue(); err != nil {
+				return err
+			}
+		case "Nanos":
+			if err := dec.StartValue(); err != nil {
+				return err
+			}
+			tmp, err := dec.DecodeInt(32)
+			if err != nil {
+				return err
+			}
+			x.Nanos = int32(tmp)
+			if err := dec.FinishValue(); err != nil {
+				return err
+			}
+		default:
+			if err := dec.SkipValue(); err != nil {
+				return err
+			}
+		}
+	}
 }
 
 // Time represents an absolute point in time with up to nanosecond precision.
@@ -368,59 +370,15 @@ func (t *TimeTarget) FinishFields(_ vdl.FieldsTarget) error {
 	return nil
 }
 
-func (x *Time) VDLRead(dec vdl.Decoder) error {
-	*x = Time{}
-	var err error
-	if err = dec.StartValue(); err != nil {
-		return err
-	}
-	if (dec.StackDepth() == 1 || dec.IsAny()) && !vdl.Compatible(vdl.TypeOf(*x), dec.Type()) {
-		return fmt.Errorf("incompatible struct %T, from %v", *x, dec.Type())
-	}
-	for {
-		f, err := dec.NextField()
-		if err != nil {
-			return err
-		}
-		switch f {
-		case "":
-			return dec.FinishValue()
-		case "Seconds":
-			if err = dec.StartValue(); err != nil {
-				return err
-			}
-			if x.Seconds, err = dec.DecodeInt(64); err != nil {
-				return err
-			}
-			if err = dec.FinishValue(); err != nil {
-				return err
-			}
-		case "Nanos":
-			if err = dec.StartValue(); err != nil {
-				return err
-			}
-			tmp, err := dec.DecodeInt(32)
-			if err != nil {
-				return err
-			}
-			x.Nanos = int32(tmp)
-			if err = dec.FinishValue(); err != nil {
-				return err
-			}
-		default:
-			if err = dec.SkipValue(); err != nil {
-				return err
-			}
-		}
-	}
+func (x Time) VDLIsZero() (bool, error) {
+	return x == Time{}, nil
 }
 
 func (x Time) VDLWrite(enc vdl.Encoder) error {
 	if err := enc.StartValue(vdl.TypeOf((*Time)(nil)).Elem()); err != nil {
 		return err
 	}
-	var1 := (x.Seconds == int64(0))
-	if !(var1) {
+	if x.Seconds != 0 {
 		if err := enc.NextField("Seconds"); err != nil {
 			return err
 		}
@@ -434,8 +392,7 @@ func (x Time) VDLWrite(enc vdl.Encoder) error {
 			return err
 		}
 	}
-	var2 := (x.Nanos == int32(0))
-	if !(var2) {
+	if x.Nanos != 0 {
 		if err := enc.NextField("Nanos"); err != nil {
 			return err
 		}
@@ -453,6 +410,53 @@ func (x Time) VDLWrite(enc vdl.Encoder) error {
 		return err
 	}
 	return enc.FinishValue()
+}
+
+func (x *Time) VDLRead(dec vdl.Decoder) error {
+	*x = Time{}
+	if err := dec.StartValue(); err != nil {
+		return err
+	}
+	if (dec.StackDepth() == 1 || dec.IsAny()) && !vdl.Compatible(vdl.TypeOf(*x), dec.Type()) {
+		return fmt.Errorf("incompatible struct %T, from %v", *x, dec.Type())
+	}
+	for {
+		f, err := dec.NextField()
+		if err != nil {
+			return err
+		}
+		switch f {
+		case "":
+			return dec.FinishValue()
+		case "Seconds":
+			if err := dec.StartValue(); err != nil {
+				return err
+			}
+			var err error
+			if x.Seconds, err = dec.DecodeInt(64); err != nil {
+				return err
+			}
+			if err := dec.FinishValue(); err != nil {
+				return err
+			}
+		case "Nanos":
+			if err := dec.StartValue(); err != nil {
+				return err
+			}
+			tmp, err := dec.DecodeInt(32)
+			if err != nil {
+				return err
+			}
+			x.Nanos = int32(tmp)
+			if err := dec.FinishValue(); err != nil {
+				return err
+			}
+		default:
+			if err := dec.SkipValue(); err != nil {
+				return err
+			}
+		}
+	}
 }
 
 // WireDeadline represents the deadline for an operation, where the operation is
@@ -608,73 +612,37 @@ func (t *WireDeadlineTarget) FinishFields(_ vdl.FieldsTarget) error {
 	return nil
 }
 
-func (x *WireDeadline) VDLRead(dec vdl.Decoder) error {
-	*x = WireDeadline{}
-	var err error
-	if err = dec.StartValue(); err != nil {
-		return err
+func (x WireDeadline) VDLIsZero() (bool, error) {
+	var wireFromNow Duration
+	if err := DurationFromNative(&wireFromNow, x.FromNow); err != nil {
+		return false, err
 	}
-	if (dec.StackDepth() == 1 || dec.IsAny()) && !vdl.Compatible(vdl.TypeOf(*x), dec.Type()) {
-		return fmt.Errorf("incompatible struct %T, from %v", *x, dec.Type())
+	if wireFromNow != (Duration{}) {
+		return false, nil
 	}
-	for {
-		f, err := dec.NextField()
-		if err != nil {
-			return err
-		}
-		switch f {
-		case "":
-			return dec.FinishValue()
-		case "FromNow":
-			var wire Duration
-			if err = wire.VDLRead(dec); err != nil {
-				return err
-			}
-			if err = DurationToNative(wire, &x.FromNow); err != nil {
-				return err
-			}
-		case "NoDeadline":
-			if err = dec.StartValue(); err != nil {
-				return err
-			}
-			if x.NoDeadline, err = dec.DecodeBool(); err != nil {
-				return err
-			}
-			if err = dec.FinishValue(); err != nil {
-				return err
-			}
-		default:
-			if err = dec.SkipValue(); err != nil {
-				return err
-			}
-		}
+	if x.NoDeadline {
+		return false, nil
 	}
+	return true, nil
 }
 
 func (x WireDeadline) VDLWrite(enc vdl.Encoder) error {
 	if err := enc.StartValue(vdl.TypeOf((*WireDeadline)(nil)).Elem()); err != nil {
 		return err
 	}
-	var wireValue1 Duration
-	if err := DurationFromNative(&wireValue1, x.FromNow); err != nil {
-		return fmt.Errorf("error converting x.FromNow to wiretype")
+	var wireFromNow Duration
+	if err := DurationFromNative(&wireFromNow, x.FromNow); err != nil {
+		return err
 	}
-
-	var2 := (wireValue1 == Duration{})
-	if !(var2) {
+	if wireFromNow != (Duration{}) {
 		if err := enc.NextField("FromNow"); err != nil {
 			return err
 		}
-		var wire Duration
-		if err := DurationFromNative(&wire, x.FromNow); err != nil {
-			return err
-		}
-		if err := wire.VDLWrite(enc); err != nil {
+		if err := wireFromNow.VDLWrite(enc); err != nil {
 			return err
 		}
 	}
-	var3 := (x.NoDeadline == false)
-	if !(var3) {
+	if x.NoDeadline {
 		if err := enc.NextField("NoDeadline"); err != nil {
 			return err
 		}
@@ -692,6 +660,49 @@ func (x WireDeadline) VDLWrite(enc vdl.Encoder) error {
 		return err
 	}
 	return enc.FinishValue()
+}
+
+func (x *WireDeadline) VDLRead(dec vdl.Decoder) error {
+	*x = WireDeadline{}
+	if err := dec.StartValue(); err != nil {
+		return err
+	}
+	if (dec.StackDepth() == 1 || dec.IsAny()) && !vdl.Compatible(vdl.TypeOf(*x), dec.Type()) {
+		return fmt.Errorf("incompatible struct %T, from %v", *x, dec.Type())
+	}
+	for {
+		f, err := dec.NextField()
+		if err != nil {
+			return err
+		}
+		switch f {
+		case "":
+			return dec.FinishValue()
+		case "FromNow":
+			var wire Duration
+			if err := wire.VDLRead(dec); err != nil {
+				return err
+			}
+			if err := DurationToNative(wire, &x.FromNow); err != nil {
+				return err
+			}
+		case "NoDeadline":
+			if err := dec.StartValue(); err != nil {
+				return err
+			}
+			var err error
+			if x.NoDeadline, err = dec.DecodeBool(); err != nil {
+				return err
+			}
+			if err := dec.FinishValue(); err != nil {
+				return err
+			}
+		default:
+			if err := dec.SkipValue(); err != nil {
+				return err
+			}
+		}
+	}
 }
 
 // Type-check native conversion functions.

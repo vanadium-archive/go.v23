@@ -217,102 +217,21 @@ func (t *__VDLTarget1_map) FinishMap(elem vdl.MapTarget) error {
 	return nil
 }
 
-func (x *Description) VDLRead(dec vdl.Decoder) error {
-	*x = Description{}
-	var err error
-	if err = dec.StartValue(); err != nil {
-		return err
+func (x Description) VDLIsZero() (bool, error) {
+	if x.Name != "" {
+		return false, nil
 	}
-	if (dec.StackDepth() == 1 || dec.IsAny()) && !vdl.Compatible(vdl.TypeOf(*x), dec.Type()) {
-		return fmt.Errorf("incompatible struct %T, from %v", *x, dec.Type())
+	if len(x.Profiles) != 0 {
+		return false, nil
 	}
-	for {
-		f, err := dec.NextField()
-		if err != nil {
-			return err
-		}
-		switch f {
-		case "":
-			return dec.FinishValue()
-		case "Name":
-			if err = dec.StartValue(); err != nil {
-				return err
-			}
-			if x.Name, err = dec.DecodeString(); err != nil {
-				return err
-			}
-			if err = dec.FinishValue(); err != nil {
-				return err
-			}
-		case "Profiles":
-			if err = __VDLRead1_map(dec, &x.Profiles); err != nil {
-				return err
-			}
-		default:
-			if err = dec.SkipValue(); err != nil {
-				return err
-			}
-		}
-	}
-}
-
-func __VDLRead1_map(dec vdl.Decoder, x *map[string]bool) error {
-	var err error
-	if err = dec.StartValue(); err != nil {
-		return err
-	}
-	if (dec.StackDepth() == 1 || dec.IsAny()) && !vdl.Compatible(vdl.TypeOf(*x), dec.Type()) {
-		return fmt.Errorf("incompatible map %T, from %v", *x, dec.Type())
-	}
-	var tmpMap map[string]bool
-	if len := dec.LenHint(); len > 0 {
-		tmpMap = make(map[string]bool, len)
-	}
-	for {
-		switch done, err := dec.NextEntry(); {
-		case err != nil:
-			return err
-		case done:
-			*x = tmpMap
-			return dec.FinishValue()
-		}
-		var key string
-		{
-			if err = dec.StartValue(); err != nil {
-				return err
-			}
-			if key, err = dec.DecodeString(); err != nil {
-				return err
-			}
-			if err = dec.FinishValue(); err != nil {
-				return err
-			}
-		}
-		var elem bool
-		{
-			if err = dec.StartValue(); err != nil {
-				return err
-			}
-			if elem, err = dec.DecodeBool(); err != nil {
-				return err
-			}
-			if err = dec.FinishValue(); err != nil {
-				return err
-			}
-		}
-		if tmpMap == nil {
-			tmpMap = make(map[string]bool)
-		}
-		tmpMap[key] = elem
-	}
+	return true, nil
 }
 
 func (x Description) VDLWrite(enc vdl.Encoder) error {
 	if err := enc.StartValue(vdl.TypeOf((*Description)(nil)).Elem()); err != nil {
 		return err
 	}
-	var1 := (x.Name == "")
-	if !(var1) {
+	if x.Name != "" {
 		if err := enc.NextField("Name"); err != nil {
 			return err
 		}
@@ -326,15 +245,11 @@ func (x Description) VDLWrite(enc vdl.Encoder) error {
 			return err
 		}
 	}
-	var var2 bool
-	if len(x.Profiles) == 0 {
-		var2 = true
-	}
-	if !(var2) {
+	if len(x.Profiles) != 0 {
 		if err := enc.NextField("Profiles"); err != nil {
 			return err
 		}
-		if err := __VDLWrite1_map(enc, &x.Profiles); err != nil {
+		if err := __VDLWriteAnon_map_1(enc, x.Profiles); err != nil {
 			return err
 		}
 	}
@@ -344,14 +259,14 @@ func (x Description) VDLWrite(enc vdl.Encoder) error {
 	return enc.FinishValue()
 }
 
-func __VDLWrite1_map(enc vdl.Encoder, x *map[string]bool) error {
+func __VDLWriteAnon_map_1(enc vdl.Encoder, x map[string]bool) error {
 	if err := enc.StartValue(vdl.TypeOf((*map[string]bool)(nil))); err != nil {
 		return err
 	}
-	if err := enc.SetLenHint(len(*x)); err != nil {
+	if err := enc.SetLenHint(len(x)); err != nil {
 		return err
 	}
-	for key, elem := range *x {
+	for key, elem := range x {
 		if err := enc.NextEntry(false); err != nil {
 			return err
 		}
@@ -378,6 +293,97 @@ func __VDLWrite1_map(enc vdl.Encoder, x *map[string]bool) error {
 		return err
 	}
 	return enc.FinishValue()
+}
+
+func (x *Description) VDLRead(dec vdl.Decoder) error {
+	*x = Description{}
+	if err := dec.StartValue(); err != nil {
+		return err
+	}
+	if (dec.StackDepth() == 1 || dec.IsAny()) && !vdl.Compatible(vdl.TypeOf(*x), dec.Type()) {
+		return fmt.Errorf("incompatible struct %T, from %v", *x, dec.Type())
+	}
+	for {
+		f, err := dec.NextField()
+		if err != nil {
+			return err
+		}
+		switch f {
+		case "":
+			return dec.FinishValue()
+		case "Name":
+			if err := dec.StartValue(); err != nil {
+				return err
+			}
+			var err error
+			if x.Name, err = dec.DecodeString(); err != nil {
+				return err
+			}
+			if err := dec.FinishValue(); err != nil {
+				return err
+			}
+		case "Profiles":
+			if err := __VDLReadAnon_map_1(dec, &x.Profiles); err != nil {
+				return err
+			}
+		default:
+			if err := dec.SkipValue(); err != nil {
+				return err
+			}
+		}
+	}
+}
+
+func __VDLReadAnon_map_1(dec vdl.Decoder, x *map[string]bool) error {
+	if err := dec.StartValue(); err != nil {
+		return err
+	}
+	if (dec.StackDepth() == 1 || dec.IsAny()) && !vdl.Compatible(vdl.TypeOf(*x), dec.Type()) {
+		return fmt.Errorf("incompatible map %T, from %v", *x, dec.Type())
+	}
+	var tmpMap map[string]bool
+	if len := dec.LenHint(); len > 0 {
+		tmpMap = make(map[string]bool, len)
+	}
+	for {
+		switch done, err := dec.NextEntry(); {
+		case err != nil:
+			return err
+		case done:
+			*x = tmpMap
+			return dec.FinishValue()
+		}
+		var key string
+		{
+			if err := dec.StartValue(); err != nil {
+				return err
+			}
+			var err error
+			if key, err = dec.DecodeString(); err != nil {
+				return err
+			}
+			if err := dec.FinishValue(); err != nil {
+				return err
+			}
+		}
+		var elem bool
+		{
+			if err := dec.StartValue(); err != nil {
+				return err
+			}
+			var err error
+			if elem, err = dec.DecodeBool(); err != nil {
+				return err
+			}
+			if err := dec.FinishValue(); err != nil {
+				return err
+			}
+		}
+		if tmpMap == nil {
+			tmpMap = make(map[string]bool)
+		}
+		tmpMap[key] = elem
+	}
 }
 
 // PartInfo holds information describing a binary part.
@@ -495,57 +501,15 @@ func (t *PartInfoTarget) FinishFields(_ vdl.FieldsTarget) error {
 	return nil
 }
 
-func (x *PartInfo) VDLRead(dec vdl.Decoder) error {
-	*x = PartInfo{}
-	var err error
-	if err = dec.StartValue(); err != nil {
-		return err
-	}
-	if (dec.StackDepth() == 1 || dec.IsAny()) && !vdl.Compatible(vdl.TypeOf(*x), dec.Type()) {
-		return fmt.Errorf("incompatible struct %T, from %v", *x, dec.Type())
-	}
-	for {
-		f, err := dec.NextField()
-		if err != nil {
-			return err
-		}
-		switch f {
-		case "":
-			return dec.FinishValue()
-		case "Checksum":
-			if err = dec.StartValue(); err != nil {
-				return err
-			}
-			if x.Checksum, err = dec.DecodeString(); err != nil {
-				return err
-			}
-			if err = dec.FinishValue(); err != nil {
-				return err
-			}
-		case "Size":
-			if err = dec.StartValue(); err != nil {
-				return err
-			}
-			if x.Size, err = dec.DecodeInt(64); err != nil {
-				return err
-			}
-			if err = dec.FinishValue(); err != nil {
-				return err
-			}
-		default:
-			if err = dec.SkipValue(); err != nil {
-				return err
-			}
-		}
-	}
+func (x PartInfo) VDLIsZero() (bool, error) {
+	return x == PartInfo{}, nil
 }
 
 func (x PartInfo) VDLWrite(enc vdl.Encoder) error {
 	if err := enc.StartValue(vdl.TypeOf((*PartInfo)(nil)).Elem()); err != nil {
 		return err
 	}
-	var1 := (x.Checksum == "")
-	if !(var1) {
+	if x.Checksum != "" {
 		if err := enc.NextField("Checksum"); err != nil {
 			return err
 		}
@@ -559,8 +523,7 @@ func (x PartInfo) VDLWrite(enc vdl.Encoder) error {
 			return err
 		}
 	}
-	var2 := (x.Size == int64(0))
-	if !(var2) {
+	if x.Size != 0 {
 		if err := enc.NextField("Size"); err != nil {
 			return err
 		}
@@ -578,6 +541,52 @@ func (x PartInfo) VDLWrite(enc vdl.Encoder) error {
 		return err
 	}
 	return enc.FinishValue()
+}
+
+func (x *PartInfo) VDLRead(dec vdl.Decoder) error {
+	*x = PartInfo{}
+	if err := dec.StartValue(); err != nil {
+		return err
+	}
+	if (dec.StackDepth() == 1 || dec.IsAny()) && !vdl.Compatible(vdl.TypeOf(*x), dec.Type()) {
+		return fmt.Errorf("incompatible struct %T, from %v", *x, dec.Type())
+	}
+	for {
+		f, err := dec.NextField()
+		if err != nil {
+			return err
+		}
+		switch f {
+		case "":
+			return dec.FinishValue()
+		case "Checksum":
+			if err := dec.StartValue(); err != nil {
+				return err
+			}
+			var err error
+			if x.Checksum, err = dec.DecodeString(); err != nil {
+				return err
+			}
+			if err := dec.FinishValue(); err != nil {
+				return err
+			}
+		case "Size":
+			if err := dec.StartValue(); err != nil {
+				return err
+			}
+			var err error
+			if x.Size, err = dec.DecodeInt(64); err != nil {
+				return err
+			}
+			if err := dec.FinishValue(); err != nil {
+				return err
+			}
+		default:
+			if err := dec.SkipValue(); err != nil {
+				return err
+			}
+		}
+	}
 }
 
 //////////////////////////////////////////////////

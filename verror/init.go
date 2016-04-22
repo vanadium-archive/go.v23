@@ -97,7 +97,10 @@ func retryFromAction(action ActionCode) vdl.WireRetryCode {
 	return vdl.WireRetryCodeNoRetry
 }
 
-// VDLRead implements the logic to read error from dec.
+// VDLRead implements the logic to read x from dec.
+//
+// Unlike regular VDLRead implementations, this handles the case where the
+// decoder contains a nil value, to make code generation simpler.
 func VDLRead(dec vdl.Decoder, x *error) error {
 	if err := dec.StartValue(); err != nil {
 		return err
@@ -122,8 +125,14 @@ func VDLRead(dec vdl.Decoder, x *error) error {
 	return nil
 }
 
-// VDLWrite implements the logic to write error to enc.
+// VDLWrite implements the logic to write x to enc.
+//
+// Unlike regular VDLWrite implementations, this handles the case where x
+// contains a nil value, to make code generation simpler.
 func VDLWrite(enc vdl.Encoder, x error) error {
+	if x == nil {
+		return enc.NilValue(vdl.ErrorType)
+	}
 	var wire vdl.WireError
 	if err := WireFromNative(&wire, x); err != nil {
 		return err

@@ -91,7 +91,7 @@ func (d *xDecoder) decodeWireType(wt *wireType) (TypeId, error) {
 	}
 	// Type messages are just a regularly encoded wireType, which is a union.  To
 	// decode we pre-populate the stack with an entry for the wire type, and run
-	// the code-generated vdlReadWireType method.
+	// the code-generated __VDLRead_wireType method.
 	tid, err := d.old.nextMessage()
 	if err != nil {
 		return 0, err
@@ -102,7 +102,7 @@ func (d *xDecoder) decodeWireType(wt *wireType) (TypeId, error) {
 		LenHint: 1, // wireType is a union
 	})
 	d.ignoreNextStartValue = true
-	if err := vdlReadWireType(d, wt); err != nil {
+	if err := __VDLRead_wireType(d, wt); err != nil {
 		return 0, err
 	}
 	return tid, nil

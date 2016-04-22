@@ -322,10 +322,93 @@ func (t *__VDLTarget1_list) FinishList(elem vdl.ListTarget) error {
 	return nil
 }
 
+func (x AccessList) VDLIsZero() (bool, error) {
+	if len(x.In) != 0 {
+		return false, nil
+	}
+	if len(x.NotIn) != 0 {
+		return false, nil
+	}
+	return true, nil
+}
+
+func (x AccessList) VDLWrite(enc vdl.Encoder) error {
+	if err := enc.StartValue(vdl.TypeOf((*AccessList)(nil)).Elem()); err != nil {
+		return err
+	}
+	if len(x.In) != 0 {
+		if err := enc.NextField("In"); err != nil {
+			return err
+		}
+		if err := __VDLWriteAnon_list_1(enc, x.In); err != nil {
+			return err
+		}
+	}
+	if len(x.NotIn) != 0 {
+		if err := enc.NextField("NotIn"); err != nil {
+			return err
+		}
+		if err := __VDLWriteAnon_list_2(enc, x.NotIn); err != nil {
+			return err
+		}
+	}
+	if err := enc.NextField(""); err != nil {
+		return err
+	}
+	return enc.FinishValue()
+}
+
+func __VDLWriteAnon_list_1(enc vdl.Encoder, x []security.BlessingPattern) error {
+	if err := enc.StartValue(vdl.TypeOf((*[]security.BlessingPattern)(nil))); err != nil {
+		return err
+	}
+	if err := enc.SetLenHint(len(x)); err != nil {
+		return err
+	}
+	for i := 0; i < len(x); i++ {
+		if err := enc.NextEntry(false); err != nil {
+			return err
+		}
+		if err := x[i].VDLWrite(enc); err != nil {
+			return err
+		}
+	}
+	if err := enc.NextEntry(true); err != nil {
+		return err
+	}
+	return enc.FinishValue()
+}
+
+func __VDLWriteAnon_list_2(enc vdl.Encoder, x []string) error {
+	if err := enc.StartValue(vdl.TypeOf((*[]string)(nil))); err != nil {
+		return err
+	}
+	if err := enc.SetLenHint(len(x)); err != nil {
+		return err
+	}
+	for i := 0; i < len(x); i++ {
+		if err := enc.NextEntry(false); err != nil {
+			return err
+		}
+		if err := enc.StartValue(vdl.TypeOf((*string)(nil))); err != nil {
+			return err
+		}
+		if err := enc.EncodeString(x[i]); err != nil {
+			return err
+		}
+		if err := enc.FinishValue(); err != nil {
+			return err
+		}
+	}
+	if err := enc.NextEntry(true); err != nil {
+		return err
+	}
+	return enc.FinishValue()
+}
+
 func (x *AccessList) VDLRead(dec vdl.Decoder) error {
 	*x = AccessList{}
-	var err error
-	if err = dec.StartValue(); err != nil {
+	if err := dec.StartValue(); err != nil {
 		return err
 	}
 	if (dec.StackDepth() == 1 || dec.IsAny()) && !vdl.Compatible(vdl.TypeOf(*x), dec.Type()) {
@@ -340,24 +423,23 @@ func (x *AccessList) VDLRead(dec vdl.Decoder) error {
 		case "":
 			return dec.FinishValue()
 		case "In":
-			if err = __VDLRead1_list(dec, &x.In); err != nil {
+			if err := __VDLReadAnon_list_1(dec, &x.In); err != nil {
 				return err
 			}
 		case "NotIn":
-			if err = __VDLRead2_list(dec, &x.NotIn); err != nil {
+			if err := __VDLReadAnon_list_2(dec, &x.NotIn); err != nil {
 				return err
 			}
 		default:
-			if err = dec.SkipValue(); err != nil {
+			if err := dec.SkipValue(); err != nil {
 				return err
 			}
 		}
 	}
 }
 
-func __VDLRead1_list(dec vdl.Decoder, x *[]security.BlessingPattern) error {
-	var err error
-	if err = dec.StartValue(); err != nil {
+func __VDLReadAnon_list_1(dec vdl.Decoder, x *[]security.BlessingPattern) error {
+	if err := dec.StartValue(); err != nil {
 		return err
 	}
 	if (dec.StackDepth() == 1 || dec.IsAny()) && !vdl.Compatible(vdl.TypeOf(*x), dec.Type()) {
@@ -377,16 +459,15 @@ func __VDLRead1_list(dec vdl.Decoder, x *[]security.BlessingPattern) error {
 			return dec.FinishValue()
 		}
 		var elem security.BlessingPattern
-		if err = elem.VDLRead(dec); err != nil {
+		if err := elem.VDLRead(dec); err != nil {
 			return err
 		}
 		*x = append(*x, elem)
 	}
 }
 
-func __VDLRead2_list(dec vdl.Decoder, x *[]string) error {
-	var err error
-	if err = dec.StartValue(); err != nil {
+func __VDLReadAnon_list_2(dec vdl.Decoder, x *[]string) error {
+	if err := dec.StartValue(); err != nil {
 		return err
 	}
 	if (dec.StackDepth() == 1 || dec.IsAny()) && !vdl.Compatible(vdl.TypeOf(*x), dec.Type()) {
@@ -406,99 +487,18 @@ func __VDLRead2_list(dec vdl.Decoder, x *[]string) error {
 			return dec.FinishValue()
 		}
 		var elem string
-		if err = dec.StartValue(); err != nil {
+		if err := dec.StartValue(); err != nil {
 			return err
 		}
+		var err error
 		if elem, err = dec.DecodeString(); err != nil {
 			return err
 		}
-		if err = dec.FinishValue(); err != nil {
+		if err := dec.FinishValue(); err != nil {
 			return err
 		}
 		*x = append(*x, elem)
 	}
-}
-
-func (x AccessList) VDLWrite(enc vdl.Encoder) error {
-	if err := enc.StartValue(vdl.TypeOf((*AccessList)(nil)).Elem()); err != nil {
-		return err
-	}
-	var var1 bool
-	if len(x.In) == 0 {
-		var1 = true
-	}
-	if !(var1) {
-		if err := enc.NextField("In"); err != nil {
-			return err
-		}
-		if err := __VDLWrite1_list(enc, &x.In); err != nil {
-			return err
-		}
-	}
-	var var2 bool
-	if len(x.NotIn) == 0 {
-		var2 = true
-	}
-	if !(var2) {
-		if err := enc.NextField("NotIn"); err != nil {
-			return err
-		}
-		if err := __VDLWrite2_list(enc, &x.NotIn); err != nil {
-			return err
-		}
-	}
-	if err := enc.NextField(""); err != nil {
-		return err
-	}
-	return enc.FinishValue()
-}
-
-func __VDLWrite1_list(enc vdl.Encoder, x *[]security.BlessingPattern) error {
-	if err := enc.StartValue(vdl.TypeOf((*[]security.BlessingPattern)(nil))); err != nil {
-		return err
-	}
-	if err := enc.SetLenHint(len(*x)); err != nil {
-		return err
-	}
-	for i := 0; i < len(*x); i++ {
-		if err := enc.NextEntry(false); err != nil {
-			return err
-		}
-		if err := (*x)[i].VDLWrite(enc); err != nil {
-			return err
-		}
-	}
-	if err := enc.NextEntry(true); err != nil {
-		return err
-	}
-	return enc.FinishValue()
-}
-
-func __VDLWrite2_list(enc vdl.Encoder, x *[]string) error {
-	if err := enc.StartValue(vdl.TypeOf((*[]string)(nil))); err != nil {
-		return err
-	}
-	if err := enc.SetLenHint(len(*x)); err != nil {
-		return err
-	}
-	for i := 0; i < len(*x); i++ {
-		if err := enc.NextEntry(false); err != nil {
-			return err
-		}
-		if err := enc.StartValue(vdl.TypeOf((*string)(nil))); err != nil {
-			return err
-		}
-		if err := enc.EncodeString((*x)[i]); err != nil {
-			return err
-		}
-		if err := enc.FinishValue(); err != nil {
-			return err
-		}
-	}
-	if err := enc.NextEntry(true); err != nil {
-		return err
-	}
-	return enc.FinishValue()
 }
 
 // Permissions maps string tags to access lists specifying the blessings
@@ -592,49 +592,8 @@ func (t *PermissionsTarget) FinishMap(elem vdl.MapTarget) error {
 	return nil
 }
 
-func (x *Permissions) VDLRead(dec vdl.Decoder) error {
-	var err error
-	if err = dec.StartValue(); err != nil {
-		return err
-	}
-	if (dec.StackDepth() == 1 || dec.IsAny()) && !vdl.Compatible(vdl.TypeOf(*x), dec.Type()) {
-		return fmt.Errorf("incompatible map %T, from %v", *x, dec.Type())
-	}
-	var tmpMap Permissions
-	if len := dec.LenHint(); len > 0 {
-		tmpMap = make(Permissions, len)
-	}
-	for {
-		switch done, err := dec.NextEntry(); {
-		case err != nil:
-			return err
-		case done:
-			*x = tmpMap
-			return dec.FinishValue()
-		}
-		var key string
-		{
-			if err = dec.StartValue(); err != nil {
-				return err
-			}
-			if key, err = dec.DecodeString(); err != nil {
-				return err
-			}
-			if err = dec.FinishValue(); err != nil {
-				return err
-			}
-		}
-		var elem AccessList
-		{
-			if err = elem.VDLRead(dec); err != nil {
-				return err
-			}
-		}
-		if tmpMap == nil {
-			tmpMap = make(Permissions)
-		}
-		tmpMap[key] = elem
-	}
+func (x Permissions) VDLIsZero() (bool, error) {
+	return len(x) == 0, nil
 }
 
 func (x Permissions) VDLWrite(enc vdl.Encoder) error {
@@ -665,6 +624,51 @@ func (x Permissions) VDLWrite(enc vdl.Encoder) error {
 		return err
 	}
 	return enc.FinishValue()
+}
+
+func (x *Permissions) VDLRead(dec vdl.Decoder) error {
+	if err := dec.StartValue(); err != nil {
+		return err
+	}
+	if (dec.StackDepth() == 1 || dec.IsAny()) && !vdl.Compatible(vdl.TypeOf(*x), dec.Type()) {
+		return fmt.Errorf("incompatible map %T, from %v", *x, dec.Type())
+	}
+	var tmpMap Permissions
+	if len := dec.LenHint(); len > 0 {
+		tmpMap = make(Permissions, len)
+	}
+	for {
+		switch done, err := dec.NextEntry(); {
+		case err != nil:
+			return err
+		case done:
+			*x = tmpMap
+			return dec.FinishValue()
+		}
+		var key string
+		{
+			if err := dec.StartValue(); err != nil {
+				return err
+			}
+			var err error
+			if key, err = dec.DecodeString(); err != nil {
+				return err
+			}
+			if err := dec.FinishValue(); err != nil {
+				return err
+			}
+		}
+		var elem AccessList
+		{
+			if err := elem.VDLRead(dec); err != nil {
+				return err
+			}
+		}
+		if tmpMap == nil {
+			tmpMap = make(Permissions)
+		}
+		tmpMap[key] = elem
+	}
 }
 
 // Tag is used to associate methods with an AccessList in a Permissions.
@@ -705,17 +709,8 @@ func (t *TagTarget) FromString(src string, tt *vdl.Type) error {
 	return nil
 }
 
-func (x *Tag) VDLRead(dec vdl.Decoder) error {
-	var err error
-	if err = dec.StartValue(); err != nil {
-		return err
-	}
-	tmp, err := dec.DecodeString()
-	if err != nil {
-		return err
-	}
-	*x = Tag(tmp)
-	return dec.FinishValue()
+func (x Tag) VDLIsZero() (bool, error) {
+	return x == "", nil
 }
 
 func (x Tag) VDLWrite(enc vdl.Encoder) error {
@@ -726,6 +721,18 @@ func (x Tag) VDLWrite(enc vdl.Encoder) error {
 		return err
 	}
 	return enc.FinishValue()
+}
+
+func (x *Tag) VDLRead(dec vdl.Decoder) error {
+	if err := dec.StartValue(); err != nil {
+		return err
+	}
+	tmp, err := dec.DecodeString()
+	if err != nil {
+		return err
+	}
+	*x = Tag(tmp)
+	return dec.FinishValue()
 }
 
 //////////////////////////////////////////////////

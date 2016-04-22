@@ -138,57 +138,15 @@ func (t *LogEntryTarget) FinishFields(_ vdl.FieldsTarget) error {
 	return nil
 }
 
-func (x *LogEntry) VDLRead(dec vdl.Decoder) error {
-	*x = LogEntry{}
-	var err error
-	if err = dec.StartValue(); err != nil {
-		return err
-	}
-	if (dec.StackDepth() == 1 || dec.IsAny()) && !vdl.Compatible(vdl.TypeOf(*x), dec.Type()) {
-		return fmt.Errorf("incompatible struct %T, from %v", *x, dec.Type())
-	}
-	for {
-		f, err := dec.NextField()
-		if err != nil {
-			return err
-		}
-		switch f {
-		case "":
-			return dec.FinishValue()
-		case "Position":
-			if err = dec.StartValue(); err != nil {
-				return err
-			}
-			if x.Position, err = dec.DecodeInt(64); err != nil {
-				return err
-			}
-			if err = dec.FinishValue(); err != nil {
-				return err
-			}
-		case "Line":
-			if err = dec.StartValue(); err != nil {
-				return err
-			}
-			if x.Line, err = dec.DecodeString(); err != nil {
-				return err
-			}
-			if err = dec.FinishValue(); err != nil {
-				return err
-			}
-		default:
-			if err = dec.SkipValue(); err != nil {
-				return err
-			}
-		}
-	}
+func (x LogEntry) VDLIsZero() (bool, error) {
+	return x == LogEntry{}, nil
 }
 
 func (x LogEntry) VDLWrite(enc vdl.Encoder) error {
 	if err := enc.StartValue(vdl.TypeOf((*LogEntry)(nil)).Elem()); err != nil {
 		return err
 	}
-	var1 := (x.Position == int64(0))
-	if !(var1) {
+	if x.Position != 0 {
 		if err := enc.NextField("Position"); err != nil {
 			return err
 		}
@@ -202,8 +160,7 @@ func (x LogEntry) VDLWrite(enc vdl.Encoder) error {
 			return err
 		}
 	}
-	var2 := (x.Line == "")
-	if !(var2) {
+	if x.Line != "" {
 		if err := enc.NextField("Line"); err != nil {
 			return err
 		}
@@ -221,6 +178,52 @@ func (x LogEntry) VDLWrite(enc vdl.Encoder) error {
 		return err
 	}
 	return enc.FinishValue()
+}
+
+func (x *LogEntry) VDLRead(dec vdl.Decoder) error {
+	*x = LogEntry{}
+	if err := dec.StartValue(); err != nil {
+		return err
+	}
+	if (dec.StackDepth() == 1 || dec.IsAny()) && !vdl.Compatible(vdl.TypeOf(*x), dec.Type()) {
+		return fmt.Errorf("incompatible struct %T, from %v", *x, dec.Type())
+	}
+	for {
+		f, err := dec.NextField()
+		if err != nil {
+			return err
+		}
+		switch f {
+		case "":
+			return dec.FinishValue()
+		case "Position":
+			if err := dec.StartValue(); err != nil {
+				return err
+			}
+			var err error
+			if x.Position, err = dec.DecodeInt(64); err != nil {
+				return err
+			}
+			if err := dec.FinishValue(); err != nil {
+				return err
+			}
+		case "Line":
+			if err := dec.StartValue(); err != nil {
+				return err
+			}
+			var err error
+			if x.Line, err = dec.DecodeString(); err != nil {
+				return err
+			}
+			if err := dec.FinishValue(); err != nil {
+				return err
+			}
+		default:
+			if err := dec.SkipValue(); err != nil {
+				return err
+			}
+		}
+	}
 }
 
 //////////////////////////////////////////////////

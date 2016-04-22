@@ -376,6 +376,14 @@ func EqualValue(a, b *Value) bool {
 	}
 }
 
+// VDLIsZero implements the vdl.IsZeroer interface.  Returns true iff v
+// represents any(nil).
+//
+// TODO(toddw): Describe the subtle difference with IsZero().
+func (v *Value) VDLIsZero() (bool, error) {
+	return v == nil || (v.t == AnyType && v.IsZero()), nil
+}
+
 // IsZero returns true iff v is the zero value for its type.
 func (v *Value) IsZero() bool {
 	return isZeroRep(v.t, v.rep)

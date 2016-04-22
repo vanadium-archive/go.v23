@@ -69,7 +69,7 @@ func rtBytes(rv reflect.Value) []byte {
 // VDLIsZero returns true iff the receiver that implements this method is the
 // VDL zero value.
 type IsZeroer interface {
-	VDLIsZero() bool
+	VDLIsZero() (bool, error)
 }
 
 type stringer interface {
@@ -83,9 +83,9 @@ type indexer interface {
 }
 
 var (
-	rvAnyType                       = reflect.ValueOf(AnyType)
-	kkTypeObjectOrUnion             = []Kind{TypeObject, Union}
-	kkTypeObjectOrUnionOrCollection = []Kind{TypeObject, Union, List, Set, Map}
+	rvAnyType            = reflect.ValueOf(AnyType)
+	kkTypeObjectOrUnion  = []Kind{TypeObject, Union}
+	kkZeroValueNotUnique = []Kind{Any, TypeObject, Union, List, Set, Map}
 )
 
 // rvZeroValue returns the zero value of rt, using the vdl zero rules.
@@ -174,39 +174,34 @@ func rvZeroValue(rt reflect.Type, tt *Type) (reflect.Value, error) {
 	return rv, nil
 }
 
-// rvIsZero returns true iff rv is a zero value, using the vdl zero rules.
-// Similar to rvZeroValue, we need to handle the places where Go zero values are
-// different from VDL zero values.  There are a few more cases; here are all the
-// types where there are multiple Go zero value representations:
-//
-//    TypeObject:     nil, or AnyType
-//    Union:          nil, or zero value of the type at index 0
-//    List, Set, Map: nil, or empty
+// rvIsZeroValue returns true iff rv represents the VDL zero value.  Here are
+// the types with multiple VDL zero value representations:
+//   Any:            nil, or VDLIsZero on vdl.Value/vom.RawBytes
+//   TypeObject:     nil, or AnyType
+//   Union:          nil, or zero value of field 0
+//   List, Set, Map: nil, or empty
 func rvIsZeroValue(rv reflect.Value, tt *Type) (bool, error) {
 	// Walk pointers and interfaces, and handle nil values.
 	for rv.Kind() == reflect.Ptr || rv.Kind() == reflect.Interface {
-		switch {
-		case rv.IsNil():
+		if rv.IsNil() {
 			// All nil pointers and nil interfaces are considered to be zero.  Note
 			// that we may have a non-optional type that happens to be represented by
 			// a pointer; technically nil might be considered an error, but it's
 			// easier for the user (and for us) to treat it as zero.
 			return true, nil
-		case rv.Type() == rtPtrToType && rv.Interface().(*Type) == AnyType:
-			// AnyType is the zero value of TypeObject.
-			return true, nil
 		}
 		rv = rv.Elem()
 	}
 	rt := rv.Type()
-	// Now we know that rv isn't nil.  Call VDLIsZero if it exists.  This handles
-	// the vdl.Value and vom.RawBytes cases.
+	// Now we know that rv isn't a pointer or interface, and also can't be nil.
+	// Call VDLIsZero if it exists.  This handles the vdl.Value/vom.RawBytes
+	// cases, as well generated code and user-implemented VDLIsZero methods.
 	if rt.Implements(rtIsZeroer) {
-		return rv.Interface().(IsZeroer).VDLIsZero(), nil
+		return rv.Interface().(IsZeroer).VDLIsZero()
 	}
 	if reflect.PtrTo(rt).Implements(rtIsZeroer) {
 		if rv.CanAddr() {
-			return rv.Addr().Interface().(IsZeroer).VDLIsZero(), nil
+			return rv.Addr().Interface().(IsZeroer).VDLIsZero()
 		}
 		// Handle the harder case where *T implements IsZeroer, but we can't take
 		// the address of rv to turn it into *T.  Create a new *T value and fill it
@@ -214,7 +209,7 @@ func rvIsZeroValue(rv reflect.Value, tt *Type) (bool, error) {
 		// to storing rv in a temporary variable, so that we can take the address.
 		rvPtr := reflect.New(rt)
 		rvPtr.Elem().Set(rv)
-		return rvPtr.Interface().(IsZeroer).VDLIsZero(), nil
+		return rvPtr.Interface().(IsZeroer).VDLIsZero()
 	}
 	// Handle native types, by converting and checking the wire value for zero.
 	if ni := nativeInfoFromNative(rt); ni != nil {
@@ -230,23 +225,30 @@ func rvIsZeroValue(rv reflect.Value, tt *Type) (bool, error) {
 	if tt.Kind() == Optional || tt.Kind() == Any {
 		return false, nil
 	}
-	// Fastpath to directly compare rv against the zero Go value.  If it returns
-	// true, we know for sure that the value is zero.  If it returns false, and if
-	// we don't have more than one zero representation, we know for sure that the
-	// value isn't zero.  Otherwise we must handle the harder cases.
+	// TODO(toddw): We could consider adding a "fastpath" here to check against
+	// the go zero value, or the zero value created by rvZeroValue, and possibly
+	// returning early.  This is tricky though; we can't use this fastpath if rt
+	// contains any native types, but the only way to know whether rt contains any
+	// native types is to look through the entire type, which might actually be
+	// slower than the benefit of this "fastpath".  The cases where it'll help are
+	// large arrays or structs.
 	//
-	// TODO(toddw): Should we check against the zero-value created by rvZeroValue
-	// instead?  This is a performance question; either way the semantics of the
-	// check remain the same.  We could also move this check to the top of the
-	// function, before pointer walking.
-	switch {
-	case rv.Interface() == reflect.Zero(rt).Interface():
-		return true, nil
-	case !tt.ContainsKind(WalkInline, kkTypeObjectOrUnionOrCollection...):
-		return false, nil
-	}
-	// Handle cases where there is more than one zero representation.
+	// Handle all reflect cases.
 	switch rv.Kind() {
+	case reflect.Bool:
+		return !rv.Bool(), nil
+	case reflect.String:
+		return rv.String() == "", nil
+	case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
+		return rv.Int() == 0, nil
+	case reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64, reflect.Uintptr:
+		return rv.Uint() == 0, nil
+	case reflect.Float32, reflect.Float64:
+		return rv.Float() == 0, nil
+	case reflect.Complex64, reflect.Complex128:
+		return rv.Complex() == 0, nil
+	case reflect.UnsafePointer:
+		return rv.Pointer() == 0, nil
 	case reflect.Slice, reflect.Map:
 		return rv.Len() == 0, nil
 	case reflect.Array:
@@ -267,13 +269,15 @@ func rvIsZeroValue(rv reflect.Value, tt *Type) (bool, error) {
 			}
 			return true, nil
 		case Union:
-			// Check to make sure the union field struct is set to its zero value.
-			rvField := rv.Field(0)
-			ttField, err := TypeFromReflect(rvField.Type())
-			if err != nil {
-				return false, err
+			// We already handled the nil union interface case above in the regular
+			// pointer/interface walking.  Here we check to make sure the union field
+			// struct represents field 0, and is set to its zero value.
+			//
+			// TypeFromReflect already validated Index(); call without error checking.
+			if index := rv.Interface().(indexer).Index(); index != 0 {
+				return false, nil
 			}
-			return rvIsZeroValue(rvField, ttField)
+			return rvIsZeroValue(rv.Field(0), tt.Field(0).Type)
 		}
 	}
 	return false, fmt.Errorf("vdl: rvIsZeroValue unhandled rt: %v tt: %v", rt, tt)

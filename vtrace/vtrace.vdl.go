@@ -150,73 +150,37 @@ func (t *AnnotationTarget) FinishFields(_ vdl.FieldsTarget) error {
 	return nil
 }
 
-func (x *Annotation) VDLRead(dec vdl.Decoder) error {
-	*x = Annotation{}
-	var err error
-	if err = dec.StartValue(); err != nil {
-		return err
+func (x Annotation) VDLIsZero() (bool, error) {
+	var wireWhen time_2.Time
+	if err := time_2.TimeFromNative(&wireWhen, x.When); err != nil {
+		return false, err
 	}
-	if (dec.StackDepth() == 1 || dec.IsAny()) && !vdl.Compatible(vdl.TypeOf(*x), dec.Type()) {
-		return fmt.Errorf("incompatible struct %T, from %v", *x, dec.Type())
+	if wireWhen != (time_2.Time{}) {
+		return false, nil
 	}
-	for {
-		f, err := dec.NextField()
-		if err != nil {
-			return err
-		}
-		switch f {
-		case "":
-			return dec.FinishValue()
-		case "When":
-			var wire time_2.Time
-			if err = wire.VDLRead(dec); err != nil {
-				return err
-			}
-			if err = time_2.TimeToNative(wire, &x.When); err != nil {
-				return err
-			}
-		case "Message":
-			if err = dec.StartValue(); err != nil {
-				return err
-			}
-			if x.Message, err = dec.DecodeString(); err != nil {
-				return err
-			}
-			if err = dec.FinishValue(); err != nil {
-				return err
-			}
-		default:
-			if err = dec.SkipValue(); err != nil {
-				return err
-			}
-		}
+	if x.Message != "" {
+		return false, nil
 	}
+	return true, nil
 }
 
 func (x Annotation) VDLWrite(enc vdl.Encoder) error {
 	if err := enc.StartValue(vdl.TypeOf((*Annotation)(nil)).Elem()); err != nil {
 		return err
 	}
-	var wireValue1 time_2.Time
-	if err := time_2.TimeFromNative(&wireValue1, x.When); err != nil {
-		return fmt.Errorf("error converting x.When to wiretype")
+	var wireWhen time_2.Time
+	if err := time_2.TimeFromNative(&wireWhen, x.When); err != nil {
+		return err
 	}
-
-	var2 := (wireValue1 == time_2.Time{})
-	if !(var2) {
+	if wireWhen != (time_2.Time{}) {
 		if err := enc.NextField("When"); err != nil {
 			return err
 		}
-		var wire time_2.Time
-		if err := time_2.TimeFromNative(&wire, x.When); err != nil {
-			return err
-		}
-		if err := wire.VDLWrite(enc); err != nil {
+		if err := wireWhen.VDLWrite(enc); err != nil {
 			return err
 		}
 	}
-	var3 := (x.Message == "")
-	if !(var3) {
+	if x.Message != "" {
 		if err := enc.NextField("Message"); err != nil {
 			return err
 		}
@@ -234,6 +198,49 @@ func (x Annotation) VDLWrite(enc vdl.Encoder) error {
 		return err
 	}
 	return enc.FinishValue()
+}
+
+func (x *Annotation) VDLRead(dec vdl.Decoder) error {
+	*x = Annotation{}
+	if err := dec.StartValue(); err != nil {
+		return err
+	}
+	if (dec.StackDepth() == 1 || dec.IsAny()) && !vdl.Compatible(vdl.TypeOf(*x), dec.Type()) {
+		return fmt.Errorf("incompatible struct %T, from %v", *x, dec.Type())
+	}
+	for {
+		f, err := dec.NextField()
+		if err != nil {
+			return err
+		}
+		switch f {
+		case "":
+			return dec.FinishValue()
+		case "When":
+			var wire time_2.Time
+			if err := wire.VDLRead(dec); err != nil {
+				return err
+			}
+			if err := time_2.TimeToNative(wire, &x.When); err != nil {
+				return err
+			}
+		case "Message":
+			if err := dec.StartValue(); err != nil {
+				return err
+			}
+			var err error
+			if x.Message, err = dec.DecodeString(); err != nil {
+				return err
+			}
+			if err := dec.FinishValue(); err != nil {
+				return err
+			}
+		default:
+			if err := dec.SkipValue(); err != nil {
+				return err
+			}
+		}
+	}
 }
 
 // A SpanRecord is the wire format for a Span.
@@ -542,10 +549,132 @@ func (t *__VDLTarget1_list) FinishList(elem vdl.ListTarget) error {
 	return nil
 }
 
+func (x SpanRecord) VDLIsZero() (bool, error) {
+	if x.Id != (uniqueid.Id{}) {
+		return false, nil
+	}
+	if x.Parent != (uniqueid.Id{}) {
+		return false, nil
+	}
+	if x.Name != "" {
+		return false, nil
+	}
+	var wireStart time_2.Time
+	if err := time_2.TimeFromNative(&wireStart, x.Start); err != nil {
+		return false, err
+	}
+	if wireStart != (time_2.Time{}) {
+		return false, nil
+	}
+	var wireEnd time_2.Time
+	if err := time_2.TimeFromNative(&wireEnd, x.End); err != nil {
+		return false, err
+	}
+	if wireEnd != (time_2.Time{}) {
+		return false, nil
+	}
+	if len(x.Annotations) != 0 {
+		return false, nil
+	}
+	return true, nil
+}
+
+func (x SpanRecord) VDLWrite(enc vdl.Encoder) error {
+	if err := enc.StartValue(vdl.TypeOf((*SpanRecord)(nil)).Elem()); err != nil {
+		return err
+	}
+	if x.Id != (uniqueid.Id{}) {
+		if err := enc.NextField("Id"); err != nil {
+			return err
+		}
+		if err := x.Id.VDLWrite(enc); err != nil {
+			return err
+		}
+	}
+	if x.Parent != (uniqueid.Id{}) {
+		if err := enc.NextField("Parent"); err != nil {
+			return err
+		}
+		if err := x.Parent.VDLWrite(enc); err != nil {
+			return err
+		}
+	}
+	if x.Name != "" {
+		if err := enc.NextField("Name"); err != nil {
+			return err
+		}
+		if err := enc.StartValue(vdl.TypeOf((*string)(nil))); err != nil {
+			return err
+		}
+		if err := enc.EncodeString(x.Name); err != nil {
+			return err
+		}
+		if err := enc.FinishValue(); err != nil {
+			return err
+		}
+	}
+	var wireStart time_2.Time
+	if err := time_2.TimeFromNative(&wireStart, x.Start); err != nil {
+		return err
+	}
+	if wireStart != (time_2.Time{}) {
+		if err := enc.NextField("Start"); err != nil {
+			return err
+		}
+		if err := wireStart.VDLWrite(enc); err != nil {
+			return err
+		}
+	}
+	var wireEnd time_2.Time
+	if err := time_2.TimeFromNative(&wireEnd, x.End); err != nil {
+		return err
+	}
+	if wireEnd != (time_2.Time{}) {
+		if err := enc.NextField("End"); err != nil {
+			return err
+		}
+		if err := wireEnd.VDLWrite(enc); err != nil {
+			return err
+		}
+	}
+	if len(x.Annotations) != 0 {
+		if err := enc.NextField("Annotations"); err != nil {
+			return err
+		}
+		if err := __VDLWriteAnon_list_1(enc, x.Annotations); err != nil {
+			return err
+		}
+	}
+	if err := enc.NextField(""); err != nil {
+		return err
+	}
+	return enc.FinishValue()
+}
+
+func __VDLWriteAnon_list_1(enc vdl.Encoder, x []Annotation) error {
+	if err := enc.StartValue(vdl.TypeOf((*[]Annotation)(nil))); err != nil {
+		return err
+	}
+	if err := enc.SetLenHint(len(x)); err != nil {
+		return err
+	}
+	for i := 0; i < len(x); i++ {
+		if err := enc.NextEntry(false); err != nil {
+			return err
+		}
+		if err := x[i].VDLWrite(enc); err != nil {
+			return err
+		}
+	}
+	if err := enc.NextEntry(true); err != nil {
+		return err
+	}
+	return enc.FinishValue()
+}
+
 func (x *SpanRecord) VDLRead(dec vdl.Decoder) error {
 	*x = SpanRecord{}
-	var err error
-	if err = dec.StartValue(); err != nil {
+	if err := dec.StartValue(); err != nil {
 		return err
 	}
 	if (dec.StackDepth() == 1 || dec.IsAny()) && !vdl.Compatible(vdl.TypeOf(*x), dec.Type()) {
@@ -560,54 +689,54 @@ func (x *SpanRecord) VDLRead(dec vdl.Decoder) error {
 		case "":
 			return dec.FinishValue()
 		case "Id":
-			if err = x.Id.VDLRead(dec); err != nil {
+			if err := x.Id.VDLRead(dec); err != nil {
 				return err
 			}
 		case "Parent":
-			if err = x.Parent.VDLRead(dec); err != nil {
+			if err := x.Parent.VDLRead(dec); err != nil {
 				return err
 			}
 		case "Name":
-			if err = dec.StartValue(); err != nil {
+			if err := dec.StartValue(); err != nil {
 				return err
 			}
+			var err error
 			if x.Name, err = dec.DecodeString(); err != nil {
 				return err
 			}
-			if err = dec.FinishValue(); err != nil {
+			if err := dec.FinishValue(); err != nil {
 				return err
 			}
 		case "Start":
 			var wire time_2.Time
-			if err = wire.VDLRead(dec); err != nil {
+			if err := wire.VDLRead(dec); err != nil {
 				return err
 			}
-			if err = time_2.TimeToNative(wire, &x.Start); err != nil {
+			if err := time_2.TimeToNative(wire, &x.Start); err != nil {
 				return err
 			}
 		case "End":
 			var wire time_2.Time
-			if err = wire.VDLRead(dec); err != nil {
+			if err := wire.VDLRead(dec); err != nil {
 				return err
 			}
-			if err = time_2.TimeToNative(wire, &x.End); err != nil {
+			if err := time_2.TimeToNative(wire, &x.End); err != nil {
 				return err
 			}
 		case "Annotations":
-			if err = __VDLRead1_list(dec, &x.Annotations); err != nil {
+			if err := __VDLReadAnon_list_1(dec, &x.Annotations); err != nil {
 				return err
 			}
 		default:
-			if err = dec.SkipValue(); err != nil {
+			if err := dec.SkipValue(); err != nil {
 				return err
 			}
 		}
 	}
 }
 
-func __VDLRead1_list(dec vdl.Decoder, x *[]Annotation) error {
-	var err error
-	if err = dec.StartValue(); err != nil {
+func __VDLReadAnon_list_1(dec vdl.Decoder, x *[]Annotation) error {
+	if err := dec.StartValue(); err != nil {
 		return err
 	}
 	if (dec.StackDepth() == 1 || dec.IsAny()) && !vdl.Compatible(vdl.TypeOf(*x), dec.Type()) {
@@ -627,123 +756,11 @@ func __VDLRead1_list(dec vdl.Decoder, x *[]Annotation) error {
 			return dec.FinishValue()
 		}
 		var elem Annotation
-		if err = elem.VDLRead(dec); err != nil {
+		if err := elem.VDLRead(dec); err != nil {
 			return err
 		}
 		*x = append(*x, elem)
 	}
-}
-
-func (x SpanRecord) VDLWrite(enc vdl.Encoder) error {
-	if err := enc.StartValue(vdl.TypeOf((*SpanRecord)(nil)).Elem()); err != nil {
-		return err
-	}
-	var1 := (x.Id == uniqueid.Id{})
-	if !(var1) {
-		if err := enc.NextField("Id"); err != nil {
-			return err
-		}
-		if err := x.Id.VDLWrite(enc); err != nil {
-			return err
-		}
-	}
-	var2 := (x.Parent == uniqueid.Id{})
-	if !(var2) {
-		if err := enc.NextField("Parent"); err != nil {
-			return err
-		}
-		if err := x.Parent.VDLWrite(enc); err != nil {
-			return err
-		}
-	}
-	var3 := (x.Name == "")
-	if !(var3) {
-		if err := enc.NextField("Name"); err != nil {
-			return err
-		}
-		if err := enc.StartValue(vdl.TypeOf((*string)(nil))); err != nil {
-			return err
-		}
-		if err := enc.EncodeString(x.Name); err != nil {
-			return err
-		}
-		if err := enc.FinishValue(); err != nil {
-			return err
-		}
-	}
-	var wireValue4 time_2.Time
-	if err := time_2.TimeFromNative(&wireValue4, x.Start); err != nil {
-		return fmt.Errorf("error converting x.Start to wiretype")
-	}
-
-	var5 := (wireValue4 == time_2.Time{})
-	if !(var5) {
-		if err := enc.NextField("Start"); err != nil {
-			return err
-		}
-		var wire time_2.Time
-		if err := time_2.TimeFromNative(&wire, x.Start); err != nil {
-			return err
-		}
-		if err := wire.VDLWrite(enc); err != nil {
-			return err
-		}
-	}
-	var wireValue6 time_2.Time
-	if err := time_2.TimeFromNative(&wireValue6, x.End); err != nil {
-		return fmt.Errorf("error converting x.End to wiretype")
-	}
-
-	var7 := (wireValue6 == time_2.Time{})
-	if !(var7) {
-		if err := enc.NextField("End"); err != nil {
-			return err
-		}
-		var wire time_2.Time
-		if err := time_2.TimeFromNative(&wire, x.End); err != nil {
-			return err
-		}
-		if err := wire.VDLWrite(enc); err != nil {
-			return err
-		}
-	}
-	var var8 bool
-	if len(x.Annotations) == 0 {
-		var8 = true
-	}
-	if !(var8) {
-		if err := enc.NextField("Annotations"); err != nil {
-			return err
-		}
-		if err := __VDLWrite1_list(enc, &x.Annotations); err != nil {
-			return err
-		}
-	}
-	if err := enc.NextField(""); err != nil {
-		return err
-	}
-	return enc.FinishValue()
-}
-
-func __VDLWrite1_list(enc vdl.Encoder, x *[]Annotation) error {
-	if err := enc.StartValue(vdl.TypeOf((*[]Annotation)(nil))); err != nil {
-		return err
-	}
-	if err := enc.SetLenHint(len(*x)); err != nil {
-		return err
-	}
-	for i := 0; i < len(*x); i++ {
-		if err := enc.NextEntry(false); err != nil {
-			return err
-		}
-		if err := (*x)[i].VDLWrite(enc); err != nil {
-			return err
-		}
-	}
-	if err := enc.NextEntry(true); err != nil {
-		return err
-	}
-	return enc.FinishValue()
 }
 
 type TraceRecord struct {
@@ -913,10 +930,66 @@ func (t *__VDLTarget2_list) FinishList(elem vdl.ListTarget) error {
 	return nil
 }
 
+func (x TraceRecord) VDLIsZero() (bool, error) {
+	if x.Id != (uniqueid.Id{}) {
+		return false, nil
+	}
+	if len(x.Spans) != 0 {
+		return false, nil
+	}
+	return true, nil
+}
+
+func (x TraceRecord) VDLWrite(enc vdl.Encoder) error {
+	if err := enc.StartValue(vdl.TypeOf((*TraceRecord)(nil)).Elem()); err != nil {
+		return err
+	}
+	if x.Id != (uniqueid.Id{}) {
+		if err := enc.NextField("Id"); err != nil {
+			return err
+		}
+		if err := x.Id.VDLWrite(enc); err != nil {
+			return err
+		}
+	}
+	if len(x.Spans) != 0 {
+		if err := enc.NextField("Spans"); err != nil {
+			return err
+		}
+		if err := __VDLWriteAnon_list_2(enc, x.Spans); err != nil {
+			return err
+		}
+	}
+	if err := enc.NextField(""); err != nil {
+		return err
+	}
+	return enc.FinishValue()
+}
+
+func __VDLWriteAnon_list_2(enc vdl.Encoder, x []SpanRecord) error {
+	if err := enc.StartValue(vdl.TypeOf((*[]SpanRecord)(nil))); err != nil {
+		return err
+	}
+	if err := enc.SetLenHint(len(x)); err != nil {
+		return err
+	}
+	for i := 0; i < len(x); i++ {
+		if err := enc.NextEntry(false); err != nil {
+			return err
+		}
+		if err := x[i].VDLWrite(enc); err != nil {
+			return err
+		}
+	}
+	if err := enc.NextEntry(true); err != nil {
+		return err
+	}
+	return enc.FinishValue()
+}
+
 func (x *TraceRecord) VDLRead(dec vdl.Decoder) error {
 	*x = TraceRecord{}
-	var err error
-	if err = dec.StartValue(); err != nil {
+	if err := dec.StartValue(); err != nil {
 		return err
 	}
 	if (dec.StackDepth() == 1 || dec.IsAny()) && !vdl.Compatible(vdl.TypeOf(*x), dec.Type()) {
@@ -931,24 +1004,23 @@ func (x *TraceRecord) VDLRead(dec vdl.Decoder) error {
 		case "":
 			return dec.FinishValue()
 		case "Id":
-			if err = x.Id.VDLRead(dec); err != nil {
+			if err := x.Id.VDLRead(dec); err != nil {
 				return err
 			}
 		case "Spans":
-			if err = __VDLRead2_list(dec, &x.Spans); err != nil {
+			if err := __VDLReadAnon_list_2(dec, &x.Spans); err != nil {
 				return err
 			}
 		default:
-			if err = dec.SkipValue(); err != nil {
+			if err := dec.SkipValue(); err != nil {
 				return err
 			}
 		}
 	}
 }
 
-func __VDLRead2_list(dec vdl.Decoder, x *[]SpanRecord) error {
-	var err error
-	if err = dec.StartValue(); err != nil {
+func __VDLReadAnon_list_2(dec vdl.Decoder, x *[]SpanRecord) error {
+	if err := dec.StartValue(); err != nil {
 		return err
 	}
 	if (dec.StackDepth() == 1 || dec.IsAny()) && !vdl.Compatible(vdl.TypeOf(*x), dec.Type()) {
@@ -968,63 +1040,11 @@ func __VDLRead2_list(dec vdl.Decoder, x *[]SpanRecord) error {
 			return dec.FinishValue()
 		}
 		var elem SpanRecord
-		if err = elem.VDLRead(dec); err != nil {
+		if err := elem.VDLRead(dec); err != nil {
 			return err
 		}
 		*x = append(*x, elem)
 	}
-}
-
-func (x TraceRecord) VDLWrite(enc vdl.Encoder) error {
-	if err := enc.StartValue(vdl.TypeOf((*TraceRecord)(nil)).Elem()); err != nil {
-		return err
-	}
-	var1 := (x.Id == uniqueid.Id{})
-	if !(var1) {
-		if err := enc.NextField("Id"); err != nil {
-			return err
-		}
-		if err := x.Id.VDLWrite(enc); err != nil {
-			return err
-		}
-	}
-	var var2 bool
-	if len(x.Spans) == 0 {
-		var2 = true
-	}
-	if !(var2) {
-		if err := enc.NextField("Spans"); err != nil {
-			return err
-		}
-		if err := __VDLWrite2_list(enc, &x.Spans); err != nil {
-			return err
-		}
-	}
-	if err := enc.NextField(""); err != nil {
-		return err
-	}
-	return enc.FinishValue()
-}
-
-func __VDLWrite2_list(enc vdl.Encoder, x *[]SpanRecord) error {
-	if err := enc.StartValue(vdl.TypeOf((*[]SpanRecord)(nil))); err != nil {
-		return err
-	}
-	if err := enc.SetLenHint(len(*x)); err != nil {
-		return err
-	}
-	for i := 0; i < len(*x); i++ {
-		if err := enc.NextEntry(false); err != nil {
-			return err
-		}
-		if err := (*x)[i].VDLWrite(enc); err != nil {
-			return err
-		}
-	}
-	if err := enc.NextEntry(true); err != nil {
-		return err
-	}
-	return enc.FinishValue()
 }
 
 type TraceFlags int32
@@ -1081,17 +1101,8 @@ func (t *TraceFlagsTarget) FromFloat(src float64, tt *vdl.Type) error {
 	return nil
 }
 
-func (x *TraceFlags) VDLRead(dec vdl.Decoder) error {
-	var err error
-	if err = dec.StartValue(); err != nil {
-		return err
-	}
-	tmp, err := dec.DecodeInt(32)
-	if err != nil {
-		return err
-	}
-	*x = TraceFlags(tmp)
-	return dec.FinishValue()
+func (x TraceFlags) VDLIsZero() (bool, error) {
+	return x == 0, nil
 }
 
 func (x TraceFlags) VDLWrite(enc vdl.Encoder) error {
@@ -1102,6 +1113,18 @@ func (x TraceFlags) VDLWrite(enc vdl.Encoder) error {
 		return err
 	}
 	return enc.FinishValue()
+}
+
+func (x *TraceFlags) VDLRead(dec vdl.Decoder) error {
+	if err := dec.StartValue(); err != nil {
+		return err
+	}
+	tmp, err := dec.DecodeInt(32)
+	if err != nil {
+		return err
+	}
+	*x = TraceFlags(tmp)
+	return dec.FinishValue()
 }
 
 // Request is the object that carries trace informtion between processes.
@@ -1276,61 +1299,15 @@ func (t *RequestTarget) FinishFields(_ vdl.FieldsTarget) error {
 	return nil
 }
 
-func (x *Request) VDLRead(dec vdl.Decoder) error {
-	*x = Request{}
-	var err error
-	if err = dec.StartValue(); err != nil {
-		return err
-	}
-	if (dec.StackDepth() == 1 || dec.IsAny()) && !vdl.Compatible(vdl.TypeOf(*x), dec.Type()) {
-		return fmt.Errorf("incompatible struct %T, from %v", *x, dec.Type())
-	}
-	for {
-		f, err := dec.NextField()
-		if err != nil {
-			return err
-		}
-		switch f {
-		case "":
-			return dec.FinishValue()
-		case "SpanId":
-			if err = x.SpanId.VDLRead(dec); err != nil {
-				return err
-			}
-		case "TraceId":
-			if err = x.TraceId.VDLRead(dec); err != nil {
-				return err
-			}
-		case "Flags":
-			if err = x.Flags.VDLRead(dec); err != nil {
-				return err
-			}
-		case "LogLevel":
-			if err = dec.StartValue(); err != nil {
-				return err
-			}
-			tmp, err := dec.DecodeInt(32)
-			if err != nil {
-				return err
-			}
-			x.LogLevel = int32(tmp)
-			if err = dec.FinishValue(); err != nil {
-				return err
-			}
-		default:
-			if err = dec.SkipValue(); err != nil {
-				return err
-			}
-		}
-	}
+func (x Request) VDLIsZero() (bool, error) {
+	return x == Request{}, nil
 }
 
 func (x Request) VDLWrite(enc vdl.Encoder) error {
 	if err := enc.StartValue(vdl.TypeOf((*Request)(nil)).Elem()); err != nil {
 		return err
 	}
-	var1 := (x.SpanId == uniqueid.Id{})
-	if !(var1) {
+	if x.SpanId != (uniqueid.Id{}) {
 		if err := enc.NextField("SpanId"); err != nil {
 			return err
 		}
@@ -1338,8 +1315,7 @@ func (x Request) VDLWrite(enc vdl.Encoder) error {
 			return err
 		}
 	}
-	var2 := (x.TraceId == uniqueid.Id{})
-	if !(var2) {
+	if x.TraceId != (uniqueid.Id{}) {
 		if err := enc.NextField("TraceId"); err != nil {
 			return err
 		}
@@ -1347,8 +1323,7 @@ func (x Request) VDLWrite(enc vdl.Encoder) error {
 			return err
 		}
 	}
-	var3 := (x.Flags == TraceFlags(0))
-	if !(var3) {
+	if x.Flags != 0 {
 		if err := enc.NextField("Flags"); err != nil {
 			return err
 		}
@@ -1356,8 +1331,7 @@ func (x Request) VDLWrite(enc vdl.Encoder) error {
 			return err
 		}
 	}
-	var4 := (x.LogLevel == int32(0))
-	if !(var4) {
+	if x.LogLevel != 0 {
 		if err := enc.NextField("LogLevel"); err != nil {
 			return err
 		}
@@ -1375,6 +1349,54 @@ func (x Request) VDLWrite(enc vdl.Encoder) error {
 		return err
 	}
 	return enc.FinishValue()
+}
+
+func (x *Request) VDLRead(dec vdl.Decoder) error {
+	*x = Request{}
+	if err := dec.StartValue(); err != nil {
+		return err
+	}
+	if (dec.StackDepth() == 1 || dec.IsAny()) && !vdl.Compatible(vdl.TypeOf(*x), dec.Type()) {
+		return fmt.Errorf("incompatible struct %T, from %v", *x, dec.Type())
+	}
+	for {
+		f, err := dec.NextField()
+		if err != nil {
+			return err
+		}
+		switch f {
+		case "":
+			return dec.FinishValue()
+		case "SpanId":
+			if err := x.SpanId.VDLRead(dec); err != nil {
+				return err
+			}
+		case "TraceId":
+			if err := x.TraceId.VDLRead(dec); err != nil {
+				return err
+			}
+		case "Flags":
+			if err := x.Flags.VDLRead(dec); err != nil {
+				return err
+			}
+		case "LogLevel":
+			if err := dec.StartValue(); err != nil {
+				return err
+			}
+			tmp, err := dec.DecodeInt(32)
+			if err != nil {
+				return err
+			}
+			x.LogLevel = int32(tmp)
+			if err := dec.FinishValue(); err != nil {
+				return err
+			}
+		default:
+			if err := dec.SkipValue(); err != nil {
+				return err
+			}
+		}
+	}
 }
 
 type Response struct {
@@ -1502,10 +1524,53 @@ func (t *ResponseTarget) FinishFields(_ vdl.FieldsTarget) error {
 	return nil
 }
 
+func (x Response) VDLIsZero() (bool, error) {
+	if x.Flags != 0 {
+		return false, nil
+	}
+	isZeroTrace, err := x.Trace.VDLIsZero()
+	if err != nil {
+		return false, err
+	}
+	if !isZeroTrace {
+		return false, nil
+	}
+	return true, nil
+}
+
+func (x Response) VDLWrite(enc vdl.Encoder) error {
+	if err := enc.StartValue(vdl.TypeOf((*Response)(nil)).Elem()); err != nil {
+		return err
+	}
+	if x.Flags != 0 {
+		if err := enc.NextField("Flags"); err != nil {
+			return err
+		}
+		if err := x.Flags.VDLWrite(enc); err != nil {
+			return err
+		}
+	}
+	isZeroTrace, err := x.Trace.VDLIsZero()
+	if err != nil {
+		return err
+	}
+	if !isZeroTrace {
+		if err := enc.NextField("Trace"); err != nil {
+			return err
+		}
+		if err := x.Trace.VDLWrite(enc); err != nil {
+			return err
+		}
+	}
+	if err := enc.NextField(""); err != nil {
+		return err
+	}
+	return enc.FinishValue()
+}
+
 func (x *Response) VDLRead(dec vdl.Decoder) error {
 	*x = Response{}
-	var err error
-	if err = dec.StartValue(); err != nil {
+	if err := dec.StartValue(); err != nil {
 		return err
 	}
 	if (dec.StackDepth() == 1 || dec.IsAny()) && !vdl.Compatible(vdl.TypeOf(*x), dec.Type()) {
@@ -1520,54 +1585,19 @@ func (x *Response) VDLRead(dec vdl.Decoder) error {
 		case "":
 			return dec.FinishValue()
 		case "Flags":
-			if err = x.Flags.VDLRead(dec); err != nil {
+			if err := x.Flags.VDLRead(dec); err != nil {
 				return err
 			}
 		case "Trace":
-			if err = x.Trace.VDLRead(dec); err != nil {
+			if err := x.Trace.VDLRead(dec); err != nil {
 				return err
 			}
 		default:
-			if err = dec.SkipValue(); err != nil {
+			if err := dec.SkipValue(); err != nil {
 				return err
 			}
 		}
 	}
-}
-
-func (x Response) VDLWrite(enc vdl.Encoder) error {
-	if err := enc.StartValue(vdl.TypeOf((*Response)(nil)).Elem()); err != nil {
-		return err
-	}
-	var1 := (x.Flags == TraceFlags(0))
-	if !(var1) {
-		if err := enc.NextField("Flags"); err != nil {
-			return err
-		}
-		if err := x.Flags.VDLWrite(enc); err != nil {
-			return err
-		}
-	}
-	var2 := true
-	var3 := (x.Trace.Id == uniqueid.Id{})
-	var2 = var2 && var3
-	var var4 bool
-	if len(x.Trace.Spans) == 0 {
-		var4 = true
-	}
-	var2 = var2 && var4
-	if !(var2) {
-		if err := enc.NextField("Trace"); err != nil {
-			return err
-		}
-		if err := x.Trace.VDLWrite(enc); err != nil {
-			return err
-		}
-	}
-	if err := enc.NextField(""); err != nil {
-		return err
-	}
-	return enc.FinishValue()
 }
 
 //////////////////////////////////////////////////

@@ -160,67 +160,15 @@ func (t *EmbedTarget) FinishFields(_ vdl.FieldsTarget) error {
 	return nil
 }
 
-func (x *Embed) VDLRead(dec vdl.Decoder) error {
-	*x = Embed{}
-	var err error
-	if err = dec.StartValue(); err != nil {
-		return err
-	}
-	if (dec.StackDepth() == 1 || dec.IsAny()) && !vdl.Compatible(vdl.TypeOf(*x), dec.Type()) {
-		return fmt.Errorf("incompatible struct %T, from %v", *x, dec.Type())
-	}
-	for {
-		f, err := dec.NextField()
-		if err != nil {
-			return err
-		}
-		switch f {
-		case "":
-			return dec.FinishValue()
-		case "Name":
-			if err = dec.StartValue(); err != nil {
-				return err
-			}
-			if x.Name, err = dec.DecodeString(); err != nil {
-				return err
-			}
-			if err = dec.FinishValue(); err != nil {
-				return err
-			}
-		case "PkgPath":
-			if err = dec.StartValue(); err != nil {
-				return err
-			}
-			if x.PkgPath, err = dec.DecodeString(); err != nil {
-				return err
-			}
-			if err = dec.FinishValue(); err != nil {
-				return err
-			}
-		case "Doc":
-			if err = dec.StartValue(); err != nil {
-				return err
-			}
-			if x.Doc, err = dec.DecodeString(); err != nil {
-				return err
-			}
-			if err = dec.FinishValue(); err != nil {
-				return err
-			}
-		default:
-			if err = dec.SkipValue(); err != nil {
-				return err
-			}
-		}
-	}
+func (x Embed) VDLIsZero() (bool, error) {
+	return x == Embed{}, nil
 }
 
 func (x Embed) VDLWrite(enc vdl.Encoder) error {
 	if err := enc.StartValue(vdl.TypeOf((*Embed)(nil)).Elem()); err != nil {
 		return err
 	}
-	var1 := (x.Name == "")
-	if !(var1) {
+	if x.Name != "" {
 		if err := enc.NextField("Name"); err != nil {
 			return err
 		}
@@ -234,8 +182,7 @@ func (x Embed) VDLWrite(enc vdl.Encoder) error {
 			return err
 		}
 	}
-	var2 := (x.PkgPath == "")
-	if !(var2) {
+	if x.PkgPath != "" {
 		if err := enc.NextField("PkgPath"); err != nil {
 			return err
 		}
@@ -249,8 +196,7 @@ func (x Embed) VDLWrite(enc vdl.Encoder) error {
 			return err
 		}
 	}
-	var3 := (x.Doc == "")
-	if !(var3) {
+	if x.Doc != "" {
 		if err := enc.NextField("Doc"); err != nil {
 			return err
 		}
@@ -268,6 +214,63 @@ func (x Embed) VDLWrite(enc vdl.Encoder) error {
 		return err
 	}
 	return enc.FinishValue()
+}
+
+func (x *Embed) VDLRead(dec vdl.Decoder) error {
+	*x = Embed{}
+	if err := dec.StartValue(); err != nil {
+		return err
+	}
+	if (dec.StackDepth() == 1 || dec.IsAny()) && !vdl.Compatible(vdl.TypeOf(*x), dec.Type()) {
+		return fmt.Errorf("incompatible struct %T, from %v", *x, dec.Type())
+	}
+	for {
+		f, err := dec.NextField()
+		if err != nil {
+			return err
+		}
+		switch f {
+		case "":
+			return dec.FinishValue()
+		case "Name":
+			if err := dec.StartValue(); err != nil {
+				return err
+			}
+			var err error
+			if x.Name, err = dec.DecodeString(); err != nil {
+				return err
+			}
+			if err := dec.FinishValue(); err != nil {
+				return err
+			}
+		case "PkgPath":
+			if err := dec.StartValue(); err != nil {
+				return err
+			}
+			var err error
+			if x.PkgPath, err = dec.DecodeString(); err != nil {
+				return err
+			}
+			if err := dec.FinishValue(); err != nil {
+				return err
+			}
+		case "Doc":
+			if err := dec.StartValue(); err != nil {
+				return err
+			}
+			var err error
+			if x.Doc, err = dec.DecodeString(); err != nil {
+				return err
+			}
+			if err := dec.FinishValue(); err != nil {
+				return err
+			}
+		default:
+			if err := dec.SkipValue(); err != nil {
+				return err
+			}
+		}
+	}
 }
 
 // Arg describes the signature of a single argument.
@@ -415,12 +418,70 @@ func (t *ArgTarget) FinishFields(_ vdl.FieldsTarget) error {
 	return nil
 }
 
+func (x Arg) VDLIsZero() (bool, error) {
+	if x.Name != "" {
+		return false, nil
+	}
+	if x.Doc != "" {
+		return false, nil
+	}
+	if x.Type != nil && x.Type != vdl.AnyType {
+		return false, nil
+	}
+	return true, nil
+}
+
+func (x Arg) VDLWrite(enc vdl.Encoder) error {
+	if err := enc.StartValue(vdl.TypeOf((*Arg)(nil)).Elem()); err != nil {
+		return err
+	}
+	if x.Name != "" {
+		if err := enc.NextField("Name"); err != nil {
+			return err
+		}
+		if err := enc.StartValue(vdl.TypeOf((*string)(nil))); err != nil {
+			return err
+		}
+		if err := enc.EncodeString(x.Name); err != nil {
+			return err
+		}
+		if err := enc.FinishValue(); err != nil {
+			return err
+		}
+	}
+	if x.Doc != "" {
+		if err := enc.NextField("Doc"); err != nil {
+			return err
+		}
+		if err := enc.StartValue(vdl.TypeOf((*string)(nil))); err != nil {
+			return err
+		}
+		if err := enc.EncodeString(x.Doc); err != nil {
+			return err
+		}
+		if err := enc.FinishValue(); err != nil {
+			return err
+		}
+	}
+	if x.Type != nil && x.Type != vdl.AnyType {
+		if err := enc.NextField("Type"); err != nil {
+			return err
+		}
+		if err := x.Type.VDLWrite(enc); err != nil {
+			return err
+		}
+	}
+	if err := enc.NextField(""); err != nil {
+		return err
+	}
+	return enc.FinishValue()
+}
+
 func (x *Arg) VDLRead(dec vdl.Decoder) error {
 	*x = Arg{
 		Type: vdl.AnyType,
 	}
-	var err error
-	if err = dec.StartValue(); err != nil {
+	if err := dec.StartValue(); err != nil {
 		return err
 	}
 	if (dec.StackDepth() == 1 || dec.IsAny()) && !vdl.Compatible(vdl.TypeOf(*x), dec.Type()) {
@@ -435,90 +496,44 @@ func (x *Arg) VDLRead(dec vdl.Decoder) error {
 		case "":
 			return dec.FinishValue()
 		case "Name":
-			if err = dec.StartValue(); err != nil {
+			if err := dec.StartValue(); err != nil {
 				return err
 			}
+			var err error
 			if x.Name, err = dec.DecodeString(); err != nil {
 				return err
 			}
-			if err = dec.FinishValue(); err != nil {
+			if err := dec.FinishValue(); err != nil {
 				return err
 			}
 		case "Doc":
-			if err = dec.StartValue(); err != nil {
+			if err := dec.StartValue(); err != nil {
 				return err
 			}
+			var err error
 			if x.Doc, err = dec.DecodeString(); err != nil {
 				return err
 			}
-			if err = dec.FinishValue(); err != nil {
+			if err := dec.FinishValue(); err != nil {
 				return err
 			}
 		case "Type":
-			if err = dec.StartValue(); err != nil {
+			if err := dec.StartValue(); err != nil {
 				return err
 			}
+			var err error
 			if x.Type, err = dec.DecodeTypeObject(); err != nil {
 				return err
 			}
-			if err = dec.FinishValue(); err != nil {
+			if err := dec.FinishValue(); err != nil {
 				return err
 			}
 		default:
-			if err = dec.SkipValue(); err != nil {
+			if err := dec.SkipValue(); err != nil {
 				return err
 			}
 		}
 	}
-}
-
-func (x Arg) VDLWrite(enc vdl.Encoder) error {
-	if err := enc.StartValue(vdl.TypeOf((*Arg)(nil)).Elem()); err != nil {
-		return err
-	}
-	var1 := (x.Name == "")
-	if !(var1) {
-		if err := enc.NextField("Name"); err != nil {
-			return err
-		}
-		if err := enc.StartValue(vdl.TypeOf((*string)(nil))); err != nil {
-			return err
-		}
-		if err := enc.EncodeString(x.Name); err != nil {
-			return err
-		}
-		if err := enc.FinishValue(); err != nil {
-			return err
-		}
-	}
-	var2 := (x.Doc == "")
-	if !(var2) {
-		if err := enc.NextField("Doc"); err != nil {
-			return err
-		}
-		if err := enc.StartValue(vdl.TypeOf((*string)(nil))); err != nil {
-			return err
-		}
-		if err := enc.EncodeString(x.Doc); err != nil {
-			return err
-		}
-		if err := enc.FinishValue(); err != nil {
-			return err
-		}
-	}
-	var3 := (x.Type == nil || x.Type == vdl.AnyType)
-	if !(var3) {
-		if err := enc.NextField("Type"); err != nil {
-			return err
-		}
-		if err := x.Type.VDLWrite(enc); err != nil {
-			return err
-		}
-	}
-	if err := enc.NextField(""); err != nil {
-		return err
-	}
-	return enc.FinishValue()
 }
 
 // Method describes the signature of an interface method.
@@ -935,10 +950,179 @@ func (t *__VDLTarget3_list) FinishList(elem vdl.ListTarget) error {
 	return nil
 }
 
+func (x Method) VDLIsZero() (bool, error) {
+	if x.Name != "" {
+		return false, nil
+	}
+	if x.Doc != "" {
+		return false, nil
+	}
+	if len(x.InArgs) != 0 {
+		return false, nil
+	}
+	if len(x.OutArgs) != 0 {
+		return false, nil
+	}
+	if x.InStream != nil {
+		return false, nil
+	}
+	if x.OutStream != nil {
+		return false, nil
+	}
+	if len(x.Tags) != 0 {
+		return false, nil
+	}
+	return true, nil
+}
+
+func (x Method) VDLWrite(enc vdl.Encoder) error {
+	if err := enc.StartValue(vdl.TypeOf((*Method)(nil)).Elem()); err != nil {
+		return err
+	}
+	if x.Name != "" {
+		if err := enc.NextField("Name"); err != nil {
+			return err
+		}
+		if err := enc.StartValue(vdl.TypeOf((*string)(nil))); err != nil {
+			return err
+		}
+		if err := enc.EncodeString(x.Name); err != nil {
+			return err
+		}
+		if err := enc.FinishValue(); err != nil {
+			return err
+		}
+	}
+	if x.Doc != "" {
+		if err := enc.NextField("Doc"); err != nil {
+			return err
+		}
+		if err := enc.StartValue(vdl.TypeOf((*string)(nil))); err != nil {
+			return err
+		}
+		if err := enc.EncodeString(x.Doc); err != nil {
+			return err
+		}
+		if err := enc.FinishValue(); err != nil {
+			return err
+		}
+	}
+	if len(x.InArgs) != 0 {
+		if err := enc.NextField("InArgs"); err != nil {
+			return err
+		}
+		if err := __VDLWriteAnon_list_1(enc, x.InArgs); err != nil {
+			return err
+		}
+	}
+	if len(x.OutArgs) != 0 {
+		if err := enc.NextField("OutArgs"); err != nil {
+			return err
+		}
+		if err := __VDLWriteAnon_list_1(enc, x.OutArgs); err != nil {
+			return err
+		}
+	}
+	if x.InStream != nil {
+		if err := enc.NextField("InStream"); err != nil {
+			return err
+		}
+		if err := enc.StartValue(vdl.TypeOf((**Arg)(nil))); err != nil {
+			return err
+		}
+		enc.SetNextStartValueIsOptional()
+		if err := (*x.InStream).VDLWrite(enc); err != nil {
+			return err
+		}
+	}
+	if x.OutStream != nil {
+		if err := enc.NextField("OutStream"); err != nil {
+			return err
+		}
+		if err := enc.StartValue(vdl.TypeOf((**Arg)(nil))); err != nil {
+			return err
+		}
+		enc.SetNextStartValueIsOptional()
+		if err := (*x.OutStream).VDLWrite(enc); err != nil {
+			return err
+		}
+	}
+	if len(x.Tags) != 0 {
+		if err := enc.NextField("Tags"); err != nil {
+			return err
+		}
+		if err := __VDLWriteAnon_list_2(enc, x.Tags); err != nil {
+			return err
+		}
+	}
+	if err := enc.NextField(""); err != nil {
+		return err
+	}
+	return enc.FinishValue()
+}
+
+func __VDLWriteAnon_list_1(enc vdl.Encoder, x []Arg) error {
+	if err := enc.StartValue(vdl.TypeOf((*[]Arg)(nil))); err != nil {
+		return err
+	}
+	if err := enc.SetLenHint(len(x)); err != nil {
+		return err
+	}
+	for i := 0; i < len(x); i++ {
+		if err := enc.NextEntry(false); err != nil {
+			return err
+		}
+		if err := x[i].VDLWrite(enc); err != nil {
+			return err
+		}
+	}
+	if err := enc.NextEntry(true); err != nil {
+		return err
+	}
+	return enc.FinishValue()
+}
+
+func __VDLWriteAnon_list_2(enc vdl.Encoder, x []*vdl.Value) error {
+	if err := enc.StartValue(vdl.TypeOf((*[]*vdl.Value)(nil))); err != nil {
+		return err
+	}
+	if err := enc.SetLenHint(len(x)); err != nil {
+		return err
+	}
+	for i := 0; i < len(x); i++ {
+		if err := enc.NextEntry(false); err != nil {
+			return err
+		}
+		if err := enc.StartValue(vdl.AnyType); err != nil {
+			return err
+		}
+		switch {
+		case x[i] == nil:
+			if err := enc.NilValue(vdl.AnyType); err != nil {
+				return err
+			}
+		case x[i].IsNil():
+			if err := enc.NilValue(x[i].Type()); err != nil {
+				return err
+			}
+		default:
+			if err := x[i].VDLWrite(enc); err != nil {
+				return err
+			}
+		}
+		if err := enc.FinishValue(); err != nil {
+			return err
+		}
+	}
+	if err := enc.NextEntry(true); err != nil {
+		return err
+	}
+	return enc.FinishValue()
+}
+
 func (x *Method) VDLRead(dec vdl.Decoder) error {
 	*x = Method{}
-	var err error
-	if err = dec.StartValue(); err != nil {
+	if err := dec.StartValue(); err != nil {
 		return err
 	}
 	if (dec.StackDepth() == 1 || dec.IsAny()) && !vdl.Compatible(vdl.TypeOf(*x), dec.Type()) {
@@ -953,35 +1137,37 @@ func (x *Method) VDLRead(dec vdl.Decoder) error {
 		case "":
 			return dec.FinishValue()
 		case "Name":
-			if err = dec.StartValue(); err != nil {
+			if err := dec.StartValue(); err != nil {
 				return err
 			}
+			var err error
 			if x.Name, err = dec.DecodeString(); err != nil {
 				return err
 			}
-			if err = dec.FinishValue(); err != nil {
+			if err := dec.FinishValue(); err != nil {
 				return err
 			}
 		case "Doc":
-			if err = dec.StartValue(); err != nil {
+			if err := dec.StartValue(); err != nil {
 				return err
 			}
+			var err error
 			if x.Doc, err = dec.DecodeString(); err != nil {
 				return err
 			}
-			if err = dec.FinishValue(); err != nil {
+			if err := dec.FinishValue(); err != nil {
 				return err
 			}
 		case "InArgs":
-			if err = __VDLRead1_list(dec, &x.InArgs); err != nil {
+			if err := __VDLReadAnon_list_1(dec, &x.InArgs); err != nil {
 				return err
 			}
 		case "OutArgs":
-			if err = __VDLRead1_list(dec, &x.OutArgs); err != nil {
+			if err := __VDLReadAnon_list_1(dec, &x.OutArgs); err != nil {
 				return err
 			}
 		case "InStream":
-			if err = dec.StartValue(); err != nil {
+			if err := dec.StartValue(); err != nil {
 				return err
 			}
 			if dec.IsNil() {
@@ -989,18 +1175,18 @@ func (x *Method) VDLRead(dec vdl.Decoder) error {
 					return fmt.Errorf("incompatible optional %T, from %v", x.InStream, dec.Type())
 				}
 				x.InStream = nil
-				if err = dec.FinishValue(); err != nil {
+				if err := dec.FinishValue(); err != nil {
 					return err
 				}
 			} else {
 				x.InStream = new(Arg)
 				dec.IgnoreNextStartValue()
-				if err = x.InStream.VDLRead(dec); err != nil {
+				if err := x.InStream.VDLRead(dec); err != nil {
 					return err
 				}
 			}
 		case "OutStream":
-			if err = dec.StartValue(); err != nil {
+			if err := dec.StartValue(); err != nil {
 				return err
 			}
 			if dec.IsNil() {
@@ -1008,31 +1194,30 @@ func (x *Method) VDLRead(dec vdl.Decoder) error {
 					return fmt.Errorf("incompatible optional %T, from %v", x.OutStream, dec.Type())
 				}
 				x.OutStream = nil
-				if err = dec.FinishValue(); err != nil {
+				if err := dec.FinishValue(); err != nil {
 					return err
 				}
 			} else {
 				x.OutStream = new(Arg)
 				dec.IgnoreNextStartValue()
-				if err = x.OutStream.VDLRead(dec); err != nil {
+				if err := x.OutStream.VDLRead(dec); err != nil {
 					return err
 				}
 			}
 		case "Tags":
-			if err = __VDLRead2_list(dec, &x.Tags); err != nil {
+			if err := __VDLReadAnon_list_2(dec, &x.Tags); err != nil {
 				return err
 			}
 		default:
-			if err = dec.SkipValue(); err != nil {
+			if err := dec.SkipValue(); err != nil {
 				return err
 			}
 		}
 	}
 }
 
-func __VDLRead1_list(dec vdl.Decoder, x *[]Arg) error {
-	var err error
-	if err = dec.StartValue(); err != nil {
+func __VDLReadAnon_list_1(dec vdl.Decoder, x *[]Arg) error {
+	if err := dec.StartValue(); err != nil {
 		return err
 	}
 	if (dec.StackDepth() == 1 || dec.IsAny()) && !vdl.Compatible(vdl.TypeOf(*x), dec.Type()) {
@@ -1052,16 +1237,15 @@ func __VDLRead1_list(dec vdl.Decoder, x *[]Arg) error {
 			return dec.FinishValue()
 		}
 		var elem Arg
-		if err = elem.VDLRead(dec); err != nil {
+		if err := elem.VDLRead(dec); err != nil {
 			return err
 		}
 		*x = append(*x, elem)
 	}
 }
 
-func __VDLRead2_list(dec vdl.Decoder, x *[]*vdl.Value) error {
-	var err error
-	if err = dec.StartValue(); err != nil {
+func __VDLReadAnon_list_2(dec vdl.Decoder, x *[]*vdl.Value) error {
+	if err := dec.StartValue(); err != nil {
 		return err
 	}
 	if (dec.StackDepth() == 1 || dec.IsAny()) && !vdl.Compatible(vdl.TypeOf(*x), dec.Type()) {
@@ -1082,179 +1266,11 @@ func __VDLRead2_list(dec vdl.Decoder, x *[]*vdl.Value) error {
 		}
 		var elem *vdl.Value
 		elem = new(vdl.Value)
-		if err = elem.VDLRead(dec); err != nil {
+		if err := elem.VDLRead(dec); err != nil {
 			return err
 		}
 		*x = append(*x, elem)
 	}
-}
-
-func (x Method) VDLWrite(enc vdl.Encoder) error {
-	if err := enc.StartValue(vdl.TypeOf((*Method)(nil)).Elem()); err != nil {
-		return err
-	}
-	var1 := (x.Name == "")
-	if !(var1) {
-		if err := enc.NextField("Name"); err != nil {
-			return err
-		}
-		if err := enc.StartValue(vdl.TypeOf((*string)(nil))); err != nil {
-			return err
-		}
-		if err := enc.EncodeString(x.Name); err != nil {
-			return err
-		}
-		if err := enc.FinishValue(); err != nil {
-			return err
-		}
-	}
-	var2 := (x.Doc == "")
-	if !(var2) {
-		if err := enc.NextField("Doc"); err != nil {
-			return err
-		}
-		if err := enc.StartValue(vdl.TypeOf((*string)(nil))); err != nil {
-			return err
-		}
-		if err := enc.EncodeString(x.Doc); err != nil {
-			return err
-		}
-		if err := enc.FinishValue(); err != nil {
-			return err
-		}
-	}
-	var var3 bool
-	if len(x.InArgs) == 0 {
-		var3 = true
-	}
-	if !(var3) {
-		if err := enc.NextField("InArgs"); err != nil {
-			return err
-		}
-		if err := __VDLWrite1_list(enc, &x.InArgs); err != nil {
-			return err
-		}
-	}
-	var var4 bool
-	if len(x.OutArgs) == 0 {
-		var4 = true
-	}
-	if !(var4) {
-		if err := enc.NextField("OutArgs"); err != nil {
-			return err
-		}
-		if err := __VDLWrite1_list(enc, &x.OutArgs); err != nil {
-			return err
-		}
-	}
-	var5 := (x.InStream == (*Arg)(nil))
-	if !(var5) {
-		if err := enc.NextField("InStream"); err != nil {
-			return err
-		}
-		if err := enc.StartValue(vdl.TypeOf((**Arg)(nil))); err != nil {
-			return err
-		}
-		if x.InStream == nil {
-			if err := enc.NilValue(vdl.TypeOf((**Arg)(nil))); err != nil {
-				return err
-			}
-		} else {
-			enc.SetNextStartValueIsOptional()
-			if err := x.InStream.VDLWrite(enc); err != nil {
-				return err
-			}
-		}
-	}
-	var6 := (x.OutStream == (*Arg)(nil))
-	if !(var6) {
-		if err := enc.NextField("OutStream"); err != nil {
-			return err
-		}
-		if err := enc.StartValue(vdl.TypeOf((**Arg)(nil))); err != nil {
-			return err
-		}
-		if x.OutStream == nil {
-			if err := enc.NilValue(vdl.TypeOf((**Arg)(nil))); err != nil {
-				return err
-			}
-		} else {
-			enc.SetNextStartValueIsOptional()
-			if err := x.OutStream.VDLWrite(enc); err != nil {
-				return err
-			}
-		}
-	}
-	var var7 bool
-	if len(x.Tags) == 0 {
-		var7 = true
-	}
-	if !(var7) {
-		if err := enc.NextField("Tags"); err != nil {
-			return err
-		}
-		if err := __VDLWrite2_list(enc, &x.Tags); err != nil {
-			return err
-		}
-	}
-	if err := enc.NextField(""); err != nil {
-		return err
-	}
-	return enc.FinishValue()
-}
-
-func __VDLWrite1_list(enc vdl.Encoder, x *[]Arg) error {
-	if err := enc.StartValue(vdl.TypeOf((*[]Arg)(nil))); err != nil {
-		return err
-	}
-	if err := enc.SetLenHint(len(*x)); err != nil {
-		return err
-	}
-	for i := 0; i < len(*x); i++ {
-		if err := enc.NextEntry(false); err != nil {
-			return err
-		}
-		if err := (*x)[i].VDLWrite(enc); err != nil {
-			return err
-		}
-	}
-	if err := enc.NextEntry(true); err != nil {
-		return err
-	}
-	return enc.FinishValue()
-}
-
-func __VDLWrite2_list(enc vdl.Encoder, x *[]*vdl.Value) error {
-	if err := enc.StartValue(vdl.TypeOf((*[]*vdl.Value)(nil))); err != nil {
-		return err
-	}
-	if err := enc.SetLenHint(len(*x)); err != nil {
-		return err
-	}
-	for i := 0; i < len(*x); i++ {
-		if err := enc.NextEntry(false); err != nil {
-			return err
-		}
-		if err := enc.StartValue(vdl.AnyType); err != nil {
-			return err
-		}
-		if (*x)[i].IsNil() {
-			if err := enc.NilValue((*x)[i].Type()); err != nil {
-				return err
-			}
-		} else {
-			if err := (*x)[i].VDLWrite(enc); err != nil {
-				return err
-			}
-		}
-		if err := enc.FinishValue(); err != nil {
-			return err
-		}
-	}
-	if err := enc.NextEntry(true); err != nil {
-		return err
-	}
-	return enc.FinishValue()
 }
 
 // Interface describes the signature of an interface.
@@ -1562,10 +1578,138 @@ func (t *__VDLTarget5_list) FinishList(elem vdl.ListTarget) error {
 	return nil
 }
 
+func (x Interface) VDLIsZero() (bool, error) {
+	if x.Name != "" {
+		return false, nil
+	}
+	if x.PkgPath != "" {
+		return false, nil
+	}
+	if x.Doc != "" {
+		return false, nil
+	}
+	if len(x.Embeds) != 0 {
+		return false, nil
+	}
+	if len(x.Methods) != 0 {
+		return false, nil
+	}
+	return true, nil
+}
+
+func (x Interface) VDLWrite(enc vdl.Encoder) error {
+	if err := enc.StartValue(vdl.TypeOf((*Interface)(nil)).Elem()); err != nil {
+		return err
+	}
+	if x.Name != "" {
+		if err := enc.NextField("Name"); err != nil {
+			return err
+		}
+		if err := enc.StartValue(vdl.TypeOf((*string)(nil))); err != nil {
+			return err
+		}
+		if err := enc.EncodeString(x.Name); err != nil {
+			return err
+		}
+		if err := enc.FinishValue(); err != nil {
+			return err
+		}
+	}
+	if x.PkgPath != "" {
+		if err := enc.NextField("PkgPath"); err != nil {
+			return err
+		}
+		if err := enc.StartValue(vdl.TypeOf((*string)(nil))); err != nil {
+			return err
+		}
+		if err := enc.EncodeString(x.PkgPath); err != nil {
+			return err
+		}
+		if err := enc.FinishValue(); err != nil {
+			return err
+		}
+	}
+	if x.Doc != "" {
+		if err := enc.NextField("Doc"); err != nil {
+			return err
+		}
+		if err := enc.StartValue(vdl.TypeOf((*string)(nil))); err != nil {
+			return err
+		}
+		if err := enc.EncodeString(x.Doc); err != nil {
+			return err
+		}
+		if err := enc.FinishValue(); err != nil {
+			return err
+		}
+	}
+	if len(x.Embeds) != 0 {
+		if err := enc.NextField("Embeds"); err != nil {
+			return err
+		}
+		if err := __VDLWriteAnon_list_3(enc, x.Embeds); err != nil {
+			return err
+		}
+	}
+	if len(x.Methods) != 0 {
+		if err := enc.NextField("Methods"); err != nil {
+			return err
+		}
+		if err := __VDLWriteAnon_list_4(enc, x.Methods); err != nil {
+			return err
+		}
+	}
+	if err := enc.NextField(""); err != nil {
+		return err
+	}
+	return enc.FinishValue()
+}
+
+func __VDLWriteAnon_list_3(enc vdl.Encoder, x []Embed) error {
+	if err := enc.StartValue(vdl.TypeOf((*[]Embed)(nil))); err != nil {
+		return err
+	}
+	if err := enc.SetLenHint(len(x)); err != nil {
+		return err
+	}
+	for i := 0; i < len(x); i++ {
+		if err := enc.NextEntry(false); err != nil {
+			return err
+		}
+		if err := x[i].VDLWrite(enc); err != nil {
+			return err
+		}
+	}
+	if err := enc.NextEntry(true); err != nil {
+		return err
+	}
+	return enc.FinishValue()
+}
+
+func __VDLWriteAnon_list_4(enc vdl.Encoder, x []Method) error {
+	if err := enc.StartValue(vdl.TypeOf((*[]Method)(nil))); err != nil {
+		return err
+	}
+	if err := enc.SetLenHint(len(x)); err != nil {
+		return err
+	}
+	for i := 0; i < len(x); i++ {
+		if err := enc.NextEntry(false); err != nil {
+			return err
+		}
+		if err := x[i].VDLWrite(enc); err != nil {
+			return err
+		}
+	}
+	if err := enc.NextEntry(true); err != nil {
+		return err
+	}
+	return enc.FinishValue()
+}
+
 func (x *Interface) VDLRead(dec vdl.Decoder) error {
 	*x = Interface{}
-	var err error
-	if err = dec.StartValue(); err != nil {
+	if err := dec.StartValue(); err != nil {
 		return err
 	}
 	if (dec.StackDepth() == 1 || dec.IsAny()) && !vdl.Compatible(vdl.TypeOf(*x), dec.Type()) {
@@ -1580,54 +1724,56 @@ func (x *Interface) VDLRead(dec vdl.Decoder) error {
 		case "":
 			return dec.FinishValue()
 		case "Name":
-			if err = dec.StartValue(); err != nil {
+			if err := dec.StartValue(); err != nil {
 				return err
 			}
+			var err error
 			if x.Name, err = dec.DecodeString(); err != nil {
 				return err
 			}
-			if err = dec.FinishValue(); err != nil {
+			if err := dec.FinishValue(); err != nil {
 				return err
 			}
 		case "PkgPath":
-			if err = dec.StartValue(); err != nil {
+			if err := dec.StartValue(); err != nil {
 				return err
 			}
+			var err error
 			if x.PkgPath, err = dec.DecodeString(); err != nil {
 				return err
 			}
-			if err = dec.FinishValue(); err != nil {
+			if err := dec.FinishValue(); err != nil {
 				return err
 			}
 		case "Doc":
-			if err = dec.StartValue(); err != nil {
+			if err := dec.StartValue(); err != nil {
 				return err
 			}
+			var err error
 			if x.Doc, err = dec.DecodeString(); err != nil {
 				return err
 			}
-			if err = dec.FinishValue(); err != nil {
+			if err := dec.FinishValue(); err != nil {
 				return err
 			}
 		case "Embeds":
-			if err = __VDLRead3_list(dec, &x.Embeds); err != nil {
+			if err := __VDLReadAnon_list_3(dec, &x.Embeds); err != nil {
 				return err
 			}
 		case "Methods":
-			if err = __VDLRead4_list(dec, &x.Methods); err != nil {
+			if err := __VDLReadAnon_list_4(dec, &x.Methods); err != nil {
 				return err
 			}
 		default:
-			if err = dec.SkipValue(); err != nil {
+			if err := dec.SkipValue(); err != nil {
 				return err
 			}
 		}
 	}
 }
 
-func __VDLRead3_list(dec vdl.Decoder, x *[]Embed) error {
-	var err error
-	if err = dec.StartValue(); err != nil {
+func __VDLReadAnon_list_3(dec vdl.Decoder, x *[]Embed) error {
+	if err := dec.StartValue(); err != nil {
 		return err
 	}
 	if (dec.StackDepth() == 1 || dec.IsAny()) && !vdl.Compatible(vdl.TypeOf(*x), dec.Type()) {
@@ -1647,16 +1793,15 @@ func __VDLRead3_list(dec vdl.Decoder, x *[]Embed) error {
 			return dec.FinishValue()
 		}
 		var elem Embed
-		if err = elem.VDLRead(dec); err != nil {
+		if err := elem.VDLRead(dec); err != nil {
 			return err
 		}
 		*x = append(*x, elem)
 	}
 }
 
-func __VDLRead4_list(dec vdl.Decoder, x *[]Method) error {
-	var err error
-	if err = dec.StartValue(); err != nil {
+func __VDLReadAnon_list_4(dec vdl.Decoder, x *[]Method) error {
+	if err := dec.StartValue(); err != nil {
 		return err
 	}
 	if (dec.StackDepth() == 1 || dec.IsAny()) && !vdl.Compatible(vdl.TypeOf(*x), dec.Type()) {
@@ -1676,132 +1821,11 @@ func __VDLRead4_list(dec vdl.Decoder, x *[]Method) error {
 			return dec.FinishValue()
 		}
 		var elem Method
-		if err = elem.VDLRead(dec); err != nil {
+		if err := elem.VDLRead(dec); err != nil {
 			return err
 		}
 		*x = append(*x, elem)
 	}
-}
-
-func (x Interface) VDLWrite(enc vdl.Encoder) error {
-	if err := enc.StartValue(vdl.TypeOf((*Interface)(nil)).Elem()); err != nil {
-		return err
-	}
-	var1 := (x.Name == "")
-	if !(var1) {
-		if err := enc.NextField("Name"); err != nil {
-			return err
-		}
-		if err := enc.StartValue(vdl.TypeOf((*string)(nil))); err != nil {
-			return err
-		}
-		if err := enc.EncodeString(x.Name); err != nil {
-			return err
-		}
-		if err := enc.FinishValue(); err != nil {
-			return err
-		}
-	}
-	var2 := (x.PkgPath == "")
-	if !(var2) {
-		if err := enc.NextField("PkgPath"); err != nil {
-			return err
-		}
-		if err := enc.StartValue(vdl.TypeOf((*string)(nil))); err != nil {
-			return err
-		}
-		if err := enc.EncodeString(x.PkgPath); err != nil {
-			return err
-		}
-		if err := enc.FinishValue(); err != nil {
-			return err
-		}
-	}
-	var3 := (x.Doc == "")
-	if !(var3) {
-		if err := enc.NextField("Doc"); err != nil {
-			return err
-		}
-		if err := enc.StartValue(vdl.TypeOf((*string)(nil))); err != nil {
-			return err
-		}
-		if err := enc.EncodeString(x.Doc); err != nil {
-			return err
-		}
-		if err := enc.FinishValue(); err != nil {
-			return err
-		}
-	}
-	var var4 bool
-	if len(x.Embeds) == 0 {
-		var4 = true
-	}
-	if !(var4) {
-		if err := enc.NextField("Embeds"); err != nil {
-			return err
-		}
-		if err := __VDLWrite3_list(enc, &x.Embeds); err != nil {
-			return err
-		}
-	}
-	var var5 bool
-	if len(x.Methods) == 0 {
-		var5 = true
-	}
-	if !(var5) {
-		if err := enc.NextField("Methods"); err != nil {
-			return err
-		}
-		if err := __VDLWrite4_list(enc, &x.Methods); err != nil {
-			return err
-		}
-	}
-	if err := enc.NextField(""); err != nil {
-		return err
-	}
-	return enc.FinishValue()
-}
-
-func __VDLWrite3_list(enc vdl.Encoder, x *[]Embed) error {
-	if err := enc.StartValue(vdl.TypeOf((*[]Embed)(nil))); err != nil {
-		return err
-	}
-	if err := enc.SetLenHint(len(*x)); err != nil {
-		return err
-	}
-	for i := 0; i < len(*x); i++ {
-		if err := enc.NextEntry(false); err != nil {
-			return err
-		}
-		if err := (*x)[i].VDLWrite(enc); err != nil {
-			return err
-		}
-	}
-	if err := enc.NextEntry(true); err != nil {
-		return err
-	}
-	return enc.FinishValue()
-}
-
-func __VDLWrite4_list(enc vdl.Encoder, x *[]Method) error {
-	if err := enc.StartValue(vdl.TypeOf((*[]Method)(nil))); err != nil {
-		return err
-	}
-	if err := enc.SetLenHint(len(*x)); err != nil {
-		return err
-	}
-	for i := 0; i < len(*x); i++ {
-		if err := enc.NextEntry(false); err != nil {
-			return err
-		}
-		if err := (*x)[i].VDLWrite(enc); err != nil {
-			return err
-		}
-	}
-	if err := enc.NextEntry(true); err != nil {
-		return err
-	}
-	return enc.FinishValue()
 }
 
 var __VDLInitCalled bool

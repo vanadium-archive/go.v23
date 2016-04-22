@@ -64,14 +64,22 @@ pkg vdltool, method (*SwiftConfigTarget) FinishFields(vdl.FieldsTarget) error
 pkg vdltool, method (*SwiftConfigTarget) StartField(string) (vdl.Target, vdl.Target, error)
 pkg vdltool, method (*SwiftConfigTarget) StartFields(*vdl.Type) (vdl.FieldsTarget, error)
 pkg vdltool, method (*SwiftConfigTarget) ZeroField(string) error
+pkg vdltool, method (Config) VDLIsZero() (bool, error)
 pkg vdltool, method (Config) VDLWrite(vdl.Encoder) error
 pkg vdltool, method (GenLanguage) String() string
+pkg vdltool, method (GenLanguage) VDLIsZero() (bool, error)
 pkg vdltool, method (GenLanguage) VDLWrite(vdl.Encoder) error
+pkg vdltool, method (GoConfig) VDLIsZero() (bool, error)
 pkg vdltool, method (GoConfig) VDLWrite(vdl.Encoder) error
+pkg vdltool, method (GoImport) VDLIsZero() (bool, error)
 pkg vdltool, method (GoImport) VDLWrite(vdl.Encoder) error
+pkg vdltool, method (GoType) VDLIsZero() (bool, error)
 pkg vdltool, method (GoType) VDLWrite(vdl.Encoder) error
+pkg vdltool, method (JavaConfig) VDLIsZero() (bool, error)
 pkg vdltool, method (JavaConfig) VDLWrite(vdl.Encoder) error
+pkg vdltool, method (JavascriptConfig) VDLIsZero() (bool, error)
 pkg vdltool, method (JavascriptConfig) VDLWrite(vdl.Encoder) error
+pkg vdltool, method (SwiftConfig) VDLIsZero() (bool, error)
 pkg vdltool, method (SwiftConfig) VDLWrite(vdl.Encoder) error
 pkg vdltool, type Config struct
 pkg vdltool, type Config struct, GenLanguages map[GenLanguage]struct{}

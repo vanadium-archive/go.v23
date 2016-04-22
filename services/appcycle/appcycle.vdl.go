@@ -144,61 +144,15 @@ func (t *TaskTarget) FinishFields(_ vdl.FieldsTarget) error {
 	return nil
 }
 
-func (x *Task) VDLRead(dec vdl.Decoder) error {
-	*x = Task{}
-	var err error
-	if err = dec.StartValue(); err != nil {
-		return err
-	}
-	if (dec.StackDepth() == 1 || dec.IsAny()) && !vdl.Compatible(vdl.TypeOf(*x), dec.Type()) {
-		return fmt.Errorf("incompatible struct %T, from %v", *x, dec.Type())
-	}
-	for {
-		f, err := dec.NextField()
-		if err != nil {
-			return err
-		}
-		switch f {
-		case "":
-			return dec.FinishValue()
-		case "Progress":
-			if err = dec.StartValue(); err != nil {
-				return err
-			}
-			tmp, err := dec.DecodeInt(32)
-			if err != nil {
-				return err
-			}
-			x.Progress = int32(tmp)
-			if err = dec.FinishValue(); err != nil {
-				return err
-			}
-		case "Goal":
-			if err = dec.StartValue(); err != nil {
-				return err
-			}
-			tmp, err := dec.DecodeInt(32)
-			if err != nil {
-				return err
-			}
-			x.Goal = int32(tmp)
-			if err = dec.FinishValue(); err != nil {
-				return err
-			}
-		default:
-			if err = dec.SkipValue(); err != nil {
-				return err
-			}
-		}
-	}
+func (x Task) VDLIsZero() (bool, error) {
+	return x == Task{}, nil
 }
 
 func (x Task) VDLWrite(enc vdl.Encoder) error {
 	if err := enc.StartValue(vdl.TypeOf((*Task)(nil)).Elem()); err != nil {
 		return err
 	}
-	var1 := (x.Progress == int32(0))
-	if !(var1) {
+	if x.Progress != 0 {
 		if err := enc.NextField("Progress"); err != nil {
 			return err
 		}
@@ -212,8 +166,7 @@ func (x Task) VDLWrite(enc vdl.Encoder) error {
 			return err
 		}
 	}
-	var2 := (x.Goal == int32(0))
-	if !(var2) {
+	if x.Goal != 0 {
 		if err := enc.NextField("Goal"); err != nil {
 			return err
 		}
@@ -231,6 +184,54 @@ func (x Task) VDLWrite(enc vdl.Encoder) error {
 		return err
 	}
 	return enc.FinishValue()
+}
+
+func (x *Task) VDLRead(dec vdl.Decoder) error {
+	*x = Task{}
+	if err := dec.StartValue(); err != nil {
+		return err
+	}
+	if (dec.StackDepth() == 1 || dec.IsAny()) && !vdl.Compatible(vdl.TypeOf(*x), dec.Type()) {
+		return fmt.Errorf("incompatible struct %T, from %v", *x, dec.Type())
+	}
+	for {
+		f, err := dec.NextField()
+		if err != nil {
+			return err
+		}
+		switch f {
+		case "":
+			return dec.FinishValue()
+		case "Progress":
+			if err := dec.StartValue(); err != nil {
+				return err
+			}
+			tmp, err := dec.DecodeInt(32)
+			if err != nil {
+				return err
+			}
+			x.Progress = int32(tmp)
+			if err := dec.FinishValue(); err != nil {
+				return err
+			}
+		case "Goal":
+			if err := dec.StartValue(); err != nil {
+				return err
+			}
+			tmp, err := dec.DecodeInt(32)
+			if err != nil {
+				return err
+			}
+			x.Goal = int32(tmp)
+			if err := dec.FinishValue(); err != nil {
+				return err
+			}
+		default:
+			if err := dec.SkipValue(); err != nil {
+				return err
+			}
+		}
+	}
 }
 
 //////////////////////////////////////////////////
