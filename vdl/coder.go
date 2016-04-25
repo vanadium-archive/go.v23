@@ -60,13 +60,13 @@ type Decoder interface {
 	DecodeTypeObject() (*Type, error)
 	// DecodeUint decodes and returns a uint, where the result has bitlen bits.
 	// Errors are returned on loss of precision.
-	DecodeUint(bitlen uint) (uint64, error)
+	DecodeUint(bitlen int) (uint64, error)
 	// DecodeInt decodes and returns an int, where the result has bitlen bits.
 	// Errors are returned on loss of precision.
-	DecodeInt(bitlen uint) (int64, error)
+	DecodeInt(bitlen int) (int64, error)
 	// DecodeFloat decodes and returns a float, where the result has bitlen bits.
 	// Errors are returned on loss of precision.
-	DecodeFloat(bitlen uint) (float64, error)
+	DecodeFloat(bitlen int) (float64, error)
 	// DecodeBytes decodes bytes into x.  If fixedlen >= 0 the decoded bytes must
 	// be exactly that length, otherwise there is no restriction on the number of
 	// decoded bytes.  If cap(*x) is not large enough to fit the decoded bytes, a

@@ -739,7 +739,7 @@ func (c convTarget) fromFloat(src float64) error {
 }
 
 func (c convTarget) fromBytes(src []byte, tt *Type) error {
-	if c.tt.IsBytes() {
+	if c.tt.IsBytes() && c.tt.Elem() == ByteType {
 		return c.fromBytesToBytes(src)
 	}
 	elemType := tt.Elem()

@@ -27,7 +27,7 @@ type valueDecoder struct {
 
 type vdStackEntry struct {
 	Value      *Value   // the vdl Value
-	Index      int      // next index or field (index into vdStackEntry.keys for map/set)
+	Index      int      // next index or field (index into Keys for map/set)
 	NumStarted int      // hold state for multiple StartValue() calls
 	IsAny      bool     // true iff this value is within an any value
 	IsOptional bool     // true iff this value is within an optional value
@@ -205,30 +205,30 @@ func (d *valueDecoder) DecodeBool() (bool, error) {
 	return top.Value.Bool(), nil
 }
 
-func (d *valueDecoder) DecodeUint(bitlen uint) (uint64, error) {
+func (d *valueDecoder) DecodeUint(bitlen int) (uint64, error) {
 	const errFmt = "vdl: %v conversion to uint%d loses precision: %v"
-	top := d.top()
+	top, ubitlen := d.top(), uint(bitlen)
 	if top == nil {
 		return 0, errEmptyDecoderStack
 	}
 	switch top.Value.Kind() {
 	case Byte, Uint16, Uint32, Uint64:
 		x := top.Value.Uint()
-		if shift := 64 - bitlen; x != (x<<shift)>>shift {
+		if shift := 64 - ubitlen; x != (x<<shift)>>shift {
 			return 0, fmt.Errorf(errFmt, top.Value, bitlen, x)
 		}
 		return x, nil
 	case Int8, Int16, Int32, Int64:
 		x := top.Value.Int()
 		ux := uint64(x)
-		if shift := 64 - bitlen; x < 0 || ux != (ux<<shift)>>shift {
+		if shift := 64 - ubitlen; x < 0 || ux != (ux<<shift)>>shift {
 			return 0, fmt.Errorf(errFmt, top.Value, bitlen, x)
 		}
 		return ux, nil
 	case Float32, Float64:
 		x := top.Value.Float()
 		ux := uint64(x)
-		if shift := 64 - bitlen; x != float64(ux) || ux != (ux<<shift)>>shift {
+		if shift := 64 - ubitlen; x != float64(ux) || ux != (ux<<shift)>>shift {
 			return 0, fmt.Errorf(errFmt, top.Value, bitlen, x)
 		}
 		return ux, nil
@@ -237,9 +237,9 @@ func (d *valueDecoder) DecodeUint(bitlen uint) (uint64, error) {
 	}
 }
 
-func (d *valueDecoder) DecodeInt(bitlen uint) (int64, error) {
+func (d *valueDecoder) DecodeInt(bitlen int) (int64, error) {
 	const errFmt = "vdl: %v conversion to int%d loses precision: %v"
-	top := d.top()
+	top, ubitlen := d.top(), uint(bitlen)
 	if top == nil {
 		return 0, errEmptyDecoderStack
 	}
@@ -247,20 +247,20 @@ func (d *valueDecoder) DecodeInt(bitlen uint) (int64, error) {
 	case Byte, Uint16, Uint32, Uint64:
 		x := top.Value.Uint()
 		ix := int64(x)
-		if shift := 64 - bitlen; ix < 0 || x != (x<<shift)>>shift {
+		if shift := 64 - ubitlen; ix < 0 || x != (x<<shift)>>shift {
 			return 0, fmt.Errorf(errFmt, top.Value, bitlen, x)
 		}
 		return ix, nil
 	case Int8, Int16, Int32, Int64:
 		x := top.Value.Int()
-		if shift := 64 - bitlen; x != (x<<shift)>>shift {
+		if shift := 64 - ubitlen; x != (x<<shift)>>shift {
 			return 0, fmt.Errorf(errFmt, top.Value, bitlen, x)
 		}
 		return x, nil
 	case Float32, Float64:
 		x := top.Value.Float()
 		ix := int64(x)
-		if shift := 64 - bitlen; x != float64(ix) || ix != (ix<<shift)>>shift {
+		if shift := 64 - ubitlen; x != float64(ix) || ix != (ix<<shift)>>shift {
 			return 0, fmt.Errorf(errFmt, top.Value, bitlen, x)
 		}
 		return ix, nil
@@ -269,7 +269,7 @@ func (d *valueDecoder) DecodeInt(bitlen uint) (int64, error) {
 	}
 }
 
-func (d *valueDecoder) DecodeFloat(bitlen uint) (float64, error) {
+func (d *valueDecoder) DecodeFloat(bitlen int) (float64, error) {
 	const errFmt = "vdl: %v conversion to float%d loses precision: %v"
 	top := d.top()
 	if top == nil {

@@ -4462,7 +4462,7 @@ func (x MStruct) VDLWrite(enc vdl.Encoder) error {
 			return err
 		}
 		enc.SetNextStartValueIsOptional()
-		if err := (*x.D).VDLWrite(enc); err != nil {
+		if err := x.D.VDLWrite(enc); err != nil {
 			return err
 		}
 	}
@@ -6028,7 +6028,7 @@ func (x RecStruct) VDLWrite(enc vdl.Encoder) error {
 			return err
 		}
 		enc.SetNextStartValueIsOptional()
-		if err := (*x.A).VDLWrite(enc); err != nil {
+		if err := x.A.VDLWrite(enc); err != nil {
 			return err
 		}
 	}
@@ -14085,7 +14085,7 @@ func (x LargeMessageType) VDLWrite(enc vdl.Encoder) error {
 			return err
 		}
 		enc.SetNextStartValueIsOptional()
-		if err := (*x.Next).VDLWrite(enc); err != nil {
+		if err := x.Next.VDLWrite(enc); err != nil {
 			return err
 		}
 	}
@@ -14346,7 +14346,7 @@ func (x LargeAnyMessageType) VDLWrite(enc vdl.Encoder) error {
 			return err
 		}
 		enc.SetNextStartValueIsOptional()
-		if err := (*x.Next).VDLWrite(enc); err != nil {
+		if err := x.Next.VDLWrite(enc); err != nil {
 			return err
 		}
 	}

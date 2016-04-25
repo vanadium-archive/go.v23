@@ -306,21 +306,21 @@ func readNonNilValue(dec Decoder, rv reflect.Value, tt *Type) error {
 		}
 		return rv.Addr().Interface().(settable).Set(val)
 	case Byte, Uint16, Uint32, Uint64:
-		val, err := dec.DecodeUint(uint(bitlenV(kind)))
+		val, err := dec.DecodeUint(kind.BitLen())
 		if err != nil {
 			return err
 		}
 		rv.SetUint(val)
 		return nil
 	case Int8, Int16, Int32, Int64:
-		val, err := dec.DecodeInt(uint(bitlenV(kind)))
+		val, err := dec.DecodeInt(kind.BitLen())
 		if err != nil {
 			return err
 		}
 		rv.SetInt(val)
 		return nil
 	case Float32, Float64:
-		val, err := dec.DecodeFloat(uint(bitlenV(kind)))
+		val, err := dec.DecodeFloat(kind.BitLen())
 		if err != nil {
 			return err
 		}

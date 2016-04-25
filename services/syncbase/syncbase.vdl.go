@@ -3174,7 +3174,7 @@ func (x RowOp) VDLWrite(enc vdl.Encoder) error {
 			return err
 		}
 		enc.SetNextStartValueIsOptional()
-		if err := (*x.LocalValue).VDLWrite(enc); err != nil {
+		if err := x.LocalValue.VDLWrite(enc); err != nil {
 			return err
 		}
 	}
@@ -3186,7 +3186,7 @@ func (x RowOp) VDLWrite(enc vdl.Encoder) error {
 			return err
 		}
 		enc.SetNextStartValueIsOptional()
-		if err := (*x.RemoteValue).VDLWrite(enc); err != nil {
+		if err := x.RemoteValue.VDLWrite(enc); err != nil {
 			return err
 		}
 	}
@@ -3198,7 +3198,7 @@ func (x RowOp) VDLWrite(enc vdl.Encoder) error {
 			return err
 		}
 		enc.SetNextStartValueIsOptional()
-		if err := (*x.AncestorValue).VDLWrite(enc); err != nil {
+		if err := x.AncestorValue.VDLWrite(enc); err != nil {
 			return err
 		}
 	}
@@ -4942,7 +4942,7 @@ func (x ResolutionInfo) VDLWrite(enc vdl.Encoder) error {
 			return err
 		}
 		enc.SetNextStartValueIsOptional()
-		if err := (*x.Result).VDLWrite(enc); err != nil {
+		if err := x.Result.VDLWrite(enc); err != nil {
 			return err
 		}
 	}

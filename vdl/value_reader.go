@@ -109,21 +109,21 @@ func (vv *Value) readNonNilValue(dec Decoder) error {
 		vv.AssignBool(val)
 		return nil
 	case Byte, Uint16, Uint32, Uint64:
-		val, err := dec.DecodeUint(uint(bitlenV(vv.Kind())))
+		val, err := dec.DecodeUint(vv.Kind().BitLen())
 		if err != nil {
 			return err
 		}
 		vv.AssignUint(val)
 		return nil
 	case Int8, Int16, Int32, Int64:
-		val, err := dec.DecodeInt(uint(bitlenV(vv.Kind())))
+		val, err := dec.DecodeInt(vv.Kind().BitLen())
 		if err != nil {
 			return err
 		}
 		vv.AssignInt(val)
 		return nil
 	case Float32, Float64:
-		val, err := dec.DecodeFloat(uint(bitlenV(vv.Kind())))
+		val, err := dec.DecodeFloat(vv.Kind().BitLen())
 		if err != nil {
 			return err
 		}

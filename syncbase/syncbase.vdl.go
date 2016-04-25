@@ -2159,7 +2159,7 @@ func (x Conflict) VDLWrite(enc vdl.Encoder) error {
 			return err
 		}
 		enc.SetNextStartValueIsOptional()
-		if err := (*x.ReadSet).VDLWrite(enc); err != nil {
+		if err := x.ReadSet.VDLWrite(enc); err != nil {
 			return err
 		}
 	}
@@ -2171,7 +2171,7 @@ func (x Conflict) VDLWrite(enc vdl.Encoder) error {
 			return err
 		}
 		enc.SetNextStartValueIsOptional()
-		if err := (*x.WriteSet).VDLWrite(enc); err != nil {
+		if err := x.WriteSet.VDLWrite(enc); err != nil {
 			return err
 		}
 	}
@@ -2183,7 +2183,7 @@ func (x Conflict) VDLWrite(enc vdl.Encoder) error {
 			return err
 		}
 		enc.SetNextStartValueIsOptional()
-		if err := (*x.ScanSet).VDLWrite(enc); err != nil {
+		if err := x.ScanSet.VDLWrite(enc); err != nil {
 			return err
 		}
 	}
@@ -2537,7 +2537,7 @@ func (x ResolvedRow) VDLWrite(enc vdl.Encoder) error {
 			return err
 		}
 		enc.SetNextStartValueIsOptional()
-		if err := (*x.Result).VDLWrite(enc); err != nil {
+		if err := x.Result.VDLWrite(enc); err != nil {
 			return err
 		}
 	}

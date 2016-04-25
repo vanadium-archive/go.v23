@@ -50,19 +50,19 @@ func transcodeNonNilValue(e Encoder, d Decoder) error {
 		}
 		return e.EncodeBool(val)
 	case Byte, Uint16, Uint32, Uint64:
-		val, err := d.DecodeUint(uint(bitlenV(d.Type().Kind())))
+		val, err := d.DecodeUint(d.Type().Kind().BitLen())
 		if err != nil {
 			return err
 		}
 		return e.EncodeUint(val)
 	case Int8, Int16, Int32, Int64:
-		val, err := d.DecodeInt(uint(bitlenV(d.Type().Kind())))
+		val, err := d.DecodeInt(d.Type().Kind().BitLen())
 		if err != nil {
 			return err
 		}
 		return e.EncodeInt(val)
 	case Float32, Float64:
-		val, err := d.DecodeFloat(uint(bitlenV(d.Type().Kind())))
+		val, err := d.DecodeFloat(d.Type().Kind().BitLen())
 		if err != nil {
 			return err
 		}

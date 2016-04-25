@@ -17,6 +17,7 @@ var _ = __VDLInit() // Must be first; see __VDLInit comments for details.
 //////////////////////////////////////////////////
 // Type definitions
 
+// Complex64 is a complex number composed of 32-bit real and imaginary parts.
 type Complex64 struct {
 	Real float32
 	Imag float32
@@ -223,6 +224,7 @@ func (x *Complex64) VDLRead(dec vdl.Decoder) error {
 	}
 }
 
+// Complex128 is a complex number composed of 64-bit real and imaginary parts.
 type Complex128 struct {
 	Real float64
 	Imag float64

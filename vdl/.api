@@ -498,6 +498,7 @@ pkg vdl, method (*WireRetryCodeTarget) StartFields(*Type) (FieldsTarget, error)
 pkg vdl, method (*WireRetryCodeTarget) StartList(*Type, int) (ListTarget, error)
 pkg vdl, method (*WireRetryCodeTarget) StartMap(*Type, int) (MapTarget, error)
 pkg vdl, method (*WireRetryCodeTarget) StartSet(*Type, int) (SetTarget, error)
+pkg vdl, method (Kind) BitLen() int
 pkg vdl, method (Kind) String() string
 pkg vdl, method (WireError) VDLIsZero() (bool, error)
 pkg vdl, method (WireError) VDLWrite(Encoder) error
@@ -516,11 +517,11 @@ pkg vdl, type BytesTarget struct, embedded TargetBase
 pkg vdl, type Decoder interface { DecodeBool, DecodeBytes, DecodeFloat, DecodeInt, DecodeString, DecodeTypeObject, DecodeUint, FinishValue, IgnoreNextStartValue, Index, IsAny, IsNil, IsOptional, LenHint, NextEntry, NextField, SkipValue, StackDepth, StartValue, Type }
 pkg vdl, type Decoder interface, DecodeBool() (bool, error)
 pkg vdl, type Decoder interface, DecodeBytes(int, *[]byte) error
-pkg vdl, type Decoder interface, DecodeFloat(uint) (float64, error)
-pkg vdl, type Decoder interface, DecodeInt(uint) (int64, error)
+pkg vdl, type Decoder interface, DecodeFloat(int) (float64, error)
+pkg vdl, type Decoder interface, DecodeInt(int) (int64, error)
 pkg vdl, type Decoder interface, DecodeString() (string, error)
 pkg vdl, type Decoder interface, DecodeTypeObject() (*Type, error)
-pkg vdl, type Decoder interface, DecodeUint(uint) (uint64, error)
+pkg vdl, type Decoder interface, DecodeUint(int) (uint64, error)
 pkg vdl, type Decoder interface, FinishValue() error
 pkg vdl, type Decoder interface, IgnoreNextStartValue()
 pkg vdl, type Decoder interface, Index() int
@@ -579,7 +580,7 @@ pkg vdl, type Int8Target struct, Value *int8
 pkg vdl, type Int8Target struct, embedded TargetBase
 pkg vdl, type IsZeroer interface { VDLIsZero }
 pkg vdl, type IsZeroer interface, VDLIsZero() (bool, error)
-pkg vdl, type Kind uint
+pkg vdl, type Kind int
 pkg vdl, type ListTarget interface { FinishElem, StartElem }
 pkg vdl, type ListTarget interface, FinishElem(Target) error
 pkg vdl, type ListTarget interface, StartElem(int) (Target, error)

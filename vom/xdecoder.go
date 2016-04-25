@@ -468,9 +468,9 @@ func (d *xDecoder) DecodeBool() (bool, error) {
 	return false, fmt.Errorf("vom: type mismatch, got %v, want bool", tt)
 }
 
-func (d *xDecoder) DecodeUint(bitlen uint) (uint64, error) {
+func (d *xDecoder) DecodeUint(bitlen int) (uint64, error) {
 	const errFmt = "vom: %v conversion to uint%d loses precision: %v"
-	tt := d.Type()
+	tt, ubitlen := d.Type(), uint(bitlen)
 	if tt == nil {
 		return 0, errEmptyDecoderStack
 	}
@@ -480,7 +480,7 @@ func (d *xDecoder) DecodeUint(bitlen uint) (uint64, error) {
 		if err != nil {
 			return 0, err
 		}
-		if shift := 64 - bitlen; x != (x<<shift)>>shift {
+		if shift := 64 - ubitlen; x != (x<<shift)>>shift {
 			return 0, fmt.Errorf(errFmt, tt, bitlen, x)
 		}
 		return x, nil
@@ -490,7 +490,7 @@ func (d *xDecoder) DecodeUint(bitlen uint) (uint64, error) {
 			return 0, err
 		}
 		ux := uint64(x)
-		if shift := 64 - bitlen; x < 0 || ux != (ux<<shift)>>shift {
+		if shift := 64 - ubitlen; x < 0 || ux != (ux<<shift)>>shift {
 			return 0, fmt.Errorf(errFmt, tt, bitlen, x)
 		}
 		return ux, nil
@@ -500,7 +500,7 @@ func (d *xDecoder) DecodeUint(bitlen uint) (uint64, error) {
 			return 0, err
 		}
 		ux := uint64(x)
-		if shift := 64 - bitlen; x != float64(ux) || ux != (ux<<shift)>>shift {
+		if shift := 64 - ubitlen; x != float64(ux) || ux != (ux<<shift)>>shift {
 			return 0, fmt.Errorf(errFmt, tt, bitlen, x)
 		}
 		return ux, nil
@@ -508,39 +508,39 @@ func (d *xDecoder) DecodeUint(bitlen uint) (uint64, error) {
 	return 0, fmt.Errorf("vom: type mismatch, got %v, want uint%d", tt, bitlen)
 }
 
-func (d *xDecoder) DecodeInt(bitlen uint) (int64, error) {
+func (d *xDecoder) DecodeInt(bitlen int) (int64, error) {
 	const errFmt = "vom: %v conversion to int%d loses precision: %v"
-	tt := d.Type()
+	tt, ubitlen := d.Type(), uint(bitlen)
 	if tt == nil {
 		return 0, errEmptyDecoderStack
 	}
 	switch tt.Kind() {
-	case vdl.Int8, vdl.Int16, vdl.Int32, vdl.Int64:
-		x, err := binaryDecodeInt(d.old.buf)
-		if err != nil {
-			return 0, err
-		}
-		if shift := 64 - bitlen; x != (x<<shift)>>shift {
-			return 0, fmt.Errorf(errFmt, tt, bitlen, x)
-		}
-		return x, nil
 	case vdl.Byte, vdl.Uint16, vdl.Uint32, vdl.Uint64:
 		x, err := binaryDecodeUint(d.old.buf)
 		if err != nil {
 			return 0, err
 		}
 		ix := int64(x)
-		if shift := 64 - bitlen; ix < 0 || x != (x<<shift)>>shift {
+		if shift := 64 - ubitlen; ix < 0 || x != (x<<shift)>>shift {
 			return 0, fmt.Errorf(errFmt, tt, bitlen, x)
 		}
 		return ix, nil
+	case vdl.Int8, vdl.Int16, vdl.Int32, vdl.Int64:
+		x, err := binaryDecodeInt(d.old.buf)
+		if err != nil {
+			return 0, err
+		}
+		if shift := 64 - ubitlen; x != (x<<shift)>>shift {
+			return 0, fmt.Errorf(errFmt, tt, bitlen, x)
+		}
+		return x, nil
 	case vdl.Float32, vdl.Float64:
 		x, err := binaryDecodeFloat(d.old.buf)
 		if err != nil {
 			return 0, err
 		}
 		ix := int64(x)
-		if shift := 64 - bitlen; x != float64(ix) || ix != (ix<<shift)>>shift {
+		if shift := 64 - ubitlen; x != float64(ix) || ix != (ix<<shift)>>shift {
 			return 0, fmt.Errorf(errFmt, tt, bitlen, x)
 		}
 		return ix, nil
@@ -548,15 +548,13 @@ func (d *xDecoder) DecodeInt(bitlen uint) (int64, error) {
 	return 0, fmt.Errorf("vom: type mismatch, got %v, want int%d", tt, bitlen)
 }
 
-func (d *xDecoder) DecodeFloat(bitlen uint) (float64, error) {
+func (d *xDecoder) DecodeFloat(bitlen int) (float64, error) {
 	const errFmt = "vom: %v conversion to float%d loses precision: %v"
 	tt := d.Type()
 	if tt == nil {
 		return 0, errEmptyDecoderStack
 	}
 	switch tt.Kind() {
-	case vdl.Float32, vdl.Float64:
-		return binaryDecodeFloat(d.old.buf)
 	case vdl.Byte, vdl.Uint16, vdl.Uint32, vdl.Uint64:
 		x, err := binaryDecodeUint(d.old.buf)
 		if err != nil {
@@ -587,6 +585,8 @@ func (d *xDecoder) DecodeFloat(bitlen uint) (float64, error) {
 			return 0, fmt.Errorf(errFmt, tt, bitlen, x)
 		}
 		return float64(x), nil
+	case vdl.Float32, vdl.Float64:
+		return binaryDecodeFloat(d.old.buf)
 	}
 	return 0, fmt.Errorf("vom: type mismatch, got %v, want float%d", tt, bitlen)
 }

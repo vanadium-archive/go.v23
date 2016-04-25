@@ -1031,7 +1031,7 @@ func (x Method) VDLWrite(enc vdl.Encoder) error {
 			return err
 		}
 		enc.SetNextStartValueIsOptional()
-		if err := (*x.InStream).VDLWrite(enc); err != nil {
+		if err := x.InStream.VDLWrite(enc); err != nil {
 			return err
 		}
 	}
@@ -1043,7 +1043,7 @@ func (x Method) VDLWrite(enc vdl.Encoder) error {
 			return err
 		}
 		enc.SetNextStartValueIsOptional()
-		if err := (*x.OutStream).VDLWrite(enc); err != nil {
+		if err := x.OutStream.VDLWrite(enc); err != nil {
 			return err
 		}
 	}

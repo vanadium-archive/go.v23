@@ -10,7 +10,7 @@ import (
 )
 
 // Kind represents the kind of type that a Type represents.
-type Kind uint
+type Kind int
 
 const (
 	// Variant kinds
@@ -93,14 +93,30 @@ func (k Kind) String() string {
 	panic(fmt.Errorf("vdl: unhandled kind: %d", k))
 }
 
+// BitLen returns the number of bits in the representation of the kind;
+// e.g. Int32 returns 32.  Returns -1 for non-number kinds.
+func (k Kind) BitLen() int {
+	switch k {
+	case Byte, Int8:
+		return 8
+	case Uint16, Int16:
+		return 16
+	case Uint32, Int32, Float32:
+		return 32
+	case Uint64, Int64, Float64:
+		return 64
+	}
+	return -1
+}
+
 type kindBitMask uint32
 
 func (k *kindBitMask) Set(kind Kind) {
-	*k |= (1 << kind)
+	*k |= (1 << uint(kind))
 }
 
 func (k kindBitMask) IsSet(kind Kind) bool {
-	return (k & (1 << kind)) != 0
+	return (k & (1 << uint(kind))) != 0
 }
 
 // SplitIdent splits the given identifier into its package path and local name.

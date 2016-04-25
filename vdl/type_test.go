@@ -324,50 +324,50 @@ func TestListTypes(t *testing.T) {
 }
 
 func TestSetTypes(t *testing.T) {
-	for _, test := range singletons {
-		if test.k == Any || test.k == TypeObject {
+	for _, key := range singletons {
+		if !key.t.CanBeKey() {
 			var builder TypeBuilder
-			x := builder.Set().AssignKey(test.t)
+			x := builder.Set().AssignKey(key.t)
 			builder.Build()
 			_, err := x.Built()
-			want := `invalid key "` + test.s + `" in "set[` + test.s + `]"`
-			ExpectErr(t, err, want, "UnExpected error building Set[%s]:", test.k)
+			want := `invalid key "` + key.s + `" in "set[` + key.s + `]"`
+			ExpectErr(t, err, want, "building Set[%s]:", key.k)
 			continue
 		}
-		x := SetType(test.t)
+		x := SetType(key.t)
 		if got, want := x.Kind(), Set; got != want {
-			t.Errorf(`Set %s got kind %q, want %q`, test.k, got, want)
+			t.Errorf(`Set %s got kind %q, want %q`, key.k, got, want)
 		}
 		if got, want := x.Kind().String(), "set"; got != want {
-			t.Errorf(`Set %s got kind %q, want %q`, test.k, got, want)
+			t.Errorf(`Set %s got kind %q, want %q`, key.k, got, want)
 		}
 		if got, want := x.Name(), ""; got != want {
-			t.Errorf(`Set %s got name %q, want %q`, test.k, got, want)
+			t.Errorf(`Set %s got name %q, want %q`, key.k, got, want)
 		}
-		if got, want := x.String(), "set["+test.s+"]"; got != want {
-			t.Errorf(`Set %s got string %q, want %q`, test.k, got, want)
+		if got, want := x.String(), "set["+key.s+"]"; got != want {
+			t.Errorf(`Set %s got string %q, want %q`, key.k, got, want)
 		}
-		if got, want := x.Key(), test.t; got != want {
-			t.Errorf(`Set %s got key %q, want %q`, test.k, got, want)
+		if got, want := x.Key(), key.t; got != want {
+			t.Errorf(`Set %s got key %q, want %q`, key.k, got, want)
 		}
-		if !x.ContainsKind(WalkAll, Set, test.k) {
-			t.Errorf(`Set %s !ContainsKind(WalkAll, Set, %v)`, test.k, test.k)
+		if !x.ContainsKind(WalkAll, Set, key.k) {
+			t.Errorf(`Set %s !ContainsKind(WalkAll, Set, %v)`, key.k, key.k)
 		}
-		if !x.ContainsType(WalkAll, x, test.t) {
-			t.Errorf(`Set %s !ContainsType(WalkAll, %v, %v)`, test.k, x, test.t)
+		if !x.ContainsType(WalkAll, x, key.t) {
+			t.Errorf(`Set %s !ContainsType(WalkAll, %v, %v)`, key.k, x, key.t)
 		}
 	}
 }
 
 func TestMapTypes(t *testing.T) {
 	for _, key := range singletons {
-		if key.k == Any || key.k == TypeObject {
+		if !key.t.CanBeKey() {
 			var builder TypeBuilder
 			x := builder.Map().AssignKey(key.t).AssignElem(key.t)
 			builder.Build()
 			_, err := x.Built()
 			want := `invalid key "` + key.s + `" in "map[` + key.s + `]` + key.s + `"`
-			ExpectErr(t, err, want, "UnExpected error building Map[%s]%s", key.k, key.k)
+			ExpectErr(t, err, want, "building Map[%s]%s", key.k, key.k)
 			continue
 		}
 		for _, elem := range singletons {
@@ -440,8 +440,8 @@ func TestInvalidMapTypes(t *testing.T) {
 		builder.Build()
 		_, errM := m.Built()
 		_, errS := s.Built()
-		ExpectErr(t, errM, `invalid key`, "UnExpected error building Map[%q]bool", x)
-		ExpectErr(t, errS, `invalid key`, "UnExpected error building Set[%q]bool", x)
+		ExpectErr(t, errM, `invalid key`, "building Map[%q]bool", x)
+		ExpectErr(t, errS, `invalid key`, "building Set[%q]bool", x)
 	}
 }
 
