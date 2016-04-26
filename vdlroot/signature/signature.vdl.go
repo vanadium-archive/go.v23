@@ -134,7 +134,7 @@ func (t *EmbedTarget) StartField(name string) (key, field vdl.Target, _ error) {
 		target, err := &t.docTarget, error(nil)
 		return nil, target, err
 	default:
-		return nil, nil, fmt.Errorf("field %s not in struct signature.Embed", name)
+		return nil, nil, vdl.ErrFieldNoExist
 	}
 }
 func (t *EmbedTarget) FinishField(_, _ vdl.Target) error {
@@ -152,7 +152,7 @@ func (t *EmbedTarget) ZeroField(name string) error {
 		t.Value.Doc = ""
 		return nil
 	default:
-		return fmt.Errorf("field %s not in struct signature.Embed", name)
+		return vdl.ErrFieldNoExist
 	}
 }
 func (t *EmbedTarget) FinishFields(_ vdl.FieldsTarget) error {
@@ -392,7 +392,7 @@ func (t *ArgTarget) StartField(name string) (key, field vdl.Target, _ error) {
 		target, err := &t.typeTarget, error(nil)
 		return nil, target, err
 	default:
-		return nil, nil, fmt.Errorf("field %s not in struct signature.Arg", name)
+		return nil, nil, vdl.ErrFieldNoExist
 	}
 }
 func (t *ArgTarget) FinishField(_, _ vdl.Target) error {
@@ -410,7 +410,7 @@ func (t *ArgTarget) ZeroField(name string) error {
 		t.Value.Type = vdl.AnyType
 		return nil
 	default:
-		return fmt.Errorf("field %s not in struct signature.Arg", name)
+		return vdl.ErrFieldNoExist
 	}
 }
 func (t *ArgTarget) FinishFields(_ vdl.FieldsTarget) error {
@@ -816,7 +816,7 @@ func (t *MethodTarget) StartField(name string) (key, field vdl.Target, _ error) 
 		target, err := &t.tagsTarget, error(nil)
 		return nil, target, err
 	default:
-		return nil, nil, fmt.Errorf("field %s not in struct signature.Method", name)
+		return nil, nil, vdl.ErrFieldNoExist
 	}
 }
 func (t *MethodTarget) FinishField(_, _ vdl.Target) error {
@@ -846,7 +846,7 @@ func (t *MethodTarget) ZeroField(name string) error {
 		t.Value.Tags = []*vdl.Value(nil)
 		return nil
 	default:
-		return fmt.Errorf("field %s not in struct signature.Method", name)
+		return vdl.ErrFieldNoExist
 	}
 }
 func (t *MethodTarget) FinishFields(_ vdl.FieldsTarget) error {
@@ -1475,7 +1475,7 @@ func (t *InterfaceTarget) StartField(name string) (key, field vdl.Target, _ erro
 		target, err := &t.methodsTarget, error(nil)
 		return nil, target, err
 	default:
-		return nil, nil, fmt.Errorf("field %s not in struct signature.Interface", name)
+		return nil, nil, vdl.ErrFieldNoExist
 	}
 }
 func (t *InterfaceTarget) FinishField(_, _ vdl.Target) error {
@@ -1499,7 +1499,7 @@ func (t *InterfaceTarget) ZeroField(name string) error {
 		t.Value.Methods = []Method(nil)
 		return nil
 	default:
-		return fmt.Errorf("field %s not in struct signature.Interface", name)
+		return vdl.ErrFieldNoExist
 	}
 }
 func (t *InterfaceTarget) FinishFields(_ vdl.FieldsTarget) error {

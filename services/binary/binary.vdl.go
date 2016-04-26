@@ -151,7 +151,7 @@ func (t *DescriptionTarget) StartField(name string) (key, field vdl.Target, _ er
 		target, err := &t.profilesTarget, error(nil)
 		return nil, target, err
 	default:
-		return nil, nil, fmt.Errorf("field %s not in struct v.io/v23/services/binary.Description", name)
+		return nil, nil, vdl.ErrFieldNoExist
 	}
 }
 func (t *DescriptionTarget) FinishField(_, _ vdl.Target) error {
@@ -166,7 +166,7 @@ func (t *DescriptionTarget) ZeroField(name string) error {
 		t.Value.Profiles = map[string]bool(nil)
 		return nil
 	default:
-		return fmt.Errorf("field %s not in struct v.io/v23/services/binary.Description", name)
+		return vdl.ErrFieldNoExist
 	}
 }
 func (t *DescriptionTarget) FinishFields(_ vdl.FieldsTarget) error {
@@ -478,7 +478,7 @@ func (t *PartInfoTarget) StartField(name string) (key, field vdl.Target, _ error
 		target, err := &t.sizeTarget, error(nil)
 		return nil, target, err
 	default:
-		return nil, nil, fmt.Errorf("field %s not in struct v.io/v23/services/binary.PartInfo", name)
+		return nil, nil, vdl.ErrFieldNoExist
 	}
 }
 func (t *PartInfoTarget) FinishField(_, _ vdl.Target) error {
@@ -493,7 +493,7 @@ func (t *PartInfoTarget) ZeroField(name string) error {
 		t.Value.Size = int64(0)
 		return nil
 	default:
-		return fmt.Errorf("field %s not in struct v.io/v23/services/binary.PartInfo", name)
+		return vdl.ErrFieldNoExist
 	}
 }
 func (t *PartInfoTarget) FinishFields(_ vdl.FieldsTarget) error {

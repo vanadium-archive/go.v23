@@ -1134,7 +1134,7 @@ func (t *DumpAtomTarget) StartField(name string) (key, field vdl.Target, _ error
 		target, err := &t.debugTarget, error(nil)
 		return nil, target, err
 	default:
-		return nil, nil, fmt.Errorf("field %s not in struct v.io/v23/vom.DumpAtom", name)
+		return nil, nil, vdl.ErrFieldNoExist
 	}
 }
 func (t *DumpAtomTarget) FinishField(_, _ vdl.Target) error {
@@ -1155,7 +1155,7 @@ func (t *DumpAtomTarget) ZeroField(name string) error {
 		t.Value.Debug = ""
 		return nil
 	default:
-		return fmt.Errorf("field %s not in struct v.io/v23/vom.DumpAtom", name)
+		return vdl.ErrFieldNoExist
 	}
 }
 func (t *DumpAtomTarget) FinishFields(_ vdl.FieldsTarget) error {
@@ -1456,7 +1456,7 @@ func (t *wireNamedTarget) StartField(name string) (key, field vdl.Target, _ erro
 		target, err := &t.baseTarget, error(nil)
 		return nil, target, err
 	default:
-		return nil, nil, fmt.Errorf("field %s not in struct v.io/v23/vom.wireNamed", name)
+		return nil, nil, vdl.ErrFieldNoExist
 	}
 }
 func (t *wireNamedTarget) FinishField(_, _ vdl.Target) error {
@@ -1471,7 +1471,7 @@ func (t *wireNamedTarget) ZeroField(name string) error {
 		t.Value.Base = TypeId(0)
 		return nil
 	default:
-		return fmt.Errorf("field %s not in struct v.io/v23/vom.wireNamed", name)
+		return vdl.ErrFieldNoExist
 	}
 }
 func (t *wireNamedTarget) FinishFields(_ vdl.FieldsTarget) error {
@@ -1664,7 +1664,7 @@ func (t *wireEnumTarget) StartField(name string) (key, field vdl.Target, _ error
 		target, err := &t.labelsTarget, error(nil)
 		return nil, target, err
 	default:
-		return nil, nil, fmt.Errorf("field %s not in struct v.io/v23/vom.wireEnum", name)
+		return nil, nil, vdl.ErrFieldNoExist
 	}
 }
 func (t *wireEnumTarget) FinishField(_, _ vdl.Target) error {
@@ -1679,7 +1679,7 @@ func (t *wireEnumTarget) ZeroField(name string) error {
 		t.Value.Labels = []string(nil)
 		return nil
 	default:
-		return fmt.Errorf("field %s not in struct v.io/v23/vom.wireEnum", name)
+		return vdl.ErrFieldNoExist
 	}
 }
 func (t *wireEnumTarget) FinishFields(_ vdl.FieldsTarget) error {
@@ -1946,7 +1946,7 @@ func (t *wireArrayTarget) StartField(name string) (key, field vdl.Target, _ erro
 		target, err := &t.lenTarget, error(nil)
 		return nil, target, err
 	default:
-		return nil, nil, fmt.Errorf("field %s not in struct v.io/v23/vom.wireArray", name)
+		return nil, nil, vdl.ErrFieldNoExist
 	}
 }
 func (t *wireArrayTarget) FinishField(_, _ vdl.Target) error {
@@ -1964,7 +1964,7 @@ func (t *wireArrayTarget) ZeroField(name string) error {
 		t.Value.Len = uint64(0)
 		return nil
 	default:
-		return fmt.Errorf("field %s not in struct v.io/v23/vom.wireArray", name)
+		return vdl.ErrFieldNoExist
 	}
 }
 func (t *wireArrayTarget) FinishFields(_ vdl.FieldsTarget) error {
@@ -2163,7 +2163,7 @@ func (t *wireListTarget) StartField(name string) (key, field vdl.Target, _ error
 		target, err := &t.elemTarget, error(nil)
 		return nil, target, err
 	default:
-		return nil, nil, fmt.Errorf("field %s not in struct v.io/v23/vom.wireList", name)
+		return nil, nil, vdl.ErrFieldNoExist
 	}
 }
 func (t *wireListTarget) FinishField(_, _ vdl.Target) error {
@@ -2178,7 +2178,7 @@ func (t *wireListTarget) ZeroField(name string) error {
 		t.Value.Elem = TypeId(0)
 		return nil
 	default:
-		return fmt.Errorf("field %s not in struct v.io/v23/vom.wireList", name)
+		return vdl.ErrFieldNoExist
 	}
 }
 func (t *wireListTarget) FinishFields(_ vdl.FieldsTarget) error {
@@ -2352,7 +2352,7 @@ func (t *wireSetTarget) StartField(name string) (key, field vdl.Target, _ error)
 		target, err := &t.keyTarget, error(nil)
 		return nil, target, err
 	default:
-		return nil, nil, fmt.Errorf("field %s not in struct v.io/v23/vom.wireSet", name)
+		return nil, nil, vdl.ErrFieldNoExist
 	}
 }
 func (t *wireSetTarget) FinishField(_, _ vdl.Target) error {
@@ -2367,7 +2367,7 @@ func (t *wireSetTarget) ZeroField(name string) error {
 		t.Value.Key = TypeId(0)
 		return nil
 	default:
-		return fmt.Errorf("field %s not in struct v.io/v23/vom.wireSet", name)
+		return vdl.ErrFieldNoExist
 	}
 }
 func (t *wireSetTarget) FinishFields(_ vdl.FieldsTarget) error {
@@ -2567,7 +2567,7 @@ func (t *wireMapTarget) StartField(name string) (key, field vdl.Target, _ error)
 		target, err := &t.elemTarget, error(nil)
 		return nil, target, err
 	default:
-		return nil, nil, fmt.Errorf("field %s not in struct v.io/v23/vom.wireMap", name)
+		return nil, nil, vdl.ErrFieldNoExist
 	}
 }
 func (t *wireMapTarget) FinishField(_, _ vdl.Target) error {
@@ -2585,7 +2585,7 @@ func (t *wireMapTarget) ZeroField(name string) error {
 		t.Value.Elem = TypeId(0)
 		return nil
 	default:
-		return fmt.Errorf("field %s not in struct v.io/v23/vom.wireMap", name)
+		return vdl.ErrFieldNoExist
 	}
 }
 func (t *wireMapTarget) FinishFields(_ vdl.FieldsTarget) error {
@@ -2771,7 +2771,7 @@ func (t *wireFieldTarget) StartField(name string) (key, field vdl.Target, _ erro
 		target, err := &t.typeTarget, error(nil)
 		return nil, target, err
 	default:
-		return nil, nil, fmt.Errorf("field %s not in struct v.io/v23/vom.wireField", name)
+		return nil, nil, vdl.ErrFieldNoExist
 	}
 }
 func (t *wireFieldTarget) FinishField(_, _ vdl.Target) error {
@@ -2786,7 +2786,7 @@ func (t *wireFieldTarget) ZeroField(name string) error {
 		t.Value.Type = TypeId(0)
 		return nil
 	default:
-		return fmt.Errorf("field %s not in struct v.io/v23/vom.wireField", name)
+		return vdl.ErrFieldNoExist
 	}
 }
 func (t *wireFieldTarget) FinishFields(_ vdl.FieldsTarget) error {
@@ -2980,7 +2980,7 @@ func (t *wireStructTarget) StartField(name string) (key, field vdl.Target, _ err
 		target, err := &t.fieldsTarget, error(nil)
 		return nil, target, err
 	default:
-		return nil, nil, fmt.Errorf("field %s not in struct v.io/v23/vom.wireStruct", name)
+		return nil, nil, vdl.ErrFieldNoExist
 	}
 }
 func (t *wireStructTarget) FinishField(_, _ vdl.Target) error {
@@ -2995,7 +2995,7 @@ func (t *wireStructTarget) ZeroField(name string) error {
 		t.Value.Fields = []wireField(nil)
 		return nil
 	default:
-		return fmt.Errorf("field %s not in struct v.io/v23/vom.wireStruct", name)
+		return vdl.ErrFieldNoExist
 	}
 }
 func (t *wireStructTarget) FinishFields(_ vdl.FieldsTarget) error {
@@ -3277,7 +3277,7 @@ func (t *wireUnionTarget) StartField(name string) (key, field vdl.Target, _ erro
 		target, err := &t.fieldsTarget, error(nil)
 		return nil, target, err
 	default:
-		return nil, nil, fmt.Errorf("field %s not in struct v.io/v23/vom.wireUnion", name)
+		return nil, nil, vdl.ErrFieldNoExist
 	}
 }
 func (t *wireUnionTarget) FinishField(_, _ vdl.Target) error {
@@ -3292,7 +3292,7 @@ func (t *wireUnionTarget) ZeroField(name string) error {
 		t.Value.Fields = []wireField(nil)
 		return nil
 	default:
-		return fmt.Errorf("field %s not in struct v.io/v23/vom.wireUnion", name)
+		return vdl.ErrFieldNoExist
 	}
 }
 func (t *wireUnionTarget) FinishFields(_ vdl.FieldsTarget) error {
@@ -3472,7 +3472,7 @@ func (t *wireOptionalTarget) StartField(name string) (key, field vdl.Target, _ e
 		target, err := &t.elemTarget, error(nil)
 		return nil, target, err
 	default:
-		return nil, nil, fmt.Errorf("field %s not in struct v.io/v23/vom.wireOptional", name)
+		return nil, nil, vdl.ErrFieldNoExist
 	}
 }
 func (t *wireOptionalTarget) FinishField(_, _ vdl.Target) error {
@@ -3487,7 +3487,7 @@ func (t *wireOptionalTarget) ZeroField(name string) error {
 		t.Value.Elem = TypeId(0)
 		return nil
 	default:
-		return fmt.Errorf("field %s not in struct v.io/v23/vom.wireOptional", name)
+		return vdl.ErrFieldNoExist
 	}
 }
 func (t *wireOptionalTarget) FinishFields(_ vdl.FieldsTarget) error {

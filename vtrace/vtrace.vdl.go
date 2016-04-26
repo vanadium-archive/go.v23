@@ -121,7 +121,7 @@ func (t *AnnotationTarget) StartField(name string) (key, field vdl.Target, _ err
 		target, err := &t.messageTarget, error(nil)
 		return nil, target, err
 	default:
-		return nil, nil, fmt.Errorf("field %s not in struct v.io/v23/vtrace.Annotation", name)
+		return nil, nil, vdl.ErrFieldNoExist
 	}
 }
 func (t *AnnotationTarget) FinishField(_, _ vdl.Target) error {
@@ -136,7 +136,7 @@ func (t *AnnotationTarget) ZeroField(name string) error {
 		t.Value.Message = ""
 		return nil
 	default:
-		return fmt.Errorf("field %s not in struct v.io/v23/vtrace.Annotation", name)
+		return vdl.ErrFieldNoExist
 	}
 }
 func (t *AnnotationTarget) FinishFields(_ vdl.FieldsTarget) error {
@@ -459,7 +459,7 @@ func (t *SpanRecordTarget) StartField(name string) (key, field vdl.Target, _ err
 		target, err := &t.annotationsTarget, error(nil)
 		return nil, target, err
 	default:
-		return nil, nil, fmt.Errorf("field %s not in struct v.io/v23/vtrace.SpanRecord", name)
+		return nil, nil, vdl.ErrFieldNoExist
 	}
 }
 func (t *SpanRecordTarget) FinishField(_, _ vdl.Target) error {
@@ -486,7 +486,7 @@ func (t *SpanRecordTarget) ZeroField(name string) error {
 		t.Value.Annotations = []Annotation(nil)
 		return nil
 	default:
-		return fmt.Errorf("field %s not in struct v.io/v23/vtrace.SpanRecord", name)
+		return vdl.ErrFieldNoExist
 	}
 }
 func (t *SpanRecordTarget) FinishFields(_ vdl.FieldsTarget) error {
@@ -844,7 +844,7 @@ func (t *TraceRecordTarget) StartField(name string) (key, field vdl.Target, _ er
 		target, err := &t.spansTarget, error(nil)
 		return nil, target, err
 	default:
-		return nil, nil, fmt.Errorf("field %s not in struct v.io/v23/vtrace.TraceRecord", name)
+		return nil, nil, vdl.ErrFieldNoExist
 	}
 }
 func (t *TraceRecordTarget) FinishField(_, _ vdl.Target) error {
@@ -859,7 +859,7 @@ func (t *TraceRecordTarget) ZeroField(name string) error {
 		t.Value.Spans = []SpanRecord(nil)
 		return nil
 	default:
-		return fmt.Errorf("field %s not in struct v.io/v23/vtrace.TraceRecord", name)
+		return vdl.ErrFieldNoExist
 	}
 }
 func (t *TraceRecordTarget) FinishFields(_ vdl.FieldsTarget) error {
@@ -1240,7 +1240,7 @@ func (t *RequestTarget) StartField(name string) (key, field vdl.Target, _ error)
 		target, err := &t.logLevelTarget, error(nil)
 		return nil, target, err
 	default:
-		return nil, nil, fmt.Errorf("field %s not in struct v.io/v23/vtrace.Request", name)
+		return nil, nil, vdl.ErrFieldNoExist
 	}
 }
 func (t *RequestTarget) FinishField(_, _ vdl.Target) error {
@@ -1261,7 +1261,7 @@ func (t *RequestTarget) ZeroField(name string) error {
 		t.Value.LogLevel = int32(0)
 		return nil
 	default:
-		return fmt.Errorf("field %s not in struct v.io/v23/vtrace.Request", name)
+		return vdl.ErrFieldNoExist
 	}
 }
 func (t *RequestTarget) FinishFields(_ vdl.FieldsTarget) error {
@@ -1471,7 +1471,7 @@ func (t *ResponseTarget) StartField(name string) (key, field vdl.Target, _ error
 		target, err := &t.traceTarget, error(nil)
 		return nil, target, err
 	default:
-		return nil, nil, fmt.Errorf("field %s not in struct v.io/v23/vtrace.Response", name)
+		return nil, nil, vdl.ErrFieldNoExist
 	}
 }
 func (t *ResponseTarget) FinishField(_, _ vdl.Target) error {
@@ -1486,7 +1486,7 @@ func (t *ResponseTarget) ZeroField(name string) error {
 		t.Value.Trace = TraceRecord{}
 		return nil
 	default:
-		return fmt.Errorf("field %s not in struct v.io/v23/vtrace.Response", name)
+		return vdl.ErrFieldNoExist
 	}
 }
 func (t *ResponseTarget) FinishFields(_ vdl.FieldsTarget) error {

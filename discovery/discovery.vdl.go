@@ -650,7 +650,7 @@ func (t *AdvertisementTarget) StartField(name string) (key, field vdl.Target, _ 
 		target, err := &t.attachmentsTarget, error(nil)
 		return nil, target, err
 	default:
-		return nil, nil, fmt.Errorf("field %s not in struct v.io/v23/discovery.Advertisement", name)
+		return nil, nil, vdl.ErrFieldNoExist
 	}
 }
 func (t *AdvertisementTarget) FinishField(_, _ vdl.Target) error {
@@ -674,7 +674,7 @@ func (t *AdvertisementTarget) ZeroField(name string) error {
 		t.Value.Attachments = Attachments(nil)
 		return nil
 	default:
-		return fmt.Errorf("field %s not in struct v.io/v23/discovery.Advertisement", name)
+		return vdl.ErrFieldNoExist
 	}
 }
 func (t *AdvertisementTarget) FinishFields(_ vdl.FieldsTarget) error {

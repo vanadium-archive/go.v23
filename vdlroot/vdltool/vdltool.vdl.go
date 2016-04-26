@@ -393,7 +393,7 @@ func (t *GoImportTarget) StartField(name string) (key, field vdl.Target, _ error
 		target, err := vdl.ReflectTarget(reflect.ValueOf(&t.Value.Name))
 		return nil, target, err
 	default:
-		return nil, nil, fmt.Errorf("field %s not in struct vdltool.GoImport", name)
+		return nil, nil, vdl.ErrFieldNoExist
 	}
 }
 func (t *GoImportTarget) FinishField(_, _ vdl.Target) error {
@@ -408,7 +408,7 @@ func (t *GoImportTarget) ZeroField(name string) error {
 		t.Value.Name = ""
 		return nil
 	default:
-		return fmt.Errorf("field %s not in struct vdltool.GoImport", name)
+		return vdl.ErrFieldNoExist
 	}
 }
 func (t *GoImportTarget) FinishFields(_ vdl.FieldsTarget) error {
@@ -727,7 +727,7 @@ func (t *GoZeroTarget) StartField(name string) (key, field vdl.Target, _ error) 
 		target, err := vdl.ReflectTarget(reflect.ValueOf(&t.Value.IsZero))
 		return nil, target, err
 	default:
-		return nil, nil, fmt.Errorf("field %s not in struct vdltool.GoZero", name)
+		return nil, nil, vdl.ErrFieldNoExist
 	}
 }
 func (t *GoZeroTarget) FinishField(_, _ vdl.Target) error {
@@ -742,7 +742,7 @@ func (t *GoZeroTarget) ZeroField(name string) error {
 		t.Value.IsZero = ""
 		return nil
 	default:
-		return fmt.Errorf("field %s not in struct vdltool.GoZero", name)
+		return vdl.ErrFieldNoExist
 	}
 }
 func (t *GoZeroTarget) FinishFields(_ vdl.FieldsTarget) error {
@@ -994,7 +994,7 @@ func (t *GoTypeTarget) StartField(name string) (key, field vdl.Target, _ error) 
 		target, err := vdl.ReflectTarget(reflect.ValueOf(&t.Value.Zero))
 		return nil, target, err
 	default:
-		return nil, nil, fmt.Errorf("field %s not in struct vdltool.GoType", name)
+		return nil, nil, vdl.ErrFieldNoExist
 	}
 }
 func (t *GoTypeTarget) FinishField(_, _ vdl.Target) error {
@@ -1015,7 +1015,7 @@ func (t *GoTypeTarget) ZeroField(name string) error {
 		t.Value.Zero = GoZero{}
 		return nil
 	default:
-		return fmt.Errorf("field %s not in struct vdltool.GoType", name)
+		return vdl.ErrFieldNoExist
 	}
 }
 func (t *GoTypeTarget) FinishFields(_ vdl.FieldsTarget) error {
@@ -1296,7 +1296,7 @@ func (t *GoConfigTarget) StartField(name string) (key, field vdl.Target, _ error
 		target, err := vdl.ReflectTarget(reflect.ValueOf(&t.Value.WireToNativeTypes))
 		return nil, target, err
 	default:
-		return nil, nil, fmt.Errorf("field %s not in struct vdltool.GoConfig", name)
+		return nil, nil, vdl.ErrFieldNoExist
 	}
 }
 func (t *GoConfigTarget) FinishField(_, _ vdl.Target) error {
@@ -1308,7 +1308,7 @@ func (t *GoConfigTarget) ZeroField(name string) error {
 		t.Value.WireToNativeTypes = map[string]GoType(nil)
 		return nil
 	default:
-		return fmt.Errorf("field %s not in struct vdltool.GoConfig", name)
+		return vdl.ErrFieldNoExist
 	}
 }
 func (t *GoConfigTarget) FinishFields(_ vdl.FieldsTarget) error {
@@ -1615,7 +1615,7 @@ func (t *JavaConfigTarget) StartField(name string) (key, field vdl.Target, _ err
 		target, err := vdl.ReflectTarget(reflect.ValueOf(&t.Value.WireTypeRenames))
 		return nil, target, err
 	default:
-		return nil, nil, fmt.Errorf("field %s not in struct vdltool.JavaConfig", name)
+		return nil, nil, vdl.ErrFieldNoExist
 	}
 }
 func (t *JavaConfigTarget) FinishField(_, _ vdl.Target) error {
@@ -1630,7 +1630,7 @@ func (t *JavaConfigTarget) ZeroField(name string) error {
 		t.Value.WireTypeRenames = map[string]string(nil)
 		return nil
 	default:
-		return fmt.Errorf("field %s not in struct vdltool.JavaConfig", name)
+		return vdl.ErrFieldNoExist
 	}
 }
 func (t *JavaConfigTarget) FinishFields(_ vdl.FieldsTarget) error {
@@ -1834,7 +1834,7 @@ func (t *JavascriptConfigTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, er
 func (t *JavascriptConfigTarget) StartField(name string) (key, field vdl.Target, _ error) {
 	switch name {
 	default:
-		return nil, nil, fmt.Errorf("field %s not in struct vdltool.JavascriptConfig", name)
+		return nil, nil, vdl.ErrFieldNoExist
 	}
 }
 func (t *JavascriptConfigTarget) FinishField(_, _ vdl.Target) error {
@@ -1843,7 +1843,7 @@ func (t *JavascriptConfigTarget) FinishField(_, _ vdl.Target) error {
 func (t *JavascriptConfigTarget) ZeroField(name string) error {
 	switch name {
 	default:
-		return fmt.Errorf("field %s not in struct vdltool.JavascriptConfig", name)
+		return vdl.ErrFieldNoExist
 	}
 }
 func (t *JavascriptConfigTarget) FinishFields(_ vdl.FieldsTarget) error {
@@ -2016,7 +2016,7 @@ func (t *SwiftConfigTarget) StartField(name string) (key, field vdl.Target, _ er
 		target, err := vdl.ReflectTarget(reflect.ValueOf(&t.Value.WireToNativeTypes))
 		return nil, target, err
 	default:
-		return nil, nil, fmt.Errorf("field %s not in struct vdltool.SwiftConfig", name)
+		return nil, nil, vdl.ErrFieldNoExist
 	}
 }
 func (t *SwiftConfigTarget) FinishField(_, _ vdl.Target) error {
@@ -2028,7 +2028,7 @@ func (t *SwiftConfigTarget) ZeroField(name string) error {
 		t.Value.WireToNativeTypes = map[string]string(nil)
 		return nil
 	default:
-		return fmt.Errorf("field %s not in struct vdltool.SwiftConfig", name)
+		return vdl.ErrFieldNoExist
 	}
 }
 func (t *SwiftConfigTarget) FinishFields(_ vdl.FieldsTarget) error {
@@ -2296,7 +2296,7 @@ func (t *ConfigTarget) StartField(name string) (key, field vdl.Target, _ error) 
 		target, err := vdl.ReflectTarget(reflect.ValueOf(&t.Value.Swift))
 		return nil, target, err
 	default:
-		return nil, nil, fmt.Errorf("field %s not in struct vdltool.Config", name)
+		return nil, nil, vdl.ErrFieldNoExist
 	}
 }
 func (t *ConfigTarget) FinishField(_, _ vdl.Target) error {
@@ -2320,7 +2320,7 @@ func (t *ConfigTarget) ZeroField(name string) error {
 		t.Value.Swift = SwiftConfig{}
 		return nil
 	default:
-		return fmt.Errorf("field %s not in struct vdltool.Config", name)
+		return vdl.ErrFieldNoExist
 	}
 }
 func (t *ConfigTarget) FinishFields(_ vdl.FieldsTarget) error {

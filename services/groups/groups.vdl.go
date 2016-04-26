@@ -129,7 +129,7 @@ func (t *GetRequestTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
 func (t *GetRequestTarget) StartField(name string) (key, field vdl.Target, _ error) {
 	switch name {
 	default:
-		return nil, nil, fmt.Errorf("field %s not in struct v.io/v23/services/groups.GetRequest", name)
+		return nil, nil, vdl.ErrFieldNoExist
 	}
 }
 func (t *GetRequestTarget) FinishField(_, _ vdl.Target) error {
@@ -138,7 +138,7 @@ func (t *GetRequestTarget) FinishField(_, _ vdl.Target) error {
 func (t *GetRequestTarget) ZeroField(name string) error {
 	switch name {
 	default:
-		return fmt.Errorf("field %s not in struct v.io/v23/services/groups.GetRequest", name)
+		return vdl.ErrFieldNoExist
 	}
 }
 func (t *GetRequestTarget) FinishFields(_ vdl.FieldsTarget) error {
@@ -269,7 +269,7 @@ func (t *GetResponseTarget) StartField(name string) (key, field vdl.Target, _ er
 		target, err := &t.entriesTarget, error(nil)
 		return nil, target, err
 	default:
-		return nil, nil, fmt.Errorf("field %s not in struct v.io/v23/services/groups.GetResponse", name)
+		return nil, nil, vdl.ErrFieldNoExist
 	}
 }
 func (t *GetResponseTarget) FinishField(_, _ vdl.Target) error {
@@ -281,7 +281,7 @@ func (t *GetResponseTarget) ZeroField(name string) error {
 		t.Value.Entries = map[BlessingPatternChunk]struct{}(nil)
 		return nil
 	default:
-		return fmt.Errorf("field %s not in struct v.io/v23/services/groups.GetResponse", name)
+		return vdl.ErrFieldNoExist
 	}
 }
 func (t *GetResponseTarget) FinishFields(_ vdl.FieldsTarget) error {
@@ -634,7 +634,7 @@ func (t *ApproximationTarget) StartField(name string) (key, field vdl.Target, _ 
 		target, err := &t.detailsTarget, error(nil)
 		return nil, target, err
 	default:
-		return nil, nil, fmt.Errorf("field %s not in struct v.io/v23/services/groups.Approximation", name)
+		return nil, nil, vdl.ErrFieldNoExist
 	}
 }
 func (t *ApproximationTarget) FinishField(_, _ vdl.Target) error {
@@ -649,7 +649,7 @@ func (t *ApproximationTarget) ZeroField(name string) error {
 		t.Value.Details = ""
 		return nil
 	default:
-		return fmt.Errorf("field %s not in struct v.io/v23/services/groups.Approximation", name)
+		return vdl.ErrFieldNoExist
 	}
 }
 func (t *ApproximationTarget) FinishFields(_ vdl.FieldsTarget) error {

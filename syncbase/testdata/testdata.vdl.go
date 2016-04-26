@@ -158,7 +158,7 @@ func (t *AddressInfoTarget) StartField(name string) (key, field vdl.Target, _ er
 		target, err := &t.zipTarget, error(nil)
 		return nil, target, err
 	default:
-		return nil, nil, fmt.Errorf("field %s not in struct v.io/v23/syncbase/testdata.AddressInfo", name)
+		return nil, nil, vdl.ErrFieldNoExist
 	}
 }
 func (t *AddressInfoTarget) FinishField(_, _ vdl.Target) error {
@@ -179,7 +179,7 @@ func (t *AddressInfoTarget) ZeroField(name string) error {
 		t.Value.Zip = ""
 		return nil
 	default:
-		return fmt.Errorf("field %s not in struct v.io/v23/syncbase/testdata.AddressInfo", name)
+		return vdl.ErrFieldNoExist
 	}
 }
 func (t *AddressInfoTarget) FinishFields(_ vdl.FieldsTarget) error {
@@ -613,7 +613,7 @@ func (t *EquifaxCreditReportTarget) StartField(name string) (key, field vdl.Targ
 		target, err := &t.ratingTarget, error(nil)
 		return nil, target, err
 	default:
-		return nil, nil, fmt.Errorf("field %s not in struct v.io/v23/syncbase/testdata.EquifaxCreditReport", name)
+		return nil, nil, vdl.ErrFieldNoExist
 	}
 }
 func (t *EquifaxCreditReportTarget) FinishField(_, _ vdl.Target) error {
@@ -625,7 +625,7 @@ func (t *EquifaxCreditReportTarget) ZeroField(name string) error {
 		t.Value.Rating = byte(0)
 		return nil
 	default:
-		return fmt.Errorf("field %s not in struct v.io/v23/syncbase/testdata.EquifaxCreditReport", name)
+		return vdl.ErrFieldNoExist
 	}
 }
 func (t *EquifaxCreditReportTarget) FinishFields(_ vdl.FieldsTarget) error {
@@ -762,7 +762,7 @@ func (t *ExperianCreditReportTarget) StartField(name string) (key, field vdl.Tar
 		target, err := &t.ratingTarget, error(nil)
 		return nil, target, err
 	default:
-		return nil, nil, fmt.Errorf("field %s not in struct v.io/v23/syncbase/testdata.ExperianCreditReport", name)
+		return nil, nil, vdl.ErrFieldNoExist
 	}
 }
 func (t *ExperianCreditReportTarget) FinishField(_, _ vdl.Target) error {
@@ -774,7 +774,7 @@ func (t *ExperianCreditReportTarget) ZeroField(name string) error {
 		t.Value.Rating = ExperianRatingGood
 		return nil
 	default:
-		return fmt.Errorf("field %s not in struct v.io/v23/syncbase/testdata.ExperianCreditReport", name)
+		return vdl.ErrFieldNoExist
 	}
 }
 func (t *ExperianCreditReportTarget) FinishFields(_ vdl.FieldsTarget) error {
@@ -896,7 +896,7 @@ func (t *TransUnionCreditReportTarget) StartField(name string) (key, field vdl.T
 		target, err := &t.ratingTarget, error(nil)
 		return nil, target, err
 	default:
-		return nil, nil, fmt.Errorf("field %s not in struct v.io/v23/syncbase/testdata.TransUnionCreditReport", name)
+		return nil, nil, vdl.ErrFieldNoExist
 	}
 }
 func (t *TransUnionCreditReportTarget) FinishField(_, _ vdl.Target) error {
@@ -908,7 +908,7 @@ func (t *TransUnionCreditReportTarget) ZeroField(name string) error {
 		t.Value.Rating = int16(0)
 		return nil
 	default:
-		return fmt.Errorf("field %s not in struct v.io/v23/syncbase/testdata.TransUnionCreditReport", name)
+		return vdl.ErrFieldNoExist
 	}
 }
 func (t *TransUnionCreditReportTarget) FinishFields(_ vdl.FieldsTarget) error {
@@ -1370,7 +1370,7 @@ func (t *CreditReportTarget) StartField(name string) (key, field vdl.Target, _ e
 		target, err := &t.reportTarget, error(nil)
 		return nil, target, err
 	default:
-		return nil, nil, fmt.Errorf("field %s not in struct v.io/v23/syncbase/testdata.CreditReport", name)
+		return nil, nil, vdl.ErrFieldNoExist
 	}
 }
 func (t *CreditReportTarget) FinishField(_, _ vdl.Target) error {
@@ -1385,7 +1385,7 @@ func (t *CreditReportTarget) ZeroField(name string) error {
 		t.Value.Report = AgencyReport(AgencyReportEquifaxReport{})
 		return nil
 	default:
-		return fmt.Errorf("field %s not in struct v.io/v23/syncbase/testdata.CreditReport", name)
+		return vdl.ErrFieldNoExist
 	}
 }
 func (t *CreditReportTarget) FinishFields(_ vdl.FieldsTarget) error {
@@ -1631,7 +1631,7 @@ func (t *CustomerTarget) StartField(name string) (key, field vdl.Target, _ error
 		target, err := &t.creditTarget, error(nil)
 		return nil, target, err
 	default:
-		return nil, nil, fmt.Errorf("field %s not in struct v.io/v23/syncbase/testdata.Customer", name)
+		return nil, nil, vdl.ErrFieldNoExist
 	}
 }
 func (t *CustomerTarget) FinishField(_, _ vdl.Target) error {
@@ -1657,7 +1657,7 @@ func (t *CustomerTarget) ZeroField(name string) error {
 		}
 		return nil
 	default:
-		return fmt.Errorf("field %s not in struct v.io/v23/syncbase/testdata.Customer", name)
+		return vdl.ErrFieldNoExist
 	}
 }
 func (t *CustomerTarget) FinishFields(_ vdl.FieldsTarget) error {
@@ -1992,7 +1992,7 @@ func (t *InvoiceTarget) StartField(name string) (key, field vdl.Target, _ error)
 		target, err := &t.shipToTarget, error(nil)
 		return nil, target, err
 	default:
-		return nil, nil, fmt.Errorf("field %s not in struct v.io/v23/syncbase/testdata.Invoice", name)
+		return nil, nil, vdl.ErrFieldNoExist
 	}
 }
 func (t *InvoiceTarget) FinishField(_, _ vdl.Target) error {
@@ -2016,7 +2016,7 @@ func (t *InvoiceTarget) ZeroField(name string) error {
 		t.Value.ShipTo = AddressInfo{}
 		return nil
 	default:
-		return fmt.Errorf("field %s not in struct v.io/v23/syncbase/testdata.Invoice", name)
+		return vdl.ErrFieldNoExist
 	}
 }
 func (t *InvoiceTarget) FinishFields(_ vdl.FieldsTarget) error {
@@ -2448,7 +2448,7 @@ func (t *NumbersTarget) StartField(name string) (key, field vdl.Target, _ error)
 		target, err := &t.f64Target, error(nil)
 		return nil, target, err
 	default:
-		return nil, nil, fmt.Errorf("field %s not in struct v.io/v23/syncbase/testdata.Numbers", name)
+		return nil, nil, vdl.ErrFieldNoExist
 	}
 }
 func (t *NumbersTarget) FinishField(_, _ vdl.Target) error {
@@ -2484,7 +2484,7 @@ func (t *NumbersTarget) ZeroField(name string) error {
 		t.Value.F64 = float64(0)
 		return nil
 	default:
-		return fmt.Errorf("field %s not in struct v.io/v23/syncbase/testdata.Numbers", name)
+		return vdl.ErrFieldNoExist
 	}
 }
 func (t *NumbersTarget) FinishFields(_ vdl.FieldsTarget) error {
@@ -3108,7 +3108,7 @@ func (t *BazTypeTarget) StartField(name string) (key, field vdl.Target, _ error)
 		target, err := &t.titleOrValueTarget, error(nil)
 		return nil, target, err
 	default:
-		return nil, nil, fmt.Errorf("field %s not in struct v.io/v23/syncbase/testdata.BazType", name)
+		return nil, nil, vdl.ErrFieldNoExist
 	}
 }
 func (t *BazTypeTarget) FinishField(_, _ vdl.Target) error {
@@ -3123,7 +3123,7 @@ func (t *BazTypeTarget) ZeroField(name string) error {
 		t.Value.TitleOrValue = TitleOrValueType(TitleOrValueTypeTitle{})
 		return nil
 	default:
-		return fmt.Errorf("field %s not in struct v.io/v23/syncbase/testdata.BazType", name)
+		return vdl.ErrFieldNoExist
 	}
 }
 func (t *BazTypeTarget) FinishFields(_ vdl.FieldsTarget) error {
@@ -3281,7 +3281,7 @@ func (t *BarTypeTarget) StartField(name string) (key, field vdl.Target, _ error)
 		target, err := &t.bazTarget, error(nil)
 		return nil, target, err
 	default:
-		return nil, nil, fmt.Errorf("field %s not in struct v.io/v23/syncbase/testdata.BarType", name)
+		return nil, nil, vdl.ErrFieldNoExist
 	}
 }
 func (t *BarTypeTarget) FinishField(_, _ vdl.Target) error {
@@ -3295,7 +3295,7 @@ func (t *BarTypeTarget) ZeroField(name string) error {
 		}
 		return nil
 	default:
-		return fmt.Errorf("field %s not in struct v.io/v23/syncbase/testdata.BarType", name)
+		return vdl.ErrFieldNoExist
 	}
 }
 func (t *BarTypeTarget) FinishFields(_ vdl.FieldsTarget) error {
@@ -3429,7 +3429,7 @@ func (t *FooTypeTarget) StartField(name string) (key, field vdl.Target, _ error)
 		target, err := &t.barTarget, error(nil)
 		return nil, target, err
 	default:
-		return nil, nil, fmt.Errorf("field %s not in struct v.io/v23/syncbase/testdata.FooType", name)
+		return nil, nil, vdl.ErrFieldNoExist
 	}
 }
 func (t *FooTypeTarget) FinishField(_, _ vdl.Target) error {
@@ -3445,7 +3445,7 @@ func (t *FooTypeTarget) ZeroField(name string) error {
 		}
 		return nil
 	default:
-		return fmt.Errorf("field %s not in struct v.io/v23/syncbase/testdata.FooType", name)
+		return vdl.ErrFieldNoExist
 	}
 }
 func (t *FooTypeTarget) FinishFields(_ vdl.FieldsTarget) error {
@@ -3840,7 +3840,7 @@ func (t *KeyIndexDataTarget) StartField(name string) (key, field vdl.Target, _ e
 		target, err := &t.sTarget, error(nil)
 		return nil, target, err
 	default:
-		return nil, nil, fmt.Errorf("field %s not in struct v.io/v23/syncbase/testdata.KeyIndexData", name)
+		return nil, nil, vdl.ErrFieldNoExist
 	}
 }
 func (t *KeyIndexDataTarget) FinishField(_, _ vdl.Target) error {
@@ -3861,7 +3861,7 @@ func (t *KeyIndexDataTarget) ZeroField(name string) error {
 		t.Value.S = map[string]struct{}(nil)
 		return nil
 	default:
-		return fmt.Errorf("field %s not in struct v.io/v23/syncbase/testdata.KeyIndexData", name)
+		return vdl.ErrFieldNoExist
 	}
 }
 func (t *KeyIndexDataTarget) FinishFields(_ vdl.FieldsTarget) error {
@@ -4325,7 +4325,7 @@ func (t *BigDataTarget) StartField(name string) (key, field vdl.Target, _ error)
 		target, err := &t.keyTarget, error(nil)
 		return nil, target, err
 	default:
-		return nil, nil, fmt.Errorf("field %s not in struct v.io/v23/syncbase/testdata.BigData", name)
+		return nil, nil, vdl.ErrFieldNoExist
 	}
 }
 func (t *BigDataTarget) FinishField(_, _ vdl.Target) error {
@@ -4337,7 +4337,7 @@ func (t *BigDataTarget) ZeroField(name string) error {
 		t.Value.Key = ""
 		return nil
 	default:
-		return fmt.Errorf("field %s not in struct v.io/v23/syncbase/testdata.BigData", name)
+		return vdl.ErrFieldNoExist
 	}
 }
 func (t *BigDataTarget) FinishFields(_ vdl.FieldsTarget) error {

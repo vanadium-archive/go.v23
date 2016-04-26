@@ -118,7 +118,7 @@ func (t *MediaInfoTarget) StartField(name string) (key, field vdl.Target, _ erro
 		target, err := &t.encodingTarget, error(nil)
 		return nil, target, err
 	default:
-		return nil, nil, fmt.Errorf("field %s not in struct v.io/v23/services/repository.MediaInfo", name)
+		return nil, nil, vdl.ErrFieldNoExist
 	}
 }
 func (t *MediaInfoTarget) FinishField(_, _ vdl.Target) error {
@@ -133,7 +133,7 @@ func (t *MediaInfoTarget) ZeroField(name string) error {
 		t.Value.Encoding = ""
 		return nil
 	default:
-		return fmt.Errorf("field %s not in struct v.io/v23/services/repository.MediaInfo", name)
+		return vdl.ErrFieldNoExist
 	}
 }
 func (t *MediaInfoTarget) FinishFields(_ vdl.FieldsTarget) error {

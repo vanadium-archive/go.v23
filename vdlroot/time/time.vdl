@@ -86,12 +86,8 @@ type Duration struct {
 // absolute Time, which automatically performs the sender and receiver
 // conversions from "now".
 type WireDeadline struct {
-	// FromNow represents the deadline as a duration from "now".
+	// FromNow represents the deadline as a duration from "now".  As a
+	// special-case, the 0 duration indicates that there is no deadline; i.e. the
+	// deadline is "infinite".
 	FromNow Duration
-	// NoDeadline indicates there is no deadline; the analogous sentry for the
-	// native Deadline is the zero Time.
-	//
-	// TODO(toddw): This should be HasDeadline, since the zero value should
-	// represent "there is no deadline" rather than "the deadline is 0".
-	NoDeadline bool
 }

@@ -48,17 +48,17 @@ func TestTimeToFromNative(t *testing.T) {
 	for _, test := range tests {
 		native := gotime.Now() // Start with an arbitrary value.
 		if err := TimeToNative(test.Wire, &native); err != nil {
-			t.Errorf("%v timeToNative failed: %v", test.Wire, err)
+			t.Errorf("%v TimeToNative failed: %v", test.Wire, err)
 		}
 		if got, want := native, test.Native; got != want {
-			t.Errorf("%v timeFromNative got %v, want %v", test.Wire, got, want)
+			t.Errorf("%v TimeFromNative got %v, want %v", test.Wire, got, want)
 		}
 		wire := Now() // Start with an arbitrary value.
 		if err := TimeFromNative(&wire, test.Native); err != nil {
-			t.Errorf("%v timeFromNative failed: %v", test.Wire, err)
+			t.Errorf("%v TimeFromNative failed: %v", test.Wire, err)
 		}
 		if got, want := wire, test.Wire.Normalize(); got != want {
-			t.Errorf("%v timeFromNative got %v, want %v", test.Wire, got, want)
+			t.Errorf("%v TimeFromNative got %v, want %v", test.Wire, got, want)
 		}
 	}
 }
@@ -202,18 +202,18 @@ func TestDeadline(t *testing.T) {
 		// Test conversion from wire to native.
 		var native Deadline
 		if err := WireDeadlineToNative(WireDeadline{FromNow: test}, &native); err != nil {
-			t.Errorf("%v wireDeadlineToNative failed: %v", test, err)
+			t.Errorf("%v WireDeadlineToNative failed: %v", test, err)
 		}
 		if got := native; got.Before(loT) || got.After(hiT) {
-			t.Errorf("%v wireDeadlineToNative got %v, want range [%v, %v]", test, got, loT, hiT)
+			t.Errorf("%v WireDeadlineToNative got %v, want range [%v, %v]", test, got, loT, hiT)
 		}
 		// Test conversion from native to wire.
 		var wire WireDeadline
 		if err := WireDeadlineFromNative(&wire, Deadline{now.Add(test)}); err != nil {
-			t.Errorf("%v wireDeadlineFromNative failed: %v", test, err)
+			t.Errorf("%v WireDeadlineFromNative failed: %v", test, err)
 		}
 		if got := wire.FromNow; got < loD || got > hiD {
-			t.Errorf("%v wireDeadlineFromNative got %v, want range [%v, %v]", test, got, loD, hiD)
+			t.Errorf("%v WireDeadlineFromNative got %v, want range [%v, %v]", test, got, loD, hiD)
 		}
 		// Test vdl.Convert from native to native type.
 		if err := vdl.Convert(&native, Deadline{now.Add(test)}); err != nil {
@@ -248,21 +248,37 @@ func TestNoDeadline(t *testing.T) {
 
 	// Test conversion from wire to native.
 	var native Deadline
-	if err := WireDeadlineToNative(WireDeadline{NoDeadline: true}, &native); err != nil {
-		t.Errorf("wireDeadlineToNative failed: %v", err)
+	if err := WireDeadlineToNative(WireDeadline{}, &native); err != nil {
+		t.Errorf("WireDeadlineToNative failed: %v", err)
 	}
 	if got := native; !got.IsZero() {
-		t.Errorf("wireDeadlineToNative got %v, want zero", got)
+		t.Errorf("WireDeadlineToNative got %v, want zero", got)
 	}
 	// Test conversion from native to wire.
 	var wire WireDeadline
 	if err := WireDeadlineFromNative(&wire, Deadline{}); err != nil {
-		t.Errorf("wireDeadlineFromNative failed: %v", err)
+		t.Errorf("WireDeadlineFromNative failed: %v", err)
 	}
-	if !wire.NoDeadline {
-		t.Errorf("wireDeadlineFromNative got %v, expected NoDeadline", wire)
+	if got, want := wire, (WireDeadline{}); got != want {
+		t.Errorf("WireDeadlineFromNative got %v, want %v", got, want)
 	}
-	if got, want := wire.FromNow, gotime.Duration(0); got != want {
-		t.Errorf("wireDeadlineFromNative got FromNow %v, want %v", got, want)
+}
+
+func TestZeroDeadlineFixup(t *testing.T) {
+	// A non-zero native deadline should never result in a zero wire deadline; the
+	// code changes the 0 to a 1.  Since the conversion uses time.Now(), we can't
+	// ensure the test hits this case.  So we just run it a few times and log when
+	// we think the 0-to-1 fixup has occured.  We add an offset on each iteration
+	// to increase the odds that we see the fixup in action.
+	var wire WireDeadline
+	for offset := gotime.Duration(0); offset < 100; offset += 10 {
+		if err := WireDeadlineFromNative(&wire, Deadline{gotime.Now().Add(offset)}); err != nil {
+			t.Errorf("WireDeadlineFromNative failed: %v", err)
+		}
+		if wire.FromNow == 1 {
+			t.Logf("WireDeadlineFromNative 0-to-1 fixup probably occurred")
+		} else {
+			t.Logf("WireDeadlineFromNative %v", wire)
+		}
 	}
 }

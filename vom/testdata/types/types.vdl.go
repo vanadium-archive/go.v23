@@ -234,7 +234,7 @@ func (t *TestCaseTarget) StartField(name string) (key, field vdl.Target, _ error
 		target, err := &t.hexValueTarget, error(nil)
 		return nil, target, err
 	default:
-		return nil, nil, fmt.Errorf("field %s not in struct v.io/v23/vom/testdata/types.TestCase", name)
+		return nil, nil, vdl.ErrFieldNoExist
 	}
 }
 func (t *TestCaseTarget) FinishField(_, _ vdl.Target) error {
@@ -264,7 +264,7 @@ func (t *TestCaseTarget) ZeroField(name string) error {
 		t.Value.HexValue = ""
 		return nil
 	default:
-		return fmt.Errorf("field %s not in struct v.io/v23/vom/testdata/types.TestCase", name)
+		return vdl.ErrFieldNoExist
 	}
 }
 func (t *TestCaseTarget) FinishFields(_ vdl.FieldsTarget) error {
@@ -636,7 +636,7 @@ func (t *ConvertGroupTarget) StartField(name string) (key, field vdl.Target, _ e
 		target, err := &t.valuesTarget, error(nil)
 		return nil, target, err
 	default:
-		return nil, nil, fmt.Errorf("field %s not in struct v.io/v23/vom/testdata/types.ConvertGroup", name)
+		return nil, nil, vdl.ErrFieldNoExist
 	}
 }
 func (t *ConvertGroupTarget) FinishField(_, _ vdl.Target) error {
@@ -654,7 +654,7 @@ func (t *ConvertGroupTarget) ZeroField(name string) error {
 		t.Value.Values = []*vdl.Value(nil)
 		return nil
 	default:
-		return fmt.Errorf("field %s not in struct v.io/v23/vom/testdata/types.ConvertGroup", name)
+		return vdl.ErrFieldNoExist
 	}
 }
 func (t *ConvertGroupTarget) FinishFields(_ vdl.FieldsTarget) error {
@@ -1107,7 +1107,7 @@ func (t *VomdataStructTarget) StartField(name string) (key, field vdl.Target, _ 
 		target, err := &t.convertDataTarget, error(nil)
 		return nil, target, err
 	default:
-		return nil, nil, fmt.Errorf("field %s not in struct v.io/v23/vom/testdata/types.VomdataStruct", name)
+		return nil, nil, vdl.ErrFieldNoExist
 	}
 }
 func (t *VomdataStructTarget) FinishField(_, _ vdl.Target) error {
@@ -1125,7 +1125,7 @@ func (t *VomdataStructTarget) ZeroField(name string) error {
 		t.Value.ConvertData = map[string][]ConvertGroup(nil)
 		return nil
 	default:
-		return fmt.Errorf("field %s not in struct v.io/v23/vom/testdata/types.VomdataStruct", name)
+		return vdl.ErrFieldNoExist
 	}
 }
 func (t *VomdataStructTarget) FinishFields(_ vdl.FieldsTarget) error {
@@ -3452,7 +3452,7 @@ func (t *NStructTarget) StartField(name string) (key, field vdl.Target, _ error)
 		target, err := &t.cTarget, error(nil)
 		return nil, target, err
 	default:
-		return nil, nil, fmt.Errorf("field %s not in struct v.io/v23/vom/testdata/types.NStruct", name)
+		return nil, nil, vdl.ErrFieldNoExist
 	}
 }
 func (t *NStructTarget) FinishField(_, _ vdl.Target) error {
@@ -3470,7 +3470,7 @@ func (t *NStructTarget) ZeroField(name string) error {
 		t.Value.C = int64(0)
 		return nil
 	default:
-		return fmt.Errorf("field %s not in struct v.io/v23/vom/testdata/types.NStruct", name)
+		return vdl.ErrFieldNoExist
 	}
 }
 func (t *NStructTarget) FinishFields(_ vdl.FieldsTarget) error {
@@ -4289,7 +4289,7 @@ func (t *MStructTarget) StartField(name string) (key, field vdl.Target, _ error)
 		target, err := vdl.ReflectTarget(reflect.ValueOf(&t.Value.F))
 		return nil, target, err
 	default:
-		return nil, nil, fmt.Errorf("field %s not in struct v.io/v23/vom/testdata/types.MStruct", name)
+		return nil, nil, vdl.ErrFieldNoExist
 	}
 }
 func (t *MStructTarget) FinishField(_, _ vdl.Target) error {
@@ -4316,7 +4316,7 @@ func (t *MStructTarget) ZeroField(name string) error {
 		t.Value.F = vdl.ZeroValue(vdl.AnyType)
 		return nil
 	default:
-		return fmt.Errorf("field %s not in struct v.io/v23/vom/testdata/types.MStruct", name)
+		return vdl.ErrFieldNoExist
 	}
 }
 func (t *MStructTarget) FinishFields(_ vdl.FieldsTarget) error {
@@ -5902,7 +5902,7 @@ func (t *RecStructTarget) StartField(name string) (key, field vdl.Target, _ erro
 		target, err := &__VDLTarget8_optional{Value: &t.Value.A}, error(nil)
 		return nil, target, err
 	default:
-		return nil, nil, fmt.Errorf("field %s not in struct v.io/v23/vom/testdata/types.RecStruct", name)
+		return nil, nil, vdl.ErrFieldNoExist
 	}
 }
 func (t *RecStructTarget) FinishField(_, _ vdl.Target) error {
@@ -5914,7 +5914,7 @@ func (t *RecStructTarget) ZeroField(name string) error {
 		t.Value.A = (*RecStruct)(nil)
 		return nil
 	default:
-		return fmt.Errorf("field %s not in struct v.io/v23/vom/testdata/types.RecStruct", name)
+		return vdl.ErrFieldNoExist
 	}
 }
 func (t *RecStructTarget) FinishFields(_ vdl.FieldsTarget) error {
@@ -6177,7 +6177,7 @@ func (t *Rec1234Target) StartField(name string) (key, field vdl.Target, _ error)
 		target, err := &t.r4Target, error(nil)
 		return nil, target, err
 	default:
-		return nil, nil, fmt.Errorf("field %s not in struct v.io/v23/vom/testdata/types.Rec1234", name)
+		return nil, nil, vdl.ErrFieldNoExist
 	}
 }
 func (t *Rec1234Target) FinishField(_, _ vdl.Target) error {
@@ -6198,7 +6198,7 @@ func (t *Rec1234Target) ZeroField(name string) error {
 		t.Value.R4 = Rec4(nil)
 		return nil
 	default:
-		return fmt.Errorf("field %s not in struct v.io/v23/vom/testdata/types.Rec1234", name)
+		return vdl.ErrFieldNoExist
 	}
 }
 func (t *Rec1234Target) FinishFields(_ vdl.FieldsTarget) error {
@@ -6434,7 +6434,7 @@ func (t *Rec1234ATarget) StartField(name string) (key, field vdl.Target, _ error
 		target, err := &t.rec1234Target, error(nil)
 		return nil, target, err
 	default:
-		return nil, nil, fmt.Errorf("field %s not in struct v.io/v23/vom/testdata/types.Rec1234A", name)
+		return nil, nil, vdl.ErrFieldNoExist
 	}
 }
 func (t *Rec1234ATarget) FinishField(_, _ vdl.Target) error {
@@ -6449,7 +6449,7 @@ func (t *Rec1234ATarget) ZeroField(name string) error {
 		t.Value.Rec1234 = []Rec1234(nil)
 		return nil
 	default:
-		return fmt.Errorf("field %s not in struct v.io/v23/vom/testdata/types.Rec1234A", name)
+		return vdl.ErrFieldNoExist
 	}
 }
 func (t *Rec1234ATarget) FinishFields(_ vdl.FieldsTarget) error {
@@ -6818,7 +6818,7 @@ func (t *Rec1234BTarget) StartField(name string) (key, field vdl.Target, _ error
 		target, err := &t.rec1234Target, error(nil)
 		return nil, target, err
 	default:
-		return nil, nil, fmt.Errorf("field %s not in struct v.io/v23/vom/testdata/types.Rec1234B", name)
+		return nil, nil, vdl.ErrFieldNoExist
 	}
 }
 func (t *Rec1234BTarget) FinishField(_, _ vdl.Target) error {
@@ -6833,7 +6833,7 @@ func (t *Rec1234BTarget) ZeroField(name string) error {
 		t.Value.Rec1234 = []Rec1234(nil)
 		return nil
 	default:
-		return fmt.Errorf("field %s not in struct v.io/v23/vom/testdata/types.Rec1234B", name)
+		return vdl.ErrFieldNoExist
 	}
 }
 func (t *Rec1234BTarget) FinishFields(_ vdl.FieldsTarget) error {
@@ -7101,7 +7101,7 @@ func (t *Rec1234AllTarget) StartField(name string) (key, field vdl.Target, _ err
 		target, err := &t.bTarget, error(nil)
 		return nil, target, err
 	default:
-		return nil, nil, fmt.Errorf("field %s not in struct v.io/v23/vom/testdata/types.Rec1234All", name)
+		return nil, nil, vdl.ErrFieldNoExist
 	}
 }
 func (t *Rec1234AllTarget) FinishField(_, _ vdl.Target) error {
@@ -7116,7 +7116,7 @@ func (t *Rec1234AllTarget) ZeroField(name string) error {
 		t.Value.B = Rec1234B{}
 		return nil
 	default:
-		return fmt.Errorf("field %s not in struct v.io/v23/vom/testdata/types.Rec1234All", name)
+		return vdl.ErrFieldNoExist
 	}
 }
 func (t *Rec1234AllTarget) FinishFields(_ vdl.FieldsTarget) error {
@@ -7682,7 +7682,7 @@ func (t *AbcStructTarget) StartField(name string) (key, field vdl.Target, _ erro
 		target, err := &t.cTarget, error(nil)
 		return nil, target, err
 	default:
-		return nil, nil, fmt.Errorf("field %s not in struct v.io/v23/vom/testdata/types.AbcStruct", name)
+		return nil, nil, vdl.ErrFieldNoExist
 	}
 }
 func (t *AbcStructTarget) FinishField(_, _ vdl.Target) error {
@@ -7700,7 +7700,7 @@ func (t *AbcStructTarget) ZeroField(name string) error {
 		t.Value.C = int64(0)
 		return nil
 	default:
-		return fmt.Errorf("field %s not in struct v.io/v23/vom/testdata/types.AbcStruct", name)
+		return vdl.ErrFieldNoExist
 	}
 }
 func (t *AbcStructTarget) FinishFields(_ vdl.FieldsTarget) error {
@@ -7939,7 +7939,7 @@ func (t *AdeStructTarget) StartField(name string) (key, field vdl.Target, _ erro
 		target, err := &t.eTarget, error(nil)
 		return nil, target, err
 	default:
-		return nil, nil, fmt.Errorf("field %s not in struct v.io/v23/vom/testdata/types.AdeStruct", name)
+		return nil, nil, vdl.ErrFieldNoExist
 	}
 }
 func (t *AdeStructTarget) FinishField(_, _ vdl.Target) error {
@@ -7957,7 +7957,7 @@ func (t *AdeStructTarget) ZeroField(name string) error {
 		t.Value.E = vdl.AnyType
 		return nil
 	default:
-		return fmt.Errorf("field %s not in struct v.io/v23/vom/testdata/types.AdeStruct", name)
+		return vdl.ErrFieldNoExist
 	}
 }
 func (t *AdeStructTarget) FinishFields(_ vdl.FieldsTarget) error {
@@ -8187,7 +8187,7 @@ func (t *XyzStructTarget) StartField(name string) (key, field vdl.Target, _ erro
 		target, err := &t.zTarget, error(nil)
 		return nil, target, err
 	default:
-		return nil, nil, fmt.Errorf("field %s not in struct v.io/v23/vom/testdata/types.XyzStruct", name)
+		return nil, nil, vdl.ErrFieldNoExist
 	}
 }
 func (t *XyzStructTarget) FinishField(_, _ vdl.Target) error {
@@ -8205,7 +8205,7 @@ func (t *XyzStructTarget) ZeroField(name string) error {
 		t.Value.Z = ""
 		return nil
 	default:
-		return fmt.Errorf("field %s not in struct v.io/v23/vom/testdata/types.XyzStruct", name)
+		return vdl.ErrFieldNoExist
 	}
 }
 func (t *XyzStructTarget) FinishFields(_ vdl.FieldsTarget) error {
@@ -8404,7 +8404,7 @@ func (t *YzStructTarget) StartField(name string) (key, field vdl.Target, _ error
 		target, err := &t.zTarget, error(nil)
 		return nil, target, err
 	default:
-		return nil, nil, fmt.Errorf("field %s not in struct v.io/v23/vom/testdata/types.YzStruct", name)
+		return nil, nil, vdl.ErrFieldNoExist
 	}
 }
 func (t *YzStructTarget) FinishField(_, _ vdl.Target) error {
@@ -8419,7 +8419,7 @@ func (t *YzStructTarget) ZeroField(name string) error {
 		t.Value.Z = NString("")
 		return nil
 	default:
-		return fmt.Errorf("field %s not in struct v.io/v23/vom/testdata/types.YzStruct", name)
+		return vdl.ErrFieldNoExist
 	}
 }
 func (t *YzStructTarget) FinishFields(_ vdl.FieldsTarget) error {
@@ -8553,7 +8553,7 @@ func (t *ZStructTarget) StartField(name string) (key, field vdl.Target, _ error)
 		target, err := &t.zTarget, error(nil)
 		return nil, target, err
 	default:
-		return nil, nil, fmt.Errorf("field %s not in struct v.io/v23/vom/testdata/types.ZStruct", name)
+		return nil, nil, vdl.ErrFieldNoExist
 	}
 }
 func (t *ZStructTarget) FinishField(_, _ vdl.Target) error {
@@ -8565,7 +8565,7 @@ func (t *ZStructTarget) ZeroField(name string) error {
 		t.Value.Z = ""
 		return nil
 	default:
-		return fmt.Errorf("field %s not in struct v.io/v23/vom/testdata/types.ZStruct", name)
+		return vdl.ErrFieldNoExist
 	}
 }
 func (t *ZStructTarget) FinishFields(_ vdl.FieldsTarget) error {
@@ -8725,7 +8725,7 @@ func (t *MapOnlyStructTarget) StartField(name string) (key, field vdl.Target, _ 
 		target, err := &t.key2Target, error(nil)
 		return nil, target, err
 	default:
-		return nil, nil, fmt.Errorf("field %s not in struct v.io/v23/vom/testdata/types.MapOnlyStruct", name)
+		return nil, nil, vdl.ErrFieldNoExist
 	}
 }
 func (t *MapOnlyStructTarget) FinishField(_, _ vdl.Target) error {
@@ -8740,7 +8740,7 @@ func (t *MapOnlyStructTarget) ZeroField(name string) error {
 		t.Value.Key2 = uint32(0)
 		return nil
 	default:
-		return fmt.Errorf("field %s not in struct v.io/v23/vom/testdata/types.MapOnlyStruct", name)
+		return vdl.ErrFieldNoExist
 	}
 }
 func (t *MapOnlyStructTarget) FinishFields(_ vdl.FieldsTarget) error {
@@ -9126,7 +9126,7 @@ func (t *MapSetStructTarget) StartField(name string) (key, field vdl.Target, _ e
 		target, err := &t.eelTarget, error(nil)
 		return nil, target, err
 	default:
-		return nil, nil, fmt.Errorf("field %s not in struct v.io/v23/vom/testdata/types.MapSetStruct", name)
+		return nil, nil, vdl.ErrFieldNoExist
 	}
 }
 func (t *MapSetStructTarget) FinishField(_, _ vdl.Target) error {
@@ -9144,7 +9144,7 @@ func (t *MapSetStructTarget) ZeroField(name string) error {
 		t.Value.Eel = false
 		return nil
 	default:
-		return fmt.Errorf("field %s not in struct v.io/v23/vom/testdata/types.MapSetStruct", name)
+		return vdl.ErrFieldNoExist
 	}
 }
 func (t *MapSetStructTarget) FinishFields(_ vdl.FieldsTarget) error {
@@ -11983,7 +11983,7 @@ func (t *StructAnyTarget) StartField(name string) (key, field vdl.Target, _ erro
 		target, err := vdl.ReflectTarget(reflect.ValueOf(&t.Value.Any))
 		return nil, target, err
 	default:
-		return nil, nil, fmt.Errorf("field %s not in struct v.io/v23/vom/testdata/types.StructAny", name)
+		return nil, nil, vdl.ErrFieldNoExist
 	}
 }
 func (t *StructAnyTarget) FinishField(_, _ vdl.Target) error {
@@ -11995,7 +11995,7 @@ func (t *StructAnyTarget) ZeroField(name string) error {
 		t.Value.Any = vdl.ZeroValue(vdl.AnyType)
 		return nil
 	default:
-		return fmt.Errorf("field %s not in struct v.io/v23/vom/testdata/types.StructAny", name)
+		return vdl.ErrFieldNoExist
 	}
 }
 func (t *StructAnyTarget) FinishFields(_ vdl.FieldsTarget) error {
@@ -12150,7 +12150,7 @@ func (t *StructMapTarget) StartField(name string) (key, field vdl.Target, _ erro
 		target, err := &t.mapTarget, error(nil)
 		return nil, target, err
 	default:
-		return nil, nil, fmt.Errorf("field %s not in struct v.io/v23/vom/testdata/types.StructMap", name)
+		return nil, nil, vdl.ErrFieldNoExist
 	}
 }
 func (t *StructMapTarget) FinishField(_, _ vdl.Target) error {
@@ -12162,7 +12162,7 @@ func (t *StructMapTarget) ZeroField(name string) error {
 		t.Value.Map = map[int64]int64(nil)
 		return nil
 	default:
-		return fmt.Errorf("field %s not in struct v.io/v23/vom/testdata/types.StructMap", name)
+		return vdl.ErrFieldNoExist
 	}
 }
 func (t *StructMapTarget) FinishFields(_ vdl.FieldsTarget) error {
@@ -12980,7 +12980,7 @@ func (t *StructManyTypesTarget) StartField(name string) (key, field vdl.Target, 
 		target, err := &t.typeObjectTarget, error(nil)
 		return nil, target, err
 	default:
-		return nil, nil, fmt.Errorf("field %s not in struct v.io/v23/vom/testdata/types.StructManyTypes", name)
+		return nil, nil, vdl.ErrFieldNoExist
 	}
 }
 func (t *StructManyTypesTarget) FinishField(_, _ vdl.Target) error {
@@ -13055,7 +13055,7 @@ func (t *StructManyTypesTarget) ZeroField(name string) error {
 		t.Value.TypeObject = vdl.AnyType
 		return nil
 	default:
-		return fmt.Errorf("field %s not in struct v.io/v23/vom/testdata/types.StructManyTypes", name)
+		return vdl.ErrFieldNoExist
 	}
 }
 func (t *StructManyTypesTarget) FinishFields(_ vdl.FieldsTarget) error {
@@ -13822,7 +13822,7 @@ func (t *LargeMessageTypeTarget) StartField(name string) (key, field vdl.Target,
 		target, err := &__VDLTarget13_optional{Value: &t.Value.Next}, error(nil)
 		return nil, target, err
 	default:
-		return nil, nil, fmt.Errorf("field %s not in struct v.io/v23/vom/testdata/types.LargeMessageType", name)
+		return nil, nil, vdl.ErrFieldNoExist
 	}
 }
 func (t *LargeMessageTypeTarget) FinishField(_, _ vdl.Target) error {
@@ -13837,7 +13837,7 @@ func (t *LargeMessageTypeTarget) ZeroField(name string) error {
 		t.Value.Next = (*LargeMessageType)(nil)
 		return nil
 	default:
-		return fmt.Errorf("field %s not in struct v.io/v23/vom/testdata/types.LargeMessageType", name)
+		return vdl.ErrFieldNoExist
 	}
 }
 func (t *LargeMessageTypeTarget) FinishFields(_ vdl.FieldsTarget) error {
@@ -14063,7 +14063,7 @@ func (t *LargeAnyMessageTypeTarget) StartField(name string) (key, field vdl.Targ
 		target, err := &__VDLTarget14_optional{Value: &t.Value.Next}, error(nil)
 		return nil, target, err
 	default:
-		return nil, nil, fmt.Errorf("field %s not in struct v.io/v23/vom/testdata/types.LargeAnyMessageType", name)
+		return nil, nil, vdl.ErrFieldNoExist
 	}
 }
 func (t *LargeAnyMessageTypeTarget) FinishField(_, _ vdl.Target) error {
@@ -14078,7 +14078,7 @@ func (t *LargeAnyMessageTypeTarget) ZeroField(name string) error {
 		t.Value.Next = (*LargeAnyMessageType)(nil)
 		return nil
 	default:
-		return fmt.Errorf("field %s not in struct v.io/v23/vom/testdata/types.LargeAnyMessageType", name)
+		return vdl.ErrFieldNoExist
 	}
 }
 func (t *LargeAnyMessageTypeTarget) FinishFields(_ vdl.FieldsTarget) error {

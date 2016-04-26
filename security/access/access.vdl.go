@@ -266,7 +266,7 @@ func (t *AccessListTarget) StartField(name string) (key, field vdl.Target, _ err
 		target, err := &t.notInTarget, error(nil)
 		return nil, target, err
 	default:
-		return nil, nil, fmt.Errorf("field %s not in struct v.io/v23/security/access.AccessList", name)
+		return nil, nil, vdl.ErrFieldNoExist
 	}
 }
 func (t *AccessListTarget) FinishField(_, _ vdl.Target) error {
@@ -281,7 +281,7 @@ func (t *AccessListTarget) ZeroField(name string) error {
 		t.Value.NotIn = []string(nil)
 		return nil
 	default:
-		return fmt.Errorf("field %s not in struct v.io/v23/security/access.AccessList", name)
+		return vdl.ErrFieldNoExist
 	}
 }
 func (t *AccessListTarget) FinishFields(_ vdl.FieldsTarget) error {

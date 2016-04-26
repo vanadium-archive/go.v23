@@ -108,7 +108,7 @@ func (t *Complex64Target) StartField(name string) (key, field vdl.Target, _ erro
 		target, err := &t.imagTarget, error(nil)
 		return nil, target, err
 	default:
-		return nil, nil, fmt.Errorf("field %s not in struct math.Complex64", name)
+		return nil, nil, vdl.ErrFieldNoExist
 	}
 }
 func (t *Complex64Target) FinishField(_, _ vdl.Target) error {
@@ -123,7 +123,7 @@ func (t *Complex64Target) ZeroField(name string) error {
 		t.wireValue.Imag = float32(0)
 		return nil
 	default:
-		return fmt.Errorf("field %s not in struct math.Complex64", name)
+		return vdl.ErrFieldNoExist
 	}
 }
 func (t *Complex64Target) FinishFields(_ vdl.FieldsTarget) error {
@@ -315,7 +315,7 @@ func (t *Complex128Target) StartField(name string) (key, field vdl.Target, _ err
 		target, err := &t.imagTarget, error(nil)
 		return nil, target, err
 	default:
-		return nil, nil, fmt.Errorf("field %s not in struct math.Complex128", name)
+		return nil, nil, vdl.ErrFieldNoExist
 	}
 }
 func (t *Complex128Target) FinishField(_, _ vdl.Target) error {
@@ -330,7 +330,7 @@ func (t *Complex128Target) ZeroField(name string) error {
 		t.wireValue.Imag = float64(0)
 		return nil
 	default:
-		return fmt.Errorf("field %s not in struct math.Complex128", name)
+		return vdl.ErrFieldNoExist
 	}
 }
 func (t *Complex128Target) FinishFields(_ vdl.FieldsTarget) error {

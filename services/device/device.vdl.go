@@ -551,7 +551,7 @@ func (t *InstanceStatusTarget) StartField(name string) (key, field vdl.Target, _
 		target, err := &t.versionTarget, error(nil)
 		return nil, target, err
 	default:
-		return nil, nil, fmt.Errorf("field %s not in struct v.io/v23/services/device.InstanceStatus", name)
+		return nil, nil, vdl.ErrFieldNoExist
 	}
 }
 func (t *InstanceStatusTarget) FinishField(_, _ vdl.Target) error {
@@ -566,7 +566,7 @@ func (t *InstanceStatusTarget) ZeroField(name string) error {
 		t.Value.Version = ""
 		return nil
 	default:
-		return fmt.Errorf("field %s not in struct v.io/v23/services/device.InstanceStatus", name)
+		return vdl.ErrFieldNoExist
 	}
 }
 func (t *InstanceStatusTarget) FinishFields(_ vdl.FieldsTarget) error {
@@ -741,7 +741,7 @@ func (t *InstallationStatusTarget) StartField(name string) (key, field vdl.Targe
 		target, err := &t.versionTarget, error(nil)
 		return nil, target, err
 	default:
-		return nil, nil, fmt.Errorf("field %s not in struct v.io/v23/services/device.InstallationStatus", name)
+		return nil, nil, vdl.ErrFieldNoExist
 	}
 }
 func (t *InstallationStatusTarget) FinishField(_, _ vdl.Target) error {
@@ -756,7 +756,7 @@ func (t *InstallationStatusTarget) ZeroField(name string) error {
 		t.Value.Version = ""
 		return nil
 	default:
-		return fmt.Errorf("field %s not in struct v.io/v23/services/device.InstallationStatus", name)
+		return vdl.ErrFieldNoExist
 	}
 }
 func (t *InstallationStatusTarget) FinishFields(_ vdl.FieldsTarget) error {
@@ -931,7 +931,7 @@ func (t *DeviceStatusTarget) StartField(name string) (key, field vdl.Target, _ e
 		target, err := &t.versionTarget, error(nil)
 		return nil, target, err
 	default:
-		return nil, nil, fmt.Errorf("field %s not in struct v.io/v23/services/device.DeviceStatus", name)
+		return nil, nil, vdl.ErrFieldNoExist
 	}
 }
 func (t *DeviceStatusTarget) FinishField(_, _ vdl.Target) error {
@@ -946,7 +946,7 @@ func (t *DeviceStatusTarget) ZeroField(name string) error {
 		t.Value.Version = ""
 		return nil
 	default:
-		return fmt.Errorf("field %s not in struct v.io/v23/services/device.DeviceStatus", name)
+		return vdl.ErrFieldNoExist
 	}
 }
 func (t *DeviceStatusTarget) FinishFields(_ vdl.FieldsTarget) error {
@@ -1768,7 +1768,7 @@ func (t *DescriptionTarget) StartField(name string) (key, field vdl.Target, _ er
 		target, err := &t.profilesTarget, error(nil)
 		return nil, target, err
 	default:
-		return nil, nil, fmt.Errorf("field %s not in struct v.io/v23/services/device.Description", name)
+		return nil, nil, vdl.ErrFieldNoExist
 	}
 }
 func (t *DescriptionTarget) FinishField(_, _ vdl.Target) error {
@@ -1780,7 +1780,7 @@ func (t *DescriptionTarget) ZeroField(name string) error {
 		t.Value.Profiles = map[string]struct{}(nil)
 		return nil
 	default:
-		return fmt.Errorf("field %s not in struct v.io/v23/services/device.Description", name)
+		return vdl.ErrFieldNoExist
 	}
 }
 func (t *DescriptionTarget) FinishFields(_ vdl.FieldsTarget) error {
@@ -2033,7 +2033,7 @@ func (t *AssociationTarget) StartField(name string) (key, field vdl.Target, _ er
 		target, err := &t.accountNameTarget, error(nil)
 		return nil, target, err
 	default:
-		return nil, nil, fmt.Errorf("field %s not in struct v.io/v23/services/device.Association", name)
+		return nil, nil, vdl.ErrFieldNoExist
 	}
 }
 func (t *AssociationTarget) FinishField(_, _ vdl.Target) error {
@@ -2048,7 +2048,7 @@ func (t *AssociationTarget) ZeroField(name string) error {
 		t.Value.AccountName = ""
 		return nil
 	default:
-		return fmt.Errorf("field %s not in struct v.io/v23/services/device.Association", name)
+		return vdl.ErrFieldNoExist
 	}
 }
 func (t *AssociationTarget) FinishFields(_ vdl.FieldsTarget) error {

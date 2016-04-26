@@ -185,7 +185,7 @@ func (t *CaveatTarget) StartField(name string) (key, field vdl.Target, _ error) 
 		target, err := &t.paramVomTarget, error(nil)
 		return nil, target, err
 	default:
-		return nil, nil, fmt.Errorf("field %s not in struct v.io/v23/security.Caveat", name)
+		return nil, nil, vdl.ErrFieldNoExist
 	}
 }
 func (t *CaveatTarget) FinishField(_, _ vdl.Target) error {
@@ -200,7 +200,7 @@ func (t *CaveatTarget) ZeroField(name string) error {
 		t.Value.ParamVom = []byte(nil)
 		return nil
 	default:
-		return fmt.Errorf("field %s not in struct v.io/v23/security.Caveat", name)
+		return vdl.ErrFieldNoExist
 	}
 }
 func (t *CaveatTarget) FinishFields(_ vdl.FieldsTarget) error {
@@ -407,7 +407,7 @@ func (t *ThirdPartyRequirementsTarget) StartField(name string) (key, field vdl.T
 		target, err := &t.reportArgumentsTarget, error(nil)
 		return nil, target, err
 	default:
-		return nil, nil, fmt.Errorf("field %s not in struct v.io/v23/security.ThirdPartyRequirements", name)
+		return nil, nil, vdl.ErrFieldNoExist
 	}
 }
 func (t *ThirdPartyRequirementsTarget) FinishField(_, _ vdl.Target) error {
@@ -425,7 +425,7 @@ func (t *ThirdPartyRequirementsTarget) ZeroField(name string) error {
 		t.Value.ReportArguments = false
 		return nil
 	default:
-		return fmt.Errorf("field %s not in struct v.io/v23/security.ThirdPartyRequirements", name)
+		return vdl.ErrFieldNoExist
 	}
 }
 func (t *ThirdPartyRequirementsTarget) FinishFields(_ vdl.FieldsTarget) error {
@@ -759,7 +759,7 @@ func (t *publicKeyThirdPartyCaveatParamTarget) StartField(name string) (key, fie
 		target, err := &t.dischargerRequirementsTarget, error(nil)
 		return nil, target, err
 	default:
-		return nil, nil, fmt.Errorf("field %s not in struct v.io/v23/security.publicKeyThirdPartyCaveatParam", name)
+		return nil, nil, vdl.ErrFieldNoExist
 	}
 }
 func (t *publicKeyThirdPartyCaveatParamTarget) FinishField(_, _ vdl.Target) error {
@@ -783,7 +783,7 @@ func (t *publicKeyThirdPartyCaveatParamTarget) ZeroField(name string) error {
 		t.Value.DischargerRequirements = ThirdPartyRequirements{}
 		return nil
 	default:
-		return fmt.Errorf("field %s not in struct v.io/v23/security.publicKeyThirdPartyCaveatParam", name)
+		return vdl.ErrFieldNoExist
 	}
 }
 func (t *publicKeyThirdPartyCaveatParamTarget) FinishFields(_ vdl.FieldsTarget) error {
@@ -1229,7 +1229,7 @@ func (t *SignatureTarget) StartField(name string) (key, field vdl.Target, _ erro
 		target, err := &t.sTarget, error(nil)
 		return nil, target, err
 	default:
-		return nil, nil, fmt.Errorf("field %s not in struct v.io/v23/security.Signature", name)
+		return nil, nil, vdl.ErrFieldNoExist
 	}
 }
 func (t *SignatureTarget) FinishField(_, _ vdl.Target) error {
@@ -1250,7 +1250,7 @@ func (t *SignatureTarget) ZeroField(name string) error {
 		t.Value.S = []byte(nil)
 		return nil
 	default:
-		return fmt.Errorf("field %s not in struct v.io/v23/security.Signature", name)
+		return vdl.ErrFieldNoExist
 	}
 }
 func (t *SignatureTarget) FinishFields(_ vdl.FieldsTarget) error {
@@ -1553,7 +1553,7 @@ func (t *PublicKeyDischargeTarget) StartField(name string) (key, field vdl.Targe
 		target, err := &t.signatureTarget, error(nil)
 		return nil, target, err
 	default:
-		return nil, nil, fmt.Errorf("field %s not in struct v.io/v23/security.PublicKeyDischarge", name)
+		return nil, nil, vdl.ErrFieldNoExist
 	}
 }
 func (t *PublicKeyDischargeTarget) FinishField(_, _ vdl.Target) error {
@@ -1571,7 +1571,7 @@ func (t *PublicKeyDischargeTarget) ZeroField(name string) error {
 		t.Value.Signature = Signature{}
 		return nil
 	default:
-		return fmt.Errorf("field %s not in struct v.io/v23/security.PublicKeyDischarge", name)
+		return vdl.ErrFieldNoExist
 	}
 }
 func (t *PublicKeyDischargeTarget) FinishFields(_ vdl.FieldsTarget) error {
@@ -1913,7 +1913,7 @@ func (t *DischargeImpetusTarget) StartField(name string) (key, field vdl.Target,
 		target, err := &t.argumentsTarget, error(nil)
 		return nil, target, err
 	default:
-		return nil, nil, fmt.Errorf("field %s not in struct v.io/v23/security.DischargeImpetus", name)
+		return nil, nil, vdl.ErrFieldNoExist
 	}
 }
 func (t *DischargeImpetusTarget) FinishField(_, _ vdl.Target) error {
@@ -1931,7 +1931,7 @@ func (t *DischargeImpetusTarget) ZeroField(name string) error {
 		t.Value.Arguments = []*vom.RawBytes(nil)
 		return nil
 	default:
-		return fmt.Errorf("field %s not in struct v.io/v23/security.DischargeImpetus", name)
+		return vdl.ErrFieldNoExist
 	}
 }
 func (t *DischargeImpetusTarget) FinishFields(_ vdl.FieldsTarget) error {
@@ -2393,7 +2393,7 @@ func (t *CertificateTarget) StartField(name string) (key, field vdl.Target, _ er
 		target, err := &t.signatureTarget, error(nil)
 		return nil, target, err
 	default:
-		return nil, nil, fmt.Errorf("field %s not in struct v.io/v23/security.Certificate", name)
+		return nil, nil, vdl.ErrFieldNoExist
 	}
 }
 func (t *CertificateTarget) FinishField(_, _ vdl.Target) error {
@@ -2414,7 +2414,7 @@ func (t *CertificateTarget) ZeroField(name string) error {
 		t.Value.Signature = Signature{}
 		return nil
 	default:
-		return fmt.Errorf("field %s not in struct v.io/v23/security.Certificate", name)
+		return vdl.ErrFieldNoExist
 	}
 }
 func (t *CertificateTarget) FinishFields(_ vdl.FieldsTarget) error {
@@ -2645,7 +2645,7 @@ func (t *CaveatDescriptorTarget) StartField(name string) (key, field vdl.Target,
 		target, err := &t.paramTypeTarget, error(nil)
 		return nil, target, err
 	default:
-		return nil, nil, fmt.Errorf("field %s not in struct v.io/v23/security.CaveatDescriptor", name)
+		return nil, nil, vdl.ErrFieldNoExist
 	}
 }
 func (t *CaveatDescriptorTarget) FinishField(_, _ vdl.Target) error {
@@ -2660,7 +2660,7 @@ func (t *CaveatDescriptorTarget) ZeroField(name string) error {
 		t.Value.ParamType = vdl.AnyType
 		return nil
 	default:
-		return fmt.Errorf("field %s not in struct v.io/v23/security.CaveatDescriptor", name)
+		return vdl.ErrFieldNoExist
 	}
 }
 func (t *CaveatDescriptorTarget) FinishFields(_ vdl.FieldsTarget) error {
@@ -2858,7 +2858,7 @@ func (t *WireBlessingsTarget) StartField(name string) (key, field vdl.Target, _ 
 		target, err := &t.certificateChainsTarget, error(nil)
 		return nil, target, err
 	default:
-		return nil, nil, fmt.Errorf("field %s not in struct v.io/v23/security.WireBlessings", name)
+		return nil, nil, vdl.ErrFieldNoExist
 	}
 }
 func (t *WireBlessingsTarget) FinishField(_, _ vdl.Target) error {
@@ -2870,7 +2870,7 @@ func (t *WireBlessingsTarget) ZeroField(name string) error {
 		t.wireValue.CertificateChains = [][]Certificate(nil)
 		return nil
 	default:
-		return fmt.Errorf("field %s not in struct v.io/v23/security.WireBlessings", name)
+		return vdl.ErrFieldNoExist
 	}
 }
 func (t *WireBlessingsTarget) FinishFields(_ vdl.FieldsTarget) error {
@@ -3359,7 +3359,7 @@ func (t *RejectedBlessingTarget) StartField(name string) (key, field vdl.Target,
 		target, err := &t.errTarget, error(nil)
 		return nil, target, err
 	default:
-		return nil, nil, fmt.Errorf("field %s not in struct v.io/v23/security.RejectedBlessing", name)
+		return nil, nil, vdl.ErrFieldNoExist
 	}
 }
 func (t *RejectedBlessingTarget) FinishField(_, _ vdl.Target) error {
@@ -3374,7 +3374,7 @@ func (t *RejectedBlessingTarget) ZeroField(name string) error {
 		t.Value.Err = (error)(nil)
 		return nil
 	default:
-		return fmt.Errorf("field %s not in struct v.io/v23/security.RejectedBlessing", name)
+		return vdl.ErrFieldNoExist
 	}
 }
 func (t *RejectedBlessingTarget) FinishFields(_ vdl.FieldsTarget) error {

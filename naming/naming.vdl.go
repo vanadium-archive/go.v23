@@ -199,7 +199,7 @@ func (t *MountedServerTarget) StartField(name string) (key, field vdl.Target, _ 
 		target, err := &t.deadlineTarget, error(nil)
 		return nil, target, err
 	default:
-		return nil, nil, fmt.Errorf("field %s not in struct v.io/v23/naming.MountedServer", name)
+		return nil, nil, vdl.ErrFieldNoExist
 	}
 }
 func (t *MountedServerTarget) FinishField(_, _ vdl.Target) error {
@@ -214,7 +214,7 @@ func (t *MountedServerTarget) ZeroField(name string) error {
 		t.Value.Deadline = vdltime.Deadline{}
 		return nil
 	default:
-		return fmt.Errorf("field %s not in struct v.io/v23/naming.MountedServer", name)
+		return vdl.ErrFieldNoExist
 	}
 }
 func (t *MountedServerTarget) FinishFields(_ vdl.FieldsTarget) error {
@@ -476,7 +476,7 @@ func (t *MountEntryTarget) StartField(name string) (key, field vdl.Target, _ err
 		target, err := &t.isLeafTarget, error(nil)
 		return nil, target, err
 	default:
-		return nil, nil, fmt.Errorf("field %s not in struct v.io/v23/naming.MountEntry", name)
+		return nil, nil, vdl.ErrFieldNoExist
 	}
 }
 func (t *MountEntryTarget) FinishField(_, _ vdl.Target) error {
@@ -497,7 +497,7 @@ func (t *MountEntryTarget) ZeroField(name string) error {
 		t.Value.IsLeaf = false
 		return nil
 	default:
-		return fmt.Errorf("field %s not in struct v.io/v23/naming.MountEntry", name)
+		return vdl.ErrFieldNoExist
 	}
 }
 func (t *MountEntryTarget) FinishFields(_ vdl.FieldsTarget) error {
@@ -823,7 +823,7 @@ func (t *GlobErrorTarget) StartField(name string) (key, field vdl.Target, _ erro
 		target, err := &t.errorTarget, error(nil)
 		return nil, target, err
 	default:
-		return nil, nil, fmt.Errorf("field %s not in struct v.io/v23/naming.GlobError", name)
+		return nil, nil, vdl.ErrFieldNoExist
 	}
 }
 func (t *GlobErrorTarget) FinishField(_, _ vdl.Target) error {
@@ -838,7 +838,7 @@ func (t *GlobErrorTarget) ZeroField(name string) error {
 		t.Value.Error = (error)(nil)
 		return nil
 	default:
-		return fmt.Errorf("field %s not in struct v.io/v23/naming.GlobError", name)
+		return vdl.ErrFieldNoExist
 	}
 }
 func (t *GlobErrorTarget) FinishFields(_ vdl.FieldsTarget) error {

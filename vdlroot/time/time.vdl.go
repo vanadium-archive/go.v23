@@ -124,7 +124,7 @@ func (t *DurationTarget) StartField(name string) (key, field vdl.Target, _ error
 		target, err := &t.nanosTarget, error(nil)
 		return nil, target, err
 	default:
-		return nil, nil, fmt.Errorf("field %s not in struct time.Duration", name)
+		return nil, nil, vdl.ErrFieldNoExist
 	}
 }
 func (t *DurationTarget) FinishField(_, _ vdl.Target) error {
@@ -139,7 +139,7 @@ func (t *DurationTarget) ZeroField(name string) error {
 		t.wireValue.Nanos = int32(0)
 		return nil
 	default:
-		return fmt.Errorf("field %s not in struct time.Duration", name)
+		return vdl.ErrFieldNoExist
 	}
 }
 func (t *DurationTarget) FinishFields(_ vdl.FieldsTarget) error {
@@ -344,7 +344,7 @@ func (t *TimeTarget) StartField(name string) (key, field vdl.Target, _ error) {
 		target, err := &t.nanosTarget, error(nil)
 		return nil, target, err
 	default:
-		return nil, nil, fmt.Errorf("field %s not in struct time.Time", name)
+		return nil, nil, vdl.ErrFieldNoExist
 	}
 }
 func (t *TimeTarget) FinishField(_, _ vdl.Target) error {
@@ -359,7 +359,7 @@ func (t *TimeTarget) ZeroField(name string) error {
 		t.wireValue.Nanos = int32(0)
 		return nil
 	default:
-		return fmt.Errorf("field %s not in struct time.Time", name)
+		return vdl.ErrFieldNoExist
 	}
 }
 func (t *TimeTarget) FinishFields(_ vdl.FieldsTarget) error {
@@ -482,14 +482,10 @@ func (x *Time) VDLRead(dec vdl.Decoder) error {
 // absolute Time, which automatically performs the sender and receiver
 // conversions from "now".
 type WireDeadline struct {
-	// FromNow represents the deadline as a duration from "now".
+	// FromNow represents the deadline as a duration from "now".  As a
+	// special-case, the 0 duration indicates that there is no deadline; i.e. the
+	// deadline is "infinite".
 	FromNow time.Duration
-	// NoDeadline indicates there is no deadline; the analogous sentry for the
-	// native Deadline is the zero Time.
-	//
-	// TODO(toddw): This should be HasDeadline, since the zero value should
-	// represent "there is no deadline" rather than "the deadline is 0".
-	NoDeadline bool
 }
 
 func (WireDeadline) __VDLReflect(struct {
@@ -527,25 +523,6 @@ func (m *WireDeadline) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 			}
 		}
 	}
-	var8 := (m.NoDeadline == false)
-	if var8 {
-		if err := fieldsTarget1.ZeroField("NoDeadline"); err != nil && err != vdl.ErrFieldNoExist {
-			return err
-		}
-	} else {
-		keyTarget6, fieldTarget7, err := fieldsTarget1.StartField("NoDeadline")
-		if err != vdl.ErrFieldNoExist {
-			if err != nil {
-				return err
-			}
-			if err := fieldTarget7.FromBool(bool(m.NoDeadline), tt.NonOptional().Field(1).Type); err != nil {
-				return err
-			}
-			if err := fieldsTarget1.FinishField(keyTarget6, fieldTarget7); err != nil {
-				return err
-			}
-		}
-	}
 	if err := t.FinishFields(fieldsTarget1); err != nil {
 		return err
 	}
@@ -557,10 +534,9 @@ func (m *WireDeadline) MakeVDLTarget() vdl.Target {
 }
 
 type WireDeadlineTarget struct {
-	Value            *Deadline
-	wireValue        WireDeadline
-	fromNowTarget    DurationTarget
-	noDeadlineTarget vdl.BoolTarget
+	Value         *Deadline
+	wireValue     WireDeadline
+	fromNowTarget DurationTarget
 	vdl.TargetBase
 	vdl.FieldsTargetBase
 }
@@ -578,12 +554,8 @@ func (t *WireDeadlineTarget) StartField(name string) (key, field vdl.Target, _ e
 		t.fromNowTarget.Value = &t.wireValue.FromNow
 		target, err := &t.fromNowTarget, error(nil)
 		return nil, target, err
-	case "NoDeadline":
-		t.noDeadlineTarget.Value = &t.wireValue.NoDeadline
-		target, err := &t.noDeadlineTarget, error(nil)
-		return nil, target, err
 	default:
-		return nil, nil, fmt.Errorf("field %s not in struct time.WireDeadline", name)
+		return nil, nil, vdl.ErrFieldNoExist
 	}
 }
 func (t *WireDeadlineTarget) FinishField(_, _ vdl.Target) error {
@@ -594,11 +566,8 @@ func (t *WireDeadlineTarget) ZeroField(name string) error {
 	case "FromNow":
 		t.wireValue.FromNow = time.Duration(0)
 		return nil
-	case "NoDeadline":
-		t.wireValue.NoDeadline = false
-		return nil
 	default:
-		return fmt.Errorf("field %s not in struct time.WireDeadline", name)
+		return vdl.ErrFieldNoExist
 	}
 }
 func (t *WireDeadlineTarget) FinishFields(_ vdl.FieldsTarget) error {
@@ -626,20 +595,6 @@ func (x WireDeadline) VDLWrite(enc vdl.Encoder) error {
 			return err
 		}
 		if err := wire.VDLWrite(enc); err != nil {
-			return err
-		}
-	}
-	if x.NoDeadline {
-		if err := enc.NextField("NoDeadline"); err != nil {
-			return err
-		}
-		if err := enc.StartValue(vdl.BoolType); err != nil {
-			return err
-		}
-		if err := enc.EncodeBool(x.NoDeadline); err != nil {
-			return err
-		}
-		if err := enc.FinishValue(); err != nil {
 			return err
 		}
 	}
@@ -671,17 +626,6 @@ func (x *WireDeadline) VDLRead(dec vdl.Decoder) error {
 				return err
 			}
 			if err := DurationToNative(wire, &x.FromNow); err != nil {
-				return err
-			}
-		case "NoDeadline":
-			if err := dec.StartValue(); err != nil {
-				return err
-			}
-			var err error
-			if x.NoDeadline, err = dec.DecodeBool(); err != nil {
-				return err
-			}
-			if err := dec.FinishValue(); err != nil {
 				return err
 			}
 		default:

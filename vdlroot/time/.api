@@ -55,7 +55,6 @@ pkg time, type TimeTarget struct, embedded vdl.FieldsTargetBase
 pkg time, type TimeTarget struct, embedded vdl.TargetBase
 pkg time, type WireDeadline struct
 pkg time, type WireDeadline struct, FromNow time.Duration
-pkg time, type WireDeadline struct, NoDeadline bool
 pkg time, type WireDeadlineTarget struct
 pkg time, type WireDeadlineTarget struct, Value *Deadline
 pkg time, type WireDeadlineTarget struct, embedded vdl.FieldsTargetBase

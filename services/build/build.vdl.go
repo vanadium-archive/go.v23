@@ -476,7 +476,7 @@ func (t *FileTarget) StartField(name string) (key, field vdl.Target, _ error) {
 		target, err := &t.contentsTarget, error(nil)
 		return nil, target, err
 	default:
-		return nil, nil, fmt.Errorf("field %s not in struct v.io/v23/services/build.File", name)
+		return nil, nil, vdl.ErrFieldNoExist
 	}
 }
 func (t *FileTarget) FinishField(_, _ vdl.Target) error {
@@ -491,7 +491,7 @@ func (t *FileTarget) ZeroField(name string) error {
 		t.Value.Contents = []byte(nil)
 		return nil
 	default:
-		return fmt.Errorf("field %s not in struct v.io/v23/services/build.File", name)
+		return vdl.ErrFieldNoExist
 	}
 }
 func (t *FileTarget) FinishFields(_ vdl.FieldsTarget) error {

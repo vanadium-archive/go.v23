@@ -309,7 +309,7 @@ func (t *WireErrorTarget) StartField(name string) (key, field Target, _ error) {
 		target, err := &t.paramListTarget, error(nil)
 		return nil, target, err
 	default:
-		return nil, nil, fmt.Errorf("field %s not in struct v.io/v23/vdl.WireError", name)
+		return nil, nil, ErrFieldNoExist
 	}
 }
 func (t *WireErrorTarget) FinishField(_, _ Target) error {
@@ -330,7 +330,7 @@ func (t *WireErrorTarget) ZeroField(name string) error {
 		t.Value.ParamList = []*Value(nil)
 		return nil
 	default:
-		return fmt.Errorf("field %s not in struct v.io/v23/vdl.WireError", name)
+		return ErrFieldNoExist
 	}
 }
 func (t *WireErrorTarget) FinishFields(_ FieldsTarget) error {

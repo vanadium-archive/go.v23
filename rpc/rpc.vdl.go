@@ -306,7 +306,7 @@ func (t *RequestTarget) StartField(name string) (key, field vdl.Target, _ error)
 		target, err := &t.languageTarget, error(nil)
 		return nil, target, err
 	default:
-		return nil, nil, fmt.Errorf("field %s not in struct v.io/v23/rpc.Request", name)
+		return nil, nil, vdl.ErrFieldNoExist
 	}
 }
 func (t *RequestTarget) FinishField(_, _ vdl.Target) error {
@@ -339,7 +339,7 @@ func (t *RequestTarget) ZeroField(name string) error {
 		t.Value.Language = ""
 		return nil
 	default:
-		return fmt.Errorf("field %s not in struct v.io/v23/rpc.Request", name)
+		return vdl.ErrFieldNoExist
 	}
 }
 func (t *RequestTarget) FinishFields(_ vdl.FieldsTarget) error {
@@ -782,7 +782,7 @@ func (t *ResponseTarget) StartField(name string) (key, field vdl.Target, _ error
 		target, err := &t.ackBlessingsTarget, error(nil)
 		return nil, target, err
 	default:
-		return nil, nil, fmt.Errorf("field %s not in struct v.io/v23/rpc.Response", name)
+		return nil, nil, vdl.ErrFieldNoExist
 	}
 }
 func (t *ResponseTarget) FinishField(_, _ vdl.Target) error {
@@ -806,7 +806,7 @@ func (t *ResponseTarget) ZeroField(name string) error {
 		t.Value.AckBlessings = false
 		return nil
 	default:
-		return fmt.Errorf("field %s not in struct v.io/v23/rpc.Response", name)
+		return vdl.ErrFieldNoExist
 	}
 }
 func (t *ResponseTarget) FinishFields(_ vdl.FieldsTarget) error {

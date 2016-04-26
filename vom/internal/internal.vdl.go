@@ -156,7 +156,7 @@ func (t *AddressInfoTarget) StartField(name string) (key, field vdl.Target, _ er
 		target, err := &t.zipTarget, error(nil)
 		return nil, target, err
 	default:
-		return nil, nil, fmt.Errorf("field %s not in struct v.io/v23/vom/internal.AddressInfo", name)
+		return nil, nil, vdl.ErrFieldNoExist
 	}
 }
 func (t *AddressInfoTarget) FinishField(_, _ vdl.Target) error {
@@ -177,7 +177,7 @@ func (t *AddressInfoTarget) ZeroField(name string) error {
 		t.Value.Zip = ""
 		return nil
 	default:
-		return fmt.Errorf("field %s not in struct v.io/v23/vom/internal.AddressInfo", name)
+		return vdl.ErrFieldNoExist
 	}
 }
 func (t *AddressInfoTarget) FinishFields(_ vdl.FieldsTarget) error {
@@ -611,7 +611,7 @@ func (t *EquifaxCreditReportTarget) StartField(name string) (key, field vdl.Targ
 		target, err := &t.ratingTarget, error(nil)
 		return nil, target, err
 	default:
-		return nil, nil, fmt.Errorf("field %s not in struct v.io/v23/vom/internal.EquifaxCreditReport", name)
+		return nil, nil, vdl.ErrFieldNoExist
 	}
 }
 func (t *EquifaxCreditReportTarget) FinishField(_, _ vdl.Target) error {
@@ -623,7 +623,7 @@ func (t *EquifaxCreditReportTarget) ZeroField(name string) error {
 		t.Value.Rating = byte(0)
 		return nil
 	default:
-		return fmt.Errorf("field %s not in struct v.io/v23/vom/internal.EquifaxCreditReport", name)
+		return vdl.ErrFieldNoExist
 	}
 }
 func (t *EquifaxCreditReportTarget) FinishFields(_ vdl.FieldsTarget) error {
@@ -760,7 +760,7 @@ func (t *ExperianCreditReportTarget) StartField(name string) (key, field vdl.Tar
 		target, err := &t.ratingTarget, error(nil)
 		return nil, target, err
 	default:
-		return nil, nil, fmt.Errorf("field %s not in struct v.io/v23/vom/internal.ExperianCreditReport", name)
+		return nil, nil, vdl.ErrFieldNoExist
 	}
 }
 func (t *ExperianCreditReportTarget) FinishField(_, _ vdl.Target) error {
@@ -772,7 +772,7 @@ func (t *ExperianCreditReportTarget) ZeroField(name string) error {
 		t.Value.Rating = ExperianRatingGood
 		return nil
 	default:
-		return fmt.Errorf("field %s not in struct v.io/v23/vom/internal.ExperianCreditReport", name)
+		return vdl.ErrFieldNoExist
 	}
 }
 func (t *ExperianCreditReportTarget) FinishFields(_ vdl.FieldsTarget) error {
@@ -894,7 +894,7 @@ func (t *TransUnionCreditReportTarget) StartField(name string) (key, field vdl.T
 		target, err := &t.ratingTarget, error(nil)
 		return nil, target, err
 	default:
-		return nil, nil, fmt.Errorf("field %s not in struct v.io/v23/vom/internal.TransUnionCreditReport", name)
+		return nil, nil, vdl.ErrFieldNoExist
 	}
 }
 func (t *TransUnionCreditReportTarget) FinishField(_, _ vdl.Target) error {
@@ -906,7 +906,7 @@ func (t *TransUnionCreditReportTarget) ZeroField(name string) error {
 		t.Value.Rating = int16(0)
 		return nil
 	default:
-		return fmt.Errorf("field %s not in struct v.io/v23/vom/internal.TransUnionCreditReport", name)
+		return vdl.ErrFieldNoExist
 	}
 }
 func (t *TransUnionCreditReportTarget) FinishFields(_ vdl.FieldsTarget) error {
@@ -1368,7 +1368,7 @@ func (t *CreditReportTarget) StartField(name string) (key, field vdl.Target, _ e
 		target, err := &t.reportTarget, error(nil)
 		return nil, target, err
 	default:
-		return nil, nil, fmt.Errorf("field %s not in struct v.io/v23/vom/internal.CreditReport", name)
+		return nil, nil, vdl.ErrFieldNoExist
 	}
 }
 func (t *CreditReportTarget) FinishField(_, _ vdl.Target) error {
@@ -1383,7 +1383,7 @@ func (t *CreditReportTarget) ZeroField(name string) error {
 		t.Value.Report = AgencyReport(AgencyReportEquifaxReport{})
 		return nil
 	default:
-		return fmt.Errorf("field %s not in struct v.io/v23/vom/internal.CreditReport", name)
+		return vdl.ErrFieldNoExist
 	}
 }
 func (t *CreditReportTarget) FinishFields(_ vdl.FieldsTarget) error {
@@ -1629,7 +1629,7 @@ func (t *CustomerTarget) StartField(name string) (key, field vdl.Target, _ error
 		target, err := &t.creditTarget, error(nil)
 		return nil, target, err
 	default:
-		return nil, nil, fmt.Errorf("field %s not in struct v.io/v23/vom/internal.Customer", name)
+		return nil, nil, vdl.ErrFieldNoExist
 	}
 }
 func (t *CustomerTarget) FinishField(_, _ vdl.Target) error {
@@ -1655,7 +1655,7 @@ func (t *CustomerTarget) ZeroField(name string) error {
 		}
 		return nil
 	default:
-		return fmt.Errorf("field %s not in struct v.io/v23/vom/internal.Customer", name)
+		return vdl.ErrFieldNoExist
 	}
 }
 func (t *CustomerTarget) FinishFields(_ vdl.FieldsTarget) error {

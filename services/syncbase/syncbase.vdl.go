@@ -126,7 +126,7 @@ func (t *IdTarget) StartField(name string) (key, field vdl.Target, _ error) {
 		target, err := &t.nameTarget, error(nil)
 		return nil, target, err
 	default:
-		return nil, nil, fmt.Errorf("field %s not in struct v.io/v23/services/syncbase.Id", name)
+		return nil, nil, vdl.ErrFieldNoExist
 	}
 }
 func (t *IdTarget) FinishField(_, _ vdl.Target) error {
@@ -141,7 +141,7 @@ func (t *IdTarget) ZeroField(name string) error {
 		t.Value.Name = ""
 		return nil
 	default:
-		return fmt.Errorf("field %s not in struct v.io/v23/services/syncbase.Id", name)
+		return vdl.ErrFieldNoExist
 	}
 }
 func (t *IdTarget) FinishFields(_ vdl.FieldsTarget) error {
@@ -423,7 +423,7 @@ func (t *DevModeUpdateVClockOptsTarget) StartField(name string) (key, field vdl.
 		target, err := &t.doLocalUpdateTarget, error(nil)
 		return nil, target, err
 	default:
-		return nil, nil, fmt.Errorf("field %s not in struct v.io/v23/services/syncbase.DevModeUpdateVClockOpts", name)
+		return nil, nil, vdl.ErrFieldNoExist
 	}
 }
 func (t *DevModeUpdateVClockOptsTarget) FinishField(_, _ vdl.Target) error {
@@ -447,7 +447,7 @@ func (t *DevModeUpdateVClockOptsTarget) ZeroField(name string) error {
 		t.Value.DoLocalUpdate = false
 		return nil
 	default:
-		return fmt.Errorf("field %s not in struct v.io/v23/services/syncbase.DevModeUpdateVClockOpts", name)
+		return vdl.ErrFieldNoExist
 	}
 }
 func (t *DevModeUpdateVClockOptsTarget) FinishFields(_ vdl.FieldsTarget) error {
@@ -726,7 +726,7 @@ func (t *BatchOptionsTarget) StartField(name string) (key, field vdl.Target, _ e
 		target, err := &t.readOnlyTarget, error(nil)
 		return nil, target, err
 	default:
-		return nil, nil, fmt.Errorf("field %s not in struct v.io/v23/services/syncbase.BatchOptions", name)
+		return nil, nil, vdl.ErrFieldNoExist
 	}
 }
 func (t *BatchOptionsTarget) FinishField(_, _ vdl.Target) error {
@@ -741,7 +741,7 @@ func (t *BatchOptionsTarget) ZeroField(name string) error {
 		t.Value.ReadOnly = false
 		return nil
 	default:
-		return fmt.Errorf("field %s not in struct v.io/v23/services/syncbase.BatchOptions", name)
+		return vdl.ErrFieldNoExist
 	}
 }
 func (t *BatchOptionsTarget) FinishFields(_ vdl.FieldsTarget) error {
@@ -991,7 +991,7 @@ func (t *KeyValueTarget) StartField(name string) (key, field vdl.Target, _ error
 		target, err := &t.valueTarget, error(nil)
 		return nil, target, err
 	default:
-		return nil, nil, fmt.Errorf("field %s not in struct v.io/v23/services/syncbase.KeyValue", name)
+		return nil, nil, vdl.ErrFieldNoExist
 	}
 }
 func (t *KeyValueTarget) FinishField(_, _ vdl.Target) error {
@@ -1006,7 +1006,7 @@ func (t *KeyValueTarget) ZeroField(name string) error {
 		t.Value.Value = []byte(nil)
 		return nil
 	default:
-		return fmt.Errorf("field %s not in struct v.io/v23/services/syncbase.KeyValue", name)
+		return vdl.ErrFieldNoExist
 	}
 }
 func (t *KeyValueTarget) FinishFields(_ vdl.FieldsTarget) error {
@@ -1198,7 +1198,7 @@ func (t *CollectionRowTarget) StartField(name string) (key, field vdl.Target, _ 
 		target, err := &t.rowTarget, error(nil)
 		return nil, target, err
 	default:
-		return nil, nil, fmt.Errorf("field %s not in struct v.io/v23/services/syncbase.CollectionRow", name)
+		return nil, nil, vdl.ErrFieldNoExist
 	}
 }
 func (t *CollectionRowTarget) FinishField(_, _ vdl.Target) error {
@@ -1213,7 +1213,7 @@ func (t *CollectionRowTarget) ZeroField(name string) error {
 		t.Value.Row = ""
 		return nil
 	default:
-		return fmt.Errorf("field %s not in struct v.io/v23/services/syncbase.CollectionRow", name)
+		return vdl.ErrFieldNoExist
 	}
 }
 func (t *CollectionRowTarget) FinishFields(_ vdl.FieldsTarget) error {
@@ -1520,7 +1520,7 @@ func (t *SyncgroupSpecTarget) StartField(name string) (key, field vdl.Target, _ 
 		target, err := &t.isPrivateTarget, error(nil)
 		return nil, target, err
 	default:
-		return nil, nil, fmt.Errorf("field %s not in struct v.io/v23/services/syncbase.SyncgroupSpec", name)
+		return nil, nil, vdl.ErrFieldNoExist
 	}
 }
 func (t *SyncgroupSpecTarget) FinishField(_, _ vdl.Target) error {
@@ -1544,7 +1544,7 @@ func (t *SyncgroupSpecTarget) ZeroField(name string) error {
 		t.Value.IsPrivate = false
 		return nil
 	default:
-		return fmt.Errorf("field %s not in struct v.io/v23/services/syncbase.SyncgroupSpec", name)
+		return vdl.ErrFieldNoExist
 	}
 }
 func (t *SyncgroupSpecTarget) FinishFields(_ vdl.FieldsTarget) error {
@@ -1925,7 +1925,7 @@ func (t *SyncgroupMemberInfoTarget) StartField(name string) (key, field vdl.Targ
 		target, err := &t.blobDevTypeTarget, error(nil)
 		return nil, target, err
 	default:
-		return nil, nil, fmt.Errorf("field %s not in struct v.io/v23/services/syncbase.SyncgroupMemberInfo", name)
+		return nil, nil, vdl.ErrFieldNoExist
 	}
 }
 func (t *SyncgroupMemberInfoTarget) FinishField(_, _ vdl.Target) error {
@@ -1940,7 +1940,7 @@ func (t *SyncgroupMemberInfoTarget) ZeroField(name string) error {
 		t.Value.BlobDevType = byte(0)
 		return nil
 	default:
-		return fmt.Errorf("field %s not in struct v.io/v23/services/syncbase.SyncgroupMemberInfo", name)
+		return vdl.ErrFieldNoExist
 	}
 }
 func (t *SyncgroupMemberInfoTarget) FinishFields(_ vdl.FieldsTarget) error {
@@ -2395,7 +2395,7 @@ func (t *BatchInfoTarget) StartField(name string) (key, field vdl.Target, _ erro
 		target, err := &t.sourceTarget, error(nil)
 		return nil, target, err
 	default:
-		return nil, nil, fmt.Errorf("field %s not in struct v.io/v23/services/syncbase.BatchInfo", name)
+		return nil, nil, vdl.ErrFieldNoExist
 	}
 }
 func (t *BatchInfoTarget) FinishField(_, _ vdl.Target) error {
@@ -2413,7 +2413,7 @@ func (t *BatchInfoTarget) ZeroField(name string) error {
 		t.Value.Source = BatchSourceLocal
 		return nil
 	default:
-		return fmt.Errorf("field %s not in struct v.io/v23/services/syncbase.BatchInfo", name)
+		return vdl.ErrFieldNoExist
 	}
 }
 func (t *BatchInfoTarget) FinishFields(_ vdl.FieldsTarget) error {
@@ -2777,7 +2777,7 @@ func (t *ValueTarget) StartField(name string) (key, field vdl.Target, _ error) {
 		target, err := &t.writeTsTarget, error(nil)
 		return nil, target, err
 	default:
-		return nil, nil, fmt.Errorf("field %s not in struct v.io/v23/services/syncbase.Value", name)
+		return nil, nil, vdl.ErrFieldNoExist
 	}
 }
 func (t *ValueTarget) FinishField(_, _ vdl.Target) error {
@@ -2795,7 +2795,7 @@ func (t *ValueTarget) ZeroField(name string) error {
 		t.Value.WriteTs = time.Time{}
 		return nil
 	default:
-		return fmt.Errorf("field %s not in struct v.io/v23/services/syncbase.Value", name)
+		return vdl.ErrFieldNoExist
 	}
 }
 func (t *ValueTarget) FinishFields(_ vdl.FieldsTarget) error {
@@ -3056,7 +3056,7 @@ func (t *RowOpTarget) StartField(name string) (key, field vdl.Target, _ error) {
 		target, err := &t.ancestorValueTarget, error(nil)
 		return nil, target, err
 	default:
-		return nil, nil, fmt.Errorf("field %s not in struct v.io/v23/services/syncbase.RowOp", name)
+		return nil, nil, vdl.ErrFieldNoExist
 	}
 }
 func (t *RowOpTarget) FinishField(_, _ vdl.Target) error {
@@ -3077,7 +3077,7 @@ func (t *RowOpTarget) ZeroField(name string) error {
 		t.Value.AncestorValue = (*Value)(nil)
 		return nil
 	default:
-		return fmt.Errorf("field %s not in struct v.io/v23/services/syncbase.RowOp", name)
+		return vdl.ErrFieldNoExist
 	}
 }
 func (t *RowOpTarget) FinishFields(_ vdl.FieldsTarget) error {
@@ -3371,7 +3371,7 @@ func (t *ScanOpTarget) StartField(name string) (key, field vdl.Target, _ error) 
 		target, err := &t.limitTarget, error(nil)
 		return nil, target, err
 	default:
-		return nil, nil, fmt.Errorf("field %s not in struct v.io/v23/services/syncbase.ScanOp", name)
+		return nil, nil, vdl.ErrFieldNoExist
 	}
 }
 func (t *ScanOpTarget) FinishField(_, _ vdl.Target) error {
@@ -3386,7 +3386,7 @@ func (t *ScanOpTarget) ZeroField(name string) error {
 		t.Value.Limit = ""
 		return nil
 	default:
-		return fmt.Errorf("field %s not in struct v.io/v23/services/syncbase.ScanOp", name)
+		return vdl.ErrFieldNoExist
 	}
 }
 func (t *ScanOpTarget) FinishFields(_ vdl.FieldsTarget) error {
@@ -3922,7 +3922,7 @@ func (t *RowInfoTarget) StartField(name string) (key, field vdl.Target, _ error)
 		target, err := &t.batchIdsTarget, error(nil)
 		return nil, target, err
 	default:
-		return nil, nil, fmt.Errorf("field %s not in struct v.io/v23/services/syncbase.RowInfo", name)
+		return nil, nil, vdl.ErrFieldNoExist
 	}
 }
 func (t *RowInfoTarget) FinishField(_, _ vdl.Target) error {
@@ -3937,7 +3937,7 @@ func (t *RowInfoTarget) ZeroField(name string) error {
 		t.Value.BatchIds = []uint64(nil)
 		return nil
 	default:
-		return fmt.Errorf("field %s not in struct v.io/v23/services/syncbase.RowInfo", name)
+		return vdl.ErrFieldNoExist
 	}
 }
 func (t *RowInfoTarget) FinishFields(_ vdl.FieldsTarget) error {
@@ -4449,7 +4449,7 @@ func (t *ConflictInfoTarget) StartField(name string) (key, field vdl.Target, _ e
 		target, err := &t.continuedTarget, error(nil)
 		return nil, target, err
 	default:
-		return nil, nil, fmt.Errorf("field %s not in struct v.io/v23/services/syncbase.ConflictInfo", name)
+		return nil, nil, vdl.ErrFieldNoExist
 	}
 }
 func (t *ConflictInfoTarget) FinishField(_, _ vdl.Target) error {
@@ -4464,7 +4464,7 @@ func (t *ConflictInfoTarget) ZeroField(name string) error {
 		t.Value.Continued = false
 		return nil
 	default:
-		return fmt.Errorf("field %s not in struct v.io/v23/services/syncbase.ConflictInfo", name)
+		return vdl.ErrFieldNoExist
 	}
 }
 func (t *ConflictInfoTarget) FinishFields(_ vdl.FieldsTarget) error {
@@ -4826,7 +4826,7 @@ func (t *ResolutionInfoTarget) StartField(name string) (key, field vdl.Target, _
 		target, err := &t.continuedTarget, error(nil)
 		return nil, target, err
 	default:
-		return nil, nil, fmt.Errorf("field %s not in struct v.io/v23/services/syncbase.ResolutionInfo", name)
+		return nil, nil, vdl.ErrFieldNoExist
 	}
 }
 func (t *ResolutionInfoTarget) FinishField(_, _ vdl.Target) error {
@@ -4847,7 +4847,7 @@ func (t *ResolutionInfoTarget) ZeroField(name string) error {
 		t.Value.Continued = false
 		return nil
 	default:
-		return fmt.Errorf("field %s not in struct v.io/v23/services/syncbase.ResolutionInfo", name)
+		return vdl.ErrFieldNoExist
 	}
 }
 func (t *ResolutionInfoTarget) FinishFields(_ vdl.FieldsTarget) error {
@@ -5138,7 +5138,7 @@ func (t *CrRuleTarget) StartField(name string) (key, field vdl.Target, _ error) 
 		target, err := &t.resolverTarget, error(nil)
 		return nil, target, err
 	default:
-		return nil, nil, fmt.Errorf("field %s not in struct v.io/v23/services/syncbase.CrRule", name)
+		return nil, nil, vdl.ErrFieldNoExist
 	}
 }
 func (t *CrRuleTarget) FinishField(_, _ vdl.Target) error {
@@ -5159,7 +5159,7 @@ func (t *CrRuleTarget) ZeroField(name string) error {
 		t.Value.Resolver = ResolverTypeLastWins
 		return nil
 	default:
-		return fmt.Errorf("field %s not in struct v.io/v23/services/syncbase.CrRule", name)
+		return vdl.ErrFieldNoExist
 	}
 }
 func (t *CrRuleTarget) FinishFields(_ vdl.FieldsTarget) error {
@@ -5370,7 +5370,7 @@ func (t *CrPolicyTarget) StartField(name string) (key, field vdl.Target, _ error
 		target, err := &t.rulesTarget, error(nil)
 		return nil, target, err
 	default:
-		return nil, nil, fmt.Errorf("field %s not in struct v.io/v23/services/syncbase.CrPolicy", name)
+		return nil, nil, vdl.ErrFieldNoExist
 	}
 }
 func (t *CrPolicyTarget) FinishField(_, _ vdl.Target) error {
@@ -5382,7 +5382,7 @@ func (t *CrPolicyTarget) ZeroField(name string) error {
 		t.Value.Rules = []CrRule(nil)
 		return nil
 	default:
-		return fmt.Errorf("field %s not in struct v.io/v23/services/syncbase.CrPolicy", name)
+		return vdl.ErrFieldNoExist
 	}
 }
 func (t *CrPolicyTarget) FinishFields(_ vdl.FieldsTarget) error {
@@ -5627,7 +5627,7 @@ func (t *SchemaMetadataTarget) StartField(name string) (key, field vdl.Target, _
 		target, err := &t.policyTarget, error(nil)
 		return nil, target, err
 	default:
-		return nil, nil, fmt.Errorf("field %s not in struct v.io/v23/services/syncbase.SchemaMetadata", name)
+		return nil, nil, vdl.ErrFieldNoExist
 	}
 }
 func (t *SchemaMetadataTarget) FinishField(_, _ vdl.Target) error {
@@ -5642,7 +5642,7 @@ func (t *SchemaMetadataTarget) ZeroField(name string) error {
 		t.Value.Policy = CrPolicy{}
 		return nil
 	default:
-		return fmt.Errorf("field %s not in struct v.io/v23/services/syncbase.SchemaMetadata", name)
+		return vdl.ErrFieldNoExist
 	}
 }
 func (t *SchemaMetadataTarget) FinishFields(_ vdl.FieldsTarget) error {
@@ -6033,7 +6033,7 @@ func (t *BlobFetchStatusTarget) StartField(name string) (key, field vdl.Target, 
 		target, err := &t.totalTarget, error(nil)
 		return nil, target, err
 	default:
-		return nil, nil, fmt.Errorf("field %s not in struct v.io/v23/services/syncbase.BlobFetchStatus", name)
+		return nil, nil, vdl.ErrFieldNoExist
 	}
 }
 func (t *BlobFetchStatusTarget) FinishField(_, _ vdl.Target) error {
@@ -6051,7 +6051,7 @@ func (t *BlobFetchStatusTarget) ZeroField(name string) error {
 		t.Value.Total = int64(0)
 		return nil
 	default:
-		return fmt.Errorf("field %s not in struct v.io/v23/services/syncbase.BlobFetchStatus", name)
+		return vdl.ErrFieldNoExist
 	}
 }
 func (t *BlobFetchStatusTarget) FinishFields(_ vdl.FieldsTarget) error {
@@ -6255,7 +6255,7 @@ func (t *StoreChangeTarget) StartField(name string) (key, field vdl.Target, _ er
 		target, err := &t.fromSyncTarget, error(nil)
 		return nil, target, err
 	default:
-		return nil, nil, fmt.Errorf("field %s not in struct v.io/v23/services/syncbase.StoreChange", name)
+		return nil, nil, vdl.ErrFieldNoExist
 	}
 }
 func (t *StoreChangeTarget) FinishField(_, _ vdl.Target) error {
@@ -6270,7 +6270,7 @@ func (t *StoreChangeTarget) ZeroField(name string) error {
 		t.Value.FromSync = false
 		return nil
 	default:
-		return fmt.Errorf("field %s not in struct v.io/v23/services/syncbase.StoreChange", name)
+		return vdl.ErrFieldNoExist
 	}
 }
 func (t *StoreChangeTarget) FinishFields(_ vdl.FieldsTarget) error {

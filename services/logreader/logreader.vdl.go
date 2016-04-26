@@ -115,7 +115,7 @@ func (t *LogEntryTarget) StartField(name string) (key, field vdl.Target, _ error
 		target, err := &t.lineTarget, error(nil)
 		return nil, target, err
 	default:
-		return nil, nil, fmt.Errorf("field %s not in struct v.io/v23/services/logreader.LogEntry", name)
+		return nil, nil, vdl.ErrFieldNoExist
 	}
 }
 func (t *LogEntryTarget) FinishField(_, _ vdl.Target) error {
@@ -130,7 +130,7 @@ func (t *LogEntryTarget) ZeroField(name string) error {
 		t.Value.Line = ""
 		return nil
 	default:
-		return fmt.Errorf("field %s not in struct v.io/v23/services/logreader.LogEntry", name)
+		return vdl.ErrFieldNoExist
 	}
 }
 func (t *LogEntryTarget) FinishFields(_ vdl.FieldsTarget) error {

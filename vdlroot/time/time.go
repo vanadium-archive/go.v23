@@ -113,7 +113,7 @@ type Deadline struct {
 // WireDeadlineToNative is called by VDL for conversions from wire to native
 // deadlines.
 func WireDeadlineToNative(wire WireDeadline, native *Deadline) error {
-	if wire.NoDeadline {
+	if wire.FromNow == 0 {
 		native.Time = time.Time{}
 	} else {
 		native.Time = time.Now().Add(wire.FromNow)
@@ -125,9 +125,21 @@ func WireDeadlineToNative(wire WireDeadline, native *Deadline) error {
 // deadlines.
 func WireDeadlineFromNative(wire *WireDeadline, native Deadline) error {
 	if native.IsZero() {
-		*wire = WireDeadline{NoDeadline: true}
+		wire.FromNow = 0
 	} else {
-		*wire = WireDeadline{FromNow: native.Sub(time.Now())}
+		wire.FromNow = native.Sub(time.Now())
+		// Ensure that we never set FromNow=0, since that is special-cased to mean
+		// "no deadline".
+		//
+		// NOTE: A previous version of this code didn't include this special-case,
+		// and instead set the WireDeadline.NoDeadline field (which has now been
+		// removed) to indicate "no deadline".  This means that there is a tiny
+		// chance that an old binary can send FromNow=0 to indicate "immediate
+		// deadline", which a new binary will interpret as "no deadline".  As all
+		// binaries are updated to this new code, this problem will go away.
+		if wire.FromNow == 0 {
+			wire.FromNow = 1
+		}
 	}
 	return nil
 }

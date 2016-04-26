@@ -121,7 +121,7 @@ func (t *TaskTarget) StartField(name string) (key, field vdl.Target, _ error) {
 		target, err := &t.goalTarget, error(nil)
 		return nil, target, err
 	default:
-		return nil, nil, fmt.Errorf("field %s not in struct v.io/v23/services/appcycle.Task", name)
+		return nil, nil, vdl.ErrFieldNoExist
 	}
 }
 func (t *TaskTarget) FinishField(_, _ vdl.Target) error {
@@ -136,7 +136,7 @@ func (t *TaskTarget) ZeroField(name string) error {
 		t.Value.Goal = int32(0)
 		return nil
 	default:
-		return fmt.Errorf("field %s not in struct v.io/v23/services/appcycle.Task", name)
+		return vdl.ErrFieldNoExist
 	}
 }
 func (t *TaskTarget) FinishFields(_ vdl.FieldsTarget) error {

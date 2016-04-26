@@ -132,7 +132,7 @@ func (t *SignedFileTarget) StartField(name string) (key, field vdl.Target, _ err
 		target, err := &t.signatureTarget, error(nil)
 		return nil, target, err
 	default:
-		return nil, nil, fmt.Errorf("field %s not in struct v.io/v23/services/application.SignedFile", name)
+		return nil, nil, vdl.ErrFieldNoExist
 	}
 }
 func (t *SignedFileTarget) FinishField(_, _ vdl.Target) error {
@@ -147,7 +147,7 @@ func (t *SignedFileTarget) ZeroField(name string) error {
 		t.Value.Signature = security.Signature{}
 		return nil
 	default:
-		return fmt.Errorf("field %s not in struct v.io/v23/services/application.SignedFile", name)
+		return vdl.ErrFieldNoExist
 	}
 }
 func (t *SignedFileTarget) FinishFields(_ vdl.FieldsTarget) error {
@@ -766,7 +766,7 @@ func (t *EnvelopeTarget) StartField(name string) (key, field vdl.Target, _ error
 		target, err := &t.restartTimeWindowTarget, error(nil)
 		return nil, target, err
 	default:
-		return nil, nil, fmt.Errorf("field %s not in struct v.io/v23/services/application.Envelope", name)
+		return nil, nil, vdl.ErrFieldNoExist
 	}
 }
 func (t *EnvelopeTarget) FinishField(_, _ vdl.Target) error {
@@ -799,7 +799,7 @@ func (t *EnvelopeTarget) ZeroField(name string) error {
 		t.Value.RestartTimeWindow = time.Duration(0)
 		return nil
 	default:
-		return fmt.Errorf("field %s not in struct v.io/v23/services/application.Envelope", name)
+		return vdl.ErrFieldNoExist
 	}
 }
 func (t *EnvelopeTarget) FinishFields(_ vdl.FieldsTarget) error {
